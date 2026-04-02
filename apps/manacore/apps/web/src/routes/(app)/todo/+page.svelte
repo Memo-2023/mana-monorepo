@@ -1,16 +1,15 @@
 <script lang="ts">
-	import { getContext } from 'svelte';
+	import { _ } from 'svelte-i18n';
+	import { getContext, onMount } from 'svelte';
 	import type { Observable } from 'dexie';
 	import { dropTarget } from '@manacore/shared-ui/dnd';
 	import type { DragPayload, TagDragData } from '@manacore/shared-ui/dnd';
 	import { useAllTags } from '$lib/stores/tags.svelte';
-	import { onMount } from 'svelte';
 	import {
 		type Task,
 		type LocalLabel,
 		type LocalBoardView,
 		type LocalTodoProject,
-		type TaskPriority,
 		tasksStore,
 		taskTable,
 		viewStore,
@@ -22,70 +21,80 @@
 		filterByProject,
 		searchTasks,
 		sortTasks,
-		getPriorityLabel,
-		getPriorityColor,
 		getTaskStats,
 	} from '$lib/modules/todo';
 	import {
-		Plus,
-		Check,
-		Circle,
-		MagnifyingGlass,
 		Tray,
 		CalendarBlank,
 		CalendarCheck,
-		Flag,
-		FunnelSimple,
-		CaretRight,
-		Folder,
 		CheckCircle,
-		ShareNetwork,
+		MagnifyingGlass,
+		Gear,
 	} from '@manacore/shared-icons';
 	import { ShareModal } from '@manacore/shared-uload';
+
+	// Components
+	import TaskList from '$lib/modules/todo/components/TaskList.svelte';
+	import TaskEditModal from '$lib/modules/todo/components/TaskEditModal.svelte';
+	import QuickAddTask from '$lib/modules/todo/components/QuickAddTask.svelte';
+	import TodoToolbar from '$lib/modules/todo/components/TodoToolbar.svelte';
+	import TagStrip from '$lib/modules/todo/components/TagStrip.svelte';
+	import SyncIndicator from '$lib/modules/todo/components/SyncIndicator.svelte';
+	import SyntaxHelpOverlay from '$lib/modules/todo/components/SyntaxHelpOverlay.svelte';
+	import OnboardingModal from '$lib/modules/todo/components/OnboardingModal.svelte';
+	import { TaskListSkeleton, StatisticsSkeleton } from '$lib/modules/todo/components/skeletons';
+	import {
+		BoardViewRenderer,
+		ViewSelector,
+		ViewEditorModal,
+	} from '$lib/modules/todo/components/board-views';
+	import { todoSettings } from '$lib/modules/todo/stores/settings.svelte';
 
 	// Get data from layout context
 	const allTasks$: Observable<Task[]> = getContext('tasks');
 	const allLabels$: Observable<LocalLabel[]> = getContext('labels');
 	const allProjects$: Observable<LocalTodoProject[]> = getContext('projects');
+	const allBoardViews$: Observable<LocalBoardView[]> = getContext('boardViews');
 
 	let allTasks = $state<Task[]>([]);
 	let allLabels = $state<LocalLabel[]>([]);
 	let allProjects = $state<LocalTodoProject[]>([]);
+	let allBoardViews = $state<LocalBoardView[]>([]);
+	let isLoaded = $state(false);
 
 	$effect(() => {
 		const sub = allTasks$.subscribe((t) => {
 			allTasks = t;
+			isLoaded = true;
 		});
 		return () => sub.unsubscribe();
 	});
 
 	$effect(() => {
-		const sub = allLabels$.subscribe((l) => {
-			allLabels = l;
-		});
+		const sub = allLabels$.subscribe((l) => (allLabels = l));
 		return () => sub.unsubscribe();
 	});
 
 	$effect(() => {
-		const sub = allProjects$.subscribe((p) => {
-			allProjects = p;
-		});
+		const sub = allProjects$.subscribe((p) => (allProjects = p));
 		return () => sub.unsubscribe();
 	});
 
-	// Global tags for resolving labelIds to names/colors
+	$effect(() => {
+		const sub = allBoardViews$.subscribe((v) => (allBoardViews = v));
+		return () => sub.unsubscribe();
+	});
+
+	// Tags for resolving labelIds
 	const globalTags = useAllTags();
-	const tagMap = $derived(new Map((globalTags.value ?? []).map((t) => [t.id, t])));
+	const tagList = $derived(
+		(globalTags.value ?? []).map((t) => ({ id: t.id, name: t.name, color: t.color }))
+	);
 
-	function getTaskTags(task: Task) {
-		const ids: string[] = (task.metadata as { labelIds?: string[] })?.labelIds ?? [];
-		return ids.map((id) => tagMap.get(id)).filter((t): t is NonNullable<typeof t> => t != null);
-	}
-
-	// Task stats
+	// Stats
 	let stats = $derived(getTaskStats(allTasks));
 
-	// Filtered tasks based on current view
+	// Filtered tasks
 	let displayTasks = $derived.by(() => {
 		let tasks = allTasks;
 		switch (viewStore.currentView) {
@@ -101,44 +110,52 @@
 			case 'search':
 				tasks = searchTasks(allTasks, viewStore.searchQuery);
 				break;
+			case 'label':
+				tasks = filterIncomplete(allTasks).filter((t) => {
+					const ids: string[] = (t.metadata as { labelIds?: string[] })?.labelIds ?? [];
+					return ids.includes(viewStore.currentLabelId ?? '');
+				});
+				break;
 			default:
 				tasks = filterIncomplete(allTasks);
+		}
+		if (viewStore.showCompleted && viewStore.currentView !== 'completed') {
+			tasks = [...tasks, ...filterCompleted(allTasks)];
 		}
 		return sortTasks(tasks, viewStore.sortBy, viewStore.sortOrder);
 	});
 
-	// Share modal state
+	// Board view state
+	let isBoardView = $state(false);
+	let activeBoardId = $state<string | null>(null);
+	let activeBoard = $derived(
+		allBoardViews.find((v) => v.id === activeBoardId) ?? allBoardViews[0] ?? null
+	);
+
+	// Modal states
+	let editTask = $state<Task | null>(null);
 	let shareTask = $state<Task | null>(null);
+	let showSyntaxHelp = $state(false);
+	let showBoardEditor = $state(false);
+	let editBoardView = $state<LocalBoardView | null>(null);
+	let showOnboarding = $state(false);
+
 	let shareUrl = $derived(
 		shareTask
 			? `${typeof window !== 'undefined' ? window.location.origin : ''}/todo?task=${shareTask.id}`
 			: ''
 	);
 
-	// Quick add task
-	let newTaskTitle = $state('');
-	let isAdding = $state(false);
+	// Check onboarding
+	onMount(() => {
+		try {
+			if (!localStorage.getItem('todo-onboarding-done')) {
+				showOnboarding = true;
+			}
+		} catch {}
+	});
 
-	async function handleQuickAdd() {
-		if (!newTaskTitle.trim()) return;
-		await tasksStore.createTask({ title: newTaskTitle.trim() });
-		newTaskTitle = '';
-		isAdding = false;
-	}
-
-	async function handleToggleComplete(e: MouseEvent, task: Task) {
-		e.stopPropagation();
-		e.preventDefault();
-		await tasksStore.toggleComplete(task.id);
-	}
-
-	async function handleDeleteTask(e: MouseEvent, task: Task) {
-		e.stopPropagation();
-		e.preventDefault();
-		await tasksStore.deleteTask(task.id);
-	}
-
-	// ── DnD: register tag drop handler for passive drops (task→tag in TagStrip)
+	// DnD tag drop handler
 	const tagDropCtx = getContext<{
 		set: (handler: (tagId: string, payload: DragPayload) => void) => void;
 		clear: () => void;
@@ -157,109 +174,104 @@
 		return () => tagDropCtx?.clear();
 	});
 
-	// ── DnD: tag dropped onto a task ────────────────────────
-	function handleTagDrop(task: Task, payload: DragPayload) {
-		const tagData = payload.data as TagDragData;
-		const currentLabels: string[] = (task.metadata as { labelIds?: string[] })?.labelIds ?? [];
-		if (!currentLabels.includes(tagData.id)) {
-			tasksStore.updateLabels(task.id, [...currentLabels, tagData.id]);
-		}
+	// Board view callbacks
+	async function handleBoardQuickAdd(title: string, _columnId: string) {
+		await tasksStore.createTask({ title });
 	}
 
-	function tagNotAlreadyOnTask(task: Task) {
-		return (payload: DragPayload) => {
-			const tagData = payload.data as TagDragData;
-			const currentLabels: string[] = (task.metadata as { labelIds?: string[] })?.labelIds ?? [];
-			return !currentLabels.includes(tagData.id);
-		};
-	}
-
-	// View navigation items
-	const views = [
-		{ id: 'inbox', label: 'Inbox', icon: Tray },
-		{ id: 'today', label: 'Heute', icon: CalendarBlank },
-		{ id: 'upcoming', label: 'Bald faellig', icon: CalendarCheck },
-		{ id: 'completed', label: 'Erledigt', icon: CheckCircle },
-	] as const;
-
-	let selectedTaskId = $state<string | null>(null);
-	let selectedTask = $derived(allTasks.find((t) => t.id === selectedTaskId));
-
-	function formatDueDate(date: string | null | undefined): string {
-		if (!date) return '';
-		const d = new Date(date);
-		const now = new Date();
-		const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-		const tomorrowStart = new Date(todayStart);
-		tomorrowStart.setDate(tomorrowStart.getDate() + 1);
-
-		if (d < todayStart) return 'Ueberfaellig';
-		if (d >= todayStart && d < tomorrowStart) return 'Heute';
-		return d.toLocaleDateString('de-DE', { day: 'numeric', month: 'short' });
-	}
-
-	function getDueDateColor(date: string | null | undefined): string {
-		if (!date) return '';
-		const d = new Date(date);
-		const now = new Date();
-		const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-		if (d < todayStart) return 'text-red-500';
-		return 'text-muted-foreground';
-	}
+	// View navigation
+	let views = $derived([
+		{ id: 'inbox', label: $_('todo.inbox'), icon: Tray },
+		{ id: 'today', label: $_('todo.todayView'), icon: CalendarBlank },
+		{ id: 'upcoming', label: $_('todo.upcoming'), icon: CalendarCheck },
+		{ id: 'completed', label: $_('todo.completedView'), icon: CheckCircle },
+	] as const);
 </script>
 
 <svelte:head>
 	<title>Todo - ManaCore</title>
 </svelte:head>
 
-<div class="mx-auto max-w-3xl">
-	<!-- Header with Stats -->
-	<header class="mb-6">
-		<h1 class="text-2xl font-bold text-foreground">Todo</h1>
-		<div class="mt-2 flex gap-4 text-sm text-muted-foreground">
-			<span>{stats.total} Aufgaben</span>
-			<span>{stats.completed} erledigt</span>
-			{#if stats.overdue > 0}
-				<span class="text-red-500">{stats.overdue} ueberfaellig</span>
+<div class="mx-auto max-w-4xl">
+	<!-- Header -->
+	<header class="mb-4 flex items-start justify-between">
+		<div>
+			<h1 class="text-2xl font-bold text-foreground">{$_('todo.title')}</h1>
+			{#if isLoaded}
+				<div class="mt-1 flex gap-4 text-sm text-muted-foreground">
+					<span>{stats.total} {$_('todo.tasks')}</span>
+					<span>{stats.completed} {$_('todo.completed')}</span>
+					{#if stats.overdue > 0}
+						<span class="text-red-500">{stats.overdue} {$_('todo.overdue')}</span>
+					{/if}
+					{#if stats.today > 0}
+						<span class="text-amber-500">{stats.today} {$_('todo.today')}</span>
+					{/if}
+				</div>
+			{:else}
+				<StatisticsSkeleton />
 			{/if}
-			{#if stats.today > 0}
-				<span class="text-amber-500">{stats.today} heute</span>
-			{/if}
+		</div>
+		<div class="flex items-center gap-2">
+			<SyncIndicator />
+			<a
+				href="/todo/settings"
+				class="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted"
+				title={$_('todo.settings.title')}
+			>
+				<Gear size={16} />
+			</a>
 		</div>
 	</header>
 
-	<!-- View Tabs -->
-	<div class="mb-4 flex gap-1 rounded-lg border border-border bg-card p-1">
-		{#each views as view}
-			<button
-				onclick={() => {
-					switch (view.id) {
-						case 'inbox':
-							viewStore.setInbox();
-							break;
-						case 'today':
-							viewStore.setToday();
-							break;
-						case 'upcoming':
-							viewStore.setUpcoming();
-							break;
-						case 'completed':
-							viewStore.setCompleted();
-							break;
-					}
-				}}
-				class="flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors
-					{viewStore.currentView === view.id
-					? 'bg-primary/10 text-primary'
-					: 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}"
-			>
-				<view.icon size={16} />
-				<span class="hidden sm:inline">{view.label}</span>
-			</button>
-		{/each}
+	<!-- View Tabs + Toolbar -->
+	<div class="mb-3 flex items-center justify-between gap-2">
+		<div class="flex gap-1 rounded-lg border border-border bg-card p-1">
+			{#each views as view}
+				<button
+					onclick={() => {
+						isBoardView = false;
+						switch (view.id) {
+							case 'inbox':
+								viewStore.setInbox();
+								break;
+							case 'today':
+								viewStore.setToday();
+								break;
+							case 'upcoming':
+								viewStore.setUpcoming();
+								break;
+							case 'completed':
+								viewStore.setCompleted();
+								break;
+						}
+					}}
+					class="flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors
+						{!isBoardView && viewStore.currentView === view.id
+						? 'bg-primary/10 text-primary'
+						: 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}"
+				>
+					<view.icon size={16} />
+					<span class="hidden sm:inline">{view.label}</span>
+				</button>
+			{/each}
+		</div>
+
+		<TodoToolbar
+			showBoardToggle={allBoardViews.length > 0}
+			{isBoardView}
+			onToggleBoard={() => (isBoardView = !isBoardView)}
+		/>
 	</div>
 
-	<!-- Search (for search view) -->
+	<!-- Tag Strip -->
+	<TagStrip
+		labels={allLabels}
+		collapsed={todoSettings.filterStripCollapsed}
+		onToggleCollapse={() => todoSettings.toggleFilterStrip()}
+	/>
+
+	<!-- Search -->
 	{#if viewStore.currentView === 'search'}
 		<div class="relative mb-4">
 			<MagnifyingGlass
@@ -268,246 +280,95 @@
 			/>
 			<input
 				type="text"
-				placeholder="Aufgaben suchen..."
+				placeholder={$_('todo.search') + '...'}
 				value={viewStore.searchQuery}
 				oninput={(e) => viewStore.updateSearchQuery(e.currentTarget.value)}
 				class="w-full rounded-lg border border-border bg-card py-2.5 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+				autofocus
+			/>
+		</div>
+	{/if}
+
+	<!-- Board View Selector -->
+	{#if isBoardView}
+		<div class="mb-4">
+			<ViewSelector
+				views={allBoardViews}
+				activeViewId={activeBoardId}
+				onSelect={(id) => (activeBoardId = id)}
+				onCreateView={() => {
+					editBoardView = null;
+					showBoardEditor = true;
+				}}
 			/>
 		</div>
 	{/if}
 
 	<!-- Quick Add -->
-	{#if isAdding}
-		<div class="mb-4 rounded-lg border border-primary bg-card p-3">
-			<form
-				onsubmit={(e) => {
-					e.preventDefault();
-					handleQuickAdd();
-				}}
-				class="flex gap-2"
-			>
-				<input
-					type="text"
-					placeholder="Was moechtest du erledigen?"
-					bind:value={newTaskTitle}
-					class="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
-					autofocus
-				/>
-				<button
-					type="submit"
-					disabled={!newTaskTitle.trim()}
-					class="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground disabled:opacity-50"
-				>
-					Hinzufuegen
-				</button>
-				<button
-					type="button"
-					onclick={() => {
-						isAdding = false;
-						newTaskTitle = '';
-					}}
-					class="text-xs text-muted-foreground hover:text-foreground"
-				>
-					Abbrechen
-				</button>
-			</form>
-		</div>
-	{:else}
-		<button
-			onclick={() => (isAdding = true)}
-			class="mb-4 flex w-full items-center gap-2 rounded-lg border border-dashed border-border px-3 py-2.5 text-sm text-muted-foreground transition-colors hover:border-primary hover:text-primary"
-		>
-			<Plus size={16} />
-			Neue Aufgabe
-		</button>
+	{#if !isBoardView}
+		<QuickAddTask labels={allLabels} onShowSyntaxHelp={() => (showSyntaxHelp = true)} />
 	{/if}
 
-	<!-- Task List -->
-	{#if displayTasks.length === 0}
+	<!-- Main Content -->
+	{#if !isLoaded}
+		<TaskListSkeleton />
+	{:else if isBoardView && activeBoard}
+		<BoardViewRenderer
+			view={activeBoard}
+			tasks={allTasks}
+			labels={allLabels}
+			wipLimit={todoSettings.wipLimitPerColumn}
+			cardSize={todoSettings.kanbanCardSize}
+			onToggleComplete={(id) => tasksStore.toggleComplete(id)}
+			onSaveTask={(id, data) => tasksStore.updateTask(id, data)}
+			onDeleteTask={(id) => tasksStore.deleteTask(id)}
+			onQuickAdd={handleBoardQuickAdd}
+			onOpenTask={(task) => (editTask = task)}
+		/>
+	{:else if displayTasks.length === 0}
 		<div class="flex flex-col items-center py-12 text-center">
 			<div class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
 				<Tray size={32} class="text-muted-foreground" />
 			</div>
 			<h2 class="mb-1 text-lg font-semibold text-foreground">
 				{#if viewStore.currentView === 'completed'}
-					Noch keine Aufgaben erledigt
+					{$_('todo.noTasksCompleted')}
 				{:else if viewStore.currentView === 'today'}
-					Keine Aufgaben fuer heute
+					{$_('todo.noTasksToday')}
 				{:else if viewStore.currentView === 'upcoming'}
-					Keine anstehenden Aufgaben
+					{$_('todo.noTasksUpcoming')}
+				{:else if viewStore.currentView === 'search'}
+					{$_('todo.noTasks')}
 				{:else}
-					Inbox ist leer
+					{$_('todo.noTasksInbox')}
 				{/if}
 			</h2>
 			<p class="text-sm text-muted-foreground">
 				{#if viewStore.currentView === 'inbox'}
-					Erstelle deine erste Aufgabe mit dem + Button oben.
+					{$_('todo.firstTaskHint')}
 				{/if}
 			</p>
 		</div>
 	{:else}
-		<div class="space-y-1">
-			{#each displayTasks as task (task.id)}
-				<div
-					class="group flex items-start gap-3 rounded-lg border border-transparent px-3 py-2.5 transition-colors hover:border-border hover:bg-card"
-					role="button"
-					tabindex="0"
-					onclick={() => (selectedTaskId = selectedTaskId === task.id ? null : task.id)}
-					use:dropTarget={{
-						accepts: ['tag'],
-						onDrop: (payload) => handleTagDrop(task, payload),
-						canDrop: tagNotAlreadyOnTask(task),
-					}}
-				>
-					<!-- Completion Toggle -->
-					<button
-						onclick={(e) => handleToggleComplete(e, task)}
-						class="mt-0.5 flex-shrink-0 transition-colors
-							{task.isCompleted ? 'text-green-500' : `text-muted-foreground hover:text-primary`}"
-						title={task.isCompleted ? 'Als offen markieren' : 'Als erledigt markieren'}
-					>
-						{#if task.isCompleted}
-							<Check size={20} weight="bold" />
-						{:else}
-							<Circle size={20} />
-						{/if}
-					</button>
-
-					<!-- Task Content -->
-					<div class="min-w-0 flex-1">
-						<div class="flex items-center gap-2">
-							<span
-								class="text-sm {task.isCompleted
-									? 'line-through text-muted-foreground'
-									: 'text-foreground'}"
-							>
-								{task.title}
-							</span>
-						</div>
-
-						<!-- Metadata Row -->
-						<div class="mt-0.5 flex items-center gap-3 text-xs">
-							{#if task.dueDate}
-								<span class={getDueDateColor(task.dueDate)}>
-									{formatDueDate(task.dueDate)}
-								</span>
-							{/if}
-							{#if task.priority !== 'medium'}
-								<span style="color: {getPriorityColor(task.priority)}">
-									{getPriorityLabel(task.priority)}
-								</span>
-							{/if}
-							{#if task.subtasks?.length}
-								<span class="text-muted-foreground">
-									{task.subtasks.filter((s) => s.isCompleted).length}/{task.subtasks.length} Teilaufgaben
-								</span>
-							{/if}
-							{#each getTaskTags(task).slice(0, 3) as tag (tag.id)}
-								<span
-									class="inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[0.625rem] font-medium"
-									style="background: color-mix(in srgb, {tag.color} 15%, transparent); color: {tag.color}"
-								>
-									{tag.name}
-								</span>
-							{/each}
-						</div>
-
-						<!-- Expanded Detail -->
-						{#if selectedTaskId === task.id}
-							<div class="mt-3 space-y-2 border-t border-border pt-3">
-								{#if task.description}
-									<p class="text-sm text-muted-foreground">{task.description}</p>
-								{/if}
-
-								{#if task.subtasks?.length}
-									<div class="space-y-1">
-										{#each task.subtasks as subtask (subtask.id)}
-											<div class="flex items-center gap-2 text-sm">
-												{#if subtask.isCompleted}
-													<Check size={14} class="text-green-500" />
-												{:else}
-													<Circle size={14} class="text-muted-foreground" />
-												{/if}
-												<span
-													class={subtask.isCompleted
-														? 'line-through text-muted-foreground'
-														: 'text-foreground'}
-												>
-													{subtask.title}
-												</span>
-											</div>
-										{/each}
-									</div>
-								{/if}
-
-								<div class="flex gap-2 pt-1">
-									<select
-										value={task.priority}
-										onchange={(e) =>
-											tasksStore.updateTask(task.id, {
-												priority: e.currentTarget.value as TaskPriority,
-											})}
-										class="rounded-md border border-border bg-background px-2 py-1 text-xs focus:border-primary focus:outline-none"
-									>
-										<option value="low">Niedrig</option>
-										<option value="medium">Mittel</option>
-										<option value="high">Hoch</option>
-										<option value="urgent">Dringend</option>
-									</select>
-									<input
-										type="date"
-										value={task.dueDate ? task.dueDate.split('T')[0] : ''}
-										onchange={(e) =>
-											tasksStore.updateTask(task.id, {
-												dueDate: e.currentTarget.value
-													? new Date(e.currentTarget.value).toISOString()
-													: null,
-											})}
-										class="rounded-md border border-border bg-background px-2 py-1 text-xs focus:border-primary focus:outline-none"
-									/>
-									<button
-										onclick={(e) => {
-											e.stopPropagation();
-											shareTask = task;
-										}}
-										class="rounded-md px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-muted"
-										title="Kurzlink teilen"
-									>
-										<ShareNetwork size={14} />
-									</button>
-									<button
-										onclick={(e) => handleDeleteTask(e, task)}
-										class="ml-auto rounded-md px-2 py-1 text-xs text-red-500 transition-colors hover:bg-red-500/10"
-									>
-										Loeschen
-									</button>
-								</div>
-							</div>
-						{/if}
-					</div>
-
-					<!-- Priority indicator -->
-					{#if task.priority === 'urgent' || task.priority === 'high'}
-						<div
-							class="mt-1 h-2 w-2 flex-shrink-0 rounded-full"
-							style="background-color: {getPriorityColor(task.priority)}"
-							title={getPriorityLabel(task.priority)}
-						></div>
-					{/if}
-				</div>
-			{/each}
-		</div>
+		<TaskList
+			tasks={displayTasks}
+			tags={tagList}
+			compact={todoSettings.compactMode}
+			dragEnabled={viewStore.sortBy === 'order'}
+			onOpenTask={(task) => (editTask = task)}
+		/>
 
 		<p class="mt-4 text-center text-xs text-muted-foreground">
-			{displayTasks.length} Aufgabe{displayTasks.length !== 1 ? 'n' : ''}
+			{displayTasks.length}
+			{$_('todo.tasks')}
 		</p>
 	{/if}
 
 	<!-- Projects Section -->
-	{#if allProjects.length > 0}
+	{#if !isBoardView && allProjects.length > 0}
 		<div class="mt-8">
 			<h2 class="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-				Projekte
+				{$_('todo.projects')}
 			</h2>
 			<div class="space-y-1">
 				{#each allProjects as project (project.id)}
@@ -519,33 +380,6 @@
 							style="background-color: {project.color ?? '#6b7280'}"
 						></div>
 						<span class="flex-1 text-left text-foreground">{project.name}</span>
-						<CaretRight size={14} class="text-muted-foreground" />
-					</button>
-				{/each}
-			</div>
-		</div>
-	{/if}
-
-	<!-- Labels Section -->
-	{#if allLabels.length > 0}
-		<div class="mt-6">
-			<h2 class="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-				Labels
-			</h2>
-			<div class="flex flex-wrap gap-2">
-				{#each allLabels as label (label.id)}
-					<button
-						onclick={() => viewStore.setLabel(label.id)}
-						class="rounded-full border px-3 py-1 text-xs font-medium transition-colors
-							{viewStore.currentView === 'label' && viewStore.currentLabelId === label.id
-							? 'border-primary bg-primary/10 text-primary'
-							: 'border-border text-muted-foreground hover:border-primary/50'}"
-					>
-						<span
-							class="mr-1 inline-block h-2 w-2 rounded-full"
-							style="background-color: {label.color}"
-						></span>
-						{label.name}
 					</button>
 				{/each}
 			</div>
@@ -553,7 +387,25 @@
 	{/if}
 </div>
 
-<!-- Share Modal (uLoad integration) -->
+<!-- Task Edit Modal -->
+{#if editTask}
+	<TaskEditModal task={editTask} open={true} onClose={() => (editTask = null)} />
+{/if}
+
+<!-- Board Editor Modal -->
+<ViewEditorModal
+	view={editBoardView}
+	open={showBoardEditor}
+	onClose={() => (showBoardEditor = false)}
+/>
+
+<!-- Syntax Help Overlay -->
+<SyntaxHelpOverlay open={showSyntaxHelp} onClose={() => (showSyntaxHelp = false)} />
+
+<!-- Onboarding Modal -->
+<OnboardingModal open={showOnboarding} onClose={() => (showOnboarding = false)} />
+
+<!-- Share Modal -->
 <ShareModal
 	visible={shareTask !== null}
 	onClose={() => (shareTask = null)}
@@ -564,7 +416,6 @@
 />
 
 <style>
-	/* DnD: tag hovering over task item */
 	:global(.mana-drop-target-hover) {
 		outline: 2px solid var(--color-primary, #6366f1);
 		outline-offset: -2px;
