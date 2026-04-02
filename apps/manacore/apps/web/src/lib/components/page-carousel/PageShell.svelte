@@ -50,27 +50,24 @@
 	const MAX_HEIGHT = 2000;
 
 	let resizing = $state(false);
+	let shellEl = $state<HTMLDivElement | null>(null);
 
 	function handleResizeStart(startX: number, startY: number) {
 		if (!onResize) return;
 		const startWidth = widthPx;
-		const startHeight = heightPx ?? 0;
+		const startHeight = heightPx ?? shellEl?.offsetHeight ?? MIN_HEIGHT;
 		resizing = true;
 		document.body.style.userSelect = 'none';
 		document.body.style.cursor = 'nwse-resize';
 
 		function onMove(clientX: number, clientY: number) {
 			const deltaX = clientX - startX;
+			const deltaY = clientY - startY;
 			const newWidth = Math.round(Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, startWidth + deltaX)));
-			if (startHeight > 0) {
-				const deltaY = clientY - startY;
-				const newHeight = Math.round(
-					Math.min(MAX_HEIGHT, Math.max(MIN_HEIGHT, startHeight + deltaY))
-				);
-				onResize!(newWidth, newHeight);
-			} else {
-				onResize!(newWidth);
-			}
+			const newHeight = Math.round(
+				Math.min(MAX_HEIGHT, Math.max(MIN_HEIGHT, startHeight + deltaY))
+			);
+			onResize!(newWidth, newHeight);
 		}
 
 		function onEnd() {
@@ -108,6 +105,7 @@
 </script>
 
 <div
+	bind:this={shellEl}
 	class="page-shell"
 	class:maximized
 	class:resizing
