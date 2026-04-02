@@ -151,6 +151,13 @@
 
 	// ── Navigation ──────────────────────────────────────────
 	let baseNavItems = $derived<PillNavItem[]>([
+		{
+			href: '/',
+			label: $_('nav.tags'),
+			icon: 'tag',
+			onClick: handleTagStripToggle,
+			active: isTagStripVisible,
+		},
 		{ href: '/', label: $_('nav.home'), icon: 'home' },
 		{ href: '/spiral', label: $_('nav.spiral'), icon: 'spiral' },
 		{ href: '/observatory', label: $_('nav.observatory'), icon: 'eye' },
@@ -159,13 +166,6 @@
 		{ href: '/api-keys', label: $_('nav.api_keys'), icon: 'key' },
 		{ href: '/profile', label: $_('nav.profile'), icon: 'user' },
 		{ href: '/settings', label: $_('nav.settings'), icon: 'settings' },
-		{
-			href: '/',
-			label: $_('nav.tags'),
-			icon: 'tag',
-			onClick: handleTagStripToggle,
-			active: isTagStripVisible,
-		},
 	]);
 
 	let isAdmin = $derived(authStore.user?.role === 'admin');
@@ -533,10 +533,10 @@
 
 	.bottom-stack-row {
 		display: flex;
-		align-items: flex-end;
-		gap: 8px;
-		padding-right: 8px;
+		align-items: center;
+		gap: 0;
 		pointer-events: none;
+		padding: 0 0.5rem;
 	}
 
 	.bottom-stack-row > :global(*) {
@@ -545,18 +545,20 @@
 
 	.bottom-stack-row > :global(:first-child) {
 		flex: 1;
+		min-width: 0;
 	}
 
 	.pill-nav-toggle {
-		width: 32px;
-		height: 32px;
+		width: 44px;
+		height: 44px;
 		flex-shrink: 0;
-		margin-bottom: 20px;
-		border-radius: 50%;
-		border: 1px solid rgba(255, 255, 255, 0.1);
-		background: rgba(0, 0, 0, 0.6);
-		backdrop-filter: blur(8px);
-		color: rgba(255, 255, 255, 0.5);
+		align-self: center;
+		border-radius: 9999px;
+		border: 1px solid hsl(var(--color-border, 0 0% 50% / 0.2));
+		background: hsl(var(--color-surface, 0 0% 10%) / 0.85);
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
+		color: hsl(var(--color-foreground, 0 0% 90%) / 0.5);
 		cursor: pointer;
 		display: flex;
 		align-items: center;
@@ -565,15 +567,17 @@
 			background 0.2s ease,
 			color 0.2s ease;
 		pointer-events: auto;
+		box-shadow:
+			0 4px 6px -1px hsl(var(--color-foreground, 0 0% 0%) / 0.1),
+			0 2px 4px -1px hsl(var(--color-foreground, 0 0% 0%) / 0.06);
 	}
 
 	.pill-nav-toggle:hover {
-		background: rgba(0, 0, 0, 0.8);
-		color: rgba(255, 255, 255, 0.9);
+		color: hsl(var(--color-foreground, 0 0% 90%) / 0.9);
 	}
 
 	.pill-nav-toggle-icon {
-		font-size: 10px;
+		font-size: 11px;
 		transition: transform 0.3s ease;
 		display: inline-block;
 	}
