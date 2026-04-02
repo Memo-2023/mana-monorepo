@@ -388,35 +388,36 @@
 	<div class="min-h-screen bg-background">
 		<!-- Bottom Stack: all fixed-bottom elements in one flex container -->
 		<div class="bottom-stack" bind:clientHeight={bottomStackHeight}>
-			<!-- QuickInputBar + toggle button row -->
-			<div class="bottom-stack-row">
-				<QuickInputBar
-					onSearch={inputBarAdapter.onSearch}
-					onSelect={inputBarAdapter.onSelect}
-					onParseCreate={inputBarAdapter.onParseCreate}
-					onCreate={inputBarAdapter.onCreate}
-					onSearchChange={inputBarAdapter.onSearchChange}
-					placeholder={inputBarAdapter.placeholder}
-					appIcon={inputBarAdapter.appIcon}
-					emptyText={inputBarAdapter.emptyText}
-					createText={inputBarAdapter.createText}
-					deferSearch={inputBarAdapter.deferSearch}
-					locale={$locale || 'de'}
-					defaultOptions={inputBarAdapter.defaultOptions}
-					selectedDefaultId={inputBarAdapter.selectedDefaultId}
-					defaultOptionLabel={inputBarAdapter.defaultOptionLabel}
-					onDefaultChange={inputBarAdapter.onDefaultChange}
-					highlightPatterns={inputBarAdapter.highlightPatterns}
-					positioning="static"
-				/>
-				<button
-					class="pill-nav-toggle"
-					onclick={() => handleCollapsedChange(!isCollapsed)}
-					title={isCollapsed ? 'Navigation einblenden' : 'Navigation ausblenden'}
-				>
-					<span class="pill-nav-toggle-icon" class:collapsed={isCollapsed}>▼</span>
-				</button>
-			</div>
+			<!-- QuickInputBar with inline nav toggle -->
+			<QuickInputBar
+				onSearch={inputBarAdapter.onSearch}
+				onSelect={inputBarAdapter.onSelect}
+				onParseCreate={inputBarAdapter.onParseCreate}
+				onCreate={inputBarAdapter.onCreate}
+				onSearchChange={inputBarAdapter.onSearchChange}
+				placeholder={inputBarAdapter.placeholder}
+				appIcon={inputBarAdapter.appIcon}
+				emptyText={inputBarAdapter.emptyText}
+				createText={inputBarAdapter.createText}
+				deferSearch={inputBarAdapter.deferSearch}
+				locale={$locale || 'de'}
+				defaultOptions={inputBarAdapter.defaultOptions}
+				selectedDefaultId={inputBarAdapter.selectedDefaultId}
+				defaultOptionLabel={inputBarAdapter.defaultOptionLabel}
+				onDefaultChange={inputBarAdapter.onDefaultChange}
+				highlightPatterns={inputBarAdapter.highlightPatterns}
+				positioning="static"
+			>
+				{#snippet leftAction()}
+					<button
+						class="pill-nav-toggle"
+						onclick={() => handleCollapsedChange(!isCollapsed)}
+						title={isCollapsed ? 'Navigation einblenden' : 'Navigation ausblenden'}
+					>
+						<span class="pill-nav-toggle-icon" class:collapsed={isCollapsed}>▼</span>
+					</button>
+				{/snippet}
+			</QuickInputBar>
 
 			<!-- TagStrip (between QuickInputBar and PillNav) -->
 			{#if isTagStripVisible}
@@ -531,49 +532,27 @@
 		pointer-events: auto;
 	}
 
-	.bottom-stack-row {
-		display: flex;
-		align-items: center;
-		gap: 0;
-		pointer-events: none;
-		padding: 0 0.5rem;
-	}
-
-	.bottom-stack-row > :global(*) {
-		pointer-events: auto;
-	}
-
-	.bottom-stack-row > :global(:first-child) {
-		flex: 1;
-		min-width: 0;
-	}
-
 	.pill-nav-toggle {
-		width: 44px;
-		height: 44px;
+		width: 28px;
+		height: 28px;
 		flex-shrink: 0;
-		align-self: center;
-		border-radius: 9999px;
-		border: 1px solid hsl(var(--color-border, 0 0% 50% / 0.2));
-		background: hsl(var(--color-surface, 0 0% 10%) / 0.85);
-		backdrop-filter: blur(12px);
-		-webkit-backdrop-filter: blur(12px);
-		color: hsl(var(--color-foreground, 0 0% 90%) / 0.5);
+		border-radius: 50%;
+		border: none;
+		background: hsl(var(--color-foreground, 0 0% 90%) / 0.08);
+		color: hsl(var(--color-foreground, 0 0% 90%) / 0.4);
 		cursor: pointer;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		transition:
-			background 0.2s ease,
-			color 0.2s ease;
-		pointer-events: auto;
-		box-shadow:
-			0 4px 6px -1px hsl(var(--color-foreground, 0 0% 0%) / 0.1),
-			0 2px 4px -1px hsl(var(--color-foreground, 0 0% 0%) / 0.06);
+			background 0.15s ease,
+			color 0.15s ease;
+		padding: 0;
 	}
 
 	.pill-nav-toggle:hover {
-		color: hsl(var(--color-foreground, 0 0% 90%) / 0.9);
+		background: hsl(var(--color-foreground, 0 0% 90%) / 0.15);
+		color: hsl(var(--color-foreground, 0 0% 90%) / 0.7);
 	}
 
 	.pill-nav-toggle-icon {
