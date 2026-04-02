@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { getContext } from 'svelte';
 	import { eventsStore } from '../stores/events.svelte';
 	import { getCalendarById, getCalendarColor } from '../queries';
@@ -173,18 +174,22 @@
 					<button class="btn btn-ghost" onclick={copyToClipboard} title="Kopieren">
 						{#if copied}<Check size={16} />{:else}<Copy size={16} />{/if}
 					</button>
-					<button class="btn btn-ghost" onclick={() => (isEditing = true)} title="Bearbeiten">
+					<button
+						class="btn btn-ghost"
+						onclick={() => (isEditing = true)}
+						title={$_('common.edit')}
+					>
 						<PencilSimple size={16} />
 					</button>
 					<button
 						class="btn btn-ghost text-destructive"
 						onclick={handleDeleteClick}
-						title="Löschen"
+						title={$_('common.delete')}
 					>
 						<Trash size={16} />
 					</button>
 				{/if}
-				<button class="btn btn-ghost btn-close" onclick={onClose} aria-label="Schließen">
+				<button class="btn btn-ghost btn-close" onclick={onClose} aria-label={$_('common.close')}>
 					<X size={20} />
 				</button>
 			</div>
@@ -290,7 +295,7 @@
 					Alle Termine der Serie
 				</button>
 				<button class="btn btn-ghost" onclick={() => (showDeleteOptions = false)}>
-					Abbrechen
+					{$_('common.cancel')}
 				</button>
 			</div>
 		</div>

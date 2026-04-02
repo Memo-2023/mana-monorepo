@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { getContext } from 'svelte';
 	import { tagMutations } from '$lib/modules/memoro/stores/tags.svelte';
 	import type { Tag } from '@manacore/shared-tags';
@@ -201,7 +202,7 @@
 						disabled={!formName.trim()}
 						class="rounded-lg bg-[hsl(var(--primary))] px-4 py-2 text-sm font-medium text-[hsl(var(--primary-foreground))] hover:opacity-90 disabled:opacity-50"
 					>
-						{editingId ? 'Speichern' : 'Erstellen'}
+						{editingId ? $_('common.save') : $_('common.create')}
 					</button>
 				</div>
 			</form>

@@ -1,7 +1,21 @@
 {
 	"save": "Salva",
+	"saving": "Salvataggio...",
 	"cancel": "Annulla",
 	"delete": "Elimina",
 	"back": "Indietro",
-	"loading": "Caricamento..."
+	"loading": "Caricamento...",
+	"close": "Chiudi",
+	"create": "Crea",
+	"creating": "Creazione...",
+	"edit": "Modifica",
+	"add": "Aggiungi",
+	"search": "Cerca...",
+	"settings": "Impostazioni",
+	"upload": "Carica",
+	"uploading": "Caricamento...",
+	"error_saving": "Errore durante il salvataggio",
+	"error_loading": "Errore durante il caricamento",
+	"error_deleting": "Errore durante l'eliminazione",
+	"click_to_close": "Clicca per chiudere"
 }

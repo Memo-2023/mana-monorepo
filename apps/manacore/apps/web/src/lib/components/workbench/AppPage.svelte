@@ -3,6 +3,7 @@
   Lazy-loads the app's AppView component and renders it inside the page shell.
 -->
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import {
 		X,
 		Minus,
@@ -117,7 +118,7 @@
 						{#if maximized}<CornersIn size={14} />{:else}<CornersOut size={14} />{/if}
 					</button>
 				{/if}
-				<button class="header-btn" onclick={onClose} title="Schließen">
+				<button class="header-btn" onclick={onClose} title={$_('common.close')}>
 					<X size={14} />
 				</button>
 			</div>

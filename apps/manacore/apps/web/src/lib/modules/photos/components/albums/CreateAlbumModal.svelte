@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { X } from '@manacore/shared-icons';
 
 	interface Props {
@@ -85,14 +86,14 @@
 					onclick={onClose}
 					disabled={loading}
 				>
-					Abbrechen
+					{$_('common.cancel')}
 				</button>
 				<button
 					type="submit"
 					class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90 disabled:opacity-50"
 					disabled={!name.trim() || loading}
 				>
-					{loading ? 'Erstelle...' : 'Erstellen'}
+					{loading ? $_('common.creating') : $_('common.create')}
 				</button>
 			</div>
 		</form>

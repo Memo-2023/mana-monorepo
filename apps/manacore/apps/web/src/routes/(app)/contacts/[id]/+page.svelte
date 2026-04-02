@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { getContext } from 'svelte';
@@ -189,7 +190,7 @@
 					<button
 						onclick={() => startEdit()}
 						class="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-						title="Bearbeiten"
+						title={$_('common.edit')}
 					>
 						<PencilSimple size={18} />
 					</button>
@@ -432,13 +433,13 @@
 						type="button"
 						onclick={cancelEdit}
 						class="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted"
-						>Abbrechen</button
+						>{$_('common.cancel')}</button
 					>
 					<button
 						type="button"
 						onclick={saveEdit}
 						class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-						>Speichern</button
+						>{$_('common.save')}</button
 					>
 				</div>
 			</div>

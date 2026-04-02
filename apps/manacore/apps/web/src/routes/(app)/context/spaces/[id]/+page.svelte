@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { Plus, ArrowLeft, PencilSimple, Check, X, MagnifyingGlass } from '@manacore/shared-icons';
@@ -157,7 +158,7 @@
 					<button
 						class="rounded-lg p-2 opacity-60 transition-colors hover:bg-gray-100 hover:opacity-100 dark:hover:bg-gray-700"
 						onclick={startEdit}
-						title="Bearbeiten"
+						title={$_('common.edit')}
 					>
 						<PencilSimple size={18} />
 					</button>
@@ -189,7 +190,7 @@
 					<input
 						type="text"
 						bind:value={searchQuery}
-						placeholder="Suchen..."
+						placeholder={$_('common.search')}
 						class="w-48 rounded-lg border border-gray-300 bg-white py-1.5 pl-8 pr-3 text-sm focus:border-indigo-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
 					/>
 				</div>

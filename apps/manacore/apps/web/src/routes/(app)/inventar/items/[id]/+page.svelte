@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { CaretLeft } from '@manacore/shared-icons';
@@ -133,18 +134,18 @@
 					<button
 						onclick={() => (editing = false)}
 						class="rounded-lg border border-[hsl(var(--border))] px-3 py-1.5 text-sm"
-						>Abbrechen</button
+						>{$_('common.cancel')}</button
 					>
 					<button
 						onclick={saveEdit}
 						class="rounded-lg bg-[hsl(var(--primary))] px-4 py-1.5 text-sm font-medium text-[hsl(var(--primary-foreground))]"
-						>Speichern</button
+						>{$_('common.save')}</button
 					>
 				{:else}
 					<button
 						onclick={startEditing}
 						class="rounded-lg border border-[hsl(var(--border))] px-3 py-1.5 text-sm text-[hsl(var(--foreground))]"
-						>Bearbeiten</button
+						>{$_('common.edit')}</button
 					>
 					<button
 						onclick={deleteItem}

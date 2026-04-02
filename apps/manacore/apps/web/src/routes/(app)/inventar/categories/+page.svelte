@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { Plus } from '@manacore/shared-icons';
 	import { getContext } from 'svelte';
 	import { categoriesStore } from '$lib/modules/inventar/stores/categories.svelte';
@@ -100,11 +101,12 @@
 					onclick={save}
 					disabled={!name.trim()}
 					class="rounded-lg bg-[hsl(var(--primary))] px-4 text-sm text-[hsl(var(--primary-foreground))] disabled:opacity-50"
-					>Speichern</button
+					>{$_('common.save')}</button
 				>
 				<button
 					onclick={() => (showForm = false)}
-					class="rounded-lg border border-[hsl(var(--border))] px-3 text-sm">Abbrechen</button
+					class="rounded-lg border border-[hsl(var(--border))] px-3 text-sm"
+					>{$_('common.cancel')}</button
 				>
 			</div>
 		</div>

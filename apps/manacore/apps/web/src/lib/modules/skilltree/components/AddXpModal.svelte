@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import type { Skill } from '../types';
 	import { LEVEL_NAMES } from '../types';
 	import { X, Lightning, Clock, Star } from '@manacore/shared-icons';
@@ -156,14 +157,14 @@
 					onclick={onClose}
 					class="flex-1 rounded-lg border border-gray-600 bg-transparent px-4 py-2 font-medium text-gray-300 transition-colors hover:bg-gray-700"
 				>
-					Abbrechen
+					{$_('common.cancel')}
 				</button>
 				<button
 					type="submit"
 					disabled={xp <= 0 || saving}
 					class="flex-1 rounded-lg bg-emerald-600 px-4 py-2 font-medium text-white transition-colors hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-50"
 				>
-					{saving ? 'Speichern...' : 'XP vergeben'}
+					{saving ? $_('common.saving') : 'XP vergeben'}
 				</button>
 			</div>
 		</form>

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { getContext } from 'svelte';
@@ -74,14 +75,14 @@
 				<button
 					onclick={startEditing}
 					class="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-					title="Bearbeiten"
+					title={$_('common.edit')}
 				>
 					<PencilSimple size={18} />
 				</button>
 				<button
 					onclick={handleDelete}
 					class="rounded-lg p-1.5 text-muted-foreground hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/20 transition-colors"
-					title="Löschen"
+					title={$_('common.delete')}
 				>
 					<Trash size={18} />
 				</button>

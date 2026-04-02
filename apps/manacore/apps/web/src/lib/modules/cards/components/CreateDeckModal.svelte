@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { deckStore } from '../stores/decks.svelte';
 	import { TagField, ColorPicker, COLORS_12, DEFAULT_COLOR } from '@manacore/shared-ui';
 	import { useAllTags } from '@manacore/shared-stores';
@@ -135,14 +136,14 @@
 						class="rounded-lg px-4 py-2 text-sm text-muted-foreground hover:text-foreground"
 						onclick={handleClose}
 					>
-						Abbrechen
+						{$_('common.cancel')}
 					</button>
 					<button
 						type="submit"
 						class="rounded-lg bg-primary px-4 py-2 text-sm text-white disabled:opacity-50"
 						disabled={submitting || !title.trim()}
 					>
-						{submitting ? 'Erstelle...' : 'Deck erstellen'}
+						{submitting ? $_('common.creating') : 'Deck erstellen'}
 					</button>
 				</div>
 			</form>

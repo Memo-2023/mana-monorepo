@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import type { Skill } from '../types';
 	import { BRANCH_INFO, LEVEL_NAMES, xpProgress, xpForNextLevel } from '../types';
 	import { Plus, Trash, PencilSimple, Star } from '@manacore/shared-icons';
@@ -100,14 +101,14 @@
 		<button
 			onclick={onEdit}
 			class="rounded-lg bg-gray-600/20 p-2 text-gray-400 opacity-0 transition-all hover:bg-gray-600/30 hover:text-white group-hover:opacity-100"
-			title="Bearbeiten"
+			title={$_('common.edit')}
 		>
 			<PencilSimple class="h-4 w-4" />
 		</button>
 		<button
 			onclick={onDelete}
 			class="rounded-lg bg-red-600/20 p-2 text-red-400 opacity-0 transition-all hover:bg-red-600/30 group-hover:opacity-100"
-			title="Löschen"
+			title={$_('common.delete')}
 		>
 			<Trash class="h-4 w-4" />
 		</button>

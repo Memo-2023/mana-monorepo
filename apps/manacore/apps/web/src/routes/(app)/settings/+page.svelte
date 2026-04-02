@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { onMount } from 'svelte';
 	import { Button, Input, Card, PageHeader, GlobalSettingsSection } from '@manacore/shared-ui';
 	import {
@@ -85,7 +86,7 @@
 			profileSuccess = true;
 			ManaCoreEvents.profileUpdated();
 		} catch (e) {
-			profileError = e instanceof Error ? e.message : 'Fehler beim Speichern';
+			profileError = e instanceof Error ? e.message : $_('common.error_saving');
 		} finally {
 			savingProfile = false;
 		}
@@ -94,7 +95,7 @@
 
 <div>
 	<PageHeader
-		title="Einstellungen"
+		title={$_('common.settings')}
 		description="Verwalte deine Kontoeinstellungen und Präferenzen"
 		size="lg"
 	/>
@@ -164,7 +165,7 @@
 						</div>
 
 						<Button onclick={handleUpdateProfile} loading={savingProfile} class="w-full sm:w-auto">
-							{savingProfile ? 'Speichern...' : 'Änderungen speichern'}
+							{savingProfile ? $_('common.saving') : 'Änderungen speichern'}
 						</Button>
 					</div>
 				</div>

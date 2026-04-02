@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { page } from '$app/stores';
 	import { db } from '$lib/data/database';
 	import {
@@ -249,7 +250,7 @@
 						<button
 							onclick={startEditing}
 							class="rounded-lg border border-[hsl(var(--border))] p-2 text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
-							title="Bearbeiten"
+							title={$_('common.edit')}
 						>
 							<PencilSimple class="h-4 w-4" />
 						</button>

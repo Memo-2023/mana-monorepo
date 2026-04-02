@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { getContext, onMount, tick } from 'svelte';
 	import { getDefaultCalendar, getCalendarColor } from '../queries';
 	import type { Calendar } from '../types';
@@ -139,7 +140,7 @@
 		<!-- Header -->
 		<div class="popover-header">
 			<span class="header-title">Neuer Termin</span>
-			<button type="button" class="close-btn" onclick={onClose} aria-label="Schließen">
+			<button type="button" class="close-btn" onclick={onClose} aria-label={$_('common.close')}>
 				<X size={16} />
 			</button>
 		</div>
@@ -238,14 +239,14 @@
 
 		<!-- Actions -->
 		<div class="popover-actions">
-			<button type="button" onclick={onClose} class="cancel-btn">Abbrechen</button>
+			<button type="button" onclick={onClose} class="cancel-btn">{$_('common.cancel')}</button>
 			<button
 				type="submit"
 				disabled={!title.trim()}
 				class="save-btn"
 				style="background-color: {calendarColor};"
 			>
-				Speichern
+				{$_('common.save')}
 			</button>
 		</div>
 	</form>

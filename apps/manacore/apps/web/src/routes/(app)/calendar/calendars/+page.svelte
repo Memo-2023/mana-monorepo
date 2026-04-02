@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { getContext } from 'svelte';
 	import { calendarsStore } from '$lib/modules/calendar/stores/calendars.svelte';
 	import type { Calendar } from '$lib/modules/calendar/types';
@@ -173,7 +174,7 @@
 						<button
 							onclick={() => handleDelete(cal.id)}
 							class="rounded-lg p-1.5 text-muted-foreground hover:text-red-600 transition-colors"
-							title="Löschen"
+							title={$_('common.delete')}
 						>
 							<Trash size={16} />
 						</button>

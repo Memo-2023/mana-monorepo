@@ -1,7 +1,21 @@
 {
 	"save": "Guardar",
+	"saving": "Guardando...",
 	"cancel": "Cancelar",
 	"delete": "Eliminar",
 	"back": "Atrás",
-	"loading": "Cargando..."
+	"loading": "Cargando...",
+	"close": "Cerrar",
+	"create": "Crear",
+	"creating": "Creando...",
+	"edit": "Editar",
+	"add": "Añadir",
+	"search": "Buscar...",
+	"settings": "Ajustes",
+	"upload": "Subir",
+	"uploading": "Subiendo...",
+	"error_saving": "Error al guardar",
+	"error_loading": "Error al cargar",
+	"error_deleting": "Error al eliminar",
+	"click_to_close": "Clic para cerrar"
 }

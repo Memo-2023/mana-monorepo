@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { getContext } from 'svelte';
 	import { getDefaultCalendar } from '../queries';
 	import type { Calendar, CalendarEvent } from '../types';
@@ -214,9 +215,11 @@
 	</div>
 
 	<div class="form-actions">
-		<button type="button" class="btn btn-secondary" onclick={onCancel}> Abbrechen </button>
+		<button type="button" class="btn btn-secondary" onclick={onCancel}>
+			{$_('common.cancel')}
+		</button>
 		<button type="submit" class="btn btn-primary" disabled={submitting || !title.trim()}>
-			{mode === 'create' ? 'Erstellen' : 'Speichern'}
+			{mode === 'create' ? $_('common.create') : $_('common.save')}
 		</button>
 	</div>
 </form>

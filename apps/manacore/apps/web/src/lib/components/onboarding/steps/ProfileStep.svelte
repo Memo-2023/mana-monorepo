@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { profileService } from '$lib/api/profile';
 	import { Camera, Check } from '@manacore/shared-icons';
@@ -70,7 +71,7 @@
 			// Refresh auth store
 			// The profile update should update the user in authStore
 		} catch (e) {
-			error = e instanceof Error ? e.message : 'Fehler beim Speichern';
+			error = e instanceof Error ? e.message : $_('common.error_saving');
 		} finally {
 			saving = false;
 		}

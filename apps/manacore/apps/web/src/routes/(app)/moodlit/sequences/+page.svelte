@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { useLiveQuery } from '@manacore/local-store/svelte';
 	import { db } from '$lib/data/database';
 	import { sequencesStore } from '$lib/modules/moodlit/stores/sequences.svelte';
@@ -83,7 +84,7 @@
 					onclick={createSequence}
 					disabled={!newName}
 					class="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
-					>Erstellen</button
+					>{$_('common.create')}</button
 				>
 			</div>
 		</div>

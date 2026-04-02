@@ -1,7 +1,21 @@
 {
 	"save": "Speichern",
+	"saving": "Speichern...",
 	"cancel": "Abbrechen",
 	"delete": "Löschen",
 	"back": "Zurück",
-	"loading": "Lädt..."
+	"loading": "Lädt...",
+	"close": "Schließen",
+	"create": "Erstellen",
+	"creating": "Erstelle...",
+	"edit": "Bearbeiten",
+	"add": "Hinzufügen",
+	"search": "Suchen...",
+	"settings": "Einstellungen",
+	"upload": "Hochladen",
+	"uploading": "Hochladen...",
+	"error_saving": "Fehler beim Speichern",
+	"error_loading": "Fehler beim Laden",
+	"error_deleting": "Fehler beim Löschen",
+	"click_to_close": "Klicken zum Schließen"
 }

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { Plus, PencilSimple, X, ArrowsOut } from '@manacore/shared-icons';
 	import AppPage from '$lib/components/workbench/AppPage.svelte';
 	import AppPagePicker from '$lib/components/workbench/AppPagePicker.svelte';
@@ -286,7 +287,11 @@
 					>
 						<ArrowsOut size={12} />
 					</button>
-					<button class="tab-close" onclick={() => handleRemoveApp(app.appId)} title="Schließen">
+					<button
+						class="tab-close"
+						onclick={() => handleRemoveApp(app.appId)}
+						title={$_('common.close')}
+					>
 						<X size={12} />
 					</button>
 				</div>

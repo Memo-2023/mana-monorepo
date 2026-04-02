@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { goto } from '$app/navigation';
 	import { getContext } from 'svelte';
 	import { boardsStore } from '$lib/modules/picture/stores/boards.svelte';
@@ -204,7 +205,7 @@
 						disabled={!boardName.trim() || isCreating}
 						class="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
 					>
-						{isCreating ? 'Erstelle...' : 'Erstellen'}
+						{isCreating ? $_('common.creating') : $_('common.create')}
 					</button>
 				</div>
 			</form>

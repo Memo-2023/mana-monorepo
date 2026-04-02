@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { goto } from '$app/navigation';
 	import { db } from '$lib/data/database';
 	import { useAllFavorites } from '$lib/modules/nutriphi/queries';
@@ -261,7 +262,7 @@
 				disabled={saving || !description.trim()}
 				class="flex-1 rounded-lg bg-[hsl(var(--primary))] px-4 py-3 text-sm font-medium text-[hsl(var(--primary-foreground))] hover:opacity-90 disabled:opacity-50"
 			>
-				{saving ? 'Speichert...' : 'Speichern'}
+				{saving ? $_('common.saving') : $_('common.save')}
 			</button>
 		</div>
 	</div>

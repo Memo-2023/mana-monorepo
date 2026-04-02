@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { uloadTagTable, useAllTags, useAllLinkTags, slugify } from '$lib/modules/uload';
 	import type { LocalTag } from '$lib/modules/uload';
 	import { toast } from 'svelte-sonner';
@@ -122,12 +123,13 @@
 								<input type="color" bind:value={editingTag.color} class="h-8 w-12 rounded" />
 								<button
 									onclick={updateTag}
-									class="rounded bg-indigo-600 px-3 py-1 text-sm text-white">Speichern</button
+									class="rounded bg-indigo-600 px-3 py-1 text-sm text-white"
+									>{$_('common.save')}</button
 								>
 								<button
 									onclick={() => (editingTag = null)}
 									class="rounded border border-white/10 px-3 py-1 text-sm text-white/60"
-									>Abbrechen</button
+									>{$_('common.cancel')}</button
 								>
 							</div>
 						</div>

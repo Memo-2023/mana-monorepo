@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import {
 		useAllLinks,
 		useAllTags,
@@ -562,7 +563,7 @@
 								<button
 									onclick={() => openEdit(link)}
 									class="rounded-lg p-2 opacity-0 transition-all hover:bg-gray-100 group-hover:opacity-100 dark:hover:bg-gray-700"
-									title="Bearbeiten"
+									title={$_('common.edit')}
 								>
 									<PencilSimple size={16} />
 								</button>

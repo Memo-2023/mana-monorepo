@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { getContext } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { deckStore } from '$lib/modules/cards/stores/decks.svelte';
@@ -39,7 +40,7 @@
 	<!-- Error State -->
 	{#if deckStore.error}
 		<div class="rounded-lg bg-destructive/10 p-4 text-destructive">
-			<p class="font-medium">Fehler beim Laden</p>
+			<p class="font-medium">{$_('common.error_loading')}</p>
 			<p class="mt-1 text-sm">{deckStore.error}</p>
 		</div>
 	{:else if (allDecks?.value ?? []).length === 0}

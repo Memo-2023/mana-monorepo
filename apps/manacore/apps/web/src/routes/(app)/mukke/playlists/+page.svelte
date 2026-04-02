@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { getContext } from 'svelte';
 	import { playlistsStore } from '$lib/modules/mukke/stores/playlists.svelte';
 	import type { Playlist } from '$lib/modules/mukke/types';
@@ -168,7 +169,7 @@
 						disabled={!newName.trim() || isCreating}
 						class="rounded-lg bg-[hsl(var(--primary))] px-4 py-2 text-sm font-medium text-[hsl(var(--primary-foreground))] hover:opacity-90 disabled:opacity-50"
 					>
-						{isCreating ? 'Erstellen...' : 'Erstellen'}
+						{isCreating ? $_('common.creating') : $_('common.create')}
 					</button>
 				</div>
 			</form>

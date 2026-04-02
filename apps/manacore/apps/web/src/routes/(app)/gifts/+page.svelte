@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { Card, PageHeader } from '@manacore/shared-ui';
@@ -60,7 +61,7 @@
 			createdGifts = created;
 			balance = balanceData;
 		} catch (e) {
-			error = e instanceof Error ? e.message : 'Fehler beim Laden der Daten';
+			error = e instanceof Error ? e.message : $_('common.error_loading');
 			console.error('Failed to load gifts data:', e);
 		} finally {
 			loading = false;

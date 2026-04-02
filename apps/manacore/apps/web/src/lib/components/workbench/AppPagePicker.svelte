@@ -2,6 +2,7 @@
   AppPagePicker — Shows available apps to add as pages to the workbench.
 -->
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { X } from '@manacore/shared-icons';
 	import { APP_REGISTRY } from './app-registry';
 
@@ -19,7 +20,7 @@
 <div class="app-picker">
 	<div class="picker-header">
 		<h3 class="picker-title">App hinzufügen</h3>
-		<button class="close-btn" onclick={onClose} title="Schließen"><X size={16} /></button>
+		<button class="close-btn" onclick={onClose} title={$_('common.close')}><X size={16} /></button>
 	</div>
 	<div class="picker-list">
 		{#each availableApps as app, i (app.id)}

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { goto } from '$app/navigation';
 	import { db } from '$lib/data/database';
 	import { useAllCollections } from '$lib/modules/questions/queries';
@@ -247,7 +248,7 @@
 				disabled={loading || !title.trim()}
 				class="flex-1 rounded-lg bg-[hsl(var(--primary))] px-4 py-3 text-sm font-medium text-[hsl(var(--primary-foreground))] hover:opacity-90 disabled:opacity-50"
 			>
-				{loading ? 'Erstelle...' : 'Frage stellen'}
+				{loading ? $_('common.creating') : 'Frage stellen'}
 			</button>
 		</div>
 	</form>

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { profileService } from '$lib/api/profile';
 	import { Warning, XCircle } from '@manacore/shared-icons';
 
@@ -141,7 +142,7 @@
 							onclick={onClose}
 							class="flex-1 px-4 py-2 border rounded-lg hover:bg-muted transition-colors"
 						>
-							Abbrechen
+							{$_('common.cancel')}
 						</button>
 						<button
 							onclick={handleContinue}
@@ -198,7 +199,7 @@
 							disabled={deleting}
 							class="flex-1 px-4 py-2 border rounded-lg hover:bg-muted transition-colors disabled:opacity-50"
 						>
-							Zurück
+							{$_('common.back')}
 						</button>
 						<button
 							onclick={handleDelete}

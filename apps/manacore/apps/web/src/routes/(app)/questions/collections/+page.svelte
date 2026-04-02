@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { db } from '$lib/data/database';
 	import {
 		useAllCollections,
@@ -175,7 +176,7 @@
 						<button
 							onclick={() => openEditModal(collection)}
 							class="rounded-lg p-2 text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))]"
-							title="Bearbeiten"
+							title={$_('common.edit')}
 						>
 							<PencilSimple class="h-4 w-4" />
 						</button>
@@ -275,14 +276,14 @@
 					onclick={closeModal}
 					class="rounded-lg border border-[hsl(var(--border))] px-4 py-2 text-sm text-[hsl(var(--foreground))] hover:bg-[hsl(var(--muted))]"
 				>
-					Abbrechen
+					{$_('common.cancel')}
 				</button>
 				<button
 					onclick={handleSave}
 					disabled={!formName.trim()}
 					class="rounded-lg bg-[hsl(var(--primary))] px-4 py-2 text-sm font-medium text-[hsl(var(--primary-foreground))] hover:opacity-90 disabled:opacity-50"
 				>
-					{editingCollection ? 'Speichern' : 'Erstellen'}
+					{editingCollection ? $_('common.save') : $_('common.create')}
 				</button>
 			</div>
 		</div>

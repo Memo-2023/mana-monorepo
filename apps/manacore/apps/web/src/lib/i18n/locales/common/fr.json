@@ -1,7 +1,21 @@
 {
 	"save": "Enregistrer",
+	"saving": "Enregistrement...",
 	"cancel": "Annuler",
 	"delete": "Supprimer",
 	"back": "Retour",
-	"loading": "Chargement..."
+	"loading": "Chargement...",
+	"close": "Fermer",
+	"create": "Créer",
+	"creating": "Création...",
+	"edit": "Modifier",
+	"add": "Ajouter",
+	"search": "Rechercher...",
+	"settings": "Paramètres",
+	"upload": "Télécharger",
+	"uploading": "Téléchargement...",
+	"error_saving": "Erreur lors de l'enregistrement",
+	"error_loading": "Erreur lors du chargement",
+	"error_deleting": "Erreur lors de la suppression",
+	"click_to_close": "Cliquer pour fermer"
 }

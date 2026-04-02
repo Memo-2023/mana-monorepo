@@ -1,7 +1,21 @@
 {
 	"save": "Save",
+	"saving": "Saving...",
 	"cancel": "Cancel",
 	"delete": "Delete",
 	"back": "Back",
-	"loading": "Loading..."
+	"loading": "Loading...",
+	"close": "Close",
+	"create": "Create",
+	"creating": "Creating...",
+	"edit": "Edit",
+	"add": "Add",
+	"search": "Search...",
+	"settings": "Settings",
+	"upload": "Upload",
+	"uploading": "Uploading...",
+	"error_saving": "Error saving",
+	"error_loading": "Error loading",
+	"error_deleting": "Error deleting",
+	"click_to_close": "Click to close"
 }

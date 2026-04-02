@@ -317,7 +317,7 @@
 		</div>
 		<div class="todo-header-actions">
 			<SyncIndicator />
-			<a href="/todo/settings" class="settings-btn" title="Einstellungen">
+			<a href="/todo/settings" class="settings-btn" title={$_('common.settings')}>
 				<Gear size={16} />
 			</a>
 		</div>
@@ -437,7 +437,11 @@
 					>
 						<ArrowsOut size={12} />
 					</button>
-					<button class="tab-close" onclick={() => handleRemovePage(page.id)} title="Schließen">
+					<button
+						class="tab-close"
+						onclick={() => handleRemovePage(page.id)}
+						title={$_('common.close')}
+					>
 						<X size={12} />
 					</button>
 				</div>

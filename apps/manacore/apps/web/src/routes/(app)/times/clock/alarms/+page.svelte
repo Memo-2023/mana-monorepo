@@ -117,7 +117,7 @@
 			toast.success('Wecker aktualisiert');
 			closeEditModal();
 		} else {
-			toast.error(result.error || 'Fehler beim Speichern');
+			toast.error(result.error || $_('common.error_saving'));
 		}
 	}
 
@@ -126,7 +126,7 @@
 		if (result.success) {
 			toast.success('Wecker gelöscht');
 		} else {
-			toast.error(result.error || 'Fehler beim Löschen');
+			toast.error(result.error || $_('common.error_deleting'));
 		}
 	}
 

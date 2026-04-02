@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import {
 		Circle,
 		CheckCircle,
@@ -80,7 +81,7 @@
 <div class="page-picker">
 	<div class="picker-header">
 		<h3 class="picker-title">Neue Seite</h3>
-		<button class="close-btn" onclick={onClose} title="Schließen"><X size={16} /></button>
+		<button class="close-btn" onclick={onClose} title={$_('common.close')}><X size={16} /></button>
 	</div>
 	<div class="picker-list">
 		{#each availableOptions as option, i (option.id)}
