@@ -5,11 +5,9 @@
 // Stores
 export { tasksStore } from './stores/tasks.svelte';
 export { boardViewsStore } from './stores/board-views.svelte';
-export { viewStore } from './stores/view.svelte';
 export { labelsStore } from './stores/labels.svelte';
 export { remindersStore } from './stores/reminders.svelte';
 export { todoSettings } from './stores/settings.svelte';
-export { minimizedPagesStore } from './stores/minimized-pages.svelte';
 export { contactsStore } from './stores/contacts.svelte';
 
 // Queries
