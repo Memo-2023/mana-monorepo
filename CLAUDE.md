@@ -4,7 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Monorepo Overview
 
-This is a pnpm workspace monorepo containing multiple product applications with shared packages. All projects use a local-first architecture (Dexie.js + mana-sync) with Hono/Bun compute servers and follow consistent patterns.
+This is a pnpm workspace monorepo with a **unified web application** (`apps/manacore/apps/web`) serving 27+ product modules. All modules share one SvelteKit app, one IndexedDB database, one auth session, and one deployment. Backend services use Hono/Bun compute servers. Data follows a local-first architecture (Dexie.js + mana-sync).
+
+**Unified App:** `apps/manacore/apps/web` — the main web interface at `mana.how`
+**Standalone Web Apps:** Archived to `apps/*/apps/web-archived/` (superseded by unified app)
+**Active Standalone:** matrix, manavoxel, arcade (separate containers, not yet unified)
 
 **Package Manager:** pnpm 9.15.0 (use `pnpm` for all commands)
 **Build System:** Turborepo
@@ -31,38 +35,49 @@ For comprehensive guidelines on code patterns and conventions, see the `.claude/
 
 ## Projects
 
-| Project | Description | Apps |
-|---------|-------------|------|
-| **manacore** | Multi-app ecosystem platform | Mobile, Web |
-| **chat** | AI chat application | Backend, Mobile, Web, Landing |
-| **picture** | AI image generation | Backend, Mobile, Web, Landing |
-| **memoro** | AI voice recording & memo management | Backend, Audio-Backend, Mobile, Web, Landing |
-| **cards** | Card/deck management | Backend, Mobile, Web |
-| **todo** | Task management | Backend, Web, Landing |
-| **calendar** | Calendar & scheduling | Backend, Web, Landing |
-| **contacts** | Contact management | Backend, Web |
-| **storage** | Cloud file storage | Backend, Web |
-| **mukke** | Music production | Backend, Web, Landing |
-| **zitare** | Daily inspiration quotes | Web, Landing |
-| **presi** | Presentations | Mobile, Web, Landing |
-| **questions** | Research assistant | Backend, Web |
-| **context** | Document workspace | Backend, Mobile, Web |
-| **photos** | Photo management | Web |
-| **nutriphi** | Nutrition tracking | Backend, Web, Landing |
-| **planta** | Plant care | Backend, Web |
-| **skilltree** | Skill tracking | Web |
-| **citycorners** | City guide for Konstanz | Web, Landing |
-| **inventar** | Inventory management | Web |
-| **traces** | City exploration | Backend, Mobile |
-| **times** | Time tracking, clocks, alarms, timers, stopwatch | Web |
-| **uload** | URL shortener & link management | Server, Web, Landing |
-| **news** | AI news reader & personal library | Server, Web, Landing |
-| **wisekeep** | AI transcription & wisdom library | Server, Web, Landing |
-| **reader** | Text-to-Speech with offline audio | Mobile |
-| **bauntown** | Developer community website | Landing |
-| **moodlit** | Ambient lighting & mood app | Server, Web, Landing |
-| **calc** | Calculator & converter | Web |
-| **playground** | LLM playground | Web |
+### Unified App — ManaCore (`apps/manacore/apps/web`)
+
+The main web interface serving 27+ modules. All modules share one SvelteKit build, one IndexedDB, one auth session. Each module lives in `src/lib/modules/{name}/`.
+
+### Project Modules (integrated into unified app)
+
+| Module | Description | Active Apps |
+|--------|-------------|-------------|
+| **todo** | Task management | Server, Landing |
+| **calendar** | Calendar & scheduling | Server, Landing |
+| **contacts** | Contact management | Server |
+| **chat** | AI chat application | Server, Mobile, Landing |
+| **picture** | AI image generation | Server, Mobile, Landing |
+| **memoro** | AI voice recording | Server, Audio-Server, Mobile, Landing |
+| **cards** | Flashcard/deck management | Mobile |
+| **storage** | Cloud file storage | Server |
+| **mukke** | Music production | Server, Landing |
+| **zitare** | Daily inspiration quotes | Landing |
+| **presi** | Presentations | Server, Mobile, Landing |
+| **questions** | Research assistant | Server |
+| **context** | Document workspace | Server, Mobile |
+| **photos** | Photo management | — |
+| **nutriphi** | Nutrition tracking | Server, Landing |
+| **planta** | Plant care | Server |
+| **skilltree** | Skill tracking | — |
+| **citycorners** | City guide for Konstanz | Landing |
+| **inventar** | Inventory management | — |
+| **traces** | City exploration | Server, Mobile |
+| **times** | Time tracking & clocks | — |
+| **uload** | URL shortener | Server, Landing |
+| **moodlit** | Ambient lighting | Server, Landing |
+| **calc** | Calculator & converter | — |
+| **guides** | City guides | Server |
+
+Standalone web apps have been archived to `apps/*/apps/web-archived/`.
+
+### Standalone Web Apps (not yet unified)
+
+| Project | Description | Why separate |
+|---------|-------------|--------------|
+| **matrix** | Matrix chat client | Docker container `matrix-web`, protocol-specific |
+| **manavoxel** | 3D voxel editor | Docker container `manavoxel-web`, WebGL-heavy |
+| **playground** | LLM playground | Docker container, development tool |
 
 ### Games (`games/`)
 
@@ -80,6 +95,9 @@ Archived apps are excluded from the pnpm workspace.
 | Project | Reason |
 |---------|--------|
 | **clock** | Consolidated into Times |
+| **wisekeep** | Inactive, not integrated into unified app |
+
+**Note:** Standalone web apps (`apps/*/apps/web-archived/`) are also archived but remain within their project directories. Only the unified ManaCore web app (`apps/manacore/apps/web`) is active.
 
 ## Development Commands
 
@@ -258,7 +276,9 @@ Parent workspace packages (e.g., `apps/chat/package.json`, `apps/zitare/package.
 
 - SvelteKit 2.x + Svelte 5
 - Tailwind CSS
-- Supabase SSR auth
+- Mana Core Auth (Better Auth + EdDSA JWT)
+- Local-first data (Dexie.js + mana-sync)
+- svelte-i18n (5 languages: de, en, it, fr, es)
 
 **Landing Pages (Astro):**
 
