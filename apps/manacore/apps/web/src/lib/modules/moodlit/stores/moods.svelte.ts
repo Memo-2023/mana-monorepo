@@ -3,6 +3,7 @@
  */
 
 import { db } from '$lib/data/database';
+import { MoodlitEvents } from '@manacore/shared-utils/analytics';
 import type { LocalMood } from '../types';
 import type { Mood, MoodSettings } from '../types';
 
@@ -87,6 +88,7 @@ function createMoodsStore() {
 				favoriteIds = [...favoriteIds, moodId];
 			}
 			persist();
+			MoodlitEvents.moodFavorited();
 		},
 
 		updateSettings(updates: Partial<MoodSettings>) {
@@ -105,6 +107,7 @@ function createMoodsStore() {
 				createdAt: new Date().toISOString(),
 				updatedAt: new Date().toISOString(),
 			});
+			MoodlitEvents.moodCreated();
 		},
 
 		async deleteMood(id: string) {
@@ -112,6 +115,7 @@ function createMoodsStore() {
 				deletedAt: new Date().toISOString(),
 				updatedAt: new Date().toISOString(),
 			});
+			MoodlitEvents.moodDeleted();
 		},
 	};
 }

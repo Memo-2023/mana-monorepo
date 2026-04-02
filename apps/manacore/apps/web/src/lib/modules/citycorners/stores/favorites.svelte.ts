@@ -6,6 +6,7 @@
  */
 
 import { db } from '$lib/data/database';
+import { CityCornersEvents } from '@manacore/shared-utils/analytics';
 import type { LocalFavorite } from '../types';
 
 let loading = $state(false);
@@ -30,6 +31,7 @@ export const favoritesStore = {
 					deletedAt: new Date().toISOString(),
 					updatedAt: new Date().toISOString(),
 				});
+				CityCornersEvents.favoriteToggled(false);
 			} else {
 				const newFav: LocalFavorite = {
 					id: crypto.randomUUID(),
@@ -38,6 +40,7 @@ export const favoritesStore = {
 					updatedAt: new Date().toISOString(),
 				};
 				await db.table('ccFavorites').add(newFav);
+				CityCornersEvents.favoriteToggled(true);
 			}
 		} catch (err) {
 			console.error('Failed to toggle favorite:', err);

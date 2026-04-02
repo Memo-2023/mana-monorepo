@@ -9,6 +9,7 @@ import { invItemTable } from '../collections';
 import { toItem } from '../queries';
 import type { LocalItem } from '../types';
 import type { ItemStatus } from '../queries';
+import { InventarEvents } from '@manacore/shared-utils/analytics';
 
 export const itemsStore = {
 	async create(data: {
@@ -45,6 +46,7 @@ export const itemsStore = {
 			order: collectionItems.length,
 		};
 		await invItemTable.add(newLocal);
+		InventarEvents.itemCreated();
 		return toItem(newLocal);
 	},
 
@@ -69,6 +71,7 @@ export const itemsStore = {
 			...data,
 			updatedAt: new Date().toISOString(),
 		});
+		InventarEvents.itemUpdated();
 	},
 
 	async delete(id: string) {
@@ -76,6 +79,7 @@ export const itemsStore = {
 			deletedAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString(),
 		});
+		InventarEvents.itemDeleted();
 	},
 
 	async deleteByCollection(collectionId: string) {

@@ -8,6 +8,7 @@
 import { invLocationTable } from '../collections';
 import { toLocation } from '../queries';
 import type { LocalLocation } from '../types';
+import { InventarEvents } from '@manacore/shared-utils/analytics';
 
 function buildPath(locations: LocalLocation[], parentId?: string): string {
 	if (!parentId) return '';
@@ -41,6 +42,7 @@ export const locationsStore = {
 			order: siblings.length,
 		};
 		await invLocationTable.add(newLocal);
+		InventarEvents.locationCreated();
 		return toLocation(newLocal);
 	},
 
@@ -64,5 +66,6 @@ export const locationsStore = {
 		for (const deleteId of idsToDelete) {
 			await invLocationTable.update(deleteId, { deletedAt: now, updatedAt: now });
 		}
+		InventarEvents.locationDeleted();
 	},
 };

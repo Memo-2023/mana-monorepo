@@ -5,6 +5,7 @@
  */
 
 import { db } from '$lib/data/database';
+import { ZitareEvents } from '@manacore/shared-utils/analytics';
 import type { LocalQuoteList } from '../types';
 import { toQuoteList, type QuoteList } from '../queries';
 
@@ -28,6 +29,7 @@ export const listsStore = {
 				updatedAt: now,
 			};
 			await db.table<LocalQuoteList>('zitareLists').add(newLocal);
+			ZitareEvents.listCreated();
 			return toQuoteList(newLocal);
 		} catch {
 			return null;
@@ -56,6 +58,7 @@ export const listsStore = {
 				deletedAt: new Date().toISOString(),
 				updatedAt: new Date().toISOString(),
 			});
+			ZitareEvents.listDeleted();
 			return true;
 		} catch {
 			return false;

@@ -7,6 +7,7 @@
 
 import { mukkeProjectTable } from '../collections';
 import { toProject } from '../queries';
+import { MukkeEvents } from '@manacore/shared-utils/analytics';
 import type { LocalProject } from '../types';
 
 export const projectsStore = {
@@ -19,6 +20,7 @@ export const projectsStore = {
 			songId: data.songId ?? null,
 		};
 		await mukkeProjectTable.add(newLocal);
+		MukkeEvents.projectCreated();
 		return toProject(newLocal);
 	},
 
@@ -34,5 +36,6 @@ export const projectsStore = {
 	async delete(id: string) {
 		const now = new Date().toISOString();
 		await mukkeProjectTable.update(id, { deletedAt: now, updatedAt: now });
+		MukkeEvents.projectDeleted();
 	},
 };

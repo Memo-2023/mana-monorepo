@@ -7,6 +7,7 @@
 
 import { memoryTable } from '../collections';
 import { toMemory } from '../queries';
+import { MemoroEvents } from '@manacore/shared-utils/analytics';
 import type { LocalMemory } from '../types';
 
 export const memoriesStore = {
@@ -19,6 +20,7 @@ export const memoriesStore = {
 			content: data.content ?? null,
 		};
 		await memoryTable.add(newLocal);
+		MemoroEvents.memoCreated();
 		return toMemory(newLocal);
 	},
 
@@ -34,5 +36,6 @@ export const memoriesStore = {
 	async delete(id: string) {
 		const now = new Date().toISOString();
 		await memoryTable.update(id, { deletedAt: now, updatedAt: now });
+		MemoroEvents.memoDeleted();
 	},
 };

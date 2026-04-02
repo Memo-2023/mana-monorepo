@@ -8,6 +8,7 @@
 import { invCategoryTable } from '../collections';
 import { toCategory } from '../queries';
 import type { LocalCategory } from '../types';
+import { InventarEvents } from '@manacore/shared-utils/analytics';
 
 export const categoriesStore = {
 	async create(data: { name: string; icon?: string; color?: string; parentId?: string }) {
@@ -24,6 +25,7 @@ export const categoriesStore = {
 			order: siblings.length,
 		};
 		await invCategoryTable.add(newLocal);
+		InventarEvents.categoryCreated();
 		return toCategory(newLocal);
 	},
 
@@ -47,5 +49,6 @@ export const categoriesStore = {
 		for (const deleteId of idsToDelete) {
 			await invCategoryTable.update(deleteId, { deletedAt: now, updatedAt: now });
 		}
+		InventarEvents.categoryDeleted();
 	},
 };

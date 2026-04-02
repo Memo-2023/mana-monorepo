@@ -166,6 +166,10 @@ const track = {
 	subscription: createModuleTracker('subscription'),
 	memoro: createModuleTracker('memoro'),
 	app: createModuleTracker('app'),
+	calc: createModuleTracker('calc'),
+	inventar: createModuleTracker('inventar'),
+	moodlit: createModuleTracker('moodlit'),
+	citycorners: createModuleTracker('citycorners'),
 };
 
 /**
@@ -545,4 +549,47 @@ export const AppEvents = {
 	helpOpened: () => track.app('help_opened'),
 	settingsOpened: () => track.app('settings_opened'),
 	shareClicked: (platform: string) => track.app('share_clicked', { platform }),
+};
+
+/**
+ * Calc App Events
+ */
+export const CalcEvents = {
+	calculationAdded: () => track.calc('calculation_added'),
+	historyCleared: () => track.calc('history_cleared'),
+	formulaSaved: () => track.calc('formula_saved'),
+	formulaDeleted: () => track.calc('formula_deleted'),
+};
+
+/**
+ * Inventar App Events
+ */
+export const InventarEvents = {
+	itemCreated: () => track.inventar('item_created'),
+	itemUpdated: () => track.inventar('item_updated'),
+	itemDeleted: () => track.inventar('item_deleted'),
+	collectionCreated: () => track.inventar('collection_created'),
+	collectionDeleted: () => track.inventar('collection_deleted'),
+	categoryCreated: () => track.inventar('category_created'),
+	categoryDeleted: () => track.inventar('category_deleted'),
+	locationCreated: () => track.inventar('location_created'),
+	locationDeleted: () => track.inventar('location_deleted'),
+};
+
+/**
+ * Moodlit App Events
+ */
+export const MoodlitEvents = {
+	moodCreated: () => track.moodlit('mood_created'),
+	moodDeleted: () => track.moodlit('mood_deleted'),
+	moodFavorited: () => track.moodlit('mood_favorited'),
+	sequenceCreated: () => track.moodlit('sequence_created'),
+	sequenceDeleted: () => track.moodlit('sequence_deleted'),
+};
+
+/**
+ * CityCorners App Events
+ */
+export const CityCornersEvents = {
+	favoriteToggled: (favorited: boolean) => track.citycorners('favorite_toggled', { favorited }),
 };

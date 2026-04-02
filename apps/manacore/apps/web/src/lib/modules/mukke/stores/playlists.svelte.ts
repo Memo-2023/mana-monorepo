@@ -7,6 +7,7 @@
 
 import { mukkePlaylistTable, playlistSongTable } from '../collections';
 import { toPlaylist } from '../queries';
+import { MukkeEvents } from '@manacore/shared-utils/analytics';
 import type { LocalPlaylist, LocalPlaylistSong } from '../types';
 
 export const playlistsStore = {
@@ -19,6 +20,7 @@ export const playlistsStore = {
 			coverArtPath: null,
 		};
 		await mukkePlaylistTable.add(newLocal);
+		MukkeEvents.playlistCreated();
 		return toPlaylist(newLocal);
 	},
 
@@ -39,6 +41,7 @@ export const playlistsStore = {
 		for (const ps of allPS) {
 			await playlistSongTable.update(ps.id, { deletedAt: now, updatedAt: now });
 		}
+		MukkeEvents.playlistDeleted();
 	},
 
 	/** Add a song to a playlist. */

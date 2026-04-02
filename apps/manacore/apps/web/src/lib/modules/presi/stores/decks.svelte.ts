@@ -7,6 +7,7 @@
 
 import { presiDeckTable, slideTable } from '../collections';
 import { toDeck, toSlide } from '../queries';
+import { PresiEvents } from '@manacore/shared-utils/analytics';
 import type {
 	LocalDeck,
 	LocalSlide,
@@ -34,6 +35,7 @@ function createDecksStore() {
 				isPublic: false,
 			};
 			await presiDeckTable.add(newLocal);
+			PresiEvents.deckCreated();
 			return toDeck(newLocal);
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to create deck';
@@ -75,6 +77,7 @@ function createDecksStore() {
 			}
 			// Soft-delete the deck
 			await presiDeckTable.update(id, { deletedAt: now, updatedAt: now });
+			PresiEvents.deckDeleted();
 			return true;
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to delete deck';
@@ -96,6 +99,7 @@ function createDecksStore() {
 				content: dto.content,
 			};
 			await slideTable.add(newLocal);
+			PresiEvents.slideCreated();
 			return toSlide(newLocal);
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to create slide';
@@ -127,6 +131,7 @@ function createDecksStore() {
 		try {
 			const now = new Date().toISOString();
 			await slideTable.update(id, { deletedAt: now, updatedAt: now });
+			PresiEvents.slideDeleted();
 			return true;
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to delete slide';

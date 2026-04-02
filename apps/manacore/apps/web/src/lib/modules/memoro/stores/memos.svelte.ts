@@ -8,6 +8,7 @@
 import { memoTable } from '../collections';
 import { toMemo } from '../queries';
 import { createArchiveOps } from '@manacore/shared-stores';
+import { MemoroEvents } from '@manacore/shared-utils/analytics';
 import type { LocalMemo } from '../types';
 
 /** Archive/soft-delete ops for memos. */
@@ -37,6 +38,7 @@ export const memosStore = {
 			language: data.language ?? null,
 		};
 		await memoTable.add(newLocal);
+		MemoroEvents.memoCreated();
 		return toMemo(newLocal);
 	},
 
@@ -72,5 +74,8 @@ export const memosStore = {
 	},
 
 	/** Soft-delete a memo. */
-	delete: (id: string) => memoArchive.softDelete(id),
+	async delete(id: string) {
+		await memoArchive.softDelete(id);
+		MemoroEvents.memoDeleted();
+	},
 };

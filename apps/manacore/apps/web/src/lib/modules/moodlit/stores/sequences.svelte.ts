@@ -3,6 +3,7 @@
  */
 
 import { db } from '$lib/data/database';
+import { MoodlitEvents } from '@manacore/shared-utils/analytics';
 import type { LocalSequence } from '../types';
 import type { MoodSequence } from '../types';
 
@@ -137,6 +138,7 @@ function createSequencesStore() {
 				createdAt: new Date().toISOString(),
 				updatedAt: new Date().toISOString(),
 			});
+			MoodlitEvents.sequenceCreated();
 		},
 
 		async deleteSequence(id: string) {
@@ -144,6 +146,7 @@ function createSequencesStore() {
 				deletedAt: new Date().toISOString(),
 				updatedAt: new Date().toISOString(),
 			});
+			MoodlitEvents.sequenceDeleted();
 		},
 	};
 }

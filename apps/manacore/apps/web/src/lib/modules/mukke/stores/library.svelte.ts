@@ -6,6 +6,7 @@
  */
 
 import { songTable } from '../collections';
+import { MukkeEvents } from '@manacore/shared-utils/analytics';
 import type { LocalSong } from '../types';
 
 export const libraryStore = {
@@ -13,10 +14,12 @@ export const libraryStore = {
 	async toggleFavorite(id: string) {
 		const local = await songTable.get(id);
 		if (local) {
+			const newState = !local.favorite;
 			await songTable.update(id, {
-				favorite: !local.favorite,
+				favorite: newState,
 				updatedAt: new Date().toISOString(),
 			});
+			MukkeEvents.songFavorited(newState);
 		}
 	},
 
@@ -29,6 +32,7 @@ export const libraryStore = {
 				lastPlayedAt: new Date().toISOString(),
 				updatedAt: new Date().toISOString(),
 			});
+			MukkeEvents.songPlayed();
 		}
 	},
 
@@ -52,6 +56,7 @@ export const libraryStore = {
 	async delete(id: string) {
 		const now = new Date().toISOString();
 		await songTable.update(id, { deletedAt: now, updatedAt: now });
+		MukkeEvents.songDeleted();
 	},
 
 	/** Insert a song (e.g., after upload). */

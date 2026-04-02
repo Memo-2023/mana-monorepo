@@ -3,6 +3,7 @@
  */
 
 import { db } from '$lib/data/database';
+import { CalcEvents } from '@manacore/shared-utils/analytics';
 import type { LocalSavedFormula } from '../types';
 import type { CreateFormulaInput, UpdateFormulaInput } from '@calc/shared';
 
@@ -17,6 +18,7 @@ export const savedFormulasStore = {
 			createdAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString(),
 		});
+		CalcEvents.formulaSaved();
 	},
 
 	async updateFormula(id: string, input: UpdateFormulaInput) {
@@ -31,5 +33,6 @@ export const savedFormulasStore = {
 			deletedAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString(),
 		});
+		CalcEvents.formulaDeleted();
 	},
 };

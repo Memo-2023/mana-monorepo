@@ -10,6 +10,7 @@ import { fileTable, storageFolderTable } from '../collections';
 import { toFile, toFolder } from '../queries';
 import type { StorageFile, StorageFolder } from '../queries';
 import type { LocalFile, LocalFolder } from '../types';
+import { StorageEvents } from '@manacore/shared-utils/analytics';
 
 let viewMode = $state<'grid' | 'list'>('grid');
 let selectedFileIds = $state<Set<string>>(new Set());
@@ -134,6 +135,7 @@ export const filesStore = {
 				isFavorite: newFav,
 				updatedAt: new Date().toISOString(),
 			});
+			StorageEvents.fileFavorited(newFav);
 			return newFav;
 		}
 		return false;
@@ -147,6 +149,7 @@ export const filesStore = {
 				isFavorite: newFav,
 				updatedAt: new Date().toISOString(),
 			});
+			StorageEvents.folderFavorited(newFav);
 			return newFav;
 		}
 		return false;
@@ -157,6 +160,7 @@ export const filesStore = {
 			isDeleted: true,
 			updatedAt: new Date().toISOString(),
 		});
+		StorageEvents.fileDeleted();
 	},
 
 	async deleteFolder(id: string) {
@@ -164,6 +168,7 @@ export const filesStore = {
 			isDeleted: true,
 			updatedAt: new Date().toISOString(),
 		});
+		StorageEvents.folderDeleted();
 	},
 
 	async restoreFile(id: string) {

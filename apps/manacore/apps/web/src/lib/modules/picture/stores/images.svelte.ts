@@ -8,6 +8,7 @@
 
 import { db } from '$lib/data/database';
 import { createArchiveOps, toggleField } from '@manacore/shared-stores';
+import { PictureEvents, trackEvent } from '@manacore/shared-utils/analytics';
 import type { LocalImage } from '../types';
 
 const imageTable = () => db.table<LocalImage>('images');
@@ -42,6 +43,7 @@ export const imagesStore = {
 		error = null;
 		try {
 			await toggleField(imageTable(), id, 'isFavorite');
+			PictureEvents.imageFavorited();
 			return { success: true };
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to toggle favorite';
@@ -52,5 +54,8 @@ export const imagesStore = {
 	// Archive ops (delegated to shared factory)
 	archiveImage: (id: string) => imageArchive.archive(id),
 	restoreImage: (id: string) => imageArchive.unarchive(id),
-	deleteImage: (id: string) => imageArchive.softDelete(id),
+	async deleteImage(id: string) {
+		await imageArchive.softDelete(id);
+		trackEvent('image_deleted', { module: 'picture' });
+	},
 };

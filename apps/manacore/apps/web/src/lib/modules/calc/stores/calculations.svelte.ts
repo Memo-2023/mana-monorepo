@@ -3,6 +3,7 @@
  */
 
 import { db } from '$lib/data/database';
+import { CalcEvents } from '@manacore/shared-utils/analytics';
 import type { LocalCalculation } from '../types';
 import type { CreateCalculationInput } from '@calc/shared';
 
@@ -17,6 +18,7 @@ export const calculationsStore = {
 			createdAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString(),
 		});
+		CalcEvents.calculationAdded();
 	},
 
 	async deleteCalculation(id: string) {
@@ -33,5 +35,6 @@ export const calculationsStore = {
 		await Promise.all(
 			active.map((c) => db.table('calculations').update(c.id, { deletedAt: now, updatedAt: now }))
 		);
+		CalcEvents.historyCleared();
 	},
 };

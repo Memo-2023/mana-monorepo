@@ -8,6 +8,7 @@
 import { invCollectionTable } from '../collections';
 import { toCollection } from '../queries';
 import type { LocalCollection } from '../types';
+import { InventarEvents } from '@manacore/shared-utils/analytics';
 
 export const collectionsStore = {
 	async create(data: {
@@ -32,6 +33,7 @@ export const collectionsStore = {
 			itemCount: 0,
 		};
 		await invCollectionTable.add(newLocal);
+		InventarEvents.collectionCreated();
 		return toCollection(newLocal);
 	},
 
@@ -50,6 +52,7 @@ export const collectionsStore = {
 			deletedAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString(),
 		});
+		InventarEvents.collectionDeleted();
 	},
 
 	async reorder(orderedIds: string[]) {
