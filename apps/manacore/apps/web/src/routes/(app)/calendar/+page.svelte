@@ -7,24 +7,20 @@
 	import { eventsStore } from '$lib/modules/calendar/stores/events.svelte';
 	import {
 		getDefaultCalendar,
-		getEventsForDay,
-		getEventsInRange,
 		filterEventsByVisibleCalendars,
-		sortEventsByTime,
 		getCalendarColor,
 	} from '$lib/modules/calendar/queries';
 	import type { Calendar, CalendarEvent } from '$lib/modules/calendar/types';
-	import {
-		format,
-		addMinutes,
-		eachDayOfInterval,
-		startOfWeek,
-		endOfWeek,
-		isSameDay,
-		isToday,
-	} from 'date-fns';
-	import { de } from 'date-fns/locale';
-	import { CaretLeft, CaretRight, Plus, ShareNetwork } from '@manacore/shared-icons';
+
+	import CalendarHeader from '$lib/modules/calendar/components/CalendarHeader.svelte';
+	import WeekView from '$lib/modules/calendar/components/WeekView.svelte';
+	import MonthView from '$lib/modules/calendar/components/MonthView.svelte';
+	import AgendaView from '$lib/modules/calendar/components/AgendaView.svelte';
+	import MiniCalendar from '$lib/modules/calendar/components/MiniCalendar.svelte';
+	import EventDetailModal from '$lib/modules/calendar/components/EventDetailModal.svelte';
+	import EventForm from '$lib/modules/calendar/components/EventForm.svelte';
+
+	import { ShareNetwork } from '@manacore/shared-icons';
 	import { ShareModal } from '@manacore/shared-uload';
 
 	const calendarsCtx: { readonly value: Calendar[] } = getContext('calendars');
@@ -41,21 +37,13 @@
 	}
 
 	function handleTagDrop(event: CalendarEvent, payload: DragPayload) {
-		const tagData = payload.data as TagDragData;
+		const tagData = payload.data as unknown as TagDragData;
 		const current = event.tagIds ?? [];
 		if (!current.includes(tagData.id)) {
 			eventsStore.updateTagIds(event.id, [...current, tagData.id]);
 		}
 	}
 
-	function tagNotAlreadyOnEvent(event: CalendarEvent) {
-		return (payload: DragPayload) => {
-			const tagData = payload.data as TagDragData;
-			return !(event.tagIds ?? []).includes(tagData.id);
-		};
-	}
-
-	// Register passive handler for task→tag direction
 	const tagDropCtx = getContext<{
 		set: (handler: (tagId: string, payload: DragPayload) => void) => void;
 		clear: () => void;
@@ -64,7 +52,6 @@
 	onMount(() => {
 		tagDropCtx?.set(async (tagId: string, payload: DragPayload) => {
 			const data = payload.data as { id: string };
-			// Check if dropped item is an event
 			if (payload.type === 'event') {
 				const event = eventsCtx.value.find((e) => e.id === data.id);
 				if (!event) return;
@@ -77,508 +64,129 @@
 		return () => tagDropCtx?.clear();
 	});
 
-	// Filtered events based on visible calendars
-	let visibleEvents = $derived(filterEventsByVisibleCalendars(eventsCtx.value, calendarsCtx.value));
+	// ── Event interactions ──────────────────────────────────
+	let selectedEvent = $state<CalendarEvent | null>(null);
+	let showCreateForm = $state(false);
+	let createStartTime = $state<Date | null>(null);
+	let createEndTime = $state<Date | null>(null);
 
-	// Current view range events
-	let rangeEvents = $derived(
-		sortEventsByTime(
-			getEventsInRange(
-				visibleEvents,
-				calendarViewStore.viewRange.start,
-				calendarViewStore.viewRange.end
-			)
-		)
-	);
-
-	// Week days for the week view
-	let weekDays = $derived(
-		eachDayOfInterval({
-			start: startOfWeek(calendarViewStore.currentDate, { weekStartsOn: 1 }),
-			end: endOfWeek(calendarViewStore.currentDate, { weekStartsOn: 1 }),
-		})
-	);
-
-	// Event form state
-	let showEventForm = $state(false);
-	let editingEvent = $state<CalendarEvent | null>(null);
-	let newTitle = $state('');
-	let newDate = $state('');
-	let newStartTime = $state('10:00');
-	let newEndTime = $state('11:00');
-	let newAllDay = $state(false);
-	let newLocation = $state('');
-
-	function openNewEvent(date?: Date) {
-		const d = date ?? new Date();
-		editingEvent = null;
-		newTitle = '';
-		newDate = format(d, 'yyyy-MM-dd');
-		newStartTime = '10:00';
-		newEndTime = '11:00';
-		newAllDay = false;
-		newLocation = '';
-		showEventForm = true;
+	function handleEventClick(event: CalendarEvent) {
+		selectedEvent = event;
 	}
 
-	function openEditEvent(event: CalendarEvent) {
-		editingEvent = event;
-		newTitle = event.title;
-		newDate = format(new Date(event.startTime), 'yyyy-MM-dd');
-		newStartTime = format(new Date(event.startTime), 'HH:mm');
-		newEndTime = format(new Date(event.endTime), 'HH:mm');
-		newAllDay = event.isAllDay;
-		newLocation = event.location ?? '';
-		showEventForm = true;
+	function handleNewEvent() {
+		createStartTime = null;
+		createEndTime = null;
+		showCreateForm = true;
 	}
 
-	async function handleSaveEvent() {
+	function handleQuickCreate(startTime: Date, endTime: Date) {
+		createStartTime = startTime;
+		createEndTime = endTime;
+		showCreateForm = true;
+	}
+
+	async function handleCreateSave(data: Record<string, unknown>) {
 		const defaultCal = getDefaultCalendar(calendarsCtx.value);
-		const startTime = newAllDay ? `${newDate}T00:00:00` : `${newDate}T${newStartTime}:00`;
-		const endTime = newAllDay ? `${newDate}T23:59:59` : `${newDate}T${newEndTime}:00`;
-
-		if (editingEvent) {
-			await eventsStore.updateEvent(editingEvent.id, {
-				title: newTitle,
-				startTime: new Date(startTime).toISOString(),
-				endTime: new Date(endTime).toISOString(),
-				isAllDay: newAllDay,
-				location: newLocation || null,
-			});
-		} else {
-			await eventsStore.createEvent({
-				calendarId: defaultCal?.id || '',
-				title: newTitle,
-				startTime: new Date(startTime).toISOString(),
-				endTime: new Date(endTime).toISOString(),
-				isAllDay: newAllDay,
-				location: newLocation || null,
-			});
-		}
-
-		showEventForm = false;
+		await eventsStore.createEvent({
+			calendarId: (data.calendarId as string) || defaultCal?.id || '',
+			title: data.title as string,
+			description: (data.description as string) || null,
+			startTime: data.startTime as string,
+			endTime: data.endTime as string,
+			isAllDay: data.isAllDay as boolean,
+			location: (data.location as string) || null,
+			recurrenceRule: (data.recurrenceRule as string) || null,
+		});
+		showCreateForm = false;
 	}
 
-	async function handleDeleteEvent() {
-		if (!editingEvent) return;
-		await eventsStore.deleteEvent(editingEvent.id);
-		showEventForm = false;
-	}
-
-	// Share modal state
+	// Share modal
 	let shareEvent = $state<CalendarEvent | null>(null);
 	let shareUrl = $derived(
 		shareEvent
 			? `${typeof window !== 'undefined' ? window.location.origin : ''}/calendar?event=${shareEvent.id}`
 			: ''
 	);
-
-	// Hours for the week grid
-	const hours = Array.from({ length: 24 }, (_, i) => i);
-
-	let headerLabel = $derived.by(() => {
-		if (calendarViewStore.viewType === 'month') {
-			return format(calendarViewStore.currentDate, 'MMMM yyyy', { locale: de });
-		}
-		return format(calendarViewStore.currentDate, "'KW' w — MMMM yyyy", { locale: de });
-	});
 </script>
 
 <svelte:head>
 	<title>Kalender - ManaCore</title>
 </svelte:head>
 
-<div class="flex h-full flex-col">
+<div class="calendar-page">
 	<!-- Header -->
-	<header class="flex items-center justify-between border-b border-border px-4 py-3">
-		<div class="flex items-center gap-3">
-			<h1 class="text-lg font-semibold text-foreground">{headerLabel}</h1>
-			<div class="flex items-center gap-1">
-				<button
-					onclick={() => calendarViewStore.goToPrevious()}
-					class="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-				>
-					<CaretLeft size={18} />
-				</button>
-				<button
-					onclick={() => calendarViewStore.goToToday()}
-					class="rounded-lg px-3 py-1 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-				>
-					Heute
-				</button>
-				<button
-					onclick={() => calendarViewStore.goToNext()}
-					class="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-				>
-					<CaretRight size={18} />
-				</button>
-			</div>
-		</div>
+	<CalendarHeader onNewEvent={handleNewEvent} />
 
-		<div class="flex items-center gap-2">
-			<!-- View Type Switcher -->
-			<div class="flex rounded-lg border border-border bg-card">
-				{#each ['week', 'month', 'agenda'] as view}
-					<button
-						onclick={() => calendarViewStore.setViewType(view as 'week' | 'month' | 'agenda')}
-						class="px-3 py-1.5 text-sm font-medium transition-colors first:rounded-l-lg last:rounded-r-lg {calendarViewStore.viewType ===
-						view
-							? 'bg-primary text-primary-foreground'
-							: 'text-muted-foreground hover:text-foreground'}"
-					>
-						{view === 'week' ? 'Woche' : view === 'month' ? 'Monat' : 'Agenda'}
-					</button>
-				{/each}
-			</div>
+	<!-- Main content area -->
+	<div class="calendar-content">
+		<!-- Sidebar (desktop only) -->
+		<aside class="calendar-sidebar">
+			<MiniCalendar
+				selectedDate={calendarViewStore.currentDate}
+				onDateSelect={(date) => {
+					calendarViewStore.setDate(date);
+					if (calendarViewStore.viewType === 'month') {
+						calendarViewStore.setViewType('week');
+					}
+				}}
+			/>
 
-			<!-- New Event Button -->
-			<button
-				onclick={() => openNewEvent()}
-				class="flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
-			>
-				<Plus size={16} />
-				Termin
-			</button>
-		</div>
-	</header>
-
-	<!-- View Content -->
-	<div class="flex-1 overflow-auto">
-		{#if calendarViewStore.viewType === 'week'}
-			<!-- Week View -->
-			<div class="week-grid">
-				<!-- Day Headers -->
-				<div
-					class="sticky top-0 z-10 grid grid-cols-[60px_repeat(7,1fr)] border-b border-border bg-card"
-				>
-					<div class="p-2"></div>
-					{#each weekDays as day}
-						<button
-							onclick={() => {
-								calendarViewStore.setDate(day);
-							}}
-							class="border-l border-border p-2 text-center {isToday(day) ? 'bg-primary/10' : ''}"
-						>
-							<div class="text-xs text-muted-foreground">
-								{format(day, 'EEE', { locale: de })}
-							</div>
-							<div
-								class="text-lg font-semibold {isToday(day) ? 'text-primary' : 'text-foreground'}"
-							>
-								{format(day, 'd')}
-							</div>
-						</button>
-					{/each}
-				</div>
-
-				<!-- Time Grid -->
-				<div class="relative">
-					{#each hours as hour}
-						<div class="grid grid-cols-[60px_repeat(7,1fr)] border-b border-border/50">
-							<div class="p-1 pr-2 text-right text-xs text-muted-foreground">
-								{hour.toString().padStart(2, '0')}:00
-							</div>
-							{#each weekDays as day}
-								<button
-									onclick={() => {
-										const d = new Date(day);
-										d.setHours(hour, 0, 0, 0);
-										openNewEvent(d);
-									}}
-									class="h-12 border-l border-border/50 hover:bg-muted/50 transition-colors relative"
-								>
-									<!-- Render events at this slot -->
-									{#each getEventsForDay(visibleEvents, day).filter((e) => {
-										const h = new Date(e.startTime).getHours();
-										return h === hour && !e.isAllDay;
-									}) as event}
-										<div
-											class="absolute inset-x-0.5 top-0 z-10 rounded px-1 py-0.5 text-xs text-white truncate cursor-pointer"
-											style="background-color: {getCalendarColor(
-												calendarsCtx.value,
-												event.calendarId
-											)}"
-											role="button"
-											tabindex="0"
-											onclick={(e) => {
-												e.stopPropagation();
-												openEditEvent(event);
-											}}
-											onkeydown={(e) => e.key === 'Enter' && openEditEvent(event)}
-										>
-											{event.title}
-										</div>
-									{/each}
-								</button>
-							{/each}
-						</div>
-					{/each}
-				</div>
-			</div>
-		{:else if calendarViewStore.viewType === 'month'}
-			<!-- Month View -->
-			<div class="p-4">
-				<div
-					class="grid grid-cols-7 gap-px rounded-lg border border-border bg-border overflow-hidden"
-				>
-					<!-- Day name headers -->
-					{#each ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'] as dayName}
-						<div class="bg-card p-2 text-center text-xs font-medium text-muted-foreground">
-							{dayName}
-						</div>
-					{/each}
-
-					<!-- Calendar days -->
-					{#each eachDayOfInterval( { start: startOfWeek( calendarViewStore.viewRange.start, { weekStartsOn: 1 } ), end: endOfWeek( calendarViewStore.viewRange.end, { weekStartsOn: 1 } ) } ) as day}
-						<button
-							onclick={() => {
-								calendarViewStore.setDate(day);
-								calendarViewStore.setViewType('week');
-							}}
-							class="min-h-[80px] bg-card p-1 text-left hover:bg-muted/50 transition-colors {day.getMonth() !==
-							calendarViewStore.currentDate.getMonth()
-								? 'opacity-40'
-								: ''}"
-						>
-							<div
-								class="mb-1 text-xs font-medium {isToday(day)
-									? 'flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground'
-									: 'text-foreground'}"
-							>
-								{format(day, 'd')}
-							</div>
-							{#each getEventsForDay(visibleEvents, day).slice(0, 3) as event}
-								<div
-									class="mb-0.5 truncate rounded px-1 text-[10px] text-white"
-									style="background-color: {getCalendarColor(calendarsCtx.value, event.calendarId)}"
-								>
-									{event.title}
-								</div>
-							{/each}
-							{#if getEventsForDay(visibleEvents, day).length > 3}
-								<div class="text-[10px] text-muted-foreground">
-									+{getEventsForDay(visibleEvents, day).length - 3} weitere
-								</div>
-							{/if}
-						</button>
-					{/each}
-				</div>
-			</div>
-		{:else}
-			<!-- Agenda View -->
-			<div class="mx-auto max-w-2xl p-4">
-				{#if rangeEvents.length === 0}
-					<div class="py-16 text-center">
-						<p class="text-lg text-muted-foreground">Keine Termine in den nächsten 30 Tagen</p>
-						<button
-							onclick={() => openNewEvent()}
-							class="mt-4 text-sm text-primary hover:underline"
-						>
-							Termin erstellen
-						</button>
+			<!-- Calendar list -->
+			<div class="sidebar-section">
+				<h3 class="sidebar-title">Kalender</h3>
+				{#each calendarsCtx.value as cal (cal.id)}
+					<div class="calendar-item">
+						<div class="calendar-dot" style="background-color: {cal.color}"></div>
+						<span class="calendar-name" class:muted={!cal.isVisible}>{cal.name}</span>
 					</div>
-				{:else}
-					{@const groupedByDate = rangeEvents.reduce(
-						(acc, event) => {
-							const key = format(new Date(event.startTime), 'yyyy-MM-dd');
-							if (!acc[key]) acc[key] = [];
-							acc[key].push(event);
-							return acc;
-						},
-						{} as Record<string, CalendarEvent[]>
-					)}
-
-					{#each Object.entries(groupedByDate) as [dateKey, dayEvents]}
-						<div class="mb-6">
-							<h3 class="mb-2 text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-								{format(new Date(dateKey), 'EEEE, d. MMMM', { locale: de })}
-								{#if isToday(new Date(dateKey))}
-									<span class="ml-2 text-primary">Heute</span>
-								{/if}
-							</h3>
-							<div class="space-y-2">
-								{#each dayEvents as event (event.id)}
-									<button
-										onclick={() => openEditEvent(event)}
-										class="flex w-full items-start gap-3 rounded-lg border border-border bg-card p-3 text-left hover:border-primary/50 transition-colors"
-										use:dropTarget={{
-											accepts: ['tag'],
-											onDrop: (payload) => handleTagDrop(event, payload),
-											canDrop: tagNotAlreadyOnEvent(event),
-										}}
-									>
-										<div
-											class="mt-1 h-3 w-3 flex-shrink-0 rounded-full"
-											style="background-color: {getCalendarColor(
-												calendarsCtx.value,
-												event.calendarId
-											)}"
-										></div>
-										<div class="flex-1 min-w-0">
-											<div class="font-medium text-foreground">{event.title}</div>
-											<div class="flex items-center gap-2 text-sm text-muted-foreground">
-												{#if event.isAllDay}
-													Ganztägig
-												{:else}
-													{format(new Date(event.startTime), 'HH:mm')} – {format(
-														new Date(event.endTime),
-														'HH:mm'
-													)}
-												{/if}
-												{#if event.location}
-													<span class="ml-2">📍 {event.location}</span>
-												{/if}
-											</div>
-											{#if getEventTags(event).length > 0}
-												<div class="mt-1 flex gap-1">
-													{#each getEventTags(event).slice(0, 3) as tag (tag.id)}
-														<span
-															class="inline-flex rounded-full px-1.5 py-0.5 text-[0.625rem] font-medium"
-															style="background: color-mix(in srgb, {tag.color} 15%, transparent); color: {tag.color}"
-														>
-															{tag.name}
-														</span>
-													{/each}
-												</div>
-											{/if}
-										</div>
-									</button>
-								{/each}
-							</div>
-						</div>
-					{/each}
-				{/if}
+				{/each}
+				<a href="/calendar/calendars" class="sidebar-link">Verwalten</a>
 			</div>
-		{/if}
+		</aside>
+
+		<!-- Calendar view -->
+		<main class="calendar-main">
+			{#if calendarViewStore.viewType === 'week'}
+				<WeekView onEventClick={handleEventClick} onQuickCreate={handleQuickCreate} />
+			{:else if calendarViewStore.viewType === 'month'}
+				<MonthView
+					onEventClick={handleEventClick}
+					onDayClick={(day) => {
+						calendarViewStore.setDate(day);
+						calendarViewStore.setViewType('week');
+					}}
+				/>
+			{:else}
+				<AgendaView onEventClick={handleEventClick} />
+			{/if}
+		</main>
 	</div>
 </div>
 
-<!-- Event Form Modal -->
-{#if showEventForm}
-	<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-		<div class="w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-xl">
-			<h2 class="mb-4 text-xl font-semibold text-foreground">
-				{editingEvent ? 'Termin bearbeiten' : 'Neuer Termin'}
-			</h2>
+<!-- Event Detail Modal -->
+{#if selectedEvent}
+	<EventDetailModal event={selectedEvent} onClose={() => (selectedEvent = null)} />
+{/if}
 
-			<form
-				onsubmit={(e) => {
-					e.preventDefault();
-					handleSaveEvent();
-				}}
-				class="space-y-4"
-			>
-				<div>
-					<label for="event-title" class="mb-1 block text-sm font-medium text-foreground">
-						Titel
-					</label>
-					<input
-						id="event-title"
-						type="text"
-						bind:value={newTitle}
-						placeholder="Termin-Titel"
-						required
-						class="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary"
-					/>
-				</div>
-
-				<div>
-					<label for="event-date" class="mb-1 block text-sm font-medium text-foreground">
-						Datum
-					</label>
-					<input
-						id="event-date"
-						type="date"
-						bind:value={newDate}
-						required
-						class="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:ring-1 focus:ring-primary"
-					/>
-				</div>
-
-				<label class="flex items-center gap-2 text-sm text-foreground">
-					<input type="checkbox" bind:checked={newAllDay} class="rounded" />
-					Ganztägig
-				</label>
-
-				{#if !newAllDay}
-					<div class="grid grid-cols-2 gap-3">
-						<div>
-							<label for="event-start" class="mb-1 block text-sm font-medium text-foreground"
-								>Von</label
-							>
-							<input
-								id="event-start"
-								type="time"
-								bind:value={newStartTime}
-								class="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:ring-1 focus:ring-primary"
-							/>
-						</div>
-						<div>
-							<label for="event-end" class="mb-1 block text-sm font-medium text-foreground"
-								>Bis</label
-							>
-							<input
-								id="event-end"
-								type="time"
-								bind:value={newEndTime}
-								class="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:ring-1 focus:ring-primary"
-							/>
-						</div>
-					</div>
-				{/if}
-
-				<div>
-					<label for="event-location" class="mb-1 block text-sm font-medium text-foreground">
-						Ort (optional)
-					</label>
-					<input
-						id="event-location"
-						type="text"
-						bind:value={newLocation}
-						placeholder="Ort eingeben..."
-						class="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary"
-					/>
-				</div>
-
-				<div class="flex gap-3 pt-2">
-					{#if editingEvent}
-						<button
-							type="button"
-							onclick={handleDeleteEvent}
-							class="rounded-lg px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
-						>
-							Löschen
-						</button>
-						<button
-							type="button"
-							onclick={() => {
-								shareEvent = editingEvent;
-								showEventForm = false;
-							}}
-							class="flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted transition-colors"
-							title="Kurzlink teilen"
-						>
-							<ShareNetwork size={16} />
-							Teilen
-						</button>
-					{/if}
-					<div class="flex-1"></div>
-					<button
-						type="button"
-						onclick={() => (showEventForm = false)}
-						class="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted transition-colors"
-					>
-						Abbrechen
-					</button>
-					<button
-						type="submit"
-						disabled={!newTitle.trim()}
-						class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
-					>
-						Speichern
-					</button>
-				</div>
-			</form>
+<!-- Create Event Modal -->
+{#if showCreateForm}
+	<div class="modal-backdrop" role="presentation">
+		<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
+		<div
+			class="modal-backdrop-inner"
+			onclick={(e) => e.target === e.currentTarget && (showCreateForm = false)}
+		>
+			<div class="modal-container" role="dialog" aria-modal="true">
+				<h2 class="modal-title">Neuer Termin</h2>
+				<EventForm
+					mode="create"
+					initialStartTime={createStartTime}
+					initialEndTime={createEndTime}
+					onSave={handleCreateSave}
+					onCancel={() => (showCreateForm = false)}
+				/>
+			</div>
 		</div>
 	</div>
 {/if}
@@ -594,10 +202,151 @@
 />
 
 <style>
-	.week-grid {
-		min-height: 100%;
+	.calendar-page {
+		display: flex;
+		flex-direction: column;
+		height: 100%;
 	}
 
+	.calendar-content {
+		flex: 1;
+		display: flex;
+		min-height: 0;
+	}
+
+	.calendar-sidebar {
+		width: 240px;
+		flex-shrink: 0;
+		border-right: 1px solid hsl(var(--color-border));
+		padding: 0.75rem;
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+		overflow-y: auto;
+	}
+
+	/* Hide sidebar on small screens */
+	@media (max-width: 768px) {
+		.calendar-sidebar {
+			display: none;
+		}
+	}
+
+	.sidebar-section {
+		display: flex;
+		flex-direction: column;
+		gap: 0.375rem;
+	}
+
+	.sidebar-title {
+		font-size: 0.75rem;
+		font-weight: 600;
+		color: hsl(var(--color-muted-foreground));
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		margin: 0;
+	}
+
+	.calendar-item {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.25rem 0;
+	}
+
+	.calendar-dot {
+		width: 10px;
+		height: 10px;
+		border-radius: 50%;
+		flex-shrink: 0;
+	}
+
+	.calendar-name {
+		font-size: 0.8125rem;
+		color: hsl(var(--color-foreground));
+	}
+
+	.calendar-name.muted {
+		opacity: 0.5;
+		text-decoration: line-through;
+	}
+
+	.sidebar-link {
+		font-size: 0.75rem;
+		color: hsl(var(--color-primary));
+		text-decoration: none;
+		margin-top: 0.25rem;
+	}
+
+	.sidebar-link:hover {
+		text-decoration: underline;
+	}
+
+	.calendar-main {
+		flex: 1;
+		min-width: 0;
+		overflow: hidden;
+	}
+
+	/* Modal styles */
+	.modal-backdrop {
+		position: fixed;
+		inset: 0;
+		z-index: 50;
+	}
+
+	.modal-backdrop-inner {
+		position: absolute;
+		inset: 0;
+		background: rgba(0, 0, 0, 0.5);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 1rem;
+		animation: fade-in 150ms ease;
+	}
+
+	.modal-container {
+		background: hsl(var(--color-card));
+		border: 1px solid hsl(var(--color-border));
+		border-radius: var(--radius-lg, 12px);
+		box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+		width: 100%;
+		max-width: 500px;
+		max-height: 90vh;
+		overflow-y: auto;
+		padding: 1.5rem;
+		animation: slide-up 200ms ease;
+	}
+
+	.modal-title {
+		font-size: 1.25rem;
+		font-weight: 600;
+		color: hsl(var(--color-foreground));
+		margin: 0 0 1rem;
+	}
+
+	@keyframes fade-in {
+		from {
+			opacity: 0;
+		}
+		to {
+			opacity: 1;
+		}
+	}
+
+	@keyframes slide-up {
+		from {
+			opacity: 0;
+			transform: translateY(20px) scale(0.95);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0) scale(1);
+		}
+	}
+
+	/* DnD styles */
 	:global(.mana-drop-target-hover) {
 		outline: 2px solid var(--color-primary, #6366f1);
 		outline-offset: -2px;
