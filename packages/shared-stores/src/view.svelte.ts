@@ -39,7 +39,7 @@ export interface SavedFilter<F> {
 	createdAt: string;
 }
 
-export interface ViewStoreConfig<V extends string, F extends Record<string, unknown>> {
+export interface ViewStoreConfig<V extends string, F extends object> {
 	/** Prefix for localStorage keys (e.g. 'inventar' → 'inventar_view_mode') */
 	storagePrefix: string;
 	/** Default view mode */
@@ -50,7 +50,7 @@ export interface ViewStoreConfig<V extends string, F extends Record<string, unkn
 	hasActiveFilters?: (filters: F) => boolean;
 }
 
-export interface ViewStore<V extends string, F extends Record<string, unknown>> {
+export interface ViewStore<V extends string, F extends object> {
 	readonly viewMode: V;
 	readonly sort: SortOption;
 	readonly activeFilters: F;
@@ -87,7 +87,7 @@ function save(key: string, value: unknown) {
 	}
 }
 
-export function createViewStore<V extends string, F extends Record<string, unknown>>(
+export function createViewStore<V extends string, F extends object>(
 	config: ViewStoreConfig<V, F>
 ): ViewStore<V, F> {
 	const VIEW_KEY = `${config.storagePrefix}_view_mode`;

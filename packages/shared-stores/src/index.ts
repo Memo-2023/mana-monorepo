@@ -44,3 +44,4 @@ export {
 	type LocalTag,
 	type LocalTagGroup,
 } from './tags-local.svelte';
+export { createTagLinkOps, type TagLinkOps, type TagLinkOpsConfig } from './tag-links';
