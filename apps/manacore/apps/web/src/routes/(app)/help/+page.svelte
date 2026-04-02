@@ -25,7 +25,7 @@
 	appId="manacore"
 	{translations}
 	showBackButton
-	onBack={() => goto('/dashboard')}
+	onBack={() => goto('/')}
 	showGettingStarted={false}
 	showChangelog={false}
 	defaultSection="faq"

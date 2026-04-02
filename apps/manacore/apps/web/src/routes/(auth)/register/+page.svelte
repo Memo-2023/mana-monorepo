@@ -35,7 +35,7 @@
 	onResendVerification={handleResendVerification}
 	baseSignupCredits={25}
 	{goto}
-	successRedirect="/dashboard"
+	successRedirect="/"
 	loginPath="/login"
 	lightBackground="#f3f4f6"
 	darkBackground="#121212"

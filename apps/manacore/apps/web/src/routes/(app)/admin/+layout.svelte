@@ -11,7 +11,7 @@
 	let isAdmin = $derived(authStore.user?.role === 'admin');
 	$effect(() => {
 		if (authStore.initialized && !authStore.loading && !isAdmin) {
-			goto('/home');
+			goto('/');
 		}
 	});
 

@@ -15,5 +15,5 @@
 	currentMode={theme.mode}
 	onModeChange={(m) => theme.setMode(m)}
 	showBackButton={true}
-	onBack={() => goto('/dashboard')}
+	onBack={() => goto('/')}
 />

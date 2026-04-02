@@ -1,16 +1,24 @@
 /**
- * App Component Registry — Maps app IDs to lazy-loaded AppView components.
+ * App Component Registry — Maps app IDs to lazy-loaded views.
  *
- * Each entry provides the dynamic import for embedding in the workbench carousel.
+ * Each entry provides a default `load` (list view) and optional named `views`
+ * for in-panel navigation (detail, create, edit, etc.).
  */
 
 import type { Component } from 'svelte';
+
+export interface ViewEntry {
+	load: () => Promise<{ default: Component }>;
+}
 
 export interface AppEntry {
 	id: string;
 	name: string;
 	color: string;
+	/** Default view loader (list/main view). */
 	load: () => Promise<{ default: Component }>;
+	/** Named views for in-panel navigation. Fallback: { list: load }. */
+	views?: Record<string, ViewEntry>;
 }
 
 export const APP_REGISTRY: AppEntry[] = [
@@ -19,18 +27,30 @@ export const APP_REGISTRY: AppEntry[] = [
 		name: 'Todo',
 		color: '#8B5CF6',
 		load: () => import('$lib/modules/todo/AppView.svelte'),
+		views: {
+			list: { load: () => import('$lib/modules/todo/AppView.svelte') },
+			detail: { load: () => import('$lib/modules/todo/views/DetailView.svelte') },
+		},
 	},
 	{
 		id: 'calendar',
 		name: 'Kalender',
 		color: '#3B82F6',
 		load: () => import('$lib/modules/calendar/AppView.svelte'),
+		views: {
+			list: { load: () => import('$lib/modules/calendar/AppView.svelte') },
+			detail: { load: () => import('$lib/modules/calendar/views/DetailView.svelte') },
+		},
 	},
 	{
 		id: 'contacts',
 		name: 'Kontakte',
 		color: '#22C55E',
 		load: () => import('$lib/modules/contacts/AppView.svelte'),
+		views: {
+			list: { load: () => import('$lib/modules/contacts/AppView.svelte') },
+			detail: { load: () => import('$lib/modules/contacts/views/DetailView.svelte') },
+		},
 	},
 	{
 		id: 'chat',

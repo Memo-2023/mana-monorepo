@@ -26,7 +26,7 @@
 		}
 
 		// Determine redirect destination
-		let redirectUrl = next || '/dashboard';
+		let redirectUrl = next || '/';
 
 		// For email verification/signup, redirect to welcome page
 		if (type === 'signup' || type === 'email_verification') {

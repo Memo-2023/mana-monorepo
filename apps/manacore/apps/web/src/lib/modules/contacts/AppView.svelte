@@ -1,6 +1,7 @@
 <!--
-  Contacts — Workbench AppView
+  Contacts — Workbench AppView (List View)
   Contact list with search + quick create.
+  Clicking a contact opens the detail view.
 -->
 <script lang="ts">
 	import { liveQuery } from 'dexie';
@@ -8,6 +9,9 @@
 	import type { LocalContact } from './types';
 	import { contactsStore } from './stores/contacts.svelte';
 	import { Plus, Star } from '@manacore/shared-icons';
+	import type { ViewProps } from '$lib/components/workbench/nav-stack';
+
+	let { navigate, goBack, params }: ViewProps = $props();
 
 	let contacts = $state<LocalContact[]>([]);
 	let search = $state('');
@@ -82,7 +86,15 @@
 
 	<div class="contact-list">
 		{#each filtered() as contact (contact.id)}
-			<div class="contact-item">
+			<button
+				class="contact-item"
+				onclick={() =>
+					navigate('detail', {
+						contactId: contact.id,
+						_siblingIds: filtered().map((c) => c.id),
+						_siblingKey: 'contactId',
+					})}
+			>
 				<div class="avatar">{initials(contact)}</div>
 				<div class="contact-info">
 					<p class="contact-name">{displayName(contact)}</p>
@@ -93,7 +105,7 @@
 				{#if contact.isFavorite}
 					<span class="fav"><Star size={12} weight="fill" /></span>
 				{/if}
-			</div>
+			</button>
 		{/each}
 
 		{#if filtered().length === 0}
@@ -184,8 +196,13 @@
 		display: flex;
 		align-items: center;
 		gap: 0.625rem;
+		width: 100%;
 		padding: 0.375rem 0.25rem;
 		border-radius: 0.25rem;
+		border: none;
+		background: transparent;
+		cursor: pointer;
+		text-align: left;
 		transition: background 0.15s;
 	}
 	.contact-item:hover {

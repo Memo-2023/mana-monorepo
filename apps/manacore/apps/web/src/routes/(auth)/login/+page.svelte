@@ -38,7 +38,7 @@
 	onVerifyBackupCode={(code) => authStore.verifyBackupCode(code)}
 	onSendMagicLink={(email) => authStore.sendMagicLink(email)}
 	{goto}
-	successRedirect="/home"
+	successRedirect="/"
 	registerPath="/register"
 	forgotPasswordPath="/forgot-password"
 	lightBackground="#f3f4f6"

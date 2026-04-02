@@ -12,7 +12,7 @@
 	onMount(async () => {
 		await authStore.initialize();
 		if (authStore.isAuthenticated) {
-			goto('/home');
+			goto('/');
 		}
 	});
 </script>

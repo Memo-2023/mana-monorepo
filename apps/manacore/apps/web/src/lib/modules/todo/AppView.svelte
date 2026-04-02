@@ -1,6 +1,7 @@
 <!--
-  Todo — Workbench AppView
+  Todo — Workbench AppView (List View)
   Compact task list with quick add, filter by inbox/today/overdue.
+  Clicking a task opens the detail view; checkbox toggles completion.
 -->
 <script lang="ts">
 	import {
@@ -13,6 +14,9 @@
 	} from './queries';
 	import { tasksStore } from './stores/tasks.svelte';
 	import { Circle, Check } from '@manacore/shared-icons';
+	import type { ViewProps } from '$lib/components/workbench/nav-stack';
+
+	let { navigate, goBack, params }: ViewProps = $props();
 
 	type ViewFilter = 'inbox' | 'today' | 'overdue';
 
@@ -50,7 +54,8 @@
 		newTitle = '';
 	}
 
-	async function toggle(id: string) {
+	async function toggleComplete(e: Event, id: string) {
+		e.stopPropagation();
 		await tasksStore.toggleComplete(id);
 	}
 </script>
@@ -87,8 +92,24 @@
 
 	<div class="task-list">
 		{#each filtered() as task (task.id)}
-			<button onclick={() => toggle(task.id)} class="task-item">
-				<div class="checkbox" class:checked={task.isCompleted}>
+			<button
+				onclick={() =>
+					navigate('detail', {
+						taskId: task.id,
+						_siblingIds: filtered().map((t) => t.id),
+						_siblingKey: 'taskId',
+					})}
+				class="task-item"
+			>
+				<div
+					class="checkbox"
+					class:checked={task.isCompleted}
+					onclick={(e) => toggleComplete(e, task.id)}
+					onkeydown={(e) => e.key === 'Enter' && toggleComplete(e, task.id)}
+					role="checkbox"
+					aria-checked={task.isCompleted}
+					tabindex={0}
+				>
 					{#if task.isCompleted}<Check size={12} />{/if}
 				</div>
 				<div class="task-content">
@@ -227,6 +248,9 @@
 		justify-content: center;
 		flex-shrink: 0;
 		transition: all 0.15s;
+	}
+	.checkbox:hover {
+		border-color: #9ca3af;
 	}
 	.checkbox.checked {
 		border-color: #22c55e;

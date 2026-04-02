@@ -1,6 +1,7 @@
 <!--
-  Calendar — Workbench AppView
+  Calendar — Workbench AppView (List View)
   Mini week view with today's events + quick event creation.
+  Clicking an event opens the detail view.
 -->
 <script lang="ts">
 	import { liveQuery } from 'dexie';
@@ -8,6 +9,9 @@
 	import type { LocalEvent } from './types';
 	import { eventsStore } from './stores/events.svelte';
 	import { Plus } from '@manacore/shared-icons';
+	import type { ViewProps } from '$lib/components/workbench/nav-stack';
+
+	let { navigate, goBack, params }: ViewProps = $props();
 
 	let events = $state<LocalEvent[]>([]);
 
@@ -117,7 +121,15 @@
 		</form>
 
 		{#each todayEvents as event (event.id)}
-			<div class="event-card">
+			<button
+				class="event-card"
+				onclick={() =>
+					navigate('detail', {
+						eventId: event.id,
+						_siblingIds: todayEvents.map((e) => e.id),
+						_siblingKey: 'eventId',
+					})}
+			>
 				<p class="event-title">{event.title}</p>
 				<p class="event-time-label">
 					{#if event.allDay}
@@ -129,7 +141,7 @@
 				{#if event.location}
 					<p class="event-location">{event.location}</p>
 				{/if}
-			</div>
+			</button>
 		{/each}
 
 		{#if todayEvents.length === 0}
@@ -245,14 +257,25 @@
 		color: #4b5563;
 	}
 	.event-card {
+		display: block;
+		width: 100%;
 		padding: 0.5rem 0.625rem;
 		border-radius: 0.375rem;
 		border: 1px solid rgba(0, 0, 0, 0.06);
 		background: rgba(0, 0, 0, 0.02);
+		cursor: pointer;
+		text-align: left;
+		transition: background 0.15s;
+	}
+	.event-card:hover {
+		background: rgba(0, 0, 0, 0.05);
 	}
 	:global(.dark) .event-card {
 		border-color: rgba(255, 255, 255, 0.06);
 		background: rgba(255, 255, 255, 0.03);
+	}
+	:global(.dark) .event-card:hover {
+		background: rgba(255, 255, 255, 0.06);
 	}
 	.event-title {
 		font-size: 0.8125rem;

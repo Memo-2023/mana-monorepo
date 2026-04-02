@@ -25,12 +25,12 @@
 		localStorage.setItem(STORAGE_KEYS.HAS_SEEN_WELCOME, 'true');
 
 		// Redirect to app's dashboard
-		goto(appConfig?.dashboardRoute || '/dashboard');
+		goto(appConfig?.dashboardRoute || '/');
 	}
 
 	function handleSkip() {
 		localStorage.setItem(STORAGE_KEYS.HAS_SEEN_WELCOME, 'true');
-		goto(appConfig?.dashboardRoute || '/dashboard');
+		goto(appConfig?.dashboardRoute || '/');
 	}
 </script>
 

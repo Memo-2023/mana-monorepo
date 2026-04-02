@@ -64,7 +64,7 @@ export const appConfigs: Record<string, AppConfig> = {
 				color: '#10B981',
 			},
 		],
-		dashboardRoute: '/dashboard',
+		dashboardRoute: '/',
 	},
 
 	// ============================================
@@ -104,7 +104,7 @@ export const appConfigs: Record<string, AppConfig> = {
 				color: '#10B981',
 			},
 		],
-		dashboardRoute: '/dashboard',
+		dashboardRoute: '/',
 		website: 'https://chat.mana.how',
 	},
 
@@ -142,7 +142,7 @@ export const appConfigs: Record<string, AppConfig> = {
 				color: '#F59E0B',
 			},
 		],
-		dashboardRoute: '/dashboard',
+		dashboardRoute: '/',
 		website: 'https://picture.mana.how',
 	},
 
@@ -180,7 +180,7 @@ export const appConfigs: Record<string, AppConfig> = {
 				color: '#10B981',
 			},
 		],
-		dashboardRoute: '/dashboard',
+		dashboardRoute: '/',
 		website: 'https://presi.mana.how',
 	},
 
@@ -219,7 +219,7 @@ export const appConfigs: Record<string, AppConfig> = {
 				color: '#0EA5E9',
 			},
 		],
-		dashboardRoute: '/dashboard',
+		dashboardRoute: '/',
 		website: 'https://mail.mana.how',
 	},
 
@@ -260,7 +260,7 @@ export const appConfigs: Record<string, AppConfig> = {
 				color: '#F59E0B',
 			},
 		],
-		dashboardRoute: '/dashboard',
+		dashboardRoute: '/',
 		website: 'https://cards.mana.how',
 	},
 
@@ -298,7 +298,7 @@ export const appConfigs: Record<string, AppConfig> = {
 				color: '#EC4899',
 			},
 		],
-		dashboardRoute: '/dashboard',
+		dashboardRoute: '/',
 		website: 'https://todo.mana.how',
 	},
 
@@ -337,7 +337,7 @@ export const appConfigs: Record<string, AppConfig> = {
 				color: '#8B5CF6',
 			},
 		],
-		dashboardRoute: '/dashboard',
+		dashboardRoute: '/',
 		website: 'https://calendar.mana.how',
 	},
 
@@ -375,7 +375,7 @@ export const appConfigs: Record<string, AppConfig> = {
 				color: '#EC4899',
 			},
 		],
-		dashboardRoute: '/dashboard',
+		dashboardRoute: '/',
 		website: 'https://contacts.mana.how',
 	},
 
@@ -414,7 +414,7 @@ export const appConfigs: Record<string, AppConfig> = {
 				color: '#8B5CF6',
 			},
 		],
-		dashboardRoute: '/dashboard',
+		dashboardRoute: '/',
 		website: 'https://finance.mana.how',
 	},
 
@@ -457,7 +457,7 @@ export const appConfigs: Record<string, AppConfig> = {
 				color: '#10B981',
 			},
 		],
-		dashboardRoute: '/dashboard',
+		dashboardRoute: '/',
 		website: 'https://zitare.mana.how',
 	},
 
@@ -495,7 +495,7 @@ export const appConfigs: Record<string, AppConfig> = {
 				color: '#F59E0B',
 			},
 		],
-		dashboardRoute: '/dashboard',
+		dashboardRoute: '/',
 		website: 'https://storage.mana.how',
 	},
 
@@ -534,7 +534,7 @@ export const appConfigs: Record<string, AppConfig> = {
 				color: '#6366F1',
 			},
 		],
-		dashboardRoute: '/dashboard',
+		dashboardRoute: '/',
 		website: 'https://moodlit.mana.how',
 	},
 };
@@ -589,7 +589,7 @@ export const defaultManaConfig: AppConfig = {
 			color: '#F59E0B',
 		},
 	],
-	dashboardRoute: '/dashboard',
+	dashboardRoute: '/',
 };
 
 /**

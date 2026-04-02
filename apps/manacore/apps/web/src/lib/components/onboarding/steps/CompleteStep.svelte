@@ -33,7 +33,7 @@
 	<!-- Quick actions -->
 	<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-left mb-8">
 		<a
-			href="/dashboard"
+			href="/"
 			class="p-4 rounded-xl bg-card border hover:border-primary/50 hover:shadow-md transition-all group"
 		>
 			<div class="flex items-center gap-3">
