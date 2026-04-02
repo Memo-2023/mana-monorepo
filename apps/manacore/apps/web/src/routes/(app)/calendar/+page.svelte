@@ -13,6 +13,7 @@
 	import type { Calendar, CalendarEvent } from '$lib/modules/calendar/types';
 
 	import CalendarHeader from '$lib/modules/calendar/components/CalendarHeader.svelte';
+	import DateStrip from '$lib/modules/calendar/components/DateStrip.svelte';
 	import WeekView from '$lib/modules/calendar/components/WeekView.svelte';
 	import MonthView from '$lib/modules/calendar/components/MonthView.svelte';
 	import AgendaView from '$lib/modules/calendar/components/AgendaView.svelte';
@@ -117,6 +118,9 @@
 <div class="calendar-page">
 	<!-- Header -->
 	<CalendarHeader onNewEvent={handleNewEvent} />
+
+	<!-- Date Strip -->
+	<DateStrip />
 
 	<!-- Main content area -->
 	<div class="calendar-content">
