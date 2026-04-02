@@ -5,6 +5,7 @@
  * This store only handles writes to IndexedDB via the unified database.
  */
 
+import { CardsEvents } from '@manacore/shared-utils/analytics';
 import { cardDeckTable, cardTable } from '../collections';
 import { toDeck } from '../queries';
 import type { LocalDeck } from '../types';
@@ -30,6 +31,7 @@ export const deckStore = {
 			};
 
 			await cardDeckTable.add(newLocal);
+			CardsEvents.deckCreated();
 			return toDeck(newLocal);
 		} catch (err: any) {
 			error = err.message || 'Failed to create deck';
@@ -69,6 +71,7 @@ export const deckStore = {
 
 			// Soft-delete the deck
 			await cardDeckTable.update(id, { deletedAt: now, updatedAt: now });
+			CardsEvents.deckDeleted();
 		} catch (err: any) {
 			error = err.message || 'Failed to delete deck';
 			console.error('Delete deck error:', err);

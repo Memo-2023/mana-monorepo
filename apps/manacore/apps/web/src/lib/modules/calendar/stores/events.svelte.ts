@@ -9,6 +9,7 @@
 import { db } from '$lib/data/database';
 import type { LocalEvent, CalendarEvent } from '../types';
 import { toCalendarEvent } from '../queries';
+import { CalendarEvents } from '@manacore/shared-utils/analytics';
 
 let error = $state<string | null>(null);
 let draftEvent = $state<CalendarEvent | null>(null);
@@ -54,6 +55,7 @@ export const eventsStore = {
 			};
 
 			await db.table<LocalEvent>('events').add(newLocal);
+			CalendarEvents.eventCreated(!!input.recurrenceRule);
 			return { success: true, data: toCalendarEvent(newLocal) };
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to create event';
@@ -96,6 +98,7 @@ export const eventsStore = {
 			await db.table('events').update(id, localData);
 			const updated = await db.table<LocalEvent>('events').get(id);
 			if (updated) {
+				CalendarEvents.eventUpdated();
 				return { success: true, data: toCalendarEvent(updated) };
 			}
 			return { success: false, error: 'Event not found' };
@@ -115,6 +118,7 @@ export const eventsStore = {
 				deletedAt: new Date().toISOString(),
 				updatedAt: new Date().toISOString(),
 			});
+			CalendarEvents.eventDeleted();
 			return { success: true };
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to delete event';

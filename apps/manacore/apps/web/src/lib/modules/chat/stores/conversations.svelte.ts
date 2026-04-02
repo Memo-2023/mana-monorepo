@@ -8,6 +8,7 @@
 import { conversationTable, messageTable } from '../collections';
 import { toConversation } from '../queries';
 import { createArchiveOps } from '@manacore/shared-stores';
+import { ChatEvents } from '@manacore/shared-utils/analytics';
 import type { LocalConversation } from '../types';
 
 /** Archive/soft-delete ops for conversations. */
@@ -37,6 +38,7 @@ export const conversationsStore = {
 			isPinned: false,
 		};
 		await conversationTable.add(newLocal);
+		ChatEvents.conversationCreated();
 		return toConversation(newLocal);
 	},
 
@@ -85,5 +87,6 @@ export const conversationsStore = {
 		for (const msg of msgs) {
 			await messageTable.update(msg.id, { deletedAt: now, updatedAt: now });
 		}
+		ChatEvents.conversationDeleted();
 	},
 };

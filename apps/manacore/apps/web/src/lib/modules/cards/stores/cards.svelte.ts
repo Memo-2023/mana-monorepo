@@ -5,6 +5,7 @@
  * This store only handles writes to IndexedDB via the unified database.
  */
 
+import { CardsEvents } from '@manacore/shared-utils/analytics';
 import { cardTable, cardDeckTable } from '../collections';
 import { toCard } from '../queries';
 import type { LocalCard, Card, CreateCardInput, UpdateCardInput } from '../types';
@@ -40,6 +41,7 @@ export const cardStore = {
 				});
 			}
 
+			CardsEvents.cardCreated();
 			return toCard(newLocal);
 		} catch (err: any) {
 			error = err.message || 'Failed to create card';
@@ -72,6 +74,7 @@ export const cardStore = {
 		try {
 			const now = new Date().toISOString();
 			await cardTable.update(id, { deletedAt: now, updatedAt: now });
+			CardsEvents.cardDeleted();
 
 			// Update deck card count
 			if (deckId) {

@@ -7,6 +7,7 @@
 
 import { messageTable, conversationTable } from '../collections';
 import { toMessage } from '../queries';
+import { ChatEvents } from '@manacore/shared-utils/analytics';
 import type { LocalMessage } from '../types';
 
 export const messagesStore = {
@@ -23,6 +24,7 @@ export const messagesStore = {
 		await conversationTable.update(conversationId, {
 			updatedAt: new Date().toISOString(),
 		});
+		ChatEvents.messageSent();
 		return toMessage(newLocal);
 	},
 

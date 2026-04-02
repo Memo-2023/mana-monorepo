@@ -5,6 +5,7 @@
  * Favorites are local-first via Dexie.
  */
 
+import { PhotosEvents } from '@manacore/shared-utils/analytics';
 import { db } from '$lib/data/database';
 import type { LocalFavorite, Photo, PhotoFilters, PhotoStats } from '../types';
 
@@ -156,6 +157,7 @@ export const photoStore = {
 
 			// Update server-fetched photos in-memory for immediate UI feedback
 			const isFav = !fav;
+			PhotosEvents.photoFavorited(isFav);
 			photos = photos.map((p) => (p.id === mediaId ? { ...p, isFavorited: isFav } : p));
 			if (selectedPhoto?.id === mediaId) {
 				selectedPhoto = { ...selectedPhoto, isFavorited: isFav };
@@ -179,6 +181,7 @@ export const photoStore = {
 
 			photos = photos.filter((p) => p.id !== mediaId);
 			if (selectedPhoto?.id === mediaId) selectedPhoto = null;
+			PhotosEvents.photoDeleted();
 			return true;
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to delete photo';

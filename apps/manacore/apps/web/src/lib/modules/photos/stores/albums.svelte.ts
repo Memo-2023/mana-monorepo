@@ -5,6 +5,7 @@
  * This store handles mutations (create, update, delete, add/remove items).
  */
 
+import { PhotosEvents } from '@manacore/shared-utils/analytics';
 import { db } from '$lib/data/database';
 import type { LocalAlbum, LocalAlbumItem, Album } from '../types';
 import { toAlbum } from '../queries';
@@ -25,6 +26,7 @@ export const albumMutations = {
 				updatedAt: now,
 			};
 			await db.table('albums').add(newLocal);
+			PhotosEvents.albumCreated();
 			return toAlbum(newLocal);
 		} catch (e) {
 			console.error('Failed to create album:', e);
@@ -59,6 +61,7 @@ export const albumMutations = {
 				await db.table('albumItems').update(item.id, { deletedAt: now, updatedAt: now });
 			}
 			await db.table('albums').update(id, { deletedAt: now, updatedAt: now });
+			PhotosEvents.albumDeleted();
 			return true;
 		} catch (e) {
 			console.error('Failed to delete album:', e);

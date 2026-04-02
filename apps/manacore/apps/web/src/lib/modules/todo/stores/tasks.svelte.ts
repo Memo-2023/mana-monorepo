@@ -8,6 +8,7 @@
 import { taskTable } from '../collections';
 import { toTask } from '../queries';
 import type { LocalTask, TaskPriority, Subtask } from '../types';
+import { TodoEvents } from '@manacore/shared-utils/analytics';
 
 export const tasksStore = {
 	async createTask(data: {
@@ -42,6 +43,7 @@ export const tasksStore = {
 		}
 
 		await taskTable.add(newLocal);
+		TodoEvents.taskCreated(!!data.dueDate);
 		return toTask(newLocal);
 	},
 
@@ -67,6 +69,7 @@ export const tasksStore = {
 			...data,
 			updatedAt: new Date().toISOString(),
 		});
+		TodoEvents.taskEdited();
 	},
 
 	async deleteTask(id: string) {
@@ -74,6 +77,7 @@ export const tasksStore = {
 			deletedAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString(),
 		});
+		TodoEvents.taskDeleted();
 	},
 
 	async completeTask(id: string) {
@@ -82,6 +86,7 @@ export const tasksStore = {
 			completedAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString(),
 		});
+		TodoEvents.taskCompleted();
 	},
 
 	async uncompleteTask(id: string) {

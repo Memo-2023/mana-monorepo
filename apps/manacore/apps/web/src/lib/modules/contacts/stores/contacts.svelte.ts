@@ -8,6 +8,7 @@
 import { contactTable } from '../collections';
 import { toContact } from '../queries';
 import { createArchiveOps } from '@manacore/shared-stores';
+import { ContactsEvents } from '@manacore/shared-utils/analytics';
 import type { LocalContact, Contact } from '../types';
 
 /** Archive/soft-delete ops for contacts. */
@@ -42,6 +43,7 @@ export const contactsStore = {
 		};
 
 		await contactTable.add(newLocal);
+		ContactsEvents.contactCreated();
 		return toContact(newLocal);
 	},
 
@@ -75,6 +77,7 @@ export const contactsStore = {
 			...updateData,
 			updatedAt: new Date().toISOString(),
 		});
+		ContactsEvents.contactUpdated();
 	},
 
 	async deleteContact(id: string) {
@@ -82,6 +85,7 @@ export const contactsStore = {
 			deletedAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString(),
 		});
+		ContactsEvents.contactDeleted();
 	},
 
 	async toggleFavorite(id: string) {
@@ -92,6 +96,7 @@ export const contactsStore = {
 			isFavorite: !local.isFavorite,
 			updatedAt: new Date().toISOString(),
 		});
+		ContactsEvents.contactFavorited();
 	},
 
 	async updateTagIds(id: string, tagIds: string[]) {
@@ -101,5 +106,8 @@ export const contactsStore = {
 		});
 	},
 
-	toggleArchive: (id: string) => contactArchive.toggleArchive(id),
+	toggleArchive: async (id: string) => {
+		await contactArchive.toggleArchive(id);
+		ContactsEvents.contactArchived();
+	},
 };
