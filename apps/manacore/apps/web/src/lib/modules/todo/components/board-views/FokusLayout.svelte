@@ -40,7 +40,10 @@
 						style="border-left: 4px solid {getPriorityColor(task.priority)}"
 					>
 						<button
-							onclick|stopPropagation={() => onToggleComplete(task.id)}
+							onclick={(e) => {
+								e.stopPropagation();
+								onToggleComplete(task.id);
+							}}
 							class="flex-shrink-0 transition-colors {task.isCompleted
 								? 'text-green-500'
 								: 'text-muted-foreground hover:text-primary'}"

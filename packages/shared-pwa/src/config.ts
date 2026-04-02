@@ -97,6 +97,7 @@ export function createPWAConfig(options: PWAConfigOptions): PWAConfig {
 		navigateFallback,
 		navigateFallbackDenylist,
 		runtimeCaching: [...getPresetRuntimeCaching(preset), ...additionalRuntimeCaching],
+		maximumFileSizeToCacheInBytes: 8 * 1024 * 1024, // 8 MiB for large unified apps
 	};
 
 	// Return complete config
@@ -126,7 +127,12 @@ export function createOfflineFirstPWAConfig(
 	const { excludePackages = [], globIgnores = [], ...rest } = options;
 
 	// Add SQLite-specific ignores
-	const allGlobIgnores = ['**/*sqlite*', '**/*wasm*', ...excludePackages.map((pkg) => `**/${pkg}/**`), ...globIgnores];
+	const allGlobIgnores = [
+		'**/*sqlite*',
+		'**/*wasm*',
+		...excludePackages.map((pkg) => `**/${pkg}/**`),
+		...globIgnores,
+	];
 
 	return createPWAConfig({
 		...rest,

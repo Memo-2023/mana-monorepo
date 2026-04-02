@@ -65,7 +65,7 @@
 			<!-- svelte-ignore a11y_no_static_element_interactions -->
 			<div
 				class="absolute left-0 top-full z-50 mt-1 min-w-[140px] rounded-lg border border-border bg-card p-1 shadow-lg"
-				onclick|stopPropagation
+				onclick={(e) => e.stopPropagation()}
 			>
 				{#each availableLabels as label (label.id)}
 					<button

@@ -3,7 +3,7 @@
  */
 
 import type { SvelteKitPWAOptions } from '@vite-pwa/sveltekit';
-import type { RuntimeCaching, ManifestEntry } from 'workbox-build';
+import type { RuntimeCaching } from 'workbox-build';
 
 /**
  * Workbox preset types for different caching strategies
@@ -172,6 +172,7 @@ export interface WorkboxConfig {
 	navigateFallback: string;
 	navigateFallbackDenylist: RegExp[];
 	runtimeCaching: RuntimeCaching[];
+	maximumFileSizeToCacheInBytes?: number;
 }
 
 /**

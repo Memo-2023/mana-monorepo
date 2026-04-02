@@ -66,7 +66,10 @@
 >
 	<!-- Completion toggle -->
 	<button
-		onclick|stopPropagation={onToggleComplete}
+		onclick={(e) => {
+			e.stopPropagation();
+			onToggleComplete();
+		}}
 		class="mt-0.5 flex-shrink-0 transition-colors {task.isCompleted
 			? 'text-green-500'
 			: 'text-muted-foreground hover:text-primary'}"

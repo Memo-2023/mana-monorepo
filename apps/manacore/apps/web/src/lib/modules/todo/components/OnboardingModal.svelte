@@ -59,9 +59,8 @@
 	>
 		<div class="w-full max-w-sm rounded-2xl border border-border bg-card shadow-2xl">
 			<div class="flex flex-col items-center p-8 text-center">
-				{@const CurrentIcon = steps[step].icon}
 				<div class="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
-					<CurrentIcon size={32} class="text-primary" />
+					<svelte:component this={steps[step].icon} size={32} class="text-primary" />
 				</div>
 
 				<h2 class="mb-2 text-xl font-bold text-foreground">{steps[step].title}</h2>

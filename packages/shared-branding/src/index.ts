@@ -34,7 +34,6 @@ export {
 	QuestionsLogo,
 	SkillTreeLogo,
 	PlantaLogo,
-	PlaygroundLogo,
 	LightWriteLogo,
 	MukkeLogo,
 	ContextLogo,
