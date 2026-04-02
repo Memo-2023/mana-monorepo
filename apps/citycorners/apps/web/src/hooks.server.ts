@@ -1,6 +1,4 @@
 import type { Handle } from '@sveltejs/kit';
-
-import { injectUmamiAnalytics } from '@manacore/shared-utils/analytics-server';
 import { setSecurityHeaders } from '@manacore/shared-utils/security-headers';
 
 const PUBLIC_MANA_CORE_AUTH_URL_CLIENT =
@@ -17,7 +15,7 @@ window.__PUBLIC_MANA_CORE_AUTH_URL__ = ${JSON.stringify(PUBLIC_MANA_CORE_AUTH_UR
 window.__PUBLIC_BACKEND_URL__ = ${JSON.stringify(PUBLIC_BACKEND_URL_CLIENT)};
 window.__PUBLIC_GLITCHTIP_DSN__ = ${JSON.stringify(PUBLIC_GLITCHTIP_DSN)};
 </script>`;
-			return injectUmamiAnalytics(html.replace('<head>', `<head>${envScript}`));
+			return html.replace('<head>', `<head>${envScript}`);
 		},
 	});
 

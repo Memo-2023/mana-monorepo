@@ -104,7 +104,6 @@ const APP_CONFIGS = [
 			PUBLIC_SUPABASE_URL: (env) => env.CHAT_SUPABASE_URL,
 			PUBLIC_SUPABASE_ANON_KEY: (env) => env.CHAT_SUPABASE_ANON_KEY,
 			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.CHAT_BACKEND_PORT || '3002'}`,
-			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_CHAT || '',
 			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
 	},
@@ -149,7 +148,6 @@ const APP_CONFIGS = [
 		vars: {
 			PUBLIC_API_URL: (env) => `http://localhost:${env.CARDS_BACKEND_PORT || '3004'}`,
 			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
-			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_CARDS || '',
 			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
 	},
@@ -199,7 +197,6 @@ const APP_CONFIGS = [
 		vars: {
 			PUBLIC_BACKEND_URL: (env) => env.PICTURE_BACKEND_URL || 'http://localhost:3003',
 			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
-			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_PICTURE || '',
 			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
 	},
@@ -229,7 +226,6 @@ const APP_CONFIGS = [
 			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.NUTRIPHI_BACKEND_PORT || '3002'}`,
 			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
 			PUBLIC_MIDDLEWARE_APP_ID: (env) => env.NUTRIPHI_APP_ID || 'nutriphi',
-			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_NUTRIPHI || '',
 			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
 	},
@@ -251,7 +247,6 @@ const APP_CONFIGS = [
 		vars: {
 			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.ZITARE_BACKEND_PORT || '3007'}`,
 			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
-			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_ZITARE || '',
 			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
 	},
@@ -264,7 +259,6 @@ const APP_CONFIGS = [
 		vars: {
 			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.PRESI_BACKEND_PORT || '3008'}`,
 			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
-			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_PRESI || '',
 			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
 	},
@@ -277,7 +271,6 @@ const APP_CONFIGS = [
 		vars: {
 			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.SKILLTREE_BACKEND_PORT || '3024'}`,
 			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
-			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_SKILLTREE || '',
 			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
 	},
@@ -374,7 +367,6 @@ const APP_CONFIGS = [
 			PUBLIC_CONTACTS_WEB_URL: () => 'http://localhost:5184',
 			// Speech-to-Text Service
 			PUBLIC_STT_URL: (env) => env.STT_URL || 'http://localhost:3020',
-			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_CALENDAR || '',
 			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
 	},
@@ -417,7 +409,6 @@ const APP_CONFIGS = [
 		vars: {
 			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.CONTACTS_BACKEND_PORT || '3015'}`,
 			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
-			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_CONTACTS || '',
 			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
 	},
@@ -449,7 +440,6 @@ const APP_CONFIGS = [
 		vars: {
 			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.STORAGE_BACKEND_PORT || '3016'}`,
 			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
-			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_STORAGE || '',
 			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
 	},
@@ -462,7 +452,6 @@ const APP_CONFIGS = [
 		vars: {
 			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.CLOCK_BACKEND_PORT || '3017'}`,
 			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
-			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_CLOCK || '',
 			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
 	},
@@ -487,7 +476,6 @@ const APP_CONFIGS = [
 		vars: {
 			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.TODO_BACKEND_PORT || '3018'}`,
 			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
-			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_TODO || '',
 			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
 	},
@@ -582,7 +570,6 @@ const APP_CONFIGS = [
 		vars: {
 			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.PHOTOS_BACKEND_PORT || '3039'}`,
 			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
-			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_PHOTOS || '',
 			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
 	},
@@ -593,7 +580,6 @@ const APP_CONFIGS = [
 		vars: {
 			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.PLANTA_BACKEND_PORT || '3022'}`,
 			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
-			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_PLANTA || '',
 			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
 	},
@@ -604,7 +590,6 @@ const APP_CONFIGS = [
 		vars: {
 			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.QUESTIONS_BACKEND_PORT || '3011'}`,
 			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
-			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_QUESTIONS || '',
 			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
 	},
@@ -634,7 +619,6 @@ const APP_CONFIGS = [
 		vars: {
 			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.MUKKE_BACKEND_PORT || '3010'}`,
 			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
-			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_MUKKE || '',
 			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
 	},

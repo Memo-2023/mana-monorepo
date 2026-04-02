@@ -6,7 +6,6 @@
  */
 
 import type { Handle } from '@sveltejs/kit';
-import { injectUmamiAnalytics } from '@manacore/shared-utils/analytics-server';
 import { setSecurityHeaders } from '@manacore/shared-utils/security-headers';
 
 // Get client-side URLs from environment (Docker runtime)
@@ -52,7 +51,7 @@ window.__PUBLIC_MANA_CORE_AUTH_URL__ = ${JSON.stringify(PUBLIC_MANA_CORE_AUTH_UR
 window.__PUBLIC_MEMORO_SERVER_URL__ = ${JSON.stringify(PUBLIC_MEMORO_SERVER_URL)};
 window.__PUBLIC_GLITCHTIP_DSN__ = ${JSON.stringify(PUBLIC_GLITCHTIP_DSN)};
 </script>`;
-			return injectUmamiAnalytics(html.replace('<head>', `<head>${envScript}`));
+			return html.replace('<head>', `<head>${envScript}`);
 		},
 	});
 
