@@ -691,7 +691,7 @@ Each service owns a PostgreSQL schema within the shared database:
 | `todo` | todo server | tasks, projects, reminders |
 | `traces` | traces server | locations, cities, POIs, guides |
 | `presi` | presi server | decks, slides, themes, shares |
-| `uload` | uload server | users, links, clicks |
+| `uload` | uload server | clicks only (links via sync_changes) |
 | `cards` | cards package | decks, cards, study progress |
 
 ### Using pgSchema
