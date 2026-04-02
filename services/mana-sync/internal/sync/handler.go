@@ -164,7 +164,7 @@ func (h *Handler) HandleSync(w http.ResponseWriter, r *http.Request) {
 		SyncedUntil:   now,
 	}
 
-	// Notify other connected clients via WebSocket
+	// Notify other connected clients via WebSocket/SSE
 	if len(affectedTables) > 0 {
 		tables := make([]string, 0, len(affectedTables))
 		for t := range affectedTables {
@@ -326,7 +326,8 @@ func (h *Handler) HandleStream(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Track cursors per collection
+	// Track cursors per collection — default to now() if no initial data
+	now := time.Now().UTC().Format(time.RFC3339Nano)
 	cursors := make(map[string]string)
 	for _, coll := range collections {
 		cursors[coll] = since
@@ -337,6 +338,7 @@ func (h *Handler) HandleStream(w http.ResponseWriter, r *http.Request) {
 		changes, err := h.store.GetChangesSince(ctx, userID, appID, coll, since, clientID, batchLimit+1)
 		if err != nil {
 			slog.Error("SSE initial pull failed", "error", err, "collection", coll)
+			cursors[coll] = now // Default to now on error
 			continue
 		}
 
@@ -350,6 +352,9 @@ func (h *Handler) HandleStream(w http.ResponseWriter, r *http.Request) {
 			cursors[coll] = cursor
 			sendChangeEvent(w, coll, h.convertChanges(changes), cursor, hasMore)
 			flusher.Flush()
+		} else {
+			// No initial data — set cursor to now so live updates work
+			cursors[coll] = now
 		}
 	}
 

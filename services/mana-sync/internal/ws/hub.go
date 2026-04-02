@@ -75,60 +75,57 @@ func (h *Hub) HandleWebSocket(w http.ResponseWriter, r *http.Request, appID stri
 // For legacy per-app connections, only clients matching the appId are notified.
 func (h *Hub) NotifyUser(userID, appID, excludeClientID string, tables []string) {
 	h.mu.RLock()
-	clients, ok := h.clients[userID]
-	if !ok {
-		h.mu.RUnlock()
-		return
-	}
+	clients := h.clients[userID]
+	sseSubs := h.sseSubscribers[userID]
 
-	// Copy the client set under read lock to avoid holding lock during writes
-	clientsCopy := make([]*Client, 0, len(clients))
+	// Copy WS clients under read lock
+	var clientsCopy []*Client
 	for client := range clients {
-		// Unified clients (AppID=="") receive all notifications.
-		// Legacy per-app clients only receive notifications for their app.
 		if client.AppID == "" || client.AppID == appID {
 			clientsCopy = append(clientsCopy, client)
 		}
 	}
+
+	// Copy SSE subscribers
+	sseSubsCopy := make([]chan Notification, len(sseSubs))
+	copy(sseSubsCopy, sseSubs)
 	h.mu.RUnlock()
 
-	if len(clientsCopy) == 0 {
+	// Nothing to notify
+	if len(clientsCopy) == 0 && len(sseSubsCopy) == 0 {
 		return
 	}
 
-	msg := Message{
-		Type:   "sync-available",
-		AppID:  appID,
-		Tables: tables,
-	}
-	data, err := json.Marshal(msg)
-	if err != nil {
-		slog.Error("failed to marshal notification", "error", err)
-		return
-	}
-
-	for _, client := range clientsCopy {
-		go func(c *Client) {
-			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-			defer cancel()
-			if err := c.Conn.Write(ctx, websocket.MessageText, data); err != nil {
-				h.removeClient(c)
+	// Notify WebSocket clients
+	if len(clientsCopy) > 0 {
+		msg := Message{
+			Type:   "sync-available",
+			AppID:  appID,
+			Tables: tables,
+		}
+		data, err := json.Marshal(msg)
+		if err == nil {
+			for _, client := range clientsCopy {
+				go func(c *Client) {
+					ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+					defer cancel()
+					if err := c.Conn.Write(ctx, websocket.MessageText, data); err != nil {
+						h.removeClient(c)
+					}
+				}(client)
 			}
-		}(client)
+		}
 	}
 
-	// Also notify SSE subscribers
-	h.mu.RLock()
-	sseSubs := h.sseSubscribers[userID]
-	h.mu.RUnlock()
-
-	if len(sseSubs) > 0 {
+	// Notify SSE subscribers
+	if len(sseSubsCopy) > 0 {
 		notification := Notification{AppID: appID, Tables: tables}
-		for _, ch := range sseSubs {
+		for _, ch := range sseSubsCopy {
 			select {
 			case ch <- notification:
+				// sent
 			default:
-				// Drop if channel full (subscriber is slow)
+				slog.Warn("SSE notification dropped (channel full)", "appID", appID)
 			}
 		}
 	}
@@ -286,6 +283,7 @@ func (h *Hub) Subscribe(userID string) chan Notification {
 		h.sseSubscribers = make(map[string][]chan Notification)
 	}
 	h.sseSubscribers[userID] = append(h.sseSubscribers[userID], ch)
+	slog.Debug("SSE subscribed", "userID", userID, "totalSubscribers", len(h.sseSubscribers[userID]))
 	return ch
 }
 
