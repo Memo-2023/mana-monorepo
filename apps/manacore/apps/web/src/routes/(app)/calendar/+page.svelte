@@ -101,26 +101,20 @@
 		endTime: string;
 		isAllDay: boolean;
 		location: string | null;
+		description: string | null;
+		recurrenceRule: string | null;
 	}) {
 		eventsStore.createEvent({
 			calendarId: data.calendarId,
 			title: data.title,
-			description: null,
+			description: data.description,
 			startTime: data.startTime,
 			endTime: data.endTime,
 			isAllDay: data.isAllDay,
 			location: data.location,
-			recurrenceRule: null,
+			recurrenceRule: data.recurrenceRule,
 		});
 		showQuickCreate = false;
-	}
-
-	function expandQuickCreate() {
-		// Transfer quick create data to full modal
-		createStartTime = quickCreateStart;
-		createEndTime = quickCreateEnd;
-		showQuickCreate = false;
-		showCreateForm = true;
 	}
 
 	async function handleCreateSave(data: Record<string, unknown>) {
@@ -184,7 +178,6 @@
 		position={quickCreatePosition}
 		onSave={handleQuickSave}
 		onClose={() => (showQuickCreate = false)}
-		onExpand={expandQuickCreate}
 	/>
 {/if}
 

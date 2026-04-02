@@ -192,7 +192,11 @@
 	}
 
 	// Unified sync manager — one sync engine for all apps
-	const SYNC_SERVER_URL = import.meta.env.PUBLIC_SYNC_SERVER_URL || 'http://localhost:3050';
+	const SYNC_SERVER_URL =
+		(typeof window !== 'undefined' &&
+			(window as Record<string, unknown>).__PUBLIC_SYNC_SERVER_URL__) ||
+		import.meta.env.PUBLIC_SYNC_SERVER_URL ||
+		'http://localhost:3050';
 	let unifiedSync: ReturnType<typeof createUnifiedSync> | null = null;
 
 	async function handleSignOut() {

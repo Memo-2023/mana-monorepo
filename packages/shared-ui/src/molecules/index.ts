@@ -13,6 +13,7 @@ export { GlassCard, StatRow } from './stats';
 // Tag components
 export {
 	TagBadge,
+	TagChip,
 	TagColorPicker,
 	TagEditModal,
 	TagSelector,

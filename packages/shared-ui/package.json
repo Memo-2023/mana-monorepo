@@ -34,7 +34,9 @@
 		}
 	},
 	"scripts": {
-		"lint": "eslint ."
+		"lint": "eslint .",
+		"test": "vitest run",
+		"test:watch": "vitest"
 	},
 	"peerDependencies": {
 		"svelte": "^5.0.0"
@@ -51,9 +53,14 @@
 		"date-fns": "^4.1.0"
 	},
 	"devDependencies": {
+		"@sveltejs/vite-plugin-svelte": "^7.0.0",
+		"@testing-library/jest-dom": "^6.9.1",
+		"@testing-library/svelte": "^5.3.1",
 		"@types/d3-force": "^3.0.10",
 		"@types/d3-selection": "^3.0.11",
 		"@types/d3-transition": "^3.0.9",
-		"@types/d3-zoom": "^3.0.8"
+		"@types/d3-zoom": "^3.0.8",
+		"jsdom": "^29.0.1",
+		"vitest": "^4.1.2"
 	}
 }

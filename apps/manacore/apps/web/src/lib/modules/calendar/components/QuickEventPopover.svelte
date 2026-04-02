@@ -2,9 +2,16 @@
 	import { getContext, onMount, tick } from 'svelte';
 	import { getDefaultCalendar, getCalendarColor } from '../queries';
 	import type { Calendar } from '../types';
-	import { format } from 'date-fns';
+	import { format, addMinutes } from 'date-fns';
 	import { de } from 'date-fns/locale';
-	import { X } from '@manacore/shared-icons';
+	import {
+		X,
+		Clock,
+		CalendarBlank,
+		MapPin,
+		ArrowsClockwise,
+		TextAlignLeft,
+	} from '@manacore/shared-icons';
 
 	interface Props {
 		startTime: Date;
@@ -17,48 +24,76 @@
 			endTime: string;
 			isAllDay: boolean;
 			location: string | null;
+			description: string | null;
+			recurrenceRule: string | null;
 		}) => void;
 		onClose: () => void;
-		onExpand?: () => void;
 	}
 
-	let { startTime, endTime, position, onSave, onClose, onExpand }: Props = $props();
+	let { startTime, endTime, position, onSave, onClose }: Props = $props();
 
 	const calendarsCtx: { readonly value: Calendar[] } = getContext('calendars');
 
 	let title = $state('');
 	let location = $state('');
+	let description = $state('');
+	let isAllDay = $state(false);
+	let recurrenceRule = $state<string | null>(null);
+	let startDateStr = $state(format(startTime, 'yyyy-MM-dd'));
+	let startTimeStr = $state(format(startTime, 'HH:mm'));
+	let endDateStr = $state(format(endTime, 'yyyy-MM-dd'));
+	let endTimeStr = $state(format(endTime, 'HH:mm'));
+
 	let titleInput: HTMLInputElement;
 	let popoverEl: HTMLDivElement;
-
-	// Calculated popover position (adjusted to stay in viewport)
 	let popoverPos = $state({ top: 0, left: 0 });
 
 	const defaultCalendar = $derived(getDefaultCalendar(calendarsCtx.value));
-	const calendarColor = $derived(getCalendarColor(calendarsCtx.value, defaultCalendar?.id || ''));
+	let calendarId = $state('');
 
-	const timeLabel = $derived(
-		`${format(startTime, 'EE d. MMM', { locale: de })} ${format(startTime, 'HH:mm')} – ${format(endTime, 'HH:mm')}`
-	);
+	$effect(() => {
+		if (defaultCalendar && !calendarId) {
+			calendarId = defaultCalendar.id;
+		}
+	});
 
-	function handleSubmit() {
+	const calendarColor = $derived(getCalendarColor(calendarsCtx.value, calendarId || ''));
+
+	const RECURRENCE_OPTIONS = [
+		{ value: '', label: 'Keine Wiederholung' },
+		{ value: 'FREQ=DAILY', label: 'Täglich' },
+		{ value: 'FREQ=WEEKLY', label: 'Wöchentlich' },
+		{ value: 'FREQ=WEEKLY;INTERVAL=2', label: 'Alle 2 Wochen' },
+		{ value: 'FREQ=MONTHLY', label: 'Monatlich' },
+		{ value: 'FREQ=YEARLY', label: 'Jährlich' },
+	];
+
+	function handleSubmit(e: Event) {
+		e.preventDefault();
 		if (!title.trim()) return;
+
+		const start = isAllDay
+			? new Date(`${startDateStr}T00:00:00`)
+			: new Date(`${startDateStr}T${startTimeStr}`);
+		const end = isAllDay
+			? new Date(`${endDateStr}T23:59:59`)
+			: new Date(`${endDateStr}T${endTimeStr}`);
+
 		onSave({
 			title: title.trim(),
-			calendarId: defaultCalendar?.id || '',
-			startTime: startTime.toISOString(),
-			endTime: endTime.toISOString(),
-			isAllDay: false,
+			calendarId,
+			startTime: start.toISOString(),
+			endTime: end.toISOString(),
+			isAllDay,
 			location: location.trim() || null,
+			description: description.trim() || null,
+			recurrenceRule: recurrenceRule || null,
 		});
 	}
 
 	function handleKeydown(e: KeyboardEvent) {
 		if (e.key === 'Escape') {
 			onClose();
-		} else if (e.key === 'Enter' && !e.shiftKey) {
-			e.preventDefault();
-			handleSubmit();
 		}
 	}
 
@@ -70,9 +105,8 @@
 			const vh = window.innerHeight;
 
 			let left = position.x + 12;
-			let top = position.y - rect.height / 2;
+			let top = position.y - 100;
 
-			// Keep in viewport
 			if (left + rect.width > vw - 16) left = position.x - rect.width - 12;
 			if (left < 16) left = 16;
 			if (top < 16) top = 16;
@@ -86,7 +120,7 @@
 
 <svelte:window onkeydown={handleKeydown} />
 
-<!-- Backdrop -->
+<!-- Backdrop (transparent - allows seeing calendar) -->
 <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
 <div class="popover-backdrop" onclick={onClose}></div>
 
@@ -101,43 +135,120 @@
 	<!-- Color accent bar -->
 	<div class="accent-bar" style="background-color: {calendarColor};"></div>
 
-	<div class="popover-content">
-		<!-- Title input -->
-		<input
-			bind:this={titleInput}
-			bind:value={title}
-			type="text"
-			placeholder="Termin hinzufügen"
-			class="title-input"
-		/>
-
-		<!-- Time display -->
-		<div class="time-row">
-			<span class="time-label">{timeLabel}</span>
+	<form onsubmit={handleSubmit}>
+		<!-- Header -->
+		<div class="popover-header">
+			<span class="header-title">Neuer Termin</span>
+			<button type="button" class="close-btn" onclick={onClose} aria-label="Schließen">
+				<X size={16} />
+			</button>
 		</div>
 
-		<!-- Location (optional) -->
-		<input bind:value={location} type="text" placeholder="Ort hinzufügen" class="location-input" />
+		<!-- Scrollable content -->
+		<div class="popover-content">
+			<!-- Title input -->
+			<input
+				bind:this={titleInput}
+				bind:value={title}
+				type="text"
+				placeholder="Titel hinzufügen"
+				class="title-input"
+				required
+			/>
 
-		<!-- Actions -->
-		<div class="action-row">
-			{#if onExpand}
-				<button type="button" onclick={onExpand} class="expand-btn"> Weitere Optionen </button>
+			<!-- Calendar pills -->
+			{#if calendarsCtx.value.length > 1}
+				<div class="calendar-pills">
+					{#each calendarsCtx.value as cal (cal.id)}
+						<button
+							type="button"
+							class="calendar-pill"
+							class:active={calendarId === cal.id}
+							onclick={() => (calendarId = cal.id)}
+						>
+							<span class="pill-dot" style="background-color: {cal.color || '#3b82f6'}"></span>
+							<span class="pill-name">{cal.name}</span>
+						</button>
+					{/each}
+				</div>
 			{/if}
-			<div class="action-right">
-				<button type="button" onclick={onClose} class="cancel-btn"> Abbrechen </button>
-				<button
-					type="button"
-					onclick={handleSubmit}
-					disabled={!title.trim()}
-					class="save-btn"
-					style="background-color: {calendarColor};"
+
+			<!-- All-day toggle -->
+			<label class="form-row clickable">
+				<CalendarBlank size={16} class="row-icon-el" />
+				<span class="row-label">Ganztägig</span>
+				<input type="checkbox" bind:checked={isAllDay} class="toggle-cb" />
+			</label>
+
+			<!-- Start date/time -->
+			<div class="form-row">
+				<Clock size={16} class="row-icon-el" />
+				<div class="datetime-fields">
+					<div class="dt-group">
+						<span class="dt-label">Beginn</span>
+						<input type="date" bind:value={startDateStr} class="dt-input" />
+						{#if !isAllDay}
+							<input type="time" bind:value={startTimeStr} class="dt-input time" />
+						{/if}
+					</div>
+					<div class="dt-group">
+						<span class="dt-label">Ende</span>
+						<input type="date" bind:value={endDateStr} class="dt-input" />
+						{#if !isAllDay}
+							<input type="time" bind:value={endTimeStr} class="dt-input time" />
+						{/if}
+					</div>
+				</div>
+			</div>
+
+			<!-- Recurrence -->
+			<div class="form-row">
+				<ArrowsClockwise size={16} class="row-icon-el" />
+				<select
+					class="field-select"
+					value={recurrenceRule || ''}
+					onchange={(e) => {
+						const v = (e.target as HTMLSelectElement).value;
+						recurrenceRule = v || null;
+					}}
 				>
-					Speichern
-				</button>
+					{#each RECURRENCE_OPTIONS as opt}
+						<option value={opt.value}>{opt.label}</option>
+					{/each}
+				</select>
+			</div>
+
+			<!-- Location -->
+			<div class="form-row">
+				<MapPin size={16} class="row-icon-el" />
+				<input bind:value={location} type="text" placeholder="Ort hinzufügen" class="field-input" />
+			</div>
+
+			<!-- Description -->
+			<div class="form-row">
+				<TextAlignLeft size={16} class="row-icon-el" />
+				<textarea
+					bind:value={description}
+					placeholder="Beschreibung"
+					rows="2"
+					class="field-input field-textarea"
+				></textarea>
 			</div>
 		</div>
-	</div>
+
+		<!-- Actions -->
+		<div class="popover-actions">
+			<button type="button" onclick={onClose} class="cancel-btn">Abbrechen</button>
+			<button
+				type="submit"
+				disabled={!title.trim()}
+				class="save-btn"
+				style="background-color: {calendarColor};"
+			>
+				Speichern
+			</button>
+		</div>
+	</form>
 </div>
 
 <style>
@@ -150,7 +261,10 @@
 	.popover {
 		position: fixed;
 		z-index: 100;
-		width: 320px;
+		width: 340px;
+		max-height: 80vh;
+		display: flex;
+		flex-direction: column;
 		background: hsl(var(--color-card));
 		border: 1px solid hsl(var(--color-border));
 		border-radius: 0.75rem;
@@ -175,10 +289,41 @@
 	.accent-bar {
 		height: 4px;
 		width: 100%;
+		flex-shrink: 0;
+	}
+
+	.popover-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 0.625rem 0.875rem;
+		border-bottom: 1px solid hsl(var(--color-border) / 0.5);
+		flex-shrink: 0;
+	}
+
+	.header-title {
+		font-size: 0.8125rem;
+		font-weight: 600;
+		color: hsl(var(--color-foreground));
+	}
+
+	.close-btn {
+		padding: 0.25rem;
+		border: none;
+		background: none;
+		color: hsl(var(--color-muted-foreground));
+		border-radius: 0.25rem;
+		cursor: pointer;
+	}
+
+	.close-btn:hover {
+		background: hsl(var(--color-muted));
 	}
 
 	.popover-content {
-		padding: 0.875rem;
+		flex: 1;
+		overflow-y: auto;
+		padding: 0.75rem 0.875rem;
 		display: flex;
 		flex-direction: column;
 		gap: 0.625rem;
@@ -188,7 +333,7 @@
 		width: 100%;
 		border: none;
 		background: none;
-		font-size: 1.0625rem;
+		font-size: 1rem;
 		font-weight: 600;
 		color: hsl(var(--color-foreground));
 		outline: none;
@@ -200,19 +345,122 @@
 		font-weight: 400;
 	}
 
-	.time-row {
+	/* Calendar pills */
+	.calendar-pills {
+		display: flex;
+		gap: 0.25rem;
+		flex-wrap: wrap;
+	}
+
+	.calendar-pill {
 		display: flex;
 		align-items: center;
+		gap: 0.25rem;
+		padding: 0.25rem 0.5rem;
+		border-radius: 9999px;
+		border: 1px solid hsl(var(--color-border));
+		background: none;
+		font-size: 0.6875rem;
+		color: hsl(var(--color-foreground));
+		cursor: pointer;
+		transition: all 0.1s;
+	}
+
+	.calendar-pill.active {
+		border-color: hsl(var(--color-primary) / 0.5);
+		background: hsl(var(--color-primary) / 0.1);
+	}
+
+	.pill-dot {
+		width: 8px;
+		height: 8px;
+		border-radius: 50%;
+	}
+
+	.pill-name {
+		font-weight: 500;
+	}
+
+	/* Form rows */
+	.form-row {
+		display: flex;
+		align-items: flex-start;
 		gap: 0.5rem;
+		padding: 0.25rem 0;
 	}
 
-	.time-label {
-		font-size: 0.8125rem;
+	.form-row.clickable {
+		cursor: pointer;
+		align-items: center;
+		border-radius: 0.375rem;
+		padding: 0.375rem 0.25rem;
+	}
+
+	.form-row.clickable:hover {
+		background: hsl(var(--color-muted) / 0.5);
+	}
+
+	.form-row :global(.row-icon-el) {
+		flex-shrink: 0;
 		color: hsl(var(--color-muted-foreground));
+		margin-top: 0.125rem;
 	}
 
-	.location-input {
-		width: 100%;
+	.row-label {
+		flex: 1;
+		font-size: 0.8125rem;
+		color: hsl(var(--color-foreground));
+	}
+
+	.toggle-cb {
+		accent-color: hsl(var(--color-primary));
+	}
+
+	/* Datetime fields */
+	.datetime-fields {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		gap: 0.375rem;
+	}
+
+	.dt-group {
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
+	}
+
+	.dt-label {
+		font-size: 0.6875rem;
+		font-weight: 500;
+		color: hsl(var(--color-muted-foreground));
+		width: 2.75rem;
+		flex-shrink: 0;
+	}
+
+	.dt-input {
+		flex: 1;
+		border: 1px solid hsl(var(--color-border));
+		border-radius: 0.375rem;
+		background: hsl(var(--color-background));
+		padding: 0.25rem 0.375rem;
+		font-size: 0.75rem;
+		color: hsl(var(--color-foreground));
+		outline: none;
+	}
+
+	.dt-input:focus {
+		border-color: hsl(var(--color-primary));
+	}
+
+	.dt-input.time {
+		max-width: 5rem;
+	}
+
+	/* Select & input fields */
+	.field-select,
+	.field-input {
+		flex: 1;
 		border: none;
 		border-bottom: 1px solid hsl(var(--color-border) / 0.5);
 		background: none;
@@ -222,41 +470,33 @@
 		padding: 0.25rem 0;
 	}
 
-	.location-input::placeholder {
-		color: hsl(var(--color-muted-foreground) / 0.4);
-	}
-
-	.location-input:focus {
+	.field-select:focus,
+	.field-input:focus {
 		border-bottom-color: hsl(var(--color-primary));
 	}
 
-	.action-row {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 0.5rem;
-		padding-top: 0.25rem;
-	}
-
-	.action-right {
-		display: flex;
-		align-items: center;
-		gap: 0.375rem;
-		margin-left: auto;
-	}
-
-	.expand-btn {
-		font-size: 0.75rem;
-		color: hsl(var(--color-primary));
-		background: none;
-		border: none;
+	.field-select {
 		cursor: pointer;
-		padding: 0.25rem 0;
-		font-weight: 500;
 	}
 
-	.expand-btn:hover {
-		text-decoration: underline;
+	.field-textarea {
+		resize: none;
+		font-family: inherit;
+	}
+
+	.field-input::placeholder,
+	.field-textarea::placeholder {
+		color: hsl(var(--color-muted-foreground) / 0.4);
+	}
+
+	/* Actions */
+	.popover-actions {
+		display: flex;
+		justify-content: flex-end;
+		gap: 0.375rem;
+		padding: 0.625rem 0.875rem;
+		border-top: 1px solid hsl(var(--color-border) / 0.5);
+		flex-shrink: 0;
 	}
 
 	.cancel-btn {
@@ -302,6 +542,7 @@
 			right: 0;
 			bottom: 0;
 			width: 100%;
+			max-height: 85vh;
 			border-radius: 1rem 1rem 0 0;
 			animation: slide-up 200ms ease-out;
 		}

@@ -1,5 +1,6 @@
 // Components
 export { default as TagBadge } from './TagBadge.svelte';
+export { default as TagChip } from './TagChip.svelte';
 export { default as TagColorPicker } from './TagColorPicker.svelte';
 export { default as TagEditModal } from './TagEditModal.svelte';
 export { default as TagSelector } from './TagSelector.svelte';

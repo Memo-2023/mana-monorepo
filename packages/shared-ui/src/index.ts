@@ -11,6 +11,7 @@ export { GlassCard, StatRow } from './molecules';
 // Tags
 export {
 	TagBadge,
+	TagChip,
 	TagColorPicker,
 	TagEditModal,
 	TagSelector,
