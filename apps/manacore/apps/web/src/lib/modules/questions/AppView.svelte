@@ -6,6 +6,9 @@
 	import { liveQuery } from 'dexie';
 	import { db } from '$lib/data/database';
 	import type { LocalQuestion, LocalCollection } from './types';
+	import type { ViewProps } from '$lib/components/workbench/nav-stack';
+
+	let { navigate, goBack, params }: ViewProps = $props();
 
 	let questions = $state<LocalQuestion[]>([]);
 	let collections = $state<LocalCollection[]>([]);
@@ -63,8 +66,14 @@
 
 	<div class="flex-1 overflow-auto">
 		{#each sorted as question (question.id)}
-			<div
-				class="mb-2 rounded-md border border-white/10 px-3 py-2.5 transition-colors hover:bg-white/5"
+			<button
+				onclick={() =>
+					navigate('detail', {
+						questionId: question.id,
+						_siblingIds: sorted.map((q) => q.id),
+						_siblingKey: 'questionId',
+					})}
+				class="mb-2 w-full text-left rounded-md border border-white/10 px-3 py-2.5 transition-colors hover:bg-white/5 cursor-pointer"
 			>
 				<div class="flex items-start justify-between gap-2">
 					<p class="text-sm font-medium text-white/80">{question.title}</p>
@@ -84,7 +93,7 @@
 						{/each}
 					</div>
 				{/if}
-			</div>
+			</button>
 		{/each}
 
 		{#if sorted.length === 0}

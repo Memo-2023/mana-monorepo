@@ -5,7 +5,10 @@
 <script lang="ts">
 	import { liveQuery } from 'dexie';
 	import { db } from '$lib/data/database';
+	import type { ViewProps } from '$lib/components/workbench/nav-stack';
 	import type { LocalPlant, LocalWateringSchedule } from './types';
+
+	let { navigate, goBack, params }: ViewProps = $props();
 
 	let plants = $state<LocalPlant[]>([]);
 	let schedules = $state<LocalWateringSchedule[]>([]);
@@ -70,8 +73,14 @@
 		{#each plants as plant (plant.id)}
 			{@const schedule = getSchedule(plant.id)}
 			{@const waterDue = needsWater(schedule)}
-			<div
-				class="mb-2 rounded-md border border-white/10 px-3 py-2.5 transition-colors hover:bg-white/5"
+			<button
+				onclick={() =>
+					navigate('detail', {
+						plantId: plant.id,
+						_siblingIds: plants.map((p) => p.id),
+						_siblingKey: 'plantId',
+					})}
+				class="mb-2 w-full rounded-md border border-white/10 px-3 py-2.5 text-left transition-colors hover:bg-white/5"
 			>
 				<div class="flex items-center gap-2">
 					<span class="text-sm"
@@ -92,7 +101,7 @@
 						Alle {schedule.frequencyDays} Tage giessen
 					</p>
 				{/if}
-			</div>
+			</button>
 		{/each}
 
 		{#if plants.length === 0}

@@ -6,6 +6,9 @@
 	import { liveQuery } from 'dexie';
 	import { db } from '$lib/data/database';
 	import type { LocalLink, LocalFolder } from './types';
+	import type { ViewProps } from '$lib/components/workbench/nav-stack';
+
+	let { navigate, goBack, params }: ViewProps = $props();
 
 	let links = $state<LocalLink[]>([]);
 	let folders = $state<LocalFolder[]>([]);
@@ -58,7 +61,15 @@
 
 	<div class="flex-1 overflow-auto">
 		{#each sorted as link (link.id)}
-			<div class="mb-1 rounded-md px-3 py-2 transition-colors hover:bg-white/5">
+			<button
+				onclick={() =>
+					navigate('detail', {
+						linkId: link.id,
+						_siblingIds: sorted.map((l) => l.id),
+						_siblingKey: 'linkId',
+					})}
+				class="mb-1 w-full text-left rounded-md px-3 py-2 transition-colors hover:bg-white/5 cursor-pointer"
+			>
 				<div class="flex items-center justify-between">
 					<p class="truncate text-sm font-medium text-white/80">
 						{link.title || link.shortCode}
@@ -69,7 +80,7 @@
 				{#if link.customCode}
 					<p class="text-xs text-blue-400/60">/{link.customCode}</p>
 				{/if}
-			</div>
+			</button>
 		{/each}
 
 		{#if sorted.length === 0}

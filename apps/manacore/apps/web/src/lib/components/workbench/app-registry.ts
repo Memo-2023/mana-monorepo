@@ -87,6 +87,10 @@ export const APP_REGISTRY: AppEntry[] = [
 		name: 'Mukke',
 		color: '#F97316',
 		load: () => import('$lib/modules/mukke/AppView.svelte'),
+		views: {
+			list: { load: () => import('$lib/modules/mukke/AppView.svelte') },
+			detail: { load: () => import('$lib/modules/mukke/views/DetailView.svelte') },
+		},
 	},
 	{
 		id: 'photos',
@@ -111,6 +115,10 @@ export const APP_REGISTRY: AppEntry[] = [
 		name: 'Planta',
 		color: '#16A34A',
 		load: () => import('$lib/modules/planta/AppView.svelte'),
+		views: {
+			list: { load: () => import('$lib/modules/planta/AppView.svelte') },
+			detail: { load: () => import('$lib/modules/planta/views/DetailView.svelte') },
+		},
 	},
 	{
 		id: 'presi',
@@ -123,24 +131,40 @@ export const APP_REGISTRY: AppEntry[] = [
 		name: 'Inventar',
 		color: '#78716C',
 		load: () => import('$lib/modules/inventar/AppView.svelte'),
+		views: {
+			list: { load: () => import('$lib/modules/inventar/AppView.svelte') },
+			detail: { load: () => import('$lib/modules/inventar/views/DetailView.svelte') },
+		},
 	},
 	{
 		id: 'memoro',
 		name: 'Memoro',
 		color: '#F59E0B',
 		load: () => import('$lib/modules/memoro/AppView.svelte'),
+		views: {
+			list: { load: () => import('$lib/modules/memoro/AppView.svelte') },
+			detail: { load: () => import('$lib/modules/memoro/views/DetailView.svelte') },
+		},
 	},
 	{
 		id: 'questions',
 		name: 'Questions',
 		color: '#2563EB',
 		load: () => import('$lib/modules/questions/AppView.svelte'),
+		views: {
+			list: { load: () => import('$lib/modules/questions/AppView.svelte') },
+			detail: { load: () => import('$lib/modules/questions/views/DetailView.svelte') },
+		},
 	},
 	{
 		id: 'skilltree',
 		name: 'SkillTree',
 		color: '#D946EF',
 		load: () => import('$lib/modules/skilltree/AppView.svelte'),
+		views: {
+			list: { load: () => import('$lib/modules/skilltree/AppView.svelte') },
+			detail: { load: () => import('$lib/modules/skilltree/views/DetailView.svelte') },
+		},
 	},
 	{
 		id: 'moodlit',
@@ -153,12 +177,20 @@ export const APP_REGISTRY: AppEntry[] = [
 		name: 'CityCorners',
 		color: '#14B8A6',
 		load: () => import('$lib/modules/citycorners/AppView.svelte'),
+		views: {
+			list: { load: () => import('$lib/modules/citycorners/AppView.svelte') },
+			detail: { load: () => import('$lib/modules/citycorners/views/DetailView.svelte') },
+		},
 	},
 	{
 		id: 'uload',
 		name: 'uLoad',
 		color: '#0EA5E9',
 		load: () => import('$lib/modules/uload/AppView.svelte'),
+		views: {
+			list: { load: () => import('$lib/modules/uload/AppView.svelte') },
+			detail: { load: () => import('$lib/modules/uload/views/DetailView.svelte') },
+		},
 	},
 	{
 		id: 'calc',

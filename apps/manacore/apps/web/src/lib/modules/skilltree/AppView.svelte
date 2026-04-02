@@ -5,8 +5,11 @@
 <script lang="ts">
 	import { liveQuery } from 'dexie';
 	import { db } from '$lib/data/database';
+	import type { ViewProps } from '$lib/components/workbench/nav-stack';
 	import type { LocalSkill, LocalActivity } from './types';
 	import { LEVEL_NAMES, BRANCH_INFO, xpProgress, type SkillBranch } from './types';
+
+	let { navigate, goBack, params }: ViewProps = $props();
 
 	let skills = $state<LocalSkill[]>([]);
 	let activities = $state<LocalActivity[]>([]);
@@ -52,8 +55,14 @@
 		{#each skills as skill (skill.id)}
 			{@const branch = BRANCH_INFO[skill.branch as SkillBranch]}
 			{@const progress = xpProgress(skill.currentXp, skill.level)}
-			<div
-				class="mb-2 rounded-md border border-white/10 px-3 py-2.5 transition-colors hover:bg-white/5"
+			<button
+				onclick={() =>
+					navigate('detail', {
+						skillId: skill.id,
+						_siblingIds: skills.map((s) => s.id),
+						_siblingKey: 'skillId',
+					})}
+				class="mb-2 w-full rounded-md border border-white/10 px-3 py-2.5 text-left transition-colors hover:bg-white/5"
 			>
 				<div class="flex items-center justify-between">
 					<div class="flex items-center gap-2">
@@ -71,7 +80,7 @@
 				<p class="mt-0.5 text-[10px] text-white/30">
 					{branch?.name ?? skill.branch} — {LEVEL_NAMES[skill.level] ?? 'Unbekannt'}
 				</p>
-			</div>
+			</button>
 		{/each}
 
 		{#if skills.length === 0}

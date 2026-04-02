@@ -5,7 +5,10 @@
 <script lang="ts">
 	import { liveQuery } from 'dexie';
 	import { db } from '$lib/data/database';
+	import type { ViewProps } from '$lib/components/workbench/nav-stack';
 	import type { LocalCollection, LocalItem } from './types';
+
+	let { navigate, goBack, params }: ViewProps = $props();
 
 	let collections = $state<LocalCollection[]>([]);
 	let items = $state<LocalItem[]>([]);
@@ -54,8 +57,14 @@
 
 	<div class="flex-1 overflow-auto">
 		{#each collections as collection (collection.id)}
-			<div
-				class="mb-2 rounded-md border border-white/10 px-3 py-2.5 transition-colors hover:bg-white/5"
+			<button
+				onclick={() =>
+					navigate('detail', {
+						collectionId: collection.id,
+						_siblingIds: collections.map((c) => c.id),
+						_siblingKey: 'collectionId',
+					})}
+				class="mb-2 w-full rounded-md border border-white/10 px-3 py-2.5 text-left transition-colors hover:bg-white/5"
 			>
 				<div class="flex items-center gap-2">
 					{#if collection.icon}
@@ -67,7 +76,7 @@
 				{#if collection.description}
 					<p class="mt-1 truncate text-xs text-white/30">{collection.description}</p>
 				{/if}
-			</div>
+			</button>
 		{/each}
 
 		{#if collections.length === 0}

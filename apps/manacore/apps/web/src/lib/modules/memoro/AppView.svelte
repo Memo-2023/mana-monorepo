@@ -5,7 +5,10 @@
 <script lang="ts">
 	import { liveQuery } from 'dexie';
 	import { db } from '$lib/data/database';
+	import type { ViewProps } from '$lib/components/workbench/nav-stack';
 	import type { LocalMemo } from './types';
+
+	let { navigate, goBack, params }: ViewProps = $props();
 
 	let memos = $state<LocalMemo[]>([]);
 
@@ -51,8 +54,14 @@
 
 	<div class="flex-1 overflow-auto">
 		{#each sorted as memo (memo.id)}
-			<div
-				class="mb-2 rounded-md border border-white/10 px-3 py-2.5 transition-colors hover:bg-white/5"
+			<button
+				onclick={() =>
+					navigate('detail', {
+						memoId: memo.id,
+						_siblingIds: sorted.map((m) => m.id),
+						_siblingKey: 'memoId',
+					})}
+				class="mb-2 w-full rounded-md border border-white/10 px-3 py-2.5 text-left transition-colors hover:bg-white/5"
 			>
 				<div class="flex items-start justify-between gap-2">
 					<div class="min-w-0 flex-1">
@@ -78,7 +87,7 @@
 							: memo.processingStatus}
 					</span>
 				</div>
-			</div>
+			</button>
 		{/each}
 
 		{#if sorted.length === 0}

@@ -6,6 +6,9 @@
 	import { liveQuery } from 'dexie';
 	import { db } from '$lib/data/database';
 	import type { LocalSong, LocalPlaylist } from './types';
+	import type { ViewProps } from '$lib/components/workbench/nav-stack';
+
+	let { navigate, goBack, params }: ViewProps = $props();
 
 	let songs = $state<LocalSong[]>([]);
 	let playlists = $state<LocalPlaylist[]>([]);
@@ -61,8 +64,14 @@
 	<div class="flex-1 overflow-auto">
 		<h3 class="mb-2 text-xs font-medium text-white/50">Zuletzt gehört</h3>
 		{#each recentlyPlayed as song (song.id)}
-			<div
-				class="flex items-center gap-3 rounded-md px-2 py-1.5 transition-colors hover:bg-white/5"
+			<button
+				onclick={() =>
+					navigate('detail', {
+						songId: song.id,
+						_siblingIds: recentlyPlayed.map((s) => s.id),
+						_siblingKey: 'songId',
+					})}
+				class="flex w-full items-center gap-3 rounded-md px-2 py-1.5 transition-colors hover:bg-white/5 cursor-pointer text-left"
 			>
 				<div
 					class="flex h-8 w-8 shrink-0 items-center justify-center rounded bg-white/10 text-xs text-white/30"
@@ -74,7 +83,7 @@
 					<p class="truncate text-xs text-white/40">{song.artist ?? 'Unbekannt'}</p>
 				</div>
 				<span class="text-xs text-white/30">{formatDuration(song.duration)}</span>
-			</div>
+			</button>
 		{/each}
 
 		{#if recentlyPlayed.length === 0}

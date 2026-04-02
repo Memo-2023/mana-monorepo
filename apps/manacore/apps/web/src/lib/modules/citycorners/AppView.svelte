@@ -7,6 +7,9 @@
 	import { db } from '$lib/data/database';
 	import type { LocalLocation, LocalFavorite } from './types';
 	import { CATEGORY_COLORS } from './types';
+	import type { ViewProps } from '$lib/components/workbench/nav-stack';
+
+	let { navigate, goBack, params }: ViewProps = $props();
 
 	let locations = $state<LocalLocation[]>([]);
 	let favorites = $state<LocalFavorite[]>([]);
@@ -14,7 +17,7 @@
 	$effect(() => {
 		const sub = liveQuery(async () => {
 			return db
-				.table<LocalLocation>('cityLocations')
+				.table<LocalLocation>('ccLocations')
 				.toArray()
 				.then((all) => all.filter((l) => !l.deletedAt));
 		}).subscribe((val) => {
@@ -26,7 +29,7 @@
 	$effect(() => {
 		const sub = liveQuery(async () => {
 			return db
-				.table<LocalFavorite>('cityFavorites')
+				.table<LocalFavorite>('ccFavorites')
 				.toArray()
 				.then((all) => all.filter((f) => !f.deletedAt));
 		}).subscribe((val) => {
@@ -60,7 +63,15 @@
 
 	<div class="flex-1 overflow-auto">
 		{#each locations as location (location.id)}
-			<div class="flex items-start gap-2 rounded-md px-2 py-2 transition-colors hover:bg-white/5">
+			<button
+				onclick={() =>
+					navigate('detail', {
+						locationId: location.id,
+						_siblingIds: locations.map((l) => l.id),
+						_siblingKey: 'locationId',
+					})}
+				class="flex w-full items-start gap-2 rounded-md px-2 py-2 transition-colors hover:bg-white/5 cursor-pointer text-left"
+			>
 				<div
 					class="mt-0.5 h-2.5 w-2.5 shrink-0 rounded-full"
 					style="background: {CATEGORY_COLORS[location.category] ?? '#666'}"
@@ -76,7 +87,7 @@
 						{categoryLabels[location.category] ?? location.category}
 					</p>
 				</div>
-			</div>
+			</button>
 		{/each}
 
 		{#if locations.length === 0}
