@@ -17,9 +17,12 @@
 	import type { ViewProps } from '$lib/components/workbench/nav-stack';
 	import { dropTarget } from '@manacore/shared-ui/dnd';
 	import type { TagDragData } from '@manacore/shared-ui/dnd';
-	import { getTagsByIds } from '$lib/stores/tags.svelte';
+	import { useAllTags, getTagsByIds } from '$lib/stores/tags.svelte';
 
 	let { navigate, goBack, params }: ViewProps = $props();
+
+	const tagsQuery = useAllTags();
+	let allTags = $derived(tagsQuery.value ?? []);
 
 	function getTaskTagIds(task: import('./types').Task): string[] {
 		return ((task.metadata as Record<string, unknown>)?.labelIds as string[]) ?? [];
@@ -109,7 +112,7 @@
 	<div class="task-list">
 		{#each filtered() as task (task.id)}
 			{@const taskTagIds = getTaskTagIds(task)}
-			{@const taskTags = getTagsByIds(taskTagIds)}
+			{@const taskTags = getTagsByIds(allTags, taskTagIds)}
 			<button
 				onclick={() =>
 					navigate('detail', {

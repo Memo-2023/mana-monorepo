@@ -12,9 +12,12 @@
 	import type { ViewProps } from '$lib/components/workbench/nav-stack';
 	import { dropTarget } from '@manacore/shared-ui/dnd';
 	import type { TagDragData } from '@manacore/shared-ui/dnd';
-	import { getTagsByIds } from '$lib/stores/tags.svelte';
+	import { useAllTags, getTagsByIds } from '$lib/stores/tags.svelte';
 
 	let { navigate, goBack, params }: ViewProps = $props();
+
+	const tagsQuery = useAllTags();
+	let allTags = $derived(tagsQuery.value ?? []);
 
 	function handleTagDrop(eventId: string, tagData: TagDragData) {
 		const event = events.find((e) => e.id === eventId);
@@ -133,7 +136,7 @@
 		</form>
 
 		{#each todayEvents as event (event.id)}
-			{@const eventTags = getTagsByIds(event.tagIds ?? [])}
+			{@const eventTags = getTagsByIds(allTags, event.tagIds ?? [])}
 			<button
 				class="event-card"
 				onclick={() =>

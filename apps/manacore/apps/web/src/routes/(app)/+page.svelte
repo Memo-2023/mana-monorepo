@@ -6,17 +6,10 @@
 	import { createAppSettingsStore } from '@manacore/shared-stores';
 	import { DragPreview, dragSource } from '@manacore/shared-ui/dnd';
 	import { useAllTags } from '$lib/stores/tags.svelte';
-	import type { Tag } from '@manacore/shared-tags';
 
 	// ── Tags for drag & drop ───────────────────────────────
-	const allTags$ = useAllTags();
-	let allTags = $state<Tag[]>([]);
-	$effect(() => {
-		const sub = allTags$.subscribe((val) => {
-			allTags = val ?? [];
-		});
-		return () => sub.unsubscribe();
-	});
+	const tagsQuery = useAllTags();
+	let allTags = $derived(tagsQuery.value ?? []);
 
 	// ── Persisted workbench state ───────────────────────────
 	const DEFAULT_WIDTH = 480;

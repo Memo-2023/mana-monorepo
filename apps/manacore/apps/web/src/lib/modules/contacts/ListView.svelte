@@ -12,9 +12,12 @@
 	import type { ViewProps } from '$lib/components/workbench/nav-stack';
 	import { dropTarget } from '@manacore/shared-ui/dnd';
 	import type { TagDragData } from '@manacore/shared-ui/dnd';
-	import { getTagsByIds } from '$lib/stores/tags.svelte';
+	import { useAllTags, getTagsByIds } from '$lib/stores/tags.svelte';
 
 	let { navigate, goBack, params }: ViewProps = $props();
+
+	const tagsQuery = useAllTags();
+	let allTags = $derived(tagsQuery.value ?? []);
 
 	function handleTagDrop(contactId: string, tagData: TagDragData) {
 		const contact = contacts.find((c) => c.id === contactId);
@@ -98,7 +101,7 @@
 
 	<div class="contact-list">
 		{#each filtered() as contact (contact.id)}
-			{@const contactTags = getTagsByIds(contact.tagIds ?? [])}
+			{@const contactTags = getTagsByIds(allTags, contact.tagIds ?? [])}
 			<button
 				class="contact-item"
 				onclick={() =>
