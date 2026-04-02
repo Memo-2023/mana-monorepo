@@ -18,5 +18,5 @@ export {
 	applyContactFilter,
 	groupByLetter,
 } from './queries';
-export { contactTable, CONTACTS_GUEST_SEED } from './collections';
+export { contactTable, CONTACTS_GUEST_SEED, SELF_CONTACT_ID } from './collections';
 export type { LocalContact, Contact, SortField, ContactFilter, ContactView } from './types';

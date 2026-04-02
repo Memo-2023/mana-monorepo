@@ -237,7 +237,7 @@
 		bottom: 4.5rem;
 		left: 50%;
 		transform: translateX(-50%);
-		z-index: 45;
+		z-index: 91;
 		display: flex;
 		align-items: center;
 		gap: 0.25rem;

@@ -1,8 +1,11 @@
 <script lang="ts">
-	import { setContext } from 'svelte';
+	import { setContext, onMount } from 'svelte';
 	import type { Snippet } from 'svelte';
 	import { useAllContacts } from '$lib/modules/contacts/queries';
 	import { contactsFilterStore } from '$lib/modules/contacts/stores/filter.svelte';
+	import { contactsStore } from '$lib/modules/contacts/stores/contacts.svelte';
+	import { profileService } from '$lib/api/profile';
+	import { authStore } from '$lib/stores/auth.svelte';
 
 	let { children }: { children: Snippet } = $props();
 
@@ -14,6 +17,17 @@
 
 	// Initialize filter state from localStorage
 	contactsFilterStore.initialize();
+
+	// Ensure self-contact exists and stays synced with profile
+	onMount(async () => {
+		if (!authStore.isAuthenticated) return;
+		try {
+			const profile = await profileService.getProfile();
+			await contactsStore.ensureSelfContact(profile);
+		} catch {
+			// Profile fetch may fail for guest users — that's OK
+		}
+	});
 </script>
 
 {@render children()}

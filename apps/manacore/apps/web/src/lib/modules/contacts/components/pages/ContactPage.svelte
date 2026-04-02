@@ -10,6 +10,7 @@
 	import {
 		Star,
 		Users,
+		User,
 		Cake,
 		Heart,
 		Envelope,
@@ -20,6 +21,7 @@
 	} from '@manacore/shared-icons';
 	import { PageShell } from '$lib/components/page-carousel';
 	import type { Contact } from '../../types';
+	import { SELF_CONTACT_ID } from '../../collections';
 	import {
 		getDisplayName,
 		getInitials,
@@ -38,7 +40,8 @@
 		| 'has-phone'
 		| 'with-company'
 		| 'with-address'
-		| 'recent';
+		| 'recent'
+		| 'my-profile';
 
 	interface Props {
 		pageId: ContactPageId;
@@ -131,6 +134,12 @@
 				const days = differenceInDays(new Date(), new Date(c.createdAt));
 				return days <= 14;
 			},
+		},
+		'my-profile': {
+			title: 'Mein Profil',
+			color: '#8B5CF6',
+			icon: User,
+			filterFn: (c) => c.id === SELF_CONTACT_ID,
 		},
 	};
 

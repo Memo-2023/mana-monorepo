@@ -5,11 +5,12 @@
  * This store only exposes mutations that write to IndexedDB.
  */
 
-import { contactTable } from '../collections';
+import { contactTable, SELF_CONTACT_ID } from '../collections';
 import { toContact } from '../queries';
 import { createArchiveOps } from '@manacore/shared-stores';
 import { ContactsEvents } from '@manacore/shared-utils/analytics';
 import type { LocalContact, Contact } from '../types';
+import type { UserProfile } from '$lib/api/profile';
 
 /** Archive/soft-delete ops for contacts. */
 export const contactArchive = createArchiveOps({ table: () => contactTable });
@@ -109,5 +110,50 @@ export const contactsStore = {
 	toggleArchive: async (id: string) => {
 		await contactArchive.toggleArchive(id);
 		ContactsEvents.contactArchived();
+	},
+
+	/**
+	 * Ensure the self-contact exists and is synced with the user's profile.
+	 * Creates the contact if missing, updates it if profile data changed.
+	 */
+	async ensureSelfContact(profile: UserProfile): Promise<void> {
+		const nameParts = (profile.name || '').split(' ');
+		const firstName = nameParts[0] || undefined;
+		const lastName = nameParts.slice(1).join(' ') || undefined;
+
+		const existing = await contactTable.get(SELF_CONTACT_ID);
+
+		if (!existing) {
+			const self: LocalContact = {
+				id: SELF_CONTACT_ID,
+				firstName,
+				lastName,
+				email: profile.email || undefined,
+				photoUrl: profile.image || undefined,
+				isFavorite: true,
+				isArchived: false,
+				createdAt: new Date().toISOString(),
+				updatedAt: new Date().toISOString(),
+			};
+			await contactTable.add(self);
+			return;
+		}
+
+		// Sync profile fields if they changed
+		const needsUpdate =
+			existing.firstName !== firstName ||
+			existing.lastName !== lastName ||
+			existing.email !== (profile.email || undefined) ||
+			existing.photoUrl !== (profile.image || undefined);
+
+		if (needsUpdate) {
+			await contactTable.update(SELF_CONTACT_ID, {
+				firstName,
+				lastName,
+				email: profile.email || undefined,
+				photoUrl: profile.image || undefined,
+				updatedAt: new Date().toISOString(),
+			});
+		}
 	},
 };

@@ -132,7 +132,7 @@
 			</div>
 		{/each}
 
-		{#if todayEvents.length === 0 && !showNewEvent}
+		{#if todayEvents.length === 0}
 			<p class="empty">Keine Termine heute</p>
 		{/if}
 	</div>

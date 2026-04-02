@@ -7,6 +7,10 @@
 import { db } from '$lib/data/database';
 import type { LocalContact } from './types';
 
+// ─── Constants ────────────────────────────────────────────
+
+export const SELF_CONTACT_ID = 'self-contact';
+
 // ─── Collection Accessors ──────────────────────────────────
 
 export const contactTable = db.table<LocalContact>('contacts');
