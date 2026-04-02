@@ -1,0 +1,51 @@
+{
+	"faq": {
+		"what_is_manacore": {
+			"question": "Qu'est-ce que ManaCore ?",
+			"answer": "<p><strong>ManaCore</strong> est la plateforme centrale de l'ecosysteme Mana :</p><ul><li>Gerez votre <strong>compte</strong> et votre profil depuis un seul endroit</li><li>Accedez a toutes les apps Mana — Chat, Picture, Zitare, Clock et plus encore</li><li>Utilisez le <strong>Single Sign-On (SSO)</strong> pour vous connecter une seule fois et rester connecte partout</li><li>Creez et gerez des <strong>organisations</strong> pour le travail en equipe</li></ul>",
+			"tags": "manacore,plateforme,ecosysteme"
+		},
+		"sso": {
+			"question": "Comment fonctionne le Single Sign-On (SSO) ?",
+			"answer": "<p>Le <strong>Single Sign-On</strong> vous permet de vous connecter une seule fois et d'utiliser toutes les apps Mana :</p><ol><li>Connectez-vous a n'importe quelle app Mana (par exemple ManaCore, Chat, Picture)</li><li>Votre connexion est automatiquement partagee avec toutes les apps connectees</li><li>Vous restez connecte jusqu'a ce que vous vous deconnectiez explicitement</li></ol><p>Le SSO utilise des <strong>tokens JWT securises</strong> avec chiffrement EdDSA. Votre mot de passe n'est transmis qu'une seule fois lors de la connexion.</p>",
+			"tags": "sso,connexion,login,authentification"
+		},
+		"organizations": {
+			"question": "Comment gerer les organisations ?",
+			"answer": "<p>Les <strong>organisations</strong> permettent le travail en equipe au sein de l'ecosysteme Mana :</p><ul><li><strong>Creer</strong> : Allez dans Parametres > Organisations > Nouvelle organisation</li><li><strong>Inviter des membres</strong> : Invitez des membres par e-mail et attribuez des roles (Admin, Membre)</li><li><strong>Gerer les apps</strong> : Activez ou desactivez des apps par organisation</li><li><strong>Page d'accueil</strong> : Creez une page d'accueil personnalisee sur <code>slug.mana.how</code></li></ul>",
+			"tags": "organisation,equipe,membres,gerer"
+		},
+		"switch_apps": {
+			"question": "Comment basculer entre les apps ?",
+			"answer": "<p>Vous pouvez rapidement basculer entre les apps Mana :</p><ul><li><strong>Vue d'ensemble des apps</strong> : Cliquez sur le menu des apps dans la navigation pour voir toutes les apps disponibles</li><li><strong>Liens directs</strong> : Chaque app a sa propre URL (par exemple chat.mana.how, picture.mana.how)</li><li><strong>Tableau de bord</strong> : Le tableau de bord ManaCore affiche toutes vos apps avec un acces rapide</li></ul><p>Votre connexion est conservee lors du passage d'une app a l'autre grace au SSO.</p>",
+			"tags": "basculer,apps,navigation"
+		}
+	},
+	"features": {
+		"sso": {
+			"title": "Single Sign-On",
+			"description": "Connectez-vous une seule fois et utilisez toutes les apps Mana",
+			"highlights": "Une connexion pour tout,Tokens JWT EdDSA,Sessions securisees,Deconnexion automatique"
+		},
+		"app_ecosystem": {
+			"title": "Ecosysteme d'Apps",
+			"description": "Accedez a toutes les apps Mana depuis une plateforme centrale",
+			"highlights": "Vue d'ensemble des apps,Acces rapide,Design unifie,Donnees connectees"
+		},
+		"organizations": {
+			"title": "Organisations et Equipes",
+			"description": "Creez des organisations et gerez les membres et les roles de votre equipe",
+			"highlights": "Acces base sur les roles,Invitations d'equipe,Gestion des apps,Pages d'accueil"
+		},
+		"unified_profile": {
+			"title": "Profil Unifie",
+			"description": "Gerez votre profil, vos parametres et votre securite en un seul endroit",
+			"highlights": "Photo de profil,Parametres de securite,Gestion des sessions,Export de donnees"
+		}
+	},
+	"contact": {
+		"title": "Contacter le support",
+		"content": "<p>Notre equipe de support est la pour vous aider pour toute question concernant ManaCore.</p>",
+		"response_time": "Generalement sous 24 heures"
+	}
+}

@@ -1,0 +1,51 @@
+{
+	"faq": {
+		"what_is_manacore": {
+			"question": "Que es ManaCore?",
+			"answer": "<p><strong>ManaCore</strong> es la plataforma central del ecosistema Mana:</p><ul><li>Gestiona tu <strong>cuenta</strong> y perfil en un solo lugar</li><li>Accede a todas las apps de Mana: Chat, Picture, Zitare, Clock y mas</li><li>Usa <strong>Single Sign-On (SSO)</strong> para iniciar sesion una vez y estar conectado en todas partes</li><li>Crea y gestiona <strong>organizaciones</strong> para el trabajo en equipo</li></ul>",
+			"tags": "manacore,plataforma,ecosistema"
+		},
+		"sso": {
+			"question": "Como funciona el Single Sign-On (SSO)?",
+			"answer": "<p><strong>Single Sign-On</strong> te permite iniciar sesion una vez y usar todas las apps de Mana:</p><ol><li>Inicia sesion en cualquier app de Mana (por ejemplo, ManaCore, Chat, Picture)</li><li>Tu inicio de sesion se transfiere automaticamente a todas las apps conectadas</li><li>Permaneces conectado hasta que cierres sesion explicitamente</li></ol><p>SSO utiliza <strong>tokens JWT seguros</strong> con cifrado EdDSA. Tu contrasena solo se transmite una vez durante el inicio de sesion.</p>",
+			"tags": "sso,inicio de sesion,login,autenticacion"
+		},
+		"organizations": {
+			"question": "Como gestiono las organizaciones?",
+			"answer": "<p>Las <strong>organizaciones</strong> permiten el trabajo en equipo dentro del ecosistema Mana:</p><ul><li><strong>Crear</strong>: Ve a Ajustes > Organizaciones > Nueva organizacion</li><li><strong>Invitar miembros</strong>: Invita a miembros del equipo por correo electronico y asigna roles (Admin, Miembro)</li><li><strong>Gestionar apps</strong>: Activa o desactiva apps por organizacion</li><li><strong>Pagina de inicio</strong>: Crea una pagina de inicio propia en <code>slug.mana.how</code></li></ul>",
+			"tags": "organizacion,equipo,miembros,gestionar"
+		},
+		"switch_apps": {
+			"question": "Como cambio entre apps?",
+			"answer": "<p>Puedes cambiar rapidamente entre las apps de Mana:</p><ul><li><strong>Vista de apps</strong>: Haz clic en el menu de apps en la navegacion para ver todas las apps disponibles</li><li><strong>Enlaces directos</strong>: Cada app tiene su propia URL (por ejemplo, chat.mana.how, picture.mana.how)</li><li><strong>Panel</strong>: El panel de ManaCore muestra todas tus apps con acceso rapido</li></ul><p>Tu sesion se mantiene al cambiar entre apps gracias al SSO.</p>",
+			"tags": "cambiar,apps,navegacion"
+		}
+	},
+	"features": {
+		"sso": {
+			"title": "Single Sign-On",
+			"description": "Inicia sesion una vez y usa todas las apps de Mana",
+			"highlights": "Un inicio de sesion para todo,Tokens JWT EdDSA,Sesiones seguras,Cierre de sesion automatico"
+		},
+		"app_ecosystem": {
+			"title": "Ecosistema de Apps",
+			"description": "Accede a todas las apps de Mana desde una plataforma central",
+			"highlights": "Vista de apps,Acceso rapido,Diseno unificado,Datos conectados"
+		},
+		"organizations": {
+			"title": "Organizaciones y Equipos",
+			"description": "Crea organizaciones y gestiona miembros del equipo y roles",
+			"highlights": "Acceso basado en roles,Invitaciones de equipo,Gestion de apps,Paginas de inicio"
+		},
+		"unified_profile": {
+			"title": "Perfil Unificado",
+			"description": "Gestiona tu perfil, ajustes y seguridad en un solo lugar",
+			"highlights": "Foto de perfil,Ajustes de seguridad,Gestion de sesiones,Exportacion de datos"
+		}
+	},
+	"contact": {
+		"title": "Contactar con soporte",
+		"content": "<p>Nuestro equipo de soporte esta aqui para ayudarte con cualquier pregunta sobre ManaCore.</p>",
+		"response_time": "Normalmente en menos de 24 horas"
+	}
+}

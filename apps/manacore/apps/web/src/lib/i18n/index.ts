@@ -47,6 +47,7 @@ function registerLocale(lang: SupportedLocale) {
 			questions,
 			matrix,
 			guides,
+			help,
 		] = await Promise.all([
 			import(`./locales/common/${lang}.json`),
 			import(`./locales/nav/${lang}.json`),
@@ -79,6 +80,7 @@ function registerLocale(lang: SupportedLocale) {
 			import(`./locales/questions/${lang}.json`),
 			import(`./locales/matrix/${lang}.json`),
 			import(`./locales/guides/${lang}.json`),
+			import(`./locales/help/${lang}.json`),
 		]);
 
 		return {
@@ -113,6 +115,7 @@ function registerLocale(lang: SupportedLocale) {
 			questions: questions.default,
 			matrix: matrix.default,
 			guides: guides.default,
+			help: help.default,
 		};
 	});
 }
