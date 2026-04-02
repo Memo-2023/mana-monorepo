@@ -31,6 +31,7 @@ export default defineConfig({
 	},
 	ssr: {
 		noExternal: [...MANACORE_SHARED_PACKAGES, ...APP_SHARED_PACKAGES],
+		external: ['@mlc-ai/web-llm'],
 	},
 	optimizeDeps: {
 		exclude: [...MANACORE_SHARED_PACKAGES, ...APP_SHARED_PACKAGES],
