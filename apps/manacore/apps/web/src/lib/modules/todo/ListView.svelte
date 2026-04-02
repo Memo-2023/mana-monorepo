@@ -146,7 +146,10 @@
 								<span class="task-due">{new Date(task.dueDate).toLocaleDateString('de')}</span>
 							{/if}
 							{#each taskTags as tag (tag.id)}
-								<span class="tag-dot" style="background: {tag.color}" title={tag.name}></span>
+								<span class="tag-pill" style="--tag-color: {tag.color}">
+									<span class="tag-dot" style="background: {tag.color}"></span>
+									{tag.name}
+								</span>
 							{/each}
 						</div>
 					{/if}
@@ -325,9 +328,25 @@
 		font-size: 0.6875rem;
 		color: #9ca3af;
 	}
+	.tag-pill {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.1875rem;
+		padding: 0 0.325rem;
+		border-radius: 9999px;
+		background: color-mix(in srgb, var(--tag-color) 12%, transparent);
+		font-size: 0.5625rem;
+		color: #6b7280;
+		line-height: 1.25rem;
+		white-space: nowrap;
+	}
+	:global(.dark) .tag-pill {
+		background: color-mix(in srgb, var(--tag-color) 18%, transparent);
+		color: #9ca3af;
+	}
 	.tag-dot {
-		width: 6px;
-		height: 6px;
+		width: 5px;
+		height: 5px;
 		border-radius: 9999px;
 		flex-shrink: 0;
 	}
