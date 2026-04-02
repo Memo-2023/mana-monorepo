@@ -40,6 +40,7 @@
 
 	/** Default features per app (German) */
 	const defaultFeaturesDE: Record<string, string[]> = {
+		manacore: ['Alle deine Apps an einem Ort', 'Quelloffen & unabhängig', 'Privat by Design'],
 		contacts: ['Alle Kontakte an einem Ort', 'Quelloffen & unabhängig', 'Privat by Design'],
 		chat: ['Dein persönlicher KI-Assistent', 'Quelloffen & unabhängig', 'Privat by Design'],
 		todo: ['Organisiere deinen Alltag', 'Quelloffen & unabhängig', 'Privat by Design'],
@@ -72,6 +73,7 @@
 
 	/** Default features per app (English) */
 	const defaultFeaturesEN: Record<string, string[]> = {
+		manacore: ['All your apps in one place', 'Open-source & independent', 'Private by design'],
 		contacts: ['All your contacts in one place', 'Open-source & independent', 'Private by design'],
 		chat: ['Your personal AI assistant', 'Open-source & independent', 'Private by design'],
 		todo: ['Organize your day', 'Open-source & independent', 'Private by design'],

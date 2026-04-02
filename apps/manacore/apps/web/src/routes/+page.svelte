@@ -1,15 +1,9 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import { authStore } from '$lib/stores/auth.svelte';
 
-	onMount(async () => {
-		await authStore.initialize();
-		if (authStore.isAuthenticated) {
-			goto('/home');
-		} else {
-			goto('/login');
-		}
+	onMount(() => {
+		goto('/home', { replaceState: true });
 	});
 </script>
 

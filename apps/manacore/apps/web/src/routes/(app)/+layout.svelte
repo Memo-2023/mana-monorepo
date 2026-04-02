@@ -2,17 +2,27 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import type { Snippet } from 'svelte';
-	import { onMount, setContext } from 'svelte';
+	import { onDestroy, setContext } from 'svelte';
 	import KeyboardShortcutsModal from '$lib/components/KeyboardShortcutsModal.svelte';
 	import SessionWarning from '$lib/components/SessionWarning.svelte';
 	import { locale } from 'svelte-i18n';
-	import { PillNavigation, TagStrip, DragPreview, ActionZone } from '@manacore/shared-ui';
+	import {
+		PillNavigation,
+		TagStrip,
+		DragPreview,
+		ActionZone,
+		QuickInputBar,
+	} from '@manacore/shared-ui';
 	import type {
 		PillNavItem,
 		PillDropdownItem,
 		SpotlightAction,
 		ContentSearcher,
 	} from '@manacore/shared-ui';
+	import type { InputBarAdapter } from '$lib/quick-input/types';
+	import { getAdapterLoader } from '$lib/quick-input/registry';
+	import { createFallbackAdapter } from '$lib/quick-input/fallback-adapter';
+	import { AuthGate } from '@manacore/shared-auth-ui';
 	import { tagLocalStore, tagMutations, useAllTags } from '$lib/stores/tags.svelte';
 	import { linkLocalStore, linkMutations } from '@manacore/shared-links';
 	import { manacoreStore } from '$lib/data/local-store';
@@ -39,30 +49,26 @@
 	import { SearchRegistry } from '$lib/search/registry';
 	import { registerAllProviders } from '$lib/search/providers';
 	import { initSharedUload } from '@manacore/shared-uload';
+	import type { DragPayload } from '@manacore/shared-ui/dnd';
 
 	let { children }: { children: Snippet } = $props();
 
-	// App switcher items (filtered by user's access tier)
+	// ── App switcher ────────────────────────────────────────
 	let appItems = $derived(getPillAppItems('manacore', undefined, undefined, authStore.user?.tier));
 
-	let loading = $state(true);
+	// ── UI State ────────────────────────────────────────────
 	let isCollapsed = $state(false);
 	let showShortcuts = $state(false);
+	let showOnboarding = $state(false);
 
-	// Get theme state
+	// ── Theme ───────────────────────────────────────────────
 	let isDark = $derived(theme.isDark);
-
-	// Get pinned themes from user settings (extended themes only)
 	let pinnedThemes = $derived<ThemeVariant[]>(
 		(userSettings.theme?.pinnedThemes || []).filter((t): t is ThemeVariant =>
 			EXTENDED_THEME_VARIANTS.includes(t as ThemeVariant)
 		)
 	);
-
-	// Visible themes in PillNav: default + pinned extended
 	let visibleThemes = $derived<ThemeVariant[]>([...DEFAULT_THEME_VARIANTS, ...pinnedThemes]);
-
-	// Theme variant dropdown items
 	let themeVariantItems = $derived<PillDropdownItem[]>([
 		...visibleThemes.map((variant) => ({
 			id: variant,
@@ -79,11 +85,9 @@
 			active: false,
 		},
 	]);
-
-	// Current theme variant label
 	let currentThemeVariantLabel = $derived(THEME_DEFINITIONS[theme.variant].label);
 
-	// Language selector items
+	// ── i18n ────────────────────────────────────────────────
 	let currentLocale = $derived($locale || 'de');
 	function handleLocaleChange(newLocale: string) {
 		setLocale(newLocale as any);
@@ -94,21 +98,17 @@
 	);
 	let currentLanguageLabel = $derived(getCurrentLanguageLabel(currentLocale));
 
-	// User email for user dropdown
-	let userEmail = $derived(authStore.user?.email);
+	// ── User / Guest awareness ──────────────────────────────
+	let userEmail = $derived(authStore.isAuthenticated ? authStore.user?.email || 'Menü' : '');
 
-	// Tags (local-first reactive query)
+	// ── Tags ────────────────────────────────────────────────
 	const allTags = useAllTags();
-
-	// TagStrip visibility
 	let isTagStripVisible = $state(false);
 	function handleTagStripToggle() {
 		isTagStripVisible = !isTagStripVisible;
 	}
 
-	// DnD: tag drop handler — set by child pages via context
-	import type { DragPayload } from '@manacore/shared-ui/dnd';
-
+	// ── DnD context ─────────────────────────────────────────
 	let tagDropHandler = $state<((tagId: string, payload: DragPayload) => void) | null>(null);
 	setContext('tagDropHandler', {
 		set(handler: (tagId: string, payload: DragPayload) => void) {
@@ -119,7 +119,7 @@
 		},
 	});
 
-	// Navigation items for ManaCore
+	// ── Navigation ──────────────────────────────────────────
 	const baseNavItems: PillNavItem[] = [
 		{ href: '/home', label: 'Home', icon: 'home' },
 		{ href: '/dashboard', label: 'Dashboard', icon: 'grid' },
@@ -139,13 +139,10 @@
 		},
 	];
 
-	// Only show admin link if user has admin role
 	let isAdmin = $derived(authStore.user?.role === 'admin');
 	let navItems = $derived<PillNavItem[]>(
 		isAdmin ? [...baseNavItems, { href: '/admin', label: 'Admin', icon: 'shield' }] : baseNavItems
 	);
-
-	// Navigation shortcuts (Ctrl+1-5)
 	const navRoutes = navItems.map((item) => item.href);
 
 	function handleKeydown(event: KeyboardEvent) {
@@ -153,22 +150,17 @@
 		if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
 			return;
 		}
-
-		// ? key opens keyboard shortcuts
 		if (event.key === '?' && !event.ctrlKey && !event.metaKey) {
 			event.preventDefault();
 			showShortcuts = !showShortcuts;
 			return;
 		}
-
 		if ((event.ctrlKey || event.metaKey) && !event.shiftKey && !event.altKey) {
 			const num = parseInt(event.key);
 			if (num >= 1 && num <= navRoutes.length) {
 				event.preventDefault();
 				const route = navRoutes[num - 1];
-				if (route) {
-					goto(route);
-				}
+				if (route) goto(route);
 			}
 		}
 	}
@@ -191,7 +183,7 @@
 		AppEvents.themeChanged(mode);
 	}
 
-	// Unified sync manager — one sync engine for all apps
+	// ── Sync ────────────────────────────────────────────────
 	const SYNC_SERVER_URL =
 		(typeof window !== 'undefined' &&
 			(window as Record<string, unknown>).__PUBLIC_SYNC_SERVER_URL__) ||
@@ -201,14 +193,15 @@
 
 	async function handleSignOut() {
 		unifiedSync?.stopAll();
+		guestMode?.destroy();
 		await authStore.signOut();
 		goto('/login');
 	}
 
-	// Track initialization state
-	let isInitializing = $state(true);
-	let showOnboarding = $state(false);
+	// ── Guest Mode ──────────────────────────────────────────
+	let guestMode: { destroy: () => void } | null = null;
 
+	// ── Onboarding ──────────────────────────────────────────
 	function handleOnboardingComplete() {
 		onboardingStore.complete();
 		ManaCoreEvents.onboardingCompleted();
@@ -221,68 +214,90 @@
 		showOnboarding = false;
 	}
 
-	onMount(async () => {
-		// Initialize auth store first
-		await authStore.initialize();
-
-		// Only after initialization is complete, check auth status
-		isInitializing = false;
-
-		// Redirect to login if not authenticated
-		if (!authStore.isAuthenticated) {
-			goto('/login');
-			return;
-		}
-
-		// Initialize local-first databases (opens IndexedDB, seeds guest data)
+	// ── Auth Ready (replaces monolith onMount) ──────────────
+	async function handleAuthReady() {
+		// Phase A: Auth-independent — guests + authenticated
 		await Promise.all([
 			manacoreStore.initialize(),
 			tagLocalStore.initialize(),
 			linkLocalStore.initialize(),
 		]);
-
-		// Migrate data from legacy per-app databases (one-time, idempotent)
 		await migrateFromLegacyDbs();
-
-		// Initialize shared-uload (opens uLoad IndexedDB for cross-app link creation)
 		initSharedUload();
-
-		// Start unified sync — one engine for all apps via Dexie hooks
-		const getToken = () => authStore.getValidToken();
-		unifiedSync = createUnifiedSync(SYNC_SERVER_URL, getToken);
-		unifiedSync.startAll();
-
-		// Initialize dashboard from IndexedDB
 		await dashboardStore.initialize();
 
-		// Initialize collapsed state from localStorage
-		const savedCollapsed = localStorage.getItem(STORAGE_KEYS.NAV_COLLAPSED);
-		if (savedCollapsed === 'true') {
-			isCollapsed = true;
-			collapsedStore.set(true);
+		// Restore nav collapsed state
+		if (typeof localStorage !== 'undefined') {
+			const savedCollapsed = localStorage.getItem(STORAGE_KEYS.NAV_COLLAPSED);
+			if (savedCollapsed === 'true') {
+				isCollapsed = true;
+				collapsedStore.set(true);
+			}
 		}
 
-		// Load user settings from server (still needed for shared-theme sync)
-		userSettings.load().catch(() => {});
+		// Phase B: Auth-dependent — sync, settings, onboarding
+		if (authStore.isAuthenticated) {
+			const getToken = () => authStore.getValidToken();
+			unifiedSync = createUnifiedSync(SYNC_SERVER_URL, getToken);
+			unifiedSync.startAll();
 
-		// Load onboarding state and show wizard if needed
-		onboardingStore.load();
-		if (onboardingStore.shouldShow) {
-			onboardingStore.start();
-			ManaCoreEvents.onboardingStarted();
-			showOnboarding = true;
+			userSettings.load().catch(() => {});
+
+			onboardingStore.load();
+			if (onboardingStore.shouldShow) {
+				onboardingStore.start();
+				ManaCoreEvents.onboardingStarted();
+				showOnboarding = true;
+			}
 		}
 
-		loading = false;
+		// Phase C: Guest mode — welcome modal + nudge
+		if (!authStore.isAuthenticated) {
+			guestMode = createGuestMode('manacore', {
+				nudgeDelayMinutes: 3,
+				onRegister: () => goto('/register'),
+			});
+		}
+	}
+
+	onDestroy(() => {
+		unifiedSync?.stopAll();
+		guestMode?.destroy();
 	});
 
-	// Cross-app search
+	// ── Search / Spotlight ───────────────────────────────────
 	const searchRegistry = new SearchRegistry();
 	registerAllProviders(searchRegistry);
 
 	const contentSearcher: ContentSearcher = async (query, signal) => {
 		return searchRegistry.search(query, { signal });
 	};
+
+	// ── QuickInputBar — context-aware adapter per module ─────
+	let inputBarAdapter = $state<InputBarAdapter>(createFallbackAdapter(searchRegistry));
+	let activeModulePrefix = $state<string | null>(null);
+
+	$effect(() => {
+		const pathname = $page.url.pathname;
+		const moduleSlug = '/' + pathname.split('/')[1];
+
+		if (moduleSlug === activeModulePrefix) return;
+
+		const loader = getAdapterLoader(pathname);
+		if (!loader) {
+			inputBarAdapter = createFallbackAdapter(searchRegistry);
+			activeModulePrefix = null;
+			return;
+		}
+
+		const target = moduleSlug;
+		loader().then(({ createAdapter }) => {
+			if (target === '/' + $page.url.pathname.split('/')[1]) {
+				inputBarAdapter = createAdapter() as InputBarAdapter;
+				activeModulePrefix = target;
+			}
+		});
+	});
 
 	const spotlightActions: SpotlightAction[] = [
 		{ id: 'home', label: 'Home', category: 'Navigation', onExecute: () => goto('/home') },
@@ -311,18 +326,16 @@
 
 <svelte:window onkeydown={handleKeydown} />
 
-{#if isInitializing || loading || authStore.loading}
-	<div class="flex min-h-screen items-center justify-center bg-background">
-		<div class="text-center">
-			<div
-				class="mb-4 inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-primary-500 border-r-transparent"
-			></div>
-			<p class="text-muted-foreground">Loading...</p>
-		</div>
-	</div>
-{:else if authStore.isAuthenticated}
-	<!-- Onboarding Wizard Modal -->
-	{#if showOnboarding}
+<AuthGate
+	{authStore}
+	{goto}
+	allowGuest={true}
+	onReady={handleAuthReady}
+	appName="ManaCore"
+	locale={($locale || 'de') === 'de' ? 'de' : 'en'}
+>
+	<!-- Onboarding Wizard (auth only) -->
+	{#if showOnboarding && authStore.isAuthenticated}
 		<div
 			class="fixed inset-0 z-50 flex items-center justify-center bg-background/95 backdrop-blur-sm"
 		>
@@ -351,7 +364,8 @@
 			showLanguageSwitcher={true}
 			{languageItems}
 			{currentLanguageLabel}
-			showLogout={true}
+			showLogout={authStore.isAuthenticated}
+			loginHref="/login"
 			primaryColor="#6366f1"
 			showAppSwitcher={true}
 			{appItems}
@@ -364,6 +378,26 @@
 			allAppsHref="/apps"
 			{spotlightActions}
 			{contentSearcher}
+		/>
+
+		<!-- QuickInputBar (context-aware per module) -->
+		<QuickInputBar
+			onSearch={inputBarAdapter.onSearch}
+			onSelect={inputBarAdapter.onSelect}
+			onParseCreate={inputBarAdapter.onParseCreate}
+			onCreate={inputBarAdapter.onCreate}
+			onSearchChange={inputBarAdapter.onSearchChange}
+			placeholder={inputBarAdapter.placeholder}
+			appIcon={inputBarAdapter.appIcon}
+			emptyText={inputBarAdapter.emptyText}
+			createText={inputBarAdapter.createText}
+			deferSearch={inputBarAdapter.deferSearch}
+			locale={$locale || 'de'}
+			defaultOptions={inputBarAdapter.defaultOptions}
+			selectedDefaultId={inputBarAdapter.selectedDefaultId}
+			defaultOptionLabel={inputBarAdapter.defaultOptionLabel}
+			onDefaultChange={inputBarAdapter.onDefaultChange}
+			highlightPatterns={inputBarAdapter.highlightPatterns}
 		/>
 
 		<!-- TagStrip (above PillNav, toggled via Tags pill) -->
@@ -383,7 +417,7 @@
 			/>
 		{/if}
 
-		<!-- DnD: floating preview + action zones -->
+		<!-- DnD: floating preview -->
 		<DragPreview />
 
 		<!-- Main content -->
@@ -393,10 +427,12 @@
 			</div>
 		</main>
 
-		<!-- Session expiry warning -->
-		<SessionWarning />
+		<!-- Session expiry warning (auth only) -->
+		{#if authStore.isAuthenticated}
+			<SessionWarning />
+		{/if}
 
 		<!-- Keyboard shortcuts modal -->
 		<KeyboardShortcutsModal open={showShortcuts} onclose={() => (showShortcuts = false)} />
 	</div>
-{/if}
+</AuthGate>
