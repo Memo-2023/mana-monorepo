@@ -3,7 +3,9 @@
 	import type { LocalBoardView } from '$lib/data/local-store';
 	import { BoardViewRenderer } from '$lib/components/board-views';
 	import { boardViewsStore } from '$lib/stores/board-views.svelte';
-	import { Plus } from '@manacore/shared-icons';
+	import { todoSettings } from '$lib/stores/settings.svelte';
+	import type { PageConfig, PageWidth } from '$lib/stores/settings.svelte';
+	import { Plus, PencilSimple, X } from '@manacore/shared-icons';
 	import PagePicker from '$lib/components/pages/PagePicker.svelte';
 	import TodoPage from '$lib/components/pages/TodoPage.svelte';
 	import type { MinimizedPagesContext } from '$lib/stores/minimized-pages.svelte';
@@ -15,6 +17,9 @@
 	let activeView = $derived(activeViewCtx.value);
 	let pageTitle = $derived(activeView?.name ?? 'Aufgaben');
 
+	// ── Edit mode ──────────────────────────────────────────
+	let editMode = $state(false);
+
 	// ── Pages ───────────────────────────────────────────────
 	let showPagePicker = $state(false);
 	let openPages = $state<
@@ -23,9 +28,12 @@
 
 	let expandedPages = $derived(openPages.filter((p) => !p.minimized));
 
+	// Custom pages from settings
+	let customPages = $derived(todoSettings.customPages);
+
 	// Sync minimized pages to layout via context
 	$effect(() => {
-		minimizedPages.sync(openPages);
+		minimizedPages.sync(openPages, customPages);
 	});
 
 	// Register handlers so layout can delegate tab actions back to us
@@ -61,12 +69,72 @@
 
 	function handleRenamePage(pageId: string, name: string) {
 		openPages = openPages.map((p) => (p.id === pageId ? { ...p, customTitle: name } : p));
+		// Also update custom page config label
+		if (pageId.startsWith('custom-')) {
+			const updated = customPages.map((cp) => (cp.id === pageId ? { ...cp, label: name } : cp));
+			todoSettings.update({ customPages: updated });
+		}
 	}
 
 	function handleMaximizePage(pageId: string) {
 		openPages = openPages.map((p) =>
 			p.id === pageId ? { ...p, maximized: !p.maximized, minimized: false } : p
 		);
+	}
+
+	// ── Custom page CRUD ────────────────────────────────────
+	function handleCreateCustomPage() {
+		const id = `custom-${crypto.randomUUID().slice(0, 8)}`;
+		const newPage: PageConfig = {
+			id,
+			label: 'Neue Seite',
+			icon: 'star',
+			filter: {},
+		};
+		todoSettings.update({ customPages: [...customPages, newPage] });
+		openPages = [...openPages, { id, minimized: false }];
+		showPagePicker = false;
+		// Auto-enable edit mode so the user can configure the new page
+		editMode = true;
+	}
+
+	function handleUpdateCustomPage(pageId: string, data: Partial<PageConfig>) {
+		const updated = customPages.map((cp) => {
+			if (cp.id !== pageId) return cp;
+			return { ...cp, ...data, filter: data.filter ?? cp.filter };
+		});
+		todoSettings.update({ customPages: updated });
+	}
+
+	function handleDeletePage(pageId: string) {
+		// Remove from open pages
+		openPages = openPages.filter((p) => p.id !== pageId);
+		// If custom, also remove from settings
+		if (pageId.startsWith('custom-')) {
+			const updated = customPages.filter((cp) => cp.id !== pageId);
+			todoSettings.update({ customPages: updated });
+		}
+	}
+
+	function getCustomPageConfig(pageId: string): PageConfig | undefined {
+		return customPages.find((cp) => cp.id === pageId);
+	}
+
+	// ── Page reorder (in edit mode, with arrows) ────────────
+	function handleMovePageLeft(pageId: string) {
+		const idx = openPages.findIndex((p) => p.id === pageId);
+		if (idx <= 0) return;
+		const pages = [...openPages];
+		[pages[idx - 1], pages[idx]] = [pages[idx], pages[idx - 1]];
+		openPages = pages;
+	}
+
+	function handleMovePageRight(pageId: string) {
+		const idx = openPages.findIndex((p) => p.id === pageId);
+		if (idx === -1 || idx >= openPages.length - 1) return;
+		const pages = [...openPages];
+		[pages[idx], pages[idx + 1]] = [pages[idx + 1], pages[idx]];
+		openPages = pages;
 	}
 
 	// ── Page drag reorder ───────────────────────────────────
@@ -107,13 +175,29 @@
 		showPagePicker = !showPagePicker;
 	}
 
+	function toggleEditMode() {
+		editMode = !editMode;
+		if (!editMode) showPagePicker = false;
+	}
+
+	// ── Width pills ─────────────────────────────────────────
+	const WIDTH_OPTIONS: { id: PageWidth; label: string }[] = [
+		{ id: 'narrow', label: 'S' },
+		{ id: 'medium', label: 'M' },
+		{ id: 'wide', label: 'L' },
+		{ id: 'full', label: 'XL' },
+	];
+
+	function setPageWidth(width: PageWidth) {
+		todoSettings.update({ pageWidth: width });
+	}
+
+	// ── Column helpers ──────────────────────────────────────
 	function handleColumnClose(colIdx: number) {
 		if (!activeView) return;
 		const columns = $state.snapshot(activeView.columns).filter((_, i) => i !== colIdx);
 		updateView({ columns });
 	}
-
-	// ── Column helpers ──────────────────────────────────────
 
 	async function updateView(data: Partial<LocalBoardView>) {
 		if (!activeView) return;
@@ -160,6 +244,23 @@
 </svelte:head>
 
 <div class="board-page">
+	<!-- Width pills (visible in edit mode) -->
+	{#if editMode}
+		<div class="edit-toolbar">
+			<div class="width-pills">
+				{#each WIDTH_OPTIONS as opt (opt.id)}
+					<button
+						class="width-pill"
+						class:active={todoSettings.pageWidth === opt.id}
+						onclick={() => setPageWidth(opt.id)}
+					>
+						{opt.label}
+					</button>
+				{/each}
+			</div>
+		</div>
+	{/if}
+
 	<!-- Board Content -->
 	{#if activeView}
 		<BoardViewRenderer
@@ -173,12 +274,14 @@
 		>
 			{#snippet trailing()}
 				<!-- Pages -->
-				{#each expandedPages as page (page.id)}
+				{#each expandedPages as page, pageIdx (page.id)}
+					{@const config = getCustomPageConfig(page.id)}
+					{@const isCustom = page.id.startsWith('custom-')}
 					<!-- svelte-ignore a11y_no_static_element_interactions -->
 					<div
 						class="page-drag-wrapper"
 						class:dragging={dragPageId === page.id}
-						draggable="true"
+						draggable={!editMode}
 						ondragstart={(e) => handlePageDragStart(e, page.id)}
 						ondragover={handlePageDragOver}
 						ondrop={(e) => handlePageDrop(e, page.id)}
@@ -186,24 +289,37 @@
 					>
 						<TodoPage
 							pageId={page.id}
-							title={page.customTitle}
+							title={page.customTitle ?? config?.label}
 							maximized={page.maximized}
+							{editMode}
+							filterConfig={isCustom ? config?.filter : undefined}
+							pageIcon={isCustom ? config?.icon : undefined}
+							pageColor={isCustom && config?.icon ? undefined : undefined}
+							customPageConfig={isCustom ? config : undefined}
+							isFirst={pageIdx === 0}
+							isLast={pageIdx === expandedPages.length - 1}
 							onClose={() => handleRemovePage(page.id)}
 							onMinimize={() => handleMinimizePage(page.id)}
 							onMaximize={() => handleMaximizePage(page.id)}
 							onRename={(name) => handleRenamePage(page.id, name)}
+							onUpdateConfig={isCustom
+								? (data) => handleUpdateCustomPage(page.id, data)
+								: undefined}
+							onMoveLeft={editMode ? () => handleMovePageLeft(page.id) : undefined}
+							onMoveRight={editMode ? () => handleMovePageRight(page.id) : undefined}
+							onDelete={editMode ? () => handleDeletePage(page.id) : undefined}
 						/>
 					</div>
 				{/each}
 
 				<!-- Page picker / add button -->
 				{#if expandedPages.length === 0}
-					<!-- Wrapper matches sheet width so fokus-track centering works -->
 					<div class="empty-pages-wrapper">
 						{#if showPagePicker}
 							<PagePicker
 								onSelect={handleAddPage}
 								onClose={() => (showPagePicker = false)}
+								onCreateCustom={handleCreateCustomPage}
 								activePageIds={openPages.map((p) => p.id)}
 							/>
 						{:else}
@@ -222,6 +338,7 @@
 						<PagePicker
 							onSelect={handleAddPage}
 							onClose={() => (showPagePicker = false)}
+							onCreateCustom={handleCreateCustomPage}
 							activePageIds={openPages.map((p) => p.id)}
 						/>
 					</div>
@@ -237,6 +354,20 @@
 			<p class="text-muted-foreground">Views werden geladen...</p>
 		</div>
 	{/if}
+
+	<!-- Edit FAB -->
+	<button
+		class="edit-fab"
+		class:active={editMode}
+		onclick={toggleEditMode}
+		title={editMode ? 'Bearbeitung beenden' : 'Seiten bearbeiten'}
+	>
+		{#if editMode}
+			<X size={20} />
+		{:else}
+			<PencilSimple size={20} />
+		{/if}
+	</button>
 </div>
 
 <style>
@@ -244,8 +375,72 @@
 		min-height: calc(100vh - 140px);
 		display: flex;
 		flex-direction: column;
+		position: relative;
 	}
 
+	/* Edit toolbar with width pills */
+	.edit-toolbar {
+		display: flex;
+		justify-content: center;
+		padding: 0.5rem 1rem;
+		animation: fadeDown 0.2s ease-out;
+	}
+
+	@keyframes fadeDown {
+		from {
+			opacity: 0;
+			transform: translateY(-8px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	.width-pills {
+		display: flex;
+		gap: 0.25rem;
+		background: rgba(0, 0, 0, 0.04);
+		border-radius: 0.5rem;
+		padding: 0.125rem;
+	}
+	:global(.dark) .width-pills {
+		background: rgba(255, 255, 255, 0.06);
+	}
+
+	.width-pill {
+		padding: 0.25rem 0.75rem;
+		border: none;
+		border-radius: 0.375rem;
+		background: transparent;
+		color: #6b7280;
+		font-size: 0.75rem;
+		font-weight: 600;
+		cursor: pointer;
+		transition: all 0.15s;
+	}
+	.width-pill:hover {
+		color: #374151;
+		background: rgba(0, 0, 0, 0.04);
+	}
+	.width-pill.active {
+		background: var(--color-primary, #8b5cf6);
+		color: white;
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+	}
+	:global(.dark) .width-pill {
+		color: #9ca3af;
+	}
+	:global(.dark) .width-pill:hover {
+		color: #e5e7eb;
+		background: rgba(255, 255, 255, 0.08);
+	}
+	:global(.dark) .width-pill.active {
+		background: var(--color-primary, #8b5cf6);
+		color: white;
+	}
+
+	/* Page drag */
 	.page-drag-wrapper {
 		flex: 0 0 auto;
 		transition: opacity 0.15s;
@@ -254,6 +449,7 @@
 		opacity: 0.4;
 	}
 
+	/* Add page button */
 	.neue-seite-card {
 		flex: 0 0 auto;
 		width: 48px;
@@ -272,7 +468,6 @@
 	}
 	.empty-pages-wrapper {
 		flex: 0 0 auto;
-		/* Match the sheet width from fokus-track so centering padding works */
 		width: var(--sheet-width, min(480px, 85vw));
 		display: flex;
 		align-items: center;
@@ -315,5 +510,59 @@
 		align-items: center;
 		justify-content: center;
 		height: 100%;
+	}
+
+	/* Edit FAB */
+	.edit-fab {
+		position: fixed;
+		bottom: 5.5rem;
+		right: 1.25rem;
+		width: 44px;
+		height: 44px;
+		border-radius: 9999px;
+		border: none;
+		background: #fffef5;
+		color: #6b7280;
+		box-shadow:
+			0 2px 8px rgba(0, 0, 0, 0.12),
+			0 0 0 1px rgba(0, 0, 0, 0.06);
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: all 0.2s;
+		z-index: 40;
+	}
+	.edit-fab:hover {
+		color: var(--color-primary, #8b5cf6);
+		box-shadow:
+			0 4px 12px rgba(0, 0, 0, 0.15),
+			0 0 0 1px rgba(0, 0, 0, 0.08);
+		transform: scale(1.05);
+	}
+	.edit-fab.active {
+		background: var(--color-primary, #8b5cf6);
+		color: white;
+		box-shadow:
+			0 4px 12px rgba(139, 92, 246, 0.3),
+			0 0 0 1px rgba(139, 92, 246, 0.5);
+	}
+	.edit-fab.active:hover {
+		background: color-mix(in srgb, var(--color-primary, #8b5cf6) 85%, black);
+		color: white;
+	}
+	:global(.dark) .edit-fab {
+		background: #252220;
+		color: #9ca3af;
+		box-shadow:
+			0 2px 8px rgba(0, 0, 0, 0.3),
+			0 0 0 1px rgba(255, 255, 255, 0.08);
+	}
+	:global(.dark) .edit-fab:hover {
+		color: var(--color-primary, #8b5cf6);
+	}
+	:global(.dark) .edit-fab.active {
+		background: var(--color-primary, #8b5cf6);
+		color: white;
 	}
 </style>

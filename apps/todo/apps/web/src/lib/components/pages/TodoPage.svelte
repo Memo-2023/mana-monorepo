@@ -261,7 +261,7 @@
 		pageId === 'todo' ? filteredTasks.filter((t) => t.isCompleted) : []
 	);
 
-	function formatCompletedTime(completedAt: string): string {
+	function formatCompletedTime(completedAt: string | Date): string {
 		const date = new Date(completedAt);
 		const time = format(date, 'HH:mm');
 		if (pageId === 'completed' || showCompleted) {
