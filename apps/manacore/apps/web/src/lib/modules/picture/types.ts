@@ -21,7 +21,7 @@ export interface LocalImage extends BaseRecord {
 	isFavorite: boolean;
 	downloadCount: number;
 	rating?: number | null;
-	archivedAt?: string | null;
+	isArchived?: boolean;
 	generationId?: string | null;
 	sourceImageId?: string | null;
 }
@@ -80,7 +80,7 @@ export interface Image {
 	isFavorite: boolean;
 	downloadCount: number;
 	rating?: number;
-	archivedAt?: string;
+	isArchived?: boolean;
 	generationId?: string;
 	sourceImageId?: string;
 	createdAt: string;

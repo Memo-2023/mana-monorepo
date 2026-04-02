@@ -63,7 +63,7 @@
 	let selectedImage = $state<Image | null>(null);
 
 	async function handleToggleFavorite(img: Image) {
-		await imagesStore.toggleFavorite(img.id, img.isFavorite);
+		await imagesStore.toggleFavorite(img.id);
 	}
 
 	async function handleArchive(img: Image) {

@@ -12,7 +12,7 @@
 	$effect(() => {
 		const sub = liveQuery(async () => {
 			const all = await db.table<LocalImage>('images').toArray();
-			return all.filter((i) => !i.deletedAt && !i.archivedAt);
+			return all.filter((i) => !i.deletedAt && !i.isArchived);
 		}).subscribe((val) => {
 			images = val ?? [];
 		});

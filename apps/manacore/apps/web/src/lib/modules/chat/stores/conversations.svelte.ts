@@ -7,7 +7,13 @@
 
 import { conversationTable, messageTable } from '../collections';
 import { toConversation } from '../queries';
+import { createArchiveOps } from '@manacore/shared-stores';
 import type { LocalConversation } from '../types';
+
+/** Archive/soft-delete ops for conversations. */
+export const conversationArchive = createArchiveOps({
+	table: () => conversationTable,
+});
 
 export const conversationsStore = {
 	/** Create a new conversation. */
@@ -50,21 +56,9 @@ export const conversationsStore = {
 		});
 	},
 
-	/** Archive a conversation. */
-	async archive(id: string) {
-		await conversationTable.update(id, {
-			isArchived: true,
-			updatedAt: new Date().toISOString(),
-		});
-	},
-
-	/** Unarchive a conversation. */
-	async unarchive(id: string) {
-		await conversationTable.update(id, {
-			isArchived: false,
-			updatedAt: new Date().toISOString(),
-		});
-	},
+	// Archive ops (delegated to shared factory)
+	archive: (id: string) => conversationArchive.archive(id),
+	unarchive: (id: string) => conversationArchive.unarchive(id),
 
 	/** Pin a conversation. */
 	async pin(id: string) {
@@ -86,7 +80,7 @@ export const conversationsStore = {
 	async delete(id: string) {
 		const now = new Date().toISOString();
 		await conversationTable.update(id, { deletedAt: now, updatedAt: now });
-		// Soft-delete all messages for this conversation
+		// Cascade soft-delete to messages
 		const msgs = await messageTable.where('conversationId').equals(id).toArray();
 		for (const msg of msgs) {
 			await messageTable.update(msg.id, { deletedAt: now, updatedAt: now });

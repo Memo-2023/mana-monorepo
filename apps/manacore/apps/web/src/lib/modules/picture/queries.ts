@@ -40,7 +40,7 @@ export function toImage(local: LocalImage): Image {
 		isFavorite: local.isFavorite,
 		downloadCount: local.downloadCount,
 		rating: local.rating ?? undefined,
-		archivedAt: local.archivedAt ?? undefined,
+		isArchived: local.isArchived ?? undefined,
 		generationId: local.generationId ?? undefined,
 		sourceImageId: local.sourceImageId ?? undefined,
 		createdAt: local.createdAt ?? new Date().toISOString(),
@@ -70,7 +70,7 @@ export function useAllImages() {
 	return useLiveQueryWithDefault(async () => {
 		const locals = await db.table<LocalImage>('images').toArray();
 		return locals
-			.filter((img) => !img.archivedAt && !img.deletedAt)
+			.filter((img) => !img.isArchived && !img.deletedAt)
 			.map(toImage)
 			.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 	}, [] as Image[]);
@@ -81,7 +81,7 @@ export function useArchivedImages() {
 	return useLiveQueryWithDefault(async () => {
 		const locals = await db.table<LocalImage>('images').toArray();
 		return locals
-			.filter((img) => !!img.archivedAt && !img.deletedAt)
+			.filter((img) => !!img.isArchived && !img.deletedAt)
 			.map(toImage)
 			.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 	}, [] as Image[]);
@@ -128,7 +128,7 @@ export function allImages$() {
 	return liveQuery(async () => {
 		const locals = await db.table<LocalImage>('images').toArray();
 		return locals
-			.filter((img) => !img.archivedAt && !img.deletedAt)
+			.filter((img) => !img.isArchived && !img.deletedAt)
 			.map(toImage)
 			.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 	});

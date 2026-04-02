@@ -7,7 +7,13 @@
 
 import { memoTable } from '../collections';
 import { toMemo } from '../queries';
+import { createArchiveOps } from '@manacore/shared-stores';
 import type { LocalMemo } from '../types';
+
+/** Archive/soft-delete ops for memos. */
+export const memoArchive = createArchiveOps({
+	table: () => memoTable,
+});
 
 export const memosStore = {
 	/** Create a new memo (e.g., after recording). */
@@ -45,21 +51,9 @@ export const memosStore = {
 		});
 	},
 
-	/** Archive a memo. */
-	async archive(id: string) {
-		await memoTable.update(id, {
-			isArchived: true,
-			updatedAt: new Date().toISOString(),
-		});
-	},
-
-	/** Unarchive a memo. */
-	async unarchive(id: string) {
-		await memoTable.update(id, {
-			isArchived: false,
-			updatedAt: new Date().toISOString(),
-		});
-	},
+	// Archive ops (delegated to shared factory)
+	archive: (id: string) => memoArchive.archive(id),
+	unarchive: (id: string) => memoArchive.unarchive(id),
 
 	/** Pin a memo. */
 	async pin(id: string) {
@@ -78,8 +72,5 @@ export const memosStore = {
 	},
 
 	/** Soft-delete a memo. */
-	async delete(id: string) {
-		const now = new Date().toISOString();
-		await memoTable.update(id, { deletedAt: now, updatedAt: now });
-	},
+	delete: (id: string) => memoArchive.softDelete(id),
 };

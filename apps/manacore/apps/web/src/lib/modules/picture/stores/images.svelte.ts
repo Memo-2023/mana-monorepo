@@ -7,8 +7,13 @@
  */
 
 import { db } from '$lib/data/database';
+import { createArchiveOps, toggleField } from '@manacore/shared-stores';
 import type { LocalImage } from '../types';
-import { toImage } from '../queries';
+
+const imageTable = () => db.table<LocalImage>('images');
+
+/** Archive/soft-delete ops for images. */
+export const imageArchive = createArchiveOps({ table: imageTable });
 
 let error = $state<string | null>(null);
 let selectedImageId = $state<string | null>(null);
@@ -33,16 +38,10 @@ export const imagesStore = {
 		showFavoritesOnly = !showFavoritesOnly;
 	},
 
-	/**
-	 * Toggle favorite status of an image.
-	 */
-	async toggleFavorite(id: string, currentIsFavorite: boolean) {
+	async toggleFavorite(id: string) {
 		error = null;
 		try {
-			await db.table('images').update(id, {
-				isFavorite: !currentIsFavorite,
-				updatedAt: new Date().toISOString(),
-			});
+			await toggleField(imageTable(), id, 'isFavorite');
 			return { success: true };
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to toggle favorite';
@@ -50,54 +49,8 @@ export const imagesStore = {
 		}
 	},
 
-	/**
-	 * Archive an image.
-	 */
-	async archiveImage(id: string) {
-		error = null;
-		try {
-			await db.table('images').update(id, {
-				archivedAt: new Date().toISOString(),
-				updatedAt: new Date().toISOString(),
-			});
-			return { success: true };
-		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to archive image';
-			return { success: false, error };
-		}
-	},
-
-	/**
-	 * Restore an archived image.
-	 */
-	async restoreImage(id: string) {
-		error = null;
-		try {
-			await db.table('images').update(id, {
-				archivedAt: null,
-				updatedAt: new Date().toISOString(),
-			});
-			return { success: true };
-		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to restore image';
-			return { success: false, error };
-		}
-	},
-
-	/**
-	 * Delete an image -- soft-deletes from IndexedDB instantly.
-	 */
-	async deleteImage(id: string) {
-		error = null;
-		try {
-			await db.table('images').update(id, {
-				deletedAt: new Date().toISOString(),
-				updatedAt: new Date().toISOString(),
-			});
-			return { success: true };
-		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to delete image';
-			return { success: false, error };
-		}
-	},
+	// Archive ops (delegated to shared factory)
+	archiveImage: (id: string) => imageArchive.archive(id),
+	restoreImage: (id: string) => imageArchive.unarchive(id),
+	deleteImage: (id: string) => imageArchive.softDelete(id),
 };

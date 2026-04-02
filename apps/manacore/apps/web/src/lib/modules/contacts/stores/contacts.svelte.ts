@@ -7,7 +7,11 @@
 
 import { contactTable } from '../collections';
 import { toContact } from '../queries';
+import { createArchiveOps } from '@manacore/shared-stores';
 import type { LocalContact, Contact } from '../types';
+
+/** Archive/soft-delete ops for contacts. */
+export const contactArchive = createArchiveOps({ table: () => contactTable });
 
 export const contactsStore = {
 	async createContact(data: Partial<Contact> & Record<string, unknown>) {
@@ -86,13 +90,5 @@ export const contactsStore = {
 		});
 	},
 
-	async toggleArchive(id: string) {
-		const local = await contactTable.get(id);
-		if (!local) return;
-
-		await contactTable.update(id, {
-			isArchived: !local.isArchived,
-			updatedAt: new Date().toISOString(),
-		});
-	},
+	toggleArchive: (id: string) => contactArchive.toggleArchive(id),
 };

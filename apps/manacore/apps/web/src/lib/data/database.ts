@@ -46,7 +46,7 @@ db.version(1).stores({
 	conversationTags: 'id, conversationId, tagId, [conversationId+tagId]',
 
 	// ─── Picture (appId: 'picture') ───
-	images: 'id, isFavorite, isPublic, archivedAt, prompt',
+	images: 'id, isFavorite, isPublic, isArchived, prompt',
 	boards: 'id, isPublic',
 	boardItems: 'id, boardId, itemType, zIndex, [boardId+zIndex]',
 	imageTags: 'id, imageId, tagId, [imageId+tagId]', // junction to globalTags

@@ -46,6 +46,16 @@ export {
 } from './tags-local.svelte';
 export { createTagLinkOps, type TagLinkOps, type TagLinkOpsConfig } from './tag-links';
 export { toggleField } from './toggle-field';
+export {
+	createArchiveOps,
+	filterActive,
+	filterArchived,
+	filterNotDeleted,
+	type Archivable,
+	type SoftDeletable,
+	type ArchiveOps,
+	type ArchiveOpsConfig,
+} from './archive';
 
 export {
 	createGuestMode,
