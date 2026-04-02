@@ -6,6 +6,9 @@
 	import { liveQuery } from 'dexie';
 	import { db } from '$lib/data/database';
 	import type { LocalDeck, LocalCard } from './types';
+	import type { ViewProps } from '$lib/components/workbench/nav-stack';
+
+	let { navigate, goBack, params }: ViewProps = $props();
 
 	let decks = $state<LocalDeck[]>([]);
 	let cards = $state<LocalCard[]>([]);
@@ -52,8 +55,14 @@
 
 	<div class="flex-1 overflow-auto">
 		{#each decks as deck (deck.id)}
-			<div
-				class="mb-2 rounded-md border border-white/10 px-3 py-2.5 transition-colors hover:bg-white/5"
+			<button
+				onclick={() =>
+					navigate('detail', {
+						deckId: deck.id,
+						_siblingIds: decks.map((d) => d.id),
+						_siblingKey: 'deckId',
+					})}
+				class="mb-2 w-full rounded-md border border-white/10 px-3 py-2.5 text-left transition-colors hover:bg-white/5"
 			>
 				<div class="flex items-center gap-2">
 					<div class="h-3 w-3 rounded" style="background: {deck.color}"></div>
@@ -63,7 +72,7 @@
 				{#if deck.description}
 					<p class="mt-1 truncate text-xs text-white/40">{deck.description}</p>
 				{/if}
-			</div>
+			</button>
 		{/each}
 
 		{#if decks.length === 0}

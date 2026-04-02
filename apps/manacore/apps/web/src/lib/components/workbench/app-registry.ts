@@ -75,6 +75,10 @@ export const APP_REGISTRY: AppEntry[] = [
 		name: 'Cards',
 		color: '#EF4444',
 		load: () => import('$lib/modules/cards/AppView.svelte'),
+		views: {
+			list: { load: () => import('$lib/modules/cards/AppView.svelte') },
+			detail: { load: () => import('$lib/modules/cards/views/DetailView.svelte') },
+		},
 	},
 	{
 		id: 'picture',
@@ -103,6 +107,10 @@ export const APP_REGISTRY: AppEntry[] = [
 		name: 'Storage',
 		color: '#6B7280',
 		load: () => import('$lib/modules/storage/AppView.svelte'),
+		views: {
+			list: { load: () => import('$lib/modules/storage/AppView.svelte') },
+			detail: { load: () => import('$lib/modules/storage/views/DetailView.svelte') },
+		},
 	},
 	{
 		id: 'nutriphi',
@@ -125,6 +133,10 @@ export const APP_REGISTRY: AppEntry[] = [
 		name: 'Presi',
 		color: '#A855F7',
 		load: () => import('$lib/modules/presi/AppView.svelte'),
+		views: {
+			list: { load: () => import('$lib/modules/presi/AppView.svelte') },
+			detail: { load: () => import('$lib/modules/presi/views/DetailView.svelte') },
+		},
 	},
 	{
 		id: 'inventar',

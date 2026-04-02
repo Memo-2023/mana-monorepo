@@ -6,6 +6,9 @@
 	import { liveQuery } from 'dexie';
 	import { db } from '$lib/data/database';
 	import type { LocalFile, LocalFolder } from './types';
+	import type { ViewProps } from '$lib/components/workbench/nav-stack';
+
+	let { navigate, goBack, params }: ViewProps = $props();
 
 	let files = $state<LocalFile[]>([]);
 	let folders = $state<LocalFolder[]>([]);
@@ -76,13 +79,19 @@
 		<!-- Recent files -->
 		<h3 class="mb-2 mt-3 text-xs font-medium text-white/50">Zuletzt</h3>
 		{#each recentFiles as file (file.id)}
-			<div
-				class="flex items-center gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-white/5"
+			<button
+				onclick={() =>
+					navigate('detail', {
+						fileId: file.id,
+						_siblingIds: recentFiles.map((f) => f.id),
+						_siblingKey: 'fileId',
+					})}
+				class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-white/5"
 			>
 				<span class="text-sm">{@html fileIcon(file.mimeType)}</span>
 				<span class="min-w-0 flex-1 truncate text-sm text-white/70">{file.name}</span>
 				<span class="shrink-0 text-xs text-white/30">{formatSize(file.size)}</span>
-			</div>
+			</button>
 		{/each}
 
 		{#if recentFiles.length === 0}
