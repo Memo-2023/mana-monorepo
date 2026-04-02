@@ -12,9 +12,8 @@ interface ResolvedLink {
 }
 
 /**
- * Reads link data from mana-sync's sync_changes table.
- * Data is stored as JSONB in the `data` column with app_id='uload' and table_name='links'.
- * We get the latest version of each record by using DISTINCT ON.
+ * Reads link data from mana-sync's sync_changes table (local-first architecture).
+ * Writes clicks to the dedicated uload.clicks table for performant analytics.
  */
 export class RedirectService {
 	constructor(private db: Database) {}
@@ -60,24 +59,18 @@ export class RedirectService {
 			country?: string;
 		}
 	) {
-		const clickId = crypto.randomUUID();
-		const clickData = JSON.stringify({
-			id: clickId,
-			linkId,
-			ipHash: meta.ipHash || null,
-			userAgent: meta.userAgent || null,
-			referer: meta.referer || null,
-			browser: meta.browser || null,
-			deviceType: meta.deviceType || null,
-			os: meta.os || null,
-			country: meta.country || null,
-			clickedAt: new Date().toISOString(),
-		});
-
-		// Insert click as a sync_changes record so it's visible to clients
 		await this.db.execute(sql`
-			INSERT INTO sync_changes (app_id, table_name, record_id, user_id, op, data, client_id)
-			VALUES ('uload', 'clicks', ${clickId}, 'system', 'insert', ${clickData}::jsonb, 'uload-server')
+			INSERT INTO uload.clicks (link_id, ip_hash, user_agent, referer, browser, device_type, os, country)
+			VALUES (
+				${linkId},
+				${meta.ipHash || null},
+				${meta.userAgent || null},
+				${meta.referer || null},
+				${meta.browser || null},
+				${meta.deviceType || null},
+				${meta.os || null},
+				${meta.country || null}
+			)
 		`);
 	}
 }

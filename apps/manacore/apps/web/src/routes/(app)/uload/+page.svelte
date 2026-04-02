@@ -85,13 +85,61 @@
 		)
 	);
 
+	const ULOAD_DOMAIN = import.meta.env.PUBLIC_ULOAD_DOMAIN || 'ulo.ad';
+
 	function getShortUrl(code: string): string {
-		return `https://ulo.ad/${code}`;
+		return `https://${ULOAD_DOMAIN}/${code}`;
+	}
+
+	function isValidUrl(url: string): boolean {
+		try {
+			const parsed = new URL(url);
+			return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+		} catch {
+			return false;
+		}
+	}
+
+	function isValidCustomCode(code: string): boolean {
+		return /^[a-zA-Z0-9_-]+$/.test(code);
+	}
+
+	async function isShortCodeUnique(code: string): Promise<boolean> {
+		const existing = await linkTable.where('shortCode').equals(code).first();
+		return !existing;
 	}
 
 	async function createLink() {
 		if (!newUrl) return;
+
+		if (!isValidUrl(newUrl)) {
+			toast.error('Bitte eine gueltige URL eingeben (mit https://)');
+			return;
+		}
+
 		const shortCode = newCustomCode || generateShortCode();
+
+		if (newCustomCode && !isValidCustomCode(newCustomCode)) {
+			toast.error('Custom Code darf nur Buchstaben, Zahlen, - und _ enthalten');
+			return;
+		}
+
+		if (!(await isShortCodeUnique(shortCode))) {
+			toast.error(`Short Code "${shortCode}" ist bereits vergeben`);
+			return;
+		}
+
+		const maxClicks = newMaxClicks ? parseInt(newMaxClicks) : null;
+		if (maxClicks !== null && maxClicks < 1) {
+			toast.error('Max Klicks muss mindestens 1 sein');
+			return;
+		}
+
+		if (newExpiresAt && new Date(newExpiresAt) <= new Date()) {
+			toast.error('Ablaufdatum muss in der Zukunft liegen');
+			return;
+		}
+
 		await linkTable.add({
 			id: crypto.randomUUID(),
 			shortCode,
@@ -101,7 +149,7 @@
 			description: null,
 			isActive: true,
 			password: newPassword || null,
-			maxClicks: newMaxClicks ? parseInt(newMaxClicks) : null,
+			maxClicks,
 			expiresAt: newExpiresAt || null,
 			clickCount: 0,
 			qrCodeUrl: null,
@@ -139,6 +187,23 @@
 
 	async function saveEdit() {
 		if (!editingLink || !editUrl) return;
+
+		if (!isValidUrl(editUrl)) {
+			toast.error('Bitte eine gueltige URL eingeben (mit https://)');
+			return;
+		}
+
+		const maxClicks = editMaxClicks ? parseInt(editMaxClicks) : null;
+		if (maxClicks !== null && maxClicks < 1) {
+			toast.error('Max Klicks muss mindestens 1 sein');
+			return;
+		}
+
+		if (editExpiresAt && new Date(editExpiresAt) <= new Date()) {
+			toast.error('Ablaufdatum muss in der Zukunft liegen');
+			return;
+		}
+
 		await linkTable.update(editingLink.id, {
 			originalUrl: editUrl,
 			title: editTitle || null,
@@ -147,7 +212,7 @@
 			utmCampaign: editUtmCampaign || null,
 			expiresAt: editExpiresAt || null,
 			password: editPassword || null,
-			maxClicks: editMaxClicks ? parseInt(editMaxClicks) : null,
+			maxClicks,
 		});
 		toast.success('Link aktualisiert');
 		editingLink = null;

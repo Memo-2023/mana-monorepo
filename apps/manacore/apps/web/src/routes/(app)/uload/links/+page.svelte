@@ -59,8 +59,10 @@
 		)
 	);
 
+	const ULOAD_DOMAIN = import.meta.env.PUBLIC_ULOAD_DOMAIN || 'ulo.ad';
+
 	function getShortUrl(code: string): string {
-		return `https://ulo.ad/${code}`;
+		return `https://${ULOAD_DOMAIN}/${code}`;
 	}
 
 	function copyShortUrl(code: string) {
