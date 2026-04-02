@@ -52,6 +52,19 @@ export type SyncStatus = 'idle' | 'syncing' | 'error' | 'offline';
 const PUSH_DEBOUNCE = 1000;
 const PULL_INTERVAL = 30_000;
 const WS_RECONNECT_DELAY = 5000;
+
+/**
+ * Eager apps are synced at startup (needed for dashboard widgets).
+ * Lazy apps are synced on first module visit via ensureAppSynced().
+ */
+const EAGER_APPS = new Set([
+	'manacore', // User settings, dashboard config
+	'todo', // Dashboard: tasks today widget
+	'calendar', // Dashboard: upcoming events widget
+	'contacts', // Dashboard: favorites widget
+	'tags', // Global tags used everywhere
+	'links', // Shared links
+]);
 // ─── Unified Sync Manager ─────────────────────────────────────
 
 export function createUnifiedSync(serverUrl: string, getToken: () => Promise<string | null>) {
@@ -65,6 +78,7 @@ export function createUnifiedSync(serverUrl: string, getToken: () => Promise<str
 	// ─── Lifecycle ──────────────────────────────────────────
 
 	function startAll(): void {
+		// Register all channels but only start eager ones immediately
 		for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {
 			const channel: SyncChannelState = {
 				appId,
@@ -75,9 +89,12 @@ export function createUnifiedSync(serverUrl: string, getToken: () => Promise<str
 			};
 			channels.set(appId, channel);
 
-			// Initial pull, then start periodic sync
-			pull(appId).catch(() => {});
-			channel.pullTimer = setInterval(() => pull(appId).catch(() => {}), PULL_INTERVAL);
+			if (EAGER_APPS.has(appId)) {
+				// Eager: pull now + start periodic sync
+				pull(appId).catch(() => {});
+				channel.pullTimer = setInterval(() => pull(appId).catch(() => {}), PULL_INTERVAL);
+			}
+			// Lazy apps: no pull until ensureAppSynced() is called
 		}
 
 		// Single unified WebSocket for all apps
@@ -457,9 +474,23 @@ export function createUnifiedSync(serverUrl: string, getToken: () => Promise<str
 		}
 	}
 
+	/**
+	 * Ensure a lazy app's collections are synced (called on module navigation).
+	 * If already synced (has pullTimer), this is a no-op.
+	 */
+	function ensureAppSynced(appId: string): void {
+		const channel = channels.get(appId);
+		if (!channel || channel.pullTimer) return; // Already active
+
+		// Start sync for this lazy app
+		pull(appId).catch(() => {});
+		channel.pullTimer = setInterval(() => pull(appId).catch(() => {}), PULL_INTERVAL);
+	}
+
 	return {
 		startAll,
 		stopAll,
+		ensureAppSynced,
 		onPendingChange,
 		get status() {
 			return status;

@@ -140,8 +140,7 @@
 
 	// ── Navigation ──────────────────────────────────────────
 	let baseNavItems = $derived<PillNavItem[]>([
-		{ href: '/home', label: $_('nav.home'), icon: 'home' },
-		{ href: '/dashboard', label: $_('nav.dashboard'), icon: 'grid' },
+		{ href: '/', label: $_('nav.home'), icon: 'home' },
 		{ href: '/spiral', label: $_('nav.spiral'), icon: 'spiral' },
 		{ href: '/observatory', label: $_('nav.observatory'), icon: 'eye' },
 		{ href: '/credits', label: $_('nav.credits'), icon: 'creditCard' },
@@ -314,10 +313,11 @@
 
 		if (moduleSlug === activeModulePrefix) return;
 
-		// Track module usage for funnel analysis
+		// Track module usage + ensure lazy sync for this module
 		const moduleName = pathname.split('/')[1];
 		if (moduleName && authStore.isAuthenticated) {
 			trackModuleUsed(moduleName);
+			unifiedSync?.ensureAppSynced(moduleName);
 		}
 
 		const loader = getAdapterLoader(pathname);
@@ -337,13 +337,7 @@
 	});
 
 	const spotlightActions: SpotlightAction[] = [
-		{ id: 'home', label: 'Home', category: 'Navigation', onExecute: () => goto('/home') },
-		{
-			id: 'dashboard',
-			label: 'Dashboard',
-			category: 'Navigation',
-			onExecute: () => goto('/dashboard'),
-		},
+		{ id: 'home', label: 'Home', category: 'Navigation', onExecute: () => goto('/') },
 		{
 			id: 'spiral',
 			label: 'Mana Spiral',
@@ -386,7 +380,7 @@
 			items={navItems}
 			currentPath={$page.url.pathname}
 			appName="ManaCore"
-			homeRoute="/home"
+			homeRoute="/"
 			onLogout={handleSignOut}
 			onToggleTheme={handleToggleTheme}
 			{isDark}
