@@ -5,6 +5,7 @@
  * Page registers callbacks (restore/remove/togglePicker) and syncs its openPages.
  */
 import type { MinimizedPage } from '@manacore/shared-ui';
+import type { PageConfig } from '$lib/stores/settings.svelte';
 
 export const PAGE_META: Record<string, { title: string; color: string }> = {
 	todo: { title: 'To Do', color: '#6B7280' },
@@ -17,13 +18,43 @@ export const PAGE_META: Record<string, { title: string; color: string }> = {
 	'no-date': { title: 'Ohne Datum', color: '#6B7280' },
 };
 
+/** Icon-to-color mapping for custom pages */
+const ICON_COLORS: Record<string, string> = {
+	warning: '#EF4444',
+	calendar: '#3B82F6',
+	'calendar-dots': '#8B5CF6',
+	check: '#22C55E',
+	star: '#F59E0B',
+	lightning: '#F97316',
+	clock: '#6B7280',
+	fire: '#EF4444',
+	leaf: '#22C55E',
+	heart: '#EC4899',
+};
+
+/** Get display meta for a page, supporting both presets and custom pages */
+export function getPageMeta(
+	pageId: string,
+	customPages: PageConfig[]
+): { title: string; color: string } {
+	if (PAGE_META[pageId]) return PAGE_META[pageId];
+	const custom = customPages.find((p) => p.id === pageId);
+	if (custom) {
+		return {
+			title: custom.label,
+			color: ICON_COLORS[custom.icon ?? 'star'] ?? '#8B5CF6',
+		};
+	}
+	return { title: pageId, color: '#6B7280' };
+}
+
 export interface MinimizedPagesContext {
 	/** Reactive list of minimized pages (read by layout for rendering) */
 	readonly pages: MinimizedPage[];
 	/** Whether there are any minimized pages */
 	readonly hasPages: boolean;
 	/** Sync open pages state from page component */
-	sync(openPages: { id: string; minimized: boolean }[]): void;
+	sync(openPages: { id: string; minimized: boolean }[], customPages?: PageConfig[]): void;
 	/** Clear all pages (called on page unmount) */
 	clear(): void;
 	/** Restore a minimized page — delegates to registered callback */
@@ -59,11 +90,11 @@ export function createMinimizedPagesContext(): MinimizedPagesContext {
 		get hasPages() {
 			return pages.length > 0;
 		},
-		sync(openPages) {
+		sync(openPages, customPages: PageConfig[] = []) {
 			pages = openPages
 				.filter((p) => p.minimized)
 				.map((p) => {
-					const meta = PAGE_META[p.id] ?? { title: p.id, color: '#6B7280' };
+					const meta = getPageMeta(p.id, customPages);
 					return { id: p.id, title: meta.title, color: meta.color };
 				});
 		},

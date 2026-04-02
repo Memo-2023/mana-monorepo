@@ -9,6 +9,7 @@
 		Calendar,
 		TagSimple,
 		X,
+		Plus,
 	} from '@manacore/shared-icons';
 
 	export interface PageOption {
@@ -22,10 +23,11 @@
 	interface Props {
 		onSelect: (pageId: string) => void;
 		onClose: () => void;
+		onCreateCustom?: () => void;
 		activePageIds?: string[];
 	}
 
-	let { onSelect, onClose, activePageIds = [] }: Props = $props();
+	let { onSelect, onClose, onCreateCustom, activePageIds = [] }: Props = $props();
 
 	const PAGE_OPTIONS: PageOption[] = [
 		{
@@ -113,7 +115,23 @@
 			</button>
 		{/each}
 
-		{#if availableOptions.length === 0}
+		{#if availableOptions.length > 0 && onCreateCustom}
+			<div class="divider"></div>
+		{/if}
+
+		{#if onCreateCustom}
+			<button class="page-option custom-option" onclick={onCreateCustom}>
+				<div class="option-icon custom-icon">
+					<Plus size={20} />
+				</div>
+				<div class="option-text">
+					<span class="option-title">Eigene Seite</span>
+					<span class="option-desc">Seite mit eigenen Filtern erstellen</span>
+				</div>
+			</button>
+		{/if}
+
+		{#if availableOptions.length === 0 && !onCreateCustom}
 			<div class="empty-state">
 				<p>Alle Seiten sind bereits geöffnet</p>
 			</div>
@@ -235,6 +253,15 @@
 		height: 36px;
 		border-radius: 0.5rem;
 		background: color-mix(in srgb, currentColor 10%, transparent);
+	}
+
+	.custom-icon {
+		color: var(--color-primary, #8b5cf6);
+		background: color-mix(in srgb, var(--color-primary, #8b5cf6) 10%, transparent);
+	}
+
+	.custom-option {
+		margin-top: 0.25rem;
 	}
 
 	.option-text {

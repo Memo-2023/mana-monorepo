@@ -38,3 +38,7 @@ export const DEFAULT_SETTINGS = {
 	timerReminderMinutes: 0,
 	autoStopTimerHours: 0,
 };
+
+// ─── Clock Constants ────────────────────────────────────
+
+export * from './clock';

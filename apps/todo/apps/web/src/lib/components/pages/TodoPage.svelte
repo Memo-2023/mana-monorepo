@@ -1,31 +1,72 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
-	import { isToday, isPast, startOfDay, addDays, subHours, format } from 'date-fns';
+	import { isToday, isTomorrow, isPast, startOfDay, addDays, subHours, format } from 'date-fns';
 	import { t } from 'svelte-i18n';
 	import type { Task } from '@todo/shared';
-	import { X, Circle, Minus, DotsSixVertical, CornersOut, CornersIn } from '@manacore/shared-icons';
+	import {
+		X,
+		Circle,
+		Minus,
+		DotsSixVertical,
+		CornersOut,
+		CornersIn,
+		Warning,
+		Calendar,
+		CalendarDots,
+		CheckCircle,
+		Star,
+		Lightning,
+		Clock,
+		Fire,
+		Leaf,
+		Heart,
+	} from '@manacore/shared-icons';
 	import KanbanTaskCard from '../kanban/KanbanTaskCard.svelte';
+	import PageEditBar from './PageEditBar.svelte';
 	import { tasksStore } from '$lib/stores/tasks.svelte';
 	import { todoSettings } from '$lib/stores/settings.svelte';
+	import type { PageConfig, PageIcon } from '$lib/stores/settings.svelte';
 
 	interface Props {
 		pageId: string;
 		title?: string;
 		maximized?: boolean;
+		editMode?: boolean;
+		filterConfig?: PageConfig['filter'];
+		pageIcon?: PageIcon;
+		pageColor?: string;
+		customPageConfig?: PageConfig;
+		isFirst?: boolean;
+		isLast?: boolean;
 		onClose: () => void;
 		onMinimize?: () => void;
 		onMaximize?: () => void;
 		onRename?: (name: string) => void;
+		onUpdateConfig?: (data: Partial<PageConfig>) => void;
+		onMoveLeft?: () => void;
+		onMoveRight?: () => void;
+		onDelete?: () => void;
 	}
 
 	let {
 		pageId,
 		title: customTitle,
 		maximized = false,
+		editMode = false,
+		filterConfig,
+		pageIcon,
+		pageColor,
+		customPageConfig,
+		isFirst = false,
+		isLast = false,
 		onClose,
 		onMinimize,
 		onMaximize,
 		onRename,
+		onUpdateConfig,
+		onMoveLeft,
+		onMoveRight,
+		onDelete,
 	}: Props = $props();
 
 	const tasksCtx: { readonly value: Task[] } = getContext('tasks');
@@ -33,7 +74,6 @@
 	let titleEl = $state<HTMLSpanElement | null>(null);
 	let isTitleFocused = $state(false);
 
-	// Set initial text content without reactive binding (avoids cursor jump)
 	$effect(() => {
 		if (titleEl && !isTitleFocused) {
 			titleEl.textContent = displayTitle;
@@ -52,25 +92,84 @@
 		}
 	}
 
-	const PAGE_META: Record<string, { title: string; color: string }> = {
+	// Icon mapping
+	const ICON_MAP: Record<PageIcon, typeof Warning> = {
+		warning: Warning,
+		calendar: Calendar,
+		'calendar-dots': CalendarDots,
+		check: CheckCircle,
+		star: Star,
+		lightning: Lightning,
+		clock: Clock,
+		fire: Fire,
+		leaf: Leaf,
+		heart: Heart,
+	};
+
+	const PAGE_META: Record<string, { title: string; color: string; icon?: PageIcon }> = {
 		todo: { title: 'To Do', color: '#6B7280' },
-		completed: { title: 'Erledigt', color: '#22C55E' },
-		today: { title: 'Heute', color: '#F59E0B' },
-		overdue: { title: 'Überfällig', color: '#EF4444' },
+		completed: { title: 'Erledigt', color: '#22C55E', icon: 'check' },
+		today: { title: 'Heute', color: '#F59E0B', icon: 'calendar' },
+		overdue: { title: 'Überfällig', color: '#EF4444', icon: 'warning' },
 		all: { title: 'Alle Aufgaben', color: '#3B82F6' },
-		'high-priority': { title: 'Hohe Priorität', color: '#EF4444' },
-		'this-week': { title: 'Diese Woche', color: '#8B5CF6' },
+		'high-priority': { title: 'Hohe Priorität', color: '#EF4444', icon: 'fire' },
+		'this-week': { title: 'Diese Woche', color: '#8B5CF6', icon: 'calendar-dots' },
 		'no-date': { title: 'Ohne Datum', color: '#6B7280' },
 	};
 
 	let pageMeta = $derived(PAGE_META[pageId] ?? { title: pageId, color: '#6B7280' });
 	let displayTitle = $derived(customTitle ?? pageMeta.title);
+	let displayColor = $derived(pageColor ?? pageMeta.color);
+	let displayIcon = $derived(pageIcon ?? pageMeta.icon);
+	let IconComponent = $derived(displayIcon ? ICON_MAP[displayIcon] : undefined);
+	let isCustom = $derived(pageId.startsWith('custom-'));
 
+	// Filter tasks - either by custom filter config or preset page ID
 	let filteredTasks = $derived.by(() => {
 		const tasks = tasksCtx.value;
 		const today = startOfDay(new Date());
 		const weekEnd = addDays(today, 7);
 
+		// Custom filter-based pages
+		if (filterConfig) {
+			return tasks.filter((task) => {
+				// Completed filter
+				if (filterConfig.completed) {
+					if (!task.isCompleted) return false;
+				} else {
+					if (task.isCompleted) return false;
+				}
+
+				// Priority filter
+				if (filterConfig.priorities?.length) {
+					if (!filterConfig.priorities.includes(task.priority as any)) return false;
+				}
+
+				// Date range filter
+				if (filterConfig.dateRange && filterConfig.dateRange !== 'any') {
+					if (!task.dueDate) return false;
+					const dueDate = startOfDay(new Date(task.dueDate));
+					switch (filterConfig.dateRange) {
+						case 'overdue':
+							if (!isPast(dueDate) || isToday(dueDate)) return false;
+							break;
+						case 'today':
+							if (!isToday(dueDate)) return false;
+							break;
+						case 'tomorrow':
+							if (!isTomorrow(dueDate)) return false;
+							break;
+						case 'upcoming':
+							if (isPast(dueDate) && !isToday(dueDate)) return false;
+							break;
+					}
+				}
+
+				return true;
+			});
+		}
+
+		// Preset page filtering (existing logic)
 		switch (pageId) {
 			case 'todo': {
 				const recentCutoff = subHours(new Date(), 24);
@@ -150,8 +249,13 @@
 
 	let sheetWidth = $derived(PAGE_WIDTH_MAP[todoSettings.pageWidth] || PAGE_WIDTH_MAP.medium);
 
+	let showCompleted = $derived(filterConfig?.completed ?? false);
 	let openTasks = $derived(
-		pageId === 'todo' ? filteredTasks.filter((t) => !t.isCompleted) : filteredTasks
+		pageId === 'todo'
+			? filteredTasks.filter((t) => !t.isCompleted)
+			: showCompleted
+				? filteredTasks
+				: filteredTasks
 	);
 	let recentlyCompleted = $derived(
 		pageId === 'todo' ? filteredTasks.filter((t) => t.isCompleted) : []
@@ -160,7 +264,7 @@
 	function formatCompletedTime(completedAt: string): string {
 		const date = new Date(completedAt);
 		const time = format(date, 'HH:mm');
-		if (pageId === 'completed') {
+		if (pageId === 'completed' || showCompleted) {
 			const dateStr = format(date, 'dd.MM.');
 			return $t('page.completedAtDateTime', { values: { date: dateStr, time } });
 		}
@@ -173,29 +277,59 @@
 	async function handleInlineCreate() {
 		const title = newTaskTitle.trim();
 		if (!title) return;
-		const data: { title: string; dueDate?: string } = { title };
-		if (pageId === 'today') {
+		const data: Record<string, unknown> = { title };
+		// Inherit filter context for new tasks
+		if (pageId === 'today' || filterConfig?.dateRange === 'today') {
 			data.dueDate = new Date().toISOString();
 		} else if (pageId === 'this-week') {
 			data.dueDate = new Date().toISOString();
 		}
-		await tasksStore.createTask(data);
+		if (filterConfig?.priorities?.length === 1) {
+			data.priority = filterConfig.priorities[0];
+		}
+		await tasksStore.createTask(
+			data as { title: string; dueDate?: string; priority?: 'low' | 'medium' | 'high' | 'urgent' }
+		);
 		newTaskTitle = '';
 		inputEl?.focus();
 	}
 </script>
 
-<div class="todo-page" class:maximized style="width: {maximized ? '100%' : sheetWidth}">
+<div
+	class="todo-page"
+	class:maximized
+	class:editing={editMode}
+	style="width: {maximized ? '100%' : sheetWidth}"
+>
 	<div class="drag-handle-bar">
 		<span class="drag-handle">
 			<DotsSixVertical size={14} />
 		</span>
 	</div>
 
+	<!-- Edit bar for custom pages -->
+	{#if editMode && isCustom && customPageConfig && onUpdateConfig && onDelete}
+		<PageEditBar
+			config={customPageConfig}
+			onUpdate={onUpdateConfig}
+			{onMoveLeft}
+			{onMoveRight}
+			{onDelete}
+			{isFirst}
+			{isLast}
+		/>
+	{/if}
+
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div class="page-header" ondragstart={(e) => e.preventDefault()}>
 		<div class="header-left">
-			<span class="color-dot" style="background-color: {pageMeta.color}"></span>
+			{#if IconComponent}
+				<span class="header-icon" style="color: {displayColor}">
+					<IconComponent size={16} weight="fill" />
+				</span>
+			{:else}
+				<span class="color-dot" style="background-color: {displayColor}"></span>
+			{/if}
 			<!-- svelte-ignore a11y_no_static_element_interactions -->
 			<span
 				bind:this={titleEl}
@@ -209,33 +343,40 @@
 			<span class="task-count">{filteredTasks.length}</span>
 		</div>
 		<div class="header-actions">
-			{#if onMinimize}
-				<button class="header-btn" onclick={onMinimize} title="Minimieren">
-					<Minus size={14} />
+			{#if editMode && !isCustom && onDelete}
+				<button class="header-btn delete-preset" onclick={onDelete} title="Seite entfernen">
+					<X size={14} />
 				</button>
 			{/if}
-			{#if onMaximize}
-				<button
-					class="header-btn"
-					onclick={onMaximize}
-					title={maximized ? 'Verkleinern' : 'Maximieren'}
-				>
-					{#if maximized}
-						<CornersIn size={14} />
-					{:else}
-						<CornersOut size={14} />
-					{/if}
+			{#if !editMode}
+				{#if onMinimize}
+					<button class="header-btn" onclick={onMinimize} title="Minimieren">
+						<Minus size={14} />
+					</button>
+				{/if}
+				{#if onMaximize}
+					<button
+						class="header-btn"
+						onclick={onMaximize}
+						title={maximized ? 'Verkleinern' : 'Maximieren'}
+					>
+						{#if maximized}
+							<CornersIn size={14} />
+						{:else}
+							<CornersOut size={14} />
+						{/if}
+					</button>
+				{/if}
+				<button class="header-btn" onclick={onClose} title="Seite schließen">
+					<X size={14} />
 				</button>
 			{/if}
-			<button class="header-btn" onclick={onClose} title="Seite schließen">
-				<X size={14} />
-			</button>
 		</div>
 	</div>
 
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div class="page-body" ondragstart={(e) => e.preventDefault()}>
-		{#if pageId === 'completed'}
+		{#if pageId === 'completed' || showCompleted}
 			{#each filteredTasks as task (task.id)}
 				<div class="task-card-wrapper completed-task">
 					<KanbanTaskCard
@@ -280,20 +421,22 @@
 				</div>
 			{/if}
 
-			<div class="inline-create">
-				<span class="inline-create-icon">
-					<Circle size={18} />
-				</span>
-				<input
-					bind:this={inputEl}
-					bind:value={newTaskTitle}
-					class="inline-create-input"
-					placeholder={$t('page.newTaskPlaceholder')}
-					onkeydown={(e) => {
-						if (e.key === 'Enter') handleInlineCreate();
-					}}
-				/>
-			</div>
+			{#if !editMode}
+				<div class="inline-create">
+					<span class="inline-create-icon">
+						<Circle size={18} />
+					</span>
+					<input
+						bind:this={inputEl}
+						bind:value={newTaskTitle}
+						class="inline-create-input"
+						placeholder={$t('page.newTaskPlaceholder')}
+						onkeydown={(e) => {
+							if (e.key === 'Enter') handleInlineCreate();
+						}}
+					/>
+				</div>
+			{/if}
 		{/if}
 	</div>
 </div>
@@ -316,6 +459,17 @@
 		box-shadow:
 			0 2px 8px rgba(0, 0, 0, 0.25),
 			0 0 0 1px rgba(255, 255, 255, 0.06);
+	}
+
+	.todo-page.editing {
+		box-shadow:
+			0 2px 12px rgba(139, 92, 246, 0.12),
+			0 0 0 2px rgba(139, 92, 246, 0.3);
+	}
+	:global(.dark) .todo-page.editing {
+		box-shadow:
+			0 2px 12px rgba(139, 92, 246, 0.2),
+			0 0 0 2px rgba(139, 92, 246, 0.4);
 	}
 
 	.todo-page.maximized {
@@ -408,6 +562,12 @@
 		gap: 0.5rem;
 	}
 
+	.header-icon {
+		flex-shrink: 0;
+		display: flex;
+		align-items: center;
+	}
+
 	.color-dot {
 		width: 0.625rem;
 		height: 0.625rem;
@@ -468,6 +628,15 @@
 	:global(.dark) .header-btn:hover {
 		background: rgba(255, 255, 255, 0.1);
 		color: #f3f4f6;
+	}
+
+	.delete-preset:hover {
+		color: #ef4444;
+		background: rgba(239, 68, 68, 0.08);
+	}
+	:global(.dark) .delete-preset:hover {
+		color: #ef4444;
+		background: rgba(239, 68, 68, 0.15);
 	}
 
 	.page-body {
