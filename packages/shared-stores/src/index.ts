@@ -16,6 +16,13 @@ export {
 	type AppSettingsStoreOptions,
 } from './settings.svelte';
 export {
+	createViewStore,
+	type ViewStore,
+	type ViewStoreConfig,
+	type SortOption,
+	type SavedFilter,
+} from './view.svelte';
+export {
 	createSimpleNavigationStores,
 	type SimpleNavigationStores,
 	type SimpleNavigationOptions,
