@@ -3,6 +3,7 @@
 	import { isToday, isPast, format } from 'date-fns';
 	import { de } from 'date-fns/locale';
 	import { Check, Circle, CalendarBlank, CheckSquare, Flag, Trash } from '@manacore/shared-icons';
+	import { TagChip } from '@manacore/shared-ui';
 
 	interface Props {
 		task: Task;
@@ -144,12 +145,7 @@
 					{/if}
 
 					{#each taskLabels as label (label.id)}
-						<span
-							class="rounded px-1.5 py-0.5 text-[0.625rem] font-medium"
-							style="background: color-mix(in srgb, {label.color} 15%, transparent); color: {label.color}"
-						>
-							{label.name}
-						</span>
+						<TagChip name={label.name} color={label.color} />
 					{/each}
 				</div>
 			{/if}

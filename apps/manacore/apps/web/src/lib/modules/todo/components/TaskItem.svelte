@@ -2,6 +2,7 @@
 	import type { Task, TaskPriority } from '../types';
 	import { getPriorityLabel, getPriorityColor } from '../queries';
 	import { Check, Circle, CalendarBlank, CheckSquare } from '@manacore/shared-icons';
+	import { TagChip } from '@manacore/shared-ui';
 	import { isToday, isPast, format } from 'date-fns';
 	import { de } from 'date-fns/locale';
 
@@ -115,12 +116,7 @@
 				</span>
 			{/if}
 			{#each taskTags as tag (tag.id)}
-				<span
-					class="rounded-full px-1.5 py-0.5 text-[0.625rem] font-medium"
-					style="background: color-mix(in srgb, {tag.color} 15%, transparent); color: {tag.color}"
-				>
-					{tag.name}
-				</span>
+				<TagChip name={tag.name} color={tag.color} />
 			{/each}
 		</div>
 	</div>

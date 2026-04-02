@@ -3,6 +3,7 @@
 	import type { Photo } from '$lib/modules/photos/types';
 	import { photoStore } from '$lib/modules/photos/stores/photos.svelte';
 	import { CaretRight, DownloadSimple, Heart, X } from '@manacore/shared-icons';
+	import { TagChip } from '@manacore/shared-ui';
 
 	interface Props {
 		photo: Photo;
@@ -145,12 +146,7 @@
 						<h4 class="info-label">Tags</h4>
 						<div class="flex flex-wrap gap-2">
 							{#each photo.tags as tag}
-								<span
-									class="rounded-full px-2 py-0.5 text-xs"
-									style="background-color: {tag.color}20; color: {tag.color}"
-								>
-									{tag.name}
-								</span>
+								<TagChip name={tag.name} color={tag.color} />
 							{/each}
 						</div>
 					</div>
