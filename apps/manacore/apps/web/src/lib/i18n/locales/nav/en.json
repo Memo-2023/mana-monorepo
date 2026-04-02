@@ -1,0 +1,16 @@
+{
+	"home": "Home",
+	"dashboard": "Dashboard",
+	"spiral": "Spiral",
+	"observatory": "Observatory",
+	"credits": "Credits",
+	"gifts": "Gifts",
+	"api_keys": "API Keys",
+	"profile": "Profile",
+	"settings": "Settings",
+	"tags": "Tags",
+	"admin": "Admin",
+	"all_themes": "All Themes",
+	"menu": "Menu",
+	"sign_out": "Sign out"
+}

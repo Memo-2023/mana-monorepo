@@ -15,20 +15,21 @@ const defaultLocale = 'de';
 
 function registerLocale(lang: SupportedLocale) {
 	register(lang, async () => {
-		const [common, dashboard, credits, profile, subscription, todo, app_slider] = await Promise.all(
-			[
+		const [common, nav, dashboard, credits, profile, subscription, todo, app_slider] =
+			await Promise.all([
 				import(`./locales/common/${lang}.json`),
+				import(`./locales/nav/${lang}.json`),
 				import(`./locales/dashboard/${lang}.json`),
 				import(`./locales/credits/${lang}.json`),
 				import(`./locales/profile/${lang}.json`),
 				import(`./locales/subscription/${lang}.json`),
 				import(`./locales/todo/${lang}.json`),
 				import(`./locales/app_slider/${lang}.json`),
-			]
-		);
+			]);
 
 		return {
 			common: common.default,
+			nav: nav.default,
 			dashboard: dashboard.default,
 			credits: credits.default,
 			profile: profile.default,

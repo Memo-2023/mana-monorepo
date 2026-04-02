@@ -5,7 +5,7 @@
 	import { onDestroy, setContext } from 'svelte';
 	import KeyboardShortcutsModal from '$lib/components/KeyboardShortcutsModal.svelte';
 	import SessionWarning from '$lib/components/SessionWarning.svelte';
-	import { locale } from 'svelte-i18n';
+	import { locale, _ } from 'svelte-i18n';
 	import {
 		PillNavigation,
 		TagStrip,
@@ -83,7 +83,7 @@
 		})),
 		{
 			id: 'all-themes',
-			label: 'Alle Themes',
+			label: $_('nav.all_themes'),
 			icon: 'palette',
 			onClick: () => goto('/themes'),
 			active: false,
@@ -95,15 +95,28 @@
 	let currentLocale = $derived($locale || 'de');
 	function handleLocaleChange(newLocale: string) {
 		setLocale(newLocale as any);
+		userSettings.updateGlobal({ locale: newLocale });
 		AppEvents.languageChanged(newLocale);
 	}
+
+	// Sync locale from user settings (backend) after login
+	$effect(() => {
+		if (userSettings.loaded && userSettings.locale) {
+			const settingsLocale = userSettings.locale;
+			if (supportedLocales.includes(settingsLocale as any) && settingsLocale !== $locale) {
+				setLocale(settingsLocale as any);
+			}
+		}
+	});
 	let languageItems = $derived(
 		getLanguageDropdownItems(supportedLocales, currentLocale, handleLocaleChange)
 	);
 	let currentLanguageLabel = $derived(getCurrentLanguageLabel(currentLocale));
 
 	// ── User / Guest awareness ──────────────────────────────
-	let userEmail = $derived(authStore.isAuthenticated ? authStore.user?.email || 'Menü' : '');
+	let userEmail = $derived(
+		authStore.isAuthenticated ? authStore.user?.email || $_('nav.menu') : ''
+	);
 
 	// ── Tags ────────────────────────────────────────────────
 	const allTags = useAllTags();
@@ -124,30 +137,30 @@
 	});
 
 	// ── Navigation ──────────────────────────────────────────
-	const baseNavItems: PillNavItem[] = [
-		{ href: '/home', label: 'Home', icon: 'home' },
-		{ href: '/dashboard', label: 'Dashboard', icon: 'grid' },
-		{ href: '/spiral', label: 'Spiral', icon: 'spiral' },
-		{ href: '/observatory', label: 'Observatory', icon: 'eye' },
-		{ href: '/credits', label: 'Credits', icon: 'creditCard' },
-		{ href: '/gifts', label: 'Geschenke', icon: 'gift' },
-		{ href: '/api-keys', label: 'API Keys', icon: 'key' },
-		{ href: '/profile', label: 'Profil', icon: 'user' },
-		{ href: '/settings', label: 'Settings', icon: 'settings' },
+	let baseNavItems = $derived<PillNavItem[]>([
+		{ href: '/home', label: $_('nav.home'), icon: 'home' },
+		{ href: '/dashboard', label: $_('nav.dashboard'), icon: 'grid' },
+		{ href: '/spiral', label: $_('nav.spiral'), icon: 'spiral' },
+		{ href: '/observatory', label: $_('nav.observatory'), icon: 'eye' },
+		{ href: '/credits', label: $_('nav.credits'), icon: 'creditCard' },
+		{ href: '/gifts', label: $_('nav.gifts'), icon: 'gift' },
+		{ href: '/api-keys', label: $_('nav.api_keys'), icon: 'key' },
+		{ href: '/profile', label: $_('nav.profile'), icon: 'user' },
+		{ href: '/settings', label: $_('nav.settings'), icon: 'settings' },
 		{
 			href: '/',
-			label: 'Tags',
+			label: $_('nav.tags'),
 			icon: 'tag',
 			onClick: handleTagStripToggle,
 			active: isTagStripVisible,
 		},
-	];
+	]);
 
 	let isAdmin = $derived(authStore.user?.role === 'admin');
 	let navItems = $derived<PillNavItem[]>(
 		isAdmin ? [...baseNavItems, { href: '/admin', label: 'Admin', icon: 'shield' }] : baseNavItems
 	);
-	const navRoutes = navItems.map((item) => item.href);
+	let navRoutes = $derived(navItems.map((item) => item.href));
 
 	function handleKeydown(event: KeyboardEvent) {
 		const target = event.target as HTMLElement;
