@@ -97,16 +97,18 @@ scrape_configs:
             method: method
             path: path
             duration: duration
-            request_id: request_id
+            request_id: requestId
+            service_name: service
       # Fall back: extract level from common log patterns
       - regex:
           expression: '(?i)(?P<level>error|warn|info|debug|fatal|panic)'
       # Normalize level label
       - labels:
           level:
+          service_name:
       # Add timestamp from log if available
       - timestamp:
-          source: time
+          source: ts
           format: RFC3339Nano
           fallback_formats:
             - "2006-01-02T15:04:05.000Z"
