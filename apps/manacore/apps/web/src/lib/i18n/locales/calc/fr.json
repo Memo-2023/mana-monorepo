@@ -1,0 +1,42 @@
+{
+	"app": {
+		"name": "Calc",
+		"tagline": "Votre centre de calcul"
+	},
+	"nav": {
+		"overview": "Vue d'ensemble",
+		"standard": "Standard",
+		"scientific": "Scientifique",
+		"programmer": "Programmeur",
+		"converter": "Unités",
+		"currency": "Devise",
+		"finance": "Finance",
+		"date": "Date",
+		"percentage": "Pourcentage",
+		"settings": "Paramètres"
+	},
+	"calc": {
+		"result": "Résultat",
+		"history": "Historique",
+		"clearHistory": "Effacer l'historique",
+		"noHistory": "Pas encore de calculs",
+		"error": "Erreur",
+		"copied": "Copié !",
+		"clear": "Effacer",
+		"equals": "Égal"
+	},
+	"converter": {
+		"from": "De",
+		"to": "Vers",
+		"swap": "Inverser"
+	},
+	"finance": {
+		"principal": "Capital initial",
+		"rate": "Taux d'intérêt",
+		"years": "Durée (années)",
+		"result": "Résultat",
+		"monthlyPayment": "Mensualité",
+		"totalInterest": "Intérêts totaux",
+		"totalAmount": "Montant total"
+	}
+}

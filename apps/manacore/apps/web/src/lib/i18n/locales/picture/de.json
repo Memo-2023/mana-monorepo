@@ -1,0 +1,52 @@
+{
+	"app": {
+		"name": "Picture",
+		"description": "KI-Bildgenerierung"
+	},
+	"nav": {
+		"generate": "Generieren",
+		"gallery": "Galerie",
+		"favorites": "Favoriten",
+		"settings": "Einstellungen"
+	},
+	"generate": {
+		"prompt": "Prompt",
+		"promptPlaceholder": "Beschreibe dein Bild...",
+		"generate": "Bild generieren",
+		"generating": "Generiere...",
+		"style": "Stil",
+		"size": "Größe",
+		"quality": "Qualität",
+		"negativePrompt": "Negativ-Prompt",
+		"negativePromptPlaceholder": "Was vermieden werden soll..."
+	},
+	"gallery": {
+		"title": "Galerie",
+		"empty": "Noch keine Bilder",
+		"download": "Herunterladen",
+		"delete": "Löschen",
+		"favorite": "Als Favorit markieren",
+		"unfavorite": "Favorit entfernen",
+		"share": "Teilen",
+		"useAsPrompt": "Als Prompt verwenden",
+		"details": "Details"
+	},
+	"styles": {
+		"photorealistic": "Fotorealistisch",
+		"artistic": "Künstlerisch",
+		"anime": "Anime",
+		"sketch": "Skizze",
+		"painting": "Gemälde",
+		"digital": "Digital Art"
+	},
+	"common": {
+		"save": "Speichern",
+		"cancel": "Abbrechen",
+		"delete": "Löschen",
+		"loading": "Lädt...",
+		"error": "Fehler",
+		"success": "Erfolgreich",
+		"copy": "Kopieren",
+		"copied": "Kopiert!"
+	}
+}

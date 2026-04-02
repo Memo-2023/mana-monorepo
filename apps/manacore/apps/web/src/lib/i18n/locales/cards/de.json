@@ -1,0 +1,55 @@
+{
+	"app": {
+		"name": "Cards",
+		"description": "KI-Lernkarten"
+	},
+	"nav": {
+		"decks": "Decks",
+		"study": "Lernen",
+		"stats": "Statistiken",
+		"settings": "Einstellungen"
+	},
+	"deck": {
+		"create": "Deck erstellen",
+		"edit": "Deck bearbeiten",
+		"delete": "Deck löschen",
+		"empty": "Noch keine Decks",
+		"cards": "Karten",
+		"study": "Lernen starten",
+		"addCard": "Karte hinzufügen",
+		"importCards": "Karten importieren",
+		"generateWithAI": "Mit KI generieren"
+	},
+	"card": {
+		"front": "Vorderseite",
+		"back": "Rückseite",
+		"edit": "Karte bearbeiten",
+		"delete": "Karte löschen",
+		"hint": "Hinweis"
+	},
+	"study": {
+		"again": "Nochmal",
+		"hard": "Schwer",
+		"good": "Gut",
+		"easy": "Einfach",
+		"showAnswer": "Antwort zeigen",
+		"complete": "Abgeschlossen!",
+		"cardsRemaining": "Karten übrig",
+		"streak": "Serie"
+	},
+	"stats": {
+		"studied": "Gelernt",
+		"mastered": "Gemeistert",
+		"accuracy": "Genauigkeit",
+		"reviewsDue": "Fällige Wiederholungen"
+	},
+	"common": {
+		"save": "Speichern",
+		"cancel": "Abbrechen",
+		"delete": "Löschen",
+		"back": "Zurück",
+		"loading": "Lädt...",
+		"error": "Fehler",
+		"success": "Erfolgreich"
+	}
+}

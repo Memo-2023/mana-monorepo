@@ -1,0 +1,55 @@
+{
+	"app": {
+		"name": "Cards",
+		"description": "Flashcards con IA"
+	},
+	"nav": {
+		"decks": "Mazos",
+		"study": "Estudiar",
+		"stats": "Estadísticas",
+		"settings": "Ajustes"
+	},
+	"deck": {
+		"create": "Crear mazo",
+		"edit": "Editar mazo",
+		"delete": "Eliminar mazo",
+		"empty": "Aún no hay mazos",
+		"cards": "Tarjetas",
+		"study": "Empezar a estudiar",
+		"addCard": "Añadir tarjeta",
+		"importCards": "Importar tarjetas",
+		"generateWithAI": "Generar con IA"
+	},
+	"card": {
+		"front": "Anverso",
+		"back": "Reverso",
+		"edit": "Editar tarjeta",
+		"delete": "Eliminar tarjeta",
+		"hint": "Pista"
+	},
+	"study": {
+		"again": "Otra vez",
+		"hard": "Difícil",
+		"good": "Bien",
+		"easy": "Fácil",
+		"showAnswer": "Mostrar respuesta",
+		"complete": "¡Completado!",
+		"cardsRemaining": "tarjetas restantes",
+		"streak": "Racha"
+	},
+	"stats": {
+		"studied": "Estudiadas",
+		"mastered": "Dominadas",
+		"accuracy": "Precisión",
+		"reviewsDue": "Repasos pendientes"
+	},
+	"common": {
+		"save": "Guardar",
+		"cancel": "Cancelar",
+		"delete": "Eliminar",
+		"back": "Atrás",
+		"loading": "Cargando...",
+		"error": "Error",
+		"success": "Éxito"
+	}
+}

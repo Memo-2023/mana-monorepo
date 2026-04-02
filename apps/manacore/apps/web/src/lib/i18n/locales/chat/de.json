@@ -1,0 +1,44 @@
+{
+	"app": {
+		"name": "Chat",
+		"description": "KI-Chat-Assistent"
+	},
+	"nav": {
+		"conversations": "Unterhaltungen",
+		"newChat": "Neuer Chat",
+		"settings": "Einstellungen",
+		"models": "Modelle"
+	},
+	"conversation": {
+		"new": "Neue Unterhaltung",
+		"delete": "Unterhaltung löschen",
+		"rename": "Umbenennen",
+		"empty": "Noch keine Unterhaltungen",
+		"deleteConfirm": "Diese Unterhaltung unwiderruflich löschen?",
+		"searchPlaceholder": "Unterhaltungen durchsuchen..."
+	},
+	"message": {
+		"placeholder": "Nachricht schreiben...",
+		"send": "Senden",
+		"regenerate": "Neu generieren",
+		"copy": "Kopieren",
+		"copied": "Kopiert!",
+		"stop": "Stoppen",
+		"thinking": "Denkt nach..."
+	},
+	"model": {
+		"select": "Modell auswählen",
+		"fast": "Schnell",
+		"balanced": "Ausgewogen",
+		"powerful": "Leistungsstark"
+	},
+	"common": {
+		"save": "Speichern",
+		"cancel": "Abbrechen",
+		"delete": "Löschen",
+		"edit": "Bearbeiten",
+		"loading": "Lädt...",
+		"error": "Fehler",
+		"retry": "Erneut versuchen"
+	}
+}

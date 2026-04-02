@@ -284,24 +284,6 @@
 		"copyright": "© 2025 Memoro GmbH",
 		"made_with_love": "Made with ❤️ in Germany"
 	},
-	"app_slider": {
-		"title": "More Manacore Apps",
-		"memoro_desc": "AI-powered voice memos",
-		"memoro_long_desc": "Transform your voice into organized, actionable insights with AI-powered transcription and analysis. Perfect for capturing ideas on the go.",
-		"maerchenzauber_desc": "Magical bedtime stories",
-		"maerchenzauber_long_desc": "Create personalized bedtime stories for your children with AI. Spark imagination and make every night magical with unique tales.",
-		"moodlit_desc": "Your mood companion",
-		"moodlit_long_desc": "Track and understand your emotions with AI-powered insights. Build emotional awareness and improve your mental wellbeing.",
-		"manacore_desc": "AI productivity suite",
-		"manacore_long_desc": "The central hub for all Manacore apps. Manage your subscriptions, sync data, and access powerful AI tools from one place.",
-		"coming_soon": "Coming Soon",
-		"download": "Download",
-		"get_started": "Get Started",
-		"status_published": "Published",
-		"status_beta": "Beta",
-		"status_development": "In Development",
-		"status_planning": "Planned"
-	},
 	"theme": {
 		"toggle": "Toggle Theme",
 		"light_mode": "Light Mode",

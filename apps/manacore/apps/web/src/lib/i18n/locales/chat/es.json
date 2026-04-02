@@ -1,0 +1,44 @@
+{
+	"app": {
+		"name": "Chat",
+		"description": "Asistente de chat con IA"
+	},
+	"nav": {
+		"conversations": "Conversaciones",
+		"newChat": "Nuevo chat",
+		"settings": "Ajustes",
+		"models": "Modelos"
+	},
+	"conversation": {
+		"new": "Nueva conversación",
+		"delete": "Eliminar conversación",
+		"rename": "Renombrar",
+		"empty": "Aún no hay conversaciones",
+		"deleteConfirm": "¿Eliminar esta conversación permanentemente?",
+		"searchPlaceholder": "Buscar conversaciones..."
+	},
+	"message": {
+		"placeholder": "Escribe un mensaje...",
+		"send": "Enviar",
+		"regenerate": "Regenerar",
+		"copy": "Copiar",
+		"copied": "¡Copiado!",
+		"stop": "Detener",
+		"thinking": "Pensando..."
+	},
+	"model": {
+		"select": "Seleccionar modelo",
+		"fast": "Rápido",
+		"balanced": "Equilibrado",
+		"powerful": "Potente"
+	},
+	"common": {
+		"save": "Guardar",
+		"cancel": "Cancelar",
+		"delete": "Eliminar",
+		"edit": "Editar",
+		"loading": "Cargando...",
+		"error": "Error",
+		"retry": "Reintentar"
+	}
+}

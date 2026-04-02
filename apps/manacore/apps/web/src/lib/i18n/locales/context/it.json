@@ -1,0 +1,68 @@
+{
+	"app": {
+		"name": "Context"
+	},
+	"common": {
+		"back": "Indietro",
+		"cancel": "Annulla",
+		"save": "Salva",
+		"delete": "Elimina",
+		"create": "Crea",
+		"edit": "Modifica",
+		"loading": "Caricamento...",
+		"search": "Cerca",
+		"confirm": "Conferma",
+		"close": "Chiudi",
+		"pin": "Fissa",
+		"unpin": "Sgancia"
+	},
+	"nav": {
+		"home": "Panoramica",
+		"spaces": "Spazi",
+		"documents": "Documenti",
+		"settings": "Impostazioni"
+	},
+	"spaces": {
+		"title": "Spazi",
+		"create": "Crea nuovo spazio",
+		"empty": "Nessuno spazio ancora",
+		"name": "Nome",
+		"description": "Descrizione",
+		"deleteConfirm": "Tutti i documenti in questo spazio verranno eliminati.",
+		"searchPlaceholder": "Cerca spazi..."
+	},
+	"documents": {
+		"title": "Documenti",
+		"create": "Nuovo documento",
+		"empty": "Nessun documento ancora",
+		"deleteConfirm": "Il documento verrà eliminato definitivamente.",
+		"searchPlaceholder": "Cerca documenti...",
+		"types": {
+			"all": "Tutti",
+			"text": "Testo",
+			"context": "Contesto",
+			"prompt": "Prompt"
+		},
+		"editor": {
+			"titlePlaceholder": "Titolo...",
+			"contentPlaceholder": "Scrivi il tuo testo in Markdown...",
+			"preview": "Anteprima",
+			"edit": "Modifica",
+			"words": "Parole",
+			"saving": "Salvataggio...",
+			"saved": "Salvato",
+			"unsaved": "Non salvato",
+			"tags": "Tag",
+			"addTag": "Aggiungi tag..."
+		}
+	},
+	"settings": {
+		"title": "Impostazioni"
+	},
+	"messages": {
+		"saved": "Salvato",
+		"deleted": "Eliminato",
+		"error": "Si è verificato un errore",
+		"created": "Creato"
+	}
+}

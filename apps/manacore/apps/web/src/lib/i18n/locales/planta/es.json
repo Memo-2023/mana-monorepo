@@ -1,0 +1,82 @@
+{
+	"app": {
+		"name": "Planta",
+		"loading": "Cargando...",
+		"tagline": "Cuidado de plantas simplificado"
+	},
+	"nav": {
+		"plants": "Plantas",
+		"watering": "Riego",
+		"identify": "Identificar",
+		"settings": "Ajustes"
+	},
+	"plant": {
+		"add": "Añadir planta",
+		"edit": "Editar planta",
+		"delete": "Eliminar planta",
+		"name": "Nombre",
+		"species": "Especie",
+		"location": "Ubicación",
+		"noPlants": "Aún no hay plantas",
+		"addFirst": "Añade tu primera planta",
+		"careNotes": "Notas de cuidado",
+		"health": "Salud"
+	},
+	"health": {
+		"healthy": "Saludable",
+		"needsAttention": "Necesita atención",
+		"sick": "Enferma"
+	},
+	"watering": {
+		"water": "Regar",
+		"watered": "Regada",
+		"lastWatered": "Último riego",
+		"nextWatering": "Próximo riego",
+		"daysUntil": "en {days} días",
+		"overdue": "Atrasado",
+		"today": "Regar hoy",
+		"noWatering": "No hay plantas para regar"
+	},
+	"identify": {
+		"takePhoto": "Tomar foto",
+		"analyzing": "Analizando...",
+		"identified": "Identificada",
+		"confidence": "Confianza",
+		"tips": "Consejos de cuidado"
+	},
+	"light": {
+		"low": "Poca luz",
+		"medium": "Luz media",
+		"bright": "Luz brillante",
+		"direct": "Luz solar directa"
+	},
+	"humidity": {
+		"low": "Baja",
+		"medium": "Media",
+		"high": "Alta"
+	},
+	"common": {
+		"save": "Guardar",
+		"cancel": "Cancelar",
+		"delete": "Eliminar",
+		"edit": "Editar",
+		"add": "Añadir",
+		"close": "Cerrar",
+		"search": "Buscar",
+		"error": "Error",
+		"success": "Éxito",
+		"loading": "Cargando..."
+	},
+	"errors": {
+		"loadPlants": "No se pudieron cargar las plantas",
+		"identifyFailed": "La identificación falló",
+		"saveFailed": "No se pudo guardar",
+		"uploadFailed": "La subida falló"
+	},
+	"success": {
+		"plantAdded": "Planta añadida",
+		"plantDeleted": "Planta eliminada",
+		"plantWatered": "Planta regada",
+		"photoUploaded": "Foto subida"
+	}
+}

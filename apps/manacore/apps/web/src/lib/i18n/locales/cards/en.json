@@ -1,0 +1,55 @@
+{
+	"app": {
+		"name": "Cards",
+		"description": "AI Flashcards"
+	},
+	"nav": {
+		"decks": "Decks",
+		"study": "Study",
+		"stats": "Statistics",
+		"settings": "Settings"
+	},
+	"deck": {
+		"create": "Create Deck",
+		"edit": "Edit Deck",
+		"delete": "Delete Deck",
+		"empty": "No decks yet",
+		"cards": "Cards",
+		"study": "Start Studying",
+		"addCard": "Add Card",
+		"importCards": "Import Cards",
+		"generateWithAI": "Generate with AI"
+	},
+	"card": {
+		"front": "Front",
+		"back": "Back",
+		"edit": "Edit Card",
+		"delete": "Delete Card",
+		"hint": "Hint"
+	},
+	"study": {
+		"again": "Again",
+		"hard": "Hard",
+		"good": "Good",
+		"easy": "Easy",
+		"showAnswer": "Show Answer",
+		"complete": "Complete!",
+		"cardsRemaining": "cards remaining",
+		"streak": "Streak"
+	},
+	"stats": {
+		"studied": "Studied",
+		"mastered": "Mastered",
+		"accuracy": "Accuracy",
+		"reviewsDue": "Reviews due"
+	},
+	"common": {
+		"save": "Save",
+		"cancel": "Cancel",
+		"delete": "Delete",
+		"back": "Back",
+		"loading": "Loading...",
+		"error": "Error",
+		"success": "Success"
+	}
+}

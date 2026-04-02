@@ -1,0 +1,36 @@
+{
+	"app": {
+		"name": "Guides",
+		"description": "Guide passo dopo passo"
+	},
+	"nav": {
+		"library": "Libreria",
+		"collections": "Collezioni",
+		"history": "Cronologia"
+	},
+	"guide": {
+		"new": "Nuova guida",
+		"startRun": "Avvia esecuzione",
+		"continueRun": "Continua",
+		"finishRun": "Completa esecuzione",
+		"steps": "Passaggi",
+		"difficulty": {
+			"easy": "Facile",
+			"medium": "Medio",
+			"hard": "Difficile"
+		}
+	},
+	"run": {
+		"mode": {
+			"scroll": "Modalità scorrimento",
+			"focus": "Modalità focus"
+		}
+	},
+	"common": {
+		"save": "Salva",
+		"cancel": "Annulla",
+		"delete": "Elimina",
+		"create": "Crea",
+		"back": "Indietro"
+	}
+}

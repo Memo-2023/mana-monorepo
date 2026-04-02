@@ -284,24 +284,6 @@
 		"copyright": "© 2025 Memoro GmbH",
 		"made_with_love": "Made with ❤️ in Germany"
 	},
-	"app_slider": {
-		"title": "Weitere Manacore Apps",
-		"memoro_desc": "KI-gestützte Sprachmemos",
-		"memoro_long_desc": "Verwandle deine Stimme in organisierte, umsetzbare Erkenntnisse mit KI-gestützter Transkription und Analyse. Perfekt zum Festhalten von Ideen unterwegs.",
-		"maerchenzauber_desc": "Magische Gute-Nacht-Geschichten",
-		"maerchenzauber_long_desc": "Erschaffe personalisierte Gute-Nacht-Geschichten für deine Kinder mit KI. Entfache die Fantasie und mache jede Nacht magisch mit einzigartigen Erzählungen.",
-		"moodlit_desc": "Dein Stimmungsbegleiter",
-		"moodlit_long_desc": "Verfolge und verstehe deine Emotionen mit KI-gestützten Einblicken. Baue emotionales Bewusstsein auf und verbessere dein mentales Wohlbefinden.",
-		"manacore_desc": "KI-Produktivitätssuite",
-		"manacore_long_desc": "Die zentrale Anlaufstelle für alle Manacore-Apps. Verwalte deine Abonnements, synchronisiere Daten und greife auf leistungsstarke KI-Tools von einem Ort aus zu.",
-		"coming_soon": "Demnächst",
-		"download": "Download",
-		"get_started": "Los geht's",
-		"status_published": "Veröffentlicht",
-		"status_beta": "Beta",
-		"status_development": "In Entwicklung",
-		"status_planning": "Geplant"
-	},
 	"theme": {
 		"toggle": "Theme wechseln",
 		"light_mode": "Heller Modus",

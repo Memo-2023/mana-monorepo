@@ -1,0 +1,46 @@
+{
+	"app": {
+		"name": "Manalink",
+		"description": "Chat Matrix seguro"
+	},
+	"nav": {
+		"chat": "Chat",
+		"bots": "Bots",
+		"settings": "Ajustes"
+	},
+	"auth": {
+		"login": "Iniciar sesión",
+		"logout": "Cerrar sesión",
+		"connecting": "Conectando con Matrix...",
+		"connectionFailed": "Conexión fallida",
+		"retry": "Reintentar"
+	},
+	"chat": {
+		"newChat": "Nuevo chat",
+		"createRoom": "Crear sala",
+		"sendMessage": "Enviar mensaje",
+		"typeMessage": "Escribe un mensaje...",
+		"noRooms": "Aún no hay salas",
+		"noMessages": "Aún no hay mensajes"
+	},
+	"bots": {
+		"title": "Bots",
+		"subtitle": "Descubre todos los asistentes bot disponibles",
+		"search": "Buscar bots...",
+		"startChat": "Iniciar chat",
+		"commands": "Comandos",
+		"example": "Ejemplo",
+		"free": "Gratis",
+		"requiresLogin": "Requiere inicio de sesión",
+		"noResults": "No se encontraron bots",
+		"found": "encontrados",
+		"categories": {
+			"all": "Todos",
+			"productivity": "Productividad",
+			"ai": "IA y Chat",
+			"media": "Medios",
+			"lifestyle": "Estilo de vida",
+			"tools": "Herramientas"
+		}
+	}
+}

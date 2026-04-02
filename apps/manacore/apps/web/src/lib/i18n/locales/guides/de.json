@@ -1,0 +1,36 @@
+{
+	"app": {
+		"name": "Guides",
+		"description": "Schritt-für-Schritt Anleitungen"
+	},
+	"nav": {
+		"library": "Bibliothek",
+		"collections": "Sammlungen",
+		"history": "Verlauf"
+	},
+	"guide": {
+		"new": "Neue Anleitung",
+		"startRun": "Durchlauf starten",
+		"continueRun": "Fortsetzen",
+		"finishRun": "Durchlauf abschließen",
+		"steps": "Schritte",
+		"difficulty": {
+			"easy": "Einfach",
+			"medium": "Mittel",
+			"hard": "Schwer"
+		}
+	},
+	"run": {
+		"mode": {
+			"scroll": "Scroll-Modus",
+			"focus": "Fokus-Modus"
+		}
+	},
+	"common": {
+		"save": "Speichern",
+		"cancel": "Abbrechen",
+		"delete": "Löschen",
+		"create": "Erstellen",
+		"back": "Zurück"
+	}
+}

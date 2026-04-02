@@ -1,0 +1,84 @@
+{
+	"app": {
+		"name": "NutriPhi",
+		"loading": "Loading...",
+		"tagline": "Understand nutrition"
+	},
+	"nav": {
+		"dashboard": "Dashboard",
+		"meals": "Meals",
+		"goals": "Goals",
+		"favorites": "Favorites",
+		"stats": "Statistics",
+		"settings": "Settings"
+	},
+	"meal": {
+		"add": "Add meal",
+		"edit": "Edit meal",
+		"delete": "Delete meal",
+		"photo": "Take photo",
+		"text": "Describe",
+		"analyzing": "Analyzing...",
+		"noMeals": "No meals yet",
+		"breakfast": "Breakfast",
+		"lunch": "Lunch",
+		"dinner": "Dinner",
+		"snack": "Snack"
+	},
+	"nutrition": {
+		"calories": "Calories",
+		"protein": "Protein",
+		"carbs": "Carbohydrates",
+		"fat": "Fat",
+		"fiber": "Fiber",
+		"sugar": "Sugar",
+		"kcal": "kcal",
+		"grams": "g"
+	},
+	"goals": {
+		"daily": "Daily goals",
+		"setGoals": "Set goals",
+		"calories": "Calorie goal",
+		"protein": "Protein goal",
+		"carbs": "Carbohydrate goal",
+		"fat": "Fat goal",
+		"progress": "Progress"
+	},
+	"stats": {
+		"today": "Today",
+		"week": "This week",
+		"remaining": "Remaining",
+		"consumed": "Consumed",
+		"average": "Average"
+	},
+	"favorites": {
+		"add": "Add to favorites",
+		"remove": "Remove from favorites",
+		"noFavorites": "No favorites",
+		"useAgain": "Use again"
+	},
+	"common": {
+		"save": "Save",
+		"cancel": "Cancel",
+		"delete": "Delete",
+		"edit": "Edit",
+		"add": "Add",
+		"close": "Close",
+		"search": "Search",
+		"error": "Error",
+		"success": "Success",
+		"loading": "Loading..."
+	},
+	"errors": {
+		"loadMeals": "Failed to load meals",
+		"analyzeFailed": "Analysis failed",
+		"saveFailed": "Failed to save",
+		"loadGoals": "Failed to load goals"
+	},
+	"success": {
+		"mealAdded": "Meal added",
+		"mealDeleted": "Meal deleted",
+		"goalsSaved": "Goals saved",
+		"favoriteAdded": "Added to favorites"
+	}
+}

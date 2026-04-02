@@ -1,0 +1,42 @@
+{
+	"app": {
+		"name": "Calc",
+		"tagline": "Tu centro de calculadora"
+	},
+	"nav": {
+		"overview": "Resumen",
+		"standard": "Estándar",
+		"scientific": "Científica",
+		"programmer": "Programador",
+		"converter": "Unidades",
+		"currency": "Moneda",
+		"finance": "Finanzas",
+		"date": "Fecha",
+		"percentage": "Porcentaje",
+		"settings": "Ajustes"
+	},
+	"calc": {
+		"result": "Resultado",
+		"history": "Historial",
+		"clearHistory": "Borrar historial",
+		"noHistory": "Aún no hay cálculos",
+		"error": "Error",
+		"copied": "¡Copiado!",
+		"clear": "Borrar",
+		"equals": "Igual"
+	},
+	"converter": {
+		"from": "De",
+		"to": "A",
+		"swap": "Intercambiar"
+	},
+	"finance": {
+		"principal": "Capital inicial",
+		"rate": "Tasa de interés",
+		"years": "Plazo (años)",
+		"result": "Resultado",
+		"monthlyPayment": "Cuota mensual",
+		"totalInterest": "Interés total",
+		"totalAmount": "Monto total"
+	}
+}

@@ -1,0 +1,52 @@
+{
+	"app": {
+		"name": "Picture",
+		"description": "Generazione immagini IA"
+	},
+	"nav": {
+		"generate": "Genera",
+		"gallery": "Galleria",
+		"favorites": "Preferiti",
+		"settings": "Impostazioni"
+	},
+	"generate": {
+		"prompt": "Prompt",
+		"promptPlaceholder": "Descrivi la tua immagine...",
+		"generate": "Genera immagine",
+		"generating": "Generazione...",
+		"style": "Stile",
+		"size": "Dimensione",
+		"quality": "Qualità",
+		"negativePrompt": "Prompt negativo",
+		"negativePromptPlaceholder": "Cosa evitare..."
+	},
+	"gallery": {
+		"title": "Galleria",
+		"empty": "Nessuna immagine ancora",
+		"download": "Scarica",
+		"delete": "Elimina",
+		"favorite": "Aggiungi ai preferiti",
+		"unfavorite": "Rimuovi dai preferiti",
+		"share": "Condividi",
+		"useAsPrompt": "Usa come prompt",
+		"details": "Dettagli"
+	},
+	"styles": {
+		"photorealistic": "Fotorealistico",
+		"artistic": "Artistico",
+		"anime": "Anime",
+		"sketch": "Schizzo",
+		"painting": "Dipinto",
+		"digital": "Arte digitale"
+	},
+	"common": {
+		"save": "Salva",
+		"cancel": "Annulla",
+		"delete": "Elimina",
+		"loading": "Caricamento...",
+		"error": "Errore",
+		"success": "Successo",
+		"copy": "Copia",
+		"copied": "Copiato!"
+	}
+}

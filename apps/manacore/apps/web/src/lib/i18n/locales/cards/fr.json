@@ -1,0 +1,55 @@
+{
+	"app": {
+		"name": "Cards",
+		"description": "Flashcards IA"
+	},
+	"nav": {
+		"decks": "Paquets",
+		"study": "Étudier",
+		"stats": "Statistiques",
+		"settings": "Paramètres"
+	},
+	"deck": {
+		"create": "Créer un paquet",
+		"edit": "Modifier le paquet",
+		"delete": "Supprimer le paquet",
+		"empty": "Pas encore de paquets",
+		"cards": "Cartes",
+		"study": "Commencer à étudier",
+		"addCard": "Ajouter une carte",
+		"importCards": "Importer des cartes",
+		"generateWithAI": "Générer avec l'IA"
+	},
+	"card": {
+		"front": "Recto",
+		"back": "Verso",
+		"edit": "Modifier la carte",
+		"delete": "Supprimer la carte",
+		"hint": "Indice"
+	},
+	"study": {
+		"again": "Encore",
+		"hard": "Difficile",
+		"good": "Bien",
+		"easy": "Facile",
+		"showAnswer": "Afficher la réponse",
+		"complete": "Terminé !",
+		"cardsRemaining": "cartes restantes",
+		"streak": "Série"
+	},
+	"stats": {
+		"studied": "Étudiées",
+		"mastered": "Maîtrisées",
+		"accuracy": "Précision",
+		"reviewsDue": "Révisions à faire"
+	},
+	"common": {
+		"save": "Enregistrer",
+		"cancel": "Annuler",
+		"delete": "Supprimer",
+		"back": "Retour",
+		"loading": "Chargement...",
+		"error": "Erreur",
+		"success": "Succès"
+	}
+}

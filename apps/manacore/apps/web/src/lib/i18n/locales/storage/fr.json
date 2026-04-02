@@ -1,0 +1,77 @@
+{
+	"app": {
+		"name": "Storage",
+		"description": "Stockage cloud sécurisé pour vos fichiers"
+	},
+	"nav": {
+		"files": "Fichiers",
+		"shared": "Partagés",
+		"favorites": "Favoris",
+		"trash": "Corbeille",
+		"search": "Recherche",
+		"settings": "Paramètres",
+		"profile": "Profil",
+		"feedback": "Feedback"
+	},
+	"files": {
+		"title": "Mes fichiers",
+		"upload": "Télécharger",
+		"newFolder": "Nouveau dossier",
+		"empty": "Pas encore de fichiers",
+		"dropHere": "Déposez les fichiers ici",
+		"viewGrid": "Vue grille",
+		"viewList": "Vue liste"
+	},
+	"folder": {
+		"create": "Créer un dossier",
+		"name": "Nom du dossier",
+		"color": "Couleur du dossier"
+	},
+	"actions": {
+		"download": "Télécharger",
+		"rename": "Renommer",
+		"move": "Déplacer",
+		"share": "Partager",
+		"favorite": "Ajouter aux favoris",
+		"unfavorite": "Retirer des favoris",
+		"delete": "Supprimer",
+		"restore": "Restaurer",
+		"permanentDelete": "Supprimer définitivement"
+	},
+	"trash": {
+		"title": "Corbeille",
+		"empty": "La corbeille est vide",
+		"emptyTrash": "Vider la corbeille",
+		"restoreAll": "Tout restaurer"
+	},
+	"share": {
+		"title": "Partager",
+		"createLink": "Créer un lien",
+		"copyLink": "Copier le lien",
+		"linkCopied": "Lien copié !",
+		"accessLevel": "Niveau d'accès",
+		"view": "Consulter",
+		"download": "Télécharger",
+		"edit": "Modifier",
+		"password": "Protection par mot de passe",
+		"expiration": "Date d'expiration",
+		"maxDownloads": "Téléchargements max."
+	},
+	"search": {
+		"title": "Recherche",
+		"placeholder": "Rechercher des fichiers et dossiers...",
+		"noResults": "Aucun résultat"
+	},
+	"favorites": {
+		"title": "Favoris",
+		"empty": "Pas encore de favoris"
+	},
+	"common": {
+		"loading": "Chargement...",
+		"save": "Enregistrer",
+		"cancel": "Annuler",
+		"confirm": "Confirmer",
+		"error": "Erreur",
+		"success": "Succès"
+	}
+}

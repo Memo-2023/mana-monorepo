@@ -114,19 +114,6 @@
 		"connectionError": "Connection failed",
 		"syncError": "Sync failed"
 	},
-	"common": {
-		"save": "Save",
-		"cancel": "Cancel",
-		"delete": "Delete",
-		"edit": "Edit",
-		"add": "Add",
-		"close": "Close",
-		"search": "Search",
-		"error": "Error",
-		"success": "Success",
-		"calendar": "Calendar",
-		"create": "Create"
-	},
 	"settings": {
 		"myCalendars": "My Calendars",
 		"externalCalendars": "External Calendars",

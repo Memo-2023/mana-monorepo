@@ -1,0 +1,84 @@
+{
+	"app": {
+		"name": "NutriPhi",
+		"loading": "Cargando...",
+		"tagline": "Entiende la nutrición"
+	},
+	"nav": {
+		"dashboard": "Panel",
+		"meals": "Comidas",
+		"goals": "Objetivos",
+		"favorites": "Favoritos",
+		"stats": "Estadísticas",
+		"settings": "Ajustes"
+	},
+	"meal": {
+		"add": "Añadir comida",
+		"edit": "Editar comida",
+		"delete": "Eliminar comida",
+		"photo": "Tomar foto",
+		"text": "Describir",
+		"analyzing": "Analizando...",
+		"noMeals": "Aún no hay comidas",
+		"breakfast": "Desayuno",
+		"lunch": "Almuerzo",
+		"dinner": "Cena",
+		"snack": "Snack"
+	},
+	"nutrition": {
+		"calories": "Calorías",
+		"protein": "Proteínas",
+		"carbs": "Carbohidratos",
+		"fat": "Grasas",
+		"fiber": "Fibra",
+		"sugar": "Azúcar",
+		"kcal": "kcal",
+		"grams": "g"
+	},
+	"goals": {
+		"daily": "Objetivos diarios",
+		"setGoals": "Establecer objetivos",
+		"calories": "Objetivo de calorías",
+		"protein": "Objetivo de proteínas",
+		"carbs": "Objetivo de carbohidratos",
+		"fat": "Objetivo de grasas",
+		"progress": "Progreso"
+	},
+	"stats": {
+		"today": "Hoy",
+		"week": "Esta semana",
+		"remaining": "Restante",
+		"consumed": "Consumido",
+		"average": "Promedio"
+	},
+	"favorites": {
+		"add": "Añadir a favoritos",
+		"remove": "Quitar de favoritos",
+		"noFavorites": "Sin favoritos",
+		"useAgain": "Usar de nuevo"
+	},
+	"common": {
+		"save": "Guardar",
+		"cancel": "Cancelar",
+		"delete": "Eliminar",
+		"edit": "Editar",
+		"add": "Añadir",
+		"close": "Cerrar",
+		"search": "Buscar",
+		"error": "Error",
+		"success": "Éxito",
+		"loading": "Cargando..."
+	},
+	"errors": {
+		"loadMeals": "No se pudieron cargar las comidas",
+		"analyzeFailed": "El análisis falló",
+		"saveFailed": "No se pudo guardar",
+		"loadGoals": "No se pudieron cargar los objetivos"
+	},
+	"success": {
+		"mealAdded": "Comida añadida",
+		"mealDeleted": "Comida eliminada",
+		"goalsSaved": "Objetivos guardados",
+		"favoriteAdded": "Añadido a favoritos"
+	}
+}

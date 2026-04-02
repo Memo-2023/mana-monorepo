@@ -1,0 +1,44 @@
+{
+	"app": {
+		"name": "Chat",
+		"description": "AI Chat Assistant"
+	},
+	"nav": {
+		"conversations": "Conversations",
+		"newChat": "New Chat",
+		"settings": "Settings",
+		"models": "Models"
+	},
+	"conversation": {
+		"new": "New Conversation",
+		"delete": "Delete Conversation",
+		"rename": "Rename",
+		"empty": "No conversations yet",
+		"deleteConfirm": "Permanently delete this conversation?",
+		"searchPlaceholder": "Search conversations..."
+	},
+	"message": {
+		"placeholder": "Type a message...",
+		"send": "Send",
+		"regenerate": "Regenerate",
+		"copy": "Copy",
+		"copied": "Copied!",
+		"stop": "Stop",
+		"thinking": "Thinking..."
+	},
+	"model": {
+		"select": "Select model",
+		"fast": "Fast",
+		"balanced": "Balanced",
+		"powerful": "Powerful"
+	},
+	"common": {
+		"save": "Save",
+		"cancel": "Cancel",
+		"delete": "Delete",
+		"edit": "Edit",
+		"loading": "Loading...",
+		"error": "Error",
+		"retry": "Retry"
+	}
+}

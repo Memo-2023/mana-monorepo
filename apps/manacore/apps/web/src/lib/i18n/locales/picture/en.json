@@ -1,0 +1,52 @@
+{
+	"app": {
+		"name": "Picture",
+		"description": "AI Image Generation"
+	},
+	"nav": {
+		"generate": "Generate",
+		"gallery": "Gallery",
+		"favorites": "Favorites",
+		"settings": "Settings"
+	},
+	"generate": {
+		"prompt": "Prompt",
+		"promptPlaceholder": "Describe your image...",
+		"generate": "Generate Image",
+		"generating": "Generating...",
+		"style": "Style",
+		"size": "Size",
+		"quality": "Quality",
+		"negativePrompt": "Negative Prompt",
+		"negativePromptPlaceholder": "What to avoid..."
+	},
+	"gallery": {
+		"title": "Gallery",
+		"empty": "No images yet",
+		"download": "Download",
+		"delete": "Delete",
+		"favorite": "Add to favorites",
+		"unfavorite": "Remove from favorites",
+		"share": "Share",
+		"useAsPrompt": "Use as prompt",
+		"details": "Details"
+	},
+	"styles": {
+		"photorealistic": "Photorealistic",
+		"artistic": "Artistic",
+		"anime": "Anime",
+		"sketch": "Sketch",
+		"painting": "Painting",
+		"digital": "Digital Art"
+	},
+	"common": {
+		"save": "Save",
+		"cancel": "Cancel",
+		"delete": "Delete",
+		"loading": "Loading...",
+		"error": "Error",
+		"success": "Success",
+		"copy": "Copy",
+		"copied": "Copied!"
+	}
+}

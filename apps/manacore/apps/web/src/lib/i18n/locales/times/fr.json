@@ -2,75 +2,75 @@
 	"app": {
 		"name": "Times",
 		"loading": "Chargement...",
-		"tagline": "Ton rythme de travail, mesurable."
+		"tagline": "Votre rythme de travail, mesurable."
 	},
 	"nav": {
 		"timer": "Minuteur",
-		"entries": "Entrées",
+		"entries": "Entrees",
 		"projects": "Projets",
 		"clients": "Clients",
 		"reports": "Rapports",
-		"settings": "Paramètres",
-		"templates": "Modèles",
+		"settings": "Parametres",
+		"templates": "Modeles",
 		"alarms": "Alarmes",
-		"countdown": "Compte à rebours",
-		"stopwatch": "Chronomètre",
+		"countdown": "Compte a rebours",
+		"stopwatch": "Chronometre",
 		"worldClock": "Horloge mondiale"
 	},
 	"timer": {
-		"start": "Démarrer le minuteur",
-		"stop": "Arrêter le minuteur",
+		"start": "Demarrer",
+		"stop": "Arreter",
 		"resume": "Reprendre",
 		"running": "En cours",
-		"noDescription": "Pas de description",
-		"whatAreYouWorkingOn": "Sur quoi travailles-tu ?"
+		"noDescription": "Sans description",
+		"whatAreYouWorkingOn": "Sur quoi travaillez-vous ?"
 	},
 	"entry": {
-		"create": "Créer une entrée",
-		"edit": "Modifier l'entrée",
-		"delete": "Supprimer l'entrée",
+		"create": "Creer",
+		"edit": "Modifier",
+		"delete": "Supprimer",
 		"description": "Description",
 		"date": "Date",
-		"startTime": "Heure de début",
-		"endTime": "Heure de fin",
-		"duration": "Durée",
+		"startTime": "Debut",
+		"endTime": "Fin",
+		"duration": "Duree",
 		"billable": "Facturable",
 		"notBillable": "Non facturable",
-		"noEntries": "Aucune entrée",
+		"noEntries": "Aucune entree",
 		"today": "Aujourd'hui",
 		"thisWeek": "Cette semaine",
-		"thisMonth": "Ce mois-ci",
-		"manual": "Entrée manuelle",
-		"deleteConfirm": "Voulez-vous vraiment supprimer cette entrée ? Cette action est irréversible."
+		"thisMonth": "Ce mois",
+		"manual": "Manuelle",
+		"deleteConfirm": "Supprimer ?"
 	},
 	"project": {
-		"create": "Créer un projet",
-		"edit": "Modifier le projet",
-		"delete": "Supprimer le projet",
+		"create": "Creer",
+		"edit": "Modifier",
+		"delete": "Supprimer",
 		"name": "Nom",
 		"description": "Description",
 		"client": "Client",
 		"billable": "Facturable",
 		"budget": "Budget",
 		"noProjects": "Aucun projet",
-		"archived": "Archivé",
+		"archived": "Archive",
 		"internal": "Interne",
-		"deleteConfirm": "Voulez-vous vraiment supprimer ce projet ? Cette action est irréversible."
+		"deleteConfirm": "Supprimer ?"
 	},
 	"client": {
-		"create": "Créer un client",
-		"edit": "Modifier le client",
-		"delete": "Supprimer le client",
+		"create": "Creer",
+		"edit": "Modifier",
+		"delete": "Supprimer",
 		"name": "Nom",
-		"shortCode": "Code court",
+		"shortCode": "Code",
 		"email": "Email",
 		"billingRate": "Tarif",
 		"noClients": "Aucun client",
-		"deleteConfirm": "Voulez-vous vraiment supprimer ce client ? Cette action est irréversible."
+		"deleteConfirm": "Supprimer ?"
 	},
 	"report": {
 		"title": "Rapports",
-		"totalHours": "Heures totales",
+		"totalHours": "Total heures",
 		"billableHours": "Heures facturables",
 		"avgPerDay": "Moy./jour",
 		"topProject": "Projet principal",
@@ -78,40 +78,32 @@
 		"byClient": "Par client",
 		"byDay": "Par jour",
 		"export": "Exporter",
-		"dateRange": "Période"
+		"dateRange": "Periode"
 	},
 	"template": {
-		"create": "Créer un modèle",
-		"edit": "Modifier le modèle",
-		"delete": "Supprimer le modèle",
-		"noTemplates": "Aucun modèle",
-		"useTemplate": "Utiliser le modèle"
+		"create": "Creer",
+		"edit": "Modifier",
+		"delete": "Supprimer",
+		"noTemplates": "Aucun modele",
+		"useTemplate": "Utiliser"
 	},
 	"settings": {
-		"title": "Paramètres",
-		"workingHours": "Heures de travail/jour",
-		"workingDays": "Jours ouvrés/semaine",
+		"title": "Parametres",
+		"workingHours": "Heures/jour",
+		"workingDays": "Jours/semaine",
 		"rounding": "Arrondi",
-		"roundingMethod": "Méthode d'arrondi",
+		"roundingMethod": "Methode",
 		"none": "Aucun",
-		"up": "Arrondir au-dessus",
-		"down": "Arrondir en-dessous",
-		"nearest": "Au plus proche",
+		"up": "Superieur",
+		"down": "Inferieur",
+		"nearest": "Plus proche",
 		"currency": "Devise",
-		"billingRate": "Tarif par défaut",
-		"weekStart": "La semaine commence le",
+		"billingRate": "Tarif",
+		"weekStart": "Debut semaine",
 		"monday": "Lundi",
 		"sunday": "Dimanche",
 		"timerReminder": "Rappel (min)",
-		"autoStop": "Arrêt auto (heures)"
-	},
-	"auth": {
-		"login": "Connexion",
-		"logout": "Déconnexion",
-		"register": "Inscription",
-		"email": "Email",
-		"password": "Mot de passe",
-		"forgotPassword": "Mot de passe oublié ?"
+		"autoStop": "Arret auto (h)"
 	},
 	"common": {
 		"save": "Enregistrer",
@@ -122,13 +114,13 @@
 		"close": "Fermer",
 		"search": "Rechercher",
 		"error": "Erreur",
-		"success": "Succès",
+		"success": "Succes",
 		"loading": "Chargement...",
-		"noResults": "Aucun résultat",
+		"noResults": "Aucun resultat",
 		"confirm": "Confirmer",
 		"back": "Retour",
 		"next": "Suivant",
-		"create": "Créer",
+		"create": "Creer",
 		"archive": "Archiver",
 		"unarchive": "Restaurer",
 		"total": "Total",
@@ -138,45 +130,45 @@
 	"clock": {
 		"alarm": {
 			"title": "Alarmes",
-			"custom": "Alarmes personnalisées",
-			"edit": "Modifier l'alarme",
+			"custom": "Personnalisees",
+			"edit": "Modifier",
 			"time": "Heure",
-			"label": "Libellé",
-			"repeat": "Répéter",
+			"label": "Libelle",
+			"repeat": "Repeter",
 			"sound": "Son",
-			"snooze": "Rappel"
+			"snooze": "Reporter"
 		},
 		"timer": {
-			"title": "Compte à rebours",
-			"finished": "Temps écoulé !"
+			"title": "Compte a rebours",
+			"finished": "Temps ecoule !"
 		},
 		"stopwatch": {
-			"title": "Chronomètre",
-			"new": "Nouveau chronomètre",
-			"start": "Démarrer",
-			"stop": "Arrêter",
+			"title": "Chronometre",
+			"new": "Nouveau",
+			"start": "Demarrer",
+			"stop": "Arreter",
 			"continue": "Continuer",
-			"reset": "Réinitialiser",
+			"reset": "Reinitialiser",
 			"lap": "Tour",
 			"laps": "Tours",
 			"total": "Total",
 			"best": "Meilleur",
 			"worst": "Pire",
-			"noStopwatches": "Aucun chronomètre",
-			"noStopwatchesDescription": "Crée un nouveau chronomètre pour commencer.",
-			"startFirst": "Démarrer le premier chronomètre",
-			"otherStopwatches": "Autres chronomètres"
+			"noStopwatches": "Aucun",
+			"noStopwatchesDescription": "Creez-en un.",
+			"startFirst": "Demarrer",
+			"otherStopwatches": "Autres"
 		},
 		"worldClock": {
 			"title": "Horloge mondiale",
-			"add": "Ajouter une ville",
-			"search": "Rechercher une ville...",
-			"noClocks": "Aucune horloge mondiale",
-			"same": "Même heure"
+			"add": "Ajouter",
+			"search": "Rechercher...",
+			"noClocks": "Aucune horloge",
+			"same": "Meme heure"
 		}
 	},
 	"error": {
-		"notFound": "Page introuvable",
-		"backToHome": "Retour à l'accueil"
+		"notFound": "Non trouvee",
+		"backToHome": "Retour"
 	}
 }

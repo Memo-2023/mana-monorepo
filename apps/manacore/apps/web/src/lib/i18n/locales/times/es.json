@@ -6,119 +6,111 @@
 	},
 	"nav": {
 		"timer": "Temporizador",
-		"entries": "Registros",
+		"entries": "Entradas",
 		"projects": "Proyectos",
 		"clients": "Clientes",
 		"reports": "Informes",
 		"settings": "Ajustes",
 		"templates": "Plantillas",
 		"alarms": "Alarmas",
-		"countdown": "Cuenta atrás",
-		"stopwatch": "Cronómetro",
+		"countdown": "Cuenta atras",
+		"stopwatch": "Cronometro",
 		"worldClock": "Reloj mundial"
 	},
 	"timer": {
-		"start": "Iniciar temporizador",
-		"stop": "Detener temporizador",
+		"start": "Iniciar",
+		"stop": "Detener",
 		"resume": "Reanudar",
 		"running": "En marcha",
-		"noDescription": "Sin descripción",
-		"whatAreYouWorkingOn": "¿En qué estás trabajando?"
+		"noDescription": "Sin descripcion",
+		"whatAreYouWorkingOn": "En que trabajas?"
 	},
 	"entry": {
-		"create": "Crear registro",
-		"edit": "Editar registro",
-		"delete": "Eliminar registro",
-		"description": "Descripción",
+		"create": "Crear entrada",
+		"edit": "Editar",
+		"delete": "Eliminar",
+		"description": "Descripcion",
 		"date": "Fecha",
-		"startTime": "Hora de inicio",
-		"endTime": "Hora de fin",
-		"duration": "Duración",
+		"startTime": "Inicio",
+		"endTime": "Fin",
+		"duration": "Duracion",
 		"billable": "Facturable",
 		"notBillable": "No facturable",
-		"noEntries": "Sin registros",
+		"noEntries": "Sin entradas",
 		"today": "Hoy",
 		"thisWeek": "Esta semana",
 		"thisMonth": "Este mes",
-		"manual": "Entrada manual",
-		"deleteConfirm": "¿Seguro que quieres eliminar este registro? No se puede deshacer."
+		"manual": "Manual",
+		"deleteConfirm": "Eliminar esta entrada?"
 	},
 	"project": {
 		"create": "Crear proyecto",
-		"edit": "Editar proyecto",
-		"delete": "Eliminar proyecto",
+		"edit": "Editar",
+		"delete": "Eliminar",
 		"name": "Nombre",
-		"description": "Descripción",
+		"description": "Descripcion",
 		"client": "Cliente",
 		"billable": "Facturable",
 		"budget": "Presupuesto",
 		"noProjects": "Sin proyectos",
 		"archived": "Archivado",
 		"internal": "Interno",
-		"deleteConfirm": "¿Seguro que quieres eliminar este proyecto? No se puede deshacer."
+		"deleteConfirm": "Eliminar este proyecto?"
 	},
 	"client": {
 		"create": "Crear cliente",
-		"edit": "Editar cliente",
-		"delete": "Eliminar cliente",
+		"edit": "Editar",
+		"delete": "Eliminar",
 		"name": "Nombre",
-		"shortCode": "Código corto",
+		"shortCode": "Codigo",
 		"email": "Email",
 		"billingRate": "Tarifa",
 		"noClients": "Sin clientes",
-		"deleteConfirm": "¿Seguro que quieres eliminar este cliente? No se puede deshacer."
+		"deleteConfirm": "Eliminar este cliente?"
 	},
 	"report": {
 		"title": "Informes",
-		"totalHours": "Horas totales",
+		"totalHours": "Total horas",
 		"billableHours": "Horas facturables",
-		"avgPerDay": "Media/día",
+		"avgPerDay": "Media/dia",
 		"topProject": "Proyecto principal",
 		"byProject": "Por proyecto",
 		"byClient": "Por cliente",
-		"byDay": "Por día",
+		"byDay": "Por dia",
 		"export": "Exportar",
-		"dateRange": "Rango de fechas"
+		"dateRange": "Periodo"
 	},
 	"template": {
 		"create": "Crear plantilla",
-		"edit": "Editar plantilla",
-		"delete": "Eliminar plantilla",
+		"edit": "Editar",
+		"delete": "Eliminar",
 		"noTemplates": "Sin plantillas",
 		"useTemplate": "Usar plantilla"
 	},
 	"settings": {
 		"title": "Ajustes",
-		"workingHours": "Horas de trabajo/día",
-		"workingDays": "Días laborables/semana",
+		"workingHours": "Horas/dia",
+		"workingDays": "Dias/semana",
 		"rounding": "Redondeo",
-		"roundingMethod": "Método de redondeo",
+		"roundingMethod": "Metodo",
 		"none": "Ninguno",
-		"up": "Redondear arriba",
-		"down": "Redondear abajo",
-		"nearest": "Al más cercano",
+		"up": "Arriba",
+		"down": "Abajo",
+		"nearest": "Cercano",
 		"currency": "Moneda",
-		"billingRate": "Tarifa por defecto",
-		"weekStart": "La semana empieza el",
+		"billingRate": "Tarifa",
+		"weekStart": "Inicio semana",
 		"monday": "Lunes",
 		"sunday": "Domingo",
 		"timerReminder": "Recordatorio (min)",
-		"autoStop": "Parada automática (horas)"
-	},
-	"auth": {
-		"login": "Iniciar sesión",
-		"logout": "Cerrar sesión",
-		"register": "Registrarse",
-		"email": "Email",
-		"password": "Contraseña",
-		"forgotPassword": "¿Olvidaste tu contraseña?"
+		"autoStop": "Auto-stop (h)"
 	},
 	"common": {
 		"save": "Guardar",
 		"cancel": "Cancelar",
 		"delete": "Eliminar",
 		"edit": "Editar",
-		"add": "Agregar",
+		"add": "Anadir",
 		"close": "Cerrar",
 		"search": "Buscar",
 		"error": "Error",
@@ -126,7 +118,7 @@
 		"loading": "Cargando...",
 		"noResults": "Sin resultados",
 		"confirm": "Confirmar",
-		"back": "Atrás",
+		"back": "Atras",
 		"next": "Siguiente",
 		"create": "Crear",
 		"archive": "Archivar",
@@ -138,8 +130,8 @@
 	"clock": {
 		"alarm": {
 			"title": "Alarmas",
-			"custom": "Alarmas personalizadas",
-			"edit": "Editar alarma",
+			"custom": "Personalizadas",
+			"edit": "Editar",
 			"time": "Hora",
 			"label": "Etiqueta",
 			"repeat": "Repetir",
@@ -147,12 +139,12 @@
 			"snooze": "Posponer"
 		},
 		"timer": {
-			"title": "Cuenta atrás",
-			"finished": "¡Tiempo terminado!"
+			"title": "Cuenta atras",
+			"finished": "Tiempo!"
 		},
 		"stopwatch": {
-			"title": "Cronómetro",
-			"new": "Nuevo cronómetro",
+			"title": "Cronometro",
+			"new": "Nuevo",
 			"start": "Iniciar",
 			"stop": "Detener",
 			"continue": "Continuar",
@@ -162,21 +154,21 @@
 			"total": "Total",
 			"best": "Mejor",
 			"worst": "Peor",
-			"noStopwatches": "Sin cronómetros",
-			"noStopwatchesDescription": "Crea un nuevo cronómetro para empezar.",
-			"startFirst": "Iniciar primer cronómetro",
-			"otherStopwatches": "Otros cronómetros"
+			"noStopwatches": "Sin cronometros",
+			"noStopwatchesDescription": "Crea uno nuevo.",
+			"startFirst": "Iniciar primero",
+			"otherStopwatches": "Otros"
 		},
 		"worldClock": {
 			"title": "Reloj mundial",
-			"add": "Agregar ciudad",
-			"search": "Buscar ciudad...",
-			"noClocks": "No hay relojes mundiales",
+			"add": "Anadir ciudad",
+			"search": "Buscar...",
+			"noClocks": "Sin relojes",
 			"same": "Misma hora"
 		}
 	},
 	"error": {
-		"notFound": "Página no encontrada",
-		"backToHome": "Volver al inicio"
+		"notFound": "No encontrada",
+		"backToHome": "Volver"
 	}
 }

@@ -1,0 +1,54 @@
+{
+	"app": {
+		"name": "Presi",
+		"description": "Präsentationen erstellen"
+	},
+	"nav": {
+		"presentations": "Präsentationen",
+		"templates": "Vorlagen",
+		"settings": "Einstellungen"
+	},
+	"presentation": {
+		"create": "Neue Präsentation",
+		"edit": "Bearbeiten",
+		"delete": "Löschen",
+		"duplicate": "Duplizieren",
+		"empty": "Noch keine Präsentationen",
+		"present": "Präsentieren",
+		"export": "Exportieren",
+		"slides": "Folien",
+		"addSlide": "Folie hinzufügen",
+		"deleteSlide": "Folie löschen",
+		"reorderSlides": "Folien sortieren"
+	},
+	"slide": {
+		"title": "Titel",
+		"content": "Inhalt",
+		"notes": "Notizen",
+		"layout": "Layout",
+		"background": "Hintergrund",
+		"transition": "Übergang"
+	},
+	"templates": {
+		"title": "Vorlagen",
+		"blank": "Leer",
+		"business": "Business",
+		"education": "Bildung",
+		"creative": "Kreativ",
+		"minimal": "Minimal"
+	},
+	"presenter": {
+		"nextSlide": "Nächste Folie",
+		"previousSlide": "Vorherige Folie",
+		"exitPresentation": "Präsentation beenden",
+		"slideOf": "Folie {current} von {total}"
+	},
+	"common": {
+		"save": "Speichern",
+		"cancel": "Abbrechen",
+		"delete": "Löschen",
+		"loading": "Lädt...",
+		"error": "Fehler",
+		"success": "Erfolgreich"
+	}
+}

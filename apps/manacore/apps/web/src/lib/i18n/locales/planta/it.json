@@ -1,0 +1,82 @@
+{
+	"app": {
+		"name": "Planta",
+		"loading": "Caricamento...",
+		"tagline": "Cura delle piante semplificata"
+	},
+	"nav": {
+		"plants": "Piante",
+		"watering": "Irrigazione",
+		"identify": "Identifica",
+		"settings": "Impostazioni"
+	},
+	"plant": {
+		"add": "Aggiungi pianta",
+		"edit": "Modifica pianta",
+		"delete": "Elimina pianta",
+		"name": "Nome",
+		"species": "Specie",
+		"location": "Posizione",
+		"noPlants": "Nessuna pianta ancora",
+		"addFirst": "Aggiungi la tua prima pianta",
+		"careNotes": "Note di cura",
+		"health": "Salute"
+	},
+	"health": {
+		"healthy": "Sana",
+		"needsAttention": "Necessita attenzione",
+		"sick": "Malata"
+	},
+	"watering": {
+		"water": "Innaffia",
+		"watered": "Innaffiata",
+		"lastWatered": "Ultima innaffiatura",
+		"nextWatering": "Prossima innaffiatura",
+		"daysUntil": "tra {days} giorni",
+		"overdue": "In ritardo",
+		"today": "Innaffia oggi",
+		"noWatering": "Nessuna pianta da innaffiare"
+	},
+	"identify": {
+		"takePhoto": "Scatta foto",
+		"analyzing": "Analisi in corso...",
+		"identified": "Identificata",
+		"confidence": "Affidabilità",
+		"tips": "Consigli di cura"
+	},
+	"light": {
+		"low": "Poca luce",
+		"medium": "Luce media",
+		"bright": "Luce intensa",
+		"direct": "Luce solare diretta"
+	},
+	"humidity": {
+		"low": "Bassa",
+		"medium": "Media",
+		"high": "Alta"
+	},
+	"common": {
+		"save": "Salva",
+		"cancel": "Annulla",
+		"delete": "Elimina",
+		"edit": "Modifica",
+		"add": "Aggiungi",
+		"close": "Chiudi",
+		"search": "Cerca",
+		"error": "Errore",
+		"success": "Successo",
+		"loading": "Caricamento..."
+	},
+	"errors": {
+		"loadPlants": "Impossibile caricare le piante",
+		"identifyFailed": "Identificazione fallita",
+		"saveFailed": "Salvataggio fallito",
+		"uploadFailed": "Caricamento fallito"
+	},
+	"success": {
+		"plantAdded": "Pianta aggiunta",
+		"plantDeleted": "Pianta eliminata",
+		"plantWatered": "Pianta innaffiata",
+		"photoUploaded": "Foto caricata"
+	}
+}

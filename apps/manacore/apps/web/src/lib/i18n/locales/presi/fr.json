@@ -1,0 +1,54 @@
+{
+	"app": {
+		"name": "Presi",
+		"description": "Créer des présentations"
+	},
+	"nav": {
+		"presentations": "Présentations",
+		"templates": "Modèles",
+		"settings": "Paramètres"
+	},
+	"presentation": {
+		"create": "Nouvelle présentation",
+		"edit": "Modifier",
+		"delete": "Supprimer",
+		"duplicate": "Dupliquer",
+		"empty": "Pas encore de présentations",
+		"present": "Présenter",
+		"export": "Exporter",
+		"slides": "Diapositives",
+		"addSlide": "Ajouter une diapositive",
+		"deleteSlide": "Supprimer la diapositive",
+		"reorderSlides": "Réorganiser les diapositives"
+	},
+	"slide": {
+		"title": "Titre",
+		"content": "Contenu",
+		"notes": "Notes",
+		"layout": "Mise en page",
+		"background": "Arrière-plan",
+		"transition": "Transition"
+	},
+	"templates": {
+		"title": "Modèles",
+		"blank": "Vierge",
+		"business": "Business",
+		"education": "Éducation",
+		"creative": "Créatif",
+		"minimal": "Minimaliste"
+	},
+	"presenter": {
+		"nextSlide": "Diapositive suivante",
+		"previousSlide": "Diapositive précédente",
+		"exitPresentation": "Quitter la présentation",
+		"slideOf": "Diapositive {current} sur {total}"
+	},
+	"common": {
+		"save": "Enregistrer",
+		"cancel": "Annuler",
+		"delete": "Supprimer",
+		"loading": "Chargement...",
+		"error": "Erreur",
+		"success": "Succès"
+	}
+}
