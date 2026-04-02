@@ -135,6 +135,7 @@
 	const baseNavItems: PillNavItem[] = [
 		{ href: '/home', label: 'Home', icon: 'home' },
 		{ href: '/dashboard', label: 'Dashboard', icon: 'grid' },
+		{ href: '/spiral', label: 'Spiral', icon: 'spiral' },
 		{ href: '/observatory', label: 'Observatory', icon: 'eye' },
 		{ href: '/credits', label: 'Credits', icon: 'creditCard' },
 		{ href: '/gifts', label: 'Geschenke', icon: 'gift' },
@@ -306,6 +307,12 @@
 			label: 'Dashboard',
 			category: 'Navigation',
 			onExecute: () => goto('/dashboard'),
+		},
+		{
+			id: 'spiral',
+			label: 'Mana Spiral',
+			category: 'Navigation',
+			onExecute: () => goto('/spiral'),
 		},
 		{ id: 'credits', label: 'Credits', category: 'Navigation', onExecute: () => goto('/credits') },
 		{ id: 'apps', label: 'Alle Apps', category: 'Navigation', onExecute: () => goto('/apps') },

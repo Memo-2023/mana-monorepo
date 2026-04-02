@@ -67,6 +67,7 @@
 		"@manacore/shared-uload": "workspace:*",
 		"@manacore/shared-ui": "workspace:*",
 		"@manacore/shared-utils": "workspace:*",
+		"@manacore/spiral-db": "workspace:*",
 		"@manacore/wallpaper-generator": "workspace:*",
 		"@calc/shared": "workspace:*",
 		"@clock/shared": "workspace:*",
