@@ -13,7 +13,7 @@ export function loadConfig(): Config {
 		port: parseInt(env('PORT', '3064'), 10),
 		databaseUrl: env(
 			'DATABASE_URL',
-			'postgresql://manacore:devpassword@localhost:5432/mana_analytics'
+			'postgresql://manacore:devpassword@localhost:5432/mana_platform'
 		),
 		manaAuthUrl: env('MANA_CORE_AUTH_URL', 'http://localhost:3001'),
 		manaLlmUrl: env('MANA_LLM_URL', 'http://localhost:3025'),

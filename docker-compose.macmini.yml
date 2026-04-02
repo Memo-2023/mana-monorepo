@@ -29,7 +29,7 @@ services:
     restart: always
     mem_limit: 1024m
     environment:
-      POSTGRES_DB: mana
+      POSTGRES_DB: mana_platform
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mana123}
     volumes:
@@ -263,13 +263,13 @@ services:
       TZ: Europe/Berlin
       NODE_ENV: production
       PORT: 3001
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana_auth
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana_platform
       BASE_URL: https://auth.mana.how
       COOKIE_DOMAIN: .mana.how
       MANA_CORE_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
       MANA_CREDITS_URL: http://mana-credits:3061
       MANA_SUBSCRIPTIONS_URL: http://mana-subscriptions:3063
-      SYNC_DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana
+      SYNC_DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana_platform
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-${JWT_SECRET:-your-jwt-secret-change-me}}
       SMTP_HOST: smtp-relay.brevo.com
       SMTP_PORT: 587
@@ -305,7 +305,7 @@ services:
     environment:
       TZ: Europe/Berlin
       PORT: 3002
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana_credits
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana_platform
       MANA_CORE_AUTH_URL: http://mana-auth:3001
       MANA_CORE_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
@@ -339,7 +339,7 @@ services:
     environment:
       TZ: Europe/Berlin
       PORT: 3062
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana_user
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana_platform
       MANA_CORE_AUTH_URL: http://mana-auth:3001
       MANA_CORE_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
       CORS_ORIGINS: https://mana.how,https://calc.mana.how,https://calendar.mana.how,https://chat.mana.how,https://clock.mana.how,https://contacts.mana.how,https://context.mana.how,https://cards.mana.how,https://mukke.mana.how,https://nutriphi.mana.how,https://photos.mana.how,https://picture.mana.how,https://planta.mana.how,https://presi.mana.how,https://questions.mana.how,https://storage.mana.how,https://todo.mana.how,https://zitare.mana.how
@@ -365,7 +365,7 @@ services:
     environment:
       TZ: Europe/Berlin
       PORT: 3063
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana_subscriptions
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana_platform
       MANA_CORE_AUTH_URL: http://mana-auth:3001
       MANA_CORE_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
@@ -394,7 +394,7 @@ services:
     environment:
       TZ: Europe/Berlin
       PORT: 3064
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana_analytics
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana_platform
       MANA_CORE_AUTH_URL: http://mana-auth:3001
       MANA_LLM_URL: http://mana-llm:3025
       CORS_ORIGINS: https://mana.how
@@ -427,7 +427,7 @@ services:
     environment:
       TZ: Europe/Berlin
       PORT: 3016
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana?sslmode=disable
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana_platform?sslmode=disable
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD:-redis123}
@@ -510,7 +510,7 @@ services:
         condition: service_healthy
     environment:
       PORT: 3010
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana?sslmode=disable
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana_sync?sslmode=disable
       JWKS_URL: http://mana-auth:3001/api/v1/auth/jwks
       CORS_ORIGINS: "https://mana.how,https://*.mana.how"
     ports:
@@ -535,7 +535,7 @@ services:
         condition: service_healthy
     environment:
       PORT: 3013
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana?sslmode=disable
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana_platform?sslmode=disable
       SERVICE_KEY: ${NOTIFY_SERVICE_KEY:-dev-service-key}
       MANA_CORE_AUTH_URL: http://mana-auth:3001
       SMTP_HOST: ${SMTP_HOST:-smtp-relay.brevo.com}
@@ -571,7 +571,7 @@ services:
     environment:
       TZ: Europe/Berlin
       PORT: 3014
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana?sslmode=disable
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana_platform?sslmode=disable
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD:-redis123}
@@ -603,7 +603,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3011
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana_media
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana_platform
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD:-redis123}

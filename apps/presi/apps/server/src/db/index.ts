@@ -6,7 +6,7 @@
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 import {
-	pgTable,
+	pgSchema,
 	uuid,
 	text,
 	boolean,
@@ -18,7 +18,7 @@ import {
 import { relations } from 'drizzle-orm';
 
 const DATABASE_URL =
-	process.env.DATABASE_URL ?? 'postgresql://manacore:devpassword@localhost:5432/presi';
+	process.env.DATABASE_URL ?? 'postgresql://manacore:devpassword@localhost:5432/mana_platform';
 
 const connection = postgres(DATABASE_URL, {
 	max: 5,
@@ -27,7 +27,9 @@ const connection = postgres(DATABASE_URL, {
 
 // ─── Schema (read-only for share lookups) ────────────────
 
-export const decks = pgTable('decks', {
+export const presiSchema = pgSchema('presi');
+
+export const decks = presiSchema.table('decks', {
 	id: uuid('id').primaryKey().defaultRandom(),
 	userId: text('user_id').notNull(),
 	title: text('title').notNull(),
@@ -38,7 +40,7 @@ export const decks = pgTable('decks', {
 	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
-export const slides = pgTable(
+export const slides = presiSchema.table(
 	'slides',
 	{
 		id: uuid('id').primaryKey().defaultRandom(),
@@ -50,7 +52,7 @@ export const slides = pgTable(
 	(table) => [index('slides_deck_order_idx').on(table.deckId, table.order)]
 );
 
-export const themes = pgTable('themes', {
+export const themes = presiSchema.table('themes', {
 	id: uuid('id').primaryKey().defaultRandom(),
 	name: text('name').notNull(),
 	colors: jsonb('colors'),
@@ -58,7 +60,7 @@ export const themes = pgTable('themes', {
 	isDefault: boolean('is_default').default(false),
 });
 
-export const sharedDecks = pgTable(
+export const sharedDecks = presiSchema.table(
 	'shared_decks',
 	{
 		id: uuid('id').primaryKey().defaultRandom(),

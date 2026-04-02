@@ -3,9 +3,9 @@ import { defineConfig, type Config } from 'drizzle-kit';
 export interface DrizzleConfigOptions {
 	/**
 	 * Database name for fallback URL when DATABASE_URL is not set
-	 * Example: 'calendar' -> postgresql://manacore:devpassword@localhost:5432/calendar
+	 * @default 'mana_platform'
 	 */
-	dbName: string;
+	dbName?: string;
 
 	/**
 	 * Path to schema file(s)
@@ -82,7 +82,7 @@ const DEFAULT_PG_PASSWORD = 'devpassword';
  */
 export function createDrizzleConfig(options: DrizzleConfigOptions): Config {
 	const {
-		dbName,
+		dbName = 'mana_platform',
 		schemaPath = './src/db/schema/index.ts',
 		outDir = './src/db/migrations',
 		envVar = 'DATABASE_URL',

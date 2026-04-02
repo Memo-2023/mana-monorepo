@@ -1,6 +1,7 @@
-import { pgTable, text, integer, decimal, date, timestamp, index } from 'drizzle-orm/pg-core';
+import { text, integer, decimal, date, timestamp, index } from 'drizzle-orm/pg-core';
+import { cardsSchema } from './schema';
 
-export const userStats = pgTable(
+export const userStats = cardsSchema.table(
 	'user_stats',
 	{
 		userId: text('user_id').primaryKey(),

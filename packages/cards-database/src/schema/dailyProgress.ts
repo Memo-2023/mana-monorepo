@@ -1,16 +1,7 @@
-import {
-	pgTable,
-	uuid,
-	text,
-	date,
-	integer,
-	decimal,
-	timestamp,
-	index,
-	unique,
-} from 'drizzle-orm/pg-core';
+import { uuid, text, date, integer, decimal, timestamp, index, unique } from 'drizzle-orm/pg-core';
+import { cardsSchema } from './schema';
 
-export const dailyProgress = pgTable(
+export const dailyProgress = cardsSchema.table(
 	'daily_progress',
 	{
 		id: uuid('id').primaryKey().defaultRandom(),

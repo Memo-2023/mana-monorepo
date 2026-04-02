@@ -1,11 +1,12 @@
-import { pgTable, uuid, text, integer, timestamp, index, pgEnum } from 'drizzle-orm/pg-core';
+import { uuid, text, integer, timestamp, index, pgEnum } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
-import { decks } from './decks.js';
+import { cardsSchema } from './schema';
+import { decks } from './decks';
 
 // Study mode enum
 export const studyModeEnum = pgEnum('study_mode', ['all', 'new', 'review', 'favorites', 'random']);
 
-export const studySessions = pgTable(
+export const studySessions = cardsSchema.table(
 	'study_sessions',
 	{
 		id: uuid('id').primaryKey().defaultRandom(),

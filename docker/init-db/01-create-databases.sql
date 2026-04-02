@@ -1,43 +1,15 @@
--- Create databases for all services
--- This script runs on first container initialization
+-- Create additional databases for services
+-- Note: mana_platform is already created as POSTGRES_DB by Docker
 
--- Core databases
-CREATE DATABASE IF NOT EXISTS glitchtip;
-CREATE DATABASE IF NOT EXISTS chat;
-CREATE DATABASE IF NOT EXISTS zitare;
-CREATE DATABASE IF NOT EXISTS contacts;
-CREATE DATABASE IF NOT EXISTS calendar;
-CREATE DATABASE IF NOT EXISTS clock;
-CREATE DATABASE IF NOT EXISTS todo;
-CREATE DATABASE IF NOT EXISTS cards;
-CREATE DATABASE IF NOT EXISTS storage;
-CREATE DATABASE IF NOT EXISTS mail;
-CREATE DATABASE IF NOT EXISTS moodlit;
-CREATE DATABASE IF NOT EXISTS finance;
-CREATE DATABASE IF NOT EXISTS inventory;
-CREATE DATABASE IF NOT EXISTS techbase;
-CREATE DATABASE IF NOT EXISTS voxel_lava;
-CREATE DATABASE IF NOT EXISTS figgos;
-CREATE DATABASE IF NOT EXISTS context;
-CREATE DATABASE IF NOT EXISTS citycorners;
+-- Sync database: separate for I/O isolation (write-heavy, append-only)
+CREATE DATABASE mana_sync;
 
--- Grant all privileges to the default user
-GRANT ALL PRIVILEGES ON DATABASE chat TO manacore;
-GRANT ALL PRIVILEGES ON DATABASE zitare TO manacore;
-GRANT ALL PRIVILEGES ON DATABASE contacts TO manacore;
-GRANT ALL PRIVILEGES ON DATABASE calendar TO manacore;
-GRANT ALL PRIVILEGES ON DATABASE clock TO manacore;
-GRANT ALL PRIVILEGES ON DATABASE todo TO manacore;
-GRANT ALL PRIVILEGES ON DATABASE cards TO manacore;
-GRANT ALL PRIVILEGES ON DATABASE storage TO manacore;
-GRANT ALL PRIVILEGES ON DATABASE mail TO manacore;
-GRANT ALL PRIVILEGES ON DATABASE moodlit TO manacore;
-GRANT ALL PRIVILEGES ON DATABASE finance TO manacore;
-GRANT ALL PRIVILEGES ON DATABASE inventory TO manacore;
-GRANT ALL PRIVILEGES ON DATABASE techbase TO manacore;
-GRANT ALL PRIVILEGES ON DATABASE voxel_lava TO manacore;
-GRANT ALL PRIVILEGES ON DATABASE figgos TO manacore;
-GRANT ALL PRIVILEGES ON DATABASE context TO manacore;
-GRANT ALL PRIVILEGES ON DATABASE citycorners TO manacore;
+-- Infrastructure databases (external tools)
+CREATE DATABASE glitchtip;
+CREATE DATABASE umami;
+
+-- Grant privileges
+GRANT ALL PRIVILEGES ON DATABASE mana_platform TO manacore;
+GRANT ALL PRIVILEGES ON DATABASE mana_sync TO manacore;
 GRANT ALL PRIVILEGES ON DATABASE glitchtip TO manacore;
-GRANT ALL PRIVILEGES ON DATABASE manacore TO manacore;
+GRANT ALL PRIVILEGES ON DATABASE umami TO manacore;

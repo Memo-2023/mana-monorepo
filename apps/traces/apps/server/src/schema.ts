@@ -1,5 +1,5 @@
 import {
-	pgTable,
+	pgSchema,
 	uuid,
 	text,
 	doublePrecision,
@@ -9,6 +9,8 @@ import {
 	index,
 	uniqueIndex,
 } from 'drizzle-orm/pg-core';
+
+export const tracesSchema = pgSchema('traces');
 
 // ============================================
 // Enums
@@ -49,7 +51,7 @@ export const guideStatusEnum = pgEnum('guide_status', ['generating', 'ready', 'e
 // Tables
 // ============================================
 
-export const locations = pgTable(
+export const locations = tracesSchema.table(
 	'locations',
 	{
 		id: uuid('id').defaultRandom().primaryKey(),
@@ -80,7 +82,7 @@ export const locations = pgTable(
 	]
 );
 
-export const cities = pgTable(
+export const cities = tracesSchema.table(
 	'cities',
 	{
 		id: uuid('id').defaultRandom().primaryKey(),
@@ -94,7 +96,7 @@ export const cities = pgTable(
 	(table) => [uniqueIndex('cities_name_country_code_idx').on(table.name, table.countryCode)]
 );
 
-export const cityVisits = pgTable(
+export const cityVisits = tracesSchema.table(
 	'city_visits',
 	{
 		id: uuid('id').defaultRandom().primaryKey(),
@@ -115,7 +117,7 @@ export const cityVisits = pgTable(
 	]
 );
 
-export const places = pgTable(
+export const places = tracesSchema.table(
 	'places',
 	{
 		id: uuid('id').defaultRandom().primaryKey(),
@@ -139,7 +141,7 @@ export const places = pgTable(
 	]
 );
 
-export const pois = pgTable(
+export const pois = tracesSchema.table(
 	'pois',
 	{
 		id: uuid('id').defaultRandom().primaryKey(),
@@ -165,7 +167,7 @@ export const pois = pgTable(
 	]
 );
 
-export const guides = pgTable(
+export const guides = tracesSchema.table(
 	'guides',
 	{
 		id: uuid('id').defaultRandom().primaryKey(),
@@ -190,7 +192,7 @@ export const guides = pgTable(
 	]
 );
 
-export const guidePois = pgTable(
+export const guidePois = tracesSchema.table(
 	'guide_pois',
 	{
 		id: uuid('id').defaultRandom().primaryKey(),

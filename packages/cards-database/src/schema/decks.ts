@@ -1,19 +1,11 @@
-import {
-	pgTable,
-	uuid,
-	text,
-	varchar,
-	boolean,
-	timestamp,
-	jsonb,
-	index,
-} from 'drizzle-orm/pg-core';
+import { uuid, text, varchar, boolean, timestamp, jsonb, index } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
-import { cards } from './cards.js';
-import { studySessions } from './studySessions.js';
-import { aiGenerations } from './aiGenerations.js';
+import { cardsSchema } from './schema';
+import { cards } from './cards';
+import { studySessions } from './studySessions';
+import { aiGenerations } from './aiGenerations';
 
-export const decks = pgTable(
+export const decks = cardsSchema.table(
 	'decks',
 	{
 		id: uuid('id').primaryKey().defaultRandom(),

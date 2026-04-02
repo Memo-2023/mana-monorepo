@@ -1,5 +1,4 @@
 import {
-	pgTable,
 	uuid,
 	varchar,
 	text,
@@ -11,8 +10,9 @@ import {
 	pgEnum,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
-import { decks } from './decks.js';
-import { cardProgress } from './cardProgress.js';
+import { cardsSchema } from './schema';
+import { decks } from './decks';
+import { cardProgress } from './cardProgress';
 
 // Card type enum
 export const cardTypeEnum = pgEnum('card_type', ['text', 'flashcard', 'quiz', 'mixed']);
@@ -46,7 +46,7 @@ export interface MixedContent {
 
 export type CardContent = TextContent | FlashcardContent | QuizContent | MixedContent;
 
-export const cards = pgTable(
+export const cards = cardsSchema.table(
 	'cards',
 	{
 		id: uuid('id').primaryKey().defaultRandom(),

@@ -666,12 +666,51 @@ import { createAuthService } from '@manacore/shared-auth';
 import { formatDate, truncate } from '@manacore/shared-utils';
 ```
 
-## Database (Supabase)
+## Database Architecture (PostgreSQL)
 
-- All projects use Supabase for PostgreSQL database, auth, and storage
-- Row Level Security (RLS) policies enforce access control via JWT claims
-- Each project has its own Supabase project/schema
-- Types typically generated via `supabase gen types`
+All backend data lives in **2 PostgreSQL databases**:
+
+| Database | Purpose | Tech |
+|----------|---------|------|
+| **mana_platform** | All services + app server-side tables | Drizzle ORM, pgSchema isolation |
+| **mana_sync** | Sync engine (write-heavy, append-only) | Go + pgx |
+
+### Schema Mapping (mana_platform)
+
+Each service owns a PostgreSQL schema within the shared database:
+
+| Schema | Service | Tables |
+|--------|---------|--------|
+| `auth` | mana-auth | users, sessions, orgs, passkeys |
+| `credits` | mana-credits | balances, transactions, packages |
+| `gifts` | mana-credits | gift codes, redemptions |
+| `subscriptions` | mana-subscriptions | plans, invoices |
+| `feedback` | mana-analytics | user feedback, votes |
+| `usr` | mana-user | settings, tags, tag groups |
+| `media` | mana-media | CAS, thumbnails, references |
+| `todo` | todo server | tasks, projects, reminders |
+| `traces` | traces server | locations, cities, POIs, guides |
+| `presi` | presi server | decks, slides, themes, shares |
+| `uload` | uload server | users, links, clicks |
+| `cards` | cards package | decks, cards, study progress |
+
+### Using pgSchema
+
+All tables must use `pgSchema('name').table()` — never plain `pgTable()`:
+
+```typescript
+import { pgSchema } from 'drizzle-orm/pg-core';
+
+const mySchema = pgSchema('myapp');
+export const items = mySchema.table('items', { ... });
+```
+
+### Adding a New Schema
+
+1. Add schema to `docker/init-db/01-create-databases.sql`
+2. Add schema to `scripts/setup-databases.sh` (PLATFORM_SCHEMAS array)
+3. Create `drizzle.config.ts` with `schemaFilter: ['myschema']`
+4. All DATABASE_URLs point to `mana_platform` (one DB for everything)
 
 ## Object Storage (MinIO)
 

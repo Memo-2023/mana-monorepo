@@ -1,16 +1,8 @@
-import {
-	pgTable,
-	varchar,
-	text,
-	uuid,
-	timestamp,
-	index,
-	unique,
-	integer,
-} from 'drizzle-orm/pg-core';
+import { varchar, text, uuid, timestamp, index, unique, integer } from 'drizzle-orm/pg-core';
+import { usrSchema } from './schema';
 import { tagGroups } from './tag-groups';
 
-export const tags = pgTable(
+export const tags = usrSchema.table(
 	'tags',
 	{
 		id: uuid('id').primaryKey().defaultRandom(),

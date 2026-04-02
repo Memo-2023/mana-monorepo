@@ -1,6 +1,7 @@
-import { pgTable, text, jsonb, timestamp } from 'drizzle-orm/pg-core';
+import { text, jsonb, timestamp } from 'drizzle-orm/pg-core';
+import { usrSchema } from './schema';
 
-export const userSettings = pgTable('user_settings', {
+export const userSettings = usrSchema.table('user_settings', {
 	userId: text('user_id').primaryKey(),
 	globalSettings: jsonb('global_settings')
 		.default({

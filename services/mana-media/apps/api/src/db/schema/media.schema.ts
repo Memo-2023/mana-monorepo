@@ -1,5 +1,5 @@
 import {
-	pgTable,
+	pgSchema,
 	uuid,
 	text,
 	timestamp,
@@ -11,11 +11,13 @@ import {
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
+export const mediaSchema = pgSchema('media');
+
 /**
  * Core media table - stores unique files by content hash (SHA-256)
  * This is the Content-Addressable Storage (CAS) approach
  */
-export const media = pgTable(
+export const media = mediaSchema.table(
 	'media',
 	{
 		id: uuid('id').primaryKey().defaultRandom(),
@@ -70,7 +72,7 @@ export const media = pgTable(
  * Media references - tracks which user/app owns a reference to a media item
  * Multiple users can reference the same media (deduplication)
  */
-export const mediaReferences = pgTable(
+export const mediaReferences = mediaSchema.table(
 	'media_references',
 	{
 		id: uuid('id').primaryKey().defaultRandom(),
@@ -101,7 +103,7 @@ export const mediaReferences = pgTable(
  * Lazy-generated thumbnails cache
  * Stores on-the-fly generated thumbnails with specific parameters
  */
-export const mediaThumbnails = pgTable(
+export const mediaThumbnails = mediaSchema.table(
 	'media_thumbnails',
 	{
 		id: uuid('id').primaryKey().defaultRandom(),

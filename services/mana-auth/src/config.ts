@@ -22,7 +22,10 @@ export function loadConfig(): Config {
 	const env = (key: string, fallback?: string) => process.env[key] || fallback || '';
 	return {
 		port: parseInt(env('PORT', '3001'), 10),
-		databaseUrl: env('DATABASE_URL', 'postgresql://manacore:devpassword@localhost:5432/mana_auth'),
+		databaseUrl: env(
+			'DATABASE_URL',
+			'postgresql://manacore:devpassword@localhost:5432/mana_platform'
+		),
 		syncDatabaseUrl: env(
 			'SYNC_DATABASE_URL',
 			'postgresql://manacore:devpassword@localhost:5432/mana_sync'

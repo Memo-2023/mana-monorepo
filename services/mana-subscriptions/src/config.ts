@@ -14,7 +14,7 @@ export function loadConfig(): Config {
 		port: parseInt(env('PORT', '3063'), 10),
 		databaseUrl: env(
 			'DATABASE_URL',
-			'postgresql://manacore:devpassword@localhost:5432/mana_subscriptions'
+			'postgresql://manacore:devpassword@localhost:5432/mana_platform'
 		),
 		manaAuthUrl: env('MANA_CORE_AUTH_URL', 'http://localhost:3001'),
 		serviceKey: env('MANA_CORE_SERVICE_KEY', 'dev-service-key'),

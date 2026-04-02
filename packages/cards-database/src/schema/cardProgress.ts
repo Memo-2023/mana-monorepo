@@ -1,5 +1,4 @@
 import {
-	pgTable,
 	uuid,
 	text,
 	integer,
@@ -10,7 +9,8 @@ import {
 	unique,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
-import { cards } from './cards.js';
+import { cardsSchema } from './schema';
+import { cards } from './cards';
 
 // Progress status enum (SM-2 algorithm states)
 export const progressStatusEnum = pgEnum('progress_status', [
@@ -20,7 +20,7 @@ export const progressStatusEnum = pgEnum('progress_status', [
 	'relearning',
 ]);
 
-export const cardProgress = pgTable(
+export const cardProgress = cardsSchema.table(
 	'card_progress',
 	{
 		id: uuid('id').primaryKey().defaultRandom(),

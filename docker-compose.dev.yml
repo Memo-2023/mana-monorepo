@@ -10,7 +10,7 @@ services:
     container_name: manacore-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: manacore
+      POSTGRES_DB: mana_platform
       POSTGRES_USER: ${POSTGRES_USER:-manacore}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-devpassword}
     volumes:
@@ -113,7 +113,7 @@ services:
     environment:
       NODE_ENV: development
       PORT: 3001
-      DATABASE_URL: postgresql://${POSTGRES_USER:-manacore}:${POSTGRES_PASSWORD:-devpassword}@postgres:5432/mana_auth
+      DATABASE_URL: postgresql://${POSTGRES_USER:-manacore}:${POSTGRES_PASSWORD:-devpassword}@postgres:5432/mana_platform
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-dev-secret-change-me}
       BETTER_AUTH_URL: http://localhost:3001
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,http://localhost:5173,http://localhost:8081}
@@ -136,7 +136,7 @@ services:
     environment:
       NODE_ENV: development
       PORT: 3002
-      DATABASE_URL: postgresql://${POSTGRES_USER:-manacore}:${POSTGRES_PASSWORD:-devpassword}@postgres:5432/chat
+      DATABASE_URL: postgresql://${POSTGRES_USER:-manacore}:${POSTGRES_PASSWORD:-devpassword}@postgres:5432/mana_platform
       DB_HOST: postgres
       DB_PORT: 5432
       DB_USER: ${POSTGRES_USER:-manacore}

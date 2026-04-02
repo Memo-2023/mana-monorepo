@@ -1,6 +1,7 @@
-import { pgTable, uuid, text, varchar, timestamp, jsonb, index, pgEnum } from 'drizzle-orm/pg-core';
+import { uuid, text, varchar, timestamp, jsonb, index, pgEnum } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
-import { decks } from './decks.js';
+import { cardsSchema } from './schema';
+import { decks } from './decks';
 
 // AI generation status enum
 export const aiGenerationStatusEnum = pgEnum('ai_generation_status', [
@@ -21,7 +22,7 @@ export interface AIGenerationMetadata {
 	[key: string]: unknown;
 }
 
-export const aiGenerations = pgTable(
+export const aiGenerations = cardsSchema.table(
 	'ai_generations',
 	{
 		id: uuid('id').primaryKey().defaultRandom(),

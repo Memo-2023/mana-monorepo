@@ -1,5 +1,5 @@
 import {
-	pgTable,
+	pgSchema,
 	uuid,
 	text,
 	boolean,
@@ -10,10 +10,12 @@ import {
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
+export const uloadSchema = pgSchema('uload');
+
 // ============================================
 // Users Table
 // ============================================
-export const users = pgTable(
+export const users = uloadSchema.table(
 	'users',
 	{
 		id: uuid('id').primaryKey().defaultRandom(),
@@ -48,7 +50,7 @@ export const users = pgTable(
 // ============================================
 // Accounts Table
 // ============================================
-export const accounts = pgTable(
+export const accounts = uloadSchema.table(
 	'accounts',
 	{
 		id: uuid('id').primaryKey().defaultRandom(),
@@ -70,7 +72,7 @@ export const accounts = pgTable(
 // ============================================
 // Workspaces Table
 // ============================================
-export const workspaces = pgTable(
+export const workspaces = uloadSchema.table(
 	'workspaces',
 	{
 		id: uuid('id').primaryKey().defaultRandom(),
@@ -92,7 +94,7 @@ export const workspaces = pgTable(
 // ============================================
 // Links Table
 // ============================================
-export const links = pgTable(
+export const links = uloadSchema.table(
 	'links',
 	{
 		id: uuid('id').primaryKey().defaultRandom(),
@@ -129,7 +131,7 @@ export const links = pgTable(
 // ============================================
 // Clicks Table
 // ============================================
-export const clicks = pgTable(
+export const clicks = uloadSchema.table(
 	'clicks',
 	{
 		id: uuid('id').primaryKey().defaultRandom(),

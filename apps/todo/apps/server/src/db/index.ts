@@ -8,7 +8,7 @@
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 import {
-	pgTable,
+	pgSchema,
 	uuid,
 	text,
 	timestamp,
@@ -20,16 +20,20 @@ import {
 } from 'drizzle-orm/pg-core';
 
 const DATABASE_URL =
-	process.env.DATABASE_URL ?? 'postgresql://manacore:devpassword@localhost:5432/todo';
+	process.env.DATABASE_URL ?? 'postgresql://manacore:devpassword@localhost:5432/mana_platform';
 
 const connection = postgres(DATABASE_URL, {
 	max: 5,
 	idle_timeout: 20,
 });
 
+// ─── Schema ────────────────
+
+export const todoSchema = pgSchema('todo');
+
 // ─── Minimal Schema (only what server needs) ────────────────
 
-export const tasks = pgTable('tasks', {
+export const tasks = todoSchema.table('tasks', {
 	id: uuid('id').primaryKey().defaultRandom(),
 	userId: text('user_id').notNull(),
 	projectId: uuid('project_id'),
@@ -55,12 +59,12 @@ export const tasks = pgTable('tasks', {
 	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
-export const projects = pgTable('projects', {
+export const projects = todoSchema.table('projects', {
 	id: uuid('id').primaryKey().defaultRandom(),
 	userId: text('user_id').notNull(),
 });
 
-export const reminders = pgTable(
+export const reminders = todoSchema.table(
 	'reminders',
 	{
 		id: uuid('id').primaryKey().defaultRandom(),

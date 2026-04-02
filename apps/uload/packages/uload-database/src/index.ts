@@ -22,8 +22,7 @@ let client: ReturnType<typeof postgres> | null = null;
 export function getDb(): ReturnType<typeof drizzle<typeof schema>> {
 	if (!db) {
 		const connectionString =
-			process.env.DATABASE_URL ||
-			'postgresql://uload:uload_dev_password_123@localhost:5432/uload_dev';
+			process.env.DATABASE_URL || 'postgresql://manacore:devpassword@localhost:5432/mana_platform';
 
 		client = postgres(connectionString, {
 			max: 10,

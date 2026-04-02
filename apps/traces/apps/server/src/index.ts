@@ -17,7 +17,7 @@ import { GuideService } from './services/guide';
 
 const PORT = parseInt(process.env.PORT || '3026', 10);
 const DB_URL =
-	process.env.DATABASE_URL || 'postgresql://manacore:devpassword@localhost:5432/traces';
+	process.env.DATABASE_URL || 'postgresql://manacore:devpassword@localhost:5432/mana_platform';
 const LLM_URL = process.env.MANA_LLM_URL || 'http://localhost:3025';
 const SEARCH_URL = process.env.MANA_SEARCH_URL || 'http://localhost:3021';
 const CORS_ORIGINS = (process.env.CORS_ORIGINS || 'http://localhost:5173').split(',');

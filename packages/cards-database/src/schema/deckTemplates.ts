@@ -1,5 +1,4 @@
 import {
-	pgTable,
 	uuid,
 	varchar,
 	text,
@@ -9,6 +8,7 @@ import {
 	jsonb,
 	index,
 } from 'drizzle-orm/pg-core';
+import { cardsSchema } from './schema';
 
 // Template data structure
 export interface DeckTemplateData {
@@ -21,7 +21,7 @@ export interface DeckTemplateData {
 	tags?: string[];
 }
 
-export const deckTemplates = pgTable(
+export const deckTemplates = cardsSchema.table(
 	'deck_templates',
 	{
 		id: uuid('id').primaryKey().defaultRandom(),

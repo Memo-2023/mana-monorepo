@@ -6,7 +6,7 @@ export default defineConfig({
 	dialect: 'postgresql',
 	dbCredentials: {
 		url:
-			process.env.DATABASE_URL || 'postgresql://manacore:devpassword@localhost:5432/mana_analytics',
+			process.env.DATABASE_URL || 'postgresql://manacore:devpassword@localhost:5432/mana_platform',
 	},
 	schemaFilter: ['feedback'],
 });
