@@ -6,13 +6,16 @@
 	import { ManaCoreLogo } from '@manacore/shared-branding';
 	import AppSlider from '$lib/components/AppSlider.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
+	import { trackGuestConversion } from '$lib/stores/funnel-tracking';
 	import '$lib/i18n';
 
 	// Get translations based on current locale
 	const translations = $derived(getRegisterTranslations($locale || 'de'));
 
 	async function handleSignUp(email: string, password: string) {
-		return authStore.signUp(email, password);
+		const result = await authStore.signUp(email, password);
+		if (result.success) trackGuestConversion();
+		return result;
 	}
 
 	async function handleResendVerification(email: string) {

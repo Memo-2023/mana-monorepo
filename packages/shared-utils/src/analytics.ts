@@ -328,6 +328,16 @@ export const ManaCoreEvents = {
 		track.manacore('widget_resized', { widget_type: widgetType, size }),
 	creditsTabViewed: (tab: string) => track.manacore('credits_tab_viewed', { tab }),
 	profileUpdated: () => track.manacore('profile_updated'),
+
+	// Funnel events — track key activation & retention moments
+	/** User created their first piece of content in any module */
+	firstContentCreated: (appId: string) => track.manacore('first_content_created', { app: appId }),
+	/** User returned after first session (fired once per user) */
+	userReturnVisit: () => track.manacore('user_return_visit'),
+	/** User used a second module (cross-app engagement) */
+	secondModuleUsed: (appId: string) => track.manacore('second_module_used', { app: appId }),
+	/** Guest user converted to registered user */
+	guestConverted: () => track.manacore('guest_converted'),
 };
 
 /**

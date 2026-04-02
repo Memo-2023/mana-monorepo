@@ -8,6 +8,7 @@
  */
 
 import Dexie, { type EntityTable } from 'dexie';
+import { trackFirstContent } from '$lib/stores/funnel-tracking';
 
 // ─── Database ──────────────────────────────────────────────
 
@@ -344,6 +345,7 @@ for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {
 				data: { ...obj },
 				createdAt: now,
 			});
+			trackFirstContent(appId);
 		});
 
 		table.hook('updating', function (modifications, primKey) {

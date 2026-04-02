@@ -9,7 +9,8 @@
 		".": "./src/index.ts",
 		"./analytics": "./src/analytics.ts",
 		"./analytics-server": "./src/analytics-server.ts",
-		"./security-headers": "./src/security-headers.ts"
+		"./security-headers": "./src/security-headers.ts",
+		"./web-vitals": "./src/web-vitals.ts"
 	},
 	"scripts": {
 		"type-check": "tsc --noEmit",
@@ -17,7 +18,8 @@
 		"lint": "eslint ."
 	},
 	"dependencies": {
-		"date-fns": "^4.1.0"
+		"date-fns": "^4.1.0",
+		"web-vitals": "^5.2.0"
 	},
 	"devDependencies": {
 		"@types/node": "^24.10.1",

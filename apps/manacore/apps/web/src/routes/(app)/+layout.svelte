@@ -40,6 +40,8 @@
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { setLocale, supportedLocales } from '$lib/i18n';
 	import { ManaCoreEvents, AppEvents } from '@manacore/shared-utils/analytics';
+	import { setUser as setErrorTrackingUser } from '@manacore/shared-error-tracking/browser';
+	import { trackReturnVisit, trackModuleUsed, markAsGuest } from '$lib/stores/funnel-tracking';
 	import { theme } from '$lib/stores/theme';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
@@ -196,6 +198,7 @@
 	async function handleSignOut() {
 		unifiedSync?.stopAll();
 		guestMode?.destroy();
+		setErrorTrackingUser(null);
 		await authStore.signOut();
 		goto('/login');
 	}
@@ -239,6 +242,8 @@
 
 		// Phase B: Auth-dependent — sync, settings, onboarding
 		if (authStore.isAuthenticated) {
+			setErrorTrackingUser({ id: authStore.user?.id ?? 'unknown', email: authStore.user?.email });
+			trackReturnVisit();
 			const getToken = () => authStore.getValidToken();
 			unifiedSync = createUnifiedSync(SYNC_SERVER_URL, getToken);
 			unifiedSync.startAll();
@@ -255,6 +260,7 @@
 
 		// Phase C: Guest mode — welcome modal + nudge
 		if (!authStore.isAuthenticated) {
+			markAsGuest();
 			guestMode = createGuestMode('manacore', {
 				nudgeDelayMinutes: 3,
 				onRegister: () => goto('/register'),
@@ -284,6 +290,12 @@
 		const moduleSlug = '/' + pathname.split('/')[1];
 
 		if (moduleSlug === activeModulePrefix) return;
+
+		// Track module usage for funnel analysis
+		const moduleName = pathname.split('/')[1];
+		if (moduleName && authStore.isAuthenticated) {
+			trackModuleUsed(moduleName);
+		}
 
 		const loader = getAdapterLoader(pathname);
 		if (!loader) {
