@@ -1,0 +1,96 @@
+{
+	"app": {
+		"name": "Questions",
+		"loading": "Cargando...",
+		"tagline": "Investigación con IA"
+	},
+	"nav": {
+		"questions": "Preguntas",
+		"collections": "Colecciones",
+		"research": "Investigación",
+		"settings": "Ajustes"
+	},
+	"question": {
+		"create": "Crear pregunta",
+		"edit": "Editar pregunta",
+		"delete": "Eliminar pregunta",
+		"title": "Pregunta",
+		"description": "Descripción",
+		"status": "Estado",
+		"priority": "Prioridad",
+		"noQuestions": "Aún no hay preguntas",
+		"addFirst": "Haz tu primera pregunta"
+	},
+	"status": {
+		"open": "Abierta",
+		"researching": "Investigando",
+		"answered": "Respondida",
+		"archived": "Archivada"
+	},
+	"priority": {
+		"low": "Baja",
+		"medium": "Media",
+		"high": "Alta"
+	},
+	"collection": {
+		"create": "Crear colección",
+		"edit": "Editar colección",
+		"delete": "Eliminar colección",
+		"name": "Nombre",
+		"color": "Color",
+		"noCollections": "Sin colecciones"
+	},
+	"research": {
+		"start": "Iniciar investigación",
+		"inProgress": "Investigación en curso...",
+		"depth": "Profundidad",
+		"quick": "Rápida",
+		"standard": "Estándar",
+		"deep": "Profunda",
+		"sources": "Fuentes",
+		"summary": "Resumen",
+		"keyPoints": "Puntos clave",
+		"followUp": "Preguntas de seguimiento"
+	},
+	"answer": {
+		"create": "Crear respuesta",
+		"edit": "Editar respuesta",
+		"accept": "Aceptar respuesta",
+		"rate": "Valorar",
+		"noAnswer": "Aún sin respuesta"
+	},
+	"source": {
+		"view": "Ver fuente",
+		"extract": "Extraer contenido",
+		"noSources": "No se encontraron fuentes"
+	},
+	"auth": {
+		"login": "Iniciar sesión",
+		"logout": "Cerrar sesión",
+		"register": "Registrarse"
+	},
+	"common": {
+		"save": "Guardar",
+		"cancel": "Cancelar",
+		"delete": "Eliminar",
+		"edit": "Editar",
+		"add": "Agregar",
+		"close": "Cerrar",
+		"search": "Buscar",
+		"error": "Error",
+		"success": "Correcto",
+		"loading": "Cargando..."
+	},
+	"errors": {
+		"loadQuestions": "Error al cargar preguntas",
+		"researchFailed": "Investigación fallida",
+		"saveFailed": "Error al guardar",
+		"loadSources": "Error al cargar fuentes"
+	},
+	"success": {
+		"questionCreated": "Pregunta creada",
+		"questionDeleted": "Pregunta eliminada",
+		"researchStarted": "Investigación iniciada",
+		"answerAccepted": "Respuesta aceptada"
+	}
+}

@@ -51,17 +51,18 @@
 	const dayNames = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 
 	// Quick event creation
-	let showNewEvent = $state(false);
 	let newTitle = $state('');
-	let newTime = $state('09:00');
 
 	async function createEvent() {
 		const title = newTitle.trim();
 		if (!title) return;
-		const startTime = `${todayStr}T${newTime}:00`;
-		const [h, m] = newTime.split(':').map(Number);
+
+		const nowTime = new Date();
+		const h = nowTime.getHours();
+		const m = nowTime.getMinutes();
+		const startTime = `${todayStr}T${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:00`;
 		const endH = h + 1;
-		const endTime = `${todayStr}T${String(endH).padStart(2, '0')}:${String(m).padStart(2, '0')}:00`;
+		const endTime = `${todayStr}T${String(endH > 23 ? 23 : endH).padStart(2, '0')}:${String(m).padStart(2, '0')}:00`;
 
 		// Get default calendar or use a fallback id
 		const calendars = await db.table('calendars').toArray();
@@ -75,7 +76,6 @@
 			endTime,
 		});
 		newTitle = '';
-		showNewEvent = false;
 	}
 </script>
 
@@ -103,24 +103,18 @@
 	<div class="events-section">
 		<div class="section-header">
 			<h3 class="section-title">Heute</h3>
-			<button class="add-btn" onclick={() => (showNewEvent = !showNewEvent)} title="Neuer Termin">
-				<Plus size={14} />
-			</button>
 		</div>
 
-		{#if showNewEvent}
-			<form
-				onsubmit={(e) => {
-					e.preventDefault();
-					createEvent();
-				}}
-				class="new-event-form"
-			>
-				<input bind:value={newTitle} placeholder="Termin-Titel..." class="event-input" autofocus />
-				<input bind:value={newTime} type="time" class="event-time" />
-				<button type="submit" class="event-submit">OK</button>
-			</form>
-		{/if}
+		<form
+			onsubmit={(e) => {
+				e.preventDefault();
+				createEvent();
+			}}
+			class="quick-add"
+		>
+			<span class="add-icon"><Plus size={16} /></span>
+			<input bind:value={newTitle} placeholder="Neuer Termin..." class="add-input" />
+		</form>
 
 		{#each todayEvents as event (event.id)}
 			<div class="event-card">
@@ -214,88 +208,41 @@
 		color: #9ca3af;
 		margin: 0;
 	}
-	.add-btn {
+	.quick-add {
 		display: flex;
 		align-items: center;
-		justify-content: center;
-		width: 24px;
-		height: 24px;
-		border-radius: 0.25rem;
-		border: none;
-		background: transparent;
-		color: #9ca3af;
-		cursor: pointer;
-		transition: all 0.15s;
-	}
-	.add-btn:hover {
-		background: rgba(0, 0, 0, 0.06);
-		color: #3b82f6;
-	}
-	:global(.dark) .add-btn:hover {
-		background: rgba(255, 255, 255, 0.08);
-		color: #60a5fa;
-	}
-	.new-event-form {
-		display: flex;
-		gap: 0.375rem;
-		padding: 0.375rem;
-		border: 1px solid rgba(0, 0, 0, 0.08);
+		gap: 0.5rem;
+		padding: 0.375rem 0.5rem;
 		border-radius: 0.375rem;
-		animation: slideDown 0.15s ease-out;
+		border: 1px solid rgba(0, 0, 0, 0.08);
+		background: transparent;
 	}
-	:global(.dark) .new-event-form {
+	:global(.dark) .quick-add {
 		border-color: rgba(255, 255, 255, 0.08);
 	}
-	@keyframes slideDown {
-		from {
-			opacity: 0;
-			transform: translateY(-4px);
-		}
-		to {
-			opacity: 1;
-			transform: translateY(0);
-		}
+	.add-icon {
+		color: #d1d5db;
+		display: flex;
 	}
-	.event-input {
+	:global(.dark) .add-icon {
+		color: #4b5563;
+	}
+	.add-input {
 		flex: 1;
 		border: none;
 		background: transparent;
 		outline: none;
 		font-size: 0.8125rem;
 		color: #374151;
-		min-width: 0;
 	}
-	.event-input::placeholder {
+	.add-input::placeholder {
 		color: #c0bfba;
 	}
-	:global(.dark) .event-input {
+	:global(.dark) .add-input {
 		color: #f3f4f6;
 	}
-	:global(.dark) .event-input::placeholder {
+	:global(.dark) .add-input::placeholder {
 		color: #4b5563;
-	}
-	.event-time {
-		width: 5rem;
-		border: none;
-		background: transparent;
-		outline: none;
-		font-size: 0.75rem;
-		color: #6b7280;
-		text-align: center;
-	}
-	:global(.dark) .event-time {
-		color: #9ca3af;
-		color-scheme: dark;
-	}
-	.event-submit {
-		padding: 0.25rem 0.5rem;
-		border: none;
-		border-radius: 0.25rem;
-		background: #3b82f6;
-		color: white;
-		font-size: 0.75rem;
-		font-weight: 500;
-		cursor: pointer;
 	}
 	.event-card {
 		padding: 0.5rem 0.625rem;

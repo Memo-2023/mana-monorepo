@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { deckStore } from '../stores/decks.svelte';
+	import { TagField, ColorPicker, COLORS_12, DEFAULT_COLOR } from '@manacore/shared-ui';
+	import { useAllTags } from '@manacore/shared-stores';
 
 	interface Props {
 		open?: boolean;
@@ -11,7 +13,10 @@
 	let title = $state('');
 	let description = $state('');
 	let isPublic = $state(false);
+	let color = $state(DEFAULT_COLOR);
 	let submitting = $state(false);
+	let selectedTagIds = $state<string[]>([]);
+	const allTags = useAllTags();
 
 	async function handleSubmit() {
 		if (!title.trim()) return;
@@ -97,6 +102,25 @@
 					<label for="deck-public" class="cursor-pointer text-sm text-foreground">
 						Offentlich machen
 					</label>
+				</div>
+
+				<div>
+					<span class="mb-1 block text-sm font-medium text-foreground">Tags</span>
+					<TagField
+						tags={allTags.value}
+						{selectedTagIds}
+						onChange={(ids) => (selectedTagIds = ids)}
+					/>
+				</div>
+
+				<div>
+					<span class="mb-1 block text-sm font-medium text-foreground">Farbe</span>
+					<ColorPicker
+						colors={[...COLORS_12]}
+						selectedColor={color}
+						onColorChange={(c) => (color = c)}
+						size="sm"
+					/>
 				</div>
 
 				{#if deckStore.error}

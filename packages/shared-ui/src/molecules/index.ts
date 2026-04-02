@@ -21,6 +21,7 @@ export {
 	TagColorPicker,
 	TagEditModal,
 	TagSelector,
+	TagField,
 	TagList,
 	TAG_COLORS,
 	DEFAULT_TAG_COLOR,

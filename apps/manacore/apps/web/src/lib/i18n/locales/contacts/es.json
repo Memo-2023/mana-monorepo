@@ -1,0 +1,219 @@
+{
+	"app": {
+		"name": "Contacts"
+	},
+	"common": {
+		"back": "Volver",
+		"cancel": "Cancelar",
+		"loadingMore": "Cargando más..."
+	},
+	"nav": {
+		"contacts": "Contactos",
+		"groups": "Grupos",
+		"tags": "Etiquetas",
+		"favorites": "Favoritos",
+		"archive": "Archivo",
+		"search": "Buscar",
+		"settings": "Configuración",
+		"feedback": "Comentarios",
+		"import": "Importar"
+	},
+	"import": {
+		"title": "Importar contactos",
+		"subtitle": "Importa contactos desde archivos vCard o CSV",
+		"tabs": {
+			"file": "Importar archivo",
+			"google": "Google Contacts"
+		},
+		"processing": "Procesando archivo...",
+		"importing": "Importando...",
+		"downloadTemplate": "Descargar plantilla CSV",
+		"dropzone": {
+			"title": "Arrastra el archivo aquí",
+			"subtitle": "o haz clic para seleccionar"
+		},
+		"preview": {
+			"total": "Total",
+			"valid": "Válidos",
+			"duplicates": "Duplicados",
+			"selected": "Seleccionados",
+			"errors": "Errores de análisis",
+			"duplicateHandling": "¿Cómo gestionar los duplicados?",
+			"skip": "Omitir",
+			"merge": "Fusionar",
+			"create": "Crear de todos modos",
+			"contacts": "Contactos a importar",
+			"selectAll": "Seleccionar todos",
+			"deselectAll": "Deseleccionar todos",
+			"duplicateTag": "Duplicado",
+			"matchesWith": "Coincide con",
+			"importButton": "Importar {count} contactos"
+		},
+		"result": {
+			"title": "Importación completada",
+			"subtitle": "Tus contactos han sido importados con éxito",
+			"imported": "Importados",
+			"merged": "Fusionados",
+			"skipped": "Omitidos",
+			"errors": "Errores",
+			"importMore": "Importar más",
+			"done": "Listo"
+		}
+	},
+	"contacts": {
+		"title": "Contactos",
+		"new": "Nuevo contacto",
+		"edit": "Editar",
+		"delete": "Eliminar",
+		"search": "Buscar contactos...",
+		"noContacts": "No se encontraron contactos",
+		"addFirst": "Añade tu primer contacto",
+		"me": "Yo",
+		"myCard": "Mi tarjeta",
+		"favorites": "Favoritos",
+		"archive": "Archivo",
+		"contact": "Contacto",
+		"contactsPlural": "Contactos",
+		"call": "Llamar",
+		"email": "Enviar correo",
+		"favorite": "Marcar como favorito",
+		"unfavorite": "Quitar de favoritos"
+	},
+	"views": {
+		"list": "Vista de lista",
+		"grid": "Vista de cuadrícula",
+		"alphabet": "Alfabético"
+	},
+	"sort": {
+		"firstName": "Nombre",
+		"lastName": "Apellido"
+	},
+	"contact": {
+		"firstName": "Nombre",
+		"lastName": "Apellido",
+		"displayName": "Nombre para mostrar",
+		"email": "Correo electrónico",
+		"phone": "Teléfono",
+		"mobile": "Móvil",
+		"company": "Empresa",
+		"jobTitle": "Cargo",
+		"department": "Departamento",
+		"street": "Calle",
+		"city": "Ciudad",
+		"postalCode": "Código postal",
+		"country": "País",
+		"website": "Sitio web",
+		"birthday": "Cumpleaños",
+		"notes": "Notas",
+		"tasks": {
+			"title": "Tareas",
+			"assigned": "Asignadas",
+			"involved": "Involucrado",
+			"empty": "No hay tareas para este contacto",
+			"serviceUnavailable": "Servicio Todo no disponible",
+			"error": "Error al cargar las tareas",
+			"overdue": "Atrasada",
+			"dueToday": "Hoy",
+			"tomorrow": "Mañana",
+			"showCompleted": "Completadas",
+			"showMore": "Mostrar {count} más",
+			"markComplete": "Marcar como completada",
+			"markIncomplete": "Marcar como no completada"
+		}
+	},
+	"groups": {
+		"title": "Grupos",
+		"new": "Nuevo grupo",
+		"noGroups": "No hay grupos disponibles"
+	},
+	"actions": {
+		"save": "Guardar",
+		"cancel": "Cancelar",
+		"delete": "Eliminar",
+		"edit": "Editar",
+		"create": "Crear",
+		"favorite": "Favorito",
+		"unfavorite": "No favorito",
+		"archive": "Archivar",
+		"unarchive": "Restaurar"
+	},
+	"messages": {
+		"saved": "Guardado",
+		"deleted": "Eliminado",
+		"error": "Ha ocurrido un error"
+	},
+	"google": {
+		"loading": "Verificando conexión...",
+		"connect": {
+			"title": "Conectar con Google",
+			"subtitle": "Importa tus contactos directamente desde Google Contacts",
+			"button": "Conectar con Google"
+		},
+		"connected": "Conectado a Google",
+		"disconnect": "Desconectar",
+		"contacts": "Contactos",
+		"loadMore": "Cargar más"
+	},
+	"filters": {
+		"title": "Filtros",
+		"clearAll": "Borrar todo",
+		"tag": "Etiqueta",
+		"allTags": "Todas las etiquetas",
+		"contactInfo": "Info de contacto",
+		"contact": {
+			"all": "Todos los contactos",
+			"favorites": "Favoritos",
+			"hasPhone": "Con teléfono",
+			"hasEmail": "Con correo",
+			"incomplete": "Incompletos"
+		},
+		"birthdayLabel": "Cumpleaños",
+		"birthday": {
+			"all": "Todos",
+			"today": "Hoy",
+			"thisWeek": "Esta semana",
+			"thisMonth": "Este mes"
+		},
+		"company": "Empresa",
+		"allCompanies": "Todas las empresas"
+	},
+	"export": {
+		"title": "Exportar contactos",
+		"button": "Exportar",
+		"format": "Seleccionar formato",
+		"selectedCount": "{count} contactos seleccionados",
+		"allContacts": "Se exportarán todos los contactos",
+		"includeArchived": "Incluir contactos archivados",
+		"exporting": "Exportando...",
+		"success": "Exportación exitosa"
+	},
+	"notes": {
+		"title": "Notas",
+		"add": "Añadir nota",
+		"addFirst": "Añade tu primera nota",
+		"empty": "Sin notas todavía",
+		"placeholder": "Escribe una nota...",
+		"confirmDelete": "¿Eliminar esta nota?",
+		"pin": "Fijar nota",
+		"unpin": "Desfijar nota",
+		"yesterday": "Ayer"
+	},
+	"tags": {
+		"title": "Etiquetas",
+		"new": "Nueva etiqueta",
+		"edit": "Editar etiqueta",
+		"noTags": "Sin etiquetas todavía",
+		"createFirst": "Crea tu primera etiqueta para organizar contactos",
+		"search": "Buscar etiquetas...",
+		"name": "Nombre",
+		"namePlaceholder": "Introduce el nombre de la etiqueta",
+		"color": "Color",
+		"preview": "Vista previa",
+		"contactCount": "{count} contactos",
+		"confirmDelete": "¿Estás seguro de que quieres eliminar \"{name}\"?",
+		"noResults": "No se encontraron etiquetas",
+		"noResultsFor": "Sin resultados para \"{query}\"",
+		"tagSingular": "Etiqueta",
+		"tagPlural": "Etiquetas"
+	}
+}

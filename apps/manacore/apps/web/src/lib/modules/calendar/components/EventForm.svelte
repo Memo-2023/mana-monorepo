@@ -4,6 +4,8 @@
 	import type { Calendar, CalendarEvent } from '../types';
 	import { toDate } from '../utils/event-date-helpers';
 	import { format, addMinutes } from 'date-fns';
+	import { TagField } from '@manacore/shared-ui';
+	import { useAllTags } from '@manacore/shared-stores';
 
 	interface Props {
 		mode: 'create' | 'edit';
@@ -24,6 +26,11 @@
 	let isAllDay = $state(event?.isAllDay || false);
 	let calendarId = $state(event?.calendarId || '');
 	let recurrenceRule = $state(event?.recurrenceRule || '');
+	let selectedTagIds = $state<string[]>(
+		((event as Record<string, unknown>)?.tagIds as string[]) ?? []
+	);
+
+	const allTags = useAllTags();
 
 	// Date/time fields
 	let startDate = $state('');
@@ -81,6 +88,8 @@
 			endTime: endDateTime.toISOString(),
 			recurrenceRule: recurrenceRule || null,
 		};
+
+		data.tagIds = selectedTagIds;
 
 		if (mode === 'create') {
 			data.calendarId = calendarId;
@@ -193,6 +202,11 @@
 			bind:value={description}
 			placeholder="Beschreibung hinzufügen"
 		></textarea>
+	</div>
+
+	<div class="field">
+		<span class="label">Tags</span>
+		<TagField tags={allTags.value} {selectedTagIds} onChange={(ids) => (selectedTagIds = ids)} />
 	</div>
 
 	<div class="form-actions">

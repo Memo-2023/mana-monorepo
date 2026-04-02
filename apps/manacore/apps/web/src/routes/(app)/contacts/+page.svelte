@@ -2,6 +2,7 @@
 	import { getContext, onMount } from 'svelte';
 	import type { Observable } from 'dexie';
 	import { dropTarget } from '@manacore/shared-ui/dnd';
+	import { FavoriteButton } from '@manacore/shared-ui';
 	import type { DragPayload, TagDragData } from '@manacore/shared-ui/dnd';
 	import { useAllTags } from '$lib/stores/tags.svelte';
 	import {
@@ -288,17 +289,13 @@
 
 							<!-- Actions (visible on hover) -->
 							<div class="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-								<button
-									onclick={(e) => handleToggleFavorite(e, contact.id)}
-									class="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-amber-500"
-									title={contact.isFavorite ? 'Favorit entfernen' : 'Zu Favoriten'}
-								>
-									{#if contact.isFavorite}
-										<Star weight="fill" size={14} />
-									{:else}
-										<Star size={14} />
-									{/if}
-								</button>
+								<FavoriteButton
+									active={contact.isFavorite}
+									onclick={() => contactsStore.toggleFavorite(contact.id)}
+									variant="star"
+									size={14}
+									activeColor="#f59e0b"
+								/>
 								<button
 									onclick={(e) => handleArchive(e, contact.id)}
 									class="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted"

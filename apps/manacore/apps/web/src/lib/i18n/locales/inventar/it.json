@@ -1,0 +1,148 @@
+{
+	"app": {
+		"name": "Inventar",
+		"loading": "Caricamento..."
+	},
+	"nav": {
+		"collections": "Collezioni",
+		"allItems": "Tutti gli articoli",
+		"locations": "Posizioni",
+		"categories": "Categorie",
+		"tags": "Tag",
+		"search": "Cerca",
+		"settings": "Impostazioni",
+		"feedback": "Feedback"
+	},
+	"collection": {
+		"create": "Crea collezione",
+		"edit": "Modifica collezione",
+		"delete": "Elimina collezione",
+		"name": "Nome",
+		"description": "Descrizione",
+		"icon": "Icona",
+		"color": "Colore",
+		"template": "Modello",
+		"schema": "Schema",
+		"noCollections": "Nessuna collezione",
+		"itemCount": "{count} articoli",
+		"selectTemplate": "Seleziona modello",
+		"customFields": "Campi personalizzati",
+		"addField": "Aggiungi campo"
+	},
+	"item": {
+		"create": "Crea articolo",
+		"edit": "Modifica articolo",
+		"delete": "Elimina articolo",
+		"name": "Nome",
+		"description": "Descrizione",
+		"status": "Stato",
+		"quantity": "Quantità",
+		"location": "Posizione",
+		"category": "Categoria",
+		"tags": "Tag",
+		"photos": "Foto",
+		"notes": "Note",
+		"documents": "Documenti",
+		"noItems": "Nessun articolo",
+		"addPhoto": "Aggiungi foto",
+		"addNote": "Aggiungi nota",
+		"addDocument": "Aggiungi documento"
+	},
+	"status": {
+		"owned": "Posseduto",
+		"lent": "Prestato",
+		"stored": "Depositato",
+		"for_sale": "In vendita",
+		"disposed": "Smaltito"
+	},
+	"location": {
+		"create": "Crea posizione",
+		"edit": "Modifica posizione",
+		"delete": "Elimina posizione",
+		"name": "Nome",
+		"parent": "Padre",
+		"noLocations": "Nessuna posizione",
+		"addSub": "Aggiungi sotto-posizione"
+	},
+	"category": {
+		"create": "Crea categoria",
+		"edit": "Modifica categoria",
+		"delete": "Elimina categoria",
+		"name": "Nome",
+		"noCategories": "Nessuna categoria"
+	},
+	"field": {
+		"text": "Testo",
+		"number": "Numero",
+		"date": "Data",
+		"select": "Selezione",
+		"tags": "Tag",
+		"checkbox": "Casella",
+		"url": "URL",
+		"currency": "Valuta",
+		"required": "Obbligatorio",
+		"placeholder": "Segnaposto",
+		"options": "Opzioni",
+		"addOption": "Aggiungi opzione",
+		"removeField": "Rimuovi campo"
+	},
+	"template": {
+		"electronics": "Elettronica",
+		"books": "Libri",
+		"furniture": "Mobili",
+		"clothing": "Abbigliamento",
+		"tools": "Utensili",
+		"kitchen": "Cucina",
+		"media": "Media",
+		"custom": "Personalizzato"
+	},
+	"view": {
+		"list": "Lista",
+		"grid": "Griglia",
+		"table": "Tabella"
+	},
+	"filter": {
+		"all": "Tutti",
+		"saved": "Filtri salvati",
+		"save": "Salva filtro",
+		"clear": "Cancella filtri"
+	},
+	"purchase": {
+		"title": "Dati di acquisto",
+		"price": "Prezzo",
+		"currency": "Valuta",
+		"date": "Data di acquisto",
+		"retailer": "Rivenditore",
+		"warranty": "Garanzia fino al",
+		"receipt": "Ricevuta"
+	},
+	"auth": {
+		"login": "Accedi",
+		"logout": "Esci",
+		"register": "Registrati",
+		"email": "Email",
+		"password": "Password",
+		"forgotPassword": "Password dimenticata?"
+	},
+	"common": {
+		"save": "Salva",
+		"cancel": "Annulla",
+		"delete": "Elimina",
+		"edit": "Modifica",
+		"add": "Aggiungi",
+		"close": "Chiudi",
+		"search": "Cerca",
+		"error": "Errore",
+		"success": "Successo",
+		"loading": "Caricamento...",
+		"noResults": "Nessun risultato",
+		"confirm": "Conferma",
+		"back": "Indietro",
+		"next": "Avanti",
+		"create": "Crea"
+	},
+	"error": {
+		"notFound": "Pagina non trovata",
+		"backToHome": "Torna alla home"
+	}
+}

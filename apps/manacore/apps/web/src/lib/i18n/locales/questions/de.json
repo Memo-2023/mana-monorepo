@@ -1,0 +1,96 @@
+{
+	"app": {
+		"name": "Questions",
+		"loading": "Laden...",
+		"tagline": "KI-gestützte Recherche"
+	},
+	"nav": {
+		"questions": "Fragen",
+		"collections": "Sammlungen",
+		"research": "Recherche",
+		"settings": "Einstellungen"
+	},
+	"question": {
+		"create": "Frage erstellen",
+		"edit": "Frage bearbeiten",
+		"delete": "Frage löschen",
+		"title": "Frage",
+		"description": "Beschreibung",
+		"status": "Status",
+		"priority": "Priorität",
+		"noQuestions": "Noch keine Fragen",
+		"addFirst": "Stelle deine erste Frage"
+	},
+	"status": {
+		"open": "Offen",
+		"researching": "Wird recherchiert",
+		"answered": "Beantwortet",
+		"archived": "Archiviert"
+	},
+	"priority": {
+		"low": "Niedrig",
+		"medium": "Mittel",
+		"high": "Hoch"
+	},
+	"collection": {
+		"create": "Sammlung erstellen",
+		"edit": "Sammlung bearbeiten",
+		"delete": "Sammlung löschen",
+		"name": "Name",
+		"color": "Farbe",
+		"noCollections": "Keine Sammlungen"
+	},
+	"research": {
+		"start": "Recherche starten",
+		"inProgress": "Recherche läuft...",
+		"depth": "Recherchetiefe",
+		"quick": "Schnell",
+		"standard": "Standard",
+		"deep": "Tiefgehend",
+		"sources": "Quellen",
+		"summary": "Zusammenfassung",
+		"keyPoints": "Kernpunkte",
+		"followUp": "Weiterführende Fragen"
+	},
+	"answer": {
+		"create": "Antwort erstellen",
+		"edit": "Antwort bearbeiten",
+		"accept": "Antwort akzeptieren",
+		"rate": "Bewerten",
+		"noAnswer": "Noch keine Antwort"
+	},
+	"source": {
+		"view": "Quelle ansehen",
+		"extract": "Inhalt extrahieren",
+		"noSources": "Keine Quellen gefunden"
+	},
+	"auth": {
+		"login": "Anmelden",
+		"logout": "Abmelden",
+		"register": "Registrieren"
+	},
+	"common": {
+		"save": "Speichern",
+		"cancel": "Abbrechen",
+		"delete": "Löschen",
+		"edit": "Bearbeiten",
+		"add": "Hinzufügen",
+		"close": "Schließen",
+		"search": "Suchen",
+		"error": "Fehler",
+		"success": "Erfolgreich",
+		"loading": "Laden..."
+	},
+	"errors": {
+		"loadQuestions": "Fragen konnten nicht geladen werden",
+		"researchFailed": "Recherche fehlgeschlagen",
+		"saveFailed": "Speichern fehlgeschlagen",
+		"loadSources": "Quellen konnten nicht geladen werden"
+	},
+	"success": {
+		"questionCreated": "Frage erstellt",
+		"questionDeleted": "Frage gelöscht",
+		"researchStarted": "Recherche gestartet",
+		"answerAccepted": "Antwort akzeptiert"
+	}
+}

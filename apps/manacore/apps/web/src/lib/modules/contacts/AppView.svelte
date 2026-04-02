@@ -48,58 +48,35 @@
 	}
 
 	// Quick create
-	let showCreate = $state(false);
-	let newFirstName = $state('');
-	let newLastName = $state('');
-	let newEmail = $state('');
+	let newName = $state('');
 
 	async function createContact() {
-		const firstName = newFirstName.trim();
-		const lastName = newLastName.trim();
-		if (!firstName && !lastName) return;
+		const name = newName.trim();
+		if (!name) return;
+		const parts = name.split(/\s+/);
+		const firstName = parts[0];
+		const lastName = parts.length > 1 ? parts.slice(1).join(' ') : undefined;
 		await contactsStore.createContact({
-			firstName: firstName || undefined,
-			lastName: lastName || undefined,
-			email: newEmail.trim() || undefined,
+			firstName,
+			lastName,
 		});
-		newFirstName = '';
-		newLastName = '';
-		newEmail = '';
-		showCreate = false;
+		newName = '';
 	}
 </script>
 
 <div class="app-view">
-	<div class="search-row">
-		<input bind:value={search} placeholder="Kontakt suchen..." class="search-input" />
-		<button class="add-btn" onclick={() => (showCreate = !showCreate)} title="Neuer Kontakt">
-			<Plus size={14} />
-		</button>
-	</div>
+	<input bind:value={search} placeholder="Kontakt suchen..." class="search-input" />
 
-	{#if showCreate}
-		<form
-			onsubmit={(e) => {
-				e.preventDefault();
-				createContact();
-			}}
-			class="create-form"
-		>
-			<div class="form-row">
-				<input bind:value={newFirstName} placeholder="Vorname" class="form-input" autofocus />
-				<input bind:value={newLastName} placeholder="Nachname" class="form-input" />
-			</div>
-			<div class="form-row">
-				<input
-					bind:value={newEmail}
-					placeholder="E-Mail (optional)"
-					class="form-input full"
-					type="email"
-				/>
-				<button type="submit" class="form-submit">Anlegen</button>
-			</div>
-		</form>
-	{/if}
+	<form
+		onsubmit={(e) => {
+			e.preventDefault();
+			createContact();
+		}}
+		class="quick-add"
+	>
+		<span class="add-icon"><Plus size={16} /></span>
+		<input bind:value={newName} placeholder="Neuer Kontakt..." class="add-input" />
+	</form>
 
 	<p class="count">{filtered().length} Kontakte</p>
 
@@ -133,12 +110,7 @@
 		padding: 1rem;
 		height: 100%;
 	}
-	.search-row {
-		display: flex;
-		gap: 0.375rem;
-	}
 	.search-input {
-		flex: 1;
 		padding: 0.375rem 0.625rem;
 		border-radius: 0.375rem;
 		border: 1px solid rgba(0, 0, 0, 0.08);
@@ -146,6 +118,7 @@
 		font-size: 0.8125rem;
 		color: #374151;
 		outline: none;
+		width: 100%;
 	}
 	.search-input::placeholder {
 		color: #c0bfba;
@@ -163,87 +136,41 @@
 	:global(.dark) .search-input:focus {
 		border-color: rgba(255, 255, 255, 0.15);
 	}
-	.add-btn {
+	.quick-add {
 		display: flex;
 		align-items: center;
-		justify-content: center;
-		width: 32px;
-		height: 32px;
+		gap: 0.5rem;
+		padding: 0.375rem 0.5rem;
 		border-radius: 0.375rem;
-		border: none;
-		background: transparent;
-		color: #9ca3af;
-		cursor: pointer;
-		transition: all 0.15s;
-	}
-	.add-btn:hover {
-		background: rgba(0, 0, 0, 0.06);
-		color: #22c55e;
-	}
-	:global(.dark) .add-btn:hover {
-		background: rgba(255, 255, 255, 0.08);
-		color: #4ade80;
-	}
-	.create-form {
-		display: flex;
-		flex-direction: column;
-		gap: 0.375rem;
-		padding: 0.5rem;
 		border: 1px solid rgba(0, 0, 0, 0.08);
-		border-radius: 0.375rem;
-		animation: slideDown 0.15s ease-out;
+		background: transparent;
 	}
-	:global(.dark) .create-form {
+	:global(.dark) .quick-add {
 		border-color: rgba(255, 255, 255, 0.08);
 	}
-	@keyframes slideDown {
-		from {
-			opacity: 0;
-			transform: translateY(-4px);
-		}
-		to {
-			opacity: 1;
-			transform: translateY(0);
-		}
-	}
-	.form-row {
+	.add-icon {
+		color: #d1d5db;
 		display: flex;
-		gap: 0.375rem;
 	}
-	.form-input {
-		flex: 1;
-		padding: 0.3125rem 0.5rem;
-		border-radius: 0.25rem;
-		border: 1px solid rgba(0, 0, 0, 0.06);
-		background: transparent;
-		font-size: 0.75rem;
-		color: #374151;
-		outline: none;
-		min-width: 0;
-	}
-	.form-input::placeholder {
-		color: #c0bfba;
-	}
-	:global(.dark) .form-input {
-		border-color: rgba(255, 255, 255, 0.06);
-		color: #f3f4f6;
-	}
-	:global(.dark) .form-input::placeholder {
+	:global(.dark) .add-icon {
 		color: #4b5563;
 	}
-	.form-input.full {
-		flex: 2;
-	}
-	.form-submit {
-		padding: 0.3125rem 0.625rem;
+	.add-input {
+		flex: 1;
 		border: none;
-		border-radius: 0.25rem;
-		background: #22c55e;
-		color: white;
-		font-size: 0.75rem;
-		font-weight: 500;
-		cursor: pointer;
-		white-space: nowrap;
+		background: transparent;
+		outline: none;
+		font-size: 0.8125rem;
+		color: #374151;
+	}
+	.add-input::placeholder {
+		color: #c0bfba;
+	}
+	:global(.dark) .add-input {
+		color: #f3f4f6;
+	}
+	:global(.dark) .add-input::placeholder {
+		color: #4b5563;
 	}
 	.count {
 		font-size: 0.6875rem;

@@ -1,0 +1,96 @@
+{
+	"app": {
+		"name": "Questions",
+		"loading": "Caricamento...",
+		"tagline": "Ricerca con IA"
+	},
+	"nav": {
+		"questions": "Domande",
+		"collections": "Collezioni",
+		"research": "Ricerca",
+		"settings": "Impostazioni"
+	},
+	"question": {
+		"create": "Crea domanda",
+		"edit": "Modifica domanda",
+		"delete": "Elimina domanda",
+		"title": "Domanda",
+		"description": "Descrizione",
+		"status": "Stato",
+		"priority": "Priorità",
+		"noQuestions": "Ancora nessuna domanda",
+		"addFirst": "Fai la tua prima domanda"
+	},
+	"status": {
+		"open": "Aperta",
+		"researching": "In ricerca",
+		"answered": "Risolta",
+		"archived": "Archiviata"
+	},
+	"priority": {
+		"low": "Bassa",
+		"medium": "Media",
+		"high": "Alta"
+	},
+	"collection": {
+		"create": "Crea collezione",
+		"edit": "Modifica collezione",
+		"delete": "Elimina collezione",
+		"name": "Nome",
+		"color": "Colore",
+		"noCollections": "Nessuna collezione"
+	},
+	"research": {
+		"start": "Avvia ricerca",
+		"inProgress": "Ricerca in corso...",
+		"depth": "Profondità",
+		"quick": "Rapida",
+		"standard": "Standard",
+		"deep": "Approfondita",
+		"sources": "Fonti",
+		"summary": "Riepilogo",
+		"keyPoints": "Punti chiave",
+		"followUp": "Domande di approfondimento"
+	},
+	"answer": {
+		"create": "Crea risposta",
+		"edit": "Modifica risposta",
+		"accept": "Accetta risposta",
+		"rate": "Valuta",
+		"noAnswer": "Ancora nessuna risposta"
+	},
+	"source": {
+		"view": "Visualizza fonte",
+		"extract": "Estrai contenuto",
+		"noSources": "Nessuna fonte trovata"
+	},
+	"auth": {
+		"login": "Accedi",
+		"logout": "Esci",
+		"register": "Registrati"
+	},
+	"common": {
+		"save": "Salva",
+		"cancel": "Annulla",
+		"delete": "Elimina",
+		"edit": "Modifica",
+		"add": "Aggiungi",
+		"close": "Chiudi",
+		"search": "Cerca",
+		"error": "Errore",
+		"success": "Successo",
+		"loading": "Caricamento..."
+	},
+	"errors": {
+		"loadQuestions": "Caricamento domande fallito",
+		"researchFailed": "Ricerca fallita",
+		"saveFailed": "Salvataggio fallito",
+		"loadSources": "Caricamento fonti fallito"
+	},
+	"success": {
+		"questionCreated": "Domanda creata",
+		"questionDeleted": "Domanda eliminata",
+		"researchStarted": "Ricerca avviata",
+		"answerAccepted": "Risposta accettata"
+	}
+}

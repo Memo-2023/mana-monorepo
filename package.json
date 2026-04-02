@@ -36,6 +36,7 @@
 		"dev:manacore:mobile": "pnpm --filter @manacore/mobile dev",
 		"dev:manacore:app": "pnpm --filter @manacore/web dev",
 		"dev:manacore:full": "concurrently -n web,servers -c cyan,yellow \"pnpm dev:manacore:web\" \"pnpm dev:manacore:servers\"",
+		"dev:manacore:all": "pnpm docker:up && pnpm setup:db && pnpm dev:manacore:full",
 		"dev:cards:web": "pnpm --filter @cards/web dev",
 		"dev:cards:landing": "pnpm --filter @cards/landing dev",
 		"dev:cards:mobile": "pnpm --filter @cards/mobile dev",

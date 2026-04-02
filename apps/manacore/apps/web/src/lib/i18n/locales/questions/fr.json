@@ -1,0 +1,96 @@
+{
+	"app": {
+		"name": "Questions",
+		"loading": "Chargement...",
+		"tagline": "Recherche assistée par IA"
+	},
+	"nav": {
+		"questions": "Questions",
+		"collections": "Collections",
+		"research": "Recherche",
+		"settings": "Paramètres"
+	},
+	"question": {
+		"create": "Créer une question",
+		"edit": "Modifier la question",
+		"delete": "Supprimer la question",
+		"title": "Question",
+		"description": "Description",
+		"status": "Statut",
+		"priority": "Priorité",
+		"noQuestions": "Pas encore de questions",
+		"addFirst": "Pose ta première question"
+	},
+	"status": {
+		"open": "Ouverte",
+		"researching": "En recherche",
+		"answered": "Répondue",
+		"archived": "Archivée"
+	},
+	"priority": {
+		"low": "Basse",
+		"medium": "Moyenne",
+		"high": "Haute"
+	},
+	"collection": {
+		"create": "Créer une collection",
+		"edit": "Modifier la collection",
+		"delete": "Supprimer la collection",
+		"name": "Nom",
+		"color": "Couleur",
+		"noCollections": "Aucune collection"
+	},
+	"research": {
+		"start": "Lancer la recherche",
+		"inProgress": "Recherche en cours...",
+		"depth": "Profondeur",
+		"quick": "Rapide",
+		"standard": "Standard",
+		"deep": "Approfondie",
+		"sources": "Sources",
+		"summary": "Résumé",
+		"keyPoints": "Points clés",
+		"followUp": "Questions de suivi"
+	},
+	"answer": {
+		"create": "Créer une réponse",
+		"edit": "Modifier la réponse",
+		"accept": "Accepter la réponse",
+		"rate": "Noter",
+		"noAnswer": "Pas encore de réponse"
+	},
+	"source": {
+		"view": "Voir la source",
+		"extract": "Extraire le contenu",
+		"noSources": "Aucune source trouvée"
+	},
+	"auth": {
+		"login": "Connexion",
+		"logout": "Déconnexion",
+		"register": "Inscription"
+	},
+	"common": {
+		"save": "Enregistrer",
+		"cancel": "Annuler",
+		"delete": "Supprimer",
+		"edit": "Modifier",
+		"add": "Ajouter",
+		"close": "Fermer",
+		"search": "Rechercher",
+		"error": "Erreur",
+		"success": "Succès",
+		"loading": "Chargement..."
+	},
+	"errors": {
+		"loadQuestions": "Échec du chargement des questions",
+		"researchFailed": "Recherche échouée",
+		"saveFailed": "Échec de la sauvegarde",
+		"loadSources": "Échec du chargement des sources"
+	},
+	"success": {
+		"questionCreated": "Question créée",
+		"questionDeleted": "Question supprimée",
+		"researchStarted": "Recherche lancée",
+		"answerAccepted": "Réponse acceptée"
+	}
+}

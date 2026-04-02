@@ -1,0 +1,112 @@
+{
+	"app": {
+		"name": "SkillTree",
+		"loading": "Chargement...",
+		"tagline": "Monte en niveau dans ta vie"
+	},
+	"nav": {
+		"skills": "Compétences",
+		"activities": "Activités",
+		"stats": "Statistiques",
+		"settings": "Paramètres"
+	},
+	"skill": {
+		"create": "Créer une compétence",
+		"edit": "Modifier la compétence",
+		"delete": "Supprimer la compétence",
+		"name": "Nom",
+		"description": "Description",
+		"branch": "Catégorie",
+		"level": "Niveau",
+		"xp": "XP",
+		"totalXp": "XP total",
+		"noSkills": "Pas encore de compétences",
+		"addFirst": "Ajoute ta première compétence"
+	},
+	"branch": {
+		"intellect": "Intellect",
+		"body": "Corps",
+		"creativity": "Créativité",
+		"social": "Social",
+		"practical": "Pratique",
+		"mindset": "État d'esprit"
+	},
+	"level": {
+		"unknown": "Inconnu",
+		"beginner": "Débutant",
+		"intermediate": "Intermédiaire",
+		"competent": "Compétent",
+		"expert": "Expert",
+		"master": "Maître"
+	},
+	"activity": {
+		"log": "Enregistrer une activité",
+		"recent": "Activités récentes",
+		"xpEarned": "+{xp} XP",
+		"noActivities": "Pas encore d'activités"
+	},
+	"stats": {
+		"totalXp": "XP total",
+		"totalSkills": "Compétences",
+		"highestLevel": "Niveau le plus élevé",
+		"streak": "Série",
+		"achievements": "Succès"
+	},
+	"achievement": {
+		"title": "Succès",
+		"unlocked": "Débloqué",
+		"locked": "Verrouillé",
+		"progress": "Progression",
+		"celebration": "Succès débloqué !",
+		"clickToClose": "Cliquer pour fermer",
+		"noAchievements": "Aucun succès trouvé",
+		"showAll": "Tout afficher",
+		"showUnlocked": "Débloqués uniquement",
+		"all": "Tous",
+		"rarity": {
+			"common": "Commun",
+			"uncommon": "Peu commun",
+			"rare": "Rare",
+			"epic": "Épique",
+			"legendary": "Légendaire"
+		},
+		"category": {
+			"xp": "Expérience",
+			"skills": "Compétences",
+			"levels": "Niveau",
+			"activities": "Activités",
+			"streak": "Série",
+			"branches": "Branches",
+			"special": "Spécial"
+		}
+	},
+	"auth": {
+		"login": "Connexion",
+		"logout": "Déconnexion",
+		"register": "Inscription"
+	},
+	"common": {
+		"save": "Enregistrer",
+		"cancel": "Annuler",
+		"delete": "Supprimer",
+		"edit": "Modifier",
+		"add": "Ajouter",
+		"close": "Fermer",
+		"search": "Rechercher",
+		"error": "Erreur",
+		"success": "Succès",
+		"loading": "Chargement..."
+	},
+	"errors": {
+		"loadSkills": "Échec du chargement des compétences",
+		"createSkill": "Échec de la création",
+		"updateSkill": "Échec de la mise à jour",
+		"deleteSkill": "Échec de la suppression"
+	},
+	"success": {
+		"skillCreated": "Compétence créée",
+		"skillUpdated": "Compétence mise à jour",
+		"skillDeleted": "Compétence supprimée",
+		"xpAdded": "XP ajouté"
+	}
+}

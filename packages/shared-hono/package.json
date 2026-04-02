@@ -14,12 +14,14 @@
 		"./admin": "./src/admin.ts",
 		"./error": "./src/error.ts",
 		"./credits": "./src/credits.ts",
-		"./rate-limit": "./src/rate-limit.ts"
+		"./rate-limit": "./src/rate-limit.ts",
+		"./logger": "./src/logger.ts"
 	},
 	"scripts": {
 		"type-check": "tsc --noEmit"
 	},
 	"dependencies": {
+		"@manacore/shared-logger": "workspace:*",
 		"hono": "^4.7.0",
 		"jose": "^6.0.11",
 		"drizzle-orm": "^0.45.1",

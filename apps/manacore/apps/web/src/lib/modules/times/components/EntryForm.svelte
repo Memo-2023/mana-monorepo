@@ -3,6 +3,7 @@
 	import { _ } from 'svelte-i18n';
 	import { timeEntryTable } from '$lib/modules/times/collections';
 	import { X, CurrencyDollar } from '@manacore/shared-icons';
+	import { TagField } from '@manacore/shared-ui';
 	import type { Project, Client } from '$lib/modules/times/types';
 	import {
 		parseMultiEntryInput,
@@ -28,6 +29,7 @@
 	let durationHours = $state(1);
 	let durationMinutes = $state(0);
 	let isBillable = $state(false);
+	let selectedTagIds = $state<string[]>([]);
 
 	// Quick-input state
 	let quickInput = $state('');
@@ -113,6 +115,7 @@
 		durationHours = 1;
 		durationMinutes = 0;
 		isBillable = false;
+		selectedTagIds = [];
 	}
 
 	async function handleSubmit() {
@@ -132,7 +135,7 @@
 			duration: totalSeconds,
 			isBillable,
 			isRunning: false,
-			tags: [],
+			tags: selectedTagIds,
 			billingRate: null,
 			visibility: 'private',
 			guildId: null,
@@ -305,6 +308,18 @@
 						<CurrencyDollar size={16} />
 						{isBillable ? $_('entry.billable') : $_('entry.notBillable')}
 					</button>
+				</div>
+
+				<!-- Tags -->
+				<div>
+					<label class="mb-1.5 block text-xs font-medium text-[hsl(var(--muted-foreground))]"
+						>Tags</label
+					>
+					<TagField
+						tags={allTags.value}
+						{selectedTagIds}
+						onChange={(ids) => (selectedTagIds = ids)}
+					/>
 				</div>
 
 				<!-- Submit -->

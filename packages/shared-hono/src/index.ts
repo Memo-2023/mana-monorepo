@@ -41,4 +41,5 @@ export { errorHandler, notFoundHandler } from './error';
 export { getBalance, validateCredits, consumeCredits, refundCredits } from './credits';
 export type { CreditBalance, CreditValidationResult } from './credits';
 export { rateLimitMiddleware } from './rate-limit';
+export { requestLogger, initLogger } from './logger';
 export type { CurrentUserData, AuthVariables } from './types';

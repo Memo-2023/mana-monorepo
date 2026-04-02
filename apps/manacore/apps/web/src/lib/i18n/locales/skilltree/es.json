@@ -1,0 +1,112 @@
+{
+	"app": {
+		"name": "SkillTree",
+		"loading": "Cargando...",
+		"tagline": "Sube de nivel en tu vida"
+	},
+	"nav": {
+		"skills": "Habilidades",
+		"activities": "Actividades",
+		"stats": "Estadísticas",
+		"settings": "Ajustes"
+	},
+	"skill": {
+		"create": "Crear habilidad",
+		"edit": "Editar habilidad",
+		"delete": "Eliminar habilidad",
+		"name": "Nombre",
+		"description": "Descripción",
+		"branch": "Categoría",
+		"level": "Nivel",
+		"xp": "XP",
+		"totalXp": "XP total",
+		"noSkills": "Aún no hay habilidades",
+		"addFirst": "Agrega tu primera habilidad"
+	},
+	"branch": {
+		"intellect": "Intelecto",
+		"body": "Cuerpo",
+		"creativity": "Creatividad",
+		"social": "Social",
+		"practical": "Práctico",
+		"mindset": "Mentalidad"
+	},
+	"level": {
+		"unknown": "Desconocido",
+		"beginner": "Principiante",
+		"intermediate": "Intermedio",
+		"competent": "Competente",
+		"expert": "Experto",
+		"master": "Maestro"
+	},
+	"activity": {
+		"log": "Registrar actividad",
+		"recent": "Actividades recientes",
+		"xpEarned": "+{xp} XP",
+		"noActivities": "Aún no hay actividades"
+	},
+	"stats": {
+		"totalXp": "XP total",
+		"totalSkills": "Habilidades",
+		"highestLevel": "Nivel más alto",
+		"streak": "Racha",
+		"achievements": "Logros"
+	},
+	"achievement": {
+		"title": "Logros",
+		"unlocked": "Desbloqueado",
+		"locked": "Bloqueado",
+		"progress": "Progreso",
+		"celebration": "¡Logro desbloqueado!",
+		"clickToClose": "Clic para cerrar",
+		"noAchievements": "No se encontraron logros",
+		"showAll": "Mostrar todos",
+		"showUnlocked": "Solo desbloqueados",
+		"all": "Todos",
+		"rarity": {
+			"common": "Común",
+			"uncommon": "Poco común",
+			"rare": "Raro",
+			"epic": "Épico",
+			"legendary": "Legendario"
+		},
+		"category": {
+			"xp": "Experiencia",
+			"skills": "Habilidades",
+			"levels": "Nivel",
+			"activities": "Actividades",
+			"streak": "Racha",
+			"branches": "Ramas",
+			"special": "Especial"
+		}
+	},
+	"auth": {
+		"login": "Iniciar sesión",
+		"logout": "Cerrar sesión",
+		"register": "Registrarse"
+	},
+	"common": {
+		"save": "Guardar",
+		"cancel": "Cancelar",
+		"delete": "Eliminar",
+		"edit": "Editar",
+		"add": "Agregar",
+		"close": "Cerrar",
+		"search": "Buscar",
+		"error": "Error",
+		"success": "Correcto",
+		"loading": "Cargando..."
+	},
+	"errors": {
+		"loadSkills": "Error al cargar habilidades",
+		"createSkill": "Error al crear habilidad",
+		"updateSkill": "Error al actualizar habilidad",
+		"deleteSkill": "Error al eliminar habilidad"
+	},
+	"success": {
+		"skillCreated": "Habilidad creada",
+		"skillUpdated": "Habilidad actualizada",
+		"skillDeleted": "Habilidad eliminada",
+		"xpAdded": "XP agregado"
+	}
+}

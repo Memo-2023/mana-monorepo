@@ -1,0 +1,219 @@
+{
+	"app": {
+		"name": "Contacts"
+	},
+	"common": {
+		"back": "Zurück",
+		"cancel": "Abbrechen",
+		"loadingMore": "Lade weitere..."
+	},
+	"nav": {
+		"contacts": "Kontakte",
+		"groups": "Gruppen",
+		"tags": "Tags",
+		"favorites": "Favoriten",
+		"archive": "Archiv",
+		"search": "Suche",
+		"settings": "Einstellungen",
+		"feedback": "Feedback",
+		"import": "Importieren"
+	},
+	"import": {
+		"title": "Kontakte importieren",
+		"subtitle": "Importiere Kontakte aus vCard- oder CSV-Dateien",
+		"tabs": {
+			"file": "Datei-Import",
+			"google": "Google Kontakte"
+		},
+		"processing": "Datei wird verarbeitet...",
+		"importing": "Importiere...",
+		"downloadTemplate": "CSV-Vorlage herunterladen",
+		"dropzone": {
+			"title": "Datei hierher ziehen",
+			"subtitle": "oder klicken zum Auswählen"
+		},
+		"preview": {
+			"total": "Gesamt",
+			"valid": "Gültig",
+			"duplicates": "Duplikate",
+			"selected": "Ausgewählt",
+			"errors": "Fehler beim Parsen",
+			"duplicateHandling": "Wie sollen Duplikate behandelt werden?",
+			"skip": "Überspringen",
+			"merge": "Zusammenführen",
+			"create": "Trotzdem erstellen",
+			"contacts": "Kontakte zum Importieren",
+			"selectAll": "Alle auswählen",
+			"deselectAll": "Alle abwählen",
+			"duplicateTag": "Duplikat",
+			"matchesWith": "Stimmt überein mit",
+			"importButton": "{count} Kontakte importieren"
+		},
+		"result": {
+			"title": "Import abgeschlossen",
+			"subtitle": "Deine Kontakte wurden erfolgreich importiert",
+			"imported": "Importiert",
+			"merged": "Zusammengeführt",
+			"skipped": "Übersprungen",
+			"errors": "Fehler",
+			"importMore": "Weitere importieren",
+			"done": "Fertig"
+		}
+	},
+	"contacts": {
+		"title": "Kontakte",
+		"new": "Neuer Kontakt",
+		"edit": "Bearbeiten",
+		"delete": "Löschen",
+		"search": "Kontakte durchsuchen...",
+		"noContacts": "Keine Kontakte gefunden",
+		"addFirst": "Füge deinen ersten Kontakt hinzu",
+		"me": "Ich",
+		"myCard": "Meine Karte",
+		"favorites": "Favoriten",
+		"archive": "Archiv",
+		"contact": "Kontakt",
+		"contactsPlural": "Kontakte",
+		"call": "Anrufen",
+		"email": "E-Mail senden",
+		"favorite": "Als Favorit markieren",
+		"unfavorite": "Favorit entfernen"
+	},
+	"views": {
+		"list": "Listenansicht",
+		"grid": "Kachelansicht",
+		"alphabet": "Alphabetisch"
+	},
+	"sort": {
+		"firstName": "Vorname",
+		"lastName": "Nachname"
+	},
+	"contact": {
+		"firstName": "Vorname",
+		"lastName": "Nachname",
+		"displayName": "Anzeigename",
+		"email": "E-Mail",
+		"phone": "Telefon",
+		"mobile": "Mobil",
+		"company": "Firma",
+		"jobTitle": "Position",
+		"department": "Abteilung",
+		"street": "Straße",
+		"city": "Stadt",
+		"postalCode": "PLZ",
+		"country": "Land",
+		"website": "Website",
+		"birthday": "Geburtstag",
+		"notes": "Notizen",
+		"tasks": {
+			"title": "Aufgaben",
+			"assigned": "Zugewiesen",
+			"involved": "Beteiligt",
+			"empty": "Keine Aufgaben für diesen Kontakt",
+			"serviceUnavailable": "Todo-Service nicht erreichbar",
+			"error": "Fehler beim Laden der Aufgaben",
+			"overdue": "Überfällig",
+			"dueToday": "Heute",
+			"tomorrow": "Morgen",
+			"showCompleted": "Erledigte",
+			"showMore": "{count} weitere anzeigen",
+			"markComplete": "Als erledigt markieren",
+			"markIncomplete": "Als unerledigt markieren"
+		}
+	},
+	"groups": {
+		"title": "Gruppen",
+		"new": "Neue Gruppe",
+		"noGroups": "Keine Gruppen vorhanden"
+	},
+	"actions": {
+		"save": "Speichern",
+		"cancel": "Abbrechen",
+		"delete": "Löschen",
+		"edit": "Bearbeiten",
+		"create": "Erstellen",
+		"favorite": "Favorit",
+		"unfavorite": "Kein Favorit",
+		"archive": "Archivieren",
+		"unarchive": "Wiederherstellen"
+	},
+	"messages": {
+		"saved": "Gespeichert",
+		"deleted": "Gelöscht",
+		"error": "Ein Fehler ist aufgetreten"
+	},
+	"google": {
+		"loading": "Verbindung wird geprüft...",
+		"connect": {
+			"title": "Mit Google verbinden",
+			"subtitle": "Importiere deine Kontakte direkt aus Google Kontakte",
+			"button": "Mit Google verbinden"
+		},
+		"connected": "Verbunden mit Google",
+		"disconnect": "Trennen",
+		"contacts": "Kontakte",
+		"loadMore": "Mehr laden"
+	},
+	"filters": {
+		"title": "Filter",
+		"clearAll": "Alle löschen",
+		"tag": "Tag",
+		"allTags": "Alle Tags",
+		"contactInfo": "Kontaktinfo",
+		"contact": {
+			"all": "Alle Kontakte",
+			"favorites": "Favoriten",
+			"hasPhone": "Mit Telefon",
+			"hasEmail": "Mit E-Mail",
+			"incomplete": "Unvollständig"
+		},
+		"birthdayLabel": "Geburtstag",
+		"birthday": {
+			"all": "Alle",
+			"today": "Heute",
+			"thisWeek": "Diese Woche",
+			"thisMonth": "Diesen Monat"
+		},
+		"company": "Firma",
+		"allCompanies": "Alle Firmen"
+	},
+	"export": {
+		"title": "Kontakte exportieren",
+		"button": "Exportieren",
+		"format": "Format auswählen",
+		"selectedCount": "{count} Kontakte ausgewählt",
+		"allContacts": "Alle Kontakte werden exportiert",
+		"includeArchived": "Archivierte Kontakte einschließen",
+		"exporting": "Exportiere...",
+		"success": "Export erfolgreich"
+	},
+	"notes": {
+		"title": "Notizen",
+		"add": "Notiz hinzufügen",
+		"addFirst": "Erste Notiz hinzufügen",
+		"empty": "Noch keine Notizen",
+		"placeholder": "Schreibe eine Notiz...",
+		"confirmDelete": "Diese Notiz löschen?",
+		"pin": "Notiz anheften",
+		"unpin": "Nicht mehr anheften",
+		"yesterday": "Gestern"
+	},
+	"tags": {
+		"title": "Tags",
+		"new": "Neuer Tag",
+		"edit": "Tag bearbeiten",
+		"noTags": "Noch keine Tags",
+		"createFirst": "Erstelle deinen ersten Tag um Kontakte zu organisieren",
+		"search": "Tags durchsuchen...",
+		"name": "Name",
+		"namePlaceholder": "Tag-Name eingeben",
+		"color": "Farbe",
+		"preview": "Vorschau",
+		"contactCount": "{count} Kontakte",
+		"confirmDelete": "Möchtest du \"{name}\" wirklich löschen?",
+		"noResults": "Keine Tags gefunden",
+		"noResultsFor": "Keine Ergebnisse für \"{query}\"",
+		"tagSingular": "Tag",
+		"tagPlural": "Tags"
+	}
+}

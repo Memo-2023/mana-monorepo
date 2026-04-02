@@ -26,6 +26,10 @@
 		ShareNetwork,
 	} from '@manacore/shared-icons';
 	import { ShareModal } from '@manacore/shared-uload';
+	import { TagField } from '@manacore/shared-ui';
+	import { useAllTags } from '@manacore/shared-stores';
+
+	const allTags = useAllTags();
 
 	const allContacts$: Observable<Contact[]> = getContext('contacts');
 
@@ -65,6 +69,7 @@
 			twitter: contact.twitter,
 			instagram: contact.instagram,
 			github: contact.github,
+			tagIds: ((contact as Record<string, unknown>).tagIds as string[]) ?? [],
 		};
 		isEditing = true;
 	}
@@ -370,6 +375,18 @@
 						rows="4"
 						class={inputClass}
 					></textarea>
+				</div>
+
+				<!-- Tags -->
+				<div class="rounded-xl border border-border bg-card p-5">
+					<h2 class="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+						Tags
+					</h2>
+					<TagField
+						tags={allTags.value}
+						selectedIds={(editData.tagIds as string[]) ?? []}
+						onChange={(ids) => (editData = { ...editData, tagIds: ids })}
+					/>
 				</div>
 
 				<!-- Social Media -->

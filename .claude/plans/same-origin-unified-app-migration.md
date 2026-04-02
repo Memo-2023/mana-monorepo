@@ -53,14 +53,22 @@
 - **Phase 5:** Infrastruktur (Docker -20 Container, Cloudflare -60 Zeilen, mana-auth 30→8 Origins)
 - **Phase 6:** Navigation (APP_URLS auf Pfade, PillNav intern statt window.open)
 - **Phase 7:** Unified Sync (Multi-App Sync Manager, Change Tracker mit appId-Routing)
+- **Phase 8:** Sync Fix & Cross-App-Reader Elimination (2026-04-02)
+  - Dexie Hooks für automatisches Change-Tracking (ersetzt manuelles trackChange())
+  - sync.ts komplett neu: korrekte URLs, Auth-Token, Table-Name-Mapping, Server-Change-Guard
+  - 12 Cross-App-Reader eliminiert (cross-app-stores.ts gelöscht, 383 Zeilen)
+  - Legacy-DB-Migration (manacore-todo etc. → unified manacore DB)
+  - manacoreStore refaktoriert auf unified DB Wrapper
+  - Build verifiziert, 0 neue Type-Fehler
 
-### Alle 7 Phasen abgeschlossen!
+### Alle 8 Phasen abgeschlossen!
 
 **Verbleibende Arbeiten (nicht im Plan, aber empfohlen):**
 - Alte standalone Web-Apps in `apps-archived/` verschieben (nach Validierung)
 - E2E-Tests pro Modul (Routen erreichbar, CRUD funktioniert)
-- Build-Validierung der unified App (`pnpm --filter @manacore/web build`)
 - Production-Deploy + Cloudflare Tunnel Config auf Server aktualisieren
+- WebSocket-Konsolidierung: eine WS-Verbindung pro User statt 27 pro App (optional, Backend-Änderung)
+- End-to-End Sync-Test mit laufendem mana-sync Server verifizieren
 
 ### Nächste Schritte — Phase 2 abgeschlossen!
 

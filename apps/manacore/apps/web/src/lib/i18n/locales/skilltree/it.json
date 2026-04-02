@@ -1,0 +1,112 @@
+{
+	"app": {
+		"name": "SkillTree",
+		"loading": "Caricamento...",
+		"tagline": "Sali di livello nella tua vita"
+	},
+	"nav": {
+		"skills": "Abilità",
+		"activities": "Attività",
+		"stats": "Statistiche",
+		"settings": "Impostazioni"
+	},
+	"skill": {
+		"create": "Crea abilità",
+		"edit": "Modifica abilità",
+		"delete": "Elimina abilità",
+		"name": "Nome",
+		"description": "Descrizione",
+		"branch": "Categoria",
+		"level": "Livello",
+		"xp": "XP",
+		"totalXp": "XP totali",
+		"noSkills": "Ancora nessuna abilità",
+		"addFirst": "Aggiungi la tua prima abilità"
+	},
+	"branch": {
+		"intellect": "Intelletto",
+		"body": "Corpo",
+		"creativity": "Creatività",
+		"social": "Sociale",
+		"practical": "Pratico",
+		"mindset": "Mentalità"
+	},
+	"level": {
+		"unknown": "Sconosciuto",
+		"beginner": "Principiante",
+		"intermediate": "Intermedio",
+		"competent": "Competente",
+		"expert": "Esperto",
+		"master": "Maestro"
+	},
+	"activity": {
+		"log": "Registra attività",
+		"recent": "Attività recenti",
+		"xpEarned": "+{xp} XP",
+		"noActivities": "Ancora nessuna attività"
+	},
+	"stats": {
+		"totalXp": "XP totali",
+		"totalSkills": "Abilità",
+		"highestLevel": "Livello più alto",
+		"streak": "Serie",
+		"achievements": "Traguardi"
+	},
+	"achievement": {
+		"title": "Traguardi",
+		"unlocked": "Sbloccato",
+		"locked": "Bloccato",
+		"progress": "Progresso",
+		"celebration": "Traguardo sbloccato!",
+		"clickToClose": "Clicca per chiudere",
+		"noAchievements": "Nessun traguardo trovato",
+		"showAll": "Mostra tutti",
+		"showUnlocked": "Solo sbloccati",
+		"all": "Tutti",
+		"rarity": {
+			"common": "Comune",
+			"uncommon": "Non comune",
+			"rare": "Raro",
+			"epic": "Epico",
+			"legendary": "Leggendario"
+		},
+		"category": {
+			"xp": "Esperienza",
+			"skills": "Abilità",
+			"levels": "Livello",
+			"activities": "Attività",
+			"streak": "Serie",
+			"branches": "Rami",
+			"special": "Speciale"
+		}
+	},
+	"auth": {
+		"login": "Accedi",
+		"logout": "Esci",
+		"register": "Registrati"
+	},
+	"common": {
+		"save": "Salva",
+		"cancel": "Annulla",
+		"delete": "Elimina",
+		"edit": "Modifica",
+		"add": "Aggiungi",
+		"close": "Chiudi",
+		"search": "Cerca",
+		"error": "Errore",
+		"success": "Successo",
+		"loading": "Caricamento..."
+	},
+	"errors": {
+		"loadSkills": "Caricamento abilità fallito",
+		"createSkill": "Creazione abilità fallita",
+		"updateSkill": "Aggiornamento abilità fallito",
+		"deleteSkill": "Eliminazione abilità fallita"
+	},
+	"success": {
+		"skillCreated": "Abilità creata",
+		"skillUpdated": "Abilità aggiornata",
+		"skillDeleted": "Abilità eliminata",
+		"xpAdded": "XP aggiunti"
+	}
+}
