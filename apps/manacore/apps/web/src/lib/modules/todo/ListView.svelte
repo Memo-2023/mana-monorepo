@@ -15,8 +15,24 @@
 	import { tasksStore } from './stores/tasks.svelte';
 	import { Circle, Check } from '@manacore/shared-icons';
 	import type { ViewProps } from '$lib/components/workbench/nav-stack';
+	import { dropTarget } from '@manacore/shared-ui/dnd';
+	import type { TagDragData } from '@manacore/shared-ui/dnd';
+	import { getTagsByIds } from '$lib/stores/tags.svelte';
 
 	let { navigate, goBack, params }: ViewProps = $props();
+
+	function getTaskTagIds(task: import('./types').Task): string[] {
+		return ((task.metadata as Record<string, unknown>)?.labelIds as string[]) ?? [];
+	}
+
+	function handleTagDrop(taskId: string, tagData: TagDragData) {
+		const task = tasks.find((t) => t.id === taskId);
+		if (!task) return;
+		const current = getTaskTagIds(task);
+		if (!current.includes(tagData.id)) {
+			tasksStore.updateLabels(taskId, [...current, tagData.id]);
+		}
+	}
 
 	type ViewFilter = 'inbox' | 'today' | 'overdue';
 
@@ -92,6 +108,8 @@
 
 	<div class="task-list">
 		{#each filtered() as task (task.id)}
+			{@const taskTagIds = getTaskTagIds(task)}
+			{@const taskTags = getTagsByIds(taskTagIds)}
 			<button
 				onclick={() =>
 					navigate('detail', {
@@ -100,6 +118,11 @@
 						_siblingKey: 'taskId',
 					})}
 				class="task-item"
+				use:dropTarget={{
+					accepts: ['tag'],
+					onDrop: (p) => handleTagDrop(task.id, p.data as unknown as TagDragData),
+					canDrop: (p) => !taskTagIds.includes((p.data as unknown as TagDragData).id),
+				}}
 			>
 				<div
 					class="checkbox"
@@ -114,8 +137,15 @@
 				</div>
 				<div class="task-content">
 					<p class="task-title" class:completed={task.isCompleted}>{task.title}</p>
-					{#if task.dueDate}
-						<p class="task-due">{new Date(task.dueDate).toLocaleDateString('de')}</p>
+					{#if task.dueDate || taskTags.length > 0}
+						<div class="task-meta">
+							{#if task.dueDate}
+								<span class="task-due">{new Date(task.dueDate).toLocaleDateString('de')}</span>
+							{/if}
+							{#each taskTags as tag (tag.id)}
+								<span class="tag-dot" style="background: {tag.color}" title={tag.name}></span>
+							{/each}
+						</div>
 					{/if}
 				</div>
 			</button>
@@ -282,10 +312,26 @@
 	:global(.dark) .task-title.completed {
 		color: #6b7280;
 	}
+	.task-meta {
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
+		margin: 0;
+	}
 	.task-due {
 		font-size: 0.6875rem;
 		color: #9ca3af;
-		margin: 0;
+	}
+	.tag-dot {
+		width: 6px;
+		height: 6px;
+		border-radius: 9999px;
+		flex-shrink: 0;
+	}
+	:global(.task-item.mana-drop-target-hover) {
+		outline: 2px solid rgba(139, 92, 246, 0.4);
+		outline-offset: -2px;
+		background: rgba(139, 92, 246, 0.06) !important;
 	}
 	.empty {
 		padding: 2rem 0;

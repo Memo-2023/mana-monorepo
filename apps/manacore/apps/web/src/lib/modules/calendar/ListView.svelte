@@ -10,8 +10,20 @@
 	import { eventsStore } from './stores/events.svelte';
 	import { Plus } from '@manacore/shared-icons';
 	import type { ViewProps } from '$lib/components/workbench/nav-stack';
+	import { dropTarget } from '@manacore/shared-ui/dnd';
+	import type { TagDragData } from '@manacore/shared-ui/dnd';
+	import { getTagsByIds } from '$lib/stores/tags.svelte';
 
 	let { navigate, goBack, params }: ViewProps = $props();
+
+	function handleTagDrop(eventId: string, tagData: TagDragData) {
+		const event = events.find((e) => e.id === eventId);
+		if (!event) return;
+		const current = event.tagIds ?? [];
+		if (!current.includes(tagData.id)) {
+			eventsStore.updateTagIds(eventId, [...current, tagData.id]);
+		}
+	}
 
 	let events = $state<LocalEvent[]>([]);
 
@@ -121,6 +133,7 @@
 		</form>
 
 		{#each todayEvents as event (event.id)}
+			{@const eventTags = getTagsByIds(event.tagIds ?? [])}
 			<button
 				class="event-card"
 				onclick={() =>
@@ -129,8 +142,22 @@
 						_siblingIds: todayEvents.map((e) => e.id),
 						_siblingKey: 'eventId',
 					})}
+				use:dropTarget={{
+					accepts: ['tag'],
+					onDrop: (p) => handleTagDrop(event.id, p.data as unknown as TagDragData),
+					canDrop: (p) => !(event.tagIds ?? []).includes((p.data as unknown as TagDragData).id),
+				}}
 			>
-				<p class="event-title">{event.title}</p>
+				<div class="event-header">
+					<p class="event-title">{event.title}</p>
+					{#if eventTags.length > 0}
+						<div class="event-tags">
+							{#each eventTags as tag (tag.id)}
+								<span class="tag-dot" style="background: {tag.color}" title={tag.name}></span>
+							{/each}
+						</div>
+					{/if}
+				</div>
 				<p class="event-time-label">
 					{#if event.allDay}
 						Ganztägig
@@ -276,6 +303,28 @@
 	}
 	:global(.dark) .event-card:hover {
 		background: rgba(255, 255, 255, 0.06);
+	}
+	.event-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.375rem;
+	}
+	.event-tags {
+		display: flex;
+		gap: 0.25rem;
+		flex-shrink: 0;
+	}
+	.tag-dot {
+		width: 6px;
+		height: 6px;
+		border-radius: 9999px;
+		flex-shrink: 0;
+	}
+	:global(.event-card.mana-drop-target-hover) {
+		outline: 2px solid rgba(59, 130, 246, 0.4);
+		outline-offset: -2px;
+		background: rgba(59, 130, 246, 0.06) !important;
 	}
 	.event-title {
 		font-size: 0.8125rem;

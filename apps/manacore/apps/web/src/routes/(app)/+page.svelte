@@ -4,6 +4,19 @@
 	import { PageCarousel, type CarouselPage } from '$lib/components/page-carousel';
 	import { getAppEntry } from '$lib/components/workbench/app-registry';
 	import { createAppSettingsStore } from '@manacore/shared-stores';
+	import { DragPreview, dragSource } from '@manacore/shared-ui/dnd';
+	import { useAllTags } from '$lib/stores/tags.svelte';
+	import type { Tag } from '@manacore/shared-tags';
+
+	// ── Tags for drag & drop ───────────────────────────────
+	const allTags$ = useAllTags();
+	let allTags = $state<Tag[]>([]);
+	$effect(() => {
+		const sub = allTags$.subscribe((val) => {
+			allTags = val ?? [];
+		});
+		return () => sub.unsubscribe();
+	});
 
 	// ── Persisted workbench state ───────────────────────────
 	const DEFAULT_WIDTH = 480;
@@ -131,7 +144,26 @@
 	<title>Home - ManaCore</title>
 </svelte:head>
 
+<DragPreview />
+
 <div class="workbench">
+	{#if allTags.length > 0}
+		<div class="tag-bar">
+			{#each allTags as tag (tag.id)}
+				<button
+					class="tag-pill"
+					use:dragSource={{
+						type: 'tag',
+						data: () => ({ id: tag.id, name: tag.name, color: tag.color }),
+					}}
+				>
+					<span class="tag-dot" style="background: {tag.color}"></span>
+					{tag.name}
+				</button>
+			{/each}
+		</div>
+	{/if}
+
 	<PageCarousel
 		pages={carouselPages}
 		defaultWidth={DEFAULT_WIDTH}
@@ -171,5 +203,52 @@
 		display: flex;
 		flex-direction: column;
 		position: relative;
+	}
+
+	.tag-bar {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.375rem;
+		padding: 0.5rem 1rem 0.25rem;
+	}
+	.tag-pill {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.25rem;
+		padding: 0.1875rem 0.5rem;
+		border-radius: 9999px;
+		border: none;
+		background: rgba(0, 0, 0, 0.04);
+		font-size: 0.6875rem;
+		color: #6b7280;
+		cursor: grab;
+		transition: all 0.15s;
+		user-select: none;
+		touch-action: none;
+	}
+	.tag-pill:hover {
+		background: rgba(0, 0, 0, 0.08);
+		color: #374151;
+	}
+	:global(.dark) .tag-pill {
+		background: rgba(255, 255, 255, 0.06);
+		color: #9ca3af;
+	}
+	:global(.dark) .tag-pill:hover {
+		background: rgba(255, 255, 255, 0.1);
+		color: #e5e7eb;
+	}
+	.tag-pill:active {
+		cursor: grabbing;
+	}
+	:global(.tag-pill.mana-drag-source-active) {
+		opacity: 0.4;
+		transform: scale(0.95);
+	}
+	.tag-dot {
+		width: 6px;
+		height: 6px;
+		border-radius: 9999px;
+		flex-shrink: 0;
 	}
 </style>

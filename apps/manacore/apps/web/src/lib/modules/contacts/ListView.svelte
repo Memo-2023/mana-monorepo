@@ -10,8 +10,20 @@
 	import { contactsStore } from './stores/contacts.svelte';
 	import { Plus, Star } from '@manacore/shared-icons';
 	import type { ViewProps } from '$lib/components/workbench/nav-stack';
+	import { dropTarget } from '@manacore/shared-ui/dnd';
+	import type { TagDragData } from '@manacore/shared-ui/dnd';
+	import { getTagsByIds } from '$lib/stores/tags.svelte';
 
 	let { navigate, goBack, params }: ViewProps = $props();
+
+	function handleTagDrop(contactId: string, tagData: TagDragData) {
+		const contact = contacts.find((c) => c.id === contactId);
+		if (!contact) return;
+		const current = contact.tagIds ?? [];
+		if (!current.includes(tagData.id)) {
+			contactsStore.updateTagIds(contactId, [...current, tagData.id]);
+		}
+	}
 
 	let contacts = $state<LocalContact[]>([]);
 	let search = $state('');
@@ -86,6 +98,7 @@
 
 	<div class="contact-list">
 		{#each filtered() as contact (contact.id)}
+			{@const contactTags = getTagsByIds(contact.tagIds ?? [])}
 			<button
 				class="contact-item"
 				onclick={() =>
@@ -94,12 +107,24 @@
 						_siblingIds: filtered().map((c) => c.id),
 						_siblingKey: 'contactId',
 					})}
+				use:dropTarget={{
+					accepts: ['tag'],
+					onDrop: (p) => handleTagDrop(contact.id, p.data as unknown as TagDragData),
+					canDrop: (p) => !(contact.tagIds ?? []).includes((p.data as unknown as TagDragData).id),
+				}}
 			>
 				<div class="avatar">{initials(contact)}</div>
 				<div class="contact-info">
 					<p class="contact-name">{displayName(contact)}</p>
 					{#if contact.company}
 						<p class="contact-company">{contact.company}</p>
+					{/if}
+					{#if contactTags.length > 0}
+						<div class="contact-tags">
+							{#each contactTags as tag (tag.id)}
+								<span class="tag-dot" style="background: {tag.color}" title={tag.name}></span>
+							{/each}
+						</div>
 					{/if}
 				</div>
 				{#if contact.isFavorite}
@@ -250,6 +275,22 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
+	}
+	.contact-tags {
+		display: flex;
+		gap: 0.25rem;
+		margin-top: 0.125rem;
+	}
+	.tag-dot {
+		width: 6px;
+		height: 6px;
+		border-radius: 9999px;
+		flex-shrink: 0;
+	}
+	:global(.contact-item.mana-drop-target-hover) {
+		outline: 2px solid rgba(34, 197, 94, 0.4);
+		outline-offset: -2px;
+		background: rgba(34, 197, 94, 0.06) !important;
 	}
 	.fav {
 		color: #f59e0b;
