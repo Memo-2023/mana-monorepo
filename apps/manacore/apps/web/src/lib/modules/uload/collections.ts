@@ -5,11 +5,12 @@
  */
 
 import { db } from '$lib/data/database';
-import type { LocalLink, LocalFolder, LocalLinkTag } from './types';
+import type { LocalLink, LocalTag, LocalFolder, LocalLinkTag } from './types';
 
 // ─── Collection Accessors ──────────────────────────────────
 
 export const linkTable = db.table<LocalLink>('links');
+export const uloadTagTable = db.table<LocalTag>('uloadTags');
 export const uloadFolderTable = db.table<LocalFolder>('uloadFolders');
 export const linkTagTable = db.table<LocalLinkTag>('linkTags');
 
@@ -79,5 +80,34 @@ export const ULOAD_GUEST_SEED = {
 			order: 1,
 		},
 	] satisfies LocalLink[],
+	uloadTags: [
+		{
+			id: 'tag-social',
+			name: 'Social Media',
+			slug: 'social-media',
+			color: '#8b5cf6',
+			icon: null,
+			isPublic: false,
+			usageCount: 0,
+		},
+		{
+			id: 'tag-docs',
+			name: 'Dokumentation',
+			slug: 'dokumentation',
+			color: '#3b82f6',
+			icon: null,
+			isPublic: false,
+			usageCount: 0,
+		},
+		{
+			id: 'tag-marketing',
+			name: 'Marketing',
+			slug: 'marketing',
+			color: '#10b981',
+			icon: null,
+			isPublic: false,
+			usageCount: 0,
+		},
+	] satisfies LocalTag[],
 	linkTags: [] as LocalLinkTag[],
 };

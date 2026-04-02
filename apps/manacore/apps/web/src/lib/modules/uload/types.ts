@@ -21,6 +21,16 @@ export interface LocalLink extends BaseRecord {
 	utmCampaign?: string | null;
 	folderId?: string | null;
 	order: number;
+	source?: string | null;
+}
+
+export interface LocalTag extends BaseRecord {
+	name: string;
+	slug: string;
+	color?: string | null;
+	icon?: string | null;
+	isPublic: boolean;
+	usageCount: number;
 }
 
 export interface LocalFolder extends BaseRecord {

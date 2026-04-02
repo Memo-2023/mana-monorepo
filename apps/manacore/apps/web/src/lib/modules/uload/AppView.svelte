@@ -25,7 +25,7 @@
 	$effect(() => {
 		const sub = liveQuery(async () => {
 			return db
-				.table<LocalFolder>('linkFolders')
+				.table<LocalFolder>('uloadFolders')
 				.toArray()
 				.then((all) => all.filter((f) => !f.deletedAt));
 		}).subscribe((val) => {
