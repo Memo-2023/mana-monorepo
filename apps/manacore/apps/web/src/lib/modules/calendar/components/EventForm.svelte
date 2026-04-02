@@ -206,7 +206,11 @@
 
 	<div class="field">
 		<span class="label">Tags</span>
-		<TagField tags={allTags.value} {selectedTagIds} onChange={(ids) => (selectedTagIds = ids)} />
+		<TagField
+			tags={allTags.value}
+			selectedIds={selectedTagIds}
+			onChange={(ids) => (selectedTagIds = ids)}
+		/>
 	</div>
 
 	<div class="form-actions">

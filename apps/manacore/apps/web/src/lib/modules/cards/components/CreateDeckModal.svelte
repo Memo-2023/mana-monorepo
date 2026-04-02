@@ -108,7 +108,7 @@
 					<span class="mb-1 block text-sm font-medium text-foreground">Tags</span>
 					<TagField
 						tags={allTags.value}
-						{selectedTagIds}
+						selectedIds={selectedTagIds}
 						onChange={(ids) => (selectedTagIds = ids)}
 					/>
 				</div>

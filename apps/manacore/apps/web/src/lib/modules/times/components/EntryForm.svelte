@@ -317,7 +317,7 @@
 					>
 					<TagField
 						tags={allTags.value}
-						{selectedTagIds}
+						selectedIds={selectedTagIds}
 						onChange={(ids) => (selectedTagIds = ids)}
 					/>
 				</div>
