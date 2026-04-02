@@ -28,7 +28,7 @@
 
 	let triggerButton: HTMLButtonElement;
 	let searchInput = $state<HTMLInputElement | undefined>(undefined);
-	let panelPosition = $state({ top: 0, left: 0 });
+	let panelPosition = $state({ bottom: 0, left: 0 });
 	let searchQuery = $state('');
 
 	// Filter apps by search
@@ -50,7 +50,7 @@
 	function toggle() {
 		if (triggerButton) {
 			const rect = triggerButton.getBoundingClientRect();
-			panelPosition = { top: rect.bottom + 8, left: rect.left };
+			panelPosition = { bottom: window.innerHeight - rect.top + 8, left: rect.left };
 		}
 		onToggle(!isOpen);
 	}
@@ -143,7 +143,7 @@
 		<!-- Panel -->
 		<div
 			class="drawer-panel"
-			style="top: {panelPosition.top}px; left: {panelPosition.left}px;"
+			style="bottom: {panelPosition.bottom}px; left: {panelPosition.left}px;"
 			role="dialog"
 			aria-label="App switcher"
 		>
@@ -408,7 +408,7 @@
 	@keyframes panelIn {
 		from {
 			opacity: 0;
-			transform: translateY(-8px);
+			transform: translateY(8px);
 		}
 		to {
 			opacity: 1;
