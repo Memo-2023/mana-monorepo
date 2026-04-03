@@ -1,40 +1,35 @@
 /**
- * Email sending functions using nodemailer.
- * German language emails with Brevo SMTP.
+ * Email sending via mana-notify service.
+ * All emails are routed through the central notification service
+ * which handles SMTP, retries, and queuing.
  */
 
-import nodemailer from 'nodemailer';
-
-let transporter: nodemailer.Transporter | null = null;
-
-export function initializeEmail(smtp: { host: string; port: number; user: string; pass: string }) {
-	if (!smtp.host || !smtp.user) {
-		console.warn('SMTP not configured — emails will be logged to console');
-		return;
-	}
-	transporter = nodemailer.createTransport({
-		host: smtp.host,
-		port: smtp.port,
-		secure: false,
-		auth: { user: smtp.user, pass: smtp.pass },
-	});
-}
+const NOTIFY_URL = process.env.MANA_NOTIFY_URL || 'http://localhost:3013';
+const SERVICE_KEY = process.env.MANA_CORE_SERVICE_KEY || 'dev-service-key';
 
 async function send(to: string, subject: string, html: string): Promise<boolean> {
-	if (!transporter) {
-		console.log(`[EMAIL] To: ${to} | Subject: ${subject}`);
-		return true;
-	}
 	try {
-		await transporter.sendMail({
-			from: '"ManaCore" <noreply@mana.how>',
-			to,
-			subject,
-			html,
+		const res = await fetch(`${NOTIFY_URL}/api/v1/notifications/send`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'X-Service-Key': SERVICE_KEY,
+			},
+			body: JSON.stringify({
+				channel: 'email',
+				appId: 'mana-auth',
+				recipient: to,
+				subject,
+				body: html,
+			}),
 		});
+		if (!res.ok) {
+			console.error('mana-notify error:', res.status, await res.text());
+			return false;
+		}
 		return true;
 	} catch (error) {
-		console.error('Failed to send email:', error);
+		console.error('Failed to send via mana-notify:', error);
 		return false;
 	}
 }

@@ -13,7 +13,6 @@ import { createBetterAuth } from './auth/better-auth.config';
 import { errorHandler } from './middleware/error-handler';
 import { jwtAuth } from './middleware/jwt-auth';
 import { serviceAuth } from './middleware/service-auth';
-import { initializeEmail } from './email/send';
 import { SecurityEventsService, AccountLockoutService } from './services/security';
 import { SignupLimitService } from './services/signup-limit';
 import { ApiKeysService } from './services/api-keys';
@@ -31,7 +30,6 @@ const db = getDb(config.databaseUrl);
 const auth = createBetterAuth(config.databaseUrl);
 
 // Initialize services
-initializeEmail(config.smtp);
 const security = new SecurityEventsService(db);
 const lockout = new AccountLockoutService(db);
 const signupLimit = new SignupLimitService(db);
