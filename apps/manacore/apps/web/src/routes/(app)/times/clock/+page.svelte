@@ -3,28 +3,28 @@
 
 	const quickLinks = [
 		{
-			href: '/clock/world-clock',
+			href: '/times/clock/world-clock',
 			icon: Globe,
 			label: 'Weltzeituhr',
 			description: 'Zeitzonen im Blick',
 			color: 'bg-blue-500',
 		},
 		{
-			href: '/clock/alarms',
+			href: '/times/clock/alarms',
 			icon: Bell,
 			label: 'Wecker',
 			description: 'Alarme verwalten',
 			color: 'bg-amber-500',
 		},
 		{
-			href: '/clock/timers',
+			href: '/times/clock/timers',
 			icon: Timer,
 			label: 'Timer',
 			description: 'Countdowns starten',
 			color: 'bg-green-500',
 		},
 		{
-			href: '/clock/stopwatch',
+			href: '/times/clock/stopwatch',
 			icon: Hourglass,
 			label: 'Stoppuhr',
 			description: 'Zeit messen',

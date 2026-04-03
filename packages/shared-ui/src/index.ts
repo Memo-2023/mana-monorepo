@@ -188,6 +188,25 @@ export type { QuickInputItem, QuickAction, CreatePreview, InputBarSettings } fro
 // Pages
 export { default as AppsPage } from './pages/AppsPage.svelte';
 export { default as OfflinePage } from './pages/OfflinePage.svelte';
+export { default as ProfilePage } from './pages/ProfilePage.svelte';
+export type { UserProfile, ProfileActions } from './pages/profile-types';
+
+// Onboarding
+export { createAppOnboardingStore } from './onboarding/create-app-onboarding.svelte';
+export { default as MiniOnboardingModal } from './onboarding/MiniOnboardingModal.svelte';
+export type {
+	AppOnboardingOption,
+	AppOnboardingStepType,
+	AppOnboardingStepBase,
+	AppOnboardingSelectStep,
+	AppOnboardingToggleStep,
+	AppOnboardingInfoStep,
+	AppOnboardingStep,
+	AppOnboardingConfig,
+	AppOnboardingPreferences,
+	AppOnboardingStore,
+	MiniOnboardingModalProps,
+} from './onboarding/types';
 
 // Charts - Statistics Visualization
 export {

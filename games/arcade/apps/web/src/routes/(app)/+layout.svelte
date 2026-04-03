@@ -28,7 +28,7 @@
 	import { SessionExpiredBanner, AuthGate, GuestWelcomeModal } from '@manacore/shared-auth-ui';
 	import { shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
 	import { gamesOnboarding } from '$lib/stores/app-onboarding.svelte';
-	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
+	import { MiniOnboardingModal } from '@manacore/shared-ui';
 	import { gamesStore } from '$lib/data/local-store';
 	import {
 		tagLocalStore,

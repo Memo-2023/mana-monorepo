@@ -33,7 +33,6 @@
 	},
 	"dependencies": {
 		"@manacore/local-store": "workspace:*",
-		"@manacore/shared-app-onboarding": "workspace:*",
 		"@manacore/shared-auth": "workspace:*",
 		"@manacore/shared-auth-ui": "workspace:*",
 		"@manacore/shared-branding": "workspace:*",
@@ -42,7 +41,6 @@
 		"@manacore/shared-i18n": "workspace:*",
 		"@manacore/help": "workspace:*",
 		"@manacore/shared-icons": "workspace:*",
-		"@manacore/shared-profile-ui": "workspace:*",
 		"@manacore/shared-stores": "workspace:*",
 		"@manacore/shared-tags": "workspace:*",
 		"@manacore/subscriptions": "workspace:*",

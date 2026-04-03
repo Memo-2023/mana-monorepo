@@ -1,11 +1,15 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { ProfilePage } from '@manacore/shared-profile-ui';
-	import type { UserProfile, ProfileActions } from '@manacore/shared-profile-ui';
+	import { ProfilePage } from '@manacore/shared-ui';
+	import type { UserProfile, ProfileActions } from '@manacore/shared-ui';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { goto } from '$app/navigation';
 	import { profileService, type UserProfile as ApiUserProfile } from '$lib/api/profile';
-	import { EditProfileModal, ChangePasswordModal, DeleteAccountModal } from '$lib/components/profile';
+	import {
+		EditProfileModal,
+		ChangePasswordModal,
+		DeleteAccountModal,
+	} from '$lib/components/profile';
 
 	// Profile data from API
 	let apiProfile = $state<ApiUserProfile | null>(null);
@@ -84,7 +88,9 @@
 
 {#if loading}
 	<div class="flex items-center justify-center py-12">
-		<div class="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+		<div
+			class="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"
+		></div>
 	</div>
 {:else}
 	<ProfilePage
@@ -130,7 +136,9 @@
 
 <!-- Toast Notification -->
 {#if toastMessage}
-	<div class="fixed bottom-4 right-4 z-50 px-4 py-3 bg-green-600 text-white rounded-lg shadow-lg animate-fade-in">
+	<div
+		class="fixed bottom-4 right-4 z-50 px-4 py-3 bg-green-600 text-white rounded-lg shadow-lg animate-fade-in"
+	>
 		{toastMessage}
 	</div>
 {/if}

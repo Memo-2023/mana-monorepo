@@ -8,7 +8,12 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
-import { authMiddleware, errorHandler, notFoundHandler } from '@manacore/shared-hono';
+import {
+	authMiddleware,
+	errorHandler,
+	notFoundHandler,
+	rateLimitMiddleware,
+} from '@manacore/shared-hono';
 
 import { memoRoutes } from './routes/memos';
 import { spaceRoutes } from './routes/spaces';
@@ -20,7 +25,6 @@ import { cleanupRoutes } from './routes/cleanup';
 import { meetingRoutes } from './routes/meetings';
 import { meetingWebhookRoutes } from './routes/meetings-webhooks';
 import { COSTS } from './lib/credits';
-import { rateLimiter } from './middleware/rate-limiter';
 
 const app = new Hono();
 
@@ -51,7 +55,7 @@ app.use(
 
 app.use(
 	'/api/v1/*',
-	rateLimiter({
+	rateLimitMiddleware({
 		windowMs: 60_000,
 		max: 100,
 	})

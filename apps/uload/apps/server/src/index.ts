@@ -1,9 +1,8 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
+import { authMiddleware, errorHandler, notFoundHandler } from '@manacore/shared-hono';
 import { loadConfig } from './config';
 import { getDb } from './db/connection';
-import { errorHandler } from './middleware/error-handler';
-import { jwtAuth } from './middleware/jwt-auth';
 import { RedirectService } from './services/redirect';
 import { AnalyticsService } from './services/analytics';
 import { healthRoutes } from './routes/health';
@@ -22,6 +21,7 @@ const analyticsService = new AnalyticsService(db);
 const app = new Hono();
 
 app.onError(errorHandler);
+app.notFound(notFoundHandler);
 app.use('*', cors({ origin: config.cors.origins, credentials: true }));
 
 // Health (no auth)
@@ -38,7 +38,7 @@ app.post('/api/v1/stripe/webhook', async (c) => {
 });
 
 // Authenticated API routes
-app.use('/api/v1/*', jwtAuth(config.manaAuthUrl));
+app.use('/api/v1/*', authMiddleware());
 app.route('/api/v1/analytics', createAnalyticsRoutes(analyticsService));
 app.route('/api/v1/stripe', createStripeRoutes(config));
 app.route('/api/v1/email', createEmailRoutes());

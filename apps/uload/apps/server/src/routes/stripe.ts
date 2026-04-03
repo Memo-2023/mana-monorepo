@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import Stripe from 'stripe';
-import type { AuthUser } from '../middleware/jwt-auth';
+import type { AuthVariables } from '@manacore/shared-hono';
 import type { Config } from '../config';
 
 const PRICES = {
@@ -11,19 +11,20 @@ const PRICES = {
 export function createStripeRoutes(config: Config) {
 	const stripe = config.stripeSecretKey ? new Stripe(config.stripeSecretKey) : null;
 
-	return new Hono<{ Variables: { user: AuthUser } }>()
+	return new Hono<{ Variables: AuthVariables }>()
 		.post('/checkout', async (c) => {
 			if (!stripe) return c.json({ error: 'Stripe not configured' }, 501);
 
-			const user = c.get('user');
+			const userId = c.get('userId');
+			const userEmail = c.get('userEmail');
 			const { priceType } = await c.req.json<{ priceType: keyof typeof PRICES }>();
 			const price = PRICES[priceType];
 			if (!price) return c.json({ error: 'Invalid price type' }, 400);
 
 			const session = await stripe.checkout.sessions.create({
 				mode: 'subscription',
-				customer_email: user.email,
-				metadata: { userId: user.userId },
+				customer_email: userEmail,
+				metadata: { userId },
 				line_items: [
 					{
 						price_data: {

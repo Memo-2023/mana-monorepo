@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { UserProfile, ProfileActions } from './types';
+	import type { UserProfile, ProfileActions } from './profile-types';
 
 	interface Props {
 		/** User profile data */

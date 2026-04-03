@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
+import { HTTPException } from 'hono/http-exception';
 import type { RedirectService } from '../services/redirect';
-import { NotFoundError } from '../lib/errors';
 
 export function createRedirectRoutes(redirectService: RedirectService) {
 	return new Hono().get('/:code', async (c) => {
@@ -8,7 +8,7 @@ export function createRedirectRoutes(redirectService: RedirectService) {
 		const link = await redirectService.resolve(code);
 
 		if (!link) {
-			throw new NotFoundError('Link not found or expired');
+			throw new HTTPException(404, { message: 'Link not found or expired' });
 		}
 
 		// Track click asynchronously (don't block redirect)

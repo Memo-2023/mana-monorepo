@@ -9,10 +9,10 @@
 		"type-check": "tsc --noEmit"
 	},
 	"dependencies": {
+		"@manacore/shared-hono": "workspace:*",
 		"drizzle-orm": "^0.44.7",
 		"hono": "^4.7.0",
 		"stripe": "^18.4.0",
-		"jose": "^6.1.2",
 		"postgres": "^3.4.7"
 	},
 	"devDependencies": {

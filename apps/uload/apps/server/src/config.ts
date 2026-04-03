@@ -1,7 +1,6 @@
 export interface Config {
 	port: number;
 	databaseUrl: string;
-	manaAuthUrl: string;
 	cors: { origins: string[] };
 	stripeSecretKey: string;
 	stripeWebhookSecret: string;
@@ -21,7 +20,6 @@ export function loadConfig(): Config {
 			'DATABASE_URL',
 			'postgresql://manacore:devpassword@localhost:5432/mana_sync'
 		),
-		manaAuthUrl: requiredEnv('MANA_CORE_AUTH_URL', 'http://localhost:3001'),
 		cors: {
 			origins: (process.env.CORS_ORIGINS || 'http://localhost:5173').split(','),
 		},

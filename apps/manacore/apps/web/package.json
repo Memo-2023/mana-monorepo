@@ -57,7 +57,6 @@
 		"@manacore/shared-i18n": "workspace:*",
 		"@manacore/shared-icons": "workspace:*",
 		"@manacore/shared-links": "workspace:*",
-		"@manacore/shared-profile-ui": "workspace:*",
 		"@manacore/shared-stores": "workspace:*",
 		"@manacore/shared-tags": "workspace:*",
 		"@manacore/shared-tailwind": "workspace:*",

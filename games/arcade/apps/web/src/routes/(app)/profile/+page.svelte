@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ProfilePage } from '@manacore/shared-profile-ui';
+	import { ProfilePage } from '@manacore/shared-ui';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { goto } from '$app/navigation';
 </script>

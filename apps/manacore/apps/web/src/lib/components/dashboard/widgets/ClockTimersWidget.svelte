@@ -83,7 +83,7 @@
 			</div>
 		{/if}
 
-		<a href="/clock" class="mt-2 block text-center text-sm text-primary hover:underline">
+		<a href="/times/clock" class="mt-2 block text-center text-sm text-primary hover:underline">
 			Uhr öffnen →
 		</a>
 	{/if}
