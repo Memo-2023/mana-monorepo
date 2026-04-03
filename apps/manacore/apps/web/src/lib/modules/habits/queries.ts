@@ -1,0 +1,138 @@
+/**
+ * Reactive Queries & Pure Helpers for Habits module.
+ *
+ * Uses Dexie liveQuery on the unified database.
+ */
+
+import { liveQuery } from 'dexie';
+import { db } from '$lib/data/database';
+import type { LocalHabit, LocalHabitLog, Habit, HabitLog } from './types';
+
+// ─── Type Converters ───────────────────────────────────────
+
+export function toHabit(local: LocalHabit): Habit {
+	return {
+		id: local.id,
+		title: local.title,
+		emoji: local.emoji,
+		color: local.color,
+		targetPerDay: local.targetPerDay,
+		order: local.order,
+		isArchived: local.isArchived,
+		createdAt: local.createdAt ?? new Date().toISOString(),
+		updatedAt: local.updatedAt ?? new Date().toISOString(),
+	};
+}
+
+export function toHabitLog(local: LocalHabitLog): HabitLog {
+	return {
+		id: local.id,
+		habitId: local.habitId,
+		timestamp: local.timestamp,
+		note: local.note,
+		createdAt: local.createdAt ?? new Date().toISOString(),
+	};
+}
+
+// ─── Live Queries ──────────────────────────────────────────
+
+export function useAllHabits() {
+	return liveQuery(async () => {
+		const locals = await db.table<LocalHabit>('habits').orderBy('order').toArray();
+		return locals.filter((h) => !h.deletedAt).map(toHabit);
+	});
+}
+
+export function useAllHabitLogs() {
+	return liveQuery(async () => {
+		const locals = await db.table<LocalHabitLog>('habitLogs').toArray();
+		return locals.filter((l) => !l.deletedAt).map(toHabitLog);
+	});
+}
+
+export function useHabitLogsForHabit(habitId: string) {
+	return liveQuery(async () => {
+		const locals = await db
+			.table<LocalHabitLog>('habitLogs')
+			.where('habitId')
+			.equals(habitId)
+			.toArray();
+		return locals
+			.filter((l) => !l.deletedAt)
+			.map(toHabitLog)
+			.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+	});
+}
+
+// ─── Pure Helpers ──────────────────────────────────────────
+
+/** Get today's date string (YYYY-MM-DD) */
+export function todayStr(): string {
+	return new Date().toISOString().split('T')[0];
+}
+
+/** Filter logs for a specific date */
+export function getLogsForDate(logs: HabitLog[], date: string): HabitLog[] {
+	return logs.filter((l) => l.timestamp.startsWith(date));
+}
+
+/** Count logs for a specific habit on a given date */
+export function getCountForDate(logs: HabitLog[], habitId: string, date: string): number {
+	return logs.filter((l) => l.habitId === habitId && l.timestamp.startsWith(date)).length;
+}
+
+/** Get active (non-archived) habits */
+export function getActiveHabits(habits: Habit[]): Habit[] {
+	return habits.filter((h) => !h.isArchived).sort((a, b) => a.order - b.order);
+}
+
+/** Get today's count per habit */
+export function getTodayCounts(habits: Habit[], logs: HabitLog[]): Map<string, number> {
+	const today = todayStr();
+	const counts = new Map<string, number>();
+	for (const h of habits) {
+		counts.set(h.id, getCountForDate(logs, h.id, today));
+	}
+	return counts;
+}
+
+/** Calculate streak (consecutive days with at least one log) */
+export function getStreak(logs: HabitLog[], habitId: string): number {
+	const habitLogs = logs.filter((l) => l.habitId === habitId);
+	if (habitLogs.length === 0) return 0;
+
+	const dates = new Set(habitLogs.map((l) => l.timestamp.split('T')[0]));
+	let streak = 0;
+	const d = new Date();
+
+	while (true) {
+		const dateStr = d.toISOString().split('T')[0];
+		if (dates.has(dateStr)) {
+			streak++;
+			d.setDate(d.getDate() - 1);
+		} else {
+			break;
+		}
+	}
+
+	return streak;
+}
+
+/** Group logs by date (most recent first) */
+export function groupLogsByDate(logs: HabitLog[]): Map<string, HabitLog[]> {
+	const groups = new Map<string, HabitLog[]>();
+	const sorted = [...logs].sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+	for (const log of sorted) {
+		const date = log.timestamp.split('T')[0];
+		const existing = groups.get(date) || [];
+		existing.push(log);
+		groups.set(date, existing);
+	}
+	return groups;
+}
+
+/** Format time from ISO string to HH:MM */
+export function formatTime(iso: string): string {
+	const d = new Date(iso);
+	return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+}

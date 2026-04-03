@@ -175,6 +175,10 @@ db.version(1).stores({
 	// ─── Playground (appId: 'playground') ───
 	// No persistent data — stateless LLM playground
 
+	// ─── Habits (appId: 'habits') ───
+	habits: 'id, order, isArchived, color',
+	habitLogs: 'id, habitId, timestamp, [habitId+timestamp]',
+
 	// ─── Shared: Global Tags (appId: 'tags') ───
 	globalTags: 'id, name, groupId',
 	tagGroups: 'id',
@@ -223,6 +227,7 @@ export const SYNC_APP_MAP: Record<string, string[]> = {
 	moodlit: ['moods', 'sequences', 'moodTags'],
 	memoro: ['memos', 'memories', 'memoTags', 'memoroSpaces', 'spaceMembers', 'memoSpaces'],
 	guides: ['guides', 'sections', 'steps', 'guideCollections', 'runs', 'guideTags'],
+	habits: ['habits', 'habitLogs'],
 	tags: ['globalTags', 'tagGroups'],
 	links: ['manaLinks'],
 };

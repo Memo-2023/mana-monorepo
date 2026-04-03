@@ -54,6 +54,12 @@ export const APP_REGISTRY: AppEntry[] = [
 		},
 	},
 	{
+		id: 'habits',
+		name: 'Habits',
+		color: '#8B5CF6',
+		load: () => import('$lib/modules/habits/ListView.svelte'),
+	},
+	{
 		id: 'chat',
 		name: 'Chat',
 		color: '#6366F1',

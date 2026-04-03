@@ -582,6 +582,23 @@ export const MANA_APPS: ManaApp[] = [
 		requiredTier: 'alpha',
 	},
 	{
+		id: 'habits',
+		name: 'Habits',
+		description: {
+			de: 'Gewohnheiten tracken',
+			en: 'Habit Tracking',
+		},
+		longDescription: {
+			de: 'Schnelles Tally-Tracking für Gewohnheiten wie Kaffee, Zigaretten, Wasser — ein Tap pro Eintrag mit Tagesstatistiken und Streaks.',
+			en: 'Quick tally tracking for habits like coffee, cigarettes, water — one tap per entry with daily stats and streaks.',
+		},
+		icon: APP_ICONS.habits,
+		color: '#8b5cf6',
+		comingSoon: false,
+		status: 'development',
+		requiredTier: 'founder',
+	},
+	{
 		id: 'arcade',
 		name: 'Arcade',
 		description: {
@@ -709,6 +726,7 @@ export const APP_URLS: Record<AppIconId, { dev: string; prod: string }> = {
 	moodlit: { dev: 'http://localhost:5173/moodlit', prod: 'https://mana.how/moodlit' },
 	memoro: { dev: 'http://localhost:5173/memoro', prod: 'https://mana.how/memoro' },
 	guides: { dev: 'http://localhost:5173/guides', prod: 'https://mana.how/guides' },
+	habits: { dev: 'http://localhost:5173/habits', prod: 'https://mana.how/habits' },
 	wisekeep: { dev: 'http://localhost:5173/wisekeep', prod: 'https://mana.how/wisekeep' },
 	news: { dev: 'http://localhost:5173/news', prod: 'https://mana.how/news' },
 	mail: { dev: 'http://localhost:5173/mail', prod: 'https://mana.how/mail' },

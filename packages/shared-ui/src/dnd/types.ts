@@ -11,7 +11,16 @@
 
 // ── Drag types ──────────────────────────────────────────────
 
-export type DragType = 'tag' | 'task' | 'card' | 'photo' | 'file' | 'event' | 'link' | 'contact';
+export type DragType =
+	| 'tag'
+	| 'task'
+	| 'card'
+	| 'photo'
+	| 'file'
+	| 'event'
+	| 'link'
+	| 'contact'
+	| 'habit';
 
 export interface DragPayload<T = Record<string, unknown>> {
 	type: DragType;

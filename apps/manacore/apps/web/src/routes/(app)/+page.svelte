@@ -41,6 +41,7 @@
 			{ appId: 'todo', minimized: false },
 			{ appId: 'calendar', minimized: false },
 			{ appId: 'contacts', minimized: false },
+			{ appId: 'habits', minimized: false },
 		],
 	});
 
@@ -56,6 +57,7 @@
 		{ appId: 'todo', minimized: false },
 		{ appId: 'calendar', minimized: false },
 		{ appId: 'contacts', minimized: false },
+		{ appId: 'habits', minimized: false },
 	]);
 
 	// Load persisted state once on mount (not reactive — avoids loop with persistState)
