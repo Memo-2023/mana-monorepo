@@ -52,6 +52,12 @@
 	let dragId = $state<string | null>(null);
 
 	function handleDragStart(e: DragEvent, id: string) {
+		// Only allow page reorder drag from the drag-handle, not from items inside the page
+		const target = e.target as HTMLElement;
+		if (!target.closest('.drag-handle')) {
+			e.preventDefault();
+			return;
+		}
 		dragId = id;
 		if (e.dataTransfer) {
 			e.dataTransfer.effectAllowed = 'move';
@@ -94,7 +100,6 @@
 			<div
 				class="page-drag-wrapper"
 				class:dragging={dragId === p.id}
-				draggable={true}
 				ondragstart={(e) => handleDragStart(e, p.id)}
 				ondragover={handleDragOver}
 				ondrop={(e) => handleDrop(e, p.id)}

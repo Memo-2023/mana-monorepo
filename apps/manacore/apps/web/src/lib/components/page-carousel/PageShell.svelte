@@ -114,7 +114,7 @@
 		: ''}"
 >
 	<div class="drag-handle-bar">
-		<span class="drag-handle"><DotsSixVertical size={14} /></span>
+		<span class="drag-handle" draggable="true"><DotsSixVertical size={14} /></span>
 	</div>
 
 	<!-- Header -->
