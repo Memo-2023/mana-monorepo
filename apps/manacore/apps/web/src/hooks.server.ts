@@ -112,6 +112,7 @@ window.__PUBLIC_GLITCHTIP_DSN__ = ${JSON.stringify(PUBLIC_GLITCHTIP_DSN)};
 		},
 	});
 
+	const isDev = process.env.NODE_ENV !== 'production';
 	setSecurityHeaders(response, {
 		connectSrc: [
 			PUBLIC_MANA_CORE_AUTH_URL_CLIENT,
@@ -130,6 +131,8 @@ window.__PUBLIC_GLITCHTIP_DSN__ = ${JSON.stringify(PUBLIC_GLITCHTIP_DSN)};
 			PUBLIC_MANA_MEDIA_URL_CLIENT,
 			PUBLIC_MANA_LLM_URL_CLIENT,
 			'wss://sync.mana.how',
+			// Allow all localhost ports in development
+			...(isDev ? ['http://localhost:*', 'ws://localhost:*'] : []),
 		].filter(Boolean),
 	});
 
