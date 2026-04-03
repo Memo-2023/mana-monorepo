@@ -9,8 +9,16 @@
 	import { getAppEntry } from './app-registry';
 	import type { Component } from 'svelte';
 	import { dropTarget } from '@manacore/shared-ui/dnd';
-	import { getEntity, getEntityByDragType, canDrop, executeDrop } from '$lib/entities';
+	import {
+		getEntity,
+		getEntityByDragType,
+		canDrop,
+		executeDrop,
+		ensureEntitiesRegistered,
+	} from '$lib/entities';
 	import type { DragPayload } from '@manacore/shared-ui/dnd';
+
+	ensureEntitiesRegistered();
 
 	interface Props {
 		appId: string;
@@ -39,8 +47,8 @@
 	let appColor = $derived(appEntry?.color ?? '#6B7280');
 
 	// ── Cross-module drop target ────────────────────────────
-	// TODO: re-enable after fixing entity descriptor hang
-	let acceptedDropTypes: string[] = [];
+	let targetEntity = $derived(getEntity(appId));
+	let acceptedDropTypes = $derived(targetEntity?.acceptsDropFrom ?? []);
 
 	function handleCrossModuleDrop(payload: DragPayload) {
 		const sourceEntity = getEntityByDragType(payload.type);

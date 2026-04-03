@@ -5,10 +5,11 @@
  * for in-panel navigation (detail, create, edit, etc.).
  */
 
-import type { Component } from 'svelte';
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyComponent = import('svelte').Component<any, any>;
 
 export interface ViewEntry {
-	load: () => Promise<{ default: Component }>;
+	load: () => Promise<{ default: AnyComponent }>;
 }
 
 export interface AppEntry {
@@ -16,7 +17,7 @@ export interface AppEntry {
 	name: string;
 	color: string;
 	/** Default view loader (list/main view). */
-	load: () => Promise<{ default: Component }>;
+	load: () => Promise<{ default: AnyComponent }>;
 	/** Named views for in-panel navigation. Fallback: { list: load }. */
 	views?: Record<string, ViewEntry>;
 }
