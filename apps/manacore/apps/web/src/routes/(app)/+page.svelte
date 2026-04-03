@@ -191,6 +191,7 @@
 	@media (min-width: 1024px) {
 		.workbench {
 			margin: -2rem -2rem 0;
+			padding-top: 2rem;
 			width: calc(100% + 4rem);
 		}
 	}
