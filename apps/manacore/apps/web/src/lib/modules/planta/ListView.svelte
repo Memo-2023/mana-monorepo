@@ -5,7 +5,7 @@
 <script lang="ts">
 	import { liveQuery } from 'dexie';
 	import { db } from '$lib/data/database';
-	import type { ViewProps } from '$lib/components/workbench/nav-stack';
+	import type { ViewProps } from '$lib/app-registry';
 	import type { LocalPlant, LocalWateringSchedule } from './types';
 
 	let { navigate, goBack, params }: ViewProps = $props();

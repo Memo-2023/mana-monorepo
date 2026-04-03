@@ -9,7 +9,7 @@
 	import { favoritesStore } from '$lib/modules/zitare/stores/favorites.svelte';
 	import { isFavorite as checkIsFavorite, type Favorite } from '$lib/modules/zitare/queries';
 	import { Heart, ShareNetwork, Info } from '@manacore/shared-icons';
-	import type { ViewProps } from '$lib/components/workbench/nav-stack';
+	import type { ViewProps } from '$lib/app-registry';
 	import type { LocalFavorite } from '../types';
 	import { QUOTES, type Quote, type Category } from '@zitare/content';
 

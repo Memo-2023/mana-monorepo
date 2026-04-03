@@ -6,19 +6,10 @@
 <script lang="ts">
 	import { X, CaretUp, CaretDown, ArrowLeft, SpinnerGap } from '@manacore/shared-icons';
 	import { PageShell } from '$lib/components/page-carousel';
-	import { getAppEntry } from './app-registry';
+	import { getApp, getAppByDragType, canDrop, executeDrop } from '$lib/app-registry';
 	import type { Component } from 'svelte';
 	import { dropTarget } from '@manacore/shared-ui/dnd';
-	import {
-		getEntity,
-		getEntityByDragType,
-		canDrop,
-		executeDrop,
-		ensureEntitiesRegistered,
-	} from '$lib/entities';
 	import type { DragPayload } from '@manacore/shared-ui/dnd';
-
-	ensureEntitiesRegistered();
 
 	interface Props {
 		appId: string;
@@ -46,18 +37,17 @@
 		onMoveRight,
 	}: Props = $props();
 
-	let appEntry = $derived(getAppEntry(appId));
-	let appName = $derived(appEntry?.name ?? appId);
-	let appColor = $derived(appEntry?.color ?? '#6B7280');
+	let app = $derived(getApp(appId));
+	let appName = $derived(app?.name ?? appId);
+	let appColor = $derived(app?.color ?? '#6B7280');
 
 	// ── Cross-module drop target ────────────────────────────
-	let targetEntity = $derived(getEntity(appId));
-	let acceptedDropTypes = $derived(targetEntity?.acceptsDropFrom ?? []);
+	let acceptedDropTypes = $derived(app?.acceptsDropFrom ?? []);
 
 	function handleCrossModuleDrop(payload: DragPayload) {
-		const sourceEntity = getEntityByDragType(payload.type);
-		if (!sourceEntity) return;
-		executeDrop(payload.data as Record<string, unknown>, sourceEntity.appId, appId);
+		const sourceApp = getAppByDragType(payload.type);
+		if (!sourceApp) return;
+		executeDrop(payload.data as Record<string, unknown>, sourceApp.id, appId);
 	}
 
 	// ── List View (always loaded) ───────────────────────────
@@ -67,8 +57,8 @@
 	$effect(() => {
 		ListComponent = null;
 		loadError = false;
-		if (appEntry) {
-			const loader = appEntry.views?.list?.load ?? appEntry.load;
+		if (app) {
+			const loader = app.views.list.load;
 			loader().then(
 				(mod) => (ListComponent = mod.default),
 				() => (loadError = true)
@@ -120,10 +110,9 @@
 			const targetId = params._targetId as string;
 			if (!targetApp || !targetId) return;
 
-			const targetEntity = getEntity(targetApp);
-			const targetAppEntry = getAppEntry(targetApp);
-			const targetViewEntry = targetAppEntry?.views?.detail;
-			if (!targetViewEntry || !targetEntity) {
+			const targetAppDesc = getApp(targetApp);
+			const targetViewEntry = targetAppDesc?.views?.detail;
+			if (!targetViewEntry || !targetAppDesc?.paramKey) {
 				console.warn(`No detail view registered for app "${targetApp}"`);
 				return;
 			}
@@ -133,10 +122,10 @@
 					...overlayStack,
 					{
 						viewName: 'cross-detail',
-						params: { [targetEntity.paramKey]: targetId },
+						params: { [targetAppDesc.paramKey!]: targetId },
 						component: mod.default,
-						overlayColor: targetAppEntry?.color,
-						overlayTitle: targetAppEntry?.name,
+						overlayColor: targetAppDesc.color,
+						overlayTitle: targetAppDesc.name,
 					},
 				];
 			});
@@ -144,7 +133,7 @@
 		}
 
 		// Normal detail view within the same app
-		const viewEntry = appEntry?.views?.[viewName];
+		const viewEntry = viewName === 'detail' ? app?.views?.detail : undefined;
 		if (!viewEntry) {
 			console.warn(`View "${viewName}" not registered for app "${appId}"`);
 			return;

@@ -13,7 +13,7 @@
 	} from './queries';
 	import { habitsStore } from './stores/habits.svelte';
 	import type { Habit, HabitLog } from './types';
-	import type { ViewProps } from '$lib/components/workbench/nav-stack';
+	import type { ViewProps } from '$lib/app-registry';
 
 	let { navigate, goBack, params }: ViewProps = $props();
 

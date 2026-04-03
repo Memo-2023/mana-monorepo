@@ -7,7 +7,7 @@
 	import { db } from '$lib/data/database';
 	import { decksStore } from '../stores/decks.svelte';
 	import { Trash } from '@manacore/shared-icons';
-	import type { ViewProps } from '$lib/components/workbench/nav-stack';
+	import type { ViewProps } from '$lib/app-registry';
 	import type { LocalDeck, LocalSlide } from '../types';
 
 	let { navigate, goBack, params }: ViewProps = $props();

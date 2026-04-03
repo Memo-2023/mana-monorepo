@@ -8,8 +8,8 @@
 		type ManaRecordRef,
 		type LocalManaLink,
 	} from '@manacore/shared-links';
-	import { getAppEntry } from '$lib/components/workbench/app-registry';
-	import type { ViewProps } from '$lib/components/workbench/nav-stack';
+	import { getApp } from '$lib/app-registry';
+	import type { ViewProps } from '$lib/app-registry';
 
 	interface Props {
 		recordRef: ManaRecordRef;
@@ -34,7 +34,7 @@
 		<span class="section-label">Verknüpfungen</span>
 		<div class="links-list">
 			{#each links as link (link.id)}
-				{@const appEntry = getAppEntry(link.targetApp)}
+				{@const appEntry = getApp(link.targetApp)}
 				{@const color = link.cachedTarget?.color ?? appEntry?.color ?? '#6B7280'}
 				<button class="link-item" onclick={() => openLink(link)}>
 					<span class="link-dot" style="background: {color}"></span>

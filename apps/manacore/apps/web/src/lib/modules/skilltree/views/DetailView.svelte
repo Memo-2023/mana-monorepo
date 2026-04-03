@@ -7,7 +7,7 @@
 	import { db } from '$lib/data/database';
 	import { skillStore } from '../stores/skills.svelte';
 	import { Trash, Lightning } from '@manacore/shared-icons';
-	import type { ViewProps } from '$lib/components/workbench/nav-stack';
+	import type { ViewProps } from '$lib/app-registry';
 	import type { LocalSkill, SkillBranch } from '../types';
 	import { BRANCH_INFO, LEVEL_NAMES, xpProgress, xpForNextLevel } from '../types';
 

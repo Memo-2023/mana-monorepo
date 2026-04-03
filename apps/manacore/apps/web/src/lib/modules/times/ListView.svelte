@@ -8,7 +8,7 @@
 	import { timerStore } from '$lib/modules/times/stores/timer.svelte';
 	import { formatDuration } from '$lib/modules/times/queries';
 	import { Play, Stop } from '@manacore/shared-icons';
-	import type { ViewProps } from '$lib/components/workbench/nav-stack';
+	import type { ViewProps } from '$lib/app-registry';
 	import type { LocalTimeEntry, LocalProject } from './types';
 
 	let { navigate, goBack, params }: ViewProps = $props();

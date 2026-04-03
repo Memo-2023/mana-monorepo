@@ -6,7 +6,7 @@
 	import { liveQuery } from 'dexie';
 	import { db } from '$lib/data/database';
 	import { Trash } from '@manacore/shared-icons';
-	import type { ViewProps } from '$lib/components/workbench/nav-stack';
+	import type { ViewProps } from '$lib/app-registry';
 	import type { LocalTimeEntry, LocalProject, LocalClient } from '../types';
 
 	let { navigate, goBack, params }: ViewProps = $props();

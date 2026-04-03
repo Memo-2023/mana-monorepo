@@ -7,7 +7,7 @@
 	import { db } from '$lib/data/database';
 	import { memosStore } from '../stores/memos.svelte';
 	import { Trash, PushPin } from '@manacore/shared-icons';
-	import type { ViewProps } from '$lib/components/workbench/nav-stack';
+	import type { ViewProps } from '$lib/app-registry';
 	import type { LocalMemo, ProcessingStatus } from '../types';
 
 	let { navigate, goBack, params }: ViewProps = $props();

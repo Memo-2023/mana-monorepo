@@ -4,7 +4,7 @@
 <script lang="ts">
 	import { _ } from 'svelte-i18n';
 	import { X } from '@manacore/shared-icons';
-	import { APP_REGISTRY } from './app-registry';
+	import { getAllApps } from '$lib/app-registry';
 
 	interface Props {
 		onSelect: (appId: string) => void;
@@ -14,7 +14,7 @@
 
 	let { onSelect, onClose, activeAppIds = [] }: Props = $props();
 
-	let availableApps = $derived(APP_REGISTRY.filter((app) => !activeAppIds.includes(app.id)));
+	let availableApps = $derived(getAllApps().filter((app) => !activeAppIds.includes(app.id)));
 </script>
 
 <div class="app-picker">

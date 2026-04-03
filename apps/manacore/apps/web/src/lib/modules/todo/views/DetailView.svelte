@@ -7,7 +7,7 @@
 	import { db } from '$lib/data/database';
 	import { tasksStore } from '../stores/tasks.svelte';
 	import { Check, Trash, X } from '@manacore/shared-icons';
-	import type { ViewProps } from '$lib/components/workbench/nav-stack';
+	import type { ViewProps } from '$lib/app-registry';
 	import type { LocalTask, TaskPriority } from '../types';
 	import { useAllTags, getTagsByIds } from '$lib/stores/tags.svelte';
 	import LinkedItems from '$lib/components/links/LinkedItems.svelte';

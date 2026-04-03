@@ -7,7 +7,7 @@
 	import { db } from '$lib/data/database';
 	import { eventsStore } from '../stores/events.svelte';
 	import { Trash, MapPin, Clock, X } from '@manacore/shared-icons';
-	import type { ViewProps } from '$lib/components/workbench/nav-stack';
+	import type { ViewProps } from '$lib/app-registry';
 	import type { LocalEvent } from '../types';
 	import { useAllTags, getTagsByIds } from '$lib/stores/tags.svelte';
 	import LinkedItems from '$lib/components/links/LinkedItems.svelte';

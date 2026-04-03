@@ -7,7 +7,7 @@
 	import { db } from '$lib/data/database';
 	import { favoritesStore } from '../stores/favorites.svelte';
 	import { Star, Trash } from '@manacore/shared-icons';
-	import type { ViewProps } from '$lib/components/workbench/nav-stack';
+	import type { ViewProps } from '$lib/app-registry';
 	import type { LocalLocation, LocalFavorite } from '../types';
 	import { CATEGORY_COLORS } from '../types';
 

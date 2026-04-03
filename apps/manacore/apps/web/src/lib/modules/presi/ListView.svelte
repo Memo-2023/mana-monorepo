@@ -6,7 +6,7 @@
 	import { liveQuery } from 'dexie';
 	import { db } from '$lib/data/database';
 	import type { LocalDeck, LocalSlide } from './types';
-	import type { ViewProps } from '$lib/components/workbench/nav-stack';
+	import type { ViewProps } from '$lib/app-registry';
 
 	let { navigate, goBack, params }: ViewProps = $props();
 

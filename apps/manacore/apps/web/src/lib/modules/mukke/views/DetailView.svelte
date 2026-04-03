@@ -7,7 +7,7 @@
 	import { db } from '$lib/data/database';
 	import { libraryStore } from '../stores/library.svelte';
 	import { Heart, Trash } from '@manacore/shared-icons';
-	import type { ViewProps } from '$lib/components/workbench/nav-stack';
+	import type { ViewProps } from '$lib/app-registry';
 	import type { LocalSong } from '../types';
 
 	let { navigate, goBack, params }: ViewProps = $props();

@@ -13,7 +13,7 @@
 	import { dropTarget } from '@manacore/shared-ui/dnd';
 	import type { TagDragData } from '@manacore/shared-ui/dnd';
 	import { getTagsByIds } from '$lib/stores/tags.svelte';
-	import type { ViewProps } from '$lib/components/workbench/nav-stack';
+	import type { ViewProps } from '$lib/app-registry';
 	import type { LocalFavorite } from './types';
 	import type { Quote } from '@zitare/content';
 

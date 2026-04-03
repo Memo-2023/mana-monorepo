@@ -7,7 +7,7 @@
 	import { db } from '$lib/data/database';
 	import { collectionsStore } from '../stores/collections.svelte';
 	import { Trash } from '@manacore/shared-icons';
-	import type { ViewProps } from '$lib/components/workbench/nav-stack';
+	import type { ViewProps } from '$lib/app-registry';
 	import type { LocalCollection, LocalItem } from '../types';
 
 	let { navigate, goBack, params }: ViewProps = $props();
