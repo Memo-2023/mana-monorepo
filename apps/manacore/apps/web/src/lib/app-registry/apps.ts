@@ -457,6 +457,15 @@ registerApp({
 });
 
 registerApp({
+	id: 'automations',
+	name: 'Automations',
+	color: '#8B5CF6',
+	views: {
+		list: { load: () => import('$lib/modules/automations/ListView.svelte') },
+	},
+});
+
+registerApp({
 	id: 'playground',
 	name: 'Playground',
 	color: '#9CA3AF',

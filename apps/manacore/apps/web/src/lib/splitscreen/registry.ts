@@ -31,6 +31,7 @@ const SPLIT_APP_ID_LIST = [
 	'moodlit',
 	'memoro',
 	'places',
+	'automations',
 	'playground',
 ] as const;
 
