@@ -34,7 +34,6 @@
 		return () => sub.unsubscribe();
 	});
 
-	// Load habits for the select dropdown
 	$effect(() => {
 		const sub = liveQuery(async () => {
 			const all = await db.table('habits').toArray();
@@ -51,7 +50,7 @@
 		return () => sub.unsubscribe();
 	});
 
-	// Load suggestions
+	// ─── Suggestions ─────────────────────────────────────────
 	async function refreshSuggestions() {
 		const all = await generateSuggestions();
 		suggestions = all.filter((s) => !isSuggestionDismissed(s.id));
@@ -61,9 +60,8 @@
 		refreshSuggestions();
 	});
 
-	// Refresh suggestions when automations change
 	$effect(() => {
-		automations; // track
+		automations;
 		refreshSuggestions();
 	});
 
@@ -121,9 +119,7 @@
 	async function handleCreate(e: Event) {
 		e.preventDefault();
 		if (!selectedSource || !selectedAction) return;
-
 		const name = newName.trim() || `${selectedSource.appLabel} → ${selectedAction.appLabel}`;
-
 		await automationsStore.create({
 			name,
 			sourceApp: selectedSource.app,
@@ -139,239 +135,335 @@
 		resetForm();
 	}
 
+	// ─── Helpers ─────────────────────────────────────────────
 	function sourceLabel(a: LocalAutomation): string {
 		const src = SOURCE_OPTIONS.find(
 			(s) => s.app === a.sourceApp && s.collection === a.sourceCollection
 		);
-		return src
-			? `${src.appLabel} / ${src.collectionLabel}`
-			: `${a.sourceApp}.${a.sourceCollection}`;
+		return src ? src.appLabel : a.sourceApp;
+	}
+
+	function sourceDetail(a: LocalAutomation): string {
+		const src = SOURCE_OPTIONS.find(
+			(s) => s.app === a.sourceApp && s.collection === a.sourceCollection
+		);
+		const opLabel = a.sourceOp === 'insert' ? 'erstellt' : 'geaendert';
+		return src ? `${src.collectionLabel} ${opLabel}` : `${a.sourceCollection} ${opLabel}`;
 	}
 
 	function actionLabel(a: LocalAutomation): string {
 		const act = ACTION_OPTIONS.find((o) => o.app === a.targetApp && o.action === a.targetAction);
-		return act ? `${act.appLabel}: ${act.actionLabel}` : `${a.targetApp}.${a.targetAction}`;
+		return act ? act.appLabel : a.targetApp;
+	}
+
+	function actionDetail(a: LocalAutomation): string {
+		const act = ACTION_OPTIONS.find((o) => o.app === a.targetApp && o.action === a.targetAction);
+		if (!act) return a.targetAction;
+		if (a.targetAction === 'logHabit' && a.targetParams?.habitId) {
+			const habit = habits.find((h) => h.id === a.targetParams?.habitId);
+			return habit ? `${act.actionLabel}: ${habit.title}` : act.actionLabel;
+		}
+		return act.actionLabel;
 	}
 
 	function conditionLabel(a: LocalAutomation): string {
-		if (!a.conditionField) return 'immer';
+		if (!a.conditionField || !a.conditionValue) return '';
 		const opLabel = CONDITION_OPS.find((o) => o.value === a.conditionOp)?.label ?? a.conditionOp;
 		return `${a.conditionField} ${opLabel} "${a.conditionValue}"`;
 	}
 </script>
 
 <div class="automations-view">
-	<!-- Header -->
-	<div class="header">
-		<span class="title">Automations</span>
-		{#if !showCreate}
-			<button class="add-btn" onclick={() => (showCreate = true)}>+ Neu</button>
-		{/if}
-	</div>
-
 	<!-- Suggestions -->
 	{#if suggestions.length > 0}
-		<div class="suggestions-section">
+		<div class="section">
 			<span class="section-label">Vorschlaege</span>
 			{#each suggestions as sug (sug.id)}
-				<div class="suggestion-card">
-					<div class="suggestion-info">
-						<span class="suggestion-name">{sug.name}</span>
-						<span class="suggestion-desc">{sug.description}</span>
+				<div class="sug-card">
+					<div class="sug-left">
+						<span class="sug-icon">&#9889;</span>
 					</div>
-					<div class="suggestion-actions">
-						<button class="sug-accept" onclick={() => acceptSuggestion(sug)}>Aktivieren</button>
-						<button class="sug-dismiss" onclick={() => handleDismiss(sug.id)}>&times;</button>
+					<div class="sug-body">
+						<span class="sug-title">{sug.name}</span>
+						<span class="sug-desc">{sug.description}</span>
+					</div>
+					<div class="sug-actions">
+						<button class="btn-sm primary" onclick={() => acceptSuggestion(sug)}>Aktivieren</button>
+						<button class="btn-sm ghost" onclick={() => handleDismiss(sug.id)}>Nein</button>
 					</div>
 				</div>
 			{/each}
 		</div>
 	{/if}
 
-	<!-- Create Form -->
-	{#if showCreate}
-		<form class="create-form" onsubmit={handleCreate}>
-			<input class="form-input" type="text" placeholder="Name (optional)" bind:value={newName} />
+	<!-- Active Automations -->
+	<div class="section">
+		<div class="section-header">
+			<span class="section-label">Aktive Regeln</span>
+			{#if !showCreate}
+				<button class="btn-sm outline" onclick={() => (showCreate = true)}>+ Neu</button>
+			{/if}
+		</div>
 
-			<!-- WHEN -->
-			<div class="form-section">
-				<span class="form-label">WENN</span>
-				<select class="form-select" bind:value={newSourceKey}>
-					<option value="">App / Collection wählen...</option>
-					{#each SOURCE_OPTIONS as src}
-						<option value="{src.app}.{src.collection}"
-							>{src.appLabel} / {src.collectionLabel}</option
-						>
-					{/each}
-				</select>
+		{#if showCreate}
+			<form class="create-form" onsubmit={handleCreate}>
+				<input
+					class="form-input full"
+					type="text"
+					placeholder="Name (optional)"
+					bind:value={newName}
+				/>
 
-				{#if selectedSource}
-					<div class="form-row">
-						<select class="form-select small" bind:value={newSourceOp}>
-							<option value="insert">erstellt</option>
-							<option value="update">geändert</option>
-						</select>
-					</div>
-				{/if}
-			</div>
-
-			<!-- CONDITION -->
-			{#if selectedSource}
-				<div class="form-section">
-					<span class="form-label">BEDINGUNG (optional)</span>
-					<div class="form-row">
-						<select class="form-select" bind:value={newConditionField}>
-							<option value="">Kein Filter</option>
-							{#each selectedSource.fields as field}
-								<option value={field}>{field}</option>
+				<div class="form-step">
+					<span class="step-badge when">WENN</span>
+					<div class="step-fields">
+						<select class="form-select" bind:value={newSourceKey}>
+							<option value="">Quelle waehlen...</option>
+							{#each SOURCE_OPTIONS as src}
+								<option value="{src.app}.{src.collection}"
+									>{src.appLabel} — {src.collectionLabel}</option
+								>
 							{/each}
 						</select>
-						{#if newConditionField}
-							<select class="form-select small" bind:value={newConditionOp}>
-								{#each CONDITION_OPS as op}
-									<option value={op.value}>{op.label}</option>
-								{/each}
+						{#if selectedSource}
+							<select class="form-select narrow" bind:value={newSourceOp}>
+								<option value="insert">erstellt wird</option>
+								<option value="update">geaendert wird</option>
 							</select>
-							<input
-								class="form-input"
-								type="text"
-								placeholder="Wert..."
-								bind:value={newConditionValue}
-							/>
 						{/if}
 					</div>
 				</div>
-			{/if}
 
-			<!-- THEN -->
-			<div class="form-section">
-				<span class="form-label">DANN</span>
-				<select class="form-select" bind:value={newActionKey}>
-					<option value="">Aktion wählen...</option>
-					{#each ACTION_OPTIONS as act}
-						<option value="{act.app}.{act.action}">{act.appLabel}: {act.actionLabel}</option>
-					{/each}
-				</select>
-
-				{#if selectedAction}
-					{#each selectedAction.params as param}
-						<div class="form-row">
-							<span class="param-label">{param.label}</span>
-							{#if param.key === 'habitId'}
-								<select
-									class="form-select"
-									value={newParams[param.key] ?? ''}
-									onchange={(e) => {
-										newParams = {
-											...newParams,
-											[param.key]: (e.target as HTMLSelectElement).value,
-										};
-									}}
-								>
-									<option value="">Habit wählen...</option>
-									{#each habits as h}
-										<option value={h.id}>{h.title}</option>
+				{#if selectedSource}
+					<div class="form-step">
+						<span class="step-badge filter">FILTER</span>
+						<div class="step-fields">
+							<select class="form-select" bind:value={newConditionField}>
+								<option value="">Kein Filter</option>
+								{#each selectedSource.fields as field}
+									<option value={field}>{field}</option>
+								{/each}
+							</select>
+							{#if newConditionField}
+								<select class="form-select narrow" bind:value={newConditionOp}>
+									{#each CONDITION_OPS as op}
+										<option value={op.value}>{op.label}</option>
 									{/each}
 								</select>
-							{:else}
 								<input
 									class="form-input"
 									type="text"
-									placeholder={param.label}
-									value={newParams[param.key] ?? ''}
-									oninput={(e) => {
-										newParams = { ...newParams, [param.key]: (e.target as HTMLInputElement).value };
-									}}
+									placeholder="Wert..."
+									bind:value={newConditionValue}
 								/>
 							{/if}
 						</div>
-					{/each}
+					</div>
 				{/if}
-			</div>
 
-			<!-- Actions -->
-			<div class="form-actions">
-				<button type="button" class="btn-cancel" onclick={resetForm}>Abbrechen</button>
-				<button type="submit" class="btn-create" disabled={!selectedSource || !selectedAction}
-					>Erstellen</button
-				>
-			</div>
-		</form>
-	{/if}
-
-	<!-- Automation List -->
-	<div class="list">
-		{#each automations as auto (auto.id)}
-			<div class="item" class:disabled={!auto.enabled}>
-				<button
-					class="toggle"
-					class:active={auto.enabled}
-					onclick={() => automationsStore.toggle(auto.id)}
-				>
-					<span class="toggle-dot"></span>
-				</button>
-				<div class="item-info">
-					<span class="item-name">{auto.name}</span>
-					<span class="item-rule">
-						<span class="rule-when">{sourceLabel(auto)}</span>
-						<span class="rule-arrow">→</span>
-						<span class="rule-condition">{conditionLabel(auto)}</span>
-						<span class="rule-arrow">→</span>
-						<span class="rule-action">{actionLabel(auto)}</span>
-					</span>
+				<div class="form-step">
+					<span class="step-badge then">DANN</span>
+					<div class="step-fields">
+						<select class="form-select" bind:value={newActionKey}>
+							<option value="">Aktion waehlen...</option>
+							{#each ACTION_OPTIONS as act}
+								<option value="{act.app}.{act.action}">{act.appLabel} — {act.actionLabel}</option>
+							{/each}
+						</select>
+						{#if selectedAction}
+							{#each selectedAction.params as param}
+								{#if param.key === 'habitId'}
+									<select
+										class="form-select"
+										value={newParams[param.key] ?? ''}
+										onchange={(e) => {
+											newParams = {
+												...newParams,
+												[param.key]: (e.target as HTMLSelectElement).value,
+											};
+										}}
+									>
+										<option value="">Habit waehlen...</option>
+										{#each habits as h}
+											<option value={h.id}>{h.title}</option>
+										{/each}
+									</select>
+								{:else}
+									<input
+										class="form-input"
+										type="text"
+										placeholder={param.label}
+										value={newParams[param.key] ?? ''}
+										oninput={(e) => {
+											newParams = {
+												...newParams,
+												[param.key]: (e.target as HTMLInputElement).value,
+											};
+										}}
+									/>
+								{/if}
+							{/each}
+						{/if}
+					</div>
 				</div>
-				<button class="delete-btn" onclick={() => automationsStore.remove(auto.id)}>
-					<Trash size={12} />
-				</button>
+
+				<div class="form-footer">
+					<button type="button" class="btn-sm ghost" onclick={resetForm}>Abbrechen</button>
+					<button type="submit" class="btn-sm primary" disabled={!selectedSource || !selectedAction}
+						>Erstellen</button
+					>
+				</div>
+			</form>
+		{/if}
+
+		<!-- Automation Cards -->
+		{#each automations as auto (auto.id)}
+			<div class="auto-card" class:inactive={!auto.enabled}>
+				<div class="auto-header">
+					<button
+						class="toggle"
+						class:on={auto.enabled}
+						onclick={() => automationsStore.toggle(auto.id)}
+						title={auto.enabled ? 'Deaktivieren' : 'Aktivieren'}
+					>
+						<span class="toggle-track"><span class="toggle-thumb"></span></span>
+					</button>
+					<span class="auto-name">{auto.name}</span>
+					<button
+						class="icon-btn danger"
+						onclick={() => automationsStore.remove(auto.id)}
+						title="Loeschen"
+					>
+						<Trash size={12} />
+					</button>
+				</div>
+				<div class="auto-flow">
+					<span class="flow-chip when">{sourceLabel(auto)}</span>
+					<span class="flow-detail">{sourceDetail(auto)}</span>
+					{#if conditionLabel(auto)}
+						<span class="flow-arrow">&#8594;</span>
+						<span class="flow-chip filter">wenn</span>
+						<span class="flow-detail">{conditionLabel(auto)}</span>
+					{/if}
+					<span class="flow-arrow">&#8594;</span>
+					<span class="flow-chip then">{actionLabel(auto)}</span>
+					<span class="flow-detail">{actionDetail(auto)}</span>
+				</div>
 			</div>
 		{/each}
-	</div>
 
-	{#if automations.length === 0 && !showCreate}
-		<div class="empty">
-			<p>Keine Automations angelegt.</p>
-			<p class="empty-hint">Erstelle Regeln die Module miteinander verbinden.</p>
-			<button class="empty-add" onclick={() => (showCreate = true)}
-				>Erste Automation erstellen</button
-			>
-		</div>
-	{/if}
+		{#if automations.length === 0 && !showCreate}
+			<div class="empty">
+				<p class="empty-title">Keine Automations</p>
+				<p class="empty-hint">Verbinde Module mit Regeln: "Wenn X passiert, mache Y"</p>
+				<button class="btn-sm primary" onclick={() => (showCreate = true)}
+					>Erste Automation erstellen</button
+				>
+			</div>
+		{/if}
+	</div>
 </div>
 
 <style>
 	.automations-view {
 		display: flex;
 		flex-direction: column;
-		gap: 0.75rem;
-		padding: 0.5rem;
+		gap: 1rem;
+		padding: 0.625rem;
 	}
 
-	/* ── Suggestions ──────────────────────── */
-	.suggestions-section {
+	.section {
 		display: flex;
 		flex-direction: column;
-		gap: 0.375rem;
+		gap: 0.5rem;
+	}
+
+	.section-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
 	}
 
 	.section-label {
-		font-size: 0.625rem;
+		font-size: 0.6875rem;
 		font-weight: 700;
 		text-transform: uppercase;
-		letter-spacing: 0.08em;
-		color: #f59e0b;
+		letter-spacing: 0.06em;
+		color: var(--color-muted-foreground);
 	}
 
-	.suggestion-card {
+	/* ── Buttons ──────────────────────────── */
+	.btn-sm {
+		padding: 0.3125rem 0.625rem;
+		border-radius: 0.375rem;
+		font-size: 0.6875rem;
+		font-weight: 600;
+		cursor: pointer;
+		border: none;
+		transition: all 0.15s;
+		white-space: nowrap;
+	}
+	.btn-sm.primary {
+		background: #8b5cf6;
+		color: white;
+	}
+	.btn-sm.primary:hover:not(:disabled) {
+		background: #7c3aed;
+	}
+	.btn-sm.primary:disabled {
+		opacity: 0.4;
+		cursor: not-allowed;
+	}
+	.btn-sm.outline {
+		background: transparent;
+		border: 1px dashed var(--color-border, rgba(255, 255, 255, 0.15));
+		color: var(--color-muted-foreground);
+	}
+	.btn-sm.outline:hover {
+		border-color: #8b5cf6;
+		color: #8b5cf6;
+	}
+	.btn-sm.ghost {
+		background: transparent;
+		color: var(--color-muted-foreground);
+	}
+	.btn-sm.ghost:hover {
+		color: var(--color-foreground);
+	}
+
+	.icon-btn {
+		border: none;
+		background: transparent;
+		cursor: pointer;
+		padding: 0.25rem;
+		border-radius: 0.25rem;
+		opacity: 0;
+		transition: all 0.15s;
+		color: var(--color-muted-foreground);
+	}
+	.icon-btn.danger:hover {
+		color: #ef4444;
+		background: rgba(239, 68, 68, 0.1);
+	}
+
+	/* ── Suggestion Cards ─────────────────── */
+	.sug-card {
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
-		padding: 0.5rem 0.625rem;
-		border-radius: 0.5rem;
-		background: rgba(245, 158, 11, 0.06);
+		gap: 0.625rem;
+		padding: 0.625rem 0.75rem;
+		border-radius: 0.625rem;
+		background: linear-gradient(135deg, rgba(245, 158, 11, 0.06), rgba(245, 158, 11, 0.02));
 		border: 1px solid rgba(245, 158, 11, 0.15);
 	}
 
-	.suggestion-info {
+	.sug-left {
+		font-size: 1.125rem;
+		line-height: 1;
+		flex-shrink: 0;
+	}
+
+	.sug-body {
 		flex: 1;
 		display: flex;
 		flex-direction: column;
@@ -379,108 +471,182 @@
 		min-width: 0;
 	}
 
-	.suggestion-name {
+	.sug-title {
 		font-size: 0.75rem;
 		font-weight: 600;
 		color: var(--color-foreground);
 	}
 
-	.suggestion-desc {
+	.sug-desc {
 		font-size: 0.6875rem;
 		color: var(--color-muted-foreground);
+		line-height: 1.3;
 	}
 
-	.suggestion-actions {
+	.sug-actions {
 		display: flex;
-		align-items: center;
 		gap: 0.25rem;
 		flex-shrink: 0;
 	}
 
-	.sug-accept {
-		padding: 0.25rem 0.5rem;
-		border-radius: 0.375rem;
-		border: none;
-		background: #8b5cf6;
-		color: white;
-		font-size: 0.625rem;
-		font-weight: 600;
-		cursor: pointer;
-		white-space: nowrap;
+	/* ── Automation Cards ─────────────────── */
+	.auto-card {
+		display: flex;
+		flex-direction: column;
+		gap: 0.375rem;
+		padding: 0.625rem 0.75rem;
+		border-radius: 0.625rem;
+		background: var(--color-surface, rgba(255, 255, 255, 0.03));
+		border: 1px solid var(--color-border, rgba(255, 255, 255, 0.06));
+		transition: all 0.15s;
 	}
-	.sug-accept:hover {
-		filter: brightness(1.1);
+	.auto-card:hover {
+		border-color: rgba(139, 92, 246, 0.2);
 	}
-
-	.sug-dismiss {
-		border: none;
-		background: transparent;
-		color: var(--color-muted-foreground);
-		font-size: 0.875rem;
-		cursor: pointer;
-		padding: 0 0.25rem;
+	.auto-card:hover .icon-btn {
+		opacity: 1;
 	}
-	.sug-dismiss:hover {
-		color: #ef4444;
+	.auto-card.inactive {
+		opacity: 0.45;
 	}
 
-	.header {
+	.auto-header {
 		display: flex;
 		align-items: center;
-		justify-content: space-between;
+		gap: 0.5rem;
 	}
 
-	.title {
+	.auto-name {
+		flex: 1;
 		font-size: 0.8125rem;
 		font-weight: 600;
 		color: var(--color-foreground);
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
 
-	.add-btn {
-		padding: 0.25rem 0.625rem;
-		border-radius: 0.375rem;
-		border: 1px dashed var(--color-border, rgba(255, 255, 255, 0.15));
+	/* Toggle Switch */
+	.toggle {
+		border: none;
 		background: transparent;
-		color: var(--color-muted-foreground);
-		font-size: 0.75rem;
 		cursor: pointer;
-		transition: all 0.15s;
+		padding: 0;
+		flex-shrink: 0;
 	}
-	.add-btn:hover {
-		border-color: #8b5cf6;
-		color: #8b5cf6;
+	.toggle-track {
+		display: block;
+		width: 28px;
+		height: 16px;
+		border-radius: 9999px;
+		background: var(--color-border, rgba(255, 255, 255, 0.15));
+		position: relative;
+		transition: background 0.2s;
+	}
+	.toggle.on .toggle-track {
+		background: #8b5cf6;
+	}
+	.toggle-thumb {
+		position: absolute;
+		top: 2px;
+		left: 2px;
+		width: 12px;
+		height: 12px;
+		border-radius: 9999px;
+		background: white;
+		transition: transform 0.2s;
+	}
+	.toggle.on .toggle-thumb {
+		transform: translateX(12px);
+	}
+
+	/* Flow visualization */
+	.auto-flow {
+		display: flex;
+		align-items: center;
+		gap: 0.25rem;
+		flex-wrap: wrap;
+		padding-left: 2.125rem;
+	}
+
+	.flow-chip {
+		padding: 0.125rem 0.375rem;
+		border-radius: 0.25rem;
+		font-size: 0.5625rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+	}
+	.flow-chip.when {
+		background: rgba(59, 130, 246, 0.12);
+		color: #60a5fa;
+	}
+	.flow-chip.filter {
+		background: rgba(245, 158, 11, 0.12);
+		color: #fbbf24;
+	}
+	.flow-chip.then {
+		background: rgba(34, 197, 94, 0.12);
+		color: #4ade80;
+	}
+
+	.flow-detail {
+		font-size: 0.6875rem;
+		color: var(--color-muted-foreground);
+	}
+
+	.flow-arrow {
+		font-size: 0.625rem;
+		color: var(--color-muted-foreground);
+		opacity: 0.4;
 	}
 
 	/* ── Create Form ──────────────────────── */
 	.create-form {
 		display: flex;
 		flex-direction: column;
-		gap: 0.625rem;
+		gap: 0.5rem;
 		padding: 0.75rem;
 		border-radius: 0.75rem;
 		background: var(--color-surface, rgba(255, 255, 255, 0.04));
-		border: 1px solid var(--color-border, rgba(255, 255, 255, 0.08));
+		border: 1px solid rgba(139, 92, 246, 0.2);
 	}
 
-	.form-section {
+	.form-step {
+		display: flex;
+		align-items: flex-start;
+		gap: 0.5rem;
+	}
+
+	.step-badge {
+		padding: 0.1875rem 0.5rem;
+		border-radius: 0.25rem;
+		font-size: 0.5625rem;
+		font-weight: 800;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		flex-shrink: 0;
+		margin-top: 0.3125rem;
+	}
+	.step-badge.when {
+		background: rgba(59, 130, 246, 0.12);
+		color: #60a5fa;
+	}
+	.step-badge.filter {
+		background: rgba(245, 158, 11, 0.12);
+		color: #fbbf24;
+	}
+	.step-badge.then {
+		background: rgba(34, 197, 94, 0.12);
+		color: #4ade80;
+	}
+
+	.step-fields {
 		display: flex;
 		flex-direction: column;
-		gap: 0.375rem;
-	}
-
-	.form-label {
-		font-size: 0.625rem;
-		font-weight: 700;
-		text-transform: uppercase;
-		letter-spacing: 0.08em;
-		color: #8b5cf6;
-	}
-
-	.form-row {
-		display: flex;
-		gap: 0.375rem;
-		align-items: center;
-		flex-wrap: wrap;
+		gap: 0.3125rem;
+		flex: 1;
+		min-width: 0;
 	}
 
 	.form-input,
@@ -492,8 +658,10 @@
 		color: var(--color-foreground);
 		font-size: 0.75rem;
 		outline: none;
-		flex: 1;
-		min-width: 0;
+		width: 100%;
+	}
+	.form-input.full {
+		width: 100%;
 	}
 	.form-input:focus,
 	.form-select:focus {
@@ -502,185 +670,35 @@
 	.form-input::placeholder {
 		color: var(--color-muted-foreground);
 	}
-	.form-select.small {
-		flex: 0 0 auto;
+	.form-select.narrow {
 		width: auto;
 	}
 
-	.param-label {
-		font-size: 0.6875rem;
-		color: var(--color-muted-foreground);
-		flex-shrink: 0;
-		min-width: 3rem;
-	}
-
-	.form-actions {
+	.form-footer {
 		display: flex;
 		justify-content: flex-end;
 		gap: 0.375rem;
-	}
-
-	.btn-cancel,
-	.btn-create {
-		padding: 0.375rem 0.75rem;
-		border-radius: 0.375rem;
-		font-size: 0.75rem;
-		font-weight: 500;
-		cursor: pointer;
-		border: none;
-	}
-	.btn-cancel {
-		background: transparent;
-		color: var(--color-muted-foreground);
-	}
-	.btn-cancel:hover {
-		background: var(--color-muted, rgba(255, 255, 255, 0.08));
-	}
-	.btn-create {
-		background: #8b5cf6;
-		color: white;
-	}
-	.btn-create:hover:not(:disabled) {
-		filter: brightness(1.1);
-	}
-	.btn-create:disabled {
-		opacity: 0.4;
-		cursor: not-allowed;
-	}
-
-	/* ── List ─────────────────────────────── */
-	.list {
-		display: flex;
-		flex-direction: column;
-		gap: 0.25rem;
-	}
-
-	.item {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		padding: 0.5rem;
-		border-radius: 0.5rem;
-		transition: background 0.15s;
-	}
-	.item:hover {
-		background: var(--color-surface, rgba(255, 255, 255, 0.04));
-	}
-	.item.disabled {
-		opacity: 0.5;
-	}
-
-	.toggle {
-		width: 28px;
-		height: 16px;
-		border-radius: 9999px;
-		border: none;
-		background: var(--color-border, rgba(255, 255, 255, 0.15));
-		cursor: pointer;
-		position: relative;
-		flex-shrink: 0;
-		transition: background 0.2s;
-	}
-	.toggle.active {
-		background: #8b5cf6;
-	}
-	.toggle-dot {
-		position: absolute;
-		top: 2px;
-		left: 2px;
-		width: 12px;
-		height: 12px;
-		border-radius: 9999px;
-		background: white;
-		transition: transform 0.2s;
-	}
-	.toggle.active .toggle-dot {
-		transform: translateX(12px);
-	}
-
-	.item-info {
-		flex: 1;
-		display: flex;
-		flex-direction: column;
-		gap: 0.125rem;
-		min-width: 0;
-	}
-
-	.item-name {
-		font-size: 0.8125rem;
-		font-weight: 500;
-		color: var(--color-foreground);
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-	}
-
-	.item-rule {
-		display: flex;
-		align-items: center;
-		gap: 0.25rem;
-		font-size: 0.625rem;
-		color: var(--color-muted-foreground);
-		flex-wrap: wrap;
-	}
-
-	.rule-when {
-		color: #3b82f6;
-	}
-	.rule-condition {
-		color: #f59e0b;
-	}
-	.rule-action {
-		color: #22c55e;
-	}
-	.rule-arrow {
-		opacity: 0.4;
-	}
-
-	.delete-btn {
-		border: none;
-		background: transparent;
-		color: var(--color-muted-foreground);
-		cursor: pointer;
-		padding: 0.25rem;
-		opacity: 0;
-		transition: all 0.15s;
-		flex-shrink: 0;
-	}
-	.item:hover .delete-btn {
-		opacity: 1;
-	}
-	.delete-btn:hover {
-		color: #ef4444;
+		padding-top: 0.25rem;
 	}
 
 	/* ── Empty ────────────────────────────── */
 	.empty {
 		text-align: center;
-		color: var(--color-muted-foreground);
-		font-size: 0.8125rem;
-		padding: 2rem 0;
+		padding: 2rem 1rem;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		gap: 0.5rem;
+		gap: 0.375rem;
+	}
+	.empty-title {
+		font-size: 0.8125rem;
+		font-weight: 500;
+		color: var(--color-foreground);
+		margin: 0;
 	}
 	.empty-hint {
 		font-size: 0.75rem;
-		opacity: 0.7;
-	}
-	.empty-add {
-		padding: 0.5rem 1rem;
-		border-radius: 0.5rem;
-		background: #8b5cf6;
-		color: white;
-		border: none;
-		font-size: 0.8125rem;
-		font-weight: 500;
-		cursor: pointer;
-		margin-top: 0.25rem;
-	}
-	.empty-add:hover {
-		filter: brightness(1.1);
+		color: var(--color-muted-foreground);
+		margin: 0 0 0.5rem;
 	}
 </style>
