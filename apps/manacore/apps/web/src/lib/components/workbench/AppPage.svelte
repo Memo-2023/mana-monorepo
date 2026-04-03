@@ -216,12 +216,20 @@
 	}
 
 	let overlayCardEl = $state<HTMLDivElement | null>(null);
+	let appPageEl = $state<HTMLDivElement | null>(null);
 
-	// Close overlay on any click outside the overlay card
+	// Close overlay on click outside the overlay card BUT inside this AppPage
+	// (clicks in other AppPages should NOT close this overlay)
 	$effect(() => {
 		if (!overlay) return;
 		function handleGlobalClick(e: MouseEvent) {
-			if (overlayCardEl && !overlayCardEl.contains(e.target as Node)) {
+			const target = e.target as Node;
+			if (
+				overlayCardEl &&
+				appPageEl &&
+				appPageEl.contains(target) &&
+				!overlayCardEl.contains(target)
+			) {
 				overlayStack = [];
 				siblingIds = [];
 				siblingKey = '';
@@ -238,6 +246,7 @@
 </script>
 
 <div
+	bind:this={appPageEl}
 	class="app-page-wrapper"
 	use:dropTarget={{
 		accepts: acceptedDropTypes,
