@@ -342,15 +342,9 @@
 		background: transparent;
 		color: #d1d5db;
 		cursor: pointer;
-		opacity: 0;
 		transition:
-			opacity 0.15s,
 			color 0.15s,
 			background 0.15s;
-	}
-	.drag-handle-bar:hover .move-btn {
-		opacity: 1;
-	}
 	.move-btn:hover {
 		color: #6b7280;
 		background: rgba(0, 0, 0, 0.06);
@@ -425,11 +419,6 @@
 		display: flex;
 		align-items: center;
 		gap: 0.125rem;
-		opacity: 0;
-		transition: opacity 0.15s;
-	}
-	.drag-handle-bar:hover .window-actions {
-		opacity: 1;
 	}
 	.window-btn {
 		display: flex;
