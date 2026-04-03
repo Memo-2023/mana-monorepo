@@ -65,25 +65,9 @@
 
 		if (onAppClick) {
 			onAppClick(app, event);
-		} else if (
-			event &&
-			(event.ctrlKey || event.metaKey) &&
-			onOpenInPanel &&
-			app.url &&
-			!app.isCurrent
-		) {
-			onOpenInPanel(app.id, app.url);
-		} else if (app.isCurrent) {
-			window.location.href = '/';
 		} else if (app.url) {
-			const isInternal =
-				app.url.startsWith('/') ||
-				new URL(app.url, window.location.origin).origin === window.location.origin;
-			if (isInternal) {
-				window.location.href = app.url;
-			} else {
-				window.open(app.url, '_blank', 'noopener,noreferrer');
-			}
+			// Always open in new tab
+			window.open(app.url, '_blank', 'noopener,noreferrer');
 		}
 
 		close();
