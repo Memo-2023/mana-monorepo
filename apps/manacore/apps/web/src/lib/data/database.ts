@@ -9,6 +9,7 @@
 
 import Dexie, { type EntityTable } from 'dexie';
 import { trackFirstContent } from '$lib/stores/funnel-tracking';
+import { fire as fireTrigger } from '$lib/triggers/registry';
 
 // ─── Database ──────────────────────────────────────────────
 
@@ -22,6 +23,7 @@ db.version(1).stores({
 	// ─── Core / ManaCore (appId: 'manacore') ───
 	userSettings: 'id, key',
 	dashboardConfigs: 'id',
+	automations: 'id, sourceApp, targetApp, enabled, [sourceApp+sourceCollection]',
 
 	// ─── Todo (appId: 'todo') ───
 	tasks:
@@ -206,7 +208,7 @@ db.version(1).stores({
 // The SyncEngine uses this to group pending changes and push to /sync/{appId}.
 
 export const SYNC_APP_MAP: Record<string, string[]> = {
-	manacore: ['userSettings', 'dashboardConfigs'],
+	manacore: ['userSettings', 'dashboardConfigs', 'automations'],
 	todo: ['tasks', 'todoProjects', 'taskLabels', 'reminders', 'boardViews'],
 	calendar: ['calendars', 'events', 'eventTags'],
 	contacts: ['contacts', 'contactTags'],
@@ -370,6 +372,7 @@ for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {
 				createdAt: now,
 			});
 			trackFirstContent(appId);
+			fireTrigger(appId, tableName, 'insert', { ...obj });
 		});
 
 		table.hook('updating', function (modifications, primKey) {
@@ -389,6 +392,8 @@ for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {
 				deletedAt: (modifications as Record<string, unknown>).deletedAt as string | undefined,
 				createdAt: now,
 			});
+			const op = (modifications as Record<string, unknown>).deletedAt ? 'delete' : 'update';
+			fireTrigger(appId, tableName, op, modifications as Record<string, unknown>);
 		});
 	}
 }
