@@ -135,7 +135,7 @@
 	});
 
 	// Icon for action type
-	const ActionIcon = $derived(() => {
+	const actionIcon = $derived.by(() => {
 		switch (action) {
 			case 'save':
 				return CloudArrowUp;
@@ -235,8 +235,7 @@
 			<div
 				class="bg-primary/10 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full"
 			>
-				{@const Icon = ActionIcon()}
-				<Icon size={32} class="text-primary" />
+				<svelte:component this={actionIcon} size={32} class="text-primary" />
 			</div>
 
 			<!-- Title -->
