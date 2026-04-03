@@ -16,6 +16,7 @@ const defaultLocale = 'de';
 function registerLocale(lang: SupportedLocale) {
 	register(lang, async () => {
 		const [
+			apps,
 			common,
 			nav,
 			dashboard,
@@ -49,6 +50,7 @@ function registerLocale(lang: SupportedLocale) {
 			guides,
 			help,
 		] = await Promise.all([
+			import(`./locales/apps/${lang}.json`),
 			import(`./locales/common/${lang}.json`),
 			import(`./locales/nav/${lang}.json`),
 			import(`./locales/dashboard/${lang}.json`),
@@ -84,6 +86,7 @@ function registerLocale(lang: SupportedLocale) {
 		]);
 
 		return {
+			apps: apps.default,
 			common: common.default,
 			nav: nav.default,
 			dashboard: dashboard.default,

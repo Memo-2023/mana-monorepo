@@ -5,6 +5,7 @@
 -->
 <script lang="ts">
 	import { X, CaretUp, CaretDown, ArrowLeft, SpinnerGap } from '@manacore/shared-icons';
+	import { _ } from 'svelte-i18n';
 	import { PageShell } from '$lib/components/page-carousel';
 	import { getApp, getAppByDragType, canDrop, executeDrop } from '$lib/app-registry';
 	import type { Component } from 'svelte';
@@ -40,7 +41,11 @@
 	}: Props = $props();
 
 	let app = $derived(getApp(appId));
-	let appName = $derived(app?.name ?? appId);
+	let appName = $derived.by(() => {
+		const key = `apps.${appId}`;
+		const translated = $_(key);
+		return translated !== key ? translated : (app?.name ?? appId);
+	});
 	let appColor = $derived(app?.color ?? '#6B7280');
 
 	// ── Cross-module drop target ────────────────────────────
@@ -152,7 +157,11 @@
 						params: { [targetAppDesc.paramKey!]: targetId },
 						component: mod.default,
 						overlayColor: targetAppDesc.color,
-						overlayTitle: targetAppDesc.name,
+						overlayTitle: (() => {
+							const k = `apps.${targetApp}`;
+							const t = $_(k);
+							return t !== k ? t : targetAppDesc.name;
+						})(),
 					},
 				];
 			});

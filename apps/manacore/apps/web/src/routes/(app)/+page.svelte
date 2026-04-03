@@ -8,6 +8,7 @@
 	import { DragPreview } from '@manacore/shared-ui/dnd';
 	import type { DragType } from '@manacore/shared-ui/dnd';
 	import { ContextMenu } from '@manacore/shared-ui';
+	import { _ } from 'svelte-i18n';
 	import { buildContextMenuItems, createWorkbenchContextMenu } from '$lib/context-menu';
 
 	function resolveEntity(type: string, data: Record<string, unknown>) {
@@ -101,7 +102,11 @@
 				maximized: a.maximized,
 				widthPx: a.widthPx ?? DEFAULT_WIDTH,
 				heightPx: a.heightPx,
-				title: entry?.name ?? a.appId,
+				title: (() => {
+					const k = `apps.${a.appId}`;
+					const t = $_(k);
+					return t !== k ? t : (entry?.name ?? a.appId);
+				})(),
 				color: entry?.color ?? '#6B7280',
 			};
 		})

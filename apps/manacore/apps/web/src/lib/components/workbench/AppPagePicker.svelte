@@ -6,6 +6,12 @@
 	import { X } from '@manacore/shared-icons';
 	import { getAllApps } from '$lib/app-registry';
 
+	function appName(id: string, fallback: string): string {
+		const key = `apps.${id}`;
+		const translated = $_(key);
+		return translated !== key ? translated : fallback;
+	}
+
 	interface Props {
 		onSelect: (appId: string) => void;
 		onClose: () => void;
@@ -27,7 +33,7 @@
 			{#if i > 0}<div class="divider"></div>{/if}
 			<button class="app-option" onclick={() => onSelect(app.id)}>
 				<div class="app-dot" style="background-color: {app.color}"></div>
-				<span class="app-name">{app.name}</span>
+				<span class="app-name">{appName(app.id, app.name)}</span>
 			</button>
 		{/each}
 
