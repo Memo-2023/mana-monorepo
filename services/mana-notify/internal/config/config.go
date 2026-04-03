@@ -19,12 +19,13 @@ type Config struct {
 	ServiceKey      string
 	ManaCoreAuthURL string
 
-	// SMTP (Brevo)
-	SMTPHost     string
-	SMTPPort     int
-	SMTPUser     string
-	SMTPPassword string
-	SMTPFrom     string
+	// SMTP
+	SMTPHost        string
+	SMTPPort        int
+	SMTPUser        string
+	SMTPPassword    string
+	SMTPFrom        string
+	SMTPInsecureTLS bool
 
 	// Expo Push
 	ExpoAccessToken string
@@ -58,7 +59,8 @@ func Load() *Config {
 		SMTPPort:     envutil.GetInt("SMTP_PORT", 587),
 		SMTPUser:     envutil.Get("SMTP_USER", ""),
 		SMTPPassword: envutil.Get("SMTP_PASSWORD", ""),
-		SMTPFrom:     envutil.Get("SMTP_FROM", "ManaCore <noreply@mana.how>"),
+		SMTPFrom:        envutil.Get("SMTP_FROM", "ManaCore <noreply@mana.how>"),
+		SMTPInsecureTLS: envutil.GetBool("SMTP_INSECURE_TLS", false),
 
 		ExpoAccessToken: envutil.Get("EXPO_ACCESS_TOKEN", ""),
 

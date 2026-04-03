@@ -12,20 +12,22 @@ import (
 )
 
 type EmailService struct {
-	host     string
-	port     int
-	user     string
-	password string
-	from     string
+	host        string
+	port        int
+	user        string
+	password    string
+	from        string
+	insecureTLS bool
 }
 
 func NewEmailService(cfg *config.Config) *EmailService {
 	return &EmailService{
-		host:     cfg.SMTPHost,
-		port:     cfg.SMTPPort,
-		user:     cfg.SMTPUser,
-		password: cfg.SMTPPassword,
-		from:     cfg.SMTPFrom,
+		host:        cfg.SMTPHost,
+		port:        cfg.SMTPPort,
+		user:        cfg.SMTPUser,
+		password:    cfg.SMTPPassword,
+		from:        cfg.SMTPFrom,
+		insecureTLS: cfg.SMTPInsecureTLS,
 	}
 }
 
@@ -85,10 +87,44 @@ func (s *EmailService) Send(msg *EmailMessage) EmailResult {
 
 	auth := smtp.PlainAuth("", s.user, s.password, s.host)
 
-	tlsConfig := &tls.Config{ServerName: s.host}
+	tlsConfig := &tls.Config{ServerName: s.host, InsecureSkipVerify: s.insecureTLS}
 	conn, err := tls.Dial("tcp", addr, tlsConfig)
 	if err != nil {
-		// Try STARTTLS fallback
+		// Try STARTTLS fallback — use custom dialer to support insecure TLS
+		if s.insecureTLS {
+			c, dialErr := smtp.Dial(addr)
+			if dialErr != nil {
+				slog.Error("email send failed", "to", msg.To, "error", dialErr, "duration", time.Since(start))
+				return EmailResult{Success: false, Error: dialErr.Error()}
+			}
+			defer c.Close()
+			if err := c.StartTLS(tlsConfig); err != nil {
+				// Continue without TLS for internal connections
+				slog.Warn("STARTTLS failed, continuing without TLS", "error", err)
+			}
+			if err := c.Auth(auth); err != nil {
+				return EmailResult{Success: false, Error: err.Error()}
+			}
+			if err := c.Mail(fromAddr); err != nil {
+				return EmailResult{Success: false, Error: err.Error()}
+			}
+			if err := c.Rcpt(msg.To); err != nil {
+				return EmailResult{Success: false, Error: err.Error()}
+			}
+			w, err := c.Data()
+			if err != nil {
+				return EmailResult{Success: false, Error: err.Error()}
+			}
+			if _, err := w.Write([]byte(builder.String())); err != nil {
+				return EmailResult{Success: false, Error: err.Error()}
+			}
+			if err := w.Close(); err != nil {
+				return EmailResult{Success: false, Error: err.Error()}
+			}
+			c.Quit()
+			slog.Info("email sent via STARTTLS (insecure)", "to", msg.To, "duration", time.Since(start))
+			return EmailResult{Success: true}
+		}
 		err = smtp.SendMail(addr, auth, fromAddr, []string{msg.To}, []byte(builder.String()))
 		if err != nil {
 			slog.Error("email send failed", "to", msg.To, "error", err, "duration", time.Since(start))

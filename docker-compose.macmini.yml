@@ -542,6 +542,7 @@ services:
       SMTP_USER: ${SMTP_USER:-noreply@mana.how}
       SMTP_PASSWORD: ${SMTP_PASSWORD:-ManaNoReply2026!}
       SMTP_FROM: "ManaCore <noreply@mana.how>"
+      SMTP_INSECURE_TLS: "true"
       EXPO_ACCESS_TOKEN: ${EXPO_ACCESS_TOKEN:-}
       MATRIX_HOMESERVER_URL: http://mana-matrix-synapse:8008
       MATRIX_ACCESS_TOKEN: ${MATRIX_NOTIFY_BOT_TOKEN:-}
