@@ -12,7 +12,6 @@ ENV PUBLIC_SYNC_SERVER_URL=$PUBLIC_SYNC_SERVER_URL
 
 COPY apps/manacore/apps/web ./apps/manacore/apps/web
 COPY apps/calc/packages/shared ./apps/calc/packages/shared
-COPY apps/clock/packages/shared ./apps/clock/packages/shared
 COPY apps/zitare/packages/content ./apps/zitare/packages/content
 COPY packages/shared-uload ./packages/shared-uload
 COPY packages/local-llm ./packages/local-llm
