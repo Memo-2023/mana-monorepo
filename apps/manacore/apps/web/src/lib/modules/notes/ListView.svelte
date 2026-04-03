@@ -1,6 +1,6 @@
 <!--
   Notes — Workbench ListView
-  Compact single-line input at top, click any note to edit inline.
+  Single-line quick-create, click any note to edit inline.
 -->
 <script lang="ts">
 	import { useAllNotes, searchNotes, getPreview, formatRelativeTime } from './queries';
@@ -21,13 +21,9 @@
 	});
 
 	let searchQuery = $state('');
-
-	// Inline editing — clicking a note opens it right there
 	let editingId = $state<string | null>(null);
 	let editTitle = $state('');
 	let editContent = $state('');
-
-	// Quick create — single input line
 	let newTitle = $state('');
 
 	let filtered = $derived(searchNotes(notes, searchQuery));
@@ -37,15 +33,11 @@
 		e.preventDefault();
 		const note = await notesStore.createNote({ title: newTitle.trim() });
 		newTitle = '';
-		// Immediately open the new note for editing
 		startEdit(note);
 	}
 
 	function startEdit(note: Note) {
-		// Save previous edit if any
-		if (editingId && editingId !== note.id) {
-			saveEdit();
-		}
+		if (editingId && editingId !== note.id) saveEdit();
 		editingId = note.id;
 		editTitle = note.title;
 		editContent = note.content;
@@ -60,12 +52,6 @@
 		editingId = null;
 	}
 
-	function handleEditKeydown(e: KeyboardEvent) {
-		if (e.key === 'Escape') {
-			saveEdit();
-		}
-	}
-
 	async function handleDelete(id: string) {
 		await notesStore.deleteNote(id);
 		if (editingId === id) editingId = null;
@@ -77,30 +63,35 @@
 	}
 </script>
 
-<div class="notes-lv">
-	<!-- Quick create input -->
-	<div class="quick-create">
-		<span class="create-icon">+</span>
+<div class="app-view">
+	<!-- Quick create -->
+	<form onsubmit={(e) => e.preventDefault()} class="quick-add">
+		<span class="add-icon">+</span>
 		<input
-			class="create-input"
+			class="add-input"
 			type="text"
 			placeholder="Neue Notiz... (Enter)"
 			bind:value={newTitle}
 			onkeydown={handleQuickCreate}
 		/>
-	</div>
+	</form>
 
-	<!-- Search (only when many notes) -->
+	<!-- Search -->
 	{#if notes.length > 5}
-		<input class="search" type="text" placeholder="Suchen..." bind:value={searchQuery} />
+		<input class="search-input" type="text" placeholder="Suchen..." bind:value={searchQuery} />
 	{/if}
 
-	<!-- Note List -->
-	<div class="list">
+	<!-- Note list -->
+	<div class="note-list">
 		{#each filtered as note (note.id)}
 			{#if editingId === note.id}
 				<!-- Inline editor -->
-				<div class="card editing" onkeydown={handleEditKeydown}>
+				<div
+					class="note-item editing"
+					onkeydown={(e) => {
+						if (e.key === 'Escape') saveEdit();
+					}}
+				>
 					<input
 						class="ed-title"
 						type="text"
@@ -110,189 +101,241 @@
 					/>
 					<textarea class="ed-content" bind:value={editContent} placeholder="Inhalt..." rows="4"
 					></textarea>
-					<div class="ed-footer">
-						<button class="ed-action danger" onclick={() => handleDelete(note.id)}>Löschen</button>
-						<button class="ed-action" onclick={() => handleTogglePin(new Event('click'), note.id)}>
+					<div class="ed-actions">
+						<button class="ed-btn danger" onclick={() => handleDelete(note.id)}>Löschen</button>
+						<button class="ed-btn" onclick={() => handleTogglePin(new Event('click'), note.id)}>
 							{note.isPinned ? 'Lösen' : 'Pinnen'}
 						</button>
-						<button class="ed-action primary" onclick={saveEdit}>Fertig</button>
+						<button class="ed-btn primary" onclick={saveEdit}>Fertig</button>
 					</div>
 				</div>
 			{:else}
 				<!-- Note row -->
-				<button
-					class="card"
-					class:pinned={note.isPinned}
-					style:border-left-color={note.color ?? 'transparent'}
-					onclick={() => startEdit(note)}
-				>
-					<div class="card-top">
-						<span class="card-title">{note.title || 'Unbenannt'}</span>
-						{#if note.isPinned}<span class="pin">&#x1f4cc;</span>{/if}
-					</div>
-					{#if note.content}
-						<div class="card-preview">{getPreview(note.content, 60)}</div>
+				<button class="note-item" onclick={() => startEdit(note)}>
+					{#if note.color}
+						<span class="color-dot" style="background: {note.color}"></span>
 					{/if}
-					<div class="card-meta">{formatRelativeTime(note.updatedAt)}</div>
+					<div class="note-content">
+						<div class="note-top">
+							<span class="note-title">{note.title || 'Unbenannt'}</span>
+							{#if note.isPinned}<span class="pin">&#x1f4cc;</span>{/if}
+						</div>
+						{#if note.content}
+							<p class="note-preview">{getPreview(note.content, 60)}</p>
+						{/if}
+						<span class="note-meta">{formatRelativeTime(note.updatedAt)}</span>
+					</div>
 				</button>
 			{/if}
 		{/each}
+
+		{#if filtered.length === 0 && notes.length > 0}
+			<p class="empty">Keine Treffer</p>
+		{/if}
 	</div>
 
 	{#if notes.length === 0}
-		<div class="empty">Tippe oben, um eine Notiz zu erstellen.</div>
+		<p class="empty">Tippe oben, um eine Notiz zu erstellen.</p>
 	{/if}
 </div>
 
 <style>
-	.notes-lv {
+	.app-view {
 		display: flex;
 		flex-direction: column;
-		gap: 0.375rem;
-		padding: 0.5rem;
+		gap: 0.625rem;
+		padding: 1rem;
+		height: 100%;
 	}
 
-	/* ── Quick Create ──────────────────────────── */
-	.quick-create {
+	/* ── Quick Add (matches todo pattern) ────────── */
+	.quick-add {
 		display: flex;
 		align-items: center;
-		gap: 0.375rem;
+		gap: 0.5rem;
 		padding: 0.375rem 0.5rem;
-		border-radius: 0.5rem;
-		background: var(--color-surface, rgba(255, 255, 255, 0.04));
-		border: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
-		transition: border-color 0.15s;
+		border-radius: 0.375rem;
+		border: 1px solid rgba(0, 0, 0, 0.08);
+		background: transparent;
 	}
-	.quick-create:focus-within {
-		border-color: var(--color-primary, #6366f1);
+	:global(.dark) .quick-add {
+		border-color: rgba(255, 255, 255, 0.08);
 	}
 
-	.create-icon {
-		color: var(--color-muted-foreground);
+	.add-icon {
+		color: #d1d5db;
 		font-size: 0.875rem;
 		font-weight: 500;
-		flex-shrink: 0;
-		opacity: 0.5;
+		display: flex;
+		align-items: center;
+	}
+	:global(.dark) .add-icon {
+		color: #4b5563;
 	}
 
-	.create-input {
+	.add-input {
 		flex: 1;
-		background: transparent;
 		border: none;
-		color: var(--color-foreground);
-		font-size: 0.8125rem;
+		background: transparent;
 		outline: none;
-		padding: 0;
+		font-size: 0.8125rem;
+		color: #374151;
 	}
-	.create-input::placeholder {
-		color: var(--color-muted-foreground);
+	.add-input::placeholder {
+		color: #c0bfba;
+	}
+	:global(.dark) .add-input {
+		color: #f3f4f6;
+	}
+	:global(.dark) .add-input::placeholder {
+		color: #4b5563;
 	}
 
 	/* ── Search ─────────────────────────────────── */
-	.search {
-		background: var(--color-surface, rgba(255, 255, 255, 0.04));
-		border: 1px solid var(--color-border, rgba(255, 255, 255, 0.08));
-		border-radius: 0.375rem;
-		color: var(--color-foreground);
-		font-size: 0.75rem;
+	.search-input {
 		padding: 0.3rem 0.5rem;
+		border-radius: 0.375rem;
+		border: 1px solid rgba(0, 0, 0, 0.08);
+		background: transparent;
+		font-size: 0.75rem;
+		color: #374151;
 		outline: none;
 	}
-	.search:focus {
-		border-color: var(--color-primary, #6366f1);
+	.search-input:focus {
+		border-color: #6366f1;
 	}
-	.search::placeholder {
-		color: var(--color-muted-foreground);
+	.search-input::placeholder {
+		color: #c0bfba;
+	}
+	:global(.dark) .search-input {
+		border-color: rgba(255, 255, 255, 0.08);
+		color: #f3f4f6;
+	}
+	:global(.dark) .search-input::placeholder {
+		color: #4b5563;
 	}
 
-	/* ── Note Cards ─────────────────────────────── */
-	.list {
-		display: flex;
-		flex-direction: column;
-		gap: 0.1875rem;
+	/* ── Note List ──────────────────────────────── */
+	.note-list {
+		flex: 1;
+		overflow-y: auto;
 	}
 
-	.card {
+	.note-item {
 		display: flex;
-		flex-direction: column;
-		gap: 0.0625rem;
-		padding: 0.375rem 0.5rem;
-		border-radius: 0.375rem;
-		background: var(--color-surface, rgba(255, 255, 255, 0.03));
-		border: 1px solid transparent;
-		border-left: 3px solid transparent;
-		cursor: pointer;
-		text-align: left;
+		align-items: flex-start;
+		gap: 0.5rem;
 		width: 100%;
-		transition: background 0.12s;
+		padding: 0.375rem 0.25rem;
+		border: none;
+		background: transparent;
+		text-align: left;
+		border-radius: 0.25rem;
+		cursor: pointer;
+		transition: background 0.15s;
 	}
-	.card:hover {
-		background: var(--color-muted, rgba(255, 255, 255, 0.06));
+	.note-item:hover {
+		background: rgba(0, 0, 0, 0.03);
 	}
-	.card.pinned {
-		background: rgba(99, 102, 241, 0.04);
+	:global(.dark) .note-item:hover {
+		background: rgba(255, 255, 255, 0.04);
 	}
 
-	.card-top {
+	.color-dot {
+		width: 6px;
+		height: 6px;
+		border-radius: 9999px;
+		flex-shrink: 0;
+		margin-top: 0.375rem;
+	}
+
+	.note-content {
+		min-width: 0;
+		flex: 1;
+	}
+
+	.note-top {
 		display: flex;
 		align-items: center;
 		gap: 0.25rem;
 	}
-	.card-title {
+
+	.note-title {
 		font-size: 0.8125rem;
-		font-weight: 600;
-		color: var(--color-foreground);
-		flex: 1;
+		font-weight: 500;
+		color: #374151;
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
+		flex: 1;
 	}
+	:global(.dark) .note-title {
+		color: #e5e7eb;
+	}
+
 	.pin {
-		font-size: 0.625rem;
+		font-size: 0.5625rem;
 		flex-shrink: 0;
 	}
 
-	.card-preview {
+	.note-preview {
 		font-size: 0.6875rem;
-		color: var(--color-muted-foreground);
+		color: #9ca3af;
+		margin: 0;
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
 	}
-	.card-meta {
+
+	.note-meta {
 		font-size: 0.625rem;
-		color: var(--color-muted-foreground);
-		opacity: 0.6;
+		color: #c0bfba;
+	}
+	:global(.dark) .note-meta {
+		color: #4b5563;
 	}
 
 	/* ── Inline Editor ──────────────────────────── */
-	.card.editing {
+	.note-item.editing {
 		cursor: default;
-		background: var(--color-surface, rgba(255, 255, 255, 0.06));
-		border: 1px solid var(--color-primary, #6366f1);
-		border-left: 3px solid var(--color-primary, #6366f1);
-		padding: 0.5rem;
+		flex-direction: column;
 		gap: 0.25rem;
+		padding: 0.5rem;
+		border: 1px solid rgba(99, 102, 241, 0.3);
+		border-radius: 0.375rem;
+		background: rgba(99, 102, 241, 0.03);
+	}
+	.note-item.editing:hover {
+		background: rgba(99, 102, 241, 0.03);
+	}
+	:global(.dark) .note-item.editing {
+		border-color: rgba(99, 102, 241, 0.4);
+		background: rgba(99, 102, 241, 0.06);
 	}
 
 	.ed-title {
+		width: 100%;
 		background: transparent;
 		border: none;
-		color: var(--color-foreground);
-		font-size: 0.875rem;
+		color: #374151;
+		font-size: 0.8125rem;
 		font-weight: 600;
 		padding: 0;
 		outline: none;
 	}
 	.ed-title::placeholder {
-		color: var(--color-muted-foreground);
+		color: #c0bfba;
+	}
+	:global(.dark) .ed-title {
+		color: #f3f4f6;
 	}
 
 	.ed-content {
+		width: 100%;
 		background: transparent;
 		border: none;
-		color: var(--color-foreground);
-		font-size: 0.8125rem;
+		color: #374151;
+		font-size: 0.75rem;
 		padding: 0;
 		outline: none;
 		resize: vertical;
@@ -301,17 +344,20 @@
 		line-height: 1.5;
 	}
 	.ed-content::placeholder {
-		color: var(--color-muted-foreground);
+		color: #c0bfba;
+	}
+	:global(.dark) .ed-content {
+		color: #e5e7eb;
 	}
 
-	.ed-footer {
+	.ed-actions {
 		display: flex;
 		gap: 0.25rem;
 		justify-content: flex-end;
-		padding-top: 0.25rem;
+		padding-top: 0.125rem;
 	}
 
-	.ed-action {
+	.ed-btn {
 		padding: 0.25rem 0.5rem;
 		border-radius: 0.25rem;
 		font-size: 0.6875rem;
@@ -319,29 +365,35 @@
 		cursor: pointer;
 		border: none;
 		background: transparent;
-		color: var(--color-muted-foreground);
-		transition: all 0.12s;
+		color: #9ca3af;
+		transition: all 0.15s;
 	}
-	.ed-action:hover {
-		background: var(--color-muted, rgba(255, 255, 255, 0.08));
+	.ed-btn:hover {
+		background: rgba(0, 0, 0, 0.04);
+		color: #374151;
 	}
-	.ed-action.primary {
-		background: var(--color-primary, #6366f1);
+	:global(.dark) .ed-btn:hover {
+		background: rgba(255, 255, 255, 0.06);
+		color: #e5e7eb;
+	}
+
+	.ed-btn.primary {
+		background: #6366f1;
 		color: white;
 	}
-	.ed-action.primary:hover {
-		filter: brightness(1.1);
+	.ed-btn.primary:hover {
+		background: #5558e6;
 	}
-	.ed-action.danger:hover {
-		color: var(--color-destructive, #ef4444);
-		background: rgba(239, 68, 68, 0.1);
+
+	.ed-btn.danger:hover {
+		color: #ef4444;
+		background: rgba(239, 68, 68, 0.08);
 	}
 
 	.empty {
+		padding: 2rem 0;
 		text-align: center;
-		color: var(--color-muted-foreground);
-		font-size: 0.75rem;
-		padding: 1.5rem 0;
-		opacity: 0.7;
+		font-size: 0.8125rem;
+		color: #9ca3af;
 	}
 </style>
