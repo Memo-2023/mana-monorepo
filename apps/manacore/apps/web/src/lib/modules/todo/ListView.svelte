@@ -13,6 +13,7 @@
 		getTaskStats,
 	} from './queries';
 	import { tasksStore } from './stores/tasks.svelte';
+	import { toastStore } from '@manacore/shared-ui/toast';
 	import { Circle, Check } from '@manacore/shared-icons';
 	import type { ViewProps } from '$lib/app-registry';
 	import { dropTarget, dragSource } from '@manacore/shared-ui/dnd';
@@ -75,7 +76,12 @@
 
 	async function toggleComplete(e: Event, id: string) {
 		e.stopPropagation();
+		const task = tasks.find((t) => t.id === id);
+		const wasCompleted = task?.isCompleted ?? false;
 		await tasksStore.toggleComplete(id);
+		toastStore.undo(wasCompleted ? 'Aufgabe wiederhergestellt' : 'Aufgabe erledigt', () =>
+			tasksStore.toggleComplete(id)
+		);
 	}
 </script>
 

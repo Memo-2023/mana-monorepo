@@ -6,6 +6,7 @@
 	import { liveQuery } from 'dexie';
 	import { db } from '$lib/data/database';
 	import { memosStore } from '../stores/memos.svelte';
+	import { toastStore } from '@manacore/shared-ui/toast';
 	import { Trash, PushPin } from '@manacore/shared-icons';
 	import type { ViewProps } from '$lib/app-registry';
 	import type { LocalMemo, ProcessingStatus } from '../types';
@@ -60,8 +61,12 @@
 	}
 
 	async function deleteMemo() {
-		await memosStore.delete(memoId);
+		const id = memoId;
+		await memosStore.delete(id);
 		goBack();
+		toastStore.undo('Memo gelöscht', () => {
+			db.table('memos').update(id, { deletedAt: undefined, updatedAt: new Date().toISOString() });
+		});
 	}
 
 	function formatDuration(ms: number | null): string {

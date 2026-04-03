@@ -6,6 +6,7 @@
 	import { liveQuery } from 'dexie';
 	import { db } from '$lib/data/database';
 	import { filesStore } from '../stores/files.svelte';
+	import { toastStore } from '@manacore/shared-ui/toast';
 	import { Heart, Trash } from '@manacore/shared-icons';
 	import type { ViewProps } from '$lib/app-registry';
 	import type { LocalFile } from '../types';
@@ -48,8 +49,12 @@
 	}
 
 	async function deleteFile() {
-		await filesStore.deleteFile(fileId);
+		const id = fileId;
+		await filesStore.deleteFile(id);
 		goBack();
+		toastStore.undo('Datei gelöscht', () => {
+			db.table('files').update(id, { deletedAt: undefined, updatedAt: new Date().toISOString() });
+		});
 	}
 
 	function formatSize(bytes: number): string {

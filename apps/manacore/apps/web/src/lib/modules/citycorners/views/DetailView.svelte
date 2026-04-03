@@ -6,6 +6,7 @@
 	import { liveQuery } from 'dexie';
 	import { db } from '$lib/data/database';
 	import { favoritesStore } from '../stores/favorites.svelte';
+	import { toastStore } from '@manacore/shared-ui/toast';
 	import { Star, Trash } from '@manacore/shared-icons';
 	import type { ViewProps } from '$lib/app-registry';
 	import type { LocalLocation, LocalFavorite } from '../types';
@@ -80,11 +81,18 @@
 	}
 
 	async function deleteLocation() {
-		await db.table('ccLocations').update(locationId, {
+		const id = locationId;
+		await db.table('ccLocations').update(id, {
 			deletedAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString(),
 		});
 		goBack();
+		toastStore.undo('Ort gelöscht', () => {
+			db.table('ccLocations').update(id, {
+				deletedAt: undefined,
+				updatedAt: new Date().toISOString(),
+			});
+		});
 	}
 
 	const categoryLabels: Record<LocalLocation['category'], string> = {

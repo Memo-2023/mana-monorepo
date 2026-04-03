@@ -6,6 +6,7 @@
 	import { liveQuery } from 'dexie';
 	import { db } from '$lib/data/database';
 	import { skillStore } from '../stores/skills.svelte';
+	import { toastStore } from '@manacore/shared-ui/toast';
 	import { Trash, Lightning } from '@manacore/shared-icons';
 	import type { ViewProps } from '$lib/app-registry';
 	import type { LocalSkill, SkillBranch } from '../types';
@@ -82,8 +83,12 @@
 	}
 
 	async function deleteSkill() {
-		await skillStore.deleteSkill(skillId);
+		const id = skillId;
+		await skillStore.deleteSkill(id);
 		goBack();
+		toastStore.undo('Skill gelöscht', () => {
+			db.table('skills').update(id, { deletedAt: undefined, updatedAt: new Date().toISOString() });
+		});
 	}
 </script>
 

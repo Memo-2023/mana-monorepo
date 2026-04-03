@@ -5,6 +5,7 @@
 <script lang="ts">
 	import { liveQuery } from 'dexie';
 	import { db } from '$lib/data/database';
+	import { toastStore } from '@manacore/shared-ui/toast';
 	import { Trash } from '@manacore/shared-icons';
 	import type { ViewProps } from '$lib/app-registry';
 	import type { LocalPlant, HealthStatus, LightLevel } from '../types';
@@ -74,11 +75,15 @@
 	}
 
 	async function deletePlant() {
-		await db.table('plants').update(plantId, {
+		const id = plantId;
+		await db.table('plants').update(id, {
 			deletedAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString(),
 		});
 		goBack();
+		toastStore.undo('Pflanze gelöscht', () => {
+			db.table('plants').update(id, { deletedAt: undefined, updatedAt: new Date().toISOString() });
+		});
 	}
 
 	const healthLabels: Record<HealthStatus, string> = {

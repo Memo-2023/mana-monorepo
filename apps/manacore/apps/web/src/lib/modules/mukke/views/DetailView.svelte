@@ -6,6 +6,7 @@
 	import { liveQuery } from 'dexie';
 	import { db } from '$lib/data/database';
 	import { libraryStore } from '../stores/library.svelte';
+	import { toastStore } from '@manacore/shared-ui/toast';
 	import { Heart, Trash } from '@manacore/shared-icons';
 	import type { ViewProps } from '$lib/app-registry';
 	import type { LocalSong } from '../types';
@@ -64,8 +65,12 @@
 	}
 
 	async function deleteSong() {
-		await libraryStore.delete(songId);
+		const id = songId;
+		await libraryStore.delete(id);
 		goBack();
+		toastStore.undo('Song gelöscht', () => {
+			db.table('songs').update(id, { deletedAt: undefined, updatedAt: new Date().toISOString() });
+		});
 	}
 
 	function formatDuration(sec?: number | null): string {

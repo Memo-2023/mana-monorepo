@@ -5,6 +5,7 @@
 <script lang="ts">
 	import { liveQuery } from 'dexie';
 	import { db } from '$lib/data/database';
+	import { toastStore } from '@manacore/shared-ui/toast';
 	import { Trash } from '@manacore/shared-icons';
 	import type { ViewProps } from '$lib/app-registry';
 	import type { LocalLink } from '../types';
@@ -67,11 +68,15 @@
 	}
 
 	async function deleteLink() {
-		await db.table('links').update(linkId, {
+		const id = linkId;
+		await db.table('links').update(id, {
 			deletedAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString(),
 		});
 		goBack();
+		toastStore.undo('Link gelöscht', () => {
+			db.table('links').update(id, { deletedAt: undefined, updatedAt: new Date().toISOString() });
+		});
 	}
 </script>
 

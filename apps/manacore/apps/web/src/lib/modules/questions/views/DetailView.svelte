@@ -5,6 +5,7 @@
 <script lang="ts">
 	import { liveQuery } from 'dexie';
 	import { db } from '$lib/data/database';
+	import { toastStore } from '@manacore/shared-ui/toast';
 	import { Trash } from '@manacore/shared-icons';
 	import type { ViewProps } from '$lib/app-registry';
 	import type { LocalQuestion, QuestionStatus, QuestionPriority, ResearchDepth } from '../types';
@@ -68,11 +69,18 @@
 	}
 
 	async function deleteQuestion() {
-		await db.table('questions').update(questionId, {
+		const id = questionId;
+		await db.table('questions').update(id, {
 			deletedAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString(),
 		});
 		goBack();
+		toastStore.undo('Frage gelöscht', () => {
+			db.table('questions').update(id, {
+				deletedAt: undefined,
+				updatedAt: new Date().toISOString(),
+			});
+		});
 	}
 
 	const statusLabels: Record<QuestionStatus, string> = {

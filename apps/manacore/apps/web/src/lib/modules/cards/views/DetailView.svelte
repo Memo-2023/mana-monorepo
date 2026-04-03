@@ -6,6 +6,7 @@
 	import { liveQuery } from 'dexie';
 	import { db } from '$lib/data/database';
 	import { deckStore } from '../stores/decks.svelte';
+	import { toastStore } from '@manacore/shared-ui/toast';
 	import { Trash } from '@manacore/shared-icons';
 	import type { ViewProps } from '$lib/app-registry';
 	import type { LocalDeck, LocalCard } from '../types';
@@ -78,8 +79,12 @@
 	}
 
 	async function deleteDeck() {
-		await deckStore.deleteDeck(deckId);
+		const id = deckId;
+		await deckStore.deleteDeck(id);
 		goBack();
+		toastStore.undo('Deck gelöscht', () => {
+			db.table('decks').update(id, { deletedAt: undefined, updatedAt: new Date().toISOString() });
+		});
 	}
 </script>
 

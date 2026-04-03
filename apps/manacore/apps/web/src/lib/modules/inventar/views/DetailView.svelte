@@ -6,6 +6,7 @@
 	import { liveQuery } from 'dexie';
 	import { db } from '$lib/data/database';
 	import { collectionsStore } from '../stores/collections.svelte';
+	import { toastStore } from '@manacore/shared-ui/toast';
 	import { Trash } from '@manacore/shared-icons';
 	import type { ViewProps } from '$lib/app-registry';
 	import type { LocalCollection, LocalItem } from '../types';
@@ -71,8 +72,15 @@
 	}
 
 	async function deleteCollection() {
-		await collectionsStore.delete(collectionId);
+		const id = collectionId;
+		await collectionsStore.delete(id);
 		goBack();
+		toastStore.undo('Sammlung gelöscht', () => {
+			db.table('invCollections').update(id, {
+				deletedAt: undefined,
+				updatedAt: new Date().toISOString(),
+			});
+		});
 	}
 </script>
 
