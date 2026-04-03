@@ -59,8 +59,15 @@
 	// ── List View (always loaded) ───────────────────────────
 	let ListComponent = $state<Component | null>(null);
 	let loadError = $state(false);
+	let effectCount = 0;
 
 	$effect(() => {
+		effectCount++;
+		console.log(`[AppPage:${appId}] effect #${effectCount}, appEntry:`, !!appEntry);
+		if (effectCount > 20) {
+			console.error(`[AppPage:${appId}] INFINITE EFFECT LOOP DETECTED`);
+			return;
+		}
 		ListComponent = null;
 		loadError = false;
 		if (appEntry) {
