@@ -1,6 +1,6 @@
 <!--
   Notes — Workbench ListView
-  Always-visible compose field at top, note list below.
+  Compact single-line input at top, click any note to edit inline.
 -->
 <script lang="ts">
 	import { useAllNotes, searchNotes, getPreview, formatRelativeTime } from './queries';
@@ -21,39 +21,31 @@
 	});
 
 	let searchQuery = $state('');
+
+	// Inline editing — clicking a note opens it right there
 	let editingId = $state<string | null>(null);
 	let editTitle = $state('');
 	let editContent = $state('');
 
-	// Always-visible compose field
-	let composeTitle = $state('');
-	let composeContent = $state('');
-	let composeFocused = $state(false);
+	// Quick create — single input line
+	let newTitle = $state('');
 
 	let filtered = $derived(searchNotes(notes, searchQuery));
 
-	async function handleCompose() {
-		if (!composeTitle.trim() && !composeContent.trim()) return;
-		await notesStore.createNote({
-			title: composeTitle.trim() || 'Unbenannt',
-			content: composeContent,
-		});
-		composeTitle = '';
-		composeContent = '';
-		composeFocused = false;
-	}
-
-	function handleComposeKeydown(e: KeyboardEvent) {
-		if (e.key === 'Enter' && e.metaKey) {
-			e.preventDefault();
-			handleCompose();
-		}
-		if (e.key === 'Escape') {
-			composeFocused = false;
-		}
+	async function handleQuickCreate(e: KeyboardEvent) {
+		if (e.key !== 'Enter' || !newTitle.trim()) return;
+		e.preventDefault();
+		const note = await notesStore.createNote({ title: newTitle.trim() });
+		newTitle = '';
+		// Immediately open the new note for editing
+		startEdit(note);
 	}
 
 	function startEdit(note: Note) {
+		// Save previous edit if any
+		if (editingId && editingId !== note.id) {
+			saveEdit();
+		}
 		editingId = note.id;
 		editTitle = note.title;
 		editContent = note.content;
@@ -68,255 +60,185 @@
 		editingId = null;
 	}
 
-	function cancelEdit() {
-		editingId = null;
+	function handleEditKeydown(e: KeyboardEvent) {
+		if (e.key === 'Escape') {
+			saveEdit();
+		}
+	}
+
+	async function handleDelete(id: string) {
+		await notesStore.deleteNote(id);
+		if (editingId === id) editingId = null;
+	}
+
+	async function handleTogglePin(e: Event, id: string) {
+		e.stopPropagation();
+		await notesStore.togglePin(id);
 	}
 </script>
 
-<div class="notes-list-view">
-	<!-- Always-visible compose area -->
-	<div class="compose-area" class:expanded={composeFocused || composeTitle || composeContent}>
+<div class="notes-lv">
+	<!-- Quick create input -->
+	<div class="quick-create">
+		<span class="create-icon">+</span>
 		<input
-			class="compose-title"
+			class="create-input"
 			type="text"
-			placeholder="Neue Notiz..."
-			bind:value={composeTitle}
-			onfocus={() => (composeFocused = true)}
-			onkeydown={handleComposeKeydown}
+			placeholder="Neue Notiz... (Enter)"
+			bind:value={newTitle}
+			onkeydown={handleQuickCreate}
 		/>
-		{#if composeFocused || composeTitle || composeContent}
-			<textarea
-				class="compose-content"
-				placeholder="Schreibe etwas..."
-				bind:value={composeContent}
-				rows="3"
-				onkeydown={handleComposeKeydown}
-			></textarea>
-			<div class="compose-footer">
-				<span class="compose-hint">&#x2318;+Enter zum Speichern</span>
-				<div class="compose-actions">
-					<button
-						class="btn-cancel"
-						onclick={() => {
-							composeTitle = '';
-							composeContent = '';
-							composeFocused = false;
-						}}>Abbrechen</button
-					>
-					<button
-						class="btn-save"
-						onclick={handleCompose}
-						disabled={!composeTitle.trim() && !composeContent.trim()}>Speichern</button
-					>
-				</div>
-			</div>
-		{/if}
 	</div>
 
-	<!-- Search (only when notes exist) -->
-	{#if notes.length > 3}
-		<input class="search-input" type="text" placeholder="Suchen..." bind:value={searchQuery} />
+	<!-- Search (only when many notes) -->
+	{#if notes.length > 5}
+		<input class="search" type="text" placeholder="Suchen..." bind:value={searchQuery} />
 	{/if}
 
 	<!-- Note List -->
-	<div class="note-list">
+	<div class="list">
 		{#each filtered as note (note.id)}
 			{#if editingId === note.id}
-				<div
-					class="note-card editing"
-					onkeydown={(e) => {
-						if (e.key === 'Escape') cancelEdit();
-					}}
-				>
-					<input class="edit-title" type="text" bind:value={editTitle} autofocus />
-					<textarea class="edit-content" bind:value={editContent} rows="4"></textarea>
-					<div class="edit-actions">
-						<button class="btn-cancel" onclick={cancelEdit}>Abbrechen</button>
-						<button class="btn-save" onclick={saveEdit}>Speichern</button>
+				<!-- Inline editor -->
+				<div class="card editing" onkeydown={handleEditKeydown}>
+					<input
+						class="ed-title"
+						type="text"
+						bind:value={editTitle}
+						placeholder="Titel..."
+						autofocus
+					/>
+					<textarea class="ed-content" bind:value={editContent} placeholder="Inhalt..." rows="4"
+					></textarea>
+					<div class="ed-footer">
+						<button class="ed-action danger" onclick={() => handleDelete(note.id)}>Löschen</button>
+						<button class="ed-action" onclick={() => handleTogglePin(new Event('click'), note.id)}>
+							{note.isPinned ? 'Lösen' : 'Pinnen'}
+						</button>
+						<button class="ed-action primary" onclick={saveEdit}>Fertig</button>
 					</div>
 				</div>
 			{:else}
+				<!-- Note row -->
 				<button
-					class="note-card"
+					class="card"
 					class:pinned={note.isPinned}
 					style:border-left-color={note.color ?? 'transparent'}
 					onclick={() => startEdit(note)}
 				>
-					<div class="note-header">
-						<span class="note-title">{note.title || 'Unbenannt'}</span>
-						{#if note.isPinned}
-							<span class="pin-icon">&#x1f4cc;</span>
-						{/if}
+					<div class="card-top">
+						<span class="card-title">{note.title || 'Unbenannt'}</span>
+						{#if note.isPinned}<span class="pin">&#x1f4cc;</span>{/if}
 					</div>
-					<div class="note-preview">{getPreview(note.content)}</div>
-					<div class="note-meta">{formatRelativeTime(note.updatedAt)}</div>
+					{#if note.content}
+						<div class="card-preview">{getPreview(note.content, 60)}</div>
+					{/if}
+					<div class="card-meta">{formatRelativeTime(note.updatedAt)}</div>
 				</button>
 			{/if}
 		{/each}
 	</div>
 
-	{#if notes.length === 0 && !composeFocused}
-		<div class="empty">Tippe oben, um deine erste Notiz zu schreiben.</div>
+	{#if notes.length === 0}
+		<div class="empty">Tippe oben, um eine Notiz zu erstellen.</div>
 	{/if}
 </div>
 
 <style>
-	.notes-list-view {
+	.notes-lv {
 		display: flex;
 		flex-direction: column;
-		gap: 0.5rem;
+		gap: 0.375rem;
 		padding: 0.5rem;
 	}
 
-	/* ── Compose Area (always visible) ──────────── */
-	.compose-area {
+	/* ── Quick Create ──────────────────────────── */
+	.quick-create {
 		display: flex;
-		flex-direction: column;
-		gap: 0.25rem;
-		padding: 0.5rem 0.625rem;
-		border-radius: 0.625rem;
+		align-items: center;
+		gap: 0.375rem;
+		padding: 0.375rem 0.5rem;
+		border-radius: 0.5rem;
 		background: var(--color-surface, rgba(255, 255, 255, 0.04));
 		border: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
-		transition:
-			border-color 0.15s,
-			background 0.15s;
+		transition: border-color 0.15s;
 	}
-
-	.compose-area.expanded {
+	.quick-create:focus-within {
 		border-color: var(--color-primary, #6366f1);
-		background: var(--color-surface, rgba(255, 255, 255, 0.06));
 	}
 
-	.compose-title {
-		background: transparent;
-		border: none;
-		color: var(--color-foreground);
-		font-size: 0.875rem;
-		font-weight: 600;
-		padding: 0.25rem 0;
-		outline: none;
-	}
-	.compose-title::placeholder {
+	.create-icon {
 		color: var(--color-muted-foreground);
-		font-weight: 400;
+		font-size: 0.875rem;
+		font-weight: 500;
+		flex-shrink: 0;
+		opacity: 0.5;
 	}
 
-	.compose-content {
+	.create-input {
+		flex: 1;
 		background: transparent;
 		border: none;
 		color: var(--color-foreground);
 		font-size: 0.8125rem;
-		padding: 0.25rem 0;
 		outline: none;
-		resize: vertical;
-		min-height: 2.5rem;
-		font-family: inherit;
+		padding: 0;
 	}
-	.compose-content::placeholder {
+	.create-input::placeholder {
 		color: var(--color-muted-foreground);
-	}
-
-	.compose-footer {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-	}
-
-	.compose-hint {
-		font-size: 0.625rem;
-		color: var(--color-muted-foreground);
-		opacity: 0.6;
-	}
-
-	.compose-actions {
-		display: flex;
-		gap: 0.375rem;
 	}
 
 	/* ── Search ─────────────────────────────────── */
-	.search-input {
+	.search {
 		background: var(--color-surface, rgba(255, 255, 255, 0.04));
-		border: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
-		border-radius: 0.5rem;
+		border: 1px solid var(--color-border, rgba(255, 255, 255, 0.08));
+		border-radius: 0.375rem;
 		color: var(--color-foreground);
-		font-size: 0.8125rem;
-		padding: 0.375rem 0.625rem;
+		font-size: 0.75rem;
+		padding: 0.3rem 0.5rem;
 		outline: none;
 	}
-	.search-input:focus {
+	.search:focus {
 		border-color: var(--color-primary, #6366f1);
 	}
-	.search-input::placeholder {
+	.search::placeholder {
 		color: var(--color-muted-foreground);
-	}
-
-	/* ── Buttons ────────────────────────────────── */
-	.btn-cancel,
-	.btn-save {
-		padding: 0.3rem 0.625rem;
-		border-radius: 0.375rem;
-		font-size: 0.75rem;
-		font-weight: 500;
-		cursor: pointer;
-		border: none;
-	}
-	.btn-cancel {
-		background: transparent;
-		color: var(--color-muted-foreground);
-	}
-	.btn-cancel:hover {
-		background: var(--color-muted, rgba(255, 255, 255, 0.08));
-	}
-	.btn-save {
-		background: var(--color-primary, #6366f1);
-		color: white;
-	}
-	.btn-save:hover:not(:disabled) {
-		filter: brightness(1.1);
-	}
-	.btn-save:disabled {
-		opacity: 0.4;
-		cursor: not-allowed;
 	}
 
 	/* ── Note Cards ─────────────────────────────── */
-	.note-list {
+	.list {
 		display: flex;
 		flex-direction: column;
-		gap: 0.25rem;
+		gap: 0.1875rem;
 	}
 
-	.note-card {
+	.card {
 		display: flex;
 		flex-direction: column;
-		gap: 0.125rem;
-		padding: 0.5rem 0.625rem;
-		border-radius: 0.5rem;
-		background: var(--color-surface, rgba(255, 255, 255, 0.04));
-		border: 1px solid var(--color-border, rgba(255, 255, 255, 0.08));
+		gap: 0.0625rem;
+		padding: 0.375rem 0.5rem;
+		border-radius: 0.375rem;
+		background: var(--color-surface, rgba(255, 255, 255, 0.03));
+		border: 1px solid transparent;
 		border-left: 3px solid transparent;
 		cursor: pointer;
 		text-align: left;
-		transition: background 0.15s;
 		width: 100%;
+		transition: background 0.12s;
 	}
-	.note-card:hover {
-		background: var(--color-muted, rgba(255, 255, 255, 0.08));
+	.card:hover {
+		background: var(--color-muted, rgba(255, 255, 255, 0.06));
 	}
-	.note-card.editing {
-		cursor: default;
-		border-left-color: var(--color-primary, #6366f1) !important;
-	}
-	.note-card.pinned {
+	.card.pinned {
 		background: rgba(99, 102, 241, 0.04);
 	}
 
-	.note-header {
+	.card-top {
 		display: flex;
 		align-items: center;
-		gap: 0.375rem;
+		gap: 0.25rem;
 	}
-	.note-title {
+	.card-title {
 		font-size: 0.8125rem;
 		font-weight: 600;
 		color: var(--color-foreground);
@@ -325,53 +247,101 @@
 		text-overflow: ellipsis;
 		white-space: nowrap;
 	}
-	.pin-icon {
-		font-size: 0.6875rem;
+	.pin {
+		font-size: 0.625rem;
 		flex-shrink: 0;
 	}
-	.note-preview {
-		font-size: 0.75rem;
+
+	.card-preview {
+		font-size: 0.6875rem;
 		color: var(--color-muted-foreground);
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
 	}
-	.note-meta {
-		font-size: 0.6875rem;
+	.card-meta {
+		font-size: 0.625rem;
 		color: var(--color-muted-foreground);
-		opacity: 0.7;
+		opacity: 0.6;
 	}
 
-	.edit-title {
+	/* ── Inline Editor ──────────────────────────── */
+	.card.editing {
+		cursor: default;
+		background: var(--color-surface, rgba(255, 255, 255, 0.06));
+		border: 1px solid var(--color-primary, #6366f1);
+		border-left: 3px solid var(--color-primary, #6366f1);
+		padding: 0.5rem;
+		gap: 0.25rem;
+	}
+
+	.ed-title {
 		background: transparent;
 		border: none;
 		color: var(--color-foreground);
 		font-size: 0.875rem;
 		font-weight: 600;
-		padding: 0.25rem 0;
+		padding: 0;
 		outline: none;
 	}
-	.edit-content {
+	.ed-title::placeholder {
+		color: var(--color-muted-foreground);
+	}
+
+	.ed-content {
 		background: transparent;
 		border: none;
 		color: var(--color-foreground);
 		font-size: 0.8125rem;
-		padding: 0.25rem 0;
+		padding: 0;
 		outline: none;
 		resize: vertical;
-		min-height: 3rem;
+		min-height: 2.5rem;
 		font-family: inherit;
+		line-height: 1.5;
 	}
-	.edit-actions {
+	.ed-content::placeholder {
+		color: var(--color-muted-foreground);
+	}
+
+	.ed-footer {
 		display: flex;
-		gap: 0.375rem;
+		gap: 0.25rem;
 		justify-content: flex-end;
+		padding-top: 0.25rem;
+	}
+
+	.ed-action {
+		padding: 0.25rem 0.5rem;
+		border-radius: 0.25rem;
+		font-size: 0.6875rem;
+		font-weight: 500;
+		cursor: pointer;
+		border: none;
+		background: transparent;
+		color: var(--color-muted-foreground);
+		transition: all 0.12s;
+	}
+	.ed-action:hover {
+		background: var(--color-muted, rgba(255, 255, 255, 0.08));
+	}
+	.ed-action.primary {
+		background: var(--color-primary, #6366f1);
+		color: white;
+	}
+	.ed-action.primary:hover {
+		filter: brightness(1.1);
+	}
+	.ed-action.danger:hover {
+		color: var(--color-destructive, #ef4444);
+		background: rgba(239, 68, 68, 0.1);
 	}
 
 	.empty {
 		text-align: center;
 		color: var(--color-muted-foreground);
-		font-size: 0.8125rem;
+		font-size: 0.75rem;
 		padding: 1.5rem 0;
+		opacity: 0.7;
 	}
 </style>
