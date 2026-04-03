@@ -19,6 +19,7 @@
 	import type { ViewProps } from '$lib/components/workbench/nav-stack';
 	import type { LocalContact } from '../types';
 	import { useAllTags, getTagsByIds } from '$lib/stores/tags.svelte';
+	import LinkedItems from '$lib/components/links/LinkedItems.svelte';
 
 	let { navigate, goBack, params }: ViewProps = $props();
 	let contactId = $derived(params.contactId as string);
@@ -288,6 +289,9 @@
 				</div>
 			</div>
 		{/if}
+
+		<!-- Links -->
+		<LinkedItems recordRef={{ app: 'contacts', collection: 'contacts', id: contactId }} />
 
 		<!-- Notes -->
 		<div class="section">

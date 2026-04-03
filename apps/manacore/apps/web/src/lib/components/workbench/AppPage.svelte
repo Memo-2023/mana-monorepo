@@ -8,6 +8,9 @@
 	import { PageShell } from '$lib/components/page-carousel';
 	import { getAppEntry } from './app-registry';
 	import type { Component } from 'svelte';
+	import { dropTarget } from '@manacore/shared-ui/dnd';
+	import { getEntity, getEntityByDragType, canDrop, executeDrop } from '$lib/entities';
+	import type { DragPayload } from '@manacore/shared-ui/dnd';
 
 	interface Props {
 		appId: string;
@@ -34,6 +37,16 @@
 	let appEntry = $derived(getAppEntry(appId));
 	let appName = $derived(appEntry?.name ?? appId);
 	let appColor = $derived(appEntry?.color ?? '#6B7280');
+
+	// ── Cross-module drop target ────────────────────────────
+	let targetEntity = $derived(getEntity(appId));
+	let acceptedDropTypes = $derived(targetEntity?.acceptsDropFrom ?? []);
+
+	function handleCrossModuleDrop(payload: DragPayload) {
+		const sourceEntity = getEntityByDragType(payload.type);
+		if (!sourceEntity) return;
+		executeDrop(payload.data as Record<string, unknown>, sourceEntity.appId, appId);
+	}
 
 	// ── List View (always loaded) ───────────────────────────
 	let ListComponent = $state<Component | null>(null);
@@ -163,7 +176,14 @@
 	});
 </script>
 
-<div class="app-page-wrapper">
+<div
+	class="app-page-wrapper"
+	use:dropTarget={{
+		accepts: acceptedDropTypes,
+		onDrop: handleCrossModuleDrop,
+		canDrop: (p) => canDrop(p.type, appId),
+	}}
+>
 	<!-- Base: PageShell with list view (always visible) -->
 	<PageShell
 		{widthPx}
@@ -238,6 +258,15 @@
 <style>
 	.app-page-wrapper {
 		position: relative;
+	}
+	:global(.app-page-wrapper.mana-drop-target-hover) :global(.page-shell) {
+		outline: 2px solid rgba(139, 92, 246, 0.5);
+		outline-offset: -2px;
+		box-shadow: 0 0 20px rgba(139, 92, 246, 0.15);
+	}
+	:global(.app-page-wrapper.mana-drop-target-success) :global(.page-shell) {
+		outline: 2px solid rgba(34, 197, 94, 0.5);
+		outline-offset: -2px;
 	}
 
 	.load-state {

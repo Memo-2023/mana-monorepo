@@ -10,6 +10,7 @@
 	import type { ViewProps } from '$lib/components/workbench/nav-stack';
 	import type { LocalEvent } from '../types';
 	import { useAllTags, getTagsByIds } from '$lib/stores/tags.svelte';
+	import LinkedItems from '$lib/components/links/LinkedItems.svelte';
 
 	let { navigate, goBack, params }: ViewProps = $props();
 	let eventId = $derived(params.eventId as string);
@@ -177,6 +178,9 @@
 				</div>
 			</div>
 		{/if}
+
+		<!-- Links -->
+		<LinkedItems recordRef={{ app: 'calendar', collection: 'events', id: eventId }} />
 
 		<!-- Description -->
 		<div class="section">

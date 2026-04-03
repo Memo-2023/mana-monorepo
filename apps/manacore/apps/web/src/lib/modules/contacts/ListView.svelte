@@ -10,7 +10,7 @@
 	import { contactsStore } from './stores/contacts.svelte';
 	import { Plus, Star } from '@manacore/shared-icons';
 	import type { ViewProps } from '$lib/components/workbench/nav-stack';
-	import { dropTarget } from '@manacore/shared-ui/dnd';
+	import { dropTarget, dragSource } from '@manacore/shared-ui/dnd';
 	import type { TagDragData } from '@manacore/shared-ui/dnd';
 	import { useAllTags, getTagsByIds } from '$lib/stores/tags.svelte';
 
@@ -110,6 +110,16 @@
 						_siblingIds: filtered().map((c) => c.id),
 						_siblingKey: 'contactId',
 					})}
+				use:dragSource={{
+					type: 'contact',
+					data: () => ({
+						id: contact.id,
+						firstName: contact.firstName,
+						lastName: contact.lastName,
+						company: contact.company,
+						email: contact.email,
+					}),
+				}}
 				use:dropTarget={{
 					accepts: ['tag'],
 					onDrop: (p) => handleTagDrop(contact.id, p.data as unknown as TagDragData),

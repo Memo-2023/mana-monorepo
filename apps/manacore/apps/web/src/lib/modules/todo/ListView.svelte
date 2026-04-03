@@ -15,7 +15,7 @@
 	import { tasksStore } from './stores/tasks.svelte';
 	import { Circle, Check } from '@manacore/shared-icons';
 	import type { ViewProps } from '$lib/components/workbench/nav-stack';
-	import { dropTarget } from '@manacore/shared-ui/dnd';
+	import { dropTarget, dragSource } from '@manacore/shared-ui/dnd';
 	import type { TagDragData } from '@manacore/shared-ui/dnd';
 	import { useAllTags, getTagsByIds } from '$lib/stores/tags.svelte';
 
@@ -121,6 +121,15 @@
 						_siblingKey: 'taskId',
 					})}
 				class="task-item"
+				use:dragSource={{
+					type: 'task',
+					data: () => ({
+						id: task.id,
+						title: task.title,
+						dueDate: task.dueDate,
+						description: task.description,
+					}),
+				}}
 				use:dropTarget={{
 					accepts: ['tag'],
 					onDrop: (p) => handleTagDrop(task.id, p.data as unknown as TagDragData),

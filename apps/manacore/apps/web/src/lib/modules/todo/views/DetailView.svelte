@@ -10,6 +10,7 @@
 	import type { ViewProps } from '$lib/components/workbench/nav-stack';
 	import type { LocalTask, TaskPriority } from '../types';
 	import { useAllTags, getTagsByIds } from '$lib/stores/tags.svelte';
+	import LinkedItems from '$lib/components/links/LinkedItems.svelte';
 
 	let { navigate, goBack, params }: ViewProps = $props();
 	let taskId = $derived(params.taskId as string);
@@ -189,6 +190,9 @@
 				</div>
 			</div>
 		{/if}
+
+		<!-- Links -->
+		<LinkedItems recordRef={{ app: 'todo', collection: 'tasks', id: taskId }} />
 
 		<!-- Description -->
 		<div class="section">

@@ -10,7 +10,7 @@
 	import { eventsStore } from './stores/events.svelte';
 	import { Plus } from '@manacore/shared-icons';
 	import type { ViewProps } from '$lib/components/workbench/nav-stack';
-	import { dropTarget } from '@manacore/shared-ui/dnd';
+	import { dropTarget, dragSource } from '@manacore/shared-ui/dnd';
 	import type { TagDragData } from '@manacore/shared-ui/dnd';
 	import { useAllTags, getTagsByIds } from '$lib/stores/tags.svelte';
 
@@ -145,6 +145,17 @@
 						_siblingIds: todayEvents.map((e) => e.id),
 						_siblingKey: 'eventId',
 					})}
+				use:dragSource={{
+					type: 'event',
+					data: () => ({
+						id: event.id,
+						title: event.title,
+						startDate: event.startDate,
+						endDate: event.endDate,
+						description: event.description,
+						location: event.location,
+					}),
+				}}
 				use:dropTarget={{
 					accepts: ['tag'],
 					onDrop: (p) => handleTagDrop(event.id, p.data as unknown as TagDragData),
