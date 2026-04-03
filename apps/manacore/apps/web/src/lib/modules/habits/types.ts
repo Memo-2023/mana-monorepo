@@ -11,7 +11,7 @@ import type { BaseRecord } from '@manacore/local-store';
 
 export interface LocalHabit extends BaseRecord {
 	title: string;
-	emoji: string;
+	icon: string;
 	color: string;
 	targetPerDay: number | null;
 	order: number;
@@ -29,7 +29,7 @@ export interface LocalHabitLog extends BaseRecord {
 export interface Habit {
 	id: string;
 	title: string;
-	emoji: string;
+	icon: string;
 	color: string;
 	targetPerDay: number | null;
 	order: number;
@@ -65,21 +65,51 @@ export const HABIT_COLORS: string[] = [
 	'#f43f5e',
 ];
 
-export const HABIT_EMOJIS: string[] = [
-	'\u2615', // coffee
-	'\ud83d\udeb6', // cigarette / walking
-	'\ud83c\udfc3', // running
-	'\ud83e\uddd8', // meditation
-	'\ud83d\udca7', // water
-	'\ud83c\udf4e', // apple / healthy food
-	'\ud83d\udcda', // reading
-	'\ud83d\udcaa', // workout
-	'\ud83d\udecc', // sleep
-	'\ud83c\udfb5', // music
-	'\ud83d\udc8a', // pill / medicine
-	'\ud83c\udf7a', // beer
-	'\ud83c\udf55', // pizza / junk food
-	'\ud83d\udeb4', // cycling
-	'\ud83d\udcdd', // journal
-	'\ud83e\uddfc', // teeth / hygiene
+export const HABIT_ICONS: string[] = [
+	'coffee',
+	'drop',
+	'barbell',
+	'person-simple-run',
+	'person-simple-walk',
+	'person-simple-tai-chi',
+	'bicycle',
+	'book-open',
+	'pencil-simple',
+	'pill',
+	'beer-stein',
+	'pizza',
+	'apple-logo',
+	'music-note',
+	'bed',
+	'tooth',
+	'shower',
+	'cigarette',
+	'heart',
+	'brain',
+	'star',
+	'moon',
+	'target',
+	'fire',
 ];
+
+/** Maps legacy emoji values to icon names for data migration. */
+export const EMOJI_TO_ICON_MAP: Record<string, string> = {
+	'\u2615': 'coffee',
+	'\ud83d\udeb6': 'person-simple-walk',
+	'\ud83c\udfc3': 'person-simple-run',
+	'\ud83e\uddd8': 'person-simple-tai-chi',
+	'\ud83d\udca7': 'drop',
+	'\ud83c\udf4e': 'apple-logo',
+	'\ud83d\udcda': 'book-open',
+	'\ud83d\udcaa': 'barbell',
+	'\ud83d\udecc': 'bed',
+	'\ud83c\udfb5': 'music-note',
+	'\ud83d\udc8a': 'pill',
+	'\ud83c\udf7a': 'beer-stein',
+	'\ud83c\udf55': 'pizza',
+	'\ud83d\udeb4': 'bicycle',
+	'\ud83d\udcdd': 'pencil-simple',
+	'\ud83e\uddfc': 'tooth',
+	'\u2b50': 'star',
+	'\ud83d\ude2e\u200d\ud83d\udca8': 'wind',
+};

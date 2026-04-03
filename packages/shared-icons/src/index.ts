@@ -14,3 +14,5 @@
  */
 
 export * from 'phosphor-svelte';
+export { ICON_REGISTRY, ICON_CATEGORIES, getIconComponent, getAllIconNames } from './icon-registry';
+export type { IconName } from './icon-registry';

@@ -56,7 +56,7 @@ export function setSecurityHeaders(response: Response, options: SecurityHeadersO
 		"default-src 'self'",
 		`script-src 'self' 'unsafe-inline' https://stats.mana.how https://glitchtip.mana.how ${scriptSrc.join(' ')}`.trim(),
 		"style-src 'self' 'unsafe-inline'",
-		`img-src 'self' data: https: ${imgSrc.join(' ')}`.trim(),
+		`img-src 'self' data: blob: https: ${imgSrc.join(' ')}`.trim(),
 		`connect-src 'self' https://stats.mana.how https://glitchtip.mana.how ${connectSrc.join(' ')}`.trim(),
 		`font-src 'self' ${fontSrc.join(' ')}`.trim(),
 		mediaSrc.length > 0 ? `media-src 'self' ${mediaSrc.join(' ')}`.trim() : '',

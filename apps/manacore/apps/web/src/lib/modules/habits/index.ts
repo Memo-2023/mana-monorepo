@@ -26,5 +26,5 @@ export {
 export { habitTable, habitLogTable, HABITS_GUEST_SEED } from './collections';
 
 // ─── Types ───────────────────────────────────────────────
-export { HABIT_COLORS, HABIT_EMOJIS } from './types';
+export { HABIT_COLORS, HABIT_ICONS, EMOJI_TO_ICON_MAP } from './types';
 export type { LocalHabit, LocalHabitLog, Habit, HabitLog } from './types';

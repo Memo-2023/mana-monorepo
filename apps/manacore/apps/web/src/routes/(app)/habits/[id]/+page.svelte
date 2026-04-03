@@ -31,7 +31,7 @@
 </script>
 
 <svelte:head>
-	<title>{habit ? `${habit.emoji} ${habit.title}` : 'Habit'} - ManaCore</title>
+	<title>{habit ? habit.title : 'Habit'} - ManaCore</title>
 </svelte:head>
 
 <div class="detail-page">

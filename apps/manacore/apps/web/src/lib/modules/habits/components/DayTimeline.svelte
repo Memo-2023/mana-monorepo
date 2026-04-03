@@ -4,6 +4,7 @@
 <script lang="ts">
 	import type { Habit, HabitLog } from '../types';
 	import { formatTime } from '../queries';
+	import { DynamicIcon } from '@manacore/shared-ui/atoms';
 
 	let {
 		logs,
@@ -45,7 +46,9 @@
 				{#if habit}
 					<div class="timeline-entry">
 						<div class="entry-dot" style:background={habit.color}></div>
-						<span class="entry-emoji">{habit.emoji}</span>
+						<span class="entry-icon" style:color={habit.color}>
+							<DynamicIcon name={habit.icon} size={16} weight="regular" />
+						</span>
 						<span class="entry-title">{habit.title}</span>
 						<span class="entry-time">{formatTime(log.timestamp)}</span>
 						{#if log.note}
@@ -97,8 +100,9 @@
 		flex-shrink: 0;
 	}
 
-	.entry-emoji {
-		font-size: 1rem;
+	.entry-icon {
+		display: flex;
+		align-items: center;
 		flex-shrink: 0;
 	}
 

@@ -12,7 +12,7 @@ import type { LocalHabit, LocalHabitLog } from '../types';
 export const habitsStore = {
 	async createHabit(data: {
 		title: string;
-		emoji: string;
+		icon: string;
 		color: string;
 		targetPerDay?: number | null;
 	}) {
@@ -22,7 +22,7 @@ export const habitsStore = {
 		const newLocal: LocalHabit = {
 			id: crypto.randomUUID(),
 			title: data.title,
-			emoji: data.emoji,
+			icon: data.icon,
 			color: data.color,
 			targetPerDay: data.targetPerDay ?? null,
 			order: count,
@@ -36,7 +36,7 @@ export const habitsStore = {
 	async updateHabit(
 		id: string,
 		data: Partial<
-			Pick<LocalHabit, 'title' | 'emoji' | 'color' | 'targetPerDay' | 'isArchived' | 'order'>
+			Pick<LocalHabit, 'title' | 'icon' | 'color' | 'targetPerDay' | 'isArchived' | 'order'>
 		>
 	) {
 		await habitTable.update(id, {

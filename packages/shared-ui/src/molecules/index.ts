@@ -7,6 +7,8 @@ export { default as FilterDropdown } from './FilterDropdown.svelte';
 export { default as FavoriteButton } from './FavoriteButton.svelte';
 export { default as ColorPicker } from './ColorPicker.svelte';
 export { COLORS_12, COLORS_16, DEFAULT_COLOR, getRandomColor } from './ColorPicker.constants';
+export { default as IconPicker } from './IconPicker.svelte';
+export { DEFAULT_ICON } from './IconPicker.constants';
 export { default as ReminderPicker } from './ReminderPicker.svelte';
 export type { SelectOption } from './Select.types';
 export type { FilterDropdownOption } from './FilterDropdown.types';

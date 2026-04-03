@@ -20,7 +20,7 @@ export const HABITS_GUEST_SEED = {
 		{
 			id: 'habit-coffee',
 			title: 'Kaffee',
-			emoji: '\u2615',
+			icon: 'coffee',
 			color: '#f59e0b',
 			targetPerDay: 3,
 			order: 0,
@@ -29,7 +29,7 @@ export const HABITS_GUEST_SEED = {
 		{
 			id: 'habit-water',
 			title: 'Wasser',
-			emoji: '\ud83d\udca7',
+			icon: 'drop',
 			color: '#06b6d4',
 			targetPerDay: 8,
 			order: 1,
@@ -38,7 +38,7 @@ export const HABITS_GUEST_SEED = {
 		{
 			id: 'habit-workout',
 			title: 'Workout',
-			emoji: '\ud83d\udcaa',
+			icon: 'barbell',
 			color: '#22c55e',
 			targetPerDay: 1,
 			order: 2,

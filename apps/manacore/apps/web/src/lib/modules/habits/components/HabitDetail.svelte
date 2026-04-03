@@ -7,6 +7,8 @@
 	import { habitsStore } from '../stores/habits.svelte';
 	import { getCountForDate, getStreak, groupLogsByDate, todayStr, formatTime } from '../queries';
 	import HabitForm from './HabitForm.svelte';
+	import { DynamicIcon } from '@manacore/shared-ui/atoms';
+	import { CaretLeft, PencilSimple, X } from '@manacore/shared-icons';
 
 	let {
 		habit,
@@ -83,33 +85,16 @@
 	<!-- Header -->
 	<header class="detail-header">
 		<button class="back-btn" onclick={onBack}>
-			<svg
-				width="20"
-				height="20"
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="2"
-			>
-				<polyline points="15 18 9 12 15 6"></polyline>
-			</svg>
+			<CaretLeft size={20} />
 		</button>
 		<div class="header-info" style:--habit-color={habit.color}>
-			<span class="header-emoji">{habit.emoji}</span>
+			<span class="header-icon">
+				<DynamicIcon name={habit.icon} size={24} weight="bold" />
+			</span>
 			<h2 class="header-title">{habit.title}</h2>
 		</div>
 		<button class="edit-btn" onclick={() => (showEdit = !showEdit)}>
-			<svg
-				width="16"
-				height="16"
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="2"
-			>
-				<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-				<path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-			</svg>
+			<PencilSimple size={16} />
 		</button>
 	</header>
 
@@ -160,7 +145,8 @@
 		style:background={habit.color}
 		onclick={() => habitsStore.logHabit(habit.id)}
 	>
-		{habit.emoji} Jetzt loggen
+		<DynamicIcon name={habit.icon} size={18} weight="bold" class="text-white" />
+		Jetzt loggen
 	</button>
 
 	<!-- Timeline -->
@@ -176,17 +162,7 @@
 							<span class="log-note">{log.note}</span>
 						{/if}
 						<button class="log-delete" onclick={() => handleDeleteLog(log.id)} title="Entfernen">
-							<svg
-								width="12"
-								height="12"
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								stroke-width="2"
-							>
-								<line x1="18" y1="6" x2="6" y2="18"></line>
-								<line x1="6" y1="6" x2="18" y2="18"></line>
-							</svg>
+							<X size={12} />
 						</button>
 					</div>
 				{/each}
@@ -250,8 +226,9 @@
 		gap: 0.5rem;
 	}
 
-	.header-emoji {
-		font-size: 1.5rem;
+	.header-icon {
+		display: flex;
+		align-items: center;
 	}
 
 	.header-title {
@@ -357,6 +334,10 @@
 		font-size: 1rem;
 		font-weight: 600;
 		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
 		transition:
 			filter 0.15s,
 			transform 0.15s;

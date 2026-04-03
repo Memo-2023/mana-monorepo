@@ -1,11 +1,13 @@
 <!--
   HabitTile — single tappable tile in the tally board.
-  Shows emoji, title, today's count, and optional target.
+  Shows icon, title, today's count, and optional target.
   Tap = log habit. Long press = undo last.
 -->
 <script lang="ts">
 	import type { Habit } from '../types';
 	import { habitsStore } from '../stores/habits.svelte';
+	import { DynamicIcon } from '@manacore/shared-ui/atoms';
+	import { CaretRight } from '@manacore/shared-icons';
 
 	let {
 		habit,
@@ -74,23 +76,16 @@
 		{#if habit.targetPerDay}
 			<div class="progress-ring" style:--progress="{progressPercent}%"></div>
 		{/if}
-		<span class="emoji">{habit.emoji}</span>
+		<span class="icon">
+			<DynamicIcon name={habit.icon} size={32} weight="bold" class="text-white" />
+		</span>
 		<span class="title">{habit.title}</span>
 		<span class="count">
 			{todayCount}{#if habit.targetPerDay}<span class="target">/{habit.targetPerDay}</span>{/if}
 		</span>
 	</button>
 	<button class="detail-btn" onclick={() => onDetail(habit)} title="Details">
-		<svg
-			width="14"
-			height="14"
-			viewBox="0 0 24 24"
-			fill="none"
-			stroke="currentColor"
-			stroke-width="2"
-		>
-			<polyline points="9 18 15 12 9 6"></polyline>
-		</svg>
+		<CaretRight size={14} />
 	</button>
 </div>
 
@@ -156,8 +151,10 @@
 		pointer-events: none;
 	}
 
-	.emoji {
-		font-size: 2rem;
+	.icon {
+		display: flex;
+		align-items: center;
+		justify-content: center;
 		line-height: 1;
 		position: relative;
 		z-index: 1;

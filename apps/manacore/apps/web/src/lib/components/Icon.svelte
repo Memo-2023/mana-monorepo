@@ -1,34 +1,21 @@
+<!--
+  Icon Component — Thin wrapper around DynamicIcon from shared-ui.
+  Renders a Phosphor icon by string name from the curated registry.
+
+  Usage:
+    <Icon name="coffee" size={24} class="text-blue-500" />
+-->
 <script lang="ts">
-	/**
-	 * Icon Component - Re-exports from @manacore/shared-icons
-	 * This wrapper ensures backward compatibility with existing imports
-	 */
-	import { iconPaths } from '@manacore/shared-icons';
+	import { DynamicIcon } from '@manacore/shared-ui/atoms';
 
 	interface Props {
-		name: keyof typeof iconPaths;
+		name: string;
 		size?: number;
 		class?: string;
 		color?: string;
 	}
 
 	let { name, size = 24, class: className = '', color }: Props = $props();
-
-	const path = $derived(iconPaths[name]);
 </script>
 
-{#if path}
-	<svg
-		xmlns="http://www.w3.org/2000/svg"
-		width={size}
-		height={size}
-		fill={color || 'currentColor'}
-		viewBox="0 0 256 256"
-		class={className}
-		aria-hidden="true"
-	>
-		{@html path}
-	</svg>
-{:else}
-	<span class="text-red-500" title="Icon '{name}' not found">⚠</span>
-{/if}
+<DynamicIcon {name} {size} class={className} {color} />

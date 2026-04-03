@@ -4,7 +4,9 @@
 -->
 <script lang="ts">
 	import { habitsStore } from '../stores/habits.svelte';
-	import { HABIT_COLORS, HABIT_EMOJIS, type Habit } from '../types';
+	import { HABIT_COLORS, type Habit } from '../types';
+	import { DynamicIcon } from '@manacore/shared-ui/atoms';
+	import { IconPicker } from '@manacore/shared-ui/molecules';
 
 	let {
 		habit = null,
@@ -17,10 +19,10 @@
 	} = $props();
 
 	let title = $state(habit?.title ?? '');
-	let emoji = $state(habit?.emoji ?? '\u2b50');
+	let icon = $state(habit?.icon ?? 'star');
 	let color = $state(habit?.color ?? '#6366f1');
 	let targetPerDay = $state<string>(habit?.targetPerDay?.toString() ?? '');
-	let showEmojiPicker = $state(false);
+	let showIconPicker = $state(false);
 
 	async function handleSubmit(e: Event) {
 		e.preventDefault();
@@ -31,14 +33,14 @@
 		if (habit) {
 			await habitsStore.updateHabit(habit.id, {
 				title: title.trim(),
-				emoji,
+				icon,
 				color,
 				targetPerDay: target,
 			});
 		} else {
 			await habitsStore.createHabit({
 				title: title.trim(),
-				emoji,
+				icon,
 				color,
 				targetPerDay: target,
 			});
@@ -62,11 +64,11 @@
 	<div class="form-row">
 		<button
 			type="button"
-			class="emoji-btn"
+			class="icon-btn"
 			style:background={color}
-			onclick={() => (showEmojiPicker = !showEmojiPicker)}
+			onclick={() => (showIconPicker = !showIconPicker)}
 		>
-			{emoji}
+			<DynamicIcon name={icon} size={20} weight="bold" class="text-white" />
 		</button>
 		<input
 			class="title-input"
@@ -77,21 +79,16 @@
 		/>
 	</div>
 
-	{#if showEmojiPicker}
-		<div class="emoji-picker">
-			{#each HABIT_EMOJIS as e}
-				<button
-					type="button"
-					class="emoji-option"
-					class:selected={emoji === e}
-					onclick={() => {
-						emoji = e;
-						showEmojiPicker = false;
-					}}
-				>
-					{e}
-				</button>
-			{/each}
+	{#if showIconPicker}
+		<div class="icon-picker-wrapper">
+			<IconPicker
+				selectedIcon={icon}
+				onIconChange={(i) => {
+					icon = i;
+					showIconPicker = false;
+				}}
+				size="sm"
+			/>
 		</div>
 	{/if}
 
@@ -146,20 +143,19 @@
 		gap: 0.75rem;
 	}
 
-	.emoji-btn {
+	.icon-btn {
 		width: 2.5rem;
 		height: 2.5rem;
 		border-radius: 0.75rem;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		font-size: 1.25rem;
 		border: none;
 		cursor: pointer;
 		flex-shrink: 0;
 		transition: transform 0.15s;
 	}
-	.emoji-btn:hover {
+	.icon-btn:hover {
 		transform: scale(1.1);
 	}
 
@@ -180,31 +176,13 @@
 		color: var(--color-muted-foreground);
 	}
 
-	.emoji-picker {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.25rem;
-	}
-
-	.emoji-option {
-		width: 2.25rem;
-		height: 2.25rem;
+	.icon-picker-wrapper {
+		max-height: 16rem;
+		overflow-y: auto;
 		border-radius: 0.5rem;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		font-size: 1.125rem;
-		background: transparent;
-		border: 2px solid transparent;
-		cursor: pointer;
-		transition: all 0.15s;
-	}
-	.emoji-option:hover {
-		background: rgba(255, 255, 255, 0.1);
-	}
-	.emoji-option.selected {
-		border-color: var(--color-primary, #6366f1);
-		background: rgba(99, 102, 241, 0.15);
+		padding: 0.5rem;
+		background: var(--color-surface, rgba(255, 255, 255, 0.03));
+		border: 1px solid var(--color-border, rgba(255, 255, 255, 0.08));
 	}
 
 	.color-picker {
