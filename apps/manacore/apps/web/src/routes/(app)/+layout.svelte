@@ -66,8 +66,6 @@
 	let isCollapsed = $state(false);
 	let showShortcuts = $state(false);
 	let showOnboarding = $state(false);
-	// Bottom chrome height: calculated from state, not measured (avoids reflow loop)
-	const bottomChromeHeight = $derived((isCollapsed ? 0 : 80) + (isTagStripVisible ? 44 : 0) + 72); // PillNav ~80px + TagStrip ~44px + QuickInputBar ~72px
 
 	// ── Theme ───────────────────────────────────────────────
 	let isDark = $derived(theme.isDark);
@@ -128,6 +126,9 @@
 	function handleTagStripToggle() {
 		isTagStripVisible = !isTagStripVisible;
 	}
+
+	// Bottom chrome height: calculated from state, not measured (avoids reflow loop)
+	const bottomChromeHeight = $derived((isCollapsed ? 0 : 80) + (isTagStripVisible ? 44 : 0) + 72);
 
 	// ── DnD context ─────────────────────────────────────────
 	let tagDropHandler = $state<((tagId: string, payload: DragPayload) => void) | null>(null);
