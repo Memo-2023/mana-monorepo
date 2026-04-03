@@ -20,11 +20,17 @@
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
 
+export interface ToastAction {
+	label: string;
+	onClick: () => void;
+}
+
 export interface Toast {
 	id: string;
 	type: ToastType;
 	message: string;
 	duration: number;
+	action?: ToastAction;
 }
 
 // State
@@ -50,11 +56,12 @@ export const toastStore = {
 	 * @param message - The message to display
 	 * @param type - Toast type: 'success' | 'error' | 'warning' | 'info'
 	 * @param duration - Duration in ms (0 = permanent, default: 4000)
+	 * @param action - Optional action button { label, onClick }
 	 * @returns The toast ID for manual dismissal
 	 */
-	show(message: string, type: ToastType = 'info', duration = 4000): string {
+	show(message: string, type: ToastType = 'info', duration = 4000, action?: ToastAction): string {
 		const id = generateId();
-		const toast: Toast = { id, type, message, duration };
+		const toast: Toast = { id, type, message, duration, action };
 
 		toasts = [...toasts, toast];
 
@@ -102,6 +109,24 @@ export const toastStore = {
 	 */
 	info(message: string, duration?: number): string {
 		return this.show(message, 'info', duration);
+	},
+
+	/**
+	 * Show a success toast with an undo action button.
+	 * @param message - The message to display
+	 * @param onUndo - Callback when "Rückgängig" is clicked
+	 * @param duration - Duration in ms (default: 5000)
+	 */
+	undo(message: string, onUndo: () => void, duration = 5000): string {
+		return this.show(message, 'success', duration, {
+			label: 'Rückgängig',
+			onClick: () => {
+				onUndo();
+				// Find and dismiss this toast after undo
+				const id = toasts.find((t) => t.action?.onClick === onUndo)?.id;
+				if (id) this.dismiss(id);
+			},
+		});
 	},
 
 	/**

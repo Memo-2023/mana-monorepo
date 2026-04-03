@@ -11,6 +11,7 @@
 	import type { LocalEvent } from '../types';
 	import { useAllTags, getTagsByIds } from '$lib/stores/tags.svelte';
 	import LinkedItems from '$lib/components/links/LinkedItems.svelte';
+	import { toastStore } from '@manacore/shared-ui/toast';
 
 	let { navigate, goBack, params }: ViewProps = $props();
 	let eventId = $derived(params.eventId as string);
@@ -34,10 +35,11 @@
 
 	async function removeTag(tagId: string) {
 		const current = event?.tagIds ?? [];
-		await eventsStore.updateTagIds(
-			eventId,
-			current.filter((id) => id !== tagId)
-		);
+		const removed = current.filter((id) => id !== tagId);
+		await eventsStore.updateTagIds(eventId, removed);
+		toastStore.undo('Tag entfernt', () => {
+			eventsStore.updateTagIds(eventId, current);
+		});
 	}
 
 	$effect(() => {
@@ -84,8 +86,12 @@
 	}
 
 	async function deleteEvent() {
-		await eventsStore.deleteEvent(eventId);
+		const id = eventId;
+		await eventsStore.deleteEvent(id);
 		goBack();
+		toastStore.undo('Termin gelöscht', () => {
+			db.table('events').update(id, { deletedAt: undefined, updatedAt: new Date().toISOString() });
+		});
 	}
 </script>
 

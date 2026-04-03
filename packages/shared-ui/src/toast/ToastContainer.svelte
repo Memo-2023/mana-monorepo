@@ -31,6 +31,17 @@
 			<div class="toast-item {colors[toast.type]}" role="alert">
 				<Icon size={20} weight="fill" class="toast-icon" />
 				<p class="toast-message">{toast.message}</p>
+				{#if toast.action}
+					<button
+						onclick={() => {
+							toast.action?.onClick();
+							handleDismiss(toast.id);
+						}}
+						class="toast-action"
+					>
+						{toast.action.label}
+					</button>
+				{/if}
 				<button
 					onclick={() => handleDismiss(toast.id)}
 					class="toast-dismiss"
@@ -90,6 +101,23 @@
 		font-weight: 500;
 		line-height: 1.4;
 		margin: 0;
+	}
+
+	.toast-action {
+		flex-shrink: 0;
+		padding: 0.25rem 0.625rem;
+		border-radius: 0.375rem;
+		background: rgba(255, 255, 255, 0.2);
+		border: 1px solid rgba(255, 255, 255, 0.3);
+		cursor: pointer;
+		font-size: 0.75rem;
+		font-weight: 600;
+		color: inherit;
+		transition: all 0.15s ease;
+		white-space: nowrap;
+	}
+	.toast-action:hover {
+		background: rgba(255, 255, 255, 0.35);
 	}
 
 	.toast-dismiss {

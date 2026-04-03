@@ -11,6 +11,7 @@
 	import type { LocalTask, TaskPriority } from '../types';
 	import { useAllTags, getTagsByIds } from '$lib/stores/tags.svelte';
 	import LinkedItems from '$lib/components/links/LinkedItems.svelte';
+	import { toastStore } from '@manacore/shared-ui/toast';
 
 	let { navigate, goBack, params }: ViewProps = $props();
 	let taskId = $derived(params.taskId as string);
@@ -38,10 +39,11 @@
 
 	async function removeTag(tagId: string) {
 		const current = getTaskTagIds();
-		await tasksStore.updateLabels(
-			taskId,
-			current.filter((id) => id !== tagId)
-		);
+		const removed = current.filter((id) => id !== tagId);
+		await tasksStore.updateLabels(taskId, removed);
+		toastStore.undo('Tag entfernt', () => {
+			tasksStore.updateLabels(taskId, current);
+		});
 	}
 
 	$effect(() => {
@@ -96,8 +98,12 @@
 	}
 
 	async function deleteTask() {
-		await tasksStore.deleteTask(taskId);
+		const id = taskId;
+		await tasksStore.deleteTask(id);
 		goBack();
+		toastStore.undo('Aufgabe gelöscht', () => {
+			db.table('tasks').update(id, { deletedAt: undefined, updatedAt: new Date().toISOString() });
+		});
 	}
 
 	const priorityLabels: Record<TaskPriority, string> = {

@@ -20,6 +20,7 @@
 	import type { LocalContact } from '../types';
 	import { useAllTags, getTagsByIds } from '$lib/stores/tags.svelte';
 	import LinkedItems from '$lib/components/links/LinkedItems.svelte';
+	import { toastStore } from '@manacore/shared-ui/toast';
 
 	let { navigate, goBack, params }: ViewProps = $props();
 	let contactId = $derived(params.contactId as string);
@@ -49,10 +50,11 @@
 
 	async function removeTag(tagId: string) {
 		const current = contact?.tagIds ?? [];
-		await contactsStore.updateTagIds(
-			contactId,
-			current.filter((id) => id !== tagId)
-		);
+		const removed = current.filter((id) => id !== tagId);
+		await contactsStore.updateTagIds(contactId, removed);
+		toastStore.undo('Tag entfernt', () => {
+			contactsStore.updateTagIds(contactId, current);
+		});
 	}
 
 	$effect(() => {
@@ -119,8 +121,15 @@
 	}
 
 	async function deleteContact() {
-		await contactsStore.deleteContact(contactId);
+		const id = contactId;
+		await contactsStore.deleteContact(id);
 		goBack();
+		toastStore.undo('Kontakt gelöscht', () => {
+			db.table('contacts').update(id, {
+				deletedAt: undefined,
+				updatedAt: new Date().toISOString(),
+			});
+		});
 	}
 </script>
 
