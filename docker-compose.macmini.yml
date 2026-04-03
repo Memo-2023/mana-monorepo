@@ -537,7 +537,7 @@ services:
       MANA_CORE_AUTH_URL: http://mana-auth:3001
       SMTP_HOST: ${SMTP_HOST:-smtp-relay.brevo.com}
       SMTP_PORT: ${SMTP_PORT:-587}
-      SMTP_USER: ${SMTP_USER:-}
+      SMTP_USER: ${SMTP_USER:-94cde5002@smtp-brevo.com}
       SMTP_PASSWORD: ${SMTP_PASSWORD:-}
       SMTP_FROM: "ManaCore <noreply@mana.how>"
       EXPO_ACCESS_TOKEN: ${EXPO_ACCESS_TOKEN:-}
