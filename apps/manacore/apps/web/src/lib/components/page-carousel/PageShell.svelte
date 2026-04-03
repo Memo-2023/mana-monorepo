@@ -113,8 +113,8 @@
 		? `height: ${heightPx}px; min-height: 0;`
 		: ''}"
 >
-	<div class="drag-handle-bar">
-		<span class="drag-handle" draggable="true"><DotsSixVertical size={14} /></span>
+	<div class="drag-handle-bar" draggable="true">
+		<span class="drag-handle-icon"><DotsSixVertical size={14} /></span>
 	</div>
 
 	<!-- Header -->
@@ -245,29 +245,45 @@
 	.drag-handle-bar {
 		display: flex;
 		justify-content: center;
-		padding: 0.25rem 0 0;
+		align-items: center;
+		padding: 0.375rem 0;
+		cursor: grab;
+		background: rgba(0, 0, 0, 0.02);
+		border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+		transition: background 0.15s;
 	}
-	.drag-handle {
+	.drag-handle-bar:hover {
+		background: rgba(0, 0, 0, 0.04);
+	}
+	.drag-handle-bar:active {
+		cursor: grabbing;
+		background: rgba(0, 0, 0, 0.06);
+	}
+	:global(.dark) .drag-handle-bar {
+		background: rgba(255, 255, 255, 0.02);
+		border-bottom-color: rgba(255, 255, 255, 0.04);
+	}
+	:global(.dark) .drag-handle-bar:hover {
+		background: rgba(255, 255, 255, 0.05);
+	}
+	:global(.dark) .drag-handle-bar:active {
+		background: rgba(255, 255, 255, 0.08);
+	}
+	.drag-handle-icon {
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		width: 32px;
-		height: 14px;
 		color: #d1d5db;
-		cursor: grab;
-		border-radius: 0.25rem;
+		transform: rotate(90deg);
 		transition: color 0.15s;
 	}
-	.drag-handle:hover {
+	.drag-handle-bar:hover .drag-handle-icon {
 		color: #9ca3af;
 	}
-	.drag-handle:active {
-		cursor: grabbing;
-	}
-	:global(.dark) .drag-handle {
+	:global(.dark) .drag-handle-icon {
 		color: #3f3b38;
 	}
-	:global(.dark) .drag-handle:hover {
+	:global(.dark) .drag-handle-bar:hover .drag-handle-icon {
 		color: #6b7280;
 	}
 
