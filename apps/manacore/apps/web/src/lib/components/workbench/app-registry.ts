@@ -63,12 +63,20 @@ export const APP_REGISTRY: AppEntry[] = [
 		name: 'Times',
 		color: '#F59E0B',
 		load: () => import('$lib/modules/times/ListView.svelte'),
+		views: {
+			list: { load: () => import('$lib/modules/times/ListView.svelte') },
+			detail: { load: () => import('$lib/modules/times/views/DetailView.svelte') },
+		},
 	},
 	{
 		id: 'zitare',
 		name: 'Zitare',
 		color: '#EC4899',
 		load: () => import('$lib/modules/zitare/ListView.svelte'),
+		views: {
+			list: { load: () => import('$lib/modules/zitare/ListView.svelte') },
+			detail: { load: () => import('$lib/modules/zitare/views/DetailView.svelte') },
+		},
 	},
 	{
 		id: 'cards',

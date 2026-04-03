@@ -1,13 +1,31 @@
 <!--
   Zitare — Workbench ListView
-  Quote of the day with favorites count.
+  Shows one quote at a time. Tap to cycle. Fav button inline.
+  Supports tag drag-and-drop onto the current quote.
 -->
 <script lang="ts">
 	import { liveQuery } from 'dexie';
 	import { db } from '$lib/data/database';
+	import { quotesStore } from '$lib/modules/zitare/stores/quotes.svelte';
+	import { favoritesStore } from '$lib/modules/zitare/stores/favorites.svelte';
+	import { isFavorite as checkIsFavorite, type Favorite } from '$lib/modules/zitare/queries';
+	import { Heart } from '@manacore/shared-icons';
+	import { dropTarget } from '@manacore/shared-ui/dnd';
+	import type { TagDragData } from '@manacore/shared-ui/dnd';
+	import { getTagsByIds } from '$lib/stores/tags.svelte';
+	import type { ViewProps } from '$lib/components/workbench/nav-stack';
 	import type { LocalFavorite } from './types';
+	import type { Quote } from '@zitare/content';
+
+	let { navigate, goBack, params }: ViewProps = $props();
 
 	let favorites = $state<LocalFavorite[]>([]);
+	let quote = $state<Quote | null>(null);
+
+	$effect(() => {
+		quotesStore.initialize();
+		quote = quotesStore.currentQuote;
+	});
 
 	$effect(() => {
 		const sub = liveQuery(async () => {
@@ -21,38 +39,95 @@
 		return () => sub.unsubscribe();
 	});
 
-	// Simple daily quote selection based on day of year
-	const quotes = [
-		{ text: 'Der Weg ist das Ziel.', author: 'Konfuzius' },
-		{ text: 'Wer nicht wagt, der nicht gewinnt.', author: 'Sprichwort' },
-		{
-			text: 'In der Mitte von Schwierigkeiten liegen die Möglichkeiten.',
-			author: 'Albert Einstein',
-		},
-		{ text: 'Es ist nicht genug zu wissen, man muss auch anwenden.', author: 'Goethe' },
-		{ text: 'Handle, ehe du denkst. Nein — denke, ehe du handelst.', author: 'Mark Twain' },
-		{
-			text: 'Die Zukunft gehört denen, die an die Schönheit ihrer Träume glauben.',
-			author: 'Eleanor Roosevelt',
-		},
-		{ text: 'Was immer du tun kannst oder träumst es zu können, fang damit an.', author: 'Goethe' },
-	];
-
-	const dayOfYear = Math.floor(
-		(Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000
+	let favoritesAsDomain = $derived<Favorite[]>(
+		favorites.map((f) => ({ id: f.id, quoteId: f.quoteId, createdAt: f.createdAt ?? '' }))
 	);
-	const todayQuote = quotes[dayOfYear % quotes.length];
+
+	let currentFav = $derived(quote ? favorites.find((f) => f.quoteId === quote!.id) : undefined);
+	let isFav = $derived(!!currentFav);
+	let currentTagIds = $derived(currentFav?.tagIds ?? []);
+	let currentTags = $derived(getTagsByIds(currentTagIds));
+
+	function nextQuote() {
+		quotesStore.loadRandomQuote();
+		quote = quotesStore.currentQuote;
+	}
+
+	async function toggleFav(e: Event) {
+		e.stopPropagation();
+		if (!quote) return;
+		await favoritesStore.toggle(quote.id, favoritesAsDomain);
+	}
+
+	async function handleTagDrop(tagData: TagDragData) {
+		if (!quote) return;
+		// Ensure quote is favorited first
+		let fav = favorites.find((f) => f.quoteId === quote!.id);
+		if (!fav) {
+			await favoritesStore.add(quote.id);
+			// Re-fetch to get the new favorite
+			const all = await db.table<LocalFavorite>('zitareFavorites').toArray();
+			fav = all.find((f) => f.quoteId === quote!.id && !f.deletedAt);
+			if (!fav) return;
+		}
+		const current = fav.tagIds ?? [];
+		if (!current.includes(tagData.id)) {
+			await db.table('zitareFavorites').update(fav.id, {
+				tagIds: [...current, tagData.id],
+				updatedAt: new Date().toISOString(),
+			});
+		}
+	}
 </script>
 
-<div class="flex h-full flex-col items-center justify-center gap-6 p-6">
-	<div class="text-center">
-		<blockquote class="text-lg font-light italic leading-relaxed text-white/80">
-			&laquo;{todayQuote.text}&raquo;
+<!-- svelte-ignore a11y_click_events_have_key_events -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
+<div
+	class="flex h-full cursor-pointer flex-col items-center justify-center p-6"
+	onclick={nextQuote}
+	use:dropTarget={{
+		accepts: ['tag'],
+		onDrop: (p) => handleTagDrop(p.data as unknown as TagDragData),
+		canDrop: (p) => !currentTagIds.includes((p.data as unknown as TagDragData).id),
+	}}
+>
+	{#if quote}
+		<blockquote
+			class="max-w-[280px] text-center text-base font-light italic leading-relaxed text-white/80"
+		>
+			&laquo;{quotesStore.getText(quote)}&raquo;
 		</blockquote>
-		<p class="mt-3 text-sm text-white/40">— {todayQuote.author}</p>
-	</div>
+		<p class="mt-3 text-xs text-white/40">— {quote.author}</p>
 
-	<div class="text-xs text-white/30">
-		{favorites.length} gespeicherte Zitate
-	</div>
+		<!-- Tags -->
+		{#if currentTags.length > 0}
+			<div class="mt-2 flex flex-wrap justify-center gap-1">
+				{#each currentTags as tag (tag.id)}
+					<span
+						class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] text-white/50"
+						style="background: {tag.color}20; border: 1px solid {tag.color}30"
+					>
+						<span class="h-1.5 w-1.5 rounded-full" style="background: {tag.color}"></span>
+						{tag.name}
+					</span>
+				{/each}
+			</div>
+		{/if}
+
+		<button onclick={toggleFav} class="mt-3 rounded-full p-1.5 transition-colors hover:bg-white/5">
+			<Heart
+				size={16}
+				weight={isFav ? 'fill' : 'regular'}
+				class="transition-colors {isFav ? 'text-red-400' : 'text-white/20 hover:text-white/40'}"
+			/>
+		</button>
+	{/if}
 </div>
+
+<style>
+	:global(.mana-drop-target-hover) {
+		outline: 2px solid rgba(139, 92, 246, 0.4);
+		outline-offset: -2px;
+		background: rgba(139, 92, 246, 0.06) !important;
+	}
+</style>

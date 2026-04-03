@@ -6,6 +6,7 @@ import type { BaseRecord } from '@manacore/local-store';
 
 export interface LocalFavorite extends BaseRecord {
 	quoteId: string;
+	tagIds?: string[] | null;
 }
 
 export interface LocalQuoteList extends BaseRecord {

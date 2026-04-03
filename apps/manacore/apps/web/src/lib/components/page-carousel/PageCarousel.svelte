@@ -161,9 +161,9 @@
 	/* Carousel track */
 	.fokus-track {
 		display: flex;
-		gap: 1.5rem;
+		gap: 1rem;
 		overflow-x: auto;
-		padding: 1rem calc(50% - var(--sheet-width) / 2);
+		padding: 0.5rem 0;
 		scrollbar-width: none;
 		flex: 1;
 	}

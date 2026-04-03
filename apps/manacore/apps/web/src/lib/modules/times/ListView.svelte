@@ -1,16 +1,35 @@
 <!--
   Times — Workbench ListView
-  Today's time entries with running timer and daily total.
+  Inline timer with start/stop + today's time entries.
 -->
 <script lang="ts">
 	import { liveQuery } from 'dexie';
 	import { db } from '$lib/data/database';
+	import { timerStore } from '$lib/modules/times/stores/timer.svelte';
+	import { formatDuration } from '$lib/modules/times/queries';
+	import { Play, Stop } from '@manacore/shared-icons';
+	import type { ViewProps } from '$lib/components/workbench/nav-stack';
 	import type { LocalTimeEntry, LocalProject } from './types';
+
+	let { navigate, goBack, params }: ViewProps = $props();
 
 	let entries = $state<LocalTimeEntry[]>([]);
 	let projects = $state<LocalProject[]>([]);
+	let description = $state('');
 
 	const todayStr = new Date().toISOString().split('T')[0];
+
+	// Initialize timer store to pick up running timers
+	$effect(() => {
+		timerStore.initialize();
+	});
+
+	// Sync description with running entry
+	$effect(() => {
+		if (timerStore.runningEntry) {
+			description = timerStore.runningEntry.description || '';
+		}
+	});
 
 	$effect(() => {
 		const sub = liveQuery(async () => {
@@ -38,11 +57,9 @@
 
 	const todayEntries = $derived(
 		entries
-			.filter((e) => e.date === todayStr)
+			.filter((e) => e.date === todayStr && !e.isRunning)
 			.sort((a, b) => (b.startTime ?? '').localeCompare(a.startTime ?? ''))
 	);
-
-	const running = $derived(entries.find((e) => e.isRunning));
 
 	const totalToday = $derived(todayEntries.reduce((sum, e) => sum + e.duration, 0));
 
@@ -51,45 +68,93 @@
 		return projects.find((p) => p.id === projectId)?.name ?? 'Projekt';
 	}
 
-	function formatDuration(minutes: number): string {
-		const h = Math.floor(minutes / 60);
-		const m = minutes % 60;
-		return h > 0 ? `${h}h ${m}m` : `${m}m`;
+	function fmtCompact(seconds: number): string {
+		const h = Math.floor(seconds / 3600);
+		const m = Math.floor((seconds % 3600) / 60);
+		const s = seconds % 60;
+		if (h > 0) return `${h}h ${m}m`;
+		if (m > 0) return `${m}m ${s}s`;
+		return `${s}s`;
+	}
+
+	async function handleStartStop() {
+		if (timerStore.isRunning) {
+			await timerStore.stop();
+			description = '';
+		} else {
+			await timerStore.start({ description });
+		}
+	}
+
+	let debounceTimeout: ReturnType<typeof setTimeout> | null = null;
+
+	function handleDescriptionInput(value: string) {
+		description = value;
+		if (!timerStore.isRunning) return;
+		if (debounceTimeout) clearTimeout(debounceTimeout);
+		debounceTimeout = setTimeout(() => {
+			timerStore.updateRunning({ description: value });
+		}, 500);
 	}
 </script>
 
 <div class="flex h-full flex-col gap-3 p-4">
-	<!-- Running timer -->
-	{#if running}
-		<div class="rounded-md border border-green-500/30 bg-green-500/10 px-3 py-2">
-			<div class="flex items-center gap-2">
-				<div class="h-2 w-2 animate-pulse rounded-full bg-green-400"></div>
-				<p class="text-sm font-medium text-white/80">{running.description || 'Timer läuft'}</p>
+	<!-- Inline Timer -->
+	<div class="flex items-center gap-2">
+		<button
+			onclick={handleStartStop}
+			class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md transition-colors {timerStore.isRunning
+				? 'bg-red-500/80 text-white hover:bg-red-500'
+				: 'bg-white/10 text-white/50 hover:bg-green-500/80 hover:text-white'}"
+		>
+			{#if timerStore.isRunning}
+				<Stop size={14} weight="fill" />
+			{:else}
+				<Play size={14} weight="fill" />
+			{/if}
+		</button>
+		<input
+			type="text"
+			value={description}
+			oninput={(e) => handleDescriptionInput((e.target as HTMLInputElement).value)}
+			placeholder="Was trackst du?"
+			class="min-w-0 flex-1 rounded-md border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs text-white/90 placeholder:text-white/30 focus:border-white/20 focus:outline-none"
+		/>
+		{#if timerStore.isRunning}
+			<div class="flex h-7 items-center gap-1.5 rounded-full bg-green-500/10 px-2.5">
+				<div class="h-1.5 w-1.5 animate-pulse rounded-full bg-green-400"></div>
+				<span class="font-mono text-xs text-green-400">
+					{formatDuration(timerStore.elapsedSeconds)}
+				</span>
 			</div>
-			<p class="mt-0.5 text-xs text-white/40">{projectName(running.projectId)}</p>
-		</div>
-	{/if}
+		{/if}
+	</div>
 
 	<!-- Today stats -->
 	<div class="flex items-center justify-between text-xs text-white/40">
-		<span>Heute: {todayEntries.length} Einträge</span>
-		<span class="font-medium text-white/60">{formatDuration(totalToday)}</span>
+		<span>Heute: {todayEntries.length} Eintr{todayEntries.length === 1 ? 'ag' : 'age'}</span>
+		<span class="font-medium text-white/60">{fmtCompact(totalToday)}</span>
 	</div>
 
 	<!-- Entry list -->
 	<div class="flex-1 overflow-auto">
 		{#each todayEntries as entry (entry.id)}
-			<div class="mb-1 rounded-md px-3 py-2 transition-colors hover:bg-white/5">
+			<button
+				onclick={() => navigate('detail', { entryId: entry.id })}
+				class="mb-1 w-full rounded-md px-3 py-2 text-left transition-colors hover:bg-white/5"
+			>
 				<div class="flex items-center justify-between">
-					<p class="truncate text-sm text-white/80">{entry.description || 'Ohne Beschreibung'}</p>
-					<span class="shrink-0 text-xs text-white/50">{formatDuration(entry.duration)}</span>
+					<p class="truncate text-sm text-white/80">
+						{entry.description || 'Ohne Beschreibung'}
+					</p>
+					<span class="shrink-0 text-xs text-white/50">{fmtCompact(entry.duration)}</span>
 				</div>
 				<p class="text-xs text-white/30">{projectName(entry.projectId)}</p>
-			</div>
+			</button>
 		{/each}
 
-		{#if todayEntries.length === 0 && !running}
-			<p class="py-8 text-center text-sm text-white/30">Noch keine Zeiteinträge heute</p>
+		{#if todayEntries.length === 0 && !timerStore.isRunning}
+			<p class="py-8 text-center text-sm text-white/30">Noch keine Zeiteintr&auml;ge heute</p>
 		{/if}
 	</div>
 </div>
