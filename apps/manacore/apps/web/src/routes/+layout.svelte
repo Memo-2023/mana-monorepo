@@ -4,6 +4,7 @@
 	import { theme } from '$lib/stores/theme';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { loadAutomations } from '$lib/triggers';
+	import SuggestionToast from '$lib/components/SuggestionToast.svelte';
 
 	let { children } = $props();
 
@@ -24,3 +25,4 @@
 </script>
 
 {@render children()}
+<SuggestionToast />

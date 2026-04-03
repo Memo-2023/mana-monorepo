@@ -12,12 +12,15 @@
 	import type { ConditionOp } from '$lib/triggers/conditions';
 	import type { ViewProps } from '$lib/app-registry';
 	import { Trash } from '@manacore/shared-icons';
+	import { generateSuggestions, dismissSuggestion, isSuggestionDismissed } from '$lib/triggers';
+	import type { AutomationSuggestion } from '$lib/triggers';
 
 	let { navigate, goBack, params }: ViewProps = $props();
 
 	// ─── Data ────────────────────────────────────────────────
 	let automations = $state<LocalAutomation[]>([]);
-	let habits = $state<{ id: string; title: string; emoji: string }[]>([]);
+	let habits = $state<{ id: string; title: string; icon: string }[]>([]);
+	let suggestions = $state<AutomationSuggestion[]>([]);
 
 	$effect(() => {
 		const sub = liveQuery(async () => {
@@ -40,13 +43,50 @@
 				.map((h: Record<string, unknown>) => ({
 					id: h.id as string,
 					title: h.title as string,
-					emoji: h.emoji as string,
+					icon: (h.icon ?? h.emoji ?? 'star') as string,
 				}));
 		}).subscribe((val) => {
 			habits = val ?? [];
 		});
 		return () => sub.unsubscribe();
 	});
+
+	// Load suggestions
+	async function refreshSuggestions() {
+		const all = await generateSuggestions();
+		suggestions = all.filter((s) => !isSuggestionDismissed(s.id));
+	}
+
+	$effect(() => {
+		refreshSuggestions();
+	});
+
+	// Refresh suggestions when automations change
+	$effect(() => {
+		automations; // track
+		refreshSuggestions();
+	});
+
+	async function acceptSuggestion(sug: AutomationSuggestion) {
+		await automationsStore.create({
+			name: sug.name,
+			sourceApp: sug.sourceApp,
+			sourceCollection: sug.sourceCollection,
+			sourceOp: sug.sourceOp,
+			conditionField: sug.conditionField,
+			conditionOp: sug.conditionOp,
+			conditionValue: sug.conditionValue,
+			targetApp: sug.targetApp,
+			targetAction: sug.targetAction,
+			targetParams: sug.targetParams,
+		});
+		suggestions = suggestions.filter((s) => s.id !== sug.id);
+	}
+
+	function handleDismiss(id: string) {
+		dismissSuggestion(id);
+		suggestions = suggestions.filter((s) => s.id !== id);
+	}
 
 	// ─── Create Form ─────────────────────────────────────────
 	let showCreate = $state(false);
@@ -128,6 +168,25 @@
 			<button class="add-btn" onclick={() => (showCreate = true)}>+ Neu</button>
 		{/if}
 	</div>
+
+	<!-- Suggestions -->
+	{#if suggestions.length > 0}
+		<div class="suggestions-section">
+			<span class="section-label">Vorschlaege</span>
+			{#each suggestions as sug (sug.id)}
+				<div class="suggestion-card">
+					<div class="suggestion-info">
+						<span class="suggestion-name">{sug.name}</span>
+						<span class="suggestion-desc">{sug.description}</span>
+					</div>
+					<div class="suggestion-actions">
+						<button class="sug-accept" onclick={() => acceptSuggestion(sug)}>Aktivieren</button>
+						<button class="sug-dismiss" onclick={() => handleDismiss(sug.id)}>&times;</button>
+					</div>
+				</div>
+			{/each}
+		</div>
+	{/if}
 
 	<!-- Create Form -->
 	{#if showCreate}
@@ -211,7 +270,7 @@
 								>
 									<option value="">Habit wählen...</option>
 									{#each habits as h}
-										<option value={h.id}>{h.emoji} {h.title}</option>
+										<option value={h.id}>{h.title}</option>
 									{/each}
 								</select>
 							{:else}
@@ -285,6 +344,84 @@
 		flex-direction: column;
 		gap: 0.75rem;
 		padding: 0.5rem;
+	}
+
+	/* ── Suggestions ──────────────────────── */
+	.suggestions-section {
+		display: flex;
+		flex-direction: column;
+		gap: 0.375rem;
+	}
+
+	.section-label {
+		font-size: 0.625rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		color: #f59e0b;
+	}
+
+	.suggestion-card {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.5rem 0.625rem;
+		border-radius: 0.5rem;
+		background: rgba(245, 158, 11, 0.06);
+		border: 1px solid rgba(245, 158, 11, 0.15);
+	}
+
+	.suggestion-info {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		gap: 0.125rem;
+		min-width: 0;
+	}
+
+	.suggestion-name {
+		font-size: 0.75rem;
+		font-weight: 600;
+		color: var(--color-foreground);
+	}
+
+	.suggestion-desc {
+		font-size: 0.6875rem;
+		color: var(--color-muted-foreground);
+	}
+
+	.suggestion-actions {
+		display: flex;
+		align-items: center;
+		gap: 0.25rem;
+		flex-shrink: 0;
+	}
+
+	.sug-accept {
+		padding: 0.25rem 0.5rem;
+		border-radius: 0.375rem;
+		border: none;
+		background: #8b5cf6;
+		color: white;
+		font-size: 0.625rem;
+		font-weight: 600;
+		cursor: pointer;
+		white-space: nowrap;
+	}
+	.sug-accept:hover {
+		filter: brightness(1.1);
+	}
+
+	.sug-dismiss {
+		border: none;
+		background: transparent;
+		color: var(--color-muted-foreground);
+		font-size: 0.875rem;
+		cursor: pointer;
+		padding: 0 0.25rem;
+	}
+	.sug-dismiss:hover {
+		color: #ef4444;
 	}
 
 	.header {

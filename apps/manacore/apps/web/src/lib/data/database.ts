@@ -10,6 +10,7 @@
 import Dexie, { type EntityTable } from 'dexie';
 import { trackFirstContent } from '$lib/stores/funnel-tracking';
 import { fire as fireTrigger } from '$lib/triggers/registry';
+import { checkInlineSuggestion } from '$lib/triggers/inline-suggest';
 
 // ─── Database ──────────────────────────────────────────────
 
@@ -203,6 +204,44 @@ db.version(1).stores({
 	manaLinks: 'id, sourceAppId, sourceRecordId, targetAppId, targetRecordId',
 });
 
+// ─── Schema Migrations ────────────────────────────────────────
+// Version 2: Habits emoji → icon field migration
+
+const EMOJI_TO_ICON: Record<string, string> = {
+	'\u2615': 'coffee',
+	'\ud83d\udeb6': 'person-simple-walk',
+	'\ud83c\udfc3': 'person-simple-run',
+	'\ud83e\uddd8': 'person-simple-tai-chi',
+	'\ud83d\udca7': 'drop',
+	'\ud83c\udf4e': 'apple-logo',
+	'\ud83d\udcda': 'book-open',
+	'\ud83d\udcaa': 'barbell',
+	'\ud83d\udecc': 'bed',
+	'\ud83c\udfb5': 'music-note',
+	'\ud83d\udc8a': 'pill',
+	'\ud83c\udf7a': 'beer-stein',
+	'\ud83c\udf55': 'pizza',
+	'\ud83d\udeb4': 'bicycle',
+	'\ud83d\udcdd': 'pencil-simple',
+	'\ud83e\uddfc': 'tooth',
+	'\u2b50': 'star',
+	'\ud83d\ude2e\u200d\ud83d\udca8': 'wind',
+};
+
+db.version(2)
+	.stores({})
+	.upgrade((tx) => {
+		return tx
+			.table('habits')
+			.toCollection()
+			.modify((habit: Record<string, unknown>) => {
+				if (habit.emoji !== undefined && habit.icon === undefined) {
+					habit.icon = EMOJI_TO_ICON[habit.emoji as string] ?? 'star';
+					delete habit.emoji;
+				}
+			});
+	});
+
 // ─── Sync App Map ──────────────────────────────────────────
 // Maps each table to its appId for sync routing.
 // The SyncEngine uses this to group pending changes and push to /sync/{appId}.
@@ -373,6 +412,9 @@ for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {
 			});
 			trackFirstContent(appId);
 			fireTrigger(appId, tableName, 'insert', { ...obj });
+			checkInlineSuggestion(appId, tableName, { ...obj }).then((sug) => {
+				if (sug) window.dispatchEvent(new CustomEvent('mana:automation-suggest', { detail: sug }));
+			});
 		});
 
 		table.hook('updating', function (modifications, primKey) {
