@@ -124,5 +124,5 @@ pnpm --filter @manacore/uload-database type-check
 - **Svelte 5 Runes**: Use `$state`, `$derived`, `$effect` — never `$:`
 - **Local-first**: All CRUD via `linkCollection.insert/update/delete` (IndexedDB)
 - **Analytics**: Fetched from Hono server, not local (server-only click data)
-- **Auth**: `authStore` from `@manacore/shared-auth-stores`, `AuthGate` with guest mode
+- **Auth**: `authStore` from `@manacore/shared-auth-ui`, `AuthGate` with guest mode
 - **Sync**: Starts on login via `uloadStore.startSync()`, stops on logout

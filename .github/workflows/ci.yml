@@ -170,7 +170,7 @@ jobs:
           # Shared packages that affect multiple services
           SHARED_AUTH_PATTERN="packages/shared-auth/|packages/shared-types/"
           SHARED_UI_PATTERN="packages/shared-ui/|packages/shared-theme/|packages/shared-icons/|packages/shared-tailwind/|packages/shared-branding/"
-          SHARED_WEB_PATTERN="packages/shared-auth-ui/|packages/shared-theme-ui/|packages/shared-feedback-ui/|packages/shared-profile-ui/|packages/shared-subscription-ui/|packages/shared-splitscreen/"
+          SHARED_WEB_PATTERN="packages/shared-auth-ui/|packages/shared-theme-ui/|packages/shared-feedback-ui/|packages/shared-subscription-ui/|packages/shared-splitscreen/"
 
           # Function to check if any pattern matches
           check_pattern() {

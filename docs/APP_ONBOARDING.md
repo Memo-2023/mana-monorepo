@@ -24,17 +24,13 @@ Das Mini-Onboarding ergänzt das globale ManaCore-Onboarding mit app-spezifische
 
 ## Shared Package
 
-**Package:** `@manacore/shared-app-onboarding`
+**Package:** `@manacore/shared-ui`
 
 ```
-packages/shared-app-onboarding/
-├── src/
-│   ├── index.ts                          # Exports
-│   ├── types.ts                          # TypeScript Interfaces
-│   ├── create-app-onboarding.svelte.ts   # Factory für App-Onboarding Store
-│   └── MiniOnboardingModal.svelte        # Wiederverwendbarer Modal
-├── package.json
-└── tsconfig.json
+packages/shared-ui/src/onboarding/
+├── types.ts                          # TypeScript Interfaces
+├── create-app-onboarding.svelte.ts   # Factory für App-Onboarding Store
+└── MiniOnboardingModal.svelte        # Wiederverwendbarer Modal
 ```
 
 ---
@@ -127,7 +123,7 @@ Mini-Onboarding-Daten werden in `deviceSettings` gespeichert:
 ```json
 {
   "dependencies": {
-    "@manacore/shared-app-onboarding": "workspace:*"
+    "@manacore/shared-ui": "workspace:*"
   }
 }
 ```
@@ -137,7 +133,7 @@ Mini-Onboarding-Daten werden in `deviceSettings` gespeichert:
 **Datei:** `src/lib/stores/app-onboarding.svelte.ts`
 
 ```typescript
-import { createAppOnboardingStore, type AppOnboardingStep } from '@manacore/shared-app-onboarding';
+import { createAppOnboardingStore, type AppOnboardingStep } from '@manacore/shared-ui';
 import { userSettings } from './user-settings.svelte';
 
 const steps: AppOnboardingStep[] = [
@@ -175,7 +171,7 @@ export const appOnboarding = createAppOnboardingStore({
 ```svelte
 <script>
   import { appOnboarding } from '$lib/stores/app-onboarding.svelte';
-  import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
+  import { MiniOnboardingModal } from '@manacore/shared-ui';
 </script>
 
 <!-- Am Ende des Layouts -->

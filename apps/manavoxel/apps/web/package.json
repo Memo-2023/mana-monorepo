@@ -38,7 +38,6 @@
 	"dependencies": {
 		"@manacore/local-store": "workspace:*",
 		"@manacore/shared-auth": "workspace:*",
-		"@manacore/shared-auth-stores": "workspace:*",
 		"@manacore/shared-auth-ui": "workspace:*",
 		"@manacore/shared-error-tracking": "workspace:*",
 		"@manacore/shared-i18n": "workspace:*",
