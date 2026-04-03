@@ -180,7 +180,7 @@
 		{/if}
 
 		<!-- Links -->
-		<LinkedItems recordRef={{ app: 'calendar', collection: 'events', id: eventId }} />
+		<LinkedItems recordRef={{ app: 'calendar', collection: 'events', id: eventId }} {navigate} />
 
 		<!-- Description -->
 		<div class="section">

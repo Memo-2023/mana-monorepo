@@ -192,7 +192,7 @@
 		{/if}
 
 		<!-- Links -->
-		<LinkedItems recordRef={{ app: 'todo', collection: 'tasks', id: taskId }} />
+		<LinkedItems recordRef={{ app: 'todo', collection: 'tasks', id: taskId }} {navigate} />
 
 		<!-- Description -->
 		<div class="section">

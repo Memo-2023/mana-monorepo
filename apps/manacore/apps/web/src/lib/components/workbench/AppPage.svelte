@@ -4,7 +4,7 @@
   that floats slightly larger than the panel underneath.
 -->
 <script lang="ts">
-	import { X, CaretUp, CaretDown, SpinnerGap } from '@manacore/shared-icons';
+	import { X, CaretUp, CaretDown, ArrowLeft, SpinnerGap } from '@manacore/shared-icons';
 	import { PageShell } from '$lib/components/page-carousel';
 	import { getAppEntry } from './app-registry';
 	import type { Component } from 'svelte';
@@ -76,23 +76,28 @@
 		}
 	});
 
-	// ── Overlay ─────────────────────────────────────────────
+	// ── Overlay Stack ───────────────────────────────────────
 	interface OverlayFrame {
 		viewName: string;
 		params: Record<string, unknown>;
 		component: Component | null;
+		/** App color for the overlay header (for cross-detail). */
+		overlayColor?: string;
+		/** App name for the overlay header (for cross-detail). */
+		overlayTitle?: string;
 	}
 
-	let overlay = $state<OverlayFrame | null>(null);
-	let hasOverlay = $derived(overlay !== null);
+	let overlayStack = $state<OverlayFrame[]>([]);
+	let overlay = $derived(overlayStack.length > 0 ? overlayStack[overlayStack.length - 1] : null);
+	let hasOverlay = $derived(overlayStack.length > 0);
 
-	// Sibling item IDs for prev/next navigation
+	// Sibling item IDs for prev/next navigation (only for first overlay level)
 	let siblingIds = $state<string[]>([]);
 	let siblingKey = $state<string>('');
 	let cachedOverlayComponent = $state<Component | null>(null);
 
 	let currentSiblingIndex = $derived(() => {
-		if (!overlay || !siblingKey || siblingIds.length === 0) return -1;
+		if (!overlay || !siblingKey || siblingIds.length === 0 || overlayStack.length > 1) return -1;
 		const currentId = overlay.params[siblingKey] as string;
 		return siblingIds.indexOf(currentId);
 	});
@@ -103,9 +108,42 @@
 
 	function navigate(viewName: string, params: Record<string, unknown> = {}) {
 		if (viewName === 'list') {
-			overlay = null;
+			overlayStack = [];
+			siblingIds = [];
+			siblingKey = '';
 			return;
 		}
+
+		// Cross-detail: open a detail view from another app
+		if (viewName === 'cross-detail') {
+			const targetApp = params._targetApp as string;
+			const targetId = params._targetId as string;
+			if (!targetApp || !targetId) return;
+
+			const targetEntity = getEntity(targetApp);
+			const targetAppEntry = getAppEntry(targetApp);
+			const targetViewEntry = targetAppEntry?.views?.detail;
+			if (!targetViewEntry || !targetEntity) {
+				console.warn(`No detail view registered for app "${targetApp}"`);
+				return;
+			}
+
+			targetViewEntry.load().then((mod) => {
+				overlayStack = [
+					...overlayStack,
+					{
+						viewName: 'cross-detail',
+						params: { [targetEntity.paramKey]: targetId },
+						component: mod.default,
+						overlayColor: targetAppEntry?.color,
+						overlayTitle: targetAppEntry?.name,
+					},
+				];
+			});
+			return;
+		}
+
+		// Normal detail view within the same app
 		const viewEntry = appEntry?.views?.[viewName];
 		if (!viewEntry) {
 			console.warn(`View "${viewName}" not registered for app "${appId}"`);
@@ -117,7 +155,7 @@
 		if (ids && key) {
 			siblingIds = ids;
 			siblingKey = key;
-		} else if (!overlay) {
+		} else if (overlayStack.length === 0) {
 			siblingIds = [];
 			siblingKey = '';
 		}
@@ -128,24 +166,32 @@
 
 		viewEntry.load().then((mod) => {
 			cachedOverlayComponent = mod.default;
-			overlay = { viewName, params: viewParams, component: mod.default };
+			// Replace the stack (not push) for same-app detail navigation
+			overlayStack = [{ viewName, params: viewParams, component: mod.default }];
 		});
 	}
 
 	function goBack() {
-		overlay = null;
-		siblingIds = [];
-		siblingKey = '';
+		if (overlayStack.length > 1) {
+			// Pop the top overlay (cross-detail)
+			overlayStack = overlayStack.slice(0, -1);
+		} else {
+			overlayStack = [];
+			siblingIds = [];
+			siblingKey = '';
+		}
 	}
 
 	function goToPrev() {
 		const idx = currentSiblingIndex();
-		if (idx > 0 && overlay && siblingKey && cachedOverlayComponent) {
-			overlay = {
-				viewName: overlay.viewName,
-				params: { ...overlay.params, [siblingKey]: siblingIds[idx - 1] },
-				component: cachedOverlayComponent,
-			};
+		if (idx > 0 && overlay && siblingKey && cachedOverlayComponent && overlayStack.length === 1) {
+			overlayStack = [
+				{
+					viewName: overlay.viewName,
+					params: { ...overlay.params, [siblingKey]: siblingIds[idx - 1] },
+					component: cachedOverlayComponent,
+				},
+			];
 		}
 	}
 
@@ -156,13 +202,16 @@
 			idx < siblingIds.length - 1 &&
 			overlay &&
 			siblingKey &&
-			cachedOverlayComponent
+			cachedOverlayComponent &&
+			overlayStack.length === 1
 		) {
-			overlay = {
-				viewName: overlay.viewName,
-				params: { ...overlay.params, [siblingKey]: siblingIds[idx + 1] },
-				component: cachedOverlayComponent,
-			};
+			overlayStack = [
+				{
+					viewName: overlay.viewName,
+					params: { ...overlay.params, [siblingKey]: siblingIds[idx + 1] },
+					component: cachedOverlayComponent,
+				},
+			];
 		}
 	}
 
@@ -173,7 +222,7 @@
 		if (!overlay) return;
 		function handleGlobalClick(e: MouseEvent) {
 			if (overlayCardEl && !overlayCardEl.contains(e.target as Node)) {
-				overlay = null;
+				overlayStack = [];
 				siblingIds = [];
 				siblingKey = '';
 			}
@@ -239,14 +288,28 @@
 
 				<!-- Header -->
 				<div class="overlay-header">
-					<span class="color-dot" style="background-color: {appColor}"></span>
-					<span class="overlay-title">{appName}</span>
-					{#if siblingIds.length > 1}
+					{#if overlayStack.length > 1}
+						<button class="back-btn" onclick={goBack} title="Zurück">
+							<ArrowLeft size={12} />
+						</button>
+					{/if}
+					<span class="color-dot" style="background-color: {overlay.overlayColor ?? appColor}"
+					></span>
+					<span class="overlay-title">{overlay.overlayTitle ?? appName}</span>
+					{#if siblingIds.length > 1 && overlayStack.length === 1}
 						<span class="nav-counter">
 							{currentSiblingIndex() + 1}/{siblingIds.length}
 						</span>
 					{/if}
-					<button class="close-btn" onclick={goBack} title="Schließen">
+					<button
+						class="close-btn"
+						onclick={() => {
+							overlayStack = [];
+							siblingIds = [];
+							siblingKey = '';
+						}}
+						title="Schließen"
+					>
 						<X size={14} />
 					</button>
 				</div>
@@ -399,6 +462,28 @@
 		color: #374151;
 	}
 	:global(.dark) .overlay-title {
+		color: #f3f4f6;
+	}
+
+	.back-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 20px;
+		height: 20px;
+		border-radius: 0.25rem;
+		border: none;
+		background: transparent;
+		color: #9ca3af;
+		cursor: pointer;
+		transition: all 0.15s;
+	}
+	.back-btn:hover {
+		background: rgba(0, 0, 0, 0.06);
+		color: #374151;
+	}
+	:global(.dark) .back-btn:hover {
+		background: rgba(255, 255, 255, 0.1);
 		color: #f3f4f6;
 	}
 

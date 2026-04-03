@@ -291,7 +291,10 @@
 		{/if}
 
 		<!-- Links -->
-		<LinkedItems recordRef={{ app: 'contacts', collection: 'contacts', id: contactId }} />
+		<LinkedItems
+			recordRef={{ app: 'contacts', collection: 'contacts', id: contactId }}
+			{navigate}
+		/>
 
 		<!-- Notes -->
 		<div class="section">

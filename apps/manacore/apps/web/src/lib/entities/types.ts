@@ -16,6 +16,9 @@ export interface EntityDescriptor {
 	appId: string;
 	collection: string;
 
+	/** Param key name used in DetailView (e.g. 'taskId', 'eventId', 'contactId'). */
+	paramKey: string;
+
 	/** How to display an item in link previews and drag ghosts. */
 	getDisplayData: (item: Record<string, unknown>) => EntityDisplayData;
 

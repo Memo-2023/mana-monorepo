@@ -5,6 +5,7 @@ import type { EntityDescriptor } from '$lib/entities/types';
 const todoEntity: EntityDescriptor = {
 	appId: 'todo',
 	collection: 'tasks',
+	paramKey: 'taskId',
 
 	getDisplayData: (item) => ({
 		title: (item.title as string) || 'Aufgabe',

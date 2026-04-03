@@ -6,6 +6,7 @@ import type { EntityDescriptor } from '$lib/entities/types';
 const calendarEntity: EntityDescriptor = {
 	appId: 'calendar',
 	collection: 'events',
+	paramKey: 'eventId',
 
 	getDisplayData: (item) => ({
 		title: (item.title as string) || 'Termin',

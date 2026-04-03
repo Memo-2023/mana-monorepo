@@ -1,6 +1,6 @@
 <!--
   LinkedItems — Shows cross-module links for a record.
-  Displays linked items as clickable pills with app color and cached title.
+  Clicking a link opens the target item's DetailView as a cross-detail overlay.
 -->
 <script lang="ts">
 	import {
@@ -9,16 +9,24 @@
 		type LocalManaLink,
 	} from '@manacore/shared-links';
 	import { getAppEntry } from '$lib/components/workbench/app-registry';
-	import { ArrowSquareOut } from '@manacore/shared-icons';
+	import type { ViewProps } from '$lib/components/workbench/nav-stack';
 
 	interface Props {
 		recordRef: ManaRecordRef;
+		navigate: ViewProps['navigate'];
 	}
 
-	let { recordRef }: Props = $props();
+	let { recordRef, navigate }: Props = $props();
 
 	const linksQuery = useLinksForRecord(recordRef);
 	let links = $derived(linksQuery.value ?? []);
+
+	function openLink(link: LocalManaLink) {
+		navigate('cross-detail', {
+			_targetApp: link.targetApp,
+			_targetId: link.targetId,
+		});
+	}
 </script>
 
 {#if links.length > 0}
@@ -28,7 +36,7 @@
 			{#each links as link (link.id)}
 				{@const appEntry = getAppEntry(link.targetApp)}
 				{@const color = link.cachedTarget?.color ?? appEntry?.color ?? '#6B7280'}
-				<div class="link-item">
+				<button class="link-item" onclick={() => openLink(link)}>
 					<span class="link-dot" style="background: {color}"></span>
 					<div class="link-content">
 						<span class="link-title">{link.cachedTarget?.title ?? link.targetId}</span>
@@ -37,7 +45,7 @@
 						{/if}
 					</div>
 					<span class="link-app">{link.cachedTarget?.appName ?? link.targetApp}</span>
-				</div>
+				</button>
 			{/each}
 		</div>
 	</div>
@@ -69,17 +77,19 @@
 		border-radius: 0.375rem;
 		background: rgba(0, 0, 0, 0.02);
 		border: 1px solid rgba(0, 0, 0, 0.04);
+		cursor: pointer;
+		text-align: left;
 		transition: background 0.15s;
 	}
 	.link-item:hover {
-		background: rgba(0, 0, 0, 0.04);
+		background: rgba(0, 0, 0, 0.05);
 	}
 	:global(.dark) .link-item {
 		background: rgba(255, 255, 255, 0.02);
 		border-color: rgba(255, 255, 255, 0.04);
 	}
 	:global(.dark) .link-item:hover {
-		background: rgba(255, 255, 255, 0.05);
+		background: rgba(255, 255, 255, 0.06);
 	}
 	.link-dot {
 		width: 8px;
