@@ -238,21 +238,15 @@
 
 	// ── Auth Ready (replaces monolith onMount) ──────────────
 	async function handleAuthReady() {
-		console.log('[LAYOUT] handleAuthReady START');
 		// Phase A: Auth-independent — guests + authenticated
 		await Promise.all([
 			manacoreStore.initialize(),
 			tagLocalStore.initialize(),
 			linkLocalStore.initialize(),
 		]);
-		console.log('[LAYOUT] stores initialized');
-		console.log('[LAYOUT] migrating legacy DBs...');
 		await migrateFromLegacyDbs();
-		console.log('[LAYOUT] initSharedUload...');
 		initSharedUload();
-		console.log('[LAYOUT] dashboardStore init...');
 		await dashboardStore.initialize();
-		console.log('[LAYOUT] Phase A complete');
 
 		// Restore nav collapsed state
 		if (typeof localStorage !== 'undefined') {

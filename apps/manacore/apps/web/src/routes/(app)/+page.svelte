@@ -43,15 +43,12 @@
 
 	// Load persisted state once on mount (not reactive — avoids loop with persistState)
 	import { onMount } from 'svelte';
-	console.log('[HOME] script init');
 	onMount(() => {
-		console.log('[HOME] onMount');
 		const s = workbenchStore.settings;
 		if (s.openApps?.length) openApps = [...s.openApps];
 	});
 
 	function persistState() {
-		console.log('[HOME] persistState called');
 		workbenchStore.update({
 			openApps: openApps.map((a) => ({
 				appId: a.appId,
@@ -64,11 +61,8 @@
 	}
 
 	// ── Map to CarouselPage[] ───────────────────────────────
-	let renderCount = 0;
 	let carouselPages = $derived<CarouselPage[]>(
 		openApps.map((a) => {
-			renderCount++;
-			if (renderCount % 100 === 0) console.log(`[HOME] carouselPages derived #${renderCount}`);
 			const entry = getAppEntry(a.appId);
 			return {
 				id: a.appId,
