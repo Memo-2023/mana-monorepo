@@ -3,6 +3,7 @@
 	import AppPagePicker from '$lib/components/workbench/AppPagePicker.svelte';
 	import { PageCarousel, type CarouselPage } from '$lib/components/page-carousel';
 	import { getApp, getAppByDragType } from '$lib/app-registry';
+	import { onMount } from 'svelte';
 	import { createAppSettingsStore } from '@manacore/shared-stores';
 	import { DragPreview } from '@manacore/shared-ui/dnd';
 	import type { DragType } from '@manacore/shared-ui/dnd';
@@ -20,7 +21,17 @@
 	}
 
 	// ── Persisted workbench state ───────────────────────────
-	const DEFAULT_WIDTH = 480;
+	const DESKTOP_WIDTH = 480;
+	let DEFAULT_WIDTH = $state(DESKTOP_WIDTH);
+
+	onMount(() => {
+		function updateDefaultWidth() {
+			DEFAULT_WIDTH = window.innerWidth < 640 ? window.innerWidth - 32 : DESKTOP_WIDTH;
+		}
+		updateDefaultWidth();
+		window.addEventListener('resize', updateDefaultWidth);
+		return () => window.removeEventListener('resize', updateDefaultWidth);
+	});
 
 	interface WorkbenchSettings extends Record<string, unknown> {
 		openApps: {
@@ -61,7 +72,6 @@
 	]);
 
 	// Load persisted state once on mount (not reactive — avoids loop with persistState)
-	import { onMount } from 'svelte';
 	onMount(() => {
 		const s = workbenchStore.settings;
 		if (s.openApps?.length) openApps = [...s.openApps];

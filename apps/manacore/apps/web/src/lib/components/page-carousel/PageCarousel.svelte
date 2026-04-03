@@ -172,6 +172,12 @@
 		scrollbar-width: none;
 		flex: 1;
 	}
+	@media (max-width: 639px) {
+		.fokus-track {
+			padding: 0.5rem 1rem;
+			gap: 0.75rem;
+		}
+	}
 	.fokus-track::-webkit-scrollbar {
 		display: none;
 	}

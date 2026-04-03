@@ -242,6 +242,7 @@
 	.page-shell {
 		flex: 0 0 auto;
 		min-height: 60vh;
+		max-width: calc(100vw - 2rem);
 		background: #fffef5;
 		border-radius: 0.375rem;
 		box-shadow:
