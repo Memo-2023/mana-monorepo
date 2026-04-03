@@ -89,10 +89,14 @@ func (s *EmailService) Send(msg *EmailMessage) EmailResult {
 	}
 
 	// Build email headers and body
+	msgID := fmt.Sprintf("<%d.%s@mana.how>", time.Now().UnixNano(), msg.To)
+
 	var builder strings.Builder
 	builder.WriteString(fmt.Sprintf("From: %s\r\n", from))
 	builder.WriteString(fmt.Sprintf("To: %s\r\n", msg.To))
 	builder.WriteString(fmt.Sprintf("Subject: %s\r\n", msg.Subject))
+	builder.WriteString(fmt.Sprintf("Message-ID: %s\r\n", msgID))
+	builder.WriteString(fmt.Sprintf("Date: %s\r\n", time.Now().UTC().Format(time.RFC1123Z)))
 	if msg.ReplyTo != "" {
 		builder.WriteString(fmt.Sprintf("Reply-To: %s\r\n", msg.ReplyTo))
 	}
