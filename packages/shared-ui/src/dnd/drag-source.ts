@@ -108,6 +108,15 @@ export function dragSource(node: HTMLElement, options: DragSourceOptions) {
 				})
 			);
 			endDrag();
+			// Block the click event that fires after pointerup — prevents
+			// opening detail views when dropping an item.
+			const blocker = (ev: Event) => {
+				ev.stopPropagation();
+				ev.preventDefault();
+			};
+			node.addEventListener('click', blocker, { capture: true, once: true });
+			// Safety: remove blocker after a tick in case click doesn't fire
+			setTimeout(() => node.removeEventListener('click', blocker, { capture: true }), 0);
 		}
 		cleanup();
 	}
