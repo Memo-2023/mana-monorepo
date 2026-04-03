@@ -246,7 +246,7 @@
 		display: flex;
 		justify-content: center;
 		align-items: center;
-		padding: 0.375rem 0;
+		padding: 0.2rem 0;
 		cursor: grab;
 		background: rgba(0, 0, 0, 0.02);
 		border-bottom: 1px solid rgba(0, 0, 0, 0.04);
