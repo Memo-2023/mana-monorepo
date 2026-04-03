@@ -140,6 +140,45 @@
 			</button>
 		{/if}
 		<span class="drag-handle-icon"><DotsSixVertical size={14} /></span>
+		<div class="window-actions">
+			{#if onMinimize}
+				<button
+					class="window-btn"
+					onclick={(e) => {
+						e.stopPropagation();
+						onMinimize();
+					}}
+					draggable="false"
+					title="Minimieren"
+				>
+					<Minus size={12} />
+				</button>
+			{/if}
+			{#if onMaximize}
+				<button
+					class="window-btn"
+					onclick={(e) => {
+						e.stopPropagation();
+						onMaximize();
+					}}
+					draggable="false"
+					title={maximized ? 'Verkleinern' : 'Maximieren'}
+				>
+					{#if maximized}<CornersIn size={12} />{:else}<CornersOut size={12} />{/if}
+				</button>
+			{/if}
+			<button
+				class="window-btn window-btn-close"
+				onclick={(e) => {
+					e.stopPropagation();
+					onClose();
+				}}
+				draggable="false"
+				title={$_('common.close')}
+			>
+				<X size={12} />
+			</button>
+		</div>
 		{#if onMoveRight}
 			<button
 				class="move-btn move-right"
@@ -174,25 +213,6 @@
 			{#if badge}
 				{@render badge()}
 			{/if}
-		</div>
-		<div class="header-actions">
-			{#if onMinimize}
-				<button class="header-btn" onclick={onMinimize} title="Minimieren">
-					<Minus size={14} />
-				</button>
-			{/if}
-			{#if onMaximize}
-				<button
-					class="header-btn"
-					onclick={onMaximize}
-					title={maximized ? 'Verkleinern' : 'Maximieren'}
-				>
-					{#if maximized}<CornersIn size={14} />{:else}<CornersOut size={14} />{/if}
-				</button>
-			{/if}
-			<button class="header-btn" onclick={onClose} title={$_('common.close')}>
-				<X size={14} />
-			</button>
 		</div>
 	</div>
 
@@ -370,8 +390,7 @@
 	.page-header {
 		display: flex;
 		align-items: center;
-		justify-content: space-between;
-		padding: 0.5rem 1rem;
+		padding: 0.375rem 1rem;
 	}
 	.header-left {
 		display: flex;
@@ -398,31 +417,51 @@
 		color: #f3f4f6;
 	}
 
-	.header-actions {
+	.window-actions {
+		position: absolute;
+		right: 2rem;
+		top: 50%;
+		transform: translateY(-50%);
 		display: flex;
 		align-items: center;
 		gap: 0.125rem;
+		opacity: 0;
+		transition: opacity 0.15s;
 	}
-	.header-btn {
+	.drag-handle-bar:hover .window-actions {
+		opacity: 1;
+	}
+	.window-btn {
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		width: 24px;
-		height: 24px;
-		border-radius: 0.25rem;
+		width: 18px;
+		height: 18px;
+		border-radius: 50%;
 		border: none;
 		background: transparent;
-		color: #9ca3af;
+		color: #d1d5db;
 		cursor: pointer;
 		transition: all 0.15s;
 	}
-	.header-btn:hover {
-		background: rgba(0, 0, 0, 0.06);
-		color: #374151;
+	.window-btn:hover {
+		background: rgba(0, 0, 0, 0.08);
+		color: #6b7280;
 	}
-	:global(.dark) .header-btn:hover {
+	.window-btn-close:hover {
+		background: rgba(239, 68, 68, 0.15);
+		color: #ef4444;
+	}
+	:global(.dark) .window-btn {
+		color: #3f3b38;
+	}
+	:global(.dark) .window-btn:hover {
 		background: rgba(255, 255, 255, 0.1);
-		color: #f3f4f6;
+		color: #9ca3af;
+	}
+	:global(.dark) .window-btn-close:hover {
+		background: rgba(239, 68, 68, 0.2);
+		color: #ef4444;
 	}
 
 	/* Body */
