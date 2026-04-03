@@ -176,5 +176,22 @@
 		display: flex;
 		flex-direction: column;
 		position: relative;
+		/* Break out of layout's max-w-7xl px-4 container */
+		margin: -2rem -1rem 0;
+		width: calc(100% + 2rem);
+	}
+
+	@media (min-width: 640px) {
+		.workbench {
+			margin: -2rem -1.5rem 0;
+			width: calc(100% + 3rem);
+		}
+	}
+
+	@media (min-width: 1024px) {
+		.workbench {
+			margin: -2rem -2rem 0;
+			width: calc(100% + 4rem);
+		}
 	}
 </style>
