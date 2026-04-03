@@ -910,7 +910,7 @@ services:
       PUBLIC_MANA_LLM_URL: http://mana-llm:3025
       PUBLIC_MANA_LLM_URL_CLIENT: https://llm.mana.how
       # Analytics & Error Tracking
-      PUBLIC_UMAMI_WEBSITE_ID: face76f4-2d3e-42be-b8c8-0ea03f33a462
+      PUBLIC_UMAMI_WEBSITE_ID: 32777167-e026-4618-933a-3429120b479b
       PUBLIC_GLITCHTIP_DSN: ${GLITCHTIP_DSN_MANACORE_WEB:-}
     ports:
       - "5000:5000"
