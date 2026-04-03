@@ -21,6 +21,7 @@ import { createAuthRoutes } from './routes/auth';
 import { createGuildRoutes } from './routes/guilds';
 import { createApiKeyRoutes, createApiKeyValidationRoute } from './routes/api-keys';
 import { createMeRoutes } from './routes/me';
+import { createSettingsRoutes } from './routes/settings';
 import { createAdminRoutes } from './routes/admin';
 
 // ─── Bootstrap ──────────────────────────────────────────────
@@ -81,6 +82,12 @@ app.route('/api/v1/api-keys', createApiKeyValidationRoute(apiKeysService));
 
 app.use('/api/v1/me/*', jwtAuth(config.baseUrl));
 app.route('/api/v1/me', createMeRoutes(userDataService));
+
+// ─── Settings ──────────────────────────────────────────────
+
+app.use('/api/v1/settings/*', jwtAuth(config.baseUrl));
+app.use('/api/v1/settings', jwtAuth(config.baseUrl));
+app.route('/api/v1/settings', createSettingsRoutes(db));
 
 // ─── Admin ──────────────────────────────────────────────────
 
