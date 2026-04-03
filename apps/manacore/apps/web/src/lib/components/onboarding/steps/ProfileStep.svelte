@@ -146,7 +146,7 @@
 
 		<!-- Email (readonly) -->
 		<div>
-			<label class="block text-sm font-medium mb-2 text-muted-foreground">E-Mail</label>
+			<p class="block text-sm font-medium mb-2 text-muted-foreground">E-Mail</p>
 			<div class="px-4 py-3 border rounded-xl bg-muted text-muted-foreground">
 				{authStore.user?.email || 'Nicht verfügbar'}
 			</div>

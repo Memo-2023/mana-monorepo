@@ -174,12 +174,6 @@
 		cursor: not-allowed;
 	}
 
-	.switcher-icon {
-		width: 1rem;
-		height: 1rem;
-		flex-shrink: 0;
-	}
-
 	.switcher-label {
 		line-height: 1;
 	}

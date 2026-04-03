@@ -65,7 +65,7 @@
 	let showFilters = $state(false);
 	let showKeyboardHelp = $state(false);
 	let strengthValue = $state(minStrength);
-	let searchInputElement: HTMLInputElement;
+	let searchInputElement = $state<HTMLInputElement | undefined>(undefined);
 
 	// Sync searchInput with external searchQuery
 	$effect(() => {

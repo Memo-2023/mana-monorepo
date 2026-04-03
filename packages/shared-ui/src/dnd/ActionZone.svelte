@@ -60,7 +60,8 @@
 		role="button"
 		tabindex="-1"
 	>
-		<svelte:component this={iconComponent} size={20} weight="bold" />
+		{@const Icon = iconComponent}
+		<Icon size={20} weight="bold" />
 		{#if label}
 			<span class="action-label">{label}</span>
 		{/if}

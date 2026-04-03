@@ -591,11 +591,6 @@
 		border-color: var(--color-primary-800, rgba(59, 130, 246, 0.4));
 	}
 
-	.split-icon {
-		width: 0.875rem;
-		height: 0.875rem;
-	}
-
 	/* Footer for custom content (e.g., a11y toggles) */
 	.dropdown-footer {
 		animation: fanIn 0.15s ease-out forwards;

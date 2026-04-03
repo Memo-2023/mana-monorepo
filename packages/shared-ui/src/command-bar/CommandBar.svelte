@@ -439,13 +439,6 @@
 		border-bottom: 1px solid hsl(var(--color-border));
 	}
 
-	.command-icon {
-		width: 1.25rem;
-		height: 1.25rem;
-		color: hsl(var(--color-muted-foreground));
-		flex-shrink: 0;
-	}
-
 	/* Input with syntax highlighting overlay */
 	.input-highlight-container {
 		position: relative;
@@ -668,13 +661,6 @@
 		text-overflow: ellipsis;
 	}
 
-	.result-favorite {
-		width: 1rem;
-		height: 1rem;
-		color: hsl(var(--color-error));
-		flex-shrink: 0;
-	}
-
 	.quick-actions-list {
 		padding: 0.5rem;
 	}
@@ -697,12 +683,6 @@
 	.quick-action:hover,
 	.quick-action.selected {
 		background: hsl(var(--color-surface-hover));
-	}
-
-	.quick-action-icon {
-		width: 1.25rem;
-		height: 1.25rem;
-		color: hsl(var(--color-muted-foreground));
 	}
 
 	.quick-action span {

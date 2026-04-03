@@ -208,12 +208,6 @@
 		background: rgba(255, 255, 255, 0.15);
 	}
 
-	.tab-icon {
-		width: 1.125rem;
-		height: 1.125rem;
-		flex-shrink: 0;
-	}
-
 	.tab-label {
 		font-size: 0.8125rem;
 		font-weight: 500;

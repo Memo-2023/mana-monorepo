@@ -273,12 +273,6 @@
 			0 4px 6px -2px hsl(var(--color-foreground) / 0.05);
 	}
 
-	.pill-icon {
-		width: 1rem;
-		height: 1rem;
-		flex-shrink: 0;
-	}
-
 	.pill-label {
 		font-size: 0.8125rem;
 	}
@@ -314,17 +308,6 @@
 		background: hsl(var(--color-primary) / 0.15);
 		border-color: hsl(var(--color-primary));
 		color: hsl(var(--color-primary));
-	}
-
-	.chevron-icon {
-		width: 0.75rem;
-		height: 0.75rem;
-		transition: transform 0.2s;
-		margin-left: 0.125rem;
-	}
-
-	.chevron-icon.rotated {
-		transform: rotate(180deg);
 	}
 
 	.backdrop {

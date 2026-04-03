@@ -172,8 +172,8 @@
 	let rememberMe = $state(false);
 	let showSuccess = $state(false);
 	let shakeError = $state(false);
-	let emailInput: HTMLInputElement;
-	let passwordInput: HTMLInputElement;
+	let emailInput = $state<HTMLInputElement | undefined>(undefined);
+	let passwordInput = $state<HTMLInputElement | undefined>(undefined);
 	let successAnnouncement = $state('');
 	let showVerifiedBanner = $state(verified);
 	let showEmailNotVerified = $state(false);

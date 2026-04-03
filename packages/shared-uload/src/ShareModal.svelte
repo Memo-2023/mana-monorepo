@@ -101,18 +101,21 @@
 <svelte:window onkeydown={handleKeydown} />
 
 {#if visible}
-	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 	<div
 		class="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
 		style="z-index: 9990;"
 		onclick={handleBackdropClick}
-		role="dialog"
-		aria-modal="true"
+		onkeydown={(e) => {
+			if (e.key === 'Escape') handleBackdropClick();
+		}}
+		role="presentation"
 		tabindex="-1"
 	>
-		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		<div
 			class="w-full max-w-md rounded-2xl border border-white/10 bg-gray-900 shadow-2xl"
+			role="dialog"
+			aria-modal="true"
+			tabindex="-1"
 			onclick={(e) => e.stopPropagation()}
 			onkeydown={(e) => e.stopPropagation()}
 		>
@@ -143,7 +146,7 @@
 
 						{#if title}
 							<div>
-								<label class="block text-xs text-gray-400 mb-1">Titel</label>
+								<p class="block text-xs text-gray-400 mb-1">Titel</p>
 								<p class="text-sm text-white">{title}</p>
 							</div>
 						{/if}

@@ -291,10 +291,19 @@
 </script>
 
 {#if open}
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<div class="spotlight-overlay" onclick={onClose} onkeydown={handleKeydown}>
+	<div
+		class="spotlight-overlay"
+		onclick={onClose}
+		onkeydown={handleKeydown}
+		role="presentation"
+		tabindex="-1"
+	>
 		<!-- svelte-ignore a11y_no_static_element_interactions -->
-		<div class="spotlight-modal" onclick={(e) => e.stopPropagation()}>
+		<div
+			class="spotlight-modal"
+			onclick={(e) => e.stopPropagation()}
+			onkeydown={(e) => e.stopPropagation()}
+		>
 			<!-- Search input -->
 			<div class="spotlight-input-wrapper">
 				<svg class="spotlight-search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -381,22 +381,6 @@
 		transform: scale(0.95) !important;
 	}
 
-	/* DnD: Item hovering over tag pill */
-	.tag-drop-highlight {
-		transform: scale(1.15) !important;
-		background: var(--tag-color) !important;
-		border-color: var(--tag-color) !important;
-		box-shadow: 0 0 16px color-mix(in srgb, var(--tag-color) 40%, transparent) !important;
-	}
-
-	.tag-drop-highlight .tag-dot {
-		background-color: white !important;
-	}
-
-	.tag-drop-highlight .tag-name {
-		color: white !important;
-	}
-
 	/* DnD: Success flash after drop */
 	:global(.tag-pill.mana-passive-zone-success) {
 		animation: tag-drop-success 400ms ease-out;

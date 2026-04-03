@@ -203,16 +203,21 @@
 <svelte:window onkeydown={handleKeydown} />
 
 {#if visible}
-	<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
 	<div
 		class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
 		onclick={handleBackdropClick}
+		onkeydown={(e) => {
+			if (e.key === 'Escape') handleBackdropClick();
+		}}
+		role="presentation"
+		tabindex="-1"
 	>
 		<div
 			class="bg-card border-border relative mx-4 w-full max-w-md rounded-xl border p-6 shadow-2xl"
 			role="dialog"
 			aria-modal="true"
 			aria-labelledby="auth-gate-title"
+			tabindex="-1"
 			onclick={(e) => e.stopPropagation()}
 			use:trapFocus
 		>
@@ -230,7 +235,8 @@
 			<div
 				class="bg-primary/10 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full"
 			>
-				<svelte:component this={ActionIcon()} size={32} class="text-primary" />
+				{@const Icon = ActionIcon()}
+				<Icon size={32} class="text-primary" />
 			</div>
 
 			<!-- Title -->

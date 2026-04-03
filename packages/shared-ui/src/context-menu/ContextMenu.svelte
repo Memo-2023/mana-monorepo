@@ -86,7 +86,6 @@
 
 {#if visible}
 	<!-- Backdrop to block clicks on elements behind -->
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
 		class="context-menu-backdrop"
 		onpointerdown={(e) => {
@@ -104,6 +103,11 @@
 			e.stopPropagation();
 			onClose();
 		}}
+		onkeydown={(e) => {
+			if (e.key === 'Escape') onClose();
+		}}
+		role="presentation"
+		tabindex="-1"
 	></div>
 
 	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->

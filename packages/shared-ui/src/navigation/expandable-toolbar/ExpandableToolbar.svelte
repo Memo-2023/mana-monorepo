@@ -181,21 +181,6 @@
 		background: hsl(var(--color-muted));
 	}
 
-	.toolbar-fab.active .fab-icon {
-		color: hsl(var(--color-primary));
-	}
-
-	.fab-icon {
-		width: 1.5rem;
-		height: 1.5rem;
-		color: hsl(var(--color-muted-foreground));
-		transition: color 0.2s ease;
-	}
-
-	.toolbar-fab:hover .fab-icon {
-		color: hsl(var(--color-foreground));
-	}
-
 	.toolbar-divider {
 		width: 1px;
 		height: 1.5rem;

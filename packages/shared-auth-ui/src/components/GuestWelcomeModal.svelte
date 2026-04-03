@@ -238,10 +238,12 @@
 
 {#if visible && appInfo}
 	<!-- Modal Backdrop -->
-	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 	<div
 		class="modal-backdrop"
 		onclick={handleBackdropClick}
+		onkeydown={(e) => {
+			if (e.key === 'Escape') handleBackdropClick();
+		}}
 		role="dialog"
 		aria-modal="true"
 		aria-labelledby="welcome-title"

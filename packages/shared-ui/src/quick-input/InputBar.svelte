@@ -688,11 +688,6 @@
 		flex-shrink: 0;
 	}
 
-	.app-icon svg {
-		width: 100%;
-		height: 100%;
-	}
-
 	.input-wrapper {
 		position: relative;
 		flex: 1;
@@ -799,11 +794,6 @@
 		transform: none;
 	}
 
-	.submit-btn svg {
-		width: 1rem;
-		height: 1rem;
-	}
-
 	/* Results Panel */
 	.results-panel {
 		position: absolute;
@@ -878,11 +868,6 @@
 		background: hsl(var(--color-success));
 	}
 
-	.result-avatar.create-avatar svg {
-		width: 1.25rem;
-		height: 1.25rem;
-	}
-
 	.result-item.search-option:hover,
 	.result-item.search-option.selected {
 		background: hsl(var(--color-primary) / 0.1);
@@ -890,11 +875,6 @@
 
 	.result-avatar.search-avatar {
 		background: hsl(var(--color-muted-foreground) / 0.3);
-	}
-
-	.result-avatar.search-avatar svg {
-		width: 1.125rem;
-		height: 1.125rem;
 	}
 
 	.result-info {
@@ -916,13 +896,6 @@
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
-	}
-
-	.favorite-icon {
-		width: 1rem;
-		height: 1rem;
-		color: hsl(var(--color-error, 0 84% 60%));
-		flex-shrink: 0;
 	}
 
 	.create-shortcut {

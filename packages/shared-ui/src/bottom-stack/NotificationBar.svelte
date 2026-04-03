@@ -32,7 +32,8 @@
 			{#if active.action}
 				<button class="notification-action" onclick={active.action.onClick}>
 					{#if active.action.icon}
-						<svelte:component this={active.action.icon} size={14} weight="bold" />
+						{@const ActionIcon = active.action.icon}
+						<ActionIcon size={14} weight="bold" />
 					{/if}
 					{active.action.label}
 					<ArrowRight size={12} />
