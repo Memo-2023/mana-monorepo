@@ -562,13 +562,13 @@ services:
       - "587:587"
       - "465:465"
       - "993:993"
-      - "8443:8443"
+      - "8443:8080"
     volumes:
       - stalwart_data:/opt/stalwart-mail
     environment:
       - STALWART_ADMIN_PASSWORD=${STALWART_ADMIN_PASSWORD:-ChangeMe123!}
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/healthz"]
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/healthz"]
       interval: 120s
       timeout: 5s
       retries: 3
