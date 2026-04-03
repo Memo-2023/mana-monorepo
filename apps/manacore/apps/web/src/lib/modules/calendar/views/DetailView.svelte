@@ -6,9 +6,10 @@
 	import { liveQuery } from 'dexie';
 	import { db } from '$lib/data/database';
 	import { eventsStore } from '../stores/events.svelte';
-	import { Trash, MapPin, Clock } from '@manacore/shared-icons';
+	import { Trash, MapPin, Clock, X } from '@manacore/shared-icons';
 	import type { ViewProps } from '$lib/components/workbench/nav-stack';
 	import type { LocalEvent } from '../types';
+	import { useAllTags, getTagsByIds } from '$lib/stores/tags.svelte';
 
 	let { navigate, goBack, params }: ViewProps = $props();
 	let eventId = $derived(params.eventId as string);
@@ -25,6 +26,18 @@
 	let editAllDay = $state(false);
 
 	let focused = $state(false);
+
+	const tagsQuery = useAllTags();
+	let allTags = $derived(tagsQuery.value ?? []);
+	let eventTags = $derived(getTagsByIds(allTags, event?.tagIds ?? []));
+
+	async function removeTag(tagId: string) {
+		const current = event?.tagIds ?? [];
+		await eventsStore.updateTagIds(
+			eventId,
+			current.filter((id) => id !== tagId)
+		);
+	}
 
 	$effect(() => {
 		eventId; // track
@@ -144,6 +157,26 @@
 				</div>
 			{/if}
 		</div>
+
+		<!-- Tags -->
+		{#if eventTags.length > 0}
+			<div class="section">
+				<span class="section-label">Tags</span>
+				<div class="tags-list">
+					{#each eventTags as tag (tag.id)}
+						<button
+							class="tag-pill"
+							style="--tag-color: {tag.color}"
+							onclick={() => removeTag(tag.id)}
+						>
+							<span class="tag-dot" style="background: {tag.color}"></span>
+							{tag.name}
+							<X size={10} />
+						</button>
+					{/each}
+				</div>
+			</div>
+		{/if}
 
 		<!-- Description -->
 		<div class="section">
@@ -297,6 +330,42 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.375rem;
+	}
+	.tags-list {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.375rem;
+	}
+	.tag-pill {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.25rem;
+		padding: 0.125rem 0.5rem;
+		border-radius: 9999px;
+		border: none;
+		background: color-mix(in srgb, var(--tag-color) 12%, transparent);
+		font-size: 0.6875rem;
+		color: #6b7280;
+		cursor: pointer;
+		transition: all 0.15s;
+	}
+	.tag-pill:hover {
+		background: color-mix(in srgb, var(--tag-color) 20%, transparent);
+		color: #ef4444;
+	}
+	:global(.dark) .tag-pill {
+		background: color-mix(in srgb, var(--tag-color) 18%, transparent);
+		color: #9ca3af;
+	}
+	:global(.dark) .tag-pill:hover {
+		background: color-mix(in srgb, var(--tag-color) 28%, transparent);
+		color: #ef4444;
+	}
+	.tag-dot {
+		width: 6px;
+		height: 6px;
+		border-radius: 9999px;
+		flex-shrink: 0;
 	}
 	.section-label {
 		font-size: 0.6875rem;
