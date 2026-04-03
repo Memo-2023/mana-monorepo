@@ -168,7 +168,7 @@
 		display: flex;
 		gap: 1rem;
 		overflow-x: auto;
-		padding: 0.5rem 0;
+		padding: 0.5rem 2rem 0.5rem calc(50vw - 240px);
 		scrollbar-width: none;
 		flex: 1;
 	}
