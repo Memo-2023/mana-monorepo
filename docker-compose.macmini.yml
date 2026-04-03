@@ -1345,7 +1345,8 @@ services:
         apk add --no-cache curl jq || { echo "apk add fehlgeschlagen, retry in 10s"; sleep 10; exit 1; }
         mkdir -p /output
         while true; do
-          sh /generate.sh
+          cp /generate.sh /tmp/generate.sh
+          sh /tmp/generate.sh
           sleep 60
         done
 
