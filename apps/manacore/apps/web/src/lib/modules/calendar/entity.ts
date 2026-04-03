@@ -1,6 +1,4 @@
 import { registerEntity } from '$lib/entities/registry';
-import { eventsStore } from './stores/events.svelte';
-import { db } from '$lib/data/database';
 import type { EntityDescriptor } from '$lib/entities/types';
 
 const calendarEntity: EntityDescriptor = {
@@ -48,6 +46,10 @@ const calendarEntity: EntityDescriptor = {
 	},
 
 	createItem: async (data) => {
+		// Lazy imports to avoid circular dependency at registration time
+		const { db } = await import('$lib/data/database');
+		const { eventsStore } = await import('./stores/events.svelte');
+
 		const calendars = await db.table('calendars').toArray();
 		const defaultCal = calendars.find((c: Record<string, unknown>) => !c.deletedAt);
 		const calendarId = (defaultCal?.id as string) ?? 'default';

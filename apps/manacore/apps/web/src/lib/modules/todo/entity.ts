@@ -1,5 +1,4 @@
 import { registerEntity } from '$lib/entities/registry';
-import { tasksStore } from './stores/tasks.svelte';
 import type { EntityDescriptor } from '$lib/entities/types';
 
 const todoEntity: EntityDescriptor = {
@@ -27,6 +26,8 @@ const todoEntity: EntityDescriptor = {
 	},
 
 	createItem: async (data) => {
+		// Lazy import to avoid circular dependency at registration time
+		const { tasksStore } = await import('./stores/tasks.svelte');
 		const task = await tasksStore.createTask(
 			data as { title: string; dueDate?: string; description?: string }
 		);
