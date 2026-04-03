@@ -530,6 +530,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      stalwart:
+        condition: service_started
     environment:
       PORT: 3013
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana_platform?sslmode=disable
@@ -538,7 +540,7 @@ services:
       SMTP_HOST: ${SMTP_HOST:-stalwart}
       SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_USER: ${SMTP_USER:-noreply@mana.how}
-      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-ManaNoReply2026!}
       SMTP_FROM: "ManaCore <noreply@mana.how>"
       EXPO_ACCESS_TOKEN: ${EXPO_ACCESS_TOKEN:-}
       MATRIX_HOMESERVER_URL: http://mana-matrix-synapse:8008
