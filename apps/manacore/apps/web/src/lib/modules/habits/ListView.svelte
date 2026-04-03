@@ -14,6 +14,10 @@
 	import { habitsStore } from './stores/habits.svelte';
 	import type { Habit, HabitLog } from './types';
 	import type { ViewProps } from '$lib/app-registry';
+	import { ContextMenu, type ContextMenuItem } from '@manacore/shared-ui';
+	import { DynamicIcon } from '@manacore/shared-ui/atoms';
+	import { IconPicker } from '@manacore/shared-ui/molecules';
+	import { PencilSimple, Trash, Pause, Play } from '@manacore/shared-icons';
 
 	let { navigate, goBack, params }: ViewProps = $props();
 
@@ -51,28 +55,10 @@
 	let animatingId = $state<string | null>(null);
 	let showCreate = $state(false);
 	let newTitle = $state('');
-	let newEmoji = $state('\u2b50');
+	let newIcon = $state('star');
 	let newColor = $state('#8b5cf6');
-	let showEmojiPicker = $state(false);
+	let showIconPicker = $state(false);
 
-	const QUICK_EMOJIS = [
-		'\u2615',
-		'\ud83d\udca7',
-		'\ud83d\udcaa',
-		'\ud83e\uddd8',
-		'\ud83c\udfc3',
-		'\ud83d\udcda',
-		'\ud83c\udf4e',
-		'\ud83d\udc8a',
-		'\ud83c\udf7a',
-		'\ud83d\udecc',
-		'\ud83c\udfb5',
-		'\ud83d\udeb4',
-		'\ud83d\udcdd',
-		'\ud83d\ude2e\u200d\ud83d\udca8',
-		'\ud83e\uddfc',
-		'\u2b50',
-	];
 	const QUICK_COLORS = [
 		'#ef4444',
 		'#f97316',
@@ -97,14 +83,63 @@
 		if (!newTitle.trim()) return;
 		await habitsStore.createHabit({
 			title: newTitle.trim(),
-			emoji: newEmoji,
+			icon: newIcon,
 			color: newColor,
 		});
 		newTitle = '';
-		newEmoji = '\u2b50';
+		newIcon = 'star';
 		showCreate = false;
-		showEmojiPicker = false;
+		showIconPicker = false;
 	}
+
+	// Context menu
+	let ctxMenu = $state<{ visible: boolean; x: number; y: number; habit: Habit | null }>({
+		visible: false,
+		x: 0,
+		y: 0,
+		habit: null,
+	});
+
+	function handleItemContextMenu(e: MouseEvent, habit: Habit) {
+		e.preventDefault();
+		ctxMenu = { visible: true, x: e.clientX, y: e.clientY, habit };
+	}
+
+	let ctxMenuItems = $derived<ContextMenuItem[]>(
+		ctxMenu.habit
+			? [
+					{
+						id: 'log',
+						label: 'Loggen',
+						icon: Play,
+						action: () => {
+							if (ctxMenu.habit) handleTap(ctxMenu.habit.id);
+						},
+					},
+					{
+						id: 'archive',
+						label: ctxMenu.habit.isArchived ? 'Aktivieren' : 'Archivieren',
+						icon: ctxMenu.habit.isArchived ? Play : Pause,
+						action: () => {
+							if (ctxMenu.habit)
+								habitsStore.updateHabit(ctxMenu.habit.id, {
+									isArchived: !ctxMenu.habit.isArchived,
+								});
+						},
+					},
+					{ id: 'div', label: '', type: 'divider' as const },
+					{
+						id: 'delete',
+						label: 'Löschen',
+						icon: Trash,
+						variant: 'danger' as const,
+						action: () => {
+							if (ctxMenu.habit) habitsStore.deleteHabit(ctxMenu.habit.id);
+						},
+					},
+				]
+			: []
+	);
 
 	function handleCreateKeydown(e: KeyboardEvent) {
 		if (e.key === 'Enter' && !e.shiftKey) {
@@ -113,7 +148,7 @@
 		}
 		if (e.key === 'Escape') {
 			showCreate = false;
-			showEmojiPicker = false;
+			showIconPicker = false;
 		}
 	}
 </script>
@@ -129,8 +164,11 @@
 				class:over-target={overTarget}
 				class:pulse={animatingId === habit.id}
 				onclick={() => handleTap(habit.id)}
+				oncontextmenu={(e) => handleItemContextMenu(e, habit)}
 			>
-				<span class="tally-emoji">{habit.emoji}</span>
+				<span class="tally-icon">
+					<DynamicIcon name={habit.icon} size={20} weight="bold" />
+				</span>
 				<span class="tally-count" style:color={habit.color}>
 					{count}{#if habit.targetPerDay}<span class="tally-target">/{habit.targetPerDay}</span
 						>{/if}
@@ -154,11 +192,11 @@
 			<div class="create-row">
 				<button
 					type="button"
-					class="emoji-btn"
+					class="icon-btn"
 					style:background={newColor}
-					onclick={() => (showEmojiPicker = !showEmojiPicker)}
+					onclick={() => (showIconPicker = !showIconPicker)}
 				>
-					{newEmoji}
+					<DynamicIcon name={newIcon} size={16} weight="bold" class="text-white" />
 				</button>
 				<input
 					class="create-input"
@@ -168,19 +206,16 @@
 					autofocus
 				/>
 			</div>
-			{#if showEmojiPicker}
-				<div class="emoji-row">
-					{#each QUICK_EMOJIS as e}
-						<button
-							type="button"
-							class="emoji-opt"
-							class:selected={newEmoji === e}
-							onclick={() => {
-								newEmoji = e;
-								showEmojiPicker = false;
-							}}>{e}</button
-						>
-					{/each}
+			{#if showIconPicker}
+				<div class="icon-picker-wrapper">
+					<IconPicker
+						selectedIcon={newIcon}
+						onIconChange={(i) => {
+							newIcon = i;
+							showIconPicker = false;
+						}}
+						size="sm"
+					/>
 				</div>
 			{/if}
 			<div class="color-row">
@@ -200,7 +235,7 @@
 					class="btn-cancel"
 					onclick={() => {
 						showCreate = false;
-						showEmojiPicker = false;
+						showIconPicker = false;
 					}}>Abbrechen</button
 				>
 				<button type="submit" class="btn-create" disabled={!newTitle.trim()}>Erstellen</button>
@@ -216,7 +251,9 @@
 				{@const habit = habitMap.get(log.habitId)}
 				{#if habit}
 					<div class="log-row">
-						<span class="log-emoji">{habit.emoji}</span>
+						<span class="log-icon" style:color={habit.color}>
+							<DynamicIcon name={habit.icon} size={14} weight="regular" />
+						</span>
 						<span class="log-name">{habit.title}</span>
 						<span class="log-time">{formatTime(log.timestamp)}</span>
 					</div>
@@ -224,6 +261,14 @@
 			{/each}
 		</div>
 	{/if}
+
+	<ContextMenu
+		visible={ctxMenu.visible}
+		x={ctxMenu.x}
+		y={ctxMenu.y}
+		items={ctxMenuItems}
+		onClose={() => (ctxMenu = { ...ctxMenu, visible: false, habit: null })}
+	/>
 
 	{#if activeHabits.length === 0 && !showCreate}
 		<div class="empty">
@@ -264,6 +309,7 @@
 			box-shadow 0.15s;
 		user-select: none;
 		touch-action: manipulation;
+		color: var(--color-foreground, #fff);
 	}
 
 	.tally-item:hover {
@@ -284,8 +330,10 @@
 		background: rgba(34, 197, 94, 0.06);
 	}
 
-	.tally-emoji {
-		font-size: 1.25rem;
+	.tally-icon {
+		display: flex;
+		align-items: center;
+		justify-content: center;
 		line-height: 1;
 	}
 
@@ -334,8 +382,9 @@
 		font-size: 0.8125rem;
 	}
 
-	.log-emoji {
-		font-size: 0.875rem;
+	.log-icon {
+		display: flex;
+		align-items: center;
 		flex-shrink: 0;
 	}
 
@@ -389,21 +438,29 @@
 		gap: 0.5rem;
 	}
 
-	.emoji-btn {
+	.icon-btn {
 		width: 2rem;
 		height: 2rem;
 		border-radius: 0.5rem;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		font-size: 1rem;
 		border: none;
 		cursor: pointer;
 		flex-shrink: 0;
 		transition: transform 0.15s;
 	}
-	.emoji-btn:hover {
+	.icon-btn:hover {
 		transform: scale(1.1);
+	}
+
+	.icon-picker-wrapper {
+		max-height: 14rem;
+		overflow-y: auto;
+		border-radius: 0.5rem;
+		padding: 0.5rem;
+		background: var(--color-surface, rgba(255, 255, 255, 0.03));
+		border: 1px solid var(--color-border, rgba(255, 255, 255, 0.08));
 	}
 
 	.create-input {
@@ -421,31 +478,6 @@
 	}
 	.create-input::placeholder {
 		color: var(--color-muted-foreground);
-	}
-
-	.emoji-row {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.125rem;
-	}
-
-	.emoji-opt {
-		width: 1.75rem;
-		height: 1.75rem;
-		border-radius: 0.375rem;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		font-size: 0.875rem;
-		background: transparent;
-		border: 2px solid transparent;
-		cursor: pointer;
-	}
-	.emoji-opt:hover {
-		background: rgba(255, 255, 255, 0.08);
-	}
-	.emoji-opt.selected {
-		border-color: var(--color-primary, #6366f1);
 	}
 
 	.color-row {

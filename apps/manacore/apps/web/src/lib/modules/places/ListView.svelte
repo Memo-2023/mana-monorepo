@@ -8,8 +8,9 @@
 	import type { LocalPlace } from './types';
 	import { placesStore } from './stores/places.svelte';
 	import { trackingStore } from './stores/tracking.svelte';
-	import { Star, MapPin, Plus } from '@manacore/shared-icons';
+	import { Star, MapPin, Plus, PencilSimple, Trash } from '@manacore/shared-icons';
 	import type { ViewProps } from '$lib/app-registry';
+	import { ContextMenu, type ContextMenuItem } from '@manacore/shared-ui';
 	import { dropTarget, dragSource } from '@manacore/shared-ui/dnd';
 	import type { TagDragData } from '@manacore/shared-ui/dnd';
 	import { useAllTags, getTagsByIds } from '$lib/stores/tags.svelte';
@@ -92,6 +93,52 @@
 		navigate('detail', { placeId, _siblingIds: ids, _siblingKey: 'placeId' });
 	}
 
+	// Context menu
+	let ctxMenu = $state<{ visible: boolean; x: number; y: number; place: LocalPlace | null }>({
+		visible: false,
+		x: 0,
+		y: 0,
+		place: null,
+	});
+
+	function handleItemContextMenu(e: MouseEvent, place: LocalPlace) {
+		e.preventDefault();
+		ctxMenu = { visible: true, x: e.clientX, y: e.clientY, place };
+	}
+
+	let ctxMenuItems = $derived<ContextMenuItem[]>(
+		ctxMenu.place
+			? [
+					{
+						id: 'open',
+						label: 'Öffnen',
+						icon: PencilSimple,
+						action: () => {
+							if (ctxMenu.place) openDetail(ctxMenu.place.id);
+						},
+					},
+					{
+						id: 'favorite',
+						label: ctxMenu.place.isFavorite ? 'Favorit entfernen' : 'Als Favorit',
+						icon: Star,
+						action: () => {
+							if (ctxMenu.place) placesStore.toggleFavorite(ctxMenu.place.id);
+						},
+					},
+					{ id: 'div', label: '', type: 'divider' as const },
+					{
+						id: 'delete',
+						label: 'Löschen',
+						icon: Trash,
+						variant: 'danger' as const,
+						action: () => {
+							if (ctxMenu.place) placesStore.deletePlace(ctxMenu.place.id);
+						},
+					},
+				]
+			: []
+	);
+
 	function formatCoords(lat: number, lng: number): string {
 		return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
 	}
@@ -150,6 +197,7 @@
 			<button
 				class="place-item"
 				onclick={() => openDetail(place.id)}
+				oncontextmenu={(e) => handleItemContextMenu(e, place)}
 				use:dropTarget={{
 					accepts: ['tag'],
 					onDrop: (payload) => handleTagDrop(place.id, payload.data as unknown as TagDragData),
@@ -194,6 +242,14 @@
 			</button>
 		{/each}
 	</div>
+
+	<ContextMenu
+		visible={ctxMenu.visible}
+		x={ctxMenu.x}
+		y={ctxMenu.y}
+		items={ctxMenuItems}
+		onClose={() => (ctxMenu = { ...ctxMenu, visible: false, place: null })}
+	/>
 
 	{#if filtered().length === 0 && !search}
 		<div class="empty">

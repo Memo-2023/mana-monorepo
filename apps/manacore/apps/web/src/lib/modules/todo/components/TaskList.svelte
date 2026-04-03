@@ -5,6 +5,14 @@
 	import TaskItem from './TaskItem.svelte';
 	import { dndzone, SOURCES, TRIGGERS } from 'svelte-dnd-action';
 	import { flip } from 'svelte/animate';
+	import { ContextMenu, type ContextMenuItem } from '@manacore/shared-ui';
+	import {
+		PencilSimple,
+		Check,
+		ArrowCounterClockwise,
+		Trash,
+		Circle,
+	} from '@manacore/shared-icons';
 
 	interface Props {
 		tasks: Task[];
@@ -23,33 +31,65 @@
 	});
 
 	// Context menu
-	let contextMenu = $state<{ x: number; y: number; task: Task } | null>(null);
+	let ctxMenu = $state<{ visible: boolean; x: number; y: number; task: Task | null }>({
+		visible: false,
+		x: 0,
+		y: 0,
+		task: null,
+	});
 
 	function handleContextMenu(task: Task, e: MouseEvent) {
-		contextMenu = { x: e.clientX, y: e.clientY, task };
+		ctxMenu = { visible: true, x: e.clientX, y: e.clientY, task };
 	}
 
-	function closeContextMenu() {
-		contextMenu = null;
-	}
-
-	async function handleSetPriority(priority: TaskPriority) {
-		if (!contextMenu) return;
-		await tasksStore.updateTask(contextMenu.task.id, { priority });
-		closeContextMenu();
-	}
-
-	async function handleComplete() {
-		if (!contextMenu) return;
-		await tasksStore.toggleComplete(contextMenu.task.id);
-		closeContextMenu();
-	}
-
-	async function handleDelete() {
-		if (!contextMenu) return;
-		await tasksStore.deleteTask(contextMenu.task.id);
-		closeContextMenu();
-	}
+	let ctxMenuItems = $derived<ContextMenuItem[]>(
+		ctxMenu.task
+			? [
+					{
+						id: 'open',
+						label: $_('todo.edit'),
+						icon: PencilSimple,
+						action: () => {
+							if (ctxMenu.task) onOpenTask(ctxMenu.task);
+						},
+					},
+					{
+						id: 'complete',
+						label: ctxMenu.task.isCompleted ? $_('todo.reopen') : $_('todo.markDone'),
+						icon: ctxMenu.task.isCompleted ? ArrowCounterClockwise : Check,
+						action: () => {
+							if (ctxMenu.task) tasksStore.toggleComplete(ctxMenu.task.id);
+						},
+					},
+					{ id: 'div-priority', label: '', type: 'divider' as const },
+					...(['urgent', 'high', 'medium', 'low'] as TaskPriority[]).map((p) => ({
+						id: `priority-${p}`,
+						label:
+							p === 'urgent'
+								? $_('todo.priorityUrgent')
+								: p === 'high'
+									? $_('todo.priorityHigh')
+									: p === 'medium'
+										? $_('todo.priorityMedium')
+										: $_('todo.priorityLow'),
+						icon: Circle,
+						action: () => {
+							if (ctxMenu.task) tasksStore.updateTask(ctxMenu.task.id, { priority: p });
+						},
+					})),
+					{ id: 'div-delete', label: '', type: 'divider' as const },
+					{
+						id: 'delete',
+						label: $_('common.delete'),
+						icon: Trash,
+						variant: 'danger' as const,
+						action: () => {
+							if (ctxMenu.task) tasksStore.deleteTask(ctxMenu.task.id);
+						},
+					},
+				]
+			: []
+	);
 
 	// DnD handlers
 	function handleDndConsider(e: CustomEvent<{ items: Task[] }>) {
@@ -108,65 +148,10 @@
 	</div>
 {/if}
 
-<!-- Context Menu -->
-{#if contextMenu}
-	<!-- svelte-ignore a11y_click_events_have_key_events -->
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<div class="fixed inset-0 z-[9990]" onclick={closeContextMenu}></div>
-	<div
-		class="fixed z-[9991] min-w-[160px] rounded-lg border border-border bg-card p-1 shadow-xl"
-		style="left: {contextMenu.x}px; top: {contextMenu.y}px"
-	>
-		<button
-			onclick={() => {
-				onOpenTask(contextMenu!.task);
-				closeContextMenu();
-			}}
-			class="flex w-full items-center rounded-md px-3 py-1.5 text-sm text-foreground hover:bg-muted"
-		>
-			{$_('todo.edit')}
-		</button>
-		<button
-			onclick={handleComplete}
-			class="flex w-full items-center rounded-md px-3 py-1.5 text-sm text-foreground hover:bg-muted"
-		>
-			{contextMenu.task.isCompleted ? $_('todo.reopen') : $_('todo.markDone')}
-		</button>
-		<div class="my-1 border-t border-border"></div>
-		<div class="px-3 py-1 text-[0.625rem] font-bold uppercase tracking-wider text-muted-foreground">
-			{$_('todo.priority')}
-		</div>
-		{#each ['urgent', 'high', 'medium', 'low'] as p}
-			<button
-				onclick={() => handleSetPriority(p as TaskPriority)}
-				class="flex w-full items-center gap-2 rounded-md px-3 py-1.5 text-sm hover:bg-muted
-					{contextMenu.task.priority === p ? 'text-primary font-medium' : 'text-foreground'}"
-			>
-				<span
-					class="h-2 w-2 rounded-full"
-					style="background-color: {p === 'urgent'
-						? '#ef4444'
-						: p === 'high'
-							? '#f59e0b'
-							: p === 'medium'
-								? '#3b82f6'
-								: '#6b7280'}"
-				></span>
-				{p === 'urgent'
-					? $_('todo.priorityUrgent')
-					: p === 'high'
-						? $_('todo.priorityHigh')
-						: p === 'medium'
-							? $_('todo.priorityMedium')
-							: $_('todo.priorityLow')}
-			</button>
-		{/each}
-		<div class="my-1 border-t border-border"></div>
-		<button
-			onclick={handleDelete}
-			class="flex w-full items-center rounded-md px-3 py-1.5 text-sm text-red-500 hover:bg-red-500/10"
-		>
-			{$_('common.delete')}
-		</button>
-	</div>
-{/if}
+<ContextMenu
+	visible={ctxMenu.visible}
+	x={ctxMenu.x}
+	y={ctxMenu.y}
+	items={ctxMenuItems}
+	onClose={() => (ctxMenu = { ...ctxMenu, visible: false, task: null })}
+/>

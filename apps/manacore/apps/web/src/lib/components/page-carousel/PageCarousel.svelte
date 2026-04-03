@@ -26,6 +26,7 @@
 		onMaximize: (id: string) => void;
 		onRemove: (id: string) => void;
 		onTogglePicker: () => void;
+		onTabContextMenu?: (e: MouseEvent, pageId: string) => void;
 		addLabel?: string;
 		page: Snippet<[CarouselPage, number]>;
 		picker?: Snippet;
@@ -40,6 +41,7 @@
 		onMaximize,
 		onRemove,
 		onTogglePicker,
+		onTabContextMenu,
 		addLabel = 'Hinzufügen',
 		page: pageSnippet,
 		picker,
@@ -136,7 +138,8 @@
 	{#if minimizedPages.length > 0}
 		<div class="minimized-tabs">
 			{#each minimizedPages as p (p.id)}
-				<div class="minimized-tab">
+				<!-- svelte-ignore a11y_no_static_element_interactions -->
+				<div class="minimized-tab" oncontextmenu={(e) => onTabContextMenu?.(e, p.id)}>
 					<span class="tab-dot" style="background-color: {p.color}"></span>
 					<button class="tab-title" onclick={() => onRestore(p.id)}>
 						{p.title}

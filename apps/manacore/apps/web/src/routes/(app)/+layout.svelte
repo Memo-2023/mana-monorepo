@@ -20,7 +20,10 @@
 		PillDropdownItem,
 		SpotlightAction,
 		ContentSearcher,
+		ContextMenuItem,
 	} from '@manacore/shared-ui';
+	import { ContextMenu } from '@manacore/shared-ui';
+	import { createWorkbenchContextMenu } from '$lib/context-menu';
 	import type { InputBarAdapter } from '$lib/quick-input/types';
 	import { getAdapterLoader } from '$lib/quick-input/registry';
 	import { createFallbackAdapter } from '$lib/quick-input/fallback-adapter';
@@ -140,6 +143,28 @@
 		},
 	});
 
+	// ── Navigation Context Menu ──────────────────────────────
+	const navCtxMenu = createWorkbenchContextMenu();
+
+	function makeNavContextMenu(href: string): (e: MouseEvent) => void {
+		return (e: MouseEvent) => {
+			e.preventDefault();
+			const items: ContextMenuItem[] = [
+				{
+					id: 'open-new-tab',
+					label: 'In neuem Tab öffnen',
+					action: () => window.open(href, '_blank'),
+				},
+				{
+					id: 'copy-link',
+					label: 'Link kopieren',
+					action: () => navigator.clipboard.writeText(window.location.origin + href),
+				},
+			];
+			navCtxMenu.open(e, href, items);
+		};
+	}
+
 	// ── Navigation ──────────────────────────────────────────
 	let baseNavItems = $derived<PillNavItem[]>([
 		{
@@ -149,11 +174,31 @@
 			onClick: handleTagStripToggle,
 			active: isTagStripVisible,
 		},
-		{ href: '/', label: $_('nav.home'), icon: 'home' },
-		{ href: '/spiral', label: $_('nav.spiral'), icon: 'spiral' },
-		{ href: '/credits', label: $_('nav.credits'), icon: 'creditCard' },
-		{ href: '/profile', label: $_('nav.profile'), icon: 'user' },
-		{ href: '/settings', label: $_('nav.settings'), icon: 'settings' },
+		{ href: '/', label: $_('nav.home'), icon: 'home', onContextMenu: makeNavContextMenu('/') },
+		{
+			href: '/spiral',
+			label: $_('nav.spiral'),
+			icon: 'spiral',
+			onContextMenu: makeNavContextMenu('/spiral'),
+		},
+		{
+			href: '/credits',
+			label: $_('nav.credits'),
+			icon: 'creditCard',
+			onContextMenu: makeNavContextMenu('/credits'),
+		},
+		{
+			href: '/profile',
+			label: $_('nav.profile'),
+			icon: 'user',
+			onContextMenu: makeNavContextMenu('/profile'),
+		},
+		{
+			href: '/settings',
+			label: $_('nav.settings'),
+			icon: 'settings',
+			onContextMenu: makeNavContextMenu('/settings'),
+		},
 	]);
 
 	let isAdmin = $derived(authStore.user?.role === 'admin');
@@ -487,6 +532,15 @@
 			</div>
 		{/if}
 	</div>
+
+	<!-- Navigation Context Menu -->
+	<ContextMenu
+		visible={navCtxMenu.state.visible}
+		x={navCtxMenu.state.x}
+		y={navCtxMenu.state.y}
+		items={navCtxMenu.items}
+		onClose={() => navCtxMenu.close()}
+	/>
 
 	<!-- Guest Welcome Modal -->
 	{#if guestMode}

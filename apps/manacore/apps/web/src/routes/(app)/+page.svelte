@@ -7,6 +7,8 @@
 	import { createAppSettingsStore } from '@manacore/shared-stores';
 	import { DragPreview } from '@manacore/shared-ui/dnd';
 	import type { DragType } from '@manacore/shared-ui/dnd';
+	import { ContextMenu } from '@manacore/shared-ui';
+	import { buildContextMenuItems, createWorkbenchContextMenu } from '$lib/context-menu';
 
 	function resolveEntity(type: string, data: Record<string, unknown>) {
 		const app = getAppByDragType(type as DragType);
@@ -165,6 +167,40 @@
 		persistState();
 	}
 
+	const ctxMenu = createWorkbenchContextMenu();
+
+	function handleCardContextMenu(e: MouseEvent, appId: string, idx: number) {
+		const app = getApp(appId);
+		if (!app) return;
+		const entry = openApps.find((a) => a.appId === appId);
+		const items = buildContextMenuItems({
+			location: 'card',
+			appId,
+			app,
+			maximized: entry?.maximized,
+			onMaximize: () => handleMaximizeApp(appId),
+			onMinimize: () => handleMinimizeApp(appId),
+			onClose: () => handleRemoveApp(appId),
+			onMoveLeft: idx > 0 ? () => handleMoveLeft(appId) : undefined,
+			onMoveRight: idx < openApps.length - 1 ? () => handleMoveRight(appId) : undefined,
+		});
+		ctxMenu.open(e, appId, items);
+	}
+
+	function handleTabContextMenu(e: MouseEvent, appId: string) {
+		const app = getApp(appId);
+		if (!app) return;
+		const items = buildContextMenuItems({
+			location: 'tab',
+			appId,
+			app,
+			onRestore: () => handleRestoreApp(appId),
+			onMaximize: () => handleMaximizeApp(appId),
+			onClose: () => handleRemoveApp(appId),
+		});
+		ctxMenu.open(e, appId, items);
+	}
+
 	function handleReorder(fromId: string, toId: string) {
 		const fromIdx = openApps.findIndex((a) => a.appId === fromId);
 		const toIdx = openApps.findIndex((a) => a.appId === toId);
@@ -193,6 +229,7 @@
 		onMaximize={handleMaximizeApp}
 		onRemove={handleRemoveApp}
 		onTogglePicker={() => (showPicker = !showPicker)}
+		onTabContextMenu={handleTabContextMenu}
 		addLabel="App hinzufügen"
 	>
 		{#snippet page(p)}
@@ -208,6 +245,7 @@
 				onResize={(w, h) => handleResize(p.id, w, h)}
 				onMoveLeft={idx > 0 ? () => handleMoveLeft(p.id) : undefined}
 				onMoveRight={idx < openApps.length - 1 ? () => handleMoveRight(p.id) : undefined}
+				onContextMenu={(e) => handleCardContextMenu(e, p.id, idx)}
 			/>
 		{/snippet}
 		{#snippet picker()}
@@ -218,6 +256,14 @@
 			/>
 		{/snippet}
 	</PageCarousel>
+
+	<ContextMenu
+		visible={ctxMenu.state.visible}
+		x={ctxMenu.state.x}
+		y={ctxMenu.state.y}
+		items={ctxMenu.items}
+		onClose={() => ctxMenu.close()}
+	/>
 </div>
 
 <style>

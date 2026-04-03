@@ -22,6 +22,7 @@
 		onResize?: (widthPx: number, heightPx?: number) => void;
 		onMoveLeft?: () => void;
 		onMoveRight?: () => void;
+		onContextMenu?: (e: MouseEvent) => void;
 	}
 
 	let {
@@ -35,6 +36,7 @@
 		onResize,
 		onMoveLeft,
 		onMoveRight,
+		onContextMenu,
 	}: Props = $props();
 
 	let app = $derived(getApp(appId));
@@ -280,6 +282,7 @@
 		{onResize}
 		{onMoveLeft}
 		{onMoveRight}
+		{onContextMenu}
 	>
 		{#if loadError}
 			<div class="load-state">

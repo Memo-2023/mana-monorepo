@@ -24,6 +24,8 @@ export interface PillNavItem {
 	onClick?: () => void;
 	/** Whether this item is currently active/selected (for toggle buttons) */
 	active?: boolean;
+	/** Right-click handler for context menu */
+	onContextMenu?: (e: MouseEvent) => void;
 }
 
 export interface PillDropdownItem {

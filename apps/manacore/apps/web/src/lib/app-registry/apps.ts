@@ -7,6 +7,7 @@
  */
 
 import { registerApp } from './registry';
+import { Plus } from '@manacore/shared-icons';
 
 // ── Apps with entity capabilities ───────────────────────────
 
@@ -18,6 +19,17 @@ registerApp({
 		list: { load: () => import('$lib/modules/todo/ListView.svelte') },
 		detail: { load: () => import('$lib/modules/todo/views/DetailView.svelte') },
 	},
+	contextMenuActions: [
+		{
+			id: 'new-task',
+			label: 'Neue Aufgabe',
+			icon: Plus,
+			action: () =>
+				window.dispatchEvent(
+					new CustomEvent('mana:quick-action', { detail: { app: 'todo', action: 'new' } })
+				),
+		},
+	],
 	collection: 'tasks',
 	paramKey: 'taskId',
 	dragType: 'task',
@@ -53,6 +65,17 @@ registerApp({
 		list: { load: () => import('$lib/modules/calendar/ListView.svelte') },
 		detail: { load: () => import('$lib/modules/calendar/views/DetailView.svelte') },
 	},
+	contextMenuActions: [
+		{
+			id: 'new-event',
+			label: 'Neuer Termin',
+			icon: Plus,
+			action: () =>
+				window.dispatchEvent(
+					new CustomEvent('mana:quick-action', { detail: { app: 'calendar', action: 'new' } })
+				),
+		},
+	],
 	collection: 'events',
 	paramKey: 'eventId',
 	dragType: 'event',
@@ -120,6 +143,17 @@ registerApp({
 		list: { load: () => import('$lib/modules/contacts/ListView.svelte') },
 		detail: { load: () => import('$lib/modules/contacts/views/DetailView.svelte') },
 	},
+	contextMenuActions: [
+		{
+			id: 'new-contact',
+			label: 'Neuer Kontakt',
+			icon: Plus,
+			action: () =>
+				window.dispatchEvent(
+					new CustomEvent('mana:quick-action', { detail: { app: 'contacts', action: 'new' } })
+				),
+		},
+	],
 	collection: 'contacts',
 	paramKey: 'contactId',
 	dragType: 'contact',
@@ -142,6 +176,17 @@ registerApp({
 	views: {
 		list: { load: () => import('$lib/modules/habits/ListView.svelte') },
 	},
+	contextMenuActions: [
+		{
+			id: 'new-habit',
+			label: 'Neues Habit',
+			icon: Plus,
+			action: () =>
+				window.dispatchEvent(
+					new CustomEvent('mana:quick-action', { detail: { app: 'habits', action: 'new' } })
+				),
+		},
+	],
 	collection: 'habits',
 	paramKey: 'habitId',
 	dragType: 'habit',
@@ -149,19 +194,19 @@ registerApp({
 	transformIncoming: {
 		task: (source) => ({
 			title: source.title as string,
-			emoji: '\u{1F4AA}',
+			icon: 'barbell',
 			color: '#6366f1',
 		}),
 	},
 	getDisplayData: (item) => ({
-		title: `${item.emoji as string} ${item.title as string}`,
+		title: item.title as string,
 		subtitle: undefined,
 	}),
 	createItem: async (data) => {
 		const { habitsStore } = await import('$lib/modules/habits/stores/habits.svelte');
 		const habit = await habitsStore.createHabit({
 			title: data.title as string,
-			emoji: (data.emoji as string) ?? '\u{2B50}',
+			icon: (data.icon as string) ?? 'star',
 			color: (data.color as string) ?? '#6366f1',
 		});
 		return habit.id;
@@ -175,6 +220,17 @@ registerApp({
 	views: {
 		list: { load: () => import('$lib/modules/notes/ListView.svelte') },
 	},
+	contextMenuActions: [
+		{
+			id: 'new-note',
+			label: 'Neue Notiz',
+			icon: Plus,
+			action: () =>
+				window.dispatchEvent(
+					new CustomEvent('mana:quick-action', { detail: { app: 'notes', action: 'new' } })
+				),
+		},
+	],
 	collection: 'notes',
 	paramKey: 'noteId',
 	dragType: 'note',

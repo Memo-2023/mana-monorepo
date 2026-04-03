@@ -14,8 +14,15 @@
 	} from './queries';
 	import { tasksStore } from './stores/tasks.svelte';
 	import { toastStore } from '@manacore/shared-ui/toast';
-	import { Circle, Check } from '@manacore/shared-icons';
+	import {
+		Circle,
+		Check,
+		PencilSimple,
+		Trash,
+		ArrowCounterClockwise,
+	} from '@manacore/shared-icons';
 	import type { ViewProps } from '$lib/app-registry';
+	import { ContextMenu, type ContextMenuItem } from '@manacore/shared-ui';
 	import { dropTarget, dragSource } from '@manacore/shared-ui/dnd';
 	import type { TagDragData } from '@manacore/shared-ui/dnd';
 	import { useAllTags, getTagsByIds } from '$lib/stores/tags.svelte';
@@ -74,6 +81,57 @@
 		newTitle = '';
 	}
 
+	// Context menu
+	let ctxMenu = $state<{
+		visible: boolean;
+		x: number;
+		y: number;
+		task: import('./types').Task | null;
+	}>({
+		visible: false,
+		x: 0,
+		y: 0,
+		task: null,
+	});
+
+	function handleItemContextMenu(e: MouseEvent, task: import('./types').Task) {
+		e.preventDefault();
+		ctxMenu = { visible: true, x: e.clientX, y: e.clientY, task };
+	}
+
+	let ctxMenuItems = $derived<ContextMenuItem[]>(
+		ctxMenu.task
+			? [
+					{
+						id: 'open',
+						label: 'Öffnen',
+						icon: PencilSimple,
+						action: () => {
+							if (ctxMenu.task) navigate('detail', { taskId: ctxMenu.task.id });
+						},
+					},
+					{
+						id: 'complete',
+						label: ctxMenu.task.isCompleted ? 'Wieder öffnen' : 'Erledigen',
+						icon: ctxMenu.task.isCompleted ? ArrowCounterClockwise : Check,
+						action: () => {
+							if (ctxMenu.task) tasksStore.toggleComplete(ctxMenu.task.id);
+						},
+					},
+					{ id: 'div', label: '', type: 'divider' as const },
+					{
+						id: 'delete',
+						label: 'Löschen',
+						icon: Trash,
+						variant: 'danger' as const,
+						action: () => {
+							if (ctxMenu.task) tasksStore.deleteTask(ctxMenu.task.id);
+						},
+					},
+				]
+			: []
+	);
+
 	async function toggleComplete(e: Event, id: string) {
 		e.stopPropagation();
 		const task = tasks.find((t) => t.id === id);
@@ -126,6 +184,7 @@
 						_siblingIds: filtered().map((t) => t.id),
 						_siblingKey: 'taskId',
 					})}
+				oncontextmenu={(e) => handleItemContextMenu(e, task)}
 				class="task-item"
 				use:dragSource={{
 					type: 'task',
@@ -176,6 +235,14 @@
 			<p class="empty">Keine Aufgaben</p>
 		{/if}
 	</div>
+
+	<ContextMenu
+		visible={ctxMenu.visible}
+		x={ctxMenu.x}
+		y={ctxMenu.y}
+		items={ctxMenuItems}
+		onClose={() => (ctxMenu = { ...ctxMenu, visible: false, task: null })}
+	/>
 </div>
 
 <style>

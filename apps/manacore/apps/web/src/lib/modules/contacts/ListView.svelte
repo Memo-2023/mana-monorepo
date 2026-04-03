@@ -8,8 +8,9 @@
 	import { db } from '$lib/data/database';
 	import type { LocalContact } from './types';
 	import { contactsStore } from './stores/contacts.svelte';
-	import { Plus, Star } from '@manacore/shared-icons';
+	import { Plus, Star, PencilSimple, Trash, StarFour } from '@manacore/shared-icons';
 	import type { ViewProps } from '$lib/app-registry';
+	import { ContextMenu, type ContextMenuItem } from '@manacore/shared-ui';
 	import { dropTarget, dragSource } from '@manacore/shared-ui/dnd';
 	import type { TagDragData } from '@manacore/shared-ui/dnd';
 	import { useAllTags, getTagsByIds } from '$lib/stores/tags.svelte';
@@ -66,6 +67,58 @@
 		return (f + l).toUpperCase() || '?';
 	}
 
+	// Context menu
+	let ctxMenu = $state<{ visible: boolean; x: number; y: number; contact: LocalContact | null }>({
+		visible: false,
+		x: 0,
+		y: 0,
+		contact: null,
+	});
+
+	function handleItemContextMenu(e: MouseEvent, contact: LocalContact) {
+		e.preventDefault();
+		ctxMenu = { visible: true, x: e.clientX, y: e.clientY, contact };
+	}
+
+	let ctxMenuItems = $derived<ContextMenuItem[]>(
+		ctxMenu.contact
+			? [
+					{
+						id: 'open',
+						label: 'Öffnen',
+						icon: PencilSimple,
+						action: () => {
+							if (ctxMenu.contact) {
+								navigate('detail', { contactId: ctxMenu.contact.id });
+							}
+						},
+					},
+					{
+						id: 'favorite',
+						label: ctxMenu.contact.isFavorite ? 'Favorit entfernen' : 'Als Favorit',
+						icon: Star,
+						action: () => {
+							if (ctxMenu.contact) {
+								contactsStore.toggleFavorite(ctxMenu.contact.id);
+							}
+						},
+					},
+					{ id: 'div', label: '', type: 'divider' as const },
+					{
+						id: 'delete',
+						label: 'Löschen',
+						icon: Trash,
+						variant: 'danger' as const,
+						action: () => {
+							if (ctxMenu.contact) {
+								contactsStore.deleteContact(ctxMenu.contact.id);
+							}
+						},
+					},
+				]
+			: []
+	);
+
 	// Quick create
 	let newName = $state('');
 
@@ -110,6 +163,7 @@
 						_siblingIds: filtered().map((c) => c.id),
 						_siblingKey: 'contactId',
 					})}
+				oncontextmenu={(e) => handleItemContextMenu(e, contact)}
 				use:dragSource={{
 					type: 'contact',
 					data: () => ({
@@ -153,6 +207,14 @@
 			<p class="empty">Keine Kontakte gefunden</p>
 		{/if}
 	</div>
+
+	<ContextMenu
+		visible={ctxMenu.visible}
+		x={ctxMenu.x}
+		y={ctxMenu.y}
+		items={ctxMenuItems}
+		onClose={() => (ctxMenu = { ...ctxMenu, visible: false, contact: null })}
+	/>
 </div>
 
 <style>

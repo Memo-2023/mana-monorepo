@@ -7,6 +7,8 @@
 	import { notesStore } from './stores/notes.svelte';
 	import type { Note } from './types';
 	import type { ViewProps } from '$lib/app-registry';
+	import { ContextMenu, type ContextMenuItem } from '@manacore/shared-ui';
+	import { PencilSimple, Trash, PushPin } from '@manacore/shared-icons';
 
 	let { navigate, goBack, params }: ViewProps = $props();
 
@@ -61,6 +63,52 @@
 		e.stopPropagation();
 		await notesStore.togglePin(id);
 	}
+
+	// Context menu
+	let ctxMenu = $state<{ visible: boolean; x: number; y: number; note: Note | null }>({
+		visible: false,
+		x: 0,
+		y: 0,
+		note: null,
+	});
+
+	function handleItemContextMenu(e: MouseEvent, note: Note) {
+		e.preventDefault();
+		ctxMenu = { visible: true, x: e.clientX, y: e.clientY, note };
+	}
+
+	let ctxMenuItems = $derived<ContextMenuItem[]>(
+		ctxMenu.note
+			? [
+					{
+						id: 'edit',
+						label: 'Bearbeiten',
+						icon: PencilSimple,
+						action: () => {
+							if (ctxMenu.note) startEdit(ctxMenu.note);
+						},
+					},
+					{
+						id: 'pin',
+						label: ctxMenu.note.isPinned ? 'Lösen' : 'Pinnen',
+						icon: PushPin,
+						action: () => {
+							if (ctxMenu.note) notesStore.togglePin(ctxMenu.note.id);
+						},
+					},
+					{ id: 'div', label: '', type: 'divider' as const },
+					{
+						id: 'delete',
+						label: 'Löschen',
+						icon: Trash,
+						variant: 'danger' as const,
+						action: () => {
+							if (ctxMenu.note) handleDelete(ctxMenu.note.id);
+						},
+					},
+				]
+			: []
+	);
 </script>
 
 <div class="app-view">
@@ -111,7 +159,11 @@
 				</div>
 			{:else}
 				<!-- Note row -->
-				<button class="note-item" onclick={() => startEdit(note)}>
+				<button
+					class="note-item"
+					onclick={() => startEdit(note)}
+					oncontextmenu={(e) => handleItemContextMenu(e, note)}
+				>
 					{#if note.color}
 						<span class="color-dot" style="background: {note.color}"></span>
 					{/if}
@@ -137,6 +189,14 @@
 	{#if notes.length === 0}
 		<p class="empty">Tippe oben, um eine Notiz zu erstellen.</p>
 	{/if}
+
+	<ContextMenu
+		visible={ctxMenu.visible}
+		x={ctxMenu.x}
+		y={ctxMenu.y}
+		items={ctxMenuItems}
+		onClose={() => (ctxMenu = { ...ctxMenu, visible: false, note: null })}
+	/>
 </div>
 
 <style>

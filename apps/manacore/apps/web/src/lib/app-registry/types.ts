@@ -10,6 +10,18 @@ import type { DragType } from '@manacore/shared-ui/dnd';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyComponent = import('svelte').Component<any, any>;
 
+export type ContextMenuLocation = 'card' | 'tab' | 'nav' | 'page';
+
+export interface AppContextMenuAction {
+	id: string;
+	label: string;
+	icon?: AnyComponent;
+	shortcut?: string;
+	/** Only show in certain contexts (default: all) */
+	showIn?: ContextMenuLocation[];
+	action: () => void;
+}
+
 export interface ViewLoader {
 	load: () => Promise<{ default: AnyComponent }>;
 }
@@ -41,6 +53,9 @@ export interface AppDescriptor {
 	>;
 	createItem?: (data: Record<string, unknown>) => Promise<string>;
 	getDisplayData?: (item: Record<string, unknown>) => EntityDisplayData;
+
+	// -- Context Menu (optional) --
+	contextMenuActions?: AppContextMenuAction[];
 }
 
 export interface DropResult {

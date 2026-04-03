@@ -30,6 +30,7 @@
 		title?: string;
 		color?: string;
 		icon?: Component;
+		onContextMenu?: (e: MouseEvent) => void;
 		// Snippet overrides
 		header_left?: Snippet;
 		badge?: Snippet;
@@ -47,6 +48,7 @@
 		onResize,
 		onMoveLeft,
 		onMoveRight,
+		onContextMenu,
 		title = '',
 		color = '#6B7280',
 		icon: IconComponent,
@@ -125,7 +127,8 @@
 		? `height: ${heightPx}px; min-height: 0;`
 		: ''}"
 >
-	<div class="drag-handle-bar" draggable="true">
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
+	<div class="drag-handle-bar" draggable="true" oncontextmenu={onContextMenu}>
 		{#if onMoveLeft}
 			<button
 				class="move-btn move-left"

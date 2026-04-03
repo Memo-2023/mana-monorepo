@@ -474,7 +474,12 @@
 			<!-- Navigation Items -->
 			{#each items as item}
 				{#if item.onClick}
-					<button onclick={item.onClick} class="pill glass-pill" class:active={item.active}>
+					<button
+						onclick={item.onClick}
+						oncontextmenu={item.onContextMenu}
+						class="pill glass-pill"
+						class:active={item.active}
+					>
 						{#if item.icon}
 							{#if item.icon === 'mana'}
 								<svg class="pill-icon" viewBox="0 0 24 24" fill="currentColor">
@@ -492,7 +497,12 @@
 						<span class="pill-label">{item.label}</span>
 					</button>
 				{:else}
-					<a href={item.href} class="pill glass-pill" class:active={isActive(item.href)}>
+					<a
+						href={item.href}
+						oncontextmenu={item.onContextMenu}
+						class="pill glass-pill"
+						class:active={isActive(item.href)}
+					>
 						{#if item.icon}
 							{#if item.icon === 'mana'}
 								<svg class="pill-icon" viewBox="0 0 24 24" fill="currentColor">
