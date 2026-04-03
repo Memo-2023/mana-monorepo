@@ -345,6 +345,7 @@
 		transition:
 			color 0.15s,
 			background 0.15s;
+	}
 	.move-btn:hover {
 		color: #6b7280;
 		background: rgba(0, 0, 0, 0.06);
