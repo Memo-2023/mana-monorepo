@@ -2,24 +2,20 @@
 	import AppPage from '$lib/components/workbench/AppPage.svelte';
 	import AppPagePicker from '$lib/components/workbench/AppPagePicker.svelte';
 	import { PageCarousel, type CarouselPage } from '$lib/components/page-carousel';
-	import { getAppEntry } from '$lib/components/workbench/app-registry';
+	import { getApp, getAppByDragType } from '$lib/app-registry';
 	import { createAppSettingsStore } from '@manacore/shared-stores';
 	import { DragPreview } from '@manacore/shared-ui/dnd';
-	import { getEntityByDragType, ensureEntitiesRegistered } from '$lib/entities';
 	import type { DragType } from '@manacore/shared-ui/dnd';
 
-	ensureEntitiesRegistered();
-
 	function resolveEntity(type: string, data: Record<string, unknown>) {
-		const entity = getEntityByDragType(type as DragType);
-		if (!entity) return null;
-		const display = entity.getDisplayData(data);
-		const appEntry = getAppEntry(entity.appId);
+		const app = getAppByDragType(type as DragType);
+		if (!app?.getDisplayData) return null;
+		const display = app.getDisplayData(data);
 		return {
 			title: display.title,
 			subtitle: display.subtitle,
-			color: appEntry?.color,
-			appName: appEntry?.name,
+			color: app.color,
+			appName: app.name,
 		};
 	}
 
@@ -42,6 +38,8 @@
 			{ appId: 'calendar', minimized: false },
 			{ appId: 'contacts', minimized: false },
 			{ appId: 'habits', minimized: false },
+			{ appId: 'notes', minimized: false },
+			{ appId: 'finance', minimized: false },
 		],
 	});
 
@@ -58,6 +56,8 @@
 		{ appId: 'calendar', minimized: false },
 		{ appId: 'contacts', minimized: false },
 		{ appId: 'habits', minimized: false },
+		{ appId: 'notes', minimized: false },
+		{ appId: 'finance', minimized: false },
 	]);
 
 	// Load persisted state once on mount (not reactive — avoids loop with persistState)
@@ -82,7 +82,7 @@
 	// ── Map to CarouselPage[] ───────────────────────────────
 	let carouselPages = $derived<CarouselPage[]>(
 		openApps.map((a) => {
-			const entry = getAppEntry(a.appId);
+			const entry = getApp(a.appId);
 			return {
 				id: a.appId,
 				minimized: a.minimized,

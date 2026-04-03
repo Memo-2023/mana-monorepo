@@ -179,6 +179,15 @@ db.version(1).stores({
 	habits: 'id, order, isArchived, color',
 	habitLogs: 'id, habitId, timestamp, [habitId+timestamp]',
 
+	// ─── Notes (appId: 'notes') ───
+	notes: 'id, isPinned, isArchived, color, title, updatedAt',
+	noteTags: 'id, noteId, tagId, [noteId+tagId]',
+
+	// ─── Finance (appId: 'finance') ───
+	transactions: 'id, type, categoryId, date, amount, [date+type], [categoryId+date]',
+	financeCategories: 'id, type, order',
+	budgets: 'id, categoryId, month, [month+categoryId]',
+
 	// ─── Shared: Global Tags (appId: 'tags') ───
 	globalTags: 'id, name, groupId',
 	tagGroups: 'id',
@@ -228,6 +237,8 @@ export const SYNC_APP_MAP: Record<string, string[]> = {
 	memoro: ['memos', 'memories', 'memoTags', 'memoroSpaces', 'spaceMembers', 'memoSpaces'],
 	guides: ['guides', 'sections', 'steps', 'guideCollections', 'runs', 'guideTags'],
 	habits: ['habits', 'habitLogs'],
+	notes: ['notes', 'noteTags'],
+	finance: ['transactions', 'financeCategories', 'budgets'],
 	tags: ['globalTags', 'tagGroups'],
 	links: ['manaLinks'],
 };
@@ -294,6 +305,8 @@ export const TABLE_TO_SYNC_NAME: Record<string, string> = {
 	uloadFolders: 'folders',
 	// guides
 	guideCollections: 'collections',
+	// finance
+	financeCategories: 'categories',
 	// shared: tags
 	globalTags: 'tags',
 	tagGroups: 'tagGroups',

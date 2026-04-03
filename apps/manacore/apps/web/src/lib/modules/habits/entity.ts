@@ -5,6 +5,7 @@ import type { EntityDescriptor } from '$lib/entities/types';
 const habitsEntity: EntityDescriptor = {
 	appId: 'habits',
 	collection: 'habits',
+	paramKey: 'habitId',
 
 	getDisplayData: (item) => ({
 		title: `${item.emoji as string} ${item.title as string}`,

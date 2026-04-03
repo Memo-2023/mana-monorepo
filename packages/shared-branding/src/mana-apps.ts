@@ -599,6 +599,40 @@ export const MANA_APPS: ManaApp[] = [
 		requiredTier: 'founder',
 	},
 	{
+		id: 'notes',
+		name: 'Notes',
+		description: {
+			de: 'Schnelle Notizen',
+			en: 'Quick Notes',
+		},
+		longDescription: {
+			de: 'Leichtgewichtige Notizen mit Suche, Farbmarkierungen und Pin-Funktion. Kein Overhead, sofort losschreiben.',
+			en: 'Lightweight notes with search, color tags, and pinning. No overhead, start writing immediately.',
+		},
+		icon: APP_ICONS.notes,
+		color: '#f59e0b',
+		comingSoon: false,
+		status: 'development',
+		requiredTier: 'founder',
+	},
+	{
+		id: 'finance',
+		name: 'Finance',
+		description: {
+			de: 'Einnahmen & Ausgaben',
+			en: 'Income & Expenses',
+		},
+		longDescription: {
+			de: 'Einfaches Finanztracking mit Kategorien, Monatsbudgets und Übersicht deiner Einnahmen und Ausgaben.',
+			en: 'Simple finance tracking with categories, monthly budgets, and overview of your income and expenses.',
+		},
+		icon: APP_ICONS.finance,
+		color: '#22c55e',
+		comingSoon: false,
+		status: 'development',
+		requiredTier: 'founder',
+	},
+	{
 		id: 'arcade',
 		name: 'Arcade',
 		description: {
@@ -727,6 +761,8 @@ export const APP_URLS: Record<AppIconId, { dev: string; prod: string }> = {
 	memoro: { dev: 'http://localhost:5173/memoro', prod: 'https://mana.how/memoro' },
 	guides: { dev: 'http://localhost:5173/guides', prod: 'https://mana.how/guides' },
 	habits: { dev: 'http://localhost:5173/habits', prod: 'https://mana.how/habits' },
+	notes: { dev: 'http://localhost:5173/notes', prod: 'https://mana.how/notes' },
+	finance: { dev: 'http://localhost:5173/finance', prod: 'https://mana.how/finance' },
 	wisekeep: { dev: 'http://localhost:5173/wisekeep', prod: 'https://mana.how/wisekeep' },
 	news: { dev: 'http://localhost:5173/news', prod: 'https://mana.how/news' },
 	mail: { dev: 'http://localhost:5173/mail', prod: 'https://mana.how/mail' },

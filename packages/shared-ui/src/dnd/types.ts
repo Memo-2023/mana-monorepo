@@ -20,7 +20,9 @@ export type DragType =
 	| 'event'
 	| 'link'
 	| 'contact'
-	| 'habit';
+	| 'habit'
+	| 'note'
+	| 'transaction';
 
 export interface DragPayload<T = Record<string, unknown>> {
 	type: DragType;
