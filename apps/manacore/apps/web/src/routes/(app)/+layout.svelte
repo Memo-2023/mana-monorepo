@@ -66,17 +66,8 @@
 	let isCollapsed = $state(false);
 	let showShortcuts = $state(false);
 	let showOnboarding = $state(false);
-	let bottomStackHeight = $state(0);
-
-	// Expose bottom stack height as CSS custom property for components outside the stack
-	$effect(() => {
-		if (typeof document !== 'undefined') {
-			document.documentElement.style.setProperty(
-				'--bottom-chrome-height',
-				`${bottomStackHeight}px`
-			);
-		}
-	});
+	// Bottom chrome height: calculated from state, not measured (avoids reflow loop)
+	const bottomChromeHeight = $derived((isCollapsed ? 0 : 80) + (isTagStripVisible ? 44 : 0) + 72); // PillNav ~80px + TagStrip ~44px + QuickInputBar ~72px
 
 	// ── Theme ───────────────────────────────────────────────
 	let isDark = $derived(theme.isDark);
@@ -384,7 +375,7 @@
 
 	<div class="min-h-screen bg-background">
 		<!-- Bottom Stack: all fixed-bottom elements in one flex container -->
-		<div class="bottom-stack" bind:clientHeight={bottomStackHeight}>
+		<div class="bottom-stack" style:--bottom-chrome-height="{bottomChromeHeight}px">
 			<!-- QuickInputBar with inline nav toggle -->
 			<QuickInputBar
 				onSearch={inputBarAdapter.onSearch}
@@ -476,7 +467,7 @@
 		<DragPreview />
 
 		<!-- Main content -->
-		<main style="padding-bottom: calc(var(--bottom-chrome-height, 6rem) + 2rem)">
+		<main style="padding-bottom: {bottomChromeHeight + 32}px">
 			<div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
 				{@render children()}
 			</div>
@@ -564,7 +555,7 @@
 
 	.notification-float {
 		position: fixed;
-		bottom: var(--bottom-chrome-height, 8rem);
+		bottom: 10rem;
 		left: 50%;
 		transform: translateX(-50%);
 		z-index: 100;
