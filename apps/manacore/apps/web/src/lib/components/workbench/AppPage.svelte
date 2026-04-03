@@ -81,6 +81,31 @@
 	let overlay = $derived(overlayStack.length > 0 ? overlayStack[overlayStack.length - 1] : null);
 	let hasOverlay = $derived(overlayStack.length > 0);
 
+	// Close animation
+	let closing = $state(false);
+
+	function closeAllOverlays() {
+		closing = true;
+		setTimeout(() => {
+			overlayStack = [];
+			siblingIds = [];
+			siblingKey = '';
+			closing = false;
+		}, 150);
+	}
+
+	// Escape key closes overlay
+	function handleKeydown(e: KeyboardEvent) {
+		if (e.key === 'Escape' && hasOverlay) {
+			e.stopPropagation();
+			if (overlayStack.length > 1) {
+				goBack();
+			} else {
+				closeAllOverlays();
+			}
+		}
+	}
+
 	// Sibling item IDs for prev/next navigation (only for first overlay level)
 	let siblingIds = $state<string[]>([]);
 	let siblingKey = $state<string>('');
@@ -207,8 +232,7 @@
 	let overlayCardEl = $state<HTMLDivElement | null>(null);
 	let appPageEl = $state<HTMLDivElement | null>(null);
 
-	// Close overlay on click outside the overlay card BUT inside this AppPage
-	// (clicks in other AppPages should NOT close this overlay)
+	// Close overlay on click outside or Escape key
 	$effect(() => {
 		if (!overlay) return;
 		function handleGlobalClick(e: MouseEvent) {
@@ -219,17 +243,17 @@
 				appPageEl.contains(target) &&
 				!overlayCardEl.contains(target)
 			) {
-				overlayStack = [];
-				siblingIds = [];
-				siblingKey = '';
+				closeAllOverlays();
 			}
 		}
 		const timer = setTimeout(() => {
 			window.addEventListener('click', handleGlobalClick, true);
 		}, 0);
+		window.addEventListener('keydown', handleKeydown);
 		return () => {
 			clearTimeout(timer);
 			window.removeEventListener('click', handleGlobalClick, true);
+			window.removeEventListener('keydown', handleKeydown);
 		};
 	});
 </script>
@@ -273,9 +297,9 @@
 	</PageShell>
 
 	<!-- Overlay: Detail view floating above -->
-	{#if overlay?.component}
-		{@const OverlayComponent = overlay.component}
-		<div class="overlay-backdrop">
+	{#if overlay?.component || closing}
+		{@const OverlayComponent = overlay?.component}
+		<div class="overlay-backdrop" class:closing>
 			<div class="overlay-card" bind:this={overlayCardEl}>
 				<!-- Nav: prev arrow -->
 				{#if hasPrev}
@@ -291,32 +315,26 @@
 							<ArrowLeft size={12} />
 						</button>
 					{/if}
-					<span class="color-dot" style="background-color: {overlay.overlayColor ?? appColor}"
+					<span class="color-dot" style="background-color: {overlay?.overlayColor ?? appColor}"
 					></span>
-					<span class="overlay-title">{overlay.overlayTitle ?? appName}</span>
+					<span class="overlay-title">{overlay?.overlayTitle ?? appName}</span>
 					{#if siblingIds.length > 1 && overlayStack.length === 1}
 						<span class="nav-counter">
 							{currentSiblingIndex() + 1}/{siblingIds.length}
 						</span>
 					{/if}
-					<button
-						class="close-btn"
-						onclick={() => {
-							overlayStack = [];
-							siblingIds = [];
-							siblingKey = '';
-						}}
-						title="Schließen"
-					>
+					<button class="close-btn" onclick={closeAllOverlays} title="Schließen">
 						<X size={14} />
 					</button>
 				</div>
 
 				<!-- Body -->
 				<div class="overlay-body">
-					{#key overlay.params[siblingKey] ?? ''}
-						<OverlayComponent {navigate} {goBack} params={overlay.params} />
-					{/key}
+					{#if OverlayComponent && overlay}
+						{#key overlay.params[siblingKey] ?? ''}
+							<OverlayComponent {navigate} {goBack} params={overlay.params} />
+						{/key}
+					{/if}
 				</div>
 
 				<!-- Nav: next arrow -->
@@ -384,6 +402,10 @@
 		justify-content: center;
 		animation: fadeIn 0.15s ease-out;
 	}
+	.overlay-backdrop.closing {
+		animation: fadeOut 0.15s ease-in forwards;
+		pointer-events: none;
+	}
 
 	.overlay-card {
 		width: 100%;
@@ -396,6 +418,9 @@
 			0 0 0 1px rgba(0, 0, 0, 0.06);
 		overflow: hidden;
 		animation: scaleIn 0.2s ease-out;
+	}
+	.closing .overlay-card {
+		animation: scaleOut 0.15s ease-in forwards;
 	}
 	:global(.dark) .overlay-card {
 		background: #252220;
@@ -529,6 +554,24 @@
 		to {
 			opacity: 1;
 			transform: scale(1);
+		}
+	}
+	@keyframes fadeOut {
+		from {
+			opacity: 1;
+		}
+		to {
+			opacity: 0;
+		}
+	}
+	@keyframes scaleOut {
+		from {
+			opacity: 1;
+			transform: scale(1);
+		}
+		to {
+			opacity: 0;
+			transform: scale(0.96);
 		}
 	}
 </style>
