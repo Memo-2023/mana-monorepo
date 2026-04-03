@@ -68,7 +68,7 @@ cat > "$PLIST_PATH" << EOF
         <key>PRELOAD_MODELS</key>
         <string>false</string>
         <key>CORS_ORIGINS</key>
-        <string>https://mana.how,https://chat.mana.how,https://todo.mana.how</string>
+        <string>https://mana.how</string>
     </dict>
 
     <key>RunAtLoad</key>

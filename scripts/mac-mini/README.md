@@ -230,17 +230,14 @@ Once running, services are available at:
 
 | Service | URL |
 |---------|-----|
-| Dashboard | https://mana.how |
+| Unified App | https://mana.how |
 | Auth API | https://auth.mana.how |
-| Chat | https://chat.mana.how |
-| Chat API | https://chat-api.mana.how |
-| Todo | https://todo.mana.how |
-| Todo API | https://todo-api.mana.how |
-| Calendar | https://calendar.mana.how |
-| Calendar API | https://calendar-api.mana.how |
-| Clock | https://clock.mana.how |
-| Clock API | https://clock-api.mana.how |
-| STT API | http://localhost:3020 (internal only) |
+| API Gateway | https://api.mana.how |
+| Forgejo (Git) | https://git.mana.how |
+| Grafana | https://grafana.mana.how |
+| Status Page | https://status.mana.how |
+| GlitchTip | https://glitchtip.mana.how |
+| Umami | https://stats.mana.how |
 | SSH | ssh mac-mini (via cloudflared) |
 
 ## Native Services (non-Docker)

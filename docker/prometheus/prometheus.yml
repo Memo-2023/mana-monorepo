@@ -46,7 +46,7 @@ scrape_configs:
       - targets: ['redis-exporter:9121']
 
   # ============================================
-  # Application Backends (after /metrics added)
+  # Core Services (Hono/Bun + Go)
   # ============================================
 
   # Auth Service
@@ -56,84 +56,51 @@ scrape_configs:
     metrics_path: '/metrics'
     scrape_interval: 30s
 
-  # Chat Backend
-  - job_name: 'chat-backend'
+  # Credits Service
+  - job_name: 'mana-credits'
     static_configs:
-      - targets: ['chat-backend:3030']
+      - targets: ['mana-credits:3002']
     metrics_path: '/metrics'
     scrape_interval: 30s
 
-  # Todo Backend
-  - job_name: 'todo-backend'
+  # User Service
+  - job_name: 'mana-user'
     static_configs:
-      - targets: ['todo-backend:3031']
+      - targets: ['mana-user:3062']
     metrics_path: '/metrics'
     scrape_interval: 30s
 
-  # Calendar Backend
-  - job_name: 'calendar-backend'
+  # Subscriptions Service
+  - job_name: 'mana-subscriptions'
     static_configs:
-      - targets: ['calendar-backend:3032']
+      - targets: ['mana-subscriptions:3063']
     metrics_path: '/metrics'
     scrape_interval: 30s
 
-  # Clock Backend: REMOVED — migrated to local-first
-
-  # Contacts Backend
-  - job_name: 'contacts-backend'
+  # Analytics Service
+  - job_name: 'mana-analytics'
     static_configs:
-      - targets: ['contacts-backend:3033']
+      - targets: ['mana-analytics:3064']
     metrics_path: '/metrics'
     scrape_interval: 30s
 
-  # Storage Backend
-  - job_name: 'storage-backend'
+  # ULoad Server
+  - job_name: 'uload-server'
     static_configs:
-      - targets: ['storage-backend:3034']
+      - targets: ['mana-app-uload-server:3070']
     metrics_path: '/metrics'
     scrape_interval: 30s
 
-  # Presi Backend: REMOVED — replaced by Hono server
-
-  # Nutriphi Backend
-  - job_name: 'nutriphi-backend'
+  # Memoro Server
+  - job_name: 'memoro-server'
     static_configs:
-      - targets: ['nutriphi-backend:3038']
+      - targets: ['mana-app-memoro-server:3015']
     metrics_path: '/metrics'
     scrape_interval: 30s
 
-  # SkillTree Backend: REMOVED — migrated to local-first
-
-  # Photos Backend: REMOVED — migrated to local-first + direct mana-media
-
-  # CityCorners Backend: REMOVED — migrated to local-first
-
-  # Zitare Backend: REMOVED — migrated to local-first
-
-  # Mukke Backend
-  - job_name: 'mukke-backend'
-    static_configs:
-      - targets: ['mukke-backend:3037']
-    metrics_path: '/metrics'
-    scrape_interval: 30s
-
-  # Planta Backend
-  - job_name: 'planta-backend'
-    static_configs:
-      - targets: ['planta-backend:3039']
-    metrics_path: '/metrics'
-    scrape_interval: 30s
-
-  # Picture Backend
-  - job_name: 'picture-backend'
-    static_configs:
-      - targets: ['picture-backend:3035']
-    metrics_path: '/metrics'
-    scrape_interval: 30s
-
-  # ============================================
-  # Core Services
-  # ============================================
+  # NOTE: Individual app backends (chat, todo, calendar, contacts, storage,
+  # nutriphi, mukke, planta, picture) have been REMOVED — all migrated to
+  # local-first architecture. Only uload-server and memoro-server remain.
 
   # Mana LLM Gateway (Ollama + Google Fallback)
   - job_name: 'mana-llm'
@@ -255,32 +222,43 @@ scrape_configs:
   # Blackbox Exporter — HTTP Uptime Probes
   # ============================================
 
-  # Web Apps (SvelteKit frontends)
+  # Web Apps (Unified ManaCore app at mana.how + standalone games)
   - job_name: 'blackbox-web'
     metrics_path: /probe
     params:
       module: [http_2xx]
     static_configs:
       - targets:
+          # Unified ManaCore app (all modules as routes)
           - https://mana.how
-          - https://chat.mana.how
-          - https://todo.mana.how
-          - https://calendar.mana.how
-          - https://contacts.mana.how
-          - https://clock.mana.how
-          - https://photos.mana.how
-          - https://picture.mana.how
-          - https://storage.mana.how
-          - https://presi.mana.how
-          - https://nutriphi.mana.how
-          - https://planta.mana.how
-          - https://calc.mana.how
-          - https://zitare.mana.how
-          - https://cards.mana.how
-          - https://skilltree.mana.how
-          - https://mukke.mana.how
-          - https://citycorners.mana.how
-          - https://playground.mana.how
+          - https://mana.how/chat
+          - https://mana.how/todo
+          - https://mana.how/calendar
+          - https://mana.how/contacts
+          - https://mana.how/times
+          - https://mana.how/photos
+          - https://mana.how/picture
+          - https://mana.how/storage
+          - https://mana.how/presi
+          - https://mana.how/nutriphi
+          - https://mana.how/planta
+          - https://mana.how/calc
+          - https://mana.how/zitare
+          - https://mana.how/cards
+          - https://mana.how/skilltree
+          - https://mana.how/mukke
+          - https://mana.how/citycorners
+          - https://mana.how/memoro
+          - https://mana.how/moodlit
+          - https://mana.how/context
+          - https://mana.how/questions
+          - https://mana.how/uload
+          - https://mana.how/notes
+          - https://mana.how/habits
+          - https://mana.how/guides
+          - https://mana.how/inventar
+          - https://mana.how/playground
+          # Standalone games (separate containers)
           - https://whopxl.mana.how
           - https://arcade.mana.how
     relabel_configs:
@@ -291,7 +269,7 @@ scrape_configs:
       - target_label: __address__
         replacement: blackbox-exporter:9115
 
-  # API Health Endpoints
+  # API Health Endpoints (only services with running containers)
   - job_name: 'blackbox-api'
     metrics_path: /probe
     params:
@@ -300,14 +278,6 @@ scrape_configs:
       - targets:
           - https://auth.mana.how/health
           - https://api.mana.how/health
-          - https://chat-api.mana.how/health
-          - https://todo-api.mana.how/health
-          - https://calendar-api.mana.how/health
-          - https://contacts-api.mana.how/health
-          - https://storage-api.mana.how/health
-          - https://nutriphi-api.mana.how/health
-          - https://planta-api.mana.how/health
-          - https://picture-api.mana.how/health
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target

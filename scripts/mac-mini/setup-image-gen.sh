@@ -102,7 +102,7 @@ cat > "$PLIST_PATH" << EOF
         <key>GENERATION_TIMEOUT</key>
         <string>120</string>
         <key>CORS_ORIGINS</key>
-        <string>https://mana.how,https://picture.mana.how,https://chat.mana.how,http://localhost:5173</string>
+        <string>https://mana.how,http://localhost:5173</string>
     </dict>
 
     <key>RunAtLoad</key>

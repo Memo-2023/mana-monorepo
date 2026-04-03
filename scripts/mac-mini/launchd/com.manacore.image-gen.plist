@@ -34,7 +34,7 @@
         <key>GENERATION_TIMEOUT</key>
         <string>300</string>
         <key>CORS_ORIGINS</key>
-        <string>https://mana.how,https://picture.mana.how,https://chat.mana.how</string>
+        <string>https://mana.how</string>
     </dict>
     <key>RunAtLoad</key>
     <true/>

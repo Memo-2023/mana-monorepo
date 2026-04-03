@@ -75,7 +75,7 @@ cat > "$PLIST_PATH" << EOF
         <key>MAX_TEXT_LENGTH</key>
         <string>1000</string>
         <key>CORS_ORIGINS</key>
-        <string>https://mana.how,https://chat.mana.how,https://todo.mana.how,https://zitare.mana.how</string>
+        <string>https://mana.how</string>
     </dict>
 
     <key>RunAtLoad</key>

@@ -59,11 +59,22 @@ get_instances() {
 # Freundlicher Name aus URL
 friendly_name() {
   url="$1"
-  # Entferne https:// und .mana.how
+  # Entferne https://
   name="${url#https://}"
-  name="${name%.mana.how}"
+  # Route-basierte URLs: mana.how/chat → Chat
+  case "$name" in
+    mana.how/*)
+      name="${name#mana.how/}"
+      ;;
+    *)
+      # Subdomain-basiert: chat.mana.how → Chat
+      name="${name%.mana.how}"
+      ;;
+  esac
   # Entferne /health suffix
   name="${name%/health}"
+  # mana.how (ohne Route) → ManaCore
+  [ "$name" = "mana.how" ] && name="ManaCore"
   # Erster Buchstabe groß (POSIX-kompatibel)
   printf '%s' "$name" | awk '{print toupper(substr($0,1,1)) substr($0,2)}'
 }
@@ -170,21 +181,29 @@ fi
 # Gibt Tier-Badge-HTML für eine Blackbox-URL zurück (leer wenn kein Match)
 get_tier_badge() {
   url="$1"
-  # Subdomain extrahieren: https://todo.mana.how → todo, https://todo-api.mana.how/health → todo-api
-  subdomain="${url#https://}"
-  subdomain="${subdomain%.mana.how*}"
-  subdomain="${subdomain%/health}"
+  raw="${url#https://}"
+  # Route-basierte URLs: mana.how/chat → chat
+  case "$raw" in
+    mana.how/*)
+      appid="${raw#mana.how/}"
+      ;;
+    *)
+      # Subdomain-basiert: todo.mana.how → todo
+      appid="${raw%.mana.how*}"
+      appid="${appid%/health}"
+      ;;
+  esac
   # API-Subdomains skippen (z.B. todo-api, chat-api)
-  case "$subdomain" in *-api) return ;; esac
-  # Subdomain-Aliase (Sonderfälle + alte Subdomains → aktuelle App-IDs)
-  case "$subdomain" in
-    mana.how)  subdomain="manacore" ;;
-    manadeck)  subdomain="cards" ;;
-    inventar)  subdomain="inventory" ;;
+  case "$appid" in *-api) return ;; esac
+  # Aliase (Sonderfälle → aktuelle App-IDs)
+  case "$appid" in
+    mana.how)  appid="manacore" ;;
+    manadeck)  appid="cards" ;;
+    inventar)  appid="inventory" ;;
   esac
 
   echo "$TIER_APPS" | while IFS='|' read -r id name tier st; do
-    [ "$id" = "$subdomain" ] || continue
+    [ "$id" = "$appid" ] || continue
     printf '<span class="badge tier-%s">%s</span>' "$tier" "$tier"
     break
   done
@@ -461,6 +480,7 @@ echo "$SUCCESS_JSON" | jq \
           | rtrimstr("/health")
           | rtrimstr("/")
           | if . == "mana.how" then "manacore"
+            elif startswith("mana.how/") then ltrimstr("mana.how/")
             else rtrimstr(".mana.how")
             end
         ),

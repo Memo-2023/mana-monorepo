@@ -22,49 +22,10 @@ ingress:
   - hostname: git.mana.how
     service: http://localhost:3041
 
-  # ──────────────────────────────────────────────────────────
-  # Backend APIs (Hono/Bun compute servers — stay separate)
-  # ──────────────────────────────────────────────────────────
-  - hostname: chat-api.mana.how
-    service: http://localhost:3030
-  - hostname: todo-api.mana.how
-    service: http://localhost:3031
-  - hostname: calendar-api.mana.how
-    service: http://localhost:3032
-  - hostname: clock-api.mana.how
-    service: http://localhost:3033
-  - hostname: contacts-api.mana.how
-    service: http://localhost:3034
-  - hostname: zitare-api.mana.how
-    service: http://localhost:3007
-  - hostname: skilltree-api.mana.how
-    service: http://localhost:3038
-  - hostname: cards-api.mana.how
-    service: http://localhost:3009
-  - hostname: storage-api.mana.how
-    service: http://localhost:3035
-  - hostname: presi-api.mana.how
-    service: http://localhost:3036
-  - hostname: nutriphi-api.mana.how
-    service: http://localhost:3037
-  - hostname: photos-api.mana.how
-    service: http://localhost:3039
-  - hostname: mukke-api.mana.how
-    service: http://localhost:3010
-  - hostname: picture-api.mana.how
-    service: http://localhost:3040
-  - hostname: clock-bot.mana.how
-    service: http://localhost:4018
-
-  # NOTE: All web app subdomains (chat.mana.how, todo.mana.how, etc.)
-  # are removed — they now run as routes under the unified app at mana.how
-  # (e.g., mana.how/chat, mana.how/todo, etc.)
-
-  # AI Voice Services (local STT/TTS, läuft über mana-service-llm)
-  - hostname: stt-api.mana.how
-    service: http://localhost:3020
-  - hostname: tts-api.mana.how
-    service: http://localhost:3022
+  # NOTE: Individual app backends (chat, todo, calendar, contacts, storage,
+  # nutriphi, mukke, planta, picture, etc.) have been REMOVED — all migrated
+  # to local-first architecture. Web apps run as routes under mana.how.
+  # Only uload-server and memoro-server remain as app-specific backends.
 
   # Games
   - hostname: whopxl.mana.how
