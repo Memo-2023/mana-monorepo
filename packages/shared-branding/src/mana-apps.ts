@@ -242,7 +242,7 @@ export const MANA_APPS: ManaApp[] = [
 	},
 	{
 		id: 'contacts',
-		name: 'ManaContacts',
+		name: 'Kontakte',
 		description: {
 			de: 'Kontaktverwaltung',
 			en: 'Contact Management',

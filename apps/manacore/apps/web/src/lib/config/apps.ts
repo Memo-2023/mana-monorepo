@@ -343,7 +343,7 @@ export const appConfigs: Record<string, AppConfig> = {
 
 	contacts: {
 		name: 'contacts',
-		displayName: 'ManaContacts',
+		displayName: 'Kontakte',
 		tagline: 'Kontaktverwaltung',
 		description: 'Verwalte deine Kontakte übersichtlich mit Gruppen, Tags und Notizen.',
 		logoEmoji: '👥',
