@@ -57,6 +57,7 @@ COPY packages/shared-utils ./packages/shared-utils
 COPY packages/shared-vite-config ./packages/shared-vite-config
 COPY packages/eslint-config ./packages/eslint-config
 COPY packages/shared-hono ./packages/shared-hono
+COPY packages/shared-logger ./packages/shared-logger
 COPY packages/shared-storage ./packages/shared-storage
 COPY packages/shared-landing-ui ./packages/shared-landing-ui
 COPY packages/subscriptions ./packages/subscriptions
