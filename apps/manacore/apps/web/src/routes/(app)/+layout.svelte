@@ -31,7 +31,6 @@
 	import { linkLocalStore, linkMutations } from '@manacore/shared-links';
 	import { manacoreStore } from '$lib/data/local-store';
 	import { createUnifiedSync } from '$lib/data/sync';
-	import { migrateFromLegacyDbs } from '$lib/data/legacy-migration';
 	import { dashboardStore } from '$lib/stores/dashboard.svelte';
 	import {
 		THEME_DEFINITIONS,
@@ -244,7 +243,6 @@
 			tagLocalStore.initialize(),
 			linkLocalStore.initialize(),
 		]);
-		await migrateFromLegacyDbs();
 		initSharedUload();
 		await dashboardStore.initialize();
 
