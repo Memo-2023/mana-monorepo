@@ -553,7 +553,7 @@ services:
       start_period: 5s
 
   stalwart:
-    image: stalwartlabs/mail-server:latest
+    image: stalwartlabs/stalwart:latest
     container_name: mana-mail
     restart: always
     mem_limit: 256m
@@ -879,7 +879,8 @@ services:
       PORT: 5000
       PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
       PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
-      PUBLIC_SYNC_SERVER_URL: ws://mana-sync:3010
+      PUBLIC_SYNC_SERVER_URL: http://mana-sync:3010
+      PUBLIC_SYNC_SERVER_URL_CLIENT: https://sync.mana.how
       # Backend API URLs (server-side → container, client-side → public domain)
       PUBLIC_TODO_API_URL: http://todo-backend:3031
       PUBLIC_TODO_API_URL_CLIENT: https://todo-api.mana.how
@@ -941,7 +942,8 @@ services:
       PORT: 5210
       PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
       PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
-      PUBLIC_SYNC_SERVER_URL: ws://mana-sync:3010
+      PUBLIC_SYNC_SERVER_URL: http://mana-sync:3010
+      PUBLIC_SYNC_SERVER_URL_CLIENT: https://sync.mana.how
     ports:
       - "5210:5210"
     healthcheck:
@@ -967,7 +969,8 @@ services:
       PORT: 5028
       PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
       PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
-      PUBLIC_SYNC_SERVER_URL: ws://mana-sync:3010
+      PUBLIC_SYNC_SERVER_URL: http://mana-sync:3010
+      PUBLIC_SYNC_SERVER_URL_CLIENT: https://sync.mana.how
     ports:
       - "5028:5028"
     healthcheck:
