@@ -5,6 +5,23 @@
 	import { getAppEntry } from '$lib/components/workbench/app-registry';
 	import { createAppSettingsStore } from '@manacore/shared-stores';
 	import { DragPreview } from '@manacore/shared-ui/dnd';
+	import { getEntityByDragType, ensureEntitiesRegistered } from '$lib/entities';
+	import type { DragType } from '@manacore/shared-ui/dnd';
+
+	ensureEntitiesRegistered();
+
+	function resolveEntity(type: string, data: Record<string, unknown>) {
+		const entity = getEntityByDragType(type as DragType);
+		if (!entity) return null;
+		const display = entity.getDisplayData(data);
+		const appEntry = getAppEntry(entity.appId);
+		return {
+			title: display.title,
+			subtitle: display.subtitle,
+			color: appEntry?.color,
+			appName: appEntry?.name,
+		};
+	}
 
 	// ── Persisted workbench state ───────────────────────────
 	const DEFAULT_WIDTH = 480;
@@ -134,7 +151,7 @@
 	<title>Home - ManaCore</title>
 </svelte:head>
 
-<DragPreview />
+<DragPreview {resolveEntity} />
 
 <div class="workbench">
 	<PageCarousel

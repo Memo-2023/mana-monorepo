@@ -5,11 +5,23 @@
 	 * Place this once in your app layout:
 	 *   <DragPreview />
 	 *
-	 * It reads from dragState and renders a small pill showing what's being dragged.
+	 * It reads from dragState and renders a pill showing what's being dragged.
+	 * For tags: colored dot + tag name.
+	 * For entities: app color dot + item title + app name.
 	 */
 
 	import { dragState } from './drag-state.svelte';
 	import type { TagDragData } from './types';
+
+	interface Props {
+		/** Resolve display data for a dragged entity. */
+		resolveEntity?: (
+			type: string,
+			data: Record<string, unknown>
+		) => { title: string; subtitle?: string; color?: string; appName?: string } | null;
+	}
+
+	let { resolveEntity }: Props = $props();
 
 	const OFFSET_X = 12;
 	const OFFSET_Y = -20;
@@ -17,6 +29,15 @@
 	const tagData = $derived(
 		dragState.activeDrag?.type === 'tag' ? (dragState.activeDrag.data as TagDragData) : null
 	);
+
+	const entityData = $derived(() => {
+		if (!dragState.activeDrag || dragState.activeDrag.type === 'tag') return null;
+		if (!resolveEntity) return null;
+		return resolveEntity(
+			dragState.activeDrag.type,
+			dragState.activeDrag.data as Record<string, unknown>
+		);
+	});
 
 	const style = $derived(
 		dragState.isDragging
@@ -28,10 +49,17 @@
 {#if dragState.isDragging}
 	<div class="drag-preview" {style}>
 		{#if tagData}
-			<span class="tag-dot" style="background-color: {tagData.color}"></span>
-			<span class="tag-name">{tagData.name}</span>
+			<span class="preview-dot" style="background-color: {tagData.color}"></span>
+			<span class="preview-title">{tagData.name}</span>
+		{:else if entityData()}
+			{@const entity = entityData()}
+			<span class="preview-dot" style="background-color: {entity?.color ?? '#6B7280'}"></span>
+			<span class="preview-title">{entity?.title}</span>
+			{#if entity?.appName}
+				<span class="preview-app">{entity.appName}</span>
+			{/if}
 		{:else if dragState.activeDrag}
-			<span class="generic-label">{dragState.activeDrag.type}</span>
+			<span class="preview-title fallback">{dragState.activeDrag.type}</span>
 		{/if}
 	</div>
 {/if}
@@ -54,8 +82,8 @@
 			0 8px 24px -4px rgba(0, 0, 0, 0.15),
 			0 2px 6px -1px rgba(0, 0, 0, 0.1);
 		font-size: 0.8125rem;
-		font-weight: 600;
 		white-space: nowrap;
+		max-width: 280px;
 		transform: scale(1.05);
 		animation: drag-preview-in 150ms ease-out;
 	}
@@ -76,23 +104,33 @@
 		}
 	}
 
-	.tag-dot {
+	.preview-dot {
 		width: 8px;
 		height: 8px;
 		border-radius: 50%;
 		flex-shrink: 0;
 	}
 
-	.tag-name {
-		color: var(--color-foreground, #1a1a1a);
+	.preview-title {
+		font-weight: 600;
+		color: #1a1a1a;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	:global(.dark) .preview-title {
+		color: #e5e5e5;
 	}
 
-	:global(.dark) .tag-name {
-		color: var(--color-foreground, #e5e5e5);
-	}
-
-	.generic-label {
-		color: var(--color-muted-foreground, #6b7280);
+	.preview-title.fallback {
+		color: #6b7280;
 		text-transform: capitalize;
+		font-weight: 500;
+	}
+
+	.preview-app {
+		font-size: 0.6875rem;
+		font-weight: 400;
+		color: #9ca3af;
+		flex-shrink: 0;
 	}
 </style>
