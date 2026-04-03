@@ -27,7 +27,9 @@
 	const OFFSET_Y = -20;
 
 	const tagData = $derived(
-		dragState.activeDrag?.type === 'tag' ? (dragState.activeDrag.data as TagDragData) : null
+		dragState.activeDrag?.type === 'tag'
+			? (dragState.activeDrag.data as unknown as TagDragData)
+			: null
 	);
 
 	const entityData = $derived(() => {

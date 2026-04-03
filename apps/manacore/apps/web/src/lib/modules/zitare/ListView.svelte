@@ -12,7 +12,7 @@
 	import { Heart } from '@manacore/shared-icons';
 	import { dropTarget } from '@manacore/shared-ui/dnd';
 	import type { TagDragData } from '@manacore/shared-ui/dnd';
-	import { getTagsByIds } from '$lib/stores/tags.svelte';
+	import { useAllTags, getTagsByIds } from '$lib/stores/tags.svelte';
 	import type { ViewProps } from '$lib/app-registry';
 	import type { LocalFavorite } from './types';
 	import type { Quote } from '@zitare/content';
@@ -45,8 +45,10 @@
 
 	let currentFav = $derived(quote ? favorites.find((f) => f.quoteId === quote!.id) : undefined);
 	let isFav = $derived(!!currentFav);
+	const tagsQuery = useAllTags();
+	let allTags = $derived(tagsQuery.value ?? []);
 	let currentTagIds = $derived(currentFav?.tagIds ?? []);
-	let currentTags = $derived(getTagsByIds(currentTagIds));
+	let currentTags = $derived(getTagsByIds(allTags, currentTagIds));
 
 	function nextQuote() {
 		quotesStore.loadRandomQuote();
