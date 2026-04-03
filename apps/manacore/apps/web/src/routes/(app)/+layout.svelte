@@ -160,10 +160,7 @@
 		},
 		{ href: '/', label: $_('nav.home'), icon: 'home' },
 		{ href: '/spiral', label: $_('nav.spiral'), icon: 'spiral' },
-		{ href: '/observatory', label: $_('nav.observatory'), icon: 'eye' },
 		{ href: '/credits', label: $_('nav.credits'), icon: 'creditCard' },
-		{ href: '/gifts', label: $_('nav.gifts'), icon: 'gift' },
-		{ href: '/api-keys', label: $_('nav.api_keys'), icon: 'key' },
 		{ href: '/profile', label: $_('nav.profile'), icon: 'user' },
 		{ href: '/settings', label: $_('nav.settings'), icon: 'settings' },
 	]);
