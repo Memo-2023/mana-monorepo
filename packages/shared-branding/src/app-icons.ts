@@ -140,6 +140,9 @@ export const APP_ICONS = {
 	finance: svgToDataUrl(
 		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="fn" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#22c55e"/><stop offset="100%" style="stop-color:#16a34a"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#fn)"/><circle cx="50" cy="50" r="22" stroke="white" stroke-width="4" fill="none"/><path d="M50 34v32M42 42c0-4 3.5-6 8-6s8 2 8 6-3.5 5-8 5-8 2-8 6 3.5 6 8 6 8-2 8-6" stroke="white" stroke-width="3" stroke-linecap="round" fill="none"/></svg>`
 	),
+	places: svgToDataUrl(
+		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="plc" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#0ea5e9"/><stop offset="100%" style="stop-color:#0284c7"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#plc)"/><path d="M50 20c-14 0-25 11-25 25 0 20 25 38 25 38s25-18 25-38c0-14-11-25-25-25zm0 34a9 9 0 1 1 0-18 9 9 0 0 1 0 18z" fill="white"/></svg>`
+	),
 	arcade: svgToDataUrl(
 		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="ar" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#ef4444"/><stop offset="100%" style="stop-color:#dc2626"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#ar)"/><rect x="25" y="30" width="50" height="35" rx="5" stroke="white" stroke-width="4" fill="none"/><path d="M38 65v10M62 65v10M32 75h36" stroke="white" stroke-width="4" stroke-linecap="round"/><circle cx="60" cy="44" r="4" fill="white"/><circle cx="68" cy="50" r="3" fill="white" fill-opacity="0.7"/><path d="M35 44h10M40 39v10" stroke="white" stroke-width="3" stroke-linecap="round"/></svg>`
 	),

@@ -633,6 +633,23 @@ export const MANA_APPS: ManaApp[] = [
 		requiredTier: 'founder',
 	},
 	{
+		id: 'places',
+		name: 'Places',
+		description: {
+			de: 'Standort-Tracking',
+			en: 'Location Tracking',
+		},
+		longDescription: {
+			de: 'Tracke deinen Standort, erstelle Orte und sieh deine Bewegungshistorie.',
+			en: 'Track your location, create places, and view your movement history.',
+		},
+		icon: APP_ICONS.places,
+		color: '#0ea5e9',
+		comingSoon: false,
+		status: 'development',
+		requiredTier: 'founder',
+	},
+	{
 		id: 'arcade',
 		name: 'Arcade',
 		description: {
@@ -763,6 +780,7 @@ export const APP_URLS: Record<AppIconId, { dev: string; prod: string }> = {
 	habits: { dev: 'http://localhost:5173/habits', prod: 'https://mana.how/habits' },
 	notes: { dev: 'http://localhost:5173/notes', prod: 'https://mana.how/notes' },
 	finance: { dev: 'http://localhost:5173/finance', prod: 'https://mana.how/finance' },
+	places: { dev: 'http://localhost:5173/places', prod: 'https://mana.how/places' },
 	wisekeep: { dev: 'http://localhost:5173/wisekeep', prod: 'https://mana.how/wisekeep' },
 	news: { dev: 'http://localhost:5173/news', prod: 'https://mana.how/news' },
 	mail: { dev: 'http://localhost:5173/mail', prod: 'https://mana.how/mail' },

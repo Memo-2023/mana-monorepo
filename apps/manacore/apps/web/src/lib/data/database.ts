@@ -188,6 +188,11 @@ db.version(1).stores({
 	financeCategories: 'id, type, order',
 	budgets: 'id, categoryId, month, [month+categoryId]',
 
+	// ─── Places (appId: 'places') ───
+	places: 'id, name, category, isFavorite, isArchived, latitude, longitude',
+	locationLogs: 'id, placeId, timestamp, [placeId+timestamp]',
+	placeTags: 'id, placeId, tagId, [placeId+tagId]',
+
 	// ─── Shared: Global Tags (appId: 'tags') ───
 	globalTags: 'id, name, groupId',
 	tagGroups: 'id',
@@ -239,6 +244,7 @@ export const SYNC_APP_MAP: Record<string, string[]> = {
 	habits: ['habits', 'habitLogs'],
 	notes: ['notes', 'noteTags'],
 	finance: ['transactions', 'financeCategories', 'budgets'],
+	places: ['places', 'locationLogs', 'placeTags'],
 	tags: ['globalTags', 'tagGroups'],
 	links: ['manaLinks'],
 };
