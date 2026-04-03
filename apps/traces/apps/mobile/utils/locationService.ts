@@ -81,8 +81,6 @@ export interface LocationData {
 		importedAt: number; // Wann importiert
 		exifData?: any; // EXIF-Daten
 	};
-	// Legacy support - will be removed in future versions
-	timestamp?: number;
 }
 
 const LOCATION_HISTORY_KEY = 'location_history';
@@ -176,8 +174,6 @@ export const getCurrentLocation = async (): Promise<LocationData | null> => {
 				verticalAccuracy: location.coords.altitudeAccuracy ?? undefined,
 				isSignificantLocation: true,
 			},
-			// Legacy support
-			timestamp: location.timestamp,
 		};
 	} catch (error) {
 		console.error('Error getting location:', error);
@@ -340,7 +336,6 @@ export const startLocationTracking = async (
 					verticalAccuracy: currentPos.coords.altitudeAccuracy ?? undefined,
 					isSignificantLocation: true,
 				},
-				timestamp: currentPos.timestamp,
 			};
 
 			// UI sofort aktualisieren
@@ -406,7 +401,6 @@ export const startLocationTracking = async (
 							verticalAccuracy: location.coords.altitudeAccuracy ?? undefined,
 							isSignificantLocation: true,
 						},
-						timestamp: location.timestamp,
 					};
 
 					// UI immer aktualisieren
@@ -596,7 +590,7 @@ export const getAddressFromCoordinates = async (latitude: number, longitude: num
 // Save location to history
 export const saveLocationToHistory = async (location: LocationData): Promise<void> => {
 	try {
-		const timestamp = location.timestamps?.recordedMs || location.timestamp || Date.now();
+		const timestamp = location.timestamps?.recordedMs || Date.now();
 		logInfo('Speichere Standort in Verlauf', {
 			coords: { lat: location.latitude, lng: location.longitude },
 			timestamp: new Date(timestamp).toISOString(),
@@ -631,103 +625,12 @@ export const saveLocationToHistory = async (location: LocationData): Promise<voi
 	}
 };
 
-// Migration function for legacy LocationData
-const migrateLegacyLocationData = (data: any): LocationData => {
-	// If already migrated, return as is
-	if (data.id && data.timestamps) {
-		return data as LocationData;
-	}
-
-	// Legacy data migration
-	const timestamp = data.timestamp || Date.now();
-	const migrated: LocationData = {
-		id: generateUUID(),
-		latitude: data.latitude,
-		longitude: data.longitude,
-		timestamps: {
-			recorded: new Date(timestamp).toISOString(),
-			recordedMs: timestamp,
-		},
-		accuracy: data.accuracy,
-		altitude: data.altitude,
-		speed: data.speed,
-		metadata: {
-			source: 'foreground', // Default assumption for legacy data
-			batteryLevel: undefined,
-			connectionType: 'cellular',
-			deviceMotion: getDeviceMotion(data.speed),
-		},
-		quality: {
-			accuracyLevel: AccuracyLevel.Balanced, // Default assumption
-			horizontalAccuracy: data.accuracy || 0,
-			verticalAccuracy: undefined,
-			isSignificantLocation: true,
-		},
-		// Legacy support
-		timestamp,
-	};
-
-	// Migrate address if exists
-	if (data.address) {
-		if (data.address.components) {
-			// Already new format
-			migrated.address = data.address;
-		} else {
-			// Legacy address format - convert to new format
-			const components = {
-				street: data.address.street,
-				houseNumber: data.address.streetNumber,
-				city: data.address.city,
-				postalCode: data.address.postalCode,
-				country: data.address.country,
-				countryCode: undefined,
-			};
-
-			// Build formatted address
-			const addressParts = [
-				components.street && components.houseNumber
-					? `${components.street} ${components.houseNumber}`
-					: components.street,
-				components.postalCode && components.city
-					? `${components.postalCode} ${components.city}`
-					: components.city,
-				components.country,
-			].filter(Boolean);
-
-			migrated.address = {
-				formatted: addressParts.join(', '),
-				components,
-				confidence: 0.8, // Lower confidence for migrated data
-			};
-		}
-	}
-
-	return migrated;
-};
-
-// Get location history with automatic migration
+// Get location history
 export const getLocationHistory = async (): Promise<LocationData[]> => {
 	try {
 		const historyString = await AsyncStorage.getItem(LOCATION_HISTORY_KEY);
 		if (!historyString) return [];
-
-		const rawHistory = JSON.parse(historyString);
-
-		// Check if migration is needed
-		const needsMigration = rawHistory.some((item: any) => !item.id || !item.timestamps);
-
-		if (needsMigration) {
-			logInfo('Migriere Standortdaten zu neuem Format', { count: rawHistory.length });
-			const migratedHistory = rawHistory.map(migrateLegacyLocationData);
-
-			// Save migrated data back
-			await AsyncStorage.setItem(LOCATION_HISTORY_KEY, JSON.stringify(migratedHistory));
-			logInfo('Standortdaten-Migration abgeschlossen');
-
-			return migratedHistory;
-		}
-
-		return rawHistory as LocationData[];
+		return JSON.parse(historyString) as LocationData[];
 	} catch (error) {
 		logError('Fehler beim Laden des Standortverlaufs', error);
 		return [];

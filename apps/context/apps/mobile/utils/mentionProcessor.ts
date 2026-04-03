@@ -11,9 +11,6 @@ export const MENTION_REGEX = /\[\[(.*?)\]\]/g;
 // Standard Markdown-Link-Format: [Titel](ID)
 export const MARKDOWN_LINK_REGEX = /\[(.*?)\]\((.*?)\)/g;
 
-// Legacy format for backward compatibility
-export const LEGACY_MENTION_REGEX = /@\[(.*?)\]\((.*?)\)/g;
-
 /**
  * Extract all document mentions from markdown content
  */
@@ -32,15 +29,6 @@ export const extractMentions = (content: string): Array<{ title: string; id?: st
 	// Standard Markdown-Link-Format: [Titel](ID)
 	const markdownRegex = new RegExp(MARKDOWN_LINK_REGEX);
 	while ((match = markdownRegex.exec(content)) !== null) {
-		mentions.push({
-			title: match[1],
-			id: match[2],
-		});
-	}
-
-	// Legacy Format: @[Dokumenttitel](dokumentId)
-	const legacyRegex = new RegExp(LEGACY_MENTION_REGEX);
-	while ((match = legacyRegex.exec(content)) !== null) {
 		mentions.push({
 			title: match[1],
 			id: match[2],
@@ -75,12 +63,6 @@ export const processMentionsInMarkdown = (content: string): string => {
 		return match;
 	});
 
-	// Verarbeite das Legacy-Format @[Dokumenttitel](dokumentId) für Abwärtskompatibilität
-	processedContent = processedContent.replace(LEGACY_MENTION_REGEX, (match, title, id) => {
-		// Verwende einen speziellen Markdown-Link mit einem data-Attribut
-		return `<mention documentId="${id}" documentTitle="${title}">${title}</mention>`;
-	});
-
 	return processedContent;
 };
 
@@ -110,5 +92,5 @@ export const cleanMentionTags = (content: string): string => {
  * Check if text contains a potential mention
  */
 export const containsPotentialMention = (text: string): boolean => {
-	return text.includes('[[') || text.includes('@') || (text.includes('[') && text.includes(']('));
+	return text.includes('[[') || (text.includes('[') && text.includes(']('));
 };
