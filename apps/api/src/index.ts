@@ -32,7 +32,7 @@ import { newsRoutes } from './modules/news/routes';
 import { tracesRoutes } from './modules/traces/routes';
 import { presiRoutes } from './modules/presi/routes';
 
-const PORT = parseInt(process.env.PORT || '3050', 10);
+const PORT = parseInt(process.env.PORT || '3060', 10);
 const CORS_ORIGINS = (process.env.CORS_ORIGINS || 'http://localhost:5173').split(',');
 
 const app = new Hono();
