@@ -135,6 +135,24 @@
 		persistState();
 	}
 
+	function handleMoveLeft(id: string) {
+		const idx = openApps.findIndex((a) => a.appId === id);
+		if (idx <= 0) return;
+		const apps = [...openApps];
+		[apps[idx - 1], apps[idx]] = [apps[idx], apps[idx - 1]];
+		openApps = apps;
+		persistState();
+	}
+
+	function handleMoveRight(id: string) {
+		const idx = openApps.findIndex((a) => a.appId === id);
+		if (idx === -1 || idx >= openApps.length - 1) return;
+		const apps = [...openApps];
+		[apps[idx], apps[idx + 1]] = [apps[idx + 1], apps[idx]];
+		openApps = apps;
+		persistState();
+	}
+
 	function handleReorder(fromId: string, toId: string) {
 		const fromIdx = openApps.findIndex((a) => a.appId === fromId);
 		const toIdx = openApps.findIndex((a) => a.appId === toId);
@@ -166,6 +184,7 @@
 		addLabel="App hinzufügen"
 	>
 		{#snippet page(p)}
+			{@const idx = openApps.findIndex((a) => a.appId === p.id)}
 			<AppPage
 				appId={p.id}
 				widthPx={p.widthPx}
@@ -175,6 +194,8 @@
 				onMinimize={() => handleMinimizeApp(p.id)}
 				onMaximize={() => handleMaximizeApp(p.id)}
 				onResize={(w, h) => handleResize(p.id, w, h)}
+				onMoveLeft={idx > 0 ? () => handleMoveLeft(p.id) : undefined}
+				onMoveRight={idx < openApps.length - 1 ? () => handleMoveRight(p.id) : undefined}
 			/>
 		{/snippet}
 		{#snippet picker()}

@@ -29,6 +29,8 @@
 		onMinimize?: () => void;
 		onMaximize?: () => void;
 		onResize?: (widthPx: number, heightPx?: number) => void;
+		onMoveLeft?: () => void;
+		onMoveRight?: () => void;
 	}
 
 	let {
@@ -40,6 +42,8 @@
 		onMinimize,
 		onMaximize,
 		onResize,
+		onMoveLeft,
+		onMoveRight,
 	}: Props = $props();
 
 	let appEntry = $derived(getAppEntry(appId));
@@ -203,6 +207,8 @@
 		{onMinimize}
 		{onMaximize}
 		{onResize}
+		{onMoveLeft}
+		{onMoveRight}
 	>
 		{#if loadError}
 			<div class="load-state">

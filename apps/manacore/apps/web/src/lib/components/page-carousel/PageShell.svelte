@@ -5,7 +5,15 @@
 -->
 <script lang="ts">
 	import { _ } from 'svelte-i18n';
-	import { X, Minus, DotsSixVertical, CornersOut, CornersIn } from '@manacore/shared-icons';
+	import {
+		X,
+		Minus,
+		DotsSixVertical,
+		CornersOut,
+		CornersIn,
+		CaretLeft,
+		CaretRight,
+	} from '@manacore/shared-icons';
 	import type { Snippet, Component } from 'svelte';
 
 	interface Props {
@@ -16,6 +24,8 @@
 		onMinimize?: () => void;
 		onMaximize?: () => void;
 		onResize?: (widthPx: number, heightPx?: number) => void;
+		onMoveLeft?: () => void;
+		onMoveRight?: () => void;
 		// Default header
 		title?: string;
 		color?: string;
@@ -35,6 +45,8 @@
 		onMinimize,
 		onMaximize,
 		onResize,
+		onMoveLeft,
+		onMoveRight,
 		title = '',
 		color = '#6B7280',
 		icon: IconComponent,
@@ -114,7 +126,33 @@
 		: ''}"
 >
 	<div class="drag-handle-bar" draggable="true">
+		{#if onMoveLeft}
+			<button
+				class="move-btn move-left"
+				onclick={(e) => {
+					e.stopPropagation();
+					onMoveLeft();
+				}}
+				draggable="false"
+				title="Nach links"
+			>
+				<CaretLeft size={12} />
+			</button>
+		{/if}
 		<span class="drag-handle-icon"><DotsSixVertical size={14} /></span>
+		{#if onMoveRight}
+			<button
+				class="move-btn move-right"
+				onclick={(e) => {
+					e.stopPropagation();
+					onMoveRight();
+				}}
+				draggable="false"
+				title="Nach rechts"
+			>
+				<CaretRight size={12} />
+			</button>
+		{/if}
 	</div>
 
 	<!-- Header -->
@@ -243,6 +281,7 @@
 	}
 
 	.drag-handle-bar {
+		position: relative;
 		display: flex;
 		justify-content: center;
 		align-items: center;
@@ -267,6 +306,46 @@
 		background: rgba(255, 255, 255, 0.05);
 	}
 	:global(.dark) .drag-handle-bar:active {
+		background: rgba(255, 255, 255, 0.08);
+	}
+	.move-btn {
+		position: absolute;
+		top: 50%;
+		transform: translateY(-50%);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 18px;
+		height: 18px;
+		border: none;
+		border-radius: 50%;
+		background: transparent;
+		color: #d1d5db;
+		cursor: pointer;
+		opacity: 0;
+		transition:
+			opacity 0.15s,
+			color 0.15s,
+			background 0.15s;
+	}
+	.drag-handle-bar:hover .move-btn {
+		opacity: 1;
+	}
+	.move-btn:hover {
+		color: #6b7280;
+		background: rgba(0, 0, 0, 0.06);
+	}
+	.move-left {
+		left: 0.5rem;
+	}
+	.move-right {
+		right: 0.5rem;
+	}
+	:global(.dark) .move-btn {
+		color: #3f3b38;
+	}
+	:global(.dark) .move-btn:hover {
+		color: #9ca3af;
 		background: rgba(255, 255, 255, 0.08);
 	}
 	.drag-handle-icon {
