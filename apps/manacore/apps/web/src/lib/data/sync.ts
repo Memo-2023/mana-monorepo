@@ -78,7 +78,7 @@ export function createUnifiedSync(serverUrl: string, getToken: () => Promise<str
 	// ─── Lifecycle ──────────────────────────────────────────
 
 	function startAll(): void {
-		// Register all channels but only start eager ones immediately
+		// Register all channels
 		for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {
 			const channel: SyncChannelState = {
 				appId,
@@ -90,9 +90,11 @@ export function createUnifiedSync(serverUrl: string, getToken: () => Promise<str
 			channels.set(appId, channel);
 
 			if (EAGER_APPS.has(appId)) {
-				connectSSE(appId);
+				// Eager apps: use HTTP polling (SSE would exhaust browser's 6-connection limit)
+				pull(appId).catch(() => {});
+				channel.pullTimer = setInterval(() => pull(appId).catch(() => {}), PULL_INTERVAL);
 			}
-			// Lazy apps: no SSE until ensureAppSynced() is called
+			// Lazy apps: no pull until ensureAppSynced() is called
 		}
 
 		// Listen for online/offline
@@ -495,10 +497,11 @@ export function createUnifiedSync(serverUrl: string, getToken: () => Promise<str
 	function handleOnline() {
 		online = true;
 		setStatus('idle');
-		// Reconnect SSE streams for active channels
-		for (const [appId, channel] of channels) {
-			if (EAGER_APPS.has(appId) || channel.pullTimer) {
-				connectSSE(appId);
+		// Resume sync for active channels
+		for (const appId of channels.keys()) {
+			const channel = channels.get(appId);
+			if (channel?.pullTimer || EAGER_APPS.has(appId)) {
+				pull(appId).catch(() => {});
 			}
 		}
 	}
@@ -506,11 +509,6 @@ export function createUnifiedSync(serverUrl: string, getToken: () => Promise<str
 	function handleOffline() {
 		online = false;
 		setStatus('offline');
-		// Abort all SSE connections
-		for (const [, controller] of sseAbortControllers) {
-			controller.abort();
-		}
-		sseAbortControllers.clear();
 	}
 
 	function setStatus(s: SyncStatus) {
@@ -522,15 +520,14 @@ export function createUnifiedSync(serverUrl: string, getToken: () => Promise<str
 
 	/**
 	 * Ensure a lazy app's collections are synced (called on module navigation).
-	 * Connects SSE stream if not already active.
+	 * If already synced (has pullTimer), this is a no-op.
 	 */
 	function ensureAppSynced(appId: string): void {
 		const channel = channels.get(appId);
-		if (!channel) return;
-		// Already connected via SSE
-		if (sseAbortControllers.has(appId)) return;
+		if (!channel || channel.pullTimer) return;
 
-		connectSSE(appId);
+		pull(appId).catch(() => {});
+		channel.pullTimer = setInterval(() => pull(appId).catch(() => {}), PULL_INTERVAL);
 	}
 
 	return {
