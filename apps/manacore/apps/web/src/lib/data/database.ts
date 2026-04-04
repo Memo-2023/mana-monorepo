@@ -412,9 +412,14 @@ for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {
 			});
 			trackFirstContent(appId);
 			fireTrigger(appId, tableName, 'insert', { ...obj });
-			checkInlineSuggestion(appId, tableName, { ...obj }).then((sug) => {
-				if (sug) window.dispatchEvent(new CustomEvent('mana:automation-suggest', { detail: sug }));
-			});
+			// Defer cross-table reads outside the Dexie hook's transaction scope
+			const objCopy = { ...obj };
+			setTimeout(() => {
+				checkInlineSuggestion(appId, tableName, objCopy).then((sug) => {
+					if (sug)
+						window.dispatchEvent(new CustomEvent('mana:automation-suggest', { detail: sug }));
+				});
+			}, 0);
 		});
 
 		table.hook('updating', function (modifications, primKey) {

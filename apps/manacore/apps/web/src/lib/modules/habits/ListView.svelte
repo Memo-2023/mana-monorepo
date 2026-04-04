@@ -23,22 +23,8 @@
 
 	let habits$ = useAllHabits();
 	let logs$ = useAllHabitLogs();
-	let habits = $state<Habit[]>([]);
-	let logs = $state<HabitLog[]>([]);
-
-	$effect(() => {
-		const sub = habits$.subscribe((val) => {
-			habits = val ?? [];
-		});
-		return () => sub.unsubscribe();
-	});
-
-	$effect(() => {
-		const sub = logs$.subscribe((val) => {
-			logs = val ?? [];
-		});
-		return () => sub.unsubscribe();
-	});
+	let habits = $derived(habits$.value);
+	let logs = $derived(logs$.value);
 
 	let activeHabits = $derived(getActiveHabits(habits));
 	let todayCounts = $derived(getTodayCounts(habits, logs));

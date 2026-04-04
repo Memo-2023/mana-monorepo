@@ -4,7 +4,7 @@
   Clicking an event opens the detail view.
 -->
 <script lang="ts">
-	import { liveQuery } from 'dexie';
+	import { useLiveQueryWithDefault } from '@manacore/local-store/svelte';
 	import { db } from '$lib/data/database';
 	import type { LocalEvent } from './types';
 	import { eventsStore } from './stores/events.svelte';
@@ -29,7 +29,13 @@
 		}
 	}
 
-	let events = $state<LocalEvent[]>([]);
+	let events$ = useLiveQueryWithDefault(async () => {
+		return db
+			.table<LocalEvent>('events')
+			.toArray()
+			.then((all) => all.filter((e) => !e.deletedAt));
+	}, [] as LocalEvent[]);
+	let events = $derived(events$.value);
 
 	const now = new Date();
 	const todayStr = now.toISOString().split('T')[0];
@@ -51,18 +57,6 @@
 			.filter((e) => e.startDate.startsWith(todayStr))
 			.sort((a, b) => a.startDate.localeCompare(b.startDate))
 	);
-
-	$effect(() => {
-		const sub = liveQuery(async () => {
-			return db
-				.table<LocalEvent>('events')
-				.toArray()
-				.then((all) => all.filter((e) => !e.deletedAt));
-		}).subscribe((val) => {
-			events = val ?? [];
-		});
-		return () => sub.unsubscribe();
-	});
 
 	function formatTime(iso: string): string {
 		return new Date(iso).toLocaleTimeString('de', { hour: '2-digit', minute: '2-digit' });

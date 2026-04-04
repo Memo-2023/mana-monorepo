@@ -4,7 +4,7 @@
   Clicking a contact opens the detail view.
 -->
 <script lang="ts">
-	import { liveQuery } from 'dexie';
+	import { useLiveQueryWithDefault } from '@manacore/local-store/svelte';
 	import { db } from '$lib/data/database';
 	import type { LocalContact } from './types';
 	import { contactsStore } from './stores/contacts.svelte';
@@ -29,20 +29,14 @@
 		}
 	}
 
-	let contacts = $state<LocalContact[]>([]);
+	let contacts$ = useLiveQueryWithDefault(async () => {
+		return db
+			.table<LocalContact>('contacts')
+			.toArray()
+			.then((all) => all.filter((c) => !c.deletedAt && !c.isArchived));
+	}, [] as LocalContact[]);
+	let contacts = $derived(contacts$.value);
 	let search = $state('');
-
-	$effect(() => {
-		const sub = liveQuery(async () => {
-			return db
-				.table<LocalContact>('contacts')
-				.toArray()
-				.then((all) => all.filter((c) => !c.deletedAt && !c.isArchived));
-		}).subscribe((val) => {
-			contacts = val ?? [];
-		});
-		return () => sub.unsubscribe();
-	});
 
 	const filtered = $derived(() => {
 		if (!search.trim()) return contacts;

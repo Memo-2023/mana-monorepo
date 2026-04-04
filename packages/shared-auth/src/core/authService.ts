@@ -1110,12 +1110,15 @@ export function createAuthService(config: AuthServiceConfig): AuthServiceInterfa
 				}
 
 				// Try to get session from cookie (credentials: 'include' sends cookies)
+				// Use AbortController with timeout so the app doesn't hang when auth is unreachable
+				const ssoAbort = AbortSignal.timeout(5000);
 				const response = await fetch(`${baseUrl}${endpoints.getSession}`, {
 					method: 'GET',
 					credentials: 'include', // Send cookies cross-origin
 					headers: {
 						'Content-Type': 'application/json',
 					},
+					signal: ssoAbort,
 				});
 
 				if (!response.ok) {
@@ -1132,12 +1135,14 @@ export function createAuthService(config: AuthServiceConfig): AuthServiceInterfa
 
 				// Now get tokens by signing in with the session
 				// We need to exchange the session for JWT tokens
+				const tokenAbort = AbortSignal.timeout(5000);
 				const tokenResponse = await fetch(`${baseUrl}/api/v1/auth/session-to-token`, {
 					method: 'POST',
 					credentials: 'include',
 					headers: {
 						'Content-Type': 'application/json',
 					},
+					signal: tokenAbort,
 				});
 
 				if (!tokenResponse.ok) {

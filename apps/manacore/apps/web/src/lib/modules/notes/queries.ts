@@ -2,7 +2,7 @@
  * Reactive Queries & Pure Helpers for Notes module.
  */
 
-import { liveQuery } from 'dexie';
+import { useLiveQueryWithDefault } from '@manacore/local-store/svelte';
 import { db } from '$lib/data/database';
 import type { LocalNote, Note } from './types';
 
@@ -24,7 +24,7 @@ export function toNote(local: LocalNote): Note {
 // ─── Live Queries ──────────────────────────────────────────
 
 export function useAllNotes() {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const locals = await db.table<LocalNote>('notes').toArray();
 		return locals
 			.filter((n) => !n.deletedAt && !n.isArchived)
@@ -33,7 +33,7 @@ export function useAllNotes() {
 				if (a.isPinned !== b.isPinned) return a.isPinned ? -1 : 1;
 				return b.updatedAt.localeCompare(a.updatedAt);
 			});
-	});
+	}, [] as Note[]);
 }
 
 // ─── Pure Helpers ──────────────────────────────────────────

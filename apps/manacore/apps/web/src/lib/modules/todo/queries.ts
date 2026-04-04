@@ -2,7 +2,7 @@
  * Reactive queries & pure helpers for Todo — uses Dexie liveQuery on the unified DB.
  */
 
-import { liveQuery } from 'dexie';
+import { useLiveQueryWithDefault } from '@manacore/local-store/svelte';
 import { db } from '$lib/data/database';
 import type {
 	LocalTask,
@@ -43,34 +43,34 @@ export function toTask(local: LocalTask): Task {
 // ─── Live Queries ──────────────────────────────────────────
 
 export function useAllTasks() {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const locals = await db.table<LocalTask>('tasks').orderBy('order').toArray();
 		return locals.filter((t) => !t.deletedAt).map(toTask);
-	});
+	}, [] as Task[]);
 }
 
 // Labels/Tags: use shared global tags from @manacore/shared-stores
 export { useAllTags as useAllLabels } from '@manacore/shared-stores';
 
 export function useAllBoardViews() {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const locals = await db.table<LocalBoardView>('boardViews').orderBy('order').toArray();
 		return locals.filter((v) => !v.deletedAt);
-	});
+	}, [] as LocalBoardView[]);
 }
 
 export function useAllReminders() {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const locals = await db.table<LocalReminder>('reminders').toArray();
 		return locals.filter((r) => !r.deletedAt);
-	});
+	}, [] as LocalReminder[]);
 }
 
 export function useAllProjects() {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const locals = await db.table<LocalTodoProject>('todoProjects').orderBy('order').toArray();
 		return locals.filter((p) => !p.deletedAt);
-	});
+	}, [] as LocalTodoProject[]);
 }
 
 // ─── Pure Filter Functions ────────────────────────────────

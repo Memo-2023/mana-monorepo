@@ -1,10 +1,10 @@
 /**
  * Reactive Queries & Pure Helpers for Habits module.
  *
- * Uses Dexie liveQuery on the unified database.
+ * Uses useLiveQueryWithDefault on the unified database.
  */
 
-import { liveQuery } from 'dexie';
+import { useLiveQueryWithDefault } from '@manacore/local-store/svelte';
 import { db } from '$lib/data/database';
 import type { LocalHabit, LocalHabitLog, Habit, HabitLog } from './types';
 import { EMOJI_TO_ICON_MAP } from './types';
@@ -38,21 +38,21 @@ export function toHabitLog(local: LocalHabitLog): HabitLog {
 // ─── Live Queries ──────────────────────────────────────────
 
 export function useAllHabits() {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const locals = await db.table<LocalHabit>('habits').orderBy('order').toArray();
 		return locals.filter((h) => !h.deletedAt).map(toHabit);
-	});
+	}, [] as Habit[]);
 }
 
 export function useAllHabitLogs() {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const locals = await db.table<LocalHabitLog>('habitLogs').toArray();
 		return locals.filter((l) => !l.deletedAt).map(toHabitLog);
-	});
+	}, [] as HabitLog[]);
 }
 
 export function useHabitLogsForHabit(habitId: string) {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const locals = await db
 			.table<LocalHabitLog>('habitLogs')
 			.where('habitId')
@@ -62,7 +62,7 @@ export function useHabitLogsForHabit(habitId: string) {
 			.filter((l) => !l.deletedAt)
 			.map(toHabitLog)
 			.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
-	});
+	}, [] as HabitLog[]);
 }
 
 // ─── Pure Helpers ──────────────────────────────────────────

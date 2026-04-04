@@ -22,22 +22,8 @@
 
 	let txs$ = useAllTransactions();
 	let cats$ = useAllCategories();
-	let txs = $state<Transaction[]>([]);
-	let categories = $state<FinanceCategory[]>([]);
-
-	$effect(() => {
-		const sub = txs$.subscribe((val) => {
-			txs = val ?? [];
-		});
-		return () => sub.unsubscribe();
-	});
-
-	$effect(() => {
-		const sub = cats$.subscribe((val) => {
-			categories = val ?? [];
-		});
-		return () => sub.unsubscribe();
-	});
+	let txs = $derived(txs$.value);
+	let categories = $derived(cats$.value);
 
 	let month = currentMonth();
 	let monthTxs = $derived(getTransactionsForMonth(txs, month));

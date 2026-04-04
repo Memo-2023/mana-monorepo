@@ -2,7 +2,7 @@
  * Reactive Queries & Pure Helpers for Finance module.
  */
 
-import { liveQuery } from 'dexie';
+import { useLiveQueryWithDefault } from '@manacore/local-store/svelte';
 import { db } from '$lib/data/database';
 import type {
 	LocalTransaction,
@@ -43,23 +43,23 @@ export function toCategory(local: LocalFinanceCategory): FinanceCategory {
 // ─── Live Queries ──────────────────────────────────────────
 
 export function useAllTransactions() {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const locals = await db.table<LocalTransaction>('transactions').toArray();
 		return locals
 			.filter((t) => !t.deletedAt)
 			.map(toTransaction)
 			.sort((a, b) => b.date.localeCompare(a.date) || b.createdAt.localeCompare(a.createdAt));
-	});
+	}, [] as Transaction[]);
 }
 
 export function useAllCategories() {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const locals = await db.table<LocalFinanceCategory>('financeCategories').toArray();
 		return locals
 			.filter((c) => !c.deletedAt)
 			.map(toCategory)
 			.sort((a, b) => a.order - b.order);
-	});
+	}, [] as FinanceCategory[]);
 }
 
 // ─── Pure Helpers ──────────────────────────────────────────

@@ -50,14 +50,7 @@
 	let filter = $state<ViewFilter>('inbox');
 	let newTitle = $state('');
 	let tasks$ = useAllTasks();
-	let tasks = $state<import('./types').Task[]>([]);
-
-	$effect(() => {
-		const sub = tasks$.subscribe((val) => {
-			tasks = val ?? [];
-		});
-		return () => sub.unsubscribe();
-	});
+	let tasks = $derived(tasks$.value);
 
 	const stats = $derived(getTaskStats(tasks));
 	const filtered = $derived(() => {

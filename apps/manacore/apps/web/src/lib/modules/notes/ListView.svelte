@@ -13,14 +13,7 @@
 	let { navigate, goBack, params }: ViewProps = $props();
 
 	let notes$ = useAllNotes();
-	let notes = $state<Note[]>([]);
-
-	$effect(() => {
-		const sub = notes$.subscribe((val) => {
-			notes = val ?? [];
-		});
-		return () => sub.unsubscribe();
-	});
+	let notes = $derived(notes$.value);
 
 	let searchQuery = $state('');
 	let editingId = $state<string | null>(null);

@@ -265,7 +265,7 @@
 	}
 
 	// ── Guest Mode ──────────────────────────────────────────
-	let guestMode: GuestMode | null = null;
+	let guestMode = $state<GuestMode | null>(null);
 
 	// ── Onboarding ──────────────────────────────────────────
 	function handleOnboardingComplete() {
