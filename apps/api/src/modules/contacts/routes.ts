@@ -29,22 +29,37 @@ routes.post('/:id/avatar', async (c) => {
 	}
 
 	try {
-		const { createContactsStorage, generateUserFileKey, getContentType } = await import(
-			'@manacore/shared-storage'
-		);
-		const storage = createContactsStorage();
-		const key = generateUserFileKey(
-			userId,
-			`avatar-${c.req.param('id')}.${file.name.split('.').pop()}`
-		);
-		const buffer = Buffer.from(await file.arrayBuffer());
+		const buffer = await file.arrayBuffer();
 
-		const result = await storage.upload(key, buffer, {
-			contentType: getContentType(file.name),
-			public: true,
-		});
+		if (file.type === 'image/svg+xml') {
+			// SVGs stay on shared-storage (Sharp can't process SVG)
+			const { createContactsStorage, generateUserFileKey } = await import(
+				'@manacore/shared-storage'
+			);
+			const storage = createContactsStorage();
+			const key = generateUserFileKey(userId, `avatar-${c.req.param('id')}.svg`);
+			const result = await storage.upload(key, Buffer.from(buffer), {
+				contentType: 'image/svg+xml',
+				public: true,
+			});
+			return c.json({ avatarUrl: result.url }, 201);
+		}
 
-		return c.json({ avatarUrl: result.url }, 201);
+		// Raster images -> mana-media for dedup, thumbnails & Photos gallery
+		const { uploadImageToMedia } = await import('../../lib/media');
+		const result = await uploadImageToMedia(
+			buffer,
+			`avatar-${c.req.param('id')}.${file.name.split('.').pop()}`,
+			{ app: 'contacts', userId }
+		);
+
+		return c.json(
+			{
+				avatarUrl: result.urls.thumbnail || result.urls.original,
+				mediaId: result.id,
+			},
+			201
+		);
 	} catch {
 		return c.json({ error: 'Upload failed' }, 500);
 	}

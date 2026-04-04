@@ -25,11 +25,15 @@ const routes = new Hono();
 // ─── Photo Analysis (server-only: Gemini Vision) ────────────
 
 routes.post('/analysis/photo', async (c) => {
+	const userId = c.get('userId');
 	const { imageBase64, mimeType } = await c.req.json();
 	if (!imageBase64) return c.json({ error: 'imageBase64 required' }, 400);
 
+	const mime = mimeType || 'image/jpeg';
+
 	try {
-		const res = await fetch(`${LLM_URL}/api/v1/chat/completions`, {
+		// Run AI analysis and mana-media upload in parallel
+		const analysisPromise = fetch(`${LLM_URL}/api/v1/chat/completions`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
@@ -41,7 +45,7 @@ routes.post('/analysis/photo', async (c) => {
 							{ type: 'text', text: 'Analysiere diese Mahlzeit.' },
 							{
 								type: 'image_url',
-								image_url: { url: `data:${mimeType || 'image/jpeg'};base64,${imageBase64}` },
+								image_url: { url: `data:${mime};base64,${imageBase64}` },
 							},
 						],
 					},
@@ -52,11 +56,28 @@ routes.post('/analysis/photo', async (c) => {
 			}),
 		});
 
+		// Store meal photo in mana-media for Photos gallery & persistence
+		const ext = mime.split('/')[1] || 'jpg';
+		const { uploadImageToMedia } = await import('../../lib/media');
+		const buffer = Uint8Array.from(atob(imageBase64), (ch) => ch.charCodeAt(0));
+		const mediaPromise = uploadImageToMedia(buffer.buffer, `meal-${Date.now()}.${ext}`, {
+			app: 'nutriphi',
+			userId,
+		}).catch(() => null); // Don't fail analysis if media upload fails
+
+		const [res, mediaResult] = await Promise.all([analysisPromise, mediaPromise]);
+
 		if (!res.ok) return c.json({ error: 'AI analysis failed' }, 502);
 
 		const data = await res.json();
 		const content = data.choices?.[0]?.message?.content;
 		const analysis = typeof content === 'string' ? JSON.parse(content) : content;
+
+		// Attach media info so the frontend can store photoMediaId on the meal
+		if (mediaResult) {
+			analysis.mediaId = mediaResult.id;
+			analysis.photoUrl = mediaResult.urls.thumbnail || mediaResult.urls.original;
+		}
 
 		return c.json(analysis);
 	} catch (err) {

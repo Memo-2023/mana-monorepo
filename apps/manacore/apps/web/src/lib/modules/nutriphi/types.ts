@@ -24,6 +24,8 @@ export interface LocalMeal extends BaseRecord {
 	portionSize?: string | null;
 	confidence: number;
 	nutrition?: NutritionData | null;
+	photoMediaId?: string | null;
+	photoUrl?: string | null;
 }
 
 export interface LocalGoal extends BaseRecord {
@@ -65,5 +67,7 @@ export interface MealWithNutrition {
 	portionSize?: string | null;
 	confidence: number;
 	nutrition: NutritionData | null;
+	photoMediaId?: string | null;
+	photoUrl?: string | null;
 	createdAt: string;
 }

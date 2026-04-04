@@ -10,6 +10,7 @@
 		"type-check": "tsc --noEmit"
 	},
 	"dependencies": {
+		"@manacore/media-client": "workspace:*",
 		"@manacore/shared-hono": "workspace:*",
 		"@manacore/shared-storage": "workspace:*",
 		"@mozilla/readability": "^0.5.0",

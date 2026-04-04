@@ -24,19 +24,19 @@ routes.post('/photos/upload', async (c) => {
 	if (file.size > 10 * 1024 * 1024) return c.json({ error: 'File too large (max 10MB)' }, 400);
 
 	try {
-		const { createPlantaStorage, generateUserFileKey, getContentType } = await import(
-			'@manacore/shared-storage'
+		const { uploadImageToMedia } = await import('../../lib/media');
+		const buffer = await file.arrayBuffer();
+		const result = await uploadImageToMedia(buffer, file.name, { app: 'planta', userId });
+
+		return c.json(
+			{
+				storagePath: result.id,
+				publicUrl: result.urls.original,
+				mediaId: result.id,
+				plantId,
+			},
+			201
 		);
-		const storage = createPlantaStorage();
-		const key = generateUserFileKey(userId, file.name);
-		const buffer = Buffer.from(await file.arrayBuffer());
-
-		const result = await storage.upload(key, buffer, {
-			contentType: getContentType(file.name),
-			public: true,
-		});
-
-		return c.json({ storagePath: key, publicUrl: result.url, plantId }, 201);
 	} catch (err) {
 		console.error('Upload failed:', err);
 		return c.json({ error: 'Upload failed' }, 500);

@@ -22,14 +22,37 @@ routes.post('/files/upload', async (c) => {
 	if (file.size > 100 * 1024 * 1024) return c.json({ error: 'Max 100MB' }, 400);
 
 	try {
+		const buffer = await file.arrayBuffer();
+		const { isImageMimeType } = await import('../../lib/media');
+
+		// Images -> mana-media for dedup, thumbnails & Photos gallery
+		if (isImageMimeType(file.type)) {
+			const { uploadImageToMedia } = await import('../../lib/media');
+			const result = await uploadImageToMedia(buffer, file.name, { app: 'storage', userId });
+
+			return c.json(
+				{
+					id: crypto.randomUUID(),
+					name: file.name,
+					storagePath: result.id,
+					storageKey: result.id,
+					mimeType: file.type,
+					size: file.size,
+					parentFolderId: folderId,
+					mediaId: result.id,
+				},
+				201
+			);
+		}
+
+		// Non-images -> shared-storage as before
 		const { createStorageStorage, generateUserFileKey, getContentType } = await import(
 			'@manacore/shared-storage'
 		);
 		const storage = createStorageStorage();
 		const key = generateUserFileKey(userId, file.name);
-		const buffer = Buffer.from(await file.arrayBuffer());
 
-		await storage.upload(key, buffer, {
+		await storage.upload(key, Buffer.from(buffer), {
 			contentType: getContentType(file.name),
 			public: false,
 		});

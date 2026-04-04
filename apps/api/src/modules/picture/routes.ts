@@ -98,7 +98,27 @@ routes.post('/generate', async (c) => {
 
 		await consumeCredits(userId, 'AI_IMAGE_GENERATION', cost, `Image: ${prompt.slice(0, 50)}`);
 
-		return c.json({ imageUrl, prompt, model: model || 'flux-schnell' });
+		// Store generated image in mana-media for dedup, thumbnails & Photos gallery
+		try {
+			const { uploadImageToMedia } = await import('../../lib/media');
+			const imgRes = await fetch(imageUrl);
+			const imgBuffer = await imgRes.arrayBuffer();
+			const media = await uploadImageToMedia(imgBuffer, `generated-${Date.now()}.png`, {
+				app: 'picture',
+				userId,
+			});
+
+			return c.json({
+				imageUrl: media.urls.original,
+				mediaId: media.id,
+				thumbnailUrl: media.urls.thumbnail,
+				prompt,
+				model: model || 'flux-schnell',
+			});
+		} catch {
+			// Fallback: return raw imageUrl if mana-media is unavailable
+			return c.json({ imageUrl, prompt, model: model || 'flux-schnell' });
+		}
 	} catch (_err) {
 		return c.json({ error: 'Generation failed' }, 500);
 	}
@@ -115,19 +135,19 @@ routes.post('/upload', async (c) => {
 	if (file.size > 10 * 1024 * 1024) return c.json({ error: 'Max 10MB' }, 400);
 
 	try {
-		const { createPictureStorage, generateUserFileKey, getContentType } = await import(
-			'@manacore/shared-storage'
+		const { uploadImageToMedia } = await import('../../lib/media');
+		const buffer = await file.arrayBuffer();
+		const result = await uploadImageToMedia(buffer, file.name, { app: 'picture', userId });
+
+		return c.json(
+			{
+				storagePath: result.id,
+				publicUrl: result.urls.original,
+				mediaId: result.id,
+				thumbnailUrl: result.urls.thumbnail,
+			},
+			201
 		);
-		const storage = createPictureStorage();
-		const key = generateUserFileKey(userId, file.name);
-		const buffer = Buffer.from(await file.arrayBuffer());
-
-		const result = await storage.upload(key, buffer, {
-			contentType: getContentType(file.name),
-			public: true,
-		});
-
-		return c.json({ storagePath: key, publicUrl: result.url }, 201);
 	} catch (_err) {
 		return c.json({ error: 'Upload failed' }, 500);
 	}
