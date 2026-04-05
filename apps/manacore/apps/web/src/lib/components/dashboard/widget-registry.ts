@@ -21,7 +21,7 @@ import PictureRecentWidget from './widgets/PictureRecentWidget.svelte';
 import CardsProgressWidget from './widgets/CardsProgressWidget.svelte';
 import ClockTimersWidget from './widgets/ClockTimersWidget.svelte';
 import StorageUsageWidget from './widgets/StorageUsageWidget.svelte';
-import MukkeLibraryWidget from './widgets/MukkeLibraryWidget.svelte';
+import MusicLibraryWidget from './widgets/MusicLibraryWidget.svelte';
 import PresiDecksWidget from './widgets/PresiDecksWidget.svelte';
 import ContextDocsWidget from './widgets/ContextDocsWidget.svelte';
 
@@ -30,6 +30,7 @@ import RecentContactsWidget from '$lib/modules/core/widgets/RecentContactsWidget
 import ActiveTimerWidget from '$lib/modules/core/widgets/ActiveTimerWidget.svelte';
 import NutritionProgressWidget from '$lib/modules/core/widgets/NutritionProgressWidget.svelte';
 import PlantWateringWidget from '$lib/modules/core/widgets/PlantWateringWidget.svelte';
+import DayTimelineWidget from './widgets/DayTimelineWidget.svelte';
 
 export const widgetComponents: Record<WidgetType, Component> = {
 	credits: CreditsWidget,
@@ -46,10 +47,11 @@ export const widgetComponents: Record<WidgetType, Component> = {
 	'cards-progress': CardsProgressWidget,
 	'clock-timers': ClockTimersWidget,
 	'storage-usage': StorageUsageWidget,
-	'mukke-library': MukkeLibraryWidget,
+	'music-library': MusicLibraryWidget,
 	'presi-decks': PresiDecksWidget,
 	'context-docs': ContextDocsWidget,
 	'active-timer': ActiveTimerWidget,
 	'nutrition-progress': NutritionProgressWidget,
 	'plant-watering': PlantWateringWidget,
+	'day-timeline': DayTimelineWidget,
 };

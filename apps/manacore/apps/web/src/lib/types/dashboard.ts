@@ -22,12 +22,13 @@ export type WidgetType =
 	| 'cards-progress' // Cards API: learning progress
 	| 'clock-timers' // Clock: active timers and alarms
 	| 'storage-usage' // Storage: file storage stats
-	| 'mukke-library' // Mukke: music library stats
+	| 'music-library' // Music: music library stats
 	| 'presi-decks' // Presi: recent presentations
 	| 'context-docs' // Context: recent documents & spaces
 	| 'active-timer' // Times: running timer
 	| 'nutrition-progress' // NutriPhi: today's calorie progress
-	| 'plant-watering'; // Planta: plants due for watering
+	| 'plant-watering' // Planta: plants due for watering
+	| 'day-timeline'; // TimeBlocks: chronological day timeline
 
 /**
  * Widget size - maps to CSS Grid columns
@@ -121,7 +122,7 @@ export interface WidgetMeta {
 		| 'picture'
 		| 'cards'
 		| 'storage'
-		| 'mukke'
+		| 'music'
 		| 'presi'
 		| 'context'
 		| 'times'
@@ -251,13 +252,13 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
 		requiredBackend: 'storage',
 	},
 	{
-		type: 'mukke-library',
-		nameKey: 'dashboard.widgets.mukke.title',
-		descriptionKey: 'dashboard.widgets.mukke.description',
+		type: 'music-library',
+		nameKey: 'dashboard.widgets.music.title',
+		descriptionKey: 'dashboard.widgets.music.description',
 		icon: '🎵',
 		defaultSize: 'medium',
 		allowMultiple: false,
-		requiredBackend: 'mukke',
+		requiredBackend: 'music',
 	},
 	{
 		type: 'presi-decks',
@@ -312,6 +313,14 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
 		defaultSize: 'small',
 		allowMultiple: false,
 		requiredBackend: 'planta',
+	},
+	{
+		type: 'day-timeline',
+		nameKey: 'dashboard.widgets.day_timeline.title',
+		descriptionKey: 'dashboard.widgets.day_timeline.description',
+		icon: '⏱️',
+		defaultSize: 'medium',
+		allowMultiple: false,
 	},
 ];
 
