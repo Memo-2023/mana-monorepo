@@ -12,7 +12,7 @@
 			"icon": "external link",
 			"includeVars": false,
 			"keepTime": true,
-			"tags": ["manacore"],
+			"tags": ["mana"],
 			"targetBlank": false,
 			"title": "Detailed Dashboards",
 			"type": "dashboards"
@@ -63,7 +63,7 @@
 			"targets": [
 				{
 					"datasource": { "type": "prometheus", "uid": "${datasource}" },
-					"expr": "sum(up{job=~\".*-backend|mana-core-auth\"}) / count(up{job=~\".*-backend|mana-core-auth\"})",
+					"expr": "sum(up{job=~\".*-backend|mana-auth\"}) / count(up{job=~\".*-backend|mana-auth\"})",
 					"legendFormat": "Services Healthy",
 					"refId": "A"
 				}
@@ -410,7 +410,7 @@
 			"targets": [
 				{
 					"datasource": { "type": "prometheus", "uid": "${datasource}" },
-					"expr": "up{job=\"mana-core-auth\"}",
+					"expr": "up{job=\"mana-auth\"}",
 					"legendFormat": "Auth",
 					"refId": "A"
 				},
@@ -1366,7 +1366,7 @@
 	],
 	"refresh": "30s",
 	"schemaVersion": 38,
-	"tags": ["manacore", "master", "overview"],
+	"tags": ["mana", "master", "overview"],
 	"templating": {
 		"list": [
 			{
@@ -1387,7 +1387,7 @@
 	"time": { "from": "now-6h", "to": "now" },
 	"timepicker": {},
 	"timezone": "browser",
-	"title": "ManaCore Master Overview",
+	"title": "Mana Master Overview",
 	"uid": "master-overview",
 	"version": 1,
 	"weekStart": ""

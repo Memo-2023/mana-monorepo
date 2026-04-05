@@ -128,7 +128,7 @@ pnpm preview                     # Preview production build
 NODE_ENV=development
 PORT=3022
 DATABASE_URL=postgresql://manacore:devpassword@localhost:5432/planta
-MANA_CORE_AUTH_URL=http://localhost:3001
+MANA_AUTH_URL=http://localhost:3001
 GOOGLE_GEMINI_API_KEY=xxx
 CORS_ORIGINS=http://localhost:5173,http://localhost:5191
 S3_ENDPOINT=http://localhost:9000
@@ -141,7 +141,7 @@ S3_SECRET_KEY=minioadmin
 
 ```
 PUBLIC_BACKEND_URL=http://localhost:3022
-PUBLIC_MANA_CORE_AUTH_URL=http://localhost:3001
+PUBLIC_MANA_AUTH_URL=http://localhost:3001
 ```
 
 ## Shared Package

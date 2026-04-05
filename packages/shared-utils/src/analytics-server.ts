@@ -6,7 +6,7 @@
  *
  * @example
  * ```typescript
- * import { injectUmamiAnalytics } from '@manacore/shared-utils/analytics-server';
+ * import { injectUmamiAnalytics } from '@mana/shared-utils/analytics-server';
  *
  * export const handle: Handle = async ({ event, resolve }) => {
  *   return resolve(event, {

@@ -4,7 +4,7 @@
  */
 
 import { Hono } from 'hono';
-import type { AuthVariables } from '@manacore/shared-hono';
+import type { AuthVariables } from '@mana/shared-hono';
 import { validateCredits, COSTS } from '../lib/credits';
 import { validateBody, validateQuery } from '../lib/validate';
 import { createBotBody, recordingToMemoBody, paginationQuery } from '../schemas';

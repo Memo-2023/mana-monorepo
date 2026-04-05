@@ -75,7 +75,7 @@ console.log(memoro.primaryColor); // "#f8d62b"
 | App              | Name          | Primary Color    | Tagline          |
 | ---------------- | ------------- | ---------------- | ---------------- |
 | `memoro`         | Memoro        | #f8d62b (Gold)   | AI Voice Memos   |
-| `manacore`       | ManaCore      | #6366f1 (Indigo) | Central Hub      |
+| `manacore`       | Mana      | #6366f1 (Indigo) | Central Hub      |
 | `cards`          | Cards         | #8b5cf6 (Purple) | AI Flashcards    |
 | `maerchenzauber` | Märchenzauber | #ec4899 (Pink)   | AI Story Creator |
 

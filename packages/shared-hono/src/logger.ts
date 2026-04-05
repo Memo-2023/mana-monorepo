@@ -3,17 +3,17 @@
  *
  * - Generates a unique request ID per request (X-Request-Id header)
  * - Logs request/response as JSON lines (in production) or console (in dev)
- * - Integrates with @manacore/shared-logger for consistent format
+ * - Integrates with @mana/shared-logger for consistent format
  *
  * @example
  * ```ts
- * import { requestLogger } from '@manacore/shared-hono/logger';
+ * import { requestLogger } from '@mana/shared-hono/logger';
  * app.use('*', requestLogger());
  * ```
  */
 
 import type { MiddlewareHandler } from 'hono';
-import { logger as log, configureLogger } from '@manacore/shared-logger';
+import { logger as log, configureLogger } from '@mana/shared-logger';
 
 let _requestIdStore: Map<object, string> | null = null;
 

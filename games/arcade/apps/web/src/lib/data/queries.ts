@@ -1,4 +1,4 @@
-import { useLiveQueryWithDefault } from '@manacore/local-store/svelte';
+import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import {
 	gameStatsCollection,
 	generatedGameCollection,

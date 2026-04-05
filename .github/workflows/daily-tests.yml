@@ -47,9 +47,9 @@ jobs:
       postgres:
         image: postgres:16-alpine
         env:
-          POSTGRES_USER: manacore
+          POSTGRES_USER: mana
           POSTGRES_PASSWORD: testpassword
-          POSTGRES_DB: manacore
+          POSTGRES_DB: mana
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -92,17 +92,17 @@ jobs:
       - name: Setup test database
         working-directory: services/mana-auth
         env:
-          DATABASE_URL: postgresql://manacore:testpassword@localhost:5432/manacore
+          DATABASE_URL: postgresql://mana:testpassword@localhost:5432/mana
         run: pnpm run db:migrate
 
       - name: Run tests with coverage
         working-directory: services/mana-auth
         env:
-          DATABASE_URL: postgresql://manacore:testpassword@localhost:5432/manacore
+          DATABASE_URL: postgresql://mana:testpassword@localhost:5432/mana
           REDIS_URL: redis://localhost:6379
           NODE_ENV: test
-          JWT_ISSUER: manacore
-          JWT_AUDIENCE: manacore
+          JWT_ISSUER: mana
+          JWT_AUDIENCE: mana
         run: |
           if [ "${{ github.event.inputs.verbose }}" = "true" ]; then
             pnpm run test:cov --verbose
@@ -140,9 +140,9 @@ jobs:
       postgres:
         image: postgres:16-alpine
         env:
-          POSTGRES_USER: manacore
+          POSTGRES_USER: mana
           POSTGRES_PASSWORD: testpassword
-          POSTGRES_DB: manacore
+          POSTGRES_DB: mana
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -185,16 +185,16 @@ jobs:
       - name: Setup databases for integration tests
         working-directory: services/mana-auth
         env:
-          DATABASE_URL: postgresql://manacore:testpassword@localhost:5432/manacore
+          DATABASE_URL: postgresql://mana:testpassword@localhost:5432/mana
         run: pnpm run db:migrate
 
       - name: Run integration tests
         env:
-          DATABASE_URL: postgresql://manacore:testpassword@localhost:5432/manacore
+          DATABASE_URL: postgresql://mana:testpassword@localhost:5432/mana
           REDIS_URL: redis://localhost:6379
           NODE_ENV: test
-          JWT_ISSUER: manacore
-          JWT_AUDIENCE: manacore
+          JWT_ISSUER: mana
+          JWT_AUDIENCE: mana
         run: |
           # Run auth integration tests
           cd services/mana-auth
@@ -278,7 +278,7 @@ jobs:
           curl -X POST "$DISCORD_WEBHOOK_URL" \
             -H 'Content-Type: application/json' \
             -d "{
-              \"username\": \"ManaCore CI/CD\",
+              \"username\": \"Mana CI/CD\",
               \"avatar_url\": \"https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png\",
               \"embeds\": [{
                 \"title\": \"$TITLE\",
@@ -312,7 +312,7 @@ jobs:
                   }
                 ],
                 \"footer\": {
-                  \"text\": \"ManaCore Monorepo\"
+                  \"text\": \"Mana Monorepo\"
                 },
                 \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
               }]

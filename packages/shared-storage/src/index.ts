@@ -6,7 +6,7 @@ export {
 	createStorage,
 	createStorageClient,
 	getStorageConfig,
-	createManaCoreStorage,
+	createManaStorage,
 	createPictureStorage,
 	createChatStorage,
 	createCardsStorage,

@@ -7,7 +7,7 @@
  */
 
 import { Hono } from 'hono';
-import { consumeCredits, validateCredits } from '@manacore/shared-hono/credits';
+import { consumeCredits, validateCredits } from '@mana/shared-hono/credits';
 
 const REPLICATE_TOKEN = process.env.REPLICATE_API_TOKEN || '';
 const IMAGE_GEN_URL = process.env.MANA_IMAGE_GEN_URL || '';

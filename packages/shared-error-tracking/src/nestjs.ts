@@ -7,7 +7,7 @@
  * @example
  * ```typescript
  * // app.module.ts
- * import { SentryExceptionFilter } from '@manacore/shared-error-tracking/nestjs';
+ * import { SentryExceptionFilter } from '@mana/shared-error-tracking/nestjs';
  *
  * @Module({
  *   providers: [

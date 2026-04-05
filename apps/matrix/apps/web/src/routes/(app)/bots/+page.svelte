@@ -3,7 +3,7 @@
 	import { matrixStore } from '$lib/matrix';
 	import { goto } from '$app/navigation';
 	import { _ as t } from 'svelte-i18n';
-	import { MagnifyingGlass, Robot, CircleNotch } from '@manacore/shared-icons';
+	import { MagnifyingGlass, Robot, CircleNotch } from '@mana/shared-icons';
 	import BotCard from '$lib/components/bots/BotCard.svelte';
 
 	let search = $state('');

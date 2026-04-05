@@ -6,7 +6,7 @@
  *
  * @example
  * ```typescript
- * import { exportToJSON, exportToCSV, importFromJSON, downloadFile } from '@manacore/shared-stores';
+ * import { exportToJSON, exportToCSV, importFromJSON, downloadFile } from '@mana/shared-stores';
  * import { db } from '$lib/data/database';
  *
  * // Export contacts as JSON

@@ -1,5 +1,5 @@
 #!/bin/bash
-# ManaCore Disk Space Monitor
+# Mana Disk Space Monitor
 # Checks disk usage on system and data volumes
 # Alerts via Telegram/ntfy when thresholds are exceeded
 #
@@ -16,7 +16,7 @@ export PATH="/usr/local/bin:/opt/homebrew/bin:$PATH"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
-LOG_FILE="/tmp/manacore-disk-check.log"
+LOG_FILE="/tmp/mana-disk-check.log"
 
 # Thresholds
 WARNING_THRESHOLD=80
@@ -51,7 +51,7 @@ send_notification() {
         [ "$priority" = "critical" ] && ntfy_priority="urgent"
 
         curl -s -d "$message" \
-            -H "Title: ManaCore Disk Alert" \
+            -H "Title: Mana Disk Alert" \
             -H "Priority: $ntfy_priority" \
             -H "Tags: warning" \
             "https://ntfy.sh/$NTFY_TOPIC" >/dev/null 2>&1 || true
@@ -277,7 +277,7 @@ check_docker_logs() {
 }
 
 # Main execution
-log "=== ManaCore Disk Space Check ==="
+log "=== Mana Disk Space Check ==="
 
 ALERT_STATUS=0
 

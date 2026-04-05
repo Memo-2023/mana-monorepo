@@ -4,12 +4,12 @@
  * Usage in backend package.json:
  * {
  *   "jest": {
- *     "preset": "@manacore/test-config/jest-backend"
+ *     "preset": "@mana/test-config/jest-backend"
  *   }
  * }
  *
  * Or extend in jest.config.js:
- * const baseConfig = require('@manacore/test-config/jest-backend');
+ * const baseConfig = require('@mana/test-config/jest-backend');
  * module.exports = {
  *   ...baseConfig,
  *   // Your overrides

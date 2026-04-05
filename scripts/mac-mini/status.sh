@@ -1,5 +1,5 @@
 #!/bin/bash
-# ManaCore Mac Mini Status Overview
+# Mana Mac Mini Status Overview
 # Shows the current state of all services
 
 # Ensure PATH includes docker
@@ -20,7 +20,7 @@ NC='\033[0m'
 
 echo ""
 echo -e "${BOLD}=========================================="
-echo -e "  ManaCore Mac Mini Status"
+echo -e "  Mana Mac Mini Status"
 echo -e "==========================================${NC}"
 echo ""
 echo -e "${BLUE}Time:${NC} $(date)"
@@ -44,8 +44,8 @@ check_launchd() {
 }
 
 check_launchd "com.cloudflare.cloudflared" "Cloudflared Tunnel"
-check_launchd "com.manacore.docker-startup" "Docker Startup"
-check_launchd "com.manacore.health-check" "Health Check (5min)"
+check_launchd "com.mana.docker-startup" "Docker Startup"
+check_launchd "com.mana.health-check" "Health Check (5min)"
 
 # ============================================
 # Docker Status
@@ -141,14 +141,14 @@ fi
 # ============================================
 echo ""
 echo -e "${BOLD}Recent Activity:${NC}"
-if [ -f /tmp/manacore-health.log ]; then
+if [ -f /tmp/mana-health.log ]; then
     echo "  Last health check:"
-    tail -3 /tmp/manacore-health.log | sed 's/^/    /'
+    tail -3 /tmp/mana-health.log | sed 's/^/    /'
 fi
 
 echo ""
 echo -e "${BLUE}Commands:${NC}"
 echo "  Health check:  ./scripts/mac-mini/health-check.sh"
 echo "  Restart all:   ./scripts/mac-mini/restart.sh"
-echo "  View logs:     tail -f /tmp/manacore-startup.log"
+echo "  View logs:     tail -f /tmp/mana-startup.log"
 echo ""

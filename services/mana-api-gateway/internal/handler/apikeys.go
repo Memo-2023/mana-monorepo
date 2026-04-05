@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/manacore/shared-go/httputil"
+	"github.com/mana/shared-go/httputil"
 	"time"
 
-	"github.com/manacore/mana-api-gateway/internal/middleware"
-	"github.com/manacore/mana-api-gateway/internal/service"
+	"github.com/mana/mana-api-gateway/internal/middleware"
+	"github.com/mana/mana-api-gateway/internal/service"
 )
 
 // ApiKeysHandler handles API key management endpoints.

@@ -1,5 +1,5 @@
 /**
- * Browser Error Tracking for ManaCore SvelteKit Apps
+ * Browser Error Tracking for Mana SvelteKit Apps
  *
  * Uses @sentry/browser with GlitchTip as the self-hosted backend.
  * This is the browser counterpart to the Node.js `index.ts`.
@@ -7,7 +7,7 @@
  * @example
  * ```typescript
  * // In hooks.client.ts
- * import { initErrorTracking, handleSvelteError } from '@manacore/shared-error-tracking/browser';
+ * import { initErrorTracking, handleSvelteError } from '@mana/shared-error-tracking/browser';
  * import type { HandleClientError } from '@sveltejs/kit';
  *
  * initErrorTracking({

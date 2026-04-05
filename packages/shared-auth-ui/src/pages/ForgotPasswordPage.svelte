@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Component, Snippet } from 'svelte';
 	import type { AuthResult } from '../types';
-	import { Key, ArrowLeft, EnvelopeOpen, SignIn, Sun, Moon } from '@manacore/shared-icons';
+	import { Key, ArrowLeft, EnvelopeOpen, SignIn, Sun, Moon } from '@mana/shared-icons';
 
 	type PageMode = 'form' | 'success';
 

@@ -1,6 +1,6 @@
 # Production Readiness Score
 
-Bewertungssystem für die Produktionsreife der ManaCore Apps. Jede App wird in 8 Kategorien (0-100) bewertet. Der Gesamtscore ist ein gewichteter Durchschnitt.
+Bewertungssystem für die Produktionsreife der Mana Apps. Jede App wird in 8 Kategorien (0-100) bewertet. Der Gesamtscore ist ein gewichteter Durchschnitt.
 
 ## Kategorien & Gewichtung
 
@@ -76,5 +76,5 @@ Bewertungssystem für die Produktionsreife der ManaCore Apps. Jede App wird in 8
 3. Bewertung jeder Kategorie (0-100)
 4. Gewichteter Gesamtscore berechnen
 5. Status ableiten
-6. Audit als Content in `apps/manacore/apps/landing/src/content/audits/` ablegen
+6. Audit als Content in `apps/mana/apps/landing/src/content/audits/` ablegen
 7. Empfehlungen für Verbesserungen dokumentieren

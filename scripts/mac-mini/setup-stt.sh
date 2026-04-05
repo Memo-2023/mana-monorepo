@@ -7,11 +7,11 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 STT_DIR="$REPO_DIR/services/mana-stt"
-PLIST_NAME="com.manacore.stt"
+PLIST_NAME="com.mana.stt"
 PLIST_PATH="$HOME/Library/LaunchAgents/$PLIST_NAME.plist"
 
 echo "=============================================="
-echo "  ManaCore STT Service Setup (Mac Mini)"
+echo "  Mana STT Service Setup (Mac Mini)"
 echo "=============================================="
 echo ""
 
@@ -86,10 +86,10 @@ cat > "$PLIST_PATH" << EOF
     <integer>10</integer>
 
     <key>StandardOutPath</key>
-    <string>/tmp/manacore-stt.log</string>
+    <string>/tmp/mana-stt.log</string>
 
     <key>StandardErrorPath</key>
-    <string>/tmp/manacore-stt.error.log</string>
+    <string>/tmp/mana-stt.error.log</string>
 </dict>
 </plist>
 EOF
@@ -119,11 +119,11 @@ if launchctl list | grep -q "$PLIST_NAME"; then
         echo "   $HEALTH"
     else
         echo "   Warning: Health check failed (service may still be starting)"
-        echo "   Check logs: tail -f /tmp/manacore-stt.log"
+        echo "   Check logs: tail -f /tmp/mana-stt.log"
     fi
 else
     echo "   Warning: Service may not be running"
-    echo "   Check logs: tail -f /tmp/manacore-stt.error.log"
+    echo "   Check logs: tail -f /tmp/mana-stt.error.log"
 fi
 
 echo ""
@@ -135,7 +135,7 @@ echo "Service URL: http://localhost:3020"
 echo ""
 echo "Useful commands:"
 echo "  # View logs"
-echo "  tail -f /tmp/manacore-stt.log"
+echo "  tail -f /tmp/mana-stt.log"
 echo ""
 echo "  # Restart service"
 echo "  launchctl kickstart -k gui/\$(id -u)/$PLIST_NAME"

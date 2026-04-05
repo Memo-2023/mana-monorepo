@@ -16,7 +16,7 @@
 <div class="tags-page">
 	<h1>Tags verwalten</h1>
 	<p class="text-sm text-muted-foreground mb-4">
-		Tags sind app-übergreifend — Änderungen gelten in allen ManaCore-Apps.
+		Tags sind app-übergreifend — Änderungen gelten in allen Mana-Apps.
 	</p>
 
 	{#if tagStore.loading}

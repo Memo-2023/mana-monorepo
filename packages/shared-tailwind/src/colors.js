@@ -1,5 +1,5 @@
 /**
- * Shared color palette for all ManaCore apps
+ * Shared color palette for all Mana apps
  *
  * Theme structure:
  * - Each theme has light and dark variants
@@ -13,7 +13,7 @@ export const colors = {
 	// App-specific primary colors
 	brand: {
 		memoro: '#f8d62b', // Gold
-		manacore: '#6366f1', // Indigo
+		mana: '#6366f1', // Indigo
 		cards: '#6366f1', // Indigo
 		storyteller: '#6366f1', // Indigo
 	},

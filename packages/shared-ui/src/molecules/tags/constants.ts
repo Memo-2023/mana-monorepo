@@ -1,5 +1,5 @@
 /**
- * Centralized tag constants and types for @manacore/shared-ui
+ * Centralized tag constants and types for @mana/shared-ui
  */
 
 export const TAG_COLORS = [

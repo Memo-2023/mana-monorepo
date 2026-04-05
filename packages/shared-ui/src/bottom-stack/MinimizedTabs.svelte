@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { X, Plus, CornersOut, ArrowLineUp } from '@manacore/shared-icons';
+	import { X, Plus, CornersOut, ArrowLineUp } from '@mana/shared-icons';
 	import type { MinimizedPage } from './types';
 
 	interface Props {

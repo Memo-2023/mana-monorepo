@@ -1,7 +1,7 @@
 /**
  * mana-analytics — Feedback and analytics service
  *
- * Hono + Bun runtime. Extracted from mana-core-auth.
+ * Hono + Bun runtime. Extracted from mana-auth.
  * Handles: user feedback, voting, AI-powered title generation.
  */
 

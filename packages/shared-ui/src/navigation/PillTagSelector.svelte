@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { Tag, X, Plus, CaretDown } from '@manacore/shared-icons';
+	import { Tag, X, Plus, CaretDown } from '@mana/shared-icons';
 
 	export interface TagItem {
 		id: string;

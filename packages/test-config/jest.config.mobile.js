@@ -4,7 +4,7 @@
  * Usage in mobile package.json:
  * {
  *   "jest": {
- *     "preset": "@manacore/test-config/jest-mobile"
+ *     "preset": "@mana/test-config/jest-mobile"
  *   }
  * }
  */
@@ -29,7 +29,7 @@ module.exports = {
 
 	// Transform ignore patterns for React Native modules
 	transformIgnorePatterns: [
-		'node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg|@manacore/.*)',
+		'node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg|@mana/.*)',
 	],
 
 	// Collect coverage from these files

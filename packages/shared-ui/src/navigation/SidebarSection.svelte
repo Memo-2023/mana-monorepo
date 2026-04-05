@@ -24,7 +24,7 @@
 	import type { NavItem } from './types';
 	import NavLink from './NavLink.svelte';
 	import { Text } from '../atoms';
-	import { CaretDown } from '@manacore/shared-icons';
+	import { CaretDown } from '@mana/shared-icons';
 
 	interface Props {
 		/** Section title (hidden when minimized) */

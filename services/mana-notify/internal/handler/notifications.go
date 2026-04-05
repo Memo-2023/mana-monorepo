@@ -7,12 +7,12 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/manacore/shared-go/httputil"
+	"github.com/mana/shared-go/httputil"
 	"time"
 
-	"github.com/manacore/mana-notify/internal/db"
-	"github.com/manacore/mana-notify/internal/queue"
-	tmpl "github.com/manacore/mana-notify/internal/template"
+	"github.com/mana/mana-notify/internal/db"
+	"github.com/mana/mana-notify/internal/queue"
+	tmpl "github.com/mana/mana-notify/internal/template"
 )
 
 type NotificationsHandler struct {

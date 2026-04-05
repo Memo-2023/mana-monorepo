@@ -11,15 +11,15 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-// RemoteValidator validates JWTs by calling mana-core-auth's validation endpoint.
+// RemoteValidator validates JWTs by calling mana-auth's validation endpoint.
 // Simpler than JWKS (no key management), but requires the auth service to be available.
 type RemoteValidator struct {
 	authURL string
 	client  *http.Client
 }
 
-// NewRemoteValidator creates a validator that delegates to mana-core-auth.
-// authURL should be the base URL of mana-core-auth (e.g., "http://localhost:3001").
+// NewRemoteValidator creates a validator that delegates to mana-auth.
+// authURL should be the base URL of mana-auth (e.g., "http://localhost:3001").
 func NewRemoteValidator(authURL string) *RemoteValidator {
 	return &RemoteValidator{
 		authURL: authURL,

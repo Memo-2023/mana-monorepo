@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { locale } from 'svelte-i18n';
-	import { HelpPage, getHelpTranslations } from '@manacore/help';
+	import { HelpPage, getHelpTranslations } from '@mana/help';
 	import { getManalinkHelpContent } from '$lib/content/help/index.js';
 
 	const content = $derived(getManalinkHelpContent($locale ?? 'de'));

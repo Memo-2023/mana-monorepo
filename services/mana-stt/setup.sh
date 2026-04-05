@@ -1,5 +1,5 @@
 #!/bin/bash
-# ManaCore STT Service Setup Script
+# Mana STT Service Setup Script
 # For Mac Mini M4 (Apple Silicon)
 
 set -e
@@ -9,7 +9,7 @@ VENV_DIR="$SCRIPT_DIR/.venv"
 PYTHON_VERSION="3.11"
 
 echo "=============================================="
-echo "  ManaCore STT Service Setup"
+echo "  Mana STT Service Setup"
 echo "  Whisper (Lightning MLX) + Voxtral"
 echo "=============================================="
 echo ""

@@ -13,12 +13,12 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/cors"
 
-	"github.com/manacore/mana-search/internal/cache"
-	"github.com/manacore/mana-search/internal/config"
-	"github.com/manacore/mana-search/internal/extract"
-	"github.com/manacore/mana-search/internal/handler"
-	"github.com/manacore/mana-search/internal/metrics"
-	"github.com/manacore/mana-search/internal/search"
+	"github.com/mana/mana-search/internal/cache"
+	"github.com/mana/mana-search/internal/config"
+	"github.com/mana/mana-search/internal/extract"
+	"github.com/mana/mana-search/internal/handler"
+	"github.com/mana/mana-search/internal/metrics"
+	"github.com/mana/mana-search/internal/search"
 )
 
 func main() {

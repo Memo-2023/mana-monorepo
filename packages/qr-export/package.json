@@ -1,5 +1,5 @@
 {
-	"name": "@manacore/qr-export",
+	"name": "@mana/qr-export",
 	"version": "0.1.0",
 	"private": true,
 	"description": "QR code export/import for personal data (contacts, events, todos, user context)",
@@ -32,7 +32,7 @@
 	"peerDependencies": {
 		"svelte": "^5.0.0",
 		"jsqr": "^1.4.0",
-		"@manacore/wallpaper-generator": "workspace:*"
+		"@mana/wallpaper-generator": "workspace:*"
 	},
 	"peerDependenciesMeta": {
 		"svelte": {
@@ -41,7 +41,7 @@
 		"jsqr": {
 			"optional": true
 		},
-		"@manacore/wallpaper-generator": {
+		"@mana/wallpaper-generator": {
 			"optional": true
 		}
 	}

@@ -3,9 +3,9 @@ package handler
 import (
 	"sync"
 
-	"github.com/manacore/mana-search/internal/cache"
-	"github.com/manacore/mana-search/internal/config"
-	"github.com/manacore/mana-search/internal/metrics"
+	"github.com/mana/mana-search/internal/cache"
+	"github.com/mana/mana-search/internal/config"
+	"github.com/mana/mana-search/internal/metrics"
 )
 
 var (

@@ -7,7 +7,7 @@
 		Trash,
 		Keyboard,
 		Question,
-	} from '@manacore/shared-icons';
+	} from '@mana/shared-icons';
 	import { getInputBarSettingsStore } from './inputBarSettings.svelte';
 	import { clearRecentHistory } from './recentInputHistory';
 

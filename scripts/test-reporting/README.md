@@ -1,6 +1,6 @@
 # Test Reporting Scripts
 
-Collection of Node.js scripts for aggregating, analyzing, and reporting on test results in the ManaCore monorepo.
+Collection of Node.js scripts for aggregating, analyzing, and reporting on test results in the Mana monorepo.
 
 ## Scripts Overview
 

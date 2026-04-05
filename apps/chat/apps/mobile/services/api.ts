@@ -6,8 +6,8 @@ import * as SecureStore from 'expo-secure-store';
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'http://localhost:3001';
 
-// Token storage key (must match what @manacore/shared-auth uses)
-const APP_TOKEN_KEY = '@manacore/app_token';
+// Token storage key (must match what @mana/shared-auth uses)
+const APP_TOKEN_KEY = '@mana/app_token';
 
 // ============================================================================
 // Types

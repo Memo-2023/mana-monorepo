@@ -4,7 +4,7 @@ info:
   description: AI-powered voice memo management — memo processing, spaces, credits, meetings, settings.
   version: 1.0.0
   contact:
-    name: ManaCore
+    name: Mana
     url: https://mana.how
 
 servers:

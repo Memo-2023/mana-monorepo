@@ -1,5 +1,5 @@
 {
-	"name": "@manacore/test-config",
+	"name": "@mana/test-config",
 	"version": "0.1.0",
 	"description": "Shared test configurations for Manacore monorepo",
 	"private": true,

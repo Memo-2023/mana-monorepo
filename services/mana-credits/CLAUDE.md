@@ -1,6 +1,6 @@
 # mana-credits
 
-Standalone credit management service for the ManaCore ecosystem. Extracted from mana-core-auth.
+Standalone credit management service for the Mana ecosystem. Extracted from mana-core-auth.
 
 ## Tech Stack
 
@@ -83,8 +83,8 @@ bun run db:studio  # Open Drizzle Studio
 ```env
 PORT=3061
 DATABASE_URL=postgresql://manacore:devpassword@localhost:5432/mana_credits
-MANA_CORE_AUTH_URL=http://localhost:3001
-MANA_CORE_SERVICE_KEY=dev-service-key
+MANA_AUTH_URL=http://localhost:3001
+MANA_SERVICE_KEY=dev-service-key
 BASE_URL=http://localhost:3061
 STRIPE_SECRET_KEY=sk_test_...
 STRIPE_WEBHOOK_SECRET=whsec_...

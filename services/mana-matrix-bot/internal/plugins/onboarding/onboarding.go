@@ -4,7 +4,7 @@ import (
 	"context"
 	"log/slog"
 
-	"github.com/manacore/mana-matrix-bot/internal/plugin"
+	"github.com/mana/mana-matrix-bot/internal/plugin"
 )
 
 func init() {
@@ -48,7 +48,7 @@ func (p *OnboardingPlugin) HandleTextMessage(ctx context.Context, mc *plugin.Mes
 
 func (p *OnboardingPlugin) cmdStart(mc *plugin.MessageContext, _ string) error {
 	mc.Client.SendReply(context.Background(), mc.RoomID, mc.EventID,
-		"**👋 Willkommen bei ManaCore!**\n\nIch helfe dir bei den ersten Schritten.\n\n1. Erstelle einen Account: `!register`\n2. Melde dich an: `!login email passwort`\n3. Erkunde die Apps!")
+		"**👋 Willkommen bei Mana!**\n\nIch helfe dir bei den ersten Schritten.\n\n1. Erstelle einen Account: `!register`\n2. Melde dich an: `!login email passwort`\n3. Erkunde die Apps!")
 	return nil
 }
 func (p *OnboardingPlugin) cmdStatus(mc *plugin.MessageContext, _ string) error {

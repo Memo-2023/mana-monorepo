@@ -1,6 +1,6 @@
 # @manacore/shared-theme
 
-Unified theme system for all ManaCore web applications. Provides a consistent theming experience with HSL-based colors, multiple theme variants, and light/dark mode support.
+Unified theme system for all Mana web applications. Provides a consistent theming experience with HSL-based colors, multiple theme variants, and light/dark mode support.
 
 ## Features
 

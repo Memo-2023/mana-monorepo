@@ -1,5 +1,5 @@
 /**
- * @manacore/help — Unified help package
+ * @mana/help — Unified help package
  *
  * Consolidates shared-help-types + shared-help-content + shared-help-ui.
  */

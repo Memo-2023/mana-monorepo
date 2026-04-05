@@ -6,8 +6,8 @@
 	 * contacts, storage files, etc.) and creates bidirectional links.
 	 */
 
-	import { MANA_APPS, getManaApp } from '@manacore/shared-branding';
-	import type { AppIconId } from '@manacore/shared-branding';
+	import { MANA_APPS, getManaApp } from '@mana/shared-branding';
+	import type { AppIconId } from '@mana/shared-branding';
 	import { linkMutations } from '../mutations.svelte.js';
 	import { buildCachedData } from '../resolvers.js';
 	import type { ManaRecordRef } from '../types.js';

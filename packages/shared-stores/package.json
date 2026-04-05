@@ -1,5 +1,5 @@
 {
-	"name": "@manacore/shared-stores",
+	"name": "@mana/shared-stores",
 	"version": "1.0.0",
 	"private": true,
 	"type": "module",
@@ -21,8 +21,8 @@
 		"vitest": "^4.1.2"
 	},
 	"dependencies": {
-		"@manacore/local-store": "workspace:*",
-		"@manacore/shared-auth": "workspace:*",
-		"@manacore/shared-tags": "workspace:*"
+		"@mana/local-store": "workspace:*",
+		"@mana/shared-auth": "workspace:*",
+		"@mana/shared-tags": "workspace:*"
 	}
 }

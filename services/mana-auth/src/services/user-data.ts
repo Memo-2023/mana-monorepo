@@ -133,7 +133,7 @@ const PROJECT_META: Record<string, { name: string; icon: string }> = {
 	times: { name: 'Taktik', icon: '⏱️' },
 	uload: { name: 'uLoad', icon: '🔗' },
 	calc: { name: 'Calc', icon: '🧮' },
-	manacore: { name: 'ManaCore', icon: '💎' },
+	mana: { name: 'Mana', icon: '💎' },
 };
 
 /** Convert camelCase/snake_case table name to readable label */

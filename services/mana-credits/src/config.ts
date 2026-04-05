@@ -28,10 +28,10 @@ export function loadConfig(): Config {
 		port: parseInt(process.env.PORT || '3061', 10),
 		databaseUrl: requiredEnv(
 			'DATABASE_URL',
-			'postgresql://manacore:devpassword@localhost:5432/mana_platform'
+			'postgresql://mana:devpassword@localhost:5432/mana_platform'
 		),
-		manaAuthUrl: requiredEnv('MANA_CORE_AUTH_URL', 'http://localhost:3001'),
-		serviceKey: requiredEnv('MANA_CORE_SERVICE_KEY', 'dev-service-key'),
+		manaAuthUrl: requiredEnv('MANA_AUTH_URL', 'http://localhost:3001'),
+		serviceKey: requiredEnv('MANA_SERVICE_KEY', 'dev-service-key'),
 		baseUrl: requiredEnv('BASE_URL', 'http://localhost:3060'),
 		stripe: {
 			secretKey: process.env.STRIPE_SECRET_KEY || '',

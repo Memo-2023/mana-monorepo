@@ -1,7 +1,7 @@
 /**
  * mana-credits — Standalone credit management service
  *
- * Hono + Bun runtime. Extracted from mana-core-auth.
+ * Hono + Bun runtime. Extracted from mana-auth.
  * Handles: personal credits, guild pools, gift codes, Stripe payments.
  */
 

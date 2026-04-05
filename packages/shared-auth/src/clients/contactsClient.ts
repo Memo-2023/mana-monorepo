@@ -5,7 +5,7 @@
  * from the Contacts app backend.
  */
 
-import type { ContactSummary } from '@manacore/shared-types';
+import type { ContactSummary } from '@mana/shared-types';
 
 export interface ContactsClientConfig {
 	/** Base URL of the Contacts API (e.g., http://localhost:3015/api/v1) */

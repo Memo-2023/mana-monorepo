@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Bell, BellSlash } from '@manacore/shared-icons';
+	import { Bell, BellSlash } from '@mana/shared-icons';
 
 	/**
 	 * Reusable reminder time picker dropdown.

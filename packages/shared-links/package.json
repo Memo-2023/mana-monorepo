@@ -1,5 +1,5 @@
 {
-	"name": "@manacore/shared-links",
+	"name": "@mana/shared-links",
 	"version": "0.1.0",
 	"private": true,
 	"type": "module",
@@ -10,8 +10,8 @@
 		"./ui": "./src/ui/index.ts"
 	},
 	"dependencies": {
-		"@manacore/local-store": "workspace:*",
-		"@manacore/shared-branding": "workspace:*"
+		"@mana/local-store": "workspace:*",
+		"@mana/shared-branding": "workspace:*"
 	},
 	"peerDependencies": {
 		"svelte": "^5.0.0"

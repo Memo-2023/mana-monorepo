@@ -1,12 +1,12 @@
 /**
  * Umami Analytics Utility
  *
- * Provides type-safe event tracking for all ManaCore apps.
+ * Provides type-safe event tracking for all Mana apps.
  * Events are automatically sent to Umami at stats.mana.how
  *
  * @example
  * ```typescript
- * import { trackEvent, trackClick } from '@manacore/shared-utils/analytics';
+ * import { trackEvent, trackClick } from '@mana/shared-utils/analytics';
  *
  * // Track a custom event
  * trackEvent('signup_completed', { method: 'email' });
@@ -152,7 +152,7 @@ const track = {
 	times: createModuleTracker('times'),
 	contacts: createModuleTracker('contacts'),
 	cards: createModuleTracker('cards'),
-	manacore: createModuleTracker('manacore'),
+	mana: createModuleTracker('mana'),
 	context: createModuleTracker('context'),
 	skilltree: createModuleTracker('skilltree'),
 	nutriphi: createModuleTracker('nutriphi'),
@@ -314,34 +314,34 @@ export const CardsEvents = {
 };
 
 /**
- * ManaCore Platform Events
+ * Mana Platform Events
  */
-export const ManaCoreEvents = {
-	appOpened: (appId: string) => track.manacore('app_opened', { app: appId }),
-	navClicked: (destination: string) => track.manacore('nav_clicked', { destination }),
-	onboardingStarted: () => track.manacore('onboarding_started'),
+export const ManaEvents = {
+	appOpened: (appId: string) => track.mana('app_opened', { app: appId }),
+	navClicked: (destination: string) => track.mana('nav_clicked', { destination }),
+	onboardingStarted: () => track.mana('onboarding_started'),
 	onboardingStepCompleted: (step: string, stepNumber: number) =>
-		track.manacore('onboarding_step_completed', { step, step_number: stepNumber }),
-	onboardingCompleted: () => track.manacore('onboarding_completed'),
-	onboardingSkipped: (atStep: number) => track.manacore('onboarding_skipped', { at_step: atStep }),
-	dashboardEditToggled: (editing: boolean) => track.manacore('dashboard_edit_toggled', { editing }),
-	widgetAdded: (widgetType: string) => track.manacore('widget_added', { widget_type: widgetType }),
+		track.mana('onboarding_step_completed', { step, step_number: stepNumber }),
+	onboardingCompleted: () => track.mana('onboarding_completed'),
+	onboardingSkipped: (atStep: number) => track.mana('onboarding_skipped', { at_step: atStep }),
+	dashboardEditToggled: (editing: boolean) => track.mana('dashboard_edit_toggled', { editing }),
+	widgetAdded: (widgetType: string) => track.mana('widget_added', { widget_type: widgetType }),
 	widgetRemoved: (widgetType: string) =>
-		track.manacore('widget_removed', { widget_type: widgetType }),
+		track.mana('widget_removed', { widget_type: widgetType }),
 	widgetResized: (widgetType: string, size: string) =>
-		track.manacore('widget_resized', { widget_type: widgetType, size }),
-	creditsTabViewed: (tab: string) => track.manacore('credits_tab_viewed', { tab }),
-	profileUpdated: () => track.manacore('profile_updated'),
+		track.mana('widget_resized', { widget_type: widgetType, size }),
+	creditsTabViewed: (tab: string) => track.mana('credits_tab_viewed', { tab }),
+	profileUpdated: () => track.mana('profile_updated'),
 
 	// Funnel events — track key activation & retention moments
 	/** User created their first piece of content in any module */
-	firstContentCreated: (appId: string) => track.manacore('first_content_created', { app: appId }),
+	firstContentCreated: (appId: string) => track.mana('first_content_created', { app: appId }),
 	/** User returned after first session (fired once per user) */
-	userReturnVisit: () => track.manacore('user_return_visit'),
+	userReturnVisit: () => track.mana('user_return_visit'),
 	/** User used a second module (cross-app engagement) */
-	secondModuleUsed: (appId: string) => track.manacore('second_module_used', { app: appId }),
+	secondModuleUsed: (appId: string) => track.mana('second_module_used', { app: appId }),
 	/** Guest user converted to registered user */
-	guestConverted: () => track.manacore('guest_converted'),
+	guestConverted: () => track.mana('guest_converted'),
 };
 
 /**

@@ -3,8 +3,8 @@
   Follows the same pattern as ColorPicker (size variants, a11y, Tailwind).
 -->
 <script lang="ts">
-	import { ICON_CATEGORIES, getIconComponent, type IconName } from '@manacore/shared-icons';
-	import { Check } from '@manacore/shared-icons';
+	import { ICON_CATEGORIES, getIconComponent, type IconName } from '@mana/shared-icons';
+	import { Check } from '@mana/shared-icons';
 
 	interface Props {
 		selectedIcon?: string;

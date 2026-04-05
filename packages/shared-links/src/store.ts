@@ -1,11 +1,11 @@
 /**
  * ManaLink — Local-First Store
  *
- * Creates a shared IndexedDB database ('manacore-links') that all apps
+ * Creates a shared IndexedDB database ('mana-links') that all apps
  * can read from. Links are synced to the server via mana-sync.
  */
 
-import { createLocalStore } from '@manacore/local-store';
+import { createLocalStore } from '@mana/local-store';
 import type { LocalManaLink } from './types.js';
 
 const SYNC_SERVER_URL =

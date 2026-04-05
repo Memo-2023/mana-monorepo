@@ -49,5 +49,5 @@ go test ./...                # Test
 - `DATABASE_URL` — PostgreSQL connection
 - `REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD`
 - `SEARCH_SERVICE_URL`, `STT_SERVICE_URL`, `TTS_SERVICE_URL`
-- `MANA_CORE_AUTH_URL` — JWT validation
+- `MANA_AUTH_URL` — JWT validation
 - `ADMIN_USER_IDS` — Comma-separated admin user IDs

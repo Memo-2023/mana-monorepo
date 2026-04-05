@@ -1,5 +1,5 @@
 /**
- * @manacore/shared-errors
+ * @mana/shared-errors
  *
  * Go-like error handling system for NestJS backends.
  *
@@ -16,7 +16,7 @@
  * import {
  *   Result, ok, err, AsyncResult,
  *   ValidationError, NotFoundError, ServiceError
- * } from '@manacore/shared-errors';
+ * } from '@mana/shared-errors';
  *
  * async function getUser(id: string): AsyncResult<User> {
  *   if (!isValidId(id)) {
@@ -32,7 +32,7 @@
  * }
  *
  * // In a controller
- * import { isOk } from '@manacore/shared-errors';
+ * import { isOk } from '@mana/shared-errors';
  *
  * const result = await userService.getUser(id);
  * if (!isOk(result)) {

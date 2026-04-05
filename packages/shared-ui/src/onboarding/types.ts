@@ -1,4 +1,4 @@
-import type { UserSettingsStore } from '@manacore/shared-theme';
+import type { UserSettingsStore } from '@mana/shared-theme';
 
 /**
  * Option for a selection-based onboarding step

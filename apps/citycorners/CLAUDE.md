@@ -122,5 +122,5 @@ Three IndexedDB collections managed by `@manacore/local-store`:
 
 | Variable | Used by | Description |
 |----------|---------|-------------|
-| `PUBLIC_MANA_CORE_AUTH_URL` | Web | Auth service URL (client) |
+| `PUBLIC_MANA_AUTH_URL` | Web | Auth service URL (client) |
 | `PUBLIC_SYNC_SERVER_URL` | Web | mana-sync WebSocket URL |

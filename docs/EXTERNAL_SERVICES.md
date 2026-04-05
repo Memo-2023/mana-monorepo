@@ -1,6 +1,6 @@
 # Externe Dienste & Self-Hosting-Analyse
 
-Dieser Bericht dokumentiert alle externen Dienste im ManaCore Monorepo und evaluiert Self-Hosting-Alternativen für den Mac Mini Server (M4, 16GB RAM).
+Dieser Bericht dokumentiert alle externen Dienste im Mana Monorepo und evaluiert Self-Hosting-Alternativen für den Mac Mini Server (M4, 16GB RAM).
 
 **Stand:** Januar 2026
 
@@ -258,7 +258,7 @@ const response = await fetch('http://localhost:8188/prompt', {
 
 LLaVA (Large Language and Vision Assistant) kann Gemini Vision für die meisten Use-Cases ersetzen.
 
-**Use-Cases in ManaCore:**
+**Use-Cases in Mana:**
 - **Planta:** Pflanzenidentifikation
 - **Nutriphi:** Lebensmittelerkennung, Nährwertschätzung
 
@@ -515,7 +515,7 @@ S3_REGION=fsn1
 
 ```env
 # Mana Core Auth
-MANA_CORE_AUTH_URL=http://localhost:3001
+MANA_AUTH_URL=http://localhost:3001
 
 # Stripe
 STRIPE_SECRET_KEY=sk_live_xxx

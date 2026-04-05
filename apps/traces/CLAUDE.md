@@ -42,7 +42,7 @@ pnpm traces:db:studio         # Open Drizzle Studio
 ## Architecture
 
 - **Mobile**: Offline-first. All GPS data in AsyncStorage. Sync is additive.
-- **Backend**: NestJS + Drizzle ORM + PostgreSQL. Auth via ManaCoreModule.
+- **Backend**: NestJS + Drizzle ORM + PostgreSQL. Auth via ManaModule.
 - **AI Guides**: Uses mana-search for POI discovery, mana-llm for narratives.
 - **Credits**: 5 base + 2 per POI consumed via CreditClientService.
 
@@ -64,8 +64,8 @@ pnpm traces:db:studio         # Open Drizzle Studio
 
 ## Environment Variables
 
-Backend: `PORT=3026`, `DATABASE_URL`, `MANA_CORE_AUTH_URL`, `MANA_LLM_URL`, `MANA_SEARCH_URL`
-Mobile: `EXPO_PUBLIC_TRACES_BACKEND_URL`, `EXPO_PUBLIC_MANA_CORE_AUTH_URL`
+Backend: `PORT=3026`, `DATABASE_URL`, `MANA_AUTH_URL`, `MANA_LLM_URL`, `MANA_SEARCH_URL`
+Mobile: `EXPO_PUBLIC_TRACES_BACKEND_URL`, `EXPO_PUBLIC_MANA_AUTH_URL`
 
 ## Mobile Navigation (5 tabs)
 

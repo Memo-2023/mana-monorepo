@@ -1,7 +1,7 @@
 {
-	"name": "@manacore/shared-error-tracking",
+	"name": "@mana/shared-error-tracking",
 	"version": "1.0.0",
-	"description": "Error tracking integration for ManaCore apps (GlitchTip/Sentry-compatible)",
+	"description": "Error tracking integration for Mana apps (GlitchTip/Sentry-compatible)",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
 	"exports": {

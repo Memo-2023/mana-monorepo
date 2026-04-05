@@ -188,7 +188,7 @@ pnpm setup:db:context          # Create DB + push schema
 NODE_ENV=development
 PORT=3020
 DATABASE_URL=postgresql://manacore:devpassword@localhost:5432/context
-MANA_CORE_AUTH_URL=http://localhost:3001
+MANA_AUTH_URL=http://localhost:3001
 AZURE_OPENAI_API_KEY=your-key
 AZURE_OPENAI_ENDPOINT=https://your-endpoint.openai.azure.com/
 GOOGLE_API_KEY=your-key
@@ -197,7 +197,7 @@ GOOGLE_API_KEY=your-key
 ### Web (.env)
 ```env
 PUBLIC_BACKEND_URL=http://localhost:3020
-PUBLIC_MANA_CORE_AUTH_URL=http://localhost:3001
+PUBLIC_MANA_AUTH_URL=http://localhost:3001
 ```
 
 ## Important Patterns

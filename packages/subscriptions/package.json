@@ -1,5 +1,5 @@
 {
-	"name": "@manacore/subscriptions",
+	"name": "@mana/subscriptions",
 	"version": "1.0.0",
 	"private": true,
 	"description": "Unified subscription package — types and UI components",

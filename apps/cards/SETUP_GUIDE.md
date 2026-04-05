@@ -5,7 +5,7 @@
 Your Mana Core integration is now **100% complete** with a fully functional credit system! 🎉
 
 ### ✅ Backend (Complete)
-- [x] ManaCoreModule configured with environment variables
+- [x] ManaModule configured with environment variables
 - [x] Service key configuration for credit operations
 - [x] Credit operation types defined (deck creation = 10 mana)
 - [x] Credit validation before deck creation

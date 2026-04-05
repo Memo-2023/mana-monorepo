@@ -4,7 +4,7 @@
 
 import { describe, it, expect, vi } from 'vitest';
 
-vi.mock('@manacore/shared-hono', () => ({
+vi.mock('@mana/shared-hono', () => ({
 	validateCredits: vi.fn(),
 	consumeCredits: vi.fn(),
 }));

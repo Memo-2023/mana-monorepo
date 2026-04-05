@@ -5,7 +5,7 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { locale } from 'svelte-i18n';
 	import type { Snippet } from 'svelte';
-	import { CircleNotch, WarningCircle, ArrowsClockwise } from '@manacore/shared-icons';
+	import { CircleNotch, WarningCircle, ArrowsClockwise } from '@mana/shared-icons';
 	import { theme } from '$lib/stores/theme';
 	import {
 		userSettings,
@@ -17,30 +17,30 @@
 		THEME_DEFINITIONS,
 		DEFAULT_THEME_VARIANTS,
 		EXTENDED_THEME_VARIANTS,
-	} from '@manacore/shared-theme';
-	import type { ThemeVariant } from '@manacore/shared-theme';
+	} from '@mana/shared-theme';
+	import type { ThemeVariant } from '@mana/shared-theme';
 	import { isNavCollapsed as collapsedStore } from '$lib/stores/navigation.svelte';
-	import { PillNavigation, TagStrip } from '@manacore/shared-ui';
+	import { PillNavigation, TagStrip } from '@mana/shared-ui';
 	import type {
 		PillNavItem,
 		PillDropdownItem,
 		QuickInputItem,
 		SpotlightAction,
-	} from '@manacore/shared-ui';
+	} from '@mana/shared-ui';
 	import { tagStore } from '$lib/stores/tags.svelte';
-	import { MagnifyingGlass, X } from '@manacore/shared-icons';
-	import { getPillAppItems } from '@manacore/shared-branding';
-	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
+	import { MagnifyingGlass, X } from '@mana/shared-icons';
+	import { getPillAppItems } from '@mana/shared-branding';
+	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@mana/shared-i18n';
 	import { setLocale, supportedLocales } from '$lib/i18n';
 
 	const AUTH_URL = import.meta.env.VITE_MANA_AUTH_URL || 'https://auth.mana.how';
 	const MATRIX_HOMESERVER = import.meta.env.VITE_MATRIX_HOMESERVER || 'matrix.mana.how';
 
 	/**
-	 * Exchange session cookie for JWT token from mana-core-auth
+	 * Exchange session cookie for JWT token from mana-auth
 	 * This enables cross-app settings sync after Matrix SSO login
 	 */
-	async function fetchManaCoreToken(): Promise<boolean> {
+	async function fetchManaToken(): Promise<boolean> {
 		try {
 			const response = await fetch(`${AUTH_URL}/api/v1/auth/session-to-token`, {
 				method: 'POST',
@@ -64,7 +64,7 @@
 	}
 
 	/**
-	 * Initialize user settings (load from mana-core-auth)
+	 * Initialize user settings (load from mana-auth)
 	 */
 	async function initUserSettings(): Promise<void> {
 		// First try to load stored token
@@ -72,13 +72,13 @@
 
 		// If no stored token, try to exchange session cookie
 		if (!storedToken) {
-			await fetchManaCoreToken();
+			await fetchManaToken();
 		}
 
 		// Load user settings (will use the token we just set)
 		await userSettings.load();
 
-		// Load tags (uses mana-core-auth token)
+		// Load tags (uses mana-auth token)
 		await tagStore.fetchTags();
 	}
 
@@ -318,7 +318,7 @@
 				if (!initialized) {
 					initError = matrixStore.error || 'Failed to initialize Matrix client';
 				} else {
-					// Matrix ready after SSO, fetch mana-core-auth token and load settings
+					// Matrix ready after SSO, fetch mana-auth token and load settings
 					// This happens after SSO so the session cookie should be available
 					initUserSettings();
 				}

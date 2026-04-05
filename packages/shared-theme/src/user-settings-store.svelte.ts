@@ -16,8 +16,8 @@ import { DEFAULT_GLOBAL_SETTINGS, DEFAULT_GENERAL_SETTINGS } from './types';
 import { isBrowser } from './utils';
 import { getStartPage as getStartPageFromConfig } from './app-routes';
 
-const STORAGE_KEY_PREFIX = 'manacore-user-settings';
-const DEVICE_ID_KEY = 'manacore-device-id';
+const STORAGE_KEY_PREFIX = 'mana-user-settings';
+const DEVICE_ID_KEY = 'mana-device-id';
 
 /**
  * Generate a unique device ID
@@ -79,14 +79,14 @@ function detectDeviceName(): string {
 /**
  * Create a User Settings store for your app
  *
- * This store syncs settings with mana-core-auth and provides:
+ * This store syncs settings with mana-auth and provides:
  * - Global settings that apply to all apps
  * - Per-app overrides for customization
  * - localStorage caching for offline support
  *
  * @example
  * ```typescript
- * import { createUserSettingsStore } from '@manacore/shared-theme';
+ * import { createUserSettingsStore } from '@mana/shared-theme';
  *
  * export const userSettings = createUserSettingsStore({
  *   appId: 'calendar',

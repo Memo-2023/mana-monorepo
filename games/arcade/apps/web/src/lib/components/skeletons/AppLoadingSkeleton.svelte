@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { SkeletonBox } from '@manacore/shared-ui';
+	import { SkeletonBox } from '@mana/shared-ui';
 </script>
 
 <div class="app-loading-skeleton" role="status" aria-label="App wird geladen...">

@@ -233,11 +233,11 @@ Diese Werte sind unser Versprechen. Sie können uns daran messen. Wenn wir diese
 
 Dieses Dokument konsolidiert Inhalte aus:
 
-- `apps/manacore/apps/landing/src/content/mission/de/unsere-werte.md`
-- `apps/manacore/apps/landing/src/content/mission/de/unsere-vision.md`
-- `apps/manacore/apps/landing/src/content/context/overview.md`
-- `apps/manacore/apps/landing/src/content/context/overview-short.md`
-- `apps/manacore/apps/landing/Plans/landing-page-concepts.md`
+- `apps/mana/apps/landing/src/content/mission/de/unsere-werte.md`
+- `apps/mana/apps/landing/src/content/mission/de/unsere-vision.md`
+- `apps/mana/apps/landing/src/content/context/overview.md`
+- `apps/mana/apps/landing/src/content/context/overview-short.md`
+- `apps/mana/apps/landing/Plans/landing-page-concepts.md`
 - `docs/MANA_EARNING_SYSTEM.md`
 
 ---

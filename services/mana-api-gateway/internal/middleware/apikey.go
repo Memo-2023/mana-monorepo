@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/manacore/mana-api-gateway/internal/service"
+	"github.com/mana/mana-api-gateway/internal/service"
 )
 
 type contextKey string

@@ -3,29 +3,29 @@ import tailwindcss from '@tailwindcss/vite';
 import { defineConfig, type UserConfig } from 'vite';
 import { SvelteKitPWA } from '@vite-pwa/sveltekit';
 
-// ManaCore shared packages that need SSR configuration
+// Mana shared packages that need SSR configuration
 const MANACORE_SHARED_PACKAGES = [
-	'@manacore/shared-icons',
-	'@manacore/shared-ui',
-	'@manacore/shared-tailwind',
-	'@manacore/shared-theme',
-	'@manacore/shared-theme-ui',
-	'@manacore/feedback',
-	'@manacore/feedback',
-	'@manacore/feedback',
-	'@manacore/shared-auth',
-	'@manacore/shared-auth-ui',
-	'@manacore/shared-branding',
-	'@manacore/subscriptions',
-	'@manacore/shared-profile-ui',
-	'@manacore/shared-i18n',
-	'@manacore/shared-api-client',
-	'@manacore/shared-splitscreen',
-	'@manacore/shared-utils',
-	'@manacore/shared-tags',
-	'@manacore/help',
-	'@manacore/help',
-	'@manacore/help',
+	'@mana/shared-icons',
+	'@mana/shared-ui',
+	'@mana/shared-tailwind',
+	'@mana/shared-theme',
+	'@mana/shared-theme-ui',
+	'@mana/feedback',
+	'@mana/feedback',
+	'@mana/feedback',
+	'@mana/shared-auth',
+	'@mana/shared-auth-ui',
+	'@mana/shared-branding',
+	'@mana/subscriptions',
+	'@mana/shared-profile-ui',
+	'@mana/shared-i18n',
+	'@mana/shared-api-client',
+	'@mana/shared-splitscreen',
+	'@mana/shared-utils',
+	'@mana/shared-tags',
+	'@mana/help',
+	'@mana/help',
+	'@mana/help',
 ];
 
 const noExternal = [...MANACORE_SHARED_PACKAGES, '@matrix/shared'];

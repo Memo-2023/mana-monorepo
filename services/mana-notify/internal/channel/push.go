@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/manacore/mana-notify/internal/config"
+	"github.com/mana/mana-notify/internal/config"
 )
 
 const expoPushURL = "https://exp.host/--/api/v2/push/send"

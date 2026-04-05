@@ -18,8 +18,8 @@ export interface CreditValidationResult {
 }
 
 const CREDITS_URL = () =>
-	process.env.MANA_CREDITS_URL || process.env.MANA_CORE_AUTH_URL || 'http://localhost:3061';
-const SERVICE_KEY = () => process.env.MANA_CORE_SERVICE_KEY || '';
+	process.env.MANA_CREDITS_URL || process.env.MANA_AUTH_URL || 'http://localhost:3061';
+const SERVICE_KEY = () => process.env.MANA_SERVICE_KEY || '';
 const APP_ID = () => process.env.APP_ID || 'unknown';
 
 const DEFAULT_BALANCE: CreditBalance = { balance: 1000, totalEarned: 0, totalSpent: 0 };

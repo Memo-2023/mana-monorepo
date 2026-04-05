@@ -1,0 +1,548 @@
+{
+	"generatedAt": "2026-03-31T14:32:40.747Z",
+	"overallScore": 72,
+	"scores": {
+		"sharedPackages": 90,
+		"iconConsistency": 78,
+		"modalConsistency": 19,
+		"errorHandling": 16,
+		"i18nCoverage": 87,
+		"localFirst": 93,
+		"styleConsistency": 87,
+		"errorBoundaries": 52,
+		"typescriptStrict": 100,
+		"testCoverage": 73,
+		"pwaSupport": 4,
+		"maintainability": 0,
+		"securityHeaders": 73,
+		"skeletonLoading": 77,
+		"toastConsistency": 100,
+		"storePattern": 94,
+		"sharedTypes": 53,
+		"depFreshness": 80,
+		"bundleConfig": 100,
+		"gitActivity": 97,
+		"a11yIndicators": 36,
+		"authGuardCoverage": 83,
+		"dockerReadiness": 80
+	},
+	"weights": {
+		"sharedPackages": 20,
+		"iconConsistency": 10,
+		"modalConsistency": 5,
+		"errorHandling": 5,
+		"i18nCoverage": 10,
+		"localFirst": 8,
+		"styleConsistency": 10,
+		"errorBoundaries": 8,
+		"typescriptStrict": 7,
+		"testCoverage": 7,
+		"pwaSupport": 4,
+		"maintainability": 4,
+		"securityHeaders": 5,
+		"skeletonLoading": 3,
+		"toastConsistency": 3,
+		"storePattern": 4,
+		"sharedTypes": 3,
+		"depFreshness": 2,
+		"bundleConfig": 2,
+		"gitActivity": 3,
+		"a11yIndicators": 4,
+		"authGuardCoverage": 5,
+		"dockerReadiness": 3
+	},
+	"details": {
+		"icons": {
+			"adoption": 78,
+			"phosphorFiles": 347,
+			"inlineSvgFiles": 98,
+			"perApp": {
+				"calc": {
+					"phosphor": 1,
+					"inlineSvg": 0
+				},
+				"calendar": {
+					"phosphor": 28,
+					"inlineSvg": 0
+				},
+				"chat": {
+					"phosphor": 18,
+					"inlineSvg": 0
+				},
+				"citycorners": {
+					"phosphor": 9,
+					"inlineSvg": 0
+				},
+				"clock": {
+					"phosphor": 3,
+					"inlineSvg": 7
+				},
+				"contacts": {
+					"phosphor": 27,
+					"inlineSvg": 4
+				},
+				"context": {
+					"phosphor": 13,
+					"inlineSvg": 0
+				},
+				"inventar": {
+					"phosphor": 12,
+					"inlineSvg": 1
+				},
+				"mana": {
+					"phosphor": 34,
+					"inlineSvg": 25
+				},
+				"cards": {
+					"phosphor": 2,
+					"inlineSvg": 1
+				},
+				"manavoxel": {
+					"phosphor": 0,
+					"inlineSvg": 0
+				},
+				"matrix": {
+					"phosphor": 26,
+					"inlineSvg": 0
+				},
+				"memoro": {
+					"phosphor": 0,
+					"inlineSvg": 53
+				},
+				"moodlit": {
+					"phosphor": 5,
+					"inlineSvg": 0
+				},
+				"mukke": {
+					"phosphor": 21,
+					"inlineSvg": 0
+				},
+				"news": {
+					"phosphor": 1,
+					"inlineSvg": 0
+				},
+				"nutriphi": {
+					"phosphor": 6,
+					"inlineSvg": 1
+				},
+				"photos": {
+					"phosphor": 11,
+					"inlineSvg": 3
+				},
+				"picture": {
+					"phosphor": 27,
+					"inlineSvg": 0
+				},
+				"planta": {
+					"phosphor": 0,
+					"inlineSvg": 0
+				},
+				"playground": {
+					"phosphor": 4,
+					"inlineSvg": 1
+				},
+				"presi": {
+					"phosphor": 6,
+					"inlineSvg": 0
+				},
+				"questions": {
+					"phosphor": 7,
+					"inlineSvg": 0
+				},
+				"skilltree": {
+					"phosphor": 12,
+					"inlineSvg": 1
+				},
+				"storage": {
+					"phosphor": 25,
+					"inlineSvg": 1
+				},
+				"times": {
+					"phosphor": 13,
+					"inlineSvg": 0
+				},
+				"todo": {
+					"phosphor": 22,
+					"inlineSvg": 0
+				},
+				"uload": {
+					"phosphor": 3,
+					"inlineSvg": 0
+				},
+				"wisekeep": {
+					"phosphor": 2,
+					"inlineSvg": 0
+				},
+				"zitare": {
+					"phosphor": 9,
+					"inlineSvg": 0
+				}
+			}
+		},
+		"modals": {
+			"adoption": 19,
+			"total": 63,
+			"sharedUsage": 12,
+			"focusTrapUsage": 6
+		},
+		"packages": {
+			"coreAdoption": 90,
+			"totalApps": 30,
+			"perPackage": {
+				"Auth": {
+					"count": 30,
+					"total": 30,
+					"adoption": 100
+				},
+				"UI": {
+					"count": 29,
+					"total": 30,
+					"adoption": 97
+				},
+				"Theme": {
+					"count": 25,
+					"total": 30,
+					"adoption": 83
+				},
+				"Branding": {
+					"count": 29,
+					"total": 30,
+					"adoption": 97
+				},
+				"i18n": {
+					"count": 24,
+					"total": 30,
+					"adoption": 80
+				},
+				"Error Tracking": {
+					"count": 25,
+					"total": 30,
+					"adoption": 83
+				},
+				"Icons": {
+					"count": 26,
+					"total": 30,
+					"adoption": 87
+				},
+				"Local Store": {
+					"count": 28,
+					"total": 30,
+					"adoption": 93
+				}
+			}
+		},
+		"errors": {
+			"adoption": 16,
+			"inline": 217,
+			"shared": 40
+		},
+		"i18n": {
+			"adoption": 87,
+			"withI18n": 26,
+			"without": 4
+		},
+		"localFirst": {
+			"adoption": 93,
+			"count": 28
+		},
+		"styles": {
+			"themeAdoption": 83,
+			"tailwindAdoption": 90
+		},
+		"errorBoundaries": {
+			"adoption": 52,
+			"errorAdoption": 27,
+			"offlineAdoption": 77,
+			"appsWithErrorPage": 8,
+			"appsWithOfflinePage": 23,
+			"missing": {
+				"error": [
+					"calc",
+					"chat",
+					"citycorners",
+					"clock",
+					"context",
+					"cards",
+					"manavoxel",
+					"memoro",
+					"moodlit",
+					"mukke",
+					"news",
+					"nutriphi",
+					"photos",
+					"picture",
+					"planta",
+					"playground",
+					"questions",
+					"skilltree",
+					"storage",
+					"uload",
+					"wisekeep",
+					"zitare"
+				],
+				"offline": ["manavoxel", "memoro", "moodlit", "news", "playground", "uload", "wisekeep"]
+			}
+		},
+		"typescript": {
+			"adoption": 100,
+			"strictApps": 30,
+			"nonStrict": []
+		},
+		"tests": {
+			"adoption": 73,
+			"e2eAdoption": 13,
+			"appsWithTests": 22,
+			"appsWithE2e": 4,
+			"totalTestFiles": 122,
+			"noTests": [
+				"calc",
+				"inventar",
+				"manavoxel",
+				"moodlit",
+				"news",
+				"playground",
+				"uload",
+				"wisekeep"
+			]
+		},
+		"pwa": {
+			"adoption": 4,
+			"manifestAdoption": 7,
+			"swAdoption": 0,
+			"appsWithManifest": 2,
+			"appsWithServiceWorker": 0,
+			"noPwa": [
+				"calc",
+				"calendar",
+				"chat",
+				"citycorners",
+				"clock",
+				"contacts",
+				"context",
+				"inventar",
+				"mana",
+				"cards",
+				"manavoxel",
+				"matrix",
+				"moodlit",
+				"mukke",
+				"news",
+				"nutriphi",
+				"photos",
+				"picture",
+				"planta",
+				"playground",
+				"presi",
+				"questions",
+				"skilltree",
+				"storage",
+				"times",
+				"todo",
+				"wisekeep",
+				"zitare"
+			]
+		},
+		"fileSizes": {
+			"adoption": 0,
+			"totalLargeFiles": 42,
+			"largestFile": {
+				"path": "matrix: lib/matrix/store.svelte.ts",
+				"lines": 2019
+			},
+			"topOffenders": [
+				{
+					"app": "matrix",
+					"file": "lib/matrix/store.svelte.ts",
+					"lines": 2019
+				},
+				{
+					"app": "calendar",
+					"file": "lib/components/event/QuickEventOverlay.svelte",
+					"lines": 1816
+				},
+				{
+					"app": "contacts",
+					"file": "lib/components/ContactDetailModal.svelte",
+					"lines": 1502
+				},
+				{
+					"app": "todo",
+					"file": "lib/components/TaskItem.svelte",
+					"lines": 1194
+				},
+				{
+					"app": "todo",
+					"file": "lib/components/board-views/ViewEditorModal.svelte",
+					"lines": 1187
+				},
+				{
+					"app": "contacts",
+					"file": "lib/components/NewContactModal.svelte",
+					"lines": 1130
+				},
+				{
+					"app": "zitare",
+					"file": "routes/(app)/lists/[id]/+page.svelte",
+					"lines": 958
+				},
+				{
+					"app": "calendar",
+					"file": "lib/components/calendar/WeekView.svelte",
+					"lines": 946
+				},
+				{
+					"app": "calendar",
+					"file": "routes/(app)/settings/sync/+page.svelte",
+					"lines": 898
+				},
+				{
+					"app": "matrix",
+					"file": "routes/(auth)/login/+page.svelte",
+					"lines": 849
+				}
+			]
+		},
+		"todos": {
+			"totalCount": 33,
+			"perApp": {
+				"mana": 13,
+				"memoro": 11,
+				"contacts": 5,
+				"todo": 2,
+				"chat": 1,
+				"picture": 1
+			}
+		},
+		"securityHeaders": {
+			"adoption": 73,
+			"appsWithHeaders": 22,
+			"missing": [
+				"manavoxel",
+				"memoro",
+				"moodlit",
+				"news",
+				"playground",
+				"times",
+				"uload",
+				"wisekeep"
+			]
+		},
+		"skeletons": {
+			"adoption": 77,
+			"appsWithSkeletons": 23,
+			"missing": ["citycorners", "cards", "manavoxel", "planta", "presi", "times", "zitare"]
+		},
+		"toasts": {
+			"adoption": 100,
+			"sharedToast": 204,
+			"customToast": 0
+		},
+		"storePattern": {
+			"adoption": 94,
+			"totalRunesStores": 177,
+			"totalOldStores": 12,
+			"appsWithRunesStores": 24,
+			"appsWithOldStores": 5
+		},
+		"sharedTypes": {
+			"adoption": 53,
+			"sharedTypeImports": 8,
+			"localTypeFiles": 7
+		},
+		"depFreshness": {
+			"adoption": 80,
+			"totalDeps": 1106,
+			"avgDepsPerApp": 37
+		},
+		"bundleSize": {
+			"adoption": 100,
+			"appsWithBundleConfig": 30
+		},
+		"gitActivity": {
+			"adoption": 97,
+			"activeApps": 29,
+			"perApp": {
+				"mana": 166,
+				"todo": 135,
+				"calendar": 125,
+				"contacts": 95,
+				"mukke": 90,
+				"storage": 87,
+				"zitare": 80,
+				"chat": 73,
+				"picture": 70,
+				"presi": 68,
+				"clock": 64,
+				"cards": 63,
+				"citycorners": 61,
+				"nutriphi": 56,
+				"photos": 56,
+				"planta": 55,
+				"context": 48,
+				"matrix": 48,
+				"skilltree": 46,
+				"questions": 39,
+				"inventar": 19,
+				"playground": 18,
+				"manavoxel": 11,
+				"uload": 10,
+				"calc": 6,
+				"moodlit": 5,
+				"times": 5,
+				"news": 4,
+				"wisekeep": 4,
+				"memoro": 0
+			}
+		},
+		"a11y": {
+			"adoption": 36,
+			"altAdoption": 100,
+			"dialogAdoption": 0,
+			"trapAdoption": 7,
+			"totalImgFiles": 21,
+			"totalImgWithAlt": 21
+		},
+		"authGuard": {
+			"adoption": 83,
+			"appsWithAuthGuard": 25,
+			"missing": ["mana", "manavoxel", "matrix", "memoro", "playground"]
+		},
+		"docker": {
+			"adoption": 80,
+			"appsWithDockerfile": 24,
+			"missing": ["context", "moodlit", "news", "planta", "questions", "wisekeep"]
+		}
+	},
+	"apps": [
+		"calc",
+		"calendar",
+		"chat",
+		"citycorners",
+		"clock",
+		"contacts",
+		"context",
+		"inventar",
+		"mana",
+		"cards",
+		"manavoxel",
+		"matrix",
+		"memoro",
+		"moodlit",
+		"mukke",
+		"news",
+		"nutriphi",
+		"photos",
+		"picture",
+		"planta",
+		"playground",
+		"presi",
+		"questions",
+		"skilltree",
+		"storage",
+		"times",
+		"todo",
+		"uload",
+		"wisekeep",
+		"zitare"
+	]
+}

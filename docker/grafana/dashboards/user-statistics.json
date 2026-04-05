@@ -514,7 +514,7 @@
 	],
 	"refresh": "30s",
 	"schemaVersion": 38,
-	"tags": ["manacore", "users", "auth"],
+	"tags": ["mana", "users", "auth"],
 	"templating": {
 		"list": [
 			{

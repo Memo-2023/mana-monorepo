@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import type { PillDropdownItem } from './types';
-	import { Columns } from '@manacore/shared-icons';
+	import { Columns } from '@mana/shared-icons';
 
 	interface Props {
 		items: PillDropdownItem[];

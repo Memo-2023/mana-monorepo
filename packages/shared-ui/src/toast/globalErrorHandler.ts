@@ -3,7 +3,7 @@
  *
  * Usage:
  * ```ts
- * import { setupGlobalErrorHandler } from '@manacore/shared-ui';
+ * import { setupGlobalErrorHandler } from '@mana/shared-ui';
  * import { onMount } from 'svelte';
  *
  * onMount(() => {

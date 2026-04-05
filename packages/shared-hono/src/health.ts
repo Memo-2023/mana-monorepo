@@ -14,7 +14,7 @@ const startTime = Date.now();
  *
  * Usage:
  * ```ts
- * import { healthRoute } from '@manacore/shared-hono/health';
+ * import { healthRoute } from '@mana/shared-hono/health';
  * app.route('/health', healthRoute('calendar-server'));
  * ```
  */

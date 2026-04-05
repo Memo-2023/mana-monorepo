@@ -147,8 +147,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 			const user = get().user;
 			if (!user) throw new Error('No user logged in');
 
-			// TODO: Implement profile update via mana-core-auth API
-			console.warn('Profile update not yet implemented via mana-core-auth API');
+			// TODO: Implement profile update via mana-auth API
+			console.warn('Profile update not yet implemented via mana-auth API');
 
 			set({
 				user: {

@@ -23,7 +23,7 @@ import {
 // ─── DB Schema ──────────────────────────────────────────────
 
 const DATABASE_URL =
-	process.env.DATABASE_URL ?? 'postgresql://manacore:devpassword@localhost:5432/mana_platform';
+	process.env.DATABASE_URL ?? 'postgresql://mana:devpassword@localhost:5432/mana_platform';
 const LLM_URL = process.env.MANA_LLM_URL || 'http://localhost:3025';
 
 const tracesSchema = pgSchema('traces');

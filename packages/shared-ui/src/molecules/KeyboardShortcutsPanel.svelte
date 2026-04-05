@@ -28,7 +28,7 @@
 	 */
 
 	import { Text } from '../atoms';
-	import { CaretDown } from '@manacore/shared-icons';
+	import { CaretDown } from '@mana/shared-icons';
 
 	export interface KeyboardShortcut {
 		/** Key combination (e.g., ['Ctrl', 'S'] or ['Cmd', 'Shift', 'P']) */

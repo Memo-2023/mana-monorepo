@@ -1,5 +1,5 @@
 /**
- * Shared Logger Utilities for ManaCore Apps
+ * Shared Logger Utilities for Mana Apps
  *
  * Dual-mode logger:
  * - **Development / Browser**: Console output with colored prefixes (human-readable)
@@ -33,7 +33,7 @@ let _getRequestId: (() => string | undefined) | null = null;
  *
  * @example
  * ```typescript
- * import { configureLogger } from '@manacore/shared-logger';
+ * import { configureLogger } from '@mana/shared-logger';
  * configureLogger({ serviceName: 'todo-server' });
  * ```
  */

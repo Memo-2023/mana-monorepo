@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { ThemeVariant } from '@manacore/shared-theme';
-	import { THEME_DEFINITIONS } from '@manacore/shared-theme';
+	import type { ThemeVariant } from '@mana/shared-theme';
+	import { THEME_DEFINITIONS } from '@mana/shared-theme';
 
 	interface Props {
 		variant: ThemeVariant;

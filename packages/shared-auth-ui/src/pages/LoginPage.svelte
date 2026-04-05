@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Component, Snippet } from 'svelte';
 	import type { AuthResult } from '../types';
-	import { Check, Warning, Eye, EyeSlash, SignIn, Sun, Moon } from '@manacore/shared-icons';
+	import { Check, Warning, Eye, EyeSlash, SignIn, Sun, Moon } from '@mana/shared-icons';
 	/** Translation strings for the login page */
 	export interface LoginTranslations {
 		title: string;
@@ -158,8 +158,8 @@
 
 	// Check if we're in development mode (early for state init)
 	const isDevMode = typeof import.meta !== 'undefined' && import.meta.env?.DEV;
-	// Local dev credentials (run `pnpm db:seed:dev` in mana-core-auth to create this user)
-	const DEV_EMAIL = 'dev@manacore.local';
+	// Local dev credentials (run `pnpm db:seed:dev` in mana-auth to create this user)
+	const DEV_EMAIL = 'dev@mana.local';
 	const DEV_PASSWORD = 'devpassword123';
 
 	let loading = $state(false);

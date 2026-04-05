@@ -1,14 +1,14 @@
 /**
  * Mana Auth Store Factory
  *
- * Creates a complete auth store using @manacore/shared-auth.
+ * Creates a complete auth store using @mana/shared-auth.
  * Replaces the ~350 lines of duplicated auth.svelte.ts in each app
  * with a single factory call.
  *
  * @example
  * ```ts
  * // apps/todo/apps/web/src/lib/stores/auth.svelte.ts
- * import { createManaAuthStore } from '@manacore/shared-auth-stores';
+ * import { createManaAuthStore } from '@mana/shared-auth-stores';
  *
  * export const authStore = createManaAuthStore({
  *   devBackendPort: 3031,
@@ -17,7 +17,7 @@
  *
  * @example With post-login callback
  * ```ts
- * import { createManaAuthStore } from '@manacore/shared-auth-stores';
+ * import { createManaAuthStore } from '@mana/shared-auth-stores';
  * import { apiClient } from '$lib/api/client';
  *
  * export const authStore = createManaAuthStore({
@@ -31,7 +31,7 @@
  */
 
 import { browser } from '$app/environment';
-import { initializeWebAuth, type UserData, type AuthServiceInterface } from '@manacore/shared-auth';
+import { initializeWebAuth, type UserData, type AuthServiceInterface } from '@mana/shared-auth';
 
 export interface ManaAuthStoreConfig {
 	/** Dev backend port (e.g. 3031 for todo). Only used in development. */
@@ -51,12 +51,12 @@ export function createManaAuthStore(config: ManaAuthStoreConfig = {}) {
 	// URL resolution (runtime, not build-time)
 	function getAuthUrl(): string {
 		if (browser && typeof window !== 'undefined') {
-			const injected = (window as unknown as { __PUBLIC_MANA_CORE_AUTH_URL__?: string })
-				.__PUBLIC_MANA_CORE_AUTH_URL__;
+			const injected = (window as unknown as { __PUBLIC_MANA_AUTH_URL__?: string })
+				.__PUBLIC_MANA_AUTH_URL__;
 			if (injected) return injected;
 			return import.meta.env.DEV ? devAuthUrl : '';
 		}
-		return process.env.PUBLIC_MANA_CORE_AUTH_URL || devAuthUrl;
+		return process.env.PUBLIC_MANA_AUTH_URL || devAuthUrl;
 	}
 
 	function getBackendUrl(): string {

@@ -6,7 +6,7 @@
  *
  * @example
  * ```typescript
- * import { SpiralDB, createTodoSchema } from '@manacore/spiral-db';
+ * import { SpiralDB, createTodoSchema } from '@mana/spiral-db';
  *
  * // Create database with todo schema
  * const db = new SpiralDB({

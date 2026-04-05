@@ -20,7 +20,7 @@
 	 */
 
 	import type { Snippet } from 'svelte';
-	import { Trash, Warning, Check, X } from '@manacore/shared-icons';
+	import { Trash, Warning, Check, X } from '@mana/shared-icons';
 
 	type ConfirmationVariant = 'danger' | 'warning' | 'info';
 	type Placement = 'top' | 'bottom' | 'left' | 'right';

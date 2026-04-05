@@ -1,5 +1,5 @@
 /**
- * PWA Configuration Types for ManaCore Apps
+ * PWA Configuration Types for Mana Apps
  */
 
 import type { SvelteKitPWAOptions } from '@vite-pwa/sveltekit';

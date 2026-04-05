@@ -1,7 +1,7 @@
 /**
  * mana-auth — Central authentication service
  *
- * Hono + Bun runtime. Replaces NestJS-based mana-core-auth.
+ * Hono + Bun runtime. Replaces NestJS-based mana-auth.
  * Uses Better Auth natively (fetch-based handler, no Express conversion).
  */
 
@@ -115,9 +115,9 @@ app.get('/api/v1/internal/org/:orgId/member/:userId', async (c) => {
 app.get('/login', (c) => {
 	const q = c.req.query();
 	return c.html(`<!DOCTYPE html>
-<html><head><title>ManaCore Login</title></head>
+<html><head><title>Mana Login</title></head>
 <body style="font-family:system-ui;max-width:400px;margin:80px auto;padding:20px;">
-<h1>ManaCore Login</h1>
+<h1>Mana Login</h1>
 <form method="POST" action="/api/auth/sign-in/email">
 <input type="hidden" name="callbackURL" value="${q.callbackURL || '/'}" />
 <label>Email<br><input type="email" name="email" required style="width:100%;padding:8px;margin:4px 0 12px;"></label>

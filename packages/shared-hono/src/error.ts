@@ -12,7 +12,7 @@ import { HTTPException } from 'hono/http-exception';
  *
  * Usage:
  * ```ts
- * import { errorHandler } from '@manacore/shared-hono/error';
+ * import { errorHandler } from '@mana/shared-hono/error';
  * const app = new Hono();
  * app.onError(errorHandler);
  * ```

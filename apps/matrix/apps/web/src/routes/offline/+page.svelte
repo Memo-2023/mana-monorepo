@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { OfflinePage } from '@manacore/shared-ui';
+	import { OfflinePage } from '@mana/shared-ui';
 </script>
 
 <OfflinePage

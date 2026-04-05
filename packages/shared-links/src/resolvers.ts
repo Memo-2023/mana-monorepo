@@ -4,8 +4,8 @@
  * Helpers to build cached display data from app metadata.
  */
 
-import { getManaApp } from '@manacore/shared-branding';
-import type { AppIconId } from '@manacore/shared-branding';
+import { getManaApp } from '@mana/shared-branding';
+import type { AppIconId } from '@mana/shared-branding';
 import type { LinkCachedData } from './types.js';
 
 /**

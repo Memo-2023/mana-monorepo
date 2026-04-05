@@ -70,7 +70,7 @@ SERVICE_KEY=your-service-key-from-mana-core
 
 **backend/src/app.module.ts**:
 ```typescript
-ManaCoreModule.forRootAsync({
+ManaModule.forRootAsync({
   imports: [ConfigModule],
   useFactory: (configService: ConfigService) => ({
     serviceKey: configService.get<string>('SERVICE_KEY', ''),

@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/manacore/mana-notify/internal/config"
+	"github.com/mana/mana-notify/internal/config"
 )
 
 type EmailService struct {

@@ -13,14 +13,14 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/cors"
 
-	"github.com/manacore/mana-notify/internal/auth"
-	"github.com/manacore/mana-notify/internal/channel"
-	"github.com/manacore/mana-notify/internal/config"
-	"github.com/manacore/mana-notify/internal/db"
-	"github.com/manacore/mana-notify/internal/handler"
-	"github.com/manacore/mana-notify/internal/metrics"
-	"github.com/manacore/mana-notify/internal/queue"
-	tmpl "github.com/manacore/mana-notify/internal/template"
+	"github.com/mana/mana-notify/internal/auth"
+	"github.com/mana/mana-notify/internal/channel"
+	"github.com/mana/mana-notify/internal/config"
+	"github.com/mana/mana-notify/internal/db"
+	"github.com/mana/mana-notify/internal/handler"
+	"github.com/mana/mana-notify/internal/metrics"
+	"github.com/mana/mana-notify/internal/queue"
+	tmpl "github.com/mana/mana-notify/internal/template"
 )
 
 func main() {
@@ -64,7 +64,7 @@ func main() {
 
 	// Middleware
 	serviceAuth := auth.ValidateServiceKey(cfg.ServiceKey)
-	jwtAuth := auth.ValidateJWT(cfg.ManaCoreAuthURL)
+	jwtAuth := auth.ValidateJWT(cfg.ManaAuthURL)
 
 	mux := http.NewServeMux()
 

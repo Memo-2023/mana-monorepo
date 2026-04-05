@@ -8,11 +8,11 @@ import {
 	setDeviceAdapter,
 	setNetworkAdapter,
 	type UserData,
-} from '@manacore/shared-auth';
+} from '@mana/shared-auth';
 import { logger } from '~/utils/logger';
 
 // Mana Core Auth URL from environment
-const MANA_AUTH_URL = process.env.EXPO_PUBLIC_MANA_CORE_AUTH_URL || 'http://localhost:3001';
+const MANA_AUTH_URL = process.env.EXPO_PUBLIC_MANA_AUTH_URL || 'http://localhost:3001';
 
 // Create SecureStore adapter for React Native
 const createSecureStoreAdapter = () => ({

@@ -7,7 +7,7 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 SERVICE_DIR="$REPO_DIR/services/mana-tts"
-PLIST_NAME="com.manacore.tts"
+PLIST_NAME="com.mana.tts"
 PLIST_PATH="$HOME/Library/LaunchAgents/$PLIST_NAME.plist"
 
 echo "=========================================="
@@ -93,10 +93,10 @@ cat > "$PLIST_PATH" << EOF
     <integer>10</integer>
 
     <key>StandardOutPath</key>
-    <string>/tmp/manacore-tts.log</string>
+    <string>/tmp/mana-tts.log</string>
 
     <key>StandardErrorPath</key>
-    <string>/tmp/manacore-tts.error.log</string>
+    <string>/tmp/mana-tts.error.log</string>
 </dict>
 </plist>
 EOF
@@ -117,7 +117,7 @@ if launchctl list | grep -q "$PLIST_NAME"; then
     echo "Service loaded successfully!"
 else
     echo "Warning: Service may not have loaded correctly."
-    echo "Check logs: tail -f /tmp/manacore-tts.log"
+    echo "Check logs: tail -f /tmp/mana-tts.log"
 fi
 
 # Health check
@@ -142,7 +142,7 @@ echo ""
 echo "Service management commands:"
 echo ""
 echo "  # View logs"
-echo "  tail -f /tmp/manacore-tts.log"
+echo "  tail -f /tmp/mana-tts.log"
 echo ""
 echo "  # Stop service"
 echo "  launchctl unload $PLIST_PATH"

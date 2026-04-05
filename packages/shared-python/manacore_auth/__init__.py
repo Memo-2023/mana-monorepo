@@ -1,12 +1,12 @@
 """
-ManaCore Shared Auth — API Key authentication for Python microservices.
+Mana Shared Auth — API Key authentication for Python microservices.
 
 Supports two authentication modes:
 1. Local API keys: Configured via environment variables
-2. External API keys: Validated via mana-core-auth service (when EXTERNAL_AUTH_ENABLED=true)
+2. External API keys: Validated via mana-auth service (when EXTERNAL_AUTH_ENABLED=true)
 
 Usage:
-    from manacore_auth import verify_api_key, AuthResult, get_api_key_stats
+    from mana_auth import verify_api_key, AuthResult, get_api_key_stats
 
     # In FastAPI:
     @app.post("/transcribe")

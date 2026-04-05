@@ -1,6 +1,6 @@
 """
-API Key Authentication for ManaCore STT Service.
-Delegates to shared manacore_auth package.
+API Key Authentication for Mana STT Service.
+Delegates to shared mana_auth package.
 """
 
 # Re-export everything from shared auth for backward compatibility
@@ -10,7 +10,7 @@ import os
 # Add shared-python to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "..", "packages", "shared-python"))
 
-from manacore_auth import (
+from mana_auth import (
     APIKey,
     AuthResult,
     RateLimitInfo,
@@ -20,7 +20,7 @@ from manacore_auth import (
     api_key_header,
     create_auth_dependency,
 )
-from manacore_auth.external_auth import (
+from mana_auth.external_auth import (
     ExternalValidationResult,
     is_external_auth_enabled,
     validate_api_key_external,

@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-// AuthClient handles login/logout via mana-core-auth.
+// AuthClient handles login/logout via mana-auth.
 type AuthClient struct {
 	backend *BackendClient
 }

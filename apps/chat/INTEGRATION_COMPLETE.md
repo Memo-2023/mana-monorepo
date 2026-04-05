@@ -47,7 +47,7 @@ The Chat project has been **fully migrated** from Supabase Auth to **Mana Core A
 - Created CurrentUser decorator to inject user data into controllers
 - Updated all controllers to use JwtAuthGuard
 - Removed userId from request body (now extracted from JWT)
-- Added MANA_CORE_AUTH_URL environment variable
+- Added MANA_AUTH_URL environment variable
 - Changed PORT from 3001 to 3002 (to avoid conflict with auth service)
 
 **Key Features:**
@@ -73,7 +73,7 @@ The Chat project has been **fully migrated** from Supabase Auth to **Mana Core A
 - Added `initializeWebAuth()` initialization
 - Added `getCredits()` method for credit balance
 - Added `getAccessToken()` method for API calls
-- Added MANA_CORE_AUTH_URL environment variable
+- Added MANA_AUTH_URL environment variable
 
 **API Compatibility:**
 
@@ -97,7 +97,7 @@ The Chat project has been **fully migrated** from Supabase Auth to **Mana Core A
 - Created React Native device adapter
 - Created React Native network adapter
 - Removed Supabase auth dependencies
-- Added MANA_CORE_AUTH_URL environment variable
+- Added MANA_AUTH_URL environment variable
 
 **Key Features:**
 
@@ -119,7 +119,7 @@ The Chat project has been **fully migrated** from Supabase Auth to **Mana Core A
 # PORT=3001
 
 # NEW (Add):
-MANA_CORE_AUTH_URL=http://localhost:3001
+MANA_AUTH_URL=http://localhost:3001
 PORT=3002
 
 # Keep (for database):
@@ -136,7 +136,7 @@ SUPABASE_SERVICE_KEY=your-service-key-here
 # PUBLIC_BACKEND_URL=http://localhost:3001
 
 # NEW (Add):
-PUBLIC_MANA_CORE_AUTH_URL=http://localhost:3001
+PUBLIC_MANA_AUTH_URL=http://localhost:3001
 PUBLIC_BACKEND_URL=http://localhost:3002
 
 # Keep (for database):
@@ -153,7 +153,7 @@ PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 # EXPO_PUBLIC_BACKEND_URL=http://localhost:3001
 
 # NEW (Add):
-EXPO_PUBLIC_MANA_CORE_AUTH_URL=http://localhost:3001
+EXPO_PUBLIC_MANA_AUTH_URL=http://localhost:3001
 EXPO_PUBLIC_BACKEND_URL=http://localhost:3002
 
 # Keep (for database):
@@ -182,7 +182,7 @@ Service runs on: `http://localhost:3001`
 cd chat/backend
 cp .env.example .env
 # Edit .env:
-# - Add MANA_CORE_AUTH_URL=http://localhost:3001
+# - Add MANA_AUTH_URL=http://localhost:3001
 # - Change PORT=3002
 pnpm start:dev
 ```
@@ -195,7 +195,7 @@ Service runs on: `http://localhost:3002`
 cd chat/apps/web
 cp .env.example .env
 # Edit .env:
-# - Add PUBLIC_MANA_CORE_AUTH_URL=http://localhost:3001
+# - Add PUBLIC_MANA_AUTH_URL=http://localhost:3001
 # - Change PUBLIC_BACKEND_URL=http://localhost:3002
 pnpm dev
 ```
@@ -208,7 +208,7 @@ App runs on: `http://localhost:5173`
 cd chat/apps/mobile
 cp .env.example .env
 # Edit .env:
-# - Add EXPO_PUBLIC_MANA_CORE_AUTH_URL=http://localhost:3001
+# - Add EXPO_PUBLIC_MANA_AUTH_URL=http://localhost:3001
 # - Change EXPO_PUBLIC_BACKEND_URL=http://localhost:3002
 pnpm dev
 ```
@@ -326,10 +326,10 @@ CORS_ORIGINS=http://localhost:5173,http://localhost:8081
 
 ### Issue: Backend can't validate tokens
 
-**Solution:** Check MANA_CORE_AUTH_URL in backend .env
+**Solution:** Check MANA_AUTH_URL in backend .env
 
 ```env
-MANA_CORE_AUTH_URL=http://localhost:3001
+MANA_AUTH_URL=http://localhost:3001
 ```
 
 ---
@@ -387,7 +387,7 @@ MANA_CORE_AUTH_URL=http://localhost:3001
 
 ## 📖 Documentation
 
-- **Integration Guide:** `/chat/MANA_CORE_AUTH_INTEGRATION.md`
+- **Integration Guide:** `/chat/MANA_AUTH_INTEGRATION.md`
 - **Mana Core Auth README:** `/mana-core-auth/README.md`
 - **Quick Start:** `/mana-core-auth/QUICKSTART.md`
 - **Master Plan:** `/.hive-mind/MASTER_PLAN_CENTRAL_AUTH_SYSTEM.md`

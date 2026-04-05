@@ -224,7 +224,7 @@ export interface A11yStoreConfig {
 }
 
 // ============================================================================
-// Global User Settings Types (synced via mana-core-auth)
+// Global User Settings Types (synced via mana-auth)
 // ============================================================================
 
 /**

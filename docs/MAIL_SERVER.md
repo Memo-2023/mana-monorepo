@@ -55,7 +55,7 @@ SMTP_HOST=stalwart           # Docker service name
 SMTP_PORT=587
 SMTP_USER=noreply            # Stalwart username (without @domain)
 SMTP_PASSWORD=ManaNoReply2026!
-SMTP_FROM=ManaCore <noreply@mana.how>
+SMTP_FROM=Mana <noreply@mana.how>
 SMTP_INSECURE_TLS=true       # Self-signed cert inside Docker network
 ```
 
@@ -63,7 +63,7 @@ SMTP_INSECURE_TLS=true       # Self-signed cert inside Docker network
 
 ```env
 MANA_NOTIFY_URL=http://mana-notify:3013   # Routes emails through mana-notify
-MANA_CORE_SERVICE_KEY=<shared-key>        # Auth for mana-notify API
+MANA_SERVICE_KEY=<shared-key>        # Auth for mana-notify API
 ```
 
 ## Stalwart Admin
@@ -185,7 +185,7 @@ docker exec mana-mail tail -30 /opt/stalwart/logs/stalwart.log.$(date +%Y-%m-%d)
 
 | Error | Cause | Fix |
 |-------|-------|-----|
-| `mana-notify error: 401` | Service key mismatch | Ensure `MANA_CORE_SERVICE_KEY` matches between mana-auth and mana-notify |
+| `mana-notify error: 401` | Service key mismatch | Ensure `MANA_SERVICE_KEY` matches between mana-auth and mana-notify |
 | `smtp not configured` | Empty SMTP_USER or SMTP_PASSWORD | Check `.env` on server, restart mana-notify |
 | `security.ip-blocked` | Stalwart banned mana-notify IP | Restart Stalwart container (clears bans) |
 | `535 Authentication credentials invalid` | Wrong password or username format | Use username without domain (`noreply`, not `noreply@mana.how`) |

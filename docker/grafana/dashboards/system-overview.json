@@ -537,7 +537,7 @@
 				},
 				{
 					"datasource": { "type": "prometheus", "uid": "${datasource}" },
-					"expr": "up{job=\"mana-core-auth\"}",
+					"expr": "up{job=\"mana-auth\"}",
 					"legendFormat": "Auth",
 					"refId": "A"
 				},
@@ -1070,7 +1070,7 @@
 	],
 	"refresh": "30s",
 	"schemaVersion": 38,
-	"tags": ["manacore", "system"],
+	"tags": ["mana", "system"],
 	"templating": {
 		"list": [
 			{

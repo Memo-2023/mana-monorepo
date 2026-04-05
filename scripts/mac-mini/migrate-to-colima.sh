@@ -329,14 +329,14 @@ else
     log "Docker Desktop Autostart deaktiviert"
 
     # Colima LaunchAgent erstellen
-    PLIST_PATH="$HOME/Library/LaunchAgents/com.manacore.colima.plist"
+    PLIST_PATH="$HOME/Library/LaunchAgents/com.mana.colima.plist"
     cat > "$PLIST_PATH" << 'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>com.manacore.colima</string>
+    <string>com.mana.colima</string>
     <key>ProgramArguments</key>
     <array>
         <string>/opt/homebrew/bin/colima</string>

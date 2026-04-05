@@ -1,4 +1,4 @@
-import { createLocalStore, type LocalCollection } from '@manacore/local-store';
+import { createLocalStore, type LocalCollection } from '@mana/local-store';
 import type { UloadLink, CreateShortLinkOptions, CreatedLink } from './types';
 import { generateShortCode, getShortUrl, getQrCodeUrl } from './utils';
 
@@ -57,7 +57,7 @@ async function ensureReady(): Promise<LocalCollection<UloadLink>> {
 	}
 	if (!_linkCollection) {
 		throw new Error(
-			'@manacore/shared-uload not initialized. Call initSharedUload() in your app layout.'
+			'@mana/shared-uload not initialized. Call initSharedUload() in your app layout.'
 		);
 	}
 	return _linkCollection;

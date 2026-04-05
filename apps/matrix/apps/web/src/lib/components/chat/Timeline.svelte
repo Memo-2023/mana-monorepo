@@ -3,7 +3,7 @@
 	import Message from './Message.svelte';
 	import TypingIndicator from './TypingIndicator.svelte';
 	import { tick } from 'svelte';
-	import { CircleNotch, ArrowDown } from '@manacore/shared-icons';
+	import { CircleNotch, ArrowDown } from '@mana/shared-icons';
 
 	interface Props {
 		onReply?: (message: SimpleMessage) => void;

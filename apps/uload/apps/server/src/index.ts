@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
-import { authMiddleware, errorHandler, notFoundHandler } from '@manacore/shared-hono';
+import { authMiddleware, errorHandler, notFoundHandler } from '@mana/shared-hono';
 import { loadConfig } from './config';
 import { getDb } from './db/connection';
 import { RedirectService } from './services/redirect';

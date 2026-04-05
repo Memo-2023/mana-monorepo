@@ -16,7 +16,7 @@
 		MagnifyingGlass,
 		CheckSquare,
 		Funnel,
-	} from '@manacore/shared-icons';
+	} from '@mana/shared-icons';
 
 	// Map icon names to Phosphor components
 	const phosphorIcons: Record<string, any> = {

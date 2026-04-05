@@ -18,7 +18,7 @@ import { z } from 'zod';
 import { eq, and, asc, sql } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
-import { serviceAuthMiddleware } from '@manacore/shared-hono';
+import { serviceAuthMiddleware } from '@mana/shared-hono';
 import {
 	pgSchema,
 	uuid,
@@ -34,7 +34,7 @@ import {
 // ─── DB Schema (minimal, server-only) ──────────────────────
 
 const DATABASE_URL =
-	process.env.DATABASE_URL ?? 'postgresql://manacore:devpassword@localhost:5432/mana_platform';
+	process.env.DATABASE_URL ?? 'postgresql://mana:devpassword@localhost:5432/mana_platform';
 
 const todoSchema = pgSchema('todo');
 

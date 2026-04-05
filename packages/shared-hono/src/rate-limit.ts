@@ -6,7 +6,7 @@
  *
  * Usage:
  * ```ts
- * import { rateLimitMiddleware } from '@manacore/shared-hono/rate-limit';
+ * import { rateLimitMiddleware } from '@mana/shared-hono/rate-limit';
  * app.use('/api/*', rateLimitMiddleware({ max: 100, windowMs: 60_000 }));
  * ```
  */

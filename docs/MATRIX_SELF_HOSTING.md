@@ -1,6 +1,6 @@
 # Matrix Self-Hosting auf Mac Mini
 
-Plan für DSGVO-konformes Messaging mit Matrix/Synapse auf dem ManaCore Server.
+Plan für DSGVO-konformes Messaging mit Matrix/Synapse auf dem Mana Server.
 
 ## Übersicht
 
@@ -222,7 +222,7 @@ volumes:
       "base_url": ""
     }
   },
-  "brand": "ManaCore Chat",
+  "brand": "Mana Chat",
   "integrations_ui_url": "",
   "integrations_rest_url": "",
   "integrations_widgets_urls": [],
@@ -477,7 +477,7 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
   }
 
   private getHelpText(): string {
-    return `**ManaCore Ollama Bot**
+    return `**Mana Ollama Bot**
 
 Befehle:
 - \`!help\` - Diese Hilfe

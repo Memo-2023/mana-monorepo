@@ -8,7 +8,7 @@
 
 import { Hono } from 'hono';
 import { streamSSE } from 'hono/streaming';
-import { consumeCredits, validateCredits } from '@manacore/shared-hono/credits';
+import { consumeCredits, validateCredits } from '@mana/shared-hono/credits';
 
 const LLM_URL = process.env.MANA_LLM_URL || 'http://localhost:3025';
 

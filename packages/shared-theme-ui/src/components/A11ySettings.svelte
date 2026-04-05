@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { A11yStore, ContrastLevel, ColorblindMode } from '@manacore/shared-theme';
-	import { COLORBLIND_OPTIONS, CONTRAST_OPTIONS } from '@manacore/shared-theme';
+	import type { A11yStore, ContrastLevel, ColorblindMode } from '@mana/shared-theme';
+	import { COLORBLIND_OPTIONS, CONTRAST_OPTIONS } from '@mana/shared-theme';
 	import type { A11yTranslations } from '../types';
 	import { defaultA11yTranslations } from '../types';
 

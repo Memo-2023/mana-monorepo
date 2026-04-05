@@ -1,14 +1,14 @@
-# ManaCore Architektur-Migration: Entwicklungsbericht
+# Mana Architektur-Migration: Entwicklungsbericht
 
 > **Datum:** 2026-03-27 bis 2026-03-28
 > **Autor:** Claude Code + Till Schneider
-> **Umfang:** Komplette Architektur-Transformation des ManaCore-Monorepos
+> **Umfang:** Komplette Architektur-Transformation des Mana-Monorepos
 
 ---
 
 ## Zusammenfassung
 
-In zwei intensiven Sessions wurde die gesamte ManaCore-Architektur von einem **API-first NestJS-Monolithen** zu einer **Local-First Microservice-Architektur** auf Hono + Bun transformiert.
+In zwei intensiven Sessions wurde die gesamte Mana-Architektur von einem **API-first NestJS-Monolithen** zu einer **Local-First Microservice-Architektur** auf Hono + Bun transformiert.
 
 **Netto-Ergebnis:**
 - **~90% weniger Backend-Code** (von ~130k auf ~8k LOC)
@@ -337,7 +337,7 @@ mana-analytics (Hono, 475 LOC)
 | 18 | SkilltTree | skills, activities, achievements | ✅ Komplett |
 | 19 | CityCorners | locations, favorites | ✅ Komplett |
 
-**Nicht migriert:** ManaCore (Hub), Matrix (Protocol), Playground (stateless)
+**Nicht migriert:** Mana (Hub), Matrix (Protocol), Playground (stateless)
 
 ### 7.2 Guest-Mode UX
 

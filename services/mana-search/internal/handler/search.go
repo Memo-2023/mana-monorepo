@@ -5,14 +5,14 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/manacore/shared-go/httputil"
+	"github.com/mana/shared-go/httputil"
 	"sort"
 	"time"
 
-	"github.com/manacore/mana-search/internal/cache"
-	"github.com/manacore/mana-search/internal/config"
-	"github.com/manacore/mana-search/internal/metrics"
-	"github.com/manacore/mana-search/internal/search"
+	"github.com/mana/mana-search/internal/cache"
+	"github.com/mana/mana-search/internal/config"
+	"github.com/mana/mana-search/internal/metrics"
+	"github.com/mana/mana-search/internal/search"
 )
 
 type SearchHandler struct {

@@ -100,7 +100,7 @@ export function createStorage(bucketKey: keyof typeof BUCKETS, publicUrl?: strin
 
 // Convenience aliases for backward compatibility
 
-export const createManaCoreStorage = (publicUrl?: string) => createStorage('MANACORE', publicUrl);
+export const createManaStorage = (publicUrl?: string) => createStorage('MANACORE', publicUrl);
 export const createPictureStorage = (publicUrl?: string) => createStorage('PICTURE', publicUrl);
 export const createChatStorage = () => createStorage('CHAT');
 export const createCardsStorage = () => createStorage('CARDS');

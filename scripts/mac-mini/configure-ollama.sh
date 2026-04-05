@@ -24,7 +24,7 @@ fi
 
 # Create override plist that sets environment variables
 # This is the recommended way to add env vars to a Homebrew service
-OVERRIDE_PLIST="$PLIST_DIR/com.manacore.ollama-env.plist"
+OVERRIDE_PLIST="$PLIST_DIR/com.mana.ollama-env.plist"
 
 cat > "$OVERRIDE_PLIST" << 'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>
@@ -32,7 +32,7 @@ cat > "$OVERRIDE_PLIST" << 'PLIST'
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>com.manacore.ollama-env</string>
+    <string>com.mana.ollama-env</string>
     <key>ProgramArguments</key>
     <array>
         <string>/bin/bash</string>

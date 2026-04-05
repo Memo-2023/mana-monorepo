@@ -16,9 +16,9 @@ export const APP_BRANDING: Record<AppId, AppBranding> = {
 		logoViewBox: '0 0 280 280',
 		logoStroke: false,
 	},
-	manacore: {
-		id: 'manacore',
-		name: 'ManaCore',
+	mana: {
+		id: 'mana',
+		name: 'Mana',
 		tagline: 'Central Hub',
 		primaryColor: '#6366f1',
 		secondaryColor: '#818cf8',

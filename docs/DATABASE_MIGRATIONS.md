@@ -1,6 +1,6 @@
 # Database Migration Guide
 
-This document describes database migration best practices, procedures, and tooling for the ManaCore monorepo. **This is a core system concept** - all developers should understand these patterns.
+This document describes database migration best practices, procedures, and tooling for the Mana monorepo. **This is a core system concept** - all developers should understand these patterns.
 
 ## Table of Contents
 
@@ -18,7 +18,7 @@ This document describes database migration best practices, procedures, and tooli
 
 ## Overview
 
-All backends in the ManaCore monorepo use **Drizzle ORM** for database schema management. We use two different approaches depending on the environment:
+All backends in the Mana monorepo use **Drizzle ORM** for database schema management. We use two different approaches depending on the environment:
 
 | Environment | Command | Purpose |
 |-------------|---------|---------|

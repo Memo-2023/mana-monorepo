@@ -1,14 +1,14 @@
 # Mobile & Desktop App Strategie
 
-> Analyse der Optionen, die bestehende ManaCore SvelteKit-App als native Mobile- und Desktop-App auszuliefern.
+> Analyse der Optionen, die bestehende Mana SvelteKit-App als native Mobile- und Desktop-App auszuliefern.
 >
 > Stand: April 2026
 
 ## Ausgangslage
 
-Die ManaCore Unified App ist eine SvelteKit 2 + Svelte 5 Anwendung mit:
+Die Mana Unified App ist eine SvelteKit 2 + Svelte 5 Anwendung mit:
 
-- **27+ Module** in einer einzigen App (`apps/manacore/apps/web`)
+- **27+ Module** in einer einzigen App (`apps/mana/apps/web`)
 - **Local-first Architektur** mit Dexie.js / IndexedDB (120+ Collections)
 - **Tailwind CSS** für Styling
 - **Hintergrund-Sync** via mana-sync (Go, WebSocket)

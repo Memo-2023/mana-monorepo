@@ -23,5 +23,5 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname mana_platform <<-EO
 
     -- Grant schema usage
     GRANT ALL ON SCHEMA auth, credits, gifts, subscriptions, feedback, usr, media,
-        todo, traces, presi, uload, cards TO manacore;
+        todo, traces, presi, uload, cards TO mana;
 EOSQL

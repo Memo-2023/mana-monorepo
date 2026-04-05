@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { matrixStore, type SimpleCall } from '$lib/matrix';
-	import { Phone, PhoneDisconnect, VideoCamera, User } from '@manacore/shared-icons';
+	import { Phone, PhoneDisconnect, VideoCamera, User } from '@mana/shared-icons';
 
 	interface Props {
 		call: SimpleCall;

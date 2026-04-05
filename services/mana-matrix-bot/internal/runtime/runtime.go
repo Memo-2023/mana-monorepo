@@ -9,11 +9,11 @@ import (
 
 	"strings"
 
-	"github.com/manacore/mana-matrix-bot/internal/config"
-	"github.com/manacore/mana-matrix-bot/internal/matrix"
-	"github.com/manacore/mana-matrix-bot/internal/plugin"
-	"github.com/manacore/mana-matrix-bot/internal/services"
-	"github.com/manacore/mana-matrix-bot/internal/session"
+	"github.com/mana/mana-matrix-bot/internal/config"
+	"github.com/mana/mana-matrix-bot/internal/matrix"
+	"github.com/mana/mana-matrix-bot/internal/plugin"
+	"github.com/mana/mana-matrix-bot/internal/services"
+	"github.com/mana/mana-matrix-bot/internal/session"
 
 	"maunium.net/go/mautrix"
 	"maunium.net/go/mautrix/event"

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Modal } from '../organisms';
-	import { Keyboard, Hash, X } from '@manacore/shared-icons';
+	import { Keyboard, Hash, X } from '@mana/shared-icons';
 	import KeyboardShortcutsPanel from './KeyboardShortcutsPanel.svelte';
 	import SyntaxHelpPanel from './SyntaxHelpPanel.svelte';
 	import type { HelpModalConfig } from './types';

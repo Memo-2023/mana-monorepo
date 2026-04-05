@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { RegisterPage } from '@manacore/shared-auth-ui';
+	import { RegisterPage } from '@mana/shared-auth-ui';
 	import { authStore } from '$lib/stores/auth.svelte';
 </script>
 

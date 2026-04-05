@@ -3,7 +3,7 @@ groups:
     rules:
       # Service Down Alert
       - alert: ServiceDown
-        expr: up{job=~"mana-core-auth|.*-backend|mana-search|mana-media|mana-llm|synapse"} == 0
+        expr: up{job=~"mana-auth|.*-backend|mana-search|mana-media|mana-llm|synapse"} == 0
         for: 1m
         labels:
           severity: critical
@@ -258,19 +258,19 @@ groups:
     rules:
       # Auth Service Down
       - alert: AuthServiceDown
-        expr: up{job="mana-core-auth"} == 0
+        expr: up{job="mana-auth"} == 0
         for: 30s
         labels:
           severity: critical
         annotations:
           summary: "Auth Service is down"
-          description: "mana-core-auth has been down for more than 30 seconds. All authentication will fail."
+          description: "mana-auth has been down for more than 30 seconds. All authentication will fail."
 
       # High Login Failure Rate (> 50% of logins fail with 401)
       - alert: HighLoginFailureRate
         expr: |
-          sum(rate(http_requests_total{job="mana-core-auth",route="/auth/login",status="401"}[5m]))
-          / sum(rate(http_requests_total{job="mana-core-auth",route="/auth/login"}[5m])) > 0.5
+          sum(rate(http_requests_total{job="mana-auth",route="/auth/login",status="401"}[5m]))
+          / sum(rate(http_requests_total{job="mana-auth",route="/auth/login"}[5m])) > 0.5
         for: 5m
         labels:
           severity: warning
@@ -281,7 +281,7 @@ groups:
       # Rate Limiting Triggered Frequently
       - alert: HighRateLimitHits
         expr: |
-          sum(rate(http_requests_total{job="mana-core-auth",status="429"}[5m])) > 1
+          sum(rate(http_requests_total{job="mana-auth",status="429"}[5m])) > 1
         for: 5m
         labels:
           severity: warning
@@ -292,7 +292,7 @@ groups:
       # Brute Force Detection (> 100 failed logins in 5 min)
       - alert: PossibleBruteForce
         expr: |
-          sum(increase(http_requests_total{job="mana-core-auth",route="/auth/login",status="401"}[5m])) > 100
+          sum(increase(http_requests_total{job="mana-auth",route="/auth/login",status="401"}[5m])) > 100
         for: 0m
         labels:
           severity: critical
@@ -303,7 +303,7 @@ groups:
       # Registration Spike (unusual registration activity)
       - alert: RegistrationSpike
         expr: |
-          sum(rate(http_requests_total{job="mana-core-auth",route="/auth/register",status="201"}[5m])) > 1
+          sum(rate(http_requests_total{job="mana-auth",route="/auth/register",status="201"}[5m])) > 1
         for: 5m
         labels:
           severity: info
@@ -314,8 +314,8 @@ groups:
       # Token Refresh Failures
       - alert: HighTokenRefreshFailures
         expr: |
-          sum(rate(http_requests_total{job="mana-core-auth",route="/auth/refresh",status=~"4.."}[5m]))
-          / sum(rate(http_requests_total{job="mana-core-auth",route="/auth/refresh"}[5m])) > 0.3
+          sum(rate(http_requests_total{job="mana-auth",route="/auth/refresh",status=~"4.."}[5m]))
+          / sum(rate(http_requests_total{job="mana-auth",route="/auth/refresh"}[5m])) > 0.3
         for: 10m
         labels:
           severity: warning
@@ -326,7 +326,7 @@ groups:
       # Password Reset Flood (possible enumeration attack)
       - alert: PasswordResetFlood
         expr: |
-          sum(increase(http_requests_total{job="mana-core-auth",route="/auth/forgot-password"}[5m])) > 50
+          sum(increase(http_requests_total{job="mana-auth",route="/auth/forgot-password"}[5m])) > 50
         for: 0m
         labels:
           severity: warning
@@ -337,7 +337,7 @@ groups:
       # Low User Verification Rate (less than 50% verified after 1 week)
       - alert: LowVerificationRate
         expr: |
-          auth_users_verified{job="mana-core-auth"} / auth_users_total{job="mana-core-auth"} < 0.5
+          auth_users_verified{job="mana-auth"} / auth_users_total{job="mana-auth"} < 0.5
         for: 1h
         labels:
           severity: info
@@ -348,7 +348,7 @@ groups:
       # Auth Service Slow (p95 > 500ms)
       - alert: AuthServiceSlow
         expr: |
-          histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="mana-core-auth"}[5m])) by (le)) > 0.5
+          histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="mana-auth"}[5m])) by (le)) > 0.5
         for: 5m
         labels:
           severity: warning
@@ -359,7 +359,7 @@ groups:
       # OIDC Token Endpoint Errors
       - alert: OIDCTokenErrors
         expr: |
-          sum(rate(http_requests_total{job="mana-core-auth",route=~"/api/auth/oauth2/token|/api/oidc/token",status=~"5.."}[5m])) > 0.1
+          sum(rate(http_requests_total{job="mana-auth",route=~"/api/auth/oauth2/token|/api/oidc/token",status=~"5.."}[5m])) > 0.1
         for: 5m
         labels:
           severity: warning

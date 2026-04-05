@@ -1,5 +1,5 @@
 #!/bin/bash
-# ManaCore Mac Mini Restart Script
+# Mana Mac Mini Restart Script
 # Restarts all Docker containers gracefully
 
 set -e
@@ -12,7 +12,7 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 COMPOSE_FILE="$PROJECT_ROOT/docker-compose.macmini.yml"
 ENV_FILE="$PROJECT_ROOT/.env.macmini"
 
-echo "=== ManaCore Restart ==="
+echo "=== Mana Restart ==="
 echo ""
 
 # Check for flags

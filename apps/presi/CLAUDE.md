@@ -128,7 +128,7 @@ pnpm db:seed                     # Seed database
 NODE_ENV=development
 PORT=3008
 DATABASE_URL=postgresql://manacore:devpassword@localhost:5432/presi
-MANA_CORE_AUTH_URL=http://localhost:3001
+MANA_AUTH_URL=http://localhost:3001
 CORS_ORIGINS=http://localhost:5173,http://localhost:8081
 ```
 
@@ -136,7 +136,7 @@ CORS_ORIGINS=http://localhost:5173,http://localhost:8081
 
 ```
 PUBLIC_BACKEND_URL=http://localhost:3008
-PUBLIC_MANA_CORE_AUTH_URL=http://localhost:3001
+PUBLIC_MANA_AUTH_URL=http://localhost:3001
 ```
 
 ## Shared Package

@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { ThemeVariant } from '@manacore/shared-theme';
-	import { DEFAULT_THEME_VARIANTS, EXTENDED_THEME_VARIANTS } from '@manacore/shared-theme';
+	import type { ThemeVariant } from '@mana/shared-theme';
+	import { DEFAULT_THEME_VARIANTS, EXTENDED_THEME_VARIANTS } from '@mana/shared-theme';
 	import type { ThemeCardData, ThemePageTranslations } from '../types';
 	import ThemeCard from './ThemeCard.svelte';
 

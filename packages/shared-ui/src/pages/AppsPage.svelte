@@ -5,7 +5,7 @@
 		APP_STATUS_LABELS,
 		type ManaApp,
 		type AppIconId,
-	} from '@manacore/shared-branding';
+	} from '@mana/shared-branding';
 
 	interface Props {
 		/** Current app ID to highlight */

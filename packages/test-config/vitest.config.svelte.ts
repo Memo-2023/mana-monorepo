@@ -3,7 +3,7 @@
  *
  * Usage in web vitest.config.ts:
  * import { defineConfig, mergeConfig } from 'vitest/config';
- * import svelteConfig from '@manacore/test-config/vitest-svelte';
+ * import svelteConfig from '@mana/test-config/vitest-svelte';
  * import { sveltekit } from '@sveltejs/kit/vite';
  *
  * export default mergeConfig(

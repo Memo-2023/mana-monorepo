@@ -1,0 +1,344 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Navbar from '../../components/navigation/Navbar.astro';
+import Footer from '../../components/navigation/Footer.astro';
+import Section from '../../components/content/Section.astro';
+import Container from '../../components/layout/Container.astro';
+import Heading from '../../components/typography/Heading.astro';
+import Text from '../../components/typography/Text.astro';
+import { getCollection } from 'astro:content';
+import { Icon } from 'astro-icon/components';
+
+export async function getStaticPaths() {
+	const blueprints = await getCollection('blueprints');
+	return blueprints.map((blueprint) => ({
+		params: { slug: blueprint.slug },
+		props: { blueprint },
+	}));
+}
+
+const { blueprint } = Astro.props;
+const { Content } = await blueprint.render();
+
+const categoryColors: Record<string, { bg: string; text: string; border: string; icon: string }> = {
+	architecture: {
+		bg: 'from-blue-500/10 to-cyan-500/10',
+		text: 'text-blue-500',
+		border: 'border-blue-500/30',
+		icon: 'mdi:sitemap',
+	},
+	infrastructure: {
+		bg: 'from-emerald-500/10 to-teal-500/10',
+		text: 'text-emerald-500',
+		border: 'border-emerald-500/30',
+		icon: 'mdi:server-network',
+	},
+	database: {
+		bg: 'from-amber-500/10 to-orange-500/10',
+		text: 'text-amber-500',
+		border: 'border-amber-500/30',
+		icon: 'mdi:database',
+	},
+	security: {
+		bg: 'from-red-500/10 to-rose-500/10',
+		text: 'text-red-500',
+		border: 'border-red-500/30',
+		icon: 'mdi:shield-lock',
+	},
+	federation: {
+		bg: 'from-purple-500/10 to-violet-500/10',
+		text: 'text-purple-500',
+		border: 'border-purple-500/30',
+		icon: 'mdi:hub',
+	},
+	licensing: {
+		bg: 'from-indigo-500/10 to-blue-500/10',
+		text: 'text-indigo-500',
+		border: 'border-indigo-500/30',
+		icon: 'mdi:license',
+	},
+	'business-model': {
+		bg: 'from-pink-500/10 to-fuchsia-500/10',
+		text: 'text-pink-500',
+		border: 'border-pink-500/30',
+		icon: 'mdi:chart-timeline-variant',
+	},
+};
+
+const categoryLabels: Record<string, string> = {
+	architecture: 'Architektur',
+	infrastructure: 'Infrastruktur',
+	database: 'Datenbank',
+	security: 'Sicherheit',
+	federation: 'Federation',
+	licensing: 'Lizenzierung',
+	'business-model': 'Geschäftsmodell',
+};
+
+const statusColors: Record<string, { bg: string; text: string; icon: string }> = {
+	draft: { bg: 'bg-gray-100 dark:bg-gray-800', text: 'text-gray-500', icon: 'mdi:pencil-outline' },
+	proposal: {
+		bg: 'bg-yellow-100 dark:bg-yellow-900/30',
+		text: 'text-yellow-600 dark:text-yellow-400',
+		icon: 'mdi:lightbulb-outline',
+	},
+	accepted: {
+		bg: 'bg-green-100 dark:bg-green-900/30',
+		text: 'text-green-600 dark:text-green-400',
+		icon: 'mdi:check-circle-outline',
+	},
+	implemented: {
+		bg: 'bg-blue-100 dark:bg-blue-900/30',
+		text: 'text-blue-600 dark:text-blue-400',
+		icon: 'mdi:rocket-launch-outline',
+	},
+	superseded: {
+		bg: 'bg-gray-100 dark:bg-gray-800',
+		text: 'text-gray-400',
+		icon: 'mdi:archive-outline',
+	},
+};
+
+const statusLabels: Record<string, string> = {
+	draft: 'Entwurf',
+	proposal: 'Vorschlag',
+	accepted: 'Akzeptiert',
+	implemented: 'Implementiert',
+	superseded: 'Ersetzt',
+};
+
+const colors = categoryColors[blueprint.data.category] || categoryColors.architecture;
+const status = statusColors[blueprint.data.status] || statusColors.draft;
+
+const formatDate = (date: Date) => {
+	return new Intl.DateTimeFormat('de-DE', {
+		weekday: 'long',
+		day: '2-digit',
+		month: 'long',
+		year: 'numeric',
+	}).format(date);
+};
+---
+
+<Layout
+	title={`${blueprint.data.title} - Mana Blueprints`}
+	description={blueprint.data.description}
+>
+	<div
+		class="bg-gradient-to-b from-blue-50/30 via-white to-blue-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 min-h-screen"
+	>
+		<Navbar />
+
+		<!-- Hero Section -->
+		<div class="relative pt-24 pb-12">
+			<div class="absolute inset-0">
+				<div
+					class="absolute inset-0 bg-gradient-to-b from-blue-50/50 to-transparent dark:from-gray-900 dark:to-transparent"
+				>
+				</div>
+				<div
+					class="absolute top-0 right-0 w-96 h-96 bg-purple-500/10 dark:bg-purple-500/5 rounded-full blur-3xl"
+				>
+				</div>
+				<div
+					class="absolute bottom-0 left-0 w-96 h-96 bg-blue-500/10 dark:bg-blue-500/5 rounded-full blur-3xl"
+				>
+				</div>
+			</div>
+
+			<Container class="relative z-10">
+				<div class="max-w-4xl mx-auto">
+					<!-- Back link -->
+					<a
+						href="/blueprints"
+						class="inline-flex items-center gap-2 text-gray-500 hover:text-purple-500 transition-colors mb-8"
+					>
+						<Icon name="mdi:arrow-left" class="w-4 h-4" />
+						<Text size="sm">Zurück zu Blueprints</Text>
+					</a>
+
+					<!-- Meta info -->
+					<div class="flex flex-wrap items-center gap-4 mb-6">
+						<!-- Status Badge -->
+						<span
+							class={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium ${status.bg} ${status.text}`}
+						>
+							<Icon name={status.icon} class="w-4 h-4" />
+							{statusLabels[blueprint.data.status]}
+						</span>
+
+						<!-- Category Badge -->
+						<span
+							class={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium bg-gradient-to-r ${colors.bg} ${colors.text} border ${colors.border}`}
+						>
+							<Icon name={colors.icon} class="w-4 h-4" />
+							{categoryLabels[blueprint.data.category]}
+						</span>
+
+						<!-- Date -->
+						<div class="flex items-center gap-2 text-gray-500 dark:text-gray-400">
+							<Icon name="mdi:calendar" class="w-5 h-5" />
+							<Text size="base">{formatDate(blueprint.data.date)}</Text>
+						</div>
+
+						<!-- Read Time -->
+						{
+							blueprint.data.readTime && (
+								<div class="flex items-center gap-2 text-gray-500 dark:text-gray-400">
+									<Icon name="mdi:clock-outline" class="w-5 h-5" />
+									<Text size="base">{blueprint.data.readTime} min Lesezeit</Text>
+								</div>
+							)
+						}
+					</div>
+
+					<!-- Decision Date if different from date -->
+					{
+						blueprint.data.decisionDate && (
+							<div class="flex items-center gap-2 text-gray-500 dark:text-gray-400 mb-6">
+								<Icon name="mdi:gavel" class="w-5 h-5" />
+								<Text size="sm">
+									Entscheidung getroffen am: {formatDate(blueprint.data.decisionDate)}
+								</Text>
+							</div>
+						)
+					}
+
+					<!-- Title -->
+					<Heading as="h1" size="1" class="mb-6">
+						{blueprint.data.title}
+					</Heading>
+
+					<!-- Description -->
+					<Text size="xl" class="text-gray-600 dark:text-gray-400 mb-8">
+						{blueprint.data.description}
+					</Text>
+
+					<!-- Author -->
+					<div class="flex items-center gap-3 pb-8 border-b border-gray-200 dark:border-gray-700">
+						<div
+							class="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold"
+						>
+							{blueprint.data.author.charAt(0)}
+						</div>
+						<div>
+							<Text weight="semibold">{blueprint.data.author}</Text>
+							<Text size="sm" class="text-gray-500">Autor</Text>
+						</div>
+					</div>
+				</div>
+			</Container>
+		</div>
+
+		<!-- Content -->
+		<Section spacing="large" class="relative">
+			<Container class="relative z-10">
+				<article
+					class="max-w-4xl mx-auto prose prose-lg dark:prose-invert prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-600 dark:prose-p:text-gray-300 prose-a:text-purple-500 prose-a:no-underline hover:prose-a:underline prose-strong:text-gray-900 dark:prose-strong:text-white prose-code:text-purple-500 prose-code:bg-gray-100 dark:prose-code:bg-gray-800 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-pre:bg-gray-900 prose-pre:border prose-pre:border-gray-700 prose-table:border-collapse prose-th:bg-gray-100 dark:prose-th:bg-gray-800 prose-th:border prose-th:border-gray-300 dark:prose-th:border-gray-600 prose-th:px-4 prose-th:py-2 prose-td:border prose-td:border-gray-300 dark:prose-td:border-gray-600 prose-td:px-4 prose-td:py-2 prose-hr:border-gray-200 dark:prose-hr:border-gray-700"
+				>
+					<Content />
+				</article>
+
+				<!-- Tags -->
+				{
+					blueprint.data.tags && blueprint.data.tags.length > 0 && (
+						<div class="max-w-4xl mx-auto mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
+							<Text size="sm" weight="semibold" class="mb-4 text-gray-500">
+								Tags
+							</Text>
+							<div class="flex flex-wrap gap-2">
+								{blueprint.data.tags.map((tag: string) => (
+									<span class="px-3 py-1.5 text-sm rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700">
+										#{tag}
+									</span>
+								))}
+							</div>
+						</div>
+					)
+				}
+
+				<!-- Related Blueprints -->
+				{
+					blueprint.data.relatedBlueprints && blueprint.data.relatedBlueprints.length > 0 && (
+						<div class="max-w-4xl mx-auto mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">
+							<Text size="sm" weight="semibold" class="mb-4 text-gray-500">
+								Verwandte Blueprints
+							</Text>
+							<div class="flex flex-wrap gap-2">
+								{blueprint.data.relatedBlueprints.map((related: string) => (
+									<a
+										href={`/blueprints/${related}`}
+										class="px-3 py-1.5 text-sm rounded-lg bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-700 hover:bg-purple-100 dark:hover:bg-purple-900/40 transition-colors"
+									>
+										{related}
+									</a>
+								))}
+							</div>
+						</div>
+					)
+				}
+
+				<!-- Navigation -->
+				<div class="max-w-4xl mx-auto mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
+					<a
+						href="/blueprints"
+						class="inline-flex items-center gap-2 px-6 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-purple-500 transition-colors"
+					>
+						<Icon name="mdi:arrow-left" class="w-5 h-5" />
+						<Text weight="semibold">Alle Blueprints</Text>
+					</a>
+				</div>
+			</Container>
+		</Section>
+
+		<Footer />
+	</div>
+</Layout>
+
+<style>
+	/* Additional prose customizations */
+	:global(.prose h2) {
+		margin-top: 2.5rem;
+		padding-bottom: 0.5rem;
+		border-bottom: 1px solid rgba(156, 163, 175, 0.2);
+	}
+
+	:global(.prose h3) {
+		margin-top: 2rem;
+	}
+
+	:global(.prose h4) {
+		margin-top: 1.5rem;
+	}
+
+	:global(.prose table) {
+		display: block;
+		overflow-x: auto;
+		width: 100%;
+	}
+
+	:global(.prose ul) {
+		list-style-type: disc;
+	}
+
+	:global(.prose li::marker) {
+		color: #a855f7;
+	}
+
+	/* Code blocks with better scrolling */
+	:global(.prose pre) {
+		overflow-x: auto;
+		max-width: 100%;
+	}
+
+	:global(.prose pre code) {
+		white-space: pre;
+	}
+
+	/* ASCII art boxes styling */
+	:global(.prose pre code) {
+		font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Mono', 'Droid Sans Mono', monospace;
+		font-size: 0.85em;
+		line-height: 1.4;
+	}
+</style>

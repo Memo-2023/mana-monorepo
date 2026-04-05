@@ -1,5 +1,5 @@
 #!/bin/bash
-# ManaCore Container Health Enforcer
+# Mana Container Health Enforcer
 # Ensures all containers are actually running and healthy
 #
 # This script detects containers that are:
@@ -17,8 +17,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 COMPOSE_FILE="$PROJECT_ROOT/docker-compose.macmini.yml"
 ENV_FILE="$PROJECT_ROOT/.env.macmini"
-LOG_FILE="/tmp/manacore-container-health.log"
-RESTART_TRACKER="/tmp/manacore-restart-tracker"
+LOG_FILE="/tmp/mana-container-health.log"
+RESTART_TRACKER="/tmp/mana-restart-tracker"
 
 # Load notification config if exists
 if [ -f "$PROJECT_ROOT/.env.notifications" ]; then
@@ -45,7 +45,7 @@ send_notification() {
     # ntfy
     if [ -n "$NTFY_TOPIC" ]; then
         curl -s -d "$message" \
-            -H "Title: ManaCore Container Health" \
+            -H "Title: Mana Container Health" \
             -H "Priority: $priority" \
             -H "Tags: white_check_mark" \
             "https://ntfy.sh/$NTFY_TOPIC" >/dev/null 2>&1 || true
@@ -209,13 +209,13 @@ ALL_STILL_BROKEN=$(echo -e "$STILL_STUCK\n$STILL_CRASHING" | grep -v "^$" | sort
 if [ -z "$ALL_STILL_BROKEN" ]; then
     FIXED_MSG="Auto-fixed containers: $(echo $ALL_PROBLEM_CONTAINERS | tr '\n' ', ')"
     log "SUCCESS: $FIXED_MSG"
-    send_notification "🔧 <b>ManaCore Auto-Recovery</b>\n\n$FIXED_MSG"
+    send_notification "🔧 <b>Mana Auto-Recovery</b>\n\n$FIXED_MSG"
 else
     log "ERROR: Some containers still have issues:"
     for container in $ALL_STILL_BROKEN; do
         STATUS=$(docker inspect "$container" --format '{{.State.Status}}' 2>/dev/null || echo "unknown")
         log "  - $container (status: $STATUS)"
     done
-    send_notification "⚠️ <b>ManaCore Container Issue</b>\n\nContainers still broken: $(echo $ALL_STILL_BROKEN | tr '\n' ', ')" "high"
+    send_notification "⚠️ <b>Mana Container Issue</b>\n\nContainers still broken: $(echo $ALL_STILL_BROKEN | tr '\n' ', ')" "high"
     exit 1
 fi

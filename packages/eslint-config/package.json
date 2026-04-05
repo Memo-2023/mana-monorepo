@@ -1,5 +1,5 @@
 {
-	"name": "@manacore/eslint-config",
+	"name": "@mana/eslint-config",
 	"version": "1.0.0",
 	"description": "Shared ESLint configuration for Manacore monorepo",
 	"private": true,
@@ -35,6 +35,6 @@
 	"keywords": [
 		"eslint",
 		"eslint-config",
-		"manacore"
+		"mana"
 	]
 }

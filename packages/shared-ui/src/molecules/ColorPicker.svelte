@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Check } from '@manacore/shared-icons';
+	import { Check } from '@mana/shared-icons';
 
 	/**
 	 * Generic color picker with predefined palette.

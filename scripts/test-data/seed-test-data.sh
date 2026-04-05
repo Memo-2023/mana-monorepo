@@ -25,7 +25,7 @@ echo -e "${GREEN}Seeding test data...${NC}"
 
 # Configuration
 export NODE_ENV="test"
-export DATABASE_URL_TEMPLATE="postgresql://manacore:devpassword@localhost:5432"
+export DATABASE_URL_TEMPLATE="postgresql://mana:devpassword@localhost:5432"
 
 # Seed auth service
 seed_auth() {

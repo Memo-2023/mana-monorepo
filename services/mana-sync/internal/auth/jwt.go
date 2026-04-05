@@ -5,7 +5,7 @@ package auth
 import (
 	"net/http"
 
-	"github.com/manacore/shared-go/authutil"
+	"github.com/mana/shared-go/authutil"
 )
 
 // Re-export types so existing consumers don't need to change imports.

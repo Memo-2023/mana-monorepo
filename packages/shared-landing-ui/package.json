@@ -1,5 +1,5 @@
 {
-	"name": "@manacore/shared-landing-ui",
+	"name": "@mana/shared-landing-ui",
 	"version": "0.1.0",
 	"private": true,
 	"description": "Shared Astro landing page components for Manacore monorepo",
@@ -15,7 +15,7 @@
 		"./data/pricing": "./src/data/pricing.ts",
 		"./themes": "./src/themes/index.css",
 		"./themes/memoro": "./src/themes/memoro.css",
-		"./themes/manacore": "./src/themes/manacore.css",
+		"./themes/mana": "./src/themes/mana.css",
 		"./themes/maerchenzauber": "./src/themes/maerchenzauber.css",
 		"./themes/cards": "./src/themes/cards.css",
 		"./themes/picture": "./src/themes/picture.css",
@@ -44,6 +44,6 @@
 		"astro",
 		"landing",
 		"components",
-		"manacore"
+		"mana"
 	]
 }

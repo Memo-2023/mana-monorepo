@@ -10,12 +10,12 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/manacore/mana-api-gateway/internal/config"
-	"github.com/manacore/mana-api-gateway/internal/db"
-	"github.com/manacore/mana-api-gateway/internal/handler"
-	"github.com/manacore/mana-api-gateway/internal/middleware"
-	"github.com/manacore/mana-api-gateway/internal/proxy"
-	"github.com/manacore/mana-api-gateway/internal/service"
+	"github.com/mana/mana-api-gateway/internal/config"
+	"github.com/mana/mana-api-gateway/internal/db"
+	"github.com/mana/mana-api-gateway/internal/handler"
+	"github.com/mana/mana-api-gateway/internal/middleware"
+	"github.com/mana/mana-api-gateway/internal/proxy"
+	"github.com/mana/mana-api-gateway/internal/service"
 	"github.com/redis/go-redis/v9"
 	"github.com/rs/cors"
 )

@@ -1,7 +1,7 @@
 /**
  * mana-subscriptions — Subscription & billing service
  *
- * Hono + Bun runtime. Extracted from mana-core-auth.
+ * Hono + Bun runtime. Extracted from mana-auth.
  * Handles: plans, subscriptions, invoices, Stripe billing.
  */
 

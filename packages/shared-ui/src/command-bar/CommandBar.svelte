@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import type { CommandBarItem, QuickAction, CreatePreview } from './CommandBar.types';
-	import { Heart, MagnifyingGlass, Plus } from '@manacore/shared-icons';
+	import { Heart, MagnifyingGlass, Plus } from '@mana/shared-icons';
 
 	// Syntax highlighting patterns for command keywords
 	interface HighlightPattern {

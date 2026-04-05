@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/manacore/mana-api-gateway/internal/service"
+	"github.com/mana/mana-api-gateway/internal/service"
 	"github.com/redis/go-redis/v9"
 )
 

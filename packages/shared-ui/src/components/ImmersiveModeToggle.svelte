@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { CaretDown, CaretUp } from '@manacore/shared-icons';
+	import { CaretDown, CaretUp } from '@mana/shared-icons';
 
 	interface Props {
 		/** Whether immersive mode is currently enabled */

@@ -1,5 +1,5 @@
 {
-	"name": "@manacore/shared-storage",
+	"name": "@mana/shared-storage",
 	"version": "0.1.0",
 	"private": true,
 	"description": "S3-compatible object storage client for Manacore monorepo (MinIO)",

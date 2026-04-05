@@ -3,7 +3,7 @@
  */
 
 import { Hono } from 'hono';
-import type { AuthVariables } from '@manacore/shared-hono';
+import type { AuthVariables } from '@mana/shared-hono';
 import { acceptInvite, declineInvite, getPendingInvites } from '../services/space';
 import { validateBody } from '../lib/validate';
 import { inviteActionBody } from '../schemas';

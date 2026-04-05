@@ -1,5 +1,5 @@
 {
-	"name": "@manacore/wallpaper-generator",
+	"name": "@mana/wallpaper-generator",
 	"version": "0.1.0",
 	"private": true,
 	"description": "Device wallpaper generator from QR codes and images",

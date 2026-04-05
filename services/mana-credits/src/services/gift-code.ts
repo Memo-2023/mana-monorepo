@@ -1,7 +1,7 @@
 /**
  * Gift Code Service — Gift code generation, redemption, cancellation
  *
- * Ported from mana-core-auth GiftCodeService.
+ * Ported from mana-auth GiftCodeService.
  */
 
 import { eq, and, desc } from 'drizzle-orm';

@@ -12,7 +12,7 @@
 	import SearchDialog from '$lib/components/chat/SearchDialog.svelte';
 	import ForwardMessageDialog from '$lib/components/chat/ForwardMessageDialog.svelte';
 	import { CallView, IncomingCallDialog } from '$lib/components/call';
-	import { ChatCircle, Plus, Gear, ShieldWarning } from '@manacore/shared-icons';
+	import { ChatCircle, Plus, Gear, ShieldWarning } from '@mana/shared-icons';
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';

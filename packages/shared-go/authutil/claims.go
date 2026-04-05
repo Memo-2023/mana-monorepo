@@ -1,8 +1,8 @@
-// Package authutil provides shared JWT authentication utilities for ManaCore Go services.
+// Package authutil provides shared JWT authentication utilities for Mana Go services.
 //
 // Two validator implementations are available:
 //   - JWKSValidator: validates EdDSA JWTs locally using cached JWKS keys (recommended for high-throughput)
-//   - RemoteValidator: validates JWTs by calling mana-core-auth's /api/v1/auth/validate endpoint
+//   - RemoteValidator: validates JWTs by calling mana-auth's /api/v1/auth/validate endpoint
 //
 // Both validators produce the same Claims/User types and work with the same middleware helpers.
 package authutil
@@ -14,7 +14,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-// Claims represents the JWT payload from mana-core-auth (EdDSA tokens).
+// Claims represents the JWT payload from mana-auth (EdDSA tokens).
 type Claims struct {
 	jwt.RegisteredClaims
 	Email string `json:"email"`

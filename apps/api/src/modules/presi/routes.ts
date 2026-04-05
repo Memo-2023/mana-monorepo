@@ -9,7 +9,7 @@
 import { Hono } from 'hono';
 import { eq, and, gt, or, isNull, asc } from 'drizzle-orm';
 import { HTTPException } from 'hono/http-exception';
-import { authMiddleware } from '@manacore/shared-hono/auth';
+import { authMiddleware } from '@mana/shared-hono/auth';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 import {
@@ -27,7 +27,7 @@ import { relations } from 'drizzle-orm';
 // ─── DB Schema (read-only for share lookups) ────────────────
 
 const DATABASE_URL =
-	process.env.DATABASE_URL ?? 'postgresql://manacore:devpassword@localhost:5432/mana_platform';
+	process.env.DATABASE_URL ?? 'postgresql://mana:devpassword@localhost:5432/mana_platform';
 
 const presiSchema = pgSchema('presi');
 

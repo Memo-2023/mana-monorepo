@@ -6,7 +6,7 @@
  *
  * @example
  * ```typescript
- * import { createReminderScheduler } from '@manacore/shared-stores';
+ * import { createReminderScheduler } from '@mana/shared-stores';
  * import { todoReminderSource } from '$lib/modules/todo/reminder-source';
  *
  * const scheduler = createReminderScheduler({

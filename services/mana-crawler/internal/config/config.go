@@ -3,7 +3,7 @@ package config
 import (
 	"strconv"
 
-	"github.com/manacore/shared-go/envutil"
+	"github.com/mana/shared-go/envutil"
 )
 
 type Config struct {
@@ -29,11 +29,11 @@ func Load() *Config {
 
 	return &Config{
 		Port:             envutil.GetInt("PORT", 3023),
-		DatabaseURL:      envutil.Get("DATABASE_URL", "postgresql://manacore:devpassword@localhost:5432/manacore"),
+		DatabaseURL:      envutil.Get("DATABASE_URL", "postgresql://mana:devpassword@localhost:5432/mana"),
 		RedisHost:        envutil.Get("REDIS_HOST", "localhost"),
 		RedisPort:        envutil.GetInt("REDIS_PORT", 6379),
 		RedisPassword:    envutil.Get("REDIS_PASSWORD", ""),
-		UserAgent:        envutil.Get("CRAWLER_USER_AGENT", "ManaCoreCrawler/1.0 (+https://manacore.io/bot)"),
+		UserAgent:        envutil.Get("CRAWLER_USER_AGENT", "ManaCrawler/1.0 (+https://mana.io/bot)"),
 		DefaultRateLimit: rateLimit,
 		DefaultMaxDepth:  envutil.GetInt("CRAWLER_DEFAULT_MAX_DEPTH", 3),
 		DefaultMaxPages:  envutil.GetInt("CRAWLER_DEFAULT_MAX_PAGES", 100),

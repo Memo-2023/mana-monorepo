@@ -6,7 +6,7 @@
  *
  * @example
  * ```typescript
- * import { keyboardShortcuts } from '@manacore/shared-stores';
+ * import { keyboardShortcuts } from '@mana/shared-stores';
  *
  * // Register shortcuts (typically in onMount)
  * const unsubscribe = keyboardShortcuts.register([

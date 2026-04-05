@@ -12,11 +12,11 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/manacore/mana-sync/internal/auth"
-	"github.com/manacore/mana-sync/internal/config"
-	"github.com/manacore/mana-sync/internal/store"
-	syncHandler "github.com/manacore/mana-sync/internal/sync"
-	"github.com/manacore/mana-sync/internal/ws"
+	"github.com/mana/mana-sync/internal/auth"
+	"github.com/mana/mana-sync/internal/config"
+	"github.com/mana/mana-sync/internal/store"
+	syncHandler "github.com/mana/mana-sync/internal/sync"
+	"github.com/mana/mana-sync/internal/ws"
 	"github.com/rs/cors"
 )
 

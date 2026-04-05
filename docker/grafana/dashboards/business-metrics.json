@@ -411,7 +411,7 @@
 	],
 	"refresh": "1m",
 	"schemaVersion": 38,
-	"tags": ["manacore", "business", "kpi", "duckdb"],
+	"tags": ["mana", "business", "kpi", "duckdb"],
 	"templating": {
 		"list": [
 			{

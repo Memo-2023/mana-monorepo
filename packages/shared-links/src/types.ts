@@ -5,7 +5,7 @@
  * across different apps in the Mana ecosystem.
  */
 
-import type { BaseRecord } from '@manacore/local-store';
+import type { BaseRecord } from '@mana/local-store';
 
 /** Cached display data for a linked record (offline-friendly). */
 export interface LinkCachedData {
@@ -23,7 +23,7 @@ export interface LinkCachedData {
 	fetchedAt: string;
 }
 
-/** A single link record stored in IndexedDB (manacore-links). */
+/** A single link record stored in IndexedDB (mana-links). */
 export interface LocalManaLink extends BaseRecord {
 	/** UUID shared by the forward and reverse link records. */
 	pairId: string;

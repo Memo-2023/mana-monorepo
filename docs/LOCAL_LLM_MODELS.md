@@ -1,4 +1,4 @@
-# Lokale LLM-Modelle für ManaCore
+# Lokale LLM-Modelle für Mana
 
 Dieses Dokument beschreibt alle verfügbaren lokalen KI-Modelle für den Mac Mini Server (M4, 16 GB RAM) und deren Einsatzmöglichkeiten.
 

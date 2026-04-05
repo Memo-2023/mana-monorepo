@@ -24,6 +24,6 @@ Tables: user_feedback, feedback_votes
 ```env
 PORT=3064
 DATABASE_URL=postgresql://manacore:devpassword@localhost:5432/mana_analytics
-MANA_CORE_AUTH_URL=http://localhost:3001
+MANA_AUTH_URL=http://localhost:3001
 MANA_LLM_URL=http://localhost:3025
 ```

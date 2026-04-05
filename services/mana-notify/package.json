@@ -1,5 +1,5 @@
 {
-	"name": "@manacore/mana-notify",
+	"name": "@mana/mana-notify",
 	"version": "1.0.0",
 	"private": true,
 	"scripts": {

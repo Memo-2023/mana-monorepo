@@ -7,13 +7,13 @@ set -e
 echo "Creating Umami database..."
 
 # Check if running inside docker network or from host
-if docker ps | grep -q manacore-postgres; then
-    docker exec -i manacore-postgres psql -U postgres <<EOF
+if docker ps | grep -q mana-postgres; then
+    docker exec -i mana-postgres psql -U postgres <<EOF
 SELECT 'CREATE DATABASE umami' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'umami')\gexec
 EOF
     echo "Umami database created successfully!"
 else
-    echo "Error: PostgreSQL container 'manacore-postgres' is not running"
+    echo "Error: PostgreSQL container 'mana-postgres' is not running"
     echo "Please start it with: docker compose -f docker-compose.macmini.yml up -d postgres"
     exit 1
 fi

@@ -61,8 +61,8 @@ const APP_CONFIGS = [
 		path: 'services/mana-auth/.env',
 		vars: {
 			NODE_ENV: () => 'development',
-			PORT: (env) => env.MANA_CORE_AUTH_PORT || '3001',
-			DATABASE_URL: (env) => env.MANA_CORE_AUTH_DATABASE_URL,
+			PORT: (env) => env.MANA_AUTH_PORT || '3001',
+			DATABASE_URL: (env) => env.MANA_AUTH_DATABASE_URL,
 			BETTER_AUTH_SECRET: (env) => env.BETTER_AUTH_SECRET || 'dev-secret-change-me',
 			BETTER_AUTH_URL: () => 'http://localhost:3001',
 			CORS_ORIGINS: (env) => env.CORS_ORIGINS,
@@ -80,7 +80,7 @@ const APP_CONFIGS = [
 			DEV_USER_ID: (env) => env.DEV_USER_ID || '00000000-0000-0000-0000-000000000000',
 			OPENROUTER_API_KEY: (env) => env.OPENROUTER_API_KEY,
 			OLLAMA_URL: (env) => env.OLLAMA_URL || 'http://localhost:11434',
-			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			MANA_AUTH_URL: (env) => env.MANA_AUTH_URL,
 			DATABASE_URL: (env) => env.CHAT_DATABASE_URL,
 		},
 	},
@@ -89,7 +89,7 @@ const APP_CONFIGS = [
 	{
 		path: 'apps/chat/apps/mobile/.env',
 		vars: {
-			EXPO_PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			EXPO_PUBLIC_MANA_AUTH_URL: (env) => env.MANA_AUTH_URL,
 			EXPO_PUBLIC_SUPABASE_URL: (env) => env.CHAT_SUPABASE_URL,
 			EXPO_PUBLIC_SUPABASE_ANON_KEY: (env) => env.CHAT_SUPABASE_ANON_KEY,
 			EXPO_PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.CHAT_BACKEND_PORT || '3002'}`,
@@ -100,7 +100,7 @@ const APP_CONFIGS = [
 	{
 		path: 'apps/chat/apps/web/.env',
 		vars: {
-			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			PUBLIC_MANA_AUTH_URL: (env) => env.MANA_AUTH_URL,
 			PUBLIC_SUPABASE_URL: (env) => env.CHAT_SUPABASE_URL,
 			PUBLIC_SUPABASE_ANON_KEY: (env) => env.CHAT_SUPABASE_ANON_KEY,
 			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.CHAT_BACKEND_PORT || '3002'}`,
@@ -110,7 +110,7 @@ const APP_CONFIGS = [
 
 	// Manacore Mobile
 	{
-		path: 'apps/manacore/apps/mobile/.env',
+		path: 'apps/mana/apps/mobile/.env',
 		vars: {
 			EXPO_PUBLIC_SUPABASE_URL: (env) => env.MANACORE_SUPABASE_URL,
 			EXPO_PUBLIC_SUPABASE_ANON_KEY: (env) => env.MANACORE_SUPABASE_ANON_KEY,
@@ -119,11 +119,11 @@ const APP_CONFIGS = [
 
 	// Manacore Web
 	{
-		path: 'apps/manacore/apps/web/.env',
+		path: 'apps/mana/apps/web/.env',
 		vars: {
 			PUBLIC_SUPABASE_URL: (env) => env.MANACORE_SUPABASE_URL,
 			PUBLIC_SUPABASE_ANON_KEY: (env) => env.MANACORE_SUPABASE_ANON_KEY,
-			MIDDLEWARE_URL: (env) => env.MANA_CORE_AUTH_URL,
+			MIDDLEWARE_URL: (env) => env.MANA_AUTH_URL,
 			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_MANACORE || '',
 			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
@@ -136,7 +136,7 @@ const APP_CONFIGS = [
 			NODE_ENV: () => 'development',
 			PORT: (env) => env.CARDS_BACKEND_PORT || '3004',
 			DATABASE_URL: (env) => env.CARDS_DATABASE_URL,
-			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			MANA_AUTH_URL: (env) => env.MANA_AUTH_URL,
 			APP_ID: (env) => env.CARDS_APP_ID,
 			GOOGLE_GENAI_API_KEY: (env) => env.GOOGLE_GENAI_API_KEY,
 		},
@@ -147,7 +147,7 @@ const APP_CONFIGS = [
 		path: 'apps/cards/apps/web/.env',
 		vars: {
 			PUBLIC_API_URL: (env) => `http://localhost:${env.CARDS_BACKEND_PORT || '3004'}`,
-			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			PUBLIC_MANA_AUTH_URL: (env) => env.MANA_AUTH_URL,
 			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
 	},
@@ -160,8 +160,8 @@ const APP_CONFIGS = [
 			PORT: (env) => env.PICTURE_BACKEND_PORT || '3006',
 			BACKEND_URL: (env) => env.PICTURE_BACKEND_URL || 'http://localhost:3006',
 			DATABASE_URL: (env) =>
-				env.PICTURE_DATABASE_URL || 'postgresql://manacore:devpassword@localhost:5432/picture',
-			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+				env.PICTURE_DATABASE_URL || 'postgresql://mana:devpassword@localhost:5432/picture',
+			MANA_AUTH_URL: (env) => env.MANA_AUTH_URL,
 			DEV_BYPASS_AUTH: () => 'true',
 			DEV_USER_ID: (env) => env.DEV_USER_ID || '00000000-0000-0000-0000-000000000000',
 			REPLICATE_API_TOKEN: (env) => env.PICTURE_REPLICATE_API_TOKEN,
@@ -178,7 +178,7 @@ const APP_CONFIGS = [
 				env.PICTURE_STORAGE_PUBLIC_URL || 'http://localhost:9000/picture-storage',
 			// Credit system (for staging)
 			APP_ID: (env) => env.PICTURE_APP_ID || 'picture-app',
-			MANA_CORE_SERVICE_KEY: (env) => env.PICTURE_MANA_CORE_SERVICE_KEY || '',
+			MANA_SERVICE_KEY: (env) => env.PICTURE_MANA_SERVICE_KEY || '',
 		},
 	},
 
@@ -187,7 +187,7 @@ const APP_CONFIGS = [
 		path: 'apps/picture/apps/mobile/.env',
 		vars: {
 			EXPO_PUBLIC_BACKEND_URL: (env) => env.PICTURE_BACKEND_URL || 'http://localhost:3003',
-			EXPO_PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			EXPO_PUBLIC_MANA_AUTH_URL: (env) => env.MANA_AUTH_URL,
 		},
 	},
 
@@ -196,7 +196,7 @@ const APP_CONFIGS = [
 		path: 'apps/picture/apps/web/.env',
 		vars: {
 			PUBLIC_BACKEND_URL: (env) => env.PICTURE_BACKEND_URL || 'http://localhost:3003',
-			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			PUBLIC_MANA_AUTH_URL: (env) => env.MANA_AUTH_URL,
 			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
 	},
@@ -208,7 +208,7 @@ const APP_CONFIGS = [
 			NODE_ENV: () => 'development',
 			PORT: (env) => env.NUTRIPHI_BACKEND_PORT || '3002',
 			DATABASE_URL: (env) => env.NUTRIPHI_DATABASE_URL,
-			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			MANA_AUTH_URL: (env) => env.MANA_AUTH_URL,
 			GEMINI_API_KEY: (env) => env.NUTRIPHI_GEMINI_API_KEY,
 			S3_ENDPOINT: (env) => env.NUTRIPHI_S3_ENDPOINT,
 			S3_ACCESS_KEY_ID: (env) => env.NUTRIPHI_S3_ACCESS_KEY_ID,
@@ -224,7 +224,7 @@ const APP_CONFIGS = [
 		path: 'apps/nutriphi/apps/web/.env',
 		vars: {
 			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.NUTRIPHI_BACKEND_PORT || '3002'}`,
-			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			PUBLIC_MANA_AUTH_URL: (env) => env.MANA_AUTH_URL,
 			PUBLIC_MIDDLEWARE_APP_ID: (env) => env.NUTRIPHI_APP_ID || 'nutriphi',
 			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
@@ -237,7 +237,7 @@ const APP_CONFIGS = [
 		path: 'apps/zitare/apps/mobile/.env',
 		vars: {
 			EXPO_PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.ZITARE_BACKEND_PORT || '3007'}`,
-			EXPO_PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			EXPO_PUBLIC_MANA_AUTH_URL: (env) => env.MANA_AUTH_URL,
 		},
 	},
 
@@ -246,7 +246,7 @@ const APP_CONFIGS = [
 		path: 'apps/zitare/apps/web/.env',
 		vars: {
 			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.ZITARE_BACKEND_PORT || '3007'}`,
-			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			PUBLIC_MANA_AUTH_URL: (env) => env.MANA_AUTH_URL,
 			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
 	},
@@ -258,7 +258,7 @@ const APP_CONFIGS = [
 		path: 'apps/presi/apps/web/.env',
 		vars: {
 			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.PRESI_BACKEND_PORT || '3008'}`,
-			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			PUBLIC_MANA_AUTH_URL: (env) => env.MANA_AUTH_URL,
 			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
 	},
@@ -270,7 +270,7 @@ const APP_CONFIGS = [
 		path: 'apps/skilltree/apps/web/.env',
 		vars: {
 			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.SKILLTREE_BACKEND_PORT || '3024'}`,
-			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			PUBLIC_MANA_AUTH_URL: (env) => env.MANA_AUTH_URL,
 			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
 	},
@@ -312,7 +312,7 @@ const APP_CONFIGS = [
 			NODE_ENV: () => 'development',
 			PORT: (env) => env.CONTEXT_BACKEND_PORT || '3020',
 			DATABASE_URL: (env) => env.CONTEXT_DATABASE_URL,
-			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			MANA_AUTH_URL: (env) => env.MANA_AUTH_URL,
 			DEV_BYPASS_AUTH: () => 'true',
 			DEV_USER_ID: (env) => env.DEV_USER_ID || '00000000-0000-0000-0000-000000000000',
 			AZURE_OPENAI_API_KEY: (env) => env.CONTEXT_AZURE_OPENAI_API_KEY || '',
@@ -327,7 +327,7 @@ const APP_CONFIGS = [
 		path: 'apps/context/apps/web/.env',
 		vars: {
 			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.CONTEXT_BACKEND_PORT || '3020'}`,
-			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			PUBLIC_MANA_AUTH_URL: (env) => env.MANA_AUTH_URL,
 		},
 	},
 
@@ -338,7 +338,7 @@ const APP_CONFIGS = [
 			NODE_ENV: () => 'development',
 			PORT: (env) => env.CALENDAR_BACKEND_PORT || '3014',
 			DATABASE_URL: (env) => env.CALENDAR_DATABASE_URL,
-			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			MANA_AUTH_URL: (env) => env.MANA_AUTH_URL,
 			DEV_BYPASS_AUTH: () => 'true',
 			DEV_USER_ID: (env) => env.DEV_USER_ID || '00000000-0000-0000-0000-000000000000',
 			CORS_ORIGINS: (env) => env.CORS_ORIGINS,
@@ -350,7 +350,7 @@ const APP_CONFIGS = [
 		path: 'apps/calendar/apps/mobile/.env',
 		vars: {
 			EXPO_PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.CALENDAR_BACKEND_PORT || '3014'}`,
-			EXPO_PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			EXPO_PUBLIC_MANA_AUTH_URL: (env) => env.MANA_AUTH_URL,
 		},
 	},
 
@@ -359,7 +359,7 @@ const APP_CONFIGS = [
 		path: 'apps/calendar/apps/web/.env',
 		vars: {
 			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.CALENDAR_BACKEND_PORT || '3014'}`,
-			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			PUBLIC_MANA_AUTH_URL: (env) => env.MANA_AUTH_URL,
 			PUBLIC_TODO_BACKEND_URL: (env) =>
 				env.TODO_BACKEND_URL || `http://localhost:${env.TODO_BACKEND_PORT || '3018'}`,
 			// Cross-app integration: Contacts service for birthdays
@@ -378,7 +378,7 @@ const APP_CONFIGS = [
 			NODE_ENV: () => 'development',
 			PORT: (env) => env.CONTACTS_BACKEND_PORT || '3015',
 			DATABASE_URL: (env) => env.CONTACTS_DATABASE_URL,
-			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			MANA_AUTH_URL: (env) => env.MANA_AUTH_URL,
 			DEV_BYPASS_AUTH: () => 'true',
 			DEV_USER_ID: (env) => env.DEV_USER_ID || '00000000-0000-0000-0000-000000000000',
 			S3_ENDPOINT: (env) => env.S3_ENDPOINT,
@@ -399,7 +399,7 @@ const APP_CONFIGS = [
 		path: 'apps/contacts/apps/mobile/.env',
 		vars: {
 			EXPO_PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.CONTACTS_BACKEND_PORT || '3015'}`,
-			EXPO_PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			EXPO_PUBLIC_MANA_AUTH_URL: (env) => env.MANA_AUTH_URL,
 		},
 	},
 
@@ -408,7 +408,7 @@ const APP_CONFIGS = [
 		path: 'apps/contacts/apps/web/.env',
 		vars: {
 			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.CONTACTS_BACKEND_PORT || '3015'}`,
-			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			PUBLIC_MANA_AUTH_URL: (env) => env.MANA_AUTH_URL,
 			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
 	},
@@ -420,7 +420,7 @@ const APP_CONFIGS = [
 			NODE_ENV: () => 'development',
 			PORT: (env) => env.STORAGE_BACKEND_PORT || '3016',
 			DATABASE_URL: (env) => env.STORAGE_DATABASE_URL,
-			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			MANA_AUTH_URL: (env) => env.MANA_AUTH_URL,
 			DEV_BYPASS_AUTH: () => 'true',
 			DEV_USER_ID: (env) => env.DEV_USER_ID || '00000000-0000-0000-0000-000000000000',
 			S3_ENDPOINT: (env) => env.S3_ENDPOINT,
@@ -439,7 +439,7 @@ const APP_CONFIGS = [
 		path: 'apps/storage/apps/web/.env',
 		vars: {
 			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.STORAGE_BACKEND_PORT || '3016'}`,
-			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			PUBLIC_MANA_AUTH_URL: (env) => env.MANA_AUTH_URL,
 			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
 	},
@@ -451,7 +451,7 @@ const APP_CONFIGS = [
 		path: 'apps/clock/apps/web/.env',
 		vars: {
 			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.CLOCK_BACKEND_PORT || '3017'}`,
-			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			PUBLIC_MANA_AUTH_URL: (env) => env.MANA_AUTH_URL,
 			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
 	},
@@ -463,7 +463,7 @@ const APP_CONFIGS = [
 			NODE_ENV: () => 'development',
 			PORT: (env) => env.TODO_BACKEND_PORT || '3018',
 			DATABASE_URL: (env) => env.TODO_DATABASE_URL,
-			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			MANA_AUTH_URL: (env) => env.MANA_AUTH_URL,
 			DEV_BYPASS_AUTH: () => 'true',
 			DEV_USER_ID: (env) => env.DEV_USER_ID || '00000000-0000-0000-0000-000000000000',
 			CORS_ORIGINS: (env) => env.CORS_ORIGINS,
@@ -475,7 +475,7 @@ const APP_CONFIGS = [
 		path: 'apps/todo/apps/web/.env',
 		vars: {
 			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.TODO_BACKEND_PORT || '3018'}`,
-			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			PUBLIC_MANA_AUTH_URL: (env) => env.MANA_AUTH_URL,
 			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
 	},
@@ -487,7 +487,7 @@ const APP_CONFIGS = [
 			NODE_ENV: () => 'development',
 			PORT: (env) => env.MOODLIT_BACKEND_PORT || '3012',
 			DATABASE_URL: (env) => env.MOODLIT_DATABASE_URL,
-			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			MANA_AUTH_URL: (env) => env.MANA_AUTH_URL,
 			DEV_BYPASS_AUTH: () => 'true',
 			DEV_USER_ID: (env) => env.DEV_USER_ID || '00000000-0000-0000-0000-000000000000',
 			CORS_ORIGINS: (env) => env.CORS_ORIGINS,
@@ -499,7 +499,7 @@ const APP_CONFIGS = [
 		path: 'apps/moodlit/apps/mobile/.env',
 		vars: {
 			EXPO_PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.MOODLIT_BACKEND_PORT || '3012'}`,
-			EXPO_PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			EXPO_PUBLIC_MANA_AUTH_URL: (env) => env.MANA_AUTH_URL,
 		},
 	},
 
@@ -508,7 +508,7 @@ const APP_CONFIGS = [
 		path: 'apps/moodlit/apps/web/.env',
 		vars: {
 			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.MOODLIT_BACKEND_PORT || '3012'}`,
-			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			PUBLIC_MANA_AUTH_URL: (env) => env.MANA_AUTH_URL,
 		},
 	},
 
@@ -518,7 +518,7 @@ const APP_CONFIGS = [
 	{
 		path: 'games/worldream/apps/web/.env',
 		vars: {
-			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			PUBLIC_MANA_AUTH_URL: (env) => env.MANA_AUTH_URL,
 		},
 	},
 
@@ -529,7 +529,7 @@ const APP_CONFIGS = [
 		path: 'apps/citycorners/apps/web/.env',
 		vars: {
 			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.CITYCORNERS_BACKEND_PORT || '3025'}`,
-			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			PUBLIC_MANA_AUTH_URL: (env) => env.MANA_AUTH_URL,
 			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
 	},
@@ -543,10 +543,10 @@ const APP_CONFIGS = [
 			NODE_ENV: () => 'development',
 			PORT: (env) => env.TRACES_BACKEND_PORT || '3026',
 			DATABASE_URL: (env) => env.TRACES_DATABASE_URL,
-			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			MANA_AUTH_URL: (env) => env.MANA_AUTH_URL,
 			MANA_LLM_URL: (env) => env.MANA_LLM_URL || 'http://localhost:3025',
 			MANA_SEARCH_URL: (env) => env.MANA_SEARCH_URL || 'http://localhost:3021',
-			MANA_CORE_SERVICE_KEY: (env) => env.MANA_CORE_SERVICE_KEY || '',
+			MANA_SERVICE_KEY: (env) => env.MANA_SERVICE_KEY || '',
 			APP_ID: () => 'traces',
 			DEV_BYPASS_AUTH: () => 'true',
 			DEV_USER_ID: (env) => env.DEV_USER_ID || '00000000-0000-0000-0000-000000000000',
@@ -560,7 +560,7 @@ const APP_CONFIGS = [
 		vars: {
 			EXPO_PUBLIC_TRACES_BACKEND_URL: (env) =>
 				`http://localhost:${env.TRACES_BACKEND_PORT || '3026'}`,
-			EXPO_PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			EXPO_PUBLIC_MANA_AUTH_URL: (env) => env.MANA_AUTH_URL,
 		},
 	},
 
@@ -569,7 +569,7 @@ const APP_CONFIGS = [
 		path: 'apps/photos/apps/web/.env',
 		vars: {
 			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.PHOTOS_BACKEND_PORT || '3039'}`,
-			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			PUBLIC_MANA_AUTH_URL: (env) => env.MANA_AUTH_URL,
 			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
 	},
@@ -579,7 +579,7 @@ const APP_CONFIGS = [
 		path: 'apps/planta/apps/web/.env',
 		vars: {
 			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.PLANTA_BACKEND_PORT || '3022'}`,
-			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			PUBLIC_MANA_AUTH_URL: (env) => env.MANA_AUTH_URL,
 			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
 	},
@@ -589,7 +589,7 @@ const APP_CONFIGS = [
 		path: 'apps/questions/apps/web/.env',
 		vars: {
 			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.QUESTIONS_BACKEND_PORT || '3011'}`,
-			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			PUBLIC_MANA_AUTH_URL: (env) => env.MANA_AUTH_URL,
 			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
 	},
@@ -601,7 +601,7 @@ const APP_CONFIGS = [
 			NODE_ENV: () => 'development',
 			PORT: (env) => env.MUSIC_BACKEND_PORT || '3010',
 			DATABASE_URL: (env) => env.MUSIC_DATABASE_URL,
-			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			MANA_AUTH_URL: (env) => env.MANA_AUTH_URL,
 			S3_ENDPOINT: (env) => env.S3_ENDPOINT || 'http://localhost:9000',
 			S3_REGION: (env) => env.S3_REGION || 'us-east-1',
 			S3_ACCESS_KEY: (env) => env.S3_ACCESS_KEY || 'minioadmin',
@@ -618,7 +618,7 @@ const APP_CONFIGS = [
 		path: 'apps/mukke/apps/web/.env',
 		vars: {
 			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.MUSIC_BACKEND_PORT || '3010'}`,
-			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			PUBLIC_MANA_AUTH_URL: (env) => env.MANA_AUTH_URL,
 			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
 	},
@@ -628,7 +628,7 @@ const APP_CONFIGS = [
 		path: 'services/llm-playground/.env',
 		vars: {
 			PUBLIC_MANA_LLM_URL: (env) => env.MANA_LLM_URL || 'http://localhost:3025',
-			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL || 'http://localhost:3001',
+			PUBLIC_MANA_AUTH_URL: (env) => env.MANA_AUTH_URL || 'http://localhost:3001',
 		},
 	},
 
@@ -652,7 +652,7 @@ const APP_CONFIGS = [
 			TELEGRAM_BOT_TOKEN: (env) => env.TODO_BOT_TELEGRAM_TOKEN,
 			DATABASE_URL: (env) => env.TODO_BOT_DATABASE_URL,
 			TODO_API_URL: (env) => env.TODO_BOT_API_URL || 'http://localhost:3018',
-			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			MANA_AUTH_URL: (env) => env.MANA_AUTH_URL,
 		},
 	},
 
@@ -668,9 +668,9 @@ const APP_CONFIGS = [
 		},
 	},
 
-	// ManaCore Landing
+	// Mana Landing
 	{
-		path: 'apps/manacore/apps/landing/.env',
+		path: 'apps/mana/apps/landing/.env',
 		vars: {
 			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_MANACORE_LANDING || '',
 		},

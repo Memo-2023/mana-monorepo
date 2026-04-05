@@ -1,7 +1,7 @@
 /**
  * Credits Schema — Personal balance, transactions, packages, purchases
  *
- * Adapted from mana-core-auth: removed FK references to auth.users (separate DB).
+ * Adapted from mana-auth: removed FK references to auth.users (separate DB).
  * userId columns remain as text() without foreign key constraints.
  */
 

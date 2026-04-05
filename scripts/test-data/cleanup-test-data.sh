@@ -24,7 +24,7 @@ echo -e "${YELLOW}Cleaning up test data...${NC}"
 
 # Configuration
 export NODE_ENV="test"
-export DATABASE_URL_TEMPLATE="postgresql://manacore:devpassword@localhost:5432"
+export DATABASE_URL_TEMPLATE="postgresql://mana:devpassword@localhost:5432"
 
 # Cleanup function
 cleanup_database() {
@@ -35,8 +35,8 @@ cleanup_database() {
   export DATABASE_URL="${DATABASE_URL_TEMPLATE}/${db_name}"
 
   # Drop and recreate database
-  psql -U manacore -h localhost -c "DROP DATABASE IF EXISTS ${db_name};" postgres 2>/dev/null || true
-  psql -U manacore -h localhost -c "CREATE DATABASE ${db_name};" postgres 2>/dev/null || true
+  psql -U mana -h localhost -c "DROP DATABASE IF EXISTS ${db_name};" postgres 2>/dev/null || true
+  psql -U mana -h localhost -c "CREATE DATABASE ${db_name};" postgres 2>/dev/null || true
 
   echo -e "${GREEN}✓ Cleaned ${db_name}${NC}"
 }
@@ -44,7 +44,7 @@ cleanup_database() {
 # Execute cleanup based on filter
 case "$SERVICE_FILTER" in
   "all")
-    cleanup_database "manacore"
+    cleanup_database "mana"
     cleanup_database "chat"
     cleanup_database "todo"
     cleanup_database "calendar"
@@ -52,7 +52,7 @@ case "$SERVICE_FILTER" in
     cleanup_database "picture"
     ;;
   "auth")
-    cleanup_database "manacore"
+    cleanup_database "mana"
     ;;
   "chat")
     cleanup_database "chat"

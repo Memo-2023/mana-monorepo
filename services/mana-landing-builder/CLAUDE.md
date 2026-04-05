@@ -151,7 +151,7 @@ services/mana-landing-builder/
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `PORT` | 3030 | Service port |
-| `MANA_CORE_AUTH_URL` | http://localhost:3001 | Auth service URL |
+| `MANA_AUTH_URL` | http://localhost:3001 | Auth service URL |
 | `CLOUDFLARE_API_TOKEN` | - | Cloudflare API token (Pages + DNS permissions) |
 | `CLOUDFLARE_ACCOUNT_ID` | - | Cloudflare account ID |
 | `ORG_LANDING_DOMAIN` | mana.how | Base domain for org landing pages |
@@ -161,8 +161,8 @@ services/mana-landing-builder/
 The landing page editor lives in the Manacore web dashboard:
 
 - **Route**: `/organizations/[id]/landing`
-- **Components**: `apps/manacore/apps/web/src/lib/components/landing/`
-- **API Client**: `apps/manacore/apps/web/src/lib/api/services/landing.ts`
+- **Components**: `apps/mana/apps/web/src/lib/components/landing/`
+- **API Client**: `apps/mana/apps/web/src/lib/api/services/landing.ts`
 
 The editor provides a form-based interface where org admins can:
 1. Select a theme (classic/warm)
@@ -205,4 +205,4 @@ pnpm --filter @mana-landing-builder/service type-check
 | `packages/shared-landing-ui/src/sections/ContactSection.astro` | Contact info component |
 | `packages/shared-landing-ui/src/themes/org-classic.css` | Classic dark theme |
 | `packages/shared-landing-ui/src/themes/org-warm.css` | Warm light theme |
-| `apps/manacore/apps/web/src/lib/components/landing/` | Admin UI components |
+| `apps/mana/apps/web/src/lib/components/landing/` | Admin UI components |

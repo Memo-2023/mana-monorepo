@@ -162,7 +162,7 @@ services:
       dockerfile: apps/chat/apps/backend/Dockerfile
     environment:
       - DATABASE_URL=postgresql://manacore:${POSTGRES_PASSWORD}@postgres:5432/chat
-      - MANA_CORE_AUTH_URL=http://mana-auth:3001
+      - MANA_AUTH_URL=http://mana-auth:3001
     depends_on:
       - mana-auth
       - postgres

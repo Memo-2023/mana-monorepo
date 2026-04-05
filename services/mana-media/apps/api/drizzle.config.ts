@@ -1,4 +1,4 @@
-import { createDrizzleConfig } from '@manacore/shared-drizzle-config';
+import { createDrizzleConfig } from '@mana/shared-drizzle-config';
 
 export default createDrizzleConfig({
 	dbName: 'mana_platform',

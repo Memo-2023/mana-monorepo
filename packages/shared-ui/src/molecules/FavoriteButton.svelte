@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Heart, Star, PushPin } from '@manacore/shared-icons';
+	import { Heart, Star, PushPin } from '@mana/shared-icons';
 
 	/**
 	 * Reusable favorite/pin toggle button.

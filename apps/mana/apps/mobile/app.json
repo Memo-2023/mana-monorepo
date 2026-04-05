@@ -1,0 +1,58 @@
+{
+	"expo": {
+		"name": "mana",
+		"slug": "mana",
+		"version": "1.0.0",
+		"scheme": "mana",
+		"web": {
+			"bundler": "metro",
+			"output": "static",
+			"favicon": "./assets/favicon.png"
+		},
+		"plugins": [
+			"expo-router",
+			[
+				"expo-dev-launcher",
+				{
+					"launchMode": "most-recent"
+				}
+			]
+		],
+		"experiments": {
+			"typedRoutes": true,
+			"tsconfigPaths": true
+		},
+		"orientation": "portrait",
+		"icon": "./assets/icon.png",
+		"userInterfaceStyle": "light",
+		"splash": {
+			"image": "./assets/splash.png",
+			"resizeMode": "contain",
+			"backgroundColor": "#ffffff"
+		},
+		"assetBundlePatterns": ["**/*"],
+		"ios": {
+			"supportsTablet": true,
+			"bundleIdentifier": "com.tilljs.mana",
+			"infoPlist": {
+				"ITSAppUsesNonExemptEncryption": false
+			}
+		},
+		"android": {
+			"adaptiveIcon": {
+				"foregroundImage": "./assets/adaptive-icon.png",
+				"backgroundColor": "#ffffff"
+			},
+			"package": "com.tilljs.mana"
+		},
+		"extra": {
+			"router": {
+				"origin": false
+			},
+			"eas": {
+				"projectId": "59ec0181-b120-4728-bf80-82623b831dda"
+			}
+		},
+		"owner": "memoro"
+	}
+}

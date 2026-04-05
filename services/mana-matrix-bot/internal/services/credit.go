@@ -6,7 +6,7 @@ import (
 	"log/slog"
 )
 
-// CreditClient handles credit balance and consumption via mana-core-auth.
+// CreditClient handles credit balance and consumption via mana-auth.
 type CreditClient struct {
 	backend *BackendClient
 }

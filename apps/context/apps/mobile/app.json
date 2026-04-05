@@ -34,7 +34,7 @@
 		"assetBundlePatterns": ["**/*"],
 		"ios": {
 			"supportsTablet": true,
-			"bundleIdentifier": "com.manacore.context",
+			"bundleIdentifier": "com.mana.context",
 			"buildNumber": "1",
 			"infoPlist": {
 				"ITSAppUsesNonExemptEncryption": false
@@ -45,7 +45,7 @@
 				"foregroundImage": "./assets/adaptive-icon.png",
 				"backgroundColor": "#ffffff"
 			},
-			"package": "com.manacore.context",
+			"package": "com.mana.context",
 			"versionCode": 1
 		},
 		"extra": {

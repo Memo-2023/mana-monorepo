@@ -1,5 +1,5 @@
 #!/bin/bash
-# Lighthouse Performance Audit for all ManaCore web apps
+# Lighthouse Performance Audit for all Mana web apps
 # Requires: npx (for lighthouse CLI)
 # Usage: ./scripts/lighthouse-audit.sh [--json]
 
@@ -28,7 +28,7 @@ APPS=(
 RESULTS_DIR="lighthouse-results"
 mkdir -p "$RESULTS_DIR"
 
-echo "=== ManaCore Lighthouse Audit ==="
+echo "=== Mana Lighthouse Audit ==="
 echo "Date: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
 echo ""
 

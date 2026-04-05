@@ -6,7 +6,7 @@
  *
  * @example
  * ```typescript
- * import { toggleField } from '@manacore/shared-stores';
+ * import { toggleField } from '@mana/shared-stores';
  * import { db } from '$lib/data/database';
  *
  * // In your store:

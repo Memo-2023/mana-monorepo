@@ -5,7 +5,7 @@
  * Auto-update when IndexedDB changes (local writes, sync, other tabs).
  */
 
-import { useLiveQueryWithDefault } from '@manacore/local-store/svelte';
+import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { linkCollection } from './store.js';
 import type { LocalManaLink, ManaRecordRef } from './types.js';
 

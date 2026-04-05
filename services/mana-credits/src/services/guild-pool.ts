@@ -1,8 +1,8 @@
 /**
  * Guild Pool Service — Shared organization credit pools
  *
- * Ported from mana-core-auth GuildPoolService.
- * Membership checks via HTTP call to mana-core-auth (separate DB).
+ * Ported from mana-auth GuildPoolService.
+ * Membership checks via HTTP call to mana-auth (separate DB).
  */
 
 import { eq, and, desc, gte, sql } from 'drizzle-orm';
@@ -30,7 +30,7 @@ export class GuildPoolService {
 		private serviceKey: string
 	) {}
 
-	/** Verify guild membership via mana-core-auth internal API */
+	/** Verify guild membership via mana-auth internal API */
 	private async verifyMembership(
 		guildId: string,
 		userId: string

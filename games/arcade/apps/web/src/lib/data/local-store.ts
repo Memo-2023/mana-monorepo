@@ -1,4 +1,4 @@
-import { createLocalStore, type BaseRecord } from '@manacore/local-store';
+import { createLocalStore, type BaseRecord } from '@mana/local-store';
 
 // ─── Types ──────────────────────────────────────────────────
 

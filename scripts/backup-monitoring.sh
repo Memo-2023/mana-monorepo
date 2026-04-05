@@ -1,5 +1,5 @@
 #!/bin/bash
-# Backup script for ManaCore Monitoring Stack
+# Backup script for Mana Monitoring Stack
 # - VictoriaMetrics (2 years of metrics)
 # - DuckDB (Business KPIs)
 
@@ -43,7 +43,7 @@ backup_victoriametrics() {
 
     # Copy snapshot to backup directory
     # Note: Adjust path based on your volume mount
-    VM_DATA_PATH="/var/lib/docker/volumes/manacore-victoriametrics/_data"
+    VM_DATA_PATH="/var/lib/docker/volumes/mana-victoriametrics/_data"
     SNAPSHOT_PATH="$VM_DATA_PATH/snapshots/$SNAPSHOT_NAME"
 
     if [ -d "$SNAPSHOT_PATH" ]; then
@@ -68,7 +68,7 @@ backup_duckdb() {
     log_info "Backing up DuckDB analytics database..."
 
     # DuckDB is a single file, so we can just copy it
-    DUCKDB_PATH="/var/lib/docker/volumes/manacore-analytics/_data/metrics.duckdb"
+    DUCKDB_PATH="/var/lib/docker/volumes/mana-analytics/_data/metrics.duckdb"
 
     if [ -f "$DUCKDB_PATH" ]; then
         BACKUP_FILE="$BACKUP_DIR/analytics-$DATE.duckdb"
@@ -107,7 +107,7 @@ cleanup_old_backups() {
 # Main
 # ============================================
 main() {
-    log_info "Starting ManaCore Monitoring Backup"
+    log_info "Starting Mana Monitoring Backup"
     log_info "Backup directory: $BACKUP_DIR"
     log_info "Date: $DATE"
     echo ""

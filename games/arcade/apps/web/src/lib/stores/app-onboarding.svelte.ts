@@ -1,4 +1,4 @@
-import { createAppOnboardingStore, type AppOnboardingStep } from '@manacore/shared-ui';
+import { createAppOnboardingStore, type AppOnboardingStep } from '@mana/shared-ui';
 import { userSettings } from './user-settings.svelte';
 
 const onboardingSteps: AppOnboardingStep[] = [

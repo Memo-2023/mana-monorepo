@@ -1,8 +1,8 @@
 """
-External API Key Validation via mana-core-auth
+External API Key Validation via mana-auth
 
 When EXTERNAL_AUTH_ENABLED=true, API keys are validated against the
-central mana-core-auth service. This allows users to create and manage
+central mana-auth service. This allows users to create and manage
 API keys from the mana.how web interface.
 
 Results are cached for 5 minutes to reduce load on the auth service.
@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 # Configuration
 EXTERNAL_AUTH_ENABLED = os.getenv("EXTERNAL_AUTH_ENABLED", "false").lower() == "true"
-MANA_CORE_AUTH_URL = os.getenv("MANA_CORE_AUTH_URL", "http://localhost:3001")
+MANA_AUTH_URL = os.getenv("MANA_AUTH_URL", "http://localhost:3001")
 API_KEY_CACHE_TTL = int(os.getenv("API_KEY_CACHE_TTL", "300"))  # 5 minutes
 EXTERNAL_AUTH_TIMEOUT = float(os.getenv("EXTERNAL_AUTH_TIMEOUT", "5.0"))  # seconds
 
@@ -71,7 +71,7 @@ def _cache_result(api_key: str, result: ExternalValidationResult):
 
 async def validate_api_key_external(api_key: str, scope: str) -> Optional[ExternalValidationResult]:
     """
-    Validate an API key against mana-core-auth service.
+    Validate an API key against mana-auth service.
 
     Args:
         api_key: The API key to validate (e.g., "sk_live_...")
@@ -95,11 +95,11 @@ async def validate_api_key_external(api_key: str, scope: str) -> Optional[Extern
             )
         return cached
 
-    # Call mana-core-auth validation endpoint
+    # Call mana-auth validation endpoint
     try:
         async with httpx.AsyncClient(timeout=EXTERNAL_AUTH_TIMEOUT) as client:
             response = await client.post(
-                f"{MANA_CORE_AUTH_URL}/api/v1/api-keys/validate",
+                f"{MANA_AUTH_URL}/api/v1/api-keys/validate",
                 json={"apiKey": api_key, "scope": scope},
             )
 

@@ -14,7 +14,7 @@ import (
 	htmltomarkdown "github.com/JohannesKaufmann/html-to-markdown/v2"
 	readability "github.com/go-shiori/go-readability"
 
-	"github.com/manacore/mana-search/internal/config"
+	"github.com/mana/mana-search/internal/config"
 )
 
 type Extractor struct {

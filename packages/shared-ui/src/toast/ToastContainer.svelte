@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { toastStore } from './toast.svelte';
 	import type { Toast } from './toast.svelte';
-	import { X, CheckCircle, XCircle, Warning, Info } from '@manacore/shared-icons';
+	import { X, CheckCircle, XCircle, Warning, Info } from '@mana/shared-icons';
 
 	let toasts = $derived(toastStore.toasts);
 

@@ -323,7 +323,7 @@ Folgende Apps nutzen bereits die zentralen User Settings:
 - Calendar (`calendar`)
 - Chat (`chat`)
 - Contacts (`contacts`)
-- ManaCore (`manacore`)
+- Mana (`manacore`)
 - Cards (`cards`)
 - Picture (`picture`)
 - Presi (`presi`)
@@ -339,7 +339,7 @@ Folgende Apps nutzen bereits die zentralen User Settings:
 
    export const userSettings = createUserSettingsStore({
      appId: 'my-app',  // Eindeutige ID
-     authUrl: import.meta.env.PUBLIC_MANA_CORE_AUTH_URL,
+     authUrl: import.meta.env.PUBLIC_MANA_AUTH_URL,
      getAccessToken: () => authStore.getAccessToken()
    });
    ```

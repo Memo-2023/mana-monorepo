@@ -2,7 +2,7 @@
  * Svelte 5 reactive integration for LocalLLMEngine.
  *
  * Usage in a Svelte component:
- *   import { getLocalLlmStatus, loadLocalLlm, generateText } from '@manacore/local-llm';
+ *   import { getLocalLlmStatus, loadLocalLlm, generateText } from '@mana/local-llm';
  *
  *   const status = getLocalLlmStatus();
  *   loadLocalLlm();

@@ -106,7 +106,7 @@ LLM_TIMEOUT=120000                 # Timeout in ms (default: 120s)
 DATABASE_URL=postgresql://manacore:devpassword@localhost:5432/chat
 
 # Auth
-MANA_CORE_AUTH_URL=http://localhost:3001
+MANA_AUTH_URL=http://localhost:3001
 
 # Server
 PORT=3002
@@ -115,14 +115,14 @@ PORT=3002
 #### Mobile (.env)
 
 ```env
-EXPO_PUBLIC_MANA_CORE_AUTH_URL=http://localhost:3001
+EXPO_PUBLIC_MANA_AUTH_URL=http://localhost:3001
 EXPO_PUBLIC_BACKEND_URL=http://localhost:3002
 ```
 
 #### Web (.env)
 
 ```env
-PUBLIC_MANA_CORE_AUTH_URL=http://localhost:3001
+PUBLIC_MANA_AUTH_URL=http://localhost:3001
 PUBLIC_BACKEND_URL=http://localhost:3002
 ```
 
@@ -173,7 +173,7 @@ pnpm --filter @chat/server db:add-local-models
    ```env
    OPENROUTER_API_KEY=sk-or-v1-xxx
    DATABASE_URL=postgresql://manacore:devpassword@localhost:5432/chat
-   MANA_CORE_AUTH_URL=http://localhost:3001
+   MANA_AUTH_URL=http://localhost:3001
    PORT=3002
    ```
 3. **Start services**:

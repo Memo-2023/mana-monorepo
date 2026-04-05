@@ -13,7 +13,7 @@ import {
 	errorHandler,
 	notFoundHandler,
 	rateLimitMiddleware,
-} from '@manacore/shared-hono';
+} from '@mana/shared-hono';
 
 import { memoRoutes } from './routes/memos';
 import { spaceRoutes } from './routes/spaces';

@@ -21,7 +21,7 @@
 		Sun,
 		Moon,
 		Desktop,
-	} from '@manacore/shared-icons';
+	} from '@mana/shared-icons';
 	import { VerificationDialog, RecoveryKeyDialog } from '$lib/components/crypto';
 	import {
 		getNotificationSettings,

@@ -5,7 +5,7 @@
  */
 
 const NOTIFY_URL = process.env.MANA_NOTIFY_URL || 'http://localhost:3013';
-const SERVICE_KEY = process.env.MANA_CORE_SERVICE_KEY || 'dev-service-key';
+const SERVICE_KEY = process.env.MANA_SERVICE_KEY || 'dev-service-key';
 
 async function send(to: string, subject: string, html: string): Promise<boolean> {
 	try {
@@ -37,7 +37,7 @@ async function send(to: string, subject: string, html: string): Promise<boolean>
 export async function sendVerificationEmail(email: string, url: string, name?: string) {
 	return send(
 		email,
-		'E-Mail bestätigen — ManaCore',
+		'E-Mail bestätigen — Mana',
 		`<p>Hallo ${name || ''},</p><p>Bitte bestätige deine E-Mail-Adresse:</p><p><a href="${url}">E-Mail bestätigen</a></p><p>Oder kopiere diesen Link: ${url}</p>`
 	);
 }
@@ -45,7 +45,7 @@ export async function sendVerificationEmail(email: string, url: string, name?: s
 export async function sendPasswordResetEmail(email: string, url: string, name?: string) {
 	return send(
 		email,
-		'Passwort zurücksetzen — ManaCore',
+		'Passwort zurücksetzen — Mana',
 		`<p>Hallo ${name || ''},</p><p>Klicke hier um dein Passwort zurückzusetzen:</p><p><a href="${url}">Passwort zurücksetzen</a></p><p>Der Link ist 1 Stunde gültig.</p>`
 	);
 }
@@ -58,7 +58,7 @@ export async function sendInvitationEmail(
 ) {
 	return send(
 		email,
-		`Einladung: ${orgName} — ManaCore`,
+		`Einladung: ${orgName} — Mana`,
 		`<p>${inviterName} hat dich zu <strong>${orgName}</strong> eingeladen.</p><p><a href="${url}">Einladung annehmen</a></p>`
 	);
 }
@@ -66,7 +66,7 @@ export async function sendInvitationEmail(
 export async function sendMagicLinkEmail(email: string, url: string) {
 	return send(
 		email,
-		'Login-Link — ManaCore',
+		'Login-Link — Mana',
 		`<p>Klicke hier um dich anzumelden:</p><p><a href="${url}">Jetzt anmelden</a></p><p>Der Link ist 10 Minuten gültig.</p>`
 	);
 }
@@ -74,7 +74,7 @@ export async function sendMagicLinkEmail(email: string, url: string) {
 export async function sendAccountDeletionEmail(email: string, name?: string) {
 	return send(
 		email,
-		'Konto gelöscht — ManaCore',
-		`<p>Hallo ${name || ''},</p><p>Dein ManaCore-Konto wurde erfolgreich gelöscht. Alle deine Daten wurden entfernt.</p>`
+		'Konto gelöscht — Mana',
+		`<p>Hallo ${name || ''},</p><p>Dein Mana-Konto wurde erfolgreich gelöscht. Alle deine Daten wurden entfernt.</p>`
 	);
 }

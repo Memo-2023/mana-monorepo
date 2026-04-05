@@ -1,5 +1,5 @@
 /**
- * Shared Error Tracking for ManaCore Apps
+ * Shared Error Tracking for Mana Apps
  *
  * Uses Sentry SDK with GlitchTip as the self-hosted backend.
  * Compatible with any Sentry-compatible error tracking service.
@@ -7,7 +7,7 @@
  * @example
  * ```typescript
  * // In instrument.ts (must be imported BEFORE app bootstrap)
- * import { initErrorTracking } from '@manacore/shared-error-tracking';
+ * import { initErrorTracking } from '@mana/shared-error-tracking';
  *
  * initErrorTracking({
  *   serviceName: 'calendar-backend',

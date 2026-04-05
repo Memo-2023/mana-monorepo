@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { ThemeVariant } from '@manacore/shared-theme';
-	import { THEME_DEFINITIONS } from '@manacore/shared-theme';
+	import type { ThemeVariant } from '@mana/shared-theme';
+	import { THEME_DEFINITIONS } from '@mana/shared-theme';
 	import {
 		Check,
 		Lock,
@@ -15,7 +15,7 @@
 		Sun,
 		Moon,
 		Flower,
-	} from '@manacore/shared-icons';
+	} from '@mana/shared-icons';
 	import type { ThemeStatus } from '../types';
 	import ThemeColorPreview from './ThemeColorPreview.svelte';
 

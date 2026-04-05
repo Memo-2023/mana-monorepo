@@ -1,5 +1,5 @@
 {
-	"name": "@manacore/local-store",
+	"name": "@mana/local-store",
 	"version": "0.1.0",
 	"private": true,
 	"description": "Local-first data layer with Dexie.js, reactive Svelte 5 queries, and sync engine",

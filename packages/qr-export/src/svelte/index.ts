@@ -4,8 +4,8 @@
  * @example
  * ```svelte
  * <script>
- *   import { ManaQRCode, ManaQRScanner } from '@manacore/qr-export/svelte';
- *   import { createManaQRExport } from '@manacore/qr-export';
+ *   import { ManaQRCode, ManaQRScanner } from '@mana/qr-export/svelte';
+ *   import { createManaQRExport } from '@mana/qr-export';
  *
  *   const exportData = createManaQRExport()
  *     .user({ n: 'Till' })

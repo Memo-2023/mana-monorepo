@@ -58,7 +58,7 @@
 			"targets": [
 				{
 					"datasource": { "type": "prometheus", "uid": "${datasource}" },
-					"expr": "up{job=~\"mana-core-auth|.*-backend|mana-search|mana-media\"}",
+					"expr": "up{job=~\"mana-auth|.*-backend|mana-search|mana-media\"}",
 					"legendFormat": "{{job}}",
 					"refId": "A"
 				}
@@ -525,7 +525,7 @@
 	],
 	"refresh": "30s",
 	"schemaVersion": 38,
-	"tags": ["manacore", "backends"],
+	"tags": ["mana", "backends"],
 	"templating": {
 		"list": [
 			{

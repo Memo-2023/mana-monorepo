@@ -1,6 +1,6 @@
 # Error Tracking with GlitchTip
 
-Self-hosted, open-source error tracking for all ManaCore apps using [GlitchTip](https://glitchtip.com) (Sentry-compatible).
+Self-hosted, open-source error tracking for all Mana apps using [GlitchTip](https://glitchtip.com) (Sentry-compatible).
 
 ## Overview
 

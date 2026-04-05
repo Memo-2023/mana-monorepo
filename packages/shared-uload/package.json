@@ -1,5 +1,5 @@
 {
-	"name": "@manacore/shared-uload",
+	"name": "@mana/shared-uload",
 	"version": "0.1.0",
 	"private": true,
 	"type": "module",
@@ -17,8 +17,8 @@
 		"check": "svelte-check --tsconfig ./tsconfig.json"
 	},
 	"dependencies": {
-		"@manacore/local-store": "workspace:*",
-		"@manacore/shared-icons": "workspace:*"
+		"@mana/local-store": "workspace:*",
+		"@mana/shared-icons": "workspace:*"
 	},
 	"devDependencies": {
 		"svelte": "^5.0.0",

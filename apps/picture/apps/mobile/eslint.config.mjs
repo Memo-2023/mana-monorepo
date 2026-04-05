@@ -1,5 +1,5 @@
 // @ts-check
-import { baseConfig, typescriptConfig, reactConfig, prettierConfig } from '@manacore/eslint-config';
+import { baseConfig, typescriptConfig, reactConfig, prettierConfig } from '@mana/eslint-config';
 
 export default [
 	{

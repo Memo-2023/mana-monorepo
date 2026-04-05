@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import Stripe from 'stripe';
-import type { AuthVariables } from '@manacore/shared-hono';
+import type { AuthVariables } from '@mana/shared-hono';
 import type { Config } from '../config';
 
 const PRICES = {

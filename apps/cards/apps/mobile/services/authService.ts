@@ -1,6 +1,6 @@
 /**
  * Mana Core Authentication Service
- * Uses @manacore/shared-auth for unified auth across all apps
+ * Uses @mana/shared-auth for unified auth across all apps
  */
 
 import { Platform } from 'react-native';
@@ -14,11 +14,11 @@ import {
 	isTokenValidLocally as sharedIsTokenValidLocally,
 	getUserFromToken as sharedGetUserFromToken,
 	decodeToken as sharedDecodeToken,
-} from '@manacore/shared-auth';
+} from '@mana/shared-auth';
 import type { ManaUser, JwtPayload } from '../types/auth';
 
 // Mana Core Auth URL
-const AUTH_URL = process.env.EXPO_PUBLIC_MANA_CORE_AUTH_URL || 'http://localhost:3001';
+const AUTH_URL = process.env.EXPO_PUBLIC_MANA_AUTH_URL || 'http://localhost:3001';
 
 // --- Adapters ---
 
@@ -123,7 +123,7 @@ export const authService = {
 		_username?: string
 	): Promise<{ success: boolean; user?: ManaUser; error?: string }> => {
 		try {
-			// TODO: username is not supported by mana-core-auth signUp - add profile update after registration
+			// TODO: username is not supported by mana-auth signUp - add profile update after registration
 			const result = await _sharedAuth.signUp(email, password);
 			if (!result.success) {
 				return { success: false, error: result.error || 'Sign up failed' };

@@ -132,7 +132,7 @@ services:
     image: ghcr.io/manacore/chat-backend:latest
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/chat
-      MANA_CORE_AUTH_URL: http://mana-auth:3001
+      MANA_AUTH_URL: http://mana-auth:3001
       JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
     depends_on:
       - mana-auth

@@ -7,9 +7,9 @@ import (
 	"math"
 	"time"
 
-	"github.com/manacore/mana-notify/internal/channel"
-	"github.com/manacore/mana-notify/internal/db"
-	"github.com/manacore/mana-notify/internal/metrics"
+	"github.com/mana/mana-notify/internal/channel"
+	"github.com/mana/mana-notify/internal/db"
+	"github.com/mana/mana-notify/internal/metrics"
 )
 
 // Job represents a notification delivery job.

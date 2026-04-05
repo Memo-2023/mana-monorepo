@@ -51,8 +51,8 @@ pnpm --filter @picture/mobile dev     # Mobile only
 | `REPLICATE_API_TOKEN` | Replicate API key | Yes |
 | `DATABASE_URL` | PostgreSQL connection | Yes |
 | `S3_ENDPOINT` | MinIO/S3 endpoint | Yes |
-| `MANA_CORE_AUTH_URL` | Auth service URL | Yes |
-| `MANA_CORE_SERVICE_KEY` | Service key for credits | Staging only |
+| `MANA_AUTH_URL` | Auth service URL | Yes |
+| `MANA_SERVICE_KEY` | Service key for credits | Staging only |
 | `APP_ID` | App identifier | Yes |
 
 ---
@@ -69,7 +69,7 @@ pnpm --filter @picture/mobile dev     # Mobile only
 - [ ] **Test staging credit enforcement**
   - Set `NODE_ENV=staging` and test credit check
   - Verify HTTP 402 returned when credits insufficient
-  - Test with valid `MANA_CORE_SERVICE_KEY`
+  - Test with valid `MANA_SERVICE_KEY`
 
 - [ ] **Test async generation (webhook mode)**
   - Test generation without `waitForResult: true`
@@ -133,7 +133,7 @@ pnpm --filter @picture/mobile dev     # Mobile only
 
 - [ ] **Staging deployment**
   - Deploy backend to staging server
-  - Configure `MANA_CORE_SERVICE_KEY` in staging
+  - Configure `MANA_SERVICE_KEY` in staging
   - Test credit system end-to-end
 
 - [ ] **Monitoring**

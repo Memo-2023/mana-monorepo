@@ -3,10 +3,10 @@ FROM golang:1.25-alpine AS builder
 WORKDIR /app
 COPY packages/shared-go/ /shared-go/
 COPY services/mana-notify/go.mod services/mana-notify/go.sum ./
-RUN go mod edit -replace github.com/manacore/shared-go=/shared-go && go mod download
+RUN go mod edit -replace github.com/mana/shared-go=/shared-go && go mod download
 
 COPY services/mana-notify/ .
-RUN go mod edit -replace github.com/manacore/shared-go=/shared-go && \
+RUN go mod edit -replace github.com/mana/shared-go=/shared-go && \
     CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /mana-notify ./cmd/server
 
 FROM alpine:3.21

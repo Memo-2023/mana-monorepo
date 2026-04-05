@@ -5,7 +5,7 @@
  * and bottom notification state for guest users.
  *
  * Usage:
- *   const guestMode = createGuestMode('manacore', { nudgeDelayMinutes: 3 });
+ *   const guestMode = createGuestMode('mana', { nudgeDelayMinutes: 3 });
  */
 
 // Inline localStorage utilities (no external dependency needed)

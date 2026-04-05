@@ -394,7 +394,7 @@
 		},
 		{
 			"datasource": { "type": "prometheus", "uid": "${datasource}" },
-			"description": "Note: Only mana-core-auth exposes Node.js runtime metrics",
+			"description": "Note: Only mana-auth exposes Node.js runtime metrics",
 			"fieldConfig": {
 				"defaults": {
 					"color": { "mode": "palette-classic" },
@@ -830,7 +830,7 @@
 	],
 	"refresh": "30s",
 	"schemaVersion": 38,
-	"tags": ["manacore", "application", "nodejs"],
+	"tags": ["mana", "application", "nodejs"],
 	"templating": {
 		"list": [
 			{
@@ -850,14 +850,14 @@
 				"allValue": ".*",
 				"current": { "selected": true, "text": "All", "value": "$__all" },
 				"datasource": { "type": "prometheus", "uid": "${datasource}" },
-				"definition": "label_values(up{job=~\".*-backend|mana-core-auth\"}, job)",
+				"definition": "label_values(up{job=~\".*-backend|mana-auth\"}, job)",
 				"hide": 0,
 				"includeAll": true,
 				"multi": true,
 				"name": "service",
 				"options": [],
 				"query": {
-					"query": "label_values(up{job=~\".*-backend|mana-core-auth\"}, job)",
+					"query": "label_values(up{job=~\".*-backend|mana-auth\"}, job)",
 					"refId": "PrometheusVariableQueryEditor-VariableQuery"
 				},
 				"refresh": 2,

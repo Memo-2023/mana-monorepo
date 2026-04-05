@@ -12,7 +12,7 @@ import {
 	isRetryableError,
 	parseErrorResponse,
 } from './utils';
-import { sleep } from '@manacore/shared-utils';
+import { sleep } from '@mana/shared-utils';
 
 const DEFAULT_TIMEOUT = 30000;
 const DEFAULT_RETRIES = 0;
@@ -23,7 +23,7 @@ const DEFAULT_RETRY_DELAY = 1000;
  *
  * @example
  * ```typescript
- * import { createApiClient } from '@manacore/shared-api-client';
+ * import { createApiClient } from '@mana/shared-api-client';
  * import { authStore } from '$lib/stores/auth.svelte';
  *
  * export const api = createApiClient({

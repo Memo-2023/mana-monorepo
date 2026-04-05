@@ -175,7 +175,7 @@ class AlertHandler(BaseHTTPRequestHandler):
             logger.info(f"Telegram: {'sent' if success else 'failed'}")
 
         if NTFY_TOPIC:
-            title = f"ManaCore Alert ({len(alerts)} alerts)"
+            title = f"Mana Alert ({len(alerts)} alerts)"
             # Strip HTML for ntfy
             plain_message = combined_message.replace('<b>', '').replace('</b>', '')
             plain_message = plain_message.replace('<code>', '').replace('</code>', '')

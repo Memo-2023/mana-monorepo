@@ -198,7 +198,7 @@ export const MANA_APP_INDEX: Record<string, number> = {
 	moodlit: 20,
 	uload: 21,
 	calc: 22,
-	manacore: 31,
+	mana: 31,
 };
 
 export const MANA_APP_NAMES: Record<number, string> = Object.fromEntries(

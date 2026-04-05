@@ -1,5 +1,5 @@
 /**
- * Shared Vite Configuration for ManaCore Web Apps
+ * Shared Vite Configuration for Mana Web Apps
  * Provides consistent SSR and optimization settings.
  */
 
@@ -7,32 +7,32 @@ import { execSync } from 'child_process';
 import type { UserConfig, UserConfigExport } from 'vite';
 
 /**
- * Common ManaCore shared packages that need SSR configuration.
+ * Common Mana shared packages that need SSR configuration.
  * These packages contain Svelte 5 runes or other client-side state.
  */
 export const MANACORE_SHARED_PACKAGES = [
-	'@manacore/shared-icons',
-	'@manacore/shared-ui',
-	'@manacore/shared-tailwind',
-	'@manacore/shared-theme',
-	'@manacore/shared-theme-ui',
-	'@manacore/shared-feedback-ui',
-	'@manacore/shared-feedback-service',
-	'@manacore/shared-feedback-types',
-	'@manacore/shared-auth',
-	'@manacore/shared-auth-ui',
-	'@manacore/shared-branding',
-	'@manacore/shared-subscription-ui',
-	'@manacore/shared-profile-ui',
-	'@manacore/shared-i18n',
-	'@manacore/shared-api-client',
-	'@manacore/shared-splitscreen',
-	'@manacore/shared-utils',
-	'@manacore/shared-tags',
-	'@manacore/shared-stores',
-	'@manacore/shared-help-types',
-	'@manacore/shared-help-content',
-	'@manacore/shared-help-ui',
+	'@mana/shared-icons',
+	'@mana/shared-ui',
+	'@mana/shared-tailwind',
+	'@mana/shared-theme',
+	'@mana/shared-theme-ui',
+	'@mana/shared-feedback-ui',
+	'@mana/shared-feedback-service',
+	'@mana/shared-feedback-types',
+	'@mana/shared-auth',
+	'@mana/shared-auth-ui',
+	'@mana/shared-branding',
+	'@mana/shared-subscription-ui',
+	'@mana/shared-profile-ui',
+	'@mana/shared-i18n',
+	'@mana/shared-api-client',
+	'@mana/shared-splitscreen',
+	'@mana/shared-utils',
+	'@mana/shared-tags',
+	'@mana/shared-stores',
+	'@mana/shared-help-types',
+	'@mana/shared-help-content',
+	'@mana/shared-help-ui',
 ] as const;
 
 /**
@@ -65,21 +65,21 @@ export interface ViteConfigOptions {
 }
 
 /**
- * Get the SSR noExternal configuration for ManaCore apps.
+ * Get the SSR noExternal configuration for Mana apps.
  */
 export function getSsrNoExternal(additionalPackages: string[] = []): string[] {
 	return [...MANACORE_SHARED_PACKAGES, ...additionalPackages];
 }
 
 /**
- * Get the optimizeDeps exclude configuration for ManaCore apps.
+ * Get the optimizeDeps exclude configuration for Mana apps.
  */
 export function getOptimizeDepsExclude(additionalExcludes: string[] = []): string[] {
 	return [...MANACORE_SHARED_PACKAGES, ...additionalExcludes];
 }
 
 /**
- * Create a base Vite configuration for ManaCore SvelteKit apps.
+ * Create a base Vite configuration for Mana SvelteKit apps.
  * Merge this with your app-specific configuration.
  */
 export function createViteConfig(options: ViteConfigOptions): Partial<UserConfig> {
@@ -112,7 +112,7 @@ export function createViteConfig(options: ViteConfigOptions): Partial<UserConfig
  * import { sveltekit } from '@sveltejs/kit/vite';
  * import tailwindcss from '@tailwindcss/vite';
  * import { defineConfig } from 'vite';
- * import { createViteConfig, mergeViteConfig } from '@manacore/shared-vite-config';
+ * import { createViteConfig, mergeViteConfig } from '@mana/shared-vite-config';
  *
  * const baseConfig = createViteConfig({
  *   port: 5174,

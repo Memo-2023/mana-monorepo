@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
-	import { WarningCircle, ArrowLeft, House } from '@manacore/shared-icons';
+	import { WarningCircle, ArrowLeft, House } from '@mana/shared-icons';
 </script>
 
 <svelte:head>

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { X, ArrowRight } from '@manacore/shared-icons';
+	import { X, ArrowRight } from '@mana/shared-icons';
 	import type { BottomNotification } from './types';
 
 	interface Props {

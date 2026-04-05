@@ -6,7 +6,7 @@
 
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
-	import { Check } from '@manacore/shared-icons';
+	import { Check } from '@mana/shared-icons';
 
 	let isOnline = $state(true);
 	let showReconnected = $state(false);

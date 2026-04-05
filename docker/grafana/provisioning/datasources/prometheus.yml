@@ -15,11 +15,11 @@ datasources:
       timeInterval: "15s"
       httpMethod: POST
 
-  # Business Metrics API (DuckDB via mana-core-auth)
+  # Business Metrics API (DuckDB via mana-auth)
   - name: Business Metrics
     type: yesoreyeram-infinity-datasource
     access: proxy
-    url: http://mana-core-auth:3001
+    url: http://mana-auth:3001
     isDefault: false
     editable: true
     jsonData:

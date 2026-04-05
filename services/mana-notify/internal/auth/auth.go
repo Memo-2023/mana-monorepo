@@ -5,7 +5,7 @@ package auth
 import (
 	"net/http"
 
-	"github.com/manacore/shared-go/authutil"
+	"github.com/mana/shared-go/authutil"
 )
 
 // Re-export types for backward compatibility.
@@ -19,7 +19,7 @@ func ValidateServiceKey(serviceKey string) func(http.Handler) http.Handler {
 	return authutil.ServiceKeyMiddleware(serviceKey)
 }
 
-// ValidateJWT validates Bearer tokens against mana-core-auth.
+// ValidateJWT validates Bearer tokens against mana-auth.
 func ValidateJWT(authURL string) func(http.Handler) http.Handler {
 	validator := authutil.NewRemoteValidator(authURL)
 	return authutil.JWTMiddleware(validator)

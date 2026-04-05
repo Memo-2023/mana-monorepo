@@ -73,8 +73,8 @@ friendly_name() {
   esac
   # Entferne /health suffix
   name="${name%/health}"
-  # mana.how (ohne Route) → ManaCore
-  [ "$name" = "mana.how" ] && name="ManaCore"
+  # mana.how (ohne Route) → Mana
+  [ "$name" = "mana.how" ] && name="Mana"
   # Erster Buchstabe groß (POSIX-kompatibel)
   printf '%s' "$name" | awk '{print toupper(substr($0,1,1)) substr($0,2)}'
 }
@@ -197,7 +197,7 @@ get_tier_badge() {
   case "$appid" in *-api) return ;; esac
   # Aliase (Sonderfälle → aktuelle App-IDs)
   case "$appid" in
-    mana.how)  appid="manacore" ;;
+    mana.how)  appid="mana" ;;
     manadeck)  appid="cards" ;;
     inventar)  appid="inventory" ;;
   esac
@@ -218,7 +218,7 @@ cat > "${OUTPUT}.tmp" << HTMLEOF
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="refresh" content="60">
-  <title>ManaCore Status</title>
+  <title>Mana Status</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -437,7 +437,7 @@ $(render_rows blackbox-gpu)
   </div>
 
   <footer>
-    <p>Powered by <a href="https://mana.how">ManaCore</a> · Metriken via Prometheus Blackbox Exporter</p>
+    <p>Powered by <a href="https://mana.how">Mana</a> · Metriken via Prometheus Blackbox Exporter</p>
   </footer>
 
 </div>
@@ -479,7 +479,7 @@ echo "$SUCCESS_JSON" | jq \
           | ltrimstr("https://")
           | rtrimstr("/health")
           | rtrimstr("/")
-          | if . == "mana.how" then "manacore"
+          | if . == "mana.how" then "mana"
             elif startswith("mana.how/") then ltrimstr("mana.how/")
             else rtrimstr(".mana.how")
             end

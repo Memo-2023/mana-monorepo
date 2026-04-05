@@ -1,13 +1,13 @@
 /**
- * @manacore/credits — Unified credit package
+ * @mana/credits — Unified credit package
  *
  * Consolidates credit-operations + shared-credit-service + shared-credit-ui.
  *
  * Usage:
- * - Operations/costs: import { CreditOperationType, CREDIT_COSTS } from '@manacore/credits'
- * - Service: import { createCreditService } from '@manacore/credits'
- * - Web UI: import { CreditBalance } from '@manacore/credits/web'
- * - Mobile UI: import { CreditBalance } from '@manacore/credits/mobile'
+ * - Operations/costs: import { CreditOperationType, CREDIT_COSTS } from '@mana/credits'
+ * - Service: import { createCreditService } from '@mana/credits'
+ * - Web UI: import { CreditBalance } from '@mana/credits/web'
+ * - Mobile UI: import { CreditBalance } from '@mana/credits/mobile'
  */
 
 // === Operations (costs, types, metadata) ===

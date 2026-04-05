@@ -126,7 +126,7 @@ export interface MultipartUploadPart {
  * Predefined bucket names for each project
  */
 export const BUCKETS = {
-	MANACORE: 'manacore-storage',
+	MANACORE: 'mana-storage',
 	PICTURE: 'picture-storage',
 	CHAT: 'chat-storage',
 	CARDS: 'cards-storage',

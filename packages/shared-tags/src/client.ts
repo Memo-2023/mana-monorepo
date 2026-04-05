@@ -18,7 +18,7 @@ import type {
  */
 export interface TagsClientConfig {
 	/**
-	 * Base URL of mana-core-auth service (e.g., 'http://localhost:3001')
+	 * Base URL of mana-auth service (e.g., 'http://localhost:3001')
 	 */
 	authUrl: string;
 
@@ -29,7 +29,7 @@ export interface TagsClientConfig {
 }
 
 /**
- * Client for interacting with the central Tags API in mana-core-auth.
+ * Client for interacting with the central Tags API in mana-auth.
  * Used by all Manacore apps to manage user tags.
  */
 export class TagsClient {

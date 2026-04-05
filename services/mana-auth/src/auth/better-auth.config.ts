@@ -345,7 +345,7 @@ export function createBetterAuth(databaseUrl: string) {
 					// For OIDC compatibility, issuer MUST match the discovery document
 					// Use BASE_URL to match /.well-known/openid-configuration issuer
 					issuer: process.env.BASE_URL || process.env.JWT_ISSUER || 'http://localhost:3001',
-					audience: process.env.JWT_AUDIENCE || 'manacore',
+					audience: process.env.JWT_AUDIENCE || 'mana',
 					expirationTime: '15m',
 
 					/**
@@ -417,7 +417,7 @@ export function createBetterAuth(databaseUrl: string) {
 			 * - POST /two-factor/generate-backup-codes
 			 */
 			twoFactor({
-				issuer: 'ManaCore',
+				issuer: 'Mana',
 			}),
 			/**
 			 * Magic Link Plugin (Passwordless Email Login)

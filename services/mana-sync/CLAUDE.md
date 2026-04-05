@@ -1,6 +1,6 @@
 # mana-sync
 
-Central sync server for local-first ManaCore apps. Handles data synchronization between IndexedDB (Dexie.js) clients and PostgreSQL via field-level Last-Write-Wins (LWW) conflict resolution.
+Central sync server for local-first Mana apps. Handles data synchronization between IndexedDB (Dexie.js) clients and PostgreSQL via field-level Last-Write-Wins (LWW) conflict resolution.
 
 ## Architecture
 

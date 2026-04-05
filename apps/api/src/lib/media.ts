@@ -3,7 +3,7 @@
  * for CAS deduplication, thumbnail generation, and Photos gallery visibility.
  */
 
-import { MediaClient, type MediaResult } from '@manacore/media-client';
+import { MediaClient, type MediaResult } from '@mana/media-client';
 
 const MEDIA_URL = process.env.MANA_MEDIA_URL || 'http://localhost:3015';
 let client: MediaClient | null = null;

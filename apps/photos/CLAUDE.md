@@ -2,7 +2,7 @@
 
 ## Overview
 
-**Photos** is a unified photo gallery application for the ManaCore ecosystem. It aggregates photos from all apps (Picture, Chat, Contacts, NutriPhi, etc.) via the mana-media service, providing a central place to view, organize, and manage photos.
+**Photos** is a unified photo gallery application for the Mana ecosystem. It aggregates photos from all apps (Picture, Chat, Contacts, NutriPhi, etc.) via the mana-media service, providing a central place to view, organize, and manage photos.
 
 | App | Dev Port | Prod Port | Prod URL |
 |-----|----------|-----------|----------|
@@ -174,7 +174,7 @@ pnpm db:studio                # Open Drizzle Studio
 NODE_ENV=development
 PORT=3019
 DATABASE_URL=postgresql://manacore:devpassword@localhost:5432/photos
-MANA_CORE_AUTH_URL=http://localhost:3001
+MANA_AUTH_URL=http://localhost:3001
 MANA_MEDIA_URL=http://localhost:3015
 CORS_ORIGINS=http://localhost:5173,http://localhost:5189,http://localhost:8081
 ```
@@ -183,7 +183,7 @@ CORS_ORIGINS=http://localhost:5173,http://localhost:5189,http://localhost:8081
 
 ```env
 PUBLIC_BACKEND_URL=http://localhost:3019
-PUBLIC_MANA_CORE_AUTH_URL=http://localhost:3001
+PUBLIC_MANA_AUTH_URL=http://localhost:3001
 PUBLIC_MANA_MEDIA_URL=http://localhost:3015
 ```
 

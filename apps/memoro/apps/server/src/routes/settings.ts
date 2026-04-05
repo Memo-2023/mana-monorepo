@@ -5,7 +5,7 @@
  */
 
 import { Hono } from 'hono';
-import type { AuthVariables } from '@manacore/shared-hono';
+import type { AuthVariables } from '@mana/shared-hono';
 import { createServiceClient } from '../lib/supabase';
 import { validateBody } from '../lib/validate';
 import { updateMemoroSettingsBody, updateDataUsageBody, updateProfileBody } from '../schemas';

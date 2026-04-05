@@ -4,8 +4,8 @@
 		ThemeMode,
 		A11yStore,
 		UserSettingsStore,
-	} from '@manacore/shared-theme';
-	import { ArrowLeft, Sun, Moon, Desktop } from '@manacore/shared-icons';
+	} from '@mana/shared-theme';
+	import { ArrowLeft, Sun, Moon, Desktop } from '@mana/shared-icons';
 	import type { ThemeCardData, ThemePageTranslations, A11yTranslations } from '../types';
 	import { defaultTranslations, defaultA11yTranslations } from '../types';
 	import ThemeGrid from '../components/ThemeGrid.svelte';

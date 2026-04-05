@@ -1,6 +1,6 @@
 # Mac Mini Server Scripts
 
-Scripts for managing the ManaCore production environment on Mac Mini.
+Scripts for managing the Mana production environment on Mac Mini.
 
 ## Quick Start (After System Update)
 

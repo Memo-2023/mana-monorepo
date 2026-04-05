@@ -7,7 +7,7 @@ import { app } from '../index';
 
 // ── Mocks ────────────────────────────────────────────────────────────────────
 
-vi.mock('@manacore/shared-hono', () => ({
+vi.mock('@mana/shared-hono', () => ({
 	authMiddleware: () => async (c: any, next: any) => {
 		c.set('userId', 'test-user-id');
 		await next();

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { onSessionExpired, isSessionExpired, resetSessionExpired } from '@manacore/shared-auth';
-	import { Warning, X, SignOut } from '@manacore/shared-icons';
+	import { onSessionExpired, isSessionExpired, resetSessionExpired } from '@mana/shared-auth';
+	import { Warning, X, SignOut } from '@mana/shared-icons';
 
 	interface Props {
 		/** Login page URL. Defaults to '/login'. */

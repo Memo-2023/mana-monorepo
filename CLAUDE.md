@@ -4,9 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Monorepo Overview
 
-This is a pnpm workspace monorepo with a **unified web application** (`apps/manacore/apps/web`) serving 27+ product modules. All modules share one SvelteKit app, one IndexedDB database, one auth session, and one deployment. Backend services use Hono/Bun compute servers. Data follows a local-first architecture (Dexie.js + mana-sync).
+This is a pnpm workspace monorepo with a **unified web application** (`apps/mana/apps/web`) serving 27+ product modules. All modules share one SvelteKit app, one IndexedDB database, one auth session, and one deployment. Backend services use Hono/Bun compute servers. Data follows a local-first architecture (Dexie.js + mana-sync).
 
-**Unified App:** `apps/manacore/apps/web` — the main web interface at `mana.how`
+**Unified App:** `apps/mana/apps/web` — the main web interface at `mana.how`
 **Standalone Web Apps:** Archived to `apps/*/apps/web-archived/` (superseded by unified app)
 **Active Standalone:** matrix, manavoxel, arcade (separate containers, not yet unified)
 
@@ -35,7 +35,7 @@ For comprehensive guidelines on code patterns and conventions, see the `.claude/
 
 ## Projects
 
-### Unified App — ManaCore (`apps/manacore/apps/web`)
+### Unified App — Mana (`apps/mana/apps/web`)
 
 The main web interface serving 27+ modules. All modules share one SvelteKit build, one IndexedDB, one auth session. Each module lives in `src/lib/modules/{name}/`.
 
@@ -97,7 +97,7 @@ Archived apps are excluded from the pnpm workspace.
 | **clock** | Consolidated into Times |
 | **wisekeep** | Inactive, not integrated into unified app |
 
-**Note:** Standalone web apps (`apps/*/apps/web-archived/`) are also archived but remain within their project directories. Only the unified ManaCore web app (`apps/manacore/apps/web`) is active.
+**Note:** Standalone web apps (`apps/*/apps/web-archived/`) are also archived but remain within their project directories. Only the unified Mana web app (`apps/mana/apps/web`) is active.
 
 ## Development Commands
 
@@ -136,7 +136,7 @@ pnpm setup:db:auth       # Setup just auth
 
 ```bash
 # Start specific project (runs all apps in project)
-pnpm run manacore:dev
+pnpm run mana:dev
 pnpm run memoro:dev
 pnpm run cards:dev
 pnpm run picture:dev
@@ -163,7 +163,7 @@ Each project has its own `CLAUDE.md` with detailed project-specific commands.
 ### Monorepo Structure
 
 ```
-manacore-monorepo/
+mana-monorepo/
 ├── apps/                    # Active SaaS product applications
 │   ├── chat/
 │   │   ├── apps/
@@ -290,7 +290,7 @@ Parent workspace packages (e.g., `apps/chat/package.json`, `apps/zitare/package.
 
 - Hono 4.x + Bun runtime
 - TypeScript, Drizzle ORM (where needed)
-- `@manacore/shared-hono` for auth middleware
+- `@mana/shared-hono` for auth middleware
 
 ### Authentication Architecture
 
@@ -315,15 +315,15 @@ All projects use **mana-core-auth** as the central authentication service:
 | Component                       | Purpose                                            |
 | ------------------------------- | -------------------------------------------------- |
 | `services/mana-auth`            | Central auth service (Better Auth + EdDSA JWT)     |
-| `@manacore/shared-hono`         | Shared Hono middleware for JWT validation           |
-| `@manacore/shared-auth`         | Client-side auth for web/mobile apps               |
+| `@mana/shared-hono`         | Shared Hono middleware for JWT validation           |
+| `@mana/shared-auth`         | Client-side auth for web/mobile apps               |
 
 #### Hono Server Auth Integration
 
-All compute servers use `@manacore/shared-hono` for auth:
+All compute servers use `@mana/shared-hono` for auth:
 
 ```typescript
-import { authMiddleware, healthRoute, errorHandler, notFoundHandler } from '@manacore/shared-hono';
+import { authMiddleware, healthRoute, errorHandler, notFoundHandler } from '@mana/shared-hono';
 
 const app = new Hono();
 app.onError(errorHandler);
@@ -342,7 +342,7 @@ app.get('/api/v1/data', (c) => {
 
 ```env
 # All servers need this
-MANA_CORE_AUTH_URL=http://localhost:3001
+MANA_AUTH_URL=http://localhost:3001
 CORS_ORIGINS=http://localhost:5173
 ```
 
@@ -355,8 +355,8 @@ CORS_ORIGINS=http://localhost:5173
 	"role": "user",
 	"sid": "session-id",
 	"exp": 1764606251,
-	"iss": "manacore",
-	"aud": "manacore"
+	"iss": "mana",
+	"aud": "mana"
 }
 ```
 
@@ -595,11 +595,11 @@ All web apps use a **local-first** data layer: reads/writes go to IndexedDB (Dex
 
 ### Unified IndexedDB Architecture
 
-The ManaCore unified app uses a **single IndexedDB** (`manacore`) containing all 120+ collections from all apps. Table names that collide across apps are prefixed (e.g., `todoProjects`, `cardDecks`, `presiDecks`).
+The Mana unified app uses a **single IndexedDB** (`mana`) containing all 120+ collections from all apps. Table names that collide across apps are prefixed (e.g., `todoProjects`, `cardDecks`, `presiDecks`).
 
 ```
 ┌─────────────────────────────────────────────┐
-│  Unified IndexedDB: "manacore"              │
+│  Unified IndexedDB: "mana"              │
 │                                             │
 │  tasks, todoProjects, labels, ...    (todo) │
 │  calendars, events                (calendar) │
@@ -629,9 +629,9 @@ The ManaCore unified app uses a **single IndexedDB** (`manacore`) containing all
 
 | File | Purpose |
 |------|---------|
-| `apps/manacore/apps/web/src/lib/data/database.ts` | Unified Dexie DB, SYNC_APP_MAP, table name mappings, Dexie hooks |
-| `apps/manacore/apps/web/src/lib/data/sync.ts` | Unified sync engine (push/pull/WS per appId) |
-| `apps/manacore/apps/web/src/lib/data/legacy-migration.ts` | One-time migration from old per-app DBs |
+| `apps/mana/apps/web/src/lib/data/database.ts` | Unified Dexie DB, SYNC_APP_MAP, table name mappings, Dexie hooks |
+| `apps/mana/apps/web/src/lib/data/sync.ts` | Unified sync engine (push/pull/WS per appId) |
+| `apps/mana/apps/web/src/lib/data/legacy-migration.ts` | One-time migration from old per-app DBs |
 | `packages/local-store/` | Standalone local-store (used by individual apps, not the unified app) |
 | `services/mana-sync/` | Go sync server (WebSocket push, field-level LWW) |
 
@@ -653,7 +653,7 @@ The ManaCore unified app uses a **single IndexedDB** (`manacore`) containing all
 
 ### Standalone Apps (Legacy)
 
-Individual apps in `apps/*/apps/web/` still use `@manacore/local-store` with per-app IndexedDB databases (`manacore-{appId}`). When users first open the unified ManaCore app, `legacy-migration.ts` migrates data from these old DBs into the unified DB.
+Individual apps in `apps/*/apps/web/` still use `@mana/local-store` with per-app IndexedDB databases (`mana-{appId}`). When users first open the unified Mana app, `legacy-migration.ts` migrates data from these old DBs into the unified DB.
 
 ### Dev Commands (Local-First Stack)
 
@@ -669,21 +669,21 @@ pnpm dev:todo:full         # Everything incl. auth + DB setup
 
 | Package                         | Purpose                                         |
 | ------------------------------- | ----------------------------------------------- |
-| `@manacore/local-store`         | Local-first data layer (Dexie.js + sync engine) |
-| `@manacore/shared-hono`         | Shared Hono middleware (auth, health, errors)   |
-| `@manacore/shared-auth`         | Client-side auth service for web/mobile apps    |
-| `@manacore/shared-storage`      | S3-compatible storage (MinIO)                     |
-| `@manacore/shared-types`        | Common TypeScript types                         |
-| `@manacore/shared-utils`        | Utility functions                               |
-| `@manacore/shared-ui`           | React Native UI components                      |
-| `@manacore/shared-theme`        | Theme configuration                             |
-| `@manacore/shared-i18n`         | Internationalization                            |
+| `@mana/local-store`         | Local-first data layer (Dexie.js + sync engine) |
+| `@mana/shared-hono`         | Shared Hono middleware (auth, health, errors)   |
+| `@mana/shared-auth`         | Client-side auth service for web/mobile apps    |
+| `@mana/shared-storage`      | S3-compatible storage (MinIO)                     |
+| `@mana/shared-types`        | Common TypeScript types                         |
+| `@mana/shared-utils`        | Utility functions                               |
+| `@mana/shared-ui`           | React Native UI components                      |
+| `@mana/shared-theme`        | Theme configuration                             |
+| `@mana/shared-i18n`         | Internationalization                            |
 
 Import shared packages:
 
 ```typescript
-import { createAuthService } from '@manacore/shared-auth';
-import { formatDate, truncate } from '@manacore/shared-utils';
+import { createAuthService } from '@mana/shared-auth';
+import { formatDate, truncate } from '@mana/shared-utils';
 ```
 
 ## Database Architecture (PostgreSQL)
@@ -771,7 +771,7 @@ pnpm docker:up
 ### Usage in Server
 
 ```typescript
-import { createPictureStorage, generateUserFileKey, getContentType } from '@manacore/shared-storage';
+import { createPictureStorage, generateUserFileKey, getContentType } from '@mana/shared-storage';
 
 const storage = createPictureStorage();
 
@@ -809,7 +809,7 @@ All landing pages are deployed to Cloudflare Pages using Direct Upload via Wrang
 |---------|---------|-------------------|-----|
 | Chat | `@chat/landing` | `chat-landing` | https://chat-landing.pages.dev |
 | Picture | `@picture/landing` | `picture-landing` | https://picture-landing.pages.dev |
-| ManaCore | `@manacore/landing` | `manacore-landing` | https://manacore-landing.pages.dev |
+| Mana | `@mana/landing` | `mana-landing` | https://mana-landing.pages.dev |
 | Cards | `@cards/landing` | `cards-landing` | https://cards-landing.pages.dev |
 | Zitare | `@zitare/landing` | `zitare-landing` | https://zitare-landing.pages.dev |
 
@@ -825,7 +825,7 @@ pnpm cf:projects:create
 # Deploy individual landing page
 pnpm deploy:landing:chat
 pnpm deploy:landing:picture
-pnpm deploy:landing:manacore
+pnpm deploy:landing:mana
 pnpm deploy:landing:cards
 pnpm deploy:landing:zitare
 
@@ -880,11 +880,11 @@ See `services/mana-landing-builder/CLAUDE.md` for full documentation.
 
 ## ManaScore (Production Readiness)
 
-ManaScore is the internal quality assessment system for all ManaCore apps. Each app is rated on a 0-100 scale across 8 categories plus extended metrics.
+ManaScore is the internal quality assessment system for all Mana apps. Each app is rated on a 0-100 scale across 8 categories plus extended metrics.
 
-**Location:** `apps/manacore/apps/landing/src/content/manascore/`
-**Live:** https://manacore-landing.pages.dev/manascore
-**Methodology:** https://manacore-landing.pages.dev/manascore/about
+**Location:** `apps/mana/apps/landing/src/content/manascore/`
+**Live:** https://mana-landing.pages.dev/manascore
+**Methodology:** https://mana-landing.pages.dev/manascore/about
 
 ### Core Categories (8)
 
@@ -941,7 +941,7 @@ Host mana-server
 
 ```bash
 ssh mana-server                              # Connect to server
-cd ~/projects/manacore-monorepo
+cd ~/projects/mana-monorepo
 
 ./scripts/mac-mini/status.sh                 # Check all services
 ./scripts/mac-mini/deploy.sh                 # Pull & restart containers
@@ -1003,7 +1003,7 @@ pnpm add <package> --filter memoro
 pnpm add <package> --filter @memoro/mobile
 
 # Add to shared package
-pnpm add <package> --filter @manacore/shared-utils
+pnpm add <package> --filter @mana/shared-utils
 ```
 
 ## Environment Variables
@@ -1059,7 +1059,7 @@ PUBLIC_SUPABASE_ANON_KEY=...
 ```
 PORT=...
 DATABASE_URL=...
-MANA_CORE_AUTH_URL=...
+MANA_AUTH_URL=...
 ```
 
 ## Project-Specific Documentation
@@ -1070,7 +1070,7 @@ MANA_CORE_AUTH_URL=...
 
 Each project has its own `CLAUDE.md` with detailed information:
 
-- `apps/manacore/CLAUDE.md` - Multi-app ecosystem, auth details
+- `apps/mana/CLAUDE.md` - Multi-app ecosystem, auth details
 - `apps/cards/CLAUDE.md` - Card/deck management
 - `apps/chat/CLAUDE.md` - Chat API endpoints, AI models
 - `apps/picture/CLAUDE.md` - AI image generation

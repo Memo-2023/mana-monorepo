@@ -2,7 +2,7 @@
 	"name": "photos",
 	"version": "0.2.0",
 	"private": true,
-	"description": "Photos App - Unified Photo Gallery for ManaCore Ecosystem",
+	"description": "Photos App - Unified Photo Gallery for Mana Ecosystem",
 	"scripts": {
 		"dev": "pnpm run --filter=@photos/* --parallel dev",
 		"dev:backend": "pnpm --filter @photos/backend dev",

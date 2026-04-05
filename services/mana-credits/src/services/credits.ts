@@ -1,7 +1,7 @@
 /**
  * Credits Service — Personal balance management
  *
- * Ported from mana-core-auth CreditsService.
+ * Ported from mana-auth CreditsService.
  * Handles balance CRUD, credit usage, purchases, and transaction ledger.
  */
 

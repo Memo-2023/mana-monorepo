@@ -160,7 +160,7 @@ Playback uses HTML5 Audio (browser-native codec support). Upload accepts any `au
 ### Backend (.env)
 ```
 DATABASE_URL=postgresql://manacore:devpassword@localhost:5432/mukke
-MANA_CORE_AUTH_URL=http://localhost:3001
+MANA_AUTH_URL=http://localhost:3001
 S3_ENDPOINT=http://localhost:9000
 S3_REGION=us-east-1
 S3_ACCESS_KEY=minioadmin
@@ -170,7 +170,7 @@ S3_BUCKET=mukke-storage
 
 ### Web (.env)
 ```
-PUBLIC_MANA_CORE_AUTH_URL=http://localhost:3001
+PUBLIC_MANA_AUTH_URL=http://localhost:3001
 PUBLIC_BACKEND_URL=http://localhost:3010
 ```
 

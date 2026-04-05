@@ -1,4 +1,4 @@
-import type { ThemeVariant, ThemeMode } from '@manacore/shared-theme';
+import type { ThemeVariant, ThemeMode } from '@mana/shared-theme';
 
 /**
  * Theme availability status for store integration

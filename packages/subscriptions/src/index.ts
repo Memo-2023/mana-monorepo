@@ -1,5 +1,5 @@
 /**
- * @manacore/subscriptions — Unified subscription package
+ * @mana/subscriptions — Unified subscription package
  *
  * Consolidates shared-subscription-types + shared-subscription-ui.
  */

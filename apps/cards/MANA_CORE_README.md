@@ -104,11 +104,11 @@ EXPO_PUBLIC_STORYTELLER_BACKEND_URL=http://localhost:3002
 
 **`backend/src/app.module.ts`**:
 ```typescript
-import { ManaCoreModule } from '@mana-core/nestjs-integration';
+import { ManaModule } from '@mana-core/nestjs-integration';
 
 @Module({
   imports: [
-    ManaCoreModule.forRootAsync({
+    ManaModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
         manaServiceUrl: 'https://mana-core-middleware-111768794939.europe-west3.run.app',

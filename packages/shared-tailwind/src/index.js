@@ -1,14 +1,14 @@
 /**
- * @manacore/shared-tailwind
+ * @mana/shared-tailwind
  *
- * Shared Tailwind CSS configuration for all ManaCore apps.
+ * Shared Tailwind CSS configuration for all Mana apps.
  *
  * Exports:
  * - preset: Tailwind preset with colors, themes, and design tokens
  * - colors: Color palette definitions
  *
  * Also available:
- * - @manacore/shared-tailwind/themes.css: CSS custom properties for runtime theming
+ * - @mana/shared-tailwind/themes.css: CSS custom properties for runtime theming
  */
 
 export { default as preset } from './preset.js';

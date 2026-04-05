@@ -7,7 +7,7 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 SERVICE_DIR="$REPO_DIR/services/mana-image-gen"
-PLIST_NAME="com.manacore.image-gen"
+PLIST_NAME="com.mana.image-gen"
 PLIST_PATH="$HOME/Library/LaunchAgents/$PLIST_NAME.plist"
 
 # flux2.c paths (in home directory, no sudo required)
@@ -120,10 +120,10 @@ cat > "$PLIST_PATH" << EOF
     <integer>10</integer>
 
     <key>StandardOutPath</key>
-    <string>/tmp/manacore-image-gen.log</string>
+    <string>/tmp/mana-image-gen.log</string>
 
     <key>StandardErrorPath</key>
-    <string>/tmp/manacore-image-gen.error.log</string>
+    <string>/tmp/mana-image-gen.error.log</string>
 </dict>
 </plist>
 EOF
@@ -144,7 +144,7 @@ if launchctl list | grep -q "$PLIST_NAME"; then
     echo "Service loaded successfully!"
 else
     echo "Warning: Service may not have loaded correctly."
-    echo "Check logs: tail -f /tmp/manacore-image-gen.log"
+    echo "Check logs: tail -f /tmp/mana-image-gen.log"
 fi
 
 # Health check
@@ -169,7 +169,7 @@ echo ""
 echo "Service management commands:"
 echo ""
 echo "  # View logs"
-echo "  tail -f /tmp/manacore-image-gen.log"
+echo "  tail -f /tmp/mana-image-gen.log"
 echo ""
 echo "  # Stop service"
 echo "  launchctl unload $PLIST_PATH"

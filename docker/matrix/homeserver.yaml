@@ -1,4 +1,4 @@
-# ManaCore Matrix Synapse Configuration
+# Mana Matrix Synapse Configuration
 # Documentation: https://element-hq.github.io/synapse/latest/usage/configuration/config_documentation.html
 
 server_name: "mana.how"
@@ -190,7 +190,7 @@ run_background_tasks_on: synapse
 #   smtp_user: "${SMTP_USER}"
 #   smtp_pass: "${SMTP_PASSWORD}"
 #   require_transport_security: true
-#   notif_from: "ManaCore Matrix <noreply@mana.how>"
+#   notif_from: "Mana Matrix <noreply@mana.how>"
 
 # ============================================
 # OIDC / SSO Configuration (Mana Core Auth)
@@ -198,7 +198,7 @@ run_background_tasks_on: synapse
 
 # Enable SSO via Mana Core Auth OIDC Provider
 oidc_providers:
-  - idp_id: manacore
+  - idp_id: mana
     idp_name: "Mana Core"
     idp_brand: "org.matrix.custom"
     discover: true

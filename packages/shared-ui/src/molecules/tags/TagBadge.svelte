@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { X } from '@manacore/shared-icons';
+	import { X } from '@mana/shared-icons';
 
 	/**
 	 * Generic tag badge component

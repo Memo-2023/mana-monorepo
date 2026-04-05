@@ -4,7 +4,7 @@
 
 set -e
 
-SERVICE_NAME="com.manacore.mana-tts"
+SERVICE_NAME="com.mana.mana-tts"
 PLIST_FILE="$SERVICE_NAME.plist"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 LAUNCH_AGENTS_DIR="$HOME/Library/LaunchAgents"

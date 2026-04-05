@@ -3,7 +3,7 @@
  *
  * Usage in project playwright.config.ts:
  * import { defineConfig, devices } from '@playwright/test';
- * import baseConfig from '@manacore/test-config/playwright';
+ * import baseConfig from '@mana/test-config/playwright';
  *
  * export default defineConfig({
  *   ...baseConfig,

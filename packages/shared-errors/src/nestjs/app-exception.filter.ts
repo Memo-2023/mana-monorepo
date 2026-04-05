@@ -30,7 +30,7 @@ export interface ErrorResponseBody {
  * @example
  * ```typescript
  * // In main.ts
- * import { AppExceptionFilter } from '@manacore/shared-errors/nestjs';
+ * import { AppExceptionFilter } from '@mana/shared-errors/nestjs';
  *
  * async function bootstrap() {
  *   const app = await NestFactory.create(AppModule);

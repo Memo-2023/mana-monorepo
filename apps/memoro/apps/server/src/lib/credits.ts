@@ -2,7 +2,7 @@
  * Credit cost constants and helper for Memoro server.
  */
 
-export { validateCredits, consumeCredits } from '@manacore/shared-hono';
+export { validateCredits, consumeCredits } from '@mana/shared-hono';
 
 export const COSTS = {
 	TRANSCRIPTION_PER_MINUTE: 2,

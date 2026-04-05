@@ -1,7 +1,7 @@
 /**
  * Spiral-DB Wallpaper Generation
  *
- * Creates device wallpapers from SpiralDB images using @manacore/wallpaper-generator.
+ * Creates device wallpapers from SpiralDB images using @mana/wallpaper-generator.
  */
 
 import type { SpiralImage } from './types.js';
@@ -11,12 +11,12 @@ import type {
 	DeviceOption,
 	Layout,
 	Background,
-} from '@manacore/wallpaper-generator';
+} from '@mana/wallpaper-generator';
 import {
 	createWallpaperGenerator,
 	DEFAULT_CENTER_LAYOUT,
 	DEFAULT_BACKGROUND,
-} from '@manacore/wallpaper-generator';
+} from '@mana/wallpaper-generator';
 import { exportToDataUrl } from './png.js';
 
 /** Options for Spiral wallpaper generation */
@@ -52,8 +52,8 @@ const DEFAULT_SPIRAL_WALLPAPER_OPTIONS: Partial<SpiralWallpaperOptions> = {
  *
  * @example
  * ```ts
- * import { SpiralDB, createTodoSchema } from '@manacore/spiral-db';
- * import { toWallpaper } from '@manacore/spiral-db/wallpaper';
+ * import { SpiralDB, createTodoSchema } from '@mana/spiral-db';
+ * import { toWallpaper } from '@mana/spiral-db/wallpaper';
  *
  * const db = new SpiralDB({ schema: createTodoSchema() });
  * db.insert({ title: 'My Todo', ... });

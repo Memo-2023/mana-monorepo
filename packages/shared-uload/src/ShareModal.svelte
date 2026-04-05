@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { X, Copy, QrCode, Link, ArrowSquareOut, Lock, Clock } from '@manacore/shared-icons';
+	import { X, Copy, QrCode, Link, ArrowSquareOut, Lock, Clock } from '@mana/shared-icons';
 	import type { CreatedLink, CreateShortLinkOptions } from './types';
 	import { createShortLink, isSharedUloadReady, getBaseUrl } from './create-link';
 	import { getQrCodeUrl, getShortUrl, downloadQrCode } from './utils';

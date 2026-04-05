@@ -3,7 +3,7 @@
  */
 export type AppId =
 	| 'memoro'
-	| 'manacore'
+	| 'mana'
 	| 'cards'
 	| 'uload'
 	| 'chat'

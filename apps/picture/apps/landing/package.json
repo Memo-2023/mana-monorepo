@@ -15,7 +15,7 @@
 	},
 	"dependencies": {
 		"@astrojs/check": "^0.9.0",
-		"@manacore/shared-landing-ui": "workspace:*",
+		"@mana/shared-landing-ui": "workspace:*",
 		"@picture/design-tokens": "workspace:*",
 		"astro": "^5.16.0",
 		"astro-i18next": "1.0.0-beta.21",

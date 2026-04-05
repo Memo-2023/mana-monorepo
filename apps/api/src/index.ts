@@ -1,5 +1,5 @@
 /**
- * ManaCore Unified API Server
+ * Mana Unified API Server
  *
  * Consolidates all app compute servers into one Hono/Bun process.
  * Each module registers its routes under /api/v1/{module}/*.
@@ -13,7 +13,7 @@ import {
 	errorHandler,
 	notFoundHandler,
 	rateLimitMiddleware,
-} from '@manacore/shared-hono';
+} from '@mana/shared-hono';
 
 // Module routes
 import { calendarRoutes } from './modules/calendar/routes';

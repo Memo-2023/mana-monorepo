@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { FeedbackPage } from '@manacore/feedback';
-	import { createFeedbackService } from '@manacore/feedback';
+	import { FeedbackPage } from '@mana/feedback';
+	import { createFeedbackService } from '@mana/feedback';
 	import { matrixStore } from '$lib/matrix';
 
 	function getAuthUrl(): string {
 		if (browser && typeof window !== 'undefined') {
-			const injectedUrl = (window as unknown as { __PUBLIC_MANA_CORE_AUTH_URL__?: string })
-				.__PUBLIC_MANA_CORE_AUTH_URL__;
+			const injectedUrl = (window as unknown as { __PUBLIC_MANA_AUTH_URL__?: string })
+				.__PUBLIC_MANA_AUTH_URL__;
 			return injectedUrl || 'http://localhost:3001';
 		}
 		return 'http://localhost:3001';

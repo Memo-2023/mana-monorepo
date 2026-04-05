@@ -55,7 +55,7 @@ export interface DrizzleConfigOptions {
  */
 const DEFAULT_PG_HOST = 'localhost';
 const DEFAULT_PG_PORT = '5432';
-const DEFAULT_PG_USER = 'manacore';
+const DEFAULT_PG_USER = 'mana';
 const DEFAULT_PG_PASSWORD = 'devpassword';
 
 /**
@@ -76,7 +76,7 @@ const DEFAULT_PG_PASSWORD = 'devpassword';
  * @example
  * // With schema filter (multi-schema)
  * export default createDrizzleConfig({
- *   dbName: 'manacore',
+ *   dbName: 'mana',
  *   schemaFilter: ['auth', 'credits', 'public'],
  * });
  */

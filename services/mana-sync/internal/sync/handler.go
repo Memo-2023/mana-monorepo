@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/manacore/mana-sync/internal/auth"
-	"github.com/manacore/mana-sync/internal/store"
-	"github.com/manacore/mana-sync/internal/ws"
+	"github.com/mana/mana-sync/internal/auth"
+	"github.com/mana/mana-sync/internal/store"
+	"github.com/mana/mana-sync/internal/ws"
 )
 
 // Handler handles sync HTTP endpoints.

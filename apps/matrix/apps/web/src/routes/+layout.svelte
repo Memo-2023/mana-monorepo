@@ -5,7 +5,7 @@
 	import type { Snippet } from 'svelte';
 	import { isLoading as i18nLoading, _ as t } from 'svelte-i18n';
 	import { theme } from '$lib/stores/theme';
-	import { ToastContainer, setupGlobalErrorHandler } from '@manacore/shared-ui';
+	import { ToastContainer, setupGlobalErrorHandler } from '@mana/shared-ui';
 
 	interface Props {
 		children: Snippet;

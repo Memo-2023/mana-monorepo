@@ -6,7 +6,7 @@
  *
  * @example
  * ```ts
- * import { createPWAConfig } from '@manacore/shared-pwa';
+ * import { createPWAConfig } from '@mana/shared-pwa';
  * import { SvelteKitPWA } from '@vite-pwa/sveltekit';
  *
  * export default defineConfig({

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { SelectOption } from './Select.types';
-	import { CaretDown } from '@manacore/shared-icons';
+	import { CaretDown } from '@mana/shared-icons';
 
 	interface Props {
 		/** Current selected value */

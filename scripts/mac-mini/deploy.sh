@@ -12,7 +12,7 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 COMPOSE_FILE="$PROJECT_ROOT/docker-compose.macmini.yml"
 ENV_FILE="$PROJECT_ROOT/.env.macmini"
 
-echo "=== ManaCore Mac Mini Deployment ==="
+echo "=== Mana Mac Mini Deployment ==="
 echo ""
 echo "Project root: $PROJECT_ROOT"
 echo "Compose file: $COMPOSE_FILE"
@@ -74,7 +74,7 @@ docker compose -f "$COMPOSE_FILE" ps
 
 echo ""
 echo "=== Creating databases ==="
-docker compose -f "$COMPOSE_FILE" exec -T postgres psql -U postgres -c "CREATE DATABASE manacore_auth;" 2>/dev/null || echo "manacore_auth exists"
+docker compose -f "$COMPOSE_FILE" exec -T postgres psql -U postgres -c "CREATE DATABASE mana_auth;" 2>/dev/null || echo "mana_auth exists"
 docker compose -f "$COMPOSE_FILE" exec -T postgres psql -U postgres -c "CREATE DATABASE chat;" 2>/dev/null || echo "chat exists"
 docker compose -f "$COMPOSE_FILE" exec -T postgres psql -U postgres -c "CREATE DATABASE todo;" 2>/dev/null || echo "todo exists"
 docker compose -f "$COMPOSE_FILE" exec -T postgres psql -U postgres -c "CREATE DATABASE calendar;" 2>/dev/null || echo "calendar exists"
@@ -93,7 +93,7 @@ check_health() {
 }
 
 check_health "Auth API" "http://localhost:3001/health"
-check_health "ManaCore Web" "http://localhost:5000/health"
+check_health "Mana Web" "http://localhost:5000/health"
 check_health "Chat Backend" "http://localhost:3030/health"
 check_health "Chat Web" "http://localhost:5010/health"
 check_health "Todo Backend" "http://localhost:3031/health"

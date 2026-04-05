@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/manacore/shared-go/httputil"
+	"github.com/mana/shared-go/httputil"
 
-	"github.com/manacore/mana-notify/internal/auth"
-	"github.com/manacore/mana-notify/internal/db"
+	"github.com/mana/mana-notify/internal/auth"
+	"github.com/mana/mana-notify/internal/db"
 )
 
 type PreferencesHandler struct {

@@ -1,4 +1,4 @@
-# Technology Audit - ManaCore Monorepo
+# Technology Audit - Mana Monorepo
 
 **Datum:** 27. Maerz 2026
 **Status:** Noch nichts live - vollstaendiger Umbau moeglich

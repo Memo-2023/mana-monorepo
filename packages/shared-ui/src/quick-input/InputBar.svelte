@@ -37,7 +37,7 @@
 		Heart,
 		MagnifyingGlass,
 		Plus,
-	} from '@manacore/shared-icons';
+	} from '@mana/shared-icons';
 
 	interface Props {
 		onSearch: (query: string) => Promise<QuickInputItem[]>;

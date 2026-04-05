@@ -1,6 +1,6 @@
 /**
  * Tag Store Factory
- * Creates a tag store that uses the central mana-core-auth Tags API.
+ * Creates a tag store that uses the central mana-auth Tags API.
  * Replaces app-specific tag/label stores with a unified, cross-app implementation.
  */
 
@@ -11,11 +11,11 @@ import type {
 	UpdateTagInput,
 	CreateTagGroupInput,
 	UpdateTagGroupInput,
-} from '@manacore/shared-tags';
-import { TagsClient } from '@manacore/shared-tags';
+} from '@mana/shared-tags';
+import { TagsClient } from '@mana/shared-tags';
 
 export interface TagStoreConfig {
-	/** Base URL of mana-core-auth (e.g., 'http://localhost:3001') */
+	/** Base URL of mana-auth (e.g., 'http://localhost:3001') */
 	authUrl: string;
 	/** Function to get the current auth token */
 	getToken: () => Promise<string | null> | string | null;
@@ -51,11 +51,11 @@ export interface TagStore {
 }
 
 /**
- * Create a tag store backed by the central mana-core-auth Tags API.
+ * Create a tag store backed by the central mana-auth Tags API.
  *
  * @example
  * ```ts
- * import { createTagStore } from '@manacore/shared-stores';
+ * import { createTagStore } from '@mana/shared-stores';
  *
  * export const tagStore = createTagStore({
  *   authUrl: 'http://localhost:3001',

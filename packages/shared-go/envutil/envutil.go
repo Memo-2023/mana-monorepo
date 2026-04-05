@@ -1,4 +1,4 @@
-// Package envutil provides shared environment variable helpers for ManaCore Go services.
+// Package envutil provides shared environment variable helpers for Mana Go services.
 package envutil
 
 import (

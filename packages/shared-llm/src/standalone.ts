@@ -2,7 +2,7 @@
  * Standalone exports for non-NestJS consumers (e.g. bot-services).
  *
  * Usage:
- *   import { LlmClient } from '@manacore/shared-llm/standalone';
+ *   import { LlmClient } from '@mana/shared-llm/standalone';
  *   const llm = new LlmClient({ manaLlmUrl: 'http://localhost:3025' });
  */
 

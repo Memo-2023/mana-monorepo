@@ -1,15 +1,15 @@
 """
-API Key Authentication for ManaCore Python Services
+API Key Authentication for Mana Python Services
 
 Supports two authentication modes:
 1. Local API keys: Configured via environment variables
-2. External API keys: Validated via mana-core-auth service (when EXTERNAL_AUTH_ENABLED=true)
+2. External API keys: Validated via mana-auth service (when EXTERNAL_AUTH_ENABLED=true)
 
 Usage:
     API_KEYS=sk-key1:name1,sk-key2:name2
     INTERNAL_API_KEY=sk-internal-xxx
     EXTERNAL_AUTH_ENABLED=true
-    MANA_CORE_AUTH_URL=http://localhost:3001
+    MANA_AUTH_URL=http://localhost:3001
 """
 
 import os

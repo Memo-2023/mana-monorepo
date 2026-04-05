@@ -1,5 +1,5 @@
 #!/bin/bash
-# ManaCore Database Backup Script
+# Mana Database Backup Script
 # Creates daily backups of all PostgreSQL databases with rotation
 #
 # Retention policy:
@@ -16,7 +16,7 @@ export PATH="/usr/local/bin:/opt/homebrew/bin:$PATH"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 BACKUP_DIR="/Volumes/ManaData/backups/postgres"
-LOG_FILE="/tmp/manacore-backup.log"
+LOG_FILE="/tmp/mana-backup.log"
 DATE=$(date +%Y-%m-%d)
 DAY_OF_WEEK=$(date +%u)  # 1=Monday, 7=Sunday
 
@@ -53,7 +53,7 @@ send_notification() {
 mkdir -p "$BACKUP_DIR/daily"
 mkdir -p "$BACKUP_DIR/weekly"
 
-log "=== ManaCore Database Backup ==="
+log "=== Mana Database Backup ==="
 
 # Check if postgres container is running
 if ! docker ps --format '{{.Names}}' | grep -q "mana-infra-postgres"; then

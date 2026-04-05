@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Component } from 'svelte';
 	import type { AuthResult } from '../types';
-	import { Eye, EyeSlash, UserPlus, ArrowLeft, Sun, Moon } from '@manacore/shared-icons';
+	import { Eye, EyeSlash, UserPlus, ArrowLeft, Sun, Moon } from '@mana/shared-icons';
 	import PasswordStrength from '../components/PasswordStrength.svelte';
 
 	import type { Snippet } from 'svelte';

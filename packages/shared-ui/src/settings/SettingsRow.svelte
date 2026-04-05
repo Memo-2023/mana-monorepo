@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { CaretRight } from '@manacore/shared-icons';
+	import { CaretRight } from '@mana/shared-icons';
 
 	interface Props {
 		/** Row label */

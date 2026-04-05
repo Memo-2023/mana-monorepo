@@ -24,7 +24,7 @@
 		MagnifyingGlass,
 		Cards,
 		PresentationChart,
-	} from '@manacore/shared-icons';
+	} from '@mana/shared-icons';
 	import { slide } from 'svelte/transition';
 	import { _ as t } from 'svelte-i18n';
 	import type { Component } from 'svelte';

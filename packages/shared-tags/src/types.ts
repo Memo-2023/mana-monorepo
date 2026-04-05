@@ -1,5 +1,5 @@
 /**
- * Tag entity from the central mana-core-auth service.
+ * Tag entity from the central mana-auth service.
  * Used across all Manacore apps (Todo, Calendar, Contacts, etc.)
  */
 export interface Tag {

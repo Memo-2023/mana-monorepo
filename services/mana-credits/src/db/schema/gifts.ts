@@ -1,7 +1,7 @@
 /**
  * Gifts Schema — Gift codes, redemptions
  *
- * Adapted from mana-core-auth: removed FK references to auth.users.
+ * Adapted from mana-auth: removed FK references to auth.users.
  * Added denormalized creatorName for display without cross-service calls.
  */
 

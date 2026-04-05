@@ -1,4 +1,4 @@
-// Package httputil provides shared HTTP handler utilities for ManaCore Go services.
+// Package httputil provides shared HTTP handler utilities for Mana Go services.
 package httputil
 
 import (

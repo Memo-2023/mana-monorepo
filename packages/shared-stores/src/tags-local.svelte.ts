@@ -1,18 +1,18 @@
 /**
  * Local-First Tag Store (Shared Across All Apps)
  *
- * Uses a shared IndexedDB database ('manacore-tags') that all apps read from.
+ * Uses a shared IndexedDB database ('mana-tags') that all apps read from.
  * Tags are synced to the server via mana-sync, just like any other collection.
  *
  * Architecture:
- * - Tags + TagGroups → shared IndexedDB ('manacore-tags'), one DB for all apps
+ * - Tags + TagGroups → shared IndexedDB ('mana-tags'), one DB for all apps
  * - TagLinks (junction) → stay in each app's own IndexedDB (app-specific)
  * - Guest mode → default seed tags (Arbeit, Persönlich, Familie, Wichtig)
  * - Cross-app → all apps import the same store, read from the same DB
  */
 
-import { createLocalStore, type BaseRecord } from '@manacore/local-store';
-import { useLiveQueryWithDefault } from '@manacore/local-store/svelte';
+import { createLocalStore, type BaseRecord } from '@mana/local-store';
+import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import type {
 	Tag,
 	TagGroup,
@@ -20,7 +20,7 @@ import type {
 	UpdateTagInput,
 	CreateTagGroupInput,
 	UpdateTagGroupInput,
-} from '@manacore/shared-tags';
+} from '@mana/shared-tags';
 
 // ─── Local Types ───────────────────────────────────────────
 

@@ -3,7 +3,7 @@
  *
  * Usage in package vitest.config.ts:
  * import { defineConfig, mergeConfig } from 'vitest/config';
- * import baseConfig from '@manacore/test-config/vitest-base';
+ * import baseConfig from '@mana/test-config/vitest-base';
  *
  * export default mergeConfig(
  *   baseConfig,

@@ -3,7 +3,7 @@
  */
 
 import { Hono } from 'hono';
-import type { AuthVariables } from '@manacore/shared-hono';
+import type { AuthVariables } from '@mana/shared-hono';
 import { v4 as uuidv4 } from 'uuid';
 import {
 	createMemoFromUploadedFile,

@@ -3,6 +3,6 @@ import tailwind from '@astrojs/tailwind';
 import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
-	site: 'https://news.manacore.app',
+	site: 'https://news.mana.app',
 	integrations: [tailwind(), sitemap()],
 });

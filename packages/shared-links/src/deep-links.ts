@@ -5,8 +5,8 @@
  * the record's detail view in the target app.
  */
 
-import { APP_URLS } from '@manacore/shared-branding';
-import type { AppIconId } from '@manacore/shared-branding';
+import { APP_URLS } from '@mana/shared-branding';
+import type { AppIconId } from '@mana/shared-branding';
 
 /** Route pattern per app and collection. Use {id} as placeholder. */
 const DEEP_LINK_PATTERNS: Record<string, Record<string, string>> = {

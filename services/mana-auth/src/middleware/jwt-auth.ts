@@ -1,7 +1,7 @@
 /**
  * JWT Authentication Middleware
  *
- * Validates Bearer tokens via JWKS from mana-core-auth.
+ * Validates Bearer tokens via JWKS from mana-auth.
  * Uses jose library with EdDSA algorithm.
  */
 
@@ -39,7 +39,7 @@ export function jwtAuth(authUrl: string): MiddlewareHandler {
 		try {
 			const { payload } = await jwtVerify(token, getJwks(authUrl), {
 				issuer: authUrl,
-				audience: 'manacore',
+				audience: 'mana',
 			});
 
 			const user: AuthUser = {

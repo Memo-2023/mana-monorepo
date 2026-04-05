@@ -212,7 +212,7 @@ pnpm build                       # Build for production
 NODE_ENV=development
 PORT=3016
 DATABASE_URL=postgresql://manacore:devpassword@localhost:5432/storage
-MANA_CORE_AUTH_URL=http://localhost:3001
+MANA_AUTH_URL=http://localhost:3001
 CORS_ORIGINS=http://localhost:5173,http://localhost:5185,http://localhost:8081
 S3_ENDPOINT=http://localhost:9000
 S3_REGION=us-east-1
@@ -227,7 +227,7 @@ MAX_FILES_PER_UPLOAD=10
 
 ```
 PUBLIC_BACKEND_URL=http://localhost:3016
-PUBLIC_MANA_CORE_AUTH_URL=http://localhost:3001
+PUBLIC_MANA_AUTH_URL=http://localhost:3001
 ```
 
 ## Shared Packages

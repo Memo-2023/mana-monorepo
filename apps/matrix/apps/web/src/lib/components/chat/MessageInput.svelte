@@ -12,7 +12,7 @@
 		Microphone,
 		Stop,
 		User,
-	} from '@manacore/shared-icons';
+	} from '@mana/shared-icons';
 
 	interface Props {
 		replyTo?: SimpleMessage | null;
@@ -53,7 +53,7 @@
 	// Recent emojis from user settings (synced across apps)
 	let recentEmojis = $derived(userSettings.globalSettings?.recentEmojis ?? []);
 
-	// Add emoji to recent list (saves to mana-core-auth)
+	// Add emoji to recent list (saves to mana-auth)
 	function addToRecentEmojis(emoji: string) {
 		const current = userSettings.globalSettings?.recentEmojis ?? [];
 		// Remove if already exists, then add to front

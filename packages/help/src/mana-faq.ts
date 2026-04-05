@@ -32,8 +32,8 @@ export function getManaFAQs(locale: string): FAQItem[] {
 			id: 'faq-mana-what',
 			question: isDE ? 'Was ist Mana?' : 'What is Mana?',
 			answer: isDE
-				? '<p><strong>Mana</strong> ist die universelle Währung im ManaCore-Ökosystem. Mit Mana bezahlst du für Premium-Funktionen wie KI-Generierungen, Cloud-Modelle und erweiterte Features — app-übergreifend mit einem einzigen Guthaben.</p><ul><li>1 Mana ≈ 1 Cent (im Abo)</li><li>Dein Guthaben gilt in <strong>allen ManaCore-Apps</strong></li><li>Jede App zeigt deinen aktuellen Stand unter <strong>Mana</strong> im Account-Menü</li></ul>'
-				: '<p><strong>Mana</strong> is the universal currency in the ManaCore ecosystem. With Mana you pay for premium features like AI generations, cloud models, and advanced features — across all apps with a single balance.</p><ul><li>1 Mana ≈ 1 cent (with subscription)</li><li>Your balance works across <strong>all ManaCore apps</strong></li><li>Each app shows your current balance under <strong>Mana</strong> in the account menu</li></ul>',
+				? '<p><strong>Mana</strong> ist die universelle Währung im Mana-Ökosystem. Mit Mana bezahlst du für Premium-Funktionen wie KI-Generierungen, Cloud-Modelle und erweiterte Features — app-übergreifend mit einem einzigen Guthaben.</p><ul><li>1 Mana ≈ 1 Cent (im Abo)</li><li>Dein Guthaben gilt in <strong>allen Mana-Apps</strong></li><li>Jede App zeigt deinen aktuellen Stand unter <strong>Mana</strong> im Account-Menü</li></ul>'
+				: '<p><strong>Mana</strong> is the universal currency in the Mana ecosystem. With Mana you pay for premium features like AI generations, cloud models, and advanced features — across all apps with a single balance.</p><ul><li>1 Mana ≈ 1 cent (with subscription)</li><li>Your balance works across <strong>all Mana apps</strong></li><li>Each app shows your current balance under <strong>Mana</strong> in the account menu</li></ul>',
 			category: 'billing',
 			order: 90,
 			language: isDE ? 'de' : 'en',
@@ -59,8 +59,8 @@ export function getManaFAQs(locale: string): FAQItem[] {
 			id: 'faq-mana-use',
 			question: isDE ? 'Wofür wird Mana verwendet?' : 'What is Mana used for?',
 			answer: isDE
-				? '<p>Mana wird für Premium-Funktionen innerhalb der ManaCore-Apps verwendet:</p><ul><li><strong>Chat</strong>: Cloud-KI-Modelle (Claude, GPT, DeepSeek) — lokale Modelle sind kostenlos</li><li><strong>Picture</strong>: KI-Bildgenerierungen (nach 3 kostenlosen Generierungen)</li><li><strong>Context</strong>: KI-Textgenerierung und -analyse</li><li><strong>Weitere Apps</strong>: KI-gestützte Features in Planta, Questions, etc.</li></ul><p>Basis-Funktionen wie Aufgaben, Kalender, Kontakte, Dateien und Chats mit lokalen Modellen sind <strong>immer kostenlos</strong>.</p>'
-				: '<p>Mana is used for premium features within ManaCore apps:</p><ul><li><strong>Chat</strong>: Cloud AI models (Claude, GPT, DeepSeek) — local models are free</li><li><strong>Picture</strong>: AI image generations (after 3 free generations)</li><li><strong>Context</strong>: AI text generation and analysis</li><li><strong>More apps</strong>: AI-powered features in Planta, Questions, etc.</li></ul><p>Core features like tasks, calendar, contacts, files, and chats with local models are <strong>always free</strong>.</p>',
+				? '<p>Mana wird für Premium-Funktionen innerhalb der Mana-Apps verwendet:</p><ul><li><strong>Chat</strong>: Cloud-KI-Modelle (Claude, GPT, DeepSeek) — lokale Modelle sind kostenlos</li><li><strong>Picture</strong>: KI-Bildgenerierungen (nach 3 kostenlosen Generierungen)</li><li><strong>Context</strong>: KI-Textgenerierung und -analyse</li><li><strong>Weitere Apps</strong>: KI-gestützte Features in Planta, Questions, etc.</li></ul><p>Basis-Funktionen wie Aufgaben, Kalender, Kontakte, Dateien und Chats mit lokalen Modellen sind <strong>immer kostenlos</strong>.</p>'
+				: '<p>Mana is used for premium features within Mana apps:</p><ul><li><strong>Chat</strong>: Cloud AI models (Claude, GPT, DeepSeek) — local models are free</li><li><strong>Picture</strong>: AI image generations (after 3 free generations)</li><li><strong>Context</strong>: AI text generation and analysis</li><li><strong>More apps</strong>: AI-powered features in Planta, Questions, etc.</li></ul><p>Core features like tasks, calendar, contacts, files, and chats with local models are <strong>always free</strong>.</p>',
 			category: 'billing',
 			order: 92,
 			language: isDE ? 'de' : 'en',
@@ -81,8 +81,8 @@ export function getManaFeature(locale: string): FeatureItem {
 		id: 'feature-mana',
 		title: isDE ? 'Mana-Credits' : 'Mana Credits',
 		description: isDE
-			? 'Universelles Guthaben für Premium-Features in allen ManaCore-Apps — 150 Mana/Monat kostenlos.'
-			: 'Universal balance for premium features across all ManaCore apps — 150 Mana/month for free.',
+			? 'Universelles Guthaben für Premium-Features in allen Mana-Apps — 150 Mana/Monat kostenlos.'
+			: 'Universal balance for premium features across all Mana apps — 150 Mana/month for free.',
 		icon: '✨',
 		category: 'core',
 		highlights: isDE

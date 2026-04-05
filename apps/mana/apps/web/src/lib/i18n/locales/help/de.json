@@ -1,0 +1,51 @@
+{
+	"faq": {
+		"what_is_mana": {
+			"question": "Was ist Mana?",
+			"answer": "<p><strong>Mana</strong> ist die zentrale Plattform des Mana-Ökosystems:</p><ul><li>Verwalte dein <strong>Konto</strong> und Profil an einem zentralen Ort</li><li>Greife auf alle Mana-Apps zu — Chat, Picture, Zitare, Clock und mehr</li><li>Nutze <strong>Single Sign-On (SSO)</strong>, um dich einmal anzumelden und überall eingeloggt zu sein</li><li>Erstelle und verwalte <strong>Organisationen</strong> für Teamarbeit</li></ul>",
+			"tags": "mana,plattform,ökosystem"
+		},
+		"sso": {
+			"question": "Wie funktioniert Single Sign-On (SSO)?",
+			"answer": "<p><strong>Single Sign-On</strong> ermöglicht dir, dich einmal anzumelden und alle Mana-Apps zu nutzen:</p><ol><li>Melde dich bei einer beliebigen Mana-App an (z.B. Mana, Chat, Picture)</li><li>Dein Login wird automatisch auf alle verbundenen Apps übertragen</li><li>Du bleibst eingeloggt, bis du dich explizit abmeldest</li></ol><p>SSO verwendet <strong>sichere JWT-Tokens</strong> mit EdDSA-Verschlüsselung. Dein Passwort wird nur einmal beim Login übertragen.</p>",
+			"tags": "sso,anmeldung,login,authentifizierung"
+		},
+		"organizations": {
+			"question": "Wie verwalte ich Organisationen?",
+			"answer": "<p><strong>Organisationen</strong> ermöglichen Teamarbeit im Mana-Ökosystem:</p><ul><li><strong>Erstellen</strong>: Gehe zu Einstellungen > Organisationen > Neue Organisation</li><li><strong>Mitglieder einladen</strong>: Lade Teammitglieder per E-Mail ein und weise Rollen zu (Admin, Mitglied)</li><li><strong>Apps verwalten</strong>: Aktiviere oder deaktiviere Apps pro Organisation</li><li><strong>Landing Page</strong>: Erstelle eine eigene Landingpage unter <code>slug.mana.how</code></li></ul>",
+			"tags": "organisation,team,mitglieder,verwalten"
+		},
+		"switch_apps": {
+			"question": "Wie wechsle ich zwischen Apps?",
+			"answer": "<p>Du kannst schnell zwischen Mana-Apps wechseln:</p><ul><li><strong>App-Übersicht</strong>: Klicke auf das App-Menü in der Navigation, um alle verfügbaren Apps zu sehen</li><li><strong>Direkt-Links</strong>: Jede App hat ihre eigene URL (z.B. chat.mana.how, picture.mana.how)</li><li><strong>Dashboard</strong>: Das Mana-Dashboard zeigt alle deine Apps mit Schnellzugriff</li></ul><p>Dein Login bleibt dank SSO beim Wechsel zwischen Apps erhalten.</p>",
+			"tags": "wechseln,apps,navigation"
+		}
+	},
+	"features": {
+		"sso": {
+			"title": "Single Sign-On",
+			"description": "Einmal anmelden und alle Mana-Apps nutzen",
+			"highlights": "Ein Login für alles,EdDSA JWT-Tokens,Sichere Sitzungen,Automatischer Logout"
+		},
+		"app_ecosystem": {
+			"title": "App-Ökosystem",
+			"description": "Zugang zu allen Mana-Apps über eine zentrale Plattform",
+			"highlights": "App-Übersicht,Schnellzugriff,Einheitliches Design,Verbundene Daten"
+		},
+		"organizations": {
+			"title": "Organisationen & Teams",
+			"description": "Erstelle Organisationen und verwalte Teammitglieder und Rollen",
+			"highlights": "Rollenbasierter Zugriff,Team-Einladungen,App-Verwaltung,Landing Pages"
+		},
+		"unified_profile": {
+			"title": "Einheitliches Profil",
+			"description": "Verwalte dein Profil, Einstellungen und Sicherheit an einem Ort",
+			"highlights": "Profilbild,Sicherheitseinstellungen,Sitzungsverwaltung,Datenexport"
+		}
+	},
+	"contact": {
+		"title": "Support kontaktieren",
+		"content": "<p>Unser Support-Team hilft dir bei allen Fragen rund um Mana.</p>",
+		"response_time": "Normalerweise innerhalb von 24 Stunden"
+	}
+}

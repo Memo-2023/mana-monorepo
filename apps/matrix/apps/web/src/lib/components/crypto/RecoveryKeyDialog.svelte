@@ -10,7 +10,7 @@
 		CircleNotch,
 		Warning,
 		ShieldCheck,
-	} from '@manacore/shared-icons';
+	} from '@mana/shared-icons';
 
 	interface Props {
 		open: boolean;

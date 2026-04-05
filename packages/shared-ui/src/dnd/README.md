@@ -1,6 +1,6 @@
 # Cross-Type Drag & Drop System
 
-Shared DnD system for ManaCore apps. Enables dragging items between different
+Shared DnD system for Mana apps. Enables dragging items between different
 component types (e.g. Tag onto Task, Task onto Trash zone).
 
 Designed to coexist with `svelte-dnd-action` which handles same-type reordering.

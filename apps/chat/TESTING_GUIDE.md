@@ -95,7 +95,7 @@ AZURE_OPENAI_API_KEY=your-api-key
 AZURE_OPENAI_API_VERSION=2024-12-01-preview
 
 # Mana Core Auth (NEW)
-MANA_CORE_AUTH_URL=http://localhost:3001
+MANA_AUTH_URL=http://localhost:3001
 
 # Supabase (for database, not auth)
 SUPABASE_URL=https://your-project.supabase.co
@@ -116,7 +116,7 @@ Edit `chat/apps/web/.env`:
 
 ```env
 # Mana Core Auth (NEW)
-PUBLIC_MANA_CORE_AUTH_URL=http://localhost:3001
+PUBLIC_MANA_AUTH_URL=http://localhost:3001
 
 # Backend API (NEW PORT)
 PUBLIC_BACKEND_URL=http://localhost:3002
@@ -137,7 +137,7 @@ Edit `chat/apps/mobile/.env`:
 
 ```env
 # Mana Core Auth (NEW)
-EXPO_PUBLIC_MANA_CORE_AUTH_URL=http://localhost:3001
+EXPO_PUBLIC_MANA_AUTH_URL=http://localhost:3001
 
 # Backend API (NEW PORT)
 EXPO_PUBLIC_BACKEND_URL=http://localhost:3002
@@ -575,7 +575,7 @@ Edit `chat/apps/mobile/.env`:
 
 ```env
 # Replace localhost with your computer's IP
-EXPO_PUBLIC_MANA_CORE_AUTH_URL=http://192.168.1.XXX:3001
+EXPO_PUBLIC_MANA_AUTH_URL=http://192.168.1.XXX:3001
 EXPO_PUBLIC_BACKEND_URL=http://192.168.1.XXX:3002
 ```
 

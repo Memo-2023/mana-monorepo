@@ -1,5 +1,5 @@
 #!/bin/bash
-# Setup notifications for ManaCore Health Checks
+# Setup notifications for Mana Health Checks
 # Run this script on the Mac Mini to configure alerts
 
 set -e
@@ -8,7 +8,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 ENV_FILE="$PROJECT_ROOT/.env.notifications"
 
-echo "=== ManaCore Notification Setup ==="
+echo "=== Mana Notification Setup ==="
 echo ""
 
 # ============================================
@@ -35,8 +35,8 @@ echo ""
 echo "To create a Telegram bot:"
 echo "  1. Open Telegram and message @BotFather"
 echo "  2. Send /newbot"
-echo "  3. Choose a name (e.g., 'ManaCore Alerts')"
-echo "  4. Choose a username (e.g., 'manacore_alerts_bot')"
+echo "  3. Choose a name (e.g., 'Mana Alerts')"
+echo "  4. Choose a username (e.g., 'mana_alerts_bot')"
 echo "  5. Copy the bot token"
 echo ""
 
@@ -120,7 +120,7 @@ echo ""
 echo "=== Writing Configuration ==="
 
 cat > "$ENV_FILE" << EOF
-# ManaCore Notification Configuration
+# Mana Notification Configuration
 # Generated on $(date)
 
 # Telegram
@@ -158,7 +158,7 @@ if [[ ! $REPLY =~ ^[Nn]$ ]]; then
         echo -n "  Testing Telegram... "
         RESULT=$(curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
             -d "chat_id=${TELEGRAM_CHAT_ID}" \
-            -d "text=✅ ManaCore notification test successful!" \
+            -d "text=✅ Mana notification test successful!" \
             -d "parse_mode=HTML")
 
         if echo "$RESULT" | grep -q '"ok":true'; then
@@ -172,7 +172,7 @@ if [[ ! $REPLY =~ ^[Nn]$ ]]; then
     # Test Email
     if [ -n "$EMAIL_TO" ] && command -v msmtp &> /dev/null; then
         echo -n "  Testing Email... "
-        echo -e "Subject: ManaCore Test Notification\nFrom: ${EMAIL_FROM}\nTo: ${EMAIL_TO}\n\nThis is a test notification from ManaCore health check." | \
+        echo -e "Subject: Mana Test Notification\nFrom: ${EMAIL_FROM}\nTo: ${EMAIL_TO}\n\nThis is a test notification from Mana health check." | \
             msmtp -a default "$EMAIL_TO" 2>/dev/null && echo "OK" || echo "FAILED (check ~/.msmtprc)"
     elif [ -n "$EMAIL_TO" ]; then
         echo "  Email configured but msmtp not installed"
@@ -181,7 +181,7 @@ if [[ ! $REPLY =~ ^[Nn]$ ]]; then
     # Test ntfy
     if [ -n "$NTFY_TOPIC" ]; then
         echo -n "  Testing ntfy... "
-        curl -s -d "ManaCore notification test successful!" \
+        curl -s -d "Mana notification test successful!" \
             -H "Title: Test" \
             "https://ntfy.sh/$NTFY_TOPIC" >/dev/null && echo "OK" || echo "FAILED"
     fi

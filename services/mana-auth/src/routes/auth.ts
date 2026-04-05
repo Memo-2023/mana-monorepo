@@ -212,7 +212,7 @@ export function createAuthRoutes(
 			const jwks = createRemoteJWKSet(new URL('/api/auth/jwks', config.baseUrl));
 			const { payload } = await jwtVerify(token, jwks, {
 				issuer: config.baseUrl,
-				audience: 'manacore',
+				audience: 'mana',
 			});
 			return c.json({ valid: true, payload });
 		} catch {

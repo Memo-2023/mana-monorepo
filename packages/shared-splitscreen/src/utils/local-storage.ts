@@ -87,11 +87,11 @@ export function clearPanelState(config: StorageConfig): void {
 }
 
 /**
- * Get default storage config with manacore prefix.
+ * Get default storage config with mana prefix.
  */
 export function createStorageConfig(currentAppId: string): StorageConfig {
 	return {
-		prefix: 'manacore',
+		prefix: 'mana',
 		currentAppId,
 	};
 }

@@ -2,14 +2,14 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { locale } from 'svelte-i18n';
-	import { PillNavigation, CommandBar, SyncIndicator } from '@manacore/shared-ui';
+	import { PillNavigation, CommandBar, SyncIndicator } from '@mana/shared-ui';
 	import type {
 		PillNavItem,
 		PillDropdownItem,
 		CommandBarItem,
 		QuickAction,
 		SpotlightAction,
-	} from '@manacore/shared-ui';
+	} from '@mana/shared-ui';
 	import { theme } from '$lib/stores/theme.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
@@ -18,23 +18,23 @@
 		THEME_DEFINITIONS,
 		DEFAULT_THEME_VARIANTS,
 		EXTENDED_THEME_VARIANTS,
-	} from '@manacore/shared-theme';
-	import type { ThemeVariant } from '@manacore/shared-theme';
-	import { filterHiddenNavItems } from '@manacore/shared-theme';
+	} from '@mana/shared-theme';
+	import type { ThemeVariant } from '@mana/shared-theme';
+	import { filterHiddenNavItems } from '@mana/shared-theme';
 	import { isNavCollapsed as collapsedStore } from '$lib/stores/navigation';
-	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
-	import { getPillAppItems } from '@manacore/shared-branding';
+	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@mana/shared-i18n';
+	import { getPillAppItems } from '@mana/shared-branding';
 	import { setLocale, supportedLocales } from '$lib/i18n';
-	import { SessionExpiredBanner, AuthGate, GuestWelcomeModal } from '@manacore/shared-auth-ui';
-	import { shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
+	import { SessionExpiredBanner, AuthGate, GuestWelcomeModal } from '@mana/shared-auth-ui';
+	import { shouldShowGuestWelcome } from '@mana/shared-auth-ui';
 	import { gamesOnboarding } from '$lib/stores/app-onboarding.svelte';
-	import { MiniOnboardingModal } from '@manacore/shared-ui';
+	import { MiniOnboardingModal } from '@mana/shared-ui';
 	import { gamesStore } from '$lib/data/local-store';
 	import {
 		tagLocalStore,
 		tagMutations,
 		useAllTags as useAllSharedTags,
-	} from '@manacore/shared-stores';
+	} from '@mana/shared-stores';
 
 	const allTags = useAllSharedTags();
 

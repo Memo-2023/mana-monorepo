@@ -11,7 +11,7 @@
 		ShieldWarning,
 		Users,
 		MagnifyingGlass,
-	} from '@manacore/shared-icons';
+	} from '@mana/shared-icons';
 
 	interface Props {
 		onMenuClick?: () => void;

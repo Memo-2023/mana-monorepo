@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/manacore/shared-go/httputil"
+	"github.com/mana/shared-go/httputil"
 
-	"github.com/manacore/mana-notify/internal/db"
-	tmpl "github.com/manacore/mana-notify/internal/template"
+	"github.com/mana/mana-notify/internal/db"
+	tmpl "github.com/mana/mana-notify/internal/template"
 )
 
 type TemplatesHandler struct {

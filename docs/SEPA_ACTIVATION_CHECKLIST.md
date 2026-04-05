@@ -221,7 +221,7 @@ stripe payment_intents confirm pi_XXXXX --payment-method pm_sepa_debit
 | `services/mana-core-auth/src/stripe/stripe.service.ts` | `payment_method_types: ['card', 'sepa_debit']` |
 | `services/mana-core-auth/src/subscriptions/subscriptions.service.ts` | `payment_method_types: ['card', 'sepa_debit']` |
 | `services/mana-core-auth/src/stripe/stripe-webhook.controller.ts` | `payment_intent.processing` Handler |
-| `apps/manacore/apps/landing/src/content/blueprints/003-*.md` | Dokumentation |
+| `apps/mana/apps/landing/src/content/blueprints/003-*.md` | Dokumentation |
 
 ---
 
@@ -256,4 +256,4 @@ Nach Abschluss aller Tests:
 ## Kontakt
 
 Bei Fragen zur Implementation: Till Schneider
-Blueprint-Dokumentation: `/apps/manacore/apps/landing/src/content/blueprints/003-payment-systems-stripe-vs-direct-debit.md`
+Blueprint-Dokumentation: `/apps/mana/apps/landing/src/content/blueprints/003-payment-systems-stripe-vs-direct-debit.md`

@@ -1,5 +1,5 @@
 {
-	"name": "@manacore/notify-client",
+	"name": "@mana/notify-client",
 	"version": "1.0.0",
 	"description": "Client SDK for mana-notify notification service",
 	"main": "./dist/index.js",

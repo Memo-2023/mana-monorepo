@@ -41,7 +41,7 @@
 
 	import type { Snippet } from 'svelte';
 	import { Text } from '../atoms';
-	import { CaretLeft } from '@manacore/shared-icons';
+	import { CaretLeft } from '@mana/shared-icons';
 
 	type HeaderSize = 'sm' | 'md' | 'lg';
 

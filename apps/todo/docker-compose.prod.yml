@@ -16,7 +16,7 @@ services:
       - NODE_ENV=production
       - PORT=3018
       - DATABASE_URL=${DATABASE_URL}
-      - MANA_CORE_AUTH_URL=${MANA_CORE_AUTH_URL}
+      - MANA_AUTH_URL=${MANA_AUTH_URL}
       - CORS_ORIGINS=${CORS_ORIGINS}
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3018/health"]
@@ -46,7 +46,7 @@ services:
       - NODE_ENV=production
       - PORT=5188
       - PUBLIC_BACKEND_URL=${PUBLIC_BACKEND_URL}
-      - PUBLIC_MANA_CORE_AUTH_URL=${PUBLIC_MANA_CORE_AUTH_URL}
+      - PUBLIC_MANA_AUTH_URL=${PUBLIC_MANA_AUTH_URL}
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5188"]
       interval: 30s
@@ -65,4 +65,4 @@ services:
 networks:
   todo-network:
     external: true
-    name: manacore-network
+    name: mana-network

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { UserSettingsStore } from '@manacore/shared-theme';
+	import type { UserSettingsStore } from '@mana/shared-theme';
 	import {
 		House,
 		Users,
@@ -51,7 +51,7 @@
 		DownloadSimple,
 		Stack,
 		TrendUp,
-	} from '@manacore/shared-icons';
+	} from '@mana/shared-icons';
 
 	interface NavItem {
 		href: string;

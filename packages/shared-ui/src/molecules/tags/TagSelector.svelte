@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Plus, MagnifyingGlass, X } from '@manacore/shared-icons';
+	import { Plus, MagnifyingGlass, X } from '@mana/shared-icons';
 	import TagBadge from './TagBadge.svelte';
 	import TagColorPicker from './TagColorPicker.svelte';
 	import { DEFAULT_TAG_COLOR } from './constants';

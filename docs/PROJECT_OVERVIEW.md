@@ -131,7 +131,7 @@ Manacore ist die zentrale Plattform für Organisations-Management, Team-Kollabor
 - **Memoro** - Sprachaufnahmen und Memory-Management
 - **Cards** - KI-gestützte Lernkarten
 - **Storyteller** - Kreatives Schreiben mit KI
-- **ManaCore** - Zentrale Account- und Organisationsverwaltung
+- **Mana** - Zentrale Account- und Organisationsverwaltung
 
 #### Tech-Stack
 

@@ -57,7 +57,7 @@ docker build -t mana-matrix-bot:local -f Dockerfile .
 - `PORT` — Health server port (default: 4000)
 - `MATRIX_HOMESERVER_URL` — Matrix homeserver (default: http://localhost:8008)
 - `MATRIX_STORAGE_PATH` — Sync state directory (default: ./data)
-- `MANA_CORE_AUTH_URL` — Auth service URL
+- `MANA_AUTH_URL` — Auth service URL
 - `REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD` — Redis for sessions
 - `STT_URL`, `TTS_URL` — Voice services
 

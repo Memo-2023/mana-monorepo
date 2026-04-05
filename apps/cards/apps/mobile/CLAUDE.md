@@ -77,7 +77,7 @@ Uses Expo Router v5 with file-based routing:
 ### Backend Integration
 
 - NestJS backend at port 3009 (`@mana-core/nestjs-integration`)
-- Environment variable: `EXPO_PUBLIC_MANA_CORE_AUTH_URL`
+- Environment variable: `EXPO_PUBLIC_MANA_AUTH_URL`
 
 ### TypeScript Configuration
 
@@ -119,7 +119,7 @@ For new screens:
 Create a `.env` or `.env.local` file:
 
 ```
-EXPO_PUBLIC_MANA_CORE_AUTH_URL=http://localhost:3001
+EXPO_PUBLIC_MANA_AUTH_URL=http://localhost:3001
 EXPO_PUBLIC_BACKEND_URL=http://localhost:3009
 ```
 

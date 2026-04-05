@@ -1,7 +1,7 @@
 /**
- * @manacore/shared-splitscreen
+ * @mana/shared-splitscreen
  *
- * Split-screen panel system for ManaCore apps.
+ * Split-screen panel system for Mana apps.
  * Enables displaying two apps side-by-side using iFrames.
  */
 

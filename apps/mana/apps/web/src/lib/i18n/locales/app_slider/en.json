@@ -1,0 +1,19 @@
+{
+	"title": "Part of the Mana Ecosystem",
+	"memoro_desc": "AI-powered voice notes",
+	"memoro_long_desc": "Capture your thoughts through voice and let AI transform them into structured notes.",
+	"maerchenzauber_desc": "Magical children's stories",
+	"maerchenzauber_long_desc": "Create personalized children's stories with AI-generated illustrations.",
+	"cards_desc": "AI Flashcards",
+	"cards_long_desc": "Create and study with smart flashcards and AI-powered spaced repetition.",
+	"moodlit_desc": "Mood light control",
+	"moodlit_long_desc": "Control your smart lights based on your mood and activity.",
+	"mana_desc": "Central management",
+	"mana_long_desc": "Manage all your Mana apps and settings in one place.",
+	"status_published": "Available",
+	"status_beta": "Beta",
+	"status_development": "In Development",
+	"status_planning": "Planned",
+	"coming_soon": "Coming Soon",
+	"download": "Open App"
+}

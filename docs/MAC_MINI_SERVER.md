@@ -1,10 +1,10 @@
 # Mac Mini Server Setup
 
-Dokumentation des Mac Mini als Self-Hosted Server für ManaCore Apps.
+Dokumentation des Mac Mini als Self-Hosted Server für Mana Apps.
 
 ## Übersicht
 
-Der Mac Mini dient als Self-Hosted Server fuer alle ManaCore-Anwendungen. Er ist ueber Cloudflare Tunnel oeffentlich erreichbar und fuehrt automatische Health Checks mit Benachrichtigungen durch.
+Der Mac Mini dient als Self-Hosted Server fuer alle Mana-Anwendungen. Er ist ueber Cloudflare Tunnel oeffentlich erreichbar und fuehrt automatische Health Checks mit Benachrichtigungen durch.
 
 ### Container Runtime: Colima (MIT-Lizenz)
 
@@ -159,7 +159,7 @@ docker logs manacore-chat-backend
 docker logs -f manacore-chat-backend  # Live-Logs
 ```
 
-**Grafana Uptime-Dashboard:** `grafana.mana.how` → Ordner "ManaCore" → **"ManaCore Uptime"**
+**Grafana Uptime-Dashboard:** `grafana.mana.how` → Ordner "Mana" → **"Mana Uptime"**
 Zeigt probe_success und probe_duration_seconds aller Dienste via Blackbox Exporter (Port 9115).
 Alerts: WebAppDown (2 min), APIDown (1 min), InfraToolDown (3 min), GPUServiceDown (5 min), SlowHTTPResponse (5 min > 5s).
 

@@ -4,7 +4,7 @@
  * @example
  * ```svelte
  * <script lang="ts">
- *   import { useSyncStatus } from '@manacore/local-store/svelte';
+ *   import { useSyncStatus } from '@mana/local-store/svelte';
  *   const sync = useSyncStatus(syncEngine);
  * </script>
  *

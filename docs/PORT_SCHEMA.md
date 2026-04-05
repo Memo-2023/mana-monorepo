@@ -1,6 +1,6 @@
 # Port Schema
 
-Canonical port assignments for all ManaCore services. This is the single source of truth.
+Canonical port assignments for all Mana services. This is the single source of truth.
 
 **Last updated:** 2026-03-28
 

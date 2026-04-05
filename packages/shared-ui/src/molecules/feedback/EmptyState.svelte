@@ -30,7 +30,7 @@
 
 	import type { Snippet } from 'svelte';
 	import { Text, Button } from '../../atoms';
-	import { Tray } from '@manacore/shared-icons';
+	import { Tray } from '@mana/shared-icons';
 
 	type EmptyStateVariant = 'default' | 'compact' | 'centered';
 

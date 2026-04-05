@@ -10,7 +10,7 @@ This guide shows you how to set up Discord notifications for daily test results.
 2. Go to **Server Settings** → **Integrations** → **Webhooks**
 3. Click **New Webhook**
 4. Configure:
-   - **Name**: `ManaCore CI/CD` (or whatever you prefer)
+   - **Name**: `Mana CI/CD` (or whatever you prefer)
    - **Channel**: Select the channel for test notifications (e.g., `#dev-alerts`)
    - **Avatar**: Optional - upload a custom icon
 5. Click **Copy Webhook URL**
@@ -104,7 +104,7 @@ Edit `.github/workflows/daily-tests.yml` and modify the Discord webhook payload:
 
 In Discord:
 1. **Server Settings** → **Integrations** → **Webhooks**
-2. Find **ManaCore CI/CD** webhook
+2. Find **Mana CI/CD** webhook
 3. Change **Channel** dropdown
 4. Save
 
@@ -246,4 +246,4 @@ For issues with:
 
 ---
 
-🏗️ ManaCore Monorepo
+🏗️ Mana Monorepo

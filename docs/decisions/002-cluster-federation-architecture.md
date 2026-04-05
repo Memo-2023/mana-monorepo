@@ -155,4 +155,4 @@ Monitoring:        VictoriaMetrics (Apache 2.0)
 
 ## Full Documentation
 
-Siehe auch: `apps/manacore/apps/landing/src/content/blueprints/001-mana-cluster-federation-architecture.md` für die ausführliche Version mit Diagrammen.
+Siehe auch: `apps/mana/apps/landing/src/content/blueprints/001-mana-cluster-federation-architecture.md` für die ausführliche Version mit Diagrammen.

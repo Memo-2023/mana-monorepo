@@ -89,7 +89,7 @@ export {
  *
  * @example
  * ```typescript
- * import { initializeWebAuth } from '@manacore/shared-auth';
+ * import { initializeWebAuth } from '@mana/shared-auth';
  *
  * // Basic setup (interceptor only for auth URL)
  * const { authService, tokenManager } = initializeWebAuth({

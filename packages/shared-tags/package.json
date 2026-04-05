@@ -1,5 +1,5 @@
 {
-	"name": "@manacore/shared-tags",
+	"name": "@mana/shared-tags",
 	"version": "0.1.0",
 	"private": true,
 	"description": "Shared tags client for Manacore apps - connects to central tags service",
@@ -20,7 +20,7 @@
 		"typescript": "^5.9.3"
 	},
 	"keywords": [
-		"manacore",
+		"mana",
 		"tags",
 		"labels"
 	],

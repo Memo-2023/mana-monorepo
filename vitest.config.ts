@@ -40,7 +40,7 @@ export default defineConfig({
 	resolve: {
 		alias: {
 			'@': path.resolve(__dirname, './src'),
-			'@manacore': path.resolve(__dirname, './packages'),
+			'@mana': path.resolve(__dirname, './packages'),
 		},
 	},
 });

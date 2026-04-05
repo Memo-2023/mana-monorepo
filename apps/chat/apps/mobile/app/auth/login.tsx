@@ -53,7 +53,7 @@ export default function LoginScreen() {
 		}
 	};
 
-	// Magic Link ist derzeit nicht verfügbar (mana-core-auth unterstützt dies nicht)
+	// Magic Link ist derzeit nicht verfügbar (mana-auth unterstützt dies nicht)
 	const handleMagicLink = async () => {
 		Alert.alert(
 			'Nicht verfügbar',

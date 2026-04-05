@@ -34,7 +34,7 @@ routes.post('/:id/avatar', async (c) => {
 		if (file.type === 'image/svg+xml') {
 			// SVGs stay on shared-storage (Sharp can't process SVG)
 			const { createContactsStorage, generateUserFileKey } = await import(
-				'@manacore/shared-storage'
+				'@mana/shared-storage'
 			);
 			const storage = createContactsStorage();
 			const key = generateUserFileKey(userId, `avatar-${c.req.param('id')}.svg`);

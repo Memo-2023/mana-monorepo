@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import type { Snippet } from 'svelte';
 	import { Text } from '../../atoms';
-	import { Pause, Play, SkipBack, SkipForward } from '@manacore/shared-icons';
+	import { Pause, Play, SkipBack, SkipForward } from '@mana/shared-icons';
 
 	interface Props {
 		/** Audio source URL */

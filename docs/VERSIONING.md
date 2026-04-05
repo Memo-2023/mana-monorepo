@@ -37,7 +37,7 @@ All apps follow `MAJOR.MINOR.PATCH`:
 | Clock | 0.2.0 | Beta |
 | Nutriphi | 0.2.0 | Beta |
 | Cards | 0.2.0 | Beta |
-| ManaCore | 0.2.0 | Beta |
+| Mana | 0.2.0 | Beta |
 | Matrix | 0.2.0 | Beta |
 | Photos | 0.2.0 | Beta |
 | Skilltree | 0.2.0 | Beta |

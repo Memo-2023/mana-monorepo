@@ -1,5 +1,5 @@
 /**
- * @manacore/shared-hono — Shared infrastructure for Hono + Bun compute servers.
+ * @mana/shared-hono — Shared infrastructure for Hono + Bun compute servers.
  *
  * Replaces NestJS boilerplate (Module, Controller, Guard, HealthModule, MetricsModule)
  * with lightweight Hono equivalents.
@@ -9,11 +9,11 @@
  * import { Hono } from 'hono';
  * import { cors } from 'hono/cors';
  * import { logger } from 'hono/logger';
- * import { authMiddleware, serviceAuthMiddleware } from '@manacore/shared-hono/auth';
- * import { createDb } from '@manacore/shared-hono/db';
- * import { healthRoute } from '@manacore/shared-hono/health';
- * import { adminRoutes } from '@manacore/shared-hono/admin';
- * import { errorHandler, notFoundHandler } from '@manacore/shared-hono/error';
+ * import { authMiddleware, serviceAuthMiddleware } from '@mana/shared-hono/auth';
+ * import { createDb } from '@mana/shared-hono/db';
+ * import { healthRoute } from '@mana/shared-hono/health';
+ * import { adminRoutes } from '@mana/shared-hono/admin';
+ * import { errorHandler, notFoundHandler } from '@mana/shared-hono/error';
  *
  * const app = new Hono();
  * app.onError(errorHandler);

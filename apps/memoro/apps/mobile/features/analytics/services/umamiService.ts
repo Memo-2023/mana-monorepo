@@ -15,7 +15,7 @@ class UmamiAnalyticsService implements AnalyticsService {
 	private websiteId =
 		process.env.EXPO_PUBLIC_UMAMI_WEBSITE_ID || 'fb5fc77a-ed24-4369-b9f5-7d8a01bc9fa4';
 	private scriptUrl =
-		process.env.EXPO_PUBLIC_UMAMI_SCRIPT_URL || 'https://umami.manacore.ai/script.js';
+		process.env.EXPO_PUBLIC_UMAMI_SCRIPT_URL || 'https://umami.mana.ai/script.js';
 
 	async initialize() {
 		if (this.initialized) return;

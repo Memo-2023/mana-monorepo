@@ -3,7 +3,7 @@
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import { matrixStore } from '$lib/matrix';
-	import { CircleNotch } from '@manacore/shared-icons';
+	import { CircleNotch } from '@mana/shared-icons';
 
 	let checking = $state(true);
 

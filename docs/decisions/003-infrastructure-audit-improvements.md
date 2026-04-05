@@ -71,4 +71,4 @@ Matrix-Bot-Volumes werden zu einem konsolidiert: `manacore-matrix-bots-data`
 
 ## Full Documentation
 
-Siehe: `apps/manacore/apps/landing/src/content/blueprints/002-infrastructure-audit-improvements.md`
+Siehe: `apps/mana/apps/landing/src/content/blueprints/002-infrastructure-audit-improvements.md`

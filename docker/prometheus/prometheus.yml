@@ -1,4 +1,4 @@
-# ManaCore Prometheus Configuration
+# Mana Prometheus Configuration
 # Scrapes metrics from all services
 
 global:
@@ -222,14 +222,14 @@ scrape_configs:
   # Blackbox Exporter — HTTP Uptime Probes
   # ============================================
 
-  # Web Apps (Unified ManaCore app at mana.how + standalone games)
+  # Web Apps (Unified Mana app at mana.how + standalone games)
   - job_name: 'blackbox-web'
     metrics_path: /probe
     params:
       module: [http_2xx]
     static_configs:
       - targets:
-          # Unified ManaCore app (all modules as routes)
+          # Unified Mana app (all modules as routes)
           - https://mana.how
           - https://mana.how/chat
           - https://mana.how/todo

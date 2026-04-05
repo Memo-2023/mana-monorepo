@@ -1,5 +1,5 @@
 #!/bin/bash
-# ManaCore Health Check Script
+# Mana Health Check Script
 # Checks all services and sends notifications on failure
 #
 # Notification channels (configure via environment or .env.notifications):
@@ -61,12 +61,12 @@ send_email() {
 
     # Use msmtp if available, otherwise try mail command
     if command -v msmtp &> /dev/null; then
-        echo -e "Subject: ${subject}\nFrom: ${EMAIL_FROM:-manacore@localhost}\nTo: ${EMAIL_TO}\n\n${body}" | \
+        echo -e "Subject: ${subject}\nFrom: ${EMAIL_FROM:-mana@localhost}\nTo: ${EMAIL_TO}\n\n${body}" | \
             msmtp -a default "$EMAIL_TO" 2>/dev/null
     elif command -v mail &> /dev/null; then
         echo "$body" | mail -s "$subject" "$EMAIL_TO" 2>/dev/null
     elif command -v sendmail &> /dev/null; then
-        echo -e "Subject: ${subject}\nFrom: ${EMAIL_FROM:-manacore@localhost}\nTo: ${EMAIL_TO}\n\n${body}" | \
+        echo -e "Subject: ${subject}\nFrom: ${EMAIL_FROM:-mana@localhost}\nTo: ${EMAIL_TO}\n\n${body}" | \
             sendmail "$EMAIL_TO" 2>/dev/null
     else
         echo "  [Email] No mail client available (install msmtp)"
@@ -105,7 +105,7 @@ send_all_notifications() {
     local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
 
     # Telegram message (HTML format)
-    local telegram_msg="🚨 <b>ManaCore Health Check Failed</b>
+    local telegram_msg="🚨 <b>Mana Health Check Failed</b>
 
 <b>Time:</b> ${timestamp}
 <b>Host:</b> $(hostname)
@@ -116,8 +116,8 @@ ${failed_services}
 Check logs: <code>ssh mac-mini</code>"
 
     # Email message
-    local email_subject="[ALERT] ManaCore Health Check Failed"
-    local email_body="ManaCore Health Check Failed
+    local email_subject="[ALERT] Mana Health Check Failed"
+    local email_body="Mana Health Check Failed
 =============================
 
 Time: ${timestamp}
@@ -128,12 +128,12 @@ ${failed_services}
 
 To investigate:
   ssh mac-mini
-  cd ~/projects/manacore-monorepo
+  cd ~/projects/mana-monorepo
   ./scripts/mac-mini/status.sh
   docker logs <container-name>"
 
     # Plain text for ntfy
-    local ntfy_msg="ManaCore Failed: ${failed_services}"
+    local ntfy_msg="Mana Failed: ${failed_services}"
 
     echo ""
     echo "Sending notifications..."
@@ -168,7 +168,7 @@ check_service() {
 # ============================================
 
 echo ""
-echo "=== ManaCore Health Check ==="
+echo "=== Mana Health Check ==="
 echo "Time: $(date)"
 echo ""
 

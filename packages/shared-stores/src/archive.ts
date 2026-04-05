@@ -7,7 +7,7 @@
  *
  * @example
  * ```typescript
- * import { createArchiveOps } from '@manacore/shared-stores';
+ * import { createArchiveOps } from '@mana/shared-stores';
  * import { db } from '$lib/data/database';
  *
  * export const memoArchive = createArchiveOps({

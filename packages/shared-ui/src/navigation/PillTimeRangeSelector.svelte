@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { CaretDown, Clock } from '@manacore/shared-icons';
+	import { CaretDown, Clock } from '@mana/shared-icons';
 
 	// Portal action - moves element to body to escape stacking contexts
 	function portal(node: HTMLElement) {

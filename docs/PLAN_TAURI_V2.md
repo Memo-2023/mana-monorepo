@@ -1,6 +1,6 @@
-# Implementierungsplan: PWA + Tauri v2 für ManaCore
+# Implementierungsplan: PWA + Tauri v2 für Mana
 
-> Schrittweiser Plan um die ManaCore Unified Web App zuerst als PWA auszubauen und anschliessend als native Desktop- und Mobile-App via Tauri v2 auszuliefern — Plattform für Plattform.
+> Schrittweiser Plan um die Mana Unified Web App zuerst als PWA auszubauen und anschliessend als native Desktop- und Mobile-App via Tauri v2 auszuliefern — Plattform für Plattform.
 >
 > Stand: April 2026
 
@@ -24,7 +24,7 @@ Jede Phase liefert ein funktionsfähiges Release. Man muss nicht alle Plattforme
 ### Zielstruktur
 
 ```
-apps/manacore/
+apps/mana/
 ├── apps/
 │   ├── web/          # Bestehende SvelteKit-App (Web + PWA)
 │   ├── tauri/        # NEU: Tauri v2 Shell (alle nativen Plattformen)
@@ -202,7 +202,7 @@ export async function getApiUrl(key: string): Promise<string> {
 
 ## Phase 3: macOS Desktop
 
-**Ziel:** ManaCore läuft als native Desktop-App auf macOS. Erste Tauri-Plattform.
+**Ziel:** Mana läuft als native Desktop-App auf macOS. Erste Tauri-Plattform.
 
 **Aufwand:** 2–3 Tage (inkrementell über SPA-Basis)
 
@@ -216,7 +216,7 @@ export async function getApiUrl(key: string): Promise<string> {
 
 ### 3.2 Tauri-Projekt initialisieren
 
-- [ ] `apps/manacore/apps/tauri/` erstellen
+- [ ] `apps/mana/apps/tauri/` erstellen
 - [ ] `package.json` mit Workspace-Referenz zu `@manacore/web`
 - [ ] `tauri.conf.json` konfigurieren:
 
@@ -228,10 +228,10 @@ export async function getApiUrl(key: string): Promise<string> {
     "frontendDist": "../../web/build-static"
   },
   "app": {
-    "title": "ManaCore",
+    "title": "Mana",
     "windows": [
       {
-        "title": "ManaCore",
+        "title": "Mana",
         "width": 1280,
         "height": 800,
         "minWidth": 800,
@@ -254,7 +254,7 @@ export async function getApiUrl(key: string): Promise<string> {
 #[tauri::command]
 fn get_config() -> serde_json::Value {
     serde_json::json!({
-        "MANA_CORE_AUTH_URL": "https://auth.mana.how",
+        "MANA_AUTH_URL": "https://auth.mana.how",
         "SYNC_SERVER_URL": "wss://sync.mana.how",
         // ...
     })
@@ -296,7 +296,7 @@ fn get_config() -> serde_json::Value {
 
 ## Phase 4: Windows Desktop
 
-**Ziel:** ManaCore als native Windows-App.
+**Ziel:** Mana als native Windows-App.
 
 **Aufwand:** 2–3 Tage (inkrementell über macOS)
 
@@ -334,7 +334,7 @@ Da WebView2 auf Chromium basiert (≠ macOS WebKit):
 
 ## Phase 5: Linux Desktop
 
-**Ziel:** ManaCore als native Linux-App.
+**Ziel:** Mana als native Linux-App.
 
 **Aufwand:** 0.5–1 Tag (inkrementell über macOS)
 
@@ -363,7 +363,7 @@ Da WebView2 auf Chromium basiert (≠ macOS WebKit):
 
 ## Phase 6: Android
 
-**Ziel:** ManaCore als Android-App im Play Store.
+**Ziel:** Mana als Android-App im Play Store.
 
 **Aufwand:** 1–2 Wochen (inkrementell über Desktop)
 
@@ -430,7 +430,7 @@ Grösstes Android-spezifisches Risiko — die System-WebView variiert je nach Ge
 
 ## Phase 7: iOS
 
-**Ziel:** ManaCore als iOS-App im App Store.
+**Ziel:** Mana als iOS-App im App Store.
 
 **Aufwand:** 1–2 Wochen (inkrementell über Android)
 
@@ -592,11 +592,11 @@ Apple prüft strenger als Google. Wichtige Punkte:
 | Nach Phase | Nutzer können... |
 |------------|-----------------|
 | Phase 1 | App auf jedem Gerät aus dem Browser installieren (PWA) |
-| Phase 3 | ManaCore als macOS Desktop-App nutzen (DMG) |
-| Phase 4 | ManaCore als Windows Desktop-App nutzen (Installer) |
-| Phase 5 | ManaCore auf Linux nutzen (AppImage) |
-| Phase 6 | ManaCore aus dem Play Store installieren |
-| Phase 7 | ManaCore aus dem App Store installieren |
+| Phase 3 | Mana als macOS Desktop-App nutzen (DMG) |
+| Phase 4 | Mana als Windows Desktop-App nutzen (Installer) |
+| Phase 5 | Mana auf Linux nutzen (AppImage) |
+| Phase 6 | Mana aus dem Play Store installieren |
+| Phase 7 | Mana aus dem App Store installieren |
 | Phase 8 | Automatische Updates, native Features, stabile CI/CD |
 
 ---

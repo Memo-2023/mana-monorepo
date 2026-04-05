@@ -1,4 +1,4 @@
-// Main entry point for @manacore/cards-database
+// Main entry point for @mana/cards-database
 
 // Export database client utilities
 export { createClient, getDb, closeDb, type Database } from './client.js';

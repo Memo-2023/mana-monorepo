@@ -31,7 +31,7 @@ All web apps now use the shared packages consistently:
 
 - `memoro/apps/web/src/lib/components/MemoroLogo.svelte` → uses `AppLogo`
 - `cards/apps/web/src/lib/components/CardsLogo.svelte` → uses `AppLogo`
-- `manacore/apps/web/src/lib/components/ManaCoreLogo.svelte` → uses `AppLogo`
+- `manacore/apps/web/src/lib/components/ManaLogo.svelte` → uses `AppLogo`
 - `maerchenzauber/apps/web/src/lib/components/StorytellerLogo.svelte` → uses `AppLogo`
 
 **Formatter Functions** - Migrated to `@manacore/shared-utils`:
@@ -66,7 +66,7 @@ All web apps now use the shared packages consistently:
 
 **Apps using these**:
 
-- ManaCore Web
+- Mana Web
 - Memoro Web
 - Maerchenzauber Web
 - Cards Web
@@ -126,7 +126,7 @@ packages/shared-tailwind/
 **Apps using this**:
 
 - Memoro Web (full migration with theme.css + components.css)
-- ManaCore Web (preset only, keeps local colors)
+- Mana Web (preset only, keeps local colors)
 - Cards Web (colors import, HSL-based system)
 - Maerchenzauber Web (dependency added)
 

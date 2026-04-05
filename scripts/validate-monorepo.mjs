@@ -132,7 +132,7 @@ function checkWorkspaceProtocol(packagePath, packageJson) {
 
 	const deps = { ...packageJson.dependencies, ...packageJson.devDependencies };
 	const internalScopes = [
-		'@manacore/',
+		'@mana/',
 		'@mana-core/',
 		'@chat/',
 		'@picture/',

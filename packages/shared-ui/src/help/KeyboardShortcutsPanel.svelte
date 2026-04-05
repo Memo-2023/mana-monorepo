@@ -8,7 +8,7 @@
 		Sparkle,
 		ChatCircle,
 		NavigationArrow,
-	} from '@manacore/shared-icons';
+	} from '@mana/shared-icons';
 	import type { ShortcutCategory } from './types';
 
 	interface Props {

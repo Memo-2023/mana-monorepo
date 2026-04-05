@@ -9,13 +9,13 @@ import Footer from '@components/Footer.astro';
 let StepsSection: any = null;
 let PricingSection: any = null;
 try {
-	const shared = await import('@manacore/shared-landing-ui/sections/StepsSection.astro');
+	const shared = await import('@mana/shared-landing-ui/sections/StepsSection.astro');
 	StepsSection = shared.default;
 } catch {
 	// Shared component not available
 }
 try {
-	const shared = await import('@manacore/shared-landing-ui/sections/PricingSection.astro');
+	const shared = await import('@mana/shared-landing-ui/sections/PricingSection.astro');
 	PricingSection = shared.default;
 } catch {
 	// Shared component not available

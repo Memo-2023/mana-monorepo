@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { PencilSimple, Tag as TagIcon, Trash } from '@manacore/shared-icons';
+	import { PencilSimple, Tag as TagIcon, Trash } from '@mana/shared-icons';
 	import { DEFAULT_TAG_COLOR } from './constants';
 	import type { Tag as TagType } from './constants';
 

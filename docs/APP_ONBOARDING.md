@@ -6,11 +6,11 @@ Dieses Dokument beschreibt das App-spezifische Mini-Onboarding-System, das beim 
 
 ## Übersicht
 
-Das Mini-Onboarding ergänzt das globale ManaCore-Onboarding mit app-spezifischen Einstellungen. Es wird pro App und pro Gerät gespeichert.
+Das Mini-Onboarding ergänzt das globale Mana-Onboarding mit app-spezifischen Einstellungen. Es wird pro App und pro Gerät gespeichert.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│ Globales Onboarding (ManaCore)                              │
+│ Globales Onboarding (Mana)                              │
 │ → Profil, Interessen, Datenschutz (einmalig pro User)       │
 └─────────────────────────────────────────────────────────────┘
                           ↓

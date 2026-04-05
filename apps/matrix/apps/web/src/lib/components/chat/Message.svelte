@@ -19,7 +19,7 @@
 		Smiley,
 		Check,
 		Checks,
-	} from '@manacore/shared-icons';
+	} from '@mana/shared-icons';
 
 	interface Props {
 		message: SimpleMessage;

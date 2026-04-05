@@ -238,7 +238,7 @@ pnpm build                    # Build for production
 NODE_ENV=development
 PORT=3023
 DATABASE_URL=postgresql://manacore:devpassword@localhost:5432/nutriphi
-MANA_CORE_AUTH_URL=http://localhost:3001
+MANA_AUTH_URL=http://localhost:3001
 CORS_ORIGINS=http://localhost:5180,http://localhost:4323
 
 # Gemini AI (uses gemini-2.5-flash model)
@@ -251,7 +251,7 @@ GEMINI_API_KEY=your-gemini-api-key
 
 ```env
 PUBLIC_BACKEND_URL=http://localhost:3023
-PUBLIC_MANA_CORE_AUTH_URL=http://localhost:3001
+PUBLIC_MANA_AUTH_URL=http://localhost:3001
 ```
 
 ## Shared Package (@nutriphi/shared)

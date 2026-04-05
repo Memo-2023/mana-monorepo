@@ -15,7 +15,7 @@ Falls nur eine Session an einem Tag stattfindet, kann die Session-Bezeichnung we
 
 ## Dateistruktur
 
-Devlogs werden im Verzeichnis `apps/manacore/apps/landing/src/content/devlog/` gespeichert.
+Devlogs werden im Verzeichnis `apps/mana/apps/landing/src/content/devlog/` gespeichert.
 
 **Dateiname-Format:** `YYYY-MM-DD-kurze-beschreibung.md`
 

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { slide } from 'svelte/transition';
 	import type { Snippet } from 'svelte';
-	import { SlidersHorizontal } from '@manacore/shared-icons';
+	import { SlidersHorizontal } from '@mana/shared-icons';
 
 	interface Props {
 		/** Whether the toolbar is collapsed */

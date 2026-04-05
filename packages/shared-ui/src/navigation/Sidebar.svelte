@@ -2,7 +2,7 @@
 	import type { Snippet } from 'svelte';
 	import type { NavItem } from './types';
 	import NavLink from './NavLink.svelte';
-	import { CaretLeft, List, Moon, SignOut, Sun } from '@manacore/shared-icons';
+	import { CaretLeft, List, Moon, SignOut, Sun } from '@mana/shared-icons';
 
 	interface Props {
 		/** Navigation items to display */

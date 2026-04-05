@@ -67,6 +67,6 @@ Tables: tags, tag_groups, tag_links, user_settings
 ```env
 PORT=3062
 DATABASE_URL=postgresql://manacore:devpassword@localhost:5432/mana_user
-MANA_CORE_AUTH_URL=http://localhost:3001
+MANA_AUTH_URL=http://localhost:3001
 CORS_ORIGINS=http://localhost:5173
 ```

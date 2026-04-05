@@ -1,7 +1,7 @@
 /**
  * QR Code Wallpaper Generation
  *
- * Creates device wallpapers from QR codes using @manacore/wallpaper-generator.
+ * Creates device wallpapers from QR codes using @mana/wallpaper-generator.
  */
 
 import type { ManaQRExport, EncodeResult } from './types';
@@ -11,12 +11,12 @@ import type {
 	DeviceOption,
 	Layout,
 	Background,
-} from '@manacore/wallpaper-generator';
+} from '@mana/wallpaper-generator';
 import {
 	createWallpaperGenerator,
 	DEFAULT_CENTER_LAYOUT,
 	DEFAULT_BACKGROUND,
-} from '@manacore/wallpaper-generator';
+} from '@mana/wallpaper-generator';
 import { toDataURL } from './generate';
 
 /** Options for QR wallpaper generation */
@@ -52,7 +52,7 @@ const DEFAULT_QR_WALLPAPER_OPTIONS: Partial<QRWallpaperOptions> = {
  *
  * @example
  * ```ts
- * import { toWallpaper } from '@manacore/qr-export/wallpaper';
+ * import { toWallpaper } from '@mana/qr-export/wallpaper';
  *
  * const result = await toWallpaper(encodeResult, {
  *   device: 'iphone-15-pro-max',

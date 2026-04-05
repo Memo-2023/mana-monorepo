@@ -2,8 +2,8 @@
  * Help content for Manalink (Matrix) app
  */
 
-import type { HelpContent } from '@manacore/help';
-import { getPrivacyFAQs } from '@manacore/help';
+import type { HelpContent } from '@mana/help';
+import { getPrivacyFAQs } from '@mana/help';
 
 export function getManalinkHelpContent(locale: string): HelpContent {
 	const isDE = locale === 'de';
@@ -25,8 +25,8 @@ export function getManalinkHelpContent(locale: string): HelpContent {
 				id: 'faq-login',
 				question: isDE ? 'Wie melde ich mich an?' : 'How do I log in?',
 				answer: isDE
-					? '<p>Du kannst dich auf zwei Wegen anmelden:</p><ul><li><strong>Matrix-Konto</strong> — Benutzername und Passwort eines Matrix-Homeservers</li><li><strong>SSO über Mana Core</strong> — Anmeldung mit deinem ManaCore-Konto</li></ul><p>Der Standard-Homeserver ist <code>matrix.mana.how</code>, aber du kannst jeden beliebigen Matrix-Homeserver verwenden.</p>'
-					: '<p>You can log in two ways:</p><ul><li><strong>Matrix account</strong> — Username and password from a Matrix homeserver</li><li><strong>SSO via Mana Core</strong> — Login with your ManaCore account</li></ul><p>The default homeserver is <code>matrix.mana.how</code>, but you can use any Matrix homeserver.</p>',
+					? '<p>Du kannst dich auf zwei Wegen anmelden:</p><ul><li><strong>Matrix-Konto</strong> — Benutzername und Passwort eines Matrix-Homeservers</li><li><strong>SSO über Mana Core</strong> — Anmeldung mit deinem Mana-Konto</li></ul><p>Der Standard-Homeserver ist <code>matrix.mana.how</code>, aber du kannst jeden beliebigen Matrix-Homeserver verwenden.</p>'
+					: '<p>You can log in two ways:</p><ul><li><strong>Matrix account</strong> — Username and password from a Matrix homeserver</li><li><strong>SSO via Mana Core</strong> — Login with your Mana account</li></ul><p>The default homeserver is <code>matrix.mana.how</code>, but you can use any Matrix homeserver.</p>',
 				category: 'getting-started',
 				order: 2,
 				language: isDE ? 'de' : 'en',
@@ -185,13 +185,13 @@ export function getManalinkHelpContent(locale: string): HelpContent {
 				id: 'feature-sso',
 				title: isDE ? 'SSO-Anmeldung' : 'SSO Login',
 				description: isDE
-					? 'Melde dich mit deinem ManaCore-Konto an — kein separates Matrix-Passwort nötig'
-					: 'Sign in with your ManaCore account — no separate Matrix password needed',
+					? 'Melde dich mit deinem Mana-Konto an — kein separates Matrix-Passwort nötig'
+					: 'Sign in with your Mana account — no separate Matrix password needed',
 				icon: '🔐',
 				category: 'core',
 				highlights: isDE
-					? ['ManaCore SSO', 'Ein-Klick-Login', 'Sicher', 'Passwort-Login']
-					: ['ManaCore SSO', 'One-click login', 'Secure', 'Password login'],
+					? ['Mana SSO', 'Ein-Klick-Login', 'Sicher', 'Passwort-Login']
+					: ['Mana SSO', 'One-click login', 'Secure', 'Password login'],
 				content: '',
 				order: 4,
 				language: isDE ? 'de' : 'en',

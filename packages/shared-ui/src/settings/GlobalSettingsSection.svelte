@@ -1,10 +1,10 @@
 <script lang="ts">
-	import type { UserSettingsStore, ThemeMode, WeekStartDay } from '@manacore/shared-theme';
-	import { getAvailableRoutes, getDefaultRoute } from '@manacore/shared-theme';
+	import type { UserSettingsStore, ThemeMode, WeekStartDay } from '@mana/shared-theme';
+	import { getAvailableRoutes, getDefaultRoute } from '@mana/shared-theme';
 	import SettingsSection from './SettingsSection.svelte';
 	import SettingsCard from './SettingsCard.svelte';
 	import NavVisibilitySettings from './NavVisibilitySettings.svelte';
-	import { Gear } from '@manacore/shared-icons';
+	import { Gear } from '@mana/shared-icons';
 
 	interface NavItem {
 		href: string;

@@ -1,6 +1,6 @@
 /**
  * User data extracted from a verified JWT token.
- * Compatible with @manacore/shared-nestjs-auth CurrentUserData.
+ * Compatible with @mana/shared-nestjs-auth CurrentUserData.
  */
 export interface CurrentUserData {
 	userId: string;

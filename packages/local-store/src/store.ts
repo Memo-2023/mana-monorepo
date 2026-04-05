@@ -8,7 +8,7 @@
  *
  * @example
  * ```ts
- * import { createLocalStore } from '@manacore/local-store';
+ * import { createLocalStore } from '@mana/local-store';
  *
  * const store = createLocalStore({
  *   appId: 'todo',
@@ -44,7 +44,7 @@ import type { BaseRecord, CollectionConfig, SyncStatus } from './types.js';
 
 /** Client ID persisted in localStorage for device identification. */
 function getOrCreateClientId(): string {
-	const key = 'manacore-client-id';
+	const key = 'mana-client-id';
 	if (typeof localStorage === 'undefined') return 'ssr-' + Math.random().toString(36).slice(2);
 
 	let clientId = localStorage.getItem(key);

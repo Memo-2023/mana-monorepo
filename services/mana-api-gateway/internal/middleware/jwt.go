@@ -5,7 +5,7 @@ package middleware
 import (
 	"net/http"
 
-	"github.com/manacore/shared-go/authutil"
+	"github.com/mana/shared-go/authutil"
 )
 
 // JWTMiddleware validates Bearer JWT tokens for management endpoints.

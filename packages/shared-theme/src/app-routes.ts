@@ -142,8 +142,8 @@ export const APP_ROUTES: Record<string, AppRouteConfig> = {
 		],
 	},
 
-	manacore: {
-		appId: 'manacore',
+	mana: {
+		appId: 'mana',
 		defaultRoute: '/',
 		availableRoutes: [
 			{ path: '/', label: 'Dashboard', icon: 'home', alwaysVisible: true },

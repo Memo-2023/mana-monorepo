@@ -1,4 +1,4 @@
-import { createFeedbackService } from '@manacore/feedback';
+import { createFeedbackService } from '@mana/feedback';
 import { authStore } from '$lib/stores/auth.svelte';
 
 export const feedbackService = createFeedbackService({

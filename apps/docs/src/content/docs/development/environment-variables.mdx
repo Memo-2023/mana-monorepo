@@ -59,7 +59,7 @@ The generator reads `.env.development` and creates app-specific `.env` files wit
 
 | Variable | Description | Used By |
 |----------|-------------|---------|
-| `MANA_CORE_AUTH_URL` | Auth service URL | All apps |
+| `MANA_AUTH_URL` | Auth service URL | All apps |
 | `JWT_PRIVATE_KEY` | JWT signing key | mana-core-auth |
 | `JWT_PUBLIC_KEY` | JWT verification key | All backends |
 | `POSTGRES_USER` | Database user | Docker, backends |
@@ -71,8 +71,8 @@ The generator reads `.env.development` and creates app-specific `.env` files wit
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `MANA_CORE_AUTH_PORT` | Service port | `3001` |
-| `MANA_CORE_AUTH_DATABASE_URL` | PostgreSQL connection | - |
+| `MANA_AUTH_PORT` | Service port | `3001` |
+| `MANA_AUTH_DATABASE_URL` | PostgreSQL connection | - |
 | `JWT_ACCESS_TOKEN_EXPIRY` | Access token TTL | `15m` |
 | `JWT_REFRESH_TOKEN_EXPIRY` | Refresh token TTL | `7d` |
 | `JWT_ISSUER` | JWT issuer claim | `manacore` |

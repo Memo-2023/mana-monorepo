@@ -1,5 +1,5 @@
 {
-	"name": "@manacore/shared-tailwind",
+	"name": "@mana/shared-tailwind",
 	"version": "1.0.0",
 	"private": true,
 	"type": "module",

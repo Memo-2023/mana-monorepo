@@ -1,5 +1,5 @@
 /**
- * Shared Tailwind CSS preset for all ManaCore apps
+ * Shared Tailwind CSS preset for all Mana apps
  *
  * This preset uses HSL-based CSS variables for theming.
  * Colors are defined as HSL values (e.g., "47 95% 58%") and
@@ -7,7 +7,7 @@
  *
  * Usage in tailwind.config.js:
  * ```
- * import preset from '@manacore/shared-tailwind/preset';
+ * import preset from '@mana/shared-tailwind/preset';
  *
  * export default {
  *   presets: [preset],
@@ -27,7 +27,7 @@ const preset = {
 				mana: '#4287f5',
 
 				// ===== HSL-Based Semantic Colors =====
-				// These use CSS variables set by @manacore/shared-theme
+				// These use CSS variables set by @mana/shared-theme
 				// Format: hsl(var(--color-name)) where --color-name is "H S% L%"
 
 				// Page background

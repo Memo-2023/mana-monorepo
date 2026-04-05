@@ -2,7 +2,7 @@
 
 ## Overview
 
-**Todo** is a full-featured task management application for the ManaCore ecosystem. It supports projects, tasks with subtasks, labels, recurring tasks, reminders, and calendar integration.
+**Todo** is a full-featured task management application for the Mana ecosystem. It supports projects, tasks with subtasks, labels, recurring tasks, reminders, and calendar integration.
 
 | App | Port | URL |
 |-----|------|-----|
@@ -208,7 +208,7 @@ pnpm preview                     # Preview build
 NODE_ENV=development
 PORT=3018
 DATABASE_URL=postgresql://manacore:devpassword@localhost:5432/todo
-MANA_CORE_AUTH_URL=http://localhost:3001
+MANA_AUTH_URL=http://localhost:3001
 CORS_ORIGINS=http://localhost:5173,http://localhost:5186,http://localhost:8081
 ```
 
@@ -216,7 +216,7 @@ CORS_ORIGINS=http://localhost:5173,http://localhost:5186,http://localhost:8081
 
 ```env
 PUBLIC_BACKEND_URL=http://localhost:3018
-PUBLIC_MANA_CORE_AUTH_URL=http://localhost:3001
+PUBLIC_MANA_AUTH_URL=http://localhost:3001
 ```
 
 ## Quick Add Syntax

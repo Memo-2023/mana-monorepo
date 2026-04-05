@@ -16,10 +16,10 @@ export default defineConfig({
 				replacesTitle: false,
 			},
 			social: {
-				github: 'https://github.com/manacore/manacore-monorepo',
+				github: 'https://github.com/mana/mana-monorepo',
 			},
 			editLink: {
-				baseUrl: 'https://github.com/manacore/manacore-monorepo/edit/main/apps/docs/',
+				baseUrl: 'https://github.com/mana/mana-monorepo/edit/main/apps/docs/',
 			},
 			customCss: ['./src/styles/custom.css'],
 			sidebar: [

@@ -1,4 +1,4 @@
-import { createThemeStore } from '@manacore/shared-theme';
+import { createThemeStore } from '@mana/shared-theme';
 
 export const theme = createThemeStore({
 	appId: 'matrix',

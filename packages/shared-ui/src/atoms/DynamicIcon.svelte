@@ -1,12 +1,12 @@
 <!--
   DynamicIcon — renders a Phosphor icon by string name.
-  Uses the curated icon registry from @manacore/shared-icons.
+  Uses the curated icon registry from @mana/shared-icons.
 
   Usage:
     <DynamicIcon name="coffee" size={24} weight="bold" />
 -->
 <script lang="ts">
-	import { getIconComponent } from '@manacore/shared-icons';
+	import { getIconComponent } from '@mana/shared-icons';
 
 	interface Props {
 		name: string;

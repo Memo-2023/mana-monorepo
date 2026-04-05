@@ -1,6 +1,6 @@
 # mana-media - Unified Media Platform
 
-Central media handling service for all ManaCore applications with content-addressable storage (CAS) and automatic deduplication.
+Central media handling service for all Mana applications with content-addressable storage (CAS) and automatic deduplication.
 
 **Stack:** Hono + Bun (migrated from NestJS 2026-03-28)
 

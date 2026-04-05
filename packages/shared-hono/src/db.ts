@@ -22,7 +22,7 @@ export interface DbOptions {
  *
  * Usage:
  * ```ts
- * import { createDb } from '@manacore/shared-hono/db';
+ * import { createDb } from '@mana/shared-hono/db';
  * import { tasks, projects } from './schema';
  *
  * const db = createDb({
@@ -36,7 +36,7 @@ export function createDb<TSchema extends Record<string, unknown>>(
 	const url =
 		opts?.url ??
 		process.env.DATABASE_URL ??
-		'postgresql://manacore:devpassword@localhost:5432/mana_platform';
+		'postgresql://mana:devpassword@localhost:5432/mana_platform';
 
 	const connection = postgres(url, {
 		max: opts?.maxConnections ?? 5,

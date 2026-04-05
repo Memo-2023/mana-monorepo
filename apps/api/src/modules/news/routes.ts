@@ -16,7 +16,7 @@ import { sql } from 'drizzle-orm';
 // ─── DB Connection (reads from sync_changes for feed) ───────
 
 const DATABASE_URL =
-	process.env.DATABASE_URL ?? 'postgresql://manacore:devpassword@localhost:5432/mana_sync';
+	process.env.DATABASE_URL ?? 'postgresql://mana:devpassword@localhost:5432/mana_sync';
 
 const connection = postgres(DATABASE_URL, { max: 10 });
 const db = drizzle(connection);

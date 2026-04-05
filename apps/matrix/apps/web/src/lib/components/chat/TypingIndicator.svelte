@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { matrixStore } from '$lib/matrix';
-	import { User } from '@manacore/shared-icons';
+	import { User } from '@mana/shared-icons';
 
 	interface Props {
 		users: string[];

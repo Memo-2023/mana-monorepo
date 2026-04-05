@@ -3,11 +3,11 @@ package handler
 import (
 	"net/http"
 
-	"github.com/manacore/shared-go/httputil"
+	"github.com/mana/shared-go/httputil"
 	"time"
 
-	"github.com/manacore/mana-search/internal/cache"
-	"github.com/manacore/mana-search/internal/search"
+	"github.com/mana/mana-search/internal/cache"
+	"github.com/mana/mana-search/internal/search"
 )
 
 type HealthHandler struct {

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { tick } from 'svelte';
-	import { CalendarBlank, List, GridFour, ClipboardText, ListChecks } from '@manacore/shared-icons';
+	import { CalendarBlank, List, GridFour, ClipboardText, ListChecks } from '@mana/shared-icons';
 
 	export interface ViewOption {
 		/** Unique identifier */

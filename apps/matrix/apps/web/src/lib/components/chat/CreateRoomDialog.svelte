@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { matrixStore } from '$lib/matrix';
-	import { X, Users, ChatCircle, Lock, Globe, CircleNotch } from '@manacore/shared-icons';
+	import { X, Users, ChatCircle, Lock, Globe, CircleNotch } from '@mana/shared-icons';
 
 	interface Props {
 		open: boolean;

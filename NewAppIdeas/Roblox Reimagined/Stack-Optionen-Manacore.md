@@ -29,7 +29,7 @@ Wir betreiben bereits ein komplexes, polyglot, selbst-gehostetes Oekosystem:
 | **Hono Services (5)**  | Hono 4.7 + Bun, Drizzle ORM              | auth, credits, user, subscriptions, analytics      |
 | **Python AI (5+)**     | FastAPI, MLX, Whisper, FLUX              | llm, image-gen, stt, tts, voice-bot                |
 | **Frontend (19 Apps)** | SvelteKit 2 + Svelte 5 + Tailwind 4      | Todo, Chat, Calendar, Photos, etc.                 |
-| **Mobile**             | Expo 55 + React Native 0.83 + NativeWind | ManaCore, Traces                                   |
+| **Mobile**             | Expo 55 + React Native 0.83 + NativeWind | Mana, Traces                                   |
 | **Local-First**        | Dexie.js + mana-sync (Go WebSocket)      | 19 Apps migriert                                   |
 | **Datenbank**          | PostgreSQL 16                            | Alle Services                                      |
 | **Cache**              | Redis 7                                  | Rate Limiting, Sessions                            |

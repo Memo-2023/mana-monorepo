@@ -2,7 +2,7 @@
 	import { page } from '$app/stores';
 	import { matrixStore, type SimpleMessage } from '$lib/matrix';
 	import { RoomHeader, Timeline, MessageInput, DropZoneOverlay } from '$lib/components/chat';
-	import { CaretLeft } from '@manacore/shared-icons';
+	import { CaretLeft } from '@mana/shared-icons';
 	import RoomSettingsPanel from '$lib/components/chat/RoomSettingsPanel.svelte';
 	import SearchDialog from '$lib/components/chat/SearchDialog.svelte';
 	import ForwardMessageDialog from '$lib/components/chat/ForwardMessageDialog.svelte';

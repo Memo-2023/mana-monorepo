@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { X } from '@manacore/shared-icons';
+	import { X } from '@mana/shared-icons';
 	import ContactAvatar from './ContactAvatar.svelte';
 	import type {
 		ContactReference,
 		ManualContactEntry,
 		ContactOrManual,
-	} from '@manacore/shared-types';
+	} from '@mana/shared-types';
 
 	interface Props {
 		/** Contact to display */

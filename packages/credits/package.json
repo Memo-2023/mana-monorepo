@@ -1,5 +1,5 @@
 {
-	"name": "@manacore/credits",
+	"name": "@mana/credits",
 	"version": "1.0.0",
 	"private": true,
 	"description": "Unified credit package — operations, service, and UI components",

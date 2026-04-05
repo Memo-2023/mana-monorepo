@@ -178,7 +178,7 @@ pnpm build                       # Build for production
 NODE_ENV=development
 PORT=3015
 DATABASE_URL=postgresql://manacore:devpassword@localhost:5432/contacts
-MANA_CORE_AUTH_URL=http://localhost:3001
+MANA_AUTH_URL=http://localhost:3001
 CORS_ORIGINS=http://localhost:5173,http://localhost:5184,http://localhost:8081
 S3_ENDPOINT=http://localhost:9000
 S3_REGION=us-east-1
@@ -197,14 +197,14 @@ GOOGLE_REDIRECT_URI=http://localhost:5184/data?tab=import&source=google
 
 ```
 EXPO_PUBLIC_BACKEND_URL=http://localhost:3015
-EXPO_PUBLIC_MANA_CORE_AUTH_URL=http://localhost:3001
+EXPO_PUBLIC_MANA_AUTH_URL=http://localhost:3001
 ```
 
 #### Web (.env)
 
 ```
 PUBLIC_BACKEND_URL=http://localhost:3015
-PUBLIC_MANA_CORE_AUTH_URL=http://localhost:3001
+PUBLIC_MANA_AUTH_URL=http://localhost:3001
 ```
 
 ## Shared Packages

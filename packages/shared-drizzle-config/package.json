@@ -1,5 +1,5 @@
 {
-	"name": "@manacore/shared-drizzle-config",
+	"name": "@mana/shared-drizzle-config",
 	"version": "1.0.0",
 	"description": "Shared Drizzle ORM configuration factory",
 	"type": "module",

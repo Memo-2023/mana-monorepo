@@ -3,9 +3,9 @@
  */
 
 import { Hono } from 'hono';
-import type { AuthVariables } from '@manacore/shared-hono';
+import type { AuthVariables } from '@mana/shared-hono';
 import { validateCredits, consumeCredits, COSTS } from '../lib/credits';
-import { getBalance } from '@manacore/shared-hono';
+import { getBalance } from '@mana/shared-hono';
 import { validateBody } from '../lib/validate';
 import { checkCreditsBody, consumeCreditsBody } from '../schemas';
 

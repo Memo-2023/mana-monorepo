@@ -7,7 +7,7 @@
 
 ## Executive Summary
 
-Upgrade des ManaCore Monitoring Stacks von Prometheus (30 Tage Retention) auf VictoriaMetrics (2 Jahre) + DuckDB (unbegrenzt) für langfristige Metriken-Speicherung und Business-Analytics.
+Upgrade des Mana Monitoring Stacks von Prometheus (30 Tage Retention) auf VictoriaMetrics (2 Jahre) + DuckDB (unbegrenzt) für langfristige Metriken-Speicherung und Business-Analytics.
 
 ---
 
@@ -15,7 +15,7 @@ Upgrade des ManaCore Monitoring Stacks von Prometheus (30 Tage Retention) auf Vi
 
 ### 1.1 Aktuelle Situation
 
-ManaCore nutzt einen Standard-Prometheus + Grafana Stack für Monitoring:
+Mana nutzt einen Standard-Prometheus + Grafana Stack für Monitoring:
 
 ```
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
@@ -90,7 +90,7 @@ ManaCore nutzt einen Standard-Prometheus + Grafana Stack für Monitoring:
 
 **Nachteile:**
 - Hohe Komplexität (5+ zusätzliche Komponenten)
-- Overkill für ManaCore's Größe (~50k Time Series)
+- Overkill für Mana's Größe (~50k Time Series)
 - Signifikanter Ops-Overhead
 
 **Bewertung:** Overengineered für unseren Use Case.
@@ -155,7 +155,7 @@ ManaCore nutzt einen Standard-Prometheus + Grafana Stack für Monitoring:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                    ManaCore Monitoring Stack v2                          │
+│                    Mana Monitoring Stack v2                          │
 ├─────────────────────────────────────────────────────────────────────────┤
 │                                                                          │
 │  OPERATIVE METRIKEN (High-Frequency Time Series)                        │

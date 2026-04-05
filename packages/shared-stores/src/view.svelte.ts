@@ -6,7 +6,7 @@
  *
  * @example
  * ```typescript
- * import { createViewStore } from '@manacore/shared-stores';
+ * import { createViewStore } from '@mana/shared-stores';
  *
  * type MyViewMode = 'list' | 'grid' | 'kanban';
  *

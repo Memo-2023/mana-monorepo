@@ -10,8 +10,8 @@ import (
 
 	"github.com/redis/go-redis/v9"
 
-	"github.com/manacore/mana-search/internal/config"
-	"github.com/manacore/mana-search/internal/metrics"
+	"github.com/mana/mana-search/internal/config"
+	"github.com/mana/mana-search/internal/metrics"
 )
 
 type Cache struct {

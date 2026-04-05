@@ -1,5 +1,5 @@
 /**
- * @manacore/credit-operations
+ * @mana/credit-operations
  *
  * Central credit operation definitions for all Mana apps.
  * This package defines operation types, costs, and helper functions

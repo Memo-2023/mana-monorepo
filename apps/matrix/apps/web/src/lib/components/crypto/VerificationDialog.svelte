@@ -11,7 +11,7 @@
 		Monitor,
 		CircleNotch,
 		ArrowsClockwise,
-	} from '@manacore/shared-icons';
+	} from '@mana/shared-icons';
 	import EmojiVerification from './EmojiVerification.svelte';
 
 	interface Props {

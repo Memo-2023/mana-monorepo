@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { matrixStore, type SimpleMessage, type SimpleRoom } from '$lib/matrix';
-	import { Check, MagnifyingGlass, PaperPlaneTilt, User, Users, X } from '@manacore/shared-icons';
+	import { Check, MagnifyingGlass, PaperPlaneTilt, User, Users, X } from '@mana/shared-icons';
 
 	interface Props {
 		open: boolean;

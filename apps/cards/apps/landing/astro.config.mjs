@@ -8,7 +8,7 @@ export default defineConfig({
 	integrations: [tailwind(), sitemap()],
 	vite: {
 		ssr: {
-			noExternal: ['@manacore/shared-landing-ui'],
+			noExternal: ['@mana/shared-landing-ui'],
 		},
 	},
 });

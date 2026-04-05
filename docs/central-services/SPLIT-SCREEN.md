@@ -1,6 +1,6 @@
 # Split-Screen Feature
 
-Das Split-Screen Feature ermöglicht es, zwei ManaCore-Apps nebeneinander in einem Browser-Tab anzuzeigen. Die rechte App wird dabei in einem iFrame eingebettet.
+Das Split-Screen Feature ermöglicht es, zwei Mana-Apps nebeneinander in einem Browser-Tab anzuzeigen. Die rechte App wird dabei in einem iFrame eingebettet.
 
 ## Übersicht
 

@@ -19,16 +19,16 @@ export function loadConfig(): Config {
 		port: parseInt(env('PORT', '3001'), 10),
 		databaseUrl: env(
 			'DATABASE_URL',
-			'postgresql://manacore:devpassword@localhost:5432/mana_platform'
+			'postgresql://mana:devpassword@localhost:5432/mana_platform'
 		),
 		syncDatabaseUrl: env(
 			'SYNC_DATABASE_URL',
-			'postgresql://manacore:devpassword@localhost:5432/mana_sync'
+			'postgresql://mana:devpassword@localhost:5432/mana_sync'
 		),
 		baseUrl: env('BASE_URL', 'http://localhost:3001'),
 		cookieDomain: env('COOKIE_DOMAIN'),
 		nodeEnv: env('NODE_ENV', 'development'),
-		serviceKey: env('MANA_CORE_SERVICE_KEY', 'dev-service-key'),
+		serviceKey: env('MANA_SERVICE_KEY', 'dev-service-key'),
 		cors: { origins: env('CORS_ORIGINS', 'http://localhost:5173').split(',') },
 		manaNotifyUrl: env('MANA_NOTIFY_URL', 'http://localhost:3013'),
 		manaCreditsUrl: env('MANA_CREDITS_URL', 'http://localhost:3061'),

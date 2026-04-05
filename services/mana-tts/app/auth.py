@@ -1,6 +1,6 @@
 """
-API Key Authentication for ManaCore TTS Service.
-Delegates to shared manacore_auth package.
+API Key Authentication for Mana TTS Service.
+Delegates to shared mana_auth package.
 """
 
 import sys
@@ -8,7 +8,7 @@ import os
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "..", "packages", "shared-python"))
 
-from manacore_auth import (
+from mana_auth import (
     APIKey,
     AuthResult,
     RateLimitInfo,
@@ -18,7 +18,7 @@ from manacore_auth import (
     api_key_header,
     create_auth_dependency,
 )
-from manacore_auth.external_auth import (
+from mana_auth.external_auth import (
     ExternalValidationResult,
     is_external_auth_enabled,
     validate_api_key_external,

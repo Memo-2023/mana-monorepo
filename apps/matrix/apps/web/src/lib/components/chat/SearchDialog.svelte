@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { matrixStore } from '$lib/matrix';
-	import { MagnifyingGlass, X, CircleNotch, ChatText } from '@manacore/shared-icons';
+	import { MagnifyingGlass, X, CircleNotch, ChatText } from '@mana/shared-icons';
 	import { formatDistanceToNow } from 'date-fns';
 	import { de } from 'date-fns/locale';
 

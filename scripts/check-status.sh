@@ -56,7 +56,7 @@ check_url() {
 }
 
 echo ""
-echo -e "${BOLD}ManaCore Service Status${NC}  $(date '+%Y-%m-%d %H:%M:%S')"
+echo -e "${BOLD}Mana Service Status${NC}  $(date '+%Y-%m-%d %H:%M:%S')"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 # Alle Hostnamen aus cloudflared-config.yml extrahieren (ohne ssh.mana.how)

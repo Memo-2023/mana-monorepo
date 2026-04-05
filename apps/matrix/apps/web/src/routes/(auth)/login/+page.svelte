@@ -16,7 +16,7 @@
 		Check,
 		ChatCircle,
 		CaretDown,
-	} from '@manacore/shared-icons';
+	} from '@mana/shared-icons';
 
 	// Form state
 	let homeserver = $state('matrix.mana.how');
@@ -68,7 +68,7 @@
 		loadingSSO = true;
 		const hs = homeserver.includes('://') ? homeserver : `https://${homeserver}`;
 		const redirectUrl = encodeURIComponent(window.location.origin + '/chat');
-		window.location.href = `${hs}/_matrix/client/v3/login/sso/redirect/oidc-manacore?redirectUrl=${redirectUrl}`;
+		window.location.href = `${hs}/_matrix/client/v3/login/sso/redirect/oidc-mana?redirectUrl=${redirectUrl}`;
 	}
 
 	// Auto-discover homeserver when username looks like a full Matrix ID

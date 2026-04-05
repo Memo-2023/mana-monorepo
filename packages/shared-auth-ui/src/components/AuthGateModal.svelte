@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { CloudArrowUp, ArrowsClockwise, Lock, Sparkle, Info, X } from '@manacore/shared-icons';
+	import { CloudArrowUp, ArrowsClockwise, Lock, Sparkle, Info, X } from '@mana/shared-icons';
 	import type { AuthGateTranslations, AuthGateAction } from '../types';
 
 	const defaultTranslationsDE: Record<AuthGateAction, { title: string; description: string }> = {

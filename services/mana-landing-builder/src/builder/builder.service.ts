@@ -9,7 +9,7 @@ import { BuildLandingDto } from './dto/build-landing.dto';
 import * as path from 'path';
 import * as fs from 'fs-extra';
 import { execSync } from 'child_process';
-import type { LandingPageConfig } from '@manacore/shared-types';
+import type { LandingPageConfig } from '@mana/shared-types';
 
 export interface BuildResult {
 	success: boolean;

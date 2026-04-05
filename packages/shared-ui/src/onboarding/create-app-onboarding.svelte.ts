@@ -18,7 +18,7 @@ const ONBOARDING_PREFERENCES_KEY = 'onboarding_preferences';
  *
  * @example
  * ```typescript
- * import { createAppOnboardingStore } from '@manacore/shared-app-onboarding';
+ * import { createAppOnboardingStore } from '@mana/shared-app-onboarding';
  *
  * const calendarOnboarding = createAppOnboardingStore({
  *   appId: 'calendar',

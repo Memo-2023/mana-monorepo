@@ -9,7 +9,7 @@
 #
 # Examples:
 #   ./scripts/run-tests-with-coverage.sh                    # Run all tests
-#   ./scripts/run-tests-with-coverage.sh mana-core-auth     # Run auth tests only
+#   ./scripts/run-tests-with-coverage.sh mana-auth     # Run auth tests only
 #   ./scripts/run-tests-with-coverage.sh chat-backend       # Run chat backend tests only
 
 set -e
@@ -56,7 +56,7 @@ run_package_tests() {
     # Extract database name from package
     DB_NAME=$(echo "$package_name" | sed 's/-backend$//' | sed 's/mana-core-//')
 
-    export DATABASE_URL="postgresql://manacore:devpassword@localhost:5432/${DB_NAME}"
+    export DATABASE_URL="postgresql://mana:devpassword@localhost:5432/${DB_NAME}"
     export NODE_ENV="test"
 
     # Run migrations if available

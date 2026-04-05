@@ -1,6 +1,6 @@
 # Monitoring Stack Documentation
 
-This document describes the ManaCore monitoring infrastructure, including metrics collection, business analytics, and long-term data retention.
+This document describes the Mana monitoring infrastructure, including metrics collection, business analytics, and long-term data retention.
 
 ## Quick Access
 
@@ -25,7 +25,7 @@ All monitoring tools are publicly accessible - no login required (except GlitchT
 
 | App | Share URL |
 |-----|-----------|
-| ManaCore | https://stats.mana.how/share/face76f42d3e42beb8c80ea03f33a462/manacore-webapp |
+| Mana | https://stats.mana.how/share/face76f42d3e42beb8c80ea03f33a462/manacore-webapp |
 | Calendar | https://stats.mana.how/share/772d2510c5bb47e0b490267f2821510a/calendar-webapp |
 | Todo | https://stats.mana.how/share/ec1bb158d8714bc6bdbc147c97b9c1c7/todo-webapp |
 | Chat | https://stats.mana.how/share/1c43fd9847674f899dc2ebdfbd8960db/chat-webapp |
@@ -49,7 +49,7 @@ All monitoring tools are publicly accessible - no login required (except GlitchT
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                           ManaCore Monitoring Stack                          │
+│                           Mana Monitoring Stack                          │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                              │
 │  ┌──────────────┐     ┌──────────────────┐     ┌──────────────────┐        │

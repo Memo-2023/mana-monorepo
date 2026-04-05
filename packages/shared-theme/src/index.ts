@@ -15,7 +15,7 @@ export type {
 	A11ySettings,
 	A11yStore,
 	A11yStoreConfig,
-	// User Settings Types (synced via mana-core-auth)
+	// User Settings Types (synced via mana-auth)
 	NavPosition,
 	NavSettings,
 	ThemeSettings,

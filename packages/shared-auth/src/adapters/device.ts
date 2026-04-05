@@ -70,7 +70,7 @@ export function isDeviceInitialized(): boolean {
 export function createWebDeviceAdapter(): DeviceManagerAdapter {
 	// Generate a persistent device ID for web
 	const getOrCreateDeviceId = (): string => {
-		const storageKey = '@manacore/deviceId';
+		const storageKey = '@mana/deviceId';
 		let deviceId = localStorage.getItem(storageKey);
 		if (!deviceId) {
 			deviceId = generateUUID();
@@ -111,7 +111,7 @@ export function createWebDeviceAdapter(): DeviceManagerAdapter {
 			};
 		},
 		async getStoredDeviceId(): Promise<string | null> {
-			return localStorage.getItem('@manacore/deviceId');
+			return localStorage.getItem('@mana/deviceId');
 		},
 	};
 }

@@ -10,11 +10,11 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/manacore/mana-crawler/internal/config"
-	"github.com/manacore/mana-crawler/internal/crawler"
-	"github.com/manacore/mana-crawler/internal/db"
-	"github.com/manacore/mana-crawler/internal/handler"
-	"github.com/manacore/mana-crawler/internal/robots"
+	"github.com/mana/mana-crawler/internal/config"
+	"github.com/mana/mana-crawler/internal/crawler"
+	"github.com/mana/mana-crawler/internal/db"
+	"github.com/mana/mana-crawler/internal/handler"
+	"github.com/mana/mana-crawler/internal/robots"
 	"github.com/rs/cors"
 )
 

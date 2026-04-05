@@ -6,7 +6,7 @@
  *
  * @example
  * ```typescript
- * import { createTagLinkOps } from '@manacore/shared-stores';
+ * import { createTagLinkOps } from '@mana/shared-stores';
  * import { db } from '$lib/data/database';
  *
  * export const memoTagOps = createTagLinkOps({

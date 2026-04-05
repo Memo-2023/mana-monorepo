@@ -18,7 +18,7 @@
 	import { dropTarget } from './drop-target';
 	import { passiveDropZone } from './passive-drop';
 	import type { DragPayload, DragType } from './types';
-	import { Trash, Archive, FolderOpen } from '@manacore/shared-icons';
+	import { Trash, Archive, FolderOpen } from '@mana/shared-icons';
 
 	interface Props {
 		accepts: DragType[];

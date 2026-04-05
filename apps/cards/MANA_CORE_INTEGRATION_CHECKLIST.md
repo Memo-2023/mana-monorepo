@@ -46,12 +46,12 @@ Use this checklist when integrating `@mana-core/nestjs-integration` into a new N
 
 ### 3. Module Configuration
 
-- [ ] Import `ManaCoreModule` in `app.module.ts`
+- [ ] Import `ManaModule` in `app.module.ts`
 
 - [ ] Configure with `forRootAsync()`:
 
   ```typescript
-  ManaCoreModule.forRootAsync({
+  ManaModule.forRootAsync({
   	imports: [ConfigModule],
   	useFactory: (configService: ConfigService) => ({
   		manaServiceUrl: 'your-mana-url',

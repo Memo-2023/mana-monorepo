@@ -1,7 +1,7 @@
 package config
 
 import (
-	"github.com/manacore/shared-go/envutil"
+	"github.com/mana/shared-go/envutil"
 )
 
 type Config struct {
@@ -17,7 +17,7 @@ type Config struct {
 
 	// Auth
 	ServiceKey      string
-	ManaCoreAuthURL string
+	ManaAuthURL string
 
 	// SMTP
 	SMTPHost        string
@@ -46,20 +46,20 @@ func Load() *Config {
 	return &Config{
 		Port: envutil.GetInt("PORT", 3040),
 
-		DatabaseURL: envutil.Get("DATABASE_URL", "postgresql://manacore:manacore@localhost:5432/mana_notify"),
+		DatabaseURL: envutil.Get("DATABASE_URL", "postgresql://mana:mana@localhost:5432/mana_notify"),
 
 		RedisHost:     envutil.Get("REDIS_HOST", "localhost"),
 		RedisPort:     envutil.GetInt("REDIS_PORT", 6379),
 		RedisPassword: envutil.Get("REDIS_PASSWORD", ""),
 
 		ServiceKey:      envutil.Get("SERVICE_KEY", "dev-service-key"),
-		ManaCoreAuthURL: envutil.Get("MANA_CORE_AUTH_URL", "http://localhost:3001"),
+		ManaAuthURL: envutil.Get("MANA_AUTH_URL", "http://localhost:3001"),
 
 		SMTPHost:     envutil.Get("SMTP_HOST", "smtp-relay.brevo.com"),
 		SMTPPort:     envutil.GetInt("SMTP_PORT", 587),
 		SMTPUser:     envutil.Get("SMTP_USER", ""),
 		SMTPPassword: envutil.Get("SMTP_PASSWORD", ""),
-		SMTPFrom:        envutil.Get("SMTP_FROM", "ManaCore <noreply@mana.how>"),
+		SMTPFrom:        envutil.Get("SMTP_FROM", "Mana <noreply@mana.how>"),
 		SMTPInsecureTLS: envutil.GetBool("SMTP_INSECURE_TLS", false),
 
 		ExpoAccessToken: envutil.Get("EXPO_ACCESS_TOKEN", ""),

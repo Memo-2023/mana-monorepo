@@ -3,7 +3,7 @@
  */
 
 import { Hono } from 'hono';
-import type { AuthVariables } from '@manacore/shared-hono';
+import type { AuthVariables } from '@mana/shared-hono';
 import { createServiceClient } from '../lib/supabase';
 import { validateBody, validateQuery } from '../lib/validate';
 import { createSpaceBody, linkMemoBody, inviteBody, paginationQuery } from '../schemas';

@@ -3,7 +3,7 @@
 /**
  * Audit Workspace Dependencies
  *
- * Finds SvelteKit web apps that import workspace packages (@manacore/*, @project/shared, etc.)
+ * Finds SvelteKit web apps that import workspace packages (@mana/*, @project/shared, etc.)
  * without declaring them in package.json. This works locally due to pnpm hoisting but breaks
  * in Docker builds.
  *
@@ -38,13 +38,13 @@ const SKIP_DIRS = new Set(['node_modules', 'dist', '.svelte-kit', 'build', '.tur
 const SCAN_EXTENSIONS = new Set(['.ts', '.svelte', '.js']);
 
 // Regex to match workspace package imports
-// Matches: @manacore/*, @calendar/shared, @todo/shared, @zitare/content, etc.
+// Matches: @mana/*, @calendar/shared, @todo/shared, @zitare/content, etc.
 const IMPORT_REGEX =
 	/(?:import\s+(?:[\s\S]*?\s+from\s+)?|import\s*\()\s*['"](@[a-z-]+\/[a-z-]+)(?:\/[^'"]*)?['"]/g;
 
 // Known workspace scopes (to distinguish from npm packages like @sveltejs/kit)
 const WORKSPACE_SCOPES = new Set([
-	'@manacore',
+	'@mana',
 	'@calendar',
 	'@chat',
 	'@clock',
@@ -154,8 +154,8 @@ function extractImports(filePath, workspacePackages) {
 	IMPORT_REGEX.lastIndex = 0;
 
 	while ((match = IMPORT_REGEX.exec(content)) !== null) {
-		const pkg = match[1]; // e.g. @manacore/shared-utils
-		const scope = pkg.split('/')[0]; // e.g. @manacore
+		const pkg = match[1]; // e.g. @mana/shared-utils
+		const scope = pkg.split('/')[0]; // e.g. @mana
 
 		if (WORKSPACE_SCOPES.has(scope) && workspacePackages.has(pkg)) {
 			imports.add(pkg);

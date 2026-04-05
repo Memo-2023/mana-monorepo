@@ -1,7 +1,7 @@
 /**
  * mana-user — User preferences, tags, and storage service
  *
- * Hono + Bun runtime. Extracted from mana-core-auth.
+ * Hono + Bun runtime. Extracted from mana-auth.
  * Handles: user settings, tags, tag groups, tag links, avatar storage.
  */
 

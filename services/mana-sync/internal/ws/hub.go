@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/coder/websocket"
-	"github.com/manacore/mana-sync/internal/auth"
+	"github.com/mana/mana-sync/internal/auth"
 )
 
 // Message types sent over WebSocket.

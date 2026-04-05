@@ -5,7 +5,7 @@
 	import { theme } from '$lib/stores/theme.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { waitLocale } from '$lib/i18n';
-	import { ToastContainer, setupGlobalErrorHandler } from '@manacore/shared-ui';
+	import { ToastContainer, setupGlobalErrorHandler } from '@mana/shared-ui';
 	import { AppLoadingSkeleton } from '$lib/components/skeletons';
 
 	let { children } = $props();

@@ -1,5 +1,5 @@
 {
-	"name": "@manacore/shared-auth-ui",
+	"name": "@mana/shared-auth-ui",
 	"version": "1.0.0",
 	"private": true,
 	"description": "Shared authentication UI components for Mana apps",
@@ -23,9 +23,9 @@
 		"test:watch": "vitest"
 	},
 	"peerDependencies": {
-		"@manacore/shared-auth": "workspace:*",
-		"@manacore/shared-branding": "workspace:*",
-		"@manacore/shared-icons": "workspace:*",
+		"@mana/shared-auth": "workspace:*",
+		"@mana/shared-branding": "workspace:*",
+		"@mana/shared-icons": "workspace:*",
 		"svelte": "^5.0.0"
 	},
 	"devDependencies": {

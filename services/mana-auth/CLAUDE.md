@@ -1,6 +1,6 @@
 # mana-auth
 
-Central authentication service for the ManaCore ecosystem. Rewritten from NestJS (mana-core-auth) to Hono + Bun.
+Central authentication service for the Mana ecosystem. Rewritten from NestJS (mana-core-auth) to Hono + Bun.
 
 ## Tech Stack
 
@@ -76,7 +76,7 @@ SYNC_DATABASE_URL=postgresql://.../mana_sync  # mana-sync DB for entity counts (
 BASE_URL=https://auth.mana.how
 COOKIE_DOMAIN=.mana.how
 NODE_ENV=production
-MANA_CORE_SERVICE_KEY=...
+MANA_SERVICE_KEY=...
 MANA_CREDITS_URL=http://mana-credits:3061
 MANA_SUBSCRIPTIONS_URL=http://mana-subscriptions:3063
 SMTP_HOST=smtp-relay.brevo.com

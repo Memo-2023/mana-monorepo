@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { User } from '@manacore/shared-icons';
+	import { User } from '@mana/shared-icons';
 
 	interface Props {
 		/** Photo URL */

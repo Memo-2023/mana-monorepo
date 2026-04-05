@@ -8,7 +8,7 @@
 		VideoCameraSlash,
 		Screencast,
 		User,
-	} from '@manacore/shared-icons';
+	} from '@mana/shared-icons';
 	import { onDestroy } from 'svelte';
 
 	interface Props {

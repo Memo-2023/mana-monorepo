@@ -7,11 +7,11 @@ services:
   # Shared PostgreSQL Database (multiple databases)
   postgres:
     image: postgres:16-alpine
-    container_name: manacore-postgres
+    container_name: mana-postgres
     restart: unless-stopped
     environment:
       POSTGRES_DB: mana_platform
-      POSTGRES_USER: ${POSTGRES_USER:-manacore}
+      POSTGRES_USER: ${POSTGRES_USER:-mana}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-devpassword}
     volumes:
       - postgres-data:/var/lib/postgresql/data
@@ -19,9 +19,9 @@ services:
     ports:
       - "5432:5432"
     networks:
-      - manacore-network
+      - mana-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-manacore}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-mana}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -29,7 +29,7 @@ services:
   # Redis cache
   redis:
     image: redis:7-alpine
-    container_name: manacore-redis
+    container_name: mana-redis
     restart: unless-stopped
     command: redis-server --requirepass ${REDIS_PASSWORD:-devpassword} --maxmemory 256mb --maxmemory-policy allkeys-lru
     volumes:
@@ -37,7 +37,7 @@ services:
     ports:
       - "6379:6379"
     networks:
-      - manacore-network
+      - mana-network
     healthcheck:
       test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-devpassword}", "ping"]
       interval: 10s
@@ -47,7 +47,7 @@ services:
   # MinIO Object Storage (S3-compatible)
   minio:
     image: minio/minio:latest
-    container_name: manacore-minio
+    container_name: mana-minio
     restart: unless-stopped
     command: server /data --console-address ":9001"
     environment:
@@ -59,7 +59,7 @@ services:
       - "9000:9000"   # S3 API
       - "9001:9001"   # Web Console
     networks:
-      - manacore-network
+      - mana-network
     healthcheck:
       test: ["CMD", "mc", "ready", "local"]
       interval: 30s
@@ -69,14 +69,14 @@ services:
   # MinIO bucket initialization (runs once)
   minio-init:
     image: minio/mc:latest
-    container_name: manacore-minio-init
+    container_name: mana-minio-init
     depends_on:
       minio:
         condition: service_healthy
     entrypoint: >
       /bin/sh -c "
       mc alias set myminio http://minio:9000 $${MINIO_ROOT_USER:-minioadmin} $${MINIO_ROOT_PASSWORD:-minioadmin};
-      mc mb --ignore-existing myminio/manacore-storage;
+      mc mb --ignore-existing myminio/mana-storage;
       mc mb --ignore-existing myminio/picture-storage;
       mc mb --ignore-existing myminio/chat-storage;
       mc mb --ignore-existing myminio/cards-storage;
@@ -89,7 +89,7 @@ services:
       mc mb --ignore-existing myminio/planta-storage;
       mc mb --ignore-existing myminio/projectdoc-storage;
       mc mb --ignore-existing myminio/music-storage;
-      mc anonymous set download myminio/manacore-storage;
+      mc anonymous set download myminio/mana-storage;
       mc anonymous set download myminio/picture-storage;
       mc anonymous set download myminio/planta-storage;
       mc anonymous set download myminio/inventory-storage;
@@ -100,7 +100,7 @@ services:
       exit 0;
       "
     networks:
-      - manacore-network
+      - mana-network
 
   # Mana Auth Service (Hono + Bun + Better Auth)
   mana-auth:
@@ -113,7 +113,7 @@ services:
     environment:
       NODE_ENV: development
       PORT: 3001
-      DATABASE_URL: postgresql://${POSTGRES_USER:-manacore}:${POSTGRES_PASSWORD:-devpassword}@postgres:5432/mana_platform
+      DATABASE_URL: postgresql://${POSTGRES_USER:-mana}:${POSTGRES_PASSWORD:-devpassword}@postgres:5432/mana_platform
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-dev-secret-change-me}
       BETTER_AUTH_URL: http://localhost:3001
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,http://localhost:5173,http://localhost:8081}
@@ -123,7 +123,7 @@ services:
     ports:
       - "3001:3001"
     networks:
-      - manacore-network
+      - mana-network
 
   # Chat Backend Service
   chat-backend:
@@ -136,26 +136,26 @@ services:
     environment:
       NODE_ENV: development
       PORT: 3002
-      DATABASE_URL: postgresql://${POSTGRES_USER:-manacore}:${POSTGRES_PASSWORD:-devpassword}@postgres:5432/mana_platform
+      DATABASE_URL: postgresql://${POSTGRES_USER:-mana}:${POSTGRES_PASSWORD:-devpassword}@postgres:5432/mana_platform
       DB_HOST: postgres
       DB_PORT: 5432
-      DB_USER: ${POSTGRES_USER:-manacore}
+      DB_USER: ${POSTGRES_USER:-mana}
       DB_PASSWORD: ${POSTGRES_PASSWORD:-devpassword}
       DB_NAME: chat
       AZURE_OPENAI_ENDPOINT: ${AZURE_OPENAI_ENDPOINT}
       AZURE_OPENAI_API_KEY: ${AZURE_OPENAI_API_KEY}
       AZURE_OPENAI_API_VERSION: ${AZURE_OPENAI_API_VERSION:-2024-12-01-preview}
-      MANA_CORE_AUTH_URL: http://mana-auth:3001
+      MANA_AUTH_URL: http://mana-auth:3001
     depends_on:
       postgres:
         condition: service_healthy
     ports:
       - "3002:3002"
     networks:
-      - manacore-network
+      - mana-network
 
 networks:
-  manacore-network:
+  mana-network:
     driver: bridge
 
 volumes:

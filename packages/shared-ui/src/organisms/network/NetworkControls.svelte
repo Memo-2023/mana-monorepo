@@ -8,7 +8,7 @@
 		X,
 		Crosshair,
 		Keyboard,
-	} from '@manacore/shared-icons';
+	} from '@mana/shared-icons';
 	import type { NetworkTag } from './network.types';
 
 	interface Props {

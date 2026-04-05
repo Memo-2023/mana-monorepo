@@ -31,7 +31,7 @@
 	 * ```
 	 */
 
-	import { Warning, WarningCircle, Info, X, Trash, Check } from '@manacore/shared-icons';
+	import { Warning, WarningCircle, Info, X, Trash, Check } from '@mana/shared-icons';
 	import Modal from './Modal.svelte';
 	import { Text } from '../atoms';
 

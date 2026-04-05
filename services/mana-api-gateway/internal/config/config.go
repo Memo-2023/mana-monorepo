@@ -3,7 +3,7 @@ package config
 import (
 	"strings"
 
-	"github.com/manacore/shared-go/envutil"
+	"github.com/mana/shared-go/envutil"
 )
 
 type Config struct {
@@ -54,7 +54,7 @@ func Load() *Config {
 
 	return &Config{
 		Port:                  envutil.GetInt("PORT", 3030),
-		DatabaseURL:           envutil.Get("DATABASE_URL", "postgresql://manacore:devpassword@localhost:5432/manacore"),
+		DatabaseURL:           envutil.Get("DATABASE_URL", "postgresql://mana:devpassword@localhost:5432/mana"),
 		RedisHost:             envutil.Get("REDIS_HOST", "localhost"),
 		RedisPort:             envutil.GetInt("REDIS_PORT", 6379),
 		RedisPassword:         envutil.Get("REDIS_PASSWORD", ""),
@@ -62,7 +62,7 @@ func Load() *Config {
 		SearchURL:             envutil.Get("SEARCH_SERVICE_URL", "http://localhost:3021"),
 		STTURL:                envutil.Get("STT_SERVICE_URL", "http://localhost:3020"),
 		TTSURL:                envutil.Get("TTS_SERVICE_URL", "http://localhost:3022"),
-		AuthURL:               envutil.Get("MANA_CORE_AUTH_URL", "http://localhost:3001"),
+		AuthURL:               envutil.Get("MANA_AUTH_URL", "http://localhost:3001"),
 		AdminUserIDs:          adminIDs,
 		KeyPrefixLive:         envutil.Get("API_KEY_PREFIX_LIVE", "sk_live_"),
 		KeyPrefixTest:         envutil.Get("API_KEY_PREFIX_TEST", "sk_test_"),

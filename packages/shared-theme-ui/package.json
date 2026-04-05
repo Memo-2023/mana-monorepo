@@ -1,5 +1,5 @@
 {
-	"name": "@manacore/shared-theme-ui",
+	"name": "@mana/shared-theme-ui",
 	"version": "0.1.0",
 	"private": true,
 	"type": "module",
@@ -48,8 +48,8 @@
 		"svelte": "^5.0.0"
 	},
 	"dependencies": {
-		"@manacore/shared-theme": "workspace:*",
-		"@manacore/shared-icons": "workspace:*"
+		"@mana/shared-theme": "workspace:*",
+		"@mana/shared-icons": "workspace:*"
 	},
 	"devDependencies": {
 		"svelte": "^5.0.0",

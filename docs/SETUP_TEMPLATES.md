@@ -7,7 +7,7 @@ Quick-reference templates for recurring setup tasks. Copy and customize for new 
 1. [New SvelteKit Web App](#1-new-sveltekit-web-app)
 2. [New NestJS Backend](#2-new-nestjs-backend)
 3. [Deploying New Service to Staging](#3-deploying-new-service-to-staging)
-4. [Adding Backend to ManaCore Dashboard](#4-adding-backend-to-manacore-dashboard)
+4. [Adding Backend to Mana Dashboard](#4-adding-backend-to-manacore-dashboard)
 5. [Quick Reference Port Assignments](#5-quick-reference-port-assignments)
 
 ---
@@ -32,8 +32,8 @@ Quick-reference templates for recurring setup tasks. Copy and customize for new 
 import type { Handle } from '@sveltejs/kit';
 
 // Runtime environment variables for client-side injection
-const PUBLIC_MANA_CORE_AUTH_URL_CLIENT =
-	process.env.PUBLIC_MANA_CORE_AUTH_URL_CLIENT || process.env.PUBLIC_MANA_CORE_AUTH_URL || '';
+const PUBLIC_MANA_AUTH_URL_CLIENT =
+	process.env.PUBLIC_MANA_AUTH_URL_CLIENT || process.env.PUBLIC_MANA_AUTH_URL || '';
 const PUBLIC_BACKEND_URL_CLIENT =
 	process.env.PUBLIC_BACKEND_URL_CLIENT || process.env.PUBLIC_BACKEND_URL || '';
 
@@ -41,7 +41,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	return resolve(event, {
 		transformPageChunk: ({ html }) => {
 			const envScript = `<script>
-window.__PUBLIC_MANA_CORE_AUTH_URL__ = "${PUBLIC_MANA_CORE_AUTH_URL_CLIENT}";
+window.__PUBLIC_MANA_AUTH_URL__ = "${PUBLIC_MANA_AUTH_URL_CLIENT}";
 window.__PUBLIC_BACKEND_URL__ = "${PUBLIC_BACKEND_URL_CLIENT}";
 </script>`;
 			return html.replace('<head>', `<head>${envScript}`);
@@ -58,11 +58,11 @@ import { browser } from '$app/environment';
 
 function getAuthUrl(): string {
 	if (browser && typeof window !== 'undefined') {
-		const injectedUrl = (window as unknown as { __PUBLIC_MANA_CORE_AUTH_URL__?: string })
-			.__PUBLIC_MANA_CORE_AUTH_URL__;
+		const injectedUrl = (window as unknown as { __PUBLIC_MANA_AUTH_URL__?: string })
+			.__PUBLIC_MANA_AUTH_URL__;
 		return injectedUrl || 'http://localhost:3001';
 	}
-	return process.env.PUBLIC_MANA_CORE_AUTH_URL || 'http://localhost:3001';
+	return process.env.PUBLIC_MANA_AUTH_URL || 'http://localhost:3001';
 }
 
 // Usage
@@ -157,10 +157,10 @@ myproject-web:
     NODE_ENV: production
     # Server-side URLs (Docker internal network)
     PUBLIC_BACKEND_URL: http://myproject-backend:30XX
-    PUBLIC_MANA_CORE_AUTH_URL: http://mana-core-auth:3001
+    PUBLIC_MANA_AUTH_URL: http://mana-core-auth:3001
     # Client-side URLs (browser access via public IP)
     PUBLIC_BACKEND_URL_CLIENT: http://your-server-ip:30XX
-    PUBLIC_MANA_CORE_AUTH_URL_CLIENT: http://your-server-ip:3001
+    PUBLIC_MANA_AUTH_URL_CLIENT: http://your-server-ip:3001
   depends_on:
     myproject-backend:
       condition: service_healthy
@@ -253,7 +253,7 @@ myproject-backend:
     NODE_ENV: production
     PORT: 30XX
     DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/myproject
-    MANA_CORE_AUTH_URL: http://mana-core-auth:3001
+    MANA_AUTH_URL: http://mana-core-auth:3001
     # CORS - Include app's web AND manacore-web dashboard
     CORS_ORIGINS: http://your-server-ip:51XX,http://your-server-ip:5173,http://localhost:51XX,http://localhost:5173
   depends_on:
@@ -327,7 +327,7 @@ curl -I -X OPTIONS http://your-server-ip:30XX/api/v1/endpoint \
 
 ---
 
-## 4. Adding Backend to ManaCore Dashboard
+## 4. Adding Backend to Mana Dashboard
 
 When adding a new backend service that manacore-web dashboard should call:
 
@@ -342,7 +342,7 @@ When adding a new backend service that manacore-web dashboard should call:
 ### Template: API Service File
 
 ```typescript
-// apps/manacore/apps/web/src/lib/api/services/myservice.ts
+// apps/mana/apps/web/src/lib/api/services/myservice.ts
 import { browser } from '$app/environment';
 import { createApiClient, type ApiResult } from '../base-client';
 

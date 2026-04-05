@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { matrixStore } from '$lib/matrix';
 	import RoomItem from './RoomItem.svelte';
-	import { Plus, Users, ChatCircle, Envelope, Check, X } from '@manacore/shared-icons';
+	import { Plus, Users, ChatCircle, Envelope, Check, X } from '@mana/shared-icons';
 
 	interface Props {
 		onCreateRoom?: () => void;

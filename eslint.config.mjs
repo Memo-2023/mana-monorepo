@@ -2,7 +2,7 @@
 /**
  * Root ESLint configuration for Manacore monorepo
  *
- * Uses @manacore/eslint-config for unified linting across all packages.
+ * Uses @mana/eslint-config for unified linting across all packages.
  * Apps can use their own eslint.config.* to add framework-specific rules.
  *
  * Config hierarchy:
@@ -11,7 +11,7 @@
  * 3. Expo Mobile: adds reactConfig
  * 4. NestJS Backend: adds nestjsConfig
  */
-import { baseConfig, typescriptConfig, prettierConfig } from '@manacore/eslint-config';
+import { baseConfig, typescriptConfig, prettierConfig } from '@mana/eslint-config';
 
 export default [
 	// ============================================
@@ -51,7 +51,7 @@ export default [
 			'games/whopixels/**',
 
 			// Apps with their own ESLint configs (framework-specific)
-			// These import from @manacore/eslint-config but add framework rules
+			// These import from @mana/eslint-config but add framework rules
 			'apps/*/apps/mobile/**',
 			'apps/*/apps/web/**',
 			'apps/*/apps/backend/**',

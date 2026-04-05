@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/manacore/mana-api-gateway/internal/middleware"
-	"github.com/manacore/mana-api-gateway/internal/service"
+	"github.com/mana/mana-api-gateway/internal/middleware"
+	"github.com/mana/mana-api-gateway/internal/service"
 )
 
 // ServiceProxy proxies requests to backend services and tracks usage.

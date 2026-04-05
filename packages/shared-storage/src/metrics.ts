@@ -2,7 +2,7 @@ import type { StorageHooks } from './hooks';
 
 /**
  * Minimal interface matching MetricsService.createCounter/createHistogram.
- * This avoids a hard dependency on @manacore/shared-nestjs-metrics or prom-client.
+ * This avoids a hard dependency on @mana/shared-nestjs-metrics or prom-client.
  */
 export interface MetricsFactory {
 	createCounter(name: string, help: string, labelNames?: string[]): CounterLike;
@@ -109,8 +109,8 @@ export function attachMetrics(hooks: StorageHooks, collector: StorageMetricsColl
  *
  * @example
  * // In a NestJS service
- * import { MetricsService } from '@manacore/shared-nestjs-metrics';
- * import { createPrometheusCollector, attachMetrics } from '@manacore/shared-storage';
+ * import { MetricsService } from '@mana/shared-nestjs-metrics';
+ * import { createPrometheusCollector, attachMetrics } from '@mana/shared-storage';
  *
  * const storage = createPictureStorage();
  * const collector = createPrometheusCollector(metricsService);

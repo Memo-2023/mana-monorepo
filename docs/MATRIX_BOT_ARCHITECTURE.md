@@ -1,4 +1,4 @@
-# ManaCore Matrix Bot Architecture
+# Mana Matrix Bot Architecture
 
 **Status:** Production
 **Datum:** 1. Februar 2026
@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-ManaCore setzt auf **Matrix** als primäre Messaging-Plattform für Bot-Interaktionen. Mit 19 spezialisierten Matrix-Bots und einem Gateway-Bot bieten wir eine vollständig dezentrale, DSGVO-konforme Alternative zu Cloud-basierten Chat-Diensten.
+Mana setzt auf **Matrix** als primäre Messaging-Plattform für Bot-Interaktionen. Mit 19 spezialisierten Matrix-Bots und einem Gateway-Bot bieten wir eine vollständig dezentrale, DSGVO-konforme Alternative zu Cloud-basierten Chat-Diensten.
 
 **Kernprinzipien:**
 - **Volle Kontrolle** - Eigene Infrastruktur, eigene Daten
@@ -23,7 +23,7 @@ ManaCore setzt auf **Matrix** als primäre Messaging-Plattform für Bot-Interakt
 
 ### 1.1 Die Entscheidung gegen Telegram/Discord/Slack
 
-Bei der Wahl der Messaging-Plattform für ManaCore hatten wir mehrere Optionen:
+Bei der Wahl der Messaging-Plattform für Mana hatten wir mehrere Optionen:
 
 | Plattform | Vorteile | Nachteile |
 |-----------|----------|-----------|
@@ -64,7 +64,7 @@ Bei der Wahl der Messaging-Plattform für ManaCore hatten wir mehrere Optionen:
 │  ├─────────────────────────────────────────────────────────────┤│
 │  │  Element (Web/Desktop/Mobile)                               ││
 │  │  FluffyChat, Nheko, SchildiChat, ...                        ││
-│  │  ManaCore Bots (matrix-bot-sdk)                             ││
+│  │  Mana Bots (matrix-bot-sdk)                             ││
 │  └─────────────────────────────────────────────────────────────┘│
 │                                                                  │
 └─────────────────────────────────────────────────────────────────┘
@@ -84,7 +84,7 @@ Bei der Wahl der Messaging-Plattform für ManaCore hatten wir mehrere Optionen:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                         ManaCore Bot Ecosystem                           │
+│                         Mana Bot Ecosystem                           │
 ├─────────────────────────────────────────────────────────────────────────┤
 │                                                                          │
 │  ┌──────────────────────────────────────────────────────────────────┐   │
@@ -821,7 +821,7 @@ MATRIX_ACCESS_TOKEN=syt_xxx...
 MATRIX_USER_ID=@todo-bot:mana.how
 
 # Auth (für Backend-Integration)
-MANA_CORE_AUTH_URL=http://mana-core-auth:3001
+MANA_AUTH_URL=http://mana-core-auth:3001
 
 # Storage
 DATA_PATH=/app/data
@@ -920,7 +920,7 @@ networks:
 
 ### 11.1 Vollständige Kontrolle
 
-| Aspekt | Telegram/Discord | ManaCore Matrix |
+| Aspekt | Telegram/Discord | Mana Matrix |
 |--------|------------------|-----------------|
 | **Datenhoheit** | Bei Anbieter | Bei uns |
 | **Verfügbarkeit** | Abhängig von Anbieter | Eigene Infrastruktur |
@@ -975,7 +975,7 @@ Der Fokus liegt auf der Konsolidierung der Bot-Services in `@manacore/bot-servic
 
 ## 13. Fazit
 
-ManaCore's Matrix-Bot-Architektur bietet eine **vollständig unabhängige, DSGVO-konforme** Alternative zu Cloud-basierten Chat-Diensten. Mit 19 spezialisierten Bots und einem Gateway-Bot decken wir alle Produktivitäts- und App-Integrationsszenarien ab.
+Mana's Matrix-Bot-Architektur bietet eine **vollständig unabhängige, DSGVO-konforme** Alternative zu Cloud-basierten Chat-Diensten. Mit 19 spezialisierten Bots und einem Gateway-Bot decken wir alle Produktivitäts- und App-Integrationsszenarien ab.
 
 **Kernvorteile:**
 1. **Volle Kontrolle** über Daten und Infrastruktur

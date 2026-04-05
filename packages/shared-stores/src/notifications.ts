@@ -6,7 +6,7 @@
  *
  * @example
  * ```typescript
- * import { notificationService } from '@manacore/shared-stores';
+ * import { notificationService } from '@mana/shared-stores';
  *
  * if (await notificationService.requestPermission()) {
  *   notificationService.send('Task fällig', { body: 'Einkaufen gehen' });

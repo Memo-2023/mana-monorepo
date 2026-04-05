@@ -1,12 +1,12 @@
 /**
- * @manacore/shared-api-client
+ * @mana/shared-api-client
  *
- * Unified API client for all ManaCore web applications.
+ * Unified API client for all Mana web applications.
  * Provides consistent error handling, token management, and retry logic.
  *
  * @example
  * ```typescript
- * import { createApiClient } from '@manacore/shared-api-client';
+ * import { createApiClient } from '@mana/shared-api-client';
  * import { authStore } from '$lib/stores/auth.svelte';
  *
  * // Create client instance

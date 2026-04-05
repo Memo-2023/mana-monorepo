@@ -21,8 +21,8 @@ cd ~/projects
 
 # 4. Repository klonen
 echo "📥 Klone Repository..."
-git clone https://github.com/Memo-2023/manacore-monorepo.git
-cd manacore-monorepo
+git clone https://github.com/Memo-2023/mana-monorepo.git
+cd mana-monorepo
 
 echo ""
 echo "✅ Basis-Setup abgeschlossen!"

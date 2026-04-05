@@ -14,7 +14,7 @@ set -e
 # Database connection details (from .env.development)
 DB_HOST="${DB_HOST:-localhost}"
 DB_PORT="${DB_PORT:-5432}"
-DB_USER="${POSTGRES_USER:-manacore}"
+DB_USER="${POSTGRES_USER:-mana}"
 DB_PASSWORD="${POSTGRES_PASSWORD:-devpassword}"
 
 # Colors for output
@@ -113,10 +113,10 @@ setup_service() {
             push_schema "@presi/server" "presi"
             ;;
         uload)
-            push_schema "@manacore/uload-database" "uload"
+            push_schema "@mana/uload-database" "uload"
             ;;
         cards)
-            push_schema "@manacore/cards-database" "cards"
+            push_schema "@mana/cards-database" "cards"
             ;;
         *)
             echo -e "${RED}Unknown service: $service${NC}"

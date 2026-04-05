@@ -1,5 +1,5 @@
 /**
- * @manacore/feedback — Unified feedback package
+ * @mana/feedback — Unified feedback package
  *
  * Consolidates shared-feedback-types + shared-feedback-service + shared-feedback-ui
  * into a single package.

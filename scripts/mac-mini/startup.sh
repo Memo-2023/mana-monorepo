@@ -1,14 +1,14 @@
 #!/bin/bash
-# ManaCore Mac Mini Startup Script
+# Mana Mac Mini Startup Script
 # Called by launchd on boot — starts Colima + all containers
 #
-# LaunchAgent: ~/Library/LaunchAgents/com.manacore.docker-startup.plist
+# LaunchAgent: ~/Library/LaunchAgents/com.mana.docker-startup.plist
 
 set -uo pipefail
 
 export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
 
-LOG_FILE="/tmp/manacore-startup.log"
+LOG_FILE="/tmp/mana-startup.log"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 COMPOSE_FILE="$PROJECT_ROOT/docker-compose.macmini.yml"
@@ -18,7 +18,7 @@ log() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a "$LOG_FILE"
 }
 
-log "=== ManaCore Startup Script ==="
+log "=== Mana Startup Script ==="
 log "Project root: $PROJECT_ROOT"
 
 # ─── Kill Docker Desktop if it auto-started ───

@@ -18,7 +18,7 @@ export function loadConfig(): Config {
 		port: parseInt(process.env.PORT || '3070', 10),
 		databaseUrl: requiredEnv(
 			'DATABASE_URL',
-			'postgresql://manacore:devpassword@localhost:5432/mana_sync'
+			'postgresql://mana:devpassword@localhost:5432/mana_sync'
 		),
 		cors: {
 			origins: (process.env.CORS_ORIGINS || 'http://localhost:5173').split(','),

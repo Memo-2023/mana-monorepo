@@ -1,5 +1,5 @@
 """
-ManaCore STT API Service
+Mana STT API Service
 Speech-to-Text with Whisper (MLX), WhisperX (CUDA), Voxtral (vLLM), and Mistral API (fallback)
 
 Run with: uvicorn app.main:app --host 0.0.0.0 --port 3020
@@ -119,7 +119,7 @@ models_status = {
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Startup and shutdown events."""
-    logger.info("Starting ManaCore STT Service...")
+    logger.info("Starting Mana STT Service...")
 
     # Check vLLM availability
     if USE_VLLM:
@@ -166,7 +166,7 @@ async def lifespan(app: FastAPI):
 
 # Create FastAPI app
 app = FastAPI(
-    title="ManaCore STT Service",
+    title="Mana STT Service",
     description="Speech-to-Text API with Whisper (MLX), Voxtral (vLLM), and Mistral API",
     version="2.0.0",
     lifespan=lifespan,

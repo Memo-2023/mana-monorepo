@@ -6,7 +6,7 @@
  *
  * @example
  * ```typescript
- * import { setSecurityHeaders } from '@manacore/shared-utils/security-headers';
+ * import { setSecurityHeaders } from '@mana/shared-utils/security-headers';
  *
  * const response = await resolve(event, { transformPageChunk: ... });
  * setSecurityHeaders(response, {

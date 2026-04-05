@@ -1,4 +1,4 @@
-import { initErrorTracking, handleSvelteError } from '@manacore/shared-error-tracking/browser';
+import { initErrorTracking, handleSvelteError } from '@mana/shared-error-tracking/browser';
 import type { HandleClientError } from '@sveltejs/kit';
 
 initErrorTracking({

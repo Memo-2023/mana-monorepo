@@ -1,5 +1,5 @@
 #!/bin/bash
-# ManaCore Mac Mini Stop Script
+# Mana Mac Mini Stop Script
 # Stops all Docker containers
 
 # Ensure PATH includes docker
@@ -10,7 +10,7 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 COMPOSE_FILE="$PROJECT_ROOT/docker-compose.macmini.yml"
 ENV_FILE="$PROJECT_ROOT/.env.macmini"
 
-echo "=== Stopping ManaCore Services ==="
+echo "=== Stopping Mana Services ==="
 echo ""
 
 cd "$PROJECT_ROOT"

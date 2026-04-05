@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { A11yStore } from '@manacore/shared-theme';
+	import type { A11yStore } from '@mana/shared-theme';
 
 	interface Props {
 		/** A11y store instance */

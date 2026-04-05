@@ -1,12 +1,12 @@
 /**
- * @manacore/qr-export
+ * @mana/qr-export
  *
  * QR code export/import for personal data (contacts, events, todos, user context).
  * Compresses data to fit within a single QR code (~2,500 bytes).
  *
  * @example
  * ```ts
- * import { createManaQRExport, decode } from '@manacore/qr-export';
+ * import { createManaQRExport, decode } from '@mana/qr-export';
  *
  * // Create export
  * const result = createManaQRExport()

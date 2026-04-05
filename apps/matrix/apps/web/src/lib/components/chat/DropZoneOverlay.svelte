@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { UploadSimple } from '@manacore/shared-icons';
+	import { UploadSimple } from '@mana/shared-icons';
 
 	interface Props {
 		visible: boolean;

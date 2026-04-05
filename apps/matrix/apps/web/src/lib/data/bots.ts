@@ -167,7 +167,7 @@ export const BOTS: BotInfo[] = [
 				example: '!search API authentication',
 			},
 			{ command: '!projects', description: 'Listet verfügbare Projekte' },
-			{ command: '!select', description: 'Wählt ein Projekt aus', example: '!select manacore' },
+			{ command: '!select', description: 'Wählt ein Projekt aus', example: '!select mana' },
 		],
 	},
 

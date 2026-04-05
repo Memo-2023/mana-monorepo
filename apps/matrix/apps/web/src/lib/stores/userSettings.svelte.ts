@@ -1,4 +1,4 @@
-import { createUserSettingsStore } from '@manacore/shared-theme';
+import { createUserSettingsStore } from '@mana/shared-theme';
 import { browser } from '$app/environment';
 
 const AUTH_URL = import.meta.env.VITE_MANA_AUTH_URL || 'https://auth.mana.how';
@@ -66,7 +66,7 @@ async function getAccessToken(): Promise<string | null> {
 /**
  * User settings store for the Matrix app
  *
- * This store syncs settings with mana-core-auth and provides:
+ * This store syncs settings with mana-auth and provides:
  * - Global settings (including recentEmojis)
  * - localStorage caching for offline support
  */

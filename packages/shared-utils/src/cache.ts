@@ -186,7 +186,7 @@ export function createCache<T = string>(config: CacheConfig) {
 
 // Default URL cache for signed URLs (like Supabase storage URLs)
 const DEFAULT_URL_CACHE_CONFIG: CacheConfig = {
-	dbName: 'manacore-cache',
+	dbName: 'mana-cache',
 	storeName: 'urls',
 	version: 1,
 };

@@ -6,7 +6,7 @@ import (
 	"log/slog"
 	"text/template"
 
-	"github.com/manacore/mana-notify/internal/db"
+	"github.com/mana/mana-notify/internal/db"
 )
 
 type Engine struct {
@@ -95,22 +95,22 @@ func (e *Engine) SeedDefaults(ctx context.Context) {
 		{
 			slug:    "auth-password-reset",
 			channel: "email",
-			subject: "Passwort zurücksetzen - ManaCore",
+			subject: "Passwort zurücksetzen - Mana",
 			body:    `<!DOCTYPE html><html><body><h1>Passwort zurücksetzen</h1><p>Hallo {{.userName}},</p><p>Klicke auf den folgenden Link, um dein Passwort zurückzusetzen:</p><p><a href="{{.resetUrl}}">Passwort zurücksetzen</a></p><p>Falls du diese Anfrage nicht gestellt hast, kannst du diese E-Mail ignorieren.</p></body></html>`,
 			vars:    `{"resetUrl": "URL zum Zurücksetzen", "userName": "Name des Benutzers"}`,
 		},
 		{
 			slug:    "auth-verification",
 			channel: "email",
-			subject: "E-Mail bestätigen - ManaCore",
+			subject: "E-Mail bestätigen - Mana",
 			body:    `<!DOCTYPE html><html><body><h1>E-Mail bestätigen</h1><p>Hallo {{.userName}},</p><p>Bitte bestätige deine E-Mail-Adresse:</p><p><a href="{{.verificationUrl}}">E-Mail bestätigen</a></p></body></html>`,
 			vars:    `{"verificationUrl": "Bestätigungs-URL", "userName": "Name des Benutzers"}`,
 		},
 		{
 			slug:    "auth-welcome",
 			channel: "email",
-			subject: "Willkommen bei ManaCore!",
-			body:    `<!DOCTYPE html><html><body><h1>Willkommen!</h1><p>Hallo {{.userName}},</p><p>Willkommen bei ManaCore! Du kannst dich jetzt anmelden:</p><p><a href="{{.loginUrl}}">Anmelden</a></p></body></html>`,
+			subject: "Willkommen bei Mana!",
+			body:    `<!DOCTYPE html><html><body><h1>Willkommen!</h1><p>Hallo {{.userName}},</p><p>Willkommen bei Mana! Du kannst dich jetzt anmelden:</p><p><a href="{{.loginUrl}}">Anmelden</a></p></body></html>`,
 			vars:    `{"userName": "Name des Benutzers", "loginUrl": "Login-URL"}`,
 		},
 		{

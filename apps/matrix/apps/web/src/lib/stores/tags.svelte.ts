@@ -1,12 +1,12 @@
 /**
- * Tag Store - Uses shared createTagStore backed by central mana-core-auth
+ * Tag Store - Uses shared createTagStore backed by central mana-auth
  *
- * Matrix uses its own auth (Matrix homeserver), not mana-core-auth directly.
- * The mana-core-auth token is obtained via session-to-token exchange and stored
- * in localStorage. Tags will work when user has a mana-core-auth session.
+ * Matrix uses its own auth (Matrix homeserver), not mana-auth directly.
+ * The mana-auth token is obtained via session-to-token exchange and stored
+ * in localStorage. Tags will work when user has a mana-auth session.
  */
 import { browser } from '$app/environment';
-import { createTagStore } from '@manacore/shared-stores';
+import { createTagStore } from '@mana/shared-stores';
 import { loadStoredAccessToken } from '$lib/stores/userSettings.svelte';
 
 const AUTH_URL = import.meta.env.VITE_MANA_AUTH_URL || 'https://auth.mana.how';

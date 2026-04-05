@@ -141,7 +141,7 @@ answers (id, question_id, research_result_id, content, rating, is_accepted, ...)
 |----------|---------|-------------|
 | `PORT` | 3011 | Backend port |
 | `DATABASE_URL` | - | PostgreSQL connection |
-| `MANA_CORE_AUTH_URL` | http://localhost:3001 | Auth service URL |
+| `MANA_AUTH_URL` | http://localhost:3001 | Auth service URL |
 | `MANA_SEARCH_URL` | http://localhost:3021 | Search service URL |
 | `MANA_SEARCH_TIMEOUT` | 30000 | Search timeout (ms) |
 | `DEV_BYPASS_AUTH` | false | Skip auth in dev |

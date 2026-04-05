@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { X } from '@manacore/shared-icons';
+	import { X } from '@mana/shared-icons';
 	import Text from '../atoms/Text.svelte';
 	import { focusTrap } from '../actions/focusTrap';
 

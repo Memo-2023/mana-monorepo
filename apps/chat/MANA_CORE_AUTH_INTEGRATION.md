@@ -57,7 +57,7 @@ The `@manacore/shared-auth` package has been updated to work with Mana Core Auth
 # SUPABASE_SERVICE_KEY=...
 
 # Add Mana Core Auth URL
-MANA_CORE_AUTH_URL=http://localhost:3001
+MANA_AUTH_URL=http://localhost:3001
 ```
 
 #### Web App `.env`
@@ -68,7 +68,7 @@ MANA_CORE_AUTH_URL=http://localhost:3001
 # PUBLIC_SUPABASE_ANON_KEY=...
 
 # Add
-PUBLIC_MANA_CORE_AUTH_URL=http://localhost:3001
+PUBLIC_MANA_AUTH_URL=http://localhost:3001
 ```
 
 #### Mobile App `.env`
@@ -79,7 +79,7 @@ PUBLIC_MANA_CORE_AUTH_URL=http://localhost:3001
 # EXPO_PUBLIC_SUPABASE_ANON_KEY=...
 
 # Add
-EXPO_PUBLIC_MANA_CORE_AUTH_URL=http://localhost:3001
+EXPO_PUBLIC_MANA_AUTH_URL=http://localhost:3001
 ```
 
 ### Step 2: Update Backend (NestJS)
@@ -115,7 +115,7 @@ export class JwtAuthGuard implements CanActivate {
 
 		try {
 			// Get public key from Mana Core Auth
-			const authUrl = this.configService.get<string>('MANA_CORE_AUTH_URL');
+			const authUrl = this.configService.get<string>('MANA_AUTH_URL');
 			const response = await fetch(`${authUrl}/api/v1/auth/validate`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
@@ -179,7 +179,7 @@ Edit `chat/apps/web/src/lib/stores/auth.svelte.ts`:
 ```typescript
 import { initializeWebAuth } from '@manacore/shared-auth';
 
-const MANA_AUTH_URL = import.meta.env.PUBLIC_MANA_CORE_AUTH_URL || 'http://localhost:3001';
+const MANA_AUTH_URL = import.meta.env.PUBLIC_MANA_AUTH_URL || 'http://localhost:3001';
 
 // Initialize Mana Core Auth
 const { authService, tokenManager } = initializeWebAuth({
@@ -248,7 +248,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	if (token) {
 		try {
 			// Validate token with Mana Core Auth
-			const authUrl = process.env.PUBLIC_MANA_CORE_AUTH_URL || 'http://localhost:3001';
+			const authUrl = process.env.PUBLIC_MANA_AUTH_URL || 'http://localhost:3001';
 			const response = await fetch(`${authUrl}/api/v1/auth/validate`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
@@ -293,7 +293,7 @@ import {
 } from '@manacore/shared-auth';
 import { createSecureStoreAdapter } from '@manacore/shared-auth/native'; // You may need to create this
 
-const MANA_AUTH_URL = process.env.EXPO_PUBLIC_MANA_CORE_AUTH_URL || 'http://localhost:3001';
+const MANA_AUTH_URL = process.env.EXPO_PUBLIC_MANA_AUTH_URL || 'http://localhost:3001';
 
 // Initialize auth service
 const authService = createAuthService({ baseUrl: MANA_AUTH_URL });

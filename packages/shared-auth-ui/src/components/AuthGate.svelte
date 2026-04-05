@@ -17,7 +17,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import type { Snippet } from 'svelte';
-	import { hasAppAccess, ACCESS_TIER_LABELS, type AccessTier } from '@manacore/shared-branding';
+	import { hasAppAccess, ACCESS_TIER_LABELS, type AccessTier } from '@mana/shared-branding';
 
 	/**
 	 * Minimal interface that all app auth stores must satisfy.

@@ -4,7 +4,7 @@
  * Scans the monorepo and generates ecosystem-wide consistency metrics.
  *
  * Usage: node scripts/ecosystem-audit.mjs
- * Output: apps/manacore/apps/landing/src/content/manascore/ecosystem.json
+ * Output: apps/mana/apps/landing/src/content/manascore/ecosystem.json
  */
 import { execSync } from 'child_process';
 import { readFileSync, writeFileSync, existsSync, readdirSync, statSync } from 'fs';
@@ -127,7 +127,7 @@ function measureModalConsistency() {
 		const webSrc = join(APPS_DIR, app, 'apps/web/src');
 		if (!existsSync(webSrc)) continue;
 
-		sharedModalUsage += grepOccurrences("from '@manacore/shared-ui'.*Modal", webSrc, '*.svelte');
+		sharedModalUsage += grepOccurrences("from '@mana/shared-ui'.*Modal", webSrc, '*.svelte');
 		sharedModalUsage += grepOccurrences("from '.*shared-ui.*Modal", webSrc, '*.svelte');
 		focusTrapUsage += grepOccurrences('use:focusTrap', webSrc, '*.svelte');
 	}
@@ -152,14 +152,14 @@ function measureModalConsistency() {
 function measureSharedPackageAdoption() {
 	console.log('📊 Measuring Shared Package Adoption...');
 	const packages = {
-		'@manacore/shared-auth': { name: 'Auth', count: 0, apps: [] },
-		'@manacore/shared-ui': { name: 'UI', count: 0, apps: [] },
-		'@manacore/shared-theme': { name: 'Theme', count: 0, apps: [] },
-		'@manacore/shared-branding': { name: 'Branding', count: 0, apps: [] },
-		'@manacore/shared-i18n': { name: 'i18n', count: 0, apps: [] },
-		'@manacore/shared-error-tracking': { name: 'Error Tracking', count: 0, apps: [] },
-		'@manacore/shared-icons': { name: 'Icons', count: 0, apps: [] },
-		'@manacore/local-store': { name: 'Local Store', count: 0, apps: [] },
+		'@mana/shared-auth': { name: 'Auth', count: 0, apps: [] },
+		'@mana/shared-ui': { name: 'UI', count: 0, apps: [] },
+		'@mana/shared-theme': { name: 'Theme', count: 0, apps: [] },
+		'@mana/shared-branding': { name: 'Branding', count: 0, apps: [] },
+		'@mana/shared-i18n': { name: 'i18n', count: 0, apps: [] },
+		'@mana/shared-error-tracking': { name: 'Error Tracking', count: 0, apps: [] },
+		'@mana/shared-icons': { name: 'Icons', count: 0, apps: [] },
+		'@mana/local-store': { name: 'Local Store', count: 0, apps: [] },
 	};
 
 	for (const app of WEB_APPS) {
@@ -172,12 +172,12 @@ function measureSharedPackageAdoption() {
 	}
 
 	const corePackages = [
-		'@manacore/shared-auth',
-		'@manacore/shared-ui',
-		'@manacore/shared-theme',
-		'@manacore/shared-branding',
-		'@manacore/shared-i18n',
-		'@manacore/shared-error-tracking',
+		'@mana/shared-auth',
+		'@mana/shared-ui',
+		'@mana/shared-theme',
+		'@mana/shared-branding',
+		'@mana/shared-i18n',
+		'@mana/shared-error-tracking',
 	];
 
 	let totalCoreAdoption = 0;
@@ -254,7 +254,7 @@ function measureLocalFirstAdoption() {
 	let appsWithLocalStore = 0;
 
 	for (const app of WEB_APPS) {
-		if (checkPackageJson(app, '@manacore/local-store')) {
+		if (checkPackageJson(app, '@mana/local-store')) {
 			appsWithLocalStore++;
 		}
 	}
@@ -875,7 +875,7 @@ function measureDockerReadiness() {
 // Main
 // ============================================================
 
-console.log('🔍 ManaCore Ecosystem Health Audit\n');
+console.log('🔍 Mana Ecosystem Health Audit\n');
 console.log('='.repeat(50));
 
 const icons = measureIconConsistency();
@@ -1024,8 +1024,8 @@ const output = {
 	apps: WEB_APPS,
 };
 
-const outputPath = 'apps/manacore/apps/landing/src/data/ecosystem-health.json';
-const outputDir = 'apps/manacore/apps/landing/src/data';
+const outputPath = 'apps/mana/apps/landing/src/data/ecosystem-health.json';
+const outputDir = 'apps/mana/apps/landing/src/data';
 try {
 	execSync(`mkdir -p ${outputDir}`);
 } catch {}

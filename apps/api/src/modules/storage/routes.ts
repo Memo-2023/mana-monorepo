@@ -47,7 +47,7 @@ routes.post('/files/upload', async (c) => {
 
 		// Non-images -> shared-storage as before
 		const { createStorageStorage, generateUserFileKey, getContentType } = await import(
-			'@manacore/shared-storage'
+			'@mana/shared-storage'
 		);
 		const storage = createStorageStorage();
 		const key = generateUserFileKey(userId, file.name);
@@ -83,7 +83,7 @@ routes.get('/files/:id/download', async (c) => {
 	if (!storagePath) return c.json({ error: 'storagePath required' }, 400);
 
 	try {
-		const { createStorageStorage } = await import('@manacore/shared-storage');
+		const { createStorageStorage } = await import('@mana/shared-storage');
 		const storage = createStorageStorage();
 
 		if (urlOnly) {
@@ -114,7 +114,7 @@ routes.post('/files/:id/versions', async (c) => {
 	if (!file) return c.json({ error: 'No file' }, 400);
 
 	try {
-		const { createStorageStorage, generateUserFileKey } = await import('@manacore/shared-storage');
+		const { createStorageStorage, generateUserFileKey } = await import('@mana/shared-storage');
 		const storage = createStorageStorage();
 		const key = generateUserFileKey(userId, `v-${Date.now()}-${file.name}`);
 		const buffer = Buffer.from(await file.arrayBuffer());

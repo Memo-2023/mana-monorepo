@@ -3,7 +3,7 @@
  *
  * Usage:
  * ```ts
- * import { toastStore } from '@manacore/shared-ui';
+ * import { toastStore } from '@mana/shared-ui';
  *
  * // Show notifications
  * toastStore.success('Saved successfully');

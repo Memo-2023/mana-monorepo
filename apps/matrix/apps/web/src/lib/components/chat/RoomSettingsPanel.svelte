@@ -14,7 +14,7 @@
 		CircleNotch,
 		SquaresFour,
 		MagnifyingGlass,
-	} from '@manacore/shared-icons';
+	} from '@mana/shared-icons';
 
 	interface Props {
 		open: boolean;

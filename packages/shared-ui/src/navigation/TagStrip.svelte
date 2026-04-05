@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { Tag, Plus, X } from '@manacore/shared-icons';
+	import { Tag, Plus, X } from '@mana/shared-icons';
 	import { dragSource } from '../dnd/drag-source';
 	import { passiveDropZone } from '../dnd/passive-drop';
 	import type { DragPayload } from '../dnd/types';

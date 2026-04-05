@@ -1,5 +1,5 @@
 {
-	"name": "@manacore/shared-vite-config",
+	"name": "@mana/shared-vite-config",
 	"version": "1.0.0",
 	"private": true,
 	"type": "module",

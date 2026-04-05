@@ -33,7 +33,7 @@ export {
 } from './utils/guestNudge';
 export { parseUserAgent, getDeviceType, formatUserAgent } from './utils/userAgent';
 
-// Auth Stores (absorbed from @manacore/shared-auth-stores)
+// Auth Stores (absorbed from @mana/shared-auth-stores)
 export { createManaAuthStore } from './stores/createManaAuthStore.svelte';
 export type { ManaAuthStoreConfig, ManaAuthStore } from './stores/createManaAuthStore.svelte';
 export { createAuthStore } from './stores/createAuthStore.svelte';

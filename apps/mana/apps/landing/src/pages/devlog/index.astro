@@ -1,0 +1,224 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Navbar from '../../components/navigation/Navbar.astro';
+import Footer from '../../components/navigation/Footer.astro';
+import Section from '../../components/content/Section.astro';
+import Container from '../../components/layout/Container.astro';
+import Heading from '../../components/typography/Heading.astro';
+import Text from '../../components/typography/Text.astro';
+import HeroSection from '../../components/content/HeroSection.astro';
+import { getCollection } from 'astro:content';
+import { Icon } from 'astro-icon/components';
+
+const posts = await getCollection('devlog');
+const sortedPosts = posts.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+const categoryColors: Record<string, { bg: string; text: string; border: string }> = {
+	release: {
+		bg: 'from-green-500/10 to-emerald-500/10',
+		text: 'text-green-500',
+		border: 'border-green-500/30',
+	},
+	infrastructure: {
+		bg: 'from-blue-500/10 to-cyan-500/10',
+		text: 'text-blue-500',
+		border: 'border-blue-500/30',
+	},
+	feature: {
+		bg: 'from-purple-500/10 to-pink-500/10',
+		text: 'text-purple-500',
+		border: 'border-purple-500/30',
+	},
+	bugfix: {
+		bg: 'from-orange-500/10 to-amber-500/10',
+		text: 'text-orange-500',
+		border: 'border-orange-500/30',
+	},
+	update: {
+		bg: 'from-gray-500/10 to-slate-500/10',
+		text: 'text-gray-400',
+		border: 'border-gray-500/30',
+	},
+};
+
+const categoryLabels: Record<string, string> = {
+	release: 'Release',
+	infrastructure: 'Infrastructure',
+	feature: 'Feature',
+	bugfix: 'Bugfix',
+	update: 'Update',
+};
+
+const formatDate = (date: Date) => {
+	return new Intl.DateTimeFormat('de-DE', {
+		day: '2-digit',
+		month: 'long',
+		year: 'numeric',
+	}).format(date);
+};
+---
+
+<Layout title="Devlog - Mana Entwicklungstagebuch">
+	<div
+		class="bg-gradient-to-b from-blue-50/30 via-white to-blue-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900"
+	>
+		<Navbar />
+
+		<!-- Hero Section -->
+		<div class="relative">
+			<div class="absolute inset-0 -bottom-32">
+				<div
+					class="absolute inset-0 bg-gradient-to-b from-blue-50/50 to-transparent dark:from-gray-900 dark:to-transparent"
+				>
+				</div>
+				<div
+					class="absolute top-0 right-0 w-96 h-96 bg-mana-blue/10 dark:bg-mana-blue/5 rounded-full blur-3xl"
+				>
+				</div>
+				<div
+					class="absolute bottom-0 left-0 w-96 h-96 bg-purple-500/10 dark:bg-purple-500/5 rounded-full blur-3xl"
+				>
+				</div>
+			</div>
+
+			<HeroSection
+				title="Devlog"
+				subtitle="Einblicke in die Entwicklung von Mana. Hier dokumentieren wir Features, Releases und technische Entscheidungen."
+				background="none"
+				minHeight="small"
+				spacing="small"
+				containerClass="py-16 relative z-10"
+				centered={true}
+				debug={false}
+			/>
+		</div>
+
+		<!-- Posts Grid -->
+		<Section spacing="xlarge" class="relative">
+			<div class="absolute inset-0 -top-32 -bottom-32"></div>
+			<div
+				class="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/15 dark:bg-blue-500/5 rounded-full blur-3xl"
+			>
+			</div>
+			<div
+				class="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/15 dark:bg-purple-500/5 rounded-full blur-3xl"
+			>
+			</div>
+
+			<Container class="relative z-10">
+				<!-- Activity Link -->
+				<div class="max-w-4xl mx-auto mb-8">
+					<a
+						href="/devlog/activity"
+						class="group flex items-center justify-between bg-gradient-to-r from-green-500/10 to-emerald-500/10 hover:from-green-500/20 hover:to-emerald-500/20 border border-green-500/30 rounded-xl p-4 transition-all"
+					>
+						<div class="flex items-center gap-3">
+							<div class="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500/20 to-emerald-500/20 flex items-center justify-center">
+								<Icon name="mdi:chart-timeline-variant" class="w-5 h-5 text-green-600 dark:text-green-400" />
+							</div>
+							<div>
+								<Text weight="semibold" class="text-green-700 dark:text-green-300">Aktivitäts-Übersicht</Text>
+								<Text size="sm" class="text-green-600/70 dark:text-green-400/70">Contribution Grid, Stats & Contributors</Text>
+							</div>
+						</div>
+						<Icon name="mdi:arrow-right" class="w-5 h-5 text-green-600 dark:text-green-400 group-hover:translate-x-1 transition-transform" />
+					</a>
+				</div>
+
+				<div class="max-w-4xl mx-auto space-y-8">
+					{
+						sortedPosts.map((post) => {
+							const colors = categoryColors[post.data.category] || categoryColors.update;
+							return (
+								<article class="group relative">
+									<div
+										class={`absolute -inset-0.5 bg-gradient-to-r ${colors.bg} rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur`}
+									/>
+									<a
+										href={`/devlog/${post.slug}`}
+										class="block relative bg-white/90 backdrop-blur-sm dark:bg-gray-800/90 rounded-2xl p-8 border border-gray-200 dark:border-gray-700 group-hover:border-mana-blue/50 transition-all duration-300"
+									>
+										<div class="flex flex-wrap items-center gap-3 mb-4">
+											<div class="flex items-center gap-2 text-gray-500 dark:text-gray-400">
+												<Icon name="mdi:calendar" class="w-4 h-4" />
+												<Text size="sm">{formatDate(post.data.date)}</Text>
+											</div>
+
+											<span
+												class={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r ${colors.bg} ${colors.text} border ${colors.border}`}
+											>
+												{categoryLabels[post.data.category]}
+											</span>
+
+											{post.data.commits && (
+												<div class="flex items-center gap-1 text-gray-500 dark:text-gray-400">
+													<Icon name="mdi:source-commit" class="w-4 h-4" />
+													<Text size="sm">{post.data.commits} Commits</Text>
+												</div>
+											)}
+
+											{post.data.readTime && (
+												<div class="flex items-center gap-1 text-gray-500 dark:text-gray-400">
+													<Icon name="mdi:clock-outline" class="w-4 h-4" />
+													<Text size="sm">{post.data.readTime} min</Text>
+												</div>
+											)}
+										</div>
+
+										<Heading
+											as="h2"
+											size="4"
+											class="mb-3 group-hover:text-mana-blue transition-colors"
+										>
+											{post.data.title}
+										</Heading>
+
+										<Text size="base" class="text-gray-600 dark:text-gray-400 mb-4">
+											{post.data.description}
+										</Text>
+
+										{post.data.tags && post.data.tags.length > 0 && (
+											<div class="flex flex-wrap gap-2">
+												{post.data.tags.map((tag: string) => (
+													<span class="px-2 py-1 text-xs rounded-md bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400">
+														#{tag}
+													</span>
+												))}
+											</div>
+										)}
+
+										<div class="mt-6 flex items-center text-mana-blue opacity-0 group-hover:opacity-100 transition-opacity">
+											<Text size="sm" weight="semibold">
+												Weiterlesen
+											</Text>
+											<Icon
+												name="mdi:arrow-right"
+												class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform"
+											/>
+										</div>
+									</a>
+								</article>
+							);
+						})
+					}
+				</div>
+
+				{
+					sortedPosts.length === 0 && (
+						<div class="text-center py-16">
+							<div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-gray-500/10 to-slate-500/10 rounded-2xl mb-4">
+								<Icon name="mdi:file-document-outline" class="w-8 h-8 text-gray-500" />
+							</div>
+							<Heading as="h2" size="4" class="mb-2">
+								Noch keine Einträge
+							</Heading>
+							<Text class="text-gray-500">Hier erscheinen bald Entwicklungsberichte.</Text>
+						</div>
+					)
+				}
+			</Container>
+		</Section>
+
+		<Footer />
+	</div>
+</Layout>

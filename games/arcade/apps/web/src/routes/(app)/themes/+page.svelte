@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { theme } from '$lib/stores/theme.svelte';
-	import { THEME_DEFINITIONS, EXTENDED_THEME_VARIANTS } from '@manacore/shared-theme';
-	import type { ThemeVariant } from '@manacore/shared-theme';
+	import { THEME_DEFINITIONS, EXTENDED_THEME_VARIANTS } from '@mana/shared-theme';
+	import type { ThemeVariant } from '@mana/shared-theme';
 
 	const allThemes = EXTENDED_THEME_VARIANTS;
 </script>

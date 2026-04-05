@@ -1,5 +1,5 @@
 {
-	"name": "@manacore/shared-i18n",
+	"name": "@mana/shared-i18n",
 	"version": "1.0.0",
 	"private": true,
 	"type": "module",

@@ -1,4 +1,4 @@
-# Alertmanager Configuration for ManaCore
+# Alertmanager Configuration for Mana
 # Sends alerts via webhook to custom notification handler
 
 global:

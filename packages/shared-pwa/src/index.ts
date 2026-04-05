@@ -1,12 +1,12 @@
 /**
- * @manacore/shared-pwa
+ * @mana/shared-pwa
  *
- * Unified PWA configuration for all ManaCore SvelteKit apps.
+ * Unified PWA configuration for all Mana SvelteKit apps.
  * Provides factory functions, presets, and defaults for consistent PWA setup.
  *
  * @example
  * ```ts
- * import { createPWAConfig } from '@manacore/shared-pwa';
+ * import { createPWAConfig } from '@mana/shared-pwa';
  * import { SvelteKitPWA } from '@vite-pwa/sveltekit';
  *
  * export default defineConfig({

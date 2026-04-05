@@ -2,7 +2,7 @@
  * Generic GDPR admin routes for Hono servers.
  *
  * Provides user-data count and deletion endpoints called by
- * mana-core-auth for GDPR compliance (right to be forgotten).
+ * mana-auth for GDPR compliance (right to be forgotten).
  *
  * Each app defines which tables contain user data; this module
  * handles the routing and service-key authentication.
@@ -27,7 +27,7 @@ interface UserTable {
  *
  * Usage:
  * ```ts
- * import { adminRoutes } from '@manacore/shared-hono/admin';
+ * import { adminRoutes } from '@mana/shared-hono/admin';
  * import { tasks, projects, reminders } from './db';
  *
  * app.route('/api/v1/admin', adminRoutes(db, [

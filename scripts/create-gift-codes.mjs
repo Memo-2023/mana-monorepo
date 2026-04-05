@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 
 /**
- * Creates multiple gift codes via the mana-core-auth API
+ * Creates multiple gift codes via the mana-auth API
  *
  * Usage:
  *   node scripts/create-gift-codes.mjs
  *
  * Requirements:
- *   - mana-core-auth must be running
+ *   - mana-auth must be running
  *   - Valid credentials (uses claude-test@mana.how by default)
  */
 

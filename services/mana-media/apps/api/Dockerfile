@@ -6,7 +6,7 @@ COPY package.json bun.lock* ./
 COPY src ./src
 
 # Remove workspace devDependencies that can't resolve in Docker, then install
-RUN sed -i '/"@manacore\/shared-drizzle-config"/d' package.json && \
+RUN sed -i '/"@mana\/shared-drizzle-config"/d' package.json && \
     bun install --production --frozen-lockfile 2>/dev/null || bun install --production
 
 EXPOSE 3015

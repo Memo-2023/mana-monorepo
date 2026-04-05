@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { LocalManaLink } from '../types.js';
-	import { getManaApp } from '@manacore/shared-branding';
-	import type { AppIconId } from '@manacore/shared-branding';
+	import { getManaApp } from '@mana/shared-branding';
+	import type { AppIconId } from '@mana/shared-branding';
 	import { resolveDeepLink } from '../deep-links.js';
 
 	interface Props {

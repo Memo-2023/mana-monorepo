@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { House } from '@manacore/shared-icons';
+	import { House } from '@mana/shared-icons';
 
 	interface Props {
 		appName: string;

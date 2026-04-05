@@ -1,10 +1,10 @@
 /**
- * Token Manager - wraps @manacore/shared-auth TokenManager
+ * Token Manager - wraps @mana/shared-auth TokenManager
  * Maintains backward-compatible API for existing consumers
  */
 
 import { _sharedTokenManager } from './authService';
-export { TokenState } from '@manacore/shared-auth';
+export { TokenState } from '@mana/shared-auth';
 
 type TokenStateObserver = (state: string, token?: string | null) => void;
 

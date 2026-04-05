@@ -3,13 +3,13 @@
  * Sends emails via mana-notify service.
  */
 
-import { NotifyClient } from '@manacore/notify-client';
+import { NotifyClient } from '@mana/notify-client';
 
 let client: NotifyClient | null = null;
 
 function getClient(): NotifyClient | null {
 	const serviceUrl = process.env.MANA_NOTIFY_URL;
-	const serviceKey = process.env.MANA_CORE_SERVICE_KEY;
+	const serviceKey = process.env.MANA_SERVICE_KEY;
 
 	if (!serviceUrl || !serviceKey) return null;
 

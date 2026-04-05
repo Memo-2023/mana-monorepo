@@ -2,7 +2,7 @@
 #
 # Mac Mini Deployment Script v2 — New Architecture (Hono + Bun + Go)
 #
-# Deploys the complete ManaCore stack:
+# Deploys the complete Mana stack:
 # - Infrastructure: PostgreSQL, Redis, MinIO, SearXNG
 # - Core Services: mana-auth, mana-credits, mana-user, mana-subscriptions, mana-analytics
 # - Go Services: mana-sync, mana-search, mana-crawler, mana-api-gateway, mana-notify, mana-matrix-bot
@@ -46,7 +46,7 @@ check_health() {
 # ─── Status Only ─────────────────────────────────────────────
 
 if [ "$1" = "--status" ]; then
-    echo -e "${BLUE}=== ManaCore Service Status ===${NC}"
+    echo -e "${BLUE}=== Mana Service Status ===${NC}"
     echo ""
     echo "Core (Hono + Bun):"
     check_health "mana-auth (3001)" "http://localhost:3001/health"
@@ -68,7 +68,7 @@ fi
 
 # ─── Pre-flight Checks ──────────────────────────────────────
 
-echo -e "${BLUE}=== ManaCore Deployment v2 ===${NC}"
+echo -e "${BLUE}=== Mana Deployment v2 ===${NC}"
 echo ""
 
 if [ ! -f "$ENV_FILE" ]; then

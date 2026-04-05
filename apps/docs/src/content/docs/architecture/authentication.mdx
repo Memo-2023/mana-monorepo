@@ -64,7 +64,7 @@ import { JwtAuthModule } from '@manacore/shared-nestjs-auth';
 @Module({
   imports: [
     JwtAuthModule.register({
-      authServiceUrl: process.env.MANA_CORE_AUTH_URL,
+      authServiceUrl: process.env.MANA_AUTH_URL,
     }),
   ],
 })
@@ -91,15 +91,15 @@ Use `@mana-core/nestjs-integration` for full integration:
 
 ```typescript
 // app.module.ts
-import { ManaCoreModule } from '@mana-core/nestjs-integration';
+import { ManaModule } from '@mana-core/nestjs-integration';
 
 @Module({
   imports: [
-    ManaCoreModule.forRootAsync({
+    ManaModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (config: ConfigService) => ({
         appId: config.get('APP_ID'),
-        serviceKey: config.get('MANA_CORE_SERVICE_KEY'),
+        serviceKey: config.get('MANA_SERVICE_KEY'),
         debug: config.get('NODE_ENV') === 'development',
       }),
       inject: [ConfigService],
@@ -143,7 +143,7 @@ export class ApiController {
 import { createAuthService } from '@manacore/shared-auth';
 
 export const auth = createAuthService({
-  authUrl: import.meta.env.PUBLIC_MANA_CORE_AUTH_URL,
+  authUrl: import.meta.env.PUBLIC_MANA_AUTH_URL,
 });
 
 // Usage in component
@@ -160,7 +160,7 @@ if (data) {
 import { createAuthService } from '@manacore/shared-auth';
 
 export const auth = createAuthService({
-  authUrl: process.env.EXPO_PUBLIC_MANA_CORE_AUTH_URL,
+  authUrl: process.env.EXPO_PUBLIC_MANA_AUTH_URL,
   storage: AsyncStorage, // Expo AsyncStorage
 });
 ```
@@ -190,7 +190,7 @@ export const auth = createAuthService({
 
 ```env
 # Required
-MANA_CORE_AUTH_URL=http://localhost:3001
+MANA_AUTH_URL=http://localhost:3001
 
 # For development bypass (optional)
 NODE_ENV=development
@@ -198,7 +198,7 @@ DEV_BYPASS_AUTH=true
 DEV_USER_ID=test-user-uuid
 
 # For credit operations
-MANA_CORE_SERVICE_KEY=your-service-key
+MANA_SERVICE_KEY=your-service-key
 APP_ID=your-app-id
 ```
 
@@ -207,12 +207,12 @@ APP_ID=your-app-id
 <Tabs>
   <TabItem label="SvelteKit">
     ```env
-    PUBLIC_MANA_CORE_AUTH_URL=http://localhost:3001
+    PUBLIC_MANA_AUTH_URL=http://localhost:3001
     ```
   </TabItem>
   <TabItem label="Expo">
     ```env
-    EXPO_PUBLIC_MANA_CORE_AUTH_URL=http://localhost:3001
+    EXPO_PUBLIC_MANA_AUTH_URL=http://localhost:3001
     ```
   </TabItem>
 </Tabs>

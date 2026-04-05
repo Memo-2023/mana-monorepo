@@ -1,5 +1,5 @@
 /**
- * Shared Store Factories for ManaCore Apps
+ * Shared Store Factories for Mana Apps
  * Provides reusable Svelte 5 runes-based stores.
  */
 

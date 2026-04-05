@@ -1,5 +1,5 @@
 {
-	"name": "@manacore/feedback",
+	"name": "@mana/feedback",
 	"version": "1.0.0",
 	"private": true,
 	"description": "Unified feedback package — types, service, and UI components",

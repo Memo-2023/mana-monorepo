@@ -1,6 +1,6 @@
-# ManaCore Microservices - API Overview
+# Mana Microservices - API Overview
 
-Dieses Dokument gibt einen Überblick über alle Microservices im ManaCore-Monorepo und beschreibt Optionen, diese als öffentliche APIs anzubieten.
+Dieses Dokument gibt einen Überblick über alle Microservices im Mana-Monorepo und beschreibt Optionen, diese als öffentliche APIs anzubieten.
 
 ## Inhaltsverzeichnis
 

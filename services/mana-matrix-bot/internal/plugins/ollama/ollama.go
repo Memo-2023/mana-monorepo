@@ -12,7 +12,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/manacore/mana-matrix-bot/internal/plugin"
+	"github.com/mana/mana-matrix-bot/internal/plugin"
 )
 
 func init() {

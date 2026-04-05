@@ -1,5 +1,5 @@
 {
-	"name": "@manacore/shared-splitscreen",
+	"name": "@mana/shared-splitscreen",
 	"version": "0.1.0",
 	"private": true,
 	"type": "module",

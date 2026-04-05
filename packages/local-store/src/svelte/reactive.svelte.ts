@@ -8,7 +8,7 @@
  * @example
  * ```svelte
  * <script lang="ts">
- *   import { useLiveQuery } from '@manacore/local-store/svelte';
+ *   import { useLiveQuery } from '@mana/local-store/svelte';
  *
  *   const tasks = useLiveQuery(() => taskCollection.getAll({ isCompleted: false }));
  * </script>

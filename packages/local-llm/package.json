@@ -1,5 +1,5 @@
 {
-	"name": "@manacore/local-llm",
+	"name": "@mana/local-llm",
 	"version": "0.1.0",
 	"private": true,
 	"description": "Client-side LLM inference via WebLLM (Qwen 2.5 1.5B) with Svelte 5 reactive stores",

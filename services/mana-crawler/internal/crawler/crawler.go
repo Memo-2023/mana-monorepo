@@ -15,8 +15,8 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/manacore/mana-crawler/internal/parser"
-	"github.com/manacore/mana-crawler/internal/robots"
+	"github.com/mana/mana-crawler/internal/parser"
+	"github.com/mana/mana-crawler/internal/robots"
 )
 
 // CrawlConfig holds configuration for a crawl job.

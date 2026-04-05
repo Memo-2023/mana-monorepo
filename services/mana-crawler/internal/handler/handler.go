@@ -7,13 +7,13 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/manacore/shared-go/httputil"
+	"github.com/mana/shared-go/httputil"
 	"net/url"
 	"strconv"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/manacore/mana-crawler/internal/crawler"
+	"github.com/mana/mana-crawler/internal/crawler"
 )
 
 // Handler serves the crawler HTTP API.

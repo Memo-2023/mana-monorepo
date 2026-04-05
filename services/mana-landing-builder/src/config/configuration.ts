@@ -5,5 +5,5 @@ export default () => ({
 		accountId: process.env.CLOUDFLARE_ACCOUNT_ID,
 	},
 	orgLandingDomain: process.env.ORG_LANDING_DOMAIN || 'mana.how',
-	manaCoreAuthUrl: process.env.MANA_CORE_AUTH_URL || 'http://localhost:3001',
+	manaCoreAuthUrl: process.env.MANA_AUTH_URL || 'http://localhost:3001',
 });

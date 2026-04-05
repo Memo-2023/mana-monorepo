@@ -14,7 +14,7 @@ import { isBrowser } from './utils';
  *
  * @example
  * ```typescript
- * import { createA11yStore } from '@manacore/shared-theme';
+ * import { createA11yStore } from '@mana/shared-theme';
  *
  * export const a11y = createA11yStore({ appId: 'myapp' });
  *

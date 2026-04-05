@@ -1,4 +1,4 @@
-# ManaCore Workspace Orchestrator
+# Mana Workspace Orchestrator
 
 > Architektur-Entscheidung für modulares Multi-App-System mit Split-Screen und Drag & Drop
 
@@ -10,7 +10,7 @@
 
 ## Executive Summary
 
-Dieses Dokument beschreibt die Architektur des **ManaCore Workspace Orchestrators** - ein modulares System, das es ermöglicht:
+Dieses Dokument beschreibt die Architektur des **Mana Workspace Orchestrators** - ein modulares System, das es ermöglicht:
 
 1. Mehrere Apps nebeneinander im Split-Screen anzuzeigen
 2. Drag & Drop zwischen Apps zu unterstützen
@@ -23,7 +23,7 @@ Dieses Dokument beschreibt die Architektur des **ManaCore Workspace Orchestrator
 
 ### Aktuelle Situation
 
-Das ManaCore-Ökosystem besteht aus mehreren unabhängigen SvelteKit-Anwendungen:
+Das Mana-Ökosystem besteht aus mehreren unabhängigen SvelteKit-Anwendungen:
 
 | App | Port (Dev) | Domain (Prod) |
 |-----|------------|---------------|

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { UserPlus, X, ArrowRight } from '@manacore/shared-icons';
+	import { UserPlus, X, ArrowRight } from '@mana/shared-icons';
 	import { startGuestSession, shouldShowGuestNudge, dismissGuestNudge } from '../utils/guestNudge';
 
 	interface Props {

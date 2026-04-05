@@ -42,7 +42,7 @@ export class LocalDatabase extends Dexie {
 	private _seeded = false;
 
 	constructor(appId: string, collections: CollectionConfig<BaseRecord>[]) {
-		super(`manacore-${appId}`);
+		super(`mana-${appId}`);
 		this._appId = appId;
 		this._collections = collections;
 

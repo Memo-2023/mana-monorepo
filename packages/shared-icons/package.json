@@ -1,5 +1,5 @@
 {
-	"name": "@manacore/shared-icons",
+	"name": "@mana/shared-icons",
 	"version": "1.0.0",
 	"private": true,
 	"description": "Phosphor Icons for all Manacore SvelteKit web apps",

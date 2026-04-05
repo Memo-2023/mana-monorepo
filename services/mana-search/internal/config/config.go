@@ -1,7 +1,7 @@
 package config
 
 import (
-	"github.com/manacore/shared-go/envutil"
+	"github.com/mana/shared-go/envutil"
 )
 
 type Config struct {

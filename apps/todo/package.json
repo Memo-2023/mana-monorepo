@@ -2,7 +2,7 @@
 	"name": "todo",
 	"version": "1.0.0",
 	"private": true,
-	"description": "Todo App - Task Management for ManaCore Ecosystem",
+	"description": "Todo App - Task Management for Mana Ecosystem",
 	"scripts": {
 		"dev": "pnpm run --filter=@todo/* --parallel dev",
 		"dev:server": "pnpm --filter @todo/server dev",

@@ -7,7 +7,7 @@
  * @example
  * ```ts
  * // In your app's auth store file
- * import { createAuthStore } from '@manacore/shared-auth-stores';
+ * import { createAuthStore } from '@mana/shared-auth-stores';
  * import { authService } from '$lib/auth';
  * import type { AppUser } from '$lib/types';
  *

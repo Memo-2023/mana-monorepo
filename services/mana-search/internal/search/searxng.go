@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/manacore/mana-search/internal/config"
+	"github.com/mana/mana-search/internal/config"
 )
 
 // SearXNG provider handles communication with the SearXNG meta-search engine.

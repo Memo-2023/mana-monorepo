@@ -4,14 +4,14 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/manacore/shared-go/httputil"
+	"github.com/mana/shared-go/httputil"
 	"net/url"
 	"time"
 
-	"github.com/manacore/mana-search/internal/cache"
-	"github.com/manacore/mana-search/internal/config"
-	"github.com/manacore/mana-search/internal/extract"
-	"github.com/manacore/mana-search/internal/metrics"
+	"github.com/mana/mana-search/internal/cache"
+	"github.com/mana/mana-search/internal/config"
+	"github.com/mana/mana-search/internal/extract"
+	"github.com/mana/mana-search/internal/metrics"
 )
 
 type ExtractHandler struct {

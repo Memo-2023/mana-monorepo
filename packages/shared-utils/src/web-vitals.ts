@@ -6,7 +6,7 @@
  *
  * @example
  * ```typescript
- * import { trackWebVitals } from '@manacore/shared-utils/web-vitals';
+ * import { trackWebVitals } from '@mana/shared-utils/web-vitals';
  * trackWebVitals();
  * ```
  */

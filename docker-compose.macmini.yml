@@ -169,7 +169,7 @@ services:
     entrypoint: >
       /bin/sh -c "
       mc alias set myminio http://minio:9000 $${MINIO_ACCESS_KEY:-minioadmin} $${MINIO_SECRET_KEY:-minioadmin};
-      mc mb --ignore-existing myminio/manacore-storage;
+      mc mb --ignore-existing myminio/mana-storage;
       mc mb --ignore-existing myminio/picture-storage;
       mc mb --ignore-existing myminio/chat-storage;
       mc mb --ignore-existing myminio/cards-storage;
@@ -182,7 +182,7 @@ services:
       mc mb --ignore-existing myminio/planta-storage;
       mc mb --ignore-existing myminio/projectdoc-storage;
       mc mb --ignore-existing myminio/mail-storage;
-      mc anonymous set download myminio/manacore-storage;
+      mc anonymous set download myminio/mana-storage;
       mc anonymous set download myminio/picture-storage;
       mc anonymous set download myminio/planta-storage;
       mc anonymous set download myminio/inventory-storage;
@@ -266,7 +266,7 @@ services:
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana_platform
       BASE_URL: https://auth.mana.how
       COOKIE_DOMAIN: .mana.how
-      MANA_CORE_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
+      MANA_SERVICE_KEY: ${MANA_SERVICE_KEY}
       MANA_CREDITS_URL: http://mana-credits:3061
       MANA_SUBSCRIPTIONS_URL: http://mana-subscriptions:3063
       SYNC_DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana_platform
@@ -303,8 +303,8 @@ services:
       TZ: Europe/Berlin
       PORT: 3002
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana_platform
-      MANA_CORE_AUTH_URL: http://mana-auth:3001
-      MANA_CORE_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
+      MANA_AUTH_URL: http://mana-auth:3001
+      MANA_SERVICE_KEY: ${MANA_SERVICE_KEY}
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_CREDITS_WEBHOOK_SECRET:-}
       BASE_URL: https://credits.mana.how
@@ -337,8 +337,8 @@ services:
       TZ: Europe/Berlin
       PORT: 3062
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana_platform
-      MANA_CORE_AUTH_URL: http://mana-auth:3001
-      MANA_CORE_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
+      MANA_AUTH_URL: http://mana-auth:3001
+      MANA_SERVICE_KEY: ${MANA_SERVICE_KEY}
       CORS_ORIGINS: https://mana.how,https://calc.mana.how,https://calendar.mana.how,https://chat.mana.how,https://clock.mana.how,https://contacts.mana.how,https://context.mana.how,https://cards.mana.how,https://music.mana.how,https://nutriphi.mana.how,https://photos.mana.how,https://picture.mana.how,https://planta.mana.how,https://presi.mana.how,https://questions.mana.how,https://storage.mana.how,https://todo.mana.how,https://zitare.mana.how
     ports:
       - "3062:3062"
@@ -363,8 +363,8 @@ services:
       TZ: Europe/Berlin
       PORT: 3063
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana_platform
-      MANA_CORE_AUTH_URL: http://mana-auth:3001
-      MANA_CORE_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
+      MANA_AUTH_URL: http://mana-auth:3001
+      MANA_SERVICE_KEY: ${MANA_SERVICE_KEY}
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_SUBSCRIPTIONS_WEBHOOK_SECRET:-}
       BASE_URL: https://subscriptions.mana.how
@@ -392,7 +392,7 @@ services:
       TZ: Europe/Berlin
       PORT: 3064
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana_platform
-      MANA_CORE_AUTH_URL: http://mana-auth:3001
+      MANA_AUTH_URL: http://mana-auth:3001
       MANA_LLM_URL: http://mana-llm:3025
       CORS_ORIGINS: https://mana.how
     ports:
@@ -428,7 +428,7 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD:-redis123}
-      MANA_CORE_AUTH_URL: http://mana-auth:3001
+      MANA_AUTH_URL: http://mana-auth:3001
       SEARCH_SERVICE_URL: http://mana-search:3012
       STT_SERVICE_URL: ${STT_SERVICE_URL:-http://192.168.178.11:3020}
       TTS_SERVICE_URL: ${TTS_SERVICE_URL:-http://192.168.178.11:3022}
@@ -535,13 +535,13 @@ services:
     environment:
       PORT: 3013
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana_platform?sslmode=disable
-      SERVICE_KEY: ${MANA_CORE_SERVICE_KEY:-dev-service-key}
-      MANA_CORE_AUTH_URL: http://mana-auth:3001
+      SERVICE_KEY: ${MANA_SERVICE_KEY:-dev-service-key}
+      MANA_AUTH_URL: http://mana-auth:3001
       SMTP_HOST: ${SMTP_HOST:-stalwart}
       SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_USER: ${SMTP_USER:-noreply}
       SMTP_PASSWORD: ${SMTP_PASSWORD:-ManaNoReply2026!}
-      SMTP_FROM: "ManaCore <noreply@mana.how>"
+      SMTP_FROM: "Mana <noreply@mana.how>"
       SMTP_INSECURE_TLS: "true"
       EXPO_ACCESS_TOKEN: ${EXPO_ACCESS_TOKEN:-}
       MATRIX_HOMESERVER_URL: http://mana-matrix-synapse:8008
@@ -597,7 +597,7 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD:-redis123}
-      CRAWLER_USER_AGENT: "ManaCoreCrawler/1.0 (+https://mana.how/bot)"
+      CRAWLER_USER_AGENT: "ManaCrawler/1.0 (+https://mana.how/bot)"
       QUEUE_CONCURRENCY: 5
     ports:
       - "3014:3014"
@@ -662,7 +662,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3015
-      MANA_CORE_AUTH_URL: http://mana-auth:3001
+      MANA_AUTH_URL: http://mana-auth:3001
       CLOUDFLARE_API_TOKEN: ${CLOUDFLARE_API_TOKEN:-}
       CLOUDFLARE_ACCOUNT_ID: ${CLOUDFLARE_ACCOUNT_ID:-}
       ORG_LANDING_DOMAIN: mana.how
@@ -760,7 +760,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 4011
-      PUBLIC_MANA_CORE_AUTH_URL: https://auth.mana.how
+      PUBLIC_MANA_AUTH_URL: https://auth.mana.how
     ports:
       - "4011:4011"
     healthcheck:
@@ -795,8 +795,8 @@ services:
       MATRIX_HOMESERVER_URL: http://synapse:8008
       MATRIX_STORAGE_PATH: /app/data
       # Auth & Redis
-      MANA_CORE_AUTH_URL: http://mana-auth:3001
-      MANA_CORE_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
+      MANA_AUTH_URL: http://mana-auth:3001
+      MANA_SERVICE_KEY: ${MANA_SERVICE_KEY}
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD:-redis123}
@@ -867,10 +867,10 @@ services:
   mana-web:
     build:
       context: .
-      dockerfile: apps/manacore/apps/web/Dockerfile
+      dockerfile: apps/mana/apps/web/Dockerfile
       args:
         PUBLIC_SYNC_SERVER_URL: wss://sync.mana.how
-    image: manacore-web:local
+    image: mana-web:local
     container_name: mana-app-web
     restart: always
     mem_limit: 256m
@@ -880,8 +880,8 @@ services:
     environment:
       NODE_ENV: production
       PORT: 5000
-      PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
-      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
+      PUBLIC_MANA_AUTH_URL: http://mana-auth:3001
+      PUBLIC_MANA_AUTH_URL_CLIENT: https://auth.mana.how
       PUBLIC_SYNC_SERVER_URL: http://mana-sync:3010
       PUBLIC_SYNC_SERVER_URL_CLIENT: https://sync.mana.how
       # Backend API URLs (server-side → container, client-side → public domain)
@@ -943,8 +943,8 @@ services:
     environment:
       NODE_ENV: production
       PORT: 5210
-      PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
-      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
+      PUBLIC_MANA_AUTH_URL: http://mana-auth:3001
+      PUBLIC_MANA_AUTH_URL_CLIENT: https://auth.mana.how
       PUBLIC_SYNC_SERVER_URL: http://mana-sync:3010
       PUBLIC_SYNC_SERVER_URL_CLIENT: https://sync.mana.how
     ports:
@@ -970,8 +970,8 @@ services:
     environment:
       NODE_ENV: production
       PORT: 5028
-      PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
-      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
+      PUBLIC_MANA_AUTH_URL: http://mana-auth:3001
+      PUBLIC_MANA_AUTH_URL_CLIENT: https://auth.mana.how
       PUBLIC_SYNC_SERVER_URL: http://mana-sync:3010
       PUBLIC_SYNC_SERVER_URL_CLIENT: https://sync.mana.how
     ports:
@@ -997,8 +997,8 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3070
-      DATABASE_URL: postgresql://manacore:${POSTGRES_PASSWORD:-devpassword}@postgres:5432/mana_sync
-      MANA_CORE_AUTH_URL: http://mana-auth:3001
+      DATABASE_URL: postgresql://mana:${POSTGRES_PASSWORD:-devpassword}@postgres:5432/mana_sync
+      MANA_AUTH_URL: http://mana-auth:3001
       CORS_ORIGINS: http://mana-web:5000,https://mana.how,https://uload.mana.how,https://ulo.ad
     ports:
       - "3070:3070"
@@ -1025,7 +1025,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3015
-      MANA_CORE_AUTH_URL: http://mana-auth:3001
+      MANA_AUTH_URL: http://mana-auth:3001
       CORS_ORIGINS: http://mana-web:5000,https://mana.how,https://memoro.mana.how
       MEMORO_SUPABASE_URL: ${MEMORO_SUPABASE_URL}
       MEMORO_SUPABASE_SERVICE_KEY: ${MEMORO_SUPABASE_SERVICE_KEY}
@@ -1132,8 +1132,8 @@ services:
     environment:
       NODE_ENV: production
       PORT: 5050
-      PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
-      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
+      PUBLIC_MANA_AUTH_URL: http://mana-auth:3001
+      PUBLIC_MANA_AUTH_URL_CLIENT: https://auth.mana.how
       PUBLIC_MANA_LLM_URL: http://mana-llm:3025
       PUBLIC_MANA_LLM_URL_CLIENT: https://llm.mana.how
     ports:

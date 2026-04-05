@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Test script for chat backend + mana-core-auth integration
+# Test script for chat backend + mana-auth integration
 
 echo "========================================="
 echo "Testing Chat Backend + Mana Core Auth"

@@ -7,7 +7,7 @@ import { app } from '../index';
 
 // ── Mocks ────────────────────────────────────────────────────────────────────
 
-vi.mock('@manacore/shared-hono', () => ({
+vi.mock('@mana/shared-hono', () => ({
 	authMiddleware: () => async (c: any, next: any) => {
 		c.set('userId', 'test-user-id');
 		await next();
@@ -115,7 +115,7 @@ describe('POST /api/v1/meetings/bots', () => {
 	});
 
 	it('returns 402 on insufficient credits', async () => {
-		const { validateCredits } = await import('@manacore/shared-hono');
+		const { validateCredits } = await import('@mana/shared-hono');
 		vi.mocked(validateCredits).mockResolvedValueOnce({
 			hasCredits: false,
 			availableCredits: 3,

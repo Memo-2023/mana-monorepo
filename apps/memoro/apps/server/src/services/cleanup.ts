@@ -9,8 +9,8 @@ import { createServiceClient } from '../lib/supabase';
 const RETENTION_DAYS = 30;
 const BATCH_SIZE = 100;
 const BUCKET = 'user-uploads';
-const MANA_CREDITS_URL = () => process.env.MANA_CREDITS_URL ?? process.env.MANA_CORE_AUTH_URL ?? 'http://localhost:3061';
-const MANA_CORE_SERVICE_KEY = () => process.env.MANA_CORE_SERVICE_KEY ?? '';
+const MANA_CREDITS_URL = () => process.env.MANA_CREDITS_URL ?? process.env.MANA_AUTH_URL ?? 'http://localhost:3061';
+const MANA_SERVICE_KEY = () => process.env.MANA_SERVICE_KEY ?? '';
 
 interface CleanupResult {
 	deleted: number;
@@ -141,9 +141,9 @@ async function updateMemoAudioDeleted(
 }
 
 async function fetchOptedInUserIds(): Promise<string[]> {
-	const serviceKey = MANA_CORE_SERVICE_KEY();
+	const serviceKey = MANA_SERVICE_KEY();
 	if (!serviceKey) {
-		console.warn('[cleanup] MANA_CORE_SERVICE_KEY not set, cannot fetch opted-in users');
+		console.warn('[cleanup] MANA_SERVICE_KEY not set, cannot fetch opted-in users');
 		return [];
 	}
 

@@ -22,7 +22,7 @@ import {
  * @example
  * ```typescript
  * // Basic usage
- * import { createThemeStore } from '@manacore/shared-theme';
+ * import { createThemeStore } from '@mana/shared-theme';
  *
  * export const theme = createThemeStore({ appId: 'myapp' });
  *
@@ -195,8 +195,8 @@ export const APP_THEME_CONFIGS = {
 			dark: '47 95% 58%' as HSLValue,
 		},
 	},
-	manacore: {
-		appId: 'manacore',
+	mana: {
+		appId: 'mana',
 		defaultVariant: 'ocean' as ThemeVariant,
 		primaryColor: {
 			light: '239 84% 67%' as HSLValue, // Indigo #6366f1

@@ -1,6 +1,6 @@
 /**
  * Types for client-side LLM inference.
- * Aligned with @manacore/shared-llm ChatMessage/ChatResult where possible.
+ * Aligned with @mana/shared-llm ChatMessage/ChatResult where possible.
  */
 
 export interface ChatMessage {

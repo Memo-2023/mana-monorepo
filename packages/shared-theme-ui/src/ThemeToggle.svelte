@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { ThemeStore } from '@manacore/shared-theme';
-	import { Sun, Moon } from '@manacore/shared-icons';
+	import type { ThemeStore } from '@mana/shared-theme';
+	import { Sun, Moon } from '@mana/shared-icons';
 
 	interface Props {
 		/** Theme store instance */

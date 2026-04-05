@@ -70,7 +70,7 @@
 			"targets": [
 				{
 					"datasource": { "type": "prometheus", "uid": "${datasource}" },
-					"expr": "up{job=\"mana-core-auth\"}",
+					"expr": "up{job=\"mana-auth\"}",
 					"legendFormat": "Auth Service",
 					"refId": "A"
 				}
@@ -110,7 +110,7 @@
 			"targets": [
 				{
 					"datasource": { "type": "prometheus", "uid": "${datasource}" },
-					"expr": "process_uptime_seconds{job=\"mana-core-auth\"}",
+					"expr": "process_uptime_seconds{job=\"mana-auth\"}",
 					"legendFormat": "Uptime",
 					"refId": "A"
 				}
@@ -154,7 +154,7 @@
 			"targets": [
 				{
 					"datasource": { "type": "prometheus", "uid": "${datasource}" },
-					"expr": "100 * (1 - avg(rate(auth_process_cpu_seconds_total{job=\"mana-core-auth\"}[5m])))",
+					"expr": "100 * (1 - avg(rate(auth_process_cpu_seconds_total{job=\"mana-auth\"}[5m])))",
 					"legendFormat": "CPU",
 					"refId": "A"
 				}
@@ -198,7 +198,7 @@
 			"targets": [
 				{
 					"datasource": { "type": "prometheus", "uid": "${datasource}" },
-					"expr": "100 * auth_nodejs_heap_size_used_bytes{job=\"mana-core-auth\"} / auth_nodejs_heap_size_total_bytes{job=\"mana-core-auth\"}",
+					"expr": "100 * auth_nodejs_heap_size_used_bytes{job=\"mana-auth\"} / auth_nodejs_heap_size_total_bytes{job=\"mana-auth\"}",
 					"legendFormat": "Heap",
 					"refId": "A"
 				}
@@ -238,7 +238,7 @@
 			"targets": [
 				{
 					"datasource": { "type": "prometheus", "uid": "${datasource}" },
-					"expr": "auth_nodejs_active_handles_total{job=\"mana-core-auth\"}",
+					"expr": "auth_nodejs_active_handles_total{job=\"mana-auth\"}",
 					"legendFormat": "Handles",
 					"refId": "A"
 				}
@@ -282,7 +282,7 @@
 			"targets": [
 				{
 					"datasource": { "type": "prometheus", "uid": "${datasource}" },
-					"expr": "rate(auth_nodejs_eventloop_lag_seconds{job=\"mana-core-auth\"}[5m])",
+					"expr": "rate(auth_nodejs_eventloop_lag_seconds{job=\"mana-auth\"}[5m])",
 					"legendFormat": "Event Loop Lag",
 					"refId": "A"
 				}
@@ -330,7 +330,7 @@
 			"targets": [
 				{
 					"datasource": { "type": "prometheus", "uid": "${datasource}" },
-					"expr": "auth_users_total{job=\"mana-core-auth\"}",
+					"expr": "auth_users_total{job=\"mana-auth\"}",
 					"legendFormat": "Total Users",
 					"refId": "A"
 				}
@@ -370,7 +370,7 @@
 			"targets": [
 				{
 					"datasource": { "type": "prometheus", "uid": "${datasource}" },
-					"expr": "auth_users_verified{job=\"mana-core-auth\"}",
+					"expr": "auth_users_verified{job=\"mana-auth\"}",
 					"legendFormat": "Verified",
 					"refId": "A"
 				}
@@ -410,7 +410,7 @@
 			"targets": [
 				{
 					"datasource": { "type": "prometheus", "uid": "${datasource}" },
-					"expr": "auth_users_created_today{job=\"mana-core-auth\"}",
+					"expr": "auth_users_created_today{job=\"mana-auth\"}",
 					"legendFormat": "Today",
 					"refId": "A"
 				}
@@ -450,7 +450,7 @@
 			"targets": [
 				{
 					"datasource": { "type": "prometheus", "uid": "${datasource}" },
-					"expr": "auth_users_created_this_week{job=\"mana-core-auth\"}",
+					"expr": "auth_users_created_this_week{job=\"mana-auth\"}",
 					"legendFormat": "This Week",
 					"refId": "A"
 				}
@@ -490,7 +490,7 @@
 			"targets": [
 				{
 					"datasource": { "type": "prometheus", "uid": "${datasource}" },
-					"expr": "auth_users_created_this_month{job=\"mana-core-auth\"}",
+					"expr": "auth_users_created_this_month{job=\"mana-auth\"}",
 					"legendFormat": "This Month",
 					"refId": "A"
 				}
@@ -534,7 +534,7 @@
 			"targets": [
 				{
 					"datasource": { "type": "prometheus", "uid": "${datasource}" },
-					"expr": "100 * auth_users_verified{job=\"mana-core-auth\"} / auth_users_total{job=\"mana-core-auth\"}",
+					"expr": "100 * auth_users_verified{job=\"mana-auth\"} / auth_users_total{job=\"mana-auth\"}",
 					"legendFormat": "Verification Rate",
 					"refId": "A"
 				}
@@ -600,7 +600,7 @@
 			"targets": [
 				{
 					"datasource": { "type": "prometheus", "uid": "${datasource}" },
-					"expr": "sum(rate(http_requests_total{job=\"mana-core-auth\"}[5m])) by (route)",
+					"expr": "sum(rate(http_requests_total{job=\"mana-auth\"}[5m])) by (route)",
 					"legendFormat": "{{route}}",
 					"refId": "A"
 				}
@@ -658,19 +658,19 @@
 			"targets": [
 				{
 					"datasource": { "type": "prometheus", "uid": "${datasource}" },
-					"expr": "histogram_quantile(0.50, sum(rate(http_request_duration_seconds_bucket{job=\"mana-core-auth\"}[5m])) by (le))",
+					"expr": "histogram_quantile(0.50, sum(rate(http_request_duration_seconds_bucket{job=\"mana-auth\"}[5m])) by (le))",
 					"legendFormat": "p50",
 					"refId": "A"
 				},
 				{
 					"datasource": { "type": "prometheus", "uid": "${datasource}" },
-					"expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job=\"mana-core-auth\"}[5m])) by (le))",
+					"expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job=\"mana-auth\"}[5m])) by (le))",
 					"legendFormat": "p95",
 					"refId": "B"
 				},
 				{
 					"datasource": { "type": "prometheus", "uid": "${datasource}" },
-					"expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{job=\"mana-core-auth\"}[5m])) by (le))",
+					"expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{job=\"mana-auth\"}[5m])) by (le))",
 					"legendFormat": "p99",
 					"refId": "C"
 				}
@@ -741,7 +741,7 @@
 			"targets": [
 				{
 					"datasource": { "type": "prometheus", "uid": "${datasource}" },
-					"expr": "sum(rate(http_requests_total{job=\"mana-core-auth\"}[5m])) by (status)",
+					"expr": "sum(rate(http_requests_total{job=\"mana-auth\"}[5m])) by (status)",
 					"legendFormat": "{{status}}",
 					"refId": "A"
 				}
@@ -785,7 +785,7 @@
 			"targets": [
 				{
 					"datasource": { "type": "prometheus", "uid": "${datasource}" },
-					"expr": "100 * sum(rate(http_requests_total{job=\"mana-core-auth\",status=~\"4..\"}[5m])) / sum(rate(http_requests_total{job=\"mana-core-auth\"}[5m]))",
+					"expr": "100 * sum(rate(http_requests_total{job=\"mana-auth\",status=~\"4..\"}[5m])) / sum(rate(http_requests_total{job=\"mana-auth\"}[5m]))",
 					"legendFormat": "4xx Error Rate",
 					"refId": "A"
 				}
@@ -829,7 +829,7 @@
 			"targets": [
 				{
 					"datasource": { "type": "prometheus", "uid": "${datasource}" },
-					"expr": "100 * sum(rate(http_requests_total{job=\"mana-core-auth\",status=~\"5..\"}[5m])) / sum(rate(http_requests_total{job=\"mana-core-auth\"}[5m]))",
+					"expr": "100 * sum(rate(http_requests_total{job=\"mana-auth\",status=~\"5..\"}[5m])) / sum(rate(http_requests_total{job=\"mana-auth\"}[5m]))",
 					"legendFormat": "5xx Error Rate",
 					"refId": "A"
 				}
@@ -869,7 +869,7 @@
 			"targets": [
 				{
 					"datasource": { "type": "prometheus", "uid": "${datasource}" },
-					"expr": "sum(increase(http_requests_total{job=\"mana-core-auth\",status=\"429\"}[1h]))",
+					"expr": "sum(increase(http_requests_total{job=\"mana-auth\",status=\"429\"}[1h]))",
 					"legendFormat": "Rate Limited",
 					"refId": "A"
 				}
@@ -909,7 +909,7 @@
 			"targets": [
 				{
 					"datasource": { "type": "prometheus", "uid": "${datasource}" },
-					"expr": "sum(increase(http_requests_total{job=\"mana-core-auth\"}[24h]))",
+					"expr": "sum(increase(http_requests_total{job=\"mana-auth\"}[24h]))",
 					"legendFormat": "Total Requests",
 					"refId": "A"
 				}
@@ -992,7 +992,7 @@
 			"targets": [
 				{
 					"datasource": { "type": "prometheus", "uid": "${datasource}" },
-					"expr": "increase(http_requests_total{job=\"mana-core-auth\",route=~\"/auth/login|/auth/register|/auth/logout|/auth/refresh\"}[1h])",
+					"expr": "increase(http_requests_total{job=\"mana-auth\",route=~\"/auth/login|/auth/register|/auth/logout|/auth/refresh\"}[1h])",
 					"legendFormat": "{{route}}",
 					"refId": "A"
 				}
@@ -1055,7 +1055,7 @@
 			"targets": [
 				{
 					"datasource": { "type": "prometheus", "uid": "${datasource}" },
-					"expr": "sum(increase(http_requests_total{job=\"mana-core-auth\",route=\"/auth/login\"}[1h])) by (status)",
+					"expr": "sum(increase(http_requests_total{job=\"mana-auth\",route=\"/auth/login\"}[1h])) by (status)",
 					"legendFormat": "Login {{status}}",
 					"refId": "A"
 				}
@@ -1066,7 +1066,7 @@
 	],
 	"refresh": "30s",
 	"schemaVersion": 38,
-	"tags": ["manacore", "auth"],
+	"tags": ["mana", "auth"],
 	"templating": {
 		"list": [
 			{

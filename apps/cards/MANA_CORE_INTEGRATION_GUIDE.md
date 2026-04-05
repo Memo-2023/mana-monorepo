@@ -123,12 +123,12 @@ SIGNUP_REDIRECT_URL=https://yourapp.com/welcome
 
 ### Step 2: Import and Configure the Module
 
-In your `app.module.ts`, import and configure `ManaCoreModule`:
+In your `app.module.ts`, import and configure `ManaModule`:
 
 ```typescript
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { ManaCoreModule } from '@mana-core/nestjs-integration';
+import { ManaModule } from '@mana-core/nestjs-integration';
 
 @Module({
   imports: [
@@ -139,7 +139,7 @@ import { ManaCoreModule } from '@mana-core/nestjs-integration';
     }),
 
     // Mana Core Module - async configuration
-    ManaCoreModule.forRootAsync({
+    ManaModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
         // Required: Mana service URL
@@ -898,7 +898,7 @@ describe('CharacterController', () => {
 Test with the Mana Core module:
 
 ```typescript
-import { ManaCoreModule } from '@mana-core/nestjs-integration';
+import { ManaModule } from '@mana-core/nestjs-integration';
 
 describe('CharacterController (e2e)', () => {
   let app: INestApplication;
@@ -910,7 +910,7 @@ describe('CharacterController (e2e)', () => {
           isGlobal: true,
           envFilePath: '.env.test',
         }),
-        ManaCoreModule.forRootAsync({
+        ManaModule.forRootAsync({
           imports: [ConfigModule],
           useFactory: (configService: ConfigService) => ({
             manaServiceUrl: configService.get('MANA_SERVICE_URL'),
@@ -1028,7 +1028,7 @@ console.log('Device info:', deviceInfo);
 Enable debug mode to see detailed logs:
 
 ```typescript
-ManaCoreModule.forRootAsync({
+ManaModule.forRootAsync({
   imports: [ConfigModule],
   useFactory: (configService: ConfigService) => ({
     manaServiceUrl: configService.get('MANA_SERVICE_URL'),

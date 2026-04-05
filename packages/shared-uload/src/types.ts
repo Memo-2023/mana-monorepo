@@ -1,4 +1,4 @@
-import type { BaseRecord } from '@manacore/local-store';
+import type { BaseRecord } from '@mana/local-store';
 
 export interface UloadLink extends BaseRecord {
 	shortCode: string;
@@ -49,7 +49,7 @@ export type AppSource =
 	| 'cards'
 	| 'picture'
 	| 'uload'
-	| 'manacore'
+	| 'mana'
 	| (string & {});
 
 export const APP_SOURCE_LABELS: Record<string, string> = {
@@ -63,5 +63,5 @@ export const APP_SOURCE_LABELS: Record<string, string> = {
 	cards: 'Cards',
 	picture: 'Picture',
 	uload: 'uLoad',
-	manacore: 'ManaCore',
+	mana: 'Mana',
 };

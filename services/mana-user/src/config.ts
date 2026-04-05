@@ -12,10 +12,10 @@ export function loadConfig(): Config {
 		port: parseInt(env('PORT', '3062'), 10),
 		databaseUrl: env(
 			'DATABASE_URL',
-			'postgresql://manacore:devpassword@localhost:5432/mana_platform'
+			'postgresql://mana:devpassword@localhost:5432/mana_platform'
 		),
-		manaAuthUrl: env('MANA_CORE_AUTH_URL', 'http://localhost:3001'),
-		serviceKey: env('MANA_CORE_SERVICE_KEY', 'dev-service-key'),
+		manaAuthUrl: env('MANA_AUTH_URL', 'http://localhost:3001'),
+		serviceKey: env('MANA_SERVICE_KEY', 'dev-service-key'),
 		cors: { origins: env('CORS_ORIGINS', 'http://localhost:5173').split(',') },
 	};
 }

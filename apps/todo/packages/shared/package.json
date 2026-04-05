@@ -15,7 +15,7 @@
 		"type-check": "tsc --noEmit"
 	},
 	"dependencies": {
-		"@manacore/shared-types": "workspace:*"
+		"@mana/shared-types": "workspace:*"
 	},
 	"devDependencies": {
 		"typescript": "^5.9.3"

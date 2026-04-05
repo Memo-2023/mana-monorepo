@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { matrixStore } from '$lib/matrix';
 	import type { VerificationRequest, SasVerification } from '$lib/matrix/types';
-	import { Check, X, CircleNotch, ShieldCheck } from '@manacore/shared-icons';
+	import { Check, X, CircleNotch, ShieldCheck } from '@mana/shared-icons';
 
 	interface Props {
 		request: VerificationRequest;

@@ -1,5 +1,5 @@
 #!/bin/bash
-# ManaCore Mac Mini Auto-Start Setup
+# Mana Mac Mini Auto-Start Setup
 # Run this ONCE on the Mac Mini to configure automatic startup on boot
 #
 # This sets up:
@@ -14,7 +14,7 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 USER_HOME="$HOME"
 LAUNCH_AGENTS_DIR="$USER_HOME/Library/LaunchAgents"
 
-echo "=== ManaCore Mac Mini Auto-Start Setup ==="
+echo "=== Mana Mac Mini Auto-Start Setup ==="
 echo ""
 echo "Project root: $PROJECT_ROOT"
 echo "User: $(whoami)"
@@ -85,19 +85,19 @@ EOF
 fi
 
 # ============================================
-# 2. ManaCore Docker Startup Service
+# 2. Mana Docker Startup Service
 # ============================================
 echo ""
 echo "=== Setting up Docker Startup Service ==="
 
-DOCKER_PLIST="$LAUNCH_AGENTS_DIR/com.manacore.docker-startup.plist"
+DOCKER_PLIST="$LAUNCH_AGENTS_DIR/com.mana.docker-startup.plist"
 cat > "$DOCKER_PLIST" << EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>com.manacore.docker-startup</string>
+    <string>com.mana.docker-startup</string>
     <key>ProgramArguments</key>
     <array>
         <string>/bin/bash</string>
@@ -108,9 +108,9 @@ cat > "$DOCKER_PLIST" << EOF
     <key>StartInterval</key>
     <integer>0</integer>
     <key>StandardOutPath</key>
-    <string>/tmp/manacore-startup.log</string>
+    <string>/tmp/mana-startup.log</string>
     <key>StandardErrorPath</key>
-    <string>/tmp/manacore-startup.error.log</string>
+    <string>/tmp/mana-startup.error.log</string>
     <key>EnvironmentVariables</key>
     <dict>
         <key>PATH</key>
@@ -132,14 +132,14 @@ echo "Docker startup service loaded"
 echo ""
 echo "=== Setting up Health Check Service ==="
 
-HEALTH_PLIST="$LAUNCH_AGENTS_DIR/com.manacore.health-check.plist"
+HEALTH_PLIST="$LAUNCH_AGENTS_DIR/com.mana.health-check.plist"
 cat > "$HEALTH_PLIST" << EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>com.manacore.health-check</string>
+    <string>com.mana.health-check</string>
     <key>ProgramArguments</key>
     <array>
         <string>/bin/bash</string>
@@ -148,9 +148,9 @@ cat > "$HEALTH_PLIST" << EOF
     <key>StartInterval</key>
     <integer>300</integer>
     <key>StandardOutPath</key>
-    <string>/tmp/manacore-health.log</string>
+    <string>/tmp/mana-health.log</string>
     <key>StandardErrorPath</key>
-    <string>/tmp/manacore-health.error.log</string>
+    <string>/tmp/mana-health.error.log</string>
     <key>EnvironmentVariables</key>
     <dict>
         <key>PATH</key>
@@ -181,14 +181,14 @@ echo "  3. Health checks (every 5 minutes)"
 echo ""
 echo "Log files:"
 echo "  /tmp/cloudflared.log"
-echo "  /tmp/manacore-startup.log"
-echo "  /tmp/manacore-health.log"
+echo "  /tmp/mana-startup.log"
+echo "  /tmp/mana-health.log"
 echo ""
 echo "Manual commands:"
-echo "  Check status:    launchctl list | grep -E 'cloudflare|manacore'"
-echo "  View logs:       tail -f /tmp/manacore-startup.log"
+echo "  Check status:    launchctl list | grep -E 'cloudflare|mana'"
+echo "  View logs:       tail -f /tmp/mana-startup.log"
 echo "  Health check:    $SCRIPT_DIR/health-check.sh"
-echo "  Restart docker:  launchctl kickstart -k gui/\$(id -u)/com.manacore.docker-startup"
+echo "  Restart docker:  launchctl kickstart -k gui/\$(id -u)/com.mana.docker-startup"
 echo ""
 echo "IMPORTANT: Make sure Docker Desktop is set to start on login!"
 echo "  Docker Desktop > Settings > General > 'Start Docker Desktop when you sign in'"

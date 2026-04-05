@@ -2,7 +2,7 @@
 	"annotations": {
 		"list": []
 	},
-	"description": "ManaCore Speech-to-Text Service Monitoring",
+	"description": "Mana Speech-to-Text Service Monitoring",
 	"editable": true,
 	"fiscalYearStartMonth": 0,
 	"graphTooltip": 1,
@@ -728,12 +728,12 @@
 	],
 	"refresh": "30s",
 	"schemaVersion": 39,
-	"tags": ["manacore", "stt", "ai"],
+	"tags": ["mana", "stt", "ai"],
 	"templating": { "list": [] },
 	"time": { "from": "now-1h", "to": "now" },
 	"timepicker": {},
 	"timezone": "browser",
-	"title": "ManaCore STT Service",
+	"title": "Mana STT Service",
 	"uid": "mana-stt-dashboard",
 	"version": 1,
 	"weekStart": "monday"

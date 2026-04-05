@@ -59,8 +59,8 @@ Tables: plans, subscriptions, invoices, stripe_customers
 ```env
 PORT=3063
 DATABASE_URL=postgresql://manacore:devpassword@localhost:5432/mana_subscriptions
-MANA_CORE_AUTH_URL=http://localhost:3001
-MANA_CORE_SERVICE_KEY=dev-service-key
+MANA_AUTH_URL=http://localhost:3001
+MANA_SERVICE_KEY=dev-service-key
 STRIPE_SECRET_KEY=sk_test_...
 STRIPE_WEBHOOK_SECRET=whsec_...
 BASE_URL=http://localhost:3063

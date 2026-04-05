@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Plus, MagnifyingGlass, User, Envelope } from '@manacore/shared-icons';
+	import { Plus, MagnifyingGlass, User, Envelope } from '@mana/shared-icons';
 	import ContactBadge from './ContactBadge.svelte';
 	import ContactAvatar from './ContactAvatar.svelte';
 	import type {
@@ -8,7 +8,7 @@
 		ManualContactEntry,
 		ContactOrManual,
 		createContactReference,
-	} from '@manacore/shared-types';
+	} from '@mana/shared-types';
 
 	interface Props {
 		/** Currently selected contacts */

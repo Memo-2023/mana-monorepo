@@ -1,5 +1,5 @@
 // Local implementation of navigation stores
-// Previously imported from @manacore/shared-stores, now inlined to avoid dependency issues
+// Previously imported from @mana/shared-stores, now inlined to avoid dependency issues
 
 import { browser } from '$app/environment';
 

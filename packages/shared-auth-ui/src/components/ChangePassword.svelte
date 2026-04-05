@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Eye, EyeSlash } from '@manacore/shared-icons';
+	import { Eye, EyeSlash } from '@mana/shared-icons';
 	import PasswordStrength from './PasswordStrength.svelte';
 
 	interface Props {

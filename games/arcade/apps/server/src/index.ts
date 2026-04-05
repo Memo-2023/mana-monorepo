@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
-import { errorHandler, notFoundHandler } from '@manacore/shared-hono';
+import { errorHandler, notFoundHandler } from '@mana/shared-hono';
 import { gamesRoutes } from './routes/games';
 
 const PORT = parseInt(process.env.PORT || '3011', 10);

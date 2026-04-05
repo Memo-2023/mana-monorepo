@@ -880,7 +880,7 @@
 	],
 	"refresh": "30s",
 	"schemaVersion": 38,
-	"tags": ["manacore", "database", "postgresql", "redis"],
+	"tags": ["mana", "database", "postgresql", "redis"],
 	"templating": {
 		"list": [
 			{

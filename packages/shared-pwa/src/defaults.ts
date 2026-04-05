@@ -5,7 +5,7 @@
 import type { ManifestIcon } from './types.js';
 
 /**
- * Default dark background color for ManaCore apps
+ * Default dark background color for Mana apps
  */
 export const DEFAULT_BACKGROUND_COLOR = '#09090b';
 

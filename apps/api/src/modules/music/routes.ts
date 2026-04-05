@@ -18,7 +18,7 @@ routes.post('/songs/upload', async (c) => {
 	const key = `users/${userId}/songs/${songId}/${filename}`;
 
 	try {
-		const { createMusicStorage } = await import('@manacore/shared-storage');
+		const { createMusicStorage } = await import('@mana/shared-storage');
 		const storage = createMusicStorage();
 		const uploadUrl = await storage.getUploadUrl(key, { expiresIn: 3600 });
 
@@ -38,7 +38,7 @@ routes.get('/songs/:id/download-url', async (c) => {
 	if (!storagePath) return c.json({ error: 'storagePath required' }, 400);
 
 	try {
-		const { createMusicStorage } = await import('@manacore/shared-storage');
+		const { createMusicStorage } = await import('@mana/shared-storage');
 		const storage = createMusicStorage();
 		const url = await storage.getDownloadUrl(storagePath, { expiresIn: 3600 });
 		return c.json({ url });
@@ -83,7 +83,7 @@ routes.get('/songs/:id/cover-url', async (c) => {
 	if (!coverArtPath) return c.json({ url: null });
 
 	try {
-		const { createMusicStorage } = await import('@manacore/shared-storage');
+		const { createMusicStorage } = await import('@mana/shared-storage');
 		const storage = createMusicStorage();
 		const url = await storage.getDownloadUrl(coverArtPath, { expiresIn: 3600 });
 		return c.json({ url });
@@ -99,7 +99,7 @@ routes.post('/library/cover-urls', async (c) => {
 	if (!paths?.length) return c.json({ urls: {} });
 
 	try {
-		const { createMusicStorage } = await import('@manacore/shared-storage');
+		const { createMusicStorage } = await import('@mana/shared-storage');
 		const storage = createMusicStorage();
 		const urls: Record<string, string> = {};
 

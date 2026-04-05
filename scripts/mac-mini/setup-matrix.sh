@@ -9,7 +9,7 @@ PROJECT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 MATRIX_DIR="$PROJECT_DIR/docker/matrix"
 
 echo "============================================"
-echo "  ManaCore Matrix Setup"
+echo "  Mana Matrix Setup"
 echo "============================================"
 echo ""
 
@@ -21,7 +21,7 @@ NC='\033[0m'
 
 # Check if postgres is running
 echo "Checking PostgreSQL..."
-if ! docker exec manacore-postgres pg_isready -U postgres > /dev/null 2>&1; then
+if ! docker exec mana-postgres pg_isready -U postgres > /dev/null 2>&1; then
     echo -e "${RED}Error: PostgreSQL is not running.${NC}"
     echo "Start it with: docker compose -f docker-compose.macmini.yml up -d postgres"
     exit 1
@@ -31,24 +31,24 @@ echo -e "${GREEN}PostgreSQL is running${NC}"
 # Create matrix database
 echo ""
 echo "Creating Matrix database..."
-if docker exec manacore-postgres psql -U postgres -lqt | cut -d \| -f 1 | grep -qw matrix; then
+if docker exec mana-postgres psql -U postgres -lqt | cut -d \| -f 1 | grep -qw matrix; then
     echo -e "${YELLOW}Database 'matrix' already exists${NC}"
 else
-    docker exec manacore-postgres psql -U postgres -c "CREATE DATABASE matrix;"
+    docker exec mana-postgres psql -U postgres -c "CREATE DATABASE matrix;"
     echo -e "${GREEN}Database 'matrix' created${NC}"
 fi
 
 # Create synapse user
 echo ""
 echo "Creating Synapse database user..."
-if docker exec manacore-postgres psql -U postgres -tAc "SELECT 1 FROM pg_roles WHERE rolname='synapse'" | grep -q 1; then
+if docker exec mana-postgres psql -U postgres -tAc "SELECT 1 FROM pg_roles WHERE rolname='synapse'" | grep -q 1; then
     echo -e "${YELLOW}User 'synapse' already exists${NC}"
 else
     # Generate a random password if not set
     SYNAPSE_DB_PASSWORD=${SYNAPSE_DB_PASSWORD:-$(openssl rand -base64 24)}
-    docker exec manacore-postgres psql -U postgres -c "CREATE USER synapse WITH PASSWORD '$SYNAPSE_DB_PASSWORD';"
-    docker exec manacore-postgres psql -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE matrix TO synapse;"
-    docker exec manacore-postgres psql -U postgres -c "ALTER DATABASE matrix OWNER TO synapse;"
+    docker exec mana-postgres psql -U postgres -c "CREATE USER synapse WITH PASSWORD '$SYNAPSE_DB_PASSWORD';"
+    docker exec mana-postgres psql -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE matrix TO synapse;"
+    docker exec mana-postgres psql -U postgres -c "ALTER DATABASE matrix OWNER TO synapse;"
     echo -e "${GREEN}User 'synapse' created${NC}"
     echo ""
     echo -e "${YELLOW}IMPORTANT: Add this to your .env file:${NC}"
@@ -63,7 +63,7 @@ mkdir -p "$MATRIX_DIR/logs" 2>/dev/null || true
 # Generate signing key if not exists
 echo ""
 echo "Checking signing key..."
-if docker volume ls | grep -q manacore-synapse; then
+if docker volume ls | grep -q mana-synapse; then
     echo -e "${YELLOW}Synapse volume already exists - signing key should be present${NC}"
 else
     echo "Signing key will be generated on first Synapse start"
@@ -110,10 +110,10 @@ echo "3. Start Matrix services:"
 echo "   docker compose -f docker-compose.macmini.yml up -d synapse element-web"
 echo ""
 echo "4. Wait for Synapse to start (check logs):"
-echo "   docker logs -f manacore-synapse"
+echo "   docker logs -f mana-synapse"
 echo ""
 echo "5. Create admin user:"
-echo "   docker exec -it manacore-synapse register_new_matrix_user \\"
+echo "   docker exec -it mana-synapse register_new_matrix_user \\"
 echo "     -c /data/homeserver.yaml http://localhost:8008 -a"
 echo ""
 echo "6. Test endpoints:"

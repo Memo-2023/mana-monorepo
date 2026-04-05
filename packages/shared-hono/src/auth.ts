@@ -1,8 +1,8 @@
 /**
  * JWT authentication middleware for Hono servers.
  *
- * Verifies EdDSA JWTs from mana-core-auth via JWKS (cached).
- * Drop-in replacement for @manacore/shared-nestjs-auth JwtAuthGuard.
+ * Verifies EdDSA JWTs from mana-auth via JWKS (cached).
+ * Drop-in replacement for @mana/shared-nestjs-auth JwtAuthGuard.
  *
  * Sets `userId`, `userEmail`, `userRole` on Hono context.
  */
@@ -11,8 +11,8 @@ import type { Context, Next } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import { createRemoteJWKSet, jwtVerify } from 'jose';
 
-const AUTH_URL = () => process.env.MANA_CORE_AUTH_URL ?? 'http://localhost:3001';
-const SERVICE_KEY = () => process.env.MANA_CORE_SERVICE_KEY ?? '';
+const AUTH_URL = () => process.env.MANA_AUTH_URL ?? 'http://localhost:3001';
+const SERVICE_KEY = () => process.env.MANA_SERVICE_KEY ?? '';
 
 /** Cached JWKS - jose handles refetch cooldown (~10 min) */
 let cachedJWKS: ReturnType<typeof createRemoteJWKSet> | null = null;
@@ -37,7 +37,7 @@ function getJWKS(): ReturnType<typeof createRemoteJWKSet> {
 function getIssuers(): string[] {
 	const issuers = new Set<string>();
 	const jwtIssuer = process.env.JWT_ISSUER;
-	const authUrl = process.env.MANA_CORE_AUTH_URL;
+	const authUrl = process.env.MANA_AUTH_URL;
 	if (jwtIssuer) issuers.add(jwtIssuer);
 	if (authUrl) issuers.add(authUrl);
 	issuers.add('https://auth.mana.how');
@@ -77,7 +77,7 @@ export function authMiddleware() {
 
 		try {
 			const jwks = getJWKS();
-			const audience = process.env.JWT_AUDIENCE ?? 'manacore';
+			const audience = process.env.JWT_AUDIENCE ?? 'mana';
 
 			const { payload } = await jwtVerify(token, jwks, {
 				issuer: getIssuers(),
@@ -103,7 +103,7 @@ export function authMiddleware() {
 
 /**
  * Service key auth middleware — validates X-Service-Key header.
- * Used for admin/GDPR endpoints called by mana-core-auth.
+ * Used for admin/GDPR endpoints called by mana-auth.
  *
  * Usage:
  * ```ts

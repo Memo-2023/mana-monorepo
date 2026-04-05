@@ -9,7 +9,7 @@ LAUNCH_AGENTS_DIR="$HOME/Library/LaunchAgents"
 LOG_DIR="$HOME/logs"
 
 echo "============================================"
-echo "Installing ManaCore STT Services"
+echo "Installing Mana STT Services"
 echo "============================================"
 echo ""
 
@@ -45,7 +45,7 @@ install_service() {
 }
 
 # Install vLLM first (STT depends on it)
-install_service "com.manacore.vllm-voxtral"
+install_service "com.mana.vllm-voxtral"
 
 # Wait for vLLM to initialize
 echo ""
@@ -63,7 +63,7 @@ done
 
 # Install STT service
 echo ""
-install_service "com.manacore.mana-stt"
+install_service "com.mana.mana-stt"
 
 echo ""
 echo "============================================"
@@ -72,7 +72,7 @@ echo "============================================"
 echo ""
 echo "Services:"
 echo "  vLLM Voxtral: http://localhost:8100"
-echo "  ManaCore STT: http://localhost:3020"
+echo "  Mana STT: http://localhost:3020"
 echo ""
 echo "Useful commands:"
 echo "  View vLLM logs:  tail -f $LOG_DIR/vllm-voxtral.log"
@@ -80,5 +80,5 @@ echo "  View STT logs:   tail -f $LOG_DIR/mana-stt.log"
 echo "  Health check:    curl http://localhost:3020/health"
 echo ""
 echo "Stop all:"
-echo "  launchctl unload $LAUNCH_AGENTS_DIR/com.manacore.vllm-voxtral.plist"
-echo "  launchctl unload $LAUNCH_AGENTS_DIR/com.manacore.mana-stt.plist"
+echo "  launchctl unload $LAUNCH_AGENTS_DIR/com.mana.vllm-voxtral.plist"
+echo "  launchctl unload $LAUNCH_AGENTS_DIR/com.mana.mana-stt.plist"

@@ -1,1 +1,1 @@
-# ManaCore STT Service
+# Mana STT Service

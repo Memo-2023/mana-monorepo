@@ -19,8 +19,8 @@
 	"dependencies": {
 		"@callstack/liquid-glass": "^0.4.2",
 		"@expo/vector-icons": "^15.0.2",
-		"@manacore/shared-auth": "workspace:*",
-		"@manacore/shared-logger": "workspace:*",
+		"@mana/shared-auth": "workspace:*",
+		"@mana/shared-logger": "workspace:*",
 		"@picture/design-tokens": "workspace:*",
 		"@picture/shared": "workspace:*",
 		"@react-native-async-storage/async-storage": "2.2.0",

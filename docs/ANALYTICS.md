@@ -1,6 +1,6 @@
 # Analytics & Event Tracking
 
-ManaCore verwendet Umami für Web Analytics. Alle Events werden zu `stats.mana.how` gesendet.
+Mana verwendet Umami für Web Analytics. Alle Events werden zu `stats.mana.how` gesendet.
 
 ## Umami Dashboard
 
@@ -45,7 +45,7 @@ injectUmamiAnalytics(html)    → <script defer src="stats.mana.how/script.js" d
 | App | Env-Variable |
 |-----|-------------|
 | Chat | `UMAMI_WEBSITE_ID_CHAT_LANDING` |
-| ManaCore | `UMAMI_WEBSITE_ID_MANACORE_LANDING` |
+| Mana | `UMAMI_WEBSITE_ID_MANACORE_LANDING` |
 | Cards | `UMAMI_WEBSITE_ID_CARDS_LANDING` |
 | Calendar | `UMAMI_WEBSITE_ID_CALENDAR_LANDING` |
 | Clock | `UMAMI_WEBSITE_ID_CLOCK_LANDING` |
@@ -60,7 +60,7 @@ injectUmamiAnalytics(html)    → <script defer src="stats.mana.how/script.js" d
 | App | Env-Variable |
 |-----|-------------|
 | Chat | `UMAMI_WEBSITE_ID_CHAT` |
-| ManaCore | `UMAMI_WEBSITE_ID_MANACORE` |
+| Mana | `UMAMI_WEBSITE_ID_MANACORE` |
 | Todo | `UMAMI_WEBSITE_ID_TODO` |
 | Calendar | `UMAMI_WEBSITE_ID_CALENDAR` |
 | Clock | `UMAMI_WEBSITE_ID_CLOCK` |

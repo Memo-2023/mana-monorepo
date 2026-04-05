@@ -6,7 +6,7 @@
  * Syncs to server via mana-sync when authenticated.
  */
 
-import { createLocalStore, type BaseRecord } from '@manacore/local-store';
+import { createLocalStore, type BaseRecord } from '@mana/local-store';
 import { generateGuestWorld } from './guest-seed';
 
 // ─── Types ──────────────────────────────────────────────────

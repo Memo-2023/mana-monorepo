@@ -1,5 +1,5 @@
 /**
- * Cross-type Drag & Drop system for ManaCore.
+ * Cross-type Drag & Drop system for Mana.
  *
  * Two layers:
  *  - Layer 1 (dragSource + dropTarget): Pointer-events based, for dragging items

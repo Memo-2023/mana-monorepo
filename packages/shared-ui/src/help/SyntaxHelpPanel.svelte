@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Hash, At, Calendar, Clock, ArrowFatLineRight } from '@manacore/shared-icons';
+	import { Hash, At, Calendar, Clock, ArrowFatLineRight } from '@mana/shared-icons';
 	import type { SyntaxGroup, SyntaxColor } from './types';
 
 	interface Props {

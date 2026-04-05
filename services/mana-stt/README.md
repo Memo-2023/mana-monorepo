@@ -1,4 +1,4 @@
-# ManaCore STT Service
+# Mana STT Service
 
 Speech-to-Text API service with **Whisper (Lightning MLX)** and **Voxtral (Mistral API)**.
 

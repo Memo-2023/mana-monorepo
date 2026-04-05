@@ -1,7 +1,7 @@
 /**
  * Guild Pool Schema — Shared Mana pools for organizations
  *
- * Adapted from mana-core-auth: removed FK references to auth.users and organizations.
+ * Adapted from mana-auth: removed FK references to auth.users and organizations.
  * Organization/user IDs remain as text columns without FK constraints.
  */
 

@@ -1,12 +1,12 @@
 /**
- * @manacore/wallpaper-generator
+ * @mana/wallpaper-generator
  *
  * Device wallpaper generator from QR codes, Spiral-DB images, and other sources.
  * Supports both browser (Canvas) and Node.js (Sharp) environments.
  *
  * @example Browser usage:
  * ```ts
- * import { createWallpaperGenerator } from '@manacore/wallpaper-generator';
+ * import { createWallpaperGenerator } from '@mana/wallpaper-generator';
  *
  * const generator = createWallpaperGenerator();
  *
@@ -25,7 +25,7 @@
  *
  * @example Node.js usage:
  * ```ts
- * import { createWallpaperGenerator, saveWallpaperToFile } from '@manacore/wallpaper-generator';
+ * import { createWallpaperGenerator, saveWallpaperToFile } from '@mana/wallpaper-generator';
  *
  * const generator = createWallpaperGenerator();
  *

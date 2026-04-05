@@ -65,12 +65,12 @@ go test ./...                # Test
 | `PORT` | 3040 | Server port |
 | `DATABASE_URL` | postgresql://...localhost:5432/mana_notify | PostgreSQL |
 | `SERVICE_KEY` | dev-service-key | Service-to-service auth |
-| `MANA_CORE_AUTH_URL` | http://localhost:3001 | JWT validation |
+| `MANA_AUTH_URL` | http://localhost:3001 | JWT validation |
 | `SMTP_HOST` | smtp-relay.brevo.com | SMTP host |
 | `SMTP_PORT` | 587 | SMTP port |
 | `SMTP_USER` | | SMTP username |
 | `SMTP_PASSWORD` | | SMTP password |
-| `SMTP_FROM` | ManaCore <noreply@mana.how> | Default from |
+| `SMTP_FROM` | Mana <noreply@mana.how> | Default from |
 | `EXPO_ACCESS_TOKEN` | | Expo push token |
 | `MATRIX_HOMESERVER_URL` | | Matrix homeserver |
 | `MATRIX_ACCESS_TOKEN` | | Matrix bot token |

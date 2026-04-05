@@ -1,5 +1,5 @@
 import type { Label } from './label';
-import type { ContactReference } from '@manacore/shared-types';
+import type { ContactReference } from '@mana/shared-types';
 
 export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
 export type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';

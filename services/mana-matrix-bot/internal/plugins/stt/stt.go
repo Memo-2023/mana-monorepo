@@ -7,8 +7,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/manacore/mana-matrix-bot/internal/plugin"
-	"github.com/manacore/mana-matrix-bot/internal/services"
+	"github.com/mana/mana-matrix-bot/internal/plugin"
+	"github.com/mana/mana-matrix-bot/internal/services"
 )
 
 func init() {
