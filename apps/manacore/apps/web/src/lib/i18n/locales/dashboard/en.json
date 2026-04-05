@@ -134,6 +134,11 @@
 		"plant_watering": {
 			"title": "Plant Care",
 			"description": "Plants that need watering"
+		},
+		"day_timeline": {
+			"title": "My Day",
+			"description": "Chronological timeline of all activities",
+			"empty": "Nothing yet today"
 		}
 	}
 }

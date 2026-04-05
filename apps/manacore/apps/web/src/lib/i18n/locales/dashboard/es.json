@@ -134,6 +134,11 @@
 		"plant_watering": {
 			"title": "Cuidado de plantas",
 			"description": "Plantas que necesitan riego"
+		},
+		"day_timeline": {
+			"title": "Mi Día",
+			"description": "Línea temporal cronológica de todas las actividades",
+			"empty": "Nada todavía hoy"
 		}
 	}
 }

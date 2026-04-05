@@ -134,6 +134,11 @@
 		"plant_watering": {
 			"title": "Soin des plantes",
 			"description": "Plantes à arroser"
+		},
+		"day_timeline": {
+			"title": "Ma Journée",
+			"description": "Chronologie de toutes les activités de la journée",
+			"empty": "Rien encore aujourd'hui"
 		}
 	}
 }

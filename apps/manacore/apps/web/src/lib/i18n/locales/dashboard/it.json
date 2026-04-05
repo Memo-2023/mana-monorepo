@@ -134,6 +134,11 @@
 		"plant_watering": {
 			"title": "Cura delle piante",
 			"description": "Piante da innaffiare"
+		},
+		"day_timeline": {
+			"title": "La Mia Giornata",
+			"description": "Cronologia di tutte le attività della giornata",
+			"empty": "Niente ancora oggi"
 		}
 	}
 }

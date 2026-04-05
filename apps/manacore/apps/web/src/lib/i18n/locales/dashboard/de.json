@@ -134,6 +134,11 @@
 		"plant_watering": {
 			"title": "Pflanzenpflege",
 			"description": "Pflanzen die gegossen werden müssen"
+		},
+		"day_timeline": {
+			"title": "Mein Tag",
+			"description": "Chronologische Tagesansicht aller Aktivitäten",
+			"empty": "Noch nichts heute"
 		}
 	}
 }
