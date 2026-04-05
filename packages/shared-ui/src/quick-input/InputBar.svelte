@@ -586,6 +586,20 @@
 		z-index: auto;
 	}
 
+	/* Mobile: tighter padding, full-width input */
+	@media (max-width: 640px) {
+		.quick-input-bar {
+			padding: 0.5rem 0.5rem;
+			height: 64px;
+		}
+
+		.input-container {
+			padding: 0.5rem 1rem;
+			height: 48px;
+			gap: 0.5rem;
+		}
+	}
+
 	/* Leave space for FAB on mobile */
 	@media (max-width: 900px) {
 		.quick-input-bar.has-fab-right {

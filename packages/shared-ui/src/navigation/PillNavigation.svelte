@@ -874,6 +874,30 @@
 		display: none;
 	}
 
+	/* Mobile: tighter padding, icon-only pills */
+	@media (max-width: 640px) {
+		.pill-nav-container {
+			padding: 0.375rem 0.75rem;
+			gap: 0.5rem;
+		}
+
+		.pill-label {
+			display: none;
+		}
+
+		.pill {
+			padding: 0.625rem;
+			min-width: 44px;
+			min-height: 44px;
+			justify-content: center;
+		}
+
+		.pill-icon {
+			width: 1.25rem;
+			height: 1.25rem;
+		}
+	}
+
 	/* Base pill styles */
 	.pill {
 		display: flex;

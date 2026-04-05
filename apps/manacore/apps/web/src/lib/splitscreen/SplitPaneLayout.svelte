@@ -15,11 +15,11 @@
 	let { children }: { children: Snippet } = $props();
 </script>
 
-<div class="flex h-full w-full overflow-hidden">
+<div class="split-layout flex h-full w-full overflow-hidden">
 	<!-- Main panel -->
 	<div
 		style="width: {splitStore.isActive ? splitStore.dividerPosition + '%' : '100%'}"
-		class="h-full overflow-auto transition-[width] duration-200 ease-out"
+		class="main-pane h-full overflow-auto transition-[width] duration-200 ease-out"
 	>
 		{@render children()}
 	</div>
@@ -30,7 +30,7 @@
 		<!-- Split panel -->
 		<div
 			style="width: {100 - splitStore.dividerPosition}%"
-			class="flex h-full flex-col overflow-hidden border-l border-white/10"
+			class="split-pane flex h-full flex-col overflow-hidden border-l border-white/10"
 		>
 			<PanelHeader appId={splitStore.splitApp} onClose={() => splitStore.closeSplit()} />
 			<div class="flex-1 overflow-auto">
@@ -47,3 +47,27 @@
 		</div>
 	{/if}
 </div>
+
+<style>
+	/* Mobile: stack split pane vertically, hide resize handle */
+	@media (max-width: 768px) {
+		.split-layout {
+			flex-direction: column;
+		}
+
+		.main-pane {
+			width: 100% !important;
+			flex-shrink: 0;
+		}
+
+		.split-pane {
+			width: 100% !important;
+			border-left: none;
+			border-top: 1px solid rgba(255, 255, 255, 0.1);
+		}
+
+		.split-layout :global(.resize-handle) {
+			display: none;
+		}
+	}
+</style>

@@ -436,4 +436,21 @@
 		font-size: 0.8125rem;
 		color: #9ca3af;
 	}
+
+	/* Mobile: larger touch targets */
+	@media (max-width: 640px) {
+		.app-view {
+			padding: 0.75rem;
+		}
+
+		.task-item {
+			padding: 0.625rem 0.375rem;
+			min-height: 44px;
+		}
+
+		.checkbox {
+			width: 20px;
+			height: 20px;
+		}
+	}
 </style>

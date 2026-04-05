@@ -47,13 +47,13 @@
 	}
 </script>
 
-<div class="flex h-full flex-col gap-3 p-4">
+<div class="flex h-full flex-col gap-3 p-3 sm:p-4">
 	<p class="text-xs text-white/40">{conversations.length} Unterhaltungen</p>
 
 	<div class="flex-1 overflow-auto">
 		{#each sorted as conv (conv.id)}
 			{@const lastMsg = lastMessages.get(conv.id)}
-			<div class="mb-1 rounded-md px-3 py-2.5 transition-colors hover:bg-white/5">
+			<div class="mb-1 min-h-[44px] rounded-md px-3 py-3 transition-colors hover:bg-white/5">
 				<div class="flex items-center justify-between">
 					<p class="truncate text-sm font-medium text-white/80">
 						{conv.title || 'Neue Unterhaltung'}

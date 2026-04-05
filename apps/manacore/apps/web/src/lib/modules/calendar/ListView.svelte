@@ -425,4 +425,21 @@
 		font-size: 0.8125rem;
 		color: #9ca3af;
 	}
+
+	/* Mobile: larger touch targets, tighter spacing */
+	@media (max-width: 640px) {
+		.app-view {
+			padding: 0.75rem;
+		}
+
+		.event-card {
+			padding: 0.75rem;
+			min-height: 44px;
+		}
+
+		.quick-add {
+			padding: 0.625rem 0.75rem;
+			min-height: 44px;
+		}
+	}
 </style>

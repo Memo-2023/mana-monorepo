@@ -390,4 +390,12 @@
 		font-size: 0.8125rem;
 		color: #9ca3af;
 	}
+
+	/* Mobile: larger touch targets */
+	@media (max-width: 640px) {
+		.contact-item {
+			padding: 0.625rem 0.375rem;
+			min-height: 44px;
+		}
+	}
 </style>
