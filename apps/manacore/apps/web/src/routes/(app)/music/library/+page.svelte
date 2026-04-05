@@ -1,15 +1,15 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
-	import { libraryStore } from '$lib/modules/mukke/stores/library.svelte';
-	import { playerStore } from '$lib/modules/mukke/stores/player.svelte';
+	import { libraryStore } from '$lib/modules/music/stores/library.svelte';
+	import { playerStore } from '$lib/modules/music/stores/player.svelte';
 	import {
 		searchSongs,
 		filterFavorites,
 		groupByAlbum,
 		groupByGenre,
 		formatDuration,
-	} from '$lib/modules/mukke/queries';
-	import type { Song } from '$lib/modules/mukke/types';
+	} from '$lib/modules/music/queries';
+	import type { Song } from '$lib/modules/music/types';
 	import {
 		MusicNote,
 		Heart,
@@ -53,14 +53,14 @@
 </script>
 
 <svelte:head>
-	<title>Bibliothek - Mukke - ManaCore</title>
+	<title>Bibliothek - Music - ManaCore</title>
 </svelte:head>
 
 <div class="space-y-6">
 	<!-- Header -->
 	<div class="flex items-center gap-3">
 		<a
-			href="/mukke"
+			href="/music"
 			class="rounded-lg p-1.5 text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--muted))]"
 		>
 			<ArrowLeft size={20} />

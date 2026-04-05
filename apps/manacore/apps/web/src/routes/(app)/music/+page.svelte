@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
-	import { computeStats } from '$lib/modules/mukke/queries';
-	import type { Song, Playlist, Project } from '$lib/modules/mukke/types';
+	import { computeStats } from '$lib/modules/music/queries';
+	import type { Song, Playlist, Project } from '$lib/modules/music/types';
 	import { MusicNote, Plus, Playlist as PlaylistIcon, Note } from '@manacore/shared-icons';
 
 	const songsCtx: { readonly value: Song[] } = getContext('songs');
@@ -20,11 +20,11 @@
 </script>
 
 <svelte:head>
-	<title>Mukke - ManaCore</title>
+	<title>Music - ManaCore</title>
 </svelte:head>
 
 <div class="space-y-8">
-	<h1 class="text-2xl font-bold text-[hsl(var(--foreground))]">Mukke</h1>
+	<h1 class="text-2xl font-bold text-[hsl(var(--foreground))]">Music</h1>
 
 	<!-- Quick Stats -->
 	<section>
@@ -62,21 +62,21 @@
 		</h2>
 		<div class="flex flex-wrap gap-3">
 			<a
-				href="/mukke/library"
+				href="/music/library"
 				class="inline-flex items-center gap-2 rounded-lg bg-[hsl(var(--primary))] px-4 py-2.5 text-sm font-medium text-[hsl(var(--primary-foreground))] hover:opacity-90"
 			>
 				<MusicNote size={20} />
 				Bibliothek
 			</a>
 			<a
-				href="/mukke/playlists"
+				href="/music/playlists"
 				class="inline-flex items-center gap-2 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))] px-4 py-2.5 text-sm font-medium text-[hsl(var(--foreground))] hover:bg-[hsl(var(--muted))]"
 			>
 				<PlaylistIcon size={20} />
 				Playlists
 			</a>
 			<a
-				href="/mukke/projects"
+				href="/music/projects"
 				class="inline-flex items-center gap-2 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))] px-4 py-2.5 text-sm font-medium text-[hsl(var(--foreground))] hover:bg-[hsl(var(--muted))]"
 			>
 				<Plus size={20} />
@@ -91,7 +91,7 @@
 			<h2 class="text-sm font-medium uppercase tracking-wide text-[hsl(var(--muted-foreground))]">
 				Letzte Projekte
 			</h2>
-			<a href="/mukke/projects" class="text-sm text-[hsl(var(--primary))] hover:underline">
+			<a href="/music/projects" class="text-sm text-[hsl(var(--primary))] hover:underline">
 				Alle anzeigen
 			</a>
 		</div>

@@ -183,7 +183,7 @@ export const MANA_APP_INDEX: Record<string, number> = {
 	picture: 5,
 	clock: 6,
 	storage: 7,
-	mukke: 8,
+	music: 8,
 	presi: 9,
 	context: 10,
 	cards: 11,

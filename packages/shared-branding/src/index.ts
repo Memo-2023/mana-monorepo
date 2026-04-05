@@ -35,7 +35,7 @@ export {
 	SkillTreeLogo,
 	PlantaLogo,
 	LightWriteLogo,
-	MukkeLogo,
+	MusicLogo,
 	ContextLogo,
 	CitycornersLogo,
 } from './logos';

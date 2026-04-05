@@ -22,6 +22,6 @@ export { default as QuestionsLogo } from './QuestionsLogo.svelte';
 export { default as SkillTreeLogo } from './SkillTreeLogo.svelte';
 export { default as PlantaLogo } from './PlantaLogo.svelte';
 export { default as LightWriteLogo } from './LightWriteLogo.svelte';
-export { default as MukkeLogo } from './MukkeLogo.svelte';
+export { default as MusicLogo } from './MusicLogo.svelte';
 export { default as ContextLogo } from './ContextLogo.svelte';
 export { default as CitycornersLogo } from './CitycornersLogo.svelte';

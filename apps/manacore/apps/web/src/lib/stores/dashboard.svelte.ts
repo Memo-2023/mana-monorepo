@@ -233,7 +233,7 @@ export const dashboardStore = {
 				'chat-recent',
 				'contacts-favorites',
 				'zitare-quote',
-				'mukke-library',
+				'music-library',
 				'presi-decks',
 				'context-docs',
 			] as WidgetType[]

@@ -514,8 +514,8 @@ export const MANA_APPS: ManaApp[] = [
 		requiredTier: 'beta',
 	},
 	{
-		id: 'mukke',
-		name: 'Mukke',
+		id: 'music',
+		name: 'Music',
 		description: {
 			de: 'Musikproduktion',
 			en: 'Music Production',
@@ -524,7 +524,7 @@ export const MANA_APPS: ManaApp[] = [
 			de: 'Erstelle und verwalte Songs, Playlists und Musikprojekte mit Markern und Arrangements.',
 			en: 'Create and manage songs, playlists, and music projects with markers and arrangements.',
 		},
-		icon: APP_ICONS.mukke,
+		icon: APP_ICONS.music,
 		color: '#ec4899',
 		comingSoon: false,
 		status: 'beta',
@@ -759,7 +759,7 @@ export const APP_URLS: Record<AppIconId, { dev: string; prod: string }> = {
 	cards: { dev: 'http://localhost:5173/cards', prod: 'https://mana.how/cards' },
 	zitare: { dev: 'http://localhost:5173/zitare', prod: 'https://mana.how/zitare' },
 	clock: { dev: 'http://localhost:5173/clock', prod: 'https://mana.how/clock' },
-	mukke: { dev: 'http://localhost:5173/mukke', prod: 'https://mana.how/mukke' },
+	music: { dev: 'http://localhost:5173/music', prod: 'https://mana.how/music' },
 	storage: { dev: 'http://localhost:5173/storage', prod: 'https://mana.how/storage' },
 	presi: { dev: 'http://localhost:5173/presi', prod: 'https://mana.how/presi' },
 	inventar: { dev: 'http://localhost:5173/inventar', prod: 'https://mana.how/inventar' },

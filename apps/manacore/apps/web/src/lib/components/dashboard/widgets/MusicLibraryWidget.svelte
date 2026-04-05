@@ -1,11 +1,11 @@
 <script lang="ts">
 	/**
-	 * MukkeLibraryWidget - Music library stats (local-first)
+	 * MusicLibraryWidget - Music library stats (local-first)
 	 */
 
 	import { _ } from 'svelte-i18n';
-	import { useMukkeStats } from '$lib/data/cross-app-queries';
-	const stats = useMukkeStats();
+	import { useMusicStats } from '$lib/data/cross-app-queries';
+	const stats = useMusicStats();
 
 	function formatDuration(seconds?: number): string {
 		if (!seconds) return '';
@@ -19,7 +19,7 @@
 	<div class="mb-3">
 		<h3 class="flex items-center gap-2 text-lg font-semibold">
 			<span>🎵</span>
-			{$_('dashboard.widgets.mukke.title')}
+			{$_('dashboard.widgets.music.title')}
 		</h3>
 	</div>
 
@@ -66,6 +66,6 @@
 			</div>
 		{/if}
 
-		<p class="mt-2 text-center text-xs text-muted-foreground">Mukke</p>
+		<p class="mt-2 text-center text-xs text-muted-foreground">Music</p>
 	{/if}
 </div>

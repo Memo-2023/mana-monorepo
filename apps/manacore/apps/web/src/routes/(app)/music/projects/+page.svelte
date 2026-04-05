@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { _ } from 'svelte-i18n';
 	import { getContext } from 'svelte';
-	import { projectsStore } from '$lib/modules/mukke/stores/projects.svelte';
-	import type { Project } from '$lib/modules/mukke/types';
+	import { projectsStore } from '$lib/modules/music/stores/projects.svelte';
+	import type { Project } from '$lib/modules/music/types';
 	import { ArrowLeft, Plus, Trash, Note, X } from '@manacore/shared-icons';
 
 	const projectsCtx: { readonly value: Project[] } = getContext('projects');
@@ -46,7 +46,7 @@
 </script>
 
 <svelte:head>
-	<title>Projekte - Mukke - ManaCore</title>
+	<title>Projekte - Music - ManaCore</title>
 </svelte:head>
 
 <div class="space-y-6">
@@ -54,7 +54,7 @@
 	<div class="flex items-center justify-between">
 		<div class="flex items-center gap-3">
 			<a
-				href="/mukke"
+				href="/music"
 				class="rounded-lg p-1.5 text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--muted))]"
 			>
 				<ArrowLeft size={20} />

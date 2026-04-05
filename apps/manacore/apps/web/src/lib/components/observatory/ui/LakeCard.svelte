@@ -29,7 +29,7 @@
 		redis: 'Schneller Cache-Speicher. Klein, kristallklar, sofort verfugbar.',
 		minio: 'Objekt-Speicher fur Dateien, Bilder und Medien aller Apps.',
 		'db-left': 'PostgreSQL-Datenbanken fur Calendar, Todo, Contacts, Storage.',
-		'db-center': 'PostgreSQL-Datenbanken fur Zitare, Mukke, Clock, NutriPhi.',
+		'db-center': 'PostgreSQL-Datenbanken fur Zitare, Music, Clock, NutriPhi.',
 		'db-right': 'PostgreSQL-Datenbanken fur Photos, SkillTree, Context, Planta.',
 	};
 

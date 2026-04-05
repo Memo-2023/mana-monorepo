@@ -5,9 +5,9 @@
  * Handles project CRUD.
  */
 
-import { mukkeProjectTable } from '../collections';
+import { musicProjectTable } from '../collections';
 import { toProject } from '../queries';
-import { MukkeEvents } from '@manacore/shared-utils/analytics';
+import { MusicEvents } from '@manacore/shared-utils/analytics';
 import type { LocalProject } from '../types';
 
 export const projectsStore = {
@@ -19,14 +19,14 @@ export const projectsStore = {
 			description: data.description ?? null,
 			songId: data.songId ?? null,
 		};
-		await mukkeProjectTable.add(newLocal);
-		MukkeEvents.projectCreated();
+		await musicProjectTable.add(newLocal);
+		MusicEvents.projectCreated();
 		return toProject(newLocal);
 	},
 
 	/** Update a project. */
 	async update(id: string, data: Partial<Pick<LocalProject, 'title' | 'description' | 'songId'>>) {
-		await mukkeProjectTable.update(id, {
+		await musicProjectTable.update(id, {
 			...data,
 			updatedAt: new Date().toISOString(),
 		});
@@ -35,7 +35,7 @@ export const projectsStore = {
 	/** Soft-delete a project. */
 	async delete(id: string) {
 		const now = new Date().toISOString();
-		await mukkeProjectTable.update(id, { deletedAt: now, updatedAt: now });
-		MukkeEvents.projectDeleted();
+		await musicProjectTable.update(id, { deletedAt: now, updatedAt: now });
+		MusicEvents.projectDeleted();
 	},
 };

@@ -94,14 +94,14 @@
 			"empty": "Aucun fichier",
 			"open": "Ouvrir Storage"
 		},
-		"mukke": {
+		"music": {
 			"title": "Musique",
 			"description": "Ta bibliothèque musicale",
 			"songs": "Titres",
 			"playlists": "Playlists",
 			"favorites": "Favoris",
 			"empty": "Aucun titre",
-			"open": "Ouvrir Mukke"
+			"open": "Ouvrir Music"
 		},
 		"presi": {
 			"title": "Présentations",

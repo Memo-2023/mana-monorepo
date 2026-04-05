@@ -1,20 +1,30 @@
 <script lang="ts">
 	/**
-	 * CalendarEventsWidget - Upcoming calendar events (local-first)
+	 * CalendarEventsWidget - Upcoming timeBlocks (local-first)
 	 *
-	 * Reads directly from Calendar's IndexedDB via cross-app reader.
-	 * Reactive: auto-updates when events change (sync, other tabs).
+	 * Shows events, tasks, habits, and time entries from the next 7 days.
+	 * Reads directly from the timeBlocks table via cross-app query.
+	 * Reactive: auto-updates when data changes (sync, other tabs).
 	 */
 
 	import { _ } from 'svelte-i18n';
 	import { useUpcomingEvents } from '$lib/data/cross-app-queries';
+	import type { LocalTimeBlock } from '$lib/data/time-blocks/types';
+	import { CalendarBlank, CheckSquare, Timer, Heart } from '@manacore/shared-icons';
 
 	const events = useUpcomingEvents(7);
 
 	const MAX_DISPLAY = 5;
 
-	function formatEventTime(event: any): string {
-		const start = new Date(event.startDate);
+	const typeIcons: Record<string, typeof CalendarBlank> = {
+		event: CalendarBlank,
+		task: CheckSquare,
+		timeEntry: Timer,
+		habit: Heart,
+	};
+
+	function formatEventTime(block: LocalTimeBlock): string {
+		const start = new Date(block.startDate);
 		const today = new Date();
 		const tomorrow = new Date(today);
 		tomorrow.setDate(tomorrow.getDate() + 1);
@@ -32,7 +42,7 @@
 			});
 		}
 
-		if (event.allDay) {
+		if (block.allDay) {
 			return dateStr;
 		}
 
@@ -47,7 +57,7 @@
 <div>
 	<div class="mb-3 flex items-center justify-between">
 		<h3 class="flex items-center gap-2 text-lg font-semibold">
-			<span>🗓️</span>
+			<span><CalendarBlank size={20} /></span>
 			{$_('dashboard.widgets.calendar.title')}
 		</h3>
 		{#if (events.value ?? []).length > 0}
@@ -65,24 +75,29 @@
 		</div>
 	{:else if (events.value ?? []).length === 0}
 		<div class="py-6 text-center">
-			<div class="mb-2 text-3xl">📅</div>
+			<div class="mb-2 text-3xl"><CalendarBlank size={32} /></div>
 			<p class="text-sm text-muted-foreground">
 				{$_('dashboard.widgets.calendar.empty')}
 			</p>
 		</div>
 	{:else}
 		<div class="space-y-2">
-			{#each displayedEvents as event (event.id)}
+			{#each displayedEvents as block (block.id)}
+				{@const TypeIcon = typeIcons[block.type] ?? CalendarBlank}
 				<div class="flex items-start gap-3 rounded-lg p-2 transition-colors hover:bg-surface-hover">
 					<div
 						class="mt-1 h-3 w-3 flex-shrink-0 rounded-full"
-						style="background-color: {event.color || '#3B82F6'}"
+						class:animate-pulse={block.isLive}
+						style="background-color: {block.color || '#3B82F6'}"
 					></div>
 					<div class="min-w-0 flex-1">
-						<p class="truncate text-sm font-medium">{event.title}</p>
-						<p class="text-xs text-muted-foreground">{formatEventTime(event)}</p>
-						{#if event.location}
-							<p class="truncate text-xs text-muted-foreground">📍 {event.location}</p>
+						<div class="flex items-center gap-1.5">
+							<svelte:component this={TypeIcon} size={12} class="text-muted-foreground" />
+							<p class="truncate text-sm font-medium">{block.title}</p>
+						</div>
+						<p class="text-xs text-muted-foreground">{formatEventTime(block)}</p>
+						{#if block.isLive}
+							<span class="text-xs text-green-600">live</span>
 						{/if}
 					</div>
 				</div>

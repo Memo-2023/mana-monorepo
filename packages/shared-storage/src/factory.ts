@@ -110,6 +110,6 @@ export const createContactsStorage = () => createStorage('CONTACTS');
 export const createStorageStorage = (publicUrl?: string) => createStorage('STORAGE', publicUrl);
 export const createMailStorage = () => createStorage('MAIL');
 export const createInventoryStorage = (publicUrl?: string) => createStorage('INVENTORY', publicUrl);
-export const createMukkeStorage = () => createStorage('MUKKE');
+export const createMusicStorage = () => createStorage('MUSIC');
 export const createPlantaStorage = (publicUrl?: string) => createStorage('PLANTA', publicUrl);
 export const createProjectDocStorage = () => createStorage('PROJECTDOC');

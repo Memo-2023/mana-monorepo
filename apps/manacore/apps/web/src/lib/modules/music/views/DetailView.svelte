@@ -1,5 +1,5 @@
 <!--
-  Mukke — DetailView (inline editable overlay)
+  Music — DetailView (inline editable overlay)
   All fields are always editable. Changes auto-save on blur.
 -->
 <script lang="ts">

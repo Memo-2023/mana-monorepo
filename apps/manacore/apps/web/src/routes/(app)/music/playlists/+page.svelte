@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { _ } from 'svelte-i18n';
 	import { getContext } from 'svelte';
-	import { playlistsStore } from '$lib/modules/mukke/stores/playlists.svelte';
-	import type { Playlist } from '$lib/modules/mukke/types';
+	import { playlistsStore } from '$lib/modules/music/stores/playlists.svelte';
+	import type { Playlist } from '$lib/modules/music/types';
 	import {
 		ArrowLeft,
 		Plus,
@@ -42,7 +42,7 @@
 </script>
 
 <svelte:head>
-	<title>Playlists - Mukke - ManaCore</title>
+	<title>Playlists - Music - ManaCore</title>
 </svelte:head>
 
 <div class="space-y-6">
@@ -50,7 +50,7 @@
 	<div class="flex items-center justify-between">
 		<div class="flex items-center gap-3">
 			<a
-				href="/mukke"
+				href="/music"
 				class="rounded-lg p-1.5 text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--muted))]"
 			>
 				<ArrowLeft size={20} />
@@ -83,7 +83,7 @@
 		<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
 			{#each playlistsCtx.value as playlist (playlist.id)}
 				<a
-					href="/mukke/playlists/{playlist.id}"
+					href="/music/playlists/{playlist.id}"
 					class="group relative rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-4 transition-all hover:border-[hsl(var(--primary)/0.3)]"
 				>
 					<div

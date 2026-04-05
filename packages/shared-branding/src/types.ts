@@ -24,7 +24,7 @@ export type AppId =
 	| 'planta'
 	| 'lightwrite'
 	| 'context'
-	| 'mukke'
+	| 'music'
 	| 'citycorners';
 
 /**

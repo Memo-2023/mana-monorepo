@@ -7,7 +7,7 @@ import { storageSearchProvider } from './storage';
 import { cardsSearchProvider } from './cards';
 import { pictureSearchProvider } from './picture';
 import { presiSearchProvider } from './presi';
-import { mukkeSearchProvider } from './mukke';
+import { musicSearchProvider } from './music';
 import { zitareSearchProvider } from './zitare';
 import { clockSearchProvider } from './clock';
 
@@ -20,7 +20,7 @@ export function registerAllProviders(registry: SearchRegistry): void {
 	registry.register(cardsSearchProvider);
 	registry.register(pictureSearchProvider);
 	registry.register(presiSearchProvider);
-	registry.register(mukkeSearchProvider);
+	registry.register(musicSearchProvider);
 	registry.register(zitareSearchProvider);
 	registry.register(clockSearchProvider);
 }
@@ -34,7 +34,7 @@ export {
 	cardsSearchProvider,
 	pictureSearchProvider,
 	presiSearchProvider,
-	mukkeSearchProvider,
+	musicSearchProvider,
 	zitareSearchProvider,
 	clockSearchProvider,
 };

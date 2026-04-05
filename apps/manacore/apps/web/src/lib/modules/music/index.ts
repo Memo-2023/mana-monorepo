@@ -1,5 +1,5 @@
 /**
- * Mukke module — barrel exports.
+ * Music module — barrel exports.
  */
 
 export { libraryStore } from './stores/library.svelte';
@@ -29,11 +29,11 @@ export {
 } from './queries';
 export {
 	songTable,
-	mukkePlaylistTable,
+	musicPlaylistTable,
 	playlistSongTable,
-	mukkeProjectTable,
+	musicProjectTable,
 	markerTable,
-	MUKKE_GUEST_SEED,
+	MUSIC_GUEST_SEED,
 } from './collections';
 export type {
 	LocalSong,

@@ -1,5 +1,5 @@
 /**
- * Reactive queries & pure helpers for Mukke — uses Dexie liveQuery on the unified DB.
+ * Reactive queries & pure helpers for Music — uses Dexie liveQuery on the unified DB.
  */
 
 import { liveQuery } from 'dexie';

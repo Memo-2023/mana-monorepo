@@ -46,7 +46,7 @@ const DEEP_LINK_PATTERNS: Record<string, Record<string, string>> = {
 		decks: '/decks/{id}',
 		cards: '/decks/{id}', // Navigate to deck containing the card
 	},
-	mukke: {
+	music: {
 		songs: '/',
 		playlists: '/playlists/{id}',
 	},

@@ -5,9 +5,9 @@
  * Handles playlist CRUD and song associations.
  */
 
-import { mukkePlaylistTable, playlistSongTable } from '../collections';
+import { musicPlaylistTable, playlistSongTable } from '../collections';
 import { toPlaylist } from '../queries';
-import { MukkeEvents } from '@manacore/shared-utils/analytics';
+import { MusicEvents } from '@manacore/shared-utils/analytics';
 import type { LocalPlaylist, LocalPlaylistSong } from '../types';
 
 export const playlistsStore = {
@@ -19,14 +19,14 @@ export const playlistsStore = {
 			description: description ?? null,
 			coverArtPath: null,
 		};
-		await mukkePlaylistTable.add(newLocal);
-		MukkeEvents.playlistCreated();
+		await musicPlaylistTable.add(newLocal);
+		MusicEvents.playlistCreated();
 		return toPlaylist(newLocal);
 	},
 
 	/** Update a playlist. */
 	async update(id: string, data: Partial<Pick<LocalPlaylist, 'name' | 'description'>>) {
-		await mukkePlaylistTable.update(id, {
+		await musicPlaylistTable.update(id, {
 			...data,
 			updatedAt: new Date().toISOString(),
 		});
@@ -35,13 +35,13 @@ export const playlistsStore = {
 	/** Soft-delete a playlist and its song associations. */
 	async delete(id: string) {
 		const now = new Date().toISOString();
-		await mukkePlaylistTable.update(id, { deletedAt: now, updatedAt: now });
+		await musicPlaylistTable.update(id, { deletedAt: now, updatedAt: now });
 		// Soft-delete associated playlistSongs
 		const allPS = await playlistSongTable.where('playlistId').equals(id).toArray();
 		for (const ps of allPS) {
 			await playlistSongTable.update(ps.id, { deletedAt: now, updatedAt: now });
 		}
-		MukkeEvents.playlistDeleted();
+		MusicEvents.playlistDeleted();
 	},
 
 	/** Add a song to a playlist. */

@@ -108,7 +108,7 @@ function createPlayerStore() {
 		state.duration = 0;
 		state.error = null;
 
-		// NOTE: In the unified app, audio URLs would come from the mukke backend
+		// NOTE: In the unified app, audio URLs would come from the music backend
 		// via presigned S3 download URLs. For now, playback requires the backend.
 		// The store manages queue/state regardless.
 		try {

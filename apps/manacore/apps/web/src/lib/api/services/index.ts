@@ -13,7 +13,7 @@ export { pictureService, type GeneratedImage, type GenerationStats } from './pic
 export { cardsService, type Deck, type Card, type LearningProgress } from './cards';
 export { clockService, type Timer, type Alarm, type ClockStats } from './clock';
 export { storageService, type StorageFile, type StorageStats } from './storage';
-export { mukkeService, type Song, type MukkeStats } from './mukke';
+export { musicService, type Song, type MusicStats } from './music';
 export { presiService, type PresiDeck, type PresiStats } from './presi';
 export {
 	contextService,

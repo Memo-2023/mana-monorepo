@@ -94,14 +94,14 @@
 			"empty": "Nessun file",
 			"open": "Apri Storage"
 		},
-		"mukke": {
+		"music": {
 			"title": "Musica",
 			"description": "La tua libreria musicale",
 			"songs": "Brani",
 			"playlists": "Playlist",
 			"favorites": "Preferiti",
 			"empty": "Nessun brano",
-			"open": "Apri Mukke"
+			"open": "Apri Music"
 		},
 		"presi": {
 			"title": "Presentazioni",

@@ -272,9 +272,9 @@ export const APP_BRANDING: Record<AppId, AppBranding> = {
 		logoStroke: true,
 		logoStrokeWidth: 1.5,
 	},
-	mukke: {
-		id: 'mukke',
-		name: 'Mukke',
+	music: {
+		id: 'music',
+		name: 'Music',
 		tagline: 'Music Workspace',
 		primaryColor: '#ec4899',
 		secondaryColor: '#f472b6',

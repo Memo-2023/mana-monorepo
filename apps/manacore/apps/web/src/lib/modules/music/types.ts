@@ -1,5 +1,5 @@
 /**
- * Mukke module types for the unified app.
+ * Music module types for the unified app.
  */
 
 import type { BaseRecord } from '@manacore/local-store';

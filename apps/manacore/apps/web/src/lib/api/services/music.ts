@@ -1,17 +1,17 @@
 /**
- * Mukke API Service
+ * Music API Service
  *
- * Fetches music library stats from the Mukke backend for dashboard widgets.
+ * Fetches music library stats from the Music backend for dashboard widgets.
  */
 
 import { browser } from '$app/environment';
 import { createApiClient, type ApiResult } from '../base-client';
 
-// Get Mukke API URL dynamically at runtime
-function getMukkeApiUrl(): string {
+// Get Music API URL dynamically at runtime
+function getMusicApiUrl(): string {
 	if (browser && typeof window !== 'undefined') {
-		const injectedUrl = (window as unknown as { __PUBLIC_MUKKE_API_URL__?: string })
-			.__PUBLIC_MUKKE_API_URL__;
+		const injectedUrl = (window as unknown as { __PUBLIC_MUSIC_API_URL__?: string })
+			.__PUBLIC_MUSIC_API_URL__;
 		if (injectedUrl) {
 			return `${injectedUrl}`;
 		}
@@ -24,13 +24,13 @@ let _client: ReturnType<typeof createApiClient> | null = null;
 
 function getClient() {
 	if (!_client) {
-		_client = createApiClient(getMukkeApiUrl());
+		_client = createApiClient(getMusicApiUrl());
 	}
 	return _client;
 }
 
 /**
- * Song entity from Mukke backend
+ * Song entity from Music backend
  */
 export interface Song {
 	id: string;
@@ -49,7 +49,7 @@ export interface Song {
 /**
  * Music library statistics
  */
-export interface MukkeStats {
+export interface MusicStats {
 	totalSongs: number;
 	totalPlaylists: number;
 	totalProjects: number;
@@ -58,14 +58,14 @@ export interface MukkeStats {
 }
 
 /**
- * Mukke service for dashboard widgets
+ * Music service for dashboard widgets
  */
-export const mukkeService = {
+export const musicService = {
 	/**
 	 * Get library statistics
 	 */
-	async getStats(): Promise<ApiResult<MukkeStats>> {
-		return getClient().get<MukkeStats>('/library/stats');
+	async getStats(): Promise<ApiResult<MusicStats>> {
+		return getClient().get<MusicStats>('/library/stats');
 	},
 
 	/**
@@ -83,7 +83,7 @@ export const mukkeService = {
 	},
 
 	/**
-	 * Format duration for display (seconds → MM:SS or HH:MM:SS)
+	 * Format duration for display (seconds -> MM:SS or HH:MM:SS)
 	 */
 	formatDuration(seconds: number): string {
 		if (seconds <= 0) return '0:00';

@@ -94,14 +94,14 @@
 			"empty": "Sin archivos",
 			"open": "Abrir Storage"
 		},
-		"mukke": {
+		"music": {
 			"title": "Música",
 			"description": "Tu biblioteca musical",
 			"songs": "Canciones",
 			"playlists": "Playlists",
 			"favorites": "Favoritos",
 			"empty": "Sin canciones",
-			"open": "Abrir Mukke"
+			"open": "Abrir Music"
 		},
 		"presi": {
 			"title": "Presentaciones",

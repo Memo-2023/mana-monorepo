@@ -2,10 +2,10 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { getContext } from 'svelte';
-	import { playlistsStore } from '$lib/modules/mukke/stores/playlists.svelte';
-	import { playerStore } from '$lib/modules/mukke/stores/player.svelte';
-	import { getPlaylistSongs, formatDuration } from '$lib/modules/mukke/queries';
-	import type { Song, Playlist, LocalPlaylistSong } from '$lib/modules/mukke/types';
+	import { playlistsStore } from '$lib/modules/music/stores/playlists.svelte';
+	import { playerStore } from '$lib/modules/music/stores/player.svelte';
+	import { getPlaylistSongs, formatDuration } from '$lib/modules/music/queries';
+	import type { Song, Playlist, LocalPlaylistSong } from '$lib/modules/music/types';
 	import {
 		ArrowLeft,
 		Play,
@@ -31,7 +31,7 @@
 	let editName = $state('');
 	let showShare = $state(false);
 	let shareUrl = $derived(
-		`${typeof window !== 'undefined' ? window.location.origin : ''}/mukke/playlists/${playlistId}`
+		`${typeof window !== 'undefined' ? window.location.origin : ''}/music/playlists/${playlistId}`
 	);
 
 	function startEdit() {
@@ -64,13 +64,13 @@
 	async function handleDeletePlaylist() {
 		if (confirm('Playlist wirklich loschen?')) {
 			await playlistsStore.delete(playlistId);
-			goto('/mukke/playlists');
+			goto('/music/playlists');
 		}
 	}
 </script>
 
 <svelte:head>
-	<title>{playlist?.name || 'Playlist'} - Mukke - ManaCore</title>
+	<title>{playlist?.name || 'Playlist'} - Music - ManaCore</title>
 </svelte:head>
 
 <div class="space-y-6">
@@ -78,7 +78,7 @@
 	<div class="flex items-center justify-between">
 		<div class="flex items-center gap-3">
 			<a
-				href="/mukke/playlists"
+				href="/music/playlists"
 				class="rounded-lg p-1.5 text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--muted))]"
 			>
 				<ArrowLeft size={20} />
@@ -222,6 +222,6 @@
 	onClose={() => (showShare = false)}
 	url={shareUrl}
 	title={playlist?.name ?? 'Playlist'}
-	source="mukke"
+	source="music"
 	description="{songs.length} {songs.length === 1 ? 'Song' : 'Songs'}"
 />

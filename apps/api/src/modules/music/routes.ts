@@ -1,6 +1,6 @@
 /**
- * Mukke module — Audio upload, presigned URLs, cover art
- * Ported from apps/mukke/apps/server
+ * Music module — Audio upload, presigned URLs, cover art
+ * Renamed from Mukke.
  */
 
 import { Hono } from 'hono';
@@ -18,8 +18,8 @@ routes.post('/songs/upload', async (c) => {
 	const key = `users/${userId}/songs/${songId}/${filename}`;
 
 	try {
-		const { createMukkeStorage } = await import('@manacore/shared-storage');
-		const storage = createMukkeStorage();
+		const { createMusicStorage } = await import('@manacore/shared-storage');
+		const storage = createMusicStorage();
 		const uploadUrl = await storage.getUploadUrl(key, { expiresIn: 3600 });
 
 		return c.json({
@@ -38,12 +38,41 @@ routes.get('/songs/:id/download-url', async (c) => {
 	if (!storagePath) return c.json({ error: 'storagePath required' }, 400);
 
 	try {
-		const { createMukkeStorage } = await import('@manacore/shared-storage');
-		const storage = createMukkeStorage();
+		const { createMusicStorage } = await import('@manacore/shared-storage');
+		const storage = createMusicStorage();
 		const url = await storage.getDownloadUrl(storagePath, { expiresIn: 3600 });
 		return c.json({ url });
 	} catch {
 		return c.json({ error: 'Failed to generate download URL' }, 500);
+	}
+});
+
+// ─── Cover Art Upload (via mana-media) ─────────────────────
+
+routes.post('/cover/upload', async (c) => {
+	const userId = c.get('userId');
+	const formData = await c.req.formData();
+	const file = formData.get('file') as File | null;
+
+	if (!file) return c.json({ error: 'No file' }, 400);
+	if (file.size > 10 * 1024 * 1024) return c.json({ error: 'Max 10MB' }, 400);
+	if (!file.type.startsWith('image/')) return c.json({ error: 'Must be an image' }, 400);
+
+	try {
+		const { uploadImageToMedia } = await import('../../lib/media');
+		const buffer = await file.arrayBuffer();
+		const result = await uploadImageToMedia(buffer, file.name, { app: 'music', userId });
+
+		return c.json(
+			{
+				coverArtPath: result.id,
+				coverUrl: result.urls.thumbnail || result.urls.original,
+				mediaId: result.id,
+			},
+			201
+		);
+	} catch {
+		return c.json({ error: 'Upload failed' }, 500);
 	}
 });
 
@@ -54,8 +83,8 @@ routes.get('/songs/:id/cover-url', async (c) => {
 	if (!coverArtPath) return c.json({ url: null });
 
 	try {
-		const { createMukkeStorage } = await import('@manacore/shared-storage');
-		const storage = createMukkeStorage();
+		const { createMusicStorage } = await import('@manacore/shared-storage');
+		const storage = createMusicStorage();
 		const url = await storage.getDownloadUrl(coverArtPath, { expiresIn: 3600 });
 		return c.json({ url });
 	} catch {
@@ -70,8 +99,8 @@ routes.post('/library/cover-urls', async (c) => {
 	if (!paths?.length) return c.json({ urls: {} });
 
 	try {
-		const { createMukkeStorage } = await import('@manacore/shared-storage');
-		const storage = createMukkeStorage();
+		const { createMusicStorage } = await import('@manacore/shared-storage');
+		const storage = createMusicStorage();
 		const urls: Record<string, string> = {};
 
 		for (const path of paths.slice(0, 50)) {
@@ -88,4 +117,4 @@ routes.post('/library/cover-urls', async (c) => {
 	}
 });
 
-export { routes as mukkeRoutes };
+export { routes as musicRoutes };

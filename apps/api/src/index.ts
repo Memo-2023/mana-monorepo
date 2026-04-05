@@ -18,7 +18,7 @@ import {
 // Module routes
 import { calendarRoutes } from './modules/calendar/routes';
 import { contactsRoutes } from './modules/contacts/routes';
-import { mukkeRoutes } from './modules/mukke/routes';
+import { musicRoutes } from './modules/music/routes';
 import { chatRoutes } from './modules/chat/routes';
 import { contextRoutes } from './modules/context/routes';
 import { pictureRoutes } from './modules/picture/routes';
@@ -48,7 +48,7 @@ app.use('/api/*', authMiddleware());
 // ─── Module Routes ──────────────────────────────────────────
 app.route('/api/v1/calendar', calendarRoutes);
 app.route('/api/v1/contacts', contactsRoutes);
-app.route('/api/v1/mukke', mukkeRoutes);
+app.route('/api/v1/music', musicRoutes);
 app.route('/api/v1/chat', chatRoutes);
 app.route('/api/v1/context', contextRoutes);
 app.route('/api/v1/picture', pictureRoutes);

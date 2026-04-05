@@ -16,7 +16,7 @@ const SERVICES = [
 	{ name: 'Chat API', url: process.env.PUBLIC_CHAT_API_URL || 'http://localhost:3030' },
 	{ name: 'Storage API', url: process.env.PUBLIC_STORAGE_API_URL || 'http://localhost:3034' },
 	{ name: 'Cards API', url: process.env.PUBLIC_CARDS_API_URL || 'http://localhost:3036' },
-	{ name: 'Mukke API', url: process.env.PUBLIC_MUKKE_API_URL || 'http://localhost:3037' },
+	{ name: 'Music API', url: process.env.PUBLIC_MUSIC_API_URL || 'http://localhost:3037' },
 	{ name: 'NutriPhi API', url: process.env.PUBLIC_NUTRIPHI_API_URL || 'http://localhost:3038' },
 	{ name: 'Uload Server', url: process.env.PUBLIC_ULOAD_SERVER_URL || 'http://localhost:3070' },
 	{ name: 'Memoro Server', url: process.env.PUBLIC_MEMORO_SERVER_URL || 'http://localhost:3015' },

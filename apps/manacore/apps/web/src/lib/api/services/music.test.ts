@@ -12,9 +12,9 @@ vi.mock('$lib/stores/auth.svelte', () => ({
 	},
 }));
 
-import { mukkeService } from './mukke';
+import { musicService } from './music';
 
-describe('mukkeService', () => {
+describe('musicService', () => {
 	beforeEach(() => {
 		vi.restoreAllMocks();
 	});
@@ -25,27 +25,27 @@ describe('mukkeService', () => {
 
 	describe('formatDuration', () => {
 		it('should format 0 seconds', () => {
-			expect(mukkeService.formatDuration(0)).toBe('0:00');
+			expect(musicService.formatDuration(0)).toBe('0:00');
 		});
 
 		it('should format seconds only', () => {
-			expect(mukkeService.formatDuration(45)).toBe('0:45');
+			expect(musicService.formatDuration(45)).toBe('0:45');
 		});
 
 		it('should format minutes and seconds', () => {
-			expect(mukkeService.formatDuration(185)).toBe('3:05');
+			expect(musicService.formatDuration(185)).toBe('3:05');
 		});
 
 		it('should format hours', () => {
-			expect(mukkeService.formatDuration(3661)).toBe('1:01:01');
+			expect(musicService.formatDuration(3661)).toBe('1:01:01');
 		});
 
 		it('should pad seconds with zero', () => {
-			expect(mukkeService.formatDuration(60)).toBe('1:00');
+			expect(musicService.formatDuration(60)).toBe('1:00');
 		});
 
 		it('should handle negative values', () => {
-			expect(mukkeService.formatDuration(-10)).toBe('0:00');
+			expect(musicService.formatDuration(-10)).toBe('0:00');
 		});
 	});
 
@@ -63,7 +63,7 @@ describe('mukkeService', () => {
 				json: () => Promise.resolve(mockStats),
 			});
 
-			const result = await mukkeService.getStats();
+			const result = await musicService.getStats();
 
 			expect(result.data).toEqual(mockStats);
 			expect(global.fetch).toHaveBeenCalledWith(
@@ -80,7 +80,7 @@ describe('mukkeService', () => {
 				json: () => Promise.resolve([{ id: 's-1', title: 'Song 1' }]),
 			});
 
-			const result = await mukkeService.getRecentSongs();
+			const result = await musicService.getRecentSongs();
 
 			expect(result.data).toHaveLength(1);
 			expect(global.fetch).toHaveBeenCalledWith(

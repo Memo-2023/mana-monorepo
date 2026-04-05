@@ -154,8 +154,8 @@ const APP_DEFINITIONS: AppDefinition[] = [
 		},
 	},
 	{
-		id: 'mukke',
-		displayName: 'Mukke',
+		id: 'music',
+		displayName: 'Music',
 		score: 80,
 		status: 'beta',
 		categories: {

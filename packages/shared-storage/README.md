@@ -27,7 +27,7 @@ Each app gets its own isolated bucket, created automatically by `minio-init`:
 | `storage-storage` | Storage | Cloud drive files |
 | `mail-storage` | Mail | Email attachments |
 | `inventory-storage` | Inventory | Product photos |
-| `mukke-storage` | Mukke | Music tracks, beats, covers |
+| `music-storage` | Music | Music tracks, beats, covers |
 | `planta-storage` | Planta | Plant photos |
 | `projectdoc-storage` | ProjectDoc | Document files |
 
@@ -88,7 +88,7 @@ import { createStorage } from '@manacore/shared-storage';
 // Instead of app-specific factories:
 const storage = createStorage('PICTURE');
 const storage = createStorage('CHAT');
-const storage = createStorage('MUKKE');
+const storage = createStorage('MUSIC');
 ```
 
 App-specific aliases still work: `createPictureStorage()`, `createChatStorage()`, etc.

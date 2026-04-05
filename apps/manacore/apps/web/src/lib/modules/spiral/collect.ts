@@ -157,11 +157,11 @@ export async function collectAppSnapshots(): Promise<AppSnapshot[]> {
 		});
 	}
 
-	// Mukke
+	// Music
 	if (songs.length > 0) {
 		snapshots.push({
-			app: 'Mukke',
-			appIndex: MANA_APP_INDEX.mukke,
+			app: 'Music',
+			appIndex: MANA_APP_INDEX.music,
 			totalItems: songs.length,
 			completedItems: 0,
 			favoriteItems: 0,

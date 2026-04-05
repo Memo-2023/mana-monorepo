@@ -45,7 +45,7 @@ export type AppSource =
 	| 'chat'
 	| 'storage'
 	| 'presi'
-	| 'mukke'
+	| 'music'
 	| 'cards'
 	| 'picture'
 	| 'uload'
@@ -59,7 +59,7 @@ export const APP_SOURCE_LABELS: Record<string, string> = {
 	chat: 'Chat',
 	storage: 'Storage',
 	presi: 'Presi',
-	mukke: 'Mukke',
+	music: 'Music',
 	cards: 'Cards',
 	picture: 'Picture',
 	uload: 'uLoad',

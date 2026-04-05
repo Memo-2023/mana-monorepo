@@ -1,5 +1,5 @@
 /**
- * Umukke Tags — Uses shared global tags + module-specific junction table.
+ * Music Tags — Uses shared global tags + module-specific junction table.
  */
 
 import { db } from '$lib/data/database';

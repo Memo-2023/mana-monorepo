@@ -1,5 +1,5 @@
 <!--
-  Mukke — Workbench ListView
+  Music — Workbench ListView
   Song library with recent plays and playlists.
 -->
 <script lang="ts">

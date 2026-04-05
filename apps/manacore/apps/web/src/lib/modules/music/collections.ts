@@ -1,7 +1,7 @@
 /**
- * Mukke module — collection accessors and guest seed data.
+ * Music module — collection accessors and guest seed data.
  *
- * Table names: songs, mukkePlaylists, playlistSongs, mukkeProjects, markers
+ * Dexie table names kept as mukkePlaylists/mukkeProjects for backward compat.
  */
 
 import { db } from '$lib/data/database';
@@ -16,16 +16,16 @@ import type {
 // ─── Collection Accessors ──────────────────────────────────
 
 export const songTable = db.table<LocalSong>('songs');
-export const mukkePlaylistTable = db.table<LocalPlaylist>('mukkePlaylists');
+export const musicPlaylistTable = db.table<LocalPlaylist>('mukkePlaylists');
 export const playlistSongTable = db.table<LocalPlaylistSong>('playlistSongs');
-export const mukkeProjectTable = db.table<LocalProject>('mukkeProjects');
+export const musicProjectTable = db.table<LocalProject>('mukkeProjects');
 export const markerTable = db.table<LocalMarker>('markers');
 
 // ─── Guest Seed ────────────────────────────────────────────
 
 const DEMO_PLAYLIST_ID = 'demo-favorites';
 
-export const MUKKE_GUEST_SEED = {
+export const MUSIC_GUEST_SEED = {
 	songs: [] as Record<string, unknown>[],
 	mukkePlaylists: [
 		{

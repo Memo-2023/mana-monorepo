@@ -3,11 +3,11 @@ import { getManaApp } from '@manacore/shared-branding';
 import { scoreRecord, truncateSubtitle } from '../scoring';
 import type { SearchProvider, SearchResult, SearchOptions } from '../types';
 
-const app = getManaApp('mukke');
+const app = getManaApp('music');
 
-export const mukkeSearchProvider: SearchProvider = {
-	appId: 'mukke',
-	appName: 'Mukke',
+export const musicSearchProvider: SearchProvider = {
+	appId: 'music',
+	appName: 'Music',
 	appIcon: app?.icon,
 	appColor: app?.color,
 	searchableTypes: ['song', 'playlist', 'project'],
@@ -33,19 +33,19 @@ export const mukkeSearchProvider: SearchProvider = {
 				results.push({
 					id: song.id,
 					type: 'song',
-					appId: 'mukke',
+					appId: 'music',
 					title: song.title,
 					subtitle: [song.artist, song.album].filter(Boolean).join(' · ') || undefined,
 					appIcon: app?.icon,
 					appColor: app?.color,
-					href: '/mukke/library',
+					href: '/music/library',
 					score,
 					matchedField,
 				});
 			}
 		}
 
-		// Search playlists
+		// Search playlists (Dexie table name kept for backward compat)
 		const playlists = await db.table('mukkePlaylists').toArray();
 		for (const pl of playlists) {
 			if (pl.deletedAt) continue;
@@ -60,19 +60,19 @@ export const mukkeSearchProvider: SearchProvider = {
 				results.push({
 					id: pl.id,
 					type: 'playlist',
-					appId: 'mukke',
+					appId: 'music',
 					title: pl.name,
 					subtitle: truncateSubtitle(pl.description) || 'Playlist',
 					appIcon: app?.icon,
 					appColor: app?.color,
-					href: `/mukke/playlists/${pl.id}`,
+					href: `/music/playlists/${pl.id}`,
 					score,
 					matchedField,
 				});
 			}
 		}
 
-		// Search projects
+		// Search projects (Dexie table name kept for backward compat)
 		const projects = await db.table('mukkeProjects').toArray();
 		for (const proj of projects) {
 			if (proj.deletedAt) continue;
@@ -87,12 +87,12 @@ export const mukkeSearchProvider: SearchProvider = {
 				results.push({
 					id: proj.id,
 					type: 'project',
-					appId: 'mukke',
+					appId: 'music',
 					title: proj.title,
 					subtitle: truncateSubtitle(proj.description) || 'Projekt',
 					appIcon: app?.icon,
 					appColor: app?.color,
-					href: `/mukke/projects`,
+					href: `/music/projects`,
 					score,
 					matchedField,
 				});

@@ -47,7 +47,7 @@ describe('WIDGET_REGISTRY', () => {
 			'cards',
 			'times',
 			'storage',
-			'mukke',
+			'music',
 			'presi',
 			'context',
 			'mana-core-auth',
@@ -73,7 +73,7 @@ describe('WIDGET_REGISTRY', () => {
 		expect(types).toContain('cards-progress');
 		expect(types).toContain('clock-timers');
 		expect(types).toContain('storage-usage');
-		expect(types).toContain('mukke-library');
+		expect(types).toContain('music-library');
 		expect(types).toContain('presi-decks');
 		expect(types).toContain('context-docs');
 	});

@@ -16,7 +16,7 @@ export {
 	createStorageStorage,
 	createMailStorage,
 	createInventoryStorage,
-	createMukkeStorage,
+	createMusicStorage,
 	createPlantaStorage,
 	createProjectDocStorage,
 } from './factory';

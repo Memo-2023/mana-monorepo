@@ -160,7 +160,7 @@ const track = {
 	questions: createModuleTracker('questions'),
 	photos: createModuleTracker('photos'),
 	storage: createModuleTracker('storage'),
-	mukke: createModuleTracker('mukke'),
+	music: createModuleTracker('music'),
 	zitare: createModuleTracker('zitare'),
 	presi: createModuleTracker('presi'),
 	subscription: createModuleTracker('subscription'),
@@ -434,21 +434,21 @@ export const StorageEvents = {
 };
 
 /**
- * Mukke App Events
+ * Music App Events
  */
-export const MukkeEvents = {
-	songUploaded: () => track.mukke('song_uploaded'),
-	songUploadFailed: () => track.mukke('song_upload_failed'),
-	songPlayed: () => track.mukke('song_played'),
-	songFavorited: (favorited: boolean) => track.mukke('song_favorited', { favorited }),
-	songDeleted: () => track.mukke('song_deleted'),
-	playlistCreated: () => track.mukke('playlist_created'),
-	playlistDeleted: () => track.mukke('playlist_deleted'),
-	playlistPlayAll: () => track.mukke('playlist_play_all'),
-	playlistShufflePlay: () => track.mukke('playlist_shuffle_play'),
-	projectCreated: () => track.mukke('project_created'),
-	projectDeleted: () => track.mukke('project_deleted'),
-	projectExported: (format: string) => track.mukke('project_exported', { format }),
+export const MusicEvents = {
+	songUploaded: () => track.music('song_uploaded'),
+	songUploadFailed: () => track.music('song_upload_failed'),
+	songPlayed: () => track.music('song_played'),
+	songFavorited: (favorited: boolean) => track.music('song_favorited', { favorited }),
+	songDeleted: () => track.music('song_deleted'),
+	playlistCreated: () => track.music('playlist_created'),
+	playlistDeleted: () => track.music('playlist_deleted'),
+	playlistPlayAll: () => track.music('playlist_play_all'),
+	playlistShufflePlay: () => track.music('playlist_shuffle_play'),
+	projectCreated: () => track.music('project_created'),
+	projectDeleted: () => track.music('project_deleted'),
+	projectExported: (format: string) => track.music('project_exported', { format }),
 };
 
 /**

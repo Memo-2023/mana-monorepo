@@ -34,7 +34,7 @@
 		storage: 'https://storage.mana.how',
 		picture: 'https://picture.mana.how',
 		presi: 'https://presi.mana.how',
-		mukke: 'https://mukke.mana.how',
+		music: 'https://music.mana.how',
 		clock: 'https://clock.mana.how',
 		nutriphi: 'https://nutriphi.mana.how',
 		photos: 'https://photos.mana.how',

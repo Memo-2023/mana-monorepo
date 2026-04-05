@@ -377,12 +377,12 @@ registerApp({
 });
 
 registerApp({
-	id: 'mukke',
-	name: 'Mukke',
+	id: 'music',
+	name: 'Music',
 	color: '#F97316',
 	views: {
-		list: { load: () => import('$lib/modules/mukke/ListView.svelte') },
-		detail: { load: () => import('$lib/modules/mukke/views/DetailView.svelte') },
+		list: { load: () => import('$lib/modules/music/ListView.svelte') },
+		detail: { load: () => import('$lib/modules/music/views/DetailView.svelte') },
 	},
 });
 

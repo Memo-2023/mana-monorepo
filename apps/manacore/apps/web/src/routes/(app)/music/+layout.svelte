@@ -6,7 +6,7 @@
 		useAllPlaylists,
 		useAllPlaylistSongs,
 		useAllProjects,
-	} from '$lib/modules/mukke/queries';
+	} from '$lib/modules/music/queries';
 
 	let { children }: { children: Snippet } = $props();
 

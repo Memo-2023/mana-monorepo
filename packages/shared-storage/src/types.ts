@@ -136,7 +136,7 @@ export const BUCKETS = {
 	STORAGE: 'storage-storage',
 	MAIL: 'mail-storage',
 	INVENTORY: 'inventory-storage',
-	MUKKE: 'mukke-storage',
+	MUSIC: 'music-storage',
 	PLANTA: 'planta-storage',
 	PROJECTDOC: 'projectdoc-storage',
 } as const;

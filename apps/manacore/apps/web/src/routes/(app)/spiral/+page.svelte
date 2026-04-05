@@ -26,7 +26,7 @@
 		Picture: 'image',
 		Clock: 'clock',
 		Storage: 'hard-drive',
-		Mukke: 'music',
+		Music: 'music',
 		Presi: 'presentation',
 		Context: 'file-text',
 		Cards: 'layers',
