@@ -8,6 +8,7 @@
 	import { habitsStore } from '../stores/habits.svelte';
 	import { DynamicIcon } from '@manacore/shared-ui/atoms';
 	import { CaretRight } from '@manacore/shared-icons';
+	import { dragSource } from '@manacore/shared-ui/dnd';
 
 	let {
 		habit,
@@ -62,7 +63,19 @@
 	);
 </script>
 
-<div class="habit-tile-wrapper">
+<div
+	class="habit-tile-wrapper"
+	use:dragSource={{
+		type: 'habit',
+		data: () => ({
+			id: habit.id,
+			title: habit.title,
+			color: habit.color,
+			icon: habit.icon,
+		}),
+		longPressMs: 600,
+	}}
+>
 	<button
 		class="habit-tile"
 		class:pressing

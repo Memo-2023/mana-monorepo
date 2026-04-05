@@ -2,6 +2,9 @@
 	import { onMount, getContext } from 'svelte';
 	import { calendarViewStore } from '../stores/view.svelte';
 	import { eventsStore } from '../stores/events.svelte';
+	import { createBlock } from '$lib/data/time-blocks/service';
+	import { dropTarget } from '@manacore/shared-ui/dnd';
+	import type { DragPayload } from '@manacore/shared-ui/dnd';
 	import {
 		getEventsForDay,
 		getEventsInRange,
@@ -172,6 +175,38 @@
 		onEventClick?.(event);
 	}
 
+	/** Handle cross-module drop (task/habit onto calendar). */
+	async function handleCrossModuleDrop(day: Date, payload: DragPayload) {
+		const data = payload.data as Record<string, unknown>;
+		const defaultStart = new Date(day);
+		defaultStart.setHours(9, 0, 0, 0);
+		const defaultEnd = new Date(day);
+		defaultEnd.setHours(10, 0, 0, 0);
+
+		if (payload.type === 'task') {
+			// Schedule task on calendar
+			const { tasksStore } = await import('$lib/modules/todo/stores/tasks.svelte');
+			const dateStr = format(day, 'yyyy-MM-dd');
+			await tasksStore.updateTask(data.id as string, {
+				_scheduleStartDate: dateStr,
+				_scheduleStartTime: '09:00',
+			});
+		} else if (payload.type === 'habit') {
+			// Create a logged habit block at this day
+			await createBlock({
+				startDate: defaultStart.toISOString(),
+				endDate: defaultEnd.toISOString(),
+				kind: 'logged',
+				type: 'habit',
+				sourceModule: 'habits',
+				sourceId: (data.id as string) || crypto.randomUUID(),
+				title: (data.title as string) || 'Habit',
+				color: (data.color as string) || null,
+				icon: (data.icon as string) || null,
+			});
+		}
+	}
+
 	function formatHour(hour: number): string {
 		return `${hour.toString().padStart(2, '0')}:00`;
 	}
@@ -245,6 +280,10 @@
 						dragToCreate.createTargetDay &&
 						isSameDay(day, dragToCreate.createTargetDay)}
 					onpointerdown={dragToCreate.startCreate}
+					use:dropTarget={{
+						accepts: ['task', 'habit'],
+						onDrop: (p) => handleCrossModuleDrop(day, p),
+					}}
 				>
 					{#each hours as hour}
 						<div class="hour-slot" role="button" tabindex="-1"></div>

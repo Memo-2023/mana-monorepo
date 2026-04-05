@@ -139,6 +139,11 @@
 			"title": "Mein Tag",
 			"description": "Chronologische Tagesansicht aller Aktivitäten",
 			"empty": "Noch nichts heute"
+		},
+		"activity_feed": {
+			"title": "Aktivität",
+			"description": "Letzte Änderungen über alle Module",
+			"empty": "Noch keine Aktivität"
 		}
 	}
 }

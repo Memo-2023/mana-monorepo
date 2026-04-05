@@ -139,6 +139,11 @@
 			"title": "My Day",
 			"description": "Chronological timeline of all activities",
 			"empty": "Nothing yet today"
+		},
+		"activity_feed": {
+			"title": "Activity",
+			"description": "Recent changes across all modules",
+			"empty": "No activity yet"
 		}
 	}
 }

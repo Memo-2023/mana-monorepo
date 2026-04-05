@@ -1,0 +1,120 @@
+<script lang="ts">
+	/**
+	 * ActivityFeedWidget — Recent timeBlock activity across all modules.
+	 *
+	 * Shows a chronological feed of recently created/updated timeBlocks.
+	 * Reads directly from IndexedDB, auto-updates via liveQuery.
+	 */
+
+	import { _ } from 'svelte-i18n';
+	import { useLiveQueryWithDefault } from '@manacore/local-store/svelte';
+	import { db } from '$lib/data/database';
+	import type { LocalTimeBlock, TimeBlockType } from '$lib/data/time-blocks/types';
+	import { toTimeBlock } from '$lib/data/time-blocks/queries';
+	import type { TimeBlock } from '$lib/data/time-blocks/types';
+	import {
+		CalendarBlank,
+		CheckSquare,
+		Timer,
+		Heart,
+		Lightning,
+		Clock,
+		Activity,
+	} from '@manacore/shared-icons';
+	import { getIconComponent } from '@manacore/shared-icons';
+	import { formatDistanceToNow } from 'date-fns';
+	import { de } from 'date-fns/locale';
+
+	const MAX_ITEMS = 10;
+
+	const recentQuery = useLiveQueryWithDefault(async () => {
+		const locals = await db.table<LocalTimeBlock>('timeBlocks').toArray();
+		return locals
+			.filter((b) => !b.deletedAt)
+			.map(toTimeBlock)
+			.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+			.slice(0, MAX_ITEMS);
+	}, [] as TimeBlock[]);
+
+	let items = $derived(recentQuery.value ?? []);
+
+	const typeIcons: Record<string, typeof CalendarBlank> = {
+		event: CalendarBlank,
+		task: CheckSquare,
+		timeEntry: Timer,
+		habit: Heart,
+		focus: Lightning,
+		break: Clock,
+	};
+
+	function timeAgo(iso: string): string {
+		return formatDistanceToNow(new Date(iso), { addSuffix: true, locale: de });
+	}
+
+	function actionLabel(block: TimeBlock): string {
+		if (block.isLive) return 'Läuft';
+		if (block.linkedBlockId) return 'Erledigt';
+		if (block.kind === 'scheduled') return 'Geplant';
+		return 'Erfasst';
+	}
+</script>
+
+<div>
+	<div class="mb-3 flex items-center justify-between">
+		<h3 class="flex items-center gap-2 text-lg font-semibold">
+			<Activity size={20} />
+			{$_('dashboard.widgets.activity_feed.title', { default: 'Aktivität' })}
+		</h3>
+	</div>
+
+	{#if recentQuery.loading}
+		<div class="space-y-2">
+			{#each Array(4) as _}
+				<div class="h-8 animate-pulse rounded bg-surface-hover"></div>
+			{/each}
+		</div>
+	{:else if items.length === 0}
+		<div class="py-6 text-center">
+			<Activity size={32} class="mx-auto mb-2 text-muted-foreground" />
+			<p class="text-sm text-muted-foreground">
+				{$_('dashboard.widgets.activity_feed.empty', { default: 'Noch keine Aktivität' })}
+			</p>
+		</div>
+	{:else}
+		<div class="space-y-1">
+			{#each items as block (block.id)}
+				{@const TypeIcon = typeIcons[block.type] ?? CalendarBlank}
+				{@const habitIcon =
+					block.type === 'habit' && block.icon ? getIconComponent(block.icon) : null}
+				<div
+					class="flex items-center gap-2.5 rounded-lg px-2 py-1.5 transition-colors hover:bg-surface-hover"
+				>
+					<div
+						class="flex h-6 w-6 flex-shrink-0 items-center justify-content-center rounded-full"
+						class:animate-pulse={block.isLive}
+						style="background: {block.color || '#6b7280'}20; color: {block.color || '#6b7280'}"
+					>
+						{#if habitIcon}
+							<svelte:component this={habitIcon} size={12} />
+						{:else}
+							<svelte:component this={TypeIcon} size={12} />
+						{/if}
+					</div>
+
+					<div class="min-w-0 flex-1">
+						<span class="truncate text-sm">{block.title}</span>
+					</div>
+
+					<div class="flex flex-shrink-0 flex-col items-end">
+						<span class="text-[0.625rem] font-medium text-muted-foreground">
+							{actionLabel(block)}
+						</span>
+						<span class="text-[0.5625rem] text-muted-foreground">
+							{timeAgo(block.updatedAt)}
+						</span>
+					</div>
+				</div>
+			{/each}
+		</div>
+	{/if}
+</div>

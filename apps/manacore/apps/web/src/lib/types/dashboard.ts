@@ -28,7 +28,8 @@ export type WidgetType =
 	| 'active-timer' // Times: running timer
 	| 'nutrition-progress' // NutriPhi: today's calorie progress
 	| 'plant-watering' // Planta: plants due for watering
-	| 'day-timeline'; // TimeBlocks: chronological day timeline
+	| 'day-timeline' // TimeBlocks: chronological day timeline
+	| 'activity-feed'; // TimeBlocks: recent activity across modules
 
 /**
  * Widget size - maps to CSS Grid columns
@@ -319,6 +320,14 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
 		nameKey: 'dashboard.widgets.day_timeline.title',
 		descriptionKey: 'dashboard.widgets.day_timeline.description',
 		icon: '⏱️',
+		defaultSize: 'medium',
+		allowMultiple: false,
+	},
+	{
+		type: 'activity-feed',
+		nameKey: 'dashboard.widgets.activity_feed.title',
+		descriptionKey: 'dashboard.widgets.activity_feed.description',
+		icon: '📊',
 		defaultSize: 'medium',
 		allowMultiple: false,
 	},
