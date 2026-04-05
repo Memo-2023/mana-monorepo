@@ -11,6 +11,7 @@
 		getCalendarColor,
 	} from '$lib/modules/calendar/queries';
 	import type { Calendar, CalendarEvent } from '$lib/modules/calendar/types';
+	import { goto } from '$app/navigation';
 
 	import CalendarHeader from '$lib/modules/calendar/components/CalendarHeader.svelte';
 	import DateStrip from '$lib/modules/calendar/components/DateStrip.svelte';
@@ -78,6 +79,21 @@
 	let quickCreatePosition = $state({ x: 0, y: 0 });
 
 	function handleEventClick(event: CalendarEvent) {
+		// Cross-module navigation: external items open in their source module
+		if (event.calendarId === '__external__') {
+			const routeMap: Record<string, string> = {
+				todo: '/todo',
+				times: '/times',
+				habits: '/habits',
+			};
+			const route = routeMap[event.sourceModule];
+			if (route) {
+				goto(route);
+				return;
+			}
+		}
+
+		// Native calendar events: open detail modal
 		selectedEvent = event;
 	}
 

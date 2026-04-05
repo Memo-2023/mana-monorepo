@@ -1,7 +1,17 @@
 <script lang="ts">
 	import { calendarViewStore } from '../stores/view.svelte';
 	import type { CalendarViewType } from '../types';
-	import { CaretLeft, CaretRight, Plus } from '@manacore/shared-icons';
+	import type { TimeBlockType } from '$lib/data/time-blocks/types';
+	import {
+		CaretLeft,
+		CaretRight,
+		Plus,
+		CalendarBlank,
+		CheckSquare,
+		Timer,
+		Heart,
+		Funnel,
+	} from '@manacore/shared-icons';
 	import { format } from 'date-fns';
 	import { de } from 'date-fns/locale';
 
@@ -10,6 +20,19 @@
 	}
 
 	let { onNewEvent }: Props = $props();
+
+	let showFilters = $state(false);
+
+	const blockTypeConfig: { type: TimeBlockType; label: string; icon: typeof CalendarBlank }[] = [
+		{ type: 'event', label: 'Termine', icon: CalendarBlank },
+		{ type: 'task', label: 'Aufgaben', icon: CheckSquare },
+		{ type: 'timeEntry', label: 'Zeiten', icon: Timer },
+		{ type: 'habit', label: 'Habits', icon: Heart },
+	];
+
+	let allActive = $derived(
+		blockTypeConfig.every((c) => calendarViewStore.visibleBlockTypes.has(c.type))
+	);
 
 	let headerLabel = $derived.by(() => {
 		if (calendarViewStore.viewType === 'month') {
@@ -52,11 +75,36 @@
 			{/each}
 		</div>
 
+		<button
+			onclick={() => (showFilters = !showFilters)}
+			class="filter-btn"
+			class:active={!allActive}
+			aria-label="Filter"
+		>
+			<Funnel size={16} />
+		</button>
+
 		<button onclick={onNewEvent} class="new-event-btn">
 			<Plus size={16} />
 			Termin
 		</button>
 	</div>
+
+	{#if showFilters}
+		<div class="filter-bar">
+			{#each blockTypeConfig as cfg}
+				{@const isActive = calendarViewStore.visibleBlockTypes.has(cfg.type)}
+				<button
+					class="filter-chip"
+					class:active={isActive}
+					onclick={() => calendarViewStore.toggleBlockType(cfg.type)}
+				>
+					<svelte:component this={cfg.icon} size={14} />
+					{cfg.label}
+				</button>
+			{/each}
+		</div>
+	{/if}
 </header>
 
 <style>
@@ -154,6 +202,60 @@
 	.view-btn.active {
 		background: hsl(var(--color-primary));
 		color: hsl(var(--color-primary-foreground));
+	}
+
+	.filter-btn {
+		padding: 0.375rem;
+		border: 1px solid hsl(var(--color-border));
+		background: transparent;
+		border-radius: var(--radius-md, 8px);
+		cursor: pointer;
+		color: hsl(var(--color-muted-foreground));
+		transition: all 0.15s ease;
+	}
+
+	.filter-btn:hover {
+		background: hsl(var(--color-muted));
+		color: hsl(var(--color-foreground));
+	}
+
+	.filter-btn.active {
+		background: hsl(var(--color-primary) / 0.1);
+		border-color: hsl(var(--color-primary) / 0.3);
+		color: hsl(var(--color-primary));
+	}
+
+	.filter-bar {
+		display: flex;
+		gap: 0.375rem;
+		padding: 0.5rem 1rem;
+		border-top: 1px solid hsl(var(--color-border));
+		width: 100%;
+	}
+
+	.filter-chip {
+		display: flex;
+		align-items: center;
+		gap: 0.25rem;
+		padding: 0.25rem 0.625rem;
+		border: 1px solid hsl(var(--color-border));
+		border-radius: 9999px;
+		background: transparent;
+		font-size: 0.75rem;
+		font-weight: 500;
+		color: hsl(var(--color-muted-foreground));
+		cursor: pointer;
+		transition: all 0.15s ease;
+	}
+
+	.filter-chip:hover {
+		background: hsl(var(--color-muted));
+	}
+
+	.filter-chip.active {
+		background: hsl(var(--color-primary) / 0.1);
+		border-color: hsl(var(--color-primary) / 0.3);
+		color: hsl(var(--color-primary));
 	}
 
 	.new-event-btn {

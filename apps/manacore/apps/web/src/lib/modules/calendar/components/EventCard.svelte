@@ -1,6 +1,8 @@
 <script lang="ts">
 	import type { CalendarEvent } from '../types';
 	import { eventsStore } from '../stores/events.svelte';
+	import { CheckSquare, Clock, Timer, Lightning } from '@manacore/shared-icons';
+	import { getIconComponent } from '@manacore/shared-icons';
 
 	interface Props {
 		event: CalendarEvent;
@@ -31,6 +33,11 @@
 	}: Props = $props();
 
 	let isDraft = $derived(eventsStore.isDraftEvent(event.id));
+
+	/** Resolve the Phosphor icon component for habit blocks. */
+	let habitIconComponent = $derived(
+		event.blockType === 'habit' && event.icon ? getIconComponent(event.icon) : null
+	);
 
 	function handleClick(e: MouseEvent) {
 		if (isDragging || isResizing || isDraft) {
@@ -71,11 +78,12 @@
 </script>
 
 <div
-	class="event-card"
+	class="event-card block-type-{event.blockType}"
 	class:dragging={isDragging && !isDraggingSource}
 	class:dragging-source={isDraggingSource}
 	class:resizing={isResizing}
 	class:draft={isDraft}
+	class:live={event.isLive}
 	data-event-id={event.id}
 	{style}
 	style:background-color={color}
@@ -98,7 +106,22 @@
 		></div>
 	{/if}
 
-	<span class="event-time">{formattedTime}</span>
+	<div class="event-header-row">
+		<!-- Type icon -->
+		{#if event.blockType === 'task'}
+			<span class="type-icon"><CheckSquare size={10} weight="bold" /></span>
+		{:else if event.blockType === 'timeEntry'}
+			<span class="type-icon"><Timer size={10} weight="bold" /></span>
+		{:else if event.blockType === 'habit' && habitIconComponent}
+			<span class="type-icon">
+				<svelte:component this={habitIconComponent} size={10} weight="bold" />
+			</span>
+		{:else if event.blockType === 'focus'}
+			<span class="type-icon"><Lightning size={10} weight="bold" /></span>
+		{/if}
+
+		<span class="event-time">{formattedTime}</span>
+	</div>
 	<span class="event-title">{event.title || (isDraft ? 'Neuer Termin' : '')}</span>
 	{#if event.location}
 		<span class="event-location">{event.location}</span>
@@ -144,6 +167,50 @@
 		outline-offset: 1px;
 	}
 
+	/* ─── Block-type visual differentiation ─── */
+
+	.event-card.block-type-task {
+		border-left: 3px solid rgba(255, 255, 255, 0.6);
+	}
+
+	.event-card.block-type-habit {
+		border-radius: var(--radius-sm, 4px) 8px 8px var(--radius-sm, 4px);
+	}
+
+	.event-card.block-type-timeEntry {
+		border-style: solid;
+		border-width: 1px;
+		border-color: rgba(255, 255, 255, 0.3);
+		background-image: repeating-linear-gradient(
+			-45deg,
+			transparent,
+			transparent 4px,
+			rgba(255, 255, 255, 0.05) 4px,
+			rgba(255, 255, 255, 0.05) 8px
+		);
+	}
+
+	.event-card.block-type-focus {
+		border: 2px dashed rgba(255, 255, 255, 0.5);
+	}
+
+	/* Live/running indicator */
+	.event-card.live {
+		animation: pulse-border 2s ease-in-out infinite;
+	}
+
+	@keyframes pulse-border {
+		0%,
+		100% {
+			box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+		}
+		50% {
+			box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+		}
+	}
+
+	/* ─── Drag/resize states ─── */
+
 	.event-card.dragging {
 		cursor: grabbing;
 		opacity: 0.9;
@@ -177,6 +244,21 @@
 		background-color: hsl(var(--color-primary) / 0.3) !important;
 	}
 
+	/* ─── Content ─── */
+
+	.event-header-row {
+		display: flex;
+		align-items: center;
+		gap: 3px;
+	}
+
+	.type-icon {
+		display: flex;
+		align-items: center;
+		opacity: 0.85;
+		flex-shrink: 0;
+	}
+
 	.event-time {
 		display: block;
 		font-size: 0.6rem;
@@ -200,6 +282,8 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 	}
+
+	/* ─── Resize handles ─── */
 
 	.resize-handle {
 		position: absolute;
