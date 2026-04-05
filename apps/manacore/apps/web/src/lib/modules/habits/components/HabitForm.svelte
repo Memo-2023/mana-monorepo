@@ -4,7 +4,7 @@
 -->
 <script lang="ts">
 	import { habitsStore } from '../stores/habits.svelte';
-	import { HABIT_COLORS, type Habit } from '../types';
+	import { HABIT_COLORS, type Habit, type HabitSchedule } from '../types';
 	import { DynamicIcon } from '@manacore/shared-ui/atoms';
 	import { IconPicker } from '@manacore/shared-ui/molecules';
 
@@ -27,12 +27,23 @@
 	);
 	let showIconPicker = $state(false);
 
+	// Schedule state
+	let hasSchedule = $state(!!habit?.schedule);
+	let scheduleDays = $state<number[]>(habit?.schedule?.days ?? [1, 2, 3, 4, 5]); // Mon-Fri default
+	let scheduleTime = $state(habit?.schedule?.time ?? '');
+
+	const dayLabels = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+
 	async function handleSubmit(e: Event) {
 		e.preventDefault();
 		if (!title.trim()) return;
 
 		const target = targetPerDay.trim() ? parseInt(targetPerDay) : null;
 		const durationSec = defaultDurationMin.trim() ? parseInt(defaultDurationMin) * 60 : null;
+		const schedule: HabitSchedule | null =
+			hasSchedule && scheduleDays.length > 0
+				? { days: scheduleDays, time: scheduleTime || undefined }
+				: null;
 
 		if (habit) {
 			await habitsStore.updateHabit(habit.id, {
@@ -42,14 +53,18 @@
 				targetPerDay: target,
 				defaultDuration: durationSec,
 			});
+			await habitsStore.setSchedule(habit.id, schedule);
 		} else {
-			await habitsStore.createHabit({
+			const created = await habitsStore.createHabit({
 				title: title.trim(),
 				icon,
 				color,
 				targetPerDay: target,
 				defaultDuration: durationSec,
 			});
+			if (schedule && created) {
+				await habitsStore.setSchedule(created.id, schedule);
+			}
 		}
 
 		onDone();
@@ -133,6 +148,43 @@
 				bind:value={defaultDurationMin}
 			/>
 		</label>
+	</div>
+
+	<!-- Schedule -->
+	<div class="schedule-section">
+		<label class="schedule-toggle">
+			<input type="checkbox" bind:checked={hasSchedule} />
+			<span>Im Kalender planen</span>
+		</label>
+
+		{#if hasSchedule}
+			<div class="schedule-days">
+				{#each dayLabels as label, i}
+					{@const active = scheduleDays.includes(i)}
+					<button
+						type="button"
+						class="day-btn"
+						class:active
+						onclick={() => {
+							if (active) {
+								scheduleDays = scheduleDays.filter((d) => d !== i);
+							} else {
+								scheduleDays = [...scheduleDays, i].sort();
+							}
+						}}
+					>
+						{label}
+					</button>
+				{/each}
+			</div>
+			<input
+				class="target-input"
+				type="time"
+				bind:value={scheduleTime}
+				placeholder="Uhrzeit (optional)"
+				style="width: auto;"
+			/>
+		{/if}
 	</div>
 
 	<div class="form-actions">
@@ -245,6 +297,44 @@
 	}
 	.target-input:focus {
 		border-color: var(--color-primary, #6366f1);
+	}
+
+	.schedule-section {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+	.schedule-toggle {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		font-size: 0.875rem;
+		color: var(--color-muted-foreground);
+		cursor: pointer;
+	}
+	.schedule-days {
+		display: flex;
+		gap: 0.25rem;
+	}
+	.day-btn {
+		width: 2rem;
+		height: 2rem;
+		border-radius: 50%;
+		border: 1px solid var(--color-border, rgba(255, 255, 255, 0.15));
+		background: transparent;
+		color: var(--color-muted-foreground);
+		font-size: 0.6875rem;
+		font-weight: 500;
+		cursor: pointer;
+		transition: all 0.15s;
+	}
+	.day-btn:hover {
+		border-color: var(--color-primary, #6366f1);
+	}
+	.day-btn.active {
+		background: var(--color-primary, #6366f1);
+		border-color: var(--color-primary, #6366f1);
+		color: white;
 	}
 
 	.form-actions {

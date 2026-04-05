@@ -4,6 +4,7 @@
 
 // ─── Times Stores ─────────────────────────────────────────
 export { timerStore } from './stores/timer.svelte';
+export { focusStore } from './stores/focus.svelte';
 export { viewStore } from './stores/view.svelte';
 
 // ─── Clock Stores (merged from clock module) ──────────────

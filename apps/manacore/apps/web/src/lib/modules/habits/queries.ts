@@ -20,6 +20,7 @@ export function toHabit(local: LocalHabit): Habit {
 		color: local.color,
 		targetPerDay: local.targetPerDay,
 		defaultDuration: local.defaultDuration ?? null,
+		schedule: local.schedule ?? null,
 		order: local.order,
 		isArchived: local.isArchived,
 		createdAt: local.createdAt ?? new Date().toISOString(),

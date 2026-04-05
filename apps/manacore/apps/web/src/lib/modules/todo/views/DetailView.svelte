@@ -9,6 +9,7 @@
 	import { getBlock } from '$lib/data/time-blocks/service';
 	import type { LocalTimeBlock } from '$lib/data/time-blocks/types';
 	import { Check, Trash, X, CalendarBlank } from '@manacore/shared-icons';
+	import SlotSuggestions from '$lib/modules/calendar/components/SlotSuggestions.svelte';
 	import type { ViewProps } from '$lib/app-registry';
 	import type { LocalTask, TaskPriority } from '../types';
 	import { useAllTags, getTagsByIds } from '$lib/stores/tags.svelte';
@@ -247,10 +248,23 @@
 						</button>
 					</div>
 				{:else}
-					<button class="schedule-btn" onclick={toggleSchedule}>
-						<CalendarBlank size={14} />
-						Planen
-					</button>
+					<div class="schedule-options">
+						<button class="schedule-btn" onclick={toggleSchedule}>
+							<CalendarBlank size={14} />
+							Planen
+						</button>
+						<SlotSuggestions
+							minDurationMinutes={task.estimatedDuration
+								? Math.round(task.estimatedDuration / 60)
+								: 60}
+							onSelect={(start, end) => {
+								isScheduled = true;
+								scheduleDate = start.toISOString().split('T')[0];
+								scheduleTime = `${String(start.getHours()).padStart(2, '0')}:${String(start.getMinutes()).padStart(2, '0')}`;
+								saveField();
+							}}
+						/>
+					</div>
 				{/if}
 			</div>
 		</div>
@@ -445,6 +459,11 @@
 		display: flex;
 		align-items: center;
 		gap: 0.375rem;
+	}
+	.schedule-options {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
 	}
 	.schedule-btn {
 		display: flex;

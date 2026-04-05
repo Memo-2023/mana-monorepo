@@ -7,8 +7,10 @@
 
 import { habitTable, habitLogTable } from '../collections';
 import { toHabit } from '../queries';
-import { createBlock, deleteBlock } from '$lib/data/time-blocks/service';
-import type { LocalHabit, LocalHabitLog } from '../types';
+import { createBlock, deleteBlock, startFromScheduled } from '$lib/data/time-blocks/service';
+import { db } from '$lib/data/database';
+import type { LocalTimeBlock } from '$lib/data/time-blocks/types';
+import type { LocalHabit, LocalHabitLog, HabitSchedule } from '../types';
 
 export const habitsStore = {
 	async createHabit(data: {
@@ -136,5 +138,93 @@ export const habitsStore = {
 				updatedAt: now,
 			});
 		}
+	},
+
+	/** Set or clear a recurring schedule for a habit. */
+	async setSchedule(habitId: string, schedule: HabitSchedule | null) {
+		await habitTable.update(habitId, {
+			schedule,
+			updatedAt: new Date().toISOString(),
+		});
+	},
+
+	/**
+	 * Generate scheduled TimeBlocks for habits with schedules for the next N days.
+	 * Skips days that already have a scheduled block for that habit.
+	 */
+	async generateScheduledBlocks(daysAhead = 7) {
+		const habits = await habitTable.toArray();
+		const scheduledHabits = habits.filter((h) => !h.deletedAt && !h.isArchived && h.schedule);
+
+		if (scheduledHabits.length === 0) return;
+
+		const today = new Date();
+		today.setHours(0, 0, 0, 0);
+
+		// Get existing scheduled habit blocks to avoid duplicates
+		const weekEnd = new Date(today);
+		weekEnd.setDate(weekEnd.getDate() + daysAhead);
+		const existingBlocks = await db
+			.table<LocalTimeBlock>('timeBlocks')
+			.where('[type+startDate]')
+			.between(['habit', today.toISOString()], ['habit', weekEnd.toISOString()], true, true)
+			.toArray();
+		const existingKeys = new Set(
+			existingBlocks
+				.filter((b) => !b.deletedAt && b.kind === 'scheduled')
+				.map((b) => `${b.sourceId}-${b.startDate.split('T')[0]}`)
+		);
+
+		for (const habit of scheduledHabits) {
+			const schedule = habit.schedule!;
+
+			for (let d = 0; d < daysAhead; d++) {
+				const date = new Date(today);
+				date.setDate(date.getDate() + d);
+				const dayOfWeek = date.getDay(); // 0=Sun
+
+				if (!schedule.days.includes(dayOfWeek)) continue;
+
+				const dateStr = date.toISOString().split('T')[0];
+				const key = `${habit.id}-${dateStr}`;
+				if (existingKeys.has(key)) continue;
+
+				const startTime = schedule.time ?? '09:00';
+				const startISO = `${dateStr}T${startTime}:00`;
+				const durationMs = habit.defaultDuration ? habit.defaultDuration * 1000 : 3600000;
+				const endISO = new Date(new Date(startISO).getTime() + durationMs).toISOString();
+
+				await createBlock({
+					startDate: startISO,
+					endDate: endISO,
+					allDay: !schedule.time,
+					kind: 'scheduled',
+					type: 'habit',
+					sourceModule: 'habits',
+					sourceId: habit.id,
+					title: habit.title,
+					color: habit.color,
+					icon: habit.icon,
+				});
+			}
+		}
+	},
+
+	/**
+	 * Log a habit from a scheduled block (plan → reality).
+	 * Creates a logged TimeBlock linked to the scheduled one.
+	 */
+	async logFromScheduled(scheduledBlockId: string, habitId: string, note?: string) {
+		const loggedBlockId = await startFromScheduled(scheduledBlockId);
+
+		const newLog: LocalHabitLog = {
+			id: crypto.randomUUID(),
+			habitId,
+			timeBlockId: loggedBlockId,
+			note: note ?? null,
+		};
+
+		await habitLogTable.add(newLog);
+		return newLog;
 	},
 };

@@ -110,7 +110,7 @@
 		showQuickCreate = true;
 	}
 
-	function handleQuickSave(data: {
+	async function handleQuickSave(data: {
 		title: string;
 		calendarId: string;
 		startTime: string;
@@ -119,7 +119,63 @@
 		location: string | null;
 		description: string | null;
 		recurrenceRule: string | null;
+		blockType?: string;
 	}) {
+		if (data.blockType === 'timeEntry') {
+			// Create a time entry via TimeBlock + LocalTimeEntry
+			const { createBlock } = await import('$lib/data/time-blocks/service');
+			const { timeEntryTable } = await import('$lib/modules/times/collections');
+			const entryId = crypto.randomUUID();
+			const timeBlockId = await createBlock({
+				startDate: data.startTime,
+				endDate: data.endTime,
+				kind: 'logged',
+				type: 'timeEntry',
+				sourceModule: 'times',
+				sourceId: entryId,
+				title: data.title,
+			});
+			await timeEntryTable.add({
+				id: entryId,
+				timeBlockId,
+				description: data.title,
+				duration: Math.round(
+					(new Date(data.endTime).getTime() - new Date(data.startTime).getTime()) / 1000
+				),
+				isBillable: false,
+				tags: [],
+				visibility: 'private',
+				source: { app: 'manual' },
+			});
+			showQuickCreate = false;
+			return;
+		}
+
+		if (data.blockType === 'habit') {
+			// Create a habit log via TimeBlock + LocalHabitLog
+			const { createBlock } = await import('$lib/data/time-blocks/service');
+			const { habitLogTable } = await import('$lib/modules/habits/collections');
+			const logId = crypto.randomUUID();
+			const timeBlockId = await createBlock({
+				startDate: data.startTime,
+				endDate: data.endTime,
+				kind: 'logged',
+				type: 'habit',
+				sourceModule: 'habits',
+				sourceId: logId,
+				title: data.title,
+			});
+			await habitLogTable.add({
+				id: logId,
+				habitId: '', // No specific habit linked
+				timeBlockId,
+				note: null,
+			});
+			showQuickCreate = false;
+			return;
+		}
+
+		// Default: create calendar event
 		eventsStore.createEvent({
 			calendarId: data.calendarId,
 			title: data.title,

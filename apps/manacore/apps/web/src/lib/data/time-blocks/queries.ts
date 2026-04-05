@@ -190,6 +190,89 @@ export function getBlockDuration(block: TimeBlock): number {
 	);
 }
 
+/** Find free time slots on a given day. */
+export function findFreeSlots(
+	blocks: TimeBlock[],
+	date: Date,
+	minDurationMinutes: number = 30,
+	workStart: number = 8,
+	workEnd: number = 18
+): { start: Date; end: Date; durationMinutes: number }[] {
+	// Get non-allday blocks for the day, sorted by start
+	const dayBlocks = getBlocksForDay(blocks, date)
+		.filter((b) => !b.allDay && b.endDate)
+		.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+
+	const slots: { start: Date; end: Date; durationMinutes: number }[] = [];
+	const dayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate(), workStart, 0, 0);
+	const dayEnd = new Date(date.getFullYear(), date.getMonth(), date.getDate(), workEnd, 0, 0);
+
+	let cursor = dayStart;
+
+	for (const block of dayBlocks) {
+		const blockStart = new Date(block.startDate);
+		const blockEnd = new Date(block.endDate!);
+
+		// Skip blocks outside working hours
+		if (blockEnd <= dayStart || blockStart >= dayEnd) continue;
+
+		const effectiveStart = blockStart < dayStart ? dayStart : blockStart;
+
+		if (cursor < effectiveStart) {
+			const gapMinutes = (effectiveStart.getTime() - cursor.getTime()) / 60000;
+			if (gapMinutes >= minDurationMinutes) {
+				slots.push({
+					start: new Date(cursor),
+					end: effectiveStart,
+					durationMinutes: Math.round(gapMinutes),
+				});
+			}
+		}
+
+		const effectiveEnd = blockEnd > dayEnd ? dayEnd : blockEnd;
+		if (effectiveEnd > cursor) {
+			cursor = effectiveEnd;
+		}
+	}
+
+	// Gap after last block until end of work
+	if (cursor < dayEnd) {
+		const gapMinutes = (dayEnd.getTime() - cursor.getTime()) / 60000;
+		if (gapMinutes >= minDurationMinutes) {
+			slots.push({ start: new Date(cursor), end: dayEnd, durationMinutes: Math.round(gapMinutes) });
+		}
+	}
+
+	return slots;
+}
+
+/** Find the next free slot across multiple days. */
+export function findNextFreeSlot(
+	blocks: TimeBlock[],
+	minDurationMinutes: number = 60,
+	daysToSearch: number = 7,
+	workStart: number = 8,
+	workEnd: number = 18
+): { start: Date; end: Date; durationMinutes: number } | null {
+	const today = new Date();
+	for (let d = 0; d < daysToSearch; d++) {
+		const date = new Date(today);
+		date.setDate(date.getDate() + d);
+		const slots = findFreeSlots(blocks, date, minDurationMinutes, workStart, workEnd);
+		if (slots.length > 0) {
+			// For today, skip slots that have already started
+			if (d === 0) {
+				const now = new Date();
+				const validSlot = slots.find((s) => s.start >= now);
+				if (validSlot) return validSlot;
+			} else {
+				return slots[0];
+			}
+		}
+	}
+	return null;
+}
+
 /** Group timeBlocks by date string (YYYY-MM-DD). */
 export function groupBlocksByDate(blocks: TimeBlock[]): Map<string, TimeBlock[]> {
 	const map = new Map<string, TimeBlock[]>();

@@ -9,12 +9,18 @@ import type { BaseRecord } from '@manacore/local-store';
 
 // ─── Local Record Types (Dexie) ───────────────────────────
 
+export interface HabitSchedule {
+	days: number[]; // 0=Sun, 1=Mon, ... 6=Sat
+	time?: string; // HH:mm (optional, defaults to all-day)
+}
+
 export interface LocalHabit extends BaseRecord {
 	title: string;
 	icon: string;
 	color: string;
 	targetPerDay: number | null;
 	defaultDuration?: number | null; // seconds (e.g., 300 for a 5min cigarette)
+	schedule?: HabitSchedule | null; // optional recurring schedule
 	order: number;
 	isArchived: boolean;
 }
@@ -33,7 +39,8 @@ export interface Habit {
 	icon: string;
 	color: string;
 	targetPerDay: number | null;
-	defaultDuration: number | null; // seconds
+	defaultDuration: number | null;
+	schedule: HabitSchedule | null;
 	order: number;
 	isArchived: boolean;
 	createdAt: string;

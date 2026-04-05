@@ -15,6 +15,11 @@
 	} from '@manacore/shared-icons';
 	import ConflictWarning from './ConflictWarning.svelte';
 
+	import type { TimeBlockType } from '$lib/data/time-blocks/types';
+	import { CheckSquare, Timer, Heart } from '@manacore/shared-icons';
+
+	type QuickCreateType = 'event' | 'timeEntry' | 'habit';
+
 	interface Props {
 		startTime: Date;
 		endTime: Date;
@@ -28,6 +33,7 @@
 			location: string | null;
 			description: string | null;
 			recurrenceRule: string | null;
+			blockType: QuickCreateType;
 		}) => void;
 		onClose: () => void;
 	}
@@ -39,6 +45,7 @@
 	let title = $state('');
 	let location = $state('');
 	let description = $state('');
+	let blockType = $state<QuickCreateType>('event');
 	let isAllDay = $state(false);
 	let recurrenceRule = $state<string | null>(null);
 	let startDateStr = $state(format(startTime, 'yyyy-MM-dd'));
@@ -90,6 +97,7 @@
 			location: location.trim() || null,
 			description: description.trim() || null,
 			recurrenceRule: recurrenceRule || null,
+			blockType,
 		});
 	}
 
@@ -158,8 +166,36 @@
 				required
 			/>
 
+			<!-- Type selector -->
+			<div class="type-pills">
+				<button
+					type="button"
+					class="type-pill"
+					class:active={blockType === 'event'}
+					onclick={() => (blockType = 'event')}
+				>
+					<CalendarBlank size={12} /> Termin
+				</button>
+				<button
+					type="button"
+					class="type-pill"
+					class:active={blockType === 'timeEntry'}
+					onclick={() => (blockType = 'timeEntry')}
+				>
+					<Timer size={12} /> Zeiterfassung
+				</button>
+				<button
+					type="button"
+					class="type-pill"
+					class:active={blockType === 'habit'}
+					onclick={() => (blockType = 'habit')}
+				>
+					<Heart size={12} /> Habit
+				</button>
+			</div>
+
 			<!-- Calendar pills -->
-			{#if calendarsCtx.value.length > 1}
+			{#if calendarsCtx.value.length > 1 && blockType === 'event'}
 				<div class="calendar-pills">
 					{#each calendarsCtx.value as cal (cal.id)}
 						<button
@@ -327,6 +363,33 @@
 
 	.close-btn:hover {
 		background: hsl(var(--color-muted));
+	}
+
+	.type-pills {
+		display: flex;
+		gap: 0.25rem;
+	}
+	.type-pill {
+		display: flex;
+		align-items: center;
+		gap: 0.25rem;
+		padding: 0.25rem 0.5rem;
+		border: 1px solid hsl(var(--color-border));
+		border-radius: 9999px;
+		background: transparent;
+		font-size: 0.6875rem;
+		font-weight: 500;
+		color: hsl(var(--color-muted-foreground));
+		cursor: pointer;
+		transition: all 0.15s;
+	}
+	.type-pill:hover {
+		background: hsl(var(--color-muted));
+	}
+	.type-pill.active {
+		background: hsl(var(--color-primary) / 0.1);
+		border-color: hsl(var(--color-primary) / 0.3);
+		color: hsl(var(--color-primary));
 	}
 
 	.popover-content {
