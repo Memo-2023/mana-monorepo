@@ -11,7 +11,12 @@
 		Timer,
 		Heart,
 		Funnel,
+		Export,
 	} from '@manacore/shared-icons';
+	import { db } from '$lib/data/database';
+	import type { LocalTimeBlock } from '$lib/data/time-blocks/types';
+	import { toTimeBlock } from '$lib/data/time-blocks/queries';
+	import { downloadICalendar } from '$lib/data/time-blocks/ical-export';
 	import { format } from 'date-fns';
 	import { de } from 'date-fns/locale';
 
@@ -33,6 +38,15 @@
 	let allActive = $derived(
 		blockTypeConfig.every((c) => calendarViewStore.visibleBlockTypes.has(c.type))
 	);
+
+	async function handleExport() {
+		const locals = await db.table<LocalTimeBlock>('timeBlocks').toArray();
+		const blocks = locals
+			.filter((b) => !b.deletedAt)
+			.map(toTimeBlock)
+			.filter((b) => calendarViewStore.visibleBlockTypes.has(b.type));
+		downloadICalendar(blocks);
+	}
 
 	let headerLabel = $derived.by(() => {
 		if (calendarViewStore.viewType === 'month') {
@@ -82,6 +96,10 @@
 			aria-label="Filter"
 		>
 			<Funnel size={16} />
+		</button>
+
+		<button class="filter-btn" onclick={handleExport} aria-label="Exportieren">
+			<Export size={16} />
 		</button>
 
 		<button onclick={onNewEvent} class="new-event-btn">
