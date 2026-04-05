@@ -10,6 +10,13 @@
 
 import { db } from '$lib/data/database';
 import { createBlock, updateBlock, deleteBlock } from '$lib/data/time-blocks/service';
+import { timeBlockTable } from '$lib/data/time-blocks/collections';
+import {
+	cleanupFutureInstances,
+	deleteAllInstances,
+	regenerateForBlock,
+} from '$lib/data/time-blocks/recurrence';
+import type { LocalTimeBlock } from '$lib/data/time-blocks/types';
 import type { LocalEvent, CalendarEvent } from '../types';
 import { CalendarEvents } from '@mana/shared-utils/analytics';
 
@@ -132,6 +139,181 @@ export const eventsStore = {
 			return { success: true };
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to update event';
+			return { success: false, error };
+		}
+	},
+
+	/**
+	 * Update a single instance of a recurring event.
+	 * Marks the instance as an exception so regeneration won't overwrite it.
+	 */
+	async updateSingleInstance(
+		id: string,
+		input: {
+			title?: string;
+			description?: string | null;
+			startTime?: string;
+			endTime?: string;
+			isAllDay?: boolean;
+			location?: string | null;
+			color?: string | null;
+		}
+	) {
+		error = null;
+		try {
+			const event = await db.table<LocalEvent>('events').get(id);
+			if (!event) return { success: false, error: 'Event not found' };
+
+			// Mark the TimeBlock as an exception
+			const blockUpdates: Record<string, unknown> = { isRecurrenceException: true };
+			if (input.startTime !== undefined) blockUpdates.startDate = input.startTime;
+			if (input.endTime !== undefined) blockUpdates.endDate = input.endTime;
+			if (input.isAllDay !== undefined) blockUpdates.allDay = input.isAllDay;
+			if (input.title !== undefined) blockUpdates.title = input.title;
+			if (input.description !== undefined) blockUpdates.description = input.description;
+			if (input.color !== undefined) blockUpdates.color = input.color;
+
+			await updateBlock(event.timeBlockId, blockUpdates);
+
+			// Update LocalEvent
+			const localData: Partial<LocalEvent> = { updatedAt: new Date().toISOString() };
+			if (input.title !== undefined) localData.title = input.title;
+			if (input.description !== undefined) localData.description = input.description;
+			if (input.location !== undefined) localData.location = input.location;
+			if (input.color !== undefined) localData.color = input.color;
+
+			await db.table('events').update(id, localData);
+			CalendarEvents.eventUpdated();
+			return { success: true };
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Failed to update instance';
+			return { success: false, error };
+		}
+	},
+
+	/**
+	 * Update this and all future instances — updates the template rule/data
+	 * and regenerates future instances.
+	 */
+	async updateAllFuture(
+		id: string,
+		input: {
+			title?: string;
+			description?: string | null;
+			startTime?: string;
+			endTime?: string;
+			isAllDay?: boolean;
+			location?: string | null;
+			recurrenceRule?: string | null;
+			color?: string | null;
+		}
+	) {
+		error = null;
+		try {
+			const event = await db.table<LocalEvent>('events').get(id);
+			if (!event) return { success: false, error: 'Event not found' };
+
+			// Find the template block (parent)
+			const block = await timeBlockTable.get(event.timeBlockId);
+			const templateBlockId = block?.parentBlockId || event.timeBlockId;
+
+			// Update template block
+			const blockUpdates: Record<string, unknown> = {};
+			if (input.startTime !== undefined) blockUpdates.startDate = input.startTime;
+			if (input.endTime !== undefined) blockUpdates.endDate = input.endTime;
+			if (input.isAllDay !== undefined) blockUpdates.allDay = input.isAllDay;
+			if (input.recurrenceRule !== undefined) blockUpdates.recurrenceRule = input.recurrenceRule;
+			if (input.title !== undefined) blockUpdates.title = input.title;
+			if (input.description !== undefined) blockUpdates.description = input.description;
+			if (input.color !== undefined) blockUpdates.color = input.color;
+
+			if (Object.keys(blockUpdates).length > 0) {
+				await updateBlock(templateBlockId, blockUpdates);
+			}
+
+			// Update template's LocalEvent
+			const templateEvent = await db
+				.table<LocalEvent>('events')
+				.where('timeBlockId')
+				.equals(templateBlockId)
+				.first();
+			if (templateEvent) {
+				const localData: Partial<LocalEvent> = { updatedAt: new Date().toISOString() };
+				if (input.title !== undefined) localData.title = input.title;
+				if (input.description !== undefined) localData.description = input.description;
+				if (input.location !== undefined) localData.location = input.location;
+				if (input.color !== undefined) localData.color = input.color;
+				await db.table('events').update(templateEvent.id, localData);
+			}
+
+			// Regenerate future instances
+			await regenerateForBlock(templateBlockId);
+			CalendarEvents.eventUpdated();
+			return { success: true };
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Failed to update series';
+			return { success: false, error };
+		}
+	},
+
+	/**
+	 * Delete a single instance of a recurring event.
+	 */
+	async deleteSingleInstance(id: string) {
+		error = null;
+		try {
+			const event = await db.table<LocalEvent>('events').get(id);
+			if (event?.timeBlockId) {
+				await deleteBlock(event.timeBlockId);
+			}
+			await db.table('events').update(id, {
+				deletedAt: new Date().toISOString(),
+				updatedAt: new Date().toISOString(),
+			});
+			CalendarEvents.eventDeleted();
+			return { success: true };
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Failed to delete instance';
+			return { success: false, error };
+		}
+	},
+
+	/**
+	 * Delete entire recurring series (template + all instances).
+	 */
+	async deleteAllInSeries(id: string) {
+		error = null;
+		try {
+			const event = await db.table<LocalEvent>('events').get(id);
+			if (!event) return { success: false, error: 'Event not found' };
+
+			const block = await timeBlockTable.get(event.timeBlockId);
+			const templateBlockId = block?.parentBlockId || event.timeBlockId;
+
+			// Delete all instances
+			await deleteAllInstances(templateBlockId);
+
+			// Soft-delete all LocalEvents linked to instance blocks
+			const instanceBlocks = await timeBlockTable
+				.where('parentBlockId')
+				.equals(templateBlockId)
+				.toArray();
+			const blockIds = new Set([templateBlockId, ...instanceBlocks.map((b) => b.id)]);
+			const allEvents = await db.table<LocalEvent>('events').toArray();
+			const now = new Date().toISOString();
+			for (const ev of allEvents) {
+				if (blockIds.has(ev.timeBlockId) && !ev.deletedAt) {
+					await db.table('events').update(ev.id, { deletedAt: now, updatedAt: now });
+				}
+			}
+
+			// Delete template block itself
+			await deleteBlock(templateBlockId);
+
+			CalendarEvents.eventDeleted();
+			return { success: true };
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Failed to delete series';
 			return { success: false, error };
 		}
 	},

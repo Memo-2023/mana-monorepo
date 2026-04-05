@@ -8,6 +8,7 @@
 	import { TagField } from '@mana/shared-ui';
 	import { useAllTags } from '@mana/shared-stores';
 	import ConflictWarning from './ConflictWarning.svelte';
+	import CustomRecurrenceBuilder from './CustomRecurrenceBuilder.svelte';
 
 	interface Props {
 		mode: 'create' | 'edit';
@@ -105,13 +106,82 @@
 	let calendarOptions = $derived(calendarsCtx.value.filter((c) => c.isVisible));
 
 	// Recurrence options
+	const CUSTOM_VALUE = '__custom__';
 	const recurrenceOptions = [
 		{ value: '', label: 'Keine Wiederholung' },
 		{ value: 'FREQ=DAILY', label: 'Täglich' },
 		{ value: 'FREQ=WEEKLY', label: 'Wöchentlich' },
 		{ value: 'FREQ=MONTHLY', label: 'Monatlich' },
 		{ value: 'FREQ=YEARLY', label: 'Jährlich' },
+		{ value: CUSTOM_VALUE, label: 'Benutzerdefiniert...' },
 	];
+
+	let showCustomBuilder = $state(false);
+
+	// If the initial rule is a custom one (not a simple preset), show it as custom
+	let isCustomRule = $derived(
+		!!recurrenceRule &&
+			!recurrenceOptions.some((o) => o.value === recurrenceRule && o.value !== CUSTOM_VALUE)
+	);
+
+	// The value shown in the select dropdown
+	let selectValue = $derived(isCustomRule ? CUSTOM_VALUE : recurrenceRule);
+
+	function handleRecurrenceChange(e: Event) {
+		const value = (e.target as HTMLSelectElement).value;
+		if (value === CUSTOM_VALUE) {
+			showCustomBuilder = true;
+		} else {
+			recurrenceRule = value;
+			showCustomBuilder = false;
+		}
+	}
+
+	function handleCustomApply(rule: string) {
+		recurrenceRule = rule;
+		showCustomBuilder = false;
+	}
+
+	function formatCustomPreview(rule: string): string {
+		if (!rule) return '';
+		const parts = Object.fromEntries(
+			rule
+				.replace(/^RRULE:/, '')
+				.split(';')
+				.map((p) => p.split('='))
+		);
+		const freqMap: Record<string, string> = {
+			DAILY: 'Täglich',
+			WEEKLY: 'Wöchentlich',
+			MONTHLY: 'Monatlich',
+			YEARLY: 'Jährlich',
+		};
+		let text = freqMap[parts.FREQ] ?? 'Wiederkehrend';
+		if (parts.INTERVAL && parseInt(parts.INTERVAL) > 1) {
+			const unitMap: Record<string, string> = {
+				DAILY: 'Tage',
+				WEEKLY: 'Wochen',
+				MONTHLY: 'Monate',
+				YEARLY: 'Jahre',
+			};
+			text = `Alle ${parts.INTERVAL} ${unitMap[parts.FREQ] ?? ''}`;
+		}
+		if (parts.BYDAY) {
+			const dayMap: Record<string, string> = {
+				MO: 'Mo',
+				TU: 'Di',
+				WE: 'Mi',
+				TH: 'Do',
+				FR: 'Fr',
+				SA: 'Sa',
+				SU: 'So',
+			};
+			text += ` (${parts.BYDAY.split(',')
+				.map((d: string) => dayMap[d] || d)
+				.join(', ')})`;
+		}
+		return text;
+	}
 </script>
 
 <form
@@ -183,12 +253,25 @@
 
 	<div class="field">
 		<label for="recurrence" class="label">Wiederholung</label>
-		<select id="recurrence" class="input" bind:value={recurrenceRule}>
+		<select id="recurrence" class="input" value={selectValue} onchange={handleRecurrenceChange}>
 			{#each recurrenceOptions as opt}
 				<option value={opt.value}>{opt.label}</option>
 			{/each}
 		</select>
+		{#if isCustomRule && !showCustomBuilder}
+			<button type="button" class="custom-rule-preview" onclick={() => (showCustomBuilder = true)}>
+				{formatCustomPreview(recurrenceRule)} — Bearbeiten
+			</button>
+		{/if}
 	</div>
+
+	{#if showCustomBuilder}
+		<CustomRecurrenceBuilder
+			initialRule={recurrenceRule || null}
+			onApply={handleCustomApply}
+			onCancel={() => (showCustomBuilder = false)}
+		/>
+	{/if}
 
 	<div class="field">
 		<label for="location" class="label">Ort</label>
@@ -341,5 +424,19 @@
 	.btn-primary:disabled {
 		opacity: 0.5;
 		cursor: not-allowed;
+	}
+
+	.custom-rule-preview {
+		font-size: 0.8125rem;
+		color: hsl(var(--color-primary));
+		background: none;
+		border: none;
+		padding: 0.25rem 0;
+		cursor: pointer;
+		text-align: left;
+	}
+
+	.custom-rule-preview:hover {
+		text-decoration: underline;
 	}
 </style>

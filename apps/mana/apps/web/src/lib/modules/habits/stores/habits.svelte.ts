@@ -7,7 +7,18 @@
 
 import { habitTable, habitLogTable } from '../collections';
 import { toHabit } from '../queries';
-import { createBlock, deleteBlock, startFromScheduled } from '$lib/data/time-blocks/service';
+import {
+	createBlock,
+	deleteBlock,
+	updateBlock,
+	startFromScheduled,
+} from '$lib/data/time-blocks/service';
+import { timeBlockTable } from '$lib/data/time-blocks/collections';
+import {
+	habitScheduleToRRule,
+	materializeRecurringBlocks,
+	regenerateForBlock,
+} from '$lib/data/time-blocks/recurrence';
 import { db } from '$lib/data/database';
 import type { LocalTimeBlock } from '$lib/data/time-blocks/types';
 import type { LocalHabit, LocalHabitLog, HabitSchedule } from '../types';
@@ -140,74 +151,81 @@ export const habitsStore = {
 		}
 	},
 
-	/** Set or clear a recurring schedule for a habit. */
+	/**
+	 * Set or clear a recurring schedule for a habit.
+	 * Creates/updates a template TimeBlock with an RRULE for the unified recurrence engine.
+	 */
 	async setSchedule(habitId: string, schedule: HabitSchedule | null) {
+		const habit = await habitTable.get(habitId);
+		if (!habit) return;
+
+		// Update the habit record
 		await habitTable.update(habitId, {
 			schedule,
 			updatedAt: new Date().toISOString(),
 		});
-	},
 
-	/**
-	 * Generate scheduled TimeBlocks for habits with schedules for the next N days.
-	 * Skips days that already have a scheduled block for that habit.
-	 */
-	async generateScheduledBlocks(daysAhead = 7) {
-		const habits = await habitTable.toArray();
-		const scheduledHabits = habits.filter((h) => !h.deletedAt && !h.isArchived && h.schedule);
-
-		if (scheduledHabits.length === 0) return;
-
-		const today = new Date();
-		today.setHours(0, 0, 0, 0);
-
-		// Get existing scheduled habit blocks to avoid duplicates
-		const weekEnd = new Date(today);
-		weekEnd.setDate(weekEnd.getDate() + daysAhead);
-		const existingBlocks = await db
-			.table<LocalTimeBlock>('timeBlocks')
-			.where('[type+startDate]')
-			.between(['habit', today.toISOString()], ['habit', weekEnd.toISOString()], true, true)
-			.toArray();
-		const existingKeys = new Set(
-			existingBlocks
-				.filter((b) => !b.deletedAt && b.kind === 'scheduled')
-				.map((b) => `${b.sourceId}-${b.startDate.split('T')[0]}`)
+		// Find existing template block for this habit
+		const existingTemplate = (await timeBlockTable.toArray()).find(
+			(b) =>
+				b.sourceModule === 'habits' &&
+				b.sourceId === habitId &&
+				b.recurrenceRule &&
+				!b.parentBlockId &&
+				!b.deletedAt
 		);
 
-		for (const habit of scheduledHabits) {
-			const schedule = habit.schedule!;
+		if (schedule) {
+			const rrule = habitScheduleToRRule(schedule);
+			const startTime = schedule.time ?? '09:00';
+			const now = new Date();
+			const startISO = `${now.toISOString().split('T')[0]}T${startTime}:00`;
+			const durationMs = habit.defaultDuration ? habit.defaultDuration * 1000 : 3600000;
+			const endISO = new Date(new Date(startISO).getTime() + durationMs).toISOString();
 
-			for (let d = 0; d < daysAhead; d++) {
-				const date = new Date(today);
-				date.setDate(date.getDate() + d);
-				const dayOfWeek = date.getDay(); // 0=Sun
-
-				if (!schedule.days.includes(dayOfWeek)) continue;
-
-				const dateStr = date.toISOString().split('T')[0];
-				const key = `${habit.id}-${dateStr}`;
-				if (existingKeys.has(key)) continue;
-
-				const startTime = schedule.time ?? '09:00';
-				const startISO = `${dateStr}T${startTime}:00`;
-				const durationMs = habit.defaultDuration ? habit.defaultDuration * 1000 : 3600000;
-				const endISO = new Date(new Date(startISO).getTime() + durationMs).toISOString();
-
-				await createBlock({
+			if (existingTemplate) {
+				// Update existing template
+				await updateBlock(existingTemplate.id, {
+					recurrenceRule: rrule,
 					startDate: startISO,
 					endDate: endISO,
 					allDay: !schedule.time,
-					kind: 'scheduled',
-					type: 'habit',
-					sourceModule: 'habits',
-					sourceId: habit.id,
 					title: habit.title,
 					color: habit.color,
 					icon: habit.icon,
 				});
+				await regenerateForBlock(existingTemplate.id);
+			} else {
+				// Create new template block
+				const templateId = await createBlock({
+					startDate: startISO,
+					endDate: endISO,
+					allDay: !schedule.time,
+					recurrenceRule: rrule,
+					kind: 'scheduled',
+					type: 'habit',
+					sourceModule: 'habits',
+					sourceId: habitId,
+					title: habit.title,
+					color: habit.color,
+					icon: habit.icon,
+				});
+				await materializeRecurringBlocks(30);
 			}
+		} else if (existingTemplate) {
+			// Schedule cleared — delete template and all instances
+			const { deleteAllInstances } = await import('$lib/data/time-blocks/recurrence');
+			await deleteAllInstances(existingTemplate.id);
+			await deleteBlock(existingTemplate.id);
 		}
+	},
+
+	/**
+	 * Generate scheduled TimeBlocks for habits using the unified recurrence engine.
+	 * Delegates to materializeRecurringBlocks() which handles all recurring templates.
+	 */
+	async generateScheduledBlocks(daysAhead = 30) {
+		await materializeRecurringBlocks(daysAhead);
 	},
 
 	/**

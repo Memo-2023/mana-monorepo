@@ -33,6 +33,8 @@
 
 	let isEditing = $state(false);
 	let showDeleteOptions = $state(false);
+	let showEditOptions = $state(false);
+	let editMode = $state<'single' | 'all' | null>(null);
 	let copied = $state(false);
 
 	let calendarName = $derived(
@@ -46,7 +48,7 @@
 			: getCalendarColor(calendarsCtx.value, event.calendarId)
 	);
 	let isRecurring = $derived(!!event.recurrenceRule);
-	let hasParent = $derived(!!event.parentEventId);
+	let hasParent = $derived(!!event.parentEventId || !!event.parentBlockId);
 
 	// Format time display
 	function formatEventTime(ev: CalendarEvent): string {
@@ -102,17 +104,36 @@
 	}
 
 	async function handleSave(data: Parameters<typeof eventsStore.updateEvent>[1]) {
-		await eventsStore.updateEvent(event.id, data);
+		if (editMode === 'single') {
+			await eventsStore.updateSingleInstance(event.id, data);
+		} else if (editMode === 'all') {
+			await eventsStore.updateAllFuture(event.id, data);
+		} else {
+			await eventsStore.updateEvent(event.id, data);
+		}
 		isEditing = false;
+		editMode = null;
+	}
+
+	function handleEditClick() {
+		if (isRecurring || hasParent) {
+			showEditOptions = true;
+		} else {
+			isEditing = true;
+		}
+	}
+
+	function startEdit(mode: 'single' | 'all') {
+		editMode = mode;
+		showEditOptions = false;
+		isEditing = true;
 	}
 
 	async function handleDelete(mode: 'this' | 'all') {
 		if (mode === 'this') {
-			await eventsStore.deleteEvent(event.id);
+			await eventsStore.deleteSingleInstance(event.id);
 		} else {
-			// Delete all: if this has a parent, delete parent; otherwise delete this
-			const targetId = event.parentEventId || event.id;
-			await eventsStore.deleteEvent(targetId);
+			await eventsStore.deleteAllInSeries(event.id);
 		}
 		showDeleteOptions = false;
 		onClose();
@@ -151,6 +172,7 @@
 	function handleKeydown(e: KeyboardEvent) {
 		if (e.key === 'Escape') {
 			if (showDeleteOptions) showDeleteOptions = false;
+			else if (showEditOptions) showEditOptions = false;
 			else onClose();
 		}
 	}
@@ -182,11 +204,7 @@
 					<button class="btn btn-ghost" onclick={copyToClipboard} title="Kopieren">
 						{#if copied}<Check size={16} />{:else}<Copy size={16} />{/if}
 					</button>
-					<button
-						class="btn btn-ghost"
-						onclick={() => (isEditing = true)}
-						title={$_('common.edit')}
-					>
+					<button class="btn btn-ghost" onclick={handleEditClick} title={$_('common.edit')}>
 						<PencilSimple size={16} />
 					</button>
 					<button
@@ -289,6 +307,27 @@
 </div>
 
 <!-- Recurrence Delete Dialog -->
+{#if showEditOptions}
+	<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
+	<div class="delete-overlay" onclick={() => (showEditOptions = false)}>
+		<div class="delete-dialog" role="dialog" aria-modal="true" onclick={(e) => e.stopPropagation()}>
+			<h3 class="delete-title">Wiederkehrenden Termin bearbeiten</h3>
+			<p class="delete-text">Möchtest du nur diesen Termin oder alle zukünftigen bearbeiten?</p>
+			<div class="delete-actions">
+				<button class="btn btn-outline" onclick={() => startEdit('single')}>
+					Nur diesen Termin
+				</button>
+				<button class="btn btn-primary-full" onclick={() => startEdit('all')}>
+					Alle zukünftigen Termine
+				</button>
+				<button class="btn btn-ghost" onclick={() => (showEditOptions = false)}>
+					{$_('common.cancel')}
+				</button>
+			</div>
+		</div>
+	</div>
+{/if}
+
 {#if showDeleteOptions}
 	<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
 	<div class="delete-overlay" onclick={() => (showDeleteOptions = false)}>
@@ -527,6 +566,16 @@
 
 	.btn-outline:hover {
 		background: hsl(var(--color-muted));
+	}
+
+	.btn-primary-full {
+		background: hsl(var(--color-primary));
+		color: hsl(var(--color-primary-foreground));
+		padding: 0.5rem 1rem;
+	}
+
+	.btn-primary-full:hover {
+		opacity: 0.9;
 	}
 
 	.btn-destructive {
