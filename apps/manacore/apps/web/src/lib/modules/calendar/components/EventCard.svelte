@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { CalendarEvent } from '../types';
 	import { eventsStore } from '../stores/events.svelte';
-	import { CheckSquare, Clock, Timer, Lightning } from '@manacore/shared-icons';
+	import { CheckSquare, Clock, Timer, Lightning, CheckCircle } from '@manacore/shared-icons';
 	import { getIconComponent } from '@manacore/shared-icons';
 
 	interface Props {
@@ -121,6 +121,9 @@
 		{/if}
 
 		<span class="event-time">{formattedTime}</span>
+		{#if event.linkedBlockId}
+			<span class="linked-badge" title="Durchgeführt"><CheckCircle size={10} weight="fill" /></span>
+		{/if}
 	</div>
 	<span class="event-title">{event.title || (isDraft ? 'Neuer Termin' : '')}</span>
 	{#if event.location}
@@ -256,6 +259,15 @@
 		display: flex;
 		align-items: center;
 		opacity: 0.85;
+		flex-shrink: 0;
+	}
+
+	.linked-badge {
+		display: flex;
+		align-items: center;
+		opacity: 0.9;
+		color: rgba(255, 255, 255, 0.95);
+		margin-left: auto;
 		flex-shrink: 0;
 	}
 

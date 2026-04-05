@@ -62,9 +62,48 @@ export async function deleteBlock(id: string): Promise<void> {
 export async function linkBlocks(scheduledId: string, loggedId: string): Promise<void> {
 	const now = new Date().toISOString();
 	await db.transaction('rw', timeBlockTable, async () => {
+		const scheduled = await timeBlockTable.get(scheduledId);
+		const logged = await timeBlockTable.get(loggedId);
+		if (!scheduled || !logged) throw new Error('Block not found');
+		if (scheduled.kind !== 'scheduled') throw new Error('First block must be scheduled');
+		if (logged.kind !== 'logged') throw new Error('Second block must be logged');
+
 		await timeBlockTable.update(scheduledId, { linkedBlockId: loggedId, updatedAt: now });
 		await timeBlockTable.update(loggedId, { linkedBlockId: scheduledId, updatedAt: now });
 	});
+}
+
+/**
+ * Start a logged block from a scheduled block (plan → reality).
+ * Creates a new "logged" block linked to the scheduled one and returns its ID.
+ */
+export async function startFromScheduled(
+	scheduledId: string,
+	overrides?: { title?: string; color?: string; icon?: string; projectId?: string | null }
+): Promise<string> {
+	const scheduled = await timeBlockTable.get(scheduledId);
+	if (!scheduled || scheduled.deletedAt) throw new Error('Scheduled block not found');
+
+	const now = new Date().toISOString();
+	const loggedId = await createBlock({
+		startDate: now,
+		endDate: null,
+		isLive: true,
+		kind: 'logged',
+		type: scheduled.type,
+		sourceModule: scheduled.sourceModule,
+		sourceId: scheduled.sourceId,
+		linkedBlockId: scheduledId,
+		title: overrides?.title ?? scheduled.title,
+		color: overrides?.color ?? scheduled.color ?? null,
+		icon: overrides?.icon ?? scheduled.icon ?? null,
+		projectId: overrides?.projectId ?? scheduled.projectId ?? null,
+	});
+
+	// Link back from scheduled → logged
+	await timeBlockTable.update(scheduledId, { linkedBlockId: loggedId, updatedAt: now });
+
+	return loggedId;
 }
 
 /** Get a single timeBlock by ID. */

@@ -57,6 +57,7 @@ export interface CalendarEvent {
 	icon: string | null;
 	isLive: boolean;
 	projectId: string | null;
+	linkedBlockId: string | null;
 }
 
 export interface Calendar {
@@ -102,5 +103,6 @@ export function timeBlockToCalendarEvent(
 		icon: block.icon,
 		isLive: block.isLive,
 		projectId: block.projectId,
+		linkedBlockId: block.linkedBlockId,
 	};
 }

@@ -13,6 +13,7 @@
 		ArrowsClockwise,
 		TextAlignLeft,
 	} from '@manacore/shared-icons';
+	import ConflictWarning from './ConflictWarning.svelte';
 
 	interface Props {
 		startTime: Date;
@@ -201,6 +202,13 @@
 					</div>
 				</div>
 			</div>
+
+			{#if !isAllDay && startDateStr && startTimeStr && endTimeStr}
+				<ConflictWarning
+					startDate="{startDateStr}T{startTimeStr}:00"
+					endDate="{endDateStr}T{endTimeStr}:00"
+				/>
+			{/if}
 
 			<!-- Recurrence -->
 			<div class="form-row">

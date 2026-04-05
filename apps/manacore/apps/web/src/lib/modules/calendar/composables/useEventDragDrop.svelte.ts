@@ -6,6 +6,7 @@ import type { CalendarEvent } from '../types';
 import { differenceInMinutes, addMinutes, setHours, setMinutes } from 'date-fns';
 import { toDate } from '../utils/event-date-helpers';
 import { eventsStore } from '../stores/events.svelte';
+import { updateBlock } from '$lib/data/time-blocks/service';
 import { formatTime, getDayFromX, getMinutesFromY } from '../utils/drag-helpers';
 
 export interface EventDragDropConfig {
@@ -132,7 +133,14 @@ export function useEventDragDrop(getConfig: () => EventDragDropConfig) {
 				startTime: newStart.toISOString(),
 				endTime: newEnd.toISOString(),
 			});
+		} else if (draggedEvent.calendarId === '__external__') {
+			// External items (tasks, habits, timeEntries): update TimeBlock directly
+			await updateBlock(draggedEvent.timeBlockId, {
+				startDate: newStart.toISOString(),
+				endDate: newEnd.toISOString(),
+			});
 		} else {
+			// Native calendar events: update via eventsStore (updates both block + event)
 			await eventsStore.updateEvent(draggedEvent.id, {
 				startTime: newStart.toISOString(),
 				endTime: newEnd.toISOString(),
@@ -254,6 +262,11 @@ export function useEventDragDrop(getConfig: () => EventDragDropConfig) {
 			eventsStore.updateDraftEvent({
 				startTime: newStart.toISOString(),
 				endTime: newEnd.toISOString(),
+			});
+		} else if (resizeEvent.calendarId === '__external__') {
+			await updateBlock(resizeEvent.timeBlockId, {
+				startDate: newStart.toISOString(),
+				endDate: newEnd.toISOString(),
 			});
 		} else {
 			await eventsStore.updateEvent(resizeEvent.id, {

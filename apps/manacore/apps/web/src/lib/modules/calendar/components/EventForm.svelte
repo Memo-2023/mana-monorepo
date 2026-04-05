@@ -7,6 +7,7 @@
 	import { format, addMinutes } from 'date-fns';
 	import { TagField } from '@manacore/shared-ui';
 	import { useAllTags } from '@manacore/shared-stores';
+	import ConflictWarning from './ConflictWarning.svelte';
 
 	interface Props {
 		mode: 'create' | 'edit';
@@ -173,6 +174,12 @@
 			</div>
 		{/if}
 	</div>
+
+	{#if !isAllDay && startDate && startTime && endDate && endTime}
+		{@const fullStart = `${startDate}T${startTime}:00`}
+		{@const fullEnd = `${endDate}T${endTime}:00`}
+		<ConflictWarning startDate={fullStart} endDate={fullEnd} excludeBlockId={event?.timeBlockId} />
+	{/if}
 
 	<div class="field">
 		<label for="recurrence" class="label">Wiederholung</label>
