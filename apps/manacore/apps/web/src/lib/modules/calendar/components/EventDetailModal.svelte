@@ -35,8 +35,16 @@
 	let showDeleteOptions = $state(false);
 	let copied = $state(false);
 
-	let calendarName = $derived(getCalendarById(calendarsCtx.value, event.calendarId)?.name);
-	let calendarColor = $derived(getCalendarColor(calendarsCtx.value, event.calendarId));
+	let calendarName = $derived(
+		event.calendarId === '__external__'
+			? event.sourceModule
+			: getCalendarById(calendarsCtx.value, event.calendarId)?.name
+	);
+	let calendarColor = $derived(
+		event.calendarId === '__external__'
+			? event.color || '#6b7280'
+			: getCalendarColor(calendarsCtx.value, event.calendarId)
+	);
 	let isRecurring = $derived(!!event.recurrenceRule);
 	let hasParent = $derived(!!event.parentEventId);
 

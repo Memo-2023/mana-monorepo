@@ -1,12 +1,13 @@
 /**
  * Habits Store — Mutation-Only Service
  *
+ * Creates a TimeBlock for each habit log (point-event or with duration).
  * All reads are handled by liveQuery hooks in queries.ts.
- * This store only provides write operations.
  */
 
 import { habitTable, habitLogTable } from '../collections';
 import { toHabit } from '../queries';
+import { createBlock, deleteBlock } from '$lib/data/time-blocks/service';
 import type { LocalHabit, LocalHabitLog } from '../types';
 
 export const habitsStore = {
@@ -15,6 +16,7 @@ export const habitsStore = {
 		icon: string;
 		color: string;
 		targetPerDay?: number | null;
+		defaultDuration?: number | null;
 	}) {
 		const existing = await habitTable.toArray();
 		const count = existing.filter((h) => !h.deletedAt).length;
@@ -25,6 +27,7 @@ export const habitsStore = {
 			icon: data.icon,
 			color: data.color,
 			targetPerDay: data.targetPerDay ?? null,
+			defaultDuration: data.defaultDuration ?? null,
 			order: count,
 			isArchived: false,
 		};
@@ -36,7 +39,10 @@ export const habitsStore = {
 	async updateHabit(
 		id: string,
 		data: Partial<
-			Pick<LocalHabit, 'title' | 'icon' | 'color' | 'targetPerDay' | 'isArchived' | 'order'>
+			Pick<
+				LocalHabit,
+				'title' | 'icon' | 'color' | 'targetPerDay' | 'defaultDuration' | 'isArchived' | 'order'
+			>
 		>
 	) {
 		await habitTable.update(id, {
@@ -50,19 +56,45 @@ export const habitsStore = {
 			deletedAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString(),
 		});
-		// Also soft-delete all logs for this habit
+		// Also soft-delete all logs and their timeBlocks
 		const logs = await habitLogTable.where('habitId').equals(id).toArray();
 		const now = new Date().toISOString();
 		for (const log of logs) {
+			if (log.timeBlockId) {
+				await deleteBlock(log.timeBlockId);
+			}
 			await habitLogTable.update(log.id, { deletedAt: now });
 		}
 	},
 
 	async logHabit(habitId: string, note?: string) {
+		const habit = await habitTable.get(habitId);
+		const now = new Date();
+		const logId = crypto.randomUUID();
+
+		// Calculate endDate if habit has a default duration
+		const endDate = habit?.defaultDuration
+			? new Date(now.getTime() + habit.defaultDuration * 1000).toISOString()
+			: null;
+
+		// 1. Create TimeBlock (point-event or with duration)
+		const timeBlockId = await createBlock({
+			startDate: now.toISOString(),
+			endDate,
+			kind: 'logged',
+			type: 'habit',
+			sourceModule: 'habits',
+			sourceId: logId,
+			title: habit?.title ?? 'Habit',
+			color: habit?.color ?? null,
+			icon: habit?.icon ?? null,
+		});
+
+		// 2. Create HabitLog
 		const newLog: LocalHabitLog = {
-			id: crypto.randomUUID(),
+			id: logId,
 			habitId,
-			timestamp: new Date().toISOString(),
+			timeBlockId,
 			note: note ?? null,
 		};
 
@@ -71,6 +103,10 @@ export const habitsStore = {
 	},
 
 	async deleteLog(logId: string) {
+		const log = await habitLogTable.get(logId);
+		if (log?.timeBlockId) {
+			await deleteBlock(log.timeBlockId);
+		}
 		await habitLogTable.update(logId, {
 			deletedAt: new Date().toISOString(),
 		});
@@ -80,9 +116,13 @@ export const habitsStore = {
 		const logs = await habitLogTable.where('habitId').equals(habitId).toArray();
 		const active = logs
 			.filter((l) => !l.deletedAt)
-			.sort((a, b) => (b.timestamp ?? '').localeCompare(a.timestamp ?? ''));
+			.sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? ''));
 		if (active.length > 0) {
-			await habitLogTable.update(active[0].id, {
+			const log = active[0];
+			if (log.timeBlockId) {
+				await deleteBlock(log.timeBlockId);
+			}
+			await habitLogTable.update(log.id, {
 				deletedAt: new Date().toISOString(),
 			});
 		}

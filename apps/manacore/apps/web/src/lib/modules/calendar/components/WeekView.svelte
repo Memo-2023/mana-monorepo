@@ -10,6 +10,7 @@
 		getDefaultCalendar,
 	} from '../queries';
 	import type { Calendar, CalendarEvent } from '../types';
+	import { calendarViewStore } from '../stores/view.svelte';
 	import {
 		useVisibleHours,
 		useCurrentTimeIndicator,
@@ -41,7 +42,20 @@
 	const calendarsCtx: { readonly value: Calendar[] } = getContext('calendars');
 	const eventsCtx: { readonly value: CalendarEvent[] } = getContext('calendarEvents');
 
-	let visibleEvents = $derived(filterEventsByVisibleCalendars(eventsCtx.value, calendarsCtx.value));
+	let filteredByCalendar = $derived(
+		filterEventsByVisibleCalendars(eventsCtx.value, calendarsCtx.value)
+	);
+	let visibleEvents = $derived(
+		filteredByCalendar.filter((e) => calendarViewStore.visibleBlockTypes.has(e.blockType))
+	);
+
+	/** Resolve color: calendar color for native events, block color for external items. */
+	function getItemColor(event: CalendarEvent): string {
+		if (event.calendarId !== '__external__') {
+			return getItemColor(event);
+		}
+		return event.color || '#6b7280';
+	}
 
 	let viewRange = $derived({
 		start: startOfWeek(calendarViewStore.currentDate, { weekStartsOn: 1 }),
@@ -192,7 +206,7 @@
 						{#each getAllDayEventsForDay(day) as event}
 							<button
 								class="all-day-event"
-								style="background-color: {getCalendarColor(calendarsCtx.value, event.calendarId)}"
+								style="background-color: {getItemColor(event)}"
 								onclick={() => onEventClick?.(event)}
 								aria-label="{event.title} - Ganztägig"
 							>
@@ -254,7 +268,7 @@
 								: isBeingResized
 									? `top: ${eventDragDrop.resizePreviewTop}%; height: ${eventDragDrop.resizePreviewHeight}%;`
 									: getEventStyle(event)}
-							color={getCalendarColor(calendarsCtx.value, event.calendarId)}
+							color={getItemColor(event)}
 							isDragging={isBeingDragged && !isCrossDayDrag}
 							isDraggingSource={isCrossDayDrag}
 							isResizing={isBeingResized}
@@ -272,7 +286,7 @@
 						<EventCard
 							event={eventDragDrop.draggedEvent}
 							style="top: {eventDragDrop.dragPreviewTop}%; height: {eventDragDrop.dragPreviewHeight}%;"
-							color={getCalendarColor(calendarsCtx.value, eventDragDrop.draggedEvent.calendarId)}
+							color={getItemColor(eventDragDrop.draggedEvent)}
 							isDragging={true}
 							formattedTime={formatEventTimeRange(eventDragDrop.draggedEvent)}
 						/>

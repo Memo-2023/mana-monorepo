@@ -30,8 +30,7 @@ export interface LocalTask extends BaseRecord {
 	isCompleted: boolean;
 	completedAt?: string | null;
 	dueDate?: string | null;
-	scheduledDate?: string | null;
-	scheduledStartTime?: string | null;
+	scheduledBlockId?: string | null; // TimeBlock ID when task is scheduled on calendar
 	estimatedDuration?: number | null;
 	order: number;
 	recurrenceRule?: string | null;
@@ -106,8 +105,7 @@ export interface Task {
 	title: string;
 	description?: string | null;
 	dueDate?: string | null;
-	scheduledDate?: string | null;
-	scheduledStartTime?: string | null;
+	scheduledBlockId?: string | null;
 	estimatedDuration?: number | null;
 	priority: TaskPriority;
 	status: TaskStatus;

@@ -26,6 +26,7 @@ import type {
 	SortOption,
 } from './types';
 import type { Alarm, Timer, WorldClock } from './types';
+import type { LocalTimeBlock } from '$lib/data/time-blocks/types';
 
 // ─── Type Converters ───────────────────────────────────────
 
@@ -65,25 +66,29 @@ export function toProject(local: LocalProject): Project {
 	};
 }
 
-export function toTimeEntry(local: LocalTimeEntry): TimeEntry {
+/** Convert LocalTimeEntry + its TimeBlock into a domain TimeEntry. */
+export function toTimeEntry(local: LocalTimeEntry, block?: LocalTimeBlock | null): TimeEntry {
+	const now = new Date().toISOString();
 	return {
 		id: local.id,
+		timeBlockId: local.timeBlockId,
 		projectId: local.projectId ?? undefined,
 		clientId: local.clientId ?? undefined,
 		description: local.description,
-		date: local.date,
-		startTime: local.startTime ?? undefined,
-		endTime: local.endTime ?? undefined,
+		// Time fields derived from TimeBlock
+		date: block?.startDate?.split('T')[0] ?? now.split('T')[0],
+		startTime: block?.startDate ?? undefined,
+		endTime: block?.endDate ?? undefined,
+		isRunning: block?.isLive ?? false,
 		duration: local.duration,
 		isBillable: local.isBillable,
-		isRunning: local.isRunning,
 		tags: local.tags,
 		billingRate: local.billingRate ?? undefined,
 		visibility: local.visibility,
 		guildId: local.guildId ?? undefined,
 		source: local.source ?? undefined,
-		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? new Date().toISOString(),
+		createdAt: local.createdAt ?? now,
+		updatedAt: local.updatedAt ?? now,
 	};
 }
 
@@ -184,7 +189,17 @@ export function useAllProjects() {
 export function useAllTimeEntries() {
 	return liveQuery(async () => {
 		const locals = await db.table<LocalTimeEntry>('timeEntries').toArray();
-		return locals.filter((e) => !e.deletedAt).map(toTimeEntry);
+		const active = locals.filter((e) => !e.deletedAt);
+
+		// Batch-fetch all related timeBlocks
+		const blockIds = active.map((e) => e.timeBlockId).filter(Boolean);
+		const blocks =
+			blockIds.length > 0
+				? await db.table<LocalTimeBlock>('timeBlocks').where('id').anyOf(blockIds).toArray()
+				: [];
+		const blocksById = new Map(blocks.map((b) => [b.id, b]));
+
+		return active.map((e) => toTimeEntry(e, blocksById.get(e.timeBlockId)));
 	});
 }
 

@@ -4,6 +4,7 @@
 
 import type { Task, TaskPriority, Subtask } from '../types';
 import { reminderTable } from '../collections';
+import { createBlock, updateBlock, deleteBlock, getBlock } from '$lib/data/time-blocks/service';
 
 export interface TaskFormState {
 	title: string;
@@ -42,12 +43,23 @@ export function useTaskForm() {
 	let showDeleteConfirm = $state(false);
 	let isLoading = $state(false);
 
-	function initFromTask(task: Task) {
+	async function initFromTask(task: Task) {
 		title = task.title;
 		description = task.description ?? '';
 		dueDate = task.dueDate ? task.dueDate.split('T')[0] : '';
-		dueTime = task.scheduledStartTime ?? '';
-		startDate = task.scheduledDate ? task.scheduledDate.split('T')[0] : '';
+		// Load scheduled time from TimeBlock if scheduled
+		if (task.scheduledBlockId) {
+			const block = await getBlock(task.scheduledBlockId);
+			if (block) {
+				startDate = block.startDate.split('T')[0];
+				dueTime = block.startDate.includes('T')
+					? block.startDate.split('T')[1]?.substring(0, 5)
+					: '';
+			}
+		} else {
+			dueTime = '';
+			startDate = '';
+		}
 		priority = task.priority;
 		status = task.status;
 		subtasks = task.subtasks ? [...task.subtasks] : [];
@@ -84,8 +96,10 @@ export function useTaskForm() {
 			description: description || undefined,
 			priority,
 			dueDate: dueDate ? new Date(dueDate).toISOString() : null,
-			scheduledDate: startDate ? new Date(startDate).toISOString() : null,
-			scheduledStartTime: dueTime || null,
+			// Schedule fields are handled via _scheduleStartDate and _scheduleStartTime
+			// for the task store to create/update/delete the TimeBlock
+			_scheduleStartDate: startDate || null,
+			_scheduleStartTime: dueTime || null,
 			estimatedDuration: effectiveDuration,
 			recurrenceRule: recurrenceRule || null,
 			subtasks: subtasks.length > 0 ? subtasks : null,

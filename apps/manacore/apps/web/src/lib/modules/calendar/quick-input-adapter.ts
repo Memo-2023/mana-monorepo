@@ -6,9 +6,10 @@ import type { InputBarAdapter } from '$lib/quick-input/types';
 import type { QuickInputItem } from '@manacore/shared-ui';
 import { db } from '$lib/data/database';
 import { parseEventInput, resolveEventIds, formatParsedEventPreview } from './utils/event-parser';
-import { toCalendar, toCalendarEvent } from './queries';
+import { toCalendar } from './queries';
 import type { LocalCalendar, LocalEvent } from './types';
-import { format, isSameDay } from 'date-fns';
+import type { LocalTimeBlock } from '$lib/data/time-blocks/types';
+import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
 
 export function createAdapter(): InputBarAdapter {
@@ -21,22 +22,28 @@ export function createAdapter(): InputBarAdapter {
 
 		async onSearch(query) {
 			const q = query.toLowerCase();
-			const events = await db.table<LocalEvent>('events').toArray();
-			return events
-				.filter((e) => !e.deletedAt && e.title?.toLowerCase().includes(q))
+			// Search timeBlocks of type 'event' for calendar events
+			const blocks = await db.table<LocalTimeBlock>('timeBlocks').toArray();
+			return blocks
+				.filter(
+					(b) =>
+						!b.deletedAt &&
+						b.sourceModule === 'calendar' &&
+						b.type === 'event' &&
+						b.title?.toLowerCase().includes(q)
+				)
 				.sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())
 				.slice(0, 10)
-				.map((e) => ({
-					id: e.id,
-					title: e.title || '',
-					subtitle: e.startDate
-						? format(new Date(e.startDate), 'dd. MMM yyyy, HH:mm', { locale: de })
+				.map((b) => ({
+					id: b.sourceId, // event ID
+					title: b.title || '',
+					subtitle: b.startDate
+						? format(new Date(b.startDate), 'dd. MMM yyyy, HH:mm', { locale: de })
 						: '',
 				}));
 		},
 
 		onSelect(item: QuickInputItem) {
-			// Could open event detail modal — for now just navigate
 			window.dispatchEvent(new CustomEvent('calendar:open-event', { detail: { id: item.id } }));
 		},
 

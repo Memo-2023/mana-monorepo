@@ -4,10 +4,10 @@
   Clicking an event opens the detail view.
 -->
 <script lang="ts">
-	import { useLiveQueryWithDefault } from '@manacore/local-store/svelte';
 	import { db } from '$lib/data/database';
-	import type { LocalEvent } from './types';
 	import { eventsStore } from './stores/events.svelte';
+	import { useAllCalendarItems } from './queries';
+	import type { CalendarEvent } from './types';
 	import { Plus, PencilSimple, Trash } from '@manacore/shared-icons';
 	import type { ViewProps } from '$lib/app-registry';
 	import { ContextMenu, type ContextMenuItem } from '@manacore/shared-ui';
@@ -21,7 +21,7 @@
 	let allTags = $derived(tagsQuery.value ?? []);
 
 	function handleTagDrop(eventId: string, tagData: TagDragData) {
-		const event = events.find((e) => e.id === eventId);
+		const event = allItems.find((e) => e.id === eventId);
 		if (!event) return;
 		const current = event.tagIds ?? [];
 		if (!current.includes(tagData.id)) {
@@ -29,13 +29,8 @@
 		}
 	}
 
-	let events$ = useLiveQueryWithDefault(async () => {
-		return db
-			.table<LocalEvent>('events')
-			.toArray()
-			.then((all) => all.filter((e) => !e.deletedAt));
-	}, [] as LocalEvent[]);
-	let events = $derived(events$.value);
+	const itemsQuery = useAllCalendarItems();
+	let allItems = $derived(itemsQuery.value ?? []);
 
 	const now = new Date();
 	const todayStr = now.toISOString().split('T')[0];
@@ -53,9 +48,9 @@
 	});
 
 	const todayEvents = $derived(
-		events
-			.filter((e) => e.startDate.startsWith(todayStr))
-			.sort((a, b) => a.startDate.localeCompare(b.startDate))
+		allItems
+			.filter((e) => e.startTime.startsWith(todayStr))
+			.sort((a, b) => a.startTime.localeCompare(b.startTime))
 	);
 
 	function formatTime(iso: string): string {
@@ -65,14 +60,14 @@
 	const dayNames = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 
 	// Context menu
-	let ctxMenu = $state<{ visible: boolean; x: number; y: number; event: LocalEvent | null }>({
+	let ctxMenu = $state<{ visible: boolean; x: number; y: number; event: CalendarEvent | null }>({
 		visible: false,
 		x: 0,
 		y: 0,
 		event: null,
 	});
 
-	function handleItemContextMenu(e: MouseEvent, event: LocalEvent) {
+	function handleItemContextMenu(e: MouseEvent, event: CalendarEvent) {
 		e.preventDefault();
 		ctxMenu = { visible: true, x: e.clientX, y: e.clientY, event };
 	}
@@ -140,8 +135,8 @@
 	<div class="week-strip">
 		{#each weekDays() as day, i}
 			{@const isToday = day.toISOString().split('T')[0] === todayStr}
-			{@const dayEvents = events.filter((e) =>
-				e.startDate.startsWith(day.toISOString().split('T')[0])
+			{@const dayEvents = allItems.filter((e) =>
+				e.startTime.startsWith(day.toISOString().split('T')[0])
 			)}
 			<div class="day-col">
 				<span class="day-name">{dayNames[i]}</span>
@@ -188,8 +183,8 @@
 					data: () => ({
 						id: event.id,
 						title: event.title,
-						startDate: event.startDate,
-						endDate: event.endDate,
+						startDate: event.startTime,
+						endDate: event.endTime,
 						description: event.description,
 						location: event.location,
 					}),
@@ -214,10 +209,10 @@
 					{/if}
 				</div>
 				<p class="event-time-label">
-					{#if event.allDay}
+					{#if event.isAllDay}
 						Ganztägig
 					{:else}
-						{formatTime(event.startDate)} — {formatTime(event.endDate)}
+						{formatTime(event.startTime)} — {formatTime(event.endTime)}
 					{/if}
 				</p>
 				{#if event.location}

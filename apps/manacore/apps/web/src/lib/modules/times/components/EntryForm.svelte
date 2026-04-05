@@ -2,6 +2,7 @@
 	import { getContext } from 'svelte';
 	import { _ } from 'svelte-i18n';
 	import { timeEntryTable } from '$lib/modules/times/collections';
+	import { createBlock } from '$lib/data/time-blocks/service';
 	import { X, CurrencyDollar } from '@manacore/shared-icons';
 	import { TagField } from '@manacore/shared-ui';
 	import type { Project, Client } from '$lib/modules/times/types';
@@ -75,17 +76,31 @@
 				? allProjects.value.find((p) => p.id === resolved.projectId)
 				: null;
 
+			const entryId = crypto.randomUUID();
+			const entryDate = resolved.date ? new Date(resolved.date).toISOString().split('T')[0] : date;
+			const startDate = resolved.startTime || `${entryDate}T00:00:00`;
+			const endDate = resolved.endTime || null;
+
+			// Create TimeBlock first
+			const timeBlockId = await createBlock({
+				startDate,
+				endDate,
+				kind: 'logged',
+				type: 'timeEntry',
+				sourceModule: 'times',
+				sourceId: entryId,
+				title: resolved.description || 'Time Entry',
+				projectId: resolved.projectId || null,
+			});
+
 			await timeEntryTable.add({
-				id: crypto.randomUUID(),
+				id: entryId,
+				timeBlockId,
 				projectId: resolved.projectId || null,
 				clientId: project?.clientId ?? null,
 				description: resolved.description,
-				date: resolved.date ? new Date(resolved.date).toISOString().split('T')[0] : date,
-				startTime: resolved.startTime || null,
-				endTime: resolved.endTime || null,
 				duration: totalSeconds,
 				isBillable: resolved.isBillable ?? isBillable,
-				isRunning: false,
 				tags: resolved.tagIds,
 				billingRate: null,
 				visibility: 'private',
@@ -123,18 +138,28 @@
 		if (totalSeconds <= 0) return;
 
 		const project = projectId ? allProjects.value.find((p) => p.id === projectId) : null;
+		const entryId = crypto.randomUUID();
+
+		// Create TimeBlock first
+		const timeBlockId = await createBlock({
+			startDate: `${date}T00:00:00`,
+			endDate: null,
+			kind: 'logged',
+			type: 'timeEntry',
+			sourceModule: 'times',
+			sourceId: entryId,
+			title: description || 'Time Entry',
+			projectId: projectId || null,
+		});
 
 		await timeEntryTable.add({
-			id: crypto.randomUUID(),
+			id: entryId,
+			timeBlockId,
 			projectId: projectId || null,
 			clientId: project?.clientId ?? null,
 			description,
-			date,
-			startTime: null,
-			endTime: null,
 			duration: totalSeconds,
 			isBillable,
-			isRunning: false,
 			tags: selectedTagIds,
 			billingRate: null,
 			visibility: 'private',

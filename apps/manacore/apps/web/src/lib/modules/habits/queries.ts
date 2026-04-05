@@ -7,6 +7,7 @@
 import { useLiveQueryWithDefault } from '@manacore/local-store/svelte';
 import { db } from '$lib/data/database';
 import type { LocalHabit, LocalHabitLog, Habit, HabitLog } from './types';
+import type { LocalTimeBlock } from '$lib/data/time-blocks/types';
 import { EMOJI_TO_ICON_MAP } from './types';
 
 // ─── Type Converters ───────────────────────────────────────
@@ -25,13 +26,16 @@ export function toHabit(local: LocalHabit): Habit {
 	};
 }
 
-export function toHabitLog(local: LocalHabitLog): HabitLog {
+/** Convert LocalHabitLog + its TimeBlock into a domain HabitLog. */
+export function toHabitLog(local: LocalHabitLog, block?: LocalTimeBlock | null): HabitLog {
+	const now = new Date().toISOString();
 	return {
 		id: local.id,
 		habitId: local.habitId,
-		timestamp: local.timestamp,
+		timeBlockId: local.timeBlockId,
+		timestamp: block?.startDate ?? local.createdAt ?? now,
 		note: local.note,
-		createdAt: local.createdAt ?? new Date().toISOString(),
+		createdAt: local.createdAt ?? now,
 	};
 }
 
@@ -47,7 +51,17 @@ export function useAllHabits() {
 export function useAllHabitLogs() {
 	return useLiveQueryWithDefault(async () => {
 		const locals = await db.table<LocalHabitLog>('habitLogs').toArray();
-		return locals.filter((l) => !l.deletedAt).map(toHabitLog);
+		const active = locals.filter((l) => !l.deletedAt);
+
+		// Batch-fetch all related timeBlocks
+		const blockIds = active.map((l) => l.timeBlockId).filter(Boolean);
+		const blocks =
+			blockIds.length > 0
+				? await db.table<LocalTimeBlock>('timeBlocks').where('id').anyOf(blockIds).toArray()
+				: [];
+		const blocksById = new Map(blocks.map((b) => [b.id, b]));
+
+		return active.map((l) => toHabitLog(l, blocksById.get(l.timeBlockId)));
 	}, [] as HabitLog[]);
 }
 
@@ -58,9 +72,17 @@ export function useHabitLogsForHabit(habitId: string) {
 			.where('habitId')
 			.equals(habitId)
 			.toArray();
-		return locals
-			.filter((l) => !l.deletedAt)
-			.map(toHabitLog)
+		const active = locals.filter((l) => !l.deletedAt);
+
+		const blockIds = active.map((l) => l.timeBlockId).filter(Boolean);
+		const blocks =
+			blockIds.length > 0
+				? await db.table<LocalTimeBlock>('timeBlocks').where('id').anyOf(blockIds).toArray()
+				: [];
+		const blocksById = new Map(blocks.map((b) => [b.id, b]));
+
+		return active
+			.map((l) => toHabitLog(l, blocksById.get(l.timeBlockId)))
 			.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
 	}, [] as HabitLog[]);
 }

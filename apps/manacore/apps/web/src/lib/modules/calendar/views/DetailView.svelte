@@ -9,6 +9,7 @@
 	import { Trash, MapPin, Clock, X } from '@manacore/shared-icons';
 	import type { ViewProps } from '$lib/app-registry';
 	import type { LocalEvent } from '../types';
+	import type { LocalTimeBlock } from '$lib/data/time-blocks/types';
 	import { useAllTags, getTagsByIds } from '$lib/stores/tags.svelte';
 	import LinkedItems from '$lib/components/links/LinkedItems.svelte';
 	import { toastStore } from '@manacore/shared-ui/toast';
@@ -17,6 +18,7 @@
 	let eventId = $derived(params.eventId as string);
 
 	let event = $state<LocalEvent | null>(null);
+	let timeBlock = $state<LocalTimeBlock | null>(null);
 	let confirmDelete = $state(false);
 
 	let editTitle = $state('');
@@ -49,18 +51,28 @@
 	});
 
 	$effect(() => {
-		const sub = liveQuery(() => db.table<LocalEvent>('events').get(eventId)).subscribe((val) => {
-			event = val ?? null;
-			if (val && !focused) {
-				editTitle = val.title;
-				editDate = val.startDate.split('T')[0];
-				editStartTime = val.startDate.includes('T')
-					? val.startDate.split('T')[1]?.substring(0, 5)
+		const sub = liveQuery(async () => {
+			const ev = await db.table<LocalEvent>('events').get(eventId);
+			if (!ev) return { event: null, block: null };
+			const block = ev.timeBlockId
+				? await db.table<LocalTimeBlock>('timeBlocks').get(ev.timeBlockId)
+				: null;
+			return { event: ev, block: block ?? null };
+		}).subscribe((val) => {
+			event = val?.event ?? null;
+			timeBlock = val?.block ?? null;
+			if (val?.event && val?.block && !focused) {
+				const tb = val.block;
+				editTitle = val.event.title;
+				editDate = tb.startDate.split('T')[0];
+				editStartTime = tb.startDate.includes('T')
+					? tb.startDate.split('T')[1]?.substring(0, 5)
 					: '';
-				editEndTime = val.endDate.includes('T') ? val.endDate.split('T')[1]?.substring(0, 5) : '';
-				editLocation = val.location ?? '';
-				editDescription = val.description ?? '';
-				editAllDay = val.allDay;
+				const endStr = tb.endDate ?? tb.startDate;
+				editEndTime = endStr.includes('T') ? endStr.split('T')[1]?.substring(0, 5) : '';
+				editLocation = val.event.location ?? '';
+				editDescription = val.event.description ?? '';
+				editAllDay = tb.allDay;
 			}
 		});
 		return () => sub.unsubscribe();
@@ -157,10 +169,10 @@
 				/>
 			</div>
 
-			{#if event.recurrenceRule}
+			{#if timeBlock?.recurrenceRule}
 				<div class="prop-row">
 					<span class="prop-icon">🔁</span>
-					<span class="prop-value recurrence">{event.recurrenceRule}</span>
+					<span class="prop-value recurrence">{timeBlock.recurrenceRule}</span>
 				</div>
 			{/if}
 		</div>

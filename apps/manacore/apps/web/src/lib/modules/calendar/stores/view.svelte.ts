@@ -4,6 +4,7 @@
 
 import { browser } from '$app/environment';
 import type { CalendarViewType } from '../types';
+import type { TimeBlockType } from '$lib/data/time-blocks/types';
 import {
 	startOfDay,
 	startOfWeek,
@@ -22,6 +23,9 @@ const SUPPORTED_VIEWS: CalendarViewType[] = ['week', 'month', 'agenda'];
 
 let currentDate = $state(new Date());
 let viewType = $state<CalendarViewType>('week');
+let visibleBlockTypes = $state<Set<TimeBlockType>>(
+	new Set(['event', 'task', 'habit', 'timeEntry', 'focus', 'break'])
+);
 
 const viewRange = $derived.by(() => {
 	const weekStartsOn = 1 as 0 | 1; // Monday
@@ -60,6 +64,9 @@ export const calendarViewStore = {
 	get viewRange() {
 		return viewRange;
 	},
+	get visibleBlockTypes() {
+		return visibleBlockTypes;
+	},
 
 	initialize() {
 		if (!browser) return;
@@ -82,6 +89,20 @@ export const calendarViewStore = {
 		if (browser) {
 			localStorage.setItem('manacore-calendar-view-type', type);
 		}
+	},
+
+	toggleBlockType(type: TimeBlockType) {
+		const next = new Set(visibleBlockTypes);
+		if (next.has(type)) {
+			next.delete(type);
+		} else {
+			next.add(type);
+		}
+		visibleBlockTypes = next;
+	},
+
+	setVisibleBlockTypes(types: Set<TimeBlockType>) {
+		visibleBlockTypes = types;
 	},
 
 	goToToday() {

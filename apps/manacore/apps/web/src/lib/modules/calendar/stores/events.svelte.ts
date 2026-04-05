@@ -1,14 +1,16 @@
 /**
  * Events Store — Mutation-Only Service
  *
+ * Creates both a TimeBlock (time dimension) and a LocalEvent (domain data)
+ * for each calendar event. Updates route time changes to the TimeBlock and
+ * domain changes to the LocalEvent.
+ *
  * All reads are handled by liveQuery hooks in queries.ts.
- * This store only provides write operations and draft event state.
- * IndexedDB writes automatically trigger UI updates via Dexie liveQuery.
  */
 
 import { db } from '$lib/data/database';
+import { createBlock, updateBlock, deleteBlock } from '$lib/data/time-blocks/service';
 import type { LocalEvent, CalendarEvent } from '../types';
-import { toCalendarEvent } from '../queries';
 import { CalendarEvents } from '@manacore/shared-utils/analytics';
 
 let error = $state<string | null>(null);
@@ -23,7 +25,7 @@ export const eventsStore = {
 	},
 
 	/**
-	 * Create a new event -- writes to IndexedDB instantly.
+	 * Create a new event — creates TimeBlock + LocalEvent in IndexedDB.
 	 */
 	async createEvent(input: {
 		calendarId: string;
@@ -38,16 +40,31 @@ export const eventsStore = {
 	}) {
 		error = null;
 		try {
-			const newLocal: LocalEvent = {
-				id: crypto.randomUUID(),
-				calendarId: input.calendarId,
-				title: input.title,
-				description: input.description ?? null,
+			const eventId = crypto.randomUUID();
+
+			// 1. Create TimeBlock (owns time dimension)
+			const timeBlockId = await createBlock({
 				startDate: input.startTime,
 				endDate: input.endTime,
 				allDay: input.isAllDay ?? false,
-				location: input.location ?? null,
 				recurrenceRule: input.recurrenceRule ?? null,
+				kind: 'scheduled',
+				type: 'event',
+				sourceModule: 'calendar',
+				sourceId: eventId,
+				title: input.title,
+				description: input.description ?? null,
+				color: input.color ?? null,
+			});
+
+			// 2. Create LocalEvent (domain data)
+			const newLocal: LocalEvent = {
+				id: eventId,
+				calendarId: input.calendarId,
+				timeBlockId,
+				title: input.title,
+				description: input.description ?? null,
+				location: input.location ?? null,
 				color: input.color ?? null,
 				reminders: null,
 				createdAt: new Date().toISOString(),
@@ -56,7 +73,7 @@ export const eventsStore = {
 
 			await db.table<LocalEvent>('events').add(newLocal);
 			CalendarEvents.eventCreated(!!input.recurrenceRule);
-			return { success: true, data: toCalendarEvent(newLocal) };
+			return { success: true, data: { id: eventId, timeBlockId } };
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to create event';
 			return { success: false, error };
@@ -64,7 +81,7 @@ export const eventsStore = {
 	},
 
 	/**
-	 * Update an event -- writes to IndexedDB instantly.
+	 * Update an event — routes time changes to TimeBlock, domain changes to LocalEvent.
 	 */
 	async updateEvent(
 		id: string,
@@ -82,26 +99,37 @@ export const eventsStore = {
 	) {
 		error = null;
 		try {
+			// Get the event to find its timeBlockId
+			const event = await db.table<LocalEvent>('events').get(id);
+			if (!event) return { success: false, error: 'Event not found' };
+
+			// Update TimeBlock for time-related fields
+			const blockUpdates: Record<string, unknown> = {};
+			if (input.startTime !== undefined) blockUpdates.startDate = input.startTime;
+			if (input.endTime !== undefined) blockUpdates.endDate = input.endTime;
+			if (input.isAllDay !== undefined) blockUpdates.allDay = input.isAllDay;
+			if (input.recurrenceRule !== undefined) blockUpdates.recurrenceRule = input.recurrenceRule;
+			if (input.title !== undefined) blockUpdates.title = input.title;
+			if (input.description !== undefined) blockUpdates.description = input.description;
+			if (input.color !== undefined) blockUpdates.color = input.color;
+
+			if (Object.keys(blockUpdates).length > 0) {
+				await updateBlock(event.timeBlockId, blockUpdates);
+			}
+
+			// Update LocalEvent for domain fields
 			const localData: Partial<LocalEvent> = {
 				updatedAt: new Date().toISOString(),
 			};
 			if (input.title !== undefined) localData.title = input.title;
 			if (input.description !== undefined) localData.description = input.description;
-			if (input.startTime !== undefined) localData.startDate = input.startTime;
-			if (input.endTime !== undefined) localData.endDate = input.endTime;
-			if (input.isAllDay !== undefined) localData.allDay = input.isAllDay;
 			if (input.location !== undefined) localData.location = input.location;
-			if (input.recurrenceRule !== undefined) localData.recurrenceRule = input.recurrenceRule;
 			if (input.color !== undefined) localData.color = input.color;
 			if (input.calendarId !== undefined) localData.calendarId = input.calendarId;
 
 			await db.table('events').update(id, localData);
-			const updated = await db.table<LocalEvent>('events').get(id);
-			if (updated) {
-				CalendarEvents.eventUpdated();
-				return { success: true, data: toCalendarEvent(updated) };
-			}
-			return { success: false, error: 'Event not found' };
+			CalendarEvents.eventUpdated();
+			return { success: true };
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to update event';
 			return { success: false, error };
@@ -109,11 +137,16 @@ export const eventsStore = {
 	},
 
 	/**
-	 * Delete an event -- soft-deletes from IndexedDB instantly.
+	 * Delete an event — soft-deletes both TimeBlock and LocalEvent.
 	 */
 	async deleteEvent(id: string) {
 		error = null;
 		try {
+			const event = await db.table<LocalEvent>('events').get(id);
+			if (event?.timeBlockId) {
+				await deleteBlock(event.timeBlockId);
+			}
+
 			await db.table('events').update(id, {
 				deletedAt: new Date().toISOString(),
 				updatedAt: new Date().toISOString(),
@@ -142,6 +175,7 @@ export const eventsStore = {
 		draftEvent = {
 			id: '__draft__',
 			calendarId: data.calendarId || '',
+			timeBlockId: '__draft_block__',
 			title: data.title || '',
 			description: data.description || null,
 			location: data.location || null,
@@ -155,6 +189,12 @@ export const eventsStore = {
 			tagIds: data.tagIds || [],
 			createdAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString(),
+			blockType: 'event',
+			sourceModule: 'calendar',
+			sourceId: '__draft__',
+			icon: null,
+			isLive: false,
+			projectId: null,
 		};
 		return draftEvent;
 	},

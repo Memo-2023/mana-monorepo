@@ -1,16 +1,22 @@
 /**
  * Reactive Queries & Pure Helpers for Calendar module.
  *
+ * The calendar is now a universal time view: it queries timeBlocks (which contain
+ * events, tasks, habits, time entries) and joins with LocalEvent for native
+ * calendar events.
+ *
  * Uses Dexie liveQuery to automatically re-render when IndexedDB changes
  * (local writes, sync updates, other tabs). Components call these hooks
  * at init time; no manual fetch/refresh needed.
  */
 
-import { liveQuery } from 'dexie';
 import { useLiveQueryWithDefault } from '@manacore/local-store/svelte';
 import { db } from '$lib/data/database';
 import type { LocalCalendar, LocalEvent, Calendar, CalendarEvent } from './types';
-import { isSameDay, isWithinInterval, differenceInMilliseconds, format } from 'date-fns';
+import { timeBlockToCalendarEvent } from './types';
+import type { LocalTimeBlock } from '$lib/data/time-blocks/types';
+import { toTimeBlock } from '$lib/data/time-blocks/queries';
+import { isSameDay, isWithinInterval } from 'date-fns';
 
 // ─── Type Converters ───────────────────────────────────────
 
@@ -27,42 +33,6 @@ export function toCalendar(local: LocalCalendar): Calendar {
 	};
 }
 
-export function toCalendarEvent(local: LocalEvent): CalendarEvent {
-	return {
-		id: local.id,
-		calendarId: local.calendarId,
-		title: local.title,
-		description: local.description ?? null,
-		location: local.location ?? null,
-		startTime: local.startDate,
-		endTime: local.endDate,
-		isAllDay: local.allDay,
-		timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-		recurrenceRule: local.recurrenceRule ?? null,
-		parentEventId: null,
-		color: local.color ?? null,
-		tagIds: local.tagIds ?? [],
-		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? new Date().toISOString(),
-	};
-}
-
-// ─── Raw Observable Queries (for Svelte $ auto-subscribe) ──
-
-export function allCalendars$() {
-	return liveQuery(async () => {
-		const locals = await db.table<LocalCalendar>('calendars').toArray();
-		return locals.filter((c) => !c.deletedAt).map(toCalendar);
-	});
-}
-
-export function allEvents$() {
-	return liveQuery(async () => {
-		const locals = await db.table<LocalEvent>('events').toArray();
-		return locals.filter((e) => !e.deletedAt).map(toCalendarEvent);
-	});
-}
-
 // ─── Svelte 5 Reactive Hooks (call during component init) ──
 
 /** All calendars, auto-updates on any change. */
@@ -73,11 +43,56 @@ export function useAllCalendars() {
 	}, [] as Calendar[]);
 }
 
-/** All events, auto-updates on any change. */
+/**
+ * All calendar items (universal view) — queries timeBlocks and joins
+ * with LocalEvent for native calendar events. Auto-updates on change.
+ */
+export function useAllCalendarItems() {
+	return useLiveQueryWithDefault(async () => {
+		// Fetch all non-deleted timeBlocks
+		const blocks = await db.table<LocalTimeBlock>('timeBlocks').toArray();
+		const activeBlocks = blocks.filter((b) => !b.deletedAt);
+
+		// Fetch all non-deleted events for joining with calendar-type blocks
+		const events = await db.table<LocalEvent>('events').toArray();
+		const eventsById = new Map<string, LocalEvent>();
+		for (const e of events) {
+			if (!e.deletedAt) eventsById.set(e.id, e);
+		}
+
+		// Convert to CalendarEvent, joining event data for calendar blocks
+		return activeBlocks.map((block) => {
+			const tb = toTimeBlock(block);
+			const eventData =
+				block.sourceModule === 'calendar' ? (eventsById.get(block.sourceId) ?? null) : null;
+			return timeBlockToCalendarEvent(tb, eventData);
+		});
+	}, [] as CalendarEvent[]);
+}
+
+/**
+ * Only native calendar events (for backward compatibility with calendar-specific views).
+ */
 export function useAllEvents() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalEvent>('events').toArray();
-		return locals.filter((e) => !e.deletedAt).map(toCalendarEvent);
+		const blocks = await db.table<LocalTimeBlock>('timeBlocks').toArray();
+		const calendarBlocks = blocks.filter(
+			(b) => !b.deletedAt && b.sourceModule === 'calendar' && b.type === 'event'
+		);
+
+		const events = await db.table<LocalEvent>('events').toArray();
+		const eventsById = new Map<string, LocalEvent>();
+		for (const e of events) {
+			if (!e.deletedAt) eventsById.set(e.id, e);
+		}
+
+		return calendarBlocks
+			.map((block) => {
+				const tb = toTimeBlock(block);
+				const eventData = eventsById.get(block.sourceId) ?? null;
+				return timeBlockToCalendarEvent(tb, eventData);
+			})
+			.filter((e) => e.calendarId !== '__external__');
 	}, [] as CalendarEvent[]);
 }
 
@@ -147,13 +162,14 @@ export function getEventsInRange(events: CalendarEvent[], start: Date, end: Date
 
 /**
  * Filter events by visible calendars.
+ * External (non-calendar) items pass through the filter.
  */
 export function filterEventsByVisibleCalendars(
 	events: CalendarEvent[],
 	calendars: Calendar[]
 ): CalendarEvent[] {
 	const visibleIds = new Set(calendars.filter((c) => c.isVisible).map((c) => c.id));
-	return events.filter((e) => visibleIds.has(e.calendarId));
+	return events.filter((e) => e.calendarId === '__external__' || visibleIds.has(e.calendarId));
 }
 
 /**

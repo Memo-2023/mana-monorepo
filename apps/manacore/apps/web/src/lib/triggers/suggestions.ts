@@ -78,17 +78,21 @@ export async function generateSuggestions(): Promise<AutomationSuggestion[]> {
 
 	// ─── Events ↔ Habits ────────────────────────────────────
 	const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-	const events = await db
-		.table('events')
+	const calendarBlocks = await db
+		.table('timeBlocks')
 		.toArray()
-		.then((all) =>
+		.then((all: Record<string, unknown>[]) =>
 			all.filter(
-				(e: Record<string, unknown>) => !e.deletedAt && (e.startDate as string) >= thirtyDaysAgo
+				(b) =>
+					!b.deletedAt &&
+					b.sourceModule === 'calendar' &&
+					b.type === 'event' &&
+					(b.startDate as string) >= thirtyDaysAgo
 			)
 		);
 
 	for (const habit of habits) {
-		const matchingEvents = events.filter((e: Record<string, unknown>) =>
+		const matchingEvents = calendarBlocks.filter((e: Record<string, unknown>) =>
 			titleContains(String(e.title ?? ''), habit.title)
 		);
 

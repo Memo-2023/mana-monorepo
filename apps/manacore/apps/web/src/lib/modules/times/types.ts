@@ -90,15 +90,17 @@ export interface Project {
 
 export interface TimeEntry {
 	id: string;
+	timeBlockId: string;
 	projectId?: string;
 	clientId?: string;
 	description: string;
-	date: string;
-	startTime?: string;
-	endTime?: string;
+	// Time fields from TimeBlock (denormalized for convenience in pure helpers)
+	date: string; // YYYY-MM-DD derived from timeBlock.startDate
+	startTime?: string; // from timeBlock.startDate
+	endTime?: string; // from timeBlock.endDate
+	isRunning: boolean; // from timeBlock.isLive
 	duration: number;
 	isBillable: boolean;
-	isRunning: boolean;
 	tags: string[];
 	billingRate?: BillingRate;
 	visibility: ProjectVisibility;
@@ -179,15 +181,12 @@ export interface LocalProject extends BaseRecord {
 }
 
 export interface LocalTimeEntry extends BaseRecord {
+	timeBlockId: string;
 	projectId?: string | null;
 	clientId?: string | null;
 	description: string;
-	date: string;
-	startTime?: string | null;
-	endTime?: string | null;
-	duration: number;
+	duration: number; // billable/rounded seconds (authoritative for billing)
 	isBillable: boolean;
-	isRunning: boolean;
 	tags: string[];
 	billingRate?: BillingRate | null;
 	visibility: ProjectVisibility;

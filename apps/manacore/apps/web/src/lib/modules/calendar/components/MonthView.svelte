@@ -49,13 +49,22 @@
 
 	let rangeEvents = $derived.by(() => {
 		if (allCalendarDays.length === 0) return [];
-		const visible = filterEventsByVisibleCalendars(eventsCtx.value, calendarsCtx.value);
+		const filtered = filterEventsByVisibleCalendars(eventsCtx.value, calendarsCtx.value).filter(
+			(e) => calendarViewStore.visibleBlockTypes.has(e.blockType)
+		);
 		return getEventsInRange(
-			visible,
+			filtered,
 			allCalendarDays[0],
 			allCalendarDays[allCalendarDays.length - 1]
 		);
 	});
+
+	function getItemColor(event: CalendarEvent): string {
+		if (event.calendarId !== '__external__') {
+			return getCalendarColor(calendarsCtx.value, event.calendarId);
+		}
+		return event.color || '#6b7280';
+	}
 
 	const weekDays = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 
@@ -224,7 +233,7 @@
 									class="event-pill"
 									class:dragging={isBeingDragged}
 									data-event-id={event.id}
-									style="background-color: {getCalendarColor(calendarsCtx.value, event.calendarId)}"
+									style="background-color: {getItemColor(event)}"
 									onpointerdown={(e) => startDrag(event, e)}
 									onclick={(e) => handleEventClick(event, e)}
 									role="button"

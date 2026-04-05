@@ -7,11 +7,9 @@ export { eventsStore } from './stores/events.svelte';
 export { calendarViewStore } from './stores/view.svelte';
 export {
 	useAllCalendars,
+	useAllCalendarItems,
 	useAllEvents,
-	allCalendars$,
-	allEvents$,
 	toCalendar,
-	toCalendarEvent,
 	getVisibleCalendars,
 	getDefaultCalendar,
 	getCalendarById,
@@ -23,4 +21,5 @@ export {
 	sortEventsByTime,
 } from './queries';
 export { calendarTable, eventTable, CALENDAR_GUEST_SEED } from './collections';
+export { timeBlockToCalendarEvent } from './types';
 export type { LocalCalendar, LocalEvent, CalendarViewType, CalendarEvent, Calendar } from './types';

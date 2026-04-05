@@ -9,14 +9,14 @@ import { useLiveQueryWithDefault } from '@manacore/local-store/svelte';
 import { db } from './database';
 
 import type { LocalTask } from '$lib/modules/todo/types';
-import type { LocalEvent } from '$lib/modules/calendar/types';
+import type { LocalTimeBlock } from '$lib/data/time-blocks/types';
 import type { LocalContact } from '$lib/modules/contacts/types';
 import type { LocalConversation } from '$lib/modules/chat/types';
 import type { LocalFavorite } from '$lib/modules/zitare/types';
 import type { LocalImage } from '$lib/modules/picture/types';
 import type { LocalAlarm, LocalCountdownTimer } from '$lib/modules/times/types';
 import type { LocalFile } from '$lib/modules/storage/types';
-import type { LocalSong, LocalPlaylist } from '$lib/modules/mukke/types';
+import type { LocalSong, LocalPlaylist } from '$lib/modules/music/types';
 import type { LocalDeck as LocalPresiDeck } from '$lib/modules/presi/types';
 import type { LocalDocument, LocalContextSpace } from '$lib/modules/context/types';
 import type { LocalDeck as LocalCardDeck, LocalCard } from '$lib/modules/cards/types';
@@ -70,7 +70,7 @@ export function useUpcomingTasks(days = 7) {
 
 // ─── Calendar Queries ───────────────────────────────────────
 
-/** Events in the next N days. */
+/** TimeBlocks (all types) in the next N days. */
 export function useUpcomingEvents(days = 7) {
 	return useLiveQueryWithDefault(async () => {
 		const now = new Date();
@@ -80,12 +80,12 @@ export function useUpcomingEvents(days = 7) {
 		const nowStr = now.toISOString();
 		const futureStr = future.toISOString();
 
-		const all = await db.table<LocalEvent>('events').orderBy('startDate').toArray();
-		return all.filter((e) => {
-			if (e.deletedAt) return false;
-			return e.startDate >= nowStr && e.startDate <= futureStr;
+		const all = await db.table<LocalTimeBlock>('timeBlocks').orderBy('startDate').toArray();
+		return all.filter((b) => {
+			if (b.deletedAt) return false;
+			return b.startDate >= nowStr && b.startDate <= futureStr;
 		});
-	}, [] as LocalEvent[]);
+	}, [] as LocalTimeBlock[]);
 }
 
 // ─── Contacts Queries ───────────────────────────────────────
@@ -181,19 +181,19 @@ export function useStorageStats() {
 	);
 }
 
-// ─── Mukke Queries ──────────────────────────────────────────
+// ─── Music Queries ──────────────────────────────────────────
 
-interface MukkeStats {
+interface MusicStats {
 	totalSongs: number;
 	totalPlaylists: number;
 	favoriteCount: number;
 	recentSongs: LocalSong[];
 }
 
-/** Mukke library stats + recent songs. */
-export function useMukkeStats() {
+/** Music library stats + recent songs. */
+export function useMusicStats() {
 	return useLiveQueryWithDefault(
-		async (): Promise<MukkeStats> => {
+		async (): Promise<MusicStats> => {
 			const songs = await db.table<LocalSong>('songs').toArray();
 			const playlists = await db.table<LocalPlaylist>('mukkePlaylists').toArray();
 			const activeSongs = songs.filter((s) => !s.deletedAt);

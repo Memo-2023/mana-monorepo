@@ -14,13 +14,14 @@ export interface LocalHabit extends BaseRecord {
 	icon: string;
 	color: string;
 	targetPerDay: number | null;
+	defaultDuration?: number | null; // seconds (e.g., 300 for a 5min cigarette)
 	order: number;
 	isArchived: boolean;
 }
 
 export interface LocalHabitLog extends BaseRecord {
 	habitId: string;
-	timestamp: string; // ISO string
+	timeBlockId: string;
 	note: string | null;
 }
 
@@ -41,7 +42,8 @@ export interface Habit {
 export interface HabitLog {
 	id: string;
 	habitId: string;
-	timestamp: string;
+	timeBlockId: string;
+	timestamp: string; // derived from timeBlock.startDate
 	note: string | null;
 	createdAt: string;
 }

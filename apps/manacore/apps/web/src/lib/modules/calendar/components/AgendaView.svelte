@@ -24,13 +24,22 @@
 	const eventsCtx: { readonly value: CalendarEvent[] } = getContext('calendarEvents');
 
 	let rangeEvents = $derived.by(() => {
-		const visible = filterEventsByVisibleCalendars(eventsCtx.value, calendarsCtx.value);
+		const filtered = filterEventsByVisibleCalendars(eventsCtx.value, calendarsCtx.value).filter(
+			(e) => calendarViewStore.visibleBlockTypes.has(e.blockType)
+		);
 		return getEventsInRange(
-			visible,
+			filtered,
 			calendarViewStore.currentDate,
 			addMonths(calendarViewStore.currentDate, 3)
 		);
 	});
+
+	function getItemColor(event: CalendarEvent): string {
+		if (event.calendarId !== '__external__') {
+			return getCalendarColor(calendarsCtx.value, event.calendarId);
+		}
+		return event.color || '#6b7280';
+	}
 
 	let groupedEvents = $derived.by(() => {
 		const currentEvents = rangeEvents ?? [];
@@ -113,10 +122,7 @@
 						{#each group.events as event}
 							<!-- svelte-ignore a11y_no_static_element_interactions -->
 							<div class="event-item">
-								<div
-									class="color-bar"
-									style="background-color: {getCalendarColor(calendarsCtx.value, event.calendarId)}"
-								></div>
+								<div class="color-bar" style="background-color: {getItemColor(event)}"></div>
 								<div class="event-content">
 									<div class="event-time">
 										{#if event.isAllDay}

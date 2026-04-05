@@ -65,7 +65,7 @@ db.version(1).stores({
 	zitareLists: 'id',
 	zitareListTags: 'id, listId, tagId, [listId+tagId]',
 
-	// ─── Mukke (appId: 'mukke') ───
+	// ─── Music (appId: 'music') ───
 	songs: 'id, artist, album, genre, favorite, title',
 	mukkePlaylists: 'id, name',
 	playlistSongs: 'id, playlistId, songId, sortOrder, [playlistId+sortOrder]',
@@ -242,6 +242,160 @@ db.version(2)
 			});
 	});
 
+// ─── Version 3: Unified Time Model (timeBlocks) ─────────────
+// Adds timeBlocks table, updates indexes on events/timeEntries/tasks/habitLogs,
+// and migrates existing time data into timeBlocks.
+
+db.version(3)
+	.stores({
+		// New tables
+		timeBlocks:
+			'id, startDate, kind, type, sourceModule, sourceId, [sourceModule+sourceId], [type+startDate], [kind+startDate]',
+		timeBlockTags: 'id, blockId, tagId, [blockId+tagId]',
+
+		// Updated indexes (timeBlockId / scheduledBlockId added)
+		events: 'id, calendarId, timeBlockId',
+		timeEntries: 'id, projectId, clientId, timeBlockId, guildId, visibility',
+		tasks:
+			'id, dueDate, isCompleted, priority, order, projectId, scheduledBlockId, [isCompleted+order], [projectId+order]',
+		habitLogs: 'id, habitId, timeBlockId, [habitId+timeBlockId]',
+	})
+	.upgrade(async (tx) => {
+		const timeBlocksTable = tx.table('timeBlocks');
+
+		// 1. Migrate calendar events → timeBlocks
+		const events = await tx.table('events').toArray();
+		for (const event of events) {
+			if (!event.startDate) continue;
+			const blockId = crypto.randomUUID();
+			await timeBlocksTable.add({
+				id: blockId,
+				startDate: event.startDate,
+				endDate: event.endDate ?? null,
+				allDay: event.allDay ?? false,
+				isLive: false,
+				timezone: null,
+				recurrenceRule: event.recurrenceRule ?? null,
+				kind: 'scheduled',
+				type: 'event',
+				sourceModule: 'calendar',
+				sourceId: event.id,
+				linkedBlockId: null,
+				title: event.title ?? '',
+				description: event.description ?? null,
+				color: event.color ?? null,
+				icon: null,
+				projectId: null,
+				createdAt: event.createdAt ?? new Date().toISOString(),
+				updatedAt: event.updatedAt ?? new Date().toISOString(),
+				deletedAt: event.deletedAt ?? null,
+			});
+			await tx.table('events').update(event.id, { timeBlockId: blockId });
+		}
+
+		// 2. Migrate time entries → timeBlocks
+		const entries = await tx.table('timeEntries').toArray();
+		for (const entry of entries) {
+			if (!entry.date && !entry.startTime) continue; // skip entries with no date at all
+			const blockId = crypto.randomUUID();
+			const startDate = entry.startTime ?? `${entry.date}T00:00:00.000Z`;
+			await timeBlocksTable.add({
+				id: blockId,
+				startDate,
+				endDate: entry.endTime ?? null,
+				allDay: false,
+				isLive: entry.isRunning ?? false,
+				timezone: null,
+				recurrenceRule: null,
+				kind: 'logged',
+				type: 'timeEntry',
+				sourceModule: 'times',
+				sourceId: entry.id,
+				linkedBlockId: null,
+				title: entry.description || 'Time Entry',
+				description: null,
+				color: null,
+				icon: null,
+				projectId: entry.projectId ?? null,
+				createdAt: entry.createdAt ?? new Date().toISOString(),
+				updatedAt: entry.updatedAt ?? new Date().toISOString(),
+				deletedAt: entry.deletedAt ?? null,
+			});
+			await tx.table('timeEntries').update(entry.id, { timeBlockId: blockId });
+		}
+
+		// 3. Migrate habit logs → timeBlocks
+		const logs = await tx.table('habitLogs').toArray();
+		const habitsById = new Map<string, Record<string, unknown>>();
+		const allHabits = await tx.table('habits').toArray();
+		for (const h of allHabits) habitsById.set(h.id as string, h);
+
+		for (const log of logs) {
+			if (!log.timestamp) continue;
+			const blockId = crypto.randomUUID();
+			const habit = habitsById.get(log.habitId as string);
+			await timeBlocksTable.add({
+				id: blockId,
+				startDate: log.timestamp,
+				endDate: null,
+				allDay: false,
+				isLive: false,
+				timezone: null,
+				recurrenceRule: null,
+				kind: 'logged',
+				type: 'habit',
+				sourceModule: 'habits',
+				sourceId: log.id,
+				linkedBlockId: null,
+				title: (habit?.title as string) ?? 'Habit',
+				description: null,
+				color: (habit?.color as string) ?? null,
+				icon: (habit?.icon as string) ?? null,
+				projectId: null,
+				createdAt: log.createdAt ?? new Date().toISOString(),
+				updatedAt: log.updatedAt ?? log.createdAt ?? new Date().toISOString(),
+				deletedAt: log.deletedAt ?? null,
+			});
+			await tx.table('habitLogs').update(log.id, { timeBlockId: blockId });
+		}
+
+		// 4. Migrate scheduled tasks → timeBlocks
+		const tasks = await tx.table('tasks').toArray();
+		for (const task of tasks) {
+			if (!task.scheduledDate) continue;
+			const blockId = crypto.randomUUID();
+			const startISO = task.scheduledStartTime
+				? `${task.scheduledDate}T${task.scheduledStartTime}:00`
+				: `${task.scheduledDate}T09:00:00`;
+			const durationMs = task.estimatedDuration ? task.estimatedDuration * 1000 : 3600000; // default 1h
+			const endISO = new Date(new Date(startISO).getTime() + durationMs).toISOString();
+
+			await timeBlocksTable.add({
+				id: blockId,
+				startDate: startISO,
+				endDate: endISO,
+				allDay: !task.scheduledStartTime,
+				isLive: false,
+				timezone: null,
+				recurrenceRule: null,
+				kind: 'scheduled',
+				type: 'task',
+				sourceModule: 'todo',
+				sourceId: task.id,
+				linkedBlockId: null,
+				title: task.title ?? '',
+				description: null,
+				color: null,
+				icon: null,
+				projectId: task.projectId ?? null,
+				createdAt: task.createdAt ?? new Date().toISOString(),
+				updatedAt: task.updatedAt ?? new Date().toISOString(),
+				deletedAt: task.deletedAt ?? null,
+			});
+			await tx.table('tasks').update(task.id, { scheduledBlockId: blockId });
+		}
+	});
+
 // ─── Sync App Map ──────────────────────────────────────────
 // Maps each table to its appId for sync routing.
 // The SyncEngine uses this to group pending changes and push to /sync/{appId}.
@@ -255,7 +409,7 @@ export const SYNC_APP_MAP: Record<string, string[]> = {
 	picture: ['images', 'boards', 'boardItems', 'imageTags'],
 	cards: ['cardDecks', 'cards', 'deckTags'],
 	zitare: ['zitareFavorites', 'zitareLists', 'zitareListTags'],
-	mukke: ['songs', 'mukkePlaylists', 'playlistSongs', 'mukkeProjects', 'markers', 'songTags'],
+	music: ['songs', 'mukkePlaylists', 'playlistSongs', 'mukkeProjects', 'markers', 'songTags'],
 	storage: ['files', 'storageFolders', 'fileTags'],
 	presi: ['presiDecks', 'slides', 'presiDeckTags'],
 	inventar: ['invCollections', 'invItems', 'invLocations', 'invCategories', 'invItemTags'],
@@ -288,6 +442,7 @@ export const SYNC_APP_MAP: Record<string, string[]> = {
 	places: ['places', 'locationLogs', 'placeTags'],
 	tags: ['globalTags', 'tagGroups'],
 	links: ['manaLinks'],
+	timeblocks: ['timeBlocks', 'timeBlockTags'],
 };
 
 // ─── Reverse Map: Table → AppId ────────────────────────────
@@ -313,7 +468,7 @@ export const TABLE_TO_SYNC_NAME: Record<string, string> = {
 	// zitare
 	zitareFavorites: 'favorites',
 	zitareLists: 'lists',
-	// mukke
+	// music
 	mukkePlaylists: 'playlists',
 	mukkeProjects: 'projects',
 	// storage
