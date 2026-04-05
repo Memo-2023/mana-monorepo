@@ -6,7 +6,9 @@
 	import { liveQuery } from 'dexie';
 	import { db } from '$lib/data/database';
 	import { tasksStore } from '../stores/tasks.svelte';
-	import { Check, Trash, X } from '@manacore/shared-icons';
+	import { getBlock } from '$lib/data/time-blocks/service';
+	import type { LocalTimeBlock } from '$lib/data/time-blocks/types';
+	import { Check, Trash, X, CalendarBlank } from '@manacore/shared-icons';
 	import type { ViewProps } from '$lib/app-registry';
 	import type { LocalTask, TaskPriority } from '../types';
 	import { useAllTags, getTagsByIds } from '$lib/stores/tags.svelte';
@@ -24,6 +26,11 @@
 	let editDescription = $state('');
 	let editDueDate = $state('');
 	let editPriority = $state<TaskPriority>('medium');
+
+	// Schedule fields
+	let scheduleDate = $state('');
+	let scheduleTime = $state('');
+	let isScheduled = $state(false);
 
 	// Track whether user is actively editing to prevent overwrite from liveQuery
 	let focused = $state(false);
@@ -53,13 +60,30 @@
 	});
 
 	$effect(() => {
-		const sub = liveQuery(() => db.table<LocalTask>('tasks').get(taskId)).subscribe((val) => {
-			task = val ?? null;
-			if (val && !focused) {
-				editTitle = val.title;
-				editDescription = val.description ?? '';
-				editDueDate = val.dueDate?.split('T')[0] ?? '';
-				editPriority = val.priority;
+		const sub = liveQuery(async () => {
+			const t = await db.table<LocalTask>('tasks').get(taskId);
+			if (!t) return { task: null, block: null };
+			const block = t.scheduledBlockId ? await getBlock(t.scheduledBlockId) : null;
+			return { task: t, block: block ?? null };
+		}).subscribe((val) => {
+			task = val?.task ?? null;
+			if (val?.task && !focused) {
+				editTitle = val.task.title;
+				editDescription = val.task.description ?? '';
+				editDueDate = val.task.dueDate?.split('T')[0] ?? '';
+				editPriority = val.task.priority;
+				// Load schedule from TimeBlock
+				if (val.block) {
+					isScheduled = true;
+					scheduleDate = val.block.startDate.split('T')[0];
+					scheduleTime = val.block.startDate.includes('T')
+						? val.block.startDate.split('T')[1]?.substring(0, 5)
+						: '';
+				} else {
+					isScheduled = false;
+					scheduleDate = '';
+					scheduleTime = '';
+				}
 			}
 		});
 		return () => sub.unsubscribe();
@@ -72,7 +96,26 @@
 			description: editDescription.trim() || undefined,
 			dueDate: editDueDate ? new Date(editDueDate).toISOString() : null,
 			priority: editPriority,
+			_scheduleStartDate: isScheduled && scheduleDate ? scheduleDate : null,
+			_scheduleStartTime: isScheduled && scheduleTime ? scheduleTime : null,
 		});
+	}
+
+	async function toggleSchedule() {
+		if (isScheduled) {
+			// Unschedule
+			isScheduled = false;
+			scheduleDate = '';
+			scheduleTime = '';
+		} else {
+			// Schedule for tomorrow 9:00 by default
+			isScheduled = true;
+			const tomorrow = new Date();
+			tomorrow.setDate(tomorrow.getDate() + 1);
+			scheduleDate = tomorrow.toISOString().split('T')[0];
+			scheduleTime = '09:00';
+		}
+		await saveField();
 	}
 
 	async function handlePriorityChange() {
@@ -172,9 +215,44 @@
 			{#if task.estimatedDuration}
 				<div class="prop-row">
 					<span class="prop-label">Dauer</span>
-					<span class="prop-value">{task.estimatedDuration} Min.</span>
+					<span class="prop-value">{Math.round(task.estimatedDuration / 60)} Min.</span>
 				</div>
 			{/if}
+
+			<!-- Schedule on calendar -->
+			<div class="prop-row">
+				<span class="prop-label">Kalender</span>
+				{#if isScheduled}
+					<div class="schedule-fields">
+						<input
+							type="date"
+							class="prop-input"
+							bind:value={scheduleDate}
+							onfocus={() => (focused = true)}
+							onblur={saveField}
+						/>
+						<input
+							type="time"
+							class="prop-input"
+							bind:value={scheduleTime}
+							onfocus={() => (focused = true)}
+							onblur={saveField}
+						/>
+						<button
+							class="unschedule-btn"
+							onclick={toggleSchedule}
+							aria-label="Vom Kalender entfernen"
+						>
+							<X size={12} />
+						</button>
+					</div>
+				{:else}
+					<button class="schedule-btn" onclick={toggleSchedule}>
+						<CalendarBlank size={14} />
+						Planen
+					</button>
+				{/if}
+			</div>
 		</div>
 
 		<!-- Tags -->
@@ -363,6 +441,50 @@
 	:global(.dark) .prop-value {
 		color: #e5e7eb;
 	}
+	.schedule-fields {
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
+	}
+	.schedule-btn {
+		display: flex;
+		align-items: center;
+		gap: 0.25rem;
+		padding: 0.25rem 0.5rem;
+		border: 1px dashed rgba(0, 0, 0, 0.15);
+		border-radius: 0.375rem;
+		background: transparent;
+		font-size: 0.75rem;
+		color: #6b7280;
+		cursor: pointer;
+		transition: all 0.15s;
+	}
+	.schedule-btn:hover {
+		border-color: #3b82f6;
+		color: #3b82f6;
+		background: rgba(59, 130, 246, 0.05);
+	}
+	:global(.dark) .schedule-btn {
+		border-color: rgba(255, 255, 255, 0.15);
+		color: #9ca3af;
+	}
+	:global(.dark) .schedule-btn:hover {
+		border-color: #3b82f6;
+		color: #3b82f6;
+	}
+	.unschedule-btn {
+		padding: 0.25rem;
+		border: none;
+		background: transparent;
+		border-radius: 0.25rem;
+		color: #9ca3af;
+		cursor: pointer;
+	}
+	.unschedule-btn:hover {
+		color: #ef4444;
+		background: rgba(239, 68, 68, 0.1);
+	}
+
 	.prop-select,
 	.prop-input {
 		font-size: 0.8125rem;

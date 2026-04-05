@@ -22,6 +22,9 @@
 	let icon = $state(habit?.icon ?? 'star');
 	let color = $state(habit?.color ?? '#6366f1');
 	let targetPerDay = $state<string>(habit?.targetPerDay?.toString() ?? '');
+	let defaultDurationMin = $state<string>(
+		habit?.defaultDuration ? String(Math.round(habit.defaultDuration / 60)) : ''
+	);
 	let showIconPicker = $state(false);
 
 	async function handleSubmit(e: Event) {
@@ -29,6 +32,7 @@
 		if (!title.trim()) return;
 
 		const target = targetPerDay.trim() ? parseInt(targetPerDay) : null;
+		const durationSec = defaultDurationMin.trim() ? parseInt(defaultDurationMin) * 60 : null;
 
 		if (habit) {
 			await habitsStore.updateHabit(habit.id, {
@@ -36,6 +40,7 @@
 				icon,
 				color,
 				targetPerDay: target,
+				defaultDuration: durationSec,
 			});
 		} else {
 			await habitsStore.createHabit({
@@ -43,6 +48,7 @@
 				icon,
 				color,
 				targetPerDay: target,
+				defaultDuration: durationSec,
 			});
 		}
 
@@ -114,6 +120,17 @@
 				max="100"
 				placeholder="-"
 				bind:value={targetPerDay}
+			/>
+		</label>
+		<label class="target-label">
+			<span>Dauer (Min)</span>
+			<input
+				class="target-input"
+				type="number"
+				min="1"
+				max="480"
+				placeholder="-"
+				bind:value={defaultDurationMin}
 			/>
 		</label>
 	</div>

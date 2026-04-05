@@ -33,6 +33,7 @@ export interface Habit {
 	icon: string;
 	color: string;
 	targetPerDay: number | null;
+	defaultDuration: number | null; // seconds
 	order: number;
 	isArchived: boolean;
 	createdAt: string;

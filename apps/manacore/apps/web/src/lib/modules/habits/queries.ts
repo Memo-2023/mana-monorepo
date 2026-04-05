@@ -19,6 +19,7 @@ export function toHabit(local: LocalHabit): Habit {
 		icon: local.icon ?? EMOJI_TO_ICON_MAP[(local as Record<string, string>).emoji] ?? 'star',
 		color: local.color,
 		targetPerDay: local.targetPerDay,
+		defaultDuration: local.defaultDuration ?? null,
 		order: local.order,
 		isArchived: local.isArchived,
 		createdAt: local.createdAt ?? new Date().toISOString(),
