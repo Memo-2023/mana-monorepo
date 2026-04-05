@@ -125,7 +125,7 @@ const PROJECT_META: Record<string, { name: string; icon: string }> = {
 	planta: { name: 'Planta', icon: '🌱' },
 	storage: { name: 'Storage', icon: '☁️' },
 	questions: { name: 'Questions', icon: '❓' },
-	mukke: { name: 'Mukke', icon: '🎵' },
+	music: { name: 'Music', icon: '🎵' },
 	context: { name: 'Context', icon: '📄' },
 	photos: { name: 'Photos', icon: '📷' },
 	skilltree: { name: 'SkillTree', icon: '🌳' },

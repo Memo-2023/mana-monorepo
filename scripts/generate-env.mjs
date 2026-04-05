@@ -594,30 +594,30 @@ const APP_CONFIGS = [
 		},
 	},
 
-	// Mukke Server (Hono/Bun)
+	// Music Server (Hono/Bun)
 	{
 		path: 'apps/mukke/apps/server/.env',
 		vars: {
 			NODE_ENV: () => 'development',
-			PORT: (env) => env.MUKKE_BACKEND_PORT || '3010',
-			DATABASE_URL: (env) => env.MUKKE_DATABASE_URL,
+			PORT: (env) => env.MUSIC_BACKEND_PORT || '3010',
+			DATABASE_URL: (env) => env.MUSIC_DATABASE_URL,
 			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
 			S3_ENDPOINT: (env) => env.S3_ENDPOINT || 'http://localhost:9000',
 			S3_REGION: (env) => env.S3_REGION || 'us-east-1',
 			S3_ACCESS_KEY: (env) => env.S3_ACCESS_KEY || 'minioadmin',
 			S3_SECRET_KEY: (env) => env.S3_SECRET_KEY || 'minioadmin',
-			S3_BUCKET: () => 'mukke-storage',
+			S3_BUCKET: () => 'music-storage',
 			DEV_BYPASS_AUTH: () => 'true',
 			DEV_USER_ID: (env) => env.DEV_USER_ID || '00000000-0000-0000-0000-000000000000',
 			CORS_ORIGINS: (env) => env.CORS_ORIGINS,
 		},
 	},
 
-	// Mukke Web (SvelteKit)
+	// Music Web (SvelteKit)
 	{
 		path: 'apps/mukke/apps/web/.env',
 		vars: {
-			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.MUKKE_BACKEND_PORT || '3010'}`,
+			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.MUSIC_BACKEND_PORT || '3010'}`,
 			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
 			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
@@ -732,11 +732,11 @@ const APP_CONFIGS = [
 		},
 	},
 
-	// Mukke Landing
+	// Music Landing
 	{
 		path: 'apps/mukke/apps/landing/.env',
 		vars: {
-			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_MUKKE_LANDING || '',
+			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_MUSIC_LANDING || '',
 		},
 	},
 ];

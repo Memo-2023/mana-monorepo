@@ -99,7 +99,7 @@ scrape_configs:
     scrape_interval: 30s
 
   # NOTE: Individual app backends (chat, todo, calendar, contacts, storage,
-  # nutriphi, mukke, planta, picture) have been REMOVED — all migrated to
+  # nutriphi, music, planta, picture) have been REMOVED — all migrated to
   # local-first architecture. Only uload-server and memoro-server remain.
 
   # Mana LLM Gateway (Ollama + Google Fallback)
@@ -246,7 +246,7 @@ scrape_configs:
           - https://mana.how/zitare
           - https://mana.how/cards
           - https://mana.how/skilltree
-          - https://mana.how/mukke
+          - https://mana.how/music
           - https://mana.how/citycorners
           - https://mana.how/memoro
           - https://mana.how/moodlit

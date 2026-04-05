@@ -23,7 +23,7 @@ ingress:
     service: http://localhost:3041
 
   # NOTE: Individual app backends (chat, todo, calendar, contacts, storage,
-  # nutriphi, mukke, planta, picture, etc.) have been REMOVED — all migrated
+  # nutriphi, music, planta, picture, etc.) have been REMOVED — all migrated
   # to local-first architecture. Web apps run as routes under mana.how.
   # Only uload-server and memoro-server remain as app-specific backends.
 

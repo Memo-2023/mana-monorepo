@@ -482,8 +482,8 @@
 				},
 				{
 					"datasource": { "type": "prometheus", "uid": "${datasource}" },
-					"expr": "up{job=\"mukke-backend\"}",
-					"legendFormat": "Mukke",
+					"expr": "up{job=\"music-backend\"}",
+					"legendFormat": "Music",
 					"refId": "P"
 				},
 				{

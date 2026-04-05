@@ -22,7 +22,7 @@ APPS=(
   "photos.mana.how"
   "skilltree.mana.how"
   "picture.mana.how"
-  "mukke.mana.how"
+  "music.mana.how"
 )
 
 RESULTS_DIR="lighthouse-results"

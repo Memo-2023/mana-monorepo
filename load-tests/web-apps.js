@@ -23,7 +23,7 @@ const apps = [
 	{ name: 'nutriphi', url: `${BASE}:5182` },
 	{ name: 'skilltree', url: `${BASE}:5183` },
 	{ name: 'photos', url: `${BASE}:5184` },
-	{ name: 'mukke', url: `${BASE}:5189` },
+	{ name: 'music', url: `${BASE}:5189` },
 	{ name: 'citycorners', url: `${BASE}:5190` },
 	{ name: 'picture', url: `${BASE}:5174` },
 	{ name: 'inventar', url: `${BASE}:5191` },

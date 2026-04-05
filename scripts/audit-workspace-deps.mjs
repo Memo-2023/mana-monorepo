@@ -51,7 +51,7 @@ const WORKSPACE_SCOPES = new Set([
 	'@contacts',
 	'@context',
 	'@matrix',
-	'@mukke',
+	'@music',
 	'@nutriphi',
 	'@photos',
 	'@picture',
