@@ -406,6 +406,7 @@
 		align-items: center;
 		gap: 0.5rem;
 		padding: 0.75rem 1rem;
+		min-height: 48px;
 		border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 	}
 
@@ -476,6 +477,7 @@
 		align-items: center;
 		gap: 0.375rem;
 		padding: 0.375rem 0.625rem;
+		min-height: 44px;
 		border-radius: 9999px;
 		border: 1px solid rgba(0, 0, 0, 0.08);
 		background: rgba(0, 0, 0, 0.03);
@@ -538,6 +540,7 @@
 		align-items: center;
 		gap: 0.5rem;
 		padding: 0.5rem;
+		min-height: 44px;
 		border-radius: 0.5rem;
 		border: none;
 		background: none;
@@ -590,6 +593,11 @@
 	/* Favorite toggle */
 	.fav-toggle {
 		padding: 0.375rem;
+		min-width: 44px;
+		min-height: 44px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 		border: none;
 		background: none;
 		cursor: pointer;

@@ -45,7 +45,7 @@
 	};
 </script>
 
-<div class="flex h-full flex-col gap-3 p-4">
+<div class="flex h-full flex-col gap-3 p-3 sm:p-4">
 	<div class="flex gap-3 text-xs text-white/40">
 		<span>{spaces.length} Spaces</span>
 		<span>{documents.length} Dokumente</span>
@@ -56,7 +56,7 @@
 		{#if spaces.filter((s) => s.pinned).length > 0}
 			<h3 class="mb-2 text-xs font-medium text-white/50">Angepinnte Spaces</h3>
 			{#each spaces.filter((s) => s.pinned) as space (space.id)}
-				<div class="mb-1 rounded-md px-3 py-2 transition-colors hover:bg-white/5">
+				<div class="mb-1 min-h-[44px] rounded-md px-3 py-2 transition-colors hover:bg-white/5">
 					<p class="text-sm font-medium text-white/80">{space.name}</p>
 					{#if space.description}
 						<p class="truncate text-xs text-white/30">{space.description}</p>
@@ -69,7 +69,7 @@
 		<h3 class="mb-2 mt-3 text-xs font-medium text-white/50">Zuletzt bearbeitet</h3>
 		{#each recentDocs as doc (doc.id)}
 			<div
-				class="flex items-center gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-white/5"
+				class="flex min-h-[44px] items-center gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-white/5"
 			>
 				<span class="text-sm">{@html typeIcons[doc.type] ?? '&#128196;'}</span>
 				<div class="min-w-0 flex-1">

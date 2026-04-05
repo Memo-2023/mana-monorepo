@@ -701,4 +701,14 @@
 		color: var(--color-muted-foreground);
 		margin: 0 0 0.5rem;
 	}
+
+	@media (max-width: 640px) {
+		.automations-view {
+			padding: 0.5rem;
+		}
+		.auto-card {
+			padding: 0.75rem;
+			min-height: 44px;
+		}
+	}
 </style>

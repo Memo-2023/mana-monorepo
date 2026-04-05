@@ -97,10 +97,12 @@
 	<!-- svelte-ignore a11y_click_events_have_key_events -->
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
-		class="fixed inset-0 z-[9996] flex items-center justify-center bg-black/45 p-4 backdrop-blur-sm"
+		class="fixed inset-0 z-[9996] flex items-end sm:items-center justify-center bg-black/45 p-0 sm:p-4 backdrop-blur-sm"
 		onclick={(e) => e.target === e.currentTarget && onClose()}
 	>
-		<div class="w-full max-w-lg rounded-2xl border border-border bg-card shadow-2xl">
+		<div
+			class="w-full max-w-lg rounded-t-2xl sm:rounded-2xl border border-border bg-card shadow-2xl max-h-[95vh] sm:max-h-[90vh]"
+		>
 			<!-- Header -->
 			<div class="flex items-center justify-between border-b border-border px-5 py-3">
 				<h2 class="text-lg font-semibold text-foreground">

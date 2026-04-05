@@ -42,7 +42,7 @@
 	}
 </script>
 
-<div class="flex h-full flex-col gap-3 p-4">
+<div class="flex h-full flex-col gap-3 p-3 sm:p-4">
 	<p class="text-xs text-white/40">{decks.length} Präsentationen</p>
 
 	<div class="flex-1 overflow-auto">
@@ -54,7 +54,7 @@
 						_siblingIds: decks.map((d) => d.id),
 						_siblingKey: 'deckId',
 					})}
-				class="mb-2 w-full rounded-md border border-white/10 px-3 py-2.5 text-left transition-colors hover:bg-white/5"
+				class="mb-2 w-full rounded-md border border-white/10 px-3 py-2.5 text-left transition-colors hover:bg-white/5 min-h-[44px]"
 			>
 				<p class="truncate text-sm font-medium text-white/80">{deck.title}</p>
 				<div class="mt-1 flex items-center gap-2 text-xs text-white/40">

@@ -98,7 +98,7 @@
 	}
 </script>
 
-<div class="flex h-full flex-col gap-3 p-4">
+<div class="flex h-full flex-col gap-3 p-3 sm:p-4">
 	<!-- Inline Timer -->
 	<div class="flex items-center gap-2">
 		<button
@@ -141,7 +141,7 @@
 		{#each todayEntries as entry (entry.id)}
 			<button
 				onclick={() => navigate('detail', { entryId: entry.id })}
-				class="mb-1 w-full rounded-md px-3 py-2 text-left transition-colors hover:bg-white/5"
+				class="mb-1 w-full min-h-[44px] rounded-md px-3 py-2 text-left transition-colors hover:bg-white/5"
 			>
 				<div class="flex items-center justify-between">
 					<p class="truncate text-sm text-white/80">

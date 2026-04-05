@@ -207,6 +207,7 @@
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
+		min-height: 44px;
 		cursor: pointer;
 		flex-shrink: 0;
 		transition: all 0.15s ease;

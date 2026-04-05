@@ -247,4 +247,14 @@
 		color: #ef4444;
 		border-color: rgba(239, 68, 68, 0.2);
 	}
+
+	@media (max-width: 640px) {
+		.detail-view {
+			padding: 1rem;
+		}
+		.action-btn,
+		.bio-btn {
+			min-height: 44px;
+		}
+	}
 </style>

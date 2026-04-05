@@ -91,11 +91,11 @@
 	<!-- svelte-ignore a11y_click_events_have_key_events -->
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
-		class="fixed inset-0 z-[9995] flex items-center justify-center bg-black/45 p-4 backdrop-blur-sm sm:p-8"
+		class="fixed inset-0 z-[9995] flex items-end sm:items-center justify-center bg-black/45 p-0 sm:p-8 backdrop-blur-sm"
 		onclick={handleBackdropClick}
 	>
 		<div
-			class="flex max-h-[calc(100vh-4rem)] w-full max-w-[1040px] flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-2xl max-sm:max-h-[calc(100vh-60px)] max-sm:rounded-b-none"
+			class="flex w-full max-w-[1040px] flex-col overflow-hidden rounded-t-2xl sm:rounded-2xl border border-border bg-card shadow-2xl max-h-[95vh] sm:max-h-[calc(100vh-4rem)]"
 		>
 			<!-- Top bar -->
 			<div

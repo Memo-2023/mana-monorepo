@@ -40,12 +40,14 @@
 </script>
 
 <div
-	class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+	class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm"
 	onclick={handleBackdropClick}
 	role="dialog"
 	aria-modal="true"
 >
-	<div class="mx-4 w-full max-w-md rounded-2xl border border-gray-700 bg-gray-800 p-6 shadow-xl">
+	<div
+		class="w-full max-w-md rounded-t-2xl sm:rounded-2xl border border-gray-700 bg-gray-800 p-6 shadow-xl max-h-[95vh] sm:max-h-[90vh] sm:mx-4"
+	>
 		<!-- Header -->
 		<div class="mb-6 flex items-center justify-between">
 			<h2 class="text-xl font-bold text-white">Neuer Skill</h2>

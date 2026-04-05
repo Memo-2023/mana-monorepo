@@ -26,14 +26,14 @@
 	const favoriteCount = $derived(images.filter((i) => i.isFavorite).length);
 </script>
 
-<div class="flex h-full flex-col gap-3 p-4">
+<div class="flex h-full flex-col gap-3 p-3 sm:p-4">
 	<div class="flex items-center justify-between">
 		<p class="text-xs text-white/40">{images.length} Bilder</p>
 		<p class="text-xs text-white/40">{favoriteCount} Favoriten</p>
 	</div>
 
 	<div class="flex-1 overflow-auto">
-		<div class="grid grid-cols-3 gap-1.5">
+		<div class="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
 			{#each sorted as image (image.id)}
 				<div class="group relative aspect-square overflow-hidden rounded-md bg-white/5">
 					{#if image.publicUrl}

@@ -283,4 +283,14 @@
 		background: rgba(255, 255, 255, 0.06);
 		color: #e5e7eb;
 	}
+
+	@media (max-width: 640px) {
+		.detail-view {
+			padding: 0.75rem;
+		}
+		.fav-btn,
+		.action-btn {
+			min-height: 44px;
+		}
+	}
 </style>

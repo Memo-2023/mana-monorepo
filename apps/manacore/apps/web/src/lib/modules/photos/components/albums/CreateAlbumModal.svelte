@@ -38,10 +38,12 @@
 
 <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
 <div
-	class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+	class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 p-0 sm:p-4"
 	onclick={handleBackdropClick}
 >
-	<div class="w-full max-w-md rounded-xl border border-border bg-background-card p-6">
+	<div
+		class="w-full max-w-md rounded-t-xl sm:rounded-xl border border-border bg-background-card p-6 max-h-[95vh] sm:max-h-[90vh]"
+	>
 		<header class="mb-6 flex items-center justify-between">
 			<h2 class="text-lg font-semibold text-foreground">Album erstellen</h2>
 			<button

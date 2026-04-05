@@ -76,7 +76,7 @@
 	);
 </script>
 
-<div class="flex h-full flex-col gap-4 p-4">
+<div class="flex h-full flex-col gap-4 p-3 sm:p-4">
 	<!-- Active mood preview -->
 	{#if activeMood}
 		<div
@@ -93,7 +93,7 @@
 
 	<!-- Mood grid -->
 	<div class="flex-1 overflow-auto">
-		<div class="grid grid-cols-3 gap-2">
+		<div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
 			{#each moods as mood (mood.id)}
 				<button
 					onclick={() => (activeMoodId = activeMoodId === mood.id ? null : mood.id)}

@@ -620,4 +620,57 @@
 	:global(.dark) .fan-up .dropdown-footer {
 		border-bottom-color: rgba(255, 255, 255, 0.15);
 	}
+
+	/* Mobile: bottom sheet */
+	@media (max-width: 640px) {
+		.fan-container {
+			position: fixed;
+			top: auto !important;
+			left: 0 !important;
+			right: 0;
+			bottom: 0;
+			width: 100%;
+			max-height: 80vh;
+			overflow-y: auto;
+			padding: 1rem;
+			padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+			background: rgba(255, 255, 255, 0.95);
+			backdrop-filter: blur(20px);
+			-webkit-backdrop-filter: blur(20px);
+			border-top: 1px solid rgba(0, 0, 0, 0.1);
+			border-radius: 1rem 1rem 0 0;
+			box-shadow: 0 -10px 25px -5px rgba(0, 0, 0, 0.15);
+			transform: none;
+			animation: pillSheetUp 0.2s ease-out;
+		}
+
+		:global(.dark) .fan-container {
+			background: rgba(30, 30, 35, 0.95);
+			border-top-color: rgba(255, 255, 255, 0.12);
+		}
+
+		.fan-up {
+			transform: none;
+			flex-direction: column;
+		}
+
+		.pill,
+		.fan-pill,
+		.submenu-item {
+			min-height: 44px;
+		}
+
+		.menu-backdrop {
+			background: rgba(0, 0, 0, 0.3);
+		}
+	}
+
+	@keyframes pillSheetUp {
+		from {
+			transform: translateY(100%);
+		}
+		to {
+			transform: translateY(0);
+		}
+	}
 </style>

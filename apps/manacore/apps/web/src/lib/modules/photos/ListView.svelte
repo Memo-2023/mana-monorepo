@@ -440,4 +440,14 @@
 			transform: rotate(360deg);
 		}
 	}
+
+	@media (max-width: 640px) {
+		.photos-list-view {
+			padding: 0.5rem;
+		}
+		.album-row {
+			padding: 0.625rem;
+			min-height: 44px;
+		}
+	}
 </style>

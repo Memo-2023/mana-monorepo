@@ -558,4 +558,14 @@
 			box-shadow: 0 0 0 12px rgba(139, 92, 246, 0);
 		}
 	}
+
+	@media (max-width: 640px) {
+		.habits-list-view {
+			padding: 0.5rem;
+		}
+		.tally-item {
+			padding: 0.625rem 0.375rem;
+			min-height: 44px;
+		}
+	}
 </style>

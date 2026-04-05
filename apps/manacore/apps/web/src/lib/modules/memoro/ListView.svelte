@@ -46,7 +46,7 @@
 	};
 </script>
 
-<div class="flex h-full flex-col gap-3 p-4">
+<div class="flex h-full flex-col gap-3 p-3 sm:p-4">
 	<div class="flex gap-3 text-xs text-white/40">
 		<span>{memos.length} Memos</span>
 		<span>{pinned.length} angepinnt</span>
@@ -61,7 +61,7 @@
 						_siblingIds: sorted.map((m) => m.id),
 						_siblingKey: 'memoId',
 					})}
-				class="mb-2 w-full rounded-md border border-white/10 px-3 py-2.5 text-left transition-colors hover:bg-white/5"
+				class="mb-2 w-full rounded-md border border-white/10 px-3 py-2.5 text-left transition-colors hover:bg-white/5 min-h-[44px]"
 			>
 				<div class="flex items-start justify-between gap-2">
 					<div class="min-w-0 flex-1">

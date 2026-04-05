@@ -534,4 +534,14 @@
 			opacity: 0.3;
 		}
 	}
+
+	@media (max-width: 640px) {
+		.places-list-view {
+			padding: 0.5rem;
+		}
+		.place-item {
+			padding: 0.625rem;
+			min-height: 44px;
+		}
+	}
 </style>

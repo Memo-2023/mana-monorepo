@@ -54,7 +54,7 @@
 	<!-- Modal Backdrop -->
 	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 	<div
-		class="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+		class="fixed inset-0 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm p-0 sm:p-4"
 		style="z-index: 9990;"
 		onclick={handleBackdropClick}
 		onkeydown={(e) => e.key === 'Enter' && handleBackdropClick(e as unknown as MouseEvent)}
@@ -66,15 +66,15 @@
 		<!-- Modal Content -->
 		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		<div
-			class="relative flex max-h-[90vh] w-full {maxWidthClasses[
+			class="relative flex max-h-[95vh] sm:max-h-[90vh] w-full {maxWidthClasses[
 				maxWidth
-			]} flex-col rounded-2xl border border-border bg-surface-elevated-2 backdrop-blur-xl shadow-2xl"
+			]} flex-col rounded-t-2xl sm:rounded-2xl border border-border bg-surface-elevated-2 backdrop-blur-xl shadow-2xl"
 			onclick={(e) => e.stopPropagation()}
 			onkeydown={(e) => e.stopPropagation()}
 		>
 			{#if showHeader}
 				<!-- Header -->
-				<div class="flex items-center justify-between p-6 border-b border-border">
+				<div class="flex items-center justify-between p-4 sm:p-6 border-b border-border">
 					<div class="flex items-center gap-3 flex-1">
 						{#if icon}
 							{@render icon()}
@@ -87,7 +87,7 @@
 					</div>
 					<button
 						onclick={onClose}
-						class="p-2 rounded-xl bg-foreground/5 hover:bg-foreground/10 transition-all duration-200 hover:scale-105"
+						class="p-2.5 sm:p-2 rounded-xl bg-foreground/5 hover:bg-foreground/10 transition-all duration-200 hover:scale-105"
 						aria-label="Close"
 					>
 						<X size={18} weight="bold" class="text-muted-foreground" />
@@ -96,13 +96,13 @@
 			{/if}
 
 			<!-- Body (scrollable) -->
-			<div class="flex-1 overflow-y-auto p-6">
+			<div class="flex-1 overflow-y-auto p-4 sm:p-6">
 				{@render children()}
 			</div>
 
 			<!-- Footer (optional) -->
 			{#if footer}
-				<div class="border-t border-border p-6">
+				<div class="border-t border-border p-4 sm:p-6">
 					{@render footer()}
 				</div>
 			{/if}

@@ -85,7 +85,7 @@
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
-	class="flex h-full cursor-pointer flex-col items-center justify-center p-6"
+	class="flex h-full cursor-pointer flex-col items-center justify-center p-4 sm:p-6"
 	onclick={nextQuote}
 	use:dropTarget={{
 		accepts: ['tag'],
@@ -116,7 +116,10 @@
 			</div>
 		{/if}
 
-		<button onclick={toggleFav} class="mt-3 rounded-full p-1.5 transition-colors hover:bg-white/5">
+		<button
+			onclick={toggleFav}
+			class="mt-3 min-h-[44px] rounded-full p-1.5 transition-colors hover:bg-white/5"
+		>
 			<Heart
 				size={16}
 				weight={isFav ? 'fill' : 'regular'}

@@ -58,7 +58,7 @@
 	);
 </script>
 
-<div class="flex h-full flex-col gap-3 p-4">
+<div class="flex h-full flex-col gap-3 p-3 sm:p-4">
 	<div class="flex gap-3 text-xs text-white/40">
 		<span>{questions.length} Fragen</span>
 		<span>{collections.length} Sammlungen</span>
@@ -73,7 +73,7 @@
 						_siblingIds: sorted.map((q) => q.id),
 						_siblingKey: 'questionId',
 					})}
-				class="mb-2 w-full text-left rounded-md border border-white/10 px-3 py-2.5 transition-colors hover:bg-white/5 cursor-pointer"
+				class="mb-2 w-full text-left rounded-md border border-white/10 px-3 py-2.5 transition-colors hover:bg-white/5 cursor-pointer min-h-[44px]"
 			>
 				<div class="flex items-start justify-between gap-2">
 					<p class="text-sm font-medium text-white/80">{question.title}</p>

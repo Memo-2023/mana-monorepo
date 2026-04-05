@@ -52,7 +52,7 @@
 	}
 </script>
 
-<div class="flex h-full flex-col gap-3 p-4">
+<div class="flex h-full flex-col gap-3 p-3 sm:p-4">
 	<div class="flex gap-3 text-xs text-white/40">
 		<span>{links.length} Links</span>
 		<span>{totalClicks} Klicks</span>
@@ -68,7 +68,7 @@
 						_siblingIds: sorted.map((l) => l.id),
 						_siblingKey: 'linkId',
 					})}
-				class="mb-1 w-full text-left rounded-md px-3 py-2 transition-colors hover:bg-white/5 cursor-pointer"
+				class="mb-1 w-full min-h-[44px] text-left rounded-md px-3 py-2 transition-colors hover:bg-white/5 cursor-pointer"
 			>
 				<div class="flex items-center justify-between">
 					<p class="truncate text-sm font-medium text-white/80">

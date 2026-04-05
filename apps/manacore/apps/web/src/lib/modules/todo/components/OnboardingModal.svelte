@@ -54,10 +54,12 @@
 	<!-- svelte-ignore a11y_click_events_have_key_events -->
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
-		class="fixed inset-0 z-[9997] flex items-center justify-center bg-black/45 p-4 backdrop-blur-sm"
+		class="fixed inset-0 z-[9997] flex items-end sm:items-center justify-center bg-black/45 p-0 sm:p-4 backdrop-blur-sm"
 		onclick={(e) => e.target === e.currentTarget && finish()}
 	>
-		<div class="w-full max-w-sm rounded-2xl border border-border bg-card shadow-2xl">
+		<div
+			class="w-full max-w-sm rounded-t-2xl sm:rounded-2xl border border-border bg-card shadow-2xl max-h-[95vh] sm:max-h-[90vh]"
+		>
 			<div class="flex flex-col items-center p-8 text-center">
 				<div class="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
 					<svelte:component this={steps[step].icon} size={32} class="text-primary" />

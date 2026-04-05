@@ -58,7 +58,7 @@
 	};
 </script>
 
-<div class="flex h-full flex-col gap-3 p-4">
+<div class="flex h-full flex-col gap-3 p-3 sm:p-4">
 	<!-- Calorie progress -->
 	<div class="text-center">
 		<p class="text-2xl font-light text-white/90">{Math.round(totalCalories)}</p>
@@ -90,7 +90,7 @@
 	<!-- Today's meals -->
 	<div class="flex-1 overflow-auto">
 		{#each todayMeals as meal (meal.id)}
-			<div class="mb-1 rounded-md px-3 py-2 transition-colors hover:bg-white/5">
+			<div class="mb-1 min-h-[44px] rounded-md px-3 py-2 transition-colors hover:bg-white/5">
 				<div class="flex items-center justify-between">
 					<span class="text-xs text-white/50">{mealTypeLabels[meal.mealType] ?? meal.mealType}</span
 					>

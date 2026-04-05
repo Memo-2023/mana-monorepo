@@ -480,8 +480,14 @@
 		display: flex;
 		align-items: center;
 		gap: 0.75rem;
-		padding: 1rem 1.25rem;
+		padding: 0.75rem 1rem;
 		border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+	}
+
+	@media (min-width: 641px) {
+		.spotlight-input-wrapper {
+			padding: 1rem 1.25rem;
+		}
 	}
 
 	:global(.dark) .spotlight-input-wrapper {
@@ -550,6 +556,7 @@
 		justify-content: space-between;
 		width: 100%;
 		padding: 0.625rem 0.75rem;
+		min-height: 44px;
 		border: none;
 		background: none;
 		border-radius: 0.5rem;
@@ -737,12 +744,37 @@
 	/* Mobile */
 	@media (max-width: 640px) {
 		.spotlight-overlay {
-			padding-top: 1rem;
+			padding-top: 0;
+			align-items: flex-end;
 		}
 
 		.spotlight-modal {
 			max-width: none;
-			margin: 0 0.5rem;
+			margin: 0;
+			border-radius: 1rem 1rem 0 0;
+			max-height: 85vh;
+			animation: spotlightSlideUp 0.2s ease-out;
+		}
+
+		.spotlight-results {
+			max-height: 60vh;
+		}
+
+		.spotlight-footer {
+			display: none;
+		}
+
+		.spotlight-input {
+			font-size: 1rem;
+		}
+	}
+
+	@keyframes spotlightSlideUp {
+		from {
+			transform: translateY(100%);
+		}
+		to {
+			transform: translateY(0);
 		}
 	}
 </style>

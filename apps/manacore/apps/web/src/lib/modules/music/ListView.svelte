@@ -54,7 +54,7 @@
 	}
 </script>
 
-<div class="flex h-full flex-col gap-3 p-4">
+<div class="flex h-full flex-col gap-3 p-3 sm:p-4">
 	<div class="flex gap-3 text-xs text-white/40">
 		<span>{songs.length} Songs</span>
 		<span>{playlists.length} Playlists</span>
@@ -71,7 +71,7 @@
 						_siblingIds: recentlyPlayed.map((s) => s.id),
 						_siblingKey: 'songId',
 					})}
-				class="flex w-full items-center gap-3 rounded-md px-2 py-1.5 transition-colors hover:bg-white/5 cursor-pointer text-left"
+				class="flex w-full min-h-[44px] items-center gap-3 rounded-md px-2 py-1.5 transition-colors hover:bg-white/5 cursor-pointer text-left"
 			>
 				<div
 					class="flex h-8 w-8 shrink-0 items-center justify-center rounded bg-white/10 text-xs text-white/30"

@@ -108,11 +108,11 @@
 {#if show}
 	<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
 	<div
-		class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+		class="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4"
 		onclick={handleBackdropClick}
 	>
 		<div
-			class="bg-card rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto"
+			class="bg-card rounded-t-xl sm:rounded-xl shadow-xl max-w-md w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto"
 			role="dialog"
 			aria-modal="true"
 		>

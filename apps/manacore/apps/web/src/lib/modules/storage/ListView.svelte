@@ -56,7 +56,7 @@
 	}
 </script>
 
-<div class="flex h-full flex-col gap-3 p-4">
+<div class="flex h-full flex-col gap-3 p-3 sm:p-4">
 	<div class="flex gap-3 text-xs text-white/40">
 		<span>{folders.length} Ordner</span>
 		<span>{files.length} Dateien</span>
@@ -68,7 +68,7 @@
 			<h3 class="mb-2 text-xs font-medium text-white/50">Ordner</h3>
 			{#each folders.filter((f) => !f.parentFolderId) as folder (folder.id)}
 				<div
-					class="flex items-center gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-white/5"
+					class="flex min-h-[44px] items-center gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-white/5"
 				>
 					<span class="text-sm" style="color: {folder.color ?? '#6b7280'}">&#128193;</span>
 					<span class="truncate text-sm text-white/70">{folder.name}</span>
@@ -86,7 +86,7 @@
 						_siblingIds: recentFiles.map((f) => f.id),
 						_siblingKey: 'fileId',
 					})}
-				class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-white/5"
+				class="flex w-full min-h-[44px] items-center gap-2 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-white/5"
 			>
 				<span class="text-sm">{@html fileIcon(file.mimeType)}</span>
 				<span class="min-w-0 flex-1 truncate text-sm text-white/70">{file.name}</span>

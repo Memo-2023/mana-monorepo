@@ -399,4 +399,17 @@
 		background: rgba(255, 255, 255, 0.06);
 		color: #e5e7eb;
 	}
+
+	@media (max-width: 640px) {
+		.detail-view {
+			padding: 0.75rem;
+		}
+		.action-btn,
+		.toggle-label {
+			min-height: 44px;
+		}
+		.prop-input {
+			min-height: 44px;
+		}
+	}
 </style>

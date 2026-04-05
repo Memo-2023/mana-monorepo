@@ -49,7 +49,7 @@
 	}
 </script>
 
-<div class="flex h-full flex-col gap-4 p-4">
+<div class="flex h-full flex-col gap-4 p-3 sm:p-4">
 	<!-- Display -->
 	<div class="rounded-md bg-white/5 p-3 text-right">
 		<p class="text-xs text-white/40">{expression || ' '}</p>

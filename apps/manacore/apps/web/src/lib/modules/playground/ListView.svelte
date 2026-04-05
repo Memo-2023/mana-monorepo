@@ -30,7 +30,7 @@
 	}
 </script>
 
-<div class="flex h-full flex-col gap-3 p-4">
+<div class="flex h-full flex-col gap-3 p-3 sm:p-4">
 	<!-- Model selector -->
 	<select
 		bind:value={selectedModel}
@@ -45,7 +45,9 @@
 	<div class="flex-1 overflow-auto">
 		{#each messages as msg, i}
 			<div
-				class="mb-2 rounded-md px-3 py-2 {msg.role === 'user' ? 'bg-white/5' : 'bg-blue-500/10'}"
+				class="mb-2 min-h-[44px] rounded-md px-3 py-2 {msg.role === 'user'
+					? 'bg-white/5'
+					: 'bg-blue-500/10'}"
 			>
 				<p class="text-[10px] text-white/30">{msg.role === 'user' ? 'Du' : modelLabel}</p>
 				<p class="text-sm text-white/70">{msg.content}</p>

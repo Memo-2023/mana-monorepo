@@ -55,7 +55,7 @@
 	};
 </script>
 
-<div class="flex h-full flex-col gap-3 p-4">
+<div class="flex h-full flex-col gap-3 p-3 sm:p-4">
 	<div class="flex gap-3 text-xs text-white/40">
 		<span>{locations.length} Orte</span>
 		<span>{favorites.length} Favoriten</span>
@@ -70,7 +70,7 @@
 						_siblingIds: locations.map((l) => l.id),
 						_siblingKey: 'locationId',
 					})}
-				class="flex w-full items-start gap-2 rounded-md px-2 py-2 transition-colors hover:bg-white/5 cursor-pointer text-left"
+				class="flex w-full min-h-[44px] items-start gap-2 rounded-md px-2 py-2 transition-colors hover:bg-white/5 cursor-pointer text-left"
 			>
 				<div
 					class="mt-0.5 h-2.5 w-2.5 shrink-0 rounded-full"

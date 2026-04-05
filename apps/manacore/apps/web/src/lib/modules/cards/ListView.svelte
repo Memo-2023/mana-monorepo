@@ -47,7 +47,7 @@
 	}
 </script>
 
-<div class="flex h-full flex-col gap-3 p-4">
+<div class="flex h-full flex-col gap-3 p-3 sm:p-4">
 	<div class="flex items-center justify-between">
 		<p class="text-xs text-white/40">{decks.length} Decks</p>
 		<p class="text-xs text-amber-400/70">{dueForReview()} fällig</p>
@@ -62,7 +62,7 @@
 						_siblingIds: decks.map((d) => d.id),
 						_siblingKey: 'deckId',
 					})}
-				class="mb-2 w-full rounded-md border border-white/10 px-3 py-2.5 text-left transition-colors hover:bg-white/5"
+				class="mb-2 w-full rounded-md border border-white/10 px-3 py-2.5 text-left transition-colors hover:bg-white/5 min-h-[44px]"
 			>
 				<div class="flex items-center gap-2">
 					<div class="h-3 w-3 rounded" style="background: {deck.color}"></div>
