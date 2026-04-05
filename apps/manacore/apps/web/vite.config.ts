@@ -18,6 +18,24 @@ export default defineConfig({
 				shortName: 'ManaCore',
 				description: 'ManaCore App Ecosystem',
 				themeColor: '#6366f1',
+				registerType: 'prompt',
+				preset: 'full',
+				shortcuts: [
+					{ name: 'Dashboard', short_name: 'Home', url: '/', description: 'Zum Dashboard' },
+					{
+						name: 'Neue Aufgabe',
+						short_name: 'Aufgabe',
+						url: '/todo',
+						description: 'Neue Aufgabe erstellen',
+					},
+					{
+						name: 'Kalender',
+						short_name: 'Kalender',
+						url: '/calendar',
+						description: 'Kalender öffnen',
+					},
+					{ name: 'Chat', short_name: 'Chat', url: '/chat', description: 'Chat öffnen' },
+				],
 			})
 		),
 	],

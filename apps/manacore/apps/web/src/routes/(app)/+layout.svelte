@@ -34,6 +34,8 @@
 	import { linkLocalStore, linkMutations } from '@manacore/shared-links';
 	import { manacoreStore } from '$lib/data/local-store';
 	import { createUnifiedSync } from '$lib/data/sync';
+	import { networkStore } from '$lib/stores/network.svelte';
+	import { db } from '$lib/data/database';
 	import { dashboardStore } from '$lib/stores/dashboard.svelte';
 	import {
 		THEME_DEFINITIONS,
@@ -306,6 +308,16 @@
 			trackReturnVisit();
 			const getToken = () => authStore.getValidToken();
 			unifiedSync = createUnifiedSync(SYNC_SERVER_URL, getToken);
+			unifiedSync.onStatusChange(async (s) => {
+				networkStore.setSyncStatus(s);
+				// Update pending count when sync status changes
+				try {
+					const count = await db.table('_pendingChanges').count();
+					networkStore.setPendingCount(count);
+				} catch {
+					// DB not ready yet
+				}
+			});
 			unifiedSync.startAll();
 
 			userSettings.load().catch(() => {});

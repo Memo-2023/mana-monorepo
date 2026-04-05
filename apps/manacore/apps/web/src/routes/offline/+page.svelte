@@ -4,6 +4,6 @@
 
 <OfflinePage
 	appName="ManaCore"
-	offlineMessage="ManaCore benötigt eine Internetverbindung."
-	accentColor="#4f46e5"
+	offlineMessage="Du bist offline. Deine Daten sind lokal gespeichert und werden synchronisiert, sobald du wieder online bist."
+	accentColor="#6366f1"
 />
