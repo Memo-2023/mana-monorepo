@@ -10,7 +10,6 @@
 		getDefaultCalendar,
 	} from '../queries';
 	import type { Calendar, CalendarEvent } from '../types';
-	import { calendarViewStore } from '../stores/view.svelte';
 	import {
 		useVisibleHours,
 		useCurrentTimeIndicator,
