@@ -229,4 +229,34 @@ export const filesStore = {
 		selectedFolderIds = new Set();
 		return count;
 	},
+
+	/**
+	 * Insert a freshly-uploaded file. Canonical path for any future
+	 * upload flow (none exists in the unified mana app yet — uploads
+	 * land via legacy mana-sync push from the standalone storage
+	 * server). When the new in-app upload UI is built it MUST go
+	 * through here so the user-typed `name` + `originalName` fields
+	 * get sealed via encryptRecord before they hit IndexedDB.
+	 *
+	 * The contract is the same as imagesStore.insert(): server-side
+	 * code can't encrypt under the user's master key, so the upload
+	 * round-trips through the client. Server returns the structural
+	 * metadata (storageKey, mimeType, size, checksum, …) and the
+	 * client calls insert() with both halves. The plaintext name
+	 * fields then get encrypted before the local write.
+	 *
+	 * NOTE on the file *bytes*: client-side bytes-encryption (so the
+	 * actual content in S3 is also opaque to the provider) is a
+	 * separate concern that needs streaming AES-GCM and is out of
+	 * scope for this commit. This insert helper only protects the
+	 * filename metadata. The bytes-on-S3 problem will need its own
+	 * milestone — track it as backlog #4b.
+	 */
+	async insert(file: LocalFile) {
+		await encryptRecord('files', file);
+		await fileTable.add(file);
+		// No StorageEvents.fileUploaded() yet — analytics doesn't have
+		// an upload-side event because the upload UI is unbuilt. Add
+		// the analytic when the corresponding UI lands.
+	},
 };

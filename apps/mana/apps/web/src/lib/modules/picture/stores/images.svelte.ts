@@ -7,6 +7,7 @@
  */
 
 import { db } from '$lib/data/database';
+import { encryptRecord } from '$lib/data/crypto';
 import { createArchiveOps, toggleField } from '@mana/shared-stores';
 import { PictureEvents, trackEvent } from '@mana/shared-utils/analytics';
 import type { LocalImage } from '../types';
@@ -57,5 +58,36 @@ export const imagesStore = {
 	async deleteImage(id: string) {
 		await imageArchive.softDelete(id);
 		trackEvent('image_deleted', { module: 'picture' });
+	},
+
+	/**
+	 * Insert a freshly-generated image. This is the canonical path for
+	 * any future image-generation flow (currently the
+	 * /picture/generate route is a stub) — it wraps the user-typed
+	 * `prompt` and `negativePrompt` fields via encryptRecord so the
+	 * generated image lands in IndexedDB with the same encryption
+	 * envelope as locally-edited rows.
+	 *
+	 * Why this is the only safe way to insert an image: server-side
+	 * code (the eventual image-gen API + sync push) cannot encrypt
+	 * under the user's master key — it lives in the browser. So the
+	 * generation flow MUST round-trip through the client store, even
+	 * if the actual AI call happens server-side. The pattern is:
+	 *
+	 *   1. Client posts { prompt, negativePrompt, ... } to image-gen API
+	 *   2. Server returns { storagePath, generationId, dimensions, ... }
+	 *   3. Client calls imagesStore.insert(...) with both halves
+	 *   4. encryptRecord seals the prompt fields before the IndexedDB
+	 *      write; sync pushes the encrypted row to the backend
+	 *
+	 * The mixed-state guarantee from picture/queries.ts already covers
+	 * the migration window where some images came in via legacy
+	 * server-side push and others through this path — decryptRecord
+	 * passes plaintext through and unwraps ciphertext blobs.
+	 */
+	async insert(image: LocalImage) {
+		await encryptRecord('images', image);
+		await imageTable().add(image);
+		trackEvent('image_created', { module: 'picture' });
 	},
 };
