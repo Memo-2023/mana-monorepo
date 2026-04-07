@@ -11,6 +11,7 @@
 	import { getVaultClient, hasAnyEncryption } from '$lib/data/crypto';
 	import SuggestionToast from '$lib/components/SuggestionToast.svelte';
 	import EncryptionIntroBanner from '$lib/components/EncryptionIntroBanner.svelte';
+	import RecoveryCodeUnlockModal from '$lib/components/RecoveryCodeUnlockModal.svelte';
 	import OfflineIndicator from '$lib/components/OfflineIndicator.svelte';
 	import PwaUpdatePrompt from '$lib/components/PwaUpdatePrompt.svelte';
 
@@ -24,6 +25,12 @@
 	// Lazy singleton — constructed on first call, reused everywhere
 	// (root layout, settings/security page, future settings sub-pages).
 	const vaultClient = getVaultClient();
+
+	/** True iff the vault unlock landed in the Phase 9 zero-knowledge
+	 *  branch and is waiting for the user to type their recovery code
+	 *  into the modal. The unlock effect below sets it after the
+	 *  vaultClient.unlock() call returns 'awaiting-recovery-code'. */
+	let needsRecoveryCode = $state(false);
 
 	// Push the active user id into the data layer whenever auth state changes.
 	// The Dexie creating-hook reads this to auto-stamp `userId` on every record,
@@ -52,12 +59,21 @@
 		// hasAnyEncryption() flips to true once Phase 3 enables a pilot.
 		if (userId && hasAnyEncryption()) {
 			vaultClient.unlock().then((state) => {
-				if (state.status !== 'unlocked') {
-					console.warn('[mana] encryption vault unlock failed:', state);
+				if (state.status === 'unlocked') {
+					needsRecoveryCode = false;
+					return;
 				}
+				if (state.status === 'awaiting-recovery-code') {
+					// Phase 9: server is in zero-knowledge mode. Show the
+					// modal that collects the user's recovery code.
+					needsRecoveryCode = true;
+					return;
+				}
+				console.warn('[mana] encryption vault unlock failed:', state);
 			});
 		} else if (!userId) {
 			vaultClient.lock();
+			needsRecoveryCode = false;
 		}
 	});
 
@@ -93,3 +109,7 @@
 <OfflineIndicator />
 <PwaUpdatePrompt />
 <EncryptionIntroBanner />
+
+{#if needsRecoveryCode}
+	<RecoveryCodeUnlockModal onUnlocked={() => (needsRecoveryCode = false)} />
+{/if}
