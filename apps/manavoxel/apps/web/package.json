@@ -33,7 +33,7 @@
 		"tslib": "^2.4.1",
 		"typescript": "^5.9.3",
 		"vite": "^6.0.0",
-		"vitest": "^4.1.0"
+		"vitest": "^4.1.2"
 	},
 	"dependencies": {
 		"@mana/local-store": "workspace:*",
