@@ -633,6 +633,23 @@ export const MANA_APPS: ManaApp[] = [
 		requiredTier: 'founder',
 	},
 	{
+		id: 'cycles',
+		name: 'Cycles',
+		description: {
+			de: 'Menstruationszyklus-Tracking',
+			en: 'Menstrual Cycle Tracking',
+		},
+		longDescription: {
+			de: 'Tracke deinen Zyklus mit Blutungstagen, Symptomen, Stimmung und Basaltemperatur. Phasen-Erkennung und Vorhersage für die nächste Periode und das fruchtbare Fenster.',
+			en: 'Track your cycle with flow days, symptoms, mood, and basal temperature. Phase detection and prediction of the next period and fertile window.',
+		},
+		icon: APP_ICONS.cycles,
+		color: '#ec4899',
+		comingSoon: false,
+		status: 'development',
+		requiredTier: 'founder',
+	},
+	{
 		id: 'events',
 		name: 'Events',
 		description: {
@@ -812,6 +829,7 @@ export const APP_URLS: Record<AppIconId, { dev: string; prod: string }> = {
 	habits: { dev: 'http://localhost:5173/habits', prod: 'https://mana.how/habits' },
 	notes: { dev: 'http://localhost:5173/notes', prod: 'https://mana.how/notes' },
 	dreams: { dev: 'http://localhost:5173/dreams', prod: 'https://mana.how/dreams' },
+	cycles: { dev: 'http://localhost:5173/cycles', prod: 'https://mana.how/cycles' },
 	events: { dev: 'http://localhost:5173/events', prod: 'https://mana.how/events' },
 	finance: { dev: 'http://localhost:5173/finance', prod: 'https://mana.how/finance' },
 	places: { dev: 'http://localhost:5173/places', prod: 'https://mana.how/places' },

@@ -136,6 +136,9 @@ export const APP_ICONS = {
 	dreams: svgToDataUrl(
 		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="dr" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#6366f1"/><stop offset="100%" style="stop-color:#312e81"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#dr)"/><path d="M62 30a22 22 0 1 0 18 34 18 18 0 0 1-18-34z" fill="white"/><circle cx="32" cy="38" r="1.6" fill="white"/><circle cx="26" cy="58" r="1.2" fill="white" fill-opacity="0.8"/><circle cx="40" cy="68" r="1.4" fill="white" fill-opacity="0.7"/><circle cx="22" cy="46" r="1" fill="white" fill-opacity="0.6"/></svg>`
 	),
+	cycles: svgToDataUrl(
+		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="cy" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#ec4899"/><stop offset="100%" style="stop-color:#be185d"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#cy)"/><circle cx="50" cy="50" r="26" stroke="white" stroke-width="4" fill="none"/><path d="M50 24a26 26 0 0 1 22 40" stroke="white" stroke-width="4" stroke-linecap="round" fill="none"/><circle cx="72" cy="64" r="3.5" fill="white"/><circle cx="50" cy="50" r="9" fill="white"/></svg>`
+	),
 	finance: svgToDataUrl(
 		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="fn" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#22c55e"/><stop offset="100%" style="stop-color:#16a34a"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#fn)"/><circle cx="50" cy="50" r="22" stroke="white" stroke-width="4" fill="none"/><path d="M50 34v32M42 42c0-4 3.5-6 8-6s8 2 8 6-3.5 5-8 5-8 2-8 6 3.5 6 8 6 8-2 8-6" stroke="white" stroke-width="3" stroke-linecap="round" fill="none"/></svg>`
 	),

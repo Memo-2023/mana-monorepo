@@ -425,6 +425,14 @@ db.version(6).stores({
 	eventInvitations: 'id, eventId, guestId, channel, [eventId+guestId]',
 });
 
+// ─── Version 7: Cycles (Menstruationszyklus-Tracking) ────────
+
+db.version(7).stores({
+	cycles: 'id, startDate, endDate, isPredicted, isArchived, updatedAt',
+	cycleDayLogs: 'id, logDate, cycleId, flow, [cycleId+logDate]',
+	cycleSymptoms: 'id, name, category, count, updatedAt',
+});
+
 // ─── Sync App Map ──────────────────────────────────────────
 // Maps each table to its appId for sync routing.
 // The SyncEngine uses this to group pending changes and push to /sync/{appId}.
@@ -468,6 +476,7 @@ export const SYNC_APP_MAP: Record<string, string[]> = {
 	habits: ['habits', 'habitLogs'],
 	notes: ['notes', 'noteTags'],
 	dreams: ['dreams', 'dreamSymbols', 'dreamTags'],
+	cycles: ['cycles', 'cycleDayLogs', 'cycleSymptoms'],
 	events: ['socialEvents', 'eventGuests', 'eventInvitations'],
 	finance: ['transactions', 'financeCategories', 'budgets'],
 	places: ['places', 'locationLogs', 'placeTags'],

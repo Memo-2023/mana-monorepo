@@ -302,6 +302,40 @@ registerApp({
 });
 
 registerApp({
+	id: 'cycles',
+	name: 'Cycles',
+	color: '#ec4899',
+	views: {
+		list: { load: () => import('$lib/modules/cycles/ListView.svelte') },
+	},
+	contextMenuActions: [
+		{
+			id: 'log-day',
+			label: 'Tag loggen',
+			icon: Plus,
+			action: () =>
+				window.dispatchEvent(
+					new CustomEvent('mana:quick-action', { detail: { app: 'cycles', action: 'new' } })
+				),
+		},
+	],
+	collection: 'cycleDayLogs',
+	paramKey: 'logId',
+	getDisplayData: (item) => ({
+		title: (item.logDate as string) || 'Tageseintrag',
+		subtitle: (item.flow as string) ?? undefined,
+	}),
+	createItem: async (data) => {
+		const { dayLogsStore } = await import('$lib/modules/cycles/stores/dayLogs.svelte');
+		const log = await dayLogsStore.logDay({
+			logDate: (data.logDate as string) ?? undefined,
+			notes: (data.title as string) ?? null,
+		});
+		return log.id;
+	},
+});
+
+registerApp({
 	id: 'finance',
 	name: 'Finance',
 	color: '#22C55E',
