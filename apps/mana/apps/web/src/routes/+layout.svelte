@@ -8,9 +8,9 @@
 	import { setCurrentUserId } from '$lib/data/current-user';
 	import { migrateGuestDataToUser } from '$lib/data/guest-migration';
 	import { installDataLayerListeners } from '$lib/data/data-layer-listeners';
-	import { createVaultClient, hasAnyEncryption } from '$lib/data/crypto';
-	import { getManaAuthUrl } from '$lib/api/config';
+	import { getVaultClient, hasAnyEncryption } from '$lib/data/crypto';
 	import SuggestionToast from '$lib/components/SuggestionToast.svelte';
+	import EncryptionIntroBanner from '$lib/components/EncryptionIntroBanner.svelte';
 	import OfflineIndicator from '$lib/components/OfflineIndicator.svelte';
 	import PwaUpdatePrompt from '$lib/components/PwaUpdatePrompt.svelte';
 
@@ -21,13 +21,9 @@
 	// initialisation, which previously caused effect_update_depth_exceeded.
 	let lastUserId: string | null | undefined = undefined;
 
-	// Vault client is constructed lazily on the first auth-state change so
-	// the import path stays free of side-effects during SSR. Reused across
-	// all subsequent unlock/lock calls.
-	const vaultClient = createVaultClient({
-		authUrl: getManaAuthUrl(),
-		getToken: () => authStore.getAccessToken(),
-	});
+	// Lazy singleton — constructed on first call, reused everywhere
+	// (root layout, settings/security page, future settings sub-pages).
+	const vaultClient = getVaultClient();
 
 	// Push the active user id into the data layer whenever auth state changes.
 	// The Dexie creating-hook reads this to auto-stamp `userId` on every record,
@@ -96,3 +92,4 @@
 <SuggestionToast />
 <OfflineIndicator />
 <PwaUpdatePrompt />
+<EncryptionIntroBanner />

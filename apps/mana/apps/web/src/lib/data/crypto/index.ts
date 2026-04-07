@@ -52,3 +52,5 @@ export {
 	type VaultUnlockState,
 	createVaultClient,
 } from './vault-client';
+
+export { getVaultClient } from './vault-instance';
