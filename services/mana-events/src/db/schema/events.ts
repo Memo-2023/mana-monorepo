@@ -74,7 +74,9 @@ export const publicRsvps = eventsSchema.table(
 export const rsvpRateBuckets = eventsSchema.table(
 	'rsvp_rate_buckets',
 	{
-		token: text('token').notNull(),
+		token: text('token')
+			.notNull()
+			.references(() => eventsPublished.token, { onDelete: 'cascade' }),
 		hourBucket: text('hour_bucket').notNull(), // YYYY-MM-DDTHH
 		count: integer('count').default(0).notNull(),
 	},
