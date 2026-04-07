@@ -34,37 +34,39 @@ export function useOpenTasks() {
 /** Tasks due today or overdue. */
 export function useTodayTasks() {
 	return useLiveQueryWithDefault(async () => {
-		const today = new Date();
-		today.setHours(0, 0, 0, 0);
-		const todayStr = today.toISOString().slice(0, 10);
+		// End of today in ISO; the schema indexes `dueDate` so this is a
+		// bounded range scan instead of a full table read.
+		const endOfToday = new Date();
+		endOfToday.setHours(23, 59, 59, 999);
 
-		const all = await db.table<LocalTask>('tasks').orderBy('order').toArray();
-		return all.filter((t) => {
-			if (t.isCompleted || t.deletedAt) return false;
-			if (!t.dueDate) return false;
-			return t.dueDate.slice(0, 10) <= todayStr;
-		});
+		const candidates = await db
+			.table<LocalTask>('tasks')
+			.where('dueDate')
+			.belowOrEqual(endOfToday.toISOString())
+			.toArray();
+		return candidates.filter((t) => !t.isCompleted && !t.deletedAt);
 	}, [] as LocalTask[]);
 }
 
 /** Tasks upcoming in the next N days. */
 export function useUpcomingTasks(days = 7) {
 	return useLiveQueryWithDefault(async () => {
-		const today = new Date();
-		today.setHours(0, 0, 0, 0);
-		const todayStr = today.toISOString().slice(0, 10);
+		const startOfTomorrow = new Date();
+		startOfTomorrow.setHours(0, 0, 0, 0);
+		startOfTomorrow.setDate(startOfTomorrow.getDate() + 1);
 
-		const future = new Date(today);
-		future.setDate(future.getDate() + days);
-		const futureStr = future.toISOString().slice(0, 10);
+		const endOfWindow = new Date(startOfTomorrow);
+		endOfWindow.setDate(endOfWindow.getDate() + days - 1);
+		endOfWindow.setHours(23, 59, 59, 999);
 
-		const all = await db.table<LocalTask>('tasks').orderBy('dueDate').toArray();
-		return all.filter((t) => {
-			if (t.isCompleted || t.deletedAt) return false;
-			if (!t.dueDate) return false;
-			const due = t.dueDate.slice(0, 10);
-			return due > todayStr && due <= futureStr;
-		});
+		// Bounded range scan on the indexed dueDate column instead of loading
+		// every task in the database and filtering in JS.
+		const candidates = await db
+			.table<LocalTask>('tasks')
+			.where('dueDate')
+			.between(startOfTomorrow.toISOString(), endOfWindow.toISOString(), true, true)
+			.toArray();
+		return candidates.filter((t) => !t.isCompleted && !t.deletedAt);
 	}, [] as LocalTask[]);
 }
 
@@ -77,14 +79,15 @@ export function useUpcomingEvents(days = 7) {
 		const future = new Date(now);
 		future.setDate(future.getDate() + days);
 
-		const nowStr = now.toISOString();
-		const futureStr = future.toISOString();
-
-		const all = await db.table<LocalTimeBlock>('timeBlocks').orderBy('startDate').toArray();
-		return all.filter((b) => {
-			if (b.deletedAt) return false;
-			return b.startDate >= nowStr && b.startDate <= futureStr;
-		});
+		// `startDate` is indexed → bounded range scan covers exactly the
+		// requested window. Previously this loaded every TimeBlock ever
+		// (including past meetings) and filtered them in JS.
+		const candidates = await db
+			.table<LocalTimeBlock>('timeBlocks')
+			.where('startDate')
+			.between(now.toISOString(), future.toISOString(), true, true)
+			.toArray();
+		return candidates.filter((b) => !b.deletedAt);
 	}, [] as LocalTimeBlock[]);
 }
 
@@ -93,8 +96,19 @@ export function useUpcomingEvents(days = 7) {
 /** Favorite contacts. */
 export function useFavoriteContacts(limit = 5) {
 	return useLiveQueryWithDefault(async () => {
-		const all = await db.table<LocalContact>('contacts').orderBy('firstName').toArray();
-		return all.filter((c) => c.isFavorite && !c.isArchived && !c.deletedAt).slice(0, limit);
+		// Dexie indexes booleans as `true`/`false` keys — `.where().equals(true)`
+		// hits the index instead of scanning every contact in the address book.
+		const favorites = await db
+			.table<LocalContact>('contacts')
+			.where('isFavorite')
+			.equals(1)
+			.or('isFavorite')
+			.equals(true as unknown as string)
+			.toArray();
+		return favorites
+			.filter((c) => !c.isArchived && !c.deletedAt)
+			.sort((a, b) => (a.firstName ?? '').localeCompare(b.firstName ?? ''))
+			.slice(0, limit);
 	}, [] as LocalContact[]);
 }
 
