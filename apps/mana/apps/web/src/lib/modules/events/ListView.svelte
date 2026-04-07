@@ -1,6 +1,8 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { useUpcomingEvents, usePastEvents, useGuestsByEvent, summarizeRsvps } from './queries';
 	import { eventsStore } from './stores/events.svelte';
+	import { drainTombstones } from './tombstones';
 	import EventCard from './components/EventCard.svelte';
 	import type { SocialEvent } from './types';
 
@@ -13,6 +15,11 @@
 	const upcoming = useUpcomingEvents();
 	const past = usePastEvents();
 	const guestsByEvent = useGuestsByEvent();
+
+	// Retry any orphaned server snapshots from previous failed deletes.
+	onMount(() => {
+		void drainTombstones();
+	});
 
 	let showCreate = $state(false);
 	let newTitle = $state('');

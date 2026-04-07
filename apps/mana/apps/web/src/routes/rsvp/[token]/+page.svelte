@@ -1,8 +1,10 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { getManaEventsUrl } from '$lib/api/config';
+	import { getStrings } from './strings';
 
 	let { data }: { data: PageData } = $props();
+	const t = $derived(getStrings(data.lang));
 
 	let name = $state('');
 	let email = $state('');
@@ -15,7 +17,7 @@
 
 	const startDate = $derived(new Date(data.event.startAt));
 	const dateLabel = $derived(
-		startDate.toLocaleDateString('de-DE', {
+		startDate.toLocaleDateString(t.dateLocale, {
 			weekday: 'long',
 			day: '2-digit',
 			month: 'long',
@@ -24,8 +26,8 @@
 	);
 	const timeLabel = $derived(
 		data.event.allDay
-			? 'Ganztägig'
-			: startDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+			? t.allDay
+			: startDate.toLocaleTimeString(t.dateLocale, { hour: '2-digit', minute: '2-digit' })
 	);
 
 	async function handleSubmit(e: SubmitEvent) {
@@ -51,7 +53,7 @@
 			}
 			submitted = true;
 		} catch (e) {
-			errorMessage = e instanceof Error ? e.message : 'Konnte nicht senden';
+			errorMessage = e instanceof Error ? e.message : t.genericError;
 		} finally {
 			submitting = false;
 		}
@@ -59,7 +61,7 @@
 </script>
 
 <svelte:head>
-	<title>{data.event.title} — RSVP</title>
+	<title>{data.event.title} {t.pageTitleSuffix}</title>
 </svelte:head>
 
 <div class="rsvp-page">
@@ -92,7 +94,8 @@
 				<div class="meta-row">
 					<span class="icon">👥</span>
 					<div>
-						<strong>{data.summary.totalAttending}</strong> Personen kommen
+						<strong>{data.summary.totalAttending}</strong>
+						{t.peopleAttending}
 						{#if data.event.capacity}
 							<span class="muted">/ {data.event.capacity}</span>
 						{/if}
@@ -106,16 +109,20 @@
 		{/if}
 
 		{#if data.cancelled}
-			<div class="cancelled">⚠️ Dieses Event wurde abgesagt.</div>
+			<div class="cancelled">{t.cancelledNotice}</div>
 		{:else if submitted}
 			<div class="success">
-				<h2>Danke für deine Antwort!</h2>
+				<h2>{t.successHeading}</h2>
 				<p>
-					Du hast mit
+					{t.successYou}
 					<strong>
-						{status === 'yes' ? '„Ja, komme“' : status === 'no' ? '„Nein“' : '„Vielleicht“'}
+						{status === 'yes'
+							? t.successComing
+							: status === 'no'
+								? t.successNotComing
+								: t.successMaybe}
 					</strong>
-					geantwortet. Du kannst diese Seite jederzeit erneut öffnen, um deine Antwort zu ändern.
+					{t.successHint}
 				</p>
 				<button
 					class="action-btn"
@@ -123,31 +130,31 @@
 						submitted = false;
 					}}
 				>
-					Antwort ändern
+					{t.changeAnswer}
 				</button>
 			</div>
 		{:else}
 			<form class="rsvp-form" onsubmit={handleSubmit}>
-				<h2>Sag bitte zu</h2>
+				<h2>{t.formHeading}</h2>
 
 				<label class="field">
-					<span class="label">Dein Name</span>
+					<span class="label">{t.yourName}</span>
 					<input
 						type="text"
 						bind:value={name}
-						placeholder="z. B. Anna Schmidt"
+						placeholder={t.yourNamePlaceholder}
 						required
 						maxlength="100"
 					/>
 				</label>
 
 				<label class="field">
-					<span class="label">E-Mail (optional)</span>
-					<input type="email" bind:value={email} placeholder="anna@example.com" maxlength="200" />
+					<span class="label">{t.emailLabel}</span>
+					<input type="email" bind:value={email} placeholder={t.emailPlaceholder} maxlength="200" />
 				</label>
 
 				<div class="field">
-					<span class="label">Kommst du?</span>
+					<span class="label">{t.areYouComing}</span>
 					<div class="status-pills">
 						<button
 							type="button"
@@ -155,7 +162,7 @@
 							class:active={status === 'yes'}
 							onclick={() => (status = 'yes')}
 						>
-							✓ Ja, komme
+							{t.yesComing}
 						</button>
 						<button
 							type="button"
@@ -163,7 +170,7 @@
 							class:active={status === 'maybe'}
 							onclick={() => (status = 'maybe')}
 						>
-							? Vielleicht
+							{t.maybe}
 						</button>
 						<button
 							type="button"
@@ -171,25 +178,21 @@
 							class:active={status === 'no'}
 							onclick={() => (status = 'no')}
 						>
-							✕ Nein
+							{t.no}
 						</button>
 					</div>
 				</div>
 
 				{#if status === 'yes'}
 					<label class="field">
-						<span class="label">Bringst du jemanden mit? ({plusOnes})</span>
+						<span class="label">{t.bringingPeople(plusOnes)}</span>
 						<input type="range" min="0" max="10" bind:value={plusOnes} />
 					</label>
 				{/if}
 
 				<label class="field">
-					<span class="label">Notiz (optional)</span>
-					<textarea
-						bind:value={note}
-						placeholder="z. B. „Komme erst um 20 Uhr“"
-						rows="2"
-						maxlength="1000"
+					<span class="label">{t.noteLabel}</span>
+					<textarea bind:value={note} placeholder={t.notePlaceholder} rows="2" maxlength="1000"
 					></textarea>
 				</label>
 
@@ -198,14 +201,14 @@
 				{/if}
 
 				<button type="submit" class="submit-btn" disabled={submitting || !name.trim()}>
-					{submitting ? 'Sende...' : 'Antwort senden'}
+					{submitting ? t.sending : t.send}
 				</button>
 			</form>
 		{/if}
 	</div>
 
 	<footer class="footer">
-		Powered by <a href="https://mana.how" target="_blank" rel="noopener">Mana</a>
+		{t.poweredBy} <a href="https://mana.how" target="_blank" rel="noopener">Mana</a>
 	</footer>
 </div>
 

@@ -10,6 +10,7 @@ import { createBlock, updateBlock, deleteBlock } from '$lib/data/time-blocks/ser
 import { timeBlockTable } from '$lib/data/time-blocks/collections';
 import type { LocalSocialEvent, EventStatus } from '../types';
 import { eventsApi } from '../api';
+import { recordTombstone } from '../tombstones';
 
 let error = $state<string | null>(null);
 
@@ -141,7 +142,11 @@ export const eventsStore = {
 				try {
 					await eventsApi.unpublish(id);
 				} catch (e) {
-					console.warn('Failed to delete server snapshot during deleteEvent:', e);
+					console.warn(
+						'Failed to delete server snapshot during deleteEvent, queuing tombstone:',
+						e
+					);
+					if (event.publicToken) await recordTombstone(id, event.publicToken);
 				}
 			}
 			await db.table('socialEvents').update(id, {
@@ -197,12 +202,16 @@ export const eventsStore = {
 	async unpublishEvent(id: string) {
 		error = null;
 		try {
-			// Best-effort delete on the server. If the network fails we still
-			// flip the local flag — host clearly intended to unpublish.
+			// Capture the token before we wipe it locally so the tombstone
+			// queue (if needed) has something to retry against.
+			const event = await db.table<LocalSocialEvent>('socialEvents').get(id);
+			const tokenForRetry = event?.publicToken ?? null;
+
 			try {
 				await eventsApi.unpublish(id);
 			} catch (e) {
-				console.warn('Failed to delete server snapshot during unpublish:', e);
+				console.warn('Failed to delete server snapshot during unpublish, queuing tombstone:', e);
+				if (tokenForRetry) await recordTombstone(id, tokenForRetry);
 			}
 			await db.table('socialEvents').update(id, {
 				isPublished: false,

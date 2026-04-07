@@ -433,6 +433,15 @@ db.version(7).stores({
 	cycleSymptoms: 'id, name, category, count, updatedAt',
 });
 
+// ─── Version 8: Events tombstones (orphaned snapshot cleanup) ─
+// Local-only retry queue. When the events store fails to DELETE a
+// server snapshot during unpublish/delete, the (eventId, token) is
+// pushed here so a later drain attempt can clean it up. NOT synced.
+
+db.version(8).stores({
+	_eventsTombstones: 'id, token, attempts, createdAt',
+});
+
 // ─── Sync App Map ──────────────────────────────────────────
 // Maps each table to its appId for sync routing.
 // The SyncEngine uses this to group pending changes and push to /sync/{appId}.

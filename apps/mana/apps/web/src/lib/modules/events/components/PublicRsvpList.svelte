@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount, onDestroy } from 'svelte';
 	import { eventsApi, type PublicRsvpRecord } from '../api';
 	import { eventGuestsStore } from '../stores/guests.svelte';
 
@@ -14,7 +13,6 @@
 	let loading = $state(false);
 	let lastError = $state<string | null>(null);
 	let lastFetchedAt = $state<Date | null>(null);
-	let pollHandle: ReturnType<typeof setInterval> | null = null;
 
 	async function fetchRsvps() {
 		if (!isPublished) return;
@@ -31,27 +29,16 @@
 		}
 	}
 
-	onMount(() => {
-		if (isPublished) {
-			void fetchRsvps();
-			pollHandle = setInterval(fetchRsvps, 30_000);
-		}
-	});
-
-	onDestroy(() => {
-		if (pollHandle) clearInterval(pollHandle);
-	});
-
-	// Re-poll when isPublished flips
+	// Single source of truth: poll only while published. Cleanup tears down
+	// the interval automatically on unmount or when isPublished flips false.
 	$effect(() => {
-		if (isPublished && !pollHandle) {
-			void fetchRsvps();
-			pollHandle = setInterval(fetchRsvps, 30_000);
-		} else if (!isPublished && pollHandle) {
-			clearInterval(pollHandle);
-			pollHandle = null;
+		if (!isPublished) {
 			rsvps = [];
+			return;
 		}
+		void fetchRsvps();
+		const id = setInterval(fetchRsvps, 30_000);
+		return () => clearInterval(id);
 	});
 
 	async function importToGuestList(r: PublicRsvpRecord) {

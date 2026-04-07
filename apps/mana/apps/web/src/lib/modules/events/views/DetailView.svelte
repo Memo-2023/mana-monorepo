@@ -17,6 +17,17 @@
 	const summary = $derived(summarizeRsvps(guests.value ?? []));
 	const event = $derived(eventQuery.value);
 
+	// Self-heal: if a previous edit failed to push its snapshot to the
+	// server (fire-and-forget can lose writes), opening the detail view
+	// re-pushes the current state. Idempotent and cheap.
+	let lastHealedId: string | null = null;
+	$effect(() => {
+		if (event?.isPublished && event.id !== lastHealedId) {
+			lastHealedId = event.id;
+			void eventsStore.syncSnapshotIfPublished(event.id);
+		}
+	});
+
 	let editing = $state(false);
 	let titleDraft = $state('');
 	let descDraft = $state('');
