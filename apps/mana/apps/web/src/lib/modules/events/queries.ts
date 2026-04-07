@@ -1,0 +1,164 @@
+/**
+ * Reactive queries & helpers for the events module.
+ *
+ * Joins LocalSocialEvent with its TimeBlock to produce the UI-facing SocialEvent.
+ */
+
+import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { db } from '$lib/data/database';
+import { timeBlockTable } from '$lib/data/time-blocks/collections';
+import type { LocalTimeBlock } from '$lib/data/time-blocks/types';
+import type {
+	LocalSocialEvent,
+	LocalEventGuest,
+	SocialEvent,
+	EventGuest,
+	RsvpSummary,
+} from './types';
+
+// ─── Type Converters ───────────────────────────────────────
+
+export function toSocialEvent(local: LocalSocialEvent, block: LocalTimeBlock | null): SocialEvent {
+	const now = new Date().toISOString();
+	return {
+		id: local.id,
+		title: local.title,
+		description: local.description ?? null,
+		location: local.location ?? null,
+		locationUrl: local.locationUrl ?? null,
+		hostContactId: local.hostContactId ?? null,
+		coverImage: local.coverImage ?? null,
+		color: local.color ?? null,
+		capacity: local.capacity ?? null,
+		isPublished: local.isPublished ?? false,
+		publicToken: local.publicToken ?? null,
+		status: local.status,
+		timeBlockId: local.timeBlockId,
+		startTime: block?.startDate ?? now,
+		endTime: block?.endDate ?? block?.startDate ?? now,
+		isAllDay: block?.allDay ?? false,
+		createdAt: local.createdAt ?? now,
+		updatedAt: local.updatedAt ?? now,
+	};
+}
+
+export function toEventGuest(local: LocalEventGuest): EventGuest {
+	const now = new Date().toISOString();
+	return {
+		id: local.id,
+		eventId: local.eventId,
+		contactId: local.contactId ?? null,
+		name: local.name,
+		email: local.email ?? null,
+		phone: local.phone ?? null,
+		rsvpStatus: local.rsvpStatus,
+		rsvpAt: local.rsvpAt ?? null,
+		plusOnes: local.plusOnes ?? 0,
+		note: local.note ?? null,
+		createdAt: local.createdAt ?? now,
+		updatedAt: local.updatedAt ?? now,
+	};
+}
+
+// ─── Reactive Hooks ────────────────────────────────────────
+
+/** All non-deleted events, joined with their TimeBlock for time fields. */
+export function useAllEvents() {
+	return useLiveQueryWithDefault(async () => {
+		const locals = await db.table<LocalSocialEvent>('socialEvents').toArray();
+		const active = locals.filter((e) => !e.deletedAt);
+		const blocks = await timeBlockTable.bulkGet(active.map((e) => e.timeBlockId));
+		return active.map((e, i) => toSocialEvent(e, blocks[i] ?? null));
+	}, [] as SocialEvent[]);
+}
+
+/** Upcoming events (startTime >= now), sorted ascending. */
+export function useUpcomingEvents() {
+	return useLiveQueryWithDefault(async () => {
+		const locals = await db.table<LocalSocialEvent>('socialEvents').toArray();
+		const active = locals.filter((e) => !e.deletedAt && e.status !== 'cancelled');
+		const blocks = await timeBlockTable.bulkGet(active.map((e) => e.timeBlockId));
+		const now = Date.now();
+		return active
+			.map((e, i) => toSocialEvent(e, blocks[i] ?? null))
+			.filter((e) => new Date(e.startTime).getTime() >= now)
+			.sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
+	}, [] as SocialEvent[]);
+}
+
+/** Past events. */
+export function usePastEvents() {
+	return useLiveQueryWithDefault(async () => {
+		const locals = await db.table<LocalSocialEvent>('socialEvents').toArray();
+		const active = locals.filter((e) => !e.deletedAt);
+		const blocks = await timeBlockTable.bulkGet(active.map((e) => e.timeBlockId));
+		const now = Date.now();
+		return active
+			.map((e, i) => toSocialEvent(e, blocks[i] ?? null))
+			.filter((e) => new Date(e.startTime).getTime() < now)
+			.sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime());
+	}, [] as SocialEvent[]);
+}
+
+/** Single event by ID. */
+export function useEvent(eventId: () => string) {
+	return useLiveQueryWithDefault(
+		async () => {
+			const id = eventId();
+			if (!id) return null;
+			const local = await db.table<LocalSocialEvent>('socialEvents').get(id);
+			if (!local || local.deletedAt) return null;
+			const block = await timeBlockTable.get(local.timeBlockId);
+			return toSocialEvent(local, block ?? null);
+		},
+		null as SocialEvent | null
+	);
+}
+
+/** All guests across all events, grouped by eventId. Useful for list views. */
+export function useGuestsByEvent() {
+	return useLiveQueryWithDefault(
+		async () => {
+			const all = await db.table<LocalEventGuest>('eventGuests').toArray();
+			const map = new Map<string, EventGuest[]>();
+			for (const g of all) {
+				if (g.deletedAt) continue;
+				const guest = toEventGuest(g);
+				const arr = map.get(guest.eventId);
+				if (arr) arr.push(guest);
+				else map.set(guest.eventId, [guest]);
+			}
+			return map;
+		},
+		new Map() as Map<string, EventGuest[]>
+	);
+}
+
+/** Guests for a single event. */
+export function useEventGuests(eventId: () => string) {
+	return useLiveQueryWithDefault(async () => {
+		const id = eventId();
+		if (!id) return [];
+		const guests = await db
+			.table<LocalEventGuest>('eventGuests')
+			.where('eventId')
+			.equals(id)
+			.toArray();
+		return guests.filter((g) => !g.deletedAt).map(toEventGuest);
+	}, [] as EventGuest[]);
+}
+
+// ─── Pure Helpers ──────────────────────────────────────────
+
+export function summarizeRsvps(guests: EventGuest[]): RsvpSummary {
+	const summary: RsvpSummary = { yes: 0, no: 0, maybe: 0, pending: 0, totalAttending: 0 };
+	for (const g of guests) {
+		summary[g.rsvpStatus]++;
+		if (g.rsvpStatus === 'yes') summary.totalAttending += 1 + (g.plusOnes ?? 0);
+	}
+	return summary;
+}
+
+export function getEventById(events: SocialEvent[], id: string): SocialEvent | undefined {
+	return events.find((e) => e.id === id);
+}

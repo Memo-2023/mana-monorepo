@@ -12,6 +12,7 @@ import { trackFirstContent } from '$lib/stores/funnel-tracking';
 import { fire as fireTrigger } from '$lib/triggers/registry';
 import { checkInlineSuggestion } from '$lib/triggers/inline-suggest';
 import { getEffectiveUserId } from './current-user';
+import { isQuotaError, notifyQuotaExceeded } from './quota-detect';
 
 // ─── Database ──────────────────────────────────────────────
 
@@ -624,6 +625,26 @@ export function setApplyingServerChanges(v: boolean): void {
 const pendingChangesTable = db.table('_pendingChanges');
 
 /**
+ * Fire-and-forget pending-change writer that surfaces quota errors via the
+ * QUOTA_EVENT bus. Without this wrapper, a full IndexedDB would silently
+ * swallow the change-tracking entry while the user-visible write succeeded
+ * — meaning the user types something, sees it, and the edit never syncs.
+ *
+ * The Dexie creating/updating hook itself is synchronous and cannot await
+ * a recovery, so we just dispatch the event and let the UI / sync engine
+ * decide what to do (e.g. surface a toast, run cleanupTombstones).
+ */
+function trackPendingChange(table: string, change: Record<string, unknown>): void {
+	pendingChangesTable.add(change).catch((err: unknown) => {
+		if (isQuotaError(err)) {
+			notifyQuotaExceeded({ table, op: 'pending-change', cleaned: 0, recovered: false });
+		} else {
+			console.error('[mana-sync] failed to record pending change:', err);
+		}
+	});
+}
+
+/**
  * Hidden field on every synced record holding per-field LWW timestamps.
  * Not indexed, not sent to the server in pending-change payloads.
  */
@@ -638,7 +659,7 @@ for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {
 		const table = db.table(tableName);
 
 		table.hook('creating', function (_primKey, obj) {
-			if (_applyingServerChanges) return;
+			if (_applyingTables.has(tableName)) return;
 			const now = new Date().toISOString();
 
 			// Auto-stamp the active user. Module stores never set userId themselves,
@@ -661,7 +682,7 @@ for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {
 			// Build payload for pending-change WITHOUT the internal timestamp map
 			const { [FIELD_TIMESTAMPS_KEY]: _omit, ...dataForSync } = obj as Record<string, unknown>;
 
-			pendingChangesTable.add({
+			trackPendingChange(tableName, {
 				appId,
 				collection: tableName,
 				recordId: obj.id,
@@ -682,7 +703,7 @@ for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {
 		});
 
 		table.hook('updating', function (modifications, primKey, obj) {
-			if (_applyingServerChanges) return undefined;
+			if (_applyingTables.has(tableName)) return undefined;
 			const now = new Date().toISOString();
 			const fields: Record<string, { value: unknown; updatedAt: string }> = {};
 
@@ -705,7 +726,7 @@ for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {
 				newFT[key] = now;
 			}
 
-			pendingChangesTable.add({
+			trackPendingChange(tableName, {
 				appId,
 				collection: tableName,
 				recordId: primKey as string,

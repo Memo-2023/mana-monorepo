@@ -145,6 +145,9 @@ export const APP_ICONS = {
 	arcade: svgToDataUrl(
 		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="ar" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#ef4444"/><stop offset="100%" style="stop-color:#dc2626"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#ar)"/><rect x="25" y="30" width="50" height="35" rx="5" stroke="white" stroke-width="4" fill="none"/><path d="M38 65v10M62 65v10M32 75h36" stroke="white" stroke-width="4" stroke-linecap="round"/><circle cx="60" cy="44" r="4" fill="white"/><circle cx="68" cy="50" r="3" fill="white" fill-opacity="0.7"/><path d="M35 44h10M40 39v10" stroke="white" stroke-width="3" stroke-linecap="round"/></svg>`
 	),
+	events: svgToDataUrl(
+		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="ev" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#f43f5e"/><stop offset="100%" style="stop-color:#be123c"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#ev)"/><path d="M22 78l14-44 30 30-44 14z" fill="white"/><path d="M36 34c4-6 12-8 18-4M50 22c4-2 10 0 12 6M62 28c6-2 12 2 12 10" stroke="white" stroke-width="3" stroke-linecap="round" fill="none"/><circle cx="74" cy="46" r="2.5" fill="white"/><circle cx="80" cy="58" r="2" fill="white" fill-opacity="0.8"/><circle cx="68" cy="62" r="2" fill="white" fill-opacity="0.7"/></svg>`
+	),
 } as const;
 
 export type AppIconId = keyof typeof APP_ICONS;

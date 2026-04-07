@@ -633,6 +633,23 @@ export const MANA_APPS: ManaApp[] = [
 		requiredTier: 'founder',
 	},
 	{
+		id: 'events',
+		name: 'Events',
+		description: {
+			de: 'Veranstaltungen mit Gästeliste',
+			en: 'Gatherings with guest lists',
+		},
+		longDescription: {
+			de: 'Plane Geburtstage, Dinner und Workshops mit Gästeliste, RSVPs und teilbaren Einladungslinks. Events erscheinen automatisch in deinem Kalender.',
+			en: 'Plan birthdays, dinners, and workshops with guest lists, RSVPs, and shareable invite links. Events appear automatically in your calendar.',
+		},
+		icon: APP_ICONS.events,
+		color: '#f43f5e',
+		comingSoon: false,
+		status: 'development',
+		requiredTier: 'founder',
+	},
+	{
 		id: 'finance',
 		name: 'Finance',
 		description: {
@@ -795,6 +812,7 @@ export const APP_URLS: Record<AppIconId, { dev: string; prod: string }> = {
 	habits: { dev: 'http://localhost:5173/habits', prod: 'https://mana.how/habits' },
 	notes: { dev: 'http://localhost:5173/notes', prod: 'https://mana.how/notes' },
 	dreams: { dev: 'http://localhost:5173/dreams', prod: 'https://mana.how/dreams' },
+	events: { dev: 'http://localhost:5173/events', prod: 'https://mana.how/events' },
 	finance: { dev: 'http://localhost:5173/finance', prod: 'https://mana.how/finance' },
 	places: { dev: 'http://localhost:5173/places', prod: 'https://mana.how/places' },
 	wisekeep: { dev: 'http://localhost:5173/wisekeep', prod: 'https://mana.how/wisekeep' },

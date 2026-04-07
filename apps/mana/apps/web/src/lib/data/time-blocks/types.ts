@@ -14,7 +14,7 @@ export type TimeBlockKind = 'scheduled' | 'logged';
 
 export type TimeBlockType = 'event' | 'task' | 'habit' | 'timeEntry' | 'focus' | 'break';
 
-export type TimeBlockSourceModule = 'calendar' | 'todo' | 'times' | 'habits';
+export type TimeBlockSourceModule = 'calendar' | 'todo' | 'times' | 'habits' | 'events';
 
 // ─── Local Record Types (Dexie) ──────────────────────────
 
