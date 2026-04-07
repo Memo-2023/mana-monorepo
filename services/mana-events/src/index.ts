@@ -16,9 +16,14 @@ import { jwtAuth } from './middleware/jwt-auth';
 import { healthRoutes } from './routes/health';
 import { createEventsRoutes } from './routes/events';
 import { createRsvpRoutes } from './routes/rsvp';
+import { startRateBucketSweeper } from './lib/cleanup';
 
 const config = loadConfig();
 const db = getDb(config.databaseUrl);
+
+// Background cleanup of stale rate-limit buckets so they don't accumulate
+// for the lifetime of long-published events.
+startRateBucketSweeper(db);
 
 const app = new Hono();
 

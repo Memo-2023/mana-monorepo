@@ -323,6 +323,39 @@ services:
       - "traefik.http.routers.mana-credits.tls=true"
       - "traefik.http.services.mana-credits.loadbalancer.server.port=3002"
 
+  mana-events:
+    build:
+      context: services/mana-events
+      dockerfile: Dockerfile
+    image: mana-events:local
+    container_name: mana-events
+    restart: always
+    mem_limit: 128m
+    depends_on:
+      postgres: { condition: service_healthy }
+    environment:
+      TZ: Europe/Berlin
+      PORT: 3065
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana_platform
+      MANA_AUTH_URL: http://mana-auth:3001
+      # The public RSVP endpoints accept requests from anywhere — they're
+      # designed to be hit by guests who only have the share link.
+      # The host endpoints sit behind JWT auth so CORS is still scoped.
+      CORS_ORIGINS: https://mana.how
+    ports:
+      - "3065:3065"
+    healthcheck:
+      test: ["CMD", "bun", "-e", "fetch('http://127.0.0.1:3065/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 120s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.mana-events.rule=Host(`events.mana.how`)"
+      - "traefik.http.routers.mana-events.tls=true"
+      - "traefik.http.services.mana-events.loadbalancer.server.port=3065"
+
   mana-user:
     build:
       context: services/mana-user
@@ -909,6 +942,8 @@ services:
       PUBLIC_MANA_MEDIA_URL_CLIENT: https://media.mana.how
       PUBLIC_MANA_LLM_URL: http://mana-llm:3025
       PUBLIC_MANA_LLM_URL_CLIENT: https://llm.mana.how
+      PUBLIC_MANA_EVENTS_URL: http://mana-events:3065
+      PUBLIC_MANA_EVENTS_URL_CLIENT: https://events.mana.how
       # Analytics & Error Tracking
       PUBLIC_UMAMI_WEBSITE_ID: 32777167-e026-4618-933a-3429120b479b
       PUBLIC_GLITCHTIP_DSN: ${GLITCHTIP_DSN_MANA_WEB:-}

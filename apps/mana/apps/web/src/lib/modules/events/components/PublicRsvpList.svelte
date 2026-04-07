@@ -11,8 +11,13 @@
 
 	let rsvps = $state<PublicRsvpRecord[]>([]);
 	let loading = $state(false);
-	let lastError = $state<string | null>(null);
+	let lastErrorMessage = $state<string | null>(null);
+	let consecutiveFailures = $state(0);
 	let lastFetchedAt = $state<Date | null>(null);
+
+	// Surface the error only after two failures in a row so a single network
+	// hiccup mid-poll doesn't flash a scary banner the user can't act on.
+	const showError = $derived(consecutiveFailures >= 2 && lastErrorMessage !== null);
 
 	async function fetchRsvps() {
 		if (!isPublished) return;
@@ -20,10 +25,12 @@
 		try {
 			const res = await eventsApi.getRsvps(eventId);
 			rsvps = res.rsvps;
-			lastError = null;
+			lastErrorMessage = null;
+			consecutiveFailures = 0;
 			lastFetchedAt = new Date();
 		} catch (e) {
-			lastError = e instanceof Error ? e.message : 'Fehler beim Laden';
+			lastErrorMessage = e instanceof Error ? e.message : 'Fehler beim Laden';
+			consecutiveFailures++;
 		} finally {
 			loading = false;
 		}
@@ -62,8 +69,8 @@
 			</button>
 		</div>
 
-		{#if lastError}
-			<p class="error">{lastError}</p>
+		{#if showError}
+			<p class="error">{lastErrorMessage}</p>
 		{:else if rsvps.length === 0 && !loading}
 			<p class="empty">Noch keine Antworten via Share-Link.</p>
 		{:else}
