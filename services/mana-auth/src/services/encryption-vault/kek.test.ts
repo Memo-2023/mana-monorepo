@@ -3,11 +3,10 @@
  *
  * Pure crypto — no Postgres or Drizzle dependency. Run with `bun test`.
  *
- * The EncryptionVaultService itself is tested via integration tests
- * against a real Postgres instance because the row-level-security
- * behaviour cannot be faithfully reproduced with pg-mem or sqlite.
- * Those integration tests live alongside the existing mana-sync test
- * pattern (separate test database, set up in CI before the run).
+ * Service-level tests for EncryptionVaultService live in `index.test.ts`
+ * and require a real Postgres (RLS + CHECK constraints can't be
+ * faithfully reproduced with pg-mem). They auto-skip when
+ * TEST_DATABASE_URL is unset, so this kek.test.ts always runs.
  */
 
 import { describe, it, expect, beforeEach } from 'bun:test';
