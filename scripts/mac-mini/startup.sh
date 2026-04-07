@@ -54,15 +54,34 @@ if [ ! -d "/Volumes/ManaData" ]; then
 fi
 
 # ─── Start Colima ───
-if colima status 2>/dev/null | grep -q "running"; then
-    log "Colima already running"
+# Use `docker info` as the source of truth for "is the runtime usable" instead
+# of `colima status`, which can mis-report and trigger a destructive restart.
+if docker info >/dev/null 2>&1; then
+    log "Colima already running (docker reachable)"
 else
+    log "Colima not reachable, preparing fresh start..."
+
+    # Reap zombie colima/limactl processes from previously failed starts.
+    # These hold locks that prevent a clean start. Do NOT touch a running VM.
+    for pat in "colima stop" "limactl stop" "colima daemon" "limactl hostagent" "limactl usernet"; do
+        pids=$(pgrep -f "$pat" || true)
+        if [ -n "$pids" ]; then
+            log "  reaping stale: $pat ($pids)"
+            echo "$pids" | xargs kill -9 2>/dev/null || true
+        fi
+    done
+    sleep 1
+
+    # Clear stale disk lock if no process actually owns it.
+    # The lock is a symlink at /Volumes/ManaData/colima-disk/in_use_by → ~/.colima/_lima/colima
+    # If the symlink exists but no limactl/vz process is running, the lock is stale.
+    LOCK="/Volumes/ManaData/colima-disk/in_use_by"
+    if [ -L "$LOCK" ] && ! pgrep -f "limactl hostagent" >/dev/null 2>&1; then
+        log "  removing stale disk lock: $LOCK"
+        rm -f "$LOCK"
+    fi
+
     log "Starting Colima..."
-
-    # Clear stale process state from hard shutdown (stop only, never delete — delete wipes all images)
-    colima stop --force 2>/dev/null || true
-    sleep 2
-
     colima start \
         --cpu 8 \
         --memory 12 \
@@ -74,8 +93,9 @@ else
         --mount /Volumes/ManaData:w \
         2>&1 | tee -a "$LOG_FILE"
 
-    if ! colima status 2>/dev/null | grep -q "running"; then
-        log "ERROR: Colima failed to start"
+    # Verify with docker info, not colima status (more reliable)
+    if ! docker info >/dev/null 2>&1; then
+        log "ERROR: Colima failed to start (docker not reachable)"
         exit 1
     fi
     log "Colima started successfully"
