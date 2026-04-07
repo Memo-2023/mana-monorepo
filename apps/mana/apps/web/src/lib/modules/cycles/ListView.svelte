@@ -21,6 +21,7 @@
 		predictNextPeriodStart,
 	} from './utils/prediction';
 	import { FLOW_COLORS, MOOD_COLORS, PHASE_COLORS, type Flow, type Mood } from './types';
+	import CycleCalendar from './components/CycleCalendar.svelte';
 	import SymptomManager from './components/SymptomManager.svelte';
 	import type { ViewProps } from '$lib/app-registry';
 
@@ -51,6 +52,9 @@
 
 	// ─ Symptom manager modal state
 	let symptomManagerOpen = $state(false);
+
+	// ─ Calendar visibility toggle
+	let calendarOpen = $state(true);
 
 	// ─ Editing state — defaults to today, can be switched to any past day
 	let editingDate = $state(todayIso);
@@ -176,6 +180,19 @@
 			{/if}
 		</div>
 	</div>
+
+	<!-- Calendar -->
+	<section class="log-section">
+		<div class="section-header">
+			<h3 class="section-label">{$_('cycles.calendar.title')}</h3>
+			<button class="section-action" onclick={() => (calendarOpen = !calendarOpen)}>
+				{calendarOpen ? '−' : '+'}
+			</button>
+		</div>
+		{#if calendarOpen}
+			<CycleCalendar {cycles} {logs} {editingDate} {todayIso} onSelectDay={selectDay} />
+		{/if}
+	</section>
 
 	<!-- Edit-past-day Banner -->
 	{#if isEditingPast}

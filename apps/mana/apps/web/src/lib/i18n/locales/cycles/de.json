@@ -67,6 +67,11 @@
 		"emotional": "Emotional",
 		"other": "Sonstiges"
 	},
+	"calendar": {
+		"title": "Kalender",
+		"prev": "Vorheriger Monat",
+		"next": "Nächster Monat"
+	},
 	"symptomManager": {
 		"title": "Symptome verwalten",
 		"open": "Verwalten",
