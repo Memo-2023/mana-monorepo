@@ -34,10 +34,34 @@ class DreamRecorder {
 		);
 	}
 
+	get isSecureContext(): boolean {
+		return typeof window !== 'undefined' && window.isSecureContext === true;
+	}
+
 	async start(): Promise<void> {
 		if (this.status !== 'idle') return;
+
+		// 1. Secure context check — getUserMedia is silently unavailable
+		// over plain http (except localhost), with no permission prompt.
+		if (!this.isSecureContext) {
+			const host = typeof window !== 'undefined' ? window.location.host : '';
+			this.error = `Mikrofon-Zugriff braucht eine sichere Verbindung. Öffne die App über https:// oder http://localhost statt http://${host}.`;
+			return;
+		}
+
+		// 2. Browser API present?
 		if (!this.isAvailable) {
 			this.error = 'Audio-Aufnahme wird in diesem Browser nicht unterstützt.';
+			return;
+		}
+
+		// 3. Sticky deny check — Permissions API tells us if the user
+		// previously denied access. The browser will silently reject
+		// getUserMedia without showing a prompt in that case.
+		const stickyDenied = await this.#checkStickyDeny();
+		if (stickyDenied) {
+			this.error =
+				'Mikrofon-Zugriff wurde für diese Seite blockiert. Klicke in der Adressleiste auf das Schloss-Symbol → Mikrofon → Erlauben, dann lade die Seite neu.';
 			return;
 		}
 
@@ -53,10 +77,7 @@ class DreamRecorder {
 				},
 			});
 		} catch (e) {
-			const msg = e instanceof Error ? e.message : String(e);
-			this.error = msg.includes('Permission')
-				? 'Mikrofon-Zugriff wurde verweigert.'
-				: `Mikrofon konnte nicht geöffnet werden: ${msg}`;
+			this.error = this.#explainError(e);
 			this.status = 'idle';
 			return;
 		}
@@ -139,6 +160,44 @@ class DreamRecorder {
 		this.#resolve = null;
 		this.#reject = null;
 		reject?.(err);
+	}
+
+	async #checkStickyDeny(): Promise<boolean> {
+		try {
+			// Permissions API may not be available everywhere; treat as unknown.
+			const perms = (
+				navigator as Navigator & {
+					permissions?: {
+						query: (descriptor: { name: string }) => Promise<{ state: string }>;
+					};
+				}
+			).permissions;
+			if (!perms?.query) return false;
+			const status = await perms.query({ name: 'microphone' });
+			return status.state === 'denied';
+		} catch {
+			return false;
+		}
+	}
+
+	#explainError(e: unknown): string {
+		const err = e instanceof Error ? e : new Error(String(e));
+		const name = err.name || '';
+		const msg = err.message || '';
+
+		if (name === 'NotAllowedError' || /denied|permission/i.test(msg)) {
+			return 'Mikrofon-Zugriff wurde verweigert. Klicke in der Adressleiste auf das Schloss-Symbol und erlaube den Zugriff.';
+		}
+		if (name === 'NotFoundError' || /not.?found|no.?device/i.test(msg)) {
+			return 'Kein Mikrofon gefunden. Schließe ein Mikrofon an oder prüfe deine System-Einstellungen.';
+		}
+		if (name === 'NotReadableError' || /in use|busy/i.test(msg)) {
+			return 'Mikrofon ist gerade von einer anderen Anwendung belegt.';
+		}
+		if (name === 'SecurityError') {
+			return 'Mikrofon-Zugriff vom Browser blockiert (Sicherheitsrichtlinie).';
+		}
+		return `Mikrofon konnte nicht geöffnet werden: ${msg || name || 'Unbekannter Fehler'}`;
 	}
 
 	#cleanupStream() {
