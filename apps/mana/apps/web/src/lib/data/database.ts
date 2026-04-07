@@ -4,7 +4,14 @@
  * All collections from all app modules are registered in one database.
  * Table names that collide across apps are prefixed (e.g., pictureTags, storageTags).
  *
- * The SYNC_APP_MAP maps each table back to its appId for sync routing.
+ * Sync routing (which table belongs to which appId, which tables are renamed
+ * for the backend) lives in `module-registry.ts`. Each module owns its own
+ * `module.config.ts` and the registry aggregates them — so adding a new
+ * module is one file edit, not three.
+ *
+ * Schema migrations (db.version(N).stores()) intentionally remain hardcoded
+ * here because they are versioned snapshots that must never change after
+ * shipping — they are not derived from the registry.
  */
 
 import Dexie, { type EntityTable } from 'dexie';
@@ -13,6 +20,25 @@ import { fire as fireTrigger } from '$lib/triggers/registry';
 import { checkInlineSuggestion } from '$lib/triggers/inline-suggest';
 import { getEffectiveUserId } from './current-user';
 import { isQuotaError, notifyQuotaExceeded } from './quota-detect';
+import {
+	SYNC_APP_MAP,
+	TABLE_TO_SYNC_NAME,
+	TABLE_TO_APP,
+	SYNC_NAME_TO_TABLE,
+	toSyncName,
+	fromSyncName,
+} from './module-registry';
+
+// Re-export the registry-derived maps so existing consumers
+// (sync.ts, quota.ts, guest-migration.ts, etc.) keep working unchanged.
+export {
+	SYNC_APP_MAP,
+	TABLE_TO_SYNC_NAME,
+	TABLE_TO_APP,
+	SYNC_NAME_TO_TABLE,
+	toSyncName,
+	fromSyncName,
+};
 
 // ─── Database ──────────────────────────────────────────────
 
@@ -466,151 +492,32 @@ db.version(9).stores({
 	mukkePlaylists: 'id, name, updatedAt',
 });
 
-// ─── Sync App Map ──────────────────────────────────────────
-// Maps each table to its appId for sync routing.
-// The SyncEngine uses this to group pending changes and push to /sync/{appId}.
+// ─── Version 10: Local activity log ───────────────────────────
+//
+// Capped, append-only feed of every local write across sync-tracked
+// tables. Powers a future "what changed recently?" UI without leaking
+// PII to the server (this table is intentionally NOT in SYNC_APP_MAP).
+//
+// Indexes:
+//   - createdAt:        timeline view
+//   - [appId+createdAt]: per-app filter
+//   - [collection+recordId]: history of a single record
+//   - userId:           multi-account isolation when that lands
+//
+// Schema is deliberately small (no field diffs, no payload) to keep
+// the table cheap to write and bound the disk footprint.
 
-export const SYNC_APP_MAP: Record<string, string[]> = {
-	mana: ['userSettings', 'dashboardConfigs', 'automations'],
-	todo: ['tasks', 'todoProjects', 'taskLabels', 'reminders', 'boardViews'],
-	calendar: ['calendars', 'events', 'eventTags'],
-	contacts: ['contacts', 'contactTags'],
-	chat: ['conversations', 'messages', 'chatTemplates', 'conversationTags'],
-	picture: ['images', 'boards', 'boardItems', 'imageTags'],
-	cards: ['cardDecks', 'cards', 'deckTags'],
-	zitare: ['zitareFavorites', 'zitareLists', 'zitareListTags'],
-	music: ['songs', 'mukkePlaylists', 'playlistSongs', 'mukkeProjects', 'markers', 'songTags'],
-	storage: ['files', 'storageFolders', 'fileTags'],
-	presi: ['presiDecks', 'slides', 'presiDeckTags'],
-	inventar: ['invCollections', 'invItems', 'invLocations', 'invCategories', 'invItemTags'],
-	photos: ['albums', 'albumItems', 'photoFavorites', 'photoMediaTags'],
-	skilltree: ['skills', 'activities', 'achievements', 'skillTags'],
-	citycorners: ['cities', 'ccLocations', 'ccFavorites', 'ccLocationTags'],
-	times: [
-		'timeClients',
-		'timeProjects',
-		'timeEntries',
-		'timeTemplates',
-		'timeSettings',
-		'timeAlarms',
-		'timeCountdownTimers',
-		'timeWorldClocks',
-		'entryTags',
-	],
-	context: ['contextSpaces', 'documents', 'documentTags'],
-	questions: ['qCollections', 'questions', 'answers', 'questionTags'],
-	nutriphi: ['meals', 'goals', 'nutriFavorites', 'mealTags'],
-	planta: ['plants', 'plantPhotos', 'wateringSchedules', 'wateringLogs', 'plantTags'],
-	uload: ['links', 'uloadTags', 'uloadFolders', 'linkTags'],
-	calc: ['calculations', 'savedFormulas'],
-	moodlit: ['moods', 'sequences', 'moodTags'],
-	memoro: ['memos', 'memories', 'memoTags', 'memoroSpaces', 'spaceMembers', 'memoSpaces'],
-	guides: ['guides', 'sections', 'steps', 'guideCollections', 'runs', 'guideTags'],
-	habits: ['habits', 'habitLogs'],
-	notes: ['notes', 'noteTags'],
-	dreams: ['dreams', 'dreamSymbols', 'dreamTags'],
-	cycles: ['cycles', 'cycleDayLogs', 'cycleSymptoms'],
-	events: ['socialEvents', 'eventGuests', 'eventInvitations'],
-	finance: ['transactions', 'financeCategories', 'budgets'],
-	places: ['places', 'locationLogs', 'placeTags'],
-	tags: ['globalTags', 'tagGroups'],
-	links: ['manaLinks'],
-	timeblocks: ['timeBlocks', 'timeBlockTags'],
-};
+db.version(10).stores({
+	_activity:
+		'++id, createdAt, appId, collection, recordId, op, [appId+createdAt], [collection+recordId], userId',
+});
 
-// ─── Reverse Map: Table → AppId ────────────────────────────
-// Used by _pendingChanges to determine which appId to tag a change with.
-
-export const TABLE_TO_APP: Record<string, string> = Object.fromEntries(
-	Object.entries(SYNC_APP_MAP).flatMap(([appId, tables]) => tables.map((table) => [table, appId]))
-);
-
-// ─── Table Name Mapping (Unified ↔ Backend) ──────────────────
-// The unified DB renames tables to avoid collisions (e.g., todoProjects, cardDecks).
-// The backend (mana-sync) knows the original names from standalone apps.
-
-/** Unified table name → backend collection name (only renamed tables). */
-export const TABLE_TO_SYNC_NAME: Record<string, string> = {
-	// todo
-	todoProjects: 'projects',
-	// chat
-	chatTemplates: 'templates',
-	// picture
-	// cards
-	cardDecks: 'decks',
-	// zitare
-	zitareFavorites: 'favorites',
-	zitareLists: 'lists',
-	// music
-	mukkePlaylists: 'playlists',
-	mukkeProjects: 'projects',
-	// storage
-	storageFolders: 'folders',
-	// presi
-	presiDecks: 'decks',
-	// inventar
-	invCollections: 'collections',
-	invItems: 'items',
-	invLocations: 'locations',
-	invCategories: 'categories',
-	// photos
-	photoFavorites: 'favorites',
-	photoMediaTags: 'photoTags',
-	// citycorners
-	ccLocations: 'locations',
-	ccFavorites: 'favorites',
-	// times
-	timeClients: 'clients',
-	timeProjects: 'projects',
-	timeTemplates: 'templates',
-	timeSettings: 'settings',
-	timeAlarms: 'alarms',
-	timeCountdownTimers: 'countdownTimers',
-	timeWorldClocks: 'worldClocks',
-	// context
-	contextSpaces: 'spaces',
-	// questions
-	qCollections: 'collections',
-	// nutriphi
-	nutriFavorites: 'favorites',
-	// memoro
-	memoroSpaces: 'spaces',
-	// uload
-	uloadTags: 'tags',
-	uloadFolders: 'folders',
-	// guides
-	guideCollections: 'collections',
-	// finance
-	financeCategories: 'categories',
-	// events (social gatherings)
-	socialEvents: 'events',
-	// shared: tags
-	globalTags: 'tags',
-	tagGroups: 'tagGroups',
-	// shared: links
-	manaLinks: 'links',
-};
-
-/** Get the backend collection name for a unified table. */
-export function toSyncName(tableName: string): string {
-	return TABLE_TO_SYNC_NAME[tableName] ?? tableName;
-}
-
-/** Build reverse map: for a given appId, maps backend collection name → unified table name. */
-export const SYNC_NAME_TO_TABLE: Record<string, Record<string, string>> = {};
-for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {
-	const map: Record<string, string> = {};
-	for (const tableName of tables) {
-		const syncName = toSyncName(tableName);
-		map[syncName] = tableName;
-	}
-	SYNC_NAME_TO_TABLE[appId] = map;
-}
-
-/** Get the unified table name for a backend collection + appId. */
-export function fromSyncName(appId: string, syncCollection: string): string {
-	return SYNC_NAME_TO_TABLE[appId]?.[syncCollection] ?? syncCollection;
-}
+// ─── Sync Routing ──────────────────────────────────────────
+// SYNC_APP_MAP, TABLE_TO_SYNC_NAME, TABLE_TO_APP, SYNC_NAME_TO_TABLE,
+// toSyncName() and fromSyncName() are now derived from per-module
+// `module.config.ts` files via `module-registry.ts` (re-exported above).
+// To register a new sync table: edit that module's config — no edits in
+// this file are needed.
 
 // ─── Change Tracking via Dexie Hooks ─────────────────────────
 // Automatically records pending changes for every write to sync-relevant tables.
@@ -699,6 +606,44 @@ function trackPendingChange(table: string, change: Record<string, unknown>): voi
 }
 
 /**
+ * Append a row to the local activity log. Fire-and-forget, deferred via
+ * setTimeout for the same reason as `trackPendingChange` (Dexie hook is
+ * inside the user's transaction; we need a fresh one).
+ *
+ * Lives here in database.ts (rather than activity.ts) so it can share
+ * the same `db` reference without causing an import cycle. The
+ * `getRecentActivity` / `pruneActivityLog` read+cleanup APIs live in
+ * activity.ts.
+ *
+ * Errors are swallowed: the activity log is a debugging convenience,
+ * not load-bearing data, and surfacing the same QuotaError twice (once
+ * for the real write, once for the activity row) would just spam the
+ * user via the quota toast.
+ */
+function trackActivity(
+	appId: string,
+	collection: string,
+	recordId: string,
+	op: 'insert' | 'update' | 'delete'
+): void {
+	const row = {
+		appId,
+		collection,
+		recordId,
+		op,
+		createdAt: new Date().toISOString(),
+		userId: getEffectiveUserId(),
+	};
+	setTimeout(() => {
+		db.table('_activity')
+			.add(row)
+			.catch(() => {
+				/* best-effort, see jsdoc */
+			});
+	}, 0);
+}
+
+/**
  * Hidden field on every synced record holding per-field LWW timestamps.
  * Not indexed, not sent to the server in pending-change payloads.
  */
@@ -744,6 +689,7 @@ for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {
 				data: dataForSync,
 				createdAt: now,
 			});
+			trackActivity(appId, tableName, obj.id, 'insert');
 			trackFirstContent(appId);
 			fireTrigger(appId, tableName, 'insert', { ...dataForSync });
 			// Defer cross-table reads outside the Dexie hook's transaction scope
@@ -780,16 +726,17 @@ for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {
 				newFT[key] = now;
 			}
 
+			const op = (modifications as Record<string, unknown>).deletedAt ? 'delete' : 'update';
 			trackPendingChange(tableName, {
 				appId,
 				collection: tableName,
 				recordId: primKey as string,
-				op: (modifications as Record<string, unknown>).deletedAt ? 'delete' : 'update',
+				op,
 				fields,
 				deletedAt: (modifications as Record<string, unknown>).deletedAt as string | undefined,
 				createdAt: now,
 			});
-			const op = (modifications as Record<string, unknown>).deletedAt ? 'delete' : 'update';
+			trackActivity(appId, tableName, primKey as string, op);
 			fireTrigger(appId, tableName, op, modifications as Record<string, unknown>);
 
 			// Returning an object from a Dexie 'updating' hook merges it into the

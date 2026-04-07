@@ -20,6 +20,7 @@ import { captureException, captureMessage } from '@mana/shared-error-tracking/br
 import { toast } from '$lib/stores/toast.svelte';
 import { QUOTA_EVENT, type QuotaExceededDetail } from './quota-detect';
 import { cleanupTombstones } from './quota';
+import { pruneActivityLog } from './activity';
 import { SYNC_TELEMETRY_EVENT, type SyncTelemetryDetail } from './sync-telemetry';
 
 /** How often to run the tombstone cleanup. 24h is a comfortable cadence
@@ -98,9 +99,15 @@ export function installDataLayerListeners(): () => void {
 	window.addEventListener(QUOTA_EVENT, handleQuota);
 	window.addEventListener(SYNC_TELEMETRY_EVENT, handleTelemetry);
 
-	// ─── Tombstone cleanup loop ────────────────────────────────
-	// Run once on boot, then daily. Errors are caught locally and reported
-	// via the same Sentry bridge so a broken cleanup never crashes the app.
+	// ─── Periodic cleanup loop ─────────────────────────────────
+	// Runs once on boot, then daily. Two independent jobs share the
+	// schedule so we never have a third interval competing for the same
+	// idle window:
+	//   - cleanupTombstones: hard-deletes soft-deleted rows >30d old
+	//   - pruneActivityLog:  drops activity entries >90d old + caps the
+	//                        log at ACTIVITY_MAX_ENTRIES rows
+	// Errors are caught locally and reported via Sentry so a broken
+	// cleanup never crashes the app.
 	const runCleanup = () => {
 		cleanupTombstones()
 			.then((cleaned) => {
@@ -110,6 +117,15 @@ export function installDataLayerListeners(): () => void {
 			})
 			.catch((err) => {
 				captureException(err, { tag: 'tombstone-cleanup' });
+			});
+		pruneActivityLog()
+			.then((pruned) => {
+				if (pruned > 0 && import.meta.env.DEV) {
+					console.debug(`[mana-data] activity log pruned ${pruned} rows`);
+				}
+			})
+			.catch((err) => {
+				captureException(err, { tag: 'activity-prune' });
 			});
 	};
 

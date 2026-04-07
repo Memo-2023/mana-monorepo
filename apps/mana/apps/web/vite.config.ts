@@ -57,4 +57,10 @@ export default defineConfig({
 	define: {
 		...getBuildDefines(),
 	},
+	// Vitest unit-test config — keeps Playwright e2e specs out of the
+	// vitest run. Without this exclude, vitest imports them and they
+	// crash on `test.afterAll()` because they expect a Playwright runner.
+	test: {
+		exclude: ['**/node_modules/**', '**/dist/**', '**/build/**', 'e2e/**', 'tests/e2e/**'],
+	},
 });
