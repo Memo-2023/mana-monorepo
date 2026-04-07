@@ -139,6 +139,12 @@
 			"title": "Mi Día",
 			"description": "Línea temporal cronológica de todas las actividades",
 			"empty": "Nada todavía hoy"
+		},
+		"cycles": {
+			"title": "Ciclo",
+			"description": "Fase actual y cuenta regresiva hasta el próximo período",
+			"empty": "Ningún ciclo registrado.",
+			"open": "Abrir"
 		}
 	}
 }

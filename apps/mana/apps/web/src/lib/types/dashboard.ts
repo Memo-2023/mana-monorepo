@@ -29,7 +29,8 @@ export type WidgetType =
 	| 'nutrition-progress' // NutriPhi: today's calorie progress
 	| 'plant-watering' // Planta: plants due for watering
 	| 'day-timeline' // TimeBlocks: chronological day timeline
-	| 'activity-feed'; // TimeBlocks: recent activity across modules
+	| 'activity-feed' // TimeBlocks: recent activity across modules
+	| 'cycles'; // Cycles: current phase + days until next period
 
 /**
  * Widget size - maps to CSS Grid columns
@@ -129,6 +130,7 @@ export interface WidgetMeta {
 		| 'times'
 		| 'nutriphi'
 		| 'planta'
+		| 'cycles'
 		| 'mana-auth';
 }
 
@@ -330,6 +332,15 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
 		icon: '📊',
 		defaultSize: 'medium',
 		allowMultiple: false,
+	},
+	{
+		type: 'cycles',
+		nameKey: 'dashboard.widgets.cycles.title',
+		descriptionKey: 'dashboard.widgets.cycles.description',
+		icon: '🌸',
+		defaultSize: 'small',
+		allowMultiple: false,
+		requiredBackend: 'cycles',
 	},
 ];
 
