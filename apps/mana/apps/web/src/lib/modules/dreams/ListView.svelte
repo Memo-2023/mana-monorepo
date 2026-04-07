@@ -11,6 +11,7 @@
 		useAllDreams,
 	} from './queries';
 	import { dreamsStore } from './stores/dreams.svelte';
+	import { dreamRecorder, formatElapsed } from './recorder.svelte';
 	import { MOOD_COLORS, MOOD_LABELS, type Dream, type DreamMood, type SleepQuality } from './types';
 	import type { ViewProps } from '$lib/app-registry';
 	import { ContextMenu, type ContextMenuItem } from '@mana/shared-ui';
@@ -59,6 +60,18 @@
 		symbolFilter ? filteredByMode.filter((d) => d.symbols?.includes(symbolFilter!)) : filteredByMode
 	);
 	let filtered = $derived(searchDreams(filteredBySymbol, searchQuery));
+
+	// While the inline editor is open, the `dreams` array updates whenever the
+	// transcript lands. If the user hasn't typed anything yet, fold the fresh
+	// content into the edit buffer so they see the transcription appear inline.
+	$effect(() => {
+		if (!editingId) return;
+		const live = dreams.find((d) => d.id === editingId);
+		if (!live) return;
+		if (!editContent.trim() && live.content.trim()) {
+			editContent = live.content;
+		}
+	});
 	let grouped = $derived(groupByMonth(filtered));
 	let insights = $derived(computeInsights(dreams));
 
@@ -166,6 +179,38 @@
 	);
 
 	const MOODS: DreamMood[] = ['angenehm', 'neutral', 'unangenehm', 'albtraum'];
+
+	// ── Voice capture ─────────────────────────────────────────
+	let recError = $state<string | null>(null);
+
+	async function handleMicClick() {
+		recError = null;
+		if (dreamRecorder.status === 'recording') {
+			try {
+				const result = await dreamRecorder.stop();
+				if (result.durationMs < 500) {
+					recError = 'Aufnahme war zu kurz.';
+					return;
+				}
+				const dream = await dreamsStore.createFromVoice(result.blob, result.durationMs, 'de');
+				// Open the dream so the user sees the transcript appear inline
+				viewMode = 'list';
+				startEdit(dream);
+			} catch (e) {
+				const msg = e instanceof Error ? e.message : String(e);
+				if (msg !== 'cancelled') recError = msg;
+			}
+		} else if (dreamRecorder.status === 'idle') {
+			await dreamRecorder.start();
+			if (dreamRecorder.error) {
+				recError = dreamRecorder.error;
+			}
+		}
+	}
+
+	function cancelRecording() {
+		dreamRecorder.cancel();
+	}
 </script>
 
 <div class="app-view">
@@ -191,6 +236,38 @@
 			}}
 		/>
 	{:else}
+		<!-- Voice capture -->
+		<div class="capture-row">
+			<button
+				class="mic-btn"
+				class:recording={dreamRecorder.status === 'recording'}
+				class:busy={dreamRecorder.status === 'requesting' || dreamRecorder.status === 'stopping'}
+				onclick={handleMicClick}
+				disabled={dreamRecorder.status === 'requesting' || dreamRecorder.status === 'stopping'}
+				aria-label={dreamRecorder.status === 'recording' ? 'Aufnahme beenden' : 'Aufnahme starten'}
+			>
+				{#if dreamRecorder.status === 'recording'}
+					<span class="mic-stop"></span>
+					<span class="mic-time">{formatElapsed(dreamRecorder.elapsedMs)}</span>
+				{:else if dreamRecorder.status === 'requesting'}
+					<span class="mic-icon">…</span>
+					<span class="mic-time">Mikro öffnen…</span>
+				{:else if dreamRecorder.status === 'stopping'}
+					<span class="mic-icon">…</span>
+					<span class="mic-time">Verarbeite…</span>
+				{:else}
+					<span class="mic-icon">&#x1f3a4;</span>
+					<span class="mic-time">Traum sprechen</span>
+				{/if}
+			</button>
+			{#if dreamRecorder.status === 'recording'}
+				<button class="mic-cancel" onclick={cancelRecording} title="Aufnahme verwerfen"> × </button>
+			{/if}
+		</div>
+		{#if recError}
+			<p class="rec-error">{recError}</p>
+		{/if}
+
 		<!-- Quick create -->
 		<form onsubmit={(e) => e.preventDefault()} class="quick-add">
 			<span class="add-icon">&#x1f319;</span>
@@ -289,6 +366,18 @@
 								placeholder="Titel (optional)..."
 								autofocus
 							/>
+							{#if dream.processingStatus === 'transcribing'}
+								<div class="ed-status">
+									<span class="ed-status-dots">●●●</span>
+									Transkribiert deine Aufnahme…
+								</div>
+							{:else if dream.processingStatus === 'failed'}
+								<div class="ed-status failed">
+									Transkription fehlgeschlagen{dream.processingError
+										? `: ${dream.processingError}`
+										: ''}
+								</div>
+							{/if}
 							<textarea
 								class="ed-content"
 								bind:value={editContent}
@@ -392,6 +481,11 @@
 							<div class="dream-content">
 								<div class="dream-top">
 									<span class="dream-title">{dream.title || 'Traum ohne Titel'}</span>
+									{#if dream.processingStatus === 'transcribing'}
+										<span class="badge transcribing" title="Wird transkribiert…">●●●</span>
+									{:else if dream.processingStatus === 'failed'}
+										<span class="badge failed" title={dream.processingError ?? 'Fehler'}>!</span>
+									{/if}
 									{#if dream.isLucid}<span class="badge lucid">&#x2728;</span>{/if}
 									{#if dream.isRecurring}<span class="badge">&#x21bb;</span>{/if}
 									{#if dream.isPinned}<span class="badge">&#x1f4cc;</span>{/if}
@@ -452,6 +546,93 @@
 		gap: 0.625rem;
 		padding: 1rem;
 		height: 100%;
+	}
+
+	/* ── Voice capture ─────────────────────────── */
+	.capture-row {
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
+	}
+
+	.mic-btn {
+		flex: 1;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		padding: 0.625rem 0.875rem;
+		border-radius: 0.5rem;
+		border: 1px solid rgba(99, 102, 241, 0.2);
+		background: rgba(99, 102, 241, 0.04);
+		color: #6366f1;
+		font-size: 0.8125rem;
+		font-weight: 500;
+		cursor: pointer;
+		transition: all 0.15s;
+	}
+	.mic-btn:hover:not(:disabled) {
+		background: rgba(99, 102, 241, 0.08);
+		border-color: #6366f1;
+	}
+	.mic-btn:disabled {
+		opacity: 0.6;
+		cursor: wait;
+	}
+	.mic-btn.recording {
+		background: rgba(239, 68, 68, 0.08);
+		border-color: rgba(239, 68, 68, 0.4);
+		color: #ef4444;
+		animation: rec-pulse 1.5s ease-in-out infinite;
+	}
+	@keyframes rec-pulse {
+		0%,
+		100% {
+			background: rgba(239, 68, 68, 0.08);
+		}
+		50% {
+			background: rgba(239, 68, 68, 0.16);
+		}
+	}
+
+	.mic-icon {
+		font-size: 1rem;
+	}
+	.mic-stop {
+		display: inline-block;
+		width: 10px;
+		height: 10px;
+		background: #ef4444;
+		border-radius: 2px;
+	}
+	.mic-time {
+		font-variant-numeric: tabular-nums;
+	}
+
+	.mic-cancel {
+		width: 32px;
+		height: 32px;
+		border-radius: 0.375rem;
+		border: 1px solid rgba(0, 0, 0, 0.08);
+		background: transparent;
+		color: #9ca3af;
+		font-size: 1.125rem;
+		line-height: 1;
+		cursor: pointer;
+	}
+	.mic-cancel:hover {
+		color: #ef4444;
+		border-color: #ef4444;
+	}
+	:global(.dark) .mic-cancel {
+		border-color: rgba(255, 255, 255, 0.1);
+	}
+
+	.rec-error {
+		font-size: 0.6875rem;
+		color: #ef4444;
+		margin: 0;
+		padding: 0 0.25rem;
 	}
 
 	/* ── View Tabs ─────────────────────────────── */
@@ -683,6 +864,33 @@
 	.badge {
 		font-size: 0.625rem;
 	}
+	.badge.transcribing {
+		color: #6366f1;
+		font-size: 0.5rem;
+		letter-spacing: 0.0625rem;
+		animation: dots-pulse 1.4s ease-in-out infinite;
+	}
+	@keyframes dots-pulse {
+		0%,
+		100% {
+			opacity: 0.4;
+		}
+		50% {
+			opacity: 1;
+		}
+	}
+	.badge.failed {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 13px;
+		height: 13px;
+		border-radius: 9999px;
+		background: rgba(239, 68, 68, 0.15);
+		color: #ef4444;
+		font-size: 0.5625rem;
+		font-weight: 700;
+	}
 
 	.dream-preview {
 		font-size: 0.6875rem;
@@ -760,6 +968,26 @@
 	}
 	:global(.dark) .ed-title {
 		color: #f3f4f6;
+	}
+
+	.ed-status {
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
+		padding: 0.25rem 0.5rem;
+		border-radius: 0.25rem;
+		background: rgba(99, 102, 241, 0.06);
+		color: #6366f1;
+		font-size: 0.6875rem;
+	}
+	.ed-status.failed {
+		background: rgba(239, 68, 68, 0.06);
+		color: #ef4444;
+	}
+	.ed-status-dots {
+		font-size: 0.5rem;
+		letter-spacing: 0.0625rem;
+		animation: dots-pulse 1.4s ease-in-out infinite;
 	}
 
 	.ed-content {

@@ -126,6 +126,9 @@ const APP_CONFIGS = [
 			MIDDLEWARE_URL: (env) => env.MANA_AUTH_URL,
 			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_MANA || '',
 			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
+			// Speech-to-Text proxy (server-side only, never exposed to the client)
+			MANA_STT_URL: (env) => env.STT_URL || 'http://localhost:3020',
+			MANA_STT_API_KEY: (env) => env.MANA_STT_API_KEY || '',
 		},
 	},
 

@@ -4,7 +4,14 @@
 
 import { dreamSymbolTable, dreamTable } from '../collections';
 import { toDream } from '../queries';
-import type { DreamClarity, DreamMood, LocalDream, SleepQuality } from '../types';
+import type {
+	Dream,
+	DreamClarity,
+	DreamMood,
+	DreamProcessingStatus,
+	LocalDream,
+	SleepQuality,
+} from '../types';
 
 function todayIsoDate(): string {
 	return new Date().toISOString().slice(0, 10);
@@ -38,7 +45,10 @@ export const dreamsStore = {
 			emotions: data.emotions ?? [],
 			symbols: data.symbols ?? [],
 			audioPath: null,
+			audioDurationMs: null,
 			transcript: null,
+			processingStatus: 'idle',
+			processingError: null,
 			interpretation: null,
 			aiInterpretation: null,
 			isPrivate: false,
@@ -94,6 +104,112 @@ export const dreamsStore = {
 			...data,
 			updatedAt: new Date().toISOString(),
 		});
+	},
+
+	/**
+	 * Create a placeholder dream from a fresh voice recording and start the
+	 * background transcription. Returns the new dream immediately so the UI
+	 * can navigate / show a "transcribing" state without waiting.
+	 */
+	async createFromVoice(blob: Blob, durationMs: number, language?: string): Promise<Dream> {
+		const newLocal: LocalDream = {
+			id: crypto.randomUUID(),
+			title: null,
+			content: '',
+			dreamDate: todayIsoDate(),
+			mood: null,
+			clarity: null,
+			isLucid: false,
+			isRecurring: false,
+			sleepQuality: null,
+			bedtime: null,
+			wakeTime: null,
+			location: null,
+			people: [],
+			emotions: [],
+			symbols: [],
+			audioPath: null,
+			audioDurationMs: durationMs,
+			transcript: null,
+			processingStatus: 'transcribing',
+			processingError: null,
+			interpretation: null,
+			aiInterpretation: null,
+			isPrivate: false,
+			isPinned: false,
+			isArchived: false,
+		};
+		await dreamTable.add(newLocal);
+
+		// Fire and forget — transcription updates the dream when it returns.
+		void this.transcribeBlob(newLocal.id, blob, language);
+
+		return toDream(newLocal);
+	},
+
+	async setProcessingStatus(
+		id: string,
+		status: DreamProcessingStatus,
+		error: string | null = null
+	) {
+		await dreamTable.update(id, {
+			processingStatus: status,
+			processingError: error,
+			updatedAt: new Date().toISOString(),
+		});
+	},
+
+	/**
+	 * Upload an audio blob to /api/v1/dreams/transcribe and write the result
+	 * back into the dream. Reset to idle on success, mark failed on error.
+	 */
+	async transcribeBlob(dreamId: string, blob: Blob, language?: string): Promise<void> {
+		try {
+			const form = new FormData();
+			const ext = blob.type.includes('webm')
+				? '.webm'
+				: blob.type.includes('mp4')
+					? '.m4a'
+					: '.audio';
+			form.append('file', blob, `dream${ext}`);
+			if (language) form.append('language', language);
+
+			const response = await fetch('/api/v1/dreams/transcribe', {
+				method: 'POST',
+				body: form,
+			});
+
+			if (!response.ok) {
+				const text = await response.text();
+				throw new Error(text || `HTTP ${response.status}`);
+			}
+
+			const result = (await response.json()) as {
+				text: string;
+				language: string | null;
+				durationSeconds: number | null;
+			};
+
+			const transcript = (result.text ?? '').trim();
+			const existing = await dreamTable.get(dreamId);
+			if (!existing) return;
+
+			await dreamTable.update(dreamId, {
+				transcript,
+				// Only fill content if user hasn't typed anything yet
+				content: existing.content?.trim() ? existing.content : transcript,
+				processingStatus: 'idle',
+				processingError: null,
+				updatedAt: new Date().toISOString(),
+			});
+		} catch (e) {
+			const msg = e instanceof Error ? e.message : String(e);
+			await dreamTable.update(dreamId, {
+				processingStatus: 'failed',
+				processingError: msg,
+				updatedAt: new Date().toISOString(),
+			});
+		}
 	},
 
 	async deleteDream(id: string) {

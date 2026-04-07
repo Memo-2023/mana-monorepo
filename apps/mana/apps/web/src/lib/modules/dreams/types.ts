@@ -7,6 +7,7 @@ import type { BaseRecord } from '@mana/local-store';
 export type DreamMood = 'angenehm' | 'neutral' | 'unangenehm' | 'albtraum';
 export type DreamClarity = 1 | 2 | 3 | 4 | 5;
 export type SleepQuality = 1 | 2 | 3 | 4 | 5;
+export type DreamProcessingStatus = 'idle' | 'recording' | 'transcribing' | 'failed';
 
 // ─── Local Record Types (Dexie) ───────────────────────────
 
@@ -26,7 +27,10 @@ export interface LocalDream extends BaseRecord {
 	emotions: string[];
 	symbols: string[];
 	audioPath: string | null;
+	audioDurationMs: number | null;
 	transcript: string | null;
+	processingStatus: DreamProcessingStatus;
+	processingError: string | null;
 	interpretation: string | null;
 	aiInterpretation: string | null;
 	isPrivate: boolean;
@@ -65,7 +69,10 @@ export interface Dream {
 	emotions: string[];
 	symbols: string[];
 	audioPath: string | null;
+	audioDurationMs: number | null;
 	transcript: string | null;
+	processingStatus: DreamProcessingStatus;
+	processingError: string | null;
 	interpretation: string | null;
 	aiInterpretation: string | null;
 	isPrivate: boolean;
