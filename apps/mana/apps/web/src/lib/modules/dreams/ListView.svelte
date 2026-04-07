@@ -11,7 +11,7 @@
 		useAllDreams,
 	} from './queries';
 	import { dreamsStore } from './stores/dreams.svelte';
-	import { MOOD_COLORS, MOOD_LABELS, type Dream, type DreamMood } from './types';
+	import { MOOD_COLORS, MOOD_LABELS, type Dream, type DreamMood, type SleepQuality } from './types';
 	import type { ViewProps } from '$lib/app-registry';
 	import { ContextMenu, type ContextMenuItem } from '@mana/shared-ui';
 	import { PencilSimple, PushPin, Trash } from '@mana/shared-icons';
@@ -21,6 +21,10 @@
 	let dreams$ = useAllDreams();
 	let dreams = $derived(dreams$.value);
 
+	type FilterMode = 'all' | 'lucid' | 'nightmare' | 'recurring';
+	let filterMode = $state<FilterMode>('all');
+	let symbolFilter = $state<string | null>(null);
+
 	let searchQuery = $state('');
 	let editingId = $state<string | null>(null);
 	let editTitle = $state('');
@@ -28,11 +32,35 @@
 	let editSymbols = $state('');
 	let editMood = $state<DreamMood | null>(null);
 	let editIsLucid = $state(false);
+	let editIsRecurring = $state(false);
+	let editDreamDate = $state('');
+	let editBedtime = $state('');
+	let editWakeTime = $state('');
+	let editSleepQuality = $state<SleepQuality | null>(null);
 	let newTitle = $state('');
 
-	let filtered = $derived(searchDreams(dreams, searchQuery));
+	let filteredByMode = $derived.by(() => {
+		switch (filterMode) {
+			case 'lucid':
+				return dreams.filter((d) => d.isLucid);
+			case 'nightmare':
+				return dreams.filter((d) => d.mood === 'albtraum');
+			case 'recurring':
+				return dreams.filter((d) => d.isRecurring);
+			default:
+				return dreams;
+		}
+	});
+	let filteredBySymbol = $derived(
+		symbolFilter ? filteredByMode.filter((d) => d.symbols?.includes(symbolFilter!)) : filteredByMode
+	);
+	let filtered = $derived(searchDreams(filteredBySymbol, searchQuery));
 	let grouped = $derived(groupByMonth(filtered));
 	let insights = $derived(computeInsights(dreams));
+
+	function selectSymbol(name: string) {
+		symbolFilter = symbolFilter === name ? null : name;
+	}
 
 	async function handleQuickCreate(e: KeyboardEvent) {
 		if (e.key !== 'Enter' || !newTitle.trim()) return;
@@ -50,6 +78,11 @@
 		editSymbols = (dream.symbols ?? []).join(', ');
 		editMood = dream.mood;
 		editIsLucid = dream.isLucid;
+		editIsRecurring = dream.isRecurring;
+		editDreamDate = dream.dreamDate;
+		editBedtime = dream.bedtime ?? '';
+		editWakeTime = dream.wakeTime ?? '';
+		editSleepQuality = dream.sleepQuality;
 	}
 
 	async function saveEdit() {
@@ -64,8 +97,17 @@
 			symbols,
 			mood: editMood,
 			isLucid: editIsLucid,
+			isRecurring: editIsRecurring,
+			dreamDate: editDreamDate || new Date().toISOString().slice(0, 10),
+			bedtime: editBedtime || null,
+			wakeTime: editWakeTime || null,
+			sleepQuality: editSleepQuality,
 		});
 		editingId = null;
+	}
+
+	function setSleepQuality(q: SleepQuality) {
+		editSleepQuality = editSleepQuality === q ? null : q;
 	}
 
 	async function handleDelete(id: string) {
@@ -143,8 +185,51 @@
 				<span class="ins-stat">&#x2728; {insights.lucidCount} Klarträume</span>
 			{/if}
 			{#each insights.topSymbols as sym}
-				<span class="ins-symbol">{sym.name} · {sym.count}</span>
+				<button
+					class="ins-symbol"
+					class:active={symbolFilter === sym.name}
+					onclick={() => selectSymbol(sym.name)}
+				>
+					{sym.name} · {sym.count}
+				</button>
 			{/each}
+			{#if symbolFilter}
+				<button class="ins-clear" onclick={() => (symbolFilter = null)}>×&nbsp;Filter</button>
+			{/if}
+		</div>
+	{/if}
+
+	<!-- Filter tabs -->
+	{#if dreams.length > 0}
+		<div class="filter-tabs">
+			<button
+				class="filter-tab"
+				class:active={filterMode === 'all'}
+				onclick={() => (filterMode = 'all')}
+			>
+				Alle
+			</button>
+			<button
+				class="filter-tab"
+				class:active={filterMode === 'lucid'}
+				onclick={() => (filterMode = 'lucid')}
+			>
+				&#x2728; Klarträume
+			</button>
+			<button
+				class="filter-tab"
+				class:active={filterMode === 'nightmare'}
+				onclick={() => (filterMode = 'nightmare')}
+			>
+				Albträume
+			</button>
+			<button
+				class="filter-tab"
+				class:active={filterMode === 'recurring'}
+				onclick={() => (filterMode = 'recurring')}
+			>
+				Wiederkehrend
+			</button>
 		</div>
 	{/if}
 
@@ -206,10 +291,49 @@
 									</button>
 								{/each}
 							</div>
-							<label class="lucid-toggle">
-								<input type="checkbox" bind:checked={editIsLucid} />
-								&#x2728; Klartraum
+						</div>
+
+						<div class="ed-row sleep-row">
+							<label class="ed-field">
+								<span class="ed-label">Nacht</span>
+								<input type="date" bind:value={editDreamDate} class="ed-input-sm" />
 							</label>
+							<label class="ed-field">
+								<span class="ed-label">Ins Bett</span>
+								<input type="time" bind:value={editBedtime} class="ed-input-sm" />
+							</label>
+							<label class="ed-field">
+								<span class="ed-label">Aufgewacht</span>
+								<input type="time" bind:value={editWakeTime} class="ed-input-sm" />
+							</label>
+						</div>
+
+						<div class="ed-row">
+							<div class="ed-field">
+								<span class="ed-label">Schlafqualität</span>
+								<div class="stars">
+									{#each [1, 2, 3, 4, 5] as q}
+										<button
+											class="star"
+											class:filled={editSleepQuality !== null && editSleepQuality >= q}
+											onclick={() => setSleepQuality(q as SleepQuality)}
+											aria-label={`${q} Sterne`}
+										>
+											★
+										</button>
+									{/each}
+								</div>
+							</div>
+							<div class="toggles">
+								<label class="lucid-toggle">
+									<input type="checkbox" bind:checked={editIsLucid} />
+									&#x2728; Klartraum
+								</label>
+								<label class="lucid-toggle">
+									<input type="checkbox" bind:checked={editIsRecurring} />
+									&#x21bb; Wiederkehrend
+								</label>
+							</div>
 						</div>
 
 						<div class="ed-actions">
@@ -219,9 +343,17 @@
 					</div>
 				{:else}
 					<!-- Dream row -->
-					<button
+					<div
 						class="dream-item"
+						role="button"
+						tabindex="0"
 						onclick={() => startEdit(dream)}
+						onkeydown={(e) => {
+							if (e.key === 'Enter' || e.key === ' ') {
+								e.preventDefault();
+								startEdit(dream);
+							}
+						}}
 						oncontextmenu={(e) => handleItemContextMenu(e, dream)}
 					>
 						{#if dream.mood}
@@ -234,6 +366,7 @@
 							<div class="dream-top">
 								<span class="dream-title">{dream.title || 'Traum ohne Titel'}</span>
 								{#if dream.isLucid}<span class="badge lucid">&#x2728;</span>{/if}
+								{#if dream.isRecurring}<span class="badge">&#x21bb;</span>{/if}
 								{#if dream.isPinned}<span class="badge">&#x1f4cc;</span>{/if}
 								{#if dream.isPrivate}<span class="badge">&#x1f512;</span>{/if}
 							</div>
@@ -244,11 +377,24 @@
 								<span>{formatDreamDate(dream.dreamDate)}</span>
 								{#if dream.symbols.length > 0}
 									<span class="dot">·</span>
-									<span class="symbols">{dream.symbols.slice(0, 3).join(' · ')}</span>
+									<span class="symbol-chips">
+										{#each dream.symbols.slice(0, 3) as sym}
+											<button
+												class="symbol-chip"
+												class:active={symbolFilter === sym}
+												onclick={(e) => {
+													e.stopPropagation();
+													selectSymbol(sym);
+												}}
+											>
+												{sym}
+											</button>
+										{/each}
+									</span>
 								{/if}
 							</div>
 						</div>
-					</button>
+					</div>
 				{/if}
 			{/each}
 		{/each}
@@ -331,6 +477,57 @@
 		border-radius: 9999px;
 		background: rgba(99, 102, 241, 0.08);
 		color: #6366f1;
+		border: 1px solid transparent;
+		font-size: 0.6875rem;
+		cursor: pointer;
+	}
+	.ins-symbol:hover {
+		background: rgba(99, 102, 241, 0.16);
+	}
+	.ins-symbol.active {
+		background: #6366f1;
+		color: white;
+	}
+	.ins-clear {
+		padding: 0.125rem 0.5rem;
+		border-radius: 9999px;
+		background: transparent;
+		color: #9ca3af;
+		border: 1px dashed rgba(0, 0, 0, 0.15);
+		font-size: 0.6875rem;
+		cursor: pointer;
+	}
+	.ins-clear:hover {
+		color: #ef4444;
+		border-color: #ef4444;
+	}
+
+	/* ── Filter Tabs ───────────────────────────── */
+	.filter-tabs {
+		display: flex;
+		gap: 0.25rem;
+		flex-wrap: wrap;
+	}
+	.filter-tab {
+		padding: 0.25rem 0.625rem;
+		border-radius: 9999px;
+		border: 1px solid rgba(0, 0, 0, 0.08);
+		background: transparent;
+		font-size: 0.6875rem;
+		color: #9ca3af;
+		cursor: pointer;
+		transition: all 0.15s;
+	}
+	.filter-tab:hover {
+		color: #6366f1;
+	}
+	.filter-tab.active {
+		background: #6366f1;
+		color: white;
+		border-color: #6366f1;
+	}
+	:global(.dark) .filter-tab {
+		border-color: rgba(255, 255, 255, 0.08);
 	}
 
 	/* ── Search ────────────────────────────────── */
@@ -441,19 +638,39 @@
 
 	.dream-meta {
 		display: flex;
+		align-items: center;
 		gap: 0.25rem;
 		font-size: 0.625rem;
 		color: #c0bfba;
 		margin-top: 0.125rem;
-	}
-	.dream-meta .symbols {
-		color: #6366f1;
 	}
 	.dream-meta .dot {
 		opacity: 0.5;
 	}
 	:global(.dark) .dream-meta {
 		color: #4b5563;
+	}
+	.symbol-chips {
+		display: inline-flex;
+		gap: 0.25rem;
+		flex-wrap: wrap;
+	}
+	.symbol-chip {
+		padding: 0.0625rem 0.375rem;
+		border-radius: 9999px;
+		border: 1px solid transparent;
+		background: rgba(99, 102, 241, 0.08);
+		color: #6366f1;
+		font-size: 0.625rem;
+		cursor: pointer;
+		transition: all 0.15s;
+	}
+	.symbol-chip:hover {
+		background: rgba(99, 102, 241, 0.18);
+	}
+	.symbol-chip.active {
+		background: #6366f1;
+		color: white;
 	}
 
 	/* ── Inline Editor ─────────────────────────── */
@@ -567,6 +784,80 @@
 		font-size: 0.6875rem;
 		color: #9ca3af;
 		cursor: pointer;
+	}
+
+	.toggles {
+		display: flex;
+		gap: 0.75rem;
+		align-items: center;
+		flex-wrap: wrap;
+	}
+
+	.sleep-row {
+		justify-content: flex-start;
+		gap: 0.75rem;
+	}
+
+	.ed-field {
+		display: flex;
+		flex-direction: column;
+		gap: 0.125rem;
+	}
+
+	.ed-label {
+		font-size: 0.5625rem;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: #c0bfba;
+		font-weight: 600;
+	}
+	:global(.dark) .ed-label {
+		color: #4b5563;
+	}
+
+	.ed-input-sm {
+		background: transparent;
+		border: 1px solid rgba(0, 0, 0, 0.08);
+		border-radius: 0.25rem;
+		padding: 0.125rem 0.375rem;
+		font-size: 0.6875rem;
+		color: #374151;
+		outline: none;
+		font-family: inherit;
+	}
+	.ed-input-sm:focus {
+		border-color: #6366f1;
+	}
+	:global(.dark) .ed-input-sm {
+		border-color: rgba(255, 255, 255, 0.08);
+		color: #f3f4f6;
+		color-scheme: dark;
+	}
+
+	.stars {
+		display: inline-flex;
+		gap: 0.0625rem;
+	}
+	.star {
+		background: transparent;
+		border: none;
+		font-size: 0.875rem;
+		color: rgba(0, 0, 0, 0.15);
+		cursor: pointer;
+		padding: 0 0.0625rem;
+		line-height: 1;
+	}
+	.star.filled {
+		color: #f59e0b;
+	}
+	.star:hover {
+		color: #fbbf24;
+	}
+	:global(.dark) .star {
+		color: rgba(255, 255, 255, 0.15);
+	}
+	:global(.dark) .star.filled {
+		color: #f59e0b;
 	}
 
 	.ed-actions {
