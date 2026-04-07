@@ -6,44 +6,37 @@ import { setSecurityHeaders } from '@mana/shared-utils/security-headers';
  * Server hooks for Mana web app
  *
  * Injects runtime environment variables into the HTML for client-side access.
- * This is necessary because SvelteKit's $env/static/public bakes values at build time,
- * but Docker containers need runtime configuration.
+ * This is necessary because SvelteKit's $env/static/public bakes values at
+ * build time, but Docker containers need runtime configuration.
+ *
+ * The set of injected URLs is intentionally short:
+ *   - Auth          → mana-auth (login, sessions, GDPR endpoints)
+ *   - Sync          → mana-sync (local-first push/pull/WS for every module)
+ *   - Media         → mana-media (CAS / thumbnails)
+ *   - LLM           → mana-llm (server-side LLM proxy)
+ *   - Events        → mana-events (public RSVP flow)
+ *   - Uload server  → standalone short-link redirect/click tracking
+ *   - Memoro server → standalone voice memo processing
+ *   - Glitchtip DSN → client-side error reporting
+ *
+ * Per-app HTTP backends (todo-api, calendar-api, contacts-api, chat-api,
+ * storage-api, cards-api, mukke-api, nutriphi-api, picture-api, presi-api,
+ * zitare-api, clock-api, context-api) were removed in the pre-launch
+ * ghost-API cleanup — every product module now talks to mana-sync directly.
  */
 
-// Auth URL
 const PUBLIC_MANA_AUTH_URL_CLIENT =
 	process.env.PUBLIC_MANA_AUTH_URL_CLIENT || process.env.PUBLIC_MANA_AUTH_URL || '';
-
-// Backend URLs for dashboard widgets
-const PUBLIC_TODO_API_URL_CLIENT =
-	process.env.PUBLIC_TODO_API_URL_CLIENT || process.env.PUBLIC_TODO_API_URL || '';
-const PUBLIC_CALENDAR_API_URL_CLIENT =
-	process.env.PUBLIC_CALENDAR_API_URL_CLIENT || process.env.PUBLIC_CALENDAR_API_URL || '';
-const PUBLIC_CLOCK_API_URL_CLIENT =
-	process.env.PUBLIC_CLOCK_API_URL_CLIENT || process.env.PUBLIC_CLOCK_API_URL || '';
-const PUBLIC_CONTACTS_API_URL_CLIENT =
-	process.env.PUBLIC_CONTACTS_API_URL_CLIENT || process.env.PUBLIC_CONTACTS_API_URL || '';
 const PUBLIC_GLITCHTIP_DSN = process.env.PUBLIC_GLITCHTIP_DSN || '';
 
-// Sync server URL (WebSocket)
 const PUBLIC_SYNC_SERVER_URL_CLIENT =
 	process.env.PUBLIC_SYNC_SERVER_URL_CLIENT || process.env.PUBLIC_SYNC_SERVER_URL || '';
-
-// Additional backend URLs
-const PUBLIC_CHAT_API_URL_CLIENT =
-	process.env.PUBLIC_CHAT_API_URL_CLIENT || process.env.PUBLIC_CHAT_API_URL || '';
-const PUBLIC_STORAGE_API_URL_CLIENT =
-	process.env.PUBLIC_STORAGE_API_URL_CLIENT || process.env.PUBLIC_STORAGE_API_URL || '';
-const PUBLIC_CARDS_API_URL_CLIENT =
-	process.env.PUBLIC_CARDS_API_URL_CLIENT || process.env.PUBLIC_CARDS_API_URL || '';
-const PUBLIC_MUSIC_API_URL_CLIENT =
-	process.env.PUBLIC_MUSIC_API_URL_CLIENT || process.env.PUBLIC_MUSIC_API_URL || '';
-const PUBLIC_NUTRIPHI_API_URL_CLIENT =
-	process.env.PUBLIC_NUTRIPHI_API_URL_CLIENT || process.env.PUBLIC_NUTRIPHI_API_URL || '';
 const PUBLIC_ULOAD_SERVER_URL_CLIENT =
 	process.env.PUBLIC_ULOAD_SERVER_URL_CLIENT || process.env.PUBLIC_ULOAD_SERVER_URL || '';
-const PUBLIC_MEMORO_SERVER_URL_CLIENT =
-	process.env.PUBLIC_MEMORO_SERVER_URL_CLIENT || process.env.PUBLIC_MEMORO_SERVER_URL || '';
+// memoro-server is intentionally not injected — the unified web app's memoro
+// module is fully local-first (recorder + Dexie + sync) and never calls the
+// standalone server. The memoro-server compose service still exists for the
+// mobile app, but mana.how does not depend on it.
 const PUBLIC_MANA_MEDIA_URL_CLIENT =
 	process.env.PUBLIC_MANA_MEDIA_URL_CLIENT || process.env.PUBLIC_MANA_MEDIA_URL || '';
 const PUBLIC_MANA_LLM_URL_CLIENT =
@@ -94,18 +87,8 @@ export const handle: Handle = async ({ event, resolve }) => {
 		transformPageChunk: ({ html }) => {
 			const envScript = `<script>
 window.__PUBLIC_MANA_AUTH_URL__ = ${JSON.stringify(PUBLIC_MANA_AUTH_URL_CLIENT)};
-window.__PUBLIC_TODO_API_URL__ = ${JSON.stringify(PUBLIC_TODO_API_URL_CLIENT)};
-window.__PUBLIC_CALENDAR_API_URL__ = ${JSON.stringify(PUBLIC_CALENDAR_API_URL_CLIENT)};
-window.__PUBLIC_CLOCK_API_URL__ = ${JSON.stringify(PUBLIC_CLOCK_API_URL_CLIENT)};
-window.__PUBLIC_CONTACTS_API_URL__ = ${JSON.stringify(PUBLIC_CONTACTS_API_URL_CLIENT)};
 window.__PUBLIC_SYNC_SERVER_URL__ = ${JSON.stringify(PUBLIC_SYNC_SERVER_URL_CLIENT)};
-window.__PUBLIC_CHAT_API_URL__ = ${JSON.stringify(PUBLIC_CHAT_API_URL_CLIENT)};
-window.__PUBLIC_STORAGE_API_URL__ = ${JSON.stringify(PUBLIC_STORAGE_API_URL_CLIENT)};
-window.__PUBLIC_CARDS_API_URL__ = ${JSON.stringify(PUBLIC_CARDS_API_URL_CLIENT)};
-window.__PUBLIC_MUSIC_API_URL__ = ${JSON.stringify(PUBLIC_MUSIC_API_URL_CLIENT)};
-window.__PUBLIC_NUTRIPHI_API_URL__ = ${JSON.stringify(PUBLIC_NUTRIPHI_API_URL_CLIENT)};
 window.__PUBLIC_ULOAD_SERVER_URL__ = ${JSON.stringify(PUBLIC_ULOAD_SERVER_URL_CLIENT)};
-window.__PUBLIC_MEMORO_SERVER_URL__ = ${JSON.stringify(PUBLIC_MEMORO_SERVER_URL_CLIENT)};
 window.__PUBLIC_MANA_MEDIA_URL__ = ${JSON.stringify(PUBLIC_MANA_MEDIA_URL_CLIENT)};
 window.__PUBLIC_MANA_LLM_URL__ = ${JSON.stringify(PUBLIC_MANA_LLM_URL_CLIENT)};
 window.__PUBLIC_MANA_EVENTS_URL__ = ${JSON.stringify(PUBLIC_MANA_EVENTS_URL_CLIENT)};
@@ -119,18 +102,8 @@ window.__PUBLIC_GLITCHTIP_DSN__ = ${JSON.stringify(PUBLIC_GLITCHTIP_DSN)};
 	setSecurityHeaders(response, {
 		connectSrc: [
 			PUBLIC_MANA_AUTH_URL_CLIENT,
-			PUBLIC_TODO_API_URL_CLIENT,
-			PUBLIC_CALENDAR_API_URL_CLIENT,
-			PUBLIC_CLOCK_API_URL_CLIENT,
-			PUBLIC_CONTACTS_API_URL_CLIENT,
 			PUBLIC_SYNC_SERVER_URL_CLIENT,
-			PUBLIC_CHAT_API_URL_CLIENT,
-			PUBLIC_STORAGE_API_URL_CLIENT,
-			PUBLIC_CARDS_API_URL_CLIENT,
-			PUBLIC_MUSIC_API_URL_CLIENT,
-			PUBLIC_NUTRIPHI_API_URL_CLIENT,
 			PUBLIC_ULOAD_SERVER_URL_CLIENT,
-			PUBLIC_MEMORO_SERVER_URL_CLIENT,
 			PUBLIC_MANA_MEDIA_URL_CLIENT,
 			PUBLIC_MANA_LLM_URL_CLIENT,
 			PUBLIC_MANA_EVENTS_URL_CLIENT,

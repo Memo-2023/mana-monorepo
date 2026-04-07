@@ -8,18 +8,14 @@ interface ServiceStatus {
 	details?: string;
 }
 
+// The per-app HTTP backends (todo, calendar, contacts, chat, storage,
+// cards, music, nutriphi, picture, presi, zitare, clock, context) were
+// removed in the pre-launch ghost-API cleanup — every product module now
+// reads/writes the unified Dexie database via mana-sync.
 const SERVICES = [
 	{ name: 'Auth', url: process.env.PUBLIC_MANA_AUTH_URL || 'http://localhost:3001' },
-	{ name: 'Todo API', url: process.env.PUBLIC_TODO_API_URL || 'http://localhost:3031' },
-	{ name: 'Calendar API', url: process.env.PUBLIC_CALENDAR_API_URL || 'http://localhost:3032' },
-	{ name: 'Contacts API', url: process.env.PUBLIC_CONTACTS_API_URL || 'http://localhost:3033' },
-	{ name: 'Chat API', url: process.env.PUBLIC_CHAT_API_URL || 'http://localhost:3030' },
-	{ name: 'Storage API', url: process.env.PUBLIC_STORAGE_API_URL || 'http://localhost:3034' },
-	{ name: 'Cards API', url: process.env.PUBLIC_CARDS_API_URL || 'http://localhost:3036' },
-	{ name: 'Music API', url: process.env.PUBLIC_MUSIC_API_URL || 'http://localhost:3037' },
-	{ name: 'NutriPhi API', url: process.env.PUBLIC_NUTRIPHI_API_URL || 'http://localhost:3038' },
+	{ name: 'Sync', url: process.env.PUBLIC_SYNC_SERVER_URL || 'http://localhost:3010' },
 	{ name: 'Uload Server', url: process.env.PUBLIC_ULOAD_SERVER_URL || 'http://localhost:3070' },
-	{ name: 'Memoro Server', url: process.env.PUBLIC_MEMORO_SERVER_URL || 'http://localhost:3015' },
 	{ name: 'Media', url: process.env.PUBLIC_MANA_MEDIA_URL || 'http://localhost:3011' },
 	{ name: 'LLM', url: process.env.PUBLIC_MANA_LLM_URL || 'http://localhost:3025' },
 ];

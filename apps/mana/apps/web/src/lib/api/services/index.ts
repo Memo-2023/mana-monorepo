@@ -1,23 +1,20 @@
 /**
- * Dashboard API Services
+ * API Services barrel.
  *
- * Re-exports all app-specific services for the dashboard.
+ * Per-app HTTP backend services (todo, calendar, contacts, chat, storage,
+ * cards, music, picture, presi, zitare, clock, context) used to live here
+ * but were removed in the pre-launch ghost-API cleanup — every product
+ * module now reads/writes the unified Dexie database via the local-first
+ * sync layer (`mana-sync`), and `qr-export` queries Dexie directly.
+ *
+ * What remains here is genuinely server-bound:
+ *   - admin       → admin operations against mana-auth
+ *   - landing     → org landing page editor (mana-landing-builder)
+ *   - my-data     → user data summary / GDPR export against mana-auth
+ *   - qr-export   → reads from local Dexie, builds the QR snapshot
  */
 
-export { todoService, type Task, type Project, type Label, type Subtask } from './todo';
-export { calendarService, type Calendar, type CalendarEvent } from './calendar';
-export { chatService, type Conversation, type Message, type AiModel } from './chat';
-export { contactsService, type Contact, type ContactActivity } from './contacts';
-export { zitareService, type Favorite, type Quote, type QuoteList } from './zitare';
-export { pictureService, type GeneratedImage, type GenerationStats } from './picture';
-export { cardsService, type Deck, type Card, type LearningProgress } from './cards';
-export { clockService, type Timer, type Alarm, type ClockStats } from './clock';
-export { storageService, type StorageFile, type StorageStats } from './storage';
-export { musicService, type Song, type MusicStats } from './music';
-export { presiService, type PresiDeck, type PresiStats } from './presi';
-export {
-	contextService,
-	type ContextSpace,
-	type ContextDocument,
-	type TokenBalance,
-} from './context';
+export { adminService, type UserListItem, type ProjectDataSummary } from './admin';
+export { getOrganization, saveLandingConfig, publishLanding } from './landing';
+export { myDataService, type UserDataSummary } from './my-data';
+export { qrExportService, type QRExportData, type QRExportResult } from './qr-export';
