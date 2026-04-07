@@ -9,7 +9,6 @@
 		useAllDayLogs,
 		useAllSymptoms,
 		useCurrentCycle,
-		useDayLog,
 	} from './queries';
 	import { cyclesStore } from './stores/cycles.svelte';
 	import { dayLogsStore } from './stores/dayLogs.svelte';
@@ -41,13 +40,11 @@
 	let logs$ = useAllDayLogs();
 	let symptoms$ = useAllSymptoms();
 	let current$ = useCurrentCycle();
-	let todayLog$ = useDayLog(todayIso);
 
 	let cycles = $derived(cycles$.value);
 	let logs = $derived(logs$.value);
 	let symptoms = $derived(symptoms$.value);
 	let currentCycle = $derived(current$.value);
-	let todayLog = $derived(todayLog$.value);
 
 	let phase = $derived(derivePhase(todayIso, cycles));
 	let cycleDay = $derived(currentCycle ? getCycleDayNumber(todayIso, currentCycle) : null);
@@ -59,49 +56,77 @@
 	const FLOWS: Flow[] = ['none', 'spotting', 'light', 'medium', 'heavy'];
 	const MOODS: Mood[] = ['great', 'good', 'neutral', 'low', 'bad'];
 
-	let selectedFlow = $derived(todayLog?.flow ?? 'none');
-	let selectedMood = $derived(todayLog?.mood ?? null);
-	let selectedSymptoms = $derived(todayLog?.symptoms ?? []);
+	// ─ Editing state — defaults to today, can be switched to any past day
+	let editingDate = $state(todayIso);
+	let editingLog = $derived(logs.find((l) => l.logDate === editingDate) ?? null);
+	let isEditingPast = $derived(editingDate !== todayIso);
+
+	let selectedFlow = $derived(editingLog?.flow ?? 'none');
+	let selectedMood = $derived(editingLog?.mood ?? null);
+	let selectedSymptoms = $derived(editingLog?.symptoms ?? []);
 	let temperature = $state('');
 	let notesText = $state('');
 
+	// Reset temperature/notes inputs when switching the editing target
 	$effect(() => {
-		if (todayLog) {
-			temperature = todayLog.temperature?.toString() ?? '';
-			notesText = todayLog.notes ?? '';
-		}
+		// Tracking editingDate so the effect re-runs whenever the target switches
+		void editingDate;
+		temperature = editingLog?.temperature?.toString() ?? '';
+		notesText = editingLog?.notes ?? '';
 	});
 
+	function selectDay(date: string) {
+		editingDate = date;
+	}
+
+	function backToToday() {
+		editingDate = todayIso;
+	}
+
 	async function setFlow(flow: Flow) {
-		await dayLogsStore.logDay({ logDate: todayIso, flow });
+		await dayLogsStore.logDay({ logDate: editingDate, flow });
 	}
 
 	async function setMood(mood: Mood) {
 		const next = selectedMood === mood ? null : mood;
-		await dayLogsStore.logDay({ logDate: todayIso, mood: next });
+		await dayLogsStore.logDay({ logDate: editingDate, mood: next });
 	}
 
 	async function toggleSymptom(id: string) {
 		const has = selectedSymptoms.includes(id);
 		const next = has ? selectedSymptoms.filter((s) => s !== id) : [...selectedSymptoms, id];
-		await dayLogsStore.logDay({ logDate: todayIso, symptoms: next });
+		await dayLogsStore.logDay({ logDate: editingDate, symptoms: next });
 	}
 
 	async function saveTemperature() {
 		const num = parseFloat(temperature);
 		await dayLogsStore.logDay({
-			logDate: todayIso,
+			logDate: editingDate,
 			temperature: Number.isFinite(num) ? num : null,
 		});
 	}
 
 	async function saveNotes() {
-		await dayLogsStore.logDay({ logDate: todayIso, notes: notesText.trim() || null });
+		await dayLogsStore.logDay({ logDate: editingDate, notes: notesText.trim() || null });
+	}
+
+	async function deleteEditingLog() {
+		if (!editingLog) {
+			backToToday();
+			return;
+		}
+		const ok = confirm(
+			`Tageseintrag vom ${new Date(editingDate).toLocaleDateString('de-DE')} wirklich löschen?`
+		);
+		if (!ok) return;
+		await dayLogsStore.deleteLog(editingLog.id);
+		backToToday();
 	}
 
 	async function startPeriodToday() {
 		await cyclesStore.createCycle({ startDate: todayIso });
 		await dayLogsStore.logDay({ logDate: todayIso, flow: 'medium' });
+		backToToday();
 	}
 
 	async function endPeriodToday() {
@@ -153,9 +178,24 @@
 		</div>
 	</div>
 
-	<!-- Today: Flow -->
+	<!-- Edit-past-day Banner -->
+	{#if isEditingPast}
+		<div class="edit-banner">
+			<span class="edit-banner-label">
+				Bearbeite <strong>{new Date(editingDate).toLocaleDateString('de-DE')}</strong>
+			</span>
+			<div class="edit-banner-actions">
+				{#if editingLog}
+					<button class="banner-btn danger" onclick={deleteEditingLog}>Löschen</button>
+				{/if}
+				<button class="banner-btn" onclick={backToToday}>Zurück zu heute</button>
+			</div>
+		</div>
+	{/if}
+
+	<!-- Flow -->
 	<section class="log-section">
-		<h3 class="section-label">Heute · Blutung</h3>
+		<h3 class="section-label">{isEditingPast ? 'Blutung' : 'Heute · Blutung'}</h3>
 		<div class="row">
 			{#each FLOWS as flow}
 				<button
@@ -271,7 +311,12 @@
 			<h3 class="section-label">Letzte Einträge</h3>
 			<div class="log-list">
 				{#each logs.slice(0, 10) as log (log.id)}
-					<div class="log-row">
+					<button
+						class="log-row"
+						class:active={log.logDate === editingDate}
+						type="button"
+						onclick={() => selectDay(log.logDate)}
+					>
 						<span class="log-flow" style="background: {FLOW_COLORS[log.flow]}"></span>
 						<div class="log-content">
 							<div class="log-top">
@@ -289,7 +334,7 @@
 								<p class="log-note">{log.notes}</p>
 							{/if}
 						</div>
-					</div>
+					</button>
 				{/each}
 			</div>
 		</section>
@@ -388,6 +433,50 @@
 	}
 	.btn-secondary:hover {
 		background: color-mix(in srgb, var(--phase-color) 10%, transparent);
+	}
+
+	/* ── Edit Past Day Banner ──────────────────── */
+	.edit-banner {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.5rem;
+		padding: 0.5rem 0.75rem;
+		border-radius: 0.5rem;
+		background: rgba(236, 72, 153, 0.08);
+		border: 1px dashed rgba(236, 72, 153, 0.4);
+	}
+	.edit-banner-label {
+		font-size: 0.75rem;
+		color: #ec4899;
+	}
+	.edit-banner-label strong {
+		font-weight: 600;
+	}
+	.edit-banner-actions {
+		display: flex;
+		gap: 0.375rem;
+	}
+	.banner-btn {
+		padding: 0.25rem 0.625rem;
+		border-radius: 0.375rem;
+		font-size: 0.6875rem;
+		border: 1px solid rgba(236, 72, 153, 0.4);
+		background: transparent;
+		color: #ec4899;
+		cursor: pointer;
+		transition: filter 0.15s;
+	}
+	.banner-btn:hover {
+		filter: brightness(1.1);
+		background: rgba(236, 72, 153, 0.1);
+	}
+	.banner-btn.danger {
+		border-color: rgba(239, 68, 68, 0.4);
+		color: #ef4444;
+	}
+	.banner-btn.danger:hover {
+		background: rgba(239, 68, 68, 0.1);
 	}
 
 	/* ── Sections ──────────────────────────────── */
@@ -554,7 +643,28 @@
 		display: flex;
 		align-items: flex-start;
 		gap: 0.5rem;
-		padding: 0.4375rem 0.25rem;
+		padding: 0.4375rem 0.5rem;
+		border: none;
+		border-radius: 0.375rem;
+		background: transparent;
+		text-align: left;
+		width: 100%;
+		cursor: pointer;
+		color: inherit;
+		font: inherit;
+		transition: background 0.15s;
+	}
+	.log-row:hover {
+		background: rgba(0, 0, 0, 0.04);
+	}
+	:global(.dark) .log-row:hover {
+		background: rgba(255, 255, 255, 0.05);
+	}
+	.log-row.active {
+		background: rgba(236, 72, 153, 0.1);
+	}
+	.log-row.active:hover {
+		background: rgba(236, 72, 153, 0.16);
 	}
 	.log-flow {
 		width: 8px;
