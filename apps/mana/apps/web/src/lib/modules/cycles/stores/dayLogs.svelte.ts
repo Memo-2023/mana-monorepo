@@ -3,7 +3,9 @@
  */
 
 import { cycleDayLogTable, cycleTable } from '../collections';
-import { toCycleDayLog } from '../queries';
+import { toCycle, toCycleDayLog } from '../queries';
+import { detectPeriodEnd, shouldStartNewCycle } from '../utils/auto-detect';
+import { cyclesStore } from './cycles.svelte';
 import { symptomsStore } from './symptoms.svelte';
 import type { CervicalMucus, Flow, LocalCycle, LocalCycleDayLog, Mood } from '../types';
 
@@ -36,10 +38,21 @@ export const dayLogsStore = {
 	/** Erstellt oder aktualisiert den Tageseintrag (eine Zeile pro Tag). */
 	async logDay(data: LogDayInput) {
 		const logDate = data.logDate ?? todayIsoDate();
+
+		// ─ Auto-Start: explizites flow + Bedingungen erfüllt → neuen Zyklus VOR dem Schreiben anlegen
+		if (data.flow !== undefined) {
+			const allCycles = await cycleTable.toArray();
+			const visibleCycles = allCycles.filter((c) => !c.deletedAt).map(toCycle);
+			if (shouldStartNewCycle(logDate, data.flow, visibleCycles)) {
+				await cyclesStore.createCycle({ startDate: logDate });
+			}
+		}
+
 		const existing = (await cycleDayLogTable.where('logDate').equals(logDate).toArray()).find(
 			(l) => !l.deletedAt
 		);
 
+		let result: LocalCycleDayLog;
 		if (existing) {
 			// Symptom-Counter aktualisieren.
 			if (data.symptoms) {
@@ -55,28 +68,46 @@ export const dayLogsStore = {
 				logDate,
 				updatedAt: new Date().toISOString(),
 			});
-			return toCycleDayLog({ ...existing, ...data, logDate });
+			result = { ...existing, ...data, logDate };
+		} else {
+			const cycleId = await resolveCycleId(logDate);
+			const newLocal: LocalCycleDayLog = {
+				id: crypto.randomUUID(),
+				logDate,
+				cycleId,
+				flow: data.flow ?? 'none',
+				mood: data.mood ?? null,
+				energy: data.energy ?? null,
+				temperature: data.temperature ?? null,
+				cervicalMucus: data.cervicalMucus ?? null,
+				symptoms: data.symptoms ?? [],
+				sexualActivity: data.sexualActivity ?? null,
+				notes: data.notes ?? null,
+			};
+			await cycleDayLogTable.add(newLocal);
+			if (newLocal.symptoms.length) {
+				await symptomsStore.touchSymptoms(newLocal.symptoms, +1);
+			}
+			result = newLocal;
 		}
 
-		const cycleId = await resolveCycleId(logDate);
-		const newLocal: LocalCycleDayLog = {
-			id: crypto.randomUUID(),
-			logDate,
-			cycleId,
-			flow: data.flow ?? 'none',
-			mood: data.mood ?? null,
-			energy: data.energy ?? null,
-			temperature: data.temperature ?? null,
-			cervicalMucus: data.cervicalMucus ?? null,
-			symptoms: data.symptoms ?? [],
-			sexualActivity: data.sexualActivity ?? null,
-			notes: data.notes ?? null,
-		};
-		await cycleDayLogTable.add(newLocal);
-		if (newLocal.symptoms.length) {
-			await symptomsStore.touchSymptoms(newLocal.symptoms, +1);
+		// ─ Auto-End: Wenn explizit 'none' geloggt wurde, prüfe ob die Periode beendet werden soll
+		if (data.flow === 'none' && result.cycleId) {
+			const openCycleLocal = await cycleTable.get(result.cycleId);
+			if (openCycleLocal && !openCycleLocal.deletedAt && !openCycleLocal.periodEndDate) {
+				const cycleLogsLocal = await cycleDayLogTable
+					.where('cycleId')
+					.equals(result.cycleId)
+					.toArray();
+				const cycleLogs = cycleLogsLocal.filter((l) => !l.deletedAt).map(toCycleDayLog);
+				const endDate = detectPeriodEnd(logDate, 'none', toCycle(openCycleLocal), cycleLogs);
+				if (endDate) {
+					await cyclesStore.setPeriodEnd(openCycleLocal.id, endDate);
+				}
+			}
 		}
-		return toCycleDayLog(newLocal);
+
+		return toCycleDayLog(result);
 	},
 
 	async deleteLog(id: string) {
