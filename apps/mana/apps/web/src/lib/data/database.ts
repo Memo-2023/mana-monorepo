@@ -405,6 +405,25 @@ db.version(4).stores({
 		'id, startDate, kind, type, sourceModule, sourceId, parentBlockId, [sourceModule+sourceId], [type+startDate], [kind+startDate], [parentBlockId+recurrenceDate]',
 });
 
+// ─── Version 5: Dreams (Traumtagebuch) ────────────────────────
+// Adds dreams, dreamSymbols, dreamTags tables.
+
+db.version(5).stores({
+	dreams: 'id, dreamDate, mood, isLucid, isPinned, isArchived, updatedAt',
+	dreamSymbols: 'id, name, count, updatedAt',
+	dreamTags: 'id, dreamId, tagId, [dreamId+tagId]',
+});
+
+// ─── Version 6: Events (Social gatherings) ────────────────────
+// Distinct from calendar's `events` table — these are gatherings with guests/RSVPs.
+// Main table is `socialEvents` to avoid collision with calendar.events.
+
+db.version(6).stores({
+	socialEvents: 'id, status, timeBlockId, hostContactId, isPublished, [status+createdAt]',
+	eventGuests: 'id, eventId, contactId, rsvpStatus, [eventId+rsvpStatus], [eventId+contactId]',
+	eventInvitations: 'id, eventId, guestId, channel, [eventId+guestId]',
+});
+
 // ─── Sync App Map ──────────────────────────────────────────
 // Maps each table to its appId for sync routing.
 // The SyncEngine uses this to group pending changes and push to /sync/{appId}.
@@ -447,6 +466,8 @@ export const SYNC_APP_MAP: Record<string, string[]> = {
 	guides: ['guides', 'sections', 'steps', 'guideCollections', 'runs', 'guideTags'],
 	habits: ['habits', 'habitLogs'],
 	notes: ['notes', 'noteTags'],
+	dreams: ['dreams', 'dreamSymbols', 'dreamTags'],
+	events: ['socialEvents', 'eventGuests', 'eventInvitations'],
 	finance: ['transactions', 'financeCategories', 'budgets'],
 	places: ['places', 'locationLogs', 'placeTags'],
 	tags: ['globalTags', 'tagGroups'],
@@ -518,6 +539,8 @@ export const TABLE_TO_SYNC_NAME: Record<string, string> = {
 	guideCollections: 'collections',
 	// finance
 	financeCategories: 'categories',
+	// events (social gatherings)
+	socialEvents: 'events',
 	// shared: tags
 	globalTags: 'tags',
 	tagGroups: 'tagGroups',
@@ -550,11 +573,52 @@ export function fromSyncName(appId: string, syncCollection: string): string {
 // Automatically records pending changes for every write to sync-relevant tables.
 // This means module stores (taskTable.add(), etc.) don't need manual trackChange() calls.
 
-let _applyingServerChanges = false;
+/**
+ * Tables that are currently having server changes applied. Hooks for tables
+ * in this set skip pending-change tracking (sync loop guard) — but writes to
+ * OTHER tables continue tracking normally, so a user typing into chat while
+ * todo is syncing no longer silently drops the chat write.
+ *
+ * Replaces a single global boolean that previously caused a cross-app race:
+ * one app's apply could swallow another app's writes for the duration.
+ */
+const _applyingTables = new Set<string>();
 
-/** Set to true while applying server changes to prevent sync loops. */
+/**
+ * Marks one or more tables as "currently applying server changes".
+ * Returned dispose function MUST be called (use try/finally) to clear them.
+ */
+export function beginApplyingTables(tables: Iterable<string>): () => void {
+	const added: string[] = [];
+	for (const t of tables) {
+		if (!_applyingTables.has(t)) {
+			_applyingTables.add(t);
+			added.push(t);
+		}
+	}
+	return () => {
+		for (const t of added) _applyingTables.delete(t);
+	};
+}
+
+/** True when a write to `tableName` should bypass the pending-change hook. */
+export function isApplyingTable(tableName: string): boolean {
+	return _applyingTables.has(tableName);
+}
+
+/**
+ * @deprecated Legacy single-flag API kept temporarily for any external
+ * caller. Prefer `beginApplyingTables` so per-table races stay impossible.
+ * When `v === true` it marks every sync-tracked table; `false` clears them.
+ */
 export function setApplyingServerChanges(v: boolean): void {
-	_applyingServerChanges = v;
+	if (v) {
+		for (const tables of Object.values(SYNC_APP_MAP)) {
+			for (const t of tables) _applyingTables.add(t);
+		}
+	} else {
+		_applyingTables.clear();
+	}
 }
 
 const pendingChangesTable = db.table('_pendingChanges');

@@ -260,6 +260,48 @@ registerApp({
 });
 
 registerApp({
+	id: 'dreams',
+	name: 'Dreams',
+	color: '#6366F1',
+	views: {
+		list: { load: () => import('$lib/modules/dreams/ListView.svelte') },
+	},
+	contextMenuActions: [
+		{
+			id: 'new-dream',
+			label: 'Neuer Traum',
+			icon: Plus,
+			action: () =>
+				window.dispatchEvent(
+					new CustomEvent('mana:quick-action', { detail: { app: 'dreams', action: 'new' } })
+				),
+		},
+	],
+	collection: 'dreams',
+	paramKey: 'dreamId',
+	dragType: 'dream',
+	acceptsDropFrom: ['note'],
+	transformIncoming: {
+		note: (source) => ({
+			title: source.title as string,
+			content: (source.content as string) ?? '',
+		}),
+	},
+	getDisplayData: (item) => ({
+		title: (item.title as string) || 'Traum',
+		subtitle: (item.dreamDate as string) ?? undefined,
+	}),
+	createItem: async (data) => {
+		const { dreamsStore } = await import('$lib/modules/dreams/stores/dreams.svelte');
+		const dream = await dreamsStore.createDream({
+			title: (data.title as string) ?? null,
+			content: (data.content as string) ?? '',
+		});
+		return dream.id;
+	},
+});
+
+registerApp({
 	id: 'finance',
 	name: 'Finance',
 	color: '#22C55E',

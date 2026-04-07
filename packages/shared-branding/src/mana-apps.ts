@@ -616,6 +616,23 @@ export const MANA_APPS: ManaApp[] = [
 		requiredTier: 'founder',
 	},
 	{
+		id: 'dreams',
+		name: 'Dreams',
+		description: {
+			de: 'Traumtagebuch',
+			en: 'Dream Journal',
+		},
+		longDescription: {
+			de: 'Halte deine Träume fest, bevor sie verblassen. Stimmung, Klartraum-Status, wiederkehrende Symbole und Insights über die Zeit.',
+			en: 'Capture your dreams before they fade. Mood, lucid status, recurring symbols, and insights over time.',
+		},
+		icon: APP_ICONS.dreams,
+		color: '#6366f1',
+		comingSoon: false,
+		status: 'development',
+		requiredTier: 'founder',
+	},
+	{
 		id: 'finance',
 		name: 'Finance',
 		description: {
@@ -777,6 +794,7 @@ export const APP_URLS: Record<AppIconId, { dev: string; prod: string }> = {
 	guides: { dev: 'http://localhost:5173/guides', prod: 'https://mana.how/guides' },
 	habits: { dev: 'http://localhost:5173/habits', prod: 'https://mana.how/habits' },
 	notes: { dev: 'http://localhost:5173/notes', prod: 'https://mana.how/notes' },
+	dreams: { dev: 'http://localhost:5173/dreams', prod: 'https://mana.how/dreams' },
 	finance: { dev: 'http://localhost:5173/finance', prod: 'https://mana.how/finance' },
 	places: { dev: 'http://localhost:5173/places', prod: 'https://mana.how/places' },
 	wisekeep: { dev: 'http://localhost:5173/wisekeep', prod: 'https://mana.how/wisekeep' },
