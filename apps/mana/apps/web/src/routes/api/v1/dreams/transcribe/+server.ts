@@ -13,8 +13,13 @@ import { error, json } from '@sveltejs/kit';
 import { env } from '$env/dynamic/private';
 import type { RequestHandler } from './$types';
 
-const ALLOWED_MIME_PREFIXES = ['audio/'];
 const MAX_BYTES = 25 * 1024 * 1024; // 25 MB
+
+function isAcceptableType(mime: string): boolean {
+	if (!mime) return true; // tolerate missing type — let upstream validate
+	if (mime === 'application/octet-stream') return true;
+	return mime.startsWith('audio/') || mime.startsWith('video/'); // m4a often reports video/mp4
+}
 
 export const POST: RequestHandler = async ({ request }) => {
 	const sttUrl = env.MANA_STT_URL;
@@ -24,7 +29,12 @@ export const POST: RequestHandler = async ({ request }) => {
 		throw error(503, 'mana-stt is not configured (MANA_STT_URL missing)');
 	}
 
-	const incoming = await request.formData();
+	let incoming: FormData;
+	try {
+		incoming = await request.formData();
+	} catch {
+		throw error(400, 'Expected multipart/form-data with a file field');
+	}
 	const file = incoming.get('file');
 	const language = (incoming.get('language') as string | null) ?? null;
 
@@ -37,7 +47,7 @@ export const POST: RequestHandler = async ({ request }) => {
 	if (file.size > MAX_BYTES) {
 		throw error(413, `Audio too large (max ${MAX_BYTES / 1024 / 1024} MB)`);
 	}
-	if (file.type && !ALLOWED_MIME_PREFIXES.some((p) => file.type.startsWith(p))) {
+	if (!isAcceptableType(file.type)) {
 		throw error(415, `Unsupported audio type: ${file.type}`);
 	}
 
