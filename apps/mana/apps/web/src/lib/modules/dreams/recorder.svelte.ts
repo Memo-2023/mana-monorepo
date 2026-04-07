@@ -38,7 +38,7 @@ class DreamRecorder {
 		return typeof window !== 'undefined' && window.isSecureContext === true;
 	}
 
-	async start(): Promise<void> {
+	async start(options: { force?: boolean } = {}): Promise<void> {
 		if (this.status !== 'idle') return;
 
 		// 1. Secure context check — getUserMedia is silently unavailable
@@ -55,14 +55,17 @@ class DreamRecorder {
 			return;
 		}
 
-		// 3. Sticky deny check — Permissions API tells us if the user
-		// previously denied access. The browser will silently reject
-		// getUserMedia without showing a prompt in that case.
-		const stickyDenied = await this.#checkStickyDeny();
-		if (stickyDenied) {
-			this.error =
-				'Mikrofon-Zugriff wurde für diese Seite blockiert. Klicke in der Adressleiste auf das Schloss-Symbol → Mikrofon → Erlauben, dann lade die Seite neu.';
-			return;
+		// 3. Sticky deny check — Permissions API tells us if the browser
+		// will silently reject getUserMedia without showing a prompt.
+		// On macOS this is most often a SYSTEM-level block, not a per-site
+		// setting, which is why no lock icon helps. Skip the check if the
+		// caller explicitly forces a retry to surface the real error.
+		if (!options.force) {
+			const stickyDenied = await this.#checkStickyDeny();
+			if (stickyDenied) {
+				this.error = this.#stickyDenyMessage();
+				return;
+			}
 		}
 
 		this.error = null;
@@ -160,6 +163,25 @@ class DreamRecorder {
 		this.#resolve = null;
 		this.#reject = null;
 		reject?.(err);
+	}
+
+	#stickyDenyMessage(): string {
+		const isMac =
+			typeof navigator !== 'undefined' && /Mac|iPhone|iPad/i.test(navigator.platform || '');
+		if (isMac) {
+			return [
+				'Mikrofon-Zugriff blockiert. Auf macOS hat das fast immer eine von zwei Ursachen:',
+				'1) System-Einstellungen → Datenschutz & Sicherheit → Mikrofon: dein Browser muss in der Liste aktiviert sein. Wenn er fehlt oder deaktiviert ist, schalte ihn ein und starte den Browser komplett neu (Cmd+Q, nicht nur Tab schließen).',
+				'2) Browser-Einstellung: chrome://settings/content/microphone (Chrome) oder about:preferences#privacy (Firefox) → "localhost" darf nicht in der Block-Liste stehen.',
+				'Tipp: Klicke auf "Trotzdem versuchen" um den exakten Browser-Fehler zu sehen.',
+			].join('\n');
+		}
+		return [
+			'Mikrofon-Zugriff blockiert. Mögliche Ursachen:',
+			'1) Browser-Einstellungen → Mikrofon → "localhost" darf nicht blockiert sein.',
+			'2) System-Einstellungen → Datenschutz → Mikrofon → Browser muss erlaubt sein.',
+			'Tipp: Klicke auf "Trotzdem versuchen" um den exakten Browser-Fehler zu sehen.',
+		].join('\n');
 	}
 
 	async #checkStickyDeny(): Promise<boolean> {

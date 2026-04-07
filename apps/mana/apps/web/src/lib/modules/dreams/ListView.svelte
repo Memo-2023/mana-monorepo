@@ -208,6 +208,14 @@
 		}
 	}
 
+	async function forceRetryMic() {
+		recError = null;
+		await dreamRecorder.start({ force: true });
+		if (dreamRecorder.error) {
+			recError = dreamRecorder.error;
+		}
+	}
+
 	function cancelRecording() {
 		dreamRecorder.cancel();
 	}
@@ -265,7 +273,10 @@
 			{/if}
 		</div>
 		{#if recError}
-			<p class="rec-error">{recError}</p>
+			<div class="rec-error">
+				<p>{recError}</p>
+				<button class="rec-retry" onclick={forceRetryMic}>Trotzdem versuchen</button>
+			</div>
 		{/if}
 
 		<!-- Quick create -->
@@ -629,10 +640,37 @@
 	}
 
 	.rec-error {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		padding: 0.625rem 0.75rem;
+		border-radius: 0.375rem;
+		background: rgba(239, 68, 68, 0.06);
+		border: 1px solid rgba(239, 68, 68, 0.2);
+	}
+	.rec-error p {
 		font-size: 0.6875rem;
-		color: #ef4444;
+		color: #b91c1c;
 		margin: 0;
-		padding: 0 0.25rem;
+		white-space: pre-line;
+		line-height: 1.5;
+	}
+	:global(.dark) .rec-error p {
+		color: #fca5a5;
+	}
+	.rec-retry {
+		align-self: flex-start;
+		padding: 0.25rem 0.625rem;
+		border-radius: 0.25rem;
+		border: 1px solid rgba(239, 68, 68, 0.3);
+		background: transparent;
+		color: #ef4444;
+		font-size: 0.6875rem;
+		font-weight: 500;
+		cursor: pointer;
+	}
+	.rec-retry:hover {
+		background: rgba(239, 68, 68, 0.08);
 	}
 
 	/* ── View Tabs ─────────────────────────────── */
