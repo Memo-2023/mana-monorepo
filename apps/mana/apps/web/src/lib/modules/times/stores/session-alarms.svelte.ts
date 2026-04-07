@@ -62,7 +62,6 @@ export const sessionAlarmsStore = {
 		const now = new Date().toISOString();
 		const alarm: Alarm = {
 			id: generateSessionId(),
-			userId: 'guest',
 			label: input.label || null,
 			time: input.time,
 			enabled: input.enabled ?? true,

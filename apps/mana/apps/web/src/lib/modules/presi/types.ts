@@ -30,7 +30,6 @@ export interface SlideContent {
 
 export interface Deck {
 	id: string;
-	userId: string;
 	title: string;
 	description?: string;
 	themeId?: string;

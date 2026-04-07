@@ -36,7 +36,6 @@ export interface LocalTemplate extends BaseRecord {
 
 export interface Conversation {
 	id: string;
-	userId: string;
 	modelId: string;
 	templateId?: string;
 	spaceId?: string;
@@ -60,7 +59,6 @@ export interface Message {
 
 export interface Template {
 	id: string;
-	userId: string;
 	name: string;
 	description: string | null;
 	systemPrompt: string;

@@ -13,7 +13,6 @@ import type { LocalDeck, LocalCard, Deck, Card } from './types';
 export function toDeck(local: LocalDeck): Deck {
 	return {
 		id: local.id,
-		userId: 'local',
 		title: local.name,
 		description: local.description ?? undefined,
 		color: local.color,

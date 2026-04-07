@@ -15,7 +15,6 @@ export function toContact(local: LocalContact): Contact {
 
 	return {
 		id: local.id,
-		userId: 'local',
 		firstName,
 		lastName,
 		displayName,

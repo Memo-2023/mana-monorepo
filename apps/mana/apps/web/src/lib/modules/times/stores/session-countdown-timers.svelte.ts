@@ -63,7 +63,6 @@ export const sessionCountdownTimersStore = {
 		const now = new Date().toISOString();
 		const timer: Timer = {
 			id: generateSessionId(),
-			userId: 'guest',
 			label: input.label || null,
 			durationSeconds: input.durationSeconds,
 			remainingSeconds: input.durationSeconds,

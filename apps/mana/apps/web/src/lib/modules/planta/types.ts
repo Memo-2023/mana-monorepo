@@ -62,7 +62,6 @@ export interface LocalWateringLog extends BaseRecord {
 
 export interface Plant {
 	id: string;
-	userId: string;
 	name: string;
 	scientificName?: string;
 	commonName?: string;
@@ -83,7 +82,6 @@ export interface Plant {
 export interface PlantPhoto {
 	id: string;
 	plantId: string;
-	userId: string;
 	storagePath: string;
 	publicUrl?: string;
 	filename: string;
@@ -100,7 +98,6 @@ export interface PlantPhoto {
 export interface WateringSchedule {
 	id: string;
 	plantId: string;
-	userId: string;
 	frequencyDays: number;
 	lastWateredAt?: Date;
 	nextWateringAt?: Date;
@@ -113,7 +110,6 @@ export interface WateringSchedule {
 export interface WateringLog {
 	id: string;
 	plantId: string;
-	userId: string;
 	wateredAt: Date;
 	notes?: string;
 	createdAt: Date;

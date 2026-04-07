@@ -12,7 +12,7 @@ import type { Calculation, SavedFormula } from '@calc/shared';
 export function toCalculation(local: LocalCalculation): Calculation {
 	return {
 		id: local.id,
-		userId: 'local',
+		userId: local.userId ?? '',
 		mode: local.mode,
 		expression: local.expression,
 		result: local.result,
@@ -24,7 +24,7 @@ export function toCalculation(local: LocalCalculation): Calculation {
 export function toSavedFormula(local: LocalSavedFormula): SavedFormula {
 	return {
 		id: local.id,
-		userId: 'local',
+		userId: local.userId ?? '',
 		name: local.name,
 		expression: local.expression,
 		description: local.description ?? undefined,

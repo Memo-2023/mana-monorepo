@@ -27,7 +27,6 @@ export interface LocalCard extends BaseRecord {
 
 export interface Deck {
 	id: string;
-	userId: string;
 	title: string;
 	description?: string;
 	color: string;

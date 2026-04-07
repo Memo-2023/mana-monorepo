@@ -251,7 +251,6 @@ export type TimerStatus = 'idle' | 'running' | 'paused' | 'finished';
 
 export interface Alarm {
 	id: string;
-	userId: string;
 	label: string | null;
 	time: string; // HH:MM:SS format
 	enabled: boolean;
@@ -285,7 +284,6 @@ export interface UpdateAlarmInput {
 
 export interface Timer {
 	id: string;
-	userId: string;
 	label: string | null;
 	durationSeconds: number;
 	remainingSeconds: number | null;
@@ -311,7 +309,6 @@ export interface UpdateTimerInput {
 
 export interface WorldClock {
 	id: string;
-	userId: string;
 	timezone: string; // IANA timezone e.g. 'America/New_York'
 	cityName: string;
 	sortOrder: number;

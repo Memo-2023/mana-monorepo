@@ -35,7 +35,6 @@ export interface LocalContact extends BaseRecord {
 
 export interface Contact {
 	id: string;
-	userId: string;
 	firstName?: string | null;
 	lastName?: string | null;
 	displayName?: string | null;

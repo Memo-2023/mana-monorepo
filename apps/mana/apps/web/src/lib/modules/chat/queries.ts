@@ -18,7 +18,6 @@ import type {
 export function toConversation(local: LocalConversation): Conversation {
 	return {
 		id: local.id,
-		userId: local.userId ?? 'guest',
 		modelId: local.modelId ?? '',
 		templateId: local.templateId ?? undefined,
 		spaceId: local.spaceId ?? undefined,
@@ -35,7 +34,6 @@ export function toConversation(local: LocalConversation): Conversation {
 export function toTemplate(local: LocalTemplate): Template {
 	return {
 		id: local.id,
-		userId: local.userId ?? 'guest',
 		name: local.name,
 		description: local.description || null,
 		systemPrompt: local.systemPrompt,

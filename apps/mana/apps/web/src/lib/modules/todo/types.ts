@@ -24,7 +24,6 @@ export type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';
 export interface LocalTask extends BaseRecord {
 	title: string;
 	description?: string;
-	userId?: string;
 	projectId?: string | null;
 	priority: TaskPriority;
 	isCompleted: boolean;
@@ -45,7 +44,6 @@ export interface LocalTaskTag extends BaseRecord {
 
 export interface LocalReminder extends BaseRecord {
 	taskId: string;
-	userId?: string;
 	minutesBefore: number;
 	type: 'push' | 'email' | 'both';
 	status: 'pending' | 'sent' | 'failed';
@@ -101,7 +99,6 @@ export interface LocalTodoProject extends BaseRecord {
 export interface Task {
 	id: string;
 	projectId?: string | null;
-	userId: string;
 	title: string;
 	description?: string | null;
 	dueDate?: string | null;

@@ -20,7 +20,6 @@ export function toTask(local: LocalTask): Task {
 	return {
 		id: local.id,
 		projectId: (local as Record<string, unknown>).projectId as string | null | undefined,
-		userId: local.userId ?? 'guest',
 		title: local.title,
 		description: local.description,
 		dueDate: local.dueDate,

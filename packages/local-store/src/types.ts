@@ -5,6 +5,11 @@
 /** Base record that all local-store entities must extend. */
 export interface BaseRecord {
 	id: string;
+	/**
+	 * Owner of this record. Auto-stamped by the Dexie creating-hook from the
+	 * active session user; module stores must never set this themselves.
+	 */
+	userId?: string;
 	createdAt?: string;
 	updatedAt?: string;
 	deletedAt?: string | null;

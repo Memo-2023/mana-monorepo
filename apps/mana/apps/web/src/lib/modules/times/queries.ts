@@ -130,7 +130,6 @@ export function toSettings(local: LocalSettings): TimesSettings {
 export function toAlarm(local: LocalAlarm): Alarm {
 	return {
 		id: local.id,
-		userId: 'local',
 		label: local.label,
 		time: local.time,
 		enabled: local.enabled,
@@ -146,7 +145,6 @@ export function toAlarm(local: LocalAlarm): Alarm {
 export function toCountdownTimer(local: LocalCountdownTimer): Timer {
 	return {
 		id: local.id,
-		userId: 'local',
 		label: local.label,
 		durationSeconds: local.durationSeconds,
 		remainingSeconds: local.remainingSeconds,
@@ -162,7 +160,6 @@ export function toCountdownTimer(local: LocalCountdownTimer): Timer {
 export function toWorldClock(local: LocalWorldClock): WorldClock {
 	return {
 		id: local.id,
-		userId: 'local',
 		timezone: local.timezone,
 		cityName: local.cityName,
 		sortOrder: local.sortOrder,

@@ -25,7 +25,6 @@ import type {
 export function toPlant(local: LocalPlant): Plant {
 	return {
 		id: local.id,
-		userId: 'local',
 		name: local.name,
 		scientificName: local.scientificName ?? undefined,
 		commonName: local.commonName ?? undefined,
@@ -49,7 +48,6 @@ export function toPlantPhoto(local: LocalPlantPhoto): PlantPhoto {
 	return {
 		id: local.id,
 		plantId: local.plantId,
-		userId: 'local',
 		storagePath: local.storagePath,
 		publicUrl: local.publicUrl ?? undefined,
 		filename: local.filename,
@@ -69,7 +67,6 @@ export function toWateringSchedule(local: LocalWateringSchedule): WateringSchedu
 	return {
 		id: local.id,
 		plantId: local.plantId,
-		userId: 'local',
 		frequencyDays: local.frequencyDays,
 		lastWateredAt: local.lastWateredAt ? new Date(local.lastWateredAt) : undefined,
 		nextWateringAt: local.nextWateringAt ? new Date(local.nextWateringAt) : undefined,
@@ -85,7 +82,6 @@ export function toWateringLog(local: LocalWateringLog): WateringLog {
 	return {
 		id: local.id,
 		plantId: local.plantId,
-		userId: 'local',
 		wateredAt: new Date(local.wateredAt),
 		notes: local.notes ?? undefined,
 		createdAt: new Date(local.createdAt ?? new Date().toISOString()),

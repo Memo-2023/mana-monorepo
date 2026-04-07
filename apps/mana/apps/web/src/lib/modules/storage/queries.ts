@@ -12,7 +12,6 @@ import type { LocalFile, LocalFolder, LocalFileTag } from './types';
 
 export interface StorageFile {
 	id: string;
-	userId: string;
 	name: string;
 	originalName: string;
 	mimeType: string;
@@ -30,7 +29,6 @@ export interface StorageFile {
 
 export interface StorageFolder {
 	id: string;
-	userId: string;
 	name: string;
 	description: string | null;
 	color: string | null;
@@ -46,7 +44,6 @@ export interface StorageFolder {
 
 export interface StorageTag {
 	id: string;
-	userId: string;
 	name: string;
 	color: string | null;
 	createdAt: string;
@@ -57,7 +54,6 @@ export interface StorageTag {
 export function toFile(local: LocalFile): StorageFile {
 	return {
 		id: local.id,
-		userId: 'local',
 		name: local.name,
 		originalName: local.originalName,
 		mimeType: local.mimeType,
@@ -77,7 +73,6 @@ export function toFile(local: LocalFile): StorageFile {
 export function toFolder(local: LocalFolder): StorageFolder {
 	return {
 		id: local.id,
-		userId: 'local',
 		name: local.name,
 		description: local.description ?? null,
 		color: local.color ?? null,
@@ -100,7 +95,6 @@ export function toTag(local: {
 }): StorageTag {
 	return {
 		id: local.id,
-		userId: 'local',
 		name: local.name,
 		color: local.color ?? null,
 		createdAt: local.createdAt ?? new Date().toISOString(),

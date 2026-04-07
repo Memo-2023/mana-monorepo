@@ -7,7 +7,6 @@ import type { BaseRecord } from '@mana/local-store';
 export type ProcessingStatus = 'pending' | 'processing' | 'completed' | 'failed';
 
 export interface LocalMemo extends BaseRecord {
-	userId?: string;
 	title: string | null;
 	intro: string | null;
 	transcript: string | null;
@@ -45,7 +44,6 @@ export interface LocalMemo extends BaseRecord {
 
 export interface LocalMemory extends BaseRecord {
 	memoId: string;
-	userId?: string;
 	title: string;
 	content: string | null;
 	metadata?: Record<string, unknown>;

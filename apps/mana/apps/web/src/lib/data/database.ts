@@ -11,6 +11,7 @@ import Dexie, { type EntityTable } from 'dexie';
 import { trackFirstContent } from '$lib/stores/funnel-tracking';
 import { fire as fireTrigger } from '$lib/triggers/registry';
 import { checkInlineSuggestion } from '$lib/triggers/inline-suggest';
+import { getEffectiveUserId } from './current-user';
 
 // ─── Database ──────────────────────────────────────────────
 
@@ -576,6 +577,14 @@ for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {
 			if (_applyingServerChanges) return;
 			const now = new Date().toISOString();
 
+			// Auto-stamp the active user. Module stores never set userId themselves,
+			// preventing accidental impersonation and removing all hardcoded
+			// 'guest'/'local' fallbacks scattered across query files.
+			const objRecord = obj as Record<string, unknown>;
+			if (objRecord.userId === undefined || objRecord.userId === null) {
+				objRecord.userId = getEffectiveUserId();
+			}
+
 			// Stamp every real field with the create-time so future LWW comparisons
 			// have a baseline. Mutates obj in place — Dexie persists the mutation.
 			const ft: Record<string, string> = {};
@@ -583,7 +592,7 @@ for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {
 				if (isInternalKey(key)) continue;
 				ft[key] = now;
 			}
-			(obj as Record<string, unknown>)[FIELD_TIMESTAMPS_KEY] = ft;
+			objRecord[FIELD_TIMESTAMPS_KEY] = ft;
 
 			// Build payload for pending-change WITHOUT the internal timestamp map
 			const { [FIELD_TIMESTAMPS_KEY]: _omit, ...dataForSync } = obj as Record<string, unknown>;
@@ -612,6 +621,12 @@ for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {
 			if (_applyingServerChanges) return undefined;
 			const now = new Date().toISOString();
 			const fields: Record<string, { value: unknown; updatedAt: string }> = {};
+
+			// userId is immutable after creation. Silently strip any attempt to
+			// reassign it from a local update so a buggy or malicious caller can
+			// never re-parent records to a different user.
+			const mods = modifications as Record<string, unknown>;
+			if ('userId' in mods) delete mods.userId;
 
 			// Merge field timestamps: keep existing, overwrite for each modified field
 			const existingFT =

@@ -14,7 +14,6 @@ import type { LocalDeck, LocalSlide, Deck, Slide } from './types';
 export function toDeck(local: LocalDeck): Deck {
 	return {
 		id: local.id,
-		userId: 'local',
 		title: local.title,
 		description: local.description ?? undefined,
 		themeId: local.themeId ?? undefined,
