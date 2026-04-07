@@ -25,7 +25,9 @@ RUN pnpm build
 
 WORKDIR /app/apps/mana/apps/web
 RUN pnpm exec svelte-kit sync
-RUN NODE_OPTIONS="--max-old-space-size=4096" pnpm build
+# Build heap was bumped 4096→8192 after the unified app grew past the
+# 4 GB ceiling — Vite OOMs while bundling all 32 module chunks otherwise.
+RUN NODE_OPTIONS="--max-old-space-size=8192" pnpm build
 
 FROM node:20-alpine AS production
 WORKDIR /app/apps/mana/apps/web
