@@ -96,6 +96,8 @@
 	function statusBadge(s: VaultUnlockState) {
 		if (s.status === 'unlocked') return { label: '🔒 Verschlüsselt', color: 'green' };
 		if (s.status === 'locked') return { label: '🔓 Gesperrt', color: 'amber' };
+		if (s.status === 'awaiting-recovery-code')
+			return { label: '🔑 Recovery-Code erforderlich', color: 'amber' };
 		if (s.reason === 'auth') return { label: '🔑 Anmeldung erforderlich', color: 'red' };
 		if (s.reason === 'network') return { label: '📡 Netzwerkfehler', color: 'red' };
 		if (s.reason === 'server') return { label: '⚠️ Server-Fehler', color: 'red' };

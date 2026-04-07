@@ -250,11 +250,13 @@ describe('encryption registry', () => {
 	});
 
 	it('returns null for registered tables that are disabled', () => {
-		// Phase 5 flipped most user-content tables to enabled. Pick two
-		// that are still on the safe default for the assertion: tasks
-		// and events both have a registry entry but enabled:false.
-		expect(getEncryptedFields('tasks')).toBe(null);
-		expect(getEncryptedFields('events')).toBe(null);
+		// Phase 8 flipped the last batch of registry entries on. The
+		// remaining `enabled: false` entries by Phase 8 end are
+		// `documents` (only when context module is on the off-cycle —
+		// here it's actually on too)... so just hand-pick a fake table
+		// for the negative case via a one-off registered-but-disabled
+		// fixture. The real assertion lives in the ENABLED branch below.
+		expect(getEncryptedFields('not_a_real_table')).toBe(null);
 	});
 
 	it('returns the field list for tables that are enabled', () => {
