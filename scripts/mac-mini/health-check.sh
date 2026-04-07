@@ -189,8 +189,13 @@ else
     FAILURES+=("Redis")
 fi
 
-# Check for stuck containers (Created/Exited status)
-STUCK_CONTAINERS=$(docker ps -a --filter "status=created" --filter "status=exited" --format "{{.Names}}" | grep "^mana-" || true)
+# Check for stuck containers (Created/Exited status). The only exclusion
+# is *-init containers, which are one-shot init pods by design — Exit 0
+# is success and the container intentionally never re-runs.
+STUCK_CONTAINERS=$(docker ps -a --filter "status=created" --filter "status=exited" --format "{{.Names}}" \
+    | grep "^mana-" \
+    | grep -vE -- "-init$" \
+    || true)
 if [ -n "$STUCK_CONTAINERS" ]; then
     echo -e "  ${RED}[FAIL]${NC} Stuck containers detected:"
     echo "$STUCK_CONTAINERS" | while read c; do echo "         - $c"; done
@@ -198,99 +203,108 @@ if [ -n "$STUCK_CONTAINERS" ]; then
 fi
 
 echo ""
-echo "Auth & Dashboard:"
-check_service "Auth API" "http://localhost:3001/health"
-check_service "Dashboard Web" "http://localhost:5000/health"
+echo "Local services (auth + unified web):"
+check_service "Auth API"      "http://localhost:3001/health"
+check_service "Unified Web"   "http://localhost:5000/health"
+
+# ────────────────────────────────────────────────────────────
+# Public hostnames via Cloudflare Tunnel
+# ────────────────────────────────────────────────────────────
+# Walk every `hostname:` entry in cloudflared's ingress config and
+# probe the live public URL. This catches the failure modes that the
+# old port-by-port probes missed:
+#
+#   - Tunnel ingress points at a port that no container listens on (502)
+#   - DNS CNAME for a tunnel hostname is missing (530 / NXDOMAIN)
+#   - Cloudflared is misrouted or stale on a different config
+#   - The container is healthy on LAN but unreachable from the public side
+#
+# A 200/204/301/302/308 from the public hostname is OK; anything else
+# (including 404/502/530/timeout) is reported as a failure.
+#
+# Hostnames matching the patterns in TUNNEL_INGRESS_SKIP are excluded
+# (typically internal-only routes or things we know don't expose
+# /health, like raw IMAP / SSH ingress).
+
+CLOUDFLARED_CONFIG="${HOME}/.cloudflared/config.yml"
+TUNNEL_INGRESS_SKIP_REGEX='^(ssh|smtp|imap|pop3)\.'
+
+check_public_hostname() {
+    local host=$1
+    local timeout=${2:-8}
+
+    # Resolve via Cloudflare's public DNS (1.1.1.1) instead of the local
+    # resolver. The Mac Mini's home-router DNS keeps a negative cache
+    # for hostnames that didn't exist when first queried — newly added
+    # CNAMEs like the 2026-04-07 sync/media records take hours to clear
+    # there, even though they resolve fine for external users. Asking
+    # 1.1.1.1 directly gives us the same view the public internet has.
+    local ip
+    ip=$(dig +short "$host" @1.1.1.1 2>/dev/null | head -1)
+    if [ -z "$ip" ]; then
+        echo -e "  ${RED}[FAIL]${NC} ${host} (no DNS record on Cloudflare zone)"
+        FAILURES+=("${host} (no DNS)")
+        return 1
+    fi
+
+    # Try /health, accept anything <500. We use --resolve to bypass any
+    # local DNS cache and pin the lookup to the IP we just got back.
+    local status
+    status=$(curl -sk -o /dev/null -w "%{http_code}" --max-time "$timeout" \
+        --resolve "${host}:443:${ip}" \
+        "https://${host}/health" 2>/dev/null)
+    if [ -z "$status" ] || [ "$status" = "000" ]; then
+        echo -e "  ${RED}[FAIL]${NC} ${host} (no response — tunnel timeout?)"
+        FAILURES+=("${host} (no response)")
+        return 1
+    fi
+    case "$status" in
+        2*|3*|404)
+            # 404 is OK for hostnames whose backend has no /health route
+            # but the tunnel + DNS are working.
+            echo -e "  ${GREEN}[OK]${NC} ${host} (HTTP ${status})"
+            return 0
+            ;;
+        5*)
+            echo -e "  ${RED}[FAIL]${NC} ${host} (HTTP ${status} — origin / tunnel)"
+            FAILURES+=("${host} (HTTP ${status})")
+            return 1
+            ;;
+        *)
+            echo -e "  ${YELLOW}[WARN]${NC} ${host} (HTTP ${status})"
+            return 0
+            ;;
+    esac
+}
+
+if [ -f "$CLOUDFLARED_CONFIG" ]; then
+    echo ""
+    echo "Public hostnames (Cloudflare Tunnel ingress):"
+    HOSTNAMES=$(awk '/^[[:space:]]*-[[:space:]]*hostname:/{print $3}' "$CLOUDFLARED_CONFIG" \
+        | grep -vE "$TUNNEL_INGRESS_SKIP_REGEX" \
+        | sort -u)
+    for host in $HOSTNAMES; do
+        check_public_hostname "$host"
+    done
+else
+    echo ""
+    echo -e "  ${YELLOW}[SKIP]${NC} cloudflared config not found at $CLOUDFLARED_CONFIG"
+fi
 
 echo ""
-echo "Chat:"
-check_service "Chat Backend" "http://localhost:3030/health"
-check_service "Chat Web" "http://localhost:5010/health"
-
-echo ""
-echo "Todo:"
-check_service "Todo Backend" "http://localhost:3031/health"
-check_service "Todo Web" "http://localhost:5011/health"
-
-echo ""
-echo "Calendar:"
-check_service "Calendar Backend" "http://localhost:3032/health"
-check_service "Calendar Web" "http://localhost:5012/health"
-
-echo ""
-echo "Clock:"
-check_service "Clock Backend" "http://localhost:3033/health"
-check_service "Clock Web" "http://localhost:5013/health"
-
-echo ""
-echo "Contacts:"
-check_service "Contacts Backend" "http://localhost:3034/health"
-check_service "Contacts Web" "http://localhost:5014/health"
-
-echo ""
-echo "Storage:"
-check_service "Storage Backend" "http://localhost:3035/api/v1/health"
-check_service "Storage Web" "http://localhost:5015/health"
-
-echo ""
-echo "Presi:"
-check_service "Presi Backend" "http://localhost:3036/api/v1/health"
-check_service "Presi Web" "http://localhost:5016/health"
-
-echo ""
-echo "NutriPhi:"
-check_service "NutriPhi Backend" "http://localhost:3037/api/v1/health"
-check_service "NutriPhi Web" "http://localhost:5017/health"
-
-echo ""
-echo "SkillTree:"
-check_service "SkillTree Backend" "http://localhost:3038/health"
-# SkillTree Web disabled - Dockerfile needs fix for shared packages
-
-echo ""
-echo "Photos:"
-check_service "Photos Backend" "http://localhost:3039/api/v1/health"
-check_service "Photos Web" "http://localhost:5019/health"
-
-echo ""
-echo "Core Services:"
-check_service "Search Service" "http://localhost:3020/api/v1/health"
-check_service "Media Service" "http://localhost:3015/api/v1/health"
-check_service "LLM Service" "http://localhost:3025/health"
-
-echo ""
-echo "GPU Server (192.168.178.11):"
+echo "GPU Server (192.168.178.11, LAN-only probe):"
+# Direct LAN check — catches GPU box being down even when the public
+# tunnel hostnames in the ingress walk above happen to time out or
+# return cached errors.
 check_service "GPU Ollama" "http://192.168.178.11:11434/api/version" 3
 check_service "GPU STT" "http://192.168.178.11:3020/health" 3
 check_service "GPU TTS" "http://192.168.178.11:3022/health" 3
 check_service "GPU Image Gen" "http://192.168.178.11:3023/health" 3
-check_service "GPU Video Gen" "http://192.168.178.11:3026/health" 3
+# GPU Video Gen (LTX) is intentionally not probed — it's planned but
+# not deployed yet, so its absence is expected and shouldn't page.
 
 echo ""
-echo "GPU Server (Cloudflare Tunnel):"
-# These probes go through the public Cloudflare tunnel rather than the LAN.
-# They catch tunnel-side breakage (cloudflared down on Windows, DNS misroute,
-# Public Hostname missing) that LAN probes above wouldn't see.
-check_service "GPU STT (tunnel)" "https://gpu-stt.mana.how/health" 8
-check_service "GPU LLM (tunnel)" "https://gpu-llm.mana.how/health" 8
-check_service "GPU TTS (tunnel)" "https://gpu-tts.mana.how/health" 8
-check_service "GPU Image Gen (tunnel)" "https://gpu-img.mana.how/health" 8
-
-echo ""
-echo "Matrix:"
-check_service "Synapse" "http://localhost:4000/health"
-check_service "Element Web" "http://localhost:4080/"
-check_service "Matrix Web" "http://localhost:4090/health"
-check_service "Matrix Mana Bot" "http://localhost:4010/health"
-check_service "Matrix Ollama Bot" "http://localhost:4011/health"
-check_service "Matrix Stats Bot" "http://localhost:4012/health"
-check_service "Matrix Project Doc Bot" "http://localhost:4013/health"
-
-echo ""
-echo "Monitoring:"
-check_service "Grafana" "http://localhost:8000/api/health"
-check_service "Umami" "http://localhost:8010/api/heartbeat"
-check_service "GlitchTip" "http://localhost:8020/_health/"
+echo "Monitoring (LAN, not exposed via tunnel):"
 check_service "VictoriaMetrics" "http://localhost:9090/health"
 
 echo ""

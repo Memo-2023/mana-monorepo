@@ -60,6 +60,54 @@ if docker info >/dev/null 2>&1; then
     RUNNING=$(docker ps -q | wc -l | tr -d ' ')
     TOTAL=$(docker ps -aq | wc -l | tr -d ' ')
     echo -e "  ${BLUE}Containers:${NC} $RUNNING running / $TOTAL total"
+
+    # ────────────────────────────────────────
+    # Compose vs Running diff
+    # ────────────────────────────────────────
+    # The "X running / Y total" line above only counts containers Docker
+    # already knows about. Containers that are *defined* in the compose
+    # file but were never started (e.g. after `docker compose down`, or
+    # after a fresh checkout that hasn't run `up -d` yet) do not show up
+    # at all — they look healthy when they are actually missing entirely.
+    #
+    # The 2026-04-07 outage was exactly this case: mana-core-sync and
+    # mana-api-gateway were declared in compose, never started, and
+    # status.sh reported "37/42 running" without flagging the gap.
+    #
+    # The diff below catches that: list every service in compose, list
+    # every running container, and report any compose service whose
+    # container_name is not currently up.
+    if [ -f "$COMPOSE_FILE" ]; then
+        DEFINED=$(docker compose -p "${COMPOSE_PROJECT_NAME:-manacore-monorepo}" \
+            -f "$COMPOSE_FILE" config --format json 2>/dev/null \
+            | python3 -c '
+import sys, json
+try:
+    cfg = json.load(sys.stdin)
+    for name, svc in (cfg.get("services") or {}).items():
+        cn = svc.get("container_name") or name
+        print(f"{name}\t{cn}")
+except Exception:
+    pass
+' 2>/dev/null)
+
+        if [ -n "$DEFINED" ]; then
+            RUNNING_NAMES=$(docker ps --format '{{.Names}}' | sort -u)
+            MISSING=""
+            while IFS=$'\t' read -r svc cn; do
+                if ! echo "$RUNNING_NAMES" | grep -qx "$cn"; then
+                    MISSING="${MISSING}    - ${svc} (${cn})\n"
+                fi
+            done <<< "$DEFINED"
+
+            if [ -n "$MISSING" ]; then
+                echo -e "  ${RED}[Missing compose services]${NC}"
+                printf "$MISSING"
+            else
+                echo -e "  ${GREEN}[All compose services running]${NC}"
+            fi
+        fi
+    fi
 else
     echo -e "  ${RED}[Stopped]${NC} Docker Desktop"
 fi
