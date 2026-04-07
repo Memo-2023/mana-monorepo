@@ -74,6 +74,25 @@ export interface RecoveryWrapInput {
 	recoveryIv: string;
 }
 
+/** Snapshot of the vault row's high-level state, exposed via
+ *  GET /api/v1/me/encryption-vault/status. The settings page reads
+ *  this on mount to render the right UI section without having to
+ *  trigger a full unwrap of the master key. Cheap (single SELECT,
+ *  no decrypt). */
+export interface VaultStatus {
+	/** True iff a vault row exists for this user. */
+	vaultExists: boolean;
+	/** True iff the user has a recovery wrap stored. Independent of
+	 *  whether zero-knowledge is currently active. */
+	hasRecoveryWrap: boolean;
+	/** True iff zero-knowledge mode is active (server has no usable
+	 *  KEK wrap, recovery wrap is the only way to unlock). */
+	zeroKnowledge: boolean;
+	/** ISO timestamp of when the recovery wrap was last set, or null
+	 *  if never set. Useful for "last backup" hints in the UI. */
+	recoverySetAt: string | null;
+}
+
 export class EncryptionVaultService {
 	constructor(private db: Database) {}
 
@@ -259,6 +278,46 @@ export class EncryptionVaultService {
 			}
 
 			return { masterKey: mkBytes, formatVersion: 1, kekId: activeKekId() };
+		});
+	}
+
+	/**
+	 * Cheap status read for UI rendering. No decryption, no audit
+	 * row (this gets called on every settings page mount and we don't
+	 * want to flood the audit log with read-only metadata fetches).
+	 *
+	 * Returns sane defaults when the vault row doesn't exist yet —
+	 * the page can render "vault not initialised" without needing a
+	 * separate code path.
+	 */
+	async getStatus(userId: string): Promise<VaultStatus> {
+		return this.withUserScope(userId, async (tx) => {
+			const rows = await tx
+				.select({
+					recoveryWrappedMk: encryptionVaults.recoveryWrappedMk,
+					recoverySetAt: encryptionVaults.recoverySetAt,
+					zeroKnowledge: encryptionVaults.zeroKnowledge,
+				})
+				.from(encryptionVaults)
+				.where(eq(encryptionVaults.userId, userId))
+				.limit(1);
+
+			if (rows.length === 0) {
+				return {
+					vaultExists: false,
+					hasRecoveryWrap: false,
+					zeroKnowledge: false,
+					recoverySetAt: null,
+				};
+			}
+
+			const row = rows[0];
+			return {
+				vaultExists: true,
+				hasRecoveryWrap: row.recoveryWrappedMk !== null,
+				zeroKnowledge: row.zeroKnowledge,
+				recoverySetAt: row.recoverySetAt ? row.recoverySetAt.toISOString() : null,
+			};
 		});
 	}
 

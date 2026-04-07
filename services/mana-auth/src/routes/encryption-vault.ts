@@ -40,6 +40,18 @@ type AppContext = Context<{ Variables: { user: AuthUser } }>;
 export function createEncryptionVaultRoutes(vaultService: EncryptionVaultService) {
 	const app = new Hono<{ Variables: { user: AuthUser } }>();
 
+	// ─── GET /status ─────────────────────────────────────────
+	// Cheap metadata read used by the settings page to hydrate the UI
+	// after a reload. No decryption, no audit logging — pure SELECT.
+	// Returns the same shape regardless of whether the vault row
+	// exists yet, so the client can avoid a 404 dance for the
+	// "vault not initialised" case.
+	app.get('/status', async (c) => {
+		const user = c.get('user');
+		const status = await vaultService.getStatus(user.userId);
+		return c.json(status);
+	});
+
 	// ─── POST /init ──────────────────────────────────────────
 	// Idempotent. First call creates a vault row; subsequent calls
 	// return the existing master key. The client uses this on first

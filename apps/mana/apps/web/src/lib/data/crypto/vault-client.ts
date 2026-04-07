@@ -83,6 +83,16 @@ export interface RecoveryCodeSetupResult {
 	formattedCode: string;
 }
 
+/** Snapshot of the server-side vault status. Returned by getStatus() so
+ *  the UI can render the right section without triggering a full unwrap. */
+export interface VaultStatus {
+	vaultExists: boolean;
+	hasRecoveryWrap: boolean;
+	zeroKnowledge: boolean;
+	/** ISO timestamp string, or null if never set. */
+	recoverySetAt: string | null;
+}
+
 export interface VaultClient {
 	/** Unlocks the in-memory key provider by fetching from the server.
 	 *  On first call per device, automatically initialises the vault.
@@ -145,6 +155,13 @@ export interface VaultClient {
 	 *  (wrong code or tampered blob — the caller maps both to "wrong
 	 *  recovery code, try again"). */
 	unlockWithRecoveryCode(code: string): Promise<VaultUnlockState>;
+
+	/** Cheap server-side metadata fetch. Returns the vault row's
+	 *  high-level state (exists, has recovery wrap, zero-knowledge
+	 *  active, recovery set timestamp) so the UI can render the
+	 *  right section without triggering a full unwrap. Used by the
+	 *  settings page on mount to hydrate after a reload. */
+	getStatus(): Promise<VaultStatus>;
 }
 
 /**
@@ -600,6 +617,22 @@ export function createVaultClient(options: VaultClientOptions): VaultClient {
 		return state;
 	}
 
+	async function getStatus(): Promise<VaultStatus> {
+		const token = await getToken();
+		if (!token) throw new Error('no auth token available');
+		// Status is a cheap metadata read — no retry loop, no audit
+		// noise. If it fails, we let the caller decide whether to fall
+		// back to "vault not initialised" defaults or surface the error.
+		const res = await fetch(`${authUrl}/api/v1/me/encryption-vault/status`, {
+			method: 'GET',
+			...authHeaders(token),
+		});
+		if (!res.ok) {
+			throw new Error(`vault status fetch failed: ${res.status}`);
+		}
+		return (await res.json()) as VaultStatus;
+	}
+
 	return {
 		unlock,
 		lock,
@@ -611,6 +644,7 @@ export function createVaultClient(options: VaultClientOptions): VaultClient {
 		enableZeroKnowledge,
 		disableZeroKnowledge,
 		unlockWithRecoveryCode,
+		getStatus,
 	};
 }
 

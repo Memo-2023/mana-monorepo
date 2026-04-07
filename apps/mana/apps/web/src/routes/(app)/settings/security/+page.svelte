@@ -57,6 +57,11 @@
 	let zkBusy = $state(false);
 	let confirmDisableZk = $state(false);
 	let confirmClearRecovery = $state(false);
+	/** True iff a recovery wrap is stored on the server, regardless of
+	 *  whether ZK is currently active. Hydrated from getStatus() on
+	 *  mount so the UI can show "Recovery-Code entfernen" without
+	 *  walking through the setup flow again. */
+	let hasRecoveryWrap = $state(false);
 
 	async function handleSetupRecoveryCode() {
 		zkError = null;
@@ -65,6 +70,7 @@
 			const result = await vaultClient.setupRecoveryCode();
 			generatedCode = result.formattedCode;
 			zkSetupStep = 'generated';
+			hasRecoveryWrap = true;
 		} catch (e) {
 			zkError = (e as Error).message;
 		} finally {
@@ -133,6 +139,7 @@
 			toast.success('Recovery-Code entfernt');
 			confirmClearRecovery = false;
 			zkSetupStep = 'idle';
+			hasRecoveryWrap = false;
 		} catch (e) {
 			zkError = (e as Error).message;
 		} finally {
@@ -167,6 +174,25 @@
 			const next = vaultClient.getState();
 			if (next.status !== vaultState.status) vaultState = next;
 		}, 1000);
+
+		// Hydrate the ZK section from the server's actual vault state
+		// so a reload after enabling zero-knowledge doesn't drop the
+		// user back into the setup flow. Best-effort: failures leave
+		// zkSetupStep at 'idle' which is the safe default.
+		void vaultClient
+			.getStatus()
+			.then((status) => {
+				hasRecoveryWrap = status.hasRecoveryWrap;
+				if (status.zeroKnowledge) {
+					zkSetupStep = 'enabled';
+				}
+			})
+			.catch(() => {
+				// Status fetch failed (network, auth, server). Stay on the
+				// idle default — the user can still run the setup flow,
+				// and the server-side error handling will catch any
+				// inconsistencies.
+			});
 	});
 
 	onDestroy(() => {
@@ -354,16 +380,68 @@
 		{/if}
 
 		{#if zkSetupStep === 'idle'}
-			<div class="zk-actions">
-				<button
-					class="btn btn-primary"
-					type="button"
-					disabled={vaultState.status !== 'unlocked' || zkBusy}
-					onclick={handleSetupRecoveryCode}
-				>
-					{zkBusy ? 'Generiere …' : 'Recovery-Code einrichten'}
-				</button>
-			</div>
+			{#if hasRecoveryWrap}
+				<div class="zk-info">
+					ℹ️ Du hast bereits einen Recovery-Code gespeichert, aber Zero-Knowledge ist noch nicht
+					aktiv. Du kannst direkt aktivieren oder den Code zurücksetzen.
+				</div>
+				<div class="zk-actions">
+					<button
+						class="btn btn-danger"
+						type="button"
+						disabled={vaultState.status !== 'unlocked' || zkBusy}
+						onclick={handleEnableZeroKnowledge}
+					>
+						{zkBusy ? 'Aktiviere …' : 'Zero-Knowledge jetzt aktivieren'}
+					</button>
+					<button
+						class="btn"
+						type="button"
+						disabled={vaultState.status !== 'unlocked' || zkBusy}
+						onclick={handleSetupRecoveryCode}
+					>
+						Neuen Recovery-Code generieren
+					</button>
+					{#if !confirmClearRecovery}
+						<button
+							class="btn btn-ghost"
+							type="button"
+							disabled={zkBusy}
+							onclick={() => (confirmClearRecovery = true)}
+						>
+							Recovery-Code entfernen
+						</button>
+					{:else}
+						<button
+							class="btn btn-danger"
+							type="button"
+							disabled={zkBusy}
+							onclick={handleClearRecoveryCode}
+						>
+							{zkBusy ? 'Entferne …' : 'Ja, entfernen'}
+						</button>
+						<button
+							class="btn btn-ghost"
+							type="button"
+							disabled={zkBusy}
+							onclick={() => (confirmClearRecovery = false)}
+						>
+							Abbrechen
+						</button>
+					{/if}
+				</div>
+			{:else}
+				<div class="zk-actions">
+					<button
+						class="btn btn-primary"
+						type="button"
+						disabled={vaultState.status !== 'unlocked' || zkBusy}
+						onclick={handleSetupRecoveryCode}
+					>
+						{zkBusy ? 'Generiere …' : 'Recovery-Code einrichten'}
+					</button>
+				</div>
+			{/if}
 		{/if}
 
 		{#if zkSetupStep === 'generated' && generatedCode}
@@ -677,6 +755,16 @@
 		border-radius: 0.5rem;
 		font-size: 0.875rem;
 		color: rgb(185, 28, 28);
+	}
+
+	.zk-info {
+		margin-top: 0.75rem;
+		padding: 0.75rem 1rem;
+		background: rgba(245, 158, 11, 0.08);
+		border: 1px solid rgba(245, 158, 11, 0.3);
+		border-radius: 0.5rem;
+		font-size: 0.875rem;
+		color: rgb(180, 83, 9);
 	}
 
 	.zk-actions {

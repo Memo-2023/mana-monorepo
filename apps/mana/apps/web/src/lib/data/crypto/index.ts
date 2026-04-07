@@ -61,6 +61,8 @@ export {
 	type VaultClient,
 	type VaultClientOptions,
 	type VaultUnlockState,
+	type VaultStatus,
+	type RecoveryCodeSetupResult,
 	createVaultClient,
 } from './vault-client';
 
