@@ -16,7 +16,10 @@ export function toHabit(local: LocalHabit): Habit {
 	return {
 		id: local.id,
 		title: local.title,
-		icon: local.icon ?? EMOJI_TO_ICON_MAP[(local as Record<string, string>).emoji] ?? 'star',
+		icon:
+			local.icon ??
+			EMOJI_TO_ICON_MAP[(local as unknown as { emoji?: string }).emoji ?? ''] ??
+			'star',
 		color: local.color,
 		targetPerDay: local.targetPerDay,
 		defaultDuration: local.defaultDuration ?? null,

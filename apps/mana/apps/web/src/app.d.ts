@@ -1,6 +1,3 @@
-declare const __BUILD_HASH__: string;
-declare const __BUILD_TIME__: string;
-
 /**
  * App type declarations for Mana web app
  *
@@ -8,6 +5,9 @@ declare const __BUILD_TIME__: string;
  * No Supabase is needed - all data comes from mana-auth APIs.
  */
 declare global {
+	const __BUILD_HASH__: string;
+	const __BUILD_TIME__: string;
+
 	namespace App {
 		// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 		interface Locals {}

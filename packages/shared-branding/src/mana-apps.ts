@@ -750,7 +750,6 @@ export const APP_SLIDER_LABELS = {
 export const APP_URLS: Record<AppIconId, { dev: string; prod: string }> = {
 	// ─── Unified App (internal paths) ─────────────────────────
 	mana: { dev: 'http://localhost:5173', prod: 'https://mana.how' },
-	mana: { dev: 'http://localhost:5173', prod: 'https://mana.how' },
 	todo: { dev: 'http://localhost:5173/todo', prod: 'https://mana.how/todo' },
 	calendar: { dev: 'http://localhost:5173/calendar', prod: 'https://mana.how/calendar' },
 	contacts: { dev: 'http://localhost:5173/contacts', prod: 'https://mana.how/contacts' },
@@ -762,8 +761,7 @@ export const APP_URLS: Record<AppIconId, { dev: string; prod: string }> = {
 	music: { dev: 'http://localhost:5173/music', prod: 'https://mana.how/music' },
 	storage: { dev: 'http://localhost:5173/storage', prod: 'https://mana.how/storage' },
 	presi: { dev: 'http://localhost:5173/presi', prod: 'https://mana.how/presi' },
-	inventar: { dev: 'http://localhost:5173/inventar', prod: 'https://mana.how/inventar' },
-	inventory: { dev: 'http://localhost:5173/inventar', prod: 'https://mana.how/inventar' },
+	inventory: { dev: 'http://localhost:5173/inventory', prod: 'https://mana.how/inventory' },
 	photos: { dev: 'http://localhost:5173/photos', prod: 'https://mana.how/photos' },
 	skilltree: { dev: 'http://localhost:5173/skilltree', prod: 'https://mana.how/skilltree' },
 	citycorners: { dev: 'http://localhost:5173/citycorners', prod: 'https://mana.how/citycorners' },

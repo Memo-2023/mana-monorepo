@@ -16,7 +16,7 @@
  * ```
  */
 
-import type { Table } from 'dexie';
+import type { Table, UpdateSpec } from 'dexie';
 
 /**
  * Toggle a boolean field on a Dexie record.
@@ -36,7 +36,7 @@ export async function toggleField<T>(
 	await table.update(id, {
 		[field]: newValue,
 		updatedAt: new Date().toISOString(),
-	} as Partial<T>);
+	} as unknown as UpdateSpec<T>);
 
 	return newValue;
 }
