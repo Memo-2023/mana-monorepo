@@ -1,91 +1,91 @@
 {
 	"app": {
 		"name": "Cycles",
-		"tagline": "Menstrual Cycle Tracking"
+		"tagline": "Suivi du cycle menstruel"
 	},
 	"phase": {
 		"menstruation": "Menstruation",
-		"follicular": "Follicular phase",
+		"follicular": "Phase folliculaire",
 		"ovulation": "Ovulation",
-		"luteal": "Luteal phase",
-		"unknown": "Unknown"
+		"luteal": "Phase lutéale",
+		"unknown": "Inconnue"
 	},
 	"flow": {
-		"none": "None",
-		"spotting": "Spotting",
-		"light": "Light",
-		"medium": "Medium",
-		"heavy": "Heavy"
+		"none": "Aucun",
+		"spotting": "Pertes légères",
+		"light": "Léger",
+		"medium": "Moyen",
+		"heavy": "Abondant"
 	},
 	"mood": {
-		"great": "Great",
-		"good": "Good",
-		"neutral": "Neutral",
-		"low": "Low",
-		"bad": "Bad"
+		"great": "Excellent",
+		"good": "Bien",
+		"neutral": "Neutre",
+		"low": "Bas",
+		"bad": "Mauvais"
 	},
 	"label": {
-		"cycleDay": "Cycle day",
-		"daysUntilPeriod": "days until period",
-		"today": "Today",
-		"predicted": "predicted",
-		"daysOverdue": "days overdue",
-		"todayBleeding": "Today · Flow",
-		"bleeding": "Flow",
-		"mood": "Mood",
-		"symptoms": "Symptoms",
-		"basalAndNotes": "Basal temperature & notes",
-		"stats": "Statistics",
-		"recentEntries": "Recent entries",
-		"editing": "Editing"
+		"cycleDay": "Jour du cycle",
+		"daysUntilPeriod": "jours avant les règles",
+		"today": "Aujourd'hui",
+		"predicted": "prévu",
+		"daysOverdue": "jours de retard",
+		"todayBleeding": "Aujourd'hui · Flux",
+		"bleeding": "Flux",
+		"mood": "Humeur",
+		"symptoms": "Symptômes",
+		"basalAndNotes": "Température basale et notes",
+		"stats": "Statistiques",
+		"recentEntries": "Entrées récentes",
+		"editing": "Modification"
 	},
 	"action": {
-		"startPeriod": "Start period",
-		"endPeriod": "Period ended",
-		"backToToday": "Back to today",
-		"delete": "Delete"
+		"startPeriod": "Démarrer les règles",
+		"endPeriod": "Règles terminées",
+		"backToToday": "Retour à aujourd'hui",
+		"delete": "Supprimer"
 	},
 	"input": {
-		"temperaturePlaceholder": "98.6 °F",
+		"temperaturePlaceholder": "36,5 °C",
 		"notesPlaceholder": "Note..."
 	},
 	"stats": {
-		"avgDays": "Avg days",
-		"shortest": "shortest",
-		"longest": "longest",
+		"avgDays": "Moy. jours",
+		"shortest": "plus court",
+		"longest": "plus long",
 		"cycles": "cycles",
-		"nextPeriod": "Next period:",
-		"fertileWindow": "Fertile window:"
+		"nextPeriod": "Prochaines règles :",
+		"fertileWindow": "Fenêtre fertile :"
 	},
 	"relativeDate": {
-		"today": "Today",
-		"yesterday": "Yesterday",
-		"daysAgo": "{days} days ago"
+		"today": "Aujourd'hui",
+		"yesterday": "Hier",
+		"daysAgo": "il y a {days} jours"
 	},
-	"empty": "Tap a flow level above to log your first day — or start a period directly.",
+	"empty": "Touchez un niveau de flux ci-dessus pour enregistrer votre premier jour — ou démarrez directement un cycle.",
 	"confirm": {
-		"deleteEntry": "Really delete the entry from {date}?",
-		"deleteSymptom": "Delete symptom \"{name}\"?"
+		"deleteEntry": "Vraiment supprimer l'entrée du {date} ?",
+		"deleteSymptom": "Supprimer le symptôme « {name} » ?"
 	},
 	"symptomCategory": {
-		"physical": "Physical",
-		"emotional": "Emotional",
-		"other": "Other"
+		"physical": "Physique",
+		"emotional": "Émotionnel",
+		"other": "Autre"
 	},
 	"calendar": {
-		"title": "Calendar",
-		"prev": "Previous month",
-		"next": "Next month"
+		"title": "Calendrier",
+		"prev": "Mois précédent",
+		"next": "Mois suivant"
 	},
 	"symptomManager": {
-		"title": "Manage symptoms",
-		"open": "Manage",
-		"newNamePlaceholder": "New symptom…",
-		"add": "Add",
-		"edit": "Edit",
-		"delete": "Delete",
-		"save": "Save",
-		"cancel": "Cancel",
-		"empty": "No symptoms yet."
+		"title": "Gérer les symptômes",
+		"open": "Gérer",
+		"newNamePlaceholder": "Nouveau symptôme…",
+		"add": "Ajouter",
+		"edit": "Modifier",
+		"delete": "Supprimer",
+		"save": "Enregistrer",
+		"cancel": "Annuler",
+		"empty": "Aucun symptôme pour l'instant."
 	}
 }
