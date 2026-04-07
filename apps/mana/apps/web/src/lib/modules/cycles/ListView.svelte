@@ -21,6 +21,7 @@
 		predictNextPeriodStart,
 	} from './utils/prediction';
 	import { FLOW_COLORS, MOOD_COLORS, PHASE_COLORS, type Flow, type Mood } from './types';
+	import SymptomManager from './components/SymptomManager.svelte';
 	import type { ViewProps } from '$lib/app-registry';
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -47,6 +48,9 @@
 
 	const FLOWS: Flow[] = ['none', 'spotting', 'light', 'medium', 'heavy'];
 	const MOODS: Mood[] = ['great', 'good', 'neutral', 'low', 'bad'];
+
+	// ─ Symptom manager modal state
+	let symptomManagerOpen = $state(false);
 
 	// ─ Editing state — defaults to today, can be switched to any past day
 	let editingDate = $state(todayIso);
@@ -230,9 +234,14 @@
 	</section>
 
 	<!-- Symptoms -->
-	{#if symptoms.length > 0}
-		<section class="log-section">
+	<section class="log-section">
+		<div class="section-header">
 			<h3 class="section-label">{$_('cycles.label.symptoms')}</h3>
+			<button class="section-action" onclick={() => (symptomManagerOpen = true)}>
+				{$_('cycles.symptomManager.open')}
+			</button>
+		</div>
+		{#if symptoms.length > 0}
 			<div class="row">
 				{#each symptoms as sym}
 					<button
@@ -246,8 +255,8 @@
 					</button>
 				{/each}
 			</div>
-		</section>
-	{/if}
+		{/if}
+	</section>
 
 	<!-- Temperature & Notes -->
 	<section class="log-section">
@@ -345,6 +354,8 @@
 		<p class="empty">{$_('cycles.empty')}</p>
 	{/if}
 </div>
+
+<SymptomManager visible={symptomManagerOpen} onClose={() => (symptomManagerOpen = false)} />
 
 <style>
 	.app-view {
@@ -490,6 +501,25 @@
 		color: #c0bfba;
 		font-weight: 600;
 		margin: 0;
+	}
+	.section-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.5rem;
+	}
+	.section-action {
+		padding: 0.125rem 0.5rem;
+		border-radius: 9999px;
+		font-size: 0.625rem;
+		color: #ec4899;
+		background: transparent;
+		border: 1px solid rgba(236, 72, 153, 0.3);
+		cursor: pointer;
+		transition: all 0.15s;
+	}
+	.section-action:hover {
+		background: rgba(236, 72, 153, 0.1);
 	}
 	:global(.dark) .section-label {
 		color: #6b7280;

@@ -59,6 +59,23 @@
 	},
 	"empty": "Tippe oben auf eine Blutungsstärke, um deinen ersten Tag festzuhalten — oder starte direkt eine Periode.",
 	"confirm": {
-		"deleteEntry": "Tageseintrag vom {date} wirklich löschen?"
+		"deleteEntry": "Tageseintrag vom {date} wirklich löschen?",
+		"deleteSymptom": "Symptom \"{name}\" löschen?"
+	},
+	"symptomCategory": {
+		"physical": "Körperlich",
+		"emotional": "Emotional",
+		"other": "Sonstiges"
+	},
+	"symptomManager": {
+		"title": "Symptome verwalten",
+		"open": "Verwalten",
+		"newNamePlaceholder": "Neues Symptom…",
+		"add": "Hinzufügen",
+		"edit": "Bearbeiten",
+		"delete": "Löschen",
+		"save": "Speichern",
+		"cancel": "Abbrechen",
+		"empty": "Noch keine Symptome angelegt."
 	}
 }

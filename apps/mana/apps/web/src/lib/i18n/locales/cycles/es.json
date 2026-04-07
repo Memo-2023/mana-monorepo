@@ -59,6 +59,23 @@
 	},
 	"empty": "Tap a flow level above to log your first day — or start a period directly.",
 	"confirm": {
-		"deleteEntry": "Really delete the entry from {date}?"
+		"deleteEntry": "Really delete the entry from {date}?",
+		"deleteSymptom": "Delete symptom \"{name}\"?"
+	},
+	"symptomCategory": {
+		"physical": "Physical",
+		"emotional": "Emotional",
+		"other": "Other"
+	},
+	"symptomManager": {
+		"title": "Manage symptoms",
+		"open": "Manage",
+		"newNamePlaceholder": "New symptom…",
+		"add": "Add",
+		"edit": "Edit",
+		"delete": "Delete",
+		"save": "Save",
+		"cancel": "Cancel",
+		"empty": "No symptoms yet."
 	}
 }
