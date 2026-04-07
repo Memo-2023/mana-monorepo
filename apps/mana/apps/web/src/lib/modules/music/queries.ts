@@ -4,6 +4,7 @@
 
 import { liveQuery } from 'dexie';
 import { db } from '$lib/data/database';
+import { decryptRecords } from '$lib/data/crypto';
 import type {
 	LocalSong,
 	LocalPlaylist,
@@ -71,10 +72,10 @@ export function toProject(local: LocalProject): Project {
 export function useAllSongs() {
 	return liveQuery(async () => {
 		const locals = await db.table<LocalSong>('songs').toArray();
-		return locals
-			.filter((s) => !s.deletedAt)
-			.map(toSong)
-			.sort((a, b) => a.title.localeCompare(b.title));
+		const visible = locals.filter((s) => !s.deletedAt);
+		// title is encrypted on disk; sort needs the plaintext value.
+		const decrypted = await decryptRecords('songs', visible);
+		return decrypted.map(toSong).sort((a, b) => a.title.localeCompare(b.title));
 	});
 }
 
@@ -82,10 +83,9 @@ export function useAllSongs() {
 export function useAllPlaylists() {
 	return liveQuery(async () => {
 		const locals = await db.table<LocalPlaylist>('mukkePlaylists').toArray();
-		return locals
-			.filter((p) => !p.deletedAt)
-			.map(toPlaylist)
-			.sort((a, b) => a.name.localeCompare(b.name));
+		const visible = locals.filter((p) => !p.deletedAt);
+		const decrypted = await decryptRecords('mukkePlaylists', visible);
+		return decrypted.map(toPlaylist).sort((a, b) => a.name.localeCompare(b.name));
 	});
 }
 

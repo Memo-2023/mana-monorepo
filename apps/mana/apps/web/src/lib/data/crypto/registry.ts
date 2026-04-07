@@ -152,14 +152,35 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	documents: { enabled: true, fields: ['title', 'content'] },
 
 	// ─── Storage ─────────────────────────────────────────────
-	files: { enabled: false, fields: ['name', 'originalName', 'notes'] },
+	// `name` IS indexed but no .where('name') call site exists in the
+	// app — encryption is safe, the index just becomes a no-op for
+	// content lookups (the file browser scans+filters in JS anyway).
+	// LocalFile has no `notes` column on the schema; the user-typed
+	// values are name (display name) + originalName (uploaded filename).
+	// mimeType / size / storagePath / checksum stay plaintext for the
+	// thumbnail + storage-layer code paths.
+	files: { enabled: true, fields: ['name', 'originalName'] },
 
 	// ─── Picture ─────────────────────────────────────────────
-	images: { enabled: false, fields: ['prompt', 'negativePrompt', 'revisedPrompt', 'notes'] },
+	// LocalImage has prompt + negativePrompt as the user-typed text.
+	// The Phase 1 placeholder also listed `revisedPrompt` and `notes`
+	// but neither column exists on the schema. `prompt` IS indexed but
+	// no .where('prompt') call site exists — same as files.name above.
+	// model / style / format / blurhash stay plaintext (technical
+	// metadata, not user content).
+	images: { enabled: true, fields: ['prompt', 'negativePrompt'] },
 
 	// ─── Music ───────────────────────────────────────────────
-	songs: { enabled: false, fields: ['title', 'artist', 'album', 'lyrics', 'notes'] },
-	mukkePlaylists: { enabled: false, fields: ['name', 'description'] },
+	// Music metadata is borderline-sensitive: technical ID3 tags vs
+	// user listening history. Encrypting `title` (which uniquely
+	// identifies a track) gives meaningful privacy; leaving artist /
+	// album / albumArtist / genre PLAINTEXT keeps the album+artist
+	// browsing views fast (they aggregate by those fields and would
+	// otherwise force a per-song decrypt to render the index).
+	// `lyrics` / `notes` listed in the Phase 1 placeholder don't
+	// exist on LocalSong.
+	songs: { enabled: true, fields: ['title'] },
+	mukkePlaylists: { enabled: true, fields: ['name', 'description'] },
 
 	// ─── Questions ───────────────────────────────────────────
 	// LocalQuestion uses `title` + `description`; LocalAnswer uses
@@ -170,8 +191,16 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	answers: { enabled: true, fields: ['content'] },
 
 	// ─── Events (social gatherings) ──────────────────────────
-	socialEvents: { enabled: false, fields: ['title', 'description', 'notes'] },
-	eventGuests: { enabled: false, fields: ['name', 'email', 'phone', 'notes'] },
+	// Distinct from calendar.events — these have guest lists, RSVPs,
+	// and shareable invitation tokens. None of the encrypted columns
+	// are indexed (status / timeBlockId / hostContactId carry the
+	// browsing keys), so the rollout is straightforward. Phase 1
+	// placeholder listed a `notes` column on socialEvents that doesn't
+	// exist; the actual user-typed text is title/description/location.
+	// On eventGuests the user-typed text is name/email/phone/note
+	// (singular).
+	socialEvents: { enabled: true, fields: ['title', 'description', 'location'] },
+	eventGuests: { enabled: true, fields: ['name', 'email', 'phone', 'note'] },
 
 	// ─── Finance ─────────────────────────────────────────────
 	// Transactions are budget-grade PII — amount/date/categoryId stay
@@ -188,7 +217,11 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	// metadata (title + description) which is the part the user actually
 	// expects to be private, and leave the routing primitives alone.
 	links: { enabled: true, fields: ['title', 'description'] },
-	manaLinks: { enabled: false, fields: ['label', 'url', 'notes'] },
+	// NOTE: `manaLinks` is intentionally NOT in the registry. Despite
+	// the name it's the cross-app link table — pure foreign keys
+	// (sourceAppId / sourceRecordId / targetAppId / targetRecordId)
+	// with zero user-typed content. The Phase 1 placeholder listed
+	// label/url/notes which don't exist on the schema.
 
 	// ─── Inventar ────────────────────────────────────────────
 	// `name` is indexed (used in where()/sortBy queries). `notes` is an

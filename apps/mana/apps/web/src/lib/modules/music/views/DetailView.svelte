@@ -5,6 +5,7 @@
 <script lang="ts">
 	import { liveQuery } from 'dexie';
 	import { db } from '$lib/data/database';
+	import { decryptRecord } from '$lib/data/crypto';
 	import { libraryStore } from '../stores/library.svelte';
 	import { toastStore } from '@mana/shared-ui/toast';
 	import { Heart, Trash } from '@mana/shared-icons';
@@ -34,7 +35,12 @@
 	});
 
 	$effect(() => {
-		const sub = liveQuery(() => db.table<LocalSong>('songs').get(songId)).subscribe((val) => {
+		const sub = liveQuery(async () => {
+			const raw = await db.table<LocalSong>('songs').get(songId);
+			// title is encrypted on disk; decrypt a clone so the inline
+			// editor binds to plaintext.
+			return raw ? await decryptRecord('songs', { ...raw }) : null;
+		}).subscribe((val) => {
 			song = val ?? null;
 			if (val && !focused) {
 				editTitle = val.title;

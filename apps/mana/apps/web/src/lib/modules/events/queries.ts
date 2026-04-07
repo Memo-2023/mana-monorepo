@@ -6,6 +6,7 @@
 
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
+import { decryptRecords } from '$lib/data/crypto';
 import { timeBlockTable } from '$lib/data/time-blocks/collections';
 import type { LocalTimeBlock } from '$lib/data/time-blocks/types';
 import type {
@@ -85,7 +86,8 @@ export function toEventGuest(local: LocalEventGuest): EventGuest {
 export function useAllEvents() {
 	return useLiveQueryWithDefault(async () => {
 		const locals = await db.table<LocalSocialEvent>('socialEvents').toArray();
-		const active = locals.filter((e) => !e.deletedAt);
+		const visible = locals.filter((e) => !e.deletedAt);
+		const active = await decryptRecords('socialEvents', visible);
 		const blocks = await timeBlockTable.bulkGet(active.map((e) => e.timeBlockId));
 		return active.map((e, i) => toSocialEvent(e, blocks[i] ?? null));
 	}, [] as SocialEvent[]);
@@ -95,7 +97,8 @@ export function useAllEvents() {
 export function useUpcomingEvents() {
 	return useLiveQueryWithDefault(async () => {
 		const locals = await db.table<LocalSocialEvent>('socialEvents').toArray();
-		const active = locals.filter((e) => !e.deletedAt && e.status !== 'cancelled');
+		const visible = locals.filter((e) => !e.deletedAt && e.status !== 'cancelled');
+		const active = await decryptRecords('socialEvents', visible);
 		const blocks = await timeBlockTable.bulkGet(active.map((e) => e.timeBlockId));
 		const now = Date.now();
 		return active
@@ -109,7 +112,8 @@ export function useUpcomingEvents() {
 export function usePastEvents() {
 	return useLiveQueryWithDefault(async () => {
 		const locals = await db.table<LocalSocialEvent>('socialEvents').toArray();
-		const active = locals.filter((e) => !e.deletedAt);
+		const visible = locals.filter((e) => !e.deletedAt);
+		const active = await decryptRecords('socialEvents', visible);
 		const blocks = await timeBlockTable.bulkGet(active.map((e) => e.timeBlockId));
 		const now = Date.now();
 		return active
@@ -125,8 +129,9 @@ export function useEvent(eventId: () => string) {
 		async () => {
 			const id = eventId();
 			if (!id) return null;
-			const local = await db.table<LocalSocialEvent>('socialEvents').get(id);
-			if (!local || local.deletedAt) return null;
+			const raw = await db.table<LocalSocialEvent>('socialEvents').get(id);
+			if (!raw || raw.deletedAt) return null;
+			const [local] = await decryptRecords('socialEvents', [raw]);
 			const block = await timeBlockTable.get(local.timeBlockId);
 			return toSocialEvent(local, block ?? null);
 		},
@@ -139,9 +144,10 @@ export function useGuestsByEvent() {
 	return useLiveQueryWithDefault(
 		async () => {
 			const all = await db.table<LocalEventGuest>('eventGuests').toArray();
+			const visible = all.filter((g) => !g.deletedAt);
+			const decrypted = await decryptRecords('eventGuests', visible);
 			const map = new Map<string, EventGuest[]>();
-			for (const g of all) {
-				if (g.deletedAt) continue;
+			for (const g of decrypted) {
 				const guest = toEventGuest(g);
 				const arr = map.get(guest.eventId);
 				if (arr) arr.push(guest);
@@ -163,7 +169,9 @@ export function useEventGuests(eventId: () => string) {
 			.where('eventId')
 			.equals(id)
 			.toArray();
-		return guests.filter((g) => !g.deletedAt).map(toEventGuest);
+		const visible = guests.filter((g) => !g.deletedAt);
+		const decrypted = await decryptRecords('eventGuests', visible);
+		return decrypted.map(toEventGuest);
 	}, [] as EventGuest[]);
 }
 

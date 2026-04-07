@@ -5,6 +5,7 @@
 <script lang="ts">
 	import { liveQuery } from 'dexie';
 	import { db } from '$lib/data/database';
+	import { decryptRecord } from '$lib/data/crypto';
 	import { filesStore } from '../stores/files.svelte';
 	import { toastStore } from '@mana/shared-ui/toast';
 	import { Heart, Trash } from '@mana/shared-icons';
@@ -29,7 +30,12 @@
 	});
 
 	$effect(() => {
-		const sub = liveQuery(() => db.table<LocalFile>('files').get(fileId)).subscribe((val) => {
+		const sub = liveQuery(async () => {
+			const raw = await db.table<LocalFile>('files').get(fileId);
+			// name + originalName are encrypted on disk; decrypt a clone
+			// so the rename input binds to plaintext.
+			return raw ? await decryptRecord('files', { ...raw }) : null;
+		}).subscribe((val) => {
 			file = val ?? null;
 			if (val && !focused) {
 				editName = val.name;

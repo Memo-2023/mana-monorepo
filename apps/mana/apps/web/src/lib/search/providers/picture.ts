@@ -1,4 +1,5 @@
 import { db } from '$lib/data/database';
+import { decryptRecords } from '$lib/data/crypto';
 import { getManaApp } from '@mana/shared-branding';
 import { scoreRecord, truncateSubtitle } from '../scoring';
 import type { SearchProvider, SearchResult, SearchOptions } from '../types';
@@ -16,10 +17,12 @@ export const pictureSearchProvider: SearchProvider = {
 		const limit = options?.limit ?? 5;
 		const results: SearchResult[] = [];
 
-		// Search images by prompt
-		const images = await db.table('images').toArray();
+		// Search images by prompt. prompt + negativePrompt are encrypted
+		// at rest; the scorer needs plaintext to do substring matching.
+		const rawImages = await db.table('images').toArray();
+		const visibleImages = rawImages.filter((i) => !i.deletedAt);
+		const images = await decryptRecords('images', visibleImages);
 		for (const image of images) {
-			if (image.deletedAt) continue;
 			const { score, matchedField } = scoreRecord(
 				[
 					{ name: 'prompt', value: image.prompt, weight: 1.0 },

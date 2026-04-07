@@ -165,13 +165,16 @@ export function useRecentImages(limit = 6) {
 		// Reverse-walk the indexed updatedAt column. Generated images have
 		// updatedAt stamped on creation and rarely move afterwards, so this
 		// is effectively "newest first" for the dashboard widget's purpose.
-		return db
+		const recent = await db
 			.table<LocalImage>('images')
 			.orderBy('updatedAt')
 			.reverse()
 			.filter((i) => !i.isArchived && !i.deletedAt)
 			.limit(limit)
 			.toArray();
+		// prompt is encrypted on disk; the dashboard widget renders it as
+		// the alt text + caption, so decrypt the small slice we return.
+		return decryptRecords('images', recent);
 	}, [] as LocalImage[]);
 }
 
@@ -208,9 +211,13 @@ export function useStorageStats() {
 			const files = await db.table<LocalFile>('files').toArray();
 			const active = files.filter((f) => !f.isDeleted && !f.deletedAt);
 			const totalSize = active.reduce((sum, f) => sum + (f.size || 0), 0);
-			const recent = active
+			// The recent-files widget renders the file name, so decrypt
+			// the small slice we return (not the whole table — totalSize
+			// only needs the plaintext .size column).
+			const recentRaw = active
 				.sort((a, b) => (b.updatedAt ?? '').localeCompare(a.updatedAt ?? ''))
 				.slice(0, 5);
+			const recent = await decryptRecords('files', recentRaw);
 			return { totalFiles: active.length, totalSize, recentFiles: recent };
 		},
 		{ totalFiles: 0, totalSize: 0, recentFiles: [] as LocalFile[] }
@@ -234,9 +241,13 @@ export function useMusicStats() {
 			const playlists = await db.table<LocalPlaylist>('mukkePlaylists').toArray();
 			const activeSongs = songs.filter((s) => !s.deletedAt);
 			const activePlaylists = playlists.filter((p) => !p.deletedAt);
-			const recent = activeSongs
+			// title is encrypted on disk; the dashboard widget renders it
+			// for the recent-songs list, so decrypt the small slice we
+			// surface (counts only need plaintext flags).
+			const recentRaw = activeSongs
 				.sort((a, b) => (b.updatedAt ?? '').localeCompare(a.updatedAt ?? ''))
 				.slice(0, 5);
+			const recent = await decryptRecords('songs', recentRaw);
 			return {
 				totalSongs: activeSongs.length,
 				totalPlaylists: activePlaylists.length,

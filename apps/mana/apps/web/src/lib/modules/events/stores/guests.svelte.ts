@@ -3,6 +3,7 @@
  */
 
 import { db } from '$lib/data/database';
+import { encryptRecord } from '$lib/data/crypto';
 import type { LocalEventGuest, RsvpStatus } from '../types';
 
 let error = $state<string | null>(null);
@@ -39,6 +40,10 @@ export const eventGuestsStore = {
 				createdAt: new Date().toISOString(),
 				updatedAt: new Date().toISOString(),
 			};
+			// name / email / phone / note are encrypted at rest. Guest
+			// records stay local-only — they're never pushed to the
+			// public RSVP snapshot, so no decrypt-before-publish here.
+			await encryptRecord('eventGuests', newGuest);
 			await db.table<LocalEventGuest>('eventGuests').add(newGuest);
 			return { success: true as const, id };
 		} catch (e) {
@@ -68,6 +73,7 @@ export const eventGuestsStore = {
 			if (input.rsvpStatus !== undefined) {
 				data.rsvpAt = new Date().toISOString();
 			}
+			await encryptRecord('eventGuests', data);
 			await db.table('eventGuests').update(id, data);
 			return { success: true as const };
 		} catch (e) {

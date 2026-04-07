@@ -1,4 +1,5 @@
 import { db } from '$lib/data/database';
+import { decryptRecords } from '$lib/data/crypto';
 import { getManaApp } from '@mana/shared-branding';
 import { scoreRecord } from '../scoring';
 import type { SearchProvider, SearchResult, SearchOptions } from '../types';
@@ -16,10 +17,12 @@ export const storageSearchProvider: SearchProvider = {
 		const limit = options?.limit ?? 5;
 		const results: SearchResult[] = [];
 
-		// Search files
-		const files = await db.table('files').toArray();
+		// Search files. name + originalName are encrypted at rest; the
+		// scorer needs plaintext to do substring matching.
+		const rawFiles = await db.table('files').toArray();
+		const visibleFiles = rawFiles.filter((f) => !f.deletedAt && !f.isDeleted);
+		const files = await decryptRecords('files', visibleFiles);
 		for (const file of files) {
-			if (file.deletedAt || file.isDeleted) continue;
 			const { score, matchedField } = scoreRecord(
 				[
 					{ name: 'name', value: file.name, weight: 1.0 },

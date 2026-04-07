@@ -8,6 +8,7 @@
 import { db } from '$lib/data/database';
 import { createBlock, updateBlock, deleteBlock } from '$lib/data/time-blocks/service';
 import { timeBlockTable } from '$lib/data/time-blocks/collections';
+import { encryptRecord, decryptRecord } from '$lib/data/crypto';
 import type { LocalSocialEvent, LocalEventItem, EventStatus } from '../types';
 import { eventsApi } from '../api';
 import { recordTombstone } from '../tombstones';
@@ -68,6 +69,9 @@ export const eventsStore = {
 				updatedAt: new Date().toISOString(),
 			};
 
+			// title / description / location are encrypted at rest. The
+			// linked TimeBlock was already encrypted by createBlock above.
+			await encryptRecord('socialEvents', newLocal);
 			await db.table<LocalSocialEvent>('socialEvents').add(newLocal);
 			return { success: true as const, id: eventId };
 		} catch (e) {
@@ -121,6 +125,7 @@ export const eventsStore = {
 			if (input.status !== undefined) localData.status = input.status;
 			if (input.coverImage !== undefined) localData.coverImage = input.coverImage;
 
+			await encryptRecord('socialEvents', localData);
 			await db.table('socialEvents').update(id, localData);
 			// Fire-and-forget snapshot sync if this event is published
 			void this.syncSnapshotIfPublished(id);
@@ -167,10 +172,16 @@ export const eventsStore = {
 	async publishEvent(id: string) {
 		error = null;
 		try {
-			const event = await db.table<LocalSocialEvent>('socialEvents').get(id);
-			if (!event) return { success: false as const, error: 'Event not found' };
-			const block = await timeBlockTable.get(event.timeBlockId);
+			const rawEvent = await db.table<LocalSocialEvent>('socialEvents').get(id);
+			if (!rawEvent) return { success: false as const, error: 'Event not found' };
+			const block = await timeBlockTable.get(rawEvent.timeBlockId);
 			if (!block) return { success: false as const, error: 'TimeBlock missing for event' };
+
+			// Decrypt before pushing to the server snapshot — the public
+			// RSVP page renders these fields, so the server needs the
+			// plaintext. By design, publishing intentionally trades local
+			// confidentiality for the linkable public page.
+			const event = await decryptRecord('socialEvents', { ...rawEvent });
 
 			const { token } = await eventsApi.publish({
 				eventId: id,
@@ -236,10 +247,13 @@ export const eventsStore = {
 	 */
 	async syncSnapshotIfPublished(id: string) {
 		try {
-			const event = await db.table<LocalSocialEvent>('socialEvents').get(id);
-			if (!event || !event.isPublished) return;
-			const block = await timeBlockTable.get(event.timeBlockId);
+			const rawEvent = await db.table<LocalSocialEvent>('socialEvents').get(id);
+			if (!rawEvent || !rawEvent.isPublished) return;
+			const block = await timeBlockTable.get(rawEvent.timeBlockId);
 			if (!block) return;
+			// Same plaintext-snapshot dance as publishEvent — the public
+			// page would otherwise render ciphertext blobs.
+			const event = await decryptRecord('socialEvents', { ...rawEvent });
 			await eventsApi.updateSnapshot(id, {
 				eventId: id,
 				title: event.title,

@@ -6,6 +6,7 @@
 
 import { liveQuery } from 'dexie';
 import { db } from '$lib/data/database';
+import { decryptRecords } from '$lib/data/crypto';
 import type { LocalFile, LocalFolder, LocalFileTag } from './types';
 
 // ─── Shared Types (inline to avoid @storage/shared dependency) ───
@@ -107,10 +108,10 @@ export function toTag(local: {
 export function useAllFiles() {
 	return liveQuery(async () => {
 		const locals = await db.table<LocalFile>('files').toArray();
-		return locals
-			.filter((f) => !f.isDeleted && !f.deletedAt)
-			.map(toFile)
-			.sort((a, b) => a.name.localeCompare(b.name));
+		const visible = locals.filter((f) => !f.isDeleted && !f.deletedAt);
+		// name + originalName are encrypted on disk; sort needs plaintext.
+		const decrypted = await decryptRecords('files', visible);
+		return decrypted.map(toFile).sort((a, b) => a.name.localeCompare(b.name));
 	});
 }
 

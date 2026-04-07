@@ -5,11 +5,15 @@
 	import type { LocalFile, LocalFolder } from '$lib/modules/storage/types';
 	import { liveQuery } from 'dexie';
 	import { db } from '$lib/data/database';
+	import { decryptRecords } from '$lib/data/crypto';
 
-	// Live query for deleted items (not permanently deleted)
+	// Live query for deleted items (not permanently deleted). file.name
+	// is encrypted on disk, so decrypt the visible set before the trash
+	// list renders.
 	const deletedFiles = liveQuery(async () => {
 		const all = await db.table<LocalFile>('files').toArray();
-		return all.filter((f) => f.isDeleted && !f.deletedAt);
+		const visible = all.filter((f) => f.isDeleted && !f.deletedAt);
+		return decryptRecords('files', visible);
 	});
 
 	const deletedFolders = liveQuery(async () => {

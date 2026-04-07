@@ -5,6 +5,7 @@
 <script lang="ts">
 	import { liveQuery } from 'dexie';
 	import { db } from '$lib/data/database';
+	import { decryptRecords } from '$lib/data/crypto';
 	import type { LocalImage } from './types';
 
 	let images = $state<LocalImage[]>([]);
@@ -12,7 +13,8 @@
 	$effect(() => {
 		const sub = liveQuery(async () => {
 			const all = await db.table<LocalImage>('images').toArray();
-			return all.filter((i) => !i.deletedAt && !i.isArchived);
+			const visible = all.filter((i) => !i.deletedAt && !i.isArchived);
+			return decryptRecords('images', visible);
 		}).subscribe((val) => {
 			images = val ?? [];
 		});

@@ -10,6 +10,7 @@ import { fileTable, storageFolderTable } from '../collections';
 import { toFile, toFolder } from '../queries';
 import type { StorageFile, StorageFolder } from '../queries';
 import type { LocalFile, LocalFolder } from '../types';
+import { encryptRecord } from '$lib/data/crypto';
 import { StorageEvents } from '@mana/shared-utils/analytics';
 
 let viewMode = $state<'grid' | 'list'>('grid');
@@ -114,10 +115,12 @@ export const filesStore = {
 	},
 
 	async renameFile(id: string, name: string) {
-		await fileTable.update(id, {
+		const diff: Record<string, unknown> = {
 			name,
 			updatedAt: new Date().toISOString(),
-		});
+		};
+		await encryptRecord('files', diff);
+		await fileTable.update(id, diff);
 	},
 
 	async renameFolder(id: string, name: string) {

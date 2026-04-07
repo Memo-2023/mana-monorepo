@@ -8,6 +8,7 @@
 import { db } from '$lib/data/database';
 import { musicPlaylistTable, playlistSongTable } from '../collections';
 import { toPlaylist } from '../queries';
+import { encryptRecord } from '$lib/data/crypto';
 import { MusicEvents } from '@mana/shared-utils/analytics';
 import type { LocalPlaylist, LocalPlaylistSong } from '../types';
 
@@ -20,17 +21,23 @@ export const playlistsStore = {
 			description: description ?? null,
 			coverArtPath: null,
 		};
+		// Snapshot the plaintext for the return value before encryptRecord
+		// mutates `newLocal` in place — UI consumers expect plaintext.
+		const plaintextSnapshot = toPlaylist({ ...newLocal });
+		await encryptRecord('mukkePlaylists', newLocal);
 		await musicPlaylistTable.add(newLocal);
 		MusicEvents.playlistCreated();
-		return toPlaylist(newLocal);
+		return plaintextSnapshot;
 	},
 
 	/** Update a playlist. */
 	async update(id: string, data: Partial<Pick<LocalPlaylist, 'name' | 'description'>>) {
-		await musicPlaylistTable.update(id, {
+		const diff: Record<string, unknown> = {
 			...data,
 			updatedAt: new Date().toISOString(),
-		});
+		};
+		await encryptRecord('mukkePlaylists', diff);
+		await musicPlaylistTable.update(id, diff);
 	},
 
 	/** Soft-delete a playlist and its song associations atomically. */

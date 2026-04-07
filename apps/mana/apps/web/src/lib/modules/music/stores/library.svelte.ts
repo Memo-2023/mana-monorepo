@@ -6,6 +6,7 @@
  */
 
 import { songTable } from '../collections';
+import { encryptRecord } from '$lib/data/crypto';
 import { MusicEvents } from '@mana/shared-utils/analytics';
 import type { LocalSong } from '../types';
 
@@ -46,10 +47,12 @@ export const libraryStore = {
 			>
 		>
 	) {
-		await songTable.update(id, {
+		const diff: Record<string, unknown> = {
 			...data,
 			updatedAt: new Date().toISOString(),
-		});
+		};
+		await encryptRecord('songs', diff);
+		await songTable.update(id, diff);
 	},
 
 	/** Soft-delete a song. */
@@ -61,6 +64,7 @@ export const libraryStore = {
 
 	/** Insert a song (e.g., after upload). */
 	async insert(song: LocalSong) {
+		await encryptRecord('songs', song);
 		await songTable.add(song);
 	},
 };

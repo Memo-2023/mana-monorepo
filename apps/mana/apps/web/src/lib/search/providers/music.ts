@@ -1,4 +1,5 @@
 import { db } from '$lib/data/database';
+import { decryptRecords } from '$lib/data/crypto';
 import { getManaApp } from '@mana/shared-branding';
 import { scoreRecord, truncateSubtitle } from '../scoring';
 import type { SearchProvider, SearchResult, SearchOptions } from '../types';
@@ -16,10 +17,12 @@ export const musicSearchProvider: SearchProvider = {
 		const limit = options?.limit ?? 5;
 		const results: SearchResult[] = [];
 
-		// Search songs
-		const songs = await db.table('songs').toArray();
+		// Search songs. title is encrypted at rest; the scorer needs
+		// plaintext to do substring matching against the user query.
+		const rawSongs = await db.table('songs').toArray();
+		const visibleSongs = rawSongs.filter((s) => !s.deletedAt);
+		const songs = await decryptRecords('songs', visibleSongs);
 		for (const song of songs) {
-			if (song.deletedAt) continue;
 			const { score, matchedField } = scoreRecord(
 				[
 					{ name: 'title', value: song.title, weight: 1.0 },
@@ -45,10 +48,12 @@ export const musicSearchProvider: SearchProvider = {
 			}
 		}
 
-		// Search playlists (Dexie table name kept for backward compat)
-		const playlists = await db.table('mukkePlaylists').toArray();
+		// Search playlists (Dexie table name kept for backward compat).
+		// name + description are encrypted at rest.
+		const rawPlaylists = await db.table('mukkePlaylists').toArray();
+		const visiblePlaylists = rawPlaylists.filter((p) => !p.deletedAt);
+		const playlists = await decryptRecords('mukkePlaylists', visiblePlaylists);
 		for (const pl of playlists) {
-			if (pl.deletedAt) continue;
 			const { score, matchedField } = scoreRecord(
 				[
 					{ name: 'name', value: pl.name, weight: 1.0 },

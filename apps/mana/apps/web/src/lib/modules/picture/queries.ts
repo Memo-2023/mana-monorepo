@@ -9,6 +9,7 @@
 import { liveQuery } from 'dexie';
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
+import { decryptRecords } from '$lib/data/crypto';
 import type {
 	LocalImage,
 	LocalBoard,
@@ -69,8 +70,9 @@ export function toBoard(local: LocalBoard): Board {
 export function useAllImages() {
 	return useLiveQueryWithDefault(async () => {
 		const locals = await db.table<LocalImage>('images').toArray();
-		return locals
-			.filter((img) => !img.isArchived && !img.deletedAt)
+		const visible = locals.filter((img) => !img.isArchived && !img.deletedAt);
+		const decrypted = await decryptRecords('images', visible);
+		return decrypted
 			.map(toImage)
 			.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 	}, [] as Image[]);
@@ -80,8 +82,9 @@ export function useAllImages() {
 export function useArchivedImages() {
 	return useLiveQueryWithDefault(async () => {
 		const locals = await db.table<LocalImage>('images').toArray();
-		return locals
-			.filter((img) => !!img.isArchived && !img.deletedAt)
+		const visible = locals.filter((img) => !!img.isArchived && !img.deletedAt);
+		const decrypted = await decryptRecords('images', visible);
+		return decrypted
 			.map(toImage)
 			.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 	}, [] as Image[]);
@@ -127,8 +130,9 @@ export function useAllImageTags() {
 export function allImages$() {
 	return liveQuery(async () => {
 		const locals = await db.table<LocalImage>('images').toArray();
-		return locals
-			.filter((img) => !img.isArchived && !img.deletedAt)
+		const visible = locals.filter((img) => !img.isArchived && !img.deletedAt);
+		const decrypted = await decryptRecords('images', visible);
+		return decrypted
 			.map(toImage)
 			.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 	});
