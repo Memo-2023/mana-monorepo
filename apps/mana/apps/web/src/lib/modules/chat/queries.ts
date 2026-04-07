@@ -1,9 +1,15 @@
 /**
  * Reactive queries & pure helpers for Chat — uses Dexie liveQuery on the unified DB.
+ *
+ * Phase 5 encryption: messageText, conversation title, and template
+ * fields (name/description/systemPrompt/initialQuestion) are encrypted
+ * at rest. liveQueries decrypt the configured fields before mapping
+ * to the public types so consumers see plaintext.
  */
 
 import { liveQuery } from 'dexie';
 import { db } from '$lib/data/database';
+import { decryptRecords } from '$lib/data/crypto';
 import type {
 	LocalConversation,
 	LocalMessage,
@@ -63,19 +69,22 @@ export function toMessage(local: LocalMessage): Message {
 /** All non-archived conversations, sorted by pinned first then updatedAt desc. */
 export function useAllConversations() {
 	return liveQuery(async () => {
-		const locals = await db.table<LocalConversation>('conversations').toArray();
-		return sortConversations(
-			locals.filter((c) => !c.deletedAt && !c.isArchived).map(toConversation)
+		const visible = (await db.table<LocalConversation>('conversations').toArray()).filter(
+			(c) => !c.deletedAt && !c.isArchived
 		);
+		const decrypted = await decryptRecords('conversations', visible);
+		return sortConversations(decrypted.map(toConversation));
 	});
 }
 
 /** All archived conversations, sorted by updatedAt desc. */
 export function useArchivedConversations() {
 	return liveQuery(async () => {
-		const locals = await db.table<LocalConversation>('conversations').toArray();
-		return locals
-			.filter((c) => !c.deletedAt && c.isArchived)
+		const visible = (await db.table<LocalConversation>('conversations').toArray()).filter(
+			(c) => !c.deletedAt && c.isArchived
+		);
+		const decrypted = await decryptRecords('conversations', visible);
+		return decrypted
 			.map(toConversation)
 			.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
 	});
@@ -84,24 +93,26 @@ export function useArchivedConversations() {
 /** All templates, sorted by name. */
 export function useAllTemplates() {
 	return liveQuery(async () => {
-		const locals = await db.table<LocalTemplate>('chatTemplates').toArray();
-		return locals
-			.filter((t) => !t.deletedAt)
-			.map(toTemplate)
-			.sort((a, b) => a.name.localeCompare(b.name));
+		const visible = (await db.table<LocalTemplate>('chatTemplates').toArray()).filter(
+			(t) => !t.deletedAt
+		);
+		const decrypted = await decryptRecords('chatTemplates', visible);
+		return decrypted.map(toTemplate).sort((a, b) => a.name.localeCompare(b.name));
 	});
 }
 
 /** Messages for a specific conversation, sorted by createdAt asc. */
 export function useConversationMessages(conversationId: string) {
 	return liveQuery(async () => {
-		const locals = await db
-			.table<LocalMessage>('messages')
-			.where('conversationId')
-			.equals(conversationId)
-			.toArray();
-		return locals
-			.filter((m) => !m.deletedAt)
+		const visible = (
+			await db
+				.table<LocalMessage>('messages')
+				.where('conversationId')
+				.equals(conversationId)
+				.toArray()
+		).filter((m) => !m.deletedAt);
+		const decrypted = await decryptRecords('messages', visible);
+		return decrypted
 			.map(toMessage)
 			.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
 	});

@@ -8,6 +8,7 @@
 import { memoryTable } from '../collections';
 import { toMemory } from '../queries';
 import { MemoroEvents } from '@mana/shared-utils/analytics';
+import { encryptRecord } from '$lib/data/crypto';
 import type { LocalMemory } from '../types';
 
 export const memoriesStore = {
@@ -19,17 +20,21 @@ export const memoriesStore = {
 			title: data.title,
 			content: data.content ?? null,
 		};
+		const plaintextSnapshot = toMemory(newLocal);
+		await encryptRecord('memories', newLocal);
 		await memoryTable.add(newLocal);
 		MemoroEvents.memoCreated();
-		return toMemory(newLocal);
+		return plaintextSnapshot;
 	},
 
 	/** Update a memory. */
 	async update(id: string, data: Partial<Pick<LocalMemory, 'title' | 'content'>>) {
-		await memoryTable.update(id, {
+		const diff: Partial<LocalMemory> = {
 			...data,
 			updatedAt: new Date().toISOString(),
-		});
+		};
+		await encryptRecord('memories', diff);
+		await memoryTable.update(id, diff);
 	},
 
 	/** Soft-delete a memory. */

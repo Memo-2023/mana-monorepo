@@ -7,6 +7,7 @@
 
 import { chatTemplateTable } from '../collections';
 import { toTemplate } from '../queries';
+import { encryptRecord } from '$lib/data/crypto';
 import type { LocalTemplate } from '../types';
 
 export const templatesStore = {
@@ -32,8 +33,10 @@ export const templatesStore = {
 			isDefault: data.isDefault ?? false,
 			documentMode: data.documentMode ?? false,
 		};
+		const plaintextSnapshot = toTemplate(newLocal);
+		await encryptRecord('chatTemplates', newLocal);
 		await chatTemplateTable.add(newLocal);
-		return toTemplate(newLocal);
+		return plaintextSnapshot;
 	},
 
 	/** Update a template. */
@@ -53,10 +56,12 @@ export const templatesStore = {
 			>
 		>
 	) {
-		await chatTemplateTable.update(id, {
+		const diff: Partial<LocalTemplate> = {
 			...data,
 			updatedAt: new Date().toISOString(),
-		});
+		};
+		await encryptRecord('chatTemplates', diff);
+		await chatTemplateTable.update(id, diff);
 	},
 
 	/** Soft-delete a template. */

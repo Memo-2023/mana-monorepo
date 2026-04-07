@@ -9,6 +9,7 @@ import { contactTable, SELF_CONTACT_ID } from '../collections';
 import { toContact } from '../queries';
 import { createArchiveOps } from '@mana/shared-stores';
 import { ContactsEvents } from '@mana/shared-utils/analytics';
+import { encryptRecord, decryptRecord } from '$lib/data/crypto';
 import type { LocalContact, Contact } from '../types';
 import type { UserProfile } from '$lib/api/profile';
 
@@ -43,9 +44,11 @@ export const contactsStore = {
 			isArchived: false,
 		};
 
+		const plaintextSnapshot = toContact(newLocal);
+		await encryptRecord('contacts', newLocal);
 		await contactTable.add(newLocal);
 		ContactsEvents.contactCreated();
-		return toContact(newLocal);
+		return plaintextSnapshot;
 	},
 
 	async updateContact(id: string, data: Partial<Contact> & Record<string, unknown>) {
@@ -74,10 +77,12 @@ export const contactsStore = {
 		if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
 		if (data.isArchived !== undefined) updateData.isArchived = data.isArchived;
 
-		await contactTable.update(id, {
+		const diff: Partial<LocalContact> = {
 			...updateData,
 			updatedAt: new Date().toISOString(),
-		});
+		};
+		await encryptRecord('contacts', diff);
+		await contactTable.update(id, diff);
 		ContactsEvents.contactUpdated();
 	},
 
@@ -136,6 +141,7 @@ export const contactsStore = {
 				createdAt: new Date().toISOString(),
 				updatedAt: new Date().toISOString(),
 			};
+			await encryptRecord('contacts', self);
 			await contactTable.add(self);
 			return;
 		}
@@ -143,20 +149,25 @@ export const contactsStore = {
 		// Only sync if we have profile data
 		if (!profile) return;
 
+		// Compare against the decrypted view of the existing record so the
+		// "did anything change?" check sees plaintext on both sides.
+		const decryptedExisting = await decryptRecord('contacts', { ...existing });
 		const needsUpdate =
-			existing.firstName !== firstName ||
-			existing.lastName !== lastName ||
-			existing.email !== (profile.email || undefined) ||
-			existing.photoUrl !== (profile.image || undefined);
+			decryptedExisting.firstName !== firstName ||
+			decryptedExisting.lastName !== lastName ||
+			decryptedExisting.email !== (profile.email || undefined) ||
+			decryptedExisting.photoUrl !== (profile.image || undefined);
 
 		if (needsUpdate) {
-			await contactTable.update(SELF_CONTACT_ID, {
+			const diff: Partial<LocalContact> = {
 				firstName,
 				lastName,
 				email: profile.email || undefined,
 				photoUrl: profile.image || undefined,
 				updatedAt: new Date().toISOString(),
-			});
+			};
+			await encryptRecord('contacts', diff);
+			await contactTable.update(SELF_CONTACT_ID, diff);
 		}
 	},
 };

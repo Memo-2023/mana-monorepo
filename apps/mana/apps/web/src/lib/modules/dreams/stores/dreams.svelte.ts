@@ -1,9 +1,16 @@
 /**
  * Dreams Store — Mutation-Only Service
+ *
+ * Phase 5 encryption: title, content, transcript, interpretation,
+ * aiInterpretation, location are encrypted at rest. Symbol metadata
+ * (dreamSymbols.meaning) is encrypted; symbol `name` stays plaintext
+ * because it's used as the unique lookup key in touchSymbols /
+ * updateSymbol via where('name').equals(...).
  */
 
 import { dreamSymbolTable, dreamTable } from '../collections';
 import { toDream } from '../queries';
+import { encryptRecord } from '$lib/data/crypto';
 import type {
 	Dream,
 	DreamClarity,
@@ -56,9 +63,15 @@ export const dreamsStore = {
 			isArchived: false,
 		};
 
+		const plaintextSnapshot = toDream(newLocal);
+		await encryptRecord('dreams', newLocal);
 		await dreamTable.add(newLocal);
-		await this.touchSymbols(newLocal.symbols, +1);
-		return toDream(newLocal);
+		// touchSymbols receives plaintext names — must run BEFORE the
+		// snapshot mutation above doesn't matter because newLocal.symbols
+		// is a non-encrypted field, but use the snapshot's symbols just
+		// to be explicit about what we're feeding the symbol counter.
+		await this.touchSymbols(plaintextSnapshot.symbols, +1);
+		return plaintextSnapshot;
 	},
 
 	async updateDream(
@@ -100,10 +113,12 @@ export const dreamsStore = {
 			}
 		}
 
-		await dreamTable.update(id, {
+		const diff: Partial<LocalDream> = {
 			...data,
 			updatedAt: new Date().toISOString(),
-		});
+		};
+		await encryptRecord('dreams', diff);
+		await dreamTable.update(id, diff);
 	},
 
 	/**
@@ -139,12 +154,14 @@ export const dreamsStore = {
 			isPinned: false,
 			isArchived: false,
 		};
+		const plaintextSnapshot = toDream(newLocal);
+		await encryptRecord('dreams', newLocal);
 		await dreamTable.add(newLocal);
 
 		// Fire and forget — transcription updates the dream when it returns.
 		void this.transcribeBlob(newLocal.id, blob, language);
 
-		return toDream(newLocal);
+		return plaintextSnapshot;
 	},
 
 	async setProcessingStatus(
@@ -194,14 +211,22 @@ export const dreamsStore = {
 			const existing = await dreamTable.get(dreamId);
 			if (!existing) return;
 
-			await dreamTable.update(dreamId, {
+			// `existing.content` may be ciphertext at this point — we need
+			// the plaintext to decide whether to overwrite. Decrypt the
+			// existing record first, then check the user-typed content.
+			const { decryptRecord } = await import('$lib/data/crypto');
+			const decryptedExisting = await decryptRecord('dreams', { ...existing });
+
+			const diff: Partial<LocalDream> = {
 				transcript,
 				// Only fill content if user hasn't typed anything yet
-				content: existing.content?.trim() ? existing.content : transcript,
+				content: decryptedExisting.content?.trim() ? decryptedExisting.content : transcript,
 				processingStatus: 'idle',
 				processingError: null,
 				updatedAt: new Date().toISOString(),
-			});
+			};
+			await encryptRecord('dreams', diff);
+			await dreamTable.update(dreamId, diff);
 		} catch (e) {
 			const msg = e instanceof Error ? e.message : String(e);
 			await dreamTable.update(dreamId, {
@@ -286,11 +311,13 @@ export const dreamsStore = {
 			}
 		}
 
-		await dreamSymbolTable.update(id, {
+		const symbolDiff: Record<string, unknown> = {
 			...data,
 			...(data.name ? { name: data.name.trim() } : {}),
 			updatedAt: new Date().toISOString(),
-		});
+		};
+		await encryptRecord('dreamSymbols', symbolDiff);
+		await dreamSymbolTable.update(id, symbolDiff);
 	},
 
 	/** Soft-delete a symbol and remove it from all dreams that reference it. */

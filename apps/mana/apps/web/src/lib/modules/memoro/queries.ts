@@ -4,6 +4,7 @@
 
 import { liveQuery } from 'dexie';
 import { db } from '$lib/data/database';
+import { decryptRecords } from '$lib/data/crypto';
 import type {
 	LocalMemo,
 	LocalMemory,
@@ -60,17 +61,22 @@ export function toSpace(local: LocalSpace): Space {
 /** All non-archived memos, sorted by pinned first then createdAt desc. */
 export function useAllMemos() {
 	return liveQuery(async () => {
-		const locals = await db.table<LocalMemo>('memos').toArray();
-		return sortMemos(locals.filter((m) => !m.deletedAt && !m.isArchived).map(toMemo));
+		const visible = (await db.table<LocalMemo>('memos').toArray()).filter(
+			(m) => !m.deletedAt && !m.isArchived
+		);
+		const decrypted = await decryptRecords('memos', visible);
+		return sortMemos(decrypted.map(toMemo));
 	});
 }
 
 /** All archived memos, sorted by updatedAt desc. */
 export function useArchivedMemos() {
 	return liveQuery(async () => {
-		const locals = await db.table<LocalMemo>('memos').toArray();
-		return locals
-			.filter((m) => !m.deletedAt && m.isArchived)
+		const visible = (await db.table<LocalMemo>('memos').toArray()).filter(
+			(m) => !m.deletedAt && m.isArchived
+		);
+		const decrypted = await decryptRecords('memos', visible);
+		return decrypted
 			.map(toMemo)
 			.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
 	});
@@ -79,8 +85,11 @@ export function useArchivedMemos() {
 /** Memories for a specific memo. */
 export function useMemoriesByMemo(memoId: string) {
 	return liveQuery(async () => {
-		const locals = await db.table<LocalMemory>('memories').where('memoId').equals(memoId).toArray();
-		return locals.filter((m) => !m.deletedAt).map(toMemory);
+		const visible = (
+			await db.table<LocalMemory>('memories').where('memoId').equals(memoId).toArray()
+		).filter((m) => !m.deletedAt);
+		const decrypted = await decryptRecords('memories', visible);
+		return decrypted.map(toMemory);
 	});
 }
 

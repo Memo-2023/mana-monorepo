@@ -39,10 +39,11 @@ export interface EncryptionConfig {
 
 export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	// ─── Chat ────────────────────────────────────────────────
-	messages: { enabled: false, fields: ['messageText'] },
-	conversations: { enabled: false, fields: ['title'] },
+	// Phase 5: messageText is the highest-value target in the entire app.
+	messages: { enabled: true, fields: ['messageText'] },
+	conversations: { enabled: true, fields: ['title'] },
 	chatTemplates: {
-		enabled: false,
+		enabled: true,
 		fields: ['name', 'description', 'systemPrompt', 'initialQuestion'],
 	},
 
@@ -52,16 +53,27 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	notes: { enabled: true, fields: ['title', 'content'] },
 
 	// ─── Dreams ──────────────────────────────────────────────
-	dreams: { enabled: false, fields: ['title', 'content', 'notes'] },
-	dreamSymbols: { enabled: false, fields: ['name', 'meaning'] },
+	// LocalDream uses content + transcript + interpretation, no `notes`.
+	dreams: {
+		enabled: true,
+		fields: ['title', 'content', 'transcript', 'interpretation', 'aiInterpretation', 'location'],
+	},
+	// Symbol `name` stays plaintext — it's used as the unique lookup key
+	// in touchSymbols / updateSymbol via where('name').equals(...). Only
+	// the user-written `meaning` (which is the actually sensitive part)
+	// is encrypted.
+	dreamSymbols: { enabled: true, fields: ['meaning'] },
 
 	// ─── Memoro ──────────────────────────────────────────────
-	memos: { enabled: false, fields: ['title', 'intro', 'transcript'] },
-	memories: { enabled: false, fields: ['title', 'content'] },
+	// Voice transcripts are typically the largest plaintext blobs in the
+	// whole app — encrypting them yields the biggest disk-footprint win
+	// of any single field.
+	memos: { enabled: true, fields: ['title', 'intro', 'transcript'] },
+	memories: { enabled: true, fields: ['title', 'content'] },
 
 	// ─── Contacts ────────────────────────────────────────────
 	contacts: {
-		enabled: false,
+		enabled: true,
 		fields: [
 			'firstName',
 			'lastName',
@@ -89,8 +101,14 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	events: { enabled: false, fields: ['title', 'description', 'location'] },
 
 	// ─── Cycles ──────────────────────────────────────────────
-	cycles: { enabled: false, fields: ['notes'] },
-	cycleDayLogs: { enabled: false, fields: ['notes', 'symptoms', 'mood'] },
+	// Health data — GDPR Art. 9 sensitive personal data category.
+	// `symptoms` stays plaintext: it's a string-array of standardised
+	// labels (cramps, headache, ...) used as a Set in the symptom
+	// counter store; encrypting it would break the diff loop in
+	// dayLogsStore.logDay. `mood` is a single enum but with the same
+	// privacy sensitivity as `notes` — encrypt it.
+	cycles: { enabled: true, fields: ['notes'] },
+	cycleDayLogs: { enabled: true, fields: ['notes', 'mood'] },
 
 	// ─── NutriPhi ────────────────────────────────────────────
 	meals: { enabled: false, fields: ['description', 'notes', 'aiAnalysis'] },
@@ -120,6 +138,10 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	mukkePlaylists: { enabled: false, fields: ['name', 'description'] },
 
 	// ─── Questions ───────────────────────────────────────────
+	// Writes from views are not yet routed through a store — registry
+	// is set so future store creation gets encryption automatically;
+	// existing direct db.table().update() call sites in the views need
+	// to migrate to a store before they actually flow through encryptRecord.
 	questions: { enabled: false, fields: ['title', 'body', 'notes'] },
 	answers: { enabled: false, fields: ['body'] },
 
@@ -128,7 +150,11 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	eventGuests: { enabled: false, fields: ['name', 'email', 'phone', 'notes'] },
 
 	// ─── Finance ─────────────────────────────────────────────
-	transactions: { enabled: false, fields: ['description', 'notes', 'merchant'] },
+	// Transactions are budget-grade PII — amount/date/categoryId stay
+	// plaintext for indexing + aggregation, only the user-typed text
+	// fields (description + note) are encrypted. The schema uses
+	// `note` (singular), not `notes` or `merchant`.
+	transactions: { enabled: true, fields: ['description', 'note'] },
 
 	// ─── uLoad ───────────────────────────────────────────────
 	links: { enabled: false, fields: ['title', 'description', 'targetUrl'] },

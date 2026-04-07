@@ -1,9 +1,15 @@
 /**
  * Finance Store — Mutation-Only Service
+ *
+ * Phase 5 encryption: transaction `description` and `note` are
+ * encrypted at rest. Amount, date, type, categoryId all stay
+ * plaintext so chart/aggregation queries continue to work without
+ * decryption.
  */
 
 import { transactionTable, categoryTable } from '../collections';
 import { toTransaction, toCategory } from '../queries';
+import { encryptRecord } from '$lib/data/crypto';
 import type { LocalTransaction, LocalFinanceCategory, TransactionType } from '../types';
 
 export const financeStore = {
@@ -25,8 +31,10 @@ export const financeStore = {
 			note: data.note ?? null,
 		};
 
+		const plaintextSnapshot = toTransaction(newLocal);
+		await encryptRecord('transactions', newLocal);
 		await transactionTable.add(newLocal);
-		return toTransaction(newLocal);
+		return plaintextSnapshot;
 	},
 
 	async updateTransaction(
@@ -35,10 +43,12 @@ export const financeStore = {
 			Pick<LocalTransaction, 'type' | 'amount' | 'categoryId' | 'description' | 'date' | 'note'>
 		>
 	) {
-		await transactionTable.update(id, {
+		const diff: Partial<LocalTransaction> = {
 			...data,
 			updatedAt: new Date().toISOString(),
-		});
+		};
+		await encryptRecord('transactions', diff);
+		await transactionTable.update(id, diff);
 	},
 
 	async deleteTransaction(id: string) {

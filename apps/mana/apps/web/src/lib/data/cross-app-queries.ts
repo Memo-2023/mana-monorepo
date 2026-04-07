@@ -98,15 +98,20 @@ export function useFavoriteContacts(limit = 5) {
 	return useLiveQueryWithDefault(async () => {
 		// Dexie indexes booleans as `true`/`false` keys — `.where().equals(true)`
 		// hits the index instead of scanning every contact in the address book.
-		const favorites = await db
-			.table<LocalContact>('contacts')
-			.where('isFavorite')
-			.equals(1)
-			.or('isFavorite')
-			.equals(true as unknown as string)
-			.toArray();
-		return favorites
-			.filter((c) => !c.isArchived && !c.deletedAt)
+		const favorites = (
+			await db
+				.table<LocalContact>('contacts')
+				.where('isFavorite')
+				.equals(1)
+				.or('isFavorite')
+				.equals(true as unknown as string)
+				.toArray()
+		).filter((c) => !c.isArchived && !c.deletedAt);
+		// Decrypt firstName/lastName before sorting — they're encrypted
+		// in Phase 5 and the sort needs the plaintext to compare.
+		const { decryptRecords } = await import('./crypto');
+		const decrypted = await decryptRecords('contacts', favorites);
+		return decrypted
 			.sort((a, b) => (a.firstName ?? '').localeCompare(b.firstName ?? ''))
 			.slice(0, limit);
 	}, [] as LocalContact[]);

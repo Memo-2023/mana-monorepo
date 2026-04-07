@@ -4,6 +4,7 @@
 
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
+import { decryptRecord, decryptRecords } from '$lib/data/crypto';
 import type {
 	Cycle,
 	CycleDayLog,
@@ -64,11 +65,11 @@ export function toCycleSymptom(local: LocalCycleSymptom): CycleSymptom {
 
 export function useAllCycles() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalCycle>('cycles').toArray();
-		return locals
-			.filter((c) => !c.deletedAt && !c.isArchived)
-			.map(toCycle)
-			.sort((a, b) => b.startDate.localeCompare(a.startDate));
+		const visible = (await db.table<LocalCycle>('cycles').toArray()).filter(
+			(c) => !c.deletedAt && !c.isArchived
+		);
+		const decrypted = await decryptRecords('cycles', visible);
+		return decrypted.map(toCycle).sort((a, b) => b.startDate.localeCompare(a.startDate));
 	}, [] as Cycle[]);
 }
 
@@ -79,7 +80,8 @@ export function useCurrentCycle() {
 			const real = locals.filter((c) => !c.deletedAt && !c.isArchived && !c.isPredicted);
 			if (real.length === 0) return null;
 			const latest = real.sort((a, b) => b.startDate.localeCompare(a.startDate))[0];
-			return toCycle(latest);
+			const decrypted = await decryptRecord('cycles', { ...latest });
+			return toCycle(decrypted);
 		},
 		null as Cycle | null
 	);
@@ -87,11 +89,11 @@ export function useCurrentCycle() {
 
 export function useAllDayLogs() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalCycleDayLog>('cycleDayLogs').toArray();
-		return locals
-			.filter((l) => !l.deletedAt)
-			.map(toCycleDayLog)
-			.sort((a, b) => b.logDate.localeCompare(a.logDate));
+		const visible = (await db.table<LocalCycleDayLog>('cycleDayLogs').toArray()).filter(
+			(l) => !l.deletedAt
+		);
+		const decrypted = await decryptRecords('cycleDayLogs', visible);
+		return decrypted.map(toCycleDayLog).sort((a, b) => b.logDate.localeCompare(a.logDate));
 	}, [] as CycleDayLog[]);
 }
 
@@ -104,7 +106,9 @@ export function useDayLog(date: string) {
 				.equals(date)
 				.toArray();
 			const active = locals.find((l) => !l.deletedAt);
-			return active ? toCycleDayLog(active) : null;
+			if (!active) return null;
+			const decrypted = await decryptRecord('cycleDayLogs', { ...active });
+			return toCycleDayLog(decrypted);
 		},
 		null as CycleDayLog | null
 	);

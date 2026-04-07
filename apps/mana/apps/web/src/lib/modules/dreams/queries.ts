@@ -1,9 +1,14 @@
 /**
  * Reactive Queries & Pure Helpers for Dreams module.
+ *
+ * Phase 5: dream content fields are encrypted at rest. liveQueries
+ * filter on plaintext metadata first (deletedAt, isArchived) and
+ * then decryptRecords the visible set before mapping to public types.
  */
 
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
+import { decryptRecords } from '$lib/data/crypto';
 import type { Dream, DreamSymbol, LocalDream, LocalDreamSymbol } from './types';
 
 // ─── Type Converters ───────────────────────────────────────
@@ -56,24 +61,25 @@ export function toDreamSymbol(local: LocalDreamSymbol): DreamSymbol {
 
 export function useAllDreams() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalDream>('dreams').toArray();
-		return locals
-			.filter((d) => !d.deletedAt && !d.isArchived)
-			.map(toDream)
-			.sort((a, b) => {
-				if (a.isPinned !== b.isPinned) return a.isPinned ? -1 : 1;
-				return b.dreamDate.localeCompare(a.dreamDate);
-			});
+		const visible = (await db.table<LocalDream>('dreams').toArray()).filter(
+			(d) => !d.deletedAt && !d.isArchived
+		);
+		const decrypted = await decryptRecords('dreams', visible);
+		return decrypted.map(toDream).sort((a, b) => {
+			if (a.isPinned !== b.isPinned) return a.isPinned ? -1 : 1;
+			return b.dreamDate.localeCompare(a.dreamDate);
+		});
 	}, [] as Dream[]);
 }
 
 export function useAllDreamSymbols() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalDreamSymbol>('dreamSymbols').toArray();
-		return locals
-			.filter((s) => !s.deletedAt)
-			.map(toDreamSymbol)
-			.sort((a, b) => b.count - a.count);
+		const visible = (await db.table<LocalDreamSymbol>('dreamSymbols').toArray()).filter(
+			(s) => !s.deletedAt
+		);
+		// Only `meaning` is encrypted; `name` stays plaintext for indexed lookups.
+		const decrypted = await decryptRecords('dreamSymbols', visible);
+		return decrypted.map(toDreamSymbol).sort((a, b) => b.count - a.count);
 	}, [] as DreamSymbol[]);
 }
 

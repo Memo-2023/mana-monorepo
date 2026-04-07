@@ -4,6 +4,7 @@
 
 import { liveQuery } from 'dexie';
 import { db } from '$lib/data/database';
+import { decryptRecords } from '$lib/data/crypto';
 import type { LocalContact, Contact, SortField, ContactFilter } from './types';
 
 // ─── Type Converter ───────────────────────────────────────
@@ -48,8 +49,11 @@ export function toContact(local: LocalContact): Contact {
 
 export function useAllContacts() {
 	return liveQuery(async () => {
-		const locals = await db.table<LocalContact>('contacts').toArray();
-		return locals.filter((c) => !c.deletedAt).map(toContact);
+		const visible = (await db.table<LocalContact>('contacts').toArray()).filter(
+			(c) => !c.deletedAt
+		);
+		const decrypted = await decryptRecords('contacts', visible);
+		return decrypted.map(toContact);
 	});
 }
 

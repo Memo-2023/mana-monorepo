@@ -7,6 +7,7 @@ import { toCycle, toCycleDayLog } from '../queries';
 import { detectPeriodEnd, shouldStartNewCycle } from '../utils/auto-detect';
 import { cyclesStore } from './cycles.svelte';
 import { symptomsStore } from './symptoms.svelte';
+import { encryptRecord } from '$lib/data/crypto';
 import type { CervicalMucus, Flow, LocalCycle, LocalCycleDayLog, Mood } from '../types';
 
 function todayIsoDate(): string {
@@ -63,11 +64,15 @@ export const dayLogsStore = {
 				if (added.length) await symptomsStore.touchSymptoms(added, +1);
 				if (removed.length) await symptomsStore.touchSymptoms(removed, -1);
 			}
-			await cycleDayLogTable.update(existing.id, {
+			const updateDiff: Partial<LocalCycleDayLog> = {
 				...data,
 				logDate,
 				updatedAt: new Date().toISOString(),
-			});
+			};
+			await encryptRecord('cycleDayLogs', updateDiff);
+			await cycleDayLogTable.update(existing.id, updateDiff);
+			// `result` keeps the plaintext for the return value — caller
+			// expects to render the input back.
 			result = { ...existing, ...data, logDate };
 		} else {
 			const cycleId = await resolveCycleId(logDate);
@@ -84,11 +89,14 @@ export const dayLogsStore = {
 				sexualActivity: data.sexualActivity ?? null,
 				notes: data.notes ?? null,
 			};
+			// Plaintext copy retained for the return value — what we
+			// write to disk is encrypted.
+			result = { ...newLocal };
+			await encryptRecord('cycleDayLogs', newLocal);
 			await cycleDayLogTable.add(newLocal);
-			if (newLocal.symptoms.length) {
-				await symptomsStore.touchSymptoms(newLocal.symptoms, +1);
+			if (result.symptoms.length) {
+				await symptomsStore.touchSymptoms(result.symptoms, +1);
 			}
-			result = newLocal;
 		}
 
 		// ─ Auto-End: Wenn explizit 'none' geloggt wurde, prüfe ob die Periode beendet werden soll

@@ -10,6 +10,7 @@ import { conversationTable, messageTable } from '../collections';
 import { toConversation } from '../queries';
 import { createArchiveOps } from '@mana/shared-stores';
 import { ChatEvents } from '@mana/shared-utils/analytics';
+import { encryptRecord } from '$lib/data/crypto';
 import type { LocalConversation } from '../types';
 
 /** Archive/soft-delete ops for conversations. */
@@ -38,25 +39,31 @@ export const conversationsStore = {
 			isArchived: false,
 			isPinned: false,
 		};
+		const plaintextSnapshot = toConversation(newLocal);
+		await encryptRecord('conversations', newLocal);
 		await conversationTable.add(newLocal);
 		ChatEvents.conversationCreated();
-		return toConversation(newLocal);
+		return plaintextSnapshot;
 	},
 
 	/** Update a conversation's fields. */
 	async update(id: string, updates: Partial<LocalConversation>) {
-		await conversationTable.update(id, {
+		const diff: Partial<LocalConversation> = {
 			...updates,
 			updatedAt: new Date().toISOString(),
-		});
+		};
+		await encryptRecord('conversations', diff);
+		await conversationTable.update(id, diff);
 	},
 
 	/** Update conversation title. */
 	async updateTitle(id: string, title: string) {
-		await conversationTable.update(id, {
+		const diff: Partial<LocalConversation> = {
 			title,
 			updatedAt: new Date().toISOString(),
-		});
+		};
+		await encryptRecord('conversations', diff);
+		await conversationTable.update(id, diff);
 	},
 
 	// Archive ops (delegated to shared factory)

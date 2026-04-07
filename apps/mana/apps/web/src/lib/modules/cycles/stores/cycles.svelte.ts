@@ -5,6 +5,7 @@
 import { cycleTable } from '../collections';
 import { toCycle } from '../queries';
 import { daysBetween } from '../utils/phase';
+import { encryptRecord } from '$lib/data/crypto';
 import type { LocalCycle } from '../types';
 
 function todayIsoDate(): string {
@@ -48,8 +49,10 @@ export const cyclesStore = {
 			isArchived: false,
 			notes: data.notes ?? null,
 		};
+		const plaintextSnapshot = toCycle(newLocal);
+		await encryptRecord('cycles', newLocal);
 		await cycleTable.add(newLocal);
-		return toCycle(newLocal);
+		return plaintextSnapshot;
 	},
 
 	async updateCycle(
@@ -61,10 +64,12 @@ export const cyclesStore = {
 			>
 		>
 	) {
-		await cycleTable.update(id, {
+		const diff: Partial<LocalCycle> = {
 			...data,
 			updatedAt: new Date().toISOString(),
-		});
+		};
+		await encryptRecord('cycles', diff);
+		await cycleTable.update(id, diff);
 	},
 
 	/** Markiert das Ende der Blutung (nicht das Ende des Zyklus). */

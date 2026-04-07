@@ -250,15 +250,17 @@ describe('encryption registry', () => {
 	});
 
 	it('returns null for registered tables that are disabled', () => {
-		// `notes` was flipped to enabled:true in Phase 4 — pick two
-		// tables that are still on the safe default for the assertion.
-		expect(getEncryptedFields('messages')).toBe(null);
-		expect(getEncryptedFields('contacts')).toBe(null);
+		// Phase 5 flipped most user-content tables to enabled. Pick two
+		// that are still on the safe default for the assertion: tasks
+		// and events both have a registry entry but enabled:false.
+		expect(getEncryptedFields('tasks')).toBe(null);
+		expect(getEncryptedFields('events')).toBe(null);
 	});
 
 	it('returns the field list for tables that are enabled', () => {
-		// Phase 4: notes is the pilot, expected to be flipped on.
+		// Phase 4 + 5: notes pilot plus the chat/dreams/memoro/contacts rollout.
 		expect(getEncryptedFields('notes')).toEqual(['title', 'content']);
+		expect(getEncryptedFields('messages')).toEqual(['messageText']);
 	});
 
 	it('hasAnyEncryption returns true once at least one table is enabled', () => {

@@ -21,6 +21,12 @@ vi.mock('$lib/triggers/inline-suggest', () => ({
 
 import { db } from '$lib/data/database';
 import { setCurrentUserId } from '$lib/data/current-user';
+import {
+	generateMasterKey,
+	MemoryKeyProvider,
+	setKeyProvider,
+	decryptRecords,
+} from '$lib/data/crypto';
 import { cyclesStore } from './cycles.svelte';
 import { dayLogsStore } from './dayLogs.svelte';
 import { symptomsStore } from './symptoms.svelte';
@@ -42,6 +48,13 @@ async function resetCyclesTables() {
 
 beforeEach(async () => {
 	setCurrentUserId('test-user');
+	// Phase 5 cycles encryption requires an unlocked vault — install a
+	// real Web Crypto key in a fresh MemoryKeyProvider for each test
+	// run so the dayLogsStore.logDay calls below can encrypt notes/mood.
+	const key = await generateMasterKey();
+	const provider = new MemoryKeyProvider();
+	provider.setKey(key);
+	setKeyProvider(provider);
 	await resetCyclesTables();
 });
 
@@ -113,7 +126,10 @@ describe('dayLogsStore.logDay — upsert behavior', () => {
 		await dayLogsStore.logDay({ logDate: '2026-04-07', mood: 'good' });
 		await dayLogsStore.logDay({ logDate: '2026-04-07', temperature: 36.6 });
 
-		const logs = (await dayLogTable().toArray()).filter((l) => !l.deletedAt);
+		// Phase 5: `mood` is encrypted on disk — decrypt before asserting
+		// so the test reads the same view the UI does.
+		const raw = (await dayLogTable().toArray()).filter((l) => !l.deletedAt);
+		const logs = await decryptRecords<LocalCycleDayLog>('cycleDayLogs', raw);
 		expect(logs).toHaveLength(1);
 		expect(logs[0].flow).toBe('light');
 		expect(logs[0].mood).toBe('good');

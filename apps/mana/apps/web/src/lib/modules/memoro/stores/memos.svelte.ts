@@ -9,6 +9,7 @@ import { memoTable } from '../collections';
 import { toMemo } from '../queries';
 import { createArchiveOps } from '@mana/shared-stores';
 import { MemoroEvents } from '@mana/shared-utils/analytics';
+import { encryptRecord } from '$lib/data/crypto';
 import type { LocalMemo } from '../types';
 
 /** Archive/soft-delete ops for memos. */
@@ -39,9 +40,11 @@ export const memosStore = {
 			blueprintId: data.blueprintId ?? null,
 			language: data.language ?? null,
 		};
+		const plaintextSnapshot = toMemo(newLocal);
+		await encryptRecord('memos', newLocal);
 		await memoTable.add(newLocal);
 		MemoroEvents.memoCreated();
-		return toMemo(newLocal);
+		return plaintextSnapshot;
 	},
 
 	/**
@@ -95,12 +98,14 @@ export const memosStore = {
 			const existing = await memoTable.get(memoId);
 			if (!existing) return;
 
-			await memoTable.update(memoId, {
+			const diff: Partial<LocalMemo> = {
 				transcript,
 				language: existing.language ?? result.language ?? null,
 				processingStatus: 'completed',
 				updatedAt: new Date().toISOString(),
-			});
+			};
+			await encryptRecord('memos', diff);
+			await memoTable.update(memoId, diff);
 		} catch (e) {
 			const msg = e instanceof Error ? e.message : String(e);
 			await memoTable.update(memoId, {
@@ -116,10 +121,12 @@ export const memosStore = {
 		id: string,
 		data: Partial<Pick<LocalMemo, 'title' | 'intro' | 'transcript' | 'language' | 'isPublic'>>
 	) {
-		await memoTable.update(id, {
+		const diff: Partial<LocalMemo> = {
 			...data,
 			updatedAt: new Date().toISOString(),
-		});
+		};
+		await encryptRecord('memos', diff);
+		await memoTable.update(id, diff);
 	},
 
 	// Archive ops (delegated to shared factory)
