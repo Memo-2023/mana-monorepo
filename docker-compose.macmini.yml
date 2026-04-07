@@ -947,6 +947,11 @@ services:
       # Analytics & Error Tracking
       PUBLIC_UMAMI_WEBSITE_ID: 32777167-e026-4618-933a-3429120b479b
       PUBLIC_GLITCHTIP_DSN: ${GLITCHTIP_DSN_MANA_WEB:-}
+      # Speech-to-Text proxy: SvelteKit /api/v1/memoro/transcribe and
+      # /api/v1/dreams/transcribe forward to mana-stt via Cloudflare Tunnel.
+      # The browser never sees the API key — it stays server-side.
+      MANA_STT_URL: https://gpu-stt.mana.how
+      MANA_STT_API_KEY: ${MANA_STT_API_KEY:-}
     ports:
       - "5000:5000"
     healthcheck:
