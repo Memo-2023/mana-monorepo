@@ -125,19 +125,33 @@ The browser never talks to mana-stt directly — requests go through the SvelteK
 
 **Where to obtain a key:**
 
-- Production deploy: set `MANA_STT_API_KEY` in the Mac Mini's `.env` (sourced by
-  `docker-compose.macmini.yml`, line ~1076). The key lives on the Windows GPU box in
-  `services/mana-stt/.env` under `API_KEYS=<key>:<name>` and is the source of truth.
-- Local dev: paste the dev key into your local `apps/mana/apps/web/.env` after running
+- **Production (Mac Mini)**: `MANA_STT_API_KEY` is read from `~/projects/mana-monorepo/.env`
+  on the Mac Mini and injected into the `mana-web` container by `docker-compose.macmini.yml`
+  (the `mana-web` service block, alongside `MANA_STT_URL=https://gpu-stt.mana.how`). To rotate,
+  update the `.env` value and recreate the container with
+  `docker compose -f docker-compose.macmini.yml up -d --no-deps --force-recreate mana-web`.
+- **Local dev**: paste the dev key into your local `apps/mana/apps/web/.env` after running
   `pnpm setup:env` (the generator only writes an empty placeholder). Ask in `#mana-dev` or
   pull from the team's password manager under `mana-stt → web-key`.
-- New dev key: SSH to the Windows GPU box (`ssh mana-gpu`), append a new entry to
-  `C:\mana\services\mana-stt\.env` `API_KEYS` (format: `<random>:<name>`), restart the
-  `ManaSTT` scheduled task. Use a fresh key per consumer (`mana-web`, `chat-server`, etc.)
-  so we can revoke individually.
+- **Source of truth**: `services/mana-stt/.env` on the Windows GPU box, in the `API_KEYS`
+  variable. Each entry is `<random>:<name>` and gets rate-limited per key.
+- **Adding a new key**: SSH to the Windows GPU box (`ssh mana-gpu`), append a new entry to
+  `C:\mana\services\mana-stt\.env` `API_KEYS`, restart the `ManaSTT` scheduled task. Use a
+  fresh key per consumer (`mana-web`, `chat-server`, etc.) so they can be revoked individually.
 
-**Endpoint:** `https://gpu-stt.mana.how` — Cloudflare Tunnel `mana-gpu-server` →
-Windows GPU box (`192.168.178.11:3020`). Health: `curl https://gpu-stt.mana.how/health`.
+**Endpoint:** `https://gpu-stt.mana.how` — Cloudflare Tunnel `mana-gpu-server` (token-managed,
+runs as a Windows Service on the GPU box, **not** as a route in the Mac Mini's cloudflared).
+The tunnel terminates at `localhost:3020` on the Windows host.
+
+**Health check**:
+
+```bash
+curl https://gpu-stt.mana.how/health
+# → {"status":"healthy","whisper_loaded":true,"whisperx":true,...}
+```
+
+If this returns 502, see "GPU Tunnel" in `docs/MAC_MINI_SERVER.md` for the standard
+debug ladder.
 
 ## Adding New Variables
 

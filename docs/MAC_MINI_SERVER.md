@@ -58,17 +58,30 @@ Cloudflare Tunnel (cloudflared)
 │  │  ├── Ollama             (Port 11434) - gemma3:12b   │   │
 │  │  ├── STT (Whisper)      (Port 3020)                 │   │
 │  │  ├── TTS                (Port 3022)                 │   │
-│  │  └── Image Gen (FLUX)   (Port 3023)                 │   │
+│  │  ├── Image Gen (FLUX)   (Port 3023)                 │   │
+│  │  └── cloudflared        (Windows Service, Tunnel    │   │
+│  │                          mana-gpu-server)           │   │
+│  │                          → gpu-*.mana.how           │   │
 │  └─────────────────────────────────────────────────────┘   │
 │                                                             │
 │  ┌─────────────────────────────────────────────────────┐   │
-│  │  LaunchAgents (Autostart)                           │   │
-│  │  ├── cloudflared            (Tunnel)                │   │
+│  │  LaunchAgents (Autostart, Mac Mini)                 │   │
+│  │  ├── cloudflared            (Tunnel mana-server,    │   │
+│  │  │                          → all .mana.how except  │   │
+│  │  │                          gpu-*)                  │   │
 │  │  ├── docker-startup         (Container beim Boot)   │   │
 │  │  └── health-check           (alle 5 Minuten)        │   │
 │  └─────────────────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────────────────┘
 ```
+
+> **Two-tunnel setup**: There are two Cloudflare tunnels in this stack.
+> The **mana-server** tunnel runs on the Mac Mini (LaunchAgent, locally-managed
+> via `~/.cloudflared/config.yml`) and handles every `*.mana.how` route except
+> the GPU ones. The **mana-gpu-server** tunnel runs on the Windows GPU box as
+> a Windows Service (token-managed via the Cloudflare dashboard, NOT a local
+> config.yml) and handles `gpu-stt`, `gpu-llm`, `gpu-tts`, `gpu-img`,
+> `gpu-ollama`. See the "GPU Tunnel" section below for adding new hostnames.
 
 ### Öffentliche URLs
 
@@ -212,6 +225,69 @@ launchctl unload ~/Library/LaunchAgents/com.mana.docker-startup.plist
 launchctl load ~/Library/LaunchAgents/com.mana.docker-startup.plist
 ```
 
+## GPU Tunnel (mana-gpu-server)
+
+The Windows GPU box is **not** reached via the Mac Mini's tunnel. It runs its
+own Cloudflare tunnel as a Windows Service, exposing five public hostnames:
+
+| Hostname | Local target on Windows | Service |
+|---|---|---|
+| `gpu-stt.mana.how` | `localhost:3020` | mana-stt (Whisper) |
+| `gpu-llm.mana.how` | `localhost:3025` | mana-llm |
+| `gpu-tts.mana.how` | `localhost:3022` | mana-tts |
+| `gpu-img.mana.how` | `localhost:3023` | mana-image-gen (FLUX) |
+| `gpu-ollama.mana.how` | `localhost:11434` | Ollama |
+
+The connector itself runs as the Windows Service `Cloudflared`, installed via
+`cloudflared.exe service install <TOKEN>`. **Token-managed** means the routing
+config (which hostname → which local port) lives in the Cloudflare Zero Trust
+dashboard, **not** in any local config file. Editing
+`~/.cloudflared/config.yml` on the Windows box has no effect on this tunnel.
+
+### Adding a new GPU hostname
+
+1. **Cloudflare dashboard**: Zero Trust → Networks → Tunnels → `mana-gpu-server`
+   → Public Hostname → "Add a public hostname" with `Service Type: HTTP` and
+   `URL: localhost:<PORT>`. The dashboard creates both the DNS CNAME and the
+   ingress rule in one step.
+2. **Verify**: `curl https://<new-host>.mana.how/health` should return 200 within
+   a few seconds (no need to restart the connector — it picks up dashboard
+   changes automatically).
+
+### If a `gpu-*` hostname returns 502
+
+Most likely the DNS CNAME points at a different tunnel (e.g. `mana-server`
+instead of `mana-gpu-server`). To force-repoint from the Mac Mini:
+
+```bash
+ssh mana-server "/opt/homebrew/bin/cloudflared tunnel route dns \
+    --overwrite-dns 83454e8e-d7f5-4954-b2cb-0307c2dba7a6 <hostname>"
+```
+
+(`83454e8e-…` is the `mana-gpu-server` tunnel UUID. Use the UUID, not the
+name — the CLI resolves the name against the wrong tunnel context otherwise.)
+
+Other 502 root causes to check, in order of likelihood:
+
+1. **Cloudflared service stopped on Windows**: `ssh mana-gpu "Get-Service Cloudflared"` → must show `Running`. Restart with `Restart-Service Cloudflared`.
+2. **Origin service down**: `ssh mana-gpu "Get-ScheduledTask -TaskName ManaSTT"` → must show `Running`. The Python service runs as a Scheduled Task with `RestartCount=5, RestartInterval=PT1M`, so a crash should self-heal within ~1 min.
+3. **Public Hostname missing in dashboard**: tunnel has zero ingress rules for the requested hostname.
+
+### API key for STT proxy
+
+The unified mana-web container's `/api/v1/memoro/transcribe` and
+`/api/v1/dreams/transcribe` proxies need `MANA_STT_API_KEY` to authenticate
+against `gpu-stt.mana.how`. The key:
+
+- Lives in **Mac Mini `~/projects/mana-monorepo/.env`** (gitignored)
+- Is referenced from `docker-compose.macmini.yml` as `${MANA_STT_API_KEY:-}`
+- The source-of-truth is `services/mana-stt/.env` on the Windows GPU box (`API_KEYS=<key>:<name>`)
+
+To rotate: append a new entry on the Windows side, restart the `ManaSTT`
+scheduled task, update both `.env` files (Mac Mini + any local dev), restart
+`mana-app-web`. Use a separate key per consumer (`mana-web`, future apps) so
+they can be revoked individually.
+
 ## Autostart-Konfiguration
 
 Drei LaunchAgents sorgen fuer automatischen Betrieb:
@@ -221,7 +297,8 @@ Drei LaunchAgents sorgen fuer automatischen Betrieb:
 **Datei:** `~/Library/LaunchAgents/com.cloudflare.cloudflared.plist`
 
 - Startet beim Login
-- Haelt den Tunnel zu Cloudflare offen
+- Haelt den Tunnel zu Cloudflare offen (mana-server tunnel only — the
+  GPU tunnel runs on the Windows box as a Windows Service, not here)
 - Automatischer Neustart bei Absturz
 
 ### 2. Docker Container Startup
