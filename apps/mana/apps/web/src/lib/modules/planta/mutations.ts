@@ -7,6 +7,7 @@
 import { db } from '$lib/data/database';
 import { toPlant, toWateringSchedule } from './queries';
 import { PlantaEvents } from '@mana/shared-utils/analytics';
+import { encryptRecord } from '$lib/data/crypto';
 import type {
 	LocalPlant,
 	LocalWateringSchedule,
@@ -38,9 +39,11 @@ export const plantMutations = {
 				createdAt: now,
 				updatedAt: now,
 			};
+			const plaintextSnapshot = toPlant(newLocal);
+			await encryptRecord('plants', newLocal);
 			await db.table('plants').add(newLocal);
 			PlantaEvents.plantCreated();
-			return toPlant(newLocal);
+			return plaintextSnapshot;
 		} catch (e) {
 			console.error('Failed to create plant:', e);
 			return null;
@@ -63,9 +66,15 @@ export const plantMutations = {
 				updateData.wateringFrequencyDays = dto.wateringFrequencyDays ?? null;
 			if (dto.humidity !== undefined) updateData.humidity = dto.humidity ?? null;
 
+			await encryptRecord('plants', updateData);
 			await db.table('plants').update(id, updateData);
+			// Re-read decrypts via the queries layer if a query is consumed.
+			// Direct returns from this function need explicit decryption.
+			const { decryptRecord } = await import('$lib/data/crypto');
 			const updated = await db.table<LocalPlant>('plants').get(id);
-			return updated ? toPlant(updated) : null;
+			if (!updated) return null;
+			const decrypted = await decryptRecord('plants', { ...updated });
+			return toPlant(decrypted);
 		} catch (e) {
 			console.error('Failed to update plant:', e);
 			return null;

@@ -9,6 +9,7 @@ import { db } from '$lib/data/database';
 import { presiDeckTable, slideTable } from '../collections';
 import { toDeck, toSlide } from '../queries';
 import { PresiEvents } from '@mana/shared-utils/analytics';
+import { encryptRecord } from '$lib/data/crypto';
 import type {
 	LocalDeck,
 	LocalSlide,
@@ -35,9 +36,11 @@ function createDecksStore() {
 				themeId: dto.themeId || null,
 				isPublic: false,
 			};
+			const plaintextSnapshot = toDeck(newLocal);
+			await encryptRecord('presiDecks', newLocal);
 			await presiDeckTable.add(newLocal);
 			PresiEvents.deckCreated();
-			return toDeck(newLocal);
+			return plaintextSnapshot;
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to create deck';
 			console.error('Failed to create deck:', e);
@@ -58,6 +61,7 @@ function createDecksStore() {
 			if (dto.themeId !== undefined) localUpdates.themeId = dto.themeId;
 			if (dto.isPublic !== undefined) localUpdates.isPublic = dto.isPublic;
 
+			await encryptRecord('presiDecks', localUpdates);
 			await presiDeckTable.update(id, localUpdates);
 			return true;
 		} catch (e) {
@@ -100,9 +104,11 @@ function createDecksStore() {
 				order,
 				content: dto.content,
 			};
+			const plaintextSnapshot = toSlide(newLocal);
+			await encryptRecord('slides', newLocal);
 			await slideTable.add(newLocal);
 			PresiEvents.slideCreated();
-			return toSlide(newLocal);
+			return plaintextSnapshot;
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to create slide';
 			console.error('Failed to create slide:', e);
@@ -119,6 +125,7 @@ function createDecksStore() {
 			if (dto.content !== undefined) localUpdates.content = dto.content;
 			if (dto.order !== undefined) localUpdates.order = dto.order;
 
+			await encryptRecord('slides', localUpdates);
 			await slideTable.update(id, localUpdates);
 			return true;
 		} catch (e) {

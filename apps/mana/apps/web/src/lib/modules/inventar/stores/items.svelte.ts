@@ -10,6 +10,7 @@ import { toItem } from '../queries';
 import type { LocalItem } from '../types';
 import type { ItemStatus } from '../queries';
 import { InventarEvents } from '@mana/shared-utils/analytics';
+import { encryptRecord } from '$lib/data/crypto';
 
 export const itemsStore = {
 	async create(data: {
@@ -45,9 +46,11 @@ export const itemsStore = {
 			tags: data.tags || [],
 			order: collectionItems.length,
 		};
+		const plaintextSnapshot = toItem(newLocal);
+		await encryptRecord('invItems', newLocal);
 		await invItemTable.add(newLocal);
 		InventarEvents.itemCreated();
-		return toItem(newLocal);
+		return plaintextSnapshot;
 	},
 
 	async update(
@@ -67,10 +70,12 @@ export const itemsStore = {
 			>
 		>
 	) {
-		await invItemTable.update(id, {
+		const diff: Partial<LocalItem> = {
 			...data,
 			updatedAt: new Date().toISOString(),
-		});
+		};
+		await encryptRecord('invItems', diff);
+		await invItemTable.update(id, diff);
 		InventarEvents.itemUpdated();
 	},
 

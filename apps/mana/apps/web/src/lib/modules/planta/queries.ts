@@ -8,6 +8,7 @@
 
 import { liveQuery } from 'dexie';
 import { db } from '$lib/data/database';
+import { decryptRecords } from '$lib/data/crypto';
 import type {
 	LocalPlant,
 	LocalPlantPhoto,
@@ -93,8 +94,9 @@ export function toWateringLog(local: LocalWateringLog): WateringLog {
 /** All plants. Auto-updates on any change. */
 export function useAllPlants() {
 	return liveQuery(async () => {
-		const locals = await db.table<LocalPlant>('plants').toArray();
-		return locals.filter((p) => !p.deletedAt).map(toPlant);
+		const visible = (await db.table<LocalPlant>('plants').toArray()).filter((p) => !p.deletedAt);
+		const decrypted = await decryptRecords('plants', visible);
+		return decrypted.map(toPlant);
 	});
 }
 

@@ -9,6 +9,7 @@ import { CardsEvents } from '@mana/shared-utils/analytics';
 import { db } from '$lib/data/database';
 import { cardDeckTable, cardTable } from '../collections';
 import { toDeck } from '../queries';
+import { encryptRecord } from '$lib/data/crypto';
 import type { LocalDeck } from '../types';
 import type { Deck, CreateDeckInput, UpdateDeckInput } from '../types';
 
@@ -31,9 +32,11 @@ export const deckStore = {
 				isPublic: input.isPublic ?? false,
 			};
 
+			const plaintextSnapshot = toDeck(newLocal);
+			await encryptRecord('cardDecks', newLocal);
 			await cardDeckTable.add(newLocal);
 			CardsEvents.deckCreated();
-			return toDeck(newLocal);
+			return plaintextSnapshot;
 		} catch (err: any) {
 			error = err.message || 'Failed to create deck';
 			console.error('Create deck error:', err);
@@ -49,10 +52,12 @@ export const deckStore = {
 			if (updates.description !== undefined) localUpdates.description = updates.description;
 			if (updates.isPublic !== undefined) localUpdates.isPublic = updates.isPublic;
 
-			await cardDeckTable.update(id, {
+			const diff: Partial<LocalDeck> = {
 				...localUpdates,
 				updatedAt: new Date().toISOString(),
-			});
+			};
+			await encryptRecord('cardDecks', diff);
+			await cardDeckTable.update(id, diff);
 		} catch (err: any) {
 			error = err.message || 'Failed to update deck';
 			console.error('Update deck error:', err);

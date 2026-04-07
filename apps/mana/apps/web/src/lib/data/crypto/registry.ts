@@ -114,15 +114,24 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	meals: { enabled: false, fields: ['description', 'notes', 'aiAnalysis'] },
 
 	// ─── Planta ──────────────────────────────────────────────
-	plants: { enabled: false, fields: ['name', 'notes', 'careNotes'] },
+	// `name` is NOT in the schema index for plants (only isActive +
+	// healthStatus), so encrypting it is safe. LocalPlant uses
+	// `careNotes` (no separate `notes`) plus the user-typed metadata.
+	plants: { enabled: true, fields: ['name', 'careNotes', 'temperature', 'soilType'] },
 
 	// ─── Cards ───────────────────────────────────────────────
-	cards: { enabled: false, fields: ['front', 'back', 'notes'] },
-	cardDecks: { enabled: false, fields: ['title', 'description'] },
+	// `cards` has no `notes` column on LocalCard — only front + back are
+	// user content. cardDecks uses `name` (not `title`) on the schema
+	// even though the public DTO translates it to `title`.
+	cards: { enabled: true, fields: ['front', 'back'] },
+	cardDecks: { enabled: true, fields: ['name', 'description'] },
 
 	// ─── Presi ───────────────────────────────────────────────
-	presiDecks: { enabled: false, fields: ['title', 'description'] },
-	slides: { enabled: false, fields: ['content', 'notes'] },
+	// LocalSlide only has `content` (SlideContent object) — no separate
+	// notes column on the schema. JSON-stringify in wrapValue handles
+	// the nested object cleanly.
+	presiDecks: { enabled: true, fields: ['title', 'description'] },
+	slides: { enabled: true, fields: ['content'] },
 
 	// ─── Context ─────────────────────────────────────────────
 	documents: { enabled: false, fields: ['title', 'content', 'body'] },
@@ -161,7 +170,13 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	manaLinks: { enabled: false, fields: ['label', 'url', 'notes'] },
 
 	// ─── Inventar ────────────────────────────────────────────
-	invItems: { enabled: false, fields: ['name', 'description', 'notes'] },
+	// `name` is indexed (used in where()/sortBy queries). `notes` is an
+	// array of {id, content, createdAt} that addNote/deleteNote splice
+	// in place — encrypting it would force every mutation to decrypt+
+	// re-encrypt the whole array. Encrypt only the description field
+	// for now; broader coverage is a Phase 7 concern that needs a
+	// different storage layout.
+	invItems: { enabled: true, fields: ['description'] },
 };
 
 /**

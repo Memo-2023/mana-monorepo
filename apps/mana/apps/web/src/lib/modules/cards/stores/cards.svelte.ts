@@ -8,6 +8,7 @@
 import { CardsEvents } from '@mana/shared-utils/analytics';
 import { cardTable, cardDeckTable } from '../collections';
 import { toCard } from '../queries';
+import { encryptRecord } from '$lib/data/crypto';
 import type { LocalCard, Card, CreateCardInput, UpdateCardInput } from '../types';
 
 let error = $state<string | null>(null);
@@ -30,6 +31,8 @@ export const cardStore = {
 				order: currentCardCount,
 			};
 
+			const plaintextSnapshot = toCard(newLocal);
+			await encryptRecord('cards', newLocal);
 			await cardTable.add(newLocal);
 
 			// Update deck card count
@@ -42,7 +45,7 @@ export const cardStore = {
 			}
 
 			CardsEvents.cardCreated();
-			return toCard(newLocal);
+			return plaintextSnapshot;
 		} catch (err: any) {
 			error = err.message || 'Failed to create card';
 			console.error('Create card error:', err);
@@ -59,10 +62,12 @@ export const cardStore = {
 			if (updates.difficulty !== undefined) localUpdates.difficulty = updates.difficulty;
 			if (updates.order !== undefined) localUpdates.order = updates.order;
 
-			await cardTable.update(id, {
+			const diff: Partial<LocalCard> = {
 				...localUpdates,
 				updatedAt: new Date().toISOString(),
-			});
+			};
+			await encryptRecord('cards', diff);
+			await cardTable.update(id, diff);
 		} catch (err: any) {
 			error = err.message || 'Failed to update card';
 			console.error('Update card error:', err);

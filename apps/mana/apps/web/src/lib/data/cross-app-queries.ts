@@ -248,13 +248,17 @@ export function useMusicStats() {
 /** Recent presentation decks. */
 export function useRecentDecks(limit = 5) {
 	return useLiveQueryWithDefault(async () => {
-		return db
+		const visible = await db
 			.table<LocalPresiDeck>('presiDecks')
 			.orderBy('updatedAt')
 			.reverse()
 			.filter((d) => !d.deletedAt)
 			.limit(limit)
 			.toArray();
+		// Phase 6: presiDecks title/description encrypted — decrypt for the
+		// dashboard widget so the user sees the deck name, not a blob.
+		const { decryptRecords } = await import('./crypto');
+		return decryptRecords('presiDecks', visible);
 	}, [] as LocalPresiDeck[]);
 }
 
@@ -306,12 +310,16 @@ export function useCardsProgress() {
 			const activeCards = cards.filter((c) => !c.deletedAt);
 			const now = new Date().toISOString();
 			const dueCards = activeCards.filter((c) => c.nextReview && c.nextReview <= now);
+			// Phase 6: cardDecks.name is encrypted — the widget renders the
+			// deck names so they need decryption. Counts work plaintext.
+			const { decryptRecords } = await import('./crypto');
+			const decryptedDecks = await decryptRecords('cardDecks', activeDecks);
 			return {
 				totalDecks: activeDecks.length,
 				totalCards: activeCards.length,
 				cardsLearned: activeCards.filter((c) => (c.reviewCount ?? 0) > 0).length,
 				dueForReview: dueCards.length,
-				decks: activeDecks,
+				decks: decryptedDecks,
 			};
 		},
 		{

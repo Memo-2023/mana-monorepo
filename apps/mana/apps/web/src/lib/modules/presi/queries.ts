@@ -6,6 +6,7 @@
 
 import { liveQuery } from 'dexie';
 import { db } from '$lib/data/database';
+import { decryptRecord, decryptRecords } from '$lib/data/crypto';
 import type { LocalDeck, LocalSlide, Deck, Slide } from './types';
 
 // ─── Type Converters ──────────────────────────────────────
@@ -39,9 +40,9 @@ export function toSlide(local: LocalSlide): Slide {
 /** All decks, sorted by updatedAt descending. Auto-updates on any change. */
 export function useAllDecks() {
 	return liveQuery(async () => {
-		const locals = await db.table<LocalDeck>('presiDecks').toArray();
-		return locals
-			.filter((d) => !d.deletedAt)
+		const visible = (await db.table<LocalDeck>('presiDecks').toArray()).filter((d) => !d.deletedAt);
+		const decrypted = await decryptRecords('presiDecks', visible);
+		return decrypted
 			.map(toDeck)
 			.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
 	});
@@ -50,11 +51,11 @@ export function useAllDecks() {
 /** Slides for a specific deck, sorted by order. Auto-updates on any change. */
 export function useDeckSlides(deckId: string) {
 	return liveQuery(async () => {
-		const locals = await db.table<LocalSlide>('slides').where('deckId').equals(deckId).toArray();
-		return locals
-			.filter((s) => !s.deletedAt)
-			.map(toSlide)
-			.sort((a, b) => a.order - b.order);
+		const visible = (
+			await db.table<LocalSlide>('slides').where('deckId').equals(deckId).toArray()
+		).filter((s) => !s.deletedAt);
+		const decrypted = await decryptRecords('slides', visible);
+		return decrypted.map(toSlide).sort((a, b) => a.order - b.order);
 	});
 }
 
@@ -63,7 +64,8 @@ export function useDeck(id: string) {
 	return liveQuery(async () => {
 		const local = await db.table<LocalDeck>('presiDecks').get(id);
 		if (!local || local.deletedAt) return null;
-		return toDeck(local);
+		const decrypted = await decryptRecord('presiDecks', { ...local });
+		return toDeck(decrypted);
 	});
 }
 

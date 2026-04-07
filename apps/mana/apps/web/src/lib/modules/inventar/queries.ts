@@ -6,6 +6,7 @@
 
 import { liveQuery } from 'dexie';
 import { db } from '$lib/data/database';
+import { decryptRecords } from '$lib/data/crypto';
 import type { LocalCollection, LocalItem, LocalLocation, LocalCategory } from './types';
 
 // ─── Shared Types (inline to avoid @inventar/shared dependency) ───
@@ -167,8 +168,9 @@ export function useAllCollections() {
 
 export function useAllItems() {
 	return liveQuery(async () => {
-		const locals = await db.table<LocalItem>('invItems').toArray();
-		return locals.filter((i) => !i.deletedAt).map(toItem);
+		const visible = (await db.table<LocalItem>('invItems').toArray()).filter((i) => !i.deletedAt);
+		const decrypted = await decryptRecords('invItems', visible);
+		return decrypted.map(toItem);
 	});
 }
 
