@@ -34,6 +34,127 @@
 	let rotating = $state(false);
 	let confirmRotate = $state(false);
 
+	// ─── Phase 9: Recovery code + Zero-knowledge ─────────────
+	//
+	// The setup flow has three steps:
+	//   1. Generate: client mints a fresh recovery secret + posts the
+	//      sealed wrap to /recovery-wrap → returns the formatted code
+	//   2. Confirm: user has to type the code back in to prove they
+	//      backed it up. We don't move to step 3 until this matches.
+	//   3. Enable: client posts /zero-knowledge { enable: true } and
+	//      the server NULLs out the KEK wrap. Irreversible without the
+	//      recovery code.
+	//
+	// The disable flow needs an unlocked vault that came in via the
+	// recovery code path (so the cached MK bytes are populated). We
+	// don't expose disable from the lock screen — only from this page
+	// while already unlocked.
+
+	let zkSetupStep = $state<'idle' | 'generated' | 'confirming' | 'enabling' | 'enabled'>('idle');
+	let generatedCode = $state<string | null>(null);
+	let confirmCodeInput = $state('');
+	let zkError = $state<string | null>(null);
+	let zkBusy = $state(false);
+	let confirmDisableZk = $state(false);
+	let confirmClearRecovery = $state(false);
+
+	async function handleSetupRecoveryCode() {
+		zkError = null;
+		zkBusy = true;
+		try {
+			const result = await vaultClient.setupRecoveryCode();
+			generatedCode = result.formattedCode;
+			zkSetupStep = 'generated';
+		} catch (e) {
+			zkError = (e as Error).message;
+		} finally {
+			zkBusy = false;
+		}
+	}
+
+	function handleStartConfirm() {
+		zkSetupStep = 'confirming';
+		confirmCodeInput = '';
+		zkError = null;
+	}
+
+	function handleConfirmCode() {
+		zkError = null;
+		// Strip whitespace + dashes from both sides for the comparison so
+		// the user doesn't get punished for inconsistent dash placement.
+		const expected = (generatedCode ?? '').replace(/[\s-]/g, '').toUpperCase();
+		const actual = confirmCodeInput.replace(/[\s-]/g, '').toUpperCase();
+		if (actual !== expected) {
+			zkError = 'Der eingegebene Code stimmt nicht mit dem angezeigten überein.';
+			return;
+		}
+		zkSetupStep = 'enabling';
+	}
+
+	async function handleEnableZeroKnowledge() {
+		zkError = null;
+		zkBusy = true;
+		try {
+			await vaultClient.enableZeroKnowledge();
+			zkSetupStep = 'enabled';
+			// Wipe the displayed code from memory now that the user has
+			// confirmed they backed it up. The DOM still has it until the
+			// next render cycle, but our reference goes away.
+			generatedCode = null;
+			confirmCodeInput = '';
+			toast.success('Zero-Knowledge-Modus aktiviert');
+		} catch (e) {
+			zkError = (e as Error).message;
+		} finally {
+			zkBusy = false;
+		}
+	}
+
+	async function handleDisableZeroKnowledge() {
+		zkError = null;
+		zkBusy = true;
+		try {
+			await vaultClient.disableZeroKnowledge();
+			toast.success('Zero-Knowledge-Modus deaktiviert');
+			confirmDisableZk = false;
+			zkSetupStep = 'idle';
+		} catch (e) {
+			zkError = (e as Error).message;
+		} finally {
+			zkBusy = false;
+		}
+	}
+
+	async function handleClearRecoveryCode() {
+		zkError = null;
+		zkBusy = true;
+		try {
+			await vaultClient.clearRecoveryCode();
+			toast.success('Recovery-Code entfernt');
+			confirmClearRecovery = false;
+			zkSetupStep = 'idle';
+		} catch (e) {
+			zkError = (e as Error).message;
+		} finally {
+			zkBusy = false;
+		}
+	}
+
+	function handleCopyCode() {
+		if (!generatedCode) return;
+		navigator.clipboard.writeText(generatedCode).then(
+			() => toast.success('Code in die Zwischenablage kopiert'),
+			() => toast.error('Konnte Code nicht kopieren')
+		);
+	}
+
+	function handleResetSetup() {
+		zkSetupStep = 'idle';
+		generatedCode = null;
+		confirmCodeInput = '';
+		zkError = null;
+	}
+
 	// Poll the vault vaultState every second so the badge reflects external
 	// lock/unlock events (logout, manual lock from another tab) without
 	// the user having to refresh the page. 1s is fine for a settings
@@ -207,6 +328,165 @@
 				>
 					Abbrechen
 				</button>
+			</div>
+		{/if}
+	</section>
+
+	<!-- Phase 9: Recovery code + Zero-knowledge mode -->
+	<section class="card">
+		<div class="card-head">
+			<h2>Zero-Knowledge-Modus</h2>
+		</div>
+		<p>
+			<strong>Optional, fortgeschritten.</strong> Im Zero-Knowledge-Modus speichert Mana deinen
+			Schlüssel <em>nur noch in einer Form, die wir selbst nicht entschlüsseln können</em>. Du
+			brauchst dann beim Login von einem neuen Gerät deinen Recovery-Code, um deine Daten
+			freizuschalten.
+		</p>
+		<p class="muted">
+			<strong>Vorteil:</strong> selbst ein Mana-Mitarbeiter mit Vollzugriff auf den Server kann
+			deine Inhalte nicht mehr lesen. <strong>Risiko:</strong> wenn du den Recovery-Code verlierst, sind
+			deine Daten unwiderruflich weg — wir haben dann keinen Backup-Schlüssel mehr.
+		</p>
+
+		{#if zkError}
+			<div class="zk-error">⚠️ {zkError}</div>
+		{/if}
+
+		{#if zkSetupStep === 'idle'}
+			<div class="zk-actions">
+				<button
+					class="btn btn-primary"
+					type="button"
+					disabled={vaultState.status !== 'unlocked' || zkBusy}
+					onclick={handleSetupRecoveryCode}
+				>
+					{zkBusy ? 'Generiere …' : 'Recovery-Code einrichten'}
+				</button>
+			</div>
+		{/if}
+
+		{#if zkSetupStep === 'generated' && generatedCode}
+			<div class="zk-step">
+				<h3>Schritt 1 von 3 — Code sicher aufschreiben</h3>
+				<p>
+					Speichere diesen Code an einem sicheren Ort (Passwort-Manager, ausgedruckt im Tresor, …).
+					<strong>Wir zeigen ihn dir nur ein einziges Mal.</strong>
+				</p>
+				<div class="recovery-code">{generatedCode}</div>
+				<div class="zk-actions">
+					<button class="btn" type="button" onclick={handleCopyCode}>📋 Kopieren</button>
+					<button class="btn btn-primary" type="button" onclick={handleStartConfirm}>
+						Ich habe den Code gesichert →
+					</button>
+					<button class="btn btn-ghost" type="button" onclick={handleResetSetup}>
+						Abbrechen
+					</button>
+				</div>
+			</div>
+		{/if}
+
+		{#if zkSetupStep === 'confirming'}
+			<div class="zk-step">
+				<h3>Schritt 2 von 3 — Code zurück eintippen</h3>
+				<p>
+					Tippe (oder paste) den Code, den du gerade gespeichert hast. So stellen wir sicher, dass
+					der Backup wirklich vollständig ist.
+				</p>
+				<input
+					class="recovery-input"
+					type="text"
+					bind:value={confirmCodeInput}
+					placeholder="1A2B-3C4D-5E6F-..."
+					autocomplete="off"
+					spellcheck="false"
+				/>
+				<div class="zk-actions">
+					<button
+						class="btn btn-primary"
+						type="button"
+						disabled={!confirmCodeInput.trim()}
+						onclick={handleConfirmCode}
+					>
+						Code bestätigen
+					</button>
+					<button class="btn btn-ghost" type="button" onclick={handleResetSetup}>
+						Abbrechen
+					</button>
+				</div>
+			</div>
+		{/if}
+
+		{#if zkSetupStep === 'enabling'}
+			<div class="zk-step">
+				<h3>Schritt 3 von 3 — Zero-Knowledge-Modus aktivieren</h3>
+				<p>
+					Wenn du jetzt aktivierst, löscht der Server seine Kopie deines Schlüssels. Ab sofort
+					kannst du <strong>nur noch mit dem Recovery-Code</strong> auf deine verschlüsselten Daten zugreifen.
+				</p>
+				<p class="warn">
+					⚠️ Diese Aktion ist nicht rückgängig zu machen ohne den Recovery-Code. Wenn du deinen Code
+					verlegst, sind deine Inhalte verloren.
+				</p>
+				<div class="zk-actions">
+					<button
+						class="btn btn-danger"
+						type="button"
+						disabled={zkBusy}
+						onclick={handleEnableZeroKnowledge}
+					>
+						{zkBusy ? 'Aktiviere …' : 'Ja, Zero-Knowledge-Modus aktivieren'}
+					</button>
+					<button class="btn btn-ghost" type="button" disabled={zkBusy} onclick={handleResetSetup}>
+						Abbrechen
+					</button>
+				</div>
+			</div>
+		{/if}
+
+		{#if zkSetupStep === 'enabled'}
+			<div class="zk-step">
+				<h3>✅ Zero-Knowledge-Modus aktiv</h3>
+				<p>
+					Der Server kann deine Daten ab sofort nicht mehr entschlüsseln. Beim nächsten Login auf
+					einem neuen Gerät wirst du nach deinem Recovery-Code gefragt.
+				</p>
+				{#if !confirmDisableZk}
+					<div class="zk-actions">
+						<button
+							class="btn"
+							type="button"
+							disabled={vaultState.status !== 'unlocked' || zkBusy}
+							onclick={() => (confirmDisableZk = true)}
+						>
+							Zero-Knowledge-Modus wieder deaktivieren …
+						</button>
+					</div>
+				{:else}
+					<p class="muted">
+						Damit wir den Server-Schlüssel wiederherstellen können, brauchen wir deinen aktuell
+						geladenen Master-Key. Der ist gerade in deinem Browser — wir senden ihn einmal an den
+						Server, der ihn dann mit dem KEK neu wrappt.
+					</p>
+					<div class="zk-actions">
+						<button
+							class="btn btn-danger"
+							type="button"
+							disabled={zkBusy}
+							onclick={handleDisableZeroKnowledge}
+						>
+							{zkBusy ? 'Deaktiviere …' : 'Ja, deaktivieren'}
+						</button>
+						<button
+							class="btn btn-ghost"
+							type="button"
+							disabled={zkBusy}
+							onclick={() => (confirmDisableZk = false)}
+						>
+							Abbrechen
+						</button>
+					</div>
+				{/if}
 			</div>
 		{/if}
 	</section>
@@ -387,6 +667,84 @@
 		gap: 0.5rem;
 	}
 
+	/* ─── Phase 9: Zero-knowledge UI ─────────────────────── */
+
+	.zk-error {
+		margin-top: 0.75rem;
+		padding: 0.75rem 1rem;
+		background: rgba(239, 68, 68, 0.08);
+		border: 1px solid rgba(239, 68, 68, 0.3);
+		border-radius: 0.5rem;
+		font-size: 0.875rem;
+		color: rgb(185, 28, 28);
+	}
+
+	.zk-actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		margin-top: 1rem;
+	}
+
+	.zk-step {
+		margin-top: 1rem;
+		padding-top: 1rem;
+		border-top: 1px solid var(--border, #e5e7eb);
+	}
+
+	.zk-step h3 {
+		font-size: 1rem;
+		font-weight: 600;
+		margin: 0 0 0.5rem 0;
+	}
+
+	.zk-step p {
+		margin: 0.5rem 0;
+		font-size: 0.9rem;
+	}
+
+	.zk-step p.warn {
+		color: rgb(185, 28, 28);
+		font-weight: 500;
+	}
+
+	.recovery-code {
+		margin: 1rem 0;
+		padding: 1rem 1.25rem;
+		background: var(--surface-muted, #f9fafb);
+		border: 1px solid var(--border, #e5e7eb);
+		border-radius: 0.5rem;
+		font-family: ui-monospace, SFMono-Regular, monospace;
+		font-size: 1rem;
+		font-weight: 500;
+		letter-spacing: 0.05em;
+		text-align: center;
+		word-break: break-all;
+		user-select: all;
+	}
+
+	.recovery-input {
+		display: block;
+		width: 100%;
+		margin: 0.75rem 0;
+		padding: 0.75rem 1rem;
+		border: 1px solid var(--border, #e5e7eb);
+		border-radius: 0.5rem;
+		font-family: ui-monospace, SFMono-Regular, monospace;
+		font-size: 0.95rem;
+		background: var(--surface, #fff);
+	}
+
+	.recovery-input:focus {
+		outline: 2px solid var(--primary, #6366f1);
+		outline-offset: 1px;
+	}
+
+	.btn-ghost {
+		background: transparent;
+		border-color: transparent;
+	}
+
 	@media (prefers-color-scheme: dark) {
 		.card {
 			background: var(--surface, #1f2937);
@@ -394,6 +752,11 @@
 		}
 		.table-list li {
 			background: var(--surface-muted, #111827);
+		}
+		.recovery-code,
+		.recovery-input {
+			background: var(--surface-muted, #111827);
+			border-color: var(--border, #374151);
 		}
 	}
 </style>
