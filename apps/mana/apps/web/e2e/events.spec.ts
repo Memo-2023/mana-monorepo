@@ -12,24 +12,8 @@
  * events-public-rsvp.spec.ts so we don't need a real auth dance here.
  */
 
-import { test, expect, type Page } from '@playwright/test';
-
-/**
- * The unified Mana app shows a guest-welcome modal on first load that
- * intercepts every click. Always dismiss it before doing anything else.
- */
-async function dismissWelcomeModal(page: Page) {
-	const dialog = page.locator('[role="dialog"][aria-labelledby="welcome-title"]');
-	// Wait up to 10s for the modal to appear (it's mounted after AuthGate finishes)
-	try {
-		await dialog.waitFor({ state: 'visible', timeout: 10_000 });
-	} catch {
-		// No modal — already dismissed in a previous test or guest-mode disabled
-		return;
-	}
-	await dialog.getByRole('button', { name: /Weiter als Gast|Continue as Guest/i }).click();
-	await dialog.waitFor({ state: 'hidden' });
-}
+import { test, expect } from '@playwright/test';
+import { dismissWelcomeModal } from './helpers';
 
 // Each test gets its own browser context so IndexedDB starts empty.
 test.describe('Events module — local flow', () => {

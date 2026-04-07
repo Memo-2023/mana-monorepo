@@ -12,7 +12,9 @@ const EVENTS_URL =
 	process.env.PUBLIC_MANA_EVENTS_URL ||
 	'http://localhost:3065';
 
-type Lang = 'de' | 'en';
+type Lang = 'de' | 'en' | 'it' | 'fr' | 'es';
+
+const SUPPORTED: ReadonlySet<Lang> = new Set(['de', 'en', 'it', 'fr', 'es']);
 
 /** Pick the best supported language from an Accept-Language header. */
 function pickLang(header: string | null): Lang {
@@ -20,8 +22,7 @@ function pickLang(header: string | null): Lang {
 	// Header looks like "de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7"
 	const parts = header.split(',').map((p) => p.trim().split(';')[0].toLowerCase().slice(0, 2));
 	for (const p of parts) {
-		if (p === 'de') return 'de';
-		if (p === 'en') return 'en';
+		if (SUPPORTED.has(p as Lang)) return p as Lang;
 	}
 	return 'de';
 }
@@ -52,8 +53,22 @@ export const load: PageServerLoad = async ({ params, fetch, request }) => {
 	if (!token) throw error(404, 'Not found');
 
 	const lang = pickLang(request.headers.get('accept-language'));
-	const notFoundMsg = lang === 'de' ? 'Event nicht gefunden' : 'Event not found';
-	const errorMsg = lang === 'de' ? 'Konnte Event nicht laden' : 'Could not load event';
+	const NOT_FOUND_MESSAGES: Record<Lang, string> = {
+		de: 'Event nicht gefunden',
+		en: 'Event not found',
+		it: 'Evento non trovato',
+		fr: 'Événement introuvable',
+		es: 'Evento no encontrado',
+	};
+	const ERROR_MESSAGES: Record<Lang, string> = {
+		de: 'Konnte Event nicht laden',
+		en: 'Could not load event',
+		it: 'Impossibile caricare l’evento',
+		fr: 'Impossible de charger l’événement',
+		es: 'No se pudo cargar el evento',
+	};
+	const notFoundMsg = NOT_FOUND_MESSAGES[lang];
+	const errorMsg = ERROR_MESSAGES[lang];
 
 	try {
 		const res = await fetch(`${EVENTS_URL}/api/v1/rsvp/${encodeURIComponent(token)}`);
