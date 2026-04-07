@@ -47,7 +47,9 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	},
 
 	// ─── Notes ───────────────────────────────────────────────
-	notes: { enabled: false, fields: ['title', 'body', 'content'] },
+	// Phase 4 pilot — first table flipped to enabled:true. The schema
+	// uses `title` + `content` (no separate `body` column).
+	notes: { enabled: true, fields: ['title', 'content'] },
 
 	// ─── Dreams ──────────────────────────────────────────────
 	dreams: { enabled: false, fields: ['title', 'content', 'notes'] },

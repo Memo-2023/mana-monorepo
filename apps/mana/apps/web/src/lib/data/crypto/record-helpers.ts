@@ -55,19 +55,22 @@ export class VaultLockedError extends Error {
  * Throws VaultLockedError if at least one field would need encryption
  * but no master key is available. Callers can pre-check with
  * `isVaultUnlocked()` to surface a friendlier error.
+ *
+ * Generic constraint: `T extends object` so domain interfaces (LocalNote,
+ * LocalMessage, etc.) can be passed directly without an explicit
+ * `as Record<string, unknown>` cast at every call site. Internal
+ * field reads/writes go through a Record<string, unknown> view.
  */
-export async function encryptRecord<T extends Record<string, unknown>>(
-	tableName: string,
-	record: T
-): Promise<T> {
+export async function encryptRecord<T extends object>(tableName: string, record: T): Promise<T> {
 	const fields = getEncryptedFields(tableName);
 	if (!fields) return record;
+	const view = record as unknown as Record<string, unknown>;
 
 	// Build the work list first so we don't half-encrypt a record on
 	// vault-locked failure mid-loop.
 	const todo: string[] = [];
 	for (const field of fields) {
-		const value = record[field];
+		const value = view[field];
 		if (value === null || value === undefined) continue;
 		// Already encrypted? Skip — happens when applyServerChanges
 		// hands a record (with encrypted blobs from the wire) back
@@ -81,8 +84,7 @@ export async function encryptRecord<T extends Record<string, unknown>>(
 	if (!key) throw new VaultLockedError(tableName);
 
 	for (const field of todo) {
-		const wrapped = await wrapValue(record[field], key);
-		(record as Record<string, unknown>)[field] = wrapped;
+		view[field] = await wrapValue(view[field], key);
 	}
 	return record;
 }
@@ -96,21 +98,19 @@ export async function encryptRecord<T extends Record<string, unknown>>(
  * throwing. Views are expected to handle the blob → "🔒" rendering
  * themselves. Plaintext fields (id, timestamps, status) stay readable.
  */
-export async function decryptRecord<T extends Record<string, unknown>>(
-	tableName: string,
-	record: T
-): Promise<T> {
+export async function decryptRecord<T extends object>(tableName: string, record: T): Promise<T> {
 	const fields = getEncryptedFields(tableName);
 	if (!fields) return record;
 
 	const key = getActiveKey();
 	if (!key) return record; // locked: leave blobs as-is
 
+	const view = record as unknown as Record<string, unknown>;
 	for (const field of fields) {
-		const value = record[field];
+		const value = view[field];
 		if (typeof value !== 'string' || !isEncrypted(value)) continue;
 		try {
-			(record as Record<string, unknown>)[field] = await unwrapValue(value, key);
+			view[field] = await unwrapValue(value, key);
 		} catch (err) {
 			// Don't kill the read just because one field is corrupt or
 			// keyed to a previous master. Log + leave the blob in place
@@ -128,7 +128,7 @@ export async function decryptRecord<T extends Record<string, unknown>>(
  * to every entry and returns a fresh array of the same length. Skips
  * null entries (e.g. from `getMany([id1, id2])` when one is missing).
  */
-export async function decryptRecords<T extends Record<string, unknown>>(
+export async function decryptRecords<T extends object>(
 	tableName: string,
 	records: (T | null | undefined)[]
 ): Promise<T[]> {
