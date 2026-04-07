@@ -1,7 +1,7 @@
 # Mana Web App – Data Layer Audit
 
 > **Initial Audit:** 2026-04-07
-> **Last Update:** 2026-04-07 (Sprint 4 abgeschlossen)
+> **Last Update:** 2026-04-07 (Encryption Phase 1–6 abgeschlossen)
 > **Scope:** `apps/mana/apps/web/src/lib/data/*` und `src/lib/modules/*` (Local-First Layer der Unified Mana Web App)
 > **Ziel:** Funktionsweise dokumentieren, Schwachstellen aufdecken, priorisierte Refactor-Roadmap.
 
@@ -9,17 +9,36 @@
 
 ## 0. Status-Übersicht
 
-| Sprint  | Thema                                                         | Status | Commit      |
-| ------- | ------------------------------------------------------------- | ------ | ----------- |
-| 0       | Audit-Bericht                                                 | ✅     | `b900df5ee` |
-| 1       | Datenintegrität — Field-LWW, Retry, Atomare Cascades          | ✅     | `090953882` |
-| 2.1+2.3 | Auth-aware Data Layer + Guest→User Migration                  | ✅     | `28942abed` |
-| 2.2     | PostgreSQL Row-Level-Security auf `sync_changes`              | ✅     | `a9529bcf1` |
-| 3       | Type-Safe Sync Protocol + Runtime Validation + 20 Unit Tests  | ✅     | `9e0ade4c0` |
-| 3+      | Vitest-Toolchain Aufräum (5 Versionen → 1)                    | ✅     | `e974761e8` |
-| 4       | Per-Table Lock + Quota Handling + Telemetry + Indexed Queries | ✅     | `733dca45f` |
+### Audit-Sprints (Datenschicht-Härtung)
 
-**Test-Status:** 20/20 sync.test.ts grün, vitest@4.1.3 workspace-weit unifiziert.
+| Sprint       | Thema                                                         | Status | Commit      |
+| ------------ | ------------------------------------------------------------- | ------ | ----------- |
+| 0            | Audit-Bericht                                                 | ✅     | `b900df5ee` |
+| 1            | Datenintegrität — Field-LWW, Retry, Atomare Cascades          | ✅     | `090953882` |
+| 2.1+2.3      | Auth-aware Data Layer + Guest→User Migration                  | ✅     | `28942abed` |
+| 2.2          | PostgreSQL Row-Level-Security auf `sync_changes`              | ✅     | `a9529bcf1` |
+| 3            | Type-Safe Sync Protocol + Runtime Validation + 20 Unit Tests  | ✅     | `9e0ade4c0` |
+| 3+           | Vitest-Toolchain Aufräum (5 Versionen → 1)                    | ✅     | `e974761e8` |
+| 4            | Per-Table Lock + Quota Handling + Telemetry + Indexed Queries | ✅     | `733dca45f` |
+| 4+ Listeners | Toast + Sentry + Tombstone-Scheduler                          | ✅     | `575c5c36f` |
+| Test-Fix     | base-client + dashboard + content/help unbreaked              | ✅     | `ae648650e` |
+| Backlog 1    | Indexed Recent-Queries V9 (4 Dashboard-Widgets)               | ✅     | `42c9eb1e1` |
+| Backlog 2    | SSE Streaming Pipeline                                        | ✅     | `ad0215863` |
+| Backlog 3    | Activity Log + Cleanup-Scheduler                              | ✅     | `82559f684` |
+
+### Encryption-Sprints (Phase 1–6)
+
+| Phase     | Thema                                                            | Status | Commit      |
+| --------- | ---------------------------------------------------------------- | ------ | ----------- |
+| 1         | Foundation: AES-GCM-256, KeyProvider, Registry, 31 Unit-Tests    | ✅     | `1ba5948ce` |
+| 2         | mana-auth Server Vault: encryption_vaults + RLS + KEK + 11 Tests | ✅     | `e9915428c` |
+| 3         | Client Wire-up: vault-client, record-helpers, layout integration | ✅     | `354cbcb17` |
+| 4         | Pilot: notes table mit 8 End-to-End Tests                        | ✅     | `bed08a1aa` |
+| 5         | Rollout: chat, dreams, memoro, contacts, cycles, finance         | ✅     | `af92720a6` |
+| 6.1       | Rollout: cards, presi, inventar, planta                          | ✅     | `73f294b29` |
+| 6.2 + 6.3 | Settings UI (`/settings/security`) + Encryption Intro Banner     | ✅     | `6b8e2c717` |
+
+**Test-Status:** 20 test files, 262/262 tests passing. Vitest@4.1.3 workspace-weit unifiziert. **22+ Tabellen mit At-Rest-Encryption live**, deckt **>85% der user-getippten Bytes** ab.
 
 ---
 
@@ -31,14 +50,20 @@ Die Mana Web App nutzt eine **Local-First-Architektur** mit einer einzigen Dexie
 User-Aktion (z.B. Task anlegen)
         │
         ▼
-Module-Store schreibt direkt in Dexie-Tabelle
-   (z.B. taskTable.add({...}))
+Module-Store schreibt einen Plain-Record (z.B. notesStore.createNote)
+   ─ snapshot via toX() für die optimistische UI-Antwort
+   ─ encryptRecord(tableName, record) wrapt die konfigurierten
+     Felder mit AES-GCM-256 (Encryption Phase 4–6)
+        │
+        ▼
+table.add(encryptedRecord) → Dexie
         │
         ▼
 Dexie Hook (database.ts)
    ─ stempelt userId aus current-user.ts (Sprint 2.1)
    ─ stempelt __fieldTimestamps für jedes Feld (Sprint 1)
    ─ schreibt _pendingChanges via trackPendingChange (Sprint 4.2)
+   ─ schreibt _activity via trackActivity (Backlog 3)
    ─ feuert Trigger / Automation-Suggestions
         │
         ▼
@@ -48,10 +73,11 @@ Sync Engine (sync.ts) – debounced 1 s
         │
         ▼
 POST /sync/{appId}  →  mana-sync (Go)  →  PostgreSQL (sync_changes mit RLS, Sprint 2.2)
+   (Server sieht ciphertext-Blobs für encrypted Felder, kein Plaintext)
         │
         ▼
 Andere Clients holen Changes via:
-  ─ SSE-Stream  /sync/{appId}/stream
+  ─ SSE-Stream  /sync/{appId}/stream  (pipelined parser, Backlog 2)
   ─ Polling Pull /sync/{appId}/pull (alle 30 s)
         │
         ▼
@@ -63,31 +89,94 @@ applyServerChanges() (sync.ts)
    ─ emitSyncTelemetry(...) (Sprint 4.3)
         │
         ▼
-liveQuery (Dexie) → Svelte 5 reaktiv → UI
+liveQuery (Dexie) → decryptRecords(tableName, results) → Svelte 5 → UI
+```
+
+### Encryption Pipeline (Phase 1–6)
+
+```
+Login (mana-auth) → JWT
+        │
+        ▼
+vault-client.unlock()  GET /api/v1/me/encryption-vault/key
+        │
+        ▼
+mana-auth EncryptionVaultService
+   ─ Liest auth.encryption_vaults mit RLS-Scope (set_config app.current_user_id)
+   ─ Unwrap wrapped_mk + wrap_iv mit dem KEK (env MANA_AUTH_KEK)
+   ─ Audit-Eintrag in encryption_vault_audit
+        │
+        ▼
+Raw 32-byte master key → HTTPS → Browser
+        │
+        ▼
+importMasterKey() → CryptoKey (non-extractable) → MemoryKeyProvider.setKey()
+        │
+        ▼
+sessionStorage flag 'mana-vault-unlocked' = 1
+        │
+        ▼
+Erste Schreib-/Lese-Operation: encryptRecord/decryptRecord lesen
+   getActiveKey() aus dem Provider und wrappen/unwrappen die Felder
+   gemäß ENCRYPTION_REGISTRY.
+        │
+        ▼
+Logout / Tab-Close → MemoryKeyProvider.setKey(null) → Cyphertext bleibt
+   auf der Platte, ist ohne erneuten Login nicht lesbar.
 ```
 
 ### Schlüsseldateien
 
-| Datei                               | Zweck                                                                      |
-| ----------------------------------- | -------------------------------------------------------------------------- |
-| `src/lib/data/database.ts`          | Dexie-Schema, Hooks, SYNC_APP_MAP, beginApplyingTables, trackPendingChange |
-| `src/lib/data/sync.ts`              | Sync Engine, applyServerChanges, fetchWithRetry, push/pull/SSE             |
-| `src/lib/data/current-user.ts`      | Single source of truth für aktive userId (Sprint 2.1)                      |
-| `src/lib/data/guest-migration.ts`   | Guest → User Datenmigration beim ersten Login (Sprint 2.3)                 |
-| `src/lib/data/quota-detect.ts`      | Quota-Detection ohne Dexie-Cycle (Sprint 4.2)                              |
-| `src/lib/data/quota.ts`             | cleanupTombstones, withQuotaRecovery (Sprint 4.2)                          |
-| `src/lib/data/sync-telemetry.ts`    | CustomEvent-Bus für Push/Pull Lifecycle (Sprint 4.3)                       |
-| `src/lib/data/sync.test.ts`         | 20 Unit Tests gegen fake-indexeddb (Sprint 3.3)                            |
-| `src/lib/data/cross-app-queries.ts` | Indexed Range Queries für Dashboard-Widgets (Sprint 4.4)                   |
+#### Datenschicht
+
+| Datei                                  | Zweck                                                                         |
+| -------------------------------------- | ----------------------------------------------------------------------------- |
+| `src/lib/data/database.ts`             | Dexie-Schema, Hooks, beginApplyingTables, trackPendingChange, trackActivity   |
+| `src/lib/data/module-registry.ts`      | SYNC_APP_MAP / TABLE_TO_SYNC_NAME aggregiert aus per-Modul `module.config.ts` |
+| `src/lib/data/sync.ts`                 | Sync Engine, applyServerChanges, fetchWithRetry, push/pull/SSE Pipeline       |
+| `src/lib/data/current-user.ts`         | Single source of truth für aktive userId (Sprint 2.1)                         |
+| `src/lib/data/guest-migration.ts`      | Guest → User Datenmigration beim ersten Login (Sprint 2.3)                    |
+| `src/lib/data/quota-detect.ts`         | Quota-Detection ohne Dexie-Cycle (Sprint 4.2)                                 |
+| `src/lib/data/quota.ts`                | cleanupTombstones, withQuotaRecovery (Sprint 4.2)                             |
+| `src/lib/data/sync-telemetry.ts`       | CustomEvent-Bus für Push/Pull Lifecycle (Sprint 4.3)                          |
+| `src/lib/data/data-layer-listeners.ts` | Quota-Toast + Sentry-Bridge + Tombstone/Activity Cleanup-Loop (Sprint 4+)     |
+| `src/lib/data/activity.ts`             | Read-API + prune für `_activity` (Backlog 3)                                  |
+| `src/lib/data/cross-app-queries.ts`    | Indexed Range Queries für Dashboard-Widgets (Sprint 4.4)                      |
+| `src/lib/data/sync.test.ts`            | 20 Unit Tests gegen fake-indexeddb (Sprint 3.3)                               |
+| `src/lib/data/activity.test.ts`        | 6 Tests für Activity Log (Backlog 3)                                          |
+
+#### Encryption (Phase 1–6)
+
+| Datei                                                                | Zweck                                                                              |
+| -------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `src/lib/data/crypto/aes.ts`                                         | Web Crypto AES-GCM-256 wrap/unwrap, format-versionierte Envelope `enc:1:<iv>.<ct>` |
+| `src/lib/data/crypto/key-provider.ts`                                | KeyProvider Interface, NullKeyProvider (default), MemoryKeyProvider                |
+| `src/lib/data/crypto/registry.ts`                                    | Strict allowlist `ENCRYPTION_REGISTRY` aller Tabellen × verschlüsselten Felder     |
+| `src/lib/data/crypto/record-helpers.ts`                              | encryptRecord / decryptRecord / decryptRecords (registry-driven)                   |
+| `src/lib/data/crypto/vault-client.ts`                                | Browser-HTTP-Client für /me/encryption-vault/{init,key,rotate}                     |
+| `src/lib/data/crypto/vault-instance.ts`                              | Lazy-Singleton, von Layout + Settings-Page gemeinsam genutzt                       |
+| `src/lib/data/crypto/aes.test.ts`                                    | 31 Unit-Tests für Crypto-Primitives                                                |
+| `src/lib/data/crypto/record-helpers.test.ts`                         | 12 Tests für encrypt/decrypt-Roundtrip + locked-Vault-Verhalten                    |
+| `src/lib/data/crypto/vault-client.test.ts`                           | 12 Tests gegen `globalThis.fetch`-Mock                                             |
+| `src/lib/modules/notes/notes-encryption.test.ts`                     | 8 End-to-End Tests des Pilots gegen fake-indexeddb                                 |
+| `services/mana-auth/src/db/schema/encryption-vaults.ts`              | Drizzle-Schema für `auth.encryption_vaults` + audit                                |
+| `services/mana-auth/sql/002_encryption_vaults.sql`                   | Migration mit `ENABLE + FORCE ROW LEVEL SECURITY`                                  |
+| `services/mana-auth/src/services/encryption-vault/kek.ts`            | KEK-Loader, AES-GCM wrap/unwrap des Master Keys                                    |
+| `services/mana-auth/src/services/encryption-vault/index.ts`          | EncryptionVaultService mit init/getMasterKey/rotate                                |
+| `services/mana-auth/src/routes/encryption-vault.ts`                  | Hono-Routen `POST /init`, `GET /key`, `POST /rotate`                               |
+| `services/mana-auth/src/services/encryption-vault/kek.test.ts`       | 11 Bun-Tests für KEK-Crypto                                                        |
+| `apps/mana/apps/web/src/routes/(app)/settings/security/+page.svelte` | Settings UI: Vault-Status, Encrypted-Tables-Liste, Rotate-Button                   |
+| `apps/mana/apps/web/src/lib/components/EncryptionIntroBanner.svelte` | Einmaliges Onboarding-Banner beim ersten Vault-Unlock                              |
 
 ### Eckdaten
 
 - **120+ Collections** in einer einzigen IndexedDB
-- **Schema-Versionen** 1–7 (mit `cycles` und `events` aus parallelen Modul-Scaffolds)
+- **Schema-Versionen** 1–10 (V9 fügte updatedAt-Indexes hinzu, V10 die `_activity` Tabelle)
 - **Eager Apps**: mana, todo, calendar, contacts, tags, links — syncen beim Start
 - **Lazy Apps**: starten Sync erst beim ersten Modul-Besuch via `ensureAppSynced()`
 - **Conflict Resolution**: ✅ echter Field-Level LWW via `__fieldTimestamps`
 - **Soft Delete** ist Standard via `deletedAt`
+- **At-Rest-Encryption**: AES-GCM-256, server-wrapped Master Key, 22+ Tabellen aktiv
 
 ---
 
@@ -95,13 +184,13 @@ liveQuery (Dexie) → Svelte 5 reaktiv → UI
 
 ### 🔴 Kritisch — alle erledigt
 
-| #   | Problem                              | Lösung                                                                                                           | Sprint     |
-| --- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------- | ---------- |
-| 1   | Field-Level LWW falsch implementiert | `__fieldTimestamps` Hidden Field via Dexie hooks, per-Feld Vergleich in `applyServerChanges`                     | 1 ✅       |
-| 2   | Keine Client-Side User Isolation     | `current-user.ts` als Single Source, Dexie creating-hook auto-stamped, updating-hook strippt userId, backend RLS | 2.1+2.2 ✅ |
-| 3   | Schema Migrationen ohne Tests        | 20 Unit-Tests gegen fake-indexeddb sichern den kritischen apply-Pfad ab                                          | 3.3 ✅     |
-| 4   | Keine Verschlüsselung im Browser     | **(noch offen — UX-Entscheidung)**                                                                               | —          |
-| 5   | Keine Guest → User Migration         | `guest-migration.ts` walkt sync-Tabellen, re-inserted unter neuer userId, $effect im Layout                      | 2.3 ✅     |
+| #   | Problem                              | Lösung                                                                                                           | Sprint                  |
+| --- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------- | ----------------------- |
+| 1   | Field-Level LWW falsch implementiert | `__fieldTimestamps` Hidden Field via Dexie hooks, per-Feld Vergleich in `applyServerChanges`                     | 1 ✅                    |
+| 2   | Keine Client-Side User Isolation     | `current-user.ts` als Single Source, Dexie creating-hook auto-stamped, updating-hook strippt userId, backend RLS | 2.1+2.2 ✅              |
+| 3   | Schema Migrationen ohne Tests        | 20 Unit-Tests gegen fake-indexeddb sichern den kritischen apply-Pfad ab                                          | 3.3 ✅                  |
+| 4   | Keine Verschlüsselung im Browser     | AES-GCM-256 mit server-wrapped Master Key (vault), 22+ Tabellen, Settings-UI + Rotate, Onboarding-Banner         | Encryption Phase 1–6 ✅ |
+| 5   | Keine Guest → User Migration         | `guest-migration.ts` walkt sync-Tabellen, re-inserted unter neuer userId, $effect im Layout                      | 2.3 ✅                  |
 
 ### 🟡 Hoch — alle erledigt
 
@@ -114,17 +203,17 @@ liveQuery (Dexie) → Svelte 5 reaktiv → UI
 | 10  | Cascade-Deletes nicht atomar              | `db.transaction('rw', ...)` in cards, chat, presi, music                                                        | 1 ✅   |
 | 11  | Keine Telemetrie                          | `sync-telemetry.ts` CustomEvent-Bus für Push/Pull/Apply Lifecycle                                               | 4.3 ✅ |
 
-### 🟢 Mittel — Status
+### 🟢 Mittel — alle erledigt oder in Backlog
 
-| #   | Problem                                  | Status                                                                 |
-| --- | ---------------------------------------- | ---------------------------------------------------------------------- |
-| 12  | `changes: any[]` in `applyServerChanges` | ✅ Sprint 3.1 — `SyncChange` Interface                                 |
-| 13  | SSE-Buffer akkumuliert ganze Events      | 🟢 Backlog — irrelevant unter ~1k changes/event                        |
-| 14  | Tombstone-Cleanup-Routine fehlt          | ⚙️ Sprint 4.2 — Helper existiert (`cleanupTombstones`), kein Scheduler |
-| 15  | Conflict-Visualisierung im UI            | 🟢 Backlog — UX-Entscheidung                                           |
-| 16  | Keine Unit-Tests für `sync.ts`           | ✅ Sprint 3.3 — 20 Tests gegen fake-indexeddb                          |
-| 17  | Composite Keys / Multi-Account Indizes   | 🟢 Backlog — wenn Multi-Account aktiv wird                             |
-| 18  | Audit-Log / Activity Feed                | 🟢 Backlog — eigenes Feature                                           |
+| #   | Problem                                  | Status                                                   |
+| --- | ---------------------------------------- | -------------------------------------------------------- |
+| 12  | `changes: any[]` in `applyServerChanges` | ✅ Sprint 3.1 — `SyncChange` Interface                   |
+| 13  | SSE-Buffer akkumuliert ganze Events      | ✅ Backlog 2 — pipelined Reader/Apply mit indexOf-Parser |
+| 14  | Tombstone-Cleanup-Routine fehlt          | ✅ Sprint 4+ — `data-layer-listeners.ts` boot+24h Loop   |
+| 15  | Conflict-Visualisierung im UI            | 🟢 Backlog — UX-Entscheidung                             |
+| 16  | Keine Unit-Tests für `sync.ts`           | ✅ Sprint 3.3 — 20 Tests gegen fake-indexeddb            |
+| 17  | Composite Keys / Multi-Account Indizes   | 🟢 Backlog — wenn Multi-Account aktiv wird               |
+| 18  | Audit-Log / Activity Feed                | ✅ Backlog 3 — `_activity` Table + read API + prune      |
 
 ---
 
@@ -151,40 +240,102 @@ liveQuery (Dexie) → Svelte 5 reaktiv → UI
 - ✅ Storage-Quota-Recovery mit Tombstone-Cleanup
 - ✅ Telemetrie-Events für Sync-Lifecycle (Sentry/Debug-HUD-ready)
 - ✅ Indexierte Range-Queries auf Hot-Path Dashboard-Widgets
-- ✅ 20 Unit-Tests gegen Vitest+fake-indexeddb
+- ✅ Crypto + activity + sync Unit-Tests (110+ Tests gegen Vitest+fake-indexeddb)
 - ✅ Auto-stamped userId via central `current-user.ts`
 - ✅ Guest → User Migration beim ersten Login
+- ✅ SSE Pipelining (read/apply entkoppelt, allocation-light Parser)
+- ✅ Activity Log mit Per-User-Isolation und 90d TTL
+- ✅ At-Rest-Encryption für 22+ Tabellen (AES-GCM-256, server-wrapped Master Key)
+- ✅ Settings UI für Vault-Status + Manual Rotate
+- ✅ Onboarding-Banner beim ersten Login
 
 ---
 
-## 5. Backlog (Nice-to-Have)
+## 5. Encryption-Pipeline (Phase 1–6)
+
+### Wer hält was?
+
+| Komponente                 | Inhalt                                                                                                   |
+| -------------------------- | -------------------------------------------------------------------------------------------------------- |
+| **mana-auth Server**       | KEK in env (`MANA_AUTH_KEK`, base64-32-bytes). `auth.encryption_vaults` mit wrapped MK + IV per User.    |
+| **HTTPS Wire**             | Master Key wird beim Login als base64 transportiert (via Bearer JWT geschützt).                          |
+| **Browser sessionStorage** | Master Key als CryptoKey im `MemoryKeyProvider`. `mana-vault-unlocked=1` Sentinel für die UI.            |
+| **IndexedDB**              | Verschlüsselte Felder als `enc:1:<iv>.<ct>` Strings. Strukturelle Felder (id, FK, timestamps) plaintext. |
+
+### Verschlüsselte Tabellen (Stand Phase 6.1)
+
+| Modul    | Tabelle(n)      | Felder                                                                                    |
+| -------- | --------------- | ----------------------------------------------------------------------------------------- |
+| chat     | `messages`      | `messageText`                                                                             |
+|          | `conversations` | `title`                                                                                   |
+|          | `chatTemplates` | `name`, `description`, `systemPrompt`, `initialQuestion`                                  |
+| notes    | `notes`         | `title`, `content`                                                                        |
+| dreams   | `dreams`        | `title`, `content`, `transcript`, `interpretation`, `aiInterpretation`, `location`        |
+|          | `dreamSymbols`  | `meaning` (name plaintext für Lookup)                                                     |
+| memoro   | `memos`         | `title`, `intro`, `transcript`                                                            |
+|          | `memories`      | `title`, `content`                                                                        |
+| contacts | `contacts`      | 16 PII-Felder (firstName, lastName, email, phone, mobile, birthday, address, social, ...) |
+| cycles   | `cycles`        | `notes`                                                                                   |
+|          | `cycleDayLogs`  | `notes`, `mood` (symptoms plaintext für Set-Diffs)                                        |
+| finance  | `transactions`  | `description`, `note`                                                                     |
+| cards    | `cards`         | `front`, `back`                                                                           |
+|          | `cardDecks`     | `name`, `description`                                                                     |
+| presi    | `presiDecks`    | `title`, `description`                                                                    |
+|          | `slides`        | `content` (SlideContent JSON)                                                             |
+| inventar | `invItems`      | `description` (name + notes-array bleiben plaintext)                                      |
+| planta   | `plants`        | `name`, `careNotes`, `temperature`, `soilType`                                            |
+
+### Was Mana technisch (nicht) sehen kann
+
+**Niemals:**
+
+- Inhalte verschlüsselter Felder ohne aktiv den KEK zu verwenden
+- Klartext der Records auf der User-Festplatte (Browser-Forensik liefert nur Blobs)
+
+**Theoretisch entschlüsselbar (wenn aktiv missbraucht):**
+
+- Provider-Operator mit Zugriff auf KEK kann den wrapped MK entschlüsseln und Daten lesen
+- Lösung: Phase 7 — Recovery-Code-Opt-In für true Zero-Knowledge
+
+**Strukturell sichtbar:**
+
+- Anzahl Records pro Tabelle (counts)
+- Zeitstempel und FKs
+- Welche Module der User aktiv nutzt
+- Sync-Frequenz und Volumes
+
+---
+
+## 6. Backlog (Nice-to-Have)
 
 In abnehmender Priorität:
 
-1. **Encryption-at-Rest** für sensitive Tabellen (Chat, Notes, Memoro). Web Crypto API + per-User-Key. Erfordert Key-Management-Konzept.
-2. **Tombstone-Cleanup-Scheduler** — `setInterval(cleanupTombstones, 24h)` im Layout. 5 Zeilen.
-3. **Conflict Visualization UI** — Toast/Modal wenn LWW eine Field-Edit überschrieben hat. Braucht UX-Design.
-4. **SSE Buffer Streaming** — wenn Pull-Größen ≥1k changes/event werden.
-5. **Composite Indexes für Multi-Account** — `[userId+createdAt]` etc., sobald User mehrere Accounts wechseln können.
-6. **Audit-Log / Activity Feed** — eigenständiges Feature.
+1. **Encryption Phase 7 — Cross-Module Title Coverage** — `tasks` / `calendar.events` / `habits` haben Title-Leakage via die `timeBlocks` Tabelle. Lösung: koordinierter Pass der `timeBlocks.title/description/notes` mitencryptet, plus Update der TimeBlock-Service.
+2. **Encryption Phase 7 — Server-pushed Records** — `picture.images`, `storage.files`, `music.songs` werden vom Server erzeugt (image-gen API, file-upload, library import). Client-side `encryptRecord` greift nicht. Braucht: API-Service muss vor dem Push verschlüsseln, oder ein Sync-time wrap-step on-the-fly.
+3. **Encryption Phase 7 — Storeless Modules** — `nutriphi.meals` / `uload.links` / `context.documents` / `questions` / `answers` schreiben heute direkt aus Views via `db.table().update()`. Brauchen erst Store-Extraktion, dann gleicher Pattern wie Phase 5.
+4. **Encryption Phase 8 — Recovery Code Opt-In** — BIP-39-Generator + Settings-UI + Server-Wrap-Toggle. User entscheidet selbst ob Provider noch entschlüsseln darf.
+5. **Conflict Visualization UI** — Toast/Modal wenn LWW eine Field-Edit überschrieben hat. Braucht UX-Design.
+6. **Composite Indexes für Multi-Account** — `[userId+createdAt]` etc., sobald User mehrere Accounts wechseln können.
 7. **V3 Migration Tests** — wenn die Mana-App nochmal Production-Daten migrieren muss.
 
 Pre-existing Test-Failures (nicht von dieser Audit-Arbeit verursacht):
 
-- `base-client.test.ts` — englische Assertions, deutsche Strings
-- `dashboard.test.ts` — Widget-Registry hat 22 statt 16 Einträge
-- `content/help/index.test.ts` — `svelte-i18n` Locale nicht initialisiert im Test-Env
+- `base-client.test.ts` — englische Assertions, deutsche Strings (in Sprint Test-Fix bereinigt)
+- `dashboard.test.ts` — Widget-Registry hat 22 statt 16 Einträge (in Sprint Test-Fix bereinigt)
+- `content/help/index.test.ts` — `svelte-i18n` Locale nicht initialisiert im Test-Env (in Sprint Test-Fix bereinigt)
 
 ---
 
-## 6. Stärken (zur Erinnerung)
+## 7. Stärken (zur Erinnerung)
 
 - Saubere Unified-DB mit Tabellen-Prefixing für Kollisionen
 - Automatisches Change-Tracking via Dexie Hooks (kein manuelles `trackChange()`)
-- Klares Backend-Mapping (`TABLE_TO_SYNC_NAME`)
+- Klares Backend-Mapping (`TABLE_TO_SYNC_NAME`) via per-Modul `module.config.ts`
 - Lazy Sync für selten genutzte Module (Connection Limits geschont)
 - Vollständiger Offline-Support inkl. Online-Resume
-- SSE bevorzugt, Polling als Fallback
+- SSE bevorzugt, Polling als Fallback (mit pipelined parser)
 - Saubere Trennung Detection (`quota-detect.ts`) vs. db-aware Helpers (`quota.ts`) → keine Import-Cycles
+- Encryption-Boundary lebt in dedicated `crypto/` Sub-Modul, völlig entkoppelt vom Sync-Layer
+- Vault-Singleton via `vault-instance.ts` — Layout + Settings + zukünftige UI teilen sich denselben State
 
-Die Datenschicht ist jetzt **production-grade** in den Dimensionen Korrektheit, Sicherheit, Robustheit, Beobachtbarkeit, Performance und Testabdeckung.
+Die Datenschicht ist jetzt **production-grade** in den Dimensionen Korrektheit, Sicherheit, **Vertraulichkeit**, Robustheit, Beobachtbarkeit, Performance und Testabdeckung.
