@@ -7,7 +7,7 @@ import { Aside, Tabs, TabItem, Steps } from '@astrojs/starlight/components';
 
 # Authentication
 
-All Manacore applications use **Mana Core Auth** as the central authentication service, providing EdDSA JWT-based authentication.
+All Mana applications use **Mana Core Auth** as the central authentication service, providing EdDSA JWT-based authentication.
 
 ## Overview
 
@@ -36,8 +36,8 @@ Mana Core Auth uses **EdDSA (Ed25519)** for JWT signing:
   "role": "user",
   "sid": "session-uuid",
   "exp": 1764606251,
-  "iss": "manacore",
-  "aud": "manacore"
+  "iss": "mana",
+  "aud": "mana"
 }
 ```
 
@@ -48,18 +48,18 @@ Mana Core Auth uses **EdDSA (Ed25519)** for JWT signing:
 | `role` | User role (`user`, `admin`) |
 | `sid` | Session ID for invalidation |
 | `exp` | Expiration timestamp |
-| `iss` | Issuer (`manacore`) |
-| `aud` | Audience (`manacore`) |
+| `iss` | Issuer (`mana`) |
+| `aud` | Audience (`mana`) |
 
 ## Backend Integration
 
 ### Option 1: Simple Auth Only
 
-Use `@manacore/shared-nestjs-auth` for JWT validation:
+Use `@mana/shared-nestjs-auth` for JWT validation:
 
 ```typescript
 // app.module.ts
-import { JwtAuthModule } from '@manacore/shared-nestjs-auth';
+import { JwtAuthModule } from '@mana/shared-nestjs-auth';
 
 @Module({
   imports: [
@@ -73,7 +73,7 @@ export class AppModule {}
 
 ```typescript
 // controller.ts
-import { JwtAuthGuard, CurrentUser, CurrentUserData } from '@manacore/shared-nestjs-auth';
+import { JwtAuthGuard, CurrentUser, CurrentUserData } from '@mana/shared-nestjs-auth';
 
 @Controller('api')
 @UseGuards(JwtAuthGuard)
@@ -140,7 +140,7 @@ export class ApiController {
 
 ```typescript
 // src/lib/auth.ts
-import { createAuthService } from '@manacore/shared-auth';
+import { createAuthService } from '@mana/shared-auth';
 
 export const auth = createAuthService({
   authUrl: import.meta.env.PUBLIC_MANA_AUTH_URL,
@@ -157,7 +157,7 @@ if (data) {
 
 ```typescript
 // src/services/auth.ts
-import { createAuthService } from '@manacore/shared-auth';
+import { createAuthService } from '@mana/shared-auth';
 
 export const auth = createAuthService({
   authUrl: process.env.EXPO_PUBLIC_MANA_AUTH_URL,
@@ -277,7 +277,7 @@ Never enable auth bypass in production!
 | Backend | Package | Port |
 |---------|---------|------|
 | Chat | `@mana-core/nestjs-integration` | 3002 |
-| Picture | `@manacore/shared-nestjs-auth` | 3006 |
-| Zitare | `@manacore/shared-nestjs-auth` | 3007 |
+| Picture | `@mana/shared-nestjs-auth` | 3006 |
+| Zitare | `@mana/shared-nestjs-auth` | 3007 |
 | Cards | `@mana-core/nestjs-integration` | 3009 |
-| Contacts | `@manacore/shared-nestjs-auth` | 3015 |
+| Contacts | `@mana/shared-nestjs-auth` | 3015 |

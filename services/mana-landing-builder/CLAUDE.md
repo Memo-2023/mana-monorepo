@@ -11,7 +11,7 @@ Static landing page builder for organizations. Takes a JSON config, generates an
 ## Architecture
 
 ```
-Admin Dashboard (Manacore Web)
+Admin Dashboard (Mana Web)
     │
     │ POST /api/v1/build { slug, config }
     ▼
@@ -79,7 +79,7 @@ curl -X POST http://localhost:3030/api/v1/build \
 
 ## Configuration
 
-The landing page config is stored in `organizations.metadata.landingPage` in mana-core-auth. The Admin UI in Manacore Web writes this config, then triggers the builder.
+The landing page config is stored in `organizations.metadata.landingPage` in mana-auth. The Admin UI in Mana Web writes this config, then triggers the builder.
 
 ### Config Structure (LandingPageConfig)
 
@@ -111,7 +111,7 @@ Both themes support `customColors` overrides for the primary color.
 
 ## Available Sections
 
-All sections use shared components from `@manacore/shared-landing-ui`:
+All sections use shared components from `@mana/shared-landing-ui`:
 
 | Section | Component | Description |
 |---------|-----------|-------------|
@@ -158,7 +158,7 @@ services/mana-landing-builder/
 
 ## Admin UI
 
-The landing page editor lives in the Manacore web dashboard:
+The landing page editor lives in the Mana web dashboard:
 
 - **Route**: `/organizations/[id]/landing`
 - **Components**: `apps/mana/apps/web/src/lib/components/landing/`
@@ -175,7 +175,7 @@ The editor provides a form-based interface where org admins can:
 1. Template directory is copied to a temporary working directory
 2. `config.json` is written with the section data from the landing config
 3. `theme.css` is generated from the selected theme + any custom color overrides
-4. `pnpm install` runs to resolve `@manacore/shared-landing-ui` from the workspace
+4. `pnpm install` runs to resolve `@mana/shared-landing-ui` from the workspace
 5. `astro build` generates static HTML/CSS/JS in `dist/`
 6. `wrangler pages deploy` pushes to Cloudflare Pages as project `org-{slug}`
 7. Custom domain `{slug}.mana.how` is configured (if Cloudflare token is set)

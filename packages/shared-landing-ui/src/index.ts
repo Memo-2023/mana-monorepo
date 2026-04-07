@@ -1,7 +1,7 @@
 /**
  * @mana/shared-landing-ui
  *
- * Shared Astro components for landing pages across the Manacore monorepo.
+ * Shared Astro components for landing pages across the Mana monorepo.
  *
  * Usage:
  * Import components directly from their paths:

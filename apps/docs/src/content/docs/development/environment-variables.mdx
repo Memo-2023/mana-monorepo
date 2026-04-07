@@ -1,13 +1,13 @@
 ---
 title: Environment Variables
-description: Centralized environment variable management in the Manacore monorepo.
+description: Centralized environment variable management in the Mana monorepo.
 ---
 
 import { Tabs, TabItem, Aside, Steps } from '@astrojs/starlight/components';
 
 # Environment Variables
 
-Manacore uses a centralized environment variable system. All development variables are managed from a single file.
+Mana uses a centralized environment variable system. All development variables are managed from a single file.
 
 ## Quick Start
 
@@ -75,8 +75,8 @@ The generator reads `.env.development` and creates app-specific `.env` files wit
 | `MANA_AUTH_DATABASE_URL` | PostgreSQL connection | - |
 | `JWT_ACCESS_TOKEN_EXPIRY` | Access token TTL | `15m` |
 | `JWT_REFRESH_TOKEN_EXPIRY` | Refresh token TTL | `7d` |
-| `JWT_ISSUER` | JWT issuer claim | `manacore` |
-| `JWT_AUDIENCE` | JWT audience claim | `manacore` |
+| `JWT_ISSUER` | JWT issuer claim | `mana` |
+| `JWT_AUDIENCE` | JWT audience claim | `mana` |
 | `STRIPE_SECRET_KEY` | Stripe secret key | - |
 | `CREDITS_SIGNUP_BONUS` | Credits on signup | `150` |
 | `CREDITS_DAILY_FREE` | Daily free credits | `5` |

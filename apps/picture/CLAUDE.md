@@ -34,7 +34,7 @@ pnpm --filter @picture/mobile dev     # Mobile only
 |---------|---------|
 | `GenerateService` | AI image generation with freemium/credit logic |
 | `ReplicateService` | Replicate API integration |
-| `StorageService` | MinIO/S3 storage via `@manacore/shared-storage` |
+| `StorageService` | MinIO/S3 storage via `@mana/shared-storage` |
 | `CreditClientService` | Credit system via `@mana-core/nestjs-integration` |
 
 ### Freemium Model

@@ -149,7 +149,7 @@ Both apps require Supabase credentials. Copy the `.env.example` files and config
 ```
 PUBLIC_SUPABASE_URL=your_supabase_url
 PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-MIDDLEWARE_URL=https://mana-core-middleware-111768794939.europe-west3.run.app
+MIDDLEWARE_URL=https://mana-middleware-111768794939.europe-west3.run.app
 ```
 
 **Mobile App** (`apps/mobile/.env`):

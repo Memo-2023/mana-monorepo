@@ -31,7 +31,7 @@ Dieser Bericht dokumentiert alle externen Dienste im Mana Monorepo und evaluiert
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                    MANACORE EXTERNAL SERVICES MAP                            │
+│                    MANA EXTERNAL SERVICES MAP                            │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                              │
 │  ┌─────────────────────────────────────────────────────────────────────┐   │
@@ -141,7 +141,7 @@ Legende: LOCAL = Self-hosted | CLOUD = Externer Dienst | FREE = Kostenlos
 **Gehostete Landing Pages:**
 - `chat-landing.pages.dev`
 - `picture-landing.pages.dev`
-- `manacore-landing.pages.dev`
+- `mana-landing.pages.dev`
 - `cards-landing.pages.dev`
 - `zitare-landing.pages.dev`
 
@@ -149,7 +149,7 @@ Legende: LOCAL = Self-hosted | CLOUD = Externer Dienst | FREE = Kostenlos
 
 | Dienst | Zweck | Status |
 |--------|-------|--------|
-| **Prometheus** | Metrics Collection | In mana-core-auth integriert |
+| **Prometheus** | Metrics Collection | In mana-auth integriert |
 | **Grafana** | Dashboards | Konfigurierbar |
 | **Winston** | Application Logging | In allen NestJS Services |
 | **Umami** | Web Analytics | `UMAMI_APP_SECRET` |
@@ -166,7 +166,7 @@ Legende: LOCAL = Self-hosted | CLOUD = Externer Dienst | FREE = Kostenlos
 | Redis | Docker | 6379 | ~256MB |
 | MinIO | Docker | 9000/9001 | ~512MB |
 | Ollama | Native | 11434 | ~4-8GB (je nach Modell) |
-| mana-core-auth | Docker | 3001 | ~512MB |
+| mana-auth | Docker | 3001 | ~512MB |
 | mana-stt | Native Python | 3020 | ~2-4GB |
 | Chat Backend | Docker | 3002 | ~512MB |
 
@@ -240,7 +240,7 @@ const response = await fetch('http://localhost:8188/prompt', {
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
     prompt: workflowJSON,
-    client_id: 'manacore'
+    client_id: 'mana'
   })
 });
 ```
@@ -496,7 +496,7 @@ AZURE_OPENAI_API_KEY=xxx
 
 ```env
 # PostgreSQL
-DATABASE_URL=postgresql://manacore:devpassword@localhost:5432/{app}
+DATABASE_URL=postgresql://mana:devpassword@localhost:5432/{app}
 
 # Redis
 REDIS_URL=redis://localhost:6379
@@ -514,7 +514,7 @@ S3_REGION=fsn1
 ### Auth & Payment
 
 ```env
-# Mana Core Auth
+# Mana Auth
 MANA_AUTH_URL=http://localhost:3001
 
 # Stripe

@@ -28,7 +28,7 @@ For comprehensive guidelines on code patterns and conventions, see the `.claude/
 | [`.claude/guidelines/error-handling.md`](.claude/guidelines/error-handling.md) | Go-style Result types, error codes |
 | [`.claude/guidelines/sveltekit-web.md`](.claude/guidelines/sveltekit-web.md) | Svelte 5 runes, stores |
 | [`.claude/guidelines/expo-mobile.md`](.claude/guidelines/expo-mobile.md) | React Native, NativeWind |
-| [`.claude/guidelines/authentication.md`](.claude/guidelines/authentication.md) | Mana Core Auth integration |
+| [`.claude/guidelines/authentication.md`](.claude/guidelines/authentication.md) | Mana Auth integration |
 | [`.claude/guidelines/design-ux.md`](.claude/guidelines/design-ux.md) | UI patterns, animations, a11y |
 
 **Always consult these guidelines before making changes.**
@@ -276,7 +276,7 @@ Parent workspace packages (e.g., `apps/chat/package.json`, `apps/zitare/package.
 
 - SvelteKit 2.x + Svelte 5
 - Tailwind CSS
-- Mana Core Auth (Better Auth + EdDSA JWT)
+- Mana Auth (Better Auth + EdDSA JWT)
 - Local-first data (Dexie.js + mana-sync)
 - svelte-i18n (5 languages: de, en, it, fr, es)
 
@@ -294,7 +294,7 @@ Parent workspace packages (e.g., `apps/chat/package.json`, `apps/zitare/package.
 
 ### Authentication Architecture
 
-All projects use **mana-core-auth** as the central authentication service:
+All projects use **mana-auth** as the central authentication service:
 
 ```
 ┌─────────────┐     ┌─────────────┐     ┌────────────────┐
@@ -383,9 +383,9 @@ curl http://localhost:3033/api/v1/import/vcard \
 
 When adding a new app that should participate in cross-app SSO, update **all three** locations:
 
-1. `trustedOrigins` in `services/mana-core-auth/src/auth/better-auth.config.ts`
+1. `trustedOrigins` in `services/mana-auth/src/auth/better-auth.config.ts`
 2. `CORS_ORIGINS` for mana-auth in `docker-compose.macmini.yml`
-3. Run `pnpm test -- src/auth/sso-config.spec.ts` (from `services/mana-core-auth/`) to verify
+3. Run `pnpm test -- src/auth/sso-config.spec.ts` (from `services/mana-auth/`) to verify
 
 Missing any of these will silently break SSO for that app.
 
@@ -868,8 +868,8 @@ pnpm dev:landing-builder
 ```
 
 **How it works:**
-1. Org admin configures landing page at `/organizations/{id}/landing` in the Manacore web dashboard
-2. Config is stored in `organizations.metadata.landingPage` (mana-core-auth)
+1. Org admin configures landing page at `/organizations/{id}/landing` in the Mana web dashboard
+2. Config is stored in `organizations.metadata.landingPage` (mana-auth)
 3. On publish, the builder service generates a static Astro site from the config
 4. Site is deployed to Cloudflare Pages as `org-{slug}` → `{slug}.mana.how`
 
@@ -1074,7 +1074,7 @@ Each project has its own `CLAUDE.md` with detailed information:
 - `apps/cards/CLAUDE.md` - Card/deck management
 - `apps/chat/CLAUDE.md` - Chat API endpoints, AI models
 - `apps/picture/CLAUDE.md` - AI image generation
-- `services/mana-core-auth/` - Central authentication service
+- `services/mana-auth/` - Central authentication service
 - `services/mana-search/CLAUDE.md` - Search & content extraction service (Go)
 - `services/mana-crawler/CLAUDE.md` - Web crawler service (Go)
 - `services/mana-notify/CLAUDE.md` - Notification service (Go)

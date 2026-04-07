@@ -1,5 +1,5 @@
 /**
- * Shared utility functions for Manacore monorepo
+ * Shared utility functions for Mana monorepo
  */
 
 // Date utilities

@@ -2,7 +2,7 @@
 
 ## What's Been Completed
 
-Your Mana Core integration is now **100% complete** with a fully functional credit system! 🎉
+Your Mana integration is now **100% complete** with a fully functional credit system! 🎉
 
 ### ✅ Backend (Complete)
 - [x] ManaModule configured with environment variables
@@ -35,14 +35,14 @@ Your Mana Core integration is now **100% complete** with a fully functional cred
 
 ### 1. Add Your Service Key (5 minutes) ⚠️ REQUIRED
 
-The backend needs a service key from Mana Core to validate and consume credits.
+The backend needs a service key from Mana to validate and consume credits.
 
 **backend/.env**:
 ```env
 SERVICE_KEY=your-actual-service-key-here
 ```
 
-**Where to get it**: Contact Mana Core admin or check your Mana Core dashboard.
+**Where to get it**: Contact Mana admin or check your Mana dashboard.
 
 Without this key, credit operations will fail with authentication errors.
 
@@ -267,7 +267,7 @@ Before deploying to production:
 
 ### Backend
 - [ ] Set `NODE_ENV=production` in production environment
-- [ ] Add real `SERVICE_KEY` from Mana Core
+- [ ] Add real `SERVICE_KEY` from Mana
 - [ ] Configure proper CORS for your frontend domain
 - [ ] Set up proper logging/monitoring
 - [ ] Add rate limiting
@@ -323,7 +323,7 @@ Add `onPurchase` handler to modal in your screens
 2. **Integration**: See [MANA_CORE_INTEGRATION_GUIDE.md](./MANA_CORE_INTEGRATION_GUIDE.md)
 3. **Architecture**: See [MANA_CORE_ARCHITECTURE.md](./MANA_CORE_ARCHITECTURE.md)
 4. **Example Code**: See [apps/mobile/examples/DeckCreationExample.tsx](./apps/mobile/examples/DeckCreationExample.tsx)
-5. **Mana Core**: https://github.com/Memo-2023/mana-core-nestjs-package
+5. **Mana**: https://github.com/Memo-2023/mana-core-nestjs-package
 
 ## Summary
 

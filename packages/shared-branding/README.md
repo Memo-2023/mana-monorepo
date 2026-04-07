@@ -1,4 +1,4 @@
-# @manacore/shared-branding
+# @mana/shared-branding
 
 Shared branding components and configuration for the Mana ecosystem.
 
@@ -12,7 +12,7 @@ Shared branding components and configuration for the Mana ecosystem.
 ## Installation
 
 ```bash
-pnpm add @manacore/shared-branding
+pnpm add @mana/shared-branding
 ```
 
 ## Usage
@@ -23,11 +23,11 @@ Display an app's logo:
 
 ```svelte
 <script lang="ts">
-	import { AppLogo } from '@manacore/shared-branding';
+	import { AppLogo } from '@mana/shared-branding';
 </script>
 
 <AppLogo app="memoro" size={32} />
-<AppLogo app="manacore" size={32} />
+<AppLogo app="mana" size={32} />
 <AppLogo app="cards" size={32} />
 <AppLogo app="maerchenzauber" size={32} />
 ```
@@ -38,11 +38,11 @@ Display logo with app name (perfect for headers):
 
 ```svelte
 <script lang="ts">
-	import { AppLogoWithName } from '@manacore/shared-branding';
+	import { AppLogoWithName } from '@mana/shared-branding';
 </script>
 
 <AppLogoWithName app="memoro" size={28} />
-<AppLogoWithName app="manacore" showName={false} />
+<AppLogoWithName app="mana" showName={false} />
 ```
 
 ### ManaIcon
@@ -51,7 +51,7 @@ Universal Mana drop icon:
 
 ```svelte
 <script lang="ts">
-	import { ManaIcon } from '@manacore/shared-branding';
+	import { ManaIcon } from '@mana/shared-branding';
 </script>
 
 <ManaIcon size={24} color="#4287f5" />
@@ -62,7 +62,7 @@ Universal Mana drop icon:
 Access branding config programmatically:
 
 ```typescript
-import { getAppBranding, APP_BRANDING } from '@manacore/shared-branding';
+import { getAppBranding, APP_BRANDING } from '@mana/shared-branding';
 
 const memoro = getAppBranding('memoro');
 console.log(memoro.name); // "Memoro"
@@ -75,7 +75,7 @@ console.log(memoro.primaryColor); // "#f8d62b"
 | App              | Name          | Primary Color    | Tagline          |
 | ---------------- | ------------- | ---------------- | ---------------- |
 | `memoro`         | Memoro        | #f8d62b (Gold)   | AI Voice Memos   |
-| `manacore`       | Mana      | #6366f1 (Indigo) | Central Hub      |
+| `mana`           | Mana      | #6366f1 (Indigo) | Central Hub      |
 | `cards`          | Cards         | #8b5cf6 (Purple) | AI Flashcards    |
 | `maerchenzauber` | Märchenzauber | #ec4899 (Pink)   | AI Story Creator |
 
@@ -113,7 +113,7 @@ console.log(memoro.primaryColor); // "#f8d62b"
 ## Types
 
 ```typescript
-type AppId = 'memoro' | 'manacore' | 'cards' | 'maerchenzauber';
+type AppId = 'memoro' | 'mana' | 'cards' | 'maerchenzauber';
 
 interface AppBranding {
 	id: AppId;

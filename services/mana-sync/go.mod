@@ -1,11 +1,11 @@
-module github.com/manacore/mana-sync
+module github.com/mana/mana-sync
 
 go 1.25.0
 
 require (
 	github.com/coder/websocket v1.8.12
 	github.com/jackc/pgx/v5 v5.7.2
-	github.com/manacore/shared-go v0.0.0
+	github.com/mana/shared-go v0.0.0
 	github.com/rs/cors v1.11.1
 )
 
@@ -19,4 +19,4 @@ require (
 	golang.org/x/text v0.21.0 // indirect
 )
 
-replace github.com/manacore/shared-go => ../../packages/shared-go
+replace github.com/mana/shared-go => ../../packages/shared-go

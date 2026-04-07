@@ -10,7 +10,7 @@ EXPO_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_HlAZpB4BxXaMcfOCNx6VJA_-64NTxu4
 EXPO_PUBLIC_MIDDLEWARE_APP_ID=973da0c1-b479-4dac-a1b0-ed09c72caca8
 
 EXPO_PUBLIC_MEMORO_MIDDLEWARE_URL=https://memoro-service-111768794939.europe-west3.run.app
-EXPO_PUBLIC_MANA_MIDDLEWARE_URL=https://mana-core-middleware-111768794939.europe-west3.run.app
+EXPO_PUBLIC_MANA_MIDDLEWARE_URL=https://mana-middleware-111768794939.europe-west3.run.app
 
 EXPO_PUBLIC_GOOGLE_CLIENT_ID=624477741877-67or55qpi440mlg1t46e178ta2gmcll9.apps.googleusercontent.com
 EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID=624477741877-5dm8kmb2ol1u6mekjd5h1onsgnc36o7u.apps.googleusercontent.com

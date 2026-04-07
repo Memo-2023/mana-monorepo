@@ -3,11 +3,7 @@
   Clicking a link opens the target item's DetailView as a cross-detail overlay.
 -->
 <script lang="ts">
-	import {
-		useLinksForRecord,
-		type ManaRecordRef,
-		type LocalManaLink,
-	} from '@mana/shared-links';
+	import { useLinksForRecord, type ManaRecordRef, type LocalManaLink } from '@mana/shared-links';
 	import { getApp } from '$lib/app-registry';
 	import type { ViewProps } from '$lib/app-registry';
 

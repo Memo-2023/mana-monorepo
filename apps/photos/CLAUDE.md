@@ -55,7 +55,7 @@ pnpm db:studio                # Open Drizzle Studio
 |-------|------------|
 | **Backend** | NestJS 10, Drizzle ORM, PostgreSQL |
 | **Web** | SvelteKit 2.x, Svelte 5 (runes mode), Tailwind CSS |
-| **Auth** | Mana Core Auth (JWT) |
+| **Auth** | Mana Auth (JWT) |
 | **Media** | mana-media service (central media storage) |
 
 ## Core Features
@@ -173,7 +173,7 @@ pnpm db:studio                # Open Drizzle Studio
 ```env
 NODE_ENV=development
 PORT=3019
-DATABASE_URL=postgresql://manacore:devpassword@localhost:5432/photos
+DATABASE_URL=postgresql://mana:devpassword@localhost:5432/photos
 MANA_AUTH_URL=http://localhost:3001
 MANA_MEDIA_URL=http://localhost:3015
 CORS_ORIGINS=http://localhost:5173,http://localhost:5189,http://localhost:8081

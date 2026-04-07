@@ -10,7 +10,7 @@ import type { UserConfig, UserConfigExport } from 'vite';
  * Common Mana shared packages that need SSR configuration.
  * These packages contain Svelte 5 runes or other client-side state.
  */
-export const MANACORE_SHARED_PACKAGES = [
+export const MANA_SHARED_PACKAGES = [
 	'@mana/shared-icons',
 	'@mana/shared-ui',
 	'@mana/shared-tailwind',
@@ -68,14 +68,14 @@ export interface ViteConfigOptions {
  * Get the SSR noExternal configuration for Mana apps.
  */
 export function getSsrNoExternal(additionalPackages: string[] = []): string[] {
-	return [...MANACORE_SHARED_PACKAGES, ...additionalPackages];
+	return [...MANA_SHARED_PACKAGES, ...additionalPackages];
 }
 
 /**
  * Get the optimizeDeps exclude configuration for Mana apps.
  */
 export function getOptimizeDepsExclude(additionalExcludes: string[] = []): string[] {
-	return [...MANACORE_SHARED_PACKAGES, ...additionalExcludes];
+	return [...MANA_SHARED_PACKAGES, ...additionalExcludes];
 }
 
 /**
@@ -85,7 +85,7 @@ export function getOptimizeDepsExclude(additionalExcludes: string[] = []): strin
 export function createViteConfig(options: ViteConfigOptions): Partial<UserConfig> {
 	const { port, additionalPackages = [], additionalExcludes = [] } = options;
 
-	const packages = options.sharedPackages || [...MANACORE_SHARED_PACKAGES];
+	const packages = options.sharedPackages || [...MANA_SHARED_PACKAGES];
 	const noExternal = [...packages, ...additionalPackages];
 	const exclude = [...packages, ...additionalExcludes];
 

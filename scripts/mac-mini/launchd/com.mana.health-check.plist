@@ -3,20 +3,18 @@
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>com.manacore.docker-startup</string>
+    <string>com.mana.health-check</string>
     <key>ProgramArguments</key>
     <array>
         <string>/bin/bash</string>
-        <string>/Users/mana/projects/manacore-monorepo/scripts/mac-mini/startup.sh</string>
+        <string>/Users/mana/projects/mana-monorepo/scripts/mac-mini/health-check.sh</string>
     </array>
-    <key>RunAtLoad</key>
-    <true/>
     <key>StartInterval</key>
-    <integer>0</integer>
+    <integer>300</integer>
     <key>StandardOutPath</key>
-    <string>/tmp/manacore-startup.log</string>
+    <string>/tmp/mana-health.log</string>
     <key>StandardErrorPath</key>
-    <string>/tmp/manacore-startup.error.log</string>
+    <string>/tmp/mana-health.error.log</string>
     <key>EnvironmentVariables</key>
     <dict>
         <key>PATH</key>

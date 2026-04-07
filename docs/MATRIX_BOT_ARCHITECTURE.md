@@ -88,7 +88,7 @@ Bei der Wahl der Messaging-Plattform für Mana hatten wir mehrere Optionen:
 ├─────────────────────────────────────────────────────────────────────────┤
 │                                                                          │
 │  ┌──────────────────────────────────────────────────────────────────┐   │
-│  │           @manacore/bot-services (Shared Business Logic)          │   │
+│  │           @mana/bot-services (Shared Business Logic)          │   │
 │  │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌─────────┐ │   │
 │  │  │ TodoSvc  │ │ CalSvc   │ │ AiSvc    │ │ ClockSvc │ │ ...     │ │   │
 │  │  └──────────┘ └──────────┘ └──────────┘ └──────────┘ └─────────┘ │   │
@@ -164,7 +164,7 @@ User → Matrix Bot → JSON File (lokal)
 Kombiniert alle Features in einem Bot:
 
 ```
-User → matrix-mana-bot → @manacore/bot-services → Multiple Backends
+User → matrix-mana-bot → @mana/bot-services → Multiple Backends
 ```
 
 **Features:**
@@ -174,11 +174,11 @@ User → matrix-mana-bot → @manacore/bot-services → Multiple Backends
 
 ---
 
-## 3. Shared Package: @manacore/bot-services
+## 3. Shared Package: @mana/bot-services
 
 ### 3.1 Architektur
 
-Das Package `@manacore/bot-services` stellt transport-agnostische Geschäftslogik bereit:
+Das Package `@mana/bot-services` stellt transport-agnostische Geschäftslogik bereit:
 
 ```typescript
 // Business Logic Services
@@ -188,7 +188,7 @@ export { AiModule, AiService } from './ai';
 export { ClockModule, ClockService } from './clock';
 
 // Infrastructure Services (NEU: Konsolidiert aus 11+ Bots)
-export { SessionModule, SessionService } from './session';      // Auth via mana-core-auth
+export { SessionModule, SessionService } from './session';      // Auth via mana-auth
 export { TranscriptionModule, TranscriptionService } from './transcription'; // STT via mana-stt
 
 // Storage Provider (pluggable)
@@ -209,7 +209,7 @@ Die folgenden Services wurden aus den einzelnen Bots konsolidiert:
 | `SessionService` | 11x dupliziert | 1x in bot-services | picture, contacts, chat, zitare, skilltree, presi, questions, storage, planta, cards, nutriphi |
 | `TranscriptionService` | 6x dupliziert | 1x in bot-services | todo, clock, zitare, nutriphi, project-doc |
 
-**Status: Vollständig migriert** - Alle 11 Bots mit SessionService und alle 5 Bots mit TranscriptionService nutzen jetzt die gemeinsamen Services aus `@manacore/bot-services`.
+**Status: Vollständig migriert** - Alle 11 Bots mit SessionService und alle 5 Bots mit TranscriptionService nutzen jetzt die gemeinsamen Services aus `@mana/bot-services`.
 
 ### 3.2 TodoService
 
@@ -523,12 +523,12 @@ Matrix User ID → Isolierte Daten pro User
 
 **Verwendung:** matrix-todo-bot, matrix-calendar-bot, matrix-ollama-bot
 
-#### Modell B: Mana Core Auth (JWT)
+#### Modell B: Mana Auth (JWT)
 Für Backend-integrierte Bots:
 
 ```
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│   Matrix User   │────>│   Matrix Bot    │────>│ mana-core-auth  │
+│   Matrix User   │────>│   Matrix Bot    │────>│ mana-auth  │
 │  !login x y     │     │                 │     │   (Port 3001)   │
 └─────────────────┘     └─────────────────┘     └─────────────────┘
                               │                        │
@@ -790,7 +790,7 @@ COPY services/matrix-todo-bot ./services/matrix-todo-bot
 
 RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
 RUN pnpm install --frozen-lockfile
-RUN pnpm --filter @manacore/bot-services build
+RUN pnpm --filter @mana/bot-services build
 RUN pnpm --filter matrix-todo-bot build
 
 # Production
@@ -821,7 +821,7 @@ MATRIX_ACCESS_TOKEN=syt_xxx...
 MATRIX_USER_ID=@todo-bot:mana.how
 
 # Auth (für Backend-Integration)
-MANA_AUTH_URL=http://mana-core-auth:3001
+MANA_AUTH_URL=http://mana-auth:3001
 
 # Storage
 DATA_PATH=/app/data
@@ -851,7 +851,7 @@ services:
     volumes:
       - todo-bot-data:/app/data
     networks:
-      - manacore
+      - mana
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:3314/health"]
@@ -875,7 +875,7 @@ volumes:
   mana-bot-data:
 
 networks:
-  manacore:
+  mana:
     external: true
 ```
 
@@ -908,7 +908,7 @@ networks:
 
 | Port | Service | Beschreibung |
 |------|---------|--------------|
-| 3001 | mana-core-auth | Authentifizierung |
+| 3001 | mana-auth | Authentifizierung |
 | 3020 | mana-stt | Speech-to-Text |
 | 3021 | mana-search | Web-Recherche |
 | 3022 | mana-tts | Text-to-Speech |
@@ -962,11 +962,11 @@ Da wir beide Seiten kontrollieren (Bot + Client), können wir:
 - **Widget-Integration:** Interaktive UIs direkt in Element
 - **Voice-Bot:** Sprachsteuerung via Matrix Calls
 - **Bot-Discovery:** Automatische Bot-Erkennung in Räumen
-- **Mehr @manacore/bot-services:** Nutrition, Stats, Docs Services
+- **Mehr @mana/bot-services:** Nutrition, Stats, Docs Services
 
 ### 12.2 Konsolidierung
 
-Der Fokus liegt auf der Konsolidierung der Bot-Services in `@manacore/bot-services`:
+Der Fokus liegt auf der Konsolidierung der Bot-Services in `@mana/bot-services`:
 - Alle wiederkehrende Logik zentral
 - Einheitliche Storage-Abstraction
 - Transport-agnostische Services
@@ -982,7 +982,7 @@ Mana's Matrix-Bot-Architektur bietet eine **vollständig unabhängige, DSGVO-kon
 2. **DSGVO-Konformität** durch lokale Datenhaltung
 3. **Einheitliche UX** durch konsistente Command-Patterns
 4. **Skalierbarkeit** durch Microservices-Architektur
-5. **Erweiterbarkeit** durch @manacore/bot-services
+5. **Erweiterbarkeit** durch @mana/bot-services
 
 ---
 

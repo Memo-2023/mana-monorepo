@@ -1,5 +1,5 @@
 ---
-title: 'Der Manacore Short'
+title: 'Der Mana Short'
 description: 'Ein Pay-as-you-use Modell für KI-gestützte Transkription und Analyse in Memoro'
 order: 1
 icon: 'mdi:information'
@@ -7,11 +7,11 @@ publishedAt: 2024-01-01
 updatedAt: 2024-01-15
 ---
 
-# Manacore: Ein nachhaltiges KI-Ökosystem für Europa
+# Mana: Ein nachhaltiges KI-Ökosystem für Europa
 
 ## Vision und Mission
 
-Manacore steht für ein langfristig nachhaltiges Software-Ökosystem mit KI im Kern. Unser Ziel ist es, durch gutes Design und optimale Vernetzung jedem zu ermöglichen, Wissen, Erfahrungen und Ideen besser festzuhalten, zu sammeln, darzustellen und zu teilen.
+Mana steht für ein langfristig nachhaltiges Software-Ökosystem mit KI im Kern. Unser Ziel ist es, durch gutes Design und optimale Vernetzung jedem zu ermöglichen, Wissen, Erfahrungen und Ideen besser festzuhalten, zu sammeln, darzustellen und zu teilen.
 
 ### Das Ökosystem
 
@@ -81,13 +81,13 @@ Das Mana-System kombiniert die Vorteile von Abonnements mit der Fairness verbrau
 
 **Unternehmen mit 50 Mitarbeitern:**
 
-- **Manacore**: 1x Mana Quelle XXL = 99,99€/Monat
+- **Mana**: 1x Mana Quelle XXL = 99,99€/Monat
 - **Klassische Lizenzen**: 50 × 19,99€ = 999,50€/Monat
 - **Ersparnis**: 90%
 
 **Universitäres Forschungsprojekt (15 Forscher, 1 Jahr):**
 
-- **Manacore**: 1x Mana Quelle L Jahresabo = 191,90€
+- **Mana**: 1x Mana Quelle L Jahresabo = 191,90€
 - **Klassische Lizenzen**: 15 × 9,99€ × 12 Monate = 1.798,20€
 - **Ersparnis**: 89%
 
@@ -122,7 +122,7 @@ Das Mana-System kombiniert die Vorteile von Abonnements mit der Fairness verbrau
 
 ## Partizipation und Community
 
-Jeder kann am Manacore-Ökosystem teilhaben:
+Jeder kann am Mana-Ökosystem teilhaben:
 
 - **Als Nutzer** der verschiedenen Tools und Apps
 - **Durch Analytics-Opt-in** für besseres Feedback und Optimierung
@@ -146,4 +146,4 @@ Jeder kann am Manacore-Ökosystem teilhaben:
 
 ## Das Ziel
 
-Manacore macht die digitale Welt und KI-Möglichkeiten für jeden zugänglich. Wir entwickeln Software zu etwas Fließendem und schaffen eine Plattform, auf der Innovation schnell und nachhaltig gedeihen kann – mit einem Geschäftsmodell, bei dem Software allen gehört, die daran mitwirken und es mitgestalten.
+Mana macht die digitale Welt und KI-Möglichkeiten für jeden zugänglich. Wir entwickeln Software zu etwas Fließendem und schaffen eine Plattform, auf der Innovation schnell und nachhaltig gedeihen kann -- mit einem Geschäftsmodell, bei dem Software allen gehört, die daran mitwirken und es mitgestalten.

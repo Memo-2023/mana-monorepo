@@ -2,13 +2,13 @@
  * Shared Theme CSS Variables
  *
  * This file defines CSS custom properties for all theme variants.
- * Variables are set by @manacore/shared-theme's createThemeStore() at runtime,
+ * Variables are set by @mana/shared-theme's createThemeStore() at runtime,
  * but this file provides sensible defaults for static rendering.
  *
  * Usage in app.css (Tailwind v4):
  * ```css
  * @import "tailwindcss";
- * @import "@manacore/shared-tailwind/themes.css";
+ * @import "@mana/shared-tailwind/themes.css";
  * ```
  *
  * Tailwind v4 Integration:

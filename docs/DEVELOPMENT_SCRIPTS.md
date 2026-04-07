@@ -1,6 +1,6 @@
 # Development Scripts
 
-Diese Dokumentation beschreibt die verfügbaren Entwicklungsbefehle im Manacore Monorepo.
+Diese Dokumentation beschreibt die verfügbaren Entwicklungsbefehle im Mana Monorepo.
 
 ## Übersicht
 
@@ -25,9 +25,9 @@ Diese Befehle starten alle Apps eines bestimmten Typs gleichzeitig:
 
 | Befehl             | Beschreibung               | Apps                                       |
 | ------------------ | -------------------------- | ------------------------------------------ |
-| `pnpm dev:web`     | Startet alle Web-Apps      | maerchenzauber, manacore, cards, memoro |
-| `pnpm dev:landing` | Startet alle Landing Pages | maerchenzauber, manacore, cards, memoro |
-| `pnpm dev:mobile`  | Startet alle Mobile-Apps   | maerchenzauber, manacore, cards, memoro |
+| `pnpm dev:web`     | Startet alle Web-Apps      | maerchenzauber, mana, cards, memoro |
+| `pnpm dev:landing` | Startet alle Landing Pages | maerchenzauber, mana, cards, memoro |
+| `pnpm dev:mobile`  | Startet alle Mobile-Apps   | maerchenzauber, mana, cards, memoro |
 
 ### Beispiel
 
@@ -49,7 +49,7 @@ Diese Befehle starten ein komplettes Projekt mit allen zugehörigen Apps und Dep
 | Befehl                    | Beschreibung                                           |
 | ------------------------- | ------------------------------------------------------ |
 | `pnpm maerchenzauber:dev` | Startet Maerchenzauber (Backend, Web, Mobile, Landing) |
-| `pnpm manacore:dev`       | Startet Manacore (Web, Mobile, Landing)                |
+| `pnpm mana:dev`           | Startet Mana (Web, Mobile, Landing)                    |
 | `pnpm cards:dev`       | Startet Cards (Web, Mobile, Landing)                |
 | `pnpm memoro:dev`         | Startet Memoro (Web, Mobile, Landing)                  |
 
@@ -62,7 +62,7 @@ Für erweiterte Kontrolle kannst du Turbo-Filter direkt verwenden:
 pnpm turbo run dev --filter=@storyteller/web
 
 # Mehrere Apps kombinieren
-pnpm turbo run dev --filter=manacore-web --filter=memoro-web
+pnpm turbo run dev --filter=mana-web --filter=memoro-web
 ```
 
 ### Package-Namen Referenz
@@ -72,7 +72,7 @@ Da die Package-Namen im Monorepo unterschiedlich sind, hier eine Übersicht:
 | Projekt        | Web                | Landing                | Mobile                | Backend                |
 | -------------- | ------------------ | ---------------------- | --------------------- | ---------------------- |
 | maerchenzauber | `@storyteller/web` | `@storyteller/landing` | `@storyteller/mobile` | `@storyteller/backend` |
-| manacore       | `manacore-web`     | `manacore-landing`     | `manacore`            | -                      |
+| mana           | `mana-web`         | `mana-landing`         | `mana`                | -                      |
 | cards       | `web`              | `landing`              | `cards`            | -                      |
 | memoro         | `memoro-web`       | `memoro-landing`       | `memoro`              | -                      |
 
@@ -91,11 +91,11 @@ Wenn mehrere Apps gleichzeitig laufen, verwenden sie unterschiedliche Ports:
 | App-Typ | Projekt        | Standard-Port |
 | ------- | -------------- | ------------- |
 | Web     | maerchenzauber | 5173          |
-| Web     | manacore       | 5174          |
+| Web     | mana       | 5174          |
 | Web     | cards       | 5175          |
 | Web     | memoro         | 5176          |
 | Landing | maerchenzauber | 4321          |
-| Landing | manacore       | 4322          |
+| Landing | mana       | 4322          |
 | Landing | cards       | 4323          |
 | Landing | memoro         | 4324          |
 | Backend | maerchenzauber | 3000          |

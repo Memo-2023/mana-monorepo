@@ -33,7 +33,7 @@ Die Architektur-Migration hat alle Apps gleichzeitig verbessert:
 - **Hono + Bun**: ~120 LOC Compute-Server statt ~3.500 LOC NestJS
 - **~50ms Cold Start**: statt 2-5 Sekunden
 - **~30MB RAM**: statt ~200MB pro Service
-- **Shared Package**: `@manacore/shared-hono` (Auth, Credits, Health)
+- **Shared Package**: `@mana/shared-hono` (Auth, Credits, Health)
 
 ### UX (+5-10 Punkte)
 - **Time to Interactive**: < 500ms (war 3-5s mit Login)

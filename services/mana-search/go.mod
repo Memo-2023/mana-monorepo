@@ -1,9 +1,9 @@
-module github.com/manacore/mana-search
+module github.com/mana/mana-search
 
 go 1.25.0
 
 require (
-	github.com/manacore/shared-go v0.0.0
+	github.com/mana/shared-go v0.0.0
 	github.com/JohannesKaufmann/html-to-markdown/v2 v2.3.3
 	github.com/go-shiori/go-readability v0.0.0-20251205110129-5db1dc9836f0
 	github.com/prometheus/client_golang v1.22.0
@@ -31,4 +31,4 @@ require (
 	google.golang.org/protobuf v1.36.5 // indirect
 )
 
-replace github.com/manacore/shared-go => ../../packages/shared-go
+replace github.com/mana/shared-go => ../../packages/shared-go

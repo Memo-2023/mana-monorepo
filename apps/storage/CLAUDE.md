@@ -211,7 +211,7 @@ pnpm build                       # Build for production
 ```
 NODE_ENV=development
 PORT=3016
-DATABASE_URL=postgresql://manacore:devpassword@localhost:5432/storage
+DATABASE_URL=postgresql://mana:devpassword@localhost:5432/storage
 MANA_AUTH_URL=http://localhost:3001
 CORS_ORIGINS=http://localhost:5173,http://localhost:5185,http://localhost:8081
 S3_ENDPOINT=http://localhost:9000
@@ -284,10 +284,10 @@ FrequencyBars (Canvas visualizer)
 
 ## Important Notes
 
-1. **Authentication**: Uses Mana Core Auth (JWT in Authorization header)
+1. **Authentication**: Uses Mana Auth (JWT in Authorization header)
 2. **Database**: PostgreSQL with Drizzle ORM
 3. **Port**: Backend runs on port 3016, Web on port 5185 by default
-4. **Storage**: Uses MinIO/S3 for file storage via @manacore/shared-storage
+4. **Storage**: Uses MinIO/S3 for file storage via @mana/shared-storage
 5. **Bucket**: `storage-storage` bucket for all files
 6. **Soft Delete**: Files/folders are soft-deleted first (trash), then permanently deleted
 7. **Versioning**: Files support version history, each version stored separately in S3

@@ -3,17 +3,17 @@
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>com.manacore.vllm-voxtral</string>
+    <string>com.mana.vllm-voxtral</string>
 
     <key>ProgramArguments</key>
     <array>
         <string>/bin/bash</string>
         <string>-c</string>
-        <string>cd /Users/mana/projects/manacore-monorepo/services/mana-stt &amp;&amp; ./scripts/start-vllm-voxtral.sh</string>
+        <string>cd /Users/mana/projects/mana-monorepo/services/mana-stt &amp;&amp; ./scripts/start-vllm-voxtral.sh</string>
     </array>
 
     <key>WorkingDirectory</key>
-    <string>/Users/mana/projects/manacore-monorepo/services/mana-stt</string>
+    <string>/Users/mana/projects/mana-monorepo/services/mana-stt</string>
 
     <key>EnvironmentVariables</key>
     <dict>

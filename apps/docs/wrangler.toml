@@ -1,4 +1,4 @@
-# Cloudflare Pages configuration for Manacore Docs
+# Cloudflare Pages configuration for Mana Docs
 # Deployed via GitHub Actions (Direct Upload)
 
 name = "mana-docs"

@@ -162,7 +162,7 @@ pnpm preview                     # Preview build
 | **Web** | SvelteKit 2.x, Svelte 5 (runes mode), Tailwind CSS 4 |
 | **Landing** | Astro 5.x, Tailwind CSS |
 | **Mobile** | React Native 0.81 + Expo SDK 54, NativeWind [TODO] |
-| **Auth** | Mana Core Auth (JWT) |
+| **Auth** | Mana Auth (JWT) |
 | **i18n** | svelte-i18n (DE, EN, FR, ES, IT) |
 | **Dates** | date-fns |
 | **Sync** | ical.js, tsdav (CalDAV) |
@@ -406,7 +406,7 @@ FREQ=WEEKLY;UNTIL=20241231T235959Z   # Wöchentlich bis Ende 2024
 ```env
 NODE_ENV=development
 PORT=3014
-DATABASE_URL=postgresql://manacore:devpassword@localhost:5432/calendar
+DATABASE_URL=postgresql://mana:devpassword@localhost:5432/calendar
 MANA_AUTH_URL=http://localhost:3001
 CORS_ORIGINS=http://localhost:5173,http://localhost:5179,http://localhost:8081
 
@@ -536,7 +536,7 @@ Priority: explicit duration in text > history estimate > default fallback > 1h (
 docker compose -f docker-compose.dev.yml up -d postgres
 
 # Datenbank erstellen
-PGPASSWORD=devpassword psql -h localhost -U manacore -d postgres -c "CREATE DATABASE calendar;"
+PGPASSWORD=devpassword psql -h localhost -U mana -d postgres -c "CREATE DATABASE calendar;"
 
 # Schema pushen
 pnpm calendar:db:push
@@ -615,7 +615,7 @@ curl -X POST http://localhost:3014/api/v1/events \
 | **Accessibility** | ✅ | Focus trapping in all modals, ARIA roles, keyboard navigation |
 | **Rate Limiting** | ✅ | ThrottlerGuard global (100 req/min) |
 | **API Validation** | ✅ | DTOs with class-validator, whitelist + forbidNonWhitelisted |
-| **Auth** | ✅ | JWT via mana-core-auth, guards on all controllers |
+| **Auth** | ✅ | JWT via mana-auth, guards on all controllers |
 | **Toast System** | ✅ | All toast messages localized via svelte-i18n |
 | **Docker** | ✅ | Multi-stage build, health checks, entrypoint script |
 | **Tests** | ✅ | 13 unit tests, 7 E2E test suites (Playwright) |
@@ -652,7 +652,7 @@ pnpm --filter @calendar/web test:e2e
 
 ## Important Notes
 
-1. **Authentication**: Nutzt Mana Core Auth (JWT im Authorization Header)
+1. **Authentication**: Nutzt Mana Auth (JWT im Authorization Header)
 2. **Database**: PostgreSQL mit Drizzle ORM (Port 5432)
 3. **Port**: Server läuft auf Port 3014
 4. **Recurrence**: Verwendet RFC 5545 RRULE Format

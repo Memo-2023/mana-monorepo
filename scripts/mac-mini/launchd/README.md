@@ -32,17 +32,17 @@ for f in *.plist; do launchctl load ~/Library/LaunchAgents/$f; done
 
 ```bash
 # Check status
-launchctl list | grep manacore
+launchctl list | grep mana
 
 # View logs
-tail -f /tmp/manacore-*.log
+tail -f /tmp/mana-*.log
 
 # Reload a service
-launchctl unload ~/Library/LaunchAgents/com.manacore.health-check.plist
-launchctl load ~/Library/LaunchAgents/com.manacore.health-check.plist
+launchctl unload ~/Library/LaunchAgents/com.mana.health-check.plist
+launchctl load ~/Library/LaunchAgents/com.mana.health-check.plist
 
 # Stop a service
-launchctl unload ~/Library/LaunchAgents/com.manacore.<service>.plist
+launchctl unload ~/Library/LaunchAgents/com.mana.<service>.plist
 ```
 
 ## Troubleshooting
@@ -55,5 +55,5 @@ Exit codes in `launchctl list`:
 
 Check error logs:
 ```bash
-cat /tmp/manacore-<service>.error.log
+cat /tmp/mana-<service>.error.log
 ```

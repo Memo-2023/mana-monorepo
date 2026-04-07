@@ -1,7 +1,7 @@
 /**
  * @mana/shared-icons
  *
- * Phosphor Icons for all Manacore SvelteKit web apps
+ * Phosphor Icons for all Mana SvelteKit web apps
  * https://phosphoricons.com
  *
  * Usage:

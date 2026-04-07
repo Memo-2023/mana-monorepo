@@ -1,10 +1,10 @@
 # Cards
 
-A deck management system with Mana Core authentication and credit system integration.
+A deck management system with Mana authentication and credit system integration.
 
 ## Features
 
-- 🔐 **Mana Core Authentication** - Complete auth system with JWT tokens, device tracking, and automatic token refresh
+- 🔐 **Mana Authentication** - Complete auth system with JWT tokens, device tracking, and automatic token refresh
 - ⚡ **Credit System** - Mana-based billing for operations (10 mana to create a deck, 5 for AI features, etc.)
 - 📱 **React Native/Expo** - Cross-platform mobile app (iOS, Android, Web)
 - 🚀 **NestJS Backend** - Type-safe API with AuthGuard protection
@@ -19,7 +19,7 @@ A deck management system with Mana Core authentication and credit system integra
 - npm or yarn
 - Expo CLI (`npm install -g expo-cli`)
 - Supabase account
-- Mana Core credentials (APP_ID, SERVICE_KEY)
+- Mana credentials (APP_ID, SERVICE_KEY)
 
 ### Backend Setup
 
@@ -40,8 +40,8 @@ A deck management system with Mana Core authentication and credit system integra
 
    Edit `.env` and add your credentials:
    ```env
-   # Mana Core
-   MANA_SERVICE_URL=https://mana-core-middleware-111768794939.europe-west3.run.app
+   # Mana
+   MANA_SERVICE_URL=https://mana-middleware-111768794939.europe-west3.run.app
    APP_ID=your-app-id-from-mana-core
    SERVICE_KEY=your-service-key-from-mana-core  # Required for credits
 
@@ -123,7 +123,7 @@ A deck management system with Mana Core authentication and credit system integra
            │                     │
            ▼                     ▼
 ┌─────────────────┐   ┌──────────────────┐
-│  Mana Core      │   │  Supabase        │
+│  Mana      │   │  Supabase        │
 │  - Auth         │   │  - Database      │
 │  - Credits      │   │  - Storage       │
 │  - Transactions │   │  - Real-time     │
@@ -181,7 +181,7 @@ function MyScreen() {
 
 ## API Endpoints
 
-### Authentication (via Mana Core)
+### Authentication (via Mana)
 
 - `POST /v1/auth/signin` - Sign in
 - `POST /v1/auth/signup` - Sign up
@@ -220,7 +220,7 @@ cards/
 │   │   │   └── health.controller.ts   # Health checks
 │   │   ├── services/
 │   │   │   └── supabase.service.ts    # Supabase integration
-│   │   ├── app.module.ts              # Main module (Mana Core config)
+│   │   ├── app.module.ts              # Main module (Mana config)
 │   │   └── main.ts                    # Entry point
 │   ├── .env                    # Environment variables
 │   └── package.json
@@ -315,9 +315,9 @@ npm run build:prod     # Production build
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `MANA_SERVICE_URL` | Mana Core service URL | `https://mana-core-middleware-*.run.app` |
-| `APP_ID` | Your app ID from Mana Core | `cea4bfc6-a4de-4e17-91e2-54275940156e` |
-| `SERVICE_KEY` | Service key for credit operations | Get from Mana Core |
+| `MANA_SERVICE_URL` | Mana service URL | `https://mana-middleware-*.run.app` |
+| `APP_ID` | Your app ID from Mana | `cea4bfc6-a4de-4e17-91e2-54275940156e` |
+| `SERVICE_KEY` | Service key for credit operations | Get from Mana |
 | `SUPABASE_URL` | Supabase project URL | `https://abc.supabase.co` |
 | `SUPABASE_ANON_KEY` | Supabase anonymous key | Your anon key |
 | `PORT` | Backend port | `8080` |
@@ -393,14 +393,14 @@ import { CreditClientService } from '@mana-core/nestjs-integration/services';
 ### Backend won't start
 
 - Check all environment variables are set
-- Verify Mana Core credentials are correct
+- Verify Mana credentials are correct
 - Check if port 8080 is available
 
 ### Credits not working
 
 - Ensure `SERVICE_KEY` is set in backend `.env`
 - Check backend logs for credit validation errors
-- Verify user has credits in Mana Core dashboard
+- Verify user has credits in Mana dashboard
 
 ### Frontend can't connect to backend
 
@@ -417,16 +417,16 @@ import { CreditClientService } from '@mana-core/nestjs-integration/services';
 ## Documentation
 
 - **[Credit System](./CREDIT_SYSTEM.md)** - Complete credit system documentation
-- **[Mana Core Integration Guide](./MANA_CORE_INTEGRATION_GUIDE.md)** - Step-by-step integration
+- **[Mana Integration Guide](./MANA_CORE_INTEGRATION_GUIDE.md)** - Step-by-step integration
 - **[Integration Checklist](./MANA_CORE_INTEGRATION_CHECKLIST.md)** - Checkboxes for tracking
 - **[Architecture Guide](./MANA_CORE_ARCHITECTURE.md)** - System architecture and flows
-- **[Mana Core README](./MANA_CORE_README.md)** - Quick reference
+- **[Mana README](./MANA_CORE_README.md)** - Quick reference
 - **[Example Implementation](./apps/mobile/examples/DeckCreationExample.tsx)** - Working code example
 
 ## Resources
 
-- [Mana Core Documentation](https://docs.mana-core.com)
-- [Mana Core NestJS Package](https://github.com/Memo-2023/mana-core-nestjs-package)
+- [Mana Documentation](https://docs.mana-core.com)
+- [Mana NestJS Package](https://github.com/Memo-2023/mana-core-nestjs-package)
 - [Expo Documentation](https://docs.expo.dev)
 - [NestJS Documentation](https://docs.nestjs.com)
 - [Supabase Documentation](https://supabase.com/docs)
@@ -438,5 +438,5 @@ Private project - All rights reserved
 ## Support
 
 For issues related to:
-- **Mana Core**: https://github.com/Memo-2023/mana-core-nestjs-package/issues
+- **Mana**: https://github.com/Memo-2023/mana-core-nestjs-package/issues
 - **This project**: Contact the development team

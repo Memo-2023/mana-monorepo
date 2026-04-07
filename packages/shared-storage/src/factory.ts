@@ -28,7 +28,7 @@ const MINIO_DEFAULTS: StorageConfig = {
  * Mapping of bucket keys to their public URL environment variable names
  */
 const PUBLIC_URL_ENV: Partial<Record<keyof typeof BUCKETS, string>> = {
-	MANACORE: 'MANACORE_STORAGE_PUBLIC_URL',
+	MANA: 'MANA_STORAGE_PUBLIC_URL',
 	PICTURE: 'PICTURE_STORAGE_PUBLIC_URL',
 	STORAGE: 'STORAGE_S3_PUBLIC_URL',
 	INVENTORY: 'INVENTORY_S3_PUBLIC_URL',
@@ -100,7 +100,7 @@ export function createStorage(bucketKey: keyof typeof BUCKETS, publicUrl?: strin
 
 // Convenience aliases for backward compatibility
 
-export const createManaStorage = (publicUrl?: string) => createStorage('MANACORE', publicUrl);
+export const createManaStorage = (publicUrl?: string) => createStorage('MANA', publicUrl);
 export const createPictureStorage = (publicUrl?: string) => createStorage('PICTURE', publicUrl);
 export const createChatStorage = () => createStorage('CHAT');
 export const createCardsStorage = () => createStorage('CARDS');

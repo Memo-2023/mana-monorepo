@@ -1,6 +1,6 @@
 # Test Examples
 
-This directory contains comprehensive example test files demonstrating best practices for testing different app types in the Manacore monorepo.
+This directory contains comprehensive example test files demonstrating best practices for testing different app types in the Mana monorepo.
 
 ## Directory Structure
 

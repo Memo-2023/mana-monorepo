@@ -178,7 +178,7 @@ Or create manually:
 # Use the SAME project as Cloud Run deployment
 PROJECT_ID="mana-core-453821"
 
-# Generate service key (used for Mana Core authentication)
+# Generate service key (used for Mana authentication)
 SERVICE_KEY=$(openssl rand -base64 32)
 
 # Create secrets in the SAME project where Cloud Run will be deployed
@@ -944,7 +944,7 @@ Health check failed with HTTP 503
 **Common Causes**:
 1. Missing environment variables
 2. Can't connect to Supabase
-3. Can't connect to Mana Core
+3. Can't connect to Mana
 4. Application error on startup
 
 **Debugging**:
@@ -1174,9 +1174,9 @@ Adjust in workflow:
 | Variable | Location | Purpose |
 |----------|----------|---------|
 | `NODE_ENV` | Cloud Run | Set to `production` |
-| `MANA_SERVICE_URL` | GCP Secret | Mana Core API URL |
+| `MANA_SERVICE_URL` | GCP Secret | Mana API URL |
 | `APP_ID` | GCP Secret | Cards app identifier |
-| `SERVICE_KEY` | GCP Secret | Mana Core auth key |
+| `SERVICE_KEY` | GCP Secret | Mana auth key |
 | `SUPABASE_URL` | GCP Secret | Supabase project URL |
 | `SUPABASE_ANON_KEY` | GCP Secret | Supabase anonymous key |
 | `SUPABASE_SERVICE_KEY` | GCP Secret | Supabase service role key |

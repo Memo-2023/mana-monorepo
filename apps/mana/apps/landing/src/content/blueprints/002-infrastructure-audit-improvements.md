@@ -73,11 +73,11 @@ Dieses Dokument analysiert den aktuellen Zustand der Mana-Infrastruktur auf dem 
 
 #### Tier 0: Infrastruktur (3 Services)
 
-| Service       | Container         | Port(s)    | Volume            | Bemerkung                     |
-| ------------- | ----------------- | ---------- | ----------------- | ----------------------------- |
-| PostgreSQL 16 | manacore-postgres | 5432       | manacore-postgres | Alle DBs in einer Instanz     |
-| Redis 7       | manacore-redis    | 6379       | manacore-redis    | Session-Cache + Pub/Sub       |
-| MinIO         | manacore-minio    | 9000, 9001 | manacore-minio    | S3-kompatibler Object Storage |
+| Service       | Container     | Port(s)    | Volume        | Bemerkung                     |
+| ------------- | ------------- | ---------- | ------------- | ----------------------------- |
+| PostgreSQL 16 | mana-postgres | 5432       | mana-postgres | Alle DBs in einer Instanz     |
+| Redis 7       | mana-redis    | 6379       | mana-redis    | Session-Cache + Pub/Sub       |
+| MinIO         | mana-minio    | 9000, 9001 | mana-minio    | S3-kompatibler Object Storage |
 
 #### Tier 1: Core Auth (1 Service)
 
@@ -109,53 +109,53 @@ Dieses Dokument analysiert den aktuellen Zustand der Mana-Infrastruktur auf dem 
 
 #### Tier 4: Web-Frontends (11 Services)
 
-| App                | Container      | Port | Backend-Port |
-| ------------------ | -------------- | ---- | ------------ |
-| Mana Dashboard | manacore-web   | 5173 | -            |
-| Chat               | chat-web       | 3000 | 3002         |
-| Presi              | presi-web      | 5178 | 3008         |
-| Matrix             | matrix-web     | 5180 | 8008         |
-| Contacts           | contacts-web   | 5184 | 3015         |
-| Storage            | storage-web    | 5185 | 3019         |
-| Calendar           | calendar-web   | 5186 | 3016         |
-| Clock              | clock-web      | 5187 | 3017         |
-| Todo               | todo-web       | 5188 | 3018         |
-| NutriPhi           | nutriphi-web   | 5189 | 3023         |
-| LLM Playground     | llm-playground | 5190 | -            |
-| SkillTree          | skilltree-web  | 5195 | 3024         |
+| App            | Container      | Port | Backend-Port |
+| -------------- | -------------- | ---- | ------------ |
+| Mana Dashboard | mana-web       | 5173 | -            |
+| Chat           | chat-web       | 3000 | 3002         |
+| Presi          | presi-web      | 5178 | 3008         |
+| Matrix         | matrix-web     | 5180 | 8008         |
+| Contacts       | contacts-web   | 5184 | 3015         |
+| Storage        | storage-web    | 5185 | 3019         |
+| Calendar       | calendar-web   | 5186 | 3016         |
+| Clock          | clock-web      | 5187 | 3017         |
+| Todo           | todo-web       | 5188 | 3018         |
+| NutriPhi       | nutriphi-web   | 5189 | 3023         |
+| LLM Playground | llm-playground | 5190 | -            |
+| SkillTree      | skilltree-web  | 5195 | 3024         |
 
 #### Tier 5: Matrix Stack (14 Services)
 
-| Service         | Container                       | Port       | Funktion                |
-| --------------- | ------------------------------- | ---------- | ----------------------- |
-| Synapse         | manacore-synapse                | 8008, 9002 | Homeserver              |
-| Element Web     | manacore-element                | 8087       | Standard Client         |
-| Matrix Web      | manacore-matrix-web             | 5180       | Custom SvelteKit Client |
-| Mana Bot        | manacore-matrix-mana-bot        | 3310       | Unified Gateway Bot     |
-| Ollama Bot      | manacore-matrix-ollama-bot      | 3311       | AI Chat                 |
-| Stats Bot       | manacore-matrix-stats-bot       | 3312       | Analytics               |
-| Project Doc Bot | manacore-matrix-project-doc-bot | 3313       | Dokumentation           |
-| Todo Bot        | manacore-matrix-todo-bot        | 3314       | Task Management         |
-| Calendar Bot    | manacore-matrix-calendar-bot    | 3315       | Termine                 |
-| NutriPhi Bot    | manacore-matrix-nutriphi-bot    | 3316       | Nutrition               |
-| Zitare Bot      | manacore-matrix-zitare-bot      | 3317       | Quotes                  |
-| Clock Bot       | manacore-matrix-clock-bot       | 3318       | Time Tracking           |
-| TTS Bot         | manacore-matrix-tts-bot         | 3033       | Text-to-Speech          |
+| Service         | Container                   | Port       | Funktion                |
+| --------------- | --------------------------- | ---------- | ----------------------- |
+| Synapse         | mana-synapse                | 8008, 9002 | Homeserver              |
+| Element Web     | mana-element                | 8087       | Standard Client         |
+| Matrix Web      | mana-matrix-web             | 5180       | Custom SvelteKit Client |
+| Mana Bot        | mana-matrix-mana-bot        | 3310       | Unified Gateway Bot     |
+| Ollama Bot      | mana-matrix-ollama-bot      | 3311       | AI Chat                 |
+| Stats Bot       | mana-matrix-stats-bot       | 3312       | Analytics               |
+| Project Doc Bot | mana-matrix-project-doc-bot | 3313       | Dokumentation           |
+| Todo Bot        | mana-matrix-todo-bot        | 3314       | Task Management         |
+| Calendar Bot    | mana-matrix-calendar-bot    | 3315       | Termine                 |
+| NutriPhi Bot    | mana-matrix-nutriphi-bot    | 3316       | Nutrition               |
+| Zitare Bot      | mana-matrix-zitare-bot      | 3317       | Quotes                  |
+| Clock Bot       | mana-matrix-clock-bot       | 3318       | Time Tracking           |
+| TTS Bot         | mana-matrix-tts-bot         | 3033       | Text-to-Speech          |
 
 #### Tier 6: Monitoring & Tools (8 Services)
 
-| Service            | Container                   | Port | Funktion            |
-| ------------------ | --------------------------- | ---- | ------------------- |
-| VictoriaMetrics    | manacore-victoriametrics    | 8428 | Metriken-DB         |
-| Grafana            | manacore-grafana            | 3100 | Dashboards          |
-| Pushgateway        | manacore-pushgateway        | 9091 | Batch-Metriken      |
-| Node Exporter      | manacore-node-exporter      | 9100 | Host-Metriken       |
-| cAdvisor           | manacore-cadvisor           | 8080 | Container-Metriken  |
-| Postgres Exporter  | manacore-postgres-exporter  | 9187 | DB-Metriken         |
-| Redis Exporter     | manacore-redis-exporter     | 9121 | Cache-Metriken      |
-| Umami              | manacore-umami              | 3200 | Web Analytics       |
-| n8n                | manacore-n8n                | 5678 | Workflow Automation |
-| Telegram Stats Bot | manacore-telegram-stats-bot | 3300 | Telegram Reports    |
+| Service            | Container               | Port | Funktion            |
+| ------------------ | ----------------------- | ---- | ------------------- |
+| VictoriaMetrics    | mana-victoriametrics    | 8428 | Metriken-DB         |
+| Grafana            | mana-grafana            | 3100 | Dashboards          |
+| Pushgateway        | mana-pushgateway        | 9091 | Batch-Metriken      |
+| Node Exporter      | mana-node-exporter      | 9100 | Host-Metriken       |
+| cAdvisor           | mana-cadvisor           | 8080 | Container-Metriken  |
+| Postgres Exporter  | mana-postgres-exporter  | 9187 | DB-Metriken         |
+| Redis Exporter     | mana-redis-exporter     | 9121 | Cache-Metriken      |
+| Umami              | mana-umami              | 3200 | Web Analytics       |
+| n8n                | mana-n8n                | 5678 | Workflow Automation |
+| Telegram Stats Bot | mana-telegram-stats-bot | 3300 | Telegram Reports    |
 
 #### Native macOS Services (3 Services)
 
@@ -168,9 +168,9 @@ Dieses Dokument analysiert den aktuellen Zustand der Mana-Infrastruktur auf dem 
 
 #### Auto-Update (1 Service)
 
-| Service    | Container           | Funktion                      |
-| ---------- | ------------------- | ----------------------------- |
-| Watchtower | manacore-watchtower | Auto-Update + Telegram Notify |
+| Service    | Container       | Funktion                      |
+| ---------- | --------------- | ----------------------------- |
+| Watchtower | mana-watchtower | Auto-Update + Telegram Notify |
 
 ---
 
@@ -231,14 +231,14 @@ AKTUELL (Chaotisch):
 
 ```
 AKTUELL:
-manacore-postgres         ✓ Konsistent
-manacore-redis            ✓ Konsistent
+mana-postgres         ✓ Konsistent
+mana-redis            ✓ Konsistent
 mana-core-auth            ✗ Bindestrich-Variante
 mana-api-gateway          ✗ Bindestrich-Variante
 chat-backend              ✗ Kein Präfix
 chat-web                  ✗ Kein Präfix
-manacore-matrix-mana-bot  ✓ Konsistent
-manacore-synapse          ✓ Konsistent
+mana-matrix-mana-bot  ✓ Konsistent
+mana-synapse          ✓ Konsistent
 ```
 
 ### 3. Nicht-optimale Dependencies
@@ -322,7 +322,7 @@ NEU (Strukturiert):
 │  └── 4090: matrix-web             (Custom Client)                   │
 │                                                                      │
 │  5000-5099: Web Frontends                                            │
-│  ├── 5000: manacore-web           (Dashboard)                       │
+│  ├── 5000: mana-web           (Dashboard)                       │
 │  ├── 5010: chat-web                                                 │
 │  ├── 5011: todo-web                                                 │
 │  ├── 5012: calendar-web                                             │
@@ -364,31 +364,31 @@ NEU (Strukturiert):
 **Container-Namen:**
 
 ```
-manacore-{category}-{service}
+mana-{category}-{service}
 
 Beispiele:
-- manacore-infra-postgres
-- manacore-infra-redis
-- manacore-core-auth
-- manacore-api-gateway
-- manacore-app-chat-backend
-- manacore-app-chat-web
-- manacore-matrix-synapse
-- manacore-matrix-bot-mana
-- manacore-mon-grafana
-- manacore-mon-victoria
+- mana-infra-postgres
+- mana-infra-redis
+- mana-core-auth
+- mana-api-gateway
+- mana-app-chat-backend
+- mana-app-chat-web
+- mana-matrix-synapse
+- mana-matrix-bot-mana
+- mana-mon-grafana
+- mana-mon-victoria
 ```
 
 **Volume-Namen:**
 
 ```
-manacore-{service}-data
+mana-{service}-data
 
 Beispiele:
-- manacore-postgres-data
-- manacore-redis-data
-- manacore-matrix-bots-data  (konsolidiert!)
-- manacore-grafana-data
+- mana-postgres-data
+- mana-redis-data
+- mana-matrix-bots-data  (konsolidiert!)
+- mana-grafana-data
 ```
 
 ### 3. Service-Konsolidierung
@@ -501,12 +501,12 @@ Mit dem neuen Schema ist die Migration zu Kubernetes wesentlich einfacher:
 ```yaml
 # Kubernetes Namespace-Struktur
 namespaces:
-  - manacore-infra # postgres, redis, minio
-  - manacore-core # auth, gateway, search
-  - manacore-apps # chat, todo, calendar, etc.
-  - manacore-matrix # synapse, bots, element
-  - manacore-monitoring # grafana, victoria, exporters
-  - manacore-tools # n8n, telegram-bots
+  - mana-infra # postgres, redis, minio
+  - mana-core # auth, gateway, search
+  - mana-apps # chat, todo, calendar, etc.
+  - mana-matrix # synapse, bots, element
+  - mana-monitoring # grafana, victoria, exporters
+  - mana-tools # n8n, telegram-bots
 ```
 
 ### Kubernetes Service-Typen

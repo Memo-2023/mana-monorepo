@@ -1,4 +1,4 @@
-module github.com/manacore/mana-matrix-bot
+module github.com/mana/mana-matrix-bot
 
 go 1.25.0
 

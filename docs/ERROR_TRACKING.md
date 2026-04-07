@@ -61,7 +61,7 @@ Each backend has an `instrument.ts` that initializes error tracking before the a
 
 ```typescript
 // src/instrument.ts
-import { initErrorTracking } from '@manacore/shared-error-tracking';
+import { initErrorTracking } from '@mana/shared-error-tracking';
 
 initErrorTracking({
   serviceName: 'calendar-backend',
@@ -73,7 +73,7 @@ initErrorTracking({
 ```typescript
 // src/main.ts - instrument MUST be the first import
 import './instrument';
-import { bootstrapApp } from '@manacore/shared-nestjs-setup';
+import { bootstrapApp } from '@mana/shared-nestjs-setup';
 ```
 
 Set the DSN as environment variable:
@@ -83,7 +83,7 @@ GLITCHTIP_DSN=https://<key>@glitchtip.mana.how/<project-id>
 
 ### Shared Package
 
-`@manacore/shared-error-tracking` provides:
+`@mana/shared-error-tracking` provides:
 
 | Function | Purpose |
 |----------|---------|
@@ -94,7 +94,7 @@ GLITCHTIP_DSN=https://<key>@glitchtip.mana.how/<project-id>
 | `setTag(key, value)` | Set extra context tags |
 | `flush(timeout)` | Flush pending events before exit |
 
-NestJS-specific (`@manacore/shared-error-tracking/nestjs`):
+NestJS-specific (`@mana/shared-error-tracking/nestjs`):
 
 | Export | Purpose |
 |--------|---------|
@@ -107,7 +107,7 @@ All 19 SvelteKit web apps have frontend error tracking via `hooks.client.ts`:
 
 ```typescript
 // src/hooks.client.ts
-import { initErrorTracking, handleSvelteError } from '@manacore/shared-error-tracking/browser';
+import { initErrorTracking, handleSvelteError } from '@mana/shared-error-tracking/browser';
 import type { HandleClientError } from '@sveltejs/kit';
 
 initErrorTracking({
@@ -140,7 +140,7 @@ const PUBLIC_GLITCHTIP_DSN = process.env.PUBLIC_GLITCHTIP_DSN || '';
 PUBLIC_GLITCHTIP_DSN=https://<key>@glitchtip.mana.how/<project-id>
 ```
 
-Browser-specific exports (`@manacore/shared-error-tracking/browser`):
+Browser-specific exports (`@mana/shared-error-tracking/browser`):
 
 | Function | Purpose |
 |----------|---------|
@@ -199,7 +199,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "glitchtip.settings")
 django.setup()
 from apps.organizations_ext.models import Organization
 from apps.projects.models import Project, ProjectKey
-org = Organization.objects.get(slug="manacore")
+org = Organization.objects.get(slug="mana")
 proj = Project.objects.create(name="new-app", organization=org, platform="node")
 key = ProjectKey.objects.create(project=proj)
 print(f"DSN: https://{key.public_key}@glitchtip.mana.how/{proj.id}")
@@ -212,7 +212,7 @@ print(f"DSN: https://{key.public_key}@glitchtip.mana.how/{proj.id}")
 
 1. Create project in GlitchTip (via UI or Django shell, `platform="node"`)
 2. Copy DSN
-3. Add `@manacore/shared-error-tracking` to backend package.json
+3. Add `@mana/shared-error-tracking` to backend package.json
 4. Create `src/instrument.ts`
 5. Import `./instrument` as first line in `src/main.ts`
 6. Set `GLITCHTIP_DSN` env variable

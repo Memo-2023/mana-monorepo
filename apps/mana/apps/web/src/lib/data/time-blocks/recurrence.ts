@@ -19,14 +19,22 @@ import type { HabitSchedule } from '$lib/modules/habits/types';
 // ─── RRULE Expansion ─────────────────────────────────────
 
 /** Expand an RRULE string to concrete dates within a range. */
-export function expandRule(rruleStr: string, dtstart: Date, rangeStart: Date, rangeEnd: Date): Date[] {
+export function expandRule(
+	rruleStr: string,
+	dtstart: Date,
+	rangeStart: Date,
+	rangeEnd: Date
+): Date[] {
 	const rule = RRule.fromString(`DTSTART:${formatRRuleDate(dtstart)}\n${rruleStr}`);
 	return rule.between(rangeStart, rangeEnd, true);
 }
 
 /** Format a Date for RRULE DTSTART (YYYYMMDDTHHMMSSZ). */
 function formatRRuleDate(date: Date): string {
-	return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+	return date
+		.toISOString()
+		.replace(/[-:]/g, '')
+		.replace(/\.\d{3}/, '');
 }
 
 // ─── HabitSchedule ↔ RRULE Conversion ────────────────────
@@ -66,7 +74,10 @@ export function rruleToHabitSchedule(rrule: string): HabitSchedule | null {
 	}
 	const byDayMatch = clean.match(/BYDAY=([A-Z,]+)/);
 	if (!byDayMatch) return null;
-	const days = byDayMatch[1].split(',').map((d) => REVERSE_DAY_MAP[d]).filter((d) => d !== undefined);
+	const days = byDayMatch[1]
+		.split(',')
+		.map((d) => REVERSE_DAY_MAP[d])
+		.filter((d) => d !== undefined);
 	return { days: days.sort() };
 }
 
@@ -81,9 +92,7 @@ export async function materializeRecurringBlocks(daysAhead: number = 30): Promis
 	const allBlocks = await timeBlockTable.toArray();
 
 	// Find "template" blocks: have recurrenceRule, no parentBlockId (not instances themselves)
-	const templates = allBlocks.filter(
-		(b) => b.recurrenceRule && !b.deletedAt && !b.parentBlockId
-	);
+	const templates = allBlocks.filter((b) => b.recurrenceRule && !b.deletedAt && !b.parentBlockId);
 
 	if (templates.length === 0) return 0;
 
@@ -182,10 +191,7 @@ export async function regenerateForBlock(
  */
 export async function cleanupFutureInstances(templateBlockId: string): Promise<void> {
 	const today = new Date().toISOString().split('T')[0];
-	const instances = await timeBlockTable
-		.where('parentBlockId')
-		.equals(templateBlockId)
-		.toArray();
+	const instances = await timeBlockTable.where('parentBlockId').equals(templateBlockId).toArray();
 
 	for (const instance of instances) {
 		if (instance.deletedAt) continue;
@@ -201,10 +207,7 @@ export async function cleanupFutureInstances(templateBlockId: string): Promise<v
  * Used when deleting the recurring event entirely.
  */
 export async function deleteAllInstances(templateBlockId: string): Promise<void> {
-	const instances = await timeBlockTable
-		.where('parentBlockId')
-		.equals(templateBlockId)
-		.toArray();
+	const instances = await timeBlockTable.where('parentBlockId').equals(templateBlockId).toArray();
 
 	for (const instance of instances) {
 		if (!instance.deletedAt) {

@@ -1,4 +1,4 @@
-# @manacore/shared-theme
+# @mana/shared-theme
 
 Unified theme system for all Mana web applications. Provides a consistent theming experience with HSL-based colors, multiple theme variants, and light/dark mode support.
 
@@ -15,7 +15,7 @@ Unified theme system for all Mana web applications. Provides a consistent themin
 ## Installation
 
 ```bash
-pnpm add @manacore/shared-theme
+pnpm add @mana/shared-theme
 ```
 
 ## Quick Start
@@ -24,7 +24,7 @@ pnpm add @manacore/shared-theme
 
 ```typescript
 // src/lib/stores/theme.ts
-import { createThemeStore } from '@manacore/shared-theme';
+import { createThemeStore } from '@mana/shared-theme';
 
 export const theme = createThemeStore({
   appId: 'myapp',
@@ -57,7 +57,7 @@ export const theme = createThemeStore({
 
 ```css
 /* src/app.css */
-@import '@manacore/shared-tailwind/themes.css';
+@import '@mana/shared-tailwind/themes.css';
 
 @tailwind base;
 @tailwind components;
@@ -163,7 +163,7 @@ The theme system provides 18 semantic color tokens:
 
 ## Usage with Tailwind
 
-The `@manacore/shared-tailwind` preset maps all CSS variables to Tailwind classes:
+The `@mana/shared-tailwind` preset maps all CSS variables to Tailwind classes:
 
 ```html
 <!-- Backgrounds -->
@@ -192,14 +192,14 @@ The `@manacore/shared-tailwind` preset maps all CSS variables to Tailwind classe
 ## Pre-defined App Configs
 
 ```typescript
-import { APP_THEME_CONFIGS } from '@manacore/shared-theme';
+import { APP_THEME_CONFIGS } from '@mana/shared-theme';
 
 // Use pre-defined config
 export const theme = createThemeStore(APP_THEME_CONFIGS.memoro);
 
 // Available configs:
 // - APP_THEME_CONFIGS.memoro (Gold)
-// - APP_THEME_CONFIGS.manacore (Indigo)
+// - APP_THEME_CONFIGS.mana (Indigo)
 // - APP_THEME_CONFIGS.cards (Indigo)
 // - APP_THEME_CONFIGS.maerchenzauber (Purple)
 ```
@@ -216,10 +216,10 @@ import type {
   AppThemeConfig,   // Store configuration
   ThemeStore,       // Store interface
   HSLValue,         // HSL string format
-} from '@manacore/shared-theme';
+} from '@mana/shared-theme';
 ```
 
 ## Related Packages
 
-- `@manacore/shared-tailwind` - Tailwind preset with theme CSS variables
-- `@manacore/shared-theme-ui` - Theme toggle and selector components
+- `@mana/shared-tailwind` - Tailwind preset with theme CSS variables
+- `@mana/shared-theme-ui` - Theme toggle and selector components

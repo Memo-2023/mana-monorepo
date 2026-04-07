@@ -17,10 +17,11 @@ http://localhost:5173/welcome?appName=memoro
 ```
 
 Try different apps:
+
 - `?appName=memoro` - Blue theme, voice memo features
 - `?appName=cards` - Purple theme, flashcard features
 - `?appName=storyteller` - Amber theme, writing features
-- `?appName=manacore` - Indigo theme, account management
+- `?appName=mana` - Indigo theme, account management
 - No parameter - Default Mana platform overview
 
 ### 2. Test Email Verification Flow
@@ -36,6 +37,7 @@ To test the full flow, you need to configure Supabase email templates:
 ```
 
 Then:
+
 1. Register a new account
 2. Check email for confirmation link
 3. Click link → Should redirect to welcome page with Memoro branding
@@ -43,13 +45,13 @@ Then:
 
 ## 🎨 Supported Apps
 
-| App Name | Theme Color | Features |
-|----------|-------------|----------|
-| `memoro` | Blue #3B82F6 | Voice memos, AI transcription |
-| `cards` | Purple #8B5CF6 | Flashcards, spaced repetition |
-| `storyteller` | Amber #F59E0B | Creative writing, AI assistant |
-| `manacore` | Indigo #6366F1 | Account management, SSO |
-| (none) | Indigo #6366F1 | Platform overview |
+| App Name      | Theme Color    | Features                       |
+| ------------- | -------------- | ------------------------------ |
+| `memoro`      | Blue #3B82F6   | Voice memos, AI transcription  |
+| `cards`       | Purple #8B5CF6 | Flashcards, spaced repetition  |
+| `storyteller` | Amber #F59E0B  | Creative writing, AI assistant |
+| `mana`        | Indigo #6366F1 | Account management, SSO        |
+| (none)        | Indigo #6366F1 | Platform overview              |
 
 ## 📝 Adding New Apps
 
@@ -57,27 +59,27 @@ Edit `/src/lib/config/apps.ts`:
 
 ```typescript
 export const appConfigs: Record<string, AppConfig> = {
-  // ... existing apps
+	// ... existing apps
 
-  mynewapp: {
-    name: 'mynewapp',
-    displayName: 'My New App',
-    tagline: 'Your tagline here',
-    description: 'What your app does',
-    logoEmoji: '🚀',
-    primaryColor: '#FF6B6B',
-    accentColor: '#FF8E8E',
-    features: [
-      {
-        icon: '✨',
-        title: 'Feature Name',
-        description: 'Feature description',
-        color: '#FF6B6B'
-      }
-      // Add 4-6 features
-    ],
-    dashboardRoute: '/dashboard'
-  }
+	mynewapp: {
+		name: 'mynewapp',
+		displayName: 'My New App',
+		tagline: 'Your tagline here',
+		description: 'What your app does',
+		logoEmoji: '🚀',
+		primaryColor: '#FF6B6B',
+		accentColor: '#FF8E8E',
+		features: [
+			{
+				icon: '✨',
+				title: 'Feature Name',
+				description: 'Feature description',
+				color: '#FF6B6B',
+			},
+			// Add 4-6 features
+		],
+		dashboardRoute: '/dashboard',
+	},
 };
 ```
 
@@ -86,6 +88,7 @@ export const appConfigs: Record<string, AppConfig> = {
 ### Change Colors
 
 Colors are in the app config. Each app has:
+
 - `primaryColor` - Main brand color (headers, buttons)
 - `accentColor` - Secondary color
 - Feature-specific colors for each feature card
@@ -108,13 +111,16 @@ Edit `/src/routes/welcome/+page.svelte` around line 125:
 ## 🐛 Troubleshooting
 
 **Issue: 404 Error on /welcome**
+
 - Solution: Refresh the dev server (files created while server running)
 
 **Issue: Page shows Mana branding instead of app branding**
+
 - Solution: Check appName parameter in URL is correct
 - Verify app exists in `apps.ts` config
 
 **Issue: localStorage not persisting**
+
 - Solution: Check browser console for errors
 - Clear localStorage and try again
 
@@ -128,11 +134,13 @@ Edit `/src/routes/welcome/+page.svelte` around line 125:
 ## 🎉 Usage Summary
 
 **Direct Access:**
+
 ```
 http://localhost:5173/welcome?appName=memoro
 ```
 
 **From Email Verification:**
+
 ```
 User registers → Email sent with appName
 → Click confirmation link

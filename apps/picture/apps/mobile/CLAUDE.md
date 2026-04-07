@@ -89,7 +89,7 @@ import { getRateLimits } from '~/services/api/profiles';
 import { generateImage } from '~/services/api/generate';
 ```
 
-- API client configured with JWT authentication via `@manacore/shared-auth`
+- API client configured with JWT authentication via `@mana/shared-auth`
 - Environment variables managed at root level
 - Database is PostgreSQL accessed through the backend
 
@@ -129,7 +129,7 @@ Located in `services/api/`:
 
 - **Navigation**: expo-router, react-navigation
 - **UI**: NativeWind, @expo/vector-icons
-- **Auth**: @manacore/shared-auth
+- **Auth**: @mana/shared-auth
 - **State**: zustand
 - **Development**: expo-dev-client for custom native builds
 

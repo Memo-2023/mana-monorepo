@@ -75,9 +75,9 @@ const { class: className } = Astro.props;
 								</div>
 							</div>
 
-							<!-- Manacore -->
+							<!-- Mana -->
 							<div>
-								<Text size="sm" class="text-gray-600 dark:text-gray-400 mb-1"> Mit Manacore </Text>
+								<Text size="sm" class="text-gray-600 dark:text-gray-400 mb-1"> Mit Mana</Text>
 								<div class="flex items-baseline gap-2">
 									<span id="manaCost" class="text-3xl font-bold text-mana-blue">30€</span>
 									<span class="text-sm text-gray-500">/Monat</span>
@@ -155,7 +155,7 @@ const { class: className } = Astro.props;
 		// Classic license cost
 		const classicCost = teamSize * classicPricePerUser;
 
-		// Manacore cost calculation
+		// Mana cost calculation
 		const plan = manaPlans[intensity];
 		const plansNeeded = Math.ceil(teamSize / plan.users);
 		const manaCost = plansNeeded * plan.price;

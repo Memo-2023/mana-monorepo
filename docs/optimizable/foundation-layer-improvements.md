@@ -84,7 +84,7 @@ export class ContactsClient {
 
 ```typescript
 // apps/chat/apps/backend/src/chat.service.ts
-import { FoundationClients } from '@manacore/foundation-clients';
+import { FoundationClients } from '@mana/foundation-clients';
 
 @Injectable()
 export class ChatService {
@@ -147,8 +147,8 @@ export interface TaskCompletedEvent {
 
 ```typescript
 // apps/todo/apps/backend/src/task/task.service.ts
-import { RedisService } from '@manacore/shared-redis';
-import { FoundationEvents } from '@manacore/foundation-events';
+import { RedisService } from '@mana/shared-redis';
+import { FoundationEvents } from '@mana/foundation-events';
 
 @Injectable()
 export class TaskService {
@@ -174,7 +174,7 @@ export class TaskService {
 
 ```typescript
 // apps/calendar/apps/backend/src/calendar.module.ts
-import { FoundationEvents } from '@manacore/foundation-events';
+import { FoundationEvents } from '@mana/foundation-events';
 
 @Injectable()
 export class CalendarEventSubscriber implements OnModuleInit {

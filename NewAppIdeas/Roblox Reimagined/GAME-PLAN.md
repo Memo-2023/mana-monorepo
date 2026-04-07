@@ -401,7 +401,7 @@ Garten:
 ║  Server-autoritative Physik + Script-Execution            ║
 ║  Orchestriert von Go-Service                              ║
 ╠═══════════════════════════════════════════════════════════╣
-║  BACKEND (bestehende Manacore-Services)                   ║
+║  BACKEND (bestehende Mana-Services)                   ║
 ║  Go:  Orchestrator, Matchmaker, Sync, Notify, Search      ║
 ║  Hono: Auth, Credits, User, Subscriptions, Analytics      ║
 ║  Python: LLM (NPCs), Image Gen, STT, TTS                 ║
@@ -791,9 +791,9 @@ DIREKT NUTZBAR (0 Aufwand):
 
 ANPASSBAR (geringer Aufwand):
   mana-sync (+ Chunk-Sync, Item-Sync)
-  @manacore/local-store (+ Voxel Collections)
-  @manacore/shared-auth (unveraendert)
-  @manacore/shared-ui (+ Editor-Komponenten)
+  @mana/local-store (+ Voxel Collections)
+  @mana/shared-auth (unveraendert)
+  @mana/shared-ui (+ Editor-Komponenten)
 
 NEU ZU BAUEN:
   Bevy Voxel Engine (Client + Server)
@@ -1016,4 +1016,4 @@ BUDGET:  ~50 MB RAM, ~1.8M Dreiecke, 60fps Desktop, 30fps Mobile
 ---
 
 *Erstellt: 28. Maerz 2026*
-*Projekt: ManaVoxel -- Teil des Manacore-Oekosystems*
+*Projekt: ManaVoxel -- Teil des Mana-Oekosystems*

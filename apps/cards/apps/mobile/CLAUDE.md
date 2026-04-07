@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Cards is a React Native/Expo application using Expo Router for navigation, TypeScript for type safety, NativeWind (Tailwind CSS) for styling, and Mana Core Auth for authentication. The app uses Zustand for state management and connects to the NestJS backend (port 3009).
+Cards is a React Native/Expo application using Expo Router for navigation, TypeScript for type safety, NativeWind (Tailwind CSS) for styling, and Mana Auth for authentication. The app uses Zustand for state management and connects to the NestJS backend (port 3009).
 
 ## Essential Commands
 
@@ -69,7 +69,7 @@ Uses Expo Router v5 with file-based routing:
 
 ### Authentication
 
-- Mana Core Auth via `@manacore/shared-auth` in `services/authService.ts`
+- Mana Auth via `@mana/shared-auth` in `services/authService.ts`
 - Zustand auth store in `store/authStore.ts`
 - Tokens stored in Expo SecureStore (encrypted)
 - Supports email/password, Google, and Apple sign-in

@@ -7,7 +7,7 @@
 ## Übersicht
 
 Einrichtung eines vollständigen Mail-Servers auf einem separaten Gerät für:
-- Eigene Email-Adressen (@manacore.ai, @mana.how)
+- Eigene Email-Adressen (@mana.how, @mana.how)
 - Ausfallsichere Alert-Benachrichtigungen
 - Unabhängigkeit von Gmail/externen Diensten
 
@@ -60,7 +60,7 @@ Mailcow ist eine Docker-basierte Mail-Server-Suite mit allem dabei:
 │  └───────────┘ └───────────┘ └───────────┘ └───────────┘   │
 │                                                             │
 │  ┌─────────────────────────────────────────────────────┐   │
-│  │  Mailcow Admin UI (https://mail.manacore.ai)        │   │
+│  │  Mailcow Admin UI (https://mail.mana.how)        │   │
 │  │  - Domain-Verwaltung                                │   │
 │  │  - Postfach-Erstellung                              │   │
 │  │  - Alias-Management                                 │   │
@@ -105,13 +105,13 @@ Internet
 
 ## DNS-Konfiguration
 
-Für `manacore.ai` bei Cloudflare:
+Für `mana.how` bei Cloudflare:
 
 ### MX Record
 ```
 Type: MX
 Name: @
-Content: mail.manacore.ai
+Content: mail.mana.how
 Priority: 10
 Proxy: DNS only (grey cloud)
 ```
@@ -128,7 +128,7 @@ Proxy: DNS only (grey cloud)  # WICHTIG: Kein Proxy für Mail!
 ```
 Type: TXT
 Name: @
-Content: v=spf1 mx a:mail.manacore.ai ~all
+Content: v=spf1 mx a:mail.mana.how ~all
 ```
 
 ### DKIM Record
@@ -142,22 +142,22 @@ Content: <wird von Mailcow generiert>
 ```
 Type: TXT
 Name: _dmarc
-Content: v=DMARC1; p=quarantine; rua=mailto:dmarc@manacore.ai
+Content: v=DMARC1; p=quarantine; rua=mailto:dmarc@mana.how
 ```
 
 ### Autodiscover (für Mail-Clients)
 ```
 Type: CNAME
 Name: autodiscover
-Content: mail.manacore.ai
+Content: mail.mana.how
 
 Type: CNAME
 Name: autoconfig
-Content: mail.manacore.ai
+Content: mail.mana.how
 
 Type: SRV
 Name: _autodiscover._tcp
-Content: 0 1 443 mail.manacore.ai
+Content: 0 1 443 mail.mana.how
 ```
 
 ## Installation
@@ -209,7 +209,7 @@ cd mailcow-dockerized
 
 # Konfiguration generieren
 sudo ./generate_config.sh
-# Hostname eingeben: mail.manacore.ai
+# Hostname eingeben: mail.mana.how
 # Timezone: Europe/Berlin
 
 # Container starten
@@ -220,7 +220,7 @@ sudo docker compose up -d
 ### 4. Admin-Zugang
 
 ```
-URL: https://mail.manacore.ai
+URL: https://mail.mana.how
 User: admin
 Password: moohoo (SOFORT ÄNDERN!)
 ```
@@ -228,7 +228,7 @@ Password: moohoo (SOFORT ÄNDERN!)
 ### 5. Domain hinzufügen
 
 1. Admin UI → Configuration → Mail Setup → Domains
-2. "Add domain" → `manacore.ai`
+2. "Add domain" → `mana.how`
 3. DKIM-Key generieren und in DNS eintragen
 
 ### 6. Postfächer erstellen
@@ -236,7 +236,7 @@ Password: moohoo (SOFORT ÄNDERN!)
 1. Admin UI → Configuration → Mail Setup → Mailboxes
 2. "Add mailbox":
    - Username: `till`
-   - Domain: `manacore.ai`
+   - Domain: `mana.how`
    - Password: sicheres Passwort
    - Quota: 5 GB
 
@@ -244,12 +244,12 @@ Password: moohoo (SOFORT ÄNDERN!)
 
 | Adresse | Typ | Verwendung |
 |---------|-----|------------|
-| till@manacore.ai | Postfach | Haupt-Email |
-| alerts@manacore.ai | Postfach | Server-Benachrichtigungen |
-| noreply@manacore.ai | Alias → till | Automatische Emails |
-| support@manacore.ai | Alias → till | Kundenanfragen |
-| info@manacore.ai | Alias → till | Allgemeine Anfragen |
-| *@manacore.ai | Catch-All → till | Alles andere |
+| till@mana.how | Postfach | Haupt-Email |
+| alerts@mana.how | Postfach | Server-Benachrichtigungen |
+| noreply@mana.how | Alias → till | Automatische Emails |
+| support@mana.how | Alias → till | Kundenanfragen |
+| info@mana.how | Alias → till | Allgemeine Anfragen |
+| *@mana.how | Catch-All → till | Alles andere |
 
 ## Integration mit Mac Mini
 
@@ -259,11 +259,11 @@ Nach Mail-Server Setup, `.env.notifications` anpassen:
 
 ```bash
 # Email über eigenen Server
-EMAIL_TO=alerts@manacore.ai
-EMAIL_FROM=alerts@manacore.ai
-SMTP_HOST=mail.manacore.ai
+EMAIL_TO=alerts@mana.how
+EMAIL_FROM=alerts@mana.how
+SMTP_HOST=mail.mana.how
 SMTP_PORT=587
-SMTP_USER=alerts@manacore.ai
+SMTP_USER=alerts@mana.how
 SMTP_PASS=<password>
 ```
 
@@ -271,16 +271,16 @@ SMTP_PASS=<password>
 
 ```bash
 # ~/.msmtprc auf Mac Mini
-account manacore
-host mail.manacore.ai
+account mana
+host mail.mana.how
 port 587
-from alerts@manacore.ai
-user alerts@manacore.ai
+from alerts@mana.how
+user alerts@mana.how
 password <password>
 auth on
 tls on
 
-account default : manacore
+account default : mana
 ```
 
 ## Wartung
@@ -331,7 +331,7 @@ sudo docker compose exec postfix-mailcow postqueue -p
 ### Mail-Test
 ```bash
 # Test-Email senden
-echo "Test" | mail -s "Test" till@manacore.ai
+echo "Test" | mail -s "Test" till@mana.how
 ```
 
 ## Kosten-Übersicht
@@ -371,8 +371,8 @@ echo "Test" | mail -s "Test" till@manacore.ai
 
 ### Keine Emails empfangen
 
-1. MX-Record prüfen: `dig MX manacore.ai`
-2. Port 25 offen? `telnet mail.manacore.ai 25`
+1. MX-Record prüfen: `dig MX mana.how`
+2. Port 25 offen? `telnet mail.mana.how 25`
 3. Firewall/Router Portforwarding prüfen
 
 ### Zertifikat-Fehler

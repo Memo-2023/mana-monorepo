@@ -9,7 +9,7 @@ All monitoring tools are publicly accessible - no login required (except GlitchT
 | Tool | URL | Access |
 |------|-----|--------|
 | **Grafana** | https://grafana.mana.how | No login needed (Anonymous Viewer) |
-| **Umami** | [Public Dashboard](https://stats.mana.how/share/face76f42d3e42beb8c80ea03f33a462/manacore-webapp) | No login needed (Public Share) |
+| **Umami** | [Public Dashboard](https://stats.mana.how/share/face76f42d3e42beb8c80ea03f33a462/mana-webapp) | No login needed (Public Share) |
 | **GlitchTip** | https://glitchtip.mana.how | `guest@mana.how` / `guestguest` |
 
 ### Grafana Dashboards
@@ -25,7 +25,7 @@ All monitoring tools are publicly accessible - no login required (except GlitchT
 
 | App | Share URL |
 |-----|-----------|
-| Mana | https://stats.mana.how/share/face76f42d3e42beb8c80ea03f33a462/manacore-webapp |
+| Mana | https://stats.mana.how/share/face76f42d3e42beb8c80ea03f33a462/mana-webapp |
 | Calendar | https://stats.mana.how/share/772d2510c5bb47e0b490267f2821510a/calendar-webapp |
 | Todo | https://stats.mana.how/share/ec1bb158d8714bc6bdbc147c97b9c1c7/todo-webapp |
 | Chat | https://stats.mana.how/share/1c43fd9847674f899dc2ebdfbd8960db/chat-webapp |
@@ -78,7 +78,7 @@ All monitoring tools are publicly accessible - no login required (except GlitchT
 | Image | `victoriametrics/victoria-metrics:v1.99.0` |
 | Port | 8428 |
 | Retention | 2 years |
-| Storage | Docker volume `manacore-victoriametrics` |
+| Storage | Docker volume `mana-victoriametrics` |
 
 **Why VictoriaMetrics instead of Prometheus?**
 - 3-10x better compression
@@ -105,8 +105,8 @@ curl "http://localhost:8428/api/v1/query_range?query=auth_users_total&start=-1h&
 
 | Property | Value |
 |----------|-------|
-| Location | `/data/analytics/metrics.duckdb` (in mana-core-auth container) |
-| Storage | Docker volume `manacore-analytics` |
+| Location | `/data/analytics/metrics.duckdb` (in mana-auth container) |
+| Storage | Docker volume `mana-analytics` |
 | Retention | Unlimited |
 | Snapshot | Daily at midnight UTC |
 
@@ -208,23 +208,23 @@ curl "https://auth.mana.how/api/v1/analytics/growth?days=30"
 
 ```bash
 # On Mac Mini server
-cd ~/projects/manacore-monorepo
+cd ~/projects/mana-monorepo
 
 # Start all monitoring services
-docker compose -f docker-compose.macmini.yml up -d victoriametrics grafana mana-core-auth
+docker compose -f docker-compose.macmini.yml up -d victoriametrics grafana mana-auth
 
 # Check status
 docker compose -f docker-compose.macmini.yml ps | grep -E "(victoria|grafana|auth)"
 ```
 
-### Rebuilding mana-core-auth (with Analytics)
+### Rebuilding mana-auth (with Analytics)
 
 ```bash
 # Build from monorepo root
-docker build -t ghcr.io/memo-2023/mana-core-auth:latest -f services/mana-core-auth/Dockerfile .
+docker build -t ghcr.io/memo-2023/mana-auth:latest -f services/mana-auth/Dockerfile .
 
 # Restart container
-docker compose -f docker-compose.macmini.yml up -d mana-core-auth
+docker compose -f docker-compose.macmini.yml up -d mana-auth
 ```
 
 ### Volume Permissions
@@ -232,8 +232,8 @@ docker compose -f docker-compose.macmini.yml up -d mana-core-auth
 If DuckDB fails with permission errors, fix the volume ownership:
 
 ```bash
-docker exec -u root mana-core-auth chown -R nestjs:nodejs /data/analytics
-docker restart mana-core-auth
+docker exec -u root mana-auth chown -R nestjs:nodejs /data/analytics
+docker restart mana-auth
 ```
 
 ## Backup
@@ -263,7 +263,7 @@ Add to crontab for daily backups:
 
 ```bash
 # Daily backup at 2 AM
-0 2 * * * /path/to/manacore-monorepo/scripts/backup-monitoring.sh
+0 2 * * * /path/to/mana-monorepo/scripts/backup-monitoring.sh
 ```
 
 ## Troubleshooting
@@ -272,7 +272,7 @@ Add to crontab for daily backups:
 
 ```bash
 # Check scrape config
-docker exec manacore-victoriametrics cat /etc/prometheus/prometheus.yml
+docker exec mana-victoriametrics cat /etc/prometheus/prometheus.yml
 
 # Check targets status
 curl http://localhost:8428/api/v1/targets
@@ -282,17 +282,17 @@ curl http://localhost:8428/api/v1/targets
 
 1. Check permissions:
 ```bash
-docker exec mana-core-auth ls -la /data/analytics/
+docker exec mana-auth ls -la /data/analytics/
 ```
 
 2. Fix if needed:
 ```bash
-docker exec -u root mana-core-auth chown -R nestjs:nodejs /data/analytics
+docker exec -u root mana-auth chown -R nestjs:nodejs /data/analytics
 ```
 
 3. Restart:
 ```bash
-docker restart mana-core-auth
+docker restart mana-auth
 ```
 
 ### Grafana can't connect to VictoriaMetrics
@@ -309,7 +309,7 @@ cat docker/grafana/provisioning/datasources/prometheus.yml
 
 3. Restart Grafana:
 ```bash
-docker restart manacore-grafana
+docker restart mana-grafana
 ```
 
 ### Missing metrics in Grafana
@@ -326,7 +326,7 @@ curl http://localhost:3001/metrics
 
 ## Environment Variables
 
-### mana-core-auth
+### mana-auth
 
 | Variable | Description | Default |
 |----------|-------------|---------|

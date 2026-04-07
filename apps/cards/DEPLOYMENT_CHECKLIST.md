@@ -109,7 +109,7 @@ for SECRET in MANA_SERVICE_URL CARDS_APP_ID CARDS_SERVICE_KEY CARDS_SUPABASE_URL
 done
 ```
 
-**IMPORTANT**: Add the generated `SERVICE_KEY` to mana-core-middleware's `APP_SERVICE_KEYS`:
+**IMPORTANT**: Add the generated `SERVICE_KEY` to mana-middleware's `APP_SERVICE_KEYS`:
 
 ```
 APP_SERVICE_KEYS=existing-apps,YOUR_APP_ID:YOUR_SERVICE_KEY
@@ -219,7 +219,7 @@ gcloud secrets add-iam-policy-binding CARDS_APP_ID \
 
 1. Missing environment variables/secrets
 2. Can't connect to Supabase
-3. Can't connect to Mana Core
+3. Can't connect to Mana
 
 **Debug**:
 

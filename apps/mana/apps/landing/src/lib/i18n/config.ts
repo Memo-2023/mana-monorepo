@@ -49,7 +49,7 @@ export const ui = {
 		'home.hero.titleHighlight': 'unabhängige Software',
 		'home.hero.subtitle':
 			'Wir entwickeln quelloffene KI-Anwendungen für Bildung, Forschung und Gesellschaft. Transparent, datenschutzfreundlich und für alle zugänglich.',
-		'home.hero.imageAlt': 'Manacore - Gemeinnützige KI-Software',
+		'home.hero.imageAlt': 'Mana - Gemeinnützige KI-Software',
 
 		// Homepage Apps Section
 		'home.apps.title': 'Entdecke unsere',
@@ -130,7 +130,7 @@ export const ui = {
 		'home.hero.titleHighlight': 'Without Limits',
 		'home.hero.subtitle':
 			'Use the latest AI models flexibly and transparently with our innovative Mana credit system. One platform, unlimited possibilities.',
-		'home.hero.imageAlt': 'Manacore AI - Flexible AI Usage',
+		'home.hero.imageAlt': 'Mana AI - Flexible AI Usage',
 
 		// Homepage Apps Section
 		'home.apps.title': 'Discover our',
@@ -210,7 +210,7 @@ export const ui = {
 		'home.hero.titleHighlight': 'Senza Limiti',
 		'home.hero.subtitle':
 			'Utilizza i modelli AI più recenti in modo flessibile e trasparente con il nostro innovativo sistema di crediti Mana. Una piattaforma, possibilità illimitate.',
-		'home.hero.imageAlt': "Manacore AI - Utilizzo flessibile dell'AI",
+		'home.hero.imageAlt': "Mana AI - Utilizzo flessibile dell'AI",
 
 		// Homepage Apps Section
 		'home.apps.title': 'Scopri le nostre',
@@ -293,7 +293,7 @@ export const ui = {
 		'home.hero.titleHighlight': 'Sans Limites',
 		'home.hero.subtitle':
 			"Utilisez les derniers modèles d'IA de manière flexible et transparente avec notre système de crédits Mana innovant. Une plateforme, des possibilités illimitées.",
-		'home.hero.imageAlt': "Manacore AI - Utilisation flexible de l'IA",
+		'home.hero.imageAlt': "Mana AI - Utilisation flexible de l'IA",
 
 		// Homepage Apps Section
 		'home.apps.title': 'Découvrez nos',
@@ -378,7 +378,7 @@ export const ui = {
 		'home.hero.titleHighlight': 'Sin Límites',
 		'home.hero.subtitle':
 			'Utiliza los últimos modelos de IA de forma flexible y transparente con nuestro innovador sistema de créditos Mana. Una plataforma, posibilidades ilimitadas.',
-		'home.hero.imageAlt': 'Manacore AI - Uso flexible de IA',
+		'home.hero.imageAlt': 'Mana AI - Uso flexible de IA',
 
 		// Homepage Apps Section
 		'home.apps.title': 'Descubre nuestras',

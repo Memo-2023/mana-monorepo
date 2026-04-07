@@ -24,7 +24,7 @@ Two layers:
 
 ```svelte
 <script>
-  import { dragSource } from '@manacore/shared-ui/dnd';
+  import { dragSource } from '@mana/shared-ui/dnd';
 </script>
 
 <button use:dragSource={{
@@ -42,7 +42,7 @@ Two layers:
 
 ```svelte
 <script>
-  import { dropTarget } from '@manacore/shared-ui/dnd';
+  import { dropTarget } from '@mana/shared-ui/dnd';
 </script>
 
 <div use:dropTarget={{
@@ -61,7 +61,7 @@ CSS class `mana-drop-target-hover` is added during hover,
 
 ```svelte
 <script>
-  import { passiveDropZone, registerSvelteActionDrag, clearSvelteActionDrag } from '@manacore/shared-ui/dnd';
+  import { passiveDropZone, registerSvelteActionDrag, clearSvelteActionDrag } from '@mana/shared-ui/dnd';
 </script>
 
 <!-- In your svelte-dnd-action handlers: -->
@@ -91,7 +91,7 @@ Place once in your app layout:
 
 ```svelte
 <script>
-  import { DragPreview, ActionZone } from '@manacore/shared-ui/dnd';
+  import { DragPreview, ActionZone } from '@mana/shared-ui/dnd';
 </script>
 
 <DragPreview />

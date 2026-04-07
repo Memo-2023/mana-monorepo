@@ -1,6 +1,6 @@
-# Mana Core Architecture in Storyteller
+# Mana Architecture in Storyteller
 
-This document explains the architecture and data flow of the Mana Core integration in the Storyteller project.
+This document explains the architecture and data flow of the Mana integration in the Storyteller project.
 
 ## System Architecture
 
@@ -32,7 +32,7 @@ This document explains the architecture and data flow of the Mana Core integrati
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
 │  ┌───────────────────────────────────────────────────────────┐ │
-│  │            Mana Core NestJS Integration                   │ │
+│  │            Mana NestJS Integration                   │ │
 │  ├───────────────────────────────────────────────────────────┤ │
 │  │                                                           │ │
 │  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐   │ │
@@ -73,7 +73,7 @@ This document explains the architecture and data flow of the Mana Core integrati
                             │   Credit Operations)
                             ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                      Mana Core Service                          │
+│                      Mana Service                          │
 │                 (Authentication & Credits)                      │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
@@ -383,7 +383,7 @@ const CREDIT_COSTS = {
    }
    ```
 
-3. **Mana Core**: Processes credit operations
+3. **Mana**: Processes credit operations
    - Validates user has sufficient credits
    - Deducts credits from user's balance
    - Records transaction in ledger
@@ -476,8 +476,8 @@ async getCharacters(
 ### Backend `.env`
 
 ```env
-# Mana Core (Required)
-MANA_SERVICE_URL=https://mana-core-middleware-111768794939.europe-west3.run.app
+# Mana (Required)
+MANA_SERVICE_URL=https://mana-middleware-111768794939.europe-west3.run.app
 APP_ID=8d2f5ddb-e251-4b3b-8802-84022a7ac77f
 MANA_SUPABASE_SECRET_KEY=your-service-key
 
@@ -504,7 +504,7 @@ EXPO_PUBLIC_STORYTELLER_BACKEND_URL=http://localhost:3002
 
 ## Key Takeaways
 
-### What Mana Core Provides
+### What Mana Provides
 
 1. **Authentication System**
    - ✅ Email/password sign-in/sign-up

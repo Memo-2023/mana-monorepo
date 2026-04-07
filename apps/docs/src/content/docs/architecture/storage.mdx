@@ -1,13 +1,13 @@
 ---
 title: Storage
-description: S3-compatible object storage for files and media in Manacore.
+description: S3-compatible object storage for files and media in Mana.
 ---
 
 import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
 
 # Storage
 
-Manacore uses S3-compatible object storage for file uploads, generated images, and other media.
+Mana uses S3-compatible object storage for file uploads, generated images, and other media.
 
 ## Architecture
 
@@ -50,7 +50,7 @@ import {
   createPictureStorage,
   generateUserFileKey,
   getContentType,
-} from '@manacore/shared-storage';
+} from '@mana/shared-storage';
 
 const storage = createPictureStorage();
 
@@ -101,7 +101,7 @@ import {
   createChatStorage,
   createCardsStorage,
   createContactsStorage,
-} from '@manacore/shared-storage';
+} from '@mana/shared-storage';
 
 // Each creates a client configured for that bucket
 const pictureStorage = createPictureStorage();
@@ -111,7 +111,7 @@ const chatStorage = createChatStorage();
 ### Custom Storage Client
 
 ```typescript
-import { createStorageClient } from '@manacore/shared-storage';
+import { createStorageClient } from '@mana/shared-storage';
 
 const customStorage = createStorageClient({
   bucket: 'my-custom-bucket',

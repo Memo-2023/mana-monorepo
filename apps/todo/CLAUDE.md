@@ -78,7 +78,7 @@ pnpm preview                     # Preview build
 | **Backend** | Hono + Bun, Drizzle ORM, PostgreSQL |
 | **Web** | SvelteKit 2.x, Svelte 5 (runes mode), Tailwind CSS 4 |
 | **Landing** | Astro 5.x, Tailwind CSS |
-| **Auth** | Mana Core Auth (JWT) |
+| **Auth** | Mana Auth (JWT) |
 | **i18n** | svelte-i18n (DE, EN) |
 | **Dates** | date-fns |
 
@@ -156,7 +156,7 @@ pnpm preview                     # Preview build
 
 ## Database Schema
 
-> **Note**: `user_id` columns use TEXT type (not UUID) because Mana Core Auth generates non-UUID user IDs.
+> **Note**: `user_id` columns use TEXT type (not UUID) because Mana Auth generates non-UUID user IDs.
 
 ### projects
 - `id` (UUID) - Primary key
@@ -207,7 +207,7 @@ pnpm preview                     # Preview build
 ```env
 NODE_ENV=development
 PORT=3018
-DATABASE_URL=postgresql://manacore:devpassword@localhost:5432/todo
+DATABASE_URL=postgresql://mana:devpassword@localhost:5432/todo
 MANA_AUTH_URL=http://localhost:3001
 CORS_ORIGINS=http://localhost:5173,http://localhost:5186,http://localhost:8081
 ```
@@ -286,7 +286,7 @@ Priority: explicit duration in text > history estimate > default fallback > none
 | **Accessibility** | ✅ | Focus trapping in all modals, ARIA roles, keyboard shortcuts |
 | **Rate Limiting** | ✅ | ThrottlerGuard global (100 req/min) |
 | **API Validation** | ✅ | DTOs with class-validator, RRULE DoS protection (max 5000 occurrences) |
-| **Auth** | ✅ | JWT via mana-core-auth, client-side redirect in `onMount` |
+| **Auth** | ✅ | JWT via mana-auth, client-side redirect in `onMount` |
 | **Toast System** | ✅ | Toast notifications via shared `toastStore` |
 | **Docker** | ✅ | Multi-stage build (web + backend), health checks, Traefik labels |
 | **Tests** | ✅ | Unit tests (7 backend, 3 web), E2E tests (3 suites: auth, projects, tasks) |
@@ -323,7 +323,7 @@ pnpm --filter @todo/web test:e2e
 
 ## Important Notes
 
-1. **Authentication**: Uses Mana Core Auth (JWT in Authorization header)
+1. **Authentication**: Uses Mana Auth (JWT in Authorization header)
 2. **Database**: PostgreSQL with Drizzle ORM (port 5432)
 3. **Ports**: Backend=3018, Web=5188, Landing=4323
 4. **Recurrence**: Uses RFC 5545 RRULE format

@@ -4,7 +4,7 @@ import { defineConfig, type UserConfig } from 'vite';
 import { SvelteKitPWA } from '@vite-pwa/sveltekit';
 
 // Mana shared packages that need SSR configuration
-const MANACORE_SHARED_PACKAGES = [
+const MANA_SHARED_PACKAGES = [
 	'@mana/shared-icons',
 	'@mana/shared-ui',
 	'@mana/shared-tailwind',
@@ -28,8 +28,8 @@ const MANACORE_SHARED_PACKAGES = [
 	'@mana/help',
 ];
 
-const noExternal = [...MANACORE_SHARED_PACKAGES, '@matrix/shared'];
-const exclude = [...MANACORE_SHARED_PACKAGES];
+const noExternal = [...MANA_SHARED_PACKAGES, '@matrix/shared'];
+const exclude = [...MANA_SHARED_PACKAGES];
 
 const baseConfig: Partial<UserConfig> = {
 	server: {

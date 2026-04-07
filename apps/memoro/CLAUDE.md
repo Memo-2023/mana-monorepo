@@ -437,7 +437,7 @@ When users enable `autoDeleteAudiosAfter30Days` in their settings, audio files o
 
 **Key Files:**
 - `memoro-service/src/cleanup/` - Cloud cleanup service
-- `mana-core-middleware/src/modules/users/services/user-settings.service.ts` - User settings query
+- `mana-middleware/src/modules/users/services/user-settings.service.ts` - User settings query
 - `apps/mobile/features/storage/services/localAudioCleanup.ts` - Local device cleanup
 - `apps/mobile/features/auth/contexts/AuthContext.tsx` - Cleanup trigger after auth
 

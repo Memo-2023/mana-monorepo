@@ -1,11 +1,11 @@
-# @manacore/notify-client
+# @mana/notify-client
 
 Client SDK for the mana-notify notification service.
 
 ## Installation
 
 ```bash
-pnpm add @manacore/notify-client
+pnpm add @mana/notify-client
 ```
 
 ## Usage
@@ -13,7 +13,7 @@ pnpm add @manacore/notify-client
 ### Basic Usage
 
 ```typescript
-import { NotifyClient } from '@manacore/notify-client';
+import { NotifyClient } from '@mana/notify-client';
 
 const notify = new NotifyClient({
   serviceUrl: 'http://localhost:3040',
@@ -57,7 +57,7 @@ await notify.scheduleEmail({
 ```typescript
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { NotifyModule } from '@manacore/notify-client/nestjs';
+import { NotifyModule } from '@mana/notify-client/nestjs';
 
 @Module({
   imports: [
@@ -80,7 +80,7 @@ Then inject the client:
 
 ```typescript
 import { Injectable, Inject } from '@nestjs/common';
-import { NOTIFY_CLIENT, NotifyClient } from '@manacore/notify-client/nestjs';
+import { NOTIFY_CLIENT, NotifyClient } from '@mana/notify-client/nestjs';
 
 @Injectable()
 export class NotificationService {

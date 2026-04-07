@@ -1,12 +1,12 @@
 # Central Tags API
 
-Das zentrale Tags-System ermöglicht einheitliche Tags/Labels über alle Manacore-Apps hinweg. Ein Tag, der in Todo erstellt wird, ist automatisch auch in Calendar und Contacts verfügbar.
+Das zentrale Tags-System ermöglicht einheitliche Tags/Labels über alle Mana-Apps hinweg. Ein Tag, der in Todo erstellt wird, ist automatisch auch in Calendar und Contacts verfügbar.
 
 ## Architektur
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                     mana-core-auth                          │
+│                     mana-auth                          │
 │  ┌─────────────────────────────────────────────────────┐   │
 │  │  tags Tabelle (zentral)                              │   │
 │  │  - id, userId, name, color, icon, createdAt         │   │
@@ -69,10 +69,10 @@ Beim Aufruf von `POST /tags/defaults` werden folgende Standard-Tags erstellt:
 
 ### Shared Package
 
-Das `@manacore/shared-tags` Package stellt einen Client bereit:
+Das `@mana/shared-tags` Package stellt einen Client bereit:
 
 ```typescript
-import { createTagsClient } from '@manacore/shared-tags';
+import { createTagsClient } from '@mana/shared-tags';
 
 const tagsClient = createTagsClient({
   authUrl: 'http://localhost:3001',
@@ -107,7 +107,7 @@ Die Apps nutzen den Client in ihren Stores:
 
 **Todo (labels.svelte.ts):**
 ```typescript
-import { createTagsClient, type Tag } from '@manacore/shared-tags';
+import { createTagsClient, type Tag } from '@mana/shared-tags';
 
 // Label = Tag (Alias für Abwärtskompatibilität)
 export type Label = Tag;
@@ -141,7 +141,7 @@ Jede App behält ihre eigene Junction-Table für die Zuordnung:
 ```sql
 CREATE TABLE task_to_tags (
   task_id UUID REFERENCES tasks(id) ON DELETE CASCADE,
-  tag_id UUID NOT NULL,  -- Soft reference zu mana-core-auth.tags
+  tag_id UUID NOT NULL,  -- Soft reference zu mana-auth.tags
   PRIMARY KEY (task_id, tag_id)
 );
 ```
@@ -150,7 +150,7 @@ CREATE TABLE task_to_tags (
 ```sql
 CREATE TABLE event_to_tags (
   event_id UUID REFERENCES events(id) ON DELETE CASCADE,
-  tag_id UUID NOT NULL,  -- Soft reference zu mana-core-auth.tags
+  tag_id UUID NOT NULL,  -- Soft reference zu mana-auth.tags
   PRIMARY KEY (event_id, tag_id)
 );
 ```
@@ -159,7 +159,7 @@ CREATE TABLE event_to_tags (
 ```sql
 CREATE TABLE contact_to_tags (
   contact_id UUID REFERENCES contacts(id) ON DELETE CASCADE,
-  tag_id UUID NOT NULL,  -- Soft reference zu mana-core-auth.tags
+  tag_id UUID NOT NULL,  -- Soft reference zu mana-auth.tags
   PRIMARY KEY (contact_id, tag_id)
 );
 ```
@@ -203,7 +203,7 @@ curl -X POST http://localhost:3001/api/v1/tags/defaults \
 
 ## Dateien
 
-### Backend (mana-core-auth)
+### Backend (mana-auth)
 
 | Datei | Beschreibung |
 |-------|--------------|
@@ -235,7 +235,7 @@ curl -X POST http://localhost:3001/api/v1/tags/defaults \
 Wenn eine App vorher eigene Tags hatte:
 
 1. **Daten exportieren:** Bestehende Tags aus der lokalen Tabelle exportieren
-2. **Tags erstellen:** Per API in mana-core-auth erstellen
+2. **Tags erstellen:** Per API in mana-auth erstellen
 3. **IDs mappen:** Alte Tag-IDs auf neue IDs mappen
 4. **Junction Tables aktualisieren:** Tag-IDs in Junction-Tables ersetzen
 5. **Lokale Tabelle löschen:** Alte Tags-Tabelle entfernen

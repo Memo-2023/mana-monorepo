@@ -7,7 +7,7 @@ Quick-reference templates for recurring setup tasks. Copy and customize for new 
 1. [New SvelteKit Web App](#1-new-sveltekit-web-app)
 2. [New NestJS Backend](#2-new-nestjs-backend)
 3. [Deploying New Service to Staging](#3-deploying-new-service-to-staging)
-4. [Adding Backend to Mana Dashboard](#4-adding-backend-to-manacore-dashboard)
+4. [Adding Backend to Mana Dashboard](#4-adding-backend-to-mana-dashboard)
 5. [Quick Reference Port Assignments](#5-quick-reference-port-assignments)
 
 ---
@@ -157,7 +157,7 @@ myproject-web:
     NODE_ENV: production
     # Server-side URLs (Docker internal network)
     PUBLIC_BACKEND_URL: http://myproject-backend:30XX
-    PUBLIC_MANA_AUTH_URL: http://mana-core-auth:3001
+    PUBLIC_MANA_AUTH_URL: http://mana-auth:3001
     # Client-side URLs (browser access via public IP)
     PUBLIC_BACKEND_URL_CLIENT: http://your-server-ip:30XX
     PUBLIC_MANA_AUTH_URL_CLIENT: http://your-server-ip:3001
@@ -171,7 +171,7 @@ myproject-web:
     retries: 3
     start_period: 40s
   networks:
-    - manacore-network
+    - mana-network
 ```
 
 ---
@@ -182,7 +182,7 @@ myproject-web:
 
 - [ ] Use `text` type for all `user_id` columns (NOT `uuid`)
 - [ ] Add health check endpoint at `/api/v1/health`
-- [ ] Configure CORS to include manacore-web origin (port 5173)
+- [ ] Configure CORS to include mana-web origin (port 5173)
 - [ ] Add database to `docker/init-db/01-create-databases.sql`
 - [ ] Add to `scripts/setup-databases.sh`
 - [ ] Add `dev:myproject:full` command to root `package.json`
@@ -253,13 +253,13 @@ myproject-backend:
     NODE_ENV: production
     PORT: 30XX
     DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/myproject
-    MANA_AUTH_URL: http://mana-core-auth:3001
-    # CORS - Include app's web AND manacore-web dashboard
+    MANA_AUTH_URL: http://mana-auth:3001
+    # CORS - Include app's web AND mana-web dashboard
     CORS_ORIGINS: http://your-server-ip:51XX,http://your-server-ip:5173,http://localhost:51XX,http://localhost:5173
   depends_on:
     postgres:
       condition: service_healthy
-    mana-core-auth:
+    mana-auth:
       condition: service_healthy
   healthcheck:
     test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost:30XX/api/v1/health']
@@ -268,7 +268,7 @@ myproject-backend:
     retries: 3
     start_period: 40s
   networks:
-    - manacore-network
+    - mana-network
 ```
 
 ---
@@ -290,17 +290,17 @@ myproject-backend:
 ssh -i ~/.ssh/deploy_key deploy@your-server-ip
 
 # Create database
-docker exec manacore-postgres-staging psql -U postgres -c 'CREATE DATABASE myproject;'
+docker exec mana-postgres-staging psql -U postgres -c 'CREATE DATABASE myproject;'
 
 # Verify
-docker exec manacore-postgres-staging psql -U postgres -c '\l' | grep myproject
+docker exec mana-postgres-staging psql -U postgres -c '\l' | grep myproject
 ```
 
 ### Deployment Tag Formats
 
 | Project | Correct Tag Format | Wrong Format |
 |---------|-------------------|--------------|
-| mana-core-auth | `mana-core-auth-staging-v1.0.X` | `auth-staging-v1.0.X` |
+| mana-auth | `mana-auth-staging-v1.0.X` | `auth-staging-v1.0.X` |
 | chat | `chat-staging-v1.0.X` or `chat-all-staging-v1.0.X` | - |
 | todo | `todo-staging-v1.0.X` or `todo-all-staging-v1.0.X` | - |
 | calendar | `calendar-staging-v1.0.X` | - |
@@ -319,7 +319,7 @@ curl http://your-server-ip:30XX/api/v1/health
 # Check logs for errors
 docker logs myproject-backend-staging --tail 50
 
-# Test CORS (from manacore-web origin)
+# Test CORS (from mana-web origin)
 curl -I -X OPTIONS http://your-server-ip:30XX/api/v1/endpoint \
   -H "Origin: http://your-server-ip:5173" \
   -H "Access-Control-Request-Method: GET"
@@ -329,15 +329,15 @@ curl -I -X OPTIONS http://your-server-ip:30XX/api/v1/endpoint \
 
 ## 4. Adding Backend to Mana Dashboard
 
-When adding a new backend service that manacore-web dashboard should call:
+When adding a new backend service that mana-web dashboard should call:
 
 ### Checklist
 
-- [ ] Add CORS origin for manacore-web (port 5173) to backend
-- [ ] Create API service file in `manacore/apps/web/src/lib/api/services/`
-- [ ] Add runtime URL injection in `manacore/apps/web/src/hooks.server.ts`
-- [ ] Add environment variables to `docker-compose.staging.yml` for manacore-web
-- [ ] Deploy both manacore-web and the backend with new config
+- [ ] Add CORS origin for mana-web (port 5173) to backend
+- [ ] Create API service file in `mana/apps/web/src/lib/api/services/`
+- [ ] Add runtime URL injection in `mana/apps/web/src/hooks.server.ts`
+- [ ] Add environment variables to `docker-compose.staging.yml` for mana-web
+- [ ] Deploy both mana-web and the backend with new config
 
 ### Template: API Service File
 
@@ -390,7 +390,7 @@ window.__PUBLIC_MYSERVICE_API_URL__ = "${PUBLIC_MYSERVICE_API_URL_CLIENT}";
 ### Template: docker-compose.staging.yml Addition
 
 ```yaml
-manacore-web:
+mana-web:
   environment:
     # ... existing env vars ...
     # Add new backend URL
@@ -407,7 +407,7 @@ manacore-web:
 | Port | Service |
 |------|---------|
 | 3000 | chat-web (legacy) |
-| 3001 | mana-core-auth |
+| 3001 | mana-auth |
 | 3002 | chat-backend |
 | 3006 | picture-backend |
 | 3007 | zitare-backend |
@@ -421,7 +421,7 @@ manacore-web:
 
 | Port | Service |
 |------|---------|
-| 5173 | manacore-web |
+| 5173 | mana-web |
 | 5175 | picture-web |
 | 5177 | zitare-web |
 | 5179 | calendar-web |
@@ -444,7 +444,7 @@ manacore-web:
 | `import.meta.env` in Docker | Use `window.__PUBLIC_*__` injection |
 | API client at module level | Use lazy `getClient()` pattern |
 | `uuid` type for user_id | Use `text` type |
-| Missing CORS for 5173 | Add manacore-web to CORS_ORIGINS |
-| `auth-staging-v*` tag | Use `mana-core-auth-staging-v*` |
+| Missing CORS for 5173 | Add mana-web to CORS_ORIGINS |
+| `auth-staging-v*` tag | Use `mana-auth-staging-v*` |
 | ALTER TABLE without USING | Use `USING column::text` |
 | `/api/health` endpoint | Use `/api/v1/health` |

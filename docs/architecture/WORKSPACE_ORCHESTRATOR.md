@@ -256,7 +256,7 @@ interface DropHandler {
 #### 4. Deployment-Konfiguration
 
 ```typescript
-// manacore.config.ts
+// mana.config.ts
 export default defineWorkspace({
   // Welche Apps in diesem Build?
   apps: ['calendar', 'todo', 'contacts'],
@@ -389,7 +389,7 @@ CalendarModule.droppable = [{
 ### Szenario 1: Vollversion (SaaS)
 
 ```typescript
-// manacore.config.ts
+// mana.config.ts
 apps: ['calendar', 'todo', 'contacts', 'chat', 'files', 'notes', ...]
 ```
 

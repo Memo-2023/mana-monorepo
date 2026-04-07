@@ -1,13 +1,13 @@
 ---
 title: Self-Hosting
-description: Host your own Manacore instance with Docker Compose.
+description: Host your own Mana instance with Docker Compose.
 ---
 
 import { Steps, Aside, Tabs, TabItem } from '@astrojs/starlight/components';
 
 # Self-Hosting
 
-Run your own Manacore instance using Docker Compose.
+Run your own Mana instance using Docker Compose.
 
 ## Requirements
 
@@ -23,8 +23,8 @@ Run your own Manacore instance using Docker Compose.
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/manacore/manacore-monorepo.git
-   cd manacore-monorepo
+   git clone https://github.com/mana/mana-monorepo.git
+   cd mana-monorepo
    ```
 
 2. **Create environment file**
@@ -37,7 +37,7 @@ Run your own Manacore instance using Docker Compose.
 
    ```env
    # Database
-   POSTGRES_USER=manacore
+   POSTGRES_USER=mana
    POSTGRES_PASSWORD=your-secure-password
 
    # Redis
@@ -113,9 +113,9 @@ services:
 
   # Auth Service
   mana-auth:
-    image: ghcr.io/manacore/mana-core-auth:latest
+    image: ghcr.io/mana/mana-core-auth:latest
     environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/manacore
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/mana_platformcore
       REDIS_HOST: redis
       REDIS_PASSWORD: ${REDIS_PASSWORD}
       JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY}
@@ -129,7 +129,7 @@ services:
 
   # Chat Backend
   chat-backend:
-    image: ghcr.io/manacore/chat-backend:latest
+    image: ghcr.io/mana/chat-backend:latest
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/chat
       MANA_AUTH_URL: http://mana-auth:3001
@@ -146,7 +146,7 @@ volumes:
 
 ## Generate JWT Keys
 
-Manacore uses EdDSA (Ed25519) for JWT signing:
+Mana uses EdDSA (Ed25519) for JWT signing:
 
 ```bash
 # Generate private key
@@ -220,18 +220,18 @@ certbot renew --dry-run
 
 ### Daily Database Backup
 
-Create `/etc/cron.daily/manacore-backup`:
+Create `/etc/cron.daily/mana-backup`:
 
 ```bash
 #!/bin/bash
-BACKUP_DIR=/var/backups/manacore
+BACKUP_DIR=/var/backups/mana
 DATE=$(date +%Y%m%d)
 
 # Create backup directory
 mkdir -p $BACKUP_DIR
 
 # Backup all databases
-docker exec postgres pg_dumpall -U manacore > $BACKUP_DIR/all_$DATE.sql
+docker exec postgres pg_dumpall -U ${POSTGRES_USER}core > $BACKUP_DIR/all_$DATE.sql
 
 # Compress
 gzip $BACKUP_DIR/all_$DATE.sql
@@ -247,7 +247,7 @@ find $BACKUP_DIR -name "*.gz" -mtime +7 -delete
 docker compose -f docker-compose.production.yml stop
 
 # Restore
-gunzip -c /var/backups/manacore/all_20240115.sql.gz | docker exec -i postgres psql -U manacore
+gunzip -c /var/backups/mana/all_20240115.sql.gz | docker exec -i postgres psql -U ${POSTGRES_USER}core
 
 # Start services
 docker compose -f docker-compose.production.yml start
@@ -265,7 +265,7 @@ docker compose -f docker-compose.production.yml start
 2. **Backup database** (always!)
 
    ```bash
-   docker exec postgres pg_dumpall -U manacore > backup_before_update.sql
+   docker exec postgres pg_dumpall -U ${POSTGRES_USER}core > backup_before_update.sql
    ```
 
 3. **Restart services**
@@ -301,7 +301,7 @@ docker compose -f docker-compose.production.yml logs mana-auth
 docker compose -f docker-compose.production.yml ps postgres
 
 # Check connection
-docker exec -it postgres psql -U manacore -c "SELECT 1"
+docker exec -it postgres psql -U ${POSTGRES_USER}core -c "SELECT 1"
 ```
 
 ### Out of Memory

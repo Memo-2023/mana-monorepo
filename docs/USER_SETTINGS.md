@@ -1,12 +1,12 @@
 # Zentrale User Settings
 
-Die User Settings werden zentral in `mana-core-auth` gespeichert und über alle Apps synchronisiert. Dies ermöglicht eine konsistente Benutzererfahrung über das gesamte Mana-Ökosystem.
+Die User Settings werden zentral in `mana-auth` gespeichert und über alle Apps synchronisiert. Dies ermöglicht eine konsistente Benutzererfahrung über das gesamte Mana-Ökosystem.
 
 ## Architektur
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                      mana-core-auth                              │
+│                      mana-auth                              │
 │                    (Port 3001)                                   │
 │  ┌─────────────────────────────────────────────────────────┐   │
 │  │   auth.user_settings Table                               │   │
@@ -154,7 +154,7 @@ curl -X DELETE http://localhost:3001/api/v1/settings/app/calendar \
 Jede App erstellt einen eigenen User Settings Store in `src/lib/stores/user-settings.svelte.ts`:
 
 ```typescript
-import { createUserSettingsStore } from '@manacore/shared-theme';
+import { createUserSettingsStore } from '@mana/shared-theme';
 import { authStore } from './auth.svelte';
 
 export const userSettings = createUserSettingsStore({
@@ -264,7 +264,7 @@ Settings werden lokal gecached für:
 - Schnelle UI beim App-Start (keine Wartezeit auf Server)
 - Offline-Unterstützung (letzte bekannte Settings)
 
-Cache-Key: `manacore-user-settings-{appId}`
+Cache-Key: `mana-user-settings-{appId}`
 
 ### Deep Merge
 
@@ -292,7 +292,7 @@ Tabelle: `auth.user_settings`
 
 ## Dateien
 
-### Backend (mana-core-auth)
+### Backend (mana-auth)
 
 | Datei | Beschreibung |
 |-------|--------------|
@@ -323,7 +323,7 @@ Folgende Apps nutzen bereits die zentralen User Settings:
 - Calendar (`calendar`)
 - Chat (`chat`)
 - Contacts (`contacts`)
-- Mana (`manacore`)
+- Mana (`mana`)
 - Cards (`cards`)
 - Picture (`picture`)
 - Presi (`presi`)
@@ -334,7 +334,7 @@ Folgende Apps nutzen bereits die zentralen User Settings:
 
 1. **Store erstellen** in `src/lib/stores/user-settings.svelte.ts`:
    ```typescript
-   import { createUserSettingsStore } from '@manacore/shared-theme';
+   import { createUserSettingsStore } from '@mana/shared-theme';
    import { authStore } from './auth.svelte';
 
    export const userSettings = createUserSettingsStore({

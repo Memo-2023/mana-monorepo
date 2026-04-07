@@ -10,15 +10,7 @@
 	import type { ParsedTask } from '../utils/task-parser';
 	import type { LocalLabel } from '../types';
 	import { getPriorityColor } from '../queries';
-	import {
-		Plus,
-		CalendarBlank,
-		Flag,
-		ArrowsClockwise,
-		Timer,
-		Tag,
-		Info,
-	} from '@mana/shared-icons';
+	import { Plus, CalendarBlank, Flag, ArrowsClockwise, Timer, Tag, Info } from '@mana/shared-icons';
 
 	interface Props {
 		labels?: LocalLabel[];

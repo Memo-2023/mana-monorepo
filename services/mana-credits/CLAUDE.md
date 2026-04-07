@@ -1,6 +1,6 @@
 # mana-credits
 
-Standalone credit management service for the Mana ecosystem. Extracted from mana-core-auth.
+Standalone credit management service for the Mana ecosystem. Extracted from mana-auth.
 
 ## Tech Stack
 
@@ -10,7 +10,7 @@ Standalone credit management service for the Mana ecosystem. Extracted from mana
 | **Framework** | Hono |
 | **Database** | PostgreSQL + Drizzle ORM |
 | **Payments** | Stripe (Payment Intents, Checkout Sessions) |
-| **Auth** | JWT validation via JWKS from mana-core-auth |
+| **Auth** | JWT validation via JWKS from mana-auth |
 
 ## Quick Start
 
@@ -82,7 +82,7 @@ bun run db:studio  # Open Drizzle Studio
 
 ```env
 PORT=3061
-DATABASE_URL=postgresql://manacore:devpassword@localhost:5432/mana_credits
+DATABASE_URL=postgresql://mana:devpassword@localhost:5432/mana_credits
 MANA_AUTH_URL=http://localhost:3001
 MANA_SERVICE_KEY=dev-service-key
 BASE_URL=http://localhost:3061

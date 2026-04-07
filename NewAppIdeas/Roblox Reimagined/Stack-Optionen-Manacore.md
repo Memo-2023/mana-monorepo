@@ -1,4 +1,4 @@
-# Roblox Reimagined: Stack-Optionen fuer Manacore
+# Roblox Reimagined: Stack-Optionen fuer Mana
 
 ## Welche Technologien koennten wir nutzen -- und was haben wir bereits?
 
@@ -29,7 +29,7 @@ Wir betreiben bereits ein komplexes, polyglot, selbst-gehostetes Oekosystem:
 | **Hono Services (5)**  | Hono 4.7 + Bun, Drizzle ORM              | auth, credits, user, subscriptions, analytics      |
 | **Python AI (5+)**     | FastAPI, MLX, Whisper, FLUX              | llm, image-gen, stt, tts, voice-bot                |
 | **Frontend (19 Apps)** | SvelteKit 2 + Svelte 5 + Tailwind 4      | Todo, Chat, Calendar, Photos, etc.                 |
-| **Mobile**             | Expo 55 + React Native 0.83 + NativeWind | Mana, Traces                                   |
+| **Mobile**             | Expo 55 + React Native 0.83 + NativeWind | Mana, Traces                                       |
 | **Local-First**        | Dexie.js + mana-sync (Go WebSocket)      | 19 Apps migriert                                   |
 | **Datenbank**          | PostgreSQL 16                            | Alle Services                                      |
 | **Cache**              | Redis 7                                  | Rate Limiting, Sessions                            |
@@ -657,16 +657,16 @@ Option B ("Ambitioniert") ist der beste Kompromiss:
 
 ### Anpassbar (moderater Umbau)
 
-| Komponente       | Basis                       | Aenderung                                   |
-| ---------------- | --------------------------- | ------------------------------------------- |
-| Local-First Sync | mana-sync                   | Game-World-Sync + Asset-Sync hinzufuegen    |
-| Local Store      | @manacore/local-store       | Game-Collections (worlds, assets, progress) |
-| Shared Auth      | @manacore/shared-auth       | Unveraendert, in neuer App nutzen           |
-| Shared UI        | @manacore/shared-ui         | Editor-Komponenten ergaenzen                |
-| API Client       | @manacore/shared-api-client | Game-Server-Endpoints hinzufuegen           |
-| PWA              | @manacore/shared-pwa        | Offline-Game-Support                        |
-| i18n             | @manacore/shared-i18n       | Game-spezifische Strings                    |
-| Analytics        | mana-analytics              | Game-Metriken (Plays, Retention)            |
+| Komponente       | Basis                   | Aenderung                                   |
+| ---------------- | ----------------------- | ------------------------------------------- |
+| Local-First Sync | mana-sync               | Game-World-Sync + Asset-Sync hinzufuegen    |
+| Local Store      | @mana/local-store       | Game-Collections (worlds, assets, progress) |
+| Shared Auth      | @mana/shared-auth       | Unveraendert, in neuer App nutzen           |
+| Shared UI        | @mana/shared-ui         | Editor-Komponenten ergaenzen                |
+| API Client       | @mana/shared-api-client | Game-Server-Endpoints hinzufuegen           |
+| PWA              | @mana/shared-pwa        | Offline-Game-Support                        |
+| i18n             | @mana/shared-i18n       | Game-spezifische Strings                    |
+| Analytics        | mana-analytics          | Game-Metriken (Plays, Retention)            |
 
 ### Neu zu bauen
 

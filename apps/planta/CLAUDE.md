@@ -48,7 +48,7 @@ pnpm preview                     # Preview production build
 - **Backend**: Hono + Bun, Drizzle ORM, PostgreSQL
 - **AI**: Google Gemini Vision for plant analysis
 - **Storage**: MinIO (S3-compatible)
-- **Auth**: Mana Core Auth (JWT)
+- **Auth**: Mana Auth (JWT)
 - **Types**: TypeScript 5.x
 
 ## Architecture
@@ -127,7 +127,7 @@ pnpm preview                     # Preview production build
 ```
 NODE_ENV=development
 PORT=3022
-DATABASE_URL=postgresql://manacore:devpassword@localhost:5432/planta
+DATABASE_URL=postgresql://mana:devpassword@localhost:5432/planta
 MANA_AUTH_URL=http://localhost:3001
 GOOGLE_GEMINI_API_KEY=xxx
 CORS_ORIGINS=http://localhost:5173,http://localhost:5191
@@ -160,7 +160,7 @@ PUBLIC_MANA_AUTH_URL=http://localhost:3001
 
 ## Important Notes
 
-1. **Authentication**: Uses Mana Core Auth (JWT in Authorization header)
+1. **Authentication**: Uses Mana Auth (JWT in Authorization header)
 2. **Database**: PostgreSQL with Drizzle ORM
 3. **Port**: Backend runs on port 3022 by default
 4. **Storage**: Photos stored in MinIO (S3-compatible)

@@ -3,7 +3,7 @@
 	"version": "1.0.0",
 	"private": true,
 	"type": "module",
-	"description": "Manacore Monorepo containing mana, cards, picture, chat, zitare, and presi",
+	"description": "Mana Monorepo containing mana, cards, picture, chat, zitare, and presi",
 	"scripts": {
 		"dev": "turbo run dev",
 		"build": "turbo run build",

@@ -1,4 +1,4 @@
-# ✅ Mana Core Auth Integration - COMPLETE
+# ✅ Mana Auth Integration - COMPLETE
 
 **Date:** 2025-11-25
 **Status:** 🎉 All code changes implemented
@@ -8,25 +8,25 @@
 
 ## 🎯 Summary
 
-The Chat project has been **fully migrated** from Supabase Auth to **Mana Core Auth**! All three apps (backend, web, mobile) now use the centralized authentication system with built-in credit management.
+The Chat project has been **fully migrated** from Supabase Auth to **Mana Auth**! All three apps (backend, web, mobile) now use the centralized authentication system with built-in credit management.
 
 ---
 
 ## ✅ What Was Done
 
-### 1. **Updated `@manacore/shared-auth` Package** ✅
+### 1. **Updated `@mana/shared-auth` Package** ✅
 
 **Location:** `/packages/shared-auth/src/core/authService.ts`
 
 **Changes:**
 
-- Updated API endpoints to match Mana Core Auth (`/api/v1/auth/*`)
+- Updated API endpoints to match Mana Auth (`/api/v1/auth/*`)
 - Fixed login response handling (`accessToken` instead of `appToken`)
 - Fixed signup flow (register then login separately)
 - Updated refresh token endpoint
 - Updated credits balance endpoint
 
-**Status:** Package is now 100% compatible with Mana Core Auth API
+**Status:** Package is now 100% compatible with Mana Auth API
 
 ---
 
@@ -43,7 +43,7 @@ The Chat project has been **fully migrated** from Supabase Auth to **Mana Core A
 
 **Changes:**
 
-- Created JWT Auth Guard that validates tokens with Mana Core Auth
+- Created JWT Auth Guard that validates tokens with Mana Auth
 - Created CurrentUser decorator to inject user data into controllers
 - Updated all controllers to use JwtAuthGuard
 - Removed userId from request body (now extracted from JWT)
@@ -54,7 +54,7 @@ The Chat project has been **fully migrated** from Supabase Auth to **Mana Core A
 
 - All endpoints now protected with JWT validation
 - User context automatically injected via @CurrentUser decorator
-- Token validation happens via Mana Core Auth API
+- Token validation happens via Mana Auth API
 - Proper error handling for invalid/expired tokens
 
 ---
@@ -68,7 +68,7 @@ The Chat project has been **fully migrated** from Supabase Auth to **Mana Core A
 
 **Changes:**
 
-- Completely rewrote auth store to use `@manacore/shared-auth`
+- Completely rewrote auth store to use `@mana/shared-auth`
 - Removed Supabase auth dependencies
 - Added `initializeWebAuth()` initialization
 - Added `getCredits()` method for credit balance
@@ -92,7 +92,7 @@ The Chat project has been **fully migrated** from Supabase Auth to **Mana Core A
 
 **Changes:**
 
-- Rewrote AuthProvider to use `@manacore/shared-auth`
+- Rewrote AuthProvider to use `@mana/shared-auth`
 - Created SecureStore adapter for token storage
 - Created React Native device adapter
 - Created React Native network adapter
@@ -165,12 +165,12 @@ EXPO_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 
 ## 🚀 How to Run
 
-### 1. Start Mana Core Auth (Terminal 1)
+### 1. Start Mana Auth (Terminal 1)
 
 ```bash
-cd mana-core-auth
+cd mana-auth
 cp .env.example .env
-# Edit .env and add JWT keys (see mana-core-auth/QUICKSTART.md)
+# Edit .env and add JWT keys (see mana-auth/QUICKSTART.md)
 pnpm start:dev
 ```
 
@@ -221,7 +221,7 @@ pnpm dev
 
 - [ ] Start backend on port 3002
 - [ ] Try accessing `/api/chat/models` without token → Should return 401
-- [ ] Login via Mana Core Auth
+- [ ] Login via Mana Auth
 - [ ] Access `/api/chat/models` with token → Should work
 - [ ] Access `/api/conversations` with token → Should work
 
@@ -271,10 +271,10 @@ const credits = await authService.getUserCredits();
 
 ## 🔄 What Changed for Users
 
-| Aspect            | Before (Supabase) | After (Mana Core)        | Impact                         |
+| Aspect            | Before (Supabase) | After (Mana)             | Impact                         |
 | ----------------- | ----------------- | ------------------------ | ------------------------------ |
 | **Registration**  | Immediate session | Register → Login         | Minimal (auto-login in mobile) |
-| **Login**         | Supabase JWT      | Mana Core JWT            | None (transparent)             |
+| **Login**         | Supabase JWT      | Mana JWT                 | None (transparent)             |
 | **Token Storage** | Supabase cookies  | localStorage/SecureStore | None (same security)           |
 | **Sessions**      | Supabase sessions | JWT + refresh tokens     | Better (token rotation)        |
 | **Credits**       | ❌ None           | ✅ 150 initial + 5 daily | **NEW FEATURE!**               |
@@ -283,23 +283,23 @@ const credits = await authService.getUserCredits();
 
 ## 📊 Port Configuration
 
-| Service            | Port | URL                   |
-| ------------------ | ---- | --------------------- |
-| **Mana Core Auth** | 3001 | http://localhost:3001 |
-| **Chat Backend**   | 3002 | http://localhost:3002 |
-| **Web App**        | 5173 | http://localhost:5173 |
-| **Mobile App**     | 8081 | exp://localhost:8081  |
+| Service          | Port | URL                   |
+| ---------------- | ---- | --------------------- |
+| **Mana Auth**    | 3001 | http://localhost:3001 |
+| **Chat Backend** | 3002 | http://localhost:3002 |
+| **Web App**      | 5173 | http://localhost:5173 |
+| **Mobile App**   | 8081 | exp://localhost:8081  |
 
 ---
 
 ## 🐛 Potential Issues & Solutions
 
-### Issue: "Connection refused" to Mana Core Auth
+### Issue: "Connection refused" to Mana Auth
 
-**Solution:** Make sure Mana Core Auth is running on port 3001
+**Solution:** Make sure Mana Auth is running on port 3001
 
 ```bash
-cd mana-core-auth && pnpm start:dev
+cd mana-auth && pnpm start:dev
 ```
 
 ### Issue: "Invalid token" errors
@@ -317,10 +317,10 @@ await SecureStore.deleteItemAsync('@auth/refreshToken');
 
 ### Issue: CORS errors from web app
 
-**Solution:** Add web app URL to Mana Core Auth CORS config
+**Solution:** Add web app URL to Mana Auth CORS config
 
 ```env
-# In mana-core-auth/.env
+# In mana-auth/.env
 CORS_ORIGINS=http://localhost:5173,http://localhost:8081
 ```
 
@@ -336,7 +336,7 @@ MANA_AUTH_URL=http://localhost:3001
 
 ## 📚 API Endpoint Reference
 
-### Mana Core Auth (Port 3001)
+### Mana Auth (Port 3001)
 
 - POST `/api/v1/auth/register` - Register new user
 - POST `/api/v1/auth/login` - Login with email/password
@@ -388,15 +388,15 @@ MANA_AUTH_URL=http://localhost:3001
 ## 📖 Documentation
 
 - **Integration Guide:** `/chat/MANA_AUTH_INTEGRATION.md`
-- **Mana Core Auth README:** `/mana-core-auth/README.md`
-- **Quick Start:** `/mana-core-auth/QUICKSTART.md`
+- **Mana Auth README:** `/mana-auth/README.md`
+- **Quick Start:** `/mana-auth/QUICKSTART.md`
 - **Master Plan:** `/.hive-mind/MASTER_PLAN_CENTRAL_AUTH_SYSTEM.md`
 
 ---
 
 ## ✨ Benefits of Migration
 
-1. **✅ Centralized Authentication** - Single auth system for all Mana Core apps
+1. **✅ Centralized Authentication** - Single auth system for all Mana apps
 2. **✅ Built-in Credits** - No need to build separate credit system
 3. **✅ Better Security** - RS256 JWT, refresh token rotation, optimistic locking
 4. **✅ Cost Savings** - Self-hosted, no per-user charges

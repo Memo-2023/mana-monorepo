@@ -112,7 +112,7 @@ pnpm build                    # Build for production
 | **AI** | Google Gemini 2.5 Flash |
 | **Web** | SvelteKit 2.x, Svelte 5 (runes mode), Tailwind CSS 4 |
 | **Landing** | Astro 5.x, Tailwind CSS |
-| **Auth** | Mana Core Auth (JWT) |
+| **Auth** | Mana Auth (JWT) |
 
 ## Architecture
 
@@ -237,7 +237,7 @@ pnpm build                    # Build for production
 ```env
 NODE_ENV=development
 PORT=3023
-DATABASE_URL=postgresql://manacore:devpassword@localhost:5432/nutriphi
+DATABASE_URL=postgresql://mana:devpassword@localhost:5432/nutriphi
 MANA_AUTH_URL=http://localhost:3001
 CORS_ORIGINS=http://localhost:5180,http://localhost:4323
 
@@ -286,7 +286,7 @@ PUBLIC_MANA_AUTH_URL=http://localhost:3001
 docker compose -f docker-compose.dev.yml up -d postgres
 
 # Create database
-PGPASSWORD=devpassword psql -h localhost -U manacore -d postgres -c "CREATE DATABASE nutriphi;"
+PGPASSWORD=devpassword psql -h localhost -U mana -d postgres -c "CREATE DATABASE nutriphi;"
 
 # Push schema
 pnpm nutriphi:db:push

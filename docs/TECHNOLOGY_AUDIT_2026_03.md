@@ -97,7 +97,7 @@ Da bereits **mana-sync (Go)** als zentraler Sync-Server existiert und **local-fi
 | Service | Zweck | Ersetzt |
 |---------|-------|---------|
 | **mana-sync** (Go) | Sync, CRUD, Echtzeit | 7+ CRUD-only Backends |
-| **mana-core-auth** (NestJS) | Auth, Credits, Billing, Admin | Bleibt |
+| **mana-auth** (NestJS) | Auth, Credits, Billing, Admin | Bleibt |
 | **mana-compute** (Hono/Bun) | App-spezifische Logik (RRULE, Reminders, AI-Pipelines) | Todo-Server-Pattern fuer alle |
 | **mana-chat** (NestJS) | AI Chat (Streaming, Azure OpenAI) | Chat-Backend |
 
@@ -132,7 +132,7 @@ Da bereits **mana-sync (Go)** als zentraler Sync-Server existiert und **local-fi
 |-------------|---------------|
 | **Hono + Bun** | Leichte Compute-Server (wie der Todo-Server) |
 | **Go (mana-sync)** | Performance-kritisch, Echtzeit, WebSocket |
-| **NestJS** | Nur fuer mana-core-auth (komplex, viele Module, 174 Source Files) |
+| **NestJS** | Nur fuer mana-auth (komplex, viele Module, 174 Source Files) |
 
 Der Todo Hono/Bun Server ist ein gutes Pattern:
 
@@ -185,7 +185,7 @@ Mischt nicht beides halbfertig. Die angefangenen Go-Rewrites (api-gateway-go, se
 | App | Expo SDK | React Native | NativeWind |
 |-----|----------|-------------|------------|
 | context, chat | **52** | 0.76 | ^3.4.0 |
-| picture, cards, manacore | **54** | 0.81 | ^4.2.1 |
+| picture, cards, mana | **54** | 0.81 | ^4.2.1 |
 | matrix | **55** | 0.83 | latest |
 
 ### Empfehlung
@@ -331,7 +331,7 @@ Negativ:
 |---------|-------------|-----------|
 | Apps (24 Stueck) | ~162 (inkl. node_modules-Artefakte) | Duenn |
 | Services (16 Stueck) | ~23 | **11 von 16 Services haben 0 Tests** |
-| mana-core-auth | Gut (5 E2E Specs) | Einziger Service mit guter Abdeckung |
+| mana-auth | Gut (5 E2E Specs) | Einziger Service mit guter Abdeckung |
 | mana-sync | **0 Tests** | Kritischster Service ohne Tests |
 | mana-llm | Vorhanden (Python) | Unit Tests |
 
@@ -352,8 +352,8 @@ Negativ:
 ### Empfehlung (Prioritaet vor Go-Live)
 
 1. **mana-sync:** Integration Tests fuer Sync-Logik und Conflict Resolution (Go)
-2. **mana-core-auth:** Weiter ausbauen (bereits gut)
-3. **@manacore/local-store:** Unit Tests fuer SyncEngine und Conflict Resolution
+2. **mana-auth:** Weiter ausbauen (bereits gut)
+3. **@mana/local-store:** Unit Tests fuer SyncEngine und Conflict Resolution
 4. **E2E Tests:** Fuer die wichtigsten User-Flows (Auth -> CRUD -> Sync -> Multi-Device)
 
 ---
@@ -363,22 +363,22 @@ Negativ:
 ### Bewertung: Zu viele (55 Stueck)
 
 Sinnvolle Packages:
-- `@manacore/local-store` - Kern der Local-first Architektur
-- `@manacore/shared-auth` - Auth-Abstraktion
-- `@manacore/shared-nestjs-auth` - NestJS JWT Guards
-- `@manacore/shared-ui` - UI-Komponenten (hat aber Type-Errors)
-- `@manacore/shared-tailwind` - Tailwind Config
-- `@manacore/shared-vite-config` - Vite Config
+- `@mana/local-store` - Kern der Local-first Architektur
+- `@mana/shared-auth` - Auth-Abstraktion
+- `@mana/shared-nestjs-auth` - NestJS JWT Guards
+- `@mana/shared-ui` - UI-Komponenten (hat aber Type-Errors)
+- `@mana/shared-tailwind` - Tailwind Config
+- `@mana/shared-vite-config` - Vite Config
 
 Zu granulare Packages (Konsolidierungskandidaten):
 
 | Aktuell (einzeln) | Konsolidiert zu |
 |-------------------|----------------|
-| shared-credit-service, shared-credit-ui, credit-operations | `@manacore/credits` |
-| shared-feedback-service, shared-feedback-types, shared-feedback-ui | `@manacore/feedback` |
-| shared-help-content, shared-help-mobile, shared-help-types, shared-help-ui | `@manacore/help` |
-| shared-subscription-types, shared-subscription-ui | `@manacore/subscriptions` |
-| shared-nestjs-health, shared-nestjs-metrics, shared-nestjs-setup | `@manacore/nestjs-bootstrap` |
+| shared-credit-service, shared-credit-ui, credit-operations | `@mana/credits` |
+| shared-feedback-service, shared-feedback-types, shared-feedback-ui | `@mana/feedback` |
+| shared-help-content, shared-help-mobile, shared-help-types, shared-help-ui | `@mana/help` |
+| shared-subscription-types, shared-subscription-ui | `@mana/subscriptions` |
+| shared-nestjs-health, shared-nestjs-metrics, shared-nestjs-setup | `@mana/nestjs-bootstrap` |
 | cards-database, nutriphi-database, spiral-db | Zurueck in die jeweiligen Apps |
 
 ### Ziel: ~25-30 Packages statt 55
@@ -428,7 +428,7 @@ apps/*/apps/web/src/lib/stores/theme.svelte.ts      # ~40 Zeilen, 15x kopiert
 
 ### Geschaetzte Duplikation: ~500+ Zeilen ueber 15 Apps
 
-Das Package `@manacore/shared-stores` existiert bereits, wird aber nicht voll genutzt. Diese Stores sollten dort zentralisiert werden.
+Das Package `@mana/shared-stores` existiert bereits, wird aber nicht voll genutzt. Diese Stores sollten dort zentralisiert werden.
 
 ---
 
@@ -438,7 +438,7 @@ Das Package `@manacore/shared-stores` existiert bereits, wird aber nicht voll ge
 
 | Service | Tech | Tests | Error Handling | Config | Completeness |
 |---------|------|-------|----------------|--------|-------------|
-| mana-core-auth | NestJS/TS | Gut (E2E + Integration) | Gut | Env-driven | 95% |
+| mana-auth | NestJS/TS | Gut (E2E + Integration) | Gut | Env-driven | 95% |
 | mana-llm | Python/FastAPI | Unit Tests | Implizit | Pydantic | 80% |
 | mana-api-gateway | NestJS/TS | Keine | Gut | Env-driven | 75% |
 | mana-search | NestJS/TS | Keine | Maessig | Env-driven | 70% |
@@ -484,7 +484,7 @@ Das Package `@manacore/shared-stores` existiert bereits, wird aber nicht voll ge
 | Kein Distributed Tracing (OpenTelemetry) | Debugging in Prod unmoeglich | 2-3 Tage |
 | Kein Staging-Environment | Bugs erst in Prod sichtbar | 1 Tag |
 | shared-ui Type-Errors | 2 Apps skippen type-check | 2-3 Tage |
-| Kein API-Dokumentation (OpenAPI/Swagger) | Nur mana-core-auth hat Swagger | 1 Woche |
+| Kein API-Dokumentation (OpenAPI/Swagger) | Nur mana-auth hat Swagger | 1 Woche |
 | Logging nicht standardisiert | Winston vs NestJS Logger vs FastAPI vs Go | 3-5 Tage |
 | Keine Correlation IDs | Requests nicht ueber Services verfolgbar | 2 Tage |
 
@@ -558,11 +558,11 @@ Diese Technologie-Entscheidungen sind gut und sollten beibehalten werden:
 
 ### Apps (24)
 
-calendar, chat, citycorners, clock, contacts, context, docs, inventar, manacore, cards, matrix, mukke, nutriphi, photos, picture, planta, playground, presi, questions, skilltree, storage, todo, traces, zitare
+calendar, chat, citycorners, clock, contacts, context, docs, inventar, mana, cards, matrix, mukke, nutriphi, photos, picture, planta, playground, presi, questions, skilltree, storage, todo, traces, zitare
 
 ### Services (17)
 
-it-landing, mana-api-gateway, mana-api-gateway-go, mana-core-auth, mana-crawler, mana-image-gen, mana-landing-builder, mana-llm, mana-matrix-bot, mana-media, mana-notify, mana-search, mana-stt, mana-sync, mana-tts, mana-voice-bot, ollama-metrics-proxy
+it-landing, mana-api-gateway, mana-api-gateway-go, mana-auth, mana-crawler, mana-image-gen, mana-landing-builder, mana-llm, mana-matrix-bot, mana-media, mana-notify, mana-search, mana-stt, mana-sync, mana-tts, mana-voice-bot, ollama-metrics-proxy
 
 ### Shared Packages (55)
 

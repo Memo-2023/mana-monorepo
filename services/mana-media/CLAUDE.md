@@ -22,7 +22,7 @@ mana-media provides:
 pnpm docker:up
 
 # Create database
-PGPASSWORD=devpassword psql -h localhost -U manacore -d postgres -c "CREATE DATABASE mana_media;"
+PGPASSWORD=devpassword psql -h localhost -U mana -d postgres -c "CREATE DATABASE mana_media;"
 
 # Install dependencies
 cd services/mana-media/apps/api
@@ -104,7 +104,7 @@ DELETE /api/v1/media/:id
 ## Client Library
 
 ```typescript
-import { MediaClient } from '@manacore/media-client';
+import { MediaClient } from '@mana/media-client';
 
 const media = new MediaClient('http://localhost:3050');
 

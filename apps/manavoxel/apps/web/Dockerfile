@@ -3,9 +3,9 @@
 # ─── Stage 1: Build ──────────────────────────────────────────
 FROM sveltekit-base:local AS builder
 
-ARG PUBLIC_MANA_CORE_AUTH_URL=http://mana-auth:3001
+ARG PUBLIC_MANA_AUTH_URL=http://mana-auth:3001
 ARG PUBLIC_SYNC_SERVER_URL=http://mana-sync:3010
-ENV PUBLIC_MANA_CORE_AUTH_URL=$PUBLIC_MANA_CORE_AUTH_URL
+ENV PUBLIC_MANA_AUTH_URL=$PUBLIC_MANA_AUTH_URL
 ENV PUBLIC_SYNC_SERVER_URL=$PUBLIC_SYNC_SERVER_URL
 
 # Copy app-specific packages

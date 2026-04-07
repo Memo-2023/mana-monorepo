@@ -2,7 +2,7 @@
 
 ## 🎉 Project Created Successfully!
 
-A brand new SvelteKit application has been created in the `manacore-web` folder, separate from the existing React Native `manacore_app`.
+A brand new SvelteKit application has been created in the `mana-web` folder, separate from the existing React Native `mana_app`.
 
 ## ✅ What's Been Implemented
 
@@ -41,7 +41,7 @@ A brand new SvelteKit application has been created in the `manacore-web` folder,
 ## 📁 Project Structure
 
 ```
-manacore-web/
+mana-web/
 ├── src/
 │   ├── routes/
 │   │   ├── (auth)/              # Public auth routes
@@ -90,7 +90,7 @@ PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
 ### 2. Install Dependencies (if not already done)
 
 ```bash
-cd manacore-web
+cd mana-web
 pnpm install
 ```
 
@@ -255,16 +255,16 @@ All components support:
 
 ## 🆚 Comparison: React Native vs SvelteKit
 
-| Feature    | React Native (manacore_app) | SvelteKit (manacore-web) |
-| ---------- | --------------------------- | ------------------------ |
-| Platform   | Mobile (iOS/Android)        | Web (Browser)            |
-| Routing    | Expo Router                 | File-based routing       |
-| State      | useState/Context            | Svelte Runes/$state      |
-| Styling    | NativeWind                  | Tailwind CSS             |
-| Auth       | Supabase                    | Supabase (same)          |
-| Database   | Supabase                    | Supabase (same)          |
-| Build      | Expo                        | Vite                     |
-| Deployment | App Stores                  | Vercel/Netlify           |
+| Feature    | React Native (mana_app) | SvelteKit (mana-web) |
+| ---------- | ----------------------- | -------------------- |
+| Platform   | Mobile (iOS/Android)    | Web (Browser)        |
+| Routing    | Expo Router             | File-based routing   |
+| State      | useState/Context        | Svelte Runes/$state  |
+| Styling    | NativeWind              | Tailwind CSS         |
+| Auth       | Supabase                | Supabase (same)      |
+| Database   | Supabase                | Supabase (same)      |
+| Build      | Expo                    | Vite                 |
+| Deployment | App Stores              | Vercel/Netlify       |
 
 ## 🚨 Common Issues & Solutions
 

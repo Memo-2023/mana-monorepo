@@ -3,27 +3,30 @@
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>com.manacore.disk-check</string>
+    <string>com.mana.weekly-report</string>
 
     <key>ProgramArguments</key>
     <array>
         <string>/bin/bash</string>
-        <string>/Users/mana/projects/manacore-monorepo/scripts/mac-mini/check-disk-space.sh</string>
+        <string>/Users/mana/projects/mana-monorepo/scripts/mac-mini/weekly-report.sh</string>
     </array>
 
-    <!-- Run every 15 minutes — frequent enough to catch disk issues early -->
-    <key>StartInterval</key>
-    <integer>900</integer>
-
-    <!-- Also run at startup -->
-    <key>RunAtLoad</key>
-    <true/>
+    <!-- Run every Sunday at 10:00 AM -->
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Weekday</key>
+        <integer>0</integer>
+        <key>Hour</key>
+        <integer>10</integer>
+        <key>Minute</key>
+        <integer>0</integer>
+    </dict>
 
     <key>StandardOutPath</key>
-    <string>/tmp/manacore-disk-check.log</string>
+    <string>/tmp/mana-weekly-report.log</string>
 
     <key>StandardErrorPath</key>
-    <string>/tmp/manacore-disk-check.error.log</string>
+    <string>/tmp/mana-weekly-report.error.log</string>
 
     <key>EnvironmentVariables</key>
     <dict>

@@ -11,7 +11,7 @@
 | Database | PostgreSQL 16 + Drizzle ORM | Docker |
 | Cache | Redis 7 | Docker |
 | Object Storage | MinIO (S3-kompatibel) | Docker |
-| Auth | Better Auth (mana-core-auth, EdDSA JWT) | NestJS |
+| Auth | Better Auth (mana-auth, EdDSA JWT) | NestJS |
 | Search | SearXNG + mana-search | Docker + NestJS |
 | Messaging | Matrix/Synapse + 13 Bots | Docker |
 | Monitoring | VictoriaMetrics + Grafana | Docker |
@@ -96,7 +96,7 @@ Brevo ist SPOF für alle Transaktions-Emails (Verifizierung, Passwort-Reset).
 
 **Status: ✅ ERLEDIGT** (2026-03-24)
 
-Alle 9 Backends nutzen jetzt `@manacore/shared-llm` → `mana-llm` Gateway:
+Alle 9 Backends nutzen jetzt `@mana/shared-llm` → `mana-llm` Gateway:
 - Auth, Chat, Context, NutriPhi, Planta, Traces, Cards, Bot Services, Matrix Bots
 - Google Gemini als automatischer Fallback wenn Ollama überlastet
 - OpenAI SDK komplett entfernt (Project Doc Bot)
@@ -150,7 +150,7 @@ Der Mac Mini ist Single Point of Failure. Optionen:
 
 **Aufwand:** Mittel | **Impact:** Niedrig
 
-Aktuell: NestJS 10.4.15. Version 11 ist stable. Shared Packages (`@manacore/shared-nestjs-auth` etc.) unterstützen bereits NestJS 11 als peerDependency. Bringt bessere Performance und ESM-Support.
+Aktuell: NestJS 10.4.15. Version 11 ist stable. Shared Packages (`@mana/shared-nestjs-auth` etc.) unterstützen bereits NestJS 11 als peerDependency. Bringt bessere Performance und ESM-Support.
 
 #### 3.2 Expo 52 → 53/54
 
@@ -198,7 +198,7 @@ NutriPhi und Planta nutzen Google Gemini Vision. Alternativen via Ollama:
 |------|----------|---------|--------|
 | ~~**1**~~ | ~~Picture App → mana-image-gen~~ | ✅ Erledigt | Lokales FLUX.2 klein als Default, Replicate für Premium |
 | ~~**2**~~ | ~~Project Doc Bot → Ollama + mana-stt~~ | ✅ Erledigt | OpenAI SDK entfernt, nutzt mana-llm + mana-stt |
-| ~~**3**~~ | ~~Alle LLM-Calls über mana-llm routen~~ | ✅ Erledigt | @manacore/shared-llm + Google Fallback |
+| ~~**3**~~ | ~~Alle LLM-Calls über mana-llm routen~~ | ✅ Erledigt | @mana/shared-llm + Google Fallback |
 | ~~**4**~~ | ~~PostgreSQL Backup~~ | ✅ Erledigt | Stündliche pg_dumpall + tägliche pg_basebackup, Docker Container |
 | **5** | Brevo → Postal/Stalwart | 2-3 Tage | Email-Unabhängigkeit |
 | ~~**6**~~ | ~~Landing Pages self-hosted~~ | ✅ Erledigt | Nginx Container auf Port 4400, 10 Domains via Tunnel |
@@ -218,7 +218,7 @@ NutriPhi und Planta nutzen Google Gemini Vision. Alternativen via Ollama:
 **Erledigte Meilensteine (2026-03-24):**
 - ✅ Prio 1: Picture App nutzt lokales `mana-image-gen` (FLUX.2 klein) als Default
 - ✅ Prio 2: Project Doc Bot: OpenAI SDK komplett entfernt, nutzt mana-llm + mana-stt
-- ✅ Prio 3: Alle LLM-Calls über `mana-llm` geroutet (10 Backends, `@manacore/shared-llm`)
+- ✅ Prio 3: Alle LLM-Calls über `mana-llm` geroutet (10 Backends, `@mana/shared-llm`)
 - ✅ Prio 3: Google Gemini Fallback in mana-llm + Cards Gemini SDK entfernt
 - ✅ Prio 4: PostgreSQL Backup mit stündlichen Dumps + täglichen Base-Backups
 - ✅ Prio 6: Landing Pages self-hosted via Nginx (10 Domains, kein Cloudflare Pages mehr)

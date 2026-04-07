@@ -40,13 +40,13 @@ games/arcade/
 | Aspekt | Technologie |
 |--------|-------------|
 | Frontend | SvelteKit 2 + Svelte 5 (Runes) |
-| Styling | Tailwind CSS 4 + @manacore/shared-tailwind |
-| Auth | @manacore/shared-auth (SSO) |
-| PWA | @vite-pwa/sveltekit + @manacore/shared-pwa |
-| State | @manacore/local-store (Dexie.js + sync) |
+| Styling | Tailwind CSS 4 + @mana/shared-tailwind |
+| Auth | @mana/shared-auth (SSO) |
+| PWA | @vite-pwa/sveltekit + @mana/shared-pwa |
+| State | @mana/local-store (Dexie.js + sync) |
 | i18n | svelte-i18n (DE + EN) |
-| UI | @manacore/shared-ui (PillNav, AuthGate, etc.) |
-| Theming | @manacore/shared-theme (multi-theme) |
+| UI | @mana/shared-ui (PillNav, AuthGate, etc.) |
+| Theming | @mana/shared-theme (multi-theme) |
 | Server | Hono + Bun (AI-Generierung, Community) |
 
 ## Entwicklung

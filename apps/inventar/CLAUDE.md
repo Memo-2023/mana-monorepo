@@ -14,7 +14,7 @@ Inventar is a schema-less inventory management system built with SvelteKit. User
 |-------|------------|
 | Frontend | SvelteKit 2, Svelte 5 (runes), Tailwind CSS 4 |
 | State | Svelte 5 runes ($state, $derived) with localStorage persistence |
-| Icons | @manacore/shared-icons (Phosphor) |
+| Icons | @mana/shared-icons (Phosphor) |
 | PWA | @vite-pwa/sveltekit + Workbox |
 | i18n | svelte-i18n (de, en) |
 

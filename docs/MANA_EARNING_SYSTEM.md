@@ -510,7 +510,7 @@ CREATE TABLE community.bounty_pool (
   - [ ] Create `transactions` table
   - [ ] Setup daily/weekly/monthly reset cron jobs
 
-- [ ] **Backend (mana-core-auth)**
+- [ ] **Backend (mana-auth)**
   - [ ] Create `KarmaModule`
   - [ ] Create `KarmaService` with methods:
     - [ ] `awardXp(userId, amount, source, sourceId?, appId?)`
@@ -556,7 +556,7 @@ CREATE TABLE community.bounty_pool (
   - [ ] Implement fraud score calculation
   - [ ] Setup scheduled job für 14-day evaluation
 
-- [ ] **Backend (mana-core-auth)**
+- [ ] **Backend (mana-auth)**
   - [ ] Create `CreatorRewardsModule`
   - [ ] Create `CreatorRewardsService`:
     - [ ] `trackInteraction(contentType, contentId, creatorId, interactingUserId)`
@@ -777,5 +777,5 @@ bugs_triage_queue_size          // Gauge: Pending triage
 
 ## Related Documents
 
-- [Credit System (bestehend)](../services/mana-core-auth/src/credits/)
+- [Credit System (bestehend)](../services/mana-auth/src/credits/)
 - [Credit Operations Registry](../packages/credit-operations/)

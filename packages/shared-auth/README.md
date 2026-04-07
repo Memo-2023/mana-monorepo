@@ -1,6 +1,6 @@
-# @manacore/shared-auth
+# @mana/shared-auth
 
-Shared authentication utilities for Manacore apps. This package provides a configurable authentication service that can be used across React Native (Expo) and web apps.
+Shared authentication utilities for Mana apps. This package provides a configurable authentication service that can be used across React Native (Expo) and web apps.
 
 ## Features
 
@@ -13,7 +13,7 @@ Shared authentication utilities for Manacore apps. This package provides a confi
 ## Installation
 
 ```bash
-pnpm add @manacore/shared-auth
+pnpm add @mana/shared-auth
 ```
 
 ## Quick Start
@@ -21,7 +21,7 @@ pnpm add @manacore/shared-auth
 ### Web (SvelteKit, React, etc.)
 
 ```typescript
-import { initializeWebAuth } from '@manacore/shared-auth';
+import { initializeWebAuth } from '@mana/shared-auth';
 
 const { authService, tokenManager } = initializeWebAuth({
 	baseUrl: 'https://api.example.com',
@@ -51,7 +51,7 @@ import {
 	setDeviceAdapter,
 	setNetworkAdapter,
 	setupFetchInterceptor,
-} from '@manacore/shared-auth';
+} from '@mana/shared-auth';
 import * as SecureStore from 'expo-secure-store';
 
 // Create storage adapter for Expo
@@ -140,7 +140,7 @@ import {
 	getUserFromToken,
 	isB2BUser,
 	getB2BInfo,
-} from '@manacore/shared-auth';
+} from '@mana/shared-auth';
 
 const payload = decodeToken(token);
 const isValid = isTokenValidLocally(token);
@@ -157,7 +157,7 @@ The package uses adapters for platform-specific functionality:
 - **NetworkAdapter**: For checking network connectivity
 
 ```typescript
-import { setStorageAdapter, setDeviceAdapter, setNetworkAdapter } from '@manacore/shared-auth';
+import { setStorageAdapter, setDeviceAdapter, setNetworkAdapter } from '@mana/shared-auth';
 
 setStorageAdapter(myStorageAdapter);
 setDeviceAdapter(myDeviceAdapter);

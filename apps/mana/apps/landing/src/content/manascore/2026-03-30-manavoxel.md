@@ -67,7 +67,7 @@ ManaVoxel ist ein **2D Top-Down Pixel-Plattform** mit vollständiger Game-Engine
 
 ## Database (55/100)
 
-- IndexedDB via Dexie.js (@manacore/local-store)
+- IndexedDB via Dexie.js (@mana/local-store)
 - 4 Collections: worlds, areas, items, inventories
 - Item-Persistenz: Sprites, Properties, Behaviors in IndexedDB
 - Inventory-Persistenz: Slot-Zuweisungen pro Player

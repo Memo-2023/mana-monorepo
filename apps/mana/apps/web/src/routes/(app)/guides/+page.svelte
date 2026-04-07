@@ -34,9 +34,7 @@
 <div class="mx-auto max-w-3xl">
 	<header class="mb-8">
 		<h1 class="text-2xl font-bold text-foreground">Guides</h1>
-		<p class="text-muted-foreground mt-1 text-sm">
-			Tutorials & Anleitungen für das Mana-Ökosystem
-		</p>
+		<p class="text-muted-foreground mt-1 text-sm">Tutorials & Anleitungen für das Mana-Ökosystem</p>
 	</header>
 
 	<!-- Category Filter -->

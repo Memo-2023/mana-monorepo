@@ -70,7 +70,7 @@ pnpm dev:web              # Start web only
 |-------|------------|
 | **Rendering** | PixiJS 8 (WebGL), chunk-based tilemap |
 | **UI** | SvelteKit 2, Svelte 5 (runes), Tailwind CSS 4 |
-| **Local-First** | Dexie.js via @manacore/local-store |
+| **Local-First** | Dexie.js via @mana/local-store |
 | **Auth** | Mana Core Auth (JWT), guest mode |
 | **PWA** | @vite-pwa/sveltekit |
 

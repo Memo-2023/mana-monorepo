@@ -1,6 +1,6 @@
 // @ts-check
 /**
- * Root ESLint configuration for Manacore monorepo
+ * Root ESLint configuration for Mana monorepo
  *
  * Uses @mana/eslint-config for unified linting across all packages.
  * Apps can use their own eslint.config.* to add framework-specific rules.

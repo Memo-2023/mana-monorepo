@@ -36,7 +36,7 @@ pnpm dev:sync:build     # Compile Go binary
 cd services/mana-sync
 go build -o server ./cmd/server
 JWKS_URL=http://localhost:3001/api/auth/jwks \
-DATABASE_URL=postgresql://manacore:devpassword@localhost:5432/mana_sync \
+DATABASE_URL=postgresql://mana:devpassword@localhost:5432/mana_sync \
 ./server
 ```
 
@@ -161,7 +161,7 @@ Indexes: `(user_id, app_id, created_at)`, `(table_name, record_id, created_at)`,
 |----------|---------|-------------|
 | `PORT` | 3050 | Server port |
 | `DATABASE_URL` | `postgresql://...localhost:5432/mana_sync` | PostgreSQL connection |
-| `JWKS_URL` | `http://localhost:3001/api/auth/jwks` | mana-core-auth JWKS endpoint |
+| `JWKS_URL` | `http://localhost:3001/api/auth/jwks` | mana-auth JWKS endpoint |
 | `CORS_ORIGINS` | `http://localhost:5173,...` | Comma-separated allowed origins |
 
 ## Testing

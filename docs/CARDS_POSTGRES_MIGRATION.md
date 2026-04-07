@@ -25,7 +25,7 @@ Dieses Dokument beschreibt die Migration von Cards von Supabase zu einer selbst-
     │                │                │
     ▼                ▼                ▼
 ┌────────┐    ┌──────────┐    ┌──────────┐
-│Supabase│    │Mana Core │    │  OpenAI  │
+│Supabase│    │Mana │    │  OpenAI  │
 │   DB   │    │  (Auth)  │    │   API    │
 └────────┘    └──────────┘    └──────────┘
 ```
@@ -51,7 +51,7 @@ Dieses Dokument beschreibt die Migration von Cards von Supabase zu einer selbst-
     │                │                │
     ▼                ▼                ▼
 ┌────────┐    ┌──────────┐    ┌──────────┐
-│ PostgreSQL │ │Mana Core │  │  OpenAI  │
+│ PostgreSQL │ │Mana │  │  OpenAI  │
 │  (Self)    │ │  (Auth)  │  │   API    │
 └────────────┘ └──────────┘  └──────────┘
 ```
@@ -67,7 +67,7 @@ Dieses Dokument beschreibt die Migration von Cards von Supabase zu einer selbst-
 ```sql
 CREATE TABLE decks (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL,  -- Mana Core User ID
+  user_id UUID NOT NULL,  -- Mana User ID
   title VARCHAR(255) NOT NULL,
   description TEXT,
   cover_image_url TEXT,
@@ -369,7 +369,7 @@ docker run -d \
 #### 1.2 Database Package erstellen
 
 ```bash
-cd /Users/tillschneider/Documents/__00__Code/manacore-monorepo
+cd /Users/tillschneider/Documents/__00__Code/mana-monorepo
 mkdir -p packages/cards-database
 cd packages/cards-database
 pnpm init

@@ -3,10 +3,10 @@
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>com.manacore.image-gen</string>
+    <string>com.mana.image-gen</string>
     <key>ProgramArguments</key>
     <array>
-        <string>/Users/mana/projects/manacore-monorepo/services/mana-image-gen/.venv/bin/python3</string>
+        <string>/Users/mana/projects/mana-monorepo/services/mana-image-gen/.venv/bin/python3</string>
         <string>-m</string>
         <string>uvicorn</string>
         <string>app.main:app</string>
@@ -16,11 +16,11 @@
         <string>3025</string>
     </array>
     <key>WorkingDirectory</key>
-    <string>/Users/mana/projects/manacore-monorepo/services/mana-image-gen</string>
+    <string>/Users/mana/projects/mana-monorepo/services/mana-image-gen</string>
     <key>EnvironmentVariables</key>
     <dict>
         <key>PATH</key>
-        <string>/opt/homebrew/bin:/Users/mana/projects/manacore-monorepo/services/mana-image-gen/.venv/bin:/usr/local/bin:/usr/bin:/bin</string>
+        <string>/opt/homebrew/bin:/Users/mana/projects/mana-monorepo/services/mana-image-gen/.venv/bin:/usr/local/bin:/usr/bin:/bin</string>
         <key>HOME</key>
         <string>/Users/mana</string>
         <key>PORT</key>
@@ -46,8 +46,8 @@
         <true/>
     </dict>
     <key>StandardOutPath</key>
-    <string>/tmp/manacore-image-gen.log</string>
+    <string>/tmp/mana-image-gen.log</string>
     <key>StandardErrorPath</key>
-    <string>/tmp/manacore-image-gen.error.log</string>
+    <string>/tmp/mana-image-gen.error.log</string>
 </dict>
 </plist>

@@ -108,23 +108,23 @@ const APP_CONFIGS = [
 		},
 	},
 
-	// Manacore Mobile
+	// Mana Mobile
 	{
 		path: 'apps/mana/apps/mobile/.env',
 		vars: {
-			EXPO_PUBLIC_SUPABASE_URL: (env) => env.MANACORE_SUPABASE_URL,
-			EXPO_PUBLIC_SUPABASE_ANON_KEY: (env) => env.MANACORE_SUPABASE_ANON_KEY,
+			EXPO_PUBLIC_SUPABASE_URL: (env) => env.MANA_SUPABASE_URL,
+			EXPO_PUBLIC_SUPABASE_ANON_KEY: (env) => env.MANA_SUPABASE_ANON_KEY,
 		},
 	},
 
-	// Manacore Web
+	// Mana Web
 	{
 		path: 'apps/mana/apps/web/.env',
 		vars: {
-			PUBLIC_SUPABASE_URL: (env) => env.MANACORE_SUPABASE_URL,
-			PUBLIC_SUPABASE_ANON_KEY: (env) => env.MANACORE_SUPABASE_ANON_KEY,
+			PUBLIC_SUPABASE_URL: (env) => env.MANA_SUPABASE_URL,
+			PUBLIC_SUPABASE_ANON_KEY: (env) => env.MANA_SUPABASE_ANON_KEY,
 			MIDDLEWARE_URL: (env) => env.MANA_AUTH_URL,
-			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_MANACORE || '',
+			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_MANA || '',
 			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
 	},
@@ -672,7 +672,7 @@ const APP_CONFIGS = [
 	{
 		path: 'apps/mana/apps/landing/.env',
 		vars: {
-			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_MANACORE_LANDING || '',
+			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_MANA_LANDING || '',
 		},
 	},
 

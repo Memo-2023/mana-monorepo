@@ -1,6 +1,6 @@
 /**
  * Tag entity from the central mana-auth service.
- * Used across all Manacore apps (Todo, Calendar, Contacts, etc.)
+ * Used across all Mana apps (Todo, Calendar, Contacts, etc.)
  */
 export interface Tag {
 	id: string;

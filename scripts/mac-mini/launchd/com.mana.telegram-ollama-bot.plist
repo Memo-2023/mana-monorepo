@@ -3,14 +3,14 @@
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>com.manacore.telegram-ollama-bot</string>
+    <string>com.mana.telegram-ollama-bot</string>
     <key>ProgramArguments</key>
     <array>
         <string>/opt/homebrew/bin/node</string>
-        <string>/Users/mana/projects/manacore-monorepo/services/telegram-ollama-bot/dist/main.js</string>
+        <string>/Users/mana/projects/mana-monorepo/services/telegram-ollama-bot/dist/main.js</string>
     </array>
     <key>WorkingDirectory</key>
-    <string>/Users/mana/projects/manacore-monorepo/services/telegram-ollama-bot</string>
+    <string>/Users/mana/projects/mana-monorepo/services/telegram-ollama-bot</string>
     <key>EnvironmentVariables</key>
     <dict>
         <key>PATH</key>

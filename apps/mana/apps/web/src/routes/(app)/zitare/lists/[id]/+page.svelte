@@ -10,14 +10,7 @@
 	import { toast } from '$lib/stores/toast.svelte';
 	import { QUOTES, type Quote } from '@zitare/content';
 	import QuoteCard from '$lib/modules/zitare/components/QuoteCard.svelte';
-	import {
-		MagnifyingGlass,
-		X,
-		PencilSimple,
-		Plus,
-		ListBullets,
-		Trash,
-	} from '@mana/shared-icons';
+	import { MagnifyingGlass, X, PencilSimple, Plus, ListBullets, Trash } from '@mana/shared-icons';
 
 	const allQuotes = QUOTES;
 	const allLists: { readonly value: QuoteList[] } = getContext('lists');

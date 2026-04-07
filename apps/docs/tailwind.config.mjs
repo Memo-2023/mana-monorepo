@@ -6,7 +6,7 @@ export default {
 	theme: {
 		extend: {
 			colors: {
-				// Manacore brand colors
+				// Mana brand colors
 				accent: {
 					50: '#f0f9ff',
 					100: '#e0f2fe',

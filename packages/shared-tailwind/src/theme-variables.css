@@ -1,5 +1,5 @@
-/* Shared Theme CSS Variables for Manacore Apps
- * Import this in your app.css: @import '@manacore/shared-tailwind/theme.css';
+/* Shared Theme CSS Variables for Mana Apps
+ * Import this in your app.css: @import '@mana/shared-tailwind/theme.css';
  *
  * Features:
  * - 4 Theme Variants: Lume (default), Nature, Stone, Ocean

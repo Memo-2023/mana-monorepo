@@ -20,11 +20,11 @@ apps/citycorners/
 ```
 
 ### Tech Stack
-- **Data Layer:** Local-first via @manacore/local-store (Dexie.js/IndexedDB)
+- **Data Layer:** Local-first via @mana/local-store (Dexie.js/IndexedDB)
 - **Sync:** mana-sync (Go, WebSocket) for server synchronization
 - **Web:** SvelteKit 2, Svelte 5 runes, Tailwind 4, OpenStreetMap embeds, svelte-i18n (DE/EN), PWA
 - **Landing:** Astro 5, Tailwind 3, static site generation
-- **Auth:** mana-core-auth (JWT, guest mode supported)
+- **Auth:** mana-auth (JWT, guest mode supported)
 
 ## Development
 
@@ -39,7 +39,7 @@ pnpm dev:citycorners:web
 
 ## Data Model (Local-First)
 
-Three IndexedDB collections managed by `@manacore/local-store`:
+Three IndexedDB collections managed by `@mana/local-store`:
 
 ### Cities
 - **id** (string, PK)

@@ -34,7 +34,7 @@ This document defines the URL schema for all mana.how subdomains.
 | Service | URL | Description |
 |---------|-----|-------------|
 | **Main Dashboard** | mana.how | Main landing/dashboard |
-| **Auth Service** | auth.mana.how | Central authentication (mana-core-auth) |
+| **Auth Service** | auth.mana.how | Central authentication (mana-auth) |
 | **API Gateway** | api.mana.how | Unified API gateway |
 | **Media Service** | media.mana.how | Image/video processing |
 | **LLM Service** | llm.mana.how | LLM abstraction layer |
@@ -63,7 +63,7 @@ For web analytics, the following apps are tracked in Umami:
 
 | Umami Website ID | Display Name | Domain |
 |------------------|--------------|--------|
-| `manacore-webapp` | Dashboard | mana.how |
+| `mana-webapp` | Dashboard | mana.how |
 | `chat-webapp` | Chat | chat.mana.how |
 | `todo-webapp` | Todo | todo.mana.how |
 | `calendar-webapp` | Calendar | calendar.mana.how |

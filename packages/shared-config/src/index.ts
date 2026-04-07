@@ -1,5 +1,5 @@
 /**
- * Shared configuration utilities for Manacore monorepo
+ * Shared configuration utilities for Mana monorepo
  *
  * This package provides common configuration utilities including
  * environment validation, API endpoint construction, and feature flags.

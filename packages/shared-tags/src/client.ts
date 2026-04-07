@@ -30,7 +30,7 @@ export interface TagsClientConfig {
 
 /**
  * Client for interacting with the central Tags API in mana-auth.
- * Used by all Manacore apps to manage user tags.
+ * Used by all Mana apps to manage user tags.
  */
 export class TagsClient {
 	private authUrl: string;

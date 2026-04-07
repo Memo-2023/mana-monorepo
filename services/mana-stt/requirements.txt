@@ -1,4 +1,4 @@
-# ManaCore STT Service Dependencies
+# Mana STT Service Dependencies
 # For Mac Mini M4 (Apple Silicon)
 
 # Web Framework

@@ -52,20 +52,20 @@ Plan für DSGVO-konformes Messaging mit Matrix/Synapse auf dem Mana Server.
 ssh mana-server
 
 # Neue Datenbank für Matrix
-docker exec manacore-postgres psql -U postgres -c "CREATE DATABASE matrix;"
-docker exec manacore-postgres psql -U postgres -c "CREATE USER synapse WITH PASSWORD 'synapse-secure-password';"
-docker exec manacore-postgres psql -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE matrix TO synapse;"
+docker exec mana-postgres psql -U postgres -c "CREATE DATABASE matrix;"
+docker exec mana-postgres psql -U postgres -c "CREATE USER synapse WITH PASSWORD 'synapse-secure-password';"
+docker exec mana-postgres psql -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE matrix TO synapse;"
 ```
 
 ### 1.2 Synapse Konfiguration erstellen
 
 ```bash
 # Verzeichnis erstellen
-mkdir -p ~/projects/manacore-monorepo/docker/matrix
+mkdir -p ~/projects/mana-monorepo/docker/matrix
 
 # Synapse Config generieren (einmalig)
 docker run -it --rm \
-  -v ~/projects/manacore-monorepo/docker/matrix:/data \
+  -v ~/projects/mana-monorepo/docker/matrix:/data \
   -e SYNAPSE_SERVER_NAME=mana.how \
   -e SYNAPSE_REPORT_STATS=no \
   matrixdotorg/synapse:latest generate
@@ -161,7 +161,7 @@ Füge zu `docker-compose.macmini.yml` hinzu:
 
   synapse:
     image: matrixdotorg/synapse:latest
-    container_name: manacore-synapse
+    container_name: mana-synapse
     restart: always
     depends_on:
       postgres:
@@ -186,7 +186,7 @@ Füge zu `docker-compose.macmini.yml` hinzu:
 
   element-web:
     image: vectorim/element-web:latest
-    container_name: manacore-element
+    container_name: mana-element
     restart: always
     depends_on:
       synapse:
@@ -204,7 +204,7 @@ Füge zu `docker-compose.macmini.yml` hinzu:
 # Volumes ergänzen:
 volumes:
   synapse_media:
-    name: manacore-synapse-media
+    name: mana-synapse-media
 ```
 
 ### 1.5 Element Web Konfiguration
@@ -271,20 +271,20 @@ launchctl start com.cloudflare.cloudflared
 ### 2.1 Container starten
 
 ```bash
-cd ~/projects/manacore-monorepo
+cd ~/projects/mana-monorepo
 
 # Nur Synapse + Element starten
 docker compose -f docker-compose.macmini.yml up -d synapse element-web
 
 # Logs prüfen
-docker logs -f manacore-synapse
+docker logs -f mana-synapse
 ```
 
 ### 2.2 Admin-User erstellen
 
 ```bash
 # Interaktiv einen Admin erstellen
-docker exec -it manacore-synapse register_new_matrix_user \
+docker exec -it mana-synapse register_new_matrix_user \
   -c /data/homeserver.yaml \
   http://localhost:8008 \
   -a
@@ -326,7 +326,7 @@ open https://element.mana.how
 
 ```bash
 # Bot-User für jeden Bot erstellen (nicht-Admin)
-docker exec -it manacore-synapse register_new_matrix_user \
+docker exec -it mana-synapse register_new_matrix_user \
   -c /data/homeserver.yaml \
   http://localhost:8008
 
@@ -520,7 +520,7 @@ OLLAMA_TIMEOUT=120000
 
   matrix-ollama-bot:
     image: ghcr.io/memo-2023/matrix-ollama-bot:latest
-    container_name: manacore-matrix-ollama-bot
+    container_name: mana-matrix-ollama-bot
     restart: always
     depends_on:
       synapse:
@@ -545,7 +545,7 @@ OLLAMA_TIMEOUT=120000
 # Volume ergänzen:
 volumes:
   matrix_ollama_bot_data:
-    name: manacore-matrix-ollama-bot
+    name: mana-matrix-ollama-bot
 ```
 
 ---

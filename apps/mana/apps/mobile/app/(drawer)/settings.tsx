@@ -333,7 +333,7 @@ export default function SettingsScreen() {
 					<View style={styles.card}>
 						<Text style={styles.sectionTitle}>Über</Text>
 						<Text style={{ color: isDarkMode ? '#9CA3AF' : '#6B7280' }}>
-							Manacore App Version 1.0.0
+							Mana App Version 1.0.0
 						</Text>
 					</View>
 				</ScrollView>

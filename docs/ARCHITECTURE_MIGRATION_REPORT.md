@@ -24,7 +24,7 @@ In zwei intensiven Sessions wurde die gesamte Mana-Architektur von einem **API-f
 
 | Aspekt | Vorher (NestJS) | Nachher (Hono + Bun) | Δ |
 |--------|----------------|---------------------|---|
-| **Auth-Service** | 1 × mana-core-auth | 5 × Hono-Services | −84% LOC |
+| **Auth-Service** | 1 × mana-auth | 5 × Hono-Services | −84% LOC |
 | **Auth LOC** | ~20.000 | ~6.233 | −69% |
 | **App-Backends** | 13 × NestJS | 14 × Hono Compute | −96% LOC |
 | **App-Backend LOC** | ~40.000 | ~1.537 | −96% |
@@ -64,11 +64,11 @@ In zwei intensiven Sessions wurde die gesamte Mana-Architektur von einem **API-f
 
 | Service | Port | LOC | Funktion | Ersetzt |
 |---------|------|-----|----------|---------|
-| **mana-auth** | 3001 | 1.931 | Auth, JWT, SSO, OIDC, 2FA, Orgs, Guilds | mana-core-auth (20k LOC NestJS) |
-| **mana-credits** | 3061 | 2.199 | Credits, Gifts, Guild Pools, Stripe | Teil von mana-core-auth |
-| **mana-user** | 3062 | 796 | Settings, Tags, Tag-Groups, Storage | Teil von mana-core-auth |
-| **mana-subscriptions** | 3063 | 832 | Plans, Billing, Invoices, Stripe | Teil von mana-core-auth |
-| **mana-analytics** | 3064 | 475 | Feedback, Voting, AI Titles | Teil von mana-core-auth |
+| **mana-auth** | 3001 | 1.931 | Auth, JWT, SSO, OIDC, 2FA, Orgs, Guilds | mana-auth (20k LOC NestJS) |
+| **mana-credits** | 3061 | 2.199 | Credits, Gifts, Guild Pools, Stripe | Teil von mana-auth |
+| **mana-user** | 3062 | 796 | Settings, Tags, Tag-Groups, Storage | Teil von mana-auth |
+| **mana-subscriptions** | 3063 | 832 | Plans, Billing, Invoices, Stripe | Teil von mana-auth |
+| **mana-analytics** | 3064 | 475 | Feedback, Voting, AI Titles | Teil von mana-auth |
 | **Σ Core** | | **6.233** | | **~20.000 LOC NestJS** |
 
 ### 2.2 App Compute Servers (Hono + Bun)
@@ -162,7 +162,7 @@ In zwei intensiven Sessions wurde die gesamte Mana-Architektur von einem **API-f
 
 | Was | Dateien | LOC |
 |-----|---------|-----|
-| mana-core-auth (NestJS) | 169 | 36.123 |
+| mana-auth (NestJS) | 169 | 36.123 |
 | 13 App-Backends (NestJS) | ~700 | ~33.000 |
 | 5 NestJS shared packages | ~30 | ~2.500 |
 | mana-search (NestJS, ersetzt durch Go) | ~30 | ~2.000 |
@@ -177,7 +177,7 @@ In zwei intensiven Sessions wurde die gesamte Mana-Architektur von einem **API-f
 |-----|---------|-----|
 | 5 Hono Core Services | ~100 | 6.233 |
 | 14 Hono Compute Servers | ~42 | 1.537 |
-| @manacore/shared-hono | ~8 | 516 |
+| @mana/shared-hono | ~8 | 516 |
 | 19 × local-store.ts | 19 | ~1.900 |
 | 19 × guest-seed.ts | 19 | ~1.200 |
 | Store-Rewrites (Presi, Picture, Mukke, etc.) | ~20 | ~800 |
@@ -236,7 +236,7 @@ Client → Hono Server → External API          ← Nur für Compute
 ### 5.3 Vorher: 1 Auth-Monolith
 
 ```
-mana-core-auth (NestJS, ~20.000 LOC)
+mana-auth (NestJS, ~20.000 LOC)
 ├── Auth (Better Auth + 1.051-Zeilen Controller)
 ├── Credits (CreditsService + GuildPoolService + StripeService)
 ├── Gifts (GiftCodeService + Controller)
@@ -307,7 +307,7 @@ mana-analytics (Hono, 475 LOC)
 | DI | **Keine** (manuelle Instantiierung) | — |
 | Auth | **Better Auth nativ** (fetch-basierter Handler) | — |
 | Database | Drizzle ORM | ✓ (beibehalten) |
-| Shared | **@manacore/shared-hono** | 1 package (auth, credits, health, admin, error) |
+| Shared | **@mana/shared-hono** | 1 package (auth, credits, health, admin, error) |
 
 ---
 
@@ -370,21 +370,21 @@ shared-gpu, nutriphi-database                                          → 2 unb
 
 | Aktion | Alt (Anzahl) | Neu | Diff |
 |--------|-------------|-----|------|
-| Feedback 3→1 | shared-feedback-{types,service,ui} | `@manacore/feedback` | -2 |
-| Help 4→1 | shared-help-{types,content,ui,mobile} | `@manacore/help` | -3 |
-| Subscription 2→1 | shared-subscription-{types,ui} | `@manacore/subscriptions` | -1 |
-| Credits 3→1 | credit-operations, shared-credit-{service,ui} | `@manacore/credits` | -2 |
+| Feedback 3→1 | shared-feedback-{types,service,ui} | `@mana/feedback` | -2 |
+| Help 4→1 | shared-help-{types,content,ui,mobile} | `@mana/help` | -3 |
+| Subscription 2→1 | shared-subscription-{types,ui} | `@mana/subscriptions` | -1 |
+| Credits 3→1 | credit-operations, shared-credit-{service,ui} | `@mana/credits` | -2 |
 | Unbenutzt geloescht | shared-gpu, nutriphi-database | — | -2 |
 | NestJS-spezifisch entfernt | shared-nestjs-{auth,health,metrics,setup}, mana-core-nestjs-integration | — | -5 |
 | **Gesamt** | **58** | **43** | **-15** |
 
 Die neuen Packages nutzen sub-path Exports:
 ```typescript
-import { CreditOperationType, CREDIT_COSTS } from '@manacore/credits';
-import { CreditBalance } from '@manacore/credits/web';
-import { FeedbackPage } from '@manacore/feedback';
-import { HelpPage, getManaFAQs } from '@manacore/help';
-import { SubscriptionPage } from '@manacore/subscriptions';
+import { CreditOperationType, CREDIT_COSTS } from '@mana/credits';
+import { CreditBalance } from '@mana/credits/web';
+import { FeedbackPage } from '@mana/feedback';
+import { HelpPage, getManaFAQs } from '@mana/help';
+import { SubscriptionPage } from '@mana/subscriptions';
 ```
 
 ---
@@ -397,17 +397,17 @@ Jede der 21 Web-Apps hatte eine eigene `auth.svelte.ts` mit ~350 Zeilen — fast
 
 ### 9.2 Loesung: createManaAuthStore Factory
 
-Neue Factory in `@manacore/shared-auth-stores`:
+Neue Factory in `@mana/shared-auth-stores`:
 
 ```typescript
 // Vorher: 350 Zeilen pro App
 import { browser } from '$app/environment';
-import { initializeWebAuth, type UserData, type AuthServiceInterface } from '@manacore/shared-auth';
+import { initializeWebAuth, type UserData, type AuthServiceInterface } from '@mana/shared-auth';
 const DEV_BACKEND_URL = 'http://localhost:3007';
 // ... 340 Zeilen SSO, Passkeys, 2FA, Token, Reset, etc.
 
 // Nachher: 5 Zeilen pro App
-import { createManaAuthStore } from '@manacore/shared-auth-stores';
+import { createManaAuthStore } from '@mana/shared-auth-stores';
 export const authStore = createManaAuthStore({ devBackendPort: 3007 });
 ```
 
@@ -484,7 +484,7 @@ Loesung: Explizites `AuthServiceInterface` mit allen 37 Methoden. Alle 5 Apps ha
 | RN 0.76 / 0.81 / 0.83 Mix | **RN 0.83.2** |
 | expo-router 4.x / 6.x / 55.x Mix | **expo-router ~55.0.5** |
 
-Alle 7 Mobile-Apps (chat, context, manacore, cards, matrix, picture, traces) auf einheitlichem Expo SDK 55.
+Alle 7 Mobile-Apps (chat, context, mana, cards, matrix, picture, traces) auf einheitlichem Expo SDK 55.
 
 ---
 

@@ -64,7 +64,7 @@ pnpm setup:db:context          # Create DB + push schema
 | **Backend** | Hono + Bun, Drizzle ORM, PostgreSQL |
 | **Web** | SvelteKit 2.x, Svelte 5 (runes mode), Tailwind CSS 4 |
 | **Mobile** | React Native 0.76 + Expo SDK 52, NativeWind |
-| **Auth** | Mana Core Auth (JWT) |
+| **Auth** | Mana Auth (JWT) |
 | **AI** | Azure OpenAI (GPT-4.1), Google Gemini (Pro, Flash) |
 | **i18n** | svelte-i18n (DE, EN) |
 
@@ -187,7 +187,7 @@ pnpm setup:db:context          # Create DB + push schema
 ```env
 NODE_ENV=development
 PORT=3020
-DATABASE_URL=postgresql://manacore:devpassword@localhost:5432/context
+DATABASE_URL=postgresql://mana:devpassword@localhost:5432/context
 MANA_AUTH_URL=http://localhost:3001
 AZURE_OPENAI_API_KEY=your-key
 AZURE_OPENAI_ENDPOINT=https://your-endpoint.openai.azure.com/
@@ -202,7 +202,7 @@ PUBLIC_MANA_AUTH_URL=http://localhost:3001
 
 ## Important Patterns
 
-1. **API Client pattern** - All web services use `@manacore/shared-api-client` (Go-style `{ data, error }`)
+1. **API Client pattern** - All web services use `@mana/shared-api-client` (Go-style `{ data, error }`)
 2. **Svelte 5 runes** - `$state`, `$derived`, `$effect` throughout
 3. **Server-side AI keys** - API keys only on backend, never in frontend
 4. **Auto word/token count** - Backend calculates on create/update

@@ -1,14 +1,14 @@
-# Mana Core Auth Integration Guide - Chat Project
+# Mana Auth Integration Guide - Chat Project
 
-This guide explains how to integrate the Chat project with the new **Mana Core Auth** system, replacing Supabase Auth.
+This guide explains how to integrate the Chat project with the new **Mana Auth** system, replacing Supabase Auth.
 
 ## Overview
 
-The Chat project currently uses **Supabase Auth** across all apps. We're migrating to **Mana Core Auth**, our centralized authentication system with built-in credit management.
+The Chat project currently uses **Supabase Auth** across all apps. We're migrating to **Mana Auth**, our centralized authentication system with built-in credit management.
 
 ### Benefits
 
-- ✅ **Unified Authentication** - Single auth system for all Mana Core apps
+- ✅ **Unified Authentication** - Single auth system for all Mana apps
 - ✅ **Built-in Credits** - Automatic credit balance management (150 signup bonus + 5 daily)
 - ✅ **Better Security** - RS256 JWT, refresh token rotation, optimistic locking
 - ✅ **Cost Savings** - Self-hosted, no per-user charges
@@ -19,9 +19,9 @@ The Chat project currently uses **Supabase Auth** across all apps. We're migrati
 ```
 Chat Apps (Web, Mobile, Landing)
     ↓
-@manacore/shared-auth (Client Library)
+@mana/shared-auth (Client Library)
     ↓
-Mana Core Auth Service (NestJS)
+Mana Auth Service (NestJS)
     ↓
 PostgreSQL (Users, Sessions, Credits)
 ```
@@ -30,7 +30,7 @@ PostgreSQL (Users, Sessions, Credits)
 
 ### 1. Shared Auth Package Updated ✅
 
-The `@manacore/shared-auth` package has been updated to work with Mana Core Auth endpoints:
+The `@mana/shared-auth` package has been updated to work with Mana Auth endpoints:
 
 **Updated endpoints:**
 
@@ -56,7 +56,7 @@ The `@manacore/shared-auth` package has been updated to work with Mana Core Auth
 # SUPABASE_URL=...
 # SUPABASE_SERVICE_KEY=...
 
-# Add Mana Core Auth URL
+# Add Mana Auth URL
 MANA_AUTH_URL=http://localhost:3001
 ```
 
@@ -114,7 +114,7 @@ export class JwtAuthGuard implements CanActivate {
 		}
 
 		try {
-			// Get public key from Mana Core Auth
+			// Get public key from Mana Auth
 			const authUrl = this.configService.get<string>('MANA_AUTH_URL');
 			const response = await fetch(`${authUrl}/api/v1/auth/validate`, {
 				method: 'POST',
@@ -177,11 +177,11 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 Edit `chat/apps/web/src/lib/stores/auth.svelte.ts`:
 
 ```typescript
-import { initializeWebAuth } from '@manacore/shared-auth';
+import { initializeWebAuth } from '@mana/shared-auth';
 
 const MANA_AUTH_URL = import.meta.env.PUBLIC_MANA_AUTH_URL || 'http://localhost:3001';
 
-// Initialize Mana Core Auth
+// Initialize Mana Auth
 const { authService, tokenManager } = initializeWebAuth({
 	baseUrl: MANA_AUTH_URL,
 });
@@ -247,7 +247,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	if (token) {
 		try {
-			// Validate token with Mana Core Auth
+			// Validate token with Mana Auth
 			const authUrl = process.env.PUBLIC_MANA_AUTH_URL || 'http://localhost:3001';
 			const response = await fetch(`${authUrl}/api/v1/auth/validate`, {
 				method: 'POST',
@@ -290,8 +290,8 @@ import {
   setDeviceAdapter,
   setNetworkAdapter,
   type UserData,
-} from '@manacore/shared-auth';
-import { createSecureStoreAdapter } from '@manacore/shared-auth/native'; // You may need to create this
+} from '@mana/shared-auth';
+import { createSecureStoreAdapter } from '@mana/shared-auth/native'; // You may need to create this
 
 const MANA_AUTH_URL = process.env.EXPO_PUBLIC_MANA_AUTH_URL || 'http://localhost:3001';
 
@@ -415,11 +415,11 @@ pnpm remove @supabase/supabase-js
 
 ### Step 6: Test the Integration
 
-#### 6.1 Start Mana Core Auth
+#### 6.1 Start Mana Auth
 
 ```bash
 # From monorepo root
-cd mana-core-auth
+cd mana-auth
 pnpm start:dev
 ```
 
@@ -465,9 +465,9 @@ pnpm dev
 
 ## API Compatibility
 
-### Mana Core Auth vs Supabase
+### Mana Auth vs Supabase
 
-| Feature            | Supabase Auth | Mana Core Auth | Status   |
+| Feature            | Supabase Auth | Mana Auth | Status   |
 | ------------------ | ------------- | -------------- | -------- |
 | Email/Password     | ✅            | ✅             | Migrated |
 | OAuth (Google)     | ✅            | 🚧             | TODO     |
@@ -480,7 +480,7 @@ pnpm dev
 
 ## Credits System
 
-Mana Core Auth includes a built-in credit system:
+Mana Auth includes a built-in credit system:
 
 ```typescript
 // Get credit balance
@@ -501,12 +501,12 @@ console.log(credits);
 
 ## Troubleshooting
 
-### "Connection refused" to Mana Core Auth
+### "Connection refused" to Mana Auth
 
-**Solution:** Make sure Mana Core Auth is running:
+**Solution:** Make sure Mana Auth is running:
 
 ```bash
-cd mana-core-auth
+cd mana-auth
 pnpm start:dev
 ```
 
@@ -520,7 +520,7 @@ await authService.clearAuthStorage();
 
 ### CORS errors
 
-**Solution:** Add Chat app URLs to Mana Core Auth `.env`:
+**Solution:** Add Chat app URLs to Mana Auth `.env`:
 
 ```env
 CORS_ORIGINS=http://localhost:3000,http://localhost:8081
@@ -528,7 +528,7 @@ CORS_ORIGINS=http://localhost:3000,http://localhost:8081
 
 ## Next Steps
 
-1. ✅ Update `@manacore/shared-auth` package
+1. ✅ Update `@mana/shared-auth` package
 2. ⏳ Integrate into Chat backend
 3. ⏳ Update Chat web app
 4. ⏳ Update Chat mobile app
@@ -539,10 +539,10 @@ CORS_ORIGINS=http://localhost:3000,http://localhost:8081
 
 ## Resources
 
-- **Mana Core Auth README:** `/mana-core-auth/README.md`
+- **Mana Auth README:** `/mana-auth/README.md`
 - **Shared Auth Package:** `/packages/shared-auth/`
-- **API Documentation:** `/mana-core-auth/README.md#api-endpoints`
-- **Quick Start:** `/mana-core-auth/QUICKSTART.md`
+- **API Documentation:** `/mana-auth/README.md#api-endpoints`
+- **Quick Start:** `/mana-auth/QUICKSTART.md`
 
 ---
 

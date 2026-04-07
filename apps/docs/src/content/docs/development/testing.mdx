@@ -1,13 +1,13 @@
 ---
 title: Testing
-description: Testing patterns and practices in the Manacore monorepo.
+description: Testing patterns and practices in the Mana monorepo.
 ---
 
 import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
 
 # Testing
 
-Manacore uses Jest for backend testing and Vitest for frontend testing.
+Mana uses Jest for backend testing and Vitest for frontend testing.
 
 ## Quick Start
 
@@ -47,7 +47,7 @@ src/
 ```typescript
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from './users.service';
-import { DRIZZLE } from '@manacore/shared-drizzle';
+import { DRIZZLE } from '@mana/shared-drizzle';
 
 describe('UsersService', () => {
   let service: UsersService;

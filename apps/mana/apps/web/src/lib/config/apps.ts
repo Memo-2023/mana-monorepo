@@ -1,5 +1,5 @@
 /**
- * Multi-app configuration for Manacore dashboard and welcome page branding
+ * Multi-app configuration for Mana dashboard and welcome page branding
  * Defines all apps in the Mana ecosystem with their features and styling
  */
 

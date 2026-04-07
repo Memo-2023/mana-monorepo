@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>com.manacore.ssd-check</string>
+    <string>com.mana.ssd-check</string>
     <key>ProgramArguments</key>
     <array>
         <string>/Users/mana/check-ssd.sh</string>

@@ -31,7 +31,7 @@ apps/news/
 | **Web** | SvelteKit 2, Svelte 5 (runes), Tailwind CSS 4 |
 | **Server** | Hono + Bun, Mozilla Readability, JSDOM |
 | **Data** | Local-first (Dexie.js + mana-sync) |
-| **Auth** | mana-core-auth (Better Auth + EdDSA JWT) |
+| **Auth** | mana-auth (Better Auth + EdDSA JWT) |
 
 ## Commands
 

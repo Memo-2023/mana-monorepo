@@ -2,12 +2,7 @@
 	import { _ } from 'svelte-i18n';
 	import { onMount } from 'svelte';
 	import { Button, Input, Card, PageHeader, GlobalSettingsSection } from '@mana/shared-ui';
-	import {
-		PasskeyManager,
-		TwoFactorSetup,
-		AuditLog,
-		SessionManager,
-	} from '@mana/shared-auth-ui';
+	import { PasskeyManager, TwoFactorSetup, AuditLog, SessionManager } from '@mana/shared-auth-ui';
 	import {
 		User,
 		CurrencyCircleDollar,

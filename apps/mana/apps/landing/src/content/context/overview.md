@@ -15,7 +15,7 @@ Mana steht für ein langfristig nachhaltiges Software-Ökosystem mit KI im Kern.
 
 ### Das Mana-Ökosystem
 
-Im Manacore-Netzwerk arbeiten verschiedene Applikationen zusammen:
+Im Mana-Netzwerk arbeiten verschiedene Applikationen zusammen:
 
 - Jede App unterstützt Menschen bei spezifischen Aufgaben
 - Verbunden entfalten sie eine ganz neue Kraft
@@ -63,7 +63,7 @@ Die Entwicklung von Mana fokussiert sich auf Europa:
 - Aufbau eines neuen Software-Ökosystems für Europa
 - Reduzierung der Abhängigkeit von US-amerikanischen Technologien
 - Langfristiges Ziel: Komplette technologische Unabhängigkeit
-- Open-Source-Pläne für den Manacore bei strategischer Sinnhaftigkeit
+- Open-Source-Pläne bei strategischer Sinnhaftigkeit
 
 ### Einheitliche Vorteile für Nutzer
 

@@ -17,7 +17,7 @@ Statt Docker Desktop nutzen wir **Colima** als Container-Runtime. Colima ist Ope
 | docker-compose | Identisch | Identisch |
 
 **Konfiguration:** 8 CPUs, 12 GB RAM, 200 GB Disk, Apple VZ, VirtioFS
-**LaunchAgent:** `~/Library/LaunchAgents/com.manacore.colima.plist`
+**LaunchAgent:** `~/Library/LaunchAgents/com.mana.colima.plist`
 **Migration:** `./scripts/mac-mini/migrate-to-colima.sh`
 **Rollback:** `./scripts/mac-mini/migrate-to-colima.sh --rollback`
 
@@ -40,7 +40,7 @@ Cloudflare Tunnel (cloudflared)
 │                                                             │
 │  ┌─────────────────────────────────────────────────────┐   │
 │  │  Docker Container (~61 Services)                     │   │
-│  │  ├── mana-core-auth     (Port 3001)                 │   │
+│  │  ├── mana-auth     (Port 3001)                 │   │
 │  │  ├── dashboard-web      (Port 5173)                 │   │
 │  │  ├── chat-web           (Port 3000)                 │   │
 │  │  ├── todo-web           (Port 5188)                 │   │
@@ -109,7 +109,7 @@ Host mana-server-remote
 ### Projekt-Verzeichnis
 
 ```bash
-cd ~/projects/manacore-monorepo
+cd ~/projects/mana-monorepo
 ```
 
 ## CI/CD
@@ -119,7 +119,7 @@ Ein GitHub Actions Self-Hosted Runner läuft nativ auf dem Mac Mini und deployt 
 - **CD Workflow:** `.github/workflows/cd-macmini.yml`
 - **Mirror Workflow:** `.github/workflows/mirror-to-forgejo.yml` (GitHub → Forgejo Sync)
 - **Runner:** `mac-mini` (self-hosted, macOS, ARM64, LaunchAgent)
-- **Manuelles Deployment:** https://github.com/Memo-2023/manacore-monorepo/actions/workflows/cd-macmini.yml
+- **Manuelles Deployment:** https://github.com/Memo-2023/mana-monorepo/actions/workflows/cd-macmini.yml
 
 ### Forgejo (Mirror-Only)
 
@@ -155,8 +155,8 @@ bash scripts/check-status.sh
 docker ps
 
 # Logs eines Containers
-docker logs manacore-chat-backend
-docker logs -f manacore-chat-backend  # Live-Logs
+docker logs mana-chat-backend
+docker logs -f mana-chat-backend  # Live-Logs
 ```
 
 **Grafana Uptime-Dashboard:** `grafana.mana.how` → Ordner "Mana" → **"Mana Uptime"**
@@ -192,7 +192,7 @@ Statische HTML-Seite, die alle 60 Sekunden vom Container `mana-status-gen` neu g
 ./scripts/mac-mini/stop.sh
 
 # Einzelnen Container neustarten
-docker restart manacore-chat-backend
+docker restart mana-chat-backend
 
 # Neueste Images pullen und Container aktualisieren
 ./scripts/mac-mini/deploy.sh
@@ -202,14 +202,14 @@ docker restart manacore-chat-backend
 
 ```bash
 # LaunchAgents Status prüfen
-launchctl list | grep -E "(cloudflare|manacore)"
+launchctl list | grep -E "(cloudflare|mana)"
 
 # Health Check manuell triggern
-launchctl start com.manacore.health-check
+launchctl start com.mana.health-check
 
 # Service neuladen
-launchctl unload ~/Library/LaunchAgents/com.manacore.docker-startup.plist
-launchctl load ~/Library/LaunchAgents/com.manacore.docker-startup.plist
+launchctl unload ~/Library/LaunchAgents/com.mana.docker-startup.plist
+launchctl load ~/Library/LaunchAgents/com.mana.docker-startup.plist
 ```
 
 ## Autostart-Konfiguration
@@ -226,7 +226,7 @@ Drei LaunchAgents sorgen fuer automatischen Betrieb:
 
 ### 2. Docker Container Startup
 
-**Datei:** `~/Library/LaunchAgents/com.manacore.docker-startup.plist`
+**Datei:** `~/Library/LaunchAgents/com.mana.docker-startup.plist`
 
 - Startet beim Login
 - Wartet auf Docker Desktop
@@ -235,7 +235,7 @@ Drei LaunchAgents sorgen fuer automatischen Betrieb:
 
 ### 3. Health Check
 
-**Datei:** `~/Library/LaunchAgents/com.manacore.health-check.plist`
+**Datei:** `~/Library/LaunchAgents/com.mana.health-check.plist`
 
 - Laeuft alle 5 Minuten
 - Prueft alle Services (HTTP + Docker)
@@ -245,8 +245,8 @@ Drei LaunchAgents sorgen fuer automatischen Betrieb:
 
 Diese LaunchAgents sind seit der GPU-Server-Migration deaktiviert:
 - `homebrew.mxcl.ollama.plist` — LLM laeuft auf GPU-Server
-- `com.manacore.image-gen.plist` — Bildgenerierung laeuft auf GPU-Server
-- `com.manacore.telegram-ollama-bot.plist` — Bot deaktiviert
+- `com.mana.image-gen.plist` — Bildgenerierung laeuft auf GPU-Server
+- `com.mana.telegram-ollama-bot.plist` — Bot deaktiviert
 
 ### Setup neu ausführen
 
@@ -269,7 +269,7 @@ TELEGRAM_CHAT_ID=xxx
 
 # Email
 EMAIL_TO=your@email.com
-EMAIL_FROM=manacore@mana.how
+EMAIL_FROM=mana@mana.how
 
 # ntfy.sh (optional)
 NTFY_TOPIC=your-topic
@@ -307,20 +307,20 @@ curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" 
 
 | Container | Service |
 |-----------|---------|
-| manacore-postgres | PostgreSQL Datenbank |
-| manacore-redis | Redis Cache |
-| manacore-auth | Auth Service |
-| manacore-dashboard-web | Dashboard |
-| manacore-chat-backend | Chat API |
-| manacore-chat-web | Chat Frontend |
-| manacore-todo-backend | Todo API |
-| manacore-todo-web | Todo Frontend |
-| manacore-calendar-backend | Calendar API |
-| manacore-calendar-web | Calendar Frontend |
-| manacore-clock-backend | Clock API |
-| manacore-clock-web | Clock Frontend |
-| manacore-synapse | Matrix Homeserver |
-| manacore-element | Element Web Client |
+| mana-postgres | PostgreSQL Datenbank |
+| mana-redis | Redis Cache |
+| mana-auth | Auth Service |
+| mana-dashboard-web | Dashboard |
+| mana-chat-backend | Chat API |
+| mana-chat-web | Chat Frontend |
+| mana-todo-backend | Todo API |
+| mana-todo-web | Todo Frontend |
+| mana-calendar-backend | Calendar API |
+| mana-calendar-web | Calendar Frontend |
+| mana-clock-backend | Clock API |
+| mana-clock-web | Clock Frontend |
+| mana-synapse | Matrix Homeserver |
+| mana-element | Element Web Client |
 
 ### Nützliche Docker-Befehle
 
@@ -358,7 +358,7 @@ docker compose -f docker-compose.macmini.yml restart chat-backend
 > 4. Cloudflared neu starten: `launchctl stop com.cloudflare.cloudflared && launchctl start com.cloudflare.cloudflared`
 
 ```yaml
-tunnel: manacore-tunnel
+tunnel: mana-tunnel
 credentials-file: ~/.cloudflared/credentials.json
 
 ingress:
@@ -388,10 +388,10 @@ tail -f ~/.cloudflared/cloudflared.log
 
 ```bash
 # Logs prüfen
-docker logs manacore-<service-name>
+docker logs mana-<service-name>
 
 # Container manuell starten
-docker start manacore-<service-name>
+docker start mana-<service-name>
 
 # Bei Problemen: Container neu erstellen
 docker compose -f docker-compose.macmini.yml up -d --force-recreate <service-name>
@@ -415,13 +415,13 @@ tail -100 ~/.cloudflared/cloudflared.log
 
 ```bash
 # PostgreSQL Status
-docker exec manacore-postgres pg_isready -U postgres
+docker exec mana-postgres pg_isready -U postgres
 
 # Datenbanken auflisten
-docker exec manacore-postgres psql -U postgres -c "\l"
+docker exec mana-postgres psql -U postgres -c "\l"
 
 # Datenbank manuell erstellen
-docker exec manacore-postgres psql -U postgres -c "CREATE DATABASE chat_db;"
+docker exec mana-postgres psql -U postgres -c "CREATE DATABASE chat_db;"
 ```
 
 ### Health Check Fehler
@@ -453,7 +453,7 @@ Bei SSH-Zugriff ist Docker nicht im Standard-PATH. Für Remote-Befehle:
 PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
 
 # Beispiel: Remote docker compose
-ssh mana-server "PATH=/Applications/Docker.app/Contents/Resources/bin:\$PATH && docker compose -f ~/projects/manacore-monorepo/docker-compose.macmini.yml restart grafana"
+ssh mana-server "PATH=/Applications/Docker.app/Contents/Resources/bin:\$PATH && docker compose -f ~/projects/mana-monorepo/docker-compose.macmini.yml restart grafana"
 ```
 
 ### Container existiert nicht (wurde nie erstellt)
@@ -565,10 +565,10 @@ Die PostgreSQL-Datenbank sollte regelmäßig gesichert werden:
 
 ```bash
 # Backup erstellen
-docker exec manacore-postgres pg_dumpall -U postgres > backup_$(date +%Y%m%d).sql
+docker exec mana-postgres pg_dumpall -U postgres > backup_$(date +%Y%m%d).sql
 
 # Backup wiederherstellen
-cat backup_20260123.sql | docker exec -i manacore-postgres psql -U postgres
+cat backup_20260123.sql | docker exec -i mana-postgres psql -U postgres
 ```
 
 ### Logs aufräumen
@@ -627,7 +627,7 @@ Ollama und FLUX.2 waren frueher lokal installiert, sind aber seit 2026-03-28 dea
 Bei Bedarf reaktivieren:
 ```bash
 brew services start ollama
-launchctl load ~/Library/LaunchAgents/com.manacore.image-gen.plist
+launchctl load ~/Library/LaunchAgents/com.mana.image-gen.plist
 ```
 
 ## Externe 4TB SSD
@@ -798,7 +798,7 @@ docker compose -f docker-compose.macmini.yml up -d matrix-mana-bot
 docker compose -f docker-compose.macmini.yml up -d synapse element-web
 
 # Admin-User erstellen
-docker exec -it manacore-synapse register_new_matrix_user \
+docker exec -it mana-synapse register_new_matrix_user \
   -c /data/homeserver.yaml http://localhost:8008 -a
 ```
 

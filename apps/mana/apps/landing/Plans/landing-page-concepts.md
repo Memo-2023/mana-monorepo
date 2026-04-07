@@ -7,7 +7,7 @@ _Fokus auf das vernetzte Ökosystem und die Vision eines nachhaltigen Software-M
 ### 1. Hero Section
 
 **Headline:** "Ein Ökosystem. Unendliche Möglichkeiten."
-**Subheadline:** "Manacore vernetzt deine KI-Tools zu einem nachhaltigen digitalen Ökosystem. Zahle nur was du nutzt, sammle Credits für später."
+**Subheadline:** "Mana vernetzt deine KI-Tools zu einem nachhaltigen digitalen Ökosystem. Zahle nur was du nutzt, sammle Credits für später."
 
 **CTA Buttons:**
 
@@ -57,7 +57,7 @@ _Fokus auf das vernetzte Ökosystem und die Vision eines nachhaltigen Software-M
 - Dropdown: "Nutzungsintensität"
 - Live-Berechnung zeigt:
   - Klassische Lizenzen: X€/Monat
-  - Mit Manacore: Y€/Monat
+  - Mit Mana: Y€/Monat
   - Deine Ersparnis: Z%
 
 **Testimonial-Box:**
@@ -131,7 +131,7 @@ _Fokus auf Innovation, Nachhaltigkeit und europäische Unabhängigkeit_
 ### 1. Hero Section
 
 **Headline:** "Die Zukunft der Software ist nachhaltig"
-**Subheadline:** "Manacore baut das erste regenerative KI-Ökosystem Europas. Sei dabei, wenn Software demokratisch wird."
+**Subheadline:** "Mana baut das erste regenerative KI-Ökosystem Europas. Sei dabei, wenn Software demokratisch wird."
 
 **Vision-Statements:**
 

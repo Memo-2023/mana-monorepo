@@ -70,7 +70,7 @@ SEPA Direct Debit wurde im Code aktiviert. Diese Checkliste dokumentiert die ver
 
 ```bash
 ssh mana-server
-cd ~/projects/manacore-monorepo
+cd ~/projects/mana-monorepo
 git pull
 ./scripts/mac-mini/deploy.sh
 ```
@@ -78,7 +78,7 @@ git pull
 **Verifizierung:**
 ```bash
 # Logs prüfen
-docker logs mana-core-auth --tail 50
+docker logs mana-auth --tail 50
 
 # Health Check
 curl https://auth.mana.how/health
@@ -143,7 +143,7 @@ curl https://auth.mana.how/health
 **In den Server-Logs:**
 ```bash
 ssh mana-server
-docker logs mana-core-auth --tail 100 | grep -i "sepa\|processing\|webhook"
+docker logs mana-auth --tail 100 | grep -i "sepa\|processing\|webhook"
 ```
 
 **Erwartete Log-Einträge:**
@@ -218,9 +218,9 @@ stripe payment_intents confirm pi_XXXXX --payment-method pm_sepa_debit
 
 | Datei | Änderung |
 |-------|----------|
-| `services/mana-core-auth/src/stripe/stripe.service.ts` | `payment_method_types: ['card', 'sepa_debit']` |
-| `services/mana-core-auth/src/subscriptions/subscriptions.service.ts` | `payment_method_types: ['card', 'sepa_debit']` |
-| `services/mana-core-auth/src/stripe/stripe-webhook.controller.ts` | `payment_intent.processing` Handler |
+| `services/mana-auth/src/stripe/stripe.service.ts` | `payment_method_types: ['card', 'sepa_debit']` |
+| `services/mana-auth/src/subscriptions/subscriptions.service.ts` | `payment_method_types: ['card', 'sepa_debit']` |
+| `services/mana-auth/src/stripe/stripe-webhook.controller.ts` | `payment_intent.processing` Handler |
 | `apps/mana/apps/landing/src/content/blueprints/003-*.md` | Dokumentation |
 
 ---

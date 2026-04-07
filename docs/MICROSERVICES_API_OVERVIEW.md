@@ -17,7 +17,7 @@ Dieses Dokument gibt einen Überblick über alle Microservices im Mana-Monorepo 
 
 | Service | Port | Typ | API-Ready | Beschreibung |
 |---------|------|-----|-----------|--------------|
-| **mana-core-auth** | 3001 | NestJS | ✅ | Zentrale Authentifizierung & Credits |
+| **mana-auth** | 3001 | NestJS | ✅ | Zentrale Authentifizierung & Credits |
 | **mana-search** | 3021 | NestJS | ✅ | Web-Suche & Content-Extraktion |
 | **mana-stt** | 3020 | FastAPI | ✅ | Speech-to-Text (Whisper, Voxtral) |
 | **mana-tts** | 3022 | FastAPI | ✅ | Text-to-Speech (Kokoro, F5-TTS) |
@@ -30,7 +30,7 @@ Dieses Dokument gibt einen Überblick über alle Microservices im Mana-Monorepo 
 
 Diese Services haben bereits REST-APIs und eignen sich für öffentliche Bereitstellung:
 
-### 1. mana-core-auth (Port 3001)
+### 1. mana-auth (Port 3001)
 
 **Zweck:** Zentrale Authentifizierung, JWT-Tokens, Credit-System
 
@@ -171,7 +171,7 @@ Diese Services sind für Matrix/Telegram konzipiert, nicht als direkte APIs:
             │                    │                    │
             ▼                    ▼                    ▼
     ┌───────────────┐   ┌───────────────┐   ┌───────────────┐
-    │ mana-core-auth│   │  mana-search  │   │   mana-stt    │
+    │ mana-auth│   │  mana-search  │   │   mana-stt    │
     │   Port 3001   │   │   Port 3021   │   │   Port 3020   │
     │               │   │               │   │               │
     │ • Auth/JWT    │   │ • Web Search  │   │ • Whisper     │
@@ -200,7 +200,7 @@ Diese Services sind für Matrix/Telegram konzipiert, nicht als direkte APIs:
 **Beschreibung:** Jeden Service direkt über eigenen Port/Subdomain exponieren.
 
 ```
-api.mana.how/auth     → mana-core-auth:3001
+api.mana.how/auth     → mana-auth:3001
 api.mana.how/search   → mana-search:3021
 api.mana.how/stt      → mana-stt:3020
 api.mana.how/tts      → mana-tts:3022
@@ -294,7 +294,7 @@ export class AppModule {}
 
 **Vorteile:**
 - Volle Kontrolle
-- Integration mit mana-core-auth
+- Integration mit mana-auth
 - TypeScript/NestJS Konsistenz
 - Einfache Erweiterung
 
@@ -447,7 +447,7 @@ services/
 
 | Port | Service | Typ |
 |------|---------|-----|
-| 3001 | mana-core-auth | Auth |
+| 3001 | mana-auth | Auth |
 | 3020 | mana-stt | AI/ML |
 | 3021 | mana-search | Search |
 | 3022 | mana-tts | AI/ML |

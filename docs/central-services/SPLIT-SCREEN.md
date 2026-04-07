@@ -6,7 +6,7 @@ Das Split-Screen Feature ermöglicht es, zwei Mana-Apps nebeneinander in einem B
 
 | Aspekt | Details |
 |--------|---------|
-| **Package** | `@manacore/shared-splitscreen` |
+| **Package** | `@mana/shared-splitscreen` |
 | **Integrierte Apps** | Calendar, Todo, Contacts |
 | **Aktivierung** | Split-Button in App-Dropdown oder Ctrl/Cmd+Klick |
 | **Persistenz** | URL-Parameter + localStorage |
@@ -69,7 +69,7 @@ Haupt-Container mit CSS Grid Layout.
 
 ```svelte
 <script>
-  import { SplitPaneContainer, setSplitPanelContext, DEFAULT_APPS } from '@manacore/shared-splitscreen';
+  import { SplitPaneContainer, setSplitPanelContext, DEFAULT_APPS } from '@mana/shared-splitscreen';
 
   // Context initialisieren
   const splitPanel = setSplitPanelContext('calendar', DEFAULT_APPS);
@@ -135,7 +135,7 @@ Overlay mit Swap- und Close-Buttons.
 ### Initialisierung
 
 ```typescript
-import { setSplitPanelContext, DEFAULT_APPS } from '@manacore/shared-splitscreen';
+import { setSplitPanelContext, DEFAULT_APPS } from '@mana/shared-splitscreen';
 
 // Im Layout-Component (z.B. +layout.svelte)
 const splitPanel = setSplitPanelContext('calendar', DEFAULT_APPS);
@@ -170,7 +170,7 @@ interface SplitPanelStore {
 ### Context-Zugriff
 
 ```typescript
-import { getSplitPanelContext } from '@manacore/shared-splitscreen';
+import { getSplitPanelContext } from '@mana/shared-splitscreen';
 
 // In Child-Components
 const splitPanel = getSplitPanelContext();
@@ -201,7 +201,7 @@ https://calendar.app/?panel=todo&split=60
 ### localStorage
 
 ```typescript
-// Key: manacore-splitscreen-{appId}
+// Key: mana-splitscreen-{appId}
 {
   "version": 1,
   "state": {
@@ -225,7 +225,7 @@ https://calendar.app/?panel=todo&split=60
 // package.json
 {
   "dependencies": {
-    "@manacore/shared-splitscreen": "workspace:*"
+    "@mana/shared-splitscreen": "workspace:*"
   }
 }
 ```
@@ -236,12 +236,12 @@ https://calendar.app/?panel=todo&split=60
 <!-- +layout.svelte -->
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { PillNavigation } from '@manacore/shared-ui';
+  import { PillNavigation } from '@mana/shared-ui';
   import {
     SplitPaneContainer,
     setSplitPanelContext,
     DEFAULT_APPS,
-  } from '@manacore/shared-splitscreen';
+  } from '@mana/shared-splitscreen';
 
   // Split-Panel Store initialisieren
   const splitPanel = setSplitPanelContext('calendar', DEFAULT_APPS);
@@ -369,7 +369,7 @@ http://localhost:5179/?panel=contacts&split=70
 ### localStorage löschen
 
 ```javascript
-localStorage.removeItem('manacore-splitscreen-calendar');
-localStorage.removeItem('manacore-splitscreen-todo');
-localStorage.removeItem('manacore-splitscreen-contacts');
+localStorage.removeItem('mana-splitscreen-calendar');
+localStorage.removeItem('mana-splitscreen-todo');
+localStorage.removeItem('mana-splitscreen-contacts');
 ```

@@ -927,4 +927,4 @@ NEUER CODE:    ~15.000-25.000 Zeilen TypeScript + ~5.000 Zeilen Go
 ---
 
 *Erstellt: 28. Maerz 2026*
-*Projekt: ManaVoxel 2D -- Teil des Manacore-Oekosystems*
+*Projekt: ManaVoxel 2D -- Teil des Mana-Oekosystems*

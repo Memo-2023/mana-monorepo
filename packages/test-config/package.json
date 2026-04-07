@@ -1,7 +1,7 @@
 {
 	"name": "@mana/test-config",
 	"version": "0.1.0",
-	"description": "Shared test configurations for Manacore monorepo",
+	"description": "Shared test configurations for Mana monorepo",
 	"private": true,
 	"type": "module",
 	"exports": {

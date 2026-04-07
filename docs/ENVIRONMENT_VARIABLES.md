@@ -1,6 +1,6 @@
 # Environment Variables Guide
 
-This document explains the centralized environment variable system for the Mana Core monorepo.
+This document explains the centralized environment variable system for the Mana monorepo.
 
 ## Quick Start
 
@@ -59,15 +59,15 @@ The generator reads `.env.development` and creates app-specific `.env` files wit
 | Variable | Description | Used By |
 |----------|-------------|---------|
 | `MANA_AUTH_URL` | Auth service URL | All apps |
-| `JWT_PRIVATE_KEY` | JWT signing key | mana-core-auth |
+| `JWT_PRIVATE_KEY` | JWT signing key | mana-auth |
 | `JWT_PUBLIC_KEY` | JWT verification key | All backends |
 | `POSTGRES_USER` | Database user | Docker, backends |
 | `POSTGRES_PASSWORD` | Database password | Docker, backends |
-| `REDIS_HOST` | Redis host | mana-core-auth |
-| `REDIS_PORT` | Redis port | mana-core-auth |
-| `REDIS_PASSWORD` | Redis password | mana-core-auth |
+| `REDIS_HOST` | Redis host | mana-auth |
+| `REDIS_PORT` | Redis port | mana-auth |
+| `REDIS_PASSWORD` | Redis password | mana-auth |
 
-### Mana Core Auth Service
+### Mana Auth Service
 
 | Variable | Description | Default |
 |----------|-------------|---------|
@@ -75,8 +75,8 @@ The generator reads `.env.development` and creates app-specific `.env` files wit
 | `MANA_AUTH_DATABASE_URL` | PostgreSQL connection string | - |
 | `JWT_ACCESS_TOKEN_EXPIRY` | Access token TTL | `15m` |
 | `JWT_REFRESH_TOKEN_EXPIRY` | Refresh token TTL | `7d` |
-| `JWT_ISSUER` | JWT issuer claim | `manacore` |
-| `JWT_AUDIENCE` | JWT audience claim | `manacore` |
+| `JWT_ISSUER` | JWT issuer claim | `mana` |
+| `JWT_AUDIENCE` | JWT audience claim | `mana` |
 | `STRIPE_SECRET_KEY` | Stripe secret key | - |
 | `STRIPE_PUBLISHABLE_KEY` | Stripe publishable key | - |
 | `STRIPE_WEBHOOK_SECRET` | Stripe webhook secret | - |
@@ -96,12 +96,12 @@ The generator reads `.env.development` and creates app-specific `.env` files wit
 | `CHAT_SUPABASE_URL` | Supabase project URL | - |
 | `CHAT_SUPABASE_ANON_KEY` | Supabase anonymous key | - |
 
-### Manacore Project
+### Mana Project
 
 | Variable | Description |
 |----------|-------------|
-| `MANACORE_SUPABASE_URL` | Supabase project URL |
-| `MANACORE_SUPABASE_ANON_KEY` | Supabase anonymous key |
+| `MANA_SUPABASE_URL` | Supabase project URL |
+| `MANA_SUPABASE_ANON_KEY` | Supabase anonymous key |
 
 ### Cards Project
 

@@ -229,8 +229,8 @@ jobs:
           done
 
           # mana-web: apps/mana/apps/web + shared packages
-          MANACORE_WEB_CHANGED=$(check_pattern "apps/mana/apps/web/|apps/mana/packages/")
-          if [ "$COMMON_CHANGED" == "true" ] || [ "$SHARED_AUTH_CHANGED" == "true" ] || [ "$SHARED_UI_CHANGED" == "true" ] || [ "$SHARED_WEB_CHANGED" == "true" ] || [ "$MANACORE_WEB_CHANGED" == "true" ]; then
+          MANA_WEB_CHANGED=$(check_pattern "apps/mana/apps/web/|apps/mana/packages/")
+          if [ "$COMMON_CHANGED" == "true" ] || [ "$SHARED_AUTH_CHANGED" == "true" ] || [ "$SHARED_UI_CHANGED" == "true" ] || [ "$SHARED_WEB_CHANGED" == "true" ] || [ "$MANA_WEB_CHANGED" == "true" ]; then
             echo "mana-web=true" >> $GITHUB_OUTPUT
           else
             echo "mana-web=false" >> $GITHUB_OUTPUT

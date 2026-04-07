@@ -1,7 +1,7 @@
 /**
  * Landing Page Configuration Types
  *
- * Used by the Admin UI (Manacore Web) and the Landing Builder Service
+ * Used by the Admin UI (Mana Web) and the Landing Builder Service
  * to configure and generate static Astro landing pages for organizations.
  */
 

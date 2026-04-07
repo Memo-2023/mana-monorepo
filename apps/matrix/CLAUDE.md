@@ -15,7 +15,7 @@ Manalink is a privacy-focused Matrix client built with SvelteKit. It connects to
 | Frontend | SvelteKit 2, Svelte 5 (runes), Tailwind CSS 4 |
 | Matrix SDK | matrix-js-sdk + matrix-sdk-crypto-wasm |
 | State Management | Svelte 5 runes ($state, $derived) |
-| Icons | @manacore/shared-icons (Phosphor) |
+| Icons | @mana/shared-icons (Phosphor) |
 | PWA | @vite-pwa/sveltekit + Workbox |
 | Date Handling | date-fns |
 

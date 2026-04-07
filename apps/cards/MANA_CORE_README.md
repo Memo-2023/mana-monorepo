@@ -1,4 +1,4 @@
-# Mana Core Integration Documentation
+# Mana Integration Documentation
 
 Complete documentation for integrating the `@mana-core/nestjs-integration` package into your NestJS application, based on the Storyteller project implementation.
 
@@ -19,7 +19,7 @@ Start here for a high-level understanding and quick reference.
 - Testing strategies
 - Troubleshooting common issues
 
-**Use this when**: You're implementing Mana Core for the first time or need detailed explanations.
+**Use this when**: You're implementing Mana for the first time or need detailed explanations.
 
 ### 3. **[Integration Checklist](./MANA_CORE_INTEGRATION_CHECKLIST.md)** - Step-by-Step Checklist
 ✅ **Actionable checklist** with checkboxes covering:
@@ -47,9 +47,9 @@ Start here for a high-level understanding and quick reference.
 
 ## 🚀 Quick Start
 
-### What is Mana Core?
+### What is Mana?
 
-Mana Core is a centralized authentication and credit management system that provides:
+Mana is a centralized authentication and credit management system that provides:
 - **Authentication**: Email/password, Google OAuth, Apple Sign-in
 - **JWT Token Management**: Automatic validation, refresh, and multi-device support
 - **Credit System**: Pre-flight validation, consumption tracking, and billing
@@ -88,7 +88,7 @@ npm install git+https://github.com/Memo-2023/mana-core-nestjs-package.git
 
 **Backend `.env`**:
 ```env
-MANA_SERVICE_URL=https://mana-core-middleware-111768794939.europe-west3.run.app
+MANA_SERVICE_URL=https://mana-middleware-111768794939.europe-west3.run.app
 APP_ID=your-app-id
 MANA_SUPABASE_SECRET_KEY=your-service-key
 NODE_ENV=development
@@ -111,7 +111,7 @@ import { ManaModule } from '@mana-core/nestjs-integration';
     ManaModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
-        manaServiceUrl: 'https://mana-core-middleware-111768794939.europe-west3.run.app',
+        manaServiceUrl: 'https://mana-middleware-111768794939.europe-west3.run.app',
         appId: '8d2f5ddb-e251-4b3b-8802-84022a7ac77f',
         serviceKey: configService.get('MANA_SUPABASE_SECRET_KEY'),
         debug: configService.get('NODE_ENV') === 'development',
@@ -324,9 +324,9 @@ Mobile App (React Native)
     ▼
 Backend (NestJS)
     │
-    │ 2. Forward to Mana Core
+    │ 2. Forward to Mana
     ▼
-Mana Core Service
+Mana Service
     │
     │ 3. Validate & Generate Tokens
     ▼
@@ -358,7 +358,7 @@ Mobile App
 
 ### Sign In
 
-**Backend** (Auto-provided by Mana Core):
+**Backend** (Auto-provided by Mana):
 ```
 POST /auth/signin
 {
@@ -516,7 +516,7 @@ MANA_CORE_README.md                    ← You are here (Quick start)
 
 | File | Purpose |
 |------|---------|
-| `backend/src/app.module.ts` | Mana Core module configuration |
+| `backend/src/app.module.ts` | Mana module configuration |
 | `backend/src/character/character.controller.ts` | AuthGuard + Credit usage example |
 | `backend/src/story/story.controller.ts` | Credit validation + consumption |
 | `backend/src/decorators/user.decorator.ts` | Custom @UserToken() for RLS |
@@ -533,8 +533,8 @@ MANA_CORE_README.md                    ← You are here (Quick start)
 
 ## 🔗 Resources
 
-- **Mana Core Package**: https://github.com/Memo-2023/mana-core-nestjs-package
-- **Mana Core Docs**: https://docs.mana-core.com
+- **Mana Package**: https://github.com/Memo-2023/mana-core-nestjs-package
+- **Mana Docs**: https://docs.mana-core.com
 - **NestJS Docs**: https://docs.nestjs.com
 - **Storyteller Source**: This repository
 
@@ -559,7 +559,7 @@ MANA_CORE_README.md                    ← You are here (Quick start)
 
 1. **Documentation**: Check all four documentation files
 2. **Code Examples**: Study Storyteller implementation
-3. **Mana Core Docs**: https://docs.mana-core.com
+3. **Mana Docs**: https://docs.mana-core.com
 4. **GitHub Issues**: https://github.com/Memo-2023/mana-core-nestjs-package/issues
 
 ### Contributing
@@ -573,7 +573,7 @@ If you find issues or improvements in this documentation:
 
 ## ✨ Summary
 
-This documentation provides everything you need to integrate Mana Core into your NestJS application:
+This documentation provides everything you need to integrate Mana into your NestJS application:
 
 - **Complete integration guide** with step-by-step instructions
 - **Actionable checklist** to track progress

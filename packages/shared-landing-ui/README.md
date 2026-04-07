@@ -1,11 +1,11 @@
-# @manacore/shared-landing-ui
+# @mana/shared-landing-ui
 
-Shared Astro components for landing pages across the Manacore monorepo.
+Shared Astro components for landing pages across the Mana monorepo.
 
 ## Installation
 
 ```bash
-pnpm add @manacore/shared-landing-ui
+pnpm add @mana/shared-landing-ui
 ```
 
 ## Usage
@@ -14,11 +14,11 @@ Import components directly from their paths:
 
 ```astro
 ---
-import Button from '@manacore/shared-landing-ui/atoms/Button.astro';
-import Card from '@manacore/shared-landing-ui/atoms/Card.astro';
-import HeroSection from '@manacore/shared-landing-ui/sections/HeroSection.astro';
-import FeatureSection from '@manacore/shared-landing-ui/sections/FeatureSection.astro';
-import FAQSection from '@manacore/shared-landing-ui/sections/FAQSection.astro';
+import Button from '@mana/shared-landing-ui/atoms/Button.astro';
+import Card from '@mana/shared-landing-ui/atoms/Card.astro';
+import HeroSection from '@mana/shared-landing-ui/sections/HeroSection.astro';
+import FeatureSection from '@mana/shared-landing-ui/sections/FeatureSection.astro';
+import FAQSection from '@mana/shared-landing-ui/sections/FAQSection.astro';
 ---
 ```
 
@@ -179,20 +179,20 @@ Use one of the pre-built theme CSS files for quick setup:
 
 ```css
 /* In your global CSS or layout */
-@import '@manacore/shared-landing-ui/themes/memoro';
+@import '@mana/shared-landing-ui/themes/memoro';
 /* OR */
-@import '@manacore/shared-landing-ui/themes/manacore';
+@import '@mana/shared-landing-ui/themes/mana';
 /* OR */
-@import '@manacore/shared-landing-ui/themes/maerchenzauber';
+@import '@mana/shared-landing-ui/themes/maerchenzauber';
 /* OR */
-@import '@manacore/shared-landing-ui/themes/cards';
+@import '@mana/shared-landing-ui/themes/cards';
 ```
 
 Or import in your Astro layout:
 
 ```astro
 ---
-import '@manacore/shared-landing-ui/themes/memoro';
+import '@mana/shared-landing-ui/themes/memoro';
 ---
 ```
 
@@ -202,14 +202,14 @@ import '@manacore/shared-landing-ui/themes/memoro';
 
 ```bash
 # In your landing app directory
-pnpm add @manacore/shared-landing-ui
+pnpm add @mana/shared-landing-ui
 ```
 
 Or add to package.json:
 ```json
 {
   "dependencies": {
-    "@manacore/shared-landing-ui": "workspace:*"
+    "@mana/shared-landing-ui": "workspace:*"
   }
 }
 ```
@@ -249,7 +249,7 @@ import HeroSection from '../components/sections/Hero.astro';
 **After (shared component):**
 ```astro
 ---
-import HeroSection from '@manacore/shared-landing-ui/sections/HeroSection.astro';
+import HeroSection from '@mana/shared-landing-ui/sections/HeroSection.astro';
 ---
 <HeroSection
   title="Your Title"
@@ -287,7 +287,7 @@ Check these demo pages for working examples:
 
 - `maerchenzauber/apps/landing/src/pages/shared-demo.astro`
 - `memoro/apps/landing/src/pages/de/shared-demo.astro`
-- `manacore/apps/landing/src/pages/de/shared-demo.astro`
+- `mana/apps/landing/src/pages/de/shared-demo.astro`
 
 ## Development
 
@@ -318,7 +318,7 @@ src/
 ├── themes/          # Pre-built CSS themes
 │   ├── index.css    # Default theme
 │   ├── memoro.css
-│   ├── manacore.css
+│   ├── mana.css
 │   ├── maerchenzauber.css
 │   └── cards.css
 └── utils/

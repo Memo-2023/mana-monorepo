@@ -1,6 +1,6 @@
 # Central Help System
 
-Das zentrale Help-System bietet eine einheitliche Hilfeseite für alle Manacore-Apps. Es unterstützt mehrsprachige Inhalte, Volltextsuche, und die Kombination von zentralen und app-spezifischen Inhalten.
+Das zentrale Help-System bietet eine einheitliche Hilfeseite für alle Mana-Apps. Es unterstützt mehrsprachige Inhalte, Volltextsuche, und die Kombination von zentralen und app-spezifischen Inhalten.
 
 ## Architektur
 
@@ -32,10 +32,10 @@ Das zentrale Help-System bietet eine einheitliche Hilfeseite für alle Manacore-
 
 | Package | Beschreibung |
 |---------|--------------|
-| `@manacore/shared-help-types` | TypeScript-Typen und Zod-Schemas |
-| `@manacore/shared-help-content` | Content-Loader, Parser, Merger, Suche |
-| `@manacore/shared-help-ui` | Svelte 5 UI-Komponenten |
-| `@manacore/shared-help-mobile` | React Native Komponenten |
+| `@mana/shared-help-types` | TypeScript-Typen und Zod-Schemas |
+| `@mana/shared-help-content` | Content-Loader, Parser, Merger, Suche |
+| `@mana/shared-help-ui` | Svelte 5 UI-Komponenten |
+| `@mana/shared-help-mobile` | React Native Komponenten |
 
 ## Content-Typen
 
@@ -178,7 +178,7 @@ interface HelpContent {
 Der Merger kombiniert zentrale und app-spezifische Inhalte:
 
 ```typescript
-import { mergeContent, createEmptyContent } from '@manacore/shared-help-content';
+import { mergeContent, createEmptyContent } from '@mana/shared-help-content';
 
 // Zentrale Inhalte (für alle Apps)
 const centralContent: HelpContent = {
@@ -220,7 +220,7 @@ Inhalte werden automatisch gefiltert nach:
 ### Such-Index erstellen
 
 ```typescript
-import { buildSearchIndex, search, createSearcher } from '@manacore/shared-help-content';
+import { buildSearchIndex, search, createSearcher } from '@mana/shared-help-content';
 
 // Index erstellen
 const index = buildSearchIndex(content, {
@@ -261,7 +261,7 @@ Vollständige Hilfeseite mit allen Sektionen:
 
 ```svelte
 <script>
-  import { HelpPage } from '@manacore/shared-help-ui';
+  import { HelpPage } from '@mana/shared-help-ui';
   import { helpContent, translations } from '$lib/help';
 </script>
 
@@ -296,7 +296,7 @@ Vollständige Hilfeseite mit allen Sektionen:
     ChangelogSection,
     ContactSection,
     HelpSearch,
-  } from '@manacore/shared-help-ui';
+  } from '@mana/shared-help-ui';
 </script>
 
 <!-- FAQ mit Kategorien -->
@@ -457,7 +457,7 @@ const translations: HelpPageTranslations = {
 
 ## Dateien
 
-### @manacore/shared-help-types
+### @mana/shared-help-types
 
 | Datei | Beschreibung |
 |-------|--------------|
@@ -465,7 +465,7 @@ const translations: HelpPageTranslations = {
 | `src/schemas.ts` | Zod-Validierungsschemas |
 | `src/search.ts` | Such-bezogene Typen |
 
-### @manacore/shared-help-content
+### @mana/shared-help-content
 
 | Datei | Beschreibung |
 |-------|--------------|
@@ -474,7 +474,7 @@ const translations: HelpPageTranslations = {
 | `src/merger.ts` | Content-Merger (zentral + app-spezifisch) |
 | `src/search.ts` | Volltextsuche mit Fuse.js |
 
-### @manacore/shared-help-ui
+### @mana/shared-help-ui
 
 | Datei | Beschreibung |
 |-------|--------------|
@@ -497,9 +497,9 @@ const translations: HelpPageTranslations = {
 ```json
 {
   "dependencies": {
-    "@manacore/shared-help-types": "workspace:*",
-    "@manacore/shared-help-content": "workspace:*",
-    "@manacore/shared-help-ui": "workspace:*"
+    "@mana/shared-help-types": "workspace:*",
+    "@mana/shared-help-content": "workspace:*",
+    "@mana/shared-help-ui": "workspace:*"
   }
 }
 ```
@@ -508,7 +508,7 @@ const translations: HelpPageTranslations = {
 
 ```typescript
 // src/lib/help/content.ts
-import type { HelpContent } from '@manacore/shared-help-types';
+import type { HelpContent } from '@mana/shared-help-types';
 
 export const appHelpContent: Partial<HelpContent> = {
   faq: [
@@ -543,8 +543,8 @@ export const appHelpContent: Partial<HelpContent> = {
 ```svelte
 <!-- src/routes/(app)/help/+page.svelte -->
 <script lang="ts">
-  import { HelpPage } from '@manacore/shared-help-ui';
-  import { mergeContent } from '@manacore/shared-help-content';
+  import { HelpPage } from '@mana/shared-help-ui';
+  import { mergeContent } from '@mana/shared-help-content';
   import { centralContent } from '$lib/help/central';
   import { appHelpContent } from '$lib/help/content';
   import { translations } from '$lib/help/translations';

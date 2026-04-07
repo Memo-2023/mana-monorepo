@@ -31,7 +31,7 @@ The Memoro app uses a multi-platform analytics system with **PostHog** for mobil
 
 ### Umami (Web)
 - **Website ID**: Set in `EXPO_PUBLIC_UMAMI_WEBSITE_ID`
-- **Script URL**: `https://umami.manacore.ai/script.js`
+- **Script URL**: `https://umami.mana.how/script.js`
 
 ## Tracked Events
 

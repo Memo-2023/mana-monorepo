@@ -36,8 +36,8 @@ Diese Dokumentation beschreibt Services, die die bestehende Infrastruktur sinnvo
 │  └── Cloudflare      Tunnel für öffentliche Erreichbarkeit              │
 ├─────────────────────────────────────────────────────────────────────────┤
 │  AUTH & CORE                                                            │
-│  ├── mana-core-auth  Zentraler Auth-Service (Better Auth + EdDSA JWT)   │
-│  └── manacore-web    Dashboard für alle Apps                            │
+│  ├── mana-auth  Zentraler Auth-Service (Better Auth + EdDSA JWT)   │
+│  └── mana-web    Dashboard für alle Apps                            │
 ├─────────────────────────────────────────────────────────────────────────┤
 │  PRODUKTIVITÄTS-APPS (je Backend + Web)                                 │
 │  ├── Chat            AI-Chat mit verschiedenen Modellen                 │
@@ -137,7 +137,7 @@ MIT BACKUP:
 services:
   backup:
     image: mazzolino/restic:latest
-    container_name: manacore-backup
+    container_name: mana-backup
     hostname: macmini-backup
     environment:
       # Backup-Ziel (Hetzner Storage Box)
@@ -170,7 +170,7 @@ services:
 ```bash
 #!/bin/bash
 # Vor dem Backup: Konsistenten DB-Dump erstellen
-docker exec manacore-postgres pg_dumpall -U postgres > /backup/postgres_dump.sql
+docker exec mana-postgres pg_dumpall -U postgres > /backup/postgres_dump.sql
 ```
 
 **Kosten:**
@@ -218,10 +218,10 @@ docker exec manacore-postgres pg_dumpall -U postgres > /backup/postgres_dump.sql
 
 ```bash
 # Fehler in der App? Du musst jeden Container einzeln durchsuchen:
-docker logs manacore-chat-backend | grep error
-docker logs manacore-todo-backend | grep error
-docker logs manacore-auth | grep error
-docker logs manacore-calendar-backend | grep error
+docker logs mana-chat-backend | grep error
+docker logs mana-todo-backend | grep error
+docker logs mana-auth | grep error
+docker logs mana-calendar-backend | grep error
 # ... 15+ weitere Container
 ```
 
@@ -251,7 +251,7 @@ Grafana Query: {job="docker"} |= "error" | json | level="error"
 services:
   loki:
     image: grafana/loki:3.0.0
-    container_name: manacore-loki
+    container_name: mana-loki
     ports:
       - "3100:3100"
     volumes:
@@ -262,7 +262,7 @@ services:
 
   promtail:
     image: grafana/promtail:3.0.0
-    container_name: manacore-promtail
+    container_name: mana-promtail
     volumes:
       - ./promtail/config.yaml:/etc/promtail/config.yaml
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -407,7 +407,7 @@ docker run -d \
 services:
   uptime-kuma:
     image: louislam/uptime-kuma:1
-    container_name: manacore-uptime-kuma
+    container_name: mana-uptime-kuma
     ports:
       - "3099:3001"
     volumes:
@@ -492,7 +492,7 @@ MIT REVERSE PROXY:
 services:
   traefik:
     image: traefik:v3.0
-    container_name: manacore-traefik
+    container_name: mana-traefik
     command:
       - "--api.dashboard=true"
       - "--providers.docker=true"
@@ -535,7 +535,7 @@ chat.mana.how {
 }
 
 auth.mana.how {
-    reverse_proxy mana-core-auth:3001
+    reverse_proxy mana-auth:3001
 }
 
 api.chat.mana.how {
@@ -620,7 +620,7 @@ MIT VAULT:
 services:
   vault:
     image: hashicorp/vault:1.15
-    container_name: manacore-vault
+    container_name: mana-vault
     ports:
       - "8200:8200"
     environment:
@@ -638,7 +638,7 @@ services:
 services:
   infisical:
     image: infisical/infisical:latest
-    container_name: manacore-infisical
+    container_name: mana-infisical
     ports:
       - "8080:8080"
     environment:
@@ -719,7 +719,7 @@ Ein **API Gateway** ist ein zentraler Eintrittspunkt für alle API-Anfragen. Es 
 services:
   kong:
     image: kong:3.5
-    container_name: manacore-kong
+    container_name: mana-kong
     environment:
       KONG_DATABASE: "off"
       KONG_DECLARATIVE_CONFIG: /etc/kong/kong.yml
@@ -784,9 +784,9 @@ Ein **CI/CD Runner** führt Build- und Deploy-Prozesse aus. Statt auf GitHub's S
 services:
   github-runner:
     image: myoung34/github-runner:latest
-    container_name: manacore-github-runner
+    container_name: mana-github-runner
     environment:
-      REPO_URL: https://github.com/your-org/manacore-monorepo
+      REPO_URL: https://github.com/your-org/mana-monorepo
       RUNNER_TOKEN: ${GITHUB_RUNNER_TOKEN}
       RUNNER_NAME: macmini-runner
     volumes:
@@ -814,7 +814,7 @@ Eine **Container Registry** speichert Docker Images. Statt von Docker Hub zu pul
 services:
   registry:
     image: registry:2
-    container_name: manacore-registry
+    container_name: mana-registry
     ports:
       - "5000:5000"
     volumes:
@@ -842,7 +842,7 @@ services:
 services:
   whisper:
     image: onerahmet/openai-whisper-asr-webservice:latest
-    container_name: manacore-whisper
+    container_name: mana-whisper
     ports:
       - "9000:9000"
     environment:

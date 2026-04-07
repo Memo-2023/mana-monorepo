@@ -1,5 +1,5 @@
 /**
- * Shared types for Manacore monorepo
+ * Shared types for Mana monorepo
  *
  * This package contains common TypeScript types used across all projects.
  */

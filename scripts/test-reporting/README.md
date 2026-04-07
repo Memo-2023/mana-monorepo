@@ -129,7 +129,7 @@ node format-metrics.js ./test-results/metrics.json
     "branches": { "total": 400, "covered": 340, "pct": 85 }
   },
   "suites": {
-    "mana-core-auth": { /* same structure */ },
+    "mana-auth": { /* same structure */ },
     "chat-backend": { /* same structure */ }
   }
 }
@@ -164,7 +164,7 @@ node format-metrics.js ./test-results/metrics.json
     "suite": "integration/auth-flow.spec.ts"
   },
   "suiteMetrics": {
-    "mana-core-auth": {
+    "mana-auth": {
       "tests": 120,
       "duration": 15000,
       "slowestTest": { /* ... */ }
@@ -187,8 +187,8 @@ To track additional metrics:
 
 ```bash
 # Create mock test results
-mkdir -p test-data/coverage-mana-core-auth
-echo '{"total":{"lines":{"total":100,"covered":85,"pct":85}}}' > test-data/coverage-mana-core-auth/coverage-summary.json
+mkdir -p test-data/coverage-mana-auth
+echo '{"total":{"lines":{"total":100,"covered":85,"pct":85}}}' > test-data/coverage-mana-auth/coverage-summary.json
 
 # Run aggregation
 node aggregate-coverage.js test-data aggregated-output

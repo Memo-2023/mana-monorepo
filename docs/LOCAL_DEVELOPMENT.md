@@ -188,7 +188,7 @@ If you see `database "xxx" does not exist`:
 pnpm setup:db:chat  # or whichever service
 
 # Option 2: Create manually
-PGPASSWORD=devpassword psql -h localhost -U manacore -d postgres -c "CREATE DATABASE chat;"
+PGPASSWORD=devpassword psql -h localhost -U mana -d postgres -c "CREATE DATABASE chat;"
 ```
 
 ### Schema out of date
@@ -277,7 +277,7 @@ Create `apps/newproject/apps/server/` with:
 1. **Add database to Docker init** (`docker/init-db/01-create-databases.sql`):
    ```sql
    CREATE DATABASE IF NOT EXISTS newproject;
-   GRANT ALL PRIVILEGES ON DATABASE newproject TO manacore;
+   GRANT ALL PRIVILEGES ON DATABASE newproject TO mana;
    ```
 
 2. **Add to setup script** (`scripts/setup-databases.sh`):
@@ -290,7 +290,7 @@ Create `apps/newproject/apps/server/` with:
 
 3. **Add DATABASE_URL to `.env.development`**:
    ```env
-   NEWPROJECT_DATABASE_URL=postgresql://manacore:devpassword@localhost:5432/newproject
+   NEWPROJECT_DATABASE_URL=postgresql://mana:devpassword@localhost:5432/newproject
    ```
 
 4. **Update `scripts/generate-env.mjs`** to generate the server `.env` file.

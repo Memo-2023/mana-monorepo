@@ -63,7 +63,7 @@ CityCorners ist ein **Stadtführer** mit interaktiven Leaflet-Karten, Marker-Clu
 
 ## Database (55/100)
 
-- IndexedDB via Dexie.js (@manacore/local-store)
+- IndexedDB via Dexie.js (@mana/local-store)
 - 3 Collections: cities (slug/country/name), locations (cityId/category/name), favorites (locationId)
 - Live Queries mit Dexie liveQuery
 - Sync über mana-sync WebSocket

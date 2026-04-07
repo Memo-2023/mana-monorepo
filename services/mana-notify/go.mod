@@ -1,10 +1,10 @@
-module github.com/manacore/mana-notify
+module github.com/mana/mana-notify
 
 go 1.25.0
 
 require (
 	github.com/jackc/pgx/v5 v5.9.1
-	github.com/manacore/shared-go v0.0.0
+	github.com/mana/shared-go v0.0.0
 	github.com/prometheus/client_golang v1.22.0
 	github.com/rs/cors v1.11.1
 )
@@ -26,4 +26,4 @@ require (
 	google.golang.org/protobuf v1.36.5 // indirect
 )
 
-replace github.com/manacore/shared-go => ../../packages/shared-go
+replace github.com/mana/shared-go => ../../packages/shared-go

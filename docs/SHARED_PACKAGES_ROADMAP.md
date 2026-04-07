@@ -4,20 +4,20 @@ This document outlines the plan to unify common code across all web apps in the 
 
 ## Current Shared Packages
 
-- [x] `@manacore/shared-icons` - Unified Phosphor Icons for all web apps
-- [x] `@manacore/shared-ui` - Unified UI Components (Text, Button, Badge, Toggle, Input, Modal, Card, Navigation, Forms)
-- [x] `@manacore/shared-auth` - Unified Auth Logic (Supabase client, token management)
-- [x] `@manacore/shared-auth-ui` - Unified Auth UI (LoginPage, RegisterPage, OAuth buttons)
-- [x] `@manacore/shared-tailwind` - Unified Tailwind Config (HSL colors, preset, themes.css)
-- [x] `@manacore/shared-theme` - Unified Theme Store (Svelte 5, 4 variants, light/dark/system)
-- [x] `@manacore/shared-theme-ui` - Theme UI Components (ThemeToggle, ThemeSelector)
-- [x] `@manacore/shared-utils` - Unified Utilities (formatting, validation, async, date, keyboard)
-- [x] `@manacore/shared-types` - Unified TypeScript Types
-- [x] `@manacore/shared-i18n` - Unified i18n (languages, locale detection, translations)
-- [x] `@manacore/shared-config` - Unified Config (env validation)
-- [x] `@manacore/shared-branding` - **NEW** Unified App Branding (logos, colors, app config)
-- [x] `@manacore/shared-subscription-types` - Subscription Type Definitions
-- [x] `@manacore/shared-subscription-ui` - Subscription UI Components
+- [x] `@mana/shared-icons` - Unified Phosphor Icons for all web apps
+- [x] `@mana/shared-ui` - Unified UI Components (Text, Button, Badge, Toggle, Input, Modal, Card, Navigation, Forms)
+- [x] `@mana/shared-auth` - Unified Auth Logic (Supabase client, token management)
+- [x] `@mana/shared-auth-ui` - Unified Auth UI (LoginPage, RegisterPage, OAuth buttons)
+- [x] `@mana/shared-tailwind` - Unified Tailwind Config (HSL colors, preset, themes.css)
+- [x] `@mana/shared-theme` - Unified Theme Store (Svelte 5, 4 variants, light/dark/system)
+- [x] `@mana/shared-theme-ui` - Theme UI Components (ThemeToggle, ThemeSelector)
+- [x] `@mana/shared-utils` - Unified Utilities (formatting, validation, async, date, keyboard)
+- [x] `@mana/shared-types` - Unified TypeScript Types
+- [x] `@mana/shared-i18n` - Unified i18n (languages, locale detection, translations)
+- [x] `@mana/shared-config` - Unified Config (env validation)
+- [x] `@mana/shared-branding` - **NEW** Unified App Branding (logos, colors, app config)
+- [x] `@mana/shared-subscription-types` - Subscription Type Definitions
+- [x] `@mana/shared-subscription-ui` - Subscription UI Components
 
 ---
 
@@ -27,14 +27,14 @@ This document outlines the plan to unify common code across all web apps in the 
 
 All web apps now use the shared packages consistently:
 
-**Logo Components** - Migrated to `@manacore/shared-branding`:
+**Logo Components** - Migrated to `@mana/shared-branding`:
 
 - `memoro/apps/web/src/lib/components/MemoroLogo.svelte` → uses `AppLogo`
 - `cards/apps/web/src/lib/components/CardsLogo.svelte` → uses `AppLogo`
-- `manacore/apps/web/src/lib/components/ManaLogo.svelte` → uses `AppLogo`
+- `mana/apps/web/src/lib/components/ManaLogo.svelte` → uses `AppLogo`
 - `maerchenzauber/apps/web/src/lib/components/StorytellerLogo.svelte` → uses `AppLogo`
 
-**Formatter Functions** - Migrated to `@manacore/shared-utils`:
+**Formatter Functions** - Migrated to `@mana/shared-utils`:
 
 - `memoro/apps/web/src/lib/components/memo/AdditionalRecordings.svelte` → uses `formatDurationFromMs`, `formatFileSize`
 - `memoro/apps/web/src/lib/components/RecordingButton.svelte` → uses `formatDuration`
@@ -46,7 +46,7 @@ All web apps now use the shared packages consistently:
 
 ## Planned Shared Packages
 
-### 1. Shared UI Components (`@manacore/shared-ui`)
+### 1. Shared UI Components (`@mana/shared-ui`)
 
 **Status**: Done
 **Priority**: High
@@ -73,7 +73,7 @@ All web apps now use the shared packages consistently:
 
 ---
 
-### 2. Shared Auth (`@manacore/shared-auth`)
+### 2. Shared Auth (`@mana/shared-auth`)
 
 **Status**: Done
 **Priority**: High
@@ -95,7 +95,7 @@ All web apps now use the shared packages consistently:
 
 ---
 
-### 3. Shared Tailwind Config (`@manacore/shared-tailwind`)
+### 3. Shared Tailwind Config (`@mana/shared-tailwind`)
 
 **Status**: Done
 **Priority**: High
@@ -132,7 +132,7 @@ packages/shared-tailwind/
 
 ---
 
-### 4. Shared Utilities (`@manacore/shared-utils`)
+### 4. Shared Utilities (`@mana/shared-utils`)
 
 **Status**: Done
 **Priority**: Medium
@@ -148,7 +148,7 @@ packages/shared-tailwind/
 
 ---
 
-### 5. Shared Types (`@manacore/shared-types`)
+### 5. Shared Types (`@mana/shared-types`)
 
 **Status**: Planned
 **Priority**: Medium
@@ -166,7 +166,7 @@ packages/shared-tailwind/
 
 ---
 
-### 6. Shared i18n (`@manacore/shared-i18n`)
+### 6. Shared i18n (`@mana/shared-i18n`)
 
 **Status**: Done
 **Priority**: Medium
@@ -202,7 +202,7 @@ packages/shared-i18n/
 
 ---
 
-### 7. Shared Config (`@manacore/shared-config`)
+### 7. Shared Config (`@mana/shared-config`)
 
 **Status**: Planned
 **Priority**: Low
@@ -220,21 +220,21 @@ packages/shared-i18n/
 ## Implementation Order
 
 1. **Phase 1** (Completed)
-   - [x] `@manacore/shared-icons`
-   - [x] `@manacore/shared-ui`
+   - [x] `@mana/shared-icons`
+   - [x] `@mana/shared-ui`
 
 2. **Phase 2** (Completed)
-   - [x] `@manacore/shared-auth`
-   - [x] `@manacore/shared-auth-ui`
-   - [x] `@manacore/shared-tailwind`
+   - [x] `@mana/shared-auth`
+   - [x] `@mana/shared-auth-ui`
+   - [x] `@mana/shared-tailwind`
 
 3. **Phase 3** (Completed)
-   - [x] `@manacore/shared-utils`
-   - [x] `@manacore/shared-types`
+   - [x] `@mana/shared-utils`
+   - [x] `@mana/shared-types`
 
 4. **Phase 4** (Completed)
-   - [x] `@manacore/shared-i18n`
-   - [x] `@manacore/shared-config`
+   - [x] `@mana/shared-i18n`
+   - [x] `@mana/shared-config`
 
 ---
 
@@ -256,7 +256,7 @@ packages/shared-{name}/
 
 ```json
 {
-	"name": "@manacore/shared-{name}",
+	"name": "@mana/shared-{name}",
 	"version": "0.1.0",
 	"private": true,
 	"type": "module",
@@ -283,7 +283,7 @@ packages/shared-{name}/
 
 ## Package Details
 
-### `@manacore/shared-branding`
+### `@mana/shared-branding`
 
 Centralized branding configuration for all Mana ecosystem apps.
 
@@ -299,14 +299,14 @@ Centralized branding configuration for all Mana ecosystem apps.
 
 ```svelte
 <script>
-	import { AppLogo } from '@manacore/shared-branding';
+	import { AppLogo } from '@mana/shared-branding';
 </script>
 
 <AppLogo app="memoro" size={32} />
-<AppLogo app="manacore" size={55} color="#fff" />
+<AppLogo app="mana" size={55} color="#fff" />
 ```
 
-### `@manacore/shared-utils/format`
+### `@mana/shared-utils/format`
 
 Duration and formatting utilities.
 

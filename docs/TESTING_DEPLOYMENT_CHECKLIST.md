@@ -23,7 +23,7 @@ Pre-deployment checklist to ensure the automated testing system is ready for pro
   ```
 - [ ] Scripts work locally:
   ```bash
-  ./scripts/run-tests-with-coverage.sh mana-core-auth
+  ./scripts/run-tests-with-coverage.sh mana-auth
   ./scripts/test-data/seed-test-data.sh auth
   ./scripts/test-data/cleanup-test-data.sh auth
   ```

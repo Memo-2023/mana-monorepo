@@ -19,7 +19,7 @@ Modern SvelteKit web application for Mana credit/mana management system.
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS 3.x
 - **Backend**: Supabase (PostgreSQL + Auth)
-- **Middleware**: Mana Core Middleware API
+- **Middleware**: Mana Middleware API
 - **Testing**: Vitest + Playwright
 - **Deployment**: Vercel/Netlify ready
 
@@ -29,7 +29,7 @@ Modern SvelteKit web application for Mana credit/mana management system.
 
 - Node.js 20+ and pnpm
 - Supabase account and project
-- Access to Mana Core Middleware
+- Access to Mana Middleware
 
 ### Installation
 
@@ -105,7 +105,7 @@ src/
 
 - `PUBLIC_SUPABASE_URL` - Supabase project URL
 - `PUBLIC_SUPABASE_ANON_KEY` - Supabase anonymous key
-- `PUBLIC_MIDDLEWARE_URL` - Mana Core Middleware URL
+- `PUBLIC_MIDDLEWARE_URL` - Mana Middleware URL
 - `PUBLIC_APP_NAME` - Application name
 
 ### Private Variables (server-only)
@@ -116,7 +116,7 @@ Add any private API keys or secrets here.
 
 ### Netlify (Production Setup)
 
-The app is currently deployed to **https://app.manacore.ai** using Netlify.
+The app is currently deployed to **https://app.mana.how** using Netlify.
 
 #### Prerequisites
 
@@ -150,7 +150,7 @@ Ensure your `.env` file exists with the following variables:
 ```bash
 PUBLIC_SUPABASE_URL=your_supabase_url
 PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-MIDDLEWARE_URL=https://mana-core-middleware-111768794939.europe-west3.run.app
+MIDDLEWARE_URL=https://mana-middleware-111768794939.europe-west3.run.app
 ```
 
 **Important**: Set these same environment variables in Netlify Dashboard → Site Settings → Environment Variables for production builds.
@@ -164,8 +164,8 @@ pnpm install
 # 2. Build for production
 pnpm build
 
-# 3. Deploy to production (site: manacore)
-netlify deploy --prod --site manacore --dir build
+# 3. Deploy to production (site: mana)
+netlify deploy --prod --site mana --dir build
 ```
 
 The build process creates:
@@ -195,10 +195,10 @@ vercel
 
 ```bash
 # Build image
-docker build -t manacore-web .
+docker build -t mana-web .
 
 # Run container
-docker run -p 3000:3000 manacore-web
+docker run -p 3000:3000 mana-web
 ```
 
 ## Contributing

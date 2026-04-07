@@ -21,7 +21,7 @@ Eine vollständige Kalender-Anwendung mit persönlichen und geteilten Kalendern,
 docker compose -f docker-compose.dev.yml up -d postgres
 
 # 2. Datenbank erstellen
-PGPASSWORD=devpassword psql -h localhost -U manacore -d postgres -c "CREATE DATABASE calendar;"
+PGPASSWORD=devpassword psql -h localhost -U mana -d postgres -c "CREATE DATABASE calendar;"
 
 # 3. Schema pushen
 pnpm calendar:db:push
@@ -44,7 +44,7 @@ pnpm dev:calendar:app
 - **Backend**: NestJS, Drizzle ORM, PostgreSQL
 - **Web**: SvelteKit, Svelte 5, Tailwind CSS
 - **Landing**: Astro, Tailwind CSS
-- **Auth**: Mana Core Auth (JWT)
+- **Auth**: Mana Auth (JWT)
 
 ## Dokumentation
 
@@ -76,4 +76,4 @@ pnpm calendar:db:studio      # Drizzle Studio öffnen
 
 ## Lizenz
 
-Proprietär - Manacore
+Proprietär - Mana

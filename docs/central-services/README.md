@@ -1,6 +1,6 @@
 # Central Services
 
-Dieses Verzeichnis dokumentiert zentrale Services, die von allen Manacore-Apps gemeinsam genutzt werden. Diese Services laufen in `mana-core-auth` und bieten einheitliche APIs.
+Dieses Verzeichnis dokumentiert zentrale Services, die von allen Mana-Apps gemeinsam genutzt werden. Diese Services laufen in `mana-auth` und bieten einheitliche APIs.
 
 ## Übersicht
 
@@ -16,7 +16,7 @@ Dieses Verzeichnis dokumentiert zentrale Services, die von allen Manacore-Apps g
 
 ### Zentralisierung
 
-Bestimmte Daten und Funktionen werden zentral in `mana-core-auth` verwaltet:
+Bestimmte Daten und Funktionen werden zentral in `mana-auth` verwaltet:
 
 - **User-bezogen:** Jeder Service speichert Daten pro User (`userId`)
 - **App-übergreifend:** Daten sind in allen Apps verfügbar
@@ -24,10 +24,10 @@ Bestimmte Daten und Funktionen werden zentral in `mana-core-auth` verwaltet:
 
 ### Soft References
 
-Da die Apps ihre eigenen Datenbanken haben, können keine Foreign Keys zu mana-core-auth erstellt werden:
+Da die Apps ihre eigenen Datenbanken haben, können keine Foreign Keys zu mana-auth erstellt werden:
 
 ```
-Todo-DB                      mana-core-auth-DB
+Todo-DB                      mana-auth-DB
 ┌─────────────────┐         ┌─────────────────┐
 │ task_to_tags    │         │ tags            │
 │                 │         │                 │
@@ -44,7 +44,7 @@ Für jeden zentralen Service gibt es ein entsprechendes Client-Package:
 
 | Service | Package |
 |---------|---------|
-| Tags | `@manacore/shared-tags` |
+| Tags | `@mana/shared-tags` |
 
 Diese Packages enthalten:
 - TypeScript Types
@@ -66,7 +66,7 @@ pnpm dev:auth
 ### Datenbank-Schema pushen
 
 ```bash
-cd services/mana-core-auth
+cd services/mana-auth
 pnpm db:push
 ```
 
@@ -74,19 +74,19 @@ pnpm db:push
 
 | Package | Beschreibung |
 |---------|--------------|
-| `@manacore/shared-tags` | Tags Client für zentrale Tags API |
-| `@manacore/shared-theme` | Theme Store, A11y Store, User Settings |
-| `@manacore/shared-theme-ui` | Svelte UI-Komponenten für Theming |
-| `@manacore/shared-help-types` | TypeScript-Typen für Help-Inhalte |
-| `@manacore/shared-help-content` | Content-Loader, Parser, Merger, Suche |
-| `@manacore/shared-help-ui` | Svelte UI-Komponenten für Hilfeseite |
-| `@manacore/shared-help-mobile` | React Native Komponenten für Hilfe |
-| `@manacore/shared-splitscreen` | Split-Screen Container, Store, Komponenten |
+| `@mana/shared-tags` | Tags Client für zentrale Tags API |
+| `@mana/shared-theme` | Theme Store, A11y Store, User Settings |
+| `@mana/shared-theme-ui` | Svelte UI-Komponenten für Theming |
+| `@mana/shared-help-types` | TypeScript-Typen für Help-Inhalte |
+| `@mana/shared-help-content` | Content-Loader, Parser, Merger, Suche |
+| `@mana/shared-help-ui` | Svelte UI-Komponenten für Hilfeseite |
+| `@mana/shared-help-mobile` | React Native Komponenten für Hilfe |
+| `@mana/shared-splitscreen` | Split-Screen Container, Store, Komponenten |
 
 ## Hinzufügen neuer zentraler Services
 
-1. **Schema erstellen:** `services/mana-core-auth/src/db/schema/<name>.schema.ts`
-2. **Module erstellen:** `services/mana-core-auth/src/<name>/`
+1. **Schema erstellen:** `services/mana-auth/src/db/schema/<name>.schema.ts`
+2. **Module erstellen:** `services/mana-auth/src/<name>/`
 3. **In app.module.ts registrieren**
 4. **Shared Package erstellen:** `packages/shared-<name>/`
 5. **Dokumentation schreiben:** `docs/central-services/<NAME>.md`

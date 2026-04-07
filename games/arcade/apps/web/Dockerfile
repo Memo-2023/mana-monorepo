@@ -1,8 +1,8 @@
 # syntax=docker/dockerfile:1
 FROM sveltekit-base:local AS builder
 
-ARG PUBLIC_MANA_CORE_AUTH_URL=http://mana-auth:3001
-ENV PUBLIC_MANA_CORE_AUTH_URL=$PUBLIC_MANA_CORE_AUTH_URL
+ARG PUBLIC_MANA_AUTH_URL=http://mana-auth:3001
+ENV PUBLIC_MANA_AUTH_URL=$PUBLIC_MANA_AUTH_URL
 
 COPY games/arcade/apps/web ./games/arcade/apps/web
 

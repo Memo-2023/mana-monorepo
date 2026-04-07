@@ -1,7 +1,14 @@
 <script lang="ts">
 	import type { CalendarEvent } from '../types';
 	import { eventsStore } from '../stores/events.svelte';
-	import { CheckSquare, Clock, Timer, Lightning, CheckCircle, ArrowsClockwise } from '@mana/shared-icons';
+	import {
+		CheckSquare,
+		Clock,
+		Timer,
+		Lightning,
+		CheckCircle,
+		ArrowsClockwise,
+	} from '@mana/shared-icons';
 	import { getIconComponent } from '@mana/shared-icons';
 
 	interface Props {

@@ -1,12 +1,12 @@
 # Central Command Bar
 
-Die zentrale Command Bar bietet eine einheitliche Schnellsuche und Navigation über alle Manacore-Apps hinweg. Sie wird mit `Cmd/Ctrl+K` aktiviert und bietet Suche, Quick Actions und Tastatur-Navigation.
+Die zentrale Command Bar bietet eine einheitliche Schnellsuche und Navigation über alle Mana-Apps hinweg. Sie wird mit `Cmd/Ctrl+K` aktiviert und bietet Suche, Quick Actions und Tastatur-Navigation.
 
 ## Architektur
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                 @manacore/shared-ui                         │
+│                 @mana/shared-ui                         │
 │  ┌─────────────────────────────────────────────────────┐   │
 │  │  CommandBar.svelte                                   │   │
 │  │  - Suche mit Debounce (150ms)                       │   │
@@ -30,7 +30,7 @@ Die zentrale Command Bar bietet eine einheitliche Schnellsuche und Navigation ü
 
 | Package | Beschreibung |
 |---------|--------------|
-| `@manacore/shared-ui` | CommandBar Svelte-Komponente + TypeScript-Typen |
+| `@mana/shared-ui` | CommandBar Svelte-Komponente + TypeScript-Typen |
 
 ## Keyboard Shortcut
 
@@ -111,8 +111,8 @@ interface Props {
 ```svelte
 <script lang="ts">
   import { goto } from '$app/navigation';
-  import { CommandBar } from '@manacore/shared-ui';
-  import type { CommandBarItem, QuickAction } from '@manacore/shared-ui';
+  import { CommandBar } from '@mana/shared-ui';
+  import type { CommandBarItem, QuickAction } from '@mana/shared-ui';
 
   let commandBarOpen = $state(false);
 
@@ -324,7 +324,7 @@ Typischerweise wird die CommandBar im App-Layout integriert:
 ```svelte
 <!-- src/routes/(app)/+layout.svelte -->
 <script lang="ts">
-  import { CommandBar } from '@manacore/shared-ui';
+  import { CommandBar } from '@mana/shared-ui';
 
   let commandBarOpen = $state(false);
 
@@ -358,7 +358,7 @@ Typischerweise wird die CommandBar im App-Layout integriert:
 
 ## Dateien
 
-### @manacore/shared-ui
+### @mana/shared-ui
 
 | Datei | Beschreibung |
 |-------|--------------|

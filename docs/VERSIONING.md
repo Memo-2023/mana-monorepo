@@ -52,7 +52,7 @@ All apps follow `MAJOR.MINOR.PATCH`:
 
 | Service | Version | Status |
 |---------|---------|--------|
-| mana-core-auth | 1.0.0 | Production |
+| mana-auth | 1.0.0 | Production |
 | mana-search | 0.1.0 | Early Beta |
 | mana-crawler | 0.1.0 | Early Beta |
 | mana-llm | 0.0.1 | Alpha |

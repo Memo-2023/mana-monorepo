@@ -2,9 +2,9 @@
 FROM sveltekit-base:local AS builder
 
 ARG PUBLIC_BACKEND_URL=http://mana-auth
-ARG PUBLIC_MANA_CORE_AUTH_URL=http://mana-auth:3001
+ARG PUBLIC_MANA_AUTH_URL=http://mana-auth:3001
 ENV PUBLIC_BACKEND_URL=$PUBLIC_BACKEND_URL
-ENV PUBLIC_MANA_CORE_AUTH_URL=$PUBLIC_MANA_CORE_AUTH_URL
+ENV PUBLIC_MANA_AUTH_URL=$PUBLIC_MANA_AUTH_URL
 
 COPY apps/matrix/packages/shared ./apps/matrix/packages/shared
 COPY apps/matrix/apps/web ./apps/matrix/apps/web

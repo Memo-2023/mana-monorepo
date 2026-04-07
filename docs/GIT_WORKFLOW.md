@@ -250,7 +250,7 @@ PUBLIC_MANA_AUTH_URL_CLIENT: https://auth.mana.how
 
 Before completing a rebase that touched configuration files:
 
-- [ ] `_CLIENT` URLs use `https://*.staging.manacore.ai` format
+- [ ] `_CLIENT` URLs use `https://*.staging.mana.how` format
 - [ ] `CORS_ORIGINS` include all HTTPS staging domains
 - [ ] No HTTP IP addresses in client-facing URLs
 - [ ] Caddy config matches docker-compose port mappings

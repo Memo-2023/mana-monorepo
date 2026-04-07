@@ -1,11 +1,7 @@
 <script lang="ts">
 	import { AppSlider } from '@mana/shared-ui';
 	import type { AppItem } from '@mana/shared-ui';
-	import {
-		getActiveManaApps,
-		APP_STATUS_LABELS,
-		APP_SLIDER_LABELS,
-	} from '@mana/shared-branding';
+	import { getActiveManaApps, APP_STATUS_LABELS, APP_SLIDER_LABELS } from '@mana/shared-branding';
 
 	// Convert MANA_APPS to AppItem format (German)
 	const apps: AppItem[] = getActiveManaApps().map((app) => ({

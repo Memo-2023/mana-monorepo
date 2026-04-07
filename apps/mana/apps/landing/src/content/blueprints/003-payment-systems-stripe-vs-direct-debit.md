@@ -484,7 +484,7 @@ Nach Analyse aller Optionen ist die Empfehlung:
    ```bash
    # Auf dem Server
    ssh mana-server
-   cd ~/projects/manacore-monorepo
+   cd ~/projects/mana-monorepo
    git pull
    ./scripts/mac-mini/deploy.sh
    ```

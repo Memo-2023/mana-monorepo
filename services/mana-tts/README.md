@@ -185,12 +185,12 @@ voices/
 ../../scripts/mac-mini/setup-tts.sh
 
 # Service management
-launchctl list | grep com.manacore.tts
-launchctl unload ~/Library/LaunchAgents/com.manacore.tts.plist
-launchctl load ~/Library/LaunchAgents/com.manacore.tts.plist
+launchctl list | grep com.mana.tts
+launchctl unload ~/Library/LaunchAgents/com.mana.tts.plist
+launchctl load ~/Library/LaunchAgents/com.mana.tts.plist
 
 # View logs
-tail -f /tmp/manacore-tts.log
+tail -f /tmp/mana-tts.log
 ```
 
 ## Requirements

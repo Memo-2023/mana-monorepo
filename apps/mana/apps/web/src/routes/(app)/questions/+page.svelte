@@ -7,13 +7,7 @@
 		searchQuestions,
 	} from '$lib/modules/questions/queries';
 	import type { QuestionStatus, ResearchDepth } from '$lib/modules/questions/types';
-	import {
-		MagnifyingGlass,
-		Clock,
-		CheckCircle,
-		CircleNotch,
-		Archive,
-	} from '@mana/shared-icons';
+	import { MagnifyingGlass, Clock, CheckCircle, CircleNotch, Archive } from '@mana/shared-icons';
 
 	const allQuestions = useAllQuestions();
 	const allCollections = useAllCollections();

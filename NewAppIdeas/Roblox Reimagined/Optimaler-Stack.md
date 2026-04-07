@@ -345,7 +345,7 @@ Transaktion: Alice kauft Item in Bobs Game fuer 100 Mana
 │  TypeScript (30%)                                   │
 │  ├── Svelte 5 UI (Editor, Marketplace, Social)      │
 │  ├── Hono Services (auth, credits, user, subs)      │
-│  ├── Shared Packages (@manacore/*)                  │
+│  ├── Shared Packages (@mana/*)                  │
 │  ├── User Game Scripts (→ WASM kompiliert)           │
 │  └── Local-First Layer (Dexie.js)                   │
 │                                                     │

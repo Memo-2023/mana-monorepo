@@ -12,14 +12,7 @@
 	import type { LocalTimeBlock, TimeBlockType } from '$lib/data/time-blocks/types';
 	import { toTimeBlock, getBlockDuration } from '$lib/data/time-blocks/queries';
 	import type { TimeBlock } from '$lib/data/time-blocks/types';
-	import {
-		CalendarBlank,
-		CheckSquare,
-		Timer,
-		Heart,
-		Lightning,
-		Clock,
-	} from '@mana/shared-icons';
+	import { CalendarBlank, CheckSquare, Timer, Heart, Lightning, Clock } from '@mana/shared-icons';
 	import { getIconComponent } from '@mana/shared-icons';
 	import { format } from 'date-fns';
 

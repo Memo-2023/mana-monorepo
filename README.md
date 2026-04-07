@@ -1,12 +1,12 @@
-# Manacore Monorepo
+# Mana Monorepo
 
-Monorepo containing all Manacore projects — a self-hosted multi-app ecosystem with shared packages and unified tooling.
+Monorepo containing all Mana projects — a self-hosted multi-app ecosystem with shared packages and unified tooling.
 
 ## Projects
 
 | Project | Description | Apps |
 |---------|-------------|------|
-| **manacore** | Multi-app ecosystem platform | Expo mobile, SvelteKit web |
+| **mana** | Multi-app ecosystem platform | Expo mobile, SvelteKit web |
 | **chat** | AI chat application | NestJS backend, Expo mobile, SvelteKit web, Astro landing |
 | **todo** | Task management | NestJS backend, SvelteKit web, Astro landing |
 | **calendar** | Calendar & scheduling | NestJS backend, SvelteKit web, Astro landing |
@@ -62,7 +62,7 @@ See [CLAUDE.md](./CLAUDE.md) for comprehensive development documentation.
 ## Architecture
 
 ```
-manacore-monorepo/
+mana-monorepo/
 ├── apps/                    # Product applications
 ├── services/                # Microservices (auth, search, LLM, bots)
 ├── packages/                # Shared packages

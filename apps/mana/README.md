@@ -178,7 +178,7 @@ Both apps require Supabase configuration. Create `.env` files based on `.env.exa
 ```env
 PUBLIC_SUPABASE_URL=your_supabase_project_url
 PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-MIDDLEWARE_URL=https://mana-core-middleware-111768794939.europe-west3.run.app
+MIDDLEWARE_URL=https://mana-middleware-111768794939.europe-west3.run.app
 PUBLIC_APP_NAME=Mana Web
 NODE_ENV=development
 ```

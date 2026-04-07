@@ -1,4 +1,4 @@
-# Mana Core Integration Checklist
+# Mana Integration Checklist
 
 Use this checklist when integrating `@mana-core/nestjs-integration` into a new NestJS project.
 
@@ -7,7 +7,7 @@ Use this checklist when integrating `@mana-core/nestjs-integration` into a new N
 - [ ] NestJS v10+ application set up
 - [ ] `@nestjs/config` installed
 - [ ] Node.js v18+ and npm/yarn
-- [ ] Mana Core credentials obtained:
+- [ ] Mana credentials obtained:
   - [ ] `MANA_SERVICE_URL`
   - [ ] `APP_ID`
   - [ ] `MANA_SUPABASE_SECRET_KEY` (service key)
@@ -329,7 +329,7 @@ Use this checklist when integrating `@mana-core/nestjs-integration` into a new N
   }
   ```
 
-- [ ] Create integration tests with real Mana Core module
+- [ ] Create integration tests with real Mana module
 
 - [ ] Test credit validation flow
 
@@ -412,7 +412,7 @@ Use this checklist when integrating `@mana-core/nestjs-integration` into a new N
 
 ## Documentation
 
-- [ ] Update README with Mana Core setup instructions
+- [ ] Update README with Mana setup instructions
 
 - [ ] Document custom operation types and credit costs
 
@@ -443,7 +443,7 @@ If something doesn't work, check:
 ## Support Resources
 
 - **Full Integration Guide**: See `MANA_CORE_INTEGRATION_GUIDE.md`
-- **Mana Core Docs**: https://docs.mana-core.com
+- **Mana Docs**: https://docs.mana-core.com
 - **GitHub Issues**: https://github.com/Memo-2023/mana-core-nestjs-package/issues
 - **Example Code**: Check Storyteller project for working implementation
 
@@ -451,7 +451,7 @@ If something doesn't work, check:
 
 ## Integration Complete! 🎉
 
-Once all items are checked, your application is fully integrated with Mana Core.
+Once all items are checked, your application is fully integrated with Mana.
 
 **Estimated Time**: 2-4 hours for basic integration, 1-2 days for complete implementation with testing.
 

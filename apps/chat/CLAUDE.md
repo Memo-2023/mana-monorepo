@@ -72,7 +72,7 @@ pnpm preview                     # Preview production build
 - **Web**: SvelteKit 2.x, Svelte 5, Tailwind CSS 4
 - **Landing**: Astro 5.16, Tailwind CSS
 - **Server**: Hono + Bun, OpenRouter AI + mana-llm (local), Drizzle ORM, PostgreSQL
-- **Auth**: Mana Core Auth (JWT)
+- **Auth**: Mana Auth (JWT)
 - **Types**: TypeScript 5.x
 
 ## Architecture
@@ -103,7 +103,7 @@ MANA_LLM_URL=http://localhost:3025 # mana-llm service URL
 LLM_TIMEOUT=120000                 # Timeout in ms (default: 120s)
 
 # Database (uses shared Docker PostgreSQL)
-DATABASE_URL=postgresql://manacore:devpassword@localhost:5432/chat
+DATABASE_URL=postgresql://mana:devpassword@localhost:5432/chat
 
 # Auth
 MANA_AUTH_URL=http://localhost:3001
@@ -172,7 +172,7 @@ pnpm --filter @chat/server db:add-local-models
 2. **Create `.env`** in `apps/chat/apps/server/`:
    ```env
    OPENROUTER_API_KEY=sk-or-v1-xxx
-   DATABASE_URL=postgresql://manacore:devpassword@localhost:5432/chat
+   DATABASE_URL=postgresql://mana:devpassword@localhost:5432/chat
    MANA_AUTH_URL=http://localhost:3001
    PORT=3002
    ```
@@ -190,6 +190,6 @@ pnpm --filter @chat/server db:add-local-models
 ## Important Notes
 
 1. **Security**: API keys are stored in the server only - never in client apps
-2. **Authentication**: Uses Mana Core Auth (JWT tokens)
+2. **Authentication**: Uses Mana Auth (JWT tokens)
 3. **Database**: PostgreSQL with Drizzle ORM (uses shared Docker container)
 4. **Deployment**: Server runs on port 3002

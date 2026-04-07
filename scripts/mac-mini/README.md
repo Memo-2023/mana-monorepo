@@ -9,7 +9,7 @@ Scripts for managing the Mana production environment on Mac Mini.
 ssh mac-mini
 
 # 2. Navigate to project
-cd ~/projects/manacore-monorepo
+cd ~/projects/mana-monorepo
 
 # 3. Setup auto-start (only needed once)
 ./scripts/mac-mini/setup-autostart.sh
@@ -51,8 +51,8 @@ brew install cloudflared git docker
 ```bash
 mkdir -p ~/projects
 cd ~/projects
-git clone https://github.com/Memo-2023/manacore-monorepo.git
-cd manacore-monorepo
+git clone https://github.com/Memo-2023/mana-monorepo.git
+cd mana-monorepo
 ```
 
 ### 3. Configure Cloudflare Tunnel
@@ -116,16 +116,16 @@ Open Docker Desktop and enable:
 
 ```bash
 # Startup log
-tail -f /tmp/manacore-startup.log
+tail -f /tmp/mana-startup.log
 
 # Health check log
-tail -f /tmp/manacore-health.log
+tail -f /tmp/mana-health.log
 
 # Cloudflare tunnel log
 tail -f /tmp/cloudflared.log
 
 # Specific container logs
-docker logs -f mana-core-auth
+docker logs -f mana-auth
 docker logs -f chat-backend
 ```
 
@@ -142,24 +142,24 @@ Three services are configured to run automatically:
 | Service | Label | Purpose |
 |---------|-------|---------|
 | Cloudflared | `com.cloudflare.cloudflared` | Tunnel to Cloudflare |
-| Docker Startup | `com.manacore.docker-startup` | Start containers on boot |
-| Health Check | `com.manacore.health-check` | Check every 5 minutes |
-| STT Service | `com.manacore.stt` | Speech-to-Text (Whisper + Voxtral) |
+| Docker Startup | `com.mana.docker-startup` | Start containers on boot |
+| Health Check | `com.mana.health-check` | Check every 5 minutes |
+| STT Service | `com.mana.stt` | Speech-to-Text (Whisper + Voxtral) |
 
 ### Manual Service Control
 
 ```bash
 # Check status
-launchctl list | grep -E 'cloudflare|manacore'
+launchctl list | grep -E 'cloudflare|mana'
 
 # Restart a service
-launchctl kickstart -k gui/$(id -u)/com.manacore.docker-startup
+launchctl kickstart -k gui/$(id -u)/com.mana.docker-startup
 
 # Stop a service
-launchctl unload ~/Library/LaunchAgents/com.manacore.docker-startup.plist
+launchctl unload ~/Library/LaunchAgents/com.mana.docker-startup.plist
 
 # Start a service
-launchctl load ~/Library/LaunchAgents/com.manacore.docker-startup.plist
+launchctl load ~/Library/LaunchAgents/com.mana.docker-startup.plist
 ```
 
 ## Troubleshooting
@@ -197,7 +197,7 @@ docker logs <container-name>
 docker restart <container-name>
 
 # Check database connectivity
-docker exec manacore-postgres pg_isready -U postgres
+docker exec mana-postgres pg_isready -U postgres
 ```
 
 ### Services not starting on boot
@@ -210,7 +210,7 @@ docker exec manacore-postgres pg_isready -U postgres
 launchctl error <exit-code>
 
 # Verify plist files
-plutil ~/Library/LaunchAgents/com.manacore.*.plist
+plutil ~/Library/LaunchAgents/com.mana.*.plist
 ```
 
 ## Push Notifications (Optional)
@@ -274,7 +274,7 @@ curl -X POST http://localhost:3020/transcribe \
   -F "language=de"
 
 # View logs
-tail -f /tmp/manacore-stt.log
+tail -f /tmp/mana-stt.log
 ```
 
 **Available endpoints:**

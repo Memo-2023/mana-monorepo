@@ -1,6 +1,6 @@
 # mana-user
 
-User preferences, tags, and storage service. Extracted from mana-core-auth.
+User preferences, tags, and storage service. Extracted from mana-auth.
 
 ## Tech Stack
 
@@ -9,7 +9,7 @@ User preferences, tags, and storage service. Extracted from mana-core-auth.
 | **Runtime** | Bun |
 | **Framework** | Hono |
 | **Database** | PostgreSQL + Drizzle ORM |
-| **Auth** | JWT validation via JWKS from mana-core-auth |
+| **Auth** | JWT validation via JWKS from mana-auth |
 
 ## Port: 3062
 
@@ -66,7 +66,7 @@ Tables: tags, tag_groups, tag_links, user_settings
 
 ```env
 PORT=3062
-DATABASE_URL=postgresql://manacore:devpassword@localhost:5432/mana_user
+DATABASE_URL=postgresql://mana:devpassword@localhost:5432/mana_user
 MANA_AUTH_URL=http://localhost:3001
 CORS_ORIGINS=http://localhost:5173
 ```

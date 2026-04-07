@@ -1,6 +1,6 @@
 # mana-subscriptions
 
-Subscription and billing service. Extracted from mana-core-auth.
+Subscription and billing service. Extracted from mana-auth.
 
 ## Tech Stack
 
@@ -10,7 +10,7 @@ Subscription and billing service. Extracted from mana-core-auth.
 | **Framework** | Hono |
 | **Database** | PostgreSQL + Drizzle ORM |
 | **Payments** | Stripe (Subscriptions, Billing Portal) |
-| **Auth** | JWT validation via JWKS from mana-core-auth |
+| **Auth** | JWT validation via JWKS from mana-auth |
 
 ## Port: 3063
 
@@ -58,7 +58,7 @@ Tables: plans, subscriptions, invoices, stripe_customers
 
 ```env
 PORT=3063
-DATABASE_URL=postgresql://manacore:devpassword@localhost:5432/mana_subscriptions
+DATABASE_URL=postgresql://mana:devpassword@localhost:5432/mana_subscriptions
 MANA_AUTH_URL=http://localhost:3001
 MANA_SERVICE_KEY=dev-service-key
 STRIPE_SECRET_KEY=sk_test_...

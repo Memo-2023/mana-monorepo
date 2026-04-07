@@ -115,7 +115,7 @@ apps/mana/
 - [ ] Offline testen: Flugmodus → App öffnen → CRUD-Operationen → Internet an → Sync
 - [ ] Update testen: Neue Version deployen → "Update verfügbar" erscheint
 
-> **Build-Validierung:** `pnpm --filter @manacore/web build` erfolgreich. 308 pre-existierende Type-Errors (keine neuen durch PWA-Änderungen).
+> **Build-Validierung:** `pnpm --filter @mana/web build` erfolgreich. 308 pre-existierende Type-Errors (keine neuen durch PWA-Änderungen).
 
 ### 1.7 Bekannte PWA-Limitationen (beobachten, nicht lösen)
 
@@ -124,7 +124,7 @@ Diese Punkte sind der Grund warum Tauri als nächster Schritt folgt:
 - iOS Safari: IndexedDB-Löschung nach 7 Tagen Inaktivität (betrifft local-first)
 - iOS Safari: Keine Push-Notifications im Hintergrund
 - Kein System Tray, keine globalen Shortcuts
-- Kein Deep Link Protocol (`manacore://`)
+- Kein Deep Link Protocol (`mana://`)
 - App Store Präsenz nicht möglich (ausser TWA auf Android)
 
 ---
@@ -193,7 +193,7 @@ export async function getApiUrl(key: string): Promise<string> {
 
 ### 2.3 Validierung
 
-- [ ] `TAURI_ENV=true pnpm --filter @manacore/web build` erzeugt `build-static/` mit `index.html`
+- [ ] `TAURI_ENV=true pnpm --filter @mana/web build` erzeugt `build-static/` mit `index.html`
 - [ ] `build-static/` in einem einfachen HTTP-Server testen (`npx serve build-static`)
 - [ ] Alle 27+ Module durchklicken — Client-Side-Routing funktioniert
 - [ ] **Go/No-Go:** Falls fundamental SSR-abhängig → Plan überdenken
@@ -217,13 +217,13 @@ export async function getApiUrl(key: string): Promise<string> {
 ### 3.2 Tauri-Projekt initialisieren
 
 - [ ] `apps/mana/apps/tauri/` erstellen
-- [ ] `package.json` mit Workspace-Referenz zu `@manacore/web`
+- [ ] `package.json` mit Workspace-Referenz zu `@mana/web`
 - [ ] `tauri.conf.json` konfigurieren:
 
 ```json
 {
   "build": {
-    "beforeBuildCommand": "TAURI_ENV=true pnpm --filter @manacore/web build",
+    "beforeBuildCommand": "TAURI_ENV=true pnpm --filter @mana/web build",
     "devUrl": "http://localhost:5173",
     "frontendDist": "../../web/build-static"
   },
@@ -240,7 +240,7 @@ export async function getApiUrl(key: string): Promise<string> {
     ]
   },
   "bundle": {
-    "identifier": "how.mana.manacore",
+    "identifier": "how.mana.app",
     "icon": ["icons/icon.png"]
   }
 }
@@ -273,7 +273,7 @@ fn get_config() -> serde_json::Value {
 ### 3.5 Dev-Workflow einrichten
 
 - [ ] Turborepo-Tasks für `tauri:dev`, `tauri:build`
-- [ ] Root-Level Script: `"dev:manacore:desktop": "pnpm --filter @manacore/tauri dev"`
+- [ ] Root-Level Script: `"dev:mana:desktop": "pnpm --filter @mana/tauri dev"`
 - [ ] Tauri Dev-Mode nutzt Vite Dev-Server (`devUrl: http://localhost:5173`) → Hot Reload
 
 ### 3.6 IndexedDB auf macOS WebKit testen
@@ -515,7 +515,7 @@ Apple prüft strenger als Google. Wichtige Punkte:
 - [ ] **Auto-Updater** — `tauri-plugin-updater`, Update-Server, In-App Dialog
 - [ ] **Native Notifications** — `tauri-plugin-notification`, Calendar-Erinnerungen
 - [ ] **Globale Shortcuts** — `Cmd/Ctrl+N` (Neues Item), `Cmd/Ctrl+K` (Quick-Suche), `Cmd/Ctrl+1-9` (Modul wechseln)
-- [ ] **Deep Links** — `manacore://` Protocol für Links aus Emails/Chat
+- [ ] **Deep Links** — `mana://` Protocol für Links aus Emails/Chat
 - [ ] **Dateisystem** — Drag & Drop, "Öffnen mit", Export (PDF/CSV)
 
 ### 8.2 Build Pipeline (Forgejo CI)

@@ -120,7 +120,7 @@ pnpm build                       # Build for production
 - `company`, `job_title`, `department` (VARCHAR)
 - `website`, `birthday`, `notes`, `photo_url` (VARCHAR/TEXT/DATE)
 - `is_favorite`, `is_archived` (BOOLEAN)
-- `organization_id`, `team_id` (UUID) - Manacore integration
+- `organization_id`, `team_id` (UUID) - Mana integration
 - `visibility` (VARCHAR) - private/team/organization/public
 - `shared_with` (JSONB) - Array of user IDs
 - `created_at`, `updated_at` (TIMESTAMP)
@@ -177,7 +177,7 @@ pnpm build                       # Build for production
 ```
 NODE_ENV=development
 PORT=3015
-DATABASE_URL=postgresql://manacore:devpassword@localhost:5432/contacts
+DATABASE_URL=postgresql://mana:devpassword@localhost:5432/contacts
 MANA_AUTH_URL=http://localhost:3001
 CORS_ORIGINS=http://localhost:5173,http://localhost:5184,http://localhost:8081
 S3_ENDPOINT=http://localhost:9000
@@ -253,8 +253,8 @@ Implementation: `duplicate-detector.ts` — runs fully offline, no server calls.
 
 ## Important Notes
 
-1. **Authentication**: Uses Mana Core Auth (JWT in Authorization header)
+1. **Authentication**: Uses Mana Auth (JWT in Authorization header)
 2. **Database**: PostgreSQL with Drizzle ORM
 3. **Port**: Backend runs on port 3015, Web on port 5184 by default
-4. **Storage**: Uses MinIO/S3 for contact photos via @manacore/shared-storage
-5. **Manacore Integration**: Contacts can be linked to Organizations and Teams
+4. **Storage**: Uses MinIO/S3 for contact photos via @mana/shared-storage
+5. **Mana Integration**: Contacts can be linked to Organizations and Teams

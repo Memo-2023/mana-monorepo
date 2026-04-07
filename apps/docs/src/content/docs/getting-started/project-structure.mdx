@@ -1,13 +1,13 @@
 ---
 title: Project Structure
-description: Understand how the Manacore monorepo is organized.
+description: Understand how the Mana monorepo is organized.
 ---
 
 import { FileTree } from '@astrojs/starlight/components';
 
 # Project Structure
 
-Manacore uses a pnpm workspace monorepo with Turborepo for build orchestration.
+Mana uses a pnpm workspace monorepo with Turborepo for build orchestration.
 
 ## Overview
 
@@ -84,21 +84,21 @@ The `services/` directory contains standalone microservices:
 Packages in `packages/` are shared across all applications:
 
 ### Authentication
-- `@manacore/shared-auth` - Client-side auth utilities
-- `@manacore/shared-nestjs-auth` - NestJS JWT guards
+- `@mana/shared-auth` - Client-side auth utilities
+- `@mana/shared-nestjs-auth` - NestJS JWT guards
 - `@mana-core/nestjs-integration` - Full NestJS auth + credits module
 
 ### UI & Styling
-- `@manacore/shared-ui` - React Native components
-- `@manacore/shared-landing-ui` - Astro landing page components
-- `@manacore/shared-theme` - Theme configuration
-- `@manacore/shared-tailwind` - Tailwind presets
+- `@mana/shared-ui` - React Native components
+- `@mana/shared-landing-ui` - Astro landing page components
+- `@mana/shared-theme` - Theme configuration
+- `@mana/shared-tailwind` - Tailwind presets
 
 ### Data & Utilities
-- `@manacore/shared-types` - Common TypeScript types
-- `@manacore/shared-utils` - Utility functions
-- `@manacore/shared-storage` - S3 storage utilities
-- `@manacore/shared-i18n` - Internationalization
+- `@mana/shared-types` - Common TypeScript types
+- `@mana/shared-utils` - Utility functions
+- `@mana/shared-storage` - S3 storage utilities
+- `@mana/shared-i18n` - Internationalization
 
 ## Workspace Configuration
 
@@ -125,7 +125,7 @@ Turborepo handles task orchestration with:
 | Type | Pattern | Example |
 |------|---------|---------|
 | App package | `@{project}/{app}` | `@chat/server` |
-| Shared package | `@manacore/shared-{name}` | `@manacore/shared-auth` |
+| Shared package | `@mana/shared-{name}` | `@mana/shared-auth` |
 | Service | `@mana-{name}/service` | `@mana-search/service` |
 
 ## Adding a New Project

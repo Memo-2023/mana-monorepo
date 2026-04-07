@@ -1,9 +1,9 @@
 /**
- * ManaCore Theme - Blue Dark Theme
- * Import this file in your landing page to use the ManaCore color scheme
+ * Mana Theme - Blue Dark Theme
+ * Import this file in your landing page to use the Mana color scheme
  */
 :root {
-  /* Primary colors - ManaCore Blue */
+  /* Primary colors - Mana Blue */
   --color-primary: #3b82f6;
   --color-primary-hover: #2563eb;
   --color-primary-glow: rgba(59, 130, 246, 0.3);

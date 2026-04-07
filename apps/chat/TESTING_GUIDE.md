@@ -1,6 +1,6 @@
-# Testing Guide - Mana Core Auth Integration
+# Testing Guide - Mana Auth Integration
 
-This guide walks you through testing the Chat project with Mana Core Auth.
+This guide walks you through testing the Chat project with Mana Auth.
 
 ---
 
@@ -11,16 +11,16 @@ Before testing, make sure you have:
 - ✅ Node.js 20+
 - ✅ pnpm installed
 - ✅ All dependencies installed (`pnpm install` from monorepo root)
-- ✅ PostgreSQL running (or Docker for Mana Core Auth)
+- ✅ PostgreSQL running (or Docker for Mana Auth)
 
 ---
 
-## Step 1: Generate JWT Keys for Mana Core Auth
+## Step 1: Generate JWT Keys for Mana Auth
 
-Mana Core Auth requires RS256 JWT keys. Generate them first:
+Mana Auth requires RS256 JWT keys. Generate them first:
 
 ```bash
-cd mana-core-auth
+cd mana-auth
 chmod +x scripts/generate-keys.sh
 ./scripts/generate-keys.sh
 ```
@@ -51,18 +51,18 @@ MIIBIjANBg...
 
 ## Step 2: Configure Environment Variables
 
-### 2.1 Mana Core Auth
+### 2.1 Mana Auth
 
 ```bash
-cd mana-core-auth
+cd mana-auth
 cp .env.example .env
 ```
 
-Edit `mana-core-auth/.env` and add:
+Edit `mana-auth/.env` and add:
 
 ```env
 # Database
-DATABASE_URL=postgresql://manacore:password@localhost:5432/manacore
+DATABASE_URL=postgresql://mana:password@localhost:5432/mana
 
 # Paste the keys from Step 1
 JWT_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----
@@ -94,7 +94,7 @@ AZURE_OPENAI_ENDPOINT=https://your-endpoint.openai.azure.com
 AZURE_OPENAI_API_KEY=your-api-key
 AZURE_OPENAI_API_VERSION=2024-12-01-preview
 
-# Mana Core Auth (NEW)
+# Mana Auth (NEW)
 MANA_AUTH_URL=http://localhost:3001
 
 # Supabase (for database, not auth)
@@ -115,7 +115,7 @@ cp .env.example .env
 Edit `chat/apps/web/.env`:
 
 ```env
-# Mana Core Auth (NEW)
+# Mana Auth (NEW)
 PUBLIC_MANA_AUTH_URL=http://localhost:3001
 
 # Backend API (NEW PORT)
@@ -136,7 +136,7 @@ cp .env.example .env
 Edit `chat/apps/mobile/.env`:
 
 ```env
-# Mana Core Auth (NEW)
+# Mana Auth (NEW)
 EXPO_PUBLIC_MANA_AUTH_URL=http://localhost:3001
 
 # Backend API (NEW PORT)
@@ -151,10 +151,10 @@ EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 
 ## Step 3: Start Services (4 Terminals)
 
-### Terminal 1: Mana Core Auth
+### Terminal 1: Mana Auth
 
 ```bash
-cd mana-core-auth
+cd mana-auth
 
 # Start PostgreSQL (if using Docker)
 docker-compose up postgres -d
@@ -169,7 +169,7 @@ pnpm start:dev
 **Expected output:**
 
 ```
-🚀 Mana Core Auth running on: http://localhost:3001
+🚀 Mana Auth running on: http://localhost:3001
 📚 Environment: development
 ```
 
@@ -432,7 +432,7 @@ curl http://localhost:3002/api/chat/models \
 
 ### 7.3 Test Token Refresh
 
-The `@manacore/shared-auth` package automatically refreshes tokens. To test:
+The `@mana/shared-auth` package automatically refreshes tokens. To test:
 
 1. Wait 15+ minutes (or change `JWT_ACCESS_TOKEN_EXPIRY=1m` for testing)
 2. Make an API call from web/mobile app
@@ -505,12 +505,12 @@ curl http://localhost:3001/api/v1/credits/transactions \
 
 ### Issue 1: "Connection refused" to port 3001
 
-**Problem:** Mana Core Auth not running
+**Problem:** Mana Auth not running
 
 **Solution:**
 
 ```bash
-cd mana-core-auth
+cd mana-auth
 pnpm start:dev
 ```
 
@@ -522,20 +522,20 @@ pnpm start:dev
 
 1. Clear tokens: `localStorage.clear()` in browser
 2. Login again
-3. Verify JWT keys are identical in Mana Core Auth .env
+3. Verify JWT keys are identical in Mana Auth .env
 
 ### Issue 3: CORS errors in browser
 
 **Problem:** Web app URL not in CORS whitelist
 
 **Solution:**
-Edit `mana-core-auth/.env`:
+Edit `mana-auth/.env`:
 
 ```env
 CORS_ORIGINS=http://localhost:5173,http://localhost:8081
 ```
 
-Restart Mana Core Auth
+Restart Mana Auth
 
 ### Issue 4: "Database connection failed"
 
@@ -545,7 +545,7 @@ Restart Mana Core Auth
 
 ```bash
 # If using Docker
-cd mana-core-auth
+cd mana-auth
 docker-compose up postgres -d
 
 # Check it's running
@@ -598,7 +598,7 @@ Save this as `test-auth.sh`:
 ```bash
 #!/bin/bash
 
-echo "🧪 Testing Mana Core Auth Integration"
+echo "🧪 Testing Mana Auth Integration"
 echo ""
 
 # Test 1: Register user
@@ -660,7 +660,7 @@ chmod +x test-auth.sh
 
 Use this checklist to verify everything works:
 
-### Mana Core Auth ✅
+### Mana Auth ✅
 
 - [ ] Service starts on port 3001
 - [ ] Can register new user

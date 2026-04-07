@@ -42,7 +42,7 @@ No manual action needed for regular deployments.
 For immediate deployment without waiting for Watchtower:
 
 ```bash
-ssh mana-server "cd ~/projects/manacore-monorepo && ./scripts/mac-mini/deploy.sh"
+ssh mana-server "cd ~/projects/mana-monorepo && ./scripts/mac-mini/deploy.sh"
 ```
 
 ## Monitoring
@@ -52,7 +52,7 @@ ssh mana-server "cd ~/projects/manacore-monorepo && ./scripts/mac-mini/deploy.sh
 ssh mana-server "./scripts/mac-mini/status.sh"
 
 # View logs
-ssh mana-server "docker logs -f manacore-chat-backend"
+ssh mana-server "docker logs -f mana-chat-backend"
 
 # Health check
 ssh mana-server "./scripts/mac-mini/health-check.sh"
@@ -62,8 +62,8 @@ ssh mana-server "./scripts/mac-mini/health-check.sh"
 
 | Service | URL | Container |
 |---------|-----|-----------|
-| Dashboard | https://mana.how | manacore-web |
-| Auth API | https://auth.mana.how | mana-core-auth |
+| Dashboard | https://mana.how | mana-web |
+| Auth API | https://auth.mana.how | mana-auth |
 | Chat | https://chat.mana.how | chat-web |
 | Chat API | https://chat-api.mana.how | chat-backend |
 | Todo | https://todo.mana.how | todo-web |
@@ -79,7 +79,7 @@ ssh mana-server "./scripts/mac-mini/health-check.sh"
 
 ```bash
 ssh mana-server
-cd ~/projects/manacore-monorepo
+cd ~/projects/mana-monorepo
 
 # Rollback to specific image tag
 docker compose -f docker-compose.macmini.yml pull <service>:<tag>

@@ -1,10 +1,10 @@
 # Cards Credit System
 
-This document explains how the Mana Core credit system is integrated into Cards.
+This document explains how the Mana credit system is integrated into Cards.
 
 ## Overview
 
-Cards uses **Mana** as its credit currency to charge for operations like deck creation, card generation, and AI features. The credit system is powered by [Mana Core](https://github.com/Memo-2023/mana-core-nestjs-package), which provides:
+Cards uses **Mana** as its credit currency to charge for operations like deck creation, card generation, and AI features. The credit system is powered by [Mana](https://github.com/Memo-2023/mana-core-nestjs-package), which provides:
 
 - Credit validation before operations
 - Credit consumption after successful operations
@@ -51,7 +51,7 @@ These costs are defined in `backend/src/config/credit-operations.ts`.
       │
       ▼
 ┌─────────────┐
-│  Mana Core  │  - Validate balance
+│  Mana  │  - Validate balance
 │   Service   │  - Deduct credits
 │             │  - Record transaction
 └─────────────┘
@@ -61,7 +61,7 @@ These costs are defined in `backend/src/config/credit-operations.ts`.
 
 ### 1. Service Key Configuration
 
-The backend needs a service key from Mana Core to perform credit operations.
+The backend needs a service key from Mana to perform credit operations.
 
 **backend/.env**:
 ```env
@@ -500,7 +500,7 @@ SERVICE_KEY=your-actual-service-key-from-mana-core
 
 ## Resources
 
-- [Mana Core Documentation](https://docs.mana-core.com)
-- [Mana Core NestJS Package](https://github.com/Memo-2023/mana-core-nestjs-package)
+- [Mana Documentation](https://docs.mana-core.com)
+- [Mana NestJS Package](https://github.com/Memo-2023/mana-core-nestjs-package)
 - [Integration Guide](./MANA_CORE_INTEGRATION_GUIDE.md)
 - [Example Implementation](./apps/mobile/examples/DeckCreationExample.tsx)

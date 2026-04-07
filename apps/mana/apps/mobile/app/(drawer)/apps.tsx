@@ -18,7 +18,7 @@ interface AppInfo {
 	link_web?: string;
 }
 
-const MANACORE_APPS: AppInfo[] = [
+const MANA_APPS: AppInfo[] = [
 	{
 		id: 'chat',
 		name: 'Chat',
@@ -96,11 +96,11 @@ export default function Apps() {
 							Verfügbare Apps
 						</Text>
 						<Text className={`mb-6 text-base ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-							Entdecke Apps, die mit Manacore verbunden werden können
+							Entdecke Apps, die mit Mana verbunden werden können
 						</Text>
 
 						<View className="flex-row flex-wrap justify-between">
-							{MANACORE_APPS.map((app) => (
+							{MANA_APPS.map((app) => (
 								<TouchableOpacity
 									key={app.id}
 									className={`mb-4 w-[48%] overflow-hidden rounded-xl shadow ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}
@@ -151,9 +151,9 @@ export default function Apps() {
 								Über Apps
 							</Text>
 							<Text className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-								Apps sind Erweiterungen, die mit Manacore verbunden werden können, um zusätzliche
+								Apps sind Erweiterungen, die mit Mana verbunden werden können, um zusätzliche
 								Funktionen zu nutzen. Jede App bietet spezifische Funktionen, die deine
-								Manacore-Erfahrung verbessern.
+								Mana-Erfahrung verbessern.
 							</Text>
 						</View>
 					</View>

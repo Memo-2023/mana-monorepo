@@ -127,7 +127,7 @@ pnpm db:seed                     # Seed database
 ```
 NODE_ENV=development
 PORT=3008
-DATABASE_URL=postgresql://manacore:devpassword@localhost:5432/presi
+DATABASE_URL=postgresql://mana:devpassword@localhost:5432/presi
 MANA_AUTH_URL=http://localhost:3001
 CORS_ORIGINS=http://localhost:5173,http://localhost:8081
 ```
@@ -169,7 +169,7 @@ Located at `packages/shared/`
 
 The SvelteKit web app provides the main user interface:
 
-- **Authentication**: Login/Register/Forgot Password with Mana Core Auth
+- **Authentication**: Login/Register/Forgot Password with Mana Auth
 - **Deck Management**: Create, edit, delete presentation decks
 - **Slide Editor**: Create slides with title, body, bullet points, images
 - **Presentation Mode**: Fullscreen presentation with keyboard navigation
@@ -207,7 +207,7 @@ src/
 
 ## Important Notes
 
-1. **Authentication**: Uses Mana Core Auth (JWT in Authorization header)
+1. **Authentication**: Uses Mana Auth (JWT in Authorization header)
 2. **Database**: PostgreSQL with Drizzle ORM
 3. **Ports**: Backend=3008, Web=5178
 4. **Landing**: Deployed on Cloudflare Pages

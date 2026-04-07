@@ -1,5 +1,5 @@
 /**
- * Shared i18n for Manacore monorepo
+ * Shared i18n for Mana monorepo
  *
  * This package provides common i18n utilities, language definitions,
  * and translations that can be shared across all projects.

@@ -2,7 +2,7 @@
 	"name": "contacts",
 	"version": "1.0.0",
 	"private": true,
-	"description": "Contacts App - Contact Management with Manacore Integration",
+	"description": "Contacts App - Contact Management with Mana Integration",
 	"scripts": {
 		"dev": "pnpm run --filter=@contacts/* --parallel dev",
 		"dev:server": "pnpm --filter @contacts/server dev",

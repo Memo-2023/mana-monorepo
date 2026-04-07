@@ -1,6 +1,6 @@
-# @manacore/shared-theme-ui
+# @mana/shared-theme-ui
 
-Svelte UI components for theme switching. Works with `@manacore/shared-theme`.
+Svelte UI components for theme switching. Works with `@mana/shared-theme`.
 
 ## Features
 
@@ -11,13 +11,13 @@ Svelte UI components for theme switching. Works with `@manacore/shared-theme`.
 ## Installation
 
 ```bash
-pnpm add @manacore/shared-theme-ui
+pnpm add @mana/shared-theme-ui
 ```
 
 ## Prerequisites
 
-- `@manacore/shared-theme` - Theme store
-- `@manacore/shared-icons` - Icon components
+- `@mana/shared-theme` - Theme store
+- `@mana/shared-icons` - Icon components
 
 ## Components
 
@@ -28,7 +28,7 @@ A simple button that toggles between light and dark mode.
 ```svelte
 <script lang="ts">
 	import { theme } from '$lib/stores/theme';
-	import { ThemeToggle } from '@manacore/shared-theme-ui';
+	import { ThemeToggle } from '@mana/shared-theme-ui';
 </script>
 
 <ThemeToggle {theme} />
@@ -53,7 +53,7 @@ A visual selector showing all theme variants with color dots.
 ```svelte
 <script lang="ts">
 	import { theme } from '$lib/stores/theme';
-	import { ThemeSelector } from '@manacore/shared-theme-ui';
+	import { ThemeSelector } from '@mana/shared-theme-ui';
 </script>
 
 <ThemeSelector {theme} />
@@ -79,7 +79,7 @@ A segmented control for selecting light, dark, or system mode.
 ```svelte
 <script lang="ts">
 	import { theme } from '$lib/stores/theme';
-	import { ThemeModeSelector } from '@manacore/shared-theme-ui';
+	import { ThemeModeSelector } from '@mana/shared-theme-ui';
 </script>
 
 <ThemeModeSelector {theme} />
@@ -100,7 +100,7 @@ A segmented control for selecting light, dark, or system mode.
 ```svelte
 <script lang="ts">
 	import { theme } from '$lib/stores/theme';
-	import { ThemeToggle, ThemeSelector, ThemeModeSelector } from '@manacore/shared-theme-ui';
+	import { ThemeToggle, ThemeSelector, ThemeModeSelector } from '@mana/shared-theme-ui';
 </script>
 
 <div class="settings-panel">
@@ -127,7 +127,7 @@ A segmented control for selecting light, dark, or system mode.
 
 ## Styling
 
-All components use CSS variables from `@manacore/shared-tailwind/themes.css` and are fully theme-aware. They automatically adapt to the current theme variant and mode.
+All components use CSS variables from `@mana/shared-tailwind/themes.css` and are fully theme-aware. They automatically adapt to the current theme variant and mode.
 
 ### Custom Styling
 
@@ -147,6 +147,6 @@ You can override styles using the `class` prop or by targeting the component cla
 
 ## Related Packages
 
-- `@manacore/shared-theme` - Theme store and utilities
-- `@manacore/shared-tailwind` - Tailwind preset with theme CSS
-- `@manacore/shared-icons` - Icon components
+- `@mana/shared-theme` - Theme store and utilities
+- `@mana/shared-tailwind` - Tailwind preset with theme CSS
+- `@mana/shared-icons` - Icon components

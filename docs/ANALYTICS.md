@@ -23,16 +23,16 @@ injectUmamiAnalytics(html)    → <script defer src="stats.mana.how/script.js" d
 
 - **Website-IDs**: `.env.development` (`UMAMI_WEBSITE_ID_*`)
 - **Env-Verteilung**: `scripts/generate-env.mjs` → `PUBLIC_UMAMI_WEBSITE_ID`
-- **Server-Side Injection**: `@manacore/shared-utils/analytics-server` (`injectUmamiAnalytics()`)
-- **Client-Side Events**: `@manacore/shared-utils/analytics` (`trackEvent()`, etc.)
+- **Server-Side Injection**: `@mana/shared-utils/analytics-server` (`injectUmamiAnalytics()`)
+- **Client-Side Events**: `@mana/shared-utils/analytics` (`trackEvent()`, etc.)
 
 ### Neue App hinzufügen
 
 1. Website in Umami anlegen (https://stats.mana.how)
 2. `UMAMI_WEBSITE_ID_APPNAME=<uuid>` zu `.env.development` hinzufügen
 3. `PUBLIC_UMAMI_WEBSITE_ID` Mapping in `scripts/generate-env.mjs` hinzufügen
-4. `@manacore/shared-utils` als Dependency in der Web-App `package.json`
-5. In `hooks.server.ts`: `import { injectUmamiAnalytics } from '@manacore/shared-utils/analytics-server'`
+4. `@mana/shared-utils` als Dependency in der Web-App `package.json`
+5. In `hooks.server.ts`: `import { injectUmamiAnalytics } from '@mana/shared-utils/analytics-server'`
 6. `injectUmamiAnalytics(html)` im `transformPageChunk` aufrufen
 7. `pnpm setup:env` ausführen
 
@@ -45,7 +45,7 @@ injectUmamiAnalytics(html)    → <script defer src="stats.mana.how/script.js" d
 | App | Env-Variable |
 |-----|-------------|
 | Chat | `UMAMI_WEBSITE_ID_CHAT_LANDING` |
-| Mana | `UMAMI_WEBSITE_ID_MANACORE_LANDING` |
+| Mana | `UMAMI_WEBSITE_ID_MANA_LANDING` |
 | Cards | `UMAMI_WEBSITE_ID_CARDS_LANDING` |
 | Calendar | `UMAMI_WEBSITE_ID_CALENDAR_LANDING` |
 | Clock | `UMAMI_WEBSITE_ID_CLOCK_LANDING` |
@@ -60,7 +60,7 @@ injectUmamiAnalytics(html)    → <script defer src="stats.mana.how/script.js" d
 | App | Env-Variable |
 |-----|-------------|
 | Chat | `UMAMI_WEBSITE_ID_CHAT` |
-| Mana | `UMAMI_WEBSITE_ID_MANACORE` |
+| Mana | `UMAMI_WEBSITE_ID_MANA` |
 | Todo | `UMAMI_WEBSITE_ID_TODO` |
 | Calendar | `UMAMI_WEBSITE_ID_CALENDAR` |
 | Clock | `UMAMI_WEBSITE_ID_CLOCK` |
@@ -81,7 +81,7 @@ injectUmamiAnalytics(html)    → <script defer src="stats.mana.how/script.js" d
 
 ## Automatisches Auth-Tracking
 
-Auth-Events werden automatisch in `@manacore/shared-auth` (`src/core/authService.ts`) getrackt (alle Web-Apps):
+Auth-Events werden automatisch in `@mana/shared-auth` (`src/core/authService.ts`) getrackt (alle Web-Apps):
 
 | Event | Wann | Data |
 |-------|------|------|
@@ -98,7 +98,7 @@ Diese Events erfordern **keinen Code in den einzelnen Apps** — sie werden auto
 
 ## Landing Page Event Tracking
 
-Alle Landing Pages binden `<Analytics />` aus `@manacore/shared-landing-ui` ein. Das Script trackt automatisch:
+Alle Landing Pages binden `<Analytics />` aus `@mana/shared-landing-ui` ein. Das Script trackt automatisch:
 
 | Event | Wann | Data |
 |-------|------|------|
@@ -121,7 +121,7 @@ Alle Landing Pages binden `<Analytics />` aus `@manacore/shared-landing-ui` ein.
 
 ### Installation
 
-Die Analytics-Utilities sind in `@manacore/shared-utils` verfügbar:
+Die Analytics-Utilities sind in `@mana/shared-utils` verfügbar:
 
 ```typescript
 import {
@@ -131,7 +131,7 @@ import {
   LandingEvents,
   ChatEvents,
   // ...
-} from '@manacore/shared-utils/analytics';
+} from '@mana/shared-utils/analytics';
 ```
 
 ### Basis-Funktionen
@@ -194,10 +194,10 @@ trackError('api_error', 'Failed to fetch data');
 
 ### AuthEvents
 
-> **Hinweis**: Diese Helpers werden in der Regel nicht direkt verwendet. Das automatische Auth-Tracking in `@manacore/shared-auth` (siehe oben) deckt alle Login/Signup/Logout-Events ab.
+> **Hinweis**: Diese Helpers werden in der Regel nicht direkt verwendet. Das automatische Auth-Tracking in `@mana/shared-auth` (siehe oben) deckt alle Login/Signup/Logout-Events ab.
 
 ```typescript
-import { AuthEvents } from '@manacore/shared-utils/analytics';
+import { AuthEvents } from '@mana/shared-utils/analytics';
 
 AuthEvents.login('email');           // login { method: 'email' }
 AuthEvents.login('google');          // login { method: 'google' }
@@ -211,7 +211,7 @@ AuthEvents.passwordReset();          // password_reset
 ### LandingEvents
 
 ```typescript
-import { LandingEvents } from '@manacore/shared-utils/analytics';
+import { LandingEvents } from '@mana/shared-utils/analytics';
 
 LandingEvents.ctaClick('hero');              // cta_click { location: 'hero' }
 LandingEvents.ctaClick('pricing');           // cta_click { location: 'pricing' }
@@ -227,7 +227,7 @@ LandingEvents.newsletterSubscribed();        // newsletter_subscribed
 ### ChatEvents
 
 ```typescript
-import { ChatEvents } from '@manacore/shared-utils/analytics';
+import { ChatEvents } from '@mana/shared-utils/analytics';
 
 ChatEvents.conversationCreated();            // conversation_created
 ChatEvents.messageSent('gpt-4');             // message_sent { model: 'gpt-4' }
@@ -239,7 +239,7 @@ ChatEvents.conversationShared();             // conversation_shared
 ### PictureEvents
 
 ```typescript
-import { PictureEvents } from '@manacore/shared-utils/analytics';
+import { PictureEvents } from '@mana/shared-utils/analytics';
 
 PictureEvents.imageGenerated('flux', 'realistic');  // image_generated { model: 'flux', style: 'realistic' }
 PictureEvents.imageDownloaded();                     // image_downloaded
@@ -253,7 +253,7 @@ PictureEvents.generationFailed('timeout');           // generation_failed { reas
 ### TodoEvents
 
 ```typescript
-import { TodoEvents } from '@manacore/shared-utils/analytics';
+import { TodoEvents } from '@mana/shared-utils/analytics';
 
 TodoEvents.taskCreated(true);            // task_created { has_deadline: true }
 TodoEvents.taskCompleted();              // task_completed
@@ -271,7 +271,7 @@ TodoEvents.filterUsed('priority');       // filter_used { filter: 'priority' }
 ### CalendarEvents
 
 ```typescript
-import { CalendarEvents } from '@manacore/shared-utils/analytics';
+import { CalendarEvents } from '@mana/shared-utils/analytics';
 
 CalendarEvents.eventCreated(true);       // event_created { recurring: true }
 CalendarEvents.eventUpdated();           // event_updated
@@ -287,7 +287,7 @@ CalendarEvents.eventDragged();           // event_dragged
 ### ClockEvents
 
 ```typescript
-import { ClockEvents } from '@manacore/shared-utils/analytics';
+import { ClockEvents } from '@mana/shared-utils/analytics';
 
 ClockEvents.timerStarted('pomodoro');            // timer_started { type: 'pomodoro' }
 ClockEvents.timerCompleted('pomodoro', 1500);    // timer_completed { type: 'pomodoro', duration_seconds: 1500 }
@@ -299,7 +299,7 @@ ClockEvents.focusSessionCompleted(45);           // focus_session_completed { du
 ### ContactsEvents
 
 ```typescript
-import { ContactsEvents } from '@manacore/shared-utils/analytics';
+import { ContactsEvents } from '@mana/shared-utils/analytics';
 
 ContactsEvents.contactCreated();             // contact_created
 ContactsEvents.contactUpdated();             // contact_updated
@@ -315,7 +315,7 @@ ContactsEvents.searchPerformed();            // search_performed
 ### CardsEvents
 
 ```typescript
-import { CardsEvents } from '@manacore/shared-utils/analytics';
+import { CardsEvents } from '@mana/shared-utils/analytics';
 
 CardsEvents.deckCreated();            // deck_created
 CardsEvents.deckStudied(25);          // deck_studied { cards: 25 }
@@ -327,7 +327,7 @@ CardsEvents.aiCardsGenerated(10);     // ai_cards_generated { count: 10 }
 ### SubscriptionEvents
 
 ```typescript
-import { SubscriptionEvents } from '@manacore/shared-utils/analytics';
+import { SubscriptionEvents } from '@mana/shared-utils/analytics';
 
 SubscriptionEvents.pricingViewed();              // pricing_viewed
 SubscriptionEvents.planSelected('pro');          // plan_selected { plan: 'pro' }
@@ -342,7 +342,7 @@ SubscriptionEvents.trialEnded(true);             // trial_ended { converted: tru
 ### AppEvents
 
 ```typescript
-import { AppEvents } from '@manacore/shared-utils/analytics';
+import { AppEvents } from '@mana/shared-utils/analytics';
 
 AppEvents.appOpened('chat');             // app_opened { app: 'chat' }
 AppEvents.themeChanged('dark');          // theme_changed { theme: 'dark' }
@@ -361,7 +361,7 @@ AppEvents.shareClicked('twitter');       // share_clicked { platform: 'twitter' 
 
 ```svelte
 <script lang="ts">
-  import { LandingEvents } from '@manacore/shared-utils/analytics';
+  import { LandingEvents } from '@mana/shared-utils/analytics';
 
   function handleCtaClick() {
     LandingEvents.ctaClick('hero');
@@ -382,7 +382,7 @@ AppEvents.shareClicked('twitter');       // share_clicked { platform: 'twitter' 
 ---
 
 <script>
-  import { LandingEvents } from '@manacore/shared-utils/analytics';
+  import { LandingEvents } from '@mana/shared-utils/analytics';
 
   document.querySelectorAll('[data-cta]').forEach(btn => {
     btn.addEventListener('click', () => {

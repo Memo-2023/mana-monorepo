@@ -11,13 +11,13 @@ lang: de
 
 **KI für alle zugänglich machen.**
 
-Wir glauben an eine Welt, in der jeder Zugang zu den besten KI-Tools hat - unabhängig von Unternehmensgröße, technischem Know-how oder Budget. Manacore revolutioniert die Art, wie Menschen und Unternehmen auf KI-Tools zugreifen: Ein Konto, ein Guthaben, unendliche Möglichkeiten.
+Wir glauben an eine Welt, in der jeder Zugang zu den besten KI-Tools hat - unabhängig von Unternehmensgröße, technischem Know-how oder Budget. Mana revolutioniert die Art, wie Menschen und Unternehmen auf KI-Tools zugreifen: Ein Konto, ein Guthaben, unendliche Möglichkeiten.
 
 ## Mission
 
 **Ein langfristig nachhaltiges Software-Ökosystem mit KI im Kern aufbauen.**
 
-Durch gutes Design und optimale Vernetzung ermöglichen wir jedem, Wissen, Erfahrungen und Ideen besser festzuhalten, zu sammeln, darzustellen und zu teilen. Im Manacore-Netzwerk arbeiten verschiedene Applikationen zusammen - jede unterstützt Menschen bei spezifischen Aufgaben, verbunden entfalten sie eine ganz neue Kraft.
+Durch gutes Design und optimale Vernetzung ermöglichen wir jedem, Wissen, Erfahrungen und Ideen besser festzuhalten, zu sammeln, darzustellen und zu teilen. Im Mana-Netzwerk arbeiten verschiedene Applikationen zusammen - jede unterstützt Menschen bei spezifischen Aufgaben, verbunden entfalten sie eine ganz neue Kraft.
 
 ---
 
@@ -101,7 +101,7 @@ Keine versteckten Kosten, keine Lock-ins. Kostenersparnisse werden direkt an Nut
 
 ### 3. Community-getrieben
 
-Unsere Nutzer gestalten aktiv mit. Feedback wird gehört und umgesetzt. Jeder kann am Manacore-Ökosystem teilhaben:
+Unsere Nutzer gestalten aktiv mit. Feedback wird gehört und umgesetzt. Jeder kann am Mana-Ökosystem teilhaben:
 
 - Als Nutzer der verschiedenen Tools
 - Durch aktives Feedback über verschiedene Kanäle
@@ -192,4 +192,4 @@ Diese Werte sind unser Versprechen an dich. Du kannst uns daran messen. Wenn wir
 
 ## In einem Satz
 
-> Manacore macht die digitale Welt und KI-Möglichkeiten für jeden zugänglich - mit einem Geschäftsmodell, bei dem Software allen gehört, die daran mitwirken und es mitgestalten.
+> Mana macht die digitale Welt und KI-Möglichkeiten für jeden zugänglich - mit einem Geschäftsmodell, bei dem Software allen gehört, die daran mitwirken und es mitgestalten.

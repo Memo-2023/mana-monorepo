@@ -35,7 +35,7 @@ apps/uload/
 | **Server** | Hono + Bun |
 | **Data** | Local-first (Dexie.js + mana-sync) |
 | **Database** | PostgreSQL via Drizzle ORM |
-| **Auth** | mana-core-auth (Better Auth + EdDSA JWT) |
+| **Auth** | mana-auth (Better Auth + EdDSA JWT) |
 | **Landing** | Astro 5 |
 | **PWA** | @vite-pwa/sveltekit |
 | **i18n** | svelte-i18n (DE/EN) |
@@ -58,7 +58,7 @@ pnpm deploy:landing:uload   # Deploy landing to Cloudflare Pages
 # Type Check
 pnpm --filter @uload/web check
 pnpm --filter @uload/server type-check
-pnpm --filter @manacore/uload-database type-check
+pnpm --filter @mana/uload-database type-check
 ```
 
 ## Ports
@@ -124,5 +124,5 @@ pnpm --filter @manacore/uload-database type-check
 - **Svelte 5 Runes**: Use `$state`, `$derived`, `$effect` — never `$:`
 - **Local-first**: All CRUD via `linkCollection.insert/update/delete` (IndexedDB)
 - **Analytics**: Fetched from Hono server, not local (server-only click data)
-- **Auth**: `authStore` from `@manacore/shared-auth-ui`, `AuthGate` with guest mode
+- **Auth**: `authStore` from `@mana/shared-auth-ui`, `AuthGate` with guest mode
 - **Sync**: Starts on login via `uloadStore.startSync()`, stops on logout

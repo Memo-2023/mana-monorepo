@@ -7,9 +7,9 @@ export default defineConfig({
 	site: 'https://docs.mana.how',
 	integrations: [
 		starlight({
-			title: 'Manacore Docs',
+			title: 'Mana Docs',
 			description:
-				'Documentation for the Manacore ecosystem - a multi-app platform with shared infrastructure.',
+				'Documentation for the Mana ecosystem - a multi-app platform with shared infrastructure.',
 			logo: {
 				light: './src/assets/logo-light.svg',
 				dark: './src/assets/logo-dark.svg',

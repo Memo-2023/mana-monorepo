@@ -1,10 +1,10 @@
-module github.com/manacore/mana-api-gateway
+module github.com/mana/mana-api-gateway
 
 go 1.25.0
 
 require (
 	github.com/jackc/pgx/v5 v5.9.1
-	github.com/manacore/shared-go v0.0.0
+	github.com/mana/shared-go v0.0.0
 	github.com/redis/go-redis/v9 v9.18.0
 	github.com/rs/cors v1.11.1
 )
@@ -21,4 +21,4 @@ require (
 	golang.org/x/text v0.29.0 // indirect
 )
 
-replace github.com/manacore/shared-go => ../../packages/shared-go
+replace github.com/mana/shared-go => ../../packages/shared-go

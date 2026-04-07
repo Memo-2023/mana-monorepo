@@ -2,7 +2,7 @@
 	"name": "@mana/shared-landing-ui",
 	"version": "0.1.0",
 	"private": true,
-	"description": "Shared Astro landing page components for Manacore monorepo",
+	"description": "Shared Astro landing page components for Mana monorepo",
 	"type": "module",
 	"exports": {
 		".": "./src/index.ts",

@@ -24,7 +24,7 @@ Das Mini-Onboarding ergänzt das globale Mana-Onboarding mit app-spezifischen Ei
 
 ## Shared Package
 
-**Package:** `@manacore/shared-ui`
+**Package:** `@mana/shared-ui`
 
 ```
 packages/shared-ui/src/onboarding/
@@ -123,7 +123,7 @@ Mini-Onboarding-Daten werden in `deviceSettings` gespeichert:
 ```json
 {
   "dependencies": {
-    "@manacore/shared-ui": "workspace:*"
+    "@mana/shared-ui": "workspace:*"
   }
 }
 ```
@@ -133,7 +133,7 @@ Mini-Onboarding-Daten werden in `deviceSettings` gespeichert:
 **Datei:** `src/lib/stores/app-onboarding.svelte.ts`
 
 ```typescript
-import { createAppOnboardingStore, type AppOnboardingStep } from '@manacore/shared-ui';
+import { createAppOnboardingStore, type AppOnboardingStep } from '@mana/shared-ui';
 import { userSettings } from './user-settings.svelte';
 
 const steps: AppOnboardingStep[] = [
@@ -171,7 +171,7 @@ export const appOnboarding = createAppOnboardingStore({
 ```svelte
 <script>
   import { appOnboarding } from '$lib/stores/app-onboarding.svelte';
-  import { MiniOnboardingModal } from '@manacore/shared-ui';
+  import { MiniOnboardingModal } from '@mana/shared-ui';
 </script>
 
 <!-- Am Ende des Layouts -->
@@ -302,7 +302,7 @@ location.reload();
 
 ### DevTools
 
-Im Browser LocalStorage unter `manacore_device_settings` → `apps.calendar` prüfen:
+Im Browser LocalStorage unter `mana_device_settings` → `apps.calendar` prüfen:
 - `onboarding_completed`: Boolean
 - `onboarding_skipped`: Boolean (wenn übersprungen)
 - Weitere Preferences auf Top-Level

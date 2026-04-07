@@ -23,7 +23,7 @@ Mana nutzt einen Standard-Prometheus + Grafana Stack für Monitoring:
 │  (6 Services)   │     │   (30 Tage)     │     │  (5 Dashboards) │
 └─────────────────┘     └─────────────────┘     └─────────────────┘
         │
-        ├── mana-core-auth (Port 3001)
+        ├── mana-auth (Port 3001)
         ├── chat-backend (Port 3002)
         ├── todo-backend (Port 3018)
         ├── calendar-backend (Port 3016)
@@ -245,7 +245,7 @@ services:
     ports:
       - "8428:8428"
     networks:
-      - manacore-network
+      - mana-network
 ```
 
 **Ressourcen-Vergleich (geschätzt):**
@@ -304,7 +304,7 @@ GROUP BY DATE_TRUNC('month', date);
 ### 4.3 DuckDB Service Implementation
 
 ```typescript
-// services/mana-core-auth/src/analytics/analytics.service.ts
+// services/mana-auth/src/analytics/analytics.service.ts
 @Injectable()
 export class AnalyticsService {
   private db: Database;
@@ -383,7 +383,7 @@ apiVersion: 1
 datasources:
   - name: Business Metrics
     type: simpod-json-datasource
-    url: http://mana-core-auth:3001/api/analytics
+    url: http://mana-auth:3001/api/analytics
     isDefault: false
     editable: false
 ```
@@ -584,9 +584,9 @@ Die bestehende `prometheus.yml` funktioniert ohne Änderung mit VictoriaMetrics:
 ```yaml
 # Alle Scrape-Configs bleiben identisch
 scrape_configs:
-  - job_name: 'mana-core-auth'
+  - job_name: 'mana-auth'
     static_configs:
-      - targets: ['mana-core-auth:3001']
+      - targets: ['mana-auth:3001']
     metrics_path: '/metrics'
     scrape_interval: 30s
   # ... alle anderen Jobs

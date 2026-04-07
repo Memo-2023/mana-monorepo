@@ -212,7 +212,7 @@ Bewertet die Tiefe der Umami-Analytics-Integration pro App:
 | ---------------------- | ---------------------------------------------------------------------- |
 | **Page View Tracking** | Umami-Script via `hooks.server.ts` injiziert (automatische Page Views) |
 | **Custom Events**      | App-spezifische Events implementiert (z.B. `TodoEvents`, `ChatEvents`) |
-| **Auth Tracking**      | Login/Signup/Logout automatisch via `@manacore/shared-auth` getrackt   |
+| **Auth Tracking**      | Login/Signup/Logout automatisch via `@mana/shared-auth` getrackt       |
 | **Landing Tracking**   | Landing Page Events (CTA-Clicks, Pricing Views) via `Analytics.astro`  |
 | **Public Dashboard**   | Öffentliches Dashboard auf `stats.mana.how` konfiguriert               |
 
@@ -251,7 +251,7 @@ Der **Ecosystem Health Score** ist ein eigenständiges Dashboard unter `/manasco
 | **Icon Consistency**  | 10%     | Verhältnis Phosphor-Icon-Imports vs. verbleibende inline SVGs                                                                                       |
 | **i18n Coverage**     | 10%     | Apps mit `svelte-i18n` Internationalisierung                                                                                                        |
 | **Style Consistency** | 10%     | Apps mit Theme-CSS-Variablen + Tailwind CSS                                                                                                         |
-| **Local-First**       | 8%      | Apps mit `@manacore/local-store` (Offline-fähig)                                                                                                    |
+| **Local-First**       | 8%      | Apps mit `@mana/local-store` (Offline-fähig)                                                                                                        |
 | **Error Boundaries**  | 8%      | Apps mit `+error.svelte` Error Page + Offline Page                                                                                                  |
 | **TypeScript Strict** | 7%      | Apps mit `strict: true` in tsconfig                                                                                                                 |
 | **Test Coverage**     | 7%      | Apps mit mindestens einem Unit- oder E2E-Test                                                                                                       |
@@ -278,8 +278,8 @@ Jede Metrik ist ein Prozentwert (0-100%):
 | Metrik              | Aktion                                                                          |
 | ------------------- | ------------------------------------------------------------------------------- |
 | Shared Packages ↑   | Fehlende Core-Packages in `package.json` hinzufügen                             |
-| Icon Consistency ↑  | Inline SVGs durch `@manacore/shared-icons` Phosphor-Komponenten ersetzen        |
-| Modal Consistency ↑ | Custom-Modals auf `<Modal>` aus `@manacore/shared-ui` migrieren                 |
+| Icon Consistency ↑  | Inline SVGs durch `@mana/shared-icons` Phosphor-Komponenten ersetzen            |
+| Modal Consistency ↑ | Custom-Modals auf `<Modal>` aus `@mana/shared-ui` migrieren                     |
 | Error Handling ↑    | `instanceof Error` durch shared `getErrorMessage()` Helper ersetzen             |
 | Error Boundaries ↑  | `+error.svelte` in jeder App anlegen                                            |
 | Test Coverage ↑     | Mindestens einen Unit-Test pro App schreiben                                    |

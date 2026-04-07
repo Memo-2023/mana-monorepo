@@ -1,6 +1,6 @@
 # mana-auth
 
-Central authentication service for the Mana ecosystem. Rewritten from NestJS (mana-core-auth) to Hono + Bun.
+Central authentication service for the Mana ecosystem. Rewritten from NestJS (mana-auth) to Hono + Bun.
 
 ## Tech Stack
 
@@ -13,7 +13,7 @@ Central authentication service for the Mana ecosystem. Rewritten from NestJS (ma
 | **JWT** | EdDSA via Better Auth JWT plugin |
 | **Email** | Nodemailer + Brevo SMTP |
 
-## Port: 3001 (same as mana-core-auth — drop-in replacement)
+## Port: 3001 (same as mana-auth — drop-in replacement)
 
 ## Better Auth Plugins
 

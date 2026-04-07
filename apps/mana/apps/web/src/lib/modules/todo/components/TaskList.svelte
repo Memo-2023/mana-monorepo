@@ -6,13 +6,7 @@
 	import { dndzone, SOURCES, TRIGGERS } from 'svelte-dnd-action';
 	import { flip } from 'svelte/animate';
 	import { ContextMenu, type ContextMenuItem } from '@mana/shared-ui';
-	import {
-		PencilSimple,
-		Check,
-		ArrowCounterClockwise,
-		Trash,
-		Circle,
-	} from '@mana/shared-icons';
+	import { PencilSimple, Check, ArrowCounterClockwise, Trash, Circle } from '@mana/shared-icons';
 
 	interface Props {
 		tasks: Task[];

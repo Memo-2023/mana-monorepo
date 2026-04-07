@@ -295,7 +295,7 @@ Auf dem **Windows-PC** in PowerShell **als Administrator** ausführen:
 
 ```powershell
 # Für Admin-User muss der Key in die systemweite Datei:
-"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAmtp92RmE6lPhHRg24VSYIvq9ne4+qe61SiR4c+lPWu claude-code@manacore" | Out-File -Encoding utf8 -FilePath C:\ProgramData\ssh\administrators_authorized_keys
+"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAmtp92RmE6lPhHRg24VSYIvq9ne4+qe61SiR4c+lPWu claude-code@mana" | Out-File -Encoding utf8 -FilePath C:\ProgramData\ssh\administrators_authorized_keys
 
 # Berechtigungen setzen (Windows erfordert das für SSH)
 # Vererbung entfernen
@@ -619,12 +619,12 @@ GPU Server (healthcheck.py → log-shipper.py)
 
 ---
 
-## TypeScript Client (`@manacore/shared-gpu`)
+## TypeScript Client (`@mana/shared-gpu`)
 
 Shared Package im Monorepo (`packages/shared-gpu/`) für alle GPU-Services:
 
 ```typescript
-import { GpuClient } from '@manacore/shared-gpu';
+import { GpuClient } from '@mana/shared-gpu';
 
 // Öffentlich (von überall, mit API-Key)
 const gpu = new GpuClient({

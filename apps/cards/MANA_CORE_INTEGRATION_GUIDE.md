@@ -1,4 +1,4 @@
-# Mana Core NestJS Integration Guide
+# Mana NestJS Integration Guide
 
 This document provides a comprehensive guide on how the `@mana-core/nestjs-integration` package was integrated into the Storyteller project. Use this guide to integrate the same authentication and credit system into your own NestJS application.
 
@@ -18,7 +18,7 @@ This document provides a comprehensive guide on how the `@mana-core/nestjs-integ
 
 ## Overview
 
-The Mana Core NestJS integration package provides:
+The Mana NestJS integration package provides:
 - **Complete Authentication System**: Email/password, Google OAuth, Apple Sign-in
 - **JWT Token Management**: Automatic validation, refresh, and storage
 - **Credit Management**: Pre-flight validation and consumption with app-level tracking
@@ -33,7 +33,7 @@ Frontend (React Native/Web)
     ↓ HTTP Requests with JWT
 Backend (NestJS)
     ↓ Token Validation & Credit Checks
-Mana Core Service
+Mana Service
     ↓ Authentication & Credit Management
 ```
 
@@ -41,11 +41,11 @@ Mana Core Service
 
 ## Prerequisites
 
-Before integrating Mana Core, ensure you have:
+Before integrating Mana, ensure you have:
 
-1. **Mana Core Credentials**:
-   - `MANA_SERVICE_URL`: URL of your Mana Core instance
-   - `APP_ID`: Your application ID from Mana Core
+1. **Mana Credentials**:
+   - `MANA_SERVICE_URL`: URL of your Mana instance
+   - `APP_ID`: Your application ID from Mana
    - `MANA_SUPABASE_SECRET_KEY`: Service key for backend operations (optional but recommended)
 
 2. **NestJS Application**:
@@ -106,8 +106,8 @@ Create or update your `.env` file in the backend directory:
 NODE_ENV=development
 PORT=3002
 
-# Mana Core Configuration
-MANA_SERVICE_URL=https://mana-core-middleware-111768794939.europe-west3.run.app
+# Mana Configuration
+MANA_SERVICE_URL=https://mana-middleware-111768794939.europe-west3.run.app
 APP_ID=your-app-id-from-mana-core
 MANA_SUPABASE_SECRET_KEY=your-service-role-key
 
@@ -116,8 +116,8 @@ SIGNUP_REDIRECT_URL=https://yourapp.com/welcome
 ```
 
 **Important Notes**:
-- `MANA_SERVICE_URL`: Your Mana Core instance URL
-- `APP_ID`: Obtained from Mana Core admin panel
+- `MANA_SERVICE_URL`: Your Mana instance URL
+- `APP_ID`: Obtained from Mana admin panel
 - `MANA_SUPABASE_SECRET_KEY`: Required for credit operations and service-level auth
 - `SIGNUP_REDIRECT_URL`: Optional redirect after successful signup
 
@@ -138,12 +138,12 @@ import { ManaModule } from '@mana-core/nestjs-integration';
       validationSchema: validationSchema, // Optional: Joi validation
     }),
 
-    // Mana Core Module - async configuration
+    // Mana Module - async configuration
     ManaModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
         // Required: Mana service URL
-        manaServiceUrl: 'https://mana-core-middleware-111768794939.europe-west3.run.app',
+        manaServiceUrl: 'https://mana-middleware-111768794939.europe-west3.run.app',
 
         // Required: Your app ID
         appId: '8d2f5ddb-e251-4b3b-8802-84022a7ac77f',
@@ -172,7 +172,7 @@ export class AppModule {}
 ```
 
 **Configuration Options**:
-- `manaServiceUrl` (required): URL of your Mana Core service
+- `manaServiceUrl` (required): URL of your Mana service
 - `appId` (required): Your application ID
 - `serviceKey` (recommended): Service role key for backend operations
 - `signupRedirectUrl` (optional): URL to redirect users after signup
@@ -596,7 +596,7 @@ if (response.ok) {
 
 ## Credit Management
 
-The Mana Core package includes a complete credit consumption system for tracking and billing user operations.
+The Mana package includes a complete credit consumption system for tracking and billing user operations.
 
 ### Step 1: Inject CreditClientService
 
@@ -847,7 +847,7 @@ try {
 
 ### Unit Testing
 
-Mock the Mana Core services in your tests:
+Mock the Mana services in your tests:
 
 ```typescript
 import { Test, TestingModule } from '@nestjs/testing';
@@ -895,7 +895,7 @@ describe('CharacterController', () => {
 
 ### Integration Testing
 
-Test with the Mana Core module:
+Test with the Mana module:
 
 ```typescript
 import { ManaModule } from '@mana-core/nestjs-integration';
@@ -1042,7 +1042,7 @@ ManaModule.forRootAsync({
 
 ### Support Resources
 
-- **Mana Core Documentation**: https://docs.mana-core.com
+- **Mana Documentation**: https://docs.mana-core.com
 - **GitHub Issues**: https://github.com/Memo-2023/mana-core-nestjs-package/issues
 - **Storyteller Example**: Check this repository for working examples
 
@@ -1093,7 +1093,7 @@ After following this guide, your application now has:
 
 | File | Purpose |
 |------|---------|
-| `backend/src/app.module.ts` | Mana Core module configuration |
+| `backend/src/app.module.ts` | Mana module configuration |
 | `backend/src/character/character.controller.ts` | Example of AuthGuard and CreditClientService usage |
 | `backend/src/story/story.controller.ts` | Example of credit validation and consumption |
 | `backend/src/decorators/user.decorator.ts` | Custom @UserToken() decorator |
@@ -1107,7 +1107,7 @@ After following this guide, your application now has:
 
 If you have questions or run into issues:
 
-1. Check the [Mana Core Documentation](https://docs.mana-core.com)
+1. Check the [Mana Documentation](https://docs.mana-core.com)
 2. Review the Storyteller codebase for working examples
 3. Open an issue on the [GitHub repository](https://github.com/Memo-2023/mana-core-nestjs-package)
 

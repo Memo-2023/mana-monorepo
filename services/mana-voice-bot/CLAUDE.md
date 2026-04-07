@@ -123,7 +123,7 @@ Typical latency breakdown:
 
 ```bash
 # On Mac Mini
-cd ~/projects/manacore-monorepo/services/mana-voice-bot
+cd ~/projects/mana-monorepo/services/mana-voice-bot
 ./setup.sh
 ./start.sh
 

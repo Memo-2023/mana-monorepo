@@ -1,13 +1,13 @@
 ---
 title: Deployment Overview
-description: Deployment strategies and infrastructure for Manacore applications.
+description: Deployment strategies and infrastructure for Mana applications.
 ---
 
 import { Card, CardGrid, Aside } from '@astrojs/starlight/components';
 
 # Deployment Overview
 
-Manacore uses multiple deployment strategies depending on the application type.
+Mana uses multiple deployment strategies depending on the application type.
 
 ## Deployment Targets
 
@@ -92,7 +92,7 @@ pnpm deploy:docs
 ssh mana-server
 
 # Pull latest changes
-cd ~/projects/manacore-monorepo
+cd ~/projects/mana-monorepo
 git pull
 
 # Restart services
@@ -135,7 +135,7 @@ npx wrangler pages deployment tail <deployment-id> --project-name=chat-landing
 
 ```bash
 ssh mana-server
-cd ~/projects/manacore-monorepo
+cd ~/projects/mana-monorepo
 
 # Revert to previous commit
 git checkout HEAD~1

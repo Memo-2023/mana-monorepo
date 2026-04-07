@@ -126,10 +126,10 @@ Environment variables:
 
 ```bash
 # Service logs
-tail -f /tmp/manacore-stt.log
+tail -f /tmp/mana-stt.log
 
 # Error logs
-tail -f /tmp/manacore-stt.error.log
+tail -f /tmp/mana-stt.error.log
 ```
 
 ## Troubleshooting

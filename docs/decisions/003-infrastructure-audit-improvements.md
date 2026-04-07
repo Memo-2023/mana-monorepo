@@ -26,7 +26,7 @@ Die aktuelle Docker-Compose-Konfiguration auf dem Mac Mini hat über die Zeit 52
 ### 2. Container-Naming
 
 ```
-manacore-{category}-{service}
+mana-{category}-{service}
 
 Categories: infra, core, app, matrix, mon, auto
 ```
@@ -41,10 +41,10 @@ Categories: infra, core, app, matrix, mon, auto
 ### 4. Volume-Naming
 
 ```
-manacore-{service}-data
+mana-{service}-data
 ```
 
-Matrix-Bot-Volumes werden zu einem konsolidiert: `manacore-matrix-bots-data`
+Matrix-Bot-Volumes werden zu einem konsolidiert: `mana-matrix-bots-data`
 
 ## Consequences
 

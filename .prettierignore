@@ -35,10 +35,10 @@ TESTING_STRATEGY_AUTH_CREDITS.md
 .prettiercache
 
 # Astro files with JSX-style comments (valid Astro but Prettier can't parse)
-apps/manacore/apps/landing/src/components/content/HeroSection.astro
-apps/manacore/apps/landing/src/components/sections/ManaPrinciple.astro
-apps/manacore/apps/landing/src/pages/apps/index.astro
-apps/manacore/apps/landing/src/pages/privacy/index.astro
+apps/mana/apps/landing/src/components/content/HeroSection.astro
+apps/mana/apps/landing/src/components/sections/ManaPrinciple.astro
+apps/mana/apps/landing/src/pages/apps/index.astro
+apps/mana/apps/landing/src/pages/privacy/index.astro
 games/mana-games/apps/web/src/layouts/Layout.astro
 games/mana-games/apps/web/src/pages/games/[slug].astro
 games/mana-games/apps/web/src/pages/games/*.astro

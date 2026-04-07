@@ -3,25 +3,27 @@
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>com.manacore.ensure-containers</string>
+    <string>com.mana.disk-check</string>
 
     <key>ProgramArguments</key>
     <array>
         <string>/bin/bash</string>
-        <string>/Users/mana/projects/manacore-monorepo/scripts/mac-mini/ensure-containers-running.sh</string>
+        <string>/Users/mana/projects/mana-monorepo/scripts/mac-mini/check-disk-space.sh</string>
     </array>
 
+    <!-- Run every 15 minutes — frequent enough to catch disk issues early -->
     <key>StartInterval</key>
-    <integer>300</integer>
+    <integer>900</integer>
 
+    <!-- Also run at startup -->
     <key>RunAtLoad</key>
     <true/>
 
     <key>StandardOutPath</key>
-    <string>/tmp/manacore-ensure-containers.log</string>
+    <string>/tmp/mana-disk-check.log</string>
 
     <key>StandardErrorPath</key>
-    <string>/tmp/manacore-ensure-containers.log</string>
+    <string>/tmp/mana-disk-check.error.log</string>
 
     <key>EnvironmentVariables</key>
     <dict>

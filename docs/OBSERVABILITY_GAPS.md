@@ -29,7 +29,7 @@ Distributed Tracing verfolgt eine einzelne Benutzeranfrage über alle beteiligte
 Ein User öffnet den Chat und die Seite lädt langsam. Im Grafana siehst du, dass die p95-Latenz bei 3 Sekunden liegt. Aber **wo** steckt das Problem?
 
 - Liegt es am Chat-Backend?
-- An der Authentifizierung bei mana-core-auth?
+- An der Authentifizierung bei mana-auth?
 - An einer langsamen PostgreSQL-Query?
 - Am Redis-Cache, der nicht greift?
 - An der Netzwerk-Latenz zwischen Containern?
@@ -42,7 +42,7 @@ Ein Trace für dieselbe Anfrage zeigt dir eine Wasserfall-Ansicht:
 
 ```
 [Chat-Web → Chat-Backend]  ─── 3.2s total ───────────────────────────────
-  ├─ [Auth Validation]      ── 45ms ──  POST mana-core-auth/validate
+  ├─ [Auth Validation]      ── 45ms ──  POST mana-auth/validate
   ├─ [Redis Cache Lookup]   ── 2ms ──   GET conversation:123
   ├─ [PostgreSQL Query]     ── 2.8s ──  SELECT * FROM messages WHERE...  ← BOTTLENECK
   │    └─ [Index Scan]      ── 2.7s ──  seq scan on messages (missing index!)
@@ -56,7 +56,7 @@ Sofort sichtbar: Die PostgreSQL-Query braucht 2.8s wegen eines fehlenden Index.
 Unser Stack hat viele Service-zu-Service-Aufrufe:
 
 ```
-Browser → SvelteKit Web → NestJS Backend → mana-core-auth (Auth-Validierung)
+Browser → SvelteKit Web → NestJS Backend → mana-auth (Auth-Validierung)
                                          → PostgreSQL (Daten)
                                          → Redis (Cache/Sessions)
                                          → mana-search (Suche)

@@ -5,14 +5,7 @@
 	import { messagesStore } from '$lib/modules/chat/stores/messages.svelte';
 	import { filterBySearch, splitPinned } from '$lib/modules/chat/queries';
 	import type { Conversation, Template } from '$lib/modules/chat/types';
-	import {
-		Plus,
-		ChatCircle,
-		PushPin,
-		Archive,
-		MagnifyingGlass,
-		Sparkle,
-	} from '@mana/shared-icons';
+	import { Plus, ChatCircle, PushPin, Archive, MagnifyingGlass, Sparkle } from '@mana/shared-icons';
 
 	const conversationsCtx: { readonly value: Conversation[] } = getContext('conversations');
 	const templatesCtx: { readonly value: Template[] } = getContext('templates');

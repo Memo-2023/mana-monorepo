@@ -1,13 +1,13 @@
 ---
 title: Backend (NestJS)
-description: NestJS backend architecture patterns in Manacore.
+description: NestJS backend architecture patterns in Mana.
 ---
 
 import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
 
 # Backend Architecture
 
-All Manacore backends use **NestJS 10-11** with consistent patterns for structure, validation, and error handling.
+All Mana backends use **NestJS 10-11** with consistent patterns for structure, validation, and error handling.
 
 ## Project Structure
 
@@ -75,7 +75,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { JwtAuthGuard, CurrentUser, CurrentUserData } from '@manacore/shared-nestjs-auth';
+import { JwtAuthGuard, CurrentUser, CurrentUserData } from '@mana/shared-nestjs-auth';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 
@@ -109,7 +109,7 @@ Services contain business logic and database operations:
 ```typescript
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Inject } from '@nestjs/common';
-import { DRIZZLE } from '@manacore/shared-drizzle';
+import { DRIZZLE } from '@mana/shared-drizzle';
 import { eq, and } from 'drizzle-orm';
 import { users } from '../drizzle/schema';
 

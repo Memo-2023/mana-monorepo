@@ -1,6 +1,6 @@
-# @manacore/shared-storage
+# @mana/shared-storage
 
-S3-compatible object storage client for the Manacore monorepo. Uses MinIO for S3-compatible storage.
+S3-compatible object storage client for the Mana monorepo. Uses MinIO for S3-compatible storage.
 
 ## Setup
 
@@ -17,7 +17,7 @@ Each app gets its own isolated bucket, created automatically by `minio-init`:
 
 | Bucket | Project | Purpose |
 |--------|---------|---------|
-| `manacore-storage` | Mana | Avatars, auth assets |
+| `mana-storage` | Mana | Avatars, auth assets |
 | `picture-storage` | Picture | AI-generated images |
 | `chat-storage` | Chat | User file uploads |
 | `cards-storage` | Cards | Card/deck assets |
@@ -36,7 +36,7 @@ Each app gets its own isolated bucket, created automatically by `minio-init`:
 ### Basic Operations
 
 ```typescript
-import { createPictureStorage, generateUserFileKey, getContentType } from '@manacore/shared-storage';
+import { createPictureStorage, generateUserFileKey, getContentType } from '@mana/shared-storage';
 
 const storage = createPictureStorage();
 
@@ -83,7 +83,7 @@ const cdnUrl = storage.getCdnUrl(key); // Falls back to publicUrl if no CDN conf
 ### Generic Factory
 
 ```typescript
-import { createStorage } from '@manacore/shared-storage';
+import { createStorage } from '@mana/shared-storage';
 
 // Instead of app-specific factories:
 const storage = createStorage('PICTURE');
@@ -168,7 +168,7 @@ unsub(); // Remove listener
 ### In-Memory (Testing / Local Dev)
 
 ```typescript
-import { InMemoryMetrics, attachMetrics } from '@manacore/shared-storage';
+import { InMemoryMetrics, attachMetrics } from '@mana/shared-storage';
 
 const storage = createPictureStorage();
 const metrics = new InMemoryMetrics();
@@ -183,8 +183,8 @@ console.log(metrics.sizes);              // [1024, 2048, ...]
 ### Prometheus (NestJS Backends)
 
 ```typescript
-import { MetricsService } from '@manacore/shared-nestjs-metrics';
-import { createPictureStorage, createPrometheusCollector, attachMetrics } from '@manacore/shared-storage';
+import { MetricsService } from '@mana/shared-nestjs-metrics';
+import { createPictureStorage, createPrometheusCollector, attachMetrics } from '@mana/shared-storage';
 
 @Injectable()
 export class StorageService {

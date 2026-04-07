@@ -1,4 +1,4 @@
-module github.com/manacore/shared-go
+module github.com/mana/shared-go
 
 go 1.25.0
 

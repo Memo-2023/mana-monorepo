@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
 import { SvelteKitPWA } from '@vite-pwa/sveltekit';
 import { createPWAConfig } from '@mana/shared-pwa';
-import { MANACORE_SHARED_PACKAGES, getBuildDefines } from '@mana/shared-vite-config';
+import { MANA_SHARED_PACKAGES, getBuildDefines } from '@mana/shared-vite-config';
 
 export default defineConfig({
 	plugins: [
@@ -39,10 +39,10 @@ export default defineConfig({
 		strictPort: true,
 	},
 	ssr: {
-		noExternal: [...MANACORE_SHARED_PACKAGES, '@manavoxel/shared'],
+		noExternal: [...MANA_SHARED_PACKAGES, '@manavoxel/shared'],
 	},
 	optimizeDeps: {
-		exclude: [...MANACORE_SHARED_PACKAGES, '@manavoxel/shared'],
+		exclude: [...MANA_SHARED_PACKAGES, '@manavoxel/shared'],
 	},
 	test: {
 		environment: 'jsdom',

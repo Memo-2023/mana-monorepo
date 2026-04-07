@@ -1,5 +1,5 @@
-/* Shared Component Styles for Manacore Apps
- * Import this in your app.css: @import '@manacore/shared-tailwind/components.css';
+/* Shared Component Styles for Mana Apps
+ * Import this in your app.css: @import '@mana/shared-tailwind/components.css';
  *
  * Requires theme-variables.css to be imported first for CSS variable support
  */

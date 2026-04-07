@@ -1,12 +1,12 @@
 # Central Theming System
 
-Das zentrale Theming-System ermöglicht einheitliches Aussehen und Benutzereinstellungen über alle Manacore-Apps hinweg. Es besteht aus mehreren Schichten: Theme-Varianten, Light/Dark-Modus und Accessibility-Einstellungen.
+Das zentrale Theming-System ermöglicht einheitliches Aussehen und Benutzereinstellungen über alle Mana-Apps hinweg. Es besteht aus mehreren Schichten: Theme-Varianten, Light/Dark-Modus und Accessibility-Einstellungen.
 
 ## Architektur
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                     mana-core-auth                          │
+│                     mana-auth                          │
 │  ┌─────────────────────────────────────────────────────┐   │
 │  │  user_settings (JSON-Feld)                           │   │
 │  │  - theme: { mode, colorScheme, pinnedThemes }       │   │
@@ -30,8 +30,8 @@ Das zentrale Theming-System ermöglicht einheitliches Aussehen und Benutzereinst
 
 | Package | Beschreibung |
 |---------|--------------|
-| `@manacore/shared-theme` | Theme Store, Types, Utilities, Konstanten |
-| `@manacore/shared-theme-ui` | Svelte UI-Komponenten (ThemeSelector, ThemePage, etc.) |
+| `@mana/shared-theme` | Theme Store, Types, Utilities, Konstanten |
+| `@mana/shared-theme-ui` | Svelte UI-Komponenten (ThemeSelector, ThemePage, etc.) |
 
 ## Theme-Varianten
 
@@ -109,7 +109,7 @@ background-color: hsl(var(--color-primary));
 ### Theme Store
 
 ```typescript
-import { createThemeStore } from '@manacore/shared-theme';
+import { createThemeStore } from '@mana/shared-theme';
 
 // Store erstellen
 export const theme = createThemeStore({
@@ -152,7 +152,7 @@ export const theme = createThemeStore({
 ### User Settings Store (Server-Sync)
 
 ```typescript
-import { createUserSettingsStore } from '@manacore/shared-theme';
+import { createUserSettingsStore } from '@mana/shared-theme';
 
 export const userSettings = createUserSettingsStore({
   appId: 'calendar',
@@ -186,7 +186,7 @@ await userSettings.updateAppOverride({
 ### A11y Store
 
 ```typescript
-import { createA11yStore } from '@manacore/shared-theme';
+import { createA11yStore } from '@mana/shared-theme';
 
 export const a11y = createA11yStore({ appId: 'calendar' });
 
@@ -226,7 +226,7 @@ Vollständige Themes-Seite mit allen Optionen:
 
 ```svelte
 <script>
-  import { ThemePage } from '@manacore/shared-theme-ui';
+  import { ThemePage } from '@mana/shared-theme-ui';
   import { theme, a11y } from '$lib/stores';
 </script>
 
@@ -247,7 +247,7 @@ Dropdown zur Theme-Auswahl:
 
 ```svelte
 <script>
-  import { ThemeSelector } from '@manacore/shared-theme-ui';
+  import { ThemeSelector } from '@mana/shared-theme-ui';
   import { theme } from '$lib/stores';
 </script>
 
@@ -260,7 +260,7 @@ Umschalter für Light/Dark/System:
 
 ```svelte
 <script>
-  import { ThemeModeSelector } from '@manacore/shared-theme-ui';
+  import { ThemeModeSelector } from '@mana/shared-theme-ui';
   import { theme } from '$lib/stores';
 </script>
 
@@ -273,7 +273,7 @@ Einfacher Dark/Light Toggle:
 
 ```svelte
 <script>
-  import { ThemeToggle } from '@manacore/shared-theme-ui';
+  import { ThemeToggle } from '@mana/shared-theme-ui';
   import { theme } from '$lib/stores';
 </script>
 
@@ -286,7 +286,7 @@ Vollständige Accessibility-Einstellungen:
 
 ```svelte
 <script>
-  import { A11ySettings } from '@manacore/shared-theme-ui';
+  import { A11ySettings } from '@mana/shared-theme-ui';
   import { a11y } from '$lib/stores';
 </script>
 
@@ -344,7 +344,7 @@ theme: {
 
 ## Dateien
 
-### @manacore/shared-theme
+### @mana/shared-theme
 
 | Datei | Beschreibung |
 |-------|--------------|
@@ -358,7 +358,7 @@ theme: {
 | `src/utils.ts` | Theme Utilities |
 | `src/app-routes.ts` | Start-Page Konfiguration |
 
-### @manacore/shared-theme-ui
+### @mana/shared-theme-ui
 
 | Datei | Beschreibung |
 |-------|--------------|
@@ -377,8 +377,8 @@ theme: {
 ```json
 {
   "dependencies": {
-    "@manacore/shared-theme": "workspace:*",
-    "@manacore/shared-theme-ui": "workspace:*"
+    "@mana/shared-theme": "workspace:*",
+    "@mana/shared-theme-ui": "workspace:*"
   }
 }
 ```
@@ -387,7 +387,7 @@ theme: {
 
 ```typescript
 // src/lib/stores/theme.ts
-import { createThemeStore, createA11yStore } from '@manacore/shared-theme';
+import { createThemeStore, createA11yStore } from '@mana/shared-theme';
 
 export const theme = createThemeStore({
   appId: 'myapp',
@@ -425,7 +425,7 @@ export const a11y = createA11yStore({
 ```svelte
 <!-- src/routes/(app)/themes/+page.svelte -->
 <script>
-  import { ThemePage } from '@manacore/shared-theme-ui';
+  import { ThemePage } from '@mana/shared-theme-ui';
   import { theme, a11y } from '$lib/stores/theme';
 </script>
 

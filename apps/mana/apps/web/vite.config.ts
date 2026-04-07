@@ -3,7 +3,7 @@ import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
 import { SvelteKitPWA } from '@vite-pwa/sveltekit';
 import { createPWAConfig } from '@mana/shared-pwa';
-import { MANACORE_SHARED_PACKAGES, getBuildDefines } from '@mana/shared-vite-config';
+import { MANA_SHARED_PACKAGES, getBuildDefines } from '@mana/shared-vite-config';
 
 /** App-specific shared packages used by migrated modules */
 const APP_SHARED_PACKAGES = ['@zitare/content', '@calc/shared'];
@@ -48,11 +48,11 @@ export default defineConfig({
 		strictPort: true,
 	},
 	ssr: {
-		noExternal: [...MANACORE_SHARED_PACKAGES, ...APP_SHARED_PACKAGES],
+		noExternal: [...MANA_SHARED_PACKAGES, ...APP_SHARED_PACKAGES],
 		external: ['@mlc-ai/web-llm'],
 	},
 	optimizeDeps: {
-		exclude: [...MANACORE_SHARED_PACKAGES, ...APP_SHARED_PACKAGES],
+		exclude: [...MANA_SHARED_PACKAGES, ...APP_SHARED_PACKAGES],
 	},
 	define: {
 		...getBuildDefines(),

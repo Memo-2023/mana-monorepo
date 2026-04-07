@@ -2,7 +2,7 @@ import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 import { SvelteKitPWA } from '@vite-pwa/sveltekit';
 import { createPWAConfig } from '@mana/shared-pwa';
-import { MANACORE_SHARED_PACKAGES, getBuildDefines } from '@mana/shared-vite-config';
+import { MANA_SHARED_PACKAGES, getBuildDefines } from '@mana/shared-vite-config';
 
 export default defineConfig({
 	plugins: [
@@ -22,10 +22,10 @@ export default defineConfig({
 		strictPort: true,
 	},
 	ssr: {
-		noExternal: [...MANACORE_SHARED_PACKAGES],
+		noExternal: [...MANA_SHARED_PACKAGES],
 	},
 	optimizeDeps: {
-		exclude: [...MANACORE_SHARED_PACKAGES],
+		exclude: [...MANA_SHARED_PACKAGES],
 	},
 	define: {
 		...getBuildDefines(),

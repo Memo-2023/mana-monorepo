@@ -32,7 +32,7 @@ internal/
 1. Create `internal/plugins/mybot/mybot.go`
 2. Implement `plugin.Plugin` interface
 3. Register via `func init() { plugin.Register("mybot", func() plugin.Plugin { return &MyBot{} }) }`
-4. Import in `cmd/server/main.go`: `_ "github.com/manacore/mana-matrix-bot/internal/plugins/mybot"`
+4. Import in `cmd/server/main.go`: `_ "github.com/mana/mana-matrix-bot/internal/plugins/mybot"`
 5. Set env: `MATRIX_MYBOT_BOT_TOKEN=syt_xxx`
 
 ## Commands

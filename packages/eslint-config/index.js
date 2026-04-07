@@ -1,7 +1,7 @@
 /**
  * @mana/eslint-config
  *
- * Shared ESLint configuration for Manacore monorepo.
+ * Shared ESLint configuration for Mana monorepo.
  * Import configs based on your project type:
  *
  * @example SvelteKit Web App

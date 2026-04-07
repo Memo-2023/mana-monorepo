@@ -1,6 +1,6 @@
 ---
 title: Mac Mini Server
-description: Production server setup and management for Manacore backends.
+description: Production server setup and management for Mana backends.
 ---
 
 import { Steps, Aside, Tabs, TabItem } from '@astrojs/starlight/components';
@@ -37,7 +37,7 @@ Requires `cloudflared` installed: `brew install cloudflare/cloudflare/cloudflare
 ## Directory Structure
 
 ```
-~/projects/manacore-monorepo/
+~/projects/mana-monorepo/
 ├── docker-compose.macmini.yml    # Production compose file
 ├── .env.production               # Production environment
 ├── scripts/mac-mini/             # Server management scripts
@@ -53,7 +53,7 @@ Requires `cloudflared` installed: `brew install cloudflare/cloudflare/cloudflare
 
 ```bash
 ssh mana-server
-cd ~/projects/manacore-monorepo
+cd ~/projects/mana-monorepo
 ./scripts/mac-mini/status.sh
 ```
 
@@ -71,7 +71,7 @@ chat-backend running (healthy)
 
 ```bash
 ssh mana-server
-cd ~/projects/manacore-monorepo
+cd ~/projects/mana-monorepo
 ./scripts/mac-mini/deploy.sh
 ```
 
@@ -117,12 +117,12 @@ services:
   postgres:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: manacore
+      POSTGRES_USER: mana
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U manacore"]
+      test: ["CMD-SHELL", "pg_isready -U mana"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -143,7 +143,7 @@ services:
       context: .
       dockerfile: services/mana-core-auth/Dockerfile
     environment:
-      - DATABASE_URL=postgresql://manacore:${POSTGRES_PASSWORD}@postgres:5432/manacore
+      - DATABASE_URL=postgresql://mana:${POSTGRES_PASSWORD}@postgres:5432/mana_platform
       - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379
     depends_on:
       postgres:
@@ -161,7 +161,7 @@ services:
       context: .
       dockerfile: apps/chat/apps/backend/Dockerfile
     environment:
-      - DATABASE_URL=postgresql://manacore:${POSTGRES_PASSWORD}@postgres:5432/chat
+      - DATABASE_URL=postgresql://mana:${POSTGRES_PASSWORD}@postgres:5432/chat
       - MANA_AUTH_URL=http://mana-auth:3001
     depends_on:
       - mana-auth
@@ -234,7 +234,7 @@ tail -f /var/log/cloudflared.log
 
 ```bash
 # Manual backup
-docker exec postgres pg_dump -U manacore manacore > backup_$(date +%Y%m%d).sql
+docker exec postgres pg_dump -U mana mana_platform > backup_$(date +%Y%m%d).sql
 
 # Automated daily backups (via cron)
 0 2 * * * /home/till/scripts/backup-databases.sh
@@ -247,7 +247,7 @@ docker exec postgres pg_dump -U manacore manacore > backup_$(date +%Y%m%d).sql
 docker compose -f docker-compose.macmini.yml stop chat-backend
 
 # Restore
-docker exec -i postgres psql -U manacore manacore < backup_20240115.sql
+docker exec -i postgres psql -U mana mana_platform < backup_20240115.sql
 
 # Start services
 docker compose -f docker-compose.macmini.yml start chat-backend
@@ -309,7 +309,7 @@ docker image prune -a
 docker compose -f docker-compose.macmini.yml ps postgres
 
 # Test connection
-docker exec -it postgres psql -U manacore -c "SELECT 1"
+docker exec -it postgres psql -U mana -c "SELECT 1"
 
 # Check logs
 docker compose -f docker-compose.macmini.yml logs postgres

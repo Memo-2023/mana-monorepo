@@ -7,7 +7,7 @@ Dieses Dokument bietet eine umfassende Übersicht über alle Projekte im Manacor
 1. [Übersicht](#übersicht)
 2. [Projekte](#projekte)
    - [Maerchenzauber](#maerchenzauber)
-   - [Manacore](#manacore)
+   - [Manacore](#mana)
    - [Cards](#cards)
    - [Memoro](#memoro)
    - [Picture](#picture)
@@ -45,7 +45,7 @@ pnpm run dev
 
 # Einzelnes Projekt starten
 pnpm run maerchenzauber:dev
-pnpm run manacore:dev
+pnpm run mana:dev
 pnpm run cards:dev
 pnpm run memoro:dev
 pnpm run picture:dev
@@ -146,7 +146,7 @@ Manacore ist die zentrale Plattform für Organisations-Management, Team-Kollabor
 #### Projektstruktur
 
 ```
-manacore/
+mana/
 ├── apps/
 │   ├── web/          # SvelteKit Web App
 │   ├── mobile/       # Expo React Native App
@@ -452,38 +452,38 @@ Alle Projekte teilen gemeinsame Packages unter `packages/`:
 
 | Package                     | Beschreibung                             |
 | --------------------------- | ---------------------------------------- |
-| `@manacore/shared-types`    | Gemeinsame TypeScript Types              |
-| `@manacore/shared-utils`    | Utility-Funktionen (Date, String, Async) |
-| `@manacore/shared-config`   | Gemeinsame Konfiguration                 |
+| `@mana/shared-types`    | Gemeinsame TypeScript Types              |
+| `@mana/shared-utils`    | Utility-Funktionen (Date, String, Async) |
+| `@mana/shared-config`   | Gemeinsame Konfiguration                 |
 
 ### Auth & Security
 
 | Package                        | Beschreibung             |
 | ------------------------------ | ------------------------ |
-| `@manacore/shared-auth`        | Authentifizierungs-Logik |
-| `@manacore/shared-auth-ui`     | Auth UI-Komponenten      |
-| `@manacore/shared-auth-stores` | Auth State Stores        |
+| `@mana/shared-auth`        | Authentifizierungs-Logik |
+| `@mana/shared-auth-ui`     | Auth UI-Komponenten      |
+| `@mana/shared-auth-stores` | Auth State Stores        |
 
 ### UI & Styling
 
 | Package                       | Beschreibung                |
 | ----------------------------- | --------------------------- |
-| `@manacore/shared-ui`         | React Native UI-Komponenten |
-| `@manacore/shared-icons`      | Icon-Library                |
-| `@manacore/shared-tailwind`   | Tailwind Konfiguration      |
-| `@manacore/shared-theme`      | Theme-Logik                 |
-| `@manacore/shared-theme-ui`   | Theme UI-Komponenten        |
-| `@manacore/shared-branding`   | Branding Assets             |
-| `@manacore/shared-landing-ui` | Landing Page Komponenten    |
+| `@mana/shared-ui`         | React Native UI-Komponenten |
+| `@mana/shared-icons`      | Icon-Library                |
+| `@mana/shared-tailwind`   | Tailwind Konfiguration      |
+| `@mana/shared-theme`      | Theme-Logik                 |
+| `@mana/shared-theme-ui`   | Theme UI-Komponenten        |
+| `@mana/shared-branding`   | Branding Assets             |
+| `@mana/shared-landing-ui` | Landing Page Komponenten    |
 
 ### Business Logic
 
 | Package                               | Beschreibung                  |
 | ------------------------------------- | ----------------------------- |
-| `@manacore/shared-subscription-types` | Subscription TypeScript Types |
-| `@manacore/shared-subscription-ui`    | Subscription UI-Komponenten   |
-| `@manacore/shared-credit-service`     | Credit/Mana Service           |
-| `@manacore/shared-i18n`               | Internationalisierung         |
+| `@mana/shared-subscription-types` | Subscription TypeScript Types |
+| `@mana/shared-subscription-ui`    | Subscription UI-Komponenten   |
+| `@mana/shared-credit-service`     | Credit/Mana Service           |
+| `@mana/shared-i18n`               | Internationalisierung         |
 
 ### Datenbank
 
@@ -496,8 +496,8 @@ Alle Projekte teilen gemeinsame Packages unter `packages/`:
 
 ```typescript
 // In einem beliebigen Projekt
-import { User, ApiResponse } from '@manacore/shared-types';
-import { formatDate, truncate, retry } from '@manacore/shared-utils';
+import { User, ApiResponse } from '@mana/shared-types';
+import { formatDate, truncate, retry } from '@mana/shared-utils';
 ```
 
 ---
@@ -519,7 +519,7 @@ import { formatDate, truncate, retry } from '@manacore/shared-utils';
 | Kategorie | Technologie                          |
 | --------- | ------------------------------------ |
 | API       | NestJS                               |
-| Auth      | Mana Core Middleware / Supabase Auth |
+| Auth      | Mana Middleware / Supabase Auth |
 | Database  | PostgreSQL (Supabase) / PocketBase   |
 | Storage   | Supabase Storage / Cloudflare R2     |
 | Cache     | Redis                                |
@@ -592,7 +592,7 @@ pnpm add -D <package> -w
 pnpm add <package> --filter maerchenzauber
 
 # Zu einem Shared Package hinzufügen
-pnpm add <package> --filter @manacore/shared-utils
+pnpm add <package> --filter @mana/shared-utils
 ```
 
 ### Projekt-spezifische Entwicklung
@@ -600,7 +600,7 @@ pnpm add <package> --filter @manacore/shared-utils
 Siehe die jeweiligen CLAUDE.md Dateien in den Projektverzeichnissen für detaillierte Entwicklungsanleitungen:
 
 - `maerchenzauber/CLAUDE.md`
-- `manacore/CLAUDE.md`
+- `mana/CLAUDE.md`
 - `cards/CLAUDE.md` (im Root)
 - `memoro/CLAUDE.md`
 - `uload/CLAUDE.md`
@@ -1431,9 +1431,9 @@ Basierend auf Synergien mit bestehenden Apps, Marktpotenzial und technischer Mac
 ### Technische Empfehlungen für neue Apps
 
 1. **Shared Packages erweitern:**
-   - `@manacore/shared-ai` - Gemeinsame KI-Service-Abstraktionen
-   - `@manacore/shared-storage` - File-Upload und -Management
-   - `@manacore/shared-realtime` - Echtzeit-Kollaboration
+   - `@mana/shared-ai` - Gemeinsame KI-Service-Abstraktionen
+   - `@mana/shared-storage` - File-Upload und -Management
+   - `@mana/shared-realtime` - Echtzeit-Kollaboration
 
 2. **Backend-Microservices:**
    - Jede größere KI-Funktion als eigener Service

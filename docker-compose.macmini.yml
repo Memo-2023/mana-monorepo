@@ -911,7 +911,7 @@ services:
       PUBLIC_MANA_LLM_URL_CLIENT: https://llm.mana.how
       # Analytics & Error Tracking
       PUBLIC_UMAMI_WEBSITE_ID: 32777167-e026-4618-933a-3429120b479b
-      PUBLIC_GLITCHTIP_DSN: ${GLITCHTIP_DSN_MANACORE_WEB:-}
+      PUBLIC_GLITCHTIP_DSN: ${GLITCHTIP_DSN_MANA_WEB:-}
     ports:
       - "5000:5000"
     healthcheck:

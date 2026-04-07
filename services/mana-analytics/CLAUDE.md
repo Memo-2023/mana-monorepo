@@ -1,6 +1,6 @@
 # mana-analytics
 
-Feedback and analytics service. Extracted from mana-core-auth.
+Feedback and analytics service. Extracted from mana-auth.
 
 ## Port: 3064
 
@@ -23,7 +23,7 @@ Tables: user_feedback, feedback_votes
 
 ```env
 PORT=3064
-DATABASE_URL=postgresql://manacore:devpassword@localhost:5432/mana_analytics
+DATABASE_URL=postgresql://mana:devpassword@localhost:5432/mana_analytics
 MANA_AUTH_URL=http://localhost:3001
 MANA_LLM_URL=http://localhost:3025
 ```

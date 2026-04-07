@@ -14,13 +14,7 @@
 	} from './queries';
 	import { tasksStore } from './stores/tasks.svelte';
 	import { toastStore } from '@mana/shared-ui/toast';
-	import {
-		Circle,
-		Check,
-		PencilSimple,
-		Trash,
-		ArrowCounterClockwise,
-	} from '@mana/shared-icons';
+	import { Circle, Check, PencilSimple, Trash, ArrowCounterClockwise } from '@mana/shared-icons';
 	import type { ViewProps } from '$lib/app-registry';
 	import { ContextMenu, type ContextMenuItem } from '@mana/shared-ui';
 	import { dropTarget, dragSource } from '@mana/shared-ui/dnd';

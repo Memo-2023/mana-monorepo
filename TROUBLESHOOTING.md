@@ -1,6 +1,6 @@
 # Troubleshooting Guide
 
-Common issues and solutions for the manacore-monorepo.
+Common issues and solutions for the mana-monorepo.
 
 ## Table of Contents
 
@@ -242,7 +242,7 @@ pnpm turbo run lint --filter=presi
 
    ```bash
    # Add shared config
-   pnpm add -D @manacore/eslint-config --filter @myapp/backend
+   pnpm add -D @mana/eslint-config --filter @myapp/backend
    ```
 
 2. **Incompatible ESLint versions**
@@ -297,7 +297,7 @@ Using **type-only imports** (`import {X }`) for classes that need to be injected
 ### ❌ WRONG - Type-Only Import
 
 ```typescript
-// services/mana-core-auth/src/ai/ai.service.ts - DON'T DO THIS!
+// services/mana-auth/src/ai/ai.service.ts - DON'T DO THIS!
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config'; // ❌ Type-only import
 
@@ -320,7 +320,7 @@ export class AiService {
 ### ✅ CORRECT - Regular Import
 
 ```typescript
-// services/mana-core-auth/src/ai/ai.service.ts - CORRECT
+// services/mana-auth/src/ai/ai.service.ts - CORRECT
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config'; // ✅ Regular import
 
@@ -361,8 +361,8 @@ export class AiService {
 4. Rebuild and test:
 
 ```bash
-pnpm --filter mana-core-auth build
-pnpm --filter mana-core-auth start:dev
+pnpm --filter mana-auth build
+pnpm --filter mana-auth start:dev
 ```
 
 ### Debugging
@@ -384,10 +384,10 @@ export class AiModule {}
 
 ```bash
 # Build the service
-pnpm --filter mana-core-auth build
+pnpm --filter mana-auth build
 
 # Check the compiled output
-cat services/mana-core-auth/dist/ai/ai.service.js | grep "require"
+cat services/mana-auth/dist/ai/ai.service.js | grep "require"
 
 # Should see:
 # const config_1 = require("@nestjs/config");  ✅ Good
@@ -401,7 +401,7 @@ If the error only happens in Docker but not locally:
 
 ```bash
 # Build Docker image without cache
-docker build --no-cache -f services/mana-core-auth/Dockerfile -t test .
+docker build --no-cache -f services/mana-auth/Dockerfile -t test .
 
 # Check the compiled code in the image
 docker run --rm --entrypoint cat test /app/dist/ai/ai.service.js
@@ -409,7 +409,7 @@ docker run --rm --entrypoint cat test /app/dist/ai/ai.service.js
 
 ### Related Issues
 
-- [Commit d69cc607](https://github.com/Memo-2023/manacore-monorepo/commit/d69cc607) - Fixed type-only ConfigService import in AiService
+- [Commit d69cc607](https://github.com/Memo-2023/mana-monorepo/commit/d69cc607) - Fixed type-only ConfigService import in AiService
 - TypeScript `import type` vs `import {}` - both erase at compile time
 - Docker layer caching can hide fixes if source wasn't properly copied
 
@@ -425,7 +425,7 @@ docker run --rm --entrypoint cat test /app/dist/ai/ai.service.js
 
 If you encounter an issue not covered here:
 
-1. Check the [GitHub Issues](https://github.com/Memo-2023/manacore-monorepo/issues)
+1. Check the [GitHub Issues](https://github.com/Memo-2023/mana-monorepo/issues)
 2. Review recent commits that may have introduced the issue
 3. Run `pnpm clean` and `pnpm install` to reset
 4. Create a new issue with full error logs

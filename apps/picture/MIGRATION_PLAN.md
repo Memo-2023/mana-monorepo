@@ -95,7 +95,7 @@ Datei: `services/api/client.ts`
 ```typescript
 import * as SecureStore from 'expo-secure-store';
 
-const APP_TOKEN_KEY = '@manacore/app_token';
+const APP_TOKEN_KEY = '@mana/app_token';
 const BACKEND_URL = process.env.EXPO_PUBLIC_PICTURE_BACKEND_URL || 'http://localhost:3003';
 
 async function getAuthToken(): Promise<string | null> {

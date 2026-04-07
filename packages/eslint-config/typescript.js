@@ -22,7 +22,6 @@ export const typescriptConfig = [
 				ecmaVersion: 2022,
 				sourceType: 'module',
 				projectService: true,
-				tsconfigRootDir: import.meta.dirname,
 			},
 		},
 		plugins: {
@@ -61,13 +60,9 @@ export const typescriptConfig = [
 			// Prefer modern patterns
 			'@typescript-eslint/prefer-as-const': 'warn',
 			'@typescript-eslint/no-inferrable-types': 'warn',
-			'@typescript-eslint/consistent-type-imports': [
-				'warn',
-				{
-					prefer: 'type-imports',
-					fixStyle: 'inline-type-imports',
-				},
-			],
+			// Disabled: requires type-aware linting which conflicts with svelte-eslint-parser
+			// for .svelte.ts files. Can be re-enabled with parser-specific scoping.
+			'@typescript-eslint/consistent-type-imports': 'off',
 
 			// ============================================
 			// OFF - Too strict or handled elsewhere

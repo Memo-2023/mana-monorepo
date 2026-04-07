@@ -56,9 +56,9 @@ function timeBlockToVEvent(block: TimeBlock): string {
 	}
 
 	// Add custom properties for Mana metadata
-	lines.push(`X-MANACORE-TYPE:${block.type}`);
-	lines.push(`X-MANACORE-KIND:${block.kind}`);
-	lines.push(`X-MANACORE-MODULE:${block.sourceModule}`);
+	lines.push(`X-MANA-TYPE:${block.type}`);
+	lines.push(`X-MANA-KIND:${block.kind}`);
+	lines.push(`X-MANA-MODULE:${block.sourceModule}`);
 
 	if (block.color) {
 		lines.push(`COLOR:${block.color}`);

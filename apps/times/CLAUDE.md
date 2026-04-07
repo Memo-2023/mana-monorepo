@@ -15,9 +15,9 @@ The Clock app was consolidated into Times — all clock features live under `/cl
 | Layer | Technology |
 |-------|------------|
 | Frontend | SvelteKit 2, Svelte 5 (runes), Tailwind CSS 4 |
-| Data | @manacore/local-store (Dexie.js + mana-sync) |
-| Auth | @manacore/shared-auth + AuthGate (guest mode supported) |
-| Icons | @manacore/shared-icons (Phosphor) |
+| Data | @mana/local-store (Dexie.js + mana-sync) |
+| Auth | @mana/shared-auth + AuthGate (guest mode supported) |
+| Icons | @mana/shared-icons (Phosphor) |
 | PWA | @vite-pwa/sveltekit + Workbox |
 | i18n | svelte-i18n (de, en) |
 | Testing | Vitest |

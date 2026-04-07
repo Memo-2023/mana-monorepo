@@ -240,10 +240,10 @@ pnpm setup:db:chat
 ### Per-Service Commands
 
 ```bash
-# mana-core-auth
-pnpm --filter mana-core-auth db:push
-pnpm --filter mana-core-auth db:generate
-pnpm --filter mana-core-auth db:migrate
+# mana-auth
+pnpm --filter mana-auth db:push
+pnpm --filter mana-auth db:generate
+pnpm --filter mana-auth db:migrate
 
 # chat-backend
 pnpm --filter @chat/server db:push
@@ -325,7 +325,7 @@ Migrations run automatically after database creation:
 # .github/workflows/cd-staging.yml
 - name: Run database migrations
   run: |
-    docker compose exec -T mana-core-auth pnpm run db:migrate
+    docker compose exec -T mana-auth pnpm run db:migrate
 ```
 
 ### Production Deployment
@@ -336,7 +336,7 @@ Migrations run BEFORE deploying new code:
 # .github/workflows/cd-production.yml
 - name: Run database migrations
   run: |
-    docker compose run --rm mana-core-auth pnpm run db:migrate
+    docker compose run --rm mana-auth pnpm run db:migrate
 
 - name: Deploy with zero-downtime
   run: |
@@ -352,7 +352,7 @@ Advisory locks prevent multiple instances from running migrations simultaneously
 ### How It Works
 
 ```typescript
-// services/mana-core-auth/src/db/migrate.ts
+// services/mana-auth/src/db/migrate.ts
 
 const MIGRATION_LOCK_ID = 987654321;
 
@@ -377,7 +377,7 @@ await db.execute(sql`SELECT pg_advisory_unlock(${LOCK_ID})`);
 
 | Service | Lock ID |
 |---------|---------|
-| mana-core-auth | `987654321` |
+| mana-auth | `987654321` |
 | chat-backend | (to be assigned) |
 | todo-backend | (to be assigned) |
 
@@ -530,7 +530,7 @@ src/db/migrations/
 
 ```bash
 # Connect to database
-docker compose exec -T postgres psql -U postgres -d manacore_auth
+docker compose exec -T postgres psql -U postgres -d mana_platform
 
 # Run down migration
 \i /path/to/001_add_feature.down.sql
@@ -594,7 +594,7 @@ docker compose exec -T postgres pg_isready -U postgres
 echo $DATABASE_URL
 
 # Manual connection test
-docker compose exec -T postgres psql -U postgres -d manacore_auth -c "SELECT 1"
+docker compose exec -T postgres psql -U postgres -d mana_platform -c "SELECT 1"
 ```
 
 ### Migration Fails in CI/CD
@@ -631,7 +631,7 @@ docker compose exec -T postgres psql -U postgres -d manacore_auth -c "SELECT 1"
 ## Migration File Structure
 
 ```
-services/mana-core-auth/
+services/mana-auth/
 ├── src/db/
 │   ├── schema/
 │   │   ├── index.ts           # Export all schemas

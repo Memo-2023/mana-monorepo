@@ -1,6 +1,6 @@
-# @manacore/test-config
+# @mana/test-config
 
-Shared test configurations for all projects in the Manacore monorepo.
+Shared test configurations for all projects in the Mana monorepo.
 
 ## Available Configurations
 
@@ -8,7 +8,7 @@ Shared test configurations for all projects in the Manacore monorepo.
 
 ```javascript
 // jest.config.js
-const baseConfig = require('@manacore/test-config/jest-backend');
+const baseConfig = require('@mana/test-config/jest-backend');
 
 module.exports = {
 	...baseConfig,
@@ -21,7 +21,7 @@ module.exports = {
 ```javascript
 // jest.config.js
 module.exports = {
-	preset: '@manacore/test-config/jest-mobile',
+	preset: '@mana/test-config/jest-mobile',
 	// Your project-specific overrides
 };
 ```
@@ -31,7 +31,7 @@ module.exports = {
 ```typescript
 // vitest.config.ts
 import { defineConfig, mergeConfig } from 'vitest/config';
-import baseConfig from '@manacore/test-config/vitest-base';
+import baseConfig from '@mana/test-config/vitest-base';
 
 export default mergeConfig(
 	baseConfig,
@@ -46,7 +46,7 @@ export default mergeConfig(
 ```typescript
 // vitest.config.ts
 import { defineConfig, mergeConfig } from 'vitest/config';
-import svelteConfig from '@manacore/test-config/vitest-svelte';
+import svelteConfig from '@mana/test-config/vitest-svelte';
 import { sveltekit } from '@sveltejs/kit/vite';
 
 export default mergeConfig(
@@ -63,7 +63,7 @@ export default mergeConfig(
 ```typescript
 // playwright.config.ts
 import { defineConfig } from '@playwright/test';
-import baseConfig from '@manacore/test-config/playwright';
+import baseConfig from '@mana/test-config/playwright';
 
 export default defineConfig({
 	...baseConfig,
@@ -96,7 +96,7 @@ export default defineConfig({
 
 - jest-expo preset
 - Transform ignore patterns for React Native modules
-- Support for @manacore packages
+- Support for @mana packages
 - Coverage from src/ and app/ directories
 
 ### Vitest Configs

@@ -11,7 +11,7 @@ Temporäre Mail-Server-Installation auf dem Mac Mini bis ein dediziertes Gerät 
 ### Vorteile
 - Sofort nutzbar
 - Keine zusätzliche Hardware nötig
-- Eigene Email-Adressen (@manacore.ai)
+- Eigene Email-Adressen (@mana.how)
 
 ### Nachteile
 - Alle Dienste auf einem Gerät (Single Point of Failure)
@@ -54,7 +54,7 @@ telnet <deine-öffentliche-ip> 25
 
 #### 1.1 DNS-Records anlegen
 
-Bei Cloudflare für `manacore.ai`:
+Bei Cloudflare für `mana.how`:
 
 ```
 # A-Record für Mail-Server (OHNE Proxy!)
@@ -66,18 +66,18 @@ Proxy: DNS only (grey cloud)
 # MX-Record
 Type: MX
 Name: @
-Content: mail.manacore.ai
+Content: mail.mana.how
 Priority: 10
 
 # SPF-Record
 Type: TXT
 Name: @
-Content: v=spf1 mx a:mail.manacore.ai ~all
+Content: v=spf1 mx a:mail.mana.how ~all
 
 # DMARC-Record
 Type: TXT
 Name: _dmarc
-Content: v=DMARC1; p=none; rua=mailto:till@manacore.ai
+Content: v=DMARC1; p=none; rua=mailto:till@mana.how
 ```
 
 #### 1.2 Router Port-Forwarding
@@ -253,7 +253,7 @@ cd mailcow-dockerized
 
 # Konfiguration generieren
 ./generate_config.sh
-# Hostname: mail.manacore.ai
+# Hostname: mail.mana.how
 # Timezone: Europe/Berlin
 
 # Ports anpassen (falls Konflikte)
@@ -271,7 +271,7 @@ docker compose up -d
 #### 3.1 Admin-Zugang
 
 ```
-URL: https://mail.manacore.ai:8443 (oder via Tunnel)
+URL: https://mail.mana.how:8443 (oder via Tunnel)
 User: admin
 Password: moohoo (SOFORT ÄNDERN!)
 ```
@@ -279,24 +279,24 @@ Password: moohoo (SOFORT ÄNDERN!)
 #### 3.2 Domain hinzufügen
 
 1. Configuration → Mail Setup → Domains
-2. Add domain: `manacore.ai`
+2. Add domain: `mana.how`
 3. DKIM-Key kopieren → in Cloudflare DNS eintragen
 
 #### 3.3 Postfächer erstellen
 
 | Adresse | Quota | Verwendung |
 |---------|-------|------------|
-| till@manacore.ai | 5 GB | Haupt-Postfach |
-| alerts@manacore.ai | 1 GB | Server-Alerts |
-| noreply@manacore.ai | 500 MB | Automatische Emails |
+| till@mana.how | 5 GB | Haupt-Postfach |
+| alerts@mana.how | 1 GB | Server-Alerts |
+| noreply@mana.how | 500 MB | Automatische Emails |
 
 #### 3.4 Aliases erstellen
 
 | Alias | Ziel |
 |-------|------|
-| support@manacore.ai | till@manacore.ai |
-| info@manacore.ai | till@manacore.ai |
-| admin@manacore.ai | till@manacore.ai |
+| support@mana.how | till@mana.how |
+| info@mana.how | till@mana.how |
+| admin@mana.how | till@mana.how |
 
 ### Phase 4: Cloudflare Tunnel erweitern (15 min)
 
@@ -308,7 +308,7 @@ In `~/.cloudflared/config.yml` hinzufügen:
 ingress:
   # ... bestehende Einträge ...
 
-  - hostname: mail.manacore.ai
+  - hostname: mail.mana.how
     service: https://localhost:8443
     originRequest:
       noTLSVerify: true
@@ -337,11 +337,11 @@ tls_starttls   on
 logfile        ~/.msmtp.log
 
 # Eigener Mail-Server
-account        manacore
+account        mana
 host           localhost
 port           587
-from           alerts@manacore.ai
-user           alerts@manacore.ai
+from           alerts@mana.how
+user           alerts@mana.how
 password       <alerts-password>
 
 # Gmail als Fallback
@@ -352,7 +352,7 @@ from           tills95@gmail.com
 user           tills95@gmail.com
 password       oeyabfavixcaqzvr
 
-account default : manacore
+account default : mana
 EOF
 
 chmod 600 ~/.msmtprc
@@ -366,8 +366,8 @@ TELEGRAM_BOT_TOKEN=8531397113:AAHmvzpQoWfnSGJo2-vaHuDNrpJSMOjs-AU
 TELEGRAM_CHAT_ID=7117174865
 
 # Email (neuer Server)
-EMAIL_TO=till@manacore.ai
-EMAIL_FROM=alerts@manacore.ai
+EMAIL_TO=till@mana.how
+EMAIL_FROM=alerts@mana.how
 ```
 
 ### Phase 6: Testing (30 min)
@@ -376,22 +376,22 @@ EMAIL_FROM=alerts@manacore.ai
 
 ```bash
 # Von Mac Mini
-echo "Test vom Mac Mini" | msmtp -a manacore till@manacore.ai
+echo "Test vom Mac Mini" | msmtp -a mana till@mana.how
 
 # Von extern
-# Email an till@manacore.ai senden
+# Email an till@mana.how senden
 ```
 
 #### 6.2 Empfangen testen
 
 ```bash
 # Webmail öffnen
-open https://mail.manacore.ai
+open https://mail.mana.how
 
 # Oder IMAP-Client konfigurieren
-# Server: mail.manacore.ai
+# Server: mail.mana.how
 # Port: 993 (IMAPS)
-# User: till@manacore.ai
+# User: till@mana.how
 ```
 
 #### 6.3 Spam-Score testen
@@ -404,7 +404,7 @@ open https://mail.manacore.ai
 
 ```bash
 # Manuell Fehler simulieren
-docker stop manacore-chat-backend
+docker stop mana-chat-backend
 
 # Health Check ausführen
 ./scripts/mac-mini/health-check.sh
@@ -412,7 +412,7 @@ docker stop manacore-chat-backend
 # Prüfen ob Alert ankommt (Telegram + Email)
 
 # Container wieder starten
-docker start manacore-chat-backend
+docker start mana-chat-backend
 ```
 
 ## Ressourcen-Monitoring
@@ -508,8 +508,8 @@ Wenn später ein separates Gerät verfügbar ist:
 - [ ] Router-Zugang für Port-Forwarding
 
 ### DNS (Cloudflare)
-- [ ] A-Record: mail.manacore.ai → IP (ohne Proxy)
-- [ ] MX-Record: manacore.ai → mail.manacore.ai
+- [ ] A-Record: mail.mana.how → IP (ohne Proxy)
+- [ ] MX-Record: mana.how → mail.mana.how
 - [ ] SPF-Record hinzugefügt
 - [ ] DMARC-Record hinzugefügt
 
@@ -527,7 +527,7 @@ Wenn später ein separates Gerät verfügbar ist:
 - [ ] Postfächer erstellt
 
 ### Cloudflare Tunnel
-- [ ] mail.manacore.ai hinzugefügt
+- [ ] mail.mana.how hinzugefügt
 - [ ] Tunnel neugestartet
 - [ ] Webmail erreichbar
 
