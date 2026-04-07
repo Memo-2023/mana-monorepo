@@ -64,7 +64,10 @@ describe('fetchWithRetry', () => {
 		const result = await fetchWithRetry('https://api.example.com/data');
 
 		expect(result.data).toBeNull();
-		expect(result.error).toContain('Authentication failed');
+		// Source returns the localised "Sitzung abgelaufen" message; the
+		// test asserts on the stable substring so a future copy tweak can
+		// land without breaking it.
+		expect(result.error).toContain('Sitzung abgelaufen');
 		expect(global.fetch).toHaveBeenCalledTimes(1);
 	});
 
@@ -77,7 +80,7 @@ describe('fetchWithRetry', () => {
 		const result = await fetchWithRetry('https://api.example.com/data');
 
 		expect(result.data).toBeNull();
-		expect(result.error).toContain('Authentication failed');
+		expect(result.error).toContain('Keine Berechtigung');
 		expect(global.fetch).toHaveBeenCalledTimes(1);
 	});
 
@@ -139,7 +142,8 @@ describe('fetchWithRetry', () => {
 		);
 
 		expect(result.data).toBeNull();
-		expect(result.error).toContain('HTTP 500');
+		// Source throws `Server-Fehler (500)` after exhausting retries.
+		expect(result.error).toContain('Server-Fehler (500)');
 		// 1 initial + 1 retry = 2
 		expect(global.fetch).toHaveBeenCalledTimes(2);
 	});

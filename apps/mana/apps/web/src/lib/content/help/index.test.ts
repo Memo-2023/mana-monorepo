@@ -1,5 +1,21 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll } from 'vitest';
+import { addMessages, init, locale, waitLocale } from 'svelte-i18n';
+import deHelp from '$lib/i18n/locales/help/de.json';
+import enHelp from '$lib/i18n/locales/help/en.json';
 import { getManaHelpContent } from './index';
+
+// svelte-i18n is module-scoped: register the help dictionary once before
+// any test calls the t() helper. Without this the store returns the bare
+// key strings and getManaHelpContent() throws on `.split(',')` of an
+// untranslated tags field.
+beforeAll(async () => {
+	addMessages('de', { help: deHelp });
+	addMessages('en', { help: enHelp });
+	init({ fallbackLocale: 'de', initialLocale: 'de' });
+	locale.set('de');
+	await waitLocale('de');
+	await waitLocale('en');
+});
 
 describe('Mana Help Content', () => {
 	it('returns valid German content', () => {
