@@ -25,13 +25,40 @@ import {
 
 // ─── Types ────────────────────────────────────────────────────
 
+/** Operations the sync protocol supports. */
+export type SyncOp = 'insert' | 'update' | 'delete';
+
+/** A single field-level change carrying its own LWW timestamp. */
+export interface FieldChange {
+	value: unknown;
+	updatedAt: string;
+}
+
+/**
+ * One row of a changeset on the wire. Pending changes (local) and server
+ * changes (remote) share the same shape so the validator can be reused.
+ *
+ * Invariants the validator enforces:
+ *   - `op === 'update'` requires `fields` (record-level `data` is ignored).
+ *   - `op === 'insert'` requires `data`.
+ *   - A `deletedAt` flag implies a soft delete regardless of `op`.
+ */
+export interface SyncChange {
+	table: string;
+	id: string;
+	op: SyncOp;
+	fields?: Record<string, FieldChange>;
+	data?: Record<string, unknown>;
+	deletedAt?: string;
+}
+
 interface PendingChange {
 	id?: number;
 	appId: string;
 	collection: string;
 	recordId: string;
-	op: 'insert' | 'update' | 'delete';
-	fields?: Record<string, { value: unknown; updatedAt: string }>;
+	op: SyncOp;
+	fields?: Record<string, FieldChange>;
 	data?: Record<string, unknown>;
 	deletedAt?: string;
 	createdAt: string;
@@ -42,6 +69,223 @@ interface SyncMeta {
 	collection: string;
 	lastSyncedAt: string;
 	pendingCount: number;
+}
+
+// ─── Wire-format type guards ─────────────────────────────────
+//
+// Server payloads are untrusted: a malformed `serverChanges` entry must be
+// rejected before it touches Dexie. Hand-rolled guards keep us free of a
+// runtime-validation dependency while still narrowing types properly.
+
+function isFieldChange(v: unknown): v is FieldChange {
+	if (!v || typeof v !== 'object') return false;
+	const f = v as Record<string, unknown>;
+	return 'value' in f && (f.updatedAt === undefined || typeof f.updatedAt === 'string');
+}
+
+function isFieldsMap(v: unknown): v is Record<string, FieldChange> {
+	if (!v || typeof v !== 'object') return false;
+	for (const value of Object.values(v as Record<string, unknown>)) {
+		if (!isFieldChange(value)) return false;
+	}
+	return true;
+}
+
+function isSyncOp(v: unknown): v is SyncOp {
+	return v === 'insert' || v === 'update' || v === 'delete';
+}
+
+/**
+ * Returns `true` only for objects that match the on-the-wire SyncChange
+ * contract well enough to apply safely. Soft errors (missing optional
+ * fields) are tolerated; structural errors (wrong types, missing id/table)
+ * are not.
+ */
+export function isValidSyncChange(v: unknown): v is SyncChange {
+	if (!v || typeof v !== 'object') return false;
+	const c = v as Record<string, unknown>;
+	if (typeof c.table !== 'string' || c.table === '') return false;
+	if (typeof c.id !== 'string' || c.id === '') return false;
+	if (!isSyncOp(c.op)) return false;
+	if (c.fields !== undefined && !isFieldsMap(c.fields)) return false;
+	if (c.data !== undefined && (typeof c.data !== 'object' || c.data === null)) return false;
+	if (c.deletedAt !== undefined && typeof c.deletedAt !== 'string') return false;
+	return true;
+}
+
+// ─── Apply Server Changes (top-level so unit tests can import directly) ──
+
+/**
+ * Reads the per-field LWW timestamps off a record. Returns an empty map for
+ * legacy records that pre-date __fieldTimestamps so callers can fall back to
+ * record-level `updatedAt`.
+ */
+export function readFieldTimestamps(record: unknown): Record<string, string> {
+	if (!record || typeof record !== 'object') return {};
+	const ft = (record as Record<string, unknown>)[FIELD_TIMESTAMPS_KEY];
+	return ft && typeof ft === 'object' ? (ft as Record<string, string>) : {};
+}
+
+/**
+ * Applies a batch of server changes to the local Dexie database with
+ * field-level Last-Write-Wins conflict resolution.
+ *
+ * Three branches based on the change op:
+ *   - delete / deletedAt → soft delete (LWW-guarded) or hard delete
+ *   - insert             → upsert with LWW merge against per-field timestamps
+ *   - update + fields    → field-level LWW merge using server field timestamps
+ *
+ * Hooks are suppressed via setApplyingServerChanges so applied changes do
+ * NOT generate new pending-changes (sync loop prevention). Malformed
+ * entries are dropped before any DB work happens.
+ */
+export async function applyServerChanges(appId: string, changes: unknown[]): Promise<void> {
+	// Reject malformed entries up-front so a single bad row from the server
+	// can never write garbage into IndexedDB. Drops are logged once and the
+	// good entries proceed — partial degradation beats a hard crash on a
+	// payload we can't fix from the client.
+	const validChanges: SyncChange[] = [];
+	let dropped = 0;
+	for (const c of changes) {
+		if (isValidSyncChange(c)) validChanges.push(c);
+		else dropped++;
+	}
+	if (dropped > 0) {
+		console.warn(
+			`[mana-sync] dropped ${dropped}/${changes.length} malformed server changes for app=${appId}`
+		);
+	}
+	if (validChanges.length === 0) return;
+
+	setApplyingServerChanges(true);
+	try {
+		// Group changes by table (server returns backend collection names)
+		const byTable = new Map<string, SyncChange[]>();
+		for (const change of validChanges) {
+			const unifiedTable = fromSyncName(appId, change.table);
+			if (!byTable.has(unifiedTable)) byTable.set(unifiedTable, []);
+			byTable.get(unifiedTable)!.push(change);
+		}
+
+		for (const [tableName, tableChanges] of byTable) {
+			const table = db.table(tableName);
+
+			await db.transaction('rw', table, async () => {
+				for (const change of tableChanges) {
+					const recordId = change.id;
+
+					if (change.deletedAt || change.op === 'delete') {
+						const existing = await table.get(recordId);
+						if (!existing) continue;
+						if (change.deletedAt) {
+							const localFT = readFieldTimestamps(existing);
+							const serverTime = change.deletedAt;
+							const localDeletedAtTime =
+								localFT.deletedAt ??
+								((existing as Record<string, unknown>).deletedAt as string | undefined) ??
+								'';
+							if (serverTime >= localDeletedAtTime) {
+								await table.update(recordId, {
+									deletedAt: serverTime,
+									updatedAt: serverTime,
+									[FIELD_TIMESTAMPS_KEY]: {
+										...localFT,
+										deletedAt: serverTime,
+										updatedAt: serverTime,
+									},
+								});
+							}
+						} else {
+							await table.delete(recordId);
+						}
+					} else if (change.op === 'insert') {
+						// Upsert. `change.data` is the canonical payload; fall back to
+						// the change envelope only for older flattened formats.
+						const existing = await table.get(recordId);
+						const changeData = change.data ?? (change as unknown as Record<string, unknown>);
+						const recordTime =
+							(changeData.updatedAt as string | undefined) ??
+							(changeData.createdAt as string | undefined) ??
+							new Date().toISOString();
+
+						if (!existing) {
+							const ft: Record<string, string> = {};
+							for (const key of Object.keys(changeData)) {
+								if (key === 'id' || key === FIELD_TIMESTAMPS_KEY) continue;
+								ft[key] = recordTime;
+							}
+							await table.put({
+								...changeData,
+								id: recordId,
+								[FIELD_TIMESTAMPS_KEY]: ft,
+							});
+						} else {
+							const localFT = readFieldTimestamps(existing);
+							const localUpdatedAt =
+								((existing as Record<string, unknown>).updatedAt as string | undefined) ?? '';
+							const updates: Record<string, unknown> = {};
+							const newFT: Record<string, string> = { ...localFT };
+
+							for (const [key, val] of Object.entries(changeData)) {
+								if (key === 'id' || key === FIELD_TIMESTAMPS_KEY) continue;
+								const localFieldTime = localFT[key] ?? localUpdatedAt;
+								if (recordTime >= localFieldTime) {
+									updates[key] = val;
+									newFT[key] = recordTime;
+								}
+							}
+							if (Object.keys(updates).length > 0) {
+								updates[FIELD_TIMESTAMPS_KEY] = newFT;
+								await table.update(recordId, updates);
+							}
+						}
+					} else if (change.op === 'update' && change.fields) {
+						// Field-level LWW update — the canonical conflict-resolution path.
+						const existing = await table.get(recordId);
+						const serverFields = change.fields;
+
+						if (!existing) {
+							// Reconstruct from fields. Other clients only see this if the
+							// record was deleted locally — recreate it under the server's
+							// authority.
+							const record: Record<string, unknown> = { id: recordId };
+							const ft: Record<string, string> = {};
+							const fallback = new Date().toISOString();
+							for (const [key, fc] of Object.entries(serverFields)) {
+								record[key] = fc.value;
+								ft[key] = fc.updatedAt ?? fallback;
+							}
+							record[FIELD_TIMESTAMPS_KEY] = ft;
+							await table.put(record);
+						} else {
+							// Per-field comparison. Falls back to record-level updatedAt
+							// only for legacy records that pre-date __fieldTimestamps.
+							const localFT = readFieldTimestamps(existing);
+							const localUpdatedAt =
+								((existing as Record<string, unknown>).updatedAt as string | undefined) ?? '';
+							const updates: Record<string, unknown> = {};
+							const newFT: Record<string, string> = { ...localFT };
+
+							for (const [key, fc] of Object.entries(serverFields)) {
+								const serverTime = fc.updatedAt ?? '';
+								const localFieldTime = localFT[key] ?? localUpdatedAt;
+								if (serverTime >= localFieldTime) {
+									updates[key] = fc.value;
+									newFT[key] = serverTime;
+								}
+							}
+							if (Object.keys(updates).length > 0) {
+								updates[FIELD_TIMESTAMPS_KEY] = newFT;
+								await table.update(recordId, updates);
+							}
+						}
+					}
+				}
+			});
+		}
+	} finally {
+		setApplyingServerChanges(false);
+	}
 }
 
 interface SyncChannelState {
@@ -413,150 +657,6 @@ export function createUnifiedSync(serverUrl: string, getToken: () => Promise<str
 		sseAbortControllers.delete(appId);
 		if (channels.has(appId) && online) {
 			setTimeout(() => connectSSE(appId), WS_RECONNECT_DELAY);
-		}
-	}
-
-	// ─── Apply Server Changes ───────────────────────────────
-
-	function readFieldTimestamps(record: unknown): Record<string, string> {
-		if (!record || typeof record !== 'object') return {};
-		const ft = (record as Record<string, unknown>)[FIELD_TIMESTAMPS_KEY];
-		return ft && typeof ft === 'object' ? (ft as Record<string, string>) : {};
-	}
-
-	async function applyServerChanges(appId: string, changes: any[]): Promise<void> {
-		setApplyingServerChanges(true);
-		try {
-			// Group changes by table (server returns backend collection names)
-			const byTable = new Map<string, any[]>();
-			for (const change of changes) {
-				const serverTable = change.table;
-				// Map backend collection name → unified table name
-				const unifiedTable = fromSyncName(appId, serverTable);
-				if (!byTable.has(unifiedTable)) byTable.set(unifiedTable, []);
-				byTable.get(unifiedTable)!.push(change);
-			}
-
-			for (const [tableName, tableChanges] of byTable) {
-				const table = db.table(tableName);
-
-				await db.transaction('rw', table, async () => {
-					for (const change of tableChanges) {
-						const recordId = change.id;
-
-						if (change.deletedAt || change.op === 'delete') {
-							// Soft delete (deletedAt) or hard delete
-							const existing = await table.get(recordId);
-							if (existing) {
-								if (change.deletedAt) {
-									const localFT = readFieldTimestamps(existing);
-									const serverTime = change.deletedAt as string;
-									// LWW guard: only apply if newer than local deletedAt timestamp
-									const localDeletedAtTime = localFT.deletedAt ?? (existing as any).deletedAt ?? '';
-									if (serverTime >= localDeletedAtTime) {
-										const newFT = {
-											...localFT,
-											deletedAt: serverTime,
-											updatedAt: serverTime,
-										};
-										await table.update(recordId, {
-											deletedAt: serverTime,
-											updatedAt: serverTime,
-											[FIELD_TIMESTAMPS_KEY]: newFT,
-										});
-									}
-								} else {
-									await table.delete(recordId);
-								}
-							}
-						} else if (change.op === 'insert') {
-							// Upsert for inserts
-							const existing = await table.get(recordId);
-							const changeData = (change.data ?? change) as Record<string, unknown>;
-							const recordTime =
-								(changeData.updatedAt as string | undefined) ??
-								(changeData.createdAt as string | undefined) ??
-								new Date().toISOString();
-
-							if (!existing) {
-								// Stamp every field at the record's timestamp
-								const ft: Record<string, string> = {};
-								for (const key of Object.keys(changeData)) {
-									if (key === 'id' || key === FIELD_TIMESTAMPS_KEY) continue;
-									ft[key] = recordTime;
-								}
-								await table.put({
-									...changeData,
-									id: recordId,
-									[FIELD_TIMESTAMPS_KEY]: ft,
-								});
-							} else {
-								// Existing record — merge with field-level LWW using recordTime as
-								// the timestamp for every incoming field.
-								const localFT = readFieldTimestamps(existing);
-								const localUpdatedAt = (existing as any).updatedAt ?? '';
-								const updates: Record<string, unknown> = {};
-								const newFT: Record<string, string> = { ...localFT };
-
-								for (const [key, val] of Object.entries(changeData)) {
-									if (key === 'id' || key === FIELD_TIMESTAMPS_KEY) continue;
-									const localFieldTime = localFT[key] ?? localUpdatedAt;
-									if (recordTime >= localFieldTime) {
-										updates[key] = val;
-										newFT[key] = recordTime;
-									}
-								}
-								if (Object.keys(updates).length > 0) {
-									updates[FIELD_TIMESTAMPS_KEY] = newFT;
-									await table.update(recordId, updates);
-								}
-							}
-						} else if (change.op === 'update' && change.fields) {
-							// Field-level LWW update
-							const existing = await table.get(recordId);
-							const serverFields = change.fields as Record<
-								string,
-								{ value: unknown; updatedAt?: string }
-							>;
-
-							if (!existing) {
-								// Record doesn't exist locally — reconstruct from fields
-								const record: Record<string, unknown> = { id: recordId };
-								const ft: Record<string, string> = {};
-								const fallback = new Date().toISOString();
-								for (const [key, fc] of Object.entries(serverFields)) {
-									record[key] = fc.value;
-									ft[key] = fc.updatedAt ?? fallback;
-								}
-								record[FIELD_TIMESTAMPS_KEY] = ft;
-								await table.put(record);
-							} else {
-								// Merge — compare per-field timestamps. Falls back to record-level
-								// updatedAt for legacy records that pre-date __fieldTimestamps.
-								const localFT = readFieldTimestamps(existing);
-								const localUpdatedAt = (existing as any).updatedAt ?? '';
-								const updates: Record<string, unknown> = {};
-								const newFT: Record<string, string> = { ...localFT };
-
-								for (const [key, fc] of Object.entries(serverFields)) {
-									const serverTime = fc.updatedAt ?? '';
-									const localFieldTime = localFT[key] ?? localUpdatedAt;
-									if (serverTime >= localFieldTime) {
-										updates[key] = fc.value;
-										newFT[key] = serverTime;
-									}
-								}
-								if (Object.keys(updates).length > 0) {
-									updates[FIELD_TIMESTAMPS_KEY] = newFT;
-									await table.update(recordId, updates);
-								}
-							}
-						}
-					}
-				});
-			}
-		} finally {
-			setApplyingServerChanges(false);
 		}
 	}
 
