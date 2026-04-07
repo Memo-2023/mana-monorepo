@@ -1,32 +1,6 @@
 <script lang="ts">
 	import QRCode from 'qrcode';
-	import type { AuthResult } from '../types';
-
-	export interface TwoFactorSetupTranslations {
-		title: string;
-		statusEnabled: string;
-		statusDisabled: string;
-		enableButton: string;
-		disableButton: string;
-		regenerateButton: string;
-		passwordLabel: string;
-		passwordPlaceholder: string;
-		confirmButton: string;
-		cancelButton: string;
-		setupTitle: string;
-		setupStep1: string;
-		setupStep2: string;
-		manualEntryLabel: string;
-		copyButton: string;
-		copiedButton: string;
-		doneButton: string;
-		disableConfirmTitle: string;
-		disableConfirmText: string;
-		backupCodesTitle: string;
-		backupCodesWarning: string;
-		copyCodesButton: string;
-		copiedCodesButton: string;
-	}
+	import type { AuthResult, TwoFactorSetupTranslations } from '../types';
 
 	const defaultTranslations: TwoFactorSetupTranslations = {
 		title: 'Zwei-Faktor-Authentifizierung',

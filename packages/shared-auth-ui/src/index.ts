@@ -53,7 +53,7 @@ export type {
 	GuestWelcomeTranslations,
 	AuthGateAction,
 	AuthGateTranslations,
+	PasskeyManagerTranslations,
+	TwoFactorSetupTranslations,
+	SessionManagerTranslations,
 } from './types';
-export type { PasskeyManagerTranslations } from './components/PasskeyManager.svelte';
-export type { TwoFactorSetupTranslations } from './components/TwoFactorSetup.svelte';
-export type { SessionManagerTranslations } from './components/SessionManager.svelte';

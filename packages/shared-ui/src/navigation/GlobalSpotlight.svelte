@@ -1,42 +1,12 @@
 <script lang="ts">
-	import type { PillAppItem } from './types';
+	import type {
+		PillAppItem,
+		SpotlightAction,
+		ContentSearchResult,
+		ContentSearchGroup,
+		ContentSearcher,
+	} from './types';
 	import { createAppNavigationStore } from './appNavigationStore.svelte';
-
-	export interface SpotlightAction {
-		id: string;
-		label: string;
-		description?: string;
-		icon?: string;
-		shortcut?: string;
-		category?: string;
-		onExecute: () => void;
-	}
-
-	export interface ContentSearchResult {
-		id: string;
-		type: string;
-		appId: string;
-		title: string;
-		subtitle?: string;
-		appIcon?: string;
-		appColor?: string;
-		href: string;
-		score: number;
-		matchedField?: string;
-	}
-
-	export interface ContentSearchGroup {
-		appId: string;
-		appName: string;
-		appIcon?: string;
-		appColor?: string;
-		results: ContentSearchResult[];
-	}
-
-	export type ContentSearcher = (
-		query: string,
-		signal: AbortSignal
-	) => Promise<ContentSearchGroup[]>;
 
 	interface Props {
 		open: boolean;

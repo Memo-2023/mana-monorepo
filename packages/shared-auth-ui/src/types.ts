@@ -76,3 +76,80 @@ export interface AuthGateTranslations {
 	/** Function to generate migration info text */
 	migrationInfo: (count: number) => string;
 }
+
+/**
+ * Translation strings for the PasskeyManager
+ */
+export interface PasskeyManagerTranslations {
+	title: string;
+	noPasskeys: string;
+	registerButton: string;
+	renameButton: string;
+	deleteButton: string;
+	cancelButton: string;
+	saveButton: string;
+	confirmDeleteTitle: string;
+	confirmDeleteMessage: string;
+	created: string;
+	lastUsed: string;
+	never: string;
+	backedUp: string;
+	notBackedUp: string;
+	browserNotSupported: string;
+	registerNamePlaceholder: string;
+	registerNameLabel: string;
+	registerTitle: string;
+	renamePlaceholder: string;
+	errorGeneric: string;
+	daysAgo: (days: number) => string;
+	hoursAgo: (hours: number) => string;
+	minutesAgo: (minutes: number) => string;
+	justNow: string;
+}
+
+export interface TwoFactorSetupTranslations {
+	title: string;
+	statusEnabled: string;
+	statusDisabled: string;
+	enableButton: string;
+	disableButton: string;
+	regenerateButton: string;
+	passwordLabel: string;
+	passwordPlaceholder: string;
+	confirmButton: string;
+	cancelButton: string;
+	setupTitle: string;
+	setupStep1: string;
+	setupStep2: string;
+	manualEntryLabel: string;
+	copyButton: string;
+	copiedButton: string;
+	doneButton: string;
+	disableConfirmTitle: string;
+	disableConfirmText: string;
+	backupCodesTitle: string;
+	backupCodesWarning: string;
+	copyCodesButton: string;
+	copiedCodesButton: string;
+}
+
+export interface SessionManagerTranslations {
+	title?: string;
+	subtitle?: string;
+	current?: string;
+	revoke?: string;
+	revokeAll?: string;
+	lastActivity?: string;
+	confirmRevoke?: string;
+	confirmRevokeAll?: string;
+	noSessions?: string;
+	unknown?: string;
+	refresh?: string;
+	revokeError?: string;
+	revokeAllError?: string;
+	justNow?: string;
+	minutesAgo?: string;
+	hoursAgo?: string;
+	yesterday?: string;
+	daysAgo?: string;
+}

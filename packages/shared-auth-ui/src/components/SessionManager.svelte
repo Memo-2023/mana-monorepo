@@ -1,26 +1,6 @@
 <script lang="ts">
 	import { parseUserAgent, getDeviceType } from '../utils/userAgent';
-
-	export interface SessionManagerTranslations {
-		title?: string;
-		subtitle?: string;
-		current?: string;
-		revoke?: string;
-		revokeAll?: string;
-		lastActivity?: string;
-		confirmRevoke?: string;
-		confirmRevokeAll?: string;
-		noSessions?: string;
-		unknown?: string;
-		refresh?: string;
-		revokeError?: string;
-		revokeAllError?: string;
-		justNow?: string;
-		minutesAgo?: string;
-		hoursAgo?: string;
-		yesterday?: string;
-		daysAgo?: string;
-	}
+	import type { SessionManagerTranslations } from '../types';
 
 	interface Session {
 		id: string;

@@ -6,16 +6,7 @@
 	import { _ } from 'svelte-i18n';
 	import { Plus, X, ArrowsOut } from '@mana/shared-icons';
 	import type { Snippet } from 'svelte';
-
-	export interface CarouselPage {
-		id: string;
-		minimized: boolean;
-		maximized?: boolean;
-		widthPx: number;
-		heightPx?: number;
-		title: string;
-		color: string;
-	}
+	import type { CarouselPage } from './types';
 
 	interface Props {
 		pages: CarouselPage[];

@@ -1,31 +1,5 @@
 <script lang="ts">
-	/** Translation strings for the PasskeyManager */
-	export interface PasskeyManagerTranslations {
-		title: string;
-		noPasskeys: string;
-		registerButton: string;
-		renameButton: string;
-		deleteButton: string;
-		cancelButton: string;
-		saveButton: string;
-		confirmDeleteTitle: string;
-		confirmDeleteMessage: string;
-		created: string;
-		lastUsed: string;
-		never: string;
-		backedUp: string;
-		notBackedUp: string;
-		browserNotSupported: string;
-		registerNamePlaceholder: string;
-		registerNameLabel: string;
-		registerTitle: string;
-		renamePlaceholder: string;
-		errorGeneric: string;
-		daysAgo: (days: number) => string;
-		hoursAgo: (hours: number) => string;
-		minutesAgo: (minutes: number) => string;
-		justNow: string;
-	}
+	import type { PasskeyManagerTranslations } from '../types';
 
 	interface Passkey {
 		id: string;
