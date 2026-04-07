@@ -1,0 +1,64 @@
+{
+	"app": {
+		"name": "Cycles",
+		"tagline": "Menstruationszyklus-Tracking"
+	},
+	"phase": {
+		"menstruation": "Menstruation",
+		"follicular": "Follikelphase",
+		"ovulation": "Eisprung",
+		"luteal": "Lutealphase",
+		"unknown": "Unbekannt"
+	},
+	"flow": {
+		"none": "Keine",
+		"spotting": "Schmierblutung",
+		"light": "Leicht",
+		"medium": "Mittel",
+		"heavy": "Stark"
+	},
+	"mood": {
+		"great": "Großartig",
+		"good": "Gut",
+		"neutral": "Neutral",
+		"low": "Niedrig",
+		"bad": "Schlecht"
+	},
+	"label": {
+		"cycleDay": "Zyklustag",
+		"daysUntilPeriod": "Tage bis zur Periode",
+		"today": "Heute",
+		"predicted": "vorhergesagt",
+		"daysOverdue": "Tage überfällig",
+		"todayBleeding": "Heute · Blutung",
+		"bleeding": "Blutung",
+		"mood": "Stimmung",
+		"symptoms": "Symptome",
+		"basalAndNotes": "Basaltemperatur & Notizen",
+		"stats": "Statistik",
+		"recentEntries": "Letzte Einträge",
+		"editing": "Bearbeite"
+	},
+	"action": {
+		"startPeriod": "Periode starten",
+		"endPeriod": "Periode beendet",
+		"backToToday": "Zurück zu heute",
+		"delete": "Löschen"
+	},
+	"input": {
+		"temperaturePlaceholder": "36.5 °C",
+		"notesPlaceholder": "Notiz..."
+	},
+	"stats": {
+		"avgDays": "Ø Tage",
+		"shortest": "kürzester",
+		"longest": "längster",
+		"cycles": "Zyklen",
+		"nextPeriod": "Nächste Periode:",
+		"fertileWindow": "Fruchtbares Fenster:"
+	},
+	"empty": "Tippe oben auf eine Blutungsstärke, um deinen ersten Tag festzuhalten — oder starte direkt eine Periode.",
+	"confirm": {
+		"deleteEntry": "Tageseintrag vom {date} wirklich löschen?"
+	}
+}

@@ -3,6 +3,7 @@
   Aktueller Zyklus, heutiger Quick-Log, einfache Statistiken.
 -->
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import {
 		formatLogDate,
 		useAllCycles,
@@ -19,16 +20,7 @@
 		predictFertileWindow,
 		predictNextPeriodStart,
 	} from './utils/prediction';
-	import {
-		FLOW_COLORS,
-		FLOW_LABELS,
-		MOOD_COLORS,
-		MOOD_LABELS,
-		PHASE_COLORS,
-		PHASE_LABELS,
-		type Flow,
-		type Mood,
-	} from './types';
+	import { FLOW_COLORS, MOOD_COLORS, PHASE_COLORS, type Flow, type Mood } from './types';
 	import type { ViewProps } from '$lib/app-registry';
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -115,9 +107,8 @@
 			backToToday();
 			return;
 		}
-		const ok = confirm(
-			`Tageseintrag vom ${new Date(editingDate).toLocaleDateString('de-DE')} wirklich löschen?`
-		);
+		const dateStr = new Date(editingDate).toLocaleDateString('de-DE');
+		const ok = confirm($_('cycles.confirm.deleteEntry', { values: { date: dateStr } }));
 		if (!ok) return;
 		await dayLogsStore.deleteLog(editingLog.id);
 		backToToday();
@@ -149,31 +140,35 @@
 		<div class="phase-top">
 			<span class="phase-dot"></span>
 			<div class="phase-info">
-				<span class="phase-label">{PHASE_LABELS[phase]}</span>
+				<span class="phase-label">{$_(`cycles.phase.${phase}`)}</span>
 				{#if cycleDay}
-					<span class="phase-sub">Zyklustag {cycleDay}</span>
+					<span class="phase-sub">{$_('cycles.label.cycleDay')} {cycleDay}</span>
 				{/if}
 			</div>
 			{#if daysUntil !== null}
 				<div class="phase-countdown">
 					{#if daysUntil > 0}
 						<strong>{daysUntil}</strong>
-						<span>Tage bis zur Periode</span>
+						<span>{$_('cycles.label.daysUntilPeriod')}</span>
 					{:else if daysUntil === 0}
-						<strong>Heute</strong>
-						<span>vorhergesagt</span>
+						<strong>{$_('cycles.label.today')}</strong>
+						<span>{$_('cycles.label.predicted')}</span>
 					{:else}
 						<strong>{Math.abs(daysUntil)}</strong>
-						<span>Tage überfällig</span>
+						<span>{$_('cycles.label.daysOverdue')}</span>
 					{/if}
 				</div>
 			{/if}
 		</div>
 		<div class="phase-actions">
 			{#if !currentCycle || (currentCycle.periodEndDate && currentCycle.periodEndDate < todayIso && phase !== 'menstruation')}
-				<button class="btn-primary" onclick={startPeriodToday}>Periode starten</button>
+				<button class="btn-primary" onclick={startPeriodToday}
+					>{$_('cycles.action.startPeriod')}</button
+				>
 			{:else if currentCycle && !currentCycle.periodEndDate}
-				<button class="btn-secondary" onclick={endPeriodToday}>Periode beendet</button>
+				<button class="btn-secondary" onclick={endPeriodToday}
+					>{$_('cycles.action.endPeriod')}</button
+				>
 			{/if}
 		</div>
 	</div>
@@ -182,20 +177,25 @@
 	{#if isEditingPast}
 		<div class="edit-banner">
 			<span class="edit-banner-label">
-				Bearbeite <strong>{new Date(editingDate).toLocaleDateString('de-DE')}</strong>
+				{$_('cycles.label.editing')}
+				<strong>{new Date(editingDate).toLocaleDateString('de-DE')}</strong>
 			</span>
 			<div class="edit-banner-actions">
 				{#if editingLog}
-					<button class="banner-btn danger" onclick={deleteEditingLog}>Löschen</button>
+					<button class="banner-btn danger" onclick={deleteEditingLog}
+						>{$_('cycles.action.delete')}</button
+					>
 				{/if}
-				<button class="banner-btn" onclick={backToToday}>Zurück zu heute</button>
+				<button class="banner-btn" onclick={backToToday}>{$_('cycles.action.backToToday')}</button>
 			</div>
 		</div>
 	{/if}
 
 	<!-- Flow -->
 	<section class="log-section">
-		<h3 class="section-label">{isEditingPast ? 'Blutung' : 'Heute · Blutung'}</h3>
+		<h3 class="section-label">
+			{isEditingPast ? $_('cycles.label.bleeding') : $_('cycles.label.todayBleeding')}
+		</h3>
 		<div class="row">
 			{#each FLOWS as flow}
 				<button
@@ -205,15 +205,15 @@
 					onclick={() => setFlow(flow)}
 				>
 					<span class="flow-dot"></span>
-					{FLOW_LABELS[flow]}
+					{$_(`cycles.flow.${flow}`)}
 				</button>
 			{/each}
 		</div>
 	</section>
 
-	<!-- Today: Mood -->
+	<!-- Mood -->
 	<section class="log-section">
-		<h3 class="section-label">Stimmung</h3>
+		<h3 class="section-label">{$_('cycles.label.mood')}</h3>
 		<div class="row">
 			{#each MOODS as mood}
 				<button
@@ -223,16 +223,16 @@
 					onclick={() => setMood(mood)}
 				>
 					<span class="mood-dot"></span>
-					{MOOD_LABELS[mood]}
+					{$_(`cycles.mood.${mood}`)}
 				</button>
 			{/each}
 		</div>
 	</section>
 
-	<!-- Today: Symptoms -->
+	<!-- Symptoms -->
 	{#if symptoms.length > 0}
 		<section class="log-section">
-			<h3 class="section-label">Symptome</h3>
+			<h3 class="section-label">{$_('cycles.label.symptoms')}</h3>
 			<div class="row">
 				{#each symptoms as sym}
 					<button
@@ -251,20 +251,20 @@
 
 	<!-- Temperature & Notes -->
 	<section class="log-section">
-		<h3 class="section-label">Basaltemperatur & Notizen</h3>
+		<h3 class="section-label">{$_('cycles.label.basalAndNotes')}</h3>
 		<div class="row inputs">
 			<input
 				type="number"
 				step="0.01"
 				class="temp-input"
-				placeholder="36.5 °C"
+				placeholder={$_('cycles.input.temperaturePlaceholder')}
 				bind:value={temperature}
 				onblur={saveTemperature}
 			/>
 			<input
 				type="text"
 				class="notes-input"
-				placeholder="Notiz..."
+				placeholder={$_('cycles.input.notesPlaceholder')}
 				bind:value={notesText}
 				onblur={saveNotes}
 			/>
@@ -274,30 +274,31 @@
 	<!-- Stats -->
 	{#if stats.total > 0}
 		<section class="log-section stats">
-			<h3 class="section-label">Statistik</h3>
+			<h3 class="section-label">{$_('cycles.label.stats')}</h3>
 			<div class="stats-grid">
 				<div class="stat">
 					<strong>{stats.avg}</strong>
-					<span>Ø Tage</span>
+					<span>{$_('cycles.stats.avgDays')}</span>
 				</div>
 				<div class="stat">
 					<strong>{stats.shortest}</strong>
-					<span>kürzester</span>
+					<span>{$_('cycles.stats.shortest')}</span>
 				</div>
 				<div class="stat">
 					<strong>{stats.longest}</strong>
-					<span>längster</span>
+					<span>{$_('cycles.stats.longest')}</span>
 				</div>
 				<div class="stat">
 					<strong>{stats.total}</strong>
-					<span>Zyklen</span>
+					<span>{$_('cycles.stats.cycles')}</span>
 				</div>
 			</div>
 			{#if nextPeriod}
 				<div class="prediction">
-					Nächste Periode: <strong>{formatDate(nextPeriod)}</strong>
+					{$_('cycles.stats.nextPeriod')} <strong>{formatDate(nextPeriod)}</strong>
 					{#if fertile}
-						· Fruchtbares Fenster: <strong>{formatDate(fertile.start)}</strong> –
+						· {$_('cycles.stats.fertileWindow')}
+						<strong>{formatDate(fertile.start)}</strong> –
 						<strong>{formatDate(fertile.end)}</strong>
 					{/if}
 				</div>
@@ -308,7 +309,7 @@
 	<!-- Recent logs -->
 	{#if logs.length > 0}
 		<section class="log-section">
-			<h3 class="section-label">Letzte Einträge</h3>
+			<h3 class="section-label">{$_('cycles.label.recentEntries')}</h3>
 			<div class="log-list">
 				{#each logs.slice(0, 10) as log (log.id)}
 					<button
@@ -322,11 +323,11 @@
 							<div class="log-top">
 								<span class="log-date">{formatLogDate(log.logDate)}</span>
 								{#if log.flow !== 'none'}
-									<span class="log-tag">{FLOW_LABELS[log.flow]}</span>
+									<span class="log-tag">{$_(`cycles.flow.${log.flow}`)}</span>
 								{/if}
 								{#if log.mood}
 									<span class="log-tag" style="color: {MOOD_COLORS[log.mood]}"
-										>{MOOD_LABELS[log.mood]}</span
+										>{$_(`cycles.mood.${log.mood}`)}</span
 									>
 								{/if}
 							</div>
@@ -341,10 +342,7 @@
 	{/if}
 
 	{#if cycles.length === 0 && logs.length === 0}
-		<p class="empty">
-			Tippe oben auf eine Blutungsstärke, um deinen ersten Tag festzuhalten — oder starte direkt
-			eine Periode.
-		</p>
+		<p class="empty">{$_('cycles.empty')}</p>
 	{/if}
 </div>
 
