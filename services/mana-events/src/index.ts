@@ -5,48 +5,26 @@
  * RSVP responses they collect. Hosts authenticate via mana-auth JWT;
  * RSVP endpoints are intentionally unauthenticated so anyone with a
  * share link can respond.
+ *
+ * The Hono app itself lives in app.ts so unit tests can import it
+ * without triggering the production bootstrap (sweeper, log, port).
  */
 
-import { Hono } from 'hono';
-import { cors } from 'hono/cors';
+import { createApp } from './app';
 import { loadConfig } from './config';
 import { getDb } from './db/connection';
-import { errorHandler } from './middleware/error-handler';
-import { jwtAuth } from './middleware/jwt-auth';
-import { healthRoutes } from './routes/health';
-import { createEventsRoutes } from './routes/events';
-import { createRsvpRoutes } from './routes/rsvp';
 import { startRateBucketSweeper } from './lib/cleanup';
 
 const config = loadConfig();
 const db = getDb(config.databaseUrl);
 
-// Background cleanup of stale rate-limit buckets so they don't accumulate
-// for the lifetime of long-published events.
+// Background cleanup of stale rate-limit buckets so they don't
+// accumulate for the lifetime of long-published events.
 startRateBucketSweeper(db);
-
-const app = new Hono();
-
-app.onError(errorHandler);
-app.use(
-	'*',
-	cors({
-		origin: config.cors.origins,
-		credentials: true,
-	})
-);
-
-// Public — no auth
-app.route('/health', healthRoutes);
-app.route('/api/v1/rsvp', createRsvpRoutes(db, config));
-
-// Authenticated host endpoints
-app.use('/api/v1/events/*', jwtAuth(config.manaAuthUrl));
-app.route('/api/v1/events', createEventsRoutes(db));
 
 console.log(`mana-events starting on port ${config.port}...`);
 
 export default {
 	port: config.port,
-	fetch: app.fetch,
+	fetch: createApp(db, config).fetch,
 };
