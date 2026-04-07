@@ -62,6 +62,13 @@
 	 *  mount so the UI can show "Recovery-Code entfernen" without
 	 *  walking through the setup flow again. */
 	let hasRecoveryWrap = $state(false);
+	/** Side flow for rotating the recovery code from the active state.
+	 *  'idle'    — show "Code rotieren" button
+	 *  'rotated' — show the new code + Copy + Done button
+	 *  Independent of zkSetupStep so the user can rotate without
+	 *  leaving the active-mode UI. */
+	let rotateStep = $state<'idle' | 'rotated'>('idle');
+	let rotatedCode = $state<string | null>(null);
 
 	async function handleSetupRecoveryCode() {
 		zkError = null;
@@ -153,6 +160,36 @@
 			() => toast.success('Code in die Zwischenablage kopiert'),
 			() => toast.error('Konnte Code nicht kopieren')
 		);
+	}
+
+	async function handleRotateRecoveryCode() {
+		zkError = null;
+		zkBusy = true;
+		try {
+			const result = await vaultClient.rotateRecoveryCode();
+			rotatedCode = result.formattedCode;
+			rotateStep = 'rotated';
+		} catch (e) {
+			zkError = (e as Error).message;
+		} finally {
+			zkBusy = false;
+		}
+	}
+
+	function handleCopyRotatedCode() {
+		if (!rotatedCode) return;
+		navigator.clipboard.writeText(rotatedCode).then(
+			() => toast.success('Code in die Zwischenablage kopiert'),
+			() => toast.error('Konnte Code nicht kopieren')
+		);
+	}
+
+	function handleFinishRotation() {
+		// User has acknowledged they backed up the new code. Wipe the
+		// reference (the DOM still shows it until the next render
+		// cycle, but our state goes away).
+		rotatedCode = null;
+		rotateStep = 'idle';
 	}
 
 	function handleResetSetup() {
@@ -529,8 +566,34 @@
 					Der Server kann deine Daten ab sofort nicht mehr entschlüsseln. Beim nächsten Login auf
 					einem neuen Gerät wirst du nach deinem Recovery-Code gefragt.
 				</p>
-				{#if !confirmDisableZk}
+
+				{#if rotateStep === 'rotated' && rotatedCode}
+					<div class="zk-step">
+						<h3>🔁 Neuer Recovery-Code</h3>
+						<p>
+							<strong>Dein alter Code ist ab sofort ungültig.</strong> Speichere den neuen Code an einem
+							sicheren Ort, bevor du diese Seite verlässt — wir zeigen ihn dir nur ein einziges Mal.
+						</p>
+						<div class="recovery-code">{rotatedCode}</div>
+						<div class="zk-actions">
+							<button class="btn" type="button" onclick={handleCopyRotatedCode}>
+								📋 Kopieren
+							</button>
+							<button class="btn btn-primary" type="button" onclick={handleFinishRotation}>
+								Ich habe den neuen Code gesichert
+							</button>
+						</div>
+					</div>
+				{:else if !confirmDisableZk}
 					<div class="zk-actions">
+						<button
+							class="btn"
+							type="button"
+							disabled={vaultState.status !== 'unlocked' || zkBusy}
+							onclick={handleRotateRecoveryCode}
+						>
+							{zkBusy ? 'Rotiere …' : '🔁 Recovery-Code rotieren'}
+						</button>
 						<button
 							class="btn"
 							type="button"

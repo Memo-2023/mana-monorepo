@@ -162,6 +162,23 @@ export interface VaultClient {
 	 *  right section without triggering a full unwrap. Used by the
 	 *  settings page on mount to hydrate after a reload. */
 	getStatus(): Promise<VaultStatus>;
+
+	/** Generates a fresh recovery code and replaces the existing
+	 *  recovery wrap on the server. Works in BOTH standard and
+	 *  zero-knowledge modes:
+	 *
+	 *  - Standard mode: re-fetches the current MK from the server
+	 *    and seals it with the new recovery key (same path as the
+	 *    initial setupRecoveryCode call).
+	 *  - Zero-knowledge mode: uses the cached MK bytes from the most
+	 *    recent recovery-code unlock, since the server can't hand
+	 *    out the plaintext MK any more. Throws if the cache is empty
+	 *    (caller has to re-unlock with the old recovery code first).
+	 *
+	 *  Returns the freshly formatted recovery code for the UI to
+	 *  display. The OLD code is now invalid — using it on a future
+	 *  unlock will fail with "wrong recovery code". */
+	rotateRecoveryCode(): Promise<RecoveryCodeSetupResult>;
 }
 
 /**
@@ -617,6 +634,90 @@ export function createVaultClient(options: VaultClientOptions): VaultClient {
 		return state;
 	}
 
+	async function rotateRecoveryCode(): Promise<RecoveryCodeSetupResult> {
+		if (state.status !== 'unlocked') {
+			throw new Error('vault must be unlocked before rotateRecoveryCode()');
+		}
+
+		const token = await getToken();
+		if (!token) {
+			throw new Error('no auth token available for rotateRecoveryCode()');
+		}
+
+		// Two paths depending on which mode the vault is in:
+		//
+		//   Standard: server still has the KEK wrap, so we can re-fetch
+		//             the plaintext MK exactly the way setupRecoveryCode
+		//             does. This branch is identical to the initial
+		//             setup, just labelled differently in the UI.
+		//
+		//   ZK:       server can't hand out the MK. We use the cached
+		//             bytes that unlockWithRecoveryCode stashed when
+		//             the user typed in their old recovery code earlier
+		//             this session. If the cache is empty (page reload
+		//             after unlock + lock cycle, or unlock via init
+		//             rather than recovery), we have to bail and ask
+		//             the user to re-authenticate first.
+
+		let rawMk: Uint8Array;
+		let needsWipe = true;
+
+		const status = await getStatus();
+		if (status.zeroKnowledge) {
+			if (!cachedUnwrappedMkBytes) {
+				throw new Error(
+					'cannot rotate recovery code: vault is in zero-knowledge mode and the master key bytes are not cached. Sign out and back in with your current recovery code first.'
+				);
+			}
+			// Clone the cache so we don't wipe the source.
+			rawMk = new Uint8Array(cachedUnwrappedMkBytes);
+		} else {
+			// Standard mode — re-fetch from the server.
+			const fetchRes = await fetchVault('/api/v1/me/encryption-vault/key', {
+				method: 'GET',
+				...authHeaders(token),
+			});
+			if (!fetchRes.ok || isRecoveryBlob(fetchRes.data)) {
+				throw new Error('failed to re-fetch master key for recovery wrap rotation');
+			}
+			rawMk = base64ToBytes((fetchRes.data as { masterKey: string }).masterKey);
+		}
+
+		// Generate fresh recovery secret + derive new wrap key.
+		const recoverySecret = generateRecoverySecret();
+		const recoveryWrapKey = await deriveRecoveryWrapKey(recoverySecret);
+
+		// Import the MK as extractable for the wrap operation.
+		const extractableMk = await crypto.subtle.importKey(
+			'raw',
+			toBufferSource(rawMk),
+			{ name: 'AES-GCM', length: 256 },
+			true,
+			['encrypt', 'decrypt']
+		);
+		const sealed = await wrapMasterKeyWithRecovery(extractableMk, recoveryWrapKey);
+
+		if (needsWipe) {
+			rawMk.fill(0);
+		}
+
+		// POST replaces the existing wrap (setRecoveryWrap is idempotent
+		// server-side). The OLD recovery code is now permanently invalid.
+		const setRes = await fetchVault('/api/v1/me/encryption-vault/recovery-wrap', {
+			method: 'POST',
+			...authHeaders(token),
+			body: JSON.stringify(sealed),
+		});
+		if (!setRes.ok) {
+			throw new Error(`failed to store rotated recovery wrap: ${setRes.status}`);
+		}
+
+		const formatted = formatRecoveryCode(recoverySecret);
+		recoverySecret.fill(0);
+
+		return { formattedCode: formatted };
+	}
+
 	async function getStatus(): Promise<VaultStatus> {
 		const token = await getToken();
 		if (!token) throw new Error('no auth token available');
@@ -645,6 +746,7 @@ export function createVaultClient(options: VaultClientOptions): VaultClient {
 		disableZeroKnowledge,
 		unlockWithRecoveryCode,
 		getStatus,
+		rotateRecoveryCode,
 	};
 }
 
