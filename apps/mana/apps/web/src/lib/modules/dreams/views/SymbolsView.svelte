@@ -4,61 +4,141 @@
   Click → opens detail panel.
 -->
 <script lang="ts">
-	import { useAllDreamSymbols } from '../queries';
-	import type { DreamSymbol } from '../types';
+	import {
+		formatDreamDate,
+		getLastUsedBySymbol,
+		useAllDreams,
+		useAllDreamSymbols,
+	} from '../queries';
+	import type { Dream, DreamSymbol } from '../types';
 	import SymbolDetailView from './SymbolDetailView.svelte';
 
-	let symbols$ = useAllDreamSymbols();
-	let symbols = $derived(symbols$.value);
+	let { onOpenDream }: { onOpenDream?: (dream: Dream) => void } = $props();
 
+	let symbols$ = useAllDreamSymbols();
+	let dreams$ = useAllDreams();
+	let symbols = $derived(symbols$.value);
+	let dreams = $derived(dreams$.value);
+
+	type SortMode = 'count' | 'alpha' | 'recent';
+	let sortMode = $state<SortMode>('count');
 	let searchQuery = $state('');
 	let selectedSymbolId = $state<string | null>(null);
 
+	let lastUsedMap = $derived(getLastUsedBySymbol(dreams));
+
+	let active = $derived(symbols.filter((s) => s.count > 0));
+
 	let filtered = $derived(
 		searchQuery.trim()
-			? symbols.filter((s) => s.name.toLowerCase().includes(searchQuery.toLowerCase()))
-			: symbols
+			? active.filter((s) => s.name.toLowerCase().includes(searchQuery.toLowerCase()))
+			: active
 	);
 
-	let maxCount = $derived(filtered.reduce((m, s) => Math.max(m, s.count), 1));
+	let sorted = $derived.by(() => {
+		const list = [...filtered];
+		switch (sortMode) {
+			case 'alpha':
+				return list.sort((a, b) => a.name.localeCompare(b.name, 'de'));
+			case 'recent':
+				return list.sort((a, b) => {
+					const ra = lastUsedMap.get(a.name) ?? '';
+					const rb = lastUsedMap.get(b.name) ?? '';
+					return rb.localeCompare(ra);
+				});
+			default:
+				return list.sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, 'de'));
+		}
+	});
+
+	let maxCount = $derived(sorted.reduce((m, s) => Math.max(m, s.count), 1));
 
 	function fontSize(sym: DreamSymbol): string {
-		// Scale 0.75rem .. 1.5rem based on count
-		const ratio = Math.max(0.2, sym.count / maxCount);
-		return `${0.75 + ratio * 0.75}rem`;
+		// More dramatic scaling: 0.75rem .. 1.625rem
+		const ratio = Math.max(0.1, sym.count / maxCount);
+		// ease-out so big symbols stand out more
+		const eased = Math.sqrt(ratio);
+		return `${0.75 + eased * 0.875}rem`;
+	}
+
+	function selectSymbol(id: string) {
+		selectedSymbolId = id;
 	}
 </script>
 
 {#if selectedSymbolId}
-	<SymbolDetailView symbolId={selectedSymbolId} onBack={() => (selectedSymbolId = null)} />
+	<SymbolDetailView
+		symbolId={selectedSymbolId}
+		onBack={() => (selectedSymbolId = null)}
+		onSelectSymbol={selectSymbol}
+		{onOpenDream}
+	/>
 {:else}
 	<div class="symbols-view">
-		{#if symbols.length > 5}
-			<input
-				class="search-input"
-				type="text"
-				placeholder="Symbol suchen..."
-				bind:value={searchQuery}
-			/>
-		{/if}
+		<!-- Toolbar: search + sort -->
+		<div class="toolbar">
+			{#if active.length > 5}
+				<input
+					class="search-input"
+					type="text"
+					placeholder="Symbol suchen..."
+					bind:value={searchQuery}
+				/>
+			{/if}
+			<div class="sort-tabs">
+				<button
+					class="sort-tab"
+					class:active={sortMode === 'count'}
+					onclick={() => (sortMode = 'count')}
+				>
+					Häufigkeit
+				</button>
+				<button
+					class="sort-tab"
+					class:active={sortMode === 'alpha'}
+					onclick={() => (sortMode = 'alpha')}
+				>
+					A-Z
+				</button>
+				<button
+					class="sort-tab"
+					class:active={sortMode === 'recent'}
+					onclick={() => (sortMode = 'recent')}
+				>
+					Zuletzt
+				</button>
+			</div>
+		</div>
 
-		{#if filtered.length === 0}
+		{#if sorted.length === 0}
 			<p class="empty">
-				{symbols.length === 0
+				{active.length === 0
 					? 'Noch keine Symbole. Füge Symbole zu deinen Träumen hinzu, um sie hier zu sehen.'
 					: 'Keine Treffer'}
 			</p>
 		{:else}
-			<div class="cloud">
-				{#each filtered as sym (sym.id)}
+			<div class="cloud" class:list-mode={sortMode !== 'count'}>
+				{#each sorted as sym (sym.id)}
+					{@const lastDate = lastUsedMap.get(sym.name)}
+					{@const noMeaning = !sym.meaning?.trim()}
 					<button
 						class="sym-chip"
-						style="font-size: {fontSize(sym)}; --sym-color: {sym.color ?? '#6366f1'}"
+						class:no-meaning={noMeaning}
+						style="font-size: {sortMode === 'count'
+							? fontSize(sym)
+							: '0.8125rem'}; --sym-color: {sym.color ?? '#6366f1'}"
 						onclick={() => (selectedSymbolId = sym.id)}
+						title={sym.meaning ?? 'Noch keine Bedeutung hinterlegt'}
 					>
 						<span class="sym-dot"></span>
 						<span class="sym-name">{sym.name}</span>
 						<span class="sym-count">{sym.count}</span>
+						{#if sortMode === 'recent' && lastDate}
+							<span class="sym-meta">· {formatDreamDate(lastDate)}</span>
+						{/if}
+						{#if noMeaning}
+							<span class="sym-badge" title="Keine Bedeutung hinterlegt">?</span>
+						{/if}
 					</button>
 				{/each}
 			</div>
@@ -70,9 +150,15 @@
 	.symbols-view {
 		display: flex;
 		flex-direction: column;
-		gap: 0.75rem;
+		gap: 0.625rem;
 		flex: 1;
 		min-height: 0;
+	}
+
+	.toolbar {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
 	}
 
 	.search-input {
@@ -92,13 +178,45 @@
 		color: #f3f4f6;
 	}
 
+	.sort-tabs {
+		display: flex;
+		gap: 0.25rem;
+		flex-wrap: wrap;
+	}
+	.sort-tab {
+		padding: 0.1875rem 0.5rem;
+		border-radius: 9999px;
+		border: 1px solid rgba(0, 0, 0, 0.08);
+		background: transparent;
+		font-size: 0.625rem;
+		color: #9ca3af;
+		cursor: pointer;
+		transition: all 0.15s;
+	}
+	.sort-tab:hover {
+		color: #6366f1;
+	}
+	.sort-tab.active {
+		background: #6366f1;
+		color: white;
+		border-color: #6366f1;
+	}
+	:global(.dark) .sort-tab {
+		border-color: rgba(255, 255, 255, 0.08);
+	}
+
 	.cloud {
 		display: flex;
 		flex-wrap: wrap;
 		align-items: baseline;
-		gap: 0.5rem 0.75rem;
+		gap: 0.5rem 0.625rem;
 		padding: 0.5rem 0.25rem;
 		overflow-y: auto;
+	}
+	.cloud.list-mode {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 0.1875rem;
 	}
 
 	.sym-chip {
@@ -114,10 +232,21 @@
 		transition: all 0.15s;
 		font-weight: 500;
 		line-height: 1.4;
+		text-align: left;
+	}
+	.cloud.list-mode .sym-chip {
+		border-radius: 0.375rem;
+		justify-content: flex-start;
 	}
 	.sym-chip:hover {
-		background: color-mix(in srgb, var(--sym-color) 10%, transparent);
+		background: color-mix(in srgb, var(--sym-color) 12%, transparent);
 		border-color: var(--sym-color);
+	}
+	.sym-chip.no-meaning {
+		opacity: 0.7;
+	}
+	.sym-chip.no-meaning:hover {
+		opacity: 1;
 	}
 	:global(.dark) .sym-chip {
 		border-color: rgba(255, 255, 255, 0.08);
@@ -139,6 +268,32 @@
 		font-size: 0.625rem;
 		color: #9ca3af;
 		font-weight: 400;
+	}
+
+	.sym-meta {
+		font-size: 0.625rem;
+		color: #c0bfba;
+		font-weight: 400;
+	}
+	:global(.dark) .sym-meta {
+		color: #4b5563;
+	}
+
+	.sym-badge {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 13px;
+		height: 13px;
+		border-radius: 9999px;
+		background: rgba(0, 0, 0, 0.06);
+		color: #9ca3af;
+		font-size: 0.5625rem;
+		font-weight: 700;
+		margin-left: 0.125rem;
+	}
+	:global(.dark) .sym-badge {
+		background: rgba(255, 255, 255, 0.08);
 	}
 
 	.empty {

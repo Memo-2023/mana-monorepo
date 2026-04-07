@@ -12,9 +12,19 @@
 		useAllDreamSymbols,
 	} from '../queries';
 	import { dreamsStore } from '../stores/dreams.svelte';
-	import { MOOD_COLORS, MOOD_LABELS, type DreamMood } from '../types';
+	import { MOOD_COLORS, MOOD_LABELS, type Dream, type DreamMood } from '../types';
 
-	let { symbolId, onBack }: { symbolId: string; onBack: () => void } = $props();
+	let {
+		symbolId,
+		onBack,
+		onSelectSymbol,
+		onOpenDream,
+	}: {
+		symbolId: string;
+		onBack: () => void;
+		onSelectSymbol?: (id: string) => void;
+		onOpenDream?: (dream: Dream) => void;
+	} = $props();
 
 	let symbols$ = useAllDreamSymbols();
 	let dreams$ = useAllDreams();
@@ -27,14 +37,14 @@
 	let editName = $state('');
 	let editMeaning = $state('');
 	let editColor = $state<string>('#6366f1');
-	let initialized = $state(false);
+	let lastInitId = $state<string | null>(null);
 
 	$effect(() => {
-		if (symbol && !initialized) {
+		if (symbol && lastInitId !== symbol.id) {
 			editName = symbol.name;
 			editMeaning = symbol.meaning ?? '';
 			editColor = symbol.color ?? '#6366f1';
-			initialized = true;
+			lastInitId = symbol.id;
 		}
 	});
 
@@ -45,10 +55,41 @@
 				editColor !== (symbol.color ?? '#6366f1'))
 	);
 
+	let savedHint = $state(false);
+
+	// Debounced auto-save
+	let saveTimer: ReturnType<typeof setTimeout> | null = null;
+	$effect(() => {
+		// react to edit fields
+		void editName;
+		void editMeaning;
+		void editColor;
+
+		if (!dirty || !symbol) return;
+		if (saveTimer) clearTimeout(saveTimer);
+		saveTimer = setTimeout(() => {
+			void save();
+		}, 500);
+		return () => {
+			if (saveTimer) clearTimeout(saveTimer);
+		};
+	});
+
 	let dreamsWithSymbol = $derived(symbol ? getDreamsWithSymbol(dreams, symbol.name) : []);
 	let moodDist = $derived(symbol ? getMoodDistribution(dreams, symbol.name) : []);
 	let cooccurring = $derived(symbol ? getCooccurringSymbols(dreams, symbol.name) : []);
 	let totalForBars = $derived(moodDist.reduce((sum, m) => sum + m.count, 0) || 1);
+
+	// Merge target candidates
+	let mergeOpen = $state(false);
+	let mergeTargetId = $state('');
+	let mergeCandidates = $derived(
+		symbol
+			? symbols
+					.filter((s) => s.id !== symbol.id && s.count > 0)
+					.sort((a, b) => a.name.localeCompare(b.name, 'de'))
+			: []
+	);
 
 	const PALETTE = ['#6366f1', '#22c55e', '#f59e0b', '#ef4444', '#06b6d4', '#a855f7', '#ec4899'];
 
@@ -59,6 +100,8 @@
 			meaning: editMeaning.trim() || null,
 			color: editColor,
 		});
+		savedHint = true;
+		setTimeout(() => (savedHint = false), 1500);
 	}
 
 	async function handleDelete() {
@@ -69,6 +112,25 @@
 		if (!ok) return;
 		await dreamsStore.deleteSymbol(symbol.id);
 		onBack();
+	}
+
+	async function handleMerge() {
+		if (!symbol || !mergeTargetId) return;
+		const target = symbols.find((s) => s.id === mergeTargetId);
+		if (!target) return;
+		const ok = confirm(
+			`"${symbol.name}" in "${target.name}" zusammenführen? Alle Träume werden umgeschrieben.`
+		);
+		if (!ok) return;
+		await dreamsStore.mergeSymbols(symbol.id, mergeTargetId);
+		mergeOpen = false;
+		mergeTargetId = '';
+		onBack();
+	}
+
+	function navigateToCooccurring(name: string) {
+		const target = symbols.find((s) => s.name === name);
+		if (target && onSelectSymbol) onSelectSymbol(target.id);
 	}
 
 	function moodColor(mood: string): string {
@@ -85,10 +147,34 @@
 <div class="detail-view">
 	<div class="header">
 		<button class="back-btn" onclick={onBack}>← Symbole</button>
-		{#if symbol}
-			<button class="del-btn" onclick={handleDelete}>Löschen</button>
-		{/if}
+		<div class="header-actions">
+			{#if savedHint}
+				<span class="saved-hint">Gespeichert</span>
+			{/if}
+			{#if symbol && mergeCandidates.length > 0}
+				<button class="meta-btn" onclick={() => (mergeOpen = !mergeOpen)}>Zusammenführen…</button>
+			{/if}
+			{#if symbol}
+				<button class="del-btn" onclick={handleDelete}>Löschen</button>
+			{/if}
+		</div>
 	</div>
+
+	{#if mergeOpen && symbol}
+		<div class="merge-panel">
+			<span class="merge-label">"{symbol.name}" zusammenführen mit:</span>
+			<select class="merge-select" bind:value={mergeTargetId}>
+				<option value="">– Symbol wählen –</option>
+				{#each mergeCandidates as c}
+					<option value={c.id}>{c.name} ({c.count})</option>
+				{/each}
+			</select>
+			<button class="merge-confirm" disabled={!mergeTargetId} onclick={handleMerge}>OK</button>
+			<button class="merge-cancel" onclick={() => ((mergeOpen = false), (mergeTargetId = ''))}
+				>Abbrechen</button
+			>
+		</div>
+	{/if}
 
 	{#if !symbol}
 		<p class="empty">Symbol nicht gefunden.</p>
@@ -129,12 +215,6 @@
 			></textarea>
 		</div>
 
-		{#if dirty}
-			<div class="save-row">
-				<button class="save-btn" onclick={save}>Speichern</button>
-			</div>
-		{/if}
-
 		<!-- Mood distribution -->
 		{#if moodDist.length > 0}
 			<div class="section">
@@ -162,7 +242,13 @@
 				<span class="section-label">Häufig zusammen mit</span>
 				<div class="cooc-row">
 					{#each cooccurring as c}
-						<span class="cooc-chip">{c.name} <span class="cooc-count">{c.count}</span></span>
+						<button
+							class="cooc-chip"
+							onclick={() => navigateToCooccurring(c.name)}
+							title={`Zu "${c.name}" wechseln`}
+						>
+							{c.name} <span class="cooc-count">{c.count}</span>
+						</button>
 					{/each}
 				</div>
 			</div>
@@ -174,7 +260,7 @@
 				<span class="section-label">Träume mit diesem Symbol</span>
 				<div class="dream-refs">
 					{#each dreamsWithSymbol as d (d.id)}
-						<div class="dream-ref">
+						<button class="dream-ref" onclick={() => onOpenDream?.(d)} disabled={!onOpenDream}>
 							{#if d.mood}
 								<span class="ref-dot" style="background: {MOOD_COLORS[d.mood]}"></span>
 							{:else}
@@ -184,7 +270,7 @@
 								<span class="ref-title">{d.title || 'Traum ohne Titel'}</span>
 								<span class="ref-date">{formatDreamDate(d.dreamDate)}</span>
 							</div>
-						</div>
+						</button>
 					{/each}
 				</div>
 			</div>
@@ -206,6 +292,13 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.header-actions {
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
 	}
 
 	.back-btn {
@@ -220,6 +313,41 @@
 		text-decoration: underline;
 	}
 
+	.saved-hint {
+		font-size: 0.625rem;
+		color: #22c55e;
+		font-weight: 500;
+		animation: fade-in 0.2s ease-out;
+	}
+	@keyframes fade-in {
+		from {
+			opacity: 0;
+			transform: translateY(-2px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	.meta-btn {
+		background: transparent;
+		border: 1px solid rgba(0, 0, 0, 0.08);
+		color: #6b7280;
+		font-size: 0.6875rem;
+		padding: 0.25rem 0.625rem;
+		border-radius: 0.25rem;
+		cursor: pointer;
+	}
+	.meta-btn:hover {
+		border-color: #6366f1;
+		color: #6366f1;
+	}
+	:global(.dark) .meta-btn {
+		border-color: rgba(255, 255, 255, 0.08);
+		color: #9ca3af;
+	}
+
 	.del-btn {
 		background: transparent;
 		border: 1px solid rgba(239, 68, 68, 0.3);
@@ -231,6 +359,62 @@
 	}
 	.del-btn:hover {
 		background: rgba(239, 68, 68, 0.08);
+	}
+
+	/* Merge panel */
+	.merge-panel {
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
+		flex-wrap: wrap;
+		padding: 0.5rem 0.625rem;
+		border-radius: 0.375rem;
+		background: rgba(99, 102, 241, 0.05);
+		border: 1px solid rgba(99, 102, 241, 0.2);
+	}
+	.merge-label {
+		font-size: 0.6875rem;
+		color: #6b7280;
+	}
+	.merge-select {
+		background: transparent;
+		border: 1px solid rgba(0, 0, 0, 0.1);
+		border-radius: 0.25rem;
+		padding: 0.1875rem 0.375rem;
+		font-size: 0.6875rem;
+		color: #374151;
+		outline: none;
+		font-family: inherit;
+	}
+	:global(.dark) .merge-select {
+		border-color: rgba(255, 255, 255, 0.12);
+		color: #f3f4f6;
+		color-scheme: dark;
+	}
+	.merge-confirm {
+		padding: 0.1875rem 0.625rem;
+		border-radius: 0.25rem;
+		border: none;
+		background: #6366f1;
+		color: white;
+		font-size: 0.6875rem;
+		cursor: pointer;
+	}
+	.merge-confirm:disabled {
+		background: rgba(99, 102, 241, 0.3);
+		cursor: not-allowed;
+	}
+	.merge-cancel {
+		padding: 0.1875rem 0.5rem;
+		border-radius: 0.25rem;
+		border: none;
+		background: transparent;
+		color: #9ca3af;
+		font-size: 0.6875rem;
+		cursor: pointer;
+	}
+	.merge-cancel:hover {
+		color: #374151;
 	}
 
 	.sym-header {
@@ -318,24 +502,6 @@
 		color: #f3f4f6;
 	}
 
-	.save-row {
-		display: flex;
-		justify-content: flex-end;
-	}
-	.save-btn {
-		padding: 0.25rem 0.75rem;
-		border-radius: 0.25rem;
-		font-size: 0.6875rem;
-		font-weight: 500;
-		background: #6366f1;
-		color: white;
-		border: none;
-		cursor: pointer;
-	}
-	.save-btn:hover {
-		background: #5558e6;
-	}
-
 	/* Bars */
 	.bars {
 		display: flex;
@@ -384,6 +550,14 @@
 		background: rgba(99, 102, 241, 0.08);
 		color: #6366f1;
 		font-size: 0.6875rem;
+		border: 1px solid transparent;
+		cursor: pointer;
+		font-family: inherit;
+		transition: all 0.15s;
+	}
+	.cooc-chip:hover {
+		background: rgba(99, 102, 241, 0.18);
+		border-color: #6366f1;
 	}
 	.cooc-count {
 		font-size: 0.5625rem;
@@ -401,13 +575,22 @@
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
-		padding: 0.375rem 0.25rem;
+		padding: 0.375rem 0.375rem;
 		border-radius: 0.25rem;
+		background: transparent;
+		border: none;
+		width: 100%;
+		text-align: left;
+		cursor: pointer;
+		font-family: inherit;
 	}
-	.dream-ref:hover {
+	.dream-ref:disabled {
+		cursor: default;
+	}
+	.dream-ref:not(:disabled):hover {
 		background: rgba(0, 0, 0, 0.03);
 	}
-	:global(.dark) .dream-ref:hover {
+	:global(.dark) .dream-ref:not(:disabled):hover {
 		background: rgba(255, 255, 255, 0.04);
 	}
 

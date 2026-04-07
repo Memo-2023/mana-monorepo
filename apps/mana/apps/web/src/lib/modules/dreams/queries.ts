@@ -120,6 +120,18 @@ export function formatDreamDate(iso: string): string {
 	return date.toLocaleDateString('de-DE', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
+/** Map of symbol name → most recent dreamDate that references it. */
+export function getLastUsedBySymbol(dreams: Dream[]): Map<string, string> {
+	const map = new Map<string, string>();
+	for (const d of dreams) {
+		for (const sym of d.symbols ?? []) {
+			const prev = map.get(sym);
+			if (!prev || d.dreamDate > prev) map.set(sym, d.dreamDate);
+		}
+	}
+	return map;
+}
+
 /** All dreams that contain the given symbol, newest first. */
 export function getDreamsWithSymbol(dreams: Dream[], symbolName: string): Dream[] {
 	return dreams

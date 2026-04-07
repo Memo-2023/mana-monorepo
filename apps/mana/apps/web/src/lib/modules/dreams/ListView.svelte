@@ -184,7 +184,12 @@
 	</div>
 
 	{#if viewMode === 'symbols'}
-		<SymbolsView />
+		<SymbolsView
+			onOpenDream={(d) => {
+				viewMode = 'list';
+				startEdit(d);
+			}}
+		/>
 	{:else}
 		<!-- Quick create -->
 		<form onsubmit={(e) => e.preventDefault()} class="quick-add">
