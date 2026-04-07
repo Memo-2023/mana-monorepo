@@ -15,6 +15,9 @@ export {
 	groupByMonth,
 	formatDreamDate,
 	computeInsights,
+	getDreamsWithSymbol,
+	getMoodDistribution,
+	getCooccurringSymbols,
 } from './queries';
 
 // ─── Collections ─────────────────────────────────────────

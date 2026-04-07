@@ -15,8 +15,12 @@
 	import type { ViewProps } from '$lib/app-registry';
 	import { ContextMenu, type ContextMenuItem } from '@mana/shared-ui';
 	import { PencilSimple, PushPin, Trash } from '@mana/shared-icons';
+	import SymbolsView from './views/SymbolsView.svelte';
 
 	let { navigate, goBack, params }: ViewProps = $props();
+
+	type ViewMode = 'list' | 'symbols';
+	let viewMode = $state<ViewMode>('list');
 
 	let dreams$ = useAllDreams();
 	let dreams = $derived(dreams$.value);
@@ -165,256 +169,275 @@
 </script>
 
 <div class="app-view">
-	<!-- Quick create -->
-	<form onsubmit={(e) => e.preventDefault()} class="quick-add">
-		<span class="add-icon">&#x1f319;</span>
-		<input
-			class="add-input"
-			type="text"
-			placeholder="Was hast du geträumt? (Enter)"
-			bind:value={newTitle}
-			onkeydown={handleQuickCreate}
-		/>
-	</form>
+	<!-- View switcher -->
+	<div class="view-tabs">
+		<button class="view-tab" class:active={viewMode === 'list'} onclick={() => (viewMode = 'list')}>
+			Träume
+		</button>
+		<button
+			class="view-tab"
+			class:active={viewMode === 'symbols'}
+			onclick={() => (viewMode = 'symbols')}
+		>
+			Symbole
+		</button>
+	</div>
 
-	<!-- Insights ribbon -->
-	{#if insights.total > 0}
-		<div class="insights">
-			<span class="ins-stat">{insights.total} Träume</span>
-			{#if insights.lucidCount > 0}
-				<span class="ins-stat">&#x2728; {insights.lucidCount} Klarträume</span>
-			{/if}
-			{#each insights.topSymbols as sym}
-				<button
-					class="ins-symbol"
-					class:active={symbolFilter === sym.name}
-					onclick={() => selectSymbol(sym.name)}
-				>
-					{sym.name} · {sym.count}
-				</button>
-			{/each}
-			{#if symbolFilter}
-				<button class="ins-clear" onclick={() => (symbolFilter = null)}>×&nbsp;Filter</button>
-			{/if}
-		</div>
-	{/if}
+	{#if viewMode === 'symbols'}
+		<SymbolsView />
+	{:else}
+		<!-- Quick create -->
+		<form onsubmit={(e) => e.preventDefault()} class="quick-add">
+			<span class="add-icon">&#x1f319;</span>
+			<input
+				class="add-input"
+				type="text"
+				placeholder="Was hast du geträumt? (Enter)"
+				bind:value={newTitle}
+				onkeydown={handleQuickCreate}
+			/>
+		</form>
 
-	<!-- Filter tabs -->
-	{#if dreams.length > 0}
-		<div class="filter-tabs">
-			<button
-				class="filter-tab"
-				class:active={filterMode === 'all'}
-				onclick={() => (filterMode = 'all')}
-			>
-				Alle
-			</button>
-			<button
-				class="filter-tab"
-				class:active={filterMode === 'lucid'}
-				onclick={() => (filterMode = 'lucid')}
-			>
-				&#x2728; Klarträume
-			</button>
-			<button
-				class="filter-tab"
-				class:active={filterMode === 'nightmare'}
-				onclick={() => (filterMode = 'nightmare')}
-			>
-				Albträume
-			</button>
-			<button
-				class="filter-tab"
-				class:active={filterMode === 'recurring'}
-				onclick={() => (filterMode = 'recurring')}
-			>
-				Wiederkehrend
-			</button>
-		</div>
-	{/if}
-
-	<!-- Search -->
-	{#if dreams.length > 5}
-		<input
-			class="search-input"
-			type="text"
-			placeholder="Träume durchsuchen..."
-			bind:value={searchQuery}
-		/>
-	{/if}
-
-	<!-- Dream list -->
-	<div class="dream-list">
-		{#each grouped as group (group.label)}
-			<div class="month-label">{group.label}</div>
-			{#each group.dreams as dream (dream.id)}
-				{#if editingId === dream.id}
-					<!-- Inline editor -->
-					<div
-						class="dream-item editing"
-						onkeydown={(e) => {
-							if (e.key === 'Escape') saveEdit();
-						}}
+		<!-- Insights ribbon -->
+		{#if insights.total > 0}
+			<div class="insights">
+				<span class="ins-stat">{insights.total} Träume</span>
+				{#if insights.lucidCount > 0}
+					<span class="ins-stat">&#x2728; {insights.lucidCount} Klarträume</span>
+				{/if}
+				{#each insights.topSymbols as sym}
+					<button
+						class="ins-symbol"
+						class:active={symbolFilter === sym.name}
+						onclick={() => selectSymbol(sym.name)}
 					>
-						<input
-							class="ed-title"
-							type="text"
-							bind:value={editTitle}
-							placeholder="Titel (optional)..."
-							autofocus
-						/>
-						<textarea
-							class="ed-content"
-							bind:value={editContent}
-							placeholder="Erzähl mir den Traum..."
-							rows="5"
-						></textarea>
-						<input
-							class="ed-symbols"
-							type="text"
-							bind:value={editSymbols}
-							placeholder="Symbole (Komma-getrennt): Wasser, Fliegen, Tür"
-						/>
+						{sym.name} · {sym.count}
+					</button>
+				{/each}
+				{#if symbolFilter}
+					<button class="ins-clear" onclick={() => (symbolFilter = null)}>×&nbsp;Filter</button>
+				{/if}
+			</div>
+		{/if}
 
-						<div class="ed-row">
-							<div class="mood-picker">
-								{#each MOODS as mood}
-									<button
-										class="mood-btn"
-										class:active={editMood === mood}
-										style="--mood-color: {MOOD_COLORS[mood]}"
-										onclick={() => (editMood = editMood === mood ? null : mood)}
-										title={MOOD_LABELS[mood]}
-									>
-										<span class="mood-dot"></span>
-										{MOOD_LABELS[mood]}
-									</button>
-								{/each}
-							</div>
-						</div>
+		<!-- Filter tabs -->
+		{#if dreams.length > 0}
+			<div class="filter-tabs">
+				<button
+					class="filter-tab"
+					class:active={filterMode === 'all'}
+					onclick={() => (filterMode = 'all')}
+				>
+					Alle
+				</button>
+				<button
+					class="filter-tab"
+					class:active={filterMode === 'lucid'}
+					onclick={() => (filterMode = 'lucid')}
+				>
+					&#x2728; Klarträume
+				</button>
+				<button
+					class="filter-tab"
+					class:active={filterMode === 'nightmare'}
+					onclick={() => (filterMode = 'nightmare')}
+				>
+					Albträume
+				</button>
+				<button
+					class="filter-tab"
+					class:active={filterMode === 'recurring'}
+					onclick={() => (filterMode = 'recurring')}
+				>
+					Wiederkehrend
+				</button>
+			</div>
+		{/if}
 
-						<div class="ed-row sleep-row">
-							<label class="ed-field">
-								<span class="ed-label">Nacht</span>
-								<input type="date" bind:value={editDreamDate} class="ed-input-sm" />
-							</label>
-							<label class="ed-field">
-								<span class="ed-label">Ins Bett</span>
-								<input type="time" bind:value={editBedtime} class="ed-input-sm" />
-							</label>
-							<label class="ed-field">
-								<span class="ed-label">Aufgewacht</span>
-								<input type="time" bind:value={editWakeTime} class="ed-input-sm" />
-							</label>
-						</div>
+		<!-- Search -->
+		{#if dreams.length > 5}
+			<input
+				class="search-input"
+				type="text"
+				placeholder="Träume durchsuchen..."
+				bind:value={searchQuery}
+			/>
+		{/if}
 
-						<div class="ed-row">
-							<div class="ed-field">
-								<span class="ed-label">Schlafqualität</span>
-								<div class="stars">
-									{#each [1, 2, 3, 4, 5] as q}
+		<!-- Dream list -->
+		<div class="dream-list">
+			{#each grouped as group (group.label)}
+				<div class="month-label">{group.label}</div>
+				{#each group.dreams as dream (dream.id)}
+					{#if editingId === dream.id}
+						<!-- Inline editor -->
+						<div
+							class="dream-item editing"
+							onkeydown={(e) => {
+								if (e.key === 'Escape') saveEdit();
+							}}
+						>
+							<input
+								class="ed-title"
+								type="text"
+								bind:value={editTitle}
+								placeholder="Titel (optional)..."
+								autofocus
+							/>
+							<textarea
+								class="ed-content"
+								bind:value={editContent}
+								placeholder="Erzähl mir den Traum..."
+								rows="5"
+							></textarea>
+							<input
+								class="ed-symbols"
+								type="text"
+								bind:value={editSymbols}
+								placeholder="Symbole (Komma-getrennt): Wasser, Fliegen, Tür"
+							/>
+
+							<div class="ed-row">
+								<div class="mood-picker">
+									{#each MOODS as mood}
 										<button
-											class="star"
-											class:filled={editSleepQuality !== null && editSleepQuality >= q}
-											onclick={() => setSleepQuality(q as SleepQuality)}
-											aria-label={`${q} Sterne`}
+											class="mood-btn"
+											class:active={editMood === mood}
+											style="--mood-color: {MOOD_COLORS[mood]}"
+											onclick={() => (editMood = editMood === mood ? null : mood)}
+											title={MOOD_LABELS[mood]}
 										>
-											★
+											<span class="mood-dot"></span>
+											{MOOD_LABELS[mood]}
 										</button>
 									{/each}
 								</div>
 							</div>
-							<div class="toggles">
-								<label class="lucid-toggle">
-									<input type="checkbox" bind:checked={editIsLucid} />
-									&#x2728; Klartraum
+
+							<div class="ed-row sleep-row">
+								<label class="ed-field">
+									<span class="ed-label">Nacht</span>
+									<input type="date" bind:value={editDreamDate} class="ed-input-sm" />
 								</label>
-								<label class="lucid-toggle">
-									<input type="checkbox" bind:checked={editIsRecurring} />
-									&#x21bb; Wiederkehrend
+								<label class="ed-field">
+									<span class="ed-label">Ins Bett</span>
+									<input type="time" bind:value={editBedtime} class="ed-input-sm" />
+								</label>
+								<label class="ed-field">
+									<span class="ed-label">Aufgewacht</span>
+									<input type="time" bind:value={editWakeTime} class="ed-input-sm" />
 								</label>
 							</div>
-						</div>
 
-						<div class="ed-actions">
-							<button class="ed-btn danger" onclick={() => handleDelete(dream.id)}>Löschen</button>
-							<button class="ed-btn primary" onclick={saveEdit}>Fertig</button>
-						</div>
-					</div>
-				{:else}
-					<!-- Dream row -->
-					<div
-						class="dream-item"
-						role="button"
-						tabindex="0"
-						onclick={() => startEdit(dream)}
-						onkeydown={(e) => {
-							if (e.key === 'Enter' || e.key === ' ') {
-								e.preventDefault();
-								startEdit(dream);
-							}
-						}}
-						oncontextmenu={(e) => handleItemContextMenu(e, dream)}
-					>
-						{#if dream.mood}
-							<span class="mood-dot-row" style="background: {MOOD_COLORS[dream.mood]}"></span>
-						{:else}
-							<span class="mood-dot-row empty"></span>
-						{/if}
-
-						<div class="dream-content">
-							<div class="dream-top">
-								<span class="dream-title">{dream.title || 'Traum ohne Titel'}</span>
-								{#if dream.isLucid}<span class="badge lucid">&#x2728;</span>{/if}
-								{#if dream.isRecurring}<span class="badge">&#x21bb;</span>{/if}
-								{#if dream.isPinned}<span class="badge">&#x1f4cc;</span>{/if}
-								{#if dream.isPrivate}<span class="badge">&#x1f512;</span>{/if}
-							</div>
-							{#if dream.content}
-								<p class="dream-preview">{dream.content.split('\n')[0]}</p>
-							{/if}
-							<div class="dream-meta">
-								<span>{formatDreamDate(dream.dreamDate)}</span>
-								{#if dream.symbols.length > 0}
-									<span class="dot">·</span>
-									<span class="symbol-chips">
-										{#each dream.symbols.slice(0, 3) as sym}
+							<div class="ed-row">
+								<div class="ed-field">
+									<span class="ed-label">Schlafqualität</span>
+									<div class="stars">
+										{#each [1, 2, 3, 4, 5] as q}
 											<button
-												class="symbol-chip"
-												class:active={symbolFilter === sym}
-												onclick={(e) => {
-													e.stopPropagation();
-													selectSymbol(sym);
-												}}
+												class="star"
+												class:filled={editSleepQuality !== null && editSleepQuality >= q}
+												onclick={() => setSleepQuality(q as SleepQuality)}
+												aria-label={`${q} Sterne`}
 											>
-												{sym}
+												★
 											</button>
 										{/each}
-									</span>
-								{/if}
+									</div>
+								</div>
+								<div class="toggles">
+									<label class="lucid-toggle">
+										<input type="checkbox" bind:checked={editIsLucid} />
+										&#x2728; Klartraum
+									</label>
+									<label class="lucid-toggle">
+										<input type="checkbox" bind:checked={editIsRecurring} />
+										&#x21bb; Wiederkehrend
+									</label>
+								</div>
+							</div>
+
+							<div class="ed-actions">
+								<button class="ed-btn danger" onclick={() => handleDelete(dream.id)}>Löschen</button
+								>
+								<button class="ed-btn primary" onclick={saveEdit}>Fertig</button>
 							</div>
 						</div>
-					</div>
-				{/if}
+					{:else}
+						<!-- Dream row -->
+						<div
+							class="dream-item"
+							role="button"
+							tabindex="0"
+							onclick={() => startEdit(dream)}
+							onkeydown={(e) => {
+								if (e.key === 'Enter' || e.key === ' ') {
+									e.preventDefault();
+									startEdit(dream);
+								}
+							}}
+							oncontextmenu={(e) => handleItemContextMenu(e, dream)}
+						>
+							{#if dream.mood}
+								<span class="mood-dot-row" style="background: {MOOD_COLORS[dream.mood]}"></span>
+							{:else}
+								<span class="mood-dot-row empty"></span>
+							{/if}
+
+							<div class="dream-content">
+								<div class="dream-top">
+									<span class="dream-title">{dream.title || 'Traum ohne Titel'}</span>
+									{#if dream.isLucid}<span class="badge lucid">&#x2728;</span>{/if}
+									{#if dream.isRecurring}<span class="badge">&#x21bb;</span>{/if}
+									{#if dream.isPinned}<span class="badge">&#x1f4cc;</span>{/if}
+									{#if dream.isPrivate}<span class="badge">&#x1f512;</span>{/if}
+								</div>
+								{#if dream.content}
+									<p class="dream-preview">{dream.content.split('\n')[0]}</p>
+								{/if}
+								<div class="dream-meta">
+									<span>{formatDreamDate(dream.dreamDate)}</span>
+									{#if dream.symbols.length > 0}
+										<span class="dot">·</span>
+										<span class="symbol-chips">
+											{#each dream.symbols.slice(0, 3) as sym}
+												<button
+													class="symbol-chip"
+													class:active={symbolFilter === sym}
+													onclick={(e) => {
+														e.stopPropagation();
+														selectSymbol(sym);
+													}}
+												>
+													{sym}
+												</button>
+											{/each}
+										</span>
+									{/if}
+								</div>
+							</div>
+						</div>
+					{/if}
+				{/each}
 			{/each}
-		{/each}
 
-		{#if filtered.length === 0 && dreams.length > 0}
-			<p class="empty">Keine Treffer</p>
+			{#if filtered.length === 0 && dreams.length > 0}
+				<p class="empty">Keine Treffer</p>
+			{/if}
+		</div>
+
+		{#if dreams.length === 0}
+			<p class="empty">Tippe oben, um deinen ersten Traum festzuhalten.</p>
 		{/if}
-	</div>
 
-	{#if dreams.length === 0}
-		<p class="empty">Tippe oben, um deinen ersten Traum festzuhalten.</p>
+		<ContextMenu
+			visible={ctxMenu.visible}
+			x={ctxMenu.x}
+			y={ctxMenu.y}
+			items={ctxMenuItems}
+			onClose={() => (ctxMenu = { ...ctxMenu, visible: false, dream: null })}
+		/>
 	{/if}
-
-	<ContextMenu
-		visible={ctxMenu.visible}
-		x={ctxMenu.x}
-		y={ctxMenu.y}
-		items={ctxMenuItems}
-		onClose={() => (ctxMenu = { ...ctxMenu, visible: false, dream: null })}
-	/>
 </div>
 
 <style>
@@ -424,6 +447,35 @@
 		gap: 0.625rem;
 		padding: 1rem;
 		height: 100%;
+	}
+
+	/* ── View Tabs ─────────────────────────────── */
+	.view-tabs {
+		display: flex;
+		gap: 0.25rem;
+		border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+		padding-bottom: 0.5rem;
+		margin-bottom: 0.25rem;
+	}
+	:global(.dark) .view-tabs {
+		border-bottom-color: rgba(255, 255, 255, 0.06);
+	}
+	.view-tab {
+		background: transparent;
+		border: none;
+		padding: 0.25rem 0.625rem;
+		font-size: 0.75rem;
+		color: #9ca3af;
+		cursor: pointer;
+		border-radius: 0.25rem;
+		font-weight: 500;
+	}
+	.view-tab:hover {
+		color: #6366f1;
+	}
+	.view-tab.active {
+		color: #6366f1;
+		background: rgba(99, 102, 241, 0.08);
 	}
 
 	/* ── Quick Add ─────────────────────────────── */

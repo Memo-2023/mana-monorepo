@@ -139,6 +139,93 @@ export const dreamsStore = {
 		});
 	},
 
+	/** Edit a symbol's metadata (name, meaning, color). */
+	async updateSymbol(
+		id: string,
+		data: { name?: string; meaning?: string | null; color?: string | null }
+	) {
+		const existing = await dreamSymbolTable.get(id);
+		if (!existing) return;
+
+		// If renaming, propagate to all dreams that reference the old name
+		if (data.name && data.name !== existing.name) {
+			const newName = data.name.trim();
+			if (!newName) return;
+
+			// Check if a symbol with the new name already exists -> merge instead
+			const collision = await dreamSymbolTable.where('name').equals(newName).first();
+			if (collision && collision.id !== id) {
+				await this.mergeSymbols(id, collision.id);
+				return;
+			}
+
+			const allDreams = await dreamTable.toArray();
+			for (const dream of allDreams) {
+				if (dream.deletedAt || !dream.symbols?.includes(existing.name)) continue;
+				const updated = dream.symbols.map((s) => (s === existing.name ? newName : s));
+				await dreamTable.update(dream.id, {
+					symbols: updated,
+					updatedAt: new Date().toISOString(),
+				});
+			}
+		}
+
+		await dreamSymbolTable.update(id, {
+			...data,
+			...(data.name ? { name: data.name.trim() } : {}),
+			updatedAt: new Date().toISOString(),
+		});
+	},
+
+	/** Soft-delete a symbol and remove it from all dreams that reference it. */
+	async deleteSymbol(id: string) {
+		const symbol = await dreamSymbolTable.get(id);
+		if (!symbol) return;
+
+		const allDreams = await dreamTable.toArray();
+		for (const dream of allDreams) {
+			if (dream.deletedAt || !dream.symbols?.includes(symbol.name)) continue;
+			await dreamTable.update(dream.id, {
+				symbols: dream.symbols.filter((s) => s !== symbol.name),
+				updatedAt: new Date().toISOString(),
+			});
+		}
+
+		await dreamSymbolTable.update(id, {
+			deletedAt: new Date().toISOString(),
+			updatedAt: new Date().toISOString(),
+		});
+	},
+
+	/** Merge `sourceId` into `targetId`: rewrite all dreams, sum counts, soft-delete source. */
+	async mergeSymbols(sourceId: string, targetId: string) {
+		if (sourceId === targetId) return;
+		const source = await dreamSymbolTable.get(sourceId);
+		const target = await dreamSymbolTable.get(targetId);
+		if (!source || !target) return;
+
+		const allDreams = await dreamTable.toArray();
+		for (const dream of allDreams) {
+			if (dream.deletedAt || !dream.symbols?.includes(source.name)) continue;
+			const set = new Set(dream.symbols);
+			set.delete(source.name);
+			set.add(target.name);
+			await dreamTable.update(dream.id, {
+				symbols: Array.from(set),
+				updatedAt: new Date().toISOString(),
+			});
+		}
+
+		await dreamSymbolTable.update(targetId, {
+			count: (target.count ?? 0) + (source.count ?? 0),
+			updatedAt: new Date().toISOString(),
+		});
+		await dreamSymbolTable.update(sourceId, {
+			deletedAt: new Date().toISOString(),
+			updatedAt: new Date().toISOString(),
+		});
+	},
+
 	/** Increment or decrement counts for the given symbol names. Creates symbols on demand. */
 	async touchSymbols(names: string[], delta: number) {
 		for (const name of names) {

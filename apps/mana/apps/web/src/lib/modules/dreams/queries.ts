@@ -120,6 +120,47 @@ export function formatDreamDate(iso: string): string {
 	return date.toLocaleDateString('de-DE', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
+/** All dreams that contain the given symbol, newest first. */
+export function getDreamsWithSymbol(dreams: Dream[], symbolName: string): Dream[] {
+	return dreams
+		.filter((d) => d.symbols?.includes(symbolName))
+		.sort((a, b) => b.dreamDate.localeCompare(a.dreamDate));
+}
+
+/** Mood distribution across dreams that contain the given symbol. */
+export function getMoodDistribution(
+	dreams: Dream[],
+	symbolName: string
+): Array<{ mood: string; count: number }> {
+	const buckets = new Map<string, number>();
+	for (const d of dreams) {
+		if (!d.symbols?.includes(symbolName)) continue;
+		const key = d.mood ?? 'unbekannt';
+		buckets.set(key, (buckets.get(key) ?? 0) + 1);
+	}
+	return Array.from(buckets, ([mood, count]) => ({ mood, count })).sort(
+		(a, b) => b.count - a.count
+	);
+}
+
+/** Other symbols that frequently co-occur with the given symbol. */
+export function getCooccurringSymbols(
+	dreams: Dream[],
+	symbolName: string
+): Array<{ name: string; count: number }> {
+	const counts = new Map<string, number>();
+	for (const d of dreams) {
+		if (!d.symbols?.includes(symbolName)) continue;
+		for (const sym of d.symbols) {
+			if (sym === symbolName) continue;
+			counts.set(sym, (counts.get(sym) ?? 0) + 1);
+		}
+	}
+	return Array.from(counts, ([name, count]) => ({ name, count }))
+		.sort((a, b) => b.count - a.count)
+		.slice(0, 10);
+}
+
 /** Compute insights snapshot from dreams collection. */
 export function computeInsights(dreams: Dream[]) {
 	const total = dreams.length;
