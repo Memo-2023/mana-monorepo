@@ -651,15 +651,27 @@ const pendingChangesTable = db.table('_pendingChanges');
  * The Dexie creating/updating hook itself is synchronous and cannot await
  * a recovery, so we just dispatch the event and let the UI / sync engine
  * decide what to do (e.g. surface a toast, run cleanupTombstones).
+ *
+ * IMPORTANT: Dexie hooks fire inside the calling write's implicit transaction
+ * which only includes the user-facing table (e.g. `tasks`). Writing to
+ * `_pendingChanges` from there hits `NotFoundError: object store not in
+ * scope`. We defer the write to a microtask so it runs in a fresh
+ * transaction after the user's commit lands.
  */
 function trackPendingChange(table: string, change: Record<string, unknown>): void {
-	pendingChangesTable.add(change).catch((err: unknown) => {
-		if (isQuotaError(err)) {
-			notifyQuotaExceeded({ table, op: 'pending-change', cleaned: 0, recovered: false });
-		} else {
-			console.error('[mana-sync] failed to record pending change:', err);
-		}
-	});
+	// setTimeout (not queueMicrotask) is required: Dexie binds the active
+	// transaction to the current Zone via Promise scheduling, and a microtask
+	// is still considered "inside" the transaction. setTimeout(0) breaks out
+	// completely so the new add() spawns its own implicit transaction.
+	setTimeout(() => {
+		pendingChangesTable.add(change).catch((err: unknown) => {
+			if (isQuotaError(err)) {
+				notifyQuotaExceeded({ table, op: 'pending-change', cleaned: 0, recovered: false });
+			} else {
+				console.error('[mana-sync] failed to record pending change:', err);
+			}
+		});
+	}, 0);
 }
 
 /**

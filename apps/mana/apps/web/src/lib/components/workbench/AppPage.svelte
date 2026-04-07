@@ -61,14 +61,30 @@
 	let ListComponent = $state<Component | null>(null);
 	let loadError = $state(false);
 
+	// Track the last appId we loaded for so we only reload when it actually
+	// changes — not on every reactive churn from the data layer below us.
+	// Without this guard, any liveQuery update inside a child ListView (e.g.
+	// creating a task) can re-run this effect, which clears ListComponent and
+	// makes the whole carousel flash like a page reload.
+	let lastLoadedAppId: string | undefined = undefined;
+
 	$effect(() => {
+		if (appId === lastLoadedAppId) return;
+		lastLoadedAppId = appId;
+
 		ListComponent = null;
 		loadError = false;
-		if (app) {
-			const loader = app.views.list.load;
-			loader().then(
-				(mod) => (ListComponent = mod.default),
-				() => (loadError = true)
+		const currentApp = app;
+		if (currentApp) {
+			currentApp.views.list.load().then(
+				(mod) => {
+					// Guard against an out-of-order load if appId changed again
+					// while we were awaiting.
+					if (lastLoadedAppId === appId) ListComponent = mod.default;
+				},
+				() => {
+					if (lastLoadedAppId === appId) loadError = true;
+				}
 			);
 		}
 	});

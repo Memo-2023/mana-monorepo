@@ -4,6 +4,7 @@
   Supports tag drag-and-drop onto the current quote.
 -->
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { liveQuery } from 'dexie';
 	import { db } from '$lib/data/database';
 	import { quotesStore } from '$lib/modules/zitare/stores/quotes.svelte';
@@ -22,8 +23,15 @@
 	let favorites = $state<LocalFavorite[]>([]);
 	let quote = $state<Quote | null>(null);
 
-	$effect(() => {
+	// Initialize once on mount (writes to store state — keep out of $effect
+	// to avoid the read/write loop where reading currentQuote retriggers
+	// the effect after initialize() updates it).
+	onMount(() => {
 		quotesStore.initialize();
+		quote = quotesStore.currentQuote;
+	});
+
+	$effect(() => {
 		quote = quotesStore.currentQuote;
 	});
 
