@@ -1,7 +1,7 @@
 # Mana Web App – Data Layer Audit
 
 > **Initial Audit:** 2026-04-07
-> **Last Update:** 2026-04-07 (Encryption Phase 7–8 abgeschlossen — Rollout komplett)
+> **Last Update:** 2026-04-07 (Encryption Phase 9 abgeschlossen — Zero-Knowledge Opt-In live)
 > **Scope:** `apps/mana/apps/web/src/lib/data/*` und `src/lib/modules/*` (Local-First Layer der Unified Mana Web App)
 > **Ziel:** Funktionsweise dokumentieren, Schwachstellen aufdecken, priorisierte Refactor-Roadmap.
 
@@ -26,23 +26,29 @@
 | Backlog 2    | SSE Streaming Pipeline                                        | ✅     | `ad0215863` |
 | Backlog 3    | Activity Log + Cleanup-Scheduler                              | ✅     | `82559f684` |
 
-### Encryption-Sprints (Phase 1–8)
+### Encryption-Sprints (Phase 1–9)
 
-| Phase     | Thema                                                                              | Status | Commit      |
-| --------- | ---------------------------------------------------------------------------------- | ------ | ----------- |
-| 1         | Foundation: AES-GCM-256, KeyProvider, Registry, 31 Unit-Tests                      | ✅     | `1ba5948ce` |
-| 2         | mana-auth Server Vault: encryption_vaults + RLS + KEK + 11 Tests                   | ✅     | `e9915428c` |
-| 3         | Client Wire-up: vault-client, record-helpers, layout integration                   | ✅     | `354cbcb17` |
-| 4         | Pilot: notes table mit 8 End-to-End Tests                                          | ✅     | `bed08a1aa` |
-| 5         | Rollout: chat, dreams, memoro, contacts, cycles, finance                           | ✅     | `af92720a6` |
-| 6.1       | Rollout: cards, presi, inventar, planta                                            | ✅     | `73f294b29` |
-| 6.2 + 6.3 | Settings UI (`/settings/security`) + Encryption Intro Banner                       | ✅     | `6b8e2c717` |
-| Roundup   | DATA_LAYER_AUDIT roll-up vor Phase 7                                               | ✅     | `4bdf4238c` |
-| 7.1       | timeBlocks-Hub: tasks + calendar.events + timeBlocks (mit Habits-Coupling)         | ✅     | `c875b4e96` |
-| 7.2       | Storeless Modules: questions, answers, links, documents, meals (Registry-Fix)      | ✅     | `40b7069eb` |
-| 8         | Storage, Picture, Music, Social Events + Guests (Schema-Fixes, manaLinks entfernt) | ✅     | `be611cd1e` |
+| Phase     | Thema                                                                               | Status | Commit      |
+| --------- | ----------------------------------------------------------------------------------- | ------ | ----------- |
+| 1         | Foundation: AES-GCM-256, KeyProvider, Registry, 31 Unit-Tests                       | ✅     | `1ba5948ce` |
+| 2         | mana-auth Server Vault: encryption_vaults + RLS + KEK + 11 Tests                    | ✅     | `e9915428c` |
+| 3         | Client Wire-up: vault-client, record-helpers, layout integration                    | ✅     | `354cbcb17` |
+| 4         | Pilot: notes table mit 8 End-to-End Tests                                           | ✅     | `bed08a1aa` |
+| 5         | Rollout: chat, dreams, memoro, contacts, cycles, finance                            | ✅     | `af92720a6` |
+| 6.1       | Rollout: cards, presi, inventar, planta                                             | ✅     | `73f294b29` |
+| 6.2 + 6.3 | Settings UI (`/settings/security`) + Encryption Intro Banner                        | ✅     | `6b8e2c717` |
+| Roundup   | DATA_LAYER_AUDIT roll-up vor Phase 7                                                | ✅     | `4bdf4238c` |
+| 7.1       | timeBlocks-Hub: tasks + calendar.events + timeBlocks (mit Habits-Coupling)          | ✅     | `c875b4e96` |
+| 7.2       | Storeless Modules: questions, answers, links, documents, meals (Registry-Fix)       | ✅     | `40b7069eb` |
+| 8         | Storage, Picture, Music, Social Events + Guests (Schema-Fixes, manaLinks entfernt)  | ✅     | `be611cd1e` |
+| 9 M1      | Recovery-Code-Primitives: HKDF-Wrap, Format/Parse, 22 Tests                         | ✅     | `2f48f867f` |
+| 9 M2      | Server-Vault: recovery_wrapped_mk + zero_knowledge + 4 Routes + 3 CHECK constraints | ✅     | `f46d1328d` |
+| 9 M3      | Client vault-client: 5 neue Methoden + awaiting-recovery-code State                 | ✅     | `6de01937c` |
+| 9 M4      | Settings-UI: 4-Schritt Setup-Flow + Active-State + Disable-Confirm                  | ✅     | `56312ff57` |
+| 9 +       | GET /status Endpoint + Settings-Page Hydration                                      | ✅     | `78d949d05` |
+| 9 +       | RecoveryCodeUnlockModal: Lock-Screen Flow im Layout                                 | ✅     | `a48b2d584` |
 
-**Test-Status:** 20 test files, 262/262 tests passing. Vitest@4.1.3 workspace-weit unifiziert. **25+ Tabellen mit At-Rest-Encryption live**, deckt **praktisch alle user-getippten Bytes** im Local-First-Pfad ab. Phase 7.1 schloss die `timeBlocks`-Lücke (Title-Leakage über das Cross-Module-Hub), Phase 7.2 stellte die Storeless-Module auf direkten encryptRecord-Wrap an jedem Call-Site um, und Phase 8 räumte die letzten Tabellen plus die ~6 falschen Phase-1-Platzhalter-Schemata weg.
+**Test-Status:** 21 test files, 284/284 tests passing (78 in crypto, davon 22 neu in `recovery.test.ts`). Vitest@4.1.3 workspace-weit unifiziert. **25+ Tabellen mit At-Rest-Encryption live**, deckt **praktisch alle user-getippten Bytes** im Local-First-Pfad ab. Phase 7.1 schloss die `timeBlocks`-Lücke (Title-Leakage über das Cross-Module-Hub), Phase 7.2 stellte die Storeless-Module auf direkten encryptRecord-Wrap an jedem Call-Site um, Phase 8 räumte die letzten Tabellen plus die ~6 falschen Phase-1-Platzhalter-Schemata weg, und **Phase 9 schließt die letzte theoretische Lücke mit dem optionalen Zero-Knowledge-Modus**: User können einen Recovery-Code generieren, mit dem ihr Master-Key clientseitig gesealed wird, und dann den serverseitigen KEK-Wrap löschen — danach ist Mana **computationally incapable** ihre Inhalte zu entschlüsseln.
 
 ---
 
@@ -181,6 +187,7 @@ Logout / Tab-Close → MemoryKeyProvider.setKey(null) → Cyphertext bleibt
 - **Conflict Resolution**: ✅ echter Field-Level LWW via `__fieldTimestamps`
 - **Soft Delete** ist Standard via `deletedAt`
 - **At-Rest-Encryption**: AES-GCM-256, server-wrapped Master Key, 25+ Tabellen aktiv (Rollout abgeschlossen)
+- **Zero-Knowledge-Modus** (Phase 9 Opt-In): Recovery-Code-basiertes Wrapping ohne Server-seitige Entschlüsselbarkeit
 
 ---
 
@@ -193,7 +200,7 @@ Logout / Tab-Close → MemoryKeyProvider.setKey(null) → Cyphertext bleibt
 | 1   | Field-Level LWW falsch implementiert | `__fieldTimestamps` Hidden Field via Dexie hooks, per-Feld Vergleich in `applyServerChanges`                     | 1 ✅                    |
 | 2   | Keine Client-Side User Isolation     | `current-user.ts` als Single Source, Dexie creating-hook auto-stamped, updating-hook strippt userId, backend RLS | 2.1+2.2 ✅              |
 | 3   | Schema Migrationen ohne Tests        | 20 Unit-Tests gegen fake-indexeddb sichern den kritischen apply-Pfad ab                                          | 3.3 ✅                  |
-| 4   | Keine Verschlüsselung im Browser     | AES-GCM-256 mit server-wrapped Master Key (vault), 25+ Tabellen, Settings-UI + Rotate, Onboarding-Banner         | Encryption Phase 1–8 ✅ |
+| 4   | Keine Verschlüsselung im Browser     | AES-GCM-256 mit server-wrapped Master Key (vault), 25+ Tabellen, Settings-UI + Rotate + Zero-Knowledge-Opt-In    | Encryption Phase 1–9 ✅ |
 | 5   | Keine Guest → User Migration         | `guest-migration.ts` walkt sync-Tabellen, re-inserted unter neuer userId, $effect im Layout                      | 2.3 ✅                  |
 
 ### 🟡 Hoch — alle erledigt
@@ -250,14 +257,18 @@ Logout / Tab-Close → MemoryKeyProvider.setKey(null) → Cyphertext bleibt
 - ✅ SSE Pipelining (read/apply entkoppelt, allocation-light Parser)
 - ✅ Activity Log mit Per-User-Isolation und 90d TTL
 - ✅ At-Rest-Encryption für 25+ Tabellen (AES-GCM-256, server-wrapped Master Key) — Rollout abgeschlossen
+- ✅ **Zero-Knowledge-Opt-In** (Phase 9): Recovery-Code-basiertes Wrapping, Server-seitige Entschlüsselbarkeit auf Knopfdruck eliminierbar
+- ✅ DB CHECK constraints erzwingen Vault-Konsistenz auf Schemaebene
 - ✅ Settings UI für Vault-Status + Manual Rotate
 - ✅ Onboarding-Banner beim ersten Login
 
 ---
 
-## 5. Encryption-Pipeline (Phase 1–8)
+## 5. Encryption-Pipeline (Phase 1–9)
 
 ### Wer hält was?
+
+**Standard-Modus (Default seit Phase 2):**
 
 | Komponente                 | Inhalt                                                                                                   |
 | -------------------------- | -------------------------------------------------------------------------------------------------------- |
@@ -265,6 +276,100 @@ Logout / Tab-Close → MemoryKeyProvider.setKey(null) → Cyphertext bleibt
 | **HTTPS Wire**             | Master Key wird beim Login als base64 transportiert (via Bearer JWT geschützt).                          |
 | **Browser sessionStorage** | Master Key als CryptoKey im `MemoryKeyProvider`. `mana-vault-unlocked=1` Sentinel für die UI.            |
 | **IndexedDB**              | Verschlüsselte Felder als `enc:1:<iv>.<ct>` Strings. Strukturelle Felder (id, FK, timestamps) plaintext. |
+
+**Zero-Knowledge-Modus (Phase 9 Opt-In):**
+
+| Komponente                 | Inhalt                                                                                                                                                                 |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **User (extern)**          | 32-Byte Recovery-Secret als 79-char Hex-Code (`1A2B-3C4D-...`) im Password-Manager / Tresor. **Niemand außer dem User** kennt diesen Wert.                             |
+| **mana-auth Server**       | `recovery_wrapped_mk` + `recovery_iv` (HKDF-derived AES-GCM Wrap des MK). `wrapped_mk` ist `NULL`. `zero_knowledge=true`. Server kann den MK NICHT mehr entschlüsseln. |
+| **HTTPS Wire**             | GET /key returnt das Recovery-Blob, NICHT den Plaintext-MK. Recovery-Code selbst überschreitet niemals den Browser.                                                    |
+| **Browser sessionStorage** | Master Key als CryptoKey im `MemoryKeyProvider` (nach lokalem Unwrap mit dem Recovery-Code).                                                                           |
+| **IndexedDB**              | Identisch zu Standard-Modus.                                                                                                                                           |
+
+### Recovery-Code-Pipeline (Phase 9)
+
+```
+Setup-Flow (Settings → Sicherheit → Zero-Knowledge):
+─────────────────────────────────────────────────────
+1. User klickt "Recovery-Code einrichten"
+        │
+        ▼
+2. vaultClient.setupRecoveryCode()
+   ─ generateRecoverySecret() → 32 zufällige Bytes (CSPRNG)
+   ─ deriveRecoveryWrapKey(secret) → HKDF-SHA256, info "mana-recovery-v1"
+   ─ Re-fetch des MK vom Server in extractable form
+   ─ wrapMasterKeyWithRecovery(mk, wrapKey) → ciphertext + iv
+   ─ POST /api/v1/me/encryption-vault/recovery-wrap mit dem Wrap
+   ─ formatRecoveryCode(secret) → "1A2B-3C4D-..." (79 chars)
+   ─ Wipe der raw bytes (best-effort)
+        │
+        ▼
+3. UI zeigt formatierten Code, User kopiert in Password-Manager
+        │
+        ▼
+4. User tippt Code zur Bestätigung zurück → case-insensitive Match
+        │
+        ▼
+5. User klickt "Aktivieren"
+        │
+        ▼
+6. POST /api/v1/me/encryption-vault/zero-knowledge { enable: true }
+   ─ Server prüft: recovery_wrapped_mk IS NOT NULL (sonst 400)
+   ─ UPDATE auth.encryption_vaults SET wrapped_mk=NULL, wrap_iv=NULL,
+            zero_knowledge=true
+   ─ DB CHECK constraint encryption_vaults_zk_consistency erzwingt Invariante
+   ─ Audit-Eintrag "zk_enable"
+        │
+        ▼
+7. Vault ist jetzt im Zero-Knowledge-Modus. Server kann nicht mehr entschlüsseln.
+
+Unlock-Flow (Login auf neuem Gerät):
+─────────────────────────────────────
+1. Login → JWT
+        │
+        ▼
+2. vaultClient.unlock() → GET /key
+        │
+        ▼
+3. Server: row.zero_knowledge === true
+   ─ Returns { requiresRecoveryCode: true, recoveryWrappedMk, recoveryIv }
+   ─ KEIN Plaintext-MK in der Response
+        │
+        ▼
+4. Client: state = 'awaiting-recovery-code', stash blob
+        │
+        ▼
+5. RecoveryCodeUnlockModal mountet → User pastet Code
+        │
+        ▼
+6. vaultClient.unlockWithRecoveryCode(code)
+   ─ parseRecoveryCode(code) → 32 bytes (RecoveryCodeFormatError on shape)
+   ─ deriveRecoveryWrapKey(secret) → wrap key
+   ─ AES-GCM decrypt(stashedBlob, wrapKey)
+     - Auf Fehler (wrong code OR tampered): generic "wrong code" Error
+   ─ Cache der raw bytes (für späteres disableZeroKnowledge)
+   ─ importMasterKey(rawMk) → non-extractable CryptoKey → MemoryKeyProvider
+   ─ Wipe der raw bytes (best-effort)
+        │
+        ▼
+7. state = 'unlocked' → Modal dismissed → App bootet normal
+```
+
+### Schlüssel- + Datei-Kette für Phase 9
+
+| Datei                                                                           | Zweck                                                                                 |
+| ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `crypto/recovery.ts`                                                            | HKDF-derive, format/parse, wrap/unwrap mit dem Recovery-Code                          |
+| `crypto/recovery.test.ts`                                                       | 22 Tests für Roundtrips, Format-Toleranz, Failure-Modes, IV-Eindeutigkeit             |
+| `crypto/vault-client.ts` (extended)                                             | 5 neue Methoden + `awaiting-recovery-code` State + Status-Endpoint-Wrapper            |
+| `services/mana-auth/sql/003_recovery_wrap.sql`                                  | Migration: 5 neue Spalten, NULLability, 3 CHECK constraints                           |
+| `services/mana-auth/src/db/schema/encryption-vaults.ts`                         | Drizzle-Schema-Update                                                                 |
+| `services/mana-auth/src/services/encryption-vault/index.ts` (extended)          | `getStatus`, `setRecoveryWrap`, `clearRecoveryWrap`, `enableZK`, `disableZK`          |
+| `services/mana-auth/src/routes/encryption-vault.ts` (extended)                  | `GET /status`, `POST /recovery-wrap`, `DELETE /recovery-wrap`, `POST /zero-knowledge` |
+| `apps/mana/apps/web/src/routes/(app)/settings/security/+page.svelte` (extended) | 4-Schritt Setup-Flow + Active-State + Hydration + "has wrap, no ZK" Branch            |
+| `apps/mana/apps/web/src/lib/components/RecoveryCodeUnlockModal.svelte`          | Lock-Screen Modal für den Unlock-Flow                                                 |
+| `apps/mana/apps/web/src/routes/+layout.svelte` (extended)                       | `awaiting-recovery-code` Branch im Vault-Unlock-Effekt                                |
 
 ### Verschlüsselte Tabellen (Stand Phase 8 — Rollout abgeschlossen)
 
@@ -323,22 +428,26 @@ Bestimmte Felder bleiben absichtlich im Klartext, weil sie strukturell gebraucht
 
 ### Was Mana technisch (nicht) sehen kann
 
-**Niemals:**
+**Standard-Modus (Default):**
 
-- Inhalte verschlüsselter Felder ohne aktiv den KEK zu verwenden
-- Klartext der Records auf der User-Festplatte (Browser-Forensik liefert nur Blobs)
+- ❌ **Niemals** Inhalte verschlüsselter Felder ohne aktiv den KEK zu verwenden
+- ❌ **Niemals** Klartext der Records auf der User-Festplatte (Browser-Forensik liefert nur Blobs)
+- ⚠️ **Theoretisch entschlüsselbar (wenn aktiv missbraucht):** Provider-Operator mit Zugriff auf KEK kann den wrapped MK entschlüsseln und Daten lesen. In der Praxis gegen alle realistischen Bedrohungen außer einer gerichtlich erzwungenen Offenlegung gegen Mana selbst geschützt.
 
-**Theoretisch entschlüsselbar (wenn aktiv missbraucht):**
+**Zero-Knowledge-Modus (Phase 9 Opt-In):**
 
-- Provider-Operator mit Zugriff auf KEK kann den wrapped MK entschlüsseln und Daten lesen
-- Lösung (offen): Phase 9 — Recovery-Code-Opt-In für true Zero-Knowledge
+- ❌ **Niemals** Inhalte verschlüsselter Felder — der Server hat KEINE Kopie des MK mehr (`wrapped_mk IS NULL`)
+- ❌ **Niemals** den Master-Key — selbst mit Vollzugriff auf DB + KEK + Source-Code kann der Provider den `recovery_wrapped_mk` nicht entschlüsseln, weil der Recovery-Code ausschließlich beim User liegt
+- ❌ **Niemals** den Recovery-Code selbst — er wird ausschließlich clientseitig generiert, wird zum Wrapping benutzt, und wird danach im Browser gewiped (best-effort)
+- ⚠️ **Trade-off:** Wenn der User den Recovery-Code verliert, sind die Daten unwiderruflich weg. Es gibt keinen Backup-Pfad. Der DB CHECK `encryption_vaults_zk_consistency` erzwingt die Invariante "ZK aktiv ⇒ recovery_wrapped_mk IS NOT NULL", sodass wir den User nicht versehentlich aussperren können.
 
-**Strukturell sichtbar:**
+**Strukturell sichtbar (in beiden Modi):**
 
 - Anzahl Records pro Tabelle (counts)
 - Zeitstempel und FKs
 - Welche Module der User aktiv nutzt
 - Sync-Frequenz und Volumes
+- Ob der User im Standard- oder Zero-Knowledge-Modus läuft (`zero_knowledge` Spalte ist plaintext)
 
 ---
 
@@ -346,13 +455,14 @@ Bestimmte Felder bleiben absichtlich im Klartext, weil sie strukturell gebraucht
 
 In abnehmender Priorität:
 
-1. **Encryption Phase 9 — Recovery Code Opt-In für True Zero-Knowledge** — BIP-39-Generator + Settings-UI + Server-Wrap-Toggle. User entscheidet selbst, ob der Provider noch entschlüsseln darf. Schließt die letzte theoretische Lücke (Provider-Operator mit KEK-Zugriff). Braucht UX-Design + Test-Flow für "Recovery-Code verloren = Daten weg".
-2. **Server-Side Image-Encryption** — `picture.images` werden vom Server erzeugt (image-gen API). Aktuell landen sie als Plaintext in IndexedDB; nur lokal editierte Records werden verschlüsselt. Decrypt-Path ist idempotent, also kein Bug — aber für volle Coverage müsste die image-gen API Records vor dem Push wrappen, oder ein Sync-time wrap-step on-the-fly laufen.
-3. **Server-Side File-Encryption** — Analog zu Bildern: `storage.files` werden via Upload-API vom Server geschrieben. Selbe Lösung wie #2.
-4. **Boards / boardItems Encryption** — Picture-Boards haben einen `textContent`-Feld auf BoardItems, der user-typed sein kann. Bisher kein zentraler Store. Niedrige Priorität, weil die Surface klein ist.
-5. **Conflict Visualization UI** — Toast/Modal wenn LWW eine Field-Edit überschrieben hat. Braucht UX-Design.
-6. **Composite Indexes für Multi-Account** — `[userId+createdAt]` etc., sobald User mehrere Accounts wechseln können.
-7. **V3 Migration Tests** — wenn die Mana-App nochmal Production-Daten migrieren muss.
+1. **Service-Tests gegen echtes Postgres für Phase 9** — Die 4 neuen Vault-Service-Methoden (`setRecoveryWrap`, `clearRecoveryWrap`, `enableZeroKnowledge`, `disableZeroKnowledge`) sind noch nicht durch Service-Level-Integrationstests abgedeckt. Crypto-Primitives sind via `recovery.test.ts` getestet (22 Tests), aber der Service braucht echtes RLS + Postgres-CHECK-Constraint-Verhalten — analog zum bestehenden `kek.test.ts` Pattern, aber gegen einen Test-DB-Container.
+2. **Recovery-Code Rotation UX im Active-State** — Wenn der User schon im ZK-Modus ist und einen neuen Recovery-Code will, gibt es aktuell keinen UI-Pfad dafür. Workaround: ZK deaktivieren → neuen Code generieren → ZK wieder aktivieren. Eine kombinierte "Code rotieren" Funktion wäre besser.
+3. **Server-Side Image-Encryption** — `picture.images` werden vom Server erzeugt (image-gen API). Aktuell landen sie als Plaintext in IndexedDB; nur lokal editierte Records werden verschlüsselt. Decrypt-Path ist idempotent, also kein Bug — aber für volle Coverage müsste die image-gen API Records vor dem Push wrappen, oder ein Sync-time wrap-step on-the-fly laufen.
+4. **Server-Side File-Encryption** — Analog zu Bildern: `storage.files` werden via Upload-API vom Server geschrieben. Selbe Lösung wie #3.
+5. **Boards / boardItems Encryption** — Picture-Boards haben einen `textContent`-Feld auf BoardItems, der user-typed sein kann. Bisher kein zentraler Store. Niedrige Priorität, weil die Surface klein ist.
+6. **Conflict Visualization UI** — Toast/Modal wenn LWW eine Field-Edit überschrieben hat. Braucht UX-Design.
+7. **Composite Indexes für Multi-Account** — `[userId+createdAt]` etc., sobald User mehrere Accounts wechseln können.
+8. **V3 Migration Tests** — wenn die Mana-App nochmal Production-Daten migrieren muss.
 
 Pre-existing Test-Failures (nicht von dieser Audit-Arbeit verursacht):
 
@@ -374,4 +484,4 @@ Pre-existing Test-Failures (nicht von dieser Audit-Arbeit verursacht):
 - Encryption-Boundary lebt in dedicated `crypto/` Sub-Modul, völlig entkoppelt vom Sync-Layer
 - Vault-Singleton via `vault-instance.ts` — Layout + Settings + zukünftige UI teilen sich denselben State
 
-Die Datenschicht ist jetzt **production-grade** in den Dimensionen Korrektheit, Sicherheit, **Vertraulichkeit**, Robustheit, Beobachtbarkeit, Performance und Testabdeckung.
+Die Datenschicht ist jetzt **production-grade** in den Dimensionen Korrektheit, Sicherheit, **Vertraulichkeit** (inkl. optionaler **Zero-Knowledge-Modus**), Robustheit, Beobachtbarkeit, Performance und Testabdeckung.
