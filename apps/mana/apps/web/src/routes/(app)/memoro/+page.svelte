@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { getContext } from 'svelte';
 	import { memosStore } from '$lib/modules/memoro/stores/memos.svelte';
+	import { memoRecorder, formatElapsed } from '$lib/modules/memoro/recorder.svelte';
 	import {
 		filterBySearch,
 		filterByTag,
@@ -41,6 +42,44 @@
 	async function handleNewMemo() {
 		const memo = await memosStore.create({});
 		goto(`/memoro/${memo.id}`);
+	}
+
+	// ── Voice capture ─────────────────────────────────────────
+	let recError = $state<string | null>(null);
+
+	async function handleMicClick() {
+		recError = null;
+		if (memoRecorder.status === 'recording') {
+			try {
+				const result = await memoRecorder.stop();
+				if (result.durationMs < 500) {
+					recError = 'Aufnahme war zu kurz.';
+					return;
+				}
+				const memo = await memosStore.createFromVoice(result.blob, result.durationMs, 'de');
+				goto(`/memoro/${memo.id}`);
+			} catch (e) {
+				const msg = e instanceof Error ? e.message : String(e);
+				if (msg !== 'cancelled') recError = msg;
+			}
+		} else if (memoRecorder.status === 'idle') {
+			await memoRecorder.start();
+			if (memoRecorder.error) {
+				recError = memoRecorder.error;
+			}
+		}
+	}
+
+	async function forceRetryMic() {
+		recError = null;
+		await memoRecorder.start({ force: true });
+		if (memoRecorder.error) {
+			recError = memoRecorder.error;
+		}
+	}
+
+	function cancelRecording() {
+		memoRecorder.cancel();
 	}
 
 	async function handlePin(e: Event, id: string, isPinned: boolean) {
@@ -95,6 +134,41 @@
 				Tags
 			</a>
 			<button
+				onclick={handleMicClick}
+				disabled={memoRecorder.status === 'requesting' || memoRecorder.status === 'stopping'}
+				aria-label={memoRecorder.status === 'recording' ? 'Aufnahme beenden' : 'Aufnahme starten'}
+				class="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors disabled:opacity-60"
+				class:recording={memoRecorder.status === 'recording'}
+				style:background-color={memoRecorder.status === 'recording'
+					? '#ef4444'
+					: 'hsl(var(--muted))'}
+				style:color={memoRecorder.status === 'recording' ? 'white' : 'hsl(var(--foreground))'}
+			>
+				{#if memoRecorder.status === 'recording'}
+					<span class="rec-dot"></span>
+					{formatElapsed(memoRecorder.elapsedMs)}
+				{:else if memoRecorder.status === 'requesting'}
+					<Microphone size={18} />
+					Mikro öffnen…
+				{:else if memoRecorder.status === 'stopping'}
+					<Microphone size={18} />
+					Verarbeite…
+				{:else}
+					<Microphone size={18} />
+					Aufnehmen
+				{/if}
+			</button>
+			{#if memoRecorder.status === 'recording'}
+				<button
+					onclick={cancelRecording}
+					title="Aufnahme verwerfen"
+					aria-label="Aufnahme verwerfen"
+					class="rounded-lg border border-[hsl(var(--border))] px-3 py-2 text-sm text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--muted))]"
+				>
+					×
+				</button>
+			{/if}
+			<button
 				onclick={handleNewMemo}
 				class="flex items-center gap-2 rounded-lg bg-[hsl(var(--primary))] px-4 py-2 text-sm font-medium text-[hsl(var(--primary-foreground))] transition-colors hover:opacity-90"
 			>
@@ -103,6 +177,17 @@
 			</button>
 		</div>
 	</div>
+
+	{#if recError}
+		<div
+			class="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-600 dark:text-red-300"
+		>
+			<p class="whitespace-pre-line">{recError}</p>
+			<button onclick={forceRetryMic} class="mt-2 text-xs font-medium underline hover:no-underline">
+				Trotzdem versuchen
+			</button>
+		</div>
+	{/if}
 
 	<!-- Search -->
 	<div class="relative">
@@ -260,3 +345,23 @@
 		</a>
 	</div>
 </div>
+
+<style>
+	.rec-dot {
+		display: inline-block;
+		width: 0.625rem;
+		height: 0.625rem;
+		border-radius: 9999px;
+		background: white;
+		animation: pulse 1s ease-in-out infinite;
+	}
+	@keyframes pulse {
+		0%,
+		100% {
+			opacity: 1;
+		}
+		50% {
+			opacity: 0.4;
+		}
+	}
+</style>

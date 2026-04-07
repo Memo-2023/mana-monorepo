@@ -111,6 +111,34 @@ The generator reads `.env.development` and creates app-specific `.env` files wit
 | `CARDS_SUPABASE_URL` | Supabase project URL | - |
 | `CARDS_SUPABASE_ANON_KEY` | Supabase anonymous key | - |
 
+### Speech-to-Text (mana-stt)
+
+Used by the unified Mana web app's voice features (Memoro recording, Dreams voice capture, etc).
+The browser never talks to mana-stt directly — requests go through the SvelteKit server-side proxy
+(`/api/v1/memoro/transcribe`, `/api/v1/dreams/transcribe`) which attaches the API key from
+`MANA_STT_API_KEY`. Keep that key out of the browser bundle.
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `STT_URL` | Public mana-stt URL — generates `MANA_STT_URL` for the web app | `https://gpu-stt.mana.how` |
+| `MANA_STT_API_KEY` | API key for mana-stt. **Never commit a real value.** | _(empty)_ |
+
+**Where to obtain a key:**
+
+- Production deploy: set `MANA_STT_API_KEY` in the Mac Mini's `.env` (sourced by
+  `docker-compose.macmini.yml`, line ~1076). The key lives on the Windows GPU box in
+  `services/mana-stt/.env` under `API_KEYS=<key>:<name>` and is the source of truth.
+- Local dev: paste the dev key into your local `apps/mana/apps/web/.env` after running
+  `pnpm setup:env` (the generator only writes an empty placeholder). Ask in `#mana-dev` or
+  pull from the team's password manager under `mana-stt → web-key`.
+- New dev key: SSH to the Windows GPU box (`ssh mana-gpu`), append a new entry to
+  `C:\mana\services\mana-stt\.env` `API_KEYS` (format: `<random>:<name>`), restart the
+  `ManaSTT` scheduled task. Use a fresh key per consumer (`mana-web`, `chat-server`, etc.)
+  so we can revoke individually.
+
+**Endpoint:** `https://gpu-stt.mana.how` — Cloudflare Tunnel `mana-gpu-server` →
+Windows GPU box (`192.168.178.11:3020`). Health: `curl https://gpu-stt.mana.how/health`.
+
 ## Adding New Variables
 
 ### Step 1: Add to `.env.development`

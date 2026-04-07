@@ -267,6 +267,16 @@ check_service "GPU Image Gen" "http://192.168.178.11:3023/health" 3
 check_service "GPU Video Gen" "http://192.168.178.11:3026/health" 3
 
 echo ""
+echo "GPU Server (Cloudflare Tunnel):"
+# These probes go through the public Cloudflare tunnel rather than the LAN.
+# They catch tunnel-side breakage (cloudflared down on Windows, DNS misroute,
+# Public Hostname missing) that LAN probes above wouldn't see.
+check_service "GPU STT (tunnel)" "https://gpu-stt.mana.how/health" 8
+check_service "GPU LLM (tunnel)" "https://gpu-llm.mana.how/health" 8
+check_service "GPU TTS (tunnel)" "https://gpu-tts.mana.how/health" 8
+check_service "GPU Image Gen (tunnel)" "https://gpu-img.mana.how/health" 8
+
+echo ""
 echo "Matrix:"
 check_service "Synapse" "http://localhost:4000/health"
 check_service "Element Web" "http://localhost:4080/"

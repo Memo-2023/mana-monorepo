@@ -176,7 +176,7 @@ const { text } = await response.json();
 const formData = new FormData();
 formData.append('file', audioBlob, 'recording.webm');
 
-const response = await fetch('https://stt-api.mana.how/transcribe', {
+const response = await fetch('https://gpu-stt.mana.how/transcribe', {
   method: 'POST',
   body: formData,
 });

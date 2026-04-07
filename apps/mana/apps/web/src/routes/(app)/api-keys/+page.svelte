@@ -275,7 +275,7 @@
 						<div>
 							<p class="text-sm font-medium mb-2">Speech-to-Text (STT)</p>
 							<pre class="bg-muted p-3 rounded-lg text-sm overflow-x-auto"><code
-									>curl -X POST https://stt-api.mana.how/transcribe \
+									>curl -X POST https://gpu-stt.mana.how/transcribe \
   -H "X-API-Key: sk_live_your_key_here" \
   -F "audio=@audio.mp3"</code
 								></pre>
