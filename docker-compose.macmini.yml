@@ -917,27 +917,15 @@ services:
       PUBLIC_MANA_AUTH_URL_CLIENT: https://auth.mana.how
       PUBLIC_SYNC_SERVER_URL: http://mana-sync:3010
       PUBLIC_SYNC_SERVER_URL_CLIENT: https://sync.mana.how
-      # Backend API URLs (server-side → container, client-side → public domain)
-      PUBLIC_TODO_API_URL: http://todo-backend:3031
-      PUBLIC_TODO_API_URL_CLIENT: https://todo-api.mana.how
-      PUBLIC_CALENDAR_API_URL: http://calendar-backend:3032
-      PUBLIC_CALENDAR_API_URL_CLIENT: https://calendar-api.mana.how
-      PUBLIC_CONTACTS_API_URL: http://contacts-backend:3033
-      PUBLIC_CONTACTS_API_URL_CLIENT: https://contacts-api.mana.how
-      PUBLIC_CHAT_API_URL: http://chat-backend:3030
-      PUBLIC_CHAT_API_URL_CLIENT: https://chat-api.mana.how
-      PUBLIC_STORAGE_API_URL: http://storage-backend:3034
-      PUBLIC_STORAGE_API_URL_CLIENT: https://storage-api.mana.how
-      PUBLIC_CARDS_API_URL: http://cards-backend:3036
-      PUBLIC_CARDS_API_URL_CLIENT: https://cards-api.mana.how
-      PUBLIC_MUSIC_API_URL: http://music-backend:3037
-      PUBLIC_MUSIC_API_URL_CLIENT: https://music-api.mana.how
-      PUBLIC_NUTRIPHI_API_URL: http://nutriphi-backend:3038
-      PUBLIC_NUTRIPHI_API_URL_CLIENT: https://nutriphi-api.mana.how
+      # Per-app HTTP backend URLs (todo-api, calendar-api, contacts-api,
+      # chat-api, storage-api, cards-api, music-api, nutriphi-api,
+      # picture-api, presi-api, zitare-api, clock-api, context-api) and
+      # the standalone memoro-server URL were removed in the pre-launch
+      # ghost-API cleanup — every product module talks to mana-sync
+      # directly and the unified `memoro` module is fully local-first.
+      # See docs/PRE_LAUNCH_CLEANUP.md for the full rationale.
       PUBLIC_ULOAD_SERVER_URL: http://uload-server:3070
       PUBLIC_ULOAD_SERVER_URL_CLIENT: https://uload-api.mana.how
-      PUBLIC_MEMORO_SERVER_URL: http://memoro-server:3015
-      PUBLIC_MEMORO_SERVER_URL_CLIENT: https://memoro-api.mana.how
       PUBLIC_MANA_MEDIA_URL: http://mana-media:3011
       PUBLIC_MANA_MEDIA_URL_CLIENT: https://media.mana.how
       PUBLIC_MANA_LLM_URL: http://mana-llm:3025
@@ -1422,7 +1410,7 @@ services:
     image: prom/blackbox-exporter:v0.25.0
     container_name: mana-mon-blackbox
     restart: always
-    mem_limit: 32m
+    mem_limit: 128m
     command: ["--config.file=/etc/blackbox/blackbox.yml"]
     volumes:
       - ./docker/blackbox/blackbox.yml:/etc/blackbox/blackbox.yml:ro

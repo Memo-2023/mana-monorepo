@@ -307,18 +307,36 @@ scrape_configs:
       - target_label: __address__
         replacement: blackbox-exporter:9115
 
-  # GPU Server Services
+  # GPU Server Services — probe /health, not /
+  # The GPU services (whisper STT, TTS, FLUX image gen) only return 2xx
+  # on /health; their root path returns 401/403/404 by design (auth or
+  # API-only). Ollama is the exception — its / returns 200, but it has
+  # no /health endpoint, so we keep it on / via a separate target.
   - job_name: 'blackbox-gpu'
+    metrics_path: /probe
+    params:
+      module: [http_health]
+    static_configs:
+      - targets:
+          - https://gpu-stt.mana.how/health
+          - https://gpu-tts.mana.how/health
+          - https://gpu-img.mana.how/health
+          - https://gpu-video.mana.how/health
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
+
+  - job_name: 'blackbox-gpu-root'
     metrics_path: /probe
     params:
       module: [http_2xx]
     static_configs:
       - targets:
           - https://gpu-ollama.mana.how
-          - https://gpu-stt.mana.how
-          - https://gpu-tts.mana.how
-          - https://gpu-img.mana.how
-          - https://gpu-video.mana.how
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target
