@@ -1,7 +1,7 @@
 # Mana Web App – Data Layer Audit
 
 > **Initial Audit:** 2026-04-07
-> **Last Update:** 2026-04-07 (Encryption Phase 1–6 abgeschlossen)
+> **Last Update:** 2026-04-07 (Encryption Phase 7–8 abgeschlossen — Rollout komplett)
 > **Scope:** `apps/mana/apps/web/src/lib/data/*` und `src/lib/modules/*` (Local-First Layer der Unified Mana Web App)
 > **Ziel:** Funktionsweise dokumentieren, Schwachstellen aufdecken, priorisierte Refactor-Roadmap.
 
@@ -26,19 +26,23 @@
 | Backlog 2    | SSE Streaming Pipeline                                        | ✅     | `ad0215863` |
 | Backlog 3    | Activity Log + Cleanup-Scheduler                              | ✅     | `82559f684` |
 
-### Encryption-Sprints (Phase 1–6)
+### Encryption-Sprints (Phase 1–8)
 
-| Phase     | Thema                                                            | Status | Commit      |
-| --------- | ---------------------------------------------------------------- | ------ | ----------- |
-| 1         | Foundation: AES-GCM-256, KeyProvider, Registry, 31 Unit-Tests    | ✅     | `1ba5948ce` |
-| 2         | mana-auth Server Vault: encryption_vaults + RLS + KEK + 11 Tests | ✅     | `e9915428c` |
-| 3         | Client Wire-up: vault-client, record-helpers, layout integration | ✅     | `354cbcb17` |
-| 4         | Pilot: notes table mit 8 End-to-End Tests                        | ✅     | `bed08a1aa` |
-| 5         | Rollout: chat, dreams, memoro, contacts, cycles, finance         | ✅     | `af92720a6` |
-| 6.1       | Rollout: cards, presi, inventar, planta                          | ✅     | `73f294b29` |
-| 6.2 + 6.3 | Settings UI (`/settings/security`) + Encryption Intro Banner     | ✅     | `6b8e2c717` |
+| Phase     | Thema                                                                              | Status | Commit      |
+| --------- | ---------------------------------------------------------------------------------- | ------ | ----------- |
+| 1         | Foundation: AES-GCM-256, KeyProvider, Registry, 31 Unit-Tests                      | ✅     | `1ba5948ce` |
+| 2         | mana-auth Server Vault: encryption_vaults + RLS + KEK + 11 Tests                   | ✅     | `e9915428c` |
+| 3         | Client Wire-up: vault-client, record-helpers, layout integration                   | ✅     | `354cbcb17` |
+| 4         | Pilot: notes table mit 8 End-to-End Tests                                          | ✅     | `bed08a1aa` |
+| 5         | Rollout: chat, dreams, memoro, contacts, cycles, finance                           | ✅     | `af92720a6` |
+| 6.1       | Rollout: cards, presi, inventar, planta                                            | ✅     | `73f294b29` |
+| 6.2 + 6.3 | Settings UI (`/settings/security`) + Encryption Intro Banner                       | ✅     | `6b8e2c717` |
+| Roundup   | DATA_LAYER_AUDIT roll-up vor Phase 7                                               | ✅     | `4bdf4238c` |
+| 7.1       | timeBlocks-Hub: tasks + calendar.events + timeBlocks (mit Habits-Coupling)         | ✅     | `c875b4e96` |
+| 7.2       | Storeless Modules: questions, answers, links, documents, meals (Registry-Fix)      | ✅     | `40b7069eb` |
+| 8         | Storage, Picture, Music, Social Events + Guests (Schema-Fixes, manaLinks entfernt) | ✅     | `be611cd1e` |
 
-**Test-Status:** 20 test files, 262/262 tests passing. Vitest@4.1.3 workspace-weit unifiziert. **22+ Tabellen mit At-Rest-Encryption live**, deckt **>85% der user-getippten Bytes** ab.
+**Test-Status:** 20 test files, 262/262 tests passing. Vitest@4.1.3 workspace-weit unifiziert. **25+ Tabellen mit At-Rest-Encryption live**, deckt **praktisch alle user-getippten Bytes** im Local-First-Pfad ab. Phase 7.1 schloss die `timeBlocks`-Lücke (Title-Leakage über das Cross-Module-Hub), Phase 7.2 stellte die Storeless-Module auf direkten encryptRecord-Wrap an jedem Call-Site um, und Phase 8 räumte die letzten Tabellen plus die ~6 falschen Phase-1-Platzhalter-Schemata weg.
 
 ---
 
@@ -176,7 +180,7 @@ Logout / Tab-Close → MemoryKeyProvider.setKey(null) → Cyphertext bleibt
 - **Lazy Apps**: starten Sync erst beim ersten Modul-Besuch via `ensureAppSynced()`
 - **Conflict Resolution**: ✅ echter Field-Level LWW via `__fieldTimestamps`
 - **Soft Delete** ist Standard via `deletedAt`
-- **At-Rest-Encryption**: AES-GCM-256, server-wrapped Master Key, 22+ Tabellen aktiv
+- **At-Rest-Encryption**: AES-GCM-256, server-wrapped Master Key, 25+ Tabellen aktiv (Rollout abgeschlossen)
 
 ---
 
@@ -189,7 +193,7 @@ Logout / Tab-Close → MemoryKeyProvider.setKey(null) → Cyphertext bleibt
 | 1   | Field-Level LWW falsch implementiert | `__fieldTimestamps` Hidden Field via Dexie hooks, per-Feld Vergleich in `applyServerChanges`                     | 1 ✅                    |
 | 2   | Keine Client-Side User Isolation     | `current-user.ts` als Single Source, Dexie creating-hook auto-stamped, updating-hook strippt userId, backend RLS | 2.1+2.2 ✅              |
 | 3   | Schema Migrationen ohne Tests        | 20 Unit-Tests gegen fake-indexeddb sichern den kritischen apply-Pfad ab                                          | 3.3 ✅                  |
-| 4   | Keine Verschlüsselung im Browser     | AES-GCM-256 mit server-wrapped Master Key (vault), 22+ Tabellen, Settings-UI + Rotate, Onboarding-Banner         | Encryption Phase 1–6 ✅ |
+| 4   | Keine Verschlüsselung im Browser     | AES-GCM-256 mit server-wrapped Master Key (vault), 25+ Tabellen, Settings-UI + Rotate, Onboarding-Banner         | Encryption Phase 1–8 ✅ |
 | 5   | Keine Guest → User Migration         | `guest-migration.ts` walkt sync-Tabellen, re-inserted unter neuer userId, $effect im Layout                      | 2.3 ✅                  |
 
 ### 🟡 Hoch — alle erledigt
@@ -245,13 +249,13 @@ Logout / Tab-Close → MemoryKeyProvider.setKey(null) → Cyphertext bleibt
 - ✅ Guest → User Migration beim ersten Login
 - ✅ SSE Pipelining (read/apply entkoppelt, allocation-light Parser)
 - ✅ Activity Log mit Per-User-Isolation und 90d TTL
-- ✅ At-Rest-Encryption für 22+ Tabellen (AES-GCM-256, server-wrapped Master Key)
+- ✅ At-Rest-Encryption für 25+ Tabellen (AES-GCM-256, server-wrapped Master Key) — Rollout abgeschlossen
 - ✅ Settings UI für Vault-Status + Manual Rotate
 - ✅ Onboarding-Banner beim ersten Login
 
 ---
 
-## 5. Encryption-Pipeline (Phase 1–6)
+## 5. Encryption-Pipeline (Phase 1–8)
 
 ### Wer hält was?
 
@@ -262,28 +266,60 @@ Logout / Tab-Close → MemoryKeyProvider.setKey(null) → Cyphertext bleibt
 | **Browser sessionStorage** | Master Key als CryptoKey im `MemoryKeyProvider`. `mana-vault-unlocked=1` Sentinel für die UI.            |
 | **IndexedDB**              | Verschlüsselte Felder als `enc:1:<iv>.<ct>` Strings. Strukturelle Felder (id, FK, timestamps) plaintext. |
 
-### Verschlüsselte Tabellen (Stand Phase 6.1)
+### Verschlüsselte Tabellen (Stand Phase 8 — Rollout abgeschlossen)
 
-| Modul    | Tabelle(n)      | Felder                                                                                    |
-| -------- | --------------- | ----------------------------------------------------------------------------------------- |
-| chat     | `messages`      | `messageText`                                                                             |
-|          | `conversations` | `title`                                                                                   |
-|          | `chatTemplates` | `name`, `description`, `systemPrompt`, `initialQuestion`                                  |
-| notes    | `notes`         | `title`, `content`                                                                        |
-| dreams   | `dreams`        | `title`, `content`, `transcript`, `interpretation`, `aiInterpretation`, `location`        |
-|          | `dreamSymbols`  | `meaning` (name plaintext für Lookup)                                                     |
-| memoro   | `memos`         | `title`, `intro`, `transcript`                                                            |
-|          | `memories`      | `title`, `content`                                                                        |
-| contacts | `contacts`      | 16 PII-Felder (firstName, lastName, email, phone, mobile, birthday, address, social, ...) |
-| cycles   | `cycles`        | `notes`                                                                                   |
-|          | `cycleDayLogs`  | `notes`, `mood` (symptoms plaintext für Set-Diffs)                                        |
-| finance  | `transactions`  | `description`, `note`                                                                     |
-| cards    | `cards`         | `front`, `back`                                                                           |
-|          | `cardDecks`     | `name`, `description`                                                                     |
-| presi    | `presiDecks`    | `title`, `description`                                                                    |
-|          | `slides`        | `content` (SlideContent JSON)                                                             |
-| inventar | `invItems`      | `description` (name + notes-array bleiben plaintext)                                      |
-| planta   | `plants`        | `name`, `careNotes`, `temperature`, `soilType`                                            |
+| Modul               | Tabelle(n)           | Felder                                                                                    | Phase   |
+| ------------------- | -------------------- | ----------------------------------------------------------------------------------------- | ------- |
+| chat                | `messages`           | `messageText`                                                                             | 5       |
+|                     | `conversations`      | `title`                                                                                   | 5       |
+|                     | `chatTemplates`      | `name`, `description`, `systemPrompt`, `initialQuestion`                                  | 5       |
+| notes               | `notes`              | `title`, `content`                                                                        | 4       |
+| dreams              | `dreams`             | `title`, `content`, `transcript`, `interpretation`, `aiInterpretation`, `location`        | 5       |
+|                     | `dreamSymbols`       | `meaning` (name plaintext für Lookup)                                                     | 5       |
+| memoro              | `memos`              | `title`, `intro`, `transcript`                                                            | 5       |
+|                     | `memories`           | `title`, `content`                                                                        | 5       |
+| contacts            | `contacts`           | 16 PII-Felder (firstName, lastName, email, phone, mobile, birthday, address, social, ...) | 5       |
+| cycles              | `cycles`             | `notes`                                                                                   | 5       |
+|                     | `cycleDayLogs`       | `notes`, `mood` (symptoms plaintext für Set-Diffs)                                        | 5       |
+| finance             | `transactions`       | `description`, `note`                                                                     | 5       |
+| cards               | `cards`              | `front`, `back`                                                                           | 6.1     |
+|                     | `cardDecks`          | `name`, `description`                                                                     | 6.1     |
+| presi               | `presiDecks`         | `title`, `description`                                                                    | 6.1     |
+|                     | `slides`             | `content` (SlideContent JSON)                                                             | 6.1     |
+| inventar            | `invItems`           | `description` (name + notes-array bleiben plaintext)                                      | 6.1     |
+| planta              | `plants`             | `name`, `careNotes`, `temperature`, `soilType`                                            | 6.1     |
+| **todo**            | **`tasks`**          | **`title`, `description`, `subtasks`, `metadata`**                                        | **7.1** |
+| **calendar**        | **`events`**         | **`title`, `description`, `location`**                                                    | **7.1** |
+| **time-blocks**     | **`timeBlocks`**     | **`title`, `description`** (Cross-Module-Hub für todo/calendar/habits/times)              | **7.1** |
+| **questions**       | **`questions`**      | **`title`, `description`**                                                                | **7.2** |
+|                     | **`answers`**        | **`content`**                                                                             | **7.2** |
+| **uload**           | **`links`**          | **`title`, `description`** (`originalUrl` plaintext — Public Redirect)                    | **7.2** |
+| **context**         | **`documents`**      | **`title`, `content`**                                                                    | **7.2** |
+| **nutriphi**        | **`meals`**          | **`description`, `portionSize`** (Nutrition-Numbers plaintext für Aggregation)            | **7.2** |
+| **storage**         | **`files`**          | **`name`, `originalName`** (mimeType/size/path plaintext)                                 | **8**   |
+| **picture**         | **`images`**         | **`prompt`, `negativePrompt`** (model/style/format plaintext)                             | **8**   |
+| **music**           | **`songs`**          | **`title`** (artist/album/genre plaintext für Browsing-Aggregation)                       | **8**   |
+|                     | **`mukkePlaylists`** | **`name`, `description`**                                                                 | **8**   |
+| **events (sozial)** | **`socialEvents`**   | **`title`, `description`, `location`** (Decrypt-vor-Publish für Public RSVP-Page)         | **8**   |
+|                     | **`eventGuests`**    | **`name`, `email`, `phone`, `note`** (Lokal-only, nie zum Server gepublished)             | **8**   |
+
+### Bewusste Plaintext-Carve-Outs
+
+Bestimmte Felder bleiben absichtlich im Klartext, weil sie strukturell gebraucht werden:
+
+- **`songs.artist/album/genre`** — Album-/Artist-/Genre-Browsing aggregiert per Group-By; Decryption pro Song wäre prohibitiv teuer
+- **`links.originalUrl`** — Public-Redirect-Handler löst `shortCode → 302` ohne async Decrypt auf
+- **`socialEvents` veröffentlicht** — Beim Publish wird die Local-Row decrypted und als Plaintext in den Server-Snapshot gepusht (per Design: shareable RSVP-Page anstatt Confidentiality)
+- **`dreamSymbols.name`** — Wird als unique Lookup-Key in `where('name').equals(...)` benutzt
+- **`cycleDayLogs.symptoms`** — String-Array, das per Set-Diff in `dayLogsStore.logDay` abgeglichen wird
+- **`plants.healthStatus`, `meals.nutrition`** — Strukturierte Browsing-/Aggregations-Felder
+- **`files.name` / `images.prompt`** — Zwar im Dexie-Schema indexed, aber kein `.where()`-Call-Site benutzt sie; Encryption ist sicher, der Index wird nur ein No-Op für Content-Lookups
+
+### Tabellen ohne Encryption (bewusst)
+
+- **`manaLinks`** — Cross-App-Foreign-Key-Tabelle: `sourceAppId`, `sourceRecordId`, `targetAppId`, `targetRecordId`. Null user-typed Content. Während Phase 8 komplett aus dem Registry entfernt.
+- **`boards`, `boardItems`** — Picture-Boards. Kein zentraler Store, sehr wenig user-typed Text (boardItems.textContent existiert aber wird selten benutzt). Kandidat für späteres Backlog.
+- **Sync/System-Tabellen** — `_pendingChanges`, `_activity`, `_syncMeta`, `globalTags`, `tagGroups` etc. enthalten keinen user-typed Content.
 
 ### Was Mana technisch (nicht) sehen kann
 
@@ -295,7 +331,7 @@ Logout / Tab-Close → MemoryKeyProvider.setKey(null) → Cyphertext bleibt
 **Theoretisch entschlüsselbar (wenn aktiv missbraucht):**
 
 - Provider-Operator mit Zugriff auf KEK kann den wrapped MK entschlüsseln und Daten lesen
-- Lösung: Phase 7 — Recovery-Code-Opt-In für true Zero-Knowledge
+- Lösung (offen): Phase 9 — Recovery-Code-Opt-In für true Zero-Knowledge
 
 **Strukturell sichtbar:**
 
@@ -310,10 +346,10 @@ Logout / Tab-Close → MemoryKeyProvider.setKey(null) → Cyphertext bleibt
 
 In abnehmender Priorität:
 
-1. **Encryption Phase 7 — Cross-Module Title Coverage** — `tasks` / `calendar.events` / `habits` haben Title-Leakage via die `timeBlocks` Tabelle. Lösung: koordinierter Pass der `timeBlocks.title/description/notes` mitencryptet, plus Update der TimeBlock-Service.
-2. **Encryption Phase 7 — Server-pushed Records** — `picture.images`, `storage.files`, `music.songs` werden vom Server erzeugt (image-gen API, file-upload, library import). Client-side `encryptRecord` greift nicht. Braucht: API-Service muss vor dem Push verschlüsseln, oder ein Sync-time wrap-step on-the-fly.
-3. **Encryption Phase 7 — Storeless Modules** — `nutriphi.meals` / `uload.links` / `context.documents` / `questions` / `answers` schreiben heute direkt aus Views via `db.table().update()`. Brauchen erst Store-Extraktion, dann gleicher Pattern wie Phase 5.
-4. **Encryption Phase 8 — Recovery Code Opt-In** — BIP-39-Generator + Settings-UI + Server-Wrap-Toggle. User entscheidet selbst ob Provider noch entschlüsseln darf.
+1. **Encryption Phase 9 — Recovery Code Opt-In für True Zero-Knowledge** — BIP-39-Generator + Settings-UI + Server-Wrap-Toggle. User entscheidet selbst, ob der Provider noch entschlüsseln darf. Schließt die letzte theoretische Lücke (Provider-Operator mit KEK-Zugriff). Braucht UX-Design + Test-Flow für "Recovery-Code verloren = Daten weg".
+2. **Server-Side Image-Encryption** — `picture.images` werden vom Server erzeugt (image-gen API). Aktuell landen sie als Plaintext in IndexedDB; nur lokal editierte Records werden verschlüsselt. Decrypt-Path ist idempotent, also kein Bug — aber für volle Coverage müsste die image-gen API Records vor dem Push wrappen, oder ein Sync-time wrap-step on-the-fly laufen.
+3. **Server-Side File-Encryption** — Analog zu Bildern: `storage.files` werden via Upload-API vom Server geschrieben. Selbe Lösung wie #2.
+4. **Boards / boardItems Encryption** — Picture-Boards haben einen `textContent`-Feld auf BoardItems, der user-typed sein kann. Bisher kein zentraler Store. Niedrige Priorität, weil die Surface klein ist.
 5. **Conflict Visualization UI** — Toast/Modal wenn LWW eine Field-Edit überschrieben hat. Braucht UX-Design.
 6. **Composite Indexes für Multi-Account** — `[userId+createdAt]` etc., sobald User mehrere Accounts wechseln können.
 7. **V3 Migration Tests** — wenn die Mana-App nochmal Production-Daten migrieren muss.
