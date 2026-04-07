@@ -5,14 +5,15 @@
 <script lang="ts">
 	import { liveQuery } from 'dexie';
 	import { db } from '$lib/data/database';
+	import { decryptRecord } from '$lib/data/crypto';
 	import { tasksStore } from '../stores/tasks.svelte';
-	import { getBlock } from '$lib/data/time-blocks/service';
+	import { getBlock, decryptBlock } from '$lib/data/time-blocks/service';
 	import type { LocalTimeBlock } from '$lib/data/time-blocks/types';
 	import { Check, Trash, X, CalendarBlank } from '@mana/shared-icons';
 	import SlotSuggestions from '$lib/modules/calendar/components/SlotSuggestions.svelte';
 	import type { ViewProps } from '$lib/app-registry';
 	import type { LocalTask, TaskPriority } from '../types';
-	import { useAllTags, getTagsByIds } from '$lib/stores/tags.svelte';
+	import { useAllTags, getTagsByIds } from '@mana/shared-stores';
 	import LinkedItems from '$lib/components/links/LinkedItems.svelte';
 	import { toastStore } from '@mana/shared-ui/toast';
 
@@ -65,7 +66,11 @@
 			const t = await db.table<LocalTask>('tasks').get(taskId);
 			if (!t) return { task: null, block: null };
 			const block = t.scheduledBlockId ? await getBlock(t.scheduledBlockId) : null;
-			return { task: t, block: block ?? null };
+			// Decrypt clones so the inline editor binds to plaintext title /
+			// description / metadata. The on-disk rows stay encrypted.
+			const decryptedTask = await decryptRecord('tasks', { ...t });
+			const decryptedBlock = block ? await decryptBlock(block) : null;
+			return { task: decryptedTask, block: decryptedBlock };
 		}).subscribe((val) => {
 			task = val?.task ?? null;
 			if (val?.task && !focused) {

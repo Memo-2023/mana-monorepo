@@ -1,4 +1,5 @@
 import { db } from '$lib/data/database';
+import { decryptRecords } from '$lib/data/crypto';
 import { getManaApp } from '@mana/shared-branding';
 import { scoreRecord, truncateSubtitle } from '../scoring';
 import type { SearchProvider, SearchResult, SearchOptions } from '../types';
@@ -16,10 +17,13 @@ export const todoSearchProvider: SearchProvider = {
 		const limit = options?.limit ?? 5;
 		const results: SearchResult[] = [];
 
-		// Search tasks
-		const tasks = await db.table('tasks').toArray();
+		// Search tasks. title + description are encrypted on disk; the
+		// scorer needs plaintext to do substring matching, so we decrypt
+		// the visible rows in one batch before iterating.
+		const rawTasks = await db.table('tasks').toArray();
+		const visibleTasks = rawTasks.filter((t) => !t.deletedAt);
+		const tasks = await decryptRecords('tasks', visibleTasks);
 		for (const task of tasks) {
-			if (task.deletedAt) continue;
 			const { score, matchedField } = scoreRecord(
 				[
 					{ name: 'title', value: task.title, weight: 1.0 },

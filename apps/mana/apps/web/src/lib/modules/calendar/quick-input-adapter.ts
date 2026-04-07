@@ -5,6 +5,7 @@
 import type { InputBarAdapter } from '$lib/quick-input/types';
 import type { QuickInputItem } from '@mana/shared-ui';
 import { db } from '$lib/data/database';
+import { decryptRecords } from '$lib/data/crypto';
 import { parseEventInput, resolveEventIds, formatParsedEventPreview } from './utils/event-parser';
 import { toCalendar } from './queries';
 import type { LocalCalendar, LocalEvent } from './types';
@@ -22,16 +23,17 @@ export function createAdapter(): InputBarAdapter {
 
 		async onSearch(query) {
 			const q = query.toLowerCase();
-			// Search timeBlocks of type 'event' for calendar events
+			// Search timeBlocks of type 'event' for calendar events. title is
+			// encrypted on disk, so we can only filter on plaintext metadata
+			// (sourceModule/type/deletedAt) before decrypting, then run the
+			// substring match on the decrypted titles.
 			const blocks = await db.table<LocalTimeBlock>('timeBlocks').toArray();
-			return blocks
-				.filter(
-					(b) =>
-						!b.deletedAt &&
-						b.sourceModule === 'calendar' &&
-						b.type === 'event' &&
-						b.title?.toLowerCase().includes(q)
-				)
+			const candidates = blocks.filter(
+				(b) => !b.deletedAt && b.sourceModule === 'calendar' && b.type === 'event'
+			);
+			const decrypted = await decryptRecords('timeBlocks', candidates);
+			return decrypted
+				.filter((b) => b.title?.toLowerCase().includes(q))
 				.sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())
 				.slice(0, 10)
 				.map((b) => ({

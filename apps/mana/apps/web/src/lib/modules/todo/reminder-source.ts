@@ -6,6 +6,7 @@
  */
 
 import { db } from '$lib/data/database';
+import { decryptRecords } from '$lib/data/crypto';
 import type { ReminderSource, DueReminder } from '@mana/shared-stores';
 import type { LocalTask, LocalReminder } from './types';
 
@@ -17,7 +18,10 @@ export const todoReminderSource: ReminderSource = {
 		const pending = reminders.filter((r) => r.status === 'pending' && !r.deletedAt);
 		if (pending.length === 0) return [];
 
-		const tasks = await db.table<LocalTask>('tasks').toArray();
+		// task.title is encrypted on disk; the notification body uses the
+		// plaintext title, so decrypt before mapping.
+		const rawTasks = await db.table<LocalTask>('tasks').toArray();
+		const tasks = await decryptRecords('tasks', rawTasks);
 		const taskMap = new Map(tasks.map((t) => [t.id, t]));
 		const now = Date.now();
 		const due: DueReminder[] = [];

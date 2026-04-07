@@ -6,6 +6,7 @@ import type { InputBarAdapter } from '$lib/quick-input/types';
 import type { QuickInputItem } from '@mana/shared-ui';
 import { goto } from '$app/navigation';
 import { db } from '$lib/data/database';
+import { decryptRecords } from '$lib/data/crypto';
 import { parseTaskInput, resolveTaskIds, formatParsedTaskPreview } from './utils/task-parser';
 import type { LocalTask } from './types';
 
@@ -19,13 +20,14 @@ export function createAdapter(): InputBarAdapter {
 
 		async onSearch(query) {
 			const q = query.toLowerCase();
-			const tasks = await db.table<LocalTask>('tasks').toArray();
+			// title + description are encrypted on disk; pre-filter on
+			// plaintext flags first, then decrypt the small candidate set.
+			const rawTasks = await db.table<LocalTask>('tasks').toArray();
+			const candidates = rawTasks.filter((t) => !t.deletedAt && !t.isCompleted);
+			const tasks = await decryptRecords('tasks', candidates);
 			return tasks
 				.filter(
-					(t) =>
-						!t.deletedAt &&
-						!t.isCompleted &&
-						(t.title?.toLowerCase().includes(q) || t.description?.toLowerCase().includes(q))
+					(t) => t.title?.toLowerCase().includes(q) || t.description?.toLowerCase().includes(q)
 				)
 				.slice(0, 10)
 				.map((t) => ({

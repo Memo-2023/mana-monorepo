@@ -7,6 +7,7 @@
 
 	import { liveQuery } from 'dexie';
 	import { db } from '$lib/data/database';
+	import { decryptRecords } from '$lib/data/crypto';
 	import type { BaseRecord } from '@mana/local-store';
 
 	interface CalendarEvent extends BaseRecord {
@@ -36,12 +37,16 @@
 			const nowStr = now.toISOString();
 			const futureStr = future.toISOString();
 
-			const [allEvents, calendars] = await Promise.all([
+			const [rawEvents, calendars] = await Promise.all([
 				db.table<CalendarEvent>('events').toArray(),
 				db.table<Calendar>('calendars').toArray(),
 			]);
 
 			const calendarMap = new Map(calendars.map((c) => [c.id, c]));
+
+			// title/description/location are encrypted on disk; the widget
+			// renders title + location, so decrypt before further filtering.
+			const allEvents = await decryptRecords('events', rawEvents);
 
 			return allEvents
 				.filter((e) => {

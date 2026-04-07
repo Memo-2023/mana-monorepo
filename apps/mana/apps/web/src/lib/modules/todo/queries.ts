@@ -4,6 +4,7 @@
 
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
+import { decryptRecords } from '$lib/data/crypto';
 import type {
 	LocalTask,
 	LocalBoardView,
@@ -42,7 +43,9 @@ export function toTask(local: LocalTask): Task {
 export function useAllTasks() {
 	return useLiveQueryWithDefault(async () => {
 		const locals = await db.table<LocalTask>('tasks').orderBy('order').toArray();
-		return locals.filter((t) => !t.deletedAt).map(toTask);
+		const visible = locals.filter((t) => !t.deletedAt);
+		const decrypted = await decryptRecords('tasks', visible);
+		return decrypted.map(toTask);
 	}, [] as Task[]);
 }
 

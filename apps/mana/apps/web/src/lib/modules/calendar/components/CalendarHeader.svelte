@@ -14,6 +14,7 @@
 		Export,
 	} from '@mana/shared-icons';
 	import { db } from '$lib/data/database';
+	import { decryptRecords } from '$lib/data/crypto';
 	import type { LocalTimeBlock } from '$lib/data/time-blocks/types';
 	import { toTimeBlock } from '$lib/data/time-blocks/queries';
 	import { downloadICalendar } from '$lib/data/time-blocks/ical-export';
@@ -41,8 +42,11 @@
 
 	async function handleExport() {
 		const locals = await db.table<LocalTimeBlock>('timeBlocks').toArray();
-		const blocks = locals
-			.filter((b) => !b.deletedAt)
+		const visible = locals.filter((b) => !b.deletedAt);
+		// iCal export embeds the title/description in the file — must
+		// decrypt before writing or we'd ship ciphertext to the user.
+		const decrypted = await decryptRecords('timeBlocks', visible);
+		const blocks = decrypted
 			.map(toTimeBlock)
 			.filter((b) => calendarViewStore.visibleBlockTypes.has(b.type));
 		downloadICalendar(blocks);

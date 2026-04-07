@@ -9,6 +9,7 @@
 	import { _ } from 'svelte-i18n';
 	import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 	import { db } from '$lib/data/database';
+	import { decryptRecords } from '$lib/data/crypto';
 	import type { LocalTimeBlock, TimeBlockType } from '$lib/data/time-blocks/types';
 	import { toTimeBlock } from '$lib/data/time-blocks/queries';
 	import type { TimeBlock } from '$lib/data/time-blocks/types';
@@ -29,8 +30,9 @@
 
 	const recentQuery = useLiveQueryWithDefault(async () => {
 		const locals = await db.table<LocalTimeBlock>('timeBlocks').toArray();
-		return locals
-			.filter((b) => !b.deletedAt)
+		const visible = locals.filter((b) => !b.deletedAt);
+		const decrypted = await decryptRecords('timeBlocks', visible);
+		return decrypted
 			.map(toTimeBlock)
 			.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
 			.slice(0, MAX_ITEMS);

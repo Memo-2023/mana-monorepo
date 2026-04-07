@@ -95,10 +95,16 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	},
 
 	// ─── Tasks ───────────────────────────────────────────────
-	tasks: { enabled: false, fields: ['title', 'description', 'subtasks', 'metadata'] },
+	// Phase 7.1: tasks coordinated with timeBlocks below — title and
+	// description are duplicated to the TimeBlock for calendar display,
+	// so both sides have to be encrypted in lockstep.
+	tasks: { enabled: true, fields: ['title', 'description', 'subtasks', 'metadata'] },
 
 	// ─── Calendar ────────────────────────────────────────────
-	events: { enabled: false, fields: ['title', 'description', 'location'] },
+	// Same coordination as tasks: events.title/description/location are
+	// mirrored onto a TimeBlock; encrypting only the calendar copy
+	// would still leak via the timeBlocks table.
+	events: { enabled: true, fields: ['title', 'description', 'location'] },
 
 	// ─── Cycles ──────────────────────────────────────────────
 	// Health data — GDPR Art. 9 sensitive personal data category.
@@ -177,6 +183,16 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	// for now; broader coverage is a Phase 7 concern that needs a
 	// different storage layout.
 	invItems: { enabled: true, fields: ['description'] },
+
+	// ─── TimeBlocks (cross-module hub) ───────────────────────
+	// Phase 7.1: encrypted alongside tasks + calendar.events + habits
+	// because the consumer modules denormalize their title/description
+	// into the timeBlock for cheap calendar rendering. Encrypting only
+	// the source records would still leak the same fields here.
+	// Indexed columns (startDate, endDate, kind, type, sourceModule,
+	// sourceId, parentBlockId, recurrenceDate) all stay plaintext —
+	// the calendar query layer needs them for range scans.
+	timeBlocks: { enabled: true, fields: ['title', 'description'] },
 };
 
 /**

@@ -5,12 +5,13 @@
 <script lang="ts">
 	import { liveQuery } from 'dexie';
 	import { db } from '$lib/data/database';
+	import { decryptRecord } from '$lib/data/crypto';
 	import { eventsStore } from '../stores/events.svelte';
 	import { Trash, MapPin, Clock, X } from '@mana/shared-icons';
 	import type { ViewProps } from '$lib/app-registry';
 	import type { LocalEvent } from '../types';
 	import type { LocalTimeBlock } from '$lib/data/time-blocks/types';
-	import { useAllTags, getTagsByIds } from '$lib/stores/tags.svelte';
+	import { useAllTags, getTagsByIds } from '@mana/shared-stores';
 	import LinkedItems from '$lib/components/links/LinkedItems.svelte';
 	import { toastStore } from '@mana/shared-ui/toast';
 
@@ -57,7 +58,11 @@
 			const block = ev.timeBlockId
 				? await db.table<LocalTimeBlock>('timeBlocks').get(ev.timeBlockId)
 				: null;
-			return { event: ev, block: block ?? null };
+			// Both rows carry encrypted title/description (events also encrypts
+			// location). Decrypt clones so the inline editor binds to plaintext.
+			const decryptedEvent = await decryptRecord('events', { ...ev });
+			const decryptedBlock = block ? await decryptRecord('timeBlocks', { ...block }) : null;
+			return { event: decryptedEvent, block: decryptedBlock };
 		}).subscribe((val) => {
 			event = val?.event ?? null;
 			timeBlock = val?.block ?? null;

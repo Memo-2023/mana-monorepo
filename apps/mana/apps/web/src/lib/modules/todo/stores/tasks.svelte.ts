@@ -9,6 +9,7 @@ import { taskTable } from '../collections';
 import { toTask } from '../queries';
 import type { LocalTask, TaskPriority, Subtask } from '../types';
 import { createBlock, updateBlock, deleteBlock } from '$lib/data/time-blocks/service';
+import { encryptRecord, decryptRecord } from '$lib/data/crypto';
 import { TodoEvents } from '@mana/shared-utils/analytics';
 
 export const tasksStore = {
@@ -72,14 +73,23 @@ export const tasksStore = {
 			newLocal.projectId = data.projectId;
 		}
 
+		// Snapshot plaintext for the return value before encryptRecord
+		// mutates `newLocal` in place. Callers (UI) need plaintext title
+		// + description; only the on-disk row is ciphertext.
+		const plaintextSnapshot = toTask({ ...newLocal });
+		await encryptRecord('tasks', newLocal);
 		await taskTable.add(newLocal);
 		TodoEvents.taskCreated(!!data.dueDate);
-		return toTask(newLocal);
+		return plaintextSnapshot;
 	},
 
 	async updateTask(id: string, data: Record<string, unknown>) {
-		const task = await taskTable.get(id);
-		if (!task) return;
+		const raw = await taskTable.get(id);
+		if (!raw) return;
+		// task.title/description are encrypted on disk — decrypt a clone so
+		// fallbacks like `data.title ?? task.title` forward plaintext to
+		// the linked TimeBlock instead of leaking ciphertext.
+		const task = await decryptRecord('tasks', { ...raw });
 
 		// Handle schedule changes via TimeBlock
 		const schedStartDate = data._scheduleStartDate as string | null | undefined;
@@ -145,10 +155,12 @@ export const tasksStore = {
 			await updateBlock(task.scheduledBlockId, { recurrenceRule });
 		}
 
-		await taskTable.update(id, {
+		const diff: Record<string, unknown> = {
 			...data,
 			updatedAt: new Date().toISOString(),
-		});
+		};
+		await encryptRecord('tasks', diff);
+		await taskTable.update(id, diff);
 		TodoEvents.taskEdited();
 	},
 
@@ -194,19 +206,27 @@ export const tasksStore = {
 	},
 
 	async updateSubtasks(id: string, subtasks: Subtask[]) {
-		await taskTable.update(id, {
+		const diff: Record<string, unknown> = {
 			subtasks,
 			updatedAt: new Date().toISOString(),
-		});
+		};
+		await encryptRecord('tasks', diff);
+		await taskTable.update(id, diff);
 	},
 
 	async updateLabels(id: string, labelIds: string[]) {
-		const existing = await taskTable.get(id);
+		const raw = await taskTable.get(id);
+		// metadata is in the encrypted-fields list — decrypt before
+		// merging labelIds in, otherwise we'd splice a plaintext key
+		// into a ciphertext blob.
+		const existing = raw ? await decryptRecord('tasks', { ...raw }) : null;
 		const existingMeta = (existing?.metadata as Record<string, unknown>) ?? {};
-		await taskTable.update(id, {
+		const diff: Record<string, unknown> = {
 			metadata: { ...existingMeta, labelIds },
 			updatedAt: new Date().toISOString(),
-		});
+		};
+		await encryptRecord('tasks', diff);
+		await taskTable.update(id, diff);
 	},
 
 	async reorderTasks(taskIds: string[]) {

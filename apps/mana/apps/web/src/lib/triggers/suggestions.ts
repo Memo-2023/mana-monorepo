@@ -4,6 +4,7 @@
  */
 
 import { db } from '$lib/data/database';
+import { decryptRecords } from '$lib/data/crypto';
 import type { ConditionOp } from './conditions';
 
 export interface AutomationSuggestion {
@@ -77,8 +78,11 @@ export async function generateSuggestions(): Promise<AutomationSuggestion[]> {
 	}
 
 	// ─── Events ↔ Habits ────────────────────────────────────
+	// Title is encrypted on disk; we have to decrypt before string-matching
+	// against habit titles. Filter on plaintext metadata first to keep the
+	// decrypt batch small.
 	const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-	const calendarBlocks = await db
+	const rawBlocks = await db
 		.table('timeBlocks')
 		.toArray()
 		.then((all: Record<string, unknown>[]) =>
@@ -90,6 +94,7 @@ export async function generateSuggestions(): Promise<AutomationSuggestion[]> {
 					(b.startDate as string) >= thirtyDaysAgo
 			)
 		);
+	const calendarBlocks = await decryptRecords('timeBlocks', rawBlocks);
 
 	for (const habit of habits) {
 		const matchingEvents = calendarBlocks.filter((e: Record<string, unknown>) =>
@@ -118,10 +123,12 @@ export async function generateSuggestions(): Promise<AutomationSuggestion[]> {
 	}
 
 	// ─── Tasks ↔ Habits ─────────────────────────────────────
-	const tasks = await db
+	// tasks.title is encrypted at rest — same decrypt-after-filter dance.
+	const rawTasks = await db
 		.table('tasks')
 		.toArray()
 		.then((all) => all.filter((t: Record<string, unknown>) => !t.deletedAt));
+	const tasks = await decryptRecords('tasks', rawTasks);
 
 	for (const habit of habits) {
 		const matchingTasks = tasks.filter((t: Record<string, unknown>) =>

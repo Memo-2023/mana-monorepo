@@ -4,6 +4,7 @@
 -->
 <script lang="ts">
 	import { db } from '$lib/data/database';
+	import { decryptRecords } from '$lib/data/crypto';
 	import type { LocalTimeBlock } from '$lib/data/time-blocks/types';
 	import { toTimeBlock, findOverlaps } from '$lib/data/time-blocks/queries';
 	import type { TimeBlock } from '$lib/data/time-blocks/types';
@@ -36,8 +37,10 @@
 			.where('startDate')
 			.between(dayStart, dayEnd, true, true)
 			.toArray()
-			.then((locals) => {
-				const blocks = locals.filter((b) => !b.deletedAt).map(toTimeBlock);
+			.then(async (locals) => {
+				const visible = locals.filter((b) => !b.deletedAt);
+				const decrypted = await decryptRecords('timeBlocks', visible);
+				const blocks = decrypted.map(toTimeBlock);
 				conflicts = findOverlaps(blocks, startDate, endDate, excludeBlockId);
 			});
 	});

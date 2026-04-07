@@ -11,6 +11,7 @@
 import { liveQuery } from 'dexie';
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
+import { decryptRecords } from '$lib/data/crypto';
 import type {
 	LocalTimeBlock,
 	TimeBlock,
@@ -55,7 +56,9 @@ export function toTimeBlock(local: LocalTimeBlock): TimeBlock {
 export function useAllTimeBlocks() {
 	return useLiveQueryWithDefault(async () => {
 		const locals = await db.table<LocalTimeBlock>('timeBlocks').toArray();
-		return locals.filter((b) => !b.deletedAt).map(toTimeBlock);
+		const visible = locals.filter((b) => !b.deletedAt);
+		const decrypted = await decryptRecords('timeBlocks', visible);
+		return decrypted.map(toTimeBlock);
 	}, [] as TimeBlock[]);
 }
 
@@ -70,7 +73,9 @@ export function timeBlocksInRange$(start: string, end: string) {
 			.where('startDate')
 			.between(start, end, true, true)
 			.toArray();
-		return locals.filter((b) => !b.deletedAt).map(toTimeBlock);
+		const visible = locals.filter((b) => !b.deletedAt);
+		const decrypted = await decryptRecords('timeBlocks', visible);
+		return decrypted.map(toTimeBlock);
 	});
 }
 
@@ -82,7 +87,9 @@ export function timeBlocksBySource$(sourceModule: TimeBlockSourceModule, sourceI
 			.where('[sourceModule+sourceId]')
 			.equals([sourceModule, sourceId])
 			.toArray();
-		return locals.filter((b) => !b.deletedAt).map(toTimeBlock);
+		const visible = locals.filter((b) => !b.deletedAt);
+		const decrypted = await decryptRecords('timeBlocks', visible);
+		return decrypted.map(toTimeBlock);
 	});
 }
 
@@ -90,10 +97,14 @@ export function timeBlocksBySource$(sourceModule: TimeBlockSourceModule, sourceI
 export function useLiveTimeBlock() {
 	return useLiveQueryWithDefault(
 		async () => {
-			// Can't index boolean in Dexie reliably, so scan and filter
+			// Can't index boolean in Dexie reliably, so scan and filter.
+			// isLive is a plaintext column so we can find before decrypting,
+			// then only decrypt the single row we actually need.
 			const locals = await db.table<LocalTimeBlock>('timeBlocks').toArray();
 			const active = locals.find((b) => b.isLive && !b.deletedAt);
-			return active ? toTimeBlock(active) : null;
+			if (!active) return null;
+			const [decrypted] = await decryptRecords('timeBlocks', [active]);
+			return toTimeBlock(decrypted);
 		},
 		null as TimeBlock | null
 	);

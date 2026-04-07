@@ -1,12 +1,20 @@
 /**
- * QR Export API Service
+ * QR Export Service
  *
- * Collects data from contacts, calendar, and todo services for QR export.
+ * Builds a QR-encoded snapshot of the user's most relevant contacts,
+ * upcoming calendar events and todo tasks. Reads from the local
+ * IndexedDB (Dexie) directly — there is no longer a per-app HTTP backend
+ * to call, all module data lives in the unified `mana` database via
+ * the local-first sync layer.
  */
 
-import { contactsService, type Contact } from './contacts';
-import { calendarService, type CalendarEvent } from './calendar';
-import { todoService, type Task } from './todo';
+import { db } from '$lib/data/database';
+import { decryptRecords } from '$lib/data/crypto';
+import { toTimeBlock } from '$lib/data/time-blocks/queries';
+import type { LocalTimeBlock } from '$lib/data/time-blocks/types';
+import type { LocalContact } from '$lib/modules/contacts/types';
+import type { LocalEvent } from '$lib/modules/calendar/types';
+import type { LocalTask } from '$lib/modules/todo/types';
 import type { UserDataSummary } from './my-data';
 import {
 	createManaQRExport,
@@ -18,19 +26,15 @@ import {
 	type TodoPriority,
 } from '@mana/qr-export';
 
-/**
- * Data collected for QR export
- */
+/** Data collected for QR export. */
 export interface QRExportData {
-	contacts: Contact[];
-	events: CalendarEvent[];
-	tasks: Task[];
+	contacts: LocalContact[];
+	events: Array<LocalEvent & { startTime: string; endTime: string | null; isAllDay: boolean }>;
+	tasks: LocalTask[];
 	userData: UserDataSummary | null;
 }
 
-/**
- * Result of QR export generation
- */
+/** Result of QR export generation. */
 export interface QRExportResult {
 	encodeResult: EncodeResult;
 	stats: {
@@ -40,54 +44,121 @@ export interface QRExportResult {
 	};
 }
 
-/**
- * Map Contact to ContactInput for qr-export
- */
-function mapContactToInput(contact: Contact): ContactInput {
-	const displayName = contactsService.getDisplayName(contact);
+// ─── Local helpers (replace the deleted *Service modules) ─────
 
-	// Determine relation based on available data
-	// Default to 3 (Freund), but this could be enhanced with actual relation data
-	let relation: ContactRelation = 3;
+/** Best-effort display name for a contact. Mirrors the legacy
+ *  contactsService.getDisplayName so QR output stays consistent. */
+function getContactDisplayName(c: LocalContact): string {
+	const anyC = c as unknown as Record<string, unknown>;
+	const displayName = anyC.displayName as string | undefined;
+	if (displayName) return displayName;
+	if (c.firstName && c.lastName) return `${c.firstName} ${c.lastName}`;
+	if (c.firstName) return c.firstName;
+	if (c.lastName) return c.lastName;
+	if (c.email) return c.email;
+	return 'Unknown';
+}
 
+/** Top N favorite (or recently updated) contacts. */
+async function loadFavoriteContacts(limit: number): Promise<LocalContact[]> {
+	const all = await db.table<LocalContact>('contacts').toArray();
+	const live = all.filter((c) => !c.deletedAt && !c.isArchived);
+	live.sort((a, b) => {
+		// Favorites first, then by updatedAt descending.
+		if (a.isFavorite !== b.isFavorite) return a.isFavorite ? -1 : 1;
+		return (b.updatedAt ?? '').localeCompare(a.updatedAt ?? '');
+	});
+	return live.slice(0, limit);
+}
+
+/** Upcoming calendar events for the next `days` days. Pulls scheduling
+ *  info from the linked timeBlocks (events table no longer holds dates
+ *  directly after the v3 schema migration). */
+async function loadUpcomingEvents(days: number): Promise<QRExportData['events']> {
+	const horizon = new Date(Date.now() + days * 86_400_000).toISOString();
+	const now = new Date().toISOString();
+
+	const blocks = await db.table<LocalTimeBlock>('timeBlocks').toArray();
+	const candidateBlocks = blocks
+		.filter(
+			(b) =>
+				!b.deletedAt &&
+				b.sourceModule === 'calendar' &&
+				b.type === 'event' &&
+				b.startDate >= now &&
+				b.startDate <= horizon
+		)
+		.sort((a, b) => a.startDate.localeCompare(b.startDate));
+	const upcomingBlocks = await decryptRecords('timeBlocks', candidateBlocks);
+
+	const allEvents = await db.table<LocalEvent>('events').toArray();
+	const visibleEvents = allEvents.filter((e) => !e.deletedAt);
+	const decryptedEvents = await decryptRecords('events', visibleEvents);
+	const eventsById = new Map<string, LocalEvent>();
+	for (const e of decryptedEvents) {
+		eventsById.set(e.id, e);
+	}
+
+	return upcomingBlocks
+		.map((block) => {
+			const tb = toTimeBlock(block);
+			const event = eventsById.get(block.sourceId);
+			if (!event) return null;
+			return {
+				...event,
+				startTime: tb.startDate,
+				endTime: tb.endDate,
+				isAllDay: tb.allDay,
+			};
+		})
+		.filter((e): e is NonNullable<typeof e> => e !== null);
+}
+
+/** Tasks with a dueDate inside the next `days` days, soft-deleted out. */
+async function loadUpcomingTasks(days: number): Promise<LocalTask[]> {
+	const horizon = new Date(Date.now() + days * 86_400_000).toISOString();
+	const all = await db.table<LocalTask>('tasks').toArray();
+	const visible = all.filter(
+		(t) => !t.deletedAt && !t.isCompleted && t.dueDate && t.dueDate <= horizon
+	);
+	const decrypted = await decryptRecords('tasks', visible);
+	return decrypted.sort((a, b) => (a.dueDate ?? '').localeCompare(b.dueDate ?? ''));
+}
+
+// ─── Mappers (unchanged in spirit, retargeted at the local types) ───
+
+function mapContactToInput(contact: LocalContact): ContactInput {
+	const displayName = getContactDisplayName(contact);
+	const relation: ContactRelation = 3; // default Freund
+
+	const anyC = contact as unknown as Record<string, unknown>;
 	return {
 		name: displayName,
-		phone: contact.mobile || contact.phone,
+		phone: (anyC.mobile as string | undefined) ?? contact.phone,
 		email: contact.email,
 		relation,
 		importance: contact.isFavorite ? 100 : 0,
 	};
 }
 
-/**
- * Map CalendarEvent to EventInput for qr-export
- */
-function mapEventToInput(event: CalendarEvent): EventInput {
-	const startDate = new Date(event.startTime);
-	const endDate = new Date(event.endTime);
-
+function mapEventToInput(event: QRExportData['events'][number]): EventInput {
 	return {
-		title: event.title,
-		start: startDate,
-		end: endDate,
-		location: event.location,
+		title: event.title ?? '',
+		start: new Date(event.startTime),
+		end: new Date(event.endTime ?? event.startTime),
+		location: (event as { location?: string }).location,
 		allDay: event.isAllDay,
 	};
 }
 
-/**
- * Map Task to TodoInput for qr-export
- */
-function mapTaskToInput(task: Task): TodoInput {
-	// Map priority string to number
+function mapTaskToInput(task: LocalTask): TodoInput {
 	const priorityMap: Record<string, TodoPriority> = {
 		urgent: 1,
 		high: 1,
 		medium: 2,
 		low: 3,
 	};
-
-	const priority = priorityMap[task.priority] || 2;
+	const priority = priorityMap[task.priority ?? 'medium'] ?? 2;
 
 	return {
 		title: task.title,
@@ -97,32 +168,20 @@ function mapTaskToInput(task: Task): TodoInput {
 	};
 }
 
-/**
- * QR Export service
- */
-export const qrExportService = {
-	/**
-	 * Collect all data needed for QR export
-	 */
-	async collectExportData(): Promise<QRExportData> {
-		// Fetch all data in parallel
-		const [contactsResult, eventsResult, tasksResult] = await Promise.all([
-			contactsService.getFavoriteContacts(10), // Get more, we'll filter
-			calendarService.getUpcomingEvents(30), // Next 30 days
-			todoService.getUpcomingTasks(30), // Next 30 days
-		]);
+// ─── Public service ───────────────────────────────────────────
 
-		return {
-			contacts: contactsResult.data || [],
-			events: eventsResult.data || [],
-			tasks: tasksResult.data || [],
-			userData: null, // Will be set by caller if needed
-		};
+export const qrExportService = {
+	/** Collect contacts/events/tasks needed for the QR export. */
+	async collectExportData(): Promise<QRExportData> {
+		const [contacts, events, tasks] = await Promise.all([
+			loadFavoriteContacts(10),
+			loadUpcomingEvents(30),
+			loadUpcomingTasks(30),
+		]);
+		return { contacts, events, tasks, userData: null };
 	},
 
-	/**
-	 * Generate QR export from collected data
-	 */
+	/** Encode an already-collected dataset into a QR result. */
 	generateExport(
 		data: QRExportData,
 		options?: {
@@ -135,31 +194,26 @@ export const qrExportService = {
 		const maxEvents = options?.maxEvents ?? 10;
 		const maxTodos = options?.maxTodos ?? 15;
 
-		// Map to input formats
 		const contactInputs = data.contacts.map(mapContactToInput);
 		const eventInputs = data.events.map(mapEventToInput);
 		const taskInputs = data.tasks.map(mapTaskToInput);
 
-		// Build export using the builder
 		const builder = createManaQRExport();
 
-		// Set user context if available
 		if (data.userData?.user) {
 			builder.user({
 				n: data.userData.user.name || data.userData.user.email.split('@')[0],
-				l: 'de', // Could be derived from user settings
-				z: 'Europe/Berlin', // Could be derived from user settings
+				l: 'de',
+				z: 'Europe/Berlin',
 			});
 		} else {
 			builder.userName('Mana User');
 		}
 
-		// Add data using smart selectors
 		builder.contactsFrom(contactInputs, maxContacts);
 		builder.eventsFrom(eventInputs, maxEvents);
 		builder.todosFrom(taskInputs, maxTodos);
 
-		// Encode
 		const encodeResult = builder.encode();
 
 		return {
@@ -172,9 +226,7 @@ export const qrExportService = {
 		};
 	},
 
-	/**
-	 * Generate QR export with all data fetched automatically
-	 */
+	/** One-shot helper used by the QR Export modal. */
 	async generateFullExport(
 		userData?: UserDataSummary | null,
 		options?: {

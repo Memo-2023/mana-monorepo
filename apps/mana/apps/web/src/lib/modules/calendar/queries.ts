@@ -12,6 +12,7 @@
 
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
+import { decryptRecords } from '$lib/data/crypto';
 import type { LocalCalendar, LocalEvent, Calendar, CalendarEvent } from './types';
 import { timeBlockToCalendarEvent } from './types';
 import type { LocalTimeBlock } from '$lib/data/time-blocks/types';
@@ -49,50 +50,28 @@ export function useAllCalendars() {
  */
 export function useAllCalendarItems() {
 	return useLiveQueryWithDefault(async () => {
-		// Fetch all non-deleted timeBlocks
+		// Fetch all non-deleted timeBlocks (filter on plaintext deletedAt
+		// before paying the per-row decrypt cost)
 		const blocks = await db.table<LocalTimeBlock>('timeBlocks').toArray();
-		const activeBlocks = blocks.filter((b) => !b.deletedAt);
+		const visibleBlocks = blocks.filter((b) => !b.deletedAt);
+		const decryptedBlocks = await decryptRecords('timeBlocks', visibleBlocks);
 
 		// Fetch all non-deleted events for joining with calendar-type blocks
 		const events = await db.table<LocalEvent>('events').toArray();
+		const visibleEvents = events.filter((e) => !e.deletedAt);
+		const decryptedEvents = await decryptRecords('events', visibleEvents);
 		const eventsById = new Map<string, LocalEvent>();
-		for (const e of events) {
-			if (!e.deletedAt) eventsById.set(e.id, e);
+		for (const e of decryptedEvents) {
+			eventsById.set(e.id, e);
 		}
 
 		// Convert to CalendarEvent, joining event data for calendar blocks
-		return activeBlocks.map((block) => {
+		return decryptedBlocks.map((block) => {
 			const tb = toTimeBlock(block);
 			const eventData =
 				block.sourceModule === 'calendar' ? (eventsById.get(block.sourceId) ?? null) : null;
 			return timeBlockToCalendarEvent(tb, eventData);
 		});
-	}, [] as CalendarEvent[]);
-}
-
-/**
- * Only native calendar events (for backward compatibility with calendar-specific views).
- */
-export function useAllEvents() {
-	return useLiveQueryWithDefault(async () => {
-		const blocks = await db.table<LocalTimeBlock>('timeBlocks').toArray();
-		const calendarBlocks = blocks.filter(
-			(b) => !b.deletedAt && b.sourceModule === 'calendar' && b.type === 'event'
-		);
-
-		const events = await db.table<LocalEvent>('events').toArray();
-		const eventsById = new Map<string, LocalEvent>();
-		for (const e of events) {
-			if (!e.deletedAt) eventsById.set(e.id, e);
-		}
-
-		return calendarBlocks
-			.map((block) => {
-				const tb = toTimeBlock(block);
-				const eventData = eventsById.get(block.sourceId) ?? null;
-				return timeBlockToCalendarEvent(tb, eventData);
-			})
-			.filter((e) => e.calendarId !== '__external__');
 	}, [] as CalendarEvent[]);
 }
 

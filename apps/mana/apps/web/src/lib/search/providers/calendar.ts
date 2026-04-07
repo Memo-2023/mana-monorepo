@@ -1,4 +1,5 @@
 import { db } from '$lib/data/database';
+import { decryptRecords } from '$lib/data/crypto';
 import { getManaApp } from '@mana/shared-branding';
 import { scoreRecord, truncateSubtitle } from '../scoring';
 import type { SearchProvider, SearchResult, SearchOptions } from '../types';
@@ -16,9 +17,12 @@ export const calendarSearchProvider: SearchProvider = {
 		const limit = options?.limit ?? 5;
 		const results: SearchResult[] = [];
 
-		const events = await db.table('events').toArray();
+		// title/description/location are encrypted at rest. Filter on the
+		// plaintext deletedAt before paying for the decrypt batch.
+		const rawEvents = await db.table('events').toArray();
+		const visibleEvents = rawEvents.filter((e) => !e.deletedAt);
+		const events = await decryptRecords('events', visibleEvents);
 		for (const event of events) {
-			if (event.deletedAt) continue;
 			const { score, matchedField } = scoreRecord(
 				[
 					{ name: 'title', value: event.title, weight: 1.0 },

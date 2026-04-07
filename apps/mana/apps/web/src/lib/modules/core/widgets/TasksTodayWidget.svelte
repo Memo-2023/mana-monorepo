@@ -8,6 +8,7 @@
 
 	import { liveQuery } from 'dexie';
 	import { db } from '$lib/data/database';
+	import { decryptRecords } from '$lib/data/crypto';
 	import type { BaseRecord } from '@mana/local-store';
 
 	interface Task extends BaseRecord {
@@ -36,13 +37,14 @@
 	$effect(() => {
 		const sub = liveQuery(async () => {
 			const all = await db.table<Task>('tasks').toArray();
-			return all
-				.filter((t) => {
-					if (t.isCompleted || t.deletedAt) return false;
-					if (!t.dueDate) return false;
-					return t.dueDate.slice(0, 10) <= todayStr;
-				})
-				.sort((a, b) => a.order - b.order);
+			const visible = all.filter((t) => {
+				if (t.isCompleted || t.deletedAt) return false;
+				if (!t.dueDate) return false;
+				return t.dueDate.slice(0, 10) <= todayStr;
+			});
+			// task.title is encrypted on disk; decrypt before rendering.
+			const decrypted = await decryptRecords('tasks', visible);
+			return decrypted.sort((a, b) => a.order - b.order);
 		}).subscribe({
 			next: (val) => {
 				tasks = val;

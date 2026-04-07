@@ -3,9 +3,21 @@
  *
  * Module stores create both their domain record and a timeBlock in the same
  * Dexie transaction to keep them consistent.
+ *
+ * Phase 7.1 encryption: title + description are encrypted at rest. The
+ * consumer modules (todo, calendar, habits, times) flow their plaintext
+ * snapshots through this service, which wraps them via encryptRecord
+ * before the actual Dexie write — so every caller gets encryption for
+ * free without touching their own code paths.
+ *
+ * `getBlock` returns the raw row (still encrypted). Read-paths must go
+ * through queries.ts which calls decryptRecord on the way out, OR call
+ * decryptBlock() explicitly if reading via getBlock for write-coupling
+ * (e.g. startFromScheduled needs the plaintext title to copy it forward).
  */
 
 import { db } from '$lib/data/database';
+import { encryptRecord, decryptRecord } from '$lib/data/crypto';
 import { timeBlockTable } from './collections';
 import type { LocalTimeBlock, CreateTimeBlockInput, UpdateTimeBlockInput } from './types';
 
@@ -36,6 +48,9 @@ export async function createBlock(input: CreateTimeBlockInput): Promise<string> 
 		updatedAt: now,
 	};
 
+	// Encrypt configured fields (title + description) before write.
+	// All other columns stay plaintext for indexed queries.
+	await encryptRecord('timeBlocks', block);
 	await timeBlockTable.add(block);
 	return id;
 }
@@ -43,10 +58,12 @@ export async function createBlock(input: CreateTimeBlockInput): Promise<string> 
 /** Update an existing timeBlock. */
 export async function updateBlock(id: string, input: UpdateTimeBlockInput): Promise<void> {
 	const now = new Date().toISOString();
-	await timeBlockTable.update(id, {
+	const diff: Partial<LocalTimeBlock> = {
 		...input,
 		updatedAt: now,
-	});
+	};
+	await encryptRecord('timeBlocks', diff);
+	await timeBlockTable.update(id, diff);
 }
 
 /** Soft-delete a timeBlock. */
@@ -84,6 +101,13 @@ export async function startFromScheduled(
 	const scheduled = await timeBlockTable.get(scheduledId);
 	if (!scheduled || scheduled.deletedAt) throw new Error('Scheduled block not found');
 
+	// scheduled.title is encrypted on disk — decrypt before forwarding
+	// to createBlock, otherwise the new logged block would carry the
+	// already-encrypted blob through encryptRecord again. encryptRecord
+	// is idempotent on already-encrypted strings, so this is defence-in-
+	// depth: future code that compares titles needs the plaintext anyway.
+	const decryptedScheduled = await decryptRecord('timeBlocks', { ...scheduled });
+
 	const now = new Date().toISOString();
 	const loggedId = await createBlock({
 		startDate: now,
@@ -94,7 +118,7 @@ export async function startFromScheduled(
 		sourceModule: scheduled.sourceModule,
 		sourceId: scheduled.sourceId,
 		linkedBlockId: scheduledId,
-		title: overrides?.title ?? scheduled.title,
+		title: overrides?.title ?? decryptedScheduled.title,
 		color: overrides?.color ?? scheduled.color ?? null,
 		icon: overrides?.icon ?? scheduled.icon ?? null,
 		projectId: overrides?.projectId ?? scheduled.projectId ?? null,
@@ -106,9 +130,27 @@ export async function startFromScheduled(
 	return loggedId;
 }
 
-/** Get a single timeBlock by ID. */
+/**
+ * Get a single timeBlock by ID. Returns the raw row WITH ciphertext
+ * still in the encrypted columns — caller is responsible for calling
+ * `decryptBlock` if they need the plaintext title/description.
+ *
+ * Read-paths via queries.ts already decrypt automatically; getBlock
+ * is the explicit escape hatch for code that needs the row outside
+ * a liveQuery (e.g. write-coupling helpers like startFromScheduled).
+ */
 export async function getBlock(id: string): Promise<LocalTimeBlock | undefined> {
 	const block = await timeBlockTable.get(id);
 	if (block?.deletedAt) return undefined;
 	return block;
+}
+
+/**
+ * Returns a decrypted copy of a single timeBlock — convenience for the
+ * few callers that need plaintext title/description outside of the
+ * liveQuery layer. Mutates a fresh copy, never the original row, so the
+ * IndexedDB record stays encrypted.
+ */
+export async function decryptBlock(block: LocalTimeBlock): Promise<LocalTimeBlock> {
+	return decryptRecord('timeBlocks', { ...block });
 }

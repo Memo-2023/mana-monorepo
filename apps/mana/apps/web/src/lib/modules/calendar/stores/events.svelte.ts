@@ -9,6 +9,7 @@
  */
 
 import { db } from '$lib/data/database';
+import { encryptRecord } from '$lib/data/crypto';
 import { createBlock, updateBlock, deleteBlock } from '$lib/data/time-blocks/service';
 import { timeBlockTable } from '$lib/data/time-blocks/collections';
 import {
@@ -78,6 +79,11 @@ export const eventsStore = {
 				updatedAt: new Date().toISOString(),
 			};
 
+			// title/description/location are encrypted at rest. createBlock
+			// already handled the TimeBlock side; this wraps the LocalEvent
+			// row before the Dexie write. UI never sees this mutation —
+			// reads go through queries.ts which decrypts on the way out.
+			await encryptRecord('events', newLocal);
 			await db.table<LocalEvent>('events').add(newLocal);
 			CalendarEvents.eventCreated(!!input.recurrenceRule);
 			return { success: true, data: { id: eventId, timeBlockId } };
@@ -134,6 +140,7 @@ export const eventsStore = {
 			if (input.color !== undefined) localData.color = input.color;
 			if (input.calendarId !== undefined) localData.calendarId = input.calendarId;
 
+			await encryptRecord('events', localData);
 			await db.table('events').update(id, localData);
 			CalendarEvents.eventUpdated();
 			return { success: true };
@@ -182,6 +189,7 @@ export const eventsStore = {
 			if (input.location !== undefined) localData.location = input.location;
 			if (input.color !== undefined) localData.color = input.color;
 
+			await encryptRecord('events', localData);
 			await db.table('events').update(id, localData);
 			CalendarEvents.eventUpdated();
 			return { success: true };
@@ -243,6 +251,7 @@ export const eventsStore = {
 				if (input.description !== undefined) localData.description = input.description;
 				if (input.location !== undefined) localData.location = input.location;
 				if (input.color !== undefined) localData.color = input.color;
+				await encryptRecord('events', localData);
 				await db.table('events').update(templateEvent.id, localData);
 			}
 

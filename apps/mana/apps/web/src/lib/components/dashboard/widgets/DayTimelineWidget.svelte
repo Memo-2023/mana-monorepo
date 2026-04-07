@@ -9,6 +9,7 @@
 	import { _ } from 'svelte-i18n';
 	import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 	import { db } from '$lib/data/database';
+	import { decryptRecords } from '$lib/data/crypto';
 	import type { LocalTimeBlock, TimeBlockType } from '$lib/data/time-blocks/types';
 	import { toTimeBlock, getBlockDuration } from '$lib/data/time-blocks/queries';
 	import type { TimeBlock } from '$lib/data/time-blocks/types';
@@ -26,10 +27,9 @@
 			.where('startDate')
 			.between(todayStart, todayEnd, true, true)
 			.toArray();
-		return locals
-			.filter((b) => !b.deletedAt)
-			.map(toTimeBlock)
-			.sort((a, b) => a.startDate.localeCompare(b.startDate));
+		const visible = locals.filter((b) => !b.deletedAt);
+		const decrypted = await decryptRecords('timeBlocks', visible);
+		return decrypted.map(toTimeBlock).sort((a, b) => a.startDate.localeCompare(b.startDate));
 	}, [] as TimeBlock[]);
 
 	let blocks = $derived(blocksQuery.value ?? []);

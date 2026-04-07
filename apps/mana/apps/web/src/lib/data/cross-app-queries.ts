@@ -7,6 +7,7 @@
 
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from './database';
+import { decryptRecords } from './crypto';
 
 import type { LocalTask } from '$lib/modules/todo/types';
 import type { LocalTimeBlock } from '$lib/data/time-blocks/types';
@@ -27,7 +28,8 @@ import type { LocalDeck as LocalCardDeck, LocalCard } from '$lib/modules/cards/t
 export function useOpenTasks() {
 	return useLiveQueryWithDefault(async () => {
 		const all = await db.table<LocalTask>('tasks').orderBy('order').toArray();
-		return all.filter((t) => !t.isCompleted && !t.deletedAt);
+		const visible = all.filter((t) => !t.isCompleted && !t.deletedAt);
+		return decryptRecords('tasks', visible);
 	}, [] as LocalTask[]);
 }
 
@@ -44,7 +46,8 @@ export function useTodayTasks() {
 			.where('dueDate')
 			.belowOrEqual(endOfToday.toISOString())
 			.toArray();
-		return candidates.filter((t) => !t.isCompleted && !t.deletedAt);
+		const visible = candidates.filter((t) => !t.isCompleted && !t.deletedAt);
+		return decryptRecords('tasks', visible);
 	}, [] as LocalTask[]);
 }
 
@@ -66,7 +69,8 @@ export function useUpcomingTasks(days = 7) {
 			.where('dueDate')
 			.between(startOfTomorrow.toISOString(), endOfWindow.toISOString(), true, true)
 			.toArray();
-		return candidates.filter((t) => !t.isCompleted && !t.deletedAt);
+		const visible = candidates.filter((t) => !t.isCompleted && !t.deletedAt);
+		return decryptRecords('tasks', visible);
 	}, [] as LocalTask[]);
 }
 
@@ -87,7 +91,8 @@ export function useUpcomingEvents(days = 7) {
 			.where('startDate')
 			.between(now.toISOString(), future.toISOString(), true, true)
 			.toArray();
-		return candidates.filter((b) => !b.deletedAt);
+		const visible = candidates.filter((b) => !b.deletedAt);
+		return decryptRecords('timeBlocks', visible);
 	}, [] as LocalTimeBlock[]);
 }
 
