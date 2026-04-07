@@ -48,7 +48,13 @@ export default defineConfig({
 		strictPort: true,
 	},
 	ssr: {
-		noExternal: [...MANA_SHARED_PACKAGES, ...APP_SHARED_PACKAGES],
+		// `rrule@2` ships dual CJS/ESM but its package.json has no `exports`
+		// field, so the SvelteKit Node adapter resolves it to the CJS bundle
+		// at runtime — and `import { RRule } from 'rrule'` then throws
+		// `Named export 'RRule' not found` when /calendar SSRs. Bundling rrule
+		// into the server build forces Vite's interop layer to handle the
+		// CJS↔ESM mismatch correctly.
+		noExternal: [...MANA_SHARED_PACKAGES, ...APP_SHARED_PACKAGES, 'rrule'],
 		external: ['@mlc-ai/web-llm'],
 	},
 	optimizeDeps: {
