@@ -4,6 +4,7 @@
 	import { ArrowLeft, Trash } from '@mana/shared-icons';
 	import { useAllDocuments, findDocumentById } from '$lib/modules/context/queries';
 	import { documentTable } from '$lib/modules/context/collections';
+	import { encryptRecord } from '$lib/data/crypto';
 	import type { DocumentType } from '$lib/modules/context/types';
 
 	let showDeleteConfirm = $state(false);
@@ -47,7 +48,7 @@
 			.map((t) => t.trim())
 			.filter(Boolean);
 		const wordCount = editContent.split(/\s+/).filter(Boolean).length;
-		await documentTable.update(docId, {
+		const diff: Record<string, unknown> = {
 			title: editTitle,
 			content: editContent,
 			type: editType,
@@ -56,7 +57,9 @@
 				tags,
 				word_count: wordCount,
 			},
-		});
+		};
+		await encryptRecord('documents', diff);
+		await documentTable.update(docId, diff);
 		saving = false;
 	}
 

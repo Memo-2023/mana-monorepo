@@ -5,6 +5,7 @@
 <script lang="ts">
 	import { liveQuery } from 'dexie';
 	import { db } from '$lib/data/database';
+	import { encryptRecord, decryptRecord } from '$lib/data/crypto';
 	import { toastStore } from '@mana/shared-ui/toast';
 	import { Trash } from '@mana/shared-icons';
 	import type { ViewProps } from '$lib/app-registry';
@@ -33,7 +34,12 @@
 	});
 
 	$effect(() => {
-		const sub = liveQuery(() => db.table<LocalLink>('links').get(linkId)).subscribe((val) => {
+		const sub = liveQuery(async () => {
+			const raw = await db.table<LocalLink>('links').get(linkId);
+			// title + description are encrypted on disk; decrypt a clone so
+			// the inline editor binds to plaintext.
+			return raw ? await decryptRecord('links', { ...raw }) : null;
+		}).subscribe((val) => {
 			link = val ?? null;
 			if (val && !focused) {
 				editTitle = val.title ?? '';
@@ -49,7 +55,7 @@
 
 	async function saveField() {
 		focused = false;
-		await db.table('links').update(linkId, {
+		const diff: Record<string, unknown> = {
 			title: editTitle.trim() || undefined,
 			originalUrl: editOriginalUrl.trim() || link?.originalUrl || '',
 			customCode: editCustomCode.trim() || undefined,
@@ -57,7 +63,9 @@
 			isActive: editIsActive,
 			expiresAt: editExpiresAt ? new Date(editExpiresAt).toISOString() : null,
 			updatedAt: new Date().toISOString(),
-		});
+		};
+		await encryptRecord('links', diff);
+		await db.table('links').update(linkId, diff);
 	}
 
 	async function handleActiveToggle() {

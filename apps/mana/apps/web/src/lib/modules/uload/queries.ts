@@ -8,6 +8,7 @@
 import { liveQuery } from 'dexie';
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
+import { decryptRecord, decryptRecords } from '$lib/data/crypto';
 import type { LocalLink, LocalTag, LocalFolder, LocalLinkTag } from './types';
 
 // ─── Shared View Types ────────────────────────────────────
@@ -133,7 +134,9 @@ export function toLinkTag(local: LocalLinkTag): LinkTag {
 export function allLinks$() {
 	return liveQuery(async () => {
 		const locals = await db.table<LocalLink>('links').toArray();
-		return locals.filter((l) => !l.deletedAt).map(toLink);
+		const visible = locals.filter((l) => !l.deletedAt);
+		const decrypted = await decryptRecords('links', visible);
+		return decrypted.map(toLink);
 	});
 }
 
@@ -163,7 +166,9 @@ export function allLinkTags$() {
 export function useAllLinks() {
 	return useLiveQueryWithDefault(async () => {
 		const locals = await db.table<LocalLink>('links').toArray();
-		return locals.filter((l) => !l.deletedAt).map(toLink);
+		const visible = locals.filter((l) => !l.deletedAt);
+		const decrypted = await decryptRecords('links', visible);
+		return decrypted.map(toLink);
 	}, [] as Link[]);
 }
 
@@ -194,7 +199,8 @@ export function useLinkById(id: string) {
 			if (!id) return null;
 			const local = await db.table<LocalLink>('links').get(id);
 			if (!local || local.deletedAt) return null;
-			return toLink(local);
+			const decrypted = await decryptRecord('links', { ...local });
+			return toLink(decrypted);
 		},
 		null as Link | null
 	);

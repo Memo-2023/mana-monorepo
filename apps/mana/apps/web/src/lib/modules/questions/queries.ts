@@ -6,6 +6,7 @@
 
 import { liveQuery } from 'dexie';
 import { db } from '$lib/data/database';
+import { decryptRecords } from '$lib/data/crypto';
 import type { LocalCollection, LocalQuestion, LocalAnswer } from './types';
 
 // ─── Shared Types (inline to avoid cross-app dependency) ───
@@ -114,7 +115,9 @@ export function useAllCollections() {
 export function useAllQuestions() {
 	return liveQuery(async () => {
 		const locals = await db.table<LocalQuestion>('questions').toArray();
-		return locals.filter((q) => !q.deletedAt).map(toQuestion);
+		const visible = locals.filter((q) => !q.deletedAt);
+		const decrypted = await decryptRecords('questions', visible);
+		return decrypted.map(toQuestion);
 	});
 }
 
@@ -122,7 +125,9 @@ export function useAllQuestions() {
 export function useAnswersByQuestion(questionId: string) {
 	return liveQuery(async () => {
 		const locals = await db.table<LocalAnswer>('answers').toArray();
-		return locals.filter((a) => !a.deletedAt && a.questionId === questionId).map(toAnswer);
+		const visible = locals.filter((a) => !a.deletedAt && a.questionId === questionId);
+		const decrypted = await decryptRecords('answers', visible);
+		return decrypted.map(toAnswer);
 	});
 }
 

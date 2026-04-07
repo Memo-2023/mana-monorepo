@@ -5,6 +5,7 @@
 <script lang="ts">
 	import { liveQuery } from 'dexie';
 	import { db } from '$lib/data/database';
+	import { decryptRecords } from '$lib/data/crypto';
 	import type { LocalContextSpace, LocalDocument } from './types';
 
 	let spaces = $state<LocalContextSpace[]>([]);
@@ -24,10 +25,9 @@
 
 	$effect(() => {
 		const sub = liveQuery(async () => {
-			return db
-				.table<LocalDocument>('documents')
-				.toArray()
-				.then((all) => all.filter((d) => !d.deletedAt));
+			const all = await db.table<LocalDocument>('documents').toArray();
+			const visible = all.filter((d) => !d.deletedAt);
+			return decryptRecords('documents', visible);
 		}).subscribe((val) => {
 			documents = val ?? [];
 		});

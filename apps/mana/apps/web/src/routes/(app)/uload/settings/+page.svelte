@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { ArrowLeft, Trash, DownloadSimple } from '@mana/shared-icons';
 	import { linkTable, uloadTagTable, uloadFolderTable, linkTagTable } from '$lib/modules/uload';
+	import { decryptRecords } from '$lib/data/crypto';
 	import { useAllLinks, useAllTags, useAllFolders } from '$lib/modules/uload';
 	import { toast } from 'svelte-sonner';
 
@@ -20,7 +21,10 @@
 	}
 
 	async function exportData() {
-		const allLinks = await linkTable.toArray();
+		// Decrypt links before serializing the export — otherwise the user
+		// would download a JSON of ciphertext blobs they couldn't restore.
+		const rawLinks = await linkTable.toArray();
+		const allLinks = await decryptRecords('links', rawLinks);
 		const allTags = await uloadTagTable.toArray();
 		const allFolders = await uloadFolderTable.toArray();
 		const allLinkTags = await linkTagTable.toArray();

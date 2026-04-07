@@ -117,7 +117,12 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	cycleDayLogs: { enabled: true, fields: ['notes', 'mood'] },
 
 	// ─── NutriPhi ────────────────────────────────────────────
-	meals: { enabled: false, fields: ['description', 'notes', 'aiAnalysis'] },
+	// LocalMeal only has `description` as user-typed text (mealType /
+	// inputType / nutrition numbers stay plaintext for the daily-summary
+	// aggregations and the calorie-progress widget). portionSize is a
+	// short label like "1 Tasse" — same sensitivity as description, so
+	// we encrypt it too.
+	meals: { enabled: true, fields: ['description', 'portionSize'] },
 
 	// ─── Planta ──────────────────────────────────────────────
 	// `name` is NOT in the schema index for plants (only isActive +
@@ -140,7 +145,11 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	slides: { enabled: true, fields: ['content'] },
 
 	// ─── Context ─────────────────────────────────────────────
-	documents: { enabled: false, fields: ['title', 'content', 'body'] },
+	// LocalDocument has `title` + `content` (no `body` column on the
+	// schema). DocumentType (text/context/prompt) and the spaceId
+	// foreign key stay plaintext so the workspace tree still groups
+	// documents per space without a key.
+	documents: { enabled: true, fields: ['title', 'content'] },
 
 	// ─── Storage ─────────────────────────────────────────────
 	files: { enabled: false, fields: ['name', 'originalName', 'notes'] },
@@ -153,12 +162,12 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	mukkePlaylists: { enabled: false, fields: ['name', 'description'] },
 
 	// ─── Questions ───────────────────────────────────────────
-	// Writes from views are not yet routed through a store — registry
-	// is set so future store creation gets encryption automatically;
-	// existing direct db.table().update() call sites in the views need
-	// to migrate to a store before they actually flow through encryptRecord.
-	questions: { enabled: false, fields: ['title', 'body', 'notes'] },
-	answers: { enabled: false, fields: ['body'] },
+	// LocalQuestion uses `title` + `description`; LocalAnswer uses
+	// `content` (not `body`). The view-driven write sites are wrapped
+	// directly via encryptRecord at each call site since this module
+	// has no central store yet.
+	questions: { enabled: true, fields: ['title', 'description'] },
+	answers: { enabled: true, fields: ['content'] },
 
 	// ─── Events (social gatherings) ──────────────────────────
 	socialEvents: { enabled: false, fields: ['title', 'description', 'notes'] },
@@ -172,7 +181,13 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	transactions: { enabled: true, fields: ['description', 'note'] },
 
 	// ─── uLoad ───────────────────────────────────────────────
-	links: { enabled: false, fields: ['title', 'description', 'targetUrl'] },
+	// `originalUrl` STAYS PLAINTEXT — the redirect handler resolves
+	// shortCode → originalUrl on every click, encrypting it would force
+	// the public redirect path to do an async decrypt before the 302.
+	// shortCode is a public lookup key. We encrypt the user-typed
+	// metadata (title + description) which is the part the user actually
+	// expects to be private, and leave the routing primitives alone.
+	links: { enabled: true, fields: ['title', 'description'] },
 	manaLinks: { enabled: false, fields: ['label', 'url', 'notes'] },
 
 	// ─── Inventar ────────────────────────────────────────────

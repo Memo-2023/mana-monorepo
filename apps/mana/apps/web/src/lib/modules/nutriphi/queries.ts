@@ -6,6 +6,7 @@
 
 import { liveQuery } from 'dexie';
 import { db } from '$lib/data/database';
+import { decryptRecords } from '$lib/data/crypto';
 import type {
 	LocalMeal,
 	LocalGoal,
@@ -39,7 +40,9 @@ export function toMealWithNutrition(local: LocalMeal): MealWithNutrition {
 export function useAllMeals() {
 	return liveQuery(async () => {
 		const locals = await db.table<LocalMeal>('meals').toArray();
-		return locals.filter((m) => !m.deletedAt).map(toMealWithNutrition);
+		const visible = locals.filter((m) => !m.deletedAt);
+		const decrypted = await decryptRecords('meals', visible);
+		return decrypted.map(toMealWithNutrition);
 	});
 }
 

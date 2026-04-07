@@ -2,6 +2,7 @@
 	import { _ } from 'svelte-i18n';
 	import { goto } from '$app/navigation';
 	import { db } from '$lib/data/database';
+	import { encryptRecord } from '$lib/data/crypto';
 	import { useAllCollections } from '$lib/modules/questions/queries';
 	import type { ResearchDepth, QuestionPriority } from '$lib/modules/questions/types';
 	import { ArrowLeft, Lightning, Clock, Sparkle } from '@mana/shared-icons';
@@ -63,7 +64,7 @@
 			const now = new Date().toISOString();
 			const id = crypto.randomUUID();
 
-			await db.table('questions').add({
+			const row: Record<string, unknown> = {
 				id,
 				collectionId: collectionId || null,
 				title: title.trim(),
@@ -74,7 +75,9 @@
 				researchDepth,
 				createdAt: now,
 				updatedAt: now,
-			});
+			};
+			await encryptRecord('questions', row);
+			await db.table('questions').add(row);
 
 			goto(`/questions/${id}`);
 		} catch (e) {

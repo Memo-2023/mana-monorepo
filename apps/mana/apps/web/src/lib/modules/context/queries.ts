@@ -8,6 +8,7 @@
 
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
+import { decryptRecords } from '$lib/data/crypto';
 import type { LocalContextSpace, LocalDocument, Space, Document, DocumentType } from './types';
 
 // ─── Type Converters ──────────────────────────────────────
@@ -60,8 +61,9 @@ export function useAllSpaces() {
 export function useAllDocuments() {
 	return useLiveQueryWithDefault(async () => {
 		const locals = await db.table<LocalDocument>('documents').toArray();
-		return locals
-			.filter((d) => !d.deletedAt)
+		const visible = locals.filter((d) => !d.deletedAt);
+		const decrypted = await decryptRecords('documents', visible);
+		return decrypted
 			.map(toDocument)
 			.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
 	}, [] as Document[]);
@@ -75,8 +77,9 @@ export function useSpaceDocuments(spaceId: string) {
 			.where('spaceId')
 			.equals(spaceId)
 			.toArray();
-		return locals
-			.filter((d) => !d.deletedAt)
+		const visible = locals.filter((d) => !d.deletedAt);
+		const decrypted = await decryptRecords('documents', visible);
+		return decrypted
 			.map(toDocument)
 			.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
 	}, [] as Document[]);

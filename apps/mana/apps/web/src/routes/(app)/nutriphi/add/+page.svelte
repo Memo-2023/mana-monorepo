@@ -2,6 +2,7 @@
 	import { _ } from 'svelte-i18n';
 	import { goto } from '$app/navigation';
 	import { db } from '$lib/data/database';
+	import { encryptRecord } from '$lib/data/crypto';
 	import { useAllFavorites } from '$lib/modules/nutriphi/queries';
 	import { MEAL_TYPE_LABELS, suggestMealType } from '$lib/modules/nutriphi/constants';
 	import type { MealType, NutritionData } from '$lib/modules/nutriphi/types';
@@ -64,7 +65,7 @@
 						}
 					: null;
 
-			await db.table('meals').add({
+			const row: Record<string, unknown> = {
 				id: crypto.randomUUID(),
 				date: today,
 				mealType,
@@ -75,7 +76,9 @@
 				nutrition,
 				createdAt: now,
 				updatedAt: now,
-			});
+			};
+			await encryptRecord('meals', row);
+			await db.table('meals').add(row);
 
 			goto('/nutriphi');
 		} catch {

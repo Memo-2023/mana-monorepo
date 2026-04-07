@@ -5,6 +5,7 @@
 <script lang="ts">
 	import { liveQuery } from 'dexie';
 	import { db } from '$lib/data/database';
+	import { encryptRecord, decryptRecord } from '$lib/data/crypto';
 	import { toastStore } from '@mana/shared-ui/toast';
 	import { Trash } from '@mana/shared-icons';
 	import type { ViewProps } from '$lib/app-registry';
@@ -32,31 +33,36 @@
 	});
 
 	$effect(() => {
-		const sub = liveQuery(() => db.table<LocalQuestion>('questions').get(questionId)).subscribe(
-			(val) => {
-				question = val ?? null;
-				if (val && !focused) {
-					editTitle = val.title;
-					editDescription = val.description ?? '';
-					editStatus = val.status;
-					editPriority = val.priority;
-					editResearchDepth = val.researchDepth;
-				}
+		const sub = liveQuery(async () => {
+			const raw = await db.table<LocalQuestion>('questions').get(questionId);
+			// title + description are encrypted on disk; decrypt a clone so
+			// the inline editor binds to plaintext.
+			return raw ? await decryptRecord('questions', { ...raw }) : null;
+		}).subscribe((val) => {
+			question = val ?? null;
+			if (val && !focused) {
+				editTitle = val.title;
+				editDescription = val.description ?? '';
+				editStatus = val.status;
+				editPriority = val.priority;
+				editResearchDepth = val.researchDepth;
 			}
-		);
+		});
 		return () => sub.unsubscribe();
 	});
 
 	async function saveField() {
 		focused = false;
-		await db.table('questions').update(questionId, {
+		const diff: Record<string, unknown> = {
 			title: editTitle.trim() || question?.title || 'Ohne Titel',
 			description: editDescription.trim() || undefined,
 			status: editStatus,
 			priority: editPriority,
 			researchDepth: editResearchDepth,
 			updatedAt: new Date().toISOString(),
-		});
+		};
+		await encryptRecord('questions', diff);
+		await db.table('questions').update(questionId, diff);
 	}
 
 	async function handleSelectChange() {

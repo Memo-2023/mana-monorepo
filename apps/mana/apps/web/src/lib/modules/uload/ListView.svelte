@@ -5,6 +5,7 @@
 <script lang="ts">
 	import { liveQuery } from 'dexie';
 	import { db } from '$lib/data/database';
+	import { decryptRecords } from '$lib/data/crypto';
 	import type { LocalLink, LocalFolder } from './types';
 	import type { ViewProps } from '$lib/app-registry';
 
@@ -15,10 +16,9 @@
 
 	$effect(() => {
 		const sub = liveQuery(async () => {
-			return db
-				.table<LocalLink>('links')
-				.toArray()
-				.then((all) => all.filter((l) => !l.deletedAt && l.isActive));
+			const all = await db.table<LocalLink>('links').toArray();
+			const visible = all.filter((l) => !l.deletedAt && l.isActive);
+			return decryptRecords('links', visible);
 		}).subscribe((val) => {
 			links = val ?? [];
 		});

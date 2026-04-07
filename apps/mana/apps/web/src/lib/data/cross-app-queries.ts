@@ -272,13 +272,17 @@ export function useRecentDecks(limit = 5) {
 /** Recent documents + spaces. */
 export function useRecentDocuments(limit = 5) {
 	return useLiveQueryWithDefault(async () => {
-		return db
+		// title + content are encrypted on disk; the dashboard surfaces the
+		// title so we have to decrypt before returning. limit is applied
+		// pre-decrypt to keep the batch small.
+		const visible = await db
 			.table<LocalDocument>('documents')
 			.orderBy('updatedAt')
 			.reverse()
 			.filter((d) => !d.deletedAt)
 			.limit(limit)
 			.toArray();
+		return decryptRecords('documents', visible);
 	}, [] as LocalDocument[]);
 }
 

@@ -5,6 +5,7 @@
 <script lang="ts">
 	import { liveQuery } from 'dexie';
 	import { db } from '$lib/data/database';
+	import { decryptRecords } from '$lib/data/crypto';
 	import type { LocalMeal, LocalGoal } from './types';
 
 	let meals = $state<LocalMeal[]>([]);
@@ -14,10 +15,9 @@
 
 	$effect(() => {
 		const sub = liveQuery(async () => {
-			return db
-				.table<LocalMeal>('meals')
-				.toArray()
-				.then((all) => all.filter((m) => !m.deletedAt));
+			const all = await db.table<LocalMeal>('meals').toArray();
+			const visible = all.filter((m) => !m.deletedAt);
+			return decryptRecords('meals', visible);
 		}).subscribe((val) => {
 			meals = val ?? [];
 		});

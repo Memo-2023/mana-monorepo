@@ -11,7 +11,8 @@
 		findSpaceById,
 	} from '$lib/modules/context/queries';
 	import { contextSpaceTable, documentTable } from '$lib/modules/context/collections';
-	import type { DocumentType } from '$lib/modules/context/types';
+	import { encryptRecord } from '$lib/data/crypto';
+	import type { DocumentType, LocalDocument } from '$lib/modules/context/types';
 
 	let editingName = $state(false);
 	let editName = $state('');
@@ -39,7 +40,7 @@
 
 	async function handleCreateDocument() {
 		const id = crypto.randomUUID();
-		await documentTable.add({
+		const row: LocalDocument = {
 			id,
 			spaceId,
 			title: 'Neues Dokument',
@@ -48,7 +49,9 @@
 			shortId: null,
 			pinned: false,
 			metadata: null,
-		});
+		};
+		await encryptRecord('documents', row);
+		await documentTable.add(row);
 		goto(`/context/documents/${id}`);
 	}
 

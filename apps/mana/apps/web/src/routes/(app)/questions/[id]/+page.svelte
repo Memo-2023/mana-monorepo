@@ -2,6 +2,7 @@
 	import { _ } from 'svelte-i18n';
 	import { page } from '$app/stores';
 	import { db } from '$lib/data/database';
+	import { encryptRecord } from '$lib/data/crypto';
 	import {
 		useAllQuestions,
 		useAnswersByQuestion,
@@ -67,11 +68,13 @@
 
 	async function saveEdit() {
 		if (!question || !editTitle.trim()) return;
-		await db.table('questions').update(question.id, {
+		const diff: Record<string, unknown> = {
 			title: editTitle.trim(),
 			description: editDescription.trim() || null,
 			updatedAt: new Date().toISOString(),
-		});
+		};
+		await encryptRecord('questions', diff);
+		await db.table('questions').update(question.id, diff);
 		editing = false;
 	}
 
@@ -98,7 +101,7 @@
 
 		try {
 			const now = new Date().toISOString();
-			await db.table('answers').add({
+			const row: Record<string, unknown> = {
 				id: crypto.randomUUID(),
 				questionId: question.id,
 				researchResultId: null,
@@ -108,7 +111,9 @@
 				isAccepted: false,
 				createdAt: now,
 				updatedAt: now,
-			});
+			};
+			await encryptRecord('answers', row);
+			await db.table('answers').add(row);
 			newAnswer = '';
 
 			// Mark question as answered if it was open

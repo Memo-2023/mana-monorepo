@@ -13,6 +13,7 @@
 		type StatusFilter,
 	} from '$lib/modules/uload/queries';
 	import { linkTable, uloadFolderTable } from '$lib/modules/uload/collections';
+	import { encryptRecord } from '$lib/data/crypto';
 	import type { LocalLink } from '$lib/modules/uload/types';
 	import {
 		CaretRight,
@@ -141,7 +142,7 @@
 			return;
 		}
 
-		await linkTable.add({
+		const newRow: LocalLink = {
 			id: crypto.randomUUID(),
 			shortCode,
 			customCode: newCustomCode || null,
@@ -159,7 +160,9 @@
 			utmCampaign: newUtmCampaign || null,
 			folderId: selectedFolderId,
 			order: links.length,
-		} satisfies LocalLink);
+		};
+		await encryptRecord('links', newRow);
+		await linkTable.add(newRow);
 		toast.success(`Link erstellt: ${shortCode}`);
 		newUrl = '';
 		newTitle = '';
@@ -205,7 +208,7 @@
 			return;
 		}
 
-		await linkTable.update(editingLink.id, {
+		const diff: Record<string, unknown> = {
 			originalUrl: editUrl,
 			title: editTitle || null,
 			utmSource: editUtmSource || null,
@@ -214,7 +217,9 @@
 			expiresAt: editExpiresAt || null,
 			password: editPassword || null,
 			maxClicks,
-		});
+		};
+		await encryptRecord('links', diff);
+		await linkTable.update(editingLink.id, diff);
 		toast.success('Link aktualisiert');
 		editingLink = null;
 	}
