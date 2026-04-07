@@ -17,10 +17,13 @@ import { SecurityEventsService, AccountLockoutService } from './services/securit
 import { SignupLimitService } from './services/signup-limit';
 import { ApiKeysService } from './services/api-keys';
 import { UserDataService } from './services/user-data';
+import { EncryptionVaultService } from './services/encryption-vault';
+import { loadKek } from './services/encryption-vault/kek';
 import { createAuthRoutes } from './routes/auth';
 import { createGuildRoutes } from './routes/guilds';
 import { createApiKeyRoutes, createApiKeyValidationRoute } from './routes/api-keys';
 import { createMeRoutes } from './routes/me';
+import { createEncryptionVaultRoutes } from './routes/encryption-vault';
 import { createSettingsRoutes } from './routes/settings';
 import { createAdminRoutes } from './routes/admin';
 
@@ -30,12 +33,18 @@ const config = loadConfig();
 const db = getDb(config.databaseUrl);
 const auth = createBetterAuth(config.databaseUrl);
 
+// Load the Key Encryption Key before any vault operation can run.
+// Top-level await is supported by Bun. Throws if MANA_AUTH_KEK is
+// missing in production or malformed in any environment.
+await loadKek(config.encryptionKek);
+
 // Initialize services
 const security = new SecurityEventsService(db);
 const lockout = new AccountLockoutService(db);
 const signupLimit = new SignupLimitService(db);
 const apiKeysService = new ApiKeysService(db);
 const userDataService = new UserDataService(db, config);
+const encryptionVaultService = new EncryptionVaultService(db);
 
 // ─── App ────────────────────────────────────────────────────
 
@@ -82,6 +91,11 @@ app.route('/api/v1/api-keys', createApiKeyValidationRoute(apiKeysService));
 
 app.use('/api/v1/me/*', jwtAuth(config.baseUrl));
 app.route('/api/v1/me', createMeRoutes(userDataService));
+
+// ─── Encryption vault (per-user master key custody) ────────
+// Mounted under /me so it inherits the JWT middleware above and shows
+// up in the same self-service surface as the GDPR endpoints.
+app.route('/api/v1/me/encryption-vault', createEncryptionVaultRoutes(encryptionVaultService));
 
 // ─── Settings ──────────────────────────────────────────────
 
