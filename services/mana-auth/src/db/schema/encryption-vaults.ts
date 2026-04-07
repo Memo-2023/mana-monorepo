@@ -1,4 +1,4 @@
-import { text, timestamp, smallint, integer, index } from 'drizzle-orm/pg-core';
+import { text, timestamp, smallint, integer, boolean, index } from 'drizzle-orm/pg-core';
 import { authSchema, users } from './auth';
 
 /**
@@ -35,15 +35,24 @@ export const encryptionVaults = authSchema.table(
 			.primaryKey()
 			.references(() => users.id, { onDelete: 'cascade' }),
 
-		/** AES-GCM ciphertext of the raw 32-byte master key. Includes the
-		 *  16-byte authentication tag at the tail (Web Crypto convention). */
-		wrappedMk: text('wrapped_mk').notNull(),
+		/** AES-GCM ciphertext of the raw 32-byte master key, wrapped with
+		 *  the server-side KEK. Includes the 16-byte authentication tag at
+		 *  the tail (Web Crypto convention).
+		 *
+		 *  NULLABLE since Phase 9: a vault in zero-knowledge mode has no
+		 *  server-side wrap. The CHECK constraint
+		 *  `encryption_vaults_has_wrap` ensures at least one of
+		 *  (wrapped_mk, recovery_wrapped_mk) is always populated so the
+		 *  user can never be locked out. */
+		wrappedMk: text('wrapped_mk'),
 
-		/** 12-byte IV used for the wrap operation. Stored base64. */
-		wrapIv: text('wrap_iv').notNull(),
+		/** 12-byte IV used for the wrap operation. Stored base64. NULLABLE
+		 *  in lockstep with wrappedMk. */
+		wrapIv: text('wrap_iv'),
 
-		/** Wire format version. Lets us migrate to a different KDF or AEAD
-		 *  later without rewriting every existing row at once. */
+		/** Wire format version of the KEK wrap. Lets us migrate to a
+		 *  different KDF or AEAD later without rewriting every existing
+		 *  row at once. */
 		formatVersion: smallint('format_version').notNull().default(1),
 
 		/** KEK identifier — currently always 'env-v1' (the env-loaded KEK).
@@ -51,6 +60,43 @@ export const encryptionVaults = authSchema.table(
 		 *  off the env-var KEK. Stored so a future rotation knows which
 		 *  KEK to unwrap with. */
 		kekId: text('kek_id').notNull().default('env-v1'),
+
+		// ─── Phase 9: Recovery wrap (zero-knowledge opt-in) ───
+		//
+		// recovery_wrapped_mk holds the same master key, wrapped with a
+		// key derived from the user's 32-byte recovery secret via HKDF.
+		// The server NEVER sees the recovery secret itself — it only
+		// accepts the already-sealed blob from the client. The client
+		// generates + displays the recovery code at setup time and the
+		// user is responsible for backing it up.
+		//
+		// When zero_knowledge=true:
+		//   - wrapped_mk + wrap_iv are NULL (the KEK wrap is gone)
+		//   - recovery_wrapped_mk + recovery_iv are NOT NULL
+		//   - GET /key returns the recovery blob, NOT a plaintext MK
+		//   - The server is computationally incapable of decrypting the
+		//     user's data even with full DB + KEK access
+
+		/** AES-GCM ciphertext of the raw 32-byte master key, wrapped with
+		 *  the user's recovery-derived key. NULL until the user opts into
+		 *  recovery wrap via POST /recovery-wrap. */
+		recoveryWrappedMk: text('recovery_wrapped_mk'),
+
+		/** 12-byte IV for the recovery wrap. Stored base64. Paired with
+		 *  recoveryWrappedMk via the encryption_vaults_wrap_iv_pair
+		 *  constraint. */
+		recoveryIv: text('recovery_iv'),
+
+		/** Wire format version of the recovery wrap. */
+		recoveryFormatVersion: smallint('recovery_format_version').notNull().default(1),
+
+		/** Timestamp of when the user first set their recovery wrap. */
+		recoverySetAt: timestamp('recovery_set_at', { withTimezone: true }),
+
+		/** True iff the user has opted into zero-knowledge mode. When set,
+		 *  the server-side wrapped_mk is gone and the user MUST provide
+		 *  their recovery code to unlock the vault. */
+		zeroKnowledge: boolean('zero_knowledge').notNull().default(false),
 
 		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 		rotatedAt: timestamp('rotated_at', { withTimezone: true }),

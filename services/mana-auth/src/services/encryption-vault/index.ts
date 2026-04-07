@@ -41,14 +41,37 @@ export interface AuditContext {
 
 export interface VaultFetchResult {
 	/** Raw 32 bytes of the unwrapped master key. Caller must base64-encode
-	 *  before placing in the JSON response body. */
-	masterKey: Uint8Array;
+	 *  before placing in the JSON response body.
+	 *
+	 *  null in zero-knowledge mode — the server cannot unwrap the MK
+	 *  itself and must return the recovery-wrapped blob instead. The
+	 *  route handler reads `requiresRecoveryCode` to know which branch
+	 *  to send to the client. */
+	masterKey: Uint8Array | null;
 	/** Format version of the wrap currently in storage — bumps if we ever
 	 *  migrate the wire format. The client doesn't usually care, but the
 	 *  rotate flow uses it to know whether a re-wrap is needed. */
 	formatVersion: number;
-	/** Which KEK produced the wrapped value. */
+	/** Which KEK produced the wrapped value. Empty string in zero-knowledge
+	 *  mode (no KEK wrap exists). */
 	kekId: string;
+	/** True if the vault is in zero-knowledge mode and the client must
+	 *  provide a recovery code to unwrap. When set, masterKey is null
+	 *  and the recovery* fields are populated instead. */
+	requiresRecoveryCode?: boolean;
+	/** Recovery wrap ciphertext (only set when requiresRecoveryCode). */
+	recoveryWrappedMk?: string;
+	/** Recovery wrap IV (only set when requiresRecoveryCode). */
+	recoveryIv?: string;
+}
+
+/** Input for setting (or replacing) the recovery wrap. The client wraps
+ *  the master key locally with a key derived from the recovery secret
+ *  and sends only the resulting ciphertext + IV. The recovery secret
+ *  itself NEVER touches the wire. */
+export interface RecoveryWrapInput {
+	recoveryWrappedMk: string;
+	recoveryIv: string;
 }
 
 export class EncryptionVaultService {
@@ -73,13 +96,28 @@ export class EncryptionVaultService {
 				.limit(1);
 
 			if (existing.length > 0) {
-				// Already initialised — fall through to a regular fetch.
-				const masterKey = await unwrapMasterKey(existing[0].wrappedMk, existing[0].wrapIv);
+				// Already initialised. If the user is in zero-knowledge mode,
+				// the server can no longer hand out the plaintext master key
+				// — the route handler will return the recovery blob instead.
+				const row = existing[0];
+				if (row.zeroKnowledge) {
+					await this.writeAudit(tx, userId, 'init', ctx, 200, 'already-exists-zk');
+					return {
+						masterKey: null,
+						formatVersion: row.recoveryFormatVersion,
+						kekId: '',
+						requiresRecoveryCode: true,
+						recoveryWrappedMk: row.recoveryWrappedMk!,
+						recoveryIv: row.recoveryIv!,
+					};
+				}
+
+				const masterKey = await unwrapMasterKey(row.wrappedMk!, row.wrapIv!);
 				await this.writeAudit(tx, userId, 'init', ctx, 200, 'already-exists');
 				return {
 					masterKey,
-					formatVersion: existing[0].formatVersion,
-					kekId: existing[0].kekId,
+					formatVersion: row.formatVersion,
+					kekId: row.kekId,
 				};
 			}
 
@@ -119,9 +157,26 @@ export class EncryptionVaultService {
 			}
 
 			const row = rows[0];
+
+			// Zero-knowledge fork: the server CANNOT decrypt the MK and
+			// must return the recovery blob for the client to unwrap.
+			// `requiresRecoveryCode` flips the route handler's response
+			// shape — it sends the recovery wrap instead of a base64 MK.
+			if (row.zeroKnowledge) {
+				await this.writeAudit(tx, userId, 'fetch', ctx, 200, 'zk-recovery-blob');
+				return {
+					masterKey: null,
+					formatVersion: row.recoveryFormatVersion,
+					kekId: '',
+					requiresRecoveryCode: true,
+					recoveryWrappedMk: row.recoveryWrappedMk!,
+					recoveryIv: row.recoveryIv!,
+				};
+			}
+
 			let masterKey: Uint8Array;
 			try {
-				masterKey = await unwrapMasterKey(row.wrappedMk, row.wrapIv);
+				masterKey = await unwrapMasterKey(row.wrappedMk!, row.wrapIv!);
 			} catch (err) {
 				// Auth-tag mismatch, wrong KEK, malformed row — all the same
 				// to the caller (500), but we want a clear audit trail.
@@ -154,6 +209,20 @@ export class EncryptionVaultService {
 	 */
 	async rotate(userId: string, ctx: AuditContext = {}): Promise<VaultFetchResult> {
 		return this.withUserScope(userId, async (tx) => {
+			// Rotate is forbidden in zero-knowledge mode — the server can't
+			// re-wrap a key it can't read. The client has to disable
+			// zero-knowledge first (which restores a server-side wrap),
+			// then call rotate, then re-enable if desired.
+			const existing = await tx
+				.select()
+				.from(encryptionVaults)
+				.where(eq(encryptionVaults.userId, userId))
+				.limit(1);
+			if (existing.length > 0 && existing[0].zeroKnowledge) {
+				await this.writeAudit(tx, userId, 'rotate', ctx, 409, 'zk-rotate-forbidden');
+				throw new ZeroKnowledgeRotateForbidden(userId);
+			}
+
 			const mkBytes = generateMasterKey();
 			const { wrappedMk, wrapIv } = await wrapMasterKey(mkBytes);
 
@@ -164,6 +233,13 @@ export class EncryptionVaultService {
 					wrapIv,
 					kekId: activeKekId(),
 					rotatedAt: new Date(),
+					// Rotation also wipes any existing recovery wrap — the
+					// new MK has nothing to do with the old one, so the old
+					// recovery code would unwrap into garbage. The user has
+					// to set up a fresh recovery code after rotating.
+					recoveryWrappedMk: null,
+					recoveryIv: null,
+					recoverySetAt: null,
 				})
 				.where(eq(encryptionVaults.userId, userId))
 				.returning();
@@ -183,6 +259,186 @@ export class EncryptionVaultService {
 			}
 
 			return { masterKey: mkBytes, formatVersion: 1, kekId: activeKekId() };
+		});
+	}
+
+	// ─── Phase 9: Recovery Wrap + Zero-Knowledge ─────────────
+
+	/**
+	 * Stores (or replaces) the user's recovery wrap. The client builds
+	 * the wrap locally — derives a key from the recovery secret, AES-GCM
+	 * encrypts the master key, sends only the resulting ciphertext + IV.
+	 * The recovery secret itself NEVER touches the wire.
+	 *
+	 * Storing a recovery wrap does NOT enable zero-knowledge mode by
+	 * itself — the user has to follow up with `enableZeroKnowledge` to
+	 * actually delete the server-side wrap. This two-step setup gives
+	 * the UI room to confirm the recovery code is backed up before
+	 * making the rotation irreversible.
+	 *
+	 * Idempotent: calling twice replaces the previous recovery wrap.
+	 * Use case: user re-prints the recovery code with a fresh secret.
+	 */
+	async setRecoveryWrap(
+		userId: string,
+		input: RecoveryWrapInput,
+		ctx: AuditContext = {}
+	): Promise<void> {
+		return this.withUserScope(userId, async (tx) => {
+			const updated = await tx
+				.update(encryptionVaults)
+				.set({
+					recoveryWrappedMk: input.recoveryWrappedMk,
+					recoveryIv: input.recoveryIv,
+					recoveryFormatVersion: 1,
+					recoverySetAt: new Date(),
+				})
+				.where(eq(encryptionVaults.userId, userId))
+				.returning();
+
+			if (updated.length === 0) {
+				await this.writeAudit(tx, userId, 'recovery_set', ctx, 404, 'no-vault');
+				throw new VaultNotFoundError(userId);
+			}
+
+			await this.writeAudit(tx, userId, 'recovery_set', ctx, 200, null);
+		});
+	}
+
+	/**
+	 * Removes the recovery wrap. Forbidden in zero-knowledge mode (would
+	 * leave the user with no usable wrap and no way to unlock).
+	 */
+	async clearRecoveryWrap(userId: string, ctx: AuditContext = {}): Promise<void> {
+		return this.withUserScope(userId, async (tx) => {
+			const existing = await tx
+				.select()
+				.from(encryptionVaults)
+				.where(eq(encryptionVaults.userId, userId))
+				.limit(1);
+
+			if (existing.length === 0) {
+				await this.writeAudit(tx, userId, 'recovery_clear', ctx, 404, 'no-vault');
+				throw new VaultNotFoundError(userId);
+			}
+			if (existing[0].zeroKnowledge) {
+				await this.writeAudit(tx, userId, 'recovery_clear', ctx, 409, 'zk-active');
+				throw new ZeroKnowledgeActiveError(userId);
+			}
+
+			await tx
+				.update(encryptionVaults)
+				.set({
+					recoveryWrappedMk: null,
+					recoveryIv: null,
+					recoverySetAt: null,
+				})
+				.where(eq(encryptionVaults.userId, userId));
+
+			await this.writeAudit(tx, userId, 'recovery_clear', ctx, 200, null);
+		});
+	}
+
+	/**
+	 * Enables zero-knowledge mode. NULLs out wrapped_mk + wrap_iv,
+	 * sets zero_knowledge=true. After this, the server is computationally
+	 * incapable of decrypting the user's data — even with full DB +
+	 * KEK access — until the user provides the recovery code on the
+	 * next unlock.
+	 *
+	 * Precondition: a recovery wrap MUST already be stored. Without it,
+	 * enabling zero-knowledge would lock the user out forever (the CHECK
+	 * constraint enforces this at the DB level too).
+	 *
+	 * This is the destructive step. The UI should require an explicit
+	 * confirmation modal — there is no undo without first calling
+	 * `disableZeroKnowledge`, which itself requires a freshly-unwrapped
+	 * MK from the client side.
+	 */
+	async enableZeroKnowledge(userId: string, ctx: AuditContext = {}): Promise<void> {
+		return this.withUserScope(userId, async (tx) => {
+			const rows = await tx
+				.select()
+				.from(encryptionVaults)
+				.where(eq(encryptionVaults.userId, userId))
+				.limit(1);
+
+			if (rows.length === 0) {
+				await this.writeAudit(tx, userId, 'zk_enable', ctx, 404, 'no-vault');
+				throw new VaultNotFoundError(userId);
+			}
+			if (rows[0].zeroKnowledge) {
+				// Already enabled — idempotent no-op so retried calls don't
+				// look like errors.
+				await this.writeAudit(tx, userId, 'zk_enable', ctx, 200, 'already-enabled');
+				return;
+			}
+			if (!rows[0].recoveryWrappedMk || !rows[0].recoveryIv) {
+				await this.writeAudit(tx, userId, 'zk_enable', ctx, 400, 'no-recovery-wrap');
+				throw new RecoveryWrapMissingError(userId);
+			}
+
+			await tx
+				.update(encryptionVaults)
+				.set({
+					zeroKnowledge: true,
+					wrappedMk: null,
+					wrapIv: null,
+				})
+				.where(eq(encryptionVaults.userId, userId));
+
+			await this.writeAudit(tx, userId, 'zk_enable', ctx, 200, null);
+		});
+	}
+
+	/**
+	 * Disables zero-knowledge mode. The client must hand back a fresh
+	 * KEK-friendly master key (i.e. the same MK it just unwrapped with
+	 * the recovery code, re-supplied so the server can KEK-wrap it).
+	 *
+	 * Why doesn't the server generate a new MK? Because that would
+	 * orphan all existing encrypted data. The user-side workflow is:
+	 *   1. Unlock with recovery code (client now has the plaintext MK)
+	 *   2. POST /zero-knowledge/disable with `{ masterKey: base64(MK) }`
+	 *   3. Server KEK-wraps the supplied MK and stores it as wrapped_mk
+	 *   4. zero_knowledge flips back to false
+	 *
+	 * The client SHOULD memzero its copy of the MK bytes after the call.
+	 */
+	async disableZeroKnowledge(
+		userId: string,
+		mkBytes: Uint8Array,
+		ctx: AuditContext = {}
+	): Promise<void> {
+		return this.withUserScope(userId, async (tx) => {
+			const rows = await tx
+				.select()
+				.from(encryptionVaults)
+				.where(eq(encryptionVaults.userId, userId))
+				.limit(1);
+
+			if (rows.length === 0) {
+				await this.writeAudit(tx, userId, 'zk_disable', ctx, 404, 'no-vault');
+				throw new VaultNotFoundError(userId);
+			}
+			if (!rows[0].zeroKnowledge) {
+				await this.writeAudit(tx, userId, 'zk_disable', ctx, 200, 'already-disabled');
+				return;
+			}
+
+			const { wrappedMk, wrapIv } = await wrapMasterKey(mkBytes);
+
+			await tx
+				.update(encryptionVaults)
+				.set({
+					zeroKnowledge: false,
+					wrappedMk,
+					wrapIv,
+					kekId: activeKekId(),
+				})
+				.where(eq(encryptionVaults.userId, userId));
+
+			await this.writeAudit(tx, userId, 'zk_disable', ctx, 200, null);
 		});
 	}
 
@@ -215,7 +471,15 @@ export class EncryptionVaultService {
 	private async writeAudit(
 		tx: Parameters<Parameters<Database['transaction']>[0]>[0],
 		userId: string,
-		action: 'init' | 'fetch' | 'rotate' | 'failed_fetch',
+		action:
+			| 'init'
+			| 'fetch'
+			| 'rotate'
+			| 'failed_fetch'
+			| 'recovery_set'
+			| 'recovery_clear'
+			| 'zk_enable'
+			| 'zk_disable',
 		ctx: AuditContext,
 		status: number,
 		context: string | null
@@ -242,6 +506,40 @@ export class VaultNotFoundError extends Error {
 	constructor(public userId: string) {
 		super(`encryption vault not initialised for user ${userId}`);
 		this.name = 'VaultNotFoundError';
+	}
+}
+
+/**
+ * Thrown when the client tries to enable zero-knowledge mode without
+ * first storing a recovery wrap. Routes convert to 400.
+ */
+export class RecoveryWrapMissingError extends Error {
+	constructor(public userId: string) {
+		super(`cannot enable zero-knowledge mode: no recovery wrap stored for user ${userId}`);
+		this.name = 'RecoveryWrapMissingError';
+	}
+}
+
+/**
+ * Thrown when the client tries to clear the recovery wrap while
+ * zero-knowledge mode is active (would lock the user out). Routes
+ * convert to 409.
+ */
+export class ZeroKnowledgeActiveError extends Error {
+	constructor(public userId: string) {
+		super(`cannot clear recovery wrap while zero-knowledge mode is active for user ${userId}`);
+		this.name = 'ZeroKnowledgeActiveError';
+	}
+}
+
+/**
+ * Thrown when rotate() is called on a vault in zero-knowledge mode.
+ * Routes convert to 409.
+ */
+export class ZeroKnowledgeRotateForbidden extends Error {
+	constructor(public userId: string) {
+		super(`cannot rotate master key in zero-knowledge mode for user ${userId}`);
+		this.name = 'ZeroKnowledgeRotateForbidden';
 	}
 }
 
