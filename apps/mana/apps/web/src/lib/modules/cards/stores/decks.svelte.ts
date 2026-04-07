@@ -6,6 +6,7 @@
  */
 
 import { CardsEvents } from '@mana/shared-utils/analytics';
+import { db } from '$lib/data/database';
 import { cardDeckTable, cardTable } from '../collections';
 import { toDeck } from '../queries';
 import type { LocalDeck } from '../types';
@@ -63,14 +64,16 @@ export const deckStore = {
 		try {
 			const now = new Date().toISOString();
 
-			// Soft-delete all cards belonging to this deck
-			const cards = await cardTable.where('deckId').equals(id).toArray();
-			for (const card of cards) {
-				await cardTable.update(card.id, { deletedAt: now, updatedAt: now });
-			}
-
-			// Soft-delete the deck
-			await cardDeckTable.update(id, { deletedAt: now, updatedAt: now });
+			// Atomic cascade: deck + all child cards are soft-deleted in one
+			// Dexie transaction. If any write fails, the whole operation aborts —
+			// no orphaned cards left pointing at a deleted deck.
+			await db.transaction('rw', cardDeckTable, cardTable, async () => {
+				const cards = await cardTable.where('deckId').equals(id).toArray();
+				for (const card of cards) {
+					await cardTable.update(card.id, { deletedAt: now, updatedAt: now });
+				}
+				await cardDeckTable.update(id, { deletedAt: now, updatedAt: now });
+			});
 			CardsEvents.deckDeleted();
 		} catch (err: any) {
 			error = err.message || 'Failed to delete deck';

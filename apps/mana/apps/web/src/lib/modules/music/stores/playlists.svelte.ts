@@ -5,6 +5,7 @@
  * Handles playlist CRUD and song associations.
  */
 
+import { db } from '$lib/data/database';
 import { musicPlaylistTable, playlistSongTable } from '../collections';
 import { toPlaylist } from '../queries';
 import { MusicEvents } from '@mana/shared-utils/analytics';
@@ -32,15 +33,17 @@ export const playlistsStore = {
 		});
 	},
 
-	/** Soft-delete a playlist and its song associations. */
+	/** Soft-delete a playlist and its song associations atomically. */
 	async delete(id: string) {
 		const now = new Date().toISOString();
-		await musicPlaylistTable.update(id, { deletedAt: now, updatedAt: now });
-		// Soft-delete associated playlistSongs
-		const allPS = await playlistSongTable.where('playlistId').equals(id).toArray();
-		for (const ps of allPS) {
-			await playlistSongTable.update(ps.id, { deletedAt: now, updatedAt: now });
-		}
+		// Atomic cascade: playlist + playlistSongs in one Dexie transaction.
+		await db.transaction('rw', musicPlaylistTable, playlistSongTable, async () => {
+			await musicPlaylistTable.update(id, { deletedAt: now, updatedAt: now });
+			const allPS = await playlistSongTable.where('playlistId').equals(id).toArray();
+			for (const ps of allPS) {
+				await playlistSongTable.update(ps.id, { deletedAt: now, updatedAt: now });
+			}
+		});
 		MusicEvents.playlistDeleted();
 	},
 

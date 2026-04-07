@@ -5,6 +5,7 @@
  * This store only handles writes to IndexedDB via the unified database.
  */
 
+import { db } from '$lib/data/database';
 import { presiDeckTable, slideTable } from '../collections';
 import { toDeck, toSlide } from '../queries';
 import { PresiEvents } from '@mana/shared-utils/analytics';
@@ -70,13 +71,14 @@ function createDecksStore() {
 		error = null;
 		try {
 			const now = new Date().toISOString();
-			// Soft-delete all slides belonging to this deck
-			const slides = await slideTable.where('deckId').equals(id).toArray();
-			for (const slide of slides) {
-				await slideTable.update(slide.id, { deletedAt: now, updatedAt: now });
-			}
-			// Soft-delete the deck
-			await presiDeckTable.update(id, { deletedAt: now, updatedAt: now });
+			// Atomic cascade: deck + all slides in one Dexie transaction.
+			await db.transaction('rw', presiDeckTable, slideTable, async () => {
+				const slides = await slideTable.where('deckId').equals(id).toArray();
+				for (const slide of slides) {
+					await slideTable.update(slide.id, { deletedAt: now, updatedAt: now });
+				}
+				await presiDeckTable.update(id, { deletedAt: now, updatedAt: now });
+			});
 			PresiEvents.deckDeleted();
 			return true;
 		} catch (e) {

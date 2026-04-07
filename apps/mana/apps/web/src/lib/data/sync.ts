@@ -14,7 +14,14 @@
  *   WS:    GET  /ws/{appId}    — auth: { type: "auth", token: "..." }
  */
 
-import { db, SYNC_APP_MAP, toSyncName, fromSyncName, setApplyingServerChanges } from './database';
+import {
+	db,
+	SYNC_APP_MAP,
+	toSyncName,
+	fromSyncName,
+	setApplyingServerChanges,
+	FIELD_TIMESTAMPS_KEY,
+} from './database';
 
 // ─── Types ────────────────────────────────────────────────────
 
@@ -52,6 +59,52 @@ export type SyncStatus = 'idle' | 'syncing' | 'error' | 'offline';
 const PUSH_DEBOUNCE = 1000;
 const PULL_INTERVAL = 30_000;
 const WS_RECONNECT_DELAY = 5000;
+
+// Retry config for transient sync failures (network drops, 5xx).
+// 4xx (auth, validation) is treated as permanent and not retried.
+const RETRY_MAX_ATTEMPTS = 3;
+const RETRY_BASE_DELAY_MS = 500;
+const RETRY_MAX_DELAY_MS = 8_000;
+
+function isRetriableStatus(status: number): boolean {
+	return status === 0 || status === 408 || status === 429 || status >= 500;
+}
+
+function backoffDelay(attempt: number): number {
+	const exp = Math.min(RETRY_MAX_DELAY_MS, RETRY_BASE_DELAY_MS * 2 ** attempt);
+	// Full jitter to avoid thundering herd when many clients reconnect together.
+	return Math.floor(Math.random() * exp);
+}
+
+const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+
+/**
+ * Wraps a fetch call with exponential backoff. Re-throws after the final
+ * attempt or immediately for non-retriable HTTP errors.
+ */
+async function fetchWithRetry(
+	input: RequestInfo | URL,
+	init: RequestInit,
+	label: string
+): Promise<Response> {
+	let lastError: unknown = null;
+	for (let attempt = 0; attempt < RETRY_MAX_ATTEMPTS; attempt++) {
+		try {
+			const res = await fetch(input, init);
+			if (res.ok) return res;
+			if (!isRetriableStatus(res.status)) return res; // permanent — let caller handle
+			lastError = new Error(`${label} failed: HTTP ${res.status}`);
+		} catch (err) {
+			// AbortError must propagate immediately (caller-initiated cancel).
+			if (err instanceof Error && err.name === 'AbortError') throw err;
+			lastError = err;
+		}
+		if (attempt < RETRY_MAX_ATTEMPTS - 1) {
+			await sleep(backoffDelay(attempt));
+		}
+	}
+	throw lastError instanceof Error ? lastError : new Error(`${label} failed`);
+}
 
 /**
  * Eager apps are synced at startup (needed for dashboard widgets).
@@ -163,15 +216,19 @@ export function createUnifiedSync(serverUrl: string, getToken: () => Promise<str
 			// Build changeset in backend protocol format
 			const changeset = buildChangeset(pending, clientId, oldestCursor);
 
-			const res = await fetch(`${serverUrl}/sync/${appId}`, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					Authorization: `Bearer ${token}`,
-					'X-Client-Id': clientId,
+			const res = await fetchWithRetry(
+				`${serverUrl}/sync/${appId}`,
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						Authorization: `Bearer ${token}`,
+						'X-Client-Id': clientId,
+					},
+					body: JSON.stringify(changeset),
 				},
-				body: JSON.stringify(changeset),
-			});
+				`push[${appId}]`
+			);
 
 			if (!res.ok) throw new Error(`Push failed: ${res.status}`);
 
@@ -220,14 +277,15 @@ export function createUnifiedSync(serverUrl: string, getToken: () => Promise<str
 
 				// Paginated pull: continue fetching until server signals no more data
 				while (hasMore) {
-					const res = await fetch(
+					const res = await fetchWithRetry(
 						`${serverUrl}/sync/${appId}/pull?collection=${encodeURIComponent(syncName)}&since=${encodeURIComponent(cursor)}`,
 						{
 							headers: {
 								Authorization: `Bearer ${token}`,
 								'X-Client-Id': clientId,
 							},
-						}
+						},
+						`pull[${appId}/${syncName}]`
 					);
 
 					if (!res.ok) break;
@@ -360,6 +418,12 @@ export function createUnifiedSync(serverUrl: string, getToken: () => Promise<str
 
 	// ─── Apply Server Changes ───────────────────────────────
 
+	function readFieldTimestamps(record: unknown): Record<string, string> {
+		if (!record || typeof record !== 'object') return {};
+		const ft = (record as Record<string, unknown>)[FIELD_TIMESTAMPS_KEY];
+		return ft && typeof ft === 'object' ? (ft as Record<string, string>) : {};
+	}
+
 	async function applyServerChanges(appId: string, changes: any[]): Promise<void> {
 		setApplyingServerChanges(true);
 		try {
@@ -381,14 +445,26 @@ export function createUnifiedSync(serverUrl: string, getToken: () => Promise<str
 						const recordId = change.id;
 
 						if (change.deletedAt || change.op === 'delete') {
-							// Soft delete or hard delete
+							// Soft delete (deletedAt) or hard delete
 							const existing = await table.get(recordId);
 							if (existing) {
 								if (change.deletedAt) {
-									await table.update(recordId, {
-										deletedAt: change.deletedAt,
-										updatedAt: change.deletedAt,
-									});
+									const localFT = readFieldTimestamps(existing);
+									const serverTime = change.deletedAt as string;
+									// LWW guard: only apply if newer than local deletedAt timestamp
+									const localDeletedAtTime = localFT.deletedAt ?? (existing as any).deletedAt ?? '';
+									if (serverTime >= localDeletedAtTime) {
+										const newFT = {
+											...localFT,
+											deletedAt: serverTime,
+											updatedAt: serverTime,
+										};
+										await table.update(recordId, {
+											deletedAt: serverTime,
+											updatedAt: serverTime,
+											[FIELD_TIMESTAMPS_KEY]: newFT,
+										});
+									}
 								} else {
 									await table.delete(recordId);
 								}
@@ -396,41 +472,82 @@ export function createUnifiedSync(serverUrl: string, getToken: () => Promise<str
 						} else if (change.op === 'insert') {
 							// Upsert for inserts
 							const existing = await table.get(recordId);
+							const changeData = (change.data ?? change) as Record<string, unknown>;
+							const recordTime =
+								(changeData.updatedAt as string | undefined) ??
+								(changeData.createdAt as string | undefined) ??
+								new Date().toISOString();
+
 							if (!existing) {
-								await table.put(change.data ?? { id: recordId, ...change });
+								// Stamp every field at the record's timestamp
+								const ft: Record<string, string> = {};
+								for (const key of Object.keys(changeData)) {
+									if (key === 'id' || key === FIELD_TIMESTAMPS_KEY) continue;
+									ft[key] = recordTime;
+								}
+								await table.put({
+									...changeData,
+									id: recordId,
+									[FIELD_TIMESTAMPS_KEY]: ft,
+								});
 							} else {
-								// Record exists — merge with LWW
+								// Existing record — merge with field-level LWW using recordTime as
+								// the timestamp for every incoming field.
+								const localFT = readFieldTimestamps(existing);
+								const localUpdatedAt = (existing as any).updatedAt ?? '';
 								const updates: Record<string, unknown> = {};
-								const changeData = change.data ?? change;
+								const newFT: Record<string, string> = { ...localFT };
+
 								for (const [key, val] of Object.entries(changeData)) {
-									if (key === 'id') continue;
-									updates[key] = val;
+									if (key === 'id' || key === FIELD_TIMESTAMPS_KEY) continue;
+									const localFieldTime = localFT[key] ?? localUpdatedAt;
+									if (recordTime >= localFieldTime) {
+										updates[key] = val;
+										newFT[key] = recordTime;
+									}
 								}
 								if (Object.keys(updates).length > 0) {
+									updates[FIELD_TIMESTAMPS_KEY] = newFT;
 									await table.update(recordId, updates);
 								}
 							}
 						} else if (change.op === 'update' && change.fields) {
 							// Field-level LWW update
 							const existing = await table.get(recordId);
+							const serverFields = change.fields as Record<
+								string,
+								{ value: unknown; updatedAt?: string }
+							>;
+
 							if (!existing) {
 								// Record doesn't exist locally — reconstruct from fields
 								const record: Record<string, unknown> = { id: recordId };
-								for (const [key, fc] of Object.entries(change.fields as Record<string, any>)) {
+								const ft: Record<string, string> = {};
+								const fallback = new Date().toISOString();
+								for (const [key, fc] of Object.entries(serverFields)) {
 									record[key] = fc.value;
+									ft[key] = fc.updatedAt ?? fallback;
 								}
+								record[FIELD_TIMESTAMPS_KEY] = ft;
 								await table.put(record);
 							} else {
-								// Merge — only update fields that are newer
+								// Merge — compare per-field timestamps. Falls back to record-level
+								// updatedAt for legacy records that pre-date __fieldTimestamps.
+								const localFT = readFieldTimestamps(existing);
+								const localUpdatedAt = (existing as any).updatedAt ?? '';
 								const updates: Record<string, unknown> = {};
-								for (const [key, fc] of Object.entries(change.fields as Record<string, any>)) {
+								const newFT: Record<string, string> = { ...localFT };
+
+								for (const [key, fc] of Object.entries(serverFields)) {
 									const serverTime = fc.updatedAt ?? '';
-									const localTime = (existing as any).updatedAt ?? '';
-									if (serverTime >= localTime) {
+									const localFieldTime = localFT[key] ?? localUpdatedAt;
+									if (serverTime >= localFieldTime) {
 										updates[key] = fc.value;
+										newFT[key] = serverTime;
 									}
 								}
 								if (Object.keys(updates).length > 0) {
+									updates[FIELD_TIMESTAMPS_KEY] = newFT;
 									await table.update(recordId, updates);
 								}
 							}

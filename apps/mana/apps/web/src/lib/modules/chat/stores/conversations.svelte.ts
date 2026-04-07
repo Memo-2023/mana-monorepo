@@ -5,6 +5,7 @@
  * This store only handles writes to IndexedDB via the unified database.
  */
 
+import { db } from '$lib/data/database';
 import { conversationTable, messageTable } from '../collections';
 import { toConversation } from '../queries';
 import { createArchiveOps } from '@mana/shared-stores';
@@ -78,15 +79,18 @@ export const conversationsStore = {
 		});
 	},
 
-	/** Soft-delete a conversation and its messages. */
+	/** Soft-delete a conversation and its messages atomically. */
 	async delete(id: string) {
 		const now = new Date().toISOString();
-		await conversationTable.update(id, { deletedAt: now, updatedAt: now });
-		// Cascade soft-delete to messages
-		const msgs = await messageTable.where('conversationId').equals(id).toArray();
-		for (const msg of msgs) {
-			await messageTable.update(msg.id, { deletedAt: now, updatedAt: now });
-		}
+		// Atomic cascade: conversation + all messages in one Dexie transaction.
+		// Aborts as a unit on failure to avoid orphaned messages.
+		await db.transaction('rw', conversationTable, messageTable, async () => {
+			await conversationTable.update(id, { deletedAt: now, updatedAt: now });
+			const msgs = await messageTable.where('conversationId').equals(id).toArray();
+			for (const msg of msgs) {
+				await messageTable.update(msg.id, { deletedAt: now, updatedAt: now });
+			}
+		});
 		ChatEvents.conversationDeleted();
 	},
 };

@@ -558,6 +558,16 @@ export function setApplyingServerChanges(v: boolean): void {
 
 const pendingChangesTable = db.table('_pendingChanges');
 
+/**
+ * Hidden field on every synced record holding per-field LWW timestamps.
+ * Not indexed, not sent to the server in pending-change payloads.
+ */
+export const FIELD_TIMESTAMPS_KEY = '__fieldTimestamps';
+
+function isInternalKey(key: string): boolean {
+	return key === 'id' || key === FIELD_TIMESTAMPS_KEY;
+}
+
 for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {
 	for (const tableName of tables) {
 		const table = db.table(tableName);
@@ -565,18 +575,31 @@ for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {
 		table.hook('creating', function (_primKey, obj) {
 			if (_applyingServerChanges) return;
 			const now = new Date().toISOString();
+
+			// Stamp every real field with the create-time so future LWW comparisons
+			// have a baseline. Mutates obj in place — Dexie persists the mutation.
+			const ft: Record<string, string> = {};
+			for (const key of Object.keys(obj)) {
+				if (isInternalKey(key)) continue;
+				ft[key] = now;
+			}
+			(obj as Record<string, unknown>)[FIELD_TIMESTAMPS_KEY] = ft;
+
+			// Build payload for pending-change WITHOUT the internal timestamp map
+			const { [FIELD_TIMESTAMPS_KEY]: _omit, ...dataForSync } = obj as Record<string, unknown>;
+
 			pendingChangesTable.add({
 				appId,
 				collection: tableName,
 				recordId: obj.id,
 				op: 'insert',
-				data: { ...obj },
+				data: dataForSync,
 				createdAt: now,
 			});
 			trackFirstContent(appId);
-			fireTrigger(appId, tableName, 'insert', { ...obj });
+			fireTrigger(appId, tableName, 'insert', { ...dataForSync });
 			// Defer cross-table reads outside the Dexie hook's transaction scope
-			const objCopy = { ...obj };
+			const objCopy = { ...dataForSync };
 			setTimeout(() => {
 				checkInlineSuggestion(appId, tableName, objCopy).then((sug) => {
 					if (sug)
@@ -585,14 +608,24 @@ for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {
 			}, 0);
 		});
 
-		table.hook('updating', function (modifications, primKey) {
-			if (_applyingServerChanges) return;
+		table.hook('updating', function (modifications, primKey, obj) {
+			if (_applyingServerChanges) return undefined;
 			const now = new Date().toISOString();
 			const fields: Record<string, { value: unknown; updatedAt: string }> = {};
+
+			// Merge field timestamps: keep existing, overwrite for each modified field
+			const existingFT =
+				((obj as Record<string, unknown>)[FIELD_TIMESTAMPS_KEY] as
+					| Record<string, string>
+					| undefined) ?? {};
+			const newFT: Record<string, string> = { ...existingFT };
+
 			for (const [key, value] of Object.entries(modifications)) {
-				if (key === 'id') continue;
+				if (isInternalKey(key)) continue;
 				fields[key] = { value, updatedAt: now };
+				newFT[key] = now;
 			}
+
 			pendingChangesTable.add({
 				appId,
 				collection: tableName,
@@ -604,6 +637,11 @@ for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {
 			});
 			const op = (modifications as Record<string, unknown>).deletedAt ? 'delete' : 'update';
 			fireTrigger(appId, tableName, op, modifications as Record<string, unknown>);
+
+			// Returning an object from a Dexie 'updating' hook merges it into the
+			// modifications applied to the record — use this to persist the new
+			// per-field timestamps alongside the user's update.
+			return { [FIELD_TIMESTAMPS_KEY]: newFT };
 		});
 	}
 }
