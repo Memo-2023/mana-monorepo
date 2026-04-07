@@ -7,29 +7,35 @@
 	import { loadAutomations } from '$lib/triggers';
 	import { setCurrentUserId } from '$lib/data/current-user';
 	import { migrateGuestDataToUser } from '$lib/data/guest-migration';
+	import { installDataLayerListeners } from '$lib/data/data-layer-listeners';
 	import SuggestionToast from '$lib/components/SuggestionToast.svelte';
 	import OfflineIndicator from '$lib/components/OfflineIndicator.svelte';
 	import PwaUpdatePrompt from '$lib/components/PwaUpdatePrompt.svelte';
 
 	let { children } = $props();
 
-	// Tracks whether we have already attempted the guest → user migration in
-	// this app load. The migration is idempotent (no guest records → no-op)
-	// so this just prevents redundant table scans on every auth state change.
-	let guestMigrationAttempted = false;
+	// Tracks the last user id we pushed into the data layer. Comparing
+	// against this lets us short-circuit identity-update churn during auth
+	// initialisation, which previously caused effect_update_depth_exceeded.
+	let lastUserId: string | null | undefined = undefined;
 
 	// Push the active user id into the data layer whenever auth state changes.
 	// The Dexie creating-hook reads this to auto-stamp `userId` on every record,
 	// so module stores never need to know who the current user is.
 	$effect(() => {
 		const userId = authStore.user?.id ?? null;
+		if (userId === lastUserId) return;
+		const previousUserId = lastUserId;
+		lastUserId = userId;
+
 		setCurrentUserId(userId);
 
-		// First time we see an authenticated user in this session, lift any
-		// guest records into their account so the data they typed before
-		// signing up follows them.
-		if (userId && !guestMigrationAttempted) {
-			guestMigrationAttempted = true;
+		// First time we see an authenticated user (transition from guest/null
+		// to a real id), lift any guest records into their account so the data
+		// they typed before signing up follows them. Only on the first such
+		// transition — re-running on token refresh would be a no-op anyway,
+		// but we skip the table scan entirely.
+		if (userId && previousUserId === undefined) {
 			migrateGuestDataToUser(userId).catch((err) => {
 				console.error('[mana] guest → user migration failed:', err);
 			});
@@ -43,6 +49,10 @@
 		// Initialize network status tracking
 		networkStore.initialize();
 
+		// Subscribe to data-layer events: quota toasts, sync telemetry to
+		// the error tracker, and the daily tombstone cleanup loop.
+		const disposeDataLayer = installDataLayerListeners();
+
 		// Auth + automation loading is async — fire and forget. Returning
 		// cleanup from an async onMount would silently drop it, so the async
 		// work runs in an inner IIFE while the outer arrow stays sync.
@@ -54,6 +64,7 @@
 		return () => {
 			cleanupTheme();
 			networkStore.destroy();
+			disposeDataLayer();
 		};
 	});
 </script>
