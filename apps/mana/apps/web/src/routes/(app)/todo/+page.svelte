@@ -3,7 +3,7 @@
 	import { getContext, onMount } from 'svelte';
 	import type { Observable } from 'dexie';
 	import type { DragPayload } from '@mana/shared-ui/dnd';
-	import { type Task, type LocalLabel, tasksStore, taskTable } from '$lib/modules/todo';
+	import { type Task, type TaskTag, tasksStore, taskTable } from '$lib/modules/todo';
 	import { Gear } from '@mana/shared-icons';
 	import { ShareModal } from '@mana/shared-uload';
 
@@ -22,10 +22,10 @@
 
 	// Get data from layout context
 	const allTasks$: Observable<Task[]> = getContext('tasks');
-	const allLabels$: Observable<LocalLabel[]> = getContext('labels');
+	const allLabels$: Observable<TaskTag[]> = getContext('labels');
 
 	let allTasks = $state<Task[]>([]);
-	let allLabels = $state<LocalLabel[]>([]);
+	let allLabels = $state<TaskTag[]>([]);
 	let isLoaded = $state(false);
 
 	$effect(() => {

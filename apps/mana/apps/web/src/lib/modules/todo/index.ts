@@ -5,7 +5,6 @@
 // Stores
 export { tasksStore } from './stores/tasks.svelte';
 export { boardViewsStore } from './stores/board-views.svelte';
-export { labelsStore } from './stores/labels.svelte';
 export { remindersStore } from './stores/reminders.svelte';
 export { todoSettings } from './stores/settings.svelte';
 export { contactsStore } from './stores/contacts.svelte';
@@ -62,7 +61,7 @@ export { useTaskForm } from './composables/useTaskForm.svelte';
 // Types
 export type {
 	LocalTask,
-	LocalLabel,
+	TaskTag,
 	LocalTaskTag,
 	LocalReminder,
 	LocalBoardView,

@@ -8,7 +8,6 @@ export { calendarViewStore } from './stores/view.svelte';
 export {
 	useAllCalendars,
 	useAllCalendarItems,
-	useAllEvents,
 	toCalendar,
 	getVisibleCalendars,
 	getDefaultCalendar,

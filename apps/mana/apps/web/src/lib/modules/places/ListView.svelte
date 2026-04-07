@@ -13,7 +13,7 @@
 	import { ContextMenu, type ContextMenuItem } from '@mana/shared-ui';
 	import { dropTarget, dragSource } from '@mana/shared-ui/dnd';
 	import type { TagDragData } from '@mana/shared-ui/dnd';
-	import { useAllTags, getTagsByIds } from '$lib/stores/tags.svelte';
+	import { useAllTags, getTagsByIds } from '@mana/shared-stores';
 
 	let { navigate, goBack, params }: ViewProps = $props();
 

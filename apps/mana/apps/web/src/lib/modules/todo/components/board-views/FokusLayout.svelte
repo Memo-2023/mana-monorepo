@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Task, LocalLabel, LocalBoardView } from '../../types';
+	import type { Task, TaskTag, LocalBoardView } from '../../types';
 	import { groupTasksByView } from '../../view-grouping';
 	import { Check, Circle, CaretRight } from '@mana/shared-icons';
 	import { getPriorityColor } from '../../queries';
@@ -7,7 +7,7 @@
 	interface Props {
 		view: LocalBoardView;
 		tasks: Task[];
-		labels: LocalLabel[];
+		labels: TaskTag[];
 		onToggleComplete: (taskId: string) => void;
 		onOpenTask: (task: Task) => void;
 	}

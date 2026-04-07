@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Task, LocalLabel, LocalBoardView } from '../../types';
+	import type { Task, TaskTag, LocalBoardView } from '../../types';
 	import KanbanLayout from './KanbanLayout.svelte';
 	import GridLayout from './GridLayout.svelte';
 	import FokusLayout from './FokusLayout.svelte';
@@ -7,7 +7,7 @@
 	interface Props {
 		view: LocalBoardView;
 		tasks: Task[];
-		labels: LocalLabel[];
+		labels: TaskTag[];
 		wipLimit?: number | null;
 		cardSize?: 'compact' | 'normal' | 'large';
 		onToggleComplete: (taskId: string) => void;

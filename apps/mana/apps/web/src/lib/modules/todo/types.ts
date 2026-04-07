@@ -5,8 +5,12 @@
 import type { BaseRecord } from '@mana/local-store';
 import type { Tag } from '@mana/shared-tags';
 
-/** @deprecated Use Tag from @mana/shared-tags. Kept for backward compatibility. */
-export type LocalLabel = Tag;
+/**
+ * A tag attached to a task. Structurally identical to the shared `Tag`
+ * type — the alias exists so todo code can read `TaskTag` without colliding
+ * with the `Tag` icon from `@mana/shared-icons` that several views import.
+ */
+export type TaskTag = Tag;
 
 // ─── Local Types (IndexedDB) ──────────────────────────────
 

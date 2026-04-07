@@ -1,12 +1,12 @@
 <script lang="ts">
-	import type { Task, LocalLabel, LocalBoardView } from '../../types';
+	import type { Task, TaskTag, LocalBoardView } from '../../types';
 	import { groupTasksByView } from '../../view-grouping';
 	import KanbanTaskCard from '../kanban/KanbanTaskCard.svelte';
 
 	interface Props {
 		view: LocalBoardView;
 		tasks: Task[];
-		labels: LocalLabel[];
+		labels: TaskTag[];
 		onToggleComplete: (taskId: string) => void;
 		onSaveTask: (taskId: string, data: Partial<Task>) => void;
 		onDeleteTask: (taskId: string) => void;

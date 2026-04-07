@@ -3,7 +3,7 @@
 	import { getContext, onMount } from 'svelte';
 	import type { Observable } from 'dexie';
 	import type { DragPayload, TagDragData } from '@mana/shared-ui/dnd';
-	import { useAllTags } from '$lib/stores/tags.svelte';
+	import { useAllTags } from '@mana/shared-stores';
 	import {
 		type Contact,
 		contactsStore,

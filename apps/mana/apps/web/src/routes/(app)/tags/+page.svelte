@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { useAllTags } from '$lib/stores/tags.svelte';
+	import { useAllTags } from '@mana/shared-stores';
 
 	const tags = useAllTags();
 </script>

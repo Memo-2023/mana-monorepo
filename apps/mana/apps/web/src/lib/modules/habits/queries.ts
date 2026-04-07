@@ -8,7 +8,6 @@ import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
 import type { LocalHabit, LocalHabitLog, Habit, HabitLog } from './types';
 import type { LocalTimeBlock } from '$lib/data/time-blocks/types';
-import { EMOJI_TO_ICON_MAP } from './types';
 
 // ─── Type Converters ───────────────────────────────────────
 
@@ -16,10 +15,7 @@ export function toHabit(local: LocalHabit): Habit {
 	return {
 		id: local.id,
 		title: local.title,
-		icon:
-			local.icon ??
-			EMOJI_TO_ICON_MAP[(local as unknown as { emoji?: string }).emoji ?? ''] ??
-			'star',
+		icon: local.icon ?? 'star',
 		color: local.color,
 		targetPerDay: local.targetPerDay,
 		defaultDuration: local.defaultDuration ?? null,

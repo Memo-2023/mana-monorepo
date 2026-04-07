@@ -44,10 +44,17 @@ export {
 
 export const db = new Dexie('mana');
 
+// Single canonical schema. The pre-launch cleanup collapsed historical
+// versions 1–10 into this one block — see docs/PRE_LAUNCH_CLEANUP.md for
+// rationale. After the system goes live, any further schema change MUST
+// be added as a new `db.version(N)` block; never edit this one.
 db.version(1).stores({
-	// ─── Sync Infrastructure ───
+	// ─── Sync Infrastructure (local-only, NOT in SYNC_APP_MAP) ───
 	_pendingChanges: '++id, appId, collection, recordId, createdAt',
 	_syncMeta: '[appId+collection]',
+	_eventsTombstones: 'id, token, attempts, createdAt',
+	_activity:
+		'++id, createdAt, appId, collection, recordId, op, [appId+createdAt], [collection+recordId], userId',
 
 	// ─── Core / Mana (appId: 'mana') ───
 	userSettings: 'id, key',
@@ -55,16 +62,19 @@ db.version(1).stores({
 	automations: 'id, sourceApp, targetApp, enabled, [sourceApp+sourceCollection]',
 
 	// ─── Todo (appId: 'todo') ───
+	// `scheduledBlockId` is the link to the unified timeBlocks table.
 	tasks:
-		'id, dueDate, isCompleted, priority, order, projectId, [isCompleted+order], [projectId+order]',
+		'id, dueDate, isCompleted, priority, order, projectId, scheduledBlockId, [isCompleted+order], [projectId+order]',
 	todoProjects: 'id, order, isArchived, isDefault',
 	taskLabels: 'id, taskId, labelId', // junction to globalTags (labelId = tagId)
 	reminders: 'id, taskId',
 	boardViews: 'id, order, groupBy',
 
 	// ─── Calendar (appId: 'calendar') ───
+	// Scheduling fields (startDate / endDate / allDay) live on the linked
+	// timeBlocks row, not on `events` itself — see time-blocks/service.ts.
 	calendars: 'id, isDefault, isVisible',
-	events: 'id, calendarId, startDate, endDate, allDay, [calendarId+startDate]',
+	events: 'id, calendarId, timeBlockId',
 	eventTags: 'id, eventId, tagId, [eventId+tagId]',
 
 	// ─── Contacts (appId: 'contacts') ───
@@ -72,13 +82,13 @@ db.version(1).stores({
 	contactTags: 'id, contactId, tagId, [contactId+tagId]',
 
 	// ─── Chat (appId: 'chat') ───
-	conversations: 'id, isArchived, isPinned, spaceId, templateId',
+	conversations: 'id, isArchived, isPinned, spaceId, templateId, updatedAt',
 	messages: 'id, conversationId, sender, [conversationId+sender]',
 	chatTemplates: 'id, isDefault',
 	conversationTags: 'id, conversationId, tagId, [conversationId+tagId]',
 
 	// ─── Picture (appId: 'picture') ───
-	images: 'id, isFavorite, isPublic, isArchived, prompt',
+	images: 'id, isFavorite, isPublic, isArchived, prompt, updatedAt',
 	boards: 'id, isPublic',
 	boardItems: 'id, boardId, itemType, zIndex, [boardId+zIndex]',
 	imageTags: 'id, imageId, tagId, [imageId+tagId]', // junction to globalTags
@@ -94,8 +104,8 @@ db.version(1).stores({
 	zitareListTags: 'id, listId, tagId, [listId+tagId]',
 
 	// ─── Music (appId: 'music') ───
-	songs: 'id, artist, album, genre, favorite, title',
-	mukkePlaylists: 'id, name',
+	songs: 'id, artist, album, genre, favorite, title, updatedAt',
+	mukkePlaylists: 'id, name, updatedAt',
 	playlistSongs: 'id, playlistId, songId, sortOrder, [playlistId+sortOrder]',
 	mukkeProjects: 'id, title, songId',
 	markers: 'id, beatId, type, sortOrder',
@@ -107,7 +117,7 @@ db.version(1).stores({
 	fileTags: 'id, fileId, tagId, [fileId+tagId]', // junction to globalTags
 
 	// ─── Presi (appId: 'presi') ───
-	presiDecks: 'id, isPublic',
+	presiDecks: 'id, isPublic, updatedAt',
 	slides: 'id, deckId, order, [deckId+order]',
 	presiDeckTags: 'id, deckId, tagId, [deckId+tagId]',
 
@@ -137,10 +147,11 @@ db.version(1).stores({
 	ccLocationTags: 'id, locationId, tagId, [locationId+tagId]',
 
 	// ─── Times (appId: 'times') ───
+	// Like calendar events, time entries store their scheduling on the
+	// linked timeBlocks row, not on the row itself.
 	timeClients: 'id, order, isArchived, shortCode',
 	timeProjects: 'id, clientId, isArchived, isBillable, guildId, visibility, order',
-	timeEntries:
-		'id, projectId, clientId, date, isRunning, [date+projectId], [date+clientId], guildId, visibility',
+	timeEntries: 'id, projectId, clientId, timeBlockId, guildId, visibility',
 	timeTemplates: 'id, usageCount, lastUsedAt, projectId',
 	timeSettings: 'id',
 	timeAlarms: 'id, enabled, time',
@@ -150,7 +161,7 @@ db.version(1).stores({
 
 	// ─── Context (appId: 'context') ───
 	contextSpaces: 'id, pinned, prefix',
-	documents: 'id, spaceId, type, pinned, title, [spaceId+type]',
+	documents: 'id, spaceId, type, pinned, title, [spaceId+type], updatedAt',
 	documentTags: 'id, documentId, tagId, [documentId+tagId]',
 
 	// ─── Questions (appId: 'questions') ───
@@ -208,7 +219,27 @@ db.version(1).stores({
 
 	// ─── Habits (appId: 'habits') ───
 	habits: 'id, order, isArchived, color',
-	habitLogs: 'id, habitId, timestamp, [habitId+timestamp]',
+	habitLogs: 'id, habitId, timeBlockId, [habitId+timeBlockId]',
+
+	// ─── Dreams (appId: 'dreams') ───
+	dreams: 'id, dreamDate, mood, isLucid, isPinned, isArchived, updatedAt',
+	dreamSymbols: 'id, name, count, updatedAt',
+	dreamTags: 'id, dreamId, tagId, [dreamId+tagId]',
+
+	// ─── Cycles (appId: 'cycles') ───
+	cycles: 'id, startDate, endDate, isPredicted, isArchived, updatedAt',
+	cycleDayLogs: 'id, logDate, cycleId, flow, [cycleId+logDate]',
+	cycleSymptoms: 'id, name, category, count, updatedAt',
+
+	// ─── Social Events (appId: 'events') ───
+	// `socialEvents` is named distinctly to avoid colliding with calendar.events.
+	socialEvents: 'id, status, timeBlockId, hostContactId, isPublished, [status+createdAt]',
+	eventGuests: 'id, eventId, contactId, rsvpStatus, [eventId+rsvpStatus], [eventId+contactId]',
+	eventInvitations: 'id, eventId, guestId, channel, [eventId+guestId]',
+	// Bring-list ("wer bringt was?") — assignedGuestId points at a local
+	// guest the host picked manually; claimedByName is set by a public
+	// RSVP visitor who reserved the item from the share-link page.
+	eventItems: 'id, eventId, assignedGuestId, done, order, [eventId+order], [eventId+done]',
 
 	// ─── Notes (appId: 'notes') ───
 	notes: 'id, isPinned, isArchived, color, title, updatedAt',
@@ -224,302 +255,20 @@ db.version(1).stores({
 	locationLogs: 'id, placeId, timestamp, [placeId+timestamp]',
 	placeTags: 'id, placeId, tagId, [placeId+tagId]',
 
+	// ─── TimeBlocks (appId: 'timeblocks') — unified time model ───
+	// Cross-cutting scheduling table that calendar events, time entries,
+	// habit logs and scheduled tasks all project into. See PROD_READINESS
+	// notes in time-blocks/service.ts for the design rationale.
+	timeBlocks:
+		'id, startDate, kind, type, sourceModule, sourceId, parentBlockId, [sourceModule+sourceId], [type+startDate], [kind+startDate], [parentBlockId+recurrenceDate]',
+	timeBlockTags: 'id, blockId, tagId, [blockId+tagId]',
+
 	// ─── Shared: Global Tags (appId: 'tags') ───
 	globalTags: 'id, name, groupId',
 	tagGroups: 'id',
 
 	// ─── Shared: Links (appId: 'links') ───
 	manaLinks: 'id, sourceAppId, sourceRecordId, targetAppId, targetRecordId',
-});
-
-// ─── Schema Migrations ────────────────────────────────────────
-// Version 2: Habits emoji → icon field migration
-
-const EMOJI_TO_ICON: Record<string, string> = {
-	'\u2615': 'coffee',
-	'\ud83d\udeb6': 'person-simple-walk',
-	'\ud83c\udfc3': 'person-simple-run',
-	'\ud83e\uddd8': 'person-simple-tai-chi',
-	'\ud83d\udca7': 'drop',
-	'\ud83c\udf4e': 'apple-logo',
-	'\ud83d\udcda': 'book-open',
-	'\ud83d\udcaa': 'barbell',
-	'\ud83d\udecc': 'bed',
-	'\ud83c\udfb5': 'music-note',
-	'\ud83d\udc8a': 'pill',
-	'\ud83c\udf7a': 'beer-stein',
-	'\ud83c\udf55': 'pizza',
-	'\ud83d\udeb4': 'bicycle',
-	'\ud83d\udcdd': 'pencil-simple',
-	'\ud83e\uddfc': 'tooth',
-	'\u2b50': 'star',
-	'\ud83d\ude2e\u200d\ud83d\udca8': 'wind',
-};
-
-db.version(2)
-	.stores({})
-	.upgrade((tx) => {
-		return tx
-			.table('habits')
-			.toCollection()
-			.modify((habit: Record<string, unknown>) => {
-				if (habit.emoji !== undefined && habit.icon === undefined) {
-					habit.icon = EMOJI_TO_ICON[habit.emoji as string] ?? 'star';
-					delete habit.emoji;
-				}
-			});
-	});
-
-// ─── Version 3: Unified Time Model (timeBlocks) ─────────────
-// Adds timeBlocks table, updates indexes on events/timeEntries/tasks/habitLogs,
-// and migrates existing time data into timeBlocks.
-
-db.version(3)
-	.stores({
-		// New tables
-		timeBlocks:
-			'id, startDate, kind, type, sourceModule, sourceId, [sourceModule+sourceId], [type+startDate], [kind+startDate]',
-		timeBlockTags: 'id, blockId, tagId, [blockId+tagId]',
-
-		// Updated indexes (timeBlockId / scheduledBlockId added)
-		events: 'id, calendarId, timeBlockId',
-		timeEntries: 'id, projectId, clientId, timeBlockId, guildId, visibility',
-		tasks:
-			'id, dueDate, isCompleted, priority, order, projectId, scheduledBlockId, [isCompleted+order], [projectId+order]',
-		habitLogs: 'id, habitId, timeBlockId, [habitId+timeBlockId]',
-	})
-	.upgrade(async (tx) => {
-		const timeBlocksTable = tx.table('timeBlocks');
-
-		// 1. Migrate calendar events → timeBlocks
-		const events = await tx.table('events').toArray();
-		for (const event of events) {
-			if (!event.startDate) continue;
-			const blockId = crypto.randomUUID();
-			await timeBlocksTable.add({
-				id: blockId,
-				startDate: event.startDate,
-				endDate: event.endDate ?? null,
-				allDay: event.allDay ?? false,
-				isLive: false,
-				timezone: null,
-				recurrenceRule: event.recurrenceRule ?? null,
-				kind: 'scheduled',
-				type: 'event',
-				sourceModule: 'calendar',
-				sourceId: event.id,
-				linkedBlockId: null,
-				title: event.title ?? '',
-				description: event.description ?? null,
-				color: event.color ?? null,
-				icon: null,
-				projectId: null,
-				createdAt: event.createdAt ?? new Date().toISOString(),
-				updatedAt: event.updatedAt ?? new Date().toISOString(),
-				deletedAt: event.deletedAt ?? null,
-			});
-			await tx.table('events').update(event.id, { timeBlockId: blockId });
-		}
-
-		// 2. Migrate time entries → timeBlocks
-		const entries = await tx.table('timeEntries').toArray();
-		for (const entry of entries) {
-			if (!entry.date && !entry.startTime) continue; // skip entries with no date at all
-			const blockId = crypto.randomUUID();
-			const startDate = entry.startTime ?? `${entry.date}T00:00:00.000Z`;
-			await timeBlocksTable.add({
-				id: blockId,
-				startDate,
-				endDate: entry.endTime ?? null,
-				allDay: false,
-				isLive: entry.isRunning ?? false,
-				timezone: null,
-				recurrenceRule: null,
-				kind: 'logged',
-				type: 'timeEntry',
-				sourceModule: 'times',
-				sourceId: entry.id,
-				linkedBlockId: null,
-				title: entry.description || 'Time Entry',
-				description: null,
-				color: null,
-				icon: null,
-				projectId: entry.projectId ?? null,
-				createdAt: entry.createdAt ?? new Date().toISOString(),
-				updatedAt: entry.updatedAt ?? new Date().toISOString(),
-				deletedAt: entry.deletedAt ?? null,
-			});
-			await tx.table('timeEntries').update(entry.id, { timeBlockId: blockId });
-		}
-
-		// 3. Migrate habit logs → timeBlocks
-		const logs = await tx.table('habitLogs').toArray();
-		const habitsById = new Map<string, Record<string, unknown>>();
-		const allHabits = await tx.table('habits').toArray();
-		for (const h of allHabits) habitsById.set(h.id as string, h);
-
-		for (const log of logs) {
-			if (!log.timestamp) continue;
-			const blockId = crypto.randomUUID();
-			const habit = habitsById.get(log.habitId as string);
-			await timeBlocksTable.add({
-				id: blockId,
-				startDate: log.timestamp,
-				endDate: null,
-				allDay: false,
-				isLive: false,
-				timezone: null,
-				recurrenceRule: null,
-				kind: 'logged',
-				type: 'habit',
-				sourceModule: 'habits',
-				sourceId: log.id,
-				linkedBlockId: null,
-				title: (habit?.title as string) ?? 'Habit',
-				description: null,
-				color: (habit?.color as string) ?? null,
-				icon: (habit?.icon as string) ?? null,
-				projectId: null,
-				createdAt: log.createdAt ?? new Date().toISOString(),
-				updatedAt: log.updatedAt ?? log.createdAt ?? new Date().toISOString(),
-				deletedAt: log.deletedAt ?? null,
-			});
-			await tx.table('habitLogs').update(log.id, { timeBlockId: blockId });
-		}
-
-		// 4. Migrate scheduled tasks → timeBlocks
-		const tasks = await tx.table('tasks').toArray();
-		for (const task of tasks) {
-			if (!task.scheduledDate) continue;
-			const blockId = crypto.randomUUID();
-			const startISO = task.scheduledStartTime
-				? `${task.scheduledDate}T${task.scheduledStartTime}:00`
-				: `${task.scheduledDate}T09:00:00`;
-			const durationMs = task.estimatedDuration ? task.estimatedDuration * 1000 : 3600000; // default 1h
-			const endISO = new Date(new Date(startISO).getTime() + durationMs).toISOString();
-
-			await timeBlocksTable.add({
-				id: blockId,
-				startDate: startISO,
-				endDate: endISO,
-				allDay: !task.scheduledStartTime,
-				isLive: false,
-				timezone: null,
-				recurrenceRule: null,
-				kind: 'scheduled',
-				type: 'task',
-				sourceModule: 'todo',
-				sourceId: task.id,
-				linkedBlockId: null,
-				title: task.title ?? '',
-				description: null,
-				color: null,
-				icon: null,
-				projectId: task.projectId ?? null,
-				createdAt: task.createdAt ?? new Date().toISOString(),
-				updatedAt: task.updatedAt ?? new Date().toISOString(),
-				deletedAt: task.deletedAt ?? null,
-			});
-			await tx.table('tasks').update(task.id, { scheduledBlockId: blockId });
-		}
-	});
-
-// ─── Version 4: Recurrence instance fields on timeBlocks ──────
-// Adds parentBlockId, recurrenceDate, isRecurrenceException indexes.
-
-db.version(4).stores({
-	timeBlocks:
-		'id, startDate, kind, type, sourceModule, sourceId, parentBlockId, [sourceModule+sourceId], [type+startDate], [kind+startDate], [parentBlockId+recurrenceDate]',
-});
-
-// ─── Version 5: Dreams (Traumtagebuch) ────────────────────────
-// Adds dreams, dreamSymbols, dreamTags tables.
-
-db.version(5).stores({
-	dreams: 'id, dreamDate, mood, isLucid, isPinned, isArchived, updatedAt',
-	dreamSymbols: 'id, name, count, updatedAt',
-	dreamTags: 'id, dreamId, tagId, [dreamId+tagId]',
-});
-
-// ─── Version 6: Events (Social gatherings) ────────────────────
-// Distinct from calendar's `events` table — these are gatherings with guests/RSVPs.
-// Main table is `socialEvents` to avoid collision with calendar.events.
-
-db.version(6).stores({
-	socialEvents: 'id, status, timeBlockId, hostContactId, isPublished, [status+createdAt]',
-	eventGuests: 'id, eventId, contactId, rsvpStatus, [eventId+rsvpStatus], [eventId+contactId]',
-	eventInvitations: 'id, eventId, guestId, channel, [eventId+guestId]',
-});
-
-// ─── Version 7: Cycles (Menstruationszyklus-Tracking) ────────
-
-db.version(7).stores({
-	cycles: 'id, startDate, endDate, isPredicted, isArchived, updatedAt',
-	cycleDayLogs: 'id, logDate, cycleId, flow, [cycleId+logDate]',
-	cycleSymptoms: 'id, name, category, count, updatedAt',
-});
-
-// ─── Version 8: Events tombstones (orphaned snapshot cleanup) ─
-// Local-only retry queue. When the events store fails to DELETE a
-// server snapshot during unpublish/delete, the (eventId, token) is
-// pushed here so a later drain attempt can clean it up. NOT synced.
-
-db.version(8).stores({
-	_eventsTombstones: 'id, token, attempts, createdAt',
-});
-
-// ─── Version 9: Add updatedAt indexes for "recent X" dashboard widgets ─
-//
-// Several cross-app queries (`useRecentConversations`, `useRecentImages`,
-// `useRecentDecks`, `useRecentDocuments`) used to load entire tables and
-// JS-sort by `updatedAt`. With these indexes Dexie can walk the BTree in
-// reverse and stop after N matches.
-//
-// `++` is NOT used — we are only adding secondary indexes to existing
-// stores. The full `stores()` line is repeated because Dexie's upgrade
-// API requires the complete schema for the version, even when most
-// fields are unchanged.
-//
-// No data migration needed: indexes are built lazily by Dexie at upgrade
-// time without touching record contents.
-
-db.version(9).stores({
-	conversations: 'id, isArchived, isPinned, spaceId, templateId, updatedAt',
-	images: 'id, isFavorite, isPublic, isArchived, prompt, updatedAt',
-	presiDecks: 'id, isPublic, updatedAt',
-	documents: 'id, spaceId, type, pinned, title, [spaceId+type], updatedAt',
-	songs: 'id, artist, album, genre, favorite, title, updatedAt',
-	mukkePlaylists: 'id, name, updatedAt',
-});
-
-// ─── Version 10: Local activity log ───────────────────────────
-//
-// Capped, append-only feed of every local write across sync-tracked
-// tables. Powers a future "what changed recently?" UI without leaking
-// PII to the server (this table is intentionally NOT in SYNC_APP_MAP).
-//
-// Indexes:
-//   - createdAt:        timeline view
-//   - [appId+createdAt]: per-app filter
-//   - [collection+recordId]: history of a single record
-//   - userId:           multi-account isolation when that lands
-//
-// Schema is deliberately small (no field diffs, no payload) to keep
-// the table cheap to write and bound the disk footprint.
-
-db.version(10).stores({
-	_activity:
-		'++id, createdAt, appId, collection, recordId, op, [appId+createdAt], [collection+recordId], userId',
-});
-
-// ─── Version 11: Events bring-list (eventItems) ───────────────
-// Adds the "wer bringt was?" table attached to social events.
-// `assignedGuestId` points at a local guest the host picked manually;
-// `claimedByName` is set by a public RSVP visitor who reserved the
-// item from the share-link page.
-
-db.version(11).stores({
-	eventItems: 'id, eventId, assignedGuestId, done, order, [eventId+order], [eventId+done]',
 });
 
 // ─── Sync Routing ──────────────────────────────────────────
@@ -564,21 +313,6 @@ export function beginApplyingTables(tables: Iterable<string>): () => void {
 /** True when a write to `tableName` should bypass the pending-change hook. */
 export function isApplyingTable(tableName: string): boolean {
 	return _applyingTables.has(tableName);
-}
-
-/**
- * @deprecated Legacy single-flag API kept temporarily for any external
- * caller. Prefer `beginApplyingTables` so per-table races stay impossible.
- * When `v === true` it marks every sync-tracked table; `false` clears them.
- */
-export function setApplyingServerChanges(v: boolean): void {
-	if (v) {
-		for (const tables of Object.values(SYNC_APP_MAP)) {
-			for (const t of tables) _applyingTables.add(t);
-		}
-	} else {
-		_applyingTables.clear();
-	}
 }
 
 const pendingChangesTable = db.table('_pendingChanges');

@@ -2,7 +2,7 @@
 	import { getContext, onMount } from 'svelte';
 	import { dropTarget } from '@mana/shared-ui/dnd';
 	import type { DragPayload, TagDragData } from '@mana/shared-ui/dnd';
-	import { useAllTags } from '$lib/stores/tags.svelte';
+	import { useAllTags } from '@mana/shared-stores';
 	import { calendarViewStore } from '$lib/modules/calendar/stores/view.svelte';
 	import { eventsStore } from '$lib/modules/calendar/stores/events.svelte';
 	import {

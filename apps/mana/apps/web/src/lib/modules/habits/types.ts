@@ -101,25 +101,3 @@ export const HABIT_ICONS: string[] = [
 	'target',
 	'fire',
 ];
-
-/** Maps legacy emoji values to icon names for data migration. */
-export const EMOJI_TO_ICON_MAP: Record<string, string> = {
-	'\u2615': 'coffee',
-	'\ud83d\udeb6': 'person-simple-walk',
-	'\ud83c\udfc3': 'person-simple-run',
-	'\ud83e\uddd8': 'person-simple-tai-chi',
-	'\ud83d\udca7': 'drop',
-	'\ud83c\udf4e': 'apple-logo',
-	'\ud83d\udcda': 'book-open',
-	'\ud83d\udcaa': 'barbell',
-	'\ud83d\udecc': 'bed',
-	'\ud83c\udfb5': 'music-note',
-	'\ud83d\udc8a': 'pill',
-	'\ud83c\udf7a': 'beer-stein',
-	'\ud83c\udf55': 'pizza',
-	'\ud83d\udeb4': 'bicycle',
-	'\ud83d\udcdd': 'pencil-simple',
-	'\ud83e\uddfc': 'tooth',
-	'\u2b50': 'star',
-	'\ud83d\ude2e\u200d\ud83d\udca8': 'wind',
-};

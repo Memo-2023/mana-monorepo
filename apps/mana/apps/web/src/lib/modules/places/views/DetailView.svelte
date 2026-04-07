@@ -9,7 +9,7 @@
 	import { Trash, Star, MapPin, X } from '@mana/shared-icons';
 	import type { ViewProps } from '$lib/app-registry';
 	import type { LocalPlace, PlaceCategory, LocalLocationLog } from '../types';
-	import { useAllTags, getTagsByIds } from '$lib/stores/tags.svelte';
+	import { useAllTags, getTagsByIds } from '@mana/shared-stores';
 	import LinkedItems from '$lib/components/links/LinkedItems.svelte';
 
 	let { navigate, goBack, params }: ViewProps = $props();

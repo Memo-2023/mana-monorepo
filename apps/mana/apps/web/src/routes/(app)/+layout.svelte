@@ -30,7 +30,7 @@
 	import { AuthGate, GuestWelcomeModal } from '@mana/shared-auth-ui';
 	import { createGuestMode, type GuestMode } from '$lib/stores/guest-mode.svelte';
 	import { NotificationBar } from '@mana/shared-ui';
-	import { tagLocalStore, tagMutations, useAllTags } from '$lib/stores/tags.svelte';
+	import { tagLocalStore, tagMutations, useAllTags } from '@mana/shared-stores';
 	import { linkLocalStore, linkMutations } from '@mana/shared-links';
 	import { manaStore } from '$lib/data/local-store';
 	import { createUnifiedSync } from '$lib/data/sync';

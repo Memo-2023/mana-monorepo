@@ -13,7 +13,7 @@
 	import { Heart } from '@mana/shared-icons';
 	import { dropTarget } from '@mana/shared-ui/dnd';
 	import type { TagDragData } from '@mana/shared-ui/dnd';
-	import { useAllTags, getTagsByIds } from '$lib/stores/tags.svelte';
+	import { useAllTags, getTagsByIds } from '@mana/shared-stores';
 	import type { ViewProps } from '$lib/app-registry';
 	import type { LocalFavorite } from './types';
 	import type { Quote } from '@zitare/content';

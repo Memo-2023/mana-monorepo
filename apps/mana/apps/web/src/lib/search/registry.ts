@@ -3,12 +3,20 @@
  *
  * Central registry that fans out search queries to all registered providers
  * in parallel and merges results sorted by relevance.
+ *
+ * Providers can be registered eagerly (the synchronous `register()` API) or
+ * lazily (`registerLazy()`). Lazy providers are loaded the first time
+ * `search()` runs — this lets the unified web app keep all per-module search
+ * code out of the initial JS bundle, since search is opened on demand.
  */
 
-import type { SearchProvider, SearchResult, SearchOptions, GroupedSearchResults } from './types';
+import type { SearchProvider, SearchOptions, GroupedSearchResults } from './types';
+
+type LazyLoader = () => Promise<SearchProvider>;
 
 export class SearchRegistry {
 	private providers: SearchProvider[] = [];
+	private lazyLoaders = new Map<string, LazyLoader>();
 
 	register(provider: SearchProvider): void {
 		// Avoid duplicate registration
@@ -17,8 +25,45 @@ export class SearchRegistry {
 		}
 	}
 
-	getProviders(): SearchProvider[] {
-		return this.providers;
+	/**
+	 * Register a provider that will be loaded on first search. The `appId` is
+	 * required up front so the registry can resolve filter constraints
+	 * (`options.appIds`) without ever loading providers the user filtered out.
+	 */
+	registerLazy(appId: string, loader: LazyLoader): void {
+		// If something already registered eagerly, prefer it.
+		if (this.providers.some((p) => p.appId === appId)) return;
+		this.lazyLoaders.set(appId, loader);
+	}
+
+	/**
+	 * Resolves the lazy loaders relevant to a search call (all of them, or just
+	 * the ones matching the appIds filter) and registers them. Each loader runs
+	 * at most once across the lifetime of the registry.
+	 */
+	private async hydrate(appIdFilter?: string[]): Promise<void> {
+		if (this.lazyLoaders.size === 0) return;
+		const targets = appIdFilter
+			? appIdFilter.filter((id) => this.lazyLoaders.has(id))
+			: Array.from(this.lazyLoaders.keys());
+		if (targets.length === 0) return;
+
+		const loaded = await Promise.all(
+			targets.map(async (appId) => {
+				const loader = this.lazyLoaders.get(appId)!;
+				try {
+					return await loader();
+				} catch (err) {
+					console.error(`[search] failed to load provider "${appId}":`, err);
+					return null;
+				}
+			})
+		);
+		for (let i = 0; i < targets.length; i++) {
+			const provider = loaded[i];
+			this.lazyLoaders.delete(targets[i]);
+			if (provider) this.register(provider);
+		}
 	}
 
 	/**
@@ -28,6 +73,8 @@ export class SearchRegistry {
 	async search(query: string, options?: SearchOptions): Promise<GroupedSearchResults[]> {
 		const q = query.trim();
 		if (!q) return [];
+
+		await this.hydrate(options?.appIds);
 
 		const limit = options?.limit ?? 5;
 		const targetProviders = options?.appIds

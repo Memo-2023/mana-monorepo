@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Task, LocalLabel } from '../../types';
+	import type { Task, TaskTag } from '../../types';
 	import type { GroupedColumn } from '../../view-grouping';
 	import ViewColumnHeader from './ViewColumnHeader.svelte';
 	import KanbanTaskCard from '../kanban/KanbanTaskCard.svelte';
@@ -9,7 +9,7 @@
 
 	interface Props {
 		column: GroupedColumn;
-		labels: LocalLabel[];
+		labels: TaskTag[];
 		wipLimit?: number | null;
 		cardSize?: 'compact' | 'normal' | 'large';
 		onToggleComplete: (taskId: string) => void;
