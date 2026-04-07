@@ -20,6 +20,7 @@ export {
 	groupLogsByMonth,
 	formatLogDate,
 } from './queries';
+export type { RelativeDateLabels } from './queries';
 
 // ─── Utils ───────────────────────────────────────────────
 export { derivePhase, findCycleForDate, getCycleDayNumber, daysBetween } from './utils/phase';

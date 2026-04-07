@@ -57,6 +57,11 @@
 		"nextPeriod": "Nächste Periode:",
 		"fertileWindow": "Fruchtbares Fenster:"
 	},
+	"relativeDate": {
+		"today": "Heute",
+		"yesterday": "Gestern",
+		"daysAgo": "vor {days} Tagen"
+	},
 	"empty": "Tippe oben auf eine Blutungsstärke, um deinen ersten Tag festzuhalten — oder starte direkt eine Periode.",
 	"confirm": {
 		"deleteEntry": "Tageseintrag vom {date} wirklich löschen?",

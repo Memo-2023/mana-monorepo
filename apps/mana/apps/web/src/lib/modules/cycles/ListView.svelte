@@ -3,13 +3,14 @@
   Aktueller Zyklus, heutiger Quick-Log, einfache Statistiken.
 -->
 <script lang="ts">
-	import { _ } from 'svelte-i18n';
+	import { _, locale } from 'svelte-i18n';
 	import {
 		formatLogDate,
 		useAllCycles,
 		useAllDayLogs,
 		useAllSymptoms,
 		useCurrentCycle,
+		type RelativeDateLabels,
 	} from './queries';
 	import { cyclesStore } from './stores/cycles.svelte';
 	import { dayLogsStore } from './stores/dayLogs.svelte';
@@ -39,6 +40,19 @@
 	let logs = $derived(logs$.value);
 	let symptoms = $derived(symptoms$.value);
 	let currentCycle = $derived(current$.value);
+
+	// Locale-aware date formatting: use the active svelte-i18n locale, with
+	// 'de-DE' as a fallback since the project defaults to German.
+	const dateLocale = $derived.by(() => {
+		const l = $locale ?? 'de';
+		return l === 'de' ? 'de-DE' : l;
+	});
+
+	const relativeLabels = $derived<RelativeDateLabels>({
+		today: $_('cycles.relativeDate.today'),
+		yesterday: $_('cycles.relativeDate.yesterday'),
+		daysAgo: (n: number) => $_('cycles.relativeDate.daysAgo', { values: { days: n } }),
+	});
 
 	let phase = $derived(derivePhase(todayIso, cycles));
 	let cycleDay = $derived(currentCycle ? getCycleDayNumber(todayIso, currentCycle) : null);
@@ -115,7 +129,7 @@
 			backToToday();
 			return;
 		}
-		const dateStr = new Date(editingDate).toLocaleDateString('de-DE');
+		const dateStr = new Date(editingDate).toLocaleDateString(dateLocale);
 		const ok = confirm($_('cycles.confirm.deleteEntry', { values: { date: dateStr } }));
 		if (!ok) return;
 		await dayLogsStore.deleteLog(editingLog.id);
@@ -135,7 +149,7 @@
 
 	function formatDate(iso: string | null): string {
 		if (!iso) return '—';
-		return new Date(iso).toLocaleDateString('de-DE', {
+		return new Date(iso).toLocaleDateString(dateLocale, {
 			day: '2-digit',
 			month: '2-digit',
 		});
@@ -199,7 +213,7 @@
 		<div class="edit-banner">
 			<span class="edit-banner-label">
 				{$_('cycles.label.editing')}
-				<strong>{new Date(editingDate).toLocaleDateString('de-DE')}</strong>
+				<strong>{new Date(editingDate).toLocaleDateString(dateLocale)}</strong>
 			</span>
 			<div class="edit-banner-actions">
 				{#if editingLog}
@@ -347,7 +361,9 @@
 						<span class="log-flow" style="background: {FLOW_COLORS[log.flow]}"></span>
 						<div class="log-content">
 							<div class="log-top">
-								<span class="log-date">{formatLogDate(log.logDate)}</span>
+								<span class="log-date"
+									>{formatLogDate(log.logDate, relativeLabels, dateLocale)}</span
+								>
 								{#if log.flow !== 'none'}
 									<span class="log-tag">{$_(`cycles.flow.${log.flow}`)}</span>
 								{/if}

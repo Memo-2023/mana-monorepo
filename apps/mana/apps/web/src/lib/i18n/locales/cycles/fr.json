@@ -57,6 +57,11 @@
 		"nextPeriod": "Next period:",
 		"fertileWindow": "Fertile window:"
 	},
+	"relativeDate": {
+		"today": "Today",
+		"yesterday": "Yesterday",
+		"daysAgo": "{days} days ago"
+	},
 	"empty": "Tap a flow level above to log your first day — or start a period directly.",
 	"confirm": {
 		"deleteEntry": "Really delete the entry from {date}?",

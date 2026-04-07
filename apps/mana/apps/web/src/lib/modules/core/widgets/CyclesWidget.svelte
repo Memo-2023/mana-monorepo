@@ -6,7 +6,7 @@
 	 * + Vorhersage pro Render ab. Linkt zur /cycles Route.
 	 */
 
-	import { _ } from 'svelte-i18n';
+	import { _, locale } from 'svelte-i18n';
 	import { liveQuery } from 'dexie';
 	import { db } from '$lib/data/database';
 	import { derivePhase, getCycleDayNumber } from '$lib/modules/cycles/utils/phase';
@@ -48,9 +48,14 @@
 	const daysUntil = $derived(daysUntilNextPeriod(cycles));
 	const nextPeriod = $derived(predictNextPeriodStart(cycles));
 
+	const dateLocale = $derived.by(() => {
+		const l = $locale ?? 'de';
+		return l === 'de' ? 'de-DE' : l;
+	});
+
 	function formatShortDate(iso: string | null): string {
 		if (!iso) return '—';
-		return new Date(iso).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
+		return new Date(iso).toLocaleDateString(dateLocale, { day: '2-digit', month: '2-digit' });
 	}
 </script>
 

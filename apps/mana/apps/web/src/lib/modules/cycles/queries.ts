@@ -122,14 +122,23 @@ export function useAllSymptoms() {
 
 // ─── Pure Helpers ──────────────────────────────────────────
 
-/** Group day logs by ISO month label. */
+/** Labels a caller must provide to formatLogDate so it can be locale-aware. */
+export interface RelativeDateLabels {
+	today: string;
+	yesterday: string;
+	/** Template for "N days ago", receives the numeric count. */
+	daysAgo: (days: number) => string;
+}
+
+/** Group day logs by localized month label. */
 export function groupLogsByMonth(
-	logs: CycleDayLog[]
+	logs: CycleDayLog[],
+	dateLocale: string = 'de-DE'
 ): Array<{ label: string; logs: CycleDayLog[] }> {
 	const groups = new Map<string, CycleDayLog[]>();
 	for (const l of logs) {
 		const date = new Date(l.logDate);
-		const label = date.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
+		const label = date.toLocaleDateString(dateLocale, { month: 'long', year: 'numeric' });
 		const bucket = groups.get(label) ?? [];
 		bucket.push(l);
 		groups.set(label, bucket);
@@ -137,12 +146,20 @@ export function groupLogsByMonth(
 	return Array.from(groups, ([label, logs]) => ({ label, logs }));
 }
 
-export function formatLogDate(iso: string): string {
+/**
+ * Format a log date relative to today using caller-provided labels.
+ * Falls back to absolute date formatting via `dateLocale` when >= 7 days ago.
+ */
+export function formatLogDate(
+	iso: string,
+	labels: RelativeDateLabels,
+	dateLocale: string = 'de-DE'
+): string {
 	const date = new Date(iso);
 	const today = new Date();
 	const diffDays = Math.floor((today.getTime() - date.getTime()) / 86_400_000);
-	if (diffDays === 0) return 'Heute';
-	if (diffDays === 1) return 'Gestern';
-	if (diffDays < 7) return `vor ${diffDays} Tagen`;
-	return date.toLocaleDateString('de-DE', { day: 'numeric', month: 'short', year: 'numeric' });
+	if (diffDays === 0) return labels.today;
+	if (diffDays === 1) return labels.yesterday;
+	if (diffDays < 7) return labels.daysAgo(diffDays);
+	return date.toLocaleDateString(dateLocale, { day: 'numeric', month: 'short', year: 'numeric' });
 }
