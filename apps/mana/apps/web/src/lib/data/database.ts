@@ -442,6 +442,30 @@ db.version(8).stores({
 	_eventsTombstones: 'id, token, attempts, createdAt',
 });
 
+// ─── Version 9: Add updatedAt indexes for "recent X" dashboard widgets ─
+//
+// Several cross-app queries (`useRecentConversations`, `useRecentImages`,
+// `useRecentDecks`, `useRecentDocuments`) used to load entire tables and
+// JS-sort by `updatedAt`. With these indexes Dexie can walk the BTree in
+// reverse and stop after N matches.
+//
+// `++` is NOT used — we are only adding secondary indexes to existing
+// stores. The full `stores()` line is repeated because Dexie's upgrade
+// API requires the complete schema for the version, even when most
+// fields are unchanged.
+//
+// No data migration needed: indexes are built lazily by Dexie at upgrade
+// time without touching record contents.
+
+db.version(9).stores({
+	conversations: 'id, isArchived, isPinned, spaceId, templateId, updatedAt',
+	images: 'id, isFavorite, isPublic, isArchived, prompt, updatedAt',
+	presiDecks: 'id, isPublic, updatedAt',
+	documents: 'id, spaceId, type, pinned, title, [spaceId+type], updatedAt',
+	songs: 'id, artist, album, genre, favorite, title, updatedAt',
+	mukkePlaylists: 'id, name, updatedAt',
+});
+
 // ─── Sync App Map ──────────────────────────────────────────
 // Maps each table to its appId for sync routing.
 // The SyncEngine uses this to group pending changes and push to /sync/{appId}.

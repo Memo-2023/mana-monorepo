@@ -117,11 +117,18 @@ export function useFavoriteContacts(limit = 5) {
 /** Recent conversations, sorted by updatedAt desc. */
 export function useRecentConversations(limit = 5) {
 	return useLiveQueryWithDefault(async () => {
-		const all = await db.table<LocalConversation>('conversations').toArray();
-		return all
+		// Walk the indexed updatedAt BTree in reverse, filtering archived /
+		// soft-deleted entries on the fly. Dexie's `.limit()` short-circuits
+		// the iterator as soon as that many matches accumulate, so the cost
+		// is O(limit + filtered) instead of the O(table) toArray+sort the
+		// query used to do.
+		return db
+			.table<LocalConversation>('conversations')
+			.orderBy('updatedAt')
+			.reverse()
 			.filter((c) => !c.isArchived && !c.deletedAt)
-			.sort((a, b) => (b.updatedAt ?? '').localeCompare(a.updatedAt ?? ''))
-			.slice(0, limit);
+			.limit(limit)
+			.toArray();
 	}, [] as LocalConversation[]);
 }
 
@@ -145,11 +152,16 @@ export function useRandomFavorite() {
 /** Recent generated images. */
 export function useRecentImages(limit = 6) {
 	return useLiveQueryWithDefault(async () => {
-		const all = await db.table<LocalImage>('images').toArray();
-		return all
+		// Reverse-walk the indexed updatedAt column. Generated images have
+		// updatedAt stamped on creation and rarely move afterwards, so this
+		// is effectively "newest first" for the dashboard widget's purpose.
+		return db
+			.table<LocalImage>('images')
+			.orderBy('updatedAt')
+			.reverse()
 			.filter((i) => !i.isArchived && !i.deletedAt)
-			.sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? ''))
-			.slice(0, limit);
+			.limit(limit)
+			.toArray();
 	}, [] as LocalImage[]);
 }
 
@@ -231,11 +243,13 @@ export function useMusicStats() {
 /** Recent presentation decks. */
 export function useRecentDecks(limit = 5) {
 	return useLiveQueryWithDefault(async () => {
-		const all = await db.table<LocalPresiDeck>('presiDecks').toArray();
-		return all
+		return db
+			.table<LocalPresiDeck>('presiDecks')
+			.orderBy('updatedAt')
+			.reverse()
 			.filter((d) => !d.deletedAt)
-			.sort((a, b) => (b.updatedAt ?? '').localeCompare(a.updatedAt ?? ''))
-			.slice(0, limit);
+			.limit(limit)
+			.toArray();
 	}, [] as LocalPresiDeck[]);
 }
 
@@ -244,11 +258,13 @@ export function useRecentDecks(limit = 5) {
 /** Recent documents + spaces. */
 export function useRecentDocuments(limit = 5) {
 	return useLiveQueryWithDefault(async () => {
-		const all = await db.table<LocalDocument>('documents').toArray();
-		return all
+		return db
+			.table<LocalDocument>('documents')
+			.orderBy('updatedAt')
+			.reverse()
 			.filter((d) => !d.deletedAt)
-			.sort((a, b) => (b.updatedAt ?? '').localeCompare(a.updatedAt ?? ''))
-			.slice(0, limit);
+			.limit(limit)
+			.toArray();
 	}, [] as LocalDocument[]);
 }
 
