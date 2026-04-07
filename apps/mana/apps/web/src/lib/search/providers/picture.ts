@@ -47,10 +47,12 @@ export const pictureSearchProvider: SearchProvider = {
 			}
 		}
 
-		// Search boards
-		const boards = await db.table('boards').toArray();
+		// Search boards. name + description are encrypted at rest; the
+		// scorer needs plaintext to do substring matching.
+		const rawBoards = await db.table('boards').toArray();
+		const visibleBoards = rawBoards.filter((b) => !b.deletedAt);
+		const boards = await decryptRecords('boards', visibleBoards);
 		for (const board of boards) {
-			if (board.deletedAt) continue;
 			const { score, matchedField } = scoreRecord(
 				[
 					{ name: 'name', value: board.name, weight: 1.0 },

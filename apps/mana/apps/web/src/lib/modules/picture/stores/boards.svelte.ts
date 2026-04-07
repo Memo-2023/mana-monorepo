@@ -7,6 +7,7 @@
  */
 
 import { db } from '$lib/data/database';
+import { encryptRecord, decryptRecord } from '$lib/data/crypto';
 import type { LocalBoard, LocalBoardItem } from '../types';
 import { toBoard } from '../queries';
 
@@ -43,8 +44,12 @@ export const boardsStore = {
 				updatedAt: new Date().toISOString(),
 			};
 
+			// Snapshot plaintext for the return value before encryptRecord
+			// mutates `newLocal` in place — UI consumers expect plaintext.
+			const plaintextSnapshot = toBoard({ ...newLocal });
+			await encryptRecord('boards', newLocal);
 			await db.table<LocalBoard>('boards').add(newLocal);
-			return { success: true, data: toBoard(newLocal) };
+			return { success: true, data: plaintextSnapshot };
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to create board';
 			return { success: false, error };
@@ -57,13 +62,18 @@ export const boardsStore = {
 	async updateBoard(id: string, input: Partial<Omit<LocalBoard, 'id'>>) {
 		error = null;
 		try {
-			await db.table('boards').update(id, {
+			const diff: Partial<LocalBoard> = {
 				...input,
 				updatedAt: new Date().toISOString(),
-			});
+			};
+			await encryptRecord('boards', diff);
+			await db.table('boards').update(id, diff);
+			// Re-fetch and decrypt for the return value so the caller
+			// gets plaintext (not the ciphertext we just wrote).
 			const updated = await db.table<LocalBoard>('boards').get(id);
 			if (updated) {
-				return { success: true, data: toBoard(updated) };
+				const plain = await decryptRecord('boards', { ...updated });
+				return { success: true, data: toBoard(plain) };
 			}
 			return { success: false, error: 'Board not found' };
 		} catch (e) {
@@ -103,8 +113,14 @@ export const boardsStore = {
 	async duplicateBoard(id: string) {
 		error = null;
 		try {
-			const original = await db.table<LocalBoard>('boards').get(id);
-			if (!original) return { success: false, error: 'Board not found' };
+			const rawOriginal = await db.table<LocalBoard>('boards').get(id);
+			if (!rawOriginal) return { success: false, error: 'Board not found' };
+
+			// Decrypt the original FIRST. We can't just spread the
+			// encrypted row because we modify `name` (string concat with
+			// "(Kopie)") — concatenating onto a "enc:1:..." prefix would
+			// produce a malformed blob that fails to decrypt later.
+			const original = await decryptRecord('boards', { ...rawOriginal });
 
 			const newId = crypto.randomUUID();
 			const now = new Date().toISOString();
@@ -120,9 +136,14 @@ export const boardsStore = {
 				createdAt: now,
 				updatedAt: now,
 			};
+			const plaintextSnapshot = toBoard({ ...duplicated });
+			await encryptRecord('boards', duplicated);
 			await db.table<LocalBoard>('boards').add(duplicated);
 
-			// Duplicate board items
+			// Duplicate board items. textContent on each item is
+			// encrypted but the duplicate uses the SAME master key,
+			// so we can spread the ciphertext directly — encryptRecord
+			// is idempotent on already-encrypted strings.
 			const originalItems = await db
 				.table<LocalBoardItem>('boardItems')
 				.where('boardId')
@@ -130,16 +151,18 @@ export const boardsStore = {
 				.toArray();
 			for (const item of originalItems) {
 				if (item.deletedAt) continue;
-				await db.table<LocalBoardItem>('boardItems').add({
+				const newItem: LocalBoardItem = {
 					...item,
 					id: crypto.randomUUID(),
 					boardId: newId,
 					createdAt: now,
 					updatedAt: now,
-				});
+				};
+				await encryptRecord('boardItems', newItem);
+				await db.table<LocalBoardItem>('boardItems').add(newItem);
 			}
 
-			return { success: true, data: toBoard(duplicated) };
+			return { success: true, data: plaintextSnapshot };
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to duplicate board';
 			return { success: false, error };

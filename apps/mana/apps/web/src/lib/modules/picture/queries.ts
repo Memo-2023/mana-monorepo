@@ -96,6 +96,9 @@ export function useAllBoards() {
 		const locals = await db.table<LocalBoard>('boards').toArray();
 		const allItems = await db.table<LocalBoardItem>('boardItems').toArray();
 
+		// boardItems.textContent is encrypted but the count map only
+		// looks at structural fields (deletedAt + boardId), so no
+		// decrypt needed for the counter.
 		const itemCounts = new Map<string, number>();
 		for (const item of allItems) {
 			if (!item.deletedAt) {
@@ -103,8 +106,12 @@ export function useAllBoards() {
 			}
 		}
 
-		return locals
-			.filter((b) => !b.deletedAt)
+		const visible = locals.filter((b) => !b.deletedAt);
+		// boards.name + description are encrypted on disk; the workbench
+		// + dashboard widgets render them, so decrypt before mapping.
+		const decrypted = await decryptRecords('boards', visible);
+
+		return decrypted
 			.map(
 				(local): BoardWithCount => ({
 					...toBoard(local),
@@ -141,7 +148,9 @@ export function allImages$() {
 export function allBoards$() {
 	return liveQuery(async () => {
 		const locals = await db.table<LocalBoard>('boards').toArray();
-		return locals.filter((b) => !b.deletedAt).map(toBoard);
+		const visible = locals.filter((b) => !b.deletedAt);
+		const decrypted = await decryptRecords('boards', visible);
+		return decrypted.map(toBoard);
 	});
 }
 

@@ -169,6 +169,15 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	// model / style / format / blurhash stay plaintext (technical
 	// metadata, not user content).
 	images: { enabled: true, fields: ['prompt', 'negativePrompt'] },
+	// Picture boards live next to images. `name` + `description` on the
+	// board itself are user-typed and protected. `textContent` on
+	// LocalBoardItem is the freeform text the user types when they add
+	// a sticky-note style item to a canvas (only set when
+	// itemType === 'text'). For image-type items the field is null and
+	// encryptRecord is a pass-through. Coordinates / dimensions /
+	// z-index / opacity stay plaintext for the canvas renderer.
+	boards: { enabled: true, fields: ['name', 'description'] },
+	boardItems: { enabled: true, fields: ['textContent'] },
 
 	// ─── Music ───────────────────────────────────────────────
 	// Music metadata is borderline-sensitive: technical ID3 tags vs
