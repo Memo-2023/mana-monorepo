@@ -59,7 +59,7 @@ export interface CalendarEvent {
 	projectId: string | null;
 	linkedBlockId: string | null;
 	parentBlockId: string | null;
-	recurrenceRule: string | null;
+	recurrenceDate: string | null;
 }
 
 export interface Calendar {
@@ -107,5 +107,6 @@ export function timeBlockToCalendarEvent(
 		projectId: block.projectId,
 		linkedBlockId: block.linkedBlockId,
 		parentBlockId: block.parentBlockId,
+		recurrenceDate: block.recurrenceDate,
 	};
 }

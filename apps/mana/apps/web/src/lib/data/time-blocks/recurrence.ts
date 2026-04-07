@@ -195,7 +195,7 @@ export async function cleanupFutureInstances(templateBlockId: string): Promise<v
 
 	for (const instance of instances) {
 		if (instance.deletedAt) continue;
-		if ((instance as Record<string, unknown>).isRecurrenceException) continue;
+		if (instance.isRecurrenceException) continue;
 		if (instance.recurrenceDate && instance.recurrenceDate >= today) {
 			await deleteBlock(instance.id);
 		}
@@ -255,7 +255,7 @@ export function expandTemplatesVirtually(
 	const existingKeys = new Set(
 		existingBlocks
 			.filter((b) => b.parentBlockId)
-			.map((b) => `${b.parentBlockId}|${(b as Record<string, unknown>).recurrenceDate}`)
+			.map((b) => `${b.parentBlockId}|${b.recurrenceDate}`)
 	);
 
 	const virtuals: VirtualTimeBlock[] = [];

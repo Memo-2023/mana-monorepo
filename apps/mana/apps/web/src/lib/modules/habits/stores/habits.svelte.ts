@@ -19,8 +19,6 @@ import {
 	materializeRecurringBlocks,
 	regenerateForBlock,
 } from '$lib/data/time-blocks/recurrence';
-import { db } from '$lib/data/database';
-import type { LocalTimeBlock } from '$lib/data/time-blocks/types';
 import type { LocalHabit, LocalHabitLog, HabitSchedule } from '../types';
 
 export const habitsStore = {

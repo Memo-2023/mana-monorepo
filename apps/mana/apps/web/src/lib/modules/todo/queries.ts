@@ -19,7 +19,7 @@ import type {
 export function toTask(local: LocalTask): Task {
 	return {
 		id: local.id,
-		projectId: (local as Record<string, unknown>).projectId as string | null | undefined,
+		projectId: local.projectId,
 		title: local.title,
 		description: local.description,
 		dueDate: local.dueDate,
@@ -30,7 +30,6 @@ export function toTask(local: LocalTask): Task {
 		isCompleted: local.isCompleted,
 		completedAt: local.completedAt,
 		order: local.order,
-		recurrenceRule: local.recurrenceRule,
 		subtasks: local.subtasks ?? null,
 		metadata: local.metadata ?? null,
 		createdAt: local.createdAt ?? new Date().toISOString(),

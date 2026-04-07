@@ -21,6 +21,7 @@ export const tasksStore = {
 		subtasks?: Subtask[];
 		recurrenceRule?: string;
 		estimatedDuration?: number;
+		labelIds?: string[];
 		// Optional: schedule on calendar
 		scheduleStartDate?: string; // YYYY-MM-DD
 		scheduleStartTime?: string; // HH:mm
@@ -49,6 +50,7 @@ export const tasksStore = {
 				sourceId: taskId,
 				title: data.title,
 				projectId: data.projectId ?? null,
+				recurrenceRule: data.recurrenceRule ?? null,
 			});
 		}
 
@@ -62,12 +64,12 @@ export const tasksStore = {
 			scheduledBlockId,
 			estimatedDuration: data.estimatedDuration ?? null,
 			order: count,
-			recurrenceRule: data.recurrenceRule ?? null,
 			subtasks: data.subtasks,
+			metadata: data.labelIds && data.labelIds.length > 0 ? { labelIds: data.labelIds } : undefined,
 		};
 
 		if (data.projectId !== undefined) {
-			(newLocal as Record<string, unknown>).projectId = data.projectId;
+			newLocal.projectId = data.projectId;
 		}
 
 		await taskTable.add(newLocal);
@@ -82,8 +84,11 @@ export const tasksStore = {
 		// Handle schedule changes via TimeBlock
 		const schedStartDate = data._scheduleStartDate as string | null | undefined;
 		const schedStartTime = data._scheduleStartTime as string | null | undefined;
+		const recurrenceRule = data.recurrenceRule as string | null | undefined;
 		delete data._scheduleStartDate;
 		delete data._scheduleStartTime;
+		// recurrenceRule lives on the TimeBlock — never on the task row
+		delete data.recurrenceRule;
 
 		if (schedStartDate !== undefined) {
 			if (schedStartDate) {
@@ -103,6 +108,7 @@ export const tasksStore = {
 						endDate: endISO,
 						allDay: !schedStartTime,
 						title: (data.title as string) ?? task.title,
+						...(recurrenceRule !== undefined ? { recurrenceRule } : {}),
 					});
 				} else {
 					// Create new block
@@ -116,6 +122,7 @@ export const tasksStore = {
 						sourceId: id,
 						title: (data.title as string) ?? task.title,
 						projectId: (data.projectId as string) ?? task.projectId ?? null,
+						recurrenceRule: recurrenceRule ?? null,
 					});
 					data.scheduledBlockId = blockId;
 				}
@@ -131,6 +138,11 @@ export const tasksStore = {
 		// Keep TimeBlock title in sync if title changed
 		if (data.title !== undefined && task.scheduledBlockId && schedStartDate === undefined) {
 			await updateBlock(task.scheduledBlockId, { title: data.title as string });
+		}
+
+		// Update recurrence on existing TimeBlock when not also rescheduling
+		if (recurrenceRule !== undefined && schedStartDate === undefined && task.scheduledBlockId) {
+			await updateBlock(task.scheduledBlockId, { recurrenceRule });
 		}
 
 		await taskTable.update(id, {

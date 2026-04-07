@@ -377,6 +377,9 @@ export const eventsStore = {
 			icon: null,
 			isLive: false,
 			projectId: null,
+			linkedBlockId: null,
+			parentBlockId: null,
+			recurrenceDate: null,
 		};
 		return draftEvent;
 	},

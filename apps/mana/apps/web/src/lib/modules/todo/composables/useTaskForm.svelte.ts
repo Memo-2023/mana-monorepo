@@ -47,7 +47,8 @@ export function useTaskForm() {
 		title = task.title;
 		description = task.description ?? '';
 		dueDate = task.dueDate ? task.dueDate.split('T')[0] : '';
-		// Load scheduled time from TimeBlock if scheduled
+		// Load scheduled time + recurrence from TimeBlock if scheduled
+		recurrenceRule = '';
 		if (task.scheduledBlockId) {
 			const block = await getBlock(task.scheduledBlockId);
 			if (block) {
@@ -55,6 +56,7 @@ export function useTaskForm() {
 				dueTime = block.startDate.includes('T')
 					? block.startDate.split('T')[1]?.substring(0, 5)
 					: '';
+				recurrenceRule = block.recurrenceRule ?? '';
 			}
 		} else {
 			dueTime = '';
@@ -63,7 +65,6 @@ export function useTaskForm() {
 		priority = task.priority;
 		status = task.status;
 		subtasks = task.subtasks ? [...task.subtasks] : [];
-		recurrenceRule = task.recurrenceRule ?? '';
 		effectiveDuration = task.estimatedDuration ?? null;
 		showDeleteConfirm = false;
 		isLoading = false;
