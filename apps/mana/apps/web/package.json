@@ -10,7 +10,7 @@
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"format": "prettier --write .",
-		"lint": "prettier --check . && eslint .",
+		"lint": "prettier --check . && NODE_OPTIONS=--max-old-space-size=8192 eslint .",
 		"test": "vitest",
 		"test:ui": "vitest --ui",
 		"test:e2e": "playwright test"
