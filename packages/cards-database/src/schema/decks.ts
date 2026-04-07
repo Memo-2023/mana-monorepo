@@ -1,9 +1,9 @@
 import { uuid, text, varchar, boolean, timestamp, jsonb, index } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
-import { cardsSchema } from './schema';
-import { cards } from './cards';
-import { studySessions } from './studySessions';
-import { aiGenerations } from './aiGenerations';
+import { cardsSchema } from './schema.js';
+import { cards } from './cards.js';
+import { studySessions } from './studySessions.js';
+import { aiGenerations } from './aiGenerations.js';
 
 export const decks = cardsSchema.table(
 	'decks',

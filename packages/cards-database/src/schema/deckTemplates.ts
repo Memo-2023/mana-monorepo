@@ -8,7 +8,7 @@ import {
 	jsonb,
 	index,
 } from 'drizzle-orm/pg-core';
-import { cardsSchema } from './schema';
+import { cardsSchema } from './schema.js';
 
 // Template data structure
 export interface DeckTemplateData {

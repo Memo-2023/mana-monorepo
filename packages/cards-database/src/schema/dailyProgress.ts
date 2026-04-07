@@ -1,5 +1,5 @@
 import { uuid, text, date, integer, decimal, timestamp, index, unique } from 'drizzle-orm/pg-core';
-import { cardsSchema } from './schema';
+import { cardsSchema } from './schema.js';
 
 export const dailyProgress = cardsSchema.table(
 	'daily_progress',

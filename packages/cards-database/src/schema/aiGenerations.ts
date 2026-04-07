@@ -1,7 +1,7 @@
 import { uuid, text, varchar, timestamp, jsonb, index, pgEnum } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
-import { cardsSchema } from './schema';
-import { decks } from './decks';
+import { cardsSchema } from './schema.js';
+import { decks } from './decks.js';
 
 // AI generation status enum
 export const aiGenerationStatusEnum = pgEnum('ai_generation_status', [

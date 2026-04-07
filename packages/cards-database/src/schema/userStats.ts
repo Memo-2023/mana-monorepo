@@ -1,5 +1,5 @@
 import { text, integer, decimal, date, timestamp, index } from 'drizzle-orm/pg-core';
-import { cardsSchema } from './schema';
+import { cardsSchema } from './schema.js';
 
 export const userStats = cardsSchema.table(
 	'user_stats',
