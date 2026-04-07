@@ -48,6 +48,8 @@ const PUBLIC_MANA_MEDIA_URL_CLIENT =
 	process.env.PUBLIC_MANA_MEDIA_URL_CLIENT || process.env.PUBLIC_MANA_MEDIA_URL || '';
 const PUBLIC_MANA_LLM_URL_CLIENT =
 	process.env.PUBLIC_MANA_LLM_URL_CLIENT || process.env.PUBLIC_MANA_LLM_URL || '';
+const PUBLIC_MANA_EVENTS_URL_CLIENT =
+	process.env.PUBLIC_MANA_EVENTS_URL_CLIENT || process.env.PUBLIC_MANA_EVENTS_URL || '';
 
 // Map of app subdomains to internal paths
 const APP_SUBDOMAINS = new Set([
@@ -106,6 +108,7 @@ window.__PUBLIC_ULOAD_SERVER_URL__ = ${JSON.stringify(PUBLIC_ULOAD_SERVER_URL_CL
 window.__PUBLIC_MEMORO_SERVER_URL__ = ${JSON.stringify(PUBLIC_MEMORO_SERVER_URL_CLIENT)};
 window.__PUBLIC_MANA_MEDIA_URL__ = ${JSON.stringify(PUBLIC_MANA_MEDIA_URL_CLIENT)};
 window.__PUBLIC_MANA_LLM_URL__ = ${JSON.stringify(PUBLIC_MANA_LLM_URL_CLIENT)};
+window.__PUBLIC_MANA_EVENTS_URL__ = ${JSON.stringify(PUBLIC_MANA_EVENTS_URL_CLIENT)};
 window.__PUBLIC_GLITCHTIP_DSN__ = ${JSON.stringify(PUBLIC_GLITCHTIP_DSN)};
 </script>`;
 			return injectUmamiAnalytics(html.replace('<head>', `<head>${envScript}`));
@@ -130,6 +133,7 @@ window.__PUBLIC_GLITCHTIP_DSN__ = ${JSON.stringify(PUBLIC_GLITCHTIP_DSN)};
 			PUBLIC_MEMORO_SERVER_URL_CLIENT,
 			PUBLIC_MANA_MEDIA_URL_CLIENT,
 			PUBLIC_MANA_LLM_URL_CLIENT,
+			PUBLIC_MANA_EVENTS_URL_CLIENT,
 			'wss://sync.mana.how',
 			// Allow all localhost ports in development
 			...(isDev ? ['http://localhost:*', 'ws://localhost:*'] : []),

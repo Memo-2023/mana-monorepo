@@ -7,7 +7,9 @@
 
 import { db } from '$lib/data/database';
 import { createBlock, updateBlock, deleteBlock } from '$lib/data/time-blocks/service';
+import { timeBlockTable } from '$lib/data/time-blocks/collections';
 import type { LocalSocialEvent, EventStatus } from '../types';
+import { eventsApi } from '../api';
 
 let error = $state<string | null>(null);
 
@@ -119,6 +121,8 @@ export const eventsStore = {
 			if (input.coverImage !== undefined) localData.coverImage = input.coverImage;
 
 			await db.table('socialEvents').update(id, localData);
+			// Fire-and-forget snapshot sync if this event is published
+			void this.syncSnapshotIfPublished(id);
 			return { success: true as const };
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to update event';
@@ -133,6 +137,13 @@ export const eventsStore = {
 			if (event?.timeBlockId) {
 				await deleteBlock(event.timeBlockId);
 			}
+			if (event?.isPublished) {
+				try {
+					await eventsApi.unpublish(id);
+				} catch (e) {
+					console.warn('Failed to delete server snapshot during deleteEvent:', e);
+				}
+			}
 			await db.table('socialEvents').update(id, {
 				deletedAt: new Date().toISOString(),
 				updatedAt: new Date().toISOString(),
@@ -145,17 +156,30 @@ export const eventsStore = {
 	},
 
 	/**
-	 * Local-only "publish" stub for Phase 1a.
-	 * Just flips isPublished + assigns a placeholder token. Phase 1b will
-	 * push the snapshot to mana-events and use a real server-issued token.
+	 * Publish event — pushes a snapshot to mana-events and stores the
+	 * server-issued token locally. Public RSVP page will read the snapshot.
 	 */
 	async publishEvent(id: string) {
 		error = null;
 		try {
-			const token =
-				typeof crypto !== 'undefined' && 'randomUUID' in crypto
-					? crypto.randomUUID().replace(/-/g, '').slice(0, 24)
-					: Math.random().toString(36).slice(2, 26);
+			const event = await db.table<LocalSocialEvent>('socialEvents').get(id);
+			if (!event) return { success: false as const, error: 'Event not found' };
+			const block = await timeBlockTable.get(event.timeBlockId);
+			if (!block) return { success: false as const, error: 'TimeBlock missing for event' };
+
+			const { token } = await eventsApi.publish({
+				eventId: id,
+				title: event.title,
+				description: event.description ?? null,
+				location: event.location ?? null,
+				locationUrl: event.locationUrl ?? null,
+				startAt: block.startDate,
+				endAt: block.endDate ?? null,
+				allDay: block.allDay ?? false,
+				coverImageUrl: event.coverImage ?? null,
+				color: event.color ?? null,
+				capacity: event.capacity ?? null,
+			});
 
 			await db.table('socialEvents').update(id, {
 				isPublished: true,
@@ -173,6 +197,13 @@ export const eventsStore = {
 	async unpublishEvent(id: string) {
 		error = null;
 		try {
+			// Best-effort delete on the server. If the network fails we still
+			// flip the local flag — host clearly intended to unpublish.
+			try {
+				await eventsApi.unpublish(id);
+			} catch (e) {
+				console.warn('Failed to delete server snapshot during unpublish:', e);
+			}
 			await db.table('socialEvents').update(id, {
 				isPublished: false,
 				publicToken: null,
@@ -183,6 +214,34 @@ export const eventsStore = {
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to unpublish event';
 			return { success: false as const, error };
+		}
+	},
+
+	/**
+	 * Push the latest local state of a published event to the server snapshot.
+	 * Called after an updateEvent() if the event is currently published.
+	 */
+	async syncSnapshotIfPublished(id: string) {
+		try {
+			const event = await db.table<LocalSocialEvent>('socialEvents').get(id);
+			if (!event || !event.isPublished) return;
+			const block = await timeBlockTable.get(event.timeBlockId);
+			if (!block) return;
+			await eventsApi.updateSnapshot(id, {
+				eventId: id,
+				title: event.title,
+				description: event.description ?? null,
+				location: event.location ?? null,
+				locationUrl: event.locationUrl ?? null,
+				startAt: block.startDate,
+				endAt: block.endDate ?? null,
+				allDay: block.allDay ?? false,
+				coverImageUrl: event.coverImage ?? null,
+				color: event.color ?? null,
+				capacity: event.capacity ?? null,
+			});
+		} catch (e) {
+			console.warn('Snapshot sync failed:', e);
 		}
 	},
 };

@@ -76,6 +76,7 @@ PLATFORM_SCHEMAS=(
     "presi"
     "uload"
     "cards"
+    "events"
 )
 
 # Check if specific service requested
@@ -118,9 +119,12 @@ setup_service() {
         cards)
             push_schema "@mana/cards-database" "cards"
             ;;
+        events|mana-events)
+            push_schema "@mana/events" "mana-events"
+            ;;
         *)
             echo -e "${RED}Unknown service: $service${NC}"
-            echo "Available services: auth, credits, user, subscriptions, analytics, media, todo, traces, presi, uload, cards"
+            echo "Available services: auth, credits, user, subscriptions, analytics, media, todo, traces, presi, uload, cards, events"
             exit 1
             ;;
     esac
@@ -150,7 +154,7 @@ done
 echo -e "\n${GREEN}Step 3: Pushing schemas${NC}"
 echo "--------------------------------------"
 
-for service in auth credits user subscriptions analytics media todo traces presi uload cards; do
+for service in auth credits user subscriptions analytics media todo traces presi uload cards events; do
     setup_service "$service" 2>/dev/null || true
 done
 

@@ -3,6 +3,7 @@
 	import { eventsStore } from '../stores/events.svelte';
 	import GuestListEditor from '../components/GuestListEditor.svelte';
 	import RsvpSummaryView from '../components/RsvpSummary.svelte';
+	import PublicRsvpList from '../components/PublicRsvpList.svelte';
 
 	interface Props {
 		eventId: string;
@@ -154,6 +155,12 @@
 			<GuestListEditor eventId={event.id} />
 		</section>
 
+		{#if event.isPublished}
+			<section class="section">
+				<PublicRsvpList eventId={event.id} isPublished={event.isPublished} />
+			</section>
+		{/if}
+
 		<section class="section">
 			<h2>Teilen</h2>
 			{#if event.isPublished && event.publicToken}
@@ -163,8 +170,7 @@
 					<button class="action-btn" onclick={handlePublish}>Privat machen</button>
 				</div>
 				<p class="share-hint">
-					Phase 1a: Link funktioniert noch nicht öffentlich — Gäste-Antworten musst du noch manuell
-					oben in der Gästeliste eintragen.
+					Antworten erscheinen automatisch unten in „Antworten via Link“ (Polling alle 30s).
 				</p>
 			{:else}
 				<button class="action-btn primary" onclick={handlePublish}>
