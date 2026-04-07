@@ -8,6 +8,8 @@
 	import { setCurrentUserId } from '$lib/data/current-user';
 	import { migrateGuestDataToUser } from '$lib/data/guest-migration';
 	import { installDataLayerListeners } from '$lib/data/data-layer-listeners';
+	import { createVaultClient, hasAnyEncryption } from '$lib/data/crypto';
+	import { getManaAuthUrl } from '$lib/api/config';
 	import SuggestionToast from '$lib/components/SuggestionToast.svelte';
 	import OfflineIndicator from '$lib/components/OfflineIndicator.svelte';
 	import PwaUpdatePrompt from '$lib/components/PwaUpdatePrompt.svelte';
@@ -18,6 +20,14 @@
 	// against this lets us short-circuit identity-update churn during auth
 	// initialisation, which previously caused effect_update_depth_exceeded.
 	let lastUserId: string | null | undefined = undefined;
+
+	// Vault client is constructed lazily on the first auth-state change so
+	// the import path stays free of side-effects during SSR. Reused across
+	// all subsequent unlock/lock calls.
+	const vaultClient = createVaultClient({
+		authUrl: getManaAuthUrl(),
+		getToken: () => authStore.getAccessToken(),
+	});
 
 	// Push the active user id into the data layer whenever auth state changes.
 	// The Dexie creating-hook reads this to auto-stamp `userId` on every record,
@@ -39,6 +49,19 @@
 			migrateGuestDataToUser(userId).catch((err) => {
 				console.error('[mana] guest → user migration failed:', err);
 			});
+		}
+
+		// Encryption vault: unlock when authenticated, lock when not.
+		// Skip the network round-trip entirely while no table is encrypted —
+		// hasAnyEncryption() flips to true once Phase 3 enables a pilot.
+		if (userId && hasAnyEncryption()) {
+			vaultClient.unlock().then((state) => {
+				if (state.status !== 'unlocked') {
+					console.warn('[mana] encryption vault unlock failed:', state);
+				}
+			});
+		} else if (!userId) {
+			vaultClient.lock();
 		}
 	});
 

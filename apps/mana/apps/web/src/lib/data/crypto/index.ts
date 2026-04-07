@@ -43,3 +43,12 @@ export {
 	hasAnyEncryption,
 	getRegisteredTables,
 } from './registry';
+
+export { encryptRecord, decryptRecord, decryptRecords, VaultLockedError } from './record-helpers';
+
+export {
+	type VaultClient,
+	type VaultClientOptions,
+	type VaultUnlockState,
+	createVaultClient,
+} from './vault-client';
