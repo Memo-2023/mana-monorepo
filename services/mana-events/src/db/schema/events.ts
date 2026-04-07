@@ -70,6 +70,37 @@ export const publicRsvps = eventsSchema.table(
 	})
 );
 
+/**
+ * Bring-list items attached to a published event. The host pushes the
+ * full list whenever it changes (small payload). Each row is owned by
+ * its parent events_published row via FK cascade so it disappears
+ * when the snapshot is deleted.
+ *
+ * `claimed_by_name` is set when a public RSVP visitor reserves the
+ * item from the share-link page. Only one claim per item — we don't
+ * support unclaim-then-reclaim conflict resolution; the host can
+ * always overwrite via a republish.
+ */
+export const eventItemsPublished = eventsSchema.table(
+	'event_items_published',
+	{
+		id: text('id').primaryKey(),
+		token: text('token')
+			.notNull()
+			.references(() => eventsPublished.token, { onDelete: 'cascade' }),
+		label: text('label').notNull(),
+		quantity: integer('quantity'),
+		sortOrder: integer('sort_order').default(0).notNull(),
+		done: boolean('done').default(false).notNull(),
+		claimedByName: text('claimed_by_name'),
+		claimedAt: timestamp('claimed_at', { withTimezone: true }),
+		updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+	},
+	(t) => ({
+		tokenIdx: index('event_items_published_token_idx').on(t.token),
+	})
+);
+
 /** Per-token rate limit bucket — token + hour-bucket → submission count. */
 export const rsvpRateBuckets = eventsSchema.table(
 	'rsvp_rate_buckets',

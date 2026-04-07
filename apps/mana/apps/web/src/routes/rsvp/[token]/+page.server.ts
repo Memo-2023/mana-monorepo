@@ -48,6 +48,15 @@ interface RsvpSummary {
 	totalAttending: number;
 }
 
+interface BringItem {
+	id: string;
+	label: string;
+	quantity: number | null;
+	sortOrder: number;
+	done: boolean;
+	claimedByName: string | null;
+}
+
 export const load: PageServerLoad = async ({ params, fetch, request }) => {
 	const token = params.token;
 	if (!token) throw error(404, 'Not found');
@@ -78,8 +87,9 @@ export const load: PageServerLoad = async ({ params, fetch, request }) => {
 			event: EventSnapshot;
 			summary: RsvpSummary | null;
 			cancelled?: boolean;
+			items?: BringItem[];
 		};
-		return { token, ...data, eventsUrl: EVENTS_URL, lang };
+		return { token, ...data, items: data.items ?? [], eventsUrl: EVENTS_URL, lang };
 	} catch (e) {
 		if (e && typeof e === 'object' && 'status' in e) throw e;
 		throw error(500, errorMsg);

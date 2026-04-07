@@ -9,7 +9,7 @@ import { Hono } from 'hono';
 import { z } from 'zod';
 import { and, eq } from 'drizzle-orm';
 import type { Database } from '../db/connection';
-import { eventsPublished, publicRsvps } from '../db/schema/events';
+import { eventsPublished, publicRsvps, eventItemsPublished } from '../db/schema/events';
 import { ForbiddenError, NotFoundError, BadRequestError } from '../lib/errors';
 import type { AuthUser } from '../middleware/jwt-auth';
 
@@ -29,6 +29,20 @@ const snapshotSchema = z.object({
 
 const snapshotUpdateSchema = snapshotSchema.partial().extend({
 	eventId: z.string().uuid(), // still required so we can verify ownership
+});
+
+const itemsBodySchema = z.object({
+	items: z
+		.array(
+			z.object({
+				id: z.string().min(1).max(64),
+				label: z.string().min(1).max(200),
+				quantity: z.number().int().positive().nullable().optional(),
+				order: z.number().int().min(0),
+				done: z.boolean().optional(),
+			})
+		)
+		.max(100),
 });
 
 function generateToken(): string {
@@ -150,6 +164,92 @@ export function createEventsRoutes(db: Database) {
 
 		await db.delete(eventsPublished).where(eq(eventsPublished.token, existing[0].token));
 		return c.json({ deleted: true });
+	});
+
+	// PUT /events/:eventId/items — full-replace the bring list snapshot.
+	// Items the host doesn't include get deleted (cascade picks them up
+	// only via snapshot delete, so we need an explicit prune here).
+	app.put('/:eventId/items', async (c) => {
+		const user = c.get('user');
+		const eventId = c.req.param('eventId');
+		const body = await c.req.json().catch(() => null);
+		const parsed = itemsBodySchema.safeParse(body);
+		if (!parsed.success) throw new BadRequestError(parsed.error.issues[0]?.message ?? 'Invalid');
+
+		const existing = await db
+			.select()
+			.from(eventsPublished)
+			.where(eq(eventsPublished.eventId, eventId))
+			.limit(1);
+		if (!existing[0]) throw new NotFoundError('Event not published');
+		if (existing[0].userId !== user.userId) throw new ForbiddenError('Not your event');
+
+		const token = existing[0].token;
+		const now = new Date();
+		const incomingIds = new Set(parsed.data.items.map((i) => i.id));
+
+		// Load currently-stored items so we can preserve `claimed_by_name`
+		// across host edits — the host shouldn't accidentally wipe a public
+		// guest's claim just because they renamed an item.
+		const existingItems = await db
+			.select()
+			.from(eventItemsPublished)
+			.where(eq(eventItemsPublished.token, token));
+		const existingById = new Map(existingItems.map((it) => [it.id, it]));
+
+		// Delete items the host removed
+		for (const it of existingItems) {
+			if (!incomingIds.has(it.id)) {
+				await db.delete(eventItemsPublished).where(eq(eventItemsPublished.id, it.id));
+			}
+		}
+
+		// Upsert each incoming item
+		for (const item of parsed.data.items) {
+			const prior = existingById.get(item.id);
+			if (prior) {
+				await db
+					.update(eventItemsPublished)
+					.set({
+						label: item.label,
+						quantity: item.quantity ?? null,
+						sortOrder: item.order,
+						done: item.done ?? false,
+						updatedAt: now,
+					})
+					.where(eq(eventItemsPublished.id, item.id));
+			} else {
+				await db.insert(eventItemsPublished).values({
+					id: item.id,
+					token,
+					label: item.label,
+					quantity: item.quantity ?? null,
+					sortOrder: item.order,
+					done: item.done ?? false,
+				});
+			}
+		}
+
+		return c.json({ ok: true, count: parsed.data.items.length });
+	});
+
+	// GET /events/:eventId/items — read back items + claims for the host
+	app.get('/:eventId/items', async (c) => {
+		const user = c.get('user');
+		const eventId = c.req.param('eventId');
+		const existing = await db
+			.select()
+			.from(eventsPublished)
+			.where(eq(eventsPublished.eventId, eventId))
+			.limit(1);
+		if (!existing[0]) throw new NotFoundError('Event not published');
+		if (existing[0].userId !== user.userId) throw new ForbiddenError('Not your event');
+
+		const items = await db
+			.select()
+			.from(eventItemsPublished)
+			.where(eq(eventItemsPublished.token, existing[0].token));
+		return c.json({ items });
 	});
 
 	// GET /events/:eventId/rsvps — list all RSVPs for the host

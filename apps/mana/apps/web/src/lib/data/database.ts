@@ -512,6 +512,16 @@ db.version(10).stores({
 		'++id, createdAt, appId, collection, recordId, op, [appId+createdAt], [collection+recordId], userId',
 });
 
+// ─── Version 11: Events bring-list (eventItems) ───────────────
+// Adds the "wer bringt was?" table attached to social events.
+// `assignedGuestId` points at a local guest the host picked manually;
+// `claimedByName` is set by a public RSVP visitor who reserved the
+// item from the share-link page.
+
+db.version(11).stores({
+	eventItems: 'id, eventId, assignedGuestId, done, order, [eventId+order], [eventId+done]',
+});
+
 // ─── Sync Routing ──────────────────────────────────────────
 // SYNC_APP_MAP, TABLE_TO_SYNC_NAME, TABLE_TO_APP, SYNC_NAME_TO_TABLE,
 // toSyncName() and fromSyncName() are now derived from per-module

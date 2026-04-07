@@ -52,6 +52,19 @@ export interface LocalEventInvitation extends BaseRecord {
 	token: string;
 }
 
+export interface LocalEventItem extends BaseRecord {
+	eventId: string;
+	label: string;
+	quantity?: number | null;
+	order: number;
+	done: boolean;
+	// Either a local guest the host assigned…
+	assignedGuestId?: string | null;
+	// …or a public visitor who claimed it via the share link.
+	claimedByName?: string | null;
+	claimedAt?: string | null;
+}
+
 // ─── Domain (UI-facing) ────────────────────────────────────
 
 export interface SocialEvent {
@@ -96,4 +109,18 @@ export interface RsvpSummary {
 	maybe: number;
 	pending: number;
 	totalAttending: number; // yes + plusOnes
+}
+
+export interface EventItem {
+	id: string;
+	eventId: string;
+	label: string;
+	quantity: number | null;
+	order: number;
+	done: boolean;
+	assignedGuestId: string | null;
+	claimedByName: string | null;
+	claimedAt: string | null;
+	createdAt: string;
+	updatedAt: string;
 }

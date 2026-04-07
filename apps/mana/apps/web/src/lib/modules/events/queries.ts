@@ -11,8 +11,10 @@ import type { LocalTimeBlock } from '$lib/data/time-blocks/types';
 import type {
 	LocalSocialEvent,
 	LocalEventGuest,
+	LocalEventItem,
 	SocialEvent,
 	EventGuest,
+	EventItem,
 	RsvpSummary,
 } from './types';
 
@@ -37,6 +39,23 @@ export function toSocialEvent(local: LocalSocialEvent, block: LocalTimeBlock | n
 		startTime: block?.startDate ?? now,
 		endTime: block?.endDate ?? block?.startDate ?? now,
 		isAllDay: block?.allDay ?? false,
+		createdAt: local.createdAt ?? now,
+		updatedAt: local.updatedAt ?? now,
+	};
+}
+
+export function toEventItem(local: LocalEventItem): EventItem {
+	const now = new Date().toISOString();
+	return {
+		id: local.id,
+		eventId: local.eventId,
+		label: local.label,
+		quantity: local.quantity ?? null,
+		order: local.order ?? 0,
+		done: local.done ?? false,
+		assignedGuestId: local.assignedGuestId ?? null,
+		claimedByName: local.claimedByName ?? null,
+		claimedAt: local.claimedAt ?? null,
 		createdAt: local.createdAt ?? now,
 		updatedAt: local.updatedAt ?? now,
 	};
@@ -146,6 +165,23 @@ export function useEventGuests(eventId: () => string) {
 			.toArray();
 		return guests.filter((g) => !g.deletedAt).map(toEventGuest);
 	}, [] as EventGuest[]);
+}
+
+/** Bring-list items for a single event, sorted by order. */
+export function useEventItems(eventId: () => string) {
+	return useLiveQueryWithDefault(async () => {
+		const id = eventId();
+		if (!id) return [];
+		const items = await db
+			.table<LocalEventItem>('eventItems')
+			.where('eventId')
+			.equals(id)
+			.toArray();
+		return items
+			.filter((i) => !i.deletedAt)
+			.map(toEventItem)
+			.sort((a, b) => a.order - b.order);
+	}, [] as EventItem[]);
 }
 
 // ─── Pure Helpers ──────────────────────────────────────────

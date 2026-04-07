@@ -4,6 +4,7 @@
 	import GuestListEditor from '../components/GuestListEditor.svelte';
 	import RsvpSummaryView from '../components/RsvpSummary.svelte';
 	import PublicRsvpList from '../components/PublicRsvpList.svelte';
+	import BringListEditor from '../components/BringListEditor.svelte';
 
 	interface Props {
 		eventId: string;
@@ -164,6 +165,11 @@
 		<section class="section">
 			<h2>Gäste</h2>
 			<GuestListEditor eventId={event.id} />
+		</section>
+
+		<section class="section">
+			<h2>Bring-Liste</h2>
+			<BringListEditor eventId={event.id} />
 		</section>
 
 		{#if event.isPublished}

@@ -48,6 +48,23 @@ async function fetchWithAuth<T>(path: string, init: RequestInit = {}): Promise<T
 	return res.json() as Promise<T>;
 }
 
+export interface PublishedItemSnapshot {
+	id: string;
+	label: string;
+	quantity?: number | null;
+	order: number;
+	done?: boolean;
+}
+
+export interface PublishedItemRecord {
+	id: string;
+	label: string;
+	quantity: number | null;
+	sortOrder: number;
+	done: boolean;
+	claimedByName: string | null;
+}
+
 export const eventsApi = {
 	async publish(input: PublishedSnapshotInput): Promise<{ token: string; isNew: boolean }> {
 		return fetchWithAuth('/api/v1/events/publish', {
@@ -72,5 +89,19 @@ export const eventsApi = {
 
 	async getRsvps(eventId: string): Promise<{ token: string; rsvps: PublicRsvpRecord[] }> {
 		return fetchWithAuth(`/api/v1/events/${eventId}/rsvps`);
+	},
+
+	async syncItems(
+		eventId: string,
+		items: PublishedItemSnapshot[]
+	): Promise<{ ok: true; count: number }> {
+		return fetchWithAuth(`/api/v1/events/${eventId}/items`, {
+			method: 'PUT',
+			body: JSON.stringify({ items }),
+		});
+	},
+
+	async getItems(eventId: string): Promise<{ items: PublishedItemRecord[] }> {
+		return fetchWithAuth(`/api/v1/events/${eventId}/items`);
 	},
 };

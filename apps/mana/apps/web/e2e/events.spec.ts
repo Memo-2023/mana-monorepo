@@ -49,13 +49,12 @@ test.describe('Events module — local flow', () => {
 		await expect(page.getByRole('heading', { name: title })).toBeVisible();
 		await expect(page.getByText('Café am See')).toBeVisible();
 
-		// 4. Add a guest
-		await page.getByPlaceholder('Name', { exact: false }).first().fill('Tante Erika');
-		await page
-			.getByPlaceholder(/E-Mail/i)
-			.first()
-			.fill('erika@example.com');
-		await page.getByRole('button', { name: 'Hinzufügen' }).click();
+		// 4. Add a guest — scope to the guest editor since the bring-list
+		// editor below it uses the same "Hinzufügen" button text.
+		const guestEditor = page.locator('.guest-editor');
+		await guestEditor.getByPlaceholder('Name', { exact: false }).fill('Tante Erika');
+		await guestEditor.getByPlaceholder(/E-Mail/i).fill('erika@example.com');
+		await guestEditor.getByRole('button', { name: 'Hinzufügen' }).click();
 
 		// Guest row should appear
 		await expect(page.getByText('Tante Erika')).toBeVisible();
@@ -68,10 +67,10 @@ test.describe('Events module — local flow', () => {
 		// Summary should reflect 1 yes / 1 attending (no plus-ones)
 		await expect(page.locator('.rsvp-summary .badge.yes .count')).toHaveText('1');
 
-		// Set 2 plus-ones
-		await page.locator('input[type="number"]').first().fill('2');
-		// Blur to commit (onchange)
-		await page.locator('input[type="number"]').first().blur();
+		// Set 2 plus-ones (scoped to the guest editor — bring list also has a number input)
+		const plusOnes = guestEditor.locator('input[type="number"]').first();
+		await plusOnes.fill('2');
+		await plusOnes.blur();
 
 		// totalAttending should now be 3 (1 + 2 plus-ones)
 		await expect(page.locator('.rsvp-summary .total strong')).toHaveText('3');

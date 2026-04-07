@@ -15,6 +15,48 @@
 	let submitted = $state(false);
 	let errorMessage = $state<string | null>(null);
 
+	// Local mirror of items so claims can update the UI without a page
+	// reload. SSR data is the initial source of truth.
+	let items = $state(data.items);
+	let claimingItemId = $state<string | null>(null);
+	let claimError = $state<string | null>(null);
+
+	async function claimItem(itemId: string) {
+		if (claimingItemId) return;
+		const claimerName = window.prompt(t.claimNamePrompt, name)?.trim();
+		if (!claimerName) return;
+
+		claimingItemId = itemId;
+		claimError = null;
+		try {
+			const res = await fetch(
+				`${getManaEventsUrl()}/api/v1/rsvp/${data.token}/items/${itemId}/claim`,
+				{
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ name: claimerName }),
+				}
+			);
+			if (!res.ok) {
+				if (res.status === 400) {
+					claimError = t.claimAlreadyTaken;
+				} else {
+					const err = await res.json().catch(() => ({ message: 'Fehler' }));
+					throw new Error(err.message || `HTTP ${res.status}`);
+				}
+				return;
+			}
+			// Optimistically reflect the claim locally
+			items = items.map((it) => (it.id === itemId ? { ...it, claimedByName: claimerName } : it));
+			// Pre-fill the RSVP name field for convenience
+			if (!name) name = claimerName;
+		} catch (e) {
+			claimError = e instanceof Error ? e.message : t.genericError;
+		} finally {
+			claimingItemId = null;
+		}
+	}
+
 	const startDate = $derived(new Date(data.event.startAt));
 	const dateLabel = $derived(
 		startDate.toLocaleDateString(t.dateLocale, {
@@ -106,6 +148,40 @@
 
 		{#if data.event.description}
 			<p class="description">{data.event.description}</p>
+		{/if}
+
+		{#if items.length > 0 && !data.cancelled}
+			<section class="bring-list">
+				<h2>{t.bringListHeading}</h2>
+				<ul>
+					{#each items as item (item.id)}
+						<li class="bring-item" class:claimed={!!item.claimedByName}>
+							<div class="bring-info">
+								<span class="bring-label">{item.label}</span>
+								{#if item.quantity}
+									<span class="bring-qty">×{item.quantity}</span>
+								{/if}
+								{#if item.claimedByName}
+									<span class="bring-claimed">{t.claimedBy(item.claimedByName)}</span>
+								{/if}
+							</div>
+							{#if !item.claimedByName}
+								<button
+									type="button"
+									class="claim-btn"
+									disabled={claimingItemId === item.id}
+									onclick={() => claimItem(item.id)}
+								>
+									{claimingItemId === item.id ? '…' : t.claimButton}
+								</button>
+							{/if}
+						</li>
+					{/each}
+				</ul>
+				{#if claimError}
+					<p class="claim-error">{claimError}</p>
+				{/if}
+			</section>
 		{/if}
 
 		{#if data.cancelled}
@@ -275,6 +351,89 @@
 		white-space: pre-wrap;
 		line-height: 1.5;
 	}
+	.bring-list {
+		margin: 0 0 1.5rem;
+		padding: 1rem;
+		background: #fef9fb;
+		border: 1px solid #fce4eb;
+		border-radius: 0.625rem;
+	}
+	.bring-list h2 {
+		margin: 0 0 0.625rem;
+		font-size: 0.8125rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		color: #be123c;
+	}
+	.bring-list ul {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0.375rem;
+	}
+	.bring-item {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.5rem 0.75rem;
+		background: white;
+		border: 1px solid #fce4eb;
+		border-radius: 0.5rem;
+	}
+	.bring-item.claimed {
+		background: #f9fafb;
+		border-color: #e5e7eb;
+	}
+	.bring-info {
+		flex: 1;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.375rem;
+		align-items: baseline;
+		font-size: 0.875rem;
+	}
+	.bring-label {
+		font-weight: 500;
+		color: #111827;
+	}
+	.bring-item.claimed .bring-label {
+		color: #6b7280;
+	}
+	.bring-qty {
+		font-size: 0.75rem;
+		color: #6b7280;
+	}
+	.bring-claimed {
+		font-size: 0.75rem;
+		color: #16a34a;
+		font-style: italic;
+	}
+	.claim-btn {
+		padding: 0.375rem 0.75rem;
+		border: 1px solid #f43f5e;
+		border-radius: 0.375rem;
+		background: white;
+		color: #be123c;
+		font-size: 0.75rem;
+		font-weight: 600;
+		cursor: pointer;
+	}
+	.claim-btn:hover:not(:disabled) {
+		background: #fff1f3;
+	}
+	.claim-btn:disabled {
+		opacity: 0.5;
+		cursor: wait;
+	}
+	.claim-error {
+		margin: 0.5rem 0 0;
+		font-size: 0.75rem;
+		color: #dc2626;
+	}
+
 	.cancelled {
 		padding: 1rem;
 		border-radius: 0.5rem;

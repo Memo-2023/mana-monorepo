@@ -9,7 +9,12 @@ import { Hono } from 'hono';
 import { z } from 'zod';
 import { and, eq, sql } from 'drizzle-orm';
 import type { Database } from '../db/connection';
-import { eventsPublished, publicRsvps, rsvpRateBuckets } from '../db/schema/events';
+import {
+	eventsPublished,
+	publicRsvps,
+	rsvpRateBuckets,
+	eventItemsPublished,
+} from '../db/schema/events';
 import { NotFoundError, BadRequestError, TooManyRequestsError } from '../lib/errors';
 import type { Config } from '../config';
 
@@ -59,6 +64,21 @@ export function createRsvpRoutes(db: Database, config: Config) {
 			else if (r.status === 'maybe') summary.maybe++;
 		}
 
+		// Public bring-list. Only the visitor's own claim name is included
+		// — that's the same name they typed when claiming, so no PII leak.
+		const items = await db
+			.select({
+				id: eventItemsPublished.id,
+				label: eventItemsPublished.label,
+				quantity: eventItemsPublished.quantity,
+				sortOrder: eventItemsPublished.sortOrder,
+				done: eventItemsPublished.done,
+				claimedByName: eventItemsPublished.claimedByName,
+			})
+			.from(eventItemsPublished)
+			.where(eq(eventItemsPublished.token, token));
+		items.sort((a, b) => a.sortOrder - b.sortOrder);
+
 		return c.json({
 			event: {
 				token: event.token,
@@ -74,7 +94,78 @@ export function createRsvpRoutes(db: Database, config: Config) {
 				capacity: event.capacity,
 			},
 			summary,
+			items,
 		});
+	});
+
+	// POST /rsvp/:token/items/:itemId/claim — public bring-list claim.
+	// First-write wins. No auth, but rate-limited via the same per-token
+	// hourly bucket as RSVPs to keep the abuse surface uniform.
+	const claimBodySchema = z.object({
+		name: z.string().min(1).max(100),
+	});
+
+	app.post('/:token/items/:itemId/claim', async (c) => {
+		const token = c.req.param('token');
+		const itemId = c.req.param('itemId');
+		const body = await c.req.json().catch(() => null);
+		const parsed = claimBodySchema.safeParse(body);
+		if (!parsed.success) throw new BadRequestError(parsed.error.issues[0]?.message ?? 'Invalid');
+
+		const eventRows = await db
+			.select()
+			.from(eventsPublished)
+			.where(eq(eventsPublished.token, token))
+			.limit(1);
+		const event = eventRows[0];
+		if (!event) throw new NotFoundError('Event not found');
+		if (event.isCancelled) throw new BadRequestError('Event has been cancelled');
+
+		// Per-token hourly rate limit (shared with RSVP submissions)
+		const bucket = currentHourBucket();
+		const bucketRows = await db
+			.select()
+			.from(rsvpRateBuckets)
+			.where(and(eq(rsvpRateBuckets.token, token), eq(rsvpRateBuckets.hourBucket, bucket)))
+			.limit(1);
+		const currentCount = bucketRows[0]?.count ?? 0;
+		if (currentCount >= config.rateLimit.rsvpPerTokenPerHour) {
+			throw new TooManyRequestsError('Too many submissions, please try again later');
+		}
+
+		// Verify the item exists and belongs to this token (cross-token
+		// claims would be a quiet authz hole otherwise).
+		const itemRows = await db
+			.select()
+			.from(eventItemsPublished)
+			.where(and(eq(eventItemsPublished.id, itemId), eq(eventItemsPublished.token, token)))
+			.limit(1);
+		const item = itemRows[0];
+		if (!item) throw new NotFoundError('Item not found');
+		if (item.claimedByName) {
+			throw new BadRequestError('Item already claimed');
+		}
+
+		await db
+			.update(eventItemsPublished)
+			.set({
+				claimedByName: parsed.data.name,
+				claimedAt: new Date(),
+				updatedAt: new Date(),
+			})
+			.where(eq(eventItemsPublished.id, itemId));
+
+		// Increment rate bucket
+		if (bucketRows[0]) {
+			await db
+				.update(rsvpRateBuckets)
+				.set({ count: bucketRows[0].count + 1 })
+				.where(and(eq(rsvpRateBuckets.token, token), eq(rsvpRateBuckets.hourBucket, bucket)));
+		} else {
+			await db.insert(rsvpRateBuckets).values({ token, hourBucket: bucket, count: 1 });
+		}
+
+		return c.json({ ok: true });
 	});
 
 	// POST /rsvp/:token — submit/update an RSVP

@@ -8,7 +8,7 @@
 import { db } from '$lib/data/database';
 import { createBlock, updateBlock, deleteBlock } from '$lib/data/time-blocks/service';
 import { timeBlockTable } from '$lib/data/time-blocks/collections';
-import type { LocalSocialEvent, EventStatus } from '../types';
+import type { LocalSocialEvent, LocalEventItem, EventStatus } from '../types';
 import { eventsApi } from '../api';
 import { recordTombstone } from '../tombstones';
 
@@ -192,6 +192,9 @@ export const eventsStore = {
 				status: 'published' satisfies EventStatus,
 				updatedAt: new Date().toISOString(),
 			});
+			// Push any pre-existing bring-list items right away so the
+			// public page shows them on first open.
+			await this.syncItems(id);
 			return { success: true as const, token };
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to publish event';
@@ -229,6 +232,7 @@ export const eventsStore = {
 	/**
 	 * Push the latest local state of a published event to the server snapshot.
 	 * Called after an updateEvent() if the event is currently published.
+	 * Also pushes the bring-list items so the public page stays in sync.
 	 */
 	async syncSnapshotIfPublished(id: string) {
 		try {
@@ -249,8 +253,39 @@ export const eventsStore = {
 				color: event.color ?? null,
 				capacity: event.capacity ?? null,
 			});
+			// Items are independent of the snapshot fields above but the
+			// host always wants them in sync after any edit.
+			await this.syncItems(id);
 		} catch (e) {
 			console.warn('Snapshot sync failed:', e);
+		}
+	},
+
+	/**
+	 * Push the local bring list to the server snapshot. Safe to call
+	 * for unpublished events — it just no-ops.
+	 */
+	async syncItems(id: string) {
+		try {
+			const event = await db.table<LocalSocialEvent>('socialEvents').get(id);
+			if (!event || !event.isPublished) return;
+			const items = await db
+				.table<LocalEventItem>('eventItems')
+				.where('eventId')
+				.equals(id)
+				.toArray();
+			const payload = items
+				.filter((i) => !i.deletedAt)
+				.map((i) => ({
+					id: i.id,
+					label: i.label,
+					quantity: i.quantity ?? null,
+					order: i.order ?? 0,
+					done: i.done ?? false,
+				}));
+			await eventsApi.syncItems(id, payload);
+		} catch (e) {
+			console.warn('Item sync failed:', e);
 		}
 	},
 };

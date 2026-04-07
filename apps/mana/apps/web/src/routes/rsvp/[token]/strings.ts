@@ -35,6 +35,12 @@ interface Strings {
 	genericError: string;
 	poweredBy: string;
 	dateLocale: string;
+	bringListHeading: string;
+	bringListEmpty: string;
+	claimButton: string;
+	claimedBy: (name: string) => string;
+	claimNamePrompt: string;
+	claimAlreadyTaken: string;
 }
 
 const DICTS: Record<Lang, Strings> = {
@@ -69,6 +75,12 @@ const DICTS: Record<Lang, Strings> = {
 		genericError: 'Konnte nicht senden',
 		poweredBy: 'Powered by',
 		dateLocale: 'de-DE',
+		bringListHeading: 'Wer bringt was?',
+		bringListEmpty: 'Noch nichts auf der Liste.',
+		claimButton: 'Übernehmen',
+		claimedBy: (name) => `${name} bringt das mit`,
+		claimNamePrompt: 'Wie heißt du? Wir reservieren das Item für dich:',
+		claimAlreadyTaken: 'Schon vergeben — bitte Seite neu laden.',
 	},
 	en: {
 		rsvpTitle: 'Please RSVP',
@@ -100,6 +112,12 @@ const DICTS: Record<Lang, Strings> = {
 		genericError: 'Could not send',
 		poweredBy: 'Powered by',
 		dateLocale: 'en-US',
+		bringListHeading: 'Who brings what?',
+		bringListEmpty: 'Nothing on the list yet.',
+		claimButton: 'Claim',
+		claimedBy: (name) => `${name} is bringing this`,
+		claimNamePrompt: "What's your name? We'll reserve the item for you:",
+		claimAlreadyTaken: 'Already taken — please reload the page.',
 	},
 	it: {
 		rsvpTitle: 'Conferma la tua presenza',
@@ -132,6 +150,12 @@ const DICTS: Record<Lang, Strings> = {
 		genericError: 'Impossibile inviare',
 		poweredBy: 'Powered by',
 		dateLocale: 'it-IT',
+		bringListHeading: 'Chi porta cosa?',
+		bringListEmpty: 'Nulla nella lista per ora.',
+		claimButton: 'Riserva',
+		claimedBy: (name) => `${name} lo porta`,
+		claimNamePrompt: 'Come ti chiami? Riserveremo l’oggetto per te:',
+		claimAlreadyTaken: 'Già preso — ricarica la pagina.',
 	},
 	fr: {
 		rsvpTitle: 'Confirmez votre présence',
@@ -163,6 +187,12 @@ const DICTS: Record<Lang, Strings> = {
 		genericError: 'Impossible d’envoyer',
 		poweredBy: 'Propulsé par',
 		dateLocale: 'fr-FR',
+		bringListHeading: 'Qui apporte quoi ?',
+		bringListEmpty: 'Rien sur la liste pour l’instant.',
+		claimButton: 'Je m’en charge',
+		claimedBy: (name) => `${name} l’apporte`,
+		claimNamePrompt: 'Quel est ton nom ? Nous te réservons l’élément :',
+		claimAlreadyTaken: 'Déjà pris — recharge la page.',
 	},
 	es: {
 		rsvpTitle: 'Confirma tu asistencia',
@@ -195,6 +225,12 @@ const DICTS: Record<Lang, Strings> = {
 		genericError: 'No se pudo enviar',
 		poweredBy: 'Powered by',
 		dateLocale: 'es-ES',
+		bringListHeading: '¿Quién trae qué?',
+		bringListEmpty: 'Nada en la lista todavía.',
+		claimButton: 'Lo traigo yo',
+		claimedBy: (name) => `${name} lo trae`,
+		claimNamePrompt: '¿Cómo te llamas? Te reservamos el artículo:',
+		claimAlreadyTaken: 'Ya lo cogió alguien — recarga la página.',
 	},
 };
 
