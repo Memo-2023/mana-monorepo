@@ -47,6 +47,17 @@ export {
 export { encryptRecord, decryptRecord, decryptRecords, VaultLockedError } from './record-helpers';
 
 export {
+	RECOVERY_SECRET_BYTES,
+	RecoveryCodeFormatError,
+	generateRecoverySecret,
+	formatRecoveryCode,
+	parseRecoveryCode,
+	deriveRecoveryWrapKey,
+	wrapMasterKeyWithRecovery,
+	unwrapMasterKeyWithRecovery,
+} from './recovery';
+
+export {
 	type VaultClient,
 	type VaultClientOptions,
 	type VaultUnlockState,
