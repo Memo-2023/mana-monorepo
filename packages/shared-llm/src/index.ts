@@ -1,39 +1,44 @@
-// Module
-export { LlmModule } from './llm.module';
-export { LlmClientService } from './llm-client.service';
-export { LLM_MODULE_OPTIONS } from './llm.constants';
-
-// Core client (for advanced use cases)
-export { LlmClient } from './llm-client';
-
-// Interfaces
+// Tiers + types
+export { ALL_TIERS, TIER_RANK, tierLabel, type LlmTier } from './tiers';
 export type {
-	LlmModuleOptions,
-	LlmModuleAsyncOptions,
-	LlmOptionsFactory,
-	ResolvedLlmOptions,
-} from './interfaces';
-export { resolveOptions } from './interfaces';
-
-// Types
-export type {
+	CapabilityRequirements,
 	ChatMessage,
-	ContentPart,
-	TextContentPart,
-	ImageContentPart,
-	ChatOptions,
-	JsonOptions,
-	VisionOptions,
-	TokenUsage,
-	ChatResult,
-	JsonResult,
-	ModelInfo,
-	HealthStatus,
+	ContentClass,
+	GenerateOptions,
+	GenerateResult,
+	LlmBackend,
+	LlmSettings,
+	LlmTaskRequest,
+	LlmTaskResult,
 } from './types';
+export { DEFAULT_LLM_SETTINGS } from './types';
 
-// Utilities
-export { extractJson } from './utils';
+// Errors
+export {
+	BackendUnreachableError,
+	EdgeLoadFailedError,
+	LlmError,
+	NoTierAvailableError,
+	ProviderBlockedError,
+	TierTooLowError,
+} from './errors';
 
-// Metrics
-export { LlmMetricsCollector } from './utils';
-export type { LlmRequestMetrics, MetricsCallback } from './utils';
+// Task contract
+export { buildTaskRequest, type LlmTask } from './task';
+
+// Orchestrator (rarely instantiated directly — most consumers use the
+// store's singleton instead)
+export { LlmOrchestrator, type LlmOrchestratorOptions } from './orchestrator';
+
+// Backends (exported for tests + custom orchestrator setups)
+export { BrowserBackend } from './backends/browser';
+export { CloudBackend, type CloudBackendOptions } from './backends/cloud';
+export { ManaServerBackend, type ManaServerBackendOptions } from './backends/mana-server';
+
+// Singleton store + Svelte 5 reactive hooks
+export {
+	llmOrchestrator,
+	llmSettingsState,
+	updateLlmSettings,
+	useTaskAvailability,
+} from './store.svelte';

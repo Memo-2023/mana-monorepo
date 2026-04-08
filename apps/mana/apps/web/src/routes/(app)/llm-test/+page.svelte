@@ -11,6 +11,16 @@
 		type ModelKey,
 	} from '@mana/local-llm';
 	import { hasModelInCache } from '@mana/local-llm';
+	import {
+		llmOrchestrator,
+		llmSettingsState,
+		updateLlmSettings,
+		ALL_TIERS,
+		tierLabel,
+		type LlmTier,
+	} from '@mana/shared-llm';
+	import { extractDateTask } from '$lib/llm-tasks/extract-date';
+	import { summarizeTextTask } from '$lib/llm-tasks/summarize';
 	import { marked } from 'marked';
 	import { Robot, Trash, PaperPlaneRight, ClockCounterClockwise } from '@mana/shared-icons';
 
@@ -43,7 +53,47 @@
 
 	// --- State ---
 	let selectedModel: ModelKey = $state('gemma-4-e2b');
-	let activeTab: 'chat' | 'extract' | 'classify' | 'compare' | 'benchmark' = $state('chat');
+	let activeTab: 'chat' | 'extract' | 'classify' | 'compare' | 'benchmark' | 'router' =
+		$state('chat');
+
+	// --- Router tab state ---
+	const settings = $derived(llmSettingsState.current);
+	let routerInput = $state('Treffen mit Sara morgen 14:30');
+	let routerRunning = $state(false);
+	let routerResult = $state<{
+		value: unknown;
+		source: string;
+		latencyMs: number;
+		attempted: string[];
+	} | null>(null);
+	let routerError = $state<string | null>(null);
+
+	function toggleAllowedTier(tier: LlmTier) {
+		const current = settings.allowedTiers;
+		const next = current.includes(tier) ? current.filter((t) => t !== tier) : [...current, tier];
+		updateLlmSettings({ allowedTiers: next });
+	}
+
+	async function runRouterTask(task: typeof extractDateTask | typeof summarizeTextTask) {
+		routerRunning = true;
+		routerResult = null;
+		routerError = null;
+		try {
+			const input = task === extractDateTask ? { text: routerInput } : { text: routerInput };
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			const result = await llmOrchestrator.run(task as any, input);
+			routerResult = {
+				value: result.value,
+				source: result.source,
+				latencyMs: result.latencyMs,
+				attempted: result.attempted,
+			};
+		} catch (err) {
+			routerError = err instanceof Error ? `${err.name}: ${err.message}` : String(err);
+		} finally {
+			routerRunning = false;
+		}
+	}
 	const supported = isLocalLlmSupported();
 	const status = getLocalLlmStatus();
 
@@ -581,7 +631,7 @@
 
 		<!-- Tabs -->
 		<div class="mb-4 flex gap-1 rounded-lg border border-border bg-card p-1">
-			{#each [{ id: 'chat', label: 'Chat' }, { id: 'extract', label: 'JSON Extract' }, { id: 'classify', label: 'Classify' }, { id: 'compare', label: 'Compare' }, { id: 'benchmark', label: 'Benchmark' }] as tab}
+			{#each [{ id: 'chat', label: 'Chat' }, { id: 'extract', label: 'JSON Extract' }, { id: 'classify', label: 'Classify' }, { id: 'compare', label: 'Compare' }, { id: 'benchmark', label: 'Benchmark' }, { id: 'router', label: 'Router' }] as tab}
 				<button
 					onclick={() => (activeTab = tab.id as typeof activeTab)}
 					class="flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors {activeTab ===
@@ -1130,6 +1180,101 @@
 					</div>
 					<div class="text-xs text-muted-foreground">
 						Total: {benchmarkStats.totalTokens} tokens in {benchmarkStats.runs.length} runs ({modelInfo.displayName})
+					</div>
+				{/if}
+			</div>
+		{/if}
+
+		<!-- Router Tab — exercises the @mana/shared-llm tiered orchestrator -->
+		{#if activeTab === 'router'}
+			<div class="flex flex-col gap-4">
+				<div class="rounded-xl border border-border bg-card p-4">
+					<p class="mb-3 text-sm text-muted-foreground">
+						Smoke-Test für den tiered LLM-Router. Wähle welche Tiers der Orchestrator benutzen darf
+						— der Router wählt dann pro Task die erste passende Schicht aus deiner Liste.
+					</p>
+
+					<div class="mb-4">
+						<div class="mb-2 text-xs font-medium text-muted-foreground">Erlaubte Tiers</div>
+						<div class="flex flex-wrap gap-2">
+							{#each ALL_TIERS as tier}
+								{@const enabled = settings.allowedTiers.includes(tier)}
+								<button
+									onclick={() => toggleAllowedTier(tier)}
+									class="rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors {enabled
+										? 'border-primary bg-primary/20 text-primary'
+										: 'border-border bg-background text-muted-foreground hover:text-foreground'}"
+								>
+									{tierLabel(tier)}
+								</button>
+							{/each}
+						</div>
+						<div class="mt-2 text-xs text-muted-foreground">
+							Aktuell: {settings.allowedTiers.length === 0
+								? 'keine LLM-Tiers — nur Tier 0 (Regeln)'
+								: settings.allowedTiers.map(tierLabel).join(' → ')}
+						</div>
+					</div>
+
+					<input
+						type="text"
+						bind:value={routerInput}
+						placeholder="Eingabetext für den Task..."
+						class="mb-3 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+					/>
+
+					<div class="flex flex-wrap gap-2">
+						<button
+							onclick={() => runRouterTask(extractDateTask)}
+							disabled={routerRunning || !routerInput.trim()}
+							class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50"
+						>
+							extractDate (hat T0-Fallback)
+						</button>
+						<button
+							onclick={() => runRouterTask(summarizeTextTask)}
+							disabled={routerRunning || !routerInput.trim()}
+							class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50"
+						>
+							summarize (kein T0)
+						</button>
+					</div>
+
+					<div class="mt-2 text-xs text-muted-foreground">
+						extractDate.canRun: {llmOrchestrator.canRun(extractDateTask)} · summarize.canRun: {llmOrchestrator.canRun(
+							summarizeTextTask
+						)}
+					</div>
+				</div>
+
+				{#if routerError}
+					<div class="rounded-xl border border-red-500/30 bg-red-500/10 p-4">
+						<div class="text-sm font-medium text-red-400">Task fehlgeschlagen</div>
+						<div class="mt-1 font-mono text-xs text-red-300">{routerError}</div>
+					</div>
+				{/if}
+
+				{#if routerResult}
+					<div class="rounded-xl border border-border bg-card p-4">
+						<div class="mb-2 flex items-center gap-2">
+							<span
+								class="rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary"
+							>
+								{tierLabel(routerResult.source as LlmTier)}
+							</span>
+							<span class="text-xs text-muted-foreground">{routerResult.latencyMs} ms</span>
+							{#if routerResult.attempted.length > 1}
+								<span class="text-xs text-muted-foreground"
+									>(versucht: {routerResult.attempted.join(' → ')})</span
+								>
+							{/if}
+						</div>
+						<pre
+							class="overflow-x-auto rounded-lg bg-background p-3 font-mono text-xs text-foreground">{JSON.stringify(
+								routerResult.value,
+								null,
+								2
+							)}</pre>
 					</div>
 				{/if}
 			</div>

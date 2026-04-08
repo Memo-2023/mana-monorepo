@@ -99,10 +99,9 @@ async function patchScene(
 	id: string,
 	patch: Partial<Pick<LocalWorkbenchScene, 'name' | 'icon' | 'openApps' | 'order'>>
 ) {
-	await db.table<LocalWorkbenchScene>(TABLE).update(id, {
-		...patch,
-		updatedAt: nowIso(),
-	});
+	// Strip Svelte 5 $state proxies — IndexedDB's structured clone can't serialize them.
+	const clean = $state.snapshot({ ...patch, updatedAt: nowIso() });
+	await db.table<LocalWorkbenchScene>(TABLE).update(id, clean);
 }
 
 async function patchActiveScene(fn: (apps: WorkbenchSceneApp[]) => WorkbenchSceneApp[]) {
@@ -110,7 +109,9 @@ async function patchActiveScene(fn: (apps: WorkbenchSceneApp[]) => WorkbenchScen
 	if (!id) return;
 	const current = scenesState.find((s) => s.id === id);
 	if (!current) return;
-	await patchScene(id, { openApps: fn(current.openApps) });
+	// Snapshot before handing to the mutator so callers operate on plain objects.
+	const plainApps = $state.snapshot(current.openApps) as WorkbenchSceneApp[];
+	await patchScene(id, { openApps: fn(plainApps) });
 }
 
 // ─── Public store ─────────────────────────────────────────────
@@ -191,7 +192,7 @@ export const workbenchScenesStore = {
 			id,
 			name: opts.name.trim() || 'Neue Szene',
 			icon: opts.icon,
-			openApps: opts.seedApps ? structuredClone(opts.seedApps) : [],
+			openApps: opts.seedApps ? ($state.snapshot(opts.seedApps) as WorkbenchSceneApp[]) : [],
 			order: maxOrder + 1,
 			createdAt: now,
 			updatedAt: now,

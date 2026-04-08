@@ -1,47 +1,26 @@
 {
 	"name": "@mana/shared-llm",
-	"version": "1.0.0",
+	"version": "2.0.0",
 	"private": true,
-	"description": "Unified LLM client for all Mana backends via mana-llm service",
-	"main": "dist/index.js",
-	"types": "dist/index.d.ts",
+	"description": "Tiered LLM orchestrator for Mana — routes tasks across rules / browser-edge / mana-server / cloud backends with explicit user-controlled privacy tiers",
+	"main": "./src/index.ts",
+	"types": "./src/index.ts",
 	"exports": {
-		".": {
-			"types": "./dist/index.d.ts",
-			"import": "./dist/index.js",
-			"require": "./dist/index.js"
-		},
-		"./standalone": {
-			"types": "./dist/standalone.d.ts",
-			"import": "./dist/standalone.js",
-			"require": "./dist/standalone.js"
-		}
+		".": "./src/index.ts"
 	},
 	"scripts": {
-		"build": "tsc",
-		"dev": "tsc --watch",
-		"clean": "rm -rf dist",
 		"type-check": "tsc --noEmit",
-		"test": "vitest run"
+		"clean": "rm -rf dist"
 	},
 	"dependencies": {
-		"@nestjs/common": "^10.0.0 || ^11.0.0",
-		"@nestjs/config": "^3.0.0 || ^4.0.0",
-		"@nestjs/core": "^10.0.0 || ^11.0.0",
-		"reflect-metadata": "^0.1.13 || ^0.2.0",
-		"rxjs": "^7.0.0"
-	},
-	"peerDependencies": {
-		"@nestjs/common": "^10.0.0 || ^11.0.0",
-		"@nestjs/config": "^3.0.0 || ^4.0.0",
-		"@nestjs/core": "^10.0.0 || ^11.0.0"
+		"@mana/local-llm": "workspace:*"
 	},
 	"devDependencies": {
-		"@types/node": "^20.0.0",
-		"typescript": "^5.0.0",
-		"vitest": "^4.1.2"
+		"@types/node": "^24.10.1",
+		"svelte": "^5.0.0",
+		"typescript": "^5.9.3"
 	},
-	"files": [
-		"dist"
-	]
+	"peerDependencies": {
+		"svelte": "^5.0.0"
+	}
 }
