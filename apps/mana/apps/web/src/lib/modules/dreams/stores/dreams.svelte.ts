@@ -177,7 +177,7 @@ export const dreamsStore = {
 	},
 
 	/**
-	 * Upload an audio blob to /api/v1/dreams/transcribe and write the result
+	 * Upload an audio blob to /api/v1/voice/transcribe and write the result
 	 * back into the dream. Reset to idle on success, mark failed on error.
 	 */
 	async transcribeBlob(dreamId: string, blob: Blob, language?: string): Promise<void> {
@@ -191,7 +191,7 @@ export const dreamsStore = {
 			form.append('file', blob, `dream${ext}`);
 			if (language) form.append('language', language);
 
-			const response = await fetch('/api/v1/dreams/transcribe', {
+			const response = await fetch('/api/v1/voice/transcribe', {
 				method: 'POST',
 				body: form,
 			});

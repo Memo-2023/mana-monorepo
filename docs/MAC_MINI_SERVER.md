@@ -275,9 +275,8 @@ Other 502 root causes to check, in order of likelihood:
 
 ### API key for STT proxy
 
-The unified mana-web container's `/api/v1/memoro/transcribe` and
-`/api/v1/dreams/transcribe` proxies need `MANA_STT_API_KEY` to authenticate
-against `gpu-stt.mana.how`. The key:
+The unified mana-web container's `/api/v1/voice/transcribe` proxy needs
+`MANA_STT_API_KEY` to authenticate against `gpu-stt.mana.how`. The key:
 
 - Lives in **Mac Mini `~/projects/mana-monorepo/.env`** (gitignored)
 - Is referenced from `docker-compose.macmini.yml` as `${MANA_STT_API_KEY:-}`

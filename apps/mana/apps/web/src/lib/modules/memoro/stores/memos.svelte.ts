@@ -64,7 +64,7 @@ export const memosStore = {
 	},
 
 	/**
-	 * Upload an audio blob to /api/v1/memoro/transcribe and write the result
+	 * Upload an audio blob to /api/v1/voice/transcribe and write the result
 	 * back into the memo. Marks completed on success, failed on error.
 	 */
 	async transcribeBlob(memoId: string, blob: Blob, language?: string): Promise<void> {
@@ -78,7 +78,7 @@ export const memosStore = {
 			form.append('file', blob, `memo${ext}`);
 			if (language) form.append('language', language);
 
-			const response = await fetch('/api/v1/memoro/transcribe', {
+			const response = await fetch('/api/v1/voice/transcribe', {
 				method: 'POST',
 				body: form,
 			});

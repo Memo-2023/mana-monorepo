@@ -113,10 +113,10 @@ The generator reads `.env.development` and creates app-specific `.env` files wit
 
 ### Speech-to-Text (mana-stt)
 
-Used by the unified Mana web app's voice features (Memoro recording, Dreams voice capture, etc).
-The browser never talks to mana-stt directly — requests go through the SvelteKit server-side proxy
-(`/api/v1/memoro/transcribe`, `/api/v1/dreams/transcribe`) which attaches the API key from
-`MANA_STT_API_KEY`. Keep that key out of the browser bundle.
+Used by the unified Mana web app's voice features (Memoro recording, Dreams voice capture, Notes
+voice memos, Todo voice quick-add, etc). The browser never talks to mana-stt directly — requests
+go through the SvelteKit server-side proxy at `/api/v1/voice/transcribe` which attaches the API
+key from `MANA_STT_API_KEY`. Keep that key out of the browser bundle.
 
 | Variable | Description | Default |
 |----------|-------------|---------|
