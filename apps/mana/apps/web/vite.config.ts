@@ -20,6 +20,15 @@ export default defineConfig({
 				themeColor: '#6366f1',
 				registerType: 'prompt',
 				preset: 'full',
+				// Disable the service worker in dev. With devEnabled=true (the
+				// default) vite-plugin-pwa registers a SW that aggressively
+				// precaches the route chunks — and after the first dev session
+				// the SW keeps serving the OLD JS even when Vite HMR pushes
+				// new code, so source edits become invisible until the user
+				// manually unregisters the worker in DevTools. The 2026-04-08
+				// dreams mic-button bug took an extra hour to track down for
+				// exactly this reason. Production still gets the full SW.
+				devEnabled: false,
 				shortcuts: [
 					{ name: 'Dashboard', short_name: 'Home', url: '/', description: 'Zum Dashboard' },
 					{

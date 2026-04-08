@@ -3,7 +3,7 @@
 	import { page } from '$app/stores';
 	import type { Snippet } from 'svelte';
 	import { onDestroy, setContext } from 'svelte';
-	import { createReminderScheduler, notificationService } from '@mana/shared-stores';
+	import { createReminderScheduler } from '@mana/shared-stores';
 	import { todoReminderSource } from '$lib/modules/todo/reminder-source';
 	import KeyboardShortcutsModal from '$lib/components/KeyboardShortcutsModal.svelte';
 	import SessionWarning from '$lib/components/SessionWarning.svelte';
@@ -332,7 +332,20 @@
 
 		// Phase B2: Start reminder scheduler
 		reminderScheduler.start();
-		notificationService.requestPermission();
+		// IMPORTANT: do NOT call notificationService.requestPermission() here.
+		// Browsers (Chrome/Firefox) require permission requests to come from
+		// a user gesture. Calling it at mount time queues the prompt until
+		// the next click, which means the FIRST click on any button (e.g.
+		// the dreams "Traum sprechen" mic button) shows a notification
+		// permission popup instead of the action the user actually clicked
+		// — and getUserMedia() / other permission requests get silently
+		// dropped because Chrome only shows one permission dialog at a time.
+		//
+		// Notification permission must be requested from a button the user
+		// explicitly clicks ("Benachrichtigungen aktivieren" toggle in
+		// Settings, or first time a reminder is created). The reminder
+		// scheduler still runs without permission — it just won't fire
+		// OS notifications until the user grants it.
 
 		// Phase C: Guest mode — welcome modal + nudge
 		if (!authStore.isAuthenticated) {

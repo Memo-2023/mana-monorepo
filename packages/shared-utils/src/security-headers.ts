@@ -49,7 +49,14 @@ export function setSecurityHeaders(response: Response, options: SecurityHeadersO
 	response.headers.set('X-Frame-Options', 'DENY');
 	response.headers.set('X-Content-Type-Options', 'nosniff');
 	response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-	response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(self)');
+	// Permissions-Policy: allow microphone for `self` so dreams/memoro voice
+	// capture (getUserMedia) works on mana.how. `microphone=()` would block
+	// the API entirely — Chrome reports `[Violation] Permissions policy
+	// violation: microphone is not allowed in this document` and the
+	// permission dialog never appears, even if the user has explicitly
+	// granted access in OS + browser settings. Camera stays disallowed
+	// since no module needs it.
+	response.headers.set('Permissions-Policy', 'camera=(), microphone=(self), geolocation=(self)');
 
 	// Content Security Policy
 	const cspDirectives = [
