@@ -126,6 +126,10 @@
 </div>
 
 <style>
+	/* P5: theme-token migration. All :global(.dark) paired rules and the
+	   hand-rolled #374151/#9ca3af palette removed — hsl(var(--color-X))
+	   from @mana/shared-tailwind/themes.css handles light + dark + variants
+	   automatically. */
 	.detail-view {
 		display: flex;
 		flex-direction: column;
@@ -138,7 +142,7 @@
 		padding: 2rem 0;
 		text-align: center;
 		font-size: 0.8125rem;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.quote-text {
@@ -146,10 +150,7 @@
 		font-weight: 300;
 		font-style: italic;
 		line-height: 1.7;
-		color: #374151;
-	}
-	:global(.dark) .quote-text {
-		color: #e5e7eb;
+		color: hsl(var(--color-foreground));
 	}
 
 	.author-row {
@@ -159,12 +160,12 @@
 	}
 	.author-name {
 		font-size: 0.875rem;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 	}
 	.bio-btn {
 		border: none;
 		background: none;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 		cursor: pointer;
 		padding: 0.125rem;
 		border-radius: 0.25rem;
@@ -172,13 +173,13 @@
 		transition: color 0.15s;
 	}
 	.bio-btn:hover {
-		color: #6b7280;
+		color: hsl(var(--color-foreground));
 	}
 
 	.author-bio {
 		font-size: 0.8125rem;
 		font-style: italic;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 		line-height: 1.5;
 	}
 
@@ -188,6 +189,7 @@
 		gap: 0.5rem;
 		flex-wrap: wrap;
 	}
+	/* Category badge uses brand violet (deliberate accent, not theme primary) */
 	.category-badge {
 		font-size: 0.6875rem;
 		font-weight: 600;
@@ -195,25 +197,19 @@
 		letter-spacing: 0.04em;
 		padding: 0.125rem 0.5rem;
 		border-radius: 9999px;
-		background: rgba(139, 92, 246, 0.1);
+		background: color-mix(in srgb, #8b5cf6 12%, transparent);
 		color: #8b5cf6;
-	}
-	:global(.dark) .category-badge {
-		background: rgba(139, 92, 246, 0.15);
 	}
 	.source-text {
 		font-size: 0.75rem;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.actions {
 		display: flex;
 		gap: 0.5rem;
 		padding-top: 0.5rem;
-		border-top: 1px solid rgba(0, 0, 0, 0.06);
-	}
-	:global(.dark) .actions {
-		border-color: rgba(255, 255, 255, 0.06);
+		border-top: 1px solid hsl(var(--color-border));
 	}
 	.action-btn {
 		display: flex;
@@ -221,31 +217,20 @@
 		gap: 0.375rem;
 		padding: 0.375rem 0.625rem;
 		border-radius: 0.375rem;
-		border: 1px solid rgba(0, 0, 0, 0.08);
+		border: 1px solid hsl(var(--color-border));
 		background: transparent;
 		font-size: 0.75rem;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 		cursor: pointer;
 		transition: all 0.15s;
 	}
 	.action-btn:hover {
-		background: rgba(0, 0, 0, 0.04);
-		color: #6b7280;
+		background: hsl(var(--color-surface-hover));
+		color: hsl(var(--color-foreground));
 	}
 	.action-btn.fav-active {
-		color: #ef4444;
-		border-color: rgba(239, 68, 68, 0.2);
-	}
-	:global(.dark) .action-btn {
-		border-color: rgba(255, 255, 255, 0.08);
-	}
-	:global(.dark) .action-btn:hover {
-		background: rgba(255, 255, 255, 0.06);
-		color: #e5e7eb;
-	}
-	:global(.dark) .action-btn.fav-active {
-		color: #ef4444;
-		border-color: rgba(239, 68, 68, 0.2);
+		color: hsl(var(--color-error));
+		border-color: hsl(var(--color-error) / 0.25);
 	}
 
 	@media (max-width: 640px) {
