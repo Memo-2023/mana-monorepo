@@ -83,6 +83,54 @@ export const tasksStore = {
 		return plaintextSnapshot;
 	},
 
+	/**
+	 * Create a task from a voice recording. Inserts a placeholder task
+	 * immediately so the user sees instant feedback in the list, then
+	 * fills in the real title once mana-stt returns the transcript.
+	 *
+	 * No date/priority parsing yet — that needs an LLM pass and is its
+	 * own follow-up. The user can edit the task inline like any other.
+	 */
+	async createFromVoice(blob: Blob, _durationMs: number, language = 'de') {
+		const placeholder = await this.createTask({ title: 'Sprachaufgabe wird transkribiert…' });
+		void this.transcribeIntoTask(placeholder.id, blob, language);
+		return placeholder;
+	},
+
+	/**
+	 * Upload an audio blob to /api/v1/voice/transcribe and write the
+	 * transcript into an existing task as the new title. On failure,
+	 * surfaces the error inline so the user isn't left with the
+	 * "wird transkribiert…" placeholder forever.
+	 */
+	async transcribeIntoTask(taskId: string, blob: Blob, language?: string): Promise<void> {
+		try {
+			const form = new FormData();
+			const ext = blob.type.includes('webm')
+				? '.webm'
+				: blob.type.includes('mp4')
+					? '.m4a'
+					: '.audio';
+			form.append('file', blob, `task${ext}`);
+			if (language) form.append('language', language);
+
+			const response = await fetch('/api/v1/voice/transcribe', {
+				method: 'POST',
+				body: form,
+			});
+			if (!response.ok) {
+				const text = await response.text();
+				throw new Error(text || `HTTP ${response.status}`);
+			}
+			const result = (await response.json()) as { text: string };
+			const transcript = (result.text ?? '').trim() || 'Sprachaufgabe';
+			await this.updateTask(taskId, { title: transcript });
+		} catch (e) {
+			const msg = e instanceof Error ? e.message : String(e);
+			await this.updateTask(taskId, { title: `Sprachaufgabe (Fehler: ${msg})` });
+		}
+	},
+
 	async updateTask(id: string, data: Record<string, unknown>) {
 		const raw = await taskTable.get(id);
 		if (!raw) return;

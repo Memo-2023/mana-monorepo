@@ -20,6 +20,7 @@
 	import { dropTarget, dragSource } from '@mana/shared-ui/dnd';
 	import type { TagDragData } from '@mana/shared-ui/dnd';
 	import { useAllTags, getTagsByIds } from '@mana/shared-stores';
+	import VoiceCaptureBar from '$lib/components/voice/VoiceCaptureBar.svelte';
 
 	let { navigate, goBack, params }: ViewProps = $props();
 
@@ -66,6 +67,10 @@
 		if (filter === 'today') data.dueDate = new Date().toISOString();
 		await tasksStore.createTask(data as { title: string; dueDate?: string });
 		newTitle = '';
+	}
+
+	async function handleVoiceComplete(blob: Blob, durationMs: number) {
+		await tasksStore.createFromVoice(blob, durationMs, 'de');
 	}
 
 	// Context menu
@@ -159,6 +164,13 @@
 		<span class="add-icon"><Circle size={18} /></span>
 		<input bind:value={newTitle} placeholder="Neue Aufgabe..." class="add-input" />
 	</form>
+
+	<VoiceCaptureBar
+		idleLabel="Aufgabe sprechen"
+		feature="todo-voice-capture"
+		reason="Aufgaben werden verschlüsselt gespeichert. Dafür brauchst du ein Mana-Konto."
+		onComplete={handleVoiceComplete}
+	/>
 
 	<div class="task-list">
 		{#each filtered() as task (task.id)}
