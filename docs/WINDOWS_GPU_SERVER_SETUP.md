@@ -30,6 +30,7 @@ Start-ScheduledTask -TaskName "ManaLLM"
 Start-ScheduledTask -TaskName "ManaSTT"
 Start-ScheduledTask -TaskName "ManaTTS"
 Start-ScheduledTask -TaskName "ManaImageGen"
+Start-ScheduledTask -TaskName "ManaVideoGen"
 ```
 
 Wenn Schritt 9 (Server-Modus) korrekt konfiguriert ist, sollte der PC:
@@ -415,12 +416,36 @@ Text-to-Speech mit mehreren Backends:
 Bildgenerierung mit FLUX.1-schnell (12B Parameter) via HuggingFace diffusers.
 
 - **Verzeichnis**: `C:\mana\services\mana-image-gen\`
+- **Repo-Pendant**: [`services/mana-image-gen/`](../services/mana-image-gen/) — `service.pyw`, `app/main.py`, `app/flux_service.py`, `app/api_auth.py`, `app/vram_manager.py`
 - **venv**: `C:\mana\venvs\image-gen\` (PyTorch 2.5.1+cu121)
-- **Config**: `C:\mana\services\mana-image-gen\.env`
+- **Config**: `C:\mana\services\mana-image-gen\.env` (siehe `services/mana-image-gen/.env.example`)
 - **Log**: `C:\mana\services\mana-image-gen\service.log`
 - **Autostart**: Windows Scheduled Task "ManaImageGen" (AtLogOn)
 - **Modell**: FLUX.1-schnell (Apache 2.0, 4-bit quantisiert via BitsAndBytes)
 - **HuggingFace**: Erfordert Login + Lizenzakzeptanz für gated Model
+
+### mana-video-gen (Port 3026)
+
+Videogenerierung mit LTX-Video (~2B Parameter) via HuggingFace diffusers + CUDA.
+
+- **Verzeichnis**: `C:\mana\services\mana-video-gen\`
+- **Repo-Pendant**: [`services/mana-video-gen/`](../services/mana-video-gen/) — `service.pyw`, `app/main.py`, `app/ltx_service.py`, `setup.sh`, `requirements.txt`
+- **venv**: `C:\mana\venvs\video-gen\` (PyTorch + CUDA + diffusers)
+- **Config**: `C:\mana\services\mana-video-gen\.env`
+- **Log**: `C:\mana\services\mana-video-gen\service.log`
+- **Autostart**: Windows Scheduled Task "ManaVideoGen" (AtLogOn)
+- **Modell**: LTX-Video (Lightricks)
+- **HuggingFace**: HF_TOKEN erforderlich für Model-Download
+
+### Repo-Pendants der anderen GPU-Services
+
+| Windows-Pfad | Repo-Pfad |
+|---|---|
+| `C:\mana\services\mana-llm\` | [`services/mana-llm/`](../services/mana-llm/) |
+| `C:\mana\services\mana-stt\` | [`services/mana-stt/`](../services/mana-stt/) |
+| `C:\mana\services\mana-tts\` | [`services/mana-tts/`](../services/mana-tts/) |
+
+Jeder Service hat im Repo eine `service.pyw` Datei — das ist der Runner, den die Scheduled Tasks aufrufen. Änderungen an einem Service sollten primär im Repo gemacht und dann auf die Windows-Box gespiegelt werden, nicht andersrum.
 
 ### Management-Skripte
 
@@ -439,6 +464,7 @@ Start-ScheduledTask -TaskName "ManaLLM"
 Start-ScheduledTask -TaskName "ManaSTT"
 Start-ScheduledTask -TaskName "ManaTTS"
 Start-ScheduledTask -TaskName "ManaImageGen"
+Start-ScheduledTask -TaskName "ManaVideoGen"
 
 # Alle Scheduled Tasks auf einmal anzeigen
 Get-ScheduledTask -TaskName "Mana*" | Format-Table TaskName, State
@@ -738,6 +764,7 @@ Start-ScheduledTask -TaskName "ManaLLM"
 Start-ScheduledTask -TaskName "ManaSTT"
 Start-ScheduledTask -TaskName "ManaTTS"
 Start-ScheduledTask -TaskName "ManaImageGen"
+Start-ScheduledTask -TaskName "ManaVideoGen"
 
 # Status prüfen
 python C:\mana\status.py

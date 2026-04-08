@@ -32,7 +32,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Configuration
-PORT = int(os.getenv("PORT", "3050"))
+PORT = int(os.getenv("PORT", "3024"))
 STT_URL = os.getenv("STT_URL", "http://localhost:3020")
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434")
 DEFAULT_MODEL = os.getenv("DEFAULT_MODEL", "gemma3:4b")

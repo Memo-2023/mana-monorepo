@@ -4,7 +4,7 @@
 cd "$(dirname "$0")"
 source venv/bin/activate
 
-export PORT=${PORT:-3050}
+export PORT=${PORT:-3024}
 export STT_URL=${STT_URL:-http://localhost:3020}
 export OLLAMA_URL=${OLLAMA_URL:-http://localhost:11434}
 export DEFAULT_MODEL=${DEFAULT_MODEL:-gemma3:4b}

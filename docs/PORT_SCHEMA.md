@@ -1,48 +1,49 @@
 # Port Schema
 
-> ⚠️ **ASPIRATIONAL — does not match running services as of 2026-04-08.**
+> ⚠️ **PARTIALLY ASPIRATIONAL.** The clean range layout below
+> (3000–3009 core, 3010–3019 infra, 3020–3029 AI/ML, …) was drafted
+> 2026-03-28 as a target state. Many services do match it; many don't.
+> Authoritative per-service ports live in each `services/*/CLAUDE.md`
+> alongside the source defaults in `app/main.py` / `config.ts` / etc.
 >
-> This document describes a *planned* reorganization of port assignments
-> into clean ranges (3000–3009 core, 3010–3019 infra, 3020–3029 AI/ML, …).
-> The reorg has not been executed: the actual ports services bind to
-> live in their `app/main.py` / `start.sh` / `config.ts`. Per-service
-> ports are documented in each `services/*/CLAUDE.md`.
+> ### Real ports today (2026-04-08)
 >
-> ### Real ports today
+> **Windows GPU server (`192.168.178.11`):**
+> - mana-stt `3020` (Scheduled Task `ManaSTT`, public: `gpu-stt.mana.how`)
+> - mana-tts `3022` (Task `ManaTTS`, public: `gpu-tts.mana.how`)
+> - mana-image-gen `3023` (Task `ManaImageGen`, public: `gpu-img.mana.how`)
+> - mana-llm `3025` (Task `ManaLLM`, public: `gpu-llm.mana.how`)
+> - mana-video-gen `3026` (Task `ManaVideoGen`, public: `gpu-video.mana.how`)
+> - Ollama `11434` (public: `gpu-ollama.mana.how`)
 >
-> **Mac Mini:**
+> **Mac Mini (production):**
 > - mana-auth `3001`
-> - mana-stt `3020` (Mac Mini local instance, MLX)
-> - mana-image-gen `3025` (Mac Mini, flux2.c, MPS — separate from the
->   Windows GPU image-gen on `gpu-img.mana.how` which lives outside the repo)
+> - mana-media `3015`
+> - mana-search `3021` (overlaps with the planned range slot, not a host
+>   collision since search runs on Mac Mini and stt runs on the GPU box)
+> - mana-crawler `3023` (same — Mac Mini, no host collision with image-gen on GPU)
+> - mana-notify `3040`
 > - mana-sync `3050`
-> - mana-search `3021`, mana-notify `3040`, mana-crawler `3023`,
->   mana-media `3015`
 > - mana-credits `3061`, mana-user `3062`, mana-subscriptions `3063`,
 >   mana-analytics `3064`, mana-events `3065`
 >
-> **Windows GPU server (`192.168.178.11`):**
-> - mana-llm `3025`
-> - mana-stt `3020`
-> - mana-tts `3022`
-> - image-gen (Windows variant, **not the repo's `mana-image-gen`**) `3023`
-> - mana-video-gen `3026`
-> - Ollama `11434`
+> **Not deployed:** `mana-voice-bot` (default port `3024`, no scheduled
+> task, no cloudflared route, no launchd plist).
 >
-> ### No production collisions today, but two latent ones in source defaults
+> No production port collisions exist today. The two latent collisions
+> that PORT_SCHEMA.md previously warned about (image-gen ↔ video-gen on
+> 3026, voice-bot ↔ sync on 3050) were resolved on 2026-04-08 by:
+> - Moving the only `mana-image-gen` to be the Windows-only diffusers
+>   variant on port 3023 (the Mac flux2.c variant was deleted)
+> - Moving `mana-voice-bot`'s source default from 3050 to 3024
 >
-> | Latent collision | Why it doesn't bite | What to watch for |
-> |---|---|---|
-> | mana-image-gen and mana-llm both use `3025` | Different machines (Mac Mini vs Windows GPU); mana-image-gen `setup.sh` hard-fails outside macOS arm64 so it can't be deployed onto the Windows GPU by accident | Don't try to run mana-image-gen and mana-llm on the same host |
-> | mana-voice-bot defaults to `3050`, mana-sync also `3050` | mana-voice-bot is not deployed anywhere yet (no launchd plist, no Scheduled Task, no cloudflared route) | Pick a free port for mana-voice-bot before deploying it — current default will collide with mana-sync wherever sync runs |
->
-> The previous version of this warning claimed two **active** collisions
-> (image-gen ↔ video-gen on 3026, voice-bot ↔ sync on 3050). That was
-> wrong: image-gen on Mac Mini was overridden to 3025 via a launchd plist
-> (now also the source default — see commit history), and voice-bot isn't
-> running anywhere.
+> Some services still don't match the planned range layout below
+> (mana-credits is at 3061 not 3002, mana-user 3062 not 3004, etc).
+> Either execute the move and update this doc, or accept reality and
+> rewrite the planned tables to reflect what's actually running.
 
 **Originally drafted:** 2026-03-28
+**Reality reconciled:** 2026-04-08
 
 ## Principles
 
