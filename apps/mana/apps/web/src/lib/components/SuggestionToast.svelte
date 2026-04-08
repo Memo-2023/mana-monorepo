@@ -62,12 +62,11 @@
 {/if}
 
 <style>
+	/* Positioning is the parent's job — this lives inside .bottom-stack
+	   in (app)/+layout.svelte. Used to be position: fixed at bottom 1rem
+	   centred with z-index 9999, which sat ON TOP of the QuickInputBar
+	   and covered it. */
 	.toast {
-		position: fixed;
-		bottom: 1rem;
-		left: 50%;
-		transform: translateX(-50%);
-		z-index: 9999;
 		display: flex;
 		align-items: center;
 		gap: 0.75rem;
@@ -139,11 +138,11 @@
 	@keyframes slide-up {
 		from {
 			opacity: 0;
-			transform: translateX(-50%) translateY(1rem);
+			transform: translateY(1rem);
 		}
 		to {
 			opacity: 1;
-			transform: translateX(-50%) translateY(0);
+			transform: translateY(0);
 		}
 	}
 </style>

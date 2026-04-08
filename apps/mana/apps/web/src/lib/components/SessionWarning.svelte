@@ -64,12 +64,10 @@
 {/if}
 
 <style>
+	/* Positioning is the parent's job — this lives inside .bottom-stack
+	   in (app)/+layout.svelte. Used to be position: fixed at bottom 16px
+	   with z-index 45, which the bottom-stack (z-index 90) hid. */
 	.session-warning {
-		position: fixed;
-		bottom: 16px;
-		left: 50%;
-		transform: translateX(-50%);
-		z-index: 45;
 		display: flex;
 		align-items: center;
 		gap: 12px;
@@ -85,11 +83,11 @@
 
 	@keyframes slideUp {
 		from {
-			transform: translateX(-50%) translateY(20px);
+			transform: translateY(20px);
 			opacity: 0;
 		}
 		to {
-			transform: translateX(-50%) translateY(0);
+			transform: translateY(0);
 			opacity: 1;
 		}
 	}

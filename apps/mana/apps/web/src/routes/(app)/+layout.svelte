@@ -8,6 +8,7 @@
 	import KeyboardShortcutsModal from '$lib/components/KeyboardShortcutsModal.svelte';
 	import SessionWarning from '$lib/components/SessionWarning.svelte';
 	import EncryptionIntroBanner from '$lib/components/EncryptionIntroBanner.svelte';
+	import SuggestionToast from '$lib/components/SuggestionToast.svelte';
 	import { locale, _ } from 'svelte-i18n';
 	import {
 		PillNavigation,
@@ -460,6 +461,23 @@
 				</div>
 			{/if}
 
+			<!-- Session expiry warning (auth only). Self-gates on the
+				 secondsLeft countdown and only renders inside the stack
+				 when actually warning, so the wrapper is no-op otherwise. -->
+			{#if authStore.isAuthenticated}
+				<div class="bottom-stack-notification">
+					<SessionWarning />
+				</div>
+			{/if}
+
+			<!-- Cross-module automation suggestions. Lives in the (app)
+				 stack because automationsStore is an (app)-only module
+				 and the toast doesn't make sense on auth/landing pages
+				 anyway. Self-gates on visible state. -->
+			<div class="bottom-stack-notification">
+				<SuggestionToast />
+			</div>
+
 			<!-- QuickInputBar with inline nav toggle -->
 			<QuickInputBar
 				onSearch={inputBarAdapter.onSearch}
@@ -557,10 +575,9 @@
 			</div>
 		</main>
 
-		<!-- Session expiry warning (auth only) -->
-		{#if authStore.isAuthenticated}
-			<SessionWarning />
-		{/if}
+		<!-- Session expiry warning lives inside .bottom-stack now (see above)
+			 so it doesn't end up obscured by the QuickInputBar like
+			 EncryptionIntroBanner used to be. -->
 
 		<!-- Keyboard shortcuts modal -->
 		<KeyboardShortcutsModal open={showShortcuts} onclose={() => (showShortcuts = false)} />

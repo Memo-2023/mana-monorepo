@@ -9,7 +9,6 @@
 	import { migrateGuestDataToUser } from '$lib/data/guest-migration';
 	import { installDataLayerListeners } from '$lib/data/data-layer-listeners';
 	import { getVaultClient, hasAnyEncryption } from '$lib/data/crypto';
-	import SuggestionToast from '$lib/components/SuggestionToast.svelte';
 	import RecoveryCodeUnlockModal from '$lib/components/RecoveryCodeUnlockModal.svelte';
 	import SyncConflictToast from '$lib/components/SyncConflictToast.svelte';
 	import OfflineIndicator from '$lib/components/OfflineIndicator.svelte';
@@ -106,7 +105,6 @@
 </script>
 
 {@render children()}
-<SuggestionToast />
 <SyncConflictToast />
 <OfflineIndicator />
 <PwaUpdatePrompt />
