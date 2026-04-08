@@ -65,8 +65,13 @@
 		if (!title) return;
 		const data: Record<string, unknown> = { title };
 		if (filter === 'today') data.dueDate = new Date().toISOString();
-		await tasksStore.createTask(data as { title: string; dueDate?: string });
+		const task = await tasksStore.createTask(data as { title: string; dueDate?: string });
 		newTitle = '';
+		// Background LLM enrichment: if the user typed something like
+		// "Steuererklärung morgen 14 Uhr hoch", swap in dueDate + priority
+		// once mana-llm answers. The task is already in the list with
+		// the user's exact title, so this only ever adds detail.
+		void tasksStore.enrichTaskFromText(task.id, title);
 	}
 
 	async function handleVoiceComplete(blob: Blob, durationMs: number) {

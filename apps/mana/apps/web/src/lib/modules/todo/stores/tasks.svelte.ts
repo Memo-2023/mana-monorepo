@@ -133,23 +133,11 @@ export const tasksStore = {
 				return;
 			}
 
-			// Step 2: structured extraction. parse-task gracefully falls
-			// back to { title: transcript, dueDate: null, ... } if mana-llm
-			// is unreachable, so we don't wrap this in another try/catch.
-			const parseResponse = await fetch('/api/v1/voice/parse-task', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ transcript, language }),
-			});
-			const parsed = parseResponse.ok
-				? ((await parseResponse.json()) as {
-						title: string;
-						dueDate: string | null;
-						priority: 'low' | 'medium' | 'high' | null;
-						labels: string[];
-					})
-				: { title: transcript, dueDate: null, priority: null as null, labels: [] as string[] };
-
+			// Step 2: structured extraction. For voice we always apply the
+			// LLM's title since the raw transcript ("erinnere mich morgen
+			// daran die steuererklärung zu machen") is much noisier than
+			// what the user actually wants to see in the list.
+			const parsed = await this.parseTaskText(transcript, language);
 			const update: Record<string, unknown> = { title: parsed.title };
 			if (parsed.dueDate) update.dueDate = parsed.dueDate;
 			if (parsed.priority) update.priority = parsed.priority;
@@ -162,6 +150,65 @@ export const tasksStore = {
 			const msg = e instanceof Error ? e.message : String(e);
 			await this.updateTask(taskId, { title: `Sprachaufgabe (Fehler: ${msg})` });
 		}
+	},
+
+	/**
+	 * Background enrichment for typed quick-add. Runs the same LLM
+	 * parser the voice flow uses, but with a stricter rule: only update
+	 * the task if the LLM actually found structured info (dueDate or
+	 * priority). For typed input the user already sees their exact text
+	 * as the title — silently rewriting it to a "cleaner" version when
+	 * the LLM didn't find a date/priority would be surprising and
+	 * occasionally wrong, so we leave it alone in that case.
+	 */
+	async enrichTaskFromText(taskId: string, text: string, language = 'de'): Promise<void> {
+		const trimmed = text.trim();
+		if (!trimmed) return;
+		try {
+			const parsed = await this.parseTaskText(trimmed, language);
+			if (!parsed.dueDate && !parsed.priority) return;
+
+			const update: Record<string, unknown> = {};
+			if (parsed.title && parsed.title !== trimmed) update.title = parsed.title;
+			if (parsed.dueDate) update.dueDate = parsed.dueDate;
+			if (parsed.priority) update.priority = parsed.priority;
+			if (Object.keys(update).length === 0) return;
+			await this.updateTask(taskId, update);
+		} catch {
+			// Silent — typed quick-add already gave the user a usable
+			// task; an LLM failure should never undo that.
+		}
+	},
+
+	/**
+	 * POST a transcript or typed text to the parse-task proxy and
+	 * return the structured result. The proxy already falls back to
+	 * { title: text, dueDate: null, ... } when mana-llm is unreachable
+	 * or returns garbage, so callers can use the result unconditionally.
+	 */
+	async parseTaskText(
+		text: string,
+		language = 'de'
+	): Promise<{
+		title: string;
+		dueDate: string | null;
+		priority: 'low' | 'medium' | 'high' | null;
+		labels: string[];
+	}> {
+		const response = await fetch('/api/v1/voice/parse-task', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ transcript: text, language }),
+		});
+		if (!response.ok) {
+			return { title: text, dueDate: null, priority: null, labels: [] };
+		}
+		return (await response.json()) as {
+			title: string;
+			dueDate: string | null;
+			priority: 'low' | 'medium' | 'high' | null;
+			labels: string[];
+		};
 	},
 
 	async updateTask(id: string, data: Record<string, unknown>) {
