@@ -12,6 +12,7 @@ import { encryptRecord, decryptRecord, decryptRecords, VaultLockedError } from '
 import { generateMasterKey, isEncrypted } from './aes';
 import { MemoryKeyProvider, setKeyProvider } from './key-provider';
 import * as registry from './registry';
+import { setCurrentUserId } from '../current-user';
 
 let key: CryptoKey;
 let provider: MemoryKeyProvider;
@@ -24,6 +25,12 @@ beforeEach(async () => {
 	provider.setKey(key);
 	setKeyProvider(provider);
 
+	// encryptRecord silently skips when no user is signed in (guest
+	// mode falls back to plaintext writes; guest-migration re-encrypts
+	// on login). Stamp a fake user id so the encryption path actually
+	// runs in these tests.
+	setCurrentUserId('test-user');
+
 	// Pretend the notes table is enabled with title + body fields.
 	vi.spyOn(registry, 'getEncryptedFields').mockImplementation((tableName: string) => {
 		if (tableName === TEST_TABLE) return ['title', 'body'];
@@ -34,6 +41,7 @@ beforeEach(async () => {
 afterEach(() => {
 	vi.restoreAllMocks();
 	provider.setKey(null);
+	setCurrentUserId(null);
 });
 
 describe('encryptRecord', () => {
@@ -83,12 +91,20 @@ describe('encryptRecord', () => {
 	});
 
 	it('throws VaultLockedError when no key is available', async () => {
+		// encryptRecord waits ~2s for the boot-time unlock race before
+		// giving up. Use fake timers so this test doesn't actually idle
+		// for two seconds — flush the timer manually after kicking off
+		// the call.
+		vi.useFakeTimers();
 		provider.setKey(null);
 		const record = { id: 'n', title: 'secret', body: 'also secret' };
-		await expect(encryptRecord(TEST_TABLE, record)).rejects.toThrow(VaultLockedError);
+		const promise = encryptRecord(TEST_TABLE, record);
+		await vi.advanceTimersByTimeAsync(2500);
+		await expect(promise).rejects.toThrow(VaultLockedError);
 		// Record was not partially mutated
 		expect(record.title).toBe('secret');
 		expect(record.body).toBe('also secret');
+		vi.useRealTimers();
 	});
 
 	it('does not throw when the vault is locked but no fields need encryption', async () => {

@@ -34,8 +34,9 @@
  */
 
 import { wrapValue, unwrapValue, isEncrypted } from './aes';
-import { getActiveKey, isVaultUnlocked } from './key-provider';
+import { getActiveKey, isVaultUnlocked, waitForActiveKey } from './key-provider';
 import { getEncryptedFields } from './registry';
+import { getCurrentUserId } from '../current-user';
 
 /** Thrown by encryptRecord when no key is available. Module stores
  *  catch this to surface "vault locked" UI. */
@@ -80,7 +81,23 @@ export async function encryptRecord<T extends object>(tableName: string, record:
 	}
 	if (todo.length === 0) return record;
 
-	const key = getActiveKey();
+	// Guest mode: there is no auth token, so the server vault is
+	// unreachable by definition. Falling back to plaintext keeps the
+	// app usable for anonymous local-first writes — guestMigration.ts
+	// will encrypt these records as part of the guest → user re-stamp
+	// when the user eventually signs in. The compromise is documented
+	// in the data-layer audit; the alternative (refusing the write)
+	// hides the entire app behind a sign-up wall.
+	if (getCurrentUserId() === null) return record;
+
+	// Boot-time race: the layout's `vaultClient.unlock()` runs in the
+	// same tick as authStore.initialize(), so the very first user
+	// mutation can land before the network round-trip finishes. Wait a
+	// short window for the provider to flip before we give up — this
+	// converts a near-miss race into a transparent ~ms delay instead of
+	// a thrown VaultLockedError that the UI silently swallows.
+	let key = getActiveKey();
+	if (!key) key = await waitForActiveKey(2000);
 	if (!key) throw new VaultLockedError(tableName);
 
 	for (const field of todo) {

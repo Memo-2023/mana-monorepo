@@ -20,10 +20,24 @@
  *   Deleting in guest mode is safe because nothing was ever pushed to the
  *   server: `_pendingChanges` is cleared as part of the migration too, so the
  *   delete is purely local and never reaches the sync layer.
+ *
+ * Encryption catch-up: while in guest mode, encryptRecord skips silently
+ * (no master key available, no auth token to fetch one). Records on
+ * encrypted tables therefore live as PLAINTEXT in IndexedDB until this
+ * migration runs. After login + vault unlock we walk the same set of
+ * records and re-encrypt the registry fields before re-inserting, so
+ * the post-migration state is indistinguishable from "user signed up
+ * first, then typed everything". The migration awaits the vault for up
+ * to 10 s — if it never opens we abort the migration and leave the
+ * guest data in place rather than re-inserting plaintext under the
+ * real user id.
  */
 
 import { db, SYNC_APP_MAP, FIELD_TIMESTAMPS_KEY } from './database';
 import { GUEST_USER_ID } from './current-user';
+import { encryptRecord } from './crypto/record-helpers';
+import { waitForActiveKey } from './crypto/key-provider';
+import { getEncryptedFields } from './crypto/registry';
 
 export interface GuestMigrationResult {
 	migratedRecords: number;
@@ -38,6 +52,19 @@ export interface GuestMigrationResult {
  */
 export async function migrateGuestDataToUser(newUserId: string): Promise<GuestMigrationResult> {
 	if (!newUserId || newUserId === GUEST_USER_ID) {
+		return { migratedRecords: 0, tablesTouched: 0 };
+	}
+
+	// Wait for the vault to unlock before we touch anything. The layout
+	// fires this migration and `vaultClient.unlock()` in the same
+	// effect run, so they race; if we re-insert plaintext under the
+	// real user id before the key arrives, those records would have to
+	// be re-encrypted by a follow-up pass that doesn't exist. Bail out
+	// instead — the guest data stays put and the user can retry by
+	// signing out and back in.
+	const key = await waitForActiveKey(10_000);
+	if (!key) {
+		console.warn('[mana] guest migration aborted: vault did not unlock in time');
 		return { migratedRecords: 0, tablesTouched: 0 };
 	}
 
@@ -64,8 +91,17 @@ export async function migrateGuestDataToUser(newUserId: string): Promise<GuestMi
 			if (guestRecords.length === 0) continue;
 			tablesTouched++;
 
+			// Snapshot the encrypted-field allowlist once per table (null if
+			// the table is not in the registry or currently disabled).
+			const encryptedFields = getEncryptedFields(tableName);
+
 			// One transaction per table keeps the delete+add pair atomic and
 			// avoids leaving the table half-migrated if Dexie throws partway.
+			// Note: encryptRecord is async and uses Web Crypto, which is fine
+			// inside a Dexie 'rw' transaction as long as we don't await
+			// non-Dexie work between Dexie ops in a way that suspends the
+			// transaction. Each iteration awaits the encrypt BEFORE touching
+			// the table, then runs the delete+add pair back-to-back.
 			await db.transaction('rw', table, async () => {
 				for (const oldRecord of guestRecords) {
 					const record = oldRecord as Record<string, unknown>;
@@ -77,6 +113,18 @@ export async function migrateGuestDataToUser(newUserId: string): Promise<GuestMi
 					const { userId: _oldUser, [FIELD_TIMESTAMPS_KEY]: _oldFt, ...clean } = record;
 					void _oldUser;
 					void _oldFt;
+
+					// Catch-up encryption: guest writes left these fields as
+					// plaintext because no key was available. Now that the
+					// vault is unlocked, encrypt them in place before the
+					// re-insert so the on-disk state matches a "logged in
+					// from the start" user. encryptRecord is a no-op for
+					// tables not in the registry, and idempotent for fields
+					// that are somehow already encrypted (e.g. partial
+					// migration retry after a crash).
+					if (encryptedFields) {
+						await encryptRecord(tableName, clean);
+					}
 
 					await table.delete(id);
 					await table.add({ ...clean, id });

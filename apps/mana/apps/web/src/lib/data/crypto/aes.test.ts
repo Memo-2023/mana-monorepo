@@ -192,6 +192,9 @@ describe('KeyProvider', () => {
 				onChange() {
 					return () => {};
 				}
+				async waitForKey() {
+					return null;
+				}
 			})()
 		);
 		expect(getActiveKey()).toBe(null);

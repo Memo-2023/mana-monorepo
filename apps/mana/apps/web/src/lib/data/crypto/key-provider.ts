@@ -34,6 +34,14 @@ export interface KeyProvider {
 	/** Subscribe to lock/unlock transitions. Returns a dispose function.
 	 *  Listeners fire only on STATE CHANGES, not on every getKey call. */
 	onChange(listener: (unlocked: boolean) => void): () => void;
+
+	/** Resolves with the active key as soon as the vault is unlocked, or
+	 *  with `null` if the timeout expires first. Used by encryptRecord to
+	 *  ride out the boot-time race where the user clicks a mutation button
+	 *  while the layout's `vaultClient.unlock()` round-trip is still in
+	 *  flight. Implementations that can never unlock (NullKeyProvider)
+	 *  resolve immediately with `null`. */
+	waitForKey(timeoutMs: number): Promise<CryptoKey | null>;
 }
 
 // ─── NullKeyProvider — default ─────────────────────────────────
@@ -53,6 +61,11 @@ class NullKeyProvider implements KeyProvider {
 	}
 	onChange(): () => void {
 		return () => {};
+	}
+	async waitForKey(): Promise<null> {
+		// Null provider can never unlock — don't make callers wait the
+		// full timeout for a guaranteed-null answer.
+		return null;
 	}
 }
 
@@ -107,6 +120,26 @@ export class MemoryKeyProvider implements KeyProvider {
 			this.listeners.delete(listener);
 		};
 	}
+
+	waitForKey(timeoutMs: number): Promise<CryptoKey | null> {
+		if (this.key) return Promise.resolve(this.key);
+		return new Promise((resolve) => {
+			let settled = false;
+			const dispose = this.onChange((unlocked) => {
+				if (settled || !unlocked) return;
+				settled = true;
+				clearTimeout(timer);
+				dispose();
+				resolve(this.key);
+			});
+			const timer = setTimeout(() => {
+				if (settled) return;
+				settled = true;
+				dispose();
+				resolve(this.key); // null on miss
+			}, timeoutMs);
+		});
+	}
 }
 
 // ─── Module-level active provider ──────────────────────────────
@@ -126,6 +159,13 @@ export function getKeyProvider(): KeyProvider {
 /** Convenience: returns the active key or `null` if locked. */
 export function getActiveKey(): CryptoKey | null {
 	return _activeProvider.getKey();
+}
+
+/** Convenience: waits up to `timeoutMs` (default 2s) for the vault to
+ *  unlock. Used by encryptRecord to ride out the boot-time race between
+ *  a user click and the layout's async vault unlock round-trip. */
+export function waitForActiveKey(timeoutMs: number = 2000): Promise<CryptoKey | null> {
+	return _activeProvider.waitForKey(timeoutMs);
 }
 
 /** Convenience: synchronous lock check. */

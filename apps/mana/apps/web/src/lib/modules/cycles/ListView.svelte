@@ -25,6 +25,8 @@
 	import CycleCalendar from './components/CycleCalendar.svelte';
 	import SymptomManager from './components/SymptomManager.svelte';
 	import type { ViewProps } from '$lib/app-registry';
+	import { toast } from '$lib/stores/toast.svelte';
+	import { VaultLockedError } from '$lib/data/crypto';
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const _props: ViewProps = $props();
@@ -97,31 +99,47 @@
 		editingDate = todayIso;
 	}
 
+	/** Wraps logDay calls so a locked vault becomes a visible toast instead
+	 *  of a silent unhandled rejection. encryptRecord already waits up to
+	 *  ~2s for the boot-time unlock race, so reaching this catch means the
+	 *  vault is genuinely unavailable (auth/network failure on /me/encryption-vault). */
+	async function safeLogDay(payload: Parameters<typeof dayLogsStore.logDay>[0]) {
+		try {
+			await dayLogsStore.logDay(payload);
+		} catch (err) {
+			if (err instanceof VaultLockedError) {
+				toast.error('Vault gesperrt — bitte unter Einstellungen → Sicherheit entsperren.');
+				return;
+			}
+			throw err;
+		}
+	}
+
 	async function setFlow(flow: Flow) {
-		await dayLogsStore.logDay({ logDate: editingDate, flow });
+		await safeLogDay({ logDate: editingDate, flow });
 	}
 
 	async function setMood(mood: Mood) {
 		const next = selectedMood === mood ? null : mood;
-		await dayLogsStore.logDay({ logDate: editingDate, mood: next });
+		await safeLogDay({ logDate: editingDate, mood: next });
 	}
 
 	async function toggleSymptom(id: string) {
 		const has = selectedSymptoms.includes(id);
 		const next = has ? selectedSymptoms.filter((s) => s !== id) : [...selectedSymptoms, id];
-		await dayLogsStore.logDay({ logDate: editingDate, symptoms: next });
+		await safeLogDay({ logDate: editingDate, symptoms: next });
 	}
 
 	async function saveTemperature() {
 		const num = parseFloat(temperature);
-		await dayLogsStore.logDay({
+		await safeLogDay({
 			logDate: editingDate,
 			temperature: Number.isFinite(num) ? num : null,
 		});
 	}
 
 	async function saveNotes() {
-		await dayLogsStore.logDay({ logDate: editingDate, notes: notesText.trim() || null });
+		await safeLogDay({ logDate: editingDate, notes: notesText.trim() || null });
 	}
 
 	async function deleteEditingLog() {
@@ -138,7 +156,7 @@
 
 	async function startPeriodToday() {
 		await cyclesStore.createCycle({ startDate: todayIso });
-		await dayLogsStore.logDay({ logDate: todayIso, flow: 'medium' });
+		await safeLogDay({ logDate: todayIso, flow: 'medium' });
 		backToToday();
 	}
 
