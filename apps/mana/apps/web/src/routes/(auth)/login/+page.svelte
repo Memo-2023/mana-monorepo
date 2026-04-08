@@ -8,7 +8,10 @@
 	import AppSlider from '$lib/components/AppSlider.svelte';
 	import LanguageSelector from '$lib/components/LanguageSelector.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
+	import { theme } from '$lib/stores/theme';
 	import { APP_VERSION, BUILD_TIME } from '$lib/version';
+
+	const isDark = $derived(theme.isDark);
 
 	// Get translations based on current locale
 	const translations = $derived(getLoginTranslations($locale || 'de'));
@@ -46,6 +49,7 @@
 	{translations}
 	{verified}
 	{initialEmail}
+	{isDark}
 	version={APP_VERSION}
 	buildTime={BUILD_TIME}
 >

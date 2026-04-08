@@ -1,7 +1,24 @@
 <script lang="ts">
 	import type { Component, Snippet } from 'svelte';
-	import type { AuthResult } from '../types';
-	import { Check, Warning, Eye, EyeSlash, SignIn, Sun, Moon } from '@mana/shared-icons';
+	import type { AuthErrorCode, AuthResult } from '../types';
+	import { Check, Warning, Eye, EyeSlash, SignIn } from '@mana/shared-icons';
+
+	/**
+	 * Map an AuthResult to a stable error code.
+	 *
+	 * Prefers the structured `errorCode` field; falls back to matching the
+	 * legacy free-form `error` string so older `onSignIn` implementations
+	 * keep working without an immediate backend change.
+	 */
+	function resolveErrorCode(result: AuthResult): AuthErrorCode {
+		if (result.errorCode) return result.errorCode;
+		const err = result.error ?? '';
+		if (err === 'INVALID_CREDENTIALS') return 'INVALID_CREDENTIALS';
+		if (err === 'EMAIL_NOT_VERIFIED') return 'EMAIL_NOT_VERIFIED';
+		if (err === 'ACCOUNT_LOCKED' || /temporarily locked/i.test(err)) return 'ACCOUNT_LOCKED';
+		if (/too many|rate.?limit/i.test(err)) return 'RATE_LIMITED';
+		return 'UNKNOWN';
+	}
 	/** Translation strings for the login page */
 	export interface LoginTranslations {
 		title: string;
@@ -120,11 +137,13 @@
 		version?: string;
 		/** Build timestamp (ISO string) to display next to version */
 		buildTime?: string;
-		onSignInWithPasskey?: () => Promise<AuthResult>;
+		onSignInWithPasskey?: (options?: { conditional?: boolean }) => Promise<AuthResult>;
 		passkeyAvailable?: boolean;
 		onVerifyTwoFactor?: (code: string, trustDevice?: boolean) => Promise<AuthResult>;
 		onVerifyBackupCode?: (code: string) => Promise<AuthResult>;
 		onSendMagicLink?: (email: string) => Promise<AuthResult>;
+		/** Whether dark mode is active. If omitted, falls back to system preference. */
+		isDark?: boolean;
 	}
 
 	let {
@@ -152,24 +171,17 @@
 		onVerifyTwoFactor,
 		onVerifyBackupCode,
 		onSendMagicLink,
+		isDark: isDarkProp,
 	}: Props = $props();
 
 	const t = $derived({ ...defaultTranslations, ...translations });
 
-	// Check if we're in development mode (early for state init)
-	const isDevMode = typeof import.meta !== 'undefined' && import.meta.env?.DEV;
-	// Local dev credentials (run `pnpm db:seed:dev` in mana-auth to create this user)
-	const DEV_EMAIL = 'dev@mana.local';
-	const DEV_PASSWORD = 'devpassword123';
-
 	let loading = $state(false);
 	let error = $state<string | null>(null);
 	let errorField = $state<'email' | 'password' | 'general' | null>(null);
-	// In dev mode, pre-fill with test credentials
-	let email = $state(initialEmail || (isDevMode ? DEV_EMAIL : ''));
-	let password = $state(initialPassword || (isDevMode ? DEV_PASSWORD : ''));
+	let email = $state(initialEmail);
+	let password = $state(initialPassword);
 	let showPassword = $state(false);
-	let rememberMe = $state(false);
 	let showSuccess = $state(false);
 	let shakeError = $state(false);
 	let emailInput = $state<HTMLInputElement | undefined>(undefined);
@@ -188,6 +200,23 @@
 	let magicLinkSent = $state(false);
 	let sendingMagicLink = $state(false);
 
+	// Pending timeouts cleared on unmount so navigation away doesn't fire stale callbacks.
+	const pendingTimeouts = new Set<ReturnType<typeof setTimeout>>();
+	function scheduleTimeout(fn: () => void, ms: number) {
+		const id = setTimeout(() => {
+			pendingTimeouts.delete(id);
+			fn();
+		}, ms);
+		pendingTimeouts.add(id);
+		return id;
+	}
+	$effect(() => {
+		return () => {
+			for (const id of pendingTimeouts) clearTimeout(id);
+			pendingTimeouts.clear();
+		};
+	});
+
 	$effect(() => {
 		if (rateLimitCountdown > 0) {
 			const timer = setTimeout(() => {
@@ -205,18 +234,14 @@
 		return m > 0 ? `${m}:${s.toString().padStart(2, '0')}` : `${s}s`;
 	}
 
-	// Theme state - can be toggled manually, defaults to system preference
-	let userThemePreference = $state<'light' | 'dark' | null>(null);
+	// Theme: prefer prop from host app, otherwise track system preference.
 	let systemIsDark = $state(
 		typeof window !== 'undefined'
 			? window.matchMedia('(prefers-color-scheme: dark)').matches
 			: false
 	);
 
-	// Effective dark mode based on user preference or system
-	let isDark = $derived(
-		userThemePreference !== null ? userThemePreference === 'dark' : systemIsDark
-	);
+	let isDark = $derived(isDarkProp ?? systemIsDark);
 
 	$effect(() => {
 		if (typeof window !== 'undefined') {
@@ -228,16 +253,6 @@
 		}
 	});
 
-	function toggleTheme() {
-		if (userThemePreference === null) {
-			// First toggle: switch to opposite of system
-			userThemePreference = systemIsDark ? 'light' : 'dark';
-		} else {
-			// Subsequent toggles: just flip
-			userThemePreference = userThemePreference === 'dark' ? 'light' : 'dark';
-		}
-	}
-
 	$effect(() => {
 		// Focus password field if email is pre-filled, otherwise focus email
 		if (initialEmail && passwordInput) {
@@ -247,20 +262,56 @@
 		}
 	});
 
+	/**
+	 * WebAuthn Conditional UI: when a passkey is registered for this site,
+	 * the browser surfaces it inline in the email autofill dropdown. This
+	 * effect kicks off a non-blocking `navigator.credentials.get` request
+	 * that resolves when the user picks a passkey, then completes sign-in.
+	 *
+	 * The request is aborted on unmount or when the user submits manually.
+	 */
+	$effect(() => {
+		if (typeof window === 'undefined') return;
+		if (!passkeyAvailable || !onSignInWithPasskey) return;
+		const PKC = (window as unknown as { PublicKeyCredential?: typeof PublicKeyCredential })
+			.PublicKeyCredential;
+		if (!PKC || typeof PKC.isConditionalMediationAvailable !== 'function') return;
+
+		let cancelled = false;
+
+		(async () => {
+			try {
+				const available = await PKC.isConditionalMediationAvailable();
+				if (!available || cancelled) return;
+				const result = await onSignInWithPasskey({ conditional: true });
+				if (cancelled || !result?.success) return;
+				showSuccess = true;
+				successAnnouncement = t.signInSuccess;
+				scheduleTimeout(() => goto(successRedirect), 600);
+			} catch {
+				/* user dismissal or no passkey — ignore silently */
+			}
+		})();
+
+		return () => {
+			cancelled = true;
+		};
+	});
+
 	function isValidEmail(email: string): boolean {
 		return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 	}
 
 	function triggerErrorShake() {
 		shakeError = true;
-		setTimeout(() => (shakeError = false), 500);
+		scheduleTimeout(() => (shakeError = false), 500);
 	}
 
 	function setError(message: string, field: 'email' | 'password' | 'general' = 'general') {
 		error = message;
 		errorField = field;
 		triggerErrorShake();
-		setTimeout(() => {
+		scheduleTimeout(() => {
 			if (field === 'email' && emailInput) emailInput.focus();
 			else if (field === 'password' && passwordInput) passwordInput.focus();
 		}, 100);
@@ -297,7 +348,7 @@
 		loading = false;
 
 		// Check if 2FA is required
-		if ((result as any).twoFactorRedirect) {
+		if (result.twoFactorRedirect) {
 			showTwoFactor = true;
 			return;
 		}
@@ -305,28 +356,29 @@
 		if (result.success) {
 			showSuccess = true;
 			successAnnouncement = t.signInSuccess;
-			setTimeout(() => goto(successRedirect), 600);
-		} else if (result.error === 'EMAIL_NOT_VERIFIED') {
+			scheduleTimeout(() => goto(successRedirect), 600);
+			return;
+		}
+
+		const code = resolveErrorCode(result);
+
+		if (code === 'EMAIL_NOT_VERIFIED') {
 			showEmailNotVerified = true;
 			setError(t.emailNotVerified || 'Email not verified.', 'general');
-		} else {
-			const errorMsg = (() => {
-				if (result.error === 'INVALID_CREDENTIALS') return t.invalidCredentials || t.signInFailed;
-				if (result.error === 'EMAIL_NOT_VERIFIED') return t.emailNotVerified || t.signInFailed;
-				return result.error || t.signInFailed;
-			})();
-			setError(errorMsg, 'general');
+			return;
+		}
 
-			// Detect rate limiting vs account lockout
-			if (result.error?.includes('Too Many') || result.error?.includes('rate limit')) {
-				rateLimitCountdown = 60; // 1 minute cooldown
-			} else if (
-				result.error?.includes('temporarily locked') ||
-				result.error === 'ACCOUNT_LOCKED'
-			) {
-				isLockedOut = true;
-				rateLimitCountdown = (result as any).retryAfter || 300; // 5 min default
-			}
+		const errorMsg =
+			code === 'INVALID_CREDENTIALS'
+				? t.invalidCredentials || t.signInFailed
+				: result.error || t.signInFailed;
+		setError(errorMsg, 'general');
+
+		if (code === 'RATE_LIMITED') {
+			rateLimitCountdown = result.retryAfter ?? 60;
+		} else if (code === 'ACCOUNT_LOCKED') {
+			isLockedOut = true;
+			rateLimitCountdown = result.retryAfter ?? 300;
 		}
 	}
 
@@ -365,7 +417,7 @@
 		if (result.success) {
 			showSuccess = true;
 			successAnnouncement = t.signInSuccess;
-			setTimeout(() => goto(successRedirect), 600);
+			scheduleTimeout(() => goto(successRedirect), 600);
 		} else {
 			setError(result.error || t.signInFailed, 'general');
 			twoFactorCode = '';
@@ -383,7 +435,7 @@
 		if (result.success) {
 			showSuccess = true;
 			successAnnouncement = t.signInSuccess;
-			setTimeout(() => goto(successRedirect), 600);
+			scheduleTimeout(() => goto(successRedirect), 600);
 		} else if (result.error === 'Passkey authentication was cancelled') {
 			// User cancelled - don't show error
 		} else {
@@ -414,11 +466,6 @@
 	function skipToForm() {
 		if (emailInput) emailInput.focus();
 	}
-
-	function fillDevCredentials() {
-		email = DEV_EMAIL;
-		password = DEV_PASSWORD;
-	}
 </script>
 
 <svelte:head>
@@ -428,7 +475,7 @@
 </svelte:head>
 
 <button
-	class="absolute -top-10 left-0 bg-black text-white px-4 py-2 z-[100] font-medium focus:top-0"
+	class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:bg-black focus:text-white focus:px-4 focus:py-2 focus:rounded-md focus:z-[100] focus:font-medium focus:outline focus:outline-2 focus:outline-white"
 	onclick={skipToForm}
 	type="button"
 >
@@ -439,30 +486,32 @@
 	{successAnnouncement}
 </div>
 
+{#snippet successBanner(message: string, onClose: () => void)}
+	<div
+		class="flex items-center gap-2 p-3 mb-4 rounded-xl relative text-sm bg-green-500/15 border border-green-500/30 text-green-500"
+		role="status"
+		aria-live="polite"
+	>
+		<Check size={18} class="text-green-500 shrink-0" />
+		<p>{message}</p>
+		<button
+			type="button"
+			class="absolute right-2 top-1/2 -translate-y-1/2 bg-transparent border-none text-green-500 text-xl cursor-pointer p-1 leading-none opacity-70 hover:opacity-100"
+			onclick={onClose}
+			aria-label="Close"
+		>
+			&times;
+		</button>
+	</div>
+{/snippet}
+
 <div
 	class="flex flex-col min-h-screen min-h-dvh w-full max-w-[100vw] overflow-x-hidden m-0 p-0"
 	style:background-color={isDark ? darkBackground || '#121212' : lightBackground || '#f5f5f5'}
 	style:--primary-color={primaryColor}
 >
-	<!-- Theme Toggle - Top Left -->
-	<button
-		type="button"
-		onclick={toggleTheme}
-		class="absolute top-4 left-4 z-50 flex items-center justify-center w-10 h-10 rounded-lg border cursor-pointer transition-all"
-		style:border-color={isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'}
-		style:background-color={isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'}
-		style:color={isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)'}
-		aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-	>
-		{#if isDark}
-			<Sun size={20} weight="bold" />
-		{:else}
-			<Moon size={20} weight="bold" />
-		{/if}
-	</button>
-
 	{#if headerControls}
-		<div class="absolute top-4 right-4 z-50 opacity-60 flex gap-3">
+		<div class="absolute top-4 right-4 z-50 flex gap-3">
 			{@render headerControls()}
 		</div>
 	{/if}
@@ -471,13 +520,12 @@
 		<div class="w-full max-w-[480px] mx-auto px-4 flex flex-col items-center">
 			<!-- Logo Section -->
 			<div class="flex flex-col items-center pt-8 max-[480px]:pt-6 pb-4 anim-fade-in-scale">
-				<button
-					type="button"
-					onclick={fillDevCredentials}
-					class="w-[100px] h-[100px] max-[480px]:w-[80px] max-[480px]:h-[80px] rounded-full border-[3px] flex items-center justify-center mb-3 cursor-pointer transition-transform shadow-lg hover:scale-105 active:scale-95"
+				<div
+					class="w-[100px] h-[100px] max-[480px]:w-[80px] max-[480px]:h-[80px] rounded-full border-[3px] flex items-center justify-center mb-3 shadow-lg"
 					class:success-pulse={showSuccess}
 					style:border-color={showSuccess ? '#22c55e' : primaryColor}
 					style:background-color={isDark ? '#000' : '#fff'}
+					role="img"
 					aria-label="{appName} logo"
 				>
 					{#if showSuccess}
@@ -485,7 +533,7 @@
 					{:else}
 						<Logo size={55} color={primaryColor} />
 					{/if}
-				</button>
+				</div>
 				<h1 class="text-2xl font-semibold" style:color={isDark ? '#fff' : '#000'}>{appName}</h1>
 			</div>
 
@@ -508,7 +556,7 @@
 							</h2>
 							<p
 								class="text-sm mt-2"
-								style:color={isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)'}
+								style:color={isDark ? 'rgba(255,255,255,0.75)' : 'rgba(0,0,0,0.75)'}
 							>
 								{useBackupCode ? t.twoFactorBackupSubtitle : t.twoFactorSubtitle}
 							</p>
@@ -606,23 +654,8 @@
 							{t.twoFactorBackToLogin}
 						</button>
 					{:else}
-						{#if showVerifiedBanner}
-							<div
-								class="flex items-center gap-2 p-3 mb-4 rounded-xl relative text-sm bg-green-500/15 border border-green-500/30 text-green-500"
-								role="status"
-								aria-live="polite"
-							>
-								<Check size={18} class="text-green-500 shrink-0" />
-								<p>{t.emailVerified}</p>
-								<button
-									type="button"
-									class="absolute right-2 top-1/2 -translate-y-1/2 bg-transparent border-none text-green-500 text-xl cursor-pointer p-1 leading-none opacity-70 hover:opacity-100"
-									onclick={() => (showVerifiedBanner = false)}
-									aria-label="Close"
-								>
-									&times;
-								</button>
-							</div>
+						{#if showVerifiedBanner && t.emailVerified}
+							{@render successBanner(t.emailVerified, () => (showVerifiedBanner = false))}
 						{/if}
 
 						<div class="text-center mb-6">
@@ -634,63 +667,17 @@
 							</h2>
 							<p
 								class="text-sm mt-2"
-								style:color={isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)'}
+								style:color={isDark ? 'rgba(255,255,255,0.75)' : 'rgba(0,0,0,0.75)'}
 							>
 								{t.subtitle}
 							</p>
 						</div>
 
-						{#if passkeyAvailable && onSignInWithPasskey}
-							<button
-								type="button"
-								onclick={handlePasskeySignIn}
-								disabled={loading || showSuccess}
-								aria-disabled={loading || showSuccess}
-								class="w-full h-14 border-2 rounded-xl font-medium flex items-center justify-center gap-2 cursor-pointer transition-opacity bg-transparent hover:opacity-85 disabled:opacity-50 disabled:cursor-not-allowed"
-								style:border-color={primaryColor}
-								style:color={isDark ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.9)'}
-							>
-								<svg
-									width="20"
-									height="20"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="2"
-									stroke-linecap="round"
-									stroke-linejoin="round"
-								>
-									<path d="M2 18v3c0 .6.4 1 1 1h4v-3h3v-3h2l1.4-1.4a6.5 6.5 0 1 0-4-4Z" />
-									<circle cx="16.5" cy="7.5" r=".5" fill="currentColor" />
-								</svg>
-								<span>Passkey</span>
-							</button>
-							<div class="divider flex items-center gap-4 my-5">
-								<span
-									class="text-xs"
-									style:color={isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)'}
-									>{t.orDivider}</span
-								>
-							</div>
-						{/if}
-
-						{#if verificationEmailSent}
-							<div
-								class="flex items-center gap-2 p-3 mb-4 rounded-xl relative text-sm bg-green-500/15 border border-green-500/30 text-green-500"
-								role="status"
-								aria-live="polite"
-							>
-								<Check size={18} class="text-green-500 shrink-0" />
-								<p>{t.verificationEmailSent}</p>
-								<button
-									type="button"
-									class="absolute right-2 top-1/2 -translate-y-1/2 bg-transparent border-none text-green-500 text-xl cursor-pointer p-1 leading-none opacity-70 hover:opacity-100"
-									onclick={() => (verificationEmailSent = false)}
-									aria-label="Close"
-								>
-									&times;
-								</button>
-							</div>
+						{#if verificationEmailSent && t.verificationEmailSent}
+							{@render successBanner(
+								t.verificationEmailSent,
+								() => (verificationEmailSent = false)
+							)}
 						{/if}
 
 						{#if isLockedOut}
@@ -826,19 +813,8 @@
 								</div>
 							</div>
 
-							<!-- Remember & Forgot -->
-							<div class="flex justify-between items-center mb-4 text-sm">
-								<label
-									class="remember-label flex items-center gap-2 cursor-pointer"
-									style:color={isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)'}
-								>
-									<input
-										type="checkbox"
-										bind:checked={rememberMe}
-										style:accent-color={primaryColor}
-									/>
-									<span>{t.rememberMe}</span>
-								</label>
+							<!-- Forgot password -->
+							<div class="flex justify-end items-center mb-4 text-sm">
 								<button
 									type="button"
 									onclick={() => goto(forgotPasswordPath)}
@@ -881,24 +857,46 @@
 							</button>
 						</form>
 
+						{#if passkeyAvailable && onSignInWithPasskey}
+							<div
+								class="divider flex items-center gap-4 my-5"
+								style:color={isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)'}
+							>
+								<span class="text-xs">{t.orDivider}</span>
+							</div>
+							<button
+								type="button"
+								onclick={handlePasskeySignIn}
+								disabled={loading || showSuccess}
+								aria-disabled={loading || showSuccess}
+								class="w-full h-14 border-2 rounded-xl font-medium flex items-center justify-center gap-2 cursor-pointer transition-opacity bg-transparent hover:opacity-85 disabled:opacity-50 disabled:cursor-not-allowed"
+								style:border-color={primaryColor}
+								style:color={isDark ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.9)'}
+							>
+								<svg
+									width="20"
+									height="20"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									aria-hidden="true"
+								>
+									<path d="M2 18v3c0 .6.4 1 1 1h4v-3h3v-3h2l1.4-1.4a6.5 6.5 0 1 0-4-4Z" />
+									<circle cx="16.5" cy="7.5" r=".5" fill="currentColor" />
+								</svg>
+								<span>Passkey</span>
+							</button>
+						{/if}
+
 						{#if onSendMagicLink}
 							{#if magicLinkSent}
-								<div
-									class="flex items-center gap-2 p-3 mb-4 rounded-xl relative text-sm bg-green-500/15 border border-green-500/30 text-green-500"
-									role="status"
-									aria-live="polite"
-								>
-									<Check size={18} class="text-green-500 shrink-0" />
-									<p>{t.magicLinkSent?.replace('{email}', email)}</p>
-									<button
-										type="button"
-										class="absolute right-2 top-1/2 -translate-y-1/2 bg-transparent border-none text-green-500 text-xl cursor-pointer p-1 leading-none opacity-70 hover:opacity-100"
-										onclick={() => (magicLinkSent = false)}
-										aria-label="Close"
-									>
-										&times;
-									</button>
-								</div>
+								{@render successBanner(
+									t.magicLinkSent?.replace('{email}', email) ?? '',
+									() => (magicLinkSent = false)
+								)}
 							{:else}
 								<button
 									type="button"
@@ -915,7 +913,7 @@
 
 						<p
 							class="text-center text-sm mt-4"
-							style:color={isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)'}
+							style:color={isDark ? 'rgba(255,255,255,0.75)' : 'rgba(0,0,0,0.75)'}
 						>
 							{t.noAccount}
 							<button
@@ -1107,6 +1105,14 @@
 	/* Focus ring color via CSS variable */
 	input:focus {
 		--tw-ring-color: var(--ring-color, currentColor);
+	}
+
+	/* Visible focus ring for all interactive controls */
+	button:focus-visible,
+	input:focus-visible {
+		outline: 2px solid var(--primary-color, currentColor);
+		outline-offset: 2px;
+		border-radius: 0.75rem;
 	}
 
 	/* Reduced motion */

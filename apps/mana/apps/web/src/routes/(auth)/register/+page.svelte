@@ -14,7 +14,16 @@
 
 	async function handleSignUp(email: string, password: string) {
 		const result = await authStore.signUp(email, password);
-		if (result.success) trackGuestConversion();
+		if (result.success) {
+			// Tracking must never block the success redirect.
+			queueMicrotask(() => {
+				try {
+					trackGuestConversion();
+				} catch {
+					/* swallow tracking errors */
+				}
+			});
+		}
 		return result;
 	}
 
@@ -33,7 +42,6 @@
 	primaryColor="#6366f1"
 	onSignUp={handleSignUp}
 	onResendVerification={handleResendVerification}
-	baseSignupCredits={25}
 	{goto}
 	successRedirect="/"
 	loginPath="/login"
