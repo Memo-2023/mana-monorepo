@@ -39,15 +39,12 @@ This document defines the URL schema for all mana.how subdomains.
 | **Media Service** | media.mana.how | Image/video processing |
 | **LLM Service** | llm.mana.how | LLM abstraction layer |
 | **LLM Playground** | playground.mana.how | LLM testing interface |
-| **Link Shortener** | link.mana.how | URL shortener (uload) |
 | **File Storage** | files.mana.how | MinIO/S3 file access |
 
-### Matrix/Communication
+### Automation
 
 | Service | URL | Description |
 |---------|-----|-------------|
-| **Matrix Server** | matrix.mana.how | Synapse homeserver |
-| **Element Web** | element.mana.how | Matrix web client |
 | **N8N** | n.mana.how | Workflow automation |
 
 ### Monitoring & Admin

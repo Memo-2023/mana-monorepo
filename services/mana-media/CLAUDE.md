@@ -9,7 +9,6 @@ Central media handling service for all Mana applications with content-addressabl
 mana-media provides:
 - **Content-Addressable Storage** - SHA-256 based deduplication across all apps
 - **Upload API** - File uploads with automatic deduplication
-- **Matrix Import** - Copy images from Matrix MXC URLs to persistent storage
 - **Processing** - Thumbnails, WebP conversion, resizing (via BullMQ)
 - **Delivery** - Optimized file serving, on-the-fly transforms
 
@@ -57,18 +56,6 @@ curl -X POST http://localhost:3015/api/v1/media/upload \
     "thumbnail": "http://localhost:3015/api/v1/media/abc123/file/thumb"
   }
 }
-```
-
-### Import from Matrix
-```bash
-# Import media from Matrix MXC URL
-curl -X POST http://localhost:3015/api/v1/media/import/matrix \
-  -H "Content-Type: application/json" \
-  -d '{
-    "mxcUrl": "mxc://matrix.mana.how/abc123",
-    "app": "nutriphi",
-    "userId": "user-uuid"
-  }'
 ```
 
 ### Get Media
@@ -128,8 +115,7 @@ const customUrl = media.getTransformUrl(result.id, {
 ┌─────────────────────────────────────────────────────────────┐
 │                      mana-media (Port 3015)                  │
 ├─────────────────────────────────────────────────────────────┤
-│  Upload Module   │  File uploads, Matrix import, dedup      │
-│  Matrix Module   │  Download from Matrix MXC URLs           │
+│  Upload Module   │  File uploads, dedup                     │
 │  Process Module  │  Sharp thumbnail generation (BullMQ)     │
 │  Storage Module  │  MinIO S3 abstraction                    │
 │  Delivery Module │  File serving + on-the-fly transforms    │
@@ -165,7 +151,7 @@ const customUrl = media.getTransformUrl(result.id, {
 | media_id | UUID | FK to media |
 | user_id | UUID | Owner user ID |
 | app | TEXT | Source app (nutriphi, contacts, etc.) |
-| source_url | TEXT | Original source (e.g., mxc:// URL) |
+| source_url | TEXT | Original source URL |
 
 ## Processing Pipeline
 
@@ -191,7 +177,6 @@ const customUrl = media.getTransformUrl(result.id, {
 | S3_SECRET_KEY | minioadmin | S3 secret key |
 | S3_BUCKET | mana-media | Storage bucket |
 | S3_PUBLIC_URL | - | Public URL for media |
-| MATRIX_HOMESERVER_URL | https://matrix.mana.how | Matrix homeserver |
 | PUBLIC_URL | http://localhost:3015/api/v1 | Public API URL |
 
 ## Development
@@ -230,27 +215,8 @@ mana-media bucket/
 - [x] v0.1: Basic upload + thumbnails
 - [x] v0.2: PostgreSQL persistence with Drizzle ORM
 - [x] v0.3: Content-addressable storage with SHA-256 deduplication
-- [x] v0.4: Matrix MXC URL import
 - [ ] v0.5: Video thumbnails (FFmpeg)
 - [ ] v0.6: Chunked upload for large files
 - [ ] v0.7: OCR for documents
 - [ ] v0.8: Vector search (Qdrant)
 - [ ] v1.0: Full production ready
-
-## Integration Example (NutriPhi Bot)
-
-```typescript
-// In matrix-nutriphi-bot
-const response = await fetch('http://mana-media:3015/api/v1/media/import/matrix', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    mxcUrl: 'mxc://matrix.mana.how/abc123',
-    app: 'nutriphi',
-    userId: userUuid,
-  }),
-});
-
-const { id, hash, urls } = await response.json();
-// Store id or hash in meal record for reference
-```

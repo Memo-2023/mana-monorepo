@@ -118,7 +118,6 @@ NAMED_VOLUMES=(
     "mana-grafana-data"
     "mana-analytics-data"
     "mana-loki-data"
-    "mana-matrix-bots-data"
 )
 
 if [ "$DRY_RUN" = true ]; then

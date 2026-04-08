@@ -174,10 +174,6 @@ for container in $ALL_PROBLEM_CONTAINERS; do
         mana-infra-postgres) SERVICE_NAME="postgres" ;;
         mana-infra-redis) SERVICE_NAME="redis" ;;
         mana-infra-minio) SERVICE_NAME="minio" ;;
-        mana-matrix-synapse) SERVICE_NAME="synapse" ;;
-        mana-matrix-element) SERVICE_NAME="element-web" ;;
-        mana-matrix-web) SERVICE_NAME="matrix-web" ;;
-        mana-matrix-bot-*) SERVICE_NAME="${container#mana-matrix-bot-}"; SERVICE_NAME="matrix-${SERVICE_NAME}-bot" ;;
         mana-mon-*) SERVICE_NAME="${container#mana-mon-}" ;;
         mana-auto-*) SERVICE_NAME="${container#mana-auto-}" ;;
         mana-service-*) SERVICE_NAME="${container#mana-service-}" ;;

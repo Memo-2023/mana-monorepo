@@ -5,7 +5,7 @@
 # Deploys the complete Mana stack:
 # - Infrastructure: PostgreSQL, Redis, MinIO, SearXNG
 # - Core Services: mana-auth, mana-credits, mana-user, mana-subscriptions, mana-analytics
-# - Go Services: mana-sync, mana-search, mana-crawler, mana-api-gateway, mana-notify, mana-matrix-bot
+# - Go Services: mana-sync, mana-search, mana-crawler, mana-api-gateway, mana-notify
 # - Python AI: mana-llm, mana-stt, mana-tts, mana-image-gen
 # - App Frontends: 19 SvelteKit web apps
 #

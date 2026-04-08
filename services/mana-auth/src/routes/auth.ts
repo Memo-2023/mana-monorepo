@@ -109,46 +109,77 @@ export function createAuthRoutes(
 		const ip = c.req.header('x-forwarded-for') || 'unknown';
 
 		try {
-			const response = await auth.api.signInEmail({
-				body: { email: body.email, password: body.password },
-				headers: c.req.raw.headers,
-			});
+			// Sign in via Better Auth's HTTP handler so we get back a real
+			// Response with Set-Cookie. The auth.api.signInEmail() SDK call
+			// only returns the body and we'd lose the signed cookie envelope
+			// that /api/auth/token needs to validate the session — the cookie
+			// value is `<sessionToken>.<HMAC>`, not just the raw session token,
+			// so reconstructing it from the API response doesn't work.
+			const signInResponse = await auth.handler(
+				new Request(new URL('/api/auth/sign-in/email', config.baseUrl), {
+					method: 'POST',
+					headers: new Headers({
+						'Content-Type': 'application/json',
+						// Forward original X-Forwarded-For so Better Auth's rate
+						// limiting and our security log see the right IP.
+						...(c.req.header('x-forwarded-for')
+							? { 'X-Forwarded-For': c.req.header('x-forwarded-for') as string }
+							: {}),
+					}),
+					body: JSON.stringify({ email: body.email, password: body.password }),
+				})
+			);
+
+			if (!signInResponse.ok) {
+				// Better Auth returns 403 with FORBIDDEN for unverified emails.
+				if (signInResponse.status === 403) {
+					return c.json({ error: 'Email not verified', code: 'EMAIL_NOT_VERIFIED' }, 403);
+				}
+				security.logEvent({
+					eventType: 'LOGIN_FAILURE',
+					ipAddress: ip,
+					metadata: { email: body.email },
+				});
+				lockout.recordAttempt(body.email, false, ip);
+				return c.json({ error: 'Invalid credentials' }, 401);
+			}
+
+			const response = (await signInResponse.json()) as {
+				user?: { id: string };
+				token?: string;
+				redirect?: boolean;
+			};
 
 			if (response?.user?.id) {
 				security.logEvent({ userId: response.user.id, eventType: 'LOGIN_SUCCESS', ipAddress: ip });
 				lockout.clearAttempts(body.email);
 			}
 
-			// signInEmail returns { token (session token), user, redirect }
-			// Use the session token to call Better Auth's JWT /token endpoint.
-			//
-			// In production Better Auth issues the session cookie with the
-			// __Secure- prefix (because secure: true is set), so we have to
-			// pass that exact cookie name back when forging the request to
-			// /api/auth/token. Without the prefix the get-session middleware
-			// can't find the session and the JWT mint silently fails — the
-			// route falls through and returns a response without accessToken.
-			const sessionToken = response?.token;
-			if (sessionToken) {
-				const cookieName =
-					config.nodeEnv === 'production' ? '__Secure-mana.session_token' : 'mana.session_token';
+			// Capture the signed session cookie that Better Auth set on the
+			// sign-in response and forward it verbatim to /api/auth/token to
+			// mint a JWT. This is the only path that produces a cookie value
+			// with a valid HMAC signature.
+			const setCookie = signInResponse.headers.get('set-cookie');
+			if (setCookie) {
 				const tokenResponse = await auth.handler(
 					new Request(new URL('/api/auth/token', config.baseUrl), {
 						method: 'GET',
-						headers: new Headers({ cookie: `${cookieName}=${sessionToken}` }),
+						headers: new Headers({ cookie: setCookie }),
 					})
 				);
 
 				if (tokenResponse.ok) {
-					const tokenData = await tokenResponse.json();
+					const tokenData = (await tokenResponse.json()) as { token: string };
 					return c.json({
 						...response,
 						accessToken: tokenData.token,
-						refreshToken: sessionToken,
+						refreshToken: response.token,
 					});
 				}
 			}
 
+			// JWT mint failed (or no Set-Cookie came back). Still return the
+			// sign-in body so the client at least sees the user object.
 			return c.json(response);
 		} catch (error) {
 			// Better Auth throws APIError with status="FORBIDDEN" for unverified emails.

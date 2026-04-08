@@ -123,13 +123,6 @@ scrape_configs:
     metrics_path: '/metrics'
     scrape_interval: 30s
 
-  # Matrix Synapse
-  - job_name: 'synapse'
-    static_configs:
-      - targets: ['synapse:9002']
-    metrics_path: '/_synapse/metrics'
-    scrape_interval: 30s
-
   # ============================================
   # GPU Server (Windows PC, LAN: 192.168.178.11)
   # ============================================
@@ -190,13 +183,6 @@ scrape_configs:
     metrics_path: '/metrics'
     scrape_interval: 15s
 
-  # Matrix Bot (Go) — consolidated 21 bots
-  - job_name: 'mana-matrix-bot'
-    static_configs:
-      - targets: ['mana-matrix-bot:4000']
-    metrics_path: '/metrics'
-    scrape_interval: 30s
-
   # Sync Server (Go) — local-first data sync
   - job_name: 'mana-sync'
     static_configs:
@@ -204,7 +190,7 @@ scrape_configs:
     metrics_path: '/metrics'
     scrape_interval: 30s
 
-  # Notification Service (Go) — email, push, matrix, webhook
+  # Notification Service (Go) — email, push, webhook
   - job_name: 'mana-notify'
     static_configs:
       - targets: ['mana-core-notify:3013']
@@ -297,8 +283,6 @@ scrape_configs:
           - https://grafana.mana.how
           - https://stats.mana.how
           - https://glitchtip.mana.how
-          - https://matrix.mana.how
-          - https://element.mana.how
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target

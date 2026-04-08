@@ -79,17 +79,15 @@ get_category_mem() {
 
 infra=$(get_category_mem "mana-infra")
 core=$(get_category_mem "mana-core\|mana-auth\|mana-credits\|mana-user\|mana-subscriptions\|mana-analytics\|mana-api-gateway\|mana-crawler\|mana-service")
-matrix=$(get_category_mem "mana-matrix")
 apps=$(get_category_mem "mana-app")
 monitoring=$(get_category_mem "mana-mon")
 games=$(get_category_mem "mana-game")
 auto=$(get_category_mem "mana-auto")
 
-total=$((infra + core + matrix + apps + monitoring + games + auto))
+total=$((infra + core + apps + monitoring + games + auto))
 
 printf "%-25s %8s MiB\n" "Infrastructure:" "$infra"
 printf "%-25s %8s MiB\n" "Core Services:" "$core"
-printf "%-25s %8s MiB\n" "Matrix Stack:" "$matrix"
 printf "%-25s %8s MiB\n" "Web Apps:" "$apps"
 printf "%-25s %8s MiB\n" "Monitoring:" "$monitoring"
 printf "%-25s %8s MiB\n" "Games:" "$games"

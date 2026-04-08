@@ -163,7 +163,6 @@ export const APP_POSITIONS: Record<string, { x: number; y: number; lakeId: strin
 	planta: { x: 1115, y: 675, lakeId: 'db-right' },
 
 	// Around Bergsee (redis) - lightweight/cache
-	matrix: { x: 260, y: 375, lakeId: 'redis' },
 	traces: { x: 400, y: 385, lakeId: 'redis' },
 
 	// Around Stausee (minio) - storage-heavy

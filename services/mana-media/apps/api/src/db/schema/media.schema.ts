@@ -80,11 +80,11 @@ export const mediaReferences = mediaSchema.table(
 		mediaId: uuid('media_id')
 			.references(() => media.id, { onDelete: 'cascade' })
 			.notNull(),
-		// Owner info (can be UUID or Matrix user ID like @user:matrix.org)
+		// Owner user ID
 		userId: text('user_id').notNull(),
 		// Source app (nutriphi, contacts, chat, etc.)
 		app: text('app').notNull(),
-		// Optional: reference to the source (e.g., mxc:// URL from Matrix)
+		// Optional: reference to the source URL
 		sourceUrl: text('source_url'),
 		// Custom metadata per reference
 		metadata: jsonb('metadata'),

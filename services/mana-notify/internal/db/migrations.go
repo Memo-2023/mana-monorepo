@@ -13,7 +13,7 @@ func (d *DB) migrate(ctx context.Context) error {
 
 		// Enum types (idempotent with DO blocks)
 		`DO $$ BEGIN
-			CREATE TYPE notify.channel_type AS ENUM ('email', 'push', 'matrix', 'webhook');
+			CREATE TYPE notify.channel_type AS ENUM ('email', 'push', 'webhook');
 		EXCEPTION WHEN duplicate_object THEN NULL;
 		END $$`,
 

@@ -7,7 +7,6 @@ import { StorageService } from './services/storage';
 import { UploadService } from './services/upload';
 import { ProcessService } from './services/process';
 import { ExifService } from './services/exif';
-import { MatrixService } from './services/matrix';
 import { uploadRoutes } from './routes/upload';
 import { deliveryRoutes } from './routes/delivery';
 import { PROCESS_QUEUE, SUPPORTED_IMAGE_TYPES } from './constants';
@@ -24,7 +23,6 @@ const storage = new StorageService();
 await storage.init();
 
 const exifService = new ExifService();
-const matrixService = new MatrixService();
 const processService = new ProcessService(storage, exifService);
 
 const processQueue = new Queue(PROCESS_QUEUE, {
@@ -35,7 +33,7 @@ const processQueue = new Queue(PROCESS_QUEUE, {
 	},
 });
 
-const uploadService = new UploadService(db, storage, matrixService, processQueue);
+const uploadService = new UploadService(db, storage, processQueue);
 
 // BullMQ Worker
 const worker = new Worker(

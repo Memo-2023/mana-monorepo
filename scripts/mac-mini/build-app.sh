@@ -146,7 +146,6 @@ if [ $# -eq 0 ]; then
   echo "  $0 todo-web todo-backend       # Build & restart both"
   echo "  $0 --base                      # Rebuild base images"
   echo "  $0 --all-web                   # Rebuild all web apps"
-  echo "  $0 mana-matrix-bot             # Build & restart consolidated Matrix bot (Go)"
   echo "  $0 --force-free todo-web       # Force stop monitoring before build"
   exit 1
 fi

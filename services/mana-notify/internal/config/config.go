@@ -30,10 +30,6 @@ type Config struct {
 	// Expo Push
 	ExpoAccessToken string
 
-	// Matrix
-	MatrixHomeserverURL string
-	MatrixAccessToken   string
-
 	// Rate Limits
 	RateLimitEmailPerMinute int
 	RateLimitPushPerMinute  int
@@ -63,9 +59,6 @@ func Load() *Config {
 		SMTPInsecureTLS: envutil.GetBool("SMTP_INSECURE_TLS", false),
 
 		ExpoAccessToken: envutil.Get("EXPO_ACCESS_TOKEN", ""),
-
-		MatrixHomeserverURL: envutil.Get("MATRIX_HOMESERVER_URL", ""),
-		MatrixAccessToken:   envutil.Get("MATRIX_ACCESS_TOKEN", ""),
 
 		RateLimitEmailPerMinute: envutil.GetInt("RATE_LIMIT_EMAIL_PER_MINUTE", 10),
 		RateLimitPushPerMinute:  envutil.GetInt("RATE_LIMIT_PUSH_PER_MINUTE", 100),

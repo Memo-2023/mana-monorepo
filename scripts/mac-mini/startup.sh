@@ -110,7 +110,7 @@ log "Docker CLI connected"
 
 # ─── Restore named volumes if missing ───
 BACKUP_DIR="/Volumes/ManaData/backups/docker-migration-20260328"
-for vol in mana-redis-data mana-victoria-data mana-alertmanager-data mana-grafana-data mana-analytics-data mana-loki-data mana-matrix-bots-data; do
+for vol in mana-redis-data mana-victoria-data mana-alertmanager-data mana-grafana-data mana-analytics-data mana-loki-data; do
     if ! docker volume inspect "$vol" >/dev/null 2>&1; then
         BACKUP_FILE="$BACKUP_DIR/${vol}.tar.gz"
         if [ -f "$BACKUP_FILE" ]; then
@@ -137,11 +137,6 @@ log "Starting Docker containers..."
 cd "$PROJECT_ROOT"
 docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" up -d --no-build 2>&1 | tee -a "$LOG_FILE"
 
-# ─── Force-recreate stateful containers that cache config ───
-# synapse copies homeserver.yaml at startup; stale container uses old cached config
-log "Force-recreating config-sensitive containers..."
-docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" up -d --no-build --force-recreate synapse 2>&1 | tee -a "$LOG_FILE"
-
 # ─── Wait and verify ───
 log "Waiting 45s for services to initialize..."
 sleep 45
@@ -154,13 +149,5 @@ log "Ensuring databases exist..."
 for db in mana_auth mana_credits chat todo calendar clock contacts storage umami; do
     docker exec mana-infra-postgres psql -U postgres -c "CREATE DATABASE $db;" 2>/dev/null || true
 done
-
-# Matrix Synapse: needs its own user and C-locale database
-docker exec mana-infra-postgres psql -U postgres -c \
-    "DO \$\$ BEGIN IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname='synapse') THEN CREATE USER synapse WITH PASSWORD 'synapse-secure-password'; END IF; END \$\$;" \
-    2>/dev/null || true
-docker exec mana-infra-postgres psql -U postgres -c \
-    "CREATE DATABASE matrix OWNER synapse ENCODING UTF8 LC_COLLATE='C' LC_CTYPE='C' TEMPLATE template0;" \
-    2>/dev/null || true
 
 log "=== Startup Complete ($RUNNING containers running) ==="

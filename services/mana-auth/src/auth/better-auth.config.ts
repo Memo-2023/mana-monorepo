@@ -18,7 +18,6 @@ import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { jwt } from 'better-auth/plugins/jwt';
 import { organization } from 'better-auth/plugins/organization';
-import { oidcProvider } from 'better-auth/plugins/oidc-provider';
 import { twoFactor } from 'better-auth/plugins/two-factor';
 import { magicLink } from 'better-auth/plugins/magic-link';
 import { getDb } from '../db/connection';
@@ -29,10 +28,6 @@ import {
 	accounts,
 	verificationTokens,
 	jwks,
-	oauthApplications,
-	oauthAccessTokens,
-	oauthAuthorizationCodes,
-	oauthConsents,
 	twoFactorAuth,
 } from '../db/schema/auth';
 import {
@@ -103,12 +98,6 @@ export function createBetterAuth(databaseUrl: string) {
 
 				// Two-Factor Authentication table
 				twoFactor: twoFactorAuth,
-
-				// OIDC Provider tables
-				oauthApplication: oauthApplications,
-				oauthAccessToken: oauthAccessTokens,
-				oauthAuthorizationCode: oauthAuthorizationCodes,
-				oauthConsent: oauthConsents,
 			},
 		}),
 
@@ -258,9 +247,6 @@ export function createBetterAuth(databaseUrl: string) {
 			// Separate apps (not part of unified app)
 			'https://arcade.mana.how', // Games
 			'https://whopxl.mana.how', // Games
-			'https://link.mana.how', // Matrix/Manalink
-			'https://element.mana.how', // Element (Matrix client)
-			'https://matrix.mana.how', // Matrix
 			// Local development
 			'http://localhost:3001',
 			'http://localhost:5173',
@@ -365,45 +351,6 @@ export function createBetterAuth(databaseUrl: string) {
 				},
 			}),
 
-			/**
-			 * OIDC Provider Plugin
-			 *
-			 * Enables Mana Core Auth to act as an OpenID Connect Provider.
-			 * This allows Matrix/Synapse and other services to use SSO.
-			 *
-			 * Endpoints provided:
-			 * - GET /.well-known/openid-configuration
-			 * - GET /api/oidc/authorize
-			 * - POST /api/oidc/token
-			 * - GET /api/oidc/userinfo
-			 * - GET /api/oidc/jwks
-			 */
-			oidcProvider({
-				// Login page for OIDC authorization
-				loginPage: '/login',
-				// Consent page (skipped for trusted clients)
-				consentPage: '/consent',
-				// Use JWT plugin for token signing (EdDSA instead of HS256)
-				// This is required for Synapse OIDC which verifies via JWKS
-				useJWTPlugin: true,
-				metadata: {
-					issuer: process.env.BASE_URL || 'http://localhost:3001',
-				},
-				// Trusted clients that skip consent screen
-				// These clients are considered first-party and don't need user consent
-				trustedClients: [
-					{
-						clientId: 'matrix-synapse',
-						clientSecret: process.env.SYNAPSE_OIDC_CLIENT_SECRET || '',
-						name: 'Matrix Synapse',
-						type: 'web',
-						disabled: false,
-						metadata: {},
-						redirectUrls: ['https://matrix.mana.how/_synapse/client/oidc/callback'],
-						skipConsent: true,
-					},
-				],
-			}),
 			/**
 			 * Two-Factor Authentication Plugin (TOTP)
 			 *

@@ -378,23 +378,6 @@ export const MANA_APPS: ManaApp[] = [
 		requiredTier: 'alpha',
 	},
 	{
-		id: 'matrix',
-		name: 'Mana Matrix',
-		description: {
-			de: 'Matrix Chat Client',
-			en: 'Matrix Chat Client',
-		},
-		longDescription: {
-			de: 'Verbinde dich mit dem dezentralen Matrix-Netzwerk für sichere, föderierte Kommunikation.',
-			en: 'Connect to the decentralized Matrix network for secure, federated communication.',
-		},
-		icon: APP_ICONS.matrix,
-		color: '#8b5cf6',
-		comingSoon: false,
-		status: 'beta',
-		requiredTier: 'alpha',
-	},
-	{
 		id: 'context',
 		name: 'Context',
 		description: {
@@ -796,7 +779,7 @@ export const APP_SLIDER_LABELS = {
  * App URLs — unified app uses internal paths, separate apps use subdomains.
  *
  * All productivity apps are now served under mana.how/{appId}.
- * Games and Matrix remain on separate subdomains.
+ * Games remain on separate subdomains.
  */
 export const APP_URLS: Record<AppIconId, { dev: string; prod: string }> = {
 	// ─── Unified App (internal paths) ─────────────────────────
@@ -837,7 +820,6 @@ export const APP_URLS: Record<AppIconId, { dev: string; prod: string }> = {
 	news: { dev: 'http://localhost:5173/news', prod: 'https://mana.how/news' },
 	mail: { dev: 'http://localhost:5173/mail', prod: 'https://mana.how/mail' },
 	// ─── Separate Apps (own subdomains) ───────────────────────
-	matrix: { dev: 'http://localhost:5180', prod: 'https://matrix.mana.how' },
 	arcade: { dev: 'http://localhost:5201', prod: 'https://arcade.mana.how' },
 };
 

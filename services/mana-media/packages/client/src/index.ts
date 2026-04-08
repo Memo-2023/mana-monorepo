@@ -14,13 +14,6 @@ export interface MediaResult {
 	createdAt: Date;
 }
 
-export interface ImportFromMatrixOptions {
-	mxcUrl: string;
-	app: string;
-	userId: string;
-	skipProcessing?: boolean;
-}
-
 export interface UploadOptions {
 	app?: string;
 	userId?: string;
@@ -80,33 +73,6 @@ export class MediaClient {
 
 		if (!response.ok) {
 			throw new Error(`Upload failed: ${response.statusText}`);
-		}
-
-		return response.json();
-	}
-
-	/**
-	 * Import media from a Matrix MXC URL
-	 * Copies the file from Matrix to mana-media storage with deduplication
-	 */
-	async importFromMatrix(options: ImportFromMatrixOptions): Promise<MediaResult> {
-		const response = await fetch(`${this.baseUrl}/api/v1/media/import/matrix`, {
-			method: 'POST',
-			headers: {
-				...this.getHeaders(),
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify({
-				mxcUrl: options.mxcUrl,
-				app: options.app,
-				userId: options.userId,
-				skipProcessing: options.skipProcessing,
-			}),
-		});
-
-		if (!response.ok) {
-			const error = await response.text();
-			throw new Error(`Import from Matrix failed: ${response.statusText} - ${error}`);
 		}
 
 		return response.json();

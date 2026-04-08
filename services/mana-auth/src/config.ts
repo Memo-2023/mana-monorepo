@@ -10,7 +10,6 @@ export interface Config {
 	manaNotifyUrl: string;
 	manaCreditsUrl: string;
 	manaSubscriptionsUrl: string;
-	synapseOidcClientSecret: string;
 	/** Base64-encoded 32-byte AES-256 key encryption key (KEK). Wraps each
 	 *  user's master key in auth.encryption_vaults. Required in production
 	 *  — in development a deterministic dev KEK is auto-generated so the
@@ -55,7 +54,6 @@ export function loadConfig(): Config {
 		manaNotifyUrl: env('MANA_NOTIFY_URL', 'http://localhost:3013'),
 		manaCreditsUrl: env('MANA_CREDITS_URL', 'http://localhost:3061'),
 		manaSubscriptionsUrl: env('MANA_SUBSCRIPTIONS_URL', 'http://localhost:3063'),
-		synapseOidcClientSecret: env('SYNAPSE_OIDC_CLIENT_SECRET'),
 		encryptionKek,
 	};
 }

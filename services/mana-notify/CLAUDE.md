@@ -1,6 +1,6 @@
 # mana-notify (Go)
 
-Go replacement for the NestJS mana-notify service. Unified notification microservice for email, push, Matrix, and webhook notifications.
+Go replacement for the NestJS mana-notify service. Unified notification microservice for email, push, and webhook notifications.
 
 ## Architecture
 
@@ -47,7 +47,6 @@ Go replacement for the NestJS mana-notify service. Unified notification microser
 |---------|---------|-------------------|-------------|
 | Email | Stalwart SMTP (self-hosted, see `docs/MAIL_SERVER.md`) | 5 | 3 |
 | Push | Expo Push API | 10 | 3 |
-| Matrix | Matrix Homeserver API | 5 | 3 |
 | Webhook | HTTP callback | 10 | 5 |
 
 ## Commands
@@ -72,5 +71,3 @@ go test ./...                # Test
 | `SMTP_PASSWORD` | | SMTP password |
 | `SMTP_FROM` | Mana <noreply@mana.how> | Default from |
 | `EXPO_ACCESS_TOKEN` | | Expo push token |
-| `MATRIX_HOMESERVER_URL` | | Matrix homeserver |
-| `MATRIX_ACCESS_TOKEN` | | Matrix bot token |

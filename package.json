@@ -76,9 +76,6 @@
 		"dev:calendar:landing": "pnpm --filter @calendar/landing dev",
 		"dev:calendar:app": "concurrently -n api,web -c yellow,cyan \"pnpm dev:api\" \"pnpm dev:calendar:web\"",
 		"dev:calendar:full": "concurrently -n auth,sync,api -c blue,magenta,yellow \"pnpm dev:auth\" \"pnpm dev:sync\" \"pnpm dev:api\"",
-		"matrix:dev": "turbo run dev --filter=matrix...",
-		"dev:matrix:web": "pnpm --filter @matrix/web dev",
-		"dev:matrix:mobile": "pnpm --filter @matrix/mobile dev",
 		"mail:dev": "turbo run dev --filter=mail...",
 		"dev:mail:mobile": "pnpm --filter @mail/mobile dev",
 		"dev:mail:web": "pnpm --filter @mail/web dev",
@@ -230,9 +227,6 @@
 		"dev:skilltree:web": "pnpm --filter @skilltree/web dev",
 		"dev:skilltree:app": "pnpm dev:skilltree:web",
 		"dev:skilltree:full": "concurrently -n auth,sync,web -c blue,magenta,cyan \"pnpm dev:auth\" \"pnpm dev:sync\" \"pnpm dev:skilltree:web\"",
-		"dev:matrix": "cd services/mana-matrix-bot && go run ./cmd/server",
-		"build:matrix": "cd services/mana-matrix-bot && go build -ldflags=\"-s -w\" -o dist/mana-matrix-bot ./cmd/server",
-		"test:matrix": "cd services/mana-matrix-bot && go test ./...",
 		"dev:llm-playground": "pnpm --filter @mana-llm/playground dev",
 		"build:llm-playground": "pnpm --filter @mana-llm/playground build",
 		"prepare": "husky",
@@ -300,8 +294,7 @@
 		"patchedDependencies": {},
 		"overrides": {
 			"cpu-features": "npm:empty-npm-package@1.0.0",
-			"ssh2": "npm:empty-npm-package@1.0.0",
-			"@matrix-org/matrix-sdk-crypto-nodejs": "npm:empty-npm-package@1.0.0"
+			"ssh2": "npm:empty-npm-package@1.0.0"
 		}
 	}
 }

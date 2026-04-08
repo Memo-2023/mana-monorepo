@@ -54,30 +54,6 @@ export function uploadRoutes(uploadService: UploadService) {
 		return c.json(toResponse(record), 201);
 	});
 
-	// Import from Matrix
-	app.post('/import/matrix', async (c) => {
-		const { mxcUrl, app: appName, userId, skipProcessing } = await c.req.json();
-
-		if (!mxcUrl) return c.json({ error: 'mxcUrl is required' }, 400);
-		if (!appName) return c.json({ error: 'app is required' }, 400);
-		if (!userId) return c.json({ error: 'userId is required' }, 400);
-
-		const record = await uploadService.importFromMatrix(mxcUrl, {
-			app: appName,
-			userId,
-			skipProcessing,
-		});
-
-		if (!record) {
-			return c.json(
-				{ error: 'Failed to import from Matrix. Invalid MXC URL or download failed.' },
-				400
-			);
-		}
-
-		return c.json(toResponse(record), 201);
-	});
-
 	// Get by ID
 	app.get('/:id', async (c) => {
 		const id = c.req.param('id');

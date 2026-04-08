@@ -579,8 +579,6 @@ services:
       SMTP_FROM: "Mana <noreply@mana.how>"
       SMTP_INSECURE_TLS: "true"
       EXPO_ACCESS_TOKEN: ${EXPO_ACCESS_TOKEN:-}
-      MATRIX_HOMESERVER_URL: http://mana-matrix-synapse:8008
-      MATRIX_ACCESS_TOKEN: ${MATRIX_NOTIFY_BOT_TOKEN:-}
     ports:
       - "3013:3013"
     healthcheck:
@@ -671,7 +669,6 @@ services:
       S3_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
       S3_BUCKET: mana-media
       S3_PUBLIC_URL: https://media.mana.how
-      MATRIX_HOMESERVER_URL: https://matrix.mana.how
       PUBLIC_URL: https://media.mana.how/api/v1
       CORS_ORIGINS: https://mana.how,https://nutriphi.mana.how,https://contacts.mana.how,https://chat.mana.how,https://storage.mana.how,https://photos.mana.how
     ports:
@@ -727,173 +724,6 @@ services:
   #   build: { context: apps/{app}/apps/server, dockerfile: ../../Dockerfile.bun }
   #   Requires: Dockerfile.bun in apps/ root (FROM oven/bun:1, COPY, CMD bun run src/index.ts)
 
-
-  # ============================================
-  # Tier 4: Matrix Stack (Ports 4000-4099)
-  # ============================================
-
-  synapse:
-    image: matrixdotorg/synapse:latest
-    container_name: mana-matrix-synapse
-    restart: always
-    mem_limit: 512m
-    depends_on:
-      postgres:
-        condition: service_healthy
-    entrypoint: ["sh", "-c", "mkdir -p /config && cp /mnt/synapse-config/*.yaml /config/ 2>/dev/null; cp -r /mnt/synapse-config/appservices /config/ 2>/dev/null; exec python -m synapse.app.homeserver -c /config/homeserver.yaml"]
-    environment:
-      TZ: Europe/Berlin
-      SYNAPSE_DB_PASSWORD: ${SYNAPSE_DB_PASSWORD:-synapse-secure-password}
-      SYNAPSE_PASSWORD_PEPPER: ${SYNAPSE_PASSWORD_PEPPER:-change-me-pepper}
-      SYNAPSE_FORM_SECRET: ${SYNAPSE_FORM_SECRET:-change-me-form-secret}
-      SYNAPSE_MACAROON_SECRET: ${SYNAPSE_MACAROON_SECRET:-change-me-macaroon-secret}
-      SYNAPSE_REGISTRATION_SECRET: ${SYNAPSE_REGISTRATION_SECRET:-change-me-registration-secret}
-      SYNAPSE_OIDC_CLIENT_SECRET: ${SYNAPSE_OIDC_CLIENT_SECRET}
-    volumes:
-      - ./docker/matrix/config:/mnt/synapse-config:ro
-      - ./docker/matrix/data:/data
-    ports:
-      - "4000:8008"
-      - "9002:9002"  # Metrics
-    healthcheck:
-      test: ["CMD", "curl", "-fSs", "http://localhost:8008/health"]
-      interval: 120s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-
-  element-web:
-    image: vectorim/element-web:latest
-    container_name: mana-matrix-element
-    restart: always
-    mem_limit: 48m
-    depends_on:
-      synapse:
-        condition: service_healthy
-    volumes:
-      - ./docker/matrix/element-config.json:/app/config.json:ro
-    ports:
-      - "4010:80"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/"]
-      interval: 180s
-      timeout: 10s
-      retries: 3
-      start_period: 45s
-
-  matrix-web:
-    build:
-      context: .
-      dockerfile: apps/matrix/apps/web/Dockerfile
-    image: matrix-web:latest
-    container_name: mana-matrix-web
-    restart: always
-    mem_limit: 96m
-    depends_on:
-      synapse:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 4011
-      PUBLIC_MANA_AUTH_URL: https://auth.mana.how
-    ports:
-      - "4011:4011"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:4011/health"]
-      interval: 180s
-      timeout: 10s
-      retries: 3
-      start_period: 45s
-
-  # ============================================
-  # Matrix Bots — Consolidated Go Service
-  # Replaces 21 separate NestJS bot containers
-  # ============================================
-
-  mana-matrix-bot:
-    build:
-      context: .
-      dockerfile: services/mana-matrix-bot/Dockerfile
-    image: mana-matrix-bot:local
-    container_name: mana-matrix-bot
-    restart: always
-    mem_limit: 128m
-    depends_on:
-      synapse:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    environment:
-      TZ: Europe/Berlin
-      PORT: 4001
-      # Matrix
-      MATRIX_HOMESERVER_URL: http://synapse:8008
-      MATRIX_STORAGE_PATH: /app/data
-      # Auth & Redis
-      MANA_AUTH_URL: http://mana-auth:3001
-      MANA_SERVICE_KEY: ${MANA_SERVICE_KEY}
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis123}
-      # Voice services (GPU server via LAN)
-      STT_URL: ${STT_SERVICE_URL:-http://192.168.178.11:3020}
-      TTS_URL: ${TTS_SERVICE_URL:-http://192.168.178.11:3022}
-      # AI (GPU server via LAN)
-      OLLAMA_URL: ${OLLAMA_URL:-http://192.168.178.11:11434}
-      OLLAMA_MODEL: ${OLLAMA_MODEL:-gemma3:12b}
-      # Plugin tokens (all 21 bot identities)
-      MATRIX_MANA_BOT_TOKEN: ${MATRIX_MANA_BOT_TOKEN}
-      MATRIX_MANA_BOT_ROOMS: ${MATRIX_MANA_BOT_ROOMS:-}
-      MATRIX_TODO_BOT_TOKEN: ${MATRIX_TODO_BOT_TOKEN}
-      MATRIX_TODO_BOT_ROOMS: ${MATRIX_TODO_BOT_ROOMS:-}
-      MATRIX_CALENDAR_BOT_TOKEN: ${MATRIX_CALENDAR_BOT_TOKEN}
-      MATRIX_CALENDAR_BOT_ROOMS: ${MATRIX_CALENDAR_BOT_ROOMS:-}
-      MATRIX_CLOCK_BOT_TOKEN: ${MATRIX_CLOCK_BOT_TOKEN}
-      MATRIX_CLOCK_BOT_ROOMS: ${MATRIX_CLOCK_BOT_ROOMS:-}
-      MATRIX_OLLAMA_BOT_TOKEN: ${MATRIX_OLLAMA_BOT_TOKEN}
-      MATRIX_OLLAMA_BOT_ROOMS: ${MATRIX_OLLAMA_BOT_ROOMS:-}
-      MATRIX_STATS_BOT_TOKEN: ${MATRIX_STATS_BOT_TOKEN}
-      MATRIX_STATS_BOT_ROOMS: ${MATRIX_STATS_BOT_ROOMS:-}
-      MATRIX_CONTACTS_BOT_TOKEN: ${MATRIX_CONTACTS_BOT_TOKEN:-}
-      MATRIX_CONTACTS_BOT_ROOMS: ${MATRIX_CONTACTS_BOT_ROOMS:-}
-      MATRIX_CHAT_BOT_TOKEN: ${MATRIX_CHAT_BOT_TOKEN:-}
-      MATRIX_CARDS_BOT_TOKEN: ${MATRIX_CARDS_BOT_TOKEN:-}
-      MATRIX_NUTRIPHI_BOT_TOKEN: ${MATRIX_NUTRIPHI_BOT_TOKEN}
-      MATRIX_NUTRIPHI_BOT_ROOMS: ${MATRIX_NUTRIPHI_BOT_ROOMS:-}
-      MATRIX_PICTURE_BOT_TOKEN: ${MATRIX_PICTURE_BOT_TOKEN:-}
-      MATRIX_PLANTA_BOT_TOKEN: ${MATRIX_PLANTA_BOT_TOKEN}
-      MATRIX_PLANTA_BOT_ROOMS: ${MATRIX_PLANTA_BOT_ROOMS:-}
-      MATRIX_PRESI_BOT_TOKEN: ${MATRIX_PRESI_BOT_TOKEN:-}
-      MATRIX_QUESTIONS_BOT_TOKEN: ${MATRIX_QUESTIONS_BOT_TOKEN:-}
-      MATRIX_SKILLTREE_BOT_TOKEN: ${MATRIX_SKILLTREE_BOT_TOKEN:-}
-      MATRIX_STORAGE_BOT_TOKEN: ${MATRIX_STORAGE_BOT_TOKEN:-}
-      MATRIX_PROJECT_DOC_BOT_TOKEN: ${MATRIX_PROJECT_DOC_BOT_TOKEN}
-      MATRIX_STT_BOT_TOKEN: ${MATRIX_STT_BOT_TOKEN}
-      MATRIX_STT_BOT_ROOMS: ${MATRIX_STT_BOT_ROOMS:-}
-      MATRIX_TTS_BOT_TOKEN: ${MATRIX_TTS_BOT_TOKEN}
-      MATRIX_TTS_BOT_ROOMS: ${MATRIX_TTS_BOT_ROOMS:-}
-      MATRIX_ZITARE_BOT_TOKEN: ${MATRIX_ZITARE_BOT_TOKEN}
-      MATRIX_ZITARE_BOT_ROOMS: ${MATRIX_ZITARE_BOT_ROOMS:-}
-      MATRIX_ONBOARDING_BOT_TOKEN: ${MATRIX_ONBOARDING_BOT_TOKEN}
-      MATRIX_ONBOARDING_BOT_ROOMS: ${MATRIX_ONBOARDING_BOT_ROOMS:-}
-      # Backend URLs
-      TODO_BACKEND_URL: http://todo-backend:3031
-      CALENDAR_BACKEND_URL: http://calendar-backend:3032
-      # CLOCK_BACKEND_URL: removed — migrated to local-first
-      CONTACTS_BACKEND_URL: http://contacts-backend:3033
-      # ZITARE_BACKEND_URL: removed — migrated to local-first
-      PLANTA_BACKEND_URL: http://planta-backend:3039
-      NUTRIPHI_BACKEND_URL: http://nutriphi-backend:3038
-      STORAGE_BACKEND_URL: http://storage-backend:3034
-    volumes:
-      - matrix_bots_data:/app/data
-    # No host port mapping needed — only communicates with synapse internally
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:4001/health"]
-      interval: 60s
-      timeout: 5s
-      retries: 3
-      start_period: 10s
 
   # ============================================
   # Tier 5: Web Frontends (Ports 5000-5099)
@@ -1617,7 +1447,5 @@ volumes:
     name: mana-analytics-data
   loki_data:
     name: mana-loki-data
-  matrix_bots_data:
-    name: mana-matrix-bots-data
   stalwart_data:
     name: mana-stalwart-data

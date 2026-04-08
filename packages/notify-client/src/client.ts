@@ -1,7 +1,6 @@
 import type {
 	SendEmailOptions,
 	SendPushOptions,
-	SendMatrixOptions,
 	SendWebhookOptions,
 	ScheduleOptions,
 	NotificationResponse,
@@ -76,24 +75,6 @@ export class NotifyClient {
 				sound: options.sound,
 				badge: options.badge,
 				channelId: options.channelId,
-			},
-			priority: options.priority,
-			externalId: options.externalId,
-		});
-	}
-
-	/**
-	 * Send a Matrix message
-	 */
-	async sendMatrix(options: SendMatrixOptions): Promise<NotificationResponse> {
-		return this.send({
-			channel: 'matrix',
-			appId: this.appId,
-			recipient: options.roomId,
-			body: options.body,
-			matrixOptions: {
-				formattedBody: options.formattedBody,
-				msgtype: options.msgtype,
 			},
 			priority: options.priority,
 			externalId: options.externalId,
@@ -184,7 +165,6 @@ export class NotifyClient {
 		notifications: Array<
 			| ({ type: 'email' } & SendEmailOptions)
 			| ({ type: 'push' } & SendPushOptions)
-			| ({ type: 'matrix' } & SendMatrixOptions)
 			| ({ type: 'webhook' } & SendWebhookOptions)
 		>
 	): Promise<BatchNotificationResponse> {
@@ -211,15 +191,6 @@ export class NotifyClient {
 					subject: n.title,
 					body: n.body,
 					data: n.data,
-					priority: n.priority,
-					externalId: n.externalId,
-				};
-			} else if (n.type === 'matrix') {
-				return {
-					channel: 'matrix' as const,
-					appId: this.appId,
-					recipient: n.roomId,
-					body: n.body,
 					priority: n.priority,
 					externalId: n.externalId,
 				};

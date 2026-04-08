@@ -19,9 +19,8 @@ Central authentication service for the Mana ecosystem. Hono + Bun + Better Auth.
 
 1. **Organization** — B2B multi-tenant with RBAC
 2. **JWT** — EdDSA tokens with minimal claims (sub, email, role, sid)
-3. **OIDC Provider** — Matrix/Synapse SSO
-4. **Two-Factor** — TOTP with backup codes
-5. **Magic Link** — Passwordless email login
+3. **Two-Factor** — TOTP with backup codes
+4. **Magic Link** — Passwordless email login
 
 ## Key Endpoints
 
@@ -36,9 +35,6 @@ Handled directly by Better Auth — includes sign-in, sign-up, session, 2FA, mag
 | POST | `/logout` | Logout |
 | POST | `/validate` | Validate JWT token |
 | GET | `/session` | Get current session |
-
-### OIDC (`/.well-known/*`, `/api/auth/oauth2/*`)
-OpenID Connect provider for Matrix/Synapse SSO.
 
 ### Me — GDPR Self-Service (`/api/v1/me/*`)
 | Method | Path | Description |
@@ -103,7 +99,6 @@ SMTP_HOST=stalwart            # self-hosted on Mac Mini, see docs/MAIL_SERVER.md
 SMTP_PORT=587
 SMTP_USER=...
 SMTP_PASS=...
-SYNAPSE_OIDC_CLIENT_SECRET=...
 
 # Encryption Vault — REQUIRED IN PRODUCTION
 # Base64-encoded 32-byte AES-256 key. Generate with `openssl rand -base64 32`.

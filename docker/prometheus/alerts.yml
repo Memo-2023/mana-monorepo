@@ -3,7 +3,7 @@ groups:
     rules:
       # Service Down Alert
       - alert: ServiceDown
-        expr: up{job=~"mana-auth|.*-backend|mana-search|mana-media|mana-llm|synapse"} == 0
+        expr: up{job=~"mana-auth|.*-backend|mana-search|mana-media|mana-llm"} == 0
         for: 1m
         labels:
           severity: critical

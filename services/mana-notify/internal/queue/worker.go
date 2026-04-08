@@ -29,9 +29,6 @@ type Job struct {
 	Sound         string             // Push
 	Badge         *int               // Push
 	Platform      string             // Push
-	RoomID        string             // Matrix
-	FormattedBody string             // Matrix
-	MsgType       string             // Matrix
 	WebhookMethod string             // Webhook
 	WebhookHeaders map[string]string // Webhook
 	WebhookTimeout int               // Webhook
@@ -53,7 +50,6 @@ type WorkerConfig struct {
 var DefaultConfigs = map[string]WorkerConfig{
 	"email":   {Concurrency: 5, MaxRetries: 3, BackoffMs: 5000},
 	"push":    {Concurrency: 10, MaxRetries: 3, BackoffMs: 1000},
-	"matrix":  {Concurrency: 5, MaxRetries: 3, BackoffMs: 2000},
 	"webhook": {Concurrency: 10, MaxRetries: 5, BackoffMs: 3000},
 }
 
@@ -62,7 +58,6 @@ type WorkerPool struct {
 	db      *db.DB
 	email   *channel.EmailService
 	push    *channel.PushService
-	matrix  *channel.MatrixService
 	webhook *channel.WebhookService
 	metrics *metrics.Metrics
 	jobs    chan Job
@@ -70,13 +65,12 @@ type WorkerPool struct {
 	cancel  context.CancelFunc
 }
 
-func NewWorkerPool(database *db.DB, email *channel.EmailService, push *channel.PushService, matrix *channel.MatrixService, webhook *channel.WebhookService, m *metrics.Metrics) *WorkerPool {
+func NewWorkerPool(database *db.DB, email *channel.EmailService, push *channel.PushService, webhook *channel.WebhookService, m *metrics.Metrics) *WorkerPool {
 	ctx, cancel := context.WithCancel(context.Background())
 	return &WorkerPool{
 		db:      database,
 		email:   email,
 		push:    push,
-		matrix:  matrix,
 		webhook: webhook,
 		metrics: m,
 		jobs:    make(chan Job, 1000),
@@ -240,22 +234,6 @@ func (wp *WorkerPool) processJob(job Job) {
 		}
 		wp.metrics.PushSent.WithLabelValues(job.Platform, status).Inc()
 		wp.metrics.PushLatency.Observe(time.Since(start).Seconds())
-
-	case "matrix":
-		result := wp.matrix.Send(ctx, &channel.MatrixMessage{
-			RoomID:        job.RoomID,
-			Body:          job.Body,
-			FormattedBody: job.FormattedBody,
-			MsgType:       job.MsgType,
-		})
-		success = result.Success
-		providerID = result.EventID
-		errMsg = result.Error
-		status := "success"
-		if !success {
-			status = "failed"
-		}
-		wp.metrics.MatrixSent.WithLabelValues(status).Inc()
 
 	case "webhook":
 		result := wp.webhook.Send(ctx, &channel.WebhookMessage{

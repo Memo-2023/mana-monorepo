@@ -70,7 +70,7 @@
 | 3010 | mana-sync | Go | Local-first data sync (WebSocket + HTTP) |
 | 3011 | mana-media | NestJS | Content-addressable storage, thumbnails |
 | 3012 | mana-search | Go | Web search via SearXNG |
-| 3013 | mana-notify | Go | Notifications (email, push, Matrix) |
+| 3013 | mana-notify | Go | Notifications (email, push, webhook) |
 | 3014 | mana-crawler | Go | Web crawler, content extraction |
 | 3015 | mana-landing-builder | NestJS | Org landing page builder |
 | 3016 | mana-api-gateway | Go | API keys, rate limiting, usage tracking |
@@ -107,14 +107,10 @@ Pure CRUD apps use mana-sync directly.
 | 3040 | presi-server | Hono/Bun | Share links |
 | 3041-3059 | *(reserved)* | | |
 
-## 4000-4099: Matrix/Chat Stack
+## 4000-4099: Misc
 
 | Port | Service | Description |
 |------|---------|-------------|
-| 4000 | synapse | Matrix homeserver |
-| 4001 | mana-matrix-bot | Go bot (health/metrics) |
-| 4010 | element-web | Element web client |
-| 4011 | matrix-web | SvelteKit Matrix client |
 | 4400 | landings | Nginx static landing pages |
 
 ## 5000-5059: Web Frontends (SvelteKit)
@@ -175,7 +171,6 @@ Pure CRUD apps use mana-sync directly.
 | 9090 | victoriametrics | Metrics storage |
 | 9091 | pushgateway | Deploy metrics |
 | 9093 | alertmanager | Alert routing |
-| 9095 | alert-notifier | Matrix alert bridge |
 | 9100 | node-exporter | Host metrics |
 | 9110 | cadvisor | Container metrics |
 | 9121 | redis-exporter | Redis metrics |

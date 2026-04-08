@@ -10,7 +10,6 @@ type Metrics struct {
 	NotificationsFailed *prometheus.CounterVec
 	EmailsSent          *prometheus.CounterVec
 	PushSent            *prometheus.CounterVec
-	MatrixSent          *prometheus.CounterVec
 	WebhooksSent        *prometheus.CounterVec
 	NotificationLatency *prometheus.HistogramVec
 	EmailLatency        prometheus.Histogram
@@ -38,11 +37,6 @@ func New() *Metrics {
 			Name: "mana_notify_push_sent_total",
 			Help: "Total push notifications sent",
 		}, []string{"platform", "status"}),
-
-		MatrixSent: promauto.NewCounterVec(prometheus.CounterOpts{
-			Name: "mana_notify_matrix_sent_total",
-			Help: "Total Matrix messages sent",
-		}, []string{"status"}),
 
 		WebhooksSent: promauto.NewCounterVec(prometheus.CounterOpts{
 			Name: "mana_notify_webhooks_sent_total",

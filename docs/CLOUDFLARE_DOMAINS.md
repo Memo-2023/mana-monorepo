@@ -61,8 +61,7 @@ Cloudflare Tunnel (bb0ea86d...)
     ├── Apps (Web + API):  chat.mana.how → localhost:5010
     ├── Services:          auth.mana.how → localhost:3001
     ├── Landing Pages:     it.mana.how   → localhost:4400 (Nginx)
-    ├── Monitoring:        grafana.mana.how → localhost:8000
-    └── Matrix:            matrix.mana.how → localhost:4000
+    └── Monitoring:        grafana.mana.how → localhost:8000
 ```
 
 **Nginx Landing Container** (`mana-infra-landings`, Port 4400):
@@ -119,9 +118,6 @@ Cloudflare Tunnel (bb0ea86d...)
 
 | Domain | Service | Port |
 |--------|---------|------|
-| `matrix.mana.how` | Matrix Synapse | 4000 |
-| `element.mana.how` | Element Web | 4080 |
-| `link.mana.how` | Matrix Link | 4090 |
 | `grafana.mana.how` | Grafana | 8000 |
 | `stats.mana.how` | Umami Analytics | 8010 |
 | `glitchtip.mana.how` | GlitchTip Errors | 8020 |

@@ -43,7 +43,6 @@ func main() {
 	m := metrics.New()
 	emailSvc := channel.NewEmailService(cfg)
 	pushSvc := channel.NewPushService(cfg)
-	matrixSvc := channel.NewMatrixService(cfg)
 	webhookSvc := channel.NewWebhookService()
 	engine := tmpl.NewEngine(database)
 
@@ -51,7 +50,7 @@ func main() {
 	engine.SeedDefaults(context.Background())
 
 	// Start worker pool
-	workerPool := queue.NewWorkerPool(database, emailSvc, pushSvc, matrixSvc, webhookSvc, m)
+	workerPool := queue.NewWorkerPool(database, emailSvc, pushSvc, webhookSvc, m)
 	workerPool.Start()
 	defer workerPool.Stop()
 

@@ -67,7 +67,6 @@
 		context: 'Context',
 		general: 'Allgemein',
 		cards: 'Cards',
-		matrix: 'Matrix Bots',
 		nutriphi: 'NutriPhi',
 		picture: 'Picture',
 		planta: 'Planta',

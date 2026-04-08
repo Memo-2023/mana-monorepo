@@ -1,4 +1,4 @@
-export type NotificationChannel = 'email' | 'push' | 'matrix' | 'webhook';
+export type NotificationChannel = 'email' | 'push' | 'webhook';
 export type NotificationPriority = 'low' | 'normal' | 'high' | 'critical';
 export type NotificationStatus = 'pending' | 'processing' | 'delivered' | 'failed' | 'cancelled';
 
@@ -24,15 +24,6 @@ export interface SendPushOptions {
 	sound?: 'default' | null;
 	badge?: number;
 	channelId?: string;
-	priority?: NotificationPriority;
-	externalId?: string;
-}
-
-export interface SendMatrixOptions {
-	roomId: string;
-	body: string;
-	formattedBody?: string;
-	msgtype?: 'text' | 'notice';
 	priority?: NotificationPriority;
 	externalId?: string;
 }

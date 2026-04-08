@@ -4,7 +4,6 @@ import * as crypto from 'crypto';
 import { eq, and, gte, lte, like, isNotNull, sql, desc, asc, inArray } from 'drizzle-orm';
 import type { Database } from '../db';
 import { StorageService } from './storage';
-import { MatrixService } from './matrix';
 import { PROCESS_QUEUE } from '../constants';
 import {
 	media,
@@ -78,7 +77,6 @@ export class UploadService {
 	constructor(
 		private db: Database,
 		private storage: StorageService,
-		private matrixService: MatrixService,
 		private processQueue: Queue
 	) {}
 
@@ -131,59 +129,6 @@ export class UploadService {
 			await this.processQueue.add('process-media', {
 				mediaId: inserted.id,
 				mimeType: mimetype,
-				originalKey,
-			});
-		}
-
-		return this.toMediaRecord(inserted);
-	}
-
-	async importFromMatrix(
-		mxcUrl: string,
-		options: { app: string; userId: string; skipProcessing?: boolean }
-	): Promise<MediaRecord | null> {
-		const matrixMedia = await this.matrixService.downloadFromMxc(mxcUrl);
-		if (!matrixMedia) return null;
-
-		const hash = this.computeHash(matrixMedia.buffer);
-
-		const existing = await this.findByHash(hash);
-		if (existing) {
-			await this.createReference(existing.id, options.userId, options.app, mxcUrl);
-			return this.toMediaRecord(existing);
-		}
-
-		const ext = mime.extension(matrixMedia.mimeType) || 'bin';
-		const date = new Date();
-		const datePath = `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}`;
-		const id = crypto.randomUUID();
-		const originalKey = `originals/${datePath}/${id}.${ext}`;
-
-		await this.storage.upload(originalKey, matrixMedia.buffer, matrixMedia.mimeType, {
-			'x-amz-meta-source': 'matrix',
-			'x-amz-meta-source-url': mxcUrl,
-			'x-amz-meta-media-id': id,
-		});
-
-		const [inserted] = await this.db
-			.insert(media)
-			.values({
-				id,
-				contentHash: hash,
-				originalName: matrixMedia.filename || null,
-				mimeType: matrixMedia.mimeType,
-				size: matrixMedia.size,
-				originalKey,
-				status: options?.skipProcessing ? 'ready' : 'processing',
-			} satisfies NewMedia)
-			.returning();
-
-		await this.createReference(inserted.id, options.userId, options.app, mxcUrl);
-
-		if (!options?.skipProcessing) {
-			await this.processQueue.add('process-media', {
-				mediaId: inserted.id,
-				mimeType: matrixMedia.mimeType,
 				originalKey,
 			});
 		}

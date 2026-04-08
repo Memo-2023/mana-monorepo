@@ -211,14 +211,6 @@ playground.mana.how {
     reverse_proxy 10.0.0.2:5090
 }
 
-matrix.mana.how {
-    reverse_proxy 10.0.0.2:4000
-}
-
-element.mana.how {
-    reverse_proxy 10.0.0.2:4080
-}
-
 grafana.mana.how {
     reverse_proxy 10.0.0.2:8000
 }

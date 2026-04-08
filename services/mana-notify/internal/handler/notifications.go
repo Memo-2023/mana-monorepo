@@ -41,7 +41,6 @@ type SendRequest struct {
 	EmailOptions   *EmailOptions   `json:"emailOptions,omitempty"`
 	PushOptions    *PushOptions    `json:"pushOptions,omitempty"`
 	WebhookOptions *WebhookOptions `json:"webhookOptions,omitempty"`
-	MatrixOptions  *MatrixOptions  `json:"matrixOptions,omitempty"`
 }
 
 type EmailOptions struct {
@@ -59,11 +58,6 @@ type WebhookOptions struct {
 	Method  string            `json:"method,omitempty"`
 	Headers map[string]string `json:"headers,omitempty"`
 	Timeout int               `json:"timeout,omitempty"`
-}
-
-type MatrixOptions struct {
-	MsgType       string `json:"msgtype,omitempty"`
-	FormattedBody string `json:"formattedBody,omitempty"`
 }
 
 type ScheduleRequest struct {
@@ -171,18 +165,10 @@ func (h *NotificationsHandler) Send(w http.ResponseWriter, r *http.Request) {
 		job.Sound = req.PushOptions.Sound
 		job.Badge = req.PushOptions.Badge
 	}
-	if req.MatrixOptions != nil {
-		job.RoomID = req.Recipient
-		job.MsgType = req.MatrixOptions.MsgType
-		job.FormattedBody = req.MatrixOptions.FormattedBody
-	}
 	if req.WebhookOptions != nil {
 		job.WebhookMethod = req.WebhookOptions.Method
 		job.WebhookHeaders = req.WebhookOptions.Headers
 		job.WebhookTimeout = req.WebhookOptions.Timeout
-	}
-	if req.Channel == "matrix" {
-		job.RoomID = req.Recipient
 	}
 
 	h.pool.Enqueue(job)
@@ -465,9 +451,9 @@ func validateSendRequest(req *SendRequest) error {
 	if req.Channel == "" {
 		return fmt.Errorf("channel is required")
 	}
-	validChannels := map[string]bool{"email": true, "push": true, "matrix": true, "webhook": true}
+	validChannels := map[string]bool{"email": true, "push": true, "webhook": true}
 	if !validChannels[req.Channel] {
-		return fmt.Errorf("channel must be email, push, matrix, or webhook")
+		return fmt.Errorf("channel must be email, push, or webhook")
 	}
 	if req.AppID == "" {
 		return fmt.Errorf("appId is required")

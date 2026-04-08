@@ -71,7 +71,6 @@ export interface CreateGiftRequest {
 	type?: 'simple' | 'personalized' | 'split' | 'first_come' | 'riddle';
 	portions?: number;
 	targetEmail?: string;
-	targetMatrixId?: string;
 	riddleQuestion?: string;
 	riddleAnswer?: string;
 	message?: string;

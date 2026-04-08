@@ -170,22 +170,6 @@ const APP_DEFINITIONS: AppDefinition[] = [
 		},
 	},
 	{
-		id: 'matrix',
-		displayName: 'Matrix',
-		score: 68,
-		status: 'production',
-		categories: {
-			backend: 10,
-			frontend: 78,
-			database: 20,
-			testing: 12,
-			deployment: 92,
-			documentation: 92,
-			security: 88,
-			ux: 82,
-		},
-	},
-	{
 		id: 'nutriphi',
 		displayName: 'NutriPhi',
 		score: 63,

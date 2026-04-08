@@ -19,7 +19,7 @@ func TestValidateSendRequest(t *testing.T) {
 		{
 			name:    "invalid channel",
 			req:     SendRequest{Channel: "sms", AppID: "app1", Recipient: "user@test.com", Body: "hello"},
-			wantErr: "channel must be email, push, matrix, or webhook",
+			wantErr: "channel must be email, push, or webhook",
 		},
 		{
 			name:    "missing appId",
@@ -55,10 +55,6 @@ func TestValidateSendRequest(t *testing.T) {
 		{
 			name: "valid push channel",
 			req:  SendRequest{Channel: "push", AppID: "app1", Recipient: "token", Body: "hi"},
-		},
-		{
-			name: "valid matrix channel",
-			req:  SendRequest{Channel: "matrix", AppID: "app1", Recipient: "!room:server", Body: "hi"},
 		},
 		{
 			name: "valid webhook channel",

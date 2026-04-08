@@ -60,11 +60,6 @@ scrape_configs:
         regex: "mana-mon-.*"
         target_label: "tier"
         replacement: "monitoring"
-      # mana-matrix-* → tier=matrix
-      - source_labels: ["container"]
-        regex: "mana-matrix-.*"
-        target_label: "tier"
-        replacement: "matrix"
       # mana-game-* → tier=games
       - source_labels: ["container"]
         regex: "mana-game-.*"

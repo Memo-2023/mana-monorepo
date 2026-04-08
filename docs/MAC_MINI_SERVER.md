@@ -93,8 +93,6 @@ Cloudflare Tunnel (cloudflared)
 | Todo | https://todo.mana.how |
 | Calendar | https://calendar.mana.how |
 | Clock | https://clock.mana.how |
-| Matrix (Synapse) | https://matrix.mana.how |
-| Element Web | https://element.mana.how |
 
 ## SSH-Zugang
 
@@ -411,8 +409,6 @@ curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" 
 | mana-calendar-web | Calendar Frontend |
 | mana-clock-backend | Clock API |
 | mana-clock-web | Clock Frontend |
-| mana-synapse | Matrix Homeserver |
-| mana-element | Element Web Client |
 
 ### Nützliche Docker-Befehle
 
@@ -530,7 +526,6 @@ curl -s http://localhost:3000/
 The health check monitors:
 - All backend APIs and web frontends
 - Infrastructure (PostgreSQL, Redis)
-- Matrix services (Synapse, Element, all bots)
 - Monitoring stack (Grafana, Umami, GlitchTip, VictoriaMetrics)
 - Alerting stack (vmalert, Alertmanager, Alert Notifier)
 - Disk space for `/` and `/Volumes/ManaData` (warning at 80%, critical at 90%)
@@ -553,11 +548,11 @@ ssh mana-server "PATH=/Applications/Docker.app/Contents/Resources/bin:\$PATH && 
 Wenn ein Service im Health-Check als `HTTP 000` erscheint und `docker ps -a` den Container nicht zeigt, wurde er vermutlich beim letzten Deploy übersprungen:
 
 ```bash
-# Container erstellen und starten (Beispiel: Project Doc Bot)
-docker compose -f docker-compose.macmini.yml up -d matrix-project-doc-bot
+# Container erstellen und starten
+docker compose -f docker-compose.macmini.yml up -d <service-name>
 
 # Nach Restart prüfen
-docker ps --filter name=mana-matrix-bot-projectdoc --format '{{.Names}} {{.Status}}'
+docker ps --filter name=mana-<service> --format '{{.Names}} {{.Status}}'
 ```
 
 ## Wartung
@@ -642,7 +637,6 @@ Alle 63 Container haben explizite `mem_limit` in `docker-compose.macmini.yml`:
 | Core (Hono/Bun) | 5 | 704 MB |
 | Go Services | 5 | 384 MB |
 | Other Backend | 3 | 576 MB |
-| Matrix | 4 | 784 MB |
 | Web Apps | 20 | 2.560 MB |
 | LLM | 2 | 384 MB |
 | Monitoring | 14 | 1.792 MB |
@@ -742,8 +736,7 @@ Die externe SSD wird für persistente Daten verwendet - sowohl für große Datei
 ├── backups/         # PostgreSQL Backups (täglich 3:00)
 ├── ollama/          # LLM Modelle (~58 GB)
 ├── flux2/           # FLUX.2 Bildgenerierung (~15 GB)
-├── stt-models/      # Speech-to-Text Modelle (~19 GB)
-└── matrix/          # Matrix Synapse Daten
+└── stt-models/      # Speech-to-Text Modelle (~19 GB)
 ```
 
 ### Docker auf externer SSD
@@ -823,81 +816,6 @@ Docker Desktop benötigt "Full Disk Access" für SSD-Mounts:
 Systemeinstellungen → Datenschutz & Sicherheit → Voller Festplattenzugriff → Docker.app ✅
 ```
 
-## Matrix (DSGVO-konformes Messaging)
-
-Matrix ist eine DSGVO-konforme Alternative zu Telegram für Bot-Kommunikation.
-
-### Komponenten
-
-| Service | Port | Beschreibung |
-|---------|------|--------------|
-| Synapse | 8008 | Matrix Homeserver |
-| Element Web | 8087 | Web-Client |
-
-### Matrix Bots
-
-Alle Matrix Bots laufen als Docker Container und werden via GHCR (GitHub Container Registry) deployed. Watchtower aktualisiert sie automatisch bei neuen Images.
-
-| Bot | Port | Beschreibung |
-|-----|------|--------------|
-| matrix-mana-bot | 4010 | Gateway - alle Features in einem Bot |
-| matrix-ollama-bot | 4011 | KI-Chat via GPU-Server Ollama |
-| matrix-stats-bot | 4012 | Server-Statistiken & Monitoring |
-| matrix-project-doc-bot | 4013 | Projekt-Dokumentation aus Fotos/Voice/Text |
-| matrix-todo-bot | 4014 | Aufgabenverwaltung |
-| matrix-calendar-bot | 4015 | Termine & Events |
-| matrix-nutriphi-bot | 4016 | Ernährungstracking |
-| matrix-zitare-bot | 4017 | Tägliche Zitate |
-| matrix-clock-bot | 4018 | Timer & Wecker |
-| matrix-tts-bot | 4019 | Text-to-Speech |
-
-**Health Checks:**
-```bash
-# Alle Bots prüfen
-for port in 4010 4011 4012 4013 4014 4015 4016 4017 4018 4019; do
-  echo -n "Port $port: "
-  curl -s http://localhost:$port/health | jq -r '.status // "error"'
-done
-```
-
-**Logs:**
-```bash
-# Logs eines Bots
-docker logs matrix-mana-bot -f
-
-# Alle Matrix Bots
-docker ps | grep matrix-.*-bot
-```
-
-**Bot neu starten:**
-```bash
-docker compose -f docker-compose.macmini.yml restart matrix-mana-bot
-```
-
-**Images manuell aktualisieren:**
-```bash
-docker compose -f docker-compose.macmini.yml pull matrix-mana-bot
-docker compose -f docker-compose.macmini.yml up -d matrix-mana-bot
-```
-
-### Setup
-
-```bash
-# Matrix initialisieren
-./scripts/mac-mini/setup-matrix.sh
-
-# Services starten
-docker compose -f docker-compose.macmini.yml up -d synapse element-web
-
-# Admin-User erstellen
-docker exec -it mana-synapse register_new_matrix_user \
-  -c /data/homeserver.yaml http://localhost:8008 -a
-```
-
-### Dokumentation
-
-Siehe [MATRIX_SELF_HOSTING.md](./MATRIX_SELF_HOSTING.md) für detaillierte Anleitung.
-
 ## Chronologie der Einrichtung
 
 1. **Docker Setup** - PostgreSQL, Redis, App-Container
@@ -909,5 +827,4 @@ Siehe [MATRIX_SELF_HOSTING.md](./MATRIX_SELF_HOSTING.md) für detaillierte Anlei
 7. **Email Notifications** - Redundante Benachrichtigung
 8. ~~**Ollama** - Lokale LLM-Inferenz~~ → Migriert auf GPU-Server (2026-03-28)
 9. ~~**Telegram Ollama Bot**~~ → Deaktiviert (2026-03-28)
-10. **Matrix Synapse** - DSGVO-konformes Messaging
-11. **GPU-Server Offload** - Alle AI-Workloads auf RTX 3090 (2026-03-28)
+10. **GPU-Server Offload** - Alle AI-Workloads auf RTX 3090 (2026-03-28)

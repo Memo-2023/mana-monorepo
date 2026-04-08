@@ -42,7 +42,6 @@
 		mana: 'https://mana.how',
 		cards: 'https://cards.mana.how',
 		planta: 'https://planta.mana.how',
-		matrix: 'https://element.mana.how',
 		playground: 'https://playground.mana.how',
 	};
 
