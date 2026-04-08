@@ -59,6 +59,7 @@ db.version(1).stores({
 	// ─── Core / Mana (appId: 'mana') ───
 	userSettings: 'id, key',
 	dashboardConfigs: 'id',
+	workbenchScenes: 'id, order',
 	automations: 'id, sourceApp, targetApp, enabled, [sourceApp+sourceCollection]',
 
 	// ─── Todo (appId: 'todo') ───

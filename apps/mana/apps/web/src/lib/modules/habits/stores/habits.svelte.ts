@@ -21,6 +21,46 @@ import {
 } from '$lib/data/time-blocks/recurrence';
 import type { LocalHabit, LocalHabitLog, HabitSchedule } from '../types';
 
+/**
+ * Normalize for fuzzy comparison: lowercase, strip diacritics,
+ * collapse whitespace. "Kaffee" / "kaffee" / "Kaffée " all collapse
+ * to "kaffee".
+ */
+function normalize(s: string): string {
+	return s
+		.normalize('NFD')
+		.replace(/[\u0300-\u036f]/g, '')
+		.toLowerCase()
+		.trim()
+		.replace(/\s+/g, ' ');
+}
+
+/**
+ * Cheap client-side substring matching from spoken transcript to
+ * habit title. Used as a fast path before falling back to the LLM
+ * parse-habit endpoint. Returns the first habit whose normalized
+ * title appears as a whole word inside the normalized transcript,
+ * or vice versa for very short titles ("Tee" inside "Grüner Tee").
+ *
+ * Word-boundary matching avoids false positives like "Bier" matching
+ * a transcript that contains "ausprobiert".
+ */
+function matchHabitToTranscript(transcript: string, habits: LocalHabit[]): LocalHabit | null {
+	const normTranscript = normalize(transcript);
+	if (!normTranscript) return null;
+	const words = new Set(normTranscript.split(/[^a-z0-9äöüß]+/i).filter((w) => w.length >= 3));
+	for (const habit of habits) {
+		const normTitle = normalize(habit.title);
+		if (normTitle.length < 3) continue;
+		// Whole-word title appears in transcript
+		if (words.has(normTitle)) return habit;
+		// Multi-word title: every token must be present as a word
+		const titleWords = normTitle.split(' ').filter((w) => w.length >= 3);
+		if (titleWords.length > 1 && titleWords.every((w) => words.has(w))) return habit;
+	}
+	return null;
+}
+
 export const habitsStore = {
 	async createHabit(data: {
 		title: string;
@@ -75,6 +115,85 @@ export const habitsStore = {
 				await deleteBlock(log.timeBlockId);
 			}
 			await habitLogTable.update(log.id, { deletedAt: now });
+		}
+	},
+
+	/**
+	 * Voice quick-log. The user taps the mic, says e.g. "kaffee" or
+	 * "30 minuten gelaufen", and we log the right habit. Two-step:
+	 *
+	 *   1. Substring pre-match against habit titles. Catches the easy
+	 *      cases ("kaffee" → "Kaffee") without an LLM round-trip.
+	 *   2. If nothing matches, send transcript + habit titles to
+	 *      /api/v1/voice/parse-habit which asks mana-llm to pick one
+	 *      from the list. Handles the harder cases ("gelaufen" →
+	 *      "Laufen", "rauchen" → "Zigarette").
+	 *
+	 * If neither step finds a habit, returns null and the caller can
+	 * surface a "habit nicht erkannt" hint instead of silently logging
+	 * nothing. The transcribe step itself never throws — failures show
+	 * up as null too.
+	 */
+	async logFromVoice(
+		blob: Blob,
+		_durationMs: number,
+		language = 'de'
+	): Promise<{ logId: string; habitTitle: string } | null> {
+		// Step 1: speech to text
+		let transcript: string;
+		try {
+			const form = new FormData();
+			const ext = blob.type.includes('webm')
+				? '.webm'
+				: blob.type.includes('mp4')
+					? '.m4a'
+					: '.audio';
+			form.append('file', blob, `habit${ext}`);
+			if (language) form.append('language', language);
+
+			const sttResponse = await fetch('/api/v1/voice/transcribe', {
+				method: 'POST',
+				body: form,
+			});
+			if (!sttResponse.ok) return null;
+			const sttResult = (await sttResponse.json()) as { text: string };
+			transcript = (sttResult.text ?? '').trim();
+		} catch {
+			return null;
+		}
+		if (!transcript) return null;
+
+		// Step 2: pick a habit. Substring fast path first, LLM fallback.
+		const habits = (await habitTable.toArray()).filter((h) => !h.deletedAt && !h.isArchived);
+		if (habits.length === 0) return null;
+
+		const matched = matchHabitToTranscript(transcript, habits);
+		const note = transcript;
+		if (matched) {
+			const log = await this.logHabit(matched.id, note);
+			return { logId: log.id, habitTitle: matched.title };
+		}
+
+		// LLM fallback
+		try {
+			const response = await fetch('/api/v1/voice/parse-habit', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					transcript,
+					habits: habits.map((h) => h.title),
+					language,
+				}),
+			});
+			if (!response.ok) return null;
+			const parsed = (await response.json()) as { match: string | null; note: string | null };
+			if (!parsed.match) return null;
+			const target = habits.find((h) => h.title === parsed.match);
+			if (!target) return null;
+			const log = await this.logHabit(target.id, parsed.note ?? note);
+			return { logId: log.id, habitTitle: target.title };
+		} catch {
+			return null;
 		}
 	},
 

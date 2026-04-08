@@ -14,7 +14,12 @@ import type { ModuleConfig } from '$lib/data/module-registry';
 
 export const manaCoreConfig: ModuleConfig = {
 	appId: 'mana',
-	tables: [{ name: 'userSettings' }, { name: 'dashboardConfigs' }, { name: 'automations' }],
+	tables: [
+		{ name: 'userSettings' },
+		{ name: 'dashboardConfigs' },
+		{ name: 'workbenchScenes' },
+		{ name: 'automations' },
+	],
 };
 
 export const tagsCoreConfig: ModuleConfig = {

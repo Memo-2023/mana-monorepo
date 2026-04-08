@@ -1,10 +1,13 @@
 <script lang="ts">
 	import AppPage from '$lib/components/workbench/AppPage.svelte';
 	import AppPagePicker from '$lib/components/workbench/AppPagePicker.svelte';
+	import SceneTabs from '$lib/components/workbench/scenes/SceneTabs.svelte';
+	import SceneRenameDialog from '$lib/components/workbench/scenes/SceneRenameDialog.svelte';
+	import ConfirmDialog from '$lib/components/workbench/scenes/ConfirmDialog.svelte';
 	import { PageCarousel, type CarouselPage } from '$lib/components/page-carousel';
 	import { getApp, getAppByDragType } from '$lib/app-registry';
-	import { onMount } from 'svelte';
-	import { createAppSettingsStore } from '@mana/shared-stores';
+	import { onMount, onDestroy } from 'svelte';
+	import { workbenchScenesStore } from '$lib/stores/workbench-scenes.svelte';
 	import { DragPreview } from '@mana/shared-ui/dnd';
 	import type { DragType } from '@mana/shared-ui/dnd';
 	import { ContextMenu } from '@mana/shared-ui';
@@ -23,7 +26,7 @@
 		};
 	}
 
-	// ── Persisted workbench state ───────────────────────────
+	// ── Default card width (responsive) ─────────────────────
 	const DESKTOP_WIDTH = 480;
 	let DEFAULT_WIDTH = $state(DESKTOP_WIDTH);
 
@@ -36,63 +39,19 @@
 		return () => window.removeEventListener('resize', updateDefaultWidth);
 	});
 
-	interface WorkbenchSettings extends Record<string, unknown> {
-		openApps: {
-			appId: string;
-			minimized: boolean;
-			maximized?: boolean;
-			widthPx?: number;
-			heightPx?: number;
-		}[];
-	}
-
-	const workbenchStore = createAppSettingsStore<WorkbenchSettings>('workbench-settings', {
-		openApps: [
-			{ appId: 'todo', minimized: false },
-			{ appId: 'calendar', minimized: false },
-			{ appId: 'contacts', minimized: false },
-			{ appId: 'habits', minimized: false },
-			{ appId: 'notes', minimized: false },
-			{ appId: 'finance', minimized: false },
-		],
-	});
-
-	let openApps = $state<
-		{
-			appId: string;
-			minimized: boolean;
-			maximized?: boolean;
-			widthPx?: number;
-			heightPx?: number;
-		}[]
-	>([
-		{ appId: 'todo', minimized: false },
-		{ appId: 'calendar', minimized: false },
-		{ appId: 'contacts', minimized: false },
-		{ appId: 'habits', minimized: false },
-		{ appId: 'notes', minimized: false },
-		{ appId: 'finance', minimized: false },
-	]);
-
-	// Load persisted state once on mount (not reactive — avoids loop with persistState)
+	// ── Scene store wiring ──────────────────────────────────
 	onMount(() => {
-		const s = workbenchStore.settings;
-		if (s.openApps?.length) openApps = [...s.openApps];
+		workbenchScenesStore.initialize();
+	});
+	onDestroy(() => {
+		workbenchScenesStore.dispose();
 	});
 
-	function persistState() {
-		workbenchStore.update({
-			openApps: openApps.map((a) => ({
-				appId: a.appId,
-				minimized: a.minimized,
-				maximized: a.maximized,
-				widthPx: a.widthPx,
-				heightPx: a.heightPx,
-			})),
-		});
-	}
+	let scenes = $derived(workbenchScenesStore.scenes);
+	let activeSceneId = $derived(workbenchScenesStore.activeSceneId);
+	let openApps = $derived(workbenchScenesStore.openApps);
 
-	// ── Map to CarouselPage[] ───────────────────────────────
+	// ── Map openApps → CarouselPage[] ───────────────────────
 	let carouselPages = $derived<CarouselPage[]>(
 		openApps.map((a) => {
 			const entry = getApp(a.appId);
@@ -114,64 +73,37 @@
 
 	let showPicker = $state(false);
 
-	// ── App CRUD ────────────────────────────────────────────
+	// ── App CRUD (delegated to active scene) ────────────────
 	function handleAddApp(appId: string) {
-		if (!openApps.some((a) => a.appId === appId)) {
-			openApps = [...openApps, { appId, minimized: false }];
-		} else {
-			openApps = openApps.map((a) => (a.appId === appId ? { ...a, minimized: false } : a));
-		}
+		workbenchScenesStore.addApp(appId);
 		showPicker = false;
-		persistState();
 	}
-
 	function handleRemoveApp(id: string) {
-		openApps = openApps.filter((a) => a.appId !== id);
-		persistState();
+		workbenchScenesStore.removeApp(id);
 	}
-
 	function handleMinimizeApp(id: string) {
-		openApps = openApps.map((a) => (a.appId === id ? { ...a, minimized: true } : a));
-		persistState();
+		workbenchScenesStore.minimizeApp(id);
 	}
-
 	function handleRestoreApp(id: string) {
-		openApps = openApps.map((a) => (a.appId === id ? { ...a, minimized: false } : a));
-		persistState();
+		workbenchScenesStore.restoreApp(id);
 	}
-
 	function handleMaximizeApp(id: string) {
-		openApps = openApps.map((a) =>
-			a.appId === id ? { ...a, maximized: !a.maximized, minimized: false } : a
-		);
-		persistState();
+		workbenchScenesStore.toggleMaximizeApp(id);
 	}
-
 	function handleResize(id: string, widthPx: number, heightPx?: number) {
-		openApps = openApps.map((a) =>
-			a.appId === id ? { ...a, widthPx, ...(heightPx !== undefined ? { heightPx } : {}) } : a
-		);
-		persistState();
+		workbenchScenesStore.resizeApp(id, widthPx, heightPx);
 	}
-
 	function handleMoveLeft(id: string) {
-		const idx = openApps.findIndex((a) => a.appId === id);
-		if (idx <= 0) return;
-		const apps = [...openApps];
-		[apps[idx - 1], apps[idx]] = [apps[idx], apps[idx - 1]];
-		openApps = apps;
-		persistState();
+		workbenchScenesStore.moveAppLeft(id);
 	}
-
 	function handleMoveRight(id: string) {
-		const idx = openApps.findIndex((a) => a.appId === id);
-		if (idx === -1 || idx >= openApps.length - 1) return;
-		const apps = [...openApps];
-		[apps[idx], apps[idx + 1]] = [apps[idx + 1], apps[idx]];
-		openApps = apps;
-		persistState();
+		workbenchScenesStore.moveAppRight(id);
+	}
+	function handleReorder(fromId: string, toId: string) {
+		workbenchScenesStore.reorderApps(fromId, toId);
 	}
 
+	// ── Card / tab context menus ────────────────────────────
 	const ctxMenu = createWorkbenchContextMenu();
 
 	function handleCardContextMenu(e: MouseEvent, appId: string, idx: number) {
@@ -206,15 +138,43 @@
 		ctxMenu.open(e, appId, items);
 	}
 
-	function handleReorder(fromId: string, toId: string) {
-		const fromIdx = openApps.findIndex((a) => a.appId === fromId);
-		const toIdx = openApps.findIndex((a) => a.appId === toId);
-		if (fromIdx === -1 || toIdx === -1) return;
-		const apps = [...openApps];
-		const [moved] = apps.splice(fromIdx, 1);
-		apps.splice(toIdx, 0, moved);
-		openApps = apps;
-		persistState();
+	// ── Scene CRUD dialogs ──────────────────────────────────
+	type SceneDialogMode =
+		| { kind: 'create' }
+		| { kind: 'rename'; id: string; name: string; icon?: string };
+	let sceneDialog = $state<SceneDialogMode | null>(null);
+	let sceneToDelete = $state<{ id: string; name: string } | null>(null);
+
+	function handleCreateScene() {
+		sceneDialog = { kind: 'create' };
+	}
+	function handleRequestRename(id: string) {
+		const scene = scenes.find((s) => s.id === id);
+		if (!scene) return;
+		sceneDialog = { kind: 'rename', id, name: scene.name, icon: scene.icon };
+	}
+	async function handleSubmitSceneDialog(name: string, icon: string | undefined) {
+		const mode = sceneDialog;
+		if (!mode) return;
+		if (mode.kind === 'create') {
+			await workbenchScenesStore.createScene({ name, icon });
+		} else {
+			await workbenchScenesStore.renameScene(mode.id, name, icon);
+		}
+		sceneDialog = null;
+	}
+	function handleDuplicateScene(id: string) {
+		workbenchScenesStore.duplicateScene(id);
+	}
+	function handleRequestDeleteScene(id: string) {
+		const scene = scenes.find((s) => s.id === id);
+		if (!scene) return;
+		sceneToDelete = { id, name: scene.name };
+	}
+	async function handleConfirmDeleteScene() {
+		if (!sceneToDelete) return;
+		await workbenchScenesStore.deleteScene(sceneToDelete.id);
+		sceneToDelete = null;
 	}
 </script>
 
@@ -225,6 +185,17 @@
 <DragPreview {resolveEntity} />
 
 <div class="workbench">
+	<SceneTabs
+		{scenes}
+		{activeSceneId}
+		onSelect={(id) => workbenchScenesStore.setActiveScene(id)}
+		onCreate={handleCreateScene}
+		onRequestRename={handleRequestRename}
+		onDuplicate={handleDuplicateScene}
+		onRequestDelete={handleRequestDeleteScene}
+		onReorder={(fromId, toId) => workbenchScenesStore.reorderScenes(fromId, toId)}
+	/>
+
 	<PageCarousel
 		pages={carouselPages}
 		defaultWidth={DEFAULT_WIDTH}
@@ -268,6 +239,28 @@
 		y={ctxMenu.state.y}
 		items={ctxMenu.items}
 		onClose={() => ctxMenu.close()}
+	/>
+
+	<SceneRenameDialog
+		show={sceneDialog !== null}
+		title={sceneDialog?.kind === 'rename' ? 'Szene umbenennen' : 'Neue Szene'}
+		initialName={sceneDialog?.kind === 'rename' ? sceneDialog.name : ''}
+		initialIcon={sceneDialog?.kind === 'rename' ? (sceneDialog.icon ?? '') : ''}
+		confirmLabel={sceneDialog?.kind === 'rename' ? 'Speichern' : 'Erstellen'}
+		onSubmit={handleSubmitSceneDialog}
+		onCancel={() => (sceneDialog = null)}
+	/>
+
+	<ConfirmDialog
+		show={sceneToDelete !== null}
+		title="Szene löschen"
+		message={sceneToDelete
+			? `„${sceneToDelete.name}" wird endgültig entfernt. Die Apps selbst bleiben erhalten — nur dieses Layout geht verloren.`
+			: ''}
+		confirmLabel="Löschen"
+		variant="danger"
+		onConfirm={handleConfirmDeleteScene}
+		onCancel={() => (sceneToDelete = null)}
 	/>
 </div>
 

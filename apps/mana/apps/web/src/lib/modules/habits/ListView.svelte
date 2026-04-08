@@ -15,9 +15,11 @@
 	import type { Habit, HabitLog } from './types';
 	import type { ViewProps } from '$lib/app-registry';
 	import { ContextMenu, type ContextMenuItem } from '@mana/shared-ui';
+	import { toastStore } from '@mana/shared-ui/toast';
 	import { DynamicIcon } from '@mana/shared-ui/atoms';
 	import { IconPicker } from '@mana/shared-ui/molecules';
 	import { PencilSimple, Trash, Pause, Play } from '@mana/shared-icons';
+	import VoiceCaptureBar from '$lib/components/voice/VoiceCaptureBar.svelte';
 
 	let { navigate, goBack, params }: ViewProps = $props();
 
@@ -62,6 +64,21 @@
 		await habitsStore.logHabit(habitId);
 		animatingId = habitId;
 		setTimeout(() => (animatingId = null), 300);
+	}
+
+	async function handleVoiceComplete(blob: Blob, durationMs: number) {
+		const result = await habitsStore.logFromVoice(blob, durationMs, 'de');
+		if (!result) {
+			toastStore.error('Habit nicht erkannt. Versuche den Namen direkt zu sagen, z.B. "Kaffee".');
+			return;
+		}
+		toastStore.success(`${result.habitTitle} geloggt`);
+		// Reuse the existing pulse animation by finding the matching habit id
+		const matched = habits.find((h) => h.title === result.habitTitle);
+		if (matched) {
+			animatingId = matched.id;
+			setTimeout(() => (animatingId = null), 300);
+		}
 	}
 
 	async function handleCreate(e: Event) {
@@ -140,6 +157,14 @@
 </script>
 
 <div class="habits-list-view">
+	<!-- Voice quick-log -->
+	<VoiceCaptureBar
+		idleLabel="Habit sprechen"
+		feature="habits-voice-log"
+		reason="Habit-Logs werden in deinem persönlichen Kalender gespeichert. Dafür brauchst du ein Mana-Konto."
+		onComplete={handleVoiceComplete}
+	/>
+
 	<!-- Tally Grid -->
 	<div class="tally-grid">
 		{#each activeHabits as habit (habit.id)}
