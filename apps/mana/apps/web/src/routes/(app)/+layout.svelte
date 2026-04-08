@@ -7,6 +7,7 @@
 	import { todoReminderSource } from '$lib/modules/todo/reminder-source';
 	import KeyboardShortcutsModal from '$lib/components/KeyboardShortcutsModal.svelte';
 	import SessionWarning from '$lib/components/SessionWarning.svelte';
+	import EncryptionIntroBanner from '$lib/components/EncryptionIntroBanner.svelte';
 	import { locale, _ } from 'svelte-i18n';
 	import {
 		PillNavigation,
@@ -445,6 +446,13 @@
 	<div class="min-h-screen bg-background">
 		<!-- Bottom Stack: all fixed-bottom elements in one flex container -->
 		<div class="bottom-stack" style:--bottom-chrome-height="{bottomChromeHeight}px">
+			<!-- One-time encryption intro — sits at the top of the stack so
+				 it can't be obscured by the QuickInputBar / TagStrip / PillNav.
+				 Self-gates on isVaultUnlocked() so guests never see it. -->
+			<div class="bottom-stack-notification">
+				<EncryptionIntroBanner />
+			</div>
+
 			<!-- Guest nudge — sits above the input bar, fades with the stack -->
 			{#if guestMode && guestMode.notifications.length > 0}
 				<div class="bottom-stack-notification">

@@ -16,9 +16,17 @@
 	    "you understand and accept what's happening" social contract
 	    that encryption-at-rest requires.
 
-	The component is mounted once at the root layout. It self-checks
-	the vault state on mount and via a small interval, so it can fire
-	even if the unlock happens asynchronously after the layout renders.
+	The component is mounted inside the bottom-stack of (app)/+layout.svelte
+	(NOT the root layout) so it shares the stack's reflow with the
+	QuickInputBar / TagStrip / PillNav and can't end up rendered
+	behind them. Earlier the banner used its own `position: fixed`
+	with z-index 60, which the QuickInputBar's higher stacking context
+	covered up — fix was to make positioning the parent's job.
+
+	It self-checks the vault state on mount and via a small interval,
+	so it can fire even if the unlock happens asynchronously after the
+	layout renders. Guests never see it because isVaultUnlocked()
+	returns false until a real master key is loaded.
 
 	NOTE: The flag uses a constant string instead of a STORAGE_KEYS
 	import because the central storage-keys file was removed in a
@@ -112,13 +120,14 @@
 {/if}
 
 <style>
+	/* Positioning is the parent's job (.bottom-stack-notification in
+	   (app)/+layout.svelte). The banner used to be position: fixed
+	   with its own bottom + transform centring; that put it in a
+	   stacking context the QuickInputBar covered. Now it's a normal
+	   in-flow flex item and the bottom-stack handles where it goes. */
 	.banner {
-		position: fixed;
-		bottom: 1.5rem;
-		left: 50%;
-		transform: translateX(-50%);
 		max-width: 32rem;
-		width: calc(100% - 2rem);
+		width: 100%;
 		display: flex;
 		align-items: flex-start;
 		gap: 0.875rem;
@@ -128,18 +137,17 @@
 		border-left: 4px solid rgb(34, 197, 94);
 		border-radius: 0.75rem;
 		box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.18);
-		z-index: 60;
 		animation: slide-up 250ms ease-out;
 	}
 
 	@keyframes slide-up {
 		from {
 			opacity: 0;
-			transform: translate(-50%, 1rem);
+			transform: translateY(0.75rem);
 		}
 		to {
 			opacity: 1;
-			transform: translate(-50%, 0);
+			transform: translateY(0);
 		}
 	}
 

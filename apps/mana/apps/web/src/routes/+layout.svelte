@@ -10,7 +10,6 @@
 	import { installDataLayerListeners } from '$lib/data/data-layer-listeners';
 	import { getVaultClient, hasAnyEncryption } from '$lib/data/crypto';
 	import SuggestionToast from '$lib/components/SuggestionToast.svelte';
-	import EncryptionIntroBanner from '$lib/components/EncryptionIntroBanner.svelte';
 	import RecoveryCodeUnlockModal from '$lib/components/RecoveryCodeUnlockModal.svelte';
 	import SyncConflictToast from '$lib/components/SyncConflictToast.svelte';
 	import OfflineIndicator from '$lib/components/OfflineIndicator.svelte';
@@ -111,7 +110,6 @@
 <SyncConflictToast />
 <OfflineIndicator />
 <PwaUpdatePrompt />
-<EncryptionIntroBanner />
 <AuthRequiredModal />
 
 {#if needsRecoveryCode}
