@@ -17,8 +17,11 @@ import { tagCollection, type LocalTag } from '@mana/shared-stores';
  * Normalize a tag-name-ish string for fuzzy comparison: lowercase,
  * strip diacritics, collapse whitespace. "Steuern" and "steuern " and
  * "Stéuern" all collapse to "steuern".
+ *
+ * Exported only so the matching unit tests can call it directly —
+ * production code goes through matchLabelsToTagsPure.
  */
-function normalizeTagName(s: string): string {
+export function normalizeTagName(s: string): string {
 	return s
 		.normalize('NFD')
 		.replace(/[\u0300-\u036f]/g, '')
@@ -28,26 +31,25 @@ function normalizeTagName(s: string): string {
 }
 
 /**
- * Match free-text label hints from the LLM against existing workspace
- * tags. Only returns IDs of tags that already exist — never auto-creates
- * a tag, even if the LLM is sure about a topic. Auto-creating tags from
- * voice transcripts would clutter the user's tag list with one-off
- * "shopping" / "einkauf" / "groceries" duplicates.
+ * Pure label-to-tag matcher. Given a list of free-text label hints
+ * from the LLM and a list of {id, name} tag entries, return the IDs
+ * of tags that match. No I/O, no Dexie — easy to unit-test.
  *
  * Match rules (in order, first hit wins per label):
  *   1. exact normalized match
- *   2. one is a substring of the other (≥3 chars to avoid noise)
+ *   2. one is a substring of the other (both sides ≥3 chars to avoid
+ *      noise — "ab" inside "abenteuer" would otherwise hit)
+ *
+ * Never invents new tags. The store wrapper around this never creates
+ * one either — auto-creating tags from voice transcripts would clutter
+ * the user's tag list with one-off "shopping" / "einkauf" / "groceries"
+ * near-duplicates.
  */
-async function matchLabelsToTagIds(labels: string[]): Promise<string[]> {
-	if (!labels.length) return [];
-	let tags: LocalTag[];
-	try {
-		tags = await tagCollection.getAll();
-	} catch {
-		return [];
-	}
-	if (!tags.length) return [];
-
+export function matchLabelsToTagsPure(
+	labels: string[],
+	tags: { id: string; name: string }[]
+): string[] {
+	if (!labels.length || !tags.length) return [];
 	const normalizedTags = tags.map((t) => ({ id: t.id, norm: normalizeTagName(t.name) }));
 	const matched = new Set<string>();
 	for (const raw of labels) {
@@ -65,6 +67,22 @@ async function matchLabelsToTagIds(labels: string[]): Promise<string[]> {
 		if (sub) matched.add(sub.id);
 	}
 	return [...matched];
+}
+
+/**
+ * Store-side wrapper: pull the tag list from the local Dexie collection
+ * and delegate to the pure matcher. Returns an empty list if the tag
+ * collection can't be read for any reason.
+ */
+async function matchLabelsToTagIds(labels: string[]): Promise<string[]> {
+	if (!labels.length) return [];
+	let tags: LocalTag[];
+	try {
+		tags = await tagCollection.getAll();
+	} catch {
+		return [];
+	}
+	return matchLabelsToTagsPure(labels, tags);
 }
 
 export const tasksStore = {

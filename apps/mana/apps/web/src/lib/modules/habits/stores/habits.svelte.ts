@@ -25,8 +25,10 @@ import type { LocalHabit, LocalHabitLog, HabitSchedule } from '../types';
  * Normalize for fuzzy comparison: lowercase, strip diacritics,
  * collapse whitespace. "Kaffee" / "kaffee" / "Kaffée " all collapse
  * to "kaffee".
+ *
+ * Exported for unit tests.
  */
-function normalize(s: string): string {
+export function normalize(s: string): string {
 	return s
 		.normalize('NFD')
 		.replace(/[\u0300-\u036f]/g, '')
@@ -45,20 +47,35 @@ function normalize(s: string): string {
  * Word-boundary matching avoids false positives like "Bier" matching
  * a transcript that contains "ausprobiert".
  */
-function matchHabitToTranscript(transcript: string, habits: LocalHabit[]): LocalHabit | null {
+export function matchHabitToTranscript<T extends { title: string }>(
+	transcript: string,
+	habits: T[]
+): T | null {
 	const normTranscript = normalize(transcript);
 	if (!normTranscript) return null;
 	const words = new Set(normTranscript.split(/[^a-z0-9äöüß]+/i).filter((w) => w.length >= 3));
+
+	// Collect all candidates with their match specificity (token count
+	// of the title that matched). The most specific match wins, so
+	// "Grüner Tee" beats "Tee" when both could fit the transcript —
+	// without specificity ranking the iteration order would silently
+	// determine the result.
+	let best: { habit: T; specificity: number } | null = null;
 	for (const habit of habits) {
 		const normTitle = normalize(habit.title);
 		if (normTitle.length < 3) continue;
-		// Whole-word title appears in transcript
-		if (words.has(normTitle)) return habit;
-		// Multi-word title: every token must be present as a word
 		const titleWords = normTitle.split(' ').filter((w) => w.length >= 3);
-		if (titleWords.length > 1 && titleWords.every((w) => words.has(w))) return habit;
+		let specificity = 0;
+		if (titleWords.length > 1 && titleWords.every((w) => words.has(w))) {
+			specificity = titleWords.length;
+		} else if (words.has(normTitle)) {
+			specificity = 1;
+		}
+		if (specificity > 0 && (!best || specificity > best.specificity)) {
+			best = { habit, specificity };
+		}
 	}
-	return null;
+	return best?.habit ?? null;
 }
 
 export const habitsStore = {
