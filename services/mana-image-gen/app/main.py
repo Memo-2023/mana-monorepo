@@ -21,6 +21,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
+from .api_auth import ApiKeyMiddleware
 from .flux_service import (
     generate_image,
     is_flux_available,
@@ -40,7 +41,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Configuration from environment
-PORT = int(os.getenv("PORT", "3025"))
+PORT = int(os.getenv("PORT", "3023"))
 MAX_PROMPT_LENGTH = int(os.getenv("MAX_PROMPT_LENGTH", "2000"))
 MIN_DIMENSION = int(os.getenv("MIN_DIMENSION", "256"))
 MAX_DIMENSION = int(os.getenv("MAX_DIMENSION", "2048"))
@@ -87,6 +88,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.add_middleware(ApiKeyMiddleware)
 
 
 # ============================================================================
