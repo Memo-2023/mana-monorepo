@@ -61,7 +61,11 @@ export function setSecurityHeaders(response: Response, options: SecurityHeadersO
 	// Content Security Policy
 	const cspDirectives = [
 		"default-src 'self'",
-		`script-src 'self' 'unsafe-inline' https://stats.mana.how https://glitchtip.mana.how ${scriptSrc.join(' ')}`.trim(),
+		// 'wasm-unsafe-eval' is required by @mana/local-llm (WebLLM) to
+		// instantiate the MLC WebGPU runtime. It only permits WebAssembly
+		// compilation, NOT eval()/new Function() — much narrower than the
+		// legacy 'unsafe-eval' source. Supported by all evergreen browsers.
+		`script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://stats.mana.how https://glitchtip.mana.how ${scriptSrc.join(' ')}`.trim(),
 		"style-src 'self' 'unsafe-inline'",
 		`img-src 'self' data: blob: https: ${imgSrc.join(' ')}`.trim(),
 		`connect-src 'self' https://stats.mana.how https://glitchtip.mana.how ${connectSrc.join(' ')}`.trim(),
