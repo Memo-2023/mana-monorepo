@@ -655,6 +655,31 @@ The Mana unified app uses a **single IndexedDB** (`mana`) containing all 120+ co
 
 Individual apps in `apps/*/apps/web/` still use `@mana/local-store` with per-app IndexedDB databases (`mana-{appId}`). When users first open the unified Mana app, `legacy-migration.ts` migrates data from these old DBs into the unified DB.
 
+### At-Rest Encryption (Phase 1–9)
+
+User-typed content in **27 tables** is encrypted with **AES-GCM-256** before it touches IndexedDB. The master key lives in mana-auth (KEK-wrapped) and is fetched on login. Two trust modes:
+
+- **Standard mode** (default): server holds the user's master key wrapped with `MANA_AUTH_KEK` (env-provided). Mana operators with KEK access could theoretically decrypt; protected against all realistic threats except court-ordered disclosure.
+- **Zero-Knowledge mode** (opt-in via Settings → Sicherheit): user generates a 32-byte recovery code locally, the server NULLs out the KEK wrap. Mana is then **computationally incapable** of decrypting user data — losing the recovery code means losing the data, by design.
+
+**Production requirement:** `MANA_AUTH_KEK` must be set on the mana-auth service to a base64-encoded 32-byte value (`openssl rand -base64 32`). The dev fallback is 32 zero bytes and prints a loud warning at startup.
+
+**When writing module code that touches sensitive fields:**
+
+1. Add the table to `apps/mana/apps/web/src/lib/data/crypto/registry.ts` with the field allowlist
+2. Wrap writes with `await encryptRecord(tableName, record)` before `table.add()` / `table.update()`
+3. Wrap reads with `decryptRecords(tableName, visible)` after the Dexie query, before the type converter
+4. Default to **encrypt** for user-typed text; default to **plaintext** for IDs / timestamps / sort keys / enum discriminators
+
+**Reference docs:**
+
+| File | Purpose |
+|------|---------|
+| `apps/mana/apps/web/src/lib/data/DATA_LAYER_AUDIT.md` | Complete sprint history, rollout phases, threat model, backlog |
+| `apps/docs/src/content/docs/architecture/security.mdx` | User-facing walkthrough + threat model table |
+| `services/mana-auth/sql/002_encryption_vaults.sql` | Vault schema + RLS policies |
+| `services/mana-auth/sql/003_recovery_wrap.sql` | Phase 9 recovery columns + CHECK constraints |
+
 ### Dev Commands (Local-First Stack)
 
 ```bash

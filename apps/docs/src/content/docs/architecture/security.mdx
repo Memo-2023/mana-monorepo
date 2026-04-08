@@ -1,0 +1,204 @@
+---
+title: Security & Encryption
+description: Trust model, at-rest encryption, and the optional zero-knowledge mode for Mana user data.
+---
+
+import { Aside, Tabs, TabItem, Steps } from '@astrojs/starlight/components';
+
+# Security & Encryption
+
+Mana encrypts user-typed content with **AES-GCM-256** before it touches IndexedDB or the sync server. The user has two trust modes to choose from:
+
+| Mode | Default | What the server can decrypt |
+|------|---------|----------------------------|
+| **Standard** | ✅ Yes | The user's master key, via the server-side KEK |
+| **Zero-Knowledge** | Opt-in | Nothing — the recovery code lives only with the user |
+
+## What's encrypted
+
+**27 tables** ship with at-rest encryption enabled. The full list is in [`DATA_LAYER_AUDIT.md`](https://github.com/mana-how/mana-monorepo/blob/main/apps/mana/apps/web/src/lib/data/DATA_LAYER_AUDIT.md), but the highlights:
+
+| Module | Fields |
+|--------|--------|
+| Chat | `messages.messageText`, `conversations.title`, chat templates |
+| Notes | `title`, `content` |
+| Dreams | `title`, `content`, `transcript`, `interpretation`, `location` |
+| Memoro | `title`, `intro`, `transcript` (the largest plaintext blobs in the app) |
+| Contacts | 16 PII fields (firstName, lastName, email, phone, mobile, birthday, address, social) |
+| Cycles | `notes`, `mood` (GDPR Art. 9 sensitive personal data) |
+| Finance | `transactions.description`, `transactions.note` |
+| Cards | `front`, `back`, deck name + description |
+| Todo | `tasks.title`, `description`, `subtasks`, `metadata` |
+| Calendar | `events.title`, `description`, `location` + the cross-module `timeBlocks` hub |
+| Picture | `images.prompt`, `negativePrompt`, board name + description |
+| Storage | `files.name`, `originalName` |
+| Music | `songs.title`, playlist name + description |
+| Events | `socialEvents.title/description/location`, guest contact details |
+
+What's intentionally **plaintext** for structural reasons:
+
+- IDs, foreign keys, timestamps
+- Sort/filter keys (e.g. `tasks.dueDate`, `songs.artist`)
+- Public-redirect lookup keys (`uload.links.shortCode` and `originalUrl`)
+- Published social-event content (decrypted by design when the user shares an RSVP link)
+
+## Standard Mode (default)
+
+```
+┌─────────────┐    Login    ┌──────────────┐
+│   Browser   │────────────>│  mana-auth   │
+│             │             │   :3001      │
+└─────────────┘             └──────────────┘
+       │                            │
+       │   GET /encryption-vault/key│
+       │ ──────────────────────────>│
+       │                            │ 1. Load wrapped MK from
+       │                            │    auth.encryption_vaults
+       │                            │ 2. Unwrap with KEK from
+       │                            │    MANA_AUTH_KEK env var
+       │                            │ 3. Return raw 32-byte MK
+       │ <──────────────────────────│
+       │
+       ▼
+   importMasterKey() → CryptoKey (non-extractable)
+       │
+       ▼
+   MemoryKeyProvider holds the key for the session
+       │
+       ▼
+   encryptRecord() / decryptRecord() per Dexie write/read
+```
+
+The master key never crosses the browser process boundary except as base64 over HTTPS during the initial fetch. Once imported, it's a **non-extractable CryptoKey** — even malicious JavaScript with a reference to it cannot read its raw bytes.
+
+### What Mana CAN see in Standard Mode
+
+- ❌ Never the contents of encrypted fields without actively unwrapping the KEK
+- ⚠️ Theoretically: a Mana operator with KEK access could unwrap the master key and decrypt user data. Protected against all realistic threats except a court-ordered disclosure.
+
+This is the same trust model as 1Password's "I trust the company" tier or Signal's local-only key.
+
+## Zero-Knowledge Mode (opt-in)
+
+Users who want **provable** confidentiality (not just "we promise") can opt into zero-knowledge mode in **Settings → Sicherheit**.
+
+<Steps>
+
+1. **Generate a recovery code.** The browser generates 32 random bytes via Web Crypto, derives an AES wrap key via HKDF-SHA256, and seals the user's master key locally. The wrapped blob is sent to the server. The 32-byte secret itself **never leaves the browser**.
+
+2. **Back up the recovery code.** The UI displays the formatted code (`1A2B-3C4D-...`, 79 characters). The user copies it into their password manager. They have to type it back to confirm — we don't move forward until the confirmation matches.
+
+3. **Activate.** The server NULLs out the KEK-wrapped master key and sets `zero_knowledge=true` on the vault row. From this moment on, **the server is computationally incapable of decrypting the user's data**.
+
+</Steps>
+
+### Unlock flow on a new device
+
+When a zero-knowledge user signs in on a new device:
+
+```
+1. Login → JWT
+        ↓
+2. Browser fetches /encryption-vault/key
+        ↓
+3. Server returns { requiresRecoveryCode: true, recoveryWrappedMk, recoveryIv }
+        ↓
+4. Browser shows the RecoveryCodeUnlockModal
+        ↓
+5. User pastes the code from their password manager
+        ↓
+6. Browser unwraps the master key locally with HKDF + AES-GCM
+        ↓
+7. App boots with decrypted data
+```
+
+If the user loses the recovery code, **the data is unrecoverable**. Mana cannot help — that's the design. The trade-off is the entire point of zero-knowledge.
+
+### What Mana CAN see in Zero-Knowledge Mode
+
+- ❌ Never the contents of encrypted fields
+- ❌ Never the master key (the server has no usable copy)
+- ❌ Never the recovery code (it lives only with the user)
+- ✅ Structural metadata: number of records, timestamps, foreign keys, which modules are active
+
+A database CHECK constraint (`encryption_vaults_zk_consistency`) enforces the "ZK active ⇒ recovery wrap exists" invariant at the schema level, so the server cannot accidentally lock a user out.
+
+## Recovery code rotation
+
+Users can rotate their recovery code without disabling zero-knowledge mode. The settings page shows a "🔁 Recovery-Code rotieren" button when ZK is active. The flow:
+
+1. Browser uses the cached master key bytes (stashed during the recovery-code unlock earlier in the session)
+2. Generates a fresh 32-byte secret + new HKDF wrap key
+3. Seals the same master key with the new wrap key
+4. Posts the new wrap to `/recovery-wrap` (replaces the previous row)
+5. Displays the new code; the old one is now permanently invalid
+
+If the user is in standard mode, rotation re-fetches the master key from the server (same path as the initial setup).
+
+## Deployment requirements
+
+<Aside type="caution" title="MANA_AUTH_KEK is required in production">
+mana-auth refuses to start without `MANA_AUTH_KEK` set to a base64-encoded 32-byte value. The dev fallback is 32 zero bytes, which prints a loud warning. Generate a real key with:
+
+```bash
+openssl rand -base64 32
+```
+
+Store it as a Docker secret, KMS-injected env var, or Vault-served value. The KEK never touches the database — it lives only in process memory.
+</Aside>
+
+### Key rotation
+
+The KEK and the per-user master keys can rotate independently:
+
+- **MK rotation** (`POST /encryption-vault/rotate`): mints a fresh master key, wipes the existing wrap. The old MK is lost — caller is responsible for re-encrypting any data sealed with it. Use case: suspected device compromise.
+- **KEK rotation**: handled by deploying a new `MANA_AUTH_KEK` value with a new `kek_id`. Old vault rows keep their original `kek_id` until a background re-wrap job migrates them. (The migration job is a future addition — for now KEK rotation requires planned downtime.)
+
+## Audit trail
+
+Every vault access is recorded in `auth.encryption_vault_audit`:
+
+| Action | When |
+|--------|------|
+| `init` | First-time vault creation |
+| `fetch` | Each `GET /key` call (the hot path) |
+| `failed_fetch` | Any 4xx/5xx on the fetch path |
+| `rotate` | Master key rotation |
+| `recovery_set` | New recovery wrap stored |
+| `recovery_clear` | Recovery wrap removed |
+| `zk_enable` | Zero-knowledge mode activated |
+| `zk_disable` | Zero-knowledge mode deactivated |
+
+Each row carries the IP address, user-agent, HTTP status code, and a free-form context string. Used for security investigations and compliance reporting.
+
+## Threat model summary
+
+| Threat | Standard | Zero-Knowledge |
+|--------|----------|----------------|
+| Browser-local malware reading IndexedDB | ✅ Protected (encrypted blobs) | ✅ Protected |
+| Stolen device with no screen lock | ✅ Protected (key not persisted) | ✅ Protected |
+| Database leak (encrypted_vaults dump) | ✅ Protected (KEK is in env, not DB) | ✅ Protected |
+| Mana operator with full DB access | ⚠️ Could decrypt with KEK | ✅ Cannot decrypt |
+| Mana operator with full DB + KEK access | ⚠️ Could decrypt | ✅ Cannot decrypt (no usable wrap) |
+| Court order against Mana | ⚠️ Could be compelled to decrypt | ✅ Mana physically cannot comply |
+| User loses recovery code | n/a | ❌ Data lost |
+| User loses password but vault is in ZK mode | Recovery via password reset | ❌ Data lost (vault is keyed to recovery code) |
+
+## Implementation references
+
+For the architectural deep dive, code locations, and the complete rollout history (Phases 1–9 + the backlog sweep), see [`DATA_LAYER_AUDIT.md`](https://github.com/mana-how/mana-monorepo/blob/main/apps/mana/apps/web/src/lib/data/DATA_LAYER_AUDIT.md).
+
+Key files:
+
+| File | Role |
+|------|------|
+| `apps/mana/apps/web/src/lib/data/crypto/aes.ts` | AES-GCM-256 wrap/unwrap primitives |
+| `apps/mana/apps/web/src/lib/data/crypto/registry.ts` | Allowlist of which fields on which tables get encrypted |
+| `apps/mana/apps/web/src/lib/data/crypto/recovery.ts` | Recovery code generation, format/parse, HKDF wrap |
+| `apps/mana/apps/web/src/lib/data/crypto/vault-client.ts` | Browser-side vault client + zero-knowledge state machine |
+| `apps/mana/apps/web/src/lib/components/RecoveryCodeUnlockModal.svelte` | Lock-screen modal for the ZK unlock flow |
+| `apps/mana/apps/web/src/routes/(app)/settings/security/+page.svelte` | Settings UI for setup, rotation, disable |
+| `services/mana-auth/src/services/encryption-vault/index.ts` | Server-side vault service |
+| `services/mana-auth/src/services/encryption-vault/kek.ts` | KEK loader + master-key wrap helpers |
+| `services/mana-auth/sql/002_encryption_vaults.sql` | Vault table + RLS policies |
+| `services/mana-auth/sql/003_recovery_wrap.sql` | Recovery wrap columns + CHECK constraints |

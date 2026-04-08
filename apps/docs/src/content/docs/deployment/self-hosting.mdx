@@ -120,6 +120,10 @@ services:
       REDIS_PASSWORD: ${REDIS_PASSWORD}
       JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY}
       JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
+      # REQUIRED: encryption-vault Key Encryption Key.
+      # Generate with: openssl rand -base64 32
+      # See "Encryption Vault Setup" below.
+      MANA_AUTH_KEK: ${MANA_AUTH_KEK}
     depends_on:
       postgres:
         condition: service_healthy
@@ -159,6 +163,50 @@ openssl pkey -in private.pem -pubout -out public.pem
 echo "JWT_PRIVATE_KEY=$(cat private.pem | base64 -w 0)"
 echo "JWT_PUBLIC_KEY=$(cat public.pem | base64 -w 0)"
 ```
+
+## Encryption Vault Setup
+
+mana-auth ships with a per-user encryption vault that wraps each user's master key with a service-wide **Key Encryption Key (KEK)**. The KEK is loaded from the `MANA_AUTH_KEK` environment variable on boot — **it is required in production** and refusing to set it leaves you running on a 32-zero-byte dev fallback that prints a loud warning every startup.
+
+### Generating a KEK
+
+```bash
+# 32 random bytes, base64-encoded
+openssl rand -base64 32
+
+# Example output (DO NOT use this — generate your own!)
+# 4n8jzXq2K9pL5mR7tY1wE3uI6oP0sD8fG2hJ4kL6nM8=
+```
+
+Add the result to your `.env`:
+
+```env
+MANA_AUTH_KEK=4n8jzXq2K9pL5mR7tY1wE3uI6oP0sD8fG2hJ4kL6nM8=
+```
+
+### Securing the KEK
+
+Treat the KEK like a database root password — anyone with both the KEK and the database can decrypt every user's master key. Do not commit it to git, do not log it, do not paste it into chat.
+
+Recommended storage:
+
+- **Docker Secrets**: `secrets:` block in compose, mounted into the container at `/run/secrets/mana_auth_kek`
+- **HashiCorp Vault / AWS Secrets Manager / Google Secret Manager**: inject at boot via init container or sidecar
+- **systemd `LoadCredential=`**: when running mana-auth as a systemd service
+
+Avoid plaintext `.env` files on production hosts where possible.
+
+### What if I lose the KEK?
+
+Every user's master key in `auth.encryption_vaults` becomes unrecoverable. The wrapped data on disk is mathematically opaque without the KEK. There is no backup path on the server side — by design.
+
+The mitigation: users who care about that risk should opt into **Zero-Knowledge Mode** in **Settings → Sicherheit**, which moves the wrap from the server-side KEK to a client-held recovery code. After that, the KEK loss only affects new user sign-ups, not existing accounts.
+
+### KEK rotation
+
+KEK rotation today requires planned downtime — there is no background re-wrap job yet. The `kek_id` column on `auth.encryption_vaults` is reserved for the future migration path. Track issue [#TODO] for when this lands.
+
+For now, treat the KEK as long-lived and rotate JWT signing keys (which are independent) on the regular schedule instead.
 
 ## Reverse Proxy Setup
 

@@ -49,6 +49,26 @@ OpenID Connect provider for Matrix/Synapse SSO.
 
 Aggregates data from 3 sources: auth DB (sessions, accounts, 2FA, passkeys), mana-credits (balance, transactions), mana-sync DB (entity counts per app).
 
+### Encryption Vault (`/api/v1/me/encryption-vault/*`)
+
+Per-user master-key custody for the Mana data-layer encryption. The browser fetches its master key here on first login and re-fetches on each session start. The key itself never lives in the database — it's wrapped with the service-wide KEK (loaded from `MANA_AUTH_KEK`).
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/status` | Cheap metadata read: `{ vaultExists, hasRecoveryWrap, zeroKnowledge, recoverySetAt }`. No decryption, no audit row. Used by the settings page on mount. |
+| POST | `/init` | Idempotent vault initialisation. Mints + KEK-wraps a fresh master key on first call, returns the existing one on subsequent calls. |
+| GET | `/key` | Hot path. Returns either `{ masterKey, formatVersion, kekId }` (standard mode) or `{ requiresRecoveryCode: true, recoveryWrappedMk, recoveryIv }` (zero-knowledge mode). |
+| POST | `/rotate` | Mints a fresh master key. Old MK is gone — caller must re-encrypt or accept loss. **Forbidden in zero-knowledge mode** (`409 ZK_ROTATE_FORBIDDEN`). |
+| POST | `/recovery-wrap` | Stores a client-built recovery wrap: `{ recoveryWrappedMk, recoveryIv }`. The recovery secret itself NEVER touches the wire. Idempotent — replaces existing wrap. |
+| DELETE | `/recovery-wrap` | Removes the recovery wrap. **Forbidden in zero-knowledge mode** (`409 ZK_ACTIVE`) — would lock the user out. |
+| POST | `/zero-knowledge` | Toggles ZK mode. `{ enable: true }` requires a recovery wrap to be set first (else `400 RECOVERY_WRAP_MISSING`). `{ enable: false, masterKey: base64 }` requires the freshly-unwrapped MK from the client so the server can KEK-re-wrap it. |
+
+All routes write to `auth.encryption_vault_audit` for security investigations. Three database CHECK constraints enforce vault consistency at the schema level (`encryption_vaults_has_wrap`, `encryption_vaults_wrap_iv_pair`, `encryption_vaults_zk_consistency`) so a code-level bug can't accidentally lock a user out.
+
+Schema lives in `src/db/schema/encryption-vaults.ts`, service in `src/services/encryption-vault/`. Migration files: `sql/002_encryption_vaults.sql` (Phase 2: tables + RLS) and `sql/003_recovery_wrap.sql` (Phase 9: recovery columns + ZK constraints).
+
+For the full architectural deep-dive, threat model, and rollout history (Phases 1–9 + backlog sweep), see `apps/mana/apps/web/src/lib/data/DATA_LAYER_AUDIT.md`. User-facing docs at `apps/docs/src/content/docs/architecture/security.mdx`.
+
 ### Admin (`/api/v1/admin/*`)
 | Method | Path | Description |
 |--------|------|-------------|
@@ -84,6 +104,13 @@ SMTP_PORT=587
 SMTP_USER=...
 SMTP_PASS=...
 SYNAPSE_OIDC_CLIENT_SECRET=...
+
+# Encryption Vault — REQUIRED IN PRODUCTION
+# Base64-encoded 32-byte AES-256 key. Generate with `openssl rand -base64 32`.
+# The dev fallback is 32 zero bytes (prints a loud warning at startup).
+# This key wraps every user's master key in auth.encryption_vaults — guard
+# it like a database password. Provision via Docker secret / KMS / Vault.
+MANA_AUTH_KEK=
 ```
 
 ## Critical Rules

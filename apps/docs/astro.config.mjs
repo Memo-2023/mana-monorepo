@@ -46,6 +46,7 @@ export default defineConfig({
 					items: [
 						{ label: 'Overview', slug: 'architecture/overview' },
 						{ label: 'Authentication', slug: 'architecture/authentication' },
+						{ label: 'Security & Encryption', slug: 'architecture/security' },
 						{ label: 'Backend (NestJS)', slug: 'architecture/backend' },
 						{ label: 'Web (SvelteKit)', slug: 'architecture/web' },
 						{ label: 'Mobile (Expo)', slug: 'architecture/mobile' },

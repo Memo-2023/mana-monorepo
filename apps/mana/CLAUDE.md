@@ -4,82 +4,118 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Mana Apps is a monorepo containing multiple applications that share a unified authentication system powered by Supabase. The repository includes:
+**Mana** is the unified web application serving 27+ product modules (todo, calendar, contacts, chat, notes, dreams, memoro, cards, picture, presi, music, storage, …) under one SvelteKit app, one IndexedDB, one auth session, and one deployment at **mana.how**.
 
-- **Web App** (`apps/web`): SvelteKit-based web application
-- **Mobile App** (`apps/mobile`): React Native (Expo) application for iOS, Android, and web
-- **Landing** (`apps/landing`): Landing page directory (currently minimal/empty)
+- **Web App** (`apps/web`): SvelteKit 2 + Svelte 5 unified app — the main surface
+- **Mobile App** (`apps/mobile`): Expo / React Native (work-in-progress, separate codebase)
+- **Landing** (`apps/landing`): Astro static landing page deployed to Cloudflare Pages
 
 ## Architecture
 
-### Multi-App Ecosystem
+### Unified Module System
 
-This is a multi-tenant system where a single authentication backend supports multiple branded applications (Memoro, Cards, Storyteller, Mana). Each app shares the same user database but can present different branding and features.
+All modules share one SvelteKit build. Each module lives in `apps/web/src/lib/modules/{name}/` and registers itself via a `module.config.ts` file. The data layer uses a single Dexie IndexedDB (`mana`) containing all 120+ collections from every module — table names that collide across modules are prefixed (e.g. `todoProjects`, `cardDecks`, `presiDecks`).
 
-**Key concept**: App configuration is centralized in `apps/web/src/lib/config/apps.ts` and defines branding, features, and routing for each application in the ecosystem.
+Module state lives in three files per module:
 
-### Authentication & Session Management
+| File | Role |
+|------|------|
+| `collections.ts` | Dexie table references + (sometimes) seed data |
+| `queries.ts` | Read-side: Dexie liveQuery hooks, type converters, pure helpers for `$derived` |
+| `stores/*.svelte.ts` | Write-side: mutation methods, no reads (those go through queries.ts) |
 
-Both web and mobile apps use Supabase for authentication with different approaches:
+### Authentication
 
-**Web App (SvelteKit)**:
+**Mana Auth** is the central authentication service (`services/mana-auth/`, port 3001), built on Better Auth + Hono + Bun. The web app talks to it via the shared `@mana/shared-auth` client.
 
-- Server-side authentication using `@supabase/ssr`
-- Two-hook middleware system in `apps/web/src/hooks.server.ts`:
-  - `supabase` hook: Creates Supabase client per request with cookie management
-  - `authGuard` hook: Validates JWT, protects `(app)` routes, redirects based on auth state
-- Safe session validation: Uses `safeGetSession()` which validates JWT via `getUser()` instead of just reading from cookies
-- Route groups: `(auth)` for login/register, `(app)` for protected dashboard pages
+- **Token format**: EdDSA JWT with minimal claims (`sub`, `email`, `role`, `sid`, `tier`)
+- **Session storage**: Cookies (`*.mana.how` domain) + JWT in memory
+- **Route protection**: `(app)` group is auth-gated via the `AuthGate` component in the layout
+- **Cross-app SSO**: Same Mana Auth session works across all `*.mana.how` apps
+- **Access tiers**: `guest` < `public` < `beta` < `alpha` < `founder` — apps can require a minimum tier via `mana-apps.ts`
 
-**Mobile App (Expo)**:
+The legacy Supabase integration was removed. Anything mentioning `@supabase/ssr`, `safeGetSession()`, or `event.locals.supabase` is a leftover from a much earlier iteration and should be deleted on sight.
 
-- Client-side authentication using `@supabase/supabase-js`
-- Custom memory storage implementation (`apps/mobile/utils/memoryStorage.ts`) for session persistence
-- `AuthProvider` component in `apps/mobile/app/_layout.tsx` handles auth state and navigation
-- Platform-specific configuration (web build disables realtime to avoid import issues)
+### Data Layer (Local-First)
 
-### Database Schema
+The app reads and writes to IndexedDB **first**, then syncs to the server in the background via the **mana-sync** Go service (port 3050).
 
-Key tables (inferred from queries):
+Architecture diagram:
 
-- `users`: User profiles linked via `auth_id` to Supabase Auth users
-- `user_roles`: Junction table linking users to organizations (with role information)
-- `organizations`: Organization entities
-- `teams`: Team entities within organizations
-- `team_members`: Junction table linking users to teams
+```
+User action (e.g. tasksStore.createTask)
+        │
+        ▼
+Module store builds the LocalRecord
+        │
+        ▼
+encryptRecord(tableName, record)        ← Phase 4–9 encryption layer
+        │
+        ▼
+table.add(encryptedRecord)              ← Dexie write
+        │
+        ▼
+Dexie hooks (database.ts):
+  - stamp userId
+  - stamp __fieldTimestamps per field
+  - record into _pendingChanges
+  - record into _activity
+        │
+        ▼
+Sync engine (sync.ts) — debounced 1s
+  - groups changes by appId
+  - POSTs to mana-sync
+        │
+        ▼
+mana-sync → PostgreSQL with field-level LWW + RLS
+        │
+        ▼
+Other clients pull via SSE / polling
+        │
+        ▼
+applyServerChanges → Dexie hooks (suppressed) → liveQuery → decryptRecord → UI
+```
+
+For the deep dive — sync engine, retry/backoff, quota recovery, telemetry, RLS, encryption rollout — read **`apps/web/src/lib/data/DATA_LAYER_AUDIT.md`**. This is the single most important file for understanding how the app works under the hood.
+
+### At-Rest Encryption
+
+User-typed content in **27 tables** is encrypted with **AES-GCM-256** before it touches IndexedDB. The master key lives in `mana-auth` (KEK-wrapped) and is fetched on login.
+
+Two trust modes:
+
+| Mode | Default | What Mana can decrypt |
+|------|---------|----------------------|
+| Standard | ✅ Yes | The user's master key, via the server-side KEK |
+| Zero-Knowledge | Opt-in (Settings → Sicherheit) | Nothing — recovery code lives only with the user |
+
+**When writing module code that touches sensitive fields:**
+
+1. Add the table to `apps/web/src/lib/data/crypto/registry.ts` with the field allowlist
+2. Wrap writes: `await encryptRecord(tableName, record)` before `table.add()` / `table.update()`
+3. Wrap reads: `decryptRecords(tableName, visible)` after the Dexie query, before the type converter
+4. The Dexie hook in `database.ts` does NOT auto-encrypt — every store does it explicitly. This is by design (Web Crypto is async, hooks are sync).
+
+For new sensitive fields, default to **encrypt**. For new structural fields (IDs, timestamps, enums, sort/filter keys), default to **plaintext**.
+
+User-facing docs at `apps/docs/src/content/docs/architecture/security.mdx`.
 
 ### Routing Structure
 
-**Web App** (SvelteKit file-based routing):
-
 ```
-routes/
-├── (auth)/          # Public authentication pages
-│   ├── login/
-│   └── register/
-├── (app)/           # Protected application pages
-│   ├── dashboard/
-│   ├── organizations/
+apps/web/src/routes/
+├── (auth)/              # Public auth pages (login, register, recovery)
+├── (app)/               # Auth-gated app surface — 27+ module routes
+│   ├── dashboard/       # Customizable widget grid
 │   ├── settings/
-│   └── teams/
-└── api/             # API endpoints
+│   │   └── security/    # Vault status + recovery code + ZK opt-in
+│   ├── todo/            # …and many more module routes
+│   └── …
+├── workbench/           # Multi-pane interface (ListView + DetailView per module)
+└── api/                 # SvelteKit API endpoints (rare; most data is local-first)
 ```
 
-**Mobile App** (Expo Router):
-
-```
-app/
-├── (drawer)/        # Main drawer navigation
-│   ├── (tabs)/      # Nested tab navigation
-│   ├── organizations/
-│   ├── teams/
-│   ├── settings/
-│   └── apps/
-├── auth/            # Auth-related screens
-└── login            # Login screen
-```
-
-### Path Aliases (Web App)
+### Path Aliases
 
 Defined in `apps/web/svelte.config.js`:
 
@@ -102,13 +138,12 @@ pnpm dev                # Start dev server on port 5173
 
 # Building
 pnpm build              # Build for production
-pnpm preview            # Preview production build on port 4173
+pnpm preview            # Preview production build
 
 # Code Quality
 pnpm check              # Type-check with svelte-check
-pnpm check:watch        # Type-check in watch mode
-pnpm lint               # Check formatting and lint
-pnpm format             # Format code with Prettier
+pnpm lint               # Format check + ESLint
+pnpm format             # Prettier write
 
 # Testing
 pnpm test               # Run Vitest unit tests
@@ -116,113 +151,108 @@ pnpm test:ui            # Run Vitest with UI
 pnpm test:e2e           # Run Playwright E2E tests
 ```
 
+For full local-dev setup (Mana Auth + mana-sync + web together), use the root-level `dev:*:full` commands. See `docs/LOCAL_DEVELOPMENT.md` and the root `CLAUDE.md`.
+
 ### Mobile App (apps/mobile)
 
-```bash
-cd apps/mobile
-
-# Development
-npm start               # Start Expo dev server with dev client
-npm run ios             # Run on iOS simulator
-npm run android         # Run on Android emulator
-npm run web             # Run web version on port 19006
-
-# Building (EAS)
-npm run build:dev       # Build development client
-npm run build:preview   # Build preview/internal distribution
-npm run build:prod      # Build production (auto-increment version)
-
-# Code Quality
-npm run lint            # Lint and check formatting
-npm run format          # Fix linting and format code
-
-# Setup
-npm run prebuild        # Generate native projects
-```
+The mobile app is currently lower-priority than the web app and may lag behind in features. Standard Expo commands apply (`pnpm start`, `pnpm ios`, `pnpm android`, EAS builds for production).
 
 ## Environment Configuration
 
-Both apps require Supabase credentials. Copy the `.env.example` files and configure:
+Generated automatically from the root `.env.development` via `pnpm setup:env`. The relevant variables for the web app:
 
-**Web App** (`apps/web/.env`):
-
-```
-PUBLIC_SUPABASE_URL=your_supabase_url
-PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-MIDDLEWARE_URL=https://mana-middleware-111768794939.europe-west3.run.app
+```env
+PUBLIC_MANA_AUTH_URL=http://localhost:3001
+PUBLIC_MANA_SYNC_URL=http://localhost:3050
 ```
 
-**Mobile App** (`apps/mobile/.env`):
-
-```
-EXPO_PUBLIC_SUPABASE_URL=your_supabase_url
-EXPO_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-```
+The web app does NOT read or store any database credentials directly — all server-side data goes through Mana Auth + mana-sync. See the root `CLAUDE.md` for the full env-var rundown.
 
 ## Technology Stack
 
 ### Web App
 
-- **Framework**: SvelteKit 2 with Svelte 5
-- **Styling**: TailwindCSS with PostCSS
-- **Database**: Supabase (PostgreSQL)
-- **Auth**: Supabase Auth with SSR
-- **Testing**: Vitest (unit), Playwright (E2E)
+- **Framework**: SvelteKit 2 + Svelte 5 (runes mode throughout)
+- **Styling**: TailwindCSS
+- **Auth**: Mana Auth (Better Auth + EdDSA JWT) via `@mana/shared-auth`
+- **Data**: Local-first with Dexie.js + mana-sync (Go) backend
+- **Encryption**: AES-GCM-256 via Web Crypto, server-wrapped MK with optional zero-knowledge mode
+- **Testing**: Vitest (unit + integration with fake-indexeddb), Playwright (E2E)
 - **Build**: Vite
 
 ### Mobile App
 
-- **Framework**: Expo 52 with React Native 0.76
-- **Routing**: Expo Router 4 (file-based)
-- **Styling**: NativeWind (TailwindCSS for React Native)
-- **Navigation**: React Navigation (drawer, tabs)
-- **Database**: Supabase
+- **Framework**: Expo + React Native
+- **Routing**: Expo Router (file-based)
+- **Styling**: NativeWind
 - **Build**: EAS Build
-- **Platforms**: iOS, Android, Web
 
 ## Important Patterns
 
-### Server-Side Data Loading (Web)
+### Module Store Pattern
 
-Use `+page.server.ts` files for server-side data fetching with automatic auth context:
+Every module has a mutation-only store that handles writes + a queries file that handles reads. The store NEVER reads from Dexie via `await table.toArray()` for UI rendering — that's the queries file's job (via liveQuery hooks). The store only reads when it needs to mutate based on existing state (e.g. toggle, increment).
 
 ```typescript
-export const load: PageServerLoad = async ({ locals: { supabase, session } }) => {
-	if (!session) {
-		throw redirect(307, '/login');
-	}
+// modules/todo/stores/tasks.svelte.ts
+import { taskTable } from '../collections';
+import { encryptRecord } from '$lib/data/crypto';
+import { toTask } from '../queries';
 
-	const { data } = await supabase.from('table_name').select('*').eq('user_id', session.user.id);
-
-	return { data };
+export const tasksStore = {
+  async createTask(input: {...}) {
+    const newLocal: LocalTask = { ...input, id: crypto.randomUUID() };
+    const plaintextSnapshot = toTask({ ...newLocal });
+    await encryptRecord('tasks', newLocal);
+    await taskTable.add(newLocal);
+    return plaintextSnapshot;
+  },
+  // ...
 };
 ```
 
-### Supabase Client Access
+```typescript
+// modules/todo/queries.ts
+export function useAllTasks() {
+  return useLiveQueryWithDefault(async () => {
+    const locals = await db.table<LocalTask>('tasks').orderBy('order').toArray();
+    const visible = locals.filter((t) => !t.deletedAt);
+    const decrypted = await decryptRecords('tasks', visible);
+    return decrypted.map(toTask);
+  }, [] as Task[]);
+}
+```
 
-**Web**: Access via `event.locals.supabase` in server code, or use helper functions in `$server/supabase.ts`:
+### Svelte 5 Runes Mode
 
-- `getUser(event)`: Get current user
-- `getSession(event)`: Get current session
-- `requireAuth(event)`: Require auth or throw error
-- `getSupabaseServerClient(event)`: Get the Supabase client
+All routes and components use Svelte 5 runes:
 
-**Mobile**: Import directly from `~/utils/supabase.ts`
+```typescript
+// CORRECT
+let count = $state(0);
+let doubled = $derived(count * 2);
+$effect(() => {
+  console.log(count);
+});
+
+// WRONG (legacy Svelte 3/4)
+let count = 0;
+$: doubled = count * 2;
+```
+
+### Auth Access
+
+Auth state lives in `$lib/stores/auth.svelte.ts`. The current user id is also pushed into the data layer's `current-user.ts` so the Dexie creating-hook can auto-stamp `userId` on every record. Module stores never need to know who the current user is.
 
 ### Route Protection
 
-**Web**: Automatic via `authGuard` hook in `hooks.server.ts`. Routes in `(app)` group are protected.
+The `(app)` group is wrapped by an `AuthGate` component that redirects unauthenticated users to `/login` and reads the access tier from the JWT to gate beta/alpha/founder-only modules.
 
-**Mobile**: Handled by `AuthProvider` in `_layout.tsx` which redirects unauthenticated users to `/login`.
+## Reference Documents
 
-## Multi-App Branding
-
-When adding new apps to the ecosystem, update `apps/web/src/lib/config/apps.ts` with:
-
-- App name and display name
-- Tagline and description
-- Logo emoji and colors
-- Feature list for marketing
-- Dashboard route
-
-The welcome page will automatically render the appropriate branding based on app context.
+| Path | Purpose |
+|------|---------|
+| `apps/web/src/lib/data/DATA_LAYER_AUDIT.md` | Complete data-layer architecture, sync engine, encryption rollout, threat model, backlog |
+| `apps/docs/src/content/docs/architecture/security.mdx` | User-facing security & encryption walkthrough |
+| `apps/docs/src/content/docs/architecture/authentication.mdx` | Auth flow + JWT structure |
+| Root `CLAUDE.md` | Monorepo overview, dev commands, sibling services |
