@@ -30,22 +30,22 @@
 	}
 
 	.separator {
-		color: var(--color-muted-foreground, #94a3b8);
+		color: hsl(var(--color-muted-foreground));
 		font-size: 11px;
 	}
 
 	.crumb-link {
-		color: var(--color-muted-foreground, #94a3b8);
+		color: hsl(var(--color-muted-foreground));
 		text-decoration: none;
 		transition: color 0.15s;
 	}
 
 	.crumb-link:hover {
-		color: var(--color-primary, #6366f1);
+		color: hsl(var(--color-primary));
 	}
 
 	.crumb-current {
-		color: var(--color-foreground, #f1f5f9);
+		color: hsl(var(--color-foreground));
 		font-weight: 500;
 	}
 </style>

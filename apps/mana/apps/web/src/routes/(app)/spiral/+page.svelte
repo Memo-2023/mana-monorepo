@@ -289,12 +289,12 @@
 	.page-title {
 		font-size: 1.75rem;
 		font-weight: 700;
-		color: var(--color-foreground);
+		color: hsl(var(--color-foreground));
 		margin: 0;
 	}
 
 	.page-subtitle {
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 		font-size: 0.875rem;
 		margin: 0.25rem 0 0;
 	}
@@ -306,8 +306,8 @@
 	}
 
 	.section {
-		background: var(--color-card, rgba(255, 255, 255, 0.05));
-		border: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
+		background: hsl(var(--color-card)));
+		border: 1px solid hsl(var(--color-border)));
 		border-radius: 12px;
 		padding: 1.25rem;
 	}
@@ -315,7 +315,7 @@
 	.section-title {
 		font-size: 1rem;
 		font-weight: 600;
-		color: var(--color-foreground);
+		color: hsl(var(--color-foreground));
 		margin: 0 0 1rem;
 		display: flex;
 		align-items: center;
@@ -323,7 +323,7 @@
 	}
 
 	.badge {
-		background: var(--color-primary, #6366f1);
+		background: hsl(var(--color-primary));
 		color: white;
 		font-size: 0.75rem;
 		padding: 0.125rem 0.5rem;
@@ -348,7 +348,7 @@
 	.viz-header h2 {
 		font-size: 1rem;
 		font-weight: 600;
-		color: var(--color-foreground);
+		color: hsl(var(--color-foreground));
 		margin: 0;
 	}
 
@@ -364,7 +364,7 @@
 		align-items: center;
 		gap: 0.5rem;
 		font-size: 0.875rem;
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.control input[type='range'] {
@@ -388,17 +388,17 @@
 	.empty-state {
 		text-align: center;
 		padding: 3rem;
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.pixel-detail {
 		text-align: center;
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 		font-size: 0.875rem;
 	}
 
 	.pixel-detail code {
-		background: var(--color-background, rgba(0, 0, 0, 0.2));
+		background: hsl(var(--color-background)));
 		padding: 0.125rem 0.5rem;
 		border-radius: 4px;
 		font-family: monospace;
@@ -427,7 +427,7 @@
 	.stat {
 		text-align: center;
 		padding: 0.75rem;
-		background: var(--color-background, rgba(0, 0, 0, 0.2));
+		background: hsl(var(--color-background)));
 		border-radius: 8px;
 	}
 
@@ -435,14 +435,14 @@
 		display: block;
 		font-size: 1.25rem;
 		font-weight: 700;
-		color: var(--color-foreground);
+		color: hsl(var(--color-foreground));
 		font-family: monospace;
 	}
 
 	.stat-label {
 		display: block;
 		font-size: 0.7rem;
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 		margin-top: 0.25rem;
 	}
 
@@ -452,7 +452,7 @@
 
 	.collected-at {
 		font-size: 0.75rem;
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 		text-align: right;
 		margin: 0;
 	}
@@ -466,7 +466,7 @@
 
 	.app-card {
 		padding: 0.75rem;
-		background: var(--color-background, rgba(0, 0, 0, 0.2));
+		background: hsl(var(--color-background)));
 		border-radius: 8px;
 	}
 
@@ -480,19 +480,19 @@
 	.app-name {
 		font-weight: 600;
 		font-size: 0.875rem;
-		color: var(--color-foreground);
+		color: hsl(var(--color-foreground));
 	}
 
 	.app-count {
 		font-family: monospace;
 		font-size: 1rem;
 		font-weight: 700;
-		color: var(--color-primary, #6366f1);
+		color: hsl(var(--color-primary));
 	}
 
 	.app-bar {
 		height: 4px;
-		background: var(--color-border, rgba(255, 255, 255, 0.1));
+		background: hsl(var(--color-border)));
 		border-radius: 2px;
 		overflow: hidden;
 		margin-bottom: 0.375rem;
@@ -513,16 +513,16 @@
 
 	.app-label {
 		font-size: 0.75rem;
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.app-events {
 		font-size: 0.7rem;
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.empty-hint {
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 		font-size: 0.875rem;
 		text-align: center;
 		padding: 1rem;
@@ -541,7 +541,7 @@
 		align-items: center;
 		gap: 0.375rem;
 		font-size: 0.75rem;
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.color-swatch {
@@ -569,15 +569,15 @@
 		border-radius: 8px;
 		font-size: 0.875rem;
 		font-weight: 500;
-		border: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
-		background: var(--color-background, rgba(0, 0, 0, 0.2));
-		color: var(--color-foreground);
+		border: 1px solid hsl(var(--color-border)));
+		background: hsl(var(--color-background)));
+		color: hsl(var(--color-foreground));
 		cursor: pointer;
 		transition: all 0.15s;
 	}
 
 	.btn:hover:not(:disabled) {
-		background: var(--color-accent, rgba(255, 255, 255, 0.1));
+		background: hsl(var(--color-accent)));
 	}
 
 	.btn:disabled {
@@ -586,8 +586,8 @@
 	}
 
 	.btn-primary {
-		background: var(--color-primary, #6366f1);
-		border-color: var(--color-primary, #6366f1);
+		background: hsl(var(--color-primary));
+		border-color: hsl(var(--color-primary));
 		color: white;
 	}
 
@@ -606,21 +606,21 @@
 
 	.info-box {
 		padding: 1rem;
-		background: var(--color-background, rgba(0, 0, 0, 0.2));
+		background: hsl(var(--color-background)));
 		border-radius: 8px;
-		border-left: 4px solid var(--color-primary, #6366f1);
+		border-left: 4px solid hsl(var(--color-primary));
 	}
 
 	.info-box h4 {
 		font-size: 0.875rem;
 		font-weight: 600;
 		margin: 0 0 0.5rem;
-		color: var(--color-foreground);
+		color: hsl(var(--color-foreground));
 	}
 
 	.info-box p {
 		font-size: 0.8rem;
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 		margin: 0;
 		line-height: 1.5;
 	}

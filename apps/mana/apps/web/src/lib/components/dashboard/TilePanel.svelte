@@ -171,8 +171,8 @@
 		display: flex;
 		flex-direction: column;
 		border-radius: 0.75rem;
-		border: 2px dashed var(--color-primary, #6366f1);
-		background: var(--color-background, #fff);
+		border: 2px dashed hsl(var(--color-primary));
+		background: hsl(var(--color-background));
 		opacity: 0.95;
 	}
 
@@ -181,7 +181,7 @@
 		align-items: center;
 		justify-content: center;
 		padding: 0.5rem;
-		border-bottom: 1px solid var(--color-border, #e5e7eb);
+		border-bottom: 1px solid hsl(var(--color-border));
 		cursor: grab;
 	}
 
@@ -211,21 +211,21 @@
 		font-size: 0.75rem;
 		font-weight: 500;
 		cursor: pointer;
-		background: var(--color-surface, #f3f4f6);
-		color: var(--color-text, #374151);
+		background: hsl(var(--color-surface));
+		color: hsl(var(--color-foreground));
 		transition: background 0.15s;
 	}
 
 	.tile-edit-btn:hover {
-		background: var(--color-surface-hover, #e5e7eb);
+		background: hsl(var(--color-surface-hover));
 	}
 
 	.tile-edit-btn-danger {
-		color: var(--color-destructive, #ef4444);
+		color: hsl(var(--color-error));
 	}
 
 	.tile-edit-btn-danger:hover {
-		background: var(--color-destructive, #ef4444);
+		background: hsl(var(--color-error));
 		color: white;
 	}
 
@@ -236,7 +236,7 @@
 		padding: 0.5rem;
 		max-height: 200px;
 		overflow-y: auto;
-		border-top: 1px solid var(--color-border, #e5e7eb);
+		border-top: 1px solid hsl(var(--color-border));
 	}
 
 	.tile-widget-option {
@@ -247,18 +247,18 @@
 		text-align: left;
 		cursor: pointer;
 		background: transparent;
-		color: var(--color-text, #374151);
+		color: hsl(var(--color-foreground));
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
 	}
 
 	.tile-widget-option:hover {
-		background: var(--color-surface-hover, #e5e7eb);
+		background: hsl(var(--color-surface-hover));
 	}
 
 	.tile-widget-option.active {
-		background: var(--color-primary, #6366f1);
+		background: hsl(var(--color-primary));
 		color: white;
 	}
 </style>

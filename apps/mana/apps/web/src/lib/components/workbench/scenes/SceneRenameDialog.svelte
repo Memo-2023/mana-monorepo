@@ -194,7 +194,7 @@
 		transition: border-color 0.15s;
 	}
 	.srd-input:focus {
-		border-color: var(--color-primary, #8b5cf6);
+		border-color: hsl(var(--color-primary));
 	}
 	:global(.dark) .srd-input {
 		background: #1f1c1a;
@@ -237,7 +237,7 @@
 		background: rgba(255, 255, 255, 0.06);
 	}
 	.srd-btn-primary {
-		background: var(--color-primary, #8b5cf6);
+		background: hsl(var(--color-primary));
 		color: white;
 	}
 	.srd-btn-primary:hover:not(:disabled) {

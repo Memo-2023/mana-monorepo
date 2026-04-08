@@ -223,10 +223,10 @@
 	}
 	.scene-add:hover {
 		background: rgba(0, 0, 0, 0.05);
-		color: var(--color-primary, #8b5cf6);
+		color: hsl(var(--color-primary));
 	}
 	:global(.dark) .scene-add:hover {
 		background: rgba(255, 255, 255, 0.06);
-		color: var(--color-primary, #8b5cf6);
+		color: hsl(var(--color-primary));
 	}
 </style>

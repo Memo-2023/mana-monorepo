@@ -215,9 +215,9 @@
 		border-color: rgba(0, 0, 0, 0.12);
 	}
 	.add-card:hover {
-		border-color: var(--color-primary, #8b5cf6);
-		color: var(--color-primary, #8b5cf6);
-		background: color-mix(in srgb, var(--color-primary, #8b5cf6) 4%, transparent);
+		border-color: hsl(var(--color-primary));
+		color: hsl(var(--color-primary));
+		background: color-mix(in srgb, hsl(var(--color-primary)) 4%, transparent);
 	}
 	:global(.dark) .add-card {
 		border-color: rgba(255, 255, 255, 0.06);
@@ -228,9 +228,9 @@
 		color: #6b7280;
 	}
 	:global(.dark) .add-card:hover {
-		border-color: var(--color-primary, #8b5cf6);
-		color: var(--color-primary, #8b5cf6);
-		background: color-mix(in srgb, var(--color-primary, #8b5cf6) 8%, transparent);
+		border-color: hsl(var(--color-primary));
+		color: hsl(var(--color-primary));
+		background: color-mix(in srgb, hsl(var(--color-primary)) 8%, transparent);
 	}
 	.add-label {
 		font-size: 0.875rem;
@@ -303,13 +303,13 @@
 		padding: 0;
 	}
 	.tab-title:hover {
-		color: var(--color-primary, #8b5cf6);
+		color: hsl(var(--color-primary));
 	}
 	:global(.dark) .tab-title {
 		color: #e5e7eb;
 	}
 	:global(.dark) .tab-title:hover {
-		color: var(--color-primary, #8b5cf6);
+		color: hsl(var(--color-primary));
 	}
 	.tab-maximize,
 	.tab-close {
@@ -329,7 +329,7 @@
 		opacity: 1;
 	}
 	.tab-maximize:hover {
-		color: var(--color-primary, #8b5cf6);
+		color: hsl(var(--color-primary));
 		background: rgba(139, 92, 246, 0.08);
 	}
 	.tab-close:hover {
@@ -349,7 +349,7 @@
 		margin-left: 0.125rem;
 	}
 	.tab-add:hover {
-		color: var(--color-primary, #8b5cf6);
+		color: hsl(var(--color-primary));
 		background: rgba(139, 92, 246, 0.08);
 	}
 </style>

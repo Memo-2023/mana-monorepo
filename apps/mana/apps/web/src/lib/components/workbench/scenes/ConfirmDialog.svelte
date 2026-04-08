@@ -163,7 +163,7 @@
 		background: rgba(255, 255, 255, 0.06);
 	}
 	.cd-btn-primary {
-		background: var(--color-primary, #8b5cf6);
+		background: hsl(var(--color-primary));
 		color: white;
 	}
 	.cd-btn-primary:hover:not(:disabled) {

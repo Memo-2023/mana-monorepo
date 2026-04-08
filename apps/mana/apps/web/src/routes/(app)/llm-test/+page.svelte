@@ -512,12 +512,12 @@
 	{@html `<style>
 		.llm-prose { line-height: 1.6; }
 		.llm-prose p { margin: 0.4em 0; }
-		.llm-prose pre { background: var(--color-muted, #1e1e2e); border-radius: 0.5rem; padding: 0.75rem; overflow-x: auto; margin: 0.5em 0; }
-		.llm-prose code { font-size: 0.85em; background: var(--color-muted, #1e1e2e); padding: 0.15em 0.3em; border-radius: 0.25rem; }
+		.llm-prose pre { background: hsl(var(--color-muted)); border-radius: 0.5rem; padding: 0.75rem; overflow-x: auto; margin: 0.5em 0; }
+		.llm-prose code { font-size: 0.85em; background: hsl(var(--color-muted)); padding: 0.15em 0.3em; border-radius: 0.25rem; }
 		.llm-prose pre code { background: none; padding: 0; }
 		.llm-prose ul, .llm-prose ol { padding-left: 1.5em; margin: 0.4em 0; }
 		.llm-prose h1, .llm-prose h2, .llm-prose h3 { margin: 0.6em 0 0.3em; font-weight: 600; }
-		.llm-prose blockquote { border-left: 3px solid var(--color-border, #444); padding-left: 0.75em; margin: 0.4em 0; opacity: 0.8; }
+		.llm-prose blockquote { border-left: 3px solid hsl(var(--color-border)); padding-left: 0.75em; margin: 0.4em 0; opacity: 0.8; }
 	</style>`}
 </svelte:head>
 

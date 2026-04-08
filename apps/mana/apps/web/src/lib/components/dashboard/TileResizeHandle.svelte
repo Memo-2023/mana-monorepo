@@ -152,7 +152,7 @@
 
 	.tile-resize-handle-bar {
 		border-radius: 3px;
-		background: var(--color-border, #e5e7eb);
+		background: hsl(var(--color-border));
 		transition: background 0.15s ease;
 	}
 
@@ -168,11 +168,11 @@
 
 	.tile-resize-handle:hover .tile-resize-handle-bar,
 	.tile-resize-handle.dragging .tile-resize-handle-bar {
-		background: var(--color-primary, #6366f1);
+		background: hsl(var(--color-primary));
 	}
 
 	.tile-resize-handle:focus-visible {
-		outline: 2px solid var(--color-primary, #6366f1);
+		outline: 2px solid hsl(var(--color-primary));
 		outline-offset: -1px;
 		border-radius: 3px;
 	}

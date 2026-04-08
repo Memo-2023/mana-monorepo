@@ -277,13 +277,13 @@
 	.gallery-title {
 		font-size: 20px;
 		font-weight: 700;
-		color: var(--color-foreground, #f1f5f9);
+		color: hsl(var(--color-foreground));
 		margin: 0 0 4px 0;
 	}
 
 	.gallery-subtitle {
 		font-size: 13px;
-		color: var(--color-muted-foreground, #94a3b8);
+		color: hsl(var(--color-muted-foreground));
 		margin: 0;
 	}
 
@@ -330,7 +330,7 @@
 	.group-label {
 		font-size: 12px;
 		font-weight: 600;
-		color: var(--color-muted-foreground, #94a3b8);
+		color: hsl(var(--color-muted-foreground));
 		text-transform: uppercase;
 		letter-spacing: 0.06em;
 		margin: 0;

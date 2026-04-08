@@ -55,8 +55,8 @@
 		left: 50%;
 		transform: translate(-50%, -50%);
 		z-index: 55;
-		background: var(--color-card, #1e293b);
-		border: 1px solid var(--color-border, rgba(148, 163, 184, 0.15));
+		background: hsl(var(--color-card));
+		border: 1px solid hsl(var(--color-border)));
 		border-radius: 12px;
 		padding: 24px;
 		min-width: 320px;
@@ -74,14 +74,14 @@
 	.modal-title {
 		font-size: 16px;
 		font-weight: 600;
-		color: var(--color-foreground, #f1f5f9);
+		color: hsl(var(--color-foreground));
 		margin: 0;
 	}
 
 	.close-btn {
 		background: none;
 		border: none;
-		color: var(--color-muted-foreground, #94a3b8);
+		color: hsl(var(--color-muted-foreground));
 		font-size: 20px;
 		cursor: pointer;
 		padding: 4px 8px;
@@ -89,7 +89,7 @@
 	}
 
 	.close-btn:hover {
-		background: var(--color-muted, rgba(148, 163, 184, 0.1));
+		background: hsl(var(--color-muted)));
 	}
 
 	.shortcut-list {
@@ -114,17 +114,17 @@
 		display: inline-flex;
 		align-items: center;
 		padding: 2px 8px;
-		background: var(--color-muted, rgba(148, 163, 184, 0.1));
-		border: 1px solid var(--color-border, rgba(148, 163, 184, 0.15));
+		background: hsl(var(--color-muted)));
+		border: 1px solid hsl(var(--color-border)));
 		border-radius: 5px;
 		font-size: 12px;
 		font-family: system-ui, sans-serif;
-		color: var(--color-foreground, #e2e8f0);
+		color: hsl(var(--color-foreground));
 		font-weight: 500;
 	}
 
 	.shortcut-desc {
 		font-size: 13px;
-		color: var(--color-muted-foreground, #94a3b8);
+		color: hsl(var(--color-muted-foreground));
 	}
 </style>
