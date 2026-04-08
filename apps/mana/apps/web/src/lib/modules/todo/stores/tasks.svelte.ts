@@ -86,25 +86,29 @@ export const tasksStore = {
 	/**
 	 * Create a task from a voice recording. Inserts a placeholder task
 	 * immediately so the user sees instant feedback in the list, then
-	 * fills in the real title once mana-stt returns the transcript.
-	 *
-	 * No date/priority parsing yet — that needs an LLM pass and is its
-	 * own follow-up. The user can edit the task inline like any other.
+	 * runs transcription + LLM parsing in the background and updates
+	 * the task with the structured result (title, due date, priority,
+	 * labels). If the LLM step fails or mana-llm is unavailable, the
+	 * server returns the raw transcript as the title and the user gets
+	 * a usable task either way — see /api/v1/voice/parse-task.
 	 */
 	async createFromVoice(blob: Blob, _durationMs: number, language = 'de') {
 		const placeholder = await this.createTask({ title: 'Sprachaufgabe wird transkribiert…' });
-		void this.transcribeIntoTask(placeholder.id, blob, language);
+		void this.transcribeAndParseIntoTask(placeholder.id, blob, language);
 		return placeholder;
 	},
 
 	/**
-	 * Upload an audio blob to /api/v1/voice/transcribe and write the
-	 * transcript into an existing task as the new title. On failure,
-	 * surfaces the error inline so the user isn't left with the
-	 * "wird transkribiert…" placeholder forever.
+	 * Two-step pipeline: STT → LLM parse → updateTask. Both steps go
+	 * through server-side proxies (/api/v1/voice/transcribe and
+	 * /api/v1/voice/parse-task) so the browser never sees STT or LLM
+	 * credentials. Failures at either step surface inline as the task
+	 * title so the user isn't left with the "wird transkribiert…"
+	 * placeholder forever.
 	 */
-	async transcribeIntoTask(taskId: string, blob: Blob, language?: string): Promise<void> {
+	async transcribeAndParseIntoTask(taskId: string, blob: Blob, language?: string): Promise<void> {
 		try {
+			// Step 1: speech to text
 			const form = new FormData();
 			const ext = blob.type.includes('webm')
 				? '.webm'
@@ -114,17 +118,46 @@ export const tasksStore = {
 			form.append('file', blob, `task${ext}`);
 			if (language) form.append('language', language);
 
-			const response = await fetch('/api/v1/voice/transcribe', {
+			const sttResponse = await fetch('/api/v1/voice/transcribe', {
 				method: 'POST',
 				body: form,
 			});
-			if (!response.ok) {
-				const text = await response.text();
-				throw new Error(text || `HTTP ${response.status}`);
+			if (!sttResponse.ok) {
+				const text = await sttResponse.text();
+				throw new Error(text || `HTTP ${sttResponse.status}`);
 			}
-			const result = (await response.json()) as { text: string };
-			const transcript = (result.text ?? '').trim() || 'Sprachaufgabe';
-			await this.updateTask(taskId, { title: transcript });
+			const sttResult = (await sttResponse.json()) as { text: string };
+			const transcript = (sttResult.text ?? '').trim();
+			if (!transcript) {
+				await this.updateTask(taskId, { title: 'Sprachaufgabe' });
+				return;
+			}
+
+			// Step 2: structured extraction. parse-task gracefully falls
+			// back to { title: transcript, dueDate: null, ... } if mana-llm
+			// is unreachable, so we don't wrap this in another try/catch.
+			const parseResponse = await fetch('/api/v1/voice/parse-task', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ transcript, language }),
+			});
+			const parsed = parseResponse.ok
+				? ((await parseResponse.json()) as {
+						title: string;
+						dueDate: string | null;
+						priority: 'low' | 'medium' | 'high' | null;
+						labels: string[];
+					})
+				: { title: transcript, dueDate: null, priority: null as null, labels: [] as string[] };
+
+			const update: Record<string, unknown> = { title: parsed.title };
+			if (parsed.dueDate) update.dueDate = parsed.dueDate;
+			if (parsed.priority) update.priority = parsed.priority;
+			// labels are free-text topic hints from the LLM and don't yet
+			// map to the workspace's tag IDs — leave label wiring to a
+			// follow-up that does fuzzy matching against existing tags.
+
+			await this.updateTask(taskId, update);
 		} catch (e) {
 			const msg = e instanceof Error ? e.message : String(e);
 			await this.updateTask(taskId, { title: `Sprachaufgabe (Fehler: ${msg})` });
