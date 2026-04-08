@@ -9,6 +9,11 @@
 		getQuestionById,
 	} from '$lib/modules/questions/queries';
 	import type { Question, Answer } from '$lib/modules/questions/queries';
+	import { answersStore } from '$lib/modules/questions/stores/answers.svelte';
+	import AnswerCitations from '$lib/modules/questions/components/AnswerCitations.svelte';
+	import type { LocalQuestion } from '$lib/modules/questions/types';
+	import type { ResearchEvent } from '$lib/api/research';
+	import { toastStore } from '@mana/shared-ui/toast';
 	import {
 		ArrowLeft,
 		Clock,
@@ -17,6 +22,8 @@
 		Archive,
 		PencilSimple,
 		Trash,
+		MagnifyingGlass,
+		ArrowCounterClockwise,
 	} from '@mana/shared-icons';
 
 	const allQuestions = useAllQuestions();
@@ -33,6 +40,92 @@
 	let editDescription = $state('');
 	let newAnswer = $state('');
 	let savingAnswer = $state(false);
+
+	// ─── Deep-research state ─────────────────────────────────
+	let researchHandle = $state<{ cancel: () => void } | null>(null);
+	let researchPhase = $state<string | null>(null);
+	let researchSourceCount = $state<number | null>(null);
+
+	const phaseLabels: Record<string, string> = {
+		planning: 'Plane Recherche…',
+		searching: 'Suche im Web…',
+		extracting: 'Lese Quellen…',
+		synthesizing: 'Schreibe Antwort…',
+	};
+
+	function resetResearchState() {
+		researchPhase = null;
+		researchSourceCount = null;
+		researchHandle = null;
+	}
+
+	function handleResearchEvent(event: ResearchEvent) {
+		switch (event.type) {
+			case 'snapshot':
+				if (event.snapshot.status !== 'done' && event.snapshot.status !== 'error') {
+					researchPhase = event.snapshot.status;
+				}
+				break;
+			case 'status':
+				researchPhase = event.status;
+				break;
+			case 'sources':
+				researchSourceCount = event.count;
+				break;
+			case 'done':
+				resetResearchState();
+				toastStore.success('Recherche abgeschlossen');
+				break;
+			case 'error':
+				resetResearchState();
+				toastStore.error(`Recherche fehlgeschlagen: ${event.message}`);
+				break;
+		}
+	}
+
+	async function startResearchRun() {
+		if (!question || researchHandle) return;
+		const confirmed = confirm(
+			'Diese Frage wird an Web-Suchmaschinen und LLM-Anbieter übermittelt. Lokale Verschlüsselung gilt nur für die Speicherung auf diesem Gerät. Recherche starten?'
+		);
+		if (!confirmed) return;
+
+		try {
+			researchHandle = await answersStore.startResearch({
+				question: question as unknown as LocalQuestion,
+				onEvent: handleResearchEvent,
+			});
+		} catch (err) {
+			researchHandle = null;
+			toastStore.error(`Recherche konnte nicht gestartet werden: ${(err as Error).message}`);
+		}
+	}
+
+	/**
+	 * Re-run research for a question that already has an answer. Soft-deletes
+	 * any prior research-driven answers (manual ones are kept) and kicks off
+	 * a fresh pipeline. Old sources stay on the server but are no longer
+	 * referenced from the local store.
+	 */
+	async function rerunResearch() {
+		if (!question || researchHandle) return;
+		const confirmed = confirm(
+			'Vorherige Recherche-Antworten werden in den Papierkorb verschoben. Erneut recherchieren?'
+		);
+		if (!confirmed) return;
+
+		const previous = (answers as Answer[]).filter((a) => a.researchResultId);
+		for (const a of previous) {
+			await answersStore.softDelete(a.id);
+		}
+		await startResearchRun();
+	}
+
+	function cancelResearch() {
+		researchHandle?.cancel();
+		resetResearchState();
+		toastStore.info('Recherche-Stream beendet');
+	}
 
 	const statusLabels: Record<string, { label: string; color: string }> = {
 		open: {
@@ -287,6 +380,58 @@
 			{/each}
 		</div>
 
+		<!-- Deep Research -->
+		<div class="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-5">
+			<div class="flex items-start justify-between gap-4">
+				<div class="flex-1">
+					<h3 class="text-sm font-semibold text-[hsl(var(--foreground))]">Recherche</h3>
+					<p class="mt-1 text-xs text-[hsl(var(--muted-foreground))]">
+						{#if question.researchDepth === 'quick'}
+							Schnell · 5 Quellen · keine Volltext-Extraktion
+						{:else if question.researchDepth === 'standard'}
+							Standard · bis zu 15 Quellen · mit Volltext-Extraktion
+						{:else}
+							Tiefgehend · bis zu 30 Quellen · alle Kategorien
+						{/if}
+					</p>
+				</div>
+				{#if researchHandle}
+					<button
+						onclick={cancelResearch}
+						class="rounded-lg border border-[hsl(var(--border))] px-3 py-1.5 text-sm text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
+					>
+						Stream beenden
+					</button>
+				{:else if (answers as Answer[]).some((a) => a.researchResultId)}
+					<button
+						onclick={rerunResearch}
+						class="inline-flex items-center gap-2 rounded-lg border border-[hsl(var(--border))] px-3 py-1.5 text-sm font-medium text-[hsl(var(--foreground))] hover:bg-[hsl(var(--muted))]"
+					>
+						<ArrowCounterClockwise class="h-4 w-4" />
+						Erneut recherchieren
+					</button>
+				{:else}
+					<button
+						onclick={startResearchRun}
+						class="inline-flex items-center gap-2 rounded-lg bg-[hsl(var(--primary))] px-3 py-1.5 text-sm font-medium text-[hsl(var(--primary-foreground))] hover:opacity-90"
+					>
+						<MagnifyingGlass class="h-4 w-4" />
+						Recherche starten
+					</button>
+				{/if}
+			</div>
+
+			{#if researchPhase}
+				<div class="mt-3 flex items-center gap-2 text-sm text-[hsl(var(--muted-foreground))]">
+					<CircleNotch class="h-4 w-4 animate-spin" />
+					<span>{phaseLabels[researchPhase] ?? researchPhase}</span>
+					{#if researchSourceCount !== null}
+						<span class="text-xs">· {researchSourceCount} Quellen</span>
+					{/if}
+				</div>
+			{/if}
+		</div>
+
 		<!-- Answers -->
 		<div class="space-y-4">
 			<h2 class="text-lg font-semibold text-[hsl(var(--foreground))]">
@@ -315,9 +460,10 @@
 							</div>
 						{/if}
 
-						<div class="whitespace-pre-wrap text-[hsl(var(--foreground))]">
-							{answer.content}
-						</div>
+						<AnswerCitations
+							content={answer.content}
+							researchResultId={answer.researchResultId ?? null}
+						/>
 
 						<div class="mt-4 flex items-center justify-between">
 							<span class="text-xs text-[hsl(var(--muted-foreground))]">

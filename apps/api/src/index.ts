@@ -31,6 +31,7 @@ import { moodlitRoutes } from './modules/moodlit/routes';
 import { newsRoutes } from './modules/news/routes';
 import { tracesRoutes } from './modules/traces/routes';
 import { presiRoutes } from './modules/presi/routes';
+import { researchRoutes } from './modules/research/routes';
 
 const PORT = parseInt(process.env.PORT || '3060', 10);
 const CORS_ORIGINS = (process.env.CORS_ORIGINS || 'http://localhost:5173').split(',');
@@ -61,6 +62,7 @@ app.route('/api/v1/moodlit', moodlitRoutes);
 app.route('/api/v1/news', newsRoutes);
 app.route('/api/v1/traces', tracesRoutes);
 app.route('/api/v1/presi', presiRoutes);
+app.route('/api/v1/research', researchRoutes);
 
 // ─── Server Info ────────────────────────────────────────────
 console.log(`mana-api starting on port ${PORT}...`);

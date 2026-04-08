@@ -33,3 +33,16 @@ export function getManaEventsUrl(): string {
 	}
 	return process.env.PUBLIC_MANA_EVENTS_URL || 'http://localhost:3065';
 }
+
+/**
+ * Get the unified mana-api URL (Hono/Bun, port 3060 in dev).
+ * Hosts module-specific compute endpoints under /api/v1/{module}/*.
+ */
+export function getManaApiUrl(): string {
+	if (browser && typeof window !== 'undefined') {
+		const injected = (window as unknown as { __PUBLIC_MANA_API_URL__?: string })
+			.__PUBLIC_MANA_API_URL__;
+		return injected || 'http://localhost:3060';
+	}
+	return process.env.PUBLIC_MANA_API_URL || 'http://localhost:3060';
+}
