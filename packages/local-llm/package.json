@@ -1,8 +1,8 @@
 {
 	"name": "@mana/local-llm",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"private": true,
-	"description": "Client-side LLM inference via WebLLM (Qwen 2.5 1.5B) with Svelte 5 reactive stores",
+	"description": "Client-side LLM inference via transformers.js (Gemma 4 E2B, WebGPU) with Svelte 5 reactive stores",
 	"main": "./src/index.ts",
 	"types": "./src/index.ts",
 	"exports": {
@@ -13,7 +13,7 @@
 		"clean": "rm -rf dist"
 	},
 	"dependencies": {
-		"@mlc-ai/web-llm": "^0.2.78"
+		"@huggingface/transformers": "^4.0.0"
 	},
 	"devDependencies": {
 		"@types/node": "^24.10.1",

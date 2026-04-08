@@ -64,7 +64,12 @@ export default defineConfig({
 		// into the server build forces Vite's interop layer to handle the
 		// CJS↔ESM mismatch correctly.
 		noExternal: [...MANA_SHARED_PACKAGES, ...APP_SHARED_PACKAGES, 'rrule'],
-		external: ['@mlc-ai/web-llm'],
+		// transformers.js is browser-only (uses WebGPU + the Cache API). The
+		// dynamic import in @mana/local-llm only ever fires client-side, but
+		// SvelteKit's adapter-node Rollup pass would otherwise warn that the
+		// import is unresolved at SSR time. Marking it external both silences
+		// the warning and ensures the SSR bundle never tries to load it.
+		external: ['@huggingface/transformers'],
 	},
 	optimizeDeps: {
 		exclude: [...MANA_SHARED_PACKAGES, ...APP_SHARED_PACKAGES],

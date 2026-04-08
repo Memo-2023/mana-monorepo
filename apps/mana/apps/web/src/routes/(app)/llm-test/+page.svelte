@@ -42,7 +42,7 @@
 	}
 
 	// --- State ---
-	let selectedModel: ModelKey = $state('qwen-2.5-1.5b');
+	let selectedModel: ModelKey = $state('gemma-4-e2b');
 	let activeTab: 'chat' | 'extract' | 'classify' | 'compare' | 'benchmark' = $state('chat');
 	const supported = isLocalLlmSupported();
 	const status = getLocalLlmStatus();
