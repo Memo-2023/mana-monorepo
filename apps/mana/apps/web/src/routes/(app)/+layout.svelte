@@ -432,6 +432,13 @@
 	<div class="min-h-screen bg-background">
 		<!-- Bottom Stack: all fixed-bottom elements in one flex container -->
 		<div class="bottom-stack" style:--bottom-chrome-height="{bottomChromeHeight}px">
+			<!-- Guest nudge — sits above the input bar, fades with the stack -->
+			{#if guestMode && guestMode.notifications.length > 0}
+				<div class="bottom-stack-notification">
+					<NotificationBar notifications={guestMode.notifications} />
+				</div>
+			{/if}
+
 			<!-- QuickInputBar with inline nav toggle -->
 			<QuickInputBar
 				onSearch={inputBarAdapter.onSearch}
@@ -536,13 +543,6 @@
 
 		<!-- Keyboard shortcuts modal -->
 		<KeyboardShortcutsModal open={showShortcuts} onclose={() => (showShortcuts = false)} />
-
-		<!-- Guest notifications (nudge) -->
-		{#if guestMode && guestMode.notifications.length > 0}
-			<div class="notification-float">
-				<NotificationBar notifications={guestMode.notifications} />
-			</div>
-		{/if}
 	</div>
 
 	<!-- Navigation Context Menu -->
@@ -618,12 +618,9 @@
 		transform: rotate(180deg);
 	}
 
-	.notification-float {
-		position: fixed;
-		bottom: 10rem;
-		left: 50%;
-		transform: translateX(-50%);
-		z-index: 100;
-		pointer-events: auto;
+	.bottom-stack-notification {
+		display: flex;
+		justify-content: center;
+		padding: 0 1rem 0.5rem;
 	}
 </style>

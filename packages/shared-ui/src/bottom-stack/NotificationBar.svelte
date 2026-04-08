@@ -52,19 +52,24 @@
 	.notification-bar {
 		display: flex;
 		align-items: center;
-		gap: 0.625rem;
-		padding: 0.5rem 0.625rem 0.5rem 0.875rem;
-		background: var(--color-surface-elevated, rgba(255, 255, 255, 0.95));
-		border: 1px solid var(--color-border, rgba(0, 0, 0, 0.1));
-		border-radius: 0.625rem;
-		box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-		backdrop-filter: blur(12px);
+		gap: 0.75rem;
+		padding: 0.625rem 0.625rem 0.625rem 1rem;
+		background: hsl(var(--color-surface-elevated));
+		border: 1px solid hsl(var(--color-border-strong, var(--color-border)));
+		border-radius: 0.875rem;
+		box-shadow:
+			0 8px 24px rgba(0, 0, 0, 0.12),
+			0 2px 6px rgba(0, 0, 0, 0.06);
+		backdrop-filter: blur(16px);
+		-webkit-backdrop-filter: blur(16px);
 		max-width: 480px;
 		width: max-content;
 		animation: slideUp 250ms ease-out;
 	}
 	:global(.dark) .notification-bar {
-		box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+		box-shadow:
+			0 12px 32px rgba(0, 0, 0, 0.45),
+			0 2px 8px rgba(0, 0, 0, 0.25);
 	}
 
 	.notification-bar.warning {
@@ -90,7 +95,7 @@
 		margin: 0;
 		font-size: 0.8125rem;
 		line-height: 1.4;
-		color: var(--color-muted-foreground, rgba(0, 0, 0, 0.65));
+		color: hsl(var(--color-foreground) / 0.85);
 	}
 
 	.notification-actions {
@@ -103,21 +108,34 @@
 	.notification-action {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.3rem;
-		padding: 0.375rem 0.75rem;
+		gap: 0.4rem;
+		padding: 0.5rem 0.95rem;
 		font-size: 0.8125rem;
 		font-weight: 600;
 		color: white;
 		background: var(--color-primary, #7c3aed);
-		border: none;
-		border-radius: 0.5rem;
+		border: 1px solid rgba(255, 255, 255, 0.18);
+		border-radius: 0.625rem;
 		cursor: pointer;
-		transition: background 150ms ease;
+		transition:
+			background 150ms ease,
+			transform 150ms ease,
+			box-shadow 150ms ease;
 		white-space: nowrap;
 		font-family: inherit;
+		box-shadow:
+			0 4px 12px rgba(124, 58, 237, 0.35),
+			0 1px 2px rgba(0, 0, 0, 0.1);
 	}
 	.notification-action:hover {
-		filter: brightness(0.9);
+		filter: brightness(1.08);
+		transform: translateY(-1px);
+		box-shadow:
+			0 6px 16px rgba(124, 58, 237, 0.45),
+			0 2px 4px rgba(0, 0, 0, 0.12);
+	}
+	.notification-action:active {
+		transform: translateY(0);
 	}
 
 	.notification-dismiss {
@@ -127,7 +145,7 @@
 		width: 24px;
 		height: 24px;
 		padding: 0;
-		color: var(--color-muted-foreground, rgba(0, 0, 0, 0.35));
+		color: hsl(var(--color-foreground) / 0.45);
 		background: transparent;
 		border: none;
 		border-radius: 0.25rem;
@@ -135,11 +153,8 @@
 		transition: all 150ms ease;
 	}
 	.notification-dismiss:hover {
-		background: rgba(0, 0, 0, 0.06);
-		color: var(--color-foreground, rgba(0, 0, 0, 0.7));
-	}
-	:global(.dark) .notification-dismiss:hover {
-		background: rgba(255, 255, 255, 0.1);
+		background: hsl(var(--color-foreground) / 0.08);
+		color: hsl(var(--color-foreground) / 0.85);
 	}
 
 	@media (max-width: 480px) {
