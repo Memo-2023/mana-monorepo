@@ -13,9 +13,12 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { coerce, transcriptMentions, __test } from './+server';
-
-const { DATE_TRIGGER_PATTERNS, PRIORITY_TRIGGER_PATTERNS } = __test;
+import {
+	coerce,
+	transcriptMentions,
+	DATE_TRIGGER_PATTERNS,
+	PRIORITY_TRIGGER_PATTERNS,
+} from './coerce';
 
 describe('transcriptMentions', () => {
 	it('returns true on an exact substring hit', () => {
