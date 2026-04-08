@@ -29,7 +29,13 @@ import type { RequestHandler } from './$types';
 const MAX_TRANSCRIPT_CHARS = 500;
 const MAX_HABITS = 50;
 const LLM_TIMEOUT_MS = 8000;
-const DEFAULT_MODEL = 'ollama/gemma3:4b';
+// gemma3:12b is more consistent than 4b at the "pick from this list,
+// don't paraphrase" instruction — 4b sometimes returns "Joggen" when
+// "Laufen" was in the list, which the verbatim-validation in coerce
+// then drops, costing an LLM round-trip for nothing. The accuracy
+// win matters more here than for parse-task because parse-habit only
+// runs at all when the cheap client-side substring fast path missed.
+const DEFAULT_MODEL = 'ollama/gemma3:12b';
 
 interface ParseResult {
 	match: string | null;

@@ -30,46 +30,56 @@ interface ParseResult {
 
 const MAX_TRANSCRIPT_CHARS = 1000;
 const LLM_TIMEOUT_MS = 8000;
-const DEFAULT_MODEL = 'ollama/gemma3:4b';
+// gemma3:12b consistently nails relative date math ("nächsten Montag"
+// from a Wednesday → next Monday's date) and respects "null when
+// absent" for both dueDate and priority. gemma3:4b gets weekday math
+// off-by-one and stamps today's date on every bare task. The 12b
+// model is only ~10% slower in practice on the GPU box (~1.1s vs
+// ~1.0s for these tiny prompts) so the accuracy win is essentially
+// free. The deterministic guards in coerce() are still kept as a
+// safety net in case the GPU box swaps in a weaker model.
+const DEFAULT_MODEL = 'ollama/gemma3:12b';
 
 function fallback(transcript: string): ParseResult {
 	return { title: transcript.trim() || 'Sprachaufgabe', dueDate: null, priority: null, labels: [] };
 }
 
 function buildPrompt(transcript: string, language: string): string {
-	const today = new Date().toISOString().slice(0, 10);
+	const now = new Date();
+	const today = now.toISOString().slice(0, 10);
+	const weekday = now.toLocaleDateString('en-US', { weekday: 'long' });
 	const langName = language === 'de' ? 'German' : language === 'en' ? 'English' : language;
+	// Few-shot prompt. Pure rule descriptions made gemma3:12b drop
+	// subjects from titles ("Anna anrufen" → "Anrufen") and miscount
+	// weekdays (off-by-one for "nächsten Montag"). Showing the model
+	// what good output looks like for the exact failure modes works
+	// where prose instructions don't. The deterministic guards in
+	// coerce() are still kept as a backstop.
 	return [
-		`You are a task parser. The user spoke a task in ${langName}.`,
-		`Today is ${today}.`,
+		`You parse spoken ${langName} tasks into JSON. Today is ${today} (${weekday}).`,
 		'',
-		'Extract the following fields and return ONLY a JSON object with these exact keys:',
-		'  - title: short imperative title without filler words (string, required)',
-		'  - dueDate: ISO date YYYY-MM-DD',
-		'  - priority: "low" | "medium" | "high"',
-		'  - labels: array of short topic labels (max 3, lowercase)',
+		'Output ONLY a JSON object. No code fences. Keys:',
+		'  title    — keep the full subject, just drop filler words',
+		'  dueDate  — YYYY-MM-DD, or null if no date is mentioned',
+		'  priority — "low" | "medium" | "high", or null if not mentioned',
+		'  labels   — array of short topic words from the transcript (may be empty)',
 		'',
-		'Rules — read carefully, the model often gets these wrong:',
-		'- dueDate: ONLY set this when the transcript explicitly mentions a',
-		'  date, weekday, or relative time word ("morgen", "tomorrow",',
-		'  "nächsten Montag", "heute Abend", "in zwei Wochen"). For a bare',
-		'  task like "Mülltonnen rausstellen" with no time at all, dueDate',
-		'  MUST be null. Never default to today just because the task feels',
-		'  like a today-thing.',
-		'- priority: ONLY set this when the transcript uses urgency or',
-		'  importance words ("dringend", "wichtig", "unbedingt", "asap",',
-		'  "low priority", "kann warten"). For a neutral task, priority',
-		'  MUST be null. Never guess from the topic.',
-		'- labels: ONLY include labels that come directly from concrete',
-		'  topic words in the transcript. For "Mülltonnen rausstellen",',
-		'  "müll" is fine but "haushalt" is a stretch — when in doubt,',
-		'  empty array. Max 3 labels, single words preferred.',
-		'- Resolve relative dates against today for the dueDate field.',
-		'- If only a time is mentioned (e.g. "um 14 Uhr"), assume today.',
-		'- title: a short imperative ("Steuererklärung machen", not',
-		'  "Erinnere mich an die Steuererklärung").',
-		'- Output JSON only, no markdown, no commentary, no code fences.',
-		'- Use null (literal, not the string "null") for absent fields.',
+		'Examples (assume today is 2026-04-08, a Wednesday):',
+		'',
+		'Transcript: "Mülltonnen rausstellen"',
+		'{"title":"Mülltonnen rausstellen","dueDate":null,"priority":null,"labels":["müll"]}',
+		'',
+		'Transcript: "Steuererklärung morgen 14 Uhr unbedingt erledigen"',
+		'{"title":"Steuererklärung erledigen","dueDate":"2026-04-09","priority":"high","labels":["steuern"]}',
+		'',
+		'Transcript: "Anna nächsten Montag anrufen"',
+		'{"title":"Anna anrufen","dueDate":"2026-04-13","priority":null,"labels":["anruf"]}',
+		'',
+		'Transcript: "Buy milk"',
+		'{"title":"Buy milk","dueDate":null,"priority":null,"labels":["grocery"]}',
+		'',
+		'Transcript: "Call dentist tomorrow at 3pm"',
+		'{"title":"Call dentist","dueDate":"2026-04-09","priority":null,"labels":["dentist"]}',
 		'',
 		`Transcript: ${JSON.stringify(transcript)}`,
 	].join('\n');
