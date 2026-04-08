@@ -120,13 +120,22 @@ export function createAuthRoutes(
 			}
 
 			// signInEmail returns { token (session token), user, redirect }
-			// Use the session token to call Better Auth's JWT /token endpoint
+			// Use the session token to call Better Auth's JWT /token endpoint.
+			//
+			// In production Better Auth issues the session cookie with the
+			// __Secure- prefix (because secure: true is set), so we have to
+			// pass that exact cookie name back when forging the request to
+			// /api/auth/token. Without the prefix the get-session middleware
+			// can't find the session and the JWT mint silently fails — the
+			// route falls through and returns a response without accessToken.
 			const sessionToken = response?.token;
 			if (sessionToken) {
+				const cookieName =
+					config.nodeEnv === 'production' ? '__Secure-mana.session_token' : 'mana.session_token';
 				const tokenResponse = await auth.handler(
 					new Request(new URL('/api/auth/token', config.baseUrl), {
 						method: 'GET',
-						headers: new Headers({ cookie: `mana.session_token=${sessionToken}` }),
+						headers: new Headers({ cookie: `${cookieName}=${sessionToken}` }),
 					})
 				);
 
