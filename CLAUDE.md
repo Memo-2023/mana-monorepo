@@ -4,18 +4,26 @@ Guidance for Claude Code when working in this repo.
 
 ## Monorepo Overview
 
-pnpm workspace monorepo. The main surface is the **unified web app** at `apps/mana/apps/web` — one SvelteKit build serving 27+ product modules under `mana.how`, sharing one IndexedDB, one auth session, one deployment.
+pnpm workspace monorepo with two consolidated tops:
+
+- **`apps/mana/apps/web`** — unified SvelteKit frontend serving 27+ product modules under `mana.how`. One build, one IndexedDB, one auth session, one deployment.
+- **`apps/api`** (`@mana/api`) — unified Hono/Bun backend API server. Consolidates per-module compute servers; routes registered under `/api/v1/{module}/*`.
+
+Per-product directories under `apps/{product}/` still exist for landing pages, mobile apps, and product-specific packages, but the active web frontend and API both live in the two consolidated apps above.
 
 - **Package Manager:** pnpm 9.15.0
 - **Build System:** Turborepo
 - **Node:** 20+
-- **Primary doc:** [`apps/mana/CLAUDE.md`](apps/mana/CLAUDE.md) — read this for module structure, data layer, encryption, and routing details.
+- **Primary doc:** [`apps/mana/CLAUDE.md`](apps/mana/CLAUDE.md) — module structure, data layer, encryption, routing.
 
 ### Repo layout
 
 ```
-apps/                # Product apps. Most are integrated as modules in apps/mana/apps/web.
-                     # Standalone (own container, not unified): matrix, manavoxel
+apps/
+├── mana/            # Unified frontend (SvelteKit web + Expo mobile + Astro landing)
+├── api/             # Unified backend API (Hono/Bun) — @mana/api
+├── {product}/       # Per-product landing pages, mobile apps, packages
+│                    # Standalone (own container, not unified): matrix, manavoxel
 games/               # arcade, voxelava, whopixels, worldream
 services/            # Backend services (Hono/Bun, Go, Python) — see list below
 packages/            # Shared workspace packages (@mana/*)
