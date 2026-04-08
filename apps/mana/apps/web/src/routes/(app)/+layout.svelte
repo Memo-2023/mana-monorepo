@@ -31,6 +31,7 @@
 	import { createFallbackAdapter } from '$lib/quick-input/fallback-adapter';
 	import { AuthGate, GuestWelcomeModal } from '@mana/shared-auth-ui';
 	import { createGuestMode, type GuestMode } from '$lib/stores/guest-mode.svelte';
+	import { guestPrompt, setGuestPromptNavigator } from '$lib/stores/guest-prompt.svelte';
 	import { NotificationBar } from '@mana/shared-ui';
 	import { tagLocalStore, tagMutations, useAllTags } from '@mana/shared-stores';
 	import { linkLocalStore, linkMutations } from '@mana/shared-links';
@@ -286,6 +287,15 @@
 
 	// ── Auth Ready (replaces monolith onMount) ──────────────
 	async function handleAuthReady() {
+		// Wire the unified guest-prompt singleton to SvelteKit's `goto`
+		// so the "Anmelden" button does a client-side transition instead
+		// of the default full-page reload. Idempotent — safe to call on
+		// every auth-ready cycle. If the user signs in successfully,
+		// drop any leftover guest prompts so the bottom bar starts the
+		// authenticated session clean.
+		setGuestPromptNavigator((href) => goto(href));
+		if (authStore.isAuthenticated) guestPrompt.clear();
+
 		// Phase A: Auth-independent — guests + authenticated
 		await Promise.all([
 			manaStore.initialize(),
@@ -454,10 +464,17 @@
 				<EncryptionIntroBanner />
 			</div>
 
-			<!-- Guest nudge — sits above the input bar, fades with the stack -->
-			{#if guestMode && guestMode.notifications.length > 0}
+			<!-- Guest notifications — combines the time-based nudge from
+				 createGuestMode (one-shot after N minutes) with the
+				 event-driven prompts pushed by guestPrompt.requireAccount
+				 (e.g. server feature called while signed out, 401 from
+				 the auth-aware fetch). Both flow into the same bar so
+				 the user only ever sees one stripe instead of stacking. -->
+			{#if (guestMode && guestMode.notifications.length > 0) || guestPrompt.notifications.length > 0}
 				<div class="bottom-stack-notification">
-					<NotificationBar notifications={guestMode.notifications} />
+					<NotificationBar
+						notifications={[...(guestMode?.notifications ?? []), ...guestPrompt.notifications]}
+					/>
 				</div>
 			{/if}
 

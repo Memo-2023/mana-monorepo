@@ -5,6 +5,7 @@
  */
 
 import { authStore } from '$lib/stores/auth.svelte';
+import { guestPrompt } from '$lib/stores/guest-prompt.svelte';
 
 /**
  * Retry configuration
@@ -87,6 +88,19 @@ export async function fetchWithRetry<T>(
 	const config = { ...DEFAULT_RETRY_CONFIG, ...retryConfig };
 	let lastError: string | null = null;
 
+	// Short-circuit for guest mode: skip the entire fetch ladder, surface
+	// the unified bottom-bar prompt instead. Without this, every server-
+	// only feature (LLM, media upload, search, …) would still hit the
+	// network and return a 401 — costing latency, log noise, and a worse
+	// error message ("Sitzung abgelaufen") than what we can show locally.
+	if (!authStore.isAuthenticated) {
+		guestPrompt.requireAccount(
+			'api',
+			'Diese Funktion braucht ein Konto. Melde dich an, um sie zu nutzen.'
+		);
+		return { data: null, error: 'Anmeldung erforderlich' };
+	}
+
 	for (let attempt = 0; attempt <= config.maxRetries; attempt++) {
 		try {
 			// Get fresh token for each attempt
@@ -104,6 +118,14 @@ export async function fetchWithRetry<T>(
 			if (!response.ok) {
 				// Don't retry on auth errors
 				if (response.status === 401) {
+					// Token has expired or been revoked server-side. Surface
+					// the unified prompt so the user has a one-click path
+					// back into the auth flow instead of a silent failure.
+					guestPrompt.requireAccount(
+						'api:401',
+						'Sitzung abgelaufen — bitte neu anmelden, um fortzufahren.',
+						'Neu anmelden'
+					);
 					return {
 						data: null,
 						error: 'Sitzung abgelaufen — bitte neu anmelden',
