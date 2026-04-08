@@ -103,6 +103,11 @@ window.__PUBLIC_GLITCHTIP_DSN__ = ${JSON.stringify(PUBLIC_GLITCHTIP_DSN)};
 
 	const isDev = process.env.NODE_ENV !== 'production';
 	setSecurityHeaders(response, {
+		// @huggingface/transformers (used by @mana/local-llm) lazy-loads the
+		// onnxruntime-web WASM loader from jsDelivr at backend selection
+		// time via a dynamic import(). Browsers route dynamic imports
+		// through script-src.
+		scriptSrc: ['https://cdn.jsdelivr.net'],
 		connectSrc: [
 			PUBLIC_MANA_AUTH_URL_CLIENT,
 			PUBLIC_SYNC_SERVER_URL_CLIENT,
@@ -112,6 +117,11 @@ window.__PUBLIC_GLITCHTIP_DSN__ = ${JSON.stringify(PUBLIC_GLITCHTIP_DSN)};
 			PUBLIC_MANA_EVENTS_URL_CLIENT,
 			PUBLIC_MANA_API_URL_CLIENT,
 			'wss://sync.mana.how',
+			// transformers.js *also* fetch()es the .wasm binary and the .mjs
+			// loader factory directly to pre-warm the runtime — those go
+			// through connect-src, not script-src, so jsDelivr has to be in
+			// both lists for the WebGPU backend resolver to succeed.
+			'https://cdn.jsdelivr.net',
 			// @mana/local-llm (transformers.js) pulls model config + ONNX
 			// shards from the HuggingFace ecosystem. HF currently uses three
 			// distinct CDN domains depending on file type and rollout state:
