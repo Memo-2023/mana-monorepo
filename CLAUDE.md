@@ -144,7 +144,7 @@ MinIO (Docker, S3-compatible) in both local and prod. Console: http://localhost:
 | `@mana/shared-ui` | React Native UI components |
 | `@mana/shared-theme` | Theme config |
 | `@mana/shared-i18n` | i18n |
-| `@mana/local-store` | Legacy local-first store (standalone apps only — unified Mana uses its own) |
+| `@mana/local-store` | Local-first store primitives — used by unified Mana, manavoxel, arcade, and shared-uload/-stores/-links |
 
 ## Adding Dependencies
 
