@@ -5,6 +5,7 @@
 	import WelcomeStep from './steps/WelcomeStep.svelte';
 	import ProfileStep from './steps/ProfileStep.svelte';
 	import AppsStep from './steps/AppsStep.svelte';
+	import AiTierStep from './steps/AiTierStep.svelte';
 	import CreditsStep from './steps/CreditsStep.svelte';
 	import CompleteStep from './steps/CompleteStep.svelte';
 	import { Check } from '@mana/shared-icons';
@@ -22,6 +23,7 @@
 		{ id: 'welcome', label: 'Willkommen', component: WelcomeStep },
 		{ id: 'profile', label: 'Profil', component: ProfileStep },
 		{ id: 'apps', label: 'Apps', component: AppsStep },
+		{ id: 'ai-tier', label: 'KI', component: AiTierStep },
 		{ id: 'credits', label: 'Credits', component: CreditsStep },
 		{ id: 'complete', label: 'Fertig', component: CompleteStep },
 	];

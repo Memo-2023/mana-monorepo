@@ -3,6 +3,7 @@
 	import { onMount } from 'svelte';
 	import { Button, Input, Card, PageHeader, GlobalSettingsSection } from '@mana/shared-ui';
 	import { PasskeyManager, TwoFactorSetup, AuditLog, SessionManager } from '@mana/shared-auth-ui';
+	import AiSettings from '$lib/components/settings/AiSettings.svelte';
 	import {
 		User,
 		CurrencyCircleDollar,
@@ -341,6 +342,11 @@
 						primaryColor="#6366f1"
 					/>
 				</div>
+			</Card>
+
+			<!-- AI Tier Settings -->
+			<Card>
+				<AiSettings />
 			</Card>
 
 			<!-- My Data & Danger Zone -->
