@@ -112,7 +112,9 @@ export const POST: RequestHandler = async ({ request }) => {
 	const language = body.language ?? 'de';
 	if (!transcript || habits.length === 0) return json(fallback());
 
-	const llmUrl = env.MANA_LLM_URL || env.PUBLIC_MANA_LLM_URL || 'http://localhost:3025';
+	// $env/dynamic/private excludes PUBLIC_-prefixed vars; compose must
+	// set MANA_LLM_URL (no prefix) for this to reach mana-llm in prod.
+	const llmUrl = env.MANA_LLM_URL || 'http://localhost:3025';
 	const apiKey = env.MANA_LLM_API_KEY;
 
 	let response: Response;

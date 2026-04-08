@@ -766,11 +766,20 @@ services:
       # Analytics & Error Tracking
       PUBLIC_UMAMI_WEBSITE_ID: 32777167-e026-4618-933a-3429120b479b
       PUBLIC_GLITCHTIP_DSN: ${GLITCHTIP_DSN_MANA_WEB:-}
-      # Speech-to-Text proxy: SvelteKit /api/v1/memoro/transcribe and
-      # /api/v1/dreams/transcribe forward to mana-stt via Cloudflare Tunnel.
-      # The browser never sees the API key — it stays server-side.
+      # Speech-to-Text proxy: SvelteKit /api/v1/voice/transcribe forwards
+      # to mana-stt via Cloudflare Tunnel. The browser never sees the API
+      # key — it stays server-side.
       MANA_STT_URL: https://gpu-stt.mana.how
       MANA_STT_API_KEY: ${MANA_STT_API_KEY:-}
+      # LLM proxy: /api/v1/voice/parse-task and /api/v1/voice/parse-habit
+      # call mana-llm for structured extraction. Set WITHOUT the PUBLIC_
+      # prefix because $env/dynamic/private explicitly excludes vars
+      # that start with the public prefix — so the parse endpoints
+      # would never see PUBLIC_MANA_LLM_URL even though it's right
+      # there in the compose env. Both vars exist; the public one
+      # is read by the browser-side playground and status page.
+      MANA_LLM_URL: http://mana-llm:3025
+      MANA_LLM_API_KEY: ${MANA_LLM_API_KEY:-}
     ports:
       - "5000:5000"
     healthcheck:
