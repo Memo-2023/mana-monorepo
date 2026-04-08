@@ -56,7 +56,7 @@
 		transform: translate(-50%, -50%);
 		z-index: 55;
 		background: hsl(var(--color-card));
-		border: 1px solid hsl(var(--color-border)));
+		border: 1px solid hsl(var(--color-border));
 		border-radius: 12px;
 		padding: 24px;
 		min-width: 320px;
@@ -89,7 +89,7 @@
 	}
 
 	.close-btn:hover {
-		background: hsl(var(--color-muted)));
+		background: hsl(var(--color-muted));
 	}
 
 	.shortcut-list {
@@ -114,8 +114,8 @@
 		display: inline-flex;
 		align-items: center;
 		padding: 2px 8px;
-		background: hsl(var(--color-muted)));
-		border: 1px solid hsl(var(--color-border)));
+		background: hsl(var(--color-muted));
+		border: 1px solid hsl(var(--color-border));
 		border-radius: 5px;
 		font-size: 12px;
 		font-family: system-ui, sans-serif;

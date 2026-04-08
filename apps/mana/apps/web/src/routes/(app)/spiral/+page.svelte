@@ -306,8 +306,8 @@
 	}
 
 	.section {
-		background: hsl(var(--color-card)));
-		border: 1px solid hsl(var(--color-border)));
+		background: hsl(var(--color-card));
+		border: 1px solid hsl(var(--color-border));
 		border-radius: 12px;
 		padding: 1.25rem;
 	}
@@ -398,7 +398,7 @@
 	}
 
 	.pixel-detail code {
-		background: hsl(var(--color-background)));
+		background: hsl(var(--color-background));
 		padding: 0.125rem 0.5rem;
 		border-radius: 4px;
 		font-family: monospace;
@@ -427,7 +427,7 @@
 	.stat {
 		text-align: center;
 		padding: 0.75rem;
-		background: hsl(var(--color-background)));
+		background: hsl(var(--color-background));
 		border-radius: 8px;
 	}
 
@@ -466,7 +466,7 @@
 
 	.app-card {
 		padding: 0.75rem;
-		background: hsl(var(--color-background)));
+		background: hsl(var(--color-background));
 		border-radius: 8px;
 	}
 
@@ -492,7 +492,7 @@
 
 	.app-bar {
 		height: 4px;
-		background: hsl(var(--color-border)));
+		background: hsl(var(--color-border));
 		border-radius: 2px;
 		overflow: hidden;
 		margin-bottom: 0.375rem;
@@ -569,15 +569,15 @@
 		border-radius: 8px;
 		font-size: 0.875rem;
 		font-weight: 500;
-		border: 1px solid hsl(var(--color-border)));
-		background: hsl(var(--color-background)));
+		border: 1px solid hsl(var(--color-border));
+		background: hsl(var(--color-background));
 		color: hsl(var(--color-foreground));
 		cursor: pointer;
 		transition: all 0.15s;
 	}
 
 	.btn:hover:not(:disabled) {
-		background: hsl(var(--color-accent)));
+		background: hsl(var(--color-accent));
 	}
 
 	.btn:disabled {
@@ -606,7 +606,7 @@
 
 	.info-box {
 		padding: 1rem;
-		background: hsl(var(--color-background)));
+		background: hsl(var(--color-background));
 		border-radius: 8px;
 		border-left: 4px solid hsl(var(--color-primary));
 	}
