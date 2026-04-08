@@ -1095,9 +1095,14 @@ services:
     container_name: mana-mon-victoria
     restart: always
     mem_limit: 256m
-    entrypoint: ["sh", "-c", "mkdir -p /etc/prometheus && cp /mnt/prometheus-config/*.yml /etc/prometheus/ 2>/dev/null; exec /victoria-metrics-prod -storageDataPath=/storage -retentionPeriod=2y -httpListenAddr=:9090 -promscrape.config=/etc/prometheus/prometheus.yml -promscrape.config.strictParse=false -selfScrapeInterval=15s -search.latencyOffset=0s"]
+    # Mount the host config dir read-only and point promscrape directly at it,
+    # so edits to docker/prometheus/prometheus.yml are picked up by POST /-/reload
+    # without a container restart. The previous setup baked a copy into
+    # /etc/prometheus/ at startup, which silently drifted from the host file
+    # whenever the container wasn't restarted (matrix removal incident, 2026-04-08).
+    entrypoint: ["/victoria-metrics-prod", "-storageDataPath=/storage", "-retentionPeriod=2y", "-httpListenAddr=:9090", "-promscrape.config=/etc/prometheus/prometheus.yml", "-promscrape.config.strictParse=false", "-selfScrapeInterval=15s", "-search.latencyOffset=0s"]
     volumes:
-      - ./docker/prometheus:/mnt/prometheus-config:ro
+      - ./docker/prometheus:/etc/prometheus:ro
       - victoriametrics_data:/storage
     ports:
       - "9090:9090"
@@ -1302,9 +1307,11 @@ services:
         condition: service_healthy
       alertmanager:
         condition: service_healthy
-    entrypoint: ["sh", "-c", "mkdir -p /etc/alerts && cp /mnt/alerts-config/alerts.yml /etc/alerts/ 2>/dev/null; exec /vmalert-prod -datasource.url=http://victoriametrics:9090 -notifier.url=http://alertmanager:9093 -remoteWrite.url=http://victoriametrics:9090 -remoteRead.url=http://victoriametrics:9090 -rule='/etc/alerts/alerts.yml' -evaluationInterval=30s -httpListenAddr=:8880"]
+    # Same direct-mount pattern as victoriametrics above — see the comment
+    # there for the rationale.
+    entrypoint: ["/vmalert-prod", "-datasource.url=http://victoriametrics:9090", "-notifier.url=http://alertmanager:9093", "-remoteWrite.url=http://victoriametrics:9090", "-remoteRead.url=http://victoriametrics:9090", "-rule=/etc/alerts/alerts.yml", "-evaluationInterval=30s", "-httpListenAddr=:8880"]
     volumes:
-      - ./docker/prometheus:/mnt/alerts-config:ro
+      - ./docker/prometheus:/etc/alerts:ro
     ports:
       - "8880:8880"
     healthcheck:

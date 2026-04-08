@@ -106,6 +106,18 @@ check_health "Contacts Backend" "http://localhost:3034/health"
 check_health "Contacts Web" "http://localhost:5014/health"
 
 echo ""
+echo "=== Reloading monitoring configs ==="
+# Bind-mounted prometheus.yml/alerts.yml are now read live from
+# docker/prometheus/ — but a running VM/vmalert needs an explicit reload to
+# pick up edits without a container restart.
+docker exec mana-mon-victoria wget -qO- --post-data= http://0.0.0.0:9090/-/reload \
+    && echo "  victoriametrics: reloaded" \
+    || echo "  victoriametrics: reload failed (container down?)"
+docker exec mana-mon-vmalert wget -qO- --post-data= http://0.0.0.0:8880/-/reload \
+    && echo "  vmalert: reloaded" \
+    || echo "  vmalert: reload failed (container down?)"
+
+echo ""
 echo "=== Deployment Complete ==="
 echo ""
 echo "URLs via Cloudflare Tunnel:"
