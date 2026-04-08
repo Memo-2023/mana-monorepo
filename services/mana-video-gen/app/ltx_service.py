@@ -68,7 +68,7 @@ def get_model_info() -> dict:
 
         gpu_name = torch.cuda.get_device_name(0) if torch.cuda.is_available() else "N/A"
         vram_gb = (
-            round(torch.cuda.get_device_properties(0).total_mem / 1e9, 1)
+            round(torch.cuda.get_device_properties(0).total_memory / 1e9, 1)
             if torch.cuda.is_available()
             else 0
         )
