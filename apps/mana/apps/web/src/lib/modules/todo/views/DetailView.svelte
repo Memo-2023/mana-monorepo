@@ -3,13 +3,14 @@
   All fields are always editable. Changes auto-save on blur.
 -->
 <script lang="ts">
-	import { liveQuery } from 'dexie';
 	import { db } from '$lib/data/database';
 	import { decryptRecord } from '$lib/data/crypto';
+	import { useDetailEntity } from '$lib/data/detail-entity.svelte';
+	import DetailViewShell from '$lib/components/DetailViewShell.svelte';
 	import { tasksStore } from '../stores/tasks.svelte';
 	import { getBlock, decryptBlock } from '$lib/data/time-blocks/service';
 	import type { LocalTimeBlock } from '$lib/data/time-blocks/types';
-	import { Check, Trash, X, CalendarBlank } from '@mana/shared-icons';
+	import { Check, X, CalendarBlank } from '@mana/shared-icons';
 	import SlotSuggestions from '$lib/modules/calendar/components/SlotSuggestions.svelte';
 	import type { ViewProps } from '$lib/app-registry';
 	import type { LocalTask, TaskPriority } from '../types';
@@ -17,31 +18,56 @@
 	import LinkedItems from '$lib/components/links/LinkedItems.svelte';
 	import { toastStore } from '@mana/shared-ui/toast';
 
-	let { navigate, goBack, params }: ViewProps = $props();
+	let { navigate, params, goBack }: ViewProps = $props();
 	let taskId = $derived(params.taskId as string);
 
-	let task = $state<LocalTask | null>(null);
-	let confirmDelete = $state(false);
+	type TaskBundle = LocalTask & { _block: LocalTimeBlock | null };
 
-	// Edit fields — always live
 	let editTitle = $state('');
 	let editDescription = $state('');
 	let editDueDate = $state('');
 	let editPriority = $state<TaskPriority>('medium');
 
-	// Schedule fields
 	let scheduleDate = $state('');
 	let scheduleTime = $state('');
 	let isScheduled = $state(false);
 
-	// Track whether user is actively editing to prevent overwrite from liveQuery
-	let focused = $state(false);
-
 	const tagsQuery = useAllTags();
 	let allTags = $derived(tagsQuery.value ?? []);
 
+	const detail = useDetailEntity<TaskBundle>({
+		id: () => taskId,
+		loader: async (id) => {
+			const t = await db.table<LocalTask>('tasks').get(id);
+			if (!t) return null;
+			const block = t.scheduledBlockId ? await getBlock(t.scheduledBlockId) : null;
+			// Decrypt clones so the inline editor binds to plaintext title /
+			// description / metadata. The on-disk rows stay encrypted.
+			const decryptedTask = (await decryptRecord('tasks', { ...t })) as LocalTask;
+			const decryptedBlock = block ? await decryptBlock(block) : null;
+			return { ...decryptedTask, _block: decryptedBlock } as TaskBundle;
+		},
+		onLoad: (bundle) => {
+			editTitle = bundle.title;
+			editDescription = bundle.description ?? '';
+			editDueDate = bundle.dueDate?.split('T')[0] ?? '';
+			editPriority = bundle.priority;
+			if (bundle._block) {
+				isScheduled = true;
+				scheduleDate = bundle._block.startDate.split('T')[0];
+				scheduleTime = bundle._block.startDate.includes('T')
+					? (bundle._block.startDate.split('T')[1]?.substring(0, 5) ?? '')
+					: '';
+			} else {
+				isScheduled = false;
+				scheduleDate = '';
+				scheduleTime = '';
+			}
+		},
+	});
+
 	function getTaskTagIds(): string[] {
-		return ((task?.metadata as Record<string, unknown>)?.labelIds as string[]) ?? [];
+		return ((detail.entity?.metadata as Record<string, unknown>)?.labelIds as string[]) ?? [];
 	}
 
 	let taskTags = $derived(getTagsByIds(allTags, getTaskTagIds()));
@@ -55,50 +81,10 @@
 		});
 	}
 
-	$effect(() => {
-		taskId; // track
-		confirmDelete = false;
-		focused = false;
-	});
-
-	$effect(() => {
-		const sub = liveQuery(async () => {
-			const t = await db.table<LocalTask>('tasks').get(taskId);
-			if (!t) return { task: null, block: null };
-			const block = t.scheduledBlockId ? await getBlock(t.scheduledBlockId) : null;
-			// Decrypt clones so the inline editor binds to plaintext title /
-			// description / metadata. The on-disk rows stay encrypted.
-			const decryptedTask = await decryptRecord('tasks', { ...t });
-			const decryptedBlock = block ? await decryptBlock(block) : null;
-			return { task: decryptedTask, block: decryptedBlock };
-		}).subscribe((val) => {
-			task = val?.task ?? null;
-			if (val?.task && !focused) {
-				editTitle = val.task.title;
-				editDescription = val.task.description ?? '';
-				editDueDate = val.task.dueDate?.split('T')[0] ?? '';
-				editPriority = val.task.priority;
-				// Load schedule from TimeBlock
-				if (val.block) {
-					isScheduled = true;
-					scheduleDate = val.block.startDate.split('T')[0];
-					scheduleTime = val.block.startDate.includes('T')
-						? val.block.startDate.split('T')[1]?.substring(0, 5)
-						: '';
-				} else {
-					isScheduled = false;
-					scheduleDate = '';
-					scheduleTime = '';
-				}
-			}
-		});
-		return () => sub.unsubscribe();
-	});
-
 	async function saveField() {
-		focused = false;
+		detail.blur();
 		await tasksStore.updateTask(taskId, {
-			title: editTitle.trim() || task?.title || 'Untitled',
+			title: editTitle.trim() || detail.entity?.title || 'Untitled',
 			description: editDescription.trim() || undefined,
 			dueDate: editDueDate ? new Date(editDueDate).toISOString() : null,
 			priority: editPriority,
@@ -109,12 +95,10 @@
 
 	async function toggleSchedule() {
 		if (isScheduled) {
-			// Unschedule
 			isScheduled = false;
 			scheduleDate = '';
 			scheduleTime = '';
 		} else {
-			// Schedule for tomorrow 9:00 by default
 			isScheduled = true;
 			const tomorrow = new Date();
 			tomorrow.setDate(tomorrow.getDate() + 1);
@@ -133,6 +117,7 @@
 	}
 
 	async function toggleSubtask(subtaskId: string) {
+		const task = detail.entity;
 		if (!task?.subtasks) return;
 		const updated = task.subtasks.map((s) =>
 			s.id === subtaskId
@@ -170,11 +155,17 @@
 	};
 </script>
 
-<div class="detail-view">
-	{#if !task}
-		<p class="empty">Aufgabe nicht gefunden</p>
-	{:else}
-		<!-- Title row with checkbox -->
+<DetailViewShell
+	entity={detail.entity}
+	loading={detail.loading}
+	notFoundLabel="Aufgabe nicht gefunden"
+	confirmDelete={detail.confirmDelete}
+	onAskDelete={detail.askDelete}
+	onCancelDelete={detail.cancelDelete}
+	confirmDeleteLabel="Aufgabe wirklich löschen?"
+	onConfirmDelete={deleteTask}
+>
+	{#snippet body(task)}
 		<div class="title-row">
 			<button class="complete-btn" onclick={toggleComplete}>
 				<div class="checkbox" class:checked={task.isCompleted}>
@@ -185,13 +176,12 @@
 				class="title-input"
 				class:completed={task.isCompleted}
 				bind:value={editTitle}
-				onfocus={() => (focused = true)}
+				onfocus={detail.focus}
 				onblur={saveField}
 				placeholder="Titel..."
 			/>
 		</div>
 
-		<!-- Properties -->
 		<div class="properties">
 			<div class="prop-row">
 				<span class="prop-label">Priorität</span>
@@ -213,7 +203,7 @@
 					type="date"
 					class="prop-input"
 					bind:value={editDueDate}
-					onfocus={() => (focused = true)}
+					onfocus={detail.focus}
 					onblur={saveField}
 				/>
 			</div>
@@ -225,7 +215,6 @@
 				</div>
 			{/if}
 
-			<!-- Schedule on calendar -->
 			<div class="prop-row">
 				<span class="prop-label">Kalender</span>
 				{#if isScheduled}
@@ -234,14 +223,14 @@
 							type="date"
 							class="prop-input"
 							bind:value={scheduleDate}
-							onfocus={() => (focused = true)}
+							onfocus={detail.focus}
 							onblur={saveField}
 						/>
 						<input
 							type="time"
 							class="prop-input"
 							bind:value={scheduleTime}
-							onfocus={() => (focused = true)}
+							onfocus={detail.focus}
 							onblur={saveField}
 						/>
 						<button
@@ -262,7 +251,7 @@
 							minDurationMinutes={task.estimatedDuration
 								? Math.round(task.estimatedDuration / 60)
 								: 60}
-							onSelect={(start, end) => {
+							onSelect={(start) => {
 								isScheduled = true;
 								scheduleDate = start.toISOString().split('T')[0];
 								scheduleTime = `${String(start.getHours()).padStart(2, '0')}:${String(start.getMinutes()).padStart(2, '0')}`;
@@ -274,7 +263,6 @@
 			</div>
 		</div>
 
-		<!-- Tags -->
 		{#if taskTags.length > 0}
 			<div class="section">
 				<span class="section-label">Tags</span>
@@ -294,23 +282,20 @@
 			</div>
 		{/if}
 
-		<!-- Links -->
 		<LinkedItems recordRef={{ app: 'todo', collection: 'tasks', id: taskId }} {navigate} />
 
-		<!-- Description -->
 		<div class="section">
 			<span class="section-label">Beschreibung</span>
 			<textarea
 				class="description-input"
 				bind:value={editDescription}
-				onfocus={() => (focused = true)}
+				onfocus={detail.focus}
 				onblur={saveField}
 				placeholder="Beschreibung hinzufügen..."
 				rows={3}
 			></textarea>
 		</div>
 
-		<!-- Subtasks -->
 		{#if task.subtasks && task.subtasks.length > 0}
 			<div class="section">
 				<span class="section-label">
@@ -331,218 +316,100 @@
 			</div>
 		{/if}
 
-		<!-- Metadata -->
 		<div class="meta">
 			<span>Erstellt: {new Date(task.createdAt ?? '').toLocaleDateString('de')}</span>
 			{#if task.updatedAt}
 				<span>Bearbeitet: {new Date(task.updatedAt).toLocaleDateString('de')}</span>
 			{/if}
 		</div>
-
-		<!-- Delete -->
-		<div class="danger-zone">
-			{#if confirmDelete}
-				<p class="confirm-text">Aufgabe wirklich löschen?</p>
-				<div class="confirm-actions">
-					<button class="action-btn danger" onclick={deleteTask}>Löschen</button>
-					<button class="action-btn" onclick={() => (confirmDelete = false)}>Abbrechen</button>
-				</div>
-			{:else}
-				<button class="action-btn danger-subtle" onclick={() => (confirmDelete = true)}>
-					<Trash size={14} /> Löschen
-				</button>
-			{/if}
-		</div>
-	{/if}
-</div>
+	{/snippet}
+</DetailViewShell>
 
 <style>
-	.detail-view {
-		display: flex;
-		flex-direction: column;
-		gap: 1rem;
-		padding: 1rem;
-		height: 100%;
-		overflow-y: auto;
-	}
-	.empty {
-		padding: 2rem 0;
-		text-align: center;
-		font-size: 0.8125rem;
-		color: #9ca3af;
-	}
-
-	/* Title row */
 	.title-row {
 		display: flex;
-		align-items: flex-start;
+		align-items: center;
 		gap: 0.5rem;
 	}
 	.complete-btn {
 		border: none;
 		background: transparent;
 		cursor: pointer;
-		padding: 0.25rem 0 0 0;
+		padding: 0.125rem;
 		flex-shrink: 0;
 	}
-	.title-input {
-		flex: 1;
-		font-size: 1.125rem;
-		font-weight: 600;
-		border: none;
-		background: transparent;
-		outline: none;
-		color: #374151;
-		padding: 0;
-	}
-	.title-input.completed {
-		text-decoration: line-through;
-		color: #9ca3af;
-	}
-	.title-input:focus {
-		border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-	}
-	:global(.dark) .title-input {
-		color: #f3f4f6;
-	}
-	:global(.dark) .title-input.completed {
-		color: #6b7280;
-	}
-	:global(.dark) .title-input:focus {
-		border-color: rgba(255, 255, 255, 0.1);
-	}
-
-	/* Checkbox */
 	.checkbox {
-		width: 20px;
-		height: 20px;
-		border-radius: 0.25rem;
-		border: 2px solid #d1d5db;
+		width: 18px;
+		height: 18px;
+		border-radius: 4px;
+		border: 1.5px solid #d1d5db;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		transition: all 0.15s;
-	}
-	.checkbox.checked {
-		border-color: #22c55e;
-		background: #22c55e;
 		color: white;
-	}
-	.checkbox.small {
-		width: 16px;
-		height: 16px;
-		border-width: 1.5px;
+		transition:
+			background 0.15s,
+			border-color 0.15s;
 	}
 	:global(.dark) .checkbox {
 		border-color: #4b5563;
 	}
-
-	/* Properties */
-	.properties {
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
+	.checkbox.checked {
+		background: #22c55e;
+		border-color: #22c55e;
 	}
-	.prop-row {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		padding: 0.25rem 0;
+	.checkbox.small {
+		width: 14px;
+		height: 14px;
+		border-radius: 3px;
 	}
-	.prop-label {
-		font-size: 0.75rem;
+	:global(.detail-view .title-input.completed) {
+		text-decoration: line-through;
 		color: #9ca3af;
 	}
-	.prop-value {
-		font-size: 0.8125rem;
-		color: #374151;
-	}
-	:global(.dark) .prop-value {
-		color: #e5e7eb;
-	}
+
 	.schedule-fields {
 		display: flex;
+		gap: 0.25rem;
 		align-items: center;
-		gap: 0.375rem;
 	}
 	.schedule-options {
 		display: flex;
-		flex-direction: column;
 		gap: 0.5rem;
+		align-items: center;
 	}
 	.schedule-btn {
 		display: flex;
 		align-items: center;
 		gap: 0.25rem;
 		padding: 0.25rem 0.5rem;
-		border: 1px dashed rgba(0, 0, 0, 0.15);
-		border-radius: 0.375rem;
+		border-radius: 0.25rem;
+		border: 1px solid rgba(0, 0, 0, 0.1);
 		background: transparent;
 		font-size: 0.75rem;
 		color: #6b7280;
 		cursor: pointer;
-		transition: all 0.15s;
 	}
 	.schedule-btn:hover {
-		border-color: #3b82f6;
-		color: #3b82f6;
-		background: rgba(59, 130, 246, 0.05);
+		background: rgba(0, 0, 0, 0.04);
 	}
 	:global(.dark) .schedule-btn {
-		border-color: rgba(255, 255, 255, 0.15);
+		border-color: rgba(255, 255, 255, 0.1);
 		color: #9ca3af;
-	}
-	:global(.dark) .schedule-btn:hover {
-		border-color: #3b82f6;
-		color: #3b82f6;
 	}
 	.unschedule-btn {
-		padding: 0.25rem;
 		border: none;
 		background: transparent;
-		border-radius: 0.25rem;
-		color: #9ca3af;
 		cursor: pointer;
+		padding: 0.125rem;
+		color: #9ca3af;
+		display: flex;
+		align-items: center;
 	}
 	.unschedule-btn:hover {
 		color: #ef4444;
-		background: rgba(239, 68, 68, 0.1);
 	}
 
-	.prop-select,
-	.prop-input {
-		font-size: 0.8125rem;
-		padding: 0.125rem 0.375rem;
-		border-radius: 0.25rem;
-		border: 1px solid transparent;
-		background: transparent;
-		color: #374151;
-		outline: none;
-		transition: border-color 0.15s;
-	}
-	.prop-select:hover,
-	.prop-input:hover,
-	.prop-select:focus,
-	.prop-input:focus {
-		border-color: rgba(0, 0, 0, 0.1);
-	}
-	:global(.dark) .prop-select,
-	:global(.dark) .prop-input {
-		color: #e5e7eb;
-	}
-	:global(.dark) .prop-select:hover,
-	:global(.dark) .prop-input:hover,
-	:global(.dark) .prop-select:focus,
-	:global(.dark) .prop-input:focus {
-		border-color: rgba(255, 255, 255, 0.1);
-	}
-
-	/* Sections */
-	.section {
-		display: flex;
-		flex-direction: column;
-		gap: 0.375rem;
-	}
 	.tags-list {
 		display: flex;
 		flex-wrap: wrap;
@@ -554,82 +421,46 @@
 		gap: 0.25rem;
 		padding: 0.125rem 0.5rem;
 		border-radius: 9999px;
-		border: none;
 		background: color-mix(in srgb, var(--tag-color) 12%, transparent);
+		border: none;
 		font-size: 0.6875rem;
 		color: #6b7280;
 		cursor: pointer;
-		transition: all 0.15s;
 	}
 	.tag-pill:hover {
-		background: color-mix(in srgb, var(--tag-color) 20%, transparent);
-		color: #ef4444;
-	}
-	:global(.dark) .tag-pill {
-		background: color-mix(in srgb, var(--tag-color) 18%, transparent);
-		color: #9ca3af;
-	}
-	:global(.dark) .tag-pill:hover {
-		background: color-mix(in srgb, var(--tag-color) 28%, transparent);
-		color: #ef4444;
+		opacity: 0.8;
 	}
 	.tag-dot {
 		width: 6px;
 		height: 6px;
 		border-radius: 9999px;
-		flex-shrink: 0;
 	}
-	.section-label {
-		font-size: 0.6875rem;
-		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: 0.04em;
+	:global(.dark) .tag-pill {
 		color: #9ca3af;
 	}
-	.description-input {
-		font-size: 0.8125rem;
-		border: 1px solid transparent;
-		border-radius: 0.375rem;
-		background: transparent;
-		color: #374151;
-		padding: 0.5rem;
-		outline: none;
-		resize: vertical;
-		font-family: inherit;
-		transition: border-color 0.15s;
-	}
-	.description-input:hover,
-	.description-input:focus {
-		border-color: rgba(0, 0, 0, 0.1);
-	}
-	.description-input::placeholder {
-		color: #c0bfba;
-	}
-	:global(.dark) .description-input {
-		color: #f3f4f6;
-	}
-	:global(.dark) .description-input:hover,
-	:global(.dark) .description-input:focus {
-		border-color: rgba(255, 255, 255, 0.1);
-	}
-	:global(.dark) .description-input::placeholder {
-		color: #4b5563;
-	}
 
-	/* Subtasks */
 	.subtask-list {
 		display: flex;
 		flex-direction: column;
+		gap: 0.25rem;
 	}
 	.subtask-item {
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
-		padding: 0.25rem 0;
+		padding: 0.25rem 0.375rem;
 		border: none;
 		background: transparent;
 		cursor: pointer;
 		text-align: left;
+		border-radius: 0.25rem;
+		transition: background 0.15s;
+	}
+	.subtask-item:hover {
+		background: rgba(0, 0, 0, 0.04);
+	}
+	:global(.dark) .subtask-item:hover {
+		background: rgba(255, 255, 255, 0.04);
 	}
 	.subtask-title {
 		font-size: 0.8125rem;
@@ -641,86 +472,5 @@
 	}
 	:global(.dark) .subtask-title {
 		color: #e5e7eb;
-	}
-	:global(.dark) .subtask-title.completed {
-		color: #6b7280;
-	}
-
-	/* Meta & actions */
-	.meta {
-		display: flex;
-		flex-direction: column;
-		gap: 0.125rem;
-		font-size: 0.6875rem;
-		color: #9ca3af;
-		padding-top: 0.5rem;
-		border-top: 1px solid rgba(0, 0, 0, 0.06);
-	}
-	:global(.dark) .meta {
-		border-color: rgba(255, 255, 255, 0.06);
-	}
-	.danger-zone {
-		padding-top: 0.5rem;
-	}
-	.confirm-text {
-		font-size: 0.8125rem;
-		color: #ef4444;
-		margin: 0 0 0.5rem;
-	}
-	.confirm-actions {
-		display: flex;
-		gap: 0.5rem;
-	}
-	.action-btn {
-		padding: 0.25rem 0.625rem;
-		border-radius: 0.375rem;
-		border: 1px solid rgba(0, 0, 0, 0.1);
-		background: transparent;
-		font-size: 0.75rem;
-		color: #6b7280;
-		cursor: pointer;
-		transition: all 0.15s;
-	}
-	.action-btn:hover {
-		background: rgba(0, 0, 0, 0.04);
-		color: #374151;
-	}
-	.action-btn.danger {
-		background: #ef4444;
-		border-color: #ef4444;
-		color: white;
-	}
-	.action-btn.danger-subtle {
-		color: #ef4444;
-		border-color: transparent;
-		display: flex;
-		align-items: center;
-		gap: 0.375rem;
-	}
-	:global(.dark) .action-btn {
-		border-color: rgba(255, 255, 255, 0.1);
-		color: #9ca3af;
-	}
-	:global(.dark) .action-btn:hover {
-		background: rgba(255, 255, 255, 0.06);
-		color: #e5e7eb;
-	}
-
-	@media (max-width: 640px) {
-		.detail-view {
-			padding: 0.75rem;
-		}
-		.complete-btn,
-		.action-btn,
-		.schedule-btn,
-		.unschedule-btn,
-		.subtask-item,
-		.tag-pill {
-			min-height: 44px;
-		}
-		.prop-select,
-		.prop-input {
-			min-height: 44px;
-		}
 	}
 </style>
