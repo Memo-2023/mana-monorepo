@@ -56,6 +56,16 @@ export default defineConfig({
 		port: 4173,
 		strictPort: true,
 	},
+	worker: {
+		// Vite defaults to IIFE worker format, which does not support code
+		// splitting. @mana/local-llm's worker imports transformers.js, which
+		// is internally code-split into many chunks. Without 'es' format the
+		// build fails with "Invalid value 'iife' for option 'worker.format'
+		// - UMD and IIFE output formats are not supported for code-splitting
+		// builds." All modern browsers (which we already require for WebGPU)
+		// support module workers.
+		format: 'es',
+	},
 	ssr: {
 		// `rrule@2` ships dual CJS/ESM but its package.json has no `exports`
 		// field, so the SvelteKit Node adapter resolves it to the CJS bundle
