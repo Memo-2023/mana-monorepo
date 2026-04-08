@@ -37,7 +37,9 @@ import {
 	isValidSyncChange,
 	readFieldTimestamps,
 	applyServerChanges,
+	subscribeSyncConflicts,
 	type SyncChange,
+	type SyncConflictPayload,
 } from './sync';
 import { db, FIELD_TIMESTAMPS_KEY } from './database';
 
@@ -340,5 +342,172 @@ describe('applyServerChanges (Dexie integration)', () => {
 			.filter((p: { recordId?: string }) => p.recordId === 'task-F')
 			.toArray();
 		expect(pendingForTaskF).toEqual([]);
+	});
+
+	// ─── Sync conflict event detection (Backlog C) ─────────────
+
+	describe('sync-conflict events', () => {
+		// Helper: collect every conflict event fired during the body
+		// of `fn`, then resolve to the captured payloads. Cleans up the
+		// listener even on test failure.
+		async function captureConflicts(fn: () => Promise<void>): Promise<SyncConflictPayload[]> {
+			const captured: SyncConflictPayload[] = [];
+			// In-module pub/sub from sync.ts — works in node-vitest +
+			// browser without DOM EventTarget polyfills.
+			const unsubscribe = subscribeSyncConflicts((payload) => {
+				captured.push(payload);
+			});
+			try {
+				await fn();
+			} finally {
+				unsubscribe();
+			}
+			return captured;
+		}
+
+		it('fires when the server overwrites a non-empty local field with a strictly newer value', async () => {
+			await db.table('tasks').add({
+				id: 'task-conflict-1',
+				title: 'my version',
+				priority: 'low',
+				isCompleted: false,
+				order: 0,
+			});
+
+			const conflicts = await captureConflicts(async () => {
+				await applyServerChanges('todo', [
+					{
+						table: 'tasks',
+						id: 'task-conflict-1',
+						op: 'update',
+						fields: {
+							title: { value: 'their version', updatedAt: '2099-01-01T00:00:00Z' },
+						},
+					},
+				]);
+			});
+
+			expect(conflicts).toHaveLength(1);
+			expect(conflicts[0]).toMatchObject({
+				tableName: 'tasks',
+				recordId: 'task-conflict-1',
+				field: 'title',
+				wasLocal: 'my version',
+				nowServer: 'their version',
+			});
+		});
+
+		it('does NOT fire when the local field is null/undefined (no edit to lose)', async () => {
+			await db.table('tasks').add({
+				id: 'task-conflict-2',
+				title: null,
+				priority: 'low',
+				isCompleted: false,
+				order: 0,
+			});
+
+			const conflicts = await captureConflicts(async () => {
+				await applyServerChanges('todo', [
+					{
+						table: 'tasks',
+						id: 'task-conflict-2',
+						op: 'update',
+						fields: {
+							title: { value: 'first server title', updatedAt: '2099-01-01T00:00:00Z' },
+						},
+					},
+				]);
+			});
+
+			expect(conflicts).toHaveLength(0);
+		});
+
+		it('does NOT fire when the values are equal (idempotent server replay)', async () => {
+			await db.table('tasks').add({
+				id: 'task-conflict-3',
+				title: 'same value',
+				priority: 'low',
+				isCompleted: false,
+				order: 0,
+			});
+
+			const conflicts = await captureConflicts(async () => {
+				await applyServerChanges('todo', [
+					{
+						table: 'tasks',
+						id: 'task-conflict-3',
+						op: 'update',
+						fields: {
+							title: { value: 'same value', updatedAt: '2099-01-01T00:00:00Z' },
+						},
+					},
+				]);
+			});
+
+			expect(conflicts).toHaveLength(0);
+		});
+
+		it('fires once per overwritten field (multi-field conflicts)', async () => {
+			await db.table('tasks').add({
+				id: 'task-conflict-4',
+				title: 'local title',
+				priority: 'low',
+				isCompleted: false,
+				order: 0,
+			});
+
+			const conflicts = await captureConflicts(async () => {
+				await applyServerChanges('todo', [
+					{
+						table: 'tasks',
+						id: 'task-conflict-4',
+						op: 'update',
+						fields: {
+							title: { value: 'server title', updatedAt: '2099-01-01T00:00:00Z' },
+							priority: { value: 'high', updatedAt: '2099-01-01T00:00:00Z' },
+						},
+					},
+				]);
+			});
+
+			expect(conflicts).toHaveLength(2);
+			expect(conflicts.map((c) => c.field).sort()).toEqual(['priority', 'title']);
+		});
+
+		it('does NOT fire when the server timestamp equals the local one (LWW tie)', async () => {
+			// Seed with a known timestamp via the insert path so we can
+			// match the server time exactly.
+			await applyServerChanges('todo', [
+				{
+					table: 'tasks',
+					id: 'task-conflict-5',
+					op: 'insert',
+					data: {
+						id: 'task-conflict-5',
+						title: 'tied title',
+						priority: 'low',
+						isCompleted: false,
+						order: 0,
+						updatedAt: '2026-04-01T00:00:00Z',
+					},
+				},
+			]);
+
+			const conflicts = await captureConflicts(async () => {
+				await applyServerChanges('todo', [
+					{
+						table: 'tasks',
+						id: 'task-conflict-5',
+						op: 'update',
+						fields: {
+							title: { value: 'changed', updatedAt: '2026-04-01T00:00:00Z' }, // exact tie
+						},
+					},
+				]);
+			});
+
+			// Tied — LWW lets server win silently (no edit-loss to surface)
+			expect(conflicts).toHaveLength(0);
+		});
 	});
 });

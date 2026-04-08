@@ -142,6 +142,88 @@ export function readFieldTimestamps(record: unknown): Record<string, string> {
  * concurrent user writes to OTHER tables continue tracking normally.
  * Malformed entries are dropped before any DB work happens.
  */
+/**
+ * Per-conflict event payload — emitted when applyServerChanges field-LWW
+ * overwrites a local field value with a strictly newer server value.
+ *
+ * `wasLocal` is the value the user had typed before the sync overwrite.
+ * `nowServer` is what the row holds now. The conflict store reads both
+ * to give the user a "restore my version" option, which writes wasLocal
+ * back with a fresh updatedAt so it wins on the next sync round.
+ *
+ * Conflicts are NOT raised when the local field was empty (no edit to
+ * lose), when the values are identical, or when the timestamps are
+ * exactly equal (LWW lets the server win on ties but there's nothing
+ * meaningful to surface — both clients agreed at the same moment).
+ */
+export interface SyncConflictPayload {
+	tableName: string;
+	recordId: string;
+	field: string;
+	wasLocal: unknown;
+	nowServer: unknown;
+	localTime: string;
+	serverTime: string;
+}
+
+/** Identifier kept around for legacy callers + readable telemetry —
+ *  the conflict bus is a plain in-module pub/sub (see below) so it
+ *  works the same way in browser and node test envs. */
+export const SYNC_CONFLICT_EVENT = 'mana-sync-conflict';
+
+/** Subscriber callback shape. */
+export type SyncConflictListener = (payload: SyncConflictPayload) => void;
+
+/** Active subscribers. Set so dedup is automatic and unsubscribe is O(1). */
+const conflictListeners = new Set<SyncConflictListener>();
+
+/**
+ * Subscribe to sync-conflict events. Returns an unsubscribe function.
+ *
+ * Why a custom registry instead of CustomEvent + window.dispatchEvent?
+ *   - Works in node-based vitest envs where `window` doesn't exist
+ *   - No accidental coupling to the DOM EventTarget surface
+ *   - Lighter than spinning up an EventTarget polyfill in tests
+ *
+ * The conflict-store module installs exactly one subscriber per app
+ * lifecycle. The test file installs a temporary one per test case
+ * via this same API.
+ */
+export function subscribeSyncConflicts(listener: SyncConflictListener): () => void {
+	conflictListeners.add(listener);
+	return () => {
+		conflictListeners.delete(listener);
+	};
+}
+
+function notifyConflict(payload: SyncConflictPayload): void {
+	// Fan out to every subscriber. Errors in one listener don't break
+	// the rest — sync detection is best-effort and we don't want a
+	// broken UI handler to corrupt the apply path.
+	for (const listener of conflictListeners) {
+		try {
+			listener(payload);
+		} catch (err) {
+			console.error('[mana-sync] conflict listener threw:', err);
+		}
+	}
+}
+
+/** Cheap structural equality for sync-conflict comparison. We don't
+ *  need a deep diff here — `===` for primitives, JSON-string compare
+ *  for objects (including encrypted-blob strings, which compare as
+ *  raw strings). Hot path is rare so the JSON serialise cost is fine. */
+function valuesEqual(a: unknown, b: unknown): boolean {
+	if (a === b) return true;
+	if (a == null || b == null) return false;
+	if (typeof a !== typeof b) return false;
+	try {
+		return JSON.stringify(a) === JSON.stringify(b);
+	} catch {
+		return false;
+	}
+}
+
 export async function applyServerChanges(appId: string, changes: unknown[]): Promise<void> {
 	// Reject malformed entries up-front so a single bad row from the server
 	// can never write garbage into IndexedDB. Drops are logged once and the
@@ -244,6 +326,26 @@ export async function applyServerChanges(appId: string, changes: unknown[]): Pro
 										if (key === 'id' || key === FIELD_TIMESTAMPS_KEY) continue;
 										const localFieldTime = localFT[key] ?? localUpdatedAt;
 										if (recordTime >= localFieldTime) {
+											// Conflict signal: server STRICTLY wins (>) and the local
+											// field had a non-empty value that differs from the new
+											// one. Equal-time ties don't fire because there's no
+											// edit to lose.
+											const localValue = (existing as Record<string, unknown>)[key];
+											if (
+												recordTime > localFieldTime &&
+												localValue != null &&
+												!valuesEqual(localValue, val)
+											) {
+												notifyConflict({
+													tableName,
+													recordId,
+													field: key,
+													wasLocal: localValue,
+													nowServer: val,
+													localTime: localFieldTime,
+													serverTime: recordTime,
+												});
+											}
 											updates[key] = val;
 											newFT[key] = recordTime;
 										}
@@ -284,6 +386,24 @@ export async function applyServerChanges(appId: string, changes: unknown[]): Pro
 										const serverTime = fc.updatedAt ?? '';
 										const localFieldTime = localFT[key] ?? localUpdatedAt;
 										if (serverTime >= localFieldTime) {
+											// Same conflict criteria as the insert-as-update path:
+											// strictly newer + non-empty local + actually different.
+											const localValue = (existing as Record<string, unknown>)[key];
+											if (
+												serverTime > localFieldTime &&
+												localValue != null &&
+												!valuesEqual(localValue, fc.value)
+											) {
+												notifyConflict({
+													tableName,
+													recordId,
+													field: key,
+													wasLocal: localValue,
+													nowServer: fc.value,
+													localTime: localFieldTime,
+													serverTime,
+												});
+											}
 											updates[key] = fc.value;
 											newFT[key] = serverTime;
 										}

@@ -12,6 +12,7 @@
 	import SuggestionToast from '$lib/components/SuggestionToast.svelte';
 	import EncryptionIntroBanner from '$lib/components/EncryptionIntroBanner.svelte';
 	import RecoveryCodeUnlockModal from '$lib/components/RecoveryCodeUnlockModal.svelte';
+	import SyncConflictToast from '$lib/components/SyncConflictToast.svelte';
 	import OfflineIndicator from '$lib/components/OfflineIndicator.svelte';
 	import PwaUpdatePrompt from '$lib/components/PwaUpdatePrompt.svelte';
 
@@ -106,6 +107,7 @@
 
 {@render children()}
 <SuggestionToast />
+<SyncConflictToast />
 <OfflineIndicator />
 <PwaUpdatePrompt />
 <EncryptionIntroBanner />

@@ -22,6 +22,7 @@ import { QUOTA_EVENT, type QuotaExceededDetail } from './quota-detect';
 import { cleanupTombstones } from './quota';
 import { pruneActivityLog } from './activity';
 import { SYNC_TELEMETRY_EVENT, type SyncTelemetryDetail } from './sync-telemetry';
+import { installConflictListener } from './conflict-store.svelte';
 
 /** How often to run the tombstone cleanup. 24h is a comfortable cadence
  * given that the cutoff is 30 days — runs roughly once per app session. */
@@ -99,6 +100,12 @@ export function installDataLayerListeners(): () => void {
 	window.addEventListener(QUOTA_EVENT, handleQuota);
 	window.addEventListener(SYNC_TELEMETRY_EVENT, handleTelemetry);
 
+	// ─── Sync conflict listener (Backlog C) ────────────────────
+	// Wires the field-LWW overwrite events into the conflict store
+	// that the SyncConflictToast component reads. The store handles
+	// coalescing, auto-dismiss, and the restore-write path.
+	const disposeConflict = installConflictListener();
+
 	// ─── Periodic cleanup loop ─────────────────────────────────
 	// Runs once on boot, then daily. Two independent jobs share the
 	// schedule so we never have a third interval competing for the same
@@ -143,5 +150,6 @@ export function installDataLayerListeners(): () => void {
 		window.removeEventListener(QUOTA_EVENT, handleQuota);
 		window.removeEventListener(SYNC_TELEMETRY_EVENT, handleTelemetry);
 		window.clearInterval(cleanupTimer);
+		disposeConflict();
 	};
 }
