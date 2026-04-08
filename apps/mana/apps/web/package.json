@@ -45,6 +45,7 @@
 	},
 	"dependencies": {
 		"@calc/shared": "workspace:*",
+		"@mlc-ai/web-llm": "^0.2.78",
 		"@mana/credits": "workspace:^",
 		"@mana/feedback": "workspace:*",
 		"@mana/help": "workspace:*",

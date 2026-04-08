@@ -16,9 +16,24 @@ export PATH="/usr/local/bin:/opt/homebrew/bin:$PATH"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 COMPOSE_FILE="$PROJECT_ROOT/docker-compose.macmini.yml"
-ENV_FILE="$PROJECT_ROOT/.env.macmini"
 LOG_FILE="/tmp/mana-container-health.log"
 RESTART_TRACKER="/tmp/mana-restart-tracker"
+
+# Container names that legitimately exit after a one-shot job completes.
+# These are NOT broken when in "exited" state — skip them entirely instead
+# of trying to "recover" them every 5 minutes (which both spams the log
+# and would actually re-run the init job needlessly).
+ONESHOT_INIT_CONTAINERS=(
+    mana-infra-minio-init
+)
+
+is_oneshot_init() {
+    local name="$1"
+    for c in "${ONESHOT_INIT_CONTAINERS[@]}"; do
+        [ "$c" = "$name" ] && return 0
+    done
+    return 1
+}
 
 # Load notification config if exists
 if [ -f "$PROJECT_ROOT/.env.notifications" ]; then
@@ -58,8 +73,16 @@ if ! docker info >/dev/null 2>&1; then
     exit 1
 fi
 
-# Get containers that are NOT running (Created, Exited)
-STUCK_CONTAINERS=$(docker ps -a --filter "status=created" --filter "status=exited" --format "{{.Names}}" | grep "^mana-" || true)
+# Get containers that are NOT running (Created, Exited), excluding one-shot
+# init containers that are *expected* to be in "exited" state.
+ALL_STUCK=$(docker ps -a --filter "status=created" --filter "status=exited" --format "{{.Names}}" | grep "^mana-" || true)
+STUCK_CONTAINERS=""
+for c in $ALL_STUCK; do
+    if is_oneshot_init "$c"; then
+        continue
+    fi
+    STUCK_CONTAINERS="${STUCK_CONTAINERS:+$STUCK_CONTAINERS$'\n'}$c"
+done
 
 # Get containers that are crash-looping (Restarting)
 CRASHLOOP_CONTAINERS=$(docker ps -a --filter "status=restarting" --format "{{.Names}}" | grep "^mana-" || true)
@@ -187,7 +210,14 @@ for container in $ALL_PROBLEM_CONTAINERS; do
 
     if [ -n "$SERVICE_NAME" ]; then
         log "  Starting service: $SERVICE_NAME"
-        docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" up -d "$SERVICE_NAME" 2>&1 || {
+        # NOTE: do NOT pass --env-file here. docker compose auto-loads .env
+        # from $PROJECT_ROOT, which is what every other compose invocation
+        # in this repo relies on (build-app.sh, deploy.sh, manual ops). The
+        # previous --env-file pointed at .env.macmini which never existed
+        # on the server, so recoveries silently created containers with
+        # blank secrets — that's how mana-auth ended up in a crash loop
+        # with empty MANA_AUTH_KEK on 2026-04-08.
+        (cd "$PROJECT_ROOT" && docker compose -f "$COMPOSE_FILE" up -d "$SERVICE_NAME") 2>&1 | tee -a "$LOG_FILE" || {
             log "  WARNING: Failed to start $SERVICE_NAME via compose, trying direct start"
             docker start "$container" 2>&1 || true
         }
@@ -198,7 +228,14 @@ done
 sleep 10
 
 # Verify containers are now running (check for created, exited, AND restarting)
-STILL_STUCK=$(docker ps -a --filter "status=created" --filter "status=exited" --format "{{.Names}}" | grep "^mana-" || true)
+ALL_STILL_STUCK=$(docker ps -a --filter "status=created" --filter "status=exited" --format "{{.Names}}" | grep "^mana-" || true)
+STILL_STUCK=""
+for c in $ALL_STILL_STUCK; do
+    if is_oneshot_init "$c"; then
+        continue
+    fi
+    STILL_STUCK="${STILL_STUCK:+$STILL_STUCK$'\n'}$c"
+done
 STILL_CRASHING=$(docker ps -a --filter "status=restarting" --format "{{.Names}}" | grep "^mana-" || true)
 ALL_STILL_BROKEN=$(echo -e "$STILL_STUCK\n$STILL_CRASHING" | grep -v "^$" | sort -u || true)
 
