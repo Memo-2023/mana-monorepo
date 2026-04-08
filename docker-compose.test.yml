@@ -1,0 +1,166 @@
+# Integration test stack for the auth/credentials/encryption-vault flow.
+#
+# Spins up the minimum stack needed to register, verify, log in, and
+# exercise the encryption-vault: postgres + redis + mailpit (fake SMTP)
+# + mana-auth + mana-notify. No mana-credits, mana-sync, mana-media etc.
+# — those are not on the auth-flow critical path and would just slow
+# down the build.
+#
+# Ports are offset from docker-compose.dev.yml so this stack can run
+# alongside a normal dev environment. Everything is bound to 127.0.0.1
+# so it's only reachable from the same machine.
+#
+# Usage:
+#   ./scripts/run-integration-tests.sh
+#
+# Or manually:
+#   docker compose -f docker-compose.test.yml up -d --build
+#   docker compose -f docker-compose.test.yml down -v
+#
+# The compose project is namespaced as `mana-test` so the containers,
+# network and volumes don't collide with the dev stack.
+name: mana-test
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: mana-test-postgres
+    environment:
+      POSTGRES_DB: mana_platform
+      POSTGRES_USER: mana
+      POSTGRES_PASSWORD: testpassword
+    volumes:
+      - ./docker/init-db:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "127.0.0.1:5443:5432"
+    networks:
+      - mana-test
+    healthcheck:
+      # pg_isready alone reports healthy while the docker-entrypoint init
+      # scripts are still running on a unix socket — TCP connections from
+      # other containers then race-fail with "connection refused". Run a
+      # real query against the actual platform DB so we only flip healthy
+      # once postgres is genuinely accepting external TCP traffic.
+      test: ["CMD-SHELL", "PGPASSWORD=testpassword psql -h localhost -U mana -d mana_platform -tAc 'SELECT 1' >/dev/null"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+      start_period: 5s
+
+  redis:
+    image: redis:7-alpine
+    container_name: mana-test-redis
+    command: redis-server --requirepass testpassword --maxmemory 64mb
+    ports:
+      - "127.0.0.1:6390:6379"
+    networks:
+      - mana-test
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "testpassword", "ping"]
+      interval: 2s
+      timeout: 3s
+      retries: 10
+
+  # Fake SMTP server. Captures every outbound email and exposes them
+  # via a REST API on :8025 (also a web UI on the same port). Tests
+  # poll the API to find the verification email.
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: mana-test-mailpit
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: "1"
+      MP_SMTP_AUTH_ALLOW_INSECURE: "1"
+    ports:
+      - "127.0.0.1:1026:1025"  # SMTP
+      - "127.0.0.1:8026:8025"  # HTTP API + Web UI
+    networks:
+      - mana-test
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8025/api/v1/info"]
+      interval: 2s
+      timeout: 3s
+      retries: 10
+
+  mana-auth:
+    build:
+      context: ./services/mana-auth
+      dockerfile: Dockerfile
+    container_name: mana-test-mana-auth
+    environment:
+      NODE_ENV: production    # exercise the prod KEK validation path
+      PORT: 3001
+      DATABASE_URL: postgresql://mana:testpassword@postgres:5432/mana_platform
+      # BASE_URL must be reachable from INSIDE the container — the validate
+      # endpoint fetches its own JWKS via this URL, and the JWT iss claim
+      # uses it. The test rewrites email verify URLs from `mana-auth:3001`
+      # to the host-bound port before following them.
+      BASE_URL: http://mana-auth:3001
+      COOKIE_DOMAIN: localhost
+      BETTER_AUTH_SECRET: test-secret-not-for-production
+      MANA_AUTH_KEK: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=  # 32 zero bytes, test only
+      MANA_NOTIFY_URL: http://mana-notify:3013
+      MANA_SERVICE_KEY: test-service-key
+      MANA_CREDITS_URL: http://localhost:9   # unreachable, .catch() swallows it
+      MANA_SUBSCRIPTIONS_URL: http://localhost:9
+      CORS_ORIGINS: http://localhost:5173,http://localhost:3091
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:3091:3001"
+    networks:
+      - mana-test
+    healthcheck:
+      test: ["CMD", "bun", "-e", "fetch('http://127.0.0.1:3001/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+
+  mana-notify:
+    build:
+      context: .
+      dockerfile: services/mana-notify/Dockerfile
+    container_name: mana-test-mana-notify
+    # mana-notify pings the database once at startup and exits on
+    # failure. If postgres is mid-restart at exactly that millisecond
+    # we want compose to bring it back up rather than declare the
+    # whole stack dead.
+    restart: on-failure:5
+    environment:
+      PORT: 3013
+      DATABASE_URL: postgresql://mana:testpassword@postgres:5432/mana_platform?sslmode=disable
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: testpassword
+      SERVICE_KEY: test-service-key
+      MANA_AUTH_URL: http://mana-auth:3001
+      SMTP_HOST: mailpit
+      SMTP_PORT: 1025
+      SMTP_USER: test
+      SMTP_PASSWORD: test
+      SMTP_FROM: "Mana Test <noreply@test.local>"
+      SMTP_INSECURE_TLS: "true"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mailpit:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:3092:3013"
+    networks:
+      - mana-test
+    healthcheck:
+      # Override the Dockerfile's port-3040 healthcheck — mana-notify
+      # actually binds to the PORT env var (3013 here).
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3013/health"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
+
+networks:
+  mana-test:
+    driver: bridge

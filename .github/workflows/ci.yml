@@ -473,6 +473,58 @@ jobs:
           fi
 
   # ===========================================
+  # Auth flow integration test
+  # ===========================================
+  # Spins up postgres + redis + mailpit + mana-auth + mana-notify via
+  # docker-compose.test.yml and runs tests/integration/auth-flow.test.ts.
+  # Catches register/verify/login/JWT/encryption-vault regressions before
+  # they can be merged. Required check — never bypass.
+
+  auth-integration:
+    name: Auth flow integration test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    timeout-minutes: 15
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run auth flow integration test
+        run: ./scripts/run-integration-tests.sh
+
+      - name: Dump test stack logs on failure
+        if: failure()
+        run: |
+          echo "::group::mana-auth logs"
+          docker logs mana-test-mana-auth 2>&1 | tail -200 || true
+          echo "::endgroup::"
+          echo "::group::mana-notify logs"
+          docker logs mana-test-mana-notify 2>&1 | tail -200 || true
+          echo "::endgroup::"
+          echo "::group::mailpit messages"
+          curl -s http://localhost:8026/api/v1/messages | head -100 || true
+          echo "::endgroup::"
+
+  # ===========================================
   # Build Docker images - only changed services
   # ===========================================
 

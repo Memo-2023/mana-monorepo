@@ -44,6 +44,28 @@ services:
       timeout: 5s
       retries: 5
 
+  # Mailpit — fake SMTP server for local development.
+  # Catches every outbound mail and exposes them via web UI + REST API.
+  # Point any service that sends email at SMTP_HOST=mailpit, SMTP_PORT=1025
+  # and inspect what came in at http://localhost:8025.
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: mana-mailpit
+    restart: unless-stopped
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: "1"
+      MP_SMTP_AUTH_ALLOW_INSECURE: "1"
+    ports:
+      - "1025:1025"   # SMTP
+      - "8025:8025"   # Web UI + REST API
+    networks:
+      - mana-network
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8025/api/v1/info"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
   # MinIO Object Storage (S3-compatible)
   minio:
     image: minio/minio:latest
