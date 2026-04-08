@@ -107,7 +107,14 @@ window.__PUBLIC_GLITCHTIP_DSN__ = ${JSON.stringify(PUBLIC_GLITCHTIP_DSN)};
 		// onnxruntime-web WASM loader from jsDelivr at backend selection
 		// time via a dynamic import(). Browsers route dynamic imports
 		// through script-src.
-		scriptSrc: ['https://cdn.jsdelivr.net'],
+		//
+		// `blob:` is also required because once the loader .mjs is fetched,
+		// onnxruntime-web wraps it in `URL.createObjectURL(new Blob([...]))`
+		// and instantiates the result as a multi-threaded Web Worker. The
+		// blob URL scheme is its own CSP source — we only allow it for
+		// our own origin (the implicit base of blob: is the document
+		// origin), so this can't be used to load remote scripts.
+		scriptSrc: ['https://cdn.jsdelivr.net', 'blob:'],
 		connectSrc: [
 			PUBLIC_MANA_AUTH_URL_CLIENT,
 			PUBLIC_SYNC_SERVER_URL_CLIENT,
