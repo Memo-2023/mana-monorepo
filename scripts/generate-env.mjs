@@ -129,6 +129,11 @@ const APP_CONFIGS = [
 			// Speech-to-Text proxy (server-side only, never exposed to the client)
 			MANA_STT_URL: (env) => env.STT_URL || 'http://localhost:3020',
 			MANA_STT_API_KEY: (env) => env.MANA_STT_API_KEY || '',
+			// LLM proxy for /api/v1/voice/parse-task and /api/v1/voice/parse-habit
+			// (server-side only). The fallback path inside those endpoints
+			// keeps voice quick-add usable when this is unset.
+			MANA_LLM_URL: (env) => env.MANA_LLM_URL || 'http://localhost:3025',
+			MANA_LLM_API_KEY: (env) => env.MANA_LLM_API_KEY || '',
 		},
 	},
 

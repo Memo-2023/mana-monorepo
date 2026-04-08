@@ -153,6 +153,28 @@ curl https://gpu-stt.mana.how/health
 If this returns 502, see "GPU Tunnel" in `docs/MAC_MINI_SERVER.md` for the standard
 debug ladder.
 
+### LLM gateway (mana-llm)
+
+Used by the unified Mana web app's voice quick-add features to turn transcripts into structured
+data: `/api/v1/voice/parse-task` (todo titles + due dates + priorities) and `/api/v1/voice/parse-habit`
+(habit picker for voice logging). Both proxies live server-side and degrade gracefully — if
+mana-llm is unreachable or unauthorized, the endpoints return a fallback shape and voice quick-add
+still works, just without LLM enrichment.
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `MANA_LLM_URL` | mana-llm gateway URL (server-side, never exposed) | `http://localhost:3025` |
+| `MANA_LLM_API_KEY` | API key — required when pointing at the GPU LLM proxy. **Never commit a real value.** | _(empty)_ |
+| `PUBLIC_MANA_LLM_URL` | Same URL exposed to the browser for direct use (status page, playground) | mirrors `MANA_LLM_URL` |
+
+**Local dev**: leave `MANA_LLM_URL=http://localhost:3025` and run mana-llm in Docker. If your local
+mana-llm has no models loaded (`curl http://localhost:3025/v1/models` returns `{"data":[]}`), point
+at the public proxy with `MANA_LLM_URL=https://gpu-llm.mana.how` and set `MANA_LLM_API_KEY` to a key
+from `services/mana-llm/.env` on the GPU box.
+
+**Endpoints:** `http://localhost:3025` (Docker), `https://llm.mana.how` (Mac Mini, no auth),
+`https://gpu-llm.mana.how` (GPU server, X-API-Key required).
+
 ## Adding New Variables
 
 ### Step 1: Add to `.env.development`

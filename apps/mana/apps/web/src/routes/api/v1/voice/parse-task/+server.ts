@@ -101,14 +101,17 @@ export const POST: RequestHandler = async ({ request }) => {
 	if (!transcript) return json(fallback(''));
 
 	const llmUrl = env.MANA_LLM_URL || env.PUBLIC_MANA_LLM_URL || 'http://localhost:3025';
+	const apiKey = env.MANA_LLM_API_KEY;
 
 	let response: Response;
 	const controller = new AbortController();
 	const timer = setTimeout(() => controller.abort(), LLM_TIMEOUT_MS);
 	try {
+		const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+		if (apiKey) headers['X-API-Key'] = apiKey;
 		response = await fetch(`${llmUrl.replace(/\/$/, '')}/v1/chat/completions`, {
 			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
+			headers,
 			signal: controller.signal,
 			body: JSON.stringify({
 				model: DEFAULT_MODEL,
