@@ -143,18 +143,40 @@ export async function runPipeline(
 		}
 
 		// Persist sources with stable rank order so citations [n] map to sources[n-1].
-		await db.insert(sources).values(
-			enriched.map((e, idx) => ({
-				researchResultId: id,
-				url: e.hit.url,
-				title: e.hit.title,
-				snippet: e.hit.snippet,
-				extractedContent: e.extractedText,
-				category: e.hit.category,
-				rank: idx + 1,
-			}))
-		);
+		// Drizzle's .values([]) throws — only insert when we actually have hits.
+		if (enriched.length > 0) {
+			await db.insert(sources).values(
+				enriched.map((e, idx) => ({
+					researchResultId: id,
+					url: e.hit.url,
+					title: e.hit.title,
+					snippet: e.hit.snippet,
+					extractedContent: e.extractedText,
+					category: e.hit.category,
+					rank: idx + 1,
+				}))
+			);
+		}
 		emit({ type: 'sources', count: enriched.length });
+
+		// If retrieval found nothing (all sub-queries failed or genuinely
+		// no hits), skip synthesis and surface an explicit "no sources"
+		// summary instead of asking the LLM to fabricate one.
+		if (enriched.length === 0) {
+			await db
+				.update(researchResults)
+				.set({
+					status: 'done',
+					summary:
+						'Keine Quellen gefunden. Die Web-Suche hat keine Treffer geliefert — entweder ist die Frage zu spezifisch oder die Suchdienste sind aktuell nicht erreichbar.',
+					keyPoints: [],
+					followUpQuestions: [],
+					finishedAt: new Date(),
+				})
+				.where(eq(researchResults.id, id));
+			emit({ type: 'done', researchResultId: id });
+			return;
+		}
 
 		// ─── Phase 3: Synthesise ───────────────────────────
 		await setStatus(id, 'synthesizing');
