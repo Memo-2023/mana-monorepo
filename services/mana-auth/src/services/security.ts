@@ -38,14 +38,29 @@ export class SecurityEventsService {
 		userAgent?: string;
 		metadata?: Record<string, unknown>;
 	}) {
+		// postgres-js renders `undefined` as literal nothing in tagged-template
+		// SQL — `${undefined}` collapses the parameter slot, producing
+		// `VALUES (..., , , ...)` and a syntax error. Explicitly fall back to
+		// `null` so optional fields go in as NULL.
+		const userId = params.userId ?? null;
+		const ipAddress = params.ipAddress ?? null;
+		const userAgent = params.userAgent ?? null;
+		const metadata = JSON.stringify(params.metadata ?? {});
 		try {
 			// Use raw SQL since securityEvents table may be in auth schema
 			await this.db.execute(
 				sql`INSERT INTO auth.security_events (id, user_id, event_type, ip_address, user_agent, metadata, created_at)
-				VALUES (gen_random_uuid(), ${params.userId}, ${params.eventType}, ${params.ipAddress}, ${params.userAgent}, ${JSON.stringify(params.metadata || {})}::jsonb, NOW())`
+				VALUES (gen_random_uuid(), ${userId}, ${params.eventType}, ${ipAddress}, ${userAgent}, ${metadata}::jsonb, NOW())`
 			);
 		} catch (error) {
-			console.warn('Failed to log security event (non-critical):', params.eventType);
+			// Audit logging is non-critical, so we never throw — but actually
+			// surface the error message so the failure mode is debuggable
+			// instead of a silent warn that hides the real cause.
+			console.warn(
+				'Failed to log security event (non-critical):',
+				params.eventType,
+				error instanceof Error ? error.message : error
+			);
 		}
 	}
 
