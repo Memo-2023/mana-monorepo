@@ -71,7 +71,11 @@
 				description: description.trim() || null,
 				status: 'open' as const,
 				priority,
-				tags,
+				// Unwrap the Svelte 5 $state proxy — Dexie / mana-sync's
+				// _pendingChanges hook structured-clones the row and proxies
+				// throw DataCloneError. $state.snapshot() returns a plain
+				// deep copy.
+				tags: $state.snapshot(tags),
 				researchDepth,
 				createdAt: now,
 				updatedAt: now,
