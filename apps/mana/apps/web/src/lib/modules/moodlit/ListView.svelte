@@ -9,6 +9,7 @@
 	import type { LocalMood } from './types';
 	import { moodsStore } from './stores/moods.svelte';
 	import { ContextMenu, type ContextMenuItem } from '@mana/shared-ui';
+	import { useItemContextMenu } from '$lib/data/item-context-menu.svelte';
 	import { Trash, Power } from '@mana/shared-icons';
 
 	const moodsQuery = useLiveQueryWithDefault(async () => {
@@ -27,29 +28,18 @@
 		return `background: linear-gradient(135deg, ${colors.join(', ')})`;
 	}
 
-	// Context menu
-	let ctxMenu = $state<{ visible: boolean; x: number; y: number; mood: LocalMood | null }>({
-		visible: false,
-		x: 0,
-		y: 0,
-		mood: null,
-	});
-
-	function handleItemContextMenu(e: MouseEvent, mood: LocalMood) {
-		e.preventDefault();
-		ctxMenu = { visible: true, x: e.clientX, y: e.clientY, mood };
-	}
+	const ctxMenu = useItemContextMenu<LocalMood>();
 
 	let ctxMenuItems = $derived<ContextMenuItem[]>(
-		ctxMenu.mood
+		ctxMenu.state.target
 			? [
 					{
 						id: 'activate',
-						label: activeMoodId === ctxMenu.mood.id ? 'Deaktivieren' : 'Aktivieren',
+						label: activeMoodId === ctxMenu.state.target.id ? 'Deaktivieren' : 'Aktivieren',
 						icon: Power,
 						action: () => {
-							if (ctxMenu.mood)
-								activeMoodId = activeMoodId === ctxMenu.mood.id ? null : ctxMenu.mood.id;
+							const target = ctxMenu.state.target;
+							if (target) activeMoodId = activeMoodId === target.id ? null : target.id;
 						},
 					},
 					{ id: 'div', label: '', type: 'divider' as const },
@@ -59,9 +49,10 @@
 						icon: Trash,
 						variant: 'danger' as const,
 						action: () => {
-							if (ctxMenu.mood) {
-								if (activeMoodId === ctxMenu.mood.id) activeMoodId = null;
-								moodsStore.deleteMood(ctxMenu.mood.id);
+							const target = ctxMenu.state.target;
+							if (target) {
+								if (activeMoodId === target.id) activeMoodId = null;
+								moodsStore.deleteMood(target.id);
 							}
 						},
 					},
@@ -96,7 +87,7 @@
 	{#snippet item(mood)}
 		<button
 			onclick={() => (activeMoodId = activeMoodId === mood.id ? null : mood.id)}
-			oncontextmenu={(e) => handleItemContextMenu(e, mood)}
+			oncontextmenu={(e) => ctxMenu.open(e, mood)}
 			class="group flex flex-col items-center gap-1.5 rounded-lg p-2 transition-colors hover:bg-white/5
 				{activeMoodId === mood.id ? 'ring-1 ring-white/30' : ''}"
 		>
@@ -107,9 +98,9 @@
 </BaseListView>
 
 <ContextMenu
-	visible={ctxMenu.visible}
-	x={ctxMenu.x}
-	y={ctxMenu.y}
+	visible={ctxMenu.state.visible}
+	x={ctxMenu.state.x}
+	y={ctxMenu.state.y}
 	items={ctxMenuItems}
-	onClose={() => (ctxMenu = { ...ctxMenu, visible: false, mood: null })}
+	onClose={ctxMenu.close}
 />

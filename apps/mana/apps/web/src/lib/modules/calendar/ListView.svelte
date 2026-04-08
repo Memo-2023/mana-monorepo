@@ -15,6 +15,7 @@
 	import type { TagDragData } from '@mana/shared-ui/dnd';
 	import { useAllTags, getTagsByIds } from '@mana/shared-stores';
 	import { addTagId } from '$lib/data/tag-mutations';
+	import { useItemContextMenu } from '$lib/data/item-context-menu.svelte';
 
 	let { navigate, goBack, params }: ViewProps = $props();
 
@@ -59,30 +60,18 @@
 
 	const dayNames = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 
-	// Context menu
-	let ctxMenu = $state<{ visible: boolean; x: number; y: number; event: CalendarEvent | null }>({
-		visible: false,
-		x: 0,
-		y: 0,
-		event: null,
-	});
-
-	function handleItemContextMenu(e: MouseEvent, event: CalendarEvent) {
-		e.preventDefault();
-		ctxMenu = { visible: true, x: e.clientX, y: e.clientY, event };
-	}
+	const ctxMenu = useItemContextMenu<CalendarEvent>();
 
 	let ctxMenuItems = $derived<ContextMenuItem[]>(
-		ctxMenu.event
+		ctxMenu.state.target
 			? [
 					{
 						id: 'open',
 						label: 'Öffnen',
 						icon: PencilSimple,
 						action: () => {
-							if (ctxMenu.event) {
-								navigate('detail', { eventId: ctxMenu.event.id });
-							}
+							const target = ctxMenu.state.target;
+							if (target) navigate('detail', { eventId: target.id });
 						},
 					},
 					{ id: 'div', label: '', type: 'divider' as const },
@@ -92,9 +81,8 @@
 						icon: Trash,
 						variant: 'danger' as const,
 						action: () => {
-							if (ctxMenu.event) {
-								eventsStore.deleteEvent(ctxMenu.event.id);
-							}
+							const target = ctxMenu.state.target;
+							if (target) eventsStore.deleteEvent(target.id);
 						},
 					},
 				]
@@ -177,7 +165,7 @@
 						_siblingIds: todayEvents.map((e) => e.id),
 						_siblingKey: 'eventId',
 					})}
-				oncontextmenu={(e) => handleItemContextMenu(e, event)}
+				oncontextmenu={(e) => ctxMenu.open(e, event)}
 				use:dragSource={{
 					type: 'event',
 					data: () => ({
@@ -227,11 +215,11 @@
 	</div>
 
 	<ContextMenu
-		visible={ctxMenu.visible}
-		x={ctxMenu.x}
-		y={ctxMenu.y}
+		visible={ctxMenu.state.visible}
+		x={ctxMenu.state.x}
+		y={ctxMenu.state.y}
 		items={ctxMenuItems}
-		onClose={() => (ctxMenu = { ...ctxMenu, visible: false, event: null })}
+		onClose={ctxMenu.close}
 	/>
 </div>
 

@@ -6,6 +6,7 @@
 	import { dndzone, SOURCES, TRIGGERS } from 'svelte-dnd-action';
 	import { flip } from 'svelte/animate';
 	import { ContextMenu, type ContextMenuItem } from '@mana/shared-ui';
+	import { useItemContextMenu } from '$lib/data/item-context-menu.svelte';
 	import { PencilSimple, Check, ArrowCounterClockwise, Trash, Circle } from '@mana/shared-icons';
 
 	interface Props {
@@ -24,35 +25,31 @@
 		items = [...tasks];
 	});
 
-	// Context menu
-	let ctxMenu = $state<{ visible: boolean; x: number; y: number; task: Task | null }>({
-		visible: false,
-		x: 0,
-		y: 0,
-		task: null,
-	});
+	const ctxMenu = useItemContextMenu<Task>();
 
 	function handleContextMenu(task: Task, e: MouseEvent) {
-		ctxMenu = { visible: true, x: e.clientX, y: e.clientY, task };
+		ctxMenu.open(e, task);
 	}
 
 	let ctxMenuItems = $derived<ContextMenuItem[]>(
-		ctxMenu.task
+		ctxMenu.state.target
 			? [
 					{
 						id: 'open',
 						label: $_('todo.edit'),
 						icon: PencilSimple,
 						action: () => {
-							if (ctxMenu.task) onOpenTask(ctxMenu.task);
+							const target = ctxMenu.state.target;
+							if (target) onOpenTask(target);
 						},
 					},
 					{
 						id: 'complete',
-						label: ctxMenu.task.isCompleted ? $_('todo.reopen') : $_('todo.markDone'),
-						icon: ctxMenu.task.isCompleted ? ArrowCounterClockwise : Check,
+						label: ctxMenu.state.target.isCompleted ? $_('todo.reopen') : $_('todo.markDone'),
+						icon: ctxMenu.state.target.isCompleted ? ArrowCounterClockwise : Check,
 						action: () => {
-							if (ctxMenu.task) tasksStore.toggleComplete(ctxMenu.task.id);
+							const target = ctxMenu.state.target;
+							if (target) tasksStore.toggleComplete(target.id);
 						},
 					},
 					{ id: 'div-priority', label: '', type: 'divider' as const },
@@ -68,7 +65,8 @@
 										: $_('todo.priorityLow'),
 						icon: Circle,
 						action: () => {
-							if (ctxMenu.task) tasksStore.updateTask(ctxMenu.task.id, { priority: p });
+							const target = ctxMenu.state.target;
+							if (target) tasksStore.updateTask(target.id, { priority: p });
 						},
 					})),
 					{ id: 'div-delete', label: '', type: 'divider' as const },
@@ -78,7 +76,8 @@
 						icon: Trash,
 						variant: 'danger' as const,
 						action: () => {
-							if (ctxMenu.task) tasksStore.deleteTask(ctxMenu.task.id);
+							const target = ctxMenu.state.target;
+							if (target) tasksStore.deleteTask(target.id);
 						},
 					},
 				]
@@ -143,9 +142,9 @@
 {/if}
 
 <ContextMenu
-	visible={ctxMenu.visible}
-	x={ctxMenu.x}
-	y={ctxMenu.y}
+	visible={ctxMenu.state.visible}
+	x={ctxMenu.state.x}
+	y={ctxMenu.state.y}
 	items={ctxMenuItems}
-	onClose={() => (ctxMenu = { ...ctxMenu, visible: false, task: null })}
+	onClose={ctxMenu.close}
 />

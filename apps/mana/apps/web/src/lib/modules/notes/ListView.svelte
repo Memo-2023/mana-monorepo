@@ -8,6 +8,7 @@
 	import type { Note } from './types';
 	import type { ViewProps } from '$lib/app-registry';
 	import { ContextMenu, type ContextMenuItem } from '@mana/shared-ui';
+	import { useItemContextMenu } from '$lib/data/item-context-menu.svelte';
 	import { PencilSimple, Trash, PushPin } from '@mana/shared-icons';
 	import VoiceCaptureBar from '$lib/components/voice/VoiceCaptureBar.svelte';
 
@@ -78,36 +79,27 @@
 		await notesStore.togglePin(id);
 	}
 
-	// Context menu
-	let ctxMenu = $state<{ visible: boolean; x: number; y: number; note: Note | null }>({
-		visible: false,
-		x: 0,
-		y: 0,
-		note: null,
-	});
-
-	function handleItemContextMenu(e: MouseEvent, note: Note) {
-		e.preventDefault();
-		ctxMenu = { visible: true, x: e.clientX, y: e.clientY, note };
-	}
+	const ctxMenu = useItemContextMenu<Note>();
 
 	let ctxMenuItems = $derived<ContextMenuItem[]>(
-		ctxMenu.note
+		ctxMenu.state.target
 			? [
 					{
 						id: 'edit',
 						label: 'Bearbeiten',
 						icon: PencilSimple,
 						action: () => {
-							if (ctxMenu.note) startEdit(ctxMenu.note);
+							const target = ctxMenu.state.target;
+							if (target) startEdit(target);
 						},
 					},
 					{
 						id: 'pin',
-						label: ctxMenu.note.isPinned ? 'Lösen' : 'Pinnen',
+						label: ctxMenu.state.target.isPinned ? 'Lösen' : 'Pinnen',
 						icon: PushPin,
 						action: () => {
-							if (ctxMenu.note) notesStore.togglePin(ctxMenu.note.id);
+							const target = ctxMenu.state.target;
+							if (target) notesStore.togglePin(target.id);
 						},
 					},
 					{ id: 'div', label: '', type: 'divider' as const },
@@ -117,7 +109,8 @@
 						icon: Trash,
 						variant: 'danger' as const,
 						action: () => {
-							if (ctxMenu.note) handleDelete(ctxMenu.note.id);
+							const target = ctxMenu.state.target;
+							if (target) handleDelete(target.id);
 						},
 					},
 				]
@@ -184,7 +177,7 @@
 				<button
 					class="note-item"
 					onclick={() => startEdit(note)}
-					oncontextmenu={(e) => handleItemContextMenu(e, note)}
+					oncontextmenu={(e) => ctxMenu.open(e, note)}
 				>
 					{#if note.color}
 						<span class="color-dot" style="background: {note.color}"></span>
@@ -213,11 +206,11 @@
 	{/if}
 
 	<ContextMenu
-		visible={ctxMenu.visible}
-		x={ctxMenu.x}
-		y={ctxMenu.y}
+		visible={ctxMenu.state.visible}
+		x={ctxMenu.state.x}
+		y={ctxMenu.state.y}
 		items={ctxMenuItems}
-		onClose={() => (ctxMenu = { ...ctxMenu, visible: false, note: null })}
+		onClose={ctxMenu.close}
 	/>
 </div>
 

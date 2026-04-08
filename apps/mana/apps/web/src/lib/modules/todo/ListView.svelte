@@ -21,6 +21,7 @@
 	import type { TagDragData } from '@mana/shared-ui/dnd';
 	import { useAllTags, getTagsByIds } from '@mana/shared-stores';
 	import { addTagId } from '$lib/data/tag-mutations';
+	import { useItemContextMenu } from '$lib/data/item-context-menu.svelte';
 	import VoiceCaptureBar from '$lib/components/voice/VoiceCaptureBar.svelte';
 
 	let { navigate, goBack, params }: ViewProps = $props();
@@ -76,41 +77,27 @@
 		await tasksStore.createFromVoice(blob, durationMs, 'de');
 	}
 
-	// Context menu
-	let ctxMenu = $state<{
-		visible: boolean;
-		x: number;
-		y: number;
-		task: import('./types').Task | null;
-	}>({
-		visible: false,
-		x: 0,
-		y: 0,
-		task: null,
-	});
-
-	function handleItemContextMenu(e: MouseEvent, task: import('./types').Task) {
-		e.preventDefault();
-		ctxMenu = { visible: true, x: e.clientX, y: e.clientY, task };
-	}
+	const ctxMenu = useItemContextMenu<import('./types').Task>();
 
 	let ctxMenuItems = $derived<ContextMenuItem[]>(
-		ctxMenu.task
+		ctxMenu.state.target
 			? [
 					{
 						id: 'open',
 						label: 'Öffnen',
 						icon: PencilSimple,
 						action: () => {
-							if (ctxMenu.task) navigate('detail', { taskId: ctxMenu.task.id });
+							const target = ctxMenu.state.target;
+							if (target) navigate('detail', { taskId: target.id });
 						},
 					},
 					{
 						id: 'complete',
-						label: ctxMenu.task.isCompleted ? 'Wieder öffnen' : 'Erledigen',
-						icon: ctxMenu.task.isCompleted ? ArrowCounterClockwise : Check,
+						label: ctxMenu.state.target.isCompleted ? 'Wieder öffnen' : 'Erledigen',
+						icon: ctxMenu.state.target.isCompleted ? ArrowCounterClockwise : Check,
 						action: () => {
-							if (ctxMenu.task) tasksStore.toggleComplete(ctxMenu.task.id);
+							const target = ctxMenu.state.target;
+							if (target) tasksStore.toggleComplete(target.id);
 						},
 					},
 					{ id: 'div', label: '', type: 'divider' as const },
@@ -120,7 +107,8 @@
 						icon: Trash,
 						variant: 'danger' as const,
 						action: () => {
-							if (ctxMenu.task) tasksStore.deleteTask(ctxMenu.task.id);
+							const target = ctxMenu.state.target;
+							if (target) tasksStore.deleteTask(target.id);
 						},
 					},
 				]
@@ -186,7 +174,7 @@
 						_siblingIds: filtered().map((t) => t.id),
 						_siblingKey: 'taskId',
 					})}
-				oncontextmenu={(e) => handleItemContextMenu(e, task)}
+				oncontextmenu={(e) => ctxMenu.open(e, task)}
 				class="task-item"
 				use:dragSource={{
 					type: 'task',
@@ -239,11 +227,11 @@
 	</div>
 
 	<ContextMenu
-		visible={ctxMenu.visible}
-		x={ctxMenu.x}
-		y={ctxMenu.y}
+		visible={ctxMenu.state.visible}
+		x={ctxMenu.state.x}
+		y={ctxMenu.state.y}
 		items={ctxMenuItems}
-		onClose={() => (ctxMenu = { ...ctxMenu, visible: false, task: null })}
+		onClose={ctxMenu.close}
 	/>
 </div>
 

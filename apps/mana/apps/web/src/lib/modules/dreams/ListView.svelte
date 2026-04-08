@@ -15,6 +15,7 @@
 	import { MOOD_COLORS, MOOD_LABELS, type Dream, type DreamMood, type SleepQuality } from './types';
 	import type { ViewProps } from '$lib/app-registry';
 	import { ContextMenu, type ContextMenuItem } from '@mana/shared-ui';
+	import { useItemContextMenu } from '$lib/data/item-context-menu.svelte';
 	import { PencilSimple, PushPin, Trash } from '@mana/shared-icons';
 	import SymbolsView from './views/SymbolsView.svelte';
 
@@ -132,36 +133,27 @@
 		if (editingId === id) editingId = null;
 	}
 
-	// Context menu
-	let ctxMenu = $state<{ visible: boolean; x: number; y: number; dream: Dream | null }>({
-		visible: false,
-		x: 0,
-		y: 0,
-		dream: null,
-	});
-
-	function handleItemContextMenu(e: MouseEvent, dream: Dream) {
-		e.preventDefault();
-		ctxMenu = { visible: true, x: e.clientX, y: e.clientY, dream };
-	}
+	const ctxMenu = useItemContextMenu<Dream>();
 
 	let ctxMenuItems = $derived<ContextMenuItem[]>(
-		ctxMenu.dream
+		ctxMenu.state.target
 			? [
 					{
 						id: 'edit',
 						label: 'Bearbeiten',
 						icon: PencilSimple,
 						action: () => {
-							if (ctxMenu.dream) startEdit(ctxMenu.dream);
+							const target = ctxMenu.state.target;
+							if (target) startEdit(target);
 						},
 					},
 					{
 						id: 'pin',
-						label: ctxMenu.dream.isPinned ? 'Lösen' : 'Pinnen',
+						label: ctxMenu.state.target.isPinned ? 'Lösen' : 'Pinnen',
 						icon: PushPin,
 						action: () => {
-							if (ctxMenu.dream) dreamsStore.togglePin(ctxMenu.dream.id);
+							const target = ctxMenu.state.target;
+							if (target) dreamsStore.togglePin(target.id);
 						},
 					},
 					{ id: 'div', label: '', type: 'divider' as const },
@@ -171,7 +163,8 @@
 						icon: Trash,
 						variant: 'danger' as const,
 						action: () => {
-							if (ctxMenu.dream) handleDelete(ctxMenu.dream.id);
+							const target = ctxMenu.state.target;
+							if (target) handleDelete(target.id);
 						},
 					},
 				]
@@ -425,7 +418,7 @@
 									startEdit(dream);
 								}
 							}}
-							oncontextmenu={(e) => handleItemContextMenu(e, dream)}
+							oncontextmenu={(e) => ctxMenu.open(e, dream)}
 						>
 							{#if dream.mood}
 								<span class="mood-dot-row" style="background: {MOOD_COLORS[dream.mood]}"></span>
@@ -485,11 +478,11 @@
 		{/if}
 
 		<ContextMenu
-			visible={ctxMenu.visible}
-			x={ctxMenu.x}
-			y={ctxMenu.y}
+			visible={ctxMenu.state.visible}
+			x={ctxMenu.state.x}
+			y={ctxMenu.state.y}
 			items={ctxMenuItems}
-			onClose={() => (ctxMenu = { ...ctxMenu, visible: false, dream: null })}
+			onClose={ctxMenu.close}
 		/>
 	{/if}
 </div>

@@ -15,6 +15,7 @@
 	import type { Habit, HabitLog } from './types';
 	import type { ViewProps } from '$lib/app-registry';
 	import { ContextMenu, type ContextMenuItem } from '@mana/shared-ui';
+	import { useItemContextMenu } from '$lib/data/item-context-menu.svelte';
 	import { toastStore } from '@mana/shared-ui/toast';
 	import { DynamicIcon } from '@mana/shared-ui/atoms';
 	import { IconPicker } from '@mana/shared-ui/molecules';
@@ -95,38 +96,29 @@
 		showIconPicker = false;
 	}
 
-	// Context menu
-	let ctxMenu = $state<{ visible: boolean; x: number; y: number; habit: Habit | null }>({
-		visible: false,
-		x: 0,
-		y: 0,
-		habit: null,
-	});
-
-	function handleItemContextMenu(e: MouseEvent, habit: Habit) {
-		e.preventDefault();
-		ctxMenu = { visible: true, x: e.clientX, y: e.clientY, habit };
-	}
+	const ctxMenu = useItemContextMenu<Habit>();
 
 	let ctxMenuItems = $derived<ContextMenuItem[]>(
-		ctxMenu.habit
+		ctxMenu.state.target
 			? [
 					{
 						id: 'log',
 						label: 'Loggen',
 						icon: Play,
 						action: () => {
-							if (ctxMenu.habit) handleTap(ctxMenu.habit.id);
+							const target = ctxMenu.state.target;
+							if (target) handleTap(target.id);
 						},
 					},
 					{
 						id: 'archive',
-						label: ctxMenu.habit.isArchived ? 'Aktivieren' : 'Archivieren',
-						icon: ctxMenu.habit.isArchived ? Play : Pause,
+						label: ctxMenu.state.target.isArchived ? 'Aktivieren' : 'Archivieren',
+						icon: ctxMenu.state.target.isArchived ? Play : Pause,
 						action: () => {
-							if (ctxMenu.habit)
-								habitsStore.updateHabit(ctxMenu.habit.id, {
-									isArchived: !ctxMenu.habit.isArchived,
+							const target = ctxMenu.state.target;
+							if (target)
+								habitsStore.updateHabit(target.id, {
+									isArchived: !target.isArchived,
 								});
 						},
 					},
@@ -137,7 +129,8 @@
 						icon: Trash,
 						variant: 'danger' as const,
 						action: () => {
-							if (ctxMenu.habit) habitsStore.deleteHabit(ctxMenu.habit.id);
+							const target = ctxMenu.state.target;
+							if (target) habitsStore.deleteHabit(target.id);
 						},
 					},
 				]
@@ -175,7 +168,7 @@
 				class:over-target={overTarget}
 				class:pulse={animatingId === habit.id}
 				onclick={() => handleTap(habit.id)}
-				oncontextmenu={(e) => handleItemContextMenu(e, habit)}
+				oncontextmenu={(e) => ctxMenu.open(e, habit)}
 			>
 				<span class="tally-icon">
 					<DynamicIcon name={habit.icon} size={20} weight="bold" />
@@ -274,11 +267,11 @@
 	{/if}
 
 	<ContextMenu
-		visible={ctxMenu.visible}
-		x={ctxMenu.x}
-		y={ctxMenu.y}
+		visible={ctxMenu.state.visible}
+		x={ctxMenu.state.x}
+		y={ctxMenu.state.y}
 		items={ctxMenuItems}
-		onClose={() => (ctxMenu = { ...ctxMenu, visible: false, habit: null })}
+		onClose={ctxMenu.close}
 	/>
 
 	{#if activeHabits.length === 0 && !showCreate}
