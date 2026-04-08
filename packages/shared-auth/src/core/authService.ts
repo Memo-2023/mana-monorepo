@@ -436,9 +436,14 @@ export function createAuthService(config: AuthServiceConfig): AuthServiceInterfa
 		},
 
 		/**
-		 * Sign in with a passkey
+		 * Sign in with a passkey.
+		 *
+		 * Pass `{ conditional: true }` to use the WebAuthn Conditional UI flow,
+		 * where the browser surfaces passkeys directly inside the email autofill
+		 * dropdown instead of opening a modal. The host MUST verify
+		 * `PublicKeyCredential.isConditionalMediationAvailable()` first.
 		 */
-		async signInWithPasskey(): Promise<AuthResult> {
+		async signInWithPasskey(options: { conditional?: boolean } = {}): Promise<AuthResult> {
 			try {
 				const { startAuthentication } = await import('@simplewebauthn/browser');
 				const storage = getStorageAdapter();
@@ -454,10 +459,13 @@ export function createAuthService(config: AuthServiceConfig): AuthServiceInterfa
 					return { success: false, error: err.message || 'Failed to get authentication options' };
 				}
 
-				const { options, challengeId } = await optionsRes.json();
+				const { options: webauthnOptions, challengeId } = await optionsRes.json();
 
 				// Step 2: Authenticate via browser WebAuthn API
-				const credential = await startAuthentication({ optionsJSON: options });
+				const credential = await startAuthentication({
+					optionsJSON: webauthnOptions,
+					useBrowserAutofill: options.conditional === true,
+				});
 
 				// Step 3: Send credential to server for verification
 				const verifyRes = await fetch(`${baseUrl}${endpoints.passkeyAuthVerify}`, {

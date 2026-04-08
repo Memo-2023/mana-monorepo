@@ -186,11 +186,11 @@ export function createManaAuthStore(config: ManaAuthStoreConfig = {}) {
 			return authService.isPasskeyAvailable();
 		},
 
-		async signInWithPasskey() {
+		async signInWithPasskey(options?: { conditional?: boolean }) {
 			const authService = getAuthService();
 			if (!authService) return { success: false, error: 'Auth not available on server' };
 			try {
-				const result = await authService.signInWithPasskey();
+				const result = await authService.signInWithPasskey(options);
 				if (!result.success)
 					return { success: false, error: result.error || 'Passkey authentication failed' };
 				user = await authService.getUserFromToken();

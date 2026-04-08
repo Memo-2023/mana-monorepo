@@ -36,12 +36,32 @@ export interface AuthServiceInterface {
 }
 
 /**
+ * Structured error code for an auth operation. Frontend should branch on
+ * this rather than parsing the human-readable `error` string, which is
+ * locale-dependent.
+ */
+export type AuthErrorCode =
+	| 'INVALID_CREDENTIALS'
+	| 'EMAIL_NOT_VERIFIED'
+	| 'RATE_LIMITED'
+	| 'ACCOUNT_LOCKED'
+	| 'NETWORK_ERROR'
+	| 'UNKNOWN';
+
+/**
  * Result from auth operations
  */
 export interface AuthResult {
 	success: boolean;
+	/** Human-readable, possibly localized error message */
 	error?: string;
+	/** Stable, locale-independent error code for branching */
+	errorCode?: AuthErrorCode;
 	needsVerification?: boolean;
+	/** Set when sign-in succeeded but a 2FA challenge must be completed */
+	twoFactorRedirect?: boolean;
+	/** Seconds until the user may retry, set on RATE_LIMITED / ACCOUNT_LOCKED */
+	retryAfter?: number;
 }
 
 /**

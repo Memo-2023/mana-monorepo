@@ -211,7 +211,7 @@ export interface AuthServiceInterface {
 	// Passkeys
 	isPasskeyAvailable(): boolean;
 	registerPasskey(friendlyName?: string): Promise<AuthResult>;
-	signInWithPasskey(): Promise<AuthResult>;
+	signInWithPasskey(options?: { conditional?: boolean }): Promise<AuthResult>;
 	listPasskeys(): Promise<any[]>;
 	deletePasskey(passkeyId: string): Promise<AuthResult>;
 	renamePasskey(passkeyId: string, friendlyName: string): Promise<AuthResult>;
