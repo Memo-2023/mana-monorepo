@@ -8,11 +8,12 @@
 
 import { Hono } from 'hono';
 import { consumeCredits, validateCredits } from '@mana/shared-hono/credits';
+import type { AuthVariables } from '@mana/shared-hono';
 
 const REPLICATE_TOKEN = process.env.REPLICATE_API_TOKEN || '';
 const IMAGE_GEN_URL = process.env.MANA_IMAGE_GEN_URL || '';
 
-const routes = new Hono();
+const routes = new Hono<{ Variables: AuthVariables }>();
 
 // ─── AI Image Generation (server-only: Replicate/local) ─────
 

@@ -18,7 +18,7 @@ import { z } from 'zod';
 import { eq, and, asc, sql } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
-import { serviceAuthMiddleware } from '@mana/shared-hono';
+import { serviceAuthMiddleware, type AuthVariables } from '@mana/shared-hono';
 import {
 	pgSchema,
 	uuid,
@@ -93,7 +93,7 @@ const db = drizzle(connection, { schema: { tasks, projects, reminders } });
 
 // ─── Routes ────────────────────────────────────────────────
 
-const routes = new Hono();
+const routes = new Hono<{ Variables: AuthVariables }>();
 
 // ─── RRULE Compute ─────────────────────────────────────────
 

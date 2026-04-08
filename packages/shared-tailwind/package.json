@@ -3,15 +3,8 @@
 	"version": "1.0.0",
 	"private": true,
 	"type": "module",
-	"main": "./src/index.js",
 	"exports": {
-		".": "./src/index.js",
-		"./preset": "./src/preset.js",
-		"./colors": "./src/colors.js",
-		"./theme.css": "./src/theme-variables.css",
-		"./themes.css": "./src/themes.css",
-		"./components.css": "./src/components.css",
-		"./v4": "./src/tailwind-v4.css"
+		"./themes.css": "./src/themes.css"
 	},
 	"scripts": {
 		"lint": "eslint ."

@@ -1,692 +1,580 @@
 /**
- * Shared Theme CSS Variables
+ * Shared Theme CSS Variables — shadcn / Tailwind v4 convention.
  *
- * This file defines CSS custom properties for all theme variants.
- * Variables are set by @mana/shared-theme's createThemeStore() at runtime,
- * but this file provides sensible defaults for static rendering.
+ * Design:
+ *   - Single source-of-truth layer: `--color-X` defined as raw HSL channels
+ *     (e.g. `0 0% 17%`, NOT `hsl(0 0% 17%)`) in :root, .dark, and variant
+ *     [data-theme="..."] blocks. The runtime store in @mana/shared-theme
+ *     writes the same names with the same format, so static and runtime
+ *     rendering stay consistent (no flash of unstyled content).
+ *
+ *   - `@theme inline` uses self-reference + `<alpha-value>` placeholder so
+ *     Tailwind v4 generates utility classes (`text-foreground`, `bg-card`,
+ *     etc.) AND opacity modifiers (`text-foreground/50`) work.
+ *
+ * Consumer conventions:
+ *
+ *   1. Markup (preferred when possible):
+ *      <p class="text-foreground">…</p>
+ *      <div class="bg-card border-border">…</div>
+ *      <span class="text-muted-foreground/60">…</span>
+ *
+ *   2. Scoped CSS (when utilities don't fit, e.g. complex selectors):
+ *      .my-text { color: hsl(var(--color-foreground)); }
+ *      .my-bg { background: hsl(var(--color-card) / 0.5); }
+ *
+ *   3. NEVER write raw `var(--color-X)` without wrapping with `hsl()`.
+ *      The variable holds raw channels, not a valid CSS color.
  *
  * Usage in app.css (Tailwind v4):
- * ```css
- * @import "tailwindcss";
- * @import "@mana/shared-tailwind/themes.css";
- * ```
- *
- * Tailwind v4 Integration:
- * - Base color values are defined in :root with --theme-* prefix
- * - @theme inline references these via var(--theme-*)
- * - This generates utility classes (bg-background, text-foreground, etc.)
- * - Theme variants override --theme-* values in [data-theme] selectors
+ *   @import "tailwindcss";
+ *   @import "@mana/shared-tailwind/themes.css";
  */
 
 /* ===== Tailwind v4 Theme Configuration ===== */
 @theme inline {
-  /*
-   * Theme Colors - Reference CSS variables that are defined in :root
-   * This tells Tailwind to generate utility classes that use these variables
-   */
-  --color-primary: var(--theme-primary);
-  --color-primary-foreground: var(--theme-primary-foreground);
-  --color-secondary: var(--theme-secondary);
-  --color-secondary-foreground: var(--theme-secondary-foreground);
-  --color-background: var(--theme-background);
-  --color-foreground: var(--theme-foreground);
-  --color-surface: var(--theme-surface);
-  --color-surface-hover: var(--theme-surface-hover);
-  --color-surface-elevated: var(--theme-surface-elevated);
+	/*
+	 * Self-referencing wrappers — `<alpha-value>` is a Tailwind v4 placeholder
+	 * that gets substituted to `1` for unmodified utilities and to `0.5`,
+	 * `0.25`, etc. for opacity modifiers (`text-foreground/50`).
+	 */
+	--color-primary: hsl(var(--color-primary) / <alpha-value>);
+	--color-primary-foreground: hsl(var(--color-primary-foreground) / <alpha-value>);
+	--color-secondary: hsl(var(--color-secondary) / <alpha-value>);
+	--color-secondary-foreground: hsl(var(--color-secondary-foreground) / <alpha-value>);
+	--color-background: hsl(var(--color-background) / <alpha-value>);
+	--color-foreground: hsl(var(--color-foreground) / <alpha-value>);
+	--color-surface: hsl(var(--color-surface) / <alpha-value>);
+	--color-surface-hover: hsl(var(--color-surface-hover) / <alpha-value>);
+	--color-surface-elevated: hsl(var(--color-surface-elevated) / <alpha-value>);
+	--color-surface-elevated-1: hsl(var(--color-surface-elevated-1) / <alpha-value>);
+	--color-surface-elevated-2: hsl(var(--color-surface-elevated-2) / <alpha-value>);
+	--color-surface-elevated-3: hsl(var(--color-surface-elevated-3) / <alpha-value>);
+	--color-muted: hsl(var(--color-muted) / <alpha-value>);
+	--color-muted-foreground: hsl(var(--color-muted-foreground) / <alpha-value>);
+	--color-border: hsl(var(--color-border) / <alpha-value>);
+	--color-border-strong: hsl(var(--color-border-strong) / <alpha-value>);
+	--color-error: hsl(var(--color-error) / <alpha-value>);
+	--color-success: hsl(var(--color-success) / <alpha-value>);
+	--color-warning: hsl(var(--color-warning) / <alpha-value>);
+	--color-input: hsl(var(--color-input) / <alpha-value>);
+	--color-ring: hsl(var(--color-ring) / <alpha-value>);
 
-  /* Elevation system - progressively lighter surfaces for overlays */
-  --color-surface-elevated-1: var(--theme-surface-elevated-1);
-  --color-surface-elevated-2: var(--theme-surface-elevated-2);
-  --color-surface-elevated-3: var(--theme-surface-elevated-3);
-  --color-muted: var(--theme-muted);
-  --color-muted-foreground: var(--theme-muted-foreground);
-  --color-border: var(--theme-border);
-  --color-border-strong: var(--theme-border-strong);
-  --color-error: var(--theme-error);
-  --color-success: var(--theme-success);
-  --color-warning: var(--theme-warning);
-  --color-input: var(--theme-input);
-  --color-ring: var(--theme-ring);
-
-  /* ShadCN-compatible color aliases */
-  --color-card: var(--theme-card);
-  --color-card-foreground: var(--theme-card-foreground);
-  --color-accent: var(--theme-accent);
-  --color-accent-foreground: var(--theme-accent-foreground);
-
-  /* Legacy aliases */
-  --color-content: var(--theme-content);
-  --color-content-hover: var(--theme-content-hover);
-  --color-content-page: var(--theme-content-page);
-  --color-menu: var(--theme-menu);
-  --color-menu-hover: var(--theme-menu-hover);
+	/* ShadCN-compatible aliases */
+	--color-card: hsl(var(--color-card) / <alpha-value>);
+	--color-card-foreground: hsl(var(--color-card-foreground) / <alpha-value>);
+	--color-accent: hsl(var(--color-accent) / <alpha-value>);
+	--color-accent-foreground: hsl(var(--color-accent-foreground) / <alpha-value>);
 }
 
 @theme {
-  /* Brand color */
-  --color-mana: #4287f5;
+	/* Brand color (literal, not theme-aware) */
+	--color-mana: #4287f5;
 
-  /* Border radius */
-  --radius-none: 0;
-  --radius-sm: 0.25rem;
-  --radius-DEFAULT: 0.375rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
-  --radius-xl: 1rem;
-  --radius-2xl: 1.5rem;
-  --radius-3xl: 2rem;
-  --radius-full: 9999px;
+	/* Border radius */
+	--radius-none: 0;
+	--radius-sm: 0.25rem;
+	--radius-DEFAULT: 0.375rem;
+	--radius-md: 0.5rem;
+	--radius-lg: 0.75rem;
+	--radius-xl: 1rem;
+	--radius-2xl: 1.5rem;
+	--radius-3xl: 2rem;
+	--radius-full: 9999px;
 
-  /* Box shadows */
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-DEFAULT: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
-  --shadow-inner: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
-  --shadow-none: none;
+	/* Box shadows */
+	--shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+	--shadow-DEFAULT: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+	--shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+	--shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+	--shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+	--shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+	--shadow-inner: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
+	--shadow-none: none;
 
-  /* Font families */
-  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --font-mono: 'JetBrains Mono', 'Fira Code', Menlo, Monaco, Consolas, monospace;
+	/* Font families */
+	--font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+	--font-mono: 'JetBrains Mono', 'Fira Code', Menlo, Monaco, Consolas, monospace;
 
-  /* Animations */
-  --animate-spin-slow: spin 3s linear infinite;
-  --animate-pulse-slow: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  --animate-bounce-slow: bounce 2s infinite;
-  --animate-fade-in: fadeIn 0.2s ease-out;
-  --animate-fade-out: fadeOut 0.2s ease-in;
-  --animate-slide-in: slideIn 0.2s ease-out;
-  --animate-slide-out: slideOut 0.2s ease-in;
+	/* Animations */
+	--animate-spin-slow: spin 3s linear infinite;
+	--animate-pulse-slow: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+	--animate-bounce-slow: bounce 2s infinite;
+	--animate-fade-in: fadeIn 0.2s ease-out;
+	--animate-fade-out: fadeOut 0.2s ease-in;
+	--animate-slide-in: slideIn 0.2s ease-out;
+	--animate-slide-out: slideOut 0.2s ease-in;
 }
 
 /* ===== Keyframes ===== */
 @keyframes fadeIn {
-  0% { opacity: 0; }
-  100% { opacity: 1; }
+	0% { opacity: 0; }
+	100% { opacity: 1; }
 }
-
 @keyframes fadeOut {
-  0% { opacity: 1; }
-  100% { opacity: 0; }
+	0% { opacity: 1; }
+	100% { opacity: 0; }
 }
-
 @keyframes slideIn {
-  0% { transform: translateY(-10px); opacity: 0; }
-  100% { transform: translateY(0); opacity: 1; }
+	0% { transform: translateY(-10px); opacity: 0; }
+	100% { transform: translateY(0); opacity: 1; }
 }
-
 @keyframes slideOut {
-  0% { transform: translateY(0); opacity: 1; }
-  100% { transform: translateY(-10px); opacity: 0; }
+	0% { transform: translateY(0); opacity: 1; }
+	100% { transform: translateY(-10px); opacity: 0; }
 }
 
 /* ===== Default Theme (Lume Light) ===== */
 :root {
-  /* Base theme values - these are referenced by @theme inline */
-  --theme-primary: hsl(47 95% 58%);
-  --theme-primary-foreground: hsl(0 0% 0%);
-  --theme-secondary: hsl(47 100% 41%);
-  --theme-secondary-foreground: hsl(0 0% 0%);
-  --theme-background: hsl(0 0% 87%);
-  --theme-foreground: hsl(0 0% 17%);
-  --theme-surface: hsl(0 0% 100%);
-  --theme-surface-hover: hsl(0 0% 96%);
-  --theme-surface-elevated: hsl(0 0% 100%);
-  /* Elevation system - progressively lighter surfaces for overlays */
-  --theme-surface-elevated-1: hsl(0 0% 100%);
-  --theme-surface-elevated-2: hsl(0 0% 100%);
-  --theme-surface-elevated-3: hsl(0 0% 100%);
-  --theme-muted: hsl(0 0% 90%);
-  --theme-muted-foreground: hsl(0 0% 40%);
-  --theme-border: hsl(0 0% 90%);
-  --theme-border-strong: hsl(0 0% 80%);
-  --theme-error: hsl(6 78% 57%);
-  --theme-success: hsl(145 63% 42%);
-  --theme-warning: hsl(36 100% 50%);
-  --theme-input: hsl(0 0% 100%);
-  --theme-ring: hsl(47 95% 58%);
+	--color-primary: 47 95% 58%;
+	--color-primary-foreground: 0 0% 0%;
+	--color-secondary: 47 100% 41%;
+	--color-secondary-foreground: 0 0% 0%;
+	--color-background: 0 0% 87%;
+	--color-foreground: 0 0% 17%;
+	--color-surface: 0 0% 100%;
+	--color-surface-hover: 0 0% 96%;
+	--color-surface-elevated: 0 0% 100%;
+	--color-surface-elevated-1: 0 0% 100%;
+	--color-surface-elevated-2: 0 0% 100%;
+	--color-surface-elevated-3: 0 0% 100%;
+	--color-muted: 0 0% 90%;
+	--color-muted-foreground: 0 0% 40%;
+	--color-border: 0 0% 90%;
+	--color-border-strong: 0 0% 80%;
+	--color-error: 6 78% 57%;
+	--color-success: 145 63% 42%;
+	--color-warning: 36 100% 50%;
+	--color-input: 0 0% 100%;
+	--color-ring: 47 95% 58%;
+	--color-card: 0 0% 100%;
+	--color-card-foreground: 0 0% 17%;
+	--color-accent: 0 0% 96%;
+	--color-accent-foreground: 0 0% 17%;
 
-  /* ShadCN-style aliases */
-  --theme-card: hsl(0 0% 100%);
-  --theme-card-foreground: hsl(0 0% 17%);
-  --theme-accent: hsl(0 0% 96%);
-  --theme-accent-foreground: hsl(0 0% 17%);
-
-  /* Legacy aliases */
-  --theme-content: hsl(0 0% 100%);
-  --theme-content-hover: hsl(0 0% 96%);
-  --theme-content-page: hsl(0 0% 87%);
-  --theme-menu: hsl(0 0% 90%);
-  --theme-menu-hover: hsl(0 0% 96%);
-
-  /* Border radius */
-  --radius-sm: 0.25rem;
-  --radius: 0.375rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
-  --radius-xl: 1rem;
-  --radius-2xl: 1.5rem;
-  --radius-3xl: 2rem;
-
-  /* ShadCN legacy aliases (HSL components for hsl(var()) usage) */
-  --background: 0 0% 87%;
-  --foreground: 0 0% 17%;
-  --primary: 47 95% 58%;
-  --primary-foreground: 0 0% 0%;
-  --secondary: 47 100% 41%;
-  --secondary-foreground: 0 0% 0%;
-  --muted: 0 0% 90%;
-  --muted-foreground: 0 0% 40%;
-  --border: 0 0% 90%;
-  --input: 0 0% 100%;
-  --ring: 47 95% 58%;
-  --card: 0 0% 100%;
-  --card-foreground: 0 0% 17%;
-  --accent: 0 0% 96%;
-  --accent-foreground: 0 0% 17%;
+	/* Border radius (legacy alias used by component utilities below) */
+	--radius-sm: 0.25rem;
+	--radius: 0.375rem;
+	--radius-md: 0.5rem;
+	--radius-lg: 0.75rem;
+	--radius-xl: 1rem;
+	--radius-2xl: 1.5rem;
+	--radius-3xl: 2rem;
 }
 
-/* ===== Dark Mode ===== */
+/* ===== Default Dark Mode ===== */
 .dark,
 :root.dark {
-  /* Override theme values for dark mode */
-  --theme-primary: hsl(47 95% 58%);
-  --theme-primary-foreground: hsl(0 0% 0%);
-  --theme-secondary: hsl(47 70% 29%);
-  --theme-secondary-foreground: hsl(0 0% 100%);
-  --theme-background: hsl(0 0% 6%);
-  --theme-foreground: hsl(0 0% 100%);
-  --theme-surface: hsl(0 0% 12%);
-  --theme-surface-hover: hsl(0 0% 16%);
-  --theme-surface-elevated: hsl(0 0% 14%);
-  /* Elevation system - progressively lighter surfaces for overlays */
-  --theme-surface-elevated-1: hsl(0 0% 16%);
-  --theme-surface-elevated-2: hsl(0 0% 20%);
-  --theme-surface-elevated-3: hsl(0 0% 24%);
-  --theme-muted: hsl(0 0% 20%);
-  --theme-muted-foreground: hsl(0 0% 60%);
-  --theme-border: hsl(0 0% 26%);
-  --theme-border-strong: hsl(0 0% 35%);
-  --theme-error: hsl(6 78% 57%);
-  --theme-success: hsl(145 63% 49%);
-  --theme-warning: hsl(48 100% 50%);
-  --theme-input: hsl(0 0% 14%);
-  --theme-ring: hsl(47 95% 58%);
-
-  /* ShadCN-style aliases */
-  --theme-card: hsl(0 0% 12%);
-  --theme-card-foreground: hsl(0 0% 100%);
-  --theme-accent: hsl(0 0% 16%);
-  --theme-accent-foreground: hsl(0 0% 100%);
-
-  /* Legacy aliases */
-  --theme-content: hsl(0 0% 12%);
-  --theme-content-hover: hsl(0 0% 16%);
-  --theme-content-page: hsl(0 0% 6%);
-  --theme-menu: hsl(0 0% 20%);
-  --theme-menu-hover: hsl(0 0% 16%);
-
-  /* ShadCN legacy aliases (HSL components for hsl(var()) usage) */
-  --background: 0 0% 6%;
-  --foreground: 0 0% 100%;
-  --primary: 47 95% 58%;
-  --primary-foreground: 0 0% 0%;
-  --secondary: 47 70% 29%;
-  --secondary-foreground: 0 0% 100%;
-  --muted: 0 0% 20%;
-  --muted-foreground: 0 0% 60%;
-  --border: 0 0% 26%;
-  --input: 0 0% 14%;
-  --ring: 47 95% 58%;
-  --card: 0 0% 12%;
-  --card-foreground: 0 0% 100%;
-  --accent: 0 0% 16%;
-  --accent-foreground: 0 0% 100%;
+	--color-primary: 47 95% 58%;
+	--color-primary-foreground: 0 0% 0%;
+	--color-secondary: 47 70% 29%;
+	--color-secondary-foreground: 0 0% 100%;
+	--color-background: 0 0% 6%;
+	--color-foreground: 0 0% 100%;
+	--color-surface: 0 0% 12%;
+	--color-surface-hover: 0 0% 16%;
+	--color-surface-elevated: 0 0% 14%;
+	--color-surface-elevated-1: 0 0% 16%;
+	--color-surface-elevated-2: 0 0% 20%;
+	--color-surface-elevated-3: 0 0% 24%;
+	--color-muted: 0 0% 20%;
+	--color-muted-foreground: 0 0% 60%;
+	--color-border: 0 0% 26%;
+	--color-border-strong: 0 0% 35%;
+	--color-error: 6 78% 57%;
+	--color-success: 145 63% 49%;
+	--color-warning: 48 100% 50%;
+	--color-input: 0 0% 14%;
+	--color-ring: 47 95% 58%;
+	--color-card: 0 0% 12%;
+	--color-card-foreground: 0 0% 100%;
+	--color-accent: 0 0% 16%;
+	--color-accent-foreground: 0 0% 100%;
 }
 
 /* ===== Lume Theme (Gold) ===== */
-[data-theme="lume"] {
-  --theme-primary: hsl(47 95% 58%);
-  --theme-primary-foreground: hsl(0 0% 0%);
-  --theme-secondary: hsl(47 100% 41%);
-  --theme-secondary-foreground: hsl(0 0% 0%);
-  --theme-background: hsl(0 0% 87%);
-  --theme-foreground: hsl(0 0% 17%);
-  --theme-surface: hsl(0 0% 100%);
-  --theme-surface-hover: hsl(0 0% 96%);
-  --theme-surface-elevated: hsl(0 0% 100%);
-  --theme-surface-elevated-1: hsl(0 0% 100%);
-  --theme-surface-elevated-2: hsl(0 0% 100%);
-  --theme-surface-elevated-3: hsl(0 0% 100%);
-  --theme-muted: hsl(0 0% 90%);
-  --theme-muted-foreground: hsl(0 0% 40%);
-  --theme-border: hsl(0 0% 90%);
-  --theme-border-strong: hsl(0 0% 80%);
-  --theme-error: hsl(6 78% 57%);
-  --theme-success: hsl(145 63% 42%);
-  --theme-warning: hsl(36 100% 50%);
-  --theme-input: hsl(0 0% 100%);
-  --theme-ring: hsl(47 95% 58%);
-  --theme-card: hsl(0 0% 100%);
-  --theme-card-foreground: hsl(0 0% 17%);
-  --theme-accent: hsl(0 0% 96%);
-  --theme-accent-foreground: hsl(0 0% 17%);
-  --theme-content: hsl(0 0% 100%);
-  --theme-content-hover: hsl(0 0% 96%);
-  --theme-content-page: hsl(0 0% 87%);
-  --theme-menu: hsl(0 0% 90%);
-  --theme-menu-hover: hsl(0 0% 96%);
+[data-theme='lume'] {
+	--color-primary: 47 95% 58%;
+	--color-primary-foreground: 0 0% 0%;
+	--color-secondary: 47 100% 41%;
+	--color-secondary-foreground: 0 0% 0%;
+	--color-background: 0 0% 87%;
+	--color-foreground: 0 0% 17%;
+	--color-surface: 0 0% 100%;
+	--color-surface-hover: 0 0% 96%;
+	--color-surface-elevated: 0 0% 100%;
+	--color-surface-elevated-1: 0 0% 100%;
+	--color-surface-elevated-2: 0 0% 100%;
+	--color-surface-elevated-3: 0 0% 100%;
+	--color-muted: 0 0% 90%;
+	--color-muted-foreground: 0 0% 40%;
+	--color-border: 0 0% 90%;
+	--color-border-strong: 0 0% 80%;
+	--color-error: 6 78% 57%;
+	--color-success: 145 63% 42%;
+	--color-warning: 36 100% 50%;
+	--color-input: 0 0% 100%;
+	--color-ring: 47 95% 58%;
+	--color-card: 0 0% 100%;
+	--color-card-foreground: 0 0% 17%;
+	--color-accent: 0 0% 96%;
+	--color-accent-foreground: 0 0% 17%;
 }
 
-[data-theme="lume"].dark,
-.dark[data-theme="lume"] {
-  --theme-primary: hsl(47 95% 58%);
-  --theme-primary-foreground: hsl(0 0% 0%);
-  --theme-secondary: hsl(47 70% 29%);
-  --theme-secondary-foreground: hsl(0 0% 100%);
-  --theme-background: hsl(0 0% 6%);
-  --theme-foreground: hsl(0 0% 100%);
-  --theme-surface: hsl(0 0% 12%);
-  --theme-surface-hover: hsl(0 0% 16%);
-  --theme-surface-elevated: hsl(0 0% 14%);
-  --theme-surface-elevated-1: hsl(0 0% 16%);
-  --theme-surface-elevated-2: hsl(0 0% 20%);
-  --theme-surface-elevated-3: hsl(0 0% 24%);
-  --theme-muted: hsl(0 0% 20%);
-  --theme-muted-foreground: hsl(0 0% 60%);
-  --theme-border: hsl(0 0% 26%);
-  --theme-border-strong: hsl(0 0% 35%);
-  --theme-error: hsl(6 78% 57%);
-  --theme-success: hsl(145 63% 49%);
-  --theme-warning: hsl(48 100% 50%);
-  --theme-input: hsl(0 0% 14%);
-  --theme-ring: hsl(47 95% 58%);
-  --theme-card: hsl(0 0% 12%);
-  --theme-card-foreground: hsl(0 0% 100%);
-  --theme-accent: hsl(0 0% 16%);
-  --theme-accent-foreground: hsl(0 0% 100%);
-  --theme-content: hsl(0 0% 12%);
-  --theme-content-hover: hsl(0 0% 16%);
-  --theme-content-page: hsl(0 0% 6%);
-  --theme-menu: hsl(0 0% 20%);
-  --theme-menu-hover: hsl(0 0% 16%);
+[data-theme='lume'].dark,
+.dark[data-theme='lume'] {
+	--color-primary: 47 95% 58%;
+	--color-primary-foreground: 0 0% 0%;
+	--color-secondary: 47 70% 29%;
+	--color-secondary-foreground: 0 0% 100%;
+	--color-background: 0 0% 6%;
+	--color-foreground: 0 0% 100%;
+	--color-surface: 0 0% 12%;
+	--color-surface-hover: 0 0% 16%;
+	--color-surface-elevated: 0 0% 14%;
+	--color-surface-elevated-1: 0 0% 16%;
+	--color-surface-elevated-2: 0 0% 20%;
+	--color-surface-elevated-3: 0 0% 24%;
+	--color-muted: 0 0% 20%;
+	--color-muted-foreground: 0 0% 60%;
+	--color-border: 0 0% 26%;
+	--color-border-strong: 0 0% 35%;
+	--color-error: 6 78% 57%;
+	--color-success: 145 63% 49%;
+	--color-warning: 48 100% 50%;
+	--color-input: 0 0% 14%;
+	--color-ring: 47 95% 58%;
+	--color-card: 0 0% 12%;
+	--color-card-foreground: 0 0% 100%;
+	--color-accent: 0 0% 16%;
+	--color-accent-foreground: 0 0% 100%;
 }
 
 /* ===== Nature Theme (Green) ===== */
-[data-theme="nature"] {
-  --theme-primary: hsl(122 39% 49%);
-  --theme-primary-foreground: hsl(0 0% 100%);
-  --theme-secondary: hsl(122 38% 63%);
-  --theme-secondary-foreground: hsl(0 0% 0%);
-  --theme-background: hsl(80 33% 97%);
-  --theme-foreground: hsl(122 56% 24%);
-  --theme-surface: hsl(0 0% 100%);
-  --theme-surface-hover: hsl(120 25% 95%);
-  --theme-surface-elevated: hsl(0 0% 100%);
-  --theme-surface-elevated-1: hsl(0 0% 100%);
-  --theme-surface-elevated-2: hsl(0 0% 100%);
-  --theme-surface-elevated-3: hsl(0 0% 100%);
-  --theme-muted: hsl(120 25% 95%);
-  --theme-muted-foreground: hsl(122 20% 40%);
-  --theme-border: hsl(120 25% 91%);
-  --theme-border-strong: hsl(120 26% 79%);
-  --theme-error: hsl(0 65% 67%);
-  --theme-success: hsl(122 39% 49%);
-  --theme-warning: hsl(36 100% 50%);
-  --theme-input: hsl(0 0% 100%);
-  --theme-ring: hsl(122 39% 49%);
-  --theme-card: hsl(0 0% 100%);
-  --theme-card-foreground: hsl(122 56% 24%);
-  --theme-accent: hsl(120 25% 95%);
-  --theme-accent-foreground: hsl(122 56% 24%);
-  --theme-content: hsl(0 0% 100%);
-  --theme-content-hover: hsl(120 25% 95%);
-  --theme-content-page: hsl(80 33% 97%);
-  --theme-menu: hsl(120 25% 95%);
-  --theme-menu-hover: hsl(120 25% 95%);
+[data-theme='nature'] {
+	--color-primary: 122 39% 49%;
+	--color-primary-foreground: 0 0% 100%;
+	--color-secondary: 122 38% 63%;
+	--color-secondary-foreground: 0 0% 0%;
+	--color-background: 80 33% 97%;
+	--color-foreground: 122 56% 24%;
+	--color-surface: 0 0% 100%;
+	--color-surface-hover: 120 25% 95%;
+	--color-surface-elevated: 0 0% 100%;
+	--color-surface-elevated-1: 0 0% 100%;
+	--color-surface-elevated-2: 0 0% 100%;
+	--color-surface-elevated-3: 0 0% 100%;
+	--color-muted: 120 25% 95%;
+	--color-muted-foreground: 122 20% 40%;
+	--color-border: 120 25% 91%;
+	--color-border-strong: 120 26% 79%;
+	--color-error: 0 65% 67%;
+	--color-success: 122 39% 49%;
+	--color-warning: 36 100% 50%;
+	--color-input: 0 0% 100%;
+	--color-ring: 122 39% 49%;
+	--color-card: 0 0% 100%;
+	--color-card-foreground: 122 56% 24%;
+	--color-accent: 120 25% 95%;
+	--color-accent-foreground: 122 56% 24%;
 }
 
-[data-theme="nature"].dark,
-.dark[data-theme="nature"] {
-  --theme-primary: hsl(122 39% 49%);
-  --theme-primary-foreground: hsl(0 0% 100%);
-  --theme-secondary: hsl(122 30% 35%);
-  --theme-secondary-foreground: hsl(0 0% 100%);
-  --theme-background: hsl(0 0% 7%);
-  --theme-foreground: hsl(0 0% 100%);
-  --theme-surface: hsl(120 10% 12%);
-  --theme-surface-hover: hsl(120 10% 16%);
-  --theme-surface-elevated: hsl(120 10% 14%);
-  --theme-surface-elevated-1: hsl(120 10% 16%);
-  --theme-surface-elevated-2: hsl(120 10% 20%);
-  --theme-surface-elevated-3: hsl(120 10% 24%);
-  --theme-muted: hsl(120 10% 20%);
-  --theme-muted-foreground: hsl(120 10% 60%);
-  --theme-border: hsl(120 10% 25%);
-  --theme-border-strong: hsl(120 10% 35%);
-  --theme-error: hsl(0 65% 57%);
-  --theme-success: hsl(122 50% 55%);
-  --theme-warning: hsl(48 100% 50%);
-  --theme-input: hsl(120 10% 14%);
-  --theme-ring: hsl(122 39% 49%);
-  --theme-card: hsl(120 10% 12%);
-  --theme-card-foreground: hsl(0 0% 100%);
-  --theme-accent: hsl(120 10% 16%);
-  --theme-accent-foreground: hsl(0 0% 100%);
-  --theme-content: hsl(120 10% 12%);
-  --theme-content-hover: hsl(120 10% 16%);
-  --theme-content-page: hsl(0 0% 7%);
-  --theme-menu: hsl(120 10% 20%);
-  --theme-menu-hover: hsl(120 10% 16%);
+[data-theme='nature'].dark,
+.dark[data-theme='nature'] {
+	--color-primary: 122 39% 49%;
+	--color-primary-foreground: 0 0% 100%;
+	--color-secondary: 122 30% 35%;
+	--color-secondary-foreground: 0 0% 100%;
+	--color-background: 0 0% 7%;
+	--color-foreground: 0 0% 100%;
+	--color-surface: 120 10% 12%;
+	--color-surface-hover: 120 10% 16%;
+	--color-surface-elevated: 120 10% 14%;
+	--color-surface-elevated-1: 120 10% 16%;
+	--color-surface-elevated-2: 120 10% 20%;
+	--color-surface-elevated-3: 120 10% 24%;
+	--color-muted: 120 10% 20%;
+	--color-muted-foreground: 120 10% 60%;
+	--color-border: 120 10% 25%;
+	--color-border-strong: 120 10% 35%;
+	--color-error: 0 65% 57%;
+	--color-success: 122 50% 55%;
+	--color-warning: 48 100% 50%;
+	--color-input: 120 10% 14%;
+	--color-ring: 122 39% 49%;
+	--color-card: 120 10% 12%;
+	--color-card-foreground: 0 0% 100%;
+	--color-accent: 120 10% 16%;
+	--color-accent-foreground: 0 0% 100%;
 }
 
 /* ===== Stone Theme (Blue Gray) ===== */
-[data-theme="stone"] {
-  --theme-primary: hsl(200 18% 46%);
-  --theme-primary-foreground: hsl(0 0% 100%);
-  --theme-secondary: hsl(200 15% 62%);
-  --theme-secondary-foreground: hsl(0 0% 0%);
-  --theme-background: hsl(210 17% 97%);
-  --theme-foreground: hsl(200 19% 18%);
-  --theme-surface: hsl(0 0% 100%);
-  --theme-surface-hover: hsl(200 10% 94%);
-  --theme-surface-elevated: hsl(0 0% 100%);
-  --theme-surface-elevated-1: hsl(0 0% 100%);
-  --theme-surface-elevated-2: hsl(0 0% 100%);
-  --theme-surface-elevated-3: hsl(0 0% 100%);
-  --theme-muted: hsl(200 10% 94%);
-  --theme-muted-foreground: hsl(200 10% 45%);
-  --theme-border: hsl(200 10% 88%);
-  --theme-border-strong: hsl(200 12% 75%);
-  --theme-error: hsl(4 90% 63%);
-  --theme-success: hsl(145 63% 42%);
-  --theme-warning: hsl(36 100% 50%);
-  --theme-input: hsl(0 0% 100%);
-  --theme-ring: hsl(200 18% 46%);
-  --theme-card: hsl(0 0% 100%);
-  --theme-card-foreground: hsl(200 19% 18%);
-  --theme-accent: hsl(200 10% 94%);
-  --theme-accent-foreground: hsl(200 19% 18%);
-  --theme-content: hsl(0 0% 100%);
-  --theme-content-hover: hsl(200 10% 94%);
-  --theme-content-page: hsl(210 17% 97%);
-  --theme-menu: hsl(200 10% 94%);
-  --theme-menu-hover: hsl(200 10% 94%);
+[data-theme='stone'] {
+	--color-primary: 200 18% 46%;
+	--color-primary-foreground: 0 0% 100%;
+	--color-secondary: 200 15% 62%;
+	--color-secondary-foreground: 0 0% 0%;
+	--color-background: 210 17% 97%;
+	--color-foreground: 200 19% 18%;
+	--color-surface: 0 0% 100%;
+	--color-surface-hover: 200 10% 94%;
+	--color-surface-elevated: 0 0% 100%;
+	--color-surface-elevated-1: 0 0% 100%;
+	--color-surface-elevated-2: 0 0% 100%;
+	--color-surface-elevated-3: 0 0% 100%;
+	--color-muted: 200 10% 94%;
+	--color-muted-foreground: 200 10% 45%;
+	--color-border: 200 10% 88%;
+	--color-border-strong: 200 12% 75%;
+	--color-error: 4 90% 63%;
+	--color-success: 145 63% 42%;
+	--color-warning: 36 100% 50%;
+	--color-input: 0 0% 100%;
+	--color-ring: 200 18% 46%;
+	--color-card: 0 0% 100%;
+	--color-card-foreground: 200 19% 18%;
+	--color-accent: 200 10% 94%;
+	--color-accent-foreground: 200 19% 18%;
 }
 
-[data-theme="stone"].dark,
-.dark[data-theme="stone"] {
-  --theme-primary: hsl(200 15% 52%);
-  --theme-primary-foreground: hsl(0 0% 0%);
-  --theme-secondary: hsl(200 12% 35%);
-  --theme-secondary-foreground: hsl(0 0% 100%);
-  --theme-background: hsl(0 0% 7%);
-  --theme-foreground: hsl(0 0% 100%);
-  --theme-surface: hsl(200 10% 12%);
-  --theme-surface-hover: hsl(200 10% 16%);
-  --theme-surface-elevated: hsl(200 10% 14%);
-  --theme-surface-elevated-1: hsl(200 10% 16%);
-  --theme-surface-elevated-2: hsl(200 10% 20%);
-  --theme-surface-elevated-3: hsl(200 10% 24%);
-  --theme-muted: hsl(200 10% 20%);
-  --theme-muted-foreground: hsl(200 10% 60%);
-  --theme-border: hsl(200 10% 25%);
-  --theme-border-strong: hsl(200 10% 35%);
-  --theme-error: hsl(4 90% 58%);
-  --theme-success: hsl(145 63% 49%);
-  --theme-warning: hsl(48 100% 50%);
-  --theme-input: hsl(200 10% 14%);
-  --theme-ring: hsl(200 15% 52%);
-  --theme-card: hsl(200 10% 12%);
-  --theme-card-foreground: hsl(0 0% 100%);
-  --theme-accent: hsl(200 10% 16%);
-  --theme-accent-foreground: hsl(0 0% 100%);
-  --theme-content: hsl(200 10% 12%);
-  --theme-content-hover: hsl(200 10% 16%);
-  --theme-content-page: hsl(0 0% 7%);
-  --theme-menu: hsl(200 10% 20%);
-  --theme-menu-hover: hsl(200 10% 16%);
+[data-theme='stone'].dark,
+.dark[data-theme='stone'] {
+	--color-primary: 200 15% 52%;
+	--color-primary-foreground: 0 0% 0%;
+	--color-secondary: 200 12% 35%;
+	--color-secondary-foreground: 0 0% 100%;
+	--color-background: 0 0% 7%;
+	--color-foreground: 0 0% 100%;
+	--color-surface: 200 10% 12%;
+	--color-surface-hover: 200 10% 16%;
+	--color-surface-elevated: 200 10% 14%;
+	--color-surface-elevated-1: 200 10% 16%;
+	--color-surface-elevated-2: 200 10% 20%;
+	--color-surface-elevated-3: 200 10% 24%;
+	--color-muted: 200 10% 20%;
+	--color-muted-foreground: 200 10% 60%;
+	--color-border: 200 10% 25%;
+	--color-border-strong: 200 10% 35%;
+	--color-error: 4 90% 58%;
+	--color-success: 145 63% 49%;
+	--color-warning: 48 100% 50%;
+	--color-input: 200 10% 14%;
+	--color-ring: 200 15% 52%;
+	--color-card: 200 10% 12%;
+	--color-card-foreground: 0 0% 100%;
+	--color-accent: 200 10% 16%;
+	--color-accent-foreground: 0 0% 100%;
 }
 
 /* ===== Ocean Theme (Blue) ===== */
-[data-theme="ocean"] {
-  --theme-primary: hsl(199 98% 45%);
-  --theme-primary-foreground: hsl(0 0% 100%);
-  --theme-secondary: hsl(199 92% 64%);
-  --theme-secondary-foreground: hsl(0 0% 0%);
-  --theme-background: hsl(199 100% 97%);
-  --theme-foreground: hsl(199 100% 18%);
-  --theme-surface: hsl(0 0% 100%);
-  --theme-surface-hover: hsl(199 100% 94%);
-  --theme-surface-elevated: hsl(0 0% 100%);
-  --theme-surface-elevated-1: hsl(0 0% 100%);
-  --theme-surface-elevated-2: hsl(0 0% 100%);
-  --theme-surface-elevated-3: hsl(0 0% 100%);
-  --theme-muted: hsl(199 100% 94%);
-  --theme-muted-foreground: hsl(199 50% 40%);
-  --theme-border: hsl(199 71% 87%);
-  --theme-border-strong: hsl(199 79% 76%);
-  --theme-error: hsl(4 90% 63%);
-  --theme-success: hsl(145 63% 42%);
-  --theme-warning: hsl(36 100% 50%);
-  --theme-input: hsl(0 0% 100%);
-  --theme-ring: hsl(199 98% 45%);
-  --theme-card: hsl(0 0% 100%);
-  --theme-card-foreground: hsl(199 100% 18%);
-  --theme-accent: hsl(199 100% 94%);
-  --theme-accent-foreground: hsl(199 100% 18%);
-  --theme-content: hsl(0 0% 100%);
-  --theme-content-hover: hsl(199 100% 94%);
-  --theme-content-page: hsl(199 100% 97%);
-  --theme-menu: hsl(199 100% 94%);
-  --theme-menu-hover: hsl(199 100% 94%);
+[data-theme='ocean'] {
+	--color-primary: 199 98% 45%;
+	--color-primary-foreground: 0 0% 100%;
+	--color-secondary: 199 92% 64%;
+	--color-secondary-foreground: 0 0% 0%;
+	--color-background: 199 100% 97%;
+	--color-foreground: 199 100% 18%;
+	--color-surface: 0 0% 100%;
+	--color-surface-hover: 199 100% 94%;
+	--color-surface-elevated: 0 0% 100%;
+	--color-surface-elevated-1: 0 0% 100%;
+	--color-surface-elevated-2: 0 0% 100%;
+	--color-surface-elevated-3: 0 0% 100%;
+	--color-muted: 199 100% 94%;
+	--color-muted-foreground: 199 50% 40%;
+	--color-border: 199 71% 87%;
+	--color-border-strong: 199 79% 76%;
+	--color-error: 4 90% 63%;
+	--color-success: 145 63% 42%;
+	--color-warning: 36 100% 50%;
+	--color-input: 0 0% 100%;
+	--color-ring: 199 98% 45%;
+	--color-card: 0 0% 100%;
+	--color-card-foreground: 199 100% 18%;
+	--color-accent: 199 100% 94%;
+	--color-accent-foreground: 199 100% 18%;
 }
 
-[data-theme="ocean"].dark,
-.dark[data-theme="ocean"] {
-  --theme-primary: hsl(199 98% 48%);
-  --theme-primary-foreground: hsl(0 0% 0%);
-  --theme-secondary: hsl(199 60% 35%);
-  --theme-secondary-foreground: hsl(0 0% 100%);
-  --theme-background: hsl(0 0% 7%);
-  --theme-foreground: hsl(0 0% 100%);
-  --theme-surface: hsl(199 30% 12%);
-  --theme-surface-hover: hsl(199 30% 16%);
-  --theme-surface-elevated: hsl(199 30% 14%);
-  --theme-surface-elevated-1: hsl(199 30% 16%);
-  --theme-surface-elevated-2: hsl(199 30% 20%);
-  --theme-surface-elevated-3: hsl(199 30% 24%);
-  --theme-muted: hsl(199 20% 20%);
-  --theme-muted-foreground: hsl(199 20% 60%);
-  --theme-border: hsl(199 20% 25%);
-  --theme-border-strong: hsl(199 20% 35%);
-  --theme-error: hsl(4 90% 58%);
-  --theme-success: hsl(145 63% 49%);
-  --theme-warning: hsl(48 100% 50%);
-  --theme-input: hsl(199 30% 14%);
-  --theme-ring: hsl(199 98% 48%);
-  --theme-card: hsl(199 30% 12%);
-  --theme-card-foreground: hsl(0 0% 100%);
-  --theme-accent: hsl(199 30% 16%);
-  --theme-accent-foreground: hsl(0 0% 100%);
-  --theme-content: hsl(199 30% 12%);
-  --theme-content-hover: hsl(199 30% 16%);
-  --theme-content-page: hsl(0 0% 7%);
-  --theme-menu: hsl(199 20% 20%);
-  --theme-menu-hover: hsl(199 30% 16%);
+[data-theme='ocean'].dark,
+.dark[data-theme='ocean'] {
+	--color-primary: 199 98% 48%;
+	--color-primary-foreground: 0 0% 0%;
+	--color-secondary: 199 60% 35%;
+	--color-secondary-foreground: 0 0% 100%;
+	--color-background: 0 0% 7%;
+	--color-foreground: 0 0% 100%;
+	--color-surface: 199 30% 12%;
+	--color-surface-hover: 199 30% 16%;
+	--color-surface-elevated: 199 30% 14%;
+	--color-surface-elevated-1: 199 30% 16%;
+	--color-surface-elevated-2: 199 30% 20%;
+	--color-surface-elevated-3: 199 30% 24%;
+	--color-muted: 199 20% 20%;
+	--color-muted-foreground: 199 20% 60%;
+	--color-border: 199 20% 25%;
+	--color-border-strong: 199 20% 35%;
+	--color-error: 4 90% 58%;
+	--color-success: 145 63% 49%;
+	--color-warning: 48 100% 50%;
+	--color-input: 199 30% 14%;
+	--color-ring: 199 98% 48%;
+	--color-card: 199 30% 12%;
+	--color-card-foreground: 0 0% 100%;
+	--color-accent: 199 30% 16%;
+	--color-accent-foreground: 0 0% 100%;
 }
 
-/* ===== Dark mode via media query (fallback) ===== */
+/* ===== Dark mode via media query (fallback for users without explicit preference) ===== */
 @media (prefers-color-scheme: dark) {
-  :root:not(.dark):not([data-theme]) {
-    --theme-primary: hsl(47 95% 58%);
-    --theme-primary-foreground: hsl(0 0% 0%);
-    --theme-secondary: hsl(47 70% 29%);
-    --theme-secondary-foreground: hsl(0 0% 100%);
-    --theme-background: hsl(0 0% 6%);
-    --theme-foreground: hsl(0 0% 100%);
-    --theme-surface: hsl(0 0% 12%);
-    --theme-surface-hover: hsl(0 0% 16%);
-    --theme-surface-elevated: hsl(0 0% 14%);
-    --theme-surface-elevated-1: hsl(0 0% 16%);
-    --theme-surface-elevated-2: hsl(0 0% 20%);
-    --theme-surface-elevated-3: hsl(0 0% 24%);
-    --theme-muted: hsl(0 0% 20%);
-    --theme-muted-foreground: hsl(0 0% 60%);
-    --theme-border: hsl(0 0% 26%);
-    --theme-border-strong: hsl(0 0% 35%);
-    --theme-error: hsl(6 78% 57%);
-    --theme-success: hsl(145 63% 49%);
-    --theme-warning: hsl(48 100% 50%);
-    --theme-input: hsl(0 0% 14%);
-    --theme-ring: hsl(47 95% 58%);
-    --theme-card: hsl(0 0% 12%);
-    --theme-card-foreground: hsl(0 0% 100%);
-    --theme-accent: hsl(0 0% 16%);
-    --theme-accent-foreground: hsl(0 0% 100%);
-    --theme-content: hsl(0 0% 12%);
-    --theme-content-hover: hsl(0 0% 16%);
-    --theme-content-page: hsl(0 0% 6%);
-    --theme-menu: hsl(0 0% 20%);
-    --theme-menu-hover: hsl(0 0% 16%);
-  }
+	:root:not(.dark):not([data-theme]) {
+		--color-primary: 47 95% 58%;
+		--color-primary-foreground: 0 0% 0%;
+		--color-secondary: 47 70% 29%;
+		--color-secondary-foreground: 0 0% 100%;
+		--color-background: 0 0% 6%;
+		--color-foreground: 0 0% 100%;
+		--color-surface: 0 0% 12%;
+		--color-surface-hover: 0 0% 16%;
+		--color-surface-elevated: 0 0% 14%;
+		--color-surface-elevated-1: 0 0% 16%;
+		--color-surface-elevated-2: 0 0% 20%;
+		--color-surface-elevated-3: 0 0% 24%;
+		--color-muted: 0 0% 20%;
+		--color-muted-foreground: 0 0% 60%;
+		--color-border: 0 0% 26%;
+		--color-border-strong: 0 0% 35%;
+		--color-error: 6 78% 57%;
+		--color-success: 145 63% 49%;
+		--color-warning: 48 100% 50%;
+		--color-input: 0 0% 14%;
+		--color-ring: 47 95% 58%;
+		--color-card: 0 0% 12%;
+		--color-card-foreground: 0 0% 100%;
+		--color-accent: 0 0% 16%;
+		--color-accent-foreground: 0 0% 100%;
+	}
 }
 
 /* ===== Base Styles ===== */
 @layer base {
-  * {
-    border-color: var(--color-border);
-  }
+	* {
+		border-color: hsl(var(--color-border));
+	}
 
-  body {
-    background-color: var(--color-background);
-    color: var(--color-foreground);
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  }
+	body {
+		background-color: hsl(var(--color-background));
+		color: hsl(var(--color-foreground));
+		font-family: 'Inter', system-ui, -apple-system, sans-serif;
+	}
 
-  /* Smooth color transitions for theme switching */
-  html {
-    color-scheme: light;
-  }
-
-  html.dark {
-    color-scheme: dark;
-  }
+	html {
+		color-scheme: light;
+	}
+	html.dark {
+		color-scheme: dark;
+	}
 }
 
 /* ===== Component Utilities ===== */
 @layer components {
-  /* Primary Button */
-  .btn-primary {
-    background-color: var(--color-primary);
-    color: var(--color-primary-foreground);
-    padding: 0.5rem 1rem;
-    border-radius: var(--radius-md);
-    font-weight: 500;
-    transition: all 0.2s ease;
-  }
+	/* Primary Button */
+	.btn-primary {
+		background-color: hsl(var(--color-primary));
+		color: hsl(var(--color-primary-foreground));
+		padding: 0.5rem 1rem;
+		border-radius: var(--radius-md);
+		font-weight: 500;
+		transition: all 0.2s ease;
+	}
+	.btn-primary:hover {
+		filter: brightness(0.9);
+	}
+	.btn-primary:focus-visible {
+		outline: 2px solid hsl(var(--color-ring));
+		outline-offset: 2px;
+	}
 
-  .btn-primary:hover {
-    filter: brightness(0.9);
-  }
+	/* Secondary Button */
+	.btn-secondary {
+		background-color: hsl(var(--color-secondary));
+		color: hsl(var(--color-secondary-foreground));
+		padding: 0.5rem 1rem;
+		border-radius: var(--radius-md);
+		font-weight: 500;
+		transition: all 0.2s ease;
+	}
+	.btn-secondary:hover {
+		filter: brightness(0.95);
+	}
 
-  .btn-primary:focus-visible {
-    outline: 2px solid var(--color-ring);
-    outline-offset: 2px;
-  }
+	/* Ghost Button */
+	.btn-ghost {
+		background-color: transparent;
+		color: hsl(var(--color-foreground));
+		padding: 0.5rem 1rem;
+		border-radius: var(--radius-md);
+		font-weight: 500;
+		transition: all 0.2s ease;
+	}
+	.btn-ghost:hover {
+		background-color: hsl(var(--color-surface-hover));
+	}
 
-  /* Secondary Button */
-  .btn-secondary {
-    background-color: var(--color-secondary);
-    color: var(--color-secondary-foreground);
-    padding: 0.5rem 1rem;
-    border-radius: var(--radius-md);
-    font-weight: 500;
-    transition: all 0.2s ease;
-  }
+	/* Card */
+	.card {
+		background-color: hsl(var(--color-surface));
+		border: 1px solid hsl(var(--color-border));
+		border-radius: var(--radius-lg);
+		padding: 1rem;
+	}
+	.card-elevated {
+		background-color: hsl(var(--color-surface-elevated));
+		box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+	}
 
-  .btn-secondary:hover {
-    filter: brightness(0.95);
-  }
+	/* Input */
+	.input {
+		background-color: hsl(var(--color-input));
+		border: 1px solid hsl(var(--color-border));
+		border-radius: var(--radius-md);
+		padding: 0.5rem 0.75rem;
+		color: hsl(var(--color-foreground));
+		transition: border-color 0.2s ease, box-shadow 0.2s ease;
+	}
+	.input:focus {
+		border-color: hsl(var(--color-ring));
+		box-shadow: 0 0 0 2px hsl(var(--color-ring) / 0.2);
+		outline: none;
+	}
+	.input::placeholder {
+		color: hsl(var(--color-muted-foreground));
+	}
 
-  /* Ghost Button */
-  .btn-ghost {
-    background-color: transparent;
-    color: var(--color-foreground);
-    padding: 0.5rem 1rem;
-    border-radius: var(--radius-md);
-    font-weight: 500;
-    transition: all 0.2s ease;
-  }
-
-  .btn-ghost:hover {
-    background-color: var(--color-surface-hover);
-  }
-
-  /* Card */
-  .card {
-    background-color: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    padding: 1rem;
-  }
-
-  .card-elevated {
-    background-color: var(--color-surface-elevated);
-    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  }
-
-  /* Input */
-  .input {
-    background-color: var(--color-input);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    padding: 0.5rem 0.75rem;
-    color: var(--color-foreground);
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-  }
-
-  .input:focus {
-    border-color: var(--color-ring);
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-ring) 20%, transparent);
-    outline: none;
-  }
-
-  .input::placeholder {
-    color: var(--color-muted-foreground);
-  }
-
-  /* Badge */
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.25rem 0.5rem;
-    border-radius: var(--radius);
-    font-size: 0.75rem;
-    font-weight: 500;
-    background-color: var(--color-muted);
-    color: var(--color-muted-foreground);
-  }
-
-  .badge-primary {
-    background-color: color-mix(in srgb, var(--color-primary) 10%, transparent);
-    color: var(--color-primary);
-  }
-
-  .badge-success {
-    background-color: color-mix(in srgb, var(--color-success) 10%, transparent);
-    color: var(--color-success);
-  }
-
-  .badge-error {
-    background-color: color-mix(in srgb, var(--color-error) 10%, transparent);
-    color: var(--color-error);
-  }
-
-  .badge-warning {
-    background-color: color-mix(in srgb, var(--color-warning) 10%, transparent);
-    color: var(--color-warning);
-  }
+	/* Badge */
+	.badge {
+		display: inline-flex;
+		align-items: center;
+		padding: 0.25rem 0.5rem;
+		border-radius: var(--radius);
+		font-size: 0.75rem;
+		font-weight: 500;
+		background-color: hsl(var(--color-muted));
+		color: hsl(var(--color-muted-foreground));
+	}
+	.badge-primary {
+		background-color: hsl(var(--color-primary) / 0.1);
+		color: hsl(var(--color-primary));
+	}
+	.badge-success {
+		background-color: hsl(var(--color-success) / 0.1);
+		color: hsl(var(--color-success));
+	}
+	.badge-error {
+		background-color: hsl(var(--color-error) / 0.1);
+		color: hsl(var(--color-error));
+	}
+	.badge-warning {
+		background-color: hsl(var(--color-warning) / 0.1);
+		color: hsl(var(--color-warning));
+	}
 }

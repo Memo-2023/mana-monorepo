@@ -9,7 +9,7 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { loadConfig } from './config';
 import { getDb } from './db/connection';
-import { errorHandler } from './middleware/error-handler';
+import { serviceErrorHandler as errorHandler } from '@mana/shared-hono';
 import { jwtAuth } from './middleware/jwt-auth';
 import { FeedbackService } from './services/feedback';
 import { healthRoutes } from './routes/health';

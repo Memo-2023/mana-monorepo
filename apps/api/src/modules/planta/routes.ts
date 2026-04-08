@@ -7,10 +7,11 @@
  */
 
 import { Hono } from 'hono';
+import { logger, type AuthVariables } from '@mana/shared-hono';
 
 const LLM_URL = process.env.MANA_LLM_URL || 'http://localhost:3025';
 
-const routes = new Hono();
+const routes = new Hono<{ Variables: AuthVariables }>();
 
 // ─── Photo Upload (server-only: S3 storage) ─────────────────
 
@@ -38,7 +39,9 @@ routes.post('/photos/upload', async (c) => {
 			201
 		);
 	} catch (err) {
-		console.error('Upload failed:', err);
+		logger.error('planta.upload_failed', {
+			error: err instanceof Error ? err.message : String(err),
+		});
 		return c.json({ error: 'Upload failed' }, 500);
 	}
 });
@@ -81,7 +84,9 @@ routes.post('/analysis/identify', async (c) => {
 
 		return c.json(analysis);
 	} catch (err) {
-		console.error('Analysis failed:', err);
+		logger.error('planta.analysis_failed', {
+			error: err instanceof Error ? err.message : String(err),
+		});
 		return c.json({ error: 'Analysis failed' }, 500);
 	}
 });

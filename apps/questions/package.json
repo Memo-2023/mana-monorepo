@@ -2,8 +2,5 @@
 	"name": "questions",
 	"version": "0.1.0",
 	"private": true,
-	"description": "Questions app - Collect questions and research answers",
-	"scripts": {
-		"dev": "turbo run dev"
-	}
+	"description": "Questions app - Collect questions and research answers"
 }

@@ -39,6 +39,33 @@ import {
 import { sourceAppStore, passwordResetRedirectStore } from './stores';
 
 /**
+ * Single source of truth for SSO trusted origins.
+ *
+ * Better Auth rejects any cross-origin auth request whose Origin header
+ * isn't in this list — silent login failure on mis-configured apps. When
+ * adding a new top-level domain (NOT a path under mana.how), update both:
+ *
+ *   1. This array
+ *   2. The `mana-auth` `CORS_ORIGINS` env var in
+ *      `docker-compose.macmini.yml` (must be a superset of this list)
+ *
+ * `sso-config.spec.ts` enforces both invariants. The unified app under
+ * `mana.how` does NOT need per-module subdomains here — modules are routed
+ * by path on the same origin.
+ */
+export const TRUSTED_ORIGINS: string[] = [
+	// Unified app — all productivity apps live under mana.how
+	'https://mana.how',
+	'https://auth.mana.how',
+	// Separate apps (not part of the unified app)
+	'https://arcade.mana.how', // Games
+	'https://whopxl.mana.how', // Games
+	// Local development
+	'http://localhost:3001',
+	'http://localhost:5173',
+];
+
+/**
  * JWT Custom Payload Interface
  *
  * MINIMAL claims only. Organization context and credits are available via:
@@ -240,17 +267,8 @@ export function createBetterAuth(databaseUrl: string) {
 		// Better Auth will reject cross-origin requests with credentials.
 		// When adding a new app, add its production domain here AND to
 		// CORS_ORIGINS in docker-compose.macmini.yml.
-		trustedOrigins: [
-			// Unified app — all productivity apps are now under mana.how
-			'https://mana.how',
-			'https://auth.mana.how',
-			// Separate apps (not part of unified app)
-			'https://arcade.mana.how', // Games
-			'https://whopxl.mana.how', // Games
-			// Local development
-			'http://localhost:3001',
-			'http://localhost:5173',
-		],
+		// Single source of truth: TRUSTED_ORIGINS (exported below).
+		trustedOrigins: TRUSTED_ORIGINS,
 
 		// Plugins
 		plugins: [

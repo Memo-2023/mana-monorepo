@@ -4,8 +4,9 @@
  */
 
 import { Hono } from 'hono';
+import type { AuthVariables } from '@mana/shared-hono';
 
-const routes = new Hono();
+const routes = new Hono<{ Variables: AuthVariables }>();
 
 // ─── Song Upload (presigned URL) ────────────────────────────
 

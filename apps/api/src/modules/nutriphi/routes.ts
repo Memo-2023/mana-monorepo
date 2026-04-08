@@ -7,6 +7,7 @@
  */
 
 import { Hono } from 'hono';
+import { logger, type AuthVariables } from '@mana/shared-hono';
 
 const LLM_URL = process.env.MANA_LLM_URL || 'http://localhost:3025';
 
@@ -20,7 +21,7 @@ const ANALYSIS_PROMPT = `Du bist ein Ernährungsexperte. Analysiere die Mahlzeit
   "suggestions": []
 }`;
 
-const routes = new Hono();
+const routes = new Hono<{ Variables: AuthVariables }>();
 
 // ─── Photo Analysis (server-only: Gemini Vision) ────────────
 
@@ -81,7 +82,9 @@ routes.post('/analysis/photo', async (c) => {
 
 		return c.json(analysis);
 	} catch (err) {
-		console.error('Photo analysis failed:', err);
+		logger.error('nutriphi.photo_analysis_failed', {
+			error: err instanceof Error ? err.message : String(err),
+		});
 		return c.json({ error: 'Analysis failed' }, 500);
 	}
 });
@@ -115,7 +118,9 @@ routes.post('/analysis/text', async (c) => {
 
 		return c.json(analysis);
 	} catch (err) {
-		console.error('Text analysis failed:', err);
+		logger.error('nutriphi.text_analysis_failed', {
+			error: err instanceof Error ? err.message : String(err),
+		});
 		return c.json({ error: 'Analysis failed' }, 500);
 	}
 });

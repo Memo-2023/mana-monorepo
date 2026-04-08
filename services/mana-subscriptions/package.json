@@ -11,6 +11,7 @@
 		"db:seed": "bun run src/db/seed.ts"
 	},
 	"dependencies": {
+		"@mana/shared-hono": "workspace:*",
 		"hono": "^4.7.0",
 		"drizzle-orm": "^0.38.3",
 		"postgres": "^3.4.5",

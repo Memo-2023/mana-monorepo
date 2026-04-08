@@ -1,67 +1,17 @@
-# News Hub — AI News Reader & Personal Library
+# News Hub — consolidated into the unified Mana app
 
-## Architecture
+This product was migrated into the unified Mana monorepo. The legacy
+per-product `apps/news/apps/server/` and `apps/news/apps/web/` directories
+have been removed. Active code now lives in:
 
-Local-first for saved articles, Hono/Bun server for content extraction and AI feed.
+- **Backend compute routes**: [`apps/api/src/modules/news/routes.ts`](../api/src/modules/news/routes.ts) (Mozilla Readability extraction, AI feed)
+- **Frontend module** (local-first): [`apps/mana/apps/web/src/lib/modules/news/`](../mana/apps/web/src/lib/modules/news/)
+- **Web route**: [`apps/mana/apps/web/src/routes/(app)/news/`](../mana/apps/web/src/routes/(app)/news/)
+- **Landing page** (still standalone): [`apps/news/apps/landing/`](apps/landing/)
 
-```
-Browser → IndexedDB (Saved Articles, Categories)
-              ↕ sync
-         mana-sync → PostgreSQL
+For monorepo-wide patterns (auth, sync, encryption, services), see the
+[root `CLAUDE.md`](../../CLAUDE.md) and [`apps/mana/CLAUDE.md`](../mana/CLAUDE.md).
 
-Browser → Hono Server → Content Extraction (Mozilla Readability)
-                      → AI Feed (from sync_changes)
-```
-
-## Project Structure
-
-```
-apps/news/
-├── apps/
-│   ├── web/        # SvelteKit web app (local-first)
-│   ├── server/     # Hono/Bun (extraction, feed API)
-│   └── landing/    # Astro marketing page
-└── package.json
-```
-
-## Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| **Web** | SvelteKit 2, Svelte 5 (runes), Tailwind CSS 4 |
-| **Server** | Hono + Bun, Mozilla Readability, JSDOM |
-| **Data** | Local-first (Dexie.js + mana-sync) |
-| **Auth** | mana-auth (Better Auth + EdDSA JWT) |
-
-## Commands
-
-```bash
-pnpm dev:news:web       # SvelteKit dev server
-pnpm dev:news:server    # Hono/Bun server (port 3071)
-pnpm dev:news:local     # Web + Sync + Server (no auth)
-pnpm dev:news:full      # Everything incl. auth
-```
-
-## Hono Server Routes
-
-| Route | Auth | Description |
-|-------|------|-------------|
-| `GET /health` | No | Health check |
-| `GET /api/v1/feed` | No | AI article feed (type, categoryId, limit, offset) |
-| `GET /api/v1/feed/:id` | No | Single article |
-| `POST /api/v1/extract/preview` | No | Preview URL content extraction |
-| `POST /api/v1/extract/save` | JWT | Extract + return article data |
-
-## Local-First Collections
-
-| Collection | Purpose |
-|-----------|---------|
-| `articles` | Saved articles (user_saved) + AI feed cache |
-| `categories` | Article categories |
-
-## Key Patterns
-
-- **Content Extraction**: Mozilla Readability + JSDOM for robust HTML parsing
-- **Saved Articles**: Local-first via IndexedDB, sync to server
-- **AI Feed**: Loaded from Hono server, not local-first (server-generated)
-- **Auth**: Guest mode allowed, sync starts on login
+The previous standalone "News Hub" guide was deleted in the audit cleanup
+of 2026-04-09 — it had been inaccurate since the consolidation.
+Pre-consolidation reference is in git history.

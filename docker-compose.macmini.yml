@@ -275,7 +275,12 @@ services:
       MANA_AUTH_KEK: ${MANA_AUTH_KEK}
       MANA_NOTIFY_URL: http://mana-notify:3013
       MAX_DAILY_SIGNUPS: ${MAX_DAILY_SIGNUPS:-0}
-      CORS_ORIGINS: https://mana.how,https://calendar.mana.how,https://chat.mana.how,https://clock.mana.how,https://contacts.mana.how,https://context.mana.how,https://docs.mana.how,https://inventar.mana.how,https://cards.mana.how,https://music.mana.how,https://nutriphi.mana.how,https://photos.mana.how,https://picture.mana.how,https://planta.mana.how,https://playground.mana.how,https://presi.mana.how,https://questions.mana.how,https://skilltree.mana.how,https://storage.mana.how,https://times.mana.how,https://todo.mana.how,https://traces.mana.how,https://zitare.mana.how
+      # Must be a superset of TRUSTED_ORIGINS in
+      # services/mana-auth/src/auth/better-auth.config.ts.
+      # Enforced by services/mana-auth/src/auth/sso-config.spec.ts.
+      # All productivity modules now live under mana.how (path-based) —
+      # no per-module subdomain entries required here.
+      CORS_ORIGINS: https://mana.how,https://auth.mana.how,https://arcade.mana.how,https://whopxl.mana.how
     ports:
       - "3001:3001"
     healthcheck:

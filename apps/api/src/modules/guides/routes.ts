@@ -6,7 +6,8 @@
  * This module handles web import via mana-search + mana-llm, and share links.
  */
 
-import { Hono } from 'hono';
+import { Hono, type Context } from 'hono';
+import { logger } from '@mana/shared-hono';
 
 const MANA_SEARCH_URL = process.env.MANA_SEARCH_URL ?? 'http://localhost:3021';
 const MANA_LLM_URL = process.env.MANA_LLM_URL ?? 'http://localhost:3030';
@@ -35,7 +36,7 @@ routes.post('/import/url', async (c) => {
 			extracted = await res.json();
 		}
 	} catch (e) {
-		console.error('mana-search extract failed:', e);
+		logger.error('guides.extract_failed', { error: e instanceof Error ? e.message : String(e) });
 	}
 
 	const content = extracted.markdown ?? extracted.content ?? '';
@@ -128,7 +129,7 @@ routes.get('/share/:token', (c) => {
 // ─── Shared: LLM guide generation ──────────────────────────
 
 async function generateGuideFromText(
-	c: Parameters<Parameters<typeof Hono.prototype.post>[1]>[0],
+	c: Context,
 	opts: { text: string; title?: string; sourceUrl?: string; isAiPrompt?: boolean }
 ) {
 	const systemPrompt = `Du bist ein Experte für das Erstellen strukturierter Schritt-für-Schritt-Anleitungen.
@@ -189,7 +190,7 @@ Regeln:
 			throw new Error(`LLM error: ${llmRes.status}`);
 		}
 
-		const llmData = await llmRes.json<{ content: string }>();
+		const llmData = (await llmRes.json()) as { content: string };
 		const rawJson = llmData.content.trim();
 
 		// Extract JSON from potential markdown code fences
@@ -209,7 +210,7 @@ Regeln:
 			sections: parsed.sections ?? [],
 		});
 	} catch (e) {
-		console.error('Guide generation failed:', e);
+		logger.error('guides.generate_failed', { error: e instanceof Error ? e.message : String(e) });
 		return c.json({ error: 'Guide-Generierung fehlgeschlagen', details: String(e) }, 500);
 	}
 }

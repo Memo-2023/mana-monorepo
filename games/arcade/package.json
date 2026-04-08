@@ -2,8 +2,5 @@
 	"name": "arcade",
 	"version": "1.0.0",
 	"private": true,
-	"description": "AI-powered browser games platform",
-	"scripts": {
-		"dev": "turbo run dev"
-	}
+	"description": "AI-powered browser games platform"
 }

@@ -4,6 +4,7 @@
  */
 
 import { Hono } from 'hono';
+import type { AuthVariables } from '@mana/shared-hono';
 
 const ALLOWED_AVATAR_TYPES = new Set([
 	'image/jpeg',
@@ -13,7 +14,7 @@ const ALLOWED_AVATAR_TYPES = new Set([
 	'image/svg+xml',
 ]);
 
-const routes = new Hono();
+const routes = new Hono<{ Variables: AuthVariables }>();
 
 // ─── Avatar Upload (S3) ─────────────────────────────────────
 
@@ -33,9 +34,7 @@ routes.post('/:id/avatar', async (c) => {
 
 		if (file.type === 'image/svg+xml') {
 			// SVGs stay on shared-storage (Sharp can't process SVG)
-			const { createContactsStorage, generateUserFileKey } = await import(
-				'@mana/shared-storage'
-			);
+			const { createContactsStorage, generateUserFileKey } = await import('@mana/shared-storage');
 			const storage = createContactsStorage();
 			const key = generateUserFileKey(userId, `avatar-${c.req.param('id')}.svg`);
 			const result = await storage.upload(key, Buffer.from(buffer), {

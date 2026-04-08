@@ -7,6 +7,7 @@
  */
 
 import { Hono } from 'hono';
+import { logger, type AuthVariables } from '@mana/shared-hono';
 import { eq, and } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
@@ -120,7 +121,7 @@ const db = drizzle(connection, { schema: { locations, cities, pois, guides, guid
 
 // ─── Routes ─────────────────────────────────────────────────
 
-const routes = new Hono();
+const routes = new Hono<{ Variables: AuthVariables }>();
 
 // ─── Guide Generation (server-only: AI + search) ────────────
 
@@ -152,7 +153,11 @@ routes.post('/guides/generate', async (c) => {
 	// Fire-and-forget async pipeline
 	runGuidePipeline(guide.id, userId, city, params.language || 'de', params.maxPois || 10).catch(
 		(err) => {
-			console.error('Guide generation failed:', err);
+			logger.error('traces.guide_generation_failed', {
+				guideId: guide.id,
+				cityId: city.id,
+				error: err instanceof Error ? err.message : String(err),
+			});
 			db.update(guides)
 				.set({ status: 'error' })
 				.where(eq(guides.id, guide.id))

@@ -7,8 +7,9 @@
  */
 
 import { Hono } from 'hono';
+import type { AuthVariables } from '@mana/shared-hono';
 
-const routes = new Hono();
+const routes = new Hono<{ Variables: AuthVariables }>();
 
 // ─── File Upload (server-only: S3) ──────────────────────────
 
@@ -46,9 +47,8 @@ routes.post('/files/upload', async (c) => {
 		}
 
 		// Non-images -> shared-storage as before
-		const { createStorageStorage, generateUserFileKey, getContentType } = await import(
-			'@mana/shared-storage'
-		);
+		const { createStorageStorage, generateUserFileKey, getContentType } =
+			await import('@mana/shared-storage');
 		const storage = createStorageStorage();
 		const key = generateUserFileKey(userId, file.name);
 
@@ -91,10 +91,13 @@ routes.get('/files/:id/download', async (c) => {
 			return c.json({ url });
 		}
 
-		const data = await storage.download(storagePath);
-		return new Response(data.body, {
+		const [buffer, metadata] = await Promise.all([
+			storage.download(storagePath),
+			storage.getMetadata(storagePath).catch(() => null),
+		]);
+		return new Response(new Uint8Array(buffer), {
 			headers: {
-				'Content-Type': data.contentType || 'application/octet-stream',
+				'Content-Type': metadata?.contentType || 'application/octet-stream',
 				'Content-Disposition': `attachment; filename="${storagePath.split('/').pop()}"`,
 			},
 		});

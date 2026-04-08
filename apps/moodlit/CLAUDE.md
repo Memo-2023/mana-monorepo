@@ -1,37 +1,17 @@
-# Moodlit — Ambient Lighting & Mood App
+# Moodlit — consolidated into the unified Mana app
 
-## Architecture
+This product was migrated into the unified Mana monorepo. The legacy
+per-product `apps/moodlit/apps/server/` and `apps/moodlit/apps/web/`
+directories have been removed. Active code now lives in:
 
-Local-first for moods/sequences, Hono/Bun server for preset library.
+- **Backend compute routes**: [`apps/api/src/modules/moodlit/routes.ts`](../api/src/modules/moodlit/routes.ts)
+- **Frontend module** (local-first): [`apps/mana/apps/web/src/lib/modules/moodlit/`](../mana/apps/web/src/lib/modules/moodlit/)
+- **Web route**: [`apps/mana/apps/web/src/routes/(app)/moodlit/`](../mana/apps/web/src/routes/(app)/moodlit/)
+- **Landing page** (still standalone): [`apps/moodlit/apps/landing/`](apps/landing/)
 
-```
-Browser → IndexedDB (Moods, Sequences)
-              ↕ sync
-         mana-sync → PostgreSQL
-```
+For monorepo-wide patterns (auth, sync, encryption, services), see the
+[root `CLAUDE.md`](../../CLAUDE.md) and [`apps/mana/CLAUDE.md`](../mana/CLAUDE.md).
 
-## Project Structure
-
-```
-apps/moodlit/
-├── apps/
-│   ├── web/        # SvelteKit web app (local-first)
-│   ├── server/     # Hono/Bun (preset moods API)
-│   └── landing/    # Astro landing page
-└── package.json
-```
-
-## Commands
-
-```bash
-pnpm dev:moodlit:web       # SvelteKit dev server
-pnpm dev:moodlit:server    # Hono/Bun server (port 3073)
-pnpm dev:moodlit:landing   # Landing page
-```
-
-## Local-First Collections
-
-| Collection | Fields |
-|-----------|--------|
-| `moods` | name, colors (hex array), animation, isDefault |
-| `sequences` | name, moodIds, duration (seconds) |
+The previous standalone "Moodlit" guide was deleted in the audit cleanup
+of 2026-04-09 — it had been inaccurate since the consolidation.
+Pre-consolidation reference is in git history.

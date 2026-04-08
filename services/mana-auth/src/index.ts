@@ -10,7 +10,7 @@ import { cors } from 'hono/cors';
 import { loadConfig } from './config';
 import { getDb } from './db/connection';
 import { createBetterAuth } from './auth/better-auth.config';
-import { errorHandler } from './middleware/error-handler';
+import { serviceErrorHandler as errorHandler } from '@mana/shared-hono';
 import { jwtAuth } from './middleware/jwt-auth';
 import { serviceAuth } from './middleware/service-auth';
 import { SecurityEventsService, AccountLockoutService } from './services/security';

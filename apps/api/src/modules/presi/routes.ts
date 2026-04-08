@@ -10,6 +10,7 @@ import { Hono } from 'hono';
 import { eq, and, gt, or, isNull, asc } from 'drizzle-orm';
 import { HTTPException } from 'hono/http-exception';
 import { authMiddleware } from '@mana/shared-hono/auth';
+import type { AuthVariables } from '@mana/shared-hono';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 import {
@@ -112,7 +113,7 @@ function generateShareCode(): string {
 
 // ─── Routes ─────────────────────────────────────────────────
 
-const routes = new Hono();
+const routes = new Hono<{ Variables: AuthVariables }>();
 
 // ─── Public endpoint (no auth) ──────────────────────────────
 
@@ -187,7 +188,9 @@ routes.post('/share/deck/:deckId', async (c) => {
 	}
 
 	// Parse optional expiry
-	const body = await c.req.json<{ expiresAt?: string }>().catch(() => ({}));
+	const body = (await c.req.json<{ expiresAt?: string }>().catch(() => ({}))) as {
+		expiresAt?: string;
+	};
 
 	const [share] = await db
 		.insert(sharedDecks)
@@ -223,6 +226,7 @@ routes.get('/share/deck/:deckId/links', async (c) => {
 routes.delete('/share/:shareId', authMiddleware(), async (c) => {
 	const userId = c.get('userId');
 	const shareId = c.req.param('shareId');
+	if (!shareId) throw new HTTPException(400, { message: 'shareId required' });
 
 	const share = await db.query.sharedDecks.findFirst({
 		where: eq(sharedDecks.id, shareId),
