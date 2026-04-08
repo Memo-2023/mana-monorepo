@@ -11,6 +11,61 @@ import type { LocalTask, TaskPriority, Subtask } from '../types';
 import { createBlock, updateBlock, deleteBlock } from '$lib/data/time-blocks/service';
 import { encryptRecord, decryptRecord } from '$lib/data/crypto';
 import { TodoEvents } from '@mana/shared-utils/analytics';
+import { tagCollection, type LocalTag } from '@mana/shared-stores';
+
+/**
+ * Normalize a tag-name-ish string for fuzzy comparison: lowercase,
+ * strip diacritics, collapse whitespace. "Steuern" and "steuern " and
+ * "Stéuern" all collapse to "steuern".
+ */
+function normalizeTagName(s: string): string {
+	return s
+		.normalize('NFD')
+		.replace(/[\u0300-\u036f]/g, '')
+		.toLowerCase()
+		.trim()
+		.replace(/\s+/g, ' ');
+}
+
+/**
+ * Match free-text label hints from the LLM against existing workspace
+ * tags. Only returns IDs of tags that already exist — never auto-creates
+ * a tag, even if the LLM is sure about a topic. Auto-creating tags from
+ * voice transcripts would clutter the user's tag list with one-off
+ * "shopping" / "einkauf" / "groceries" duplicates.
+ *
+ * Match rules (in order, first hit wins per label):
+ *   1. exact normalized match
+ *   2. one is a substring of the other (≥3 chars to avoid noise)
+ */
+async function matchLabelsToTagIds(labels: string[]): Promise<string[]> {
+	if (!labels.length) return [];
+	let tags: LocalTag[];
+	try {
+		tags = await tagCollection.getAll();
+	} catch {
+		return [];
+	}
+	if (!tags.length) return [];
+
+	const normalizedTags = tags.map((t) => ({ id: t.id, norm: normalizeTagName(t.name) }));
+	const matched = new Set<string>();
+	for (const raw of labels) {
+		const norm = normalizeTagName(raw);
+		if (!norm) continue;
+		const exact = normalizedTags.find((t) => t.norm === norm);
+		if (exact) {
+			matched.add(exact.id);
+			continue;
+		}
+		if (norm.length < 3) continue;
+		const sub = normalizedTags.find(
+			(t) => t.norm.length >= 3 && (t.norm.includes(norm) || norm.includes(t.norm))
+		);
+		if (sub) matched.add(sub.id);
+	}
+	return [...matched];
+}
 
 export const tasksStore = {
 	async createTask(data: {
@@ -138,14 +193,15 @@ export const tasksStore = {
 			// daran die steuererklärung zu machen") is much noisier than
 			// what the user actually wants to see in the list.
 			const parsed = await this.parseTaskText(transcript, language);
+			const matchedLabelIds = await matchLabelsToTagIds(parsed.labels);
+
 			const update: Record<string, unknown> = { title: parsed.title };
 			if (parsed.dueDate) update.dueDate = parsed.dueDate;
 			if (parsed.priority) update.priority = parsed.priority;
-			// labels are free-text topic hints from the LLM and don't yet
-			// map to the workspace's tag IDs — leave label wiring to a
-			// follow-up that does fuzzy matching against existing tags.
-
 			await this.updateTask(taskId, update);
+			if (matchedLabelIds.length > 0) {
+				await this.updateLabels(taskId, matchedLabelIds);
+			}
 		} catch (e) {
 			const msg = e instanceof Error ? e.message : String(e);
 			await this.updateTask(taskId, { title: `Sprachaufgabe (Fehler: ${msg})` });
@@ -166,14 +222,21 @@ export const tasksStore = {
 		if (!trimmed) return;
 		try {
 			const parsed = await this.parseTaskText(trimmed, language);
-			if (!parsed.dueDate && !parsed.priority) return;
+			const matchedLabelIds = await matchLabelsToTagIds(parsed.labels);
+			// Only touch the task if the LLM found something we'd actually
+			// add — date, priority, or a label that maps to an existing tag.
+			if (!parsed.dueDate && !parsed.priority && matchedLabelIds.length === 0) return;
 
 			const update: Record<string, unknown> = {};
 			if (parsed.title && parsed.title !== trimmed) update.title = parsed.title;
 			if (parsed.dueDate) update.dueDate = parsed.dueDate;
 			if (parsed.priority) update.priority = parsed.priority;
-			if (Object.keys(update).length === 0) return;
-			await this.updateTask(taskId, update);
+			if (Object.keys(update).length > 0) {
+				await this.updateTask(taskId, update);
+			}
+			if (matchedLabelIds.length > 0) {
+				await this.updateLabels(taskId, matchedLabelIds);
+			}
 		} catch {
 			// Silent — typed quick-add already gave the user a usable
 			// task; an LLM failure should never undo that.
