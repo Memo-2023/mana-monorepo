@@ -125,7 +125,6 @@ new NotifyClient({
 
 ##### Other Channels
 
-- `sendMatrix(options)` - Send a Matrix message
 - `sendWebhook(options)` - Send a webhook
 
 ##### Batch & Management

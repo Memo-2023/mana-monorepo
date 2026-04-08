@@ -129,5 +129,4 @@ pip-delete-this-directory.txt
 
 # ML Models (large files, downloaded on demand)
 mlx_models/
-services/matrix-stt-bot/data/
 services/mana-sync/server

@@ -17,7 +17,7 @@ mana-llm acts as a central gateway for all LLM requests in the monorepo, providi
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
 │                        Consumer Apps                                 │
-│  matrix-ollama-bot │ telegram-ollama-bot │ chat-backend │ etc.     │
+│  chat-backend │ mana web │ todo (LLM enrich) │ etc.                  │
 └────────────────────────────────┬────────────────────────────────────┘
                                  │ HTTP/SSE
                                  ▼
@@ -288,5 +288,3 @@ while (true) {
 | mana-tts | 3022 | Text-to-speech service |
 | mana-stt | 3023 | Speech-to-text service |
 | mana-search | 3021 | Web search & extraction |
-| matrix-ollama-bot | - | Matrix bot (consumer) |
-| telegram-ollama-bot | - | Telegram bot (consumer) |

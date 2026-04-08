@@ -151,7 +151,6 @@ The GPU server runs multiple AI services. LTX-Video uses ~10 GB VRAM:
 Used by:
 - **Picture App** — video generation alongside images
 - **Chat App** — inline video generation
-- **Matrix Bots** — video generation via chat commands
 
 ### Example (TypeScript)
 
