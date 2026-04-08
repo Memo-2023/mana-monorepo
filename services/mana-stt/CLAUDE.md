@@ -1,79 +1,96 @@
 # mana-stt
 
-Speech-to-Text service for the Mana ecosystem. Runs on the Mac Mini M4 (Apple Silicon) and exposes a small FastAPI surface that wraps multiple Whisper backends plus Mistral's hosted Voxtral API.
+Speech-to-Text microservice. Wraps Whisper (CUDA, with WhisperX for word-level timestamps + diarization), local Voxtral via vLLM, and Mistral's hosted Voxtral API behind a small FastAPI surface. Lives on the Windows GPU server (`mana-server-gpu`, RTX 3090).
+
+> ⚠️ **Earlier history**: this directory used to contain Mac-Mini–targeted
+> code (Whisper Lightning MLX, com.mana.mana-stt.plist launchd setup,
+> setup.sh with Apple-Silicon checks). That all moved to the Windows
+> GPU box and was removed from the repo. If you're looking for the MLX
+> path, see git history.
 
 ## Tech Stack
 
 | Layer | Technology |
 |-------|------------|
-| **Runtime** | Python 3.11 + uvicorn |
+| **Runtime** | Python 3.11 + uvicorn (Windows) |
 | **Framework** | FastAPI |
-| **Local model** | Whisper Large V3 via [`lightning-whisper-mlx`](https://github.com/mustafaaljadery/lightning-whisper-mlx) (Apple MLX) |
-| **Local model (rich)** | WhisperX for word-level timestamps + diarization |
-| **Cloud model** | Mistral Voxtral Mini API |
-| **Optional** | vLLM Voxtral (GPU) — see `vllm_service.py` |
-| **Auth** | JWT validation via mana-auth (`external_auth.py`) + API key fallback (`auth.py`) |
-| **Process supervision** | launchd via `com.mana.mana-stt.plist` |
+| **Whisper** | `whisperx` on CUDA (large-v3 + word alignment + pyannote diarization) |
+| **Voxtral (local)** | vLLM serving Voxtral 3B/4B/24B (`vllm_service.py`) |
+| **Voxtral (cloud)** | Mistral API (`voxtral_api_service.py`) |
+| **Auth** | Per-key + internal-key API auth (`app/auth.py`, JWT via mana-auth in `app/external_auth.py`) |
+| **VRAM** | Shared `vram_manager.py` accountant — coordinated with mana-tts and mana-image-gen so multiple GPU services don't OOM each other |
+| **Process supervision** | Windows Scheduled Task `ManaSTT` (AtLogOn) |
 
 ## Port: 3020
 
-## Quick Start
+## Where it runs
 
-```bash
-cd services/mana-stt
-./setup.sh                                          # Create venv + install
-.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 3020
-```
+| Host | Path on disk | Entrypoint |
+|------|--------------|------------|
+| Windows GPU server (`192.168.178.11`) | `C:\mana\services\mana-stt\` | `service.pyw` via Scheduled Task `ManaSTT` |
 
-Production runs via launchd on the Mac Mini — `install-service.sh` (single service) or `install-services.sh` (mana-stt + vllm-voxtral together).
+Public URL: `https://gpu-stt.mana.how` (via Cloudflare Tunnel + Mac Mini gpu-proxy).
 
 ## API Endpoints
 
 | Method | Path | Description |
 |--------|------|-------------|
 | GET | `/health` | Liveness + which backends are loaded |
-| GET | `/models` | List available STT models |
-| POST | `/transcribe` | Whisper MLX (default, fastest local) |
-| POST | `/transcribe/whisperx` | WhisperX with word-level timestamps + diarization |
-| POST | `/transcribe/voxtral` | Local Voxtral (vLLM) |
-| POST | `/transcribe/voxtral/api` | Mistral Voxtral API (cloud) |
-| POST | `/transcribe/auto` | Tries WhisperX first, falls back to Whisper MLX |
+| GET | `/models` | Available STT models |
+| POST | `/transcribe` | Whisper (WhisperX, default) — multipart `file` + optional `language` |
+| POST | `/transcribe/voxtral` | Local Voxtral via vLLM |
+| POST | `/transcribe/auto` | Routing helper — picks the best backend for the input |
 
-All `/transcribe*` endpoints accept multipart `file` upload + optional `language` form field. Auth via `Authorization: Bearer <jwt>` or `X-API-Key`.
+All endpoints (except `/health`) require `Authorization: Bearer <token>`. Tokens are validated against `API_KEYS` (per-app keys) or `INTERNAL_API_KEY` (no rate limit), and JWTs from mana-auth are also accepted via `external_auth.py`.
 
 ## Backends (`app/`)
 
 | File | What it loads |
 |------|---------------|
-| `whisper_service.py` | Whisper Large V3 via MLX (local, default) |
-| `whisper_service_cuda.py` | CUDA Whisper (only used on Windows GPU server) |
-| `whisperx_service.py` | WhisperX with diarization (local, slower, richer output) |
-| `voxtral_service.py` | Local Voxtral via vLLM (optional, needs the second launchd job) |
-| `voxtral_api_service.py` | Mistral hosted Voxtral API (cloud) |
-| `vllm_service.py` | vLLM client primitives shared with Voxtral |
-| `auth.py` | API key auth (fallback path) |
-| `external_auth.py` | JWT auth via mana-auth public key |
+| `whisper_service.py` | WhisperX on CUDA (large-v3 + alignment + pyannote diarization) |
+| `voxtral_service.py` | Local Voxtral via vLLM (slower start, richer multilingual) |
+| `voxtral_api_service.py` | Mistral hosted Voxtral API (cloud, no GPU needed) |
+| `vllm_service.py` | vLLM client primitives shared by Voxtral |
+| `vram_manager.py` | Shared VRAM accounting — same module also used by mana-tts and mana-image-gen |
+| `auth.py` | API-key auth (internal + per-app keys) |
+| `external_auth.py` | JWT validation via mana-auth |
 
-Backends are loaded lazily during the FastAPI lifespan and reported by `/health`. Missing dependencies (e.g. CUDA on Mac) are tolerated — the service starts without them.
+Backends are loaded lazily during the FastAPI lifespan and reported by `/health`.
 
-## Configuration
-
-Reads from `services/mana-stt/.env` (loaded by the launchd plist's `set -a; source .env; set +a`). Relevant variables:
+## Configuration (`.env` on the Windows GPU box)
 
 ```env
 PORT=3020
-MANA_AUTH_URL=http://localhost:3001     # JWKS source for JWT verification
-MISTRAL_API_KEY=...                     # only needed for /transcribe/voxtral/api
-STT_API_KEY=...                         # legacy API key fallback
+WHISPER_MODEL=large-v3
+WHISPER_DEVICE=cuda
+WHISPER_COMPUTE_TYPE=float16
+WHISPER_DEFAULT_LANGUAGE=de
+PRELOAD_MODELS=true
+USE_VLLM=false
+HF_TOKEN=...                    # required for pyannote diarization models
+REQUIRE_AUTH=true
+API_KEYS=sk-app1:app1,sk-app2:app2
+INTERNAL_API_KEY=...            # cross-service, no rate limit
+CORS_ORIGINS=https://mana.how,https://chat.mana.how
 ```
 
 ## Operations
 
-- **Logs**: launchd writes to `~/Library/Logs/mana-stt.{out,err}.log` (see plist)
-- **Metrics**: Prometheus endpoint at `/metrics` if enabled in config; Grafana dashboard JSON checked in at `grafana-dashboard.json`
-- **Restart**: `launchctl kickstart -k gui/$(id -u)/com.mana.mana-stt`
+```powershell
+# Status
+Get-ScheduledTask -TaskName "ManaSTT" | Format-List TaskName, State
+Get-NetTCPConnection -LocalPort 3020 -State Listen
+
+# Restart
+Stop-ScheduledTask -TaskName "ManaSTT"
+Start-ScheduledTask -TaskName "ManaSTT"
+
+# Logs
+Get-Content C:\mana\services\mana-stt\service.log -Tail 50
+```
 
 ## Reference
 
-- `services/mana-stt/README.md` — user-facing setup, model download instructions, language coverage
-- `docs/LOCAL_STT_MODELS.md` — WER comparisons, model size/quality tradeoffs
+- `docs/WINDOWS_GPU_SERVER_SETUP.md` — Windows box setup, scheduled tasks, firewall, Cloudflare tunnel
+- `docs/LOCAL_STT_MODELS.md` — model comparisons (WER, latency, language coverage)
+- `services/mana-stt/grafana-dashboard.json` — Prometheus metrics dashboard

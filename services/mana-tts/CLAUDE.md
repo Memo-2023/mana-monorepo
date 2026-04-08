@@ -1,125 +1,115 @@
-# CLAUDE.md - Mana TTS Service
+# mana-tts
 
-## Service Overview
+Text-to-Speech microservice. Wraps Kokoro (English presets), Piper (German, local ONNX), and F5-TTS (voice cloning) behind a small FastAPI surface. Lives on the Windows GPU server (`mana-server-gpu`, RTX 3090).
 
-Text-to-Speech microservice using MLX-optimized models for Apple Silicon:
+> ⚠️ **Earlier history**: this directory used to contain MLX-optimized
+> Mac-Mini code (`f5-tts-mlx`, `mlx-audio`, `setup.sh` with Apple Silicon
+> checks, `com.mana.mana-tts.plist` launchd setup). All of that moved to
+> the Windows GPU box and was removed from the repo. If you need the
+> MLX path, see git history.
 
-- **Port**: 3022
-- **Framework**: Python + FastAPI
-- **Models**: Kokoro-82M (fast), F5-TTS (voice cloning)
+## Tech Stack
 
-## Commands
+| Layer | Technology |
+|-------|------------|
+| **Runtime** | Python 3.11 + uvicorn (Windows) |
+| **Framework** | FastAPI |
+| **English (preset)** | Kokoro-82M (`kokoro_service.py`) |
+| **German (local)** | Piper ONNX with `kerstin_low.onnx` and `thorsten_medium.onnx` voices (`piper_service.py`) |
+| **Voice cloning** | F5-TTS on CUDA (`f5_service.py`) |
+| **Audio I/O** | `soundfile`, `pydub` |
+| **Auth** | Per-key + internal-key API auth (`auth.py`) + JWT via mana-auth (`external_auth.py`) |
+| **VRAM** | Shared `vram_manager.py` (same module as mana-stt + mana-image-gen) |
+| **Process supervision** | Windows Scheduled Task `ManaTTS` (AtLogOn) |
 
-```bash
-# Setup
-./setup.sh
+## Port: 3022
 
-# Development
-source .venv/bin/activate
-uvicorn app.main:app --host 0.0.0.0 --port 3022 --reload
+## Where it runs
 
-# Production (Mac Mini)
-../../scripts/mac-mini/setup-tts.sh
+| Host | Path on disk | Entrypoint |
+|------|--------------|------------|
+| Windows GPU server (`192.168.178.11`) | `C:\mana\services\mana-tts\` | `service.pyw` via Scheduled Task `ManaTTS` |
 
-# Test
-curl http://localhost:3022/health
+Public URL: `https://gpu-tts.mana.how`.
 
-# English (Kokoro)
-curl -X POST http://localhost:3022/synthesize/kokoro \
-  -H "Content-Type: application/json" \
-  -d '{"text": "Hello world", "voice": "af_heart"}' \
-  --output test_en.wav
+## API Endpoints
 
-# German (Piper) - use /synthesize/auto
-curl -X POST http://localhost:3022/synthesize/auto \
-  -H "Content-Type: application/json" \
-  -d '{"text": "Hallo Welt", "voice": "de_kerstin"}' \
-  --output test_de.wav
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/health` | Liveness + which backends are loaded |
+| GET | `/models` | Available TTS models |
+| GET | `/voices` | List all voices (preset + custom) |
+| POST | `/voices` | Register a custom voice (reference audio + transcript) |
+| DELETE | `/voices/{voice_id}` | Delete a custom voice |
+| POST | `/synthesize/kokoro` | Kokoro synthesis (English presets) |
+| POST | `/synthesize` | F5-TTS voice cloning |
+| POST | `/synthesize/auto` | Routing helper — picks the right backend for the requested voice |
+
+All non-health endpoints require `Authorization: Bearer <token>` (per-app key, internal key, or mana-auth JWT).
+
+## Voices
+
+### Kokoro-82M (English presets)
+~300 MB download. 30+ preset English voices. Fast, no reference audio needed.
+
+### Piper (German, local ONNX)
+~63 MB per voice. 100% local, GDPR-compliant. Available:
+- `de_kerstin` (female, default)
+- `de_thorsten` (male)
+
+Fallback to Edge TTS cloud voices if Piper isn't loaded.
+
+### F5-TTS (voice cloning)
+~6 GB. Requires reference audio + transcript. Higher quality, slower. Custom voices live in `voices/` (reference audio + transcript per voice ID).
+
+## Configuration (`.env` on the Windows GPU box)
+
+```env
+PORT=3022
+PRELOAD_MODELS=false
+MAX_TEXT_LENGTH=1000
+REQUIRE_AUTH=true
+API_KEYS=sk-app1:app1,sk-app2:app2
+INTERNAL_API_KEY=...
+CORS_ORIGINS=https://mana.how,https://chat.mana.how
 ```
 
-## File Structure
+## Code layout
 
 ```
 services/mana-tts/
 ├── app/
 │   ├── __init__.py
-│   ├── main.py              # FastAPI endpoints
-│   ├── kokoro_service.py    # Kokoro TTS (English preset voices)
-│   ├── piper_service.py     # Piper TTS (German voices, local)
-│   ├── f5_service.py        # F5-TTS (voice cloning)
-│   ├── voice_manager.py     # Custom voice registry
-│   └── audio_utils.py       # Audio format conversion
-├── piper_voices/            # Piper voice models (.onnx)
-├── voices/                  # Custom F5 voice storage
-├── mlx_models/             # MLX model cache
-├── setup.sh                # Setup script
-├── requirements.txt
-└── README.md
+│   ├── main.py             # FastAPI endpoints
+│   ├── kokoro_service.py   # Kokoro (English presets)
+│   ├── piper_service.py    # Piper (German, local ONNX)
+│   ├── f5_service.py       # F5-TTS (voice cloning, CUDA)
+│   ├── voice_manager.py    # Custom voice registry
+│   ├── audio_utils.py      # Format conversion, resampling
+│   ├── auth.py             # API-key auth
+│   ├── external_auth.py    # JWT validation via mana-auth
+│   └── vram_manager.py     # Shared VRAM accountant
+└── service.pyw             # Windows runner (used by ManaTTS scheduled task)
 ```
 
-## API Endpoints
+The Piper voice ONNX files live alongside the service on the GPU box (`C:\mana\services\mana-tts\piper_voices\*.onnx`) — too big to commit, downloaded once during setup.
 
-| Endpoint | Method | Purpose |
-|----------|--------|---------|
-| `/health` | GET | Health check |
-| `/models` | GET | Model info |
-| `/voices` | GET | List all voices |
-| `/voices` | POST | Register custom voice |
-| `/voices/{id}` | DELETE | Delete custom voice |
-| `/synthesize/kokoro` | POST | Kokoro synthesis |
-| `/synthesize` | POST | F5-TTS voice cloning |
-| `/synthesize/auto` | POST | Auto-select model |
+## Operations
 
-## Models
+```powershell
+# Status
+Get-ScheduledTask -TaskName "ManaTTS" | Format-List TaskName, State
+Get-NetTCPConnection -LocalPort 3022 -State Listen
 
-### Kokoro-82M (English)
-- ~300 MB download
-- 30+ preset English voices
-- Fast inference
-- No reference audio needed
+# Restart
+Stop-ScheduledTask -TaskName "ManaTTS"
+Start-ScheduledTask -TaskName "ManaTTS"
 
-### Piper TTS (German)
-- ~63 MB per voice model
-- 100% local, GDPR-compliant
-- Fast inference on CPU
-- Available voices:
-  - `de_kerstin` - Female (default)
-  - `de_thorsten` - Male
-- Fallback to Edge TTS (cloud) if Piper unavailable:
-  - `de_katja` - Female (cloud)
-  - `de_conrad` - Male (cloud)
-  - `de_amala` - Female young (cloud)
-  - `de_florian` - Male young (cloud)
+# Logs
+Get-Content C:\mana\services\mana-tts\service.log -Tail 50
+```
 
-### F5-TTS (Voice Cloning)
-- ~6 GB download
-- Voice cloning capability
-- Requires reference audio + transcript
-- Higher quality, slower
+## Reference
 
-## Environment Variables
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `PORT` | `3022` | Service port |
-| `PRELOAD_MODELS` | `false` | Load on startup |
-| `MAX_TEXT_LENGTH` | `1000` | Max chars |
-| `CORS_ORIGINS` | (production URLs) | CORS config |
-
-## Key Dependencies
-
-- `fastapi` - Web framework
-- `f5-tts-mlx` - Voice cloning model
-- `mlx-audio` - Kokoro implementation
-- `mlx` - Apple Silicon ML framework
-- `piper-tts` - German TTS (local)
-- `edge-tts` - German TTS fallback (cloud)
-- `soundfile` - Audio I/O
-- `pydub` - MP3 conversion
-
-## Development Notes
-
-- Models load lazily on first request (unless `PRELOAD_MODELS=true`)
-- Custom voices stored in `voices/` with reference audio + transcript
-- Singleton pattern for model instances
-- Audio returned as raw bytes with headers for metadata
+- `docs/WINDOWS_GPU_SERVER_SETUP.md` — Windows box setup, scheduled tasks, firewall, Cloudflare tunnel
+- `docs/PORT_SCHEMA.md` — port assignments across services

@@ -318,12 +318,28 @@ Drei LaunchAgents sorgen fuer automatischen Betrieb:
 - Prueft alle Services (HTTP + Docker)
 - Sendet Benachrichtigungen bei Fehlern
 
-### Deaktivierte LaunchAgents
+### Deaktivierte / entfernte LaunchAgents
 
-Diese LaunchAgents sind seit der GPU-Server-Migration deaktiviert:
-- `homebrew.mxcl.ollama.plist` — LLM laeuft auf GPU-Server
-- `com.mana.image-gen.plist` — Bildgenerierung laeuft auf GPU-Server
+Seit der GPU-Server-Migration laufen keine AI-Services mehr auf dem Mac
+Mini. Die zugehörigen LaunchAgents sind deaktiviert und ihre Repo-Vorlagen
+wurden entfernt:
+- `homebrew.mxcl.ollama.plist` — LLM läuft auf GPU-Server (`gpu-llm.mana.how`)
+- `com.mana.image-gen.plist` — entfernt; image-gen läuft als
+  Scheduled Task `ManaImageGen` auf GPU-Server (`gpu-img.mana.how`)
+- `com.mana.mana-stt.plist` — entfernt; STT als Task `ManaSTT`
+- `com.mana.mana-tts.plist` — entfernt; TTS als Task `ManaTTS`
+- `com.mana.vllm-voxtral.plist` — entfernt; vLLM-Voxtral nicht mehr verwendet
 - `com.mana.telegram-ollama-bot.plist` — Bot deaktiviert
+
+Falls auf einem Mac Mini noch alte plists installiert sind:
+
+```bash
+launchctl unload ~/Library/LaunchAgents/com.mana.image-gen.plist 2>/dev/null
+launchctl unload ~/Library/LaunchAgents/com.mana.mana-stt.plist 2>/dev/null
+launchctl unload ~/Library/LaunchAgents/com.mana.mana-tts.plist 2>/dev/null
+launchctl unload ~/Library/LaunchAgents/com.mana.vllm-voxtral.plist 2>/dev/null
+rm -f ~/Library/LaunchAgents/com.mana.{image-gen,mana-stt,mana-tts,vllm-voxtral}.plist
+```
 
 ### Setup neu ausführen
 
@@ -684,28 +700,28 @@ docker image prune -a
 
 Alle AI-Services (LLM, Bildgenerierung, STT, TTS) laufen auf dem Windows GPU-Server (RTX 3090, 24 GB VRAM) unter `192.168.178.11`. Der Mac Mini ist reiner Hosting-Server fuer Web, API, DB und Sync.
 
-| Service | GPU-Server Port | Zugriff aus Docker |
-|---------|----------------|-------------------|
-| Ollama (LLM) | 11434 | `http://192.168.178.11:11434` |
-| STT (Whisper) | 3020 | `http://192.168.178.11:3020` |
-| TTS | 3022 | `http://192.168.178.11:3022` |
-| Image Gen | 3023 | `http://192.168.178.11:3023` |
+| Service | GPU-Server Port | Zugriff aus Docker | Public URL |
+|---------|----------------|-------------------|------------|
+| mana-llm | 3025 | `http://192.168.178.11:3025` | `gpu-llm.mana.how` |
+| mana-stt (Whisper) | 3020 | `http://192.168.178.11:3020` | `gpu-stt.mana.how` |
+| mana-tts | 3022 | `http://192.168.178.11:3022` | `gpu-tts.mana.how` |
+| mana-image-gen | 3023 | `http://192.168.178.11:3023` | `gpu-img.mana.how` |
+| mana-video-gen | 3026 | `http://192.168.178.11:3026` | `gpu-video.mana.how` |
+| Ollama | 11434 | `http://192.168.178.11:11434` | `gpu-ollama.mana.how` |
+
+Repo-Pendants: `services/mana-{llm,stt,tts,image-gen,video-gen}/` — die `service.pyw` Runner werden direkt auf der Windows-Box als Scheduled Tasks ausgeführt.
 
 Alle Werte sind per Env-Var ueberschreibbar (`OLLAMA_URL`, `STT_SERVICE_URL`, `TTS_SERVICE_URL`, `IMAGE_GEN_SERVICE_URL`).
 
 Cloud-Fallback bei GPU-Server-Ausfall: `mana-llm` hat `AUTO_FALLBACK_ENABLED=true` (OpenRouter, Groq, Google).
 
-### Ollama/FLUX.2 auf dem Mac Mini (deaktiviert)
+### Ollama/FLUX.2 Mac-Mini-Reste (deaktiviert)
 
-Ollama und FLUX.2 waren frueher lokal installiert, sind aber seit 2026-03-28 deaktiviert. Die Modelle liegen noch auf der SSD als Backup:
+Ollama und das alte Mac-Mini FLUX.2 (`flux2.c` MPS) waren früher lokal installiert, sind seit 2026-03-28 deaktiviert. Die zugehörigen Repo-Setup-Skripte (`scripts/mac-mini/setup-image-gen.sh`, launchd plists) wurden 2026-04-08 entfernt; die Modelle liegen ggf. noch auf der SSD als Backup:
 - `/Volumes/ManaData/ollama/` (~58 GB)
 - `/Volumes/ManaData/flux2/` (~15 GB)
 
-Bei Bedarf reaktivieren:
-```bash
-brew services start ollama
-launchctl load ~/Library/LaunchAgents/com.mana.image-gen.plist
-```
+Falls du sie auf einem alten Mac Mini noch findest, einfach löschen — sie laufen nicht mehr und werden nirgendwo gebraucht.
 
 ## Externe 4TB SSD
 
