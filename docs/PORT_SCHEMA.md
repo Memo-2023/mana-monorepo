@@ -4,23 +4,43 @@
 >
 > This document describes a *planned* reorganization of port assignments
 > into clean ranges (3000–3009 core, 3010–3019 infra, 3020–3029 AI/ML, …).
-> The reorg has not been executed: the actual ports the services bind to
-> live in their `app/main.py` / `start.sh` / `config.ts` and currently
-> follow a different scheme. Per-service ports are documented in each
-> `services/*/CLAUDE.md`. Notable real-world ports today:
+> The reorg has not been executed: the actual ports services bind to
+> live in their `app/main.py` / `start.sh` / `config.ts`. Per-service
+> ports are documented in each `services/*/CLAUDE.md`.
 >
-> - mana-auth `3001`, mana-credits `3061`, mana-user `3062`,
->   mana-subscriptions `3063`, mana-analytics `3064`, mana-events `3065`
-> - mana-media `3015`, mana-sync `3050`, mana-search `3021`,
->   mana-notify `3040`, mana-crawler `3023`
-> - mana-llm `3025`, mana-stt `3020`, mana-tts `3022`,
->   mana-image-gen `3026`, mana-video-gen `3026` ⚠️ **collision**,
->   mana-voice-bot `3050` ⚠️ **collision with mana-sync**
+> ### Real ports today
 >
-> Two real port collisions exist (image-gen ↔ video-gen, voice-bot ↔ sync)
-> that are masked by the fact that they don't all run on the same host
-> today. Either execute the reorg below, or pick non-colliding ports and
-> update this doc to match reality.
+> **Mac Mini:**
+> - mana-auth `3001`
+> - mana-stt `3020` (Mac Mini local instance, MLX)
+> - mana-image-gen `3025` (Mac Mini, flux2.c, MPS — separate from the
+>   Windows GPU image-gen on `gpu-img.mana.how` which lives outside the repo)
+> - mana-sync `3050`
+> - mana-search `3021`, mana-notify `3040`, mana-crawler `3023`,
+>   mana-media `3015`
+> - mana-credits `3061`, mana-user `3062`, mana-subscriptions `3063`,
+>   mana-analytics `3064`, mana-events `3065`
+>
+> **Windows GPU server (`192.168.178.11`):**
+> - mana-llm `3025`
+> - mana-stt `3020`
+> - mana-tts `3022`
+> - image-gen (Windows variant, **not the repo's `mana-image-gen`**) `3023`
+> - mana-video-gen `3026`
+> - Ollama `11434`
+>
+> ### No production collisions today, but two latent ones in source defaults
+>
+> | Latent collision | Why it doesn't bite | What to watch for |
+> |---|---|---|
+> | mana-image-gen and mana-llm both use `3025` | Different machines (Mac Mini vs Windows GPU); mana-image-gen `setup.sh` hard-fails outside macOS arm64 so it can't be deployed onto the Windows GPU by accident | Don't try to run mana-image-gen and mana-llm on the same host |
+> | mana-voice-bot defaults to `3050`, mana-sync also `3050` | mana-voice-bot is not deployed anywhere yet (no launchd plist, no Scheduled Task, no cloudflared route) | Pick a free port for mana-voice-bot before deploying it — current default will collide with mana-sync wherever sync runs |
+>
+> The previous version of this warning claimed two **active** collisions
+> (image-gen ↔ video-gen on 3026, voice-bot ↔ sync on 3050). That was
+> wrong: image-gen on Mac Mini was overridden to 3025 via a launchd plist
+> (now also the source default — see commit history), and voice-bot isn't
+> running anywhere.
 
 **Originally drafted:** 2026-03-28
 

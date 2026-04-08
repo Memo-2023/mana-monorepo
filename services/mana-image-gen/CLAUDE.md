@@ -4,10 +4,18 @@
 
 AI image generation microservice using FLUX.2 klein 4B model via flux2.c:
 
-- **Port**: 3026
+- **Port**: 3025
+- **Host**: Mac Mini only — `setup.sh` hard-fails on anything other than macOS arm64
 - **Framework**: Python + FastAPI
 - **Model**: FLUX.2 klein 4B (Black Forest Labs)
 - **Backend**: flux2.c (Pure C, MPS accelerated)
+
+> ⚠️ **Two image-gen services exist with the same name.** This one is the
+> Mac Mini implementation in the repo (flux2.c, MPS, Apple Silicon only).
+> The Windows GPU server runs a *separate* image-gen on `gpu-img.mana.how`
+> (port 3023, PyTorch + diffusers + CUDA) whose code lives outside the
+> repo at `C:\mana\services\mana-image-gen\` on the GPU box. See
+> `docs/WINDOWS_GPU_SERVER_SETUP.md` for that one.
 
 ## Features
 
@@ -26,14 +34,14 @@ AI image generation microservice using FLUX.2 klein 4B model via flux2.c:
 # Development
 source .venv/bin/activate
 FLUX_BINARY=/opt/flux2/flux FLUX_MODEL_DIR=/opt/flux2/model \
-  uvicorn app.main:app --host 0.0.0.0 --port 3026 --reload
+  uvicorn app.main:app --host 0.0.0.0 --port 3025 --reload
 
 # Production
 ../../scripts/mac-mini/setup-image-gen.sh
 
 # Test
-curl http://localhost:3026/health
-curl -X POST http://localhost:3026/generate \
+curl http://localhost:3025/health
+curl -X POST http://localhost:3025/generate \
   -H "Content-Type: application/json" \
   -d '{"prompt": "A cat in space"}' | jq
 ```
@@ -95,7 +103,7 @@ services/mana-image-gen/
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `PORT` | `3026` | Service port |
+| `PORT` | `3025` | Service port |
 | `FLUX_BINARY` | `/opt/flux2/flux` | Path to flux2.c binary |
 | `FLUX_MODEL_DIR` | `/opt/flux2/model` | Path to model weights |
 | `DEFAULT_STEPS` | `4` | Default sampling steps |
@@ -128,7 +136,7 @@ The service is designed to be used by:
 ### Example Integration (TypeScript)
 
 ```typescript
-const response = await fetch('http://localhost:3026/generate', {
+const response = await fetch('http://localhost:3025/generate', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
@@ -139,7 +147,7 @@ const response = await fetch('http://localhost:3026/generate', {
 });
 
 const result = await response.json();
-const imageUrl = `http://localhost:3026${result.image_url}`;
+const imageUrl = `http://localhost:3025${result.image_url}`;
 ```
 
 ## Dependencies
