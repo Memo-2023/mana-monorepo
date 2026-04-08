@@ -164,12 +164,17 @@ const PRIORITY_TRIGGER_PATTERNS = [
 	'whenever',
 ];
 
-function transcriptMentions(transcript: string, patterns: string[]): boolean {
+/** Exported for unit tests. */
+export function transcriptMentions(transcript: string, patterns: string[]): boolean {
 	const lower = transcript.toLowerCase();
 	return patterns.some((p) => lower.includes(p));
 }
 
-function coerce(raw: unknown, transcript: string): ParseResult {
+/** Exported for unit tests. */
+export const __test = { DATE_TRIGGER_PATTERNS, PRIORITY_TRIGGER_PATTERNS };
+
+/** Exported for unit tests. */
+export function coerce(raw: unknown, transcript: string): ParseResult {
 	if (!raw || typeof raw !== 'object') return fallback(transcript);
 	const r = raw as Record<string, unknown>;
 	const title = typeof r.title === 'string' && r.title.trim() ? r.title.trim() : transcript.trim();
