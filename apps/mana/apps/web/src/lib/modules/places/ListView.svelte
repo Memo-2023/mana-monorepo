@@ -14,6 +14,7 @@
 	import { dropTarget, dragSource } from '@mana/shared-ui/dnd';
 	import type { TagDragData } from '@mana/shared-ui/dnd';
 	import { useAllTags, getTagsByIds } from '@mana/shared-stores';
+	import { addTagId } from '$lib/data/tag-mutations';
 
 	let { navigate, goBack, params }: ViewProps = $props();
 
@@ -23,10 +24,9 @@
 	function handleTagDrop(placeId: string, tagData: TagDragData) {
 		const place = places.find((p) => p.id === placeId);
 		if (!place) return;
-		const current = place.tagIds ?? [];
-		if (!current.includes(tagData.id)) {
-			placesStore.updateTagIds(placeId, [...current, tagData.id]);
-		}
+		void addTagId(place.tagIds ?? [], tagData.id, (next) =>
+			placesStore.updateTagIds(placeId, next)
+		);
 	}
 
 	let places = $state<LocalPlace[]>([]);

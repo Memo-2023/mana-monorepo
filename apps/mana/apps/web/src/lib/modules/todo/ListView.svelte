@@ -20,6 +20,7 @@
 	import { dropTarget, dragSource } from '@mana/shared-ui/dnd';
 	import type { TagDragData } from '@mana/shared-ui/dnd';
 	import { useAllTags, getTagsByIds } from '@mana/shared-stores';
+	import { addTagId } from '$lib/data/tag-mutations';
 	import VoiceCaptureBar from '$lib/components/voice/VoiceCaptureBar.svelte';
 
 	let { navigate, goBack, params }: ViewProps = $props();
@@ -34,10 +35,7 @@
 	function handleTagDrop(taskId: string, tagData: TagDragData) {
 		const task = tasks.find((t) => t.id === taskId);
 		if (!task) return;
-		const current = getTaskTagIds(task);
-		if (!current.includes(tagData.id)) {
-			tasksStore.updateLabels(taskId, [...current, tagData.id]);
-		}
+		void addTagId(getTaskTagIds(task), tagData.id, (next) => tasksStore.updateLabels(taskId, next));
 	}
 
 	type ViewFilter = 'inbox' | 'today' | 'overdue';

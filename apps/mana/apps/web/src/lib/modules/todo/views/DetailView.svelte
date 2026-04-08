@@ -17,6 +17,7 @@
 	import { useAllTags, getTagsByIds } from '@mana/shared-stores';
 	import LinkedItems from '$lib/components/links/LinkedItems.svelte';
 	import { toastStore } from '@mana/shared-ui/toast';
+	import { removeTagIdWithUndo } from '$lib/data/tag-mutations';
 
 	let { navigate, params, goBack }: ViewProps = $props();
 	let taskId = $derived(params.taskId as string);
@@ -73,12 +74,9 @@
 	let taskTags = $derived(getTagsByIds(allTags, getTaskTagIds()));
 
 	async function removeTag(tagId: string) {
-		const current = getTaskTagIds();
-		const removed = current.filter((id) => id !== tagId);
-		await tasksStore.updateLabels(taskId, removed);
-		toastStore.undo('Tag entfernt', () => {
-			tasksStore.updateLabels(taskId, current);
-		});
+		await removeTagIdWithUndo(getTaskTagIds(), tagId, (next) =>
+			tasksStore.updateLabels(taskId, next)
+		);
 	}
 
 	async function saveField() {

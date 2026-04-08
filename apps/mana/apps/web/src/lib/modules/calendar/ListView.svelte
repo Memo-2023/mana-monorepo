@@ -14,6 +14,7 @@
 	import { dropTarget, dragSource } from '@mana/shared-ui/dnd';
 	import type { TagDragData } from '@mana/shared-ui/dnd';
 	import { useAllTags, getTagsByIds } from '@mana/shared-stores';
+	import { addTagId } from '$lib/data/tag-mutations';
 
 	let { navigate, goBack, params }: ViewProps = $props();
 
@@ -23,10 +24,9 @@
 	function handleTagDrop(eventId: string, tagData: TagDragData) {
 		const event = allItems.find((e) => e.id === eventId);
 		if (!event) return;
-		const current = event.tagIds ?? [];
-		if (!current.includes(tagData.id)) {
-			eventsStore.updateTagIds(eventId, [...current, tagData.id]);
-		}
+		void addTagId(event.tagIds ?? [], tagData.id, (next) =>
+			eventsStore.updateTagIds(eventId, next)
+		);
 	}
 
 	const itemsQuery = useAllCalendarItems();

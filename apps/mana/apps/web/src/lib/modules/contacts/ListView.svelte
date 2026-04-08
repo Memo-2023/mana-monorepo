@@ -14,6 +14,7 @@
 	import { dropTarget, dragSource } from '@mana/shared-ui/dnd';
 	import type { TagDragData } from '@mana/shared-ui/dnd';
 	import { useAllTags, getTagsByIds } from '@mana/shared-stores';
+	import { addTagId } from '$lib/data/tag-mutations';
 
 	let { navigate, goBack, params }: ViewProps = $props();
 
@@ -23,10 +24,9 @@
 	function handleTagDrop(contactId: string, tagData: TagDragData) {
 		const contact = contacts.find((c) => c.id === contactId);
 		if (!contact) return;
-		const current = contact.tagIds ?? [];
-		if (!current.includes(tagData.id)) {
-			contactsStore.updateTagIds(contactId, [...current, tagData.id]);
-		}
+		void addTagId(contact.tagIds ?? [], tagData.id, (next) =>
+			contactsStore.updateTagIds(contactId, next)
+		);
 	}
 
 	let contacts$ = useLiveQueryWithDefault(async () => {

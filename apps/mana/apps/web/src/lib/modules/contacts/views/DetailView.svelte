@@ -11,7 +11,7 @@
 	import type { LocalContact } from '../types';
 	import { useAllTags, getTagsByIds } from '@mana/shared-stores';
 	import LinkedItems from '$lib/components/links/LinkedItems.svelte';
-	import { toastStore } from '@mana/shared-ui/toast';
+	import { removeTagIdWithUndo } from '$lib/data/tag-mutations';
 
 	let { navigate, params, goBack }: ViewProps = $props();
 	let contactId = $derived(params.contactId as string);
@@ -58,12 +58,9 @@
 	let contactTags = $derived(getTagsByIds(allTags, detail.entity?.tagIds ?? []));
 
 	async function removeTag(tagId: string) {
-		const current = detail.entity?.tagIds ?? [];
-		const removed = current.filter((id) => id !== tagId);
-		await contactsStore.updateTagIds(contactId, removed);
-		toastStore.undo('Tag entfernt', () => {
-			contactsStore.updateTagIds(contactId, current);
-		});
+		await removeTagIdWithUndo(detail.entity?.tagIds ?? [], tagId, (next) =>
+			contactsStore.updateTagIds(contactId, next)
+		);
 	}
 
 	function initials(c: LocalContact): string {

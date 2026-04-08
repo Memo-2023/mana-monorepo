@@ -13,6 +13,7 @@
 	import type { LocalPlace, PlaceCategory, LocalLocationLog } from '../types';
 	import { useAllTags, getTagsByIds } from '@mana/shared-stores';
 	import LinkedItems from '$lib/components/links/LinkedItems.svelte';
+	import { removeTagIdWithUndo } from '$lib/data/tag-mutations';
 
 	let { navigate, params, goBack }: ViewProps = $props();
 	let placeId = $derived(params.placeId as string);
@@ -64,10 +65,8 @@
 	];
 
 	async function removeTag(tagId: string) {
-		const current = detail.entity?.tagIds ?? [];
-		await placesStore.updateTagIds(
-			placeId,
-			current.filter((id) => id !== tagId)
+		await removeTagIdWithUndo(detail.entity?.tagIds ?? [], tagId, (next) =>
+			placesStore.updateTagIds(placeId, next)
 		);
 	}
 
