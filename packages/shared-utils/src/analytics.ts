@@ -326,8 +326,7 @@ export const ManaEvents = {
 	onboardingSkipped: (atStep: number) => track.mana('onboarding_skipped', { at_step: atStep }),
 	dashboardEditToggled: (editing: boolean) => track.mana('dashboard_edit_toggled', { editing }),
 	widgetAdded: (widgetType: string) => track.mana('widget_added', { widget_type: widgetType }),
-	widgetRemoved: (widgetType: string) =>
-		track.mana('widget_removed', { widget_type: widgetType }),
+	widgetRemoved: (widgetType: string) => track.mana('widget_removed', { widget_type: widgetType }),
 	widgetResized: (widgetType: string, size: string) =>
 		track.mana('widget_resized', { widget_type: widgetType, size }),
 	creditsTabViewed: (tab: string) => track.mana('credits_tab_viewed', { tab }),
@@ -342,6 +341,15 @@ export const ManaEvents = {
 	secondModuleUsed: (appId: string) => track.mana('second_module_used', { app: appId }),
 	/** Guest user converted to registered user */
 	guestConverted: () => track.mana('guest_converted'),
+	/**
+	 * A guest tried to use a feature that requires an account.
+	 * `feature` is the stable identifier passed to `requireAuth()`,
+	 * `action` is whether the user clicked through to login or
+	 * cancelled the modal — useful for measuring the conversion
+	 * rate of the auth gate.
+	 */
+	featureBlockedByAuth: (params: { feature: string; action: 'login' | 'cancel' }) =>
+		track.mana('feature_blocked_by_auth', params),
 };
 
 /**

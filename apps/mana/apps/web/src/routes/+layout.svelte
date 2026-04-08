@@ -15,6 +15,7 @@
 	import SyncConflictToast from '$lib/components/SyncConflictToast.svelte';
 	import OfflineIndicator from '$lib/components/OfflineIndicator.svelte';
 	import PwaUpdatePrompt from '$lib/components/PwaUpdatePrompt.svelte';
+	import AuthRequiredModal from '$lib/components/auth/AuthRequiredModal.svelte';
 
 	let { children } = $props();
 
@@ -111,6 +112,7 @@
 <OfflineIndicator />
 <PwaUpdatePrompt />
 <EncryptionIntroBanner />
+<AuthRequiredModal />
 
 {#if needsRecoveryCode}
 	<RecoveryCodeUnlockModal onUnlocked={() => (needsRecoveryCode = false)} />

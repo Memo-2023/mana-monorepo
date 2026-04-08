@@ -14,6 +14,7 @@
 	import { dreamRecorder, formatElapsed } from './recorder.svelte';
 	import { MOOD_COLORS, MOOD_LABELS, type Dream, type DreamMood, type SleepQuality } from './types';
 	import type { ViewProps } from '$lib/app-registry';
+	import { requireAuth } from '$lib/auth/require-auth.svelte';
 	import { ContextMenu, type ContextMenuItem } from '@mana/shared-ui';
 	import { PencilSimple, PushPin, Trash } from '@mana/shared-icons';
 	import SymbolsView from './views/SymbolsView.svelte';
@@ -201,6 +202,19 @@
 				if (msg !== 'cancelled') recError = msg;
 			}
 		} else if (dreamRecorder.status === 'idle') {
+			// Voice recording writes to the encrypted `dreams` table — without
+			// an account the vault is locked and the very last step (the
+			// dexie write) would throw VaultLockedError after the user has
+			// already invested time recording and waiting for transcription.
+			// Gate the entry point so guests see a friendly login prompt
+			// BEFORE the mic permission request.
+			const ok = await requireAuth({
+				feature: 'dreams-voice-capture',
+				reason:
+					'Sprach-Aufnahmen werden verschlüsselt in deinem persönlichen Tagebuch gespeichert. Dafür brauchst du ein Mana-Konto.',
+			});
+			if (!ok) return;
+
 			await dreamRecorder.start();
 			if (dreamRecorder.error) {
 				recError = dreamRecorder.error;

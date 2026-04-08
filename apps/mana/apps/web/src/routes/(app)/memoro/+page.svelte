@@ -3,6 +3,7 @@
 	import { getContext } from 'svelte';
 	import { memosStore } from '$lib/modules/memoro/stores/memos.svelte';
 	import { memoRecorder, formatElapsed } from '$lib/modules/memoro/recorder.svelte';
+	import { requireAuth } from '$lib/auth/require-auth.svelte';
 	import {
 		filterBySearch,
 		filterByTag,
@@ -63,6 +64,16 @@
 				if (msg !== 'cancelled') recError = msg;
 			}
 		} else if (memoRecorder.status === 'idle') {
+			// Memos write to the encrypted `memos` table — gate guests
+			// before the mic permission request, otherwise they record
+			// audio + wait for transcription only to crash on the
+			// VaultLockedError at the very last step.
+			const ok = await requireAuth({
+				feature: 'memoro-voice-capture',
+				reason: 'Sprach-Memos werden verschlüsselt gespeichert. Dafür brauchst du ein Mana-Konto.',
+			});
+			if (!ok) return;
+
 			await memoRecorder.start();
 			if (memoRecorder.error) {
 				recError = memoRecorder.error;
