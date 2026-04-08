@@ -16,7 +16,7 @@
 
 import { noteTable } from '../collections';
 import { toNote } from '../queries';
-import type { LocalNote } from '../types';
+import type { LocalNote, Note } from '../types';
 import { encryptRecord } from '$lib/data/crypto';
 
 export const notesStore = {
@@ -36,6 +36,63 @@ export const notesStore = {
 		await encryptRecord('notes', newLocal);
 		await noteTable.add(newLocal);
 		return plaintextSnapshot;
+	},
+
+	/**
+	 * Create a note from a voice recording. Returns the placeholder note
+	 * immediately so the UI can navigate to it; the transcript is filled
+	 * in asynchronously once mana-stt returns. The placeholder title
+	 * 'Sprachnotiz' is intentionally generic — once we have a transcript,
+	 * the user can rename inline like any other note.
+	 */
+	async createFromVoice(blob: Blob, _durationMs: number, language = 'de'): Promise<Note> {
+		const note = await this.createNote({ title: 'Sprachnotiz', content: '…' });
+		// Fire-and-forget: caller has already navigated into edit mode.
+		void this.transcribeIntoNote(note.id, blob, language);
+		return note;
+	},
+
+	/**
+	 * Upload an audio blob to /api/v1/voice/transcribe and write the
+	 * transcript into an existing note. On failure, surfaces the error
+	 * inline as the note content so the user isn't left with an empty
+	 * placeholder.
+	 */
+	async transcribeIntoNote(noteId: string, blob: Blob, language?: string): Promise<void> {
+		try {
+			const form = new FormData();
+			const ext = blob.type.includes('webm')
+				? '.webm'
+				: blob.type.includes('mp4')
+					? '.m4a'
+					: '.audio';
+			form.append('file', blob, `note${ext}`);
+			if (language) form.append('language', language);
+
+			const response = await fetch('/api/v1/voice/transcribe', {
+				method: 'POST',
+				body: form,
+			});
+			if (!response.ok) {
+				const text = await response.text();
+				throw new Error(text || `HTTP ${response.status}`);
+			}
+			const result = (await response.json()) as { text: string };
+			const transcript = (result.text ?? '').trim();
+
+			// Use the first line as the title if it's short — keeps the
+			// note browseable without forcing the user to rename it.
+			const firstLine = transcript.split('\n')[0]?.trim() ?? '';
+			const title = firstLine.length > 0 && firstLine.length <= 80 ? firstLine : 'Sprachnotiz';
+
+			await this.updateNote(noteId, { title, content: transcript });
+		} catch (e) {
+			const msg = e instanceof Error ? e.message : String(e);
+			await this.updateNote(noteId, {
+				title: 'Sprachnotiz (Fehler)',
+				content: `Transkription fehlgeschlagen: ${msg}`,
+			});
+		}
 	},
 
 	async updateNote(

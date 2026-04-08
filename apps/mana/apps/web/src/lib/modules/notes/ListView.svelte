@@ -9,6 +9,7 @@
 	import type { ViewProps } from '$lib/app-registry';
 	import { ContextMenu, type ContextMenuItem } from '@mana/shared-ui';
 	import { PencilSimple, Trash, PushPin } from '@mana/shared-icons';
+	import VoiceCaptureBar from '$lib/components/voice/VoiceCaptureBar.svelte';
 
 	let { navigate, goBack, params }: ViewProps = $props();
 
@@ -31,12 +32,32 @@
 		startEdit(note);
 	}
 
+	async function handleVoiceComplete(blob: Blob, durationMs: number) {
+		const note = await notesStore.createFromVoice(blob, durationMs, 'de');
+		startEdit(note);
+	}
+
 	function startEdit(note: Note) {
 		if (editingId && editingId !== note.id) saveEdit();
 		editingId = note.id;
 		editTitle = note.title;
 		editContent = note.content;
 	}
+
+	// When a voice note's transcript arrives asynchronously while the
+	// inline editor is open, the underlying Dexie row updates but the
+	// editor's local copy stays on the "…" placeholder. Sync it back in
+	// — but ONLY while the editor still shows the placeholder, so we
+	// never overwrite content the user has already typed.
+	$effect(() => {
+		if (!editingId) return;
+		const live = notes.find((n) => n.id === editingId);
+		if (!live) return;
+		if (editContent === '…' && live.content !== '…') {
+			editTitle = live.title;
+			editContent = live.content;
+		}
+	});
 
 	async function saveEdit() {
 		if (!editingId) return;
@@ -105,6 +126,14 @@
 </script>
 
 <div class="app-view">
+	<!-- Voice capture -->
+	<VoiceCaptureBar
+		idleLabel="Notiz sprechen"
+		feature="notes-voice-capture"
+		reason="Notizen werden verschlüsselt gespeichert. Dafür brauchst du ein Mana-Konto."
+		onComplete={handleVoiceComplete}
+	/>
+
 	<!-- Quick create -->
 	<form onsubmit={(e) => e.preventDefault()} class="quick-add">
 		<span class="add-icon">+</span>
