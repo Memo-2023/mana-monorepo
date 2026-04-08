@@ -86,7 +86,10 @@ export class AccountLockoutService {
 
 	async checkLockout(email: string): Promise<{ locked: boolean; remainingSeconds?: number }> {
 		try {
-			const windowStart = new Date(Date.now() - WINDOW_MINUTES * 60 * 1000);
+			// postgres-js can't bind a JS Date directly via the drizzle sql
+			// template — it tries to byteLength() the parameter and crashes
+			// with `Received an instance of Date`. Pass an ISO string instead.
+			const windowStart = new Date(Date.now() - WINDOW_MINUTES * 60 * 1000).toISOString();
 			const result = await this.db.execute(
 				sql`SELECT COUNT(*) as count, MAX(attempted_at) as last_attempt
 				FROM auth.login_attempts
@@ -104,19 +107,38 @@ export class AccountLockoutService {
 				locked: true,
 				remainingSeconds: Math.ceil((lockoutEnd.getTime() - Date.now()) / 1000),
 			};
-		} catch {
+		} catch (error) {
+			// Fail open on lockout-check errors (we'd rather let a legit
+			// user log in than block them on a transient DB hiccup), but
+			// surface the cause so the next bug doesn't take 4 hours to
+			// find like this one did.
+			console.warn(
+				'checkLockout failed (fail-open):',
+				email,
+				error instanceof Error ? error.message : error
+			);
 			return { locked: false };
 		}
 	}
 
 	async recordAttempt(email: string, successful: boolean, ipAddress?: string) {
 		try {
+			// Don't INSERT id — auth.login_attempts.id is a serial integer
+			// (`nextval('auth.login_attempts_id_seq')` default), not a UUID.
+			// The previous code passed `gen_random_uuid()` into it and the
+			// resulting type-cast error was silently eaten by the catch
+			// below — meaning lockout's "5 failures in 15 min" check ran on
+			// an empty table forever and the lockout never actually triggered.
 			await this.db.execute(
-				sql`INSERT INTO auth.login_attempts (id, email, successful, ip_address, attempted_at)
-				VALUES (gen_random_uuid(), ${email}, ${successful}, ${ipAddress}, NOW())`
+				sql`INSERT INTO auth.login_attempts (email, successful, ip_address, attempted_at)
+				VALUES (${email}, ${successful}, ${ipAddress ?? null}, NOW())`
 			);
-		} catch {
-			// Non-critical
+		} catch (error) {
+			console.warn(
+				'Failed to record login attempt (non-critical):',
+				email,
+				error instanceof Error ? error.message : error
+			);
 		}
 	}
 

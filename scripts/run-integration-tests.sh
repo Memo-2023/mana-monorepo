@@ -68,9 +68,9 @@ echo "==> Restarting mana-auth so it picks up the freshly-created tables"
 $DOCKER compose -f "$COMPOSE_FILE" restart mana-auth >/dev/null
 $DOCKER compose -f "$COMPOSE_FILE" up -d --wait mana-auth
 
-echo "==> Running auth-flow integration test"
+echo "==> Running integration tests"
 cd "$TEST_DIR"
-bun test auth-flow.test.ts
+bun test auth-flow.test.ts auth-failures.test.ts
 
 echo
 echo "✅ integration tests passed"
