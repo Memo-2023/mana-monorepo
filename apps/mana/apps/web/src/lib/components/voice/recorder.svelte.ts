@@ -1,8 +1,29 @@
 /**
- * Browser audio recorder for the Memoro voice-capture feature.
+ * Shared browser audio recorder for all voice-capture features.
  *
- * Uses MediaRecorder under the hood. Exposes a small reactive state object
- * that components can read to render the mic button state and elapsed time.
+ * Originally lived as `dreams/recorder.svelte.ts` and
+ * `memoro/recorder.svelte.ts` — two literal copies that diverged only
+ * by the class name and a few comments. Extracted to one shared
+ * singleton + state machine so:
+ *
+ *  - New voice-capture features (e.g. notes voice memos, todo voice
+ *    quick-add, chat voice messages) just import this and drop a
+ *    `<VoiceCaptureBar>` into their UI without copy-pasting 200 LOC
+ *    of MediaRecorder boilerplate.
+ *  - There is exactly ONE recording at a time across the whole app,
+ *    which matches the physical reality (one mic, one MediaStream).
+ *    The state machine enforces it explicitly instead of relying on
+ *    `getUserMedia()` to fail at the second simultaneous call.
+ *  - Bug fixes (sticky-deny detection, error message wording, secure
+ *    context check, …) live in one place. The 2026-04-08 mic-button
+ *    investigation surfaced three orthogonal issues
+ *    (Permissions-Policy header, mount-time notification request,
+ *    dev SW caching) — all of which would have had to be debugged
+ *    twice with the old per-module recorders.
+ *
+ * Use it via `<VoiceCaptureBar>` in `$lib/components/voice/`. Direct
+ * use is also supported for advanced cases (analysers, custom UI),
+ * but most call sites only need the bar.
  */
 
 export type RecorderStatus = 'idle' | 'requesting' | 'recording' | 'stopping';
@@ -13,7 +34,7 @@ export interface RecordingResult {
 	mimeType: string;
 }
 
-class MemoRecorder {
+class VoiceRecorder {
 	status = $state<RecorderStatus>('idle');
 	error = $state<string | null>(null);
 	elapsedMs = $state(0);
@@ -41,6 +62,8 @@ class MemoRecorder {
 	async start(options: { force?: boolean } = {}): Promise<void> {
 		if (this.status !== 'idle') return;
 
+		// Secure context check — getUserMedia is silently unavailable
+		// over plain http (except localhost), with no permission prompt.
 		if (!this.isSecureContext) {
 			const host = typeof window !== 'undefined' ? window.location.host : '';
 			this.error = `Mikrofon-Zugriff braucht eine sichere Verbindung. Öffne die App über https:// oder http://localhost statt http://${host}.`;
@@ -52,6 +75,12 @@ class MemoRecorder {
 			return;
 		}
 
+		// Sticky deny check — Permissions API tells us if the browser
+		// will silently reject getUserMedia without showing a prompt.
+		// On macOS this is most often a SYSTEM-level block, not a
+		// per-site setting, which is why no lock icon helps. Skip the
+		// check if the caller explicitly forces a retry to surface the
+		// real error.
 		if (!options.force) {
 			const stickyDenied = await this.#checkStickyDeny();
 			if (stickyDenied) {
@@ -235,7 +264,14 @@ function pickSupportedMimeType(): string | null {
 	return null;
 }
 
-export const memoRecorder = new MemoRecorder();
+/**
+ * Single shared recorder. The browser physically only allows one
+ * active recording at a time anyway (one mic, one MediaStream); the
+ * singleton makes that constraint explicit and visible to UI code so
+ * a second module can render its mic button as disabled while another
+ * module is still recording.
+ */
+export const voiceRecorder = new VoiceRecorder();
 
 export function formatElapsed(ms: number): string {
 	const totalSec = Math.floor(ms / 1000);

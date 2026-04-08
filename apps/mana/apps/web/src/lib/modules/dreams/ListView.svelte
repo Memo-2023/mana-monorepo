@@ -11,10 +11,9 @@
 		useAllDreams,
 	} from './queries';
 	import { dreamsStore } from './stores/dreams.svelte';
-	import { dreamRecorder, formatElapsed } from './recorder.svelte';
+	import VoiceCaptureBar from '$lib/components/voice/VoiceCaptureBar.svelte';
 	import { MOOD_COLORS, MOOD_LABELS, type Dream, type DreamMood, type SleepQuality } from './types';
 	import type { ViewProps } from '$lib/app-registry';
-	import { requireAuth } from '$lib/auth/require-auth.svelte';
 	import { ContextMenu, type ContextMenuItem } from '@mana/shared-ui';
 	import { PencilSimple, PushPin, Trash } from '@mana/shared-icons';
 	import SymbolsView from './views/SymbolsView.svelte';
@@ -182,56 +181,14 @@
 	const MOODS: DreamMood[] = ['angenehm', 'neutral', 'unangenehm', 'albtraum'];
 
 	// ── Voice capture ─────────────────────────────────────────
-	let recError = $state<string | null>(null);
-
-	async function handleMicClick() {
-		recError = null;
-		if (dreamRecorder.status === 'recording') {
-			try {
-				const result = await dreamRecorder.stop();
-				if (result.durationMs < 500) {
-					recError = 'Aufnahme war zu kurz.';
-					return;
-				}
-				const dream = await dreamsStore.createFromVoice(result.blob, result.durationMs, 'de');
-				// Open the dream so the user sees the transcript appear inline
-				viewMode = 'list';
-				startEdit(dream);
-			} catch (e) {
-				const msg = e instanceof Error ? e.message : String(e);
-				if (msg !== 'cancelled') recError = msg;
-			}
-		} else if (dreamRecorder.status === 'idle') {
-			// Voice recording writes to the encrypted `dreams` table — without
-			// an account the vault is locked and the very last step (the
-			// dexie write) would throw VaultLockedError after the user has
-			// already invested time recording and waiting for transcription.
-			// Gate the entry point so guests see a friendly login prompt
-			// BEFORE the mic permission request.
-			const ok = await requireAuth({
-				feature: 'dreams-voice-capture',
-				reason:
-					'Sprach-Aufnahmen werden verschlüsselt in deinem persönlichen Tagebuch gespeichert. Dafür brauchst du ein Mana-Konto.',
-			});
-			if (!ok) return;
-
-			await dreamRecorder.start();
-			if (dreamRecorder.error) {
-				recError = dreamRecorder.error;
-			}
-		}
-	}
-
-	async function forceRetryMic() {
-		recError = null;
-		await dreamRecorder.start({ force: true });
-		if (dreamRecorder.error) {
-			recError = dreamRecorder.error;
-		}
-	}
-
-	function cancelRecording() {
-		dreamRecorder.cancel();
+	// All MediaRecorder + auth gating + error handling lives in
+	// <VoiceCaptureBar> in $lib/components/voice/. This module just
+	// passes the host-specific bits via props and a callback.
+	async function handleVoiceComplete(blob: Blob, durationMs: number) {
+		const dream = await dreamsStore.createFromVoice(blob, durationMs, 'de');
+		// Open the dream so the user sees the transcript appear inline
+		viewMode = 'list';
+		startEdit(dream);
 	}
 </script>
 
@@ -259,39 +216,12 @@
 		/>
 	{:else}
 		<!-- Voice capture -->
-		<div class="capture-row">
-			<button
-				class="mic-btn"
-				class:recording={dreamRecorder.status === 'recording'}
-				class:busy={dreamRecorder.status === 'requesting' || dreamRecorder.status === 'stopping'}
-				onclick={handleMicClick}
-				disabled={dreamRecorder.status === 'requesting' || dreamRecorder.status === 'stopping'}
-				aria-label={dreamRecorder.status === 'recording' ? 'Aufnahme beenden' : 'Aufnahme starten'}
-			>
-				{#if dreamRecorder.status === 'recording'}
-					<span class="mic-stop"></span>
-					<span class="mic-time">{formatElapsed(dreamRecorder.elapsedMs)}</span>
-				{:else if dreamRecorder.status === 'requesting'}
-					<span class="mic-icon">…</span>
-					<span class="mic-time">Mikro öffnen…</span>
-				{:else if dreamRecorder.status === 'stopping'}
-					<span class="mic-icon">…</span>
-					<span class="mic-time">Verarbeite…</span>
-				{:else}
-					<span class="mic-icon">&#x1f3a4;</span>
-					<span class="mic-time">Traum sprechen</span>
-				{/if}
-			</button>
-			{#if dreamRecorder.status === 'recording'}
-				<button class="mic-cancel" onclick={cancelRecording} title="Aufnahme verwerfen"> × </button>
-			{/if}
-		</div>
-		{#if recError}
-			<div class="rec-error">
-				<p>{recError}</p>
-				<button class="rec-retry" onclick={forceRetryMic}>Trotzdem versuchen</button>
-			</div>
-		{/if}
+		<VoiceCaptureBar
+			idleLabel="Traum sprechen"
+			feature="dreams-voice-capture"
+			reason="Sprach-Aufnahmen werden verschlüsselt in deinem persönlichen Tagebuch gespeichert. Dafür brauchst du ein Mana-Konto."
+			onComplete={handleVoiceComplete}
+		/>
 
 		<!-- Quick create -->
 		<form onsubmit={(e) => e.preventDefault()} class="quick-add">
@@ -573,119 +503,7 @@
 		height: 100%;
 	}
 
-	/* ── Voice capture ─────────────────────────── */
-	.capture-row {
-		display: flex;
-		align-items: center;
-		gap: 0.375rem;
-	}
-
-	.mic-btn {
-		flex: 1;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 0.5rem;
-		padding: 0.625rem 0.875rem;
-		border-radius: 0.5rem;
-		border: 1px solid rgba(99, 102, 241, 0.2);
-		background: rgba(99, 102, 241, 0.04);
-		color: #6366f1;
-		font-size: 0.8125rem;
-		font-weight: 500;
-		cursor: pointer;
-		transition: all 0.15s;
-	}
-	.mic-btn:hover:not(:disabled) {
-		background: rgba(99, 102, 241, 0.08);
-		border-color: #6366f1;
-	}
-	.mic-btn:disabled {
-		opacity: 0.6;
-		cursor: wait;
-	}
-	.mic-btn.recording {
-		background: rgba(239, 68, 68, 0.08);
-		border-color: rgba(239, 68, 68, 0.4);
-		color: #ef4444;
-		animation: rec-pulse 1.5s ease-in-out infinite;
-	}
-	@keyframes rec-pulse {
-		0%,
-		100% {
-			background: rgba(239, 68, 68, 0.08);
-		}
-		50% {
-			background: rgba(239, 68, 68, 0.16);
-		}
-	}
-
-	.mic-icon {
-		font-size: 1rem;
-	}
-	.mic-stop {
-		display: inline-block;
-		width: 10px;
-		height: 10px;
-		background: #ef4444;
-		border-radius: 2px;
-	}
-	.mic-time {
-		font-variant-numeric: tabular-nums;
-	}
-
-	.mic-cancel {
-		width: 32px;
-		height: 32px;
-		border-radius: 0.375rem;
-		border: 1px solid rgba(0, 0, 0, 0.08);
-		background: transparent;
-		color: #9ca3af;
-		font-size: 1.125rem;
-		line-height: 1;
-		cursor: pointer;
-	}
-	.mic-cancel:hover {
-		color: #ef4444;
-		border-color: #ef4444;
-	}
-	:global(.dark) .mic-cancel {
-		border-color: rgba(255, 255, 255, 0.1);
-	}
-
-	.rec-error {
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-		padding: 0.625rem 0.75rem;
-		border-radius: 0.375rem;
-		background: rgba(239, 68, 68, 0.06);
-		border: 1px solid rgba(239, 68, 68, 0.2);
-	}
-	.rec-error p {
-		font-size: 0.6875rem;
-		color: #b91c1c;
-		margin: 0;
-		white-space: pre-line;
-		line-height: 1.5;
-	}
-	:global(.dark) .rec-error p {
-		color: #fca5a5;
-	}
-	.rec-retry {
-		align-self: flex-start;
-		padding: 0.25rem 0.625rem;
-		border-radius: 0.25rem;
-		border: 1px solid rgba(239, 68, 68, 0.3);
-		background: transparent;
-		color: #ef4444;
-		font-size: 0.6875rem;
-		font-weight: 500;
-		cursor: pointer;
-	}
-	.rec-retry:hover {
-		background: rgba(239, 68, 68, 0.08);
-	}
+	/* Voice capture styles live in $lib/components/voice/VoiceCaptureBar.svelte */
 
 	/* ── View Tabs ─────────────────────────────── */
 	.view-tabs {

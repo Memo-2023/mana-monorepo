@@ -7,10 +7,22 @@
 	import { db } from '$lib/data/database';
 	import type { ViewProps } from '$lib/app-registry';
 	import type { LocalMemo } from './types';
+	import { memosStore } from './stores/memos.svelte';
+	import VoiceCaptureBar from '$lib/components/voice/VoiceCaptureBar.svelte';
 
 	let { navigate, goBack, params }: ViewProps = $props();
 
 	let memos = $state<LocalMemo[]>([]);
+
+	async function handleVoiceComplete(blob: Blob, durationMs: number) {
+		const memo = await memosStore.createFromVoice(blob, durationMs, 'de');
+		// Open the new memo so the user sees the transcription land
+		navigate('detail', {
+			memoId: memo.id,
+			_siblingIds: sorted.map((m) => m.id),
+			_siblingKey: 'memoId',
+		});
+	}
 
 	$effect(() => {
 		const sub = liveQuery(async () => {
@@ -47,6 +59,13 @@
 </script>
 
 <div class="flex h-full flex-col gap-3 p-3 sm:p-4">
+	<VoiceCaptureBar
+		idleLabel="Memo sprechen"
+		feature="memoro-voice-capture"
+		reason="Sprach-Memos werden verschlüsselt gespeichert. Dafür brauchst du ein Mana-Konto."
+		onComplete={handleVoiceComplete}
+	/>
+
 	<div class="flex gap-3 text-xs text-white/40">
 		<span>{memos.length} Memos</span>
 		<span>{pinned.length} angepinnt</span>
