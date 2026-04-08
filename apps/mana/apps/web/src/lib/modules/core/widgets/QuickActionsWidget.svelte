@@ -3,7 +3,9 @@
 	 * QuickActionsWidget — Schnellzugriff-Buttons für häufige Aktionen.
 	 *
 	 * Navigiert direkt zu den jeweiligen App-Routen innerhalb der Unified App.
+	 * Thin wrapper around <QuickActionsList> in compact mode.
 	 */
+	import QuickActionsList from '$lib/components/QuickActionsList.svelte';
 
 	const actions = [
 		{
@@ -39,23 +41,4 @@
 	];
 </script>
 
-<div>
-	<div class="mb-3">
-		<h3 class="flex items-center gap-2 text-lg font-semibold">Schnellzugriff</h3>
-	</div>
-
-	<div class="space-y-1">
-		{#each actions as action}
-			<a
-				href={action.href}
-				class="flex items-center gap-3 rounded-lg p-2.5 transition-colors hover:bg-surface-hover"
-			>
-				<span class="text-xl">{@html action.icon}</span>
-				<div>
-					<p class="text-sm font-medium">{action.label}</p>
-					<p class="text-xs text-muted-foreground">{action.description}</p>
-				</div>
-			</a>
-		{/each}
-	</div>
-</div>
+<QuickActionsList title="Schnellzugriff" {actions} compact />

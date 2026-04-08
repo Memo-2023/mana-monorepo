@@ -1,9 +1,12 @@
 <script lang="ts">
 	/**
-	 * QuickActionsWidget - Quick action links
+	 * QuickActionsWidget - Quick action links (dashboard variant, i18n).
+	 *
+	 * Thin wrapper around <QuickActionsList>. Resolves i18n keys to literal
+	 * strings before passing the actions array down.
 	 */
-
 	import { _ } from 'svelte-i18n';
+	import QuickActionsList, { type QuickAction } from '$lib/components/QuickActionsList.svelte';
 
 	const actions = [
 		{
@@ -25,25 +28,19 @@
 			descKey: 'dashboard.widgets.quick_actions.profile_desc',
 		},
 	];
+
+	let resolved = $derived<QuickAction[]>(
+		actions.map((a) => ({
+			href: a.href,
+			icon: a.icon,
+			label: $_(a.labelKey),
+			description: $_(a.descKey),
+		}))
+	);
 </script>
 
-<div>
-	<h3 class="mb-3 flex items-center gap-2 text-lg font-semibold">
-		<span>⚡</span>
-		{$_('dashboard.widgets.quick_actions.title')}
-	</h3>
-
-	<div class="space-y-2">
-		{#each actions as action}
-			<a href={action.href} class="block rounded-lg p-3 transition-colors hover:bg-surface-hover">
-				<div class="flex items-center">
-					<span class="text-2xl">{action.icon}</span>
-					<div class="ml-3">
-						<p class="font-medium">{$_(action.labelKey)}</p>
-						<p class="text-sm text-muted-foreground">{$_(action.descKey)}</p>
-					</div>
-				</div>
-			</a>
-		{/each}
-	</div>
-</div>
+<QuickActionsList
+	title={$_('dashboard.widgets.quick_actions.title')}
+	titleIcon="⚡"
+	actions={resolved}
+/>
