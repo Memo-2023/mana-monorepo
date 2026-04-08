@@ -1,6 +1,6 @@
 """
 F5-TTS Service for voice cloning synthesis.
-Uses f5-tts-mlx optimized for Apple Silicon.
+CUDA version using f5-tts PyTorch package.
 """
 
 import logging
@@ -15,14 +15,12 @@ import numpy as np
 logger = logging.getLogger(__name__)
 
 # Global singleton for lazy initialization
-_f5_model = None
-_f5_model_name = None
+_f5_api = None
 
 # Default model
-DEFAULT_F5_MODEL = os.getenv("F5_MODEL", "lucasnewman/f5-tts-mlx")
+DEFAULT_F5_MODEL = os.getenv("F5_MODEL", "F5-TTS")
 
 # Default generation parameters
-DEFAULT_DURATION = 10.0  # seconds
 DEFAULT_STEPS = 32
 DEFAULT_CFG_STRENGTH = 2.0
 DEFAULT_SWAY_COEF = -1.0
@@ -40,35 +38,25 @@ class F5Result:
 
 
 def get_f5_model(model_name: str = DEFAULT_F5_MODEL):
-    """
-    Get or create F5-TTS model instance (singleton pattern).
+    """Get or create F5-TTS API instance (singleton pattern)."""
+    global _f5_api
 
-    Args:
-        model_name: HuggingFace model identifier
-
-    Returns:
-        F5TTS model instance
-    """
-    global _f5_model, _f5_model_name
-
-    # Return existing model if same model name
-    if _f5_model is not None and _f5_model_name == model_name:
-        return _f5_model
+    if _f5_api is not None:
+        return _f5_api
 
     logger.info(f"Loading F5-TTS model: {model_name}")
 
     try:
-        from f5_tts_mlx import F5TTS
+        from f5_tts.api import F5TTS
 
-        _f5_model = F5TTS(model_name=model_name)
-        _f5_model_name = model_name
-        logger.info("F5-TTS model loaded successfully")
-        return _f5_model
+        _f5_api = F5TTS(model_type="F5-TTS")
+        logger.info("F5-TTS model loaded successfully (CUDA)")
+        return _f5_api
 
     except ImportError as e:
-        logger.error(f"Failed to import f5_tts_mlx: {e}")
+        logger.error(f"Failed to import f5_tts: {e}")
         raise RuntimeError(
-            "f5-tts-mlx not installed. Run: pip install f5-tts-mlx"
+            "f5-tts not installed. Run: pip install f5-tts"
         )
     except Exception as e:
         logger.error(f"Failed to load F5-TTS model: {e}")
@@ -77,7 +65,7 @@ def get_f5_model(model_name: str = DEFAULT_F5_MODEL):
 
 def is_f5_loaded() -> bool:
     """Check if F5-TTS model is currently loaded."""
-    return _f5_model is not None
+    return _f5_api is not None
 
 
 async def synthesize_f5(
@@ -103,13 +91,14 @@ async def synthesize_f5(
         cfg_strength: Classifier-free guidance strength
         sway_coef: Sway sampling coefficient
         speed: Speech speed multiplier
-        model_name: HuggingFace model identifier
+        model_name: Model identifier
 
     Returns:
         F5Result with audio data
     """
-    # Get model
-    model = get_f5_model(model_name)
+    import asyncio
+
+    api = get_f5_model(model_name)
 
     logger.info(
         f"Synthesizing with F5-TTS: text_length={len(text)}, "
@@ -117,17 +106,26 @@ async def synthesize_f5(
     )
 
     try:
-        # Generate audio
-        audio, sample_rate = model.generate(
-            text=text,
-            ref_audio_path=reference_audio_path,
-            ref_audio_text=reference_text,
-            duration=duration,
-            steps=steps,
-            cfg_strength=cfg_strength,
-            sway_coef=sway_coef,
-            speed=speed,
-        )
+        # F5-TTS API infer method (runs synchronously, offload to thread)
+        loop = asyncio.get_event_loop()
+
+        def _generate():
+            wav, sr, _ = api.infer(
+                ref_file=reference_audio_path,
+                ref_text=reference_text,
+                gen_text=text,
+                nfe_step=steps,
+                cfg_strength=cfg_strength,
+                sway_sampling_coeff=sway_coef,
+                speed=speed,
+            )
+            return wav, sr
+
+        audio, sample_rate = await loop.run_in_executor(None, _generate)
+
+        # Convert to numpy if needed
+        if not isinstance(audio, np.ndarray):
+            audio = np.array(audio, dtype=np.float32)
 
         # Calculate duration
         audio_duration = len(audio) / sample_rate
@@ -152,24 +150,8 @@ async def synthesize_f5_from_bytes(
     audio_extension: str = ".wav",
     **kwargs,
 ) -> F5Result:
-    """
-    Synthesize speech using F5-TTS with reference audio as bytes.
-
-    Args:
-        text: Text to synthesize
-        reference_audio_bytes: Reference audio as bytes
-        reference_text: Transcript of the reference audio
-        audio_extension: File extension for temp file
-        **kwargs: Additional arguments passed to synthesize_f5
-
-    Returns:
-        F5Result with audio data
-    """
-    # Save reference audio to temp file
-    with tempfile.NamedTemporaryFile(
-        suffix=audio_extension,
-        delete=False,
-    ) as tmp:
+    """Synthesize speech using F5-TTS with reference audio as bytes."""
+    with tempfile.NamedTemporaryFile(suffix=audio_extension, delete=False) as tmp:
         tmp.write(reference_audio_bytes)
         tmp_path = tmp.name
 
@@ -182,7 +164,6 @@ async def synthesize_f5_from_bytes(
         )
         return result
     finally:
-        # Clean up temp file
         try:
             Path(tmp_path).unlink()
         except Exception:
@@ -190,18 +171,7 @@ async def synthesize_f5_from_bytes(
 
 
 def estimate_duration(text: str, speed: float = 1.0) -> float:
-    """
-    Estimate audio duration from text.
-
-    Args:
-        text: Text to synthesize
-        speed: Speech speed multiplier
-
-    Returns:
-        Estimated duration in seconds
-    """
-    # Rough estimate: ~150 words per minute at normal speed
-    # Average word length: ~5 characters
+    """Estimate audio duration from text."""
     words = len(text) / 5
     minutes = words / 150
     seconds = minutes * 60

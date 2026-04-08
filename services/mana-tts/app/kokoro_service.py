@@ -1,6 +1,6 @@
 """
 Kokoro TTS Service for fast preset voice synthesis.
-Uses mlx-audio's Kokoro implementation optimized for Apple Silicon.
+CUDA version using kokoro PyTorch package.
 """
 
 import logging
@@ -12,11 +12,10 @@ import numpy as np
 logger = logging.getLogger(__name__)
 
 # Global singleton for lazy initialization
-_kokoro_model = None
-_kokoro_model_name = None
+_kokoro_pipeline = None
 
 # Default model
-DEFAULT_KOKORO_MODEL = "mlx-community/Kokoro-82M-bf16"
+DEFAULT_KOKORO_MODEL = "hexgrad/Kokoro-82M"
 
 # Available Kokoro voices (American Female/Male, British Female/Male)
 KOKORO_VOICES = {
@@ -67,35 +66,25 @@ class KokoroResult:
 
 
 def get_kokoro_model(model_name: str = DEFAULT_KOKORO_MODEL):
-    """
-    Get or create Kokoro model instance (singleton pattern).
+    """Get or create Kokoro pipeline instance (singleton pattern)."""
+    global _kokoro_pipeline
 
-    Args:
-        model_name: HuggingFace model identifier
-
-    Returns:
-        Kokoro model instance
-    """
-    global _kokoro_model, _kokoro_model_name
-
-    # Return existing model if same model name
-    if _kokoro_model is not None and _kokoro_model_name == model_name:
-        return _kokoro_model
+    if _kokoro_pipeline is not None:
+        return _kokoro_pipeline
 
     logger.info(f"Loading Kokoro model: {model_name}")
 
     try:
-        from mlx_audio.tts import load
+        from kokoro import KPipeline
 
-        _kokoro_model = load(model_name)
-        _kokoro_model_name = model_name
-        logger.info("Kokoro model loaded successfully")
-        return _kokoro_model
+        _kokoro_pipeline = KPipeline(lang_code="a")  # 'a' for American English
+        logger.info("Kokoro pipeline loaded successfully")
+        return _kokoro_pipeline
 
     except ImportError as e:
-        logger.error(f"Failed to import mlx_audio: {e}")
+        logger.error(f"Failed to import kokoro: {e}")
         raise RuntimeError(
-            "mlx-audio not installed. Run: pip install mlx-audio"
+            "kokoro not installed. Run: pip install kokoro"
         )
     except Exception as e:
         logger.error(f"Failed to load Kokoro model: {e}")
@@ -104,7 +93,7 @@ def get_kokoro_model(model_name: str = DEFAULT_KOKORO_MODEL):
 
 def is_kokoro_loaded() -> bool:
     """Check if Kokoro model is currently loaded."""
-    return _kokoro_model is not None
+    return _kokoro_pipeline is not None
 
 
 def get_available_voices() -> dict[str, str]:
@@ -125,7 +114,7 @@ async def synthesize_kokoro(
         text: Text to synthesize
         voice: Voice ID from KOKORO_VOICES
         speed: Speech speed multiplier (0.5-2.0)
-        model_name: HuggingFace model identifier
+        model_name: Model identifier
 
     Returns:
         KokoroResult with audio data
@@ -139,29 +128,18 @@ async def synthesize_kokoro(
     speed = max(0.5, min(2.0, speed))
 
     # Get model
-    model = get_kokoro_model(model_name)
+    pipeline = get_kokoro_model(model_name)
 
     logger.info(f"Synthesizing with Kokoro: voice={voice}, speed={speed}, text_length={len(text)}")
 
     try:
-        # Generate audio using mlx-audio's generate method
-        # Returns a generator of GenerationResult objects
-        result_gen = model.generate(
-            text=text,
-            voice=voice,
-            speed=speed,
-        )
-
-        # Collect all audio chunks from the generator
+        # Generate audio using kokoro pipeline
         audio_chunks = []
-        sample_rate = 24000  # Default, will be updated from result
+        sample_rate = 24000  # Kokoro default
 
-        for result in result_gen:
-            # Each result has audio, sample_rate, audio_duration (string)
-            sample_rate = result.sample_rate
-
-            # Convert MLX array to numpy
-            audio_np = np.array(result.audio, dtype=np.float32)
+        for result in pipeline(text, voice=voice, speed=speed):
+            # result is a KPipelineResult with .audio (tensor) and .graphemes/.phonemes
+            audio_np = result.audio.numpy()
             audio_chunks.append(audio_np)
 
         # Concatenate all chunks
