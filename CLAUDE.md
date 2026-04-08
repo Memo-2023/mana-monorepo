@@ -145,6 +145,7 @@ MinIO (Docker, S3-compatible) in both local and prod. Console: http://localhost:
 | `@mana/shared-theme` | Theme config |
 | `@mana/shared-i18n` | i18n |
 | `@mana/local-store` | Local-first store primitives — used by unified Mana, manavoxel, arcade, and shared-uload/-stores/-links |
+| `@mana/local-llm` | Browser-local LLM inference (transformers.js + Gemma 4 E2B, WebGPU). Powers `/llm-test` and the playground module. See [`packages/local-llm/CLAUDE.md`](packages/local-llm/CLAUDE.md) for the CSP requirements and the transformers.js v4 gotchas. |
 
 ## Adding Dependencies
 
