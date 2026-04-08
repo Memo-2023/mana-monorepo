@@ -45,7 +45,7 @@ Go replacement for the NestJS mana-notify service. Unified notification microser
 
 | Channel | Service | Worker Concurrency | Max Retries |
 |---------|---------|-------------------|-------------|
-| Email | Brevo SMTP | 5 | 3 |
+| Email | Stalwart SMTP (self-hosted, see `docs/MAIL_SERVER.md`) | 5 | 3 |
 | Push | Expo Push API | 10 | 3 |
 | Matrix | Matrix Homeserver API | 5 | 3 |
 | Webhook | HTTP callback | 10 | 5 |
@@ -66,7 +66,7 @@ go test ./...                # Test
 | `DATABASE_URL` | postgresql://...localhost:5432/mana_notify | PostgreSQL |
 | `SERVICE_KEY` | dev-service-key | Service-to-service auth |
 | `MANA_AUTH_URL` | http://localhost:3001 | JWT validation |
-| `SMTP_HOST` | smtp-relay.brevo.com | SMTP host |
+| `SMTP_HOST` | stalwart | SMTP host (self-hosted Stalwart) |
 | `SMTP_PORT` | 587 | SMTP port |
 | `SMTP_USER` | | SMTP username |
 | `SMTP_PASSWORD` | | SMTP password |

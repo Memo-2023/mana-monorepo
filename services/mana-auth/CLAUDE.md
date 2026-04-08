@@ -1,6 +1,6 @@
 # mana-auth
 
-Central authentication service for the Mana ecosystem. Rewritten from NestJS (mana-auth) to Hono + Bun.
+Central authentication service for the Mana ecosystem. Hono + Bun + Better Auth.
 
 ## Tech Stack
 
@@ -11,9 +11,9 @@ Central authentication service for the Mana ecosystem. Rewritten from NestJS (ma
 | **Auth** | Better Auth (native Hono handler) |
 | **Database** | PostgreSQL + Drizzle ORM |
 | **JWT** | EdDSA via Better Auth JWT plugin |
-| **Email** | Nodemailer + Brevo SMTP |
+| **Email** | Nodemailer → self-hosted Stalwart SMTP (`docs/MAIL_SERVER.md`) |
 
-## Port: 3001 (same as mana-auth — drop-in replacement)
+## Port: 3001
 
 ## Better Auth Plugins
 
@@ -99,7 +99,7 @@ NODE_ENV=production
 MANA_SERVICE_KEY=...
 MANA_CREDITS_URL=http://mana-credits:3061
 MANA_SUBSCRIPTIONS_URL=http://mana-subscriptions:3063
-SMTP_HOST=smtp-relay.brevo.com
+SMTP_HOST=stalwart            # self-hosted on Mac Mini, see docs/MAIL_SERVER.md
 SMTP_PORT=587
 SMTP_USER=...
 SMTP_PASS=...

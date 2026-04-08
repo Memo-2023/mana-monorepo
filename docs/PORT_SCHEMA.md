@@ -1,8 +1,28 @@
 # Port Schema
 
-Canonical port assignments for all Mana services. This is the single source of truth.
+> ⚠️ **ASPIRATIONAL — does not match running services as of 2026-04-08.**
+>
+> This document describes a *planned* reorganization of port assignments
+> into clean ranges (3000–3009 core, 3010–3019 infra, 3020–3029 AI/ML, …).
+> The reorg has not been executed: the actual ports the services bind to
+> live in their `app/main.py` / `start.sh` / `config.ts` and currently
+> follow a different scheme. Per-service ports are documented in each
+> `services/*/CLAUDE.md`. Notable real-world ports today:
+>
+> - mana-auth `3001`, mana-credits `3061`, mana-user `3062`,
+>   mana-subscriptions `3063`, mana-analytics `3064`, mana-events `3065`
+> - mana-media `3015`, mana-sync `3050`, mana-search `3021`,
+>   mana-notify `3040`, mana-crawler `3023`
+> - mana-llm `3025`, mana-stt `3020`, mana-tts `3022`,
+>   mana-image-gen `3026`, mana-video-gen `3026` ⚠️ **collision**,
+>   mana-voice-bot `3050` ⚠️ **collision with mana-sync**
+>
+> Two real port collisions exist (image-gen ↔ video-gen, voice-bot ↔ sync)
+> that are masked by the fact that they don't all run on the same host
+> today. Either execute the reorg below, or pick non-colliding ports and
+> update this doc to match reality.
 
-**Last updated:** 2026-03-28
+**Originally drafted:** 2026-03-28
 
 ## Principles
 
