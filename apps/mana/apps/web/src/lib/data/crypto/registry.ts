@@ -264,6 +264,13 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	// join table (placeId / tagId), zero user-typed content. Same pattern
 	// as manaLinks.
 
+	// ─── Playground ──────────────────────────────────────────
+	// Saved system-prompt snippets. `name` is the user's label and
+	// `systemPrompt` is the actual prompt body — both are user-typed
+	// free-form text and the whole point of having a vault. Indexed
+	// columns (isPinned, order) stay plaintext for sort.
+	playgroundSnippets: { enabled: true, fields: ['name', 'systemPrompt'] },
+
 	// ─── TimeBlocks (cross-module hub) ───────────────────────
 	// Phase 7.1: encrypted alongside tasks + calendar.events + habits
 	// because the consumer modules denormalize their title/description

@@ -256,6 +256,11 @@ db.version(1).stores({
 	locationLogs: 'id, placeId, timestamp, [placeId+timestamp]',
 	placeTags: 'id, placeId, tagId, [placeId+tagId]',
 
+	// ─── Playground (appId: 'playground') ───
+	// Saved system-prompt snippets. `name` IS encrypted but no .where('name')
+	// call site exists — same rationale as files.name / places.name above.
+	playgroundSnippets: 'id, isPinned, order, [isPinned+order]',
+
 	// ─── TimeBlocks (appId: 'timeblocks') — unified time model ───
 	// Cross-cutting scheduling table that calendar events, time entries,
 	// habit logs and scheduled tasks all project into. See PROD_READINESS
