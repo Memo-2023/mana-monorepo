@@ -108,6 +108,14 @@ window.__PUBLIC_GLITCHTIP_DSN__ = ${JSON.stringify(PUBLIC_GLITCHTIP_DSN)};
 			PUBLIC_MANA_LLM_URL_CLIENT,
 			PUBLIC_MANA_EVENTS_URL_CLIENT,
 			'wss://sync.mana.how',
+			// @mana/local-llm (WebLLM) downloads model weights + config from
+			// the mlc-ai HuggingFace repos and the WebGPU model library WASM
+			// from the binary-mlc-llm-libs GitHub raw host.
+			'https://huggingface.co',
+			'https://*.huggingface.co',
+			'https://cdn-lfs.huggingface.co',
+			'https://cdn-lfs-us-1.huggingface.co',
+			'https://raw.githubusercontent.com',
 			// Allow all localhost ports in development
 			...(isDev ? ['http://localhost:*', 'ws://localhost:*'] : []),
 		].filter(Boolean),

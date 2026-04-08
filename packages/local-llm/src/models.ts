@@ -20,6 +20,20 @@ export const MODELS = {
 		downloadSizeMb: 400,
 		ramUsageMb: 800,
 	},
+	/** Google Gemma 2 — strong general-purpose model, similar size class to Qwen 1.5B */
+	'gemma-2-2b': {
+		modelId: 'gemma-2-2b-it-q4f16_1-MLC',
+		displayName: 'Gemma 2 2B',
+		downloadSizeMb: 1400,
+		ramUsageMb: 2200,
+	},
+	/** Google Gemma 2 9B — much higher quality, needs a beefy GPU (~6GB VRAM) */
+	'gemma-2-9b': {
+		modelId: 'gemma-2-9b-it-q4f16_1-MLC',
+		displayName: 'Gemma 2 9B',
+		downloadSizeMb: 5300,
+		ramUsageMb: 6500,
+	},
 } as const satisfies Record<string, ModelConfig>;
 
 export type ModelKey = keyof typeof MODELS;
