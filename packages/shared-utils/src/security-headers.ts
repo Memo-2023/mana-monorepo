@@ -76,7 +76,12 @@ export function setSecurityHeaders(response: Response, options: SecurityHeadersO
 		`script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://stats.mana.how https://glitchtip.mana.how https://cdn.jsdelivr.net ${scriptSrc.join(' ')}`.trim(),
 		"style-src 'self' 'unsafe-inline'",
 		`img-src 'self' data: blob: https: ${imgSrc.join(' ')}`.trim(),
-		`connect-src 'self' https://stats.mana.how https://glitchtip.mana.how ${connectSrc.join(' ')}`.trim(),
+		// jsDelivr also has to be in connect-src because @huggingface/transformers
+		// pre-loads the WASM binary and the loader .mjs via plain fetch() (not
+		// just dynamic import) when selecting the ONNX backend. The script-src
+		// allowlist alone covers the import() but not the fetch() — both are
+		// required for the WebGPU backend resolver to succeed.
+		`connect-src 'self' https://stats.mana.how https://glitchtip.mana.how https://cdn.jsdelivr.net ${connectSrc.join(' ')}`.trim(),
 		`font-src 'self' ${fontSrc.join(' ')}`.trim(),
 		mediaSrc.length > 0 ? `media-src 'self' ${mediaSrc.join(' ')}`.trim() : '',
 		"object-src 'none'",
