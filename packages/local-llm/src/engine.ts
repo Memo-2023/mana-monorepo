@@ -105,8 +105,45 @@ export class LocalLLMEngine {
 
 			// transformers.js progress callback shape:
 			//   { status: 'initiate'|'download'|'progress'|'done'|'ready',
-			//     name?: string, file?: string, progress?: number, loaded?: number, total?: number }
-			// We collapse it into our LoadingStatus union.
+			//     name?: string, file?: string, progress?: number,
+			//     loaded?: number, total?: number }
+			//
+			// The callback fires per-file, and the library downloads many
+			// shards in parallel (config.json, tokenizer.json, several
+			// onnx weight files, …). If we naively report the latest event
+			// the bar bounces wildly between files. Instead we keep a
+			// per-file byte-accounting map and emit an aggregated total
+			// every time anything moves. The denominator can grow as new
+			// files are discovered (causing brief dips), but both
+			// numerator and denominator are individually monotonic, so the
+			// dips are small and brief — much smoother than per-file.
+			const fileProgress = new Map<string, { loaded: number; total: number }>();
+
+			const formatBytes = (bytes: number): string => {
+				if (bytes < 1024) return `${bytes} B`;
+				if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+				if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(0)} MB`;
+				return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+			};
+
+			const emitAggregate = () => {
+				let totalLoaded = 0;
+				let totalSize = 0;
+				for (const { loaded, total } of fileProgress.values()) {
+					totalLoaded += loaded;
+					totalSize += total;
+				}
+				const pct = totalSize > 0 ? totalLoaded / totalSize : 0;
+				this.setStatus({
+					state: 'downloading',
+					progress: pct,
+					text:
+						totalSize > 0
+							? `Downloading model (${(pct * 100).toFixed(0)}%, ${formatBytes(totalLoaded)} / ${formatBytes(totalSize)}, ${fileProgress.size} files)`
+							: `Downloading model (${fileProgress.size} files queued)`,
+				});
+			};
+
 			const progressCallback = (report: {
 				status: string;
 				file?: string;
@@ -115,20 +152,23 @@ export class LocalLLMEngine {
 				loaded?: number;
 				total?: number;
 			}) => {
-				const label = report.file ?? report.name ?? '';
-				if (report.status === 'progress' || report.status === 'download') {
-					const pct = typeof report.progress === 'number' ? report.progress : 0;
-					this.setStatus({
-						state: 'downloading',
-						progress: pct / 100,
-						text: label
-							? `Downloading ${label} (${pct.toFixed(0)}%)`
-							: `Downloading (${pct.toFixed(0)}%)`,
+				const file = report.file ?? report.name ?? '_unknown';
+				if (report.status === 'initiate') {
+					if (!fileProgress.has(file)) fileProgress.set(file, { loaded: 0, total: 0 });
+					emitAggregate();
+				} else if (report.status === 'download' || report.status === 'progress') {
+					fileProgress.set(file, {
+						loaded: report.loaded ?? 0,
+						total: report.total ?? fileProgress.get(file)?.total ?? 0,
 					});
-				} else if (report.status === 'initiate') {
-					this.setStatus({ state: 'downloading', progress: 0, text: `Starting ${label}` });
+					emitAggregate();
 				} else if (report.status === 'done') {
-					this.setStatus({ state: 'loading', text: label ? `Loaded ${label}` : 'Loaded shard' });
+					// Pin the file to 100% so a final emit shows it complete
+					const existing = fileProgress.get(file);
+					if (existing && existing.total > 0) {
+						fileProgress.set(file, { loaded: existing.total, total: existing.total });
+					}
+					emitAggregate();
 				}
 				// 'ready' is handled below after both processor + model finish
 			};
