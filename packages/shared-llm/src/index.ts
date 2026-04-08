@@ -26,6 +26,16 @@ export {
 // Task contract
 export { buildTaskRequest, type LlmTask } from './task';
 
+// Persistent task queue
+export {
+	LlmTaskQueue,
+	type EnqueueOptions,
+	type LlmTaskQueueOptions,
+	type QueuedTask,
+	type QueuedTaskState,
+	type TaskRegistry,
+} from './queue';
+
 // Orchestrator (rarely instantiated directly — most consumers use the
 // store's singleton instead)
 export { LlmOrchestrator, type LlmOrchestratorOptions } from './orchestrator';

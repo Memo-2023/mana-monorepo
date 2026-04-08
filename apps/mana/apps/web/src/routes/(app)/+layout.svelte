@@ -36,6 +36,7 @@
 	import { tagLocalStore, tagMutations, useAllTags } from '@mana/shared-stores';
 	import { linkLocalStore, linkMutations } from '@mana/shared-links';
 	import { manaStore } from '$lib/data/local-store';
+	import { startLlmQueue, stopLlmQueue } from '$lib/llm-queue';
 	import { createUnifiedSync } from '$lib/data/sync';
 	import { networkStore } from '$lib/stores/network.svelte';
 	import { db } from '$lib/data/database';
@@ -305,6 +306,12 @@
 		initSharedUload();
 		await dashboardStore.initialize();
 
+		// Start the persistent LLM task queue. Idempotent — safe to call
+		// repeatedly. The queue picks up any tasks left in 'pending' state
+		// from previous sessions (and reclaims orphaned 'running' rows
+		// from a crashed session) before going idle. See $lib/llm-queue.ts.
+		startLlmQueue();
+
 		// Restore nav collapsed state
 		if (typeof localStorage !== 'undefined') {
 			const savedCollapsed = localStorage.getItem(STORAGE_KEYS.NAV_COLLAPSED);
@@ -373,6 +380,10 @@
 		unifiedSync?.stopAll();
 		reminderScheduler.stop();
 		guestMode?.destroy();
+		// Fire-and-forget — we don't need to await; the in-flight task
+		// will finish in the background and the next page session will
+		// pick up where we left off.
+		void stopLlmQueue();
 	});
 
 	// ── Search / Spotlight ───────────────────────────────────

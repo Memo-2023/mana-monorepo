@@ -21,6 +21,8 @@
 	} from '@mana/shared-llm';
 	import { extractDateTask } from '$lib/llm-tasks/extract-date';
 	import { summarizeTextTask } from '$lib/llm-tasks/summarize';
+	import { llmTaskQueue, llmQueueDb } from '$lib/llm-queue';
+	import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 	import { marked } from 'marked';
 	import { Robot, Trash, PaperPlaneRight, ClockCounterClockwise } from '@mana/shared-icons';
 
@@ -53,8 +55,20 @@
 
 	// --- State ---
 	let selectedModel: ModelKey = $state('gemma-4-e2b');
-	let activeTab: 'chat' | 'extract' | 'classify' | 'compare' | 'benchmark' | 'router' =
+	let activeTab: 'chat' | 'extract' | 'classify' | 'compare' | 'benchmark' | 'router' | 'queue' =
 		$state('chat');
+
+	// --- Queue tab state ---
+	let queueInput = $state('Treffen mit Sara morgen 14:30');
+	let queueLastEnqueuedId = $state<string | null>(null);
+	const queueRows = useLiveQueryWithDefault(
+		async () => llmQueueDb.tasks.orderBy('enqueuedAt').reverse().limit(20).toArray(),
+		[]
+	);
+
+	async function enqueueTaskNow(task: typeof extractDateTask | typeof summarizeTextTask) {
+		queueLastEnqueuedId = await llmTaskQueue.enqueue(task, { text: queueInput });
+	}
 
 	// --- Router tab state ---
 	const settings = $derived(llmSettingsState.current);
@@ -631,7 +645,7 @@
 
 		<!-- Tabs -->
 		<div class="mb-4 flex gap-1 rounded-lg border border-border bg-card p-1">
-			{#each [{ id: 'chat', label: 'Chat' }, { id: 'extract', label: 'JSON Extract' }, { id: 'classify', label: 'Classify' }, { id: 'compare', label: 'Compare' }, { id: 'benchmark', label: 'Benchmark' }, { id: 'router', label: 'Router' }] as tab}
+			{#each [{ id: 'chat', label: 'Chat' }, { id: 'extract', label: 'JSON Extract' }, { id: 'classify', label: 'Classify' }, { id: 'compare', label: 'Compare' }, { id: 'benchmark', label: 'Benchmark' }, { id: 'router', label: 'Router' }, { id: 'queue', label: 'Queue' }] as tab}
 				<button
 					onclick={() => (activeTab = tab.id as typeof activeTab)}
 					class="flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors {activeTab ===
@@ -1277,6 +1291,114 @@
 							)}</pre>
 					</div>
 				{/if}
+			</div>
+		{/if}
+
+		<!-- Queue Tab — exercises the persistent LlmTaskQueue -->
+		{#if activeTab === 'queue'}
+			<div class="flex flex-col gap-4">
+				<div class="rounded-xl border border-border bg-card p-4">
+					<p class="mb-3 text-sm text-muted-foreground">
+						Smoke-Test für die persistente Task-Queue. Tasks werden in einer eigenen Dexie-DB (<code
+							class="rounded bg-muted px-1 py-0.5 text-[10px]">mana-llm-queue</code
+						>) gespeichert und im Hintergrund vom Queue-Processor abgearbeitet sobald ein passender
+						LLM-Tier verfügbar ist. Tasks überleben Page-Reloads — du kannst die Seite hart neuladen
+						und sie laufen weiter.
+					</p>
+
+					<input
+						type="text"
+						bind:value={queueInput}
+						placeholder="Eingabetext für den Task..."
+						class="mb-3 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+					/>
+
+					<div class="flex flex-wrap gap-2">
+						<button
+							onclick={() => enqueueTaskNow(extractDateTask)}
+							disabled={!queueInput.trim()}
+							class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50"
+						>
+							Enqueue extractDate
+						</button>
+						<button
+							onclick={() => enqueueTaskNow(summarizeTextTask)}
+							disabled={!queueInput.trim()}
+							class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50"
+						>
+							Enqueue summarize
+						</button>
+					</div>
+
+					{#if queueLastEnqueuedId}
+						<div class="mt-3 text-xs text-muted-foreground">
+							Letzte Task-ID:
+							<code class="rounded bg-muted px-1 py-0.5 font-mono">{queueLastEnqueuedId}</code>
+						</div>
+					{/if}
+				</div>
+
+				<!-- Live queue table view via Dexie liveQuery -->
+				<div class="rounded-xl border border-border bg-card p-4">
+					<div class="mb-3 flex items-center justify-between">
+						<h3 class="text-sm font-semibold">Letzte 20 Tasks</h3>
+						<button
+							onclick={() => llmTaskQueue.purge(0)}
+							class="rounded-md border border-border px-2 py-1 text-xs text-muted-foreground hover:text-foreground"
+						>
+							Done/failed löschen
+						</button>
+					</div>
+
+					{#if queueRows.value.length === 0}
+						<div class="rounded-lg bg-muted/20 p-3 text-sm text-muted-foreground">
+							Queue ist leer. Reihe oben einen Task ein.
+						</div>
+					{:else}
+						<div class="space-y-2">
+							{#each queueRows.value as row}
+								{@const stateColor =
+									row.state === 'done'
+										? 'border-emerald-500/40 bg-emerald-500/5 text-emerald-600 dark:text-emerald-400'
+										: row.state === 'failed'
+											? 'border-red-500/40 bg-red-500/5 text-red-600 dark:text-red-400'
+											: row.state === 'running'
+												? 'border-blue-500/40 bg-blue-500/5 text-blue-600 dark:text-blue-400'
+												: 'border-muted-foreground/30 bg-muted/10 text-muted-foreground'}
+								<div class="rounded-lg border p-3 text-xs {stateColor}">
+									<div class="flex flex-wrap items-center gap-2">
+										<span class="rounded-full border border-current px-2 py-0.5 font-medium">
+											{row.state}
+										</span>
+										<span class="font-mono text-foreground">{row.taskName}</span>
+										<span class="text-muted-foreground">
+											· {new Date(row.enqueuedAt).toLocaleTimeString()}
+										</span>
+										{#if row.attempts > 1}
+											<span class="text-muted-foreground">
+												· {row.attempts}/{row.maxAttempts} attempts
+											</span>
+										{/if}
+										{#if row.source}
+											<span class="text-muted-foreground">· via {row.source}</span>
+										{/if}
+									</div>
+									<div class="mt-1 truncate text-muted-foreground">
+										input: <code class="font-mono">{JSON.stringify(row.input)}</code>
+									</div>
+									{#if row.result !== undefined}
+										<div class="mt-1 text-foreground">
+											result: <code class="font-mono">{JSON.stringify(row.result)}</code>
+										</div>
+									{/if}
+									{#if row.error}
+										<div class="mt-1 text-red-400">error: {row.error}</div>
+									{/if}
+								</div>
+							{/each}
+						</div>
+					{/if}
+				</div>
 			</div>
 		{/if}
 	{/if}
