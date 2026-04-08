@@ -9,7 +9,7 @@
  *   llmStream()  — streaming, calls onToken() for each delta and returns
  *                  the full concatenated text at the end. Used for synthesis.
  *
- * mana-llm exposes an OpenAI-compatible /api/v1/chat/completions endpoint
+ * mana-llm exposes an OpenAI-compatible /v1/chat/completions endpoint
  * (see services/mana-llm). Models are namespaced as `provider/model`, e.g.
  * `ollama/gemma3:4b`, `openrouter/meta-llama/llama-3.1-70b-instruct`.
  *
@@ -66,7 +66,7 @@ function buildMessages(system: string | undefined, user: string): LlmMessage[] {
  * Throws LlmError on transport/HTTP failure or if the body isn't valid JSON.
  */
 export async function llmJson<T = unknown>(opts: LlmJsonOptions): Promise<T> {
-	const res = await fetch(`${LLM_URL}/api/v1/chat/completions`, {
+	const res = await fetch(`${LLM_URL}/v1/chat/completions`, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify({
@@ -109,7 +109,7 @@ export async function llmJson<T = unknown>(opts: LlmJsonOptions): Promise<T> {
  * sentinel `data: [DONE]`.
  */
 export async function llmStream(opts: LlmStreamOptions): Promise<string> {
-	const res = await fetch(`${LLM_URL}/api/v1/chat/completions`, {
+	const res = await fetch(`${LLM_URL}/v1/chat/completions`, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify({
