@@ -5,6 +5,7 @@
  * entries to IndexedDB. Also detects proximity to known places.
  */
 
+import { decryptRecords, encryptRecord } from '$lib/data/crypto';
 import { locationLogTable, placeTable } from '../collections';
 import { getDistanceKm, findNearestPlace, toPlace } from '../queries';
 import type { LocalLocationLog, LocalPlace } from '../types';
@@ -106,9 +107,14 @@ async function logPosition(pos: GeolocationPosition) {
 	const lat = pos.coords.latitude;
 	const lng = pos.coords.longitude;
 
-	// Check proximity to known places
+	// Check proximity to known places. lat/lng on `places` stay plaintext
+	// (see registry.ts) so the proximity matcher works during background
+	// geolocation logging even before the vault is unlocked. We still
+	// decrypt so that nearest.name etc. is usable downstream.
 	const allLocals = await placeTable.toArray();
-	const places = allLocals.filter((p) => !p.deletedAt).map(toPlace);
+	const visible = allLocals.filter((p) => !p.deletedAt);
+	const decrypted = await decryptRecords<LocalPlace>('places', visible);
+	const places = decrypted.map(toPlace);
 	const nearest = findNearestPlace(places, lat, lng);
 
 	const log: LocalLocationLog = {
@@ -125,6 +131,7 @@ async function logPosition(pos: GeolocationPosition) {
 		updatedAt: new Date().toISOString(),
 	};
 
+	await encryptRecord('locationLogs', log);
 	await locationLogTable.add(log);
 
 	// Update visit count on the matched place

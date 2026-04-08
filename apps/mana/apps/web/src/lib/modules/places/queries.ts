@@ -4,6 +4,7 @@
 
 import { liveQuery } from 'dexie';
 import { db } from '$lib/data/database';
+import { decryptRecords } from '$lib/data/crypto';
 import type { LocalPlace, LocalLocationLog, Place, LocationLog } from './types';
 
 // ─── Type Converters ─────────────────────────────────────
@@ -46,7 +47,9 @@ export function toLocationLog(local: LocalLocationLog): LocationLog {
 export function useAllPlaces() {
 	return liveQuery(async () => {
 		const locals = await db.table<LocalPlace>('places').toArray();
-		return locals.filter((p) => !p.deletedAt).map(toPlace);
+		const visible = locals.filter((p) => !p.deletedAt);
+		const decrypted = await decryptRecords<LocalPlace>('places', visible);
+		return decrypted.map(toPlace);
 	});
 }
 
@@ -55,7 +58,8 @@ export function useLocationLogs(placeId?: string) {
 		let query = db.table<LocalLocationLog>('locationLogs').orderBy('timestamp').reverse();
 		const locals = await query.toArray();
 		const filtered = placeId ? locals.filter((l) => l.placeId === placeId) : locals;
-		return filtered.map(toLocationLog);
+		const decrypted = await decryptRecords<LocalLocationLog>('locationLogs', filtered);
+		return decrypted.map(toLocationLog);
 	});
 }
 

@@ -5,6 +5,7 @@
  * This store only exposes mutations that write to IndexedDB.
  */
 
+import { encryptRecord } from '$lib/data/crypto';
 import { placeTable } from '../collections';
 import { toPlace } from '../queries';
 import type { LocalPlace, Place, PlaceCategory } from '../types';
@@ -34,8 +35,12 @@ export const placesStore = {
 			updatedAt: now,
 		};
 
+		// Snapshot the plaintext DTO before encryption mutates the record
+		// in place — same pattern as the notes/dreams/contacts stores.
+		const plaintextSnapshot = toPlace({ ...newLocal });
+		await encryptRecord('places', newLocal);
 		await placeTable.add(newLocal);
-		return toPlace(newLocal);
+		return plaintextSnapshot;
 	},
 
 	async updatePlace(id: string, data: Partial<Place> & Record<string, unknown>) {
@@ -49,10 +54,15 @@ export const placesStore = {
 		if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
 		if (data.isArchived !== undefined) updateData.isArchived = data.isArchived;
 
-		await placeTable.update(id, {
+		const diff = {
 			...updateData,
 			updatedAt: new Date().toISOString(),
-		});
+		};
+		// encryptRecord mutates the diff in place. Fields not in the
+		// places allowlist (lat/lng, isFavorite, isArchived, …) pass
+		// through untouched.
+		await encryptRecord('places', diff);
+		await placeTable.update(id, diff);
 	},
 
 	async deletePlace(id: string) {
