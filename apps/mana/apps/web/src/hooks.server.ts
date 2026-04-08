@@ -112,13 +112,22 @@ window.__PUBLIC_GLITCHTIP_DSN__ = ${JSON.stringify(PUBLIC_GLITCHTIP_DSN)};
 			PUBLIC_MANA_EVENTS_URL_CLIENT,
 			PUBLIC_MANA_API_URL_CLIENT,
 			'wss://sync.mana.how',
-			// @mana/local-llm (WebLLM) downloads model weights + config from
-			// the mlc-ai HuggingFace repos and the WebGPU model library WASM
-			// from the binary-mlc-llm-libs GitHub raw host.
+			// @mana/local-llm (transformers.js) pulls model config + ONNX
+			// shards from the HuggingFace ecosystem. HF currently uses three
+			// distinct CDN domains depending on file type and rollout state:
+			//   - huggingface.co              → repo metadata + small files
+			//   - *.huggingface.co            → cdn-lfs-* hosts for legacy LFS
+			//   - *.hf.co                     → the new XET-backed CDN
+			//                                   (cas-bridge.xethub.hf.co etc.)
+			// We allow the broad wildcards because HF rotates the exact host
+			// names and a new path lands on a different bucket every few
+			// months. Adding the narrow ones too keeps older clients happy.
 			'https://huggingface.co',
 			'https://*.huggingface.co',
 			'https://cdn-lfs.huggingface.co',
 			'https://cdn-lfs-us-1.huggingface.co',
+			'https://*.hf.co',
+			'https://cas-bridge.xethub.hf.co',
 			'https://raw.githubusercontent.com',
 			// Allow all localhost ports in development
 			...(isDev ? ['http://localhost:*', 'ws://localhost:*'] : []),
