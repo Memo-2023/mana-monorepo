@@ -121,13 +121,27 @@ async function pgExec(sql: string): Promise<string> {
 	return out.trim();
 }
 
+// Returns the count of audit rows for (user, eventType). Used to assert
+// that the security_events INSERT actually committed — historically this
+// was silently broken because the SQL builder collapsed undefined params
+// into literal nothing, which the catch swallowed as "(non-critical)".
+async function countSecurityEvents(userId: string, eventType: string): Promise<number> {
+	const out = await pgExec(
+		`SELECT COUNT(*) FROM auth.security_events WHERE user_id = '${userId}' AND event_type = '${eventType}';`
+	);
+	return parseInt(out, 10);
+}
+
 // ─── Cleanup at the end so failed runs don't leak ────────────────────
 
 afterAll(async () => {
 	if (!createdUserId) return;
 	try {
+		// security_events would also CASCADE on auth.users delete, but we
+		// drop it explicitly so the cleanup is obvious from reading.
 		await pgExec(
-			`DELETE FROM auth.encryption_vault_audit WHERE user_id = '${createdUserId}';
+			`DELETE FROM auth.security_events WHERE user_id = '${createdUserId}';
+			 DELETE FROM auth.encryption_vault_audit WHERE user_id = '${createdUserId}';
 			 DELETE FROM auth.encryption_vaults WHERE user_id = '${createdUserId}';
 			 DELETE FROM auth.users WHERE id = '${createdUserId}';`
 		);
@@ -148,6 +162,13 @@ test('full register → verify → login → vault → logout flow', async () =>
 	expect(reg.status).toBe(200);
 	expect(reg.json.user?.id).toBeTruthy();
 	createdUserId = reg.json.user!.id;
+
+	// 1a. Audit row was actually committed.
+	//     Catches the bug class where security.logEvent silently swallows
+	//     a SQL error (e.g. undefined params collapsing the values list)
+	//     and the audit log goes into the void.
+	const registerAuditCount = await countSecurityEvents(createdUserId, 'REGISTER');
+	expect(registerAuditCount).toBe(1);
 
 	// 2. Wait for the verification email to land in mailpit
 	const mail = await waitForMail(TEST_EMAIL);
@@ -187,6 +208,10 @@ test('full register → verify → login → vault → logout flow', async () =>
 	expect(login.json.accessToken!.split('.').length).toBe(3); // JWT has 3 segments
 	expect(login.json.refreshToken).toBeTruthy();
 	const jwt = login.json.accessToken!;
+
+	// 5a. Audit row for the successful login was committed too.
+	const loginAuditCount = await countSecurityEvents(createdUserId, 'LOGIN_SUCCESS');
+	expect(loginAuditCount).toBe(1);
 
 	// 6. Validate the JWT against the same service that minted it
 	const validate = await postJson<{ valid: boolean; payload?: { sub: string; email: string } }>(
