@@ -3,16 +3,28 @@
   Recent memos with transcription status.
 -->
 <script lang="ts">
-	import { liveQuery } from 'dexie';
+	import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 	import { db } from '$lib/data/database';
+	import { BaseListView } from '@mana/shared-ui';
 	import type { ViewProps } from '$lib/app-registry';
 	import type { LocalMemo } from './types';
 	import { memosStore } from './stores/memos.svelte';
 	import VoiceCaptureBar from '$lib/components/voice/VoiceCaptureBar.svelte';
 
-	let { navigate, goBack, params }: ViewProps = $props();
+	let { navigate }: ViewProps = $props();
 
-	let memos = $state<LocalMemo[]>([]);
+	const memosQuery = useLiveQueryWithDefault(async () => {
+		const all = await db.table<LocalMemo>('memos').toArray();
+		return all.filter((m) => !m.deletedAt && !m.isArchived);
+	}, [] as LocalMemo[]);
+
+	const memos = $derived(memosQuery.value);
+
+	const sorted = $derived(
+		[...memos].sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? ''))
+	);
+
+	const pinned = $derived(memos.filter((m) => m.isPinned));
 
 	async function handleVoiceComplete(blob: Blob, durationMs: number) {
 		const memo = await memosStore.createFromVoice(blob, durationMs, 'de');
@@ -23,24 +35,6 @@
 			_siblingKey: 'memoId',
 		});
 	}
-
-	$effect(() => {
-		const sub = liveQuery(async () => {
-			return db
-				.table<LocalMemo>('memos')
-				.toArray()
-				.then((all) => all.filter((m) => !m.deletedAt && !m.isArchived));
-		}).subscribe((val) => {
-			memos = val ?? [];
-		});
-		return () => sub.unsubscribe();
-	});
-
-	const sorted = $derived(
-		[...memos].sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? ''))
-	);
-
-	const pinned = $derived(memos.filter((m) => m.isPinned));
 
 	function formatDuration(ms: number | null): string {
 		if (!ms) return '--:--';
@@ -58,59 +52,54 @@
 	};
 </script>
 
-<div class="flex h-full flex-col gap-3 p-3 sm:p-4">
-	<VoiceCaptureBar
-		idleLabel="Memo sprechen"
-		feature="memoro-voice-capture"
-		reason="Sprach-Memos werden verschlüsselt gespeichert. Dafür brauchst du ein Mana-Konto."
-		onComplete={handleVoiceComplete}
-	/>
+<BaseListView items={sorted} getKey={(m) => m.id} emptyTitle="Keine Memos">
+	{#snippet toolbar()}
+		<VoiceCaptureBar
+			idleLabel="Memo sprechen"
+			feature="memoro-voice-capture"
+			reason="Sprach-Memos werden verschlüsselt gespeichert. Dafür brauchst du ein Mana-Konto."
+			onComplete={handleVoiceComplete}
+		/>
+	{/snippet}
 
-	<div class="flex gap-3 text-xs text-white/40">
+	{#snippet header()}
 		<span>{memos.length} Memos</span>
 		<span>{pinned.length} angepinnt</span>
-	</div>
+	{/snippet}
 
-	<div class="flex-1 overflow-auto">
-		{#each sorted as memo (memo.id)}
-			<button
-				onclick={() =>
-					navigate('detail', {
-						memoId: memo.id,
-						_siblingIds: sorted.map((m) => m.id),
-						_siblingKey: 'memoId',
-					})}
-				class="mb-2 w-full rounded-md border border-white/10 px-3 py-2.5 text-left transition-colors hover:bg-white/5 min-h-[44px]"
-			>
-				<div class="flex items-start justify-between gap-2">
-					<div class="min-w-0 flex-1">
-						<div class="flex items-center gap-1">
-							{#if memo.isPinned}
-								<span class="text-xs text-white/30">&#128204;</span>
-							{/if}
-							<p class="truncate text-sm font-medium text-white/80">
-								{memo.title || 'Unbenanntes Memo'}
-							</p>
-						</div>
-						{#if memo.intro}
-							<p class="mt-0.5 truncate text-xs text-white/40">{memo.intro}</p>
+	{#snippet item(memo)}
+		<button
+			onclick={() =>
+				navigate('detail', {
+					memoId: memo.id,
+					_siblingIds: sorted.map((m) => m.id),
+					_siblingKey: 'memoId',
+				})}
+			class="mb-2 w-full rounded-md border border-white/10 px-3 py-2.5 text-left transition-colors hover:bg-white/5 min-h-[44px]"
+		>
+			<div class="flex items-start justify-between gap-2">
+				<div class="min-w-0 flex-1">
+					<div class="flex items-center gap-1">
+						{#if memo.isPinned}
+							<span class="text-xs text-white/30">&#128204;</span>
 						{/if}
+						<p class="truncate text-sm font-medium text-white/80">
+							{memo.title || 'Unbenanntes Memo'}
+						</p>
 					</div>
-					<span
-						class="shrink-0 rounded px-1.5 py-0.5 text-[10px] {statusColors[
-							memo.processingStatus
-						] ?? ''}"
-					>
-						{memo.processingStatus === 'completed'
-							? formatDuration(memo.audioDurationMs)
-							: memo.processingStatus}
-					</span>
+					{#if memo.intro}
+						<p class="mt-0.5 truncate text-xs text-white/40">{memo.intro}</p>
+					{/if}
 				</div>
-			</button>
-		{/each}
-
-		{#if sorted.length === 0}
-			<p class="py-8 text-center text-sm text-white/30">Keine Memos</p>
-		{/if}
-	</div>
-</div>
+				<span
+					class="shrink-0 rounded px-1.5 py-0.5 text-[10px] {statusColors[memo.processingStatus] ??
+						''}"
+				>
+					{memo.processingStatus === 'completed'
+						? formatDuration(memo.audioDurationMs)
+						: memo.processingStatus}
+				</span>
+			</div>
+		</button>
+	{/snippet}
+</BaseListView>

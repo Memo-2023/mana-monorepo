@@ -3,39 +3,28 @@
   Song library with recent plays and playlists.
 -->
 <script lang="ts">
-	import { liveQuery } from 'dexie';
+	import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 	import { db } from '$lib/data/database';
 	import { decryptRecords } from '$lib/data/crypto';
+	import { BaseListView } from '@mana/shared-ui';
 	import type { LocalSong, LocalPlaylist } from './types';
 	import type { ViewProps } from '$lib/app-registry';
 
-	let { navigate, goBack, params }: ViewProps = $props();
+	let { navigate }: ViewProps = $props();
 
-	let songs = $state<LocalSong[]>([]);
-	let playlists = $state<LocalPlaylist[]>([]);
+	const songsQuery = useLiveQueryWithDefault(async () => {
+		const all = await db.table<LocalSong>('songs').toArray();
+		const visible = all.filter((s) => !s.deletedAt);
+		return decryptRecords('songs', visible);
+	}, [] as LocalSong[]);
 
-	$effect(() => {
-		const sub = liveQuery(async () => {
-			const all = await db.table<LocalSong>('songs').toArray();
-			const visible = all.filter((s) => !s.deletedAt);
-			return decryptRecords('songs', visible);
-		}).subscribe((val) => {
-			songs = val ?? [];
-		});
-		return () => sub.unsubscribe();
-	});
+	const playlistsQuery = useLiveQueryWithDefault(async () => {
+		const all = await db.table<LocalPlaylist>('playlists').toArray();
+		return all.filter((p) => !p.deletedAt);
+	}, [] as LocalPlaylist[]);
 
-	$effect(() => {
-		const sub = liveQuery(async () => {
-			return db
-				.table<LocalPlaylist>('playlists')
-				.toArray()
-				.then((all) => all.filter((p) => !p.deletedAt));
-		}).subscribe((val) => {
-			playlists = val ?? [];
-		});
-		return () => sub.unsubscribe();
-	});
+	const songs = $derived(songsQuery.value);
+	const playlists = $derived(playlistsQuery.value);
 
 	const recentlyPlayed = $derived(
 		[...songs]
@@ -54,40 +43,37 @@
 	}
 </script>
 
-<div class="flex h-full flex-col gap-3 p-3 sm:p-4">
-	<div class="flex gap-3 text-xs text-white/40">
+<BaseListView items={recentlyPlayed} getKey={(s) => s.id} emptyTitle="Noch nichts gehört">
+	{#snippet header()}
 		<span>{songs.length} Songs</span>
 		<span>{playlists.length} Playlists</span>
 		<span>{favorites.length} Favoriten</span>
-	</div>
+	{/snippet}
 
-	<div class="flex-1 overflow-auto">
+	{#snippet listHeader()}
 		<h3 class="mb-2 text-xs font-medium text-white/50">Zuletzt gehört</h3>
-		{#each recentlyPlayed as song (song.id)}
-			<button
-				onclick={() =>
-					navigate('detail', {
-						songId: song.id,
-						_siblingIds: recentlyPlayed.map((s) => s.id),
-						_siblingKey: 'songId',
-					})}
-				class="flex w-full min-h-[44px] items-center gap-3 rounded-md px-2 py-1.5 transition-colors hover:bg-white/5 cursor-pointer text-left"
-			>
-				<div
-					class="flex h-8 w-8 shrink-0 items-center justify-center rounded bg-white/10 text-xs text-white/30"
-				>
-					&#9835;
-				</div>
-				<div class="min-w-0 flex-1">
-					<p class="truncate text-sm text-white/80">{song.title}</p>
-					<p class="truncate text-xs text-white/40">{song.artist ?? 'Unbekannt'}</p>
-				</div>
-				<span class="text-xs text-white/30">{formatDuration(song.duration)}</span>
-			</button>
-		{/each}
+	{/snippet}
 
-		{#if recentlyPlayed.length === 0}
-			<p class="py-8 text-center text-sm text-white/30">Noch nichts gehört</p>
-		{/if}
-	</div>
-</div>
+	{#snippet item(song)}
+		<button
+			onclick={() =>
+				navigate('detail', {
+					songId: song.id,
+					_siblingIds: recentlyPlayed.map((s) => s.id),
+					_siblingKey: 'songId',
+				})}
+			class="flex w-full min-h-[44px] items-center gap-3 rounded-md px-2 py-1.5 transition-colors hover:bg-white/5 cursor-pointer text-left"
+		>
+			<div
+				class="flex h-8 w-8 shrink-0 items-center justify-center rounded bg-white/10 text-xs text-white/30"
+			>
+				&#9835;
+			</div>
+			<div class="min-w-0 flex-1">
+				<p class="truncate text-sm text-white/80">{song.title}</p>
+				<p class="truncate text-xs text-white/40">{song.artist ?? 'Unbekannt'}</p>
+			</div>
+			<span class="text-xs text-white/30">{formatDuration(song.duration)}</span>
+		</button>
+	{/snippet}
+</BaseListView>

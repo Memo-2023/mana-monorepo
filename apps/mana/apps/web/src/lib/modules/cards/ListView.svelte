@@ -3,41 +3,28 @@
   Deck list with card counts and study info.
 -->
 <script lang="ts">
-	import { liveQuery } from 'dexie';
+	import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 	import { db } from '$lib/data/database';
+	import { BaseListView } from '@mana/shared-ui';
 	import type { LocalDeck, LocalCard } from './types';
 	import type { ViewProps } from '$lib/app-registry';
 
-	let { navigate, goBack, params }: ViewProps = $props();
+	let { navigate }: ViewProps = $props();
 
-	let decks = $state<LocalDeck[]>([]);
-	let cards = $state<LocalCard[]>([]);
+	const decksQuery = useLiveQueryWithDefault(async () => {
+		const all = await db.table<LocalDeck>('decks').toArray();
+		return all.filter((d) => !d.deletedAt);
+	}, [] as LocalDeck[]);
 
-	$effect(() => {
-		const sub = liveQuery(async () => {
-			return db
-				.table<LocalDeck>('decks')
-				.toArray()
-				.then((all) => all.filter((d) => !d.deletedAt));
-		}).subscribe((val) => {
-			decks = val ?? [];
-		});
-		return () => sub.unsubscribe();
-	});
+	const cardsQuery = useLiveQueryWithDefault(async () => {
+		const all = await db.table<LocalCard>('cards').toArray();
+		return all.filter((c) => !c.deletedAt);
+	}, [] as LocalCard[]);
 
-	$effect(() => {
-		const sub = liveQuery(async () => {
-			return db
-				.table<LocalCard>('cards')
-				.toArray()
-				.then((all) => all.filter((c) => !c.deletedAt));
-		}).subscribe((val) => {
-			cards = val ?? [];
-		});
-		return () => sub.unsubscribe();
-	});
+	const decks = $derived(decksQuery.value);
+	const cards = $derived(cardsQuery.value);
 
-	const dueForReview = $derived(() => {
+	const dueForReview = $derived.by(() => {
 		const now = new Date().toISOString();
 		return cards.filter((c) => c.nextReview && c.nextReview <= now).length;
 	});
@@ -47,36 +34,30 @@
 	}
 </script>
 
-<div class="flex h-full flex-col gap-3 p-3 sm:p-4">
-	<div class="flex items-center justify-between">
-		<p class="text-xs text-white/40">{decks.length} Decks</p>
-		<p class="text-xs text-amber-400/70">{dueForReview()} fällig</p>
-	</div>
+<BaseListView items={decks} getKey={(d) => d.id} emptyTitle="Keine Decks">
+	{#snippet header()}
+		<span class="flex-1">{decks.length} Decks</span>
+		<span class="text-amber-400/70">{dueForReview} fällig</span>
+	{/snippet}
 
-	<div class="flex-1 overflow-auto">
-		{#each decks as deck (deck.id)}
-			<button
-				onclick={() =>
-					navigate('detail', {
-						deckId: deck.id,
-						_siblingIds: decks.map((d) => d.id),
-						_siblingKey: 'deckId',
-					})}
-				class="mb-2 w-full rounded-md border border-white/10 px-3 py-2.5 text-left transition-colors hover:bg-white/5 min-h-[44px]"
-			>
-				<div class="flex items-center gap-2">
-					<div class="h-3 w-3 rounded" style="background: {deck.color}"></div>
-					<p class="flex-1 truncate text-sm font-medium text-white/80">{deck.name}</p>
-					<span class="text-xs text-white/40">{cardsInDeck(deck.id)}</span>
-				</div>
-				{#if deck.description}
-					<p class="mt-1 truncate text-xs text-white/40">{deck.description}</p>
-				{/if}
-			</button>
-		{/each}
-
-		{#if decks.length === 0}
-			<p class="py-8 text-center text-sm text-white/30">Keine Decks</p>
-		{/if}
-	</div>
-</div>
+	{#snippet item(deck)}
+		<button
+			onclick={() =>
+				navigate('detail', {
+					deckId: deck.id,
+					_siblingIds: decks.map((d) => d.id),
+					_siblingKey: 'deckId',
+				})}
+			class="mb-2 w-full rounded-md border border-white/10 px-3 py-2.5 text-left transition-colors hover:bg-white/5 min-h-[44px]"
+		>
+			<div class="flex items-center gap-2">
+				<div class="h-3 w-3 rounded" style="background: {deck.color}"></div>
+				<p class="flex-1 truncate text-sm font-medium text-white/80">{deck.name}</p>
+				<span class="text-xs text-white/40">{cardsInDeck(deck.id)}</span>
+			</div>
+			{#if deck.description}
+				<p class="mt-1 truncate text-xs text-white/40">{deck.description}</p>
+			{/if}
+		</button>
+	{/snippet}
+</BaseListView>

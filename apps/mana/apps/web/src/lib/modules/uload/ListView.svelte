@@ -3,39 +3,28 @@
   Short links list with click counts.
 -->
 <script lang="ts">
-	import { liveQuery } from 'dexie';
+	import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 	import { db } from '$lib/data/database';
 	import { decryptRecords } from '$lib/data/crypto';
+	import { BaseListView } from '@mana/shared-ui';
 	import type { LocalLink, LocalFolder } from './types';
 	import type { ViewProps } from '$lib/app-registry';
 
-	let { navigate, goBack, params }: ViewProps = $props();
+	let { navigate }: ViewProps = $props();
 
-	let links = $state<LocalLink[]>([]);
-	let folders = $state<LocalFolder[]>([]);
+	const linksQuery = useLiveQueryWithDefault(async () => {
+		const all = await db.table<LocalLink>('links').toArray();
+		const visible = all.filter((l) => !l.deletedAt && l.isActive);
+		return decryptRecords('links', visible);
+	}, [] as LocalLink[]);
 
-	$effect(() => {
-		const sub = liveQuery(async () => {
-			const all = await db.table<LocalLink>('links').toArray();
-			const visible = all.filter((l) => !l.deletedAt && l.isActive);
-			return decryptRecords('links', visible);
-		}).subscribe((val) => {
-			links = val ?? [];
-		});
-		return () => sub.unsubscribe();
-	});
+	const foldersQuery = useLiveQueryWithDefault(async () => {
+		const all = await db.table<LocalFolder>('uloadFolders').toArray();
+		return all.filter((f) => !f.deletedAt);
+	}, [] as LocalFolder[]);
 
-	$effect(() => {
-		const sub = liveQuery(async () => {
-			return db
-				.table<LocalFolder>('uloadFolders')
-				.toArray()
-				.then((all) => all.filter((f) => !f.deletedAt));
-		}).subscribe((val) => {
-			folders = val ?? [];
-		});
-		return () => sub.unsubscribe();
-	});
+	const links = $derived(linksQuery.value);
+	const folders = $derived(foldersQuery.value);
 
 	const totalClicks = $derived(links.reduce((sum, l) => sum + l.clickCount, 0));
 
@@ -52,39 +41,33 @@
 	}
 </script>
 
-<div class="flex h-full flex-col gap-3 p-3 sm:p-4">
-	<div class="flex gap-3 text-xs text-white/40">
+<BaseListView items={sorted} getKey={(l) => l.id} emptyTitle="Keine Links">
+	{#snippet header()}
 		<span>{links.length} Links</span>
 		<span>{totalClicks} Klicks</span>
 		<span>{folders.length} Ordner</span>
-	</div>
+	{/snippet}
 
-	<div class="flex-1 overflow-auto">
-		{#each sorted as link (link.id)}
-			<button
-				onclick={() =>
-					navigate('detail', {
-						linkId: link.id,
-						_siblingIds: sorted.map((l) => l.id),
-						_siblingKey: 'linkId',
-					})}
-				class="mb-1 w-full min-h-[44px] text-left rounded-md px-3 py-2 transition-colors hover:bg-white/5 cursor-pointer"
-			>
-				<div class="flex items-center justify-between">
-					<p class="truncate text-sm font-medium text-white/80">
-						{link.title || link.shortCode}
-					</p>
-					<span class="shrink-0 text-xs text-white/40">{link.clickCount}</span>
-				</div>
-				<p class="truncate text-xs text-white/30">{hostname(link.originalUrl)}</p>
-				{#if link.customCode}
-					<p class="text-xs text-blue-400/60">/{link.customCode}</p>
-				{/if}
-			</button>
-		{/each}
-
-		{#if sorted.length === 0}
-			<p class="py-8 text-center text-sm text-white/30">Keine Links</p>
-		{/if}
-	</div>
-</div>
+	{#snippet item(link)}
+		<button
+			onclick={() =>
+				navigate('detail', {
+					linkId: link.id,
+					_siblingIds: sorted.map((l) => l.id),
+					_siblingKey: 'linkId',
+				})}
+			class="mb-1 w-full min-h-[44px] text-left rounded-md px-3 py-2 transition-colors hover:bg-white/5 cursor-pointer"
+		>
+			<div class="flex items-center justify-between">
+				<p class="truncate text-sm font-medium text-white/80">
+					{link.title || link.shortCode}
+				</p>
+				<span class="shrink-0 text-xs text-white/40">{link.clickCount}</span>
+			</div>
+			<p class="truncate text-xs text-white/30">{hostname(link.originalUrl)}</p>
+			{#if link.customCode}
+				<p class="text-xs text-blue-400/60">/{link.customCode}</p>
+			{/if}
+		</button>
+	{/snippet}
+</BaseListView>

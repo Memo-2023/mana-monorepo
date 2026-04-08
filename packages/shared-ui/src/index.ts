@@ -67,7 +67,7 @@ export { ModalFooter, DataCard, PageHeader, KeyboardShortcutsPanel } from './mol
 export { ConfirmationPopover } from './molecules';
 
 // Organisms
-export { Modal, ConfirmationModal, FormModal, AppSlider } from './organisms';
+export { Modal, ConfirmationModal, FormModal, AppSlider, BaseListView } from './organisms';
 export type { AppItem } from './organisms';
 
 // Network Graph

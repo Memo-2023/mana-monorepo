@@ -3,39 +3,30 @@
   File browser with recent files and folders.
 -->
 <script lang="ts">
-	import { liveQuery } from 'dexie';
+	import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 	import { db } from '$lib/data/database';
 	import { decryptRecords } from '$lib/data/crypto';
+	import { BaseListView } from '@mana/shared-ui';
 	import type { LocalFile, LocalFolder } from './types';
 	import type { ViewProps } from '$lib/app-registry';
 
-	let { navigate, goBack, params }: ViewProps = $props();
+	let { navigate }: ViewProps = $props();
 
-	let files = $state<LocalFile[]>([]);
-	let folders = $state<LocalFolder[]>([]);
+	const filesQuery = useLiveQueryWithDefault(async () => {
+		const all = await db.table<LocalFile>('files').toArray();
+		const visible = all.filter((f) => !f.deletedAt && !f.isDeleted);
+		return decryptRecords('files', visible);
+	}, [] as LocalFile[]);
 
-	$effect(() => {
-		const sub = liveQuery(async () => {
-			const all = await db.table<LocalFile>('files').toArray();
-			const visible = all.filter((f) => !f.deletedAt && !f.isDeleted);
-			return decryptRecords('files', visible);
-		}).subscribe((val) => {
-			files = val ?? [];
-		});
-		return () => sub.unsubscribe();
-	});
+	const foldersQuery = useLiveQueryWithDefault(async () => {
+		const all = await db.table<LocalFolder>('folders').toArray();
+		return all.filter((f) => !f.deletedAt && !f.isDeleted);
+	}, [] as LocalFolder[]);
 
-	$effect(() => {
-		const sub = liveQuery(async () => {
-			return db
-				.table<LocalFolder>('folders')
-				.toArray()
-				.then((all) => all.filter((f) => !f.deletedAt && !f.isDeleted));
-		}).subscribe((val) => {
-			folders = val ?? [];
-		});
-		return () => sub.unsubscribe();
-	});
+	const files = $derived(filesQuery.value);
+	const folders = $derived(foldersQuery.value);
+
+	const rootFolders = $derived(folders.filter((f) => !f.parentFolderId));
 
 	const recentFiles = $derived(
 		[...files].sort((a, b) => (b.updatedAt ?? '').localeCompare(a.updatedAt ?? '')).slice(0, 15)
@@ -56,17 +47,16 @@
 	}
 </script>
 
-<div class="flex h-full flex-col gap-3 p-3 sm:p-4">
-	<div class="flex gap-3 text-xs text-white/40">
+<BaseListView items={recentFiles} getKey={(f) => f.id} emptyTitle="Keine Dateien">
+	{#snippet header()}
 		<span>{folders.length} Ordner</span>
 		<span>{files.length} Dateien</span>
-	</div>
+	{/snippet}
 
-	<div class="flex-1 overflow-auto">
-		<!-- Root folders -->
-		{#if folders.filter((f) => !f.parentFolderId).length > 0}
+	{#snippet listHeader()}
+		{#if rootFolders.length > 0}
 			<h3 class="mb-2 text-xs font-medium text-white/50">Ordner</h3>
-			{#each folders.filter((f) => !f.parentFolderId) as folder (folder.id)}
+			{#each rootFolders as folder (folder.id)}
 				<div
 					class="flex min-h-[44px] items-center gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-white/5"
 				>
@@ -75,27 +65,22 @@
 				</div>
 			{/each}
 		{/if}
-
-		<!-- Recent files -->
 		<h3 class="mb-2 mt-3 text-xs font-medium text-white/50">Zuletzt</h3>
-		{#each recentFiles as file (file.id)}
-			<button
-				onclick={() =>
-					navigate('detail', {
-						fileId: file.id,
-						_siblingIds: recentFiles.map((f) => f.id),
-						_siblingKey: 'fileId',
-					})}
-				class="flex w-full min-h-[44px] items-center gap-2 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-white/5"
-			>
-				<span class="text-sm">{@html fileIcon(file.mimeType)}</span>
-				<span class="min-w-0 flex-1 truncate text-sm text-white/70">{file.name}</span>
-				<span class="shrink-0 text-xs text-white/30">{formatSize(file.size)}</span>
-			</button>
-		{/each}
+	{/snippet}
 
-		{#if recentFiles.length === 0}
-			<p class="py-8 text-center text-sm text-white/30">Keine Dateien</p>
-		{/if}
-	</div>
-</div>
+	{#snippet item(file)}
+		<button
+			onclick={() =>
+				navigate('detail', {
+					fileId: file.id,
+					_siblingIds: recentFiles.map((f) => f.id),
+					_siblingKey: 'fileId',
+				})}
+			class="flex w-full min-h-[44px] items-center gap-2 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-white/5"
+		>
+			<span class="text-sm">{@html fileIcon(file.mimeType)}</span>
+			<span class="min-w-0 flex-1 truncate text-sm text-white/70">{file.name}</span>
+			<span class="shrink-0 text-xs text-white/30">{formatSize(file.size)}</span>
+		</button>
+	{/snippet}
+</BaseListView>

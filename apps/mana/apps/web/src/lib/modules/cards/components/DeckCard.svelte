@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Card } from '@mana/shared-ui';
 	import type { Deck } from '../types';
 
 	interface Props {
@@ -17,10 +18,7 @@
 	}
 </script>
 
-<button
-	class="w-full rounded-xl border border-border bg-card p-4 text-left transition-all hover:border-primary/50 hover:shadow-lg"
-	{onclick}
->
+<Card variant="outlined" interactive {onclick} fullWidth class="text-left">
 	<div class="space-y-3">
 		<!-- Color strip -->
 		<div class="h-1 w-12 rounded-full" style="background: {deck.color}"></div>
@@ -43,11 +41,11 @@
 				<span>{deck.cardCount || 0} Karten</span>
 				{#if deck.isPublic}
 					<span class="rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">
-						Offentlich
+						Öffentlich
 					</span>
 				{/if}
 			</div>
 			<span>{formatDate(deck.updatedAt)}</span>
 		</div>
 	</div>
-</button>
+</Card>
