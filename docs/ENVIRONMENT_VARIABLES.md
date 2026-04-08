@@ -17,16 +17,26 @@ That's it! All app-specific `.env` files are generated from `.env.development`.
 ## How It Works
 
 ```
-.env.development          # Central config (committed)
+.env.development          # Central config (committed, no secrets)
+        │
+        ├── .env.secrets   # Optional gitignored override (your API keys)
+        ▼
+scripts/generate-env.mjs   # Merges + transforms variables
         │
         ▼
-scripts/generate-env.mjs  # Transforms variables
-        │
-        ▼
-apps/**/apps/**/.env      # Generated files (gitignored)
+apps/**/apps/**/.env       # Generated files (gitignored)
 ```
 
-The generator reads `.env.development` and creates app-specific `.env` files with the correct prefixes for each platform:
+The generator reads `.env.development` first, then layers `.env.secrets` (if it exists) on
+top — non-empty values in `.env.secrets` override the matching key in `.env.development`.
+This is where personal dev secrets like `MANA_STT_API_KEY` live, so you don't have to
+re-paste them into per-app `.env` files after every `pnpm setup:env`.
+
+To populate `.env.secrets` from the Mac Mini in one shot, run `pnpm setup:secrets` (see
+[`docs/LOCAL_DEVELOPMENT.md`](LOCAL_DEVELOPMENT.md#personal-dev-secrets--envsecrets) for
+the full walk-through).
+
+The generator then creates app-specific `.env` files with the correct prefixes for each platform:
 
 | Platform | Prefix | Example |
 |----------|--------|---------|

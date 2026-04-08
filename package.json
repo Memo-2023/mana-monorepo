@@ -21,6 +21,7 @@
 		"audit:deps": "node scripts/audit-workspace-deps.mjs",
 		"generate:dockerfiles": "node scripts/generate-dockerfiles.mjs",
 		"setup:env": "node scripts/generate-env.mjs",
+		"setup:secrets": "node scripts/setup-secrets.mjs",
 		"setup:db": "./scripts/setup-databases.sh",
 		"setup:db:chat": "./scripts/setup-databases.sh chat",
 		"setup:db:auth": "./scripts/setup-databases.sh auth",

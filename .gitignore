@@ -28,9 +28,11 @@ ios/
 .env.test.local
 .env.production.local
 .env*.local
+.env.secrets
 
-# BUT commit the central development env file
+# BUT commit the central development env file + the secrets template
 !.env.development
+!.env.secrets.example
 
 # IDE
 .idea/

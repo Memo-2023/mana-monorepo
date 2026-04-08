@@ -101,11 +101,49 @@ pnpm docker:up
 # 2. Build mana-sync (first time only, or after Go changes)
 pnpm dev:sync:build
 
-# 3. Generate environment files (runs automatically on pnpm install)
+# 3. (Optional) Pull dev secrets from the Mac Mini into .env.secrets
+pnpm setup:secrets
+
+# 4. Generate environment files (runs automatically on pnpm install)
 pnpm setup:env
 ```
 
 For `dev:*:local`, only mana-sync needs to be built. No Docker required unless your server uses a database.
+
+### Personal dev secrets — `.env.secrets`
+
+`.env.development` is committed and contains non-secret defaults. Real API keys (mana-stt,
+gpu-llm, OpenRouter, etc.) live in a separate gitignored `.env.secrets` at the repo root.
+The env generator merges this file on top of `.env.development`, so any key you set there
+gets propagated into every per-app `.env` on `pnpm setup:env` — no more re-pasting keys
+into individual app folders after every regeneration.
+
+**One-time setup:**
+
+```bash
+# Pulls keys from ~/projects/mana-monorepo/.env on the Mac Mini via SSH
+pnpm setup:secrets
+
+# Then propagate into per-app .env files
+pnpm setup:env
+```
+
+`pnpm setup:secrets` reads `.env.secrets.example` to know which keys to look for, asks
+before overwriting an existing `.env.secrets`, and reports which keys it couldn't find on
+the remote (some service-specific keys live in their own per-service `.env` files on the
+Mac Mini and need to be filled in manually).
+
+If you don't have SSH access to `mana-server`, copy the template and fill values manually:
+
+```bash
+cp .env.secrets.example .env.secrets
+$EDITOR .env.secrets
+pnpm setup:env
+```
+
+Empty values in `.env.secrets` are no-ops — they fall through to the `.env.development`
+defaults. So a freshly-copied template doesn't change anything until you start filling
+keys in.
 
 ## Database Setup Commands
 

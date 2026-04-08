@@ -16,6 +16,11 @@ import { fileURLToPath } from 'url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT_DIR = join(__dirname, '..');
 const ENV_FILE = join(ROOT_DIR, '.env.development');
+// Optional gitignored override for personal dev secrets. Keys defined
+// here win over .env.development, so devs can keep API keys in one
+// place instead of re-pasting them into per-app .env files after every
+// `pnpm setup:env`. See .env.secrets.example for the template.
+const SECRETS_FILE = join(ROOT_DIR, '.env.secrets');
 
 // Parse a .env file into an object
 function parseEnvFile(content) {
@@ -762,6 +767,25 @@ function main() {
 	// Parse source env file
 	const sourceContent = readFileSync(ENV_FILE, 'utf-8');
 	const sourceEnv = parseEnvFile(sourceContent);
+
+	// Layer .env.secrets (gitignored) on top — only non-empty values
+	// override. An empty value in .env.secrets is treated as "use the
+	// .env.development default", so a freshly-copied .env.secrets.example
+	// (all keys present, all values empty) is a no-op.
+	let secretsLoaded = 0;
+	if (existsSync(SECRETS_FILE)) {
+		const secretsContent = readFileSync(SECRETS_FILE, 'utf-8');
+		const secretsEnv = parseEnvFile(secretsContent);
+		for (const [key, value] of Object.entries(secretsEnv)) {
+			if (value !== '' && value !== undefined) {
+				sourceEnv[key] = value;
+				secretsLoaded++;
+			}
+		}
+		console.log(
+			`Loaded ${secretsLoaded} secret${secretsLoaded === 1 ? '' : 's'} from .env.secrets\n`
+		);
+	}
 
 	let generated = 0;
 	let skipped = 0;
