@@ -61,7 +61,6 @@ export const giftCodes = giftsSchema.table(
 
 		// Personalization
 		targetEmail: text('target_email'),
-		targetMatrixId: text('target_matrix_id'),
 
 		// Riddle
 		riddleQuestion: text('riddle_question'),

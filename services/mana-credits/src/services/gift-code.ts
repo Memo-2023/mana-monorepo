@@ -22,7 +22,6 @@ interface CreateGiftParams {
 	type?: 'simple' | 'personalized' | 'split' | 'first_come' | 'riddle';
 	totalPortions?: number;
 	targetEmail?: string;
-	targetMatrixId?: string;
 	riddleQuestion?: string;
 	riddleAnswer?: string;
 	message?: string;
@@ -118,7 +117,6 @@ export class GiftCodeService {
 					totalPortions,
 					type,
 					targetEmail: params.targetEmail,
-					targetMatrixId: params.targetMatrixId,
 					riddleQuestion: params.riddleQuestion,
 					riddleAnswerHash,
 					message: params.message,

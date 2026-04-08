@@ -512,12 +512,6 @@
 				},
 				{
 					"datasource": { "type": "prometheus", "uid": "${datasource}" },
-					"expr": "up{job=\"synapse\"}",
-					"legendFormat": "Synapse",
-					"refId": "U"
-				},
-				{
-					"datasource": { "type": "prometheus", "uid": "${datasource}" },
 					"expr": "pg_up",
 					"legendFormat": "PostgreSQL",
 					"refId": "G"

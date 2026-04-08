@@ -3,14 +3,13 @@
 #
 # Port Schema:
 #   3000-3099: Core Services & Backends
-#   4000-4099: Matrix Stack
 #   5000-5099: Web Frontends
 #   5100-5199: Games
 #   8000-8099: Monitoring Dashboards
 #   9000-9199: Infrastructure & Exporters
 #
 # Naming Convention: mana-{category}-{service}
-#   Categories: infra, core, app, matrix, mon, auto
+#   Categories: infra, core, app, mon, auto
 #
 # Memory Limits:
 #   All containers have explicit mem_limit to prevent unbounded growth.
@@ -1352,7 +1351,6 @@ services:
       WATCHTOWER_POLL_INTERVAL: 300
       WATCHTOWER_CLEANUP: "true"
       WATCHTOWER_INCLUDE_STOPPED: "false"
-      # Notifications disabled - configure Matrix if needed
 
 # ============================================
 # Volumes (Naming: mana-{service}-data)

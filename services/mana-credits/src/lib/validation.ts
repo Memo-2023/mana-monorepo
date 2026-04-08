@@ -48,7 +48,6 @@ export const createGiftSchema = z.object({
 	type: z.enum(['simple', 'personalized', 'split', 'first_come', 'riddle']).default('simple'),
 	totalPortions: z.number().int().positive().max(100).default(1),
 	targetEmail: z.string().email().optional(),
-	targetMatrixId: z.string().optional(),
 	riddleQuestion: z.string().max(200).optional(),
 	riddleAnswer: z.string().optional(),
 	message: z.string().max(500).optional(),
