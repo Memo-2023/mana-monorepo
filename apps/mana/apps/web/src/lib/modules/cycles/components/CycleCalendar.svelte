@@ -193,7 +193,7 @@
 		text-align: center;
 		font-size: 0.8125rem;
 		font-weight: 600;
-		color: #374151;
+		color: hsl(var(--color-foreground));
 		background: transparent;
 		border: none;
 		padding: 0.25rem;
@@ -204,19 +204,16 @@
 	.cal-title:hover {
 		background: rgba(236, 72, 153, 0.08);
 	}
-	:global(.dark) .cal-title {
-		color: #f3f4f6;
-	}
 	.cal-nav {
 		width: 1.75rem;
 		height: 1.75rem;
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		border: 1px solid rgba(0, 0, 0, 0.08);
+		border: 1px solid hsl(var(--color-border));
 		border-radius: 0.375rem;
 		background: transparent;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 		font-size: 1rem;
 		line-height: 1;
 		cursor: pointer;
@@ -226,10 +223,6 @@
 		color: #ec4899;
 		border-color: #ec4899;
 	}
-	:global(.dark) .cal-nav {
-		border-color: rgba(255, 255, 255, 0.08);
-	}
-
 	.cal-weekdays {
 		display: grid;
 		grid-template-columns: repeat(7, 1fr);
@@ -240,13 +233,9 @@
 		font-size: 0.5625rem;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
-		color: #c0bfba;
+		color: hsl(var(--color-muted-foreground));
 		font-weight: 600;
 	}
-	:global(.dark) .cal-weekday {
-		color: #6b7280;
-	}
-
 	.cal-grid {
 		display: grid;
 		grid-template-columns: repeat(7, 1fr);
@@ -262,7 +251,7 @@
 		border: 1px solid transparent;
 		border-radius: 0.375rem;
 		background: color-mix(in srgb, var(--phase-color) 10%, transparent);
-		color: #374151;
+		color: hsl(var(--color-foreground));
 		font-size: 0.6875rem;
 		cursor: pointer;
 		transition: all 0.15s;
@@ -271,9 +260,6 @@
 	}
 	.cal-day:hover {
 		background: color-mix(in srgb, var(--phase-color) 24%, transparent);
-	}
-	:global(.dark) .cal-day {
-		color: #e5e7eb;
 	}
 	.cal-day.out {
 		opacity: 0.35;

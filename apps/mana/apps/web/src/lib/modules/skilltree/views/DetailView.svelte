@@ -199,39 +199,33 @@
 	.xp-level {
 		font-size: 0.8125rem;
 		font-weight: 500;
-		color: #374151;
-	}
-	:global(.dark) .xp-level {
-		color: #e5e7eb;
+		color: hsl(var(--color-foreground));
 	}
 	.xp-numbers {
 		font-size: 0.75rem;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 	}
 	.xp-bar {
 		height: 6px;
 		border-radius: 3px;
-		background: rgba(0, 0, 0, 0.08);
+		background: hsl(var(--color-border));
 		overflow: hidden;
-	}
-	:global(.dark) .xp-bar {
-		background: rgba(255, 255, 255, 0.1);
 	}
 	.xp-fill {
 		height: 100%;
 		border-radius: 3px;
-		background: #8b5cf6;
+		background: hsl(var(--color-primary));
 		transition: width 0.3s ease;
 	}
 	.xp-total {
 		font-size: 0.6875rem;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 	}
 	.level-up {
 		padding: 0.375rem 0.75rem;
 		border-radius: 0.375rem;
-		background: #8b5cf6;
-		color: white;
+		background: hsl(var(--color-primary));
+		color: hsl(var(--color-primary-foreground));
 		font-size: 0.8125rem;
 		font-weight: 500;
 		text-align: center;
@@ -246,28 +240,20 @@
 		font-size: 0.8125rem;
 		padding: 0.25rem 0.375rem;
 		border-radius: 0.25rem;
-		border: 1px solid rgba(0, 0, 0, 0.1);
+		border: 1px solid hsl(var(--color-border));
 		background: transparent;
-		color: #374151;
+		color: hsl(var(--color-foreground));
 		outline: none;
-	}
-	:global(.dark) .xp-input {
-		color: #e5e7eb;
-		border-color: rgba(255, 255, 255, 0.1);
 	}
 	.xp-desc-input {
 		flex: 1;
 		font-size: 0.8125rem;
 		padding: 0.25rem 0.375rem;
 		border-radius: 0.25rem;
-		border: 1px solid rgba(0, 0, 0, 0.1);
+		border: 1px solid hsl(var(--color-border));
 		background: transparent;
-		color: #374151;
+		color: hsl(var(--color-foreground));
 		outline: none;
-	}
-	:global(.dark) .xp-desc-input {
-		color: #e5e7eb;
-		border-color: rgba(255, 255, 255, 0.1);
 	}
 	.xp-btn {
 		display: flex;
@@ -276,8 +262,8 @@
 		padding: 0.25rem 0.5rem;
 		border-radius: 0.25rem;
 		border: none;
-		background: #8b5cf6;
-		color: white;
+		background: hsl(var(--color-primary));
+		color: hsl(var(--color-primary-foreground));
 		font-size: 0.75rem;
 		cursor: pointer;
 		white-space: nowrap;

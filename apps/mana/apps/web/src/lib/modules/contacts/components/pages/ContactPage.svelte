@@ -371,16 +371,11 @@
 	.contact-count {
 		font-size: 0.75rem;
 		font-weight: 500;
-		color: #9ca3af;
-		background: rgba(0, 0, 0, 0.05);
+		color: hsl(var(--color-muted-foreground));
+		background: hsl(var(--color-surface-hover));
 		padding: 0.125rem 0.5rem;
 		border-radius: 9999px;
 	}
-	:global(.dark) .contact-count {
-		background: rgba(255, 255, 255, 0.1);
-		color: #6b7280;
-	}
-
 	.page-content {
 		padding: 0.5rem 0.75rem;
 	}
@@ -392,7 +387,7 @@
 		justify-content: center;
 		gap: 0.5rem;
 		min-height: 200px;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 		font-size: 0.8125rem;
 	}
 
@@ -404,17 +399,13 @@
 		font-weight: 700;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 		padding: 0.25rem 0.5rem;
 		position: sticky;
 		top: 0;
-		background: #fffef5;
+		background: hsl(var(--color-card));
 		z-index: 1;
 	}
-	:global(.dark) .letter-header {
-		background: #252220;
-	}
-
 	.contact-row {
 		display: flex;
 		align-items: center;
@@ -425,12 +416,8 @@
 		transition: background 0.15s;
 	}
 	.contact-row:hover {
-		background: rgba(0, 0, 0, 0.03);
+		background: hsl(var(--color-surface-hover));
 	}
-	:global(.dark) .contact-row:hover {
-		background: rgba(255, 255, 255, 0.04);
-	}
-
 	.avatar {
 		width: 2rem;
 		height: 2rem;
@@ -463,21 +450,18 @@
 	.contact-name {
 		font-size: 0.8125rem;
 		font-weight: 500;
-		color: #374151;
+		color: hsl(var(--color-foreground));
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
 	}
-	:global(.dark) .contact-name {
-		color: #f3f4f6;
-	}
 	:global(.favorite-star) {
-		color: #f59e0b;
+		color: hsl(var(--color-warning));
 		flex-shrink: 0;
 	}
 	.contact-subtitle {
 		font-size: 0.6875rem;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
@@ -531,10 +515,7 @@
 		transition: background 0.15s;
 	}
 	.profile-card:hover {
-		background: rgba(0, 0, 0, 0.02);
-	}
-	:global(.dark) .profile-card:hover {
-		background: rgba(255, 255, 255, 0.03);
+		background: hsl(var(--color-surface-hover));
 	}
 	.profile-avatar {
 		width: 4.5rem;
@@ -558,26 +539,20 @@
 	.profile-name {
 		font-size: 1.125rem;
 		font-weight: 700;
-		color: #374151;
+		color: hsl(var(--color-foreground));
 		margin-bottom: 0.75rem;
-	}
-	:global(.dark) .profile-name {
-		color: #f3f4f6;
 	}
 	.profile-detail {
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
 		font-size: 0.8125rem;
-		color: #6b7280;
+		color: hsl(var(--color-muted-foreground));
 		padding: 0.25rem 0;
-	}
-	:global(.dark) .profile-detail {
-		color: #9ca3af;
 	}
 	.profile-hint {
 		margin-top: 1rem;
 		font-size: 0.6875rem;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 	}
 </style>

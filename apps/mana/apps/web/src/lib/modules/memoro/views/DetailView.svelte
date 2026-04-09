@@ -157,31 +157,27 @@
 		background: transparent;
 		cursor: pointer;
 		padding: 0.125rem;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 		flex-shrink: 0;
 		transition:
 			color 0.15s,
 			transform 0.15s;
 	}
 	.pin-btn:hover {
-		color: #6b7280;
+		color: hsl(var(--color-muted-foreground));
 	}
 	.pin-btn.pinned {
-		color: #f59e0b;
+		color: hsl(var(--color-warning));
 	}
 	.transcript {
 		font-size: 0.8125rem;
-		color: #6b7280;
+		color: hsl(var(--color-muted-foreground));
 		line-height: 1.5;
 		padding: 0.5rem;
 		border-radius: 0.375rem;
-		background: rgba(0, 0, 0, 0.02);
+		background: hsl(var(--color-surface-hover));
 		white-space: pre-wrap;
 		max-height: 12rem;
 		overflow-y: auto;
-	}
-	:global(.dark) .transcript {
-		background: rgba(255, 255, 255, 0.03);
-		color: #9ca3af;
 	}
 </style>

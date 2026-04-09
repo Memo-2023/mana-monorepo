@@ -190,11 +190,7 @@
 		font-size: 0.6875rem;
 		padding: 0.125rem 0.5rem;
 		border-radius: 0.25rem;
-		background: rgba(0, 0, 0, 0.04);
-		color: #6b7280;
-	}
-	:global(.dark) .tag {
-		background: rgba(255, 255, 255, 0.06);
-		color: #9ca3af;
+		background: hsl(var(--color-surface-hover));
+		color: hsl(var(--color-muted-foreground));
 	}
 </style>

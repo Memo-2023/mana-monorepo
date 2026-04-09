@@ -225,7 +225,7 @@
 	.prop-icon {
 		display: flex;
 		align-items: center;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 		flex-shrink: 0;
 		width: 1rem;
 	}
@@ -241,7 +241,7 @@
 		gap: 0.25rem;
 	}
 	.time-sep {
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 		font-size: 0.75rem;
 	}
 	.allday-label {
@@ -249,7 +249,7 @@
 		align-items: center;
 		gap: 0.375rem;
 		font-size: 0.75rem;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 		cursor: pointer;
 	}
 	:global(.detail-view .prop-input.wide) {
@@ -272,7 +272,7 @@
 		background: color-mix(in srgb, var(--tag-color) 12%, transparent);
 		border: none;
 		font-size: 0.6875rem;
-		color: #6b7280;
+		color: hsl(var(--color-muted-foreground));
 		cursor: pointer;
 		transition: opacity 0.15s;
 	}
@@ -284,11 +284,8 @@
 		height: 6px;
 		border-radius: 9999px;
 	}
-	:global(.dark) .tag-pill {
-		color: #9ca3af;
-	}
 	.recurrence {
 		font-size: 0.75rem;
-		color: #6b7280;
+		color: hsl(var(--color-muted-foreground));
 	}
 </style>

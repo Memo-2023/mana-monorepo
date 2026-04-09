@@ -164,20 +164,15 @@
 	.search-input {
 		padding: 0.3rem 0.5rem;
 		border-radius: 0.375rem;
-		border: 1px solid rgba(0, 0, 0, 0.08);
+		border: 1px solid hsl(var(--color-border));
 		background: transparent;
 		font-size: 0.75rem;
-		color: #374151;
+		color: hsl(var(--color-foreground));
 		outline: none;
 	}
 	.search-input:focus {
-		border-color: #6366f1;
+		border-color: hsl(var(--color-primary));
 	}
-	:global(.dark) .search-input {
-		border-color: rgba(255, 255, 255, 0.08);
-		color: #f3f4f6;
-	}
-
 	.sort-tabs {
 		display: flex;
 		gap: 0.25rem;
@@ -186,25 +181,21 @@
 	.sort-tab {
 		padding: 0.1875rem 0.5rem;
 		border-radius: 9999px;
-		border: 1px solid rgba(0, 0, 0, 0.08);
+		border: 1px solid hsl(var(--color-border));
 		background: transparent;
 		font-size: 0.625rem;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 		cursor: pointer;
 		transition: all 0.15s;
 	}
 	.sort-tab:hover {
-		color: #6366f1;
+		color: hsl(var(--color-primary));
 	}
 	.sort-tab.active {
-		background: #6366f1;
-		color: white;
-		border-color: #6366f1;
+		background: hsl(var(--color-primary));
+		color: hsl(var(--color-primary-foreground));
+		border-color: hsl(var(--color-primary));
 	}
-	:global(.dark) .sort-tab {
-		border-color: rgba(255, 255, 255, 0.08);
-	}
-
 	.cloud {
 		display: flex;
 		flex-wrap: wrap;
@@ -225,7 +216,7 @@
 		gap: 0.375rem;
 		padding: 0.25rem 0.625rem;
 		border-radius: 9999px;
-		border: 1px solid rgba(0, 0, 0, 0.06);
+		border: 1px solid hsl(var(--color-border));
 		background: transparent;
 		color: var(--sym-color);
 		cursor: pointer;
@@ -248,10 +239,6 @@
 	.sym-chip.no-meaning:hover {
 		opacity: 1;
 	}
-	:global(.dark) .sym-chip {
-		border-color: rgba(255, 255, 255, 0.08);
-	}
-
 	.sym-dot {
 		width: 6px;
 		height: 6px;
@@ -266,19 +253,15 @@
 
 	.sym-count {
 		font-size: 0.625rem;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 		font-weight: 400;
 	}
 
 	.sym-meta {
 		font-size: 0.625rem;
-		color: #c0bfba;
+		color: hsl(var(--color-muted-foreground));
 		font-weight: 400;
 	}
-	:global(.dark) .sym-meta {
-		color: #4b5563;
-	}
-
 	.sym-badge {
 		display: inline-flex;
 		align-items: center;
@@ -286,20 +269,16 @@
 		width: 13px;
 		height: 13px;
 		border-radius: 9999px;
-		background: rgba(0, 0, 0, 0.06);
-		color: #9ca3af;
+		background: hsl(var(--color-muted));
+		color: hsl(var(--color-muted-foreground));
 		font-size: 0.5625rem;
 		font-weight: 700;
 		margin-left: 0.125rem;
 	}
-	:global(.dark) .sym-badge {
-		background: rgba(255, 255, 255, 0.08);
-	}
-
 	.empty {
 		padding: 2rem 0;
 		text-align: center;
 		font-size: 0.8125rem;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 	}
 </style>

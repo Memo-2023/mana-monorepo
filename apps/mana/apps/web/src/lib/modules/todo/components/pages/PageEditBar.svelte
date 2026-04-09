@@ -151,14 +151,11 @@
 <style>
 	.edit-bar {
 		padding: 0.5rem 0.75rem;
-		border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+		border-bottom: 1px solid hsl(var(--color-border));
 		display: flex;
 		flex-direction: column;
 		gap: 0.375rem;
 		animation: slideDown 0.2s ease-out;
-	}
-	:global(.dark) .edit-bar {
-		border-bottom-color: rgba(255, 255, 255, 0.08);
 	}
 	@keyframes slideDown {
 		from {
@@ -188,28 +185,17 @@
 		border-radius: 0.25rem;
 		border: none;
 		background: transparent;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 		cursor: pointer;
 		transition: all 0.15s;
 	}
 	.icon-btn:hover {
-		background: rgba(0, 0, 0, 0.06);
-		color: #374151;
+		background: hsl(var(--color-muted));
+		color: hsl(var(--color-foreground));
 	}
 	.icon-btn.active {
 		background: var(--color-primary, #8b5cf6);
-		color: white;
-	}
-	:global(.dark) .icon-btn {
-		color: #6b7280;
-	}
-	:global(.dark) .icon-btn:hover {
-		background: rgba(255, 255, 255, 0.1);
-		color: #e5e7eb;
-	}
-	:global(.dark) .icon-btn.active {
-		background: var(--color-primary, #8b5cf6);
-		color: white;
+		color: hsl(var(--color-primary-foreground));
 	}
 	.filter-toggle {
 		display: flex;
@@ -218,7 +204,7 @@
 		padding: 0.25rem 0.5rem;
 		border: none;
 		background: transparent;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 		cursor: pointer;
 		font-size: 0.6875rem;
 		font-weight: 500;
@@ -227,10 +213,7 @@
 		transition: color 0.15s;
 	}
 	.filter-toggle:hover {
-		color: #374151;
-	}
-	:global(.dark) .filter-toggle:hover {
-		color: #e5e7eb;
+		color: hsl(var(--color-foreground));
 	}
 	.filter-toggle-arrow {
 		font-size: 0.625rem;
@@ -255,7 +238,7 @@
 		font-weight: 600;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 	}
 	.filter-pills {
 		display: flex;
@@ -265,42 +248,29 @@
 	.filter-pill {
 		padding: 0.1875rem 0.5rem;
 		border-radius: 9999px;
-		border: 1px solid rgba(0, 0, 0, 0.1);
+		border: 1px solid hsl(var(--color-border));
 		background: transparent;
-		color: #6b7280;
+		color: hsl(var(--color-muted-foreground));
 		font-size: 0.6875rem;
 		font-weight: 500;
 		cursor: pointer;
 		transition: all 0.15s;
 	}
 	.filter-pill:hover {
-		border-color: rgba(0, 0, 0, 0.2);
-		color: #374151;
+		border-color: hsl(var(--color-border-strong));
+		color: hsl(var(--color-foreground));
 	}
 	.filter-pill.active {
 		background: var(--pill-color, var(--color-primary, #8b5cf6));
 		border-color: var(--pill-color, var(--color-primary, #8b5cf6));
-		color: white;
-	}
-	:global(.dark) .filter-pill {
-		border-color: rgba(255, 255, 255, 0.1);
-		color: #9ca3af;
-	}
-	:global(.dark) .filter-pill:hover {
-		border-color: rgba(255, 255, 255, 0.2);
-		color: #e5e7eb;
-	}
-	:global(.dark) .filter-pill.active {
-		background: var(--pill-color, var(--color-primary, #8b5cf6));
-		border-color: var(--pill-color, var(--color-primary, #8b5cf6));
-		color: white;
+		color: hsl(var(--color-primary-foreground));
 	}
 	.completed-toggle {
 		display: flex;
 		align-items: center;
 		gap: 0.375rem;
 		font-size: 0.6875rem;
-		color: #6b7280;
+		color: hsl(var(--color-muted-foreground));
 		cursor: pointer;
 	}
 	.completed-toggle input {
@@ -308,9 +278,6 @@
 		height: 14px;
 		accent-color: var(--color-primary, #8b5cf6);
 		cursor: pointer;
-	}
-	:global(.dark) .completed-toggle {
-		color: #9ca3af;
 	}
 	.actions-row {
 		justify-content: flex-end;
@@ -324,24 +291,16 @@
 		border-radius: 0.25rem;
 		border: none;
 		background: transparent;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 		cursor: pointer;
 		transition: all 0.15s;
 	}
 	.action-btn:hover {
-		background: rgba(0, 0, 0, 0.06);
-		color: #374151;
-	}
-	:global(.dark) .action-btn:hover {
-		background: rgba(255, 255, 255, 0.1);
-		color: #e5e7eb;
+		background: hsl(var(--color-muted));
+		color: hsl(var(--color-foreground));
 	}
 	.delete-btn:hover {
-		color: #ef4444;
-		background: rgba(239, 68, 68, 0.08);
-	}
-	:global(.dark) .delete-btn:hover {
-		color: #ef4444;
-		background: rgba(239, 68, 68, 0.15);
+		color: hsl(var(--color-error));
+		background: hsl(var(--color-error) / 0.08);
 	}
 </style>

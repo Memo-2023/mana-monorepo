@@ -242,7 +242,7 @@
 <style>
 	.time-range {
 		font-size: 0.75rem;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 	}
 	.duration-inputs {
 		display: flex;
@@ -262,22 +262,15 @@
 		border-radius: 0.25rem;
 		border: 1px solid transparent;
 		background: transparent;
-		color: #374151;
+		color: hsl(var(--color-foreground));
 		outline: none;
 	}
 	.dur-input:hover,
 	.dur-input:focus {
-		border-color: rgba(0, 0, 0, 0.1);
+		border-color: hsl(var(--color-border));
 	}
 	.dur-unit {
 		font-size: 0.6875rem;
-		color: #9ca3af;
-	}
-	:global(.dark) .dur-input {
-		color: #e5e7eb;
-	}
-	:global(.dark) .dur-input:hover,
-	:global(.dark) .dur-input:focus {
-		border-color: rgba(255, 255, 255, 0.1);
+		color: hsl(var(--color-muted-foreground));
 	}
 </style>

@@ -282,16 +282,12 @@
 		width: 48px;
 		height: 48px;
 		border-radius: 9999px;
-		background: rgba(0, 0, 0, 0.06);
-		color: #6b7280;
+		background: hsl(var(--color-muted));
+		color: hsl(var(--color-muted-foreground));
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		flex-shrink: 0;
-	}
-	:global(.dark) .place-avatar {
-		background: rgba(255, 255, 255, 0.08);
-		color: #9ca3af;
 	}
 	.name-fields {
 		flex: 1;
@@ -304,32 +300,20 @@
 		border: 1px solid transparent;
 		background: transparent;
 		outline: none;
-		color: #374151;
+		color: hsl(var(--color-foreground));
 		padding: 0.125rem 0.25rem;
 		border-radius: 0.25rem;
 		transition: border-color 0.15s;
 	}
 	.name-input:hover,
 	.name-input:focus {
-		border-color: rgba(0, 0, 0, 0.1);
+		border-color: hsl(var(--color-border));
 	}
-	:global(.dark) .name-input {
-		color: #f3f4f6;
-	}
-	:global(.dark) .name-input:hover,
-	:global(.dark) .name-input:focus {
-		border-color: rgba(255, 255, 255, 0.1);
-	}
-
 	.map-container {
 		border-radius: 0.5rem;
 		overflow: hidden;
-		border: 1px solid rgba(0, 0, 0, 0.08);
+		border: 1px solid hsl(var(--color-border));
 	}
-	:global(.dark) .map-container {
-		border-color: rgba(255, 255, 255, 0.08);
-	}
-
 	.fields {
 		display: flex;
 		flex-direction: column;
@@ -343,7 +327,7 @@
 	}
 	.field-label {
 		font-size: 0.75rem;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 		min-width: 5.5rem;
 		padding-top: 0.375rem;
 	}
@@ -356,7 +340,7 @@
 		border-radius: 0.25rem;
 		border: 1px solid transparent;
 		background: transparent;
-		color: #374151;
+		color: hsl(var(--color-foreground));
 		outline: none;
 		text-align: right;
 		transition: border-color 0.15s;
@@ -365,17 +349,7 @@
 	.field-input:focus,
 	.field-select:hover,
 	.field-select:focus {
-		border-color: rgba(0, 0, 0, 0.1);
-	}
-	:global(.dark) .field-input,
-	:global(.dark) .field-select {
-		color: #e5e7eb;
-	}
-	:global(.dark) .field-input:hover,
-	:global(.dark) .field-input:focus,
-	:global(.dark) .field-select:hover,
-	:global(.dark) .field-select:focus {
-		border-color: rgba(255, 255, 255, 0.1);
+		border-color: hsl(var(--color-border));
 	}
 	.field-input.small {
 		max-width: 6rem;
@@ -401,7 +375,7 @@
 		background: color-mix(in srgb, var(--tag-color) 12%, transparent);
 		border: none;
 		font-size: 0.6875rem;
-		color: #6b7280;
+		color: hsl(var(--color-muted-foreground));
 		cursor: pointer;
 	}
 	.tag-pill:hover {
@@ -412,10 +386,6 @@
 		height: 6px;
 		border-radius: 9999px;
 	}
-	:global(.dark) .tag-pill {
-		color: #9ca3af;
-	}
-
 	.log-list {
 		display: flex;
 		flex-direction: column;
@@ -425,9 +395,9 @@
 	.log-row {
 		display: flex;
 		justify-content: space-between;
-		color: #6b7280;
+		color: hsl(var(--color-muted-foreground));
 	}
 	.log-accuracy {
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 	}
 </style>

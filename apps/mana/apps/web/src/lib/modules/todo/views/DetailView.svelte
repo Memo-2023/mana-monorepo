@@ -344,17 +344,14 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		color: white;
+		color: hsl(var(--color-primary-foreground));
 		transition:
 			background 0.15s,
 			border-color 0.15s;
 	}
-	:global(.dark) .checkbox {
-		border-color: #4b5563;
-	}
 	.checkbox.checked {
-		background: #22c55e;
-		border-color: #22c55e;
+		background: hsl(var(--color-success));
+		border-color: hsl(var(--color-success));
 	}
 	.checkbox.small {
 		width: 14px;
@@ -363,7 +360,7 @@
 	}
 	:global(.detail-view .title-input.completed) {
 		text-decoration: line-through;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.schedule-fields {
@@ -382,30 +379,26 @@
 		gap: 0.25rem;
 		padding: 0.25rem 0.5rem;
 		border-radius: 0.25rem;
-		border: 1px solid rgba(0, 0, 0, 0.1);
+		border: 1px solid hsl(var(--color-border));
 		background: transparent;
 		font-size: 0.75rem;
-		color: #6b7280;
+		color: hsl(var(--color-muted-foreground));
 		cursor: pointer;
 	}
 	.schedule-btn:hover {
-		background: rgba(0, 0, 0, 0.04);
-	}
-	:global(.dark) .schedule-btn {
-		border-color: rgba(255, 255, 255, 0.1);
-		color: #9ca3af;
+		background: hsl(var(--color-surface-hover));
 	}
 	.unschedule-btn {
 		border: none;
 		background: transparent;
 		cursor: pointer;
 		padding: 0.125rem;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 		display: flex;
 		align-items: center;
 	}
 	.unschedule-btn:hover {
-		color: #ef4444;
+		color: hsl(var(--color-error));
 	}
 
 	.tags-list {
@@ -422,7 +415,7 @@
 		background: color-mix(in srgb, var(--tag-color) 12%, transparent);
 		border: none;
 		font-size: 0.6875rem;
-		color: #6b7280;
+		color: hsl(var(--color-muted-foreground));
 		cursor: pointer;
 	}
 	.tag-pill:hover {
@@ -433,10 +426,6 @@
 		height: 6px;
 		border-radius: 9999px;
 	}
-	:global(.dark) .tag-pill {
-		color: #9ca3af;
-	}
-
 	.subtask-list {
 		display: flex;
 		flex-direction: column;
@@ -455,20 +444,14 @@
 		transition: background 0.15s;
 	}
 	.subtask-item:hover {
-		background: rgba(0, 0, 0, 0.04);
-	}
-	:global(.dark) .subtask-item:hover {
-		background: rgba(255, 255, 255, 0.04);
+		background: hsl(var(--color-surface-hover));
 	}
 	.subtask-title {
 		font-size: 0.8125rem;
-		color: #374151;
+		color: hsl(var(--color-foreground));
 	}
 	.subtask-title.completed {
 		text-decoration: line-through;
-		color: #9ca3af;
-	}
-	:global(.dark) .subtask-title {
-		color: #e5e7eb;
+		color: hsl(var(--color-muted-foreground));
 	}
 </style>
