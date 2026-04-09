@@ -28,9 +28,9 @@ COPY pnpm-lock.yaml ./
 COPY patches/ ./patches/
 
 # Copy ALL shared packages used by SvelteKit web apps
-COPY packages/credit-operations ./packages/credit-operations
+# packages/credit-operations and packages/shared-api-client were deleted
+# during the NestJS-to-Hono migration; their COPY lines are removed.
 COPY packages/qr-export ./packages/qr-export
-COPY packages/shared-api-client ./packages/shared-api-client
 COPY packages/shared-auth ./packages/shared-auth
 COPY packages/shared-auth-ui ./packages/shared-auth-ui
 COPY packages/shared-branding ./packages/shared-branding
@@ -42,7 +42,7 @@ COPY packages/local-store ./packages/local-store
 COPY packages/shared-i18n ./packages/shared-i18n
 COPY packages/shared-icons ./packages/shared-icons
 COPY packages/shared-pwa ./packages/shared-pwa
-COPY packages/shared-splitscreen ./packages/shared-splitscreen
+# packages/shared-splitscreen was removed; its COPY line is gone too.
 COPY packages/shared-stores ./packages/shared-stores
 # packages/shared-subscription-types and shared-subscription-ui were
 # consolidated into packages/subscriptions (copied below). Their stale
@@ -92,8 +92,6 @@ RUN cd packages/shared-vite-config && pnpm build \
     && cd /app/packages/shared-error-tracking && pnpm build \
     && cd /app/packages/shared-pwa && pnpm build \
     && cd /app/packages/shared-tags && pnpm build \
-    && cd /app/packages/shared-api-client && pnpm build 2>/dev/null || true \
-    && cd /app/packages/credit-operations && pnpm build 2>/dev/null || true \
     && cd /app/packages/spiral-db && pnpm build 2>/dev/null || true
 
 WORKDIR /app
