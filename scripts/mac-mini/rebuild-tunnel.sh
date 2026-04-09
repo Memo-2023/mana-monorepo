@@ -68,6 +68,130 @@ log() { echo -e "${GREEN}[$(date +%H:%M:%S)]${NC} $*"; }
 warn() { echo -e "${YELLOW}[$(date +%H:%M:%S)] WARN${NC} $*"; }
 err() { echo -e "${RED}[$(date +%H:%M:%S)] ERROR${NC} $*"; }
 
+# ─── HTTP probe helpers ────────────────────────────────────
+#
+# A naive `curl /` check produces tons of false positives because
+# many backend services don't have a root handler — mana-credits,
+# mana-llm, media etc. all return 404 at `/` but are perfectly
+# healthy at `/health`. The grafana installation has `/api/health`
+# instead of `/health`. Forgejo (git) has neither and serves the
+# repo browser at root.
+#
+# `probe_host` tries `/health` first — that's the convention for
+# every Mana service that has one — and falls back to `/` if /health
+# returns a 4xx. The combined "best" status is returned.
+#
+# `probe_is_down` decides what counts as a real failure: only 5xx
+# Cloudflare/origin errors and the libcurl 000 (couldn't connect /
+# DNS error / timeout) count as down. Anything in the 1xx-4xx range
+# means the request reached the origin and got a structured reply,
+# which is what we care about for "the tunnel is routing correctly".
+#
+# `probe_label` formats a one-word health summary for the verify log
+# so the output reads "200 ok" / "401 auth" / "404 routed" / etc.
+probe_host() {
+    local host=$1
+    local code
+    code=$(curl -s -o /dev/null -m 6 -w "%{http_code}" "https://$host/health" 2>/dev/null || echo "000")
+    if [ "$code" -ge 400 ] 2>/dev/null && [ "$code" -lt 500 ]; then
+        # /health returned 4xx — probably no /health handler. Fall back to /
+        local code_root
+        code_root=$(curl -s -o /dev/null -m 6 -w "%{http_code}" "https://$host" 2>/dev/null || echo "000")
+        # Prefer the root probe if it returned a 2xx/3xx (real success)
+        case "$code_root" in
+            2*|3*) code=$code_root ;;
+        esac
+    fi
+    echo "$code"
+}
+
+probe_is_down() {
+    local code=$1
+    case "$code" in
+        000|5*) return 0 ;;   # 000 = curl error, 5xx = server/tunnel error
+        *) return 1 ;;        # everything else = reached the origin
+    esac
+}
+
+probe_label() {
+    local code=$1
+    case "$code" in
+        200|204) echo "ok" ;;
+        301|302|307|308) echo "redirect (auth gate)" ;;
+        401) echo "auth required" ;;
+        403) echo "forbidden" ;;
+        404) echo "routed (no handler)" ;;
+        4*) echo "client error" ;;
+        502) echo "bad gateway (origin down)" ;;
+        503) echo "unavailable" ;;
+        530) echo "tunnel error" ;;
+        5*) echo "server error" ;;
+        000) echo "unreachable" ;;
+        *) echo "?" ;;
+    esac
+}
+
+# ─── Apex DNS via Cloudflare API ───────────────────────────
+#
+# `cloudflared tunnel route dns` cannot route the apex of a zone
+# (e.g. `mana.how`) because Cloudflare requires the apex to be a
+# CNAME and refuses to create one when A/AAAA records already exist
+# (error code 1003). The CLI has no command to delete those records.
+#
+# Workaround: if $CLOUDFLARE_API_TOKEN is set, this function uses the
+# Cloudflare REST API to:
+#   1. Resolve the zone id by name
+#   2. Find any existing A / AAAA / CNAME records for the hostname
+#   3. Delete them
+#   4. Create a fresh proxied CNAME pointing at the tunnel's
+#      `<id>.cfargotunnel.com` target
+#
+# The token needs `Zone:DNS:Edit` permission for the target zone.
+# Cloudflare's CNAME flattening at the apex makes this work
+# transparently — the apex resolves to Cloudflare anycast IPs as
+# usual, but is internally a CNAME that follows the tunnel.
+#
+# Returns 0 on success, 1 if no token / non-apex / API error.
+apex_route_via_api() {
+    local hostname=$1
+    local tunnel_id=$2
+
+    # Apex check: exactly one dot in the hostname (e.g. mana.how, not
+    # chat.mana.how). cloudflared handles non-apex hostnames fine via
+    # `tunnel route dns` so we never need to call the API for those.
+    local dot_count=$(echo "$hostname" | tr -cd '.' | wc -c | tr -d ' ')
+    [ "$dot_count" = "1" ] || return 1
+
+    [ -n "${CLOUDFLARE_API_TOKEN:-}" ] || return 1
+
+    local api="https://api.cloudflare.com/client/v4"
+    local auth="Authorization: Bearer $CLOUDFLARE_API_TOKEN"
+
+    local zone_id
+    zone_id=$(curl -sf -H "$auth" "$api/zones?name=$hostname" 2>/dev/null \
+        | jq -r '.result[0].id // empty')
+    [ -n "$zone_id" ] || { warn "  apex API: zone not found for $hostname"; return 1; }
+
+    # Delete any existing A / AAAA / CNAME records on the apex
+    local existing_ids
+    existing_ids=$(curl -sf -H "$auth" "$api/zones/$zone_id/dns_records?name=$hostname" 2>/dev/null \
+        | jq -r '.result[] | select(.type == "A" or .type == "AAAA" or .type == "CNAME") | .id')
+
+    for rid in $existing_ids; do
+        curl -sf -X DELETE -H "$auth" "$api/zones/$zone_id/dns_records/$rid" >/dev/null 2>&1 \
+            || { warn "  apex API: delete of record $rid failed"; return 1; }
+    done
+
+    # Create a fresh proxied CNAME at the apex pointing at the tunnel
+    local target="$tunnel_id.cfargotunnel.com"
+    local resp
+    resp=$(curl -sf -X POST -H "$auth" -H "Content-Type: application/json" \
+        "$api/zones/$zone_id/dns_records" \
+        -d "{\"type\":\"CNAME\",\"name\":\"$hostname\",\"content\":\"$target\",\"proxied\":true,\"ttl\":1}" 2>/dev/null)
+    [ -n "$resp" ] || { warn "  apex API: create CNAME failed"; return 1; }
+    return 0
+}
+
 # ─── Pre-flight checks ─────────────────────────────────────
 
 [ -x "$CLOUDFLARED" ] || { err "$CLOUDFLARED not found or not executable"; exit 1; }
@@ -115,7 +239,7 @@ BASELINE_FILE="$BACKUP_DIR/baseline-http-statuses.txt"
 : > "$BASELINE_FILE"
 for host in $HOSTNAMES; do
     [ "$host" = "ssh.mana.how" ] && continue   # SSH-only, no HTTP
-    code=$(curl -s -o /dev/null -m 5 -w "%{http_code}" "https://$host" 2>/dev/null || echo "000")
+    code=$(probe_host "$host")
     printf "%-35s %s\n" "$host" "$code" | tee -a "$BASELINE_FILE"
 done
 
@@ -166,11 +290,17 @@ log "  ✓ ingress validate passed"
 # ─── Step 6: DNS routes ────────────────────────────────────
 
 log "Step 6/8: Routing $HOSTNAME_COUNT hostnames at the new tunnel..."
+if [ -z "${CLOUDFLARE_API_TOKEN:-}" ]; then
+    warn "  CLOUDFLARE_API_TOKEN not set — apex domains (e.g. mana.how) cannot be auto-fixed"
+    warn "  Set it before running the script for fully unattended apex routing."
+fi
 ROUTE_FAILS=0
 for host in $HOSTNAMES; do
     [ "$host" = "ssh.mana.how" ] && continue   # cloudflared tunnel route dns is for HTTP/TCP, ssh is special
     if $CLOUDFLARED tunnel route dns -f "$TUNNEL_NAME" "$host" 2>/dev/null; then
         printf "  ✓ %s\n" "$host"
+    elif apex_route_via_api "$host" "$NEW_TUNNEL_ID"; then
+        printf "  ✓ %s (via Cloudflare API — apex)\n" "$host"
     else
         printf "  ✗ %s (route failed)\n" "$host"
         ROUTE_FAILS=$((ROUTE_FAILS + 1))
@@ -204,9 +334,10 @@ VERIFY_FILE="$BACKUP_DIR/post-rebuild-http-statuses.txt"
 DOWN_COUNT=0
 for host in $HOSTNAMES; do
     [ "$host" = "ssh.mana.how" ] && continue
-    code=$(curl -s -o /dev/null -m 8 -w "%{http_code}" "https://$host" 2>/dev/null || echo "000")
-    printf "%-35s %s\n" "$host" "$code" | tee -a "$VERIFY_FILE"
-    if [ "$code" = "000" ] || [ "$code" = "404" ]; then
+    code=$(probe_host "$host")
+    label=$(probe_label "$code")
+    printf "%-35s %s  %s\n" "$host" "$code" "$label" | tee -a "$VERIFY_FILE"
+    if probe_is_down "$code"; then
         DOWN_COUNT=$((DOWN_COUNT + 1))
     fi
 done
