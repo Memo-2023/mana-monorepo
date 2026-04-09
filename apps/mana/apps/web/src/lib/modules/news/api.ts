@@ -13,12 +13,21 @@
  * leak the SSR-side internal Docker hostname (`http://mana-api:3060`) to
  * the browser and trip CSP / DNS.
  *
- * Auth is the unified Mana JWT, picked up by the same fetch wrapper the
- * rest of the app uses (cookie + Authorization header set by SvelteKit
- * `fetch` via the auth-provider middleware).
+ * Auth is the unified Mana JWT pulled from `authStore.getAccessToken()`
+ * and attached as a `Authorization: Bearer …` header. The credentials/
+ * cookie path does NOT work — the apps/api authMiddleware only reads
+ * the Authorization header. Initially we passed `credentials: 'include'`
+ * thinking the cookie alone was enough, which made every browser-side
+ * fetch return 401 because mana-api never sees a token.
  */
 
+import { authStore } from '$lib/stores/auth.svelte';
 import { getManaApiUrl } from '$lib/api/config';
+
+async function authHeader(): Promise<Record<string, string>> {
+	const token = await authStore.getAccessToken();
+	return token ? { Authorization: `Bearer ${token}` } : {};
+}
 
 export interface FeedArticleDto {
 	id: string;
@@ -61,7 +70,9 @@ export async function fetchFeed(
 	if (query.offset != null) params.set('offset', String(query.offset));
 
 	const url = `${getManaApiUrl()}/api/v1/news/feed${params.toString() ? `?${params}` : ''}`;
-	const response = await fetchImpl(url, { credentials: 'include' });
+	const response = await fetchImpl(url, {
+		headers: await authHeader(),
+	});
 	if (!response.ok) {
 		throw new Error(`fetchFeed failed: ${response.status}`);
 	}
@@ -92,8 +103,10 @@ export async function extractFromUrl(
 ): Promise<ExtractedArticleDto> {
 	const response = await fetchImpl(`${getManaApiUrl()}/api/v1/news/extract/save`, {
 		method: 'POST',
-		credentials: 'include',
-		headers: { 'Content-Type': 'application/json' },
+		headers: {
+			'Content-Type': 'application/json',
+			...(await authHeader()),
+		},
 		body: JSON.stringify({ url }),
 	});
 	if (!response.ok) {

@@ -32,9 +32,10 @@
 
 	// We accept ViewProps for protocol compatibility but the workbench
 	// view doesn't navigate within itself — every "open" jumps to the
-	// dedicated /news routes.
-	let _props: ViewProps = $props();
-	void _props;
+	// dedicated /news routes. Empty destructure satisfies the $props()
+	// declaration without referencing the props object (which would
+	// trigger Svelte's "captured initial value" warning).
+	const {}: ViewProps = $props();
 
 	const prefs$ = usePreferences();
 	const pool$ = useCachedFeed();

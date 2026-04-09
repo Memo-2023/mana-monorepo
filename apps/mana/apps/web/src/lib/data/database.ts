@@ -269,23 +269,12 @@ db.version(1).stores({
 		'id, startDate, kind, type, sourceModule, sourceId, parentBlockId, [sourceModule+sourceId], [type+startDate], [kind+startDate], [parentBlockId+recurrenceDate]',
 	timeBlockTags: 'id, blockId, tagId, [blockId+tagId]',
 
-	// ─── News (appId: 'news') ───
-	// `newsArticles` is the user's personal reading list (saved articles
-	// from the curated pool plus user-pasted URLs). `newsCategories` is
-	// user-defined folders for the reading list. `newsPreferences` is a
-	// singleton row holding selected topics, blocklist, language and the
-	// learned topic/source weights. `newsReactions` records per-article
-	// feedback (interested / not_interested / source_blocked / hidden)
-	// and is what the feed engine uses to suppress already-rated items.
-	// `newsCachedFeed` is a local mirror of the latest curated pool from
-	// the server — capped to ~200 entries for offline reading. It is
-	// intentionally NOT in module.config.ts and therefore not synced.
-	newsArticles:
-		'id, type, isArchived, isRead, isFavorite, categoryId, originalUrl, sourceCuratedId, [type+isArchived], [categoryId+createdAt]',
-	newsCategories: 'id, sortOrder',
-	newsPreferences: 'id',
-	newsReactions: 'id, articleId, reaction, sourceSlug, topic, [reaction+createdAt]',
-	newsCachedFeed: 'id, topic, sourceSlug, language, publishedAt, [topic+publishedAt]',
+	// ─── News tables intentionally NOT in v1 ───
+	// Originally added here, but that violates Dexie's "never edit a
+	// published version" rule. Existing browsers stuck at db.version(3)
+	// would never trigger an upgrade for v1 changes, so the news tables
+	// would only appear on a fresh-cleared IndexedDB. Moved into
+	// db.version(4) below — see comment there for rationale + indexes.
 
 	// ─── Shared: Global Tags (appId: 'tags') ───
 	globalTags: 'id, name, groupId',
@@ -327,6 +316,38 @@ db.version(2).stores({
 db.version(3).stores({
 	whoGames: 'id, status, deckId, startedAt, finishedAt, [status+startedAt]',
 	whoMessages: 'id, gameId, sender, createdAt, [gameId+createdAt]',
+});
+
+// Schema version 4 — adds the News module (curated public feed + saved
+// reading list + per-user preferences/reactions + a local cache of the
+// server pool). Additive only; no v1/v2/v3 tables touched.
+//
+// `newsArticles` is the user's personal reading list (saved from the
+// curated pool or pasted URLs). `newsCategories` are user-defined
+// folders. `newsPreferences` is a singleton row keyed on 'singleton'
+// holding selected topics, blocklist, languages and the learned topic
+// + source weights. `newsReactions` records per-article feedback
+// (interested / not_interested / source_blocked / hidden) and is what
+// the feed engine uses to suppress already-rated items. `newsCachedFeed`
+// is a local mirror of the server's curated pool, capped to ~400 rows
+// for offline reading — intentionally NOT in module.config.ts and
+// therefore not synced.
+//
+// Index strategy:
+//   - newsArticles indexes type/categoryId/sourceCuratedId for the
+//     reading-list filter strip and the saveFromCurated() dedupe lookup
+//     ([type+isArchived] for the unread/archive tab queries)
+//   - newsReactions indexes [reaction+createdAt] so the feed engine can
+//     range-scan "what did the user dismiss" without loading every row
+//   - newsCachedFeed indexes [topic+publishedAt] so the topic-filter
+//     pass in rankFeed() can do a single index walk instead of N scans
+db.version(4).stores({
+	newsArticles:
+		'id, type, isArchived, isRead, isFavorite, categoryId, originalUrl, sourceCuratedId, [type+isArchived], [categoryId+createdAt]',
+	newsCategories: 'id, sortOrder',
+	newsPreferences: 'id',
+	newsReactions: 'id, articleId, reaction, sourceSlug, topic, [reaction+createdAt]',
+	newsCachedFeed: 'id, topic, sourceSlug, language, publishedAt, [topic+publishedAt]',
 });
 
 // ─── Sync Routing ──────────────────────────────────────────
