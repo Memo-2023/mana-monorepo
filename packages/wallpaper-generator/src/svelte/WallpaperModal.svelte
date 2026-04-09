@@ -48,7 +48,13 @@
 
 	const currentDevices = $derived(devicesByCategory[selectedCategory] || []);
 
-	const currentLayout = $derived<Layout>(() => {
+	// `$derived.by(...)` is the variant that takes a thunk and runs it
+	// inside the derivation. Plain `$derived(expr)` only takes a single
+	// expression — passing an arrow function there made `currentLayout`
+	// itself a function value, which is why the call sites below had to
+	// invoke it as `currentLayout()`. Both call sites now read it as a
+	// plain value.
+	const currentLayout = $derived.by<Layout>(() => {
 		if (layoutType === 'center') {
 			return { type: 'center', scale: layoutScale };
 		} else if (layoutType === 'corner') {
@@ -58,7 +64,7 @@
 		}
 	});
 
-	const currentBackground = $derived<Background>(() => {
+	const currentBackground = $derived.by<Background>(() => {
 		if (backgroundType === 'solid') {
 			return { type: 'solid', color: solidColor };
 		} else {
@@ -83,8 +89,8 @@
 				{ type: 'dataUrl', data: imageDataUrl },
 				{
 					device: selectedDeviceId,
-					layout: currentLayout(),
-					background: currentBackground(),
+					layout: currentLayout,
+					background: currentBackground,
 				}
 			);
 			previewUrl = url;
@@ -102,8 +108,8 @@
 				{ type: 'dataUrl', data: imageDataUrl },
 				{
 					device: selectedDeviceId,
-					layout: currentLayout(),
-					background: currentBackground(),
+					layout: currentLayout,
+					background: currentBackground,
 					format: 'png',
 				}
 			);

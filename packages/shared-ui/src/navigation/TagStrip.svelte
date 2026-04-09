@@ -3,7 +3,7 @@
 	import { Tag, Plus, X } from '@mana/shared-icons';
 	import { dragSource } from '../dnd/drag-source';
 	import { passiveDropZone } from '../dnd/passive-drop';
-	import type { DragPayload } from '../dnd/types';
+	import type { DragPayload, DragType } from '../dnd/types';
 
 	interface TagItem {
 		id: string;
@@ -23,7 +23,7 @@
 		/** Called when an item (task, card, etc.) is dropped on a tag pill */
 		onTagDrop?: (tagId: string, payload: DragPayload) => void;
 		/** Drag types accepted for drop-on-tag (default: ['task']) */
-		dropAccepts?: string[];
+		dropAccepts?: DragType[];
 		/** Link for "Tags verwalten" pill */
 		managementHref?: string;
 		/** Loading state */

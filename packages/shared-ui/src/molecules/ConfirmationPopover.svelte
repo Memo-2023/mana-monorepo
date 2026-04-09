@@ -222,7 +222,7 @@
 	bind:this={triggerRef}
 	onclick={handleTriggerClick}
 	onkeydown={(e) => {
-		if (e.key === 'Enter' || e.key === ' ') handleTriggerClick();
+		if (e.key === 'Enter' || e.key === ' ') handleTriggerClick(e as unknown as MouseEvent);
 	}}
 	role="button"
 	tabindex="0"

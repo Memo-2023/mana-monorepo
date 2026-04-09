@@ -29,7 +29,7 @@
 		return tag.color ?? tag.style?.color ?? DEFAULT_TAG_COLOR;
 	}
 
-	function handleKeyDown(e: KeyboardEvent, tag: Tag, action: 'click' | 'edit' | 'delete') {
+	function handleKeyDown(e: KeyboardEvent, tag: TagType, action: 'click' | 'edit' | 'delete') {
 		if (e.key === 'Enter' || e.key === ' ') {
 			e.preventDefault();
 			if (action === 'click' && onClick) onClick(tag);

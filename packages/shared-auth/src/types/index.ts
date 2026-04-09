@@ -59,6 +59,13 @@ export interface UserData {
 	 * button on this should default to `false` when undefined.
 	 */
 	twoFactorEnabled?: boolean;
+	/**
+	 * Display name + avatar URL, populated from the JWT's user_metadata
+	 * claim when the user has filled in their profile. Both are
+	 * optional because the onboarding flow lets users skip this step.
+	 */
+	name?: string;
+	image?: string;
 }
 
 /**

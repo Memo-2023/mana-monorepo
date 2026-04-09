@@ -106,7 +106,7 @@
 		style="z-index: 9990;"
 		onclick={handleBackdropClick}
 		onkeydown={(e) => {
-			if (e.key === 'Escape') handleBackdropClick();
+			if (e.key === 'Escape') handleClose();
 		}}
 		role="presentation"
 		tabindex="-1"

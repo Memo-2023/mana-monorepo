@@ -207,7 +207,7 @@
 		class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
 		onclick={handleBackdropClick}
 		onkeydown={(e) => {
-			if (e.key === 'Escape') handleBackdropClick();
+			if (e.key === 'Escape') onClose();
 		}}
 		role="presentation"
 		tabindex="-1"

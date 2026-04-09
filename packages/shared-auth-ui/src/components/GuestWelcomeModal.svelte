@@ -242,7 +242,7 @@
 		class="modal-backdrop"
 		onclick={handleBackdropClick}
 		onkeydown={(e) => {
-			if (e.key === 'Escape') handleBackdropClick();
+			if (e.key === 'Escape') handleContinueAsGuest();
 		}}
 		role="dialog"
 		aria-modal="true"
