@@ -2,18 +2,9 @@
 	import { onMount } from 'svelte';
 	import StatCard from '$lib/components/admin/StatCard.svelte';
 	import QuickLinks from '$lib/components/admin/QuickLinks.svelte';
+	import { adminService, type AdminStats } from '$lib/api/services/admin';
 
-	interface Stats {
-		totalUsers: number;
-		newUsers7d: number;
-		newUsers30d: number;
-		activeSessions: number;
-		uniqueUsers24h: number;
-		loginSuccess7d: number;
-		loginFailed7d: number;
-	}
-
-	let stats = $state<Stats | null>(null);
+	let stats = $state<AdminStats | null>(null);
 	let loading = $state(true);
 	let error = $state<string | null>(null);
 
@@ -45,27 +36,13 @@
 	];
 
 	onMount(async () => {
-		try {
-			// TODO: Replace with actual API call to fetch admin stats
-			// const response = await fetch('/api/admin/stats');
-			// stats = await response.json();
-
-			// Mock data for now
-			await new Promise((resolve) => setTimeout(resolve, 500));
-			stats = {
-				totalUsers: 42,
-				newUsers7d: 8,
-				newUsers30d: 23,
-				activeSessions: 15,
-				uniqueUsers24h: 12,
-				loginSuccess7d: 156,
-				loginFailed7d: 3,
-			};
-		} catch (e) {
-			error = 'Failed to load stats';
-		} finally {
-			loading = false;
+		const result = await adminService.getStats();
+		if (result.error) {
+			error = result.error;
+		} else {
+			stats = result.data;
 		}
+		loading = false;
 	});
 
 	let userGrowthPercent = $derived(
@@ -131,9 +108,11 @@
 						<div class="flex items-center justify-between text-sm">
 							<span class="text-muted-foreground">Success Rate</span>
 							<span class="font-medium text-green-600">
-								{Math.round(
-									(stats.loginSuccess7d / (stats.loginSuccess7d + stats.loginFailed7d)) * 100
-								)}%
+								{stats.loginSuccess7d + stats.loginFailed7d > 0
+									? Math.round(
+											(stats.loginSuccess7d / (stats.loginSuccess7d + stats.loginFailed7d)) * 100
+										)
+									: '—'}%
 							</span>
 						</div>
 					</div>

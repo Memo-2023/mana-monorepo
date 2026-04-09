@@ -5,10 +5,11 @@
  */
 
 import { Hono } from 'hono';
-import { eq } from 'drizzle-orm';
+import { and, count, countDistinct, eq, gte, isNull } from 'drizzle-orm';
 import type { AuthUser } from '../middleware/jwt-auth';
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
-import { users } from '../db/schema/auth';
+import { users, sessions } from '../db/schema/auth';
+import { loginAttempts } from '../db/schema/login-attempts';
 import type { UserDataService } from '../services/user-data';
 
 const VALID_TIERS = ['guest', 'public', 'beta', 'alpha', 'founder'] as const;
@@ -24,6 +25,75 @@ export function createAdminRoutes(db: PostgresJsDatabase<any>, userDataService: 
 			return c.json({ error: 'Forbidden', message: 'Admin access required' }, 403);
 		}
 		await next();
+	});
+
+	// ─── Aggregate stats for the admin dashboard ──────────────
+	//
+	// Replaces hardcoded mock data in apps/mana/apps/web/src/routes/
+	// (app)/admin/+page.svelte. All seven values come from auth.users,
+	// auth.sessions and auth.login_attempts — no other service is
+	// involved, which keeps this endpoint a pure single-DB read.
+
+	app.get('/stats', async (c) => {
+		const now = new Date();
+		const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+		const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+		const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+		// One query per stat — Postgres handles them in parallel via
+		// the connection pool when wrapped in Promise.all. Each one is
+		// a single indexed count, so total latency is dominated by
+		// round-trip not query work.
+		const [
+			[{ value: totalUsers }],
+			[{ value: newUsers7d }],
+			[{ value: newUsers30d }],
+			[{ value: activeSessions }],
+			[{ value: uniqueUsers24h }],
+			[{ value: loginSuccess7d }],
+			[{ value: loginFailed7d }],
+		] = await Promise.all([
+			db.select({ value: count() }).from(users).where(isNull(users.deletedAt)),
+			db
+				.select({ value: count() })
+				.from(users)
+				.where(and(isNull(users.deletedAt), gte(users.createdAt, sevenDaysAgo))),
+			db
+				.select({ value: count() })
+				.from(users)
+				.where(and(isNull(users.deletedAt), gte(users.createdAt, thirtyDaysAgo))),
+			db
+				.select({ value: count() })
+				.from(sessions)
+				.where(and(gte(sessions.expiresAt, now), isNull(sessions.revokedAt))),
+			db
+				.select({ value: countDistinct(sessions.userId) })
+				.from(sessions)
+				.where(and(isNull(sessions.revokedAt), gte(sessions.lastActivityAt, twentyFourHoursAgo))),
+			db
+				.select({ value: count() })
+				.from(loginAttempts)
+				.where(
+					and(eq(loginAttempts.successful, true), gte(loginAttempts.attemptedAt, sevenDaysAgo))
+				),
+			db
+				.select({ value: count() })
+				.from(loginAttempts)
+				.where(
+					and(eq(loginAttempts.successful, false), gte(loginAttempts.attemptedAt, sevenDaysAgo))
+				),
+		]);
+
+		return c.json({
+			totalUsers,
+			newUsers7d,
+			newUsers30d,
+			activeSessions,
+			uniqueUsers24h,
+			loginSuccess7d,
+			loginFailed7d,
+			generatedAt: now.toISOString(),
+		});
 	});
 
 	// ─── List users with pagination and search ────────────────

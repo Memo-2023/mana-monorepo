@@ -147,9 +147,33 @@ export interface DeleteUserDataResponse {
 }
 
 /**
+ * Admin dashboard stats — aggregate counts from auth.users,
+ * auth.sessions, auth.login_attempts. Backed by GET /admin/stats.
+ */
+export interface AdminStats {
+	totalUsers: number;
+	newUsers7d: number;
+	newUsers30d: number;
+	activeSessions: number;
+	uniqueUsers24h: number;
+	loginSuccess7d: number;
+	loginFailed7d: number;
+	/** ISO timestamp of when the snapshot was generated server-side */
+	generatedAt: string;
+}
+
+/**
  * Admin service for user data management
  */
 export const adminService = {
+	/**
+	 * Aggregate dashboard stats. Backed by a single mana-auth endpoint
+	 * that runs seven counts against the auth schema in parallel.
+	 */
+	async getStats(): Promise<ApiResult<AdminStats>> {
+		return getClient().get<AdminStats>('/admin/stats');
+	},
+
 	/**
 	 * Get list of users with pagination and search
 	 */
