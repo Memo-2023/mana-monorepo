@@ -715,7 +715,12 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#a855f7',
 		comingSoon: false,
 		status: 'beta',
-		requiredTier: 'beta',
+		// Open to all signed-in users (Standard / public tier and up).
+		// The initial 'beta' here was an arbitrary RFC default — it
+		// matched the status='beta' badge but the gate was more friction
+		// than value while the module is finding its audience. The LLM
+		// calls behind it are credit-gated server-side regardless.
+		requiredTier: 'public',
 	},
 ];
 
