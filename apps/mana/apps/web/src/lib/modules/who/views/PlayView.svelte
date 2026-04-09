@@ -58,6 +58,7 @@
 			inputText = '';
 			await whoGamesStore.sendMessage(gameId, text);
 		} catch (e) {
+			console.error('[who] sendMessage failed', e);
 			error = e instanceof Error ? e.message : 'Nachricht fehlgeschlagen';
 		} finally {
 			sending = false;
