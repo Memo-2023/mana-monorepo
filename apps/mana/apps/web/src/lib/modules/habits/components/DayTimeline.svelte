@@ -73,7 +73,7 @@
 		font-weight: 600;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 		padding: 0 0.25rem;
 	}
 
@@ -89,7 +89,7 @@
 		gap: 0.5rem;
 		padding: 0.5rem 0.75rem;
 		border-radius: 0.5rem;
-		background: var(--color-surface, rgba(255, 255, 255, 0.04));
+		background: hsl(var(--color-muted));
 		font-size: 0.875rem;
 	}
 
@@ -107,19 +107,19 @@
 	}
 
 	.entry-title {
-		color: var(--color-foreground);
+		color: hsl(var(--color-foreground));
 		font-weight: 500;
 	}
 
 	.entry-time {
 		margin-left: auto;
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 		font-size: 0.8125rem;
 		font-variant-numeric: tabular-nums;
 	}
 
 	.entry-note {
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 		font-size: 0.8125rem;
 		font-style: italic;
 	}

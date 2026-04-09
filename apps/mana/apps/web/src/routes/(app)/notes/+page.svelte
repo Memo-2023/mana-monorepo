@@ -94,7 +94,7 @@
 							type="button"
 							class="color-dot"
 							class:selected={newColor === c}
-							style:background={c ?? 'var(--color-muted-foreground)'}
+							style:background={c ?? 'hsl(var(--color-muted-foreground))'}
 							style:opacity={c ? 1 : 0.4}
 							onclick={() => (newColor = c)}
 						></button>
@@ -181,11 +181,11 @@
 	.notes-title {
 		font-size: 1.5rem;
 		font-weight: 700;
-		color: var(--color-foreground);
+		color: hsl(var(--color-foreground));
 	}
 	.notes-stats {
 		font-size: 0.875rem;
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 		margin-top: 0.25rem;
 	}
 
@@ -196,25 +196,25 @@
 
 	.search-input {
 		flex: 1;
-		background: var(--color-surface, rgba(255, 255, 255, 0.04));
-		border: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
+		background: hsl(var(--color-muted));
+		border: 1px solid hsl(var(--color-border));
 		border-radius: 0.5rem;
-		color: var(--color-foreground);
+		color: hsl(var(--color-foreground));
 		font-size: 0.875rem;
 		padding: 0.5rem 0.75rem;
 		outline: none;
 	}
 	.search-input:focus {
-		border-color: var(--color-primary, #6366f1);
+		border-color: hsl(var(--color-primary));
 	}
 	.search-input::placeholder {
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.add-btn {
 		padding: 0.5rem 1rem;
 		border-radius: 0.5rem;
-		background: var(--color-primary, #6366f1);
+		background: hsl(var(--color-primary));
 		color: white;
 		border: none;
 		font-size: 0.875rem;
@@ -233,27 +233,27 @@
 		gap: 0.5rem;
 		padding: 1rem;
 		border-radius: 0.75rem;
-		background: var(--color-surface, rgba(255, 255, 255, 0.06));
-		border: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
+		background: hsl(var(--color-muted));
+		border: 1px solid hsl(var(--color-border));
 	}
 
 	.create-title {
 		background: transparent;
 		border: none;
-		color: var(--color-foreground);
+		color: hsl(var(--color-foreground));
 		font-size: 1rem;
 		font-weight: 600;
 		padding: 0.25rem 0;
 		outline: none;
 	}
 	.create-title::placeholder {
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.create-content {
 		background: transparent;
 		border: none;
-		color: var(--color-foreground);
+		color: hsl(var(--color-foreground));
 		font-size: 0.875rem;
 		padding: 0.25rem 0;
 		outline: none;
@@ -262,7 +262,7 @@
 		font-family: inherit;
 	}
 	.create-content::placeholder {
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.create-footer {
@@ -288,7 +288,7 @@
 	}
 	.color-dot.selected {
 		border-color: white;
-		box-shadow: 0 0 0 1px var(--color-primary, #6366f1);
+		box-shadow: 0 0 0 1px hsl(var(--color-primary));
 	}
 
 	.create-actions {
@@ -306,13 +306,13 @@
 	}
 	.btn-cancel {
 		background: transparent;
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 	}
 	.btn-cancel:hover {
-		background: var(--color-muted, rgba(255, 255, 255, 0.08));
+		background: hsl(var(--color-muted));
 	}
 	.btn-save {
-		background: var(--color-primary, #6366f1);
+		background: hsl(var(--color-primary));
 		color: white;
 	}
 	.btn-save:hover {
@@ -329,7 +329,7 @@
 		font-weight: 600;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.notes-grid {
@@ -344,8 +344,8 @@
 		gap: 0.375rem;
 		padding: 0.75rem;
 		border-radius: 0.75rem;
-		background: var(--color-surface, rgba(255, 255, 255, 0.04));
-		border: 1px solid var(--color-border, rgba(255, 255, 255, 0.08));
+		background: hsl(var(--color-muted));
+		border: 1px solid hsl(var(--color-border));
 		border-top: 3px solid transparent;
 		text-decoration: none;
 		transition:
@@ -354,14 +354,14 @@
 		min-height: 6rem;
 	}
 	.note-card:hover {
-		background: var(--color-muted, rgba(255, 255, 255, 0.08));
+		background: hsl(var(--color-muted));
 		transform: translateY(-1px);
 	}
 
 	.card-title {
 		font-size: 0.875rem;
 		font-weight: 600;
-		color: var(--color-foreground);
+		color: hsl(var(--color-foreground));
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
@@ -369,7 +369,7 @@
 
 	.card-preview {
 		font-size: 0.8125rem;
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 		display: -webkit-box;
 		-webkit-line-clamp: 3;
 		-webkit-box-orient: vertical;
@@ -379,14 +379,14 @@
 
 	.card-meta {
 		font-size: 0.6875rem;
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 		opacity: 0.7;
 		margin-top: auto;
 	}
 
 	.empty {
 		text-align: center;
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 		font-size: 0.875rem;
 		padding: 3rem 0;
 		display: flex;
@@ -396,7 +396,7 @@
 	}
 
 	.loading {
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 		text-align: center;
 		padding: 3rem 0;
 	}

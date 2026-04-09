@@ -131,7 +131,7 @@
 						type="button"
 						class="color-dot"
 						class:selected={note.color === c}
-						style:background={c ?? 'var(--color-muted-foreground)'}
+						style:background={c ?? 'hsl(var(--color-muted-foreground))'}
 						style:opacity={c ? 1 : 0.4}
 						onclick={() => handleColorChange(c)}
 					></button>
@@ -178,18 +178,18 @@
 		height: 2rem;
 		border-radius: 0.5rem;
 		background: transparent;
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 		border: none;
 		cursor: pointer;
 	}
 	.back-btn:hover {
-		background: var(--color-muted, rgba(255, 255, 255, 0.08));
+		background: hsl(var(--color-muted));
 	}
 
 	.header-meta {
 		flex: 1;
 		font-size: 0.8125rem;
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.header-actions {
@@ -219,20 +219,20 @@
 	.detail-title {
 		background: transparent;
 		border: none;
-		color: var(--color-foreground);
+		color: hsl(var(--color-foreground));
 		font-size: 1.5rem;
 		font-weight: 700;
 		padding: 0;
 		outline: none;
 	}
 	.detail-title::placeholder {
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.detail-content {
 		background: transparent;
 		border: none;
-		color: var(--color-foreground);
+		color: hsl(var(--color-foreground));
 		font-size: 0.9375rem;
 		line-height: 1.6;
 		padding: 0;
@@ -243,7 +243,7 @@
 		flex: 1;
 	}
 	.detail-content::placeholder {
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.detail-footer {
@@ -251,7 +251,7 @@
 		justify-content: space-between;
 		align-items: center;
 		padding-top: 0.75rem;
-		border-top: 1px solid var(--color-border, rgba(255, 255, 255, 0.08));
+		border-top: 1px solid hsl(var(--color-border));
 	}
 
 	.color-row {
@@ -272,7 +272,7 @@
 	}
 	.color-dot.selected {
 		border-color: white;
-		box-shadow: 0 0 0 1px var(--color-primary, #6366f1);
+		box-shadow: 0 0 0 1px hsl(var(--color-primary));
 	}
 
 	.danger-actions {
@@ -285,7 +285,7 @@
 		font-size: 0.8125rem;
 		font-weight: 500;
 		background: transparent;
-		color: var(--color-destructive, #ef4444);
+		color: hsl(var(--color-error));
 		border: 1px solid rgba(239, 68, 68, 0.2);
 		cursor: pointer;
 	}
@@ -300,13 +300,13 @@
 	.loading {
 		text-align: center;
 		padding: 3rem 0;
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 	}
 	.not-found button {
 		margin-top: 1rem;
 		padding: 0.5rem 1rem;
 		border-radius: 0.5rem;
-		background: var(--color-primary, #6366f1);
+		background: hsl(var(--color-primary));
 		color: white;
 		border: none;
 		cursor: pointer;

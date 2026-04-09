@@ -73,16 +73,16 @@
 		gap: 0.25rem;
 		aspect-ratio: 1;
 		border-radius: 1rem;
-		background: var(--color-surface, rgba(255, 255, 255, 0.04));
-		border: 2px dashed var(--color-border, rgba(255, 255, 255, 0.15));
-		color: var(--color-muted-foreground);
+		background: hsl(var(--color-muted));
+		border: 2px dashed hsl(var(--color-border));
+		color: hsl(var(--color-muted-foreground));
 		cursor: pointer;
 		transition: all 0.15s;
 	}
 
 	.add-tile:hover {
-		border-color: var(--color-primary, #6366f1);
-		color: var(--color-primary, #6366f1);
+		border-color: hsl(var(--color-primary));
+		color: hsl(var(--color-primary));
 		background: rgba(99, 102, 241, 0.06);
 	}
 

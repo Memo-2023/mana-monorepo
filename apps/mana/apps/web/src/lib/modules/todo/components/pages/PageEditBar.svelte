@@ -194,7 +194,7 @@
 		color: hsl(var(--color-foreground));
 	}
 	.icon-btn.active {
-		background: var(--color-primary, #8b5cf6);
+		background: hsl(var(--color-primary));
 		color: hsl(var(--color-primary-foreground));
 	}
 	.filter-toggle {
@@ -261,8 +261,8 @@
 		color: hsl(var(--color-foreground));
 	}
 	.filter-pill.active {
-		background: var(--pill-color, var(--color-primary, #8b5cf6));
-		border-color: var(--pill-color, var(--color-primary, #8b5cf6));
+		background: var(--pill-color, hsl(var(--color-primary)));
+		border-color: var(--pill-color, hsl(var(--color-primary)));
 		color: hsl(var(--color-primary-foreground));
 	}
 	.completed-toggle {
@@ -276,7 +276,7 @@
 	.completed-toggle input {
 		width: 14px;
 		height: 14px;
-		accent-color: var(--color-primary, #8b5cf6);
+		accent-color: hsl(var(--color-primary));
 		cursor: pointer;
 	}
 	.actions-row {

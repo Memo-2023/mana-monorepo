@@ -305,15 +305,15 @@
 		gap: 0.125rem;
 		padding: 0.5rem 0.25rem;
 		border-radius: 0.75rem;
-		background: var(--color-surface, rgba(255, 255, 255, 0.04));
-		border: 1px solid var(--color-border, rgba(255, 255, 255, 0.08));
+		background: hsl(var(--color-muted));
+		border: 1px solid hsl(var(--color-border));
 		cursor: pointer;
 		transition:
 			transform 0.15s,
 			box-shadow 0.15s;
 		user-select: none;
 		touch-action: manipulation;
-		color: var(--color-foreground, #fff);
+		color: hsl(var(--color-foreground));
 	}
 
 	.tally-item:hover {
@@ -355,7 +355,7 @@
 
 	.tally-name {
 		font-size: 0.625rem;
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 		text-overflow: ellipsis;
 		overflow: hidden;
 		white-space: nowrap;
@@ -373,7 +373,7 @@
 		font-weight: 600;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 		padding: 0.25rem 0;
 	}
 
@@ -393,7 +393,7 @@
 	}
 
 	.log-name {
-		color: var(--color-foreground);
+		color: hsl(var(--color-foreground));
 		flex: 1;
 		overflow: hidden;
 		text-overflow: ellipsis;
@@ -401,28 +401,28 @@
 	}
 
 	.log-time {
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 		font-variant-numeric: tabular-nums;
 		flex-shrink: 0;
 	}
 
 	.add-btn {
-		border: 2px dashed var(--color-border, rgba(255, 255, 255, 0.15));
+		border: 2px dashed hsl(var(--color-border));
 		background: transparent;
 	}
 	.add-btn:hover {
-		border-color: var(--color-primary, #6366f1);
-		color: var(--color-primary, #6366f1);
+		border-color: hsl(var(--color-primary));
+		color: hsl(var(--color-primary));
 	}
 
 	.add-icon {
 		font-size: 1.25rem;
 		font-weight: 300;
 		line-height: 1;
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 	}
 	.add-btn:hover .add-icon {
-		color: var(--color-primary, #6366f1);
+		color: hsl(var(--color-primary));
 	}
 
 	/* ── Create Form ──────────────────────────────── */
@@ -432,8 +432,8 @@
 		gap: 0.5rem;
 		padding: 0.75rem;
 		border-radius: 0.75rem;
-		background: var(--color-surface, rgba(255, 255, 255, 0.06));
-		border: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
+		background: hsl(var(--color-muted));
+		border: 1px solid hsl(var(--color-border));
 	}
 
 	.create-row {
@@ -463,25 +463,25 @@
 		overflow-y: auto;
 		border-radius: 0.5rem;
 		padding: 0.5rem;
-		background: var(--color-surface, rgba(255, 255, 255, 0.03));
-		border: 1px solid var(--color-border, rgba(255, 255, 255, 0.08));
+		background: hsl(var(--color-muted));
+		border: 1px solid hsl(var(--color-border));
 	}
 
 	.create-input {
 		flex: 1;
 		background: transparent;
 		border: none;
-		border-bottom: 2px solid var(--color-border, rgba(255, 255, 255, 0.15));
-		color: var(--color-foreground);
+		border-bottom: 2px solid hsl(var(--color-border));
+		color: hsl(var(--color-foreground));
 		font-size: 0.875rem;
 		padding: 0.375rem 0;
 		outline: none;
 	}
 	.create-input:focus {
-		border-color: var(--color-primary, #6366f1);
+		border-color: hsl(var(--color-primary));
 	}
 	.create-input::placeholder {
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.color-row {
@@ -502,7 +502,7 @@
 	}
 	.color-dot.selected {
 		border-color: white;
-		box-shadow: 0 0 0 1px var(--color-primary, #6366f1);
+		box-shadow: 0 0 0 1px hsl(var(--color-primary));
 	}
 
 	.create-actions {
@@ -523,14 +523,14 @@
 
 	.btn-cancel {
 		background: transparent;
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 	}
 	.btn-cancel:hover {
-		background: var(--color-muted, rgba(255, 255, 255, 0.08));
+		background: hsl(var(--color-muted));
 	}
 
 	.btn-create {
-		background: var(--color-primary, #6366f1);
+		background: hsl(var(--color-primary));
 		color: white;
 	}
 	.btn-create:hover:not(:disabled) {
@@ -544,7 +544,7 @@
 	/* ── Empty / Misc ─────────────────────────────── */
 	.empty {
 		text-align: center;
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 		font-size: 0.875rem;
 		padding: 2rem 0;
 		display: flex;
@@ -556,7 +556,7 @@
 	.empty-add-btn {
 		padding: 0.5rem 1rem;
 		border-radius: 0.5rem;
-		background: var(--color-primary, #6366f1);
+		background: hsl(var(--color-primary));
 		color: white;
 		border: none;
 		font-size: 0.8125rem;

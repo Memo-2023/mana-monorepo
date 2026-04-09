@@ -115,7 +115,7 @@
 						{:else}
 							<span
 								class="sm-dot"
-								style="background: {sym.color ?? 'var(--color-muted-foreground, #9ca3af)'}"
+								style="background: {sym.color ?? 'hsl(var(--color-muted-foreground))'}"
 							></span>
 							<div class="sm-info">
 								<span class="sm-name">{sym.name}</span>

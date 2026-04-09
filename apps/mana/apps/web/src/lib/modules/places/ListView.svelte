@@ -273,8 +273,8 @@
 		gap: 0.25rem;
 		padding: 0.5rem;
 		border-radius: 0.75rem;
-		background: var(--color-surface, rgba(255, 255, 255, 0.04));
-		border: 1px solid var(--color-border, rgba(255, 255, 255, 0.08));
+		background: hsl(var(--color-muted));
+		border: 1px solid hsl(var(--color-border));
 	}
 
 	.tracking-row {
@@ -289,9 +289,9 @@
 		gap: 0.375rem;
 		padding: 0.375rem 0.75rem;
 		border-radius: 9999px;
-		border: 1px solid var(--color-border, rgba(255, 255, 255, 0.15));
+		border: 1px solid hsl(var(--color-border));
 		background: transparent;
-		color: var(--color-foreground);
+		color: hsl(var(--color-foreground));
 		font-size: 0.75rem;
 		font-weight: 500;
 		cursor: pointer;
@@ -323,7 +323,7 @@
 
 	.tracking-coords {
 		font-size: 0.6875rem;
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 		font-variant-numeric: tabular-nums;
 	}
 
@@ -341,9 +341,9 @@
 		flex: 1;
 		padding: 0.375rem 0.625rem;
 		border-radius: 0.5rem;
-		border: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
+		border: 1px solid hsl(var(--color-border));
 		background: transparent;
-		color: var(--color-foreground);
+		color: hsl(var(--color-foreground));
 		font-size: 0.8125rem;
 		outline: none;
 	}
@@ -353,7 +353,7 @@
 	}
 
 	.search-input::placeholder {
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	/* ── Quick Create ─────────────────────────── */
@@ -366,9 +366,9 @@
 		flex: 1;
 		padding: 0.375rem 0.625rem;
 		border-radius: 0.5rem;
-		border: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
+		border: 1px solid hsl(var(--color-border));
 		background: transparent;
-		color: var(--color-foreground);
+		color: hsl(var(--color-foreground));
 		font-size: 0.8125rem;
 		outline: none;
 	}
@@ -378,15 +378,15 @@
 	}
 
 	.create-input::placeholder {
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.create-btn {
 		padding: 0.375rem 0.5rem;
 		border-radius: 0.5rem;
-		border: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
+		border: 1px solid hsl(var(--color-border));
 		background: transparent;
-		color: var(--color-foreground);
+		color: hsl(var(--color-foreground));
 		cursor: pointer;
 		display: flex;
 		align-items: center;
@@ -419,7 +419,7 @@
 		border-radius: 0.5rem;
 		border: none;
 		background: transparent;
-		color: var(--color-foreground);
+		color: hsl(var(--color-foreground));
 		cursor: pointer;
 		text-align: left;
 		transition: background 0.15s;
@@ -427,7 +427,7 @@
 	}
 
 	.place-item:hover {
-		background: var(--color-surface, rgba(255, 255, 255, 0.04));
+		background: hsl(var(--color-muted));
 	}
 
 	.place-icon {
@@ -465,7 +465,7 @@
 		align-items: center;
 		gap: 0.375rem;
 		font-size: 0.6875rem;
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.category-badge {
@@ -500,14 +500,14 @@
 	.visit-count {
 		font-size: 0.6875rem;
 		font-weight: 600;
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 		font-variant-numeric: tabular-nums;
 	}
 
 	/* ── Empty ────────────────────────────────── */
 	.empty {
 		text-align: center;
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 		font-size: 0.8125rem;
 		padding: 2rem 0;
 	}

@@ -259,9 +259,9 @@
 		justify-content: center;
 		gap: 0.5rem;
 		background: rgba(99, 102, 241, 0.15);
-		border: 2px dashed var(--color-primary, #6366f1);
+		border: 2px dashed hsl(var(--color-primary));
 		border-radius: 0.75rem;
-		color: var(--color-primary, #6366f1);
+		color: hsl(var(--color-primary));
 		font-size: 0.875rem;
 		font-weight: 600;
 		pointer-events: none;
@@ -272,7 +272,7 @@
 		display: flex;
 		gap: 0.75rem;
 		font-size: 0.75rem;
-		color: var(--color-muted-foreground, rgba(255, 255, 255, 0.4));
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	/* ── Upload Button ─────────────────────────────── */
@@ -283,17 +283,17 @@
 		gap: 0.5rem;
 		padding: 0.625rem;
 		border-radius: 0.5rem;
-		border: 2px dashed var(--color-border, rgba(255, 255, 255, 0.15));
+		border: 2px dashed hsl(var(--color-border));
 		background: transparent;
-		color: var(--color-muted-foreground, rgba(255, 255, 255, 0.5));
+		color: hsl(var(--color-muted-foreground));
 		font-size: 0.8125rem;
 		font-weight: 500;
 		cursor: pointer;
 		transition: all 0.15s;
 	}
 	.upload-btn:hover {
-		border-color: var(--color-primary, #6366f1);
-		color: var(--color-primary, #6366f1);
+		border-color: hsl(var(--color-primary));
+		color: hsl(var(--color-primary));
 		background: rgba(99, 102, 241, 0.05);
 	}
 
@@ -315,7 +315,7 @@
 		aspect-ratio: 1;
 		border-radius: 0.375rem;
 		overflow: hidden;
-		background: var(--color-surface, rgba(255, 255, 255, 0.04));
+		background: hsl(var(--color-muted));
 	}
 	.upload-thumb img {
 		width: 100%;
@@ -327,7 +327,7 @@
 		outline-offset: -2px;
 	}
 	.upload-thumb.error {
-		outline: 2px solid var(--color-destructive, #ef4444);
+		outline: 2px solid hsl(var(--color-error));
 		outline-offset: -2px;
 	}
 
@@ -370,7 +370,7 @@
 		font-weight: 600;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
-		color: var(--color-muted-foreground, rgba(255, 255, 255, 0.4));
+		color: hsl(var(--color-muted-foreground));
 		margin-bottom: 0.5rem;
 	}
 
@@ -385,7 +385,7 @@
 		cursor: pointer;
 	}
 	.album-row:hover {
-		background: var(--color-surface, rgba(255, 255, 255, 0.05));
+		background: hsl(var(--color-muted));
 	}
 
 	.album-icon {
@@ -395,8 +395,8 @@
 		width: 1.75rem;
 		height: 1.75rem;
 		border-radius: 0.375rem;
-		background: var(--color-surface, rgba(255, 255, 255, 0.06));
-		color: var(--color-muted-foreground);
+		background: hsl(var(--color-muted));
+		color: hsl(var(--color-muted-foreground));
 		flex-shrink: 0;
 	}
 
@@ -408,7 +408,7 @@
 	.album-name {
 		font-size: 0.8125rem;
 		font-weight: 500;
-		color: var(--color-foreground, rgba(255, 255, 255, 0.8));
+		color: hsl(var(--color-foreground));
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
@@ -416,7 +416,7 @@
 
 	.album-desc {
 		font-size: 0.6875rem;
-		color: var(--color-muted-foreground, rgba(255, 255, 255, 0.3));
+		color: hsl(var(--color-muted-foreground));
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
@@ -424,7 +424,7 @@
 
 	.album-badge {
 		font-size: 0.625rem;
-		color: var(--color-muted-foreground, rgba(255, 255, 255, 0.3));
+		color: hsl(var(--color-muted-foreground));
 		flex-shrink: 0;
 	}
 
@@ -432,7 +432,7 @@
 		padding: 2rem 0;
 		text-align: center;
 		font-size: 0.8125rem;
-		color: var(--color-muted-foreground, rgba(255, 255, 255, 0.3));
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	@keyframes spin {

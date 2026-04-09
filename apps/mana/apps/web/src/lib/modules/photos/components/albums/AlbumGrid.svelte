@@ -39,8 +39,8 @@
 	.spinner {
 		width: 32px;
 		height: 32px;
-		border: 3px solid var(--color-border, #e2e8f0);
-		border-top-color: var(--color-primary, #6366f1);
+		border: 3px solid hsl(var(--color-border));
+		border-top-color: hsl(var(--color-primary));
 		border-radius: 50%;
 		animation: spin 1s linear infinite;
 	}

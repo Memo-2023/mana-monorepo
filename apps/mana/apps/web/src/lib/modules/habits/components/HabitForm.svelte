@@ -202,8 +202,8 @@
 		gap: 0.75rem;
 		padding: 1rem;
 		border-radius: 1rem;
-		background: var(--color-surface, rgba(255, 255, 255, 0.06));
-		border: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
+		background: hsl(var(--color-muted));
+		border: 1px solid hsl(var(--color-border));
 	}
 
 	.form-row {
@@ -232,17 +232,17 @@
 		flex: 1;
 		background: transparent;
 		border: none;
-		border-bottom: 2px solid var(--color-border, rgba(255, 255, 255, 0.15));
-		color: var(--color-foreground);
+		border-bottom: 2px solid hsl(var(--color-border));
+		color: hsl(var(--color-foreground));
 		font-size: 1rem;
 		padding: 0.5rem 0;
 		outline: none;
 	}
 	.title-input:focus {
-		border-color: var(--color-primary, #6366f1);
+		border-color: hsl(var(--color-primary));
 	}
 	.title-input::placeholder {
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.icon-picker-wrapper {
@@ -250,8 +250,8 @@
 		overflow-y: auto;
 		border-radius: 0.5rem;
 		padding: 0.5rem;
-		background: var(--color-surface, rgba(255, 255, 255, 0.03));
-		border: 1px solid var(--color-border, rgba(255, 255, 255, 0.08));
+		background: hsl(var(--color-muted));
+		border: 1px solid hsl(var(--color-border));
 	}
 
 	.color-picker {
@@ -273,7 +273,7 @@
 	}
 	.color-swatch.selected {
 		border-color: white;
-		box-shadow: 0 0 0 2px var(--color-primary, #6366f1);
+		box-shadow: 0 0 0 2px hsl(var(--color-primary));
 	}
 
 	.target-label {
@@ -281,22 +281,22 @@
 		align-items: center;
 		gap: 0.5rem;
 		font-size: 0.875rem;
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.target-input {
 		width: 4rem;
 		background: transparent;
-		border: 1px solid var(--color-border, rgba(255, 255, 255, 0.15));
+		border: 1px solid hsl(var(--color-border));
 		border-radius: 0.5rem;
-		color: var(--color-foreground);
+		color: hsl(var(--color-foreground));
 		font-size: 0.875rem;
 		padding: 0.375rem 0.5rem;
 		outline: none;
 		text-align: center;
 	}
 	.target-input:focus {
-		border-color: var(--color-primary, #6366f1);
+		border-color: hsl(var(--color-primary));
 	}
 
 	.schedule-section {
@@ -309,7 +309,7 @@
 		align-items: center;
 		gap: 0.5rem;
 		font-size: 0.875rem;
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 		cursor: pointer;
 	}
 	.schedule-days {
@@ -320,20 +320,20 @@
 		width: 2rem;
 		height: 2rem;
 		border-radius: 50%;
-		border: 1px solid var(--color-border, rgba(255, 255, 255, 0.15));
+		border: 1px solid hsl(var(--color-border));
 		background: transparent;
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 		font-size: 0.6875rem;
 		font-weight: 500;
 		cursor: pointer;
 		transition: all 0.15s;
 	}
 	.day-btn:hover {
-		border-color: var(--color-primary, #6366f1);
+		border-color: hsl(var(--color-primary));
 	}
 	.day-btn.active {
-		background: var(--color-primary, #6366f1);
-		border-color: var(--color-primary, #6366f1);
+		background: hsl(var(--color-primary));
+		border-color: hsl(var(--color-primary));
 		color: white;
 	}
 
@@ -356,14 +356,14 @@
 
 	.btn-cancel {
 		background: transparent;
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 	}
 	.btn-cancel:hover {
-		background: var(--color-muted, rgba(255, 255, 255, 0.08));
+		background: hsl(var(--color-muted));
 	}
 
 	.btn-save {
-		background: var(--color-primary, #6366f1);
+		background: hsl(var(--color-primary));
 		color: white;
 	}
 	.btn-save:hover:not(:disabled) {

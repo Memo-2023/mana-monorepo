@@ -209,14 +209,14 @@
 		height: 2rem;
 		border-radius: 0.5rem;
 		background: transparent;
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 		border: none;
 		cursor: pointer;
 		transition: background 0.15s;
 	}
 	.back-btn:hover,
 	.edit-btn:hover {
-		background: var(--color-muted, rgba(255, 255, 255, 0.08));
+		background: hsl(var(--color-muted));
 	}
 
 	.header-info {
@@ -234,7 +234,7 @@
 	.header-title {
 		font-size: 1.25rem;
 		font-weight: 700;
-		color: var(--color-foreground);
+		color: hsl(var(--color-foreground));
 	}
 
 	.stats-grid {
@@ -249,34 +249,34 @@
 		align-items: center;
 		padding: 0.75rem;
 		border-radius: 0.75rem;
-		background: var(--color-surface, rgba(255, 255, 255, 0.04));
-		border: 1px solid var(--color-border, rgba(255, 255, 255, 0.08));
+		background: hsl(var(--color-muted));
+		border: 1px solid hsl(var(--color-border));
 	}
 
 	.stat-value {
 		font-size: 1.5rem;
 		font-weight: 700;
-		color: var(--color-foreground);
+		color: hsl(var(--color-foreground));
 		font-variant-numeric: tabular-nums;
 	}
 
 	.stat-label {
 		font-size: 0.75rem;
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 		margin-top: 0.125rem;
 	}
 
 	.week-chart {
 		padding: 1rem;
 		border-radius: 0.75rem;
-		background: var(--color-surface, rgba(255, 255, 255, 0.04));
-		border: 1px solid var(--color-border, rgba(255, 255, 255, 0.08));
+		background: hsl(var(--color-muted));
+		border: 1px solid hsl(var(--color-border));
 	}
 
 	.chart-title {
 		font-size: 0.75rem;
 		font-weight: 600;
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 		margin-bottom: 0.75rem;
 	}
 
@@ -315,13 +315,13 @@
 	.bar-count {
 		font-size: 0.6875rem;
 		font-weight: 600;
-		color: var(--color-foreground);
+		color: hsl(var(--color-foreground));
 		font-variant-numeric: tabular-nums;
 	}
 
 	.bar-day {
 		font-size: 0.625rem;
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 		text-transform: uppercase;
 	}
 
@@ -358,7 +358,7 @@
 	.section-title {
 		font-size: 0.875rem;
 		font-weight: 600;
-		color: var(--color-foreground);
+		color: hsl(var(--color-foreground));
 	}
 
 	.day-group {
@@ -372,7 +372,7 @@
 		font-weight: 600;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 		padding: 0.25rem 0;
 	}
 
@@ -382,19 +382,19 @@
 		gap: 0.5rem;
 		padding: 0.375rem 0.5rem;
 		border-radius: 0.375rem;
-		background: var(--color-surface, rgba(255, 255, 255, 0.03));
+		background: hsl(var(--color-muted));
 	}
 
 	.log-time {
 		font-size: 0.8125rem;
 		font-weight: 500;
-		color: var(--color-foreground);
+		color: hsl(var(--color-foreground));
 		font-variant-numeric: tabular-nums;
 	}
 
 	.log-note {
 		font-size: 0.8125rem;
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 		font-style: italic;
 		flex: 1;
 	}
@@ -407,7 +407,7 @@
 		height: 1.25rem;
 		border-radius: 0.25rem;
 		background: transparent;
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 		border: none;
 		cursor: pointer;
 		opacity: 0;
@@ -418,7 +418,7 @@
 		opacity: 1;
 	}
 	.log-delete:hover {
-		color: var(--color-destructive, #ef4444);
+		color: hsl(var(--color-error));
 		background: rgba(239, 68, 68, 0.1);
 	}
 
@@ -426,7 +426,7 @@
 		display: flex;
 		gap: 0.5rem;
 		padding-top: 0.5rem;
-		border-top: 1px solid var(--color-border, rgba(255, 255, 255, 0.08));
+		border-top: 1px solid hsl(var(--color-border));
 	}
 
 	.action-btn {
@@ -434,18 +434,18 @@
 		border-radius: 0.5rem;
 		font-size: 0.8125rem;
 		font-weight: 500;
-		background: var(--color-surface, rgba(255, 255, 255, 0.06));
-		color: var(--color-muted-foreground);
-		border: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
+		background: hsl(var(--color-muted));
+		color: hsl(var(--color-muted-foreground));
+		border: 1px solid hsl(var(--color-border));
 		cursor: pointer;
 		transition: all 0.15s;
 	}
 	.action-btn:hover {
-		background: var(--color-muted, rgba(255, 255, 255, 0.1));
+		background: hsl(var(--color-muted));
 	}
 
 	.action-btn.danger {
-		color: var(--color-destructive, #ef4444);
+		color: hsl(var(--color-error));
 		border-color: rgba(239, 68, 68, 0.2);
 	}
 	.action-btn.danger:hover {
@@ -453,7 +453,7 @@
 	}
 
 	.empty-text {
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 		font-size: 0.875rem;
 		text-align: center;
 		padding: 1.5rem 0;

@@ -33,7 +33,7 @@
 		aspect-ratio: 4/3;
 		overflow: hidden;
 		border-radius: 0.75rem;
-		background-color: var(--color-muted, #f1f5f9);
+		background-color: hsl(var(--color-muted));
 		cursor: pointer;
 		border: none;
 		padding: 0;
@@ -60,12 +60,8 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		color: var(--color-muted-foreground, #64748b);
-		background: linear-gradient(
-			135deg,
-			var(--color-muted, #f1f5f9) 0%,
-			var(--color-accent, #e2e8f0) 100%
-		);
+		color: hsl(var(--color-muted-foreground));
+		background: linear-gradient(135deg, hsl(var(--color-muted)) 0%, hsl(var(--color-accent)) 100%);
 	}
 
 	.album-overlay {

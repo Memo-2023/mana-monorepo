@@ -111,7 +111,7 @@
 		margin-top: 0.25rem;
 	}
 	:global(.picker .custom-icon) {
-		color: var(--color-primary, #8b5cf6);
-		background: color-mix(in srgb, var(--color-primary, #8b5cf6) 10%, transparent);
+		color: hsl(var(--color-primary));
+		background: hsl(var(--color-primary) / 0.1);
 	}
 </style>

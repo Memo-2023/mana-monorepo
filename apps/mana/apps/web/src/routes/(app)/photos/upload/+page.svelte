@@ -194,15 +194,15 @@
 		aspect-ratio: 1;
 		border-radius: var(--radius-md);
 		overflow: hidden;
-		background: var(--color-muted);
+		background: hsl(var(--color-muted));
 	}
 
 	.file-item.success {
-		outline: 2px solid var(--color-success, #22c55e);
+		outline: 2px solid hsl(var(--color-success));
 	}
 
 	.file-item.error {
-		outline: 2px solid var(--color-destructive);
+		outline: 2px solid hsl(var(--color-error));
 	}
 
 	.file-preview {
@@ -236,7 +236,7 @@
 		padding: 0.5rem;
 		border-radius: 50%;
 		background: rgba(255, 255, 255, 0.9);
-		color: var(--color-foreground);
+		color: hsl(var(--color-foreground));
 		border: none;
 		cursor: pointer;
 	}
@@ -271,11 +271,11 @@
 	}
 
 	.status-icon.success {
-		background: var(--color-success, #22c55e);
+		background: hsl(var(--color-success));
 	}
 
 	.status-icon.error {
-		background: var(--color-destructive);
+		background: hsl(var(--color-error));
 	}
 
 	.file-name {

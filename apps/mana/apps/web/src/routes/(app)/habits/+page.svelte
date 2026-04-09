@@ -87,7 +87,7 @@
 	.habits-title {
 		font-size: 1.5rem;
 		font-weight: 700;
-		color: var(--color-foreground);
+		color: hsl(var(--color-foreground));
 	}
 
 	.habits-stats {
@@ -95,7 +95,7 @@
 		gap: 1rem;
 		margin-top: 0.25rem;
 		font-size: 0.875rem;
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.board-section {
@@ -111,11 +111,11 @@
 	.section-title {
 		font-size: 0.875rem;
 		font-weight: 600;
-		color: var(--color-foreground);
+		color: hsl(var(--color-foreground));
 	}
 
 	.loading {
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 		text-align: center;
 		padding: 3rem 0;
 	}

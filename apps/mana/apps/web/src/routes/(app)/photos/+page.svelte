@@ -110,8 +110,8 @@
 
 	.error-message {
 		padding: 1rem;
-		background-color: var(--color-destructive);
-		color: var(--color-destructive-foreground);
+		background-color: hsl(var(--color-error));
+		color: white;
 		border-radius: var(--radius-md);
 		margin-bottom: 1rem;
 	}

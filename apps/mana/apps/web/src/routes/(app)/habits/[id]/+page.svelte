@@ -55,21 +55,21 @@
 	.not-found {
 		text-align: center;
 		padding: 3rem 0;
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.not-found button {
 		margin-top: 1rem;
 		padding: 0.5rem 1rem;
 		border-radius: 0.5rem;
-		background: var(--color-primary, #6366f1);
+		background: hsl(var(--color-primary));
 		color: white;
 		border: none;
 		cursor: pointer;
 	}
 
 	.loading {
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 		text-align: center;
 		padding: 3rem 0;
 	}
