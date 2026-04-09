@@ -16,7 +16,7 @@ import type {
 	SearchResult,
 	SearchOptions,
 	SearchIndexConfig,
-} from './content';
+} from './search-types';
 import { generateExcerpt, stripHtml } from './parser.js';
 import { sanitizeHtml } from './sanitize.js';
 
