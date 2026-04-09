@@ -51,16 +51,68 @@ function rulesImpl(input: GenerateTitleInput): string {
 
 	// Take the first sentence — split on .!? or newline.
 	const firstSentence = text.split(/[.!?\n]/)[0]?.trim() ?? text;
-	const wordCount = firstSentence.split(/\s+/).filter(Boolean).length;
+	const allWords = firstSentence.split(/\s+/).filter(Boolean);
+	const wordCount = allWords.length;
 
 	// Short transcripts: a date label is more honest than echoing the
 	// transcript back verbatim as if it were a title.
 	if (wordCount <= 8) return dateLabel();
 
-	// Cap at ~60 chars / maxWords words, whichever comes first.
+	// For longer transcripts, take the first N words. But: if the
+	// extracted slice is clearly a sentence fragment (ends mid-word
+	// rather than at a clause boundary like a comma) AND the original
+	// transcript doesn't have an obvious topic-noun in the first 5
+	// words, fall back to the date label. Sentence fragments like
+	// "Eine kleine Testaufnahme um zu sehen ob" are worse than
+	// "Memo vom 9. April 2026" — both convey nothing useful, but the
+	// date is at least honest about being a placeholder.
 	const maxWords = input.maxWords ?? 7;
-	const words = firstSentence.split(/\s+/).slice(0, maxWords);
-	let candidate = words.join(' ');
+	const slice = allWords.slice(0, maxWords);
+	let candidate = slice.join(' ');
+
+	// "Looks like a sentence fragment" heuristic:
+	//   - the slice ends without a comma, period, colon, or
+	//     conjunction-like word (so we know we cut mid-thought)
+	//   - AND the slice contains a stop-word in the last position
+	//     (typical of "und/oder/wenn/ob/zu/um/...")
+	const lastWord = (slice[slice.length - 1] ?? '').toLowerCase();
+	const fragmentStopWords = new Set([
+		'und',
+		'oder',
+		'aber',
+		'wenn',
+		'ob',
+		'um',
+		'zu',
+		'der',
+		'die',
+		'das',
+		'ein',
+		'eine',
+		'einen',
+		'mit',
+		'für',
+		'auf',
+		'an',
+		'in',
+		'von',
+		'bei',
+		'nach',
+		'vor',
+		'noch',
+		'auch',
+		'ist',
+		'sind',
+		'war',
+		'wurde',
+		'hat',
+		'haben',
+		'wird',
+		'werden',
+	]);
+	if (fragmentStopWords.has(lastWord)) {
+		return dateLabel();
+	}
 
 	if (candidate.length > 60) {
 		candidate = candidate.slice(0, 57).trimEnd() + '…';
@@ -76,35 +128,28 @@ export const generateTitleTask: LlmTask<GenerateTitleInput, GenerateTitleOutput>
 	displayLabel: 'Titel automatisch erzeugen',
 
 	async runLlm(input, backend: LlmBackend): Promise<GenerateTitleOutput> {
-		// Few-shot prompt — small instruct models like Gemma 4 E2B respond
-		// far better to "here's the pattern, complete the next one" than
-		// to a list of negative constraints ("no markdown, no quotes, no
-		// vorrede..."). The model just sees the structure and continues
-		// it. Empirically this produces real titles instead of single
-		// punctuation marks or empty special-token-only outputs.
-		const userMessage = `Erstelle einen kurzen, aussagekräftigen Titel (3-5 Wörter) für die folgende Sprachaufnahme.
-
-Beispiel 1:
-Aufnahme: "Erinnere mich daran, morgen Vormittag den Müll rauszubringen, bevor die Müllabfuhr kommt."
-Titel: Erinnerung Müll rausbringen
-
-Beispiel 2:
-Aufnahme: "Ich hatte heute eine Idee für die Präsentation nächste Woche, vielleicht sollten wir mit einer Demo anfangen statt mit Folien."
-Titel: Idee Präsentation Demo-Start
-
-Beispiel 3:
-Aufnahme: "Notiz für mich, ich muss noch die Steuererklärung für 2025 fertig machen, Belege liegen schon im Ordner."
-Titel: Steuererklärung 2025
-
-Aufnahme: "${input.text.slice(0, 2000).replace(/"/g, "'")}"
-Titel:`;
-
+		// Simple two-message prompt — system + user. The previous few-shot
+		// prompt with three `Aufnahme: "..."\nTitel: ...` examples confused
+		// Ollama gemma3:4b on the mana-server tier — it returned literal ""
+		// for reasons we still don't fully understand (possibly chat-template
+		// confusion with the embedded quotes / multi-section format). Keep
+		// this minimal: one instruction, one input, one expected continuation.
 		const result = await backend.generate({
 			taskName: generateTitleTask.name,
 			contentClass: generateTitleTask.contentClass,
-			messages: [{ role: 'user', content: userMessage }],
+			messages: [
+				{
+					role: 'system',
+					content:
+						'Du erzeugst einen kurzen Titel (3-5 Wörter) für eine Sprachnotiz. Antworte nur mit dem Titel, ohne Anführungszeichen, ohne Punkt, ohne Erklärung.',
+				},
+				{
+					role: 'user',
+					content: input.text.slice(0, 2000),
+				},
+			],
 			temperature: 0.4,
-			maxTokens: 24,
+			maxTokens: 32,
 		});
 
 		// Log the raw model output BEFORE cleanup so the next test

@@ -87,6 +87,16 @@ export async function callManaLlmStreaming(
 	let promptTokens = 0;
 	let completionTokens = 0;
 
+	// Diagnostic counters — logged once at the end if `collected` is
+	// empty so we can see whether the empty result is "no frames at
+	// all", "frames with a different shape", or "frames with empty
+	// content fields". Without this we'd have to add a network sniffer
+	// to debug remote-tier title failures.
+	let totalFrames = 0;
+	let dataFrames = 0;
+	let firstFrameRaw: string | null = null;
+	let firstFrameParsed: unknown = null;
+
 	while (true) {
 		const { value, done } = await reader.read();
 		if (done) break;
@@ -97,17 +107,35 @@ export async function callManaLlmStreaming(
 		while ((sep = buffer.indexOf('\n\n')) !== -1) {
 			const frame = buffer.slice(0, sep);
 			buffer = buffer.slice(sep + 2);
+			totalFrames++;
 
 			for (const line of frame.split('\n')) {
 				if (!line.startsWith('data:')) continue;
 				const data = line.slice(5).trim();
 				if (!data || data === '[DONE]') continue;
+				dataFrames++;
+				if (firstFrameRaw === null) firstFrameRaw = data;
 				try {
 					const json = JSON.parse(data) as {
-						choices?: Array<{ delta?: { content?: string } }>;
+						choices?: Array<{
+							delta?: { content?: string; text?: string };
+							message?: { content?: string };
+							text?: string;
+						}>;
 						usage?: { prompt_tokens?: number; completion_tokens?: number };
 					};
-					const delta = json.choices?.[0]?.delta?.content;
+					if (firstFrameParsed === null) firstFrameParsed = json;
+
+					// Be liberal in what we accept: OpenAI uses delta.content,
+					// some Ollama-compat shims use delta.text or text or
+					// message.content. Pick whichever shows up.
+					const choice = json.choices?.[0];
+					const delta =
+						choice?.delta?.content ??
+						choice?.delta?.text ??
+						choice?.message?.content ??
+						choice?.text ??
+						'';
 					if (delta) {
 						collected += delta;
 						req.onToken?.(delta);
@@ -121,6 +149,19 @@ export async function callManaLlmStreaming(
 				}
 			}
 		}
+	}
+
+	// Empty-result diagnostic dump. Only fires when something went
+	// wrong, so it's quiet in the happy path.
+	if (!collected) {
+		console.warn(
+			`[shared-llm:${tier}] empty completion — totalFrames=${totalFrames}, dataFrames=${dataFrames}`,
+			{
+				model,
+				firstFrameRaw,
+				firstFrameParsed,
+			}
+		);
 	}
 
 	return {
