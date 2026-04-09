@@ -21,6 +21,29 @@ export interface GenerateTitleInput {
 
 export type GenerateTitleOutput = string;
 
+/** Deterministic first-sentence heuristic. Extracted to a module-scope
+ *  function so runLlm can call it as a fallback when the LLM returns
+ *  empty or whitespace-only output (which happens when the model emits
+ *  only a `.` or special tokens that get stripped by skip_special_tokens). */
+function rulesImpl(input: GenerateTitleInput): string {
+	const text = input.text.trim();
+	if (!text) return 'Ohne Titel';
+
+	// Take the first sentence — split on .!? or newline.
+	const firstSentence = text.split(/[.!?\n]/)[0]?.trim() ?? text;
+
+	// Cap at ~60 chars / maxWords words, whichever comes first.
+	const maxWords = input.maxWords ?? 7;
+	const words = firstSentence.split(/\s+/).slice(0, maxWords);
+	let candidate = words.join(' ');
+
+	if (candidate.length > 60) {
+		candidate = candidate.slice(0, 57).trimEnd() + '…';
+	}
+
+	return candidate || 'Ohne Titel';
+}
+
 export const generateTitleTask: LlmTask<GenerateTitleInput, GenerateTitleOutput> = {
 	name: 'common.generateTitle',
 	minTier: 'none', // works on Tier 0 via the first-sentence heuristic
@@ -49,29 +72,26 @@ export const generateTitleTask: LlmTask<GenerateTitleInput, GenerateTitleOutput>
 
 		// Defensive: strip surrounding quotes / markdown / trailing dots in
 		// case the model didn't fully respect the system prompt.
-		return result.content
+		const cleaned = result.content
 			.trim()
 			.replace(/^["'`*_]+|["'`*_]+$/g, '')
 			.replace(/\.+$/, '')
 			.trim();
+
+		// LLM produced nothing usable (empty content, only punctuation,
+		// only special tokens that got stripped, etc.) — fall back to the
+		// deterministic rules implementation so the user gets *something*.
+		// Without this fallback the watcher writes "" to memo.title and the
+		// user sees an empty placeholder forever.
+		if (!cleaned) {
+			console.info('[generateTitle] LLM returned empty after cleanup, falling back to rules');
+			return rulesImpl(input);
+		}
+
+		return cleaned;
 	},
 
 	async runRules(input): Promise<GenerateTitleOutput> {
-		const text = input.text.trim();
-		if (!text) return 'Ohne Titel';
-
-		// Take the first sentence — split on .!? or newline.
-		const firstSentence = text.split(/[.!?\n]/)[0]?.trim() ?? text;
-
-		// Cap at ~60 chars / maxWords words, whichever comes first.
-		const maxWords = input.maxWords ?? 7;
-		const words = firstSentence.split(/\s+/).slice(0, maxWords);
-		let candidate = words.join(' ');
-
-		if (candidate.length > 60) {
-			candidate = candidate.slice(0, 57).trimEnd() + '…';
-		}
-
-		return candidate || 'Ohne Titel';
+		return rulesImpl(input);
 	},
 };

@@ -132,9 +132,34 @@ async function applyRow(row: QueuedTask): Promise<void> {
 		return;
 	}
 
-	console.info(`[memoro-llm-watcher] writing title to memo ${row.refId}: "${row.result}"`);
+	// Backstop: if the task result somehow came back empty/whitespace
+	// (LLM emitted only special tokens, runRules got an empty input,
+	// any other edge case), synthesize a date-based fallback so the
+	// user always gets *some* title rather than a stuck empty input.
+	let titleToWrite = row.result.trim();
+	if (!titleToWrite) {
+		const created = (memo as { createdAt?: string }).createdAt;
+		const dateLabel = created
+			? new Date(created).toLocaleDateString('de', {
+					day: 'numeric',
+					month: 'long',
+					year: 'numeric',
+				})
+			: new Date().toLocaleDateString('de');
+		titleToWrite = `Memo vom ${dateLabel}`;
+		console.warn(
+			`[memoro-llm-watcher] row ${row.id} returned empty title — using date fallback "${titleToWrite}"`,
+			{ source: row.source, attempts: row.attempts, rawResult: JSON.stringify(row.result) }
+		);
+	} else {
+		console.info(`[memoro-llm-watcher] writing title to memo ${row.refId}: "${titleToWrite}"`, {
+			source: row.source,
+			attempts: row.attempts,
+		});
+	}
+
 	const diff: Partial<LocalMemo> = {
-		title: row.result,
+		title: titleToWrite,
 		updatedAt: new Date().toISOString(),
 	};
 	await encryptRecord('memos', diff);
