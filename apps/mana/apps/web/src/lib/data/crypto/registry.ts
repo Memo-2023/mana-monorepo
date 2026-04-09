@@ -124,7 +124,13 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	cycleDayLogs: { enabled: true, fields: ['notes', 'mood'] },
 
 	// ─── NutriPhi ────────────────────────────────────────────
-	// LocalMeal user-typed text → encrypted: description, portionSize.
+	// LocalMeal user-typed / AI-generated content → encrypted:
+	//   - description, portionSize: free-text, same sensitivity tier
+	//   - foods: AI-identified food items (array of {name, quantity,
+	//     calories}). aes.ts JSON-stringifies before wrap, so an array
+	//     value works the same as a string. The food names are user
+	//     content ("Currywurst Pommes mittel") and deserve the same
+	//     protection as `description`.
 	// Plaintext (intentional):
 	//   - mealType / inputType / date / createdAt: structural, used for
 	//     filtering and the daily-summary aggregations + calorie-progress
@@ -133,12 +139,12 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	//   - nutrition (object of numbers): same — calorie totals are summed
 	//     in pure $derived helpers; encrypting them would defeat the
 	//     local-first reactive layer.
-	//   - photoMediaId / photoUrl: opaque pointers to mana-media; the URL
-	//     alone is not PII (anyone with the URL already has the bytes),
-	//     and CAS-deduped media IDs leak no user content. Same rationale
-	//     planta uses for plantPhotos.
+	//   - photoMediaId / photoUrl / photoThumbnailUrl: opaque pointers to
+	//     mana-media; the URL alone is not PII (anyone with the URL
+	//     already has the bytes), and CAS-deduped media IDs leak no user
+	//     content. Same rationale planta uses for plantPhotos.
 	//   - confidence (float 0-1): pure metadata about the AI run.
-	meals: { enabled: true, fields: ['description', 'portionSize'] },
+	meals: { enabled: true, fields: ['description', 'portionSize', 'foods'] },
 
 	// ─── Planta ──────────────────────────────────────────────
 	// `name` is NOT in the schema index for plants (only isActive +

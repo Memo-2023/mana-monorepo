@@ -32,6 +32,8 @@ export function toMealWithNutrition(local: LocalMeal): MealWithNutrition {
 		nutrition: local.nutrition ?? null,
 		photoMediaId: local.photoMediaId ?? null,
 		photoUrl: local.photoUrl ?? null,
+		photoThumbnailUrl: local.photoThumbnailUrl ?? null,
+		foods: local.foods ?? null,
 		createdAt: local.createdAt ?? new Date().toISOString(),
 	};
 }
@@ -46,6 +48,18 @@ export function useAllMeals() {
 		const decrypted = await decryptRecords('meals', visible);
 		return decrypted.map(toMealWithNutrition);
 	});
+}
+
+/**
+ * Look up a single meal by id and decrypt it. Used by the detail page,
+ * which inlines its own useLiveQueryWithDefault wrapper so the querier
+ * can capture the route param directly (matches planta DetailView pattern).
+ */
+export async function loadMealById(id: string): Promise<MealWithNutrition | null> {
+	const local = await db.table<LocalMeal>('meals').get(id);
+	if (!local || local.deletedAt) return null;
+	const [decrypted] = await decryptRecords('meals', [local]);
+	return decrypted ? toMealWithNutrition(decrypted) : null;
 }
 
 /** All goals, auto-updates on any change. */

@@ -16,6 +16,13 @@ export interface NutritionData {
 	sugar: number;
 }
 
+/** A single food item identified by Gemini Vision in a meal photo. */
+export interface AnalyzedFood {
+	name: string;
+	quantity?: string | null;
+	calories?: number | null;
+}
+
 export interface LocalMeal extends BaseRecord {
 	date: string;
 	mealType: MealType;
@@ -25,7 +32,12 @@ export interface LocalMeal extends BaseRecord {
 	confidence: number;
 	nutrition?: NutritionData | null;
 	photoMediaId?: string | null;
+	/** Full-resolution media URL — used in the detail view + lightbox. */
 	photoUrl?: string | null;
+	/** Pre-generated thumbnail URL — used in list views to save bandwidth. */
+	photoThumbnailUrl?: string | null;
+	/** AI-identified individual food items. Encrypted (food names = user content). */
+	foods?: AnalyzedFood[] | null;
 }
 
 export interface LocalGoal extends BaseRecord {
@@ -69,5 +81,7 @@ export interface MealWithNutrition {
 	nutrition: NutritionData | null;
 	photoMediaId?: string | null;
 	photoUrl?: string | null;
+	photoThumbnailUrl?: string | null;
+	foods?: AnalyzedFood[] | null;
 	createdAt: string;
 }

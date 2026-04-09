@@ -13,7 +13,7 @@
  */
 
 import { db } from '$lib/data/database';
-import { encryptRecord } from '$lib/data/crypto';
+import { encryptRecord, decryptRecord } from '$lib/data/crypto';
 import {
 	uploadMealPhoto,
 	analyzeMealPhoto,
@@ -21,7 +21,7 @@ import {
 	type MealAnalysisResult,
 	type UploadMealPhotoResult,
 } from './api';
-import type { LocalMeal, MealType, NutritionData } from './types';
+import type { LocalMeal, MealType, NutritionData, AnalyzedFood } from './types';
 
 export interface CreateMealDto {
 	mealType: MealType;
@@ -34,7 +34,17 @@ export interface CreateMealDto {
 export interface CreateMealFromPhotoDto extends CreateMealDto {
 	photoMediaId: string;
 	photoUrl: string;
+	photoThumbnailUrl?: string | null;
 	confidence: number;
+	foods?: AnalyzedFood[] | null;
+}
+
+export interface UpdateMealDto {
+	mealType?: MealType;
+	description?: string;
+	nutrition?: NutritionData | null;
+	portionSize?: string | null;
+	date?: string;
 }
 
 function todayStr(): string {
@@ -56,6 +66,8 @@ export const mealMutations = {
 			nutrition: dto.nutrition ?? null,
 			photoMediaId: null,
 			photoUrl: null,
+			photoThumbnailUrl: null,
+			foods: null,
 			createdAt: now,
 			updatedAt: now,
 		};
@@ -79,6 +91,8 @@ export const mealMutations = {
 			nutrition: dto.nutrition ?? null,
 			photoMediaId: dto.photoMediaId,
 			photoUrl: dto.photoUrl,
+			photoThumbnailUrl: dto.photoThumbnailUrl ?? null,
+			foods: dto.foods ?? null,
 			createdAt: now,
 			updatedAt: now,
 		};
@@ -86,6 +100,34 @@ export const mealMutations = {
 		await encryptRecord('meals', encrypted);
 		await db.table('meals').add(encrypted);
 		return row;
+	},
+
+	/**
+	 * Patch an existing meal. Only the provided fields are updated.
+	 * Returns the decrypted snapshot after the write.
+	 *
+	 * Encryption note: we build a partial update object containing only
+	 * the changed fields, run encryptRecord on it (mutates the encrypted
+	 * fields in place), then Dexie .update() merges it into the row. The
+	 * decryptRecord at the end reads back the full merged row from Dexie
+	 * and decrypts it for the caller.
+	 */
+	async update(id: string, dto: UpdateMealDto): Promise<LocalMeal> {
+		const updateData: Record<string, unknown> = {
+			updatedAt: new Date().toISOString(),
+		};
+		if (dto.mealType !== undefined) updateData.mealType = dto.mealType;
+		if (dto.description !== undefined) updateData.description = dto.description.trim();
+		if (dto.nutrition !== undefined) updateData.nutrition = dto.nutrition;
+		if (dto.portionSize !== undefined) updateData.portionSize = dto.portionSize;
+		if (dto.date !== undefined) updateData.date = dto.date;
+
+		await encryptRecord('meals', updateData);
+		await db.table('meals').update(id, updateData);
+
+		const updated = await db.table<LocalMeal>('meals').get(id);
+		if (!updated) throw new Error('Meal disappeared after update');
+		return decryptRecord('meals', { ...updated });
 	},
 
 	async delete(id: string): Promise<void> {
