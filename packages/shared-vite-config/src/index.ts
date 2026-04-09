@@ -16,23 +16,13 @@ export const MANA_SHARED_PACKAGES = [
 	'@mana/shared-tailwind',
 	'@mana/shared-theme',
 	'@mana/shared-theme-ui',
-	'@mana/shared-feedback-ui',
-	'@mana/shared-feedback-service',
-	'@mana/shared-feedback-types',
 	'@mana/shared-auth',
 	'@mana/shared-auth-ui',
 	'@mana/shared-branding',
-	'@mana/shared-subscription-ui',
-	'@mana/shared-profile-ui',
 	'@mana/shared-i18n',
-	'@mana/shared-api-client',
-	'@mana/shared-splitscreen',
 	'@mana/shared-utils',
 	'@mana/shared-tags',
 	'@mana/shared-stores',
-	'@mana/shared-help-types',
-	'@mana/shared-help-content',
-	'@mana/shared-help-ui',
 ] as const;
 
 /**
