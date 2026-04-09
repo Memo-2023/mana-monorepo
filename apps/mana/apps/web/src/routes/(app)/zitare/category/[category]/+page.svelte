@@ -21,8 +21,10 @@
 	let searchTerm = $state('');
 	let sortBy = $state<'default' | 'author'>('default');
 
-	// Filtered and sorted quotes
-	let displayedQuotes = $derived<Quote[]>(() => {
+	// Filtered and sorted quotes — `$derived.by` is the variant that
+	// takes a thunk; plain `$derived(expr)` only takes a single
+	// expression.
+	let displayedQuotes = $derived.by<Quote[]>(() => {
 		let filtered = quotes;
 
 		// Filter by search

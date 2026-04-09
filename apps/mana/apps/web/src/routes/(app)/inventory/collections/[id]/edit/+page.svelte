@@ -6,7 +6,7 @@
 	import { collectionsStore } from '$lib/modules/inventory/stores/collections.svelte';
 	import { getCollectionById } from '$lib/modules/inventory/queries';
 	import type { Collection } from '$lib/modules/inventory/queries';
-	import type { CollectionSchema } from '$lib/modules/inventory/constants';
+	import type { CollectionSchema, FieldDefinition } from '$lib/modules/inventory/constants';
 	import SchemaEditor from '$lib/modules/inventory/components/fields/SchemaEditor.svelte';
 
 	const collectionsCtx: { readonly value: Collection[] } = getContext('collections');
@@ -25,7 +25,11 @@
 			name = collection.name;
 			description = collection.description || '';
 			icon = collection.icon || '';
-			schema = { fields: [...collection.schema.fields] };
+			// `collection.schema.fields` round-trips through JSON in the
+			// Dexie row, which widens `type` to plain `string`. Cast back
+			// to the FieldDefinition union — the runtime values match the
+			// FieldType union, the loss is purely at the type layer.
+			schema = { fields: [...collection.schema.fields] as FieldDefinition[] };
 			loaded = true;
 		}
 	});

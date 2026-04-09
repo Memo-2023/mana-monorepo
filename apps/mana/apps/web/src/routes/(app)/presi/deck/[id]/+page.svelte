@@ -402,7 +402,7 @@
 	visible={showShare}
 	onClose={() => (showShare = false)}
 	url={typeof window !== 'undefined' ? `${window.location.origin}/presi/deck/${deckId}` : ''}
-	title={currentDeck?.name ?? 'Presentation'}
+	title={currentDeck?.title ?? 'Presentation'}
 	source="presi"
 	description={currentDeck?.description ?? ''}
 />

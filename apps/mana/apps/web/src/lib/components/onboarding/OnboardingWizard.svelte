@@ -12,9 +12,16 @@
 
 	interface Props {
 		onComplete: () => void;
+		/**
+		 * Optional callback fired when the user explicitly skips the wizard
+		 * (vs. completing it normally). Layout consumers use it to track
+		 * skip-rate analytics; the default skip path still calls onComplete
+		 * so the modal closes either way.
+		 */
+		onSkip?: () => void;
 	}
 
-	let { onComplete }: Props = $props();
+	let { onComplete, onSkip }: Props = $props();
 
 	// Reference to profile name for auto-save on step transition
 	let profileNameRef = $state('');
@@ -60,6 +67,7 @@
 
 	function handleSkip() {
 		onboardingStore.skip();
+		onSkip?.();
 		onComplete();
 	}
 

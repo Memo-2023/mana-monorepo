@@ -14,11 +14,13 @@
 		};
 	});
 
-	function checkSession() {
+	async function checkSession() {
 		if (!authStore.isAuthenticated) return;
 
-		// Try to get token expiry from JWT
-		const token = authStore.getAccessTokenSync?.();
+		// Pull the latest access token. The wrapper doesn't expose a sync
+		// variant — getAccessToken() reads from the storage adapter behind
+		// a Promise, which is fine for a polling-style warning.
+		const token = await authStore.getAccessToken();
 		if (!token) return;
 
 		try {
@@ -40,7 +42,11 @@
 
 	async function handleRefresh() {
 		try {
-			await authStore.refreshToken?.();
+			// getValidToken() returns the current token if still valid, or
+			// triggers a refresh under the hood when it isn't. Same effect
+			// as the old `refreshToken()` call site, with the wrapper's
+			// existing public surface.
+			await authStore.getValidToken();
 			showWarning = false;
 		} catch {
 			// Refresh failed, user will be logged out

@@ -5,6 +5,12 @@
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
 import { decryptRecords } from '$lib/data/crypto';
+// `useAllTags` re-exports the shared-tags hook below; the actual tag
+// objects flowing through this module are the shared shape, not the
+// memoro/types.Tag declared next to LocalMemoTag. Importing the shared
+// type here keeps `getTagsForMemo` and friends in sync with what the
+// hook actually returns.
+import type { Tag } from '@mana/shared-tags';
 import type {
 	LocalMemo,
 	LocalMemory,

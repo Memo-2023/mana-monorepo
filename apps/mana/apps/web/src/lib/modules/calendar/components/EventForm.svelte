@@ -30,7 +30,7 @@
 	let calendarId = $state(event?.calendarId || '');
 	let recurrenceRule = $state(event?.recurrenceRule || '');
 	let selectedTagIds = $state<string[]>(
-		((event as Record<string, unknown>)?.tagIds as string[]) ?? []
+		((event as unknown as Record<string, unknown>)?.tagIds as string[]) ?? []
 	);
 
 	const allTags = useAllTags();

@@ -2,12 +2,7 @@
  * Questions module — barrel exports.
  */
 
-export {
-	questionCollectionTable,
-	questionTable,
-	answerTable,
-	QUESTIONS_GUEST_SEED,
-} from './collections';
+export { qCollectionTable, questionTable, answerTable, QUESTIONS_GUEST_SEED } from './collections';
 export * from './queries';
 export type {
 	LocalCollection,

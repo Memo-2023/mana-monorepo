@@ -4,7 +4,7 @@
 	import { timeEntryTable } from '$lib/modules/times/collections';
 	import { formatDurationCompact } from '$lib/modules/times/queries';
 	import { CurrencyDollar } from '@mana/shared-icons';
-	import type { TimeEntry, Project, Client } from '$lib/modules/times/types';
+	import type { TimeEntry, Project, Client, LocalTimeEntry } from '$lib/modules/times/types';
 	import { ConfirmationModal } from '@mana/shared-ui';
 
 	let {
@@ -46,7 +46,7 @@
 
 	let saveDebounce: ReturnType<typeof setTimeout> | null = null;
 
-	function autoSave(updates: Record<string, unknown>) {
+	function autoSave(updates: Partial<LocalTimeEntry>) {
 		if (saveDebounce) clearTimeout(saveDebounce);
 		saveDebounce = setTimeout(async () => {
 			await timeEntryTable.update(entry.id, updates);

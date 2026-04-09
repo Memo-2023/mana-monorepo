@@ -1,6 +1,9 @@
 import { sveltekit } from '@sveltejs/kit/vite';
 import tailwindcss from '@tailwindcss/vite';
-import { defineConfig } from 'vite';
+// `defineConfig` from vitest/config is a superset of vite's that
+// recognizes the `test:` block. Without this, the inline test exclude
+// below trips a "test does not exist on UserConfigExport" type error.
+import { defineConfig } from 'vitest/config';
 import { SvelteKitPWA } from '@vite-pwa/sveltekit';
 import { createPWAConfig } from '@mana/shared-pwa';
 import { MANA_SHARED_PACKAGES, getBuildDefines } from '@mana/shared-vite-config';

@@ -11,7 +11,8 @@
 		formatDuration,
 		getStatusLabel,
 	} from '$lib/modules/memoro/queries';
-	import type { Memo, Memory, Tag, LocalMemoTag } from '$lib/modules/memoro/types';
+	import type { Memo, Memory, LocalMemoTag } from '$lib/modules/memoro/types';
+	import type { Tag } from '@mana/shared-tags';
 	import {
 		ArrowLeft,
 		Trash,

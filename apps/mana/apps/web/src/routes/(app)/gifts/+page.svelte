@@ -437,7 +437,7 @@
 						<div class="mb-6 rounded-lg bg-surface p-4 text-center">
 							<p class="text-sm text-muted-foreground">Verfügbare Credits</p>
 							<p class="text-2xl font-bold text-primary">
-								{formatCredits(balance.balance + balance.freeCreditsRemaining)}
+								{formatCredits(balance.balance + (balance.freeCreditsRemaining ?? 0))}
 							</p>
 						</div>
 					{/if}

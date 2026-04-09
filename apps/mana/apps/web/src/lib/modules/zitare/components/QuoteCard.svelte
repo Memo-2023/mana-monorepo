@@ -25,8 +25,11 @@
 	let quoteText = $derived(quotesStore.getText(quote));
 	let showBio = $state(false);
 
-	// Get author bio in current language
-	let authorBioText = $derived(() => {
+	// Get author bio in current language. `$derived.by` is the variant
+	// that takes a thunk; plain `$derived(expr)` would have stored the
+	// arrow function itself, making `authorBioText` always truthy and
+	// the {#if} below dead.
+	let authorBioText = $derived.by(() => {
 		if (!quote.authorBio) return '';
 		const lang = quotesStore.language === 'original' ? 'de' : quotesStore.language;
 		return quote.authorBio[lang] || quote.authorBio.de || '';

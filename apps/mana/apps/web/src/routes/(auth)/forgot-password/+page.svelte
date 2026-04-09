@@ -6,7 +6,9 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 
 	async function handleForgotPassword(email: string) {
-		return authStore.forgotPassword(email);
+		// resetPassword is the wrapper's "send-the-email" entry point.
+		// resetPasswordWithToken is the actually-perform-the-reset step.
+		return authStore.resetPassword(email);
 	}
 </script>
 

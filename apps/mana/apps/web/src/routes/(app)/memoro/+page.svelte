@@ -10,7 +10,8 @@
 		formatDuration,
 		getStatusLabel,
 	} from '$lib/modules/memoro/queries';
-	import type { Memo, Tag, LocalMemoTag } from '$lib/modules/memoro/types';
+	import type { Memo, LocalMemoTag } from '$lib/modules/memoro/types';
+	import type { Tag } from '@mana/shared-tags';
 	import {
 		Plus,
 		MagnifyingGlass,

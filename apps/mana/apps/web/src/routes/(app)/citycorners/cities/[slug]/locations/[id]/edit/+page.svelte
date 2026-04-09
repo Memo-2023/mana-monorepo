@@ -11,7 +11,7 @@
 	const cityCtx = getContext<{ value: LocalCity | undefined }>('currentCity');
 	let city = $derived(cityCtx.value);
 	let citySlug = $derived($page.params.slug ?? '');
-	let locId = $derived(locId ?? '');
+	let locId = $derived($page.params.id ?? '');
 
 	let loading = $state(true);
 	let name = $state('');

@@ -293,7 +293,7 @@
 	// ── Sync ────────────────────────────────────────────────
 	const SYNC_SERVER_URL =
 		(typeof window !== 'undefined' &&
-			(window as Record<string, unknown>).__PUBLIC_SYNC_SERVER_URL__) ||
+			(window as unknown as Record<string, unknown>).__PUBLIC_SYNC_SERVER_URL__) ||
 		import.meta.env.PUBLIC_SYNC_SERVER_URL ||
 		'http://localhost:3050';
 	let unifiedSync: ReturnType<typeof createUnifiedSync> | null = null;

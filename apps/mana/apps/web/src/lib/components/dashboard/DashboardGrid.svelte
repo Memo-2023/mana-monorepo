@@ -57,7 +57,7 @@
 							{widget.id} fehlgeschlagen
 						</p>
 						<p class="mb-3 text-xs text-red-500 dark:text-red-500/70">
-							{error?.message || 'Unbekannter Fehler'}
+							{(error as Error | undefined)?.message || 'Unbekannter Fehler'}
 						</p>
 						<button
 							type="button"

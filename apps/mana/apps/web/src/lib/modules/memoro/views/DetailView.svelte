@@ -8,6 +8,7 @@
 	import DetailViewShell from '$lib/components/DetailViewShell.svelte';
 	import { memosStore } from '../stores/memos.svelte';
 	import { llmQueueDb } from '$lib/llm-queue';
+	import type { QueuedTask } from '@mana/shared-llm';
 	import type { LlmTier } from '@mana/shared-llm';
 	import { PushPin } from '@mana/shared-icons';
 	import type { ViewProps } from '$lib/app-registry';
@@ -97,19 +98,16 @@
 	// Reactive lookup of any LLM queue task tagged with this memo, so the
 	// UI can show "Titel wird generiert..." while a generateTitleTask is
 	// pending or running. Returns the most recent task row (any state).
-	const titleQueueRow = useLiveQueryWithDefault(
-		async () => {
-			if (!memoId) return null;
-			const rows = await llmQueueDb.tasks
-				.where('[refType+refId]')
-				.equals(['memo', memoId])
-				.and((t) => t.taskName === 'common.generateTitle')
-				.reverse()
-				.sortBy('enqueuedAt');
-			return rows[0] ?? null;
-		},
-		null as Awaited<ReturnType<typeof llmQueueDb.tasks.toArray>>[number] | null
-	);
+	const titleQueueRow = useLiveQueryWithDefault<QueuedTask | null>(async () => {
+		if (!memoId) return null;
+		const rows = await llmQueueDb.tasks
+			.where('[refType+refId]')
+			.equals(['memo', memoId])
+			.and((t) => t.taskName === 'common.generateTitle')
+			.reverse()
+			.sortBy('enqueuedAt');
+		return rows[0] ?? null;
+	}, null);
 
 	const titleIsGenerating = $derived(
 		titleQueueRow.value?.state === 'pending' || titleQueueRow.value?.state === 'running'

@@ -10,11 +10,12 @@
 	import type { ParsedTask } from '../utils/task-parser';
 	import type { TaskTag } from '../types';
 	import { getPriorityColor } from '../queries';
+	import type { ParserLocale } from '@mana/shared-utils';
 	import { Plus, CalendarBlank, Flag, ArrowsClockwise, Timer, Tag, Info } from '@mana/shared-icons';
 
 	interface Props {
 		labels?: TaskTag[];
-		locale?: string;
+		locale?: ParserLocale;
 		onShowSyntaxHelp?: () => void;
 	}
 

@@ -9,7 +9,8 @@
 	const docs = useRecentDocuments(5);
 	const spaces = useSpaces();
 
-	function getSpaceName(spaceId: string): string {
+	function getSpaceName(spaceId: string | null | undefined): string {
+		if (!spaceId) return '';
 		const space = (spaces.value ?? []).find((s) => s.id === spaceId);
 		return space?.name ?? '';
 	}

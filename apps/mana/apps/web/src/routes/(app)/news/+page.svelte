@@ -314,7 +314,8 @@
 			</div>
 		{:else}
 			<div class="card-grid">
-				{#each ranked as { article } (article.id)}
+				{#each ranked as scored (scored.article.id)}
+					{@const article = scored.article}
 					{@const isSaved = interestedIds.has(article.id)}
 					<article class="card">
 						{#if article.imageUrl}

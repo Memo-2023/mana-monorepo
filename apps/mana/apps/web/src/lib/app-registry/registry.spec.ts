@@ -48,7 +48,7 @@ const BRANDING_ONLY = new Set([
 
 describe('app registry ↔ MANA_APPS consistency', () => {
 	it('every workbench-registry app has a MANA_APPS entry or is in WORKBENCH_ONLY', () => {
-		const brandingIds = new Set(MANA_APPS.map((a) => a.id));
+		const brandingIds = new Set<string>(MANA_APPS.map((a) => a.id));
 		const unaccounted = getAllApps()
 			.map((a) => a.id)
 			.filter((id) => !brandingIds.has(id) && !WORKBENCH_ONLY.has(id));

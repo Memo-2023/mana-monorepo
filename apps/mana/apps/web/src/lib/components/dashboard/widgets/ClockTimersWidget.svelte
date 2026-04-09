@@ -11,14 +11,15 @@
 
 	const DAY_NAMES = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
 
-	function formatRepeatDays(days?: number[]): string {
+	function formatRepeatDays(days?: number[] | null): string {
 		if (!days || days.length === 0) return 'Einmalig';
 		if (days.length === 7) return 'Täglich';
 		if (days.length === 5 && !days.includes(0) && !days.includes(6)) return 'Werktags';
 		return days.map((d) => DAY_NAMES[d]).join(', ');
 	}
 
-	function formatRemaining(seconds: number): string {
+	function formatRemaining(seconds: number | null | undefined): string {
+		if (seconds == null) return '—';
 		const h = Math.floor(seconds / 3600);
 		const m = Math.floor((seconds % 3600) / 60);
 		const s = seconds % 60;

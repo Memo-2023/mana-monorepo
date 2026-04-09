@@ -70,7 +70,7 @@
 			twitter: contact.twitter,
 			instagram: contact.instagram,
 			github: contact.github,
-			tagIds: ((contact as Record<string, unknown>).tagIds as string[]) ?? [],
+			tagIds: ((contact as unknown as Record<string, unknown>).tagIds as string[]) ?? [],
 		};
 		isEditing = true;
 	}

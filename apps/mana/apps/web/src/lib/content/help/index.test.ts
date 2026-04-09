@@ -30,7 +30,7 @@ describe('Mana Help Content', () => {
 
 		expect(content.features).toBeDefined();
 		expect(content.contact).toBeDefined();
-		expect(content.contact.supportEmail).toBe('support@mana.how');
+		expect(content.contact!.supportEmail).toBe('support@mana.how');
 	});
 
 	it('returns valid English content', () => {

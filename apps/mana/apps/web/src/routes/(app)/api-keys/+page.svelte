@@ -388,14 +388,7 @@
 				<div class="mb-6">
 					<label for="rateLimit" class="block text-sm font-medium mb-2">Rate Limit</label>
 					<div class="flex items-center gap-2">
-						<Input
-							type="number"
-							id="rateLimit"
-							bind:value={newKeyRateLimit}
-							min={1}
-							max={1000}
-							class="w-24"
-						/>
+						<Input type="number" id="rateLimit" bind:value={newKeyRateLimit} class="w-24" />
 						<span class="text-sm text-muted-foreground">requests per minute</span>
 					</div>
 					<p class="mt-1 text-xs text-muted-foreground">

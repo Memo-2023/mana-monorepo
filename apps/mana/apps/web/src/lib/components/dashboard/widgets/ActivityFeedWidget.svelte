@@ -20,7 +20,7 @@
 		Heart,
 		Lightning,
 		Clock,
-		Activity,
+		Pulse,
 	} from '@mana/shared-icons';
 	import { getIconComponent } from '@mana/shared-icons';
 	import { formatDistanceToNow } from 'date-fns';
@@ -64,7 +64,7 @@
 <div>
 	<div class="mb-3 flex items-center justify-between">
 		<h3 class="flex items-center gap-2 text-lg font-semibold">
-			<Activity size={20} />
+			<Pulse size={20} />
 			{$_('dashboard.widgets.activity_feed.title', { default: 'Aktivität' })}
 		</h3>
 	</div>
@@ -77,7 +77,7 @@
 		</div>
 	{:else if items.length === 0}
 		<div class="py-6 text-center">
-			<Activity size={32} class="mx-auto mb-2 text-muted-foreground" />
+			<Pulse size={32} class="mx-auto mb-2 text-muted-foreground" />
 			<p class="text-sm text-muted-foreground">
 				{$_('dashboard.widgets.activity_feed.empty', { default: 'Noch keine Aktivität' })}
 			</p>

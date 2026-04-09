@@ -285,7 +285,9 @@
 						<TaskItem
 							{task}
 							compact={false}
-							onOpen={onOpenTask ? () => onOpenTask(task) : undefined}
+							onToggleComplete={() => tasksStore.toggleComplete(task.id)}
+							onClick={() => onOpenTask?.(task)}
+							onContextMenu={() => {}}
 						/>
 					</div>
 				{/each}

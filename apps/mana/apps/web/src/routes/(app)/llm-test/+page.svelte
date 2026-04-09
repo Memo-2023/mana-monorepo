@@ -67,7 +67,12 @@
 	);
 
 	async function enqueueTaskNow(task: typeof extractDateTask | typeof summarizeTextTask) {
-		queueLastEnqueuedId = await llmTaskQueue.enqueue(task, { text: queueInput });
+		// The two LlmTask shapes have different output types but identical
+		// {text: string} input, so we widen `task` to `any` for the
+		// enqueue call — TypeScript can't unify the union arg with the
+		// generic without specializing per task.
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		queueLastEnqueuedId = await llmTaskQueue.enqueue(task as any, { text: queueInput });
 	}
 
 	// --- Router tab state ---

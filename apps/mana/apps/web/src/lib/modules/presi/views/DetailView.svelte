@@ -69,7 +69,11 @@
 	onConfirmDelete={() =>
 		detail.deleteWithUndo({
 			label: 'Präsentation gelöscht',
-			delete: () => decksStore.deleteDeck(deckId),
+			// deleteDeck returns Promise<boolean>; the deleteWithUndo helper
+			// expects Promise<void>, so we discard the result.
+			delete: async () => {
+				await decksStore.deleteDeck(deckId);
+			},
 			goBack,
 		})}
 >
