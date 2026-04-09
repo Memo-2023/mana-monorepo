@@ -58,7 +58,7 @@
 		<div class="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
 			<Robot size={28} class="text-primary" />
 		</div>
-		<h2 class="mb-2 text-2xl font-bold">Wie soll Mana KI nutzen?</h2>
+		<div class="mb-2 text-2xl font-bold">Wie soll Mana KI nutzen?</div>
 		<p class="text-muted-foreground">
 			Mana bietet KI-Funktionen auf vier Ebenen — von "gar keine" bis zu allem. Du entscheidest,
 			welche Schichten dein Vertrauen haben.
@@ -103,7 +103,7 @@
 					</div>
 					<div class="min-w-0 flex-1">
 						<div class="flex items-center gap-2">
-							<h3 class="font-semibold">{card.title}</h3>
+							<div class="text-base font-semibold">{card.title}</div>
 							<span class="h-1.5 w-1.5 rounded-full {card.privacyDot}"></span>
 							<span class="text-xs text-muted-foreground">{card.tagline}</span>
 							{#if enabled}

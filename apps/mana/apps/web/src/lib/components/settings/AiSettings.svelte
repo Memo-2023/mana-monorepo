@@ -119,7 +119,7 @@
 			<Robot size={20} />
 		</div>
 		<div>
-			<h2 class="text-lg font-semibold">KI-Optionen</h2>
+			<div class="text-lg font-semibold">KI-Optionen</div>
 			<p class="text-sm text-muted-foreground">
 				Wähle, welche KI-Schichten Mana verwenden darf — von gar keiner bis zu allen
 			</p>
@@ -166,7 +166,7 @@
 					</div>
 					<div class="min-w-0 flex-1">
 						<div class="flex items-center gap-2">
-							<h3 class="font-semibold">{card.title}</h3>
+							<div class="text-base font-semibold">{card.title}</div>
 							{#if enabled}
 								<span
 									class="rounded-full bg-primary px-2 py-0.5 text-[10px] font-medium text-primary-foreground"
