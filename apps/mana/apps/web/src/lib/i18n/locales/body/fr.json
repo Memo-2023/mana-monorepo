@@ -1,0 +1,38 @@
+{
+	"title": "Body",
+	"subtitle": "Entraînement et corps dans un seul module",
+	"activeWorkout": "Séance en cours",
+	"finish": "Terminer",
+	"readyToTrain": "Prêt à t'entraîner ?",
+	"startHint": "Démarre une nouvelle séance et enregistre tes séries",
+	"startWorkout": "Démarrer la séance",
+	"weight": "Poids",
+	"dailyCheck": "Aujourd'hui",
+	"recent": "Dernières séances",
+	"noWorkouts": "Pas encore de séance",
+	"log": "Enregistrer",
+	"measurement": {
+		"weight": "Poids",
+		"bodyfat": "Masse grasse",
+		"muscle": "Masse musculaire",
+		"chest": "Poitrine",
+		"waist": "Tour de taille",
+		"hips": "Hanches",
+		"thigh": "Cuisse",
+		"arm": "Bras",
+		"calf": "Mollet",
+		"neck": "Cou"
+	},
+	"check": {
+		"energy": "Énergie",
+		"sleep": "Sommeil",
+		"soreness": "Courbatures",
+		"mood": "Humeur"
+	},
+	"phase": {
+		"cut": "Sèche",
+		"bulk": "Prise de masse",
+		"maintenance": "Maintenance",
+		"recomp": "Recomposition"
+	}
+}

@@ -149,6 +149,10 @@
 		"news_unread": {
 			"title": "Actualités",
 			"description": "Articles phares de ton fil personnalisé"
+		},
+		"body_stats": {
+			"title": "Body",
+			"description": "Poids actuel et statut de l'entraînement"
 		}
 	}
 }

@@ -31,7 +31,8 @@ export type WidgetType =
 	| 'day-timeline' // TimeBlocks: chronological day timeline
 	| 'activity-feed' // TimeBlocks: recent activity across modules
 	| 'cycles' // Cycles: current phase + days until next period
-	| 'news-unread'; // News: latest unread curated articles
+	| 'news-unread' // News: latest unread curated articles
+	| 'body-stats'; // Body: latest weight + active workout summary
 
 /**
  * Widget size - maps to CSS Grid columns
@@ -132,6 +133,7 @@ export interface WidgetMeta {
 		| 'nutriphi'
 		| 'planta'
 		| 'cycles'
+		| 'body'
 		| 'mana-auth';
 }
 
@@ -350,6 +352,15 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
 		icon: '📰',
 		defaultSize: 'small',
 		allowMultiple: false,
+	},
+	{
+		type: 'body-stats',
+		nameKey: 'dashboard.widgets.body_stats.title',
+		descriptionKey: 'dashboard.widgets.body_stats.description',
+		icon: '💪',
+		defaultSize: 'small',
+		allowMultiple: false,
+		requiredBackend: 'body',
 	},
 ];
 

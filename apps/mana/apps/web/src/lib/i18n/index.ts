@@ -50,6 +50,7 @@ function registerLocale(lang: SupportedLocale) {
 			help,
 			cycles,
 			news,
+			body,
 		] = await Promise.all([
 			import(`./locales/apps/${lang}.json`),
 			import(`./locales/common/${lang}.json`),
@@ -85,6 +86,7 @@ function registerLocale(lang: SupportedLocale) {
 			import(`./locales/help/${lang}.json`),
 			import(`./locales/cycles/${lang}.json`),
 			import(`./locales/news/${lang}.json`),
+			import(`./locales/body/${lang}.json`),
 		]);
 
 		return {
@@ -122,6 +124,7 @@ function registerLocale(lang: SupportedLocale) {
 			help: help.default,
 			cycles: cycles.default,
 			news: news.default,
+			body: body.default,
 		};
 	});
 }

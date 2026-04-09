@@ -1,0 +1,38 @@
+{
+	"title": "Body",
+	"subtitle": "Training & Körper in einem Modul",
+	"activeWorkout": "Aktives Workout",
+	"finish": "Beenden",
+	"readyToTrain": "Bereit für ein Workout?",
+	"startHint": "Starte eine neue Session und logge deine Sätze",
+	"startWorkout": "Workout starten",
+	"weight": "Gewicht",
+	"dailyCheck": "Heute",
+	"recent": "Letzte Workouts",
+	"noWorkouts": "Noch keine Sessions",
+	"log": "Loggen",
+	"measurement": {
+		"weight": "Gewicht",
+		"bodyfat": "Körperfett",
+		"muscle": "Muskelmasse",
+		"chest": "Brust",
+		"waist": "Taille",
+		"hips": "Hüfte",
+		"thigh": "Oberschenkel",
+		"arm": "Arm",
+		"calf": "Wade",
+		"neck": "Hals"
+	},
+	"check": {
+		"energy": "Energie",
+		"sleep": "Schlaf",
+		"soreness": "Muskelkater",
+		"mood": "Stimmung"
+	},
+	"phase": {
+		"cut": "Cut",
+		"bulk": "Bulk",
+		"maintenance": "Maintenance",
+		"recomp": "Recomp"
+	}
+}

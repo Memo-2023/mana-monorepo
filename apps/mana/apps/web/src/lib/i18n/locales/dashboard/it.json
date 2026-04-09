@@ -149,6 +149,10 @@
 		"news_unread": {
 			"title": "Notizie",
 			"description": "Articoli in evidenza dal tuo feed curato"
+		},
+		"body_stats": {
+			"title": "Body",
+			"description": "Peso attuale e stato dell'allenamento"
 		}
 	}
 }
