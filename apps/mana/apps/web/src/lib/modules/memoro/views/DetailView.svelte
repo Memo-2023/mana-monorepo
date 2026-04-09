@@ -20,6 +20,13 @@
 	const detail = useDetailEntity<LocalMemo>({
 		id: () => memoId,
 		table: 'memos',
+		// title, intro, transcript live in the encryption registry — without
+		// `decrypt: true` the inputs would bind to raw `enc:1:...` ciphertext
+		// strings instead of plaintext. Pre-existing bug surfaced when the
+		// LLM auto-title started populating the title field for the first
+		// time on 2026-04-09; previously the field was always null and the
+		// transcript was the only encrypted field shown, but no one noticed.
+		decrypt: true,
 		onLoad: (val) => {
 			editTitle = val.title ?? '';
 			editIntro = val.intro ?? '';

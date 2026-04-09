@@ -29,6 +29,7 @@ export const memosStore = {
 		audioDurationMs?: number;
 		processingStatus?: LocalMemo['processingStatus'];
 	}) {
+		const now = new Date().toISOString();
 		const newLocal: LocalMemo = {
 			id: crypto.randomUUID(),
 			title: data.title ?? null,
@@ -41,7 +42,15 @@ export const memosStore = {
 			isPublic: false,
 			blueprintId: data.blueprintId ?? null,
 			language: data.language ?? null,
-		};
+			// createdAt + updatedAt are required by LocalMemo's type but the
+			// previous create() never set them — DetailView showed
+			// "Erstellt: Invalid Date" for every memo. The Dexie creating
+			// hook only auto-stamps userId + __fieldTimestamps; module
+			// stores have to set their own createdAt/updatedAt explicitly
+			// (consistent with the rest of the Mana modules).
+			createdAt: now,
+			updatedAt: now,
+		} as LocalMemo;
 		const plaintextSnapshot = toMemo(newLocal);
 		await encryptRecord('memos', newLocal);
 		await memoTable.add(newLocal);
