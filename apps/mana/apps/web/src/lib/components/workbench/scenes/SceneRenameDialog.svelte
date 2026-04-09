@@ -119,7 +119,7 @@
 	.srd-backdrop {
 		position: fixed;
 		inset: 0;
-		background: rgba(0, 0, 0, 0.5);
+		background: hsl(0 0% 0% / 0.5);
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -127,17 +127,13 @@
 		padding: 1rem;
 	}
 	.srd-dialog {
-		background: #fffef5;
+		background: hsl(var(--color-card));
 		border-radius: 0.75rem;
 		box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
 		max-width: 420px;
 		width: 100%;
 		padding: 1.5rem;
 		animation: srd-pop 0.18s ease-out;
-	}
-	:global(.dark) .srd-dialog {
-		background: #252220;
-		box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
 	}
 	@keyframes srd-pop {
 		from {
@@ -152,11 +148,8 @@
 	.srd-title {
 		font-size: 1.0625rem;
 		font-weight: 600;
-		color: #111827;
+		color: hsl(var(--color-foreground));
 		margin: 0 0 1rem;
-	}
-	:global(.dark) .srd-title {
-		color: #f9fafb;
 	}
 	.srd-fields {
 		display: flex;
@@ -178,28 +171,20 @@
 	.srd-label {
 		font-size: 0.75rem;
 		font-weight: 500;
-		color: #6b7280;
-	}
-	:global(.dark) .srd-label {
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 	}
 	.srd-input {
 		padding: 0.5rem 0.75rem;
 		border-radius: 0.5rem;
-		border: 1px solid rgba(0, 0, 0, 0.12);
+		border: 1px solid hsl(var(--color-border));
 		background: white;
 		font-size: 0.875rem;
-		color: #111827;
+		color: hsl(var(--color-foreground));
 		outline: none;
 		transition: border-color 0.15s;
 	}
 	.srd-input:focus {
 		border-color: hsl(var(--color-primary));
-	}
-	:global(.dark) .srd-input {
-		background: #1f1c1a;
-		border-color: rgba(255, 255, 255, 0.12);
-		color: #f9fafb;
 	}
 	.srd-icon-input {
 		text-align: center;
@@ -225,20 +210,14 @@
 	}
 	.srd-btn-cancel {
 		background: transparent;
-		color: #6b7280;
+		color: hsl(var(--color-muted-foreground));
 	}
 	.srd-btn-cancel:hover:not(:disabled) {
-		background: rgba(0, 0, 0, 0.05);
-	}
-	:global(.dark) .srd-btn-cancel {
-		color: #9ca3af;
-	}
-	:global(.dark) .srd-btn-cancel:hover:not(:disabled) {
-		background: rgba(255, 255, 255, 0.06);
+		background: hsl(var(--color-surface-hover));
 	}
 	.srd-btn-primary {
 		background: hsl(var(--color-primary));
-		color: white;
+		color: hsl(var(--color-primary-foreground));
 	}
 	.srd-btn-primary:hover:not(:disabled) {
 		filter: brightness(1.08);

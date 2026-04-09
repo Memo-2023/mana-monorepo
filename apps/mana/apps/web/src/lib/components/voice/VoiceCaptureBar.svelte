@@ -147,26 +147,26 @@
 		gap: 0.5rem;
 		padding: 0.625rem 0.875rem;
 		border-radius: 0.5rem;
-		border: 1px solid rgba(99, 102, 241, 0.2);
-		background: rgba(99, 102, 241, 0.04);
-		color: #6366f1;
+		border: 1px solid hsl(var(--color-primary) / 0.2);
+		background: hsl(var(--color-primary) / 0.04);
+		color: hsl(var(--color-primary));
 		font-size: 0.8125rem;
 		font-weight: 500;
 		cursor: pointer;
 		transition: all 0.15s;
 	}
 	.mic-btn:hover:not(:disabled) {
-		background: rgba(99, 102, 241, 0.08);
-		border-color: #6366f1;
+		background: hsl(var(--color-primary) / 0.08);
+		border-color: hsl(var(--color-primary));
 	}
 	.mic-btn:disabled {
 		opacity: 0.6;
 		cursor: wait;
 	}
 	.mic-btn.recording {
-		background: rgba(239, 68, 68, 0.08);
-		border-color: rgba(239, 68, 68, 0.4);
-		color: #ef4444;
+		background: hsl(var(--color-error) / 0.08);
+		border-color: hsl(var(--color-error) / 0.4);
+		color: hsl(var(--color-error));
 		animation: rec-pulse 1.5s ease-in-out infinite;
 	}
 	@keyframes rec-pulse {
@@ -197,19 +197,16 @@
 		width: 32px;
 		height: 32px;
 		border-radius: 0.375rem;
-		border: 1px solid rgba(0, 0, 0, 0.08);
+		border: 1px solid hsl(var(--color-border));
 		background: transparent;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 		font-size: 1.125rem;
 		line-height: 1;
 		cursor: pointer;
 	}
 	.mic-cancel:hover {
-		color: #ef4444;
-		border-color: #ef4444;
-	}
-	:global(.dark) .mic-cancel {
-		border-color: rgba(255, 255, 255, 0.1);
+		color: hsl(var(--color-error));
+		border-color: hsl(var(--color-error));
 	}
 	.rec-error {
 		display: flex;
@@ -218,31 +215,28 @@
 		padding: 0.625rem 0.75rem;
 		margin-top: 0.5rem;
 		border-radius: 0.375rem;
-		background: rgba(239, 68, 68, 0.06);
-		border: 1px solid rgba(239, 68, 68, 0.2);
+		background: hsl(var(--color-error) / 0.08);
+		border: 1px solid hsl(var(--color-error) / 0.2);
 	}
 	.rec-error p {
 		font-size: 0.6875rem;
-		color: #b91c1c;
+		color: hsl(var(--color-error));
 		margin: 0;
 		white-space: pre-line;
 		line-height: 1.5;
-	}
-	:global(.dark) .rec-error p {
-		color: #fca5a5;
 	}
 	.rec-retry {
 		align-self: flex-start;
 		padding: 0.25rem 0.625rem;
 		border-radius: 0.25rem;
-		border: 1px solid rgba(239, 68, 68, 0.3);
+		border: 1px solid hsl(var(--color-error) / 0.3);
 		background: transparent;
-		color: #ef4444;
+		color: hsl(var(--color-error));
 		font-size: 0.6875rem;
 		font-weight: 500;
 		cursor: pointer;
 	}
 	.rec-retry:hover {
-		background: rgba(239, 68, 68, 0.08);
+		background: hsl(var(--color-error) / 0.08);
 	}
 </style>

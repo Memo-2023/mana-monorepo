@@ -58,7 +58,7 @@
 		font-weight: 600;
 		text-transform: uppercase;
 		letter-spacing: 0.04em;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 	}
 	.links-list {
 		display: flex;
@@ -71,21 +71,14 @@
 		gap: 0.5rem;
 		padding: 0.375rem 0.5rem;
 		border-radius: 0.375rem;
-		background: rgba(0, 0, 0, 0.02);
-		border: 1px solid rgba(0, 0, 0, 0.04);
+		background: hsl(var(--color-surface-hover));
+		border: 1px solid hsl(var(--color-border));
 		cursor: pointer;
 		text-align: left;
 		transition: background 0.15s;
 	}
 	.link-item:hover {
-		background: rgba(0, 0, 0, 0.05);
-	}
-	:global(.dark) .link-item {
-		background: rgba(255, 255, 255, 0.02);
-		border-color: rgba(255, 255, 255, 0.04);
-	}
-	:global(.dark) .link-item:hover {
-		background: rgba(255, 255, 255, 0.06);
+		background: hsl(var(--color-surface-hover));
 	}
 	.link-dot {
 		width: 8px;
@@ -102,21 +95,18 @@
 	}
 	.link-title {
 		font-size: 0.8125rem;
-		color: #374151;
+		color: hsl(var(--color-foreground));
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
 	}
-	:global(.dark) .link-title {
-		color: #e5e7eb;
-	}
 	.link-subtitle {
 		font-size: 0.6875rem;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 	}
 	.link-app {
 		font-size: 0.625rem;
-		color: #b0afa8;
+		color: hsl(var(--color-muted-foreground));
 		flex-shrink: 0;
 	}
 </style>

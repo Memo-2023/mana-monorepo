@@ -65,7 +65,7 @@
 		width: min(var(--picker-width), 85vw);
 		min-height: 60vh;
 		max-height: 80vh;
-		background: #fffef5;
+		background: hsl(var(--color-card));
 		border-radius: 0.375rem;
 		box-shadow:
 			0 2px 8px rgba(0, 0, 0, 0.08),
@@ -73,12 +73,6 @@
 		display: flex;
 		flex-direction: column;
 		animation: slideIn 0.25s ease-out;
-	}
-	:global(.dark) .picker {
-		background-color: #252220;
-		box-shadow:
-			0 2px 8px rgba(0, 0, 0, 0.25),
-			0 0 0 1px rgba(255, 255, 255, 0.06);
 	}
 	@keyframes slideIn {
 		from {
@@ -101,11 +95,8 @@
 	.picker-title {
 		font-size: 0.875rem;
 		font-weight: 600;
-		color: #374151;
+		color: hsl(var(--color-foreground));
 		margin: 0;
-	}
-	:global(.dark) .picker-title {
-		color: #f3f4f6;
 	}
 	.close-btn {
 		display: flex;
@@ -116,17 +107,13 @@
 		border-radius: 0.375rem;
 		border: none;
 		background: transparent;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 		cursor: pointer;
 		transition: all 0.15s;
 	}
 	.close-btn:hover {
-		background: rgba(0, 0, 0, 0.06);
-		color: #374151;
-	}
-	:global(.dark) .close-btn:hover {
-		background: rgba(255, 255, 255, 0.1);
-		color: #f3f4f6;
+		background: hsl(var(--color-muted));
+		color: hsl(var(--color-foreground));
 	}
 
 	.picker-list {
@@ -138,13 +125,9 @@
 	/* Divider between rows — used by both auto-render above and consumer snippets. */
 	:global(.picker .divider) {
 		height: 1px;
-		background: rgba(0, 0, 0, 0.06);
+		background: hsl(var(--color-muted));
 		margin: 0 0.5rem;
 	}
-	:global(.dark .picker .divider) {
-		background: rgba(255, 255, 255, 0.06);
-	}
-
 	/* Standard option button — consumers use these classes inside the item snippet. */
 	:global(.picker .picker-option) {
 		display: flex;
@@ -160,12 +143,8 @@
 		text-align: left;
 	}
 	:global(.picker .picker-option:hover) {
-		background: rgba(0, 0, 0, 0.04);
+		background: hsl(var(--color-surface-hover));
 	}
-	:global(.dark .picker .picker-option:hover) {
-		background: rgba(255, 255, 255, 0.06);
-	}
-
 	:global(.picker .option-icon) {
 		flex-shrink: 0;
 		display: flex;
@@ -186,25 +165,18 @@
 	:global(.picker .option-title) {
 		font-size: 0.875rem;
 		font-weight: 600;
-		color: #374151;
-	}
-	:global(.dark .picker .option-title) {
-		color: #f3f4f6;
+		color: hsl(var(--color-foreground));
 	}
 	:global(.picker .option-desc) {
 		font-size: 0.75rem;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 	}
-	:global(.dark .picker .option-desc) {
-		color: #6b7280;
-	}
-
 	.empty-state {
 		padding: 2rem 1rem;
 		text-align: center;
 	}
 	.empty-state p {
 		font-size: 0.8125rem;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 	}
 </style>

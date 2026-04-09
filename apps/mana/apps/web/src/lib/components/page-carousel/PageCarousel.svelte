@@ -194,10 +194,10 @@
 		align-items: center;
 		justify-content: center;
 		gap: 0.75rem;
-		border: 2px dashed rgba(0, 0, 0, 0.08);
+		border: 2px dashed hsl(var(--color-border));
 		border-radius: 0.375rem;
 		background: transparent;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 		cursor: pointer;
 		transition: all 0.2s;
 	}
@@ -212,25 +212,12 @@
 	.add-card.alone {
 		width: 100%;
 		min-height: 60vh;
-		border-color: rgba(0, 0, 0, 0.12);
+		border-color: hsl(var(--color-border-strong));
 	}
 	.add-card:hover {
 		border-color: hsl(var(--color-primary));
 		color: hsl(var(--color-primary));
 		background: color-mix(in srgb, hsl(var(--color-primary)) 4%, transparent);
-	}
-	:global(.dark) .add-card {
-		border-color: rgba(255, 255, 255, 0.06);
-		color: #4b5563;
-	}
-	:global(.dark) .add-card.alone {
-		border-color: rgba(255, 255, 255, 0.1);
-		color: #6b7280;
-	}
-	:global(.dark) .add-card:hover {
-		border-color: hsl(var(--color-primary));
-		color: hsl(var(--color-primary));
-		background: color-mix(in srgb, hsl(var(--color-primary)) 8%, transparent);
 	}
 	.add-label {
 		font-size: 0.875rem;
@@ -249,15 +236,10 @@
 		gap: 0.25rem;
 		padding: 0.375rem 0.5rem;
 		border-radius: 0.75rem;
-		background: #fffef5;
-		border: 1px solid rgba(0, 0, 0, 0.08);
+		background: hsl(var(--color-card));
+		border: 1px solid hsl(var(--color-border));
 		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 		animation: slideUp 0.25s ease-out;
-	}
-	:global(.dark) .minimized-tabs {
-		background: #252220;
-		border-color: rgba(255, 255, 255, 0.08);
-		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 	}
 	@keyframes slideUp {
 		from {
@@ -278,10 +260,7 @@
 		transition: background 0.15s;
 	}
 	.minimized-tab:hover {
-		background: rgba(0, 0, 0, 0.04);
-	}
-	:global(.dark) .minimized-tab:hover {
-		background: rgba(255, 255, 255, 0.06);
+		background: hsl(var(--color-surface-hover));
 	}
 	.tab-dot {
 		width: 8px;
@@ -292,7 +271,7 @@
 	.tab-title {
 		border: none;
 		background: none;
-		color: #374151;
+		color: hsl(var(--color-foreground));
 		font-size: 0.8125rem;
 		font-weight: 500;
 		cursor: pointer;
@@ -305,17 +284,11 @@
 	.tab-title:hover {
 		color: hsl(var(--color-primary));
 	}
-	:global(.dark) .tab-title {
-		color: #e5e7eb;
-	}
-	:global(.dark) .tab-title:hover {
-		color: hsl(var(--color-primary));
-	}
 	.tab-maximize,
 	.tab-close {
 		border: none;
 		background: none;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 		cursor: pointer;
 		padding: 0.125rem;
 		border-radius: 0.25rem;
@@ -330,16 +303,16 @@
 	}
 	.tab-maximize:hover {
 		color: hsl(var(--color-primary));
-		background: rgba(139, 92, 246, 0.08);
+		background: hsl(var(--color-primary) / 0.08);
 	}
 	.tab-close:hover {
-		color: #ef4444;
-		background: rgba(239, 68, 68, 0.08);
+		color: hsl(var(--color-error));
+		background: hsl(var(--color-error) / 0.08);
 	}
 	.tab-add {
 		border: none;
 		background: none;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 		cursor: pointer;
 		padding: 0.25rem;
 		border-radius: 0.25rem;
@@ -350,6 +323,6 @@
 	}
 	.tab-add:hover {
 		color: hsl(var(--color-primary));
-		background: rgba(139, 92, 246, 0.08);
+		background: hsl(var(--color-primary) / 0.08);
 	}
 </style>

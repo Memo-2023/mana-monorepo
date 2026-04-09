@@ -149,13 +149,10 @@
 		scrollbar-width: none;
 		padding: 0.25rem;
 		border-radius: 0.625rem;
-		background: rgba(0, 0, 0, 0.03);
+		background: hsl(var(--color-surface-hover));
 	}
 	.scene-tabs-scroll::-webkit-scrollbar {
 		display: none;
-	}
-	:global(.dark) .scene-tabs-scroll {
-		background: rgba(255, 255, 255, 0.04);
 	}
 
 	.scene-pill {
@@ -165,7 +162,7 @@
 		flex: 0 0 auto;
 		border: none;
 		background: transparent;
-		color: #6b7280;
+		color: hsl(var(--color-muted-foreground));
 		font-size: 0.8125rem;
 		font-weight: 500;
 		padding: 0.375rem 0.75rem;
@@ -175,28 +172,16 @@
 		max-width: 180px;
 	}
 	.scene-pill:hover {
-		background: rgba(0, 0, 0, 0.05);
-		color: #374151;
+		background: hsl(var(--color-surface-hover));
+		color: hsl(var(--color-foreground));
 	}
 	.scene-pill.active {
-		background: #fffef5;
-		color: #111827;
+		background: hsl(var(--color-card));
+		color: hsl(var(--color-foreground));
 		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
 	}
 	.scene-pill.dragging {
 		opacity: 0.4;
-	}
-	:global(.dark) .scene-pill {
-		color: #9ca3af;
-	}
-	:global(.dark) .scene-pill:hover {
-		background: rgba(255, 255, 255, 0.06);
-		color: #f3f4f6;
-	}
-	:global(.dark) .scene-pill.active {
-		background: #2f2b29;
-		color: #f9fafb;
-		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 	}
 	.scene-icon {
 		font-size: 0.95rem;
@@ -215,18 +200,14 @@
 		flex: 0 0 auto;
 		border: none;
 		background: transparent;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 		padding: 0.375rem;
 		border-radius: 0.5rem;
 		cursor: pointer;
 		transition: all 0.15s;
 	}
 	.scene-add:hover {
-		background: rgba(0, 0, 0, 0.05);
-		color: hsl(var(--color-primary));
-	}
-	:global(.dark) .scene-add:hover {
-		background: rgba(255, 255, 255, 0.06);
+		background: hsl(var(--color-surface-hover));
 		color: hsl(var(--color-primary));
 	}
 </style>

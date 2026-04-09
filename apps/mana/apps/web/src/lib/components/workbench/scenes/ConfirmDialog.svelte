@@ -83,7 +83,7 @@
 	.cd-backdrop {
 		position: fixed;
 		inset: 0;
-		background: rgba(0, 0, 0, 0.5);
+		background: hsl(0 0% 0% / 0.5);
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -91,17 +91,13 @@
 		padding: 1rem;
 	}
 	.cd-dialog {
-		background: #fffef5;
+		background: hsl(var(--color-card));
 		border-radius: 0.75rem;
 		box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
 		max-width: 420px;
 		width: 100%;
 		padding: 1.5rem;
 		animation: cd-pop 0.18s ease-out;
-	}
-	:global(.dark) .cd-dialog {
-		background: #252220;
-		box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
 	}
 	@keyframes cd-pop {
 		from {
@@ -116,20 +112,14 @@
 	.cd-title {
 		font-size: 1.0625rem;
 		font-weight: 600;
-		color: #111827;
+		color: hsl(var(--color-foreground));
 		margin: 0 0 0.5rem;
-	}
-	:global(.dark) .cd-title {
-		color: #f9fafb;
 	}
 	.cd-message {
 		font-size: 0.875rem;
-		color: #4b5563;
+		color: hsl(var(--color-foreground));
 		margin: 0 0 1.25rem;
 		line-height: 1.5;
-	}
-	:global(.dark) .cd-message {
-		color: #d1d5db;
 	}
 	.cd-actions {
 		display: flex;
@@ -151,29 +141,23 @@
 	}
 	.cd-btn-cancel {
 		background: transparent;
-		color: #6b7280;
+		color: hsl(var(--color-muted-foreground));
 	}
 	.cd-btn-cancel:hover:not(:disabled) {
-		background: rgba(0, 0, 0, 0.05);
-	}
-	:global(.dark) .cd-btn-cancel {
-		color: #9ca3af;
-	}
-	:global(.dark) .cd-btn-cancel:hover:not(:disabled) {
-		background: rgba(255, 255, 255, 0.06);
+		background: hsl(var(--color-surface-hover));
 	}
 	.cd-btn-primary {
 		background: hsl(var(--color-primary));
-		color: white;
+		color: hsl(var(--color-primary-foreground));
 	}
 	.cd-btn-primary:hover:not(:disabled) {
 		filter: brightness(1.08);
 	}
 	.cd-btn-danger {
-		background: #ef4444;
-		color: white;
+		background: hsl(var(--color-error));
+		color: hsl(var(--color-primary-foreground));
 	}
 	.cd-btn-danger:hover:not(:disabled) {
-		background: #dc2626;
+		background: hsl(var(--color-error));
 	}
 </style>
