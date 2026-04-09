@@ -18,6 +18,7 @@
 		BodyCheck,
 		BodyPhase,
 	} from './types';
+	import type { MealWithNutrition } from '$lib/modules/nutriphi/types';
 	import { getActiveWorkout, getActivePhase } from './queries';
 	import { bodyStore } from './stores/body.svelte';
 	import WorkoutLogger from './components/WorkoutLogger.svelte';
@@ -28,6 +29,7 @@
 	import RoutineManager from './components/RoutineManager.svelte';
 	import PhaseManager from './components/PhaseManager.svelte';
 	import ExerciseProgressionChart from './components/ExerciseProgressionChart.svelte';
+	import CalorieWeightChart from './components/CalorieWeightChart.svelte';
 
 	const exercises$: Observable<BodyExercise[]> = getContext('bodyExercises');
 	const routines$: Observable<BodyRoutine[]> = getContext('bodyRoutines');
@@ -36,6 +38,7 @@
 	const measurements$: Observable<BodyMeasurement[]> = getContext('bodyMeasurements');
 	const checks$: Observable<BodyCheck[]> = getContext('bodyChecks');
 	const phases$: Observable<BodyPhase[]> = getContext('bodyPhases');
+	const meals$: Observable<MealWithNutrition[]> = getContext('bodyNutriphiMeals');
 
 	let exercises = $state<BodyExercise[]>([]);
 	let routines = $state<BodyRoutine[]>([]);
@@ -44,6 +47,7 @@
 	let measurements = $state<BodyMeasurement[]>([]);
 	let checks = $state<BodyCheck[]>([]);
 	let phases = $state<BodyPhase[]>([]);
+	let meals = $state<MealWithNutrition[]>([]);
 
 	$effect(() => {
 		const sub = exercises$.subscribe((v) => (exercises = v));
@@ -71,6 +75,10 @@
 	});
 	$effect(() => {
 		const sub = phases$.subscribe((v) => (phases = v));
+		return () => sub.unsubscribe();
+	});
+	$effect(() => {
+		const sub = meals$.subscribe((v) => (meals = v));
 		return () => sub.unsubscribe();
 	});
 
@@ -132,6 +140,11 @@
 		<h2>{$_('body.weight', { default: 'Gewicht' })}</h2>
 		<WeightChart {measurements} />
 		<MeasurementForm />
+	</section>
+
+	<section class="card">
+		<h2>{$_('body.calorieWeight', { default: 'Kalorien × Gewicht' })}</h2>
+		<CalorieWeightChart {measurements} {meals} {activePhase} />
 	</section>
 
 	<section class="card">

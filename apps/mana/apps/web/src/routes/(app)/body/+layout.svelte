@@ -9,6 +9,8 @@
 		useAllBodyMeasurements,
 		useAllBodyChecks,
 		useAllBodyPhases,
+		useNutriphiMealsSince,
+		dateNDaysAgo,
 	} from '$lib/modules/body/queries';
 
 	let { children }: { children: Snippet } = $props();
@@ -20,6 +22,9 @@
 	setContext('bodyMeasurements', useAllBodyMeasurements());
 	setContext('bodyChecks', useAllBodyChecks());
 	setContext('bodyPhases', useAllBodyPhases());
+	// Cross-module read for the Body × Nutriphi correlation chart.
+	// 8 weeks back covers a typical cut/bulk cycle and matches the chart default.
+	setContext('bodyNutriphiMeals', useNutriphiMealsSince(dateNDaysAgo(56)));
 </script>
 
 {@render children()}

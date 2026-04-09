@@ -7,6 +7,7 @@
 	"startHint": "Start a new session and log your sets",
 	"startWorkout": "Start workout",
 	"weight": "Weight",
+	"calorieWeight": "Calories × Weight",
 	"dailyCheck": "Today",
 	"recent": "Recent workouts",
 	"noWorkouts": "No sessions yet",

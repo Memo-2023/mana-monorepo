@@ -7,6 +7,7 @@
 	"startHint": "Inizia una nuova sessione e registra le serie",
 	"startWorkout": "Inizia allenamento",
 	"weight": "Peso",
+	"calorieWeight": "Calorie × Peso",
 	"dailyCheck": "Oggi",
 	"recent": "Ultimi allenamenti",
 	"noWorkouts": "Nessuna sessione",
@@ -33,6 +34,37 @@
 		"cut": "Definizione",
 		"bulk": "Massa",
 		"maintenance": "Mantenimento",
-		"recomp": "Ricomposizione"
+		"recomp": "Ricomposizione",
+		"start": "Avvia fase",
+		"startNew": "Avvia fase",
+		"end": "Termina"
+	},
+	"progression": "Progressione",
+	"routines": {
+		"title": "Routine",
+		"start": "Inizia",
+		"empty": "Nessuna routine"
+	},
+	"exercisePicker": {
+		"title": "Scegli un esercizio",
+		"pick": "Scegli esercizio",
+		"search": "Cerca…",
+		"empty": "Nessun risultato",
+		"create": "Nuovo esercizio"
+	},
+	"muscle": {
+		"chest": "Petto",
+		"back": "Schiena",
+		"shoulders": "Spalle",
+		"biceps": "Bicipiti",
+		"triceps": "Tricipiti",
+		"forearms": "Avambracci",
+		"core": "Core",
+		"quads": "Quadricipiti",
+		"hamstrings": "Femorali",
+		"glutes": "Glutei",
+		"calves": "Polpacci",
+		"cardio": "Cardio",
+		"fullbody": "Corpo intero"
 	}
 }
