@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { _ } from 'svelte-i18n';
 	import { getContext } from 'svelte';
+	import { toast } from '$lib/stores/toast.svelte';
 	import { wateringMutations } from '$lib/modules/planta/mutations';
 	import {
 		getActivePlants,
@@ -33,10 +35,9 @@
 		if (!schedule) return '';
 		const days = getDaysUntilWatering(schedule);
 		if (days === null) return '';
-		if (days < 0) return 'Ueberfaellig!';
-		if (days === 0) return 'Heute giessen';
-		if (days === 1) return 'Morgen giessen';
-		return `In ${days} Tagen`;
+		if (days < 0) return $_('planta.watering.overdue');
+		if (days === 0) return $_('planta.watering.today');
+		return $_('planta.watering.daysUntil', { values: { days } });
 	}
 
 	function shouldShowWaterButton(plantId: string): boolean {
@@ -48,37 +49,51 @@
 
 	async function handleWater(plantId: string, e: Event) {
 		e.stopPropagation();
-		await wateringMutations.logWatering(plantId);
+		try {
+			await wateringMutations.logWatering(plantId);
+			toast.success($_('planta.success.plantWatered'));
+		} catch (err) {
+			console.error('logWatering failed:', err);
+			toast.error($_('planta.errors.wateringFailed'));
+		}
 	}
 </script>
 
 <svelte:head>
-	<title>Meine Pflanzen - Planta</title>
+	<title>{$_('planta.nav.plants')} - Planta</title>
 </svelte:head>
 
 <div class="space-y-6">
 	<div class="flex items-center justify-between">
-		<h1 class="text-2xl font-bold">Meine Pflanzen</h1>
-		<a href="/planta/add" class="btn btn-success"> + Pflanze hinzufuegen </a>
+		<h1 class="text-2xl font-bold">{$_('planta.nav.plants')}</h1>
+		<a href="/planta/add" class="btn btn-success">{$_('planta.plant.add')}</a>
 	</div>
 
 	{#if plants.length === 0}
 		<div class="text-center py-12">
 			<div class="text-6xl mb-4">🌱</div>
-			<h2 class="text-xl font-semibold mb-2">Noch keine Pflanzen</h2>
-			<p class="text-muted-foreground mb-4">
-				Fuege deine erste Pflanze hinzu und lass sie von der KI analysieren.
-			</p>
-			<a href="/planta/add" class="btn btn-success"> Erste Pflanze hinzufuegen </a>
+			<h2 class="text-xl font-semibold mb-2">{$_('planta.plant.noPlants')}</h2>
+			<p class="text-muted-foreground mb-4">{$_('planta.app.tagline')}</p>
+			<a href="/planta/add" class="btn btn-success">{$_('planta.plant.addFirst')}</a>
 		</div>
 	{:else}
 		<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
 			{#each plants as plant (plant.id)}
 				{@const primaryPhoto = getPrimaryPhoto(allPlantPhotos.value, plant.id)}
-				<button
-					type="button"
-					class="card plant-card cursor-pointer text-left"
+				<!-- Outer is a div with role=link so we can nest a real
+					 <button> inside without violating HTML's "no interactive
+					 inside interactive" rule. Keyboard nav: Enter/Space opens. -->
+				<div
+					role="link"
+					tabindex="0"
+					class="card plant-card text-left"
 					onclick={() => goto(`/planta/${plant.id}`)}
+					onkeydown={(e) => {
+						if (e.key === 'Enter' || e.key === ' ') {
+							e.preventDefault();
+							goto(`/planta/${plant.id}`);
+						}
+					}}
 				>
 					{#if primaryPhoto?.publicUrl}
 						<img src={primaryPhoto.publicUrl} alt={plant.name} />
@@ -94,7 +109,6 @@
 						{/if}
 						{#if getWateringText(plant.id)}
 							<div class="water-status {getWateringClass(plant.id)} mt-1">
-								<span>💧</span>
 								<span>{getWateringText(plant.id)}</span>
 							</div>
 						{/if}
@@ -102,14 +116,14 @@
 					{#if shouldShowWaterButton(plant.id)}
 						<button
 							type="button"
-							class="absolute top-2 right-2 rounded-full bg-blue-500 p-2 text-white hover:bg-blue-600"
+							class="absolute top-2 right-2 rounded-full bg-blue-500 px-3 py-1 text-xs text-white hover:bg-blue-600"
 							onclick={(e) => handleWater(plant.id, e)}
-							title="Als gegossen markieren"
+							title={$_('planta.watering.water')}
 						>
-							💧
+							{$_('planta.watering.water')}
 						</button>
 					{/if}
-				</button>
+				</div>
 			{/each}
 		</div>
 	{/if}

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { getContext } from 'svelte';
 	import type { Tag } from '@mana/shared-tags';
 
@@ -10,13 +11,13 @@
 </svelte:head>
 
 <div class="tags-page">
-	<h1>Tags verwalten</h1>
+	<h1>Tags</h1>
 	<p class="text-sm text-muted-foreground mb-4">
-		Tags sind app-uebergreifend -- Aenderungen gelten in allen Mana-Apps.
+		{$_('planta.app.tagline')}
 	</p>
 
 	{#if tagsCtx.value.length === 0}
-		<p>Keine Tags vorhanden.</p>
+		<p>{$_('planta.list.empty')}</p>
 	{:else}
 		<div class="grid gap-2">
 			{#each tagsCtx.value as tag}

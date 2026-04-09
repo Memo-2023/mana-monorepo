@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
+	import { _ } from 'svelte-i18n';
 	import { getContext } from 'svelte';
+	import { toast } from '$lib/stores/toast.svelte';
 	import { plantMutations, wateringMutations } from '$lib/modules/planta/mutations';
 	import {
 		getPlantById,
@@ -17,7 +19,9 @@
 		getContext('wateringSchedules');
 	const allWateringLogs: { readonly value: WateringLog[] } = getContext('wateringLogs');
 
-	const plantId = $derived($page.params.id);
+	// SvelteKit's params type allows undefined; coerce to '' so the helper
+	// signatures stay strict and we still resolve to "not found" for missing.
+	const plantId = $derived($page.params.id ?? '');
 
 	// Derived reactive data from live queries (auto-updates on any change)
 	let plant = $derived(getPlantById(allPlants.value, plantId));
@@ -30,21 +34,34 @@
 	async function handleWater() {
 		if (!plant) return;
 		watering = true;
-		await wateringMutations.logWatering(plant.id);
-		watering = false;
+		try {
+			await wateringMutations.logWatering(plant.id);
+			toast.success($_('planta.success.plantWatered'));
+		} catch (err) {
+			console.error('logWatering failed:', err);
+			toast.error($_('planta.errors.wateringFailed'));
+		} finally {
+			watering = false;
+		}
 	}
 
 	async function handleDelete() {
 		if (!plant) return;
-		if (!confirm(`Moechtest du "${plant.name}" wirklich loeschen?`)) return;
+		if (!confirm($_('planta.plant.confirmDelete'))) return;
 
-		const success = await plantMutations.delete(plant.id);
-		if (success) goto('/planta');
+		try {
+			await plantMutations.delete(plant.id);
+			toast.success($_('planta.success.plantDeleted'));
+			goto('/planta');
+		} catch (err) {
+			console.error('delete plant failed:', err);
+			toast.error($_('planta.errors.deleteFailed'));
+		}
 	}
 
 	function formatDate(date: Date | string | undefined | null): string {
-		if (!date) return '-';
-		return new Date(date).toLocaleDateString('de-DE', {
+		if (!date) return '–';
+		return new Date(date).toLocaleDateString(undefined, {
 			day: '2-digit',
 			month: '2-digit',
 			year: 'numeric',
@@ -52,49 +69,54 @@
 	}
 
 	function getHealthBadgeClass(status: string | null | undefined): string {
-		if (!status) return 'healthy';
 		if (status === 'needs_attention') return 'needs_attention';
 		if (status === 'sick') return 'sick';
 		return 'healthy';
 	}
 
 	function getHealthText(status: string | null | undefined): string {
-		const map: Record<string, string> = {
-			healthy: 'Gesund',
-			needs_attention: 'Braucht Aufmerksamkeit',
-			sick: 'Krank',
-		};
-		return map[status || ''] || 'Gesund';
+		if (status === 'needs_attention') return $_('planta.health.needsAttention');
+		if (status === 'sick') return $_('planta.health.sick');
+		return $_('planta.health.healthy');
 	}
 
 	function getLightText(light: string | null | undefined): string {
-		const map: Record<string, string> = {
-			low: 'Wenig Licht',
-			medium: 'Mittleres Licht',
-			bright: 'Helles Licht',
-			direct: 'Direkte Sonne',
-		};
-		return map[light || ''] || '-';
+		switch (light) {
+			case 'low':
+				return $_('planta.light.low');
+			case 'medium':
+				return $_('planta.light.medium');
+			case 'bright':
+				return $_('planta.light.bright');
+			case 'direct':
+				return $_('planta.light.direct');
+			default:
+				return $_('planta.common.none');
+		}
 	}
 
 	function getHumidityText(humidity: string | null | undefined): string {
-		const map: Record<string, string> = {
-			low: 'Niedrig',
-			medium: 'Mittel',
-			high: 'Hoch',
-		};
-		return map[humidity || ''] || '-';
+		switch (humidity) {
+			case 'low':
+				return $_('planta.humidity.low');
+			case 'medium':
+				return $_('planta.humidity.medium');
+			case 'high':
+				return $_('planta.humidity.high');
+			default:
+				return $_('planta.common.none');
+		}
 	}
 </script>
 
 <svelte:head>
-	<title>{plant?.name || 'Pflanze'} - Planta</title>
+	<title>{plant?.name || $_('planta.app.name')} - Planta</title>
 </svelte:head>
 
 {#if !plant}
 	<div class="text-center py-12">
-		<p class="text-lg">Pflanze nicht gefunden</p>
-		<a href="/planta" class="btn btn-primary mt-4">Zurueck zur Uebersicht</a>
+		<p class="text-lg">{$_('planta.plant.notFound')}</p>
+		<a href="/planta" class="btn btn-primary mt-4">{$_('planta.nav.plants')}</a>
 	</div>
 {:else}
 	<div class="space-y-6">
@@ -131,30 +153,28 @@
 
 		<!-- Care Info -->
 		<div class="card">
-			<h2 class="font-semibold mb-4">Pflege</h2>
+			<h2 class="font-semibold mb-4">{$_('planta.plant.careNotes')}</h2>
 			<div class="grid grid-cols-2 gap-4">
 				<div>
-					<p class="text-sm text-muted-foreground">Licht</p>
-					<p class="font-medium">☀️ {getLightText(plant.lightRequirements)}</p>
+					<p class="text-sm text-muted-foreground">{$_('planta.plant.light')}</p>
+					<p class="font-medium">{getLightText(plant.lightRequirements)}</p>
 				</div>
 				<div>
-					<p class="text-sm text-muted-foreground">Giessen</p>
+					<p class="text-sm text-muted-foreground">{$_('planta.watering.water')}</p>
 					<p class="font-medium">
-						💧 {plant.wateringFrequencyDays ? `Alle ${plant.wateringFrequencyDays} Tage` : '-'}
+						{plant.wateringFrequencyDays
+							? $_('planta.list.everyXDays', { values: { days: plant.wateringFrequencyDays } })
+							: $_('planta.common.none')}
 					</p>
 				</div>
 				<div>
-					<p class="text-sm text-muted-foreground">Luftfeuchtigkeit</p>
-					<p class="font-medium">💨 {getHumidityText(plant.humidity)}</p>
-				</div>
-				<div>
-					<p class="text-sm text-muted-foreground">Temperatur</p>
-					<p class="font-medium">🌡️ {plant.temperature || '-'}</p>
+					<p class="text-sm text-muted-foreground">{$_('planta.humidity.medium')}</p>
+					<p class="font-medium">{getHumidityText(plant.humidity)}</p>
 				</div>
 			</div>
 			{#if plant.careNotes}
 				<div class="mt-4 pt-4 border-t">
-					<p class="text-sm text-muted-foreground mb-1">Pflegehinweise</p>
+					<p class="text-sm text-muted-foreground mb-1">{$_('planta.plant.careNotes')}</p>
 					<p class="text-sm whitespace-pre-line">{plant.careNotes}</p>
 				</div>
 			{/if}
@@ -163,14 +183,14 @@
 		<!-- Watering Schedule -->
 		<div class="card">
 			<div class="flex items-center justify-between mb-4">
-				<h2 class="font-semibold">Giessplan</h2>
+				<h2 class="font-semibold">{$_('planta.nav.watering')}</h2>
 				<button type="button" class="btn btn-success" onclick={handleWater} disabled={watering}>
 					{#if watering}
 						<span
 							class="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-r-transparent"
 						></span>
 					{:else}
-						💧 Jetzt giessen
+						{$_('planta.watering.water')}
 					{/if}
 				</button>
 			</div>
@@ -178,11 +198,11 @@
 			{#if wateringSchedule}
 				<div class="grid grid-cols-2 gap-4 mb-4">
 					<div>
-						<p class="text-sm text-muted-foreground">Zuletzt gegossen</p>
+						<p class="text-sm text-muted-foreground">{$_('planta.watering.lastWatered')}</p>
 						<p class="font-medium">{formatDate(wateringSchedule.lastWateredAt)}</p>
 					</div>
 					<div>
-						<p class="text-sm text-muted-foreground">Naechstes Giessen</p>
+						<p class="text-sm text-muted-foreground">{$_('planta.watering.nextWatering')}</p>
 						<p class="font-medium">{formatDate(wateringSchedule.nextWateringAt)}</p>
 					</div>
 				</div>
@@ -190,11 +210,11 @@
 
 			{#if wateringHistory.length > 0}
 				<div class="border-t pt-4">
-					<p class="text-sm text-muted-foreground mb-2">Letzte Giessvorgaenge</p>
+					<p class="text-sm text-muted-foreground mb-2">{$_('planta.watering.watered')}</p>
 					<ul class="space-y-1">
 						{#each wateringHistory.slice(0, 5) as log (log.id)}
 							<li class="text-sm flex justify-between">
-								<span>💧 Gegossen</span>
+								<span>{$_('planta.watering.watered')}</span>
 								<span class="text-muted-foreground">{formatDate(log.wateredAt)}</span>
 							</li>
 						{/each}
@@ -205,9 +225,9 @@
 
 		<!-- Actions -->
 		<div class="flex gap-4">
-			<a href="/planta" class="btn flex-1 bg-muted text-foreground"> Zurueck </a>
+			<a href="/planta" class="btn flex-1 bg-muted text-foreground">{$_('planta.nav.plants')}</a>
 			<button type="button" class="btn bg-destructive text-white" onclick={handleDelete}>
-				Loeschen
+				{$_('planta.plant.delete')}
 			</button>
 		</div>
 	</div>
