@@ -108,23 +108,25 @@ export const whoGamesStore = {
 		const trimmed = text.trim();
 		if (!trimmed) return;
 
-		// 1. Optimistic insert of the user message.
+		// 1. Optimistic insert of the user message. createdAt is set
+		//    explicitly because the database creating-hook does NOT
+		//    auto-stamp it; without it, time-based sorts and any
+		//    composite index that includes createdAt skip the row.
 		const userMsg: LocalWhoMessage = {
 			id: crypto.randomUUID(),
 			gameId,
 			sender: 'user',
 			content: trimmed,
+			createdAt: new Date().toISOString(),
 		};
 		await encryptRecord('whoMessages', userMsg);
 		await whoMessageTable.add(userMsg);
 
-		// 2. Pull recent message history to send to the server. Decrypt
-		//    on the way out — the wire format is plaintext to/from
-		//    apps/api, encryption happens at-rest in Dexie.
-		const allMessages = await whoMessageTable
-			.where('[gameId+createdAt]')
-			.between([gameId, ''], [gameId, '\uffff'])
-			.toArray();
+		// 2. Pull recent message history to send to the server. Use the
+		//    simple gameId index instead of [gameId+createdAt] composite
+		//    — same reason as the queries.ts: rows with undefined
+		//    createdAt aren't visible through the composite.
+		const allMessages = await whoMessageTable.where('gameId').equals(gameId).toArray();
 		const { decryptRecords } = await import('$lib/data/crypto');
 		const decrypted = await decryptRecords('whoMessages', allMessages);
 		// Drop the just-inserted user message from the history payload —
@@ -141,12 +143,15 @@ export const whoGamesStore = {
 			history,
 		});
 
-		// 4. Insert the NPC reply.
+		// 4. Insert the NPC reply. createdAt explicit + bumped by 1ms
+		//    so the npc message sorts strictly after the user message
+		//    even when both inserts happen in the same millisecond.
 		const npcMsg: LocalWhoMessage = {
 			id: crypto.randomUUID(),
 			gameId,
 			sender: 'npc',
 			content: response.reply,
+			createdAt: new Date(Date.now() + 1).toISOString(),
 		};
 		await encryptRecord('whoMessages', npcMsg);
 		await whoMessageTable.add(npcMsg);

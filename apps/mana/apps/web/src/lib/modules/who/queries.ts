@@ -61,14 +61,21 @@ export function gameByIdLive(gameId: string) {
 
 export function messagesForGameLive(gameId: string) {
 	return liveQuery(async () => {
+		// Pull by the simple gameId index, sort in JS by createdAt asc.
+		// Same pattern as the chat module — using the [gameId+createdAt]
+		// composite would skip rows where createdAt is undefined (Dexie
+		// doesn't index undefined components in compound keys), and the
+		// creating hook in database.ts doesn't auto-stamp createdAt.
 		const locals = await db
 			.table<LocalWhoMessage>('whoMessages')
-			.where('[gameId+createdAt]')
-			.between([gameId, ''], [gameId, '\uffff'])
+			.where('gameId')
+			.equals(gameId)
 			.toArray();
 		const visible = locals.filter((m) => !m.deletedAt);
 		const decrypted = await decryptRecords('whoMessages', visible);
-		return decrypted.map(toWhoMessage);
+		return decrypted
+			.map(toWhoMessage)
+			.sort((a, b) => (a.createdAt ?? '').localeCompare(b.createdAt ?? ''));
 	});
 }
 
