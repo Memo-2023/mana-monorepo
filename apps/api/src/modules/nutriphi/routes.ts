@@ -45,6 +45,14 @@ const llm = createOpenAICompatible({
 	// src/main.py:125). The AI SDK's openai-compatible adapter appends
 	// /chat/completions to baseURL, so baseURL ends in /v1.
 	baseURL: `${LLM_URL}/v1`,
+	// Tell the AI SDK that mana-llm honours OpenAI-style strict
+	// json_schema response_format. Without this, generateObject() falls
+	// back to a tool-call mode that Ollama-backed models don't support
+	// reliably and the response fails to validate against the Zod schema.
+	// mana-llm's Ollama provider translates response_format → Ollama's
+	// native `format` field (services/mana-llm/src/providers/ollama.py)
+	// so this is honoured end-to-end.
+	supportsStructuredOutputs: true,
 });
 
 const ANALYSIS_PROMPT = `Du bist ein Ernährungsexperte. Analysiere die Mahlzeit und gib strukturierte Nährwertdaten zurück. Schätze realistische Portionsgrößen und Kalorien. Antworte auf Deutsch.`;

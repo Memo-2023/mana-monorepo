@@ -28,6 +28,8 @@ const VISION_MODEL = process.env.VISION_MODEL || 'ollama/gemma3:4b';
 const llm = createOpenAICompatible({
 	name: 'mana-llm',
 	baseURL: `${LLM_URL}/v1`,
+	// See nutriphi/routes.ts for the rationale on this flag.
+	supportsStructuredOutputs: true,
 });
 
 const IDENTIFICATION_PROMPT = `Du bist ein Pflanzenexperte. Analysiere das Pflanzenfoto und liefere eine strukturierte Identifikation mit lateinischem Namen, deutschen Trivialnamen, Pflegehinweisen und einer Gesundheitseinschätzung. Antworte auf Deutsch.`;
