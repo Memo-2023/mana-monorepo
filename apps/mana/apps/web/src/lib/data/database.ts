@@ -99,6 +99,14 @@ db.version(1).stores({
 	cards: 'id, deckId, difficulty, nextReview, order, [deckId+order]',
 	deckTags: 'id, deckId, tagId, [deckId+tagId]',
 
+	// ─── Who (appId: 'who') ───
+	// LLM character-guessing game. whoGames holds one row per session
+	// (status, deck, character id, message count); whoMessages holds the
+	// chat scrollback. Standard plaintext index pattern: id, FK, status,
+	// timestamps for sort/filter; content + revealedName encrypted.
+	whoGames: 'id, status, deckId, startedAt, finishedAt, [status+startedAt]',
+	whoMessages: 'id, gameId, sender, createdAt, [gameId+createdAt]',
+
 	// ─── Zitare (appId: 'zitare') ───
 	zitareFavorites: 'id, quoteId',
 	zitareLists: 'id',

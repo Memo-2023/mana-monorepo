@@ -47,6 +47,13 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 		fields: ['name', 'description', 'systemPrompt', 'initialQuestion'],
 	},
 
+	// ─── Who (LLM character guessing game) ──────────────────
+	// Conversation content + the revealed character name + free-form
+	// notes count as user-typed content. Plaintext: ids, FK, status,
+	// timestamps, message counts (all needed for query/sort/filter).
+	whoGames: { enabled: true, fields: ['revealedName', 'notes'] },
+	whoMessages: { enabled: true, fields: ['content'] },
+
 	// ─── Notes ───────────────────────────────────────────────
 	// Phase 4 pilot — first table flipped to enabled:true. The schema
 	// uses `title` + `content` (no separate `body` column).

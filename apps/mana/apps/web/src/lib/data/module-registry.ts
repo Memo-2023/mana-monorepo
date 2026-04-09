@@ -83,6 +83,7 @@ import { eventsModuleConfig } from '$lib/modules/events/module.config';
 import { financeModuleConfig } from '$lib/modules/finance/module.config';
 import { placesModuleConfig } from '$lib/modules/places/module.config';
 import { playgroundModuleConfig } from '$lib/modules/playground/module.config';
+import { whoModuleConfig } from '$lib/modules/who/module.config';
 
 export const MODULE_CONFIGS: readonly ModuleConfig[] = [
 	manaCoreConfig,
@@ -121,6 +122,7 @@ export const MODULE_CONFIGS: readonly ModuleConfig[] = [
 	financeModuleConfig,
 	placesModuleConfig,
 	playgroundModuleConfig,
+	whoModuleConfig,
 ];
 
 // ─── Derived Maps ──────────────────────────────────────────
