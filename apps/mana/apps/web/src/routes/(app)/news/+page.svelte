@@ -57,10 +57,13 @@
 	}
 
 	async function finishOnboarding() {
+		// $state.snapshot strips the Svelte 5 reactive proxies — without it
+		// the arrays travel into Dexie hooks as proxies and trip
+		// DataCloneError on the structured-clone into _pendingChanges.
 		await preferencesStore.completeOnboarding({
-			topics: pickedTopics,
-			languages: pickedLanguages,
-			blockedSources: pickedBlocked,
+			topics: $state.snapshot(pickedTopics) as Topic[],
+			languages: $state.snapshot(pickedLanguages) as Language[],
+			blockedSources: $state.snapshot(pickedBlocked) as string[],
 		});
 		// The +layout effect will pick up the new prefs and refresh.
 	}

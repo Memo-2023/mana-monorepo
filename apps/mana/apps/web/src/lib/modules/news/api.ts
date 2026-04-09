@@ -5,17 +5,20 @@
  *   - GET /feed         — pulls the curated pool, with topic/lang filters
  *   - POST /extract/*   — Mozilla Readability for ad-hoc URL saves
  *
- * The base URL is read from `PUBLIC_MANA_API_URL` if set (production
- * docker setup), otherwise falls back to localhost dev. Auth is the
- * unified Mana JWT, picked up by the same fetch wrapper the rest of
- * the app uses (cookie + Authorization header set by SvelteKit `fetch`
- * via the auth-provider middleware).
+ * The base URL comes from `getManaApiUrl()`, which on the client reads the
+ * browser-injected `__PUBLIC_MANA_API_URL__` (set from
+ * `PUBLIC_MANA_API_URL_CLIENT` in hooks.server.ts → e.g.
+ * `https://mana-api.mana.how`) and on the server reads `process.env`
+ * directly. Reading `$env/dynamic/public.PUBLIC_MANA_API_URL` here would
+ * leak the SSR-side internal Docker hostname (`http://mana-api:3060`) to
+ * the browser and trip CSP / DNS.
+ *
+ * Auth is the unified Mana JWT, picked up by the same fetch wrapper the
+ * rest of the app uses (cookie + Authorization header set by SvelteKit
+ * `fetch` via the auth-provider middleware).
  */
 
-import { env as publicEnv } from '$env/dynamic/public';
-
-const API_BASE =
-	publicEnv.PUBLIC_MANA_API_URL || (typeof window !== 'undefined' ? '' : 'http://localhost:3060');
+import { getManaApiUrl } from '$lib/api/config';
 
 export interface FeedArticleDto {
 	id: string;
@@ -57,7 +60,7 @@ export async function fetchFeed(
 	if (query.limit != null) params.set('limit', String(query.limit));
 	if (query.offset != null) params.set('offset', String(query.offset));
 
-	const url = `${API_BASE}/api/v1/news/feed${params.toString() ? `?${params}` : ''}`;
+	const url = `${getManaApiUrl()}/api/v1/news/feed${params.toString() ? `?${params}` : ''}`;
 	const response = await fetchImpl(url, { credentials: 'include' });
 	if (!response.ok) {
 		throw new Error(`fetchFeed failed: ${response.status}`);
@@ -87,7 +90,7 @@ export async function extractFromUrl(
 	url: string,
 	fetchImpl: typeof fetch = fetch
 ): Promise<ExtractedArticleDto> {
-	const response = await fetchImpl(`${API_BASE}/api/v1/news/extract/save`, {
+	const response = await fetchImpl(`${getManaApiUrl()}/api/v1/news/extract/save`, {
 		method: 'POST',
 		credentials: 'include',
 		headers: { 'Content-Type': 'application/json' },

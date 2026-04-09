@@ -33,10 +33,13 @@ export const preferencesStore = {
 		blockedSources?: string[];
 	}): Promise<void> {
 		await ensureRow();
+		// Spread the input arrays — callers in onboarding pass Svelte 5
+		// `$state` proxy arrays, which IndexedDB cannot structured-clone
+		// (DataCloneError on the Dexie hook's _pendingChanges write).
 		const diff: Partial<LocalPreferences> = {
-			selectedTopics: input.topics,
-			preferredLanguages: input.languages,
-			blockedSources: input.blockedSources ?? [],
+			selectedTopics: [...input.topics],
+			preferredLanguages: [...input.languages],
+			blockedSources: [...(input.blockedSources ?? [])],
 			onboardingCompleted: true,
 			updatedAt: new Date().toISOString(),
 		};
@@ -47,7 +50,7 @@ export const preferencesStore = {
 	async setTopics(topics: Topic[]): Promise<void> {
 		await ensureRow();
 		const diff: Partial<LocalPreferences> = {
-			selectedTopics: topics,
+			selectedTopics: [...topics],
 			updatedAt: new Date().toISOString(),
 		};
 		await encryptRecord('newsPreferences', diff);
@@ -57,7 +60,7 @@ export const preferencesStore = {
 	async setLanguages(languages: Language[]): Promise<void> {
 		await ensureRow();
 		const diff: Partial<LocalPreferences> = {
-			preferredLanguages: languages,
+			preferredLanguages: [...languages],
 			updatedAt: new Date().toISOString(),
 		};
 		await encryptRecord('newsPreferences', diff);
