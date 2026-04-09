@@ -411,13 +411,13 @@
 	.contacts-title {
 		font-size: 1.5rem;
 		font-weight: 700;
-		color: var(--color-foreground);
+		color: hsl(var(--color-foreground));
 	}
 
 	.contacts-stats {
 		margin-top: 0.25rem;
 		font-size: 0.875rem;
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.header-actions {
@@ -434,7 +434,7 @@
 	:global(.search-icon) {
 		position: absolute;
 		left: 0.625rem;
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 		pointer-events: none;
 	}
 	.search-input {
@@ -462,12 +462,12 @@
 		padding: 0.125rem;
 		border: none;
 		background: none;
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 		cursor: pointer;
 		border-radius: 0.25rem;
 	}
 	.search-clear:hover {
-		color: var(--color-foreground);
+		color: hsl(var(--color-foreground));
 	}
 
 	.new-btn {
@@ -533,10 +533,10 @@
 	}
 
 	:global(.mana-drop-target-hover) {
-		outline: 2px solid var(--color-primary, #6366f1);
+		outline: 2px solid hsl(var(--color-primary));
 		outline-offset: -2px;
 		border-radius: 0.5rem;
-		background: rgba(99, 102, 241, 0.06) !important;
+		background: hsl(var(--color-primary) / 0.06) !important;
 	}
 
 	:global(.mana-drop-target-success) {
@@ -545,8 +545,8 @@
 
 	@keyframes drop-success {
 		0% {
-			outline-color: #10b981;
-			background: rgba(16, 185, 129, 0.1);
+			outline-color: hsl(var(--color-success));
+			background: hsl(var(--color-success) / 0.1);
 		}
 		100% {
 			outline-color: transparent;

@@ -310,10 +310,11 @@
 		z-index: 50;
 	}
 
+	/* Modal backdrop overlay is intentionally near-black regardless of theme */
 	.modal-backdrop-inner {
 		position: absolute;
 		inset: 0;
-		background: rgba(0, 0, 0, 0.5);
+		background: hsl(0 0% 0% / 0.5);
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -324,8 +325,8 @@
 	.modal-container {
 		background: hsl(var(--color-card));
 		border: 1px solid hsl(var(--color-border));
-		border-radius: var(--radius-lg, 12px);
-		box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+		border-radius: 0.75rem;
+		box-shadow: 0 25px 50px -12px hsl(0 0% 0% / 0.5);
 		width: 100%;
 		max-width: 500px;
 		max-height: 90vh;
@@ -363,10 +364,10 @@
 
 	/* DnD styles */
 	:global(.mana-drop-target-hover) {
-		outline: 2px solid var(--color-primary, #6366f1);
+		outline: 2px solid hsl(var(--color-primary));
 		outline-offset: -2px;
 		border-radius: 0.5rem;
-		background: rgba(99, 102, 241, 0.06) !important;
+		background: hsl(var(--color-primary) / 0.06) !important;
 	}
 
 	:global(.mana-drop-target-success) {
@@ -375,8 +376,8 @@
 
 	@keyframes drop-success {
 		0% {
-			outline-color: #10b981;
-			background: rgba(16, 185, 129, 0.1);
+			outline-color: hsl(var(--color-success));
+			background: hsl(var(--color-success) / 0.1);
 		}
 		100% {
 			outline-color: transparent;

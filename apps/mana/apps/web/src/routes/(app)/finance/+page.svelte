@@ -250,7 +250,7 @@
 	.page-title {
 		font-size: 1.5rem;
 		font-weight: 700;
-		color: var(--color-foreground);
+		color: hsl(var(--color-foreground));
 	}
 
 	.month-nav {
@@ -264,8 +264,8 @@
 		height: 2rem;
 		border-radius: 0.5rem;
 		background: transparent;
-		color: var(--color-muted-foreground);
-		border: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
+		color: hsl(var(--color-muted-foreground));
+		border: 1px solid hsl(var(--color-border));
 		cursor: pointer;
 		font-size: 0.875rem;
 		display: flex;
@@ -273,12 +273,12 @@
 		justify-content: center;
 	}
 	.nav-btn:hover {
-		background: var(--color-muted, rgba(255, 255, 255, 0.08));
+		background: hsl(var(--color-muted));
 	}
 	.month-label {
 		font-size: 1rem;
 		font-weight: 600;
-		color: var(--color-foreground);
+		color: hsl(var(--color-foreground));
 	}
 
 	.summary-cards {
@@ -292,15 +292,15 @@
 		align-items: center;
 		padding: 0.75rem 0.5rem;
 		border-radius: 0.75rem;
-		background: var(--color-surface, rgba(255, 255, 255, 0.04));
-		border: 1px solid var(--color-border, rgba(255, 255, 255, 0.08));
+		background: hsl(var(--color-card));
+		border: 1px solid hsl(var(--color-border));
 	}
 	.summary-card.highlight {
-		background: rgba(99, 102, 241, 0.06);
+		background: hsl(var(--color-primary) / 0.06);
 	}
 	.card-label {
 		font-size: 0.75rem;
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 	}
 	.card-value {
 		font-size: 1rem;
@@ -309,10 +309,10 @@
 		margin-top: 0.25rem;
 	}
 	.card-value.income {
-		color: #22c55e;
+		color: hsl(var(--color-success));
 	}
 	.card-value.expense {
-		color: #ef4444;
+		color: hsl(var(--color-error));
 	}
 
 	.section {
@@ -323,7 +323,7 @@
 	.section-title {
 		font-size: 0.875rem;
 		font-weight: 600;
-		color: var(--color-foreground);
+		color: hsl(var(--color-foreground));
 	}
 
 	.cat-breakdown {
@@ -342,7 +342,7 @@
 	}
 	.cat-name {
 		width: 5rem;
-		color: var(--color-foreground);
+		color: hsl(var(--color-foreground));
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
@@ -351,7 +351,7 @@
 		flex: 1;
 		height: 0.5rem;
 		border-radius: 0.25rem;
-		background: var(--color-surface, rgba(255, 255, 255, 0.06));
+		background: hsl(var(--color-muted));
 		overflow: hidden;
 	}
 	.cat-bar-fill {
@@ -362,7 +362,7 @@
 	.cat-amount {
 		font-weight: 600;
 		font-variant-numeric: tabular-nums;
-		color: var(--color-foreground);
+		color: hsl(var(--color-foreground));
 		flex-shrink: 0;
 	}
 
@@ -370,7 +370,7 @@
 		width: 100%;
 		padding: 0.625rem;
 		border-radius: 0.5rem;
-		background: var(--color-primary, #6366f1);
+		background: hsl(var(--color-primary));
 		color: white;
 		border: none;
 		font-size: 0.875rem;
@@ -388,8 +388,8 @@
 		gap: 0.75rem;
 		padding: 1rem;
 		border-radius: 0.75rem;
-		background: var(--color-surface, rgba(255, 255, 255, 0.06));
-		border: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
+		background: hsl(var(--color-muted));
+		border: 1px solid hsl(var(--color-border));
 	}
 
 	.type-toggle {
@@ -403,19 +403,19 @@
 		font-size: 0.875rem;
 		font-weight: 500;
 		background: transparent;
-		color: var(--color-muted-foreground);
-		border: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
+		color: hsl(var(--color-muted-foreground));
+		border: 1px solid hsl(var(--color-border));
 		cursor: pointer;
 	}
 	.type-btn.active {
-		background: rgba(239, 68, 68, 0.15);
-		color: #ef4444;
-		border-color: rgba(239, 68, 68, 0.3);
+		background: hsl(var(--color-error) / 0.15);
+		color: hsl(var(--color-error));
+		border-color: hsl(var(--color-error) / 0.3);
 	}
 	.type-btn.inc.active {
-		background: rgba(34, 197, 94, 0.15);
-		color: #22c55e;
-		border-color: rgba(34, 197, 94, 0.3);
+		background: hsl(var(--color-success) / 0.15);
+		color: hsl(var(--color-success));
+		border-color: hsl(var(--color-success) / 0.3);
 	}
 
 	.amount-row {
@@ -427,8 +427,8 @@
 		flex: 1;
 		background: transparent;
 		border: none;
-		border-bottom: 2px solid var(--color-border, rgba(255, 255, 255, 0.15));
-		color: var(--color-foreground);
+		border-bottom: 2px solid hsl(var(--color-border));
+		color: hsl(var(--color-foreground));
 		font-size: 1.75rem;
 		font-weight: 700;
 		padding: 0.25rem 0;
@@ -437,28 +437,28 @@
 		font-variant-numeric: tabular-nums;
 	}
 	.amount-input:focus {
-		border-color: var(--color-primary, #6366f1);
+		border-color: hsl(var(--color-primary));
 	}
 	.amount-input::placeholder {
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 		font-weight: 400;
 	}
 	.currency {
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 		font-size: 1.25rem;
 	}
 
 	.desc-input {
 		background: transparent;
 		border: none;
-		border-bottom: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
-		color: var(--color-foreground);
+		border-bottom: 1px solid hsl(var(--color-border));
+		color: hsl(var(--color-foreground));
 		font-size: 0.875rem;
 		padding: 0.5rem 0;
 		outline: none;
 	}
 	.desc-input::placeholder {
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.cat-chips {
@@ -470,25 +470,25 @@
 		padding: 0.375rem 0.75rem;
 		border-radius: 9999px;
 		font-size: 0.8125rem;
-		background: rgba(255, 255, 255, 0.06);
-		border: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
-		color: var(--color-foreground);
+		background: hsl(var(--color-muted));
+		border: 1px solid hsl(var(--color-border));
+		color: hsl(var(--color-foreground));
 		cursor: pointer;
 		transition: all 0.15s;
 	}
 	.cat-chip:hover {
-		background: rgba(255, 255, 255, 0.1);
+		background: hsl(var(--color-surface-hover));
 	}
 	.cat-chip.selected {
-		border-color: var(--color-primary, #6366f1);
-		background: rgba(99, 102, 241, 0.15);
+		border-color: hsl(var(--color-primary));
+		background: hsl(var(--color-primary) / 0.15);
 	}
 
 	.submit-btn {
 		width: 100%;
 		padding: 0.625rem;
 		border-radius: 0.5rem;
-		background: var(--color-primary, #6366f1);
+		background: hsl(var(--color-primary));
 		color: white;
 		border: none;
 		font-size: 0.875rem;
@@ -513,7 +513,7 @@
 		font-weight: 600;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 		padding: 0.5rem 0 0.25rem;
 	}
 	.tx-row {
@@ -534,14 +534,14 @@
 	}
 	.tx-desc {
 		font-size: 0.875rem;
-		color: var(--color-foreground);
+		color: hsl(var(--color-foreground));
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
 	}
 	.tx-cat {
 		font-size: 0.75rem;
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 	}
 	.tx-amount {
 		font-size: 0.875rem;
@@ -550,14 +550,14 @@
 		flex-shrink: 0;
 	}
 	.tx-amount.income {
-		color: #22c55e;
+		color: hsl(var(--color-success));
 	}
 	.tx-amount.expense {
-		color: #ef4444;
+		color: hsl(var(--color-error));
 	}
 
 	.loading {
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 		text-align: center;
 		padding: 3rem 0;
 	}

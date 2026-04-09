@@ -380,7 +380,11 @@
 		display: flex;
 		justify-content: center;
 		padding: 2rem;
-		background: radial-gradient(ellipse at center, rgba(99, 102, 241, 0.05) 0%, transparent 70%);
+		background: radial-gradient(
+			ellipse at center,
+			hsl(var(--color-primary) / 0.05) 0%,
+			transparent 70%
+		);
 		border-radius: 8px;
 		overflow: auto;
 	}
@@ -446,8 +450,9 @@
 		margin-top: 0.25rem;
 	}
 
+	/* Indigo→violet gradient is the spiral module's literal brand mark */
 	.stat.highlight {
-		background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
+		background: linear-gradient(135deg, rgb(99 102 241 / 0.2), rgb(139 92 246 / 0.2));
 	}
 
 	.collected-at {
@@ -548,7 +553,7 @@
 		width: 14px;
 		height: 14px;
 		border-radius: 3px;
-		border: 1px solid rgba(255, 255, 255, 0.2);
+		border: 1px solid hsl(var(--color-border));
 		flex-shrink: 0;
 	}
 
@@ -596,12 +601,12 @@
 	}
 
 	.btn-danger {
-		color: #ef4444;
-		border-color: rgba(239, 68, 68, 0.3);
+		color: hsl(var(--color-error));
+		border-color: hsl(var(--color-error) / 0.3);
 	}
 
 	.btn-danger:hover:not(:disabled) {
-		background: rgba(239, 68, 68, 0.1);
+		background: hsl(var(--color-error) / 0.1);
 	}
 
 	.info-box {

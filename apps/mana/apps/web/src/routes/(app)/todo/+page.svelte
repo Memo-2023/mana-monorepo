@@ -337,7 +337,7 @@
 	.todo-title {
 		font-size: 1.5rem;
 		font-weight: 700;
-		color: var(--color-foreground);
+		color: hsl(var(--color-foreground));
 	}
 
 	.todo-stats {
@@ -345,7 +345,7 @@
 		gap: 1rem;
 		margin-top: 0.25rem;
 		font-size: 0.875rem;
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.todo-header-actions {
@@ -361,11 +361,11 @@
 		width: 2rem;
 		height: 2rem;
 		border-radius: 0.5rem;
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 		transition: background 0.15s;
 	}
 	.settings-btn:hover {
-		background: var(--color-muted);
+		background: hsl(var(--color-muted));
 	}
 
 	.quick-add-wrapper {
@@ -374,18 +374,18 @@
 	}
 
 	:global(.mana-drop-target-hover) {
-		outline: 2px solid var(--color-primary, #6366f1);
+		outline: 2px solid hsl(var(--color-primary));
 		outline-offset: -2px;
 		border-radius: 0.5rem;
-		background: rgba(99, 102, 241, 0.06) !important;
+		background: hsl(var(--color-primary) / 0.06) !important;
 	}
 	:global(.mana-drop-target-success) {
 		animation: drop-success 400ms ease-out;
 	}
 	@keyframes drop-success {
 		0% {
-			outline-color: #10b981;
-			background: rgba(16, 185, 129, 0.1);
+			outline-color: hsl(var(--color-success));
+			background: hsl(var(--color-success) / 0.1);
 		}
 		100% {
 			outline-color: transparent;
