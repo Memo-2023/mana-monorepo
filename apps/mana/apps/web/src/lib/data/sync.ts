@@ -551,11 +551,37 @@ export function createUnifiedSync(serverUrl: string, getToken: () => Promise<str
 			// Lazy apps: no pull until ensureAppSynced() is called
 		}
 
+		// Drain leftover pending changes from previous sessions. Without this,
+		// pending writes survive across reloads but never push because
+		// schedulePush() only fires on fresh Dexie writes — channels start
+		// cold and the queue stays stuck until the user happens to mutate
+		// the same table again.
+		drainLeftoverPending();
+
 		// Listen for online/offline
 		if (typeof window !== 'undefined') {
 			window.addEventListener('online', handleOnline);
 			window.addEventListener('offline', handleOffline);
 		}
+	}
+
+	function drainLeftoverPending(): void {
+		// Fire-and-forget: startAll() is sync, but the drain needs an async
+		// Dexie query. Errors are swallowed because the existing push retry
+		// path handles failures — we just need to kick the channels once.
+		(async () => {
+			try {
+				const leftoverAppIds = new Set<string>();
+				await db.table('_pendingChanges').each((change: { appId?: string }) => {
+					if (change.appId) leftoverAppIds.add(change.appId);
+				});
+				for (const appId of leftoverAppIds) {
+					if (channels.has(appId)) schedulePush(appId);
+				}
+			} catch {
+				// DB not ready or query failed — next user write will trigger push anyway.
+			}
+		})();
 	}
 
 	function stopAll(): void {
