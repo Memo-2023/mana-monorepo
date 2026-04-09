@@ -29,10 +29,13 @@ COPY apps/api/package.json ./apps/api/package.json
 
 # Workspace packages that apps/api depends on, plus their transitive
 # workspace deps. Listed explicitly so the install layer doesn't pull
-# in the entire monorepo.
+# in the entire monorepo. When adding a new @mana/* import to any
+# apps/api module, add the package here too — otherwise the runtime
+# fails with "ENOENT reading /app/apps/api/node_modules/@mana/<x>".
 COPY packages/shared-hono ./packages/shared-hono
 COPY packages/shared-logger ./packages/shared-logger
 COPY packages/shared-storage ./packages/shared-storage
+COPY packages/shared-types ./packages/shared-types
 # @mana/media-client lives under services/mana-media (sub-package).
 COPY services/mana-media/packages/client ./services/mana-media/packages/client
 
