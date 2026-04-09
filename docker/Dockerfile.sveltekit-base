@@ -34,7 +34,7 @@ COPY packages/qr-export ./packages/qr-export
 COPY packages/shared-auth ./packages/shared-auth
 COPY packages/shared-auth-ui ./packages/shared-auth-ui
 COPY packages/shared-branding ./packages/shared-branding
-COPY packages/shared-config ./packages/shared-config
+# packages/shared-config was removed; its COPY line is gone too.
 COPY packages/shared-error-tracking ./packages/shared-error-tracking
 COPY packages/feedback ./packages/feedback
 COPY packages/help ./packages/help
