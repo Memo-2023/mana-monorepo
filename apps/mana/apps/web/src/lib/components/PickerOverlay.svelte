@@ -20,6 +20,9 @@
 		items: TItem[];
 		onClose: () => void;
 		item: Snippet<[TItem, number]>;
+		/** Optional snippet rendered between the header and the list
+		 *  (e.g. a search input). */
+		subheader?: Snippet;
 		/** Optional snippet rendered after the items (e.g. "create custom" button). */
 		footer?: Snippet;
 		emptyLabel?: string;
@@ -32,6 +35,7 @@
 		items,
 		onClose,
 		item,
+		subheader,
 		footer,
 		emptyLabel = 'Keine Einträge',
 		width = '320px',
@@ -45,6 +49,11 @@
 			<X size={16} />
 		</button>
 	</div>
+	{#if subheader}
+		<div class="picker-subheader">
+			{@render subheader()}
+		</div>
+	{/if}
 	<div class="picker-list">
 		{#each items as entry, i}
 			{#if i > 0}<div class="divider"></div>{/if}
@@ -114,6 +123,11 @@
 	.close-btn:hover {
 		background: hsl(var(--color-muted));
 		color: hsl(var(--color-foreground));
+	}
+
+	.picker-subheader {
+		padding: 0 1rem 0.5rem;
+		flex-shrink: 0;
 	}
 
 	.picker-list {
