@@ -1444,28 +1444,10 @@ services:
   # ============================================
   # Games
   # ============================================
-
-  whopixels:
-    build:
-      context: .
-      dockerfile: games/whopixels/Dockerfile
-    container_name: mana-game-whopixels
-    restart: unless-stopped
-    mem_limit: 128m
-    environment:
-      PORT: 5100
-      AZURE_OPENAI_API_KEY: ${AZURE_OPENAI_API_KEY:-}
-      AZURE_OPENAI_ENDPOINT: ${AZURE_OPENAI_ENDPOINT:-}
-      AZURE_OPENAI_DEPLOYMENT: ${AZURE_OPENAI_DEPLOYMENT:-}
-      AZURE_OPENAI_API_VERSION: ${AZURE_OPENAI_API_VERSION:-}
-    ports:
-      - "5100:5100"
-    healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:5100/"]
-      interval: 180s
-      timeout: 10s
-      retries: 3
-      start_period: 45s
+  # whopixels was removed 2026-04-09 — its core mechanic (LLM-driven
+  # historical figure guessing) lives now as the `who` module inside
+  # apps/mana/apps/web. The standalone Phaser/Node container is gone;
+  # see docs/WHO_MODULE.md for the migration rationale.
 
 volumes:
   redis_data:
