@@ -1,25 +1,40 @@
 /**
- * NutriPhi module — Meal analysis (Gemini) + recommendations
- * Ported from apps/nutriphi/apps/server
+ * NutriPhi module — Meal analysis (Gemini Vision via mana-llm) + recommendations.
  *
- * CRUD for meals, goals, favorites handled by mana-sync.
- * This module handles AI analysis and rule-based recommendations.
+ * CRUD for meals, goals, favorites is handled by mana-sync. This module
+ * owns the server-only operations: photo upload to mana-media, structured
+ * AI analysis using the Vercel AI SDK (`generateObject`) against the
+ * shared Zod schema in @mana/shared-types, and a small rule-based
+ * recommendation engine.
+ *
+ * Why generateObject + Zod instead of raw fetch?
+ *   - Runtime validation of the AI response — if Gemini drifts on a
+ *     field, we throw at the boundary instead of corrupting downstream
+ *     state. The frontend never sees malformed data.
+ *   - Provider-portable structured outputs: the AI SDK translates one
+ *     Zod schema into OpenAI strict json_schema / Anthropic tool-use /
+ *     Gemini response_schema depending on which backend mana-llm routes
+ *     to. We don't have to know which.
+ *   - Single source of truth: the same MealAnalysisSchema is consumed
+ *     by the unified web app via `z.infer<typeof MealAnalysisSchema>`,
+ *     so changes here propagate end-to-end without manual sync.
  */
 
 import { Hono } from 'hono';
+import { generateObject } from 'ai';
+import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
+import { MealAnalysisSchema } from '@mana/shared-types';
 import { logger, type AuthVariables } from '@mana/shared-hono';
 
 const LLM_URL = process.env.MANA_LLM_URL || 'http://localhost:3025';
+const VISION_MODEL = process.env.VISION_MODEL || 'gemini-2.0-flash';
 
-const ANALYSIS_PROMPT = `Du bist ein Ernährungsexperte. Analysiere die Mahlzeit und gib ein JSON zurück mit:
-{
-  "foods": [{"name": "...", "quantity": "...", "calories": 0}],
-  "totalNutrition": {"calories": 0, "protein": 0, "carbohydrates": 0, "fat": 0, "fiber": 0, "sugar": 0},
-  "description": "Kurze Beschreibung der Mahlzeit",
-  "confidence": 0.0-1.0,
-  "warnings": [],
-  "suggestions": []
-}`;
+const llm = createOpenAICompatible({
+	name: 'mana-llm',
+	baseURL: `${LLM_URL}/api/v1`,
+});
+
+const ANALYSIS_PROMPT = `Du bist ein Ernährungsexperte. Analysiere die Mahlzeit und gib strukturierte Nährwertdaten zurück. Schätze realistische Portionsgrößen und Kalorien. Antworte auf Deutsch.`;
 
 const routes = new Hono<{ Variables: AuthVariables }>();
 
@@ -55,40 +70,29 @@ routes.post('/photos/upload', async (c) => {
 	}
 });
 
-// ─── Photo Analysis (server-only: Gemini Vision on uploaded URL) ──
+// ─── Photo Analysis (Gemini Vision on uploaded URL) ──────────
 
 routes.post('/analysis/photo', async (c) => {
 	const { photoUrl } = await c.req.json();
 	if (!photoUrl) return c.json({ error: 'photoUrl required' }, 400);
 
 	try {
-		const res = await fetch(`${LLM_URL}/api/v1/chat/completions`, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({
-				messages: [
-					{ role: 'system', content: ANALYSIS_PROMPT },
-					{
-						role: 'user',
-						content: [
-							{ type: 'text', text: 'Analysiere diese Mahlzeit.' },
-							{ type: 'image_url', image_url: { url: photoUrl } },
-						],
-					},
-				],
-				model: process.env.VISION_MODEL || 'gemini-2.0-flash',
-				response_format: { type: 'json_object' },
-				temperature: 0.3,
-			}),
+		const { object } = await generateObject({
+			model: llm(VISION_MODEL),
+			schema: MealAnalysisSchema,
+			system: ANALYSIS_PROMPT,
+			messages: [
+				{
+					role: 'user',
+					content: [
+						{ type: 'text', text: 'Analysiere diese Mahlzeit.' },
+						{ type: 'image', image: new URL(photoUrl) },
+					],
+				},
+			],
+			temperature: 0.3,
 		});
-
-		if (!res.ok) return c.json({ error: 'AI analysis failed' }, 502);
-
-		const data = await res.json();
-		const content = data.choices?.[0]?.message?.content;
-		const analysis = typeof content === 'string' ? JSON.parse(content) : content;
-
-		return c.json(analysis);
+		return c.json(object);
 	} catch (err) {
 		logger.error('nutriphi.photo_analysis_failed', {
 			error: err instanceof Error ? err.message : String(err),
@@ -97,34 +101,21 @@ routes.post('/analysis/photo', async (c) => {
 	}
 });
 
-// ─── Text Analysis (server-only: Gemini) ─────────────────────
+// ─── Text Analysis (Gemini on a free-text meal description) ──
 
 routes.post('/analysis/text', async (c) => {
 	const { description } = await c.req.json();
 	if (!description) return c.json({ error: 'description required' }, 400);
 
 	try {
-		const res = await fetch(`${LLM_URL}/api/v1/chat/completions`, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({
-				messages: [
-					{ role: 'system', content: ANALYSIS_PROMPT },
-					{ role: 'user', content: `Analysiere diese Mahlzeit: ${description}` },
-				],
-				model: process.env.GEMINI_MODEL || 'gemini-2.0-flash',
-				response_format: { type: 'json_object' },
-				temperature: 0.3,
-			}),
+		const { object } = await generateObject({
+			model: llm(VISION_MODEL),
+			schema: MealAnalysisSchema,
+			system: ANALYSIS_PROMPT,
+			prompt: `Analysiere diese Mahlzeit: ${description}`,
+			temperature: 0.3,
 		});
-
-		if (!res.ok) return c.json({ error: 'AI analysis failed' }, 502);
-
-		const data = await res.json();
-		const content = data.choices?.[0]?.message?.content;
-		const analysis = typeof content === 'string' ? JSON.parse(content) : content;
-
-		return c.json(analysis);
+		return c.json(object);
 	} catch (err) {
 		logger.error('nutriphi.text_analysis_failed', {
 			error: err instanceof Error ? err.message : String(err),

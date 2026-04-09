@@ -1,15 +1,29 @@
 /**
- * Planta module — Photo upload + AI plant analysis
- * Ported from apps/planta/apps/server
+ * Planta module — Photo upload + AI plant identification.
  *
- * CRUD for plants, photos, watering handled by mana-sync.
- * This module handles S3 uploads and Gemini Vision analysis.
+ * CRUD for plants, photos, watering is handled by mana-sync. This
+ * module owns the server-only operations: photo upload to mana-media
+ * and structured plant identification via the Vercel AI SDK
+ * (`generateObject`) using the shared PlantIdentificationSchema in
+ * @mana/shared-types. See nutriphi/routes.ts for the rationale behind
+ * the AI SDK + Zod approach.
  */
 
 import { Hono } from 'hono';
+import { generateObject } from 'ai';
+import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
+import { PlantIdentificationSchema } from '@mana/shared-types';
 import { logger, type AuthVariables } from '@mana/shared-hono';
 
 const LLM_URL = process.env.MANA_LLM_URL || 'http://localhost:3025';
+const VISION_MODEL = process.env.VISION_MODEL || 'gemini-2.0-flash';
+
+const llm = createOpenAICompatible({
+	name: 'mana-llm',
+	baseURL: `${LLM_URL}/api/v1`,
+});
+
+const IDENTIFICATION_PROMPT = `Du bist ein Pflanzenexperte. Analysiere das Pflanzenfoto und liefere eine strukturierte Identifikation mit lateinischem Namen, deutschen Trivialnamen, Pflegehinweisen und einer Gesundheitseinschätzung. Antworte auf Deutsch.`;
 
 const routes = new Hono<{ Variables: AuthVariables }>();
 
@@ -46,43 +60,28 @@ routes.post('/photos/upload', async (c) => {
 	}
 });
 
-// ─── AI Analysis (server-only: Gemini Vision) ───────────────
+// ─── AI Analysis (Gemini Vision on uploaded URL) ─────────────
 
 routes.post('/analysis/identify', async (c) => {
 	const { photoUrl } = await c.req.json();
 	if (!photoUrl) return c.json({ error: 'photoUrl required' }, 400);
 
 	try {
-		const res = await fetch(`${LLM_URL}/api/v1/chat/completions`, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({
-				messages: [
-					{
-						role: 'system',
-						content:
-							'Du bist ein Pflanzenexperte. Analysiere das Bild und gib JSON zurück: {scientificName, commonNames[], confidence, healthAssessment, wateringAdvice, lightAdvice, generalTips[]}',
-					},
-					{
-						role: 'user',
-						content: [
-							{ type: 'text', text: 'Analysiere diese Pflanze.' },
-							{ type: 'image_url', image_url: { url: photoUrl } },
-						],
-					},
-				],
-				model: process.env.VISION_MODEL || 'gemini-2.0-flash',
-				response_format: { type: 'json_object' },
-			}),
+		const { object } = await generateObject({
+			model: llm(VISION_MODEL),
+			schema: PlantIdentificationSchema,
+			system: IDENTIFICATION_PROMPT,
+			messages: [
+				{
+					role: 'user',
+					content: [
+						{ type: 'text', text: 'Analysiere diese Pflanze.' },
+						{ type: 'image', image: new URL(photoUrl) },
+					],
+				},
+			],
 		});
-
-		if (!res.ok) return c.json({ error: 'AI analysis failed' }, 502);
-
-		const data = await res.json();
-		const content = data.choices?.[0]?.message?.content;
-		const analysis = typeof content === 'string' ? JSON.parse(content) : content;
-
-		return c.json(analysis);
+		return c.json(object);
 	} catch (err) {
 		logger.error('planta.analysis_failed', {
 			error: err instanceof Error ? err.message : String(err),
