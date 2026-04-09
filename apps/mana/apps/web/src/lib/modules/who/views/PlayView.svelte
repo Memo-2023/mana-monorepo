@@ -163,11 +163,9 @@
 	<!-- Result banner (post-game only) -->
 	{#if game && game.status !== 'playing'}
 		<div
-			class="border-b border-white/5 px-4 py-3"
-			class:bg-emerald-500={game.status === 'won'}
-			class:bg-opacity-10={game.status === 'won'}
-			class:bg-amber-500={game.status === 'surrendered'}
-			class:bg-amber-500-10={game.status === 'surrendered'}
+			class="border-b border-white/5 px-4 py-3 {game.status === 'won'
+				? 'bg-emerald-500/10'
+				: 'bg-amber-500/10'}"
 		>
 			{#if game.status === 'won'}
 				<p class="text-sm font-medium text-emerald-300">
@@ -195,17 +193,19 @@
 			<div class="mx-auto flex max-w-2xl flex-col gap-3">
 				{#each messages as msg (msg.id)}
 					<div class:flex-row-reverse={msg.sender === 'user'} class="flex gap-2">
-						<div
-							class="max-w-[80%] rounded-lg px-3 py-2 text-sm leading-relaxed"
-							class:bg-purple-500={msg.sender === 'user'}
-							class:bg-opacity-20={msg.sender === 'user'}
-							class:text-white={msg.sender === 'user'}
-							class:bg-white={msg.sender === 'npc'}
-							class:bg-opacity-5={msg.sender === 'npc'}
-							class:text-white-90={msg.sender === 'npc'}
-						>
-							{msg.content}
-						</div>
+						{#if msg.sender === 'user'}
+							<div
+								class="max-w-[80%] whitespace-pre-wrap rounded-lg bg-purple-500/30 px-3 py-2 text-sm leading-relaxed text-white"
+							>
+								{msg.content}
+							</div>
+						{:else}
+							<div
+								class="max-w-[80%] whitespace-pre-wrap rounded-lg bg-white/5 px-3 py-2 text-sm leading-relaxed text-white/90"
+							>
+								{msg.content}
+							</div>
+						{/if}
 					</div>
 				{/each}
 			</div>
