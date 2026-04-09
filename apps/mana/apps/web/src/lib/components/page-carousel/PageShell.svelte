@@ -242,36 +242,27 @@
 </div>
 
 <style>
+	/* P5: theme-token migration. The workbench paper card now follows the
+	   active theme variant. */
 	.page-shell {
 		flex: 0 0 auto;
 		min-height: 60vh;
 		max-width: calc(100vw - 2rem);
-		background: #fffef5;
+		background: hsl(var(--color-card));
 		border-radius: 0.375rem;
 		box-shadow:
-			0 2px 8px rgba(0, 0, 0, 0.08),
-			0 0 0 1px rgba(0, 0, 0, 0.04);
+			0 2px 8px hsl(0 0% 0% / 0.08),
+			0 0 0 1px hsl(var(--color-border));
 		display: flex;
 		flex-direction: column;
 		animation: fadeIn 0.25s ease-out;
 		overflow: hidden;
 		position: relative;
 	}
-	:global(.dark) .page-shell {
-		background-color: #252220;
-		box-shadow:
-			0 2px 8px rgba(0, 0, 0, 0.25),
-			0 0 0 1px rgba(255, 255, 255, 0.06);
-	}
 	.page-shell.resizing {
 		box-shadow:
-			0 2px 12px rgba(139, 92, 246, 0.12),
-			0 0 0 2px rgba(139, 92, 246, 0.3);
-	}
-	:global(.dark) .page-shell.resizing {
-		box-shadow:
-			0 2px 12px rgba(139, 92, 246, 0.2),
-			0 0 0 2px rgba(139, 92, 246, 0.4);
+			0 2px 12px hsl(var(--color-primary) / 0.15),
+			0 0 0 2px hsl(var(--color-primary) / 0.3);
 	}
 	.page-shell.maximized {
 		position: fixed;
@@ -311,26 +302,16 @@
 		align-items: center;
 		padding: 0.2rem 0;
 		cursor: grab;
-		background: rgba(0, 0, 0, 0.02);
-		border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+		background: hsl(var(--color-muted) / 0.4);
+		border-bottom: 1px solid hsl(var(--color-border));
 		transition: background 0.15s;
 	}
 	.drag-handle-bar:hover {
-		background: rgba(0, 0, 0, 0.04);
+		background: hsl(var(--color-surface-hover));
 	}
 	.drag-handle-bar:active {
 		cursor: grabbing;
-		background: rgba(0, 0, 0, 0.06);
-	}
-	:global(.dark) .drag-handle-bar {
-		background: rgba(255, 255, 255, 0.02);
-		border-bottom-color: rgba(255, 255, 255, 0.04);
-	}
-	:global(.dark) .drag-handle-bar:hover {
-		background: rgba(255, 255, 255, 0.05);
-	}
-	:global(.dark) .drag-handle-bar:active {
-		background: rgba(255, 255, 255, 0.08);
+		background: hsl(var(--color-muted));
 	}
 	.move-btn {
 		position: absolute;
@@ -344,15 +325,15 @@
 		border: none;
 		border-radius: 50%;
 		background: transparent;
-		color: #d1d5db;
+		color: hsl(var(--color-muted-foreground) / 0.5);
 		cursor: pointer;
 		transition:
 			color 0.15s,
 			background 0.15s;
 	}
 	.move-btn:hover {
-		color: #6b7280;
-		background: rgba(0, 0, 0, 0.06);
+		color: hsl(var(--color-foreground));
+		background: hsl(var(--color-surface-hover));
 	}
 	.move-left {
 		left: 0.5rem;
@@ -360,29 +341,16 @@
 	.move-right {
 		right: 0.5rem;
 	}
-	:global(.dark) .move-btn {
-		color: #3f3b38;
-	}
-	:global(.dark) .move-btn:hover {
-		color: #9ca3af;
-		background: rgba(255, 255, 255, 0.08);
-	}
 	.drag-handle-icon {
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		color: #d1d5db;
+		color: hsl(var(--color-muted-foreground) / 0.5);
 		transform: rotate(90deg);
 		transition: color 0.15s;
 	}
 	.drag-handle-bar:hover .drag-handle-icon {
-		color: #9ca3af;
-	}
-	:global(.dark) .drag-handle-icon {
-		color: #3f3b38;
-	}
-	:global(.dark) .drag-handle-bar:hover .drag-handle-icon {
-		color: #6b7280;
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	/* Header */
@@ -410,10 +378,7 @@
 	.page-title {
 		font-size: 0.875rem;
 		font-weight: 600;
-		color: #374151;
-	}
-	:global(.dark) .page-title {
-		color: #f3f4f6;
+		color: hsl(var(--color-foreground));
 	}
 
 	.window-actions {
@@ -434,28 +399,17 @@
 		border-radius: 50%;
 		border: none;
 		background: transparent;
-		color: #d1d5db;
+		color: hsl(var(--color-muted-foreground) / 0.5);
 		cursor: pointer;
 		transition: all 0.15s;
 	}
 	.window-btn:hover {
-		background: rgba(0, 0, 0, 0.08);
-		color: #6b7280;
+		background: hsl(var(--color-surface-hover));
+		color: hsl(var(--color-foreground));
 	}
 	.window-btn-close:hover {
-		background: rgba(239, 68, 68, 0.15);
-		color: #ef4444;
-	}
-	:global(.dark) .window-btn {
-		color: #3f3b38;
-	}
-	:global(.dark) .window-btn:hover {
-		background: rgba(255, 255, 255, 0.1);
-		color: #9ca3af;
-	}
-	:global(.dark) .window-btn-close:hover {
-		background: rgba(239, 68, 68, 0.2);
-		color: #ef4444;
+		background: hsl(var(--color-error) / 0.15);
+		color: hsl(var(--color-error));
 	}
 
 	/* Body */
@@ -476,18 +430,12 @@
 		align-items: center;
 		justify-content: center;
 		cursor: nwse-resize;
-		color: #d1d5db;
+		color: hsl(var(--color-muted-foreground) / 0.5);
 		transition: color 0.15s;
 		border-radius: 0.25rem 0 0.375rem 0;
 		touch-action: none;
 	}
 	.resize-handle:hover {
-		color: #9ca3af;
-	}
-	:global(.dark) .resize-handle {
-		color: #3f3b38;
-	}
-	:global(.dark) .resize-handle:hover {
-		color: #6b7280;
+		color: hsl(var(--color-muted-foreground));
 	}
 </style>
