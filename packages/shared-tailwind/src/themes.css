@@ -24,7 +24,37 @@
  *      .my-bg { background: hsl(var(--color-card) / 0.5); }
  *
  *   3. NEVER write raw `var(--color-X)` without wrapping with `hsl()`.
- *      The variable holds raw channels, not a valid CSS color.
+ *      The variable holds raw channels, not a valid CSS color. A bare
+ *      `color: var(--color-foreground)` is NOT an error — the browser
+ *      silently falls back to `inherit`, which is how the early P5 zitare
+ *      regression produced white-on-white text in light mode. Always wrap.
+ *
+ *      ❌  color: var(--color-foreground);
+ *      ❌  background: var(--color-primary, #6366f1);   // fallback wrong format
+ *      ❌  color-mix(in srgb, var(--color-primary) 12%, transparent);
+ *      ✅  color: hsl(var(--color-foreground));
+ *      ✅  background: hsl(var(--color-primary) / 0.12);
+ *
+ *   4. Brand-literal colors (cycles pink, observatory cosmic scenes, the
+ *      automations/spiral indigo→violet ramp, sport/category palettes, the
+ *      photo viewer's near-black backdrop, etc.) deliberately stay as
+ *      literal hex/rgba/hsl. They are NOT theme intent — they encode brand
+ *      or domain semantics that must look the same under every theme
+ *      variant. Don't migrate them to tokens.
+ *
+ *   5. Token names are stable. There is intentionally NO `--color-info`,
+ *      `--color-text`, `--color-destructive`, `--color-surface`, or
+ *      `--color-input` (use `--color-error`, `--color-foreground`,
+ *      `--color-error`, `--color-muted`, `--color-background` instead).
+ *      Adding a new token? Define it in :root + .dark + every
+ *      [data-theme="..."] block, or it will be undefined under at least
+ *      one variant.
+ *
+ * Runtime: the `createThemeStore` factory in @mana/shared-theme writes the
+ * same `--color-X` names as inline styles on document.documentElement when
+ * the active variant changes. Static defaults in :root mean first paint is
+ * already themed (no FOUC); the runtime store only takes over after
+ * hydration to honor the user's stored preference.
  *
  * Usage in app.css (Tailwind v4):
  *   @import "tailwindcss";
