@@ -449,17 +449,17 @@ export const MANA_APPS: ManaApp[] = [
 		id: 'news',
 		name: 'News Hub',
 		description: {
-			de: 'KI-Nachrichten & Leseliste',
-			en: 'AI News & Reading List',
+			de: 'Kuratierter Newsfeed',
+			en: 'Curated News Feed',
 		},
 		longDescription: {
-			de: 'KI-kuratierte Nachrichten mit persönlicher Leseliste und Content-Extraction.',
-			en: 'AI-curated news with personal reading list and content extraction.',
+			de: 'Kuratierter Newsfeed aus öffentlichen Quellen mit persönlicher Leseliste — wähle Themen aus, blende Quellen aus und bau dir deinen eigenen Feed.',
+			en: 'Curated news feed from public sources with a personal reading list — pick topics, hide sources, and shape your own feed.',
 		},
 		icon: APP_ICONS.news,
 		color: '#10b981',
 		comingSoon: false,
-		status: 'planning',
+		status: 'development',
 		requiredTier: 'guest',
 	},
 	{
@@ -841,6 +841,7 @@ export const APP_URLS: Record<AppIconId, { dev: string; prod: string }> = {
 	wisekeep: { dev: 'http://localhost:5173/wisekeep', prod: 'https://mana.how/wisekeep' },
 	news: { dev: 'http://localhost:5173/news', prod: 'https://mana.how/news' },
 	mail: { dev: 'http://localhost:5173/mail', prod: 'https://mana.how/mail' },
+	who: { dev: 'http://localhost:5173/who', prod: 'https://mana.how/who' },
 	// ─── Separate Apps (own subdomains) ───────────────────────
 	arcade: { dev: 'http://localhost:5201', prod: 'https://arcade.mana.how' },
 };
