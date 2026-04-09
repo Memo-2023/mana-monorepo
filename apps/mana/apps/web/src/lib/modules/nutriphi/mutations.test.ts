@@ -191,6 +191,76 @@ describe('mealMutations.createFromPhoto', () => {
 	});
 });
 
+describe('mealMutations.update', () => {
+	it('patches the description and re-encrypts it', async () => {
+		const created = await mealMutations.create({
+			mealType: 'lunch',
+			description: 'Originaltext',
+			nutrition: sampleNutrition,
+		});
+
+		const result = await mealMutations.update(created.id, {
+			description: 'Geänderter Text',
+		});
+
+		expect(result.description).toBe('Geänderter Text');
+		// And the row in Dexie has the new description, encrypted.
+		const raw = await meals().get(created.id);
+		expect(raw?.description.startsWith(ENC_PREFIX)).toBe(true);
+		expect(raw?.description).not.toContain('Geänderter');
+		expect(raw?.description).not.toContain('Originaltext');
+	});
+
+	it('patches numeric nutrition fields', async () => {
+		const created = await mealMutations.create({
+			mealType: 'lunch',
+			description: 'Suppe',
+			nutrition: sampleNutrition,
+		});
+
+		const result = await mealMutations.update(created.id, {
+			nutrition: { ...sampleNutrition, calories: 999 },
+		});
+
+		expect(result.nutrition?.calories).toBe(999);
+		// Plaintext on disk for fast aggregation.
+		const raw = await meals().get(created.id);
+		expect(raw?.nutrition?.calories).toBe(999);
+	});
+
+	it('only touches the fields supplied in the dto', async () => {
+		const created = await mealMutations.create({
+			mealType: 'breakfast',
+			description: 'Müsli',
+			nutrition: sampleNutrition,
+		});
+
+		await mealMutations.update(created.id, { mealType: 'snack' });
+
+		const raw = await meals().get(created.id);
+		expect(raw?.mealType).toBe('snack');
+		expect(raw?.nutrition).toEqual(sampleNutrition);
+	});
+
+	it('bumps updatedAt', async () => {
+		const created = await mealMutations.create({
+			mealType: 'lunch',
+			description: 'Pasta',
+		});
+		const before = (await meals().get(created.id))!.updatedAt;
+		await new Promise((r) => setTimeout(r, 5));
+		await mealMutations.update(created.id, { description: 'Pasta mit Pesto' });
+		const after = (await meals().get(created.id))!.updatedAt;
+		expect(after).not.toBe(before);
+	});
+
+	it('throws if the meal does not exist', async () => {
+		await expect(mealMutations.update('nonexistent-id', { description: 'foo' })).rejects.toThrow(
+			/disappeared/
+		);
+	});
+});
+
 describe('mealMutations.delete', () => {
 	it('soft-deletes by stamping deletedAt + updatedAt', async () => {
 		const created = await mealMutations.create({
