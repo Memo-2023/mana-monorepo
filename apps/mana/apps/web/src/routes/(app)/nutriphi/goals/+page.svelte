@@ -5,13 +5,16 @@
 	import { ArrowLeft } from '@mana/shared-icons';
 
 	const allGoals = useAllGoals();
-	let currentGoals = $derived((allGoals.current ?? [])[0] ?? null);
+	let currentGoals = $derived(allGoals.value[0] ?? null);
 
-	let dailyCalories = $state(DEFAULT_DAILY_VALUES.calories);
-	let dailyProtein = $state(DEFAULT_DAILY_VALUES.protein);
-	let dailyCarbs = $state(DEFAULT_DAILY_VALUES.carbohydrates);
-	let dailyFat = $state(DEFAULT_DAILY_VALUES.fat);
-	let dailyFiber = $state(DEFAULT_DAILY_VALUES.fiber);
+	// DEFAULT_DAILY_VALUES is `as const`, so its fields are literal types
+	// (e.g. `2000`). Widen to plain `number` so the user can edit them
+	// without TS rejecting the assignment as a literal-type mismatch.
+	let dailyCalories = $state<number>(DEFAULT_DAILY_VALUES.calories);
+	let dailyProtein = $state<number>(DEFAULT_DAILY_VALUES.protein);
+	let dailyCarbs = $state<number>(DEFAULT_DAILY_VALUES.carbohydrates);
+	let dailyFat = $state<number>(DEFAULT_DAILY_VALUES.fat);
+	let dailyFiber = $state<number>(DEFAULT_DAILY_VALUES.fiber);
 
 	let saving = $state(false);
 	let saved = $state(false);
