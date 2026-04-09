@@ -8,7 +8,7 @@
 		textAnalysisMutations,
 	} from '$lib/modules/nutriphi/mutations';
 	import { MEAL_TYPE_LABELS, suggestMealType } from '$lib/modules/nutriphi/constants';
-	import type { MealType, NutritionData } from '$lib/modules/nutriphi/types';
+	import type { AnalyzedFood, MealType, NutritionData } from '$lib/modules/nutriphi/types';
 	import { ArrowLeft } from '@mana/shared-icons';
 
 	const allFavorites = useAllFavorites();
@@ -32,7 +32,9 @@
 	let photoPreviewUrl = $state<string | null>(null);
 	let photoMediaId = $state<string | null>(null);
 	let photoUploadedUrl = $state<string | null>(null);
+	let photoUploadedThumbnailUrl = $state<string | null>(null);
 	let aiConfidence = $state<number | null>(null);
+	let aiFoods = $state<AnalyzedFood[] | null>(null);
 	let analyzing = $state(false);
 	let analyzed = $state(false);
 
@@ -67,7 +69,9 @@
 		photoPreviewUrl = null;
 		photoMediaId = null;
 		photoUploadedUrl = null;
+		photoUploadedThumbnailUrl = null;
 		aiConfidence = null;
+		aiFoods = null;
 		analyzed = false;
 	}
 
@@ -93,7 +97,9 @@
 		photoPreviewUrl = URL.createObjectURL(file);
 		photoMediaId = null;
 		photoUploadedUrl = null;
+		photoUploadedThumbnailUrl = null;
 		aiConfidence = null;
+		aiFoods = null;
 		analyzed = false;
 		error = '';
 	}
@@ -106,6 +112,7 @@
 			const { upload, analysis } = await photoMutations.uploadAndAnalyze(photoFile);
 			photoMediaId = upload.mediaId;
 			photoUploadedUrl = upload.publicUrl;
+			photoUploadedThumbnailUrl = upload.thumbnailUrl;
 
 			// Prefill the same fields the text mode uses, so the user can review/edit.
 			if (analysis.description) description = analysis.description;
@@ -118,6 +125,7 @@
 				sugar = analysis.totalNutrition.sugar ?? null;
 			}
 			aiConfidence = analysis.confidence ?? null;
+			aiFoods = analysis.foods?.length ? analysis.foods : null;
 			analyzed = true;
 		} catch (err) {
 			console.error('photo analysis failed:', err);
@@ -189,7 +197,9 @@
 					nutrition,
 					photoMediaId,
 					photoUrl: photoUploadedUrl,
+					photoThumbnailUrl: photoUploadedThumbnailUrl,
 					confidence: aiConfidence ?? 0.8,
+					foods: aiFoods,
 				});
 			} else {
 				await mealMutations.create({
@@ -346,6 +356,33 @@
 							{#if lowConfidence}
 								<span class="ml-auto">⚠ Bitte Werte prüfen</span>
 							{/if}
+						</div>
+					{/if}
+
+					{#if analyzed && aiFoods && aiFoods.length > 0}
+						<div
+							class="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--muted)/0.3)] p-3"
+						>
+							<p class="mb-2 text-xs font-medium text-[hsl(var(--muted-foreground))]">
+								Erkannte Bestandteile
+							</p>
+							<ul class="space-y-1">
+								{#each aiFoods as food}
+									<li class="flex items-baseline justify-between gap-2 text-xs">
+										<span class="text-[hsl(var(--foreground))]">
+											{food.name}
+											{#if food.quantity}
+												<span class="text-[hsl(var(--muted-foreground))]"> · {food.quantity}</span>
+											{/if}
+										</span>
+										{#if food.calories != null}
+											<span class="whitespace-nowrap text-[hsl(var(--muted-foreground))]">
+												{food.calories} kcal
+											</span>
+										{/if}
+									</li>
+								{/each}
+							</ul>
 						</div>
 					{/if}
 				</div>

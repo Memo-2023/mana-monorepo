@@ -196,13 +196,14 @@
 		{:else}
 			<div class="space-y-3">
 				{#each todaysMeals as meal (meal.id)}
-					<div
-						class="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-4 transition-all hover:border-[hsl(var(--primary)/0.3)]"
+					<a
+						href="/nutriphi/{meal.id}"
+						class="block rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-4 transition-all hover:border-[hsl(var(--primary)/0.3)]"
 					>
 						<div class="flex items-start gap-3">
-							{#if meal.photoUrl}
+							{#if meal.photoThumbnailUrl || meal.photoUrl}
 								<img
-									src={meal.photoUrl}
+									src={meal.photoThumbnailUrl ?? meal.photoUrl}
 									alt={meal.description}
 									class="h-16 w-16 flex-shrink-0 rounded-lg object-cover"
 									loading="lazy"
@@ -245,7 +246,7 @@
 								</span>
 							{/if}
 						</div>
-					</div>
+					</a>
 				{/each}
 			</div>
 		{/if}

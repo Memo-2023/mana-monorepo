@@ -164,38 +164,42 @@
 							<div
 								class="group flex items-center gap-4 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-3"
 							>
-								{#if meal.photoUrl}
-									<img
-										src={meal.photoUrl}
-										alt={meal.description}
-										class="h-12 w-12 flex-shrink-0 rounded-lg object-cover"
-										loading="lazy"
-									/>
-								{/if}
-								<div class="min-w-0 flex-1">
-									<div class="flex items-center gap-2">
-										<span
-											class="rounded bg-[hsl(var(--muted))] px-1.5 py-0.5 text-[10px] font-medium text-[hsl(var(--muted-foreground))]"
-										>
-											{getMealTypeLabel(meal.mealType)}
-										</span>
-										<span class="text-xs text-[hsl(var(--muted-foreground))]">
-											{formatTime(meal.createdAt)}
-										</span>
-										{#if meal.inputType === 'photo'}
-											<span class="text-xs text-[hsl(var(--muted-foreground))]">📷</span>
-										{/if}
+								<a href="/nutriphi/{meal.id}" class="flex min-w-0 flex-1 items-center gap-4">
+									{#if meal.photoThumbnailUrl || meal.photoUrl}
+										<img
+											src={meal.photoThumbnailUrl ?? meal.photoUrl}
+											alt={meal.description}
+											class="h-12 w-12 flex-shrink-0 rounded-lg object-cover"
+											loading="lazy"
+										/>
+									{/if}
+									<div class="min-w-0 flex-1">
+										<div class="flex items-center gap-2">
+											<span
+												class="rounded bg-[hsl(var(--muted))] px-1.5 py-0.5 text-[10px] font-medium text-[hsl(var(--muted-foreground))]"
+											>
+												{getMealTypeLabel(meal.mealType)}
+											</span>
+											<span class="text-xs text-[hsl(var(--muted-foreground))]">
+												{formatTime(meal.createdAt)}
+											</span>
+											{#if meal.inputType === 'photo'}
+												<span class="text-xs text-[hsl(var(--muted-foreground))]">📷</span>
+											{/if}
+										</div>
+										<p class="mt-1 text-sm text-[hsl(var(--foreground))] truncate">
+											{meal.description}
+										</p>
 									</div>
-									<p class="mt-1 text-sm text-[hsl(var(--foreground))] truncate">
-										{meal.description}
-									</p>
-								</div>
 
-								{#if meal.nutrition}
-									<span class="whitespace-nowrap text-sm font-medium text-[hsl(var(--foreground))]">
-										{meal.nutrition.calories} kcal
-									</span>
-								{/if}
+									{#if meal.nutrition}
+										<span
+											class="whitespace-nowrap text-sm font-medium text-[hsl(var(--foreground))]"
+										>
+											{meal.nutrition.calories} kcal
+										</span>
+									{/if}
+								</a>
 
 								<button
 									onclick={() => deleteMeal(meal.id)}
