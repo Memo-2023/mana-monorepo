@@ -36,6 +36,7 @@ export interface AppDescriptor {
 	id: string;
 	name: string;
 	color: string;
+	icon?: AnyComponent;
 
 	// -- Views --
 	views: {

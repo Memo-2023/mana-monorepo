@@ -41,6 +41,7 @@
 	}: Props = $props();
 
 	let app = $derived(getApp(appId));
+	let appIcon = $derived(app?.icon);
 	let appName = $derived.by(() => {
 		const key = `apps.${appId}`;
 		const translated = $_(key);
@@ -300,7 +301,9 @@
 		{heightPx}
 		{maximized}
 		title={appName}
+		titleHref={`/${appId}`}
 		color={appColor}
+		icon={appIcon}
 		{onClose}
 		{onMinimize}
 		{onMaximize}

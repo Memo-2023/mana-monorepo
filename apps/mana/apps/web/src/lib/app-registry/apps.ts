@@ -7,7 +7,40 @@
  */
 
 import { registerApp } from './registry';
-import { Plus } from '@mana/shared-icons';
+import {
+	Plus,
+	CheckSquare,
+	Calendar,
+	AddressBook,
+	Repeat,
+	NotePencil,
+	Moon,
+	Drop,
+	Wallet,
+	MapPin,
+	ChatCircle,
+	Brain,
+	Clock,
+	Quotes,
+	Cards,
+	Image,
+	MusicNotes,
+	Camera,
+	HardDrives,
+	ForkKnife,
+	Plant,
+	Presentation,
+	Package,
+	Lightbulb,
+	Question,
+	Tree,
+	Smiley,
+	Buildings,
+	UploadSimple,
+	Calculator,
+	Lightning,
+	Sparkle,
+} from '@mana/shared-icons';
 
 // ── Apps with entity capabilities ───────────────────────────
 
@@ -15,6 +48,7 @@ registerApp({
 	id: 'todo',
 	name: 'Todo',
 	color: '#8B5CF6',
+	icon: CheckSquare,
 	views: {
 		list: { load: () => import('$lib/modules/todo/ListView.svelte') },
 		detail: { load: () => import('$lib/modules/todo/views/DetailView.svelte') },
@@ -61,6 +95,7 @@ registerApp({
 	id: 'calendar',
 	name: 'Kalender',
 	color: '#3B82F6',
+	icon: Calendar,
 	views: {
 		list: { load: () => import('$lib/modules/calendar/ListView.svelte') },
 		detail: { load: () => import('$lib/modules/calendar/views/DetailView.svelte') },
@@ -139,6 +174,7 @@ registerApp({
 	id: 'contacts',
 	name: 'Kontakte',
 	color: '#22C55E',
+	icon: AddressBook,
 	views: {
 		list: { load: () => import('$lib/modules/contacts/ListView.svelte') },
 		detail: { load: () => import('$lib/modules/contacts/views/DetailView.svelte') },
@@ -173,6 +209,7 @@ registerApp({
 	id: 'habits',
 	name: 'Habits',
 	color: '#8B5CF6',
+	icon: Repeat,
 	views: {
 		list: { load: () => import('$lib/modules/habits/ListView.svelte') },
 	},
@@ -217,6 +254,7 @@ registerApp({
 	id: 'notes',
 	name: 'Notes',
 	color: '#F59E0B',
+	icon: NotePencil,
 	views: {
 		list: { load: () => import('$lib/modules/notes/ListView.svelte') },
 	},
@@ -263,6 +301,7 @@ registerApp({
 	id: 'dreams',
 	name: 'Dreams',
 	color: '#6366F1',
+	icon: Moon,
 	views: {
 		list: { load: () => import('$lib/modules/dreams/ListView.svelte') },
 	},
@@ -305,6 +344,7 @@ registerApp({
 	id: 'cycles',
 	name: 'Cycles',
 	color: '#ec4899',
+	icon: Drop,
 	views: {
 		list: { load: () => import('$lib/modules/cycles/ListView.svelte') },
 	},
@@ -339,6 +379,7 @@ registerApp({
 	id: 'finance',
 	name: 'Finance',
 	color: '#22C55E',
+	icon: Wallet,
 	views: {
 		list: { load: () => import('$lib/modules/finance/ListView.svelte') },
 	},
@@ -365,6 +406,7 @@ registerApp({
 	id: 'places',
 	name: 'Places',
 	color: '#0EA5E9',
+	icon: MapPin,
 	views: {
 		list: { load: () => import('$lib/modules/places/ListView.svelte') },
 		detail: { load: () => import('$lib/modules/places/views/DetailView.svelte') },
@@ -399,6 +441,7 @@ registerApp({
 	id: 'chat',
 	name: 'Chat',
 	color: '#6366F1',
+	icon: ChatCircle,
 	views: {
 		list: { load: () => import('$lib/modules/chat/ListView.svelte') },
 	},
@@ -408,6 +451,7 @@ registerApp({
 	id: 'context',
 	name: 'Context',
 	color: '#7C3AED',
+	icon: Brain,
 	views: {
 		list: { load: () => import('$lib/modules/context/ListView.svelte') },
 	},
@@ -417,6 +461,7 @@ registerApp({
 	id: 'times',
 	name: 'Times',
 	color: '#F59E0B',
+	icon: Clock,
 	views: {
 		list: { load: () => import('$lib/modules/times/ListView.svelte') },
 		detail: { load: () => import('$lib/modules/times/views/DetailView.svelte') },
@@ -427,6 +472,7 @@ registerApp({
 	id: 'zitare',
 	name: 'Zitare',
 	color: '#EC4899',
+	icon: Quotes,
 	views: {
 		list: { load: () => import('$lib/modules/zitare/ListView.svelte') },
 		detail: { load: () => import('$lib/modules/zitare/views/DetailView.svelte') },
@@ -437,6 +483,7 @@ registerApp({
 	id: 'cards',
 	name: 'Cards',
 	color: '#EF4444',
+	icon: Cards,
 	views: {
 		list: { load: () => import('$lib/modules/cards/ListView.svelte') },
 		detail: { load: () => import('$lib/modules/cards/views/DetailView.svelte') },
@@ -447,6 +494,7 @@ registerApp({
 	id: 'picture',
 	name: 'Picture',
 	color: '#8B5CF6',
+	icon: Image,
 	views: {
 		list: { load: () => import('$lib/modules/picture/ListView.svelte') },
 	},
@@ -456,6 +504,7 @@ registerApp({
 	id: 'music',
 	name: 'Music',
 	color: '#F97316',
+	icon: MusicNotes,
 	views: {
 		list: { load: () => import('$lib/modules/music/ListView.svelte') },
 		detail: { load: () => import('$lib/modules/music/views/DetailView.svelte') },
@@ -466,6 +515,7 @@ registerApp({
 	id: 'photos',
 	name: 'Photos',
 	color: '#06B6D4',
+	icon: Camera,
 	views: {
 		list: { load: () => import('$lib/modules/photos/ListView.svelte') },
 	},
@@ -475,6 +525,7 @@ registerApp({
 	id: 'storage',
 	name: 'Storage',
 	color: '#6B7280',
+	icon: HardDrives,
 	views: {
 		list: { load: () => import('$lib/modules/storage/ListView.svelte') },
 		detail: { load: () => import('$lib/modules/storage/views/DetailView.svelte') },
@@ -485,6 +536,7 @@ registerApp({
 	id: 'nutriphi',
 	name: 'Nutriphi',
 	color: '#22C55E',
+	icon: ForkKnife,
 	views: {
 		list: { load: () => import('$lib/modules/nutriphi/ListView.svelte') },
 	},
@@ -494,6 +546,7 @@ registerApp({
 	id: 'planta',
 	name: 'Planta',
 	color: '#16A34A',
+	icon: Plant,
 	views: {
 		list: { load: () => import('$lib/modules/planta/ListView.svelte') },
 		detail: { load: () => import('$lib/modules/planta/views/DetailView.svelte') },
@@ -504,6 +557,7 @@ registerApp({
 	id: 'presi',
 	name: 'Presi',
 	color: '#A855F7',
+	icon: Presentation,
 	views: {
 		list: { load: () => import('$lib/modules/presi/ListView.svelte') },
 		detail: { load: () => import('$lib/modules/presi/views/DetailView.svelte') },
@@ -514,6 +568,7 @@ registerApp({
 	id: 'inventar',
 	name: 'Inventar',
 	color: '#78716C',
+	icon: Package,
 	views: {
 		list: { load: () => import('$lib/modules/inventar/ListView.svelte') },
 		detail: { load: () => import('$lib/modules/inventar/views/DetailView.svelte') },
@@ -524,6 +579,7 @@ registerApp({
 	id: 'memoro',
 	name: 'Memoro',
 	color: '#F59E0B',
+	icon: Lightbulb,
 	views: {
 		list: { load: () => import('$lib/modules/memoro/ListView.svelte') },
 		detail: { load: () => import('$lib/modules/memoro/views/DetailView.svelte') },
@@ -534,6 +590,7 @@ registerApp({
 	id: 'questions',
 	name: 'Questions',
 	color: '#2563EB',
+	icon: Question,
 	views: {
 		list: { load: () => import('$lib/modules/questions/ListView.svelte') },
 		detail: { load: () => import('$lib/modules/questions/views/DetailView.svelte') },
@@ -544,6 +601,7 @@ registerApp({
 	id: 'skilltree',
 	name: 'SkillTree',
 	color: '#D946EF',
+	icon: Tree,
 	views: {
 		list: { load: () => import('$lib/modules/skilltree/ListView.svelte') },
 		detail: { load: () => import('$lib/modules/skilltree/views/DetailView.svelte') },
@@ -554,6 +612,7 @@ registerApp({
 	id: 'moodlit',
 	name: 'Moodlit',
 	color: '#F97316',
+	icon: Smiley,
 	views: {
 		list: { load: () => import('$lib/modules/moodlit/ListView.svelte') },
 	},
@@ -563,6 +622,7 @@ registerApp({
 	id: 'citycorners',
 	name: 'CityCorners',
 	color: '#14B8A6',
+	icon: Buildings,
 	views: {
 		list: { load: () => import('$lib/modules/citycorners/ListView.svelte') },
 		detail: { load: () => import('$lib/modules/citycorners/views/DetailView.svelte') },
@@ -573,6 +633,7 @@ registerApp({
 	id: 'uload',
 	name: 'uLoad',
 	color: '#0EA5E9',
+	icon: UploadSimple,
 	views: {
 		list: { load: () => import('$lib/modules/uload/ListView.svelte') },
 		detail: { load: () => import('$lib/modules/uload/views/DetailView.svelte') },
@@ -583,6 +644,7 @@ registerApp({
 	id: 'calc',
 	name: 'Calc',
 	color: '#6B7280',
+	icon: Calculator,
 	views: {
 		list: { load: () => import('$lib/modules/calc/ListView.svelte') },
 	},
@@ -592,6 +654,7 @@ registerApp({
 	id: 'automations',
 	name: 'Automations',
 	color: '#8B5CF6',
+	icon: Lightning,
 	views: {
 		list: { load: () => import('$lib/modules/automations/ListView.svelte') },
 	},
@@ -601,6 +664,7 @@ registerApp({
 	id: 'playground',
 	name: 'Playground',
 	color: '#9CA3AF',
+	icon: Sparkle,
 	views: {
 		list: { load: () => import('$lib/modules/playground/ListView.svelte') },
 	},
