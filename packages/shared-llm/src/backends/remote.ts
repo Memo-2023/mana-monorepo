@@ -31,12 +31,36 @@ export function resolveLlmBaseUrl(): string {
 }
 
 /**
- * Send a chat completion to mana-llm and yield streaming token deltas.
- * The caller is responsible for assembling the final string and tracking
- * latency.
+ * Send a chat completion to mana-llm and return the result.
  *
- * `tier` is only used for error tagging — both 'mana-server' and 'cloud'
- * call the same endpoint with different model strings.
+ * Implementation notes:
+ *
+ * - We use the NON-streaming endpoint (`stream: false`). Curl tests
+ *   from the same hostname showed that mana-llm's streaming endpoint
+ *   works perfectly when called from outside the browser, but the
+ *   browser receives `totalFrames=0` (an empty response body) for
+ *   reasons that almost certainly trace back to CORS + credentials
+ *   + streaming-body interactions. Non-streaming is a single JSON
+ *   response, much friendlier to the browser fetch API.
+ *
+ * - We do NOT pass `credentials: 'include'`. The mana-llm service
+ *   doesn't require user auth (the API key middleware accepts
+ *   anonymous requests), and `credentials: 'include'` plus
+ *   `Access-Control-Allow-Origin: *` is one of the patterns that
+ *   silently breaks the response body in browsers. Verified by
+ *   comparing curl-from-server (no creds, works) vs browser fetch
+ *   (with creds, empty body).
+ *
+ * - For tasks that registered an `onToken` callback (legacy chat-
+ *   style streaming UX), we fire it ONCE with the full content at
+ *   the end. That's a degraded streaming experience, but no current
+ *   shared-llm caller actually consumes the per-token stream — the
+ *   queue + watcher model only cares about the final result. The
+ *   playground module uses its own client (apps/.../modules/
+ *   playground/llm.ts) which keeps real streaming for live UX.
+ *
+ * `tier` is only used for error tagging — both 'mana-server' and
+ * 'cloud' call the same endpoint with different model strings.
  */
 export async function callManaLlmStreaming(
 	tier: Exclude<LlmTier, 'none' | 'browser'>,
@@ -51,13 +75,12 @@ export async function callManaLlmStreaming(
 		res = await fetch(url, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			credentials: 'include', // forwards the Mana auth cookie if present
 			body: JSON.stringify({
 				model,
 				messages: req.messages,
 				temperature: req.temperature ?? 0.7,
 				max_tokens: req.maxTokens ?? 1024,
-				stream: true,
+				stream: false,
 			}),
 		});
 	} catch (err) {
@@ -69,107 +92,51 @@ export async function callManaLlmStreaming(
 		);
 	}
 
-	if (!res.ok || !res.body) {
+	if (!res.ok) {
 		const text = await res.text().catch(() => '');
 		// 451 = upstream blocked content (we use this convention; Gemini
 		// safety blocks are mapped to 451 in mana-llm's google provider).
-		// Other 4xx/5xx are generic server errors.
 		if (res.status === 451 || /safety|blocked|filter/i.test(text)) {
 			throw new ProviderBlockedError(tier, text || `HTTP ${res.status}`);
 		}
 		throw new BackendUnreachableError(tier, res.status, text);
 	}
 
-	const reader = res.body.getReader();
-	const decoder = new TextDecoder();
-	let buffer = '';
-	let collected = '';
-	let promptTokens = 0;
-	let completionTokens = 0;
-
-	// Diagnostic counters — logged once at the end if `collected` is
-	// empty so we can see whether the empty result is "no frames at
-	// all", "frames with a different shape", or "frames with empty
-	// content fields". Without this we'd have to add a network sniffer
-	// to debug remote-tier title failures.
-	let totalFrames = 0;
-	let dataFrames = 0;
-	let firstFrameRaw: string | null = null;
-	let firstFrameParsed: unknown = null;
-
-	while (true) {
-		const { value, done } = await reader.read();
-		if (done) break;
-		buffer += decoder.decode(value, { stream: true });
-
-		// SSE frames are separated by blank lines.
-		let sep: number;
-		while ((sep = buffer.indexOf('\n\n')) !== -1) {
-			const frame = buffer.slice(0, sep);
-			buffer = buffer.slice(sep + 2);
-			totalFrames++;
-
-			for (const line of frame.split('\n')) {
-				if (!line.startsWith('data:')) continue;
-				const data = line.slice(5).trim();
-				if (!data || data === '[DONE]') continue;
-				dataFrames++;
-				if (firstFrameRaw === null) firstFrameRaw = data;
-				try {
-					const json = JSON.parse(data) as {
-						choices?: Array<{
-							delta?: { content?: string; text?: string };
-							message?: { content?: string };
-							text?: string;
-						}>;
-						usage?: { prompt_tokens?: number; completion_tokens?: number };
-					};
-					if (firstFrameParsed === null) firstFrameParsed = json;
-
-					// Be liberal in what we accept: OpenAI uses delta.content,
-					// some Ollama-compat shims use delta.text or text or
-					// message.content. Pick whichever shows up.
-					const choice = json.choices?.[0];
-					const delta =
-						choice?.delta?.content ??
-						choice?.delta?.text ??
-						choice?.message?.content ??
-						choice?.text ??
-						'';
-					if (delta) {
-						collected += delta;
-						req.onToken?.(delta);
-					}
-					if (json.usage) {
-						promptTokens = json.usage.prompt_tokens ?? promptTokens;
-						completionTokens = json.usage.completion_tokens ?? completionTokens;
-					}
-				} catch {
-					// Malformed frame — keepalive comment, skip silently.
-				}
-			}
-		}
+	let json: {
+		choices?: Array<{
+			message?: { content?: string };
+			text?: string;
+		}>;
+		usage?: { prompt_tokens?: number; completion_tokens?: number };
+	};
+	try {
+		json = await res.json();
+	} catch (err) {
+		console.warn(`[shared-llm:${tier}] failed to parse response JSON`, err);
+		throw new BackendUnreachableError(tier, res.status, 'invalid JSON response');
 	}
 
-	// Empty-result diagnostic dump. Only fires when something went
-	// wrong, so it's quiet in the happy path.
-	if (!collected) {
-		console.warn(
-			`[shared-llm:${tier}] empty completion — totalFrames=${totalFrames}, dataFrames=${dataFrames}`,
-			{
-				model,
-				firstFrameRaw,
-				firstFrameParsed,
-			}
-		);
+	const choice = json.choices?.[0];
+	const content = choice?.message?.content ?? choice?.text ?? '';
+
+	if (!content) {
+		console.warn(`[shared-llm:${tier}] empty completion content`, { model, json });
+	}
+
+	// One-shot "streaming" for any caller that registered onToken: emit
+	// the whole content as a single chunk at the end. The current
+	// orchestrator + queue model never reads tokens incrementally for
+	// remote tiers anyway.
+	if (content && req.onToken) {
+		req.onToken(content);
 	}
 
 	return {
-		content: collected,
+		content,
 		usage: {
-			promptTokens,
-			completionTokens,
-			totalTokens: promptTokens + completionTokens,
+			promptTokens: json.usage?.prompt_tokens ?? 0,
+			completionTokens: json.usage?.completion_tokens ?? 0,
+			totalTokens: (json.usage?.prompt_tokens ?? 0) + (json.usage?.completion_tokens ?? 0),
 		},
 		latencyMs: Math.round(performance.now() - start),
 	};
