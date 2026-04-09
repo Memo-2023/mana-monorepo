@@ -145,6 +145,10 @@
 			"description": "Phase actuelle et compte à rebours jusqu'aux prochaines règles",
 			"empty": "Aucun cycle enregistré.",
 			"open": "Ouvrir"
+		},
+		"news_unread": {
+			"title": "Actualités",
+			"description": "Articles phares de ton fil personnalisé"
 		}
 	}
 }

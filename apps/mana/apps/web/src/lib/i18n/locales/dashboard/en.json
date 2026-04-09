@@ -150,6 +150,10 @@
 			"description": "Current phase and countdown to next period",
 			"empty": "No cycle logged yet.",
 			"open": "Open"
+		},
+		"news_unread": {
+			"title": "News",
+			"description": "Top articles from your curated feed"
 		}
 	}
 }

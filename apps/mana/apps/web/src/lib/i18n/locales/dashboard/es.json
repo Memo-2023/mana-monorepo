@@ -145,6 +145,10 @@
 			"description": "Fase actual y cuenta regresiva hasta el próximo período",
 			"empty": "Ningún ciclo registrado.",
 			"open": "Abrir"
+		},
+		"news_unread": {
+			"title": "Noticias",
+			"description": "Artículos destacados de tu feed curado"
 		}
 	}
 }

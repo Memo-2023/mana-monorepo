@@ -150,6 +150,10 @@
 			"description": "Aktuelle Phase und Countdown zur nächsten Periode",
 			"empty": "Noch kein Zyklus erfasst.",
 			"open": "Öffnen"
+		},
+		"news_unread": {
+			"title": "News",
+			"description": "Top-Artikel aus deinem kuratierten Feed"
 		}
 	}
 }

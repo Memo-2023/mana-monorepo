@@ -30,7 +30,8 @@ export type WidgetType =
 	| 'plant-watering' // Planta: plants due for watering
 	| 'day-timeline' // TimeBlocks: chronological day timeline
 	| 'activity-feed' // TimeBlocks: recent activity across modules
-	| 'cycles'; // Cycles: current phase + days until next period
+	| 'cycles' // Cycles: current phase + days until next period
+	| 'news-unread'; // News: latest unread curated articles
 
 /**
  * Widget size - maps to CSS Grid columns
@@ -341,6 +342,14 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
 		defaultSize: 'small',
 		allowMultiple: false,
 		requiredBackend: 'cycles',
+	},
+	{
+		type: 'news-unread',
+		nameKey: 'dashboard.widgets.news_unread.title',
+		descriptionKey: 'dashboard.widgets.news_unread.description',
+		icon: '📰',
+		defaultSize: 'small',
+		allowMultiple: false,
 	},
 ];
 

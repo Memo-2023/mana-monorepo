@@ -31,6 +31,7 @@ import ActiveTimerWidget from '$lib/modules/core/widgets/ActiveTimerWidget.svelt
 import NutritionProgressWidget from '$lib/modules/core/widgets/NutritionProgressWidget.svelte';
 import PlantWateringWidget from '$lib/modules/core/widgets/PlantWateringWidget.svelte';
 import CyclesWidget from '$lib/modules/core/widgets/CyclesWidget.svelte';
+import NewsUnreadWidget from '$lib/modules/news/widgets/NewsUnreadWidget.svelte';
 import DayTimelineWidget from './widgets/DayTimelineWidget.svelte';
 import ActivityFeedWidget from './widgets/ActivityFeedWidget.svelte';
 
@@ -58,4 +59,5 @@ export const widgetComponents: Record<WidgetType, Component> = {
 	'day-timeline': DayTimelineWidget,
 	'activity-feed': ActivityFeedWidget,
 	cycles: CyclesWidget,
+	'news-unread': NewsUnreadWidget,
 };

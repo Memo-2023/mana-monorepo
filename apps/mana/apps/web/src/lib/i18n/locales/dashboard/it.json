@@ -145,6 +145,10 @@
 			"description": "Fase attuale e conto alla rovescia per il prossimo ciclo",
 			"empty": "Nessun ciclo registrato.",
 			"open": "Apri"
+		},
+		"news_unread": {
+			"title": "Notizie",
+			"description": "Articoli in evidenza dal tuo feed curato"
 		}
 	}
 }
