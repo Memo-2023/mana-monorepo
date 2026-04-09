@@ -41,7 +41,7 @@
 		loading = true;
 
 		try {
-			const result = await authStore.resetPassword(token, password);
+			const result = await authStore.resetPasswordWithToken(token, password);
 
 			if (!result.success) {
 				error = result.error || 'Failed to reset password';
@@ -116,7 +116,6 @@
 							autocomplete="new-password"
 							placeholder="Enter new password"
 							required
-							minlength={12}
 							bind:value={password}
 						/>
 						<p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
@@ -138,7 +137,6 @@
 							autocomplete="new-password"
 							placeholder="Confirm new password"
 							required
-							minlength={12}
 							bind:value={confirmPassword}
 						/>
 					</div>

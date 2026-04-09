@@ -3,23 +3,17 @@
 	import { buildAchievementStatus, getAchievementStats } from '../stores/achievements.svelte';
 	import { Trophy, Lightning, Target, Fire, Medal } from '@mana/shared-icons';
 
-	// Reactive live queries
+	// Reactive live queries — useLiveQueryWithDefault wraps Dexie's
+	// liveQuery and exposes a `.value` getter backed by $state, so we
+	// just read it inside $derived without manual subscribe plumbing.
 	const allSkills = useAllSkills();
 	const allActivities = useAllActivities();
 	const allAchievementsRaw = useAllAchievements();
 
-	let skills = $state<import('../types').Skill[]>([]);
-	let activities = $state<import('../types').Activity[]>([]);
-	let achievementsRaw = $state<import('../types').LocalAchievement[]>([]);
-
-	$effect(() => {
-		allSkills.subscribe((v) => (skills = v ?? []));
-		allActivities.subscribe((v) => (activities = v ?? []));
-		allAchievementsRaw.subscribe((v) => (achievementsRaw = v ?? []));
-	});
-
-	const userStats = $derived(computeUserStats(skills, activities));
-	const achievementStats = $derived(getAchievementStats(buildAchievementStatus(achievementsRaw)));
+	const userStats = $derived(computeUserStats(allSkills.value, allActivities.value));
+	const achievementStats = $derived(
+		getAchievementStats(buildAchievementStatus(allAchievementsRaw.value))
+	);
 </script>
 
 <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">

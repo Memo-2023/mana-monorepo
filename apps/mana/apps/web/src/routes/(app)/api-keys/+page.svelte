@@ -15,7 +15,9 @@
 	let creating = $state(false);
 	let newKeyName = $state('');
 	let newKeyScopes = $state<{ stt: boolean; tts: boolean }>({ stt: true, tts: true });
-	let newKeyRateLimit = $state(60);
+	// Stored as string because the shared <Input> component binds to a
+	// string value; we parseInt at submit time.
+	let newKeyRateLimit = $state('60');
 	let createdKey = $state<ApiKeyWithSecret | null>(null);
 	let copied = $state(false);
 
@@ -62,21 +64,17 @@
 		const result = await apiKeysService.create({
 			name: newKeyName.trim(),
 			scopes,
-			rateLimitRequests: newKeyRateLimit,
+			rateLimitRequests: parseInt(newKeyRateLimit, 10) || 60,
 		});
 
 		if (result.error) {
 			error = result.error;
 		} else if (result.data) {
 			createdKey = result.data;
-			// Add to list (without the secret key)
-			apiKeys = [
-				...apiKeys,
-				{
-					...result.data,
-					key: undefined as unknown as string, // Remove secret from local state
-				},
-			];
+			// Add to list — strip the secret `key` field that only appears on
+			// creation responses, so the local list matches the ApiKey shape.
+			const { key: _omit, ...withoutSecret } = result.data;
+			apiKeys = [...apiKeys, withoutSecret];
 		}
 
 		creating = false;
@@ -110,7 +108,7 @@
 		createdKey = null;
 		newKeyName = '';
 		newKeyScopes = { stt: true, tts: true };
-		newKeyRateLimit = 60;
+		newKeyRateLimit = '60';
 		copied = false;
 	}
 
@@ -186,8 +184,8 @@
 									<div class="flex-1 min-w-0">
 										<div class="flex items-center gap-2 flex-wrap">
 											<span class="font-medium">{key.name}</span>
-											<Badge variant="secondary">{key.scopes.join(', ')}</Badge>
-											<Badge variant="outline">{key.rateLimitRequests}/min</Badge>
+											<Badge variant="default">{key.scopes.join(', ')}</Badge>
+											<Badge variant="info">{key.rateLimitRequests}/min</Badge>
 										</div>
 										<div
 											class="flex items-center gap-4 mt-1 text-sm text-muted-foreground flex-wrap"
@@ -200,7 +198,7 @@
 										</div>
 									</div>
 									<Button
-										variant="destructive"
+										variant="danger"
 										size="sm"
 										loading={revoking === key.id}
 										onclick={() => handleRevoke(key.id)}
@@ -240,7 +238,7 @@
 									<div class="flex-1 min-w-0">
 										<div class="flex items-center gap-2">
 											<span class="font-medium line-through">{key.name}</span>
-											<Badge variant="destructive">Revoked</Badge>
+											<Badge variant="danger">Revoked</Badge>
 										</div>
 										<div class="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
 											<code class="bg-muted px-2 py-0.5 rounded font-mono text-xs"

@@ -152,14 +152,9 @@
 								</span>
 							{/if}
 						</div>
-						{#if task.dueTime || getSubtaskProgress(task)}
+						{#if getSubtaskProgress(task)}
 							<div class="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
-								{#if task.dueTime}
-									<span>{task.dueTime}</span>
-								{/if}
-								{#if getSubtaskProgress(task)}
-									<span>{getSubtaskProgress(task)}</span>
-								{/if}
+								<span>{getSubtaskProgress(task)}</span>
 							</div>
 						{/if}
 					</div>
