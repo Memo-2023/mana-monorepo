@@ -8,7 +8,15 @@
  */
 
 import { Readability } from '@mozilla/readability';
-import { JSDOM } from 'jsdom';
+import { JSDOM, VirtualConsole } from 'jsdom';
+
+// JSDOM emits CSS parse errors and resource-loading warnings via its
+// virtualConsole. The default console rethrows some of those as
+// uncaughtException, which in a long-running ingester loop kills the
+// whole process. A bare VirtualConsole with no listeners swallows
+// everything quietly — exactly what we want for a "best-effort article
+// extractor" that doesn't care about CSS or sub-resources.
+const silentConsole = new VirtualConsole();
 
 export interface ExtractedArticle {
 	title: string | null;
@@ -37,7 +45,7 @@ export async function fetchAndExtract(url: string): Promise<ExtractedArticle | n
 	}
 
 	try {
-		const dom = new JSDOM(html, { url });
+		const dom = new JSDOM(html, { url, virtualConsole: silentConsole });
 		const reader = new Readability(dom.window.document);
 		const article = reader.parse();
 		if (!article || !article.textContent) return null;

@@ -17,6 +17,26 @@ import { loadConfig } from './config';
 import { getDb } from './db/connection';
 import { runIngestTick, type TickResult } from './ingest';
 
+// JSDOM (used by the Readability fallback parser) likes to throw async
+// CSS / parser errors that escape every try/catch frame in the call
+// stack and reach the process top-level. In a long-running daemon
+// container we'd rather log + continue than crash + restart, because
+// crash-restart loops never make forward progress through the source
+// list (each restart begins again at source #0). Catching here is the
+// failure-mode boundary for "we attempted to ingest one bad page".
+process.on('uncaughtException', (err) => {
+	console.warn(
+		'[news-ingester] uncaughtException swallowed:',
+		err instanceof Error ? err.message : err
+	);
+});
+process.on('unhandledRejection', (reason) => {
+	console.warn(
+		'[news-ingester] unhandledRejection swallowed:',
+		reason instanceof Error ? reason.message : reason
+	);
+});
+
 const config = loadConfig();
 const db = getDb(config.databaseUrl);
 
