@@ -242,7 +242,7 @@ scrape_configs:
           - https://mana.how/notes
           - https://mana.how/habits
           - https://mana.how/guides
-          - https://mana.how/inventar
+          - https://mana.how/inventory
           - https://mana.how/playground
           # Standalone games (separate containers)
           - https://whopxl.mana.how

@@ -91,10 +91,9 @@ export function getAllApps(): AppDescriptor[] {
  *
  * Returns null when there is no matching MANA_APPS entry. Internal-only
  * tools that exist in the workbench but not in MANA_APPS (`automations`,
- * `playground`, the `inventar` ↔ `inventory` id mismatch) fall into this
- * case — `getAccessibleApps` then treats them as visible by default
- * rather than hiding them for everyone, since the alternative is a
- * silent regression for founders/devs.
+ * `playground`) fall into this case — `getAccessibleApps` then treats
+ * them as visible by default rather than hiding them for everyone, since
+ * the alternative is a silent regression for founders/devs.
  */
 function getAppRequiredTier(appId: string): AccessTier | null {
 	const branding = MANA_APPS.find((a) => a.id === appId);

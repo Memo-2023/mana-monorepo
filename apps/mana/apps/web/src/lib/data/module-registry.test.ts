@@ -138,7 +138,7 @@ describe('module-registry — pre-refactor snapshot', () => {
 			music: ['songs', 'mukkePlaylists', 'playlistSongs', 'mukkeProjects', 'markers', 'songTags'],
 			storage: ['files', 'storageFolders', 'fileTags'],
 			presi: ['presiDecks', 'slides', 'presiDeckTags'],
-			inventar: ['invCollections', 'invItems', 'invLocations', 'invCategories', 'invItemTags'],
+			inventory: ['invCollections', 'invItems', 'invLocations', 'invCategories', 'invItemTags'],
 			photos: ['albums', 'albumItems', 'photoFavorites', 'photoMediaTags'],
 			skilltree: ['skills', 'activities', 'achievements', 'skillTags'],
 			citycorners: ['cities', 'ccLocations', 'ccFavorites', 'ccLocationTags'],

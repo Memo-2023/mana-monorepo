@@ -199,7 +199,6 @@ get_tier_badge() {
   case "$appid" in
     mana.how)  appid="mana" ;;
     manadeck)  appid="cards" ;;
-    inventar)  appid="inventory" ;;
   esac
 
   echo "$TIER_APPS" | while IFS='|' read -r id name tier st; do

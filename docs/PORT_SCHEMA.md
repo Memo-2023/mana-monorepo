@@ -133,7 +133,7 @@ Pure CRUD apps use mana-sync directly.
 | 5022 | citycorners-web | *(local-first only)* |
 | 5023 | cards-web | 3036 cards-server |
 | 5024 | mukke-web | 3037 mukke-server |
-| 5025 | inventar-web | *(local-first only)* |
+| 5025 | inventory-web | *(local-first only)* |
 | 5026 | context-web | *(local-first only)* |
 | 5027 | questions-web | *(local-first only)* |
 | 5028 | planta-web | 3039 planta-server |

@@ -190,7 +190,7 @@ export const MANA_APP_INDEX: Record<string, number> = {
 	photos: 12,
 	skilltree: 13,
 	citycorners: 14,
-	inventar: 15,
+	inventory: 15,
 	times: 16,
 	nutriphi: 17,
 	planta: 18,

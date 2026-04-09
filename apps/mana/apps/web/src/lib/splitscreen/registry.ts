@@ -17,7 +17,7 @@ const SPLIT_APP_ID_LIST = [
 	'music',
 	'storage',
 	'presi',
-	'inventar',
+	'inventory',
 	'photos',
 	'skilltree',
 	'citycorners',

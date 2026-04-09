@@ -26,7 +26,7 @@ const apps = [
 	{ name: 'music', url: `${BASE}:5189` },
 	{ name: 'citycorners', url: `${BASE}:5190` },
 	{ name: 'picture', url: `${BASE}:5174` },
-	{ name: 'inventar', url: `${BASE}:5191` },
+	{ name: 'inventory', url: `${BASE}:5191` },
 ];
 
 // When testing against production, use subdomains

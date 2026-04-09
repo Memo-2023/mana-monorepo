@@ -40,6 +40,7 @@ import {
 	Calculator,
 	Lightning,
 	Sparkle,
+	Newspaper,
 } from '@mana/shared-icons';
 
 // ── Apps with entity capabilities ───────────────────────────
@@ -565,13 +566,13 @@ registerApp({
 });
 
 registerApp({
-	id: 'inventar',
+	id: 'inventory',
 	name: 'Inventar',
 	color: '#78716C',
 	icon: Package,
 	views: {
-		list: { load: () => import('$lib/modules/inventar/ListView.svelte') },
-		detail: { load: () => import('$lib/modules/inventar/views/DetailView.svelte') },
+		list: { load: () => import('$lib/modules/inventory/ListView.svelte') },
+		detail: { load: () => import('$lib/modules/inventory/views/DetailView.svelte') },
 	},
 });
 
@@ -668,4 +669,25 @@ registerApp({
 	views: {
 		list: { load: () => import('$lib/modules/playground/ListView.svelte') },
 	},
+});
+
+registerApp({
+	id: 'news',
+	name: 'News',
+	color: '#10B981',
+	icon: Newspaper,
+	views: {
+		list: { load: () => import('$lib/modules/news/ListView.svelte') },
+	},
+	contextMenuActions: [
+		{
+			id: 'open-feed',
+			label: 'Feed öffnen',
+			icon: Plus,
+			action: () =>
+				window.dispatchEvent(
+					new CustomEvent('mana:quick-action', { detail: { app: 'news', action: 'open' } })
+				),
+		},
+	],
 });

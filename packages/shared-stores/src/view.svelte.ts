@@ -17,7 +17,7 @@
  * }
  *
  * export const viewStore = createViewStore<MyViewMode, MyFilters>({
- *   storagePrefix: 'inventar',
+ *   storagePrefix: 'inventory',
  *   defaultViewMode: 'list',
  *   defaultSort: { field: 'name', direction: 'asc' },
  *   hasActiveFilters: (f) => !!(f.search || f.status?.length || f.tagIds?.length),
@@ -40,7 +40,7 @@ export interface SavedFilter<F> {
 }
 
 export interface ViewStoreConfig<V extends string, F extends object> {
-	/** Prefix for localStorage keys (e.g. 'inventar' → 'inventar_view_mode') */
+	/** Prefix for localStorage keys (e.g. 'inventory' → 'inventory_view_mode') */
 	storagePrefix: string;
 	/** Default view mode */
 	defaultViewMode: V;

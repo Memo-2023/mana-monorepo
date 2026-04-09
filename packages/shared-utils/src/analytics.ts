@@ -167,7 +167,7 @@ const track = {
 	memoro: createModuleTracker('memoro'),
 	app: createModuleTracker('app'),
 	calc: createModuleTracker('calc'),
-	inventar: createModuleTracker('inventar'),
+	inventory: createModuleTracker('inventory'),
 	moodlit: createModuleTracker('moodlit'),
 	citycorners: createModuleTracker('citycorners'),
 };
@@ -570,18 +570,18 @@ export const CalcEvents = {
 };
 
 /**
- * Inventar App Events
+ * Inventory App Events
  */
-export const InventarEvents = {
-	itemCreated: () => track.inventar('item_created'),
-	itemUpdated: () => track.inventar('item_updated'),
-	itemDeleted: () => track.inventar('item_deleted'),
-	collectionCreated: () => track.inventar('collection_created'),
-	collectionDeleted: () => track.inventar('collection_deleted'),
-	categoryCreated: () => track.inventar('category_created'),
-	categoryDeleted: () => track.inventar('category_deleted'),
-	locationCreated: () => track.inventar('location_created'),
-	locationDeleted: () => track.inventar('location_deleted'),
+export const InventoryEvents = {
+	itemCreated: () => track.inventory('item_created'),
+	itemUpdated: () => track.inventory('item_updated'),
+	itemDeleted: () => track.inventory('item_deleted'),
+	collectionCreated: () => track.inventory('collection_created'),
+	collectionDeleted: () => track.inventory('collection_deleted'),
+	categoryCreated: () => track.inventory('category_created'),
+	categoryDeleted: () => track.inventory('category_deleted'),
+	locationCreated: () => track.inventory('location_created'),
+	locationDeleted: () => track.inventory('location_deleted'),
 };
 
 /**

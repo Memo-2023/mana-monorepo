@@ -120,7 +120,7 @@ const PROJECT_META: Record<string, { name: string; icon: string }> = {
 	picture: { name: 'ManaPicture', icon: '🎨' },
 	zitare: { name: 'Zitare', icon: '✨' },
 	presi: { name: 'Presi', icon: '📊' },
-	inventar: { name: 'Inventar', icon: '📦' },
+	inventory: { name: 'Inventar', icon: '📦' },
 	nutriphi: { name: 'Nutriphi', icon: '🥗' },
 	planta: { name: 'Planta', icon: '🌱' },
 	storage: { name: 'Storage', icon: '☁️' },

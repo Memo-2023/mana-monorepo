@@ -61,7 +61,7 @@ import { zitareModuleConfig } from '$lib/modules/zitare/module.config';
 import { musicModuleConfig } from '$lib/modules/music/module.config';
 import { storageModuleConfig } from '$lib/modules/storage/module.config';
 import { presiModuleConfig } from '$lib/modules/presi/module.config';
-import { inventarModuleConfig } from '$lib/modules/inventar/module.config';
+import { inventoryModuleConfig } from '$lib/modules/inventory/module.config';
 import { photosModuleConfig } from '$lib/modules/photos/module.config';
 import { skilltreeModuleConfig } from '$lib/modules/skilltree/module.config';
 import { citycornersModuleConfig } from '$lib/modules/citycorners/module.config';
@@ -84,6 +84,7 @@ import { financeModuleConfig } from '$lib/modules/finance/module.config';
 import { placesModuleConfig } from '$lib/modules/places/module.config';
 import { playgroundModuleConfig } from '$lib/modules/playground/module.config';
 import { whoModuleConfig } from '$lib/modules/who/module.config';
+import { newsModuleConfig } from '$lib/modules/news/module.config';
 
 export const MODULE_CONFIGS: readonly ModuleConfig[] = [
 	manaCoreConfig,
@@ -100,7 +101,7 @@ export const MODULE_CONFIGS: readonly ModuleConfig[] = [
 	musicModuleConfig,
 	storageModuleConfig,
 	presiModuleConfig,
-	inventarModuleConfig,
+	inventoryModuleConfig,
 	photosModuleConfig,
 	skilltreeModuleConfig,
 	citycornersModuleConfig,
@@ -123,6 +124,7 @@ export const MODULE_CONFIGS: readonly ModuleConfig[] = [
 	placesModuleConfig,
 	playgroundModuleConfig,
 	whoModuleConfig,
+	newsModuleConfig,
 ];
 
 // ─── Derived Maps ──────────────────────────────────────────

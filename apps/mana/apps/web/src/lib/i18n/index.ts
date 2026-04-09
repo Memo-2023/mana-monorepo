@@ -38,7 +38,7 @@ function registerLocale(lang: SupportedLocale) {
 			presi,
 			uload,
 			times,
-			inventar,
+			inventory,
 			photos,
 			nutriphi,
 			planta,
@@ -49,6 +49,7 @@ function registerLocale(lang: SupportedLocale) {
 			guides,
 			help,
 			cycles,
+			news,
 		] = await Promise.all([
 			import(`./locales/apps/${lang}.json`),
 			import(`./locales/common/${lang}.json`),
@@ -72,7 +73,7 @@ function registerLocale(lang: SupportedLocale) {
 			import(`./locales/presi/${lang}.json`),
 			import(`./locales/uload/${lang}.json`),
 			import(`./locales/times/${lang}.json`),
-			import(`./locales/inventar/${lang}.json`),
+			import(`./locales/inventory/${lang}.json`),
 			import(`./locales/photos/${lang}.json`),
 			import(`./locales/nutriphi/${lang}.json`),
 			import(`./locales/planta/${lang}.json`),
@@ -83,6 +84,7 @@ function registerLocale(lang: SupportedLocale) {
 			import(`./locales/guides/${lang}.json`),
 			import(`./locales/help/${lang}.json`),
 			import(`./locales/cycles/${lang}.json`),
+			import(`./locales/news/${lang}.json`),
 		]);
 
 		return {
@@ -108,7 +110,7 @@ function registerLocale(lang: SupportedLocale) {
 			presi: presi.default,
 			uload: uload.default,
 			times: times.default,
-			inventar: inventar.default,
+			inventory: inventory.default,
 			photos: photos.default,
 			nutriphi: nutriphi.default,
 			planta: planta.default,
@@ -119,6 +121,7 @@ function registerLocale(lang: SupportedLocale) {
 			guides: guides.default,
 			help: help.default,
 			cycles: cycles.default,
+			news: news.default,
 		};
 	});
 }

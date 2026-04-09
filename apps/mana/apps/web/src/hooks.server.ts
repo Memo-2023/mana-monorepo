@@ -64,7 +64,7 @@ const APP_SUBDOMAINS = new Set([
 	'picture',
 	'calc',
 	'citycorners',
-	'inventar',
+	'inventory',
 	'times',
 	'uload',
 	'memoro',
