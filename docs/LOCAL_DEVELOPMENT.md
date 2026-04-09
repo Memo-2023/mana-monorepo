@@ -172,6 +172,52 @@ pnpm setup:db:traces      # Setup traces database + schema
 pnpm setup:db             # Creates ALL databases and pushes ALL schemas
 ```
 
+## Local Login & Dev Users
+
+The local mana-auth has `requireEmailVerification: true` and no real
+SMTP wired up, so a freshly-registered user can't actually log in until
+the verification flag is flipped manually. There's also no built-in
+admin seed and no `DEV_BYPASS_AUTH` env var. Use the convenience script:
+
+```bash
+pnpm setup:dev-user
+```
+
+Creates three founder-tier accounts with `email_verified = true` so
+you can immediately exercise every tier-gated module:
+
+| Email | Password | Tier |
+|---|---|---|
+| `tills95@gmail.com` | `Aa-123456789` | founder |
+| `tilljkb@gmail.com` | `Aa-123456789` | founder |
+| `rajiehq@gmail.com` | `Aa-123456789` | founder |
+
+Login at http://localhost:5173/login with any of them.
+
+**Single account / custom credentials:**
+
+```bash
+./scripts/dev/setup-dev-user.sh you@example.com YourPassword
+```
+
+**Override defaults via env:**
+
+```bash
+TIER=alpha AUTH_URL=http://localhost:3001 pnpm setup:dev-user
+```
+
+The script is **idempotent** — re-running re-applies `email_verified`
++ `access_tier` to existing users without touching their password.
+
+**Prereqs**: Postgres up (`pnpm docker:up`), mana-auth running on
+:3001 (`pnpm dev:auth`), `psql` in `PATH`. Both gates fail loud if
+missing.
+
+**How it works internally**: `POST /api/v1/auth/register` so Better
+Auth's `signUpEmail` handles password hashing correctly, then
+`UPDATE auth.users SET email_verified = true, access_tier = 'founder'`
+to bypass the missing local SMTP and lift the tier in one step.
+
 This is useful when setting up a fresh environment or after pulling new schema changes.
 
 ## How It Works

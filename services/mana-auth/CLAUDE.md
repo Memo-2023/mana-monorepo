@@ -79,6 +79,23 @@ For the full architectural deep-dive, threat model, and rollout history (Phases 
 |--------|------|-------------|
 | GET | `/org/:orgId/member/:userId` | Check membership (for mana-credits) |
 
+## Local Dev Login
+
+There is **no built-in admin seed** and **no auth-bypass env var**, and
+the local stack runs with `requireEmailVerification: true` against no
+real SMTP. Use the convenience script instead of hand-crafting SQL:
+
+```bash
+pnpm setup:dev-user                              # 3 founder accounts
+./scripts/dev/setup-dev-user.sh foo@x.de pass    # single account
+```
+
+Defaults to `tills95@gmail.com` / `tilljkb@gmail.com` / `rajiehq@gmail.com`,
+all with password `Aa-123456789` and `access_tier = founder`. The script
+calls `POST /api/v1/auth/register` (so Better Auth handles hashing),
+then runs an idempotent SQL `UPDATE auth.users SET email_verified = true,
+access_tier = 'founder'`. Full docs in `docs/LOCAL_DEVELOPMENT.md`.
+
 ## Cross-Domain SSO
 
 Session cookies shared across `*.mana.how` via `COOKIE_DOMAIN=.mana.how`.
