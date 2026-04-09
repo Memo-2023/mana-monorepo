@@ -16,7 +16,7 @@ backend with its own database, schema, and watering scheduler was deleted
 in the audit cleanup of 2026-04-09 — it had been inaccurate since the
 consolidation. Pre-consolidation reference is in git history.
 
-> **Note:** The orphaned `apps/planta/packages/shared/` package and the
-> related sub-script entries in `apps/planta/package.json` referencing
-> non-existent `@planta/server` / `@planta/web` filters are tracked as
-> dead code in `docs/REFACTORING_AUDIT_2026_04.md` items #18/#29.
+> **Note:** The orphaned `apps/planta/packages/shared/` package was
+> removed on 2026-04-09 — it had zero consumers across the repo. The
+> remaining `apps/planta/package.json` is kept as a placeholder so the
+> directory still surfaces in IDEs and as a doc anchor.
