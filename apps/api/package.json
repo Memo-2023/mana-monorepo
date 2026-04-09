@@ -12,10 +12,13 @@
 		"db:push": "drizzle-kit push"
 	},
 	"dependencies": {
+		"@ai-sdk/openai-compatible": "^2.0.41",
 		"@mana/media-client": "workspace:*",
 		"@mana/shared-hono": "workspace:*",
 		"@mana/shared-storage": "workspace:*",
+		"@mana/shared-types": "workspace:^",
 		"@mozilla/readability": "^0.5.0",
+		"ai": "^6.0.154",
 		"drizzle-orm": "^0.38.0",
 		"hono": "^4.7.0",
 		"jsdom": "^25.0.0",

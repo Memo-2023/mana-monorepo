@@ -81,7 +81,8 @@
 		"suncalc": "^1.9.0",
 		"svelte-dnd-action": "^0.9.68",
 		"svelte-i18n": "^4.0.0",
-		"svelte-sonner": "^1.0.5"
+		"svelte-sonner": "^1.0.5",
+		"zod": "^3.25.76"
 	},
 	"type": "module"
 }

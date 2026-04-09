@@ -22,6 +22,9 @@ export * from './contact';
 // Landing page configuration types
 export * from './landing-config';
 
+// AI structured-output Zod schemas (shared between mana-api + web frontend)
+export * from './ai-schemas';
+
 // API types
 export interface User {
 	id: string;
