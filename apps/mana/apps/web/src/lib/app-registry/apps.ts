@@ -41,6 +41,10 @@ import {
 	Lightning,
 	Sparkle,
 	Newspaper,
+	Barbell,
+	Confetti,
+	Detective,
+	BookOpen,
 } from '@mana/shared-icons';
 
 // ── Apps with entity capabilities ───────────────────────────
@@ -679,6 +683,47 @@ registerApp({
 	icon: Sparkle,
 	views: {
 		list: { load: () => import('$lib/modules/playground/ListView.svelte') },
+	},
+});
+
+registerApp({
+	id: 'guides',
+	name: 'Guides',
+	color: '#0d9488',
+	icon: BookOpen,
+	views: {
+		list: { load: () => import('$lib/modules/guides/ListView.svelte') },
+	},
+});
+
+registerApp({
+	id: 'body',
+	name: 'Body',
+	color: '#ef4444',
+	icon: Barbell,
+	views: {
+		list: { load: () => import('$lib/modules/body/ListView.svelte') },
+	},
+});
+
+registerApp({
+	id: 'events',
+	name: 'Events',
+	color: '#f43f5e',
+	icon: Confetti,
+	views: {
+		list: { load: () => import('$lib/modules/events/ListView.svelte') },
+		detail: { load: () => import('$lib/modules/events/views/DetailView.svelte') },
+	},
+});
+
+registerApp({
+	id: 'who',
+	name: 'Who',
+	color: '#a855f7',
+	icon: Detective,
+	views: {
+		list: { load: () => import('$lib/modules/who/ListView.svelte') },
 	},
 });
 
