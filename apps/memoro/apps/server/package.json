@@ -8,6 +8,7 @@
 		"build": "bun build src/index.ts --outdir dist --target bun"
 	},
 	"dependencies": {
+		"@mana/notify-client": "workspace:*",
 		"@mana/shared-hono": "workspace:*",
 		"@supabase/supabase-js": "^2.49.5",
 		"hono": "^4.7.0",

@@ -4,10 +4,8 @@
 	"private": true,
 	"description": "Memoro - AI-powered voice recording & memo management",
 	"scripts": {
-		"dev": "pnpm run --filter=@memoro/* --parallel dev",
 		"dev:server": "cd apps/server && bun run --watch src/index.ts",
 		"dev:audio-server": "cd apps/audio-server && bun run --watch src/index.ts",
-		"dev:web": "pnpm --filter @memoro/web dev",
 		"dev:mobile": "pnpm --filter @memoro/mobile start",
 		"dev:landing": "pnpm --filter @memoro/landing dev"
 	},
