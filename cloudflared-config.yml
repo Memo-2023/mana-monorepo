@@ -22,8 +22,8 @@
 # Cloudflare routes here that we don't have an explicit ingress rule
 # for. This is the desired failure mode.
 
-tunnel: bb0ea86d-8253-4a54-838b-107bb7945be9
-credentials-file: /Users/mana/.cloudflared/bb0ea86d-8253-4a54-838b-107bb7945be9.json
+tunnel: 1435166a-0e3f-4222-8de6-744f32cea5c9
+credentials-file: /Users/mana/.cloudflared/1435166a-0e3f-4222-8de6-744f32cea5c9.json
 
 ingress:
   # ============================================
