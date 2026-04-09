@@ -39,6 +39,14 @@
 	let pickedLanguages = $state<Language[]>(['de', 'en']);
 	let pickedBlocked = $state<string[]>([]);
 	let onboardingStep = $state<1 | 2 | 3>(1);
+	// Local "just finished" override so the wizard hides immediately on
+	// click instead of waiting for Dexie's liveQuery to debounce + emit
+	// the new prefs.onboardingCompleted = true. Without this, the user
+	// clicks "Fertig", the write goes through, but the UI re-renders
+	// the same wizard step until the next liveQuery tick (~50-100ms),
+	// so people instinctively click again before noticing the change.
+	let onboardingJustFinished = $state(false);
+	let onboardingSubmitting = $state(false);
 
 	function toggleTopic(t: Topic) {
 		pickedTopics = pickedTopics.includes(t)
@@ -57,20 +65,49 @@
 	}
 
 	async function finishOnboarding() {
-		// $state.snapshot strips the Svelte 5 reactive proxies — without it
-		// the arrays travel into Dexie hooks as proxies and trip
-		// DataCloneError on the structured-clone into _pendingChanges.
-		await preferencesStore.completeOnboarding({
-			topics: $state.snapshot(pickedTopics) as Topic[],
-			languages: $state.snapshot(pickedLanguages) as Language[],
-			blockedSources: $state.snapshot(pickedBlocked) as string[],
-		});
-		// The +layout effect will pick up the new prefs and refresh.
+		if (onboardingSubmitting) return;
+		onboardingSubmitting = true;
+		try {
+			// $state.snapshot strips the Svelte 5 reactive proxies — without it
+			// the arrays travel into Dexie hooks as proxies and trip
+			// DataCloneError on the structured-clone into _pendingChanges.
+			const topicsSnap = $state.snapshot(pickedTopics) as Topic[];
+			const langsSnap = $state.snapshot(pickedLanguages) as Language[];
+			const blockedSnap = $state.snapshot(pickedBlocked) as string[];
+
+			await preferencesStore.completeOnboarding({
+				topics: topicsSnap,
+				languages: langsSnap,
+				blockedSources: blockedSnap,
+			});
+
+			// Flip to the feed branch immediately. Without this we'd be at
+			// the mercy of Dexie's liveQuery debounce — the prefs read
+			// behind `prefs.onboardingCompleted` only updates a few ticks
+			// after the write, so the wizard would re-render the same
+			// step for ~50-100ms and the user would click "Fertig" twice.
+			onboardingJustFinished = true;
+
+			// Eagerly trigger the first feed pull instead of waiting for
+			// the layout's $effect to notice the prefs change. The layout
+			// effect WILL also fire shortly after, but its refresh is a
+			// no-op via the store's inFlight guard.
+			void feedCacheStore.refresh({
+				topics: topicsSnap,
+				lang: langsSnap.length === 1 ? langsSnap[0] : 'all',
+			});
+		} finally {
+			onboardingSubmitting = false;
+		}
 	}
 
 	// ─── Feed branch ──────────────────────────────────────────
 	const reactedIds = $derived(buildReactedIds(reactions));
-	const ranked = $derived(prefs.onboardingCompleted ? rankFeed(pool, { prefs, reactedIds }) : []);
+	// Treat the local "just finished" override as fully onboarded so the
+	// feed renders immediately after the user clicks Fertig, before the
+	// liveQuery has had a chance to refresh prefs.
+	const isOnboarded = $derived(prefs.onboardingCompleted || onboardingJustFinished);
+	const ranked = $derived(isOnboarded ? rankFeed(pool, { prefs, reactedIds }) : []);
 
 	async function react(
 		article: LocalCachedArticle,
@@ -107,7 +144,7 @@
 </svelte:head>
 
 <div class="news-page">
-	{#if !prefs.onboardingCompleted}
+	{#if !isOnboarded}
 		<!-- ─── Onboarding ───────────────────────────────────── -->
 		<header class="hero">
 			<h1>Willkommen beim News Hub</h1>
@@ -216,7 +253,14 @@
 					<button type="button" class="btn-secondary" onclick={() => (onboardingStep = 2)}>
 						Zurück
 					</button>
-					<button type="button" class="btn-primary" onclick={finishOnboarding}> Fertig </button>
+					<button
+						type="button"
+						class="btn-primary"
+						onclick={finishOnboarding}
+						disabled={onboardingSubmitting}
+					>
+						{onboardingSubmitting ? 'Speichere…' : 'Fertig'}
+					</button>
 				</div>
 			</section>
 		{/if}
