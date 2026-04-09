@@ -25,7 +25,7 @@
 		"setup:db": "./scripts/setup-databases.sh",
 		"setup:db:chat": "./scripts/setup-databases.sh chat",
 		"setup:db:auth": "./scripts/setup-databases.sh auth",
-		"seed:dev-user": "pnpm --filter @mana/auth db:seed:dev",
+		"setup:dev-user": "./scripts/dev/setup-dev-user.sh",
 		"build:packages": "pnpm --filter '@mana/*' build",
 		"postinstall": "node scripts/generate-env.mjs || true && pnpm run build:packages || true",
 		"mana:dev": "turbo run dev --filter=mana...",
