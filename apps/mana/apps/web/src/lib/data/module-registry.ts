@@ -85,6 +85,7 @@ import { placesModuleConfig } from '$lib/modules/places/module.config';
 import { playgroundModuleConfig } from '$lib/modules/playground/module.config';
 import { whoModuleConfig } from '$lib/modules/who/module.config';
 import { newsModuleConfig } from '$lib/modules/news/module.config';
+import { bodyModuleConfig } from '$lib/modules/body/module.config';
 
 export const MODULE_CONFIGS: readonly ModuleConfig[] = [
 	manaCoreConfig,
@@ -125,6 +126,7 @@ export const MODULE_CONFIGS: readonly ModuleConfig[] = [
 	playgroundModuleConfig,
 	whoModuleConfig,
 	newsModuleConfig,
+	bodyModuleConfig,
 ];
 
 // ─── Derived Maps ──────────────────────────────────────────

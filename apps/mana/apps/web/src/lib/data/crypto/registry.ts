@@ -331,6 +331,46 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	},
 	newsReactions: { enabled: true, fields: ['reaction', 'sourceSlug', 'topic'] },
 
+	// ─── Body (combined fitness + bodylog) ───────────────────
+	// Health/fitness data is GDPR-sensitive (Art. 9 special category).
+	// What's encrypted:
+	//   - Free-text everywhere: notes / description / title fields are
+	//     user-typed and the most obviously private bits.
+	//   - bodyMeasurements.value: weight + body-fat + circumference numbers
+	//     are the headline sensitive fields. Encrypting the value while
+	//     leaving (date, type) plaintext keeps the per-metric trend chart's
+	//     [type+date] range scan working — only the projection step has to
+	//     decrypt, not the index lookup.
+	//   - bodySets.weight + reps: same rationale. The (workoutId, exerciseId)
+	//     plaintext indexes still resolve "which sets did I do" without
+	//     leaking how heavy or how many.
+	//   - bodyChecks.energy/sleep/soreness/mood: 1-5 mood-style ratings with
+	//     the same sensitivity as cycleDayLogs.mood.
+	//   - bodyPhases.startWeight/targetWeight: identical reasoning to
+	//     measurement values.
+	// Plaintext (intentional):
+	//   - All ids, foreign keys, ordering, dates, kind/type discriminators,
+	//     muscleGroup/equipment enums — needed by the index layer and the
+	//     pure aggregation helpers in queries.ts.
+	//   - bodyExercises.name on PRESETS would ideally stay plaintext to
+	//     avoid a per-record decrypt for the exercise picker, but since
+	//     user-created exercises share the same column we encrypt the
+	//     whole field and the picker pays the decrypt cost in JS. The
+	//     library is small (dozens, not thousands) so this is fine.
+	bodyExercises: { enabled: true, fields: ['name', 'notes'] },
+	bodyRoutines: { enabled: true, fields: ['name', 'description'] },
+	bodyWorkouts: { enabled: true, fields: ['title', 'notes'] },
+	bodySets: { enabled: true, fields: ['weight', 'reps', 'notes'] },
+	bodyMeasurements: { enabled: true, fields: ['value', 'notes'] },
+	bodyChecks: {
+		enabled: true,
+		fields: ['energy', 'sleep', 'soreness', 'mood', 'notes'],
+	},
+	bodyPhases: {
+		enabled: true,
+		fields: ['startWeight', 'targetWeight', 'notes'],
+	},
+
 	// ─── TimeBlocks (cross-module hub) ───────────────────────
 	// Phase 7.1: encrypted alongside tasks + calendar.events + habits
 	// because the consumer modules denormalize their title/description

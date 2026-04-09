@@ -1,0 +1,260 @@
+/**
+ * Reactive Queries & Pure Helpers for the Body module.
+ *
+ * Read-side only — mutations live in stores/body.svelte.ts.
+ */
+
+import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { decryptRecords } from '$lib/data/crypto';
+import { db } from '$lib/data/database';
+import type {
+	LocalBodyExercise,
+	LocalBodyRoutine,
+	LocalBodyWorkout,
+	LocalBodySet,
+	LocalBodyMeasurement,
+	LocalBodyCheck,
+	LocalBodyPhase,
+	BodyExercise,
+	BodyRoutine,
+	BodyWorkout,
+	BodySet,
+	BodyMeasurement,
+	BodyCheck,
+	BodyPhase,
+} from './types';
+
+// ─── Type Converters ────────────────────────────────────────
+
+export function toBodyExercise(local: LocalBodyExercise): BodyExercise {
+	const now = new Date().toISOString();
+	return {
+		id: local.id,
+		name: local.name,
+		muscleGroup: local.muscleGroup,
+		equipment: local.equipment,
+		notes: local.notes ?? null,
+		isArchived: local.isArchived,
+		isPreset: local.isPreset,
+		createdAt: local.createdAt ?? now,
+		updatedAt: local.updatedAt ?? now,
+	};
+}
+
+export function toBodyRoutine(local: LocalBodyRoutine): BodyRoutine {
+	const now = new Date().toISOString();
+	return {
+		id: local.id,
+		name: local.name,
+		description: local.description ?? null,
+		exerciseIds: local.exerciseIds ?? [],
+		order: local.order,
+		isArchived: local.isArchived,
+		createdAt: local.createdAt ?? now,
+		updatedAt: local.updatedAt ?? now,
+	};
+}
+
+export function toBodyWorkout(local: LocalBodyWorkout): BodyWorkout {
+	const now = new Date().toISOString();
+	return {
+		id: local.id,
+		startedAt: local.startedAt,
+		endedAt: local.endedAt ?? null,
+		routineId: local.routineId ?? null,
+		title: local.title ?? null,
+		notes: local.notes ?? null,
+		rpe: local.rpe ?? null,
+		createdAt: local.createdAt ?? now,
+		updatedAt: local.updatedAt ?? now,
+	};
+}
+
+export function toBodySet(local: LocalBodySet): BodySet {
+	return {
+		id: local.id,
+		workoutId: local.workoutId,
+		exerciseId: local.exerciseId,
+		order: local.order,
+		reps: local.reps,
+		weight: local.weight,
+		weightUnit: local.weightUnit,
+		rpe: local.rpe ?? null,
+		isWarmup: local.isWarmup,
+		notes: local.notes ?? null,
+		createdAt: local.createdAt ?? new Date().toISOString(),
+	};
+}
+
+export function toBodyMeasurement(local: LocalBodyMeasurement): BodyMeasurement {
+	return {
+		id: local.id,
+		date: local.date,
+		type: local.type,
+		value: local.value,
+		unit: local.unit,
+		notes: local.notes ?? null,
+		createdAt: local.createdAt ?? new Date().toISOString(),
+	};
+}
+
+export function toBodyCheck(local: LocalBodyCheck): BodyCheck {
+	return {
+		id: local.id,
+		date: local.date,
+		energy: local.energy ?? null,
+		sleep: local.sleep ?? null,
+		soreness: local.soreness ?? null,
+		mood: local.mood ?? null,
+		notes: local.notes ?? null,
+		createdAt: local.createdAt ?? new Date().toISOString(),
+	};
+}
+
+export function toBodyPhase(local: LocalBodyPhase): BodyPhase {
+	const now = new Date().toISOString();
+	return {
+		id: local.id,
+		kind: local.kind,
+		startDate: local.startDate,
+		endDate: local.endDate ?? null,
+		startWeight: local.startWeight ?? null,
+		targetWeight: local.targetWeight ?? null,
+		notes: local.notes ?? null,
+		createdAt: local.createdAt ?? now,
+		updatedAt: local.updatedAt ?? now,
+	};
+}
+
+// ─── Live Queries ───────────────────────────────────────────
+
+export function useAllBodyExercises() {
+	return useLiveQueryWithDefault(async () => {
+		const locals = await db.table<LocalBodyExercise>('bodyExercises').toArray();
+		const visible = locals.filter((e) => !e.deletedAt);
+		const decrypted = await decryptRecords('bodyExercises', visible);
+		return decrypted.map(toBodyExercise).sort((a, b) => a.name.localeCompare(b.name));
+	}, [] as BodyExercise[]);
+}
+
+export function useAllBodyRoutines() {
+	return useLiveQueryWithDefault(async () => {
+		const locals = await db.table<LocalBodyRoutine>('bodyRoutines').orderBy('order').toArray();
+		const visible = locals.filter((r) => !r.deletedAt);
+		const decrypted = await decryptRecords('bodyRoutines', visible);
+		return decrypted.map(toBodyRoutine);
+	}, [] as BodyRoutine[]);
+}
+
+export function useAllBodyWorkouts() {
+	return useLiveQueryWithDefault(async () => {
+		const locals = await db.table<LocalBodyWorkout>('bodyWorkouts').toArray();
+		const visible = locals.filter((w) => !w.deletedAt);
+		const decrypted = await decryptRecords('bodyWorkouts', visible);
+		return decrypted.map(toBodyWorkout).sort((a, b) => b.startedAt.localeCompare(a.startedAt));
+	}, [] as BodyWorkout[]);
+}
+
+export function useAllBodySets() {
+	return useLiveQueryWithDefault(async () => {
+		const locals = await db.table<LocalBodySet>('bodySets').toArray();
+		const visible = locals.filter((s) => !s.deletedAt);
+		const decrypted = await decryptRecords('bodySets', visible);
+		return decrypted.map(toBodySet);
+	}, [] as BodySet[]);
+}
+
+export function useSetsForWorkout(workoutId: string) {
+	return useLiveQueryWithDefault(async () => {
+		const locals = await db
+			.table<LocalBodySet>('bodySets')
+			.where('workoutId')
+			.equals(workoutId)
+			.toArray();
+		const visible = locals.filter((s) => !s.deletedAt);
+		const decrypted = await decryptRecords('bodySets', visible);
+		return decrypted.map(toBodySet).sort((a, b) => a.order - b.order);
+	}, [] as BodySet[]);
+}
+
+export function useAllBodyMeasurements() {
+	return useLiveQueryWithDefault(async () => {
+		const locals = await db.table<LocalBodyMeasurement>('bodyMeasurements').toArray();
+		const visible = locals.filter((m) => !m.deletedAt);
+		const decrypted = await decryptRecords('bodyMeasurements', visible);
+		return decrypted.map(toBodyMeasurement).sort((a, b) => b.date.localeCompare(a.date));
+	}, [] as BodyMeasurement[]);
+}
+
+export function useAllBodyChecks() {
+	return useLiveQueryWithDefault(async () => {
+		const locals = await db.table<LocalBodyCheck>('bodyChecks').toArray();
+		const visible = locals.filter((c) => !c.deletedAt);
+		const decrypted = await decryptRecords('bodyChecks', visible);
+		return decrypted.map(toBodyCheck).sort((a, b) => b.date.localeCompare(a.date));
+	}, [] as BodyCheck[]);
+}
+
+export function useAllBodyPhases() {
+	return useLiveQueryWithDefault(async () => {
+		const locals = await db.table<LocalBodyPhase>('bodyPhases').toArray();
+		const visible = locals.filter((p) => !p.deletedAt);
+		const decrypted = await decryptRecords('bodyPhases', visible);
+		return decrypted.map(toBodyPhase).sort((a, b) => b.startDate.localeCompare(a.startDate));
+	}, [] as BodyPhase[]);
+}
+
+// ─── Pure Helpers ───────────────────────────────────────────
+
+/** Today as YYYY-MM-DD. */
+export function todayDateStr(): string {
+	return new Date().toISOString().split('T')[0];
+}
+
+/** Latest weight measurement (in whatever unit the user logged it). */
+export function getLatestWeight(measurements: BodyMeasurement[]): BodyMeasurement | null {
+	return measurements.find((m) => m.type === 'weight') ?? null;
+}
+
+/** Volume = sum(reps * weight) for non-warmup sets, in the unit of the first set. */
+export function getWorkoutVolume(sets: BodySet[]): number {
+	return sets.filter((s) => !s.isWarmup).reduce((sum, s) => sum + s.reps * s.weight, 0);
+}
+
+/**
+ * Best (heaviest) working set per exercise across the supplied sets.
+ * Used for the "PR feed" + per-exercise progression chart.
+ */
+export function getBestSetByExercise(sets: BodySet[]): Map<string, BodySet> {
+	const best = new Map<string, BodySet>();
+	for (const s of sets) {
+		if (s.isWarmup) continue;
+		const current = best.get(s.exerciseId);
+		if (!current || s.weight > current.weight) {
+			best.set(s.exerciseId, s);
+		}
+	}
+	return best;
+}
+
+/** Estimated 1-rep-max via the Epley formula. */
+export function estimateOneRepMax(weight: number, reps: number): number {
+	if (reps <= 0) return 0;
+	if (reps === 1) return weight;
+	return Math.round(weight * (1 + reps / 30));
+}
+
+/** Active (non-archived) exercises sorted by name. */
+export function getActiveExercises(exercises: BodyExercise[]): BodyExercise[] {
+	return exercises.filter((e) => !e.isArchived);
+}
+
+/** The currently-running workout (endedAt = null), if any. */
+export function getActiveWorkout(workouts: BodyWorkout[]): BodyWorkout | null {
+	return workouts.find((w) => w.endedAt === null) ?? null;
+}
+
+/** Phase that is currently in progress, if any. */
+export function getActivePhase(phases: BodyPhase[]): BodyPhase | null {
+	return phases.find((p) => p.endDate === null) ?? null;
+}

@@ -565,6 +565,23 @@ export const MANA_APPS: ManaApp[] = [
 		requiredTier: 'guest',
 	},
 	{
+		id: 'body',
+		name: 'Body',
+		description: {
+			de: 'Training & Körper-Tracking',
+			en: 'Training & Body Tracking',
+		},
+		longDescription: {
+			de: 'Logge Workouts, Sätze und progressive Steigerung neben Gewicht, Maßen und täglichen Energie-Checks. Eine App für alles, was deinen Körper bewegt und verändert.',
+			en: 'Log workouts, sets, and progressive overload alongside weight, measurements, and daily energy check-ins. One app for everything that moves and changes your body.',
+		},
+		icon: APP_ICONS.body,
+		color: '#ef4444',
+		comingSoon: false,
+		status: 'development',
+		requiredTier: 'guest',
+	},
+	{
 		id: 'habits',
 		name: 'Habits',
 		description: {
