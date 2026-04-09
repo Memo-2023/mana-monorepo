@@ -178,23 +178,13 @@ ingress:
     service: http://localhost:8020
 
   # ============================================
-  # GPU server forwarders (Windows PC, LAN: 192.168.178.11)
+  # GPU services (NOT in this tunnel)
   # ============================================
-  # The Mac Mini fronts the Windows GPU box's services so they're
-  # reachable through the same tunnel without exposing the LAN box
-  # to the public internet directly.
-  - hostname: gpu-llm.mana.how
-    service: http://192.168.178.11:3025
-  - hostname: gpu-stt.mana.how
-    service: http://192.168.178.11:3020
-  - hostname: gpu-tts.mana.how
-    service: http://192.168.178.11:3022
-  - hostname: gpu-img.mana.how
-    service: http://192.168.178.11:3023
-  - hostname: gpu-video.mana.how
-    service: http://192.168.178.11:3026
-  - hostname: gpu-ollama.mana.how
-    service: http://192.168.178.11:11434
+  # gpu-llm / gpu-stt / gpu-tts / gpu-img / gpu-video / gpu-ollama
+  # are served by a SEPARATE cloudflared tunnel running on the Windows
+  # GPU box itself (`mana-gpu-server` tunnel ID 83454e8e-...). Routing
+  # them via the Mac Mini's tunnel would cause DNS routing conflicts
+  # because each Cloudflare DNS CNAME can only point at one tunnel.
 
   # ============================================
   # Catch-all (returns 404 for any unmapped hostname)
