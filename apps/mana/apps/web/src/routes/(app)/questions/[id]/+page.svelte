@@ -28,12 +28,12 @@
 
 	const allQuestions = useAllQuestions();
 
-	let questionId = $derived($page.params.id);
-	let question = $derived(getQuestionById(allQuestions.current ?? [], questionId));
+	let questionId = $derived($page.params.id ?? '');
+	let question = $derived(getQuestionById(allQuestions.value, questionId));
 
 	// Answers live query — we call it reactively via the id
 	let answersQuery = $derived(useAnswersByQuestion(questionId));
-	let answers = $derived(answersQuery?.current ?? []);
+	let answers = $derived(answersQuery.value);
 
 	let editing = $state(false);
 	let editTitle = $state('');

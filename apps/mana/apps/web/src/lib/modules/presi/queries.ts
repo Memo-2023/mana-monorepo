@@ -4,7 +4,7 @@
  * Uses prefixed table names: presiDecks, slides.
  */
 
-import { liveQuery } from 'dexie';
+import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
 import { decryptRecord, decryptRecords } from '$lib/data/crypto';
 import type { LocalDeck, LocalSlide, Deck, Slide } from './types';
@@ -39,34 +39,37 @@ export function toSlide(local: LocalSlide): Slide {
 
 /** All decks, sorted by updatedAt descending. Auto-updates on any change. */
 export function useAllDecks() {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const visible = (await db.table<LocalDeck>('presiDecks').toArray()).filter((d) => !d.deletedAt);
 		const decrypted = await decryptRecords('presiDecks', visible);
 		return decrypted
 			.map(toDeck)
 			.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
-	});
+	}, [] as Deck[]);
 }
 
 /** Slides for a specific deck, sorted by order. Auto-updates on any change. */
 export function useDeckSlides(deckId: string) {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const visible = (
 			await db.table<LocalSlide>('slides').where('deckId').equals(deckId).toArray()
 		).filter((s) => !s.deletedAt);
 		const decrypted = await decryptRecords('slides', visible);
 		return decrypted.map(toSlide).sort((a, b) => a.order - b.order);
-	});
+	}, [] as Slide[]);
 }
 
 /** Single deck by ID. Auto-updates on any change. */
 export function useDeck(id: string) {
-	return liveQuery(async () => {
-		const local = await db.table<LocalDeck>('presiDecks').get(id);
-		if (!local || local.deletedAt) return null;
-		const decrypted = await decryptRecord('presiDecks', { ...local });
-		return toDeck(decrypted);
-	});
+	return useLiveQueryWithDefault(
+		async () => {
+			const local = await db.table<LocalDeck>('presiDecks').get(id);
+			if (!local || local.deletedAt) return null;
+			const decrypted = await decryptRecord('presiDecks', { ...local });
+			return toDeck(decrypted);
+		},
+		null as Deck | null
+	);
 }
 
 // ─── Pure Helper Functions ────────────────────────────────

@@ -7,7 +7,7 @@
  * to the public types so consumers see plaintext.
  */
 
-import { liveQuery } from 'dexie';
+import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
 import { decryptRecords } from '$lib/data/crypto';
 import type {
@@ -68,18 +68,18 @@ export function toMessage(local: LocalMessage): Message {
 
 /** All non-archived conversations, sorted by pinned first then updatedAt desc. */
 export function useAllConversations() {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const visible = (await db.table<LocalConversation>('conversations').toArray()).filter(
 			(c) => !c.deletedAt && !c.isArchived
 		);
 		const decrypted = await decryptRecords('conversations', visible);
 		return sortConversations(decrypted.map(toConversation));
-	});
+	}, [] as Conversation[]);
 }
 
 /** All archived conversations, sorted by updatedAt desc. */
 export function useArchivedConversations() {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const visible = (await db.table<LocalConversation>('conversations').toArray()).filter(
 			(c) => !c.deletedAt && c.isArchived
 		);
@@ -87,23 +87,23 @@ export function useArchivedConversations() {
 		return decrypted
 			.map(toConversation)
 			.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
-	});
+	}, [] as Conversation[]);
 }
 
 /** All templates, sorted by name. */
 export function useAllTemplates() {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const visible = (await db.table<LocalTemplate>('chatTemplates').toArray()).filter(
 			(t) => !t.deletedAt
 		);
 		const decrypted = await decryptRecords('chatTemplates', visible);
 		return decrypted.map(toTemplate).sort((a, b) => a.name.localeCompare(b.name));
-	});
+	}, [] as Template[]);
 }
 
 /** Messages for a specific conversation, sorted by createdAt asc. */
 export function useConversationMessages(conversationId: string) {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const visible = (
 			await db
 				.table<LocalMessage>('messages')
@@ -115,7 +115,7 @@ export function useConversationMessages(conversationId: string) {
 		return decrypted
 			.map(toMessage)
 			.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-	});
+	}, [] as Message[]);
 }
 
 // ─── Pure Sort / Filter Functions (for $derived) ───────────

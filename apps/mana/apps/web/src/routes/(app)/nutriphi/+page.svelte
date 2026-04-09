@@ -16,8 +16,8 @@
 	const allMeals = useAllMeals();
 	const allGoals = useAllGoals();
 
-	let meals = $derived(allMeals.current ?? []);
-	let goals = $derived((allGoals.current ?? [])[0] ?? null);
+	let meals = $derived(allMeals.value);
+	let goals = $derived(allGoals.value[0] ?? null);
 
 	let todaysMeals = $derived(getTodaysMeals(meals));
 	let dailySummary = $derived(getDailySummary(meals, undefined, goals));

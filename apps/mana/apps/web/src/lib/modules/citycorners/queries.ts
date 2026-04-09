@@ -5,34 +5,39 @@
  * at init time; no manual fetch/refresh needed.
  */
 
-import { liveQuery } from 'dexie';
+import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
 import type { LocalCity, LocalLocation, LocalFavorite } from './types';
 
 // ─── Live Query Hooks ─────────────────────────────────────
+//
+// Each hook returns `{ value, loading, error }` — call sites read
+// `.value` reactively (the wrapper internally manages a `$state`
+// snapshot synced to the underlying Dexie liveQuery). MUST be called
+// from inside a component setup, never from a module-level constant.
 
 /** All cities, sorted by name. Auto-updates on any change. */
 export function useAllCities() {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const all = await db.table<LocalCity>('cities').toArray();
 		return all.filter((c) => !c.deletedAt).sort((a, b) => a.name.localeCompare(b.name));
-	});
+	}, [] as LocalCity[]);
 }
 
 /** All locations, sorted by name. Auto-updates on any change. */
 export function useAllLocations() {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const all = await db.table<LocalLocation>('ccLocations').toArray();
 		return all.filter((l) => !l.deletedAt).sort((a, b) => a.name.localeCompare(b.name));
-	});
+	}, [] as LocalLocation[]);
 }
 
 /** All favorites. Auto-updates on any change. */
 export function useAllFavorites() {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const all = await db.table<LocalFavorite>('ccFavorites').toArray();
 		return all.filter((f) => !f.deletedAt);
-	});
+	}, [] as LocalFavorite[]);
 }
 
 // ─── Pure Filter Functions (for $derived) ───────────────────

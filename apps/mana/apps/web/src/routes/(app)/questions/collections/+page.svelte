@@ -13,8 +13,8 @@
 	const allCollections = useAllCollections();
 	const allQuestions = useAllQuestions();
 
-	let collections = $derived(allCollections.current ?? []);
-	let questions = $derived(allQuestions.current ?? []);
+	let collections = $derived(allCollections.value);
+	let questions = $derived(allQuestions.value);
 
 	let showModal = $state(false);
 	let editingCollection = $state<Collection | null>(null);

@@ -8,7 +8,7 @@
 	import { ArrowLeft, Lightning, Clock, Sparkle } from '@mana/shared-icons';
 
 	const allCollections = useAllCollections();
-	let collections = $derived(allCollections.current ?? []);
+	let collections = $derived(allCollections.value);
 
 	let title = $state('');
 	let description = $state('');

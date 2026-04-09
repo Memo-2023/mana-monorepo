@@ -4,7 +4,7 @@
  * Uses table names: meals, goals, nutriFavorites.
  */
 
-import { liveQuery } from 'dexie';
+import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
 import { decryptRecords } from '$lib/data/crypto';
 import type {
@@ -42,12 +42,12 @@ export function toMealWithNutrition(local: LocalMeal): MealWithNutrition {
 
 /** All meals, auto-updates on any change. */
 export function useAllMeals() {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const locals = await db.table<LocalMeal>('meals').toArray();
 		const visible = locals.filter((m) => !m.deletedAt);
 		const decrypted = await decryptRecords('meals', visible);
 		return decrypted.map(toMealWithNutrition);
-	});
+	}, [] as MealWithNutrition[]);
 }
 
 /**
@@ -64,18 +64,18 @@ export async function loadMealById(id: string): Promise<MealWithNutrition | null
 
 /** All goals, auto-updates on any change. */
 export function useAllGoals() {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const locals = await db.table<LocalGoal>('goals').toArray();
 		return locals.filter((g) => !g.deletedAt);
-	});
+	}, [] as LocalGoal[]);
 }
 
 /** All favorites, auto-updates on any change. */
 export function useAllFavorites() {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const locals = await db.table<LocalFavorite>('nutriFavorites').toArray();
 		return locals.filter((f) => !f.deletedAt);
-	});
+	}, [] as LocalFavorite[]);
 }
 
 // ─── Pure Filter/Helper Functions (for $derived) ──────────

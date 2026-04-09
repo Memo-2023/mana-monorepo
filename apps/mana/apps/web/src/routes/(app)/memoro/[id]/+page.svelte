@@ -33,7 +33,7 @@
 
 	// Live query for memories of this memo
 	const memoriesQuery = $derived(useMemoriesByMemo(memoId));
-	let memories = $derived((memoriesQuery as { value: Memory[] })?.value ?? []);
+	let memories = $derived(memoriesQuery.value);
 
 	let memoTags = $derived(getTagsForMemo(tagsCtx.value, memoTagsCtx.value, memoId));
 

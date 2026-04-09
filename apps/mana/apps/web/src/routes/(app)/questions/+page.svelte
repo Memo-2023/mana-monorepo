@@ -17,14 +17,14 @@
 	let selectedCollectionId = $state<string | null>(null);
 
 	let filteredQuestions = $derived.by(() => {
-		let result = allQuestions.current ?? [];
+		let result = allQuestions.value;
 		result = filterByCollection(result, selectedCollectionId);
 		if (statusFilter) result = filterByStatus(result, statusFilter);
 		if (searchQuery) result = searchQuestions(result, searchQuery);
 		return result;
 	});
 
-	let collections = $derived(allCollections.current ?? []);
+	let collections = $derived(allCollections.value);
 
 	let selectedCollection = $derived(
 		selectedCollectionId ? collections.find((c) => c.id === selectedCollectionId) : null

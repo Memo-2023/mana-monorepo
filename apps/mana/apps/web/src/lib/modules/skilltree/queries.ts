@@ -6,7 +6,7 @@
  * at init time; no manual fetch/refresh needed.
  */
 
-import { liveQuery } from 'dexie';
+import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
 import type { LocalSkill, LocalActivity, LocalAchievement } from './types';
 import type { Skill, Activity, SkillBranch, UserStats } from './types';
@@ -46,26 +46,26 @@ export function toActivity(local: LocalActivity): Activity {
 
 /** All skills, auto-updates on any change. */
 export function useAllSkills() {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const locals = await db.table<LocalSkill>('skills').toArray();
 		return locals.filter((s) => !s.deletedAt).map(toSkill);
-	});
+	}, [] as Skill[]);
 }
 
 /** All activities, auto-updates on any change. */
 export function useAllActivities() {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const locals = await db.table<LocalActivity>('activities').toArray();
 		return locals.filter((a) => !a.deletedAt).map(toActivity);
-	});
+	}, [] as Activity[]);
 }
 
 /** All achievements (raw local records), auto-updates on any change. */
 export function useAllAchievements() {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const locals = await db.table<LocalAchievement>('achievements').toArray();
 		return locals.filter((a) => !a.deletedAt);
-	});
+	}, [] as LocalAchievement[]);
 }
 
 // ─── Pure Filter/Helper Functions (for $derived) ──────────

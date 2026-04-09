@@ -2,7 +2,7 @@
  * Reactive queries & pure helpers for Memoro — uses Dexie liveQuery on the unified DB.
  */
 
-import { liveQuery } from 'dexie';
+import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
 import { decryptRecords } from '$lib/data/crypto';
 import type {
@@ -60,18 +60,18 @@ export function toSpace(local: LocalSpace): Space {
 
 /** All non-archived memos, sorted by pinned first then createdAt desc. */
 export function useAllMemos() {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const visible = (await db.table<LocalMemo>('memos').toArray()).filter(
 			(m) => !m.deletedAt && !m.isArchived
 		);
 		const decrypted = await decryptRecords('memos', visible);
 		return sortMemos(decrypted.map(toMemo));
-	});
+	}, [] as Memo[]);
 }
 
 /** All archived memos, sorted by updatedAt desc. */
 export function useArchivedMemos() {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const visible = (await db.table<LocalMemo>('memos').toArray()).filter(
 			(m) => !m.deletedAt && m.isArchived
 		);
@@ -79,18 +79,18 @@ export function useArchivedMemos() {
 		return decrypted
 			.map(toMemo)
 			.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
-	});
+	}, [] as Memo[]);
 }
 
 /** Memories for a specific memo. */
 export function useMemoriesByMemo(memoId: string) {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const visible = (
 			await db.table<LocalMemory>('memories').where('memoId').equals(memoId).toArray()
 		).filter((m) => !m.deletedAt);
 		const decrypted = await decryptRecords('memories', visible);
 		return decrypted.map(toMemory);
-	});
+	}, [] as Memory[]);
 }
 
 // Tags: use shared global tags from @mana/shared-stores
@@ -98,18 +98,18 @@ export { useAllTags } from '@mana/shared-stores';
 
 /** All memo-tag associations. */
 export function useAllMemoTags() {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const locals = await db.table<LocalMemoTag>('memoTags').toArray();
 		return locals.filter((mt) => !mt.deletedAt);
-	});
+	}, [] as LocalMemoTag[]);
 }
 
 /** All spaces. */
 export function useAllSpaces() {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const locals = await db.table<LocalSpace>('memoroSpaces').toArray();
 		return locals.filter((s) => !s.deletedAt).map(toSpace);
-	});
+	}, [] as Space[]);
 }
 
 // ─── Pure Sort / Filter Functions ──────────────────────────

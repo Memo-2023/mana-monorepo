@@ -4,7 +4,7 @@
  * Uses table names: qCollections, questions, answers.
  */
 
-import { liveQuery } from 'dexie';
+import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
 import { decryptRecords } from '$lib/data/crypto';
 import type { LocalCollection, LocalQuestion, LocalAnswer } from './types';
@@ -102,33 +102,33 @@ export function toAnswer(local: LocalAnswer): Answer {
 
 /** All collections, sorted by sortOrder. Auto-updates on any change. */
 export function useAllCollections() {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const locals = await db.table<LocalCollection>('qCollections').toArray();
 		return locals
 			.filter((c) => !c.deletedAt)
 			.sort((a, b) => a.sortOrder - b.sortOrder)
 			.map(toCollection);
-	});
+	}, [] as Collection[]);
 }
 
 /** All questions. Auto-updates on any change. */
 export function useAllQuestions() {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const locals = await db.table<LocalQuestion>('questions').toArray();
 		const visible = locals.filter((q) => !q.deletedAt);
 		const decrypted = await decryptRecords('questions', visible);
 		return decrypted.map(toQuestion);
-	});
+	}, [] as Question[]);
 }
 
 /** All answers for a given question. */
 export function useAnswersByQuestion(questionId: string) {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const locals = await db.table<LocalAnswer>('answers').toArray();
 		const visible = locals.filter((a) => !a.deletedAt && a.questionId === questionId);
 		const decrypted = await decryptRecords('answers', visible);
 		return decrypted.map(toAnswer);
-	});
+	}, [] as Answer[]);
 }
 
 // ─── Pure Filter Functions (for $derived) ───────────────────

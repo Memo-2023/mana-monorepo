@@ -25,7 +25,7 @@
 
 	// Live query for messages of this conversation
 	const messagesQuery = $derived(useConversationMessages(conversationId));
-	let messages = $derived((messagesQuery as { value: Message[] })?.value ?? []);
+	let messages = $derived(messagesQuery.value);
 
 	let inputText = $state('');
 	let isSending = $state(false);

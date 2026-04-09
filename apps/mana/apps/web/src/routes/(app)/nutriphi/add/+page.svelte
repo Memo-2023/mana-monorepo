@@ -12,7 +12,7 @@
 	import { ArrowLeft } from '@mana/shared-icons';
 
 	const allFavorites = useAllFavorites();
-	let favorites = $derived(allFavorites.current ?? []);
+	let favorites = $derived(allFavorites.value);
 
 	type Mode = 'text' | 'photo';
 	let mode = $state<Mode>('text');
