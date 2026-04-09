@@ -99,14 +99,6 @@ db.version(1).stores({
 	cards: 'id, deckId, difficulty, nextReview, order, [deckId+order]',
 	deckTags: 'id, deckId, tagId, [deckId+tagId]',
 
-	// ─── Who (appId: 'who') ───
-	// LLM character-guessing game. whoGames holds one row per session
-	// (status, deck, character id, message count); whoMessages holds the
-	// chat scrollback. Standard plaintext index pattern: id, FK, status,
-	// timestamps for sort/filter; content + revealedName encrypted.
-	whoGames: 'id, status, deckId, startedAt, finishedAt, [status+startedAt]',
-	whoMessages: 'id, gameId, sender, createdAt, [gameId+createdAt]',
-
 	// ─── Zitare (appId: 'zitare') ───
 	zitareFavorites: 'id, quoteId',
 	zitareLists: 'id',
@@ -301,6 +293,40 @@ db.version(1).stores({
 
 	// ─── Shared: Links (appId: 'links') ───
 	manaLinks: 'id, sourceAppId, sourceRecordId, targetAppId, targetRecordId',
+});
+
+// Schema version 2 — adds the unified Body module (combined fitness training
+// + body composition tracking). Additive only; no v1 tables touched.
+//
+// Index strategy:
+//   - bodySets indexes [workoutId+order] so the per-workout view can do a
+//     range scan instead of loading every set and filtering in JS.
+//   - bodyMeasurements indexes [type+date] for the per-metric trend chart
+//     (e.g. "weight over time").
+//   - bodyChecks indexes `date` so the daily upsert can `.where('date')`.
+//   - bodyPhases indexes `endDate` to find the active (open) phase quickly.
+db.version(2).stores({
+	bodyExercises: 'id, muscleGroup, equipment, isArchived, isPreset',
+	bodyRoutines: 'id, order, isArchived',
+	bodyWorkouts: 'id, startedAt, endedAt, routineId, [endedAt+startedAt]',
+	bodySets: 'id, workoutId, exerciseId, order, [workoutId+order], [exerciseId+createdAt]',
+	bodyMeasurements: 'id, date, type, [type+date]',
+	bodyChecks: 'id, date',
+	bodyPhases: 'id, kind, startDate, endDate',
+});
+
+// Schema version 3 — adds the Who module (LLM character-guessing game).
+// Additive only; no v1/v2 tables touched.
+//
+// Index strategy:
+//   - whoGames indexes status + startedAt + the [status+startedAt] composite
+//     so the past-games ListView can sort active vs finished cleanly without
+//     loading the full set every render.
+//   - whoMessages indexes [gameId+createdAt] for the chat scrollback query
+//     (range scan inside one game's messages, ordered by time).
+db.version(3).stores({
+	whoGames: 'id, status, deckId, startedAt, finishedAt, [status+startedAt]',
+	whoMessages: 'id, gameId, sender, createdAt, [gameId+createdAt]',
 });
 
 // ─── Sync Routing ──────────────────────────────────────────
