@@ -15,6 +15,7 @@
 
 import { db } from '$lib/data/database';
 import { authStore } from '$lib/stores/auth.svelte';
+import { guestPrompt } from '$lib/stores/guest-prompt.svelte';
 import { encryptRecord } from '$lib/data/crypto';
 import { whoGameTable, whoMessageTable } from '../collections';
 import type {
@@ -37,10 +38,25 @@ const API_BASE = '/api/v1/who';
  * this app — Bearer token from authStore, JSON body, structured
  * error throwing. Kept inline (no wrapping client) because the who
  * module has only three endpoints; a full client would be overkill.
+ *
+ * 401 handling: when the access token is missing OR the upstream
+ * returns 401, we surface the standard `guestPrompt.requireAccount`
+ * UI instead of throwing a raw "not authenticated" error. The
+ * common case is JWT expiry mid-game — the session cookie is still
+ * present (so the navbar still shows the user as logged in) but
+ * the access token has aged out and the silent refresh failed.
+ * Same pattern as base-client.ts uses for every other API call.
  */
 async function postJson<T>(path: string, body: unknown): Promise<T> {
 	const token = await authStore.getAccessToken();
-	if (!token) throw new Error('not authenticated');
+	if (!token) {
+		guestPrompt.requireAccount(
+			'who',
+			'Sitzung abgelaufen — bitte neu anmelden, um weiterzuspielen.',
+			'Neu anmelden'
+		);
+		throw new Error('Sitzung abgelaufen — bitte neu anmelden');
+	}
 	const res = await fetch(`${API_BASE}${path}`, {
 		method: 'POST',
 		headers: {
@@ -49,6 +65,14 @@ async function postJson<T>(path: string, body: unknown): Promise<T> {
 		},
 		body: JSON.stringify(body),
 	});
+	if (res.status === 401) {
+		guestPrompt.requireAccount(
+			'who',
+			'Sitzung abgelaufen — bitte neu anmelden, um weiterzuspielen.',
+			'Neu anmelden'
+		);
+		throw new Error('Sitzung abgelaufen — bitte neu anmelden');
+	}
 	if (!res.ok) {
 		const text = await res.text().catch(() => '');
 		throw new Error(`who ${path} failed: ${res.status} ${text}`);
