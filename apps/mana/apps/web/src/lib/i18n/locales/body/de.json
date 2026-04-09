@@ -33,6 +33,37 @@
 		"cut": "Cut",
 		"bulk": "Bulk",
 		"maintenance": "Maintenance",
-		"recomp": "Recomp"
+		"recomp": "Recomp",
+		"start": "Phase starten",
+		"startNew": "Phase starten",
+		"end": "Beenden"
+	},
+	"progression": "Progression",
+	"routines": {
+		"title": "Routinen",
+		"start": "Start",
+		"empty": "Noch keine Routinen"
+	},
+	"exercisePicker": {
+		"title": "Übung wählen",
+		"pick": "Übung wählen",
+		"search": "Suchen…",
+		"empty": "Nichts gefunden",
+		"create": "Neue Übung anlegen"
+	},
+	"muscle": {
+		"chest": "Brust",
+		"back": "Rücken",
+		"shoulders": "Schultern",
+		"biceps": "Bizeps",
+		"triceps": "Trizeps",
+		"forearms": "Unterarme",
+		"core": "Core",
+		"quads": "Quadrizeps",
+		"hamstrings": "Hamstrings",
+		"glutes": "Gesäß",
+		"calves": "Waden",
+		"cardio": "Cardio",
+		"fullbody": "Ganzkörper"
 	}
 }

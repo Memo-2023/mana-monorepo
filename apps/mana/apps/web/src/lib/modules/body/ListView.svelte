@@ -11,6 +11,7 @@
 	import type { Observable } from 'dexie';
 	import type {
 		BodyExercise,
+		BodyRoutine,
 		BodyWorkout,
 		BodySet,
 		BodyMeasurement,
@@ -24,8 +25,12 @@
 	import WeightChart from './components/WeightChart.svelte';
 	import DailyCheckCard from './components/DailyCheckCard.svelte';
 	import RecentWorkouts from './components/RecentWorkouts.svelte';
+	import RoutineManager from './components/RoutineManager.svelte';
+	import PhaseManager from './components/PhaseManager.svelte';
+	import ExerciseProgressionChart from './components/ExerciseProgressionChart.svelte';
 
 	const exercises$: Observable<BodyExercise[]> = getContext('bodyExercises');
+	const routines$: Observable<BodyRoutine[]> = getContext('bodyRoutines');
 	const workouts$: Observable<BodyWorkout[]> = getContext('bodyWorkouts');
 	const sets$: Observable<BodySet[]> = getContext('bodySets');
 	const measurements$: Observable<BodyMeasurement[]> = getContext('bodyMeasurements');
@@ -33,6 +38,7 @@
 	const phases$: Observable<BodyPhase[]> = getContext('bodyPhases');
 
 	let exercises = $state<BodyExercise[]>([]);
+	let routines = $state<BodyRoutine[]>([]);
 	let workouts = $state<BodyWorkout[]>([]);
 	let sets = $state<BodySet[]>([]);
 	let measurements = $state<BodyMeasurement[]>([]);
@@ -41,6 +47,10 @@
 
 	$effect(() => {
 		const sub = exercises$.subscribe((v) => (exercises = v));
+		return () => sub.unsubscribe();
+	});
+	$effect(() => {
+		const sub = routines$.subscribe((v) => (routines = v));
 		return () => sub.unsubscribe();
 	});
 	$effect(() => {
@@ -85,12 +95,11 @@
 				{$_('body.subtitle', { default: 'Training & Körper in einem Modul' })}
 			</p>
 		</div>
-		{#if activePhase}
-			<div class="phase-pill" data-kind={activePhase.kind}>
-				{$_(`body.phase.${activePhase.kind}`, { default: activePhase.kind })}
-			</div>
-		{/if}
 	</header>
+
+	<section class="card">
+		<PhaseManager {activePhase} />
+	</section>
 
 	<section class="card workout-card">
 		{#if activeWorkout}
@@ -108,6 +117,15 @@
 				</button>
 			</div>
 		{/if}
+	</section>
+
+	<section class="card">
+		<RoutineManager {routines} {exercises} />
+	</section>
+
+	<section class="card">
+		<h2>{$_('body.progression', { default: 'Progression' })}</h2>
+		<ExerciseProgressionChart {sets} {exercises} />
 	</section>
 
 	<section class="card">
@@ -150,28 +168,6 @@
 		font-size: 0.875rem;
 		color: hsl(var(--color-muted-foreground));
 		margin-top: 0.125rem;
-	}
-	.phase-pill {
-		padding: 0.25rem 0.75rem;
-		border-radius: 999px;
-		font-size: 0.75rem;
-		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
-		background: hsl(var(--color-muted));
-		color: hsl(var(--color-foreground));
-	}
-	.phase-pill[data-kind='cut'] {
-		background: hsl(0 84% 60% / 0.15);
-		color: hsl(0 84% 50%);
-	}
-	.phase-pill[data-kind='bulk'] {
-		background: hsl(142 71% 45% / 0.15);
-		color: hsl(142 71% 38%);
-	}
-	.phase-pill[data-kind='maintenance'] {
-		background: hsl(217 91% 60% / 0.15);
-		color: hsl(217 91% 50%);
 	}
 	.card {
 		display: flex;

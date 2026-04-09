@@ -13,7 +13,9 @@
 	import { _ } from 'svelte-i18n';
 	import type { BodyExercise, BodySet, BodyWorkout } from '../types';
 	import { bodyStore } from '../stores/body.svelte';
+	import { getLastSetByExercise, relativeDays } from '../queries';
 	import SetRow from './SetRow.svelte';
+	import ExercisePicker from './ExercisePicker.svelte';
 
 	interface Props {
 		workout: BodyWorkout;
@@ -26,6 +28,11 @@
 	let weight = $state<number>(0);
 	let reps = $state<number>(8);
 	let isWarmup = $state(false);
+	let pickerOpen = $state(false);
+
+	let lastSets = $derived(getLastSetByExercise(sets));
+	let selectedExercise = $derived(exercises.find((e) => e.id === selectedExerciseId) ?? null);
+	let lastForSelected = $derived(selectedExerciseId ? lastSets.get(selectedExerciseId) : null);
 
 	// Pre-fill from the most recent set of the selected exercise so the
 	// "next set" form starts at last week's working weight, not zero.
@@ -108,11 +115,17 @@
 			addSet();
 		}}
 	>
-		<select bind:value={selectedExerciseId}>
-			{#each exercises as ex (ex.id)}
-				<option value={ex.id}>{ex.name}</option>
-			{/each}
-		</select>
+		<button type="button" class="exercise-picker-btn" onclick={() => (pickerOpen = true)}>
+			<div class="picker-name">
+				{selectedExercise?.name ?? $_('body.exercisePicker.pick', { default: 'Übung wählen' })}
+			</div>
+			{#if lastForSelected}
+				<div class="picker-last">
+					Last: {lastForSelected.weight}kg × {lastForSelected.reps}
+					· {relativeDays(lastForSelected.createdAt)}
+				</div>
+			{/if}
+		</button>
 
 		<label class="field">
 			<span class="label">kg</span>
@@ -132,6 +145,15 @@
 		<button type="submit">+ Set</button>
 	</form>
 </div>
+
+{#if pickerOpen}
+	<ExercisePicker
+		{exercises}
+		{sets}
+		onPick={(id) => (selectedExerciseId = id)}
+		onClose={() => (pickerOpen = false)}
+	/>
+{/if}
 
 <style>
 	.workout-logger {
@@ -174,14 +196,28 @@
 		border-radius: 0.5rem;
 		background: hsl(var(--color-muted) / 0.4);
 	}
-	.add-set select {
-		flex: 1 1 8rem;
-		padding: 0.375rem 0.5rem;
+	.exercise-picker-btn {
+		flex: 1 1 100%;
+		padding: 0.5rem 0.625rem;
 		border-radius: 0.375rem;
 		border: 1px solid hsl(var(--color-border));
 		background: hsl(var(--color-background));
 		color: hsl(var(--color-foreground));
 		font-size: 0.875rem;
+		text-align: left;
+		cursor: pointer;
+	}
+	.exercise-picker-btn:hover {
+		border-color: hsl(var(--color-primary));
+	}
+	.picker-name {
+		font-weight: 500;
+	}
+	.picker-last {
+		font-size: 0.6875rem;
+		color: hsl(var(--color-muted-foreground));
+		margin-top: 0.125rem;
+		font-variant-numeric: tabular-nums;
 	}
 	.field {
 		display: flex;

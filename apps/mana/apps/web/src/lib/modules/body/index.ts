@@ -30,7 +30,11 @@ export {
 	getActiveExercises,
 	getActiveWorkout,
 	getActivePhase,
+	getLastSetByExercise,
+	getE1rmTimeline,
+	relativeDays,
 } from './queries';
+export type { E1rmPoint } from './queries';
 
 // ─── Collections ─────────────────────────────────────────
 export {

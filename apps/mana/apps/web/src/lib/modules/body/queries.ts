@@ -258,3 +258,54 @@ export function getActiveWorkout(workouts: BodyWorkout[]): BodyWorkout | null {
 export function getActivePhase(phases: BodyPhase[]): BodyPhase | null {
 	return phases.find((p) => p.endDate === null) ?? null;
 }
+
+/**
+ * Most recent working (non-warmup) set for each exercise across the
+ * supplied set list. Used by the exercise picker to render the
+ * "Last: 80kg × 8 (3 days ago)" hint.
+ */
+export function getLastSetByExercise(sets: BodySet[]): Map<string, BodySet> {
+	const out = new Map<string, BodySet>();
+	for (const s of sets) {
+		if (s.isWarmup) continue;
+		const current = out.get(s.exerciseId);
+		if (!current || s.createdAt > current.createdAt) {
+			out.set(s.exerciseId, s);
+		}
+	}
+	return out;
+}
+
+/** Estimated 1RM (Epley) timeline for one exercise across all sets. */
+export interface E1rmPoint {
+	date: string;
+	value: number;
+}
+export function getE1rmTimeline(sets: BodySet[], exerciseId: string): E1rmPoint[] {
+	// Best (highest) e1RM per calendar day — collapses multiple working sets
+	// in one session down to the most informative point so the chart isn't
+	// noisy with within-workout fluctuations.
+	const bestPerDay = new Map<string, number>();
+	for (const s of sets) {
+		if (s.exerciseId !== exerciseId || s.isWarmup) continue;
+		const day = (s.createdAt ?? '').split('T')[0];
+		if (!day) continue;
+		const e = estimateOneRepMax(s.weight, s.reps);
+		const prev = bestPerDay.get(day) ?? 0;
+		if (e > prev) bestPerDay.set(day, e);
+	}
+	return [...bestPerDay.entries()]
+		.sort((a, b) => a[0].localeCompare(b[0]))
+		.map(([date, value]) => ({ date, value }));
+}
+
+/** Coarse "X days ago" formatter. */
+export function relativeDays(iso: string, now = new Date()): string {
+	const then = new Date(iso);
+	const days = Math.floor((now.getTime() - then.getTime()) / (1000 * 60 * 60 * 24));
+	if (days <= 0) return 'heute';
+	if (days === 1) return 'gestern';
+	if (days < 7) return `vor ${days} Tagen`;
+	if (days < 30) return `vor ${Math.floor(days / 7)} Wochen`;
+	return `vor ${Math.floor(days / 30)} Monaten`;
+}
