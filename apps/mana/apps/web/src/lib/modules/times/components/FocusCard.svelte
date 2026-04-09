@@ -32,8 +32,15 @@
 		focusStore.phase === 'focus' ? 'Fokus' : focusStore.phase === 'break' ? 'Pause' : 'Bereit'
 	);
 
+	// Focus = error/red, break = success/green, idle = muted — read from theme tokens
+	// so the ring tracks light/dark + variants. SVG strokes need a real color value,
+	// so we wrap with hsl().
 	const phaseColor = $derived(
-		focusStore.phase === 'focus' ? '#ef4444' : focusStore.phase === 'break' ? '#22c55e' : '#6b7280'
+		focusStore.phase === 'focus'
+			? 'hsl(var(--color-error))'
+			: focusStore.phase === 'break'
+				? 'hsl(var(--color-success))'
+				: 'hsl(var(--color-muted-foreground))'
 	);
 
 	// SVG ring
@@ -179,7 +186,7 @@
 		padding: 0.625rem 0.75rem;
 		border: 1px solid hsl(var(--color-border));
 		border-radius: 0.5rem;
-		background: hsl(var(--color-input, var(--color-background)));
+		background: hsl(var(--color-background));
 		color: hsl(var(--color-foreground));
 		font-size: 0.875rem;
 		outline: none;
@@ -206,7 +213,7 @@
 		padding: 0.625rem;
 		border: none;
 		border-radius: 0.75rem;
-		background: #ef4444;
+		background: hsl(var(--color-error));
 		color: white;
 		font-size: 0.9375rem;
 		font-weight: 600;
@@ -322,8 +329,8 @@
 		opacity: 0.9;
 	}
 	.control-btn.danger:hover {
-		color: #ef4444;
-		border-color: #ef4444;
+		color: hsl(var(--color-error));
+		border-color: hsl(var(--color-error));
 	}
 
 	/* Compact mode */

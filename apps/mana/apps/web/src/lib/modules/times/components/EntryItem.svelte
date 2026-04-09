@@ -103,8 +103,8 @@
 </script>
 
 <div
-	class="entry-item rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] transition-all {isExpanded
-		? 'ring-1 ring-[hsl(var(--primary)/0.3)]'
+	class="entry-item rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] transition-all {isExpanded
+		? 'ring-1 ring-[hsl(var(--color-primary)/0.3)]'
 		: ''}"
 >
 	<!-- Compact row (always visible) -->
@@ -115,13 +115,13 @@
 		{#if project}
 			<div class="project-dot" style="background-color: {project.color}"></div>
 		{:else}
-			<div class="project-dot" style="background-color: #9ca3af"></div>
+			<div class="project-dot" style="background-color: hsl(var(--color-muted-foreground))"></div>
 		{/if}
 		<div class="min-w-0 flex-1">
-			<p class="truncate text-sm font-medium text-[hsl(var(--foreground))]">
+			<p class="truncate text-sm font-medium text-[hsl(var(--color-foreground))]">
 				{entry.description || $_('timer.noDescription')}
 			</p>
-			<p class="text-xs text-[hsl(var(--muted-foreground))]">
+			<p class="text-xs text-[hsl(var(--color-muted-foreground))]">
 				{project?.name || $_('project.internal')}
 				{#if client}· {client.name}{/if}
 				{#if startTimeStr && endTimeStr}
@@ -130,25 +130,25 @@
 			</p>
 		</div>
 		<div class="text-right shrink-0">
-			<p class="duration-display text-sm font-medium text-[hsl(var(--foreground))]">
+			<p class="duration-display text-sm font-medium text-[hsl(var(--color-foreground))]">
 				{formatDurationCompact(entry.duration)}
 			</p>
 			{#if entry.isBillable}
-				<span class="text-xs text-[hsl(var(--primary))]">$</span>
+				<span class="text-xs text-[hsl(var(--color-primary))]">$</span>
 			{/if}
 		</div>
 	</button>
 
 	<!-- Expanded edit form -->
 	{#if isExpanded}
-		<div class="border-t border-[hsl(var(--border))] px-4 py-3 space-y-3">
+		<div class="border-t border-[hsl(var(--color-border))] px-4 py-3 space-y-3">
 			<!-- Description -->
 			<input
 				type="text"
 				value={editDescription}
 				oninput={(e) => handleDescriptionChange((e.target as HTMLInputElement).value)}
 				placeholder={$_('entry.description')}
-				class="w-full rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] px-3 py-2 text-sm text-[hsl(var(--foreground))] focus:border-[hsl(var(--primary))] focus:outline-none"
+				class="w-full rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-background))] px-3 py-2 text-sm text-[hsl(var(--color-foreground))] focus:border-[hsl(var(--color-primary))] focus:outline-none"
 			/>
 
 			<!-- Project + Duration row -->
@@ -156,7 +156,7 @@
 				<select
 					value={editProjectId}
 					onchange={(e) => handleProjectChange((e.target as HTMLSelectElement).value)}
-					class="flex-1 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] px-3 py-2 text-sm text-[hsl(var(--foreground))]"
+					class="flex-1 rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-background))] px-3 py-2 text-sm text-[hsl(var(--color-foreground))]"
 				>
 					<option value="">{$_('project.internal')}</option>
 					{#each allProjects.value.filter((p) => !p.isArchived) as proj}
@@ -171,9 +171,9 @@
 						oninput={(e) =>
 							handleDurationChange(parseInt((e.target as HTMLInputElement).value) || 0)}
 						min="0"
-						class="w-20 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] px-3 py-2 text-center text-sm text-[hsl(var(--foreground))]"
+						class="w-20 rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-background))] px-3 py-2 text-center text-sm text-[hsl(var(--color-foreground))]"
 					/>
-					<span class="text-xs text-[hsl(var(--muted-foreground))]">min</span>
+					<span class="text-xs text-[hsl(var(--color-muted-foreground))]">min</span>
 				</div>
 			</div>
 
@@ -182,8 +182,8 @@
 				<button
 					onclick={handleBillableToggle}
 					class="flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs transition-colors {editIsBillable
-						? 'bg-[hsl(var(--primary)/0.1)] text-[hsl(var(--primary))]'
-						: 'text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]'}"
+						? 'bg-[hsl(var(--color-primary)/0.1)] text-[hsl(var(--color-primary))]'
+						: 'text-[hsl(var(--color-muted-foreground))] hover:text-[hsl(var(--color-foreground))]'}"
 				>
 					<CurrencyDollar size={14} />
 					{editIsBillable ? $_('entry.billable') : $_('entry.notBillable')}
@@ -191,7 +191,7 @@
 
 				<button
 					onclick={handleDelete}
-					class="rounded-lg px-3 py-1.5 text-xs text-red-500 transition-colors hover:bg-red-500/10"
+					class="rounded-lg px-3 py-1.5 text-xs text-[hsl(var(--color-error))] transition-colors hover:bg-[hsl(var(--color-error)/0.1)]"
 				>
 					{$_('common.delete')}
 				</button>

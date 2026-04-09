@@ -157,10 +157,12 @@
 </div>
 
 <style>
+	/* Lightbox backdrop is intentionally near-black regardless of theme — photos
+	   need a neutral viewing chrome. */
 	.lightbox-backdrop {
 		position: fixed;
 		inset: 0;
-		background: rgba(0, 0, 0, 0.95);
+		background: hsl(0 0% 0% / 0.95);
 		z-index: 50;
 		display: flex;
 		align-items: center;
@@ -180,7 +182,7 @@
 		left: 1rem;
 		padding: 0.5rem;
 		border-radius: 50%;
-		background: rgba(255, 255, 255, 0.1);
+		background: hsl(0 0% 100% / 0.1);
 		color: white;
 		border: none;
 		cursor: pointer;
@@ -189,7 +191,7 @@
 	}
 
 	.close-btn:hover {
-		background: rgba(255, 255, 255, 0.2);
+		background: hsl(0 0% 100% / 0.2);
 	}
 
 	.lightbox-main {
@@ -208,8 +210,8 @@
 
 	.info-panel {
 		width: 320px;
-		background: var(--color-card, #ffffff);
-		color: var(--color-foreground, #0f172a);
+		background: hsl(var(--color-card));
+		color: hsl(var(--color-foreground));
 		overflow-y: auto;
 		padding: 1.5rem;
 	}
@@ -220,7 +222,7 @@
 		align-items: center;
 		margin-bottom: 1.5rem;
 		padding-bottom: 1rem;
-		border-bottom: 1px solid var(--color-border, #e2e8f0);
+		border-bottom: 1px solid hsl(var(--color-border));
 	}
 
 	.info-actions {
@@ -235,10 +237,10 @@
 		align-items: center;
 		gap: 0.5rem;
 		padding: 0.75rem 1rem;
-		border: 1px solid var(--color-border, #e2e8f0);
+		border: 1px solid hsl(var(--color-border));
 		border-radius: 0.5rem;
-		background: var(--color-background, #ffffff);
-		color: var(--color-foreground, #0f172a);
+		background: hsl(var(--color-background));
+		color: hsl(var(--color-foreground));
 		cursor: pointer;
 		transition: all 150ms;
 		text-decoration: none;
@@ -246,11 +248,11 @@
 	}
 
 	.action-btn:hover {
-		background: var(--color-accent, #f1f5f9);
+		background: hsl(var(--color-accent));
 	}
 	.action-btn.favorited {
-		color: #ef4444;
-		border-color: #ef4444;
+		color: hsl(var(--color-error));
+		border-color: hsl(var(--color-error));
 	}
 
 	.info-section {
@@ -259,7 +261,7 @@
 
 	.info-label {
 		font-size: 0.75rem;
-		color: var(--color-muted-foreground, #64748b);
+		color: hsl(var(--color-muted-foreground));
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
 		margin-bottom: 0.25rem;
@@ -273,7 +275,7 @@
 		padding: 0.25rem;
 		border-radius: 50%;
 		background: transparent;
-		color: var(--color-foreground, #0f172a);
+		color: hsl(var(--color-foreground));
 		border: none;
 		cursor: pointer;
 	}

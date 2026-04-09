@@ -64,8 +64,8 @@
 		position: relative;
 		aspect-ratio: 1;
 		overflow: hidden;
-		border-radius: var(--radius-md, 0.5rem);
-		background-color: var(--color-muted, #f1f5f9);
+		border-radius: 0.5rem;
+		background-color: hsl(var(--color-muted));
 		cursor: pointer;
 		border: none;
 		padding: 0;
@@ -76,18 +76,14 @@
 
 	.photo-card:hover {
 		transform: scale(1.02);
-		box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+		box-shadow: 0 10px 20px hsl(0 0% 0% / 0.2);
 		z-index: 10;
 	}
 
 	.placeholder {
 		position: absolute;
 		inset: 0;
-		background: linear-gradient(
-			135deg,
-			var(--color-muted, #f1f5f9) 0%,
-			var(--color-accent, #e2e8f0) 100%
-		);
+		background: linear-gradient(135deg, hsl(var(--color-muted)) 0%, hsl(var(--color-accent)) 100%);
 		animation: pulse 2s ease-in-out infinite;
 	}
 
@@ -119,13 +115,13 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		color: var(--color-muted-foreground, #64748b);
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.photo-overlay {
 		position: absolute;
 		inset: 0;
-		background: linear-gradient(to top, rgba(0, 0, 0, 0.5) 0%, transparent 40%);
+		background: linear-gradient(to top, hsl(0 0% 0% / 0.5) 0%, transparent 40%);
 		opacity: 0;
 		transition: opacity 150ms;
 		display: flex;
@@ -141,8 +137,8 @@
 	.favorite-btn {
 		padding: 0.5rem;
 		border-radius: 50%;
-		background: rgba(255, 255, 255, 0.9);
-		color: var(--color-muted-foreground, #64748b);
+		background: hsl(0 0% 100% / 0.9);
+		color: hsl(var(--color-muted-foreground));
 		border: none;
 		cursor: pointer;
 		transition: all 150ms;
@@ -152,6 +148,6 @@
 		transform: scale(1.1);
 	}
 	.favorite-btn.favorited {
-		color: #ef4444;
+		color: hsl(var(--color-error));
 	}
 </style>
