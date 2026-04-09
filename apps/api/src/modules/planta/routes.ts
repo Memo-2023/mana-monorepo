@@ -21,11 +21,13 @@ import {
 import { logger, type AuthVariables } from '@mana/shared-hono';
 
 const LLM_URL = process.env.MANA_LLM_URL || 'http://localhost:3025';
-const VISION_MODEL = process.env.VISION_MODEL || 'gemini-2.0-flash';
+// See nutriphi/routes.ts for the explanation of the model prefix and
+// the /v1 suffix on the base URL.
+const VISION_MODEL = process.env.VISION_MODEL || 'google/gemini-2.0-flash';
 
 const llm = createOpenAICompatible({
 	name: 'mana-llm',
-	baseURL: `${LLM_URL}/api/v1`,
+	baseURL: `${LLM_URL}/v1`,
 });
 
 const IDENTIFICATION_PROMPT = `Du bist ein Pflanzenexperte. Analysiere das Pflanzenfoto und liefere eine strukturierte Identifikation mit lateinischem Namen, deutschen Trivialnamen, Pflegehinweisen und einer Gesundheitseinschätzung. Antworte auf Deutsch.`;

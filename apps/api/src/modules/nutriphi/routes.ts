@@ -32,11 +32,17 @@ import {
 import { logger, type AuthVariables } from '@mana/shared-hono';
 
 const LLM_URL = process.env.MANA_LLM_URL || 'http://localhost:3025';
-const VISION_MODEL = process.env.VISION_MODEL || 'gemini-2.0-flash';
+// mana-llm parses model strings as `provider/model` (router.py:_parse_model).
+// Without a prefix, it defaults to ollama/ which then falls back to Google
+// only if auto_fallback_enabled + google_api_key are set. Be explicit.
+const VISION_MODEL = process.env.VISION_MODEL || 'google/gemini-2.0-flash';
 
 const llm = createOpenAICompatible({
 	name: 'mana-llm',
-	baseURL: `${LLM_URL}/api/v1`,
+	// mana-llm exposes /v1/chat/completions (see services/mana-llm/CLAUDE.md +
+	// src/main.py:125). The AI SDK's openai-compatible adapter appends
+	// /chat/completions to baseURL, so baseURL ends in /v1.
+	baseURL: `${LLM_URL}/v1`,
 });
 
 const ANALYSIS_PROMPT = `Du bist ein Ernährungsexperte. Analysiere die Mahlzeit und gib strukturierte Nährwertdaten zurück. Schätze realistische Portionsgrößen und Kalorien. Antworte auf Deutsch.`;
