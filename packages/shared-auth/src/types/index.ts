@@ -52,6 +52,13 @@ export interface UserData {
 	email: string;
 	role: string;
 	tier: string;
+	/**
+	 * Whether 2FA is enrolled. Optional because the field is only present
+	 * when the JWT was minted with the `twofa` claim — guest tokens and
+	 * legacy sessions omit it. Settings UIs that gate the "enable 2FA"
+	 * button on this should default to `false` when undefined.
+	 */
+	twoFactorEnabled?: boolean;
 }
 
 /**

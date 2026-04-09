@@ -11,6 +11,14 @@ export interface CreditBalance {
 	balance: number;
 	totalEarned: number;
 	totalSpent: number;
+	/**
+	 * Daily-free-credit accounting. Optional because the backend only
+	 * returns these fields when the user has a free-tier allowance
+	 * configured (paying users get them too but with `dailyFreeCredits = 0`).
+	 * Settings UIs render the "free today" tile only when both are present.
+	 */
+	freeCreditsRemaining?: number;
+	dailyFreeCredits?: number;
 }
 
 export interface CreditTransaction {

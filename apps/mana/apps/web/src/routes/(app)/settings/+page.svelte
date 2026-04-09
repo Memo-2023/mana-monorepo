@@ -274,7 +274,7 @@
 								<p class="text-sm text-muted-foreground">Deine eindeutige Kennung</p>
 							</div>
 							<code class="rounded bg-muted px-2 py-1 text-xs font-mono">
-								{authStore.user?.sub?.slice(0, 8) || '...'}...
+								{authStore.user?.id?.slice(0, 8) || '...'}...
 							</code>
 						</div>
 					</div>

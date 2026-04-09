@@ -314,6 +314,71 @@ export function createManaAuthStore(config: ManaAuthStoreConfig = {}) {
 				return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
 			}
 		},
+
+		// Passkey CRUD — thin passthroughs to authService. The settings page
+		// (and any other consumer) needs these to render the PasskeyManager
+		// UI. Each method swallows the SSR/no-service case the same way the
+		// rest of the wrapper does.
+		async listPasskeys() {
+			const authService = getAuthService();
+			if (!authService) return [] as unknown[];
+			return authService.listPasskeys();
+		},
+		async registerPasskey(friendlyName?: string) {
+			const authService = getAuthService();
+			if (!authService) return { success: false, error: 'Auth not available on server' };
+			return authService.registerPasskey(friendlyName);
+		},
+		async deletePasskey(passkeyId: string) {
+			const authService = getAuthService();
+			if (!authService) return { success: false, error: 'Auth not available on server' };
+			return authService.deletePasskey(passkeyId);
+		},
+		async renamePasskey(passkeyId: string, friendlyName: string) {
+			const authService = getAuthService();
+			if (!authService) return { success: false, error: 'Auth not available on server' };
+			return authService.renamePasskey(passkeyId, friendlyName);
+		},
+
+		// Two-factor passthroughs. enableTwoFactor refreshes the local user
+		// snapshot on success because the JWT issued post-enrollment carries
+		// the new flag and downstream UI gates on it.
+		async enableTwoFactor(password: string) {
+			const authService = getAuthService();
+			if (!authService) return { success: false, error: 'Auth not available on server' };
+			const result = await authService.enableTwoFactor(password);
+			if (result.success) user = await authService.getUserFromToken();
+			return result;
+		},
+		async disableTwoFactor(password: string) {
+			const authService = getAuthService();
+			if (!authService) return { success: false, error: 'Auth not available on server' };
+			const result = await authService.disableTwoFactor(password);
+			if (result.success) user = await authService.getUserFromToken();
+			return result;
+		},
+		async generateBackupCodes(password: string) {
+			const authService = getAuthService();
+			if (!authService) return { success: false, error: 'Auth not available on server' };
+			return authService.generateBackupCodes(password);
+		},
+
+		// Sessions + audit log passthroughs.
+		async listSessions() {
+			const authService = getAuthService();
+			if (!authService) return [] as unknown[];
+			return authService.listSessions();
+		},
+		async revokeSession(sessionId: string) {
+			const authService = getAuthService();
+			if (!authService) return { success: false, error: 'Auth not available on server' };
+			return authService.revokeSession(sessionId);
+		},
+		async getSecurityEvents(limit?: number) {
+			const authService = getAuthService();
+			if (!authService) return [] as unknown[];
+			return authService.getSecurityEvents(limit);
+		},
 	};
 }
 
