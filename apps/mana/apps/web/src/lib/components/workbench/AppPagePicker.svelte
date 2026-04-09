@@ -4,7 +4,7 @@
 <script lang="ts">
 	import { _ } from 'svelte-i18n';
 	import PickerOverlay from '$lib/components/PickerOverlay.svelte';
-	import { getAllApps } from '$lib/app-registry';
+	import { getAccessibleApps } from '$lib/app-registry';
 
 	function appName(id: string, fallback: string): string {
 		const key = `apps.${id}`;
@@ -16,11 +16,19 @@
 		onSelect: (appId: string) => void;
 		onClose: () => void;
 		activeAppIds?: string[];
+		/** User access tier from authStore.user?.tier — `undefined` falls
+		 *  through to 'guest' inside getAccessibleApps. */
+		userTier?: string | null;
 	}
 
-	let { onSelect, onClose, activeAppIds = [] }: Props = $props();
+	let { onSelect, onClose, activeAppIds = [], userTier = null }: Props = $props();
 
-	let availableApps = $derived(getAllApps().filter((app) => !activeAppIds.includes(app.id)));
+	// Filter twice: tier-gate first (so guests + public users don't see
+	// founder/alpha/beta apps at all), then drop apps that are already
+	// open in the current scene.
+	let availableApps = $derived(
+		getAccessibleApps(userTier).filter((app) => !activeAppIds.includes(app.id))
+	);
 </script>
 
 <PickerOverlay

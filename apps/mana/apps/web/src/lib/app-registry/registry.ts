@@ -4,6 +4,7 @@
 
 import type { DragType } from '@mana/shared-ui/dnd';
 import { linkMutations, buildCachedData } from '@mana/shared-links';
+import { MANA_APPS, hasAppAccess, type AccessTier } from '@mana/shared-branding';
 import type { AppDescriptor, DropResult } from './types';
 
 const apps = new Map<string, AppDescriptor>();
@@ -80,4 +81,54 @@ export async function executeDrop(
 
 export function getAllApps(): AppDescriptor[] {
 	return Array.from(apps.values());
+}
+
+/**
+ * Looks up the access tier for a workbench-registry app via the canonical
+ * @mana/shared-branding MANA_APPS list. The two registries are intentionally
+ * separate (workbench needs createItem/dragType/views; MANA_APPS holds tier
+ * + branding metadata), so the join happens by `id`.
+ *
+ * Returns null when there is no matching MANA_APPS entry. Internal-only
+ * tools that exist in the workbench but not in MANA_APPS (`automations`,
+ * `playground`, the `inventar` ↔ `inventory` id mismatch) fall into this
+ * case — `getAccessibleApps` then treats them as visible by default
+ * rather than hiding them for everyone, since the alternative is a
+ * silent regression for founders/devs.
+ */
+function getAppRequiredTier(appId: string): AccessTier | null {
+	const branding = MANA_APPS.find((a) => a.id === appId);
+	return branding?.requiredTier ?? null;
+}
+
+/**
+ * Returns workbench apps the given user tier may access. Used by the
+ * AppPagePicker to hide gated modules from the "add page" picker, and
+ * by the workbench layout to soft-filter `openApps` so seeded / migrated
+ * scenes don't render gated content for downgraded users or guests.
+ *
+ * Tier semantics (from @mana/shared-branding):
+ *   guest(0) < public(1) < beta(2) < alpha(3) < founder(4)
+ *
+ * Pass `undefined` (no signed-in user) → treated as `'guest'`. The
+ * default behaviour for apps with NO MANA_APPS entry is "visible" (see
+ * `getAppRequiredTier` rationale above).
+ */
+export function getAccessibleApps(userTier?: string | null): AppDescriptor[] {
+	const tier = userTier ?? 'guest';
+	return Array.from(apps.values()).filter((app) => {
+		const required = getAppRequiredTier(app.id);
+		if (!required) return true;
+		return hasAppAccess(tier, required);
+	});
+}
+
+/** Single-app version of `getAccessibleApps`. Returns true when the
+ *  given user tier may use this app. Used by the (app) layout's
+ *  per-route tier check so direct URL navigation to a gated module
+ *  is blocked for users without access. */
+export function isAppAccessible(appId: string, userTier?: string | null): boolean {
+	const required = getAppRequiredTier(appId);
+	if (!required) return true;
+	return hasAppAccess(userTier ?? 'guest', required);
 }

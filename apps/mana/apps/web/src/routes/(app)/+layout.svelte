@@ -30,6 +30,8 @@
 	import { getAdapterLoader } from '$lib/quick-input/registry';
 	import { createFallbackAdapter } from '$lib/quick-input/fallback-adapter';
 	import { AuthGate, GuestWelcomeModal } from '@mana/shared-auth-ui';
+	import { MANA_APPS, hasAppAccess, ACCESS_TIER_LABELS } from '@mana/shared-branding';
+	import type { AccessTier } from '@mana/shared-branding';
 	import { createGuestMode, type GuestMode } from '$lib/stores/guest-mode.svelte';
 	import { guestPrompt, setGuestPromptNavigator } from '$lib/stores/guest-prompt.svelte';
 	import { NotificationBar } from '@mana/shared-ui';
@@ -73,6 +75,39 @@
 
 	// ── App switcher ────────────────────────────────────────
 	let appItems = $derived(getPillAppItems('mana', undefined, undefined, authStore.user?.tier));
+
+	// ── Per-route tier gate ─────────────────────────────────
+	// AuthGate (the wrapping component) only checks tiers onMount and only
+	// for authenticated users — so a guest typing /dreams into the URL bar
+	// or a public-tier user navigating into a founder module would slip
+	// past silently. This reactive check looks up the first path segment
+	// in MANA_APPS, and if that app has a requiredTier the current user
+	// (or guest) doesn't meet, we render a denial panel instead of the
+	// routed view.
+	//
+	// Routes that don't map to a MANA_APPS id (settings, profile, admin,
+	// help, …) fall through with `routeAppId === null` and are never
+	// blocked here. Workbench `/` (empty first segment) likewise passes
+	// through — soft-filtering of openApps happens in (app)/+page.svelte.
+	let routeAppId = $derived.by(() => {
+		const seg = $page.url.pathname.split('/')[1] ?? '';
+		if (!seg) return null;
+		return MANA_APPS.find((a) => a.id === seg) ?? null;
+	});
+	let routeBlocked = $derived.by(() => {
+		if (!routeAppId) return false;
+		const tier = authStore.user?.tier ?? 'guest';
+		return !hasAppAccess(tier, routeAppId.requiredTier);
+	});
+	let routeTierLabels = $derived.by(() => {
+		const labels = ACCESS_TIER_LABELS[($locale || 'de') === 'de' ? 'de' : 'en'];
+		const userTier = (authStore.user?.tier ?? 'guest') as AccessTier;
+		const required = routeAppId?.requiredTier ?? ('public' as AccessTier);
+		return {
+			user: labels[userTier] ?? userTier,
+			required: labels[required] ?? required,
+		};
+	});
 
 	// ── UI State ────────────────────────────────────────────
 	let isCollapsed = $state(false);
@@ -610,7 +645,74 @@
 		<!-- Main content -->
 		<main style="padding-bottom: {bottomChromeHeight + 32}px">
 			<div class="mx-auto max-w-7xl px-3 py-4 sm:px-6 sm:py-8 lg:px-8">
-				{@render children()}
+				{#if routeBlocked && routeAppId}
+					<!-- Per-route tier gate. The wrapping AuthGate only fires
+						 onMount + only for authenticated users, so this is the
+						 only place that catches direct URL navigation into a
+						 gated module by a guest or under-tier user. -->
+					<div class="flex min-h-[60vh] items-center justify-center p-6">
+						<div
+							class="w-full max-w-96 rounded-2xl border px-8 py-10 text-center shadow-sm"
+							style:border-color="hsl(var(--border, 0 0% 90%))"
+							style:background-color="hsl(var(--card, 0 0% 100%))"
+						>
+							<h1 class="mb-4 text-xl font-bold" style:color="hsl(var(--foreground, 0 0% 9%))">
+								{routeAppId.name}
+							</h1>
+							<div class="mb-4 text-5xl">🔒</div>
+							<p
+								class="mb-6 text-[0.9375rem] leading-relaxed"
+								style:color="hsl(var(--muted-foreground, 0 0% 45%))"
+							>
+								{($locale || 'de') === 'de'
+									? 'Diese App ist aktuell in der geschlossenen '
+									: 'This app is currently in closed '}<strong>{routeTierLabels.required}</strong
+								>{($locale || 'de') === 'de' ? '-Phase.' : ' phase.'}
+							</p>
+							<div
+								class="mb-6 flex flex-col gap-2 rounded-xl p-4"
+								style:background-color="hsl(var(--muted, 0 0% 96%))"
+							>
+								<div class="flex items-center justify-between text-sm">
+									<span style:color="hsl(var(--muted-foreground, 0 0% 45%))"
+										>{($locale || 'de') === 'de' ? 'Dein Zugang:' : 'Your access:'}</span
+									>
+									<span class="font-semibold" style:color="hsl(var(--foreground, 0 0% 9%))"
+										>{routeTierLabels.user}</span
+									>
+								</div>
+								<div class="flex items-center justify-between text-sm">
+									<span style:color="hsl(var(--muted-foreground, 0 0% 45%))"
+										>{($locale || 'de') === 'de' ? 'Benötigt:' : 'Required:'}</span
+									>
+									<span class="font-semibold text-violet-500">{routeTierLabels.required}</span>
+								</div>
+							</div>
+							<div class="flex flex-col gap-2">
+								<button
+									class="w-full cursor-pointer rounded-lg border-none px-4 py-2.5 text-sm font-medium transition-opacity hover:opacity-90"
+									style:background-color="hsl(var(--primary, 239 84% 67%))"
+									style:color="hsl(var(--primary-foreground, 0 0% 100%))"
+									onclick={() => goto('/')}
+								>
+									{($locale || 'de') === 'de' ? 'Zur Übersicht' : 'Back to overview'}
+								</button>
+								{#if !authStore.isAuthenticated}
+									<button
+										class="w-full cursor-pointer rounded-lg border px-4 py-2.5 text-sm font-medium transition-opacity hover:opacity-90"
+										style:border-color="hsl(var(--border, 0 0% 90%))"
+										style:color="hsl(var(--foreground, 0 0% 9%))"
+										onclick={() => goto('/login')}
+									>
+										{($locale || 'de') === 'de' ? 'Anmelden' : 'Sign in'}
+									</button>
+								{/if}
+							</div>
+						</div>
+					</div>
+				{:else}
+					{@render children()}
+				{/if}
 			</div>
 		</main>
 

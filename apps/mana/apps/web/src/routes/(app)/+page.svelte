@@ -5,9 +5,10 @@
 	import SceneRenameDialog from '$lib/components/workbench/scenes/SceneRenameDialog.svelte';
 	import ConfirmDialog from '$lib/components/workbench/scenes/ConfirmDialog.svelte';
 	import { PageCarousel, type CarouselPage } from '$lib/components/page-carousel';
-	import { getApp, getAppByDragType } from '$lib/app-registry';
+	import { getApp, getAppByDragType, isAppAccessible } from '$lib/app-registry';
 	import { onMount, onDestroy } from 'svelte';
 	import { workbenchScenesStore } from '$lib/stores/workbench-scenes.svelte';
+	import { authStore } from '$lib/stores/auth.svelte';
 	import { DragPreview } from '@mana/shared-ui/dnd';
 	import type { DragType } from '@mana/shared-ui/dnd';
 	import { ContextMenu } from '@mana/shared-ui';
@@ -49,7 +50,16 @@
 
 	let scenes = $derived(workbenchScenesStore.scenes);
 	let activeSceneId = $derived(workbenchScenesStore.activeSceneId);
-	let openApps = $derived(workbenchScenesStore.openApps);
+
+	// Soft-filter the scene's open apps so gated modules don't render
+	// for users who aren't allowed to use them. The store still holds
+	// the full list — that way a founder-tier scene migrated to a
+	// guest device just hides the gated tabs locally instead of
+	// destructively deleting them from sync. When the user upgrades
+	// (or signs in) the apps reappear automatically.
+	let openApps = $derived(
+		workbenchScenesStore.openApps.filter((a) => isAppAccessible(a.appId, authStore.user?.tier))
+	);
 
 	// ── Map openApps → CarouselPage[] ───────────────────────
 	let carouselPages = $derived<CarouselPage[]>(
@@ -229,6 +239,7 @@
 				onSelect={handleAddApp}
 				onClose={() => (showPicker = false)}
 				activeAppIds={openApps.map((a) => a.appId)}
+				userTier={authStore.user?.tier}
 			/>
 		{/snippet}
 	</PageCarousel>

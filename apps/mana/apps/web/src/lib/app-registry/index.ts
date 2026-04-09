@@ -9,6 +9,8 @@ export {
 	canDrop,
 	executeDrop,
 	getAllApps,
+	getAccessibleApps,
+	isAppAccessible,
 } from './registry';
 
 // Register all apps eagerly — descriptors are lightweight with lazy imports
