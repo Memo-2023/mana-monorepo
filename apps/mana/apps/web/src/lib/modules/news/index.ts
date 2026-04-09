@@ -29,6 +29,7 @@ export {
 	rankFeed,
 	scoreArticle,
 	buildReactedIds,
+	buildReactionSets,
 	applyReaction,
 	TOPIC_WEIGHT_DEFAULT,
 } from './feed-engine';

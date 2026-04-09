@@ -42,15 +42,59 @@ function recencyScore(publishedAt: string | null): number {
 
 export interface ScoreContext {
 	prefs: Preferences;
-	/** Set of curatedArticleIds that already have any reaction. */
-	reactedIds: ReadonlySet<string>;
+	/**
+	 * Set of curatedArticleIds the user has actively dismissed
+	 * (`not_interested`, `hidden`, or via `source_blocked`). Used as a
+	 * hard hide-from-feed filter.
+	 *
+	 * `interested` reactions are NOT in this set on purpose — those
+	 * articles stay visible in the feed (with a saved-badge) so the
+	 * user can keep reading and clicking around without articles
+	 * disappearing the moment they tap "❤️". The reading list remains
+	 * the source of truth for "what did I save".
+	 */
+	dismissedIds: ReadonlySet<string>;
+	/** Set of curatedArticleIds the user marked as interested. */
+	interestedIds: ReadonlySet<string>;
 }
 
-/** Build the lookup set once and reuse across all scoreArticle calls. */
+/**
+ * Split the user's reactions into two sets: dismissed (hard-hide
+ * from feed) and interested (keep visible, badge in UI). Built once
+ * per render and reused across all scoreArticle calls.
+ *
+ * `source_blocked` reactions are NOT added to dismissedIds even
+ * though they hide articles — the source-level filter in
+ * `scoreArticle` handles those via `prefs.blockedSources` instead,
+ * so adding them here would be a no-op duplicate.
+ */
+export function buildReactionSets(reactions: readonly Reaction[]): {
+	dismissedIds: Set<string>;
+	interestedIds: Set<string>;
+} {
+	const dismissedIds = new Set<string>();
+	const interestedIds = new Set<string>();
+	for (const r of reactions) {
+		if (r.reaction === 'interested') {
+			interestedIds.add(r.articleId);
+		} else if (r.reaction === 'not_interested' || r.reaction === 'hidden') {
+			dismissedIds.add(r.articleId);
+		}
+	}
+	return { dismissedIds, interestedIds };
+}
+
+/**
+ * @deprecated Kept for backwards compat with the dashboard widget.
+ * New call sites should use `buildReactionSets` and the
+ * dismissedIds/interestedIds shape instead. This helper now returns
+ * only the dismissed ids — same effect on the feed filter, but it
+ * means widgets that haven't migrated still hide
+ * `not_interested`/`hidden` articles correctly while leaving
+ * `interested` articles visible (matching the new feed behavior).
+ */
 export function buildReactedIds(reactions: readonly Reaction[]): Set<string> {
-	const set = new Set<string>();
-	for (const r of reactions) set.add(r.articleId);
-	return set;
+	return buildReactionSets(reactions).dismissedIds;
 }
 
 /**
@@ -58,7 +102,7 @@ export function buildReactedIds(reactions: readonly Reaction[]): Set<string> {
  * should be hidden entirely. Callers sort by descending score.
  */
 export function scoreArticle(article: LocalCachedArticle, ctx: ScoreContext): number | null {
-	const { prefs, reactedIds } = ctx;
+	const { prefs, dismissedIds } = ctx;
 
 	if (prefs.selectedTopics.length > 0 && !prefs.selectedTopics.includes(article.topic as never)) {
 		return null;
@@ -70,7 +114,10 @@ export function scoreArticle(article: LocalCachedArticle, ctx: ScoreContext): nu
 	) {
 		return null;
 	}
-	if (reactedIds.has(article.id)) return null;
+	// Only ACTIVELY DISMISSED articles are filtered out. `interested`
+	// reactions stay visible in the feed (the user's read state is
+	// communicated via the badge in the UI, not by hiding the card).
+	if (dismissedIds.has(article.id)) return null;
 
 	const topicW = prefs.topicWeights[article.topic] ?? TOPIC_WEIGHT_DEFAULT;
 	const sourceW = prefs.sourceWeights[article.sourceSlug] ?? TOPIC_WEIGHT_DEFAULT;

@@ -24,7 +24,7 @@
 		useReactions,
 		formatRelativeTime,
 	} from '$lib/modules/news/queries';
-	import { rankFeed, buildReactedIds } from '$lib/modules/news/feed-engine';
+	import { rankFeed, buildReactionSets } from '$lib/modules/news/feed-engine';
 	import { reactionsStore } from '$lib/modules/news/stores/reactions.svelte';
 	import { articlesStore } from '$lib/modules/news/stores/articles.svelte';
 	import { feedCacheStore } from '$lib/modules/news/stores/feed-cache.svelte';
@@ -45,8 +45,10 @@
 	const pool = $derived(pool$.value);
 	const reactions = $derived(reactions$.value);
 
-	const reactedIds = $derived(buildReactedIds(reactions));
-	const ranked = $derived(prefs.onboardingCompleted ? rankFeed(pool, { prefs, reactedIds }) : []);
+	const { dismissedIds, interestedIds } = $derived(buildReactionSets(reactions));
+	const ranked = $derived(
+		prefs.onboardingCompleted ? rankFeed(pool, { prefs, dismissedIds, interestedIds }) : []
+	);
 
 	onMount(() => {
 		feedCacheStore.start();

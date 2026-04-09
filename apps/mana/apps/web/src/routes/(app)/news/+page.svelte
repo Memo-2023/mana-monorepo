@@ -13,7 +13,7 @@
 		useReactions,
 		formatRelativeTime,
 	} from '$lib/modules/news/queries';
-	import { rankFeed, buildReactedIds } from '$lib/modules/news/feed-engine';
+	import { rankFeed, buildReactionSets } from '$lib/modules/news/feed-engine';
 	import { preferencesStore } from '$lib/modules/news/stores/preferences.svelte';
 	import { reactionsStore } from '$lib/modules/news/stores/reactions.svelte';
 	import { articlesStore } from '$lib/modules/news/stores/articles.svelte';
@@ -102,12 +102,14 @@
 	}
 
 	// ─── Feed branch ──────────────────────────────────────────
-	const reactedIds = $derived(buildReactedIds(reactions));
+	const { dismissedIds, interestedIds } = $derived(buildReactionSets(reactions));
 	// Treat the local "just finished" override as fully onboarded so the
 	// feed renders immediately after the user clicks Fertig, before the
 	// liveQuery has had a chance to refresh prefs.
 	const isOnboarded = $derived(prefs.onboardingCompleted || onboardingJustFinished);
-	const ranked = $derived(isOnboarded ? rankFeed(pool, { prefs, reactedIds }) : []);
+	const ranked = $derived(
+		isOnboarded ? rankFeed(pool, { prefs, dismissedIds, interestedIds }) : []
+	);
 
 	async function react(
 		article: LocalCachedArticle,
@@ -313,6 +315,7 @@
 		{:else}
 			<div class="card-grid">
 				{#each ranked as { article } (article.id)}
+					{@const isSaved = interestedIds.has(article.id)}
 					<article class="card">
 						{#if article.imageUrl}
 							<button
@@ -324,7 +327,7 @@
 								<img src={article.imageUrl} alt="" loading="lazy" />
 							</button>
 						{/if}
-						<div class="card-body">
+						<div class="card-body" class:is-saved={isSaved}>
 							<div class="card-meta">
 								<span class="source">{article.siteName}</span>
 								<span class="dot">·</span>
@@ -332,6 +335,9 @@
 								{#if article.readingTimeMinutes}
 									<span class="dot">·</span>
 									<span>{article.readingTimeMinutes} min</span>
+								{/if}
+								{#if isSaved}
+									<span class="saved-badge" title="In deiner Leseliste">❤️ gespeichert</span>
 								{/if}
 							</div>
 							<button type="button" class="card-title-btn" onclick={() => openReader(article)}>
@@ -344,10 +350,14 @@
 								<button
 									type="button"
 									class="reaction-btn interested"
+									class:active={isSaved}
 									onclick={() => react(article, 'interested')}
-									title="Speichern + mehr davon"
+									title={isSaved
+										? 'Schon gespeichert — nochmal klicken bestätigt nur'
+										: 'In Leseliste speichern + mehr davon zeigen'}
+									disabled={isSaved}
 								>
-									❤️ Interessiert
+									❤️ {isSaved ? 'Gespeichert' : 'Interessiert'}
 								</button>
 								<button
 									type="button"
@@ -715,5 +725,32 @@
 	}
 	.reaction-btn.interested:hover {
 		border-color: hsl(var(--color-primary));
+	}
+	.reaction-btn.interested.active {
+		background: hsl(var(--color-primary) / 0.18);
+		border-color: hsl(var(--color-primary) / 0.5);
+		color: hsl(var(--color-primary));
+		cursor: default;
+		opacity: 0.85;
+	}
+	.reaction-btn.interested.active:hover {
+		filter: none;
+	}
+	.saved-badge {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.2rem;
+		padding: 0 0.4rem;
+		border-radius: 999px;
+		background: hsl(var(--color-primary) / 0.15);
+		color: hsl(var(--color-primary));
+		font-size: 0.6875rem;
+		font-weight: 600;
+		margin-left: auto;
+	}
+	.card-body.is-saved {
+		/* Subtle visual cue that this article is in the reading list,
+		 * but still readable as a feed card. */
+		background: hsl(var(--color-primary) / 0.04);
 	}
 </style>

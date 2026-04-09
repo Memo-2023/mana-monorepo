@@ -21,7 +21,7 @@
 		DEFAULT_PREFERENCES,
 	} from '$lib/modules/news/collections';
 	import { decryptRecords } from '$lib/data/crypto';
-	import { rankFeed, buildReactedIds } from '$lib/modules/news/feed-engine';
+	import { rankFeed, buildReactionSets } from '$lib/modules/news/feed-engine';
 	import { toPreferences, toReaction, formatRelativeTime } from '$lib/modules/news/queries';
 	import { PREFERENCES_ID, type LocalCachedArticle } from '$lib/modules/news/types';
 
@@ -49,7 +49,7 @@
 
 			return {
 				prefs,
-				ranked: rankFeed(pool, { prefs, reactedIds: buildReactedIds(reactions) }),
+				ranked: rankFeed(pool, { prefs, ...buildReactionSets(reactions) }),
 			};
 		}).subscribe({
 			next: ({ prefs, ranked }) => {
