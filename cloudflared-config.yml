@@ -1,53 +1,157 @@
+# Cloudflare Tunnel Configuration for the Mac Mini production server.
+#
+# This file is the SINGLE SOURCE OF TRUTH for which public hostnames
+# the tunnel exposes. The cloudflared launchd plist is started with
+# `--config <this-file> run` so any change here is one `git pull` +
+# `launchctl kickstart -k gui/501/com.cloudflare.cloudflared` away
+# from being live in production.
+#
+# Adding a new public hostname:
+#   1. Append the hostname / service line below in the matching section
+#   2. Make sure the corresponding Cloudflare DNS record exists (the
+#      tunnel needs the hostname pointing at its CNAME — see
+#      `cloudflared tunnel route dns <tunnel-id> <hostname>` if not)
+#   3. Run `./scripts/mac-mini/sync-tunnel-config.sh` to copy this file
+#      onto the Mac Mini and reload cloudflared
+#   4. Verify with `curl -sI https://<hostname>/health` (or the route's
+#      equivalent) — expect a non-404 status line
+#
+# Removing a hostname: same steps, just delete the lines.
+#
+# Catch-all at the bottom returns http_status:404 for any hostname
+# Cloudflare routes here that we don't have an explicit ingress rule
+# for. This is the desired failure mode.
+
 tunnel: bb0ea86d-8253-4a54-838b-107bb7945be9
 credentials-file: /Users/mana/.cloudflared/bb0ea86d-8253-4a54-838b-107bb7945be9.json
 
 ingress:
-  # SSH Access (requires cloudflared on client)
+  # ============================================
+  # SSH (requires cloudflared on the client)
+  # ============================================
   - hostname: ssh.mana.how
     service: ssh://localhost:22
 
-  # Mana Dashboard (Main)
+  # ============================================
+  # Unified Mana Web App (Port 5000)
+  # ============================================
+  # Every per-product subdomain points at the same SvelteKit container.
+  # The container's hooks.server.ts reads the host header and renders
+  # the matching module surface. mana.how itself is the dashboard.
   - hostname: mana.how
     service: http://localhost:5000
+  - hostname: chat.mana.how
+    service: http://localhost:5000
+  - hostname: todo.mana.how
+    service: http://localhost:5000
+  - hostname: calendar.mana.how
+    service: http://localhost:5000
+  - hostname: clock.mana.how
+    service: http://localhost:5000
+  - hostname: contacts.mana.how
+    service: http://localhost:5000
+  - hostname: zitare.mana.how
+    service: http://localhost:5000
+  - hostname: skilltree.mana.how
+    service: http://localhost:5000
+  - hostname: planta.mana.how
+    service: http://localhost:5000
+  - hostname: cards.mana.how
+    service: http://localhost:5000
+  - hostname: storage.mana.how
+    service: http://localhost:5000
+  - hostname: presi.mana.how
+    service: http://localhost:5000
+  - hostname: nutriphi.mana.how
+    service: http://localhost:5000
+  - hostname: photos.mana.how
+    service: http://localhost:5000
+  - hostname: mukke.mana.how
+    service: http://localhost:5000
+  - hostname: picture.mana.how
+    service: http://localhost:5000
+  - hostname: calc.mana.how
+    service: http://localhost:5000
+  - hostname: citycorners.mana.how
+    service: http://localhost:5000
+  - hostname: inventar.mana.how
+    service: http://localhost:5000
+  - hostname: times.mana.how
+    service: http://localhost:5000
+  - hostname: uload.mana.how
+    service: http://localhost:5000
+  - hostname: memoro.mana.how
+    service: http://localhost:5000
+  - hostname: context.mana.how
+    service: http://localhost:5000
+  - hostname: questions.mana.how
+    service: http://localhost:5000
+  - hostname: moodlit.mana.how
+    service: http://localhost:5000
 
-  # Auth Service
+  # ============================================
+  # Auth Service (Hono/Bun)
+  # ============================================
   - hostname: auth.mana.how
     service: http://localhost:3001
 
+  # ============================================
+  # Unified Backend API (Hono/Bun, port 3060)
+  # ============================================
+  # apps/api hosts every product compute module (calendar, chat,
+  # picture, planta, news, who, …) under /api/v1/{module}/*. The
+  # unified web app's PUBLIC_MANA_API_URL_CLIENT points here.
+  - hostname: mana-api.mana.how
+    service: http://localhost:3060
+
+  # ============================================
   # API Gateway (Go)
+  # ============================================
+  # Older gateway in front of the per-service compute layer. New
+  # services should go directly through mana-api above; this gateway
+  # only handles legacy entry points.
   - hostname: api.mana.how
     service: http://localhost:3016
 
+  # ============================================
   # Forgejo (Git + CI/CD)
+  # ============================================
   - hostname: git.mana.how
     service: http://localhost:3041
 
-  # NOTE: Individual app backends (chat, todo, calendar, contacts, storage,
-  # nutriphi, music, planta, picture, etc.) have been REMOVED — all migrated
-  # to local-first architecture. Web apps run as routes under mana.how.
-  # Only uload-server and memoro-server remain as app-specific backends.
+  # ============================================
+  # Standalone microservices
+  # ============================================
+  - hostname: uload-api.mana.how
+    service: http://localhost:3070
+  - hostname: media.mana.how
+    service: http://localhost:3011
+  - hostname: llm.mana.how
+    service: http://localhost:3025
+  - hostname: sync.mana.how
+    service: http://localhost:3010
+  - hostname: credits.mana.how
+    service: http://localhost:3002
+  - hostname: subscriptions.mana.how
+    service: http://localhost:3063
 
-  # Games
-  - hostname: whopxl.mana.how
-    service: http://localhost:5100
+  # ============================================
+  # Standalone web apps (separate containers)
+  # ============================================
+  - hostname: playground.mana.how
+    service: http://localhost:5050
   - hostname: arcade.mana.how
     service: http://localhost:5210
+  - hostname: manavoxel.mana.how
+    service: http://localhost:5028
+  - hostname: whopxl.mana.how
+    service: http://localhost:5100
 
-  # Public Status Page (generated every 60s by mana-status-gen container)
+  # ============================================
+  # Self-hosted landing pages (Nginx on port 4400)
+  # ============================================
   - hostname: status.mana.how
     service: http://localhost:4400
-
-  # Monitoring & Tools
-  - hostname: grafana.mana.how
-    service: http://localhost:8000
-  - hostname: stats.mana.how
-    service: http://localhost:8010
-
-  # GlitchTip Error Tracking
-  - hostname: glitchtip.mana.how
-    service: http://localhost:8020
-
-  # Self-Hosted Landing Pages (via Nginx on port 4400)
   - hostname: it.mana.how
     service: http://localhost:4400
   - hostname: chats.mana.how
@@ -63,7 +167,22 @@ ingress:
   - hostname: docs.mana.how
     service: http://localhost:4400
 
-  # GPU Server (Windows PC, LAN: 192.168.178.11)
+  # ============================================
+  # Monitoring & observability
+  # ============================================
+  - hostname: grafana.mana.how
+    service: http://localhost:8000
+  - hostname: stats.mana.how
+    service: http://localhost:8010
+  - hostname: glitchtip.mana.how
+    service: http://localhost:8020
+
+  # ============================================
+  # GPU server forwarders (Windows PC, LAN: 192.168.178.11)
+  # ============================================
+  # The Mac Mini fronts the Windows GPU box's services so they're
+  # reachable through the same tunnel without exposing the LAN box
+  # to the public internet directly.
   - hostname: gpu-llm.mana.how
     service: http://192.168.178.11:3025
   - hostname: gpu-stt.mana.how
@@ -77,5 +196,7 @@ ingress:
   - hostname: gpu-ollama.mana.how
     service: http://192.168.178.11:11434
 
-  # Catch-all
+  # ============================================
+  # Catch-all (returns 404 for any unmapped hostname)
+  # ============================================
   - service: http_status:404
