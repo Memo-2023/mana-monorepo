@@ -277,6 +277,24 @@ db.version(1).stores({
 		'id, startDate, kind, type, sourceModule, sourceId, parentBlockId, [sourceModule+sourceId], [type+startDate], [kind+startDate], [parentBlockId+recurrenceDate]',
 	timeBlockTags: 'id, blockId, tagId, [blockId+tagId]',
 
+	// ─── News (appId: 'news') ───
+	// `newsArticles` is the user's personal reading list (saved articles
+	// from the curated pool plus user-pasted URLs). `newsCategories` is
+	// user-defined folders for the reading list. `newsPreferences` is a
+	// singleton row holding selected topics, blocklist, language and the
+	// learned topic/source weights. `newsReactions` records per-article
+	// feedback (interested / not_interested / source_blocked / hidden)
+	// and is what the feed engine uses to suppress already-rated items.
+	// `newsCachedFeed` is a local mirror of the latest curated pool from
+	// the server — capped to ~200 entries for offline reading. It is
+	// intentionally NOT in module.config.ts and therefore not synced.
+	newsArticles:
+		'id, type, isArchived, isRead, isFavorite, categoryId, originalUrl, sourceCuratedId, [type+isArchived], [categoryId+createdAt]',
+	newsCategories: 'id, sortOrder',
+	newsPreferences: 'id',
+	newsReactions: 'id, articleId, reaction, sourceSlug, topic, [reaction+createdAt]',
+	newsCachedFeed: 'id, topic, sourceSlug, language, publishedAt, [topic+publishedAt]',
+
 	// ─── Shared: Global Tags (appId: 'tags') ───
 	globalTags: 'id, name, groupId',
 	tagGroups: 'id',
