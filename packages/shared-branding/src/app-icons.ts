@@ -147,6 +147,11 @@ export const APP_ICONS = {
 	events: svgToDataUrl(
 		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="ev" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#f43f5e"/><stop offset="100%" style="stop-color:#be123c"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#ev)"/><path d="M22 78l14-44 30 30-44 14z" fill="white"/><path d="M36 34c4-6 12-8 18-4M50 22c4-2 10 0 12 6M62 28c6-2 12 2 12 10" stroke="white" stroke-width="3" stroke-linecap="round" fill="none"/><circle cx="74" cy="46" r="2.5" fill="white"/><circle cx="80" cy="58" r="2" fill="white" fill-opacity="0.8"/><circle cx="68" cy="62" r="2" fill="white" fill-opacity="0.7"/></svg>`
 	),
+	who: svgToDataUrl(
+		// Theatre mask silhouette in front of a question mark — references
+		// the "guess who's behind the disguise" mechanic. Purple gradient.
+		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="wh" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#a855f7"/><stop offset="100%" style="stop-color:#7c3aed"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#wh)"/><path d="M58 30c-3-2-7-3-11-3-12 0-22 9-22 21 0 7 4 13 9 17l-3 11 11-5c2 0 3 1 5 1 12 0 22-9 22-21 0-7-4-13-11-21z" fill="white" fill-opacity="0.18"/><path d="M50 28c-4 0-8 1-11 3-7 8-11 14-11 21 0 12 10 21 22 21 12 0 22-9 22-21s-10-24-22-24z" fill="white"/><circle cx="44" cy="48" r="2.6" fill="#7c3aed"/><circle cx="60" cy="48" r="2.6" fill="#7c3aed"/><path d="M44 60c2 3 4 4 6 4s4-1 6-4" stroke="#7c3aed" stroke-width="2.5" stroke-linecap="round" fill="none"/><text x="76" y="42" font-family="system-ui" font-size="22" font-weight="700" fill="white" fill-opacity="0.85">?</text></svg>`
+	),
 } as const;
 
 export type AppIconId = keyof typeof APP_ICONS;

@@ -700,6 +700,23 @@ export const MANA_APPS: ManaApp[] = [
 		status: 'beta',
 		requiredTier: 'guest',
 	},
+	{
+		id: 'who',
+		name: 'Who',
+		description: {
+			de: 'Errate wer ich bin',
+			en: 'Guess who I am',
+		},
+		longDescription: {
+			de: 'Chatte mit einer historischen Persönlichkeit. Eine KI verkörpert sie ohne den Namen zu verraten — du musst durch geschickte Fragen herausfinden, mit wem du sprichst. Vier Decks: Historisch, Frauen der Geschichte, Antike, Erfinder & Pioniere.',
+			en: 'Chat with a historical figure. An AI roleplays them without revealing their name — you have to figure out who you are talking to. Four decks: Historical, Women in History, Antiquity, Inventors & Pioneers.',
+		},
+		icon: APP_ICONS.who,
+		color: '#a855f7',
+		comingSoon: false,
+		status: 'beta',
+		requiredTier: 'beta',
+	},
 ];
 
 /**
