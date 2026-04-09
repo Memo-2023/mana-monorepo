@@ -28,6 +28,27 @@ from .base import LLMProvider
 logger = logging.getLogger(__name__)
 
 
+def _strip_json_fences(content: str) -> str:
+    """Strip ```json ... ``` markdown fences from a string if present.
+
+    Some Ollama vision models still wrap structured-output responses in
+    a markdown code block even when `format` is set. Downstream parsers
+    (Vercel AI SDK generateObject, manual JSON.parse) expect clean JSON,
+    so we normalize the response here at the proxy boundary.
+    """
+    s = content.strip()
+    if s.startswith("```"):
+        # Drop the opening fence (```json or ``` plus any language tag)
+        first_newline = s.find("\n")
+        if first_newline != -1:
+            s = s[first_newline + 1 :]
+        # Drop the closing fence
+        if s.endswith("```"):
+            s = s[:-3]
+        s = s.strip()
+    return s
+
+
 class OllamaProvider(LLMProvider):
     """Ollama LLM provider."""
 
@@ -94,6 +115,37 @@ class OllamaProvider(LLMProvider):
             "stream": False,
         }
 
+        # Pass through structured-output requests to Ollama's native
+        # `format` field. Ollama supports either `"json"` (free-form
+        # JSON object) or a full JSON schema dict. The OpenAI-style
+        # response_format the consumer sends maps as follows:
+        #   - {"type": "json_object"}            → "json"
+        #   - {"type": "json_schema", "json_schema": {"schema": {...}}}
+        #     → the schema dict (Ollama 0.5+ supports full schemas)
+        # Without this, Ollama wraps JSON in ```json ... ``` markdown
+        # fences, which breaks downstream strict parsers like the AI SDK
+        # generateObject() helper.
+        if request.response_format is not None:
+            rf = request.response_format
+            rf_type = getattr(rf, "type", None) or (
+                rf.get("type") if isinstance(rf, dict) else None
+            )
+            if rf_type == "json_object":
+                payload["format"] = "json"
+            elif rf_type == "json_schema":
+                rf_schema = (
+                    getattr(rf, "json_schema", None)
+                    or (rf.get("json_schema") if isinstance(rf, dict) else None)
+                )
+                if rf_schema is not None:
+                    inner = (
+                        getattr(rf_schema, "schema", None)
+                        or (rf_schema.get("schema") if isinstance(rf_schema, dict) else None)
+                    )
+                    payload["format"] = inner if inner is not None else "json"
+                else:
+                    payload["format"] = "json"
+
         # Add optional parameters
         options: dict[str, Any] = {}
         if request.temperature is not None:
@@ -114,11 +166,16 @@ class OllamaProvider(LLMProvider):
         response.raise_for_status()
         data = response.json()
 
+        # Defensive fence-stripping: even with `format` set, some older
+        # Ollama versions still emit ```json ... ``` wrappers for vision
+        # models. Strip them so strict downstream parsers see clean JSON.
+        content = _strip_json_fences(data["message"]["content"])
+
         return ChatCompletionResponse(
             model=f"ollama/{model}",
             choices=[
                 Choice(
-                    message=MessageResponse(content=data["message"]["content"]),
+                    message=MessageResponse(content=content),
                     finish_reason="stop" if data.get("done") else None,
                 )
             ],
