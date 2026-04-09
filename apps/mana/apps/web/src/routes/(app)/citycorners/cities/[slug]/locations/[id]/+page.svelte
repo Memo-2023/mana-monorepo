@@ -36,7 +36,7 @@
 
 	const cityCtx = getContext<{ value: LocalCity | undefined }>('currentCity');
 	let city = $derived(cityCtx.value);
-	let citySlug = $derived($page.params.slug);
+	let citySlug = $derived($page.params.slug ?? '');
 
 	const allFavorites = useAllFavorites();
 	let favoriteIds = $derived(getFavoriteIds(allFavorites.value));
@@ -96,7 +96,7 @@
 
 	onMount(async () => {
 		try {
-			const locId = $page.params.id;
+			const locId = $page.params.id ?? '';
 			const loc = await ccLocationTable.get(locId);
 			if (loc) {
 				location = {

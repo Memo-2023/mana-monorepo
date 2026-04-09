@@ -4,7 +4,7 @@
 	import { page } from '$app/stores';
 	import { giftsService, type GiftCodeInfo } from '$lib/api/gifts';
 
-	let code = $derived($page.params.code);
+	let code = $derived($page.params.code ?? '');
 	let giftInfo = $state<GiftCodeInfo | null>(null);
 	let loading = $state(true);
 	let error = $state<string | null>(null);

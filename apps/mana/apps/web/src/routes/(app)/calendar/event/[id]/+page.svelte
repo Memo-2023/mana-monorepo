@@ -13,7 +13,7 @@
 	const calendarsCtx: { readonly value: Calendar[] } = getContext('calendars');
 	const eventsCtx: { readonly value: CalendarEvent[] } = getContext('calendarEvents');
 
-	let eventId = $derived($page.params.id);
+	let eventId = $derived($page.params.id ?? '');
 	let event = $derived(getEventById(eventsCtx.value, eventId));
 	let calendar = $derived(
 		event ? getCalendarById(calendarsCtx.value, event.calendarId) : undefined

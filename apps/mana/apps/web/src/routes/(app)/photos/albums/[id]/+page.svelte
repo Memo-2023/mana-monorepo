@@ -13,7 +13,7 @@
 	const allAlbums: { readonly value: Album[] } = getContext('albums');
 	const allAlbumItems: { readonly value: AlbumItem[] } = getContext('albumItems');
 
-	const albumId = $derived($page.params.id);
+	const albumId = $derived($page.params.id ?? '');
 	let currentAlbum = $derived(getAlbumById(allAlbums.value, albumId));
 	let albumItems = $derived(getAlbumItemsForAlbum(allAlbumItems.value, albumId));
 	let albumPhotos = $derived(albumItems.map((item) => ({ id: item.mediaId }) as Photo));

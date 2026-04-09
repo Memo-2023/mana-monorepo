@@ -16,7 +16,7 @@
 	const allFiles: { readonly value: StorageFile[] } = getContext('storageFiles');
 	const allFolders: { readonly value: StorageFolder[] } = getContext('storageFolders');
 
-	let folderId = $derived($page.params.folderId);
+	let folderId = $derived($page.params.folderId ?? '');
 
 	// Current folder and its contents
 	let currentFolder = $derived(findFolderById(allFolders?.value ?? [], folderId));

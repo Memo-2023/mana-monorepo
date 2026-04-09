@@ -10,7 +10,8 @@
 
 	const cityCtx = getContext<{ value: LocalCity | undefined }>('currentCity');
 	let city = $derived(cityCtx.value);
-	let citySlug = $derived($page.params.slug);
+	let citySlug = $derived($page.params.slug ?? '');
+	let locId = $derived(locId ?? '');
 
 	let loading = $state(true);
 	let name = $state('');
@@ -43,7 +44,7 @@
 
 	onMount(async () => {
 		try {
-			const loc = await ccLocationTable.get($page.params.id);
+			const loc = await ccLocationTable.get(locId);
 			if (!loc) {
 				error = $_('edit.loadError');
 				return;
@@ -68,14 +69,14 @@
 		error = '';
 
 		try {
-			await ccLocationTable.update($page.params.id, {
+			await ccLocationTable.update(locId, {
 				name: name.trim(),
 				category: category as any,
 				description: description.trim(),
 				address: address.trim() || null,
 				imageUrl: imageUrl.trim() || null,
 			});
-			goto(`/citycorners/cities/${citySlug}/locations/${$page.params.id}`);
+			goto(`/citycorners/cities/${citySlug}/locations/${locId}`);
 		} catch {
 			error = $_('edit.error');
 		} finally {
@@ -91,7 +92,7 @@
 <header class="mb-6">
 	<div class="flex items-center gap-2 mb-1">
 		<a
-			href="/citycorners/cities/{citySlug}/locations/{$page.params.id}"
+			href="/citycorners/cities/{citySlug}/locations/{locId}"
 			class="text-foreground-secondary hover:text-primary transition-colors"
 		>
 			<CaretLeft size={16} />
@@ -112,7 +113,7 @@
 		<span class="mb-2 block text-4xl">🔒</span>
 		<p class="text-foreground-secondary">{$_('edit.forbidden')}</p>
 		<a
-			href="/citycorners/cities/{citySlug}/locations/{$page.params.id}"
+			href="/citycorners/cities/{citySlug}/locations/{locId}"
 			class="mt-4 inline-block text-sm text-primary hover:underline"
 		>
 			{$_('detail.back')}
@@ -252,7 +253,7 @@
 
 		<div class="flex gap-3">
 			<a
-				href="/citycorners/cities/{citySlug}/locations/{$page.params.id}"
+				href="/citycorners/cities/{citySlug}/locations/{locId}"
 				class="rounded-lg border border-border bg-background px-4 py-3 text-sm font-medium text-foreground-secondary transition-colors hover:bg-background-card-hover"
 			>
 				{$_('edit.cancel')}

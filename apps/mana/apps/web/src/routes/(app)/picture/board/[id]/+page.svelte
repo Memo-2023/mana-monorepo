@@ -10,7 +10,7 @@
 
 	const allBoards: { value: BoardWithCount[] } = getContext('allBoards');
 
-	let boardId = $derived($page.params.id);
+	let boardId = $derived($page.params.id ?? '');
 	let board = $derived(findBoardById(allBoards.value, boardId));
 
 	// Edit state

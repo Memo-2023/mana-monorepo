@@ -27,7 +27,8 @@
 	let selectedQuoteIds = $state<Set<string>>(new Set());
 
 	// Reactive list from liveQuery context
-	let list = $derived<QuoteList | undefined>(findListById(allLists.value, $page.params.id));
+	let listId = $derived($page.params.id ?? '');
+	let list = $derived<QuoteList | undefined>(findListById(allLists.value, listId));
 
 	// Get quotes in this list
 	let listQuotes = $derived<Quote[]>(

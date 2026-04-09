@@ -28,7 +28,7 @@
 	const locationsCtx: { readonly value: Location[] } = getContext('locations');
 	const categoriesCtx: { readonly value: Category[] } = getContext('categories');
 
-	let itemId = $derived($page.params.id);
+	let itemId = $derived($page.params.id ?? '');
 	let item = $derived(getItemById(itemsCtx.value, itemId));
 	let collection = $derived(
 		item ? getCollectionById(collectionsCtx.value, item.collectionId) : undefined

@@ -9,7 +9,7 @@
 	import { ArrowLeft, Trash, Plus, ShareNetwork } from '@mana/shared-icons';
 	import { ShareModal } from '@mana/shared-uload';
 
-	let deckId = $derived($page.params.id);
+	let deckId = $derived($page.params.id ?? '');
 	let showDeleteConfirm = $state(false);
 	let deleting = $state(false);
 	let showShare = $state(false);

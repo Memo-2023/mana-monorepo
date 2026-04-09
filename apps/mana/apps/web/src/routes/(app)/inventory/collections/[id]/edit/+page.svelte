@@ -11,7 +11,7 @@
 
 	const collectionsCtx: { readonly value: Collection[] } = getContext('collections');
 
-	let collectionId = $derived($page.params.id);
+	let collectionId = $derived($page.params.id ?? '');
 	let collection = $derived(getCollectionById(collectionsCtx.value, collectionId));
 
 	let name = $state('');

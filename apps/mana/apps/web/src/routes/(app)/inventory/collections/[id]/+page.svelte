@@ -19,7 +19,7 @@
 	const collectionsCtx: { readonly value: Collection[] } = getContext('collections');
 	const itemsCtx: { readonly value: Item[] } = getContext('items');
 
-	let collectionId = $derived($page.params.id);
+	let collectionId = $derived($page.params.id ?? '');
 	let collection = $derived(getCollectionById(collectionsCtx.value, collectionId));
 	let items = $derived(getItemsByCollection(itemsCtx.value, collectionId));
 	let sortedItems = $derived(getSortedItems(items, viewStore.sort));
