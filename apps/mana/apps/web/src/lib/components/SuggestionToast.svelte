@@ -95,7 +95,7 @@
 
 	.toast-text {
 		font-size: 0.75rem;
-		color: #e5e7eb;
+		color: hsl(var(--color-foreground));
 		line-height: 1.3;
 	}
 
@@ -110,7 +110,7 @@
 		padding: 0.25rem 0.625rem;
 		border-radius: 0.375rem;
 		border: none;
-		background: #8b5cf6;
+		background: hsl(var(--color-primary));
 		color: white;
 		font-size: 0.6875rem;
 		font-weight: 600;
@@ -125,14 +125,14 @@
 	.toast-dismiss {
 		border: none;
 		background: transparent;
-		color: #6b7280;
+		color: hsl(var(--color-muted-foreground));
 		font-size: 1rem;
 		cursor: pointer;
 		padding: 0.125rem 0.25rem;
 		line-height: 1;
 	}
 	.toast-dismiss:hover {
-		color: #ef4444;
+		color: hsl(var(--color-error));
 	}
 
 	@keyframes slide-up {

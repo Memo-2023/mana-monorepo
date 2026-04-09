@@ -113,7 +113,7 @@
 		position: fixed;
 		inset: 0;
 		z-index: 9999;
-		background: rgba(0, 0, 0, 0.6);
+		background: hsl(0 0% 0% / 0.6);
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -173,7 +173,7 @@
 	.error {
 		margin: 0.75rem 0;
 		padding: 0.75rem 1rem;
-		background: rgba(239, 68, 68, 0.08);
+		background: hsl(var(--color-error) / 0.08);
 		border: 1px solid rgba(239, 68, 68, 0.3);
 		border-radius: 0.5rem;
 		font-size: 0.85rem;

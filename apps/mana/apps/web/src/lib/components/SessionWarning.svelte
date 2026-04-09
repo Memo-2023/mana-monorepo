@@ -71,8 +71,8 @@
 		display: flex;
 		align-items: center;
 		gap: 12px;
-		background: rgba(245, 158, 11, 0.95);
-		color: #1e293b;
+		background: hsl(var(--color-warning) / 0.95);
+		color: hsl(0 0% 12%);
 		padding: 10px 20px;
 		border-radius: 10px;
 		font-size: 13px;
@@ -97,9 +97,9 @@
 	}
 
 	.refresh-btn {
-		background: rgba(0, 0, 0, 0.15);
+		background: hsl(0 0% 0% / 0.15);
 		border: none;
-		color: #1e293b;
+		color: hsl(0 0% 12%);
 		padding: 4px 12px;
 		border-radius: 6px;
 		font-size: 12px;
@@ -109,6 +109,6 @@
 	}
 
 	.refresh-btn:hover {
-		background: rgba(0, 0, 0, 0.25);
+		background: hsl(0 0% 0% / 0.25);
 	}
 </style>

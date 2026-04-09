@@ -179,7 +179,7 @@
 
 	.close:hover {
 		color: var(--text-primary, #111);
-		background: rgba(0, 0, 0, 0.05);
+		background: hsl(var(--color-surface-hover));
 	}
 
 	.body {

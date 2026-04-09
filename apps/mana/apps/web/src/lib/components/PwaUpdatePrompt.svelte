@@ -121,7 +121,7 @@
 
 	.update-icon {
 		flex-shrink: 0;
-		color: #6366f1;
+		color: hsl(var(--color-primary));
 	}
 
 	.update-text {
@@ -150,7 +150,7 @@
 	}
 
 	.update-btn {
-		background: #6366f1;
+		background: hsl(var(--color-primary));
 		border: none;
 		color: white;
 		padding: 5px 12px;
@@ -162,7 +162,8 @@
 	}
 
 	.update-btn:hover {
-		background: #5558e6;
+		background: hsl(var(--color-primary));
+		filter: brightness(0.9);
 	}
 
 	.dismiss-btn {

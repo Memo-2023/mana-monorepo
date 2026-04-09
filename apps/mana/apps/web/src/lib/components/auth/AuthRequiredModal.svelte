@@ -85,7 +85,7 @@
 		position: fixed;
 		inset: 0;
 		z-index: 9999;
-		background: rgba(0, 0, 0, 0.6);
+		background: hsl(0 0% 0% / 0.6);
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -151,7 +151,7 @@
 
 	.btn-primary {
 		background: var(--primary, #6366f1);
-		color: #fff;
+		color: hsl(var(--color-primary-foreground));
 		border-color: var(--primary, #6366f1);
 	}
 
