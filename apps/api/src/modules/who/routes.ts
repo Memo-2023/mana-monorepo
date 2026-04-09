@@ -196,7 +196,30 @@ routes.post('/chat', async (c) => {
 	// Detect the sentinel. The LLM appends [IDENTITY_REVEALED] when
 	// it recognizes the player has guessed the name. We strip the
 	// sentinel from the visible reply.
-	const identityRevealed = raw.includes(IDENTITY_SENTINEL);
+	//
+	// Belt-and-suspenders: gemma3:4b (and weaker LLMs in general) will
+	// occasionally emit the sentinel even when the player's guess was
+	// wrong — e.g. the user says "bist du Kopernikus?" while playing
+	// Galileo, the LLM correctly denies it in prose, BUT then still
+	// appends the sentinel because the prompt mentioned "errät den
+	// Namen". To stop the false positive from ending the game, we
+	// independently verify that the user's CURRENT message contains
+	// the canonical name (or last-name, with diacritic-stripped fuzzy
+	// match — same logic as the explicit /guess endpoint). If the
+	// LLM emitted the sentinel but the user's message doesn't actually
+	// name this character, we strip the sentinel and treat the reply
+	// as a normal turn. The legit cases (user actually said the right
+	// name) still pass through cleanly.
+	const llmEmittedSentinel = raw.includes(IDENTITY_SENTINEL);
+	const userActuallyGuessed = matchesName(character, message);
+	const identityRevealed = llmEmittedSentinel && userActuallyGuessed;
+	if (llmEmittedSentinel && !userActuallyGuessed) {
+		logger.info('who.sentinel_false_positive', {
+			gameId,
+			characterId,
+			userMessageHead: message.slice(0, 80),
+		});
+	}
 	const reply = raw.replace(IDENTITY_SENTINEL, '').trim();
 
 	// Charge credits AFTER we know the call worked. The chat module
@@ -304,24 +327,40 @@ verwendet. Gib subtile Hinweise auf deine Identität — sage aber NICHT direkt
 "Ich bin ${character.name}". Halte deine Antworten auf 2–4 Sätze begrenzt,
 es sei denn, eine längere Erklärung ist nötig.
 
-Wenn der Nutzer deinen Namen korrekt errät, füge am Ende deiner Antwort
-den Code "${IDENTITY_SENTINEL}" ein. Dieser Code erscheint NUR, wenn der
-Nutzer deinen vollständigen oder eindeutigen Namen genannt hat. Bei
-Spitznamen oder unklaren Bezügen erscheint der Code nicht.`;
+Sentinel-Regel (sehr wichtig — folge ihr exakt):
+- Füge "${IDENTITY_SENTINEL}" NUR dann am Ende deiner Antwort ein, wenn
+  der Nutzer in seiner letzten Nachricht deinen Namen "${character.name}"
+  WÖRTLICH genannt hat (Vor- und/oder Nachname).
+- Wenn der Nutzer einen ANDEREN Namen rät — selbst wenn er nahe dran ist
+  — erscheint der Code NICHT. Korrigiere ihn höflich im Charakter.
+- Wenn der Nutzer nach deinem Beruf, deiner Zeit oder deinen Werken fragt,
+  ohne einen Namen zu nennen, erscheint der Code NICHT.
+- Beispiele für FALSCHEN Trigger (Code NICHT einfügen): "bist du Tesla?"
+  während du Edison bist, "bist du ein Erfinder?", "im 19. Jahrhundert?".
+- Beispiele für KORREKTEN Trigger (Code einfügen): "bist du ${character.name}?",
+  "ich glaube du bist ${character.name}".`;
 }
 
 function matchesName(character: WhoCharacter, guess: string): boolean {
 	const normalizedGuess = normalize(guess);
 	const normalizedName = normalize(character.name);
+
+	// 1. Exact normalized match
 	if (normalizedGuess === normalizedName) return true;
-	// Allow last-name-only guesses for unambiguous historical figures.
-	// "Curie" matches "Marie Curie", "Tesla" matches "Nikola Tesla".
-	const parts = normalizedName.split(/\s+/).filter((p) => p.length >= 4);
-	if (parts.length > 1 && parts.some((p) => p === normalizedGuess)) return true;
-	// Allow guess-contains-name as a fuzzy fallback. Catches "I think
-	// it's Marie Curie" → contains "marie curie".
+
+	// 2. Guess contains the full name as substring
+	//    ("ich glaube du bist Marie Curie" → contains "marie curie")
 	if (normalizedGuess.includes(normalizedName)) return true;
-	return false;
+
+	// 3. Guess CONTAINS one of the name's significant parts as a whole
+	//    word. Catches "bist du Tesla?", "ich glaube Leonardo", etc.
+	//    Splits the guess into words (set membership for O(1) lookup),
+	//    splits the name into parts of length >= 4 (filters out short
+	//    connectors like "da" / "von" / "of"), then checks any name
+	//    part appears as a complete guess word.
+	const nameParts = normalizedName.split(/\s+/).filter((p) => p.length >= 4);
+	const guessWords = new Set(normalizedGuess.split(/\s+/));
+	return nameParts.some((part) => guessWords.has(part));
 }
 
 function normalize(s: string): string {
