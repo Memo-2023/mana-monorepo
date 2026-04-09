@@ -21,16 +21,41 @@ export interface GenerateTitleInput {
 
 export type GenerateTitleOutput = string;
 
+/** Date-based fallback label, e.g. "Memo vom 9. April 2026". Used when
+ *  the input is too short to produce a meaningful first-sentence title
+ *  or when rulesImpl gets called on empty/garbled input. */
+function dateLabel(): string {
+	const today = new Date();
+	const formatted = today.toLocaleDateString('de', {
+		day: 'numeric',
+		month: 'long',
+		year: 'numeric',
+	});
+	return `Memo vom ${formatted}`;
+}
+
 /** Deterministic first-sentence heuristic. Extracted to a module-scope
  *  function so runLlm can call it as a fallback when the LLM returns
  *  empty or whitespace-only output (which happens when the model emits
- *  only a `.` or special tokens that get stripped by skip_special_tokens). */
+ *  only a `.` or special tokens that get stripped by skip_special_tokens).
+ *
+ *  For very short transcripts (≤8 words), the "first sentence" IS the
+ *  whole transcript — using it as a title means the user sees their
+ *  recording verbatim, which isn't a title. In that case fall through
+ *  to the date label. The threshold is empirical: short voice memos
+ *  benefit from a date marker, longer ones can spare a few words for
+ *  a snippet. */
 function rulesImpl(input: GenerateTitleInput): string {
 	const text = input.text.trim();
-	if (!text) return 'Ohne Titel';
+	if (!text) return dateLabel();
 
 	// Take the first sentence — split on .!? or newline.
 	const firstSentence = text.split(/[.!?\n]/)[0]?.trim() ?? text;
+	const wordCount = firstSentence.split(/\s+/).filter(Boolean).length;
+
+	// Short transcripts: a date label is more honest than echoing the
+	// transcript back verbatim as if it were a title.
+	if (wordCount <= 8) return dateLabel();
 
 	// Cap at ~60 chars / maxWords words, whichever comes first.
 	const maxWords = input.maxWords ?? 7;
@@ -41,7 +66,7 @@ function rulesImpl(input: GenerateTitleInput): string {
 		candidate = candidate.slice(0, 57).trimEnd() + '…';
 	}
 
-	return candidate || 'Ohne Titel';
+	return candidate || dateLabel();
 }
 
 export const generateTitleTask: LlmTask<GenerateTitleInput, GenerateTitleOutput> = {
@@ -51,40 +76,60 @@ export const generateTitleTask: LlmTask<GenerateTitleInput, GenerateTitleOutput>
 	displayLabel: 'Titel automatisch erzeugen',
 
 	async runLlm(input, backend: LlmBackend): Promise<GenerateTitleOutput> {
-		const maxWords = input.maxWords ?? 7;
-		const language = input.language ?? 'de';
+		// Few-shot prompt — small instruct models like Gemma 4 E2B respond
+		// far better to "here's the pattern, complete the next one" than
+		// to a list of negative constraints ("no markdown, no quotes, no
+		// vorrede..."). The model just sees the structure and continues
+		// it. Empirically this produces real titles instead of single
+		// punctuation marks or empty special-token-only outputs.
+		const userMessage = `Erstelle einen kurzen, aussagekräftigen Titel (3-5 Wörter) für die folgende Sprachaufnahme.
+
+Beispiel 1:
+Aufnahme: "Erinnere mich daran, morgen Vormittag den Müll rauszubringen, bevor die Müllabfuhr kommt."
+Titel: Erinnerung Müll rausbringen
+
+Beispiel 2:
+Aufnahme: "Ich hatte heute eine Idee für die Präsentation nächste Woche, vielleicht sollten wir mit einer Demo anfangen statt mit Folien."
+Titel: Idee Präsentation Demo-Start
+
+Beispiel 3:
+Aufnahme: "Notiz für mich, ich muss noch die Steuererklärung für 2025 fertig machen, Belege liegen schon im Ordner."
+Titel: Steuererklärung 2025
+
+Aufnahme: "${input.text.slice(0, 2000).replace(/"/g, "'")}"
+Titel:`;
+
 		const result = await backend.generate({
 			taskName: generateTitleTask.name,
 			contentClass: generateTitleTask.contentClass,
-			messages: [
-				{
-					role: 'system',
-					content: `Du erstellst kurze, aussagekräftige Titel (max. ${maxWords} Wörter) für Texte. Sprache: ${language}. Antworte AUSSCHLIESSLICH mit dem Titel — kein Markdown, keine Anführungszeichen, keine Vorrede, kein Punkt am Ende.`,
-				},
-				{
-					role: 'user',
-					content: input.text.slice(0, 4000), // cap context for speed
-				},
-			],
-			temperature: 0.5,
-			maxTokens: 32,
+			messages: [{ role: 'user', content: userMessage }],
+			temperature: 0.4,
+			maxTokens: 24,
 		});
 
-		// Defensive: strip surrounding quotes / markdown / trailing dots in
-		// case the model didn't fully respect the system prompt.
-		const cleaned = result.content
-			.trim()
-			.replace(/^["'`*_]+|["'`*_]+$/g, '')
-			.replace(/\.+$/, '')
-			.trim();
+		// Log the raw model output BEFORE cleanup so the next test
+		// session can show us exactly what Gemma is producing if it
+		// still misbehaves.
+		console.info('[generateTitle] raw LLM output:', JSON.stringify(result.content));
 
-		// LLM produced nothing usable (empty content, only punctuation,
-		// only special tokens that got stripped, etc.) — fall back to the
-		// deterministic rules implementation so the user gets *something*.
-		// Without this fallback the watcher writes "" to memo.title and the
-		// user sees an empty placeholder forever.
+		// Cleanup chain — but rolled back if any step would empty the
+		// result. We'd rather keep a slightly imperfect title (with
+		// quotes, with a trailing dot) than lose it entirely.
+		const trimmed = result.content.trim();
+		const stripFences = trimmed.split('\n')[0]?.trim() ?? trimmed; // first line only
+		const stripQuotes = stripFences.replace(/^["'`*_]+|["'`*_]+$/g, '').trim();
+		const stripDots = stripQuotes.replace(/\.+$/, '').trim();
+
+		// Walk the chain and pick the first non-empty stage. This way
+		// even if the model emits `"."` we still get something via the
+		// trimmed stage; only if EVERY stage is empty do we fall through
+		// to the rules implementation.
+		const cleaned = stripDots || stripQuotes || stripFences || trimmed;
+
 		if (!cleaned) {
-			console.info('[generateTitle] LLM returned empty after cleanup, falling back to rules');
+			console.info(
+				'[generateTitle] LLM returned empty after all cleanup stages, falling back to rules'
+			);
 			return rulesImpl(input);
 		}
 
