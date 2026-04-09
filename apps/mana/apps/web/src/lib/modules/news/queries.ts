@@ -69,13 +69,21 @@ export function toCategory(local: LocalCategory): Category {
 }
 
 export function toPreferences(local: LocalPreferences): Preferences {
+	// Force the array fields back to arrays even if decryption left an
+	// encrypted blob string in place (vault locked at boot). Without this
+	// guard `{#each prefs.selectedTopics}` iterates the encrypted string
+	// char-by-char and crashes `TOPIC_LABELS[topic].emoji` on render.
 	return {
 		id: local.id,
-		selectedTopics: local.selectedTopics ?? [],
-		blockedSources: local.blockedSources ?? [],
-		preferredLanguages: local.preferredLanguages ?? ['de', 'en'],
-		topicWeights: local.topicWeights ?? {},
-		sourceWeights: local.sourceWeights ?? {},
+		selectedTopics: Array.isArray(local.selectedTopics) ? local.selectedTopics : [],
+		blockedSources: Array.isArray(local.blockedSources) ? local.blockedSources : [],
+		preferredLanguages: Array.isArray(local.preferredLanguages)
+			? local.preferredLanguages
+			: ['de', 'en'],
+		topicWeights:
+			local.topicWeights && typeof local.topicWeights === 'object' ? local.topicWeights : {},
+		sourceWeights:
+			local.sourceWeights && typeof local.sourceWeights === 'object' ? local.sourceWeights : {},
 		onboardingCompleted: local.onboardingCompleted ?? false,
 	};
 }

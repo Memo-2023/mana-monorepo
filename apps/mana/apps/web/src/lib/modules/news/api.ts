@@ -25,7 +25,11 @@ import { authStore } from '$lib/stores/auth.svelte';
 import { getManaApiUrl } from '$lib/api/config';
 
 async function authHeader(): Promise<Record<string, string>> {
-	const token = await authStore.getAccessToken();
+	// getValidToken (not getAccessToken) — runs the token through the
+	// tokenManager so it refreshes if expired. getAccessToken just reads
+	// localStorage and returns null/stale, which is what made the first
+	// pass at this fix still 401. sync.ts uses the same getValidToken.
+	const token = await authStore.getValidToken();
 	return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
