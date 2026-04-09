@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { FeaturesOverviewProps } from '../types.js';
+	import type { FeaturesOverviewProps } from '../ui-types';
 	import FeatureCard from './FeatureCard.svelte';
 
 	let { items, translations }: FeaturesOverviewProps = $props();

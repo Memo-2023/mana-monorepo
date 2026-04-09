@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { HelpSearchProps } from '../types.js';
+	import type { HelpSearchProps } from '../ui-types';
 	import type { SearchResult } from '../content';
 	import { createSearcher } from '../search-engine';
 

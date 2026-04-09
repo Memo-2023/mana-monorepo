@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { ChangelogEntryProps } from '../types.js';
+	import type { ChangelogEntryProps } from '../ui-types';
 
 	let { item, translations }: ChangelogEntryProps = $props();
 

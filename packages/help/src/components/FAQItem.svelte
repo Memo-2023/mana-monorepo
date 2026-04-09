@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { FAQItem } from './content';
+	import type { FAQItem } from '../content';
 
 	interface Props {
 		item: FAQItem;

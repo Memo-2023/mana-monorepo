@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { ContactSectionProps } from '../types.js';
+	import type { ContactSectionProps } from '../ui-types';
 
 	let { contact, translations }: ContactSectionProps = $props();
 </script>

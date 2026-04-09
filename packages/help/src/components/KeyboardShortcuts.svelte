@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { KeyboardShortcutsProps } from '../types.js';
+	import type { KeyboardShortcutsProps } from '../ui-types';
 
 	let { items, translations }: KeyboardShortcutsProps = $props();
 

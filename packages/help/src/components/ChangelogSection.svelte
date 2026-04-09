@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { ChangelogSectionProps } from '../types.js';
+	import type { ChangelogSectionProps } from '../ui-types';
 	import ChangelogEntry from './ChangelogEntry.svelte';
 
 	let { items, translations, maxItems = 10 }: ChangelogSectionProps = $props();

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { GettingStartedGuideProps } from '../types.js';
+	import type { GettingStartedGuideProps } from '../ui-types';
 
 	let { items, translations }: GettingStartedGuideProps = $props();
 

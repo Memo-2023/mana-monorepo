@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { FAQItem, FAQCategory } from './content';
-	import type { FAQSectionProps } from '../types.js';
+	import type { FAQItem, FAQCategory } from '../content';
+	import type { FAQSectionProps } from '../ui-types';
 	import FAQItemComponent from './FAQItem.svelte';
 
 	let {

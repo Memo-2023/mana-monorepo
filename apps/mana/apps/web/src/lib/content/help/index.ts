@@ -2,7 +2,7 @@
  * Help content for Mana app — reads from i18n locale files.
  */
 
-import type { HelpContent } from '@mana/help';
+import type { HelpContent, SupportedLanguage } from '@mana/help';
 import { getPrivacyFAQs } from '@mana/help';
 import { get } from 'svelte/store';
 import { _, locale } from 'svelte-i18n';
@@ -11,8 +11,17 @@ function t(key: string): string {
 	return get(_)(key) || key;
 }
 
+const SUPPORTED: readonly SupportedLanguage[] = ['en', 'de', 'fr', 'it', 'es'];
+
+function asSupportedLanguage(loc: string | null | undefined): SupportedLanguage {
+	if (loc && (SUPPORTED as readonly string[]).includes(loc)) {
+		return loc as SupportedLanguage;
+	}
+	return 'de';
+}
+
 export function getManaHelpContent(loc?: string): HelpContent {
-	const currentLocale = loc || get(locale) || 'de';
+	const currentLocale = asSupportedLanguage(loc || get(locale));
 
 	return {
 		faq: [
