@@ -1,27 +1,20 @@
 /**
  * NutriPhi module types for the unified app.
+ *
+ * NutritionData and AnalyzedFood are re-exported from @mana/shared-types
+ * because they double as the AI wire format (same Zod schema lives in
+ * packages/shared-types/src/ai-schemas.ts and is used by the backend
+ * generateObject() validator). Module-local types like LocalMeal compose
+ * those shared shapes with storage-specific BaseRecord fields.
  */
 
 import type { BaseRecord } from '@mana/local-store';
+import type { NutritionData, AnalyzedFood } from '@mana/shared-types';
+
+export type { NutritionData, AnalyzedFood };
 
 export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';
 export type InputType = 'photo' | 'text';
-
-export interface NutritionData {
-	calories: number;
-	protein: number;
-	carbohydrates: number;
-	fat: number;
-	fiber: number;
-	sugar: number;
-}
-
-/** A single food item identified by Gemini Vision in a meal photo. */
-export interface AnalyzedFood {
-	name: string;
-	quantity?: string | null;
-	calories?: number | null;
-}
 
 export interface LocalMeal extends BaseRecord {
 	date: string;

@@ -9,28 +9,17 @@
 
 import { authStore } from '$lib/stores/auth.svelte';
 import { getManaApiUrl } from '$lib/api/config';
-import type { NutritionData } from './types';
+// Wire format is the single source of truth in @mana/shared-types —
+// the backend validates AI responses with these same Zod schemas.
+import type { MealAnalysis } from '@mana/shared-types';
+
+export type MealAnalysisResult = MealAnalysis;
 
 export interface UploadMealPhotoResult {
 	mediaId: string;
 	publicUrl: string;
 	thumbnailUrl: string;
 	storagePath: string;
-}
-
-export interface AnalyzedFood {
-	name: string;
-	quantity?: string;
-	calories?: number;
-}
-
-export interface MealAnalysisResult {
-	foods?: AnalyzedFood[];
-	totalNutrition?: NutritionData;
-	description?: string;
-	confidence?: number;
-	warnings?: string[];
-	suggestions?: string[];
 }
 
 async function authHeader(): Promise<Record<string, string>> {

@@ -8,22 +8,17 @@
 
 import { authStore } from '$lib/stores/auth.svelte';
 import { getManaApiUrl } from '$lib/api/config';
+// Wire format is the single source of truth in @mana/shared-types —
+// the backend validates AI responses with the same Zod schema.
+import type { PlantIdentification } from '@mana/shared-types';
+
+export type IdentifyResult = PlantIdentification;
 
 export interface UploadPhotoResult {
 	storagePath: string;
 	publicUrl: string;
 	mediaId: string;
 	plantId: string | null;
-}
-
-export interface IdentifyResult {
-	scientificName?: string;
-	commonNames?: string[];
-	confidence?: number;
-	healthAssessment?: string;
-	wateringAdvice?: string;
-	lightAdvice?: string;
-	generalTips?: string[];
 }
 
 async function authHeader(): Promise<Record<string, string>> {
