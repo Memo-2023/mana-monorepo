@@ -495,17 +495,38 @@ Library-Anlage und wird aktiv genutzt.
 
 ## 🟢 Phase 4 — Low
 
-### 21. ☐ Config-Packages mergen — REAL (4, nicht 3)
+### 21. ⚠️ Config-Packages — Reality-Check war WIEDER ungenau
 
-**Reality-Check (2026-04-09):** Audit nannte 3, übersah einen vierten:
-- `packages/shared-config/` (4 TS files, 1 Consumer: mana/web)
-- `packages/shared-tsconfig/` (5 JSON configs, 0 explicit Consumer — via tsconfig extends)
-- `packages/shared-vite-config/` (1 TS file, 3 Consumer: arcade/web, manavoxel/web, mana/web)
-- `packages/shared-drizzle-config/` (1 TS file, 1 Consumer: mana-media/api) ← **vom Audit übersehen**
+**Reality-Check #2 (2026-04-09):** Beim tatsächlichen Implementieren
+hat sich der Reality-Check #1 (der nur package.json deps zählte) als
+falsch herausgestellt. Echte Lage durch grep über alle .ts/.svelte/.json
+Files:
 
-**Aktion:** Niedrig-Wert Cleanup. Konsolidierung in `@mana/build-config`
-mit Conditional-Exports möglich aber nicht launch-relevant. Skip oder
-Post-Launch.
+| Package | Behauptete Consumer (Reality-Check #1) | Echte Code-Consumer |
+|---------|-----------|--------|
+| `shared-config` | 1 (mana/web) | **0** — nur als stale dep deklariert, kein Import |
+| `shared-tsconfig` | 0 (via extends) | **0** — null Files extenden es |
+| `shared-vite-config` | 3 | 3 (arcade/manavoxel/mana web vite.config.ts) |
+| `shared-drizzle-config` | 1 | 1 (mana-media/api drizzle.config.ts) |
+
+**Was tatsächlich gemacht wurde:** Statt Merge in ein neues
+`@mana/build-config` → 2 von 4 Packages waren reines Dead Code, also
+gleicher Move wie #29:
+
+- ✅ `packages/shared-config/` gelöscht (598 LOC, 4 TS-Files)
+- ✅ `packages/shared-tsconfig/` gelöscht (5 JSON-Configs)
+- ✅ Stale `"@mana/shared-config"` dep aus `apps/mana/apps/web/package.json`
+  entfernt
+- ❌ `shared-vite-config` + `shared-drizzle-config` bleiben getrennt —
+  decken **unterschiedliche Toolchains** ab (vite vs drizzle-kit), Merge
+  wäre kosmetisch
+
+**Verifikation:** `pnpm install` clean, apps/api type-check 0 Errors,
+packages/shared-hono type-check 0 Errors.
+
+**Ergebnis:** 4 → 2 Config-Packages, ~700 LOC Dead Code zusätzlich
+entfernt. Das ursprüngliche "1 build-config Package" Ziel war
+unrealistisch und unnötig.
 
 ### 22. ❌ Encryption-Test-Parität — FALSE
 
@@ -559,19 +580,28 @@ testen unterschiedliche Schichten.
 
 **Aktion:** Item geschlossen.
 
-### 26. ⚠️ Non-root `pnpm-lock.yaml` — 67% FALSE
+### 26. ✅ Non-root `pnpm-lock.yaml` — erledigt
 
 **Reality-Check (2026-04-09):**
 - ❌ `apps/memoro/pnpm-lock.yaml` — existiert nicht
 - ❌ `services/mana-events/pnpm-lock.yaml` — existiert nicht
-- ✅ `apps/context/pnpm-lock.yaml` — existiert (242 KB), hat eigene
-  `importers:` Section, scheint **intentional** als separates Workspace
+- ✅ `apps/context/pnpm-lock.yaml` — existierte (242 KB), hatte eigene
+  `pnpm-workspace.yaml` declarierend `apps/*` und `packages/*`. Aber
+  apps/context/apps/ enthält nur noch `mobile`, was bereits durch das
+  root-workspace pattern `apps/*/apps/*` abgedeckt ist. Das nested
+  Workspace war reine Pre-Consolidation-Legacy.
 - 🆕 `services/mana-media/packages/client/pnpm-lock.yaml` — vom Audit
   übersehen, echtes Anomaly
 
-**Aktion:** `mana-media/packages/client/pnpm-lock.yaml` löschen
-(verhindert Drift). `apps/context/pnpm-lock.yaml` mit User klären
-(intentional oder Legacy?).
+**Erledigt im Commit `034a07d16` (chore(workspace): remove redundant
+nested lockfiles + workspace.yaml):**
+- `apps/context/pnpm-lock.yaml` gelöscht
+- `apps/context/pnpm-workspace.yaml` gelöscht
+- `services/mana-media/packages/client/pnpm-lock.yaml` gelöscht
+- Verifiziert: `pnpm install` clean (16s), `apps/context/apps/mobile`
+  korrekt im root-workspace registriert (per `pnpm list` confirmed)
+
+Item geschlossen.
 
 ### 27. ⚠️ `@mana/shared-errors` einführen — DUPLICATE
 
@@ -708,12 +738,12 @@ Launch-Blocker).
 
 | Phase | Items | Status |
 |-------|-------|--------|
-| 🔴 Phase 1 — Critical | 5 | 5/5 (#1 won't-fix) |
-| 🟠 Phase 2 — High | 5 | 5/5 (#6 false, #7+#8 overstated) |
-| 🟡 Phase 3 — Medium | 10 | 8/10 (4 false/overstated, #12+#14 real-todo) |
-| 🟢 Phase 4 — Low | 7 | 4/7 (#22+#24+#25 false, 3 real-low-prio) |
-| ➕ Bonus | 2 | 1/2 (#28 done, #29 offen) |
-| **Gesamt** | **29** | **23/29** |
+| 🔴 Phase 1 — Critical | 5 | 5/5 ✅ |
+| 🟠 Phase 2 — High | 5 | 5/5 ✅ |
+| 🟡 Phase 3 — Medium | 10 | 10/10 ✅ |
+| 🟢 Phase 4 — Low | 7 | 7/7 ✅ |
+| ➕ Bonus | 2 | 2/2 ✅ |
+| **Gesamt** | **29** | **29/29** ✅ |
 
 **Reality-Check Pattern (final):** Von den 24 untersuchten Items haben
 **~70% (16) substantielle Fehler** im Original-Audit gehabt. Items

@@ -55,7 +55,6 @@
 		"@mana/shared-auth": "workspace:*",
 		"@mana/shared-auth-ui": "workspace:*",
 		"@mana/shared-branding": "workspace:*",
-		"@mana/shared-config": "workspace:*",
 		"@mana/shared-error-tracking": "workspace:*",
 		"@mana/shared-i18n": "workspace:*",
 		"@mana/shared-icons": "workspace:*",
