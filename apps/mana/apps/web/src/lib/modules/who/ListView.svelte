@@ -12,7 +12,6 @@
 	import { allGames$, gameStatusLabel } from './queries';
 	import { whoGamesStore } from './stores/games.svelte';
 	import type { WhoDeckId, WhoGame, WhoDeckMeta } from './types';
-	import { getManaApiUrl } from '$lib/api/config';
 	import { authStore } from '$lib/stores/auth.svelte';
 
 	let games = $state<WhoGame[]>([]);
@@ -35,7 +34,10 @@
 				loadingDecks = false;
 				return;
 			}
-			const res = await fetch(`${getManaApiUrl()}/api/v1/who/decks`, {
+			// Same-origin path — proxied by the SvelteKit handler at
+			// /api/v1/who/[...path] to mana-api:3060 over the docker
+			// network. See routes/api/v1/who/[...path]/+server.ts.
+			const res = await fetch('/api/v1/who/decks', {
 				headers: { Authorization: `Bearer ${token}` },
 			});
 			if (res.ok) {

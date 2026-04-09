@@ -26,9 +26,11 @@ import type {
 	WhoRandomResponse,
 } from '../types';
 
-import { getManaApiUrl } from '$lib/api/config';
-
-const apiBase = () => `${getManaApiUrl()}/api/v1/who`;
+// Same-origin path. Routed by SvelteKit at
+// apps/mana/apps/web/src/routes/api/v1/who/[...path]/+server.ts and
+// proxied internally to mana-api:3060 over the docker network. This
+// avoids the cloudflared dependency for new mana-api routes.
+const API_BASE = '/api/v1/who';
 
 /**
  * Authenticated fetch helper. Mirrors the shape used elsewhere in
@@ -39,7 +41,7 @@ const apiBase = () => `${getManaApiUrl()}/api/v1/who`;
 async function postJson<T>(path: string, body: unknown): Promise<T> {
 	const token = await authStore.getAccessToken();
 	if (!token) throw new Error('not authenticated');
-	const res = await fetch(`${apiBase()}${path}`, {
+	const res = await fetch(`${API_BASE}${path}`, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
