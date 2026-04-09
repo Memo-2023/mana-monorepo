@@ -126,15 +126,17 @@ export const memosStore = {
 			// none (regex-based first-sentence fallback).
 			if (!existing.title?.trim() && transcript.length > 0) {
 				try {
-					await llmTaskQueue.enqueue(
+					const taskId = await llmTaskQueue.enqueue(
 						generateTitleTask,
 						{ text: transcript, language: existing.language ?? result.language ?? 'de' },
 						{ refType: 'memo', refId: memoId, priority: 1 }
 					);
-				} catch {
+					console.info('[memoro] enqueued title task', { taskId, memoId });
+				} catch (err) {
 					// Don't let queue failures break the transcription path.
 					// Worst case the memo stays untitled — the user can still
 					// rename it manually.
+					console.warn('[memoro] failed to enqueue title task:', err);
 				}
 			}
 		} catch (e) {

@@ -4,8 +4,10 @@
 -->
 <script lang="ts">
 	import { useDetailEntity } from '$lib/data/detail-entity.svelte';
+	import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 	import DetailViewShell from '$lib/components/DetailViewShell.svelte';
 	import { memosStore } from '../stores/memos.svelte';
+	import { llmQueueDb } from '$lib/llm-queue';
 	import { PushPin } from '@mana/shared-icons';
 	import type { ViewProps } from '$lib/app-registry';
 	import type { LocalMemo, ProcessingStatus } from '../types';
@@ -74,6 +76,27 @@
 		completed: '#22c55e',
 		failed: '#ef4444',
 	};
+
+	// Reactive lookup of any LLM queue task tagged with this memo, so the
+	// UI can show "Titel wird generiert..." while a generateTitleTask is
+	// pending or running. Returns the most recent task row (any state).
+	const titleQueueRow = useLiveQueryWithDefault(
+		async () => {
+			if (!memoId) return null;
+			const rows = await llmQueueDb.tasks
+				.where('[refType+refId]')
+				.equals(['memo', memoId])
+				.and((t) => t.taskName === 'common.generateTitle')
+				.reverse()
+				.sortBy('enqueuedAt');
+			return rows[0] ?? null;
+		},
+		null as Awaited<ReturnType<typeof llmQueueDb.tasks.toArray>>[number] | null
+	);
+
+	const titleIsGenerating = $derived(
+		titleQueueRow.value?.state === 'pending' || titleQueueRow.value?.state === 'running'
+	);
 </script>
 
 <DetailViewShell
@@ -98,7 +121,7 @@
 				bind:value={editTitle}
 				onfocus={detail.focus}
 				onblur={saveField}
-				placeholder="Titel..."
+				placeholder={titleIsGenerating && !editTitle ? 'Titel wird generiert…' : 'Titel…'}
 			/>
 			<button class="pin-btn" class:pinned={memo.isPinned} onclick={togglePin}>
 				<PushPin size={16} />
@@ -142,12 +165,26 @@
 			></textarea>
 		</div>
 
-		{#if memo.transcript}
-			<div class="section">
-				<span class="section-label">Transkript</span>
+		<div class="section">
+			<span class="section-label">Transkript</span>
+			{#if memo.processingStatus === 'processing'}
+				<div class="transcript transcript-loading">
+					<span class="loading-dot"></span>
+					<span class="loading-dot"></span>
+					<span class="loading-dot"></span>
+					<span>Wird transkribiert…</span>
+				</div>
+			{:else if memo.processingStatus === 'failed'}
+				<div class="transcript transcript-failed">
+					Transkription fehlgeschlagen. Versuche es erneut oder gib das Transkript manuell ein.
+				</div>
+			{:else if memo.transcript}
 				<div class="transcript">{memo.transcript}</div>
-			</div>
-		{/if}
+				<div class="source-label">Voxtral via mana-stt</div>
+			{:else}
+				<div class="transcript transcript-empty">Kein Transkript vorhanden.</div>
+			{/if}
+		</div>
 
 		<div class="meta">
 			<span>Erstellt: {new Date(memo.createdAt ?? '').toLocaleDateString('de')}</span>
@@ -186,5 +223,52 @@
 		white-space: pre-wrap;
 		max-height: 12rem;
 		overflow-y: auto;
+	}
+	.transcript-loading {
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
+		font-style: italic;
+	}
+	.transcript-empty {
+		font-style: italic;
+		opacity: 0.7;
+	}
+	.transcript-failed {
+		color: hsl(var(--color-destructive, 0 84% 60%));
+	}
+	.loading-dot {
+		display: inline-block;
+		width: 0.375rem;
+		height: 0.375rem;
+		border-radius: 50%;
+		background: currentColor;
+		opacity: 0.4;
+		animation: loadingPulse 1.2s ease-in-out infinite;
+	}
+	.loading-dot:nth-child(2) {
+		animation-delay: 0.15s;
+	}
+	.loading-dot:nth-child(3) {
+		animation-delay: 0.3s;
+	}
+	@keyframes loadingPulse {
+		0%,
+		80%,
+		100% {
+			opacity: 0.4;
+			transform: scale(0.85);
+		}
+		40% {
+			opacity: 1;
+			transform: scale(1);
+		}
+	}
+	.source-label {
+		margin-top: 0.375rem;
+		font-size: 0.6875rem;
+		color: hsl(var(--color-muted-foreground));
+		opacity: 0.7;
+		font-style: italic;
 	}
 </style>

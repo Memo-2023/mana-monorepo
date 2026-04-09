@@ -24,6 +24,7 @@
  */
 
 import { liveQuery, type Subscription } from 'dexie';
+import type { QueuedTask } from '@mana/shared-llm';
 import { llmQueueDb } from '$lib/llm-queue';
 import { encryptRecord } from '$lib/data/crypto';
 import { memoTable } from './collections';
@@ -35,53 +36,113 @@ export function startMemoroLlmWatcher(): void {
 	if (subscription) return; // already running
 	if (typeof window === 'undefined') return; // SSR-safe no-op
 
+	console.info('[memoro-llm-watcher] starting subscription');
+
 	const observable = liveQuery(async () =>
 		llmQueueDb.tasks
 			.where('state')
 			.equals('done')
-			.and((t) => t.taskName === 'common.generateTitle' && t.refType === 'memo')
+			.and((t: QueuedTask) => t.taskName === 'common.generateTitle' && t.refType === 'memo')
 			.toArray()
 	);
 
 	subscription = observable.subscribe({
 		next: async (rows) => {
+			if (rows.length === 0) return;
+			console.info(`[memoro-llm-watcher] saw ${rows.length} done title task(s)`);
+
 			for (const row of rows) {
-				if (!row.refId || typeof row.result !== 'string') {
-					// Result shape didn't match — drop the queue row so we
-					// don't keep retrying it.
-					await llmQueueDb.tasks.delete(row.id);
-					continue;
+				try {
+					await applyRow(row);
+				} catch (err) {
+					console.warn('[memoro-llm-watcher] failed to apply row', row.id, err);
+					// Best-effort: mark the row consumed so we don't keep
+					// retrying a row that crashes the watcher every cycle.
+					try {
+						await llmQueueDb.tasks.delete(row.id);
+					} catch {
+						/* ignore */
+					}
 				}
-
-				const memo = await memoTable.get(row.refId);
-				if (!memo) {
-					// Memo was deleted before the task finished — discard.
-					await llmQueueDb.tasks.delete(row.id);
-					continue;
-				}
-
-				// Don't overwrite a manual title that the user typed
-				// between enqueue time and result time.
-				if (memo.title?.trim()) {
-					await llmQueueDb.tasks.delete(row.id);
-					continue;
-				}
-
-				const diff: Partial<LocalMemo> = {
-					title: row.result,
-					updatedAt: new Date().toISOString(),
-				};
-				await encryptRecord('memos', diff);
-				await memoTable.update(row.refId, diff);
-
-				// Mark consumed
-				await llmQueueDb.tasks.delete(row.id);
 			}
 		},
 		error: (err) => {
 			console.warn('[memoro-llm-watcher] subscription error:', err);
 		},
 	});
+
+	// Belt-and-suspenders: Dexie liveQuery sometimes misses the FIRST
+	// emission if the subscription is set up in the same microtask as
+	// the table update. Trigger an immediate manual sweep on startup
+	// so any rows already done from a previous tab session get picked up.
+	void runOneSweep();
+}
+
+async function runOneSweep(): Promise<void> {
+	try {
+		const rows = await llmQueueDb.tasks
+			.where('state')
+			.equals('done')
+			.and((t: QueuedTask) => t.taskName === 'common.generateTitle' && t.refType === 'memo')
+			.toArray();
+		if (rows.length === 0) {
+			console.info('[memoro-llm-watcher] startup sweep: no pending done rows');
+			return;
+		}
+		console.info(`[memoro-llm-watcher] startup sweep: applying ${rows.length} row(s)`);
+		for (const row of rows) {
+			try {
+				await applyRow(row);
+			} catch (err) {
+				console.warn('[memoro-llm-watcher] startup sweep failed for row', row.id, err);
+			}
+		}
+	} catch (err) {
+		console.warn('[memoro-llm-watcher] startup sweep error:', err);
+	}
+}
+
+async function applyRow(row: QueuedTask): Promise<void> {
+	if (!row.refId || typeof row.result !== 'string') {
+		console.info(
+			`[memoro-llm-watcher] dropping row ${row.id} — missing refId or result not a string`
+		);
+		await llmQueueDb.tasks.delete(row.id);
+		return;
+	}
+
+	const memo = await memoTable.get(row.refId);
+	if (!memo) {
+		console.info(`[memoro-llm-watcher] dropping row ${row.id} — memo ${row.refId} not found`);
+		await llmQueueDb.tasks.delete(row.id);
+		return;
+	}
+
+	// Don't overwrite a manual title that the user typed
+	// between enqueue time and result time. The memo we just read
+	// from Dexie is still ENCRYPTED — title is either null/undefined
+	// (no manual title) or an `enc:1:...` blob (manual title set).
+	// Either way, presence-check is enough — we don't need to decrypt
+	// to know if the user filled it in.
+	if (typeof memo.title === 'string' && memo.title.trim()) {
+		console.info(
+			`[memoro-llm-watcher] memo ${row.refId} already has a title — skipping auto-title`
+		);
+		await llmQueueDb.tasks.delete(row.id);
+		return;
+	}
+
+	console.info(`[memoro-llm-watcher] writing title to memo ${row.refId}: "${row.result}"`);
+	const diff: Partial<LocalMemo> = {
+		title: row.result,
+		updatedAt: new Date().toISOString(),
+	};
+	await encryptRecord('memos', diff);
+	await memoTable.update(row.refId, diff);
+
+	// Mark consumed
+	await llmQueueDb.tasks.delete(row.id);
+	console.info(`[memoro-llm-watcher] applied + cleared row ${row.id}`);
 }
 
 export function stopMemoroLlmWatcher(): void {
