@@ -206,31 +206,22 @@
 		padding: 1rem;
 		height: 100%;
 	}
+	/* P5: theme-token migration. */
 	.search-input {
 		padding: 0.375rem 0.625rem;
 		border-radius: 0.375rem;
-		border: 1px solid rgba(0, 0, 0, 0.08);
+		border: 1px solid hsl(var(--color-border));
 		background: transparent;
 		font-size: 0.8125rem;
-		color: #374151;
+		color: hsl(var(--color-foreground));
 		outline: none;
 		width: 100%;
 	}
 	.search-input::placeholder {
-		color: #c0bfba;
+		color: hsl(var(--color-muted-foreground));
 	}
 	.search-input:focus {
-		border-color: rgba(0, 0, 0, 0.15);
-	}
-	:global(.dark) .search-input {
-		border-color: rgba(255, 255, 255, 0.08);
-		color: #f3f4f6;
-	}
-	:global(.dark) .search-input::placeholder {
-		color: #4b5563;
-	}
-	:global(.dark) .search-input:focus {
-		border-color: rgba(255, 255, 255, 0.15);
+		border-color: hsl(var(--color-border-strong));
 	}
 	.quick-add {
 		display: flex;
@@ -238,18 +229,12 @@
 		gap: 0.5rem;
 		padding: 0.375rem 0.5rem;
 		border-radius: 0.375rem;
-		border: 1px solid rgba(0, 0, 0, 0.08);
+		border: 1px solid hsl(var(--color-border));
 		background: transparent;
 	}
-	:global(.dark) .quick-add {
-		border-color: rgba(255, 255, 255, 0.08);
-	}
 	.add-icon {
-		color: #d1d5db;
+		color: hsl(var(--color-muted-foreground));
 		display: flex;
-	}
-	:global(.dark) .add-icon {
-		color: #4b5563;
 	}
 	.add-input {
 		flex: 1;
@@ -257,20 +242,14 @@
 		background: transparent;
 		outline: none;
 		font-size: 0.8125rem;
-		color: #374151;
+		color: hsl(var(--color-foreground));
 	}
 	.add-input::placeholder {
-		color: #c0bfba;
-	}
-	:global(.dark) .add-input {
-		color: #f3f4f6;
-	}
-	:global(.dark) .add-input::placeholder {
-		color: #4b5563;
+		color: hsl(var(--color-muted-foreground));
 	}
 	.count {
 		font-size: 0.6875rem;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 	}
 	.contact-list {
 		flex: 1;
@@ -290,10 +269,7 @@
 		transition: background 0.15s;
 	}
 	.contact-item:hover {
-		background: rgba(0, 0, 0, 0.03);
-	}
-	:global(.dark) .contact-item:hover {
-		background: rgba(255, 255, 255, 0.04);
+		background: hsl(var(--color-surface-hover));
 	}
 	.avatar {
 		width: 32px;
@@ -303,14 +279,10 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		background: rgba(0, 0, 0, 0.06);
+		background: hsl(var(--color-muted));
 		font-size: 0.6875rem;
 		font-weight: 600;
-		color: #6b7280;
-	}
-	:global(.dark) .avatar {
-		background: rgba(255, 255, 255, 0.08);
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 	}
 	.contact-info {
 		min-width: 0;
@@ -318,18 +290,15 @@
 	}
 	.contact-name {
 		font-size: 0.8125rem;
-		color: #374151;
+		color: hsl(var(--color-foreground));
 		margin: 0;
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
 	}
-	:global(.dark) .contact-name {
-		color: #e5e7eb;
-	}
 	.contact-company {
 		font-size: 0.6875rem;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 		margin: 0;
 		overflow: hidden;
 		text-overflow: ellipsis;
@@ -348,13 +317,9 @@
 		border-radius: 9999px;
 		background: color-mix(in srgb, var(--tag-color) 12%, transparent);
 		font-size: 0.5625rem;
-		color: #6b7280;
+		color: hsl(var(--color-muted-foreground));
 		line-height: 1.25rem;
 		white-space: nowrap;
-	}
-	:global(.dark) .tag-pill {
-		background: color-mix(in srgb, var(--tag-color) 18%, transparent);
-		color: #9ca3af;
 	}
 	.tag-dot {
 		width: 5px;
@@ -363,19 +328,19 @@
 		flex-shrink: 0;
 	}
 	:global(.contact-item.mana-drop-target-hover) {
-		outline: 2px solid rgba(34, 197, 94, 0.4);
+		outline: 2px solid hsl(var(--color-success) / 0.4);
 		outline-offset: -2px;
-		background: rgba(34, 197, 94, 0.06) !important;
+		background: hsl(var(--color-success) / 0.06) !important;
 	}
 	.fav {
-		color: #f59e0b;
+		color: hsl(var(--color-warning));
 		display: flex;
 	}
 	.empty {
 		padding: 2rem 0;
 		text-align: center;
 		font-size: 0.8125rem;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	/* Mobile: larger touch targets */
