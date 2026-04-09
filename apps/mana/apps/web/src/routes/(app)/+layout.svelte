@@ -372,17 +372,24 @@
 			trackReturnVisit();
 			const getToken = () => authStore.getValidToken();
 			unifiedSync = createUnifiedSync(SYNC_SERVER_URL, getToken);
-			unifiedSync.onStatusChange(async (s) => {
-				networkStore.setSyncStatus(s);
-				// Update pending count when sync status changes
+			const refreshPendingCount = async () => {
 				try {
 					const count = await db.table('_pendingChanges').count();
 					networkStore.setPendingCount(count);
 				} catch {
 					// DB not ready yet
 				}
+			};
+			unifiedSync.onStatusChange(async (s) => {
+				networkStore.setSyncStatus(s);
+				// Update pending count when sync status changes
+				await refreshPendingCount();
 			});
 			unifiedSync.startAll();
+			// Seed the badge count on mount: onStatusChange only fires on
+			// transitions, so without this the badge stays at its last known
+			// value (0 on a fresh tab) until a sync actually runs.
+			refreshPendingCount();
 
 			userSettings.load().catch(() => {});
 
