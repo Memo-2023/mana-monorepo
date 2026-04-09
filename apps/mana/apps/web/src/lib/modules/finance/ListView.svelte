@@ -175,25 +175,22 @@
 		height: 100%;
 	}
 
-	/* ── Quick Add Form ─────────────────────────── */
+	/* P5: theme-token migration. income/expense semantic colors stay literal
+	   (#22c55e, #ef4444) — these have specific meaning in finance UX (green
+	   for money in, red for money out) and should NOT track theme primary. */
 	.quick-add-form {
 		display: flex;
 		flex-direction: column;
 		gap: 0.375rem;
 		padding: 0.5rem;
 		border-radius: 0.375rem;
-		border: 1px solid rgba(0, 0, 0, 0.08);
+		border: 1px solid hsl(var(--color-border));
 		background: transparent;
 	}
-	:global(.dark) .quick-add-form {
-		border-color: rgba(255, 255, 255, 0.08);
-	}
-
 	.type-tabs {
 		display: flex;
 		gap: 0.25rem;
 	}
-
 	.type-tab {
 		flex: 1;
 		padding: 0.25rem;
@@ -201,51 +198,36 @@
 		font-size: 0.6875rem;
 		font-weight: 600;
 		background: transparent;
-		color: #9ca3af;
-		border: 1px solid rgba(0, 0, 0, 0.06);
+		color: hsl(var(--color-muted-foreground));
+		border: 1px solid hsl(var(--color-border));
 		cursor: pointer;
 		transition: all 0.15s;
 	}
 	.type-tab:hover {
-		color: #374151;
-		background: rgba(0, 0, 0, 0.03);
+		color: hsl(var(--color-foreground));
+		background: hsl(var(--color-surface-hover));
 	}
 	.type-tab.active {
-		background: rgba(239, 68, 68, 0.08);
-		color: #ef4444;
-		border-color: rgba(239, 68, 68, 0.2);
+		background: hsl(var(--color-error) / 0.1);
+		color: hsl(var(--color-error));
+		border-color: hsl(var(--color-error) / 0.25);
 	}
 	.type-tab.inc.active {
-		background: rgba(34, 197, 94, 0.08);
-		color: #22c55e;
-		border-color: rgba(34, 197, 94, 0.2);
+		background: hsl(var(--color-success) / 0.1);
+		color: hsl(var(--color-success));
+		border-color: hsl(var(--color-success) / 0.25);
 	}
-	:global(.dark) .type-tab {
-		border-color: rgba(255, 255, 255, 0.06);
-	}
-	:global(.dark) .type-tab:hover {
-		color: #e5e7eb;
-		background: rgba(255, 255, 255, 0.04);
-	}
-	:global(.dark) .type-tab.active {
-		background: rgba(239, 68, 68, 0.12);
-	}
-	:global(.dark) .type-tab.inc.active {
-		background: rgba(34, 197, 94, 0.12);
-	}
-
 	.input-row {
 		display: flex;
 		align-items: center;
 		gap: 0.25rem;
 	}
-
 	.amount-input {
 		width: 4.5rem;
 		background: transparent;
 		border: none;
-		border-bottom: 1.5px solid rgba(0, 0, 0, 0.1);
-		color: #374151;
+		border-bottom: 1.5px solid hsl(var(--color-border));
+		color: hsl(var(--color-foreground));
 		font-size: 1rem;
 		font-weight: 700;
 		padding: 0.25rem 0;
@@ -255,57 +237,40 @@
 		flex-shrink: 0;
 	}
 	.amount-input:focus {
-		border-color: #6366f1;
+		border-color: hsl(var(--color-ring));
 	}
 	.amount-input::placeholder {
-		color: #c0bfba;
+		color: hsl(var(--color-muted-foreground));
 		font-weight: 400;
 	}
-	:global(.dark) .amount-input {
-		border-color: rgba(255, 255, 255, 0.12);
-		color: #f3f4f6;
-	}
-	:global(.dark) .amount-input::placeholder {
-		color: #4b5563;
-	}
-
 	.currency-label {
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 		font-size: 0.8125rem;
 		flex-shrink: 0;
 	}
-
 	.desc-input {
 		flex: 1;
 		background: transparent;
 		border: none;
-		border-bottom: 1.5px solid rgba(0, 0, 0, 0.1);
-		color: #374151;
+		border-bottom: 1.5px solid hsl(var(--color-border));
+		color: hsl(var(--color-foreground));
 		font-size: 0.8125rem;
 		padding: 0.25rem 0;
 		outline: none;
 		min-width: 0;
 	}
 	.desc-input:focus {
-		border-color: #6366f1;
+		border-color: hsl(var(--color-ring));
 	}
 	.desc-input::placeholder {
-		color: #c0bfba;
+		color: hsl(var(--color-muted-foreground));
 	}
-	:global(.dark) .desc-input {
-		border-color: rgba(255, 255, 255, 0.12);
-		color: #f3f4f6;
-	}
-	:global(.dark) .desc-input::placeholder {
-		color: #4b5563;
-	}
-
 	.add-btn {
 		width: 1.625rem;
 		height: 1.625rem;
 		border-radius: 0.25rem;
-		background: #6366f1;
-		color: white;
+		background: hsl(var(--color-primary));
+		color: hsl(var(--color-primary-foreground));
 		border: none;
 		font-size: 0.875rem;
 		font-weight: 500;
@@ -314,53 +279,38 @@
 		align-items: center;
 		justify-content: center;
 		flex-shrink: 0;
-		transition: background 0.15s;
+		transition: filter 0.15s;
 	}
 	.add-btn:hover:not(:disabled) {
-		background: #5558e6;
+		filter: brightness(0.9);
 	}
 	.add-btn:disabled {
 		opacity: 0.25;
 		cursor: not-allowed;
 	}
-
 	.cat-chips {
 		display: flex;
 		flex-wrap: wrap;
 		gap: 0.1875rem;
 	}
-
 	.cat-chip {
 		padding: 0.1875rem 0.375rem;
 		border-radius: 9999px;
 		font-size: 0.625rem;
 		background: transparent;
-		border: 1px solid rgba(0, 0, 0, 0.08);
-		color: #6b7280;
+		border: 1px solid hsl(var(--color-border));
+		color: hsl(var(--color-muted-foreground));
 		cursor: pointer;
 		transition: all 0.15s;
 	}
 	.cat-chip:hover {
-		background: rgba(0, 0, 0, 0.03);
-		color: #374151;
+		background: hsl(var(--color-surface-hover));
+		color: hsl(var(--color-foreground));
 	}
 	.cat-chip.selected {
-		border-color: #6366f1;
-		background: rgba(99, 102, 241, 0.08);
-		color: #6366f1;
-	}
-	:global(.dark) .cat-chip {
-		border-color: rgba(255, 255, 255, 0.08);
-		color: #9ca3af;
-	}
-	:global(.dark) .cat-chip:hover {
-		background: rgba(255, 255, 255, 0.04);
-		color: #e5e7eb;
-	}
-	:global(.dark) .cat-chip.selected {
-		border-color: #6366f1;
-		background: rgba(99, 102, 241, 0.15);
-		color: #818cf8;
+		border-color: hsl(var(--color-primary));
+		background: hsl(var(--color-primary) / 0.1);
+		color: hsl(var(--color-primary));
 	}
 
 	/* ── Summary ─────────────────────────────────── */
@@ -368,7 +318,6 @@
 		display: flex;
 		gap: 0.25rem;
 	}
-
 	.summary-col {
 		flex: 1;
 		display: flex;
@@ -376,27 +325,22 @@
 		align-items: center;
 		padding: 0.375rem 0.25rem;
 		border-radius: 0.375rem;
-		background: rgba(0, 0, 0, 0.02);
+		background: hsl(var(--color-muted) / 0.5);
 	}
-	:global(.dark) .summary-col {
-		background: rgba(255, 255, 255, 0.03);
-	}
-
 	.s-value {
 		font-size: 0.75rem;
 		font-weight: 700;
 		font-variant-numeric: tabular-nums;
 	}
 	.s-value.income {
-		color: #22c55e;
+		color: hsl(var(--color-success));
 	}
 	.s-value.expense {
-		color: #ef4444;
+		color: hsl(var(--color-error));
 	}
-
 	.s-label {
 		font-size: 0.5625rem;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 		text-transform: uppercase;
 		letter-spacing: 0.03em;
 	}
@@ -406,16 +350,14 @@
 		flex: 1;
 		overflow-y: auto;
 	}
-
 	.day-label {
 		font-size: 0.625rem;
 		font-weight: 600;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 		padding: 0.375rem 0 0.125rem;
 	}
-
 	.tx-item {
 		display: flex;
 		align-items: center;
@@ -423,34 +365,26 @@
 		padding: 0.3rem 0.25rem;
 		border-radius: 0.25rem;
 	}
-
 	.tx-emoji {
 		font-size: 0.8125rem;
 		flex-shrink: 0;
 	}
-
 	.tx-info {
 		flex: 1;
 		min-width: 0;
 	}
-
 	.tx-desc {
 		font-size: 0.75rem;
-		color: #374151;
+		color: hsl(var(--color-foreground));
 		display: block;
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
 	}
-	:global(.dark) .tx-desc {
-		color: #e5e7eb;
-	}
-
 	.tx-cat {
 		font-size: 0.625rem;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 	}
-
 	.tx-amount {
 		font-size: 0.75rem;
 		font-weight: 600;
@@ -458,17 +392,16 @@
 		flex-shrink: 0;
 	}
 	.tx-amount.income {
-		color: #22c55e;
+		color: hsl(var(--color-success));
 	}
 	.tx-amount.expense {
-		color: #ef4444;
+		color: hsl(var(--color-error));
 	}
-
 	.empty {
 		padding: 2rem 0;
 		text-align: center;
 		font-size: 0.8125rem;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	@media (max-width: 640px) {
