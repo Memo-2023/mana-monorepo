@@ -757,11 +757,15 @@ services:
       PUBLIC_SYNC_SERVER_URL_CLIENT: https://sync.mana.how
       # Unified Hono/Bun API server (apps/api) — hosts all 16 product
       # compute modules (calendar, todo, picture, … who) on port 3060.
-      # Browser calls go through https://api.mana.how (cloudflared
+      # Browser calls go through https://mana-api.mana.how (cloudflared
       # tunnel route to mana-api:3060). SSR calls inside the docker
       # network use the internal hostname.
+      #
+      # NOTE: api.mana.how is already in use for the Go mana-api-gateway
+      # on port 3016 (different service, predates apps/api). The
+      # mana-api.* subdomain is the unambiguous new home.
       PUBLIC_MANA_API_URL: http://mana-api:3060
-      PUBLIC_MANA_API_URL_CLIENT: https://api.mana.how
+      PUBLIC_MANA_API_URL_CLIENT: https://mana-api.mana.how
       # Per-app HTTP backend URLs (todo-api, calendar-api, contacts-api,
       # chat-api, storage-api, cards-api, music-api, nutriphi-api,
       # picture-api, presi-api, zitare-api, clock-api, context-api) and
@@ -1502,6 +1506,39 @@ services:
       test: ["CMD", "bun", "-e", "fetch('http://127.0.0.1:3060/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
       interval: 60s
       timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  # ============================================
+  # News Ingester
+  # ============================================
+  # services/news-ingester — pulls public RSS/JSON feeds into the
+  # news.curated_articles pool every 15 min. The unified mana-api reads
+  # from the same table to serve /api/v1/news/feed; user reading lists
+  # remain client-side in the unified Mana app's local IndexedDB.
+
+  news-ingester:
+    build:
+      context: services/news-ingester
+      dockerfile: Dockerfile
+    image: news-ingester:local
+    container_name: news-ingester
+    restart: always
+    mem_limit: 256m
+    depends_on:
+      postgres: { condition: service_healthy }
+    environment:
+      TZ: Europe/Berlin
+      PORT: 3066
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana_platform
+      TICK_INTERVAL_MS: "900000"
+      RUN_ON_STARTUP: "true"
+    ports:
+      - "3066:3066"
+    healthcheck:
+      test: ["CMD", "bun", "-e", "fetch('http://127.0.0.1:3066/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 120s
+      timeout: 10s
       retries: 3
       start_period: 30s
 
