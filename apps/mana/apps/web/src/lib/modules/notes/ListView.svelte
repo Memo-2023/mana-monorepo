@@ -223,79 +223,53 @@
 		height: 100%;
 	}
 
-	/* ── Quick Add (matches todo pattern) ────────── */
+	/* P5: theme-token migration. */
 	.quick-add {
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
 		padding: 0.375rem 0.5rem;
 		border-radius: 0.375rem;
-		border: 1px solid rgba(0, 0, 0, 0.08);
+		border: 1px solid hsl(var(--color-border));
 		background: transparent;
 	}
-	:global(.dark) .quick-add {
-		border-color: rgba(255, 255, 255, 0.08);
-	}
-
 	.add-icon {
-		color: #d1d5db;
+		color: hsl(var(--color-muted-foreground));
 		font-size: 0.875rem;
 		font-weight: 500;
 		display: flex;
 		align-items: center;
 	}
-	:global(.dark) .add-icon {
-		color: #4b5563;
-	}
-
 	.add-input {
 		flex: 1;
 		border: none;
 		background: transparent;
 		outline: none;
 		font-size: 0.8125rem;
-		color: #374151;
+		color: hsl(var(--color-foreground));
 	}
 	.add-input::placeholder {
-		color: #c0bfba;
+		color: hsl(var(--color-muted-foreground));
 	}
-	:global(.dark) .add-input {
-		color: #f3f4f6;
-	}
-	:global(.dark) .add-input::placeholder {
-		color: #4b5563;
-	}
-
-	/* ── Search ─────────────────────────────────── */
 	.search-input {
 		padding: 0.3rem 0.5rem;
 		border-radius: 0.375rem;
-		border: 1px solid rgba(0, 0, 0, 0.08);
+		border: 1px solid hsl(var(--color-border));
 		background: transparent;
 		font-size: 0.75rem;
-		color: #374151;
+		color: hsl(var(--color-foreground));
 		outline: none;
 	}
 	.search-input:focus {
-		border-color: #6366f1;
+		border-color: hsl(var(--color-ring));
 	}
 	.search-input::placeholder {
-		color: #c0bfba;
+		color: hsl(var(--color-muted-foreground));
 	}
-	:global(.dark) .search-input {
-		border-color: rgba(255, 255, 255, 0.08);
-		color: #f3f4f6;
-	}
-	:global(.dark) .search-input::placeholder {
-		color: #4b5563;
-	}
-
-	/* ── Note List ──────────────────────────────── */
 	.note-list {
 		flex: 1;
 		overflow-y: auto;
 	}
-
 	.note-item {
 		display: flex;
 		align-items: flex-start;
@@ -310,12 +284,8 @@
 		transition: background 0.15s;
 	}
 	.note-item:hover {
-		background: rgba(0, 0, 0, 0.03);
+		background: hsl(var(--color-surface-hover));
 	}
-	:global(.dark) .note-item:hover {
-		background: rgba(255, 255, 255, 0.04);
-	}
-
 	.color-dot {
 		width: 6px;
 		height: 6px;
@@ -323,51 +293,39 @@
 		flex-shrink: 0;
 		margin-top: 0.375rem;
 	}
-
 	.note-content {
 		min-width: 0;
 		flex: 1;
 	}
-
 	.note-top {
 		display: flex;
 		align-items: center;
 		gap: 0.25rem;
 	}
-
 	.note-title {
 		font-size: 0.8125rem;
 		font-weight: 500;
-		color: #374151;
+		color: hsl(var(--color-foreground));
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
 		flex: 1;
 	}
-	:global(.dark) .note-title {
-		color: #e5e7eb;
-	}
-
 	.pin {
 		font-size: 0.5625rem;
 		flex-shrink: 0;
 	}
-
 	.note-preview {
 		font-size: 0.6875rem;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 		margin: 0;
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
 	}
-
 	.note-meta {
 		font-size: 0.625rem;
-		color: #c0bfba;
-	}
-	:global(.dark) .note-meta {
-		color: #4b5563;
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	/* ── Inline Editor ──────────────────────────── */
@@ -376,40 +334,31 @@
 		flex-direction: column;
 		gap: 0.25rem;
 		padding: 0.5rem;
-		border: 1px solid rgba(99, 102, 241, 0.3);
+		border: 1px solid hsl(var(--color-primary) / 0.3);
 		border-radius: 0.375rem;
-		background: rgba(99, 102, 241, 0.03);
+		background: hsl(var(--color-primary) / 0.04);
 	}
 	.note-item.editing:hover {
-		background: rgba(99, 102, 241, 0.03);
+		background: hsl(var(--color-primary) / 0.04);
 	}
-	:global(.dark) .note-item.editing {
-		border-color: rgba(99, 102, 241, 0.4);
-		background: rgba(99, 102, 241, 0.06);
-	}
-
 	.ed-title {
 		width: 100%;
 		background: transparent;
 		border: none;
-		color: #374151;
+		color: hsl(var(--color-foreground));
 		font-size: 0.8125rem;
 		font-weight: 600;
 		padding: 0;
 		outline: none;
 	}
 	.ed-title::placeholder {
-		color: #c0bfba;
+		color: hsl(var(--color-muted-foreground));
 	}
-	:global(.dark) .ed-title {
-		color: #f3f4f6;
-	}
-
 	.ed-content {
 		width: 100%;
 		background: transparent;
 		border: none;
-		color: #374151;
+		color: hsl(var(--color-foreground));
 		font-size: 0.75rem;
 		padding: 0;
 		outline: none;
@@ -419,19 +368,14 @@
 		line-height: 1.5;
 	}
 	.ed-content::placeholder {
-		color: #c0bfba;
+		color: hsl(var(--color-muted-foreground));
 	}
-	:global(.dark) .ed-content {
-		color: #e5e7eb;
-	}
-
 	.ed-actions {
 		display: flex;
 		gap: 0.25rem;
 		justify-content: flex-end;
 		padding-top: 0.125rem;
 	}
-
 	.ed-btn {
 		padding: 0.25rem 0.5rem;
 		border-radius: 0.25rem;
@@ -440,36 +384,29 @@
 		cursor: pointer;
 		border: none;
 		background: transparent;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 		transition: all 0.15s;
 	}
 	.ed-btn:hover {
-		background: rgba(0, 0, 0, 0.04);
-		color: #374151;
+		background: hsl(var(--color-surface-hover));
+		color: hsl(var(--color-foreground));
 	}
-	:global(.dark) .ed-btn:hover {
-		background: rgba(255, 255, 255, 0.06);
-		color: #e5e7eb;
-	}
-
 	.ed-btn.primary {
-		background: #6366f1;
-		color: white;
+		background: hsl(var(--color-primary));
+		color: hsl(var(--color-primary-foreground));
 	}
 	.ed-btn.primary:hover {
-		background: #5558e6;
+		filter: brightness(0.9);
 	}
-
 	.ed-btn.danger:hover {
-		color: #ef4444;
-		background: rgba(239, 68, 68, 0.08);
+		color: hsl(var(--color-error));
+		background: hsl(var(--color-error) / 0.08);
 	}
-
 	.empty {
 		padding: 2rem 0;
 		text-align: center;
 		font-size: 0.8125rem;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	@media (max-width: 640px) {
