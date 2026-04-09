@@ -23,18 +23,46 @@ const ANALYSIS_PROMPT = `Du bist ein Ernährungsexperte. Analysiere die Mahlzeit
 
 const routes = new Hono<{ Variables: AuthVariables }>();
 
-// ─── Photo Analysis (server-only: Gemini Vision) ────────────
+// ─── Photo Upload (server-only: S3 storage via mana-media) ───
 
-routes.post('/analysis/photo', async (c) => {
+routes.post('/photos/upload', async (c) => {
 	const userId = c.get('userId');
-	const { imageBase64, mimeType } = await c.req.json();
-	if (!imageBase64) return c.json({ error: 'imageBase64 required' }, 400);
+	const formData = await c.req.formData();
+	const file = formData.get('file') as File | null;
 
-	const mime = mimeType || 'image/jpeg';
+	if (!file) return c.json({ error: 'No file provided' }, 400);
+	if (file.size > 10 * 1024 * 1024) return c.json({ error: 'File too large (max 10MB)' }, 400);
 
 	try {
-		// Run AI analysis and mana-media upload in parallel
-		const analysisPromise = fetch(`${LLM_URL}/api/v1/chat/completions`, {
+		const { uploadImageToMedia } = await import('../../lib/media');
+		const buffer = await file.arrayBuffer();
+		const result = await uploadImageToMedia(buffer, file.name, { app: 'nutriphi', userId });
+
+		return c.json(
+			{
+				mediaId: result.id,
+				publicUrl: result.urls.original,
+				thumbnailUrl: result.urls.thumbnail || result.urls.original,
+				storagePath: result.id,
+			},
+			201
+		);
+	} catch (err) {
+		logger.error('nutriphi.upload_failed', {
+			error: err instanceof Error ? err.message : String(err),
+		});
+		return c.json({ error: 'Upload failed' }, 500);
+	}
+});
+
+// ─── Photo Analysis (server-only: Gemini Vision on uploaded URL) ──
+
+routes.post('/analysis/photo', async (c) => {
+	const { photoUrl } = await c.req.json();
+	if (!photoUrl) return c.json({ error: 'photoUrl required' }, 400);
+
+	try {
+		const res = await fetch(`${LLM_URL}/api/v1/chat/completions`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
@@ -44,41 +72,21 @@ routes.post('/analysis/photo', async (c) => {
 						role: 'user',
 						content: [
 							{ type: 'text', text: 'Analysiere diese Mahlzeit.' },
-							{
-								type: 'image_url',
-								image_url: { url: `data:${mime};base64,${imageBase64}` },
-							},
+							{ type: 'image_url', image_url: { url: photoUrl } },
 						],
 					},
 				],
-				model: process.env.GEMINI_MODEL || 'gemini-2.0-flash',
+				model: process.env.VISION_MODEL || 'gemini-2.0-flash',
 				response_format: { type: 'json_object' },
 				temperature: 0.3,
 			}),
 		});
-
-		// Store meal photo in mana-media for Photos gallery & persistence
-		const ext = mime.split('/')[1] || 'jpg';
-		const { uploadImageToMedia } = await import('../../lib/media');
-		const buffer = Uint8Array.from(atob(imageBase64), (ch) => ch.charCodeAt(0));
-		const mediaPromise = uploadImageToMedia(buffer.buffer, `meal-${Date.now()}.${ext}`, {
-			app: 'nutriphi',
-			userId,
-		}).catch(() => null); // Don't fail analysis if media upload fails
-
-		const [res, mediaResult] = await Promise.all([analysisPromise, mediaPromise]);
 
 		if (!res.ok) return c.json({ error: 'AI analysis failed' }, 502);
 
 		const data = await res.json();
 		const content = data.choices?.[0]?.message?.content;
 		const analysis = typeof content === 'string' ? JSON.parse(content) : content;
-
-		// Attach media info so the frontend can store photoMediaId on the meal
-		if (mediaResult) {
-			analysis.mediaId = mediaResult.id;
-			analysis.photoUrl = mediaResult.urls.thumbnail || mediaResult.urls.original;
-		}
 
 		return c.json(analysis);
 	} catch (err) {
