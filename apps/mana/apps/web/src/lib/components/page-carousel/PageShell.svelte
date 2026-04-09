@@ -28,6 +28,7 @@
 		onMoveRight?: () => void;
 		// Default header
 		title?: string;
+		titleHref?: string;
 		color?: string;
 		icon?: Component;
 		onContextMenu?: (e: MouseEvent) => void;
@@ -50,6 +51,7 @@
 		onMoveRight,
 		onContextMenu,
 		title = '',
+		titleHref,
 		color = '#6B7280',
 		icon: IconComponent,
 		header_left,
@@ -211,7 +213,22 @@
 				{:else}
 					<span class="color-dot" style="background-color: {color}"></span>
 				{/if}
-				<span class="page-title">{title}</span>
+				{#if titleHref}
+					<a
+						class="page-title page-title-link"
+						href={titleHref}
+						target="_blank"
+						rel="noopener noreferrer"
+						onclick={(e) => e.stopPropagation()}
+						ondragstart={(e) => e.preventDefault()}
+						draggable="false"
+						title={`${title} in neuem Tab öffnen`}
+					>
+						{title}
+					</a>
+				{:else}
+					<span class="page-title">{title}</span>
+				{/if}
 			{/if}
 			{#if badge}
 				{@render badge()}
@@ -379,6 +396,15 @@
 		font-size: 0.875rem;
 		font-weight: 600;
 		color: hsl(var(--color-foreground));
+	}
+	a.page-title-link {
+		text-decoration: none;
+		cursor: pointer;
+		transition: color 0.15s;
+	}
+	a.page-title-link:hover {
+		color: hsl(var(--color-primary));
+		text-decoration: underline;
 	}
 
 	.window-actions {

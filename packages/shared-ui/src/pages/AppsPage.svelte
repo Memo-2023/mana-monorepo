@@ -125,11 +125,20 @@
 
 	<div class="apps-grid">
 		{#each apps as app, index}
-			<button
+			<!-- svelte-ignore a11y_click_events_have_key_events -->
+			<div
 				class="app-card"
 				class:current={app.id === currentAppId}
 				style="--app-color: {app.color};"
+				role="button"
+				tabindex="0"
 				onclick={() => openModal(index)}
+				onkeydown={(e) => {
+					if (e.key === 'Enter' || e.key === ' ') {
+						e.preventDefault();
+						openModal(index);
+					}
+				}}
 			>
 				<div
 					class="status-indicator"
@@ -147,9 +156,18 @@
 					{/if}
 				</div>
 
-				<h3 class="app-name">{app.name}</h3>
+				<a
+					class="app-name app-name-link"
+					href={`/${app.id}`}
+					target="_blank"
+					rel="noopener noreferrer"
+					onclick={(e) => e.stopPropagation()}
+					title={`${app.name} in neuem Tab öffnen`}
+				>
+					{app.name}
+				</a>
 				<p class="app-description">{app.description[locale]}</p>
-			</button>
+			</div>
 		{/each}
 	</div>
 </div>
@@ -375,6 +393,17 @@
 
 	:global(.dark) .app-name {
 		color: #f3f4f6;
+	}
+
+	.app-name-link {
+		display: inline-block;
+		text-decoration: none;
+		cursor: pointer;
+		transition: color 0.15s;
+	}
+	.app-name-link:hover {
+		color: var(--app-color);
+		text-decoration: underline;
 	}
 
 	.app-description {
