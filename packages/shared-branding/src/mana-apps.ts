@@ -795,56 +795,35 @@ export const APP_SLIDER_LABELS = {
 } as const;
 
 /**
- * Default app URLs for local development and production
- */
-/**
- * App URLs — unified app uses internal paths, separate apps use subdomains.
+ * App URLs — derived automatically from MANA_APPS.
  *
- * All productivity apps are now served under mana.how/{appId}.
- * Games remain on separate subdomains.
+ * Almost every productivity app lives under the unified mana.how/{id}
+ * surface, so listing each entry by hand was duplicated bookkeeping that
+ * silently drifted (a missing entry crashed `getPillAppItems` at runtime
+ * when the new `who` app was added). Instead we generate the map from
+ * MANA_APPS at module load and only override the few apps that don't
+ * follow the unified-path convention.
+ *
+ * To add a new app: register it in MANA_APPS and you're done. To put it
+ * on its own subdomain or use a custom port: add an entry to
+ * APP_URL_OVERRIDES below.
  */
-export const APP_URLS: Record<AppIconId, { dev: string; prod: string }> = {
-	// ─── Unified App (internal paths) ─────────────────────────
+const APP_URL_OVERRIDES: Partial<Record<AppIconId, { dev: string; prod: string }>> = {
+	// The unified app itself lives at the root, not at /mana.
 	mana: { dev: 'http://localhost:5173', prod: 'https://mana.how' },
-	todo: { dev: 'http://localhost:5173/todo', prod: 'https://mana.how/todo' },
-	calendar: { dev: 'http://localhost:5173/calendar', prod: 'https://mana.how/calendar' },
-	contacts: { dev: 'http://localhost:5173/contacts', prod: 'https://mana.how/contacts' },
-	chat: { dev: 'http://localhost:5173/chat', prod: 'https://mana.how/chat' },
-	picture: { dev: 'http://localhost:5173/picture', prod: 'https://mana.how/picture' },
-	cards: { dev: 'http://localhost:5173/cards', prod: 'https://mana.how/cards' },
-	zitare: { dev: 'http://localhost:5173/zitare', prod: 'https://mana.how/zitare' },
-	clock: { dev: 'http://localhost:5173/clock', prod: 'https://mana.how/clock' },
-	music: { dev: 'http://localhost:5173/music', prod: 'https://mana.how/music' },
-	storage: { dev: 'http://localhost:5173/storage', prod: 'https://mana.how/storage' },
-	presi: { dev: 'http://localhost:5173/presi', prod: 'https://mana.how/presi' },
-	inventory: { dev: 'http://localhost:5173/inventory', prod: 'https://mana.how/inventory' },
-	photos: { dev: 'http://localhost:5173/photos', prod: 'https://mana.how/photos' },
-	skilltree: { dev: 'http://localhost:5173/skilltree', prod: 'https://mana.how/skilltree' },
-	citycorners: { dev: 'http://localhost:5173/citycorners', prod: 'https://mana.how/citycorners' },
-	times: { dev: 'http://localhost:5173/times', prod: 'https://mana.how/times' },
-	context: { dev: 'http://localhost:5173/context', prod: 'https://mana.how/context' },
-	questions: { dev: 'http://localhost:5173/questions', prod: 'https://mana.how/questions' },
-	nutriphi: { dev: 'http://localhost:5173/nutriphi', prod: 'https://mana.how/nutriphi' },
-	planta: { dev: 'http://localhost:5173/planta', prod: 'https://mana.how/planta' },
-	uload: { dev: 'http://localhost:5173/uload', prod: 'https://mana.how/uload' },
-	calc: { dev: 'http://localhost:5173/calc', prod: 'https://mana.how/calc' },
-	moodlit: { dev: 'http://localhost:5173/moodlit', prod: 'https://mana.how/moodlit' },
-	memoro: { dev: 'http://localhost:5173/memoro', prod: 'https://mana.how/memoro' },
-	guides: { dev: 'http://localhost:5173/guides', prod: 'https://mana.how/guides' },
-	habits: { dev: 'http://localhost:5173/habits', prod: 'https://mana.how/habits' },
-	notes: { dev: 'http://localhost:5173/notes', prod: 'https://mana.how/notes' },
-	dreams: { dev: 'http://localhost:5173/dreams', prod: 'https://mana.how/dreams' },
-	cycles: { dev: 'http://localhost:5173/cycles', prod: 'https://mana.how/cycles' },
-	events: { dev: 'http://localhost:5173/events', prod: 'https://mana.how/events' },
-	finance: { dev: 'http://localhost:5173/finance', prod: 'https://mana.how/finance' },
-	places: { dev: 'http://localhost:5173/places', prod: 'https://mana.how/places' },
-	wisekeep: { dev: 'http://localhost:5173/wisekeep', prod: 'https://mana.how/wisekeep' },
-	news: { dev: 'http://localhost:5173/news', prod: 'https://mana.how/news' },
-	mail: { dev: 'http://localhost:5173/mail', prod: 'https://mana.how/mail' },
-	who: { dev: 'http://localhost:5173/who', prod: 'https://mana.how/who' },
-	// ─── Separate Apps (own subdomains) ───────────────────────
+	// Standalone apps on their own subdomain / port.
 	arcade: { dev: 'http://localhost:5201', prod: 'https://arcade.mana.how' },
 };
+
+export const APP_URLS: Record<AppIconId, { dev: string; prod: string }> = Object.fromEntries(
+	(Object.keys(APP_ICONS) as AppIconId[]).map((id) => [
+		id,
+		APP_URL_OVERRIDES[id] ?? {
+			dev: `http://localhost:5173/${id}`,
+			prod: `https://mana.how/${id}`,
+		},
+	])
+) as Record<AppIconId, { dev: string; prod: string }>;
 
 /**
  * App item type for PillNavigation app switcher

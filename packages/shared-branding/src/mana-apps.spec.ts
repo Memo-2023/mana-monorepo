@@ -7,7 +7,9 @@ import {
 	getManaApp,
 	getManaAppsByStatus,
 	MANA_APPS,
+	APP_URLS,
 } from './mana-apps';
+import { APP_ICONS } from './app-icons';
 
 describe('getTierLevel', () => {
 	it('returns correct levels for all tiers', () => {
@@ -120,5 +122,28 @@ describe('MANA_APPS integrity', () => {
 			expect(app.description.de).toBeTruthy();
 			expect(app.description.en).toBeTruthy();
 		});
+	});
+
+	it('every MANA_APPS entry has a corresponding APP_ICONS icon', () => {
+		// Catches the case where a new app is registered but no icon was
+		// added to APP_ICONS (which is also where AppIconId is derived).
+		const missing = MANA_APPS.filter((app) => !APP_ICONS[app.id]);
+		expect(missing.map((a) => a.id)).toEqual([]);
+	});
+});
+
+describe('APP_URLS integrity', () => {
+	it('every AppIconId resolves to a non-empty dev + prod URL', () => {
+		// Regression guard: when `who` was added to AppIconId but never to
+		// the hand-maintained APP_URLS map, getPillAppItems crashed at
+		// runtime with "Cannot read properties of undefined (reading
+		// 'prod')". APP_URLS is now derived from APP_ICONS, so this test
+		// will fail loudly if that derivation ever stops covering every id.
+		for (const id of Object.keys(APP_ICONS) as Array<keyof typeof APP_ICONS>) {
+			const entry = APP_URLS[id];
+			expect(entry, `APP_URLS missing entry for "${id}"`).toBeDefined();
+			expect(entry.dev, `APP_URLS["${id}"].dev is empty`).toBeTruthy();
+			expect(entry.prod, `APP_URLS["${id}"].prod is empty`).toBeTruthy();
+		}
 	});
 });
