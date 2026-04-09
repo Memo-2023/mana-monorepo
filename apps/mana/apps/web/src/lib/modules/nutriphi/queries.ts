@@ -30,6 +30,8 @@ export function toMealWithNutrition(local: LocalMeal): MealWithNutrition {
 		portionSize: local.portionSize,
 		confidence: local.confidence,
 		nutrition: local.nutrition ?? null,
+		photoMediaId: local.photoMediaId ?? null,
+		photoUrl: local.photoUrl ?? null,
 		createdAt: local.createdAt ?? new Date().toISOString(),
 	};
 }

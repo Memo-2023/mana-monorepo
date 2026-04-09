@@ -164,6 +164,14 @@
 							<div
 								class="group flex items-center gap-4 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-3"
 							>
+								{#if meal.photoUrl}
+									<img
+										src={meal.photoUrl}
+										alt={meal.description}
+										class="h-12 w-12 flex-shrink-0 rounded-lg object-cover"
+										loading="lazy"
+									/>
+								{/if}
 								<div class="min-w-0 flex-1">
 									<div class="flex items-center gap-2">
 										<span
@@ -174,6 +182,9 @@
 										<span class="text-xs text-[hsl(var(--muted-foreground))]">
 											{formatTime(meal.createdAt)}
 										</span>
+										{#if meal.inputType === 'photo'}
+											<span class="text-xs text-[hsl(var(--muted-foreground))]">📷</span>
+										{/if}
 									</div>
 									<p class="mt-1 text-sm text-[hsl(var(--foreground))] truncate">
 										{meal.description}

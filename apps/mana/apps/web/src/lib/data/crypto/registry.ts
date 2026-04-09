@@ -124,11 +124,20 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	cycleDayLogs: { enabled: true, fields: ['notes', 'mood'] },
 
 	// ─── NutriPhi ────────────────────────────────────────────
-	// LocalMeal only has `description` as user-typed text (mealType /
-	// inputType / nutrition numbers stay plaintext for the daily-summary
-	// aggregations and the calorie-progress widget). portionSize is a
-	// short label like "1 Tasse" — same sensitivity as description, so
-	// we encrypt it too.
+	// LocalMeal user-typed text → encrypted: description, portionSize.
+	// Plaintext (intentional):
+	//   - mealType / inputType / date / createdAt: structural, used for
+	//     filtering and the daily-summary aggregations + calorie-progress
+	//     widget. Encrypting would force decrypt-then-aggregate on every
+	//     liveQuery refresh.
+	//   - nutrition (object of numbers): same — calorie totals are summed
+	//     in pure $derived helpers; encrypting them would defeat the
+	//     local-first reactive layer.
+	//   - photoMediaId / photoUrl: opaque pointers to mana-media; the URL
+	//     alone is not PII (anyone with the URL already has the bytes),
+	//     and CAS-deduped media IDs leak no user content. Same rationale
+	//     planta uses for plantPhotos.
+	//   - confidence (float 0-1): pure metadata about the AI run.
 	meals: { enabled: true, fields: ['description', 'portionSize'] },
 
 	// ─── Planta ──────────────────────────────────────────────
@@ -277,6 +286,44 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	// free-form text and the whole point of having a vault. Indexed
 	// columns (isPinned, order) stay plaintext for sort.
 	playgroundSnippets: { enabled: true, fields: ['name', 'systemPrompt'] },
+
+	// ─── News ────────────────────────────────────────────────
+	// Saved articles are reading-behavior data (sensitive). The body
+	// fields (title/excerpt/content/htmlContent/author) are encrypted
+	// at rest. The structural columns — type, isRead, isArchived,
+	// originalUrl, sourceCuratedId, sourceSlug, categoryId, image, the
+	// numeric metrics — stay plaintext for indexing, dedupe, and the
+	// reader's reading-progress logic.
+	//
+	// `newsCategories.name` is the user-named folder label and gets the
+	// same treatment as note titles.
+	//
+	// `newsPreferences` holds selected topics + blocklist + learned
+	// weights. The lists themselves leak less than the *contents* of
+	// the user's reading; still, the topic-weight map is a noisy proxy
+	// for interests, so we encrypt it.
+	//
+	// `newsReactions` records "what did the user say about article X";
+	// the meaningful payload is the (articleId, reaction) tuple. We
+	// encrypt the reaction enum to avoid leaking aggregate "user thumbs
+	// down N% of articles from source X" signals to anyone with raw DB
+	// access. The articleId itself stays plaintext because it's used as
+	// the join key to suppress already-rated articles in the feed scorer.
+	//
+	// `newsCachedFeed` is intentionally NOT registered — it's a local
+	// mirror of the public server pool, the same content already lives
+	// unencrypted in news.curated_articles, and encrypting it would
+	// break the [topic+publishedAt] index used for the feed query.
+	newsArticles: {
+		enabled: true,
+		fields: ['title', 'excerpt', 'content', 'htmlContent', 'author'],
+	},
+	newsCategories: { enabled: true, fields: ['name'] },
+	newsPreferences: {
+		enabled: true,
+		fields: ['selectedTopics', 'blockedSources', 'topicWeights', 'sourceWeights'],
+	},
+	newsReactions: { enabled: true, fields: ['reaction', 'sourceSlug', 'topic'] },
 
 	// ─── TimeBlocks (cross-module hub) ───────────────────────
 	// Phase 7.1: encrypted alongside tasks + calendar.events + habits
