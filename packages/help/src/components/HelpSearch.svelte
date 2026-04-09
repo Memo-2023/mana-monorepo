@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { HelpSearchProps } from '../ui-types';
-	import type { SearchResult } from '../content';
+	import type { SearchResult } from '../search-types';
 	import { createSearcher } from '../search-engine';
 
 	let { content, translations, placeholder, onResultSelect }: HelpSearchProps = $props();

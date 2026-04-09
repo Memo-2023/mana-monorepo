@@ -15,7 +15,7 @@
  * ```
  */
 
-import type { AuthServiceAdapter, AuthResult, BaseUser } from './types';
+import type { AuthServiceAdapter, AuthResult, BaseUser } from './store-types';
 
 /**
  * Create a Svelte 5 runes-based auth store

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { UsageData } from './plans';
+	import type { UsageData } from './usage';
 
 	interface Props {
 		title?: string;

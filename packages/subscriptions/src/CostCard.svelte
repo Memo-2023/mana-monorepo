@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { CostItem } from './plans';
+	import type { CostItem } from './usage';
 
 	interface Props {
 		costs: CostItem[];

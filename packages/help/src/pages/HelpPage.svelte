@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { HelpPageProps, HelpSection } from '../types.js';
-	import type { SearchResult } from './content';
+	import type { HelpPageProps, HelpSection } from '../ui-types';
+	import type { SearchResult } from '../search-types';
 	import HelpSearch from '../components/HelpSearch.svelte';
 	import FAQSection from '../components/FAQSection.svelte';
 	import FeaturesOverview from '../components/FeaturesOverview.svelte';

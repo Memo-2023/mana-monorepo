@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { CreateFeedbackInput } from './feedback';
+	import type { CreateFeedbackInput } from './api';
 
 	interface Props {
 		onSubmit: (input: CreateFeedbackInput) => Promise<void>;

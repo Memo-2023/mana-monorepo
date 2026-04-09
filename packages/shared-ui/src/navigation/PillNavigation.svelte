@@ -7,15 +7,14 @@
 		PillTabGroupConfig,
 		PillTagSelectorConfig,
 		PillAppItem,
+		SpotlightAction,
+		ContentSearcher,
 	} from './types';
 	import PillDropdown from './PillDropdown.svelte';
 	import PillTabGroup from './PillTabGroup.svelte';
 	import PillTagSelector from './PillTagSelector.svelte';
 	import AppDrawer from './AppDrawer.svelte';
-	import GlobalSpotlight, {
-		type SpotlightAction,
-		type ContentSearcher,
-	} from './GlobalSpotlight.svelte';
+	import GlobalSpotlight from './GlobalSpotlight.svelte';
 	import { createGlobalSpotlightState } from './useGlobalSpotlight.svelte';
 	// Phosphor Icons (via shared-icons)
 	import {

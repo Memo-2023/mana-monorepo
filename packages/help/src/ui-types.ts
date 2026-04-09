@@ -2,7 +2,8 @@
  * Component Props and Translation Types
  */
 
-import type { HelpContent, SearchResult } from './content';
+import type { HelpContent } from './content';
+import type { SearchResult } from './search-types';
 
 // ============================================================================
 // Translation Types

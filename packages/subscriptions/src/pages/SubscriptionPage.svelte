@@ -1,11 +1,6 @@
 <script lang="ts">
-	import type {
-		SubscriptionPlan,
-		ManaPackage,
-		UsageData,
-		CostItem,
-		BillingCycle,
-	} from './plans';
+	import type { SubscriptionPlan, ManaPackage, BillingCycle } from '../plans';
+	import type { UsageData, CostItem } from '../usage';
 	import BillingToggle from '../BillingToggle.svelte';
 	import SubscriptionCard from '../SubscriptionCard.svelte';
 	import PackageCard from '../PackageCard.svelte';

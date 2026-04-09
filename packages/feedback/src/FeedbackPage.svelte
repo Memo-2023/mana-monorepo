@@ -1,9 +1,7 @@
 <script lang="ts">
-	import type {
-		FeedbackService,
-		Feedback,
-		CreateFeedbackInput,
-	} from './createFeedbackService';
+	import type { FeedbackService } from './createFeedbackService';
+	import type { Feedback } from './feedback';
+	import type { CreateFeedbackInput } from './api';
 	import FeedbackForm from './FeedbackForm.svelte';
 	import FeedbackList from './FeedbackList.svelte';
 

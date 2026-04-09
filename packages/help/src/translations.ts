@@ -3,7 +3,7 @@
  * Apps can use these directly or override individual fields.
  */
 
-import type { HelpPageTranslations } from './types.js';
+import type { HelpPageTranslations } from './ui-types';
 
 export const defaultTranslationsDE: HelpPageTranslations = {
 	title: 'Hilfe & Support',
