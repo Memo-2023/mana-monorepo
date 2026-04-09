@@ -35,7 +35,15 @@ export interface SyncTelemetryDetail {
 	/** number of changes touched (pushed / pulled / applied / dropped). */
 	count?: number;
 	/** Error category for `*:error`. Free-form short string, never raw stacks. */
-	errorCategory?: 'network' | 'auth' | 'http-5xx' | 'http-4xx' | 'parse' | 'unknown';
+	errorCategory?:
+		| 'network'
+		| 'auth'
+		| 'http-5xx'
+		| 'http-4xx'
+		| 'parse'
+		| 'no-token'
+		| 'unknown-appid'
+		| 'unknown';
 	/** HTTP status code if applicable. */
 	status?: number;
 	/** Table name for apply-level events. */

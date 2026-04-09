@@ -372,6 +372,13 @@
 			trackReturnVisit();
 			const getToken = () => authStore.getValidToken();
 			unifiedSync = createUnifiedSync(SYNC_SERVER_URL, getToken);
+			// Expose on window for SYNC_DEBUG.md (Schritt C). Not a security
+			// concern: every method on the returned object is also reachable
+			// via Dexie + a fresh fetch from the same DevTools console, and
+			// the production user can't escalate anything by poking at it.
+			if (typeof window !== 'undefined') {
+				(window as unknown as { __unifiedSync: typeof unifiedSync }).__unifiedSync = unifiedSync;
+			}
 			const refreshPendingCount = async () => {
 				try {
 					const count = await db.table('_pendingChanges').count();

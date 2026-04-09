@@ -631,10 +631,36 @@ export function createUnifiedSync(serverUrl: string, getToken: () => Promise<str
 
 	async function push(appId: string): Promise<void> {
 		const channel = channels.get(appId);
-		if (!channel) return;
+		if (!channel) {
+			// Pending changes exist for an appId we never registered. Almost
+			// always means the module's appId in module-registry.ts drifted
+			// from the appId stamped on the pending row (e.g. someone renamed
+			// `bodylog` → `body` and old rows are still tagged `bodylog`).
+			// Surface it loudly: silent drops here is exactly the SYNC_DEBUG
+			// failure mode where pending counts only ever go up.
+			console.warn(
+				`[mana-sync] push: no channel registered for appId="${appId}". ` +
+					`Known appIds: ${[...channels.keys()].join(', ')}. ` +
+					`Pending changes for "${appId}" will accumulate forever until you fix the registry.`
+			);
+			emitSyncTelemetry({ kind: 'push:error', appId, errorCategory: 'unknown-appid' });
+			return;
+		}
 
 		const token = await getToken();
-		if (!token) return;
+		if (!token) {
+			// getValidToken returned null. Most likely the local exp check
+			// failed and the refresh-on-online retry didn't yield a new token.
+			// Without this surfacing, the user sees pending counts climb with
+			// no error anywhere — same SYNC_DEBUG symptom as above.
+			console.warn(
+				`[mana-sync] push[${appId}]: getToken() returned null — pending changes will not flush until auth recovers.`
+			);
+			channel.lastError = 'no-token';
+			setStatus('error');
+			emitSyncTelemetry({ kind: 'push:error', appId, errorCategory: 'no-token' });
+			return;
+		}
 
 		// Get pending changes for this appId
 		const pending: PendingChange[] = await db
@@ -1021,6 +1047,31 @@ export function createUnifiedSync(serverUrl: string, getToken: () => Promise<str
 		getChannel: (appId: string) => channels.get(appId),
 		pushNow: push,
 		pullNow: pull,
+		/**
+		 * Snapshot of every registered channel's state — meant for the
+		 * SYNC_DEBUG.md runbook (Schritt C). Returns a plain serializable
+		 * object so it survives `JSON.stringify` in DevTools without
+		 * Promise/Map weirdness.
+		 */
+		getDebugInfo: () => ({
+			status,
+			online,
+			clientId,
+			serverUrl,
+			channels: Object.fromEntries(
+				[...channels.entries()].map(([id, c]) => [
+					id,
+					{
+						appId: c.appId,
+						tables: c.tables,
+						lastError: c.lastError,
+						hasPushTimer: c.pushTimer !== null,
+						hasPullTimer: c.pullTimer !== null,
+					},
+				])
+			),
+			knownAppIds: [...channels.keys()],
+		}),
 	};
 }
 
