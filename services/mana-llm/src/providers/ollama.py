@@ -127,24 +127,16 @@ class OllamaProvider(LLMProvider):
         # generateObject() helper.
         if request.response_format is not None:
             rf = request.response_format
-            rf_type = getattr(rf, "type", None) or (
-                rf.get("type") if isinstance(rf, dict) else None
-            )
-            if rf_type == "json_object":
+            if rf.type == "json_object":
                 payload["format"] = "json"
-            elif rf_type == "json_schema":
-                rf_schema = (
-                    getattr(rf, "json_schema", None)
-                    or (rf.get("json_schema") if isinstance(rf, dict) else None)
-                )
-                if rf_schema is not None:
-                    inner = (
-                        getattr(rf_schema, "schema", None)
-                        or (rf_schema.get("schema") if isinstance(rf_schema, dict) else None)
-                    )
-                    payload["format"] = inner if inner is not None else "json"
-                else:
-                    payload["format"] = "json"
+            elif rf.type == "json_schema" and rf.json_schema is not None:
+                # rf.json_schema is the OpenAI envelope:
+                #   {"name": "...", "schema": {...}, "strict": true}
+                # Ollama wants just the inner schema dict.
+                inner = rf.json_schema.get("schema")
+                payload["format"] = inner if inner is not None else "json"
+            else:
+                payload["format"] = "json"
 
         # Add optional parameters
         options: dict[str, Any] = {}

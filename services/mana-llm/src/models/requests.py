@@ -1,6 +1,6 @@
 """Request models for OpenAI-compatible API."""
 
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
@@ -35,6 +35,21 @@ class Message(BaseModel):
     content: MessageContent
 
 
+class ResponseFormat(BaseModel):
+    """OpenAI structured-output response_format hint.
+
+    Two shapes are accepted:
+      - {"type": "json_object"}             — free-form JSON
+      - {"type": "json_schema",
+         "json_schema": {"name": "...", "schema": {...}, "strict": bool}}
+        — schema-constrained JSON; passed through to providers that
+          support it (e.g. Ollama 0.5+ via its native `format` field).
+    """
+
+    type: Literal["json_object", "json_schema"]
+    json_schema: dict[str, Any] | None = None
+
+
 class ChatCompletionRequest(BaseModel):
     """Request body for chat completions endpoint."""
 
@@ -47,6 +62,7 @@ class ChatCompletionRequest(BaseModel):
     frequency_penalty: float | None = Field(default=None, ge=-2.0, le=2.0)
     presence_penalty: float | None = Field(default=None, ge=-2.0, le=2.0)
     stop: str | list[str] | None = None
+    response_format: ResponseFormat | None = None
 
 
 class EmbeddingRequest(BaseModel):
