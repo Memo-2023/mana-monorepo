@@ -191,7 +191,44 @@ build_services() {
   $DOCKER compose -f "$COMPOSE_FILE" build --no-cache "${services[@]}" 2>&1
   echo ""
   echo "=== Restarting: ${services[*]} ==="
-  $DOCKER compose -f "$COMPOSE_FILE" up -d --no-deps "${services[@]}" 2>&1
+  # Tear down existing containers BEFORE the up cycle. We hit "container
+  # name already in use" errors repeatedly during the Phase 5 deploys —
+  # a previous interrupted recreate would leave a stale container that
+  # the next `up -d` couldn't replace, even with --force-recreate.
+  #
+  # The two-step pattern (rm -fs + up -d) is reliable because:
+  #   1. `compose rm -fs` stops + force-removes the canonical container
+  #      managed by compose. Idempotent — does nothing if already gone.
+  #   2. A separate `docker rm -f` pass catches hash-prefixed orphans
+  #      (`<hash>_<container_name>`) that compose sometimes creates when
+  #      a previous recreate failed mid-cycle. Those aren't tracked by
+  #      compose's own state, so `compose rm` misses them.
+  #   3. `up -d --remove-orphans` then creates a clean new container
+  #      and silences the "Found orphan containers" warning we kept
+  #      seeing for the unrelated mana-game-whopixels leftover.
+  $DOCKER compose -f "$COMPOSE_FILE" rm -fs "${services[@]}" 2>&1 \
+    | grep -v 'No stopped containers' || true
+  for svc in "${services[@]}"; do
+    # Map compose service name → container_name from the compose config.
+    # Falls back to the service name itself if container_name isn't set.
+    local cname
+    cname=$($DOCKER compose -f "$COMPOSE_FILE" config 2>/dev/null \
+      | awk -v s="$svc:" '
+          $0 ~ "^  "s {found=1; next}
+          found && /^  [a-z]/ {found=0}
+          found && /container_name:/ {print $2; exit}
+        ')
+    cname="${cname:-$svc}"
+    local orphans
+    orphans=$($DOCKER ps -aq --filter "name=^${cname}$" 2>/dev/null || true)
+    orphans+=" $($DOCKER ps -aq --filter "name=_${cname}$" 2>/dev/null || true)"
+    orphans=$(echo "$orphans" | tr ' ' '\n' | grep -v '^$' || true)
+    if [ -n "$orphans" ]; then
+      echo "  Removing leftover containers for $svc: $(echo $orphans | tr '\n' ' ')"
+      echo "$orphans" | xargs -r $DOCKER rm -f 2>/dev/null || true
+    fi
+  done
+  $DOCKER compose -f "$COMPOSE_FILE" up -d --no-deps --remove-orphans "${services[@]}" 2>&1
 }
 
 # --- Main ---
