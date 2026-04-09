@@ -25,8 +25,22 @@ import { fetchAndExtract } from './parsers/readability';
 
 const RETENTION_DAYS = 30;
 
-/** Min word count to consider an RSS body "full enough" to skip Readability. */
-const FULL_TEXT_THRESHOLD_WORDS = 200;
+/**
+ * Min word count to consider an RSS body "full enough" to skip Readability.
+ *
+ * Set to 0 to disable Readability entirely. The fallback was useful for
+ * sources like Hacker News where the RSS only ships titles, but JSDOM's
+ * CSS parser throws on a meaningful fraction of real-world pages and
+ * those throws happen in detached parse5 callbacks that escape every
+ * try/catch frame *and* bun's process-level handlers — leaving us with
+ * a crash-restart loop that never makes forward progress past the
+ * first bad page in source #4. Storing the RSS excerpt and letting the
+ * client reader offer "Open original ↗" is the robust fallback.
+ *
+ * If we want full text back later: run Readability in a worker thread
+ * or out-of-process so the parent stays alive when JSDOM blows up.
+ */
+const FULL_TEXT_THRESHOLD_WORDS = 0;
 
 function hashUrl(url: string): string {
 	return createHash('sha256').update(url).digest('hex');
@@ -63,7 +77,7 @@ async function buildRow(
 	let imageUrl = item.imageUrl;
 
 	const initialWords = wordCountOf(content);
-	if (initialWords < FULL_TEXT_THRESHOLD_WORDS) {
+	if (FULL_TEXT_THRESHOLD_WORDS > 0 && initialWords < FULL_TEXT_THRESHOLD_WORDS) {
 		const extracted = await fetchAndExtract(item.url);
 		if (extracted) {
 			content = extracted.content;
@@ -75,8 +89,12 @@ async function buildRow(
 		}
 	}
 
+	// If the RSS gave nothing usable (Hacker News only ships titles +
+	// urls) keep the row anyway so the title is searchable / clickable
+	// and the reader can fall back to "Original öffnen ↗". The empty
+	// `content` is the signal the reader uses to skip prose rendering.
+	if (!content) content = excerpt ?? '';
 	const words = wordCountOf(content);
-	if (words === 0) return null; // nothing usable, skip
 
 	return {
 		urlHash: hashUrl(item.url),
