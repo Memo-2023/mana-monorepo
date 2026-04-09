@@ -104,7 +104,7 @@ export async function callManaLlmStreaming(
 
 	let json: {
 		choices?: Array<{
-			message?: { content?: string };
+			message?: { content?: string; reasoning?: string };
 			text?: string;
 		}>;
 		usage?: { prompt_tokens?: number; completion_tokens?: number };
@@ -116,8 +116,17 @@ export async function callManaLlmStreaming(
 		throw new BackendUnreachableError(tier, res.status, 'invalid JSON response');
 	}
 
+	// Field ordering: prefer the canonical OpenAI `message.content` first.
+	// If that's empty AND `message.reasoning` is set, fall back to it —
+	// reasoning models like Gemma 4 emit their thought process there
+	// when given too few tokens to also produce a final answer (we hit
+	// this with max_tokens=10 / no system prompt: content was "" while
+	// reasoning had the half-finished thought). For our title task this
+	// rarely happens because the system prompt is directive, but the
+	// fallback is cheap and protects against future tasks that might
+	// trigger longer reasoning chains.
 	const choice = json.choices?.[0];
-	const content = choice?.message?.content ?? choice?.text ?? '';
+	const content = choice?.message?.content ?? choice?.message?.reasoning ?? choice?.text ?? '';
 
 	if (!content) {
 		console.warn(`[shared-llm:${tier}] empty completion content`, { model, json });
