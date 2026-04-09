@@ -37,6 +37,10 @@
 	import { linkLocalStore, linkMutations } from '@mana/shared-links';
 	import { manaStore } from '$lib/data/local-store';
 	import { startLlmQueue, stopLlmQueue } from '$lib/llm-queue';
+	import {
+		startMemoroLlmWatcher,
+		stopMemoroLlmWatcher,
+	} from '$lib/modules/memoro/llm-watcher.svelte';
 	import { createUnifiedSync } from '$lib/data/sync';
 	import { networkStore } from '$lib/stores/network.svelte';
 	import { db } from '$lib/data/database';
@@ -312,6 +316,12 @@
 		// from a crashed session) before going idle. See $lib/llm-queue.ts.
 		startLlmQueue();
 
+		// Module-side LLM result watchers. Each subscribes via Dexie
+		// liveQuery to completed task rows tagged for its module and
+		// writes the results back to the module's own collection
+		// (e.g. memoro auto-titles → memo.title). Idempotent.
+		startMemoroLlmWatcher();
+
 		// Restore nav collapsed state
 		if (typeof localStorage !== 'undefined') {
 			const savedCollapsed = localStorage.getItem(STORAGE_KEYS.NAV_COLLAPSED);
@@ -384,6 +394,7 @@
 		// will finish in the background and the next page session will
 		// pick up where we left off.
 		void stopLlmQueue();
+		stopMemoroLlmWatcher();
 	});
 
 	// ── Search / Spotlight ───────────────────────────────────

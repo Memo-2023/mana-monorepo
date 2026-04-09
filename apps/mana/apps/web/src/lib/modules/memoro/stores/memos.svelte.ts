@@ -10,6 +10,8 @@ import { toMemo } from '../queries';
 import { createArchiveOps } from '@mana/shared-stores';
 import { MemoroEvents } from '@mana/shared-utils/analytics';
 import { encryptRecord } from '$lib/data/crypto';
+import { llmTaskQueue } from '$lib/llm-queue';
+import { generateTitleTask } from '$lib/llm-tasks/generate-title';
 import type { LocalMemo } from '../types';
 
 /** Archive/soft-delete ops for memos. */
@@ -106,6 +108,26 @@ export const memosStore = {
 			};
 			await encryptRecord('memos', diff);
 			await memoTable.update(memoId, diff);
+
+			// Auto-title: if the user didn't already give the memo a title,
+			// queue a background task to generate one from the transcript.
+			// The task is fire-and-forget — the memoro LLM watcher
+			// (./llm-watcher.svelte.ts) picks up the result reactively and
+			// writes it back to memo.title. Works on every tier including
+			// none (regex-based first-sentence fallback).
+			if (!existing.title?.trim() && transcript.length > 0) {
+				try {
+					await llmTaskQueue.enqueue(
+						generateTitleTask,
+						{ text: transcript, language: existing.language ?? result.language ?? 'de' },
+						{ refType: 'memo', refId: memoId, priority: 1 }
+					);
+				} catch {
+					// Don't let queue failures break the transcription path.
+					// Worst case the memo stays untitled — the user can still
+					// rename it manually.
+				}
+			}
 		} catch (e) {
 			const msg = e instanceof Error ? e.message : String(e);
 			await memoTable.update(memoId, {

@@ -19,9 +19,11 @@
 
 import type { TaskRegistry } from '@mana/shared-llm';
 import { extractDateTask } from './llm-tasks/extract-date';
+import { generateTitleTask } from './llm-tasks/generate-title';
 import { summarizeTextTask } from './llm-tasks/summarize';
 
 export const taskRegistry: TaskRegistry = {
 	[extractDateTask.name]: extractDateTask,
+	[generateTitleTask.name]: generateTitleTask,
 	[summarizeTextTask.name]: summarizeTextTask,
 };
