@@ -2,17 +2,24 @@
 #
 # apps/api — unified Hono/Bun API server
 #
-# Multi-stage build that runs from the monorepo root so the workspace
-# packages (@mana/shared-hono, @mana/shared-storage, @mana/media-client,
-# @mana/shared-logger) resolve via pnpm before being copied into a
-# minimal runtime image.
+# Multi-stage build:
+#   - builder: node:20-alpine with pnpm to resolve the workspace
+#     dependency graph (@mana/shared-hono + 3 more workspace packages).
+#     Bun's install command doesn't read pnpm-workspace.yaml, so we use
+#     pnpm here even though the runtime is Bun.
+#   - runtime: oven/bun:1 to actually run the server. Bun handles the
+#     pnpm symlink farm at node_modules/.pnpm/* natively, so the only
+#     thing the runtime stage needs is the workspace tree the builder
+#     produced and the entry script.
 #
 # Build context MUST be the monorepo root, not apps/api/. The compose
 # service uses `context: .` for this reason.
 
-FROM oven/bun:1 AS builder
+FROM node:20-alpine AS builder
 
 WORKDIR /app
+
+RUN npm install -g pnpm@9.15.0
 
 # Copy the workspace manifest first so the dependency graph is known
 # before we add source. This caches the install layer for incremental
@@ -29,8 +36,8 @@ COPY packages/shared-storage ./packages/shared-storage
 # @mana/media-client lives under services/mana-media (sub-package).
 COPY services/mana-media/packages/client ./services/mana-media/packages/client
 
-# Install pnpm and resolve the dependency graph for apps/api.
-RUN npm install -g pnpm@9.15.0
+# Resolve the dependency graph for apps/api only (--filter ...
+# follows the workspace transitive deps automatically).
 RUN pnpm install --filter @mana/api... --no-frozen-lockfile --ignore-scripts
 
 # Copy the api source and tsconfig last so source-only changes don't
