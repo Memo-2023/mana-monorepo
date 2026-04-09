@@ -541,6 +541,17 @@ registerApp({
 	views: {
 		list: { load: () => import('$lib/modules/nutriphi/ListView.svelte') },
 	},
+	contextMenuActions: [
+		{
+			id: 'new-meal',
+			label: 'Neue Mahlzeit',
+			icon: Plus,
+			action: () =>
+				window.dispatchEvent(
+					new CustomEvent('mana:quick-action', { detail: { app: 'nutriphi', action: 'new' } })
+				),
+		},
+	],
 });
 
 registerApp({
