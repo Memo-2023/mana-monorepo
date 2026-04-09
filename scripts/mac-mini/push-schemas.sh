@@ -34,6 +34,7 @@ push_schema "mana-credits" "services/mana-credits"
 push_schema "mana-user" "services/mana-user"
 push_schema "mana-subscriptions" "services/mana-subscriptions"
 push_schema "mana-analytics" "services/mana-analytics"
+push_schema "news-ingester" "services/news-ingester"
 
 echo ""
 echo "Done. mana-sync creates its schema automatically on startup."

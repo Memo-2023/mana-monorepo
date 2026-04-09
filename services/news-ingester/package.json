@@ -1,0 +1,27 @@
+{
+	"name": "@mana/news-ingester",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "bun run --watch src/index.ts",
+		"start": "bun run src/index.ts",
+		"db:push": "drizzle-kit push",
+		"db:generate": "drizzle-kit generate",
+		"db:studio": "drizzle-kit studio"
+	},
+	"dependencies": {
+		"@mana/shared-hono": "workspace:*",
+		"@mozilla/readability": "^0.5.0",
+		"drizzle-orm": "^0.38.3",
+		"hono": "^4.7.0",
+		"jsdom": "^25.0.1",
+		"postgres": "^3.4.5",
+		"rss-parser": "^3.13.0"
+	},
+	"devDependencies": {
+		"@types/jsdom": "^21.1.7",
+		"drizzle-kit": "^0.30.4",
+		"typescript": "^5.9.3"
+	}
+}
