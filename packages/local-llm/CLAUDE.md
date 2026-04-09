@@ -1,6 +1,8 @@
 # `@mana/local-llm` — Browser-Local LLM Inference
 
-Client-side LLM inference that runs **entirely in the user's browser** via WebGPU. No server roundtrips, no API keys, no data leaving the device. Used by `/llm-test` (developer tool) and the `playground` module in `apps/mana/apps/web`. Not related to `services/mana-llm` (which is the server-side LLM proxy that talks to Ollama, OpenAI, etc.).
+Client-side LLM inference that runs **entirely in the user's browser** via WebGPU. No server roundtrips, no API keys, no data leaving the device. Used by `/llm-test` (developer tool) and the `playground` module in `apps/mana/apps/web`.
+
+**Don't confuse this with the server-side LLM** (`services/mana-llm`). The server-side proxy is what backs the **`mana-server`** and **`cloud`** tiers in `@mana/shared-llm`'s tiered orchestrator — it speaks OpenAI-compatible HTTP and routes to a configured Ollama instance or to Gemini. The Ollama instance is **not** the Mac Mini's local Ollama: traffic goes via `~/gpu-proxy.py` (a Python TCP forwarder running as a LaunchAgent on the Mac Mini host) to the Windows GPU server's Ollama at `192.168.178.11:11434`, where inference runs on the **RTX 3090**. See `docs/MAC_MINI_SERVER.md` and `docs/WINDOWS_GPU_SERVER_SETUP.md` for the full topology. This package (`@mana/local-llm`) is the **only** path that uses the user's own device — `mana-server` and `cloud` both leave the device.
 
 ## What's currently in the box
 
