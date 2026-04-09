@@ -21,6 +21,7 @@ import {
 	fromSyncName,
 	beginApplyingTables,
 	FIELD_TIMESTAMPS_KEY,
+	setPendingChangeListener,
 } from './database';
 import { isQuotaError, cleanupTombstones, notifyQuotaExceeded } from './quota';
 import { emitSyncTelemetry, categorizeSyncError } from './sync-telemetry';
@@ -551,11 +552,20 @@ export function createUnifiedSync(serverUrl: string, getToken: () => Promise<str
 			// Lazy apps: no pull until ensureAppSynced() is called
 		}
 
+		// Wire fresh pending writes back to schedulePush. Without this, the
+		// Dexie hook in database.ts records the row but the sync engine
+		// never hears about it — pending accumulates indefinitely until the
+		// next reload triggers drainLeftoverPending below. Register before
+		// the drain so any change that lands during the drain itself is
+		// also caught.
+		setPendingChangeListener((appId) => {
+			if (channels.has(appId)) schedulePush(appId);
+		});
+
 		// Drain leftover pending changes from previous sessions. Without this,
-		// pending writes survive across reloads but never push because
-		// schedulePush() only fires on fresh Dexie writes — channels start
-		// cold and the queue stays stuck until the user happens to mutate
-		// the same table again.
+		// pending writes that survived a reload would sit until the user
+		// happens to mutate the same table again — even with the listener
+		// above wired up, leftovers never trigger it.
 		drainLeftoverPending();
 
 		// Listen for online/offline
@@ -585,6 +595,7 @@ export function createUnifiedSync(serverUrl: string, getToken: () => Promise<str
 	}
 
 	function stopAll(): void {
+		setPendingChangeListener(null);
 		for (const [, channel] of channels) {
 			if (channel.pushTimer) clearTimeout(channel.pushTimer);
 			if (channel.pullTimer) clearInterval(channel.pullTimer);

@@ -346,20 +346,39 @@ const pendingChangesTable = db.table('_pendingChanges');
  * `_pendingChanges` from there hits `NotFoundError: object store not in
  * scope`. We defer the write to a microtask so it runs in a fresh
  * transaction after the user's commit lands.
+ *
+ * After the row lands, `pendingChangeListener` (set by sync.ts at startup)
+ * is invoked with the change's appId so the unified sync engine can push
+ * immediately. Without that listener, pending rows would only ever drain
+ * on the next page reload via drainLeftoverPending.
  */
+let pendingChangeListener: ((appId: string) => void) | null = null;
+
+export function setPendingChangeListener(fn: ((appId: string) => void) | null): void {
+	pendingChangeListener = fn;
+}
+
 function trackPendingChange(table: string, change: Record<string, unknown>): void {
 	// setTimeout (not queueMicrotask) is required: Dexie binds the active
 	// transaction to the current Zone via Promise scheduling, and a microtask
 	// is still considered "inside" the transaction. setTimeout(0) breaks out
 	// completely so the new add() spawns its own implicit transaction.
 	setTimeout(() => {
-		pendingChangesTable.add(change).catch((err: unknown) => {
-			if (isQuotaError(err)) {
-				notifyQuotaExceeded({ table, op: 'pending-change', cleaned: 0, recovered: false });
-			} else {
-				console.error('[mana-sync] failed to record pending change:', err);
-			}
-		});
+		pendingChangesTable
+			.add(change)
+			.then(() => {
+				const appId = change.appId;
+				if (typeof appId === 'string' && pendingChangeListener) {
+					pendingChangeListener(appId);
+				}
+			})
+			.catch((err: unknown) => {
+				if (isQuotaError(err)) {
+					notifyQuotaExceeded({ table, op: 'pending-change', cleaned: 0, recovered: false });
+				} else {
+					console.error('[mana-sync] failed to record pending change:', err);
+				}
+			});
 	}, 0);
 }
 
