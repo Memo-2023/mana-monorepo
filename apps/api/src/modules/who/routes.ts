@@ -147,7 +147,10 @@ routes.post('/chat', async (c) => {
 	// LLM-gateway improvement applies here too.
 	let llmRes: Response;
 	try {
-		llmRes = await fetch(`${LLM_URL}/api/v1/chat/completions`, {
+		// mana-llm exposes /v1/chat/completions (OpenAI-compatible path,
+		// no /api/ prefix). The chat module had the same bug before commit
+		// 63a91e36a fixed research's path; this is the same correction.
+		llmRes = await fetch(`${LLM_URL}/v1/chat/completions`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
