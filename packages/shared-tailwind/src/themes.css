@@ -124,6 +124,21 @@
 	100% { transform: translateY(-10px); opacity: 0; }
 }
 
+/* ===== Domain Accent Colors =====
+   Module-internal brand accents that should NOT track the active theme
+   variant. Defined once at :root, never overridden by .dark or variant
+   blocks — they look the same regardless of light/dark/lume/ocean/etc.
+   Consumers wrap with hsl(): `color: hsl(var(--color-branch-intellect));`. */
+:root {
+	/* Skilltree — 6 skill category accents */
+	--color-branch-intellect: 217 91% 60%;   /* blue — knowledge, thinking */
+	--color-branch-body: 0 84% 60%;          /* red — physical, energy */
+	--color-branch-creativity: 271 91% 65%;  /* violet — art, expression */
+	--color-branch-social: 38 92% 50%;       /* amber — warmth, relationships */
+	--color-branch-practical: 173 80% 40%;   /* teal — craft, tools */
+	--color-branch-mindset: 142 71% 45%;     /* green — calm, growth */
+}
+
 /* ===== Default Theme (Lume Light) ===== */
 :root {
 	--color-primary: 47 95% 58%;
