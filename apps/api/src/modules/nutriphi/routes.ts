@@ -33,9 +33,11 @@ import { logger, type AuthVariables } from '@mana/shared-hono';
 
 const LLM_URL = process.env.MANA_LLM_URL || 'http://localhost:3025';
 // mana-llm parses model strings as `provider/model` (router.py:_parse_model).
-// Without a prefix, it defaults to ollama/ which then falls back to Google
-// only if auto_fallback_enabled + google_api_key are set. Be explicit.
-const VISION_MODEL = process.env.VISION_MODEL || 'google/gemini-2.0-flash';
+// Default to Gemma 3 (4B, multimodal) on the local Ollama instance — it
+// runs on the GPU server (192.168.178.11) via the gpu-proxy bridge and
+// supports vision out of the box. Override with VISION_MODEL=google/gemini-2.0-flash
+// (or similar) once mana-llm has GOOGLE_API_KEY configured.
+const VISION_MODEL = process.env.VISION_MODEL || 'ollama/gemma3:4b';
 
 const llm = createOpenAICompatible({
 	name: 'mana-llm',

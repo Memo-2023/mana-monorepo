@@ -21,9 +21,9 @@ import {
 import { logger, type AuthVariables } from '@mana/shared-hono';
 
 const LLM_URL = process.env.MANA_LLM_URL || 'http://localhost:3025';
-// See nutriphi/routes.ts for the explanation of the model prefix and
-// the /v1 suffix on the base URL.
-const VISION_MODEL = process.env.VISION_MODEL || 'google/gemini-2.0-flash';
+// See nutriphi/routes.ts for the rationale on the default model and
+// the /v1 base URL.
+const VISION_MODEL = process.env.VISION_MODEL || 'ollama/gemma3:4b';
 
 const llm = createOpenAICompatible({
 	name: 'mana-llm',
