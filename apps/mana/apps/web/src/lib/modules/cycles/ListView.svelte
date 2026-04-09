@@ -451,14 +451,14 @@
 	}
 	.phase-sub {
 		font-size: 0.6875rem;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 	}
 	.phase-countdown {
 		display: flex;
 		flex-direction: column;
 		align-items: flex-end;
 		font-size: 0.625rem;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 	}
 	.phase-countdown strong {
 		font-size: 1rem;
@@ -532,11 +532,11 @@
 		background: rgba(236, 72, 153, 0.1);
 	}
 	.banner-btn.danger {
-		border-color: rgba(239, 68, 68, 0.4);
-		color: #ef4444;
+		border-color: hsl(var(--color-error) / 0.4);
+		color: hsl(var(--color-error));
 	}
 	.banner-btn.danger:hover {
-		background: rgba(239, 68, 68, 0.1);
+		background: hsl(var(--color-error) / 0.1);
 	}
 
 	/* ── Sections ──────────────────────────────── */
@@ -549,7 +549,7 @@
 		font-size: 0.625rem;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
-		color: #c0bfba;
+		color: hsl(var(--color-muted-foreground));
 		font-weight: 600;
 		margin: 0;
 	}
@@ -572,9 +572,6 @@
 	.section-action:hover {
 		background: rgba(236, 72, 153, 0.1);
 	}
-	:global(.dark) .section-label {
-		color: #6b7280;
-	}
 	.row {
 		display: flex;
 		flex-wrap: wrap;
@@ -592,16 +589,12 @@
 		gap: 0.375rem;
 		padding: 0.3125rem 0.625rem;
 		border-radius: 9999px;
-		border: 1px solid rgba(0, 0, 0, 0.08);
+		border: 1px solid hsl(var(--color-border));
 		background: transparent;
 		font-size: 0.6875rem;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 		cursor: pointer;
 		transition: all 0.15s;
-	}
-	:global(.dark) .flow-btn,
-	:global(.dark) .mood-btn {
-		border-color: rgba(255, 255, 255, 0.08);
 	}
 	.flow-btn .flow-dot,
 	.mood-btn .mood-dot {
@@ -624,15 +617,12 @@
 	.sym-chip {
 		padding: 0.25rem 0.625rem;
 		border-radius: 9999px;
-		border: 1px solid rgba(0, 0, 0, 0.08);
+		border: 1px solid hsl(var(--color-border));
 		background: transparent;
 		font-size: 0.6875rem;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 		cursor: pointer;
 		transition: all 0.15s;
-	}
-	:global(.dark) .sym-chip {
-		border-color: rgba(255, 255, 255, 0.08);
 	}
 	.sym-chip:hover {
 		color: var(--sym-color);
@@ -652,10 +642,10 @@
 	.notes-input {
 		padding: 0.375rem 0.625rem;
 		border-radius: 0.375rem;
-		border: 1px solid rgba(0, 0, 0, 0.08);
+		border: 1px solid hsl(var(--color-border));
 		background: transparent;
 		font-size: 0.75rem;
-		color: #374151;
+		color: hsl(var(--color-foreground));
 		outline: none;
 		font-family: inherit;
 	}
@@ -669,12 +659,6 @@
 	.temp-input:focus,
 	.notes-input:focus {
 		border-color: #ec4899;
-	}
-	:global(.dark) .temp-input,
-	:global(.dark) .notes-input {
-		border-color: rgba(255, 255, 255, 0.08);
-		color: #f3f4f6;
-		color-scheme: dark;
 	}
 
 	/* ── Stats ────────────────────────────────── */
@@ -700,12 +684,12 @@
 		font-size: 0.5625rem;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 		margin-top: 0.125rem;
 	}
 	.prediction {
 		font-size: 0.6875rem;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 		padding: 0.375rem 0.25rem;
 	}
 	.prediction strong {
@@ -734,10 +718,7 @@
 		transition: background 0.15s;
 	}
 	.log-row:hover {
-		background: rgba(0, 0, 0, 0.04);
-	}
-	:global(.dark) .log-row:hover {
-		background: rgba(255, 255, 255, 0.05);
+		background: hsl(var(--color-surface-hover));
 	}
 	.log-row.active {
 		background: rgba(236, 72, 153, 0.1);
@@ -765,18 +746,15 @@
 	.log-date {
 		font-size: 0.75rem;
 		font-weight: 500;
-		color: #374151;
-	}
-	:global(.dark) .log-date {
-		color: #e5e7eb;
+		color: hsl(var(--color-foreground));
 	}
 	.log-tag {
 		font-size: 0.625rem;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 	}
 	.log-note {
 		font-size: 0.6875rem;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 		margin: 0.125rem 0 0;
 		overflow: hidden;
 		text-overflow: ellipsis;
@@ -787,7 +765,7 @@
 		padding: 2rem 0;
 		text-align: center;
 		font-size: 0.8125rem;
-		color: #9ca3af;
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	@media (max-width: 640px) {
