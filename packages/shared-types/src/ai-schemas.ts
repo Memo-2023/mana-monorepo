@@ -20,6 +20,57 @@
 
 import { z } from 'zod';
 
+// ─── Wire-format versioning ──────────────────────────────────────
+//
+// All AI structured-output endpoints wrap their response as
+// `{ schemaVersion, data }`. The version is bumped any time the data
+// shape changes in a non-additive way. Frontend clients verify the
+// version on receipt and throw if it doesn't match what they were
+// compiled against — this prevents a stale browser cache from
+// silently consuming a payload it can't decode.
+//
+// Bump rules:
+//   - Adding an optional field      → no bump (forward-compatible)
+//   - Adding a required field       → BUMP (old clients miss it)
+//   - Removing/renaming any field   → BUMP (old clients break)
+//   - Changing a type               → BUMP (zod parse fails on old client)
+//
+// History:
+//   1 — initial schemas (foods/totalNutrition for nutriphi,
+//       scientificName/commonNames/etc for planta)
+
+export const AI_SCHEMA_VERSION = '1' as const;
+export type AiSchemaVersion = typeof AI_SCHEMA_VERSION;
+
+/**
+ * Generic envelope used by every AI structured-output endpoint.
+ * Backend wraps the validated object in this; frontend api.ts
+ * unwraps it after checking schemaVersion === AI_SCHEMA_VERSION.
+ */
+export interface AiResponseEnvelope<T> {
+	schemaVersion: AiSchemaVersion;
+	data: T;
+}
+
+/**
+ * Thrown by frontend api.ts helpers when an envelope arrives with a
+ * schemaVersion the client wasn't compiled against. The error message
+ * includes both versions so it's obvious in the network panel which
+ * side is stale.
+ */
+export class AiSchemaVersionMismatchError extends Error {
+	constructor(
+		public readonly received: string,
+		public readonly expected: AiSchemaVersion = AI_SCHEMA_VERSION
+	) {
+		super(
+			`AI wire-format version mismatch: received "${received}", expected "${expected}". ` +
+				`The client and server are out of sync — reload the page or redeploy.`
+		);
+		this.name = 'AiSchemaVersionMismatchError';
+	}
+}
+
 // ─── NutriPhi: meal photo / text analysis ────────────────────────
 
 const AnalyzedFoodSchema = z.object({

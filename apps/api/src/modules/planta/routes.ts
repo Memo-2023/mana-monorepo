@@ -12,7 +12,12 @@
 import { Hono } from 'hono';
 import { generateObject } from 'ai';
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
-import { PlantIdentificationSchema } from '@mana/shared-types';
+import {
+	AI_SCHEMA_VERSION,
+	PlantIdentificationSchema,
+	type AiResponseEnvelope,
+	type PlantIdentification,
+} from '@mana/shared-types';
 import { logger, type AuthVariables } from '@mana/shared-hono';
 
 const LLM_URL = process.env.MANA_LLM_URL || 'http://localhost:3025';
@@ -24,6 +29,17 @@ const llm = createOpenAICompatible({
 });
 
 const IDENTIFICATION_PROMPT = `Du bist ein Pflanzenexperte. Analysiere das Pflanzenfoto und liefere eine strukturierte Identifikation mit lateinischem Namen, deutschen Trivialnamen, Pflegehinweisen und einer Gesundheitseinschätzung. Antworte auf Deutsch.`;
+
+// See nutriphi/routes.ts for the rationale: this is a forward-compat
+// hint for Anthropic prompt caching, ignored by Gemini today.
+const SYSTEM_CACHE_HINT = {
+	anthropic: { cacheControl: { type: 'ephemeral' as const } },
+};
+
+/** Wrap a validated AI object in the standard wire-format envelope. */
+function envelope(data: PlantIdentification): AiResponseEnvelope<PlantIdentification> {
+	return { schemaVersion: AI_SCHEMA_VERSION, data };
+}
 
 const routes = new Hono<{ Variables: AuthVariables }>();
 
@@ -70,8 +86,12 @@ routes.post('/analysis/identify', async (c) => {
 		const { object } = await generateObject({
 			model: llm(VISION_MODEL),
 			schema: PlantIdentificationSchema,
-			system: IDENTIFICATION_PROMPT,
 			messages: [
+				{
+					role: 'system',
+					content: IDENTIFICATION_PROMPT,
+					providerOptions: SYSTEM_CACHE_HINT,
+				},
 				{
 					role: 'user',
 					content: [
@@ -81,7 +101,7 @@ routes.post('/analysis/identify', async (c) => {
 				},
 			],
 		});
-		return c.json(object);
+		return c.json(envelope(object));
 	} catch (err) {
 		logger.error('planta.analysis_failed', {
 			error: err instanceof Error ? err.message : String(err),

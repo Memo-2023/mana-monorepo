@@ -23,7 +23,12 @@
 import { Hono } from 'hono';
 import { generateObject } from 'ai';
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
-import { MealAnalysisSchema } from '@mana/shared-types';
+import {
+	AI_SCHEMA_VERSION,
+	MealAnalysisSchema,
+	type AiResponseEnvelope,
+	type MealAnalysis,
+} from '@mana/shared-types';
 import { logger, type AuthVariables } from '@mana/shared-hono';
 
 const LLM_URL = process.env.MANA_LLM_URL || 'http://localhost:3025';
@@ -35,6 +40,28 @@ const llm = createOpenAICompatible({
 });
 
 const ANALYSIS_PROMPT = `Du bist ein Ernährungsexperte. Analysiere die Mahlzeit und gib strukturierte Nährwertdaten zurück. Schätze realistische Portionsgrößen und Kalorien. Antworte auf Deutsch.`;
+
+/**
+ * Provider hints attached to the system message. Forward-compat:
+ *
+ *   - anthropic.cacheControl: ephemeral system-prompt caching. NO-OP today
+ *     because (a) we route to Gemini via mana-llm and (b) the prompt is
+ *     ~50 tokens — well under Anthropic's 1024-token cache minimum. Becomes
+ *     active automatically when mana-llm routes to Claude AND the prompt
+ *     grows (e.g. once we attach per-user dietary preferences as system
+ *     context, which would push us past the threshold).
+ *
+ * Kept here so the day we flip the backend, we don't have to revisit
+ * every route to enable caching — it just starts working.
+ */
+const SYSTEM_CACHE_HINT = {
+	anthropic: { cacheControl: { type: 'ephemeral' as const } },
+};
+
+/** Wrap a validated AI object in the standard wire-format envelope. */
+function envelope(data: MealAnalysis): AiResponseEnvelope<MealAnalysis> {
+	return { schemaVersion: AI_SCHEMA_VERSION, data };
+}
 
 const routes = new Hono<{ Variables: AuthVariables }>();
 
@@ -80,8 +107,12 @@ routes.post('/analysis/photo', async (c) => {
 		const { object } = await generateObject({
 			model: llm(VISION_MODEL),
 			schema: MealAnalysisSchema,
-			system: ANALYSIS_PROMPT,
 			messages: [
+				{
+					role: 'system',
+					content: ANALYSIS_PROMPT,
+					providerOptions: SYSTEM_CACHE_HINT,
+				},
 				{
 					role: 'user',
 					content: [
@@ -92,7 +123,7 @@ routes.post('/analysis/photo', async (c) => {
 			],
 			temperature: 0.3,
 		});
-		return c.json(object);
+		return c.json(envelope(object));
 	} catch (err) {
 		logger.error('nutriphi.photo_analysis_failed', {
 			error: err instanceof Error ? err.message : String(err),
@@ -111,11 +142,20 @@ routes.post('/analysis/text', async (c) => {
 		const { object } = await generateObject({
 			model: llm(VISION_MODEL),
 			schema: MealAnalysisSchema,
-			system: ANALYSIS_PROMPT,
-			prompt: `Analysiere diese Mahlzeit: ${description}`,
+			messages: [
+				{
+					role: 'system',
+					content: ANALYSIS_PROMPT,
+					providerOptions: SYSTEM_CACHE_HINT,
+				},
+				{
+					role: 'user',
+					content: `Analysiere diese Mahlzeit: ${description}`,
+				},
+			],
 			temperature: 0.3,
 		});
-		return c.json(object);
+		return c.json(envelope(object));
 	} catch (err) {
 		logger.error('nutriphi.text_analysis_failed', {
 			error: err instanceof Error ? err.message : String(err),

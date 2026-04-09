@@ -10,10 +10,36 @@
 import { authStore } from '$lib/stores/auth.svelte';
 import { getManaApiUrl } from '$lib/api/config';
 // Wire format is the single source of truth in @mana/shared-types —
-// the backend validates AI responses with these same Zod schemas.
-import type { MealAnalysis } from '@mana/shared-types';
+// the backend validates AI responses with these same Zod schemas and
+// wraps them in an AiResponseEnvelope { schemaVersion, data }.
+import {
+	AI_SCHEMA_VERSION,
+	AiSchemaVersionMismatchError,
+	type AiResponseEnvelope,
+	type MealAnalysis,
+} from '@mana/shared-types';
 
 export type MealAnalysisResult = MealAnalysis;
+
+/**
+ * Decode an AI response envelope, asserting the schema version matches
+ * the one this client was compiled against. Throws if the server is on
+ * a different version (clears confusing "field is undefined" bugs in
+ * the wild — instead you get an actionable error in the network panel).
+ */
+function unwrapEnvelope<T>(raw: unknown): T {
+	const env = raw as Partial<AiResponseEnvelope<T>> | null;
+	if (!env || typeof env !== 'object' || !('schemaVersion' in env)) {
+		throw new Error('AI response is not a versioned envelope');
+	}
+	if (env.schemaVersion !== AI_SCHEMA_VERSION) {
+		throw new AiSchemaVersionMismatchError(String(env.schemaVersion));
+	}
+	if (env.data === undefined) {
+		throw new Error('AI response envelope missing data field');
+	}
+	return env.data as T;
+}
 
 export interface UploadMealPhotoResult {
 	mediaId: string;
@@ -62,7 +88,7 @@ export async function analyzeMealPhoto(photoUrl: string): Promise<MealAnalysisRe
 		throw new Error(`Analysis failed (${res.status}): ${body || res.statusText}`);
 	}
 
-	return res.json() as Promise<MealAnalysisResult>;
+	return unwrapEnvelope<MealAnalysisResult>(await res.json());
 }
 
 /** Run Gemini analysis on a free-text meal description. */
@@ -81,5 +107,5 @@ export async function analyzeMealText(description: string): Promise<MealAnalysis
 		throw new Error(`Analysis failed (${res.status}): ${body || res.statusText}`);
 	}
 
-	return res.json() as Promise<MealAnalysisResult>;
+	return unwrapEnvelope<MealAnalysisResult>(await res.json());
 }
