@@ -15,13 +15,13 @@
 
 	// Human-readable labels for the title-source badge below the title
 	// input. We use these specific strings (not @mana/shared-llm's
-	// generic tierLabel) so we can surface the actual model name where
-	// known — "gemma3:4b" for mana-server, "Gemma 4" for browser tier
-	// — rather than the abstract tier name.
+	// generic tierLabel) so we can surface the actual model family
+	// — both browser and mana-server now run Gemma 4 variants, so the
+	// label stays coherent across tiers.
 	const TITLE_SOURCE_LABELS: Record<LlmTier, string> = {
 		none: 'Lokal (regelbasiert)',
-		browser: 'Auf deinem Gerät (Gemma 4)',
-		'mana-server': 'Mana-Server (gemma3:4b)',
+		browser: 'Auf deinem Gerät (Gemma 4 E2B)',
+		'mana-server': 'Mana-Server (Gemma 4 E4B)',
 		cloud: 'Google Gemini',
 	};
 
