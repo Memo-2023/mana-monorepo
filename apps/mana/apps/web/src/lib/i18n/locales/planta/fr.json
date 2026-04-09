@@ -20,7 +20,26 @@
 		"noPlants": "Pas encore de plantes",
 		"addFirst": "Ajoutez votre première plante",
 		"careNotes": "Notes d'entretien",
-		"health": "Santé"
+		"health": "Santé",
+		"unnamed": "Sans nom",
+		"namePlaceholder": "Nom...",
+		"scientificName": "Nom scientifique",
+		"state": "État",
+		"light": "Lumière",
+		"wateringDays": "Arrosage (jours)",
+		"acquired": "Acquise",
+		"created": "Créée",
+		"edited": "Modifiée",
+		"notFound": "Plante introuvable",
+		"confirmDelete": "Vraiment supprimer cette plante ?",
+		"notesPlaceholder": "Ajouter des notes d'entretien..."
+	},
+	"list": {
+		"empty": "Aucune plante",
+		"count": "{count} plantes",
+		"dueWatering": "{count} à arroser",
+		"needsCare": "{count} à soigner",
+		"everyXDays": "Arroser tous les {days} jours"
 	},
 	"health": {
 		"healthy": "En bonne santé",
@@ -42,7 +61,17 @@
 		"analyzing": "Analyse en cours...",
 		"identified": "Identifiée",
 		"confidence": "Confiance",
-		"tips": "Conseils d'entretien"
+		"tips": "Conseils d'entretien",
+		"button": "Identifier la plante",
+		"applyResult": "Appliquer",
+		"resultTitle": "Suggestion de l'IA"
+	},
+	"photo": {
+		"section": "Photos",
+		"upload": "Téléverser une photo",
+		"uploading": "Téléversement...",
+		"noPhotos": "Aucune photo pour l'instant",
+		"primary": "Principale"
 	},
 	"light": {
 		"low": "Faible luminosité",
@@ -65,18 +94,23 @@
 		"search": "Rechercher",
 		"error": "Erreur",
 		"success": "Succès",
-		"loading": "Chargement..."
+		"loading": "Chargement...",
+		"none": "—"
 	},
 	"errors": {
 		"loadPlants": "Impossible de charger les plantes",
 		"identifyFailed": "L'identification a échoué",
 		"saveFailed": "Impossible d'enregistrer",
-		"uploadFailed": "Le téléchargement a échoué"
+		"uploadFailed": "Le téléchargement a échoué",
+		"deleteFailed": "Échec de la suppression",
+		"wateringFailed": "Impossible d'enregistrer l'arrosage"
 	},
 	"success": {
 		"plantAdded": "Plante ajoutée",
+		"plantSaved": "Enregistré",
 		"plantDeleted": "Plante supprimée",
 		"plantWatered": "Plante arrosée",
-		"photoUploaded": "Photo téléchargée"
+		"photoUploaded": "Photo téléchargée",
+		"identified": "Plante identifiée"
 	}
 }

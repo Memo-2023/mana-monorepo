@@ -20,11 +20,30 @@
 		"noPlants": "Noch keine Pflanzen",
 		"addFirst": "Füge deine erste Pflanze hinzu",
 		"careNotes": "Pflegehinweise",
-		"health": "Gesundheit"
+		"health": "Gesundheit",
+		"unnamed": "Unbenannt",
+		"namePlaceholder": "Name...",
+		"scientificName": "Wissenschaftlicher Name",
+		"state": "Zustand",
+		"light": "Licht",
+		"wateringDays": "Gießen (Tage)",
+		"acquired": "Erworben",
+		"created": "Erstellt",
+		"edited": "Bearbeitet",
+		"notFound": "Pflanze nicht gefunden",
+		"confirmDelete": "Pflanze wirklich löschen?",
+		"notesPlaceholder": "Pflegehinweise hinzufügen..."
+	},
+	"list": {
+		"empty": "Keine Pflanzen",
+		"count": "{count} Pflanzen",
+		"dueWatering": "{count} gießen",
+		"needsCare": "{count} brauchen Pflege",
+		"everyXDays": "Alle {days} Tage gießen"
 	},
 	"health": {
 		"healthy": "Gesund",
-		"needsAttention": "Braucht Aufmerksamkeit",
+		"needsAttention": "Braucht Pflege",
 		"sick": "Krank"
 	},
 	"watering": {
@@ -42,7 +61,17 @@
 		"analyzing": "Analysiere...",
 		"identified": "Identifiziert",
 		"confidence": "Sicherheit",
-		"tips": "Pflegetipps"
+		"tips": "Pflegetipps",
+		"button": "Pflanze identifizieren",
+		"applyResult": "Übernehmen",
+		"resultTitle": "Vorschlag von der KI"
+	},
+	"photo": {
+		"section": "Fotos",
+		"upload": "Foto hochladen",
+		"uploading": "Hochladen...",
+		"noPhotos": "Noch keine Fotos",
+		"primary": "Hauptbild"
 	},
 	"light": {
 		"low": "Wenig Licht",
@@ -65,18 +94,23 @@
 		"search": "Suchen",
 		"error": "Fehler",
 		"success": "Erfolgreich",
-		"loading": "Laden..."
+		"loading": "Laden...",
+		"none": "—"
 	},
 	"errors": {
 		"loadPlants": "Pflanzen konnten nicht geladen werden",
 		"identifyFailed": "Identifizierung fehlgeschlagen",
 		"saveFailed": "Speichern fehlgeschlagen",
-		"uploadFailed": "Upload fehlgeschlagen"
+		"uploadFailed": "Upload fehlgeschlagen",
+		"deleteFailed": "Löschen fehlgeschlagen",
+		"wateringFailed": "Gießen konnte nicht gespeichert werden"
 	},
 	"success": {
 		"plantAdded": "Pflanze hinzugefügt",
+		"plantSaved": "Gespeichert",
 		"plantDeleted": "Pflanze gelöscht",
 		"plantWatered": "Pflanze gegossen",
-		"photoUploaded": "Foto hochgeladen"
+		"photoUploaded": "Foto hochgeladen",
+		"identified": "Pflanze identifiziert"
 	}
 }

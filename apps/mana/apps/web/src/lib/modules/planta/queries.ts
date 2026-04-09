@@ -9,9 +9,11 @@
 import { liveQuery } from 'dexie';
 import { db } from '$lib/data/database';
 import { decryptRecords } from '$lib/data/crypto';
+import type { Tag } from '@mana/shared-tags';
 import type {
 	LocalPlant,
 	LocalPlantPhoto,
+	LocalPlantTag,
 	LocalWateringSchedule,
 	LocalWateringLog,
 	Plant,
@@ -19,6 +21,9 @@ import type {
 	WateringSchedule,
 	WateringLog,
 } from './types';
+
+// Re-export the global tag query so callers don't need a separate import.
+export { useAllTags } from '@mana/shared-stores';
 
 // ─── Type Converters ───────────────────────────────────────
 
@@ -124,6 +129,14 @@ export function useAllWateringLogs() {
 	});
 }
 
+/** All plant↔tag junctions (active only). */
+export function useAllPlantTags() {
+	return liveQuery(async () => {
+		const locals = await db.table<LocalPlantTag>('plantTags').toArray();
+		return locals.filter((t) => !t.deletedAt);
+	});
+}
+
 // ─── Pure Plant Helpers ────────────────────────────────────
 
 /** Get a plant by ID. */
@@ -175,4 +188,12 @@ export function getDaysUntilWatering(schedule: WateringSchedule | undefined): nu
 export function isWateringOverdue(schedule: WateringSchedule | undefined): boolean {
 	const days = getDaysUntilWatering(schedule);
 	return days !== null && days < 0;
+}
+
+// ─── Tag Helpers ───────────────────────────────────────────
+
+/** Resolve the global Tag objects attached to a single plant. */
+export function getTagsForPlant(tags: Tag[], plantTags: LocalPlantTag[], plantId: string): Tag[] {
+	const tagIds = new Set(plantTags.filter((pt) => pt.plantId === plantId).map((pt) => pt.tagId));
+	return tags.filter((t) => tagIds.has(t.id));
 }

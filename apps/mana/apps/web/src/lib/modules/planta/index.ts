@@ -50,7 +50,11 @@ export {
 } from './queries';
 
 // Mutations
-export { plantMutations, wateringMutations } from './mutations';
+export { plantMutations, wateringMutations, photoMutations } from './mutations';
+
+// API client (server-only operations)
+export { uploadPlantPhoto, identifyPlant } from './api';
+export type { UploadPhotoResult, IdentifyResult } from './api';
 
 // Utils
 export {

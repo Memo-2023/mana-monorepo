@@ -58,6 +58,11 @@ export interface LocalWateringLog extends BaseRecord {
 	notes?: string | null;
 }
 
+export interface LocalPlantTag extends BaseRecord {
+	plantId: string;
+	tagId: string;
+}
+
 // ─── Shared Domain Types ───────────────────────────────────
 
 export interface Plant {

@@ -3,10 +3,11 @@
  */
 
 import type { InputBarAdapter } from '$lib/quick-input/types';
-import type { QuickInputItem } from '@mana/shared-ui';
 import { db } from '$lib/data/database';
+import { decryptRecords } from '$lib/data/crypto';
 import { parsePlantInput, formatParsedPlantPreview } from './utils/plant-parser';
-import { plantTable } from './collections';
+import { plantMutations } from './mutations';
+import type { LocalPlant } from './types';
 
 export function createAdapter(): InputBarAdapter {
 	return {
@@ -18,19 +19,22 @@ export function createAdapter(): InputBarAdapter {
 
 		async onSearch(query) {
 			const q = query.toLowerCase();
-			const plants = await db.table('plants').toArray();
-			return (plants as Record<string, unknown>[])
-				.filter(
-					(p) =>
-						!(p.deletedAt as string) &&
-						((p.name as string)?.toLowerCase().includes(q) ||
-							(p.species as string)?.toLowerCase().includes(q))
-				)
+			// `name` is encrypted on disk — decrypt before substring matching.
+			const raw = await db.table<LocalPlant>('plants').toArray();
+			const visible = raw.filter((p) => !p.deletedAt);
+			const decrypted = await decryptRecords<LocalPlant>('plants', visible);
+			return decrypted
+				.filter((p) => {
+					const name = p.name?.toLowerCase() ?? '';
+					const sci = p.scientificName?.toLowerCase() ?? '';
+					const common = p.commonName?.toLowerCase() ?? '';
+					return name.includes(q) || sci.includes(q) || common.includes(q);
+				})
 				.slice(0, 10)
 				.map((p) => ({
-					id: p.id as string,
-					title: (p.name as string) || '',
-					subtitle: (p.species as string) || (p.location as string) || '',
+					id: p.id,
+					title: p.name || '',
+					subtitle: p.scientificName || p.commonName || '',
 				}));
 		},
 
@@ -49,10 +53,9 @@ export function createAdapter(): InputBarAdapter {
 		async onCreate(query) {
 			if (!query.trim()) return;
 			const parsed = parsePlantInput(query);
-			await plantTable.add({
-				id: crypto.randomUUID(),
+			await plantMutations.create({
 				name: parsed.name,
-				species: parsed.species,
+				acquiredAt: parsed.acquiredAt?.toISOString(),
 			});
 		},
 	};

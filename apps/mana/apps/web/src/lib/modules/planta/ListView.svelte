@@ -3,6 +3,7 @@
   Plant overview with watering schedule.
 -->
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 	import { db } from '$lib/data/database';
 	import { BaseListView } from '@mana/shared-ui';
@@ -45,14 +46,18 @@
 	};
 </script>
 
-<BaseListView items={plants} getKey={(p) => p.id} emptyTitle="Keine Pflanzen">
+<BaseListView items={plants} getKey={(p) => p.id} emptyTitle={$_('planta.list.empty')}>
 	{#snippet header()}
-		<span>{plants.length} Pflanzen</span>
+		<span>{$_('planta.list.count', { values: { count: plants.length } })}</span>
 		{#if dueForWatering.length > 0}
-			<span class="text-blue-400">{dueForWatering.length} giessen</span>
+			<span class="text-blue-400"
+				>{$_('planta.list.dueWatering', { values: { count: dueForWatering.length } })}</span
+			>
 		{/if}
 		{#if needsAttention.length > 0}
-			<span class="text-amber-400">{needsAttention.length} brauchen Pflege</span>
+			<span class="text-amber-400"
+				>{$_('planta.list.needsCare', { values: { count: needsAttention.length } })}</span
+			>
 		{/if}
 	{/snippet}
 
@@ -84,7 +89,7 @@
 			</div>
 			{#if schedule}
 				<p class="mt-1 text-xs text-white/30">
-					Alle {schedule.frequencyDays} Tage giessen
+					{$_('planta.list.everyXDays', { values: { days: schedule.frequencyDays } })}
 				</p>
 			{/if}
 		</button>

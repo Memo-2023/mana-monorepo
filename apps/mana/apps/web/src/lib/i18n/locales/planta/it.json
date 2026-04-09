@@ -20,7 +20,26 @@
 		"noPlants": "Nessuna pianta ancora",
 		"addFirst": "Aggiungi la tua prima pianta",
 		"careNotes": "Note di cura",
-		"health": "Salute"
+		"health": "Salute",
+		"unnamed": "Senza nome",
+		"namePlaceholder": "Nome...",
+		"scientificName": "Nome scientifico",
+		"state": "Condizione",
+		"light": "Luce",
+		"wateringDays": "Innaffiatura (giorni)",
+		"acquired": "Acquisita",
+		"created": "Creata",
+		"edited": "Modificata",
+		"notFound": "Pianta non trovata",
+		"confirmDelete": "Eliminare davvero questa pianta?",
+		"notesPlaceholder": "Aggiungi note di cura..."
+	},
+	"list": {
+		"empty": "Nessuna pianta",
+		"count": "{count} piante",
+		"dueWatering": "{count} da innaffiare",
+		"needsCare": "{count} da curare",
+		"everyXDays": "Innaffia ogni {days} giorni"
 	},
 	"health": {
 		"healthy": "Sana",
@@ -42,7 +61,17 @@
 		"analyzing": "Analisi in corso...",
 		"identified": "Identificata",
 		"confidence": "Affidabilità",
-		"tips": "Consigli di cura"
+		"tips": "Consigli di cura",
+		"button": "Identifica pianta",
+		"applyResult": "Applica",
+		"resultTitle": "Suggerimento IA"
+	},
+	"photo": {
+		"section": "Foto",
+		"upload": "Carica foto",
+		"uploading": "Caricamento...",
+		"noPhotos": "Nessuna foto",
+		"primary": "Principale"
 	},
 	"light": {
 		"low": "Poca luce",
@@ -65,18 +94,23 @@
 		"search": "Cerca",
 		"error": "Errore",
 		"success": "Successo",
-		"loading": "Caricamento..."
+		"loading": "Caricamento...",
+		"none": "—"
 	},
 	"errors": {
 		"loadPlants": "Impossibile caricare le piante",
 		"identifyFailed": "Identificazione fallita",
 		"saveFailed": "Salvataggio fallito",
-		"uploadFailed": "Caricamento fallito"
+		"uploadFailed": "Caricamento fallito",
+		"deleteFailed": "Eliminazione fallita",
+		"wateringFailed": "Impossibile registrare l'innaffiatura"
 	},
 	"success": {
 		"plantAdded": "Pianta aggiunta",
+		"plantSaved": "Salvato",
 		"plantDeleted": "Pianta eliminata",
 		"plantWatered": "Pianta innaffiata",
-		"photoUploaded": "Foto caricata"
+		"photoUploaded": "Foto caricata",
+		"identified": "Pianta identificata"
 	}
 }
