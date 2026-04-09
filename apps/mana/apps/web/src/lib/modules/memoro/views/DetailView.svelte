@@ -8,9 +8,26 @@
 	import DetailViewShell from '$lib/components/DetailViewShell.svelte';
 	import { memosStore } from '../stores/memos.svelte';
 	import { llmQueueDb } from '$lib/llm-queue';
+	import type { LlmTier } from '@mana/shared-llm';
 	import { PushPin } from '@mana/shared-icons';
 	import type { ViewProps } from '$lib/app-registry';
 	import type { LocalMemo, ProcessingStatus } from '../types';
+
+	// Human-readable labels for the title-source badge below the title
+	// input. We use these specific strings (not @mana/shared-llm's
+	// generic tierLabel) so we can surface the actual model name where
+	// known — "gemma3:4b" for mana-server, "Gemma 4" for browser tier
+	// — rather than the abstract tier name.
+	const TITLE_SOURCE_LABELS: Record<LlmTier, string> = {
+		none: 'Lokal (regelbasiert)',
+		browser: 'Auf deinem Gerät (Gemma 4)',
+		'mana-server': 'Mana-Server (gemma3:4b)',
+		cloud: 'Google Gemini',
+	};
+
+	function isLlmTier(value: unknown): value is LlmTier {
+		return value === 'none' || value === 'browser' || value === 'mana-server' || value === 'cloud';
+	}
 
 	let { params, goBack }: ViewProps = $props();
 	let memoId = $derived(params.memoId as string);
@@ -97,6 +114,23 @@
 	const titleIsGenerating = $derived(
 		titleQueueRow.value?.state === 'pending' || titleQueueRow.value?.state === 'running'
 	);
+
+	// Source label for the title — read from memo.metadata.titleSource
+	// (set by the memoro LLM watcher when it applies an auto-generated
+	// title, cleared by memosStore.update() when the user types over it).
+	// Returns a label string or null if the title was manually entered.
+	const titleSourceLabel = $derived.by(() => {
+		const memo = detail.entity;
+		if (!memo) return null;
+		// Don't show a source label while we're still mid-generation.
+		if (titleIsGenerating) return null;
+		// Don't show a source label if the user has typed into the field
+		// and edits haven't been saved yet — they're about to overwrite.
+		if (detail.focused) return null;
+		const metadata = (memo.metadata as Record<string, unknown> | null) ?? {};
+		const source = metadata.titleSource;
+		return isLlmTier(source) ? TITLE_SOURCE_LABELS[source] : null;
+	});
 </script>
 
 <DetailViewShell
@@ -127,6 +161,10 @@
 				<PushPin size={16} />
 			</button>
 		</div>
+
+		{#if titleSourceLabel}
+			<div class="source-label title-source-label">{titleSourceLabel}</div>
+		{/if}
 
 		<div class="properties">
 			<div class="prop-row">
@@ -270,5 +308,13 @@
 		color: hsl(var(--color-muted-foreground));
 		opacity: 0.7;
 		font-style: italic;
+	}
+	.title-source-label {
+		/* Sit visually right under the title input rather than the
+		   transcript box — needs a tighter top gap and a small left
+		   indent so it lines up with the text inside the input. */
+		margin-top: 0.125rem;
+		margin-bottom: 0.5rem;
+		padding-left: 0.125rem;
 	}
 </style>

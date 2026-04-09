@@ -158,9 +158,21 @@ async function applyRow(row: QueuedTask): Promise<void> {
 		});
 	}
 
+	// Stamp the title source on the memo's metadata so the DetailView can
+	// render a "via Mana-Server" / "Auf deinem Gerät" / "Lokal (Regeln)"
+	// label under the title — the same UX we already have under the
+	// transcript ("Voxtral via mana-stt"). Stored as plaintext metadata
+	// because the tier name isn't sensitive and the encryption registry
+	// for memos only covers title/intro/transcript.
+	const existingMetadata = (memo.metadata as Record<string, unknown> | null) ?? {};
+
 	const diff: Partial<LocalMemo> = {
 		title: titleToWrite,
 		updatedAt: new Date().toISOString(),
+		metadata: {
+			...existingMetadata,
+			titleSource: row.source,
+		},
 	};
 	await encryptRecord('memos', diff);
 	await memoTable.update(row.refId, diff);

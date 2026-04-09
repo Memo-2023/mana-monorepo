@@ -158,6 +158,23 @@ export const memosStore = {
 			...data,
 			updatedAt: new Date().toISOString(),
 		};
+
+		// If the user is overwriting the title manually, clear the
+		// auto-generated titleSource marker so the DetailView stops
+		// showing "via Mana-Server" — the title is now the user's, not
+		// the LLM's. We only touch metadata when title was actually in
+		// the diff so we don't accidentally wipe other metadata fields
+		// (e.g. STT failure markers) on a non-title update.
+		if ('title' in data) {
+			const existing = await memoTable.get(id);
+			const existingMetadata = (existing?.metadata as Record<string, unknown> | null) ?? {};
+			if ('titleSource' in existingMetadata) {
+				const { titleSource: _omit, ...rest } = existingMetadata;
+				void _omit;
+				diff.metadata = rest;
+			}
+		}
+
 		await encryptRecord('memos', diff);
 		await memoTable.update(id, diff);
 	},
