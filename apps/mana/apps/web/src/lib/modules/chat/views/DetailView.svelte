@@ -56,6 +56,8 @@
 					text,
 					history: messages,
 					currentTitle: conversation?.title,
+					templateId: conversation?.templateId,
+					model: conversation?.modelId || undefined,
 				},
 				(accumulated) => {
 					streamingText = accumulated;
