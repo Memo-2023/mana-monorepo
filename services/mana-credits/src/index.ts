@@ -74,6 +74,22 @@ app.route(
 	createWebhookRoutes(stripeService, creditsService, config.stripe.webhookSecret)
 );
 
+// ─── Cron: Daily sync billing charge ────────────────────────
+
+const CHARGE_INTERVAL_MS = 60 * 60 * 1000; // Check every hour
+setInterval(async () => {
+	try {
+		const result = await syncBillingService.chargeRecurring();
+		if (result.total > 0) {
+			console.log(
+				`[sync-billing] Recurring charge: ${result.charged} charged, ${result.paused} paused, ${result.errors} errors`
+			);
+		}
+	} catch (err) {
+		console.error('[sync-billing] Recurring charge failed:', err);
+	}
+}, CHARGE_INTERVAL_MS);
+
 // ─── Start ──────────────────────────────────────────────────
 
 console.log(`mana-credits starting on port ${config.port}...`);

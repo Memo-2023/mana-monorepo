@@ -10,6 +10,34 @@ import { BadRequestError, NotFoundError, InsufficientCreditsError } from '../lib
 
 type BillingInterval = 'monthly' | 'quarterly' | 'yearly';
 
+const MANA_NOTIFY_URL = () => process.env.MANA_NOTIFY_URL || 'http://localhost:3040';
+const SERVICE_KEY = () => process.env.MANA_SERVICE_KEY || '';
+
+async function sendPauseNotification(userId: string): Promise<void> {
+	const key = SERVICE_KEY();
+	if (!key) return;
+
+	try {
+		await fetch(`${MANA_NOTIFY_URL()}/api/v1/notifications/send`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'X-Service-Key': key,
+			},
+			body: JSON.stringify({
+				channel: 'email',
+				appId: 'sync',
+				userId,
+				subject: 'Cloud Sync pausiert',
+				body: 'Dein Cloud Sync wurde pausiert, weil deine Credits nicht ausreichen. Lade Credits auf, um die Synchronisation fortzusetzen.',
+				data: { type: 'sync-paused', resumeUrl: 'https://mana.how/settings/sync' },
+			}),
+		});
+	} catch (err) {
+		console.error(`[sync-billing] Failed to send pause notification for ${userId}:`, err);
+	}
+}
+
 const SYNC_PRICES: Record<BillingInterval, number> = {
 	monthly: 30,
 	quarterly: 90,
@@ -222,7 +250,7 @@ export class SyncBillingService {
 						.where(eq(syncSubscriptions.userId, sub.userId));
 
 					paused++;
-					// TODO Phase 2: send notification via mana-notify
+					sendPauseNotification(sub.userId).catch(() => {});
 				} else {
 					errors++;
 					console.error(`[sync-billing] Failed to charge user ${sub.userId}:`, error);

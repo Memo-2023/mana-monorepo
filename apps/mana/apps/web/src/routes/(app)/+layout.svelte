@@ -471,6 +471,10 @@
 				// Update pending count when sync status changes
 				await refreshPendingCount();
 			});
+			unifiedSync.onBillingRequired(() => {
+				// Server returned 402 — sync subscription expired or paused
+				syncBilling.load();
+			});
 			unifiedSync.startAll();
 			// Seed the badge count on mount: onStatusChange only fires on
 			// transitions, so without this the badge stays at its last known

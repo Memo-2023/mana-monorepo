@@ -539,6 +539,7 @@ export function createUnifiedSync(
 	let status: SyncStatus = 'idle';
 	let online = typeof navigator !== 'undefined' ? navigator.onLine : true;
 	let _statusListeners: Array<(s: SyncStatus) => void> = [];
+	let _billingRequiredCallback: (() => void) | null = null;
 	const sseAbortControllers = new Map<string, AbortController>();
 
 	// ─── Lifecycle ──────────────────────────────────────────
@@ -714,6 +715,10 @@ export function createUnifiedSync(
 				`push[${appId}]`
 			);
 
+			if (res.status === 402) {
+				_billingRequiredCallback?.();
+				return;
+			}
 			if (!res.ok) throw new Error(`Push failed: ${res.status}`);
 
 			const data = await res.json();
@@ -813,6 +818,10 @@ export function createUnifiedSync(
 						`pull[${appId}/${syncName}]`
 					);
 
+					if (res.status === 402) {
+						_billingRequiredCallback?.();
+						return;
+					}
 					if (!res.ok) break;
 
 					const data = await res.json();
@@ -1088,6 +1097,9 @@ export function createUnifiedSync(
 			return () => {
 				_statusListeners = _statusListeners.filter((l) => l !== listener);
 			};
+		},
+		onBillingRequired(callback: () => void) {
+			_billingRequiredCallback = callback;
 		},
 		getChannel: (appId: string) => channels.get(appId),
 		pushNow: push,

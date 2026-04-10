@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/mana/mana-sync/internal/auth"
+	"github.com/mana/mana-sync/internal/billing"
 	"github.com/mana/mana-sync/internal/config"
 	"github.com/mana/mana-sync/internal/store"
 	syncHandler "github.com/mana/mana-sync/internal/sync"
@@ -49,16 +50,20 @@ func main() {
 	// Initialize WebSocket hub (with JWT validator for auth)
 	hub := ws.NewHub(validator)
 
+	// Initialize billing checker (verifies sync subscription via mana-credits)
+	billingChecker := billing.NewChecker(cfg.ManaCreditsURL, cfg.ServiceKey)
+	billingMiddleware := billingChecker.Middleware(validator)
+
 	// Initialize sync handler
 	handler := syncHandler.NewHandler(db, validator, hub)
 
 	// Set up routes
 	mux := http.NewServeMux()
 
-	// Sync endpoints (Go 1.22+ routing patterns)
-	mux.HandleFunc("POST /sync/{appId}", handler.HandleSync)
-	mux.HandleFunc("GET /sync/{appId}/pull", handler.HandlePull)
-	mux.HandleFunc("GET /sync/{appId}/stream", handler.HandleStream)
+	// Sync endpoints (Go 1.22+ routing patterns) — gated by billing check
+	mux.Handle("POST /sync/{appId}", billingMiddleware(http.HandlerFunc(handler.HandleSync)))
+	mux.Handle("GET /sync/{appId}/pull", billingMiddleware(http.HandlerFunc(handler.HandlePull)))
+	mux.Handle("GET /sync/{appId}/stream", billingMiddleware(http.HandlerFunc(handler.HandleStream)))
 
 	// WebSocket endpoints
 	// Unified: one connection per user, receives all app notifications with appId in payload
