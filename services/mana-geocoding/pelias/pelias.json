@@ -1,0 +1,39 @@
+{
+	"esclient": {
+		"apiVersion": "7.x",
+		"hosts": [
+			{
+				"host": "elasticsearch",
+				"port": 9200
+			}
+		]
+	},
+	"api": {
+		"services": {
+			"libpostal": "http://libpostal:4400"
+		},
+		"defaultParameters": {
+			"boundary.country": ["DEU", "AUT", "CHE"]
+		}
+	},
+	"imports": {
+		"openstreetmap": {
+			"download": [
+				{
+					"sourceURL": "https://download.geofabrik.de/europe/dach-latest.osm.pbf"
+				}
+			],
+			"datapath": "/data/openstreetmap",
+			"leveldbpath": "/tmp/leveldb",
+			"importVenues": true,
+			"importAddresses": true
+		},
+		"polylines": {
+			"datapath": "/data/polylines",
+			"files": ["extract.0sv"]
+		}
+	},
+	"logger": {
+		"level": "info"
+	}
+}

@@ -7,7 +7,8 @@
 	import { useAllPlaces } from './queries';
 	import { placesStore } from './stores/places.svelte';
 	import { trackingStore } from './stores/tracking.svelte';
-	import { Star, MapPin, Plus, PencilSimple, Trash } from '@mana/shared-icons';
+	import { searchAddress, formatAddress, type GeocodingResult } from './geocoding';
+	import { Star, MapPin, Plus, PencilSimple, Trash, MagnifyingGlass } from '@mana/shared-icons';
 	import type { ViewProps } from '$lib/app-registry';
 	import { ContextMenu, type ContextMenuItem } from '@mana/shared-ui';
 	import { dropTarget, dragSource } from '@mana/shared-ui/dnd';
@@ -54,7 +55,58 @@
 		other: 'Sonstiges',
 	};
 
-	// Quick create
+	// --- Address autocomplete ---
+	let addressQuery = $state('');
+	let suggestions = $state<GeocodingResult[]>([]);
+	let showSuggestions = $state(false);
+	let debounceTimer: ReturnType<typeof setTimeout> | undefined;
+
+	function onAddressInput() {
+		clearTimeout(debounceTimer);
+		if (addressQuery.trim().length < 2) {
+			suggestions = [];
+			showSuggestions = false;
+			return;
+		}
+		debounceTimer = setTimeout(async () => {
+			const focusLat = trackingStore.currentPosition?.coords.latitude;
+			const focusLon = trackingStore.currentPosition?.coords.longitude;
+			suggestions = await searchAddress(addressQuery, {
+				limit: 6,
+				focusLat,
+				focusLon,
+			});
+			showSuggestions = suggestions.length > 0;
+		}, 300);
+	}
+
+	async function selectSuggestion(result: GeocodingResult) {
+		showSuggestions = false;
+		addressQuery = '';
+		const place = await placesStore.createPlace({
+			name: result.name || result.label,
+			latitude: result.latitude,
+			longitude: result.longitude,
+			address: formatAddress(result.address),
+			category: result.category,
+		});
+		navigate('detail', { placeId: place.id });
+	}
+
+	function onAddressKeydown(e: KeyboardEvent) {
+		if (e.key === 'Escape') {
+			showSuggestions = false;
+		}
+	}
+
+	function onAddressBlur() {
+		// Delay to allow click on suggestion
+		setTimeout(() => {
+			showSuggestions = false;
+		}, 200);
+	}
+
+	// Quick create (manual name)
 	let newName = $state('');
 
 	async function createPlace() {
@@ -157,12 +209,51 @@
 		<input class="search-input" type="text" placeholder="Orte suchen..." bind:value={search} />
 	</div>
 
-	<!-- Quick Create -->
+	<!-- Address Search (Geocoding) -->
+	<div class="address-search">
+		<div class="address-input-row">
+			<MagnifyingGlass size={14} class="address-icon" />
+			<input
+				class="address-input"
+				type="text"
+				placeholder="Adresse suchen..."
+				bind:value={addressQuery}
+				oninput={onAddressInput}
+				onkeydown={onAddressKeydown}
+				onblur={onAddressBlur}
+				onfocus={() => {
+					if (suggestions.length > 0) showSuggestions = true;
+				}}
+			/>
+		</div>
+		{#if showSuggestions}
+			<div class="suggestions">
+				{#each suggestions as result}
+					<button class="suggestion-item" onclick={() => selectSuggestion(result)}>
+						<div class="suggestion-icon">
+							<MapPin size={14} />
+						</div>
+						<div class="suggestion-info">
+							<span class="suggestion-name">{result.name || result.label}</span>
+							<span class="suggestion-address">{formatAddress(result.address)}</span>
+						</div>
+						{#if result.category !== 'other'}
+							<span class="suggestion-category"
+								>{CATEGORY_LABELS[result.category] ?? result.category}</span
+							>
+						{/if}
+					</button>
+				{/each}
+			</div>
+		{/if}
+	</div>
+
+	<!-- Quick Create (manual) -->
 	<div class="create-row">
 		<input
 			class="create-input"
 			type="text"
-			placeholder="Neuen Ort erstellen..."
+			placeholder="Oder manuell erstellen..."
 			bind:value={newName}
 			onkeydown={handleKeydown}
 		/>
@@ -342,6 +433,120 @@
 
 	.search-input::placeholder {
 		color: hsl(var(--color-muted-foreground));
+	}
+
+	/* ── Address Search ───────────────────────── */
+	.address-search {
+		position: relative;
+	}
+
+	.address-input-row {
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
+		padding: 0.375rem 0.625rem;
+		border-radius: 0.5rem;
+		border: 1px solid hsl(var(--color-border));
+		background: transparent;
+		transition: border-color 0.15s;
+	}
+
+	.address-input-row:focus-within {
+		border-color: #0ea5e9;
+	}
+
+	.address-input-row :global(.address-icon) {
+		color: hsl(var(--color-muted-foreground));
+		flex-shrink: 0;
+	}
+
+	.address-input {
+		flex: 1;
+		border: none;
+		background: transparent;
+		color: hsl(var(--color-foreground));
+		font-size: 0.8125rem;
+		outline: none;
+	}
+
+	.address-input::placeholder {
+		color: hsl(var(--color-muted-foreground));
+	}
+
+	.suggestions {
+		position: absolute;
+		top: 100%;
+		left: 0;
+		right: 0;
+		margin-top: 0.25rem;
+		background: hsl(var(--color-background));
+		border: 1px solid hsl(var(--color-border));
+		border-radius: 0.5rem;
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+		z-index: 50;
+		overflow: hidden;
+	}
+
+	.suggestion-item {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.5rem 0.625rem;
+		width: 100%;
+		border: none;
+		background: transparent;
+		color: hsl(var(--color-foreground));
+		cursor: pointer;
+		text-align: left;
+		transition: background 0.1s;
+	}
+
+	.suggestion-item:hover {
+		background: hsl(var(--color-muted));
+	}
+
+	.suggestion-item + .suggestion-item {
+		border-top: 1px solid hsl(var(--color-border) / 0.5);
+	}
+
+	.suggestion-icon {
+		color: #0ea5e9;
+		flex-shrink: 0;
+	}
+
+	.suggestion-info {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		gap: 0.0625rem;
+		min-width: 0;
+	}
+
+	.suggestion-name {
+		font-size: 0.8125rem;
+		font-weight: 500;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.suggestion-address {
+		font-size: 0.6875rem;
+		color: hsl(var(--color-muted-foreground));
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.suggestion-category {
+		padding: 0.0625rem 0.375rem;
+		border-radius: 9999px;
+		background: rgba(14, 165, 233, 0.1);
+		color: #0ea5e9;
+		font-size: 0.5625rem;
+		font-weight: 500;
+		flex-shrink: 0;
+		white-space: nowrap;
 	}
 
 	/* ── Quick Create ─────────────────────────── */

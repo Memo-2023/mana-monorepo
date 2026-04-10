@@ -8,7 +8,8 @@
 	import { useDetailEntity } from '$lib/data/detail-entity.svelte';
 	import DetailViewShell from '$lib/components/DetailViewShell.svelte';
 	import { placesStore } from '../stores/places.svelte';
-	import { Star, MapPin, X } from '@mana/shared-icons';
+	import { reverseGeocode, formatAddress, searchAddress, type GeocodingResult } from '../geocoding';
+	import { Star, MapPin, X, MagnifyingGlass, ArrowsClockwise } from '@mana/shared-icons';
 	import type { ViewProps } from '$lib/app-registry';
 	import type { LocalPlace, PlaceCategory, LocalLocationLog } from '../types';
 	import { useAllTags, getTagsByIds } from '@mana/shared-stores';
@@ -63,6 +64,64 @@
 		{ value: 'leisure', label: 'Freizeit' },
 		{ value: 'other', label: 'Sonstiges' },
 	];
+
+	// --- Reverse geocoding (coords → address) ---
+	let isResolving = $state(false);
+
+	async function resolveAddress() {
+		const lat = parseFloat(editLatitude);
+		const lng = parseFloat(editLongitude);
+		if (isNaN(lat) || isNaN(lng) || (lat === 0 && lng === 0)) return;
+
+		isResolving = true;
+		const result = await reverseGeocode(lat, lng);
+		isResolving = false;
+
+		if (result) {
+			editAddress = formatAddress(result.address);
+			if (editCategory === 'other' && result.category !== 'other') {
+				editCategory = result.category;
+			}
+			await saveField();
+		}
+	}
+
+	// --- Address search in detail view ---
+	let addressSearch = $state('');
+	let addressSuggestions = $state<GeocodingResult[]>([]);
+	let showAddressSuggestions = $state(false);
+	let addressDebounce: ReturnType<typeof setTimeout> | undefined;
+
+	function onAddressSearchInput() {
+		clearTimeout(addressDebounce);
+		if (addressSearch.trim().length < 2) {
+			addressSuggestions = [];
+			showAddressSuggestions = false;
+			return;
+		}
+		addressDebounce = setTimeout(async () => {
+			addressSuggestions = await searchAddress(addressSearch, { limit: 5 });
+			showAddressSuggestions = addressSuggestions.length > 0;
+		}, 300);
+	}
+
+	async function applyAddressResult(result: GeocodingResult) {
+		showAddressSuggestions = false;
+		addressSearch = '';
+		editAddress = formatAddress(result.address);
+		editLatitude = String(result.latitude);
+		editLongitude = String(result.longitude);
+		if (result.category !== 'other') {
+			editCategory = result.category;
+		}
+		await saveField();
+	}
+
+	function onAddressSearchBlur() {
+		setTimeout(() => {
+			showAddressSuggestions = false;
+		}, 200);
+	}
 
 	async function removeTag(tagId: string) {
 		await removeTagIdWithUndo(detail.entity?.tagIds ?? [], tagId, (next) =>
@@ -181,6 +240,37 @@
 				/>
 			</div>
 
+			<!-- Address Search -->
+			<div class="field-row address-search-row">
+				<span class="field-label"></span>
+				<div class="address-search-wrapper">
+					<div class="address-search-input-row">
+						<MagnifyingGlass size={12} />
+						<input
+							class="address-search-input"
+							type="text"
+							placeholder="Adresse suchen..."
+							bind:value={addressSearch}
+							oninput={onAddressSearchInput}
+							onblur={onAddressSearchBlur}
+							onfocus={() => {
+								if (addressSuggestions.length > 0) showAddressSuggestions = true;
+							}}
+						/>
+					</div>
+					{#if showAddressSuggestions}
+						<div class="address-suggestions">
+							{#each addressSuggestions as result}
+								<button class="address-suggestion" onclick={() => applyAddressResult(result)}>
+									<span class="address-suggestion-name">{result.name || result.label}</span>
+									<span class="address-suggestion-detail">{formatAddress(result.address)}</span>
+								</button>
+							{/each}
+						</div>
+					{/if}
+				</div>
+			</div>
+
 			<div class="field-row">
 				<span class="field-label">Koordinaten</span>
 				<div class="coords-row">
@@ -202,6 +292,14 @@
 						type="number"
 						step="any"
 					/>
+					<button
+						class="resolve-btn"
+						onclick={resolveAddress}
+						disabled={isResolving}
+						title="Adresse aus Koordinaten ermitteln"
+					>
+						<ArrowsClockwise size={14} class={isResolving ? 'spinning' : ''} />
+					</button>
 				</div>
 			</div>
 
@@ -359,6 +457,134 @@
 		gap: 0.25rem;
 		flex: 1;
 		justify-content: flex-end;
+		align-items: center;
+	}
+
+	.resolve-btn {
+		padding: 0.25rem;
+		border-radius: 0.25rem;
+		border: 1px solid transparent;
+		background: transparent;
+		color: hsl(var(--color-muted-foreground));
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		transition: all 0.15s;
+		flex-shrink: 0;
+	}
+
+	.resolve-btn:hover:not(:disabled) {
+		color: #0ea5e9;
+		border-color: hsl(var(--color-border));
+	}
+
+	.resolve-btn:disabled {
+		opacity: 0.4;
+		cursor: not-allowed;
+	}
+
+	.resolve-btn :global(.spinning) {
+		animation: spin 0.8s linear infinite;
+	}
+
+	@keyframes spin {
+		from {
+			transform: rotate(0deg);
+		}
+		to {
+			transform: rotate(360deg);
+		}
+	}
+
+	/* ── Address Search (Detail) ─────────────── */
+	.address-search-row {
+		align-items: flex-start;
+	}
+
+	.address-search-wrapper {
+		flex: 1;
+		position: relative;
+		min-width: 0;
+	}
+
+	.address-search-input-row {
+		display: flex;
+		align-items: center;
+		gap: 0.25rem;
+		padding: 0.1875rem 0.375rem;
+		border-radius: 0.25rem;
+		border: 1px solid transparent;
+		color: hsl(var(--color-muted-foreground));
+		transition: border-color 0.15s;
+	}
+
+	.address-search-input-row:focus-within {
+		border-color: hsl(var(--color-border));
+	}
+
+	.address-search-input {
+		flex: 1;
+		border: none;
+		background: transparent;
+		color: hsl(var(--color-foreground));
+		font-size: 0.75rem;
+		outline: none;
+		text-align: right;
+	}
+
+	.address-search-input::placeholder {
+		color: hsl(var(--color-muted-foreground));
+	}
+
+	.address-suggestions {
+		position: absolute;
+		top: 100%;
+		left: 0;
+		right: 0;
+		margin-top: 0.125rem;
+		background: hsl(var(--color-background));
+		border: 1px solid hsl(var(--color-border));
+		border-radius: 0.375rem;
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+		z-index: 50;
+		overflow: hidden;
+	}
+
+	.address-suggestion {
+		display: flex;
+		flex-direction: column;
+		gap: 0.0625rem;
+		padding: 0.375rem 0.5rem;
+		width: 100%;
+		border: none;
+		background: transparent;
+		color: hsl(var(--color-foreground));
+		cursor: pointer;
+		text-align: left;
+		font-size: 0.75rem;
+	}
+
+	.address-suggestion:hover {
+		background: hsl(var(--color-muted));
+	}
+
+	.address-suggestion + .address-suggestion {
+		border-top: 1px solid hsl(var(--color-border) / 0.5);
+	}
+
+	.address-suggestion-name {
+		font-weight: 500;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.address-suggestion-detail {
+		font-size: 0.6875rem;
+		color: hsl(var(--color-muted-foreground));
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
 
 	.tags-list {

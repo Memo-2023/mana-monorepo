@@ -9,6 +9,7 @@ import { decryptRecords, encryptRecord } from '$lib/data/crypto';
 import { createBlock } from '$lib/data/time-blocks/service';
 import { locationLogTable, placeTable } from '../collections';
 import { getDistanceKm, findNearestPlace, toPlace } from '../queries';
+import { reverseGeocode, formatAddress } from '../geocoding';
 import type { LocalLocationLog, LocalPlace } from '../types';
 
 // ─── State ──────────────────────────────────────────────
@@ -139,11 +140,30 @@ async function logPosition(pos: GeolocationPosition) {
 	if (nearest) {
 		const local = await placeTable.get(nearest.id);
 		if (local) {
-			await placeTable.update(nearest.id, {
+			const updates: Partial<LocalPlace> = {
 				visitCount: (local.visitCount ?? 0) + 1,
 				lastVisitedAt: log.timestamp,
 				updatedAt: new Date().toISOString(),
-			});
+			};
+
+			// Auto-fill address via reverse geocoding if the place has none
+			if (!local.address) {
+				reverseGeocode(lat, lng).then(async (result) => {
+					if (result) {
+						const addr = formatAddress(result.address);
+						if (addr) {
+							const rec: Partial<LocalPlace> = { address: addr };
+							await encryptRecord('places', rec);
+							await placeTable.update(nearest.id, {
+								address: rec.address,
+								updatedAt: new Date().toISOString(),
+							});
+						}
+					}
+				});
+			}
+
+			await placeTable.update(nearest.id, updates);
 
 			await createBlock({
 				startDate: log.timestamp,

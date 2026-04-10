@@ -74,7 +74,8 @@
 | 3014 | mana-crawler | Go | Web crawler, content extraction |
 | 3015 | mana-landing-builder | NestJS | Org landing page builder |
 | 3016 | mana-api-gateway | Go | API keys, rate limiting, usage tracking |
-| 3017-3019 | *(reserved)* | | |
+| 3018 | mana-geocoding | Hono/Bun | Self-hosted geocoding (Pelias proxy) |
+| 3017, 3019 | *(reserved)* | | |
 
 ## 3020-3029: AI/ML Services
 

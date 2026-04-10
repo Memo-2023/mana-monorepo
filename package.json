@@ -251,6 +251,7 @@
 		"dev:calc:local": "concurrently -n sync,web -c magenta,cyan \"pnpm dev:sync\" \"pnpm dev:calc:web\"",
 		"dev:manavoxel:local": "concurrently -n sync,web -c magenta,cyan \"pnpm dev:sync\" \"pnpm dev:manavoxel:web\"",
 		"dev:media": "cd services/mana-media/apps/api && bun run --hot src/index.ts",
+		"dev:geocoding": "cd services/mana-geocoding && bun run --watch src/index.ts",
 		"dev:mana:servers": "concurrently -n auth,sync,api,media -c blue,magenta,yellow,green \"pnpm dev:auth\" \"pnpm dev:sync\" \"pnpm dev:api\" \"pnpm dev:media\""
 	},
 	"devDependencies": {
