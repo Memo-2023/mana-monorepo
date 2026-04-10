@@ -3,9 +3,9 @@
 	import { goto } from '$app/navigation';
 	import { getContext } from 'svelte';
 	import { conversationsStore } from '$lib/modules/chat/stores/conversations.svelte';
-	import { messagesStore } from '$lib/modules/chat/stores/messages.svelte';
 	import { useConversationMessages } from '$lib/modules/chat/queries';
-	import type { Conversation, Message } from '$lib/modules/chat/types';
+	import { sendAndStream } from '$lib/modules/chat/services/completion';
+	import type { Conversation } from '$lib/modules/chat/types';
 	import {
 		PaperPlaneRight,
 		ArrowLeft,
@@ -29,6 +29,7 @@
 
 	let inputText = $state('');
 	let isSending = $state(false);
+	let streamingText = $state('');
 	let isEditingTitle = $state(false);
 	let editTitle = $state('');
 	let showShare = $state(false);
@@ -41,26 +42,26 @@
 		if (!text || isSending) return;
 
 		isSending = true;
+		streamingText = '';
 		inputText = '';
 
 		try {
-			// Add user message to IndexedDB
-			await messagesStore.addUserMessage(conversationId, text);
-
-			// Auto-set title if first message and no title
-			if (messages.length <= 1 && !conversation?.title) {
-				const title = text.length > 50 ? text.substring(0, 50) + '...' : text;
-				await conversationsStore.updateTitle(conversationId, title);
-			}
-
-			// NOTE: In the standalone chat app, this would call the chat backend for AI response.
-			// In the unified app, the chat compute server handles streaming completions.
-			// For now, messages are stored locally. AI integration will be added via
-			// the chat compute server at /api/v1/chat/completions.
+			await sendAndStream(
+				{
+					conversationId,
+					text,
+					history: messages,
+					currentTitle: conversation?.title,
+				},
+				(accumulated) => {
+					streamingText = accumulated;
+				}
+			);
 		} catch (e) {
 			console.error('Failed to send message:', e);
 		} finally {
 			isSending = false;
+			streamingText = '';
 		}
 	}
 
@@ -203,6 +204,25 @@
 						</div>
 					</div>
 				{/each}
+
+				{#if isSending && streamingText}
+					<div class="flex justify-start">
+						<div
+							class="max-w-[80%] rounded-2xl px-4 py-2.5 text-sm bg-[hsl(var(--muted))] text-[hsl(var(--foreground))]"
+						>
+							<p class="whitespace-pre-wrap">{streamingText}</p>
+							<p class="mt-1 text-[10px] opacity-60">...</p>
+						</div>
+					</div>
+				{:else if isSending}
+					<div class="flex justify-start">
+						<div
+							class="rounded-2xl px-4 py-2.5 text-sm bg-[hsl(var(--muted))] text-[hsl(var(--muted-foreground))]"
+						>
+							<span class="thinking-dots">●●●</span>
+						</div>
+					</div>
+				{/if}
 			</div>
 		{/if}
 	</div>
@@ -236,3 +256,20 @@
 	title={conversation?.title ?? 'Chat'}
 	source="chat"
 />
+
+<style>
+	.thinking-dots {
+		font-size: 0.625rem;
+		letter-spacing: 0.125rem;
+		animation: dots-pulse 1.4s ease-in-out infinite;
+	}
+	@keyframes dots-pulse {
+		0%,
+		100% {
+			opacity: 0.3;
+		}
+		50% {
+			opacity: 1;
+		}
+	}
+</style>
