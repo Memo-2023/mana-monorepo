@@ -11,6 +11,7 @@ export interface LocalDeck extends BaseRecord {
 	cardCount: number;
 	lastStudied?: string | null;
 	isPublic: boolean;
+	activeStudyBlockId?: string | null;
 }
 
 export interface LocalCard extends BaseRecord {

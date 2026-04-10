@@ -30,6 +30,9 @@ const TYPE_COLORS: Record<TimeBlockType, string> = {
 	sleep: '#6366f1',
 	practice: '#f97316',
 	cycle: '#ec4899',
+	guide: '#14b8a6',
+	visit: '#a855f7',
+	study: '#0ea5e9',
 };
 
 const TYPE_LABELS: Record<TimeBlockType, string> = {
@@ -44,6 +47,9 @@ const TYPE_LABELS: Record<TimeBlockType, string> = {
 	sleep: 'Schlaf',
 	practice: 'Übung',
 	cycle: 'Zyklus',
+	guide: 'Guides',
+	visit: 'Besuche',
+	study: 'Lernen',
 };
 
 function blockDuration(b: TimeBlock): number {

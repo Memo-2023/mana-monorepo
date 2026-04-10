@@ -8,7 +8,8 @@
 
 import { guideTable, sectionTable, stepTable, runTable } from '../collections';
 import { toGuide, toSection, toStep, toRun } from '../queries';
-import { encryptRecord } from '$lib/data/crypto';
+import { encryptRecord, decryptRecord } from '$lib/data/crypto';
+import { createBlock, updateBlock, deleteBlock } from '$lib/data/time-blocks/service';
 import type {
 	LocalGuide,
 	LocalSection,
@@ -150,12 +151,32 @@ export const guidesStore = {
 	// ─── Runs (Progress Tracking) ────────────────────────
 
 	async startRun(guideId: string): Promise<Run> {
+		// Resolve guide title for the TimeBlock
+		const guide = await guideTable.get(guideId);
+		const decryptedGuide = guide ? await decryptRecord('guides', { ...guide }) : null;
+		const guideTitle = decryptedGuide?.title ?? 'Guide';
+
+		const runId = crypto.randomUUID();
+		const now = new Date().toISOString();
+
+		const timeBlockId = await createBlock({
+			startDate: now,
+			endDate: null,
+			kind: 'logged',
+			type: 'guide',
+			sourceModule: 'guides',
+			sourceId: runId,
+			title: guideTitle,
+			color: '#14b8a6',
+		});
+
 		const newLocal: LocalRun = {
-			id: crypto.randomUUID(),
+			id: runId,
 			guideId,
-			startedAt: new Date().toISOString(),
+			startedAt: now,
 			completedAt: null,
 			completedStepIds: [],
+			timeBlockId,
 		};
 		const snapshot = toRun({ ...newLocal });
 		await runTable.add(newLocal);
@@ -182,14 +203,23 @@ export const guidesStore = {
 	},
 
 	async completeRun(runId: string): Promise<void> {
+		const now = new Date().toISOString();
+		const run = await runTable.get(runId);
 		await runTable.update(runId, {
-			completedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
+			completedAt: now,
+			updatedAt: now,
 		});
+		if (run?.timeBlockId) {
+			await updateBlock(run.timeBlockId, { endDate: now });
+		}
 	},
 
 	async deleteRun(id: string): Promise<void> {
+		const run = await runTable.get(id);
 		const now = new Date().toISOString();
+		if (run?.timeBlockId) {
+			await deleteBlock(run.timeBlockId);
+		}
 		await runTable.update(id, { deletedAt: now, updatedAt: now });
 	},
 };

@@ -66,6 +66,7 @@ export interface LocalRun extends BaseRecord {
 	startedAt: string;
 	completedAt: string | null;
 	completedStepIds: string[];
+	timeBlockId?: string | null;
 }
 
 // ─── Domain Types (UI-facing) ─────────────────────────────

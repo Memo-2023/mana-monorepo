@@ -23,7 +23,10 @@ export type TimeBlockType =
 	| 'watering'
 	| 'sleep'
 	| 'practice'
-	| 'cycle';
+	| 'cycle'
+	| 'guide'
+	| 'visit'
+	| 'study';
 
 export type TimeBlockSourceModule =
 	| 'calendar'
@@ -35,7 +38,10 @@ export type TimeBlockSourceModule =
 	| 'planta'
 	| 'dreams'
 	| 'skilltree'
-	| 'cycles';
+	| 'cycles'
+	| 'guides'
+	| 'places'
+	| 'cards';
 
 // ─── Local Record Types (Dexie) ──────────────────────────
 

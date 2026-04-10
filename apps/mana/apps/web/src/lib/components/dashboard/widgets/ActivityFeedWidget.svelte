@@ -26,6 +26,9 @@
 		Moon,
 		GraduationCap,
 		FlowerLotus,
+		Compass,
+		MapPin,
+		BookOpen,
 	} from '@mana/shared-icons';
 	import { getIconComponent } from '@mana/shared-icons';
 	import { formatDistanceToNow } from 'date-fns';
@@ -57,6 +60,9 @@
 		sleep: Moon,
 		practice: GraduationCap,
 		cycle: FlowerLotus,
+		guide: Compass,
+		visit: MapPin,
+		study: BookOpen,
 	};
 
 	function timeAgo(iso: string): string {

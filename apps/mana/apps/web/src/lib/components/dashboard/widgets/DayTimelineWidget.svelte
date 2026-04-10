@@ -25,6 +25,9 @@
 		Moon,
 		GraduationCap,
 		FlowerLotus,
+		Compass,
+		MapPin,
+		BookOpen,
 	} from '@mana/shared-icons';
 	import { getIconComponent } from '@mana/shared-icons';
 	import { format } from 'date-fns';
@@ -72,6 +75,9 @@
 		sleep: { icon: Moon, label: 'Schlaf' },
 		practice: { icon: GraduationCap, label: 'Übung' },
 		cycle: { icon: FlowerLotus, label: 'Zyklus' },
+		guide: { icon: Compass, label: 'Guide' },
+		visit: { icon: MapPin, label: 'Besuch' },
+		study: { icon: BookOpen, label: 'Lernen' },
 	};
 
 	function formatBlockTime(block: TimeBlock): string {

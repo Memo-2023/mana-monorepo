@@ -17,6 +17,9 @@
 		Moon,
 		GraduationCap,
 		FlowerLotus,
+		Compass,
+		MapPin,
+		BookOpen,
 	} from '@mana/shared-icons';
 	import { db } from '$lib/data/database';
 	import { decryptRecords } from '$lib/data/crypto';
@@ -44,6 +47,9 @@
 		{ type: 'sleep', label: 'Schlaf', icon: Moon },
 		{ type: 'practice', label: 'Übung', icon: GraduationCap },
 		{ type: 'cycle', label: 'Zyklus', icon: FlowerLotus },
+		{ type: 'guide', label: 'Guides', icon: Compass },
+		{ type: 'visit', label: 'Besuche', icon: MapPin },
+		{ type: 'study', label: 'Lernen', icon: BookOpen },
 	];
 
 	let allActive = $derived(

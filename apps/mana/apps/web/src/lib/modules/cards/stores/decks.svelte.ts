@@ -9,7 +9,8 @@ import { CardsEvents } from '@mana/shared-utils/analytics';
 import { db } from '$lib/data/database';
 import { cardDeckTable, cardTable } from '../collections';
 import { toDeck } from '../queries';
-import { encryptRecord } from '$lib/data/crypto';
+import { encryptRecord, decryptRecord } from '$lib/data/crypto';
+import { createBlock, updateBlock } from '$lib/data/time-blocks/service';
 import type { LocalDeck } from '../types';
 import type { Deck, CreateDeckInput, UpdateDeckInput } from '../types';
 
@@ -84,6 +85,54 @@ export const deckStore = {
 			error = err.message || 'Failed to delete deck';
 			console.error('Delete deck error:', err);
 		}
+	},
+
+	async startStudySession(deckId: string): Promise<string | null> {
+		const deck = await cardDeckTable.get(deckId);
+		if (!deck) return null;
+
+		// Don't start a second session if one is already active
+		if (deck.activeStudyBlockId) return deck.activeStudyBlockId;
+
+		const decrypted = await decryptRecord('cardDecks', { ...deck });
+		const deckName = decrypted?.name ?? 'Deck';
+		const now = new Date().toISOString();
+
+		const timeBlockId = await createBlock({
+			startDate: now,
+			endDate: null,
+			isLive: true,
+			kind: 'logged',
+			type: 'study',
+			sourceModule: 'cards',
+			sourceId: deckId,
+			title: `${deckName} lernen`,
+			color: '#0ea5e9',
+		});
+
+		await cardDeckTable.update(deckId, {
+			activeStudyBlockId: timeBlockId,
+			lastStudied: now,
+			updatedAt: now,
+		});
+
+		return timeBlockId;
+	},
+
+	async endStudySession(deckId: string): Promise<void> {
+		const deck = await cardDeckTable.get(deckId);
+		if (!deck?.activeStudyBlockId) return;
+
+		const now = new Date().toISOString();
+		await updateBlock(deck.activeStudyBlockId, {
+			endDate: now,
+			isLive: false,
+		});
+
+		await cardDeckTable.update(deckId, {
+			activeStudyBlockId: null,
+			updatedAt: now,
+		});
 	},
 
 	clearError() {

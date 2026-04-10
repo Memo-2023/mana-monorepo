@@ -5,7 +5,8 @@
  * This store only exposes mutations that write to IndexedDB.
  */
 
-import { encryptRecord } from '$lib/data/crypto';
+import { encryptRecord, decryptRecord } from '$lib/data/crypto';
+import { createBlock } from '$lib/data/time-blocks/service';
 import { placeTable } from '../collections';
 import { toPlace } from '../queries';
 import type { LocalPlace, Place, PlaceCategory } from '../types';
@@ -93,10 +94,25 @@ export const placesStore = {
 		const local = await placeTable.get(id);
 		if (!local) return;
 
+		const now = new Date().toISOString();
+		const decrypted = await decryptRecord('places', { ...local });
+		const placeName = decrypted?.name ?? 'Ort';
+
 		await placeTable.update(id, {
 			visitCount: (local.visitCount ?? 0) + 1,
-			lastVisitedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
+			lastVisitedAt: now,
+			updatedAt: now,
+		});
+
+		await createBlock({
+			startDate: now,
+			endDate: now,
+			kind: 'logged',
+			type: 'visit',
+			sourceModule: 'places',
+			sourceId: id,
+			title: placeName,
+			color: '#a855f7',
 		});
 	},
 };

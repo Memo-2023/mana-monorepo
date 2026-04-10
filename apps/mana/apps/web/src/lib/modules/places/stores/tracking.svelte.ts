@@ -6,6 +6,7 @@
  */
 
 import { decryptRecords, encryptRecord } from '$lib/data/crypto';
+import { createBlock } from '$lib/data/time-blocks/service';
 import { locationLogTable, placeTable } from '../collections';
 import { getDistanceKm, findNearestPlace, toPlace } from '../queries';
 import type { LocalLocationLog, LocalPlace } from '../types';
@@ -134,7 +135,7 @@ async function logPosition(pos: GeolocationPosition) {
 	await encryptRecord('locationLogs', log);
 	await locationLogTable.add(log);
 
-	// Update visit count on the matched place
+	// Update visit count on the matched place + create TimeBlock
 	if (nearest) {
 		const local = await placeTable.get(nearest.id);
 		if (local) {
@@ -142,6 +143,17 @@ async function logPosition(pos: GeolocationPosition) {
 				visitCount: (local.visitCount ?? 0) + 1,
 				lastVisitedAt: log.timestamp,
 				updatedAt: new Date().toISOString(),
+			});
+
+			await createBlock({
+				startDate: log.timestamp,
+				endDate: log.timestamp,
+				kind: 'logged',
+				type: 'visit',
+				sourceModule: 'places',
+				sourceId: nearest.id,
+				title: nearest.name,
+				color: '#a855f7',
 			});
 		}
 	}
