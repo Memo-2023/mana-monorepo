@@ -21,7 +21,9 @@
 		"dev": "tsup src/index.ts src/wallpaper.ts --format esm --dts --watch",
 		"test": "vitest",
 		"test:run": "vitest run",
-		"type-check": "tsc --noEmit"
+		"type-check": "tsc --noEmit",
+		"prepare": "pnpm build",
+		"prepublishOnly": "pnpm build"
 	},
 	"dependencies": {
 		"pako": "^2.1.0"

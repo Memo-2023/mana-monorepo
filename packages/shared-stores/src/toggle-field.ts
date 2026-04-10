@@ -16,14 +16,14 @@
  * ```
  */
 
-import type { Table, UpdateSpec } from 'dexie';
+import type { IndexableType, Table, UpdateSpec } from 'dexie';
 
 /**
  * Toggle a boolean field on a Dexie record.
  * @returns The new value of the field after toggling.
  */
 export async function toggleField<T>(
-	table: Table<T, string>,
+	table: Table<T, IndexableType>,
 	id: string,
 	field: string
 ): Promise<boolean> {
