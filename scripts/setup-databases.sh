@@ -55,7 +55,12 @@ push_schema() {
     local filter=$1
     local name=$2
     echo -e "${YELLOW}Pushing schema for ${name}...${NC}"
-    if pnpm --filter "$filter" db:push --force 2>/dev/null; then
+    local output
+    output=$(pnpm --filter "$filter" db:push --force 2>&1)
+    local exit_code=$?
+    if echo "$output" | grep -q "No projects matched the filters\|None of the selected packages has"; then
+        echo -e "  ${YELLOW}⊘ Skipped (no db:push script for ${filter})${NC}"
+    elif [ $exit_code -eq 0 ]; then
         echo -e "  ${GREEN}✓ Schema pushed${NC}"
     else
         echo -e "  ${RED}✗ Failed (may not have db:push script)${NC}"
