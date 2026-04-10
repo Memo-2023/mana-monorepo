@@ -9,15 +9,11 @@ import { getManaAuthUrl } from './config';
 // Types
 export interface GiftCodeInfo {
 	code: string;
-	type: 'simple' | 'personalized' | 'split' | 'first_come' | 'riddle';
+	type: 'simple' | 'personalized';
 	status: 'active' | 'depleted' | 'expired' | 'cancelled' | 'refunded';
-	creditsPerPortion: number;
-	totalPortions: number;
-	claimedPortions: number;
-	remainingPortions: number;
+	totalCredits: number;
+	redeemed: boolean;
 	message?: string;
-	riddleQuestion?: string;
-	hasRiddle: boolean;
 	isPersonalized: boolean;
 	expiresAt?: string;
 	creatorName?: string;
@@ -38,9 +34,7 @@ export interface GiftListItem {
 	type: string;
 	status: string;
 	totalCredits: number;
-	creditsPerPortion: number;
-	totalPortions: number;
-	claimedPortions: number;
+	redeemed: number;
 	message?: string;
 	expiresAt?: string;
 	createdAt: string;
@@ -60,19 +54,14 @@ export interface CreateGiftResponse {
 	code: string;
 	url: string;
 	totalCredits: number;
-	creditsPerPortion: number;
-	totalPortions: number;
 	type: string;
 	expiresAt?: string;
 }
 
 export interface CreateGiftRequest {
 	credits: number;
-	type?: 'simple' | 'personalized' | 'split' | 'first_come' | 'riddle';
-	portions?: number;
+	type?: 'simple' | 'personalized';
 	targetEmail?: string;
-	riddleQuestion?: string;
-	riddleAnswer?: string;
 	message?: string;
 	expiresAt?: string;
 	sourceAppId?: string;
@@ -127,10 +116,10 @@ export const giftsService = {
 	/**
 	 * Redeem a gift code
 	 */
-	async redeemGift(code: string, answer?: string): Promise<GiftRedeemResponse> {
+	async redeemGift(code: string): Promise<GiftRedeemResponse> {
 		return fetchWithAuth<GiftRedeemResponse>(`/api/v1/gifts/${code.toUpperCase()}/redeem`, {
 			method: 'POST',
-			body: JSON.stringify({ answer, sourceAppId: 'mana-web' }),
+			body: JSON.stringify({ sourceAppId: 'mana-web' }),
 		});
 	},
 
@@ -159,7 +148,7 @@ export const giftsService = {
 	},
 
 	/**
-	 * Cancel a gift code and get refund for unclaimed portions
+	 * Cancel a gift code and get refund
 	 */
 	async cancelGift(id: string): Promise<{ refundedCredits: number }> {
 		return fetchWithAuth<{ refundedCredits: number }>(`/api/v1/gifts/${id}`, {

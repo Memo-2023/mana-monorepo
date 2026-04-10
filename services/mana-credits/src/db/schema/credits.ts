@@ -26,7 +26,6 @@ export const transactionTypeEnum = pgEnum('transaction_type', [
 	'usage',
 	'refund',
 	'gift',
-	'guild_funding',
 ]);
 
 export const transactionStatusEnum = pgEnum('transaction_status', [
@@ -73,7 +72,6 @@ export const transactions = creditsSchema.table(
 		description: text('description').notNull(),
 		metadata: jsonb('metadata'),
 		idempotencyKey: text('idempotency_key').unique(),
-		guildId: text('guild_id'),
 		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 		completedAt: timestamp('completed_at', { withTimezone: true }),
 	},
@@ -82,7 +80,6 @@ export const transactions = creditsSchema.table(
 		appIdIdx: index('transactions_app_id_idx').on(table.appId),
 		createdAtIdx: index('transactions_created_at_idx').on(table.createdAt),
 		idempotencyKeyIdx: index('transactions_idempotency_key_idx').on(table.idempotencyKey),
-		guildIdIdx: index('transactions_guild_id_idx').on(table.guildId),
 	})
 );
 

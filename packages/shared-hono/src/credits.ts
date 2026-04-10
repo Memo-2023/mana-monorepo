@@ -85,8 +85,7 @@ export async function consumeCredits(
 	operation: string,
 	amount: number,
 	description: string,
-	metadata?: Record<string, unknown>,
-	creditSource?: { type: 'guild'; guildId: string }
+	metadata?: Record<string, unknown>
 ): Promise<boolean> {
 	const result = await callCredits('/api/v1/internal/credits/use', {
 		method: 'POST',
@@ -96,7 +95,6 @@ export async function consumeCredits(
 			appId: APP_ID(),
 			description,
 			metadata: { operation, ...metadata },
-			...(creditSource && { creditSource }),
 		}),
 	});
 	return !!result;

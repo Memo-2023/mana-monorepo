@@ -228,6 +228,9 @@ db.version(1).stores({
 	habits: 'id, order, isArchived, color',
 	habitLogs: 'id, habitId, timeBlockId, [habitId+timeBlockId]',
 
+	// ─── Journal (appId: 'journal') ───
+	journalEntries: 'id, entryDate, mood, isPinned, isArchived, isFavorite, updatedAt',
+
 	// ─── Dreams (appId: 'dreams') ───
 	dreams: 'id, dreamDate, mood, isLucid, isPinned, isArchived, updatedAt',
 	dreamSymbols: 'id, name, count, updatedAt',
@@ -354,6 +357,14 @@ db.version(4).stores({
 	newsPreferences: 'id',
 	newsReactions: 'id, articleId, reaction, sourceSlug, topic, [reaction+createdAt]',
 	newsCachedFeed: 'id, topic, sourceSlug, language, publishedAt, [topic+publishedAt]',
+});
+
+// Schema version 5 — adds timeBlockId index to bodyWorkouts so the
+// calendar/timeline integration (createBlock in startWorkout) can
+// look up "which workout owns this TimeBlock" via a Dexie index
+// instead of a full-table scan + filter. Additive only.
+db.version(5).stores({
+	bodyWorkouts: 'id, startedAt, endedAt, routineId, timeBlockId, [endedAt+startedAt]',
 });
 
 // v5: Zitare custom quotes — user-created quotes stored locally.

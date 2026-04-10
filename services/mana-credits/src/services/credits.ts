@@ -9,7 +9,6 @@ import { eq, and, desc } from 'drizzle-orm';
 import { balances, transactions, purchases, packages, usageStats } from '../db/schema/credits';
 import type { Database } from '../db/connection';
 import type { StripeService } from './stripe';
-import type { GuildPoolService } from './guild-pool';
 import {
 	BadRequestError,
 	NotFoundError,
@@ -21,7 +20,6 @@ interface UseCreditsParams {
 	amount: number;
 	appId: string;
 	description: string;
-	creditSource?: { type: 'guild'; guildId: string };
 	idempotencyKey?: string;
 	metadata?: Record<string, unknown>;
 }
@@ -29,8 +27,7 @@ interface UseCreditsParams {
 export class CreditsService {
 	constructor(
 		private db: Database,
-		private stripeService: StripeService,
-		private guildPoolService: GuildPoolService
+		private stripeService: StripeService
 	) {}
 
 	async initializeBalance(userId: string) {
@@ -148,14 +145,6 @@ export class CreditsService {
 				newBalance: { balance: newBalance, totalSpent: newTotalSpent },
 			};
 		});
-	}
-
-	/** Route to personal or guild pool based on creditSource */
-	async useCreditsWithSource(userId: string, params: UseCreditsParams) {
-		if (params.creditSource?.type === 'guild' && params.creditSource.guildId) {
-			return this.guildPoolService.useGuildCredits(params.creditSource.guildId, userId, params);
-		}
-		return this.useCredits(userId, params);
 	}
 
 	async refundCredits(

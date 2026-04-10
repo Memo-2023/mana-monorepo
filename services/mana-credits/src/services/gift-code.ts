@@ -1,11 +1,11 @@
 /**
  * Gift Code Service — Gift code generation, redemption, cancellation
  *
- * Ported from mana-auth GiftCodeService.
+ * Simplified: only 'simple' and 'personalized' gift types.
+ * Each gift is a single-use code (one redeemer gets all credits).
  */
 
 import { eq, and, desc } from 'drizzle-orm';
-import bcrypt from 'bcryptjs';
 import {
 	giftCodes,
 	giftRedemptions,
@@ -19,11 +19,8 @@ import { BadRequestError, NotFoundError } from '../lib/errors';
 
 interface CreateGiftParams {
 	totalCredits: number;
-	type?: 'simple' | 'personalized' | 'split' | 'first_come' | 'riddle';
-	totalPortions?: number;
+	type?: 'simple' | 'personalized';
 	targetEmail?: string;
-	riddleQuestion?: string;
-	riddleAnswer?: string;
 	message?: string;
 	expirationDays?: number;
 }
@@ -43,7 +40,7 @@ export class GiftCodeService {
 	}
 
 	async createGift(creatorId: string, creatorName: string, params: CreateGiftParams) {
-		const { totalCredits, type = 'simple', totalPortions = 1 } = params;
+		const { totalCredits, type = 'simple' } = params;
 
 		if (totalCredits < GIFT_CODE_RULES.minCredits || totalCredits > GIFT_CODE_RULES.maxCredits) {
 			throw new BadRequestError(
@@ -51,10 +48,6 @@ export class GiftCodeService {
 			);
 		}
 
-		const creditsPerPortion = Math.floor(totalCredits / totalPortions);
-		if (creditsPerPortion < 1) throw new BadRequestError('Credits per portion must be at least 1');
-
-		// Reserve credits from creator's balance
 		return await this.db.transaction(async (tx) => {
 			const [balance] = await tx
 				.select()
@@ -94,12 +87,6 @@ export class GiftCodeService {
 				})
 				.returning();
 
-			// Hash riddle answer if present
-			let riddleAnswerHash: string | undefined;
-			if (params.riddleAnswer) {
-				riddleAnswerHash = await bcrypt.hash(params.riddleAnswer.toLowerCase().trim(), 10);
-			}
-
 			const code = this.generateCode();
 			const expiresAt = params.expirationDays
 				? new Date(Date.now() + params.expirationDays * 24 * 60 * 60 * 1000)
@@ -113,12 +100,8 @@ export class GiftCodeService {
 					creatorId,
 					creatorName,
 					totalCredits,
-					creditsPerPortion,
-					totalPortions,
 					type,
 					targetEmail: params.targetEmail,
-					riddleQuestion: params.riddleQuestion,
-					riddleAnswerHash,
 					message: params.message,
 					expiresAt,
 					reservationTransactionId: reservationTx.id,
@@ -129,7 +112,7 @@ export class GiftCodeService {
 		});
 	}
 
-	async redeemGift(code: string, redeemerId: string, riddleAnswer?: string, sourceAppId?: string) {
+	async redeemGift(code: string, redeemerId: string, sourceAppId?: string) {
 		return await this.db.transaction(async (tx) => {
 			const [gift] = await tx
 				.select()
@@ -142,32 +125,7 @@ export class GiftCodeService {
 			if (gift.status !== 'active') throw new BadRequestError(`Gift code is ${gift.status}`);
 			if (gift.expiresAt && new Date() > gift.expiresAt)
 				throw new BadRequestError('Gift code expired');
-			if (gift.claimedPortions >= gift.totalPortions)
-				throw new BadRequestError('Gift fully claimed');
-
-			// Personalization check
-			if (gift.type === 'personalized' && gift.targetEmail) {
-				// Caller must verify email matches — for now we allow all
-			}
-
-			// Riddle check
-			if (gift.type === 'riddle' && gift.riddleAnswerHash) {
-				if (!riddleAnswer) throw new BadRequestError('Riddle answer required');
-				const correct = await bcrypt.compare(
-					riddleAnswer.toLowerCase().trim(),
-					gift.riddleAnswerHash
-				);
-				if (!correct) {
-					await tx.insert(giftRedemptions).values({
-						giftCodeId: gift.id,
-						redeemerUserId: redeemerId,
-						status: 'failed_wrong_answer',
-						creditsReceived: 0,
-						sourceAppId,
-					});
-					throw new BadRequestError('Wrong riddle answer');
-				}
-			}
+			if (gift.redeemed >= 1) throw new BadRequestError('Gift already claimed');
 
 			// Add credits to redeemer
 			const [balance] = await tx
@@ -178,14 +136,14 @@ export class GiftCodeService {
 				.limit(1);
 
 			const balanceBefore = balance?.balance ?? 0;
-			const newBalance = balanceBefore + gift.creditsPerPortion;
+			const newBalance = balanceBefore + gift.totalCredits;
 
 			if (balance) {
 				await tx
 					.update(balances)
 					.set({
 						balance: newBalance,
-						totalEarned: balance.totalEarned + gift.creditsPerPortion,
+						totalEarned: balance.totalEarned + gift.totalCredits,
 						version: balance.version + 1,
 						updatedAt: new Date(),
 					})
@@ -193,8 +151,8 @@ export class GiftCodeService {
 			} else {
 				await tx.insert(balances).values({
 					userId: redeemerId,
-					balance: gift.creditsPerPortion,
-					totalEarned: gift.creditsPerPortion,
+					balance: gift.totalCredits,
+					totalEarned: gift.totalCredits,
 					totalSpent: 0,
 				});
 			}
@@ -206,11 +164,11 @@ export class GiftCodeService {
 					userId: redeemerId,
 					type: 'gift',
 					status: 'completed',
-					amount: gift.creditsPerPortion,
+					amount: gift.totalCredits,
 					balanceBefore,
 					balanceAfter: newBalance,
 					appId: 'gifts',
-					description: `Gift redeemed: ${gift.creditsPerPortion} credits from ${gift.creatorName || 'someone'}`,
+					description: `Gift redeemed: ${gift.totalCredits} credits from ${gift.creatorName || 'someone'}`,
 					completedAt: new Date(),
 				})
 				.returning();
@@ -220,23 +178,20 @@ export class GiftCodeService {
 				giftCodeId: gift.id,
 				redeemerUserId: redeemerId,
 				status: 'success',
-				creditsReceived: gift.creditsPerPortion,
-				portionNumber: gift.claimedPortions + 1,
+				creditsReceived: gift.totalCredits,
 				creditTransactionId: creditTx.id,
 				sourceAppId,
 			});
 
-			// Update gift
-			const newClaimedPortions = gift.claimedPortions + 1;
-			const newStatus = newClaimedPortions >= gift.totalPortions ? 'depleted' : 'active';
+			// Mark gift as depleted
 			await tx
 				.update(giftCodes)
-				.set({ claimedPortions: newClaimedPortions, status: newStatus, updatedAt: new Date() })
+				.set({ redeemed: 1, status: 'depleted', updatedAt: new Date() })
 				.where(eq(giftCodes.id, gift.id));
 
 			return {
 				success: true,
-				creditsReceived: gift.creditsPerPortion,
+				creditsReceived: gift.totalCredits,
 				message: gift.message,
 				creatorName: gift.creatorName,
 			};
@@ -256,10 +211,8 @@ export class GiftCodeService {
 			code: gift.code,
 			type: gift.type,
 			status: gift.status,
-			creditsPerPortion: gift.creditsPerPortion,
-			totalPortions: gift.totalPortions,
-			claimedPortions: gift.claimedPortions,
-			riddleQuestion: gift.riddleQuestion,
+			totalCredits: gift.totalCredits,
+			redeemed: gift.redeemed > 0,
 			message: gift.message,
 			creatorName: gift.creatorName,
 			expiresAt: gift.expiresAt,
@@ -294,7 +247,8 @@ export class GiftCodeService {
 			if (!gift) throw new NotFoundError('Gift not found');
 			if (gift.status !== 'active') throw new BadRequestError('Only active gifts can be cancelled');
 
-			const refundAmount = (gift.totalPortions - gift.claimedPortions) * gift.creditsPerPortion;
+			// Only refund if not yet redeemed
+			const refundAmount = gift.redeemed === 0 ? gift.totalCredits : 0;
 
 			if (refundAmount > 0) {
 				const [balance] = await tx
@@ -354,7 +308,7 @@ export class GiftCodeService {
 		let totalRedeemed = 0;
 		for (const gift of pendingGifts) {
 			try {
-				const result = await this.redeemGift(gift.code, userId, undefined, 'auto-registration');
+				const result = await this.redeemGift(gift.code, userId, 'auto-registration');
 				totalRedeemed += result.creditsReceived;
 			} catch {
 				// Skip failed redemptions

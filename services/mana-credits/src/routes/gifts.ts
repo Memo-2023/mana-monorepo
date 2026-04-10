@@ -46,7 +46,6 @@ export function createGiftRoutes(giftCodeService: GiftCodeService, authUrl: stri
 		const result = await giftCodeService.redeemGift(
 			c.req.param('code'),
 			user.userId,
-			body.riddleAnswer,
 			body.sourceAppId
 		);
 		return c.json(result);

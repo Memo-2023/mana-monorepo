@@ -11,13 +11,7 @@ export const giftsSchema = pgSchema('gifts');
 
 // ─── Enums ──────────────────────────────────────────────────
 
-export const giftCodeTypeEnum = pgEnum('gift_code_type', [
-	'simple',
-	'personalized',
-	'split',
-	'first_come',
-	'riddle',
-]);
+export const giftCodeTypeEnum = pgEnum('gift_code_type', ['simple', 'personalized']);
 
 export const giftCodeStatusEnum = pgEnum('gift_code_status', [
 	'active',
@@ -29,7 +23,6 @@ export const giftCodeStatusEnum = pgEnum('gift_code_status', [
 
 export const giftRedemptionStatusEnum = pgEnum('gift_redemption_status', [
 	'success',
-	'failed_wrong_answer',
 	'failed_wrong_user',
 	'failed_depleted',
 	'failed_expired',
@@ -51,9 +44,7 @@ export const giftCodes = giftsSchema.table(
 
 		// Credit allocation
 		totalCredits: integer('total_credits').notNull(),
-		creditsPerPortion: integer('credits_per_portion').notNull(),
-		totalPortions: integer('total_portions').notNull().default(1),
-		claimedPortions: integer('claimed_portions').notNull().default(0),
+		redeemed: integer('redeemed').notNull().default(0), // 0 = unclaimed, 1 = claimed
 
 		// Type and status
 		type: giftCodeTypeEnum('type').notNull().default('simple'),
@@ -61,10 +52,6 @@ export const giftCodes = giftsSchema.table(
 
 		// Personalization
 		targetEmail: text('target_email'),
-
-		// Riddle
-		riddleQuestion: text('riddle_question'),
-		riddleAnswerHash: text('riddle_answer_hash'),
 
 		// Message
 		message: text('message'),
@@ -98,7 +85,6 @@ export const giftRedemptions = giftsSchema.table(
 
 		status: giftRedemptionStatusEnum('status').notNull(),
 		creditsReceived: integer('credits_received').notNull().default(0),
-		portionNumber: integer('portion_number'),
 
 		creditTransactionId: uuid('credit_transaction_id'),
 		sourceAppId: text('source_app_id'),
@@ -127,8 +113,6 @@ export const GIFT_CODE_LENGTH = 6;
 export const GIFT_CODE_RULES = {
 	minCredits: 1,
 	maxCredits: 10000,
-	maxPortions: 100,
 	maxMessageLength: 500,
-	maxRiddleQuestionLength: 200,
 	defaultExpirationDays: 90,
 } as const;

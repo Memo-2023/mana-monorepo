@@ -46,7 +46,8 @@ export type {
 	LocalMemoSpace,
 	Memo,
 	Memory,
-	Tag,
 	Space,
 	ProcessingStatus,
 } from './types';
+// Tag type re-exported from @mana/shared-tags (the local memoro Tag was removed)
+export type { Tag } from '@mana/shared-tags';

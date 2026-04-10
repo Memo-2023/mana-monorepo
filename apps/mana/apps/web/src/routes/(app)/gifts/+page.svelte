@@ -21,11 +21,9 @@
 
 	// Create form state
 	let createCredits = $state(50);
-	let createType = $state<'simple' | 'split' | 'riddle'>('simple');
-	let createPortions = $state(1);
+	let createType = $state<'simple' | 'personalized'>('simple');
+	let createTargetEmail = $state('');
 	let createMessage = $state('');
-	let createRiddleQuestion = $state('');
-	let createRiddleAnswer = $state('');
 	let creating = $state(false);
 	let createError = $state<string | null>(null);
 	let createdGift = $state<{ code: string; url: string } | null>(null);
@@ -74,8 +72,8 @@
 			return;
 		}
 
-		if (createType === 'riddle' && (!createRiddleQuestion.trim() || !createRiddleAnswer.trim())) {
-			createError = 'Frage und Antwort sind für Rätsel-Geschenke erforderlich';
+		if (createType === 'personalized' && !createTargetEmail.trim()) {
+			createError = 'E-Mail-Adresse ist für persönliche Geschenke erforderlich';
 			return;
 		}
 
@@ -86,11 +84,9 @@
 		try {
 			const request: CreateGiftRequest = {
 				credits: createCredits,
-				type: createType === 'split' ? 'split' : createType,
-				portions: createType === 'split' ? createPortions : 1,
+				type: createType,
+				targetEmail: createType === 'personalized' ? createTargetEmail.trim() : undefined,
 				message: createMessage.trim() || undefined,
-				riddleQuestion: createType === 'riddle' ? createRiddleQuestion.trim() : undefined,
-				riddleAnswer: createType === 'riddle' ? createRiddleAnswer.trim() : undefined,
 			};
 
 			const result = await giftsService.createGift(request);
@@ -100,10 +96,8 @@
 			// Reset form
 			createCredits = 50;
 			createType = 'simple';
-			createPortions = 1;
+			createTargetEmail = '';
 			createMessage = '';
-			createRiddleQuestion = '';
-			createRiddleAnswer = '';
 
 			// Reload data
 			await loadData();
@@ -199,14 +193,8 @@
 		switch (type) {
 			case 'simple':
 				return 'Einfach';
-			case 'split':
-				return 'Geteilt';
-			case 'riddle':
-				return 'Rätsel';
 			case 'personalized':
 				return 'Persönlich';
-			case 'first_come':
-				return 'Erste kommen';
 			default:
 				return type;
 		}
@@ -406,7 +394,7 @@
 									</div>
 									<div>
 										<p class="text-muted-foreground">Eingelöst</p>
-										<p class="font-medium">{gift.claimedPortions} / {gift.totalPortions}</p>
+										<p class="font-medium">{gift.redeemed ? 'Ja' : 'Nein'}</p>
 									</div>
 									<div>
 										<p class="text-muted-foreground">Erstellt</p>
@@ -466,60 +454,27 @@
 								class="w-full rounded-lg border border-border bg-background px-4 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
 								disabled={creating}
 							>
-								<option value="simple">Einfach (1 Person)</option>
-								<option value="split">Geteilt (mehrere Personen)</option>
-								<option value="riddle">Mit Rätsel</option>
+								<option value="simple">Einfach (Code teilen)</option>
+								<option value="personalized">Persönlich (für bestimmte E-Mail)</option>
 							</select>
 						</div>
 
-						{#if createType === 'split'}
+						{#if createType === 'personalized'}
 							<div>
-								<label for="portions" class="block text-sm font-medium text-foreground mb-2">
-									Anzahl Portionen
+								<label for="target-email" class="block text-sm font-medium text-foreground mb-2">
+									E-Mail des Empfängers
 								</label>
 								<input
-									id="portions"
-									type="number"
-									bind:value={createPortions}
-									min="2"
-									max="100"
+									id="target-email"
+									type="email"
+									bind:value={createTargetEmail}
+									placeholder="empfaenger@example.com"
 									class="w-full rounded-lg border border-border bg-background px-4 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
 									disabled={creating}
 								/>
 								<p class="mt-1 text-sm text-muted-foreground">
-									Jede Person erhält {Math.floor(createCredits / createPortions)} Credits
+									Wird automatisch eingelöst, wenn sich diese Person registriert.
 								</p>
-							</div>
-						{/if}
-
-						{#if createType === 'riddle'}
-							<div>
-								<label for="riddle-question" class="block text-sm font-medium text-foreground mb-2">
-									Rätsel-Frage
-								</label>
-								<input
-									id="riddle-question"
-									type="text"
-									bind:value={createRiddleQuestion}
-									placeholder="z.B. Was ist die Hauptstadt von Deutschland?"
-									maxlength="200"
-									class="w-full rounded-lg border border-border bg-background px-4 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-									disabled={creating}
-								/>
-							</div>
-							<div>
-								<label for="riddle-answer" class="block text-sm font-medium text-foreground mb-2">
-									Antwort
-								</label>
-								<input
-									id="riddle-answer"
-									type="text"
-									bind:value={createRiddleAnswer}
-									placeholder="z.B. Berlin"
-									maxlength="100"
-									class="w-full rounded-lg border border-border bg-background px-4 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-									disabled={creating}
-								/>
 							</div>
 						{/if}
 

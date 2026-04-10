@@ -65,23 +65,38 @@ apps/{project}/apps/web/
 
 ### Derived Values with $derived
 
+**CRITICAL: `$derived(expr)` vs `$derived.by(fn)`**
+
+- `$derived(expression)` — takes a **single expression**. The value IS the expression result.
+- `$derived.by(() => { ... return value; })` — takes a **function** (thunk). Use this when you need `if`/`switch`/`for` or multiple statements.
+
+**Common mistake:** writing `$derived(() => { ... })` — this stores the arrow function itself as the value, not its return value. Every `{#if myDerived}` will be truthy (functions are always truthy), and `myDerived()` will fail with "not callable" at the type level.
+
 ```svelte
 <script lang="ts">
 	let count = $state(0);
 	let items = $state<Item[]>([]);
 
-	// Computed value - updates automatically
+	// ✅ Single expression → $derived
 	const doubled = $derived(count * 2);
 	const itemCount = $derived(items.length);
 	const hasItems = $derived(items.length > 0);
-
-	// Complex derived
 	const sortedItems = $derived([...items].sort((a, b) => a.name.localeCompare(b.name)));
 
-	// Derived with conditions
+	// ✅ Ternary is still a single expression
 	const displayText = $derived(
 		count === 0 ? 'No items' : count === 1 ? '1 item' : `${count} items`
 	);
+
+	// ✅ Multi-statement logic → $derived.by
+	const filteredItems = $derived.by(() => {
+		if (!searchQuery.trim()) return items;
+		const q = searchQuery.toLowerCase();
+		return items.filter((i) => i.name.toLowerCase().includes(q));
+	});
+
+	// ❌ WRONG — stores the function, not the result!
+	// const filteredItems = $derived(() => { ... });
 </script>
 ```
 

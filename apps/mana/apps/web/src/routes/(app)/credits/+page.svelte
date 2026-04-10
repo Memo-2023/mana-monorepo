@@ -24,7 +24,7 @@
 	let loading = $state(true);
 	let error = $state<string | null>(null);
 	let activeTab = $state<'overview' | 'transactions' | 'packages' | 'costs'>('overview');
-	let costFilter = $state<'all' | 'ai' | 'productivity' | 'premium'>('all');
+	let costFilter = $state<'all' | 'ai' | 'premium'>('all');
 
 	// Build pricing data grouped by app
 	const allOperations = $derived(
@@ -44,7 +44,6 @@
 			? allOperations
 			: allOperations.filter((op) => {
 					if (costFilter === 'ai') return op.category === CreditCategory.AI;
-					if (costFilter === 'productivity') return op.category === CreditCategory.PRODUCTIVITY;
 					if (costFilter === 'premium') return op.category === CreditCategory.PREMIUM;
 					return true;
 				})
@@ -86,8 +85,6 @@
 		switch (category) {
 			case CreditCategory.AI:
 				return 'KI-Features';
-			case CreditCategory.PRODUCTIVITY:
-				return 'Erstellen';
 			case CreditCategory.PREMIUM:
 				return 'Premium';
 			default:
@@ -486,7 +483,7 @@
 		{:else if activeTab === 'costs'}
 			<!-- Category Filter -->
 			<div class="flex flex-wrap gap-2 mb-6">
-				{#each [{ key: 'all', label: 'Alle' }, { key: 'ai', label: 'KI-Features' }, { key: 'productivity', label: 'Erstellen' }, { key: 'premium', label: 'Premium' }] as filter}
+				{#each [{ key: 'all', label: 'Alle' }, { key: 'ai', label: 'KI-Features' }, { key: 'premium', label: 'Premium' }] as filter}
 					<button
 						onclick={() => (costFilter = filter.key as typeof costFilter)}
 						class="px-3 py-1.5 rounded-full text-sm font-medium transition-colors {costFilter ===

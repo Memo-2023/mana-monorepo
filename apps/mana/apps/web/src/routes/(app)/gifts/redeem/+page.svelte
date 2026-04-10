@@ -126,7 +126,7 @@
 						<p class="font-medium text-green-800 dark:text-green-200">Gültiger Code gefunden!</p>
 					</div>
 					<div class="text-sm text-green-700 dark:text-green-300 space-y-1">
-						<p>Credits: <span class="font-semibold">{giftInfo.creditsPerPortion}</span></p>
+						<p>Credits: <span class="font-semibold">{giftInfo.totalCredits}</span></p>
 						<p>Status: <span class="font-semibold">{getStatusLabel(giftInfo.status)}</span></p>
 						{#if giftInfo.creatorName}
 							<p>Von: <span class="font-semibold">{giftInfo.creatorName}</span></p>

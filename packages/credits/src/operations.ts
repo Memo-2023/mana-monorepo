@@ -59,28 +59,6 @@ export enum CreditOperationType {
 	AI_ENRICHMENT = 'ai_enrichment',
 
 	// -------------------------------------------------------------------------
-	// Productivity Operations (Micro Credits: 0.01-0.10)
-	// -------------------------------------------------------------------------
-
-	// Todo
-	TASK_CREATE = 'task_create',
-	PROJECT_CREATE = 'project_create',
-
-	// Calendar
-	EVENT_CREATE = 'event_create',
-	CALENDAR_CREATE = 'calendar_create',
-
-	// Contacts
-	CONTACT_CREATE = 'contact_create',
-
-	// Zitare
-	COLLECTION_CREATE = 'collection_create',
-
-	// Presi
-	PRESENTATION_CREATE = 'presentation_create',
-	SLIDE_CREATE = 'slide_create',
-
-	// -------------------------------------------------------------------------
 	// Premium Features (Standard Credits: 0.5-5)
 	// -------------------------------------------------------------------------
 
@@ -133,20 +111,6 @@ export const CREDIT_COSTS: Record<CreditOperationType, number> = {
 	[CreditOperationType.AI_SMART_SCHEDULING]: 2,
 	[CreditOperationType.AI_SUGGESTIONS]: 2,
 	[CreditOperationType.AI_ENRICHMENT]: 2,
-
-	// Productivity Operations (Micro Credits)
-	[CreditOperationType.TASK_CREATE]: 0.02,
-	[CreditOperationType.PROJECT_CREATE]: 0.1,
-
-	[CreditOperationType.EVENT_CREATE]: 0.02,
-	[CreditOperationType.CALENDAR_CREATE]: 0.1,
-
-	[CreditOperationType.CONTACT_CREATE]: 0.02,
-
-	[CreditOperationType.COLLECTION_CREATE]: 0.1,
-
-	[CreditOperationType.PRESENTATION_CREATE]: 0.5,
-	[CreditOperationType.SLIDE_CREATE]: 0.02,
 
 	// Premium Features
 	[CreditOperationType.CALDAV_SYNC]: 0.5,
@@ -328,64 +292,6 @@ export const OPERATION_METADATA: Record<CreditOperationType, OperationMetadata> 
 		app: 'contacts',
 	},
 
-	// Productivity - Todo
-	[CreditOperationType.TASK_CREATE]: {
-		name: 'Create Task',
-		description: 'Create a new task',
-		category: CreditCategory.PRODUCTIVITY,
-		app: 'todo',
-	},
-	[CreditOperationType.PROJECT_CREATE]: {
-		name: 'Create Project',
-		description: 'Create a new project',
-		category: CreditCategory.PRODUCTIVITY,
-		app: 'todo',
-	},
-
-	// Productivity - Calendar
-	[CreditOperationType.EVENT_CREATE]: {
-		name: 'Create Event',
-		description: 'Create a calendar event',
-		category: CreditCategory.PRODUCTIVITY,
-		app: 'calendar',
-	},
-	[CreditOperationType.CALENDAR_CREATE]: {
-		name: 'Create Calendar',
-		description: 'Create a new calendar',
-		category: CreditCategory.PRODUCTIVITY,
-		app: 'calendar',
-	},
-
-	// Productivity - Contacts
-	[CreditOperationType.CONTACT_CREATE]: {
-		name: 'Create Contact',
-		description: 'Create a new contact',
-		category: CreditCategory.PRODUCTIVITY,
-		app: 'contacts',
-	},
-
-	// Productivity - Zitare
-	[CreditOperationType.COLLECTION_CREATE]: {
-		name: 'Create Collection',
-		description: 'Create a quote collection',
-		category: CreditCategory.PRODUCTIVITY,
-		app: 'zitare',
-	},
-
-	// Productivity - Presi
-	[CreditOperationType.PRESENTATION_CREATE]: {
-		name: 'Create Presentation',
-		description: 'Create a new presentation',
-		category: CreditCategory.PRODUCTIVITY,
-		app: 'presi',
-	},
-	[CreditOperationType.SLIDE_CREATE]: {
-		name: 'Create Slide',
-		description: 'Add a slide to a presentation',
-		category: CreditCategory.PRODUCTIVITY,
-		app: 'presi',
-	},
-
 	// Premium - Sync
 	[CreditOperationType.CALDAV_SYNC]: {
 		name: 'CalDAV Sync',
@@ -500,16 +406,6 @@ export function calculateBulkCost(operation: CreditOperationType, count: number)
  */
 export function isFreeOperation(operation: CreditOperationType): boolean {
 	return CREDIT_COSTS[operation] === 0;
-}
-
-/**
- * Check if an operation is a micro-credit operation (< 0.5 credits).
- * @param operation The operation type
- * @returns True if micro-credit operation
- */
-export function isMicroCreditOperation(operation: CreditOperationType): boolean {
-	const cost = CREDIT_COSTS[operation];
-	return cost > 0 && cost < 0.5;
 }
 
 /**

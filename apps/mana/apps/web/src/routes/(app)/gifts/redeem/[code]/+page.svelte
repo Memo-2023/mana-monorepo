@@ -11,7 +11,6 @@
 	let redeeming = $state(false);
 	let success = $state(false);
 	let error = $state<string | null>(null);
-	let riddleAnswer = $state('');
 	let receivedCredits = $state(0);
 	let newBalance = $state(0);
 
@@ -39,19 +38,12 @@
 
 	async function handleRedeem() {
 		if (!giftInfo) return;
-		if (giftInfo.hasRiddle && !riddleAnswer.trim()) {
-			showToast('Bitte gib die Antwort auf das Rätsel ein', 'error');
-			return;
-		}
 
 		redeeming = true;
 		error = null;
 
 		try {
-			const result = await giftsService.redeemGift(
-				code,
-				giftInfo.hasRiddle ? riddleAnswer : undefined
-			);
+			const result = await giftsService.redeemGift(code);
 
 			if (result.success) {
 				success = true;
@@ -110,12 +102,6 @@
 				return 'Geschenk';
 			case 'personalized':
 				return 'Persönliches Geschenk';
-			case 'split':
-				return 'Geteiltes Geschenk';
-			case 'first_come':
-				return 'Erste kommen';
-			case 'riddle':
-				return 'Rätsel-Geschenk';
 			default:
 				return type;
 		}
@@ -198,7 +184,7 @@
 
 				<div class="mt-6 text-center">
 					<p class="text-sm text-muted-foreground">Du erhältst</p>
-					<p class="text-4xl font-bold text-primary">{giftInfo.creditsPerPortion}</p>
+					<p class="text-4xl font-bold text-primary">{giftInfo.totalCredits}</p>
 					<p class="text-muted-foreground">Credits</p>
 				</div>
 
@@ -217,14 +203,6 @@
 							{getStatusLabel(giftInfo.status)}
 						</span>
 					</div>
-					{#if giftInfo.totalPortions > 1}
-						<div class="flex justify-between text-sm">
-							<span class="text-muted-foreground">Verfügbar</span>
-							<span class="font-medium"
-								>{giftInfo.remainingPortions} / {giftInfo.totalPortions}</span
-							>
-						</div>
-					{/if}
 					{#if giftInfo.expiresAt}
 						<div class="flex justify-between text-sm">
 							<span class="text-muted-foreground">Gültig bis</span>
@@ -249,7 +227,7 @@
 					<div class="rounded-lg bg-amber-50 dark:bg-amber-900/20 p-4 text-center">
 						<p class="font-medium text-amber-800 dark:text-amber-200">
 							{#if giftInfo.status === 'depleted'}
-								Dieses Geschenk wurde bereits vollständig eingelöst
+								Dieses Geschenk wurde bereits eingelöst
 							{:else if giftInfo.status === 'expired'}
 								Dieses Geschenk ist abgelaufen
 							{:else}
@@ -270,32 +248,6 @@
 						</div>
 					{/if}
 
-					{#if giftInfo.hasRiddle}
-						<div class="mb-4 rounded-lg bg-purple-50 dark:bg-purple-900/20 p-4">
-							<div class="flex items-start gap-2">
-								<span class="text-xl">🧩</span>
-								<div>
-									<p class="font-medium text-purple-800 dark:text-purple-200 mb-2">Rätsel:</p>
-									<p class="text-purple-900 dark:text-purple-100">{giftInfo.riddleQuestion}</p>
-								</div>
-							</div>
-						</div>
-
-						<div class="mb-6">
-							<label for="riddle-answer" class="block text-sm font-medium text-foreground mb-2">
-								Deine Antwort
-							</label>
-							<input
-								id="riddle-answer"
-								type="text"
-								bind:value={riddleAnswer}
-								placeholder="Antwort eingeben..."
-								class="w-full rounded-lg border border-border bg-background px-4 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-								disabled={redeeming}
-							/>
-						</div>
-					{/if}
-
 					{#if error}
 						<div class="mb-4 rounded-lg bg-red-50 dark:bg-red-900/20 p-4">
 							<p class="text-sm text-red-800 dark:text-red-200">{error}</p>
@@ -304,7 +256,7 @@
 
 					<button
 						onclick={handleRedeem}
-						disabled={redeeming || (giftInfo.hasRiddle && !riddleAnswer.trim())}
+						disabled={redeeming}
 						class="w-full rounded-lg bg-primary py-3 font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50 flex items-center justify-center gap-2"
 					>
 						{#if redeeming}

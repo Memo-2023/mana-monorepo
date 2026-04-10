@@ -28,7 +28,6 @@
 	}
 
 	function handleRedeem() {
-		// Redirect to the redemption page (within the authenticated area)
 		goto(`/gifts/redeem/${code}`);
 	}
 
@@ -63,12 +62,6 @@
 				return 'Geschenk';
 			case 'personalized':
 				return 'Persönliches Geschenk';
-			case 'split':
-				return 'Geteiltes Geschenk';
-			case 'first_come':
-				return 'Erste kommen';
-			case 'riddle':
-				return 'Rätsel-Geschenk';
 			default:
 				return type;
 		}
@@ -130,7 +123,7 @@
 							<div class="mb-6 rounded-lg bg-amber-50 dark:bg-amber-900/20 p-4 text-center">
 								<p class="font-medium text-amber-800 dark:text-amber-200">
 									{#if giftInfo.status === 'depleted'}
-										Dieses Geschenk wurde bereits vollständig eingelöst
+										Dieses Geschenk wurde bereits eingelöst
 									{:else if giftInfo.status === 'expired'}
 										Dieses Geschenk ist abgelaufen
 									{:else}
@@ -143,7 +136,7 @@
 						<!-- Credits amount -->
 						<div class="mb-6 text-center">
 							<p class="text-sm text-muted-foreground">Du erhältst</p>
-							<p class="text-5xl font-bold text-primary">{giftInfo.creditsPerPortion}</p>
+							<p class="text-5xl font-bold text-primary">{giftInfo.totalCredits}</p>
 							<p class="text-lg text-muted-foreground">Credits</p>
 						</div>
 
@@ -153,14 +146,6 @@
 								<span class="text-muted-foreground">Art</span>
 								<span class="font-medium">{getTypeLabel(giftInfo.type)}</span>
 							</div>
-							{#if giftInfo.totalPortions > 1}
-								<div class="flex justify-between text-sm">
-									<span class="text-muted-foreground">Verfügbar</span>
-									<span class="font-medium"
-										>{giftInfo.remainingPortions} / {giftInfo.totalPortions}</span
-									>
-								</div>
-							{/if}
 							{#if giftInfo.expiresAt}
 								<div class="flex justify-between text-sm">
 									<span class="text-muted-foreground">Gültig bis</span>
@@ -174,16 +159,6 @@
 							<div class="mb-6 rounded-lg border border-border p-4">
 								<p class="text-sm text-muted-foreground mb-1">Nachricht:</p>
 								<p class="italic text-foreground">"{giftInfo.message}"</p>
-							</div>
-						{/if}
-
-						<!-- Riddle hint -->
-						{#if giftInfo.hasRiddle}
-							<div class="mb-6 rounded-lg bg-purple-50 dark:bg-purple-900/20 p-4 text-center">
-								<span class="text-2xl">🧩</span>
-								<p class="mt-1 text-sm text-purple-800 dark:text-purple-200">
-									Dieses Geschenk enthält ein Rätsel
-								</p>
 							</div>
 						{/if}
 

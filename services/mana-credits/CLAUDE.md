@@ -32,23 +32,12 @@ bun run db:studio  # Open Drizzle Studio
 | Method | Path | Description |
 |--------|------|-------------|
 | GET | `/api/v1/credits/balance` | Get personal balance |
-| POST | `/api/v1/credits/use` | Use credits (personal or guild) |
+| POST | `/api/v1/credits/use` | Use credits |
 | GET | `/api/v1/credits/transactions` | Transaction history |
 | GET | `/api/v1/credits/purchases` | Purchase history |
 | GET | `/api/v1/credits/packages` | Available packages |
 | POST | `/api/v1/credits/purchase` | Initiate Stripe purchase |
 | GET | `/api/v1/credits/purchase/:id` | Purchase status |
-
-### Guild Pool (JWT auth)
-
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/api/v1/credits/guild/:id/balance` | Pool balance |
-| POST | `/api/v1/credits/guild/:id/fund` | Fund pool from personal |
-| POST | `/api/v1/credits/guild/:id/use` | Use from pool |
-| GET | `/api/v1/credits/guild/:id/transactions` | Pool history |
-| GET | `/api/v1/credits/guild/:id/members/:uid/limits` | Get limits |
-| PUT | `/api/v1/credits/guild/:id/members/:uid/limits` | Set limits |
 
 ### Gift Codes (Mixed auth)
 
@@ -70,7 +59,6 @@ bun run db:studio  # Open Drizzle Studio
 | POST | `/api/v1/internal/credits/refund` | Refund credits |
 | POST | `/api/v1/internal/credits/init` | Initialize balance |
 | POST | `/api/v1/internal/gifts/redeem-pending` | Auto-redeem on registration |
-| POST | `/api/v1/internal/guild-pool/init` | Initialize guild pool |
 
 ### Webhooks
 
@@ -97,4 +85,16 @@ Own database: `mana_credits`
 
 Schemas: `credits.*`, `gifts.*`
 
-Tables: balances, transactions, packages, purchases, usage_stats, stripe_customers, gift_codes, gift_redemptions, guild_pools, guild_transactions, guild_spending_limits
+Tables: balances, transactions, packages, purchases, usage_stats, stripe_customers, gift_codes, gift_redemptions
+
+## Credit Operations
+
+Credits are only charged for operations that cost real money:
+- **AI operations** (2-25 credits): Chat with GPT-4/Claude/Gemini, image generation, research, food/plant analysis
+- **Premium features** (0.5-5 credits): CalDAV/Google sync, cloud sync, PDF export, bulk import
+
+Local-first CRUD operations (tasks, events, contacts, etc.) are **free** — they happen in IndexedDB with no server cost.
+
+## Gift Types
+
+Two gift types: `simple` (anyone with code can redeem) and `personalized` (auto-redeemed when target email registers). Each gift is single-use.

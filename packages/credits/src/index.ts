@@ -23,7 +23,6 @@ export {
 	getOperationsByCategory,
 	calculateBulkCost,
 	isFreeOperation,
-	isMicroCreditOperation,
 	isAiOperation,
 	formatCreditCost,
 	getPricingTable,

@@ -17,7 +17,7 @@ export function createCreditsRoutes(creditsService: CreditsService) {
 		.post('/use', async (c) => {
 			const user = c.get('user');
 			const body = useCreditsSchema.parse(await c.req.json());
-			const result = await creditsService.useCreditsWithSource(user.userId, body);
+			const result = await creditsService.useCredits(user.userId, body);
 			return c.json(result);
 		})
 		.get('/transactions', async (c) => {
