@@ -100,7 +100,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#6366f1',
 		comingSoon: false,
 		status: 'beta',
-		requiredTier: 'alpha',
+		requiredTier: 'guest',
 	},
 	{
 		id: 'chat',
@@ -117,7 +117,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#0ea5e9',
 		comingSoon: false,
 		status: 'beta',
-		requiredTier: 'alpha',
+		requiredTier: 'guest',
 	},
 	{
 		id: 'memoro',
@@ -134,7 +134,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#f8d62b',
 		comingSoon: false,
 		status: 'published',
-		requiredTier: 'founder',
+		requiredTier: 'guest',
 	},
 	{
 		id: 'presi',
@@ -151,7 +151,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#f97316',
 		comingSoon: false,
 		status: 'development',
-		requiredTier: 'alpha',
+		requiredTier: 'guest',
 	},
 	{
 		id: 'cards',
@@ -168,7 +168,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#8b5cf6',
 		comingSoon: false,
 		status: 'development',
-		requiredTier: 'alpha',
+		requiredTier: 'guest',
 	},
 	{
 		id: 'picture',
@@ -185,7 +185,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#22c55e',
 		comingSoon: false,
 		status: 'development',
-		requiredTier: 'alpha',
+		requiredTier: 'guest',
 	},
 	{
 		id: 'zitare',
@@ -202,7 +202,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#f59e0b',
 		comingSoon: false,
 		status: 'beta',
-		requiredTier: 'beta',
+		requiredTier: 'guest',
 	},
 	{
 		id: 'wisekeep',
@@ -219,7 +219,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#6366f1',
 		comingSoon: false,
 		status: 'planning',
-		requiredTier: 'founder',
+		requiredTier: 'guest',
 		archived: true,
 	},
 	{
@@ -237,7 +237,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#10b981',
 		comingSoon: false,
 		status: 'development',
-		requiredTier: 'founder',
+		requiredTier: 'guest',
 		archived: true,
 	},
 	{
@@ -255,7 +255,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#3b82f6',
 		comingSoon: false,
 		status: 'published',
-		requiredTier: 'public',
+		requiredTier: 'guest',
 	},
 	{
 		id: 'calendar',
@@ -272,7 +272,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#0ea5e9',
 		comingSoon: false,
 		status: 'published',
-		requiredTier: 'public',
+		requiredTier: 'guest',
 	},
 	{
 		id: 'storage',
@@ -289,7 +289,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#3b82f6',
 		comingSoon: false,
 		status: 'beta',
-		requiredTier: 'alpha',
+		requiredTier: 'guest',
 	},
 	// Clock consolidated into Times
 	{
@@ -307,7 +307,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#8b5cf6',
 		comingSoon: false,
 		status: 'published',
-		requiredTier: 'public',
+		requiredTier: 'guest',
 	},
 	{
 		id: 'mail',
@@ -324,7 +324,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#6366f1',
 		comingSoon: false,
 		status: 'planning',
-		requiredTier: 'founder',
+		requiredTier: 'guest',
 	},
 	{
 		id: 'moodlit',
@@ -341,7 +341,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#8b5cf6',
 		comingSoon: false,
 		status: 'beta',
-		requiredTier: 'alpha',
+		requiredTier: 'guest',
 	},
 	{
 		id: 'inventory',
@@ -358,7 +358,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#14b8a6',
 		comingSoon: false,
 		status: 'beta',
-		requiredTier: 'alpha',
+		requiredTier: 'guest',
 	},
 	{
 		id: 'questions',
@@ -375,7 +375,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#8b5cf6',
 		comingSoon: false,
 		status: 'beta',
-		requiredTier: 'alpha',
+		requiredTier: 'guest',
 	},
 	{
 		id: 'context',
@@ -392,7 +392,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#0ea5e9',
 		comingSoon: false,
 		status: 'beta',
-		requiredTier: 'alpha',
+		requiredTier: 'guest',
 	},
 	{
 		id: 'times',
@@ -409,7 +409,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#f59e0b',
 		comingSoon: false,
 		status: 'beta',
-		requiredTier: 'alpha',
+		requiredTier: 'guest',
 	},
 	{
 		id: 'citycorners',
@@ -426,7 +426,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#2563eb',
 		comingSoon: false,
 		status: 'beta',
-		requiredTier: 'alpha',
+		requiredTier: 'guest',
 	},
 	{
 		id: 'uload',
@@ -443,7 +443,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#6366f1',
 		comingSoon: false,
 		status: 'beta',
-		requiredTier: 'alpha',
+		requiredTier: 'guest',
 	},
 	{
 		id: 'news',
@@ -460,7 +460,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#10b981',
 		comingSoon: false,
 		status: 'development',
-		requiredTier: 'founder',
+		requiredTier: 'guest',
 	},
 	{
 		id: 'calc',
@@ -477,7 +477,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#ec4899',
 		comingSoon: false,
 		status: 'beta',
-		requiredTier: 'beta',
+		requiredTier: 'guest',
 	},
 	{
 		id: 'guides',
@@ -494,7 +494,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#0d9488',
 		comingSoon: false,
 		status: 'beta',
-		requiredTier: 'beta',
+		requiredTier: 'guest',
 	},
 	{
 		id: 'music',
@@ -511,7 +511,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#ec4899',
 		comingSoon: false,
 		status: 'beta',
-		requiredTier: 'alpha',
+		requiredTier: 'guest',
 	},
 	{
 		id: 'photos',
@@ -528,7 +528,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#8b5cf6',
 		comingSoon: false,
 		status: 'beta',
-		requiredTier: 'alpha',
+		requiredTier: 'guest',
 	},
 	{
 		id: 'planta',
@@ -545,7 +545,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#22c55e',
 		comingSoon: false,
 		status: 'beta',
-		requiredTier: 'alpha',
+		requiredTier: 'guest',
 	},
 	{
 		id: 'skilltree',
@@ -562,7 +562,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#f59e0b',
 		comingSoon: false,
 		status: 'beta',
-		requiredTier: 'alpha',
+		requiredTier: 'guest',
 	},
 	{
 		id: 'body',
@@ -596,7 +596,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#8b5cf6',
 		comingSoon: false,
 		status: 'development',
-		requiredTier: 'founder',
+		requiredTier: 'guest',
 	},
 	{
 		id: 'journal',
@@ -630,7 +630,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#f59e0b',
 		comingSoon: false,
 		status: 'development',
-		requiredTier: 'founder',
+		requiredTier: 'guest',
 	},
 	{
 		id: 'dreams',
@@ -647,7 +647,24 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#6366f1',
 		comingSoon: false,
 		status: 'development',
-		requiredTier: 'founder',
+		requiredTier: 'guest',
+	},
+	{
+		id: 'firsts',
+		name: 'Firsts',
+		description: {
+			de: 'Erste Male',
+			en: 'First Times',
+		},
+		longDescription: {
+			de: 'Halte deine ersten Male fest — von Bucket-List-Träumen bis zu erlebten Momenten. Mit Personen, Orten, Fotos und dem Vorher/Nachher-Gefühl.',
+			en: 'Track your first times — from bucket list dreams to lived moments. With people, places, photos, and the before/after feeling.',
+		},
+		icon: APP_ICONS.firsts,
+		color: '#f59e0b',
+		comingSoon: false,
+		status: 'development',
+		requiredTier: 'guest',
 	},
 	{
 		id: 'cycles',
@@ -664,7 +681,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#ec4899',
 		comingSoon: false,
 		status: 'development',
-		requiredTier: 'founder',
+		requiredTier: 'guest',
 	},
 	{
 		id: 'events',
@@ -681,7 +698,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#f43f5e',
 		comingSoon: false,
 		status: 'development',
-		requiredTier: 'founder',
+		requiredTier: 'guest',
 	},
 	{
 		id: 'finance',
@@ -698,7 +715,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#22c55e',
 		comingSoon: false,
 		status: 'development',
-		requiredTier: 'founder',
+		requiredTier: 'guest',
 	},
 	{
 		id: 'places',
@@ -715,7 +732,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#0ea5e9',
 		comingSoon: false,
 		status: 'development',
-		requiredTier: 'founder',
+		requiredTier: 'guest',
 	},
 	{
 		id: 'arcade',
@@ -732,7 +749,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#ef4444',
 		comingSoon: false,
 		status: 'beta',
-		requiredTier: 'beta',
+		requiredTier: 'guest',
 	},
 	{
 		id: 'who',
@@ -754,7 +771,7 @@ export const MANA_APPS: ManaApp[] = [
 		// matched the status='beta' badge but the gate was more friction
 		// than value while the module is finding its audience. The LLM
 		// calls behind it are credit-gated server-side regardless.
-		requiredTier: 'public',
+		requiredTier: 'guest',
 	},
 ];
 
