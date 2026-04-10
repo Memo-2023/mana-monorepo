@@ -4,8 +4,14 @@
 	 *
 	 * Provides edit mode controls (drag handle, resize, remove) and
 	 * renders the appropriate widget component based on type.
+	 *
+	 * Performance: widgets are lazy-mounted via IntersectionObserver.
+	 * Offscreen widgets don't run their liveQuery subscriptions until
+	 * they scroll into the viewport, which avoids 13+ parallel
+	 * IndexedDB reads on dashboard mount.
 	 */
 
+	import { onMount } from 'svelte';
 	import { _ } from 'svelte-i18n';
 	import { Card } from '@mana/shared-ui';
 	import { DotsSixVertical, Trash } from '@mana/shared-icons';
@@ -43,6 +49,31 @@
 	}
 
 	const WidgetComponent = $derived(widgetComponents[widget.type]);
+
+	// Lazy mount: only render the widget component once it enters the
+	// viewport. This defers liveQuery subscriptions for offscreen
+	// widgets until the user scrolls to them, cutting the initial
+	// dashboard mount from 13 parallel IndexedDB reads to ~3-4.
+	let containerEl = $state<HTMLElement | undefined>(undefined);
+	let visible = $state(false);
+
+	onMount(() => {
+		if (!containerEl || typeof IntersectionObserver === 'undefined') {
+			visible = true; // fallback: mount immediately
+			return;
+		}
+		const observer = new IntersectionObserver(
+			([entry]) => {
+				if (entry.isIntersecting) {
+					visible = true;
+					observer.disconnect(); // once visible, stay mounted
+				}
+			},
+			{ rootMargin: '200px' } // pre-load slightly before entering viewport
+		);
+		observer.observe(containerEl);
+		return () => observer.disconnect();
+	});
 </script>
 
 <Card class="relative h-full">
@@ -90,11 +121,16 @@
 	{/if}
 
 	<!-- Widget Content -->
-	<div class="min-h-[10rem] p-4" class:opacity-0={dashboardStore.isEditing}>
-		{#if WidgetComponent}
+	<div class="min-h-[10rem] p-4" class:opacity-0={dashboardStore.isEditing} bind:this={containerEl}>
+		{#if visible && WidgetComponent}
 			<WidgetComponent />
-		{:else}
+		{:else if visible}
 			<p class="text-muted-foreground">Unknown widget type: {widget.type}</p>
+		{:else}
+			<!-- Placeholder while waiting for IntersectionObserver -->
+			<div class="flex h-32 items-center justify-center">
+				<div class="h-4 w-4 animate-pulse rounded-full bg-muted"></div>
+			</div>
 		{/if}
 	</div>
 </Card>
