@@ -167,6 +167,12 @@ export interface PillNavigationProps {
 	showLanguageSwitcher?: boolean;
 	/** Show theme toggle */
 	showThemeToggle?: boolean;
+	/** Show AI tier selector dropdown */
+	showAiTierSelector?: boolean;
+	/** AI tier dropdown items (each representing a toggleable tier) */
+	aiTierItems?: PillDropdownItem[];
+	/** Current AI tier label, e.g. "Browser" or "Server" */
+	currentAiTierLabel?: string;
 	/** Primary color for active state */
 	primaryColor?: string;
 	/** Elements to prepend before nav items (tab groups, dividers, nav items) */

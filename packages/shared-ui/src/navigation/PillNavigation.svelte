@@ -241,6 +241,12 @@
 		showLanguageSwitcher?: boolean;
 		/** Show theme toggle (standalone button, hidden if showThemeVariants is true) */
 		showThemeToggle?: boolean;
+		/** Show AI tier selector dropdown */
+		showAiTierSelector?: boolean;
+		/** AI tier dropdown items (each representing a toggleable tier) */
+		aiTierItems?: PillDropdownItem[];
+		/** Current AI tier label, e.g. "Browser" or "Server" */
+		currentAiTierLabel?: string;
 		/** Primary color for active state (CSS custom property or hex) */
 		primaryColor?: string;
 		/** Elements to prepend before nav items (tab groups, dividers, nav items) */
@@ -333,6 +339,9 @@
 		themeVariantItems = [],
 		currentThemeVariantLabel = 'Theme',
 		showThemeVariants = false,
+		showAiTierSelector = false,
+		aiTierItems = [],
+		currentAiTierLabel = 'KI',
 		themeMode = 'system',
 		onThemeModeChange,
 		appItems = [],
@@ -649,6 +658,16 @@
 						{/if}
 					{/snippet}
 				</PillDropdown>
+			{/if}
+
+			<!-- AI Tier Selector -->
+			{#if showAiTierSelector && aiTierItems.length > 0}
+				<PillDropdown
+					items={aiTierItems}
+					direction={dropdownDirection}
+					label={currentAiTierLabel}
+					icon="cpu"
+				/>
 			{/if}
 
 			<!-- Theme Toggle (only show when not using theme variants dropdown) -->

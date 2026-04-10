@@ -39,6 +39,8 @@
 	import { linkLocalStore, linkMutations } from '@mana/shared-links';
 	import { manaStore } from '$lib/data/local-store';
 	import { startLlmQueue, stopLlmQueue } from '$lib/llm-queue';
+	import { llmSettingsState, updateLlmSettings, tierLabel, type LlmTier } from '@mana/shared-llm';
+	import { isLocalLlmSupported, getLocalLlmStatus, loadLocalLlm } from '@mana/local-llm';
 	import {
 		startMemoroLlmWatcher,
 		stopMemoroLlmWatcher,
@@ -161,6 +163,73 @@
 		getLanguageDropdownItems(supportedLocales, currentLocale, handleLocaleChange)
 	);
 	let currentLanguageLabel = $derived(getCurrentLanguageLabel(currentLocale));
+
+	// ── AI Tier Selector (PillNav dropdown) ─────────────────
+	const webgpuSupported = isLocalLlmSupported();
+	const localLlmStatus = getLocalLlmStatus();
+	const llmSettings = $derived(llmSettingsState.current);
+
+	function toggleAiTier(tier: LlmTier) {
+		const current = llmSettings.allowedTiers;
+		const next = current.includes(tier)
+			? current.filter((t: LlmTier) => t !== tier)
+			: [...current, tier];
+		updateLlmSettings({ allowedTiers: next });
+	}
+
+	const TIER_TOGGLE_LIST: Array<{ tier: LlmTier; shortLabel: string }> = [
+		{ tier: 'browser', shortLabel: 'Browser (Gemma 4)' },
+		{ tier: 'mana-server', shortLabel: 'Server (Gemma 4)' },
+		{ tier: 'cloud', shortLabel: 'Cloud (Gemini)' },
+	];
+
+	let aiTierItems = $derived<PillDropdownItem[]>([
+		// Tier toggles
+		...TIER_TOGGLE_LIST.filter((t) => t.tier !== 'browser' || webgpuSupported).map((t) => ({
+			id: `ai-tier-${t.tier}`,
+			label: t.shortLabel,
+			active: llmSettings.allowedTiers.includes(t.tier),
+			onClick: () => toggleAiTier(t.tier),
+		})),
+		// Browser model status / load button
+		...(llmSettings.allowedTiers.includes('browser') && webgpuSupported
+			? [
+					{
+						id: 'ai-browser-status',
+						label:
+							localLlmStatus.current.state === 'ready'
+								? '✓ Modell geladen'
+								: localLlmStatus.current.state === 'downloading'
+									? `Lade… ${((localLlmStatus.current as { progress: number }).progress * 100).toFixed(0)}%`
+									: 'Modell laden (~500 MB)',
+						disabled: localLlmStatus.current.state === 'ready',
+						onClick:
+							localLlmStatus.current.state !== 'ready' ? () => void loadLocalLlm() : undefined,
+					},
+				]
+			: []),
+		// Divider + settings link
+		{ id: 'ai-divider', label: '', divider: true },
+		{
+			id: 'ai-settings',
+			label: 'KI-Einstellungen',
+			icon: 'settings',
+			onClick: () => goto('/settings'),
+		},
+	]);
+
+	let currentAiTierLabel = $derived.by(() => {
+		const active = llmSettings.allowedTiers;
+		if (active.length === 0) return 'Aus';
+		// Show the first (privacy-sorted) tier's short name
+		const sorted = [...active].sort(
+			(a, b) =>
+				TIER_TOGGLE_LIST.findIndex((t) => t.tier === a) -
+				TIER_TOGGLE_LIST.findIndex((t) => t.tier === b)
+		);
+		const first = TIER_TOGGLE_LIST.find((t) => t.tier === sorted[0]);
+		return first ? first.shortLabel.split(' (')[0] : 'KI';
+	});
 
 	// ── User / Guest awareness ──────────────────────────────
 	let userEmail = $derived(
@@ -639,6 +708,9 @@
 				loginHref="/login"
 				primaryColor="#6366f1"
 				showAppSwitcher={true}
+				showAiTierSelector={true}
+				{aiTierItems}
+				{currentAiTierLabel}
 				{appItems}
 				{userEmail}
 				settingsHref="/settings"
