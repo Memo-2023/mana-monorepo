@@ -998,10 +998,10 @@
 	.card-note {
 		font-size: 0.6875rem;
 		color: hsl(var(--color-muted-foreground));
-		// svelte-ignore a11y_no_static_element_interactions
 		margin: 0;
 		display: -webkit-box;
 		-webkit-line-clamp: 2;
+		line-clamp: 2;
 		-webkit-box-orient: vertical;
 		overflow: hidden;
 	}
