@@ -3,6 +3,7 @@ import { cors } from 'hono/cors';
 import { Queue, Worker, Job } from 'bullmq';
 import { collectDefaultMetrics, Registry, Counter, Histogram } from 'prom-client';
 import { getDb, closeConnection } from './db';
+import { runMigrations } from './db/migrate';
 import { StorageService } from './services/storage';
 import { UploadService } from './services/upload';
 import { ProcessService } from './services/process';
@@ -16,6 +17,12 @@ const port = parseInt(process.env.PORT || '3015');
 // Database
 const databaseUrl = process.env.DATABASE_URL;
 if (!databaseUrl) throw new Error('DATABASE_URL is required');
+
+// Apply pending Drizzle migrations before opening the pool. Idempotent —
+// drizzle tracks applied migrations in drizzle.__drizzle_migrations, so
+// existing deployments are unaffected.
+await runMigrations(databaseUrl);
+
 const db = getDb(databaseUrl);
 
 // Services
