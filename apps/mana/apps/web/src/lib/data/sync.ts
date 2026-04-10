@@ -459,6 +459,13 @@ export type SyncStatus = 'idle' | 'syncing' | 'error' | 'offline';
 // ─── Config ───────────────────────────────────────────────────
 
 const PUSH_DEBOUNCE = 1000;
+/**
+ * Maximum number of pending changes to include in a single push request.
+ * Prevents multi-MB payloads when a user was offline for weeks and
+ * accumulated thousands of changes. The push loop re-schedules itself
+ * after each batch so all changes eventually drain.
+ */
+const PUSH_BATCH_SIZE = 200;
 const PULL_INTERVAL = 30_000;
 const WS_RECONNECT_DELAY = 5000;
 
@@ -662,14 +669,19 @@ export function createUnifiedSync(serverUrl: string, getToken: () => Promise<str
 			return;
 		}
 
-		// Get pending changes for this appId
-		const pending: PendingChange[] = await db
+		// Get pending changes for this appId — capped to PUSH_BATCH_SIZE
+		// so a long-offline session doesn't produce a multi-MB request.
+		// If more rows exist, schedulePush re-triggers after this batch.
+		const allPending: PendingChange[] = await db
 			.table('_pendingChanges')
 			.where('appId')
 			.equals(appId)
 			.sortBy('createdAt');
 
-		if (pending.length === 0) return;
+		if (allPending.length === 0) return;
+
+		const pending = allPending.slice(0, PUSH_BATCH_SIZE);
+		const hasMore = allPending.length > PUSH_BATCH_SIZE;
 
 		setStatus('syncing');
 		const startedAt = Date.now();
