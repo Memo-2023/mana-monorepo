@@ -8,6 +8,7 @@
 	import KeyboardShortcutsModal from '$lib/components/KeyboardShortcutsModal.svelte';
 	import SessionWarning from '$lib/components/SessionWarning.svelte';
 	import EncryptionIntroBanner from '$lib/components/EncryptionIntroBanner.svelte';
+	import { bottomBarStore } from '$lib/stores/bottom-bar.svelte';
 	import SuggestionToast from '$lib/components/SuggestionToast.svelte';
 	import { locale, _ } from 'svelte-i18n';
 	import {
@@ -249,7 +250,9 @@
 	}
 
 	// Bottom chrome height: calculated from state, not measured (avoids reflow loop)
-	const bottomChromeHeight = $derived((isCollapsed ? 0 : 80) + (isTagStripVisible ? 44 : 0) + 72);
+	const bottomChromeHeight = $derived(
+		(isCollapsed ? 0 : 80) + (isTagStripVisible ? 44 : 0) + 72 + (bottomBarStore.component ? 36 : 0)
+	);
 
 	// ── DnD context ─────────────────────────────────────────
 	let tagDropHandler = $state<((tagId: string, payload: DragPayload) => void) | null>(null);
@@ -602,6 +605,12 @@
 	<div class="min-h-screen bg-background">
 		<!-- Bottom Stack: all fixed-bottom elements in one flex container -->
 		<div class="bottom-stack" style:--bottom-chrome-height="{bottomChromeHeight}px">
+			<!-- Page-injected bottom bar (e.g. workbench scene+app tabs) -->
+			{#if bottomBarStore.component}
+				{@const BarComponent = bottomBarStore.component}
+				<BarComponent {...bottomBarStore.props} />
+			{/if}
+
 			<!-- One-time encryption intro — sits at the top of the stack so
 				 it can't be obscured by the QuickInputBar / TagStrip / PillNav.
 				 Self-gates on isVaultUnlocked() so guests never see it. -->

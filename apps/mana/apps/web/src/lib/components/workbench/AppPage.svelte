@@ -18,7 +18,6 @@
 		heightPx?: number;
 		maximized?: boolean;
 		onClose: () => void;
-		onMinimize?: () => void;
 		onMaximize?: () => void;
 		onResize?: (widthPx: number, heightPx?: number) => void;
 		onMoveLeft?: () => void;
@@ -32,7 +31,6 @@
 		heightPx,
 		maximized = false,
 		onClose,
-		onMinimize,
 		onMaximize,
 		onResize,
 		onMoveLeft,
@@ -305,7 +303,6 @@
 		color={appColor}
 		icon={appIcon}
 		{onClose}
-		{onMinimize}
 		{onMaximize}
 		{onResize}
 		{onMoveLeft}

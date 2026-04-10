@@ -26,9 +26,9 @@ const TABLE = 'workbenchScenes';
 const ACTIVE_SCENE_LS_KEY = 'mana:workbench:activeSceneId';
 
 const DEFAULT_HOME_APPS: WorkbenchSceneApp[] = [
-	{ appId: 'todo', minimized: false },
-	{ appId: 'calendar', minimized: false },
-	{ appId: 'notes', minimized: false },
+	{ appId: 'todo' },
+	{ appId: 'calendar' },
+	{ appId: 'notes' },
 ];
 
 // ─── Reactive state ───────────────────────────────────────────
@@ -251,10 +251,8 @@ export const workbenchScenesStore = {
 
 	async addApp(appId: string) {
 		await patchActiveScene((apps) => {
-			if (apps.some((a) => a.appId === appId)) {
-				return apps.map((a) => (a.appId === appId ? { ...a, minimized: false } : a));
-			}
-			return [...apps, { appId, minimized: false }];
+			if (apps.some((a) => a.appId === appId)) return apps;
+			return [...apps, { appId }];
 		});
 	},
 
@@ -262,21 +260,9 @@ export const workbenchScenesStore = {
 		await patchActiveScene((apps) => apps.filter((a) => a.appId !== appId));
 	},
 
-	async minimizeApp(appId: string) {
-		await patchActiveScene((apps) =>
-			apps.map((a) => (a.appId === appId ? { ...a, minimized: true } : a))
-		);
-	},
-
-	async restoreApp(appId: string) {
-		await patchActiveScene((apps) =>
-			apps.map((a) => (a.appId === appId ? { ...a, minimized: false } : a))
-		);
-	},
-
 	async toggleMaximizeApp(appId: string) {
 		await patchActiveScene((apps) =>
-			apps.map((a) => (a.appId === appId ? { ...a, maximized: !a.maximized, minimized: false } : a))
+			apps.map((a) => (a.appId === appId ? { ...a, maximized: !a.maximized } : a))
 		);
 	},
 

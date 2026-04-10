@@ -2,7 +2,7 @@
  * Workbench Scenes — user-defined named layouts of the workbench (homepage).
  *
  * Each scene is a named bundle of "open apps" with their window state
- * (minimized / maximized / size). Users can switch between scenes to
+ * (maximized / size). Users can switch between scenes to
  * quickly change context (e.g. "Home", "Deep Work", "Travel").
  *
  * Scenes are persisted in the unified Mana Dexie database under the
@@ -15,7 +15,6 @@ import type { BaseRecord } from '@mana/local-store';
 
 export interface WorkbenchSceneApp {
 	appId: string;
-	minimized: boolean;
 	maximized?: boolean;
 	widthPx?: number;
 	heightPx?: number;

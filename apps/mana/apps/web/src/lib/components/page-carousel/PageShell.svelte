@@ -7,7 +7,6 @@
 	import { _ } from 'svelte-i18n';
 	import {
 		X,
-		Minus,
 		DotsSixVertical,
 		CornersOut,
 		CornersIn,
@@ -21,7 +20,6 @@
 		heightPx?: number;
 		maximized?: boolean;
 		onClose: () => void;
-		onMinimize?: () => void;
 		onMaximize?: () => void;
 		onResize?: (widthPx: number, heightPx?: number) => void;
 		onMoveLeft?: () => void;
@@ -44,7 +42,6 @@
 		heightPx,
 		maximized = false,
 		onClose,
-		onMinimize,
 		onMaximize,
 		onResize,
 		onMoveLeft,
@@ -146,19 +143,6 @@
 		{/if}
 		<span class="drag-handle-icon"><DotsSixVertical size={14} /></span>
 		<div class="window-actions">
-			{#if onMinimize}
-				<button
-					class="window-btn"
-					onclick={(e) => {
-						e.stopPropagation();
-						onMinimize();
-					}}
-					draggable="false"
-					title="Minimieren"
-				>
-					<Minus size={12} />
-				</button>
-			{/if}
 			{#if onMaximize}
 				<button
 					class="window-btn"

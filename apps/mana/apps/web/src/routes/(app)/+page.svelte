@@ -1,7 +1,7 @@
 <script lang="ts">
 	import AppPage from '$lib/components/workbench/AppPage.svelte';
 	import AppPagePicker from '$lib/components/workbench/AppPagePicker.svelte';
-	import SceneTabs from '$lib/components/workbench/scenes/SceneTabs.svelte';
+	import SceneAppBar from '$lib/components/workbench/SceneAppBar.svelte';
 	import SceneRenameDialog from '$lib/components/workbench/scenes/SceneRenameDialog.svelte';
 	import ConfirmDialog from '$lib/components/workbench/scenes/ConfirmDialog.svelte';
 	import { PageCarousel, type CarouselPage } from '$lib/components/page-carousel';
@@ -9,11 +9,14 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { workbenchScenesStore } from '$lib/stores/workbench-scenes.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
+	import { bottomBarStore } from '$lib/stores/bottom-bar.svelte';
 	import { DragPreview } from '@mana/shared-ui/dnd';
 	import type { DragType } from '@mana/shared-ui/dnd';
-	import { ContextMenu } from '@mana/shared-ui';
+	import { ContextMenu, type ContextMenuItem } from '@mana/shared-ui';
+	import { Pencil, Copy, Trash } from '@mana/shared-icons';
 	import { _ } from 'svelte-i18n';
 	import { buildContextMenuItems, createWorkbenchContextMenu } from '$lib/context-menu';
+	import type { WorkbenchScene } from '$lib/types/workbench-scenes';
 
 	function resolveEntity(type: string, data: Record<string, unknown>) {
 		const app = getAppByDragType(type as DragType);
@@ -46,6 +49,7 @@
 	});
 	onDestroy(() => {
 		workbenchScenesStore.dispose();
+		bottomBarStore.clear();
 	});
 
 	let scenes = $derived(workbenchScenesStore.scenes);
@@ -67,7 +71,6 @@
 			const entry = getApp(a.appId);
 			return {
 				id: a.appId,
-				minimized: a.minimized,
 				maximized: a.maximized,
 				widthPx: a.widthPx ?? DEFAULT_WIDTH,
 				heightPx: a.heightPx,
@@ -77,11 +80,34 @@
 					return t !== k ? t : (entry?.name ?? a.appId);
 				})(),
 				color: entry?.color ?? '#6B7280',
+				icon: entry?.icon,
 			};
 		})
 	);
 
 	let showPicker = $state(false);
+
+	function scrollToPage(id: string) {
+		const el = document.querySelector(`[data-page-id="${id}"]`);
+		if (el) el.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+	}
+
+	// ── Register SceneAppBar in the layout's bottom-stack ───
+	$effect(() => {
+		if (scenes.length > 0) {
+			bottomBarStore.set(SceneAppBar, {
+				scenes,
+				activeSceneId,
+				pages: carouselPages,
+				onSceneSelect: (id: string) => workbenchScenesStore.setActiveScene(id),
+				onSceneCreate: handleCreateScene,
+				onSceneContextMenu: handleSceneContextMenu,
+				onAppClick: scrollToPage,
+				onAppContextMenu: (e: MouseEvent, id: string) => handleTabContextMenu(e, id),
+				onAddApp: () => (showPicker = !showPicker),
+			});
+		}
+	});
 
 	// ── App CRUD (delegated to active scene) ────────────────
 	function handleAddApp(appId: string) {
@@ -90,12 +116,6 @@
 	}
 	function handleRemoveApp(id: string) {
 		workbenchScenesStore.removeApp(id);
-	}
-	function handleMinimizeApp(id: string) {
-		workbenchScenesStore.minimizeApp(id);
-	}
-	function handleRestoreApp(id: string) {
-		workbenchScenesStore.restoreApp(id);
 	}
 	function handleMaximizeApp(id: string) {
 		workbenchScenesStore.toggleMaximizeApp(id);
@@ -126,7 +146,6 @@
 			app,
 			maximized: entry?.maximized,
 			onMaximize: () => handleMaximizeApp(appId),
-			onMinimize: () => handleMinimizeApp(appId),
 			onClose: () => handleRemoveApp(appId),
 			onMoveLeft: idx > 0 ? () => handleMoveLeft(appId) : undefined,
 			onMoveRight: idx < openApps.length - 1 ? () => handleMoveRight(appId) : undefined,
@@ -141,11 +160,39 @@
 			location: 'tab',
 			appId,
 			app,
-			onRestore: () => handleRestoreApp(appId),
 			onMaximize: () => handleMaximizeApp(appId),
 			onClose: () => handleRemoveApp(appId),
 		});
 		ctxMenu.open(e, appId, items);
+	}
+
+	function handleSceneContextMenu(e: MouseEvent, scene: WorkbenchScene) {
+		e.preventDefault();
+		const items: ContextMenuItem[] = [
+			{
+				id: 'rename',
+				label: 'Umbenennen',
+				icon: Pencil,
+				action: () => handleRequestRename(scene.id),
+			},
+			{
+				id: 'duplicate',
+				label: 'Duplizieren',
+				icon: Copy,
+				action: () => handleDuplicateScene(scene.id),
+			},
+		];
+		if (scenes.length > 1) {
+			items.push({ id: 'div', label: '', type: 'divider' });
+			items.push({
+				id: 'delete',
+				label: 'Löschen',
+				icon: Trash,
+				variant: 'danger',
+				action: () => handleRequestDeleteScene(scene.id),
+			});
+		}
+		ctxMenu.open(e, scene.id, items);
 	}
 
 	// ── Scene CRUD dialogs ──────────────────────────────────
@@ -195,27 +242,12 @@
 <DragPreview {resolveEntity} />
 
 <div class="workbench">
-	<SceneTabs
-		{scenes}
-		{activeSceneId}
-		onSelect={(id) => workbenchScenesStore.setActiveScene(id)}
-		onCreate={handleCreateScene}
-		onRequestRename={handleRequestRename}
-		onDuplicate={handleDuplicateScene}
-		onRequestDelete={handleRequestDeleteScene}
-		onReorder={(fromId, toId) => workbenchScenesStore.reorderScenes(fromId, toId)}
-	/>
-
 	<PageCarousel
 		pages={carouselPages}
 		defaultWidth={DEFAULT_WIDTH}
 		{showPicker}
 		onReorder={handleReorder}
-		onRestore={handleRestoreApp}
-		onMaximize={handleMaximizeApp}
-		onRemove={handleRemoveApp}
 		onTogglePicker={() => (showPicker = !showPicker)}
-		onTabContextMenu={handleTabContextMenu}
 		addLabel="App hinzufügen"
 	>
 		{#snippet page(p)}
@@ -226,7 +258,6 @@
 				heightPx={p.heightPx}
 				maximized={p.maximized}
 				onClose={() => handleRemoveApp(p.id)}
-				onMinimize={() => handleMinimizeApp(p.id)}
 				onMaximize={() => handleMaximizeApp(p.id)}
 				onResize={(w, h) => handleResize(p.id, w, h)}
 				onMoveLeft={idx > 0 ? () => handleMoveLeft(p.id) : undefined}
