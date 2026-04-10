@@ -127,12 +127,15 @@ Result:   title="Buy eggs", completed=true  (merged — different fields)
 
 | Endpoint | Method | Auth | Description |
 |----------|--------|------|-------------|
-| `POST /sync/{appId}` | POST | JWT | Push changes, get server delta |
-| `GET /sync/{appId}/pull` | GET | JWT | Pull changes for a collection |
+| `POST /sync/{appId}` | POST | JWT + Billing | Push changes, get server delta |
+| `GET /sync/{appId}/pull` | GET | JWT + Billing | Pull changes for a collection |
+| `GET /sync/{appId}/stream` | GET | JWT + Billing | SSE stream for real-time changes |
 | `GET /ws` | WS | JWT (in-band) | Unified real-time sync (all apps, one connection) |
 | `GET /ws/{appId}` | WS | JWT (in-band) | Legacy per-app sync notifications |
 | `GET /health` | GET | No | Health check with connection stats |
 | `GET /metrics` | GET | No | Prometheus metrics |
+
+**Billing gate**: Push, pull, and stream endpoints are wrapped by a billing middleware that checks the user's sync subscription status via `mana-credits`. Returns **402 Payment Required** if sync is not active. Status is cached for 5 minutes per user. Fail-open: if mana-credits is unreachable, sync is allowed.
 
 ## Database Schema
 
@@ -163,6 +166,8 @@ Indexes: `(user_id, app_id, created_at)`, `(table_name, record_id, created_at)`,
 | `DATABASE_URL` | `postgresql://...localhost:5432/mana_sync` | PostgreSQL connection |
 | `JWKS_URL` | `http://localhost:3001/api/auth/jwks` | mana-auth JWKS endpoint |
 | `CORS_ORIGINS` | `http://localhost:5173,...` | Comma-separated allowed origins |
+| `MANA_CREDITS_URL` | `http://localhost:3061` | mana-credits service URL for billing checks |
+| `MANA_SERVICE_KEY` | `dev-service-key` | Service-to-service auth key |
 
 ## Testing
 
@@ -181,6 +186,7 @@ services/mana-sync/
 ├── internal/
 │   ├── auth/jwt.go             — EdDSA JWT validation via JWKS
 │   ├── auth/jwt_test.go        — Token extraction, validator tests
+│   ├── billing/check.go        — Sync billing status checker (cached, fail-open)
 │   ├── config/config.go        — Environment variable loading
 │   ├── config/config_test.go   — Config defaults and env override tests
 │   ├── store/postgres.go       — PostgreSQL schema, queries
@@ -195,6 +201,7 @@ services/mana-sync/
 ## Security
 
 - JWT validated via EdDSA JWKS (same as NestJS backends)
+- Sync endpoints gated by billing check (402 if subscription inactive)
 - WebSocket connections must authenticate within 10 seconds
 - Request body limited to 10 MB
 - Operation types validated (insert/update/delete only)
