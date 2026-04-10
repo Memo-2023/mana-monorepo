@@ -34,6 +34,9 @@
 		mut: 'Mut',
 		hoffnung: 'Hoffnung',
 		natur: 'Natur',
+		humor: 'Humor',
+		wissenschaft: 'Wissenschaft',
+		kunst: 'Kunst',
 	};
 
 	$effect(() => {

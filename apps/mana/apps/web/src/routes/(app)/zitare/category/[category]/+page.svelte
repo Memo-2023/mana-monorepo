@@ -56,6 +56,9 @@
 		mut: 'categories.courage',
 		hoffnung: 'categories.hope',
 		natur: 'categories.nature',
+		humor: 'categories.humor',
+		wissenschaft: 'categories.science',
+		kunst: 'categories.art',
 	};
 </script>
 

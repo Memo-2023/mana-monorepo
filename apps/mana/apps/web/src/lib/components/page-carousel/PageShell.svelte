@@ -20,6 +20,7 @@
 		heightPx?: number;
 		maximized?: boolean;
 		onClose: () => void;
+		onMinimize?: () => void;
 		onMaximize?: () => void;
 		onResize?: (widthPx: number, heightPx?: number) => void;
 		onMoveLeft?: () => void;

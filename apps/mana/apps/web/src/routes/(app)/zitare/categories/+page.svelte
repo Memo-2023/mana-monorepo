@@ -69,6 +69,24 @@
 			labelKey: 'categories.nature',
 			count: getQuotesByCategory('natur').length,
 		},
+		humor: {
+			icon: '😄',
+			gradient: 'from-amber-400 to-yellow-500',
+			labelKey: 'categories.humor',
+			count: getQuotesByCategory('humor').length,
+		},
+		wissenschaft: {
+			icon: '🔬',
+			gradient: 'from-cyan-500 to-blue-600',
+			labelKey: 'categories.science',
+			count: getQuotesByCategory('wissenschaft').length,
+		},
+		kunst: {
+			icon: '🎨',
+			gradient: 'from-fuchsia-500 to-pink-600',
+			labelKey: 'categories.art',
+			count: getQuotesByCategory('kunst').length,
+		},
 	};
 </script>
 

@@ -12,6 +12,7 @@
 		defaultWidth?: number;
 		showPicker: boolean;
 		onReorder: (fromId: string, toId: string) => void;
+		onRestore?: (id: string) => void;
 		onMaximize?: (id: string) => void;
 		onRemove?: (id: string) => void;
 		onTogglePicker: () => void;
@@ -26,6 +27,7 @@
 		defaultWidth = 480,
 		showPicker,
 		onReorder,
+		onRestore: _onRestore,
 		onMaximize: _onMaximize,
 		onRemove: _onRemove,
 		onTogglePicker,
