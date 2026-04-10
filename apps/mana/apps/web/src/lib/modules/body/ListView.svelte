@@ -96,15 +96,6 @@
 </svelte:head>
 
 <div class="body-page">
-	<header class="body-header">
-		<div>
-			<h1>{$_('body.title', { default: 'Body' })}</h1>
-			<p class="subtitle">
-				{$_('body.subtitle', { default: 'Training & Körper in einem Modul' })}
-			</p>
-		</div>
-	</header>
-
 	<section class="card">
 		<PhaseManager {activePhase} />
 	</section>
@@ -165,22 +156,6 @@
 		gap: 1rem;
 		padding: 0 1rem;
 		max-width: 720px;
-	}
-	.body-header {
-		display: flex;
-		align-items: flex-start;
-		justify-content: space-between;
-		gap: 0.75rem;
-	}
-	.body-header h1 {
-		font-size: 1.5rem;
-		font-weight: 700;
-		color: hsl(var(--color-foreground));
-	}
-	.subtitle {
-		font-size: 0.875rem;
-		color: hsl(var(--color-muted-foreground));
-		margin-top: 0.125rem;
 	}
 	.card {
 		display: flex;

@@ -10,7 +10,8 @@
 -->
 <script lang="ts">
 	import { _ } from 'svelte-i18n';
-	import type { BodyExercise, BodyRoutine } from '../types';
+	import type { BodyExercise, BodyRoutine, MuscleGroup } from '../types';
+	import { MUSCLE_GROUPS } from '../types';
 	import { bodyStore } from '../stores/body.svelte';
 
 	interface Props {
@@ -23,6 +24,10 @@
 	let creating = $state(false);
 	let newName = $state('');
 	let newSelected = $state<Set<string>>(new Set());
+
+	let addingExercise = $state(false);
+	let newExerciseName = $state('');
+	let newExerciseMuscle = $state<MuscleGroup>('chest');
 
 	function exerciseName(id: string): string {
 		return exercises.find((e) => e.id === id)?.name ?? id;
@@ -43,7 +48,7 @@
 	async function saveRoutine(e: Event) {
 		e.preventDefault();
 		const name = newName.trim();
-		if (!name || newSelected.size === 0) return;
+		if (!name) return;
 		await bodyStore.createRoutine({
 			name,
 			description: null,
@@ -52,6 +57,22 @@
 		newName = '';
 		newSelected = new Set();
 		creating = false;
+	}
+
+	async function addExerciseInline(e: Event) {
+		e.preventDefault();
+		const name = newExerciseName.trim();
+		if (!name) return;
+		const created = await bodyStore.createExercise({
+			name,
+			muscleGroup: newExerciseMuscle,
+			equipment: 'barbell',
+		});
+		const next = new Set(newSelected);
+		next.add(created.id);
+		newSelected = next;
+		newExerciseName = '';
+		addingExercise = false;
 	}
 
 	async function archive(id: string) {
@@ -72,20 +93,50 @@
 	{#if creating}
 		<form class="create" onsubmit={saveRoutine}>
 			<input type="text" placeholder="Routine-Name" bind:value={newName} required />
-			<div class="picker-grid">
-				{#each exercises.filter((e) => !e.isArchived) as ex (ex.id)}
-					<label class="ex-chip" class:active={newSelected.has(ex.id)}>
-						<input
-							type="checkbox"
-							checked={newSelected.has(ex.id)}
-							onchange={() => toggle(ex.id)}
-						/>
-						{ex.name}
-					</label>
-				{/each}
-			</div>
-			<button type="submit" class="primary" disabled={!newName.trim() || newSelected.size === 0}>
-				Speichern ({newSelected.size})
+			{#if exercises.filter((e) => !e.isArchived).length === 0}
+				<p class="empty">
+					Noch keine Übungen angelegt. Du kannst die Routine ohne Übungen speichern oder direkt eine
+					anlegen.
+				</p>
+			{:else}
+				<div class="picker-grid">
+					{#each exercises.filter((e) => !e.isArchived) as ex (ex.id)}
+						<label class="ex-chip" class:active={newSelected.has(ex.id)}>
+							<input
+								type="checkbox"
+								checked={newSelected.has(ex.id)}
+								onchange={() => toggle(ex.id)}
+							/>
+							{ex.name}
+						</label>
+					{/each}
+				</div>
+			{/if}
+
+			{#if addingExercise}
+				<div class="add-exercise">
+					<input
+						type="text"
+						placeholder="Übungs-Name"
+						bind:value={newExerciseName}
+						onkeydown={(e) => e.key === 'Enter' && addExerciseInline(e)}
+					/>
+					<select bind:value={newExerciseMuscle}>
+						{#each MUSCLE_GROUPS as g (g)}
+							<option value={g}>{g}</option>
+						{/each}
+					</select>
+					<button type="button" class="primary" onclick={addExerciseInline}>Anlegen</button>
+					<button type="button" onclick={() => (addingExercise = false)}>Abbrechen</button>
+				</div>
+			{:else}
+				<button type="button" class="link add-exercise-btn" onclick={() => (addingExercise = true)}>
+					+ Übung anlegen
+				</button>
+			{/if}
+
+			<button type="submit" class="primary" disabled={!newName.trim()}>
+				Speichern{newSelected.size > 0 ? ` (${newSelected.size})` : ''}
 			</button>
 		</form>
 	{/if}
@@ -157,6 +208,32 @@
 		background: hsl(var(--color-background));
 		color: hsl(var(--color-foreground));
 		font-size: 0.875rem;
+	}
+	.add-exercise {
+		display: flex;
+		gap: 0.375rem;
+		flex-wrap: wrap;
+	}
+	.add-exercise input {
+		flex: 1 1 8rem;
+		padding: 0.5rem 0.625rem;
+		border-radius: 0.375rem;
+		border: 1px solid hsl(var(--color-border));
+		background: hsl(var(--color-background));
+		color: hsl(var(--color-foreground));
+		font-size: 0.8125rem;
+	}
+	.add-exercise select {
+		padding: 0.5rem 0.625rem;
+		border-radius: 0.375rem;
+		border: 1px solid hsl(var(--color-border));
+		background: hsl(var(--color-background));
+		color: hsl(var(--color-foreground));
+		font-size: 0.8125rem;
+	}
+	.add-exercise-btn {
+		align-self: flex-start;
+		padding: 0;
 	}
 	.picker-grid {
 		display: flex;
