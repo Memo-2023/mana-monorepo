@@ -2,13 +2,22 @@ FROM oven/bun:1 AS production
 
 WORKDIR /app
 
-# Copy package files and install
+# Copy workspace package files for dependency resolution
 COPY package.json bun.lock* ./
-RUN bun install --frozen-lockfile 2>/dev/null || bun install
+COPY services/mana-credits/package.json ./services/mana-credits/
+COPY packages/shared-hono/package.json ./packages/shared-hono/
+COPY packages/shared-types/package.json ./packages/shared-types/
 
-# Copy source
-COPY src ./src
-COPY tsconfig.json drizzle.config.ts ./
+# Install dependencies
+RUN cd services/mana-credits && bun install --frozen-lockfile 2>/dev/null || cd services/mana-credits && bun install
+
+# Copy source (workspace deps + service)
+COPY packages/shared-hono ./packages/shared-hono
+COPY packages/shared-types ./packages/shared-types
+COPY services/mana-credits/src ./services/mana-credits/src
+COPY services/mana-credits/tsconfig.json services/mana-credits/drizzle.config.ts ./services/mana-credits/
+
+WORKDIR /app/services/mana-credits
 
 EXPOSE 3061
 
