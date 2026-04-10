@@ -107,8 +107,7 @@
 		aria-label="Verknüpfung erstellen"
 		onkeydown={handleKeydown}
 	>
-		<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-		<div class="manalinkpicker-backdrop" onclick={onClose}></div>
+		<div class="manalinkpicker-backdrop" onclick={onClose} role="presentation" tabindex="-1"></div>
 		<div class="manalinkpicker-modal">
 			<div class="manalinkpicker-header">
 				<h3>Verknüpfung erstellen</h3>

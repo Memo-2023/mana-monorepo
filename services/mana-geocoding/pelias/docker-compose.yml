@@ -37,7 +37,7 @@ services:
       - pelias
 
   elasticsearch:
-    image: pelias/elasticsearch:7.17.1
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.1
     container_name: pelias-elasticsearch
     restart: unless-stopped
     ports:
@@ -46,6 +46,8 @@ services:
       - pelias-elasticsearch:/usr/share/elasticsearch/data
     environment:
       ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+      discovery.type: single-node
+      xpack.security.enabled: "false"
     ulimits:
       memlock:
         soft: -1

@@ -42,12 +42,12 @@
 	let isHovered = $state(false);
 </script>
 
-<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
 	class="package-card"
 	class:package-card--popular={pkg.popular}
 	onmouseenter={() => (isHovered = true)}
 	onmouseleave={() => (isHovered = false)}
+	role="article"
 >
 	{#if pkg.popular}
 		<div class="package-card__badge">

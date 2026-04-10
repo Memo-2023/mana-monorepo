@@ -57,13 +57,13 @@
 	let isHovered = $state(false);
 </script>
 
-<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
 	class="subscription-card"
 	class:subscription-card--current={isCurrentPlan}
 	class:subscription-card--popular={plan.popular && !isCurrentPlan}
 	onmouseenter={() => (isHovered = true)}
 	onmouseleave={() => (isHovered = false)}
+	role="article"
 >
 	{#if isCurrentPlan}
 		<div class="subscription-card__badge subscription-card__badge--current">
