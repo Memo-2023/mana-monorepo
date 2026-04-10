@@ -16,6 +16,7 @@ import { db } from './database';
 // ─── Module Seed Imports ─────────────────────────────────────
 import { HABITS_GUEST_SEED } from '$lib/modules/habits/collections';
 import { BODY_GUEST_SEED } from '$lib/modules/body/collections';
+import { JOURNAL_GUEST_SEED } from '$lib/modules/journal/collections';
 import { DREAMS_GUEST_SEED } from '$lib/modules/dreams/collections';
 import { MOODLIT_GUEST_SEED } from '$lib/modules/moodlit/collections';
 import { CONTACTS_GUEST_SEED } from '$lib/modules/contacts/collections';
@@ -47,6 +48,7 @@ function register(seed: Record<string, Record<string, unknown>[]>) {
 // Register all module seeds
 register(HABITS_GUEST_SEED);
 register(BODY_GUEST_SEED);
+register(JOURNAL_GUEST_SEED);
 register(DREAMS_GUEST_SEED);
 register(MOODLIT_GUEST_SEED);
 register(CONTACTS_GUEST_SEED);

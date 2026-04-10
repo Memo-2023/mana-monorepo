@@ -303,6 +303,49 @@ registerApp({
 });
 
 registerApp({
+	id: 'journal',
+	name: 'Journal',
+	color: '#6366F1',
+	icon: BookOpen,
+	views: {
+		list: { load: () => import('$lib/modules/journal/ListView.svelte') },
+	},
+	contextMenuActions: [
+		{
+			id: 'new-entry',
+			label: 'Neuer Eintrag',
+			icon: Plus,
+			action: () =>
+				window.dispatchEvent(
+					new CustomEvent('mana:quick-action', { detail: { app: 'journal', action: 'new' } })
+				),
+		},
+	],
+	collection: 'journalEntries',
+	paramKey: 'entryId',
+	dragType: 'journal-entry',
+	acceptsDropFrom: ['note'],
+	transformIncoming: {
+		note: (source) => ({
+			title: source.title as string,
+			content: (source.content as string) ?? '',
+		}),
+	},
+	getDisplayData: (item) => ({
+		title: (item.title as string) || 'Eintrag',
+		subtitle: (item.entryDate as string) ?? undefined,
+	}),
+	createItem: async (data) => {
+		const { journalStore } = await import('$lib/modules/journal/stores/journal.svelte');
+		const entry = await journalStore.createEntry({
+			title: (data.title as string) ?? null,
+			content: (data.content as string) ?? '',
+		});
+		return entry.id;
+	},
+});
+
+registerApp({
 	id: 'dreams',
 	name: 'Dreams',
 	color: '#6366F1',

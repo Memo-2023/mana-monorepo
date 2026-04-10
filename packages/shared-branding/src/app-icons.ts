@@ -126,6 +126,9 @@ export const APP_ICONS = {
 	habits: svgToDataUrl(
 		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="hb" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#8b5cf6"/><stop offset="100%" style="stop-color:#6d28d9"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#hb)"/><path d="M30 55l8 8 16-16" stroke="white" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="50" cy="50" r="24" stroke="white" stroke-width="4" fill="none"/><path d="M50 26v6M50 68v6M26 50h6M68 50h6" stroke="white" stroke-width="3" stroke-linecap="round"/></svg>`
 	),
+	journal: svgToDataUrl(
+		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="jn" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#6366f1"/><stop offset="100%" style="stop-color:#4338ca"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#jn)"/><rect x="30" y="20" width="40" height="60" rx="4" stroke="white" stroke-width="4" fill="none"/><path d="M26 24v52" stroke="white" stroke-width="4" stroke-linecap="round"/><path d="M40 36h20M40 46h16M40 56h12" stroke="white" stroke-width="3" stroke-linecap="round"/></svg>`
+	),
 	notes: svgToDataUrl(
 		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="nt" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#f59e0b"/><stop offset="100%" style="stop-color:#d97706"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#nt)"/><rect x="28" y="22" width="44" height="56" rx="4" stroke="white" stroke-width="4" fill="none"/><path d="M38 36h24M38 46h24M38 56h16" stroke="white" stroke-width="3" stroke-linecap="round"/></svg>`
 	),

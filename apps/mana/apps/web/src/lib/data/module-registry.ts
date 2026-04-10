@@ -77,6 +77,7 @@ import { memoroModuleConfig } from '$lib/modules/memoro/module.config';
 import { guidesModuleConfig } from '$lib/modules/guides/module.config';
 import { habitsModuleConfig } from '$lib/modules/habits/module.config';
 import { notesModuleConfig } from '$lib/modules/notes/module.config';
+import { journalModuleConfig } from '$lib/modules/journal/module.config';
 import { dreamsModuleConfig } from '$lib/modules/dreams/module.config';
 import { cyclesModuleConfig } from '$lib/modules/cycles/module.config';
 import { eventsModuleConfig } from '$lib/modules/events/module.config';
@@ -118,6 +119,7 @@ export const MODULE_CONFIGS: readonly ModuleConfig[] = [
 	guidesModuleConfig,
 	habitsModuleConfig,
 	notesModuleConfig,
+	journalModuleConfig,
 	dreamsModuleConfig,
 	cyclesModuleConfig,
 	eventsModuleConfig,

@@ -599,6 +599,23 @@ export const MANA_APPS: ManaApp[] = [
 		requiredTier: 'founder',
 	},
 	{
+		id: 'journal',
+		name: 'Journal',
+		description: {
+			de: 'Tagebuch',
+			en: 'Journal',
+		},
+		longDescription: {
+			de: 'Täglich deine Gedanken und Gefühle festhalten. Mit Stimmungen, Tags, Streak-Tracking und historischen Rückblicken.',
+			en: 'Capture your thoughts and feelings daily. With moods, tags, streak tracking, and historical recaps.',
+		},
+		icon: APP_ICONS.journal,
+		color: '#6366f1',
+		comingSoon: false,
+		status: 'development',
+		requiredTier: 'guest',
+	},
+	{
 		id: 'notes',
 		name: 'Notes',
 		description: {

@@ -59,6 +59,12 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	// uses `title` + `content` (no separate `body` column).
 	notes: { enabled: true, fields: ['title', 'content'] },
 
+	// ─── Journal ─────────────────────────────────────────────
+	// Daily freeform entries — title and content are the user-typed parts.
+	// entryDate, mood (enum), tags (string[]), isPinned/isArchived/isFavorite,
+	// wordCount stay plaintext for indexing, sorting, and insights.
+	journalEntries: { enabled: true, fields: ['title', 'content'] },
+
 	// ─── Dreams ──────────────────────────────────────────────
 	// LocalDream uses content + transcript + interpretation, no `notes`.
 	dreams: {
