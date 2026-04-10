@@ -11,7 +11,8 @@ export type { Category } from './categories';
 
 // Data
 export { QUOTES, QUOTE_COUNT } from './quotes';
-export { CATEGORIES, CATEGORY_LABELS } from './categories';
+export { CATEGORIES, CATEGORY_LABELS, THEME_DECKS } from './categories';
+export type { ThemeDeckId } from './categories';
 
 // Utilities
 export {
@@ -31,9 +32,13 @@ export {
 	getQuotesByTag,
 	getAllTags,
 	getQuotesByAuthor,
+	getAllAuthors,
+	getQuotesByThemeDeck,
+	fuzzySearchQuotes,
 	getVerifiedQuotes,
 	getQuotesByYearRange,
 	getQuotesByOriginalLanguage,
 } from './utils';
+export type { AuthorInfo } from './utils';
 
 export { getCategoryLabel, isValidCategory } from './categories';

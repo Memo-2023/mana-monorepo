@@ -6,5 +6,6 @@ export const zitareModuleConfig: ModuleConfig = {
 		{ name: 'zitareFavorites', syncName: 'favorites' },
 		{ name: 'zitareLists', syncName: 'lists' },
 		{ name: 'zitareListTags' },
+		{ name: 'zitareCustomQuotes', syncName: 'custom-quotes' },
 	],
 };

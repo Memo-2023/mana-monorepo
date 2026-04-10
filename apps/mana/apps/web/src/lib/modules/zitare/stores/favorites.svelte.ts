@@ -37,4 +37,11 @@ export const favoritesStore = {
 			await this.add(quoteId);
 		}
 	},
+
+	async setNotes(favoriteId: string, notes: string) {
+		await db.table('zitareFavorites').update(favoriteId, {
+			notes: notes || null,
+			updatedAt: new Date().toISOString(),
+		});
+	},
 };

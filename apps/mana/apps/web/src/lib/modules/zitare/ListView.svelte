@@ -22,6 +22,7 @@
 
 	let favorites = $state<LocalFavorite[]>([]);
 	let quote = $state<Quote | null>(null);
+	let transitioning = $state(false);
 
 	// Initialize once on mount (writes to store state — keep out of $effect
 	// to avoid the read/write loop where reading currentQuote retriggers
@@ -59,8 +60,14 @@
 	let currentTags = $derived(getTagsByIds(allTags, currentTagIds));
 
 	function nextQuote() {
-		quotesStore.loadRandomQuote();
-		quote = quotesStore.currentQuote;
+		if (transitioning) return;
+		transitioning = true;
+		// After fade-out completes, swap quote and fade back in
+		setTimeout(() => {
+			quotesStore.loadRandomQuote();
+			quote = quotesStore.currentQuote;
+			transitioning = false;
+		}, 200);
 	}
 
 	async function toggleFav(e: Event) {
@@ -102,42 +109,60 @@
 	}}
 >
 	{#if quote}
-		<blockquote
-			class="max-w-[280px] text-center text-base font-light italic leading-relaxed text-white/80"
-		>
-			&laquo;{quotesStore.getText(quote)}&raquo;
-		</blockquote>
-		<p class="mt-3 text-xs text-white/40">— {quote.author}</p>
+		<div class="quote-transition" class:fade-out={transitioning}>
+			<blockquote
+				class="max-w-[280px] text-center text-base font-light italic leading-relaxed text-white/80"
+			>
+				&laquo;{quotesStore.getText(quote)}&raquo;
+			</blockquote>
+			<p class="mt-3 text-xs text-white/40">— {quote.author}</p>
 
-		<!-- Tags -->
-		{#if currentTags.length > 0}
-			<div class="mt-2 flex flex-wrap justify-center gap-1">
-				{#each currentTags as tag (tag.id)}
-					<span
-						class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] text-white/50"
-						style="background: {tag.color}20; border: 1px solid {tag.color}30"
-					>
-						<span class="h-1.5 w-1.5 rounded-full" style="background: {tag.color}"></span>
-						{tag.name}
-					</span>
-				{/each}
-			</div>
-		{/if}
+			<!-- Tags -->
+			{#if currentTags.length > 0}
+				<div class="mt-2 flex flex-wrap justify-center gap-1">
+					{#each currentTags as tag (tag.id)}
+						<span
+							class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] text-white/50"
+							style="background: {tag.color}20; border: 1px solid {tag.color}30"
+						>
+							<span class="h-1.5 w-1.5 rounded-full" style="background: {tag.color}"></span>
+							{tag.name}
+						</span>
+					{/each}
+				</div>
+			{/if}
 
-		<button
-			onclick={toggleFav}
-			class="mt-3 min-h-[44px] rounded-full p-1.5 transition-colors hover:bg-white/5"
-		>
-			<Heart
-				size={16}
-				weight={isFav ? 'fill' : 'regular'}
-				class="transition-colors {isFav ? 'text-red-400' : 'text-white/20 hover:text-white/40'}"
-			/>
-		</button>
+			<button
+				onclick={toggleFav}
+				class="mt-3 min-h-[44px] rounded-full p-1.5 transition-colors hover:bg-white/5"
+			>
+				<Heart
+					size={16}
+					weight={isFav ? 'fill' : 'regular'}
+					class="transition-colors {isFav ? 'text-red-400' : 'text-white/20 hover:text-white/40'}"
+				/>
+			</button>
+		</div>
 	{/if}
 </div>
 
 <style>
+	.quote-transition {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		transition:
+			opacity 0.2s ease-out,
+			transform 0.2s ease-out;
+		opacity: 1;
+		transform: translateY(0);
+	}
+
+	.quote-transition.fade-out {
+		opacity: 0;
+		transform: translateY(-6px);
+	}
+
 	:global(.mana-drop-target-hover) {
 		outline: 2px solid rgba(139, 92, 246, 0.4);
 		outline-offset: -2px;

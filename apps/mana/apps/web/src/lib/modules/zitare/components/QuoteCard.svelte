@@ -47,6 +47,9 @@
 		mut: 'quote-gradient-courage',
 		hoffnung: 'quote-gradient-hope',
 		natur: 'quote-gradient-nature',
+		humor: 'quote-gradient-humor',
+		wissenschaft: 'quote-gradient-science',
+		kunst: 'quote-gradient-art',
 	};
 
 	// Category labels
@@ -61,6 +64,9 @@
 		mut: 'categories.courage',
 		hoffnung: 'categories.hope',
 		natur: 'categories.nature',
+		humor: 'categories.humor',
+		wissenschaft: 'categories.science',
+		kunst: 'categories.art',
 	};
 
 	async function toggleFavorite() {

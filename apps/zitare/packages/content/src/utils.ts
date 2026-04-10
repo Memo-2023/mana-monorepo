@@ -1,5 +1,11 @@
 import { QUOTES } from './quotes';
-import { CATEGORIES, CATEGORY_LABELS, type Category } from './categories';
+import {
+	CATEGORIES,
+	CATEGORY_LABELS,
+	THEME_DECKS,
+	type Category,
+	type ThemeDeckId,
+} from './categories';
 import type { Quote, SupportedLanguage } from './types';
 
 /**
@@ -20,11 +26,24 @@ export function getDailyQuote(date: Date = new Date()): Quote {
 	return QUOTES[index];
 }
 
+// ─── Pre-built category index (built once, O(1) per lookup) ──
+
+let _categoryIndex: Map<Category, Quote[]> | null = null;
+
+function getCategoryIndex(): Map<Category, Quote[]> {
+	if (!_categoryIndex) {
+		_categoryIndex = new Map();
+		for (const cat of CATEGORIES) _categoryIndex.set(cat, []);
+		for (const q of QUOTES) _categoryIndex.get(q.category)?.push(q);
+	}
+	return _categoryIndex;
+}
+
 /**
- * Get quotes by category
+ * Get quotes by category (uses pre-built index for O(1) lookups).
  */
 export function getQuotesByCategory(category: Category): Quote[] {
-	return QUOTES.filter((q) => q.category === category);
+	return getCategoryIndex().get(category) ?? [];
 }
 
 /**
@@ -154,12 +173,72 @@ export function getAllTags(): string[] {
 	return Array.from(tags).sort();
 }
 
+// ─── Pre-built author index ──────────────────────────────────
+
+let _authorIndex: Map<string, Quote[]> | null = null;
+
+function getAuthorIndex(): Map<string, Quote[]> {
+	if (!_authorIndex) {
+		_authorIndex = new Map();
+		for (const q of QUOTES) {
+			const key = q.author.toLowerCase();
+			let arr = _authorIndex.get(key);
+			if (!arr) {
+				arr = [];
+				_authorIndex.set(key, arr);
+			}
+			arr.push(q);
+		}
+	}
+	return _authorIndex;
+}
+
 /**
- * Get quotes by author
+ * Get quotes by author (substring match on name).
  */
 export function getQuotesByAuthor(author: string): Quote[] {
 	const lowerAuthor = author.toLowerCase();
-	return QUOTES.filter((q) => q.author.toLowerCase().includes(lowerAuthor));
+	// Exact match via index first
+	const exact = getAuthorIndex().get(lowerAuthor);
+	if (exact) return exact;
+	// Fall back to substring match across all authors
+	const results: Quote[] = [];
+	for (const [key, quotes] of getAuthorIndex()) {
+		if (key.includes(lowerAuthor)) results.push(...quotes);
+	}
+	return results;
+}
+
+/** Author summary for browse pages. */
+export interface AuthorInfo {
+	name: string;
+	quoteCount: number;
+	categories: string[];
+	bio?: { de?: string; en?: string; it?: string; fr?: string; es?: string };
+}
+
+/**
+ * Get all unique authors with their quote counts, categories, and bios.
+ * Sorted by quote count descending, then name ascending.
+ */
+export function getAllAuthors(): AuthorInfo[] {
+	const map = new Map<string, AuthorInfo>();
+	for (const q of QUOTES) {
+		let info = map.get(q.author);
+		if (!info) {
+			info = { name: q.author, quoteCount: 0, categories: [], bio: q.authorBio };
+			map.set(q.author, info);
+		}
+		info.quoteCount++;
+		if (!info.categories.includes(q.category)) {
+			info.categories.push(q.category);
+		}
+		// Prefer the bio entry that has content
+		if (!info.bio && q.authorBio) info.bio = q.authorBio;
+	}
+	return Array.from(map.values()).sort(
+		(a, b) => b.quoteCount - a.quoteCount || a.name.localeCompare(b.name)
+	);
 }
 
 /**
@@ -181,6 +260,71 @@ export function getQuotesByYearRange(startYear: number, endYear: number): Quote[
  */
 export function getQuotesByOriginalLanguage(language: string): Quote[] {
 	return QUOTES.filter((q) => q.originalLanguage === language);
+}
+
+/**
+ * Get quotes for a curated theme deck.
+ */
+export function getQuotesByThemeDeck(deckId: ThemeDeckId): Quote[] {
+	const deck = THEME_DECKS.find((d) => d.id === deckId);
+	if (!deck) return [];
+	const authorSet = new Set(deck.authors.map((a) => a.toLowerCase()));
+	return QUOTES.filter((q) => authorSet.has(q.author.toLowerCase()));
+}
+
+/**
+ * Fuzzy search — matches even with typos using bigram similarity.
+ * Falls back to simple substring match for short queries.
+ */
+export function fuzzySearchQuotes(
+	query: string,
+	language: SupportedLanguage = 'de',
+	threshold = 0.3
+): Quote[] {
+	const normalizedQuery = query.toLowerCase().trim();
+	if (!normalizedQuery) return [];
+
+	// For very short queries (1-2 chars), use exact substring
+	if (normalizedQuery.length <= 2) return searchQuotes(query, language);
+
+	const queryBigrams = toBigrams(normalizedQuery);
+
+	return QUOTES.filter((q) => {
+		const text = language === 'original' ? q.text.original : q.text[language];
+		const haystack = `${text} ${q.author}`.toLowerCase();
+
+		// Fast path: exact substring match
+		if (haystack.includes(normalizedQuery)) return true;
+
+		// Check individual words for fuzzy match
+		const queryWords = normalizedQuery.split(/\s+/);
+		return queryWords.every((word) => {
+			if (haystack.includes(word)) return true;
+			if (word.length <= 2) return false;
+			const wordBigrams = toBigrams(word);
+			// Check if any word in the haystack has high bigram similarity
+			return haystack.split(/\s+/).some((hw) => {
+				if (hw.length <= 2) return false;
+				return bigramSimilarity(wordBigrams, toBigrams(hw)) >= threshold;
+			});
+		});
+	});
+}
+
+function toBigrams(s: string): Set<string> {
+	const bigrams = new Set<string>();
+	for (let i = 0; i < s.length - 1; i++) {
+		bigrams.add(s.slice(i, i + 2));
+	}
+	return bigrams;
+}
+
+function bigramSimilarity(a: Set<string>, b: Set<string>): number {
+	let intersection = 0;
+	for (const bigram of a) {
+		if (b.has(bigram)) intersection++;
+	}
+	return (2 * intersection) / (a.size + b.size);
 }
 
 // Helper function

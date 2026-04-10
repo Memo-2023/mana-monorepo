@@ -4,13 +4,24 @@
 
 import { liveQuery } from 'dexie';
 import { db } from '$lib/data/database';
-import type { LocalFavorite, LocalQuoteList } from './types';
+import type { LocalFavorite, LocalQuoteList, LocalCustomQuote } from './types';
 
 // ─── Domain Types ─────────────────────────────────────────
 
 export interface Favorite {
 	id: string;
 	quoteId: string;
+	notes?: string;
+	createdAt: string;
+}
+
+export interface CustomQuote {
+	id: string;
+	text: string;
+	author: string;
+	category?: string;
+	source?: string;
+	year?: number;
 	createdAt: string;
 }
 
@@ -29,6 +40,19 @@ export function toFavorite(local: LocalFavorite): Favorite {
 	return {
 		id: local.id,
 		quoteId: local.quoteId,
+		notes: local.notes ?? undefined,
+		createdAt: local.createdAt ?? new Date().toISOString(),
+	};
+}
+
+export function toCustomQuote(local: LocalCustomQuote): CustomQuote {
+	return {
+		id: local.id,
+		text: local.text,
+		author: local.author,
+		category: local.category ?? undefined,
+		source: local.source ?? undefined,
+		year: local.year ?? undefined,
 		createdAt: local.createdAt ?? new Date().toISOString(),
 	};
 }
@@ -59,6 +83,14 @@ export function useAllLists() {
 	return liveQuery(async () => {
 		const locals = await db.table<LocalQuoteList>('zitareLists').toArray();
 		return locals.filter((l) => !l.deletedAt).map(toQuoteList);
+	});
+}
+
+/** All custom quotes. Auto-updates on any change. */
+export function useAllCustomQuotes() {
+	return liveQuery(async () => {
+		const locals = await db.table<LocalCustomQuote>('zitareCustomQuotes').toArray();
+		return locals.filter((q) => !q.deletedAt).map(toCustomQuote);
 	});
 }
 

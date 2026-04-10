@@ -3,12 +3,13 @@
  */
 
 import { db } from '$lib/data/database';
-import type { LocalFavorite, LocalQuoteList } from './types';
+import type { LocalFavorite, LocalQuoteList, LocalCustomQuote } from './types';
 
 // ─── Collection Accessors ──────────────────────────────────
 
 export const favoriteTable = db.table<LocalFavorite>('zitareFavorites');
 export const listTable = db.table<LocalQuoteList>('zitareLists');
+export const customQuoteTable = db.table<LocalCustomQuote>('zitareCustomQuotes');
 
 // ─── Guest Seed ────────────────────────────────────────────
 
