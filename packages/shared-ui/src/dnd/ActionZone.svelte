@@ -44,6 +44,7 @@
 </script>
 
 {#if visible}
+	{@const Icon = iconComponent}
 	<div
 		class="action-zone variant-{variant}"
 		use:dropTarget={{
@@ -60,7 +61,7 @@
 		role="button"
 		tabindex="-1"
 	>
-		<svelte:component this={iconComponent} size={20} weight="bold" />
+		<Icon size={20} weight="bold" />
 		{#if label}
 			<span class="action-label">{label}</span>
 		{/if}

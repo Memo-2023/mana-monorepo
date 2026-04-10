@@ -309,6 +309,8 @@
 <!-- Recurrence Delete Dialog -->
 {#if showEditOptions}
 	<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
+	<!-- svelte-ignore a11y_interactive_supports_focus -->
 	<div class="delete-overlay" onclick={() => (showEditOptions = false)}>
 		<div class="delete-dialog" role="dialog" aria-modal="true" onclick={(e) => e.stopPropagation()}>
 			<h3 class="delete-title">Wiederkehrenden Termin bearbeiten</h3>
@@ -330,6 +332,8 @@
 
 {#if showDeleteOptions}
 	<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
+	<!-- svelte-ignore a11y_interactive_supports_focus -->
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div class="delete-overlay" onclick={() => (showDeleteOptions = false)}>
 		<div class="delete-dialog" role="dialog" aria-modal="true" onclick={(e) => e.stopPropagation()}>
 			<h3 class="delete-title">Wiederkehrenden Termin löschen</h3>

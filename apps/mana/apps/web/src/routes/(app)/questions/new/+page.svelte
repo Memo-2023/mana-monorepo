@@ -203,11 +203,13 @@
 
 		<!-- Research Depth -->
 		<div>
+			<!-- svelte-ignore a11y_label_has_associated_control -->
 			<label class="mb-2 block text-sm font-medium text-[hsl(var(--foreground))]">
 				Recherchetiefe
 			</label>
 			<div class="grid grid-cols-3 gap-3">
 				{#each depthOptions as option}
+					{@const OptionIcon = option.icon}
 					<button
 						type="button"
 						onclick={() => (researchDepth = option.value)}
@@ -215,7 +217,7 @@
 							? 'border-[hsl(var(--primary))] bg-[hsl(var(--primary)/0.05)]'
 							: 'border-[hsl(var(--border))] hover:border-[hsl(var(--primary)/0.3)]'}"
 					>
-						<svelte:component this={option.icon} class="mb-2 h-5 w-5 text-[hsl(var(--primary))]" />
+						<OptionIcon class="mb-2 h-5 w-5 text-[hsl(var(--primary))]" />
 						<div class="font-medium text-[hsl(var(--foreground))]">{option.label}</div>
 						<div class="mt-1 text-xs text-[hsl(var(--muted-foreground))]">
 							{option.description}

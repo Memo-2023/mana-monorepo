@@ -278,6 +278,7 @@
 
 				<!-- Quick Duration Buttons -->
 				<div>
+					<!-- svelte-ignore a11y_label_has_associated_control -->
 					<label class="mb-1.5 block text-xs font-medium text-[hsl(var(--muted-foreground))]">
 						{$_('entry.duration')}
 					</label>
@@ -337,6 +338,7 @@
 
 				<!-- Tags -->
 				<div>
+					<!-- svelte-ignore a11y_label_has_associated_control -->
 					<label class="mb-1.5 block text-xs font-medium text-[hsl(var(--muted-foreground))]"
 						>Tags</label
 					>

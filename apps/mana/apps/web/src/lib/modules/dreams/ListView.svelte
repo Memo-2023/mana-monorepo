@@ -301,12 +301,14 @@
 				{#each group.dreams as dream (dream.id)}
 					{#if editingId === dream.id}
 						<!-- Inline editor -->
+						<!-- svelte-ignore a11y_no_static_element_interactions -->
 						<div
 							class="dream-item editing"
 							onkeydown={(e) => {
 								if (e.key === 'Escape') saveEdit();
 							}}
 						>
+							<!-- svelte-ignore a11y_autofocus -->
 							<input
 								class="ed-title"
 								type="text"
@@ -324,6 +326,10 @@
 									Transkription fehlgeschlagen{dream.processingError
 										? `: ${dream.processingError}`
 										: ''}
+								</div>
+							{:else if dream.transcript && dream.transcriptModel}
+								<div class="ed-status muted" title="STT-Pipeline, die den Transkript erzeugt hat">
+									Transkribiert via <strong>{dream.transcriptModel}</strong>
 								</div>
 							{/if}
 							<textarea
@@ -444,6 +450,12 @@
 								{/if}
 								<div class="dream-meta">
 									<span>{formatDreamDate(dream.dreamDate)}</span>
+									{#if dream.transcriptModel}
+										<span class="dot">·</span>
+										<span class="stt-chip" title="STT-Pipeline">
+											&#x1f3a4; {dream.transcriptModel}
+										</span>
+									{/if}
 									{#if dream.symbols.length > 0}
 										<span class="dot">·</span>
 										<span class="symbol-chips">
@@ -744,6 +756,17 @@
 	.dream-meta .dot {
 		opacity: 0.5;
 	}
+	.stt-chip {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.125rem;
+		padding: 0 0.375rem;
+		border-radius: 9999px;
+		background: hsl(var(--color-muted) / 0.6);
+		color: hsl(var(--color-muted-foreground));
+		font-size: 0.5625rem;
+		font-variant-numeric: tabular-nums;
+	}
 	.symbol-chips {
 		display: inline-flex;
 		gap: 0.25rem;
@@ -805,6 +828,16 @@
 	.ed-status.failed {
 		background: hsl(var(--color-error) / 0.06);
 		color: hsl(var(--color-error));
+	}
+	.ed-status.muted {
+		background: transparent;
+		color: hsl(var(--color-muted-foreground));
+		font-size: 0.625rem;
+		padding: 0.125rem 0;
+	}
+	.ed-status.muted strong {
+		color: hsl(var(--color-foreground));
+		font-weight: 600;
 	}
 	.ed-status-dots {
 		font-size: 0.5rem;

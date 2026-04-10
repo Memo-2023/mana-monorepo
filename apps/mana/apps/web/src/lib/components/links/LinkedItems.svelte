@@ -14,6 +14,7 @@
 
 	let { recordRef, navigate }: Props = $props();
 
+	// svelte-ignore state_referenced_locally
 	const linksQuery = useLinksForRecord(recordRef);
 	let links = $derived(linksQuery.value ?? []);
 

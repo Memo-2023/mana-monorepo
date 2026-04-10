@@ -135,8 +135,9 @@
 		<div class="filter-bar">
 			{#each typeConfig as cfg}
 				{@const active = visibleTypes.has(cfg.type)}
+				{@const Icon = cfg.icon}
 				<button class="filter-chip" class:active onclick={() => toggleType(cfg.type)}>
-					<svelte:component this={cfg.icon} size={14} />
+					<Icon size={14} />
 					{cfg.label}
 				</button>
 			{/each}
@@ -180,13 +181,11 @@
 						<div class="content-col">
 							<div class="item-header">
 								{#if habitIcon}
-									<svelte:component
-										this={habitIcon}
-										size={16}
-										style="color: {block.color || '#6b7280'}"
-									/>
+									{@const HabitIcon = habitIcon}
+									<HabitIcon size={16} style="color: {block.color || '#6b7280'}" />
 								{:else if typeCfg}
-									<svelte:component this={typeCfg.icon} size={16} class="item-type-icon" />
+									{@const TypeIcon = typeCfg.icon}
+									<TypeIcon size={16} class="item-type-icon" />
 								{/if}
 								<span class="item-title">{block.title}</span>
 								{#if block.linkedBlockId}

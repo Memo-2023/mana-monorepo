@@ -3,6 +3,7 @@
 
 	let { items, translations }: GettingStartedGuideProps = $props();
 
+	// svelte-ignore state_referenced_locally
 	let selectedGuideId = $state<string | null>(items.length > 0 ? items[0].id : null);
 
 	const guide = $derived(items.find((item) => item.id === selectedGuideId) ?? null);

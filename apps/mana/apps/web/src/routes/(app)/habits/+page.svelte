@@ -98,10 +98,6 @@
 		color: hsl(var(--color-muted-foreground));
 	}
 
-	.board-section {
-		/* main content */
-	}
-
 	.timeline-section {
 		display: flex;
 		flex-direction: column;

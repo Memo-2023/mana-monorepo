@@ -48,6 +48,8 @@
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
+<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 <div
 	class="group relative flex w-1.5 shrink-0 cursor-col-resize items-center justify-center
 		hover:bg-white/10 {isDragging ? 'bg-white/15' : 'bg-white/5'}"

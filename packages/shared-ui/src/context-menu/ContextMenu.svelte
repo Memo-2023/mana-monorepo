@@ -15,7 +15,9 @@
 	let { visible, x, y, items, onClose, onSelect }: Props = $props();
 
 	let menuElement = $state<HTMLElement | null>(null);
+	// svelte-ignore state_referenced_locally
 	let adjustedX = $state(x);
+	// svelte-ignore state_referenced_locally
 	let adjustedY = $state(y);
 
 	// Adjust position to keep menu within viewport

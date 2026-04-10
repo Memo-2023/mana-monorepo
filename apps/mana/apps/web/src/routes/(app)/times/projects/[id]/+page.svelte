@@ -200,6 +200,7 @@
 				</div>
 				<div class="flex gap-2">
 					<div class="flex items-center gap-1">
+						<!-- svelte-ignore a11y_label_has_associated_control -->
 						<label class="text-xs text-[hsl(var(--muted-foreground))]"
 							>{$_('project.budget')} (h):</label
 						>
@@ -217,6 +218,7 @@
 						/>
 					</div>
 					<div class="flex items-center gap-1">
+						<!-- svelte-ignore a11y_label_has_associated_control -->
 						<label class="text-xs text-[hsl(var(--muted-foreground))]">Rate:</label>
 						<input
 							type="number"
@@ -237,6 +239,7 @@
 						<span class="text-xs text-[hsl(var(--muted-foreground))]">/h</span>
 					</div>
 				</div>
+				<!-- svelte-ignore a11y_consider_explicit_label -->
 				<div class="flex flex-wrap gap-1.5">
 					{#each PROJECT_COLORS as color}
 						<button

@@ -24,6 +24,7 @@
 	const PADDING = { top: 20, right: 20, bottom: 30, left: 40 };
 
 	let chartWidth = WIDTH - PADDING.left - PADDING.right;
+	// svelte-ignore state_referenced_locally
 	let chartHeight = height - PADDING.top - PADDING.bottom;
 
 	// Calculate max for scaling

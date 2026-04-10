@@ -61,9 +61,11 @@
 		onClearFilters,
 	}: Props = $props();
 
+	// svelte-ignore state_referenced_locally
 	let searchInput = $state(searchQuery);
 	let showFilters = $state(false);
 	let showKeyboardHelp = $state(false);
+	// svelte-ignore state_referenced_locally
 	let strengthValue = $state(minStrength);
 	let searchInputElement = $state<HTMLInputElement | undefined>(undefined);
 

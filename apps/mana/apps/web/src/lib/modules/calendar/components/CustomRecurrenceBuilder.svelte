@@ -10,6 +10,7 @@
 	let { initialRule, onApply, onCancel }: Props = $props();
 
 	// Parse initial rule if provided
+	// svelte-ignore state_referenced_locally
 	const parsed = initialRule ? parseRule(initialRule) : null;
 
 	let freq = $state<'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY'>(parsed?.freq ?? 'WEEKLY');

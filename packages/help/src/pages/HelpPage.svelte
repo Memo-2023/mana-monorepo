@@ -28,6 +28,7 @@
 		onSearch,
 	}: HelpPageProps = $props();
 
+	// svelte-ignore state_referenced_locally
 	let activeSection = $state<HelpSection>(defaultSection);
 
 	const sections: { id: HelpSection; label: string; show: boolean }[] = $derived([

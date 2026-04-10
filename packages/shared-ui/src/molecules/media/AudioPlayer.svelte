@@ -23,6 +23,7 @@
 
 	let audio: HTMLAudioElement;
 	let currentTime = $state(0);
+	// svelte-ignore state_referenced_locally
 	let audioDuration = $state(duration || 0);
 	let isPlaying = $state(false);
 	let isLoading = $state(true);

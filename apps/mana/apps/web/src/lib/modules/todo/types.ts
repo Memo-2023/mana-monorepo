@@ -38,6 +38,8 @@ export interface LocalTask extends BaseRecord {
 	order: number;
 	// recurrenceRule lives on the TimeBlock (via scheduledBlockId)
 	subtasks?: Subtask[] | null;
+	/** STT backend/model identifier (e.g. "whisperx-large-v3"). Set when task created via voice. */
+	transcriptModel?: string | null;
 	metadata?: Record<string, unknown>;
 }
 
@@ -115,6 +117,7 @@ export interface Task {
 	order: number;
 	// recurrenceRule lives on the TimeBlock (via scheduledBlockId)
 	subtasks?: Subtask[] | null;
+	transcriptModel: string | null;
 	metadata?: Record<string, unknown> | null;
 	createdAt: string;
 	updatedAt: string;

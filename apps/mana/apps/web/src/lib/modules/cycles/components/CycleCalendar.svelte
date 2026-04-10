@@ -21,6 +21,7 @@
 	const { cycles, logs, editingDate, todayIso, onSelectDay }: Props = $props();
 
 	// ─ Month state ──────────────────────────────────────────
+	// svelte-ignore state_referenced_locally
 	const [initialYear, initialMonth] = todayIso.split('-').map((n) => parseInt(n, 10));
 	let viewYear = $state(initialYear);
 	let viewMonth = $state(initialMonth); // 1..12

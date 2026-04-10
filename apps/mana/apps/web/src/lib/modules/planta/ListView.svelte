@@ -9,8 +9,31 @@
 	import { BaseListView } from '@mana/shared-ui';
 	import type { ViewProps } from '$lib/app-registry';
 	import type { LocalPlant, LocalWateringSchedule } from './types';
+	import { plantMutations } from './mutations';
 
 	let { navigate }: ViewProps = $props();
+
+	let creating = $state(false);
+	let newName = $state('');
+	let newScientific = $state('');
+
+	async function handleCreate(e: SubmitEvent) {
+		e.preventDefault();
+		const name = newName.trim();
+		if (!name) return;
+		const plant = await plantMutations.create({
+			name,
+			scientificName: newScientific.trim() || undefined,
+		});
+		newName = '';
+		newScientific = '';
+		creating = false;
+		navigate('detail', {
+			plantId: plant.id,
+			_siblingIds: [...plants.map((p) => p.id), plant.id],
+			_siblingKey: 'plantId',
+		});
+	}
 
 	const plantsQuery = useLiveQueryWithDefault(async () => {
 		const all = await db.table<LocalPlant>('plants').toArray();
@@ -47,6 +70,47 @@
 </script>
 
 <BaseListView items={plants} getKey={(p) => p.id} emptyTitle={$_('planta.list.empty')}>
+	{#snippet toolbar()}
+		<div class="flex items-center justify-end">
+			<button
+				type="button"
+				class="text-xs text-white/50 transition-colors hover:text-white/80"
+				onclick={() => (creating = !creating)}
+			>
+				{creating
+					? $_('planta.create.cancel', { default: 'Abbrechen' })
+					: $_('planta.create.new', { default: '+ Neue Pflanze' })}
+			</button>
+		</div>
+
+		{#if creating}
+			<form class="flex flex-col gap-2 rounded-lg bg-white/5 p-3" onsubmit={handleCreate}>
+				<input
+					type="text"
+					bind:value={newName}
+					placeholder={$_('planta.create.namePlaceholder', { default: 'Name (z. B. Monstera)' })}
+					required
+					class="rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white placeholder:text-white/30 focus:border-white/20 focus:outline-none"
+				/>
+				<input
+					type="text"
+					bind:value={newScientific}
+					placeholder={$_('planta.create.scientificPlaceholder', {
+						default: 'Botanischer Name (optional)',
+					})}
+					class="rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white placeholder:text-white/30 focus:border-white/20 focus:outline-none"
+				/>
+				<button
+					type="submit"
+					class="rounded-md bg-green-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
+					disabled={!newName.trim()}
+				>
+					{$_('planta.create.save', { default: 'Pflanze anlegen' })}
+				</button>
+			</form>
+		{/if}
+	{/snippet}
+
 	{#snippet header()}
 		<span>{$_('planta.list.count', { values: { count: plants.length } })}</span>
 		{#if dueForWatering.length > 0}

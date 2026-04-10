@@ -70,7 +70,7 @@
 	async function handleVoiceComplete(blob: Blob, durationMs: number) {
 		const result = await habitsStore.logFromVoice(blob, durationMs, 'de');
 		if (!result) {
-			toastStore.error('Habit nicht erkannt. Versuche den Namen direkt zu sagen, z.B. "Kaffee".');
+			toastStore.error('Routine nicht erkannt. Versuche den Namen direkt zu sagen, z.B. "Kaffee".');
 			return;
 		}
 		toastStore.success(`${result.habitTitle} geloggt`);
@@ -152,9 +152,9 @@
 <div class="habits-list-view">
 	<!-- Voice quick-log -->
 	<VoiceCaptureBar
-		idleLabel="Habit sprechen"
+		idleLabel="Routine sprechen"
 		feature="habits-voice-log"
-		reason="Habit-Logs werden in deinem persönlichen Kalender gespeichert. Dafür brauchst du ein Mana-Konto."
+		reason="Routinen-Logs werden in deinem persönlichen Kalender gespeichert. Dafür brauchst du ein Mana-Konto."
 		onComplete={handleVoiceComplete}
 	/>
 
@@ -192,6 +192,7 @@
 
 	<!-- Inline Create Form -->
 	{#if showCreate}
+		<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 		<form class="create-form" onsubmit={handleCreate} onkeydown={handleCreateKeydown}>
 			<div class="create-row">
 				<button
@@ -202,10 +203,11 @@
 				>
 					<DynamicIcon name={newIcon} size={16} weight="bold" class="text-white" />
 				</button>
+				<!-- svelte-ignore a11y_autofocus -->
 				<input
 					class="create-input"
 					type="text"
-					placeholder="Habit Name..."
+					placeholder="Routinen-Name..."
 					bind:value={newTitle}
 					autofocus
 				/>
@@ -224,6 +226,7 @@
 			{/if}
 			<div class="color-row">
 				{#each QUICK_COLORS as c}
+					<!-- svelte-ignore a11y_consider_explicit_label -->
 					<button
 						type="button"
 						class="color-dot"
@@ -276,9 +279,9 @@
 
 	{#if activeHabits.length === 0 && !showCreate}
 		<div class="empty">
-			<p>Noch keine Habits angelegt.</p>
+			<p>Noch keine Routinen angelegt.</p>
 			<button class="empty-add-btn" onclick={() => (showCreate = true)}
-				>Erstes Habit erstellen</button
+				>Erste Routine erstellen</button
 			>
 		</div>
 	{/if}

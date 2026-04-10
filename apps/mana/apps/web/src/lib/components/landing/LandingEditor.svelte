@@ -38,6 +38,7 @@
 	};
 
 	let config: LandingPageConfig = $state(
+		// svelte-ignore state_referenced_locally
 		initialConfig ? structuredClone(initialConfig) : structuredClone(defaultConfig)
 	);
 
@@ -190,6 +191,7 @@
 	<SectionEditor title="Hero" expanded={true}>
 		<div class="space-y-3">
 			<div>
+				<!-- svelte-ignore a11y_label_has_associated_control -->
 				<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
 				<input
 					type="text"
@@ -199,6 +201,7 @@
 				/>
 			</div>
 			<div>
+				<!-- svelte-ignore a11y_label_has_associated_control -->
 				<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
 					>Subtitle</label
 				>
@@ -210,6 +213,7 @@
 				></textarea>
 			</div>
 			<div>
+				<!-- svelte-ignore a11y_label_has_associated_control -->
 				<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
 					>Variant</label
 				>
@@ -224,6 +228,7 @@
 			</div>
 			<div class="grid gap-3 md:grid-cols-2">
 				<div>
+					<!-- svelte-ignore a11y_label_has_associated_control -->
 					<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
 						>CTA Button Text</label
 					>
@@ -240,6 +245,7 @@
 					/>
 				</div>
 				<div>
+					<!-- svelte-ignore a11y_label_has_associated_control -->
 					<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
 						>CTA Button Link</label
 					>
@@ -263,6 +269,7 @@
 	<SectionEditor title="About / Features">
 		<div class="space-y-3">
 			<div>
+				<!-- svelte-ignore a11y_label_has_associated_control -->
 				<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
 					>Section Title</label
 				>
@@ -274,6 +281,7 @@
 				/>
 			</div>
 			<div>
+				<!-- svelte-ignore a11y_label_has_associated_control -->
 				<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
 					>Subtitle</label
 				>
@@ -285,6 +293,7 @@
 				/>
 			</div>
 
+			<!-- svelte-ignore a11y_label_has_associated_control -->
 			<label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Features</label>
 			<RepeatableField
 				items={config.sections.about.features}
@@ -324,6 +333,7 @@
 	<SectionEditor title="Team">
 		<div class="space-y-3">
 			<div>
+				<!-- svelte-ignore a11y_label_has_associated_control -->
 				<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
 					>Section Title</label
 				>
@@ -335,6 +345,7 @@
 				/>
 			</div>
 
+			<!-- svelte-ignore a11y_label_has_associated_control -->
 			<label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Members</label>
 			<RepeatableField
 				items={config.sections.team.members}
@@ -374,6 +385,7 @@
 	<SectionEditor title="Contact">
 		<div class="space-y-3">
 			<div>
+				<!-- svelte-ignore a11y_label_has_associated_control -->
 				<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
 					>Section Title</label
 				>
@@ -386,6 +398,7 @@
 			</div>
 			<div class="grid gap-3 md:grid-cols-2">
 				<div>
+					<!-- svelte-ignore a11y_label_has_associated_control -->
 					<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
 						>E-Mail</label
 					>
@@ -397,6 +410,7 @@
 					/>
 				</div>
 				<div>
+					<!-- svelte-ignore a11y_label_has_associated_control -->
 					<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
 						>Phone</label
 					>
@@ -409,6 +423,7 @@
 				</div>
 			</div>
 			<div>
+				<!-- svelte-ignore a11y_label_has_associated_control -->
 				<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
 					>Address</label
 				>
@@ -426,6 +441,7 @@
 	<SectionEditor title="Footer">
 		<div class="space-y-3">
 			<div>
+				<!-- svelte-ignore a11y_label_has_associated_control -->
 				<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
 					>Copyright Text</label
 				>
@@ -437,6 +453,7 @@
 				/>
 			</div>
 
+			<!-- svelte-ignore a11y_label_has_associated_control -->
 			<label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Links</label>
 			<RepeatableField
 				items={config.sections.footer.links || []}

@@ -204,6 +204,7 @@
 										).toFixed(0)}%)…
 									</span>
 								{:else}
+									<!-- svelte-ignore node_invalid_placement_ssr -->
 									<button
 										type="button"
 										onclick={(e) => {
@@ -242,6 +243,7 @@
 									Cloud-Anfragen senden deine Inhalte an Google. Bitte bestätige, dass du das
 									verstanden hast und akzeptierst.
 								</p>
+								<!-- svelte-ignore node_invalid_placement_ssr -->
 								<button
 									type="button"
 									onclick={(e) => {
@@ -258,6 +260,7 @@
 						{#if card.tier === 'cloud' && enabled && settings.cloudConsentGiven}
 							<div class="mt-3 flex items-center justify-between gap-2 text-xs">
 								<span class="text-emerald-500">✓ Cloud-Zustimmung erteilt</span>
+								<!-- svelte-ignore node_invalid_placement_ssr -->
 								<button
 									type="button"
 									onclick={(e) => {

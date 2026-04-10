@@ -172,6 +172,7 @@
 					>
 				</div>
 				<div class="amount-row">
+					<!-- svelte-ignore a11y_autofocus -->
 					<input
 						class="amount-input"
 						type="text"

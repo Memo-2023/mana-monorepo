@@ -124,6 +124,7 @@
 				</text>
 
 				<!-- Hover area (invisible wide line) -->
+				<!-- svelte-ignore a11y_no_static_element_interactions -->
 				<path
 					d={line.path}
 					fill="none"

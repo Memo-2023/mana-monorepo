@@ -42,7 +42,9 @@
 		deleteConfirmMessage = 'Möchtest du diesen Tag wirklich löschen?',
 	}: Props = $props();
 
+	// svelte-ignore state_referenced_locally
 	let name = $state(tag?.name ?? '');
+	// svelte-ignore state_referenced_locally
 	let color = $state(tag?.color ?? tag?.style?.color ?? DEFAULT_TAG_COLOR);
 
 	// Reset form when tag changes

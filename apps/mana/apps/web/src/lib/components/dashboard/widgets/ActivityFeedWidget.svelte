@@ -88,6 +88,7 @@
 				{@const TypeIcon = typeIcons[block.type] ?? CalendarBlank}
 				{@const habitIcon =
 					block.type === 'habit' && block.icon ? getIconComponent(block.icon) : null}
+				{@const Icon = habitIcon ?? TypeIcon}
 				<div
 					class="flex items-center gap-2.5 rounded-lg px-2 py-1.5 transition-colors hover:bg-surface-hover"
 				>
@@ -96,11 +97,7 @@
 						class:animate-pulse={block.isLive}
 						style="background: {block.color || '#6b7280'}20; color: {block.color || '#6b7280'}"
 					>
-						{#if habitIcon}
-							<svelte:component this={habitIcon} size={12} />
-						{:else}
-							<svelte:component this={TypeIcon} size={12} />
-						{/if}
+						<Icon size={12} />
 					</div>
 
 					<div class="min-w-0 flex-1">

@@ -33,6 +33,7 @@ export function toDream(local: LocalDream): Dream {
 		audioPath: local.audioPath,
 		audioDurationMs: local.audioDurationMs ?? null,
 		transcript: local.transcript,
+		transcriptModel: local.transcriptModel ?? null,
 		processingStatus: local.processingStatus ?? 'idle',
 		processingError: local.processingError ?? null,
 		interpretation: local.interpretation,

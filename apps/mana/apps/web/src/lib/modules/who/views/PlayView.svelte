@@ -272,6 +272,7 @@
 			<p class="mb-3 text-xs text-white/50">
 				Wenn die KI deine Vermutung nicht erkannt hat, kannst du den Namen hier direkt eintragen.
 			</p>
+			<!-- svelte-ignore a11y_autofocus -->
 			<input
 				type="text"
 				bind:value={guessText}

@@ -27,6 +27,7 @@ export function toNote(local: LocalNote): Note {
 		title: local.title,
 		content: local.content,
 		color: local.color,
+		transcriptModel: local.transcriptModel ?? null,
 		isPinned: local.isPinned,
 		isArchived: local.isArchived,
 		createdAt: local.createdAt ?? new Date().toISOString(),

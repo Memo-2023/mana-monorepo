@@ -22,6 +22,7 @@
 	const showTabs = $derived(config.showTabs ?? (hasShortcuts && hasSyntax));
 
 	// Active tab state
+	// svelte-ignore state_referenced_locally
 	let activeTab = $state<'shortcuts' | 'syntax'>(config.defaultTab ?? 'shortcuts');
 
 	// Reset to default tab when modal opens

@@ -10,6 +10,7 @@ import { toMemo } from '../queries';
 import { createArchiveOps } from '@mana/shared-stores';
 import { MemoroEvents } from '@mana/shared-utils/analytics';
 import { encryptRecord } from '$lib/data/crypto';
+import { transcribeAudio } from '$lib/voice/transcribe';
 import { llmTaskQueue } from '$lib/llm-queue';
 import { generateTitleTask } from '$lib/llm-tasks/generate-title';
 import type { LocalMemo } from '../types';
@@ -36,6 +37,7 @@ export const memosStore = {
 			intro: null,
 			transcript: data.transcript ?? null,
 			audioDurationMs: data.audioDurationMs ?? null,
+			transcriptModel: null,
 			processingStatus: data.processingStatus ?? (data.transcript ? 'completed' : 'pending'),
 			isArchived: false,
 			isPinned: false,
@@ -80,37 +82,15 @@ export const memosStore = {
 	 */
 	async transcribeBlob(memoId: string, blob: Blob, language?: string): Promise<void> {
 		try {
-			const form = new FormData();
-			const ext = blob.type.includes('webm')
-				? '.webm'
-				: blob.type.includes('mp4')
-					? '.m4a'
-					: '.audio';
-			form.append('file', blob, `memo${ext}`);
-			if (language) form.append('language', language);
+			const result = await transcribeAudio(blob, language);
 
-			const response = await fetch('/api/v1/voice/transcribe', {
-				method: 'POST',
-				body: form,
-			});
-
-			if (!response.ok) {
-				const text = await response.text();
-				throw new Error(text || `HTTP ${response.status}`);
-			}
-
-			const result = (await response.json()) as {
-				text: string;
-				language: string | null;
-				durationSeconds: number | null;
-			};
-
-			const transcript = (result.text ?? '').trim();
+			const transcript = result.text;
 			const existing = await memoTable.get(memoId);
 			if (!existing) return;
 
 			const diff: Partial<LocalMemo> = {
 				transcript,
+				transcriptModel: result.model,
 				language: existing.language ?? result.language ?? null,
 				processingStatus: 'completed',
 				updatedAt: new Date().toISOString(),

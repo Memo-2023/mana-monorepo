@@ -83,6 +83,7 @@
 <div class="note-detail">
 	{#if note}
 		<header class="detail-header">
+			<!-- svelte-ignore a11y_consider_explicit_label -->
 			<button class="back-btn" onclick={handleBack}>
 				<svg
 					width="20"
@@ -127,6 +128,7 @@
 		<div class="detail-footer">
 			<div class="color-row">
 				{#each NOTE_COLORS as c}
+					<!-- svelte-ignore a11y_consider_explicit_label -->
 					<button
 						type="button"
 						class="color-dot"

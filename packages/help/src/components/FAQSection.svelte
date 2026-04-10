@@ -11,6 +11,7 @@
 		expandFirst = false,
 	}: FAQSectionProps = $props();
 
+	// svelte-ignore state_referenced_locally
 	let expandedId = $state<string | null>(expandFirst && items.length > 0 ? items[0].id : null);
 	let selectedCategory = $state<FAQCategory | 'all'>('all');
 	let showAll = $state(false);

@@ -120,8 +120,9 @@
 		{:else if event.blockType === 'timeEntry'}
 			<span class="type-icon"><Timer size={10} weight="bold" /></span>
 		{:else if event.blockType === 'habit' && habitIconComponent}
+			{@const HabitIcon = habitIconComponent}
 			<span class="type-icon">
-				<svelte:component this={habitIconComponent} size={10} weight="bold" />
+				<HabitIcon size={10} weight="bold" />
 			</span>
 		{:else if event.blockType === 'focus'}
 			<span class="type-icon"><Lightning size={10} weight="bold" /></span>

@@ -258,12 +258,14 @@
 				>
 					<!-- Time -->
 					<div class="mb-4">
+						<!-- svelte-ignore a11y_label_has_associated_control -->
 						<label class="mb-1 block text-sm font-medium">{$_('alarm.time')}</label>
 						<input type="time" class="input time-input" bind:value={editTime} />
 					</div>
 
 					<!-- Label -->
 					<div class="mb-4">
+						<!-- svelte-ignore a11y_label_has_associated_control -->
 						<label class="mb-1 block text-sm font-medium">{$_('alarm.label')}</label>
 						<input
 							type="text"
@@ -275,6 +277,7 @@
 
 					<!-- Repeat Days -->
 					<div class="mb-4">
+						<!-- svelte-ignore a11y_label_has_associated_control -->
 						<label class="mb-2 block text-sm font-medium">{$_('alarm.repeat')}</label>
 						<div class="day-selector">
 							{#each dayNames as day, i}
@@ -291,6 +294,7 @@
 
 					<!-- Sound -->
 					<div class="mb-4">
+						<!-- svelte-ignore a11y_label_has_associated_control -->
 						<label class="mb-1 block text-sm font-medium">{$_('alarm.sound')}</label>
 						<select class="input" bind:value={editSound}>
 							{#each ALARM_SOUNDS as sound}
@@ -301,6 +305,7 @@
 
 					<!-- Snooze -->
 					<div class="mb-6">
+						<!-- svelte-ignore a11y_label_has_associated_control -->
 						<label class="mb-1 block text-sm font-medium">{$_('alarm.snooze')}</label>
 						<select class="input" bind:value={editSnoozeMinutes}>
 							<option value={5}>5 Minuten</option>

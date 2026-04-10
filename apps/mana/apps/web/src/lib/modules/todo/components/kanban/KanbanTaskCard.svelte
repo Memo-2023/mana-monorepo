@@ -98,6 +98,7 @@
 		<!-- Content -->
 		<div class="min-w-0 flex-1">
 			{#if isEditing}
+				<!-- svelte-ignore a11y_autofocus -->
 				<input
 					bind:value={editTitle}
 					onblur={saveTitle}

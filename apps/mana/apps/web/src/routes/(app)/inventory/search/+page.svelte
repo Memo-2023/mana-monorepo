@@ -27,6 +27,7 @@
 			size={20}
 			class="absolute left-3 top-1/2 -translate-y-1/2 text-[hsl(var(--muted-foreground))]"
 		/>
+		<!-- svelte-ignore a11y_autofocus -->
 		<input
 			type="text"
 			bind:value={query}

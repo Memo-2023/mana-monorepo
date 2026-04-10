@@ -135,6 +135,7 @@
 										{/if}
 									</div>
 									<!-- svelte-ignore a11y_no_static_element_interactions -->
+									<!-- svelte-ignore a11y_interactive_supports_focus -->
 									<span
 										class="event-title agenda-event-title"
 										contenteditable="true"

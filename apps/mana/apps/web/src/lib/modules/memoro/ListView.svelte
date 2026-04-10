@@ -91,14 +91,23 @@
 						<p class="mt-0.5 truncate text-xs text-white/40">{memo.intro}</p>
 					{/if}
 				</div>
-				<span
-					class="shrink-0 rounded px-1.5 py-0.5 text-[10px] {statusColors[memo.processingStatus] ??
-						''}"
-				>
-					{memo.processingStatus === 'completed'
-						? formatDuration(memo.audioDurationMs)
-						: memo.processingStatus}
-				</span>
+				<div class="flex items-center gap-1.5 shrink-0">
+					{#if memo.transcriptModel && memo.processingStatus === 'completed'}
+						<span
+							class="rounded px-1 py-0.5 text-[9px] bg-white/5 text-white/30"
+							title="STT-Pipeline"
+						>
+							{memo.transcriptModel}
+						</span>
+					{/if}
+					<span
+						class="rounded px-1.5 py-0.5 text-[10px] {statusColors[memo.processingStatus] ?? ''}"
+					>
+						{memo.processingStatus === 'completed'
+							? formatDuration(memo.audioDurationMs)
+							: memo.processingStatus}
+					</span>
+				</div>
 			</div>
 		</button>
 	{/snippet}

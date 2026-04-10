@@ -191,6 +191,7 @@
 					>
 					<div class="flex items-center gap-2 px-4">
 						{#each currentSlides as _, index}
+							<!-- svelte-ignore a11y_consider_explicit_label -->
 							<button
 								onclick={() => goToSlide(index)}
 								class="w-2 h-2 rounded-full transition-all"

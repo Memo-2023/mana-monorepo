@@ -86,12 +86,14 @@ export const POST: RequestHandler = async ({ request }) => {
 		text: string;
 		language?: string;
 		duration_seconds?: number;
+		model?: string;
 	};
 
 	return json({
 		text: result.text ?? '',
 		language: result.language ?? null,
 		durationSeconds: result.duration_seconds ?? null,
+		model: result.model ?? null,
 	});
 };
 

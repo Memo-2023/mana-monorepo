@@ -32,6 +32,7 @@ export function toTask(local: LocalTask): Task {
 		completedAt: local.completedAt,
 		order: local.order,
 		subtasks: local.subtasks ?? null,
+		transcriptModel: local.transcriptModel ?? null,
 		metadata: local.metadata ?? null,
 		createdAt: local.createdAt ?? new Date().toISOString(),
 		updatedAt: local.updatedAt ?? new Date().toISOString(),

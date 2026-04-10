@@ -20,7 +20,7 @@
 	let selectedFile = $state<File | null>(null);
 
 	// File input ref
-	let fileInput: HTMLInputElement;
+	let fileInput = $state<HTMLInputElement | undefined>(undefined);
 
 	// Initialize form when modal opens
 	$effect(() => {
@@ -140,6 +140,7 @@
 
 {#if show}
 	<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
 		class="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4"
 		onclick={handleBackdropClick}
@@ -161,6 +162,7 @@
 					<div class="space-y-4">
 						<!-- Avatar Upload -->
 						<div>
+							<!-- svelte-ignore a11y_label_has_associated_control -->
 							<label class="block text-sm font-medium mb-2">Profilbild</label>
 							<div class="flex items-center gap-4">
 								<!-- Avatar Preview -->

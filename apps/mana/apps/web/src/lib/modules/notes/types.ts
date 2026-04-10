@@ -12,6 +12,8 @@ export interface LocalNote extends BaseRecord {
 	title: string;
 	content: string;
 	color: string | null;
+	/** STT backend/model identifier. Set when note created via voice. */
+	transcriptModel?: string | null;
 	isPinned: boolean;
 	isArchived: boolean;
 }
@@ -23,6 +25,7 @@ export interface Note {
 	title: string;
 	content: string;
 	color: string | null;
+	transcriptModel: string | null;
 	isPinned: boolean;
 	isArchived: boolean;
 	createdAt: string;

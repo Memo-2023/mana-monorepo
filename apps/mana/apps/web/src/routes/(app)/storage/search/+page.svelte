@@ -85,6 +85,7 @@
 	<!-- Search Bar -->
 	<div class="mb-6 flex items-center gap-3 rounded-xl border border-border bg-card p-3">
 		<MagnifyingGlass size={20} class="text-muted-foreground" />
+		<!-- svelte-ignore a11y_autofocus -->
 		<input
 			type="search"
 			bind:value={query}

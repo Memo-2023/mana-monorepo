@@ -11,6 +11,7 @@ export interface LocalMemo extends BaseRecord {
 	intro: string | null;
 	transcript: string | null;
 	audioDurationMs: number | null;
+	transcriptModel: string | null;
 	processingStatus: ProcessingStatus;
 	isArchived: boolean;
 	isPinned: boolean;
@@ -79,6 +80,7 @@ export interface Memo {
 	intro: string | null;
 	transcript: string | null;
 	audioDurationMs: number | null;
+	transcriptModel: string | null;
 	processingStatus: ProcessingStatus;
 	isArchived: boolean;
 	isPinned: boolean;

@@ -135,7 +135,7 @@
 	});
 
 	// Icon for action type
-	const actionIcon = $derived.by(() => {
+	const ActionIcon = $derived.by(() => {
 		switch (action) {
 			case 'save':
 				return CloudArrowUp;
@@ -212,6 +212,7 @@
 		role="presentation"
 		tabindex="-1"
 	>
+		<!-- svelte-ignore a11y_click_events_have_key_events -->
 		<div
 			class="bg-card border-border relative mx-4 w-full max-w-md rounded-xl border p-6 shadow-2xl"
 			role="dialog"
@@ -235,7 +236,7 @@
 			<div
 				class="bg-primary/10 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full"
 			>
-				<svelte:component this={actionIcon} size={32} class="text-primary" />
+				<ActionIcon size={32} class="text-primary" />
 			</div>
 
 			<!-- Title -->

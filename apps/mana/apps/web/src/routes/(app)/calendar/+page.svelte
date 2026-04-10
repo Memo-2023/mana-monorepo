@@ -262,6 +262,7 @@
 {#if showCreateForm}
 	<div class="modal-backdrop" role="presentation">
 		<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		<div
 			class="modal-backdrop-inner"
 			onclick={(e) => e.target === e.currentTarget && (showCreateForm = false)}

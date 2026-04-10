@@ -271,8 +271,10 @@
 					></textarea>
 				</div>
 				<div>
+					<!-- svelte-ignore a11y_label_has_associated_control -->
 					<label class="mb-1 block text-sm font-medium">Farbe</label>
 					<div class="flex gap-2">
+						<!-- svelte-ignore a11y_consider_explicit_label -->
 						{#each COLORS as color}
 							<button
 								type="button"

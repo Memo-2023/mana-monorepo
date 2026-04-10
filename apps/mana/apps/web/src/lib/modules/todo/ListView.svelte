@@ -204,10 +204,13 @@
 				</div>
 				<div class="task-content">
 					<p class="task-title" class:completed={task.isCompleted}>{task.title}</p>
-					{#if task.dueDate || taskTags.length > 0}
+					{#if task.dueDate || taskTags.length > 0 || task.transcriptModel}
 						<div class="task-meta">
 							{#if task.dueDate}
 								<span class="task-due">{new Date(task.dueDate).toLocaleDateString('de')}</span>
+							{/if}
+							{#if task.transcriptModel}
+								<span class="stt-chip" title="STT-Pipeline">&#x1f3a4; {task.transcriptModel}</span>
 							{/if}
 							{#each taskTags as tag (tag.id)}
 								<span class="tag-pill" style="--tag-color: {tag.color}">
@@ -365,6 +368,17 @@
 	.task-due {
 		font-size: 0.6875rem;
 		color: hsl(var(--color-muted-foreground));
+	}
+	.stt-chip {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.125rem;
+		padding: 0 0.375rem;
+		border-radius: 9999px;
+		background: hsl(var(--color-muted) / 0.6);
+		color: hsl(var(--color-muted-foreground));
+		font-size: 0.5625rem;
+		line-height: 1.25rem;
 	}
 	.tag-pill {
 		display: inline-flex;

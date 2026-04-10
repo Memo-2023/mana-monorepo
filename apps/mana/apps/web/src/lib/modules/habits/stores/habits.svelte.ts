@@ -156,25 +156,12 @@ export const habitsStore = {
 		_durationMs: number,
 		language = 'de'
 	): Promise<{ logId: string; habitTitle: string } | null> {
-		// Step 1: speech to text
+		// Step 1: speech to text (shared helper)
 		let transcript: string;
 		try {
-			const form = new FormData();
-			const ext = blob.type.includes('webm')
-				? '.webm'
-				: blob.type.includes('mp4')
-					? '.m4a'
-					: '.audio';
-			form.append('file', blob, `habit${ext}`);
-			if (language) form.append('language', language);
-
-			const sttResponse = await fetch('/api/v1/voice/transcribe', {
-				method: 'POST',
-				body: form,
-			});
-			if (!sttResponse.ok) return null;
-			const sttResult = (await sttResponse.json()) as { text: string };
-			transcript = (sttResult.text ?? '').trim();
+			const { transcribeAudio } = await import('$lib/voice/transcribe');
+			const result = await transcribeAudio(blob, language);
+			transcript = result.text;
 		} catch {
 			return null;
 		}

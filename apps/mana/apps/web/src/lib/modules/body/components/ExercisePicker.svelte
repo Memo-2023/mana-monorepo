@@ -104,6 +104,7 @@
 			<button type="button" class="close" onclick={onClose} aria-label="Schließen">×</button>
 		</header>
 
+		<!-- svelte-ignore a11y_autofocus -->
 		<input
 			class="search"
 			type="search"

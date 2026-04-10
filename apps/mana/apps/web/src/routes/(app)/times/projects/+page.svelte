@@ -164,6 +164,7 @@
 			<!-- Color Picker -->
 			<div class="flex flex-wrap gap-2">
 				{#each PROJECT_COLORS as color}
+					<!-- svelte-ignore a11y_consider_explicit_label -->
 					<button
 						type="button"
 						onclick={() => (newColor = color)}
@@ -238,6 +239,7 @@
 							</select>
 							<div class="flex flex-wrap gap-1.5">
 								{#each PROJECT_COLORS as color}
+									<!-- svelte-ignore a11y_consider_explicit_label -->
 									<button
 										type="button"
 										onclick={() => {

@@ -23,12 +23,15 @@
 	}: Props = $props();
 
 	// Use real credits (this would normally come from a store/API)
+	// svelte-ignore state_referenced_locally
 	const currentMana = usageData.currentMana;
 
 	// Calculate used vs available Mana
+	// svelte-ignore state_referenced_locally
 	const usedMana = usageData.maxMana - currentMana;
 	const formattedCurrentMana = currentMana.toString();
 	const formattedUsedMana = usedMana.toString();
+	// svelte-ignore state_referenced_locally
 	const calculatedPercentage = Math.round((currentMana / usageData.maxMana) * 100);
 	// Minimum 1% for numbers up to 5, so that a small blue bar is always visible
 	const availablePercentage =

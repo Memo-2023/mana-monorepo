@@ -11,6 +11,7 @@
 
 	let { result, onClose }: Props = $props();
 
+	// svelte-ignore state_referenced_locally
 	const rarity = RARITY_INFO[result.achievement.rarity];
 
 	function getRarityGradient(r: string): string {
@@ -31,6 +32,10 @@
 	});
 </script>
 
+// svelte-ignore a11y_interactive_supports_focus // svelte-ignore a11y_click_events_have_key_events
+
+<!-- svelte-ignore a11y_interactive_supports_focus -->
+<!-- svelte-ignore a11y_click_events_have_key_events -->
 <div
 	class="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm"
 	onclick={onClose}

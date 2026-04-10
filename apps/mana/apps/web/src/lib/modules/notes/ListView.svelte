@@ -149,12 +149,14 @@
 		{#each filtered as note (note.id)}
 			{#if editingId === note.id}
 				<!-- Inline editor -->
+				<!-- svelte-ignore a11y_no_static_element_interactions -->
 				<div
 					class="note-item editing"
 					onkeydown={(e) => {
 						if (e.key === 'Escape') saveEdit();
 					}}
 				>
+					<!-- svelte-ignore a11y_autofocus -->
 					<input
 						class="ed-title"
 						type="text"
@@ -190,7 +192,12 @@
 						{#if note.content}
 							<p class="note-preview">{getPreview(note.content, 60)}</p>
 						{/if}
-						<span class="note-meta">{formatRelativeTime(note.updatedAt)}</span>
+						<span class="note-meta">
+							{formatRelativeTime(note.updatedAt)}
+							{#if note.transcriptModel}
+								<span class="stt-chip" title="STT-Pipeline">&#x1f3a4; {note.transcriptModel}</span>
+							{/if}
+						</span>
 					</div>
 				</button>
 			{/if}
@@ -324,8 +331,20 @@
 		white-space: nowrap;
 	}
 	.note-meta {
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
 		font-size: 0.625rem;
 		color: hsl(var(--color-muted-foreground));
+	}
+	.stt-chip {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.125rem;
+		padding: 0 0.375rem;
+		border-radius: 9999px;
+		background: hsl(var(--color-muted) / 0.6);
+		font-size: 0.5625rem;
 	}
 
 	/* ── Inline Editor ──────────────────────────── */

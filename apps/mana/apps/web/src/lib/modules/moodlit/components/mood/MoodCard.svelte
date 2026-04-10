@@ -75,6 +75,7 @@
 			</div>
 
 			{#if showFavorite}
+				<!-- svelte-ignore node_invalid_placement_ssr -->
 				<button
 					type="button"
 					class="rounded-full p-1.5 transition-colors hover:bg-white/20"

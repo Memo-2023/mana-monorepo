@@ -144,6 +144,7 @@
 		</span>
 	</div>
 
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<svg
 		bind:this={svgEl}
 		viewBox={viewBoxStr}
@@ -176,6 +177,7 @@
 		<Ambient {hour} />
 
 		<!-- Layer 6: Plants (apps) sorted by y-position for depth -->
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		{#each apps.toSorted((a, b) => a.position.y - b.position.y) as app (app.id)}
 			<g
 				onmouseenter={(e) => handleAppHover(app, e)}

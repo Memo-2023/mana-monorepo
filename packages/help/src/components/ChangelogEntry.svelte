@@ -28,7 +28,9 @@
 		});
 	}
 
+	// svelte-ignore state_referenced_locally
 	const typeLabels = translations.changelog.types;
+	// svelte-ignore state_referenced_locally
 	const changeLabels = translations.changelog.labels;
 </script>
 

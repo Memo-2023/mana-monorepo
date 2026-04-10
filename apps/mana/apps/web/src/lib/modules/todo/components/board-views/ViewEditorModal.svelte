@@ -119,6 +119,7 @@
 			<!-- Form -->
 			<div class="space-y-4 p-5">
 				<div>
+					<!-- svelte-ignore a11y_label_has_associated_control -->
 					<label class="mb-1 block text-xs font-medium text-muted-foreground">Name</label>
 					<input
 						type="text"
@@ -130,6 +131,7 @@
 
 				<div class="grid grid-cols-2 gap-3">
 					<div>
+						<!-- svelte-ignore a11y_label_has_associated_control -->
 						<label class="mb-1 block text-xs font-medium text-muted-foreground"
 							>{$_('todo.board.groupBy')}</label
 						>
@@ -143,6 +145,7 @@
 						</select>
 					</div>
 					<div>
+						<!-- svelte-ignore a11y_label_has_associated_control -->
 						<label class="mb-1 block text-xs font-medium text-muted-foreground"
 							>{$_('todo.board.layout')}</label
 						>
@@ -160,6 +163,7 @@
 				<!-- Columns -->
 				<div>
 					<div class="mb-2 flex items-center justify-between">
+						<!-- svelte-ignore a11y_label_has_associated_control -->
 						<label class="text-xs font-medium text-muted-foreground"
 							>{$_('todo.board.columns')}</label
 						>

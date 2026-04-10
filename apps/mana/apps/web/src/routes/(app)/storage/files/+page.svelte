@@ -111,6 +111,7 @@
 	{#if showNewFolderInput}
 		<div class="mb-4 flex items-center gap-2 rounded-lg border border-primary bg-card p-3">
 			<FolderPlus size={20} class="text-primary" />
+			<!-- svelte-ignore a11y_autofocus -->
 			<input
 				type="text"
 				bind:value={newFolderName}

@@ -67,13 +67,21 @@
 	}: Props = $props();
 
 	const t = {
+		// svelte-ignore state_referenced_locally
 		locked: translations.locked ?? 'Gesperrt',
+		// svelte-ignore state_referenced_locally
 		comingSoon: translations.comingSoon ?? 'Bald verfügbar',
+		// svelte-ignore state_referenced_locally
 		premium: translations.premium ?? 'Premium',
+		// svelte-ignore state_referenced_locally
 		unlock: translations.unlock ?? 'Freischalten',
+		// svelte-ignore state_referenced_locally
 		lightPreview: translations.lightPreview ?? 'Hell',
+		// svelte-ignore state_referenced_locally
 		darkPreview: translations.darkPreview ?? 'Dunkel',
+		// svelte-ignore state_referenced_locally
 		pin: translations.pin ?? 'Anpinnen',
+		// svelte-ignore state_referenced_locally
 		unpin: translations.unpin ?? 'Lösen',
 	};
 

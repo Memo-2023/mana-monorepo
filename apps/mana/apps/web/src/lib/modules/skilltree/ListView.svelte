@@ -9,6 +9,7 @@
 	import type { ViewProps } from '$lib/app-registry';
 	import type { LocalSkill } from './types';
 	import { LEVEL_NAMES, BRANCH_INFO, xpProgress, type SkillBranch } from './types';
+	import { skillStore } from './stores/skills.svelte';
 
 	let { navigate }: ViewProps = $props();
 
@@ -21,9 +22,73 @@
 
 	const totalXp = $derived(skills.reduce((sum, s) => sum + s.totalXp, 0));
 	const highestLevel = $derived(Math.max(0, ...skills.map((s) => s.level)));
+
+	const branches = Object.entries(BRANCH_INFO) as [
+		SkillBranch,
+		(typeof BRANCH_INFO)[SkillBranch],
+	][];
+
+	let creating = $state(false);
+	let newName = $state('');
+	let newBranch = $state<SkillBranch>('custom');
+
+	async function handleCreate(e: SubmitEvent) {
+		e.preventDefault();
+		const name = newName.trim();
+		if (!name) return;
+		const skill = await skillStore.addSkill({ name, branch: newBranch });
+		newName = '';
+		newBranch = 'custom';
+		creating = false;
+		navigate('detail', {
+			skillId: skill.id,
+			_siblingIds: [...skills.map((s) => s.id), skill.id],
+			_siblingKey: 'skillId',
+		});
+	}
 </script>
 
 <BaseListView items={skills} getKey={(s) => s.id} emptyTitle="Keine Skills angelegt">
+	{#snippet toolbar()}
+		<div class="flex items-center justify-between">
+			<span class="text-xs text-white/40">{totalXp} XP · Level {highestLevel}</span>
+			<button
+				type="button"
+				class="text-xs text-white/50 transition-colors hover:text-white/80"
+				onclick={() => (creating = !creating)}
+			>
+				{creating ? 'Abbrechen' : '+ Neuer Skill'}
+			</button>
+		</div>
+
+		{#if creating}
+			<form class="flex flex-col gap-2 rounded-lg bg-white/5 p-3" onsubmit={handleCreate}>
+				<input
+					type="text"
+					bind:value={newName}
+					placeholder="Skill-Name (z. B. Gitarre, Python, Kochen)"
+					required
+					class="rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white placeholder:text-white/30 focus:border-white/20 focus:outline-none"
+				/>
+				<select
+					bind:value={newBranch}
+					class="rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white focus:border-white/20 focus:outline-none"
+				>
+					{#each branches as [key, info] (key)}
+						<option value={key}>{info.name}</option>
+					{/each}
+				</select>
+				<button
+					type="submit"
+					class="rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+					disabled={!newName.trim()}
+				>
+					Skill anlegen
+				</button>
+			</form>
+		{/if}
+	{/snippet}
+
 	{#snippet header()}
 		<span>{totalXp} XP</span>
 		<span>Level {highestLevel}</span>

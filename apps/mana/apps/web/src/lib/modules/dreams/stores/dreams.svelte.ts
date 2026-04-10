@@ -11,6 +11,7 @@
 import { dreamSymbolTable, dreamTable } from '../collections';
 import { toDream } from '../queries';
 import { encryptRecord } from '$lib/data/crypto';
+import { transcribeAudio } from '$lib/voice/transcribe';
 import type {
 	Dream,
 	DreamClarity,
@@ -54,6 +55,7 @@ export const dreamsStore = {
 			audioPath: null,
 			audioDurationMs: null,
 			transcript: null,
+			transcriptModel: null,
 			processingStatus: 'idle',
 			processingError: null,
 			interpretation: null,
@@ -146,6 +148,7 @@ export const dreamsStore = {
 			audioPath: null,
 			audioDurationMs: durationMs,
 			transcript: null,
+			transcriptModel: null,
 			processingStatus: 'transcribing',
 			processingError: null,
 			interpretation: null,
@@ -182,32 +185,9 @@ export const dreamsStore = {
 	 */
 	async transcribeBlob(dreamId: string, blob: Blob, language?: string): Promise<void> {
 		try {
-			const form = new FormData();
-			const ext = blob.type.includes('webm')
-				? '.webm'
-				: blob.type.includes('mp4')
-					? '.m4a'
-					: '.audio';
-			form.append('file', blob, `dream${ext}`);
-			if (language) form.append('language', language);
+			const result = await transcribeAudio(blob, language);
 
-			const response = await fetch('/api/v1/voice/transcribe', {
-				method: 'POST',
-				body: form,
-			});
-
-			if (!response.ok) {
-				const text = await response.text();
-				throw new Error(text || `HTTP ${response.status}`);
-			}
-
-			const result = (await response.json()) as {
-				text: string;
-				language: string | null;
-				durationSeconds: number | null;
-			};
-
-			const transcript = (result.text ?? '').trim();
+			const transcript = result.text;
 			const existing = await dreamTable.get(dreamId);
 			if (!existing) return;
 
@@ -219,6 +199,7 @@ export const dreamsStore = {
 
 			const diff: Partial<LocalDream> = {
 				transcript,
+				transcriptModel: result.model,
 				// Only fill content if user hasn't typed anything yet
 				content: decryptedExisting.content?.trim() ? decryptedExisting.content : transcript,
 				processingStatus: 'idle',

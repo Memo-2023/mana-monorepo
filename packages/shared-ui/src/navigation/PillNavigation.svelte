@@ -395,6 +395,7 @@
 	let appDrawerOpen = $state(false);
 
 	// Global spotlight (Cmd+K) — only active when spotlightActions are provided
+	// svelte-ignore state_referenced_locally
 	const spotlight = spotlightActions ? createGlobalSpotlightState() : null;
 
 	function isActive(path: string) {

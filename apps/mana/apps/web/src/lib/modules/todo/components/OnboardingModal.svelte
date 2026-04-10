@@ -34,6 +34,8 @@
 		},
 	]);
 
+	const StepIcon = $derived(steps[step].icon);
+
 	function next() {
 		if (step < steps.length - 1) {
 			step++;
@@ -62,7 +64,7 @@
 		>
 			<div class="flex flex-col items-center p-8 text-center">
 				<div class="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
-					<svelte:component this={steps[step].icon} size={32} class="text-primary" />
+					<StepIcon size={32} class="text-primary" />
 				</div>
 
 				<h2 class="mb-2 text-xl font-bold text-foreground">{steps[step].title}</h2>

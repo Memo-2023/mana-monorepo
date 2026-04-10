@@ -108,8 +108,9 @@
 				{#each [...typeCounts().entries()] as [type, count]}
 					{@const cfg = typeConfig[type]}
 					{#if cfg}
+						{@const Icon = cfg.icon}
 						<span class="flex items-center gap-1">
-							<svelte:component this={cfg.icon} size={12} />
+							<Icon size={12} />
 							{count}
 						</span>
 					{/if}
@@ -124,6 +125,7 @@
 				{@const habitIcon =
 					block.type === 'habit' && block.icon ? getIconComponent(block.icon) : null}
 				{@const duration = getBlockDuration(block)}
+				{@const Icon = habitIcon ?? cfg.icon}
 				<div
 					class="flex items-start gap-2.5 rounded-lg p-2 transition-colors hover:bg-surface-hover"
 				>
@@ -134,11 +136,7 @@
 							class:animate-pulse={block.isLive}
 							style="background-color: {block.color || '#6b7280'}"
 						></div>
-						{#if habitIcon}
-							<svelte:component this={habitIcon} size={14} class="text-muted-foreground" />
-						{:else}
-							<svelte:component this={cfg.icon} size={14} class="text-muted-foreground" />
-						{/if}
+						<Icon size={14} class="text-muted-foreground" />
 					</div>
 
 					<!-- Content -->

@@ -10,6 +10,7 @@ import { toTask } from '../queries';
 import type { LocalTask, TaskPriority, Subtask } from '../types';
 import { createBlock, updateBlock, deleteBlock } from '$lib/data/time-blocks/service';
 import { encryptRecord, decryptRecord } from '$lib/data/crypto';
+import { transcribeAudio } from '$lib/voice/transcribe';
 import { TodoEvents } from '@mana/shared-utils/analytics';
 import { tagCollection, type LocalTag } from '@mana/shared-stores';
 
@@ -181,26 +182,9 @@ export const tasksStore = {
 	 */
 	async transcribeAndParseIntoTask(taskId: string, blob: Blob, language?: string): Promise<void> {
 		try {
-			// Step 1: speech to text
-			const form = new FormData();
-			const ext = blob.type.includes('webm')
-				? '.webm'
-				: blob.type.includes('mp4')
-					? '.m4a'
-					: '.audio';
-			form.append('file', blob, `task${ext}`);
-			if (language) form.append('language', language);
-
-			const sttResponse = await fetch('/api/v1/voice/transcribe', {
-				method: 'POST',
-				body: form,
-			});
-			if (!sttResponse.ok) {
-				const text = await sttResponse.text();
-				throw new Error(text || `HTTP ${sttResponse.status}`);
-			}
-			const sttResult = (await sttResponse.json()) as { text: string };
-			const transcript = (sttResult.text ?? '').trim();
+			// Step 1: speech to text (shared helper)
+			const sttResult = await transcribeAudio(blob, language);
+			const transcript = sttResult.text;
 			if (!transcript) {
 				await this.updateTask(taskId, { title: 'Sprachaufgabe' });
 				return;
@@ -213,7 +197,10 @@ export const tasksStore = {
 			const parsed = await this.parseTaskText(transcript, language);
 			const matchedLabelIds = await matchLabelsToTagIds(parsed.labels);
 
-			const update: Record<string, unknown> = { title: parsed.title };
+			const update: Record<string, unknown> = {
+				title: parsed.title,
+				transcriptModel: sttResult.model,
+			};
 			if (parsed.dueDate) update.dueDate = parsed.dueDate;
 			if (parsed.priority) update.priority = parsed.priority;
 			await this.updateTask(taskId, update);

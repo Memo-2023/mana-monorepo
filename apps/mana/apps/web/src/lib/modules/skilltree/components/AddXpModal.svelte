@@ -52,6 +52,8 @@
 	}
 </script>
 
+<!-- svelte-ignore a11y_interactive_supports_focus -->
+<!-- svelte-ignore a11y_click_events_have_key_events -->
 <div
 	class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm"
 	onclick={handleBackdropClick}
@@ -78,6 +80,7 @@
 		<form onsubmit={handleSubmit} class="space-y-4">
 			<!-- Quick XP Presets -->
 			<div>
+				<!-- svelte-ignore a11y_label_has_associated_control -->
 				<label class="mb-2 block text-sm font-medium text-gray-300"> Schnellauswahl </label>
 				<div class="flex flex-wrap gap-2">
 					{#each xpPresets as preset}

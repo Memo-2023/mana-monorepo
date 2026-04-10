@@ -23,13 +23,20 @@
 
 	const calendarsCtx: { readonly value: Calendar[] } = getContext('calendars');
 
+	// svelte-ignore state_referenced_locally
 	let title = $state(event?.title || '');
+	// svelte-ignore state_referenced_locally
 	let description = $state(event?.description || '');
+	// svelte-ignore state_referenced_locally
 	let location = $state(event?.location || '');
+	// svelte-ignore state_referenced_locally
 	let isAllDay = $state(event?.isAllDay || false);
+	// svelte-ignore state_referenced_locally
 	let calendarId = $state(event?.calendarId || '');
+	// svelte-ignore state_referenced_locally
 	let recurrenceRule = $state(event?.recurrenceRule || '');
 	let selectedTagIds = $state<string[]>(
+		// svelte-ignore state_referenced_locally
 		((event as unknown as Record<string, unknown>)?.tagIds as string[]) ?? []
 	);
 

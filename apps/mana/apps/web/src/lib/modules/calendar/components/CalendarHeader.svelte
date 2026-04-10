@@ -116,12 +116,13 @@
 		<div class="filter-bar">
 			{#each blockTypeConfig as cfg}
 				{@const isActive = calendarViewStore.visibleBlockTypes.has(cfg.type)}
+				{@const Icon = cfg.icon}
 				<button
 					class="filter-chip"
 					class:active={isActive}
 					onclick={() => calendarViewStore.toggleBlockType(cfg.type)}
 				>
-					<svelte:component this={cfg.icon} size={14} />
+					<Icon size={14} />
 					{cfg.label}
 				</button>
 			{/each}

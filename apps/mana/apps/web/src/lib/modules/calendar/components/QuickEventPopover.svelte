@@ -48,9 +48,13 @@
 	let blockType = $state<QuickCreateType>('event');
 	let isAllDay = $state(false);
 	let recurrenceRule = $state<string | null>(null);
+	// svelte-ignore state_referenced_locally
 	let startDateStr = $state(format(startTime, 'yyyy-MM-dd'));
+	// svelte-ignore state_referenced_locally
 	let startTimeStr = $state(format(startTime, 'HH:mm'));
+	// svelte-ignore state_referenced_locally
 	let endDateStr = $state(format(endTime, 'yyyy-MM-dd'));
+	// svelte-ignore state_referenced_locally
 	let endTimeStr = $state(format(endTime, 'HH:mm'));
 
 	let titleInput: HTMLInputElement;
@@ -128,10 +132,12 @@
 	});
 </script>
 
+<!-- svelte-ignore a11y_no_static_element_interactions -->
 <svelte:window onkeydown={handleKeydown} />
 
 <!-- Backdrop (transparent - allows seeing calendar) -->
 <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div class="popover-backdrop" onclick={onClose}></div>
 
 <!-- Popover -->

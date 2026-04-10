@@ -21,6 +21,7 @@
 	let dashOffset = $derived(circumference - (percentage / 100) * circumference);
 
 	// Animation
+	// svelte-ignore state_referenced_locally
 	let animatedOffset = $state(circumference);
 	let mounted = $state(false);
 

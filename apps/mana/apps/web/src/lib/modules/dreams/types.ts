@@ -29,6 +29,8 @@ export interface LocalDream extends BaseRecord {
 	audioPath: string | null;
 	audioDurationMs: number | null;
 	transcript: string | null;
+	/** STT backend/model identifier (e.g. "whisperx-large-v3"). */
+	transcriptModel: string | null;
 	processingStatus: DreamProcessingStatus;
 	processingError: string | null;
 	interpretation: string | null;
@@ -71,6 +73,7 @@ export interface Dream {
 	audioPath: string | null;
 	audioDurationMs: number | null;
 	transcript: string | null;
+	transcriptModel: string | null;
 	processingStatus: DreamProcessingStatus;
 	processingError: string | null;
 	interpretation: string | null;

@@ -22,9 +22,13 @@
 	const allProjects = getContext<{ value: Project[] }>('projects');
 	const allClients = getContext<{ value: Client[] }>('clients');
 
+	// svelte-ignore state_referenced_locally
 	let editDescription = $state(entry.description);
+	// svelte-ignore state_referenced_locally
 	let editProjectId = $state(entry.projectId ?? '');
+	// svelte-ignore state_referenced_locally
 	let editIsBillable = $state(entry.isBillable);
+	// svelte-ignore state_referenced_locally
 	let editDurationMinutes = $state(Math.round(entry.duration / 60));
 
 	// Sync when entry changes

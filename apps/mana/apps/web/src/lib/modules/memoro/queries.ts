@@ -30,6 +30,7 @@ export function toMemo(local: LocalMemo): Memo {
 		intro: local.intro,
 		transcript: local.transcript,
 		audioDurationMs: local.audioDurationMs,
+		transcriptModel: local.transcriptModel ?? null,
 		processingStatus: local.processingStatus,
 		isArchived: local.isArchived,
 		isPinned: local.isPinned,

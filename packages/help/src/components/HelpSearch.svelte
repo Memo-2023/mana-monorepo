@@ -122,6 +122,7 @@
 			role="combobox"
 			aria-expanded={showResults}
 			aria-haspopup="listbox"
+			aria-controls="help-search-results"
 		/>
 		<div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
 			{#if isSearching}
@@ -162,6 +163,7 @@
 		<div
 			class="absolute z-50 mt-1 w-full rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800"
 			role="listbox"
+			id="help-search-results"
 		>
 			{#if results.length === 0}
 				<div class="p-4 text-center text-sm text-gray-500 dark:text-gray-400">

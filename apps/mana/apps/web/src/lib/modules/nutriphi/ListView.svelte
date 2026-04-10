@@ -54,8 +54,10 @@
 	// ─── Quick-add state ──────────────────────────────────────────
 	let quickText = $state('');
 	let quickSaving = $state(false);
-	let fileInput: HTMLInputElement | undefined = $state();
+	let cameraInput: HTMLInputElement | undefined = $state();
+	let galleryInput: HTMLInputElement | undefined = $state();
 	let photoUploading = $state(false);
+	let showPhotoMenu = $state(false);
 
 	async function submitText() {
 		const text = quickText.trim();
@@ -80,6 +82,20 @@
 			e.preventDefault();
 			void submitText();
 		}
+	}
+
+	function openCamera() {
+		showPhotoMenu = false;
+		cameraInput?.click();
+	}
+
+	function openGallery() {
+		showPhotoMenu = false;
+		galleryInput?.click();
+	}
+
+	function handleWindowClick(e: MouseEvent) {
+		if (showPhotoMenu) showPhotoMenu = false;
 	}
 
 	async function onPhotoSelected(event: Event) {
@@ -111,118 +127,158 @@
 			});
 			const pct =
 				analysis.confidence != null ? ` · KI ${Math.round(analysis.confidence * 100)}%` : '';
-			toast.success(`📷 Mahlzeit hinzugefügt${pct}`);
+			toast.success(`Mahlzeit hinzugefuegt${pct}`);
 		} catch (err) {
 			console.error('photo quick add failed:', err);
 			toast.error('Foto-Analyse fehlgeschlagen');
 		} finally {
 			photoUploading = false;
-			if (fileInput) fileInput.value = '';
+			if (cameraInput) cameraInput.value = '';
+			if (galleryInput) galleryInput.value = '';
 		}
 	}
 </script>
 
-<BaseListView items={todayMeals} getKey={(m) => m.id} emptyTitle="Noch keine Mahlzeiten heute">
-	{#snippet toolbar()}
-		<!-- Calorie progress -->
-		<div class="text-center">
-			<p class="text-2xl font-light text-white/90">{Math.round(totalCalories)}</p>
-			<p class="text-xs text-white/40">
+<!-- svelte-ignore a11y_click_events_have_key_events -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
+<div onclick={handleWindowClick}>
+	<BaseListView items={todayMeals} getKey={(m) => m.id} emptyTitle="Noch keine Mahlzeiten heute">
+		{#snippet toolbar()}
+			<!-- Calorie progress -->
+			<div class="text-center">
+				<p class="text-2xl font-light text-white/90">{Math.round(totalCalories)}</p>
+				<p class="text-xs text-white/40">
+					{#if goal}
+						von {goal.dailyCalories} kcal
+					{:else}
+						kcal heute
+					{/if}
+				</p>
 				{#if goal}
-					von {goal.dailyCalories} kcal
-				{:else}
-					kcal heute
-				{/if}
-			</p>
-			{#if goal}
-				<div class="mx-auto mt-2 h-1.5 w-32 rounded-full bg-white/10">
-					<div
-						class="h-full rounded-full transition-all {calorieProgress >= 100
-							? 'bg-green-400'
-							: 'bg-blue-400'}"
-						style="width: {calorieProgress}%"
-					></div>
-				</div>
-			{/if}
-		</div>
-
-		<!-- Quick-add bar -->
-		<div class="flex items-center gap-2">
-			<input
-				type="text"
-				bind:value={quickText}
-				onkeydown={onTextKeydown}
-				placeholder="Was hast du gegessen?"
-				disabled={quickSaving}
-				class="flex-1 rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white/90 placeholder:text-white/30 focus:border-white/20 focus:outline-none disabled:opacity-50"
-			/>
-			<button
-				type="button"
-				onclick={() => void submitText()}
-				disabled={!quickText.trim() || quickSaving}
-				aria-label="Mahlzeit speichern"
-				title="Speichern"
-				class="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white/70 transition-colors hover:bg-white/10 disabled:opacity-30"
-			>
-				{quickSaving ? '…' : '↵'}
-			</button>
-			<button
-				type="button"
-				onclick={() => fileInput?.click()}
-				disabled={photoUploading}
-				aria-label="Foto aufnehmen"
-				title="Foto"
-				class="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white/70 transition-colors hover:bg-white/10 disabled:opacity-30"
-			>
-				{photoUploading ? '…' : '📷'}
-			</button>
-			<input
-				bind:this={fileInput}
-				type="file"
-				accept="image/*"
-				capture="environment"
-				class="hidden"
-				onchange={onPhotoSelected}
-			/>
-		</div>
-	{/snippet}
-
-	{#snippet header()}
-		<span class="mx-auto">{Math.round(totalProtein)}g Protein · {todayMeals.length} Mahlzeiten</span
-		>
-	{/snippet}
-
-	{#snippet item(meal)}
-		<a
-			href="/nutriphi/{meal.id}"
-			class="mb-1 block min-h-[44px] rounded-md px-3 py-2 transition-colors hover:bg-white/5"
-		>
-			<div class="flex items-center justify-between gap-3">
-				<div class="min-w-0 flex-1">
-					<div class="flex items-center gap-2">
-						<span class="text-xs text-white/50"
-							>{mealTypeLabels[meal.mealType] ?? meal.mealType}</span
-						>
-						{#if meal.inputType === 'photo'}
-							<span class="text-xs text-white/40">📷</span>
-						{/if}
+					<div class="mx-auto mt-2 h-1.5 w-32 rounded-full bg-white/10">
+						<div
+							class="h-full rounded-full transition-all {calorieProgress >= 100
+								? 'bg-green-400'
+								: 'bg-blue-400'}"
+							style="width: {calorieProgress}%"
+						></div>
 					</div>
-					<p class="truncate text-sm text-white/70">{meal.description}</p>
-				</div>
-				{#if meal.photoThumbnailUrl || meal.photoUrl}
-					<img
-						src={meal.photoThumbnailUrl ?? meal.photoUrl}
-						alt={meal.description}
-						class="h-10 w-10 flex-shrink-0 rounded object-cover"
-						loading="lazy"
-					/>
-				{/if}
-				{#if meal.nutrition}
-					<span class="whitespace-nowrap text-xs text-white/50"
-						>{Math.round(meal.nutrition.calories)} kcal</span
-					>
 				{/if}
 			</div>
-		</a>
-	{/snippet}
-</BaseListView>
+
+			<!-- Quick-add bar -->
+			<div class="flex items-center gap-2">
+				<input
+					type="text"
+					bind:value={quickText}
+					onkeydown={onTextKeydown}
+					placeholder="Was hast du gegessen?"
+					disabled={quickSaving}
+					class="flex-1 rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white/90 placeholder:text-white/30 focus:border-white/20 focus:outline-none disabled:opacity-50"
+				/>
+				<button
+					type="button"
+					onclick={() => void submitText()}
+					disabled={!quickText.trim() || quickSaving}
+					aria-label="Mahlzeit speichern"
+					title="Speichern"
+					class="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white/70 transition-colors hover:bg-white/10 disabled:opacity-30"
+				>
+					{quickSaving ? '…' : '↵'}
+				</button>
+				<div class="relative">
+					<button
+						type="button"
+						onclick={(e) => {
+							e.stopPropagation();
+							showPhotoMenu = !showPhotoMenu;
+						}}
+						disabled={photoUploading}
+						aria-label="Foto hinzufuegen"
+						title="Foto"
+						class="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white/70 transition-colors hover:bg-white/10 disabled:opacity-30"
+					>
+						{photoUploading ? '...' : '📷'}
+					</button>
+					{#if showPhotoMenu}
+						<div
+							class="absolute bottom-full right-0 z-10 mb-1 flex flex-col overflow-hidden rounded-lg border border-white/10 bg-[hsl(var(--color-card))] shadow-lg"
+						>
+							<button
+								type="button"
+								onclick={openCamera}
+								class="flex items-center gap-2 whitespace-nowrap px-4 py-2.5 text-left text-sm text-white/80 transition-colors hover:bg-white/10"
+							>
+								<span>📸</span> Kamera
+							</button>
+							<button
+								type="button"
+								onclick={openGallery}
+								class="flex items-center gap-2 whitespace-nowrap px-4 py-2.5 text-left text-sm text-white/80 transition-colors hover:bg-white/10"
+							>
+								<span>🖼️</span> Mediathek
+							</button>
+						</div>
+					{/if}
+				</div>
+				<!-- Camera capture (mobile: opens camera directly) -->
+				<input
+					bind:this={cameraInput}
+					type="file"
+					accept="image/*"
+					capture="environment"
+					class="hidden"
+					onchange={onPhotoSelected}
+				/>
+				<!-- Gallery / file picker (no capture attr → opens gallery / file dialog) -->
+				<input
+					bind:this={galleryInput}
+					type="file"
+					accept="image/*"
+					class="hidden"
+					onchange={onPhotoSelected}
+				/>
+			</div>
+		{/snippet}
+
+		{#snippet header()}
+			<span class="mx-auto"
+				>{Math.round(totalProtein)}g Protein · {todayMeals.length} Mahlzeiten</span
+			>
+		{/snippet}
+
+		{#snippet item(meal)}
+			<a
+				href="/nutriphi/{meal.id}"
+				class="mb-1 block min-h-[44px] rounded-md px-3 py-2 transition-colors hover:bg-white/5"
+			>
+				<div class="flex items-center justify-between gap-3">
+					<div class="min-w-0 flex-1">
+						<div class="flex items-center gap-2">
+							<span class="text-xs text-white/50"
+								>{mealTypeLabels[meal.mealType] ?? meal.mealType}</span
+							>
+							{#if meal.inputType === 'photo'}
+								<span class="text-xs text-white/40">📷</span>
+							{/if}
+						</div>
+						<p class="truncate text-sm text-white/70">{meal.description}</p>
+					</div>
+					{#if meal.photoThumbnailUrl || meal.photoUrl}
+						<img
+							src={meal.photoThumbnailUrl ?? meal.photoUrl}
+							alt={meal.description}
+							class="h-10 w-10 flex-shrink-0 rounded object-cover"
+							loading="lazy"
+						/>
+					{/if}
+					{#if meal.nutrition}
+						<span class="whitespace-nowrap text-xs text-white/50"
+							>{Math.round(meal.nutrition.calories)} kcal</span
+						>
+					{/if}
+				</div>
+			</a>
+		{/snippet}
+	</BaseListView>
+</div>

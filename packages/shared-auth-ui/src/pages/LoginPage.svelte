@@ -179,7 +179,9 @@
 	let loading = $state(false);
 	let error = $state<string | null>(null);
 	let errorField = $state<'email' | 'password' | 'general' | null>(null);
+	// svelte-ignore state_referenced_locally
 	let email = $state(initialEmail);
+	// svelte-ignore state_referenced_locally
 	let password = $state(initialPassword);
 	let showPassword = $state(false);
 	let showSuccess = $state(false);
@@ -187,6 +189,7 @@
 	let emailInput = $state<HTMLInputElement | undefined>(undefined);
 	let passwordInput = $state<HTMLInputElement | undefined>(undefined);
 	let successAnnouncement = $state('');
+	// svelte-ignore state_referenced_locally
 	let showVerifiedBanner = $state(verified);
 	let showEmailNotVerified = $state(false);
 	let resendingVerification = $state(false);

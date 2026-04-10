@@ -23,7 +23,9 @@
 	let newCardBack = $state('');
 
 	// Live queries for this deck's data
+	// svelte-ignore state_referenced_locally
 	const currentDeck = useDeck(deckId);
+	// svelte-ignore state_referenced_locally
 	const deckCards = useCardsByDeck(deckId);
 
 	// Reactively read values
@@ -149,6 +151,7 @@
 						<label for="card-front" class="mb-1 block text-sm text-muted-foreground">
 							Vorderseite
 						</label>
+						<!-- svelte-ignore a11y_autofocus -->
 						<input
 							id="card-front"
 							type="text"

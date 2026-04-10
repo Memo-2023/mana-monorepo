@@ -142,6 +142,7 @@
 				<!-- Colors -->
 				<div class="space-y-2">
 					<div class="flex items-center justify-between">
+						<!-- svelte-ignore a11y_label_has_associated_control -->
 						<label class="text-sm font-medium">Farben</label>
 						<button
 							type="button"

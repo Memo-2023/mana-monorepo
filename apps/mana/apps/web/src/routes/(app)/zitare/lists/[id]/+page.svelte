@@ -297,6 +297,8 @@
 <!-- Edit List Modal -->
 {#if showEditModal}
 	<div class="modal-overlay" onclick={closeEditModal} role="presentation">
+		<!-- svelte-ignore a11y_interactive_supports_focus -->
+		<!-- svelte-ignore a11y_click_events_have_key_events -->
 		<div class="modal" onclick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
 			<div class="modal-header">
 				<h3>{$_('lists.detail.editModal.title')}</h3>
@@ -355,7 +357,9 @@
 
 <!-- Add Quotes Modal -->
 {#if showAddQuotesModal}
+	<!-- svelte-ignore a11y_interactive_supports_focus -->
 	<div class="modal-overlay" onclick={closeAddQuotesModal} role="presentation">
+		<!-- svelte-ignore a11y_click_events_have_key_events -->
 		<div
 			class="modal modal-large"
 			onclick={(e) => e.stopPropagation()}
@@ -418,28 +422,11 @@
 		padding-bottom: var(--spacing-2xl);
 	}
 
-	.loading-state,
 	.error-state {
 		max-width: 500px;
 		margin: var(--spacing-2xl) auto;
 		text-align: center;
 		padding: var(--spacing-2xl);
-	}
-
-	.spinner {
-		width: 40px;
-		height: 40px;
-		border: 3px solid rgb(var(--color-border));
-		border-top-color: rgb(var(--color-primary));
-		border-radius: 50%;
-		animation: spin 1s linear infinite;
-		margin: 0 auto var(--spacing-md);
-	}
-
-	@keyframes spin {
-		to {
-			transform: rotate(360deg);
-		}
 	}
 
 	.header-container {

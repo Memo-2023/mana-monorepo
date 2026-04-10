@@ -18,6 +18,7 @@ import { noteTable } from '../collections';
 import { toNote } from '../queries';
 import type { LocalNote, Note } from '../types';
 import { encryptRecord } from '$lib/data/crypto';
+import { transcribeAudio } from '$lib/voice/transcribe';
 
 export const notesStore = {
 	async createNote(data: { title?: string; content?: string; color?: string | null }) {
@@ -60,32 +61,20 @@ export const notesStore = {
 	 */
 	async transcribeIntoNote(noteId: string, blob: Blob, language?: string): Promise<void> {
 		try {
-			const form = new FormData();
-			const ext = blob.type.includes('webm')
-				? '.webm'
-				: blob.type.includes('mp4')
-					? '.m4a'
-					: '.audio';
-			form.append('file', blob, `note${ext}`);
-			if (language) form.append('language', language);
+			const result = await transcribeAudio(blob, language);
+			const transcript = result.text;
 
-			const response = await fetch('/api/v1/voice/transcribe', {
-				method: 'POST',
-				body: form,
-			});
-			if (!response.ok) {
-				const text = await response.text();
-				throw new Error(text || `HTTP ${response.status}`);
-			}
-			const result = (await response.json()) as { text: string };
-			const transcript = (result.text ?? '').trim();
-
-			// Use the first line as the title if it's short — keeps the
-			// note browseable without forcing the user to rename it.
 			const firstLine = transcript.split('\n')[0]?.trim() ?? '';
 			const title = firstLine.length > 0 && firstLine.length <= 80 ? firstLine : 'Sprachnotiz';
 
-			await this.updateNote(noteId, { title, content: transcript });
+			const diff: Partial<LocalNote> = {
+				title,
+				content: transcript,
+				transcriptModel: result.model,
+				updatedAt: new Date().toISOString(),
+			};
+			await encryptRecord('notes', diff);
+			await noteTable.update(noteId, diff);
 		} catch (e) {
 			const msg = e instanceof Error ? e.message : String(e);
 			await this.updateNote(noteId, {

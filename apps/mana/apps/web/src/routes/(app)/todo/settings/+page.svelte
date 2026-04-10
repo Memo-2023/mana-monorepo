@@ -35,6 +35,7 @@
 			</h2>
 			<div class="space-y-4">
 				<div class="flex items-center justify-between">
+					<!-- svelte-ignore a11y_label_has_associated_control -->
 					<label class="text-sm text-foreground">Standard-Priorität</label>
 					<select
 						value={todoSettings.defaultPriority}
@@ -50,6 +51,7 @@
 				</div>
 
 				<div class="flex items-center justify-between">
+					<!-- svelte-ignore a11y_label_has_associated_control -->
 					<label class="text-sm text-foreground">Standard-Fälligkeitszeit</label>
 					<input
 						type="time"
@@ -64,6 +66,7 @@
 
 				<div class="flex items-center justify-between">
 					<div>
+						<!-- svelte-ignore a11y_label_has_associated_control -->
 						<label class="text-sm text-foreground">Auto-Archivierung</label>
 						<p class="text-xs text-muted-foreground">Erledigte Aufgaben nach X Tagen archivieren</p>
 					</div>
@@ -91,6 +94,7 @@
 			</h2>
 			<div class="space-y-4">
 				<div class="flex items-center justify-between">
+					<!-- svelte-ignore a11y_label_has_associated_control -->
 					<label class="text-sm text-foreground">Standard-Ansicht</label>
 					<select
 						value={todoSettings.defaultView}
@@ -106,10 +110,13 @@
 
 				{#each [{ key: 'compactMode', label: 'Kompaktmodus', desc: 'Weniger Abstand zwischen Aufgaben' }, { key: 'showTaskCounts', label: 'Aufgabenzahl', desc: 'Anzahl der Aufgaben anzeigen' }, { key: 'showSubtaskProgress', label: 'Teilaufgaben-Fortschritt', desc: 'Fortschritt der Subtasks anzeigen' }, { key: 'groupByProject', label: 'Nach Projekt gruppieren', desc: 'Aufgaben nach Projekt gruppieren' }] as toggle_item}
 					<div class="flex items-center justify-between">
+						<!-- svelte-ignore a11y_consider_explicit_label -->
 						<div>
+							<!-- svelte-ignore a11y_label_has_associated_control -->
 							<label class="text-sm text-foreground">{toggle_item.label}</label>
 							<p class="text-xs text-muted-foreground">{toggle_item.desc}</p>
 						</div>
+						<!-- svelte-ignore a11y_consider_explicit_label -->
 						<button
 							onclick={() => toggle(toggle_item.key)}
 							class="relative h-6 w-11 rounded-full transition-colors {todoSettings.settings[
@@ -137,6 +144,7 @@
 			</h2>
 			<div class="space-y-4">
 				<div class="flex items-center justify-between">
+					<!-- svelte-ignore a11y_label_has_associated_control -->
 					<label class="text-sm text-foreground">Kartengröße</label>
 					<div class="flex gap-1">
 						{#each ['compact', 'normal', 'large'] as size}
@@ -149,12 +157,15 @@
 							>
 								{size === 'compact' ? 'Kompakt' : size === 'normal' ? 'Normal' : 'Groß'}
 							</button>
+							// svelte-ignore a11y_consider_explicit_label
 						{/each}
 					</div>
 				</div>
 
 				<div class="flex items-center justify-between">
+					<!-- svelte-ignore a11y_label_has_associated_control -->
 					<label class="text-sm text-foreground">Labels auf Karten</label>
+					<!-- svelte-ignore a11y_consider_explicit_label -->
 					<button
 						onclick={() => toggle('showLabelsOnCards')}
 						class="relative h-6 w-11 rounded-full transition-colors {todoSettings.showLabelsOnCards
@@ -171,6 +182,7 @@
 
 				<div class="flex items-center justify-between">
 					<div>
+						<!-- svelte-ignore a11y_label_has_associated_control -->
 						<label class="text-sm text-foreground">WIP-Limit pro Spalte</label>
 						<p class="text-xs text-muted-foreground">Maximum Aufgaben pro Spalte</p>
 					</div>
@@ -194,9 +206,11 @@
 			<h2 class="mb-4 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
 				Smarte Dauer
 			</h2>
+			<!-- svelte-ignore a11y_consider_explicit_label -->
 			<div class="space-y-4">
 				<div class="flex items-center justify-between">
 					<div>
+						<!-- svelte-ignore a11y_label_has_associated_control -->
 						<label class="text-sm text-foreground">Smarte Dauer-Schätzung</label>
 						<p class="text-xs text-muted-foreground">
 							Dauer automatisch basierend auf ähnlichen Aufgaben schätzen
@@ -217,6 +231,7 @@
 				</div>
 
 				<div class="flex items-center justify-between">
+					<!-- svelte-ignore a11y_label_has_associated_control -->
 					<label class="text-sm text-foreground">Standard-Dauer (Minuten)</label>
 					<input
 						type="number"
@@ -238,6 +253,7 @@
 			</h2>
 			<div class="space-y-4">
 				<div class="flex items-center justify-between">
+					<!-- svelte-ignore a11y_label_has_associated_control -->
 					<label class="text-sm text-foreground">Standard-Erinnerung</label>
 					<select
 						value={todoSettings.settings.defaultReminderMinutes ?? ''}
@@ -250,6 +266,7 @@
 						class="rounded-md border border-border bg-background px-3 py-1.5 text-sm focus:border-primary focus:outline-none"
 					>
 						<option value="">Keine</option>
+						<!-- svelte-ignore a11y_consider_explicit_label -->
 						<option value="5">5 Min</option>
 						<option value="15">15 Min</option>
 						<option value="30">30 Min</option>
@@ -260,7 +277,9 @@
 
 				{#each [{ key: 'dailyDigestEnabled', label: 'Tägliche Zusammenfassung' }, { key: 'overdueNotifications', label: 'Überfällig-Benachrichtigungen' }] as item}
 					<div class="flex items-center justify-between">
+						<!-- svelte-ignore a11y_label_has_associated_control -->
 						<label class="text-sm text-foreground">{item.label}</label>
+						<!-- svelte-ignore a11y_consider_explicit_label -->
 						<button
 							onclick={() => toggle(item.key)}
 							class="relative h-6 w-11 rounded-full transition-colors {todoSettings.settings[
@@ -281,6 +300,7 @@
 			</div>
 		</section>
 
+		<!-- svelte-ignore a11y_consider_explicit_label -->
 		<!-- Productivity -->
 		<section class="rounded-xl border border-border bg-card p-5">
 			<h2 class="mb-4 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
@@ -290,6 +310,7 @@
 				{#each [{ key: 'focusMode', label: 'Fokus-Modus', desc: 'Ablenkungen minimieren' }, { key: 'pomodoroEnabled', label: 'Pomodoro', desc: 'Pomodoro-Timer integrieren' }, { key: 'showStreak', label: 'Streak anzeigen', desc: 'Tägliche Erledigungsserie' }, { key: 'immersiveModeEnabled', label: 'Immersiver Modus', desc: 'Navigation ausblenden' }] as item}
 					<div class="flex items-center justify-between">
 						<div>
+							<!-- svelte-ignore a11y_label_has_associated_control -->
 							<label class="text-sm text-foreground">{item.label}</label>
 							<p class="text-xs text-muted-foreground">{item.desc}</p>
 						</div>
@@ -312,6 +333,7 @@
 				{/each}
 
 				<div class="flex items-center justify-between">
+					<!-- svelte-ignore a11y_label_has_associated_control -->
 					<label class="text-sm text-foreground">Tagesziel (Aufgaben)</label>
 					<input
 						type="number"

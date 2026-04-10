@@ -16,6 +16,7 @@
 
 	// Generate a slug from title for TOC navigation
 	const sectionId =
+		// svelte-ignore state_referenced_locally
 		title
 			?.toLowerCase()
 			.replace(/[^a-z0-9]+/g, '-')

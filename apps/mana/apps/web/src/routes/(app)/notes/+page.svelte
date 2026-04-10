@@ -74,6 +74,7 @@
 	<!-- Create Form -->
 	{#if showCreate}
 		<form class="create-form" onsubmit={handleCreate}>
+			<!-- svelte-ignore a11y_autofocus -->
 			<input
 				class="create-title"
 				type="text"
@@ -90,6 +91,7 @@
 			<div class="create-footer">
 				<div class="color-row">
 					{#each NOTE_COLORS as c}
+						<!-- svelte-ignore a11y_consider_explicit_label -->
 						<button
 							type="button"
 							class="color-dot"
@@ -372,6 +374,7 @@
 		color: hsl(var(--color-muted-foreground));
 		display: -webkit-box;
 		-webkit-line-clamp: 3;
+		line-clamp: 3;
 		-webkit-box-orient: vertical;
 		overflow: hidden;
 		line-height: 1.4;

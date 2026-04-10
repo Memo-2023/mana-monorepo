@@ -8,6 +8,7 @@
 		children,
 	}: { title: string; expanded?: boolean; children: Snippet } = $props();
 
+	// svelte-ignore state_referenced_locally
 	let isExpanded = $state(expanded);
 </script>
 

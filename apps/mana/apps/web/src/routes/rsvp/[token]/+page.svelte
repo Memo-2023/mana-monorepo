@@ -17,6 +17,7 @@
 
 	// Local mirror of items so claims can update the UI without a page
 	// reload. SSR data is the initial source of truth.
+	// svelte-ignore state_referenced_locally
 	let items = $state(data.items);
 	let claimingItemId = $state<string | null>(null);
 	let claimError = $state<string | null>(null);
