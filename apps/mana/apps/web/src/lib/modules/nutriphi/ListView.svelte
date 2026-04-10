@@ -139,9 +139,9 @@
 	}
 </script>
 
-<!-- svelte-ignore a11y_click_events_have_key_events -->
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<div onclick={handleWindowClick}>
+<!-- Wrapper captures clicks to close dropdowns; role="none" marks it as non-interactive -->
+<div onclick={handleWindowClick} role="none">
 	<BaseListView items={todayMeals} getKey={(m) => m.id} emptyTitle="Noch keine Mahlzeiten heute">
 		{#snippet toolbar()}
 			<!-- Calorie progress -->

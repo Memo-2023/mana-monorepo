@@ -120,8 +120,7 @@
 
 					<div class="events-for-date">
 						{#each group.events as event}
-							<!-- svelte-ignore a11y_no_static_element_interactions -->
-							<div class="event-item">
+							<div class="event-item" role="listitem">
 								<div class="color-bar" style="background-color: {getItemColor(event)}"></div>
 								<div class="event-content">
 									<div class="event-time">
@@ -134,12 +133,11 @@
 											)}
 										{/if}
 									</div>
-									<!-- svelte-ignore a11y_no_static_element_interactions -->
-									<!-- svelte-ignore a11y_interactive_supports_focus -->
 									<span
 										class="event-title agenda-event-title"
 										contenteditable="true"
 										role="textbox"
+										tabindex="0"
 										spellcheck="true"
 										onkeydown={(e) => handleTitleKeydown(e, event)}
 										onblur={(e) => handleTitleBlur(event, e.target as HTMLSpanElement)}

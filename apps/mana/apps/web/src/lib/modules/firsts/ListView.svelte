@@ -328,12 +328,13 @@
 			{#each filtered() as first (first.id)}
 				{#if convertingId === first.id}
 					<!-- Dream → Lived conversion sheet -->
-					<!-- svelte-ignore a11y_no_static_element_interactions -->
+					<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 					<div
 						class="entry-card converting"
 						onkeydown={(e) => {
 							if (e.key === 'Escape') convertingId = null;
 						}}
+						role="form"
 					>
 						<div class="convert-header">
 							<span class="cat-dot" style="background: {CATEGORY_COLORS[first.category]}"></span>
@@ -417,12 +418,13 @@
 					</div>
 				{:else if editingId === first.id}
 					<!-- Inline editor -->
-					<!-- svelte-ignore a11y_no_static_element_interactions -->
+					<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 					<div
 						class="entry-card editing"
 						onkeydown={(e) => {
 							if (e.key === 'Escape') saveEdit();
 						}}
+						role="form"
 					>
 						<!-- svelte-ignore a11y_autofocus -->
 						<input
@@ -996,6 +998,7 @@
 	.card-note {
 		font-size: 0.6875rem;
 		color: hsl(var(--color-muted-foreground));
+		// svelte-ignore a11y_no_static_element_interactions
 		margin: 0;
 		display: -webkit-box;
 		-webkit-line-clamp: 2;

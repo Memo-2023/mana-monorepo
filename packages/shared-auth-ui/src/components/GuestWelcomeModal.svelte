@@ -251,12 +251,12 @@
 		tabindex="-1"
 	>
 		<!-- Modal Content -->
-		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		<div
 			class="modal-content"
 			onclick={(e) => e.stopPropagation()}
 			onkeydown={(e) => e.stopPropagation()}
 			use:trapFocus
+			role="none"
 		>
 			<!-- Close Button -->
 			<button type="button" class="close-button" onclick={handleContinueAsGuest} aria-label="Close">

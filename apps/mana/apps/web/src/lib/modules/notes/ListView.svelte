@@ -149,12 +149,13 @@
 		{#each filtered as note (note.id)}
 			{#if editingId === note.id}
 				<!-- Inline editor -->
-				<!-- svelte-ignore a11y_no_static_element_interactions -->
+				<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 				<div
 					class="note-item editing"
 					onkeydown={(e) => {
 						if (e.key === 'Escape') saveEdit();
 					}}
+					role="form"
 				>
 					<!-- svelte-ignore a11y_autofocus -->
 					<input

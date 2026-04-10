@@ -172,28 +172,37 @@
 
 				<div class="grid gap-4 sm:grid-cols-2">
 					<div>
-						<!-- svelte-ignore a11y_label_has_associated_control -->
-						<label class="mb-1 block text-xs font-medium text-[hsl(var(--muted-foreground))]"
+						<label
+							for="inventory-status"
+							class="mb-1 block text-xs font-medium text-[hsl(var(--muted-foreground))]"
 							>Status</label
 						>
-						<select bind:value={editStatus} class={inputClass}>
+						<select id="inventory-status" bind:value={editStatus} class={inputClass}>
 							{#each statuses as s}<option value={s}>{statusLabels[s]}</option>{/each}
 						</select>
 					</div>
 					<div>
-						<!-- svelte-ignore a11y_label_has_associated_control -->
-						<label class="mb-1 block text-xs font-medium text-[hsl(var(--muted-foreground))]"
+						<label
+							for="inventory-quantity"
+							class="mb-1 block text-xs font-medium text-[hsl(var(--muted-foreground))]"
 							>Menge</label
 						>
-						<input type="number" bind:value={editQuantity} min="1" class={inputClass} />
+						<input
+							id="inventory-quantity"
+							type="number"
+							bind:value={editQuantity}
+							min="1"
+							class={inputClass}
+						/>
 					</div>
 					{#if locationsCtx.value.length > 0}
 						<div>
-							<!-- svelte-ignore a11y_label_has_associated_control -->
-							<label class="mb-1 block text-xs font-medium text-[hsl(var(--muted-foreground))]"
+							<label
+								for="inventory-location"
+								class="mb-1 block text-xs font-medium text-[hsl(var(--muted-foreground))]"
 								>Standort</label
 							>
-							<select bind:value={editLocationId} class={inputClass}>
+							<select id="inventory-location" bind:value={editLocationId} class={inputClass}>
 								<option value={undefined}>-- Kein Standort --</option>
 								{#each locationsCtx.value as loc}
 									<option value={loc.id}>{loc.path ? `${loc.path}/` : ''}{loc.name}</option>
@@ -203,11 +212,12 @@
 					{/if}
 					{#if categoriesCtx.value.length > 0}
 						<div>
-							<!-- svelte-ignore a11y_label_has_associated_control -->
-							<label class="mb-1 block text-xs font-medium text-[hsl(var(--muted-foreground))]"
+							<label
+								for="inventory-category"
+								class="mb-1 block text-xs font-medium text-[hsl(var(--muted-foreground))]"
 								>Kategorie</label
 							>
-							<select bind:value={editCategoryId} class={inputClass}>
+							<select id="inventory-category" bind:value={editCategoryId} class={inputClass}>
 								<option value={undefined}>-- Keine Kategorie --</option>
 								{#each categoriesCtx.value as cat}
 									<option value={cat.id}>{cat.name}</option>
@@ -223,9 +233,8 @@
 						<div class="grid gap-3 sm:grid-cols-2">
 							{#each collection.schema.fields.sort((a, b) => a.order - b.order) as field}
 								<div>
-									<!-- svelte-ignore a11y_label_has_associated_control -->
-									<label class="mb-1 block text-xs font-medium text-[hsl(var(--muted-foreground))]"
-										>{field.name}</label
+									<span class="mb-1 block text-xs font-medium text-[hsl(var(--muted-foreground))]"
+										>{field.name}</span
 									>
 									<FieldEditor
 										{field}

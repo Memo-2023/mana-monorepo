@@ -266,12 +266,12 @@
 	role="application"
 	aria-label="Network Graph"
 >
-	<!-- svelte-ignore a11y_click_events_have_key_events -->
 	<svg
 		bind:this={svgElement}
 		class="network-graph-svg"
 		style="width: 100%; height: 100%;"
 		onclick={handleBackgroundClick}
+		onkeydown={(e) => e.key === 'Escape' && handleBackgroundClick(e as unknown as MouseEvent)}
 		role="img"
 		aria-label="Network graph visualization"
 	>
@@ -327,6 +327,7 @@
 					{@const badgeOffset = isSelected
 						? NODE_CONFIG.selectedBadgeOffset
 						: NODE_CONFIG.badgeOffset}
+					<!-- svelte-ignore a11y_click_events_have_key_events -->
 					<g
 						transform="translate({node.x ?? 0}, {node.y ?? 0})"
 						class="node"

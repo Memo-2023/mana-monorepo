@@ -278,10 +278,9 @@
 
 				<!-- Quick Duration Buttons -->
 				<div>
-					<!-- svelte-ignore a11y_label_has_associated_control -->
-					<label class="mb-1.5 block text-xs font-medium text-[hsl(var(--muted-foreground))]">
+					<span class="mb-1.5 block text-xs font-medium text-[hsl(var(--muted-foreground))]">
 						{$_('entry.duration')}
-					</label>
+					</span>
 					<div class="mb-2 flex flex-wrap gap-2">
 						{#each quickDurations as qd}
 							<button
@@ -338,9 +337,8 @@
 
 				<!-- Tags -->
 				<div>
-					<!-- svelte-ignore a11y_label_has_associated_control -->
-					<label class="mb-1.5 block text-xs font-medium text-[hsl(var(--muted-foreground))]"
-						>Tags</label
+					<span class="mb-1.5 block text-xs font-medium text-[hsl(var(--muted-foreground))]"
+						>Tags</span
 					>
 					<TagField
 						tags={allTags.value}

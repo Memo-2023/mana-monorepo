@@ -76,9 +76,9 @@
 <div class="carousel-root">
 	<div class="fokus-track" style="--sheet-width: {defaultWidth}px">
 		{#each pages as p, idx (p.id)}
-			<!-- svelte-ignore a11y_no_static_element_interactions -->
 			<div
 				class="page-drag-wrapper"
+				role="listitem"
 				class:dragging={dragId === p.id}
 				data-page-id={p.id}
 				ondragstart={(e) => handleDragStart(e, p.id)}
@@ -148,7 +148,7 @@
 		justify-content: center;
 		gap: 0.75rem;
 		border: 2px dashed hsl(var(--color-border));
-		border-radius: 0.375rem;
+		border-radius: 1.25rem;
 		background: transparent;
 		color: hsl(var(--color-muted-foreground));
 		cursor: pointer;

@@ -142,8 +142,7 @@
 				<!-- Colors -->
 				<div class="space-y-2">
 					<div class="flex items-center justify-between">
-						<!-- svelte-ignore a11y_label_has_associated_control -->
-						<label class="text-sm font-medium">Farben</label>
+						<span class="text-sm font-medium">Farben</span>
 						<button
 							type="button"
 							class="flex items-center gap-1 px-2 py-1 text-sm rounded-lg hover:bg-muted transition-colors"

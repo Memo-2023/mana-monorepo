@@ -203,10 +203,9 @@
 
 		<!-- Research Depth -->
 		<div>
-			<!-- svelte-ignore a11y_label_has_associated_control -->
-			<label class="mb-2 block text-sm font-medium text-[hsl(var(--foreground))]">
+			<span class="mb-2 block text-sm font-medium text-[hsl(var(--foreground))]">
 				Recherchetiefe
-			</label>
+			</span>
 			<div class="grid grid-cols-3 gap-3">
 				{#each depthOptions as option}
 					{@const OptionIcon = option.icon}

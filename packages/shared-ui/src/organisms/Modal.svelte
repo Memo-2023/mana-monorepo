@@ -64,13 +64,13 @@
 		use:focusTrap
 	>
 		<!-- Modal Content -->
-		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		<div
 			class="relative flex max-h-[95vh] sm:max-h-[90vh] w-full {maxWidthClasses[
 				maxWidth
 			]} flex-col rounded-t-2xl sm:rounded-2xl border border-border bg-surface-elevated-2 backdrop-blur-xl shadow-2xl"
 			onclick={(e) => e.stopPropagation()}
 			onkeydown={(e) => e.stopPropagation()}
+			role="none"
 		>
 			{#if showHeader}
 				<!-- Header -->

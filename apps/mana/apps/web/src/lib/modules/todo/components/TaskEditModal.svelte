@@ -88,11 +88,12 @@
 <svelte:window onkeydown={open ? handleKeydown : undefined} />
 
 {#if open}
-	<!-- svelte-ignore a11y_click_events_have_key_events -->
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
 		class="fixed inset-0 z-[9995] flex items-end sm:items-center justify-center bg-black/45 p-0 sm:p-8 backdrop-blur-sm"
 		onclick={handleBackdropClick}
+		onkeydown={(e) => e.key === 'Escape' && handleBackdropClick(e as unknown as MouseEvent)}
+		tabindex="-1"
+		role="presentation"
 	>
 		<div
 			class="flex w-full max-w-[1040px] flex-col overflow-hidden rounded-t-2xl sm:rounded-2xl border border-border bg-card shadow-2xl max-h-[95vh] sm:max-h-[calc(100vh-4rem)]"

@@ -30,14 +30,7 @@
 	}
 
 	import type { Snippet } from 'svelte';
-	import {
-		ArrowRight,
-		Check,
-		CheckSquare,
-		Heart,
-		MagnifyingGlass,
-		Plus,
-	} from '@mana/shared-icons';
+	import { ArrowRight, Check, CheckSquare, Heart, MagnifyingGlass, Plus } from '@mana/shared-icons';
 
 	interface Props {
 		onSearch: (query: string) => Promise<QuickInputItem[]>;
@@ -485,11 +478,12 @@
 	{/if}
 
 	<!-- Input Bar (always visible) -->
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
+	<!-- svelte-ignore a11y_interactive_supports_focus -->
 	<div
 		class="input-container"
 		class:create-success={createSuccess}
 		oncontextmenu={handleContextMenu}
+		role="toolbar"
 	>
 		<!-- Left action slot (e.g., voice input button) -->
 		{#if leftAction}

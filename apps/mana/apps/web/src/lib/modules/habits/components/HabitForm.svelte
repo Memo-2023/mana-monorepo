@@ -118,7 +118,6 @@
 				onIconChange={(i) => {
 					icon = i;
 					showIconPicker = false;
-					// svelte-ignore a11y_consider_explicit_label
 				}}
 				size="sm"
 			/>

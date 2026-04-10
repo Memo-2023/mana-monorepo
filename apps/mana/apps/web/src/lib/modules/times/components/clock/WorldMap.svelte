@@ -48,8 +48,14 @@
 					{@const y = ((90 - city.lat) / 180) * 400}
 					{@const isSelected = selectedTimezones.includes(city.timezone)}
 					<!-- svelte-ignore a11y_no_static_element_interactions -->
-					<!-- svelte-ignore a11y_click_events_have_key_events -->
-					<g class="city-marker" onclick={() => handleCityClick(city.timezone, city.city)}>
+					<!-- SVG group with click handler - no semantic alternative for inline SVG -->
+					<g
+						class="city-marker"
+						onclick={() => handleCityClick(city.timezone, city.city)}
+						role="button"
+						tabindex="0"
+						onkeydown={(e) => e.key === 'Enter' && handleCityClick(city.timezone, city.city)}
+					>
 						<circle
 							cx={x}
 							cy={y}

@@ -97,11 +97,12 @@
 	}
 </script>
 
-<!-- svelte-ignore a11y_click_events_have_key_events -->
-<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
 	class="flex h-full cursor-pointer flex-col items-center justify-center p-4 sm:p-6"
 	onclick={nextQuote}
+	onkeydown={(e) => e.key === 'Enter' && nextQuote()}
+	role="button"
+	tabindex="0"
 	use:dropTarget={{
 		accepts: ['tag'],
 		onDrop: (p) => handleTagDrop(p.data as unknown as TagDragData),

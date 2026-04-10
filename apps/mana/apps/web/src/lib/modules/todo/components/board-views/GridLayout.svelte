@@ -29,9 +29,13 @@
 			</div>
 			<div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
 				{#each column.tasks as task (task.id)}
-					<!-- svelte-ignore a11y_click_events_have_key_events -->
-					<!-- svelte-ignore a11y_no_static_element_interactions -->
-					<div onclick={() => onOpenTask(task)} class="cursor-pointer">
+					<div
+						onclick={() => onOpenTask(task)}
+						onkeydown={(e) => e.key === 'Enter' && onOpenTask(task)}
+						role="button"
+						tabindex="0"
+						class="cursor-pointer"
+					>
 						<KanbanTaskCard
 							{task}
 							{labels}

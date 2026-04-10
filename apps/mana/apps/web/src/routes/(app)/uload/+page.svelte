@@ -597,17 +597,17 @@
 
 <!-- Edit Modal -->
 {#if editingLink}
-	<!-- svelte-ignore a11y_click_events_have_key_events -->
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
 		class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
 		onclick={() => (editingLink = null)}
-		// svelte-ignore a11y_click_events_have_key_events
+		onkeydown={(e) => e.key === 'Escape' && (editingLink = null)}
+		tabindex="-1"
+		role="presentation"
 	>
-		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		<div
 			class="w-full max-w-lg rounded-xl bg-white p-6 shadow-2xl dark:bg-gray-800"
 			onclick={(e) => e.stopPropagation()}
+			role="none"
 		>
 			<div class="mb-4 flex items-center justify-between">
 				<h3 class="text-lg font-semibold">Link bearbeiten</h3>
@@ -664,14 +664,19 @@
 					<p class="mb-2 text-sm font-medium opacity-70">Erweitert</p>
 					<div class="grid gap-3 md:grid-cols-3">
 						<div>
-							<!-- svelte-ignore a11y_label_has_associated_control -->
-							<label class="mb-1 block text-xs opacity-50">Ablaufdatum</label>
-							<input type="datetime-local" bind:value={editExpiresAt} class={inputSmClass} />
+							<label for="uload-expires-at" class="mb-1 block text-xs opacity-50">Ablaufdatum</label
+							>
+							<input
+								id="uload-expires-at"
+								type="datetime-local"
+								bind:value={editExpiresAt}
+								class={inputSmClass}
+							/>
 						</div>
 						<div>
-							<!-- svelte-ignore a11y_label_has_associated_control -->
-							<label class="mb-1 block text-xs opacity-50">Passwort</label>
+							<label for="uload-password" class="mb-1 block text-xs opacity-50">Passwort</label>
 							<input
+								id="uload-password"
 								type="text"
 								bind:value={editPassword}
 								placeholder="Optional"
@@ -679,9 +684,9 @@
 							/>
 						</div>
 						<div>
-							<!-- svelte-ignore a11y_label_has_associated_control -->
-							<label class="mb-1 block text-xs opacity-50">Max Klicks</label>
+							<label for="uload-max-clicks" class="mb-1 block text-xs opacity-50">Max Klicks</label>
 							<input
+								id="uload-max-clicks"
 								type="number"
 								bind:value={editMaxClicks}
 								placeholder="Unbegrenzt"
@@ -709,27 +714,22 @@
 				</button>
 			</div>
 		</div>
-		<!-- svelte-ignore a11y_click_events_have_key_events -->
 	</div>
 {/if}
 
-// svelte-ignore a11y_no_static_element_interactions // svelte-ignore
-a11y_click_events_have_key_events
-
 <!-- QR Code Modal -->
 {#if qrLink}
-	<!-- svelte-ignore a11y_click_events_have_key_events -->
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
-		// svelte-ignore a11y_no_static_element_interactions
 		class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
 		onclick={() => (qrLink = null)}
-		// svelte-ignore a11y_click_events_have_key_events
+		onkeydown={(e) => e.key === 'Escape' && (qrLink = null)}
+		tabindex="-1"
+		role="presentation"
 	>
-		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		<div
 			class="w-full max-w-sm rounded-xl bg-white p-6 shadow-2xl dark:bg-gray-800"
 			onclick={(e) => e.stopPropagation()}
+			role="none"
 		>
 			<div class="mb-4 flex items-center justify-between">
 				<h3 class="text-lg font-semibold">QR-Code</h3>

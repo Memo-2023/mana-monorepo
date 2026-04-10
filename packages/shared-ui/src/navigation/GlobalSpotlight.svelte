@@ -268,11 +268,11 @@
 		role="presentation"
 		tabindex="-1"
 	>
-		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		<div
 			class="spotlight-modal"
 			onclick={(e) => e.stopPropagation()}
 			onkeydown={(e) => e.stopPropagation()}
+			role="none"
 		>
 			<!-- Search input -->
 			<div class="spotlight-input-wrapper">

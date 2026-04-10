@@ -60,9 +60,8 @@
 <svelte:window onkeydown={handleKeydown} />
 
 {#if show}
-	<!-- svelte-ignore a11y_click_events_have_key_events -->
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<div class="srd-backdrop" onclick={onCancel}>
+	<div class="srd-backdrop" onclick={onCancel} role="presentation" tabindex="-1">
+		<!-- svelte-ignore a11y_click_events_have_key_events -->
 		<div
 			class="srd-dialog"
 			role="dialog"

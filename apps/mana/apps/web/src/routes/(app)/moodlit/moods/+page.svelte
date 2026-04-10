@@ -83,9 +83,11 @@
 		<div class="mb-6 rounded-xl border border-border bg-card p-6">
 			<div class="grid gap-4 md:grid-cols-2">
 				<div>
-					<!-- svelte-ignore a11y_label_has_associated_control -->
-					<label class="mb-1 block text-sm font-medium text-muted-foreground">Name</label>
+					<label for="moodlit-name" class="mb-1 block text-sm font-medium text-muted-foreground"
+						>Name</label
+					>
 					<input
+						id="moodlit-name"
 						type="text"
 						bind:value={newName}
 						placeholder="Mein Mood"
@@ -93,9 +95,12 @@
 					/>
 				</div>
 				<div>
-					<!-- svelte-ignore a11y_label_has_associated_control -->
-					<label class="mb-1 block text-sm font-medium text-muted-foreground">Animation</label>
+					<label
+						for="moodlit-animation"
+						class="mb-1 block text-sm font-medium text-muted-foreground">Animation</label
+					>
 					<select
+						id="moodlit-animation"
 						bind:value={newAnimation}
 						class="w-full rounded-lg border border-border bg-input px-3 py-2 text-foreground"
 					>
@@ -107,8 +112,7 @@
 					</select>
 				</div>
 				<div class="md:col-span-2">
-					<!-- svelte-ignore a11y_label_has_associated_control -->
-					<label class="mb-1 block text-sm font-medium text-muted-foreground">Farben</label>
+					<span class="mb-1 block text-sm font-medium text-muted-foreground">Farben</span>
 					<div class="flex gap-2">
 						{#each newColors as color, i}
 							<input

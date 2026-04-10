@@ -410,10 +410,9 @@
 	<div class="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-6 space-y-5">
 		<!-- Meal Type -->
 		<div>
-			<!-- svelte-ignore a11y_label_has_associated_control -->
-			<label class="mb-2 block text-sm font-medium text-[hsl(var(--foreground))]">
+			<span class="mb-2 block text-sm font-medium text-[hsl(var(--foreground))]">
 				Mahlzeittyp
-			</label>
+			</span>
 			<div class="grid grid-cols-4 gap-2">
 				{#each mealTypes as type}
 					<button

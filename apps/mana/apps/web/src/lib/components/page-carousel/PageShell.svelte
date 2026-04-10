@@ -127,8 +127,8 @@
 		? `height: ${heightPx}px; min-height: 0;`
 		: ''}"
 >
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<div class="drag-handle-bar" draggable="true" oncontextmenu={onContextMenu}>
+	<!-- svelte-ignore a11y_interactive_supports_focus -->
+	<div class="drag-handle-bar" draggable="true" oncontextmenu={onContextMenu} role="toolbar">
 		{#if onMoveLeft}
 			<button
 				class="move-btn move-left"
@@ -185,15 +185,14 @@
 	</div>
 
 	<!-- Header -->
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<div class="page-header" ondragstart={(e) => e.preventDefault()}>
+	<div class="page-header" ondragstart={(e) => e.preventDefault()} role="banner">
 		<div class="header-left">
 			{#if header_left}
 				{@render header_left()}
 			{:else}
 				{#if IconComponent}
 					<span class="header-icon" style="color: {color}">
-						<IconComponent size={16} weight="fill" />
+						<IconComponent size={24} weight="fill" />
 					</span>
 				{:else}
 					<span class="color-dot" style="background-color: {color}"></span>
@@ -233,8 +232,14 @@
 
 	<!-- Resize handle -->
 	{#if onResize && !maximized}
-		<!-- svelte-ignore a11y_no_static_element_interactions -->
-		<div class="resize-handle" onmousedown={onMouseDown} ontouchstart={onTouchStartHandle}>
+		<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+		<div
+			class="resize-handle"
+			onmousedown={onMouseDown}
+			ontouchstart={onTouchStartHandle}
+			role="separator"
+			aria-orientation="horizontal"
+		>
 			<svg width="10" height="10" viewBox="0 0 10 10">
 				<line x1="9" y1="1" x2="1" y2="9" stroke="currentColor" stroke-width="1.2" />
 				<line x1="9" y1="5" x2="5" y2="9" stroke="currentColor" stroke-width="1.2" />
@@ -251,7 +256,7 @@
 		min-height: 60vh;
 		max-width: calc(100vw - 2rem);
 		background: hsl(var(--color-card));
-		border-radius: 0.375rem;
+		border-radius: 1.25rem;
 		box-shadow:
 			0 2px 8px hsl(0 0% 0% / 0.08),
 			0 0 0 1px hsl(var(--color-border));
@@ -304,16 +309,16 @@
 		align-items: center;
 		padding: 0.2rem 0;
 		cursor: grab;
-		background: hsl(var(--color-muted) / 0.4);
-		border-bottom: 1px solid hsl(var(--color-border));
+		background: transparent;
+		border-bottom: none;
 		transition: background 0.15s;
 	}
 	.drag-handle-bar:hover {
-		background: hsl(var(--color-surface-hover));
+		background: transparent;
 	}
 	.drag-handle-bar:active {
 		cursor: grabbing;
-		background: hsl(var(--color-muted));
+		background: transparent;
 	}
 	.move-btn {
 		position: absolute;
@@ -378,7 +383,7 @@
 		flex-shrink: 0;
 	}
 	.page-title {
-		font-size: 0.875rem;
+		font-size: 1.125rem;
 		font-weight: 600;
 		color: hsl(var(--color-foreground));
 	}

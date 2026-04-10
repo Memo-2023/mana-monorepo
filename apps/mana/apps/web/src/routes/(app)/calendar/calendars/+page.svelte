@@ -95,13 +95,12 @@
 				</div>
 
 				<div>
-					<!-- svelte-ignore a11y_label_has_associated_control -->
-					<label class="mb-2 block text-sm font-medium text-foreground">Farbe</label>
+					<span class="mb-2 block text-sm font-medium text-foreground">Farbe</span>
 					<div class="flex gap-2">
-						<!-- svelte-ignore a11y_consider_explicit_label -->
 						{#each PRESET_COLORS as color}
 							<button
 								type="button"
+								aria-label="Farbe wählen"
 								onclick={() => (newColor = color)}
 								class="h-8 w-8 rounded-full border-2 transition-transform hover:scale-110 {newColor ===
 								color

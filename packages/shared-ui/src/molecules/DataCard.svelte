@@ -139,10 +139,10 @@
 		<!-- Actions -->
 		{#if actions}
 			<!-- svelte-ignore a11y_no_static_element_interactions -->
-			<!-- svelte-ignore a11y_click_events_have_key_events -->
 			<div
 				class="data-card__actions flex-shrink-0 flex items-center gap-1"
 				onclick={(e) => e.stopPropagation()}
+				role="none"
 			>
 				{@render actions()}
 			</div>

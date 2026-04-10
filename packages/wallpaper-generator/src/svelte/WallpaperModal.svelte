@@ -152,11 +152,12 @@
 </script>
 
 {#if show}
-	<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
 		class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4"
 		onclick={handleBackdropClick}
+		onkeydown={(e) => e.key === 'Escape' && onClose()}
+		tabindex="-1"
+		role="presentation"
 	>
 		<div
 			class="bg-card rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"

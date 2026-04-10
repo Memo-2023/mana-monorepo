@@ -258,16 +258,18 @@
 				>
 					<!-- Time -->
 					<div class="mb-4">
-						<!-- svelte-ignore a11y_label_has_associated_control -->
-						<label class="mb-1 block text-sm font-medium">{$_('alarm.time')}</label>
-						<input type="time" class="input time-input" bind:value={editTime} />
+						<label for="alarm-time" class="mb-1 block text-sm font-medium">{$_('alarm.time')}</label
+						>
+						<input id="alarm-time" type="time" class="input time-input" bind:value={editTime} />
 					</div>
 
 					<!-- Label -->
 					<div class="mb-4">
-						<!-- svelte-ignore a11y_label_has_associated_control -->
-						<label class="mb-1 block text-sm font-medium">{$_('alarm.label')}</label>
+						<label for="alarm-label" class="mb-1 block text-sm font-medium"
+							>{$_('alarm.label')}</label
+						>
 						<input
+							id="alarm-label"
 							type="text"
 							class="input"
 							placeholder="Arbeit, Sport, etc."
@@ -277,8 +279,7 @@
 
 					<!-- Repeat Days -->
 					<div class="mb-4">
-						<!-- svelte-ignore a11y_label_has_associated_control -->
-						<label class="mb-2 block text-sm font-medium">{$_('alarm.repeat')}</label>
+						<span class="mb-2 block text-sm font-medium">{$_('alarm.repeat')}</span>
 						<div class="day-selector">
 							{#each dayNames as day, i}
 								<button
@@ -294,9 +295,10 @@
 
 					<!-- Sound -->
 					<div class="mb-4">
-						<!-- svelte-ignore a11y_label_has_associated_control -->
-						<label class="mb-1 block text-sm font-medium">{$_('alarm.sound')}</label>
-						<select class="input" bind:value={editSound}>
+						<label for="alarm-sound" class="mb-1 block text-sm font-medium"
+							>{$_('alarm.sound')}</label
+						>
+						<select id="alarm-sound" class="input" bind:value={editSound}>
 							{#each ALARM_SOUNDS as sound}
 								<option value={sound.id}>{sound.nameDE}</option>
 							{/each}
@@ -305,9 +307,10 @@
 
 					<!-- Snooze -->
 					<div class="mb-6">
-						<!-- svelte-ignore a11y_label_has_associated_control -->
-						<label class="mb-1 block text-sm font-medium">{$_('alarm.snooze')}</label>
-						<select class="input" bind:value={editSnoozeMinutes}>
+						<label for="alarm-snooze" class="mb-1 block text-sm font-medium"
+							>{$_('alarm.snooze')}</label
+						>
+						<select id="alarm-snooze" class="input" bind:value={editSnoozeMinutes}>
 							<option value={5}>5 Minuten</option>
 							<option value={10}>10 Minuten</option>
 							<option value={15}>15 Minuten</option>

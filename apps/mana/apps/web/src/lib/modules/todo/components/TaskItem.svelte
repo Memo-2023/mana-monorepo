@@ -51,7 +51,6 @@
 	});
 </script>
 
-<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
 	class="group flex items-start gap-3 rounded-lg border border-transparent px-3 transition-colors hover:border-border hover:bg-card {compact
 		? 'py-1.5'

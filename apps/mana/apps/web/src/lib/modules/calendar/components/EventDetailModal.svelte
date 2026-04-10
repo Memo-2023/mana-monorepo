@@ -180,8 +180,13 @@
 
 <svelte:window onkeydown={handleKeydown} />
 
-<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-<div class="modal-backdrop" onclick={handleBackdropClick} role="presentation">
+<div
+	class="modal-backdrop"
+	onclick={handleBackdropClick}
+	onkeydown={(e) => e.key === 'Escape' && onClose()}
+	tabindex="-1"
+	role="presentation"
+>
 	<div class="modal-container" role="dialog" aria-modal="true" aria-labelledby="modal-title">
 		<!-- Color accent bar -->
 		<div class="accent-bar" style="background-color: {calendarColor};"></div>
@@ -308,10 +313,15 @@
 
 <!-- Recurrence Delete Dialog -->
 {#if showEditOptions}
-	<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<!-- svelte-ignore a11y_interactive_supports_focus -->
-	<div class="delete-overlay" onclick={() => (showEditOptions = false)}>
+	<div
+		class="delete-overlay"
+		onclick={() => (showEditOptions = false)}
+		onkeydown={(e) => e.key === 'Escape' && (showEditOptions = false)}
+		tabindex="-1"
+		role="presentation"
+	>
+		<!-- svelte-ignore a11y_interactive_supports_focus -->
+		<!-- svelte-ignore a11y_click_events_have_key_events -->
 		<div class="delete-dialog" role="dialog" aria-modal="true" onclick={(e) => e.stopPropagation()}>
 			<h3 class="delete-title">Wiederkehrenden Termin bearbeiten</h3>
 			<p class="delete-text">Möchtest du nur diesen Termin oder alle zukünftigen bearbeiten?</p>
@@ -331,10 +341,15 @@
 {/if}
 
 {#if showDeleteOptions}
-	<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
 	<!-- svelte-ignore a11y_interactive_supports_focus -->
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<div class="delete-overlay" onclick={() => (showDeleteOptions = false)}>
+	<div
+		class="delete-overlay"
+		onclick={() => (showDeleteOptions = false)}
+		onkeydown={(e) => e.key === 'Escape' && (showDeleteOptions = false)}
+		tabindex="-1"
+		role="presentation"
+	>
+		<!-- svelte-ignore a11y_click_events_have_key_events -->
 		<div class="delete-dialog" role="dialog" aria-modal="true" onclick={(e) => e.stopPropagation()}>
 			<h3 class="delete-title">Wiederkehrenden Termin löschen</h3>
 			<p class="delete-text">Möchtest du nur diesen Termin oder die gesamte Serie löschen?</p>

@@ -116,10 +116,9 @@
 					<div class="grid gap-3 sm:grid-cols-2">
 						{#each collection.schema.fields.sort((a, b) => a.order - b.order) as field}
 							<div>
-								<!-- svelte-ignore a11y_label_has_associated_control -->
-								<label class="mb-1 block text-xs font-medium text-[hsl(var(--muted-foreground))]">
+								<span class="mb-1 block text-xs font-medium text-[hsl(var(--muted-foreground))]">
 									{field.name}{field.required ? ' *' : ''}
-								</label>
+								</span>
 								<FieldEditor
 									{field}
 									value={newItemFields[field.id]}

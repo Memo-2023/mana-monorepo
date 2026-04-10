@@ -98,7 +98,6 @@
 <div class="scene-tabs">
 	<div class="scene-tabs-scroll">
 		{#each scenes as scene (scene.id)}
-			<!-- svelte-ignore a11y_no_static_element_interactions -->
 			<button
 				type="button"
 				class="scene-pill"

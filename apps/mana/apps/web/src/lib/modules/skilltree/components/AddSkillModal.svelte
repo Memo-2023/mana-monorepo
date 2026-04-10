@@ -39,11 +39,11 @@
 	}
 </script>
 
-<!-- svelte-ignore a11y_interactive_supports_focus -->
-<!-- svelte-ignore a11y_click_events_have_key_events -->
 <div
 	class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm"
 	onclick={handleBackdropClick}
+	onkeydown={(e) => e.key === 'Escape' && onClose()}
+	tabindex="-1"
 	role="dialog"
 	aria-modal="true"
 >

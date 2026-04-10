@@ -110,10 +110,11 @@
 					autofocus
 				/>
 			{:else}
-				<!-- svelte-ignore a11y_click_events_have_key_events -->
-				<!-- svelte-ignore a11y_no_static_element_interactions -->
 				<span
 					onclick={startEdit}
+					onkeydown={(e) => e.key === 'Enter' && startEdit(e as unknown as MouseEvent)}
+					role="button"
+					tabindex="0"
 					class="block cursor-text text-sm leading-snug {task.isCompleted
 						? 'text-muted-foreground line-through'
 						: 'text-foreground'}"

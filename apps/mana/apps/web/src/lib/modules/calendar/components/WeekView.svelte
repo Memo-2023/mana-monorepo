@@ -272,9 +272,9 @@
 		<!-- Day columns -->
 		<div class="days-container" bind:this={daysContainerEl}>
 			{#each days as day}
-				<!-- svelte-ignore a11y_no_static_element_interactions -->
 				<div
 					class="day-column"
+					role="application"
 					class:today={isToday(day)}
 					class:creating={dragToCreate.isCreating &&
 						dragToCreate.createTargetDay &&

@@ -161,11 +161,11 @@
 			</div>
 			<div class="p-6 space-y-4">
 				<div>
-					<!-- svelte-ignore a11y_label_has_associated_control -->
-					<label class="block text-sm font-medium text-foreground mb-2"
+					<label for="zitare-list-name" class="block text-sm font-medium text-foreground mb-2"
 						>{$_('lists.nameLabel')} *</label
 					>
 					<input
+						id="zitare-list-name"
 						type="text"
 						bind:value={newListName}
 						placeholder={$_('lists.createModal.namePlaceholder')}
@@ -174,11 +174,13 @@
 					/>
 				</div>
 				<div>
-					<!-- svelte-ignore a11y_label_has_associated_control -->
-					<label class="block text-sm font-medium text-foreground mb-2"
+					<label
+						for="zitare-list-description"
+						class="block text-sm font-medium text-foreground mb-2"
 						>{$_('lists.descriptionLabel')}</label
 					>
 					<textarea
+						id="zitare-list-description"
 						bind:value={newListDescription}
 						placeholder={$_('lists.createModal.descriptionPlaceholder')}
 						maxlength="200"

@@ -35,7 +35,6 @@
 <div class="scene-app-bar">
 	{#each scenes as scene (scene.id)}
 		{@const isActive = scene.id === activeSceneId}
-		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		<button
 			type="button"
 			class="scene-pill"
@@ -53,7 +52,6 @@
 		{#if isActive && pages.length > 0}
 			{#each pages as p (p.id)}
 				{@const AppIcon = p.icon}
-				<!-- svelte-ignore a11y_no_static_element_interactions -->
 				<button
 					class="app-tab"
 					onclick={() => onAppClick(p.id)}

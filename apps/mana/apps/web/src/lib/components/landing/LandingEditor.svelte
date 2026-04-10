@@ -191,9 +191,12 @@
 	<SectionEditor title="Hero" expanded={true}>
 		<div class="space-y-3">
 			<div>
-				<!-- svelte-ignore a11y_label_has_associated_control -->
-				<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
+				<label
+					for="landing-hero-title"
+					class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label
+				>
 				<input
+					id="landing-hero-title"
 					type="text"
 					bind:value={config.sections.hero.title}
 					placeholder="Your organization name"
@@ -201,11 +204,12 @@
 				/>
 			</div>
 			<div>
-				<!-- svelte-ignore a11y_label_has_associated_control -->
-				<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-					>Subtitle</label
+				<label
+					for="landing-hero-subtitle"
+					class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Subtitle</label
 				>
 				<textarea
+					id="landing-hero-subtitle"
 					bind:value={config.sections.hero.subtitle}
 					placeholder="A short description of your organization"
 					rows="2"
@@ -213,11 +217,12 @@
 				></textarea>
 			</div>
 			<div>
-				<!-- svelte-ignore a11y_label_has_associated_control -->
-				<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-					>Variant</label
+				<label
+					for="landing-hero-variant"
+					class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Variant</label
 				>
 				<select
+					id="landing-hero-variant"
 					bind:value={config.sections.hero.variant}
 					class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm"
 				>
@@ -228,11 +233,13 @@
 			</div>
 			<div class="grid gap-3 md:grid-cols-2">
 				<div>
-					<!-- svelte-ignore a11y_label_has_associated_control -->
-					<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+					<label
+						for="landing-hero-cta-text"
+						class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
 						>CTA Button Text</label
 					>
 					<input
+						id="landing-hero-cta-text"
 						type="text"
 						value={config.sections.hero.primaryCta?.text || ''}
 						oninput={(e) => {
@@ -245,11 +252,13 @@
 					/>
 				</div>
 				<div>
-					<!-- svelte-ignore a11y_label_has_associated_control -->
-					<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+					<label
+						for="landing-hero-cta-link"
+						class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
 						>CTA Button Link</label
 					>
 					<input
+						id="landing-hero-cta-link"
 						type="text"
 						value={config.sections.hero.primaryCta?.href || ''}
 						oninput={(e) => {
@@ -269,11 +278,13 @@
 	<SectionEditor title="About / Features">
 		<div class="space-y-3">
 			<div>
-				<!-- svelte-ignore a11y_label_has_associated_control -->
-				<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+				<label
+					for="landing-about-title"
+					class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
 					>Section Title</label
 				>
 				<input
+					id="landing-about-title"
 					type="text"
 					bind:value={config.sections.about.title}
 					placeholder="What we offer"
@@ -281,11 +292,12 @@
 				/>
 			</div>
 			<div>
-				<!-- svelte-ignore a11y_label_has_associated_control -->
-				<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-					>Subtitle</label
+				<label
+					for="landing-about-subtitle"
+					class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Subtitle</label
 				>
 				<input
+					id="landing-about-subtitle"
 					type="text"
 					bind:value={config.sections.about.subtitle}
 					placeholder="Optional subtitle"
@@ -293,8 +305,7 @@
 				/>
 			</div>
 
-			<!-- svelte-ignore a11y_label_has_associated_control -->
-			<label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Features</label>
+			<p class="block text-sm font-medium text-gray-700 dark:text-gray-300">Features</p>
 			<RepeatableField
 				items={config.sections.about.features}
 				onAdd={addFeature}
@@ -333,11 +344,13 @@
 	<SectionEditor title="Team">
 		<div class="space-y-3">
 			<div>
-				<!-- svelte-ignore a11y_label_has_associated_control -->
-				<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+				<label
+					for="landing-team-title"
+					class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
 					>Section Title</label
 				>
 				<input
+					id="landing-team-title"
 					type="text"
 					bind:value={config.sections.team.title}
 					placeholder="Our Team"
@@ -345,8 +358,7 @@
 				/>
 			</div>
 
-			<!-- svelte-ignore a11y_label_has_associated_control -->
-			<label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Members</label>
+			<p class="block text-sm font-medium text-gray-700 dark:text-gray-300">Members</p>
 			<RepeatableField
 				items={config.sections.team.members}
 				onAdd={addMember}
@@ -385,11 +397,13 @@
 	<SectionEditor title="Contact">
 		<div class="space-y-3">
 			<div>
-				<!-- svelte-ignore a11y_label_has_associated_control -->
-				<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+				<label
+					for="landing-contact-title"
+					class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
 					>Section Title</label
 				>
 				<input
+					id="landing-contact-title"
 					type="text"
 					bind:value={config.sections.contact.title}
 					placeholder="Contact"
@@ -398,11 +412,12 @@
 			</div>
 			<div class="grid gap-3 md:grid-cols-2">
 				<div>
-					<!-- svelte-ignore a11y_label_has_associated_control -->
-					<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-						>E-Mail</label
+					<label
+						for="landing-contact-email"
+						class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">E-Mail</label
 					>
 					<input
+						id="landing-contact-email"
 						type="email"
 						bind:value={config.sections.contact.email}
 						placeholder="info@example.com"
@@ -410,11 +425,12 @@
 					/>
 				</div>
 				<div>
-					<!-- svelte-ignore a11y_label_has_associated_control -->
-					<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-						>Phone</label
+					<label
+						for="landing-contact-phone"
+						class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Phone</label
 					>
 					<input
+						id="landing-contact-phone"
 						type="tel"
 						bind:value={config.sections.contact.phone}
 						placeholder="+49 123 456789"
@@ -423,11 +439,12 @@
 				</div>
 			</div>
 			<div>
-				<!-- svelte-ignore a11y_label_has_associated_control -->
-				<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-					>Address</label
+				<label
+					for="landing-contact-address"
+					class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Address</label
 				>
 				<textarea
+					id="landing-contact-address"
 					bind:value={config.sections.contact.address}
 					placeholder="Street, City, ZIP"
 					rows="2"
@@ -441,11 +458,13 @@
 	<SectionEditor title="Footer">
 		<div class="space-y-3">
 			<div>
-				<!-- svelte-ignore a11y_label_has_associated_control -->
-				<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+				<label
+					for="landing-footer-copyright"
+					class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
 					>Copyright Text</label
 				>
 				<input
+					id="landing-footer-copyright"
 					type="text"
 					bind:value={config.sections.footer.copyright}
 					placeholder="e.g. 2024 My Organization. All rights reserved."
@@ -453,8 +472,7 @@
 				/>
 			</div>
 
-			<!-- svelte-ignore a11y_label_has_associated_control -->
-			<label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Links</label>
+			<p class="block text-sm font-medium text-gray-700 dark:text-gray-300">Links</p>
 			<RepeatableField
 				items={config.sections.footer.links || []}
 				onAdd={addFooterLink}

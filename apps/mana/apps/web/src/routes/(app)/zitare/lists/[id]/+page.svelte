@@ -297,9 +297,14 @@
 <!-- Edit List Modal -->
 {#if showEditModal}
 	<div class="modal-overlay" onclick={closeEditModal} role="presentation">
-		<!-- svelte-ignore a11y_interactive_supports_focus -->
 		<!-- svelte-ignore a11y_click_events_have_key_events -->
-		<div class="modal" onclick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+		<div
+			class="modal"
+			onclick={(e) => e.stopPropagation()}
+			role="dialog"
+			aria-modal="true"
+			tabindex="-1"
+		>
 			<div class="modal-header">
 				<h3>{$_('lists.detail.editModal.title')}</h3>
 				<button class="close-btn" onclick={closeEditModal} aria-label={$_('common.close')}>
@@ -358,7 +363,13 @@
 <!-- Add Quotes Modal -->
 {#if showAddQuotesModal}
 	<!-- svelte-ignore a11y_interactive_supports_focus -->
-	<div class="modal-overlay" onclick={closeAddQuotesModal} role="presentation">
+	<div
+		class="modal-overlay"
+		onclick={closeAddQuotesModal}
+		onkeydown={(e) => e.key === 'Escape' && closeAddQuotesModal()}
+		tabindex="-1"
+		role="presentation"
+	>
 		<!-- svelte-ignore a11y_click_events_have_key_events -->
 		<div
 			class="modal modal-large"

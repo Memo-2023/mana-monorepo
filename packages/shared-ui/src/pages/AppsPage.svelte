@@ -125,7 +125,6 @@
 
 	<div class="apps-grid">
 		{#each apps as app, index}
-			<!-- svelte-ignore a11y_click_events_have_key_events -->
 			<div
 				class="app-card"
 				class:current={app.id === currentAppId}
@@ -174,8 +173,14 @@
 
 <!-- Modal -->
 {#if selectedAppIndex !== null}
-	<!-- svelte-ignore a11y_click_events_have_key_events -->
-	<div class="modal-overlay" onclick={closeModal} role="dialog" aria-modal="true" tabindex="-1">
+	<div
+		class="modal-overlay"
+		onclick={closeModal}
+		onkeydown={(e) => e.key === 'Escape' && closeModal()}
+		role="dialog"
+		aria-modal="true"
+		tabindex="-1"
+	>
 		<button onclick={closeModal} class="modal-close-btn" aria-label="Close modal">
 			<svg
 				width="24"

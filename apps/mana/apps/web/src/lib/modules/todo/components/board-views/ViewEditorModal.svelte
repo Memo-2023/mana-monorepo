@@ -94,11 +94,12 @@
 </script>
 
 {#if open}
-	<!-- svelte-ignore a11y_click_events_have_key_events -->
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
 		class="fixed inset-0 z-[9996] flex items-end sm:items-center justify-center bg-black/45 p-0 sm:p-4 backdrop-blur-sm"
 		onclick={(e) => e.target === e.currentTarget && onClose()}
+		onkeydown={(e) => e.key === 'Escape' && onClose()}
+		tabindex="-1"
+		role="presentation"
 	>
 		<div
 			class="w-full max-w-lg rounded-t-2xl sm:rounded-2xl border border-border bg-card shadow-2xl max-h-[95vh] sm:max-h-[90vh]"
@@ -119,9 +120,11 @@
 			<!-- Form -->
 			<div class="space-y-4 p-5">
 				<div>
-					<!-- svelte-ignore a11y_label_has_associated_control -->
-					<label class="mb-1 block text-xs font-medium text-muted-foreground">Name</label>
+					<label for="todo-view-name" class="mb-1 block text-xs font-medium text-muted-foreground"
+						>Name</label
+					>
 					<input
+						id="todo-view-name"
 						type="text"
 						bind:value={name}
 						placeholder={$_('todo.board.name')}
@@ -131,11 +134,13 @@
 
 				<div class="grid grid-cols-2 gap-3">
 					<div>
-						<!-- svelte-ignore a11y_label_has_associated_control -->
-						<label class="mb-1 block text-xs font-medium text-muted-foreground"
+						<label
+							for="todo-view-groupby"
+							class="mb-1 block text-xs font-medium text-muted-foreground"
 							>{$_('todo.board.groupBy')}</label
 						>
 						<select
+							id="todo-view-groupby"
 							bind:value={groupBy}
 							class="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
 						>
@@ -145,11 +150,13 @@
 						</select>
 					</div>
 					<div>
-						<!-- svelte-ignore a11y_label_has_associated_control -->
-						<label class="mb-1 block text-xs font-medium text-muted-foreground"
+						<label
+							for="todo-view-layout"
+							class="mb-1 block text-xs font-medium text-muted-foreground"
 							>{$_('todo.board.layout')}</label
 						>
 						<select
+							id="todo-view-layout"
 							bind:value={layout}
 							class="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
 						>
@@ -163,9 +170,7 @@
 				<!-- Columns -->
 				<div>
 					<div class="mb-2 flex items-center justify-between">
-						<!-- svelte-ignore a11y_label_has_associated_control -->
-						<label class="text-xs font-medium text-muted-foreground"
-							>{$_('todo.board.columns')}</label
+						<span class="text-xs font-medium text-muted-foreground">{$_('todo.board.columns')}</span
 						>
 						<button
 							onclick={addColumn}

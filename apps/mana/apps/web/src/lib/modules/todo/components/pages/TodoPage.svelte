@@ -241,11 +241,13 @@
 		{:else}
 			<span class="color-dot" style="background-color: {displayColor}"></span>
 		{/if}
-		<!-- svelte-ignore a11y_no_static_element_interactions -->
+		<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 		<span
 			bind:this={titleEl}
 			class="page-title"
 			contenteditable={!!onRename}
+			role={onRename ? 'textbox' : undefined}
+			tabindex={onRename ? 0 : undefined}
 			oninput={handleTitleInput}
 			onkeydown={handleTitleKeydown}
 			onfocus={() => (isTitleFocused = true)}
@@ -263,8 +265,7 @@
 		{/if}
 	{/snippet}
 
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<div class="page-content" ondragstart={(e) => e.preventDefault()}>
+	<div class="page-content" ondragstart={(e) => e.preventDefault()} role="list">
 		{#each openTasks as task (task.id)}
 			<div class="task-card-wrapper" class:completed-task={task.isCompleted}>
 				<TaskItem

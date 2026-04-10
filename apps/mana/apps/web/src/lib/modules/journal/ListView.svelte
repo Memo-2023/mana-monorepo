@@ -285,12 +285,13 @@
 			{#each group.entries as entry (entry.id)}
 				{#if editingId === entry.id}
 					<!-- Inline editor -->
-					<!-- svelte-ignore a11y_no_static_element_interactions -->
+					<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 					<div
 						class="entry-item editing"
 						onkeydown={(e) => {
 							if (e.key === 'Escape') saveEdit();
 						}}
+						role="form"
 					>
 						<!-- svelte-ignore a11y_autofocus -->
 						<input

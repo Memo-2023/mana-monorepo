@@ -48,12 +48,15 @@
 </script>
 
 {#if open}
-	<!-- svelte-ignore a11y_click_events_have_key_events -->
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
 		class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50"
 		onclick={handleClose}
+		onkeydown={(e) => e.key === 'Escape' && handleClose()}
+		tabindex="-1"
+		role="presentation"
 	>
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
+		<!-- svelte-ignore a11y_click_events_have_key_events -->
 		<div
 			class="w-full max-w-md rounded-t-xl sm:rounded-xl border border-border bg-card p-6 shadow-xl max-h-[95vh] sm:max-h-[90vh] sm:mx-4"
 			onclick={(e) => e.stopPropagation()}

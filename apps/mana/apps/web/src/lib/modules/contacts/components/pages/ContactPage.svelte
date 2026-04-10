@@ -255,9 +255,11 @@
 </PageShell>
 
 {#snippet profileCard(contact: Contact)}
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<!-- svelte-ignore a11y_click_events_have_key_events -->
-	<div class="profile-card" onclick={() => onOpenContact?.(contact)}>
+	<button
+		type="button"
+		class="text-left w-full profile-card"
+		onclick={() => onOpenContact?.(contact)}
+	>
 		<div class="profile-avatar">
 			{#if contact.photoUrl}
 				<img src={contact.photoUrl} alt={getDisplayName(contact)} class="profile-avatar-img" />
@@ -297,15 +299,16 @@
 			</div>
 		{/if}
 		<div class="profile-hint">Tippe zum Bearbeiten</div>
-	</div>
+	</button>
 {/snippet}
 
 {#snippet contactRow(contact: Contact)}
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<!-- svelte-ignore a11y_click_events_have_key_events -->
 	<div
 		class="contact-row"
 		onclick={() => onOpenContact?.(contact)}
+		onkeydown={(e) => e.key === 'Enter' && onOpenContact?.(contact)}
+		role="button"
+		tabindex="0"
 		use:dropTarget={{
 			accepts: ['tag'],
 			onDrop: (payload) => onTagDrop?.(contact, payload),

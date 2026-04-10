@@ -79,9 +79,13 @@
 	>
 		{#each items as task (task.id)}
 			<div animate:flip={{ duration: flipDurationMs }}>
-				<!-- svelte-ignore a11y_click_events_have_key_events -->
-				<!-- svelte-ignore a11y_no_static_element_interactions -->
-				<div onclick={() => onOpenTask(task)} class="cursor-pointer">
+				<div
+					onclick={() => onOpenTask(task)}
+					onkeydown={(e) => e.key === 'Enter' && onOpenTask(task)}
+					role="button"
+					tabindex="0"
+					class="cursor-pointer"
+				>
 					<KanbanTaskCard
 						{task}
 						{labels}

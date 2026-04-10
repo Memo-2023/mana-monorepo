@@ -69,8 +69,8 @@
 	}
 </script>
 
-<!-- svelte-ignore a11y_no_static_element_interactions -->
-<div class="pill-tab-group" oncontextmenu={handleContextMenu}>
+<!-- svelte-ignore a11y_interactive_supports_focus -->
+<div class="pill-tab-group" oncontextmenu={handleContextMenu} role="tablist">
 	<div
 		class="tab-container glass-pill"
 		style={primaryColor ? `--pill-primary-color: ${primaryColor}` : ''}

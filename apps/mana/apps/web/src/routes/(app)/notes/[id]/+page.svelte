@@ -83,8 +83,7 @@
 <div class="note-detail">
 	{#if note}
 		<header class="detail-header">
-			<!-- svelte-ignore a11y_consider_explicit_label -->
-			<button class="back-btn" onclick={handleBack}>
+			<button class="back-btn" onclick={handleBack} aria-label="Aktion">
 				<svg
 					width="20"
 					height="20"

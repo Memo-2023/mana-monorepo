@@ -96,8 +96,8 @@
 	};
 </script>
 
-<!-- svelte-ignore a11y_no_static_element_interactions -->
-<div class="app-drawer" onkeydown={handleKeydown}>
+<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+<div class="app-drawer" onkeydown={handleKeydown} role="navigation">
 	<!-- Trigger Button -->
 	<button bind:this={triggerButton} onclick={toggle} class="pill glass-pill trigger-button">
 		<svg class="pill-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">

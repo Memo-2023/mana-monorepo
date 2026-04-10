@@ -360,8 +360,7 @@
 
 				<!-- Scopes -->
 				<div class="mb-4">
-					<!-- svelte-ignore a11y_label_has_associated_control -->
-					<label class="block text-sm font-medium mb-2">Scopes</label>
+					<span class="block text-sm font-medium mb-2">Scopes</span>
 					<div class="space-y-2">
 						<label class="flex items-center gap-2 cursor-pointer">
 							<input

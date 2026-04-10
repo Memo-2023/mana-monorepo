@@ -112,8 +112,7 @@
 		<!-- Favorites list -->
 		<div class="space-y-6">
 			{#each favoriteQuotes as quote (quote.id)}
-				<!-- svelte-ignore a11y_no_static_element_interactions -->
-				<div oncontextmenu={(e) => handleContextMenu(e, quote)}>
+				<div oncontextmenu={(e) => handleContextMenu(e, quote)} role="listitem">
 					<QuoteCard
 						{quote}
 						showCategory={zitareSettings.showCategory}

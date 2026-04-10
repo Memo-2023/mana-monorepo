@@ -132,13 +132,10 @@
 	});
 </script>
 
-<!-- svelte-ignore a11y_no_static_element_interactions -->
 <svelte:window onkeydown={handleKeydown} />
 
 <!-- Backdrop (transparent - allows seeing calendar) -->
-<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-<!-- svelte-ignore a11y_no_static_element_interactions -->
-<div class="popover-backdrop" onclick={onClose}></div>
+<div class="popover-backdrop" onclick={onClose} role="presentation" tabindex="-1"></div>
 
 <!-- Popover -->
 <div

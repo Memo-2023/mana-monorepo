@@ -200,11 +200,11 @@
 				</div>
 				<div class="flex gap-2">
 					<div class="flex items-center gap-1">
-						<!-- svelte-ignore a11y_label_has_associated_control -->
-						<label class="text-xs text-[hsl(var(--muted-foreground))]"
+						<label for="times-project-budget" class="text-xs text-[hsl(var(--muted-foreground))]"
 							>{$_('project.budget')} (h):</label
 						>
 						<input
+							id="times-project-budget"
 							type="number"
 							value={editBudgetHours}
 							min="0"
@@ -218,9 +218,11 @@
 						/>
 					</div>
 					<div class="flex items-center gap-1">
-						<!-- svelte-ignore a11y_label_has_associated_control -->
-						<label class="text-xs text-[hsl(var(--muted-foreground))]">Rate:</label>
+						<label for="times-project-rate" class="text-xs text-[hsl(var(--muted-foreground))]"
+							>Rate:</label
+						>
 						<input
+							id="times-project-rate"
 							type="number"
 							value={editRateAmount}
 							min="0"
@@ -239,11 +241,11 @@
 						<span class="text-xs text-[hsl(var(--muted-foreground))]">/h</span>
 					</div>
 				</div>
-				<!-- svelte-ignore a11y_consider_explicit_label -->
 				<div class="flex flex-wrap gap-1.5">
 					{#each PROJECT_COLORS as color}
 						<button
 							type="button"
+							aria-label="Farbe wählen"
 							onclick={() => {
 								editColor = color;
 								save({ color });

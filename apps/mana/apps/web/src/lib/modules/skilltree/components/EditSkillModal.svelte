@@ -48,16 +48,14 @@
 	function confirmDelete() {
 		onDelete();
 		onClose();
-		// svelte-ignore a11y_interactive_supports_focus
-		// svelte-ignore a11y_click_events_have_key_events
 	}
 </script>
 
-<!-- svelte-ignore a11y_interactive_supports_focus -->
-<!-- svelte-ignore a11y_click_events_have_key_events -->
 <div
 	class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm"
 	onclick={handleBackdropClick}
+	onkeydown={(e) => e.key === 'Escape' && onClose()}
+	tabindex="-1"
 	role="dialog"
 	aria-modal="true"
 >
@@ -133,8 +131,7 @@
 
 				<!-- Branch -->
 				<div>
-					<!-- svelte-ignore a11y_label_has_associated_control -->
-					<label class="mb-2 block text-sm font-medium text-gray-300"> Kategorie </label>
+					<span class="mb-2 block text-sm font-medium text-gray-300"> Kategorie </span>
 					<div class="grid grid-cols-2 gap-2">
 						{#each Object.entries(BRANCH_INFO) as [key, info]}
 							<button

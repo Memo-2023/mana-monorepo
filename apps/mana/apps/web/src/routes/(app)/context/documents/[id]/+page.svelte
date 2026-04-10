@@ -206,17 +206,17 @@
 
 <!-- Delete Confirmation -->
 {#if showDeleteConfirm}
-	<!-- svelte-ignore a11y_click_events_have_key_events -->
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
 		class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
 		onclick={() => (showDeleteConfirm = false)}
-		// svelte-ignore a11y_click_events_have_key_events
+		onkeydown={(e) => e.key === 'Escape' && (showDeleteConfirm = false)}
+		tabindex="-1"
+		role="presentation"
 	>
-		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		<div
 			class="w-full max-w-sm rounded-xl bg-white p-6 shadow-2xl dark:bg-gray-800"
 			onclick={(e) => e.stopPropagation()}
+			role="none"
 		>
 			<h3 class="text-lg font-semibold">Dokument loeschen?</h3>
 			<p class="mt-2 text-sm opacity-60">Das Dokument wird unwiderruflich geloescht.</p>

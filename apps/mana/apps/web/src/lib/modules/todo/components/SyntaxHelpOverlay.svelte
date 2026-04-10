@@ -71,11 +71,12 @@
 </script>
 
 {#if open}
-	<!-- svelte-ignore a11y_click_events_have_key_events -->
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
 		class="fixed inset-0 z-[9996] flex items-center justify-center bg-black/45 p-4 backdrop-blur-sm"
 		onclick={(e) => e.target === e.currentTarget && onClose()}
+		onkeydown={(e) => e.key === 'Escape' && onClose()}
+		tabindex="-1"
+		role="presentation"
 	>
 		<div
 			class="max-h-[80vh] w-full max-w-md overflow-y-auto rounded-2xl border border-border bg-card shadow-2xl"
