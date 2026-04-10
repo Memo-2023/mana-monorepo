@@ -227,8 +227,12 @@ export class LlmOrchestrator {
 	 *  - Rule 2: sensitive content excludes mana-server + cloud
 	 *  Also always includes 'none' at the end if the task has runRules. */
 	private candidateTiers<TIn, TOut>(task: LlmTask<TIn, TOut>): LlmTier[] {
-		// Start from the user's allowed tiers, in their preference order
-		let tiers = this.settings.allowedTiers.filter((t) => TIER_RANK[t] >= TIER_RANK[task.minTier]);
+		// Sort by privacy gradient (most private first) so the browser tier
+		// always wins over mana-server when both are enabled, regardless of
+		// the order the user toggled them in settings.
+		let tiers = this.settings.allowedTiers
+			.filter((t) => TIER_RANK[t] >= TIER_RANK[task.minTier])
+			.sort((a, b) => TIER_RANK[a] - TIER_RANK[b]);
 
 		// Rule 2: sensitive content backstop
 		if (task.contentClass === 'sensitive') {
