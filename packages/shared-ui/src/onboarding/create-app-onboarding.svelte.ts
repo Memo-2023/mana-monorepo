@@ -42,20 +42,19 @@ const ONBOARDING_PREFERENCES_KEY = 'onboarding_preferences';
 export function createAppOnboardingStore(config: AppOnboardingConfig): AppOnboardingStore {
 	const { appId, steps, userSettings, onComplete, onSkip } = config;
 
-	// State
-	let currentStep = $state(0);
-	let preferences = $state<AppOnboardingPreferences>({});
-	let saving = $state(false);
-	let completed = $state(false);
-
-	// Initialize preferences with default values
+	// Build initial preferences from step defaults before creating state
+	const initialPreferences: AppOnboardingPreferences = {};
 	for (const step of steps) {
-		if (step.type === 'select' && step.defaultValue !== undefined) {
-			preferences[step.id] = step.defaultValue;
-		} else if (step.type === 'toggle' && step.defaultValue !== undefined) {
-			preferences[step.id] = step.defaultValue;
+		if ((step.type === 'select' || step.type === 'toggle') && step.defaultValue !== undefined) {
+			initialPreferences[step.id] = step.defaultValue;
 		}
 	}
+
+	// State
+	let currentStep = $state(0);
+	let preferences = $state<AppOnboardingPreferences>(initialPreferences);
+	let saving = $state(false);
+	let completed = $state(false);
 
 	// Derived values
 	const totalSteps = $derived(steps.length);
@@ -170,16 +169,7 @@ export function createAppOnboardingStore(config: AppOnboardingConfig): AppOnboar
 
 			completed = false;
 			currentStep = 0;
-
-			// Reset preferences to defaults
-			preferences = {};
-			for (const step of steps) {
-				if (step.type === 'select' && step.defaultValue !== undefined) {
-					preferences[step.id] = step.defaultValue;
-				} else if (step.type === 'toggle' && step.defaultValue !== undefined) {
-					preferences[step.id] = step.defaultValue;
-				}
-			}
+			preferences = { ...initialPreferences };
 		} finally {
 			saving = false;
 		}

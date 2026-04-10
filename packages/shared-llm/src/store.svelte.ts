@@ -56,7 +56,8 @@ function persistSettings(settings: LlmSettings): void {
 
 // ─── Reactive state ──────────────────────────────────────────────
 
-let _settings = $state<LlmSettings>(loadSettings());
+const initialSettings = loadSettings();
+let _settings = $state<LlmSettings>(initialSettings);
 
 // Backends are constructed once per page session. They're stateless
 // (or hold their own internal state in the case of BrowserBackend
@@ -65,7 +66,7 @@ let _settings = $state<LlmSettings>(loadSettings());
 const backends = [new BrowserBackend(), new ManaServerBackend(), new CloudBackend()];
 
 export const llmOrchestrator = new LlmOrchestrator({
-	settings: _settings,
+	settings: initialSettings,
 	backends,
 });
 

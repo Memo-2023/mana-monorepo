@@ -36,7 +36,7 @@ services:
     container_name: mana-search-redis-dev
     ports:
       - "6380:6379"  # Different port to avoid conflicts
-    command: redis-server --appendonly yes --maxmemory 64mb --maxmemory-policy allkeys-lru
+    command: redis-server --appendonly yes --maxmemory 64mb --maxmemory-policy noeviction
     volumes:
       - redis-dev-data:/data
     networks:

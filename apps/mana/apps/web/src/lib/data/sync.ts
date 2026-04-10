@@ -724,6 +724,14 @@ export function createUnifiedSync(serverUrl: string, getToken: () => Promise<str
 				count: pending.length,
 				durationMs: Date.now() - startedAt,
 			});
+
+			// If there are more pending rows beyond this batch, schedule
+			// another push immediately (with a tiny delay to avoid starving
+			// the UI thread). This drains the backlog in PUSH_BATCH_SIZE
+			// chunks without sending a single oversized request.
+			if (hasMore) {
+				schedulePush(appId);
+			}
 		} catch (err) {
 			channel.lastError = err instanceof Error ? err.message : 'Push failed';
 			setStatus('error');
