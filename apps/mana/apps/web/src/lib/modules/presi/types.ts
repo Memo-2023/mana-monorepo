@@ -9,6 +9,7 @@ export interface LocalDeck extends BaseRecord {
 	description?: string | null;
 	themeId?: string | null;
 	isPublic: boolean;
+	activeRehearsalBlockId?: string | null;
 }
 
 export interface LocalSlide extends BaseRecord {

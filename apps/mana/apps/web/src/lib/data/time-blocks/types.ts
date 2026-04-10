@@ -26,7 +26,10 @@ export type TimeBlockType =
 	| 'cycle'
 	| 'guide'
 	| 'visit'
-	| 'study';
+	| 'study'
+	| 'listening'
+	| 'mood'
+	| 'rehearsal';
 
 export type TimeBlockSourceModule =
 	| 'calendar'
@@ -41,7 +44,10 @@ export type TimeBlockSourceModule =
 	| 'cycles'
 	| 'guides'
 	| 'places'
-	| 'cards';
+	| 'cards'
+	| 'music'
+	| 'moodlit'
+	| 'presi';
 
 // ─── Local Record Types (Dexie) ──────────────────────────
 

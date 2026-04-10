@@ -28,6 +28,9 @@
 		Compass,
 		MapPin,
 		BookOpen,
+		MusicNote,
+		SunHorizon,
+		Presentation,
 	} from '@mana/shared-icons';
 	import { getIconComponent } from '@mana/shared-icons';
 	import { format } from 'date-fns';
@@ -78,6 +81,9 @@
 		guide: { icon: Compass, label: 'Guide' },
 		visit: { icon: MapPin, label: 'Besuch' },
 		study: { icon: BookOpen, label: 'Lernen' },
+		listening: { icon: MusicNote, label: 'Musik' },
+		mood: { icon: SunHorizon, label: 'Stimmung' },
+		rehearsal: { icon: Presentation, label: 'Probe' },
 	};
 
 	function formatBlockTime(block: TimeBlock): string {

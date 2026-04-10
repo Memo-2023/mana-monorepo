@@ -9,7 +9,8 @@ import { db } from '$lib/data/database';
 import { presiDeckTable, slideTable } from '../collections';
 import { toDeck, toSlide } from '../queries';
 import { PresiEvents } from '@mana/shared-utils/analytics';
-import { encryptRecord } from '$lib/data/crypto';
+import { encryptRecord, decryptRecord } from '$lib/data/crypto';
+import { createBlock, updateBlock } from '$lib/data/time-blocks/service';
 import type {
 	LocalDeck,
 	LocalSlide,
@@ -164,6 +165,51 @@ function createDecksStore() {
 		}
 	}
 
+	async function startRehearsal(deckId: string): Promise<string | null> {
+		const deck = await presiDeckTable.get(deckId);
+		if (!deck) return null;
+		if (deck.activeRehearsalBlockId) return deck.activeRehearsalBlockId;
+
+		const decrypted = await decryptRecord('presiDecks', { ...deck });
+		const deckTitle = decrypted?.title ?? 'Präsentation';
+		const now = new Date().toISOString();
+
+		const timeBlockId = await createBlock({
+			startDate: now,
+			endDate: null,
+			isLive: true,
+			kind: 'logged',
+			type: 'rehearsal',
+			sourceModule: 'presi',
+			sourceId: deckId,
+			title: `${deckTitle} — Probe`,
+			color: '#84cc16',
+		});
+
+		await presiDeckTable.update(deckId, {
+			activeRehearsalBlockId: timeBlockId,
+			updatedAt: now,
+		});
+
+		return timeBlockId;
+	}
+
+	async function endRehearsal(deckId: string): Promise<void> {
+		const deck = await presiDeckTable.get(deckId);
+		if (!deck?.activeRehearsalBlockId) return;
+
+		const now = new Date().toISOString();
+		await updateBlock(deck.activeRehearsalBlockId, {
+			endDate: now,
+			isLive: false,
+		});
+
+		await presiDeckTable.update(deckId, {
+			activeRehearsalBlockId: null,
+			updatedAt: now,
+		});
+	}
+
 	return {
 		get isLoading() {
 			return isLoading;
@@ -178,6 +224,8 @@ function createDecksStore() {
 		updateSlide,
 		deleteSlide,
 		reorderSlides,
+		startRehearsal,
+		endRehearsal,
 	};
 }
 

@@ -4,6 +4,7 @@
 
 import { db } from '$lib/data/database';
 import { MoodlitEvents } from '@mana/shared-utils/analytics';
+import { createBlock, updateBlock } from '$lib/data/time-blocks/service';
 import type { LocalMood } from '../types';
 import type { Mood, MoodSettings } from '../types';
 
@@ -21,6 +22,7 @@ function createMoodsStore() {
 	let favoriteIds = $state<string[]>([]);
 	let settings = $state<MoodSettings>({ ...DEFAULT_SETTINGS });
 	let activeMood = $state<Mood | null>(null);
+	let activeSessionBlockId = $state<string | null>(null);
 
 	// Load from localStorage on init
 	if (typeof window !== 'undefined') {
@@ -63,6 +65,34 @@ function createMoodsStore() {
 
 		setActiveMood(mood: Mood | null) {
 			activeMood = mood;
+		},
+
+		async startMoodSession(mood: Mood): Promise<void> {
+			if (activeSessionBlockId) {
+				await updateBlock(activeSessionBlockId, {
+					endDate: new Date().toISOString(),
+				});
+			}
+			activeSessionBlockId = await createBlock({
+				startDate: new Date().toISOString(),
+				endDate: null,
+				isLive: true,
+				kind: 'logged',
+				type: 'mood',
+				sourceModule: 'moodlit',
+				sourceId: mood.id,
+				title: mood.name,
+				color: mood.colors?.[0] ?? '#fb923c',
+			});
+		},
+
+		async endMoodSession(): Promise<void> {
+			if (!activeSessionBlockId) return;
+			await updateBlock(activeSessionBlockId, {
+				endDate: new Date().toISOString(),
+				isLive: false,
+			});
+			activeSessionBlockId = null;
 		},
 
 		addMood(mood: Mood) {

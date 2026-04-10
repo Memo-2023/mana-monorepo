@@ -6,7 +6,8 @@
  */
 
 import { songTable } from '../collections';
-import { encryptRecord } from '$lib/data/crypto';
+import { encryptRecord, decryptRecord } from '$lib/data/crypto';
+import { createBlock } from '$lib/data/time-blocks/service';
 import { MusicEvents } from '@mana/shared-utils/analytics';
 import type { LocalSong } from '../types';
 
@@ -24,15 +25,35 @@ export const libraryStore = {
 		}
 	},
 
-	/** Increment play count. */
+	/** Increment play count and create a listening TimeBlock. */
 	async incrementPlayCount(id: string) {
 		const local = await songTable.get(id);
 		if (local) {
+			const now = new Date().toISOString();
 			await songTable.update(id, {
 				playCount: (local.playCount || 0) + 1,
-				lastPlayedAt: new Date().toISOString(),
-				updatedAt: new Date().toISOString(),
+				lastPlayedAt: now,
+				updatedAt: now,
 			});
+
+			const decrypted = await decryptRecord('songs', { ...local });
+			const title = decrypted?.title ?? 'Song';
+			const artist = decrypted?.artist;
+			const endDate = local.duration
+				? new Date(Date.now() + local.duration * 1000).toISOString()
+				: now;
+
+			await createBlock({
+				startDate: now,
+				endDate,
+				kind: 'logged',
+				type: 'listening',
+				sourceModule: 'music',
+				sourceId: id,
+				title: artist ? `${title} — ${artist}` : title,
+				color: '#d946ef',
+			});
+
 			MusicEvents.songPlayed();
 		}
 	},

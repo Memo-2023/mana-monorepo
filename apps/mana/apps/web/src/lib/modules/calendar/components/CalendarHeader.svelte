@@ -20,6 +20,9 @@
 		Compass,
 		MapPin,
 		BookOpen,
+		MusicNote,
+		SunHorizon,
+		Presentation,
 	} from '@mana/shared-icons';
 	import { db } from '$lib/data/database';
 	import { decryptRecords } from '$lib/data/crypto';
@@ -50,6 +53,9 @@
 		{ type: 'guide', label: 'Guides', icon: Compass },
 		{ type: 'visit', label: 'Besuche', icon: MapPin },
 		{ type: 'study', label: 'Lernen', icon: BookOpen },
+		{ type: 'listening', label: 'Musik', icon: MusicNote },
+		{ type: 'mood', label: 'Stimmung', icon: SunHorizon },
+		{ type: 'rehearsal', label: 'Probe', icon: Presentation },
 	];
 
 	let allActive = $derived(

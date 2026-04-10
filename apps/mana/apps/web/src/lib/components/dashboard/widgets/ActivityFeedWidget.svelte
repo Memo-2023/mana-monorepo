@@ -29,6 +29,9 @@
 		Compass,
 		MapPin,
 		BookOpen,
+		MusicNote,
+		SunHorizon,
+		Presentation,
 	} from '@mana/shared-icons';
 	import { getIconComponent } from '@mana/shared-icons';
 	import { formatDistanceToNow } from 'date-fns';
@@ -63,6 +66,9 @@
 		guide: Compass,
 		visit: MapPin,
 		study: BookOpen,
+		listening: MusicNote,
+		mood: SunHorizon,
+		rehearsal: Presentation,
 	};
 
 	function timeAgo(iso: string): string {

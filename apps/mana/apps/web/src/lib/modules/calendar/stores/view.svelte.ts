@@ -39,6 +39,9 @@ let visibleBlockTypes = $state<Set<TimeBlockType>>(
 		'guide',
 		'visit',
 		'study',
+		'listening',
+		'mood',
+		'rehearsal',
 	])
 );
 

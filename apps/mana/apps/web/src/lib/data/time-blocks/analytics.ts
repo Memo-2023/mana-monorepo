@@ -33,6 +33,9 @@ const TYPE_COLORS: Record<TimeBlockType, string> = {
 	guide: '#14b8a6',
 	visit: '#a855f7',
 	study: '#0ea5e9',
+	listening: '#d946ef',
+	mood: '#fb923c',
+	rehearsal: '#84cc16',
 };
 
 const TYPE_LABELS: Record<TimeBlockType, string> = {
@@ -50,6 +53,9 @@ const TYPE_LABELS: Record<TimeBlockType, string> = {
 	guide: 'Guides',
 	visit: 'Besuche',
 	study: 'Lernen',
+	listening: 'Musik',
+	mood: 'Stimmung',
+	rehearsal: 'Probe',
 };
 
 function blockDuration(b: TimeBlock): number {
