@@ -58,13 +58,14 @@
 		isLoading = true;
 		abortController = new AbortController();
 		try {
-			for await (const delta of streamCompletion({
+			for await (const chunk of streamCompletion({
 				model: selectedModel,
 				messages: wire,
 				signal: abortController.signal,
 			})) {
+				if (chunk.type !== 'delta') continue;
 				const next = [...messages];
-				next[idx] = { ...next[idx], content: next[idx].content + delta };
+				next[idx] = { ...next[idx], content: next[idx].content + chunk.content };
 				messages = next;
 			}
 		} catch (err) {

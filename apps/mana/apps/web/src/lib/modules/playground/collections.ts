@@ -1,12 +1,17 @@
 /**
  * Playground module — collection accessors.
  *
- * Only one table: snippets (saved system prompts). The chat history
- * itself is intentionally NOT persisted — playground is for one-off
- * exploration; chat module owns the persisted-conversation surface.
+ * Three tables: snippets (saved system prompts), conversations, and messages.
  */
 
 import { db } from '$lib/data/database';
-import type { LocalPlaygroundSnippet } from './types';
+import type {
+	LocalPlaygroundSnippet,
+	LocalPlaygroundConversation,
+	LocalPlaygroundMessage,
+} from './types';
 
 export const playgroundSnippetTable = db.table<LocalPlaygroundSnippet>('playgroundSnippets');
+export const playgroundConversationTable =
+	db.table<LocalPlaygroundConversation>('playgroundConversations');
+export const playgroundMessageTable = db.table<LocalPlaygroundMessage>('playgroundMessages');

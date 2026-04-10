@@ -9,7 +9,14 @@
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
 import { decryptRecords } from '$lib/data/crypto';
-import type { LocalPlaygroundSnippet, PlaygroundSnippet } from './types';
+import type {
+	LocalPlaygroundSnippet,
+	PlaygroundSnippet,
+	LocalPlaygroundConversation,
+	PlaygroundConversation,
+	LocalPlaygroundMessage,
+	PlaygroundConversationMessage,
+} from './types';
 
 export function toSnippet(local: LocalPlaygroundSnippet): PlaygroundSnippet {
 	return {
@@ -42,4 +49,63 @@ export function useAllSnippets() {
 		});
 		return sorted.map(toSnippet);
 	}, [] as PlaygroundSnippet[]);
+}
+
+// ─── Conversations ──────────────────────────────────────
+
+export function toConversation(local: LocalPlaygroundConversation): PlaygroundConversation {
+	return {
+		id: local.id,
+		title: local.title,
+		model: local.model,
+		systemPrompt: local.systemPrompt,
+		temperature: local.temperature,
+		snippetId: local.snippetId,
+		isPinned: local.isPinned ?? false,
+		comparisonModels: local.comparisonModels ?? null,
+		createdAt: local.createdAt ?? new Date().toISOString(),
+		updatedAt: local.updatedAt ?? new Date().toISOString(),
+	};
+}
+
+export function toMessage(local: LocalPlaygroundMessage): PlaygroundConversationMessage {
+	return {
+		id: local.id,
+		conversationId: local.conversationId,
+		role: local.role,
+		content: local.content,
+		model: local.model,
+		promptTokens: local.promptTokens,
+		completionTokens: local.completionTokens,
+		comparisonGroupId: local.comparisonGroupId,
+		order: local.order,
+		createdAt: local.createdAt ?? new Date().toISOString(),
+	};
+}
+
+export function useAllConversations() {
+	return useLiveQueryWithDefault(async () => {
+		const locals = await db.table<LocalPlaygroundConversation>('playgroundConversations').toArray();
+		const visible = locals.filter((c) => !c.deletedAt);
+		const decrypted = await decryptRecords<LocalPlaygroundConversation>(
+			'playgroundConversations',
+			visible
+		);
+		return decrypted.map(toConversation).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+	}, [] as PlaygroundConversation[]);
+}
+
+export function useConversationMessages(conversationId: () => string | null) {
+	return useLiveQueryWithDefault(async () => {
+		const cid = conversationId();
+		if (!cid) return [];
+		const locals = await db
+			.table<LocalPlaygroundMessage>('playgroundMessages')
+			.where('conversationId')
+			.equals(cid)
+			.sortBy('order');
+		const visible = locals.filter((m) => !m.deletedAt);
+		const decrypted = await decryptRecords<LocalPlaygroundMessage>('playgroundMessages', visible);
+		return decrypted.map(toMessage);
+	}, [] as PlaygroundConversationMessage[]);
 }

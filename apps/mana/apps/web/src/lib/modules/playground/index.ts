@@ -1,8 +1,8 @@
 /**
  * Playground module — barrel exports.
  *
- * Stateless LLM playground for testing prompts against different models.
- * No local-first collections needed (no persistent data model).
+ * LLM playground for testing prompts against different models with
+ * persistent chat history, token tracking, and model comparison.
  */
 
 export const PLAYGROUND_MODELS = [

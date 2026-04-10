@@ -61,16 +61,19 @@ export interface CompletionOptions {
 	signal?: AbortSignal;
 }
 
+/** A chunk yielded during streaming — either a content delta or final usage stats. */
+export type StreamChunk =
+	| { type: 'delta'; content: string }
+	| { type: 'usage'; promptTokens: number; completionTokens: number };
+
 /**
- * Streams a chat completion from mana-llm and yields content deltas as
- * they arrive. The caller concatenates deltas into the visible message —
- * see `routes/(app)/playground/+page.svelte` for the consumer pattern.
+ * Streams a chat completion from mana-llm and yields StreamChunks as
+ * they arrive. Content deltas have `type: 'delta'`, and the final usage
+ * stats (if the provider includes them) have `type: 'usage'`.
  *
  * Errors propagate as thrown exceptions (network failure, non-2xx, abort).
- * The playground page catches them and renders a friendly fallback rather
- * than blanking the conversation.
  */
-export async function* streamCompletion(opts: CompletionOptions): AsyncGenerator<string> {
+export async function* streamCompletion(opts: CompletionOptions): AsyncGenerator<StreamChunk> {
 	const res = await fetch(`${llmUrl()}/v1/chat/completions`, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
@@ -112,9 +115,19 @@ export async function* streamCompletion(opts: CompletionOptions): AsyncGenerator
 				try {
 					const json = JSON.parse(data) as {
 						choices?: Array<{ delta?: { content?: string } }>;
+						usage?: { prompt_tokens?: number; completion_tokens?: number };
 					};
 					const delta = json.choices?.[0]?.delta?.content;
-					if (delta) yield delta;
+					if (delta) yield { type: 'delta', content: delta };
+
+					// Usage stats — typically in the final chunk
+					if (json.usage?.prompt_tokens != null) {
+						yield {
+							type: 'usage',
+							promptTokens: json.usage.prompt_tokens,
+							completionTokens: json.usage.completion_tokens ?? 0,
+						};
+					}
 				} catch {
 					// Malformed frame — skip silently. mana-llm occasionally
 					// emits keepalive comments and we don't want them to
