@@ -247,6 +247,12 @@
 		aiTierItems?: PillDropdownItem[];
 		/** Current AI tier label, e.g. "Browser" or "Server" */
 		currentAiTierLabel?: string;
+		/** Show sync status dropdown */
+		showSyncStatus?: boolean;
+		/** Sync status dropdown items */
+		syncStatusItems?: PillDropdownItem[];
+		/** Current sync status label */
+		currentSyncLabel?: string;
 		/** Primary color for active state (CSS custom property or hex) */
 		primaryColor?: string;
 		/** Elements to prepend before nav items (tab groups, dividers, nav items) */
@@ -342,6 +348,9 @@
 		showAiTierSelector = false,
 		aiTierItems = [],
 		currentAiTierLabel = 'KI',
+		showSyncStatus = false,
+		syncStatusItems = [],
+		currentSyncLabel = 'Sync',
 		themeMode = 'system',
 		onThemeModeChange,
 		appItems = [],
@@ -667,6 +676,16 @@
 					direction={dropdownDirection}
 					label={currentAiTierLabel}
 					icon="cpu"
+				/>
+			{/if}
+
+			<!-- Sync Status -->
+			{#if showSyncStatus && syncStatusItems.length > 0}
+				<PillDropdown
+					items={syncStatusItems}
+					direction={dropdownDirection}
+					label={currentSyncLabel}
+					icon="cloud"
 				/>
 			{/if}
 

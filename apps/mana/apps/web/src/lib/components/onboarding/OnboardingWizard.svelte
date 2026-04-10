@@ -6,6 +6,7 @@
 	import ProfileStep from './steps/ProfileStep.svelte';
 	import AppsStep from './steps/AppsStep.svelte';
 	import AiTierStep from './steps/AiTierStep.svelte';
+	import SyncStep from './steps/SyncStep.svelte';
 	import CreditsStep from './steps/CreditsStep.svelte';
 	import CompleteStep from './steps/CompleteStep.svelte';
 	import { Check } from '@mana/shared-icons';
@@ -31,6 +32,7 @@
 		{ id: 'profile', label: 'Profil', component: ProfileStep },
 		{ id: 'apps', label: 'Apps', component: AppsStep },
 		{ id: 'ai-tier', label: 'KI', component: AiTierStep },
+		{ id: 'sync', label: 'Sync', component: SyncStep },
 		{ id: 'credits', label: 'Credits', component: CreditsStep },
 		{ id: 'complete', label: 'Fertig', component: CompleteStep },
 	];
@@ -159,6 +161,10 @@
 				<ProfileStep bind:nameValue={profileNameRef} />
 			{:else if currentStepData.id === 'apps'}
 				<AppsStep />
+			{:else if currentStepData.id === 'ai-tier'}
+				<AiTierStep />
+			{:else if currentStepData.id === 'sync'}
+				<SyncStep />
 			{:else if currentStepData.id === 'credits'}
 				<CreditsStep />
 			{:else if currentStepData.id === 'complete'}

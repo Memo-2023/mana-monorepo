@@ -238,6 +238,72 @@
 		return first ? first.shortLabel.split(' (')[0] : 'KI';
 	});
 
+	// ── Sync status dropdown ────────────────────────────────
+	let syncStatusItems = $derived.by(() => {
+		const items: import('@mana/shared-ui').PillDropdownItem[] = [];
+
+		if (syncBilling.active) {
+			items.push({
+				id: 'sync-active',
+				label: 'Cloud Sync aktiv',
+				icon: 'cloudCheck',
+				active: true,
+				disabled: true,
+			});
+			if (syncBilling.nextChargeAt) {
+				const date = new Date(syncBilling.nextChargeAt).toLocaleDateString('de-DE', {
+					day: '2-digit',
+					month: '2-digit',
+					year: 'numeric',
+				});
+				items.push({
+					id: 'sync-next',
+					label: `Nächste Abbuchung: ${date}`,
+					disabled: true,
+				});
+			}
+		} else if (syncBilling.paused) {
+			items.push({
+				id: 'sync-paused',
+				label: 'Sync pausiert — Credits aufladen',
+				icon: 'warning',
+				onClick: () => goto('/credits?tab=packages'),
+			});
+		} else {
+			items.push({
+				id: 'sync-inactive',
+				label: 'Sync aktivieren',
+				icon: 'cloudArrowUp',
+				onClick: () => goto('/settings/sync'),
+			});
+			items.push({
+				id: 'sync-info',
+				label: 'Nur lokal — ab 30 Credits/Monat',
+				disabled: true,
+			});
+		}
+
+		items.push({ id: 'sync-divider', label: '', divider: true });
+		items.push({
+			id: 'sync-settings',
+			label: 'Sync-Einstellungen',
+			icon: 'gear',
+			onClick: () => goto('/settings/sync'),
+		});
+
+		return items;
+	});
+
+	let currentSyncLabel = $derived(
+		syncBilling.loading
+			? '...'
+			: syncBilling.active
+				? 'Sync'
+				: syncBilling.paused
+					? 'Pausiert'
+					: 'Lokal'
+	);
+
 	// ── User / Guest awareness ──────────────────────────────
 	let userEmail = $derived(
 		authStore.isAuthenticated ? authStore.user?.email || $_('nav.menu') : ''
@@ -750,6 +816,9 @@
 				showAiTierSelector={true}
 				{aiTierItems}
 				{currentAiTierLabel}
+				showSyncStatus={authStore.isAuthenticated}
+				{syncStatusItems}
+				{currentSyncLabel}
 				{appItems}
 				{userEmail}
 				settingsHref="/settings"
