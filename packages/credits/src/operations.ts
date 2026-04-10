@@ -62,9 +62,7 @@ export enum CreditOperationType {
 	// Premium Features (Standard Credits: 0.5-5)
 	// -------------------------------------------------------------------------
 
-	// Sync features
-	CALDAV_SYNC = 'caldav_sync',
-	GOOGLE_SYNC = 'google_sync',
+	// Sync
 	CLOUD_SYNC = 'cloud_sync',
 
 	// Import/Export
@@ -113,9 +111,7 @@ export const CREDIT_COSTS: Record<CreditOperationType, number> = {
 	[CreditOperationType.AI_ENRICHMENT]: 2,
 
 	// Premium Features
-	[CreditOperationType.CALDAV_SYNC]: 0.5,
-	[CreditOperationType.GOOGLE_SYNC]: 0.5,
-	[CreditOperationType.CLOUD_SYNC]: 5, // Monthly
+	[CreditOperationType.CLOUD_SYNC]: 30, // Monthly (or 90/quarterly, 360/yearly)
 
 	[CreditOperationType.BULK_IMPORT]: 0.2, // Per 10 items
 	[CreditOperationType.PDF_EXPORT]: 1,
@@ -132,7 +128,6 @@ export const CREDIT_COSTS: Record<CreditOperationType, number> = {
  */
 export enum CreditCategory {
 	AI = 'ai',
-	PRODUCTIVITY = 'productivity',
 	PREMIUM = 'premium',
 }
 
@@ -293,23 +288,11 @@ export const OPERATION_METADATA: Record<CreditOperationType, OperationMetadata> 
 	},
 
 	// Premium - Sync
-	[CreditOperationType.CALDAV_SYNC]: {
-		name: 'CalDAV Sync',
-		description: 'Sync with CalDAV server',
-		category: CreditCategory.PREMIUM,
-		app: 'calendar',
-	},
-	[CreditOperationType.GOOGLE_SYNC]: {
-		name: 'Google Sync',
-		description: 'Sync with Google services',
-		category: CreditCategory.PREMIUM,
-		app: 'contacts',
-	},
 	[CreditOperationType.CLOUD_SYNC]: {
-		name: 'Cloud Sync (Monthly)',
-		description: 'Enable cloud synchronization',
+		name: 'Cloud Sync',
+		description: 'Cloud-Synchronisation über alle Geräte (30 Credits/Monat)',
 		category: CreditCategory.PREMIUM,
-		app: 'skilltree',
+		app: 'general',
 	},
 
 	// Premium - Import/Export

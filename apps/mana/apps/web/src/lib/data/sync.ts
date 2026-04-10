@@ -529,7 +529,11 @@ const EAGER_APPS = new Set([
 ]);
 // ─── Unified Sync Manager ─────────────────────────────────────
 
-export function createUnifiedSync(serverUrl: string, getToken: () => Promise<string | null>) {
+export function createUnifiedSync(
+	serverUrl: string,
+	getToken: () => Promise<string | null>,
+	syncEnabled = true
+) {
 	const channels = new Map<string, SyncChannelState>();
 	const clientId = getOrCreateClientId();
 	let status: SyncStatus = 'idle';
@@ -540,6 +544,8 @@ export function createUnifiedSync(serverUrl: string, getToken: () => Promise<str
 	// ─── Lifecycle ──────────────────────────────────────────
 
 	function startAll(): void {
+		if (!syncEnabled) return;
+
 		// Register all channels
 		for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {
 			const channel: SyncChannelState = {
@@ -1058,6 +1064,7 @@ export function createUnifiedSync(serverUrl: string, getToken: () => Promise<str
 	 * If already synced (has pullTimer), this is a no-op.
 	 */
 	function ensureAppSynced(appId: string): void {
+		if (!syncEnabled) return;
 		const channel = channels.get(appId);
 		if (!channel || channel.pullTimer) return;
 

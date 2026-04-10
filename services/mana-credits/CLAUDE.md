@@ -39,6 +39,15 @@ bun run db:studio  # Open Drizzle Studio
 | POST | `/api/v1/credits/purchase` | Initiate Stripe purchase |
 | GET | `/api/v1/credits/purchase/:id` | Purchase status |
 
+### Sync Billing (JWT auth)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/v1/sync/status` | Sync subscription status |
+| POST | `/api/v1/sync/activate` | Activate sync (body: `{ interval }`) |
+| POST | `/api/v1/sync/deactivate` | Deactivate sync |
+| POST | `/api/v1/sync/change-interval` | Change billing interval |
+
 ### Gift Codes (Mixed auth)
 
 | Method | Path | Description |
@@ -59,6 +68,8 @@ bun run db:studio  # Open Drizzle Studio
 | POST | `/api/v1/internal/credits/refund` | Refund credits |
 | POST | `/api/v1/internal/credits/init` | Initialize balance |
 | POST | `/api/v1/internal/gifts/redeem-pending` | Auto-redeem on registration |
+| GET | `/api/v1/internal/sync/status/:userId` | Sync status for server check |
+| POST | `/api/v1/internal/sync/charge-recurring` | Cron trigger for billing |
 
 ### Webhooks
 
@@ -85,15 +96,22 @@ Own database: `mana_credits`
 
 Schemas: `credits.*`, `gifts.*`
 
-Tables: balances, transactions, packages, purchases, usage_stats, stripe_customers, gift_codes, gift_redemptions
+Tables: balances, transactions, packages, purchases, usage_stats, stripe_customers, gift_codes, gift_redemptions, sync_subscriptions
 
 ## Credit Operations
 
 Credits are only charged for operations that cost real money:
 - **AI operations** (2-25 credits): Chat with GPT-4/Claude/Gemini, image generation, research, food/plant analysis
-- **Premium features** (0.5-5 credits): CalDAV/Google sync, cloud sync, PDF export, bulk import
+- **Premium features** (1-3 credits): PDF export, bulk import, premium themes
+- **Cloud Sync** (30 credits/month, 90/quarter, 360/year): Multi-device sync via mana-sync
 
 Local-first CRUD operations (tasks, events, contacts, etc.) are **free** — they happen in IndexedDB with no server cost.
+
+## Sync Billing
+
+Cloud Sync is a monthly credit subscription. Users start in local-only mode and opt-in via Settings. Billing intervals: monthly (30), quarterly (90), yearly (360). 1 Credit = 1 Cent.
+
+When credits run out, sync is paused (not deleted). Local data is preserved. User sees an in-app banner and can reactivate after topping up credits.
 
 ## Gift Types
 

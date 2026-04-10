@@ -47,6 +47,7 @@
 		stopMemoroLlmWatcher,
 	} from '$lib/modules/memoro/llm-watcher.svelte';
 	import { createUnifiedSync } from '$lib/data/sync';
+	import { syncBilling } from '$lib/stores/sync-billing.svelte';
 	import { networkStore } from '$lib/stores/network.svelte';
 	import { db } from '$lib/data/database';
 	import { dashboardStore } from '$lib/stores/dashboard.svelte';
@@ -447,8 +448,9 @@
 		if (authStore.isAuthenticated) {
 			setErrorTrackingUser({ id: authStore.user?.id ?? 'unknown', email: authStore.user?.email });
 			trackReturnVisit();
+			await syncBilling.load();
 			const getToken = () => authStore.getValidToken();
-			unifiedSync = createUnifiedSync(SYNC_SERVER_URL, getToken);
+			unifiedSync = createUnifiedSync(SYNC_SERVER_URL, getToken, syncBilling.active);
 			// Expose on window for SYNC_DEBUG.md (Schritt C). Not a security
 			// concern: every method on the returned object is also reachable
 			// via Dexie + a fresh fetch from the same DevTools console, and
@@ -617,6 +619,25 @@
 			<div class="bottom-stack-notification">
 				<EncryptionIntroBanner />
 			</div>
+
+			<!-- Sync pause banner — shown when sync was paused due to insufficient credits -->
+			{#if syncBilling.paused}
+				<div class="bottom-stack-notification">
+					<div
+						class="flex items-center justify-between gap-3 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:bg-amber-900/20 dark:text-amber-200"
+					>
+						<span>Cloud Sync pausiert — Credits reichen nicht aus.</span>
+						<div class="flex gap-2">
+							<a href="/credits?tab=packages" class="font-medium underline hover:no-underline">
+								Credits aufladen
+							</a>
+							<a href="/settings/sync" class="font-medium underline hover:no-underline">
+								Sync-Einstellungen
+							</a>
+						</div>
+					</div>
+				</div>
+			{/if}
 
 			<!-- Guest notifications — combines the time-based nudge from
 				 createGuestMode (one-shot after N minutes) with the

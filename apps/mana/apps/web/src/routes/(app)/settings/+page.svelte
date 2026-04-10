@@ -170,6 +170,30 @@
 			<!-- Global Settings Section (synced across all apps) -->
 			<GlobalSettingsSection {userSettings} appId="mana" />
 
+			<!-- Cloud Sync Section -->
+			<Card>
+				<div class="p-6">
+					<div class="flex items-center justify-between">
+						<div class="flex items-center gap-3">
+							<div
+								class="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
+							>
+								<span class="text-lg">☁️</span>
+							</div>
+							<div>
+								<h2 class="text-lg font-semibold">Cloud Sync</h2>
+								<p class="text-sm text-muted-foreground">
+									Synchronisiere deine Daten über alle Geräte
+								</p>
+							</div>
+						</div>
+						<a href="/settings/sync" class="text-sm text-primary hover:underline">
+							Einstellungen
+						</a>
+					</div>
+				</div>
+			</Card>
+
 			<!-- Credits Section -->
 			<Card>
 				<div class="p-6">

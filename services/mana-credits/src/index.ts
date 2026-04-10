@@ -2,7 +2,7 @@
  * mana-credits — Standalone credit management service
  *
  * Hono + Bun runtime. Extracted from mana-auth.
- * Handles: personal credits, gift codes, Stripe payments.
+ * Handles: personal credits, gift codes, sync billing, Stripe payments.
  */
 
 import { Hono } from 'hono';
@@ -15,9 +15,11 @@ import { serviceAuth } from './middleware/service-auth';
 import { StripeService } from './services/stripe';
 import { CreditsService } from './services/credits';
 import { GiftCodeService } from './services/gift-code';
+import { SyncBillingService } from './services/sync-billing';
 import { healthRoutes } from './routes/health';
 import { createCreditsRoutes } from './routes/credits';
 import { createGiftRoutes } from './routes/gifts';
+import { createSyncRoutes } from './routes/sync';
 import { createInternalRoutes } from './routes/internal';
 import { createWebhookRoutes } from './routes/stripe-webhook';
 
@@ -30,6 +32,7 @@ const db = getDb(config.databaseUrl);
 const stripeService = new StripeService(db, config.stripe.secretKey);
 const creditsService = new CreditsService(db, stripeService);
 const giftCodeService = new GiftCodeService(db, config.baseUrl);
+const syncBillingService = new SyncBillingService(db, creditsService);
 
 // ─── App ────────────────────────────────────────────────────
 
@@ -52,12 +55,18 @@ app.route('/health', healthRoutes);
 app.use('/api/v1/credits/*', jwtAuth(config.manaAuthUrl));
 app.route('/api/v1/credits', createCreditsRoutes(creditsService));
 
+app.use('/api/v1/sync/*', jwtAuth(config.manaAuthUrl));
+app.route('/api/v1/sync', createSyncRoutes(syncBillingService));
+
 // Gift routes (mixed: public GET /:code, JWT for rest)
 app.route('/api/v1/gifts', createGiftRoutes(giftCodeService, config.manaAuthUrl));
 
 // Service-to-service routes (X-Service-Key auth)
 app.use('/api/v1/internal/*', serviceAuth(config.serviceKey));
-app.route('/api/v1/internal', createInternalRoutes(creditsService, giftCodeService));
+app.route(
+	'/api/v1/internal',
+	createInternalRoutes(creditsService, giftCodeService, syncBillingService)
+);
 
 // Stripe webhooks (verified by signature, no auth middleware)
 app.route(

@@ -5,6 +5,7 @@
 import { Hono } from 'hono';
 import type { CreditsService } from '../services/credits';
 import type { GiftCodeService } from '../services/gift-code';
+import type { SyncBillingService } from '../services/sync-billing';
 import {
 	internalUseCreditsSchema,
 	internalRefundSchema,
@@ -14,7 +15,8 @@ import {
 
 export function createInternalRoutes(
 	creditsService: CreditsService,
-	giftCodeService: GiftCodeService
+	giftCodeService: GiftCodeService,
+	syncBillingService: SyncBillingService
 ) {
 	return new Hono()
 		.get('/credits/balance/:userId', async (c) => {
@@ -46,6 +48,14 @@ export function createInternalRoutes(
 		.post('/gifts/redeem-pending', async (c) => {
 			const body = internalRedeemPendingSchema.parse(await c.req.json());
 			const result = await giftCodeService.redeemPendingForUser(body.userId, body.email);
+			return c.json(result);
+		})
+		.get('/sync/status/:userId', async (c) => {
+			const status = await syncBillingService.getSyncStatus(c.req.param('userId'));
+			return c.json(status);
+		})
+		.post('/sync/charge-recurring', async (c) => {
+			const result = await syncBillingService.chargeRecurring();
 			return c.json(result);
 		});
 }

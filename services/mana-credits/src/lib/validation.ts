@@ -37,6 +37,16 @@ export const redeemGiftSchema = z.object({
 	sourceAppId: z.string().optional(),
 });
 
+// ─── Sync ──────────────────────────────────────────────────
+
+export const activateSyncSchema = z.object({
+	interval: z.enum(['monthly', 'quarterly', 'yearly']).default('monthly'),
+});
+
+export const changeSyncIntervalSchema = z.object({
+	interval: z.enum(['monthly', 'quarterly', 'yearly']),
+});
+
 // ─── Internal (Service-to-Service) ──────────────────────────
 
 export const internalUseCreditsSchema = z.object({
