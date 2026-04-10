@@ -18,6 +18,8 @@ const SERVICES = [
 	{ name: 'Uload Server', url: process.env.PUBLIC_ULOAD_SERVER_URL || 'http://localhost:3070' },
 	{ name: 'Media', url: process.env.PUBLIC_MANA_MEDIA_URL || 'http://localhost:3011' },
 	{ name: 'LLM', url: process.env.PUBLIC_MANA_LLM_URL || 'http://localhost:3025' },
+	{ name: 'Geocoding', url: process.env.PUBLIC_MANA_GEOCODING_URL || 'http://localhost:3018' },
+	{ name: 'Events', url: process.env.PUBLIC_MANA_EVENTS_URL || 'http://localhost:3065' },
 ];
 
 async function checkService(service: { name: string; url: string }): Promise<ServiceStatus> {

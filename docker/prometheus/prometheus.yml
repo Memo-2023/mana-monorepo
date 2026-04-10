@@ -243,6 +243,17 @@ scrape_configs:
           - https://mana.how/habits
           - https://mana.how/guides
           - https://mana.how/inventory
+          - https://mana.how/body
+          - https://mana.how/journal
+          - https://mana.how/dreams
+          - https://mana.how/firsts
+          - https://mana.how/cycles
+          - https://mana.how/events
+          - https://mana.how/finance
+          - https://mana.how/places
+          - https://mana.how/who
+          - https://mana.how/news
+          - https://mana.how/mail
           - https://mana.how/playground
           # Standalone games (separate containers)
           - https://whopxl.mana.how
