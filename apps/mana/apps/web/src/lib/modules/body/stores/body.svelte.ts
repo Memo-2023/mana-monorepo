@@ -13,6 +13,7 @@
  */
 
 import { encryptRecord } from '$lib/data/crypto';
+import { createBlock, updateBlock, deleteBlock } from '$lib/data/time-blocks/service';
 import {
 	bodyExerciseTable,
 	bodyRoutineTable,
@@ -151,14 +152,33 @@ export const bodyStore = {
 		const active = existing.find((w) => !w.deletedAt && w.endedAt === null);
 		if (active) return toBodyWorkout(active);
 
+		const workoutId = crypto.randomUUID();
+		const now = new Date().toISOString();
+		const title = input.title ?? 'Workout';
+
+		// Create a TimeBlock so the workout appears in calendar + timeline.
+		// endDate is null (ongoing) — finishWorkout stamps it later.
+		const timeBlockId = await createBlock({
+			startDate: now,
+			endDate: null,
+			kind: 'logged',
+			type: 'body',
+			sourceModule: 'body',
+			sourceId: workoutId,
+			title,
+			color: '#ef4444',
+			icon: null,
+		});
+
 		const newLocal: LocalBodyWorkout = {
-			id: crypto.randomUUID(),
-			startedAt: new Date().toISOString(),
+			id: workoutId,
+			startedAt: now,
 			endedAt: null,
 			routineId: input.routineId ?? null,
-			title: input.title ?? null,
+			title,
 			notes: null,
 			rpe: null,
+			timeBlockId,
 		};
 		const snapshot = toBodyWorkout({ ...newLocal });
 		await encryptRecord('bodyWorkouts', newLocal);
@@ -167,16 +187,23 @@ export const bodyStore = {
 	},
 
 	async finishWorkout(id: string, patch?: { notes?: string | null; rpe?: number | null }) {
+		const now = new Date().toISOString();
 		const update: Partial<LocalBodyWorkout> = {
-			endedAt: new Date().toISOString(),
+			endedAt: now,
 			notes: patch?.notes ?? null,
 			rpe: patch?.rpe ?? null,
 		};
 		const wrapped = await encryptRecord('bodyWorkouts', { ...update });
 		await bodyWorkoutTable.update(id, {
 			...wrapped,
-			updatedAt: new Date().toISOString(),
+			updatedAt: now,
 		});
+
+		// Stamp the TimeBlock's endDate so the calendar shows duration.
+		const workout = await bodyWorkoutTable.get(id);
+		if (workout?.timeBlockId) {
+			await updateBlock(workout.timeBlockId, { endDate: now });
+		}
 	},
 
 	async updateWorkout(
@@ -192,13 +219,16 @@ export const bodyStore = {
 
 	async deleteWorkout(id: string) {
 		// Soft-delete the workout AND its sets so the volume aggregates
-		// stop counting them. We do not touch measurements/checks here;
-		// those are independent timelines.
+		// stop counting them. Also remove the linked TimeBlock.
+		const workout = await bodyWorkoutTable.get(id);
 		const now = new Date().toISOString();
 		await bodyWorkoutTable.update(id, { deletedAt: now, updatedAt: now });
 		const sets = await bodySetTable.where('workoutId').equals(id).toArray();
 		for (const s of sets) {
 			await bodySetTable.update(s.id, { deletedAt: now });
+		}
+		if (workout?.timeBlockId) {
+			await deleteBlock(workout.timeBlockId);
 		}
 	},
 

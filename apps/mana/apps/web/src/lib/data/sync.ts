@@ -740,10 +740,28 @@ export function createUnifiedSync(serverUrl: string, getToken: () => Promise<str
 
 	async function pull(appId: string): Promise<void> {
 		const channel = channels.get(appId);
-		if (!channel || !online) return;
+		if (!channel) {
+			// Same guard as push() — an appId without a registered channel
+			// means either a registry drift or a stale pull timer. Surface
+			// it loudly so the SYNC_DEBUG runbook can spot it.
+			console.warn(
+				`[mana-sync] pull: no channel registered for appId="${appId}". ` +
+					`Known appIds: ${[...channels.keys()].join(', ')}.`
+			);
+			emitSyncTelemetry({ kind: 'pull:error', appId, errorCategory: 'unknown-appid' });
+			return;
+		}
+		if (!online) return;
 
 		const token = await getToken();
-		if (!token) return;
+		if (!token) {
+			console.warn(
+				`[mana-sync] pull[${appId}]: getToken() returned null — pull skipped until auth recovers.`
+			);
+			channel.lastError = 'no-token';
+			emitSyncTelemetry({ kind: 'pull:error', appId, errorCategory: 'no-token' });
+			return;
+		}
 
 		setStatus('syncing');
 		const startedAt = Date.now();

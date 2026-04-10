@@ -1,0 +1,21 @@
+#!/bin/sh
+# Pre-push hook: run svelte-check on the unified Mana app to catch
+# type regressions before they reach origin. Takes ~15s on a warm
+# Vite cache, which is acceptable for push (not commit) frequency.
+#
+# Skip with: git push --no-verify (not recommended)
+
+echo "🔍 Running svelte-check..."
+cd apps/mana/apps/web && pnpm check --fail-on-warnings 2>&1 | tail -5
+
+# Capture the exit code from pnpm check (not tail)
+STATUS=${PIPESTATUS[0]:-$?}
+
+if [ $STATUS -ne 0 ]; then
+  echo ""
+  echo "❌ svelte-check failed. Fix errors before pushing."
+  echo "   Run: cd apps/mana/apps/web && pnpm check"
+  exit 1
+fi
+
+echo "✅ svelte-check passed"

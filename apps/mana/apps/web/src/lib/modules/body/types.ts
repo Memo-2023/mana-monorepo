@@ -89,6 +89,8 @@ export interface LocalBodyWorkout extends BaseRecord {
 	/** ISO date+time the session ended (null = still ongoing). */
 	endedAt: string | null;
 	routineId: string | null;
+	/** Link to the unified timeBlocks table so the workout shows in calendar/timeline. */
+	timeBlockId?: string | null;
 	title: string | null;
 	notes: string | null;
 	/** 1–10 perceived effort for the whole session. */

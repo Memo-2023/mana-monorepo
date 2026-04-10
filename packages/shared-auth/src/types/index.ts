@@ -31,8 +31,16 @@ export interface DecodedToken {
 	app_id?: string;
 	is_b2b?: boolean | string | number;
 	subscription_plan_id?: string;
+	/** Display name from Better Auth user profile. */
+	name?: string;
+	/** Avatar URL from Better Auth user profile. */
+	image?: string;
+	/** Whether 2FA is enrolled — Better Auth sets this on the session. */
+	twoFactorEnabled?: boolean;
 	user_metadata?: {
 		email?: string;
+		name?: string;
+		image?: string;
 	};
 	app_settings?: {
 		b2b?: {

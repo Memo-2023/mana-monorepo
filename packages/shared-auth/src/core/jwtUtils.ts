@@ -74,11 +74,19 @@ export function getUserFromToken(token: string, storedEmail?: string): UserData 
 			email = storedEmail;
 		}
 
+		// Name + image can live at top-level (Better Auth default) or
+		// inside user_metadata (legacy/custom JWT layout). Check both.
+		const name = payload.name || payload.user_metadata?.name || undefined;
+		const image = payload.image || payload.user_metadata?.image || undefined;
+
 		return {
 			id: payload.sub,
 			email: email || 'user@example.com',
 			role: payload.role || 'user',
 			tier: payload.tier || 'public',
+			twoFactorEnabled: payload.twoFactorEnabled ?? undefined,
+			name,
+			image,
 		};
 	} catch (error) {
 		console.error('Error extracting user from token:', error);
