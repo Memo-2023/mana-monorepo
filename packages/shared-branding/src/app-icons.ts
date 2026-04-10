@@ -156,6 +156,11 @@ export const APP_ICONS = {
 		// modules (planta, nutriphi) and the pink cycles icon.
 		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="bd" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#ef4444"/><stop offset="100%" style="stop-color:#f97316"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#bd)"/><rect x="18" y="42" width="6" height="16" rx="2" fill="white"/><rect x="76" y="42" width="6" height="16" rx="2" fill="white"/><rect x="24" y="46" width="4" height="8" rx="1" fill="white" fill-opacity="0.85"/><rect x="72" y="46" width="4" height="8" rx="1" fill="white" fill-opacity="0.85"/><rect x="28" y="48" width="44" height="4" rx="2" fill="white"/><path d="M30 70h12l4-8 6 16 4-10 6 6h12" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>`
 	),
+	firsts: svgToDataUrl(
+		// Sparkle/star burst — represents a special "first time" moment.
+		// Warm amber→rose gradient to evoke excitement and novelty.
+		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="fi" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#f59e0b"/><stop offset="100%" style="stop-color:#e11d48"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#fi)"/><path d="M50 18l5 14 14-5-10 11 10 11-14-5-5 14-5-14-14 5 10-11-10-11 14 5z" fill="white"/><circle cx="28" cy="70" r="4" fill="white" fill-opacity="0.6"/><circle cx="72" cy="68" r="3" fill="white" fill-opacity="0.5"/><circle cx="38" cy="80" r="2.5" fill="white" fill-opacity="0.4"/><circle cx="65" cy="82" r="2" fill="white" fill-opacity="0.35"/></svg>`
+	),
 	who: svgToDataUrl(
 		// Theatre mask silhouette in front of a question mark — references
 		// the "guess who's behind the disguise" mechanic. Purple gradient.

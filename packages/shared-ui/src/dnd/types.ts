@@ -25,7 +25,8 @@ export type DragType =
 	| 'transaction'
 	| 'place'
 	| 'dream'
-	| 'journal-entry';
+	| 'journal-entry'
+	| 'first';
 
 export interface DragPayload<T = Record<string, unknown>> {
 	type: DragType;

@@ -372,6 +372,14 @@ db.version(5).stores({
 	zitareCustomQuotes: 'id, author, category',
 });
 
+// Schema version 6 — Firsts module: track first-time experiences.
+// `status` indexed for dream/lived filtering, `category` for grouping,
+// `date` for chronological sort of lived entries, `priority` for dream
+// ranking. `isPinned`/`isArchived` for standard meta-filtering.
+db.version(6).stores({
+	firsts: 'id, status, category, date, priority, isPinned, isArchived',
+});
+
 // ─── Sync Routing ──────────────────────────────────────────
 // SYNC_APP_MAP, TABLE_TO_SYNC_NAME, TABLE_TO_APP, SYNC_NAME_TO_TABLE,
 // toSyncName() and fromSyncName() are now derived from per-module

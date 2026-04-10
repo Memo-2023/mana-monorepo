@@ -796,3 +796,38 @@ registerApp({
 		},
 	],
 });
+
+registerApp({
+	id: 'firsts',
+	name: 'Firsts',
+	color: '#F59E0B',
+	icon: Sparkle,
+	views: {
+		list: { load: () => import('$lib/modules/firsts/ListView.svelte') },
+	},
+	contextMenuActions: [
+		{
+			id: 'new-first',
+			label: 'Neues erstes Mal',
+			icon: Plus,
+			action: () =>
+				window.dispatchEvent(
+					new CustomEvent('mana:quick-action', { detail: { app: 'firsts', action: 'new' } })
+				),
+		},
+	],
+	collection: 'firsts',
+	paramKey: 'firstId',
+	dragType: 'first',
+	getDisplayData: (item) => ({
+		title: (item.title as string) || 'Erstes Mal',
+		subtitle: (item.date as string) ?? (item.status === 'dream' ? 'Dream' : undefined),
+	}),
+	createItem: async (data) => {
+		const { firstsStore } = await import('$lib/modules/firsts/stores/firsts.svelte');
+		const first = await firstsStore.createDream({
+			title: (data.title as string) ?? 'Neues erstes Mal',
+		});
+		return first.id;
+	},
+});

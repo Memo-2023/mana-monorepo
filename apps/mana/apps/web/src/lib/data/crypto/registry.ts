@@ -389,6 +389,16 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	// the calendar query layer needs them for range scans.
 	timeBlocks: { enabled: true, fields: ['title', 'description'] },
 
+	// ─── Firsts ──────────────────────────────────────────────
+	// User-typed text fields (title, motivation, note, expectation, reality,
+	// sharedWith) are encrypted. Status, category, priority, date, rating,
+	// wouldRepeat, personIds, mediaIds, placeId stay plaintext for indexing
+	// and filtering.
+	firsts: {
+		enabled: true,
+		fields: ['title', 'motivation', 'note', 'expectation', 'reality', 'sharedWith'],
+	},
+
 	// ─── Guides ──────────────────────────────────────────────
 	guides: { enabled: true, fields: ['title', 'description'] },
 	sections: { enabled: true, fields: ['title', 'content'] },
