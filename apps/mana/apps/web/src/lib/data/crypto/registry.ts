@@ -292,6 +292,8 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	// free-form text and the whole point of having a vault. Indexed
 	// columns (isPinned, order) stay plaintext for sort.
 	playgroundSnippets: { enabled: true, fields: ['name', 'systemPrompt'] },
+	playgroundConversations: { enabled: true, fields: ['title', 'systemPrompt'] },
+	playgroundMessages: { enabled: true, fields: ['content'] },
 
 	// ─── News ────────────────────────────────────────────────
 	// Saved articles are reading-behavior data (sensitive). The body
@@ -380,6 +382,11 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	// sourceId, parentBlockId, recurrenceDate) all stay plaintext —
 	// the calendar query layer needs them for range scans.
 	timeBlocks: { enabled: true, fields: ['title', 'description'] },
+
+	// ─── Guides ──────────────────────────────────────────────
+	guides: { enabled: true, fields: ['title', 'description'] },
+	sections: { enabled: true, fields: ['title', 'content'] },
+	steps: { enabled: true, fields: ['title', 'content'] },
 };
 
 /**

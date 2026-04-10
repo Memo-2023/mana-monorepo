@@ -693,7 +693,9 @@ registerApp({
 	icon: BookOpen,
 	views: {
 		list: { load: () => import('$lib/modules/guides/ListView.svelte') },
+		detail: { load: () => import('$lib/modules/guides/views/DetailView.svelte') },
 	},
+	paramKey: 'guideId',
 });
 
 registerApp({
