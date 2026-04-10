@@ -5,12 +5,9 @@
 	import { drainTombstones } from './tombstones';
 	import EventCard from './components/EventCard.svelte';
 	import type { SocialEvent } from './types';
+	import type { ViewProps } from '$lib/app-registry';
 
-	interface Props {
-		onOpenEvent?: (id: string) => void;
-	}
-
-	let { onOpenEvent }: Props = $props();
+	let { navigate, goBack, params }: ViewProps = $props();
 
 	const upcoming = useUpcomingEvents();
 	const past = usePastEvents();
@@ -44,12 +41,17 @@
 			newDate = '';
 			newLocation = '';
 			showCreate = false;
-			onOpenEvent?.(result.id);
+			open({ id: result.id } as SocialEvent);
 		}
 	}
 
 	function open(event: SocialEvent) {
-		onOpenEvent?.(event.id);
+		const ids = [...(upcoming.value ?? []), ...(past.value ?? [])].map((e) => e.id);
+		navigate('detail', {
+			eventId: event.id,
+			_siblingIds: ids,
+			_siblingKey: 'eventId',
+		});
 	}
 </script>
 
@@ -59,12 +61,9 @@
 
 <div class="events-page">
 	<header class="events-header">
-		<div>
-			<h1 class="page-title">Events</h1>
-			<p class="page-subtitle">
-				{(upcoming.value ?? []).length} bevorstehend · {(past.value ?? []).length} vergangen
-			</p>
-		</div>
+		<p class="page-subtitle">
+			{(upcoming.value ?? []).length} bevorstehend · {(past.value ?? []).length} vergangen
+		</p>
 		<button class="new-btn" onclick={() => (showCreate = !showCreate)}>
 			{showCreate ? 'Abbrechen' : '+ Neues Event'}
 		</button>
@@ -126,12 +125,6 @@
 		display: flex;
 		align-items: flex-start;
 		justify-content: space-between;
-	}
-	.page-title {
-		margin: 0;
-		font-size: 1.5rem;
-		font-weight: 700;
-		color: hsl(var(--color-foreground));
 	}
 	.page-subtitle {
 		margin: 0.25rem 0 0;

@@ -5,13 +5,11 @@
 	import RsvpSummaryView from '../components/RsvpSummary.svelte';
 	import PublicRsvpList from '../components/PublicRsvpList.svelte';
 	import BringListEditor from '../components/BringListEditor.svelte';
+	import type { ViewProps } from '$lib/app-registry';
 
-	interface Props {
-		eventId: string;
-		onBack?: () => void;
-	}
+	let { navigate, goBack, params }: ViewProps = $props();
 
-	let { eventId, onBack }: Props = $props();
+	let eventId = $derived((params.eventId as string) ?? '');
 
 	const eventQuery = useEvent(() => eventId);
 	const guests = useEventGuests(() => eventId);
@@ -84,7 +82,7 @@
 		if (!event) return;
 		if (!confirm(`Event "${event.title}" wirklich löschen?`)) return;
 		await eventsStore.deleteEvent(event.id);
-		onBack?.();
+		goBack();
 	}
 
 	function copyShareLink() {
@@ -99,9 +97,7 @@
 {:else}
 	<div class="detail">
 		<header class="detail-header">
-			{#if onBack}
-				<button class="back-btn" onclick={onBack}>← Zurück</button>
-			{/if}
+			<button class="back-btn" onclick={goBack}>← Zurück</button>
 			<div class="header-actions">
 				<button class="action-btn" onclick={startEdit}>Bearbeiten</button>
 				<button class="action-btn danger" onclick={handleDelete}>Löschen</button>

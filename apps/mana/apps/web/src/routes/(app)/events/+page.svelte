@@ -2,9 +2,15 @@
 	import { goto } from '$app/navigation';
 	import ListView from '$lib/modules/events/ListView.svelte';
 
-	function handleOpen(id: string) {
-		goto(`/events/${id}`);
+	function navigate(viewName: string, params: Record<string, unknown> = {}) {
+		if (viewName === 'detail' && params.eventId) {
+			goto(`/events/${params.eventId}`);
+		}
+	}
+
+	function goBack() {
+		goto('/events');
 	}
 </script>
 
-<ListView onOpenEvent={handleOpen} />
+<ListView {navigate} {goBack} params={{}} />

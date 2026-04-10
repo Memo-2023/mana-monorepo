@@ -5,9 +5,17 @@
 
 	const eventId = $derived($page.params.id ?? '');
 
-	function handleBack() {
+	function navigate(viewName: string, navParams: Record<string, unknown> = {}) {
+		if (viewName === 'detail' && navParams.eventId) {
+			goto(`/events/${navParams.eventId}`);
+		} else if (viewName === 'list') {
+			goto('/events');
+		}
+	}
+
+	function goBack() {
 		goto('/events');
 	}
 </script>
 
-<DetailView {eventId} onBack={handleBack} />
+<DetailView {navigate} {goBack} params={{ eventId }} />

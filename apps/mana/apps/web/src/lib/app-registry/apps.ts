@@ -715,6 +715,7 @@ registerApp({
 		list: { load: () => import('$lib/modules/events/ListView.svelte') },
 		detail: { load: () => import('$lib/modules/events/views/DetailView.svelte') },
 	},
+	paramKey: 'eventId',
 });
 
 registerApp({
