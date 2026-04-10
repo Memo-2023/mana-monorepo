@@ -9,6 +9,7 @@
 	import { migrateGuestDataToUser } from '$lib/data/guest-migration';
 	import { installDataLayerListeners } from '$lib/data/data-layer-listeners';
 	import { getVaultClient, hasAnyEncryption } from '$lib/data/crypto';
+	import { toast } from '$lib/stores/toast.svelte';
 	import RecoveryCodeUnlockModal from '$lib/components/RecoveryCodeUnlockModal.svelte';
 	import SyncConflictToast from '$lib/components/SyncConflictToast.svelte';
 	import OfflineIndicator from '$lib/components/OfflineIndicator.svelte';
@@ -58,18 +59,25 @@
 		// Skip the network round-trip entirely while no table is encrypted —
 		// hasAnyEncryption() flips to true once Phase 3 enables a pilot.
 		if (userId && hasAnyEncryption()) {
+			console.info('[mana-crypto] vault unlock started — userId present, encryption enabled');
 			vaultClient.unlock().then((state) => {
 				if (state.status === 'unlocked') {
+					console.info('[mana-crypto] vault unlocked successfully');
 					needsRecoveryCode = false;
 					return;
 				}
 				if (state.status === 'awaiting-recovery-code') {
 					// Phase 9: server is in zero-knowledge mode. Show the
 					// modal that collects the user's recovery code.
+					console.info('[mana-crypto] vault awaiting recovery code (zero-knowledge mode)');
 					needsRecoveryCode = true;
 					return;
 				}
-				console.warn('[mana] encryption vault unlock failed:', state);
+				const reason = 'reason' in state ? state.reason : 'unknown';
+				console.error(`[mana-crypto] vault unlock FAILED — reason: ${reason}`, state);
+				toast.error(
+					`Verschlüsselungs-Vault konnte nicht entsperrt werden (${reason}). Verschlüsselte Inhalte sind nicht lesbar.`
+				);
 			});
 		} else if (!userId) {
 			vaultClient.lock();

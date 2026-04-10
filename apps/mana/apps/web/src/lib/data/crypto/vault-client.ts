@@ -249,8 +249,12 @@ export function createVaultClient(options: VaultClientOptions): VaultClient {
 			let res: Response;
 			try {
 				res = await fetch(`${authUrl}${path}`, init);
-			} catch {
+			} catch (err) {
 				lastStatus = 0; // network error
+				console.warn(
+					`[mana-crypto:vault] fetchVault ${path} — network error (attempt ${attempt + 1}/${RETRY_MAX_ATTEMPTS})`,
+					(err as Error).message
+				);
 				if (attempt < RETRY_MAX_ATTEMPTS - 1) await sleep(backoffDelay(attempt));
 				continue;
 			}
@@ -263,10 +267,20 @@ export function createVaultClient(options: VaultClientOptions): VaultClient {
 			lastStatus = res.status;
 			if (!isRetriableStatus(res.status)) {
 				const body = await res.json().catch(() => undefined);
+				console.warn(
+					`[mana-crypto:vault] fetchVault ${path} — permanent error ${res.status}`,
+					body
+				);
 				return { ok: false, status: res.status, body };
 			}
+			console.warn(
+				`[mana-crypto:vault] fetchVault ${path} — retriable error ${res.status} (attempt ${attempt + 1}/${RETRY_MAX_ATTEMPTS})`
+			);
 			if (attempt < RETRY_MAX_ATTEMPTS - 1) await sleep(backoffDelay(attempt));
 		}
+		console.error(
+			`[mana-crypto:vault] fetchVault ${path} — all ${RETRY_MAX_ATTEMPTS} attempts exhausted, last status: ${lastStatus}`
+		);
 		return { ok: false, status: lastStatus };
 	}
 
@@ -318,6 +332,7 @@ export function createVaultClient(options: VaultClientOptions): VaultClient {
 
 	async function unlock(): Promise<VaultUnlockState> {
 		if (provider.isUnlocked()) {
+			console.debug('[mana-crypto:vault] unlock() — provider already unlocked, skipping fetch');
 			pendingRecoveryBlob = null;
 			state = { status: 'unlocked' };
 			return state;
@@ -325,10 +340,12 @@ export function createVaultClient(options: VaultClientOptions): VaultClient {
 
 		const token = await getToken();
 		if (!token) {
+			console.warn('[mana-crypto:vault] unlock() — no auth token available');
 			state = { status: 'error', reason: 'auth' };
 			return state;
 		}
 
+		console.info('[mana-crypto:vault] unlock() — fetching GET /key...');
 		// Try GET /key first.
 		const fetchRes = await fetchVault('/api/v1/me/encryption-vault/key', {
 			method: 'GET',
@@ -340,12 +357,14 @@ export function createVaultClient(options: VaultClientOptions): VaultClient {
 			// of an unwrapped MK. Stash it and wait for the UI to collect
 			// the user's recovery code.
 			if (isRecoveryBlob(fetchRes.data)) {
+				console.info('[mana-crypto:vault] unlock() — server returned recovery blob (ZK mode)');
 				awaitRecoveryCode({
 					recoveryWrappedMk: fetchRes.data.recoveryWrappedMk,
 					recoveryIv: fetchRes.data.recoveryIv,
 				});
 				return state;
 			}
+			console.info('[mana-crypto:vault] unlock() — GET /key succeeded, importing master key');
 			await applyMasterKey((fetchRes.data as { masterKey: string }).masterKey);
 			pendingRecoveryBlob = null;
 			state = { status: 'unlocked' };
@@ -354,27 +373,38 @@ export function createVaultClient(options: VaultClientOptions): VaultClient {
 
 		// 404 with VAULT_NOT_INITIALISED → bootstrap by calling /init.
 		if (fetchRes.status === 404 && fetchRes.body?.code === 'VAULT_NOT_INITIALISED') {
+			console.info('[mana-crypto:vault] unlock() — vault not initialised, calling POST /init...');
 			const initRes = await fetchVault('/api/v1/me/encryption-vault/init', {
 				method: 'POST',
 				...authHeaders(token),
 			});
 			if (initRes.ok) {
 				if (isRecoveryBlob(initRes.data)) {
+					console.info('[mana-crypto:vault] unlock() — /init returned recovery blob (ZK mode)');
 					awaitRecoveryCode({
 						recoveryWrappedMk: initRes.data.recoveryWrappedMk,
 						recoveryIv: initRes.data.recoveryIv,
 					});
 					return state;
 				}
+				console.info('[mana-crypto:vault] unlock() — /init succeeded, importing master key');
 				await applyMasterKey((initRes.data as { masterKey: string }).masterKey);
 				pendingRecoveryBlob = null;
 				state = { status: 'unlocked' };
 				return state;
 			}
+			console.error(
+				`[mana-crypto:vault] unlock() — /init failed with status ${initRes.status}`,
+				initRes.body
+			);
 			state = await categorise(initRes.status);
 			return state;
 		}
 
+		console.error(
+			`[mana-crypto:vault] unlock() — GET /key failed with status ${fetchRes.status}`,
+			fetchRes.body
+		);
 		state = await categorise(fetchRes.status);
 		return state;
 	}

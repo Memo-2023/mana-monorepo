@@ -88,6 +88,12 @@ export class MemoryKeyProvider implements KeyProvider {
 		this.key = key;
 		const nowUnlocked = key !== null;
 
+		if (wasUnlocked !== nowUnlocked) {
+			console.info(
+				`[mana-crypto:key] MemoryKeyProvider: vault ${nowUnlocked ? 'UNLOCKED' : 'LOCKED'}`
+			);
+		}
+
 		if (typeof window !== 'undefined') {
 			if (nowUnlocked) sessionStorage.setItem('mana-vault-unlocked', '1');
 			else sessionStorage.removeItem('mana-vault-unlocked');
@@ -123,6 +129,9 @@ export class MemoryKeyProvider implements KeyProvider {
 
 	waitForKey(timeoutMs: number): Promise<CryptoKey | null> {
 		if (this.key) return Promise.resolve(this.key);
+		console.debug(
+			`[mana-crypto:key] waitForKey — waiting up to ${timeoutMs}ms for vault unlock...`
+		);
 		return new Promise((resolve) => {
 			let settled = false;
 			const dispose = this.onChange((unlocked) => {
@@ -130,12 +139,16 @@ export class MemoryKeyProvider implements KeyProvider {
 				settled = true;
 				clearTimeout(timer);
 				dispose();
+				console.debug('[mana-crypto:key] waitForKey — vault unlocked during wait');
 				resolve(this.key);
 			});
 			const timer = setTimeout(() => {
 				if (settled) return;
 				settled = true;
 				dispose();
+				console.warn(
+					`[mana-crypto:key] waitForKey — timed out after ${timeoutMs}ms, vault still locked`
+				);
 				resolve(this.key); // null on miss
 			}, timeoutMs);
 		});
@@ -148,7 +161,9 @@ let _activeProvider: KeyProvider = new NullKeyProvider();
 
 /** Replace the active provider. Called once at app boot in Phase 3. */
 export function setKeyProvider(provider: KeyProvider): void {
+	const prev = _activeProvider.constructor.name;
 	_activeProvider = provider;
+	console.info(`[mana-crypto:key] setKeyProvider: ${prev} → ${provider.constructor.name}`);
 }
 
 /** Returns the currently-installed provider. */

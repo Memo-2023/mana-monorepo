@@ -88,7 +88,10 @@ export async function encryptRecord<T extends object>(tableName: string, record:
 	// when the user eventually signs in. The compromise is documented
 	// in the data-layer audit; the alternative (refusing the write)
 	// hides the entire app behind a sign-up wall.
-	if (getCurrentUserId() === null) return record;
+	if (getCurrentUserId() === null) {
+		console.debug(`[mana-crypto] encryptRecord(${tableName}) — guest mode, writing plaintext`);
+		return record;
+	}
 
 	// Boot-time race: the layout's `vaultClient.unlock()` runs in the
 	// same tick as authStore.initialize(), so the very first user
@@ -115,12 +118,27 @@ export async function encryptRecord<T extends object>(tableName: string, record:
  * throwing. Views are expected to handle the blob → "🔒" rendering
  * themselves. Plaintext fields (id, timestamps, status) stay readable.
  */
+/** Throttle "vault locked" warnings so liveQuery refreshes don't spam the console. */
+const _lockedWarnings = new Set<string>();
+
 export async function decryptRecord<T extends object>(tableName: string, record: T): Promise<T> {
 	const fields = getEncryptedFields(tableName);
 	if (!fields) return record;
 
 	const key = getActiveKey();
-	if (!key) return record; // locked: leave blobs as-is
+	if (!key) {
+		// Log once per table to avoid flooding the console from liveQuery loops
+		if (!_lockedWarnings.has(tableName)) {
+			_lockedWarnings.add(tableName);
+			console.warn(
+				`[mana-crypto] decryptRecord(${tableName}) — vault is LOCKED, returning encrypted blobs as-is. ` +
+					`Encrypted fields: [${fields.join(', ')}]`
+			);
+		}
+		return record; // locked: leave blobs as-is
+	}
+	// Clear the throttle flag so we log again if the vault re-locks later
+	_lockedWarnings.delete(tableName);
 
 	const view = record as unknown as Record<string, unknown>;
 	for (const field of fields) {
@@ -133,7 +151,7 @@ export async function decryptRecord<T extends object>(tableName: string, record:
 			// keyed to a previous master. Log + leave the blob in place
 			// so the UI can show a "decryption failed" marker.
 			console.error(
-				`[mana-crypto] decrypt failed for ${tableName}.${field}: ${(err as Error).message}`
+				`[mana-crypto] decrypt FAILED for ${tableName}.${field}: ${(err as Error).message}`
 			);
 		}
 	}
@@ -149,6 +167,12 @@ export async function decryptRecords<T extends object>(
 	tableName: string,
 	records: (T | null | undefined)[]
 ): Promise<T[]> {
+	const fields = getEncryptedFields(tableName);
+	if (fields && !isVaultUnlocked() && records.length > 0) {
+		console.warn(
+			`[mana-crypto] decryptRecords(${tableName}) — ${records.length} record(s) will stay encrypted (vault locked)`
+		);
+	}
 	const out: T[] = [];
 	for (const r of records) {
 		if (r) out.push(await decryptRecord(tableName, r));
