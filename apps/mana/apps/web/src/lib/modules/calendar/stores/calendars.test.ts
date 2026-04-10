@@ -77,7 +77,7 @@ describe('calendarsStore.setAsDefault', () => {
 			isDefault: c.isDefault as boolean,
 			isVisible: c.isVisible as boolean,
 			color: c.color as string,
-			timezone: (c.timezone as string) ?? null,
+			timezone: (c.timezone as string) ?? 'Europe/Berlin',
 			createdAt: (c.createdAt as string) ?? '',
 			updatedAt: (c.updatedAt as string) ?? '',
 		}));
