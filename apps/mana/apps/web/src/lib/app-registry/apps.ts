@@ -449,7 +449,10 @@ registerApp({
 	icon: ChatCircle,
 	views: {
 		list: { load: () => import('$lib/modules/chat/ListView.svelte') },
+		detail: { load: () => import('$lib/modules/chat/views/DetailView.svelte') },
 	},
+	collection: 'conversations',
+	paramKey: 'conversationId',
 });
 
 registerApp({
