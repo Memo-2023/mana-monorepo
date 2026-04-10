@@ -1,18 +1,11 @@
 <!--
   PageShell — Shared card wrapper for pages in a carousel.
-  Provides: drag handle, header, resize handle, maximized mode.
+  Provides: header, resize handle, maximized mode.
   Used by workbench (AppPage) and todo (TodoPage).
 -->
 <script lang="ts">
 	import { _ } from 'svelte-i18n';
-	import {
-		X,
-		DotsSixVertical,
-		CornersOut,
-		CornersIn,
-		CaretLeft,
-		CaretRight,
-	} from '@mana/shared-icons';
+	import { X, CornersOut, CornersIn, CaretLeft, CaretRight } from '@mana/shared-icons';
 	import type { Snippet, Component } from 'svelte';
 
 	interface Props {
@@ -127,72 +120,15 @@
 		? `height: ${heightPx}px; min-height: 0;`
 		: ''}"
 >
-	<!-- svelte-ignore a11y_interactive_supports_focus -->
-	<div class="drag-handle-bar" draggable="true" oncontextmenu={onContextMenu} role="toolbar">
-		{#if onMoveLeft}
-			<button
-				class="move-btn move-left"
-				onclick={(e) => {
-					e.stopPropagation();
-					onMoveLeft();
-				}}
-				draggable="false"
-				title="Nach links"
-			>
-				<CaretLeft size={12} />
-			</button>
-		{/if}
-		<span class="drag-handle-icon"><DotsSixVertical size={14} /></span>
-		<div class="window-actions">
-			{#if onMaximize}
-				<button
-					class="window-btn"
-					onclick={(e) => {
-						e.stopPropagation();
-						onMaximize();
-					}}
-					draggable="false"
-					title={maximized ? 'Verkleinern' : 'Maximieren'}
-				>
-					{#if maximized}<CornersIn size={12} />{:else}<CornersOut size={12} />{/if}
-				</button>
-			{/if}
-			<button
-				class="window-btn window-btn-close"
-				onclick={(e) => {
-					e.stopPropagation();
-					onClose();
-				}}
-				draggable="false"
-				title={$_('common.close')}
-			>
-				<X size={12} />
-			</button>
-		</div>
-		{#if onMoveRight}
-			<button
-				class="move-btn move-right"
-				onclick={(e) => {
-					e.stopPropagation();
-					onMoveRight();
-				}}
-				draggable="false"
-				title="Nach rechts"
-			>
-				<CaretRight size={12} />
-			</button>
-		{/if}
-	</div>
-
-	<!-- Header -->
-	<div class="page-header" ondragstart={(e) => e.preventDefault()} role="banner">
+	<!-- Header with window actions -->
+	<div class="page-header" oncontextmenu={onContextMenu} role="banner">
 		<div class="header-left">
 			{#if header_left}
 				{@render header_left()}
 			{:else}
 				{#if IconComponent}
-					<span class="header-icon" style="color: {color}">
-						<IconComponent size={24} weight="fill" />
+					<span class="header-icon">
+						<IconComponent size={28} weight="bold" />
 					</span>
 				{:else}
 					<span class="color-dot" style="background-color: {color}"></span>
@@ -204,8 +140,6 @@
 						target="_blank"
 						rel="noopener noreferrer"
 						onclick={(e) => e.stopPropagation()}
-						ondragstart={(e) => e.preventDefault()}
-						draggable="false"
 						title={`${title} in neuem Tab öffnen`}
 					>
 						{title}
@@ -217,6 +151,57 @@
 			{#if badge}
 				{@render badge()}
 			{/if}
+		</div>
+		<div class="window-actions">
+			{#if onMoveLeft}
+				<button
+					class="window-btn"
+					onclick={(e) => {
+						e.stopPropagation();
+						onMoveLeft();
+					}}
+					title="Nach links"
+				>
+					<CaretLeft size={24} weight="bold" />
+				</button>
+			{/if}
+			{#if onMoveRight}
+				<button
+					class="window-btn"
+					onclick={(e) => {
+						e.stopPropagation();
+						onMoveRight();
+					}}
+					title="Nach rechts"
+				>
+					<CaretRight size={24} weight="bold" />
+				</button>
+			{/if}
+			{#if onMaximize}
+				<button
+					class="window-btn"
+					onclick={(e) => {
+						e.stopPropagation();
+						onMaximize();
+					}}
+					title={maximized ? 'Verkleinern' : 'Maximieren'}
+				>
+					{#if maximized}<CornersIn size={24} weight="bold" />{:else}<CornersOut
+							size={24}
+							weight="bold"
+						/>{/if}
+				</button>
+			{/if}
+			<button
+				class="window-btn window-btn-close"
+				onclick={(e) => {
+					e.stopPropagation();
+					onClose();
+				}}
+				title={$_('common.close')}
+			>
+				<X size={24} weight="bold" />
+			</button>
 		</div>
 	</div>
 
@@ -302,79 +287,24 @@
 		}
 	}
 
-	.drag-handle-bar {
-		position: relative;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		padding: 0.2rem 0;
-		cursor: grab;
-		background: transparent;
-		border-bottom: none;
-		transition: background 0.15s;
-	}
-	.drag-handle-bar:hover {
-		background: transparent;
-	}
-	.drag-handle-bar:active {
-		cursor: grabbing;
-		background: transparent;
-	}
-	.move-btn {
-		position: absolute;
-		top: 50%;
-		transform: translateY(-50%);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 18px;
-		height: 18px;
-		border: none;
-		border-radius: 50%;
-		background: transparent;
-		color: hsl(var(--color-muted-foreground) / 0.5);
-		cursor: pointer;
-		transition:
-			color 0.15s,
-			background 0.15s;
-	}
-	.move-btn:hover {
-		color: hsl(var(--color-foreground));
-		background: hsl(var(--color-surface-hover));
-	}
-	.move-left {
-		left: 0.5rem;
-	}
-	.move-right {
-		right: 0.5rem;
-	}
-	.drag-handle-icon {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		color: hsl(var(--color-muted-foreground) / 0.5);
-		transform: rotate(90deg);
-		transition: color 0.15s;
-	}
-	.drag-handle-bar:hover .drag-handle-icon {
-		color: hsl(var(--color-muted-foreground));
-	}
-
 	/* Header */
 	.page-header {
 		display: flex;
 		align-items: center;
-		padding: 0.375rem 1rem;
+		justify-content: space-between;
+		padding: 0.5rem 0.75rem;
 	}
 	.header-left {
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
+		gap: 0.3rem;
 	}
 	.header-icon {
 		flex-shrink: 0;
 		display: flex;
 		align-items: center;
+		color: hsl(var(--color-foreground));
+		opacity: 0.5;
 	}
 	.color-dot {
 		width: 0.625rem;
@@ -383,9 +313,11 @@
 		flex-shrink: 0;
 	}
 	.page-title {
-		font-size: 1.125rem;
+		font-size: 0.95rem;
 		font-weight: 600;
 		color: hsl(var(--color-foreground));
+		opacity: 0.5;
+		transform: translateY(1px);
 	}
 	a.page-title-link {
 		text-decoration: none;
@@ -398,20 +330,17 @@
 	}
 
 	.window-actions {
-		position: absolute;
-		right: 2rem;
-		top: 50%;
-		transform: translateY(-50%);
 		display: flex;
 		align-items: center;
-		gap: 0.125rem;
+		gap: 0.25rem;
+		flex-shrink: 0;
 	}
 	.window-btn {
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		width: 18px;
-		height: 18px;
+		width: 28px;
+		height: 28px;
 		border-radius: 50%;
 		border: none;
 		background: transparent;

@@ -1,5 +1,5 @@
 <!--
-  PageCarousel — Shared horizontal carousel with drag reorder and add button.
+  PageCarousel — Shared horizontal carousel with add button.
   The scene+app bar is rendered in the layout's bottom-stack via bottomBarStore.
 -->
 <script lang="ts">
@@ -11,7 +11,6 @@
 		pages: CarouselPage[];
 		defaultWidth?: number;
 		showPicker: boolean;
-		onReorder: (fromId: string, toId: string) => void;
 		onRestore?: (id: string) => void;
 		onMaximize?: (id: string) => void;
 		onRemove?: (id: string) => void;
@@ -26,7 +25,6 @@
 		pages,
 		defaultWidth = 480,
 		showPicker,
-		onReorder,
 		onRestore: _onRestore,
 		onMaximize: _onMaximize,
 		onRemove: _onRemove,
@@ -36,35 +34,6 @@
 		page: pageSnippet,
 		picker,
 	}: Props = $props();
-
-	let dragId = $state<string | null>(null);
-
-	function handleDragStart(e: DragEvent, id: string) {
-		const target = e.target as HTMLElement;
-		if (!target.closest('.drag-handle')) {
-			e.preventDefault();
-			return;
-		}
-		dragId = id;
-		if (e.dataTransfer) {
-			e.dataTransfer.effectAllowed = 'move';
-			e.dataTransfer.setData('text/plain', id);
-		}
-	}
-	function handleDragOver(e: DragEvent) {
-		if (!dragId) return;
-		e.preventDefault();
-		if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
-	}
-	function handleDrop(e: DragEvent, targetId: string) {
-		e.preventDefault();
-		if (!dragId || dragId === targetId) return;
-		onReorder(dragId, targetId);
-		dragId = null;
-	}
-	function handleDragEnd() {
-		dragId = null;
-	}
 
 	let pickerEl = $state<HTMLDivElement | null>(null);
 	$effect(() => {
@@ -76,16 +45,7 @@
 <div class="carousel-root">
 	<div class="fokus-track" style="--sheet-width: {defaultWidth}px">
 		{#each pages as p, idx (p.id)}
-			<div
-				class="page-drag-wrapper"
-				role="listitem"
-				class:dragging={dragId === p.id}
-				data-page-id={p.id}
-				ondragstart={(e) => handleDragStart(e, p.id)}
-				ondragover={handleDragOver}
-				ondrop={(e) => handleDrop(e, p.id)}
-				ondragend={handleDragEnd}
-			>
+			<div class="page-wrapper" role="listitem" data-page-id={p.id}>
 				{@render pageSnippet(p, idx)}
 			</div>
 		{/each}
@@ -131,12 +91,8 @@
 	.fokus-track::-webkit-scrollbar {
 		display: none;
 	}
-	.page-drag-wrapper {
+	.page-wrapper {
 		flex: 0 0 auto;
-		transition: opacity 0.15s;
-	}
-	.page-drag-wrapper.dragging {
-		opacity: 0.4;
 	}
 	.add-card {
 		flex: 0 0 auto;

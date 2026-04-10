@@ -120,16 +120,6 @@
 		openPages = openPages.map((p) => (p.id === id ? { ...p, widthPx } : p));
 	}
 
-	function handleReorder(fromId: string, toId: string) {
-		const fromIdx = openPages.findIndex((p) => p.id === fromId);
-		const toIdx = openPages.findIndex((p) => p.id === toId);
-		if (fromIdx === -1 || toIdx === -1) return;
-		const pages = [...openPages];
-		const [moved] = pages.splice(fromIdx, 1);
-		pages.splice(toIdx, 0, moved);
-		openPages = pages;
-	}
-
 	function navigateToContact(contact: Contact) {
 		window.location.href = `/contacts/${contact.id}`;
 	}
@@ -177,7 +167,6 @@
 		pages={carouselPages}
 		defaultWidth={DEFAULT_WIDTH}
 		{showPicker}
-		onReorder={handleReorder}
 		onRestore={handleRestorePage}
 		onMaximize={handleMaximizePage}
 		onRemove={handleRemovePage}

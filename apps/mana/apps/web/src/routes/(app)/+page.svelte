@@ -129,10 +129,6 @@
 	function handleMoveRight(id: string) {
 		workbenchScenesStore.moveAppRight(id);
 	}
-	function handleReorder(fromId: string, toId: string) {
-		workbenchScenesStore.reorderApps(fromId, toId);
-	}
-
 	// ── Card / tab context menus ────────────────────────────
 	const ctxMenu = createWorkbenchContextMenu();
 
@@ -246,7 +242,6 @@
 		pages={carouselPages}
 		defaultWidth={DEFAULT_WIDTH}
 		{showPicker}
-		onReorder={handleReorder}
 		onTogglePicker={() => (showPicker = !showPicker)}
 		addLabel="App hinzufügen"
 	>

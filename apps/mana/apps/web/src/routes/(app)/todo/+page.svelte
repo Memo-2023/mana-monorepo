@@ -181,16 +181,6 @@
 		}
 	}
 
-	function handleReorder(fromId: string, toId: string) {
-		const fromIdx = openPages.findIndex((p) => p.id === fromId);
-		const toIdx = openPages.findIndex((p) => p.id === toId);
-		if (fromIdx === -1 || toIdx === -1) return;
-		const pages = [...openPages];
-		const [moved] = pages.splice(fromIdx, 1);
-		pages.splice(toIdx, 0, moved);
-		openPages = pages;
-	}
-
 	// ── Custom page CRUD ────────────────────────────────────
 	function handleCreateCustomPage() {
 		const id = `custom-${crypto.randomUUID().slice(0, 8)}`;
@@ -257,7 +247,6 @@
 		pages={carouselPages}
 		defaultWidth={DEFAULT_WIDTH}
 		showPicker={showPagePicker}
-		onReorder={handleReorder}
 		onRestore={handleRestorePage}
 		onMaximize={handleMaximizePage}
 		onRemove={handleRemovePage}
