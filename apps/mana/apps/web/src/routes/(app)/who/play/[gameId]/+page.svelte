@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import PlayView from '$lib/modules/who/views/PlayView.svelte';
 
@@ -10,5 +11,5 @@
 </svelte:head>
 
 {#if gameId}
-	<PlayView {gameId} />
+	<PlayView {gameId} onBack={() => goto('/who')} />
 {/if}

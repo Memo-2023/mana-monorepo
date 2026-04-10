@@ -9,12 +9,11 @@
 -->
 <script lang="ts">
 	import { onMount, tick } from 'svelte';
-	import { goto } from '$app/navigation';
 	import { whoGamesStore } from '../stores/games.svelte';
 	import { gameByIdLive, messagesForGameLive } from '../queries';
 	import type { WhoGame, WhoMessage } from '../types';
 
-	let { gameId }: { gameId: string } = $props();
+	let { gameId, onBack }: { gameId: string; onBack: () => void } = $props();
 
 	let game = $state<WhoGame | null>(null);
 	let messages = $state<WhoMessage[]>([]);
@@ -121,7 +120,7 @@
 		<button
 			type="button"
 			class="rounded p-1.5 text-white/60 hover:bg-white/5 hover:text-white/90"
-			onclick={() => goto('/who')}
+			onclick={onBack}
 			aria-label="Zurück"
 		>
 			←
