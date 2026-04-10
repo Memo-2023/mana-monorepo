@@ -139,8 +139,8 @@
 			</div>
 		{:else}
 			<!-- Guide metadata -->
+			{@const catInfo = GUIDE_CATEGORIES[guide.category]}
 			<div class="meta">
-				{@const catInfo = GUIDE_CATEGORIES[guide.category]}
 				<div class="meta-badges">
 					<span class="badge {catInfo.color}">{catInfo.label}</span>
 					<span class="badge bg-white/10">{DIFFICULTY_LABELS[guide.difficulty]}</span>
