@@ -6,7 +6,8 @@
 	import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 	import { db } from '$lib/data/database';
 	import { BaseListView } from '@mana/shared-ui';
-	import type { LocalMood } from './types';
+	import type { LocalMood, AnimationType } from './types';
+	import { ANIMATIONS } from './types';
 	import { moodsStore } from './stores/moods.svelte';
 	import { ContextMenu, type ContextMenuItem } from '@mana/shared-ui';
 	import { useItemContextMenu } from '$lib/data/item-context-menu.svelte';
@@ -26,6 +27,39 @@
 		if (colors.length === 0) return 'background: #333';
 		if (colors.length === 1) return `background: ${colors[0]}`;
 		return `background: linear-gradient(135deg, ${colors.join(', ')})`;
+	}
+
+	// ── Inline create ──────────────────────────────────────
+	let creating = $state(false);
+	let newName = $state('');
+	let newColors = $state<string[]>(['#667eea', '#764ba2']);
+	let newAnimation = $state<AnimationType>('gradient');
+
+	function addColor() {
+		if (newColors.length < 8) {
+			const hex =
+				'#' +
+				Math.floor(Math.random() * 16777215)
+					.toString(16)
+					.padStart(6, '0');
+			newColors = [...newColors, hex];
+		}
+	}
+
+	function removeColor(index: number) {
+		if (newColors.length > 1) {
+			newColors = newColors.filter((_, i) => i !== index);
+		}
+	}
+
+	async function handleCreate() {
+		const name = newName.trim();
+		if (!name || newColors.length === 0) return;
+		await moodsStore.createMood({ name, colors: newColors, animation: newAnimation });
+		newName = '';
+		newColors = ['#667eea', '#764ba2'];
+		newAnimation = 'gradient';
+		creating = false;
 	}
 
 	const ctxMenu = useItemContextMenu<LocalMood>();
@@ -80,6 +114,88 @@
 		{:else}
 			<div class="flex h-24 items-center justify-center rounded-lg bg-white/5">
 				<p class="text-sm text-white/30">Kein Mood aktiv</p>
+			</div>
+		{/if}
+
+		<!-- Create toggle -->
+		<div class="flex items-center justify-between">
+			<span class="text-xs text-white/40">{moods.length} Moods</span>
+			<button
+				type="button"
+				class="text-xs text-white/50 transition-colors hover:text-white/80"
+				onclick={() => (creating = !creating)}
+			>
+				{creating ? 'Abbrechen' : '+ Neues Mood'}
+			</button>
+		</div>
+
+		{#if creating}
+			<div class="flex flex-col gap-2 rounded-lg bg-white/5 p-3">
+				<!-- Preview -->
+				<div
+					class="flex h-12 items-center justify-center rounded-md"
+					style={gradientStyle(newColors)}
+				>
+					<span class="text-xs font-medium text-white drop-shadow">{newName || 'Vorschau'}</span>
+				</div>
+
+				<!-- Name -->
+				<input
+					type="text"
+					bind:value={newName}
+					placeholder="Mood-Name"
+					class="rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white placeholder:text-white/30 focus:border-white/20 focus:outline-none"
+				/>
+
+				<!-- Colors -->
+				<div class="flex flex-wrap items-center gap-1.5">
+					{#each newColors as color, i}
+						<div class="relative">
+							<input
+								type="color"
+								value={color}
+								onchange={(e) => {
+									newColors = newColors.map((c, j) => (j === i ? e.currentTarget.value : c));
+								}}
+								class="h-8 w-8 cursor-pointer rounded-md border border-white/10"
+							/>
+							{#if newColors.length > 1}
+								<button
+									type="button"
+									class="absolute -right-1 -top-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-red-500 text-[8px] text-white"
+									onclick={() => removeColor(i)}>x</button
+								>
+							{/if}
+						</div>
+					{/each}
+					{#if newColors.length < 8}
+						<button
+							type="button"
+							class="flex h-8 w-8 items-center justify-center rounded-md border border-dashed border-white/20 text-white/40 transition-colors hover:text-white/60"
+							onclick={addColor}>+</button
+						>
+					{/if}
+				</div>
+
+				<!-- Animation -->
+				<select
+					bind:value={newAnimation}
+					class="rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white focus:border-white/20 focus:outline-none"
+				>
+					{#each ANIMATIONS as anim (anim.id)}
+						<option value={anim.id}>{anim.name}</option>
+					{/each}
+				</select>
+
+				<!-- Save -->
+				<button
+					type="button"
+					class="rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+					disabled={!newName.trim() || newColors.length === 0}
+					onclick={handleCreate}
+				>
+					Mood erstellen
+				</button>
 			</div>
 		{/if}
 	{/snippet}
