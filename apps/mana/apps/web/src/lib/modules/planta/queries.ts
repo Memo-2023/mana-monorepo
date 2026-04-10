@@ -6,7 +6,7 @@
  * at init time; no manual fetch/refresh needed.
  */
 
-import { liveQuery } from 'dexie';
+import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
 import { decryptRecords } from '$lib/data/crypto';
 import type { Tag } from '@mana/shared-tags';
@@ -98,43 +98,43 @@ export function toWateringLog(local: LocalWateringLog): WateringLog {
 
 /** All plants. Auto-updates on any change. */
 export function useAllPlants() {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const visible = (await db.table<LocalPlant>('plants').toArray()).filter((p) => !p.deletedAt);
 		const decrypted = await decryptRecords('plants', visible);
 		return decrypted.map(toPlant);
-	});
+	}, []);
 }
 
 /** All plant photos. Auto-updates on any change. */
 export function useAllPlantPhotos() {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const locals = await db.table<LocalPlantPhoto>('plantPhotos').toArray();
 		return locals.filter((p) => !p.deletedAt).map(toPlantPhoto);
-	});
+	}, []);
 }
 
 /** All watering schedules. Auto-updates on any change. */
 export function useAllWateringSchedules() {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const locals = await db.table<LocalWateringSchedule>('wateringSchedules').toArray();
 		return locals.filter((s) => !s.deletedAt).map(toWateringSchedule);
-	});
+	}, []);
 }
 
 /** All watering logs. Auto-updates on any change. */
 export function useAllWateringLogs() {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const locals = await db.table<LocalWateringLog>('wateringLogs').toArray();
 		return locals.filter((l) => !l.deletedAt).map(toWateringLog);
-	});
+	}, []);
 }
 
 /** All plant↔tag junctions (active only). */
 export function useAllPlantTags() {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const locals = await db.table<LocalPlantTag>('plantTags').toArray();
 		return locals.filter((t) => !t.deletedAt);
-	});
+	}, []);
 }
 
 // ─── Pure Plant Helpers ────────────────────────────────────

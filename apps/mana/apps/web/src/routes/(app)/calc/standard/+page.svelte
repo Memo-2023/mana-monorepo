@@ -129,7 +129,7 @@
 	}
 
 	let recentHistory = $derived(
-		($allCalculations ?? []).filter((c) => c.mode === 'standard').slice(0, 10)
+		allCalculations.value.filter((c: { mode: string }) => c.mode === 'standard').slice(0, 10)
 	);
 
 	let skinProps = $derived({

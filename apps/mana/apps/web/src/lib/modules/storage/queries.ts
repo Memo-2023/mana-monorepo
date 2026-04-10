@@ -4,7 +4,7 @@
  * Uses table names: files, storageFolders, storageTags, fileTags.
  */
 
-import { liveQuery } from 'dexie';
+import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
 import { decryptRecords } from '$lib/data/crypto';
 import type { LocalFile, LocalFolder, LocalFileTag } from './types';
@@ -106,24 +106,24 @@ export function toTag(local: {
 
 /** All non-deleted files, sorted by name. Auto-updates on any change. */
 export function useAllFiles() {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const locals = await db.table<LocalFile>('files').toArray();
 		const visible = locals.filter((f) => !f.isDeleted && !f.deletedAt);
 		// name + originalName are encrypted on disk; sort needs plaintext.
 		const decrypted = await decryptRecords('files', visible);
 		return decrypted.map(toFile).sort((a, b) => a.name.localeCompare(b.name));
-	});
+	}, []);
 }
 
 /** All non-deleted folders, sorted by name. Auto-updates on any change. */
 export function useAllFolders() {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const locals = await db.table<LocalFolder>('storageFolders').toArray();
 		return locals
 			.filter((f) => !f.isDeleted && !f.deletedAt)
 			.map(toFolder)
 			.sort((a, b) => a.name.localeCompare(b.name));
-	});
+	}, []);
 }
 
 // Tags: use shared global tags from @mana/shared-stores

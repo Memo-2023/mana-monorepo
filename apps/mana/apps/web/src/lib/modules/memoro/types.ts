@@ -99,15 +99,11 @@ export interface Memory {
 	updatedAt: string;
 }
 
-export interface Tag {
-	id: string;
-	name: string;
-	color: string | null;
-	isPinned: boolean;
-	sortOrder: number;
-	createdAt: string;
-	updatedAt: string;
-}
+// NOTE: the Tag type used throughout the memoro module comes from
+// `@mana/shared-tags`, not from a local definition. A legacy `Tag`
+// interface used to live here but was removed because it diverged
+// from the shared shape (missing userId, had isPinned/sortOrder that
+// nothing reads). Import Tag from '@mana/shared-tags' everywhere.
 
 export interface Space {
 	id: string;

@@ -2,7 +2,7 @@
  * Reactive queries & pure helpers for Contacts — uses Dexie liveQuery on the unified DB.
  */
 
-import { liveQuery } from 'dexie';
+import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
 import { decryptRecords } from '$lib/data/crypto';
 import type { LocalContact, Contact, SortField, ContactFilter } from './types';
@@ -48,13 +48,13 @@ export function toContact(local: LocalContact): Contact {
 // ─── Live Queries ──────────────────────────────────────────
 
 export function useAllContacts() {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const visible = (await db.table<LocalContact>('contacts').toArray()).filter(
 			(c) => !c.deletedAt
 		);
 		const decrypted = await decryptRecords('contacts', visible);
 		return decrypted.map(toContact);
-	});
+	}, []);
 }
 
 // ─── Display Helpers ──────────────────────────────────────

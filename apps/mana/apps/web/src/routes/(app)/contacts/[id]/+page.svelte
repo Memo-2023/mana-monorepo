@@ -32,17 +32,10 @@
 
 	const allTags = useAllTags();
 
-	const allContacts$: Observable<Contact[]> = getContext('contacts');
+	const allContactsCtx: { readonly value: Contact[] } = getContext('contacts');
+	let allContacts = $derived(allContactsCtx.value);
 
-	let allContacts = $state<Contact[]>([]);
-	$effect(() => {
-		const sub = allContacts$.subscribe((c) => {
-			allContacts = c;
-		});
-		return () => sub.unsubscribe();
-	});
-
-	let contactId = $derived($page.params.id);
+	let contactId = $derived($page.params.id ?? '');
 	let contact = $derived(allContacts.find((c) => c.id === contactId));
 
 	// Editing state

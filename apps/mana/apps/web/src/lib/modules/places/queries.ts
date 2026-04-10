@@ -2,7 +2,7 @@
  * Reactive queries & pure helpers for Places — uses Dexie liveQuery on the unified DB.
  */
 
-import { liveQuery } from 'dexie';
+import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
 import { decryptRecords } from '$lib/data/crypto';
 import type { LocalPlace, LocalLocationLog, Place, LocationLog } from './types';
@@ -45,22 +45,22 @@ export function toLocationLog(local: LocalLocationLog): LocationLog {
 // ─── Live Queries ────────────────────────────────────────
 
 export function useAllPlaces() {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const locals = await db.table<LocalPlace>('places').toArray();
 		const visible = locals.filter((p) => !p.deletedAt);
 		const decrypted = await decryptRecords<LocalPlace>('places', visible);
 		return decrypted.map(toPlace);
-	});
+	}, []);
 }
 
 export function useLocationLogs(placeId?: string) {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		let query = db.table<LocalLocationLog>('locationLogs').orderBy('timestamp').reverse();
 		const locals = await query.toArray();
 		const filtered = placeId ? locals.filter((l) => l.placeId === placeId) : locals;
 		const decrypted = await decryptRecords<LocalLocationLog>('locationLogs', filtered);
 		return decrypted.map(toLocationLog);
-	});
+	}, []);
 }
 
 // ─── Pure Filter / Search ────────────────────────────────

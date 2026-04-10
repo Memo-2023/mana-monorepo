@@ -3,7 +3,7 @@
   Collection details, always editable, auto-save on blur.
 -->
 <script lang="ts">
-	import { liveQuery } from 'dexie';
+	import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 	import { db } from '$lib/data/database';
 	import { useDetailEntity } from '$lib/data/detail-entity.svelte';
 	import DetailViewShell from '$lib/components/DetailViewShell.svelte';
@@ -30,20 +30,17 @@
 		},
 	});
 
-	let itemCount = $state(0);
-	$effect(() => {
-		const sub = liveQuery(async () =>
+	const itemCountQuery = useLiveQueryWithDefault(
+		async () =>
 			db
 				.table<LocalItem>('invItems')
 				.where('collectionId')
 				.equals(collectionId)
 				.filter((i) => !i.deletedAt)
-				.count()
-		).subscribe((val) => {
-			itemCount = val ?? 0;
-		});
-		return () => sub.unsubscribe();
-	});
+				.count(),
+		0
+	);
+	let itemCount = $derived(itemCountQuery.value);
 
 	async function saveField() {
 		detail.blur();

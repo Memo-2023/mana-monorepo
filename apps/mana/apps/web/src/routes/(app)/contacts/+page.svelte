@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { _ } from 'svelte-i18n';
 	import { getContext, onMount } from 'svelte';
-	import type { Observable } from 'dexie';
+
 	import type { DragPayload, TagDragData } from '@mana/shared-ui/dnd';
 	import { useAllTags } from '@mana/shared-stores';
 	import {
@@ -16,17 +16,9 @@
 	import type { ContactPageId } from '$lib/modules/contacts/components/pages/ContactPage.svelte';
 	import ContactPagePicker from '$lib/modules/contacts/components/pages/ContactPagePicker.svelte';
 
-	// Get contacts from layout context
-	const allContacts$: Observable<Contact[]> = getContext('contacts');
-
-	let allContacts = $state<Contact[]>([]);
-
-	$effect(() => {
-		const sub = allContacts$.subscribe((contacts) => {
-			allContacts = contacts;
-		});
-		return () => sub.unsubscribe();
-	});
+	// Get contacts from layout context (useLiveQueryWithDefault wrapper)
+	const allContactsCtx: { readonly value: Contact[] } = getContext('contacts');
+	let allContacts = $derived(allContactsCtx.value);
 
 	// Tags for DnD
 	const globalTags = useAllTags();

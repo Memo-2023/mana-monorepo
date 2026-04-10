@@ -4,7 +4,7 @@
  * Uses Dexie liveQuery on the unified DB.
  */
 
-import { liveQuery } from 'dexie';
+import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
 import type { LocalAlbum, LocalAlbumItem, LocalFavorite, Album, AlbumItem } from './types';
 
@@ -41,26 +41,26 @@ export function toAlbumItem(local: LocalAlbumItem): AlbumItem {
 
 /** All albums. Auto-updates on any change. */
 export function useAllAlbums() {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const locals = await db.table<LocalAlbum>('albums').toArray();
 		return locals.filter((a) => !a.deletedAt).map(toAlbum);
-	});
+	}, []);
 }
 
 /** All album items. Auto-updates on any change. */
 export function useAllAlbumItems() {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const locals = await db.table<LocalAlbumItem>('albumItems').toArray();
 		return locals.filter((i) => !i.deletedAt).map(toAlbumItem);
-	});
+	}, []);
 }
 
 /** All favorites. Auto-updates on any change. */
 export function useAllFavorites() {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const locals = await db.table<LocalFavorite>('photoFavorites').toArray();
 		return locals.filter((f) => !f.deletedAt);
-	});
+	}, []);
 }
 
 // ─── Pure Album Helpers ────────────────────────────────────

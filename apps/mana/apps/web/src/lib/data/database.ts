@@ -44,10 +44,15 @@ export {
 
 export const db = new Dexie('mana');
 
-// Single canonical schema. The pre-launch cleanup collapsed historical
-// versions 1–10 into this one block — see docs/PRE_LAUNCH_CLEANUP.md for
-// rationale. After the system goes live, any further schema change MUST
-// be added as a new `db.version(N)` block; never edit this one.
+// Schema version 1 — the pre-launch canonical schema. Collapsed from
+// historical v1–v10 during cleanup (see docs/PRE_LAUNCH_CLEANUP.md).
+//
+// IMPORTANT: this block is FROZEN. Any new tables MUST go into a new
+// `db.version(N)` block below (currently v2=body, v3=who, v4=news).
+// Adding tables here instead of in a new version causes silent schema
+// drift: Dexie only runs the upgrade if the version number bumps, so
+// existing IndexedDB instances would never see the new tables until
+// the user clears storage.
 db.version(1).stores({
 	// ─── Sync Infrastructure (local-only, NOT in SYNC_APP_MAP) ───
 	_pendingChanges: '++id, appId, collection, recordId, createdAt',
@@ -216,7 +221,8 @@ db.version(1).stores({
 	guideTags: 'id, guideId, tagId, [guideId+tagId]',
 
 	// ─── Playground (appId: 'playground') ───
-	// No persistent data — stateless LLM playground
+	playgroundConversations: 'id, model, isPinned, updatedAt',
+	playgroundMessages: 'id, conversationId, role, order, [conversationId+order]',
 
 	// ─── Habits (appId: 'habits') ───
 	habits: 'id, order, isArchived, color',
@@ -348,6 +354,11 @@ db.version(4).stores({
 	newsPreferences: 'id',
 	newsReactions: 'id, articleId, reaction, sourceSlug, topic, [reaction+createdAt]',
 	newsCachedFeed: 'id, topic, sourceSlug, language, publishedAt, [topic+publishedAt]',
+});
+
+// v5: Zitare custom quotes — user-created quotes stored locally.
+db.version(5).stores({
+	zitareCustomQuotes: 'id, author, category',
 });
 
 // ─── Sync Routing ──────────────────────────────────────────

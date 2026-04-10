@@ -3,9 +3,8 @@
   Location tracking toggle, place list with search + quick create.
 -->
 <script lang="ts">
-	import { liveQuery } from 'dexie';
-	import { db } from '$lib/data/database';
-	import type { LocalPlace } from './types';
+	import type { Place } from './types';
+	import { useAllPlaces } from './queries';
 	import { placesStore } from './stores/places.svelte';
 	import { trackingStore } from './stores/tracking.svelte';
 	import { Star, MapPin, Plus, PencilSimple, Trash } from '@mana/shared-icons';
@@ -30,22 +29,11 @@
 		);
 	}
 
-	let places = $state<LocalPlace[]>([]);
+	const placesQuery = useAllPlaces();
+	let places = $derived(placesQuery.value);
 	let search = $state('');
 
-	$effect(() => {
-		const sub = liveQuery(async () => {
-			return db
-				.table<LocalPlace>('places')
-				.toArray()
-				.then((all) => all.filter((p) => !p.deletedAt && !p.isArchived));
-		}).subscribe((val) => {
-			places = val ?? [];
-		});
-		return () => sub.unsubscribe();
-	});
-
-	const filtered = $derived(() => {
+	const filtered = $derived.by(() => {
 		if (!search.trim()) return places;
 		const q = search.toLowerCase();
 		return places.filter(
@@ -90,11 +78,11 @@
 	}
 
 	function openDetail(placeId: string) {
-		const ids = filtered().map((p) => p.id);
+		const ids = filtered.map((p) => p.id);
 		navigate('detail', { placeId, _siblingIds: ids, _siblingKey: 'placeId' });
 	}
 
-	const ctxMenu = useItemContextMenu<LocalPlace>();
+	const ctxMenu = useItemContextMenu<Place>();
 
 	let ctxMenuItems = $derived<ContextMenuItem[]>(
 		ctxMenu.state.target
@@ -185,7 +173,7 @@
 
 	<!-- Place List -->
 	<div class="place-list">
-		{#each filtered() as place (place.id)}
+		{#each filtered as place (place.id)}
 			{@const tags = getTagsByIds(allTags, place.tagIds ?? [])}
 			<button
 				class="place-item"
@@ -244,14 +232,14 @@
 		onClose={ctxMenu.close}
 	/>
 
-	{#if filtered().length === 0 && !search}
+	{#if filtered.length === 0 && !search}
 		<div class="empty">
 			<p>Noch keine Orte gespeichert.</p>
 			<p class="empty-hint">Starte das Tracking oder erstelle einen Ort manuell.</p>
 		</div>
 	{/if}
 
-	{#if filtered().length === 0 && search}
+	{#if filtered.length === 0 && search}
 		<div class="empty">
 			<p>Keine Orte gefunden.</p>
 		</div>

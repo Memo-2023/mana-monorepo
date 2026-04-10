@@ -3,42 +3,18 @@
   Drop-to-upload zone, recent photos, albums overview.
 -->
 <script lang="ts">
-	import { liveQuery } from 'dexie';
-	import { db } from '$lib/data/database';
-	import type { LocalAlbum, LocalFavorite } from './types';
 	import type { ViewProps } from '$lib/app-registry';
+	import { useAllAlbums, useAllFavorites } from './queries';
 	import { UploadSimple, X, Check, ImageSquare } from '@mana/shared-icons';
 
 	let { navigate }: ViewProps = $props();
 
 	const MEDIA_URL = import.meta.env.PUBLIC_MANA_MEDIA_URL || 'http://localhost:3015';
 
-	let albums = $state<LocalAlbum[]>([]);
-	let favorites = $state<LocalFavorite[]>([]);
-
-	$effect(() => {
-		const sub = liveQuery(async () => {
-			return db
-				.table<LocalAlbum>('albums')
-				.toArray()
-				.then((all) => all.filter((a) => !a.deletedAt));
-		}).subscribe((val) => {
-			albums = val ?? [];
-		});
-		return () => sub.unsubscribe();
-	});
-
-	$effect(() => {
-		const sub = liveQuery(async () => {
-			return db
-				.table<LocalFavorite>('photoFavorites')
-				.toArray()
-				.then((all) => all.filter((f) => !f.deletedAt));
-		}).subscribe((val) => {
-			favorites = val ?? [];
-		});
-		return () => sub.unsubscribe();
-	});
+	const albumsQuery = useAllAlbums();
+	const favoritesQuery = useAllFavorites();
+	let albums = $derived(albumsQuery.value);
+	let favorites = $derived(favoritesQuery.value);
 
 	// ─── Upload State ────────────────────────────────────────
 	let dragActive = $state(false);

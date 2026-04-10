@@ -13,6 +13,7 @@ import type { WidgetConfig } from '$lib/types/dashboard';
 import type { TileNode } from '$lib/types/tiling';
 import { db } from './database';
 import { guestSettings, guestDashboardConfigs } from './guest-seed.js';
+import { seedAllGuestData } from './seed-registry';
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -123,6 +124,10 @@ export const manaStore = {
 		if (dashboardCount === 0 && guestDashboardConfigs.length > 0) {
 			await db.table('dashboardConfigs').bulkPut(guestDashboardConfigs);
 		}
+
+		// Seed per-module guest data (habits presets, body exercises, dream
+		// examples, etc.). Idempotent: only inserts into empty tables.
+		await seedAllGuestData();
 	},
 
 	// No-ops — sync is handled by the unified sync engine

@@ -2,7 +2,7 @@
  * Reactive queries & pure helpers for Music — uses Dexie liveQuery on the unified DB.
  */
 
-import { liveQuery } from 'dexie';
+import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
 import { decryptRecords } from '$lib/data/crypto';
 import type {
@@ -70,50 +70,50 @@ export function toProject(local: LocalProject): Project {
 
 /** All songs, sorted by title. */
 export function useAllSongs() {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const locals = await db.table<LocalSong>('songs').toArray();
 		const visible = locals.filter((s) => !s.deletedAt);
 		// title is encrypted on disk; sort needs the plaintext value.
 		const decrypted = await decryptRecords('songs', visible);
 		return decrypted.map(toSong).sort((a, b) => a.title.localeCompare(b.title));
-	});
+	}, []);
 }
 
 /** All playlists, sorted by name. */
 export function useAllPlaylists() {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const locals = await db.table<LocalPlaylist>('mukkePlaylists').toArray();
 		const visible = locals.filter((p) => !p.deletedAt);
 		const decrypted = await decryptRecords('mukkePlaylists', visible);
 		return decrypted.map(toPlaylist).sort((a, b) => a.name.localeCompare(b.name));
-	});
+	}, []);
 }
 
 /** All playlist-song associations. */
 export function useAllPlaylistSongs() {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const locals = await db.table<LocalPlaylistSong>('playlistSongs').toArray();
 		return locals.filter((ps) => !ps.deletedAt);
-	});
+	}, []);
 }
 
 /** All projects, sorted by title. */
 export function useAllProjects() {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const locals = await db.table<LocalProject>('mukkeProjects').toArray();
 		return locals
 			.filter((p) => !p.deletedAt)
 			.map(toProject)
 			.sort((a, b) => a.title.localeCompare(b.title));
-	});
+	}, []);
 }
 
 /** All markers for a given beat ID. */
 export function useMarkersByBeat(beatId: string) {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const locals = await db.table<LocalMarker>('markers').where('beatId').equals(beatId).toArray();
 		return locals.filter((m) => !m.deletedAt).sort((a, b) => a.startTime - b.startTime);
-	});
+	}, []);
 }
 
 // ─── Pure Filter Functions ─────────────────────────────────

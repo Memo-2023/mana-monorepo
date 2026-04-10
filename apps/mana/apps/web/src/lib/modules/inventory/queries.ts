@@ -4,7 +4,7 @@
  * Uses prefixed table names: invCollections, invItems, invLocations, invCategories.
  */
 
-import { liveQuery } from 'dexie';
+import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
 import { decryptRecords } from '$lib/data/crypto';
 import type { LocalCollection, LocalItem, LocalLocation, LocalCategory } from './types';
@@ -160,32 +160,32 @@ export function toCategory(local: LocalCategory): Category {
 // ─── Live Queries ──────────────────────────────────────────
 
 export function useAllCollections() {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const locals = await db.table<LocalCollection>('invCollections').toArray();
 		return locals.filter((c) => !c.deletedAt).map(toCollection);
-	});
+	}, []);
 }
 
 export function useAllItems() {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const visible = (await db.table<LocalItem>('invItems').toArray()).filter((i) => !i.deletedAt);
 		const decrypted = await decryptRecords('invItems', visible);
 		return decrypted.map(toItem);
-	});
+	}, []);
 }
 
 export function useAllLocations() {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const locals = await db.table<LocalLocation>('invLocations').toArray();
 		return locals.filter((l) => !l.deletedAt).map(toLocation);
-	});
+	}, []);
 }
 
 export function useAllCategories() {
-	return liveQuery(async () => {
+	return useLiveQueryWithDefault(async () => {
 		const locals = await db.table<LocalCategory>('invCategories').toArray();
 		return locals.filter((c) => !c.deletedAt).map(toCategory);
-	});
+	}, []);
 }
 
 // ─── Pure Collection Helpers ──────────────────────────────
