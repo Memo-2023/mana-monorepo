@@ -24,7 +24,19 @@ const SUPPORTED_VIEWS: CalendarViewType[] = ['week', 'month', 'agenda'];
 let currentDate = $state(new Date());
 let viewType = $state<CalendarViewType>('week');
 let visibleBlockTypes = $state<Set<TimeBlockType>>(
-	new Set(['event', 'task', 'habit', 'timeEntry', 'focus', 'break'])
+	new Set([
+		'event',
+		'task',
+		'habit',
+		'timeEntry',
+		'focus',
+		'break',
+		'body',
+		'watering',
+		'sleep',
+		'practice',
+		'cycle',
+	])
 );
 
 const viewRange = $derived.by(() => {

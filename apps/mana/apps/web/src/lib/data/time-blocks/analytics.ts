@@ -25,6 +25,11 @@ const TYPE_COLORS: Record<TimeBlockType, string> = {
 	habit: '#22c55e',
 	focus: '#ef4444',
 	break: '#6b7280',
+	body: '#ef4444',
+	watering: '#06b6d4',
+	sleep: '#6366f1',
+	practice: '#f97316',
+	cycle: '#ec4899',
 };
 
 const TYPE_LABELS: Record<TimeBlockType, string> = {
@@ -34,6 +39,11 @@ const TYPE_LABELS: Record<TimeBlockType, string> = {
 	habit: 'Habits',
 	focus: 'Fokus',
 	break: 'Pausen',
+	body: 'Training',
+	watering: 'Gießen',
+	sleep: 'Schlaf',
+	practice: 'Übung',
+	cycle: 'Zyklus',
 };
 
 function blockDuration(b: TimeBlock): number {

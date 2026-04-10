@@ -13,7 +13,19 @@
 	import type { LocalTimeBlock, TimeBlockType } from '$lib/data/time-blocks/types';
 	import { toTimeBlock, getBlockDuration } from '$lib/data/time-blocks/queries';
 	import type { TimeBlock } from '$lib/data/time-blocks/types';
-	import { CalendarBlank, CheckSquare, Timer, Heart, Lightning, Clock } from '@mana/shared-icons';
+	import {
+		CalendarBlank,
+		CheckSquare,
+		Timer,
+		Heart,
+		Lightning,
+		Clock,
+		Barbell,
+		Drop,
+		Moon,
+		GraduationCap,
+		FlowerLotus,
+	} from '@mana/shared-icons';
 	import { getIconComponent } from '@mana/shared-icons';
 	import { format } from 'date-fns';
 
@@ -55,6 +67,11 @@
 		habit: { icon: Heart, label: 'Habit' },
 		focus: { icon: Lightning, label: 'Fokus' },
 		break: { icon: Clock, label: 'Pause' },
+		body: { icon: Barbell, label: 'Training' },
+		watering: { icon: Drop, label: 'Gießen' },
+		sleep: { icon: Moon, label: 'Schlaf' },
+		practice: { icon: GraduationCap, label: 'Übung' },
+		cycle: { icon: FlowerLotus, label: 'Zyklus' },
 	};
 
 	function formatBlockTime(block: TimeBlock): string {

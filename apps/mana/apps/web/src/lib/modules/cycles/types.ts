@@ -20,6 +20,7 @@ export interface LocalCycle extends BaseRecord {
 	isPredicted: boolean;
 	isArchived: boolean;
 	notes: string | null;
+	timeBlockId?: string | null; // link to timeBlocks table (menstruation phase)
 }
 
 export interface LocalCycleDayLog extends BaseRecord {

@@ -38,6 +38,7 @@ export interface LocalDream extends BaseRecord {
 	isPrivate: boolean;
 	isPinned: boolean;
 	isArchived: boolean;
+	timeBlockId?: string | null;
 }
 
 export interface LocalDreamSymbol extends BaseRecord {

@@ -21,6 +21,11 @@
 		Lightning,
 		Clock,
 		Pulse,
+		Barbell,
+		Drop,
+		Moon,
+		GraduationCap,
+		FlowerLotus,
 	} from '@mana/shared-icons';
 	import { getIconComponent } from '@mana/shared-icons';
 	import { formatDistanceToNow } from 'date-fns';
@@ -47,6 +52,11 @@
 		habit: Heart,
 		focus: Lightning,
 		break: Clock,
+		body: Barbell,
+		watering: Drop,
+		sleep: Moon,
+		practice: GraduationCap,
+		cycle: FlowerLotus,
 	};
 
 	function timeAgo(iso: string): string {

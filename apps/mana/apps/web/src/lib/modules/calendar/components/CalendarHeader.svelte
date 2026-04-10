@@ -12,6 +12,11 @@
 		Heart,
 		Funnel,
 		Export,
+		Barbell,
+		Drop,
+		Moon,
+		GraduationCap,
+		FlowerLotus,
 	} from '@mana/shared-icons';
 	import { db } from '$lib/data/database';
 	import { decryptRecords } from '$lib/data/crypto';
@@ -34,6 +39,11 @@
 		{ type: 'task', label: 'Aufgaben', icon: CheckSquare },
 		{ type: 'timeEntry', label: 'Zeiten', icon: Timer },
 		{ type: 'habit', label: 'Habits', icon: Heart },
+		{ type: 'body', label: 'Training', icon: Barbell },
+		{ type: 'watering', label: 'Gießen', icon: Drop },
+		{ type: 'sleep', label: 'Schlaf', icon: Moon },
+		{ type: 'practice', label: 'Übung', icon: GraduationCap },
+		{ type: 'cycle', label: 'Zyklus', icon: FlowerLotus },
 	];
 
 	let allActive = $derived(

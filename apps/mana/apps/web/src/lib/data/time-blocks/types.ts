@@ -12,9 +12,30 @@ import type { BaseRecord } from '@mana/local-store';
 
 export type TimeBlockKind = 'scheduled' | 'logged';
 
-export type TimeBlockType = 'event' | 'task' | 'habit' | 'timeEntry' | 'focus' | 'break';
+export type TimeBlockType =
+	| 'event'
+	| 'task'
+	| 'habit'
+	| 'timeEntry'
+	| 'focus'
+	| 'break'
+	| 'body'
+	| 'watering'
+	| 'sleep'
+	| 'practice'
+	| 'cycle';
 
-export type TimeBlockSourceModule = 'calendar' | 'todo' | 'times' | 'habits' | 'events';
+export type TimeBlockSourceModule =
+	| 'calendar'
+	| 'todo'
+	| 'times'
+	| 'habits'
+	| 'events'
+	| 'body'
+	| 'planta'
+	| 'dreams'
+	| 'skilltree'
+	| 'cycles';
 
 // ─── Local Record Types (Dexie) ──────────────────────────
 

@@ -6,6 +6,7 @@ import { cycleTable } from '../collections';
 import { toCycle } from '../queries';
 import { daysBetween } from '../utils/phase';
 import { encryptRecord } from '$lib/data/crypto';
+import { createBlock, updateBlock, deleteBlock } from '$lib/data/time-blocks/service';
 import type { LocalCycle } from '../types';
 
 function todayIsoDate(): string {
@@ -39,8 +40,22 @@ export const cyclesStore = {
 			});
 		}
 
+		// Create a TimeBlock for the menstruation phase (allDay, open-ended until periodEnd is set)
+		const cycleId = crypto.randomUUID();
+		const timeBlockId = await createBlock({
+			startDate: `${startDate}T00:00:00.000Z`,
+			endDate: null,
+			allDay: true,
+			kind: 'logged',
+			type: 'cycle',
+			sourceModule: 'cycles',
+			sourceId: cycleId,
+			title: 'Periode',
+			color: '#ec4899',
+		});
+
 		const newLocal: LocalCycle = {
-			id: crypto.randomUUID(),
+			id: cycleId,
 			startDate,
 			periodEndDate: null,
 			endDate: null,
@@ -48,6 +63,7 @@ export const cyclesStore = {
 			isPredicted: false,
 			isArchived: false,
 			notes: data.notes ?? null,
+			timeBlockId,
 		};
 		const plaintextSnapshot = toCycle(newLocal);
 		await encryptRecord('cycles', newLocal);
@@ -74,13 +90,24 @@ export const cyclesStore = {
 
 	/** Markiert das Ende der Blutung (nicht das Ende des Zyklus). */
 	async setPeriodEnd(id: string, periodEndDate: string | null) {
+		const cycle = await cycleTable.get(id);
 		await cycleTable.update(id, {
 			periodEndDate,
 			updatedAt: new Date().toISOString(),
 		});
+		// Update the TimeBlock's endDate to reflect the period duration
+		if (cycle?.timeBlockId && periodEndDate) {
+			await updateBlock(cycle.timeBlockId, {
+				endDate: `${periodEndDate}T23:59:59.999Z`,
+			});
+		}
 	},
 
 	async deleteCycle(id: string) {
+		const cycle = await cycleTable.get(id);
+		if (cycle?.timeBlockId) {
+			await deleteBlock(cycle.timeBlockId);
+		}
 		await cycleTable.update(id, {
 			deletedAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString(),

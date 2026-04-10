@@ -10,6 +10,7 @@ import type { Skill } from '../types';
 import { calculateLevel, createDefaultSkill, createActivity } from '../types';
 import type { LocalSkill, LocalActivity } from '../types';
 import { SkillTreeEvents } from '@mana/shared-utils/analytics';
+import { createBlock } from '$lib/data/time-blocks/service';
 
 // ─── Actions ─────────────────────────────────────────────────
 
@@ -87,6 +88,7 @@ async function addXp(
 	});
 
 	const activity = createActivity(skillId, xp, description, duration);
+	const now = new Date().toISOString();
 	await db.table<LocalActivity>('activities').add({
 		id: activity.id,
 		skillId: activity.skillId,
@@ -94,9 +96,25 @@ async function addXp(
 		description: activity.description,
 		duration: activity.duration,
 		timestamp: activity.timestamp,
-		createdAt: new Date().toISOString(),
-		updatedAt: new Date().toISOString(),
+		createdAt: now,
+		updatedAt: now,
 	});
+
+	// Create a TimeBlock for practice sessions with duration
+	if (duration && duration > 0) {
+		const startDate = new Date(activity.timestamp);
+		const endDate = new Date(startDate.getTime() + duration * 60_000);
+		await createBlock({
+			startDate: startDate.toISOString(),
+			endDate: endDate.toISOString(),
+			kind: 'logged',
+			type: 'practice',
+			sourceModule: 'skilltree',
+			sourceId: activity.id,
+			title: `${skill.name}: ${description}`,
+			color: skill.color ?? '#f97316',
+		});
+	}
 
 	SkillTreeEvents.xpAdded(xp, leveledUp);
 

@@ -11,6 +11,7 @@
 import { dreamSymbolTable, dreamTable } from '../collections';
 import { toDream } from '../queries';
 import { encryptRecord } from '$lib/data/crypto';
+import { createBlock, deleteBlock } from '$lib/data/time-blocks/service';
 import { transcribeAudio } from '$lib/voice/transcribe';
 import type {
 	Dream,
@@ -25,6 +26,32 @@ function todayIsoDate(): string {
 	return new Date().toISOString().slice(0, 10);
 }
 
+/**
+ * Build ISO start/end timestamps for a sleep session.
+ * bedtime is assumed to be the evening before dreamDate,
+ * wakeTime is the morning of dreamDate.
+ */
+function buildSleepRange(
+	dreamDate: string,
+	bedtime: string,
+	wakeTime: string
+): { startDate: string; endDate: string } {
+	const bedHour = parseInt(bedtime.split(':')[0], 10);
+	// If bedtime is before 12:00, assume same day; otherwise previous day
+	const bedDay =
+		bedHour < 12
+			? dreamDate
+			: (() => {
+					const d = new Date(dreamDate);
+					d.setDate(d.getDate() - 1);
+					return d.toISOString().slice(0, 10);
+				})();
+	return {
+		startDate: `${bedDay}T${bedtime}:00.000Z`,
+		endDate: `${dreamDate}T${wakeTime}:00.000Z`,
+	};
+}
+
 export const dreamsStore = {
 	async createDream(data: {
 		title?: string | null;
@@ -35,19 +62,40 @@ export const dreamsStore = {
 		isLucid?: boolean;
 		symbols?: string[];
 		emotions?: string[];
+		bedtime?: string | null;
+		wakeTime?: string | null;
 	}) {
+		const dreamDate = data.dreamDate ?? todayIsoDate();
+		const dreamId = crypto.randomUUID();
+
+		// Create sleep TimeBlock if both bedtime and wakeTime are provided
+		let timeBlockId: string | null = null;
+		if (data.bedtime && data.wakeTime) {
+			const range = buildSleepRange(dreamDate, data.bedtime, data.wakeTime);
+			timeBlockId = await createBlock({
+				startDate: range.startDate,
+				endDate: range.endDate,
+				kind: 'logged',
+				type: 'sleep',
+				sourceModule: 'dreams',
+				sourceId: dreamId,
+				title: data.title ?? 'Schlaf',
+				color: '#6366f1',
+			});
+		}
+
 		const newLocal: LocalDream = {
-			id: crypto.randomUUID(),
+			id: dreamId,
 			title: data.title ?? null,
 			content: data.content ?? '',
-			dreamDate: data.dreamDate ?? todayIsoDate(),
+			dreamDate,
 			mood: data.mood ?? null,
 			clarity: data.clarity ?? null,
 			isLucid: data.isLucid ?? false,
 			isRecurring: false,
 			sleepQuality: null,
-			bedtime: null,
-			wakeTime: null,
+			bedtime: data.bedtime ?? null,
+			wakeTime: data.wakeTime ?? null,
 			location: null,
 			people: [],
 			emotions: data.emotions ?? [],
@@ -63,15 +111,12 @@ export const dreamsStore = {
 			isPrivate: false,
 			isPinned: false,
 			isArchived: false,
+			timeBlockId,
 		};
 
 		const plaintextSnapshot = toDream(newLocal);
 		await encryptRecord('dreams', newLocal);
 		await dreamTable.add(newLocal);
-		// touchSymbols receives plaintext names — must run BEFORE the
-		// snapshot mutation above doesn't matter because newLocal.symbols
-		// is a non-encrypted field, but use the snapshot's symbols just
-		// to be explicit about what we're feeding the symbol counter.
 		await this.touchSymbols(plaintextSnapshot.symbols, +1);
 		return plaintextSnapshot;
 	},
@@ -103,15 +148,44 @@ export const dreamsStore = {
 			>
 		>
 	) {
-		if (data.symbols) {
-			const existing = await dreamTable.get(id);
-			if (existing) {
-				const oldSet = new Set(existing.symbols ?? []);
-				const newSet = new Set(data.symbols);
-				const added = [...newSet].filter((s) => !oldSet.has(s));
-				const removed = [...oldSet].filter((s) => !newSet.has(s));
-				if (added.length) await this.touchSymbols(added, +1);
-				if (removed.length) await this.touchSymbols(removed, -1);
+		const existing = await dreamTable.get(id);
+
+		if (data.symbols && existing) {
+			const oldSet = new Set(existing.symbols ?? []);
+			const newSet = new Set(data.symbols);
+			const added = [...newSet].filter((s) => !oldSet.has(s));
+			const removed = [...oldSet].filter((s) => !newSet.has(s));
+			if (added.length) await this.touchSymbols(added, +1);
+			if (removed.length) await this.touchSymbols(removed, -1);
+		}
+
+		// Create or update sleep TimeBlock when bedtime/wakeTime change
+		if (existing && (data.bedtime !== undefined || data.wakeTime !== undefined)) {
+			const bedtime = data.bedtime ?? existing.bedtime;
+			const wakeTime = data.wakeTime ?? existing.wakeTime;
+			const dreamDate = data.dreamDate ?? existing.dreamDate;
+
+			if (bedtime && wakeTime) {
+				const range = buildSleepRange(dreamDate, bedtime, wakeTime);
+				if (!existing.timeBlockId) {
+					const timeBlockId = await createBlock({
+						startDate: range.startDate,
+						endDate: range.endDate,
+						kind: 'logged',
+						type: 'sleep',
+						sourceModule: 'dreams',
+						sourceId: id,
+						title: data.title ?? existing.title ?? 'Schlaf',
+						color: '#6366f1',
+					});
+					data = { ...data, timeBlockId } as typeof data;
+				} else {
+					const { updateBlock } = await import('$lib/data/time-blocks/service');
+					await updateBlock(existing.timeBlockId, {
+						startDate: range.startDate,
+						endDate: range.endDate,
+					});
+				}
 			}
 		}
 
@@ -222,6 +296,9 @@ export const dreamsStore = {
 		const existing = await dreamTable.get(id);
 		if (existing?.symbols?.length) {
 			await this.touchSymbols(existing.symbols, -1);
+		}
+		if (existing?.timeBlockId) {
+			await deleteBlock(existing.timeBlockId);
 		}
 		await dreamTable.update(id, {
 			deletedAt: new Date().toISOString(),

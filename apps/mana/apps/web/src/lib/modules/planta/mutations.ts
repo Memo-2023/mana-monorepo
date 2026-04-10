@@ -9,6 +9,7 @@ import { db } from '$lib/data/database';
 import { toPlant, toWateringSchedule } from './queries';
 import { PlantaEvents } from '@mana/shared-utils/analytics';
 import { encryptRecord, decryptRecord } from '$lib/data/crypto';
+import { createBlock } from '$lib/data/time-blocks/service';
 import { uploadPlantPhoto, identifyPlant, type IdentifyResult } from './api';
 import type {
 	LocalPlant,
@@ -116,6 +117,11 @@ export const wateringMutations = {
 	async logWatering(plantId: string, notes?: string): Promise<void> {
 		const now = new Date().toISOString();
 
+		// Resolve plant name for TimeBlock title
+		const plant = await db.table<LocalPlant>('plants').get(plantId);
+		const decryptedPlant = plant ? await decryptRecord('plants', { ...plant }) : null;
+		const plantName = decryptedPlant?.name ?? 'Pflanze';
+
 		// Create watering log entry
 		const logEntry: LocalWateringLog = {
 			id: crypto.randomUUID(),
@@ -126,6 +132,18 @@ export const wateringMutations = {
 			updatedAt: now,
 		};
 		await db.table('wateringLogs').add(logEntry);
+
+		// Create a TimeBlock for the watering event
+		await createBlock({
+			startDate: now,
+			endDate: now,
+			kind: 'logged',
+			type: 'watering',
+			sourceModule: 'planta',
+			sourceId: logEntry.id,
+			title: `${plantName} gegossen`,
+			color: '#06b6d4',
+		});
 
 		// Update watering schedule
 		const schedules = await db.table<LocalWateringSchedule>('wateringSchedules').toArray();
