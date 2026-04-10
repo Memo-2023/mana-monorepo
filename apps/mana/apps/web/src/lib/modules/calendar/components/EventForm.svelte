@@ -35,10 +35,8 @@
 	let calendarId = $state(event?.calendarId || '');
 	// svelte-ignore state_referenced_locally
 	let recurrenceRule = $state(event?.recurrenceRule || '');
-	let selectedTagIds = $state<string[]>(
-		// svelte-ignore state_referenced_locally
-		((event as unknown as Record<string, unknown>)?.tagIds as string[]) ?? []
-	);
+	// svelte-ignore state_referenced_locally
+	let selectedTagIds = $state<string[]>(event?.tagIds ?? []);
 
 	const allTags = useAllTags();
 

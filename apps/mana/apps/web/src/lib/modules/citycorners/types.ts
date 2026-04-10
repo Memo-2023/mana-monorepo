@@ -37,6 +37,7 @@ export interface LocalLocation extends BaseRecord {
 	longitude?: number | null;
 	imageUrl?: string | null;
 	timeline?: Array<{ year: number; event: string }> | null;
+	createdBy?: string | null;
 }
 
 export interface LocalFavorite extends BaseRecord {

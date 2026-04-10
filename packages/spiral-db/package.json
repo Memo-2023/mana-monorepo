@@ -18,6 +18,8 @@
 	},
 	"scripts": {
 		"build": "tsup src/index.ts src/wallpaper.ts --format esm --dts --clean",
+		"prepublishOnly": "pnpm build",
+		"prepare": "pnpm build",
 		"dev": "tsup src/index.ts src/wallpaper.ts --format esm --dts --watch",
 		"test": "vitest",
 		"test:run": "vitest run",

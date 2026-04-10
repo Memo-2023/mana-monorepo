@@ -56,7 +56,7 @@
 	} from '@mana/shared-theme';
 	import type { ThemeVariant } from '@mana/shared-theme';
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@mana/shared-i18n';
-	import { setLocale, supportedLocales } from '$lib/i18n';
+	import { setLocale, supportedLocales, type SupportedLocale } from '$lib/i18n';
 	import { ManaEvents, AppEvents } from '@mana/shared-utils/analytics';
 	import { setUser as setErrorTrackingUser } from '@mana/shared-error-tracking/browser';
 	import { trackReturnVisit, trackModuleUsed, markAsGuest } from '$lib/stores/funnel-tracking';
@@ -145,7 +145,9 @@
 	// ── i18n ────────────────────────────────────────────────
 	let currentLocale = $derived($locale || 'de');
 	function handleLocaleChange(newLocale: string) {
-		setLocale(newLocale as any);
+		if (supportedLocales.includes(newLocale as SupportedLocale)) {
+			setLocale(newLocale as SupportedLocale);
+		}
 		userSettings.updateGlobal({ locale: newLocale });
 		AppEvents.languageChanged(newLocale);
 	}
@@ -154,8 +156,11 @@
 	$effect(() => {
 		if (userSettings.loaded && userSettings.locale) {
 			const settingsLocale = userSettings.locale;
-			if (supportedLocales.includes(settingsLocale as any) && settingsLocale !== $locale) {
-				setLocale(settingsLocale as any);
+			if (
+				supportedLocales.includes(settingsLocale as SupportedLocale) &&
+				settingsLocale !== $locale
+			) {
+				setLocale(settingsLocale as SupportedLocale);
 			}
 		}
 	});

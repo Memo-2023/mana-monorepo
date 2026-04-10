@@ -43,14 +43,7 @@ export const imagesStore = {
 	async toggleFavorite(id: string) {
 		error = null;
 		try {
-			// Cast: toggleField expects a string-keyed Table, but db.table()
-			// returns the generic IndexableType-keyed shape. The runtime keys
-			// for `images` are all strings (UUIDs).
-			await toggleField(
-				imageTable() as unknown as Parameters<typeof toggleField>[0],
-				id,
-				'isFavorite'
-			);
+			await toggleField(imageTable(), id, 'isFavorite');
 			PictureEvents.imageFavorited();
 			return { success: true };
 		} catch (e) {

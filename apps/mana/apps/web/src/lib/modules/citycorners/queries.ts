@@ -123,7 +123,7 @@ export function getCityStats(locations: LocalLocation[]): CityStats {
 
 	for (const loc of locations) {
 		categoryCounts[loc.category] = (categoryCounts[loc.category] || 0) + 1;
-		if ((loc as any).createdBy) contributors.add((loc as any).createdBy);
+		if (loc.createdBy) contributors.add(loc.createdBy);
 		if (loc.latitude && loc.longitude) hasCoordinates++;
 	}
 
@@ -134,8 +134,8 @@ export function getCityStats(locations: LocalLocation[]): CityStats {
 
 	const recentLocations = [...locations]
 		.sort((a, b) => {
-			const aTime = (a as any).createdAt ? new Date((a as any).createdAt).getTime() : 0;
-			const bTime = (b as any).createdAt ? new Date((b as any).createdAt).getTime() : 0;
+			const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+			const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
 			return bTime - aTime;
 		})
 		.slice(0, 3);
@@ -161,7 +161,7 @@ export interface PlatformStats {
 export function getPlatformStats(cities: LocalCity[], locations: LocalLocation[]): PlatformStats {
 	const contributors = new Set<string>();
 	for (const loc of locations) {
-		if ((loc as any).createdBy) contributors.add((loc as any).createdBy);
+		if (loc.createdBy) contributors.add(loc.createdBy);
 	}
 	for (const city of cities) {
 		if (city.createdBy) contributors.add(city.createdBy);
