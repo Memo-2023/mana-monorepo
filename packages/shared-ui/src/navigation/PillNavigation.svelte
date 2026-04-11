@@ -247,6 +247,8 @@
 		aiTierItems?: PillDropdownItem[];
 		/** Current AI tier label, e.g. "Browser" or "Server" */
 		currentAiTierLabel?: string;
+		/** Current AI tier icon name (passed to the dropdown trigger) */
+		currentAiTierIcon?: string;
 		/** Show sync status dropdown */
 		showSyncStatus?: boolean;
 		/** Sync status dropdown items */
@@ -348,6 +350,7 @@
 		showAiTierSelector = false,
 		aiTierItems = [],
 		currentAiTierLabel = 'KI',
+		currentAiTierIcon = 'cpu',
 		showSyncStatus = false,
 		syncStatusItems = [],
 		currentSyncLabel = 'Sync',
@@ -675,7 +678,7 @@
 					items={aiTierItems}
 					direction={dropdownDirection}
 					label={currentAiTierLabel}
-					icon="cpu"
+					icon={currentAiTierIcon}
 				/>
 			{/if}
 

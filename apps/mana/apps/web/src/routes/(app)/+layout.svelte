@@ -184,10 +184,10 @@
 		updateLlmSettings({ allowedTiers: next });
 	}
 
-	const TIER_TOGGLE_LIST: Array<{ tier: LlmTier; shortLabel: string }> = [
-		{ tier: 'browser', shortLabel: 'Browser (Gemma 4)' },
-		{ tier: 'mana-server', shortLabel: 'Server (Gemma 4)' },
-		{ tier: 'cloud', shortLabel: 'Cloud (Gemini)' },
+	const TIER_TOGGLE_LIST: Array<{ tier: LlmTier; shortLabel: string; icon: string }> = [
+		{ tier: 'browser', shortLabel: 'Browser (Gemma 4)', icon: 'cpu' },
+		{ tier: 'mana-server', shortLabel: 'Server (Gemma 4)', icon: 'server' },
+		{ tier: 'cloud', shortLabel: 'Cloud (Gemini)', icon: 'cloud' },
 	];
 
 	let aiTierItems = $derived<PillDropdownItem[]>([
@@ -195,6 +195,7 @@
 		...TIER_TOGGLE_LIST.filter((t) => t.tier !== 'browser' || webgpuSupported).map((t) => ({
 			id: `ai-tier-${t.tier}`,
 			label: t.shortLabel,
+			icon: t.icon,
 			active: llmSettings.allowedTiers.includes(t.tier),
 			onClick: () => toggleAiTier(t.tier),
 		})),
@@ -209,6 +210,7 @@
 								: localLlmStatus.current.state === 'downloading'
 									? `Lade… ${((localLlmStatus.current as { progress: number }).progress * 100).toFixed(0)}%`
 									: 'Modell laden (~500 MB)',
+						icon: localLlmStatus.current.state === 'ready' ? 'check' : 'download',
 						disabled: localLlmStatus.current.state === 'ready',
 						onClick:
 							localLlmStatus.current.state !== 'ready' ? () => void loadLocalLlm() : undefined,
@@ -221,7 +223,7 @@
 			id: 'ai-settings',
 			label: 'KI-Einstellungen',
 			icon: 'settings',
-			onClick: () => goto('/settings'),
+			onClick: () => goto('/settings#ai-options'),
 		},
 	]);
 
@@ -236,6 +238,18 @@
 		);
 		const first = TIER_TOGGLE_LIST.find((t) => t.tier === sorted[0]);
 		return first ? first.shortLabel.split(' (')[0] : 'KI';
+	});
+
+	let currentAiTierIcon = $derived.by(() => {
+		const active = llmSettings.allowedTiers;
+		if (active.length === 0) return 'power';
+		const sorted = [...active].sort(
+			(a, b) =>
+				TIER_TOGGLE_LIST.findIndex((t) => t.tier === a) -
+				TIER_TOGGLE_LIST.findIndex((t) => t.tier === b)
+		);
+		const first = TIER_TOGGLE_LIST.find((t) => t.tier === sorted[0]);
+		return first ? first.icon : 'cpu';
 	});
 
 	// ── Sync status dropdown ────────────────────────────────
@@ -816,6 +830,7 @@
 				showAiTierSelector={true}
 				{aiTierItems}
 				{currentAiTierLabel}
+				{currentAiTierIcon}
 				showSyncStatus={authStore.isAuthenticated}
 				{syncStatusItems}
 				{currentSyncLabel}
