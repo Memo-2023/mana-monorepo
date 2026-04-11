@@ -25,8 +25,8 @@ fetch_metric() {
     2>/dev/null || echo '{"status":"error","data":{"result":[]}}'
 }
 
-SUCCESS_JSON="$(fetch_metric 'probe_success{job=~"blackbox-web|blackbox-api|blackbox-infra|blackbox-gpu"}')"
-DURATION_JSON="$(fetch_metric 'probe_duration_seconds{job=~"blackbox-web|blackbox-api|blackbox-infra|blackbox-gpu"}')"
+SUCCESS_JSON="$(fetch_metric 'probe_success{job=~"blackbox-web|blackbox-api|blackbox-infra|blackbox-internal|blackbox-gpu"}')"
+DURATION_JSON="$(fetch_metric 'probe_duration_seconds{job=~"blackbox-web|blackbox-api|blackbox-infra|blackbox-internal|blackbox-gpu"}')"
 
 # ── Hilfsfunktionen ─────────────────────────────────────────────────────────
 
@@ -59,10 +59,20 @@ get_instances() {
 # Freundlicher Name aus URL
 friendly_name() {
   url="$1"
-  # Entferne https://
+  # Entferne https:// oder http://
   name="${url#https://}"
-  # Route-basierte URLs: mana.how/chat → Chat
+  name="${name#http://}"
+  # Interne Services (Docker-Netz): mana-geocoding:3018/health → Mana Geocoding
   case "$name" in
+    mana-geocoding:*)
+      name="Mana Geocoding"
+      ;;
+    host.docker.internal:4000*)
+      name="Pelias API"
+      ;;
+    host.docker.internal:9200*)
+      name="Pelias Elasticsearch"
+      ;;
     mana.how/*)
       name="${name#mana.how/}"
       ;;
@@ -71,8 +81,10 @@ friendly_name() {
       name="${name%.mana.how}"
       ;;
   esac
-  # Entferne /health suffix
+  # Entferne /health, /_cluster/health, /v1/status suffixe
   name="${name%/health}"
+  name="${name%/_cluster/health}"
+  name="${name%/v1/status}"
   # mana.how (ohne Route) → Mana
   [ "$name" = "mana.how" ] && name="Mana"
   # Erster Buchstabe groß (POSIX-kompatibel)
@@ -131,11 +143,12 @@ render_rows() {
 
 web_up="$(count_up blackbox-web)";   web_total="$(count_total blackbox-web)"
 api_up="$(count_up blackbox-api)";   api_total="$(count_total blackbox-api)"
+internal_up="$(count_up blackbox-internal)"; internal_total="$(count_total blackbox-internal)"
 infra_up="$(count_up blackbox-infra)"; infra_total="$(count_total blackbox-infra)"
 gpu_up="$(count_up blackbox-gpu)";   gpu_total="$(count_total blackbox-gpu)"
 
-total_up=$(( web_up + api_up + infra_up + gpu_up ))
-total_all=$(( web_total + api_total + infra_total + gpu_total ))
+total_up=$(( web_up + api_up + internal_up + infra_up + gpu_up ))
+total_all=$(( web_total + api_total + internal_total + infra_total + gpu_total ))
 total_down=$(( total_all - total_up ))
 
 if [ "$total_down" -eq 0 ] && [ "$total_all" -gt 0 ]; then
@@ -276,10 +289,11 @@ cat > "${OUTPUT}.tmp" << HTMLEOF
     /* ── Summary Row ── */
     .summary {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(5, 1fr);
       gap: 12px;
       margin-bottom: 32px;
     }
+    @media (max-width: 900px) { .summary { grid-template-columns: repeat(3, 1fr); } }
     @media (max-width: 600px) { .summary { grid-template-columns: repeat(2, 1fr); } }
 
     .summary-card {
@@ -386,6 +400,10 @@ cat > "${OUTPUT}.tmp" << HTMLEOF
       <div class="label">API Backends</div>
     </div>
     <div class="summary-card">
+      <div class="count $([ "$internal_up" -eq "$internal_total" ] && echo green || echo yellow)">${internal_up}/${internal_total}</div>
+      <div class="label">Interne</div>
+    </div>
+    <div class="summary-card">
       <div class="count $([ "$infra_up" -eq "$infra_total" ] && echo green || echo yellow)">${infra_up}/${infra_total}</div>
       <div class="label">Infrastruktur</div>
     </div>
@@ -412,6 +430,16 @@ $(render_rows blackbox-web)
     </div>
     <table>
 $(render_rows blackbox-api)
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <h2>Interne Dienste</h2>
+      <span class="fraction">${internal_up} von ${internal_total} online</span>
+    </div>
+    <table>
+$(render_rows blackbox-internal)
     </table>
   </div>
 

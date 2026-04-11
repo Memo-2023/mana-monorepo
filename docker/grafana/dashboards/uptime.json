@@ -6,7 +6,10 @@
 	"schemaVersion": 38,
 	"version": 1,
 	"refresh": "1m",
-	"time": { "from": "now-24h", "to": "now" },
+	"time": {
+		"from": "now-24h",
+		"to": "now"
+	},
 	"timepicker": {},
 	"timezone": "browser",
 	"templating": {
@@ -27,23 +30,47 @@
 			"id": 1,
 			"title": "Zusammenfassung",
 			"collapsed": false,
-			"gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 }
+			"gridPos": {
+				"h": 1,
+				"w": 24,
+				"x": 0,
+				"y": 0
+			}
 		},
 		{
 			"type": "stat",
 			"id": 2,
 			"title": "Web Apps Online",
-			"datasource": { "type": "prometheus", "uid": "${datasource}" },
-			"gridPos": { "h": 4, "w": 4, "x": 0, "y": 1 },
+			"datasource": {
+				"type": "prometheus",
+				"uid": "${datasource}"
+			},
+			"gridPos": {
+				"h": 4,
+				"w": 4,
+				"x": 0,
+				"y": 1
+			},
 			"fieldConfig": {
 				"defaults": {
-					"color": { "mode": "thresholds" },
+					"color": {
+						"mode": "thresholds"
+					},
 					"thresholds": {
 						"mode": "absolute",
 						"steps": [
-							{ "color": "red", "value": null },
-							{ "color": "yellow", "value": 10 },
-							{ "color": "green", "value": 18 }
+							{
+								"color": "red",
+								"value": null
+							},
+							{
+								"color": "yellow",
+								"value": 10
+							},
+							{
+								"color": "green",
+								"value": 18
+							}
 						]
 					},
 					"unit": "short",
@@ -56,12 +83,19 @@
 				"graphMode": "area",
 				"justifyMode": "center",
 				"orientation": "auto",
-				"reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+				"reduceOptions": {
+					"calcs": ["lastNotNull"],
+					"fields": "",
+					"values": false
+				},
 				"textMode": "auto"
 			},
 			"targets": [
 				{
-					"datasource": { "type": "prometheus", "uid": "${datasource}" },
+					"datasource": {
+						"type": "prometheus",
+						"uid": "${datasource}"
+					},
 					"expr": "sum(probe_success{job=\"blackbox-web\"})",
 					"refId": "A",
 					"legendFormat": "Online"
@@ -72,17 +106,36 @@
 			"type": "stat",
 			"id": 3,
 			"title": "APIs Online",
-			"datasource": { "type": "prometheus", "uid": "${datasource}" },
-			"gridPos": { "h": 4, "w": 4, "x": 4, "y": 1 },
+			"datasource": {
+				"type": "prometheus",
+				"uid": "${datasource}"
+			},
+			"gridPos": {
+				"h": 4,
+				"w": 4,
+				"x": 4,
+				"y": 1
+			},
 			"fieldConfig": {
 				"defaults": {
-					"color": { "mode": "thresholds" },
+					"color": {
+						"mode": "thresholds"
+					},
 					"thresholds": {
 						"mode": "absolute",
 						"steps": [
-							{ "color": "red", "value": null },
-							{ "color": "yellow", "value": 7 },
-							{ "color": "green", "value": 9 }
+							{
+								"color": "red",
+								"value": null
+							},
+							{
+								"color": "yellow",
+								"value": 7
+							},
+							{
+								"color": "green",
+								"value": 9
+							}
 						]
 					},
 					"unit": "short",
@@ -95,12 +148,19 @@
 				"graphMode": "area",
 				"justifyMode": "center",
 				"orientation": "auto",
-				"reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+				"reduceOptions": {
+					"calcs": ["lastNotNull"],
+					"fields": "",
+					"values": false
+				},
 				"textMode": "auto"
 			},
 			"targets": [
 				{
-					"datasource": { "type": "prometheus", "uid": "${datasource}" },
+					"datasource": {
+						"type": "prometheus",
+						"uid": "${datasource}"
+					},
 					"expr": "sum(probe_success{job=\"blackbox-api\"})",
 					"refId": "A",
 					"legendFormat": "Online"
@@ -111,17 +171,36 @@
 			"type": "stat",
 			"id": 4,
 			"title": "Infra Online",
-			"datasource": { "type": "prometheus", "uid": "${datasource}" },
-			"gridPos": { "h": 4, "w": 4, "x": 8, "y": 1 },
+			"datasource": {
+				"type": "prometheus",
+				"uid": "${datasource}"
+			},
+			"gridPos": {
+				"h": 4,
+				"w": 4,
+				"x": 8,
+				"y": 1
+			},
 			"fieldConfig": {
 				"defaults": {
-					"color": { "mode": "thresholds" },
+					"color": {
+						"mode": "thresholds"
+					},
 					"thresholds": {
 						"mode": "absolute",
 						"steps": [
-							{ "color": "red", "value": null },
-							{ "color": "yellow", "value": 4 },
-							{ "color": "green", "value": 5 }
+							{
+								"color": "red",
+								"value": null
+							},
+							{
+								"color": "yellow",
+								"value": 4
+							},
+							{
+								"color": "green",
+								"value": 5
+							}
 						]
 					},
 					"unit": "short",
@@ -134,12 +213,19 @@
 				"graphMode": "area",
 				"justifyMode": "center",
 				"orientation": "auto",
-				"reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+				"reduceOptions": {
+					"calcs": ["lastNotNull"],
+					"fields": "",
+					"values": false
+				},
 				"textMode": "auto"
 			},
 			"targets": [
 				{
-					"datasource": { "type": "prometheus", "uid": "${datasource}" },
+					"datasource": {
+						"type": "prometheus",
+						"uid": "${datasource}"
+					},
 					"expr": "sum(probe_success{job=\"blackbox-infra\"})",
 					"refId": "A",
 					"legendFormat": "Online"
@@ -150,17 +236,36 @@
 			"type": "stat",
 			"id": 5,
 			"title": "GPU Services Online",
-			"datasource": { "type": "prometheus", "uid": "${datasource}" },
-			"gridPos": { "h": 4, "w": 4, "x": 12, "y": 1 },
+			"datasource": {
+				"type": "prometheus",
+				"uid": "${datasource}"
+			},
+			"gridPos": {
+				"h": 4,
+				"w": 4,
+				"x": 12,
+				"y": 1
+			},
 			"fieldConfig": {
 				"defaults": {
-					"color": { "mode": "thresholds" },
+					"color": {
+						"mode": "thresholds"
+					},
 					"thresholds": {
 						"mode": "absolute",
 						"steps": [
-							{ "color": "red", "value": null },
-							{ "color": "yellow", "value": 2 },
-							{ "color": "green", "value": 4 }
+							{
+								"color": "red",
+								"value": null
+							},
+							{
+								"color": "yellow",
+								"value": 2
+							},
+							{
+								"color": "green",
+								"value": 4
+							}
 						]
 					},
 					"unit": "short",
@@ -173,12 +278,19 @@
 				"graphMode": "area",
 				"justifyMode": "center",
 				"orientation": "auto",
-				"reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+				"reduceOptions": {
+					"calcs": ["lastNotNull"],
+					"fields": "",
+					"values": false
+				},
 				"textMode": "auto"
 			},
 			"targets": [
 				{
-					"datasource": { "type": "prometheus", "uid": "${datasource}" },
+					"datasource": {
+						"type": "prometheus",
+						"uid": "${datasource}"
+					},
 					"expr": "sum(probe_success{job=\"blackbox-gpu\"})",
 					"refId": "A",
 					"legendFormat": "Online"
@@ -189,17 +301,36 @@
 			"type": "stat",
 			"id": 6,
 			"title": "Ø Antwortzeit (Web)",
-			"datasource": { "type": "prometheus", "uid": "${datasource}" },
-			"gridPos": { "h": 4, "w": 4, "x": 16, "y": 1 },
+			"datasource": {
+				"type": "prometheus",
+				"uid": "${datasource}"
+			},
+			"gridPos": {
+				"h": 4,
+				"w": 4,
+				"x": 16,
+				"y": 1
+			},
 			"fieldConfig": {
 				"defaults": {
-					"color": { "mode": "thresholds" },
+					"color": {
+						"mode": "thresholds"
+					},
 					"thresholds": {
 						"mode": "absolute",
 						"steps": [
-							{ "color": "green", "value": null },
-							{ "color": "yellow", "value": 2 },
-							{ "color": "red", "value": 5 }
+							{
+								"color": "green",
+								"value": null
+							},
+							{
+								"color": "yellow",
+								"value": 2
+							},
+							{
+								"color": "red",
+								"value": 5
+							}
 						]
 					},
 					"unit": "s",
@@ -212,12 +343,19 @@
 				"graphMode": "area",
 				"justifyMode": "center",
 				"orientation": "auto",
-				"reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+				"reduceOptions": {
+					"calcs": ["lastNotNull"],
+					"fields": "",
+					"values": false
+				},
 				"textMode": "auto"
 			},
 			"targets": [
 				{
-					"datasource": { "type": "prometheus", "uid": "${datasource}" },
+					"datasource": {
+						"type": "prometheus",
+						"uid": "${datasource}"
+					},
 					"expr": "avg(probe_duration_seconds{job=\"blackbox-web\"})",
 					"refId": "A",
 					"legendFormat": "Ø ms"
@@ -229,14 +367,27 @@
 			"id": 10,
 			"title": "Web Apps",
 			"collapsed": false,
-			"gridPos": { "h": 1, "w": 24, "x": 0, "y": 5 }
+			"gridPos": {
+				"h": 1,
+				"w": 24,
+				"x": 0,
+				"y": 5
+			}
 		},
 		{
 			"type": "table",
 			"id": 11,
 			"title": "Web App Status",
-			"datasource": { "type": "prometheus", "uid": "${datasource}" },
-			"gridPos": { "h": 14, "w": 12, "x": 0, "y": 6 },
+			"datasource": {
+				"type": "prometheus",
+				"uid": "${datasource}"
+			},
+			"gridPos": {
+				"h": 14,
+				"w": 12,
+				"x": 0,
+				"y": 6
+			},
 			"fieldConfig": {
 				"defaults": {
 					"custom": {
@@ -247,53 +398,106 @@
 						{
 							"type": "value",
 							"options": {
-								"0": { "text": "DOWN", "color": "red" },
-								"1": { "text": "UP", "color": "green" }
+								"0": {
+									"text": "DOWN",
+									"color": "red"
+								},
+								"1": {
+									"text": "UP",
+									"color": "green"
+								}
 							}
 						}
 					],
 					"thresholds": {
 						"mode": "absolute",
 						"steps": [
-							{ "color": "red", "value": null },
-							{ "color": "green", "value": 1 }
+							{
+								"color": "red",
+								"value": null
+							},
+							{
+								"color": "green",
+								"value": 1
+							}
 						]
 					}
 				},
 				"overrides": [
 					{
-						"matcher": { "id": "byName", "options": "instance" },
+						"matcher": {
+							"id": "byName",
+							"options": "instance"
+						},
 						"properties": [
-							{ "id": "displayName", "value": "URL" },
-							{ "id": "custom.width", "value": 260 }
+							{
+								"id": "displayName",
+								"value": "URL"
+							},
+							{
+								"id": "custom.width",
+								"value": 260
+							}
 						]
 					},
 					{
-						"matcher": { "id": "byName", "options": "Value" },
+						"matcher": {
+							"id": "byName",
+							"options": "Value"
+						},
 						"properties": [
-							{ "id": "displayName", "value": "Status" },
-							{ "id": "custom.width", "value": 80 }
+							{
+								"id": "displayName",
+								"value": "Status"
+							},
+							{
+								"id": "custom.width",
+								"value": 80
+							}
 						]
 					}
 				]
 			},
 			"options": {
-				"sortBy": [{ "displayName": "Status", "desc": false }],
-				"footer": { "show": false }
+				"sortBy": [
+					{
+						"displayName": "Status",
+						"desc": false
+					}
+				],
+				"footer": {
+					"show": false
+				}
 			},
 			"transformations": [
-				{ "id": "labelsToFields", "options": { "mode": "columns", "keepLabels": ["instance"] } },
+				{
+					"id": "labelsToFields",
+					"options": {
+						"mode": "columns",
+						"keepLabels": ["instance"]
+					}
+				},
 				{
 					"id": "organize",
 					"options": {
-						"excludeByName": { "Time": true, "job": true, "__name__": true },
-						"indexByName": { "instance": 0, "Value": 1 }
+						"excludeByName": {
+							"Time": true,
+							"job": true,
+							"__name__": true
+						},
+						"indexByName": {
+							"instance": 0,
+							"Value": 1
+						}
 					}
 				}
 			],
 			"targets": [
 				{
-					"datasource": { "type": "prometheus", "uid": "${datasource}" },
+					"datasource": {
+						"type": "prometheus",
+						"uid": "${datasource}"
+					},
 					"expr": "probe_success{job=\"blackbox-web\"}",
 					"instant": true,
 					"refId": "A",
@@ -305,18 +509,37 @@
 			"type": "timeseries",
 			"id": 12,
 			"title": "Web App Antwortzeiten",
-			"datasource": { "type": "prometheus", "uid": "${datasource}" },
-			"gridPos": { "h": 14, "w": 12, "x": 12, "y": 6 },
+			"datasource": {
+				"type": "prometheus",
+				"uid": "${datasource}"
+			},
+			"gridPos": {
+				"h": 14,
+				"w": 12,
+				"x": 12,
+				"y": 6
+			},
 			"fieldConfig": {
 				"defaults": {
-					"color": { "mode": "palette-classic" },
-					"custom": { "lineWidth": 1, "fillOpacity": 10 },
+					"color": {
+						"mode": "palette-classic"
+					},
+					"custom": {
+						"lineWidth": 1,
+						"fillOpacity": 10
+					},
 					"unit": "s",
 					"thresholds": {
 						"mode": "absolute",
 						"steps": [
-							{ "color": "green", "value": null },
-							{ "color": "red", "value": 5 }
+							{
+								"color": "green",
+								"value": null
+							},
+							{
+								"color": "red",
+								"value": 5
+							}
 						]
 					}
 				},
@@ -328,11 +551,16 @@
 					"placement": "bottom",
 					"calcs": ["lastNotNull", "mean"]
 				},
-				"tooltip": { "mode": "multi" }
+				"tooltip": {
+					"mode": "multi"
+				}
 			},
 			"targets": [
 				{
-					"datasource": { "type": "prometheus", "uid": "${datasource}" },
+					"datasource": {
+						"type": "prometheus",
+						"uid": "${datasource}"
+					},
 					"expr": "probe_duration_seconds{job=\"blackbox-web\"}",
 					"refId": "A",
 					"legendFormat": "{{instance}}"
@@ -344,68 +572,136 @@
 			"id": 20,
 			"title": "API Health Endpoints",
 			"collapsed": false,
-			"gridPos": { "h": 1, "w": 24, "x": 0, "y": 20 }
+			"gridPos": {
+				"h": 1,
+				"w": 24,
+				"x": 0,
+				"y": 20
+			}
 		},
 		{
 			"type": "table",
 			"id": 21,
 			"title": "API Status",
-			"datasource": { "type": "prometheus", "uid": "${datasource}" },
-			"gridPos": { "h": 10, "w": 12, "x": 0, "y": 21 },
+			"datasource": {
+				"type": "prometheus",
+				"uid": "${datasource}"
+			},
+			"gridPos": {
+				"h": 10,
+				"w": 12,
+				"x": 0,
+				"y": 21
+			},
 			"fieldConfig": {
 				"defaults": {
-					"custom": { "align": "left", "displayMode": "color-background" },
+					"custom": {
+						"align": "left",
+						"displayMode": "color-background"
+					},
 					"mappings": [
 						{
 							"type": "value",
 							"options": {
-								"0": { "text": "DOWN", "color": "red" },
-								"1": { "text": "UP", "color": "green" }
+								"0": {
+									"text": "DOWN",
+									"color": "red"
+								},
+								"1": {
+									"text": "UP",
+									"color": "green"
+								}
 							}
 						}
 					],
 					"thresholds": {
 						"mode": "absolute",
 						"steps": [
-							{ "color": "red", "value": null },
-							{ "color": "green", "value": 1 }
+							{
+								"color": "red",
+								"value": null
+							},
+							{
+								"color": "green",
+								"value": 1
+							}
 						]
 					}
 				},
 				"overrides": [
 					{
-						"matcher": { "id": "byName", "options": "instance" },
+						"matcher": {
+							"id": "byName",
+							"options": "instance"
+						},
 						"properties": [
-							{ "id": "displayName", "value": "Endpoint" },
-							{ "id": "custom.width", "value": 300 }
+							{
+								"id": "displayName",
+								"value": "Endpoint"
+							},
+							{
+								"id": "custom.width",
+								"value": 300
+							}
 						]
 					},
 					{
-						"matcher": { "id": "byName", "options": "Value" },
+						"matcher": {
+							"id": "byName",
+							"options": "Value"
+						},
 						"properties": [
-							{ "id": "displayName", "value": "Status" },
-							{ "id": "custom.width", "value": 80 }
+							{
+								"id": "displayName",
+								"value": "Status"
+							},
+							{
+								"id": "custom.width",
+								"value": 80
+							}
 						]
 					}
 				]
 			},
 			"options": {
-				"sortBy": [{ "displayName": "Status", "desc": false }],
-				"footer": { "show": false }
+				"sortBy": [
+					{
+						"displayName": "Status",
+						"desc": false
+					}
+				],
+				"footer": {
+					"show": false
+				}
 			},
 			"transformations": [
-				{ "id": "labelsToFields", "options": { "mode": "columns", "keepLabels": ["instance"] } },
+				{
+					"id": "labelsToFields",
+					"options": {
+						"mode": "columns",
+						"keepLabels": ["instance"]
+					}
+				},
 				{
 					"id": "organize",
 					"options": {
-						"excludeByName": { "Time": true, "job": true },
-						"indexByName": { "instance": 0, "Value": 1 }
+						"excludeByName": {
+							"Time": true,
+							"job": true
+						},
+						"indexByName": {
+							"instance": 0,
+							"Value": 1
+						}
 					}
 				}
 			],
 			"targets": [
 				{
-					"datasource": { "type": "prometheus", "uid": "${datasource}" },
+					"datasource": {
+						"type": "prometheus",
+						"uid": "${datasource}"
+					},
 					"expr": "probe_success{job=\"blackbox-api\"}",
 					"instant": true,
 					"refId": "A",
@@ -417,23 +713,52 @@
 			"type": "timeseries",
 			"id": 22,
 			"title": "API Uptime-Verlauf (24h)",
-			"datasource": { "type": "prometheus", "uid": "${datasource}" },
-			"gridPos": { "h": 10, "w": 12, "x": 12, "y": 21 },
+			"datasource": {
+				"type": "prometheus",
+				"uid": "${datasource}"
+			},
+			"gridPos": {
+				"h": 10,
+				"w": 12,
+				"x": 12,
+				"y": 21
+			},
 			"fieldConfig": {
 				"defaults": {
-					"color": { "mode": "palette-classic" },
-					"custom": { "lineWidth": 2, "fillOpacity": 20 },
+					"color": {
+						"mode": "palette-classic"
+					},
+					"custom": {
+						"lineWidth": 2,
+						"fillOpacity": 20
+					},
 					"unit": "short",
 					"min": 0,
 					"max": 1,
 					"mappings": [
-						{ "type": "value", "options": { "0": { "text": "DOWN" }, "1": { "text": "UP" } } }
+						{
+							"type": "value",
+							"options": {
+								"0": {
+									"text": "DOWN"
+								},
+								"1": {
+									"text": "UP"
+								}
+							}
+						}
 					],
 					"thresholds": {
 						"mode": "absolute",
 						"steps": [
-							{ "color": "red", "value": null },
-							{ "color": "green", "value": 1 }
+							{
+								"color": "red",
+								"value": null
+							},
+							{
+								"color": "green",
+								"value": 1
+							}
 						]
 					}
 				},
@@ -445,11 +770,16 @@
 					"placement": "bottom",
 					"calcs": ["lastNotNull", "mean"]
 				},
-				"tooltip": { "mode": "multi" }
+				"tooltip": {
+					"mode": "multi"
+				}
 			},
 			"targets": [
 				{
-					"datasource": { "type": "prometheus", "uid": "${datasource}" },
+					"datasource": {
+						"type": "prometheus",
+						"uid": "${datasource}"
+					},
 					"expr": "probe_success{job=\"blackbox-api\"}",
 					"refId": "A",
 					"legendFormat": "{{instance}}"
@@ -461,65 +791,132 @@
 			"id": 30,
 			"title": "Infrastruktur & GPU",
 			"collapsed": false,
-			"gridPos": { "h": 1, "w": 24, "x": 0, "y": 31 }
+			"gridPos": {
+				"h": 1,
+				"w": 24,
+				"x": 0,
+				"y": 31
+			}
 		},
 		{
 			"type": "table",
 			"id": 31,
 			"title": "Infra-Dienste Status",
-			"datasource": { "type": "prometheus", "uid": "${datasource}" },
-			"gridPos": { "h": 8, "w": 8, "x": 0, "y": 32 },
+			"datasource": {
+				"type": "prometheus",
+				"uid": "${datasource}"
+			},
+			"gridPos": {
+				"h": 8,
+				"w": 8,
+				"x": 0,
+				"y": 32
+			},
 			"fieldConfig": {
 				"defaults": {
-					"custom": { "align": "left", "displayMode": "color-background" },
+					"custom": {
+						"align": "left",
+						"displayMode": "color-background"
+					},
 					"mappings": [
 						{
 							"type": "value",
 							"options": {
-								"0": { "text": "DOWN", "color": "red" },
-								"1": { "text": "UP", "color": "green" }
+								"0": {
+									"text": "DOWN",
+									"color": "red"
+								},
+								"1": {
+									"text": "UP",
+									"color": "green"
+								}
 							}
 						}
 					],
 					"thresholds": {
 						"mode": "absolute",
 						"steps": [
-							{ "color": "red", "value": null },
-							{ "color": "green", "value": 1 }
+							{
+								"color": "red",
+								"value": null
+							},
+							{
+								"color": "green",
+								"value": 1
+							}
 						]
 					}
 				},
 				"overrides": [
 					{
-						"matcher": { "id": "byName", "options": "instance" },
+						"matcher": {
+							"id": "byName",
+							"options": "instance"
+						},
 						"properties": [
-							{ "id": "displayName", "value": "Dienst" },
-							{ "id": "custom.width", "value": 220 }
+							{
+								"id": "displayName",
+								"value": "Dienst"
+							},
+							{
+								"id": "custom.width",
+								"value": 220
+							}
 						]
 					},
 					{
-						"matcher": { "id": "byName", "options": "Value" },
-						"properties": [{ "id": "displayName", "value": "Status" }]
+						"matcher": {
+							"id": "byName",
+							"options": "Value"
+						},
+						"properties": [
+							{
+								"id": "displayName",
+								"value": "Status"
+							}
+						]
 					}
 				]
 			},
 			"options": {
-				"sortBy": [{ "displayName": "Status", "desc": false }],
-				"footer": { "show": false }
+				"sortBy": [
+					{
+						"displayName": "Status",
+						"desc": false
+					}
+				],
+				"footer": {
+					"show": false
+				}
 			},
 			"transformations": [
-				{ "id": "labelsToFields", "options": { "mode": "columns", "keepLabels": ["instance"] } },
+				{
+					"id": "labelsToFields",
+					"options": {
+						"mode": "columns",
+						"keepLabels": ["instance"]
+					}
+				},
 				{
 					"id": "organize",
 					"options": {
-						"excludeByName": { "Time": true, "job": true },
-						"indexByName": { "instance": 0, "Value": 1 }
+						"excludeByName": {
+							"Time": true,
+							"job": true
+						},
+						"indexByName": {
+							"instance": 0,
+							"Value": 1
+						}
 					}
 				}
 			],
 			"targets": [
 				{
-					"datasource": { "type": "prometheus", "uid": "${datasource}" },
+					"datasource": {
+						"type": "prometheus",
+						"uid": "${datasource}"
+					},
 					"expr": "probe_success{job=\"blackbox-infra\"}",
 					"instant": true,
 					"refId": "A",
@@ -531,59 +928,121 @@
 			"type": "table",
 			"id": 32,
 			"title": "GPU Server Status",
-			"datasource": { "type": "prometheus", "uid": "${datasource}" },
-			"gridPos": { "h": 8, "w": 8, "x": 8, "y": 32 },
+			"datasource": {
+				"type": "prometheus",
+				"uid": "${datasource}"
+			},
+			"gridPos": {
+				"h": 8,
+				"w": 8,
+				"x": 8,
+				"y": 32
+			},
 			"fieldConfig": {
 				"defaults": {
-					"custom": { "align": "left", "displayMode": "color-background" },
+					"custom": {
+						"align": "left",
+						"displayMode": "color-background"
+					},
 					"mappings": [
 						{
 							"type": "value",
 							"options": {
-								"0": { "text": "DOWN", "color": "red" },
-								"1": { "text": "UP", "color": "green" }
+								"0": {
+									"text": "DOWN",
+									"color": "red"
+								},
+								"1": {
+									"text": "UP",
+									"color": "green"
+								}
 							}
 						}
 					],
 					"thresholds": {
 						"mode": "absolute",
 						"steps": [
-							{ "color": "red", "value": null },
-							{ "color": "green", "value": 1 }
+							{
+								"color": "red",
+								"value": null
+							},
+							{
+								"color": "green",
+								"value": 1
+							}
 						]
 					}
 				},
 				"overrides": [
 					{
-						"matcher": { "id": "byName", "options": "instance" },
+						"matcher": {
+							"id": "byName",
+							"options": "instance"
+						},
 						"properties": [
-							{ "id": "displayName", "value": "Dienst" },
-							{ "id": "custom.width", "value": 220 }
+							{
+								"id": "displayName",
+								"value": "Dienst"
+							},
+							{
+								"id": "custom.width",
+								"value": 220
+							}
 						]
 					},
 					{
-						"matcher": { "id": "byName", "options": "Value" },
-						"properties": [{ "id": "displayName", "value": "Status" }]
+						"matcher": {
+							"id": "byName",
+							"options": "Value"
+						},
+						"properties": [
+							{
+								"id": "displayName",
+								"value": "Status"
+							}
+						]
 					}
 				]
 			},
 			"options": {
-				"sortBy": [{ "displayName": "Status", "desc": false }],
-				"footer": { "show": false }
+				"sortBy": [
+					{
+						"displayName": "Status",
+						"desc": false
+					}
+				],
+				"footer": {
+					"show": false
+				}
 			},
 			"transformations": [
-				{ "id": "labelsToFields", "options": { "mode": "columns", "keepLabels": ["instance"] } },
+				{
+					"id": "labelsToFields",
+					"options": {
+						"mode": "columns",
+						"keepLabels": ["instance"]
+					}
+				},
 				{
 					"id": "organize",
 					"options": {
-						"excludeByName": { "Time": true, "job": true },
-						"indexByName": { "instance": 0, "Value": 1 }
+						"excludeByName": {
+							"Time": true,
+							"job": true
+						},
+						"indexByName": {
+							"instance": 0,
+							"Value": 1
+						}
 					}
 				}
 			],
 			"targets": [
 				{
-					"datasource": { "type": "prometheus", "uid": "${datasource}" },
+					"datasource": {
+						"type": "prometheus",
+						"uid": "${datasource}"
+					},
 					"expr": "probe_success{job=\"blackbox-gpu\"}",
 					"instant": true,
 					"refId": "A",
@@ -595,53 +1054,289 @@
 			"type": "timeseries",
 			"id": 33,
 			"title": "Alle Dienste — Uptime-Verlauf",
-			"datasource": { "type": "prometheus", "uid": "${datasource}" },
-			"gridPos": { "h": 8, "w": 8, "x": 16, "y": 32 },
+			"datasource": {
+				"type": "prometheus",
+				"uid": "${datasource}"
+			},
+			"gridPos": {
+				"h": 8,
+				"w": 8,
+				"x": 16,
+				"y": 32
+			},
 			"fieldConfig": {
 				"defaults": {
-					"color": { "mode": "palette-classic" },
-					"custom": { "lineWidth": 2, "fillOpacity": 10 },
+					"color": {
+						"mode": "palette-classic"
+					},
+					"custom": {
+						"lineWidth": 2,
+						"fillOpacity": 10
+					},
 					"unit": "short",
 					"min": 0,
 					"max": 1,
 					"thresholds": {
 						"mode": "absolute",
 						"steps": [
-							{ "color": "red", "value": null },
-							{ "color": "green", "value": 1 }
+							{
+								"color": "red",
+								"value": null
+							},
+							{
+								"color": "green",
+								"value": 1
+							}
 						]
 					}
 				},
 				"overrides": []
 			},
 			"options": {
-				"legend": { "displayMode": "list", "placement": "bottom" },
-				"tooltip": { "mode": "multi" }
+				"legend": {
+					"displayMode": "list",
+					"placement": "bottom"
+				},
+				"tooltip": {
+					"mode": "multi"
+				}
 			},
 			"targets": [
 				{
-					"datasource": { "type": "prometheus", "uid": "${datasource}" },
+					"datasource": {
+						"type": "prometheus",
+						"uid": "${datasource}"
+					},
 					"expr": "avg(probe_success{job=\"blackbox-web\"})",
 					"refId": "A",
 					"legendFormat": "Web Apps"
 				},
 				{
-					"datasource": { "type": "prometheus", "uid": "${datasource}" },
+					"datasource": {
+						"type": "prometheus",
+						"uid": "${datasource}"
+					},
 					"expr": "avg(probe_success{job=\"blackbox-api\"})",
 					"refId": "B",
 					"legendFormat": "APIs"
 				},
 				{
-					"datasource": { "type": "prometheus", "uid": "${datasource}" },
+					"datasource": {
+						"type": "prometheus",
+						"uid": "${datasource}"
+					},
 					"expr": "avg(probe_success{job=\"blackbox-infra\"})",
 					"refId": "C",
 					"legendFormat": "Infra"
 				},
 				{
-					"datasource": { "type": "prometheus", "uid": "${datasource}" },
+					"datasource": {
+						"type": "prometheus",
+						"uid": "${datasource}"
+					},
+					"expr": "avg(probe_success{job=\"blackbox-internal\"})",
+					"refId": "E",
+					"legendFormat": "Internal"
+				},
+				{
+					"datasource": {
+						"type": "prometheus",
+						"uid": "${datasource}"
+					},
 					"expr": "avg(probe_success{job=\"blackbox-gpu\"})",
 					"refId": "D",
 					"legendFormat": "GPU"
+				}
+			]
+		},
+		{
+			"type": "table",
+			"id": 34,
+			"title": "Interne Dienste Status",
+			"datasource": {
+				"type": "prometheus",
+				"uid": "${datasource}"
+			},
+			"gridPos": {
+				"h": 6,
+				"w": 12,
+				"x": 0,
+				"y": 40
+			},
+			"fieldConfig": {
+				"defaults": {
+					"custom": {
+						"align": "left",
+						"displayMode": "color-background"
+					},
+					"mappings": [
+						{
+							"type": "value",
+							"options": {
+								"0": {
+									"text": "DOWN",
+									"color": "red"
+								},
+								"1": {
+									"text": "UP",
+									"color": "green"
+								}
+							}
+						}
+					],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "red",
+								"value": null
+							},
+							{
+								"color": "green",
+								"value": 1
+							}
+						]
+					}
+				},
+				"overrides": [
+					{
+						"matcher": {
+							"id": "byName",
+							"options": "instance"
+						},
+						"properties": [
+							{
+								"id": "displayName",
+								"value": "Dienst"
+							},
+							{
+								"id": "custom.width",
+								"value": 320
+							}
+						]
+					},
+					{
+						"matcher": {
+							"id": "byName",
+							"options": "Value"
+						},
+						"properties": [
+							{
+								"id": "displayName",
+								"value": "Status"
+							}
+						]
+					}
+				]
+			},
+			"options": {
+				"sortBy": [
+					{
+						"displayName": "Status",
+						"desc": false
+					}
+				],
+				"footer": {
+					"show": false
+				}
+			},
+			"transformations": [
+				{
+					"id": "labelsToFields",
+					"options": {
+						"mode": "columns",
+						"keepLabels": ["instance"]
+					}
+				},
+				{
+					"id": "organize",
+					"options": {
+						"excludeByName": {
+							"Time": true,
+							"job": true
+						},
+						"indexByName": {
+							"instance": 0,
+							"Value": 1
+						}
+					}
+				}
+			],
+			"targets": [
+				{
+					"datasource": {
+						"type": "prometheus",
+						"uid": "${datasource}"
+					},
+					"expr": "probe_success{job=\"blackbox-internal\"}",
+					"instant": true,
+					"refId": "A",
+					"legendFormat": "{{instance}}"
+				}
+			]
+		},
+		{
+			"type": "stat",
+			"id": 35,
+			"title": "Geocoding Ø Latenz",
+			"datasource": {
+				"type": "prometheus",
+				"uid": "${datasource}"
+			},
+			"gridPos": {
+				"h": 6,
+				"w": 12,
+				"x": 12,
+				"y": 40
+			},
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "thresholds"
+					},
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "green",
+								"value": null
+							},
+							{
+								"color": "yellow",
+								"value": 0.5
+							},
+							{
+								"color": "red",
+								"value": 2
+							}
+						]
+					},
+					"unit": "s",
+					"mappings": []
+				},
+				"overrides": []
+			},
+			"options": {
+				"colorMode": "background",
+				"graphMode": "area",
+				"justifyMode": "center",
+				"orientation": "auto",
+				"reduceOptions": {
+					"calcs": ["lastNotNull"],
+					"fields": "",
+					"values": false
+				},
+				"textMode": "auto"
+			},
+			"targets": [
+				{
+					"datasource": {
+						"type": "prometheus",
+						"uid": "${datasource}"
+					},
+					"expr": "avg(probe_duration_seconds{instance=~\".*mana-geocoding.*\"})",
+					"refId": "A",
+					"legendFormat": "Ø"
 				}
 			]
 		}

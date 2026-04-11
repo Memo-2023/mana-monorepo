@@ -283,6 +283,27 @@ scrape_configs:
       - target_label: __address__
         replacement: blackbox-exporter:9115
 
+  # Internal-only services (not exposed via Cloudflare).
+  # Probed over the Docker network so the blackbox exporter reaches
+  # them by container name.
+  - job_name: 'blackbox-internal'
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets:
+          - http://mana-geocoding:3018/health
+          # Pelias stack runs on host network, reached via host gateway
+          - http://host.docker.internal:4000/v1/status
+          - http://host.docker.internal:9200/_cluster/health
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
+
   # Infrastructure & Monitoring Tools
   - job_name: 'blackbox-infra'
     metrics_path: /probe
