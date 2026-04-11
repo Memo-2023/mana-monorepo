@@ -77,10 +77,10 @@
 		</div>
 	{/snippet}
 	{#snippet item(app)}
+		{@const Icon = app.icon}
 		<button class="picker-option" onclick={() => onSelect(app.id)}>
 			<div class="app-icon-wrap">
-				{#if app.icon}
-					{@const Icon = app.icon}
+				{#if Icon}
 					<Icon size={18} />
 				{/if}
 			</div>
