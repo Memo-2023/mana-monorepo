@@ -1,22 +1,32 @@
-FROM oven/bun:1 AS production
+# Install stage: use node + pnpm to resolve workspace dependencies
+FROM node:22-alpine AS installer
 
-# Install pnpm (mana-credits is part of a pnpm workspace)
-RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates && rm -rf /var/lib/apt/lists/* && \
-    curl -fsSL https://get.pnpm.io/install.sh | env SHELL=/bin/bash PNPM_HOME=/usr/local/share/pnpm sh - && \
-    ln -s /usr/local/share/pnpm/pnpm /usr/local/bin/pnpm
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
 
 WORKDIR /app
 
-# Copy workspace structure for dependency resolution
+# Copy workspace structure
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY services/mana-credits/package.json ./services/mana-credits/
 COPY packages/shared-hono ./packages/shared-hono
+COPY packages/shared-logger ./packages/shared-logger
 COPY packages/shared-types ./packages/shared-types
 
-# Install dependencies for mana-credits only (with workspace deps)
+# Install only mana-credits and its workspace deps
 RUN pnpm install --filter @mana/credits... --no-frozen-lockfile --ignore-scripts
 
+# Runtime stage: bun
+FROM oven/bun:1 AS production
+
+WORKDIR /app
+
+# Copy installed deps from installer stage
+COPY --from=installer /app/node_modules ./node_modules
+COPY --from=installer /app/services/mana-credits/node_modules ./services/mana-credits/node_modules
+COPY --from=installer /app/packages ./packages
+
 # Copy source
+COPY services/mana-credits/package.json ./services/mana-credits/
 COPY services/mana-credits/src ./services/mana-credits/src
 COPY services/mana-credits/tsconfig.json services/mana-credits/drizzle.config.ts ./services/mana-credits/
 
