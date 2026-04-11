@@ -6,7 +6,7 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import type { Config } from './config';
-import { healthRoutes } from './routes/health';
+import { createHealthRoutes } from './routes/health';
 import { createGeocodeRoutes } from './routes/geocode';
 
 export function createApp(config: Config): Hono {
@@ -25,7 +25,7 @@ export function createApp(config: Config): Hono {
 		})
 	);
 
-	app.route('/health', healthRoutes);
+	app.route('/health', createHealthRoutes(config));
 	app.route('/api/v1/geocode', createGeocodeRoutes(config));
 
 	return app;

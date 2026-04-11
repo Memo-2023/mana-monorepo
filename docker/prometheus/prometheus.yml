@@ -292,10 +292,11 @@ scrape_configs:
       module: [http_2xx]
     static_configs:
       - targets:
+          # mana-geocoding's own health (Hono wrapper)
           - http://mana-geocoding:3018/health
-          # Pelias stack runs on host network, reached via host gateway
-          - http://host.docker.internal:4000/v1/status
-          - http://host.docker.internal:9200/_cluster/health
+          # Upstream Pelias health, proxied through the wrapper so the
+          # blackbox-exporter doesn't need host.docker.internal access.
+          - http://mana-geocoding:3018/health/pelias
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target

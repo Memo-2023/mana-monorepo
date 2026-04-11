@@ -64,14 +64,11 @@ friendly_name() {
   name="${name#http://}"
   # Interne Services (Docker-Netz): mana-geocoding:3018/health → Mana Geocoding
   case "$name" in
+    mana-geocoding:*/health/pelias)
+      name="Pelias (via Geocoding)"
+      ;;
     mana-geocoding:*)
       name="Mana Geocoding"
-      ;;
-    host.docker.internal:4000*)
-      name="Pelias API"
-      ;;
-    host.docker.internal:9200*)
-      name="Pelias Elasticsearch"
       ;;
     mana.how/*)
       name="${name#mana.how/}"
@@ -81,10 +78,8 @@ friendly_name() {
       name="${name%.mana.how}"
       ;;
   esac
-  # Entferne /health, /_cluster/health, /v1/status suffixe
+  # Entferne /health suffixe
   name="${name%/health}"
-  name="${name%/_cluster/health}"
-  name="${name%/v1/status}"
   # mana.how (ohne Route) → Mana
   [ "$name" = "mana.how" ] && name="Mana"
   # Erster Buchstabe groß (POSIX-kompatibel)
