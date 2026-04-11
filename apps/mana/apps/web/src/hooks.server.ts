@@ -76,10 +76,30 @@ const APP_SUBDOMAINS = new Set([
 ]);
 
 export const handle: Handle = async ({ event, resolve }) => {
+	// Force HTTPS in production. Cloudflare forwards HTTP requests to the
+	// origin without rewriting the scheme, so without this redirect a user
+	// who types `mana.how` (no scheme → HTTP default) loads the page over
+	// HTTP and the browser then sends `Origin: http://mana.how` on every
+	// fetch. mana-auth's CORS only allows `https://mana.how`, so all auth
+	// requests fail and the loader hangs forever.
+	const host = event.request.headers.get('host') || '';
+	const cfVisitor = event.request.headers.get('cf-visitor'); // {"scheme":"http"|"https"}
+	const xfProto = event.request.headers.get('x-forwarded-proto');
+	const isHttp =
+		(cfVisitor && cfVisitor.includes('"scheme":"http"')) ||
+		xfProto === 'http' ||
+		(event.url.protocol === 'http:' && !cfVisitor && !xfProto);
+	const isLocal = host.startsWith('localhost') || host.startsWith('127.');
+	if (isHttp && !isLocal) {
+		return new Response(null, {
+			status: 301,
+			headers: { Location: `https://${host}${event.url.pathname}${event.url.search}` },
+		});
+	}
+
 	// Redirect app subdomains to their path equivalent
 	// e.g. todo.mana.how → mana.how/todo
-	const host = event.request.headers.get('host') || '';
-	const subdomain = host.split('.')[0];
+	const subdomain = host.split('.')[0]; // host already declared above
 	if (APP_SUBDOMAINS.has(subdomain) && event.url.pathname === '/') {
 		return new Response(null, {
 			status: 302,

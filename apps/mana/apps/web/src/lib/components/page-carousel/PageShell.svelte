@@ -250,6 +250,38 @@
 		animation: fadeIn 0.25s ease-out;
 		overflow: hidden;
 		position: relative;
+		/* Establish a blend-mode stacking context so the grain overlay
+		   only blends within this card, not through to the workbench
+		   background behind it. */
+		isolation: isolate;
+	}
+
+	/* Per-theme paper-grain overlay. CSS variables come from
+	   applyThemeToDocument() in @mana/shared-theme — swap one line in
+	   THEME_DEFINITIONS to change the texture for a whole theme. */
+	.page-shell::before {
+		content: '';
+		position: absolute;
+		inset: 0;
+		pointer-events: none;
+		z-index: 0;
+		background-image: var(--paper-texture, none);
+		background-size: var(--paper-size, 240px 240px);
+		background-repeat: repeat;
+		mix-blend-mode: var(--paper-blend-mode, multiply);
+		opacity: var(--paper-opacity, 0);
+		transition: opacity 0.25s ease;
+	}
+	/* Make sure the header, body and resize handle sit above the grain */
+	.page-shell > * {
+		position: relative;
+		z-index: 1;
+	}
+	/* A11y: let users who asked for reduced transparency/contrast opt out */
+	@media (prefers-contrast: more) {
+		.page-shell::before {
+			opacity: 0;
+		}
 	}
 	.page-shell.resizing {
 		box-shadow:

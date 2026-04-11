@@ -372,6 +372,12 @@ const lavenderDark: ThemeColors = {
 
 /**
  * Complete theme variant definitions
+ *
+ * Each theme can also carry a `paper` descriptor — a tileable texture
+ * the workbench page-shell uses as a grain overlay. Swap the filename
+ * here to change the texture for a whole theme in one place. Assets
+ * live under `apps/<app>/static/textures/paper/` and are CC0-licensed
+ * (see that directory's LICENSE.txt for provenance).
  */
 export const THEME_DEFINITIONS: Record<ThemeVariant, ThemeVariantDefinition> = {
 	lume: {
@@ -382,6 +388,12 @@ export const THEME_DEFINITIONS: Record<ThemeVariant, ThemeVariantDefinition> = {
 		hue: 47,
 		light: lumeLight,
 		dark: lumeDark,
+		paper: {
+			url: '/textures/paper/paper-001.jpg',
+			blendMode: 'multiply',
+			opacityLight: 0.4,
+			opacityDark: 0.18,
+		},
 	},
 	nature: {
 		name: 'nature',
@@ -391,6 +403,12 @@ export const THEME_DEFINITIONS: Record<ThemeVariant, ThemeVariantDefinition> = {
 		hue: 122,
 		light: natureLight,
 		dark: natureDark,
+		paper: {
+			url: '/textures/paper/cardboard-001.jpg',
+			blendMode: 'multiply',
+			opacityLight: 0.32,
+			opacityDark: 0.14,
+		},
 	},
 	stone: {
 		name: 'stone',
@@ -400,6 +418,12 @@ export const THEME_DEFINITIONS: Record<ThemeVariant, ThemeVariantDefinition> = {
 		hue: 200,
 		light: stoneLight,
 		dark: stoneDark,
+		paper: {
+			url: '/textures/paper/paper-005.jpg',
+			blendMode: 'multiply',
+			opacityLight: 0.35,
+			opacityDark: 0.15,
+		},
 	},
 	ocean: {
 		name: 'ocean',
@@ -409,6 +433,12 @@ export const THEME_DEFINITIONS: Record<ThemeVariant, ThemeVariantDefinition> = {
 		hue: 199,
 		light: oceanLight,
 		dark: oceanDark,
+		paper: {
+			url: '/textures/paper/paper-003.jpg',
+			blendMode: 'multiply',
+			opacityLight: 0.3,
+			opacityDark: 0.12,
+		},
 	},
 	// Extended themes (not in PillNav by default, can be pinned)
 	sunset: {
@@ -419,6 +449,12 @@ export const THEME_DEFINITIONS: Record<ThemeVariant, ThemeVariantDefinition> = {
 		hue: 15,
 		light: sunsetLight,
 		dark: sunsetDark,
+		paper: {
+			url: '/textures/paper/paper-006.jpg',
+			blendMode: 'multiply',
+			opacityLight: 0.38,
+			opacityDark: 0.16,
+		},
 	},
 	midnight: {
 		name: 'midnight',
@@ -428,6 +464,12 @@ export const THEME_DEFINITIONS: Record<ThemeVariant, ThemeVariantDefinition> = {
 		hue: 260,
 		light: midnightLight,
 		dark: midnightDark,
+		paper: {
+			url: '/textures/paper/paper-004.jpg',
+			blendMode: 'overlay',
+			opacityLight: 0.35,
+			opacityDark: 0.22,
+		},
 	},
 	rose: {
 		name: 'rose',
@@ -437,6 +479,12 @@ export const THEME_DEFINITIONS: Record<ThemeVariant, ThemeVariantDefinition> = {
 		hue: 340,
 		light: roseLight,
 		dark: roseDark,
+		paper: {
+			url: '/textures/paper/paper-002.jpg',
+			blendMode: 'multiply',
+			opacityLight: 0.32,
+			opacityDark: 0.14,
+		},
 	},
 	lavender: {
 		name: 'lavender',
@@ -446,6 +494,12 @@ export const THEME_DEFINITIONS: Record<ThemeVariant, ThemeVariantDefinition> = {
 		hue: 270,
 		light: lavenderLight,
 		dark: lavenderDark,
+		paper: {
+			url: '/textures/paper/cardboard-002.jpg',
+			blendMode: 'soft-light',
+			opacityLight: 0.4,
+			opacityDark: 0.18,
+		},
 	},
 };
 

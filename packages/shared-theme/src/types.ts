@@ -104,6 +104,33 @@ export interface ThemeVariantDefinition {
 	hue: number;
 	light: ThemeColors;
 	dark: ThemeColors;
+	/**
+	 * Optional "paper grain" overlay for workbench page surfaces.
+	 * Each theme can ship its own tileable texture to give pages a
+	 * distinct tactile character. The consuming app is responsible for
+	 * serving the asset at the given URL (typically under `/textures/`).
+	 * When undefined, no paper overlay is applied for this theme.
+	 */
+	paper?: {
+		/** URL / absolute path to a seamless tileable texture */
+		url: string;
+		/** CSS blend-mode for the overlay vs. the underlying card bg */
+		blendMode?:
+			| 'multiply'
+			| 'overlay'
+			| 'soft-light'
+			| 'hard-light'
+			| 'screen'
+			| 'darken'
+			| 'lighten'
+			| 'color-burn';
+		/** Opacity of the paper layer in light mode (0..1, default 0.35) */
+		opacityLight?: number;
+		/** Opacity of the paper layer in dark mode (0..1, default 0.15) */
+		opacityDark?: number;
+		/** CSS background-size (default "240px 240px") */
+		size?: string;
+	};
 }
 
 /**

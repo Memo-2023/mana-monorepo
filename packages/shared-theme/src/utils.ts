@@ -112,6 +112,25 @@ export function applyThemeToDocument(
 		root.style.setProperty(key, value);
 	});
 
+	// Set per-theme paper-grain CSS variables (consumed by PageShell).
+	// Unset the vars for themes without a paper config so they don't
+	// leak across theme switches.
+	const paper = THEME_DEFINITIONS[variant]?.paper;
+	if (paper) {
+		root.style.setProperty('--paper-texture', `url("${paper.url}")`);
+		root.style.setProperty('--paper-blend-mode', paper.blendMode ?? 'multiply');
+		root.style.setProperty(
+			'--paper-opacity',
+			String(effectiveMode === 'dark' ? (paper.opacityDark ?? 0.15) : (paper.opacityLight ?? 0.35))
+		);
+		root.style.setProperty('--paper-size', paper.size ?? '240px 240px');
+	} else {
+		root.style.removeProperty('--paper-texture');
+		root.style.removeProperty('--paper-blend-mode');
+		root.style.removeProperty('--paper-opacity');
+		root.style.removeProperty('--paper-size');
+	}
+
 	// Set data-theme attribute
 	root.setAttribute('data-theme', variant);
 

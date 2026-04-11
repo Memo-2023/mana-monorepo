@@ -1,0 +1,20 @@
+Paper textures used for the per-theme workbench paper-grain overlay.
+
+Source: ambientCG (https://ambientcg.com)
+License: CC0 1.0 Universal (Public Domain)
+         https://creativecommons.org/publicdomain/zero/1.0/
+
+No attribution required for commercial or private use. The original 1K
+PBR material sets were downloaded from ambientCG, only the diffuse /
+Color map was extracted, then downscaled to 512×512 via `sips` and
+re-encoded as JPEG (quality 70) to keep web payloads tiny.
+
+Original asset → local filename:
+  Paper001      → paper-001.jpg
+  Paper002      → paper-002.jpg
+  Paper003      → paper-003.jpg
+  Paper004      → paper-004.jpg
+  Paper005      → paper-005.jpg
+  Paper006      → paper-006.jpg
+  Cardboard001  → cardboard-001.jpg
+  Cardboard002  → cardboard-002.jpg
