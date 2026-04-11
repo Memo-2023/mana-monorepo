@@ -251,27 +251,43 @@ A few non-obvious settings required for a self-hosted DACH deployment:
 
 ## Testing
 
-There is **no automated test suite yet**. The service was validated
-end-to-end during the 2026-04-11 deploy with a manual smoke-test set:
+Two layers:
+
+### Unit tests (`bun test`)
+
+Fast, no dependencies. Locks in the subtle logic:
 
 ```bash
-# From the mac-mini (or any container in the mana docker network):
-curl -s "http://localhost:3018/api/v1/geocode/search?q=Konzil+Konstanz&limit=1"
-curl -s "http://localhost:3018/api/v1/geocode/search?q=Stuttgart+Hauptbahnhof&limit=1"
-curl -sG "http://localhost:3018/api/v1/geocode/search" \
-  --data-urlencode "q=Marktstätte Konstanz" --data-urlencode "limit=1"
-curl -s "http://localhost:3018/api/v1/geocode/reverse?lat=48.137&lon=11.575"
-curl -s "http://localhost:3018/health/pelias"
+cd services/mana-geocoding
+bun test
 ```
 
-Expected shape per result: `{name, latitude, longitude, address, category,
-peliasCategories, confidence}`. At least the major Konstanz/München/Berlin
-venues should resolve with sensible categories (restaurant → `food`,
-station → `transit`, school → `work`, park → `leisure`).
+- `src/lib/__tests__/category-map.test.ts` — Pelias→PlaceCategory
+  priority resolution. Covers the multi-category ambiguity (food beats
+  retail for a restaurant, transport beats professional for a car rental,
+  …), single-category mappings, layer-hint fallback, and real-world
+  venue categories observed from the DACH index during the 2026-04-11
+  deploy verification.
+- `src/lib/__tests__/cache.test.ts` — LRU eviction order, TTL expiry,
+  move-to-end on `get`, size tracking.
 
-If you add logic here, at least add unit tests around `lib/category-map.ts`
-(the Pelias→PlaceCategory priority list is the most subtle part) and a
-smoke test that runs the above curls against a local stack.
+As of the 2026-04-11 deploy: **42 tests, all green**.
+
+### Smoke test (`bun run test:smoke`)
+
+End-to-end curls against a running service. Requires a fully deployed
+Pelias stack with the DACH index loaded — run this after a deploy to
+confirm the full pipeline is healthy.
+
+```bash
+cd services/mana-geocoding
+bun run test:smoke                                  # default http://localhost:3018
+./scripts/smoke-test.sh http://mana-geocoding:3018  # from another container
+```
+
+Asserts: wrapper + pelias health, restaurant→food, station→transit,
+street+locality fallback returns results, focus biasing works, reverse
+geocoding for Konstanz and München, cache hit on repeat. 9 checks.
 
 ## Code Layout
 
