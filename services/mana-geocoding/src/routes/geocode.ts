@@ -77,15 +77,33 @@ export function createGeocodeRoutes(config: Config) {
 			params.set('focus.point.lon', focusLon);
 		}
 
-		const response = await fetch(`${config.pelias.apiUrl}/autocomplete?${params}`);
-		if (!response.ok) {
-			console.error(`Pelias autocomplete error: ${response.status} ${response.statusText}`);
-			return c.json({ results: [], error: 'geocoding_unavailable' }, 502);
+		// Query Pelias /autocomplete first (fast, fuzzy, good for venue names).
+		// Autocomplete intentionally excludes the address layer as a perf
+		// optimization, so if it returns nothing we fall back to /search which
+		// covers streets/addresses too. This gives us the best of both worlds:
+		// quick venue matches for names like "Konzil Restaurant" AND reliable
+		// address matches for queries like "Marktstätte Konstanz".
+		let features: PeliasFeature[] = [];
+		const autocompleteRes = await fetch(`${config.pelias.apiUrl}/autocomplete?${params}`);
+		if (autocompleteRes.ok) {
+			const data = (await autocompleteRes.json()) as PeliasResponse;
+			features = data.features;
 		}
 
-		const data = (await response.json()) as PeliasResponse;
-		const results = data.features.map(normalizePeliasFeature);
+		if (features.length === 0) {
+			const searchRes = await fetch(`${config.pelias.apiUrl}/search?${params}`);
+			if (searchRes.ok) {
+				const data = (await searchRes.json()) as PeliasResponse;
+				features = data.features;
+			} else if (!autocompleteRes.ok) {
+				console.error(
+					`Pelias error: autocomplete=${autocompleteRes.status} search=${searchRes.status}`
+				);
+				return c.json({ results: [], error: 'geocoding_unavailable' }, 502);
+			}
+		}
 
+		const results = features.map(normalizePeliasFeature);
 		searchCache.set(cacheKey, results);
 		return c.json({ results });
 	});
