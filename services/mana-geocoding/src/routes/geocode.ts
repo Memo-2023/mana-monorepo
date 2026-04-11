@@ -65,11 +65,12 @@ export function createGeocodeRoutes(config: Config) {
 			return c.json({ results: cached, cached: true });
 		}
 
+		// Note: we don't set boundary.country — the Pelias index only
+		// contains DACH data, so everything is implicitly DE/AT/CH.
 		const params = new URLSearchParams({
 			text: q.trim(),
 			size: String(limit),
 			lang,
-			'boundary.country': 'DEU,AUT,CHE',
 		});
 
 		// Bias results towards a focus point (user's current location)

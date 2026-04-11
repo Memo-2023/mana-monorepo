@@ -10,13 +10,25 @@
 	},
 	"api": {
 		"services": {
-			"libpostal": "http://libpostal:4400"
+			"libpostal": {
+				"url": "http://libpostal:4400"
+			},
+			"placeholder": {
+				"url": "http://placeholder:4100"
+			},
+			"pip": {
+				"url": "http://pip:4200"
+			},
+			"interpolation": {
+				"url": "http://interpolation:4300"
+			}
 		},
-		"defaultParameters": {
-			"boundary.country": ["DEU", "AUT", "CHE"]
-		}
+		"defaultParameters": {}
 	},
 	"imports": {
+		"adminLookup": {
+			"enabled": false
+		},
 		"openstreetmap": {
 			"download": [
 				{
@@ -24,9 +36,19 @@
 				}
 			],
 			"datapath": "/data/openstreetmap",
-			"leveldbpath": "/tmp/leveldb",
+			"leveldbpath": "/data/leveldb",
 			"importVenues": true,
-			"importAddresses": true
+			"importAddresses": true,
+			"adminLookup": false,
+			"useAdminHierarchyLabels": false,
+			"leveldb": {
+				"cacheSize": 256
+			},
+			"import": [
+				{
+					"filename": "planet-latest.osm.pbf"
+				}
+			]
 		},
 		"polylines": {
 			"datapath": "/data/polylines",
