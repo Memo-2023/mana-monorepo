@@ -75,8 +75,7 @@ All endpoints are public (no auth required) — the service is internal-only, no
         "country": "Germany"
       },
       "category": "food",
-      "osmCategory": "amenity",
-      "osmType": "cafe",
+      "peliasCategories": ["food", "retail", "nightlife"],
       "confidence": 0.95
     }
   ]
@@ -85,17 +84,53 @@ All endpoints are public (no auth required) — the service is internal-only, no
 
 ## Category Mapping
 
-The service maps OSM tags to our 7 PlaceCategories:
+Pelias' OSM importer tags each venue with its own taxonomy (`food`, `retail`,
+`transport`, `health`, `education`, …). We collapse those into the 7
+PlaceCategories used by the Places module, using a **priority-ordered list**
+so the most specific signal wins:
 
-| PlaceCategory | OSM examples |
-|---------------|-------------|
-| `home` | building:residential, building:house, building:apartments |
-| `work` | amenity:school, amenity:university, office:*, building:commercial |
-| `food` | amenity:restaurant, amenity:cafe, shop:bakery, shop:supermarket |
-| `shopping` | shop:*, amenity:marketplace |
-| `transit` | railway:station, highway:bus_stop, amenity:parking, aeroway:* |
-| `leisure` | tourism:*, leisure:park, amenity:cinema, sport:* |
-| `other` | Everything else |
+| PlaceCategory | Wins if Pelias categories contain |
+|---------------|-----------------------------------|
+| `food` | `food` (beats retail/nightlife — a restaurant is food) |
+| `transit` | `transport`, `transport:public`, `transport:air`, `transport:bus`, `transport:taxi`, `transport:sea` |
+| `shopping` | `retail` (when no `food` present) |
+| `leisure` | `entertainment`, `nightlife`, `recreation` |
+| `work` | `education`, `professional`, `government`, `finance` |
+| `other` | `health`, `religion`, everything else |
+| `home` | (not auto-detected — set manually by the user) |
+
+**Example mappings verified on the DACH index:**
+
+| OSM venue | Pelias categories | → PlaceCategory |
+|-----------|-------------------|-----------------|
+| Konzil Konstanz Restaurant | `[food, retail, nightlife]` | `food` |
+| Bahnhof Konstanz | `[transport, transport:station]` | `transit` |
+| Physiotherapie-Schule | `[education]` | `work` |
+| MX-Park (Rennstrecke) | `[recreation]` | `leisure` |
+
+The priority list lives in `src/lib/category-map.ts` — update it if you want
+a Pelias category to map somewhere else.
+
+### Critical: the Pelias API patch
+
+By default, Pelias **hides** the `category` field from API responses unless
+the caller explicitly passes `?categories=...` — a quirk intended for keyword
+filtering that also strips category metadata from normal address queries. We
+work around this by mounting a **patched copy** of
+`helper/geojsonify_place_details.js` over the upstream one in the `pelias-api`
+container (`pelias/geojsonify_place_details.js`). The patch changes
+`condition: checkCategoryParam` → `condition: () => true` so the category
+array always flows through to the wrapper.
+
+If you bump the `pelias/api` image, regenerate the patched file:
+
+```bash
+cd services/mana-geocoding/pelias
+docker run --rm pelias/api:latest cat /code/pelias/api/helper/geojsonify_place_details.js \
+  | sed 's|condition: checkCategoryParam|condition: () => true|' \
+  > geojsonify_place_details.js
+docker compose up -d --force-recreate api
+```
 
 ## Architecture
 
@@ -103,7 +138,7 @@ The service maps OSM tags to our 7 PlaceCategories:
 Client (Places module)
   → mana-geocoding (Hono, port 3018)
     → LRU cache check
-    → Pelias API (port 4000)
+    → Pelias API (port 4000) [patched — see above]
       → Elasticsearch (port 9200)
 ```
 
@@ -121,12 +156,50 @@ CACHE_TTL_MS=86400000
 
 The Pelias stack runs as a separate docker-compose in `pelias/`:
 
-- **elasticsearch** — Index storage (~500MB for DACH)
-- **api** — HTTP API (port 4000)
+- **elasticsearch** — Index storage (Docker volume, ~5GB for DACH after
+  indexing 22.1M OSM objects — 18.3M addresses + 3.86M venues)
+- **api** — HTTP API (port 4000), patched for category passthrough
 - **libpostal** — Address parsing (port 4400)
-- **Import containers** — Run once for initial data load, then stop
+- **Import containers** — Run once for initial data load, then stopped
 
 RAM usage (running): ~1.5GB (elasticsearch 512MB + api + libpostal)
+
+### Initial import (one-time)
+
+The DACH PBF extract is ~5GB and takes 30-45 minutes to index. See
+`pelias/setup.sh` for the full pipeline. Key steps, in order:
+
+1. `docker compose up -d` — bring up ES, api, libpostal
+2. `docker exec pelias-elasticsearch elasticsearch-plugin install analysis-icu`
+   then restart — the official ES image doesn't ship `analysis-icu` which
+   Pelias' schema mapping requires
+3. `docker compose --profile import run --rm schema ./bin/create_index`
+4. `docker compose --profile import run --rm openstreetmap ./bin/download`
+   (downloads `dach-latest.osm.pbf` from Geofabrik, ~5GB)
+5. **Rename** `dach-latest.osm.pbf` → `planet-latest.osm.pbf` inside the
+   pelias-data volume (Pelias' importer expects that filename). The
+   `pelias.json` config references it as `planet-latest.osm.pbf` too.
+6. `docker compose --profile import run --rm openstreetmap ./bin/start`
+   (22M objects, ~30 min on an M2 Mac mini)
+
+### pelias.json gotchas
+
+A few non-obvious settings required for a self-hosted DACH deployment:
+
+- **`adminLookup.enabled: false`** — Pelias tries to resolve country/region
+  hierarchies via "Who's On First" data by default. We don't import WOF,
+  so this must be disabled or import crashes with `unable to locate sqlite
+  folder`.
+- **`leveldbpath: "/data/leveldb"`** — not `/tmp/leveldb`; the container
+  user (1001) needs write access and `/tmp` is not mounted.
+- **`api.services.libpostal: { url: "..." }`** — must be an object, not a
+  string. The API's Joi schema rejects the string form.
+- **No `defaultParameters.boundary.country`** — Pelias only accepts a
+  single country value for `boundary.country`. Since our index only
+  contains DACH data anyway, we drop the filter entirely.
+- **`features: { filename: "planet-latest.osm.pbf" }`** — required because
+  Geofabrik downloads come named `dach-latest.osm.pbf`, but Pelias'
+  openstreetmap importer looks for `planet-latest.osm.pbf` by default.
 
 ## Code Layout
 
