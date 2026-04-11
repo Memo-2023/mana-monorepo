@@ -235,58 +235,53 @@
 
 <style>
 	/* P5: theme-token migration. The workbench paper card now follows the
-	   active theme variant. */
+	   active theme variant, incl. a per-theme paper-grain texture applied
+	   via background-blend-mode (more robust than a ::before overlay +
+	   mix-blend-mode + opacity combo, which had invisibility issues in
+	   dark mode and stacking-context quirks). CSS vars come from
+	   applyThemeToDocument() in @mana/shared-theme — swap one line in
+	   THEME_DEFINITIONS to change the texture for a whole theme. */
 	.page-shell {
 		flex: 0 0 auto;
 		min-height: 60vh;
 		max-width: calc(100vw - 2rem);
-		background: hsl(var(--color-card));
+		background-color: hsl(var(--color-card));
+		background-image: var(--paper-texture, none);
+		background-size: var(--paper-size, 240px 240px);
+		background-repeat: repeat;
+		background-blend-mode: var(--paper-blend-mode, multiply);
+		/* Soft black border — 12% in light mode, bumped to 28% in dark
+		   mode (see :global(.dark) override below) where a low-alpha
+		   black would otherwise vanish into the background. */
+		border: 2px solid hsl(0 0% 0% / 0.12);
 		border-radius: 1.25rem;
 		box-shadow:
-			0 2px 8px hsl(0 0% 0% / 0.08),
-			0 0 0 1px hsl(var(--color-border));
+			0 8px 24px hsl(0 0% 0% / 0.12),
+			0 3px 8px hsl(0 0% 0% / 0.08);
 		display: flex;
 		flex-direction: column;
 		animation: fadeIn 0.25s ease-out;
 		overflow: hidden;
 		position: relative;
-		/* Establish a blend-mode stacking context so the grain overlay
-		   only blends within this card, not through to the workbench
-		   background behind it. */
-		isolation: isolate;
+	}
+	/* Dark-mode border needs more alpha to stay visible against the
+	   dark card background. */
+	:global(.dark) .page-shell {
+		border-color: hsl(0 0% 0% / 0.28);
 	}
 
-	/* Per-theme paper-grain overlay. CSS variables come from
-	   applyThemeToDocument() in @mana/shared-theme — swap one line in
-	   THEME_DEFINITIONS to change the texture for a whole theme. */
-	.page-shell::before {
-		content: '';
-		position: absolute;
-		inset: 0;
-		pointer-events: none;
-		z-index: 0;
-		background-image: var(--paper-texture, none);
-		background-size: var(--paper-size, 240px 240px);
-		background-repeat: repeat;
-		mix-blend-mode: var(--paper-blend-mode, multiply);
-		opacity: var(--paper-opacity, 0);
-		transition: opacity 0.25s ease;
-	}
-	/* Make sure the header, body and resize handle sit above the grain */
-	.page-shell > * {
-		position: relative;
-		z-index: 1;
-	}
-	/* A11y: let users who asked for reduced transparency/contrast opt out */
+	/* A11y: users who asked for reduced transparency/contrast drop the
+	   texture entirely — solid card only. */
 	@media (prefers-contrast: more) {
-		.page-shell::before {
-			opacity: 0;
+		.page-shell {
+			background-image: none;
 		}
 	}
 	.page-shell.resizing {
+		border-color: hsl(var(--color-primary) / 0.55);
 		box-shadow:
-			0 2px 12px hsl(var(--color-primary) / 0.15),
-			0 0 0 2px hsl(var(--color-primary) / 0.3);
+			0 10px 28px hsl(var(--color-primary) / 0.22),
+			0 4px 10px hsl(var(--color-primary) / 0.15);
 	}
 	.page-shell.maximized {
 		position: fixed;

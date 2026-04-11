@@ -113,21 +113,20 @@ export function applyThemeToDocument(
 	});
 
 	// Set per-theme paper-grain CSS variables (consumed by PageShell).
-	// Unset the vars for themes without a paper config so they don't
-	// leak across theme switches.
+	// Dark mode auto-switches multiply → overlay because multiply on a
+	// dark backdrop is practically invisible (dark × dark ≈ dark). Other
+	// blend modes (soft-light/screen/…) are respected as-is.
 	const paper = THEME_DEFINITIONS[variant]?.paper;
 	if (paper) {
+		const configuredBlend = paper.blendMode ?? 'multiply';
+		const effectiveBlend =
+			effectiveMode === 'dark' && configuredBlend === 'multiply' ? 'overlay' : configuredBlend;
 		root.style.setProperty('--paper-texture', `url("${paper.url}")`);
-		root.style.setProperty('--paper-blend-mode', paper.blendMode ?? 'multiply');
-		root.style.setProperty(
-			'--paper-opacity',
-			String(effectiveMode === 'dark' ? (paper.opacityDark ?? 0.15) : (paper.opacityLight ?? 0.35))
-		);
+		root.style.setProperty('--paper-blend-mode', effectiveBlend);
 		root.style.setProperty('--paper-size', paper.size ?? '240px 240px');
 	} else {
 		root.style.removeProperty('--paper-texture');
 		root.style.removeProperty('--paper-blend-mode');
-		root.style.removeProperty('--paper-opacity');
 		root.style.removeProperty('--paper-size');
 	}
 

@@ -114,46 +114,49 @@ const natureDark: ThemeColors = {
 	ring: '122 39% 49%',
 };
 
+// Stone: cooled toward a proper blue-slate. Hue shifted 200 → 212
+// (more blue, less cyan) and saturation bumped ~10pts across the
+// palette so the chill actually reads instead of looking like warm grey.
 const stoneLight: ThemeColors = {
-	primary: '200 18% 46%', // #607D8B - Blue gray
+	primary: '212 32% 44%', // #4A6B8C - Deeper slate-blue
 	primaryForeground: '0 0% 100%',
-	secondary: '200 15% 62%', // #90A4AE - Light slate
+	secondary: '212 26% 60%', // #7E9CB8 - Cool slate
 	secondaryForeground: '0 0% 0%',
-	background: '210 17% 97%', // #F5F7F9 - Very light blue gray
-	foreground: '200 19% 18%', // #263238 - Dark slate
-	surface: '0 0% 100%',
-	surfaceHover: '200 10% 94%', // #ECEFF1
-	surfaceElevated: '0 0% 100%',
-	muted: '200 10% 94%', // #ECEFF1
-	mutedForeground: '200 10% 45%',
-	border: '200 10% 88%', // #CFD8DC
-	borderStrong: '200 12% 75%', // #B0BEC5
-	error: '4 90% 63%', // #EF5350
+	background: '214 30% 96%', // #EEF2F7 - Icy blue-white
+	foreground: '215 32% 16%', // #1B2835 - Deep slate
+	surface: '210 40% 99%',
+	surfaceHover: '212 24% 92%', // #E0E7EF
+	surfaceElevated: '210 40% 99%',
+	muted: '212 22% 92%', // #DFE6EE
+	mutedForeground: '212 18% 42%',
+	border: '212 22% 84%', // #C4D0DE
+	borderStrong: '212 24% 70%', // #9FB2C6
+	error: '4 90% 63%',
 	success: '145 63% 42%',
 	warning: '36 100% 50%',
-	input: '0 0% 100%',
-	ring: '200 18% 46%',
+	input: '210 40% 99%',
+	ring: '212 32% 44%',
 };
 
 const stoneDark: ThemeColors = {
-	primary: '200 15% 52%', // #78909C - Lighter in dark mode
+	primary: '212 28% 56%', // #6F8DAC - Brighter slate-blue for dark
 	primaryForeground: '0 0% 0%',
-	secondary: '200 12% 35%',
+	secondary: '212 20% 38%',
 	secondaryForeground: '0 0% 100%',
-	background: '210 15% 8%', // Very dark with blue-gray tint
-	foreground: '0 0% 100%',
-	surface: '200 12% 12%',
-	surfaceHover: '200 12% 16%',
-	surfaceElevated: '200 12% 14%',
-	muted: '200 10% 20%',
-	mutedForeground: '200 10% 60%',
-	border: '200 10% 25%',
-	borderStrong: '200 10% 35%',
+	background: '215 30% 8%', // Very dark with clear blue cast
+	foreground: '210 20% 96%',
+	surface: '214 24% 12%',
+	surfaceHover: '214 22% 17%',
+	surfaceElevated: '214 22% 15%',
+	muted: '212 18% 22%',
+	mutedForeground: '212 18% 62%',
+	border: '212 18% 28%',
+	borderStrong: '212 18% 40%',
 	error: '4 90% 58%',
 	success: '145 63% 49%',
 	warning: '48 100% 50%',
-	input: '200 10% 14%',
-	ring: '200 15% 52%',
+	input: '214 22% 15%',
+	ring: '212 28% 56%',
 };
 
 const oceanLight: ThemeColors = {
@@ -388,11 +391,14 @@ export const THEME_DEFINITIONS: Record<ThemeVariant, ThemeVariantDefinition> = {
 		hue: 47,
 		light: lumeLight,
 		dark: lumeDark,
+		// Lume wants a stronger, more contrasty grain — paper-004 has
+		// the heaviest fiber detail in the set, multiply makes it bite.
+		// Larger tile so the grain pattern reads as big paper fibers
+		// instead of fine noise.
 		paper: {
-			url: '/textures/paper/paper-001.jpg',
+			url: '/textures/paper/paper-004.jpg',
 			blendMode: 'multiply',
-			opacityLight: 0.4,
-			opacityDark: 0.18,
+			size: '480px 480px',
 		},
 	},
 	nature: {
@@ -406,8 +412,6 @@ export const THEME_DEFINITIONS: Record<ThemeVariant, ThemeVariantDefinition> = {
 		paper: {
 			url: '/textures/paper/cardboard-001.jpg',
 			blendMode: 'multiply',
-			opacityLight: 0.32,
-			opacityDark: 0.14,
 		},
 	},
 	stone: {
@@ -415,14 +419,14 @@ export const THEME_DEFINITIONS: Record<ThemeVariant, ThemeVariantDefinition> = {
 		label: 'Stone',
 		emoji: '🪨',
 		icon: 'hexagon',
-		hue: 200,
+		hue: 212,
 		light: stoneLight,
 		dark: stoneDark,
+		// Stone gets the linen-like cardboard texture — more tactile
+		// fiber pattern than the old paper-005 (which felt too smooth).
 		paper: {
-			url: '/textures/paper/paper-005.jpg',
+			url: '/textures/paper/cardboard-002.jpg',
 			blendMode: 'multiply',
-			opacityLight: 0.35,
-			opacityDark: 0.15,
 		},
 	},
 	ocean: {
@@ -436,8 +440,6 @@ export const THEME_DEFINITIONS: Record<ThemeVariant, ThemeVariantDefinition> = {
 		paper: {
 			url: '/textures/paper/paper-003.jpg',
 			blendMode: 'multiply',
-			opacityLight: 0.3,
-			opacityDark: 0.12,
 		},
 	},
 	// Extended themes (not in PillNav by default, can be pinned)
@@ -452,8 +454,6 @@ export const THEME_DEFINITIONS: Record<ThemeVariant, ThemeVariantDefinition> = {
 		paper: {
 			url: '/textures/paper/paper-006.jpg',
 			blendMode: 'multiply',
-			opacityLight: 0.38,
-			opacityDark: 0.16,
 		},
 	},
 	midnight: {
@@ -467,8 +467,6 @@ export const THEME_DEFINITIONS: Record<ThemeVariant, ThemeVariantDefinition> = {
 		paper: {
 			url: '/textures/paper/paper-004.jpg',
 			blendMode: 'overlay',
-			opacityLight: 0.35,
-			opacityDark: 0.22,
 		},
 	},
 	rose: {
@@ -482,8 +480,6 @@ export const THEME_DEFINITIONS: Record<ThemeVariant, ThemeVariantDefinition> = {
 		paper: {
 			url: '/textures/paper/paper-002.jpg',
 			blendMode: 'multiply',
-			opacityLight: 0.32,
-			opacityDark: 0.14,
 		},
 	},
 	lavender: {
@@ -494,11 +490,11 @@ export const THEME_DEFINITIONS: Record<ThemeVariant, ThemeVariantDefinition> = {
 		hue: 270,
 		light: lavenderLight,
 		dark: lavenderDark,
+		// Freed up after Stone claimed cardboard-002 — paper-001 gives
+		// lavender a softer, smoother fiber than the rough cardboard.
 		paper: {
-			url: '/textures/paper/cardboard-002.jpg',
+			url: '/textures/paper/paper-001.jpg',
 			blendMode: 'soft-light',
-			opacityLight: 0.4,
-			opacityDark: 0.18,
 		},
 	},
 };
