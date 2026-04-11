@@ -37,7 +37,20 @@ All endpoints are public (no auth required) — the service is internal-only, no
 | GET | `/api/v1/geocode/search?q=...` | Forward geocoding / autocomplete |
 | GET | `/api/v1/geocode/reverse?lat=...&lon=...` | Reverse geocoding |
 | GET | `/api/v1/geocode/stats` | Cache statistics |
-| GET | `/health` | Health check |
+| GET | `/health` | Wrapper health |
+| GET | `/health/pelias` | Upstream Pelias health (used by blackbox monitoring) |
+
+### Forward-search strategy
+
+The wrapper queries Pelias `/autocomplete` first (fast, fuzzy, optimised for
+venue names like "Konzil Restaurant"). If that returns zero features, it
+falls back to `/search`, which covers the address layer that autocomplete
+deliberately excludes as a performance optimisation.
+
+This gives the best of both worlds: quick venue matches for free-text
+queries AND reliable results for street-style queries like "Marktstätte
+Konstanz". See `src/routes/geocode.ts` — the fallback is baked into the
+forward handler.
 
 ### Search params
 
@@ -157,12 +170,23 @@ CACHE_TTL_MS=86400000
 The Pelias stack runs as a separate docker-compose in `pelias/`:
 
 - **elasticsearch** — Index storage (Docker volume, ~5GB for DACH after
-  indexing 22.1M OSM objects — 18.3M addresses + 3.86M venues)
+  indexing 13.4M OSM objects — 10M addresses + 3.3M venues)
 - **api** — HTTP API (port 4000), patched for category passthrough
-- **libpostal** — Address parsing (port 4400)
+- **libpostal** — Address parsing (internal only, not exposed on host port
+  because 4400 collides with mana-infra-landings on the Mac Mini)
 - **Import containers** — Run once for initial data load, then stopped
 
-RAM usage (running): ~1.5GB (elasticsearch 512MB + api + libpostal)
+**Production RAM usage** (measured on the Mac Mini after the 2026-04-11 deploy):
+
+| Container | RAM |
+|---|---|
+| pelias-elasticsearch | ~1.2 GB |
+| pelias-libpostal | ~1.9 GB (address parser model) |
+| pelias-api | ~100 MB |
+| mana-geocoding (wrapper) | ~20–60 MB |
+
+Total: **~3.2 GB** — larger than the initial ~1.5 GB estimate because
+libpostal loads its full address parser into memory up front.
 
 ### Initial import (one-time)
 
@@ -194,12 +218,60 @@ A few non-obvious settings required for a self-hosted DACH deployment:
   user (1001) needs write access and `/tmp` is not mounted.
 - **`api.services.libpostal: { url: "..." }`** — must be an object, not a
   string. The API's Joi schema rejects the string form.
+- **Only declare services you actually run.** We used to list `placeholder`,
+  `pip`, and `interpolation` in `api.services` but never ran the containers;
+  Pelias logged `ENOTFOUND` errors on every query. Dropping the unused
+  entries makes Pelias degrade cleanly to libpostal-only parsing (warns
+  `service disabled` once at startup, then silent).
 - **No `defaultParameters.boundary.country`** — Pelias only accepts a
   single country value for `boundary.country`. Since our index only
   contains DACH data anyway, we drop the filter entirely.
 - **`features: { filename: "planet-latest.osm.pbf" }`** — required because
   Geofabrik downloads come named `dach-latest.osm.pbf`, but Pelias'
   openstreetmap importer looks for `planet-latest.osm.pbf` by default.
+
+### Wrapper gotchas
+
+- **`idleTimeout: 60`** on `Bun.serve` — the default 10 s cuts off cold
+  queries that hit Elasticsearch and libpostal in sequence. 60 s is
+  generous for the worst case while still catching actually-stuck
+  connections.
+- **Colima bind-mount cache.** The mac-mini bind-mounts this repo's files
+  into several monitoring containers. Colima on macOS sometimes serves a
+  stale view of a bind-mounted file even after the file on disk changes.
+  After editing `scripts/generate-status-page.sh` (also bind-mounted into
+  `mana-status-gen`), restart the consuming container so it sees the
+  fresh content: `docker restart mana-status-gen`.
+- **`host.docker.internal` doesn't resolve from blackbox-exporter** on
+  Colima, so the external monitoring can't probe pelias-api or
+  elasticsearch directly. Instead, the wrapper exposes `/health/pelias`
+  which proxies a request to Pelias; Prometheus probes that internal
+  endpoint inside the docker network. See `prometheus.yml` job
+  `blackbox-internal`.
+
+## Testing
+
+There is **no automated test suite yet**. The service was validated
+end-to-end during the 2026-04-11 deploy with a manual smoke-test set:
+
+```bash
+# From the mac-mini (or any container in the mana docker network):
+curl -s "http://localhost:3018/api/v1/geocode/search?q=Konzil+Konstanz&limit=1"
+curl -s "http://localhost:3018/api/v1/geocode/search?q=Stuttgart+Hauptbahnhof&limit=1"
+curl -sG "http://localhost:3018/api/v1/geocode/search" \
+  --data-urlencode "q=Marktstätte Konstanz" --data-urlencode "limit=1"
+curl -s "http://localhost:3018/api/v1/geocode/reverse?lat=48.137&lon=11.575"
+curl -s "http://localhost:3018/health/pelias"
+```
+
+Expected shape per result: `{name, latitude, longitude, address, category,
+peliasCategories, confidence}`. At least the major Konstanz/München/Berlin
+venues should resolve with sensible categories (restaurant → `food`,
+station → `transit`, school → `work`, park → `leisure`).
+
+If you add logic here, at least add unit tests around `lib/category-map.ts`
+(the Pelias→PlaceCategory priority list is the most subtle part) and a
+smoke test that runs the above curls against a local stack.
 
 ## Code Layout
 
