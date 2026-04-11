@@ -1,21 +1,22 @@
 FROM oven/bun:1 AS production
 
+# Install pnpm (mana-credits is part of a pnpm workspace)
+RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates && rm -rf /var/lib/apt/lists/* && \
+    curl -fsSL https://get.pnpm.io/install.sh | env SHELL=/bin/bash PNPM_HOME=/usr/local/share/pnpm sh - && \
+    ln -s /usr/local/share/pnpm/pnpm /usr/local/bin/pnpm
+
 WORKDIR /app
 
-# Copy workspace package files for dependency resolution
-COPY package.json bun.lock* ./
+# Copy workspace structure for dependency resolution
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY services/mana-credits/package.json ./services/mana-credits/
-COPY packages/shared-hono/package.json ./packages/shared-hono/
-COPY packages/shared-types/package.json ./packages/shared-types/
-
-# Install dependencies (workspace-aware install from root)
-WORKDIR /app/services/mana-credits
-RUN bun install
-
-# Copy source (workspace deps + service)
-WORKDIR /app
 COPY packages/shared-hono ./packages/shared-hono
 COPY packages/shared-types ./packages/shared-types
+
+# Install dependencies for mana-credits only (with workspace deps)
+RUN pnpm install --filter @mana/credits... --no-frozen-lockfile --ignore-scripts
+
+# Copy source
 COPY services/mana-credits/src ./services/mana-credits/src
 COPY services/mana-credits/tsconfig.json services/mana-credits/drizzle.config.ts ./services/mana-credits/
 
