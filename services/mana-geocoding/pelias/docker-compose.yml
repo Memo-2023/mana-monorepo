@@ -39,8 +39,12 @@ services:
     image: pelias/libpostal-service
     container_name: pelias-libpostal
     restart: unless-stopped
-    ports:
-      - "4400:4400"
+    # No host port mapping — libpostal is an internal dependency of
+    # pelias-api, reached over the pelias network at libpostal:4400.
+    # Port 4400 on the host is used by mana-infra-landings (nginx for
+    # status.mana.how) on the production mac mini.
+    expose:
+      - "4400"
     networks:
       - pelias
 
