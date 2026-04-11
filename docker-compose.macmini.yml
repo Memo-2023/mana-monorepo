@@ -535,8 +535,8 @@ services:
 
   mana-sync:
     build:
-      context: services/mana-sync
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: services/mana-sync/Dockerfile
     image: mana-sync:local
     container_name: mana-core-sync
     restart: always

@@ -2,10 +2,15 @@
 FROM golang:1.25-alpine AS builder
 
 WORKDIR /app
-COPY go.mod go.sum ./
-RUN go mod download
 
-COPY . .
+# Copy workspace dependency first (replace directive in go.mod)
+COPY packages/shared-go ./packages/shared-go
+
+# Copy mana-sync source
+COPY services/mana-sync ./services/mana-sync
+
+WORKDIR /app/services/mana-sync
+RUN go mod download
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /mana-sync ./cmd/server
 
 # Runtime stage
