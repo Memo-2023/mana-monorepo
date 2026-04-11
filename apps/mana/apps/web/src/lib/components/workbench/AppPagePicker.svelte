@@ -78,7 +78,12 @@
 	{/snippet}
 	{#snippet item(app)}
 		<button class="picker-option" onclick={() => onSelect(app.id)}>
-			<div class="app-dot" style="background-color: {app.color}"></div>
+			<div class="app-icon-wrap">
+				{#if app.icon}
+					{@const Icon = app.icon}
+					<Icon size={18} />
+				{/if}
+			</div>
 			<span class="app-name">{appName(app.id, app.name)}</span>
 		</button>
 	{/snippet}
@@ -111,18 +116,21 @@
 		color: hsl(var(--color-muted-foreground));
 	}
 
-	:global(.picker .app-dot) {
-		width: 10px;
-		height: 10px;
-		border-radius: 9999px;
+	:global(.picker .app-icon-wrap) {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 22px;
+		height: 22px;
 		flex-shrink: 0;
+		color: hsl(var(--color-muted-foreground));
+	}
+	:global(.picker .picker-option:hover .app-icon-wrap) {
+		color: hsl(var(--color-foreground));
 	}
 	:global(.picker .app-name) {
 		font-size: 0.875rem;
 		font-weight: 500;
-		color: #374151;
-	}
-	:global(.dark .picker .app-name) {
-		color: #f3f4f6;
+		color: hsl(var(--color-foreground));
 	}
 </style>

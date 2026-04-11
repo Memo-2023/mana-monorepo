@@ -75,13 +75,14 @@
 		min-height: 60vh;
 		max-height: 80vh;
 		background: hsl(var(--color-card));
-		border-radius: 0.375rem;
+		border-radius: 1.25rem;
 		box-shadow:
-			0 2px 8px rgba(0, 0, 0, 0.08),
-			0 0 0 1px rgba(0, 0, 0, 0.04);
+			0 2px 8px hsl(0 0% 0% / 0.08),
+			0 0 0 1px hsl(var(--color-border));
 		display: flex;
 		flex-direction: column;
 		animation: slideIn 0.25s ease-out;
+		overflow: hidden;
 	}
 	@keyframes slideIn {
 		from {
