@@ -136,6 +136,8 @@
 			'M2.25 15a4.5 4.5 0 004.5 4.5H18a3.75 3.75 0 001.332-7.257 3 3 0 00-3.758-3.848 5.25 5.25 0 00-10.233 2.33A4.502 4.502 0 002.25 15z',
 		power: 'M12 3v9m6.364-6.364a9 9 0 11-12.728 0',
 		download: 'M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3',
+		creditCard: 'M3 10h18M5 6h14a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2zM7 15h2',
+		spiral: 'M12 4a8 8 0 108 8 6 6 0 00-6-6 4 4 0 00-4 4 2 2 0 002 2 1 1 0 001-1',
 	};
 
 	function getIcon(iconName: string) {
@@ -214,6 +216,7 @@
 							onclick={(e) => handleItemClick(item, e)}
 							class="pill glass-pill fan-pill"
 							class:danger-pill={item.danger}
+							class:primary-pill={item.primary}
 							class:active-pill={item.active}
 							class:has-submenu={item.submenu && item.submenu.length > 0}
 							class:submenu-open={openSubmenuId === item.id}
@@ -388,37 +391,25 @@
 		cursor: pointer;
 	}
 
+	/* Solid theme-tokened pill (formerly the "glass" frosted pill).
+	   Class name kept for backwards compatibility. */
 	.glass-pill,
 	:global(.fan-container .glass-pill) {
-		background: rgba(255, 255, 255, 0.85);
-		backdrop-filter: blur(12px);
-		-webkit-backdrop-filter: blur(12px);
-		border: 1px solid rgba(0, 0, 0, 0.1);
+		background: hsl(var(--color-card));
+		border: 1px solid hsl(var(--color-border));
 		box-shadow:
-			0 4px 6px -1px rgba(0, 0, 0, 0.1),
-			0 2px 4px -1px rgba(0, 0, 0, 0.06);
-		color: #374151;
-	}
-
-	:global(.dark) .glass-pill,
-	:global(.dark .fan-container .glass-pill) {
-		background: rgba(255, 255, 255, 0.12);
-		border: 1px solid rgba(255, 255, 255, 0.15);
-		color: #f3f4f6;
+			0 1px 2px hsl(0 0% 0% / 0.05),
+			0 2px 6px hsl(0 0% 0% / 0.04);
+		color: hsl(var(--color-foreground));
 	}
 
 	.glass-pill:hover {
-		background: rgba(255, 255, 255, 0.95);
-		border-color: rgba(0, 0, 0, 0.15);
+		background: hsl(var(--color-surface-hover));
+		border-color: hsl(var(--color-border-strong, var(--color-border)));
 		transform: translateY(-2px);
 		box-shadow:
-			0 10px 15px -3px rgba(0, 0, 0, 0.1),
-			0 4px 6px -2px rgba(0, 0, 0, 0.05);
-	}
-
-	:global(.dark) .glass-pill:hover {
-		background: rgba(255, 255, 255, 0.2);
-		border-color: rgba(255, 255, 255, 0.25);
+			0 6px 12px hsl(0 0% 0% / 0.08),
+			0 2px 4px hsl(0 0% 0% / 0.05);
 	}
 
 	.active-pill {
@@ -442,6 +433,23 @@
 	.danger-pill:hover {
 		background: rgba(220, 38, 38, 0.15);
 		border-color: rgba(220, 38, 38, 0.3);
+	}
+
+	/* Primary CTA pill — used for the guest "Anmelden" entry */
+	.primary-pill {
+		background: hsl(var(--color-primary));
+		border-color: hsl(var(--color-primary));
+		color: hsl(var(--color-primary-foreground, 0 0% 100%));
+		font-weight: 600;
+	}
+
+	.primary-pill:hover {
+		background: hsl(var(--color-primary) / 0.92);
+		border-color: hsl(var(--color-primary) / 0.92);
+		color: hsl(var(--color-primary-foreground, 0 0% 100%));
+		box-shadow:
+			0 6px 14px hsl(var(--color-primary) / 0.3),
+			0 2px 4px hsl(0 0% 0% / 0.06);
 	}
 
 	.pill-icon {

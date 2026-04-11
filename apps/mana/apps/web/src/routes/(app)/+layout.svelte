@@ -369,6 +369,11 @@
 	}
 
 	// ── Navigation ──────────────────────────────────────────
+	// Note: spiral, credits, profile and settings used to live here as
+	// standalone pills but were moved into the user-menu dropdown so the
+	// nav stays compact. They are still routable via the dropdown items
+	// the layout passes as `spiralHref` / `creditsHref` / `profileHref` /
+	// `settingsHref` below.
 	let baseNavItems = $derived<PillNavItem[]>([
 		{
 			href: '/',
@@ -378,30 +383,6 @@
 			active: isTagStripVisible,
 		},
 		{ href: '/', label: $_('nav.home'), icon: 'home', onContextMenu: makeNavContextMenu('/') },
-		{
-			href: '/spiral',
-			label: $_('nav.spiral'),
-			icon: 'spiral',
-			onContextMenu: makeNavContextMenu('/spiral'),
-		},
-		{
-			href: '/credits',
-			label: $_('nav.credits'),
-			icon: 'creditCard',
-			onContextMenu: makeNavContextMenu('/credits'),
-		},
-		{
-			href: '/profile',
-			label: $_('nav.profile'),
-			icon: 'user',
-			onContextMenu: makeNavContextMenu('/profile'),
-		},
-		{
-			href: '/settings',
-			label: $_('nav.settings'),
-			icon: 'settings',
-			onContextMenu: makeNavContextMenu('/settings'),
-		},
 	]);
 
 	let isAdmin = $derived(authStore.user?.role === 'admin');
@@ -839,6 +820,8 @@
 				settingsHref="/settings"
 				manaHref="/mana"
 				profileHref="/profile"
+				spiralHref="/spiral"
+				creditsHref="/credits"
 				themesHref="/themes"
 				helpHref="/help"
 				allAppsHref="/apps"

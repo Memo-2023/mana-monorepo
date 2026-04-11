@@ -73,18 +73,11 @@
 	}
 
 	.glass-pill {
-		background: rgba(255, 255, 255, 0.85);
-		backdrop-filter: blur(12px);
-		-webkit-backdrop-filter: blur(12px);
-		border: 1px solid rgba(0, 0, 0, 0.1);
+		background: hsl(var(--color-card));
+		border: 1px solid hsl(var(--color-border));
 		box-shadow:
-			0 4px 6px -1px rgba(0, 0, 0, 0.1),
-			0 2px 4px -1px rgba(0, 0, 0, 0.06);
+			0 1px 2px hsl(0 0% 0% / 0.05),
+			0 2px 6px hsl(0 0% 0% / 0.04);
 		border-radius: 9999px;
-	}
-
-	:global(.dark) .glass-pill {
-		background: rgba(255, 255, 255, 0.12);
-		border: 1px solid rgba(255, 255, 255, 0.15);
 	}
 </style>

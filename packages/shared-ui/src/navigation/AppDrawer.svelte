@@ -318,36 +318,23 @@
 		transform: rotate(180deg);
 	}
 
-	/* Glass pill - matches PillDropdown exactly */
+	/* Solid theme-tokened pill (formerly the "glass" frosted pill). */
 	.glass-pill {
-		background: rgba(255, 255, 255, 0.85);
-		backdrop-filter: blur(12px);
-		-webkit-backdrop-filter: blur(12px);
-		border: 1px solid rgba(0, 0, 0, 0.1);
+		background: hsl(var(--color-card));
+		border: 1px solid hsl(var(--color-border));
 		box-shadow:
-			0 4px 6px -1px rgba(0, 0, 0, 0.1),
-			0 2px 4px -1px rgba(0, 0, 0, 0.06);
-		color: #374151;
-	}
-
-	:global(.dark) .glass-pill {
-		background: rgba(255, 255, 255, 0.12);
-		border: 1px solid rgba(255, 255, 255, 0.15);
-		color: #f3f4f6;
+			0 1px 2px hsl(0 0% 0% / 0.05),
+			0 2px 6px hsl(0 0% 0% / 0.04);
+		color: hsl(var(--color-foreground));
 	}
 
 	.glass-pill:hover {
-		background: rgba(255, 255, 255, 0.95);
-		border-color: rgba(0, 0, 0, 0.15);
+		background: hsl(var(--color-surface-hover));
+		border-color: hsl(var(--color-border-strong, var(--color-border)));
 		transform: translateY(-2px);
 		box-shadow:
-			0 10px 15px -3px rgba(0, 0, 0, 0.1),
-			0 4px 6px -2px rgba(0, 0, 0, 0.05);
-	}
-
-	:global(.dark) .glass-pill:hover {
-		background: rgba(255, 255, 255, 0.2);
-		border-color: rgba(255, 255, 255, 0.25);
+			0 6px 12px hsl(0 0% 0% / 0.08),
+			0 2px 4px hsl(0 0% 0% / 0.05);
 	}
 
 	/* Backdrop */

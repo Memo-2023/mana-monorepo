@@ -43,6 +43,8 @@ export interface PillDropdownItem {
 	disabled?: boolean;
 	/** Whether item should be styled as danger/destructive */
 	danger?: boolean;
+	/** Whether item should be styled prominently with the primary color */
+	primary?: boolean;
 	/** Whether this item is currently active/selected */
 	active?: boolean;
 	/** Whether this item is a divider */

@@ -318,6 +318,10 @@
 		themesHref?: string;
 		/** Spiral page href (shown in user dropdown). Set to empty string to hide. */
 		spiralHref?: string;
+		/** Credits page href (shown in user dropdown). Set to empty string to hide. */
+		creditsHref?: string;
+		/** Trigger label for the user dropdown when no one is signed in. */
+		guestMenuLabel?: string;
 		/** Help page href (shown in user dropdown). Set to empty string to hide. */
 		helpHref?: string;
 		/** Bottom offset from viewport bottom (default: '0px'). Use to position above other fixed bars. */
@@ -378,6 +382,8 @@
 		feedbackHref = '/feedback',
 		themesHref,
 		spiralHref,
+		creditsHref,
+		guestMenuLabel = 'Menü',
 		helpHref,
 		bottomOffset = '0px',
 	}: Props = $props();
@@ -708,11 +714,14 @@
 				</button>
 			{/if}
 
-			<!-- User Menu Dropdown -->
-			{#if userEmail}
+			<!-- User Menu Dropdown — rendered for both authenticated users and
+			     guests. Auth-only items (profile/settings/logout) are filtered
+			     out when userEmail is empty; spiral/credits/themes/help stay
+			     available either way so guests can still navigate. -->
+			{#if userEmail || loginHref}
 				<PillDropdown
 					items={[
-						...(profileHref
+						...(userEmail && profileHref
 							? [
 									{
 										id: 'profile',
@@ -734,7 +743,7 @@
 							},
 							active: currentPath === settingsHref,
 						},
-						...(manaHref
+						...(userEmail && manaHref
 							? [
 									{
 										id: 'mana',
@@ -747,7 +756,33 @@
 									},
 								]
 							: []),
-						...(feedbackHref
+						...(spiralHref
+							? [
+									{
+										id: 'spiral',
+										label: 'Spiral',
+										icon: 'spiral',
+										onClick: () => {
+											window.location.href = spiralHref;
+										},
+										active: currentPath === spiralHref,
+									},
+								]
+							: []),
+						...(creditsHref
+							? [
+									{
+										id: 'credits',
+										label: 'Credits',
+										icon: 'creditCard',
+										onClick: () => {
+											window.location.href = creditsHref;
+										},
+										active: currentPath === creditsHref,
+									},
+								]
+							: []),
+						...(userEmail && feedbackHref
 							? [
 									{
 										id: 'feedback',
@@ -757,32 +792,6 @@
 											window.location.href = feedbackHref;
 										},
 										active: currentPath === feedbackHref,
-									},
-								]
-							: []),
-						...(themesHref
-							? [
-									{
-										id: 'themes',
-										label: 'Themes',
-										icon: 'palette',
-										onClick: () => {
-											window.location.href = themesHref;
-										},
-										active: currentPath === themesHref,
-									},
-								]
-							: []),
-						...(spiralHref
-							? [
-									{
-										id: 'spiral',
-										label: 'Spiral',
-										icon: 'sparkles',
-										onClick: () => {
-											window.location.href = spiralHref;
-										},
-										active: currentPath === spiralHref,
 									},
 								]
 							: []),
@@ -813,7 +822,7 @@
 								]
 							: []),
 						{ id: 'auth-divider', label: '', divider: true },
-						...(showLogout && onLogout
+						...(userEmail && showLogout && onLogout
 							? [
 									{
 										id: 'logout',
@@ -823,12 +832,13 @@
 										danger: true,
 									},
 								]
-							: loginHref
+							: !userEmail && loginHref
 								? [
 										{
 											id: 'login',
-											label: 'Login',
+											label: 'Anmelden',
 											icon: 'user',
+											primary: true,
 											onClick: () => {
 												window.location.href = loginHref;
 											},
@@ -837,21 +847,15 @@
 								: []),
 					]}
 					direction={dropdownDirection}
-					label={truncateEmail(userEmail)}
+					label={userEmail ? truncateEmail(userEmail) : guestMenuLabel}
 					icon="user"
 				/>
 			{:else if onLogout && showLogout}
-				<!-- Fallback to standalone logout if no user email -->
+				<!-- Fallback to standalone logout if no user email and no loginHref -->
 				<button onclick={onLogout} class="pill glass-pill logout-pill" title="Logout">
 					<SignOut size={18} class="pill-icon" />
 					<span class="pill-label">Logout</span>
 				</button>
-			{:else if loginHref && !userEmail}
-				<!-- Guest mode: prominent login button -->
-				<a href={loginHref} class="pill glass-pill login-pill" title="Anmelden">
-					<User size={18} class="pill-icon" />
-					<span class="pill-label">Anmelden</span>
-				</a>
 			{/if}
 		</div>
 	</nav>
@@ -955,36 +959,24 @@
 		cursor: pointer;
 	}
 
-	/* Glass effect */
+	/* Solid theme-tokened pill (formerly the "glass" frosted pill).
+	   The class name is kept for backwards compatibility. */
 	.glass-pill {
-		background: rgba(255, 255, 255, 0.85);
-		backdrop-filter: blur(12px);
-		-webkit-backdrop-filter: blur(12px);
-		border: 1px solid rgba(0, 0, 0, 0.1);
+		background: hsl(var(--color-card));
+		border: 1px solid hsl(var(--color-border));
 		box-shadow:
-			0 4px 6px -1px rgba(0, 0, 0, 0.1),
-			0 2px 4px -1px rgba(0, 0, 0, 0.06);
-		color: #374151;
-	}
-
-	:global(.dark) .glass-pill {
-		background: rgba(255, 255, 255, 0.12);
-		border: 1px solid rgba(255, 255, 255, 0.15);
-		color: #f3f4f6;
+			0 1px 2px hsl(0 0% 0% / 0.05),
+			0 2px 6px hsl(0 0% 0% / 0.04);
+		color: hsl(var(--color-foreground));
 	}
 
 	.glass-pill:hover {
-		background: rgba(255, 255, 255, 0.95);
-		border-color: rgba(0, 0, 0, 0.15);
+		background: hsl(var(--color-surface-hover));
+		border-color: hsl(var(--color-border-strong, var(--color-border)));
 		transform: translateY(-2px);
 		box-shadow:
-			0 10px 15px -3px rgba(0, 0, 0, 0.1),
-			0 4px 6px -2px rgba(0, 0, 0, 0.05);
-	}
-
-	:global(.dark) .glass-pill:hover {
-		background: rgba(255, 255, 255, 0.2);
-		border-color: rgba(255, 255, 255, 0.25);
+			0 6px 12px hsl(0 0% 0% / 0.08),
+			0 2px 4px hsl(0 0% 0% / 0.05);
 	}
 
 	/* Active state - uses CSS custom property for theming */
@@ -1034,20 +1026,6 @@
 	.logout-pill:hover {
 		background: rgba(220, 38, 38, 0.15);
 		border-color: rgba(220, 38, 38, 0.3);
-	}
-
-	/* Guest login pill — prominent with primary color */
-	.login-pill {
-		background: var(--pill-primary-color, var(--color-primary-500, #3b82f6));
-		color: #fff;
-		border-color: transparent;
-		font-weight: 600;
-		text-decoration: none;
-	}
-
-	.login-pill:hover {
-		filter: brightness(1.1);
-		transform: scale(1.03);
 	}
 
 	.pill-icon {

@@ -145,13 +145,13 @@
 		overflow: visible;
 	}
 
-	/* Glass styling */
+	/* Solid theme-tokened pill (formerly the "glass" frosted pill). */
 	.glass-pill {
-		background: hsl(var(--color-surface) / 0.85);
-		backdrop-filter: blur(12px);
-		-webkit-backdrop-filter: blur(12px);
+		background: hsl(var(--color-card));
 		border: 1px solid hsl(var(--color-border));
-		box-shadow: 0 2px 8px hsl(var(--color-foreground) / 0.08);
+		box-shadow:
+			0 1px 2px hsl(0 0% 0% / 0.05),
+			0 2px 6px hsl(0 0% 0% / 0.04);
 		border-radius: 9999px;
 	}
 
