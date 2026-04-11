@@ -12,6 +12,7 @@
 		reverseGeocode,
 		formatAddress,
 		formatLocality,
+		formatFullAddress,
 		type GeocodingResult,
 	} from '$lib/geocoding';
 	import { Star, MapPin, Plus, PencilSimple, Trash, MagnifyingGlass } from '@mana/shared-icons';
@@ -66,17 +67,37 @@
 	// the GeolocationPosition object is replaced on every update. We debounce
 	// by ~1.5 s and round to ~10 m precision so we only hit the geocoding
 	// service when the user has actually moved, not on every micro-jitter.
-	let currentLocationLabel = $state<string | null>(null);
+	let currentLocationResult = $state<GeocodingResult | null>(null);
 	let lastReverseKey = '';
 	let reverseDebounce: ReturnType<typeof setTimeout> | undefined;
+
+	// Inline editing: user can tap the location label, type a different
+	// address, and pick an autocomplete suggestion. Useful when GPS snaps
+	// to a nearby building but the user is actually next door.
+	let editingLocation = $state(false);
+	let locationDraft = $state('');
+	let locationSuggestions = $state<GeocodingResult[]>([]);
+	let showLocationSuggestions = $state(false);
+	let locationDebounce: ReturnType<typeof setTimeout> | undefined;
+	let locationInputEl = $state<HTMLInputElement | null>(null);
+
+	const currentLocationFull = $derived(
+		currentLocationResult ? formatFullAddress(currentLocationResult) : null
+	);
+	const currentLocationName = $derived(
+		currentLocationResult
+			? currentLocationResult.name || formatLocality(currentLocationResult)
+			: null
+	);
 
 	$effect(() => {
 		const pos = trackingStore.currentPosition;
 		if (!pos) {
-			currentLocationLabel = null;
+			currentLocationResult = null;
 			lastReverseKey = '';
 			return;
 		}
+		if (editingLocation) return; // don't clobber user typing
 
 		// Round to ~10 m precision (4 decimal places) so we don't re-fetch
 		// on every tiny coordinate drift while standing still.
@@ -90,10 +111,56 @@
 		reverseDebounce = setTimeout(async () => {
 			const result = await reverseGeocode(pos.coords.latitude, pos.coords.longitude);
 			if (result) {
-				currentLocationLabel = formatLocality(result);
+				currentLocationResult = result;
 			}
 		}, 1500);
 	});
+
+	function startEditLocation() {
+		locationDraft = currentLocationFull ?? '';
+		editingLocation = true;
+		queueMicrotask(() => {
+			locationInputEl?.focus();
+			locationInputEl?.select();
+		});
+	}
+
+	function cancelEditLocation() {
+		editingLocation = false;
+		showLocationSuggestions = false;
+		locationSuggestions = [];
+		locationDraft = '';
+	}
+
+	function onLocationDraftInput() {
+		clearTimeout(locationDebounce);
+		const q = locationDraft.trim();
+		if (q.length < 2) {
+			locationSuggestions = [];
+			showLocationSuggestions = false;
+			return;
+		}
+		locationDebounce = setTimeout(async () => {
+			const pos = trackingStore.currentPosition;
+			locationSuggestions = await searchAddress(q, {
+				limit: 6,
+				focusLat: pos?.coords.latitude,
+				focusLon: pos?.coords.longitude,
+			});
+			showLocationSuggestions = locationSuggestions.length > 0;
+		}, 250);
+	}
+
+	function selectLocationSuggestion(result: GeocodingResult) {
+		currentLocationResult = result;
+		editingLocation = false;
+		showLocationSuggestions = false;
+		locationSuggestions = [];
+	}
+
+	function onLocationKeydown(e: KeyboardEvent) {
+		if (e.key === 'Escape') cancelEditLocation();
+	}
 
 	// --- Address autocomplete ---
 	let addressQuery = $state('');
@@ -232,18 +299,62 @@
 			</button>
 			{#if trackingStore.currentPosition}
 				<div class="tracking-location">
-					{#if currentLocationLabel}
-						<span class="tracking-label">
-							<MapPin size={10} />
-							{currentLocationLabel}
-						</span>
+					{#if editingLocation}
+						<div class="tracking-edit-wrapper">
+							<input
+								bind:this={locationInputEl}
+								class="tracking-edit-input"
+								type="text"
+								bind:value={locationDraft}
+								oninput={onLocationDraftInput}
+								onkeydown={onLocationKeydown}
+								onblur={() => setTimeout(cancelEditLocation, 200)}
+								placeholder="Adresse suchen..."
+							/>
+							{#if showLocationSuggestions}
+								<div class="tracking-suggestions">
+									{#each locationSuggestions as result}
+										<button
+											type="button"
+											class="tracking-suggestion"
+											onclick={() => selectLocationSuggestion(result)}
+										>
+											<div class="tracking-suggestion-name">
+												{result.name || formatLocality(result)}
+											</div>
+											<div class="tracking-suggestion-full">
+												{formatFullAddress(result)}
+											</div>
+										</button>
+									{/each}
+								</div>
+							{/if}
+						</div>
+					{:else}
+						<button
+							type="button"
+							class="tracking-display"
+							onclick={startEditLocation}
+							title="Adresse bearbeiten"
+						>
+							{#if currentLocationName}
+								<span class="tracking-label">
+									<MapPin size={10} weight="fill" />
+									{currentLocationName}
+								</span>
+							{/if}
+							{#if currentLocationFull}
+								<span class="tracking-address">{currentLocationFull}</span>
+							{:else}
+								<span class="tracking-coords">
+									{formatCoords(
+										trackingStore.currentPosition.coords.latitude,
+										trackingStore.currentPosition.coords.longitude
+									)}
+								</span>
+							{/if}
+						</button>
 					{/if}
-					<span class="tracking-coords">
-						{formatCoords(
-							trackingStore.currentPosition.coords.latitude,
-							trackingStore.currentPosition.coords.longitude
-						)}
-					</span>
 				</div>
 			{/if}
 		</div>
@@ -449,11 +560,34 @@
 	}
 
 	.tracking-location {
+		flex: 1;
+		min-width: 0;
+		display: flex;
+		justify-content: flex-end;
+		position: relative;
+	}
+
+	.tracking-display {
 		display: flex;
 		flex-direction: column;
 		align-items: flex-end;
 		gap: 0.0625rem;
 		min-width: 0;
+		max-width: 100%;
+		padding: 0.25rem 0.375rem;
+		border-radius: 0.375rem;
+		border: 1px solid transparent;
+		background: transparent;
+		cursor: pointer;
+		text-align: right;
+		transition:
+			background 0.15s,
+			border-color 0.15s;
+	}
+
+	.tracking-display:hover {
+		background: rgba(14, 165, 233, 0.06);
+		border-color: rgba(14, 165, 233, 0.2);
 	}
 
 	.tracking-label {
@@ -462,17 +596,97 @@
 		gap: 0.1875rem;
 		font-size: 0.75rem;
 		color: #0ea5e9;
-		font-weight: 500;
+		font-weight: 600;
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
 		max-width: 220px;
 	}
 
+	.tracking-address {
+		font-size: 0.6875rem;
+		color: hsl(var(--color-muted-foreground));
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		max-width: 260px;
+	}
+
 	.tracking-coords {
 		font-size: 0.6875rem;
 		color: hsl(var(--color-muted-foreground));
 		font-variant-numeric: tabular-nums;
+	}
+
+	.tracking-edit-wrapper {
+		position: relative;
+		min-width: 240px;
+		max-width: 320px;
+		flex: 1;
+	}
+
+	.tracking-edit-input {
+		width: 100%;
+		padding: 0.375rem 0.5rem;
+		border-radius: 0.375rem;
+		border: 1px solid #0ea5e9;
+		background: hsl(var(--color-background));
+		color: hsl(var(--color-foreground));
+		font-size: 0.75rem;
+		outline: none;
+	}
+
+	.tracking-suggestions {
+		position: absolute;
+		top: 100%;
+		left: 0;
+		right: 0;
+		margin-top: 0.25rem;
+		background: hsl(var(--color-background));
+		border: 1px solid hsl(var(--color-border));
+		border-radius: 0.5rem;
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+		z-index: 60;
+		overflow: hidden;
+		max-height: 280px;
+		overflow-y: auto;
+	}
+
+	.tracking-suggestion {
+		display: flex;
+		flex-direction: column;
+		gap: 0.0625rem;
+		padding: 0.375rem 0.5rem;
+		width: 100%;
+		border: none;
+		background: transparent;
+		color: hsl(var(--color-foreground));
+		cursor: pointer;
+		text-align: left;
+	}
+
+	.tracking-suggestion:hover {
+		background: hsl(var(--color-muted));
+	}
+
+	.tracking-suggestion + .tracking-suggestion {
+		border-top: 1px solid hsl(var(--color-border) / 0.5);
+	}
+
+	.tracking-suggestion-name {
+		font-size: 0.75rem;
+		font-weight: 500;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.tracking-suggestion-full {
+		font-size: 0.6875rem;
+		color: hsl(var(--color-muted-foreground));
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
 
 	.tracking-error {

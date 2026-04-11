@@ -14,14 +14,41 @@
 
 export type PlaceCategory = 'home' | 'work' | 'food' | 'shopping' | 'transit' | 'leisure' | 'other';
 
+/**
+ * Where to send geocoding requests:
+ * - **Browser**: same-origin proxy at `/api/v1/geocode/*` (handled by the
+ *   SvelteKit `+server.ts` under `routes/api/v1/geocode/[...path]`). This
+ *   keeps geocoding off the public internet — it's explicitly NOT exposed
+ *   via Cloudflare — and saves us an auth round-trip.
+ * - **Node / SSR**: direct hit on the wrapper via `PUBLIC_MANA_GEOCODING_URL`
+ *   or `MANA_GEOCODING_INTERNAL_URL`, with a localhost fallback for dev.
+ *
+ * Because `PlacesListView` is client-only (reads `navigator.geolocation`),
+ * browser → same-origin is by far the common path.
+ */
 const GEOCODING_URL = () => {
 	if (typeof window !== 'undefined') {
-		const injected = (window as unknown as { __PUBLIC_MANA_GEOCODING_URL__?: string })
-			.__PUBLIC_MANA_GEOCODING_URL__;
-		if (injected) return injected;
+		// Same-origin proxy — nothing to configure, nothing to leak.
+		return '';
 	}
-	return import.meta.env.PUBLIC_MANA_GEOCODING_URL ?? 'http://localhost:3018';
+	return (
+		process.env.MANA_GEOCODING_INTERNAL_URL ??
+		process.env.PUBLIC_MANA_GEOCODING_URL ??
+		'http://localhost:3018'
+	);
 };
+
+/** Build a request URL that works in both the browser (relative) and Node (absolute). */
+function geocodeUrl(path: string, params: URLSearchParams): string {
+	const base = GEOCODING_URL();
+	const query = params.toString();
+	if (base) {
+		// Node / SSR path — absolute
+		return `${base}/api/v1/geocode/${path}${query ? '?' + query : ''}`;
+	}
+	// Browser path — same-origin proxy
+	return `/api/v1/geocode/${path}${query ? '?' + query : ''}`;
+}
 
 export interface GeocodingAddress {
 	street?: string;
@@ -72,7 +99,7 @@ export async function searchAddress(
 	if (options?.focusLon != null) params.set('focus.lon', String(options.focusLon));
 
 	try {
-		const res = await fetch(`${GEOCODING_URL()}/api/v1/geocode/search?${params}`);
+		const res = await fetch(geocodeUrl('search', params));
 		if (!res.ok) return [];
 		const data: GeocodingResponse = await res.json();
 		return data.results;
@@ -96,7 +123,7 @@ export async function reverseGeocode(
 			lon: String(lon),
 			lang,
 		});
-		const res = await fetch(`${GEOCODING_URL()}/api/v1/geocode/reverse?${params}`);
+		const res = await fetch(geocodeUrl('reverse', params));
 		if (!res.ok) return null;
 		const data: GeocodingResponse = await res.json();
 		return data.results[0] ?? null;
@@ -135,4 +162,40 @@ export function formatLocality(result: GeocodingResult): string {
 	if (result.name && result.name !== a.city) return result.name;
 	if (a.city && a.country) return `${a.city}, ${a.country}`;
 	return a.city ?? a.country ?? result.label ?? '';
+}
+
+/** Map OSM country names to 2-letter codes (DE/AT/CH focus). */
+const COUNTRY_CODE: Record<string, string> = {
+	Germany: 'DE',
+	Deutschland: 'DE',
+	Austria: 'AT',
+	Österreich: 'AT',
+	Switzerland: 'CH',
+	Schweiz: 'CH',
+};
+
+/**
+ * Compact address label with street, house number, postal code and 2-letter
+ * country. Used by the places tracking overlay where horizontal space is
+ * tight.
+ *
+ * Examples:
+ *   "Hafenstraße 2, 78462 Konstanz, DE"
+ *   "Marienplatz 26, 80331 München, DE"
+ *   "78462 Konstanz, DE"  (when no street is available)
+ */
+export function formatFullAddress(result: GeocodingResult): string {
+	const a = result.address;
+	const countryCode = a.country ? (COUNTRY_CODE[a.country] ?? a.country) : undefined;
+
+	const streetLine = a.street ? (a.houseNumber ? `${a.street} ${a.houseNumber}` : a.street) : '';
+
+	const cityLine = a.postalCode && a.city ? `${a.postalCode} ${a.city}` : (a.city ?? '');
+
+	const parts: string[] = [];
+	if (streetLine) parts.push(streetLine);
+	if (cityLine) parts.push(cityLine);
+	if (countryCode) parts.push(countryCode);
+
+	return parts.join(', ') || result.label || '';
 }
