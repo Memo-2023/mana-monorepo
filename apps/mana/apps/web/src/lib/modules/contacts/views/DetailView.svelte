@@ -6,12 +6,22 @@
 	import { useDetailEntity } from '$lib/data/detail-entity.svelte';
 	import DetailViewShell from '$lib/components/DetailViewShell.svelte';
 	import { contactsStore } from '../stores/contacts.svelte';
-	import { Star, EnvelopeSimple, Phone, MapPin, Briefcase, Globe, X } from '@mana/shared-icons';
+	import {
+		Star,
+		EnvelopeSimple,
+		Phone,
+		MapPin,
+		Briefcase,
+		Globe,
+		X,
+		MagnifyingGlass,
+	} from '@mana/shared-icons';
 	import type { ViewProps } from '$lib/app-registry';
 	import type { LocalContact } from '../types';
 	import { useAllTags, getTagsByIds } from '@mana/shared-stores';
 	import LinkedItems from '$lib/components/links/LinkedItems.svelte';
 	import { removeTagIdWithUndo } from '$lib/data/tag-mutations';
+	import { searchAddress, formatAddress, type GeocodingResult } from '$lib/geocoding';
 
 	let { navigate, params, goBack }: ViewProps = $props();
 	let contactId = $derived(params.contactId as string);
@@ -27,9 +37,49 @@
 	let editCity = $state('');
 	let editPostalCode = $state('');
 	let editCountry = $state('');
+	let editLatitude = $state<number | null>(null);
+	let editLongitude = $state<number | null>(null);
 	let editBirthday = $state('');
 	let editWebsite = $state('');
 	let editNotes = $state('');
+
+	// Address autocomplete
+	let addressSearchQuery = $state('');
+	let addressSuggestions = $state<GeocodingResult[]>([]);
+	let showAddressSuggestions = $state(false);
+	let addressDebounce: ReturnType<typeof setTimeout> | undefined;
+
+	function onAddressSearchInput() {
+		clearTimeout(addressDebounce);
+		if (addressSearchQuery.trim().length < 2) {
+			addressSuggestions = [];
+			showAddressSuggestions = false;
+			return;
+		}
+		addressDebounce = setTimeout(async () => {
+			addressSuggestions = await searchAddress(addressSearchQuery, { limit: 5 });
+			showAddressSuggestions = addressSuggestions.length > 0;
+		}, 300);
+	}
+
+	async function applyAddressSuggestion(result: GeocodingResult) {
+		showAddressSuggestions = false;
+		addressSearchQuery = '';
+		const a = result.address;
+		editStreet = [a.street, a.houseNumber].filter(Boolean).join(' ');
+		editCity = a.city ?? '';
+		editPostalCode = a.postalCode ?? '';
+		editCountry = a.country ?? '';
+		editLatitude = result.latitude;
+		editLongitude = result.longitude;
+		await saveField();
+	}
+
+	function onAddressSearchBlur() {
+		setTimeout(() => {
+			showAddressSuggestions = false;
+		}, 200);
+	}
 
 	const tagsQuery = useAllTags();
 	let allTags = $derived(tagsQuery.value ?? []);
@@ -49,6 +99,8 @@
 			editCity = c.city ?? '';
 			editPostalCode = c.postalCode ?? '';
 			editCountry = c.country ?? '';
+			editLatitude = c.latitude ?? null;
+			editLongitude = c.longitude ?? null;
 			editBirthday = c.birthday ?? '';
 			editWebsite = c.website ?? '';
 			editNotes = c.notes ?? '';
@@ -83,6 +135,8 @@
 			city: editCity.trim() || null,
 			postalCode: editPostalCode.trim() || null,
 			country: editCountry.trim() || null,
+			latitude: editLatitude,
+			longitude: editLongitude,
 			birthday: editBirthday || null,
 			website: editWebsite.trim() || null,
 			notes: editNotes.trim() || null,
@@ -193,6 +247,36 @@
 			<div class="field-row">
 				<span class="field-icon"><MapPin size={14} /></span>
 				<div class="field-group">
+					<div class="address-search-wrapper">
+						<div class="address-search-row">
+							<MagnifyingGlass size={12} />
+							<input
+								class="field-input address-search-input"
+								type="text"
+								placeholder="Adresse suchen..."
+								bind:value={addressSearchQuery}
+								oninput={onAddressSearchInput}
+								onblur={onAddressSearchBlur}
+								onfocus={() => {
+									if (addressSuggestions.length > 0) showAddressSuggestions = true;
+								}}
+							/>
+						</div>
+						{#if showAddressSuggestions}
+							<div class="address-suggestions">
+								{#each addressSuggestions as result}
+									<button
+										type="button"
+										class="address-suggestion"
+										onclick={() => applyAddressSuggestion(result)}
+									>
+										<span class="address-suggestion-name">{result.name || result.label}</span>
+										<span class="address-suggestion-addr">{formatAddress(result.address)}</span>
+									</button>
+								{/each}
+							</div>
+						{/if}
+					</div>
 					<input
 						class="field-input"
 						bind:value={editStreet}
@@ -384,6 +468,63 @@
 	.field-row-inline {
 		display: flex;
 		gap: 0.25rem;
+	}
+	.address-search-wrapper {
+		position: relative;
+		margin-bottom: 0.25rem;
+	}
+	.address-search-row {
+		display: flex;
+		align-items: center;
+		gap: 0.25rem;
+		padding: 0 0.375rem;
+		border: 1px dashed hsl(var(--color-border));
+		border-radius: 0.25rem;
+		color: hsl(var(--color-muted-foreground));
+	}
+	.address-search-input {
+		border: none !important;
+		background: transparent !important;
+		padding: 0.25rem !important;
+	}
+	.address-suggestions {
+		position: absolute;
+		top: 100%;
+		left: 0;
+		right: 0;
+		margin-top: 0.125rem;
+		background: hsl(var(--color-background));
+		border: 1px solid hsl(var(--color-border));
+		border-radius: 0.375rem;
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+		z-index: 50;
+		overflow: hidden;
+	}
+	.address-suggestion {
+		display: flex;
+		flex-direction: column;
+		gap: 0.0625rem;
+		padding: 0.375rem 0.5rem;
+		width: 100%;
+		border: none;
+		background: transparent;
+		color: hsl(var(--color-foreground));
+		cursor: pointer;
+		text-align: left;
+	}
+	.address-suggestion:hover {
+		background: hsl(var(--color-muted));
+	}
+	.address-suggestion + .address-suggestion {
+		border-top: 1px solid hsl(var(--color-border) / 0.5);
+	}
+	.address-suggestion-name {
+		font-size: 0.75rem;
+		font-weight: 500;
+	}
+	.address-suggestion-addr {
+		font-size: 0.6875rem;
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.tags-list {

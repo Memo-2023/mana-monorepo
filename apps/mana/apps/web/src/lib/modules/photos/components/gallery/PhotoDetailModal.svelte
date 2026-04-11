@@ -2,8 +2,9 @@
 	import { _ } from 'svelte-i18n';
 	import type { Photo } from '$lib/modules/photos/types';
 	import { photoStore } from '$lib/modules/photos/stores/photos.svelte';
-	import { CaretRight, DownloadSimple, Heart, X } from '@mana/shared-icons';
+	import { CaretRight, DownloadSimple, Heart, MapPin, X } from '@mana/shared-icons';
 	import { TagChip } from '@mana/shared-ui';
+	import { reverseGeocode, formatLocality, type GeocodingResult } from '$lib/geocoding';
 
 	interface Props {
 		photo: Photo;
@@ -13,6 +14,28 @@
 	let { photo, onClose }: Props = $props();
 
 	let showInfo = $state(true);
+
+	// Reverse geocoding for GPS coordinates
+	let locationLabel = $state<string | null>(null);
+	let locationResult = $state<GeocodingResult | null>(null);
+
+	$effect(() => {
+		const lat = photo.exif?.gpsLatitude;
+		const lon = photo.exif?.gpsLongitude;
+		if (lat && lon) {
+			locationLabel = null;
+			locationResult = null;
+			reverseGeocode(lat, lon).then((result) => {
+				if (result) {
+					locationResult = result;
+					locationLabel = formatLocality(result);
+				}
+			});
+		} else {
+			locationLabel = null;
+			locationResult = null;
+		}
+	});
 
 	function handleKeydown(e: KeyboardEvent) {
 		if (e.key === 'Escape') onClose();
@@ -128,13 +151,28 @@
 					{#if photo.exif.gpsLatitude && photo.exif.gpsLongitude}
 						<div class="info-section">
 							<h4 class="info-label">Standort</h4>
+							{#if locationLabel}
+								<p class="info-value location-line">
+									<MapPin size={12} />
+									<span>{locationLabel}</span>
+								</p>
+								{#if locationResult?.address.city && locationResult.address.country}
+									<p class="info-value location-sub">
+										{[locationResult.address.city, locationResult.address.country]
+											.filter(Boolean)
+											.join(', ')}
+									</p>
+								{/if}
+							{:else}
+								<p class="info-value location-loading">Wird ermittelt…</p>
+							{/if}
 							<a
-								class="info-value text-primary hover:underline"
-								href={`https://www.google.com/maps?q=${photo.exif.gpsLatitude},${photo.exif.gpsLongitude}`}
+								class="info-value location-map-link"
+								href={`https://www.openstreetmap.org/?mlat=${photo.exif.gpsLatitude}&mlon=${photo.exif.gpsLongitude}#map=17/${photo.exif.gpsLatitude}/${photo.exif.gpsLongitude}`}
 								target="_blank"
 								rel="noopener noreferrer"
 							>
-								Auf Karte anzeigen
+								In OpenStreetMap öffnen →
 							</a>
 						</div>
 					{/if}
@@ -268,6 +306,36 @@
 
 	.info-value {
 		font-size: 0.875rem;
+	}
+
+	.location-line {
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
+		font-weight: 500;
+	}
+
+	.location-sub {
+		color: hsl(var(--color-muted-foreground));
+		font-size: 0.75rem;
+		margin-top: 0.125rem;
+	}
+
+	.location-loading {
+		color: hsl(var(--color-muted-foreground));
+		font-style: italic;
+	}
+
+	.location-map-link {
+		display: inline-block;
+		margin-top: 0.375rem;
+		font-size: 0.75rem;
+		color: hsl(var(--color-muted-foreground));
+		text-decoration: none;
+	}
+
+	.location-map-link:hover {
+		color: #0ea5e9;
 	}
 
 	.icon-btn {

@@ -22,6 +22,10 @@ export interface LocalSocialEvent extends BaseRecord {
 	description?: string | null;
 	location?: string | null;
 	locationUrl?: string | null;
+	/** Geocoded latitude — plaintext (coordinates stay unencrypted for map rendering). */
+	locationLat?: number | null;
+	/** Geocoded longitude — plaintext. */
+	locationLon?: number | null;
 	hostContactId?: string | null;
 	coverImage?: string | null;
 	color?: string | null;
@@ -73,6 +77,8 @@ export interface SocialEvent {
 	description: string | null;
 	location: string | null;
 	locationUrl: string | null;
+	locationLat: number | null;
+	locationLon: number | null;
 	hostContactId: string | null;
 	coverImage: string | null;
 	color: string | null;

@@ -28,6 +28,8 @@ export function toContact(local: LocalContact): Contact {
 		city: local.city || null,
 		postalCode: local.postalCode || null,
 		country: local.country || null,
+		latitude: local.latitude ?? null,
+		longitude: local.longitude ?? null,
 		notes: local.notes || null,
 		photoUrl: local.photoUrl || null,
 		birthday: local.birthday || null,

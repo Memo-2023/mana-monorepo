@@ -16,6 +16,10 @@ export interface LocalContact extends BaseRecord {
 	city?: string;
 	postalCode?: string;
 	country?: string;
+	/** Geocoded latitude — plaintext (coordinates stay unencrypted for map rendering). */
+	latitude?: number;
+	/** Geocoded longitude — plaintext. */
+	longitude?: number;
 	address?: string;
 	notes?: string;
 	photoUrl?: string;
@@ -47,6 +51,8 @@ export interface Contact {
 	city?: string | null;
 	postalCode?: string | null;
 	country?: string | null;
+	latitude?: number | null;
+	longitude?: number | null;
 	notes?: string | null;
 	photoUrl?: string | null;
 	birthday?: string | null;

@@ -6,6 +6,8 @@
 	import PublicRsvpList from '../components/PublicRsvpList.svelte';
 	import BringListEditor from '../components/BringListEditor.svelte';
 	import type { ViewProps } from '$lib/app-registry';
+	import { searchAddress, formatAddress, type GeocodingResult } from '$lib/geocoding';
+	import { MapPin } from '@mana/shared-icons';
 
 	let { navigate, goBack, params }: ViewProps = $props();
 
@@ -31,19 +33,61 @@
 	let titleDraft = $state('');
 	let descDraft = $state('');
 	let locationDraft = $state('');
+	let locationLatDraft = $state<number | null>(null);
+	let locationLonDraft = $state<number | null>(null);
 	let startDraft = $state('');
 	let endDraft = $state('');
 	let allDayDraft = $state(false);
+
+	// Address autocomplete state
+	let addressSuggestions = $state<GeocodingResult[]>([]);
+	let showAddressSuggestions = $state(false);
+	let addressDebounce: ReturnType<typeof setTimeout> | undefined;
 
 	function startEdit() {
 		if (!event) return;
 		titleDraft = event.title;
 		descDraft = event.description ?? '';
 		locationDraft = event.location ?? '';
+		locationLatDraft = event.locationLat;
+		locationLonDraft = event.locationLon;
 		startDraft = toLocalDatetime(event.startTime);
 		endDraft = toLocalDatetime(event.endTime);
 		allDayDraft = event.isAllDay;
 		editing = true;
+	}
+
+	function onLocationInput() {
+		clearTimeout(addressDebounce);
+		// User is typing a custom location — clear coordinates until they pick a suggestion
+		if (locationDraft !== event?.location) {
+			locationLatDraft = null;
+			locationLonDraft = null;
+		}
+		if (locationDraft.trim().length < 2) {
+			addressSuggestions = [];
+			showAddressSuggestions = false;
+			return;
+		}
+		addressDebounce = setTimeout(async () => {
+			addressSuggestions = await searchAddress(locationDraft, { limit: 5 });
+			showAddressSuggestions = addressSuggestions.length > 0;
+		}, 300);
+	}
+
+	function selectAddressSuggestion(result: GeocodingResult) {
+		showAddressSuggestions = false;
+		const addr = formatAddress(result.address);
+		locationDraft = result.name ? `${result.name}${addr ? ', ' + addr : ''}` : addr || result.label;
+		locationLatDraft = result.latitude;
+		locationLonDraft = result.longitude;
+	}
+
+	function onLocationBlur() {
+		// Delay so suggestion clicks register first
+		setTimeout(() => {
+			showAddressSuggestions = false;
+		}, 200);
 	}
 
 	async function saveEdit() {
@@ -52,12 +96,22 @@
 			title: titleDraft,
 			description: descDraft || null,
 			location: locationDraft || null,
+			locationLat: locationLatDraft,
+			locationLon: locationLonDraft,
 			startTime: fromLocalDatetime(startDraft),
 			endTime: fromLocalDatetime(endDraft),
 			isAllDay: allDayDraft,
 		});
 		editing = false;
 	}
+
+	let mapUrl = $derived.by(() => {
+		if (!event?.locationLat || !event?.locationLon) return '';
+		const lat = event.locationLat;
+		const lng = event.locationLon;
+		const bbox = `${lng - 0.005},${lat - 0.003},${lng + 0.005},${lat + 0.003}`;
+		return `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat},${lng}`;
+	});
 
 	function toLocalDatetime(iso: string): string {
 		const d = new Date(iso);
@@ -109,7 +163,40 @@
 				<input class="title-input" bind:value={titleDraft} placeholder="Event-Titel" />
 				<textarea class="desc-input" bind:value={descDraft} rows="3" placeholder="Beschreibung"
 				></textarea>
-				<input class="loc-input" bind:value={locationDraft} placeholder="Ort" />
+				<div class="loc-wrapper">
+					<input
+						class="loc-input"
+						bind:value={locationDraft}
+						oninput={onLocationInput}
+						onblur={onLocationBlur}
+						onfocus={() => {
+							if (addressSuggestions.length > 0) showAddressSuggestions = true;
+						}}
+						placeholder="Ort — tippe eine Adresse..."
+					/>
+					{#if locationLatDraft && locationLonDraft}
+						<span class="loc-pinned" title="Koordinaten gesetzt">
+							<MapPin size={12} weight="fill" />
+						</span>
+					{/if}
+					{#if showAddressSuggestions}
+						<div class="loc-suggestions">
+							{#each addressSuggestions as result}
+								<button
+									type="button"
+									class="loc-suggestion"
+									onclick={() => selectAddressSuggestion(result)}
+								>
+									<MapPin size={12} />
+									<div class="loc-suggestion-text">
+										<span class="loc-suggestion-name">{result.name || result.label}</span>
+										<span class="loc-suggestion-addr">{formatAddress(result.address)}</span>
+									</div>
+								</button>
+							{/each}
+						</div>
+					{/if}
+				</div>
 				<div class="time-row">
 					<label>
 						<span>Start</span>
@@ -149,6 +236,26 @@
 				</div>
 				{#if event.description}
 					<p class="description">{event.description}</p>
+				{/if}
+				{#if mapUrl}
+					<div class="event-map">
+						<iframe
+							title="Event-Ort auf Karte"
+							src={mapUrl}
+							width="100%"
+							height="180"
+							frameborder="0"
+							loading="lazy"
+						></iframe>
+						<a
+							class="map-open-link"
+							href={`https://www.openstreetmap.org/?mlat=${event.locationLat}&mlon=${event.locationLon}#map=17/${event.locationLat}/${event.locationLon}`}
+							target="_blank"
+							rel="noopener noreferrer"
+						>
+							In OpenStreetMap öffnen →
+						</a>
+					</div>
 				{/if}
 			</div>
 		{/if}
@@ -287,7 +394,11 @@
 	}
 	.title-input,
 	.desc-input,
+	.loc-wrapper {
+		position: relative;
+	}
 	.loc-input {
+		width: 100%;
 		padding: 0.625rem 0.875rem;
 		border: 1px solid hsl(var(--color-border));
 		border-radius: 0.5rem;
@@ -295,6 +406,83 @@
 		font-size: 0.9375rem;
 		color: hsl(var(--color-foreground));
 		font-family: inherit;
+	}
+	.loc-pinned {
+		position: absolute;
+		right: 0.625rem;
+		top: 50%;
+		transform: translateY(-50%);
+		color: #0ea5e9;
+		pointer-events: none;
+	}
+	.loc-suggestions {
+		position: absolute;
+		top: 100%;
+		left: 0;
+		right: 0;
+		margin-top: 0.25rem;
+		background: hsl(var(--color-background));
+		border: 1px solid hsl(var(--color-border));
+		border-radius: 0.5rem;
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+		z-index: 50;
+		overflow: hidden;
+	}
+	.loc-suggestion {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.5rem 0.625rem;
+		width: 100%;
+		border: none;
+		background: transparent;
+		color: hsl(var(--color-foreground));
+		cursor: pointer;
+		text-align: left;
+	}
+	.loc-suggestion:hover {
+		background: hsl(var(--color-muted));
+	}
+	.loc-suggestion + .loc-suggestion {
+		border-top: 1px solid hsl(var(--color-border) / 0.5);
+	}
+	.loc-suggestion-text {
+		display: flex;
+		flex-direction: column;
+		gap: 0.0625rem;
+		min-width: 0;
+	}
+	.loc-suggestion-name {
+		font-size: 0.8125rem;
+		font-weight: 500;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	.loc-suggestion-addr {
+		font-size: 0.6875rem;
+		color: hsl(var(--color-muted-foreground));
+	}
+	.event-map {
+		margin-top: 0.75rem;
+		border-radius: 0.5rem;
+		overflow: hidden;
+		border: 1px solid hsl(var(--color-border));
+	}
+	.event-map iframe {
+		display: block;
+	}
+	.map-open-link {
+		display: block;
+		padding: 0.375rem 0.625rem;
+		font-size: 0.75rem;
+		color: hsl(var(--color-muted-foreground));
+		text-decoration: none;
+		text-align: right;
+		background: hsl(var(--color-muted));
+	}
+	.map-open-link:hover {
+		color: #0ea5e9;
 	}
 	.title-input {
 		font-size: 1.25rem;

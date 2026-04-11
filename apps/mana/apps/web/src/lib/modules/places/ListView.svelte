@@ -7,7 +7,7 @@
 	import { useAllPlaces } from './queries';
 	import { placesStore } from './stores/places.svelte';
 	import { trackingStore } from './stores/tracking.svelte';
-	import { searchAddress, formatAddress, type GeocodingResult } from './geocoding';
+	import { searchAddress, formatAddress, type GeocodingResult } from '$lib/geocoding';
 	import { Star, MapPin, Plus, PencilSimple, Trash, MagnifyingGlass } from '@mana/shared-icons';
 	import type { ViewProps } from '$lib/app-registry';
 	import { ContextMenu, type ContextMenuItem } from '@mana/shared-ui';

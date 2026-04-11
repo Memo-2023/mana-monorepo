@@ -65,6 +65,8 @@ export const contactsStore = {
 		if (data.postalCode !== undefined)
 			updateData.postalCode = data.postalCode as string | undefined;
 		if (data.country !== undefined) updateData.country = data.country as string | undefined;
+		if (data.latitude !== undefined) updateData.latitude = data.latitude as number | undefined;
+		if (data.longitude !== undefined) updateData.longitude = data.longitude as number | undefined;
 		if (data.notes !== undefined) updateData.notes = data.notes ?? undefined;
 		if (data.photoUrl !== undefined) updateData.photoUrl = data.photoUrl ?? undefined;
 		if (data.birthday !== undefined) updateData.birthday = data.birthday ?? undefined;

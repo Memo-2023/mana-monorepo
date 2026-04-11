@@ -9,7 +9,7 @@ import { decryptRecords, encryptRecord } from '$lib/data/crypto';
 import { createBlock } from '$lib/data/time-blocks/service';
 import { locationLogTable, placeTable } from '../collections';
 import { getDistanceKm, findNearestPlace, toPlace } from '../queries';
-import { reverseGeocode, formatAddress } from '../geocoding';
+import { reverseGeocode, formatAddress } from '$lib/geocoding';
 import type { LocalLocationLog, LocalPlace } from '../types';
 
 // ─── State ──────────────────────────────────────────────

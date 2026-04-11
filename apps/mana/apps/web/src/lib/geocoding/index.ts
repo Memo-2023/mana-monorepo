@@ -1,12 +1,18 @@
 /**
- * Geocoding client for the Places module.
+ * Shared geocoding client for all modules in the unified Mana app.
  *
- * Talks to our self-hosted mana-geocoding service (Pelias-backed).
- * All queries stay within our infrastructure — no location data
- * leaves the network.
+ * Talks to our self-hosted mana-geocoding service (Pelias-backed, port 3018).
+ * All queries stay within our infrastructure — no user location data leaves
+ * the network.
+ *
+ * Used by: places, events, contacts, photos, …
+ *
+ * The `PlaceCategory` type is defined here (rather than imported from the
+ * places module) because geocoding is the source of truth for categories —
+ * places just happens to be the first consumer.
  */
 
-import type { PlaceCategory } from './types';
+export type PlaceCategory = 'home' | 'work' | 'food' | 'shopping' | 'transit' | 'leisure' | 'other';
 
 const GEOCODING_URL = () => {
 	if (typeof window !== 'undefined') {
@@ -17,19 +23,21 @@ const GEOCODING_URL = () => {
 	return import.meta.env.PUBLIC_MANA_GEOCODING_URL ?? 'http://localhost:3018';
 };
 
+export interface GeocodingAddress {
+	street?: string;
+	houseNumber?: string;
+	postalCode?: string;
+	city?: string;
+	state?: string;
+	country?: string;
+}
+
 export interface GeocodingResult {
 	label: string;
 	name: string;
 	latitude: number;
 	longitude: number;
-	address: {
-		street?: string;
-		houseNumber?: string;
-		postalCode?: string;
-		city?: string;
-		state?: string;
-		country?: string;
-	};
+	address: GeocodingAddress;
 	category: PlaceCategory;
 	/** Raw Pelias categories (food, retail, transport, …) */
 	peliasCategories?: string[];
@@ -101,7 +109,7 @@ export async function reverseGeocode(
 /**
  * Format a structured address into a single-line string.
  */
-export function formatAddress(address: GeocodingResult['address']): string {
+export function formatAddress(address: GeocodingAddress): string {
 	const parts: string[] = [];
 
 	if (address.street) {
@@ -114,4 +122,17 @@ export function formatAddress(address: GeocodingResult['address']): string {
 	}
 
 	return parts.join(', ');
+}
+
+/**
+ * Build a short locality label ("Konstanz", "Konstanz, Germany") from a result.
+ * Useful for photos / journal / memoro where you just want to know the rough
+ * place, not the full street address.
+ */
+export function formatLocality(result: GeocodingResult): string {
+	const a = result.address;
+	// Prefer the name for venues (e.g. "Konzil Restaurant")
+	if (result.name && result.name !== a.city) return result.name;
+	if (a.city && a.country) return `${a.city}, ${a.country}`;
+	return a.city ?? a.country ?? result.label ?? '';
 }

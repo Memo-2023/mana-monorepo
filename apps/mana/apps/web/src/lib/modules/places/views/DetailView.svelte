@@ -8,7 +8,12 @@
 	import { useDetailEntity } from '$lib/data/detail-entity.svelte';
 	import DetailViewShell from '$lib/components/DetailViewShell.svelte';
 	import { placesStore } from '../stores/places.svelte';
-	import { reverseGeocode, formatAddress, searchAddress, type GeocodingResult } from '../geocoding';
+	import {
+		reverseGeocode,
+		formatAddress,
+		searchAddress,
+		type GeocodingResult,
+	} from '$lib/geocoding';
 	import { Star, MapPin, X, MagnifyingGlass, ArrowsClockwise } from '@mana/shared-icons';
 	import type { ViewProps } from '$lib/app-registry';
 	import type { LocalPlace, PlaceCategory, LocalLocationLog } from '../types';

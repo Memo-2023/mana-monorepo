@@ -87,6 +87,8 @@ export const eventsStore = {
 			description?: string | null;
 			location?: string | null;
 			locationUrl?: string | null;
+			locationLat?: number | null;
+			locationLon?: number | null;
 			startTime?: string;
 			endTime?: string;
 			isAllDay?: boolean;
@@ -120,6 +122,8 @@ export const eventsStore = {
 			if (input.description !== undefined) localData.description = input.description;
 			if (input.location !== undefined) localData.location = input.location;
 			if (input.locationUrl !== undefined) localData.locationUrl = input.locationUrl;
+			if (input.locationLat !== undefined) localData.locationLat = input.locationLat;
+			if (input.locationLon !== undefined) localData.locationLon = input.locationLon;
 			if (input.color !== undefined) localData.color = input.color;
 			if (input.capacity !== undefined) localData.capacity = input.capacity;
 			if (input.status !== undefined) localData.status = input.status;

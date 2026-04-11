@@ -29,6 +29,8 @@ export function toSocialEvent(local: LocalSocialEvent, block: LocalTimeBlock | n
 		description: local.description ?? null,
 		location: local.location ?? null,
 		locationUrl: local.locationUrl ?? null,
+		locationLat: local.locationLat ?? null,
+		locationLon: local.locationLon ?? null,
 		hostContactId: local.hostContactId ?? null,
 		coverImage: local.coverImage ?? null,
 		color: local.color ?? null,
