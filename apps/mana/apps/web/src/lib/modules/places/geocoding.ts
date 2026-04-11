@@ -31,8 +31,8 @@ export interface GeocodingResult {
 		country?: string;
 	};
 	category: PlaceCategory;
-	osmCategory?: string;
-	osmType?: string;
+	/** Raw Pelias categories (food, retail, transport, …) */
+	peliasCategories?: string[];
 	confidence: number;
 }
 

@@ -1,156 +1,75 @@
 /**
- * Maps Pelias/OSM categories to our 7 Places categories.
+ * Maps Pelias categories (OSM taxonomy) to our 7 Places categories.
  *
- * Pelias returns results with `addendum.osm.category` and `addendum.osm.type`
- * fields that correspond to OSM key/value pairs. We map these to our simple
- * category enum: home, work, food, shopping, transit, leisure, other.
+ * Pelias' openstreetmap importer tags venues with categories from its
+ * built-in taxonomy (food, retail, transport, health, education, …).
+ * We collapse those into the simpler Places enum:
+ *
+ *   home · work · food · shopping · transit · leisure · other
+ *
+ * A venue can have multiple Pelias categories (e.g. a restaurant is
+ * tagged `['food', 'retail', 'nightlife']`). We pick the most specific
+ * one in priority order rather than the first — a restaurant should be
+ * "food" even though "retail" also matches.
  */
 
 export type PlaceCategory = 'home' | 'work' | 'food' | 'shopping' | 'transit' | 'leisure' | 'other';
 
 /**
- * OSM key → PlaceCategory mapping.
- * The key is the OSM tag key (e.g. "amenity", "shop"), the value maps
- * specific OSM values to our categories. A `_default` entry covers
- * any value not explicitly listed.
+ * Priority-ordered: first matching category wins. Earlier entries are
+ * more specific, so "food" beats "retail", "transport" beats "professional".
  */
-const OSM_CATEGORY_MAP: Record<
-	string,
-	Record<string, PlaceCategory> & { _default?: PlaceCategory }
-> = {
-	amenity: {
-		_default: 'other',
-		restaurant: 'food',
-		cafe: 'food',
-		fast_food: 'food',
-		bar: 'food',
-		pub: 'food',
-		biergarten: 'food',
-		food_court: 'food',
-		ice_cream: 'food',
-		bakery: 'food',
-		school: 'work',
-		university: 'work',
-		college: 'work',
-		library: 'work',
-		coworking_space: 'work',
-		office: 'work',
-		bus_station: 'transit',
-		ferry_terminal: 'transit',
-		taxi: 'transit',
-		parking: 'transit',
-		fuel: 'transit',
-		bicycle_parking: 'transit',
-		charging_station: 'transit',
-		cinema: 'leisure',
-		theatre: 'leisure',
-		nightclub: 'leisure',
-		community_centre: 'leisure',
-		swimming_pool: 'leisure',
-		marketplace: 'shopping',
-	},
-	shop: {
-		_default: 'shopping',
-		supermarket: 'shopping',
-		bakery: 'food',
-		butcher: 'food',
-		deli: 'food',
-		greengrocer: 'food',
-		seafood: 'food',
-		pastry: 'food',
-		cheese: 'food',
-		coffee: 'food',
-	},
-	tourism: {
-		_default: 'leisure',
-		hotel: 'other',
-		hostel: 'other',
-		guest_house: 'other',
-		motel: 'other',
-		apartment: 'home',
-	},
-	leisure: {
-		_default: 'leisure',
-		park: 'leisure',
-		playground: 'leisure',
-		sports_centre: 'leisure',
-		fitness_centre: 'leisure',
-		stadium: 'leisure',
-		swimming_pool: 'leisure',
-		garden: 'leisure',
-		nature_reserve: 'leisure',
-		beach_resort: 'leisure',
-		marina: 'leisure',
-	},
-	railway: {
-		_default: 'transit',
-		station: 'transit',
-		halt: 'transit',
-		tram_stop: 'transit',
-	},
-	aeroway: {
-		_default: 'transit',
-		aerodrome: 'transit',
-		terminal: 'transit',
-	},
-	highway: {
-		_default: 'transit',
-		bus_stop: 'transit',
-	},
-	building: {
-		_default: 'other',
-		residential: 'home',
-		house: 'home',
-		apartments: 'home',
-		detached: 'home',
-		commercial: 'work',
-		office: 'work',
-		industrial: 'work',
-		retail: 'shopping',
-		supermarket: 'shopping',
-		church: 'leisure',
-		cathedral: 'leisure',
-		stadium: 'leisure',
-		school: 'work',
-		university: 'work',
-		hospital: 'other',
-	},
-	office: {
-		_default: 'work',
-	},
-	sport: {
-		_default: 'leisure',
-	},
-};
+const PELIAS_PRIORITY: Array<[string, PlaceCategory]> = [
+	// Food is strongest signal — a restaurant is food, not retail
+	['food', 'food'],
+
+	// Transit/transport
+	['transport:public', 'transit'],
+	['transport:air', 'transit'],
+	['transport:sea', 'transit'],
+	['transport:bus', 'transit'],
+	['transport:taxi', 'transit'],
+	['transport', 'transit'],
+
+	// Shopping — explicit retail markers
+	['retail', 'shopping'],
+
+	// Leisure / entertainment / recreation
+	['entertainment', 'leisure'],
+	['nightlife', 'leisure'],
+	['recreation', 'leisure'],
+
+	// Work-ish
+	['education', 'work'],
+	['professional', 'work'],
+	['government', 'work'],
+	['finance', 'work'],
+
+	// Health/religion fall through to other
+	['health', 'other'],
+	['religion', 'other'],
+];
 
 /**
- * Derive a PlaceCategory from a Pelias result's OSM metadata.
+ * Derive a PlaceCategory from a Pelias feature's category array.
  *
- * Pelias provides category info in several fields depending on the data source.
- * We check them in order of specificity.
+ * @param categories The `category` array from a Pelias feature's properties
+ * @param peliasLayer The Pelias layer (venue, address, street, …) — used as fallback hint
  */
-export function mapOsmToPlaceCategory(
-	osmCategory?: string,
-	osmType?: string,
+export function mapPeliasToPlaceCategory(
+	categories?: string[] | null,
 	peliasLayer?: string
 ): PlaceCategory {
-	// Try direct OSM key/value mapping first
-	if (osmCategory && osmType) {
-		const categoryMap = OSM_CATEGORY_MAP[osmCategory];
-		if (categoryMap) {
-			return categoryMap[osmType] ?? categoryMap._default ?? 'other';
+	if (Array.isArray(categories) && categories.length > 0) {
+		// Walk our priority list and pick the first match
+		for (const [peliasCat, placeCat] of PELIAS_PRIORITY) {
+			if (categories.includes(peliasCat)) return placeCat;
 		}
 	}
 
-	// Try just the OSM key as a category
-	if (osmCategory) {
-		const categoryMap = OSM_CATEGORY_MAP[osmCategory];
-		if (categoryMap?._default) {
-			return categoryMap._default;
-		}
-	}
-
-	// Fallback: use Pelias layer as a hint
+	// Fallback: use Pelias layer as a hint. Addresses/streets/regions
+	// all land in "other" since they aren't really "places" in the
+	// categorical sense.
 	if (peliasLayer) {
 		switch (peliasLayer) {
 			case 'venue':

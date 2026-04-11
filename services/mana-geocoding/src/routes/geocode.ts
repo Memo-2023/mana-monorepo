@@ -10,7 +10,7 @@
 import { Hono } from 'hono';
 import type { Config } from '../config';
 import { LRUCache } from '../lib/cache';
-import { mapOsmToPlaceCategory, type PlaceCategory } from '../lib/category-map';
+import { mapPeliasToPlaceCategory, type PlaceCategory } from '../lib/category-map';
 
 /** Normalized result returned to the client */
 export interface GeocodingResult {
@@ -29,12 +29,10 @@ export interface GeocodingResult {
 		state?: string;
 		country?: string;
 	};
-	/** Our Places category, derived from OSM tags */
+	/** Our Places category, derived from Pelias taxonomy */
 	category: PlaceCategory;
-	/** Raw OSM category key (e.g. "amenity") */
-	osmCategory?: string;
-	/** Raw OSM type value (e.g. "restaurant") */
-	osmType?: string;
+	/** Raw Pelias categories (food, retail, transport, …) */
+	peliasCategories?: string[];
 	/** Pelias confidence score 0-1 */
 	confidence: number;
 }
@@ -174,21 +172,13 @@ interface PeliasFeature {
 		locality?: string;
 		region?: string;
 		country?: string;
-		addendum?: {
-			osm?: {
-				category?: string;
-				type?: string;
-			};
-		};
+		category?: string[];
 	};
 }
 
 function normalizePeliasFeature(feature: PeliasFeature): GeocodingResult {
 	const props = feature.properties;
 	const [lon, lat] = feature.geometry.coordinates;
-
-	const osmCategory = props.addendum?.osm?.category;
-	const osmType = props.addendum?.osm?.type;
 
 	return {
 		label: props.label || props.name || '',
@@ -203,9 +193,8 @@ function normalizePeliasFeature(feature: PeliasFeature): GeocodingResult {
 			state: props.region,
 			country: props.country,
 		},
-		category: mapOsmToPlaceCategory(osmCategory, osmType, props.layer),
-		osmCategory,
-		osmType,
+		category: mapPeliasToPlaceCategory(props.category, props.layer),
+		peliasCategories: props.category,
 		confidence: props.confidence ?? 0,
 	};
 }

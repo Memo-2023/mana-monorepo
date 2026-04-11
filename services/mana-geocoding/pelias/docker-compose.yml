@@ -21,6 +21,14 @@ services:
       PORT: 4000
     volumes:
       - ./pelias.json:/code/pelias.json:ro
+      # Patch: always return the `category` field in API responses, not only
+      # when a `categories=...` filter is present. Pelias' default
+      # `checkCategoryParam` hides category from results unless the caller
+      # filters by it, but we want the OSM taxonomy (food, retail, transport, …)
+      # on every venue so our Places UI can auto-map it to a PlaceCategory.
+      # The patched file is generated from the upstream one with
+      # `sed "s|condition: checkCategoryParam|condition: () => true|"`
+      - ./geojsonify_place_details.js:/code/pelias/api/helper/geojsonify_place_details.js:ro
     depends_on:
       elasticsearch:
         condition: service_healthy
