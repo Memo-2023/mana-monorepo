@@ -10,7 +10,12 @@
 #
 # Ausgabe: /output/index.html + /output/status.json
 
-set -eu
+# set -e dropped — too many false positives from expected non-zero exits
+# in subshells ($(render_rows ...) under heredoc expansion) and from
+# conditional tests inside the while-read tier_apps loop. The script is
+# long and best-effort; we accept partial failures over silent exits
+# before the jq that writes status.json.
+set -u
 
 VM_URL="${VICTORIAMETRICS_URL:-http://victoriametrics:9090}"
 OUTPUT="${OUTPUT_FILE:-/output/index.html}"
