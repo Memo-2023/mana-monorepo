@@ -475,15 +475,30 @@ echo "$(date '+%H:%M:%S') Status-Seite generiert → $OUTPUT (${total_up}/${tota
 JSON_OUTPUT="$(dirname "$OUTPUT")/status.json"
 TIMESTAMP_ISO="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
 
-# Tier-Daten als JSON-Array für jq
+# Tier-Daten als JSON-Array für jq.
+# Shell-native instead of multi-line awk in $() — alpine ash has parsing
+# quirks with escaped double quotes inside single-quoted awk programs
+# that caused the whole script to fail `sh -n` syntax check and skip
+# the jq invocation below (set -e). Building the JSON via a plain
+# while-read loop sidesteps the problem entirely.
 TIER_JSON="[]"
 if [ -n "$TIER_APPS" ]; then
-  TIER_JSON="$(echo "$TIER_APPS" | awk -F'|' '
-    BEGIN { printf "[" }
-    NR>1  { printf "," }
-    { printf "{\"id\":\"%s\",\"name\":\"%s\",\"tier\":\"%s\",\"status\":\"%s\"}", $1, $2, $3, $4 }
-    END   { printf "]" }
-  ')"
+  tier_json_buf="["
+  tier_json_first=1
+  printf '%s\n' "$TIER_APPS" | while IFS='|' read -r tj_id tj_name tj_tier tj_st; do
+    [ -z "$tj_id" ] && continue
+    if [ "$tier_json_first" = "1" ]; then
+      tier_json_first=0
+    else
+      tier_json_buf="${tier_json_buf},"
+    fi
+    tier_json_buf="${tier_json_buf}{\"id\":\"${tj_id}\",\"name\":\"${tj_name}\",\"tier\":\"${tj_tier}\",\"status\":\"${tj_st}\"}"
+    printf '%s' "$tier_json_buf" > /tmp/tier_json.part
+  done
+  if [ -s /tmp/tier_json.part ]; then
+    TIER_JSON="$(cat /tmp/tier_json.part)]"
+    rm -f /tmp/tier_json.part
+  fi
 fi
 
 echo "$SUCCESS_JSON" | jq \
