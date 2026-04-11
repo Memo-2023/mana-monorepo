@@ -8,10 +8,12 @@ COPY services/mana-credits/package.json ./services/mana-credits/
 COPY packages/shared-hono/package.json ./packages/shared-hono/
 COPY packages/shared-types/package.json ./packages/shared-types/
 
-# Install dependencies
-RUN cd services/mana-credits && bun install --frozen-lockfile 2>/dev/null || cd services/mana-credits && bun install
+# Install dependencies (workspace-aware install from root)
+WORKDIR /app/services/mana-credits
+RUN bun install
 
 # Copy source (workspace deps + service)
+WORKDIR /app
 COPY packages/shared-hono ./packages/shared-hono
 COPY packages/shared-types ./packages/shared-types
 COPY services/mana-credits/src ./services/mana-credits/src
