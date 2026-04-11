@@ -45,6 +45,8 @@ const PUBLIC_MANA_EVENTS_URL_CLIENT =
 	process.env.PUBLIC_MANA_EVENTS_URL_CLIENT || process.env.PUBLIC_MANA_EVENTS_URL || '';
 const PUBLIC_MANA_API_URL_CLIENT =
 	process.env.PUBLIC_MANA_API_URL_CLIENT || process.env.PUBLIC_MANA_API_URL || '';
+const PUBLIC_MANA_CREDITS_URL_CLIENT =
+	process.env.PUBLIC_MANA_CREDITS_URL_CLIENT || process.env.PUBLIC_MANA_CREDITS_URL || '';
 
 // Map of app subdomains to internal paths
 const APP_SUBDOMAINS = new Set([
@@ -95,6 +97,7 @@ window.__PUBLIC_MANA_MEDIA_URL__ = ${JSON.stringify(PUBLIC_MANA_MEDIA_URL_CLIENT
 window.__PUBLIC_MANA_LLM_URL__ = ${JSON.stringify(PUBLIC_MANA_LLM_URL_CLIENT)};
 window.__PUBLIC_MANA_EVENTS_URL__ = ${JSON.stringify(PUBLIC_MANA_EVENTS_URL_CLIENT)};
 window.__PUBLIC_MANA_API_URL__ = ${JSON.stringify(PUBLIC_MANA_API_URL_CLIENT)};
+window.__PUBLIC_MANA_CREDITS_URL__ = ${JSON.stringify(PUBLIC_MANA_CREDITS_URL_CLIENT)};
 window.__PUBLIC_GLITCHTIP_DSN__ = ${JSON.stringify(PUBLIC_GLITCHTIP_DSN)};
 </script>`;
 			return injectUmamiAnalytics(html.replace('<head>', `<head>${envScript}`));
@@ -123,6 +126,7 @@ window.__PUBLIC_GLITCHTIP_DSN__ = ${JSON.stringify(PUBLIC_GLITCHTIP_DSN)};
 			PUBLIC_MANA_LLM_URL_CLIENT,
 			PUBLIC_MANA_EVENTS_URL_CLIENT,
 			PUBLIC_MANA_API_URL_CLIENT,
+			PUBLIC_MANA_CREDITS_URL_CLIENT,
 			'wss://sync.mana.how',
 			// transformers.js *also* fetch()es the .wasm binary and the .mjs
 			// loader factory directly to pre-warm the runtime — those go

@@ -46,3 +46,16 @@ export function getManaApiUrl(): string {
 	}
 	return process.env.PUBLIC_MANA_API_URL || 'http://localhost:3060';
 }
+
+/**
+ * Get the mana-credits service URL.
+ * Hosts credit balance, packages, transactions, gift codes, sync billing.
+ */
+export function getManaCreditsUrl(): string {
+	if (browser && typeof window !== 'undefined') {
+		const injected = (window as unknown as { __PUBLIC_MANA_CREDITS_URL__?: string })
+			.__PUBLIC_MANA_CREDITS_URL__;
+		return injected || 'http://localhost:3061';
+	}
+	return process.env.PUBLIC_MANA_CREDITS_URL || 'http://localhost:3061';
+}

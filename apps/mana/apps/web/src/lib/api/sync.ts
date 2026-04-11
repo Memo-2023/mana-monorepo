@@ -4,7 +4,7 @@
  */
 
 import { authStore } from '$lib/stores/auth.svelte';
-import { getManaAuthUrl } from './config';
+import { getManaCreditsUrl } from './config';
 
 // Types
 export type BillingInterval = 'monthly' | 'quarterly' | 'yearly';
@@ -28,7 +28,7 @@ export interface SyncActivateResponse {
 async function fetchWithAuth<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
 	const token = await authStore.getAccessToken();
 
-	const response = await fetch(`${getManaAuthUrl()}${endpoint}`, {
+	const response = await fetch(`${getManaCreditsUrl()}${endpoint}`, {
 		...options,
 		headers: {
 			'Content-Type': 'application/json',

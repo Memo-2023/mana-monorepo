@@ -583,6 +583,8 @@ services:
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana_sync?sslmode=disable
       JWKS_URL: http://mana-auth:3001/api/v1/auth/jwks
       CORS_ORIGINS: "https://mana.how,https://*.mana.how"
+      MANA_CREDITS_URL: http://mana-credits:3002
+      MANA_SERVICE_KEY: ${MANA_SERVICE_KEY}
     ports:
       - "3010:3010"
     healthcheck:
@@ -800,6 +802,8 @@ services:
       # mana-api.* subdomain is the unambiguous new home.
       PUBLIC_MANA_API_URL: http://mana-api:3060
       PUBLIC_MANA_API_URL_CLIENT: https://mana-api.mana.how
+      PUBLIC_MANA_CREDITS_URL: http://mana-credits:3002
+      PUBLIC_MANA_CREDITS_URL_CLIENT: https://credits.mana.how
       # Per-app HTTP backend URLs (todo-api, calendar-api, contacts-api,
       # chat-api, storage-api, cards-api, music-api, nutriphi-api,
       # picture-api, presi-api, zitare-api, clock-api, context-api) and
