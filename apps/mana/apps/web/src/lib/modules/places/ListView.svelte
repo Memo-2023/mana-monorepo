@@ -7,7 +7,13 @@
 	import { useAllPlaces } from './queries';
 	import { placesStore } from './stores/places.svelte';
 	import { trackingStore } from './stores/tracking.svelte';
-	import { searchAddress, formatAddress, type GeocodingResult } from '$lib/geocoding';
+	import {
+		searchAddress,
+		reverseGeocode,
+		formatAddress,
+		formatLocality,
+		type GeocodingResult,
+	} from '$lib/geocoding';
 	import { Star, MapPin, Plus, PencilSimple, Trash, MagnifyingGlass } from '@mana/shared-icons';
 	import type { ViewProps } from '$lib/app-registry';
 	import { ContextMenu, type ContextMenuItem } from '@mana/shared-ui';
@@ -54,6 +60,40 @@
 		leisure: 'Freizeit',
 		other: 'Sonstiges',
 	};
+
+	// --- Reverse geocode of current tracking position ---
+	// When tracking is active we have fresh coordinates every few seconds, but
+	// the GeolocationPosition object is replaced on every update. We debounce
+	// by ~1.5 s and round to ~10 m precision so we only hit the geocoding
+	// service when the user has actually moved, not on every micro-jitter.
+	let currentLocationLabel = $state<string | null>(null);
+	let lastReverseKey = '';
+	let reverseDebounce: ReturnType<typeof setTimeout> | undefined;
+
+	$effect(() => {
+		const pos = trackingStore.currentPosition;
+		if (!pos) {
+			currentLocationLabel = null;
+			lastReverseKey = '';
+			return;
+		}
+
+		// Round to ~10 m precision (4 decimal places) so we don't re-fetch
+		// on every tiny coordinate drift while standing still.
+		const lat = pos.coords.latitude.toFixed(4);
+		const lon = pos.coords.longitude.toFixed(4);
+		const key = `${lat},${lon}`;
+		if (key === lastReverseKey) return;
+		lastReverseKey = key;
+
+		clearTimeout(reverseDebounce);
+		reverseDebounce = setTimeout(async () => {
+			const result = await reverseGeocode(pos.coords.latitude, pos.coords.longitude);
+			if (result) {
+				currentLocationLabel = formatLocality(result);
+			}
+		}, 1500);
+	});
 
 	// --- Address autocomplete ---
 	let addressQuery = $state('');
@@ -191,12 +231,20 @@
 				{trackingStore.isTracking ? 'Tracking aktiv' : 'Tracking starten'}
 			</button>
 			{#if trackingStore.currentPosition}
-				<span class="tracking-coords">
-					{formatCoords(
-						trackingStore.currentPosition.coords.latitude,
-						trackingStore.currentPosition.coords.longitude
-					)}
-				</span>
+				<div class="tracking-location">
+					{#if currentLocationLabel}
+						<span class="tracking-label">
+							<MapPin size={10} />
+							{currentLocationLabel}
+						</span>
+					{/if}
+					<span class="tracking-coords">
+						{formatCoords(
+							trackingStore.currentPosition.coords.latitude,
+							trackingStore.currentPosition.coords.longitude
+						)}
+					</span>
+				</div>
 			{/if}
 		</div>
 		{#if trackingStore.error}
@@ -398,6 +446,27 @@
 	.tracking-dot.pulse {
 		background: #0ea5e9;
 		animation: dot-pulse 2s ease-in-out infinite;
+	}
+
+	.tracking-location {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-end;
+		gap: 0.0625rem;
+		min-width: 0;
+	}
+
+	.tracking-label {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.1875rem;
+		font-size: 0.75rem;
+		color: #0ea5e9;
+		font-weight: 500;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		max-width: 220px;
 	}
 
 	.tracking-coords {
