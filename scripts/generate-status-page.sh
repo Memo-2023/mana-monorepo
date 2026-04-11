@@ -482,7 +482,7 @@ TIMESTAMP_ISO="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
 # the jq invocation below (set -e). Building the JSON via a plain
 # while-read loop sidesteps the problem entirely.
 TIER_JSON="[]"
-if [ -n "$TIER_APPS" ]; then
+if [ -n "${TIER_APPS:-}" ]; then
   tier_json_buf="["
   tier_json_first=1
   printf '%s\n' "$TIER_APPS" | while IFS='|' read -r tj_id tj_name tj_tier tj_st; do
