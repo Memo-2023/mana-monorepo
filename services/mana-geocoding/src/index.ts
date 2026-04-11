@@ -16,5 +16,9 @@ console.log(`Pelias API: ${config.pelias.apiUrl}`);
 
 export default {
 	port: config.port,
+	// Bun's default idleTimeout is 10s — too tight for Pelias cold queries
+	// that need to hit Elasticsearch and libpostal. 60s is generous enough
+	// for the worst-case while still cutting off stuck connections.
+	idleTimeout: 60,
 	fetch: createApp(config).fetch,
 };

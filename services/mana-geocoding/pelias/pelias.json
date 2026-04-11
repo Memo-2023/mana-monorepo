@@ -12,15 +12,6 @@
 		"services": {
 			"libpostal": {
 				"url": "http://libpostal:4400"
-			},
-			"placeholder": {
-				"url": "http://placeholder:4100"
-			},
-			"pip": {
-				"url": "http://pip:4200"
-			},
-			"interpolation": {
-				"url": "http://interpolation:4300"
 			}
 		},
 		"defaultParameters": {}
