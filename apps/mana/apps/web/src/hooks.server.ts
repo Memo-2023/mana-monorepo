@@ -76,21 +76,29 @@ const APP_SUBDOMAINS = new Set([
 ]);
 
 export const handle: Handle = async ({ event, resolve }) => {
-	// Force HTTPS in production. Cloudflare forwards HTTP requests to the
-	// origin without rewriting the scheme, so without this redirect a user
-	// who types `mana.how` (no scheme → HTTP default) loads the page over
-	// HTTP and the browser then sends `Origin: http://mana.how` on every
-	// fetch. mana-auth's CORS only allows `https://mana.how`, so all auth
-	// requests fail and the loader hangs forever.
+	// Force HTTPS in production. cloudflared forwards HTTP requests over
+	// the tunnel without rewriting the scheme, so a user who types
+	// `mana.how` (no scheme → HTTP default) loads the page over HTTP. The
+	// browser then sends `Origin: http://mana.how` on every fetch, but
+	// mana-auth's CORS only allows `https://mana.how` → all auth requests
+	// fail → AuthGate hangs on the loading spinner forever.
+	//
+	// Detection: prefer cf-visitor / x-forwarded-proto when present
+	// (Cloudflare proxy adds them); otherwise fall back to event.url.protocol.
 	const host = event.request.headers.get('host') || '';
 	const cfVisitor = event.request.headers.get('cf-visitor'); // {"scheme":"http"|"https"}
 	const xfProto = event.request.headers.get('x-forwarded-proto');
-	const isHttp =
-		(cfVisitor && cfVisitor.includes('"scheme":"http"')) ||
-		xfProto === 'http' ||
-		(event.url.protocol === 'http:' && !cfVisitor && !xfProto);
+	let actualProto: 'http' | 'https' = 'https';
+	if (cfVisitor) {
+		actualProto = cfVisitor.includes('"scheme":"http"') ? 'http' : 'https';
+	} else if (xfProto) {
+		actualProto = xfProto === 'http' ? 'http' : 'https';
+	} else if (event.url.protocol === 'http:') {
+		actualProto = 'http';
+	}
 	const isLocal = host.startsWith('localhost') || host.startsWith('127.');
-	if (isHttp && !isLocal) {
+	const isMana = host.endsWith('mana.how');
+	if (actualProto === 'http' && !isLocal && isMana) {
 		return new Response(null, {
 			status: 301,
 			headers: { Location: `https://${host}${event.url.pathname}${event.url.search}` },
