@@ -12,7 +12,7 @@ import { HTTPException } from 'hono/http-exception';
 import { authMiddleware } from '@mana/shared-hono/auth';
 import type { AuthVariables } from '@mana/shared-hono';
 import { drizzle } from 'drizzle-orm/postgres-js';
-import postgres from 'postgres';
+import { getConnection } from '../../lib/db';
 import {
 	decks,
 	slides,
@@ -25,11 +25,7 @@ import {
 
 // ─── DB Connection ─────────────────────────────────────────
 
-const DATABASE_URL =
-	process.env.DATABASE_URL ?? 'postgresql://mana:devpassword@localhost:5432/mana_platform';
-
-const connection = postgres(DATABASE_URL, { max: 5, idle_timeout: 20 });
-const db = drizzle(connection, {
+const db = drizzle(getConnection(), {
 	schema: {
 		decks,
 		slides,

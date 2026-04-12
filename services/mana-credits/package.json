@@ -1,5 +1,5 @@
 {
-	"name": "@mana/credits",
+	"name": "@mana/credits-service",
 	"version": "0.1.0",
 	"private": true,
 	"type": "module",

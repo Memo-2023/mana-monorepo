@@ -615,7 +615,7 @@
 				},
 				{
 					"datasource": { "type": "prometheus", "uid": "${datasource}" },
-					"expr": "up{job=\"planta-backend\"}",
+					"expr": "up{job=\"plants-backend\"}",
 					"legendFormat": "Planta",
 					"refId": "Q"
 				},

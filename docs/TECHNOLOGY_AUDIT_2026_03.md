@@ -64,7 +64,7 @@ Jeder einzelne Backend-Service:
 | Kategorie | Backends | Source Files | Empfehlung |
 |-----------|----------|-------------|------------|
 | **Komplex (behalten)** | Chat, Todo, Calendar, Contacts, Storage, Mukke | 60-89 pro Backend | Eigenstaendige Services |
-| **AI-spezialisiert (behalten)** | Picture, Planta, NutriPhi | 30-50 pro Backend | Eigene AI-Pipelines |
+| **AI-spezialisiert (behalten)** | Picture, Plants, NutriPhi | 30-50 pro Backend | Eigene AI-Pipelines |
 | **Triviales CRUD (konsolidieren)** | Zitare (20!), Clock (31), Presi, CityCorners, Questions, Context | 20-35 pro Backend | -> 1 Content Service |
 | **Eliminieren** | Photos (mana-media Proxy), Skilltree (Frontend-only) | minimal | Backend loeschen |
 
@@ -558,7 +558,7 @@ Diese Technologie-Entscheidungen sind gut und sollten beibehalten werden:
 
 ### Apps (24)
 
-calendar, chat, citycorners, clock, contacts, context, docs, inventar, mana, cards, matrix, mukke, nutriphi, photos, picture, planta, playground, presi, questions, skilltree, storage, todo, traces, zitare
+calendar, chat, citycorners, clock, contacts, context, docs, inventar, mana, cards, matrix, mukke, nutriphi, photos, picture, plants, playground, presi, questions, skilltree, storage, todo, traces, zitare
 
 ### Services (17)
 

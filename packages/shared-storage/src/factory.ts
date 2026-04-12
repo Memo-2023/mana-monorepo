@@ -32,7 +32,7 @@ const PUBLIC_URL_ENV: Partial<Record<keyof typeof BUCKETS, string>> = {
 	PICTURE: 'PICTURE_STORAGE_PUBLIC_URL',
 	STORAGE: 'STORAGE_S3_PUBLIC_URL',
 	INVENTORY: 'INVENTORY_S3_PUBLIC_URL',
-	PLANTA: 'PLANTA_STORAGE_PUBLIC_URL',
+	PLANTS: 'PLANTS_STORAGE_PUBLIC_URL',
 };
 
 /**
@@ -111,5 +111,5 @@ export const createStorageStorage = (publicUrl?: string) => createStorage('STORA
 export const createMailStorage = () => createStorage('MAIL');
 export const createInventoryStorage = (publicUrl?: string) => createStorage('INVENTORY', publicUrl);
 export const createMusicStorage = () => createStorage('MUSIC');
-export const createPlantaStorage = (publicUrl?: string) => createStorage('PLANTA', publicUrl);
+export const createPlantsStorage = (publicUrl?: string) => createStorage('PLANTS', publicUrl);
 export const createProjectDocStorage = () => createStorage('PROJECTDOC');

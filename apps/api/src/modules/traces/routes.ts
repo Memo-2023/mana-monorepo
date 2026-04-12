@@ -10,7 +10,7 @@ import { Hono } from 'hono';
 import { logger, type AuthVariables } from '@mana/shared-hono';
 import { eq, and } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/postgres-js';
-import postgres from 'postgres';
+import { getConnection } from '../../lib/db';
 import {
 	pgSchema,
 	uuid,
@@ -23,8 +23,6 @@ import {
 
 // ─── DB Schema ──────────────────────────────────────────────
 
-const DATABASE_URL =
-	process.env.DATABASE_URL ?? 'postgresql://mana:devpassword@localhost:5432/mana_platform';
 const LLM_URL = process.env.MANA_LLM_URL || 'http://localhost:3025';
 
 const tracesSchema = pgSchema('traces');
@@ -116,8 +114,7 @@ const guidePois = tracesSchema.table('guide_pois', {
 	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
-const connection = postgres(DATABASE_URL, { max: 5, idle_timeout: 20 });
-const db = drizzle(connection, { schema: { locations, cities, pois, guides, guidePois } });
+const db = drizzle(getConnection(), { schema: { locations, cities, pois, guides, guidePois } });
 
 // ─── Routes ─────────────────────────────────────────────────
 

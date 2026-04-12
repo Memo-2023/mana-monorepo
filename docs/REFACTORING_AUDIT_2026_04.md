@@ -33,7 +33,7 @@ nicht zentralisiert.
 
 ### 2. ✅ 8× Recursive Turbo Anti-Pattern fixen
 
-**Wo:** `apps/{uload,context,moodlit,planta,storage,news,questions}/package.json`
+**Wo:** `apps/{uload,context,moodlit,plants,storage,news,questions}/package.json`
 + `games/arcade/package.json` (im Audit-Sweep zusätzlich gefunden)
 
 **Problem:** Diese package.json enthielten `"dev": "turbo run dev"`.
@@ -49,9 +49,9 @@ gefundene Dead-Code:
   auf nicht-existierende `@context/web` / `@context/server` Packages —
   entfernt, nur `dev:mobile` bleibt (das einzige real existierende
   Sub-Package).
-- `apps/planta/package.json` hatte `dev:web`, `dev:server`, `db:push`,
-  `db:studio`, `db:seed` Filter auf nicht-existierende `@planta/web` /
-  `@planta/server` Packages — entfernt. `apps/planta/` enthält nur ein
+- `apps/plants/package.json` hatte `dev:web`, `dev:server`, `db:push`,
+  `db:studio`, `db:seed` Filter auf nicht-existierende `@plants/web` /
+  `@plants/server` Packages — entfernt. `apps/plants/` enthält nur ein
   leeres `packages/shared/` (siehe Audit-Item #11/#18).
 - Analog ist `apps/storage/` und `apps/questions/` nur ein Stub mit
   `packages/shared/` bzw. nichts — die CLAUDE.md-Files referenzieren
@@ -86,7 +86,7 @@ hatten die Infrastruktur bereits — sie wurde nur nicht benutzt.
 - `packages/shared-hono/src/index.ts`: Re-exportiert `logger` aus
   `@mana/shared-logger`, damit Module ohne extra dependency darauf
   zugreifen können.
-- 7 `console.error` Aufrufe in `apps/api/src/modules/{guides,planta,
+- 7 `console.error` Aufrufe in `apps/api/src/modules/{guides,plants,
   nutriphi,traces}/routes.ts` durch
   `logger.error('module.event_name', { error: ... })` ersetzt. Event-Namen
   folgen `<module>.<event>` Konvention für Filterbarkeit in Sentry/JSON-Logs.
@@ -373,7 +373,7 @@ nicht mehr existiert.
   `apps/uload/apps/server`. Beide deployed via
   `docker-compose.macmini.yml`.
 - Alle anderen 17 (`calendar`, `chat`, `todo`, `contacts`, `picture`,
-  `cards`, `planta`, `nutriphi`, `news`, `traces`, `presi`, `storage`,
+  `cards`, `plants`, `nutriphi`, `news`, `traces`, `presi`, `storage`,
   `music`, `moodlit`, `context`, `guides`, `questions`) wurden zu
   `apps/api/src/modules/{name}/routes.ts` migriert. Ihre `apps/server/`
   Verzeichnisse existieren nicht mehr.

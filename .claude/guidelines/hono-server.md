@@ -85,7 +85,7 @@ uploadRoutes.post('/avatar', async (c) => {
 
 Only servers that need their own database use Drizzle. Most apps rely on mana-sync for data persistence.
 
-**Servers with Drizzle:** chat, todo, moodlit, context, planta, presi, traces, uload, wisekeep, news
+**Servers with Drizzle:** chat, todo, moodlit, context, plants, presi, traces, uload, wisekeep, news
 
 **Servers without Drizzle (mana-sync only):** calendar, contacts, cards, mukke, nutriphi, picture, questions, storage
 

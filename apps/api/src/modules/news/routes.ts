@@ -14,16 +14,12 @@ import { Hono } from 'hono';
 import { Readability } from '@mozilla/readability';
 import { JSDOM } from 'jsdom';
 import { drizzle } from 'drizzle-orm/postgres-js';
-import postgres from 'postgres';
 import { sql } from 'drizzle-orm';
+import { getConnection } from '../../lib/db';
 
 // ─── DB Connection (reads from news.curated_articles) ──────
 
-const DATABASE_URL =
-	process.env.DATABASE_URL ?? 'postgresql://mana:devpassword@localhost:5432/mana_platform';
-
-const connection = postgres(DATABASE_URL, { max: 10 });
-const db = drizzle(connection);
+const db = drizzle(getConnection());
 
 // ─── Extract Service (Readability fallback for ad-hoc URLs) ─
 

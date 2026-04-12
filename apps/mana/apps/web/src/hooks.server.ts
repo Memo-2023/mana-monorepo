@@ -56,7 +56,7 @@ const APP_SUBDOMAINS = new Set([
 	'contacts',
 	'zitare',
 	'skilltree',
-	'planta',
+	'plants',
 	'cards',
 	'storage',
 	'presi',

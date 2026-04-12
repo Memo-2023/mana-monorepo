@@ -69,7 +69,7 @@ import { timesModuleConfig } from '$lib/modules/times/module.config';
 import { contextModuleConfig } from '$lib/modules/context/module.config';
 import { questionsModuleConfig } from '$lib/modules/questions/module.config';
 import { nutriphiModuleConfig } from '$lib/modules/nutriphi/module.config';
-import { plantaModuleConfig } from '$lib/modules/planta/module.config';
+import { plantsModuleConfig } from '$lib/modules/plants/module.config';
 import { uloadModuleConfig } from '$lib/modules/uload/module.config';
 import { calcModuleConfig } from '$lib/modules/calc/module.config';
 import { moodlitModuleConfig } from '$lib/modules/moodlit/module.config';
@@ -113,7 +113,7 @@ export const MODULE_CONFIGS: readonly ModuleConfig[] = [
 	contextModuleConfig,
 	questionsModuleConfig,
 	nutriphiModuleConfig,
-	plantaModuleConfig,
+	plantsModuleConfig,
 	uloadModuleConfig,
 	calcModuleConfig,
 	moodlitModuleConfig,

@@ -25,7 +25,7 @@ const SPLIT_APP_ID_LIST = [
 	'context',
 	'questions',
 	'nutriphi',
-	'planta',
+	'plants',
 	'uload',
 	'calc',
 	'moodlit',

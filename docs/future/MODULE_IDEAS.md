@@ -19,7 +19,7 @@ recommendation.
 
 **Productivity:** todo, calendar, contacts, notes, habits, times, timeblocks, events
 **Knowledge & learning:** cards, zitare, guides, questions, skilltree, memoro, context
-**Health & self:** nutriphi, cycles, dreams, moodlit, planta
+**Health & self:** nutriphi, cycles, dreams, moodlit, plants
 **Media & creative:** chat, picture, presi, music, photos, storage, uload
 **Data & tools:** finance, calc, inventory, places, citycorners, who, news, links, tags, playground
 
@@ -104,7 +104,7 @@ recommendation.
 
 - **kids** *(ZK)* — Milestones, illnesses, growth, photos
 - **pets** — Vet appointments, vaccinations, feeding, weight
-- **plants-care** — Extension of `planta`: watering plan, fertilizing, repotting
+- **plants-care** — Extension of `plants`: watering plan, fertilizing, repotting
 
 ## Health & Body (additional)
 

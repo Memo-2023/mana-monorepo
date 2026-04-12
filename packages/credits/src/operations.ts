@@ -44,7 +44,7 @@ export enum CreditOperationType {
 	// Zitare - AI explanations
 	AI_QUOTE_EXPLANATION = 'ai_quote_explanation',
 
-	// Planta - Plant analysis
+	// Plants - Plant analysis
 	AI_PLANT_ANALYSIS = 'ai_plant_analysis',
 
 	// Traces - City guide generation
@@ -243,12 +243,12 @@ export const OPERATION_METADATA: Record<CreditOperationType, OperationMetadata> 
 		app: 'zitare',
 	},
 
-	// Planta
+	// Plants
 	[CreditOperationType.AI_PLANT_ANALYSIS]: {
 		name: 'Plant Analysis',
 		description: 'Identify and analyze a plant from a photo',
 		category: CreditCategory.AI,
-		app: 'planta',
+		app: 'plants',
 	},
 
 	// Traces

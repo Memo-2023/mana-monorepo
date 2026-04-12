@@ -68,7 +68,7 @@
 		cards: 'Cards',
 		nutriphi: 'NutriPhi',
 		picture: 'Picture',
-		planta: 'Planta',
+		plants: 'Plants',
 		presi: 'Presi',
 		questions: 'Questions',
 		skilltree: 'SkillTree',

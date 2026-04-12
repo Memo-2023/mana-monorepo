@@ -605,13 +605,13 @@ registerApp({
 });
 
 registerApp({
-	id: 'planta',
-	name: 'Planta',
+	id: 'plants',
+	name: 'Plants',
 	color: '#16A34A',
 	icon: Plant,
 	views: {
-		list: { load: () => import('$lib/modules/planta/ListView.svelte') },
-		detail: { load: () => import('$lib/modules/planta/views/DetailView.svelte') },
+		list: { load: () => import('$lib/modules/plants/ListView.svelte') },
+		detail: { load: () => import('$lib/modules/plants/views/DetailView.svelte') },
 	},
 });
 

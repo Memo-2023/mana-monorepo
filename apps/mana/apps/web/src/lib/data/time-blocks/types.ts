@@ -38,7 +38,7 @@ export type TimeBlockSourceModule =
 	| 'habits'
 	| 'events'
 	| 'body'
-	| 'planta'
+	| 'plants'
 	| 'dreams'
 	| 'skilltree'
 	| 'cycles'

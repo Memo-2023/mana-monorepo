@@ -28,7 +28,7 @@ Each app gets its own isolated bucket, created automatically by `minio-init`:
 | `mail-storage` | Mail | Email attachments |
 | `inventory-storage` | Inventory | Product photos |
 | `music-storage` | Music | Music tracks, beats, covers |
-| `planta-storage` | Planta | Plant photos |
+| `plants-storage` | Planta | Plant photos |
 | `projectdoc-storage` | ProjectDoc | Document files |
 
 ## Usage

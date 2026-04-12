@@ -13,11 +13,8 @@
  */
 
 import { drizzle } from 'drizzle-orm/postgres-js';
-import postgres from 'postgres';
 import { pgSchema, uuid, text, timestamp, integer, jsonb } from 'drizzle-orm/pg-core';
-
-const DATABASE_URL =
-	process.env.DATABASE_URL ?? 'postgresql://mana:devpassword@localhost:5432/mana_platform';
+import { getConnection } from '../../lib/db';
 
 export const researchSchema = pgSchema('research');
 
@@ -58,8 +55,7 @@ export const sources = researchSchema.table('sources', {
 	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
-const connection = postgres(DATABASE_URL, { max: 5, idle_timeout: 20 });
-export const db = drizzle(connection, { schema: { researchResults, sources } });
+export const db = drizzle(getConnection(), { schema: { researchResults, sources } });
 
 export type ResearchResult = typeof researchResults.$inferSelect;
 export type Source = typeof sources.$inferSelect;

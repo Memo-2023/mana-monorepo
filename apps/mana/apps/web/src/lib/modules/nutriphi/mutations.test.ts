@@ -15,7 +15,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Database hooks call into funnel-tracking + trigger registry on every write.
 // They reach for browser-only globals (localStorage), so stub them the same
-// way the planta tests do.
+// way the plants tests do.
 vi.mock('$lib/stores/funnel-tracking', () => ({ trackFirstContent: vi.fn() }));
 vi.mock('$lib/triggers/registry', () => ({ fire: vi.fn() }));
 vi.mock('$lib/triggers/inline-suggest', () => ({

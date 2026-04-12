@@ -124,7 +124,7 @@
 			<div class="mb-2 text-3xl">&#127793;</div>
 			<p class="text-sm text-muted-foreground">Noch keine Pflanzen angelegt.</p>
 			<a
-				href="/planta"
+				href="/plants"
 				class="mt-3 inline-block rounded-lg bg-primary/10 px-4 py-2 text-sm font-medium text-primary hover:bg-primary/20"
 			>
 				Pflanze hinzufügen
@@ -140,7 +140,7 @@
 		<div class="space-y-2">
 			{#each plantsToWater as plant (plant.id)}
 				<a
-					href="/planta"
+					href="/plants"
 					class="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-surface-hover"
 				>
 					<span class="text-lg">{@html getHealthIcon(plant.healthStatus)}</span>
@@ -157,7 +157,7 @@
 			{/each}
 		</div>
 
-		<a href="/planta" class="mt-3 block text-center text-sm text-primary hover:underline">
+		<a href="/plants" class="mt-3 block text-center text-sm text-primary hover:underline">
 			Alle Pflanzen anzeigen
 		</a>
 	{/if}

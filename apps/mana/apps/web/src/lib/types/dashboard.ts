@@ -27,7 +27,7 @@ export type WidgetType =
 	| 'context-docs' // Context: recent documents & spaces
 	| 'active-timer' // Times: running timer
 	| 'nutrition-progress' // NutriPhi: today's calorie progress
-	| 'plant-watering' // Planta: plants due for watering
+	| 'plant-watering' // Plants: plants due for watering
 	| 'day-timeline' // TimeBlocks: chronological day timeline
 	| 'activity-feed' // TimeBlocks: recent activity across modules
 	| 'cycles' // Cycles: current phase + days until next period
@@ -131,7 +131,7 @@ export interface WidgetMeta {
 		| 'context'
 		| 'times'
 		| 'nutriphi'
-		| 'planta'
+		| 'plants'
 		| 'cycles'
 		| 'body'
 		| 'mana-auth';
@@ -318,7 +318,7 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
 		icon: '🌱',
 		defaultSize: 'small',
 		allowMultiple: false,
-		requiredBackend: 'planta',
+		requiredBackend: 'plants',
 	},
 	{
 		type: 'day-timeline',

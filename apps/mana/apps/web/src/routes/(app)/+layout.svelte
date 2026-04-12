@@ -42,16 +42,9 @@
 	import { linkLocalStore, linkMutations } from '@mana/shared-links';
 	import { manaStore } from '$lib/data/local-store';
 	import { startLlmQueue, stopLlmQueue } from '$lib/llm-queue';
-	import { llmSettingsState, updateLlmSettings, tierLabel, type LlmTier } from '@mana/shared-llm';
-	import { isLocalLlmSupported, getLocalLlmStatus, loadLocalLlm } from '@mana/local-llm';
-	import {
-		getLocalSttStatus,
-		loadLocalStt,
-		isLocalSttSupported,
-		MODELS as STT_MODELS,
-		DEFAULT_MODEL as STT_DEFAULT_MODEL,
-		type ModelKey as SttModelKey,
-	} from '@mana/local-stt';
+	import { useAiTierItems } from '$lib/components/layout/use-ai-tier-items.svelte';
+	import { useSyncStatusItems } from '$lib/components/layout/use-sync-status-items.svelte';
+	import RouteTierGate from '$lib/components/layout/RouteTierGate.svelte';
 	import { useLocalStt } from '$lib/components/voice/use-local-stt.svelte';
 	import { Microphone, Stop } from '@mana/shared-icons';
 	import {
@@ -186,274 +179,10 @@
 	let currentLanguageLabel = $derived(getCurrentLanguageLabel(currentLocale));
 
 	// ── AI Tier Selector (PillNav dropdown) ─────────────────
-	const webgpuSupported = isLocalLlmSupported();
-	const localLlmStatus = getLocalLlmStatus();
-	const sttSupported = isLocalSttSupported();
-	const localSttStatus = getLocalSttStatus();
-	let selectedSttModel = $state<SttModelKey>(STT_DEFAULT_MODEL);
-	const llmSettings = $derived(llmSettingsState.current);
-
-	function toggleAiTier(tier: LlmTier) {
-		const current = llmSettings.allowedTiers;
-		const next = current.includes(tier)
-			? current.filter((t: LlmTier) => t !== tier)
-			: [...current, tier];
-		updateLlmSettings({ allowedTiers: next });
-	}
-
-	const TIER_TOGGLE_LIST: Array<{ tier: LlmTier; shortLabel: string; icon: string }> = [
-		{ tier: 'browser', shortLabel: 'Lokal (Gemma 4)', icon: 'robot' },
-		{ tier: 'mana-server', shortLabel: 'Server (Gemma 4)', icon: 'globe' },
-		{ tier: 'cloud', shortLabel: 'Cloud (Gemini)', icon: 'cloud' },
-	];
-
-	let aiTierItems = $derived<PillDropdownItem[]>([
-		// Tier toggles — browser tier item and its model-status buddy share a
-		// group so PillDropdownBar renders them as a paired pill.
-		...TIER_TOGGLE_LIST.filter((t) => t.tier !== 'browser' || webgpuSupported).map((t) => {
-			const isActive = llmSettings.allowedTiers.includes(t.tier);
-			return {
-				id: `ai-tier-${t.tier}`,
-				label: t.shortLabel,
-				icon: isActive ? 'checkCircle' : t.icon,
-				active: isActive,
-				onClick: () => toggleAiTier(t.tier),
-				...(t.tier === 'browser' ? { group: 'local-llm' } : {}),
-			};
-		}),
-		// Browser model status / load button (grouped with the "Lokal" toggle).
-		// Handles all LoadingStatus states so the user sees feedback during
-		// download, initialization, and on error (e.g. worker crash).
-		...(llmSettings.allowedTiers.includes('browser') && webgpuSupported
-			? [
-					(() => {
-						const s = localLlmStatus.current;
-						const state = s.state;
-						let label: string;
-						let icon: string;
-						let danger = false;
-						let disabled = false;
-
-						switch (state) {
-							case 'ready':
-								label = 'Geladen';
-								icon = 'checkCircle';
-								disabled = true;
-								break;
-							case 'downloading':
-								label = `Lade… ${((s as { progress: number }).progress * 100).toFixed(0)}%`;
-								icon = 'clock';
-								disabled = true;
-								break;
-							case 'loading':
-								label = 'Initialisiere…';
-								icon = 'clock';
-								disabled = true;
-								break;
-							case 'checking':
-								label = 'Prüfe…';
-								icon = 'clock';
-								disabled = true;
-								break;
-							case 'error':
-								label = 'Fehler — erneut versuchen';
-								icon = 'bell';
-								danger = true;
-								break;
-							default:
-								label = 'Modell laden';
-								icon = 'cloud';
-						}
-
-						return {
-							id: 'ai-browser-status',
-							label,
-							icon,
-							group: 'local-llm',
-							danger,
-							disabled,
-							progress: state === 'downloading' ? (s as { progress: number }).progress : undefined,
-							onClick: !disabled ? () => void loadLocalLlm() : undefined,
-						};
-					})(),
-				]
-			: []),
-		// ── STT section ──────────────────────────────────
-		{ id: 'stt-divider', label: '', divider: true },
-		// STT model selector — each model is a pill, active = currently selected
-		...(sttSupported
-			? (Object.entries(STT_MODELS) as [SttModelKey, (typeof STT_MODELS)[SttModelKey]][]).map(
-					([key, model]) => {
-						const isSelected = selectedSttModel === key;
-						return {
-							id: `stt-model-${key}`,
-							label: model.displayName,
-							icon: isSelected ? 'checkCircle' : 'mic',
-							active: isSelected,
-							onClick: () => {
-								selectedSttModel = key;
-								void loadLocalStt(key);
-							},
-						};
-					}
-				)
-			: []),
-		// STT model status (grouped with selected model)
-		...(sttSupported
-			? [
-					(() => {
-						const s = localSttStatus.current;
-						const state = s.state;
-						let label: string;
-						let icon: string;
-						let danger = false;
-						let disabled = false;
-
-						switch (state) {
-							case 'ready':
-								label = 'STT bereit';
-								icon = 'checkCircle';
-								disabled = true;
-								break;
-							case 'downloading':
-								label = `STT Lade… ${((s as { progress: number }).progress * 100).toFixed(0)}%`;
-								icon = 'clock';
-								disabled = true;
-								break;
-							case 'loading':
-								label = 'STT lädt…';
-								icon = 'clock';
-								disabled = true;
-								break;
-							case 'checking':
-								label = 'STT prüft…';
-								icon = 'clock';
-								disabled = true;
-								break;
-							case 'error':
-								label = 'STT Fehler';
-								icon = 'bell';
-								danger = true;
-								break;
-							default:
-								label = 'STT Modell laden';
-								icon = 'mic';
-						}
-
-						return {
-							id: 'stt-status',
-							label,
-							icon,
-							danger,
-							disabled,
-							progress: state === 'downloading' ? (s as { progress: number }).progress : undefined,
-							onClick: !disabled ? () => void loadLocalStt(selectedSttModel) : undefined,
-						};
-					})(),
-				]
-			: []),
-		// Divider + settings link
-		{ id: 'ai-divider', label: '', divider: true },
-		{
-			id: 'ai-settings',
-			label: 'KI-Einstellungen',
-			icon: 'settings',
-			onClick: () => goto('/settings#ai-options'),
-		},
-	]);
-
-	let currentAiTierLabel = $derived.by(() => {
-		const active = llmSettings.allowedTiers;
-		if (active.length === 0) return 'Aus';
-		// Show the first (privacy-sorted) tier's short name
-		const sorted = [...active].sort(
-			(a, b) =>
-				TIER_TOGGLE_LIST.findIndex((t) => t.tier === a) -
-				TIER_TOGGLE_LIST.findIndex((t) => t.tier === b)
-		);
-		const first = TIER_TOGGLE_LIST.find((t) => t.tier === sorted[0]);
-		return first ? first.shortLabel.split(' (')[0] : 'KI';
-	});
-
-	let currentAiTierIcon = $derived.by(() => {
-		const active = llmSettings.allowedTiers;
-		if (active.length === 0) return 'power';
-		const sorted = [...active].sort(
-			(a, b) =>
-				TIER_TOGGLE_LIST.findIndex((t) => t.tier === a) -
-				TIER_TOGGLE_LIST.findIndex((t) => t.tier === b)
-		);
-		const first = TIER_TOGGLE_LIST.find((t) => t.tier === sorted[0]);
-		return first ? first.icon : 'cpu';
-	});
+	const aiTier = useAiTierItems();
 
 	// ── Sync status dropdown ────────────────────────────────
-	let syncStatusItems = $derived.by(() => {
-		const items: import('@mana/shared-ui').PillDropdownItem[] = [];
-
-		if (syncBilling.active) {
-			items.push({
-				id: 'sync-active',
-				label: 'Cloud Sync aktiv',
-				icon: 'cloud',
-				active: true,
-				disabled: true,
-			});
-			if (syncBilling.nextChargeAt) {
-				const date = new Date(syncBilling.nextChargeAt).toLocaleDateString('de-DE', {
-					day: '2-digit',
-					month: '2-digit',
-					year: 'numeric',
-				});
-				items.push({
-					id: 'sync-next',
-					label: `Nächste Abbuchung: ${date}`,
-					icon: 'calendar',
-					disabled: true,
-				});
-			}
-		} else if (syncBilling.paused) {
-			items.push({
-				id: 'sync-paused',
-				label: 'Sync pausiert — Credits aufladen',
-				icon: 'bell',
-				onClick: () => goto('/credits?tab=packages'),
-			});
-		} else {
-			items.push({
-				id: 'sync-inactive',
-				label: 'Sync aktivieren',
-				icon: 'cloud',
-				onClick: () => goto('/settings/sync'),
-			});
-			items.push({
-				id: 'sync-info',
-				label: 'Nur lokal — ab 30 Credits/Monat',
-				icon: 'creditCard',
-				disabled: true,
-			});
-		}
-
-		items.push({ id: 'sync-divider', label: '', divider: true });
-		items.push({
-			id: 'sync-settings',
-			label: 'Sync-Einstellungen',
-			icon: 'settings',
-			onClick: () => goto('/settings/sync'),
-		});
-
-		return items;
-	});
-
-	let currentSyncLabel = $derived(
-		syncBilling.loading
-			? '...'
-			: syncBilling.active
-				? 'Sync'
-				: syncBilling.paused
-					? 'Pausiert'
-					: 'Lokal'
-	);
+	const syncStatus = useSyncStatusItems();
 
 	// ── User / Guest awareness ──────────────────────────────
 	let userEmail = $derived(
@@ -817,11 +546,10 @@
 	$effect(() => {
 		const t = localStt.text;
 		const e = localStt.error;
-		if (e) {
+		if (import.meta.env.DEV && e) {
 			console.warn('[layout-stt] Error:', e);
 		}
 		if (t) {
-			console.log('[layout-stt] Transcribed text:', t);
 			sttInjectedText = t;
 		}
 	});
@@ -1082,12 +810,12 @@
 					primaryColor="#6366f1"
 					showAppSwitcher={true}
 					showAiTierSelector={true}
-					{aiTierItems}
-					{currentAiTierLabel}
-					{currentAiTierIcon}
+					aiTierItems={aiTier.items}
+					currentAiTierLabel={aiTier.label}
+					currentAiTierIcon={aiTier.icon}
 					showSyncStatus={authStore.isAuthenticated}
-					{syncStatusItems}
-					{currentSyncLabel}
+					syncStatusItems={syncStatus.items}
+					currentSyncLabel={syncStatus.label}
 					{appItems}
 					{userEmail}
 					settingsHref="/settings"
@@ -1121,70 +849,11 @@
 		>
 			<div class="mx-auto max-w-7xl px-3 py-2 sm:px-6 sm:py-3 lg:px-8">
 				{#if routeBlocked && routeAppId}
-					<!-- Per-route tier gate. The wrapping AuthGate only fires
-						 onMount + only for authenticated users, so this is the
-						 only place that catches direct URL navigation into a
-						 gated module by a guest or under-tier user. -->
-					<div class="flex min-h-[60vh] items-center justify-center p-6">
-						<div
-							class="w-full max-w-96 rounded-2xl border px-8 py-10 text-center shadow-sm"
-							style:border-color="hsl(var(--border, 0 0% 90%))"
-							style:background-color="hsl(var(--card, 0 0% 100%))"
-						>
-							<h1 class="mb-4 text-xl font-bold" style:color="hsl(var(--foreground, 0 0% 9%))">
-								{routeAppId.name}
-							</h1>
-							<div class="mb-4 text-5xl">🔒</div>
-							<p
-								class="mb-6 text-[0.9375rem] leading-relaxed"
-								style:color="hsl(var(--muted-foreground, 0 0% 45%))"
-							>
-								{($locale || 'de') === 'de'
-									? 'Diese App ist aktuell in der geschlossenen '
-									: 'This app is currently in closed '}<strong>{routeTierLabels.required}</strong
-								>{($locale || 'de') === 'de' ? '-Phase.' : ' phase.'}
-							</p>
-							<div
-								class="mb-6 flex flex-col gap-2 rounded-xl p-4"
-								style:background-color="hsl(var(--muted, 0 0% 96%))"
-							>
-								<div class="flex items-center justify-between text-sm">
-									<span style:color="hsl(var(--muted-foreground, 0 0% 45%))"
-										>{($locale || 'de') === 'de' ? 'Dein Zugang:' : 'Your access:'}</span
-									>
-									<span class="font-semibold" style:color="hsl(var(--foreground, 0 0% 9%))"
-										>{routeTierLabels.user}</span
-									>
-								</div>
-								<div class="flex items-center justify-between text-sm">
-									<span style:color="hsl(var(--muted-foreground, 0 0% 45%))"
-										>{($locale || 'de') === 'de' ? 'Benötigt:' : 'Required:'}</span
-									>
-									<span class="font-semibold text-violet-500">{routeTierLabels.required}</span>
-								</div>
-							</div>
-							<div class="flex flex-col gap-2">
-								<button
-									class="w-full cursor-pointer rounded-lg border-none px-4 py-2.5 text-sm font-medium transition-opacity hover:opacity-90"
-									style:background-color="hsl(var(--primary, 239 84% 67%))"
-									style:color="hsl(var(--primary-foreground, 0 0% 100%))"
-									onclick={() => goto('/')}
-								>
-									{($locale || 'de') === 'de' ? 'Zur Übersicht' : 'Back to overview'}
-								</button>
-								{#if !authStore.isAuthenticated}
-									<button
-										class="w-full cursor-pointer rounded-lg border px-4 py-2.5 text-sm font-medium transition-opacity hover:opacity-90"
-										style:border-color="hsl(var(--border, 0 0% 90%))"
-										style:color="hsl(var(--foreground, 0 0% 9%))"
-										onclick={() => goto('/login')}
-									>
-										{($locale || 'de') === 'de' ? 'Anmelden' : 'Sign in'}
-									</button>
-								{/if}
-							</div>
-						</div>
-					</div>
+					<RouteTierGate
+						appName={routeAppId.name}
+						userTierLabel={routeTierLabels.user}
+						requiredTierLabel={routeTierLabels.required}
+					/>
 				{:else}
 					{@render children()}
 				{/if}

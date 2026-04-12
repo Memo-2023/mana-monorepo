@@ -17,8 +17,8 @@ import { rrulestr } from 'rrule';
 import { z } from 'zod';
 import { eq, and, asc, sql } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/postgres-js';
-import postgres from 'postgres';
 import { serviceAuthMiddleware, type AuthVariables } from '@mana/shared-hono';
+import { getConnection } from '../../lib/db';
 import {
 	pgSchema,
 	uuid,
@@ -32,9 +32,6 @@ import {
 } from 'drizzle-orm/pg-core';
 
 // ─── DB Schema (minimal, server-only) ──────────────────────
-
-const DATABASE_URL =
-	process.env.DATABASE_URL ?? 'postgresql://mana:devpassword@localhost:5432/mana_platform';
 
 const todoSchema = pgSchema('todo');
 
@@ -88,8 +85,7 @@ const reminders = todoSchema.table(
 	})
 );
 
-const connection = postgres(DATABASE_URL, { max: 5, idle_timeout: 20 });
-const db = drizzle(connection, { schema: { tasks, projects, reminders } });
+const db = drizzle(getConnection(), { schema: { tasks, projects, reminders } });
 
 // ─── Routes ────────────────────────────────────────────────
 

@@ -193,7 +193,7 @@ export const MANA_APP_INDEX: Record<string, number> = {
 	inventory: 15,
 	times: 16,
 	nutriphi: 17,
-	planta: 18,
+	plants: 18,
 	questions: 19,
 	moodlit: 20,
 	uload: 21,

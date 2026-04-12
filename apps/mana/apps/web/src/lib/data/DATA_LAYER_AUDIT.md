@@ -35,7 +35,7 @@
 | 3         | Client Wire-up: vault-client, record-helpers, layout integration                    | ✅     | `354cbcb17` |
 | 4         | Pilot: notes table mit 8 End-to-End Tests                                           | ✅     | `bed08a1aa` |
 | 5         | Rollout: chat, dreams, memoro, contacts, cycles, finance                            | ✅     | `af92720a6` |
-| 6.1       | Rollout: cards, presi, inventar, planta                                             | ✅     | `73f294b29` |
+| 6.1       | Rollout: cards, presi, inventar, plants                                             | ✅     | `73f294b29` |
 | 6.2 + 6.3 | Settings UI (`/settings/security`) + Encryption Intro Banner                        | ✅     | `6b8e2c717` |
 | Roundup   | DATA_LAYER_AUDIT roll-up vor Phase 7                                                | ✅     | `4bdf4238c` |
 | 7.1       | timeBlocks-Hub: tasks + calendar.events + timeBlocks (mit Habits-Coupling)          | ✅     | `c875b4e96` |
@@ -396,7 +396,7 @@ Unlock-Flow (Login auf neuem Gerät):
 | presi                | `presiDecks`         | `title`, `description`                                                                    | 6.1      |
 |                      | `slides`             | `content` (SlideContent JSON)                                                             | 6.1      |
 | inventar             | `invItems`           | `description` (name + notes-array bleiben plaintext)                                      | 6.1      |
-| planta               | `plants`             | `name`, `careNotes`, `temperature`, `soilType`                                            | 6.1      |
+| plants               | `plants`             | `name`, `careNotes`, `temperature`, `soilType`                                            | 6.1      |
 | **todo**             | **`tasks`**          | **`title`, `description`, `subtasks`, `metadata`**                                        | **7.1**  |
 | **calendar**         | **`events`**         | **`title`, `description`, `location`**                                                    | **7.1**  |
 | **time-blocks**      | **`timeBlocks`**     | **`title`, `description`** (Cross-Module-Hub für todo/calendar/habits/times)              | **7.1**  |

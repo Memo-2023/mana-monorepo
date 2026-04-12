@@ -104,7 +104,7 @@ Pure CRUD apps use mana-sync directly.
 | 3036 | cards-server | Hono/Bun | AI card generation |
 | 3037 | mukke-server | Hono/Bun | Audio processing, BPM, ID3 tags |
 | 3038 | nutriphi-server | Hono/Bun | Gemini meal analysis |
-| 3039 | planta-server | Hono/Bun | Gemini plant analysis |
+| 3039 | plants-server | Hono/Bun | Gemini plant analysis |
 | 3040 | presi-server | Hono/Bun | Share links |
 | 3041-3059 | *(reserved)* | | |
 
@@ -137,7 +137,7 @@ Pure CRUD apps use mana-sync directly.
 | 5025 | inventory-web | *(local-first only)* |
 | 5026 | context-web | *(local-first only)* |
 | 5027 | questions-web | *(local-first only)* |
-| 5028 | planta-web | 3039 planta-server |
+| 5028 | plants-web | 3039 plants-server |
 | 5029 | moodlit-web | *(future)* |
 | 5030-5049 | *(reserved)* | |
 

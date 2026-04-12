@@ -156,7 +156,7 @@ const track = {
 	context: createModuleTracker('context'),
 	skilltree: createModuleTracker('skilltree'),
 	nutriphi: createModuleTracker('nutriphi'),
-	planta: createModuleTracker('planta'),
+	plants: createModuleTracker('plants'),
 	questions: createModuleTracker('questions'),
 	photos: createModuleTracker('photos'),
 	storage: createModuleTracker('storage'),
@@ -389,13 +389,13 @@ export const NutriPhiEvents = {
 };
 
 /**
- * Planta App Events
+ * Plants App Events
  */
-export const PlantaEvents = {
-	plantAnalyzed: () => track.planta('plant_analyzed'),
-	plantCreated: () => track.planta('plant_created'),
-	plantDeleted: () => track.planta('plant_deleted'),
-	plantWatered: () => track.planta('plant_watered'),
+export const PlantsEvents = {
+	plantAnalyzed: () => track.plants('plant_analyzed'),
+	plantCreated: () => track.plants('plant_created'),
+	plantDeleted: () => track.plants('plant_deleted'),
+	plantWatered: () => track.plants('plant_watered'),
 };
 
 /**

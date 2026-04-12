@@ -151,16 +151,8 @@ export function useLocalStt(options?: { language?: string }): LocalSttHandle {
 		const capturedRate = sampleRate;
 		cleanup();
 
-		console.log(
-			'[local-stt] Captured',
-			capturedChunks.length,
-			'chunks, sample rate:',
-			capturedRate
-		);
-
 		if (capturedChunks.length === 0) {
 			error = 'Keine Audiodaten aufgenommen.';
-			console.warn('[local-stt] No audio chunks captured');
 			state = 'idle';
 			return;
 		}
@@ -180,25 +172,14 @@ export function useLocalStt(options?: { language?: string }): LocalSttHandle {
 			// Resample to 16 kHz if needed
 			const audio = capturedRate === 16000 ? merged : resample(merged, capturedRate, 16000);
 
-			const durationSec = audio.length / 16000;
-			console.log('[local-stt] Audio ready:', {
-				originalSamples: merged.length,
-				resampledSamples: audio.length,
-				durationSec: durationSec.toFixed(1),
-				sampleRate: capturedRate,
-				maxAmplitude: Math.max(...Array.from(audio.slice(0, 16000)).map(Math.abs)),
-			});
-
 			const result = await transcribe({
 				audio,
 				language: options?.language,
 				onChunk: (t: string) => {
 					partial += t;
-					console.log('[local-stt] Chunk:', t);
 				},
 			});
 
-			console.log('[local-stt] Result:', result);
 			text = result.text.trim();
 		} catch (e) {
 			error = e instanceof Error ? e.message : String(e);

@@ -16,7 +16,7 @@ Monorepo containing all Mana projects — a self-hosted multi-app ecosystem with
 | **cards** | Card/deck management | NestJS backend, Expo mobile, SvelteKit web |
 | **zitare** | Daily inspiration quotes | NestJS backend, Expo mobile, SvelteKit web, Astro landing |
 | **mukke** | Music player | NestJS backend, SvelteKit web |
-| **planta** | Plant care tracker | NestJS backend, SvelteKit web |
+| **plants** | Plant care tracker | NestJS backend, SvelteKit web |
 | **storage** | Cloud storage | NestJS backend, SvelteKit web |
 | **questions** | Q&A with web search | SvelteKit web |
 | **skilltree** | Skill tree visualization | NestJS backend, SvelteKit web |

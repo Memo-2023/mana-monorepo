@@ -21,7 +21,7 @@ export type AppId =
 	| 'inventory'
 	| 'questions'
 	| 'skilltree'
-	| 'planta'
+	| 'plants'
 	| 'lightwrite'
 	| 'context'
 	| 'music'

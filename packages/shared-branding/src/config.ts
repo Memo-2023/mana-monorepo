@@ -246,9 +246,9 @@ export const APP_BRANDING: Record<AppId, AppBranding> = {
 		logoStroke: true,
 		logoStrokeWidth: 1.5,
 	},
-	planta: {
-		id: 'planta',
-		name: 'Planta',
+	plants: {
+		id: 'plants',
+		name: 'Plants',
 		tagline: 'Plant Care Assistant',
 		primaryColor: '#22c55e',
 		secondaryColor: '#4ade80',

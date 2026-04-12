@@ -54,7 +54,7 @@ describe('WIDGET_REGISTRY', () => {
 			'context',
 			'mana-auth',
 			'nutriphi',
-			'planta',
+			'plants',
 			'cycles',
 			undefined,
 		];

@@ -182,7 +182,7 @@ db.version(1).stores({
 	nutriFavorites: 'id, mealType, usageCount',
 	mealTags: 'id, mealId, tagId, [mealId+tagId]',
 
-	// ─── Planta (appId: 'planta') ───
+	// ─── Plants (appId: 'plants') ───
 	plants: 'id, isActive, healthStatus',
 	plantPhotos: 'id, plantId, isPrimary, [plantId+isPrimary]',
 	wateringSchedules: 'id, plantId, nextWateringAt',

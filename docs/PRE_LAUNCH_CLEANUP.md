@@ -289,7 +289,7 @@ needed them.
   removed.
 - `~/.cloudflared/config.yml` on the Mac Mini lost its 16 dead ingress
   routes (`chat-api`, `todo-api`, `calendar-api`, `clock-api`, `clock-bot`,
-  `contacts-api`, `zitare-api`, `skilltree-api`, `planta-api`, `cards-api`,
+  `contacts-api`, `zitare-api`, `skilltree-api`, `plants-api`, `cards-api`,
   `storage-api`, `presi-api`, `nutriphi-api`, `photos-api`, `mukke-api`,
   `picture-api`). The tunnel was reloaded via `kill -HUP <pid>`.
 - After reload, every former 502 returns 404 from the Cloudflare edge

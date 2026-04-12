@@ -37,7 +37,7 @@ import { z } from 'zod';
 //
 // History:
 //   1 — initial schemas (foods/totalNutrition for nutriphi,
-//       scientificName/commonNames/etc for planta)
+//       scientificName/commonNames/etc for plants)
 
 export const AI_SCHEMA_VERSION = '1' as const;
 export type AiSchemaVersion = typeof AI_SCHEMA_VERSION;
@@ -107,7 +107,7 @@ export type MealAnalysis = z.infer<typeof MealAnalysisSchema>;
 export type AnalyzedFood = z.infer<typeof AnalyzedFoodSchema>;
 export type NutritionData = z.infer<typeof NutritionDataSchema>;
 
-// ─── Planta: plant photo identification ──────────────────────────
+// ─── Plants: plant photo identification ──────────────────────────
 
 export const PlantIdentificationSchema = z.object({
 	scientificName: z.string().optional().describe('Latin binomial, e.g. "Monstera deliciosa"'),

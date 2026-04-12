@@ -35,7 +35,7 @@ export interface DueReminder {
 }
 
 export interface ReminderSource {
-	/** Source identifier (e.g. 'todo', 'calendar', 'planta') */
+	/** Source identifier (e.g. 'todo', 'calendar', 'plants') */
 	id: string;
 	/** Returns reminders that are currently due */
 	checkDue: () => Promise<DueReminder[]>;

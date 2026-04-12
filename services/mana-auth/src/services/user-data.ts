@@ -122,7 +122,7 @@ const PROJECT_META: Record<string, { name: string; icon: string }> = {
 	presi: { name: 'Presi', icon: '📊' },
 	inventory: { name: 'Inventar', icon: '📦' },
 	nutriphi: { name: 'Nutriphi', icon: '🥗' },
-	planta: { name: 'Planta', icon: '🌱' },
+	plants: { name: 'Plants', icon: '🌱' },
 	storage: { name: 'Storage', icon: '☁️' },
 	questions: { name: 'Questions', icon: '❓' },
 	music: { name: 'Music', icon: '🎵' },

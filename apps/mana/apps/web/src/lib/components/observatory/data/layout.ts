@@ -160,7 +160,7 @@ export const APP_POSITIONS: Record<string, { x: number; y: number; lakeId: strin
 	photos: { x: 1110, y: 575, lakeId: 'db-right' },
 	skilltree: { x: 1310, y: 590, lakeId: 'db-right' },
 	context: { x: 1320, y: 660, lakeId: 'db-right' },
-	planta: { x: 1115, y: 675, lakeId: 'db-right' },
+	plants: { x: 1115, y: 675, lakeId: 'db-right' },
 
 	// Around Bergsee (redis) - lightweight/cache
 	traces: { x: 400, y: 385, lakeId: 'redis' },

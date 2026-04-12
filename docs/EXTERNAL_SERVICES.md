@@ -103,7 +103,7 @@ Legende: LOCAL = Self-hosted | CLOUD = Externer Dienst | FREE = Kostenlos
 - `picture-storage` - AI-generierte Bilder
 - `chat-storage` - User-Uploads
 - `cards-storage` - Card/Deck Assets
-- `planta-storage` - Pflanzenfotos
+- `plants-storage` - Pflanzenfotos
 - `nutriphi-storage` - Mahlzeitenfotos
 - `presi-storage` - Präsentationsfolien
 - `calendar-storage` - Kalender-Anhänge

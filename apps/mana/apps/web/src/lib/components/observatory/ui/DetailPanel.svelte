@@ -41,7 +41,7 @@
 		zitare: 'https://zitare.mana.how',
 		mana: 'https://mana.how',
 		cards: 'https://cards.mana.how',
-		planta: 'https://planta.mana.how',
+		plants: 'https://plants.mana.how',
 		playground: 'https://playground.mana.how',
 	};
 

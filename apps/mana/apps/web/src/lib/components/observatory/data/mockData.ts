@@ -266,8 +266,8 @@ const APP_DEFINITIONS: AppDefinition[] = [
 		},
 	},
 	{
-		id: 'planta',
-		displayName: 'Planta',
+		id: 'plants',
+		displayName: 'Plants',
 		score: 50,
 		status: 'alpha',
 		categories: {

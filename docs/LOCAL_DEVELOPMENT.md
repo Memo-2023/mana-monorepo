@@ -160,7 +160,7 @@ pnpm setup:db:uload       # Setup uload database + schema
 pnpm setup:db:context     # Setup context database + schema
 pnpm setup:db:storage     # Setup storage database + schema
 pnpm setup:db:mukke       # Setup mukke database + schema
-pnpm setup:db:planta      # Setup planta database + schema
+pnpm setup:db:plants      # Setup plants database + schema
 pnpm setup:db:nutriphi    # Setup nutriphi database + schema
 pnpm setup:db:questions   # Setup questions database + schema
 pnpm setup:db:traces      # Setup traces database + schema

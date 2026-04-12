@@ -148,11 +148,11 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	//   - photoMediaId / photoUrl / photoThumbnailUrl: opaque pointers to
 	//     mana-media; the URL alone is not PII (anyone with the URL
 	//     already has the bytes), and CAS-deduped media IDs leak no user
-	//     content. Same rationale planta uses for plantPhotos.
+	//     content. Same rationale plants uses for plantPhotos.
 	//   - confidence (float 0-1): pure metadata about the AI run.
 	meals: { enabled: true, fields: ['description', 'portionSize', 'foods'] },
 
-	// ─── Planta ──────────────────────────────────────────────
+	// ─── Plants ──────────────────────────────────────────────
 	// `name` is NOT in the schema index for plants (only isActive +
 	// healthStatus), so encrypting it is safe. LocalPlant uses
 	// `careNotes` (no separate `notes`) plus the user-typed metadata.

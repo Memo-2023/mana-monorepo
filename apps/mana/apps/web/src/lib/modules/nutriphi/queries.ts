@@ -53,7 +53,7 @@ export function useAllMeals() {
 /**
  * Look up a single meal by id and decrypt it. Used by the detail page,
  * which inlines its own useLiveQueryWithDefault wrapper so the querier
- * can capture the route param directly (matches planta DetailView pattern).
+ * can capture the route param directly (matches plants DetailView pattern).
  */
 export async function loadMealById(id: string): Promise<MealWithNutrition | null> {
 	const local = await db.table<LocalMeal>('meals').get(id);

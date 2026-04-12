@@ -156,7 +156,7 @@ describe('module-registry — pre-refactor snapshot', () => {
 			context: ['contextSpaces', 'documents', 'documentTags'],
 			questions: ['qCollections', 'questions', 'answers', 'questionTags'],
 			nutriphi: ['meals', 'goals', 'nutriFavorites', 'mealTags'],
-			planta: ['plants', 'plantPhotos', 'wateringSchedules', 'wateringLogs', 'plantTags'],
+			plants: ['plants', 'plantPhotos', 'wateringSchedules', 'wateringLogs', 'plantTags'],
 			uload: ['links', 'uloadTags', 'uloadFolders', 'linkTags'],
 			calc: ['calculations', 'savedFormulas'],
 			moodlit: ['moods', 'sequences', 'moodTags'],

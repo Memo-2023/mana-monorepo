@@ -33,7 +33,7 @@ export {
 	ClockLogo,
 	QuestionsLogo,
 	SkillTreeLogo,
-	PlantaLogo,
+	PlantsLogo,
 	LightWriteLogo,
 	MusicLogo,
 	ContextLogo,

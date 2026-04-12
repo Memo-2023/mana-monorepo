@@ -27,7 +27,7 @@ import { SKILLTREE_GUEST_SEED } from '$lib/modules/skilltree/collections';
 import { TODO_GUEST_SEED } from '$lib/modules/todo/collections';
 import { NOTES_GUEST_SEED } from '$lib/modules/notes/collections';
 import { TIMES_GUEST_SEED } from '$lib/modules/times/collections';
-import { PLANTA_GUEST_SEED } from '$lib/modules/planta/collections';
+import { PLANTS_GUEST_SEED } from '$lib/modules/plants/collections';
 import { DRINK_GUEST_SEED } from '$lib/modules/drink/collections';
 
 /**
@@ -60,7 +60,7 @@ register(SKILLTREE_GUEST_SEED);
 register(TODO_GUEST_SEED);
 register(NOTES_GUEST_SEED);
 register(TIMES_GUEST_SEED);
-register(PLANTA_GUEST_SEED);
+register(PLANTS_GUEST_SEED);
 register(DRINK_GUEST_SEED);
 
 /**

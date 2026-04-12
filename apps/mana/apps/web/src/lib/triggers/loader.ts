@@ -59,7 +59,7 @@ export async function loadAutomations(): Promise<void> {
 		});
 	}
 
-	if (active.length > 0) {
+	if (import.meta.env.DEV && active.length > 0) {
 		console.log(`[Triggers] Loaded ${active.length} automation(s)`);
 	}
 }

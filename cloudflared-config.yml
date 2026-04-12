@@ -54,7 +54,7 @@ ingress:
     service: http://localhost:5000
   - hostname: skilltree.mana.how
     service: http://localhost:5000
-  - hostname: planta.mana.how
+  - hostname: plants.mana.how
     service: http://localhost:5000
   - hostname: cards.mana.how
     service: http://localhost:5000

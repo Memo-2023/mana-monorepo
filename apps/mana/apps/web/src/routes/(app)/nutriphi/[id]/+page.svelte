@@ -9,7 +9,7 @@
 	import { ArrowLeft, Trash } from '@mana/shared-icons';
 
 	// Inline the live query so the closure captures page.params.id directly
-	// (matches the planta DetailView pattern).
+	// (matches the plants DetailView pattern).
 	const mealQuery = useLiveQueryWithDefault(
 		() => (page.params.id ? loadMealById(page.params.id) : Promise.resolve(null)),
 		null as MealWithNutrition | null
