@@ -6,6 +6,7 @@ export { default as PillNavigation } from './PillNavigation.svelte';
 export { default as PillDropdown } from './PillDropdown.svelte';
 export { default as PillDropdownBar } from './PillDropdownBar.svelte';
 export { default as AppDrawer } from './AppDrawer.svelte';
+export { default as UserMenuPanel } from './UserMenuPanel.svelte';
 export { default as GlobalSpotlight } from './GlobalSpotlight.svelte';
 export { createGlobalSpotlightState } from './useGlobalSpotlight.svelte';
 export {

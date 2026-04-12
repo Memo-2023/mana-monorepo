@@ -15,6 +15,7 @@
 	import PillTabGroup from './PillTabGroup.svelte';
 	import PillTagSelector from './PillTagSelector.svelte';
 	import AppDrawer from './AppDrawer.svelte';
+	import UserMenuPanel from './UserMenuPanel.svelte';
 	import GlobalSpotlight from './GlobalSpotlight.svelte';
 	import { createGlobalSpotlightState } from './useGlobalSpotlight.svelte';
 	// Phosphor Icons (via shared-icons)
@@ -406,173 +407,6 @@
 
 	// Build the flat PillDropdownItem list for each bar, matching what the
 	// equivalent PillDropdown would render. Mode toggles + variants + a11y
-	// toggles for theme; tier/sync items pass through; user menu is assembled
-	// from the same rules as the PillDropdown below.
-	const themeBarItems = $derived.by<PillDropdownItem[]>(() => {
-		const out: PillDropdownItem[] = [];
-		if (onThemeModeChange) {
-			out.push(
-				{
-					id: 'theme-mode-light',
-					label: 'Light',
-					icon: 'sun',
-					group: 'theme-mode',
-					onClick: () => onThemeModeChange('light'),
-					active: themeMode === 'light',
-				},
-				{
-					id: 'theme-mode-dark',
-					label: 'Dark',
-					icon: 'moon',
-					group: 'theme-mode',
-					onClick: () => onThemeModeChange('dark'),
-					active: themeMode === 'dark',
-				},
-				{
-					id: 'theme-mode-system',
-					label: 'System',
-					icon: 'settings',
-					group: 'theme-mode',
-					onClick: () => onThemeModeChange('system'),
-					active: themeMode === 'system',
-				}
-			);
-		}
-		if (themeVariantItems.length > 0) {
-			if (out.length > 0) out.push({ id: 'theme-variants-div', label: '', divider: true });
-			for (const v of themeVariantItems) out.push(v);
-		}
-		if (showA11yQuickToggles) {
-			out.push({ id: 'a11y-div', label: '', divider: true });
-			if (onA11yContrastChange) {
-				out.push({
-					id: 'a11y-contrast',
-					label: 'Hoher Kontrast',
-					icon: 'sun',
-					onClick: () => onA11yContrastChange(a11yContrast === 'high' ? 'normal' : 'high'),
-					active: a11yContrast === 'high',
-				});
-			}
-			if (onA11yReduceMotionChange) {
-				out.push({
-					id: 'a11y-reduce-motion',
-					label: 'Animationen reduzieren',
-					icon: 'check',
-					onClick: () => onA11yReduceMotionChange(!a11yReduceMotion),
-					active: a11yReduceMotion,
-				});
-			}
-		}
-		return out;
-	});
-
-	const userBarItems = $derived.by<PillDropdownItem[]>(() => {
-		const out: PillDropdownItem[] = [];
-		if (userEmail && profileHref) {
-			out.push({
-				id: 'profile',
-				label: 'Profil',
-				icon: 'user',
-				onClick: () => {
-					window.location.href = profileHref!;
-				},
-				active: currentPath === profileHref,
-			});
-		}
-		out.push({
-			id: 'settings',
-			label: 'Einstellungen',
-			icon: 'settings',
-			onClick: () => {
-				window.location.href = settingsHref;
-			},
-			active: currentPath === settingsHref,
-		});
-		if (userEmail && manaHref) {
-			out.push({
-				id: 'mana',
-				label: 'Mana',
-				icon: 'sparkle',
-				onClick: () => {
-					window.location.href = manaHref!;
-				},
-				active: currentPath === manaHref,
-			});
-		}
-		if (spiralHref) {
-			out.push({
-				id: 'spiral',
-				label: 'Spiral',
-				icon: 'spiral',
-				onClick: () => {
-					window.location.href = spiralHref!;
-				},
-				active: currentPath === spiralHref,
-			});
-		}
-		if (creditsHref) {
-			out.push({
-				id: 'credits',
-				label: 'Credits',
-				icon: 'creditCard',
-				onClick: () => {
-					window.location.href = creditsHref!;
-				},
-				active: currentPath === creditsHref,
-			});
-		}
-		if (userEmail && feedbackHref) {
-			out.push({
-				id: 'feedback',
-				label: 'Feedback',
-				icon: 'chat',
-				onClick: () => {
-					window.location.href = feedbackHref!;
-				},
-				active: currentPath === feedbackHref,
-			});
-		}
-		if (helpHref) {
-			out.push({
-				id: 'help',
-				label: 'Hilfe',
-				icon: 'help',
-				onClick: () => {
-					window.location.href = helpHref!;
-				},
-				active: currentPath === helpHref,
-			});
-		}
-		if (showLanguageSwitcher && languageItems.length > 0) {
-			out.push({ id: 'language-div', label: '', divider: true });
-			out.push({
-				id: 'language',
-				label: currentLanguageLabel,
-				submenu: languageItems.map((item) => ({ ...item, id: `lang-${item.id}` })),
-			});
-		}
-		out.push({ id: 'auth-div', label: '', divider: true });
-		if (userEmail && showLogout && onLogout) {
-			out.push({
-				id: 'logout',
-				label: 'Logout',
-				icon: 'logout',
-				onClick: () => onLogout!(),
-				danger: true,
-			});
-		} else if (!userEmail && loginHref) {
-			out.push({
-				id: 'login',
-				label: 'Anmelden',
-				icon: 'user',
-				primary: true,
-				onClick: () => {
-					window.location.href = loginHref!;
-				},
-			});
-		}
-		return out;
-	});
 
 	function toggleBar(config: PillBarConfig) {
 		if (!onOpenBar) return;
@@ -615,6 +449,92 @@
 
 	// App drawer state
 	let appDrawerOpen = $state(false);
+
+	// User menu panel state
+	let userMenuOpen = $state(false);
+	let userMenuTrigger = $state<HTMLButtonElement | undefined>(undefined);
+
+	// Close user menu on navigation
+	$effect(() => {
+		currentPath;
+		userMenuOpen = false;
+	});
+
+	// Account links for UserMenuPanel
+	const accountLinks = $derived.by(() => {
+		const links: { id: string; label: string; icon: string; href: string; active?: boolean }[] = [];
+		if (userEmail && profileHref) {
+			links.push({
+				id: 'profile',
+				label: 'Profil',
+				icon: 'user',
+				href: profileHref,
+				active: currentPath === profileHref,
+			});
+		}
+		links.push({
+			id: 'settings',
+			label: 'Einstellungen',
+			icon: 'settings',
+			href: settingsHref,
+			active: currentPath === settingsHref,
+		});
+		if (userEmail && manaHref) {
+			links.push({
+				id: 'mana',
+				label: 'Mana',
+				icon: 'sparkle',
+				href: manaHref,
+				active: currentPath === manaHref,
+			});
+		}
+		if (spiralHref) {
+			links.push({
+				id: 'spiral',
+				label: 'Spiral',
+				icon: 'spiral',
+				href: spiralHref,
+				active: currentPath === spiralHref,
+			});
+		}
+		if (creditsHref) {
+			links.push({
+				id: 'credits',
+				label: 'Credits',
+				icon: 'creditCard',
+				href: creditsHref,
+				active: currentPath === creditsHref,
+			});
+		}
+		if (userEmail && feedbackHref) {
+			links.push({
+				id: 'feedback',
+				label: 'Feedback',
+				icon: 'chat',
+				href: feedbackHref,
+				active: currentPath === feedbackHref,
+			});
+		}
+		if (helpHref) {
+			links.push({
+				id: 'help',
+				label: 'Hilfe',
+				icon: 'help',
+				href: helpHref,
+				active: currentPath === helpHref,
+			});
+		}
+		if (themesHref) {
+			links.push({
+				id: 'themes',
+				label: 'Themes',
+				icon: 'palette',
+				href: themesHref,
+				active: currentPath === themesHref,
+			});
+		}
+		return links;
+	});
 
 	// Global spotlight (Cmd+K) — only active when spotlightActions are provided
 	// svelte-ignore state_referenced_locally
@@ -791,149 +711,6 @@
 				{/if}
 			{/each}
 
-			<!-- Theme Variant Selector -->
-			{#if showThemeVariants && themeVariantItems.length > 0 && barMode}
-				{@const themeConfig = {
-					id: 'theme',
-					label: '',
-					icon: undefined,
-					items: themeBarItems,
-				}}
-				<button
-					type="button"
-					onclick={() => toggleBar(themeConfig)}
-					class="pill glass-pill icon-only"
-					class:active={activeBarId === 'theme'}
-					title={currentThemeVariantLabel}
-					aria-label={currentThemeVariantLabel}
-				>
-					<Palette size={18} class="pill-icon" />
-				</button>
-			{:else if showThemeVariants && themeVariantItems.length > 0}
-				<PillDropdown
-					items={themeVariantItems}
-					direction={dropdownDirection}
-					label={currentThemeVariantLabel}
-					icon="palette"
-				>
-					{#snippet header()}
-						<div class="theme-mode-selector glass-pill">
-							<button
-								type="button"
-								onclick={() => onThemeModeChange?.('light')}
-								class="mode-btn"
-								class:active={themeMode === 'light'}
-								title="Light mode"
-							>
-								<Sun size={16} class="mode-icon" />
-							</button>
-							<button
-								type="button"
-								onclick={() => onThemeModeChange?.('dark')}
-								class="mode-btn"
-								class:active={themeMode === 'dark'}
-								title="Dark mode"
-							>
-								<Moon size={16} class="mode-icon" />
-							</button>
-							<button
-								type="button"
-								onclick={() => onThemeModeChange?.('system')}
-								class="mode-btn"
-								class:active={themeMode === 'system'}
-								title="System mode"
-							>
-								<svg class="mode-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<rect x="2" y="3" width="20" height="14" rx="2" stroke-width="2" />
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M8 21h8M12 17v4"
-									/>
-								</svg>
-							</button>
-						</div>
-					{/snippet}
-					{#snippet footer()}
-						{#if showA11yQuickToggles}
-							<div class="a11y-quick-toggles glass-pill">
-								<!-- Contrast Toggle -->
-								<button
-									type="button"
-									onclick={() =>
-										onA11yContrastChange?.(a11yContrast === 'high' ? 'normal' : 'high')}
-									class="a11y-btn"
-									class:active={a11yContrast === 'high'}
-									title="Hoher Kontrast"
-									aria-pressed={a11yContrast === 'high'}
-								>
-									<Sun size={20} class="a11y-icon" />
-								</button>
-								<!-- Reduce Motion Toggle -->
-								<button
-									type="button"
-									onclick={() => onA11yReduceMotionChange?.(!a11yReduceMotion)}
-									class="a11y-btn"
-									class:active={a11yReduceMotion}
-									title="Animationen reduzieren"
-									aria-pressed={a11yReduceMotion}
-								>
-									<svg
-										class="a11y-icon"
-										viewBox="0 0 24 24"
-										fill="none"
-										stroke="currentColor"
-										stroke-width="2"
-									>
-										{#if a11yReduceMotion}
-											<rect x="6" y="4" width="4" height="16" rx="1" />
-											<rect x="14" y="4" width="4" height="16" rx="1" />
-										{:else}
-											<polygon points="5 3 19 12 5 21 5 3" />
-										{/if}
-									</svg>
-								</button>
-							</div>
-						{/if}
-					{/snippet}
-				</PillDropdown>
-			{/if}
-
-			<!-- AI Tier Selector -->
-			{#if showAiTierSelector && aiTierItems.length > 0 && barMode}
-				{@const aiProgress = aiTierItems.find((i) => i.progress != null)?.progress}
-				{@const aiConfig = {
-					id: 'ai',
-					label: '',
-					icon: undefined,
-					items: aiTierItems,
-					progress: aiProgress,
-				}}
-				{@const AiIcon = phosphorIcons[currentAiTierIcon]}
-				<button
-					type="button"
-					onclick={() => toggleBar(aiConfig)}
-					class="pill glass-pill icon-only"
-					class:active={activeBarId === 'ai'}
-					class:downloading={aiProgress != null}
-					title={currentAiTierLabel}
-					aria-label={currentAiTierLabel}
-					style={aiProgress != null ? `--progress: ${aiProgress}` : ''}
-				>
-					{#if AiIcon}
-						<AiIcon size={18} class="pill-icon" />
-					{/if}
-				</button>
-			{:else if showAiTierSelector && aiTierItems.length > 0}
-				<PillDropdown
-					items={aiTierItems}
-					direction={dropdownDirection}
-					label={currentAiTierLabel}
-					icon={currentAiTierIcon}
-				/>
-			{/if}
-
 			<!-- Sync Status -->
 			{#if showSyncStatus && syncStatusItems.length > 0 && barMode}
 				{@const syncConfig = {
@@ -961,178 +738,21 @@
 				/>
 			{/if}
 
-			<!-- Theme Toggle (only show when not using theme variants dropdown) -->
-			{#if showThemeToggle && onToggleTheme && !showThemeVariants}
-				<button
-					onclick={onToggleTheme}
-					class="pill glass-pill"
-					title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-				>
-					{#if !isDark}
-						<Moon size={18} class="pill-icon" />
-					{:else}
-						<Sun size={18} class="pill-icon" />
-					{/if}
-					<span class="pill-label">{isDark ? 'Light' : 'Dark'}</span>
-				</button>
-			{/if}
-
-			<!-- User Menu Dropdown — rendered for both authenticated users and
-			     guests. Auth-only items (profile/settings/logout) are filtered
-			     out when userEmail is empty; spiral/credits/themes/help stay
-			     available either way so guests can still navigate. -->
-			{#if (userEmail || loginHref) && barMode}
+			<!-- User Menu -->
+			{#if userEmail || loginHref}
 				{@const userLabel = userEmail ? truncateEmail(userEmail) : guestMenuLabel}
-				{@const userConfig = {
-					id: 'user',
-					label: userLabel,
-					icon: 'user',
-					items: userBarItems,
-				}}
 				<button
+					bind:this={userMenuTrigger}
 					type="button"
-					onclick={() => toggleBar(userConfig)}
-					class="pill glass-pill"
-					class:active={activeBarId === 'user'}
+					onclick={() => (userMenuOpen = !userMenuOpen)}
+					class="pill glass-pill icon-only"
+					class:active={userMenuOpen}
+					aria-label={userLabel}
 					title={userLabel}
 				>
 					<User size={18} class="pill-icon" />
-					<span class="pill-label">{userLabel}</span>
 				</button>
-			{:else if userEmail || loginHref}
-				<PillDropdown
-					items={[
-						...(userEmail && profileHref
-							? [
-									{
-										id: 'profile',
-										label: 'Profil',
-										icon: 'user',
-										onClick: () => {
-											window.location.href = profileHref;
-										},
-										active: currentPath === profileHref,
-									},
-								]
-							: []),
-						{
-							id: 'settings',
-							label: 'Einstellungen',
-							icon: 'settings',
-							onClick: () => {
-								window.location.href = settingsHref;
-							},
-							active: currentPath === settingsHref,
-						},
-						...(userEmail && manaHref
-							? [
-									{
-										id: 'mana',
-										label: 'Mana',
-										icon: 'sparkle',
-										onClick: () => {
-											window.location.href = manaHref;
-										},
-										active: currentPath === manaHref,
-									},
-								]
-							: []),
-						...(spiralHref
-							? [
-									{
-										id: 'spiral',
-										label: 'Spiral',
-										icon: 'spiral',
-										onClick: () => {
-											window.location.href = spiralHref;
-										},
-										active: currentPath === spiralHref,
-									},
-								]
-							: []),
-						...(creditsHref
-							? [
-									{
-										id: 'credits',
-										label: 'Credits',
-										icon: 'creditCard',
-										onClick: () => {
-											window.location.href = creditsHref;
-										},
-										active: currentPath === creditsHref,
-									},
-								]
-							: []),
-						...(userEmail && feedbackHref
-							? [
-									{
-										id: 'feedback',
-										label: 'Feedback',
-										icon: 'chat',
-										onClick: () => {
-											window.location.href = feedbackHref;
-										},
-										active: currentPath === feedbackHref,
-									},
-								]
-							: []),
-						...(helpHref
-							? [
-									{
-										id: 'help',
-										label: 'Hilfe',
-										icon: 'help',
-										onClick: () => {
-											window.location.href = helpHref;
-										},
-										active: currentPath === helpHref,
-									},
-								]
-							: []),
-						...(showLanguageSwitcher && languageItems.length > 0
-							? [
-									{ id: 'language-divider', label: '', divider: true },
-									{
-										id: 'language',
-										label: currentLanguageLabel,
-										submenu: languageItems.map((item) => ({
-											...item,
-											id: `lang-${item.id}`,
-										})),
-									},
-								]
-							: []),
-						{ id: 'auth-divider', label: '', divider: true },
-						...(userEmail && showLogout && onLogout
-							? [
-									{
-										id: 'logout',
-										label: 'Logout',
-										icon: 'logout',
-										onClick: () => onLogout?.(),
-										danger: true,
-									},
-								]
-							: !userEmail && loginHref
-								? [
-										{
-											id: 'login',
-											label: 'Anmelden',
-											icon: 'user',
-											primary: true,
-											onClick: () => {
-												window.location.href = loginHref;
-											},
-										},
-									]
-								: []),
-					]}
-					direction={dropdownDirection}
-					label={userEmail ? truncateEmail(userEmail) : guestMenuLabel}
-					icon="user"
-				/>
 			{:else if onLogout && showLogout}
-				<!-- Fallback to standalone logout if no user email and no loginHref -->
 				<button onclick={onLogout} class="pill glass-pill logout-pill" title="Logout">
 					<SignOut size={18} class="pill-icon" />
 					<span class="pill-label">Logout</span>
@@ -1140,6 +760,31 @@
 			{/if}
 		</div>
 	</nav>
+{/if}
+
+<!-- User Menu Panel (overlay) -->
+{#if userMenuOpen}
+	<UserMenuPanel
+		{userEmail}
+		{loginHref}
+		{accountLinks}
+		showLogout={showLogout && !!userEmail}
+		{onLogout}
+		showAiTier={showAiTierSelector && aiTierItems.length > 0}
+		{aiTierItems}
+		{themeMode}
+		{onThemeModeChange}
+		{themeVariantItems}
+		{showA11yQuickToggles}
+		{a11yContrast}
+		{onA11yContrastChange}
+		{a11yReduceMotion}
+		{onA11yReduceMotionChange}
+		showLanguageSwitcher={showLanguageSwitcher && languageItems.length > 0}
+		{languageItems}
+		onClose={() => (userMenuOpen = false)}
+		triggerElement={userMenuTrigger}
+	/>
 {/if}
 
 <!-- Global Spotlight (Cmd+K) -->
@@ -1328,38 +973,6 @@
 	/* Progress ring on pill (used for download indicator).
 	   Uses a conic-gradient border trick so it follows the pill's
 	   own border-radius regardless of shape. */
-	.pill.downloading {
-		position: relative;
-		overflow: visible;
-	}
-
-	.pill.downloading::after {
-		content: '';
-		position: absolute;
-		inset: -3px;
-		border-radius: inherit;
-		border: 2.5px solid transparent;
-		background:
-			conic-gradient(
-					from 0deg,
-					var(--pill-primary-color, var(--color-primary-500, #6366f1))
-						calc(var(--progress) * 360deg),
-					transparent calc(var(--progress) * 360deg)
-				)
-				border-box,
-			linear-gradient(hsl(var(--color-card)), hsl(var(--color-card))) padding-box;
-		mask:
-			linear-gradient(#fff 0 0) content-box,
-			linear-gradient(#fff 0 0);
-		mask-composite: exclude;
-		-webkit-mask:
-			linear-gradient(#fff 0 0) content-box,
-			linear-gradient(#fff 0 0);
-		-webkit-mask-composite: xor;
-		pointer-events: none;
-		transition: none;
-	}
-
 	/* Transitions */
 	.pill-nav {
 		transition: all 0.3s ease;

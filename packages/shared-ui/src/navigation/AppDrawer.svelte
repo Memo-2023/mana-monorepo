@@ -99,24 +99,15 @@
 <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 <div class="app-drawer" onkeydown={handleKeydown} role="navigation">
 	<!-- Trigger Button -->
-	<button bind:this={triggerButton} onclick={toggle} class="pill glass-pill trigger-button">
+	<button
+		bind:this={triggerButton}
+		onclick={toggle}
+		class="pill glass-pill trigger-button icon-only"
+		aria-label={triggerLabel}
+		title={triggerLabel}
+	>
 		<svg class="pill-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={iconPaths.grid} />
-		</svg>
-		<span class="pill-label">{triggerLabel}</span>
-		<svg
-			class="chevron-icon"
-			class:rotated={isOpen}
-			fill="none"
-			stroke="currentColor"
-			viewBox="0 0 24 24"
-		>
-			<path
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				stroke-width="2"
-				d={iconPaths.chevronDown}
-			/>
 		</svg>
 	</button>
 
@@ -303,19 +294,9 @@
 		flex-shrink: 0;
 	}
 
-	.pill-label {
-		display: inline;
-	}
-
-	.chevron-icon {
-		width: 0.75rem;
-		height: 0.75rem;
-		transition: transform 0.2s;
-		margin-left: 0.25rem;
-	}
-
-	.chevron-icon.rotated {
-		transform: rotate(180deg);
+	.trigger-button.icon-only {
+		gap: 0;
+		padding: 0.5rem 0.625rem;
 	}
 
 	/* Solid theme-tokened pill (formerly the "glass" frosted pill). */
