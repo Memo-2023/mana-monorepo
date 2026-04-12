@@ -106,11 +106,7 @@
 </script>
 
 <div>
-	<PageHeader
-		title="Cloud Sync"
-		description="Synchronisiere deine Daten über alle Geräte"
-		size="lg"
-	/>
+	<PageHeader title="Cloud Sync" backHref="/settings" sticky size="lg" />
 
 	{#if syncBilling.loading}
 		<div class="flex items-center justify-center py-12">

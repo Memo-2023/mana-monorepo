@@ -12,6 +12,7 @@
  */
 
 import type { BaseRecord } from '@mana/local-store';
+import type { WallpaperConfig } from '@mana/shared-theme';
 
 export interface WorkbenchSceneApp {
 	appId: string;
@@ -29,6 +30,8 @@ export interface WorkbenchScene {
 	openApps: WorkbenchSceneApp[];
 	/** Sort order in the scene tab bar. */
 	order: number;
+	/** Per-scene wallpaper override. When set, takes priority over globalSettings.wallpaper. */
+	wallpaper?: WallpaperConfig;
 }
 
 /** Dexie row shape (adds the BaseRecord audit fields stamped by hooks). */

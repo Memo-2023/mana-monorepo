@@ -183,6 +183,68 @@ export interface ThemeStore {
 }
 
 // ============================================================================
+// Wallpaper / Background Types
+// ============================================================================
+
+/** No wallpaper — the theme's default bg-background color shows through. */
+export interface WallpaperSourceNone {
+	type: 'none';
+}
+
+/** A bundled, predefined wallpaper image (e.g. "ocean-1"). */
+export interface WallpaperSourcePredefined {
+	type: 'predefined';
+	id: string;
+}
+
+/** Solid color background for generated wallpapers. */
+export interface WallpaperSolid {
+	type: 'solid';
+	color: string;
+}
+
+/** Gradient background for generated wallpapers. */
+export interface WallpaperGradient {
+	type: 'gradient';
+	colors: string[];
+	angle?: number;
+}
+
+/** A CSS gradient or solid color generated client-side. Only parameters are stored. */
+export interface WallpaperSourceGenerated {
+	type: 'generated';
+	params: WallpaperSolid | WallpaperGradient;
+}
+
+/** A user-uploaded image served by mana-media / MinIO. */
+export interface WallpaperSourceUpload {
+	type: 'upload';
+	mediaId: string;
+	url: string;
+}
+
+/** All wallpaper source types. */
+export type WallpaperSource =
+	| WallpaperSourceNone
+	| WallpaperSourcePredefined
+	| WallpaperSourceGenerated
+	| WallpaperSourceUpload;
+
+/** Overlay applied on top of the wallpaper for readability. */
+export interface WallpaperOverlay {
+	/** Backdrop blur in px (0–20, default 0). */
+	blur?: number;
+	/** Semi-transparent overlay darkness (0–0.6, default 0). */
+	opacity?: number;
+}
+
+/** Complete wallpaper configuration. */
+export interface WallpaperConfig {
+	source: WallpaperSource;
+	overlay?: WallpaperOverlay;
+}
+
+// ============================================================================
 // Accessibility (A11y) Types
 // ============================================================================
 
@@ -322,6 +384,8 @@ export interface GlobalSettings {
 	general: GeneralSettings;
 	/** Recently used emojis (shared across all apps) - max 16 */
 	recentEmojis?: string[];
+	/** Global wallpaper / background config (can be overridden per scene) */
+	wallpaper?: WallpaperConfig;
 }
 
 /**

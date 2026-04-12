@@ -45,6 +45,16 @@
 	import { llmSettingsState, updateLlmSettings, tierLabel, type LlmTier } from '@mana/shared-llm';
 	import { isLocalLlmSupported, getLocalLlmStatus, loadLocalLlm } from '@mana/local-llm';
 	import {
+		getLocalSttStatus,
+		loadLocalStt,
+		isLocalSttSupported,
+		MODELS as STT_MODELS,
+		DEFAULT_MODEL as STT_DEFAULT_MODEL,
+		type ModelKey as SttModelKey,
+	} from '@mana/local-stt';
+	import { useLocalStt } from '$lib/components/voice/use-local-stt.svelte';
+	import { Microphone, Stop } from '@mana/shared-icons';
+	import {
 		startMemoroLlmWatcher,
 		stopMemoroLlmWatcher,
 	} from '$lib/modules/memoro/llm-watcher.svelte';
@@ -76,6 +86,8 @@
 	import { registerAllProviders } from '$lib/search/providers';
 	import { initSharedUload } from '@mana/shared-uload';
 	import type { DragPayload } from '@mana/shared-ui/dnd';
+	import WallpaperLayer from '$lib/components/wallpaper/WallpaperLayer.svelte';
+	import { wallpaperStore } from '$lib/stores/wallpaper.svelte';
 
 	let { children }: { children: Snippet } = $props();
 
@@ -176,6 +188,9 @@
 	// ── AI Tier Selector (PillNav dropdown) ─────────────────
 	const webgpuSupported = isLocalLlmSupported();
 	const localLlmStatus = getLocalLlmStatus();
+	const sttSupported = isLocalSttSupported();
+	const localSttStatus = getLocalSttStatus();
+	let selectedSttModel = $state<SttModelKey>(STT_DEFAULT_MODEL);
 	const llmSettings = $derived(llmSettingsState.current);
 
 	function toggleAiTier(tier: LlmTier) {
@@ -187,36 +202,148 @@
 	}
 
 	const TIER_TOGGLE_LIST: Array<{ tier: LlmTier; shortLabel: string; icon: string }> = [
-		{ tier: 'browser', shortLabel: 'Browser (Gemma 4)', icon: 'cpu' },
-		{ tier: 'mana-server', shortLabel: 'Server (Gemma 4)', icon: 'server' },
+		{ tier: 'browser', shortLabel: 'Lokal (Gemma 4)', icon: 'robot' },
+		{ tier: 'mana-server', shortLabel: 'Server (Gemma 4)', icon: 'globe' },
 		{ tier: 'cloud', shortLabel: 'Cloud (Gemini)', icon: 'cloud' },
 	];
 
 	let aiTierItems = $derived<PillDropdownItem[]>([
-		// Tier toggles
+		// Tier toggles — browser tier item and its model-status buddy share a
+		// group so PillDropdownBar renders them as a paired pill.
 		...TIER_TOGGLE_LIST.filter((t) => t.tier !== 'browser' || webgpuSupported).map((t) => ({
 			id: `ai-tier-${t.tier}`,
 			label: t.shortLabel,
 			icon: t.icon,
 			active: llmSettings.allowedTiers.includes(t.tier),
 			onClick: () => toggleAiTier(t.tier),
+			...(t.tier === 'browser' ? { group: 'local-llm' } : {}),
 		})),
-		// Browser model status / load button
+		// Browser model status / load button (grouped with the "Lokal" toggle).
+		// Handles all LoadingStatus states so the user sees feedback during
+		// download, initialization, and on error (e.g. worker crash).
 		...(llmSettings.allowedTiers.includes('browser') && webgpuSupported
 			? [
-					{
-						id: 'ai-browser-status',
-						label:
-							localLlmStatus.current.state === 'ready'
-								? '✓ Modell geladen'
-								: localLlmStatus.current.state === 'downloading'
-									? `Lade… ${((localLlmStatus.current as { progress: number }).progress * 100).toFixed(0)}%`
-									: 'Modell laden (~500 MB)',
-						icon: localLlmStatus.current.state === 'ready' ? 'check' : 'download',
-						disabled: localLlmStatus.current.state === 'ready',
-						onClick:
-							localLlmStatus.current.state !== 'ready' ? () => void loadLocalLlm() : undefined,
-					},
+					(() => {
+						const s = localLlmStatus.current;
+						const state = s.state;
+						let label: string;
+						let icon: string;
+						let danger = false;
+						let disabled = false;
+
+						switch (state) {
+							case 'ready':
+								label = 'Geladen';
+								icon = 'check';
+								disabled = true;
+								break;
+							case 'downloading':
+								label = `Lade… ${((s as { progress: number }).progress * 100).toFixed(0)}%`;
+								icon = 'clock';
+								disabled = true;
+								break;
+							case 'loading':
+								label = 'Initialisiere…';
+								icon = 'clock';
+								disabled = true;
+								break;
+							case 'checking':
+								label = 'Prüfe…';
+								icon = 'clock';
+								disabled = true;
+								break;
+							case 'error':
+								label = 'Fehler — erneut versuchen';
+								icon = 'bell';
+								danger = true;
+								break;
+							default:
+								label = 'Modell laden';
+								icon = 'cloud';
+						}
+
+						return {
+							id: 'ai-browser-status',
+							label,
+							icon,
+							group: 'local-llm',
+							danger,
+							disabled,
+							progress: state === 'downloading' ? (s as { progress: number }).progress : undefined,
+							onClick: !disabled ? () => void loadLocalLlm() : undefined,
+						};
+					})(),
+				]
+			: []),
+		// ── STT section ──────────────────────────────────
+		{ id: 'stt-divider', label: '', divider: true },
+		// STT model selector — each model is a pill, active = currently selected
+		...(sttSupported
+			? (Object.entries(STT_MODELS) as [SttModelKey, (typeof STT_MODELS)[SttModelKey]][]).map(
+					([key, model]) => ({
+						id: `stt-model-${key}`,
+						label: model.displayName,
+						icon: 'mic' as const,
+						active: selectedSttModel === key,
+						onClick: () => {
+							selectedSttModel = key;
+							void loadLocalStt(key);
+						},
+					})
+				)
+			: []),
+		// STT model status (grouped with selected model)
+		...(sttSupported
+			? [
+					(() => {
+						const s = localSttStatus.current;
+						const state = s.state;
+						let label: string;
+						let icon: string;
+						let danger = false;
+						let disabled = false;
+
+						switch (state) {
+							case 'ready':
+								label = 'STT bereit';
+								icon = 'check';
+								disabled = true;
+								break;
+							case 'downloading':
+								label = `STT Lade… ${((s as { progress: number }).progress * 100).toFixed(0)}%`;
+								icon = 'clock';
+								disabled = true;
+								break;
+							case 'loading':
+								label = 'STT lädt…';
+								icon = 'clock';
+								disabled = true;
+								break;
+							case 'checking':
+								label = 'STT prüft…';
+								icon = 'clock';
+								disabled = true;
+								break;
+							case 'error':
+								label = 'STT Fehler';
+								icon = 'bell';
+								danger = true;
+								break;
+							default:
+								label = 'STT Modell laden';
+								icon = 'mic';
+						}
+
+						return {
+							id: 'stt-status',
+							label,
+							icon,
+							danger,
+							disabled,
+							progress: state === 'downloading' ? (s as { progress: number }).progress : undefined,
+							onClick: !disabled ? () => void loadLocalStt(selectedSttModel) : undefined,
+						};
+					})(),
 				]
 			: []),
 		// Divider + settings link
@@ -262,7 +389,7 @@
 			items.push({
 				id: 'sync-active',
 				label: 'Cloud Sync aktiv',
-				icon: 'cloudCheck',
+				icon: 'cloud',
 				active: true,
 				disabled: true,
 			});
@@ -275,6 +402,7 @@
 				items.push({
 					id: 'sync-next',
 					label: `Nächste Abbuchung: ${date}`,
+					icon: 'calendar',
 					disabled: true,
 				});
 			}
@@ -282,19 +410,20 @@
 			items.push({
 				id: 'sync-paused',
 				label: 'Sync pausiert — Credits aufladen',
-				icon: 'warning',
+				icon: 'bell',
 				onClick: () => goto('/credits?tab=packages'),
 			});
 		} else {
 			items.push({
 				id: 'sync-inactive',
 				label: 'Sync aktivieren',
-				icon: 'cloudArrowUp',
+				icon: 'cloud',
 				onClick: () => goto('/settings/sync'),
 			});
 			items.push({
 				id: 'sync-info',
 				label: 'Nur lokal — ab 30 Credits/Monat',
+				icon: 'creditCard',
 				disabled: true,
 			});
 		}
@@ -303,7 +432,7 @@
 		items.push({
 			id: 'sync-settings',
 			label: 'Sync-Einstellungen',
-			icon: 'gear',
+			icon: 'settings',
 			onClick: () => goto('/settings/sync'),
 		});
 
@@ -669,6 +798,28 @@
 		return searchRegistry.search(query, { signal });
 	};
 
+	// ── Local STT (speech-to-text via Whisper in browser) ───
+	const localStt = useLocalStt({ language: ($locale || 'de') === 'de' ? 'de' : 'en' });
+
+	// When STT finishes transcription, feed the text into the current
+	// module's QuickInputBar adapter (create action). This makes voice
+	// input context-aware: on /todo it creates a task, on /calendar an
+	// event, on / it searches, etc.
+	// Transcribed text is injected into the QuickInputBar so the user
+	// can see, edit, and confirm it before creating anything.
+	let sttInjectedText = $state('');
+	$effect(() => {
+		const t = localStt.text;
+		const e = localStt.error;
+		if (e) {
+			console.warn('[layout-stt] Error:', e);
+		}
+		if (t) {
+			console.log('[layout-stt] Transcribed text:', t);
+			sttInjectedText = t;
+		}
+	});
+
 	// ── QuickInputBar — context-aware adapter per module ─────
 	let inputBarAdapter = $state<InputBarAdapter>(createFallbackAdapter(searchRegistry));
 	let activeModulePrefix = $state<string | null>(null);
@@ -740,7 +891,9 @@
 		</div>
 	{/if}
 
-	<div class="min-h-screen bg-background">
+	<div class="min-h-screen" class:bg-background={!wallpaperStore.hasWallpaper}>
+		<WallpaperLayer config={wallpaperStore.effective} />
+
 		<!-- Bottom Stack: all fixed-bottom elements in one flex container.
 			 Hidden entirely when fullscreen mode is active (press "f"). -->
 		{#if !isFullscreen}
@@ -830,7 +983,30 @@
 						onDefaultChange={inputBarAdapter.onDefaultChange}
 						highlightPatterns={inputBarAdapter.highlightPatterns}
 						positioning="static"
+						injectedText={sttInjectedText}
 					>
+						{#snippet leftAction()}
+							<button
+								class="stt-mic-btn"
+								class:recording={localStt.state === 'recording'}
+								class:busy={localStt.state === 'loading' || localStt.state === 'transcribing'}
+								onclick={() => localStt.toggle()}
+								disabled={localStt.state === 'loading' || localStt.state === 'transcribing'}
+								title={localStt.state === 'recording'
+									? 'Aufnahme beenden'
+									: localStt.state === 'transcribing'
+										? 'Wird transkribiert…'
+										: localStt.state === 'loading'
+											? 'Modell wird geladen…'
+											: 'Spracheingabe'}
+							>
+								{#if localStt.state === 'recording'}
+									<Stop size={16} weight="fill" />
+								{:else}
+									<Microphone size={16} weight={localStt.state === 'idle' ? 'regular' : 'fill'} />
+								{/if}
+							</button>
+						{/snippet}
 						{#snippet rightAction()}
 							<button
 								class="pill-nav-toggle"
@@ -869,7 +1045,6 @@
 						items={activeBar.items}
 						label={activeBar.label}
 						icon={activeBar.icon}
-						onClose={closeActiveBar}
 						positioning="static"
 					/>
 				{/if}
@@ -935,7 +1110,8 @@
 			 padding on the inner max-w-7xl wrapper below. -->
 		<main
 			style="padding-bottom: {bottomChromeHeight +
-				8}px; --bottom-chrome-height: {bottomChromeHeight}px; --workbench-reserved-y: 2.5rem;"
+				8}px; --bottom-chrome-height: {bottomChromeHeight}px; --workbench-reserved-y: 1.5rem;"
+			class="pt-2"
 		>
 			<div class="mx-auto max-w-7xl px-3 py-2 sm:px-6 sm:py-3 lg:px-8">
 				{#if routeBlocked && routeAppId}
@@ -1058,6 +1234,65 @@
 
 	.bottom-stack > :global(*) {
 		pointer-events: auto;
+	}
+
+	/* STT mic button inside QuickInputBar leftAction slot */
+	.stt-mic-btn {
+		width: 36px;
+		height: 36px;
+		flex-shrink: 0;
+		border-radius: 50%;
+		border: none;
+		background: hsl(var(--color-foreground, 0 0% 90%) / 0.08);
+		color: hsl(var(--color-foreground, 0 0% 90%) / 0.5);
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: all 0.15s ease;
+		padding: 0;
+	}
+
+	.stt-mic-btn:hover:not(:disabled) {
+		background: hsl(var(--color-foreground, 0 0% 90%) / 0.15);
+		color: hsl(var(--color-primary, 239 84% 67%));
+	}
+
+	.stt-mic-btn:disabled {
+		opacity: 0.5;
+		cursor: wait;
+	}
+
+	.stt-mic-btn.recording {
+		background: hsl(var(--color-error, 0 84% 60%) / 0.15);
+		color: hsl(var(--color-error, 0 84% 60%));
+		animation: stt-pulse 1.5s ease-in-out infinite;
+	}
+
+	.stt-mic-btn.busy {
+		animation: stt-spin 1s linear infinite;
+	}
+
+	@keyframes stt-pulse {
+		0%,
+		100% {
+			box-shadow: 0 0 0 0 hsl(var(--color-error, 0 84% 60%) / 0.3);
+		}
+		50% {
+			box-shadow: 0 0 0 4px hsl(var(--color-error, 0 84% 60%) / 0);
+		}
+	}
+
+	@keyframes stt-spin {
+		from {
+			opacity: 0.5;
+		}
+		50% {
+			opacity: 1;
+		}
+		to {
+			opacity: 0.5;
+		}
 	}
 
 	.pill-nav-toggle {

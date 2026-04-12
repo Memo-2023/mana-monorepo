@@ -65,6 +65,7 @@ function toScene(local: LocalWorkbenchScene): WorkbenchScene {
 		icon: local.icon,
 		openApps: local.openApps ?? [],
 		order: local.order,
+		wallpaper: local.wallpaper,
 	};
 }
 
@@ -97,7 +98,7 @@ function pickActiveId(scenes: WorkbenchScene[], current: string | null): string 
 
 async function patchScene(
 	id: string,
-	patch: Partial<Pick<LocalWorkbenchScene, 'name' | 'icon' | 'openApps' | 'order'>>
+	patch: Partial<Pick<LocalWorkbenchScene, 'name' | 'icon' | 'openApps' | 'order' | 'wallpaper'>>
 ) {
 	// Strip Svelte 5 $state proxies — IndexedDB's structured clone can't serialize them.
 	const clean = $state.snapshot({ ...patch, updatedAt: nowIso() });

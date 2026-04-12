@@ -58,6 +58,8 @@
 		centered?: boolean;
 		/** Back navigation href (shows back arrow button) */
 		backHref?: string;
+		/** Sticky position at top of viewport with frosted-glass background */
+		sticky?: boolean;
 		/** Icon snippet (before title) */
 		icon?: Snippet;
 		/** Breadcrumb snippet (above title) */
@@ -77,12 +79,16 @@
 		bordered = false,
 		centered = false,
 		backHref,
+		sticky = false,
 		icon,
 		breadcrumb,
 		actions,
 		tabs,
 		class: className = '',
 	}: Props = $props();
+
+	const stickyClasses =
+		'sticky top-0 z-40 backdrop-blur-lg bg-[hsl(var(--color-background,0_0%_100%)/0.8)] border-b border-[hsl(var(--color-border)/0.3)]';
 
 	const sizeClasses: Record<HeaderSize, { container: string; title: string }> = {
 		sm: {
@@ -101,8 +107,8 @@
 </script>
 
 <header
-	class="page-header {sizeClasses[size].container} {bordered
-		? 'border-b border-theme'
+	class="page-header {sizeClasses[size].container} {bordered ? 'border-b border-theme' : ''} {sticky
+		? stickyClasses
 		: ''} {className}"
 >
 	<!-- Breadcrumb -->

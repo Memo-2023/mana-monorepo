@@ -134,6 +134,8 @@ window.__PUBLIC_GLITCHTIP_DSN__ = ${JSON.stringify(PUBLIC_GLITCHTIP_DSN)};
 
 	const isDev = process.env.NODE_ENV !== 'production';
 	setSecurityHeaders(response, {
+		// Allow mana-media images (localhost in dev, https in prod)
+		imgSrc: isDev ? ['http://localhost:*'] : [],
 		// @huggingface/transformers (used by @mana/local-llm) lazy-loads the
 		// onnxruntime-web WASM loader from jsDelivr at backend selection
 		// time via a dynamic import(). Browsers route dynamic imports

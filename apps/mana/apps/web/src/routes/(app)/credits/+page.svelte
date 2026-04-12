@@ -215,7 +215,7 @@
 </script>
 
 <div>
-	<PageHeader title="Credits" description="Verwalte deine Mana Credits" size="lg" />
+	<PageHeader title="Credits" backHref="/" sticky size="lg" />
 
 	{#if loading}
 		<div class="flex items-center justify-center py-12">

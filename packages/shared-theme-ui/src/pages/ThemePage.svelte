@@ -1,10 +1,6 @@
 <script lang="ts">
-	import type {
-		ThemeVariant,
-		ThemeMode,
-		A11yStore,
-		UserSettingsStore,
-	} from '@mana/shared-theme';
+	import type { Snippet } from 'svelte';
+	import type { ThemeVariant, ThemeMode, A11yStore, UserSettingsStore } from '@mana/shared-theme';
 	import { ArrowLeft, Sun, Moon, Desktop } from '@mana/shared-icons';
 	import type { ThemeCardData, ThemePageTranslations, A11yTranslations } from '../types';
 	import { defaultTranslations, defaultA11yTranslations } from '../types';
@@ -26,7 +22,7 @@
 		currentMode?: ThemeMode;
 		onModeChange?: (mode: ThemeMode) => void;
 
-		// Back navigation
+		// Back navigation (deprecated — use PageHeader sticky on the consuming page instead)
 		showBackButton?: boolean;
 		onBack?: () => void;
 
@@ -46,6 +42,13 @@
 		userSettingsStore?: UserSettingsStore;
 		pinnedThemes?: ThemeVariant[];
 		onTogglePin?: (variant: ThemeVariant) => void;
+
+		// Visual
+		/** Make outer wrapper transparent (so a wallpaper layer behind it shows through). */
+		transparent?: boolean;
+
+		/** Extra content rendered below the theme grid (e.g. wallpaper picker). */
+		children?: Snippet;
 	}
 
 	let {
@@ -67,6 +70,8 @@
 		a11yTranslations = {},
 		pinnedThemes = [],
 		onTogglePin,
+		transparent = false,
+		children,
 	}: Props = $props();
 
 	// Merge translations with defaults
@@ -80,8 +85,8 @@
 	]);
 </script>
 
-<div class="min-h-screen bg-background">
-	<div class="max-w-4xl mx-auto px-4 py-8">
+<div class="min-h-screen" class:bg-background={!transparent}>
+	<div class="max-w-3xl mx-auto px-4 py-8" class:theme-page-card={transparent}>
 		<!-- Header -->
 		<header class="mb-6">
 			<div class="flex items-center gap-3 mb-2">
@@ -155,5 +160,25 @@
 				<A11ySettings store={a11yStore} translations={a11yTranslations} />
 			</section>
 		{/if}
+
+		<!-- Extra content (e.g. wallpaper picker) -->
+		{#if children}
+			{@render children()}
+		{/if}
 	</div>
 </div>
+
+<style>
+	.theme-page-card {
+		background: hsl(var(--color-card, 0 0% 100%) / 0.82);
+		backdrop-filter: blur(20px);
+		-webkit-backdrop-filter: blur(20px);
+		border-radius: 1.25rem;
+		margin-top: 2rem;
+		margin-bottom: 2rem;
+		padding-left: 2rem;
+		padding-right: 2rem;
+		border: 1px solid hsl(var(--color-border) / 0.2);
+		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+	}
+</style>

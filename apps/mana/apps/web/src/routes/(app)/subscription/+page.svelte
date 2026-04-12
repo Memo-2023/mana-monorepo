@@ -195,11 +195,7 @@
 </script>
 
 <div>
-	<PageHeader
-		title="Abonnement"
-		description="Verwalte dein Abonnement und sieh dir deine Rechnungen an"
-		size="lg"
-	/>
+	<PageHeader title="Abonnement" backHref="/" sticky size="lg" />
 
 	{#if loading}
 		<div class="flex items-center justify-center py-12">

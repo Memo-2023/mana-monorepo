@@ -28,6 +28,16 @@ export type {
 	StartPageConfig,
 	WeekStartDay,
 	GeneralSettings,
+	// Wallpaper Types
+	WallpaperSource,
+	WallpaperSourceNone,
+	WallpaperSourcePredefined,
+	WallpaperSourceGenerated,
+	WallpaperSourceUpload,
+	WallpaperSolid,
+	WallpaperGradient,
+	WallpaperOverlay,
+	WallpaperConfig,
 } from './types';
 
 // User Settings Constants

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { ProfilePage } from '@mana/shared-ui';
+	import { ProfilePage, PageHeader } from '@mana/shared-ui';
 	import type { UserProfile, ProfileActions } from '@mana/shared-ui';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { goto } from '$app/navigation';
@@ -85,6 +85,8 @@
 		}, 3000);
 	}
 </script>
+
+<PageHeader title="Profil" backHref="/" sticky />
 
 {#if loading}
 	<div class="flex items-center justify-center py-12">

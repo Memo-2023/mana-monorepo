@@ -13,7 +13,8 @@
 	import { DragPreview } from '@mana/shared-ui/dnd';
 	import type { DragType } from '@mana/shared-ui/dnd';
 	import { ContextMenu, type ContextMenuItem } from '@mana/shared-ui';
-	import { Pencil, Copy, Trash } from '@mana/shared-icons';
+	import { Pencil, Copy, Trash, Image } from '@mana/shared-icons';
+	import { goto } from '$app/navigation';
 	import { _ } from 'svelte-i18n';
 	import { buildContextMenuItems, createWorkbenchContextMenu } from '$lib/context-menu';
 	import type { WorkbenchScene } from '$lib/types/workbench-scenes';
@@ -177,6 +178,12 @@
 				icon: Copy,
 				action: () => handleDuplicateScene(scene.id),
 			},
+			{
+				id: 'wallpaper',
+				label: 'Hintergrund ändern',
+				icon: Image,
+				action: () => goto('/themes'),
+			},
 		];
 		if (scenes.length > 1) {
 			items.push({ id: 'div', label: '', type: 'divider' });
@@ -307,22 +314,22 @@
 		display: flex;
 		flex-direction: column;
 		position: relative;
-		/* Break out of layout's max-w-7xl px-4 container */
-		margin: -2rem -1rem 0;
-		width: calc(100% + 2rem);
+		/* Break out of layout's max-w-7xl px-3 container;
+		   only negate the inner wrapper's py-2, keep main's pt-4 */
+		margin: -0.5rem -0.75rem 0;
+		width: calc(100% + 1.5rem);
 	}
 
 	@media (min-width: 640px) {
 		.workbench {
-			margin: -2rem -1.5rem 0;
+			margin: -0.75rem -1.5rem 0;
 			width: calc(100% + 3rem);
 		}
 	}
 
 	@media (min-width: 1024px) {
 		.workbench {
-			margin: -2rem -2rem 0;
-			padding-top: 2rem;
+			margin: -0.75rem -2rem 0;
 			width: calc(100% + 4rem);
 		}
 	}

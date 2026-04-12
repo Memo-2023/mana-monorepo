@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { locale } from 'svelte-i18n';
 	import { HelpPage, getHelpTranslations } from '@mana/help';
+	import { PageHeader } from '@mana/shared-ui';
 	import { getManaHelpContent } from '$lib/content/help/index.js';
 
 	const content = $derived(getManaHelpContent($locale ?? 'de'));
@@ -19,13 +20,14 @@
 	<title>{translations.title} | Mana</title>
 </svelte:head>
 
+<PageHeader title={translations.title} backHref="/" sticky />
+
 <HelpPage
 	{content}
 	appName="Mana"
 	appId="mana"
 	{translations}
-	showBackButton
-	onBack={() => goto('/')}
+	showBackButton={false}
 	showGettingStarted={false}
 	showChangelog={false}
 	defaultSection="faq"

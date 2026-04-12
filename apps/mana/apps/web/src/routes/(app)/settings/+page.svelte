@@ -48,11 +48,7 @@
 </script>
 
 <div class="mx-auto w-full max-w-4xl px-4 sm:px-6">
-	<PageHeader
-		title={$_('common.settings')}
-		description="Verwalte deine Kontoeinstellungen und Präferenzen"
-		size="lg"
-	/>
+	<PageHeader title={$_('common.settings')} backHref="/" sticky size="lg" />
 
 	<div class="mt-6 flex flex-col gap-6 lg:flex-row lg:items-start">
 		<SettingsSidebar {activeCategory} onSelect={(id) => (activeCategory = id)} onJump={jumpTo} />

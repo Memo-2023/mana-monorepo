@@ -267,6 +267,7 @@ export function createUserSettingsStore(config: UserSettingsStoreConfig): UserSe
 				},
 			},
 			recentEmojis: settings.recentEmojis ?? globalSettings.recentEmojis,
+			wallpaper: settings.wallpaper !== undefined ? settings.wallpaper : globalSettings.wallpaper,
 		};
 		saveToStorage();
 
