@@ -13,6 +13,7 @@
 	import { locale, _ } from 'svelte-i18n';
 	import {
 		PillNavigation,
+		PillDropdownBar,
 		TagStrip,
 		DragPreview,
 		ActionZone,
@@ -21,6 +22,7 @@
 	import type {
 		PillNavItem,
 		PillDropdownItem,
+		PillBarConfig,
 		SpotlightAction,
 		ContentSearcher,
 		ContextMenuItem,
@@ -330,9 +332,47 @@
 		isTagStripVisible = !isTagStripVisible;
 	}
 
+	// ── QuickInputBar visibility (toggled by the "search" pill) ──
+	let isQuickInputVisible = $state(true);
+	function handleQuickInputToggle() {
+		isQuickInputVisible = !isQuickInputVisible;
+	}
+
+	// ── Workbench tab bar visibility (toggled by the "tabs" pill) ──
+	// Controls whether the page-injected bottomBar (SceneAppBar on /) is rendered.
+	let isBottomBarVisible = $state(true);
+	function handleBottomBarToggle() {
+		isBottomBarVisible = !isBottomBarVisible;
+	}
+
+	// ── Dropdown-as-bar ──────────────────────────────────────
+	// Theme / AI tier / Sync / User-menu dropdowns are surfaced as
+	// bars in the bottom stack instead of floating popovers. PillNavigation
+	// calls handleOpenBar with a PillBarConfig (or null to close); we
+	// render the items via PillDropdownBar just above the PillNav.
+	let activeBar = $state<PillBarConfig | null>(null);
+	function handleOpenBar(config: PillBarConfig | null) {
+		activeBar = config;
+	}
+	function closeActiveBar() {
+		activeBar = null;
+	}
+
+	// ── Fullscreen mode (press "f" to toggle) ───────────────
+	// Hides the entire bottom-stack (pill nav, QuickInputBar, TagStrip,
+	// notifications, bottom bar) so only the routed page content
+	// (e.g. workbench pages) is visible. Esc exits.
+	let isFullscreen = $state(false);
+
 	// Bottom chrome height: calculated from state, not measured (avoids reflow loop)
 	const bottomChromeHeight = $derived(
-		(isCollapsed ? 0 : 80) + (isTagStripVisible ? 44 : 0) + 72 + (bottomBarStore.component ? 36 : 0)
+		isFullscreen
+			? 0
+			: (isCollapsed ? 0 : 80) +
+					(activeBar ? 56 : 0) +
+					(isTagStripVisible ? 44 : 0) +
+					(isQuickInputVisible ? 72 : 0) +
+					(isBottomBarVisible && bottomBarStore.component ? 36 : 0)
 	);
 
 	// ── DnD context ─────────────────────────────────────────
@@ -379,10 +419,26 @@
 			href: '/',
 			label: $_('nav.tags'),
 			icon: 'tag',
+			iconOnly: true,
 			onClick: handleTagStripToggle,
 			active: isTagStripVisible,
 		},
-		{ href: '/', label: $_('nav.home'), icon: 'home', onContextMenu: makeNavContextMenu('/') },
+		{
+			href: '/',
+			label: 'Suche',
+			icon: 'search',
+			iconOnly: true,
+			onClick: handleQuickInputToggle,
+			active: isQuickInputVisible,
+		},
+		{
+			href: '/',
+			label: 'Workbench-Tabs',
+			icon: 'columns',
+			iconOnly: true,
+			onClick: handleBottomBarToggle,
+			active: isBottomBarVisible,
+		},
 	]);
 
 	let isAdmin = $derived(authStore.user?.role === 'admin');
@@ -399,6 +455,21 @@
 		if (event.key === '?' && !event.ctrlKey && !event.metaKey) {
 			event.preventDefault();
 			showShortcuts = !showShortcuts;
+			return;
+		}
+		if (
+			(event.key === 'f' || event.key === 'F') &&
+			!event.ctrlKey &&
+			!event.metaKey &&
+			!event.altKey
+		) {
+			event.preventDefault();
+			isFullscreen = !isFullscreen;
+			return;
+		}
+		if (event.key === 'Escape' && isFullscreen) {
+			event.preventDefault();
+			isFullscreen = false;
 			return;
 		}
 		if ((event.ctrlKey || event.metaKey) && !event.shiftKey && !event.altKey) {
@@ -670,173 +741,203 @@
 	{/if}
 
 	<div class="min-h-screen bg-background">
-		<!-- Bottom Stack: all fixed-bottom elements in one flex container -->
-		<div class="bottom-stack" style:--bottom-chrome-height="{bottomChromeHeight}px">
-			<!-- Page-injected bottom bar (e.g. workbench scene+app tabs) -->
-			{#if bottomBarStore.component}
-				{@const BarComponent = bottomBarStore.component}
-				<BarComponent {...bottomBarStore.props} />
-			{/if}
+		<!-- Bottom Stack: all fixed-bottom elements in one flex container.
+			 Hidden entirely when fullscreen mode is active (press "f"). -->
+		{#if !isFullscreen}
+			<div class="bottom-stack" style:--bottom-chrome-height="{bottomChromeHeight}px">
+				<!-- Page-injected bottom bar (e.g. workbench scene+app tabs).
+				 Gated by isBottomBarVisible so the "workbench tabs" pill can
+				 toggle it without unmounting the owning page. -->
+				{#if isBottomBarVisible && bottomBarStore.component}
+					{@const BarComponent = bottomBarStore.component}
+					<BarComponent {...bottomBarStore.props} />
+				{/if}
 
-			<!-- One-time encryption intro — sits at the top of the stack so
+				<!-- One-time encryption intro — sits at the top of the stack so
 				 it can't be obscured by the QuickInputBar / TagStrip / PillNav.
 				 Self-gates on isVaultUnlocked() so guests never see it. -->
-			<div class="bottom-stack-notification">
-				<EncryptionIntroBanner />
-			</div>
-
-			<!-- Sync pause banner — shown when sync was paused due to insufficient credits -->
-			{#if syncBilling.paused}
 				<div class="bottom-stack-notification">
-					<div
-						class="flex items-center justify-between gap-3 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:bg-amber-900/20 dark:text-amber-200"
-					>
-						<span>Cloud Sync pausiert — Credits reichen nicht aus.</span>
-						<div class="flex gap-2">
-							<a href="/credits?tab=packages" class="font-medium underline hover:no-underline">
-								Credits aufladen
-							</a>
-							<a href="/settings/sync" class="font-medium underline hover:no-underline">
-								Sync-Einstellungen
-							</a>
+					<EncryptionIntroBanner />
+				</div>
+
+				<!-- Sync pause banner — shown when sync was paused due to insufficient credits -->
+				{#if syncBilling.paused}
+					<div class="bottom-stack-notification">
+						<div
+							class="flex items-center justify-between gap-3 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:bg-amber-900/20 dark:text-amber-200"
+						>
+							<span>Cloud Sync pausiert — Credits reichen nicht aus.</span>
+							<div class="flex gap-2">
+								<a href="/credits?tab=packages" class="font-medium underline hover:no-underline">
+									Credits aufladen
+								</a>
+								<a href="/settings/sync" class="font-medium underline hover:no-underline">
+									Sync-Einstellungen
+								</a>
+							</div>
 						</div>
 					</div>
-				</div>
-			{/if}
+				{/if}
 
-			<!-- Guest notifications — combines the time-based nudge from
+				<!-- Guest notifications — combines the time-based nudge from
 				 createGuestMode (one-shot after N minutes) with the
 				 event-driven prompts pushed by guestPrompt.requireAccount
 				 (e.g. server feature called while signed out, 401 from
 				 the auth-aware fetch). Both flow into the same bar so
 				 the user only ever sees one stripe instead of stacking. -->
-			{#if (guestMode && guestMode.notifications.length > 0) || guestPrompt.notifications.length > 0}
-				<div class="bottom-stack-notification">
-					<NotificationBar
-						notifications={[...(guestMode?.notifications ?? []), ...guestPrompt.notifications]}
-					/>
-				</div>
-			{/if}
+				{#if (guestMode && guestMode.notifications.length > 0) || guestPrompt.notifications.length > 0}
+					<div class="bottom-stack-notification">
+						<NotificationBar
+							notifications={[...(guestMode?.notifications ?? []), ...guestPrompt.notifications]}
+						/>
+					</div>
+				{/if}
 
-			<!-- Session expiry warning (auth only). Self-gates on the
+				<!-- Session expiry warning (auth only). Self-gates on the
 				 secondsLeft countdown and only renders inside the stack
 				 when actually warning, so the wrapper is no-op otherwise. -->
-			{#if authStore.isAuthenticated}
-				<div class="bottom-stack-notification">
-					<SessionWarning />
-				</div>
-			{/if}
+				{#if authStore.isAuthenticated}
+					<div class="bottom-stack-notification">
+						<SessionWarning />
+					</div>
+				{/if}
 
-			<!-- Cross-module automation suggestions. Lives in the (app)
+				<!-- Cross-module automation suggestions. Lives in the (app)
 				 stack because automationsStore is an (app)-only module
 				 and the toast doesn't make sense on auth/landing pages
 				 anyway. Self-gates on visible state. -->
-			<div class="bottom-stack-notification">
-				<SuggestionToast />
-			</div>
+				<div class="bottom-stack-notification">
+					<SuggestionToast />
+				</div>
 
-			<!-- QuickInputBar with inline nav toggle -->
-			<QuickInputBar
-				onSearch={inputBarAdapter.onSearch}
-				onSelect={inputBarAdapter.onSelect}
-				onParseCreate={inputBarAdapter.onParseCreate}
-				onCreate={inputBarAdapter.onCreate}
-				onSearchChange={inputBarAdapter.onSearchChange}
-				placeholder={inputBarAdapter.placeholder}
-				appIcon={inputBarAdapter.appIcon}
-				emptyText={inputBarAdapter.emptyText}
-				createText={inputBarAdapter.createText}
-				deferSearch={inputBarAdapter.deferSearch}
-				locale={$locale || 'de'}
-				defaultOptions={inputBarAdapter.defaultOptions}
-				selectedDefaultId={inputBarAdapter.selectedDefaultId}
-				defaultOptionLabel={inputBarAdapter.defaultOptionLabel}
-				onDefaultChange={inputBarAdapter.onDefaultChange}
-				highlightPatterns={inputBarAdapter.highlightPatterns}
-				positioning="static"
-			>
-				{#snippet rightAction()}
-					<button
-						class="pill-nav-toggle"
-						onclick={() => handleCollapsedChange(!isCollapsed)}
-						title={isCollapsed ? 'Navigation einblenden' : 'Navigation ausblenden'}
+				<!-- QuickInputBar with inline nav toggle — gated by the "search" pill -->
+				{#if isQuickInputVisible}
+					<QuickInputBar
+						onSearch={inputBarAdapter.onSearch}
+						onSelect={inputBarAdapter.onSelect}
+						onParseCreate={inputBarAdapter.onParseCreate}
+						onCreate={inputBarAdapter.onCreate}
+						onSearchChange={inputBarAdapter.onSearchChange}
+						placeholder={inputBarAdapter.placeholder}
+						appIcon={inputBarAdapter.appIcon}
+						emptyText={inputBarAdapter.emptyText}
+						createText={inputBarAdapter.createText}
+						deferSearch={inputBarAdapter.deferSearch}
+						locale={$locale || 'de'}
+						defaultOptions={inputBarAdapter.defaultOptions}
+						selectedDefaultId={inputBarAdapter.selectedDefaultId}
+						defaultOptionLabel={inputBarAdapter.defaultOptionLabel}
+						onDefaultChange={inputBarAdapter.onDefaultChange}
+						highlightPatterns={inputBarAdapter.highlightPatterns}
+						positioning="static"
 					>
-						<span class="pill-nav-toggle-icon" class:collapsed={isCollapsed}>▼</span>
-					</button>
-				{/snippet}
-			</QuickInputBar>
+						{#snippet rightAction()}
+							<button
+								class="pill-nav-toggle"
+								onclick={() => handleCollapsedChange(!isCollapsed)}
+								title={isCollapsed ? 'Navigation einblenden' : 'Navigation ausblenden'}
+							>
+								<span class="pill-nav-toggle-icon" class:collapsed={isCollapsed}>▼</span>
+							</button>
+						{/snippet}
+					</QuickInputBar>
+				{/if}
 
-			<!-- TagStrip (between QuickInputBar and PillNav) -->
-			{#if isTagStripVisible}
-				<TagStrip
-					tags={(allTags.value ?? []).map((t) => ({
-						id: t.id,
-						name: t.name,
-						color: t.color || '#3b82f6',
-					}))}
-					selectedIds={[]}
-					onToggle={() => {}}
-					onClear={() => {}}
-					onTagDrop={tagDropHandler ?? undefined}
-					managementHref="/tags"
-					loading={allTags.loading}
+				<!-- TagStrip (between QuickInputBar and PillNav) -->
+				{#if isTagStripVisible}
+					<TagStrip
+						tags={(allTags.value ?? []).map((t) => ({
+							id: t.id,
+							name: t.name,
+							color: t.color || '#3b82f6',
+						}))}
+						selectedIds={[]}
+						onToggle={() => {}}
+						onClear={() => {}}
+						onTagDrop={tagDropHandler ?? undefined}
+						managementHref="/tags"
+						loading={allTags.loading}
+						positioning="static"
+					/>
+				{/if}
+
+				<!-- Dropdown-as-bar: shows the items of the currently opened
+				 PillNavigation dropdown (theme / AI / sync / user) as
+				 horizontal pills directly above the PillNav. -->
+				{#if activeBar}
+					<PillDropdownBar
+						items={activeBar.items}
+						label={activeBar.label}
+						icon={activeBar.icon}
+						onClose={closeActiveBar}
+						positioning="static"
+					/>
+				{/if}
+
+				<!-- PillNav (bottom of stack) -->
+				<PillNavigation
+					onOpenBar={handleOpenBar}
+					activeBarId={activeBar?.id ?? null}
+					items={navItems}
+					currentPath={$page.url.pathname}
+					appName="Mana"
+					homeRoute="/"
+					onLogout={handleSignOut}
+					onToggleTheme={handleToggleTheme}
+					{isDark}
+					{isCollapsed}
+					onCollapsedChange={handleCollapsedChange}
+					showThemeToggle={true}
+					showThemeVariants={true}
+					{themeVariantItems}
+					{currentThemeVariantLabel}
+					themeMode={theme.mode}
+					onThemeModeChange={handleThemeModeChange}
+					showLanguageSwitcher={true}
+					{languageItems}
+					{currentLanguageLabel}
+					showLogout={authStore.isAuthenticated}
+					loginHref="/login"
+					primaryColor="#6366f1"
+					showAppSwitcher={true}
+					showAiTierSelector={true}
+					{aiTierItems}
+					{currentAiTierLabel}
+					{currentAiTierIcon}
+					showSyncStatus={authStore.isAuthenticated}
+					{syncStatusItems}
+					{currentSyncLabel}
+					{appItems}
+					{userEmail}
+					settingsHref="/settings"
+					manaHref="/mana"
+					profileHref="/profile"
+					spiralHref="/spiral"
+					creditsHref="/credits"
+					themesHref="/themes"
+					helpHref="/help"
+					allAppsHref="/apps"
+					{spotlightActions}
+					{contentSearcher}
 					positioning="static"
 				/>
-			{/if}
-
-			<!-- PillNav (bottom of stack) -->
-			<PillNavigation
-				items={navItems}
-				currentPath={$page.url.pathname}
-				appName="Mana"
-				homeRoute="/"
-				onLogout={handleSignOut}
-				onToggleTheme={handleToggleTheme}
-				{isDark}
-				{isCollapsed}
-				onCollapsedChange={handleCollapsedChange}
-				showThemeToggle={true}
-				showThemeVariants={true}
-				{themeVariantItems}
-				{currentThemeVariantLabel}
-				themeMode={theme.mode}
-				onThemeModeChange={handleThemeModeChange}
-				showLanguageSwitcher={true}
-				{languageItems}
-				{currentLanguageLabel}
-				showLogout={authStore.isAuthenticated}
-				loginHref="/login"
-				primaryColor="#6366f1"
-				showAppSwitcher={true}
-				showAiTierSelector={true}
-				{aiTierItems}
-				{currentAiTierLabel}
-				{currentAiTierIcon}
-				showSyncStatus={authStore.isAuthenticated}
-				{syncStatusItems}
-				{currentSyncLabel}
-				{appItems}
-				{userEmail}
-				settingsHref="/settings"
-				manaHref="/mana"
-				profileHref="/profile"
-				spiralHref="/spiral"
-				creditsHref="/credits"
-				themesHref="/themes"
-				helpHref="/help"
-				allAppsHref="/apps"
-				{spotlightActions}
-				{contentSearcher}
-				positioning="static"
-			/>
-		</div>
+			</div>
+		{/if}
 
 		<!-- DnD: floating preview -->
 		<DragPreview />
 
-		<!-- Main content -->
-		<main style="padding-bottom: {bottomChromeHeight + 32}px">
-			<div class="mx-auto max-w-7xl px-3 py-4 sm:px-6 sm:py-8 lg:px-8">
+		<!-- Main content.
+			 Publish layout offsets as CSS variables so descendants (esp.
+			 PageShell in the carousel) can compute their available
+			 height against viewport + bottom chrome without prop
+			 drilling. `--workbench-top-offset` must match the vertical
+			 padding on the inner max-w-7xl wrapper below. -->
+		<main
+			style="padding-bottom: {bottomChromeHeight +
+				8}px; --bottom-chrome-height: {bottomChromeHeight}px; --workbench-reserved-y: 2.5rem;"
+		>
+			<div class="mx-auto max-w-7xl px-3 py-2 sm:px-6 sm:py-3 lg:px-8">
 				{#if routeBlocked && routeAppId}
 					<!-- Per-route tier gate. The wrapping AuthGate only fires
 						 onMount + only for authenticated users, so this is the
@@ -948,6 +1049,9 @@
 		display: flex;
 		flex-direction: column;
 		align-items: stretch;
+		/* Uniform small gap between bars instead of each wrapper
+		   providing its own ad-hoc padding-bottom. */
+		gap: 0.25rem;
 		pointer-events: none;
 		padding-bottom: env(safe-area-inset-bottom, 0px);
 	}
@@ -992,6 +1096,9 @@
 	.bottom-stack-notification {
 		display: flex;
 		justify-content: center;
-		padding: 0 1rem 0.5rem;
+		/* Only horizontal padding — vertical spacing comes from the
+		   parent .bottom-stack `gap`, so all bars are evenly spaced
+		   regardless of how many children they nest. */
+		padding: 0 1rem;
 	}
 </style>

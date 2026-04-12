@@ -243,7 +243,19 @@
 	   THEME_DEFINITIONS to change the texture for a whole theme. */
 	.page-shell {
 		flex: 0 0 auto;
-		min-height: 60vh;
+		/* Default page height fills the viewport between the workbench
+		   top padding and the bottom chrome (pill nav + tag strip +
+		   bottom bar). Two CSS vars cascade from the layout's <main>:
+		    - --bottom-chrome-height reacts to pill-nav collapse, tag
+		      strip visibility and bottom-bar mount state
+		    - --workbench-reserved-y collapses the py-* wrapper padding
+		      plus a small buffer into a single "non-chrome vertical"
+		      number so this calc doesn't have to mirror DOM padding
+		   `dvh` accounts for mobile Safari's retractable address bar.
+		   An inline `height: {px}px` style from the resize-drag prop
+		   overrides this value (same specificity rule as before). */
+		height: calc(100dvh - var(--bottom-chrome-height, 80px) - var(--workbench-reserved-y, 2.5rem));
+		min-height: 320px;
 		max-width: calc(100vw - 2rem);
 		background-color: hsl(var(--color-card));
 		background-image: var(--paper-texture, none);
