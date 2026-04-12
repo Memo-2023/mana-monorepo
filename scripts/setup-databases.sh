@@ -54,9 +54,10 @@ create_schema_if_not_exists() {
 push_schema() {
     local filter=$1
     local name=$2
+    local script=${3:-db:push}
     echo -e "${YELLOW}Pushing schema for ${name}...${NC}"
     local output
-    output=$(pnpm --filter "$filter" db:push --force 2>&1)
+    output=$(pnpm --filter "$filter" "$script" --force 2>&1)
     local exit_code=$?
     if echo "$output" | grep -q "No projects matched the filters\|None of the selected packages has"; then
         echo -e "  ${YELLOW}⊘ Skipped (no db:push script for ${filter})${NC}"
@@ -117,7 +118,7 @@ setup_service() {
             push_schema "@traces/server" "traces"
             ;;
         presi)
-            push_schema "@presi/server" "presi"
+            push_schema "@mana/api" "presi" "db:push:presi"
             ;;
         uload)
             push_schema "@mana/uload-database" "uload"

@@ -14,79 +14,19 @@ import type { AuthVariables } from '@mana/shared-hono';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 import {
-	pgSchema,
-	uuid,
-	text,
-	boolean,
-	timestamp,
-	integer,
-	jsonb,
-	index,
-} from 'drizzle-orm/pg-core';
-import { relations } from 'drizzle-orm';
+	decks,
+	slides,
+	themes,
+	sharedDecks,
+	decksRelations,
+	slidesRelations,
+	sharedDecksRelations,
+} from './schema.js';
 
-// ─── DB Schema (read-only for share lookups) ────────────────
+// ─── DB Connection ─────────────────────────────────────────
 
 const DATABASE_URL =
 	process.env.DATABASE_URL ?? 'postgresql://mana:devpassword@localhost:5432/mana_platform';
-
-const presiSchema = pgSchema('presi');
-
-const decks = presiSchema.table('decks', {
-	id: uuid('id').primaryKey().defaultRandom(),
-	userId: text('user_id').notNull(),
-	title: text('title').notNull(),
-	description: text('description'),
-	themeId: uuid('theme_id'),
-	isPublic: boolean('is_public').default(false).notNull(),
-	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
-});
-
-const slides = presiSchema.table(
-	'slides',
-	{
-		id: uuid('id').primaryKey().defaultRandom(),
-		deckId: uuid('deck_id').notNull(),
-		order: integer('order').default(0).notNull(),
-		content: jsonb('content'),
-		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-	},
-	(table) => [index('slides_deck_order_api_idx').on(table.deckId, table.order)]
-);
-
-const themes = presiSchema.table('themes', {
-	id: uuid('id').primaryKey().defaultRandom(),
-	name: text('name').notNull(),
-	colors: jsonb('colors'),
-	fonts: jsonb('fonts'),
-	isDefault: boolean('is_default').default(false),
-});
-
-const sharedDecks = presiSchema.table(
-	'shared_decks',
-	{
-		id: uuid('id').primaryKey().defaultRandom(),
-		deckId: uuid('deck_id').notNull(),
-		shareCode: text('share_code').notNull().unique(),
-		expiresAt: timestamp('expires_at', { withTimezone: true }),
-		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-	},
-	(table) => [index('shared_decks_deck_id_api_idx').on(table.deckId)]
-);
-
-const decksRelations = relations(decks, ({ many }) => ({
-	slides: many(slides),
-	sharedDecks: many(sharedDecks),
-}));
-
-const slidesRelations = relations(slides, ({ one }) => ({
-	deck: one(decks, { fields: [slides.deckId], references: [decks.id] }),
-}));
-
-const sharedDecksRelations = relations(sharedDecks, ({ one }) => ({
-	deck: one(decks, { fields: [sharedDecks.deckId], references: [decks.id] }),
-}));
 
 const connection = postgres(DATABASE_URL, { max: 5, idle_timeout: 20 });
 const db = drizzle(connection, {
