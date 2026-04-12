@@ -26,7 +26,7 @@ export function getVaultClient(): VaultClient {
 	if (!_instance) {
 		_instance = createVaultClient({
 			authUrl: getManaAuthUrl(),
-			getToken: () => authStore.getAccessToken(),
+			getToken: () => authStore.getValidToken(),
 		});
 	}
 	return _instance;

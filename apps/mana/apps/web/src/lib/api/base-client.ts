@@ -104,7 +104,7 @@ export async function fetchWithRetry<T>(
 	for (let attempt = 0; attempt <= config.maxRetries; attempt++) {
 		try {
 			// Get fresh token for each attempt
-			const token = await authStore.getAccessToken();
+			const token = await authStore.getValidToken();
 
 			const response = await fetch(url, {
 				...options,

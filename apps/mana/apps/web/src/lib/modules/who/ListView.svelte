@@ -33,7 +33,7 @@
 
 	onMount(async () => {
 		try {
-			const token = await authStore.getAccessToken();
+			const token = await authStore.getValidToken();
 			if (!token) {
 				loadingDecks = false;
 				return;

@@ -48,7 +48,7 @@ const API_BASE = '/api/v1/who';
  * Same pattern as base-client.ts uses for every other API call.
  */
 async function postJson<T>(path: string, body: unknown): Promise<T> {
-	const token = await authStore.getAccessToken();
+	const token = await authStore.getValidToken();
 	if (!token) {
 		guestPrompt.requireAccount(
 			'who',

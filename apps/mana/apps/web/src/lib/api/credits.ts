@@ -56,7 +56,7 @@ export interface CreditPurchase {
 
 // Helper function for authenticated requests
 async function fetchWithAuth<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-	const token = await authStore.getAccessToken();
+	const token = await authStore.getValidToken();
 
 	const response = await fetch(`${getManaCreditsUrl()}${endpoint}`, {
 		...options,

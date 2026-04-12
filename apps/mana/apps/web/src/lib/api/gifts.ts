@@ -85,7 +85,7 @@ async function fetchPublic<T>(endpoint: string): Promise<T> {
 
 // Helper function for authenticated requests
 async function fetchWithAuth<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-	const token = await authStore.getAccessToken();
+	const token = await authStore.getValidToken();
 
 	const response = await fetch(`${getManaAuthUrl()}${endpoint}`, {
 		...options,

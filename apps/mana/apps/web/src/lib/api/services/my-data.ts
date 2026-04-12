@@ -74,7 +74,7 @@ export const myDataService = {
 	 */
 	async downloadMyData(): Promise<void> {
 		const baseUrl = getAuthApiUrl();
-		const token = await authStore.getAccessToken();
+		const token = await authStore.getValidToken();
 
 		// Use fetch with blob response for file download
 		const response = await fetch(`${baseUrl}/me/data/export`, {

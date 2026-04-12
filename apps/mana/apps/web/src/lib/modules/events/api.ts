@@ -32,7 +32,7 @@ export interface PublicRsvpRecord {
 }
 
 async function fetchWithAuth<T>(path: string, init: RequestInit = {}): Promise<T> {
-	const token = await authStore.getAccessToken();
+	const token = await authStore.getValidToken();
 	const res = await fetch(`${getManaEventsUrl()}${path}`, {
 		...init,
 		headers: {

@@ -121,7 +121,7 @@
 		if (uploading) return;
 		uploading = true;
 
-		const token = await authStore.getAccessToken();
+		const token = await authStore.getValidToken();
 
 		for (let i = 0; i < uploadFiles.length; i++) {
 			if (uploadFiles[i]!.status !== 'pending') continue;

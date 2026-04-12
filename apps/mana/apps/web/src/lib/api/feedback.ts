@@ -9,5 +9,5 @@ import { getManaAuthUrl } from './config';
 export const feedbackService = createFeedbackService({
 	apiUrl: getManaAuthUrl(),
 	appId: 'mana',
-	getAuthToken: async () => authStore.getAccessToken(),
+	getAuthToken: async () => authStore.getValidToken(),
 });

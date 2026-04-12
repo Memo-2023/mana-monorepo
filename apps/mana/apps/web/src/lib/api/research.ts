@@ -87,7 +87,7 @@ export class ResearchApiError extends Error {
 // ─── Internal helpers ───────────────────────────────────────
 
 async function authHeaders(extra: HeadersInit = {}): Promise<HeadersInit> {
-	const token = await authStore.getAccessToken();
+	const token = await authStore.getValidToken();
 	return {
 		'Content-Type': 'application/json',
 		...(token ? { Authorization: `Bearer ${token}` } : {}),

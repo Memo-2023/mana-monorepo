@@ -58,7 +58,7 @@ async function resolveSystemPrompt(templateId: string | undefined): Promise<stri
  * Returns an empty object when no token is available (guest mode).
  */
 async function authHeader(): Promise<Record<string, string>> {
-	const token = await authStore.getAccessToken();
+	const token = await authStore.getValidToken();
 	return token ? { Authorization: `Bearer ${token}` } : {};
 }
 

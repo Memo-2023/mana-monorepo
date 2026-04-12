@@ -24,5 +24,5 @@ function getAuthUrl(): string {
 export const userSettings = createUserSettingsStore({
 	appId: 'mana',
 	authUrl: getAuthUrl,
-	getAccessToken: () => authStore.getAccessToken(),
+	getAccessToken: () => authStore.getValidToken(),
 });

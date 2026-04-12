@@ -43,7 +43,7 @@ export interface UploadPhotoResult {
 }
 
 async function authHeader(): Promise<Record<string, string>> {
-	const token = await authStore.getAccessToken();
+	const token = await authStore.getValidToken();
 	return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
