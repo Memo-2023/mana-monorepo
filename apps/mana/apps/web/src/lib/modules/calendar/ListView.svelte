@@ -1,14 +1,13 @@
 <!--
   Calendar — Workbench ListView
-  Mini week view with today's events + quick event creation.
-  Clicking an event opens the detail view.
+  Mini week strip + today's events. Floating input at bottom.
 -->
 <script lang="ts">
 	import { db } from '$lib/data/database';
 	import { eventsStore } from './stores/events.svelte';
 	import { useAllCalendarItems } from './queries';
 	import type { CalendarEvent } from './types';
-	import { Plus, PencilSimple, Trash } from '@mana/shared-icons';
+	import { PencilSimple, Trash } from '@mana/shared-icons';
 	import type { ViewProps } from '$lib/app-registry';
 	import { ContextMenu, type ContextMenuItem } from '@mana/shared-ui';
 	import { dropTarget, dragSource } from '@mana/shared-ui/dnd';
@@ -16,6 +15,8 @@
 	import { useAllTags, getTagsByIds } from '@mana/shared-stores';
 	import { addTagId } from '$lib/data/tag-mutations';
 	import { useItemContextMenu } from '$lib/data/item-context-menu.svelte';
+	import { transcribeAudio } from '$lib/voice/transcribe';
+	import FloatingInputBar from '$lib/components/FloatingInputBar.svelte';
 
 	let { navigate, goBack, params }: ViewProps = $props();
 
@@ -48,9 +49,9 @@
 		return days;
 	});
 
-	const todayEvents = $derived(
+	const upcomingEvents = $derived(
 		allItems
-			.filter((e) => e.startTime.startsWith(todayStr))
+			.filter((e) => e.startTime >= todayStr)
 			.sort((a, b) => a.startTime.localeCompare(b.startTime))
 	);
 
@@ -58,7 +59,31 @@
 		return new Date(iso).toLocaleTimeString('de', { hour: '2-digit', minute: '2-digit' });
 	}
 
+	const WEEKDAYS = [
+		'Sonntag',
+		'Montag',
+		'Dienstag',
+		'Mittwoch',
+		'Donnerstag',
+		'Freitag',
+		'Samstag',
+	];
 	const dayNames = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+
+	function formatDateLabel(iso: string): string {
+		const date = new Date(iso);
+		const dateStr = date.toISOString().split('T')[0];
+		const todayDate = new Date(now);
+		const tomorrowDate = new Date(todayDate);
+		tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+		if (dateStr === todayStr) return 'Heute';
+		if (dateStr === tomorrowDate.toISOString().split('T')[0]) return 'Morgen';
+		// Within 7 days: show weekday name
+		const diffMs = date.getTime() - todayDate.getTime();
+		const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+		if (diffDays < 7) return WEEKDAYS[date.getDay()];
+		return date.toLocaleDateString('de', { day: 'numeric', month: 'short' });
+	}
 
 	const ctxMenu = useItemContextMenu<CalendarEvent>();
 
@@ -89,6 +114,14 @@
 			: []
 	);
 
+	async function handleVoiceComplete(blob: Blob, _durationMs: number) {
+		const { text } = await transcribeAudio(blob, 'de');
+		if (text) {
+			newTitle = text;
+			await createEvent();
+		}
+	}
+
 	// Quick event creation
 	let newTitle = $state('');
 
@@ -103,7 +136,6 @@
 		const endH = h + 1;
 		const endTime = `${todayStr}T${String(endH > 23 ? 23 : endH).padStart(2, '0')}:${String(m).padStart(2, '0')}:00`;
 
-		// Get default calendar or use a fallback id
 		const calendars = await db.table('calendars').toArray();
 		const defaultCal = calendars.find((c: Record<string, unknown>) => !c.deletedAt);
 		const calendarId = defaultCal?.id ?? 'default';
@@ -118,7 +150,7 @@
 	}
 </script>
 
-<div class="app-view">
+<div class="cal-view">
 	<!-- Mini week strip -->
 	<div class="week-strip">
 		{#each weekDays() as day, i}
@@ -138,34 +170,21 @@
 		{/each}
 	</div>
 
-	<!-- Today's events -->
-	<div class="events-section">
-		<div class="section-header">
-			<h3 class="section-title">Heute</h3>
-		</div>
-
-		<form
-			onsubmit={(e) => {
-				e.preventDefault();
-				createEvent();
-			}}
-			class="quick-add"
-		>
-			<span class="add-icon"><Plus size={16} /></span>
-			<input bind:value={newTitle} placeholder="Neuer Termin..." class="add-input" />
-		</form>
-
-		{#each todayEvents as event (event.id)}
+	<!-- Event list -->
+	<div class="event-list">
+		{#each upcomingEvents as event (event.id)}
 			{@const eventTags = getTagsByIds(allTags, event.tagIds ?? [])}
-			<button
-				class="event-card"
+			<!-- svelte-ignore a11y_no_static_element_interactions -->
+			<div
+				class="event-row"
 				onclick={() =>
 					navigate('detail', {
 						eventId: event.id,
-						_siblingIds: todayEvents.map((e) => e.id),
+						_siblingIds: upcomingEvents.map((e) => e.id),
 						_siblingKey: 'eventId',
 					})}
 				oncontextmenu={(e) => ctxMenu.open(e, event)}
+				role="listitem"
 				use:dragSource={{
 					type: 'event',
 					data: () => ({
@@ -183,36 +202,37 @@
 					canDrop: (p) => !(event.tagIds ?? []).includes((p.data as unknown as TagDragData).id),
 				}}
 			>
-				<div class="event-header">
-					<p class="event-title">{event.title}</p>
-					{#if eventTags.length > 0}
-						<div class="event-tags">
-							{#each eventTags as tag (tag.id)}
-								<span class="tag-pill" style="--tag-color: {tag.color}">
-									<span class="tag-dot" style="background: {tag.color}"></span>
-									{tag.name}
-								</span>
-							{/each}
-						</div>
-					{/if}
+				<span class="event-title">{event.title}</span>
+				<div class="event-right">
+					{#each eventTags as tag (tag.id)}
+						<span class="tag-dot" style="background: {tag.color}" title={tag.name}></span>
+					{/each}
+					<span class="event-date">{formatDateLabel(event.startTime)}</span>
+					<span class="event-time">
+						{#if event.isAllDay}
+							Ganztägig
+						{:else}
+							{formatTime(event.startTime)}
+						{/if}
+					</span>
 				</div>
-				<p class="event-time-label">
-					{#if event.isAllDay}
-						Ganztägig
-					{:else}
-						{formatTime(event.startTime)} — {formatTime(event.endTime)}
-					{/if}
-				</p>
-				{#if event.location}
-					<p class="event-location">{event.location}</p>
-				{/if}
-			</button>
+			</div>
 		{/each}
 
-		{#if todayEvents.length === 0}
-			<p class="empty">Keine Termine heute</p>
+		{#if upcomingEvents.length === 0}
+			<p class="empty">Keine Termine</p>
 		{/if}
 	</div>
+
+	<FloatingInputBar
+		bind:value={newTitle}
+		placeholder="Neuer Termin..."
+		onSubmit={createEvent}
+		voice
+		voiceFeature="calendar-voice-capture"
+		voiceReason="Termine werden verschlüsselt gespeichert. Dafür brauchst du ein Mana-Konto."
+		onVoiceComplete={handleVoiceComplete}
+	/>
 
 	<ContextMenu
 		visible={ctxMenu.state.visible}
@@ -224,25 +244,27 @@
 </div>
 
 <style>
-	.app-view {
+	.cal-view {
 		display: flex;
 		flex-direction: column;
-		gap: 0.75rem;
-		padding: 1rem;
 		height: 100%;
+		position: relative;
 	}
+
+	/* Week strip */
 	.week-strip {
 		display: grid;
 		grid-template-columns: repeat(7, 1fr);
 		gap: 0.25rem;
+		padding: 0.75rem 0.75rem 0.5rem;
+		border-bottom: 1px solid hsl(var(--color-foreground) / 0.1);
 	}
 	.day-col {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		gap: 0.25rem;
+		gap: 0.125rem;
 	}
-	/* P5: theme-token migration. */
 	.day-name {
 		font-size: 0.625rem;
 		color: hsl(var(--color-muted-foreground));
@@ -253,129 +275,79 @@
 		justify-content: center;
 		width: 28px;
 		height: 28px;
-		border-radius: 9999px;
+		border-radius: 50%;
 		font-size: 0.75rem;
-		color: hsl(var(--color-muted-foreground));
+		color: hsl(var(--color-foreground));
 	}
 	.day-num.today {
-		background: hsl(var(--color-primary));
-		color: hsl(var(--color-primary-foreground));
+		background: hsl(var(--color-foreground));
+		color: hsl(var(--color-background));
 		font-weight: 600;
 	}
 	.day-dot {
 		width: 4px;
 		height: 4px;
-		border-radius: 9999px;
-		background: hsl(var(--color-primary));
+		border-radius: 50%;
+		background: hsl(var(--color-foreground) / 0.35);
 	}
-	.events-section {
+
+	/* Event list */
+	.event-list {
 		flex: 1;
 		overflow-y: auto;
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
+		padding: 0.5rem 0.75rem;
+		padding-bottom: 4rem;
 	}
-	.section-header {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-	}
-	.section-title {
-		font-size: 0.6875rem;
-		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: 0.04em;
-		color: hsl(var(--color-muted-foreground));
-		margin: 0;
-	}
-	.quick-add {
+	.event-row {
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
-		padding: 0.375rem 0.5rem;
-		border-radius: 0.375rem;
-		border: 1px solid hsl(var(--color-border));
-		background: transparent;
-	}
-	.add-icon {
-		color: hsl(var(--color-muted-foreground));
-		display: flex;
-	}
-	.add-input {
-		flex: 1;
-		border: none;
-		background: transparent;
-		outline: none;
-		font-size: 0.8125rem;
-		color: hsl(var(--color-foreground));
-	}
-	.add-input::placeholder {
-		color: hsl(var(--color-muted-foreground));
-	}
-	.event-card {
-		display: block;
-		width: 100%;
-		padding: 0.5rem 0.625rem;
-		border-radius: 0.375rem;
-		border: 1px solid hsl(var(--color-border));
-		background: hsl(var(--color-surface));
+		padding: 0.5rem 0.25rem;
 		cursor: pointer;
-		text-align: left;
+		border-radius: 0.25rem;
 		transition: background 0.15s;
 	}
-	.event-card:hover {
+	.event-row:hover {
 		background: hsl(var(--color-surface-hover));
 	}
-	.event-header {
+	.event-title {
+		flex: 1;
+		font-size: 0.8125rem;
+		color: hsl(var(--color-foreground));
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		min-width: 0;
+	}
+	.event-right {
 		display: flex;
 		align-items: center;
-		justify-content: space-between;
 		gap: 0.375rem;
-	}
-	.event-tags {
-		display: flex;
-		gap: 0.25rem;
 		flex-shrink: 0;
 	}
-	.tag-pill {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.1875rem;
-		padding: 0 0.325rem;
-		border-radius: 9999px;
-		background: color-mix(in srgb, var(--tag-color) 12%, transparent);
-		font-size: 0.5625rem;
+	.event-date {
+		font-size: 0.625rem;
+		font-weight: 500;
+		color: hsl(var(--color-foreground) / 0.6);
+		white-space: nowrap;
+	}
+	.event-time {
+		font-size: 0.625rem;
 		color: hsl(var(--color-muted-foreground));
-		line-height: 1.25rem;
 		white-space: nowrap;
 	}
 	.tag-dot {
-		width: 5px;
-		height: 5px;
-		border-radius: 9999px;
+		width: 6px;
+		height: 6px;
+		border-radius: 50%;
 		flex-shrink: 0;
 	}
-	:global(.event-card.mana-drop-target-hover) {
+	:global(.event-row.mana-drop-target-hover) {
 		outline: 2px solid hsl(var(--color-primary) / 0.4);
 		outline-offset: -2px;
 		background: hsl(var(--color-primary) / 0.06) !important;
 	}
-	.event-title {
-		font-size: 0.8125rem;
-		font-weight: 500;
-		color: hsl(var(--color-foreground));
-		margin: 0;
-	}
-	.event-time-label {
-		font-size: 0.6875rem;
-		color: hsl(var(--color-muted-foreground));
-		margin: 0;
-	}
-	.event-location {
-		font-size: 0.6875rem;
-		color: hsl(var(--color-muted-foreground));
-		margin: 0;
-	}
+
 	.empty {
 		padding: 2rem 0;
 		text-align: center;
@@ -383,19 +355,9 @@
 		color: hsl(var(--color-muted-foreground));
 	}
 
-	/* Mobile: larger touch targets, tighter spacing */
 	@media (max-width: 640px) {
-		.app-view {
-			padding: 0.75rem;
-		}
-
-		.event-card {
-			padding: 0.75rem;
-			min-height: 44px;
-		}
-
-		.quick-add {
-			padding: 0.625rem 0.75rem;
+		.event-row {
+			padding: 0.625rem 0.375rem;
 			min-height: 44px;
 		}
 	}

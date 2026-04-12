@@ -10,7 +10,7 @@
 	import { ContextMenu, type ContextMenuItem } from '@mana/shared-ui';
 	import { useItemContextMenu } from '$lib/data/item-context-menu.svelte';
 	import { PencilSimple, Trash, PushPin } from '@mana/shared-icons';
-	import VoiceCaptureBar from '$lib/components/voice/VoiceCaptureBar.svelte';
+	import FloatingInputBar from '$lib/components/FloatingInputBar.svelte';
 
 	let { navigate, goBack, params }: ViewProps = $props();
 
@@ -25,9 +25,8 @@
 
 	let filtered = $derived(searchNotes(notes, searchQuery));
 
-	async function handleQuickCreate(e: KeyboardEvent) {
-		if (e.key !== 'Enter' || !newTitle.trim()) return;
-		e.preventDefault();
+	async function handleQuickCreate() {
+		if (!newTitle.trim()) return;
 		const note = await notesStore.createNote({ title: newTitle.trim() });
 		newTitle = '';
 		startEdit(note);
@@ -119,26 +118,6 @@
 </script>
 
 <div class="app-view">
-	<!-- Voice capture -->
-	<VoiceCaptureBar
-		idleLabel="Notiz sprechen"
-		feature="notes-voice-capture"
-		reason="Notizen werden verschlüsselt gespeichert. Dafür brauchst du ein Mana-Konto."
-		onComplete={handleVoiceComplete}
-	/>
-
-	<!-- Quick create -->
-	<form onsubmit={(e) => e.preventDefault()} class="quick-add">
-		<span class="add-icon">+</span>
-		<input
-			class="add-input"
-			type="text"
-			placeholder="Neue Notiz... (Enter)"
-			bind:value={newTitle}
-			onkeydown={handleQuickCreate}
-		/>
-	</form>
-
 	<!-- Search -->
 	{#if notes.length > 5}
 		<input class="search-input" type="text" placeholder="Suchen..." bind:value={searchQuery} />
@@ -210,8 +189,18 @@
 	</div>
 
 	{#if notes.length === 0}
-		<p class="empty">Tippe oben, um eine Notiz zu erstellen.</p>
+		<p class="empty">Erstelle deine erste Notiz.</p>
 	{/if}
+
+	<FloatingInputBar
+		bind:value={newTitle}
+		placeholder="Neue Notiz..."
+		onSubmit={handleQuickCreate}
+		voice
+		voiceFeature="notes-voice-capture"
+		voiceReason="Notizen werden verschlüsselt gespeichert. Dafür brauchst du ein Mana-Konto."
+		onVoiceComplete={handleVoiceComplete}
+	/>
 
 	<ContextMenu
 		visible={ctxMenu.state.visible}
@@ -229,36 +218,9 @@
 		gap: 0.625rem;
 		padding: 1rem;
 		height: 100%;
+		position: relative;
 	}
 
-	/* P5: theme-token migration. */
-	.quick-add {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		padding: 0.375rem 0.5rem;
-		border-radius: 0.375rem;
-		border: 1px solid hsl(var(--color-border));
-		background: transparent;
-	}
-	.add-icon {
-		color: hsl(var(--color-muted-foreground));
-		font-size: 0.875rem;
-		font-weight: 500;
-		display: flex;
-		align-items: center;
-	}
-	.add-input {
-		flex: 1;
-		border: none;
-		background: transparent;
-		outline: none;
-		font-size: 0.8125rem;
-		color: hsl(var(--color-foreground));
-	}
-	.add-input::placeholder {
-		color: hsl(var(--color-muted-foreground));
-	}
 	.search-input {
 		padding: 0.3rem 0.5rem;
 		border-radius: 0.375rem;
@@ -277,6 +239,7 @@
 	.note-list {
 		flex: 1;
 		overflow-y: auto;
+		padding-bottom: 4rem;
 	}
 	.note-item {
 		display: flex;

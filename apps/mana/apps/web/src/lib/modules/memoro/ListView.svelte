@@ -9,7 +9,7 @@
 	import type { ViewProps } from '$lib/app-registry';
 	import type { LocalMemo } from './types';
 	import { memosStore } from './stores/memos.svelte';
-	import VoiceCaptureBar from '$lib/components/voice/VoiceCaptureBar.svelte';
+	import FloatingInputBar from '$lib/components/FloatingInputBar.svelte';
 
 	let { navigate }: ViewProps = $props();
 
@@ -25,6 +25,19 @@
 	);
 
 	const pinned = $derived(memos.filter((m) => m.isPinned));
+
+	let memoTitle = $state('');
+
+	async function handleTextCreate() {
+		if (!memoTitle.trim()) return;
+		const memo = await memosStore.create({ title: memoTitle.trim() });
+		memoTitle = '';
+		navigate('detail', {
+			memoId: memo.id,
+			_siblingIds: sorted.map((m) => m.id),
+			_siblingKey: 'memoId',
+		});
+	}
 
 	async function handleVoiceComplete(blob: Blob, durationMs: number) {
 		const memo = await memosStore.createFromVoice(blob, durationMs, 'de');
@@ -52,63 +65,73 @@
 	};
 </script>
 
-<BaseListView items={sorted} getKey={(m) => m.id} emptyTitle="Keine Memos">
-	{#snippet toolbar()}
-		<VoiceCaptureBar
-			idleLabel="Memo sprechen"
-			feature="memoro-voice-capture"
-			reason="Sprach-Memos werden verschlüsselt gespeichert. Dafür brauchst du ein Mana-Konto."
-			onComplete={handleVoiceComplete}
-		/>
-	{/snippet}
+<div class="memoro-view">
+	<BaseListView items={sorted} getKey={(m) => m.id} emptyTitle="Keine Memos">
+		{#snippet header()}
+			<span>{memos.length} Memos</span>
+			<span>{pinned.length} angepinnt</span>
+		{/snippet}
 
-	{#snippet header()}
-		<span>{memos.length} Memos</span>
-		<span>{pinned.length} angepinnt</span>
-	{/snippet}
-
-	{#snippet item(memo)}
-		<button
-			onclick={() =>
-				navigate('detail', {
-					memoId: memo.id,
-					_siblingIds: sorted.map((m) => m.id),
-					_siblingKey: 'memoId',
-				})}
-			class="mb-2 w-full rounded-md border border-white/10 px-3 py-2.5 text-left transition-colors hover:bg-white/5 min-h-[44px]"
-		>
-			<div class="flex items-start justify-between gap-2">
-				<div class="min-w-0 flex-1">
-					<div class="flex items-center gap-1">
-						{#if memo.isPinned}
-							<span class="text-xs text-white/30">&#128204;</span>
+		{#snippet item(memo)}
+			<button
+				onclick={() =>
+					navigate('detail', {
+						memoId: memo.id,
+						_siblingIds: sorted.map((m) => m.id),
+						_siblingKey: 'memoId',
+					})}
+				class="mb-2 w-full rounded-md border border-white/10 px-3 py-2.5 text-left transition-colors hover:bg-white/5 min-h-[44px]"
+			>
+				<div class="flex items-start justify-between gap-2">
+					<div class="min-w-0 flex-1">
+						<div class="flex items-center gap-1">
+							{#if memo.isPinned}
+								<span class="text-xs text-white/30">&#128204;</span>
+							{/if}
+							<p class="truncate text-sm font-medium text-white/80">
+								{memo.title || 'Unbenanntes Memo'}
+							</p>
+						</div>
+						{#if memo.intro}
+							<p class="mt-0.5 truncate text-xs text-white/40">{memo.intro}</p>
 						{/if}
-						<p class="truncate text-sm font-medium text-white/80">
-							{memo.title || 'Unbenanntes Memo'}
-						</p>
 					</div>
-					{#if memo.intro}
-						<p class="mt-0.5 truncate text-xs text-white/40">{memo.intro}</p>
-					{/if}
-				</div>
-				<div class="flex items-center gap-1.5 shrink-0">
-					{#if memo.transcriptModel && memo.processingStatus === 'completed'}
+					<div class="flex items-center gap-1.5 shrink-0">
+						{#if memo.transcriptModel && memo.processingStatus === 'completed'}
+							<span
+								class="rounded px-1 py-0.5 text-[9px] bg-white/5 text-white/30"
+								title="STT-Pipeline"
+							>
+								{memo.transcriptModel}
+							</span>
+						{/if}
 						<span
-							class="rounded px-1 py-0.5 text-[9px] bg-white/5 text-white/30"
-							title="STT-Pipeline"
+							class="rounded px-1.5 py-0.5 text-[10px] {statusColors[memo.processingStatus] ?? ''}"
 						>
-							{memo.transcriptModel}
+							{memo.processingStatus === 'completed'
+								? formatDuration(memo.audioDurationMs)
+								: memo.processingStatus}
 						</span>
-					{/if}
-					<span
-						class="rounded px-1.5 py-0.5 text-[10px] {statusColors[memo.processingStatus] ?? ''}"
-					>
-						{memo.processingStatus === 'completed'
-							? formatDuration(memo.audioDurationMs)
-							: memo.processingStatus}
-					</span>
+					</div>
 				</div>
-			</div>
-		</button>
-	{/snippet}
-</BaseListView>
+			</button>
+		{/snippet}
+	</BaseListView>
+
+	<FloatingInputBar
+		bind:value={memoTitle}
+		placeholder="Memo sprechen..."
+		onSubmit={handleTextCreate}
+		voice
+		voiceFeature="memoro-voice-capture"
+		voiceReason="Sprach-Memos werden verschlüsselt gespeichert. Dafür brauchst du ein Mana-Konto."
+		onVoiceComplete={handleVoiceComplete}
+	/>
+</div>
+
+<style>
+	.memoro-view {
+		height: 100%;
+		position: relative;
+	}
+</style>

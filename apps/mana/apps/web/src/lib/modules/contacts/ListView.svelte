@@ -8,7 +8,8 @@
 	import { db } from '$lib/data/database';
 	import type { LocalContact } from './types';
 	import { contactsStore } from './stores/contacts.svelte';
-	import { Plus, Star, PencilSimple, Trash, StarFour } from '@mana/shared-icons';
+	import { Star, PencilSimple, Trash, StarFour } from '@mana/shared-icons';
+	import FloatingInputBar from '$lib/components/FloatingInputBar.svelte';
 	import type { ViewProps } from '$lib/app-registry';
 	import { ContextMenu, type ContextMenuItem } from '@mana/shared-ui';
 	import { dropTarget, dragSource } from '@mana/shared-ui/dnd';
@@ -120,17 +121,6 @@
 <div class="app-view">
 	<input bind:value={search} placeholder="Kontakt suchen..." class="search-input" />
 
-	<form
-		onsubmit={(e) => {
-			e.preventDefault();
-			createContact();
-		}}
-		class="quick-add"
-	>
-		<span class="add-icon"><Plus size={16} /></span>
-		<input bind:value={newName} placeholder="Neuer Kontakt..." class="add-input" />
-	</form>
-
 	<p class="count">{filtered().length} Kontakte</p>
 
 	<div class="contact-list">
@@ -189,6 +179,8 @@
 		{/if}
 	</div>
 
+	<FloatingInputBar bind:value={newName} placeholder="Neuer Kontakt..." onSubmit={createContact} />
+
 	<ContextMenu
 		visible={ctxMenu.state.visible}
 		x={ctxMenu.state.x}
@@ -205,6 +197,7 @@
 		gap: 0.5rem;
 		padding: 1rem;
 		height: 100%;
+		position: relative;
 	}
 	/* P5: theme-token migration. */
 	.search-input {
@@ -223,30 +216,6 @@
 	.search-input:focus {
 		border-color: hsl(var(--color-border-strong));
 	}
-	.quick-add {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		padding: 0.375rem 0.5rem;
-		border-radius: 0.375rem;
-		border: 1px solid hsl(var(--color-border));
-		background: transparent;
-	}
-	.add-icon {
-		color: hsl(var(--color-muted-foreground));
-		display: flex;
-	}
-	.add-input {
-		flex: 1;
-		border: none;
-		background: transparent;
-		outline: none;
-		font-size: 0.8125rem;
-		color: hsl(var(--color-foreground));
-	}
-	.add-input::placeholder {
-		color: hsl(var(--color-muted-foreground));
-	}
 	.count {
 		font-size: 0.6875rem;
 		color: hsl(var(--color-muted-foreground));
@@ -254,6 +223,7 @@
 	.contact-list {
 		flex: 1;
 		overflow-y: auto;
+		padding-bottom: 4rem;
 	}
 	.contact-item {
 		display: flex;

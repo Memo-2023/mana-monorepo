@@ -11,7 +11,7 @@
 		useAllDreams,
 	} from './queries';
 	import { dreamsStore } from './stores/dreams.svelte';
-	import VoiceCaptureBar from '$lib/components/voice/VoiceCaptureBar.svelte';
+	import FloatingInputBar from '$lib/components/FloatingInputBar.svelte';
 	import { MOOD_COLORS, MOOD_LABELS, type Dream, type DreamMood, type SleepQuality } from './types';
 	import type { ViewProps } from '$lib/app-registry';
 	import { ContextMenu, type ContextMenuItem } from '@mana/shared-ui';
@@ -80,9 +80,8 @@
 		symbolFilter = symbolFilter === name ? null : name;
 	}
 
-	async function handleQuickCreate(e: KeyboardEvent) {
-		if (e.key !== 'Enter' || !newTitle.trim()) return;
-		e.preventDefault();
+	async function handleQuickCreate() {
+		if (!newTitle.trim()) return;
 		const dream = await dreamsStore.createDream({ title: newTitle.trim() });
 		newTitle = '';
 		startEdit(dream);
@@ -208,26 +207,6 @@
 			}}
 		/>
 	{:else}
-		<!-- Voice capture -->
-		<VoiceCaptureBar
-			idleLabel="Traum sprechen"
-			feature="dreams-voice-capture"
-			reason="Sprach-Aufnahmen werden verschlüsselt in deinem persönlichen Tagebuch gespeichert. Dafür brauchst du ein Mana-Konto."
-			onComplete={handleVoiceComplete}
-		/>
-
-		<!-- Quick create -->
-		<form onsubmit={(e) => e.preventDefault()} class="quick-add">
-			<span class="add-icon">&#x1f319;</span>
-			<input
-				class="add-input"
-				type="text"
-				placeholder="Was hast du geträumt? (Enter)"
-				bind:value={newTitle}
-				onkeydown={handleQuickCreate}
-			/>
-		</form>
-
 		<!-- Insights ribbon -->
 		{#if insights.total > 0}
 			<div class="insights">
@@ -487,8 +466,18 @@
 		</div>
 
 		{#if dreams.length === 0}
-			<p class="empty">Tippe oben, um deinen ersten Traum festzuhalten.</p>
+			<p class="empty">Erzähl deinen ersten Traum.</p>
 		{/if}
+
+		<FloatingInputBar
+			bind:value={newTitle}
+			placeholder="Was hast du geträumt?"
+			onSubmit={handleQuickCreate}
+			voice
+			voiceFeature="dreams-voice-capture"
+			voiceReason="Sprach-Aufnahmen werden verschlüsselt in deinem persönlichen Tagebuch gespeichert. Dafür brauchst du ein Mana-Konto."
+			onVoiceComplete={handleVoiceComplete}
+		/>
 
 		<ContextMenu
 			visible={ctxMenu.state.visible}
@@ -507,9 +496,8 @@
 		gap: 0.625rem;
 		padding: 1rem;
 		height: 100%;
+		position: relative;
 	}
-
-	/* Voice capture styles live in $lib/components/voice/VoiceCaptureBar.svelte */
 
 	/* ── View Tabs ─────────────────────────────── */
 	.view-tabs {
@@ -535,31 +523,6 @@
 	.view-tab.active {
 		color: hsl(var(--color-primary));
 		background: hsl(var(--color-primary) / 0.08);
-	}
-
-	/* ── Quick Add ─────────────────────────────── */
-	.quick-add {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		padding: 0.375rem 0.5rem;
-		border-radius: 0.375rem;
-		border: 1px solid hsl(var(--color-border));
-		background: transparent;
-	}
-	.add-icon {
-		font-size: 0.875rem;
-	}
-	.add-input {
-		flex: 1;
-		border: none;
-		background: transparent;
-		outline: none;
-		font-size: 0.8125rem;
-		color: hsl(var(--color-foreground));
-	}
-	.add-input::placeholder {
-		color: hsl(var(--color-muted-foreground));
 	}
 
 	/* ── Insights ──────────────────────────────── */
@@ -647,6 +610,7 @@
 	.dream-list {
 		flex: 1;
 		overflow-y: auto;
+		padding-bottom: 4rem;
 	}
 
 	.month-label {

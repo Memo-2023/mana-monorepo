@@ -19,7 +19,7 @@
 		type JournalEntry,
 		type JournalMood,
 	} from './types';
-	import VoiceCaptureBar from '$lib/components/voice/VoiceCaptureBar.svelte';
+	import FloatingInputBar from '$lib/components/FloatingInputBar.svelte';
 	import type { ViewProps } from '$lib/app-registry';
 	import { ContextMenu, type ContextMenuItem } from '@mana/shared-ui';
 	import { useItemContextMenu } from '$lib/data/item-context-menu.svelte';
@@ -85,9 +85,8 @@
 	let insights = $derived(computeInsights(entries));
 	let onThisDay = $derived(getOnThisDay(entries));
 
-	async function handleQuickCreate(e: KeyboardEvent) {
-		if (e.key !== 'Enter' || !newTitle.trim()) return;
-		e.preventDefault();
+	async function handleQuickCreate() {
+		if (!newTitle.trim()) return;
 		const entry = await journalStore.createEntry({ title: newTitle.trim() });
 		newTitle = '';
 		startEdit(entry);
@@ -182,26 +181,6 @@
 </script>
 
 <div class="app-view">
-	<!-- Voice capture -->
-	<VoiceCaptureBar
-		idleLabel="Eintrag sprechen"
-		feature="journal-voice-capture"
-		reason="Spracheinträge werden verschlüsselt in deinem Tagebuch gespeichert. Dafür brauchst du ein Mana-Konto."
-		onComplete={handleVoiceComplete}
-	/>
-
-	<!-- Quick create -->
-	<form onsubmit={(e) => e.preventDefault()} class="quick-add">
-		<span class="add-icon">{'\u{270d}\u{fe0f}'}</span>
-		<input
-			class="add-input"
-			type="text"
-			placeholder="Was bewegt dich heute? (Enter)"
-			bind:value={newTitle}
-			onkeydown={handleQuickCreate}
-		/>
-	</form>
-
 	<!-- On this day -->
 	{#if onThisDay.length > 0}
 		<div class="on-this-day">
@@ -422,6 +401,16 @@
 		<p class="empty">Schreibe deinen ersten Tagebucheintrag.</p>
 	{/if}
 
+	<FloatingInputBar
+		bind:value={newTitle}
+		placeholder="Was bewegt dich heute?"
+		onSubmit={handleQuickCreate}
+		voice
+		voiceFeature="journal-voice-capture"
+		voiceReason="Spracheinträge werden verschlüsselt in deinem Tagebuch gespeichert. Dafür brauchst du ein Mana-Konto."
+		onVoiceComplete={handleVoiceComplete}
+	/>
+
 	<ContextMenu
 		visible={ctxMenu.state.visible}
 		x={ctxMenu.state.x}
@@ -438,31 +427,7 @@
 		gap: 0.625rem;
 		padding: 1rem;
 		height: 100%;
-	}
-
-	/* ── Quick Add ─────────────────────────────── */
-	.quick-add {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		padding: 0.375rem 0.5rem;
-		border-radius: 0.375rem;
-		border: 1px solid hsl(var(--color-border));
-		background: transparent;
-	}
-	.add-icon {
-		font-size: 0.875rem;
-	}
-	.add-input {
-		flex: 1;
-		border: none;
-		background: transparent;
-		outline: none;
-		font-size: 0.8125rem;
-		color: hsl(var(--color-foreground));
-	}
-	.add-input::placeholder {
-		color: hsl(var(--color-muted-foreground));
+		position: relative;
 	}
 
 	/* ── On This Day ──────────────────────────── */
@@ -597,6 +562,7 @@
 	.entry-list {
 		flex: 1;
 		overflow-y: auto;
+		padding-bottom: 4rem;
 	}
 
 	.month-label {
