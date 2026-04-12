@@ -6,12 +6,13 @@
 	import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 	import { db } from '$lib/data/database';
 	import { BaseListView } from '@mana/shared-ui';
-	import type { LocalMood, AnimationType } from './types';
+	import type { LocalMood, AnimationType, Mood } from './types';
 	import { ANIMATIONS } from './types';
 	import { moodsStore } from './stores/moods.svelte';
 	import { ContextMenu, type ContextMenuItem } from '@mana/shared-ui';
 	import { useItemContextMenu } from '$lib/data/item-context-menu.svelte';
 	import { Trash, Power } from '@mana/shared-icons';
+	import MoodFullscreen from './components/mood/MoodFullscreen.svelte';
 
 	const moodsQuery = useLiveQueryWithDefault(async () => {
 		const all = await db.table<LocalMood>('moods').toArray();
@@ -20,13 +21,40 @@
 
 	const moods = $derived(moodsQuery.value);
 
-	let activeMoodId = $state<string | null>(null);
-	const activeMood = $derived(moods.find((m) => m.id === activeMoodId));
+	let fullscreenMood = $state<LocalMood | null>(null);
+
+	function toMood(local: LocalMood): Mood {
+		return {
+			id: local.id,
+			name: local.name,
+			colors: local.colors,
+			animationType: local.animation as AnimationType,
+		};
+	}
 
 	function gradientStyle(colors: string[]): string {
 		if (colors.length === 0) return 'background: #333';
 		if (colors.length === 1) return `background: ${colors[0]}`;
 		return `background: linear-gradient(135deg, ${colors.join(', ')})`;
+	}
+
+	function getAnimClass(animation: string): string {
+		switch (animation) {
+			case 'pulse':
+			case 'breath':
+				return 'anim-breath';
+			case 'wave':
+			case 'ocean':
+				return 'anim-wave';
+			case 'candle':
+			case 'fire':
+				return 'anim-candle';
+			case 'disco':
+			case 'rave':
+				return 'anim-disco';
+			default:
+				return 'anim-gradient';
+		}
 	}
 
 	// ── Inline create ──────────────────────────────────────
@@ -69,11 +97,11 @@
 			? [
 					{
 						id: 'activate',
-						label: activeMoodId === ctxMenu.state.target.id ? 'Deaktivieren' : 'Aktivieren',
+						label: 'Aktivieren',
 						icon: Power,
 						action: () => {
 							const target = ctxMenu.state.target;
-							if (target) activeMoodId = activeMoodId === target.id ? null : target.id;
+							if (target) fullscreenMood = target;
 						},
 					},
 					{ id: 'div', label: '', type: 'divider' as const },
@@ -84,10 +112,7 @@
 						variant: 'danger' as const,
 						action: () => {
 							const target = ctxMenu.state.target;
-							if (target) {
-								if (activeMoodId === target.id) activeMoodId = null;
-								moodsStore.deleteMood(target.id);
-							}
+							if (target) moodsStore.deleteMood(target.id);
 						},
 					},
 				]
@@ -103,22 +128,6 @@
 	listClass="grid grid-cols-2 sm:grid-cols-3 gap-2 content-start"
 >
 	{#snippet toolbar()}
-		<!-- Active mood preview -->
-		{#if activeMood}
-			<div
-				class="flex h-24 items-center justify-center rounded-lg"
-				style={gradientStyle(activeMood.colors)}
-			>
-				<p class="text-sm font-medium text-white drop-shadow">{activeMood.name}</p>
-			</div>
-		{:else}
-			<div
-				class="flex h-24 items-center justify-center rounded-lg bg-[hsl(var(--color-foreground)/0.05)]"
-			>
-				<p class="text-sm text-[hsl(var(--color-muted-foreground))]">Kein Mood aktiv</p>
-			</div>
-		{/if}
-
 		<!-- Create toggle -->
 		<div class="flex items-center justify-between">
 			<span class="text-xs text-[hsl(var(--color-muted-foreground))]">{moods.length} Moods</span>
@@ -135,10 +144,15 @@
 			<div class="flex flex-col gap-2 rounded-lg bg-[hsl(var(--color-foreground)/0.05)] p-3">
 				<!-- Preview -->
 				<div
-					class="flex h-12 items-center justify-center rounded-md"
+					class="relative flex h-12 items-center justify-center overflow-hidden rounded-lg"
 					style={gradientStyle(newColors)}
 				>
-					<span class="text-xs font-medium text-white drop-shadow">{newName || 'Vorschau'}</span>
+					<div
+						class="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent"
+					></div>
+					<span class="relative text-xs font-medium text-white drop-shadow-md"
+						>{newName || 'Vorschau'}</span
+					>
 				</div>
 
 				<!-- Name -->
@@ -204,19 +218,30 @@
 
 	{#snippet item(mood)}
 		<button
-			onclick={() => (activeMoodId = activeMoodId === mood.id ? null : mood.id)}
+			onclick={() => (fullscreenMood = mood)}
 			oncontextmenu={(e) => ctxMenu.open(e, mood)}
-			class="group flex flex-col items-center gap-1.5 rounded-lg p-2 transition-colors hover:bg-[hsl(var(--color-foreground)/0.05)]
-				{activeMoodId === mood.id ? 'ring-1 ring-[hsl(var(--color-border))]' : ''}"
+			class="mood-card group relative aspect-[4/3] w-full overflow-hidden rounded-xl border-2 border-transparent transition-all duration-200 hover:border-white/40 focus:outline-none"
+			style="--mood-color: {mood.colors[0]}"
 		>
-			<div class="h-10 w-10 rounded-full" style={gradientStyle(mood.colors)}></div>
+			<div
+				class="absolute inset-0 {getAnimClass(mood.animation)}"
+				style="{gradientStyle(mood.colors)}; background-size: 400% 400%;"
+			></div>
+			<div
+				class="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent"
+			></div>
 			<span
-				class="text-[10px] text-[hsl(var(--color-muted-foreground))] group-hover:text-[hsl(var(--color-foreground))]"
-				>{mood.name}</span
+				class="absolute inset-x-0 bottom-0 px-2 pb-1.5 text-[10px] font-medium text-white drop-shadow-md"
 			>
+				{mood.name}
+			</span>
 		</button>
 	{/snippet}
 </BaseListView>
+
+{#if fullscreenMood}
+	<MoodFullscreen mood={toMood(fullscreenMood)} minimal onClose={() => (fullscreenMood = null)} />
+{/if}
 
 <ContextMenu
 	visible={ctxMenu.state.visible}
@@ -225,3 +250,78 @@
 	items={ctxMenuItems}
 	onClose={ctxMenu.close}
 />
+
+<style>
+	.anim-gradient {
+		animation: gradient-shift 8s ease infinite;
+	}
+	.anim-breath {
+		animation: breath 4s ease-in-out infinite;
+	}
+	.anim-wave {
+		animation: wave 3s ease-in-out infinite;
+	}
+	.anim-candle {
+		animation: candle 0.8s ease-in-out infinite;
+	}
+	.anim-disco {
+		animation: disco 2s linear infinite;
+	}
+
+	@keyframes gradient-shift {
+		0% {
+			background-position: 0% 50%;
+		}
+		50% {
+			background-position: 100% 50%;
+		}
+		100% {
+			background-position: 0% 50%;
+		}
+	}
+	@keyframes breath {
+		0%,
+		100% {
+			opacity: 0.85;
+			transform: scale(1);
+		}
+		50% {
+			opacity: 1;
+			transform: scale(1.02);
+		}
+	}
+	@keyframes wave {
+		0%,
+		100% {
+			background-position: 0% 50%;
+			opacity: 1;
+		}
+		50% {
+			background-position: 100% 50%;
+			opacity: 0.85;
+		}
+	}
+	@keyframes candle {
+		0%,
+		100% {
+			filter: brightness(1);
+		}
+		25% {
+			filter: brightness(0.92);
+		}
+		50% {
+			filter: brightness(1.08);
+		}
+		75% {
+			filter: brightness(0.95);
+		}
+	}
+	@keyframes disco {
+		0% {
+			filter: hue-rotate(0deg) saturate(1.2);
+		}
+		100% {
+			filter: hue-rotate(360deg) saturate(1.2);
+		}
+	}
+</style>

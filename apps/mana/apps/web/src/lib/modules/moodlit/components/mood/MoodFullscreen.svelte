@@ -5,12 +5,13 @@
 
 	interface Props {
 		mood: Mood;
+		minimal?: boolean;
 		isFavorite?: boolean;
 		onClose: () => void;
 		onFavoriteToggle?: () => void;
 	}
 
-	let { mood, isFavorite = false, onClose, onFavoriteToggle }: Props = $props();
+	let { mood, minimal = false, isFavorite = false, onClose, onFavoriteToggle }: Props = $props();
 
 	let isPlaying = $state(true);
 	let showControls = $state(true);
@@ -87,7 +88,7 @@
 			timerRemaining--;
 			if (timerRemaining <= 0) {
 				stopTimer();
-				onClose();
+				handleClose();
 			}
 		}, 1000);
 	}
@@ -106,9 +107,16 @@
 		return `${mins}:${secs.toString().padStart(2, '0')}`;
 	}
 
+	async function handleClose() {
+		if (document.fullscreenElement) {
+			await document.exitFullscreen().catch(() => {});
+		}
+		onClose();
+	}
+
 	function handleKeydown(e: KeyboardEvent) {
 		if (e.key === 'Escape') {
-			onClose();
+			handleClose();
 		} else if (e.key === ' ') {
 			e.preventDefault();
 			togglePlay();
@@ -116,10 +124,26 @@
 	}
 
 	$effect(() => {
-		showControlsTemporarily();
+		if (minimal) {
+			document.documentElement.requestFullscreen?.().catch(() => {});
+		} else {
+			showControlsTemporarily();
+		}
+
+		const onFsChange = () => {
+			if (minimal && !document.fullscreenElement) {
+				onClose();
+			}
+		};
+		document.addEventListener('fullscreenchange', onFsChange);
+
 		return () => {
 			if (controlsTimeout) clearTimeout(controlsTimeout);
 			if (timerInterval) clearInterval(timerInterval);
+			document.removeEventListener('fullscreenchange', onFsChange);
+			if (document.fullscreenElement) {
+				document.exitFullscreen().catch(() => {});
+			}
 		};
 	});
 </script>
@@ -127,9 +151,10 @@
 <svelte:window on:keydown={handleKeydown} />
 
 <div
-	class="fixed inset-0 z-50 flex items-center justify-center cursor-pointer select-none"
-	onclick={showControlsTemporarily}
-	onmousemove={showControlsTemporarily}
+	class="fixed inset-0 flex items-center justify-center cursor-pointer select-none"
+	style="z-index: 1000001;"
+	onclick={minimal ? handleClose : showControlsTemporarily}
+	onmousemove={minimal ? undefined : showControlsTemporarily}
 	role="presentation"
 >
 	<!-- Animated Background -->
@@ -153,121 +178,125 @@
 	{/if}
 
 	<!-- Controls Overlay -->
-	<div
-		class="absolute inset-0 flex flex-col transition-opacity duration-300 pointer-events-none"
-		class:opacity-0={!showControls}
-		class:opacity-100={showControls}
-	>
-		<!-- Top Bar -->
+	{#if !minimal}
 		<div
-			class="flex items-center justify-between p-4 bg-gradient-to-b from-black/40 to-transparent pointer-events-auto"
+			class="absolute inset-0 flex flex-col transition-opacity duration-300 pointer-events-none"
+			class:opacity-0={!showControls}
+			class:opacity-100={showControls}
 		>
-			<div class="flex items-center gap-3">
-				<button
-					type="button"
-					class="p-2 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm transition-colors"
-					onclick={(e) => {
-						e.stopPropagation();
-						onClose();
-					}}
-					aria-label="Close"
-				>
-					<X size={24} class="text-white" />
-				</button>
-				<div>
-					<h1 class="text-xl font-bold text-white drop-shadow-lg">{mood.name}</h1>
-					<p class="text-sm text-white/70 capitalize">{mood.animationType}</p>
+			<!-- Top Bar -->
+			<div
+				class="flex items-center justify-between p-4 bg-gradient-to-b from-black/40 to-transparent pointer-events-auto"
+			>
+				<div class="flex items-center gap-3">
+					<button
+						type="button"
+						class="p-2 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm transition-colors"
+						onclick={(e) => {
+							e.stopPropagation();
+							handleClose();
+						}}
+						aria-label="Close"
+					>
+						<X size={24} class="text-white" />
+					</button>
+					<div>
+						<h1 class="text-xl font-bold text-white drop-shadow-lg">{mood.name}</h1>
+						<p class="text-sm text-white/70 capitalize">{mood.animationType}</p>
+					</div>
+				</div>
+
+				<div class="flex items-center gap-2">
+					{#if timerActive}
+						<div class="px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-sm text-white font-mono">
+							{formatTime(timerRemaining)}
+						</div>
+					{/if}
+
+					<button
+						type="button"
+						class="p-2 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm transition-colors"
+						onclick={(e) => {
+							e.stopPropagation();
+							onFavoriteToggle?.();
+						}}
+						aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+					>
+						<Heart
+							size={20}
+							weight={isFavorite ? 'fill' : 'regular'}
+							class={isFavorite ? 'text-red-500' : 'text-white'}
+						/>
+					</button>
 				</div>
 			</div>
 
-			<div class="flex items-center gap-2">
-				{#if timerActive}
-					<div class="px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-sm text-white font-mono">
-						{formatTime(timerRemaining)}
-					</div>
-				{/if}
-
+			<!-- Center Play/Pause -->
+			<div class="flex-1 flex items-center justify-center pointer-events-auto">
 				<button
 					type="button"
-					class="p-2 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm transition-colors"
+					class="p-6 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm transition-all hover:scale-110"
 					onclick={(e) => {
 						e.stopPropagation();
-						onFavoriteToggle?.();
+						togglePlay();
 					}}
-					aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+					aria-label={isPlaying ? 'Pause' : 'Play'}
 				>
-					<Heart
-						size={20}
-						weight={isFavorite ? 'fill' : 'regular'}
-						class={isFavorite ? 'text-red-500' : 'text-white'}
-					/>
+					{#if isPlaying}
+						<Pause size={48} class="text-white" />
+					{:else}
+						<Play size={48} class="text-white" />
+					{/if}
 				</button>
 			</div>
-		</div>
 
-		<!-- Center Play/Pause -->
-		<div class="flex-1 flex items-center justify-center pointer-events-auto">
-			<button
-				type="button"
-				class="p-6 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm transition-all hover:scale-110"
-				onclick={(e) => {
-					e.stopPropagation();
-					togglePlay();
-				}}
-				aria-label={isPlaying ? 'Pause' : 'Play'}
-			>
-				{#if isPlaying}
-					<Pause size={48} class="text-white" />
-				{:else}
-					<Play size={48} class="text-white" />
-				{/if}
-			</button>
-		</div>
-
-		<!-- Bottom Bar -->
-		<div class="p-4 bg-gradient-to-t from-black/40 to-transparent pointer-events-auto">
-			<div class="flex items-center justify-center gap-4">
-				{#if !timerActive}
-					<div class="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2">
-						<Timer size={20} class="text-white" />
-						<select
-							class="bg-transparent text-white border-none outline-none cursor-pointer"
-							bind:value={timerMinutes}
-							onclick={(e) => e.stopPropagation()}
+			<!-- Bottom Bar -->
+			<div class="p-4 bg-gradient-to-t from-black/40 to-transparent pointer-events-auto">
+				<div class="flex items-center justify-center gap-4">
+					{#if !timerActive}
+						<div
+							class="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2"
 						>
-							<option value={1}>1 min</option>
-							<option value={5}>5 min</option>
-							<option value={10}>10 min</option>
-							<option value={15}>15 min</option>
-							<option value={30}>30 min</option>
-							<option value={60}>60 min</option>
-						</select>
+							<Timer size={20} class="text-white" />
+							<select
+								class="bg-transparent text-white border-none outline-none cursor-pointer"
+								bind:value={timerMinutes}
+								onclick={(e) => e.stopPropagation()}
+							>
+								<option value={1}>1 min</option>
+								<option value={5}>5 min</option>
+								<option value={10}>10 min</option>
+								<option value={15}>15 min</option>
+								<option value={30}>30 min</option>
+								<option value={60}>60 min</option>
+							</select>
+							<button
+								type="button"
+								class="px-3 py-1 bg-white/20 hover:bg-white/30 rounded-full text-sm text-white transition-colors"
+								onclick={(e) => {
+									e.stopPropagation();
+									startTimer();
+								}}
+							>
+								Start Timer
+							</button>
+						</div>
+					{:else}
 						<button
 							type="button"
-							class="px-3 py-1 bg-white/20 hover:bg-white/30 rounded-full text-sm text-white transition-colors"
+							class="px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full text-white transition-colors"
 							onclick={(e) => {
 								e.stopPropagation();
-								startTimer();
+								stopTimer();
 							}}
 						>
-							Start Timer
+							Stop Timer
 						</button>
-					</div>
-				{:else}
-					<button
-						type="button"
-						class="px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full text-white transition-colors"
-						onclick={(e) => {
-							e.stopPropagation();
-							stopTimer();
-						}}
-					>
-						Stop Timer
-					</button>
-				{/if}
+					{/if}
+				</div>
 			</div>
 		</div>
-	</div>
+	{/if}
 </div>
 
 <style>

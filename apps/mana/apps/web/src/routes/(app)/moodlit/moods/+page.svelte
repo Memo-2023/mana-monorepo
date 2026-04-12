@@ -3,10 +3,11 @@
 	import { useLiveQuery } from '@mana/local-store/svelte';
 	import { moodTable } from '$lib/modules/moodlit/collections';
 	import { moodsStore } from '$lib/modules/moodlit/stores/moods.svelte';
-	import type { LocalMood } from '$lib/modules/moodlit/types';
+	import type { LocalMood, Mood, AnimationType } from '$lib/modules/moodlit/types';
 	import { db } from '$lib/data/database';
 	import { toast } from '$lib/stores/toast.svelte';
 	import { X } from '@mana/shared-icons';
+	import MoodFullscreen from '$lib/modules/moodlit/components/mood/MoodFullscreen.svelte';
 
 	const moods = useLiveQuery(() =>
 		db
@@ -19,7 +20,16 @@
 	let newName = $state('');
 	let newColors = $state(['#7c3aed', '#a78bfa', '#c4b5fd']);
 	let newAnimation = $state('gradient');
-	let activeMood = $state<LocalMood | null>(null);
+	let fullscreenMood = $state<LocalMood | null>(null);
+
+	function toMood(local: LocalMood): Mood {
+		return {
+			id: local.id,
+			name: local.name,
+			colors: local.colors,
+			animationType: local.animation as AnimationType,
+		};
+	}
 
 	async function createMood() {
 		if (!newName) return;
@@ -33,18 +43,32 @@
 		showCreate = false;
 	}
 
+	function getAnimClass(animation: string): string {
+		switch (animation) {
+			case 'pulse':
+			case 'breath':
+				return 'anim-breath';
+			case 'wave':
+			case 'ocean':
+				return 'anim-wave';
+			case 'candle':
+			case 'fire':
+				return 'anim-candle';
+			case 'disco':
+			case 'rave':
+				return 'anim-disco';
+			default:
+				return 'anim-gradient';
+		}
+	}
+
 	async function deleteMood(mood: LocalMood) {
 		if (mood.isDefault) {
 			toast.error('Standard-Moods konnen nicht geloscht werden');
 			return;
 		}
 		await moodsStore.deleteMood(mood.id);
-		if (activeMood?.id === mood.id) activeMood = null;
 		toast.success('Geloscht');
-	}
-
-	function activateMood(mood: LocalMood) {
-		activeMood = activeMood?.id === mood.id ? null : mood;
 	}
 </script>
 
@@ -62,22 +86,6 @@
 			{showCreate ? 'Schliessen' : '+ Neues Mood'}
 		</button>
 	</div>
-
-	<!-- Active Mood Display -->
-	{#if activeMood}
-		<div
-			class="mb-6 overflow-hidden rounded-2xl p-8 text-center transition-all duration-1000"
-			style="background: linear-gradient(135deg, {activeMood.colors.join(', ')})"
-		>
-			<h2 class="text-4xl font-bold text-white drop-shadow-lg">{activeMood.name}</h2>
-			<p class="mt-2 text-white/70">{activeMood.animation}</p>
-			<button
-				onclick={() => (activeMood = null)}
-				class="mt-4 rounded-lg bg-white/20 px-4 py-2 text-sm text-white backdrop-blur hover:bg-white/30"
-				>Stoppen</button
-			>
-		</div>
-	{/if}
 
 	{#if showCreate}
 		<div class="mb-6 rounded-xl border border-border bg-card p-6">
@@ -145,42 +153,136 @@
 	{#if moods.loading}
 		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 			{#each Array(6) as _}
-				<div class="h-32 animate-pulse rounded-xl bg-muted"></div>
+				<div class="aspect-[16/10] animate-pulse rounded-2xl bg-muted"></div>
 			{/each}
 		</div>
 	{:else}
 		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 			{#each moods.value ?? [] as mood (mood.id)}
+				{@const gradient =
+					mood.colors.length === 1
+						? mood.colors[0]
+						: `linear-gradient(135deg, ${mood.colors.join(', ')})`}
 				<button
-					onclick={() => activateMood(mood)}
-					class="group relative overflow-hidden rounded-xl border-2 p-6 text-left transition-all hover:scale-[1.02] {activeMood?.id ===
-					mood.id
-						? 'border-primary shadow-lg shadow-purple-500/20'
-						: 'border-border hover:border-muted-foreground/30'}"
-					style="background: linear-gradient(135deg, {mood.colors.map((c) => c + '40').join(', ')})"
+					onclick={() => (fullscreenMood = mood)}
+					class="mood-card group relative aspect-[16/10] w-full overflow-hidden rounded-2xl border-[3px] border-transparent transition-all duration-200 hover:border-white/40 focus:outline-none focus:ring-2 focus:ring-primary/50"
+					style="--mood-color: {mood.colors[0]}"
 				>
-					<h3 class="text-lg font-bold text-foreground">{mood.name}</h3>
-					<p class="mt-1 text-xs text-muted-foreground">{mood.animation}</p>
-					<div class="mt-3 flex gap-1">
-						{#each mood.colors as color}
-							<div class="h-4 w-4 rounded-full" style="background: {color}"></div>
-							// svelte-ignore node_invalid_placement_ssr
-						{/each}
+					<div
+						class="absolute inset-0 {getAnimClass(mood.animation)}"
+						style="background: {gradient}; background-size: 400% 400%;"
+					></div>
+					<div
+						class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"
+					></div>
+					<div class="absolute inset-x-0 bottom-0 p-4 text-left">
+						<h3 class="text-lg font-semibold text-white drop-shadow-md">{mood.name}</h3>
+						<span
+							class="mt-1 inline-block rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-medium text-white/80 backdrop-blur-sm capitalize"
+							>{mood.animation}</span
+						>
 					</div>
 					{#if !mood.isDefault}
 						<!-- svelte-ignore node_invalid_placement_ssr -->
-						<button
+						<div
+							role="button"
+							tabindex="-1"
 							onclick={(e) => {
 								e.stopPropagation();
 								deleteMood(mood);
 							}}
-							class="absolute right-2 top-2 rounded-full p-1 text-muted-foreground opacity-0 hover:bg-muted hover:text-red-400 group-hover:opacity-100"
+							onkeydown={(e) => {
+								if (e.key === 'Enter') {
+									e.stopPropagation();
+									deleteMood(mood);
+								}
+							}}
+							class="absolute right-2 top-2 rounded-full bg-black/20 p-1.5 text-white/70 opacity-0 backdrop-blur-sm transition-all hover:bg-black/40 hover:text-white group-hover:opacity-100 cursor-pointer"
 						>
-							<X size={16} />
-						</button>
+							<X size={14} />
+						</div>
 					{/if}
 				</button>
 			{/each}
 		</div>
 	{/if}
 </div>
+
+{#if fullscreenMood}
+	<MoodFullscreen mood={toMood(fullscreenMood)} minimal onClose={() => (fullscreenMood = null)} />
+{/if}
+
+<style>
+	.anim-gradient {
+		animation: gradient-shift 8s ease infinite;
+	}
+	.anim-breath {
+		animation: breath 4s ease-in-out infinite;
+	}
+	.anim-wave {
+		animation: wave 3s ease-in-out infinite;
+	}
+	.anim-candle {
+		animation: candle 0.8s ease-in-out infinite;
+	}
+	.anim-disco {
+		animation: disco 2s linear infinite;
+	}
+
+	@keyframes gradient-shift {
+		0% {
+			background-position: 0% 50%;
+		}
+		50% {
+			background-position: 100% 50%;
+		}
+		100% {
+			background-position: 0% 50%;
+		}
+	}
+	@keyframes breath {
+		0%,
+		100% {
+			opacity: 0.85;
+			transform: scale(1);
+		}
+		50% {
+			opacity: 1;
+			transform: scale(1.02);
+		}
+	}
+	@keyframes wave {
+		0%,
+		100% {
+			background-position: 0% 50%;
+			opacity: 1;
+		}
+		50% {
+			background-position: 100% 50%;
+			opacity: 0.85;
+		}
+	}
+	@keyframes candle {
+		0%,
+		100% {
+			filter: brightness(1);
+		}
+		25% {
+			filter: brightness(0.92);
+		}
+		50% {
+			filter: brightness(1.08);
+		}
+		75% {
+			filter: brightness(0.95);
+		}
+	}
+	@keyframes disco {
+		0% {
+			filter: hue-rotate(0deg) saturate(1.2);
+		}
+		100% {
+			filter: hue-rotate(360deg) saturate(1.2);
+		}
+	}
+</style>
