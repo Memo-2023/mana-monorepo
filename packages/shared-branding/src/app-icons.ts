@@ -161,6 +161,11 @@ export const APP_ICONS = {
 		// Warm amber→rose gradient to evoke excitement and novelty.
 		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="fi" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#f59e0b"/><stop offset="100%" style="stop-color:#e11d48"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#fi)"/><path d="M50 18l5 14 14-5-10 11 10 11-14-5-5 14-5-14-14 5 10-11-10-11 14 5z" fill="white"/><circle cx="28" cy="70" r="4" fill="white" fill-opacity="0.6"/><circle cx="72" cy="68" r="3" fill="white" fill-opacity="0.5"/><circle cx="38" cy="80" r="2.5" fill="white" fill-opacity="0.4"/><circle cx="65" cy="82" r="2" fill="white" fill-opacity="0.35"/></svg>`
 	),
+	drink: svgToDataUrl(
+		// Water drop + glass — represents beverage tracking.
+		// Blue→cyan gradient for the hydration theme.
+		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="dk" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#3b82f6"/><stop offset="100%" style="stop-color:#06b6d4"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#dk)"/><path d="M35 28h30l-4 48a10 10 0 0 1-10 9h-2a10 10 0 0 1-10-9L35 28z" fill="white" fill-opacity="0.9"/><path d="M39 52c0-4 5-6 11-6s11 2 11 6v12a8 8 0 0 1-8 7h-6a8 8 0 0 1-8-7V52z" fill="#3b82f6" fill-opacity="0.35"/><path d="M33 28h34" stroke="white" stroke-width="4" stroke-linecap="round"/><circle cx="72" cy="36" r="3" fill="white" fill-opacity="0.6"/><circle cx="68" cy="46" r="2" fill="white" fill-opacity="0.4"/><circle cx="74" cy="54" r="2.5" fill="white" fill-opacity="0.3"/></svg>`
+	),
 	who: svgToDataUrl(
 		// Theatre mask silhouette in front of a question mark — references
 		// the "guess who's behind the disguise" mechanic. Purple gradient.

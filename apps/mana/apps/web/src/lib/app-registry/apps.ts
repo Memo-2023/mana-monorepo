@@ -831,3 +831,13 @@ registerApp({
 		return first.id;
 	},
 });
+
+registerApp({
+	id: 'drink',
+	name: 'Drink',
+	color: '#3b82f6',
+	icon: Drop,
+	views: {
+		list: { load: () => import('$lib/modules/drink/ListView.svelte') },
+	},
+});

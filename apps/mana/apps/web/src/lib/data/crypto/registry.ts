@@ -403,6 +403,13 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	guides: { enabled: true, fields: ['title', 'description'] },
 	sections: { enabled: true, fields: ['title', 'content'] },
 	steps: { enabled: true, fields: ['title', 'content'] },
+
+	// ─── Drink ───────────────────────────────────────────────
+	// User-typed content (drink names, notes) → encrypted.
+	// Structural fields (date, time, drinkType, quantityMl, presetId) →
+	// plaintext for indexing and daily aggregation queries.
+	drinkEntries: { enabled: true, fields: ['name', 'note'] },
+	drinkPresets: { enabled: true, fields: ['name'] },
 };
 
 /**

@@ -380,6 +380,18 @@ db.version(6).stores({
 	firsts: 'id, status, category, date, priority, isPinned, isArchived',
 });
 
+// Schema version 7 — adds the Drink module (beverage tracking).
+// Additive only; no prior tables touched.
+//
+// Index strategy:
+//   - drinkEntries indexes [date+time] for the daily timeline view
+//     (range scan on date, sorted by time within a day).
+//   - drinkPresets indexes `order` for the preset-picker sort.
+db.version(7).stores({
+	drinkEntries: 'id, date, drinkType, presetId, [date+time]',
+	drinkPresets: 'id, order, drinkType, isArchived',
+});
+
 // ─── Sync Routing ──────────────────────────────────────────
 // SYNC_APP_MAP, TABLE_TO_SYNC_NAME, TABLE_TO_APP, SYNC_NAME_TO_TABLE,
 // toSyncName() and fromSyncName() are now derived from per-module

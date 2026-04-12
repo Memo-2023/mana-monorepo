@@ -752,6 +752,23 @@ export const MANA_APPS: ManaApp[] = [
 		requiredTier: 'guest',
 	},
 	{
+		id: 'drink',
+		name: 'Drink',
+		description: {
+			de: 'Getränke-Tracker',
+			en: 'Beverage Tracker',
+		},
+		longDescription: {
+			de: 'Tracke alle Getränke — Wasser, Kaffee, Tee, Saft, Alkohol und mehr. Mit Tageszielen, Favoriten und Verlauf.',
+			en: 'Track all beverages — water, coffee, tea, juice, alcohol, and more. With daily goals, favourites, and history.',
+		},
+		icon: APP_ICONS.drink,
+		color: '#3b82f6',
+		comingSoon: false,
+		status: 'development',
+		requiredTier: 'guest',
+	},
+	{
 		id: 'who',
 		name: 'Who',
 		description: {

@@ -106,6 +106,37 @@ recommendation.
 - **pets** — Vet appointments, vaccinations, feeding, weight
 - **plants-care** — Extension of `planta`: watering plan, fertilizing, repotting
 
+## Health & Body (additional)
+
+- **drink** — ✅ **Built.** Getränke-Tracker für alle Getränke (Wasser, Kaffee, Tee, Saft, Alkohol etc.). Tages-/Wochenziele, Favoriten, Verlauf. Verknüpfung mit `nutriphi` und `body`.
+- **breathe** — Atemübungen & Meditation-Timer mit geführten Mustern (Box Breathing, 4-7-8). Sessions-Log verknüpft mit `moodlit`.
+- **fasting** — Intervallfasten-Timer (16:8, 5:2 etc.), verknüpft mit `nutriphi` und `body`.
+
+## Knowledge & Productivity (additional)
+
+- **readlog** — Lese-Fortschritt tracken (Seiten/Tag, aktuelles Kapitel). Leichter als `library`, fokussiert auf Dranbleiben.
+- **snippets** — Code-Schnipsel-Bibliothek mit Syntax-Highlighting, Tags, Suche.
+- **flashbacks** — "On this day"-Aggregator über alle Module. Journal, Fotos, Moods, Todos von vor 1/2/5 Jahren.
+- **teach** — Feynman-Methode: Konzepte in eigenen Worten erklären, Lücken erkennen. Verknüpft mit `cards` und `skilltree`.
+
+## Alltag & Organisation (additional)
+
+- **routines** — Morgen-/Abend-Routinen als geordnete Checklisten mit Timer pro Schritt. Ergänzt `habits`.
+- **documents** *(ZK)* — Persönliches Dokumenten-Management: Pass, Ausweis, Versicherungen, Verträge. Ablaufdaten mit Erinnerungen.
+- **addresses** — Adressen-Sammlung über `contacts` hinaus: Ärzte, Handwerker, Restaurants mit Bewertungen.
+
+## Social & Fun (additional)
+
+- **challenges** — Gemeinsame Challenges mit Freunden (30 Tage Sport, Bücher lesen). Leaderboard, Beweise per Foto.
+- **mixtapes** — Kuratierte Playlists/Musikempfehlungen für Freunde, verknüpft mit `music`.
+
+## Meta & System
+
+- **dashboard** — Konfigurierbares Dashboard mit Widgets aus allen Modulen. Tages-Überblick: Wetter, Termine, Habits, Mood, Todos.
+- **review** — Wöchentliche/monatliche/jährliche Reviews: automatisch Daten aus allen Modulen aggregieren, Trends zeigen, Reflexionsfragen.
+- **export** — Daten-Export pro Modul (JSON, CSV, PDF). DSGVO-konform, "deine Daten gehören dir".
+- **integrations** — Webhook/API-Anbindungen für externe Dienste (Spotify, Strava, Toggl). Feeds Daten in bestehende Module.
+
 ---
 
 ## Next steps

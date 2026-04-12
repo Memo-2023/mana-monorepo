@@ -28,6 +28,7 @@ import { TODO_GUEST_SEED } from '$lib/modules/todo/collections';
 import { NOTES_GUEST_SEED } from '$lib/modules/notes/collections';
 import { TIMES_GUEST_SEED } from '$lib/modules/times/collections';
 import { PLANTA_GUEST_SEED } from '$lib/modules/planta/collections';
+import { DRINK_GUEST_SEED } from '$lib/modules/drink/collections';
 
 /**
  * Flat list of { tableName, rows } entries. Only modules with non-empty
@@ -60,6 +61,7 @@ register(TODO_GUEST_SEED);
 register(NOTES_GUEST_SEED);
 register(TIMES_GUEST_SEED);
 register(PLANTA_GUEST_SEED);
+register(DRINK_GUEST_SEED);
 
 /**
  * Seed all module guest data into empty tables. Idempotent: tables
