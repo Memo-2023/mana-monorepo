@@ -1,28 +1,21 @@
 <!--
   Todo — Workbench ListView
-  Compact task list with quick add, filter by inbox/today/overdue.
-  Clicking a task opens the detail view; checkbox toggles completion.
+  Minimal task list. Inline due-date badges. Floating input at bottom.
 -->
 <script lang="ts">
-	import {
-		useAllTasks,
-		filterIncomplete,
-		filterToday,
-		filterOverdue,
-		sortTasks,
-		getTaskStats,
-	} from './queries';
+	import { useAllTasks, filterIncomplete, filterOverdue, filterToday, sortTasks } from './queries';
 	import { tasksStore } from './stores/tasks.svelte';
 	import { toastStore } from '@mana/shared-ui/toast';
-	import { Circle, Check, PencilSimple, Trash, ArrowCounterClockwise } from '@mana/shared-icons';
+	import { Check } from '@mana/shared-icons';
 	import type { ViewProps } from '$lib/app-registry';
 	import { ContextMenu, type ContextMenuItem } from '@mana/shared-ui';
+	import { PencilSimple, Trash, ArrowCounterClockwise } from '@mana/shared-icons';
 	import { dropTarget, dragSource } from '@mana/shared-ui/dnd';
 	import type { TagDragData } from '@mana/shared-ui/dnd';
 	import { useAllTags, getTagsByIds } from '@mana/shared-stores';
 	import { addTagId } from '$lib/data/tag-mutations';
 	import { useItemContextMenu } from '$lib/data/item-context-menu.svelte';
-	import VoiceCaptureBar from '$lib/components/voice/VoiceCaptureBar.svelte';
+	import FloatingInputBar from '$lib/components/FloatingInputBar.svelte';
 
 	let { navigate, goBack, params }: ViewProps = $props();
 
@@ -39,37 +32,36 @@
 		void addTagId(getTaskTagIds(task), tagData.id, (next) => tasksStore.updateLabels(taskId, next));
 	}
 
-	type ViewFilter = 'inbox' | 'today' | 'overdue';
-
-	let filter = $state<ViewFilter>('inbox');
 	let newTitle = $state('');
 	let tasks$ = useAllTasks();
 	let tasks = $derived(tasks$.value);
 
-	const stats = $derived(getTaskStats(tasks));
-	const filtered = $derived(() => {
-		const incomplete = filterIncomplete(tasks);
-		switch (filter) {
-			case 'today':
-				return filterToday(tasks);
-			case 'overdue':
-				return filterOverdue(tasks);
-			default:
-				return sortTasks(incomplete, 'order');
-		}
-	});
+	const openTasks = $derived(sortTasks(filterIncomplete(tasks), 'order'));
+	const completedTasks = $derived(tasks.filter((t) => t.isCompleted));
+	const sorted = $derived([...openTasks, ...completedTasks]);
+
+	function dueBadge(
+		task: import('./types').Task
+	): { label: string; variant: 'overdue' | 'today' | 'upcoming' } | null {
+		if (!task.dueDate || task.isCompleted) return null;
+		const now = new Date();
+		const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+		const tomorrowStart = new Date(todayStart);
+		tomorrowStart.setDate(tomorrowStart.getDate() + 1);
+		const due = new Date(task.dueDate);
+		if (due < todayStart) return { label: 'Überfällig', variant: 'overdue' };
+		if (due < tomorrowStart) return { label: 'Heute', variant: 'today' };
+		return {
+			label: due.toLocaleDateString('de', { day: 'numeric', month: 'short' }),
+			variant: 'upcoming',
+		};
+	}
 
 	async function addTask() {
 		const title = newTitle.trim();
 		if (!title) return;
-		const data: Record<string, unknown> = { title };
-		if (filter === 'today') data.dueDate = new Date().toISOString();
-		const task = await tasksStore.createTask(data as { title: string; dueDate?: string });
+		const task = await tasksStore.createTask({ title });
 		newTitle = '';
-		// Background LLM enrichment: if the user typed something like
-		// "Steuererklärung morgen 14 Uhr hoch", swap in dueDate + priority
-		// once mana-llm answers. The task is already in the list with
-		// the user's exact title, so this only ever adds detail.
 		void tasksStore.enrichTaskFromText(task.id, title);
 	}
 
@@ -126,56 +118,20 @@
 	}
 </script>
 
-<div class="app-view">
-	<div class="stats">
-		<span>{stats.total} gesamt</span>
-		<span>{stats.today} heute</span>
-		<span class:overdue={stats.overdue > 0}>{stats.overdue} überfällig</span>
-	</div>
-
-	<div class="filter-tabs">
-		{#each ['inbox', 'today', 'overdue'] as f}
-			<button
-				onclick={() => (filter = f as ViewFilter)}
-				class="filter-tab"
-				class:active={filter === f}
-			>
-				{f === 'inbox' ? 'Inbox' : f === 'today' ? 'Heute' : 'Überfällig'}
-			</button>
-		{/each}
-	</div>
-
-	<form
-		onsubmit={(e) => {
-			e.preventDefault();
-			addTask();
-		}}
-		class="quick-add"
-	>
-		<span class="add-icon"><Circle size={18} /></span>
-		<input bind:value={newTitle} placeholder="Neue Aufgabe..." class="add-input" />
-	</form>
-
-	<VoiceCaptureBar
-		idleLabel="Aufgabe sprechen"
-		feature="todo-voice-capture"
-		reason="Aufgaben werden verschlüsselt gespeichert. Dafür brauchst du ein Mana-Konto."
-		onComplete={handleVoiceComplete}
-	/>
-
+<div class="todo-view">
 	<div class="task-list">
-		{#each filtered() as task (task.id)}
+		{#each sorted as task, i (task.id)}
 			{@const taskTagIds = getTaskTagIds(task)}
 			{@const taskTags = getTagsByIds(allTags, taskTagIds)}
-			<button
-				onclick={() =>
-					navigate('detail', {
-						taskId: task.id,
-						_siblingIds: filtered().map((t) => t.id),
-						_siblingKey: 'taskId',
-					})}
+			{@const badge = dueBadge(task)}
+			{#if task.isCompleted && i === openTasks.length && completedTasks.length > 0}
+				<hr class="divider" />
+			{/if}
+			<!-- svelte-ignore a11y_no_static_element_interactions -->
+			<div
 				oncontextmenu={(e) => ctxMenu.open(e, task)}
 				class="task-item"
+				role="listitem"
 				use:dragSource={{
 					type: 'task',
 					data: () => ({
@@ -191,43 +147,67 @@
 					canDrop: (p) => !taskTagIds.includes((p.data as unknown as TagDragData).id),
 				}}
 			>
-				<div
+				<button
+					type="button"
 					class="checkbox"
 					class:checked={task.isCompleted}
-					onclick={(e) => toggleComplete(e, task.id)}
-					onkeydown={(e) => e.key === 'Enter' && toggleComplete(e, task.id)}
-					role="checkbox"
-					aria-checked={task.isCompleted}
-					tabindex={0}
+					onclick={(e) => {
+						e.preventDefault();
+						e.stopPropagation();
+						toggleComplete(e, task.id);
+					}}
+					aria-label={task.isCompleted ? 'Als unerledigt markieren' : 'Als erledigt markieren'}
 				>
-					{#if task.isCompleted}<Check size={12} />{/if}
-				</div>
-				<div class="task-content">
-					<p class="task-title" class:completed={task.isCompleted}>{task.title}</p>
-					{#if task.dueDate || taskTags.length > 0 || task.transcriptModel}
-						<div class="task-meta">
-							{#if task.dueDate}
-								<span class="task-due">{new Date(task.dueDate).toLocaleDateString('de')}</span>
-							{/if}
-							{#if task.transcriptModel}
-								<span class="stt-chip" title="STT-Pipeline">&#x1f3a4; {task.transcriptModel}</span>
-							{/if}
-							{#each taskTags as tag (tag.id)}
-								<span class="tag-pill" style="--tag-color: {tag.color}">
-									<span class="tag-dot" style="background: {tag.color}"></span>
-									{tag.name}
-								</span>
-							{/each}
-						</div>
+					{#if task.isCompleted}<Check size={10} weight="bold" />{/if}
+				</button>
+				<button
+					type="button"
+					class="task-title-btn"
+					onclick={() =>
+						navigate('detail', {
+							taskId: task.id,
+							_siblingIds: sorted.map((t) => t.id),
+							_siblingKey: 'taskId',
+						})}
+				>
+					<span class="task-title" class:completed={task.isCompleted}>{task.title}</span>
+				</button>
+				<div class="task-right">
+					{#each taskTags as tag (tag.id)}
+						<span class="tag-dot" style="background: {tag.color}" title={tag.name}></span>
+					{/each}
+					{#if badge}
+						<span class="due-badge {badge.variant}">{badge.label}</span>
+					{/if}
+					{#if task.isCompleted && task.completedAt}
+						<span class="completed-at"
+							>{new Date(task.completedAt).toLocaleTimeString('de', {
+								hour: '2-digit',
+								minute: '2-digit',
+							})} Uhr, {new Date(task.completedAt).toLocaleDateString('de', {
+								day: 'numeric',
+								month: 'short',
+							})}</span
+						>
 					{/if}
 				</div>
-			</button>
+			</div>
 		{/each}
 
-		{#if filtered().length === 0}
+		{#if sorted.length === 0}
 			<p class="empty">Keine Aufgaben</p>
 		{/if}
 	</div>
+
+	<FloatingInputBar
+		bind:value={newTitle}
+		placeholder="Neue Aufgabe..."
+		onSubmit={addTask}
+		voice
+		voiceFeature="todo-voice-capture"
+		voiceReason="Aufgaben werden verschlüsselt gespeichert. Dafür brauchst du ein Mana-Konto."
+		onVoiceComplete={handleVoiceComplete}
+	/>
 
 	<ContextMenu
 		visible={ctxMenu.state.visible}
@@ -239,169 +219,130 @@
 </div>
 
 <style>
-	.app-view {
+	.todo-view {
 		display: flex;
 		flex-direction: column;
-		gap: 0.625rem;
-		padding: 1rem;
 		height: 100%;
-	}
-	/* P5: theme-token migration. */
-	.stats {
-		display: flex;
-		gap: 0.75rem;
-		font-size: 0.75rem;
-		color: hsl(var(--color-muted-foreground));
-	}
-	.overdue {
-		color: hsl(var(--color-error));
-	}
-	.filter-tabs {
-		display: flex;
-		gap: 0.25rem;
-	}
-	.filter-tab {
-		padding: 0.25rem 0.625rem;
-		border-radius: 0.375rem;
-		border: none;
-		background: transparent;
-		color: hsl(var(--color-muted-foreground));
-		font-size: 0.75rem;
-		font-weight: 500;
-		cursor: pointer;
-		transition: all 0.15s;
-	}
-	.filter-tab:hover {
-		color: hsl(var(--color-foreground));
-		background: hsl(var(--color-surface-hover));
-	}
-	.filter-tab.active {
-		background: hsl(var(--color-muted));
-		color: hsl(var(--color-foreground));
-	}
-	.quick-add {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		padding: 0.375rem 0.5rem;
-		border-radius: 0.375rem;
-		border: 1px solid hsl(var(--color-border));
-		background: transparent;
-	}
-	.add-icon {
-		color: hsl(var(--color-muted-foreground));
-		display: flex;
-	}
-	.add-input {
-		flex: 1;
-		border: none;
-		background: transparent;
-		outline: none;
-		font-size: 0.8125rem;
-		color: hsl(var(--color-foreground));
-	}
-	.add-input::placeholder {
-		color: hsl(var(--color-muted-foreground));
+		position: relative;
 	}
 	.task-list {
 		flex: 1;
 		overflow-y: auto;
+		padding: 0.5rem 0.75rem;
+		padding-bottom: 4rem;
 	}
 	.task-item {
 		display: flex;
-		align-items: flex-start;
+		align-items: center;
 		gap: 0.5rem;
 		width: 100%;
-		padding: 0.375rem 0.25rem;
+		padding: 0.5rem 0.25rem;
 		border: none;
 		background: transparent;
 		text-align: left;
-		border-radius: 0.25rem;
 		cursor: pointer;
 		transition: background 0.15s;
+		border-radius: 0.25rem;
 	}
 	.task-item:hover {
 		background: hsl(var(--color-surface-hover));
 	}
+
+	/* Round checkbox — monochrome, matches text color */
 	.checkbox {
-		margin-top: 0.125rem;
-		width: 16px;
-		height: 16px;
-		border-radius: 0.25rem;
-		border: 1.5px solid hsl(var(--color-border-strong));
+		width: 18px;
+		height: 18px;
+		border-radius: 50%;
+		border: 1.5px solid hsl(var(--color-foreground) / 0.35);
+		background: transparent;
+		padding: 0;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		flex-shrink: 0;
 		transition: all 0.15s;
+		cursor: pointer;
+		color: transparent;
 	}
 	.checkbox:hover {
-		border-color: hsl(var(--color-muted-foreground));
+		border-color: hsl(var(--color-foreground) / 0.6);
 	}
 	.checkbox.checked {
-		border-color: hsl(var(--color-success));
-		background: hsl(var(--color-success));
-		color: white;
+		border-color: hsl(var(--color-foreground));
+		background: hsl(var(--color-foreground));
+		color: hsl(var(--color-background));
 	}
-	.task-content {
-		min-width: 0;
+
+	.task-title-btn {
 		flex: 1;
+		min-width: 0;
+		border: none;
+		background: transparent;
+		padding: 0;
+		cursor: pointer;
+		text-align: left;
 	}
 	.task-title {
+		display: block;
 		font-size: 0.8125rem;
 		color: hsl(var(--color-foreground));
-		margin: 0;
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
+		min-width: 0;
 	}
 	.task-title.completed {
-		color: hsl(var(--color-muted-foreground));
-		text-decoration: line-through;
+		color: hsl(var(--color-foreground));
 	}
-	.task-meta {
+
+	/* Right side: tags + due badge */
+	.task-right {
 		display: flex;
 		align-items: center;
 		gap: 0.375rem;
-		margin: 0;
-	}
-	.task-due {
-		font-size: 0.6875rem;
-		color: hsl(var(--color-muted-foreground));
-	}
-	.stt-chip {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.125rem;
-		padding: 0 0.375rem;
-		border-radius: 9999px;
-		background: hsl(var(--color-muted) / 0.6);
-		color: hsl(var(--color-muted-foreground));
-		font-size: 0.5625rem;
-		line-height: 1.25rem;
-	}
-	.tag-pill {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.1875rem;
-		padding: 0 0.325rem;
-		border-radius: 9999px;
-		background: color-mix(in srgb, var(--tag-color) 12%, transparent);
-		font-size: 0.5625rem;
-		color: hsl(var(--color-muted-foreground));
-		line-height: 1.25rem;
-		white-space: nowrap;
-	}
-	.tag-dot {
-		width: 5px;
-		height: 5px;
-		border-radius: 9999px;
 		flex-shrink: 0;
 	}
+	.tag-dot {
+		width: 6px;
+		height: 6px;
+		border-radius: 50%;
+		flex-shrink: 0;
+	}
+	.due-badge {
+		font-size: 0.625rem;
+		font-weight: 500;
+		padding: 0.0625rem 0.375rem;
+		border-radius: 9999px;
+		white-space: nowrap;
+	}
+	.due-badge.overdue {
+		color: hsl(var(--color-error));
+		background: hsl(var(--color-error) / 0.1);
+	}
+	.due-badge.today {
+		color: hsl(var(--color-primary));
+		background: hsl(var(--color-primary) / 0.1);
+	}
+	.completed-at {
+		font-size: 0.625rem;
+		color: hsl(var(--color-muted-foreground));
+		white-space: nowrap;
+	}
+	.due-badge.upcoming {
+		color: hsl(var(--color-muted-foreground));
+		background: hsl(var(--color-muted) / 0.5);
+	}
+
 	:global(.task-item.mana-drop-target-hover) {
 		outline: 2px solid hsl(var(--color-primary) / 0.4);
 		outline-offset: -2px;
 		background: hsl(var(--color-primary) / 0.06) !important;
+	}
+
+	.divider {
+		border: none;
+		border-top: 1px solid hsl(var(--color-foreground) / 0.1);
+		margin: 0.5rem -0.75rem;
 	}
 	.empty {
 		padding: 2rem 0;
@@ -410,20 +351,14 @@
 		color: hsl(var(--color-muted-foreground));
 	}
 
-	/* Mobile: larger touch targets */
 	@media (max-width: 640px) {
-		.app-view {
-			padding: 0.75rem;
-		}
-
 		.task-item {
 			padding: 0.625rem 0.375rem;
 			min-height: 44px;
 		}
-
 		.checkbox {
-			width: 20px;
-			height: 20px;
+			width: 22px;
+			height: 22px;
 		}
 	}
 </style>
