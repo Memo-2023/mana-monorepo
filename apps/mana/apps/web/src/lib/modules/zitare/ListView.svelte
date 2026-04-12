@@ -112,18 +112,18 @@
 	{#if quote}
 		<div class="quote-transition" class:fade-out={transitioning}>
 			<blockquote
-				class="max-w-[280px] text-center text-base font-light italic leading-relaxed text-white/80"
+				class="max-w-[280px] text-center text-base font-light italic leading-relaxed text-[hsl(var(--color-foreground)/0.8)]"
 			>
 				&laquo;{quotesStore.getText(quote)}&raquo;
 			</blockquote>
-			<p class="mt-3 text-xs text-white/40">— {quote.author}</p>
+			<p class="mt-3 text-xs text-[hsl(var(--color-muted-foreground))]">— {quote.author}</p>
 
 			<!-- Tags -->
 			{#if currentTags.length > 0}
 				<div class="mt-2 flex flex-wrap justify-center gap-1">
 					{#each currentTags as tag (tag.id)}
 						<span
-							class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] text-white/50"
+							class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] text-[hsl(var(--color-muted-foreground))]"
 							style="background: {tag.color}20; border: 1px solid {tag.color}30"
 						>
 							<span class="h-1.5 w-1.5 rounded-full" style="background: {tag.color}"></span>
@@ -135,12 +135,14 @@
 
 			<button
 				onclick={toggleFav}
-				class="mt-3 min-h-[44px] rounded-full p-1.5 transition-colors hover:bg-white/5"
+				class="mt-3 min-h-[44px] rounded-full p-1.5 transition-colors hover:bg-[hsl(var(--color-foreground)/0.05)]"
 			>
 				<Heart
 					size={16}
 					weight={isFav ? 'fill' : 'regular'}
-					class="transition-colors {isFav ? 'text-red-400' : 'text-white/20 hover:text-white/40'}"
+					class="transition-colors {isFav
+						? 'text-red-400'
+						: 'text-[hsl(var(--color-muted-foreground)/0.5)] hover:text-[hsl(var(--color-muted-foreground))]'}"
 				/>
 			</button>
 		</div>

@@ -51,10 +51,12 @@
 <BaseListView items={skills} getKey={(s) => s.id} emptyTitle="Keine Skills angelegt">
 	{#snippet toolbar()}
 		<div class="flex items-center justify-between">
-			<span class="text-xs text-white/40">{totalXp} XP · Level {highestLevel}</span>
+			<span class="text-xs text-[hsl(var(--color-muted-foreground))]"
+				>{totalXp} XP · Level {highestLevel}</span
+			>
 			<button
 				type="button"
-				class="text-xs text-white/50 transition-colors hover:text-white/80"
+				class="text-xs text-[hsl(var(--color-muted-foreground))] transition-colors hover:text-[hsl(var(--color-foreground))]"
 				onclick={() => (creating = !creating)}
 			>
 				{creating ? 'Abbrechen' : '+ Neuer Skill'}
@@ -62,17 +64,20 @@
 		</div>
 
 		{#if creating}
-			<form class="flex flex-col gap-2 rounded-lg bg-white/5 p-3" onsubmit={handleCreate}>
+			<form
+				class="flex flex-col gap-2 rounded-lg bg-[hsl(var(--color-foreground)/0.05)] p-3"
+				onsubmit={handleCreate}
+			>
 				<input
 					type="text"
 					bind:value={newName}
 					placeholder="Skill-Name (z. B. Gitarre, Python, Kochen)"
 					required
-					class="rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white placeholder:text-white/30 focus:border-white/20 focus:outline-none"
+					class="rounded-md border border-[hsl(var(--color-border))] bg-[hsl(var(--color-foreground)/0.05)] px-3 py-1.5 text-sm text-[hsl(var(--color-foreground))] placeholder:text-[hsl(var(--color-muted-foreground)/0.5)] focus:border-[hsl(var(--color-border))] focus:outline-none"
 				/>
 				<select
 					bind:value={newBranch}
-					class="rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white focus:border-white/20 focus:outline-none"
+					class="rounded-md border border-[hsl(var(--color-border))] bg-[hsl(var(--color-foreground)/0.05)] px-3 py-1.5 text-sm text-[hsl(var(--color-foreground))] focus:border-[hsl(var(--color-border))] focus:outline-none"
 				>
 					{#each branches as [key, info] (key)}
 						<option value={key}>{info.name}</option>
@@ -105,22 +110,27 @@
 					_siblingIds: skills.map((s) => s.id),
 					_siblingKey: 'skillId',
 				})}
-			class="mb-2 w-full rounded-md border border-white/10 px-3 py-2.5 text-left transition-colors hover:bg-white/5 min-h-[44px]"
+			class="mb-2 w-full rounded-md border border-[hsl(var(--color-border))] px-3 py-2.5 text-left transition-colors hover:bg-[hsl(var(--color-foreground)/0.05)] min-h-[44px]"
 		>
 			<div class="flex items-center justify-between">
 				<div class="flex items-center gap-2">
 					<span class="text-sm">{skill.icon}</span>
-					<p class="text-sm font-medium text-white/80">{skill.name}</p>
+					<p class="text-sm font-medium text-[hsl(var(--color-foreground)/0.8)]">{skill.name}</p>
 				</div>
-				<span class="text-xs text-white/50">Lv. {skill.level}</span>
+				<span class="text-xs text-[hsl(var(--color-muted-foreground))]">Lv. {skill.level}</span>
 			</div>
 			<div class="mt-1 flex items-center gap-2">
-				<div class="h-1 flex-1 rounded-full bg-white/10">
-					<div class="h-full rounded-full bg-white/30" style="width: {progress}%"></div>
+				<div class="h-1 flex-1 rounded-full bg-[hsl(var(--color-foreground)/0.1)]">
+					<div
+						class="h-full rounded-full bg-[hsl(var(--color-foreground)/0.3)]"
+						style="width: {progress}%"
+					></div>
 				</div>
-				<span class="text-[10px] text-white/30">{skill.currentXp} XP</span>
+				<span class="text-[10px] text-[hsl(var(--color-muted-foreground))]"
+					>{skill.currentXp} XP</span
+				>
 			</div>
-			<p class="mt-0.5 text-[10px] text-white/30">
+			<p class="mt-0.5 text-[10px] text-[hsl(var(--color-muted-foreground))]">
 				{branch?.name ?? skill.branch} — {LEVEL_NAMES[skill.level] ?? 'Unbekannt'}
 			</p>
 		</button>

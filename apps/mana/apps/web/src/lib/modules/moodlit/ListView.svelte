@@ -112,17 +112,19 @@
 				<p class="text-sm font-medium text-white drop-shadow">{activeMood.name}</p>
 			</div>
 		{:else}
-			<div class="flex h-24 items-center justify-center rounded-lg bg-white/5">
-				<p class="text-sm text-white/30">Kein Mood aktiv</p>
+			<div
+				class="flex h-24 items-center justify-center rounded-lg bg-[hsl(var(--color-foreground)/0.05)]"
+			>
+				<p class="text-sm text-[hsl(var(--color-muted-foreground))]">Kein Mood aktiv</p>
 			</div>
 		{/if}
 
 		<!-- Create toggle -->
 		<div class="flex items-center justify-between">
-			<span class="text-xs text-white/40">{moods.length} Moods</span>
+			<span class="text-xs text-[hsl(var(--color-muted-foreground))]">{moods.length} Moods</span>
 			<button
 				type="button"
-				class="text-xs text-white/50 transition-colors hover:text-white/80"
+				class="text-xs text-[hsl(var(--color-muted-foreground))] transition-colors hover:text-[hsl(var(--color-foreground))]"
 				onclick={() => (creating = !creating)}
 			>
 				{creating ? 'Abbrechen' : '+ Neues Mood'}
@@ -130,7 +132,7 @@
 		</div>
 
 		{#if creating}
-			<div class="flex flex-col gap-2 rounded-lg bg-white/5 p-3">
+			<div class="flex flex-col gap-2 rounded-lg bg-[hsl(var(--color-foreground)/0.05)] p-3">
 				<!-- Preview -->
 				<div
 					class="flex h-12 items-center justify-center rounded-md"
@@ -144,7 +146,7 @@
 					type="text"
 					bind:value={newName}
 					placeholder="Mood-Name"
-					class="rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white placeholder:text-white/30 focus:border-white/20 focus:outline-none"
+					class="rounded-md border border-[hsl(var(--color-border))] bg-[hsl(var(--color-foreground)/0.05)] px-3 py-1.5 text-sm text-[hsl(var(--color-foreground))] placeholder:text-[hsl(var(--color-muted-foreground)/0.5)] focus:border-[hsl(var(--color-border))] focus:outline-none"
 				/>
 
 				<!-- Colors -->
@@ -157,7 +159,7 @@
 								onchange={(e) => {
 									newColors = newColors.map((c, j) => (j === i ? e.currentTarget.value : c));
 								}}
-								class="h-8 w-8 cursor-pointer rounded-md border border-white/10"
+								class="h-8 w-8 cursor-pointer rounded-md border border-[hsl(var(--color-border))]"
 							/>
 							{#if newColors.length > 1}
 								<button
@@ -171,7 +173,7 @@
 					{#if newColors.length < 8}
 						<button
 							type="button"
-							class="flex h-8 w-8 items-center justify-center rounded-md border border-dashed border-white/20 text-white/40 transition-colors hover:text-white/60"
+							class="flex h-8 w-8 items-center justify-center rounded-md border border-dashed border-[hsl(var(--color-border))] text-[hsl(var(--color-muted-foreground))] transition-colors hover:text-[hsl(var(--color-foreground))]"
 							onclick={addColor}>+</button
 						>
 					{/if}
@@ -180,7 +182,7 @@
 				<!-- Animation -->
 				<select
 					bind:value={newAnimation}
-					class="rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white focus:border-white/20 focus:outline-none"
+					class="rounded-md border border-[hsl(var(--color-border))] bg-[hsl(var(--color-foreground)/0.05)] px-3 py-1.5 text-sm text-[hsl(var(--color-foreground))] focus:border-[hsl(var(--color-border))] focus:outline-none"
 				>
 					{#each ANIMATIONS as anim (anim.id)}
 						<option value={anim.id}>{anim.name}</option>
@@ -204,11 +206,14 @@
 		<button
 			onclick={() => (activeMoodId = activeMoodId === mood.id ? null : mood.id)}
 			oncontextmenu={(e) => ctxMenu.open(e, mood)}
-			class="group flex flex-col items-center gap-1.5 rounded-lg p-2 transition-colors hover:bg-white/5
-				{activeMoodId === mood.id ? 'ring-1 ring-white/30' : ''}"
+			class="group flex flex-col items-center gap-1.5 rounded-lg p-2 transition-colors hover:bg-[hsl(var(--color-foreground)/0.05)]
+				{activeMoodId === mood.id ? 'ring-1 ring-[hsl(var(--color-border))]' : ''}"
 		>
 			<div class="h-10 w-10 rounded-full" style={gradientStyle(mood.colors)}></div>
-			<span class="text-[10px] text-white/50 group-hover:text-white/70">{mood.name}</span>
+			<span
+				class="text-[10px] text-[hsl(var(--color-muted-foreground))] group-hover:text-[hsl(var(--color-foreground))]"
+				>{mood.name}</span
+			>
 		</button>
 	{/snippet}
 </BaseListView>

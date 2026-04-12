@@ -76,7 +76,7 @@
 	{/if}
 
 	{#if header}
-		<div class="flex gap-3 text-xs text-white/40">
+		<div class="flex gap-3 text-xs text-[hsl(var(--color-muted-foreground))]">
 			{@render header()}
 		</div>
 	{/if}

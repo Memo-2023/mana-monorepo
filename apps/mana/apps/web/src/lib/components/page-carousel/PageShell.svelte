@@ -343,7 +343,6 @@
 		display: flex;
 		align-items: center;
 		color: hsl(var(--color-foreground));
-		opacity: 0.5;
 	}
 	.color-dot {
 		width: 0.625rem;
@@ -355,7 +354,6 @@
 		font-size: 0.95rem;
 		font-weight: 600;
 		color: hsl(var(--color-foreground));
-		opacity: 0.5;
 		transform: translateY(1px);
 	}
 	a.page-title-link {
@@ -383,7 +381,7 @@
 		border-radius: 50%;
 		border: none;
 		background: transparent;
-		color: hsl(var(--color-muted-foreground) / 0.5);
+		color: hsl(var(--color-muted-foreground));
 		cursor: pointer;
 		transition: all 0.15s;
 	}
