@@ -4,6 +4,7 @@ export { default as Sidebar } from './Sidebar.svelte';
 export { default as SidebarSection } from './SidebarSection.svelte';
 export { default as PillNavigation } from './PillNavigation.svelte';
 export { default as PillDropdown } from './PillDropdown.svelte';
+export { default as PillDropdownBar } from './PillDropdownBar.svelte';
 export { default as AppDrawer } from './AppDrawer.svelte';
 export { default as GlobalSpotlight } from './GlobalSpotlight.svelte';
 export { createGlobalSpotlightState } from './useGlobalSpotlight.svelte';
@@ -43,6 +44,7 @@ export type {
 	PillTagSelectorConfig,
 	PillDivider,
 	PillNavElement,
+	PillBarConfig,
 	SpotlightAction,
 	ContentSearchResult,
 	ContentSearchGroup,

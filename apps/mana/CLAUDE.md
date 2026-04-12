@@ -160,6 +160,7 @@ pnpm test:e2e     # Playwright
 - **Auth**: Mana Auth (Better Auth + EdDSA JWT) via `@mana/shared-auth`
 - **Data**: Dexie.js (local-first) + mana-sync (Go) backend
 - **Encryption**: AES-GCM-256 via Web Crypto, server-wrapped MK with optional zero-knowledge
+- **Local AI**: `@mana/local-llm` (Gemma 4 E2B, WebGPU) + `@mana/local-stt` (Whisper, WebGPU) — both run entirely in-browser via transformers.js
 - **Testing**: Vitest, Playwright
 - **Mobile**: Expo, Expo Router, NativeWind, EAS Build
 

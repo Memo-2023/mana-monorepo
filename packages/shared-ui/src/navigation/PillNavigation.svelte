@@ -7,6 +7,7 @@
 		PillTabGroupConfig,
 		PillTagSelectorConfig,
 		PillAppItem,
+		PillBarConfig,
 		SpotlightAction,
 		ContentSearcher,
 	} from './types';
@@ -32,6 +33,7 @@
 		CheckCircle,
 		CheckSquare,
 		Clock,
+		Cloud,
 		Columns,
 		Compass,
 		CreditCard,
@@ -140,6 +142,7 @@
 		share: ShareFat,
 		trash: Trash,
 		filter: Funnel,
+		cloud: Cloud,
 	};
 
 	// Convert app items to dropdown items (will be computed as derived)
@@ -326,6 +329,14 @@
 		helpHref?: string;
 		/** Bottom offset from viewport bottom (default: '0px'). Use to position above other fixed bars. */
 		bottomOffset?: string;
+		/** When provided, dropdown triggers (theme, AI tier, sync, user menu) render
+		 *  as plain pills that call this callback with a bar config instead of
+		 *  opening their in-place PillDropdown popover. The host is expected to
+		 *  render the returned items in its own bar (e.g. bottom-stack). Pass null
+		 *  to request closing the active bar. */
+		onOpenBar?: (config: PillBarConfig | null) => void;
+		/** Id of the bar currently open in the host. Used to highlight the trigger pill. */
+		activeBarId?: string | null;
 	}
 
 	let {
@@ -386,7 +397,191 @@
 		guestMenuLabel = 'Menü',
 		helpHref,
 		bottomOffset = '0px',
+		onOpenBar,
+		activeBarId = null,
 	}: Props = $props();
+
+	// Whether this nav should surface dropdowns as bars instead of popovers.
+	const barMode = $derived(!!onOpenBar);
+
+	// Build the flat PillDropdownItem list for each bar, matching what the
+	// equivalent PillDropdown would render. Mode toggles + variants + a11y
+	// toggles for theme; tier/sync items pass through; user menu is assembled
+	// from the same rules as the PillDropdown below.
+	const themeBarItems = $derived.by<PillDropdownItem[]>(() => {
+		const out: PillDropdownItem[] = [];
+		if (onThemeModeChange) {
+			out.push(
+				{
+					id: 'theme-mode-light',
+					label: 'Light',
+					icon: 'sun',
+					group: 'theme-mode',
+					onClick: () => onThemeModeChange('light'),
+					active: themeMode === 'light',
+				},
+				{
+					id: 'theme-mode-dark',
+					label: 'Dark',
+					icon: 'moon',
+					group: 'theme-mode',
+					onClick: () => onThemeModeChange('dark'),
+					active: themeMode === 'dark',
+				},
+				{
+					id: 'theme-mode-system',
+					label: 'System',
+					icon: 'settings',
+					group: 'theme-mode',
+					onClick: () => onThemeModeChange('system'),
+					active: themeMode === 'system',
+				}
+			);
+		}
+		if (themeVariantItems.length > 0) {
+			if (out.length > 0) out.push({ id: 'theme-variants-div', label: '', divider: true });
+			for (const v of themeVariantItems) out.push(v);
+		}
+		if (showA11yQuickToggles) {
+			out.push({ id: 'a11y-div', label: '', divider: true });
+			if (onA11yContrastChange) {
+				out.push({
+					id: 'a11y-contrast',
+					label: 'Hoher Kontrast',
+					icon: 'sun',
+					onClick: () => onA11yContrastChange(a11yContrast === 'high' ? 'normal' : 'high'),
+					active: a11yContrast === 'high',
+				});
+			}
+			if (onA11yReduceMotionChange) {
+				out.push({
+					id: 'a11y-reduce-motion',
+					label: 'Animationen reduzieren',
+					icon: 'check',
+					onClick: () => onA11yReduceMotionChange(!a11yReduceMotion),
+					active: a11yReduceMotion,
+				});
+			}
+		}
+		return out;
+	});
+
+	const userBarItems = $derived.by<PillDropdownItem[]>(() => {
+		const out: PillDropdownItem[] = [];
+		if (userEmail && profileHref) {
+			out.push({
+				id: 'profile',
+				label: 'Profil',
+				icon: 'user',
+				onClick: () => {
+					window.location.href = profileHref!;
+				},
+				active: currentPath === profileHref,
+			});
+		}
+		out.push({
+			id: 'settings',
+			label: 'Einstellungen',
+			icon: 'settings',
+			onClick: () => {
+				window.location.href = settingsHref;
+			},
+			active: currentPath === settingsHref,
+		});
+		if (userEmail && manaHref) {
+			out.push({
+				id: 'mana',
+				label: 'Mana',
+				icon: 'sparkle',
+				onClick: () => {
+					window.location.href = manaHref!;
+				},
+				active: currentPath === manaHref,
+			});
+		}
+		if (spiralHref) {
+			out.push({
+				id: 'spiral',
+				label: 'Spiral',
+				icon: 'spiral',
+				onClick: () => {
+					window.location.href = spiralHref!;
+				},
+				active: currentPath === spiralHref,
+			});
+		}
+		if (creditsHref) {
+			out.push({
+				id: 'credits',
+				label: 'Credits',
+				icon: 'creditCard',
+				onClick: () => {
+					window.location.href = creditsHref!;
+				},
+				active: currentPath === creditsHref,
+			});
+		}
+		if (userEmail && feedbackHref) {
+			out.push({
+				id: 'feedback',
+				label: 'Feedback',
+				icon: 'chat',
+				onClick: () => {
+					window.location.href = feedbackHref!;
+				},
+				active: currentPath === feedbackHref,
+			});
+		}
+		if (helpHref) {
+			out.push({
+				id: 'help',
+				label: 'Hilfe',
+				icon: 'help',
+				onClick: () => {
+					window.location.href = helpHref!;
+				},
+				active: currentPath === helpHref,
+			});
+		}
+		if (showLanguageSwitcher && languageItems.length > 0) {
+			out.push({ id: 'language-div', label: '', divider: true });
+			out.push({
+				id: 'language',
+				label: currentLanguageLabel,
+				submenu: languageItems.map((item) => ({ ...item, id: `lang-${item.id}` })),
+			});
+		}
+		out.push({ id: 'auth-div', label: '', divider: true });
+		if (userEmail && showLogout && onLogout) {
+			out.push({
+				id: 'logout',
+				label: 'Logout',
+				icon: 'logout',
+				onClick: () => onLogout!(),
+				danger: true,
+			});
+		} else if (!userEmail && loginHref) {
+			out.push({
+				id: 'login',
+				label: 'Anmelden',
+				icon: 'user',
+				primary: true,
+				onClick: () => {
+					window.location.href = loginHref!;
+				},
+			});
+		}
+		return out;
+	});
+
+	function toggleBar(config: PillBarConfig) {
+		if (!onOpenBar) return;
+		if (activeBarId === config.id) {
+			onOpenBar(null);
+		} else {
+			onOpenBar(config);
+		}
+	}
 
 	// Type guards for elements
 	function isTabGroup(element: PillNavElement): element is PillTabGroupConfig {
@@ -506,6 +701,9 @@
 						oncontextmenu={item.onContextMenu}
 						class="pill glass-pill"
 						class:active={item.active}
+						class:icon-only={item.iconOnly}
+						aria-label={item.iconOnly ? item.label : undefined}
+						title={item.iconOnly ? item.label : undefined}
 					>
 						{#if item.icon}
 							{#if item.icon === 'mana'}
@@ -521,7 +719,9 @@
 								<IconComponent size={18} class="pill-icon" />
 							{/if}
 						{/if}
-						<span class="pill-label">{item.label}</span>
+						{#if !item.iconOnly}
+							<span class="pill-label">{item.label}</span>
+						{/if}
 					</button>
 				{:else}
 					<a
@@ -529,6 +729,9 @@
 						oncontextmenu={item.onContextMenu}
 						class="pill glass-pill"
 						class:active={isActive(item.href)}
+						class:icon-only={item.iconOnly}
+						aria-label={item.iconOnly ? item.label : undefined}
+						title={item.iconOnly ? item.label : undefined}
 					>
 						{#if item.icon}
 							{#if item.icon === 'mana'}
@@ -544,7 +747,9 @@
 								<IconComponent size={18} class="pill-icon" />
 							{/if}
 						{/if}
-						<span class="pill-label">{item.label}</span>
+						{#if !item.iconOnly}
+							<span class="pill-label">{item.label}</span>
+						{/if}
 					</a>
 				{/if}
 			{/each}
@@ -587,7 +792,24 @@
 			{/each}
 
 			<!-- Theme Variant Selector -->
-			{#if showThemeVariants && themeVariantItems.length > 0}
+			{#if showThemeVariants && themeVariantItems.length > 0 && barMode}
+				{@const themeConfig = {
+					id: 'theme',
+					label: '',
+					icon: undefined,
+					items: themeBarItems,
+				}}
+				<button
+					type="button"
+					onclick={() => toggleBar(themeConfig)}
+					class="pill glass-pill icon-only"
+					class:active={activeBarId === 'theme'}
+					title={currentThemeVariantLabel}
+					aria-label={currentThemeVariantLabel}
+				>
+					<Palette size={18} class="pill-icon" />
+				</button>
+			{:else if showThemeVariants && themeVariantItems.length > 0}
 				<PillDropdown
 					items={themeVariantItems}
 					direction={dropdownDirection}
@@ -679,7 +901,31 @@
 			{/if}
 
 			<!-- AI Tier Selector -->
-			{#if showAiTierSelector && aiTierItems.length > 0}
+			{#if showAiTierSelector && aiTierItems.length > 0 && barMode}
+				{@const aiProgress = aiTierItems.find((i) => i.progress != null)?.progress}
+				{@const aiConfig = {
+					id: 'ai',
+					label: '',
+					icon: undefined,
+					items: aiTierItems,
+					progress: aiProgress,
+				}}
+				{@const AiIcon = phosphorIcons[currentAiTierIcon]}
+				<button
+					type="button"
+					onclick={() => toggleBar(aiConfig)}
+					class="pill glass-pill icon-only"
+					class:active={activeBarId === 'ai'}
+					class:downloading={aiProgress != null}
+					title={currentAiTierLabel}
+					aria-label={currentAiTierLabel}
+					style={aiProgress != null ? `--progress: ${aiProgress}` : ''}
+				>
+					{#if AiIcon}
+						<AiIcon size={18} class="pill-icon" />
+					{/if}
+				</button>
+			{:else if showAiTierSelector && aiTierItems.length > 0}
 				<PillDropdown
 					items={aiTierItems}
 					direction={dropdownDirection}
@@ -689,7 +935,24 @@
 			{/if}
 
 			<!-- Sync Status -->
-			{#if showSyncStatus && syncStatusItems.length > 0}
+			{#if showSyncStatus && syncStatusItems.length > 0 && barMode}
+				{@const syncConfig = {
+					id: 'sync',
+					label: currentSyncLabel,
+					icon: 'cloud',
+					items: syncStatusItems,
+				}}
+				<button
+					type="button"
+					onclick={() => toggleBar(syncConfig)}
+					class="pill glass-pill"
+					class:active={activeBarId === 'sync'}
+					title={currentSyncLabel}
+				>
+					<Cloud size={18} class="pill-icon" />
+					<span class="pill-label">{currentSyncLabel}</span>
+				</button>
+			{:else if showSyncStatus && syncStatusItems.length > 0}
 				<PillDropdown
 					items={syncStatusItems}
 					direction={dropdownDirection}
@@ -718,7 +981,25 @@
 			     guests. Auth-only items (profile/settings/logout) are filtered
 			     out when userEmail is empty; spiral/credits/themes/help stay
 			     available either way so guests can still navigate. -->
-			{#if userEmail || loginHref}
+			{#if (userEmail || loginHref) && barMode}
+				{@const userLabel = userEmail ? truncateEmail(userEmail) : guestMenuLabel}
+				{@const userConfig = {
+					id: 'user',
+					label: userLabel,
+					icon: 'user',
+					items: userBarItems,
+				}}
+				<button
+					type="button"
+					onclick={() => toggleBar(userConfig)}
+					class="pill glass-pill"
+					class:active={activeBarId === 'user'}
+					title={userLabel}
+				>
+					<User size={18} class="pill-icon" />
+					<span class="pill-label">{userLabel}</span>
+				</button>
+			{:else if userEmail || loginHref}
 				<PillDropdown
 					items={[
 						...(userEmail && profileHref
@@ -1036,6 +1317,47 @@
 
 	.pill-label {
 		display: inline;
+	}
+
+	/* Icon-only pill: square-ish shape, no label gap */
+	.pill.icon-only {
+		gap: 0;
+		padding: 0.5rem 0.625rem;
+	}
+
+	/* Progress ring on pill (used for download indicator).
+	   Uses a conic-gradient border trick so it follows the pill's
+	   own border-radius regardless of shape. */
+	.pill.downloading {
+		position: relative;
+		overflow: visible;
+	}
+
+	.pill.downloading::after {
+		content: '';
+		position: absolute;
+		inset: -3px;
+		border-radius: inherit;
+		border: 2.5px solid transparent;
+		background:
+			conic-gradient(
+					from 0deg,
+					var(--pill-primary-color, var(--color-primary-500, #6366f1))
+						calc(var(--progress) * 360deg),
+					transparent calc(var(--progress) * 360deg)
+				)
+				border-box,
+			linear-gradient(hsl(var(--color-card)), hsl(var(--color-card))) padding-box;
+		mask:
+			linear-gradient(#fff 0 0) content-box,
+			linear-gradient(#fff 0 0);
+		mask-composite: exclude;
+		-webkit-mask:
+			linear-gradient(#fff 0 0) content-box,
+			linear-gradient(#fff 0 0);
+		-webkit-mask-composite: xor;
+		pointer-events: none;
+		transition: none;
 	}
 
 	/* Transitions */

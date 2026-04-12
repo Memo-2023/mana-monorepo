@@ -76,6 +76,9 @@
 		locale?: string;
 		/** Use 'static' when inside a flex container (bottom-stack pattern). Default: 'fixed'. */
 		positioning?: 'fixed' | 'static';
+		/** Externally injected text (e.g. from voice input). When this changes
+		 *  to a non-empty string, the input bar's query is set and focused. */
+		injectedText?: string;
 	}
 
 	let {
@@ -106,6 +109,7 @@
 		highlightPatterns,
 		locale = 'de',
 		positioning = 'fixed',
+		injectedText,
 	}: Props = $props();
 
 	// Use settings for autoFocus
@@ -124,6 +128,18 @@
 	let inputElement = $state<HTMLInputElement | null>(null);
 	// Whether search has been explicitly triggered in deferred mode
 	let searchTriggered = $state(false);
+
+	// External text injection (e.g. from voice-to-text). When the prop
+	// changes to a new non-empty value, set the search query and focus.
+	let lastInjected = '';
+	$effect(() => {
+		if (injectedText && injectedText !== lastInjected) {
+			lastInjected = injectedText;
+			searchQuery = injectedText;
+			// Focus the input so the user sees and can edit the text
+			requestAnimationFrame(() => inputElement?.focus());
+		}
+	});
 
 	// Context menu state
 	let contextMenuVisible = $state(false);

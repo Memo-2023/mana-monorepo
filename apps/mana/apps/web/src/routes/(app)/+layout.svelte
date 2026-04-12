@@ -210,14 +210,17 @@
 	let aiTierItems = $derived<PillDropdownItem[]>([
 		// Tier toggles — browser tier item and its model-status buddy share a
 		// group so PillDropdownBar renders them as a paired pill.
-		...TIER_TOGGLE_LIST.filter((t) => t.tier !== 'browser' || webgpuSupported).map((t) => ({
-			id: `ai-tier-${t.tier}`,
-			label: t.shortLabel,
-			icon: t.icon,
-			active: llmSettings.allowedTiers.includes(t.tier),
-			onClick: () => toggleAiTier(t.tier),
-			...(t.tier === 'browser' ? { group: 'local-llm' } : {}),
-		})),
+		...TIER_TOGGLE_LIST.filter((t) => t.tier !== 'browser' || webgpuSupported).map((t) => {
+			const isActive = llmSettings.allowedTiers.includes(t.tier);
+			return {
+				id: `ai-tier-${t.tier}`,
+				label: t.shortLabel,
+				icon: isActive ? 'checkCircle' : t.icon,
+				active: isActive,
+				onClick: () => toggleAiTier(t.tier),
+				...(t.tier === 'browser' ? { group: 'local-llm' } : {}),
+			};
+		}),
 		// Browser model status / load button (grouped with the "Lokal" toggle).
 		// Handles all LoadingStatus states so the user sees feedback during
 		// download, initialization, and on error (e.g. worker crash).
@@ -234,7 +237,7 @@
 						switch (state) {
 							case 'ready':
 								label = 'Geladen';
-								icon = 'check';
+								icon = 'checkCircle';
 								disabled = true;
 								break;
 							case 'downloading':
@@ -280,16 +283,19 @@
 		// STT model selector — each model is a pill, active = currently selected
 		...(sttSupported
 			? (Object.entries(STT_MODELS) as [SttModelKey, (typeof STT_MODELS)[SttModelKey]][]).map(
-					([key, model]) => ({
-						id: `stt-model-${key}`,
-						label: model.displayName,
-						icon: 'mic' as const,
-						active: selectedSttModel === key,
-						onClick: () => {
-							selectedSttModel = key;
-							void loadLocalStt(key);
-						},
-					})
+					([key, model]) => {
+						const isSelected = selectedSttModel === key;
+						return {
+							id: `stt-model-${key}`,
+							label: model.displayName,
+							icon: isSelected ? 'checkCircle' : 'mic',
+							active: isSelected,
+							onClick: () => {
+								selectedSttModel = key;
+								void loadLocalStt(key);
+							},
+						};
+					}
 				)
 			: []),
 		// STT model status (grouped with selected model)
@@ -306,7 +312,7 @@
 						switch (state) {
 							case 'ready':
 								label = 'STT bereit';
-								icon = 'check';
+								icon = 'checkCircle';
 								disabled = true;
 								break;
 							case 'downloading':

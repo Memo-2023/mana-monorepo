@@ -54,6 +54,14 @@ export default defineConfig({
 	server: {
 		port: 5173,
 		strictPort: true,
+		fs: {
+			// Allow serving files from the monorepo root so that workspace
+			// packages (e.g. @mana/local-llm's Web Worker entry) can be
+			// resolved by Vite's dev server. Without this, worker.ts in
+			// packages/local-llm triggers "request url is outside of Vite
+			// serving allow list".
+			allow: ['../../../..'],
+		},
 	},
 	preview: {
 		port: 4173,

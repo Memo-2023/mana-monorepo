@@ -51,6 +51,7 @@
 		"@mana/help": "workspace:*",
 		"@mana/local-llm": "workspace:*",
 		"@mana/local-store": "workspace:*",
+		"@mana/local-stt": "workspace:^",
 		"@mana/qr-export": "workspace:*",
 		"@mana/shared-auth": "workspace:*",
 		"@mana/shared-auth-ui": "workspace:*",

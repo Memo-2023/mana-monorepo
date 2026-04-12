@@ -26,6 +26,23 @@ export interface PillNavItem {
 	active?: boolean;
 	/** Right-click handler for context menu */
 	onContextMenu?: (e: MouseEvent) => void;
+	/** Show only the icon (hide the label). Label is still used for aria-label/title. */
+	iconOnly?: boolean;
+}
+
+/** Config passed when a PillNavigation dropdown should surface as a bar
+ *  in the host's bottom stack instead of an in-place popover. */
+export interface PillBarConfig {
+	/** Stable id (e.g. 'theme', 'ai', 'sync', 'user') */
+	id: string;
+	/** Title shown at the start of the bar */
+	label: string;
+	/** Icon name shown next to the title */
+	icon?: string;
+	/** Items to render as pills */
+	items: PillDropdownItem[];
+	/** Progress value 0–1. When set, a progress ring is shown on the trigger pill. */
+	progress?: number;
 }
 
 export interface PillDropdownItem {
@@ -51,6 +68,10 @@ export interface PillDropdownItem {
 	divider?: boolean;
 	/** Nested submenu items */
 	submenu?: PillDropdownItem[];
+	/** Group id — items sharing the same group are rendered as a segmented toggle pill */
+	group?: string;
+	/** Progress value 0–1. When set, a circular progress ring is rendered around the icon. */
+	progress?: number;
 	/** Whether to show a split button for opening in panel */
 	showSplitButton?: boolean;
 	/** Click handler for split button */
