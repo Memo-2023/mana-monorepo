@@ -86,18 +86,19 @@
 			const result = evaluate(expression);
 			const formatted = formatResult(result);
 
+			display = formatted;
+			hasResult = true;
+			error = '';
+
 			await calculationsStore.addCalculation({
 				mode: 'standard',
 				expression: expression,
 				result: formatted,
 				skin: activeSkin,
 			});
-
-			display = formatted;
-			hasResult = true;
-			error = '';
 		} catch (e) {
-			error = e instanceof Error ? e.message : 'Fehler';
+			console.error('[calc] Fehler bei Berechnung:', e);
+			error = e instanceof Error ? e.message : String(e);
 		}
 	}
 

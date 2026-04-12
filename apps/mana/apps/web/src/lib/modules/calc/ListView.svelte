@@ -5,6 +5,7 @@
 <script lang="ts">
 	import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 	import { db } from '$lib/data/database';
+	import { evaluate as evalExpression, formatResult } from './engine/evaluate';
 	import type { LocalCalculation } from './types';
 
 	const calcQuery = useLiveQueryWithDefault(async () => {
@@ -32,37 +33,31 @@
 			return;
 		}
 		try {
-			const sanitized = expression.replace(/[^0-9+\-*/().%\s]/g, '');
-			const evalResult = Function('"use strict"; return (' + sanitized + ')')();
-			if (evalResult === undefined || evalResult === null || isNaN(evalResult)) {
-				result = expression;
-				hasError = false;
-			} else {
-				result = String(evalResult);
-				hasError = false;
-			}
+			const num = evalExpression(expression);
+			result = formatResult(num);
+			hasError = false;
 		} catch {
 			// Incomplete expression — don't show error while typing
 			hasError = false;
 		}
 	});
 
-	function evaluate() {
+	function calc() {
 		if (!expression.trim()) return;
 		try {
-			const sanitized = expression.replace(/[^0-9+\-*/().%\s]/g, '');
-			const evalResult = Function('"use strict"; return (' + sanitized + ')')();
-			result = String(evalResult);
+			const num = evalExpression(expression);
+			result = formatResult(num);
 			hasError = false;
-		} catch {
-			result = 'Fehler';
+		} catch (e) {
+			console.error('[calc] ListView error:', e);
+			result = e instanceof Error ? e.message : 'Fehler';
 			hasError = true;
 		}
 	}
 
 	function press(key: string) {
 		if (key === '=') {
-			evaluate();
+			calc();
 		} else if (key === 'C') {
 			expression = '';
 			result = '0';
@@ -77,7 +72,7 @@
 	function handleKeydown(e: KeyboardEvent) {
 		if (e.key === 'Enter') {
 			e.preventDefault();
-			evaluate();
+			calc();
 		}
 	}
 
