@@ -15,6 +15,7 @@ COPY apps/calc/packages/shared ./apps/calc/packages/shared
 COPY apps/zitare/packages/content ./apps/zitare/packages/content
 COPY packages/shared-uload ./packages/shared-uload
 COPY packages/local-llm ./packages/local-llm
+COPY packages/local-stt ./packages/local-stt
 COPY packages/shared-llm ./packages/shared-llm
 
 RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
