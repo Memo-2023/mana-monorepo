@@ -174,8 +174,8 @@
 	<div class="event-list">
 		{#each upcomingEvents as event (event.id)}
 			{@const eventTags = getTagsByIds(allTags, event.tagIds ?? [])}
-			<!-- svelte-ignore a11y_no_static_element_interactions -->
-			<div
+			<button
+				type="button"
 				class="event-row"
 				onclick={() =>
 					navigate('detail', {
@@ -184,7 +184,6 @@
 						_siblingKey: 'eventId',
 					})}
 				oncontextmenu={(e) => ctxMenu.open(e, event)}
-				role="listitem"
 				use:dragSource={{
 					type: 'event',
 					data: () => ({
@@ -216,7 +215,7 @@
 						{/if}
 					</span>
 				</div>
-			</div>
+			</button>
 		{/each}
 
 		{#if upcomingEvents.length === 0}
@@ -302,7 +301,11 @@
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
+		width: 100%;
 		padding: 0.5rem 0.25rem;
+		border: none;
+		background: transparent;
+		text-align: left;
 		cursor: pointer;
 		border-radius: 0.25rem;
 		transition: background 0.15s;
