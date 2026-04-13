@@ -859,6 +859,24 @@ export const MANA_APPS: ManaApp[] = [
 		requiredTier: 'guest',
 	},
 
+	{
+		id: 'mood',
+		name: 'Mood',
+		description: {
+			de: 'Stimmungs-Tracking',
+			en: 'Mood Tracking',
+		},
+		longDescription: {
+			de: 'Tracke deine Stimmung mehrmals am Tag mit Emotionen, Kontext und Aktivität. Erkenne Muster: Wochentage, Tageszeiten, Aktivitäten — und wie sie deine Laune beeinflussen.',
+			en: 'Track your mood multiple times a day with emotions, context, and activity. Discover patterns: weekdays, times of day, activities — and how they affect your mood.',
+		},
+		icon: APP_ICONS.mood,
+		color: '#f59e0b',
+		comingSoon: false,
+		status: 'development',
+		requiredTier: 'guest',
+	},
+
 	// ── Companion Brain ─────────────────────────────────
 
 	{

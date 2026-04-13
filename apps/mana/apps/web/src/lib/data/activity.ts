@@ -1,22 +1,18 @@
 /**
- * Local activity log — capped append-only feed of every write to a
- * sync-tracked table.
+ * Local activity log — legacy read API.
  *
- * Powers a future "What changed recently?" UI and a per-record history
- * view without ever shipping these entries to the backend (the table is
- * deliberately NOT in SYNC_APP_MAP). Each row is intentionally tiny — no
- * field diffs, no payloads — so the disk footprint stays bounded even on
- * power-user accounts.
+ * @deprecated The `_activity` table is no longer written to (replaced by
+ * the Domain Event Store in `data/events/`). This module now delegates
+ * `getRecentActivity()` to `queryEvents()` from the event store,
+ * converting the richer domain events back to the old ActivityEntry shape
+ * for backward compatibility with any remaining consumers.
  *
- * Population is automatic: the Dexie creating/updating hooks in
- * `database.ts` call `recordActivity()` after every successful write.
- * Soft deletes (`deletedAt` set on an update) are recorded as `op:
- * 'delete'`. Server-applied changes (apply lock active for the table) are
- * skipped so the feed reflects local user intent, not sync echo.
+ * New code should use `queryEvents()` directly.
  */
 
 import { db } from './database';
 import { getEffectiveUserId } from './current-user';
+import { queryEvents } from './events/event-store';
 
 export type ActivityOp = 'insert' | 'update' | 'delete';
 
@@ -56,49 +52,42 @@ export interface ActivityQueryOptions {
 }
 
 /**
- * Reads recent activity entries newest-first. The reverse-order walk
- * over the indexed `createdAt` BTree short-circuits as soon as the
- * limit is reached, so the cost is bounded by `limit` rather than the
- * total log size.
+ * Reads recent activity entries newest-first.
+ *
+ * Delegates to the `_events` Domain Event Store and converts to the
+ * legacy ActivityEntry shape. The old `_activity` table is no longer
+ * written to.
  */
 export async function getRecentActivity(
 	options: ActivityQueryOptions = {}
 ): Promise<ActivityEntry[]> {
 	const limit = Math.min(options.limit ?? 50, 500);
-	const userId = getEffectiveUserId();
 
-	// Single-record history takes the most-specific compound index.
-	if (options.collection && options.recordId) {
-		return db
-			.table<ActivityEntry>('_activity')
-			.where('[collection+recordId]')
-			.equals([options.collection, options.recordId])
-			.reverse()
-			.limit(limit)
-			.toArray();
-	}
+	const events = await queryEvents({
+		appId: options.appId,
+		limit,
+	});
 
-	// Per-app feed uses the [appId+createdAt] compound index.
-	if (options.appId) {
-		const collection = db
-			.table<ActivityEntry>('_activity')
-			.where('[appId+createdAt]')
-			.between([options.appId, ''], [options.appId, '\uffff'])
-			.reverse();
-		return collection
-			.filter((a) => a.userId === userId)
-			.limit(limit)
-			.toArray();
-	}
+	return events.map((e) => ({
+		createdAt: e.meta.timestamp,
+		appId: e.meta.appId,
+		collection: e.meta.collection,
+		recordId: e.meta.recordId,
+		op: eventTypeToOp(e.type),
+		userId: e.meta.userId,
+	}));
+}
 
-	// Global feed: walk createdAt BTree backwards, filter to current user.
-	return db
-		.table<ActivityEntry>('_activity')
-		.orderBy('createdAt')
-		.reverse()
-		.filter((a) => a.userId === userId)
-		.limit(limit)
-		.toArray();
+function eventTypeToOp(type: string): ActivityOp {
+	if (type.includes('Deleted') || type.includes('Undone')) return 'delete';
+	if (
+		type.includes('Created') ||
+		type.includes('Logged') ||
+		type.includes('Started') ||
+		type.includes('Added')
+	)
+		return 'insert';
+	return 'update';
 }
 
 // ─── Cleanup ─────────────────────────────────────────────────

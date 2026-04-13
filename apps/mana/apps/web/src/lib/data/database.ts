@@ -442,6 +442,18 @@ db.version(14).stores({
 	ritualLogs: '++id, ritualId, date, [ritualId+date]',
 });
 
+// Schema version 15 — adds the Mood module (multi-daily mood tracking with
+// emotions, context, and pattern detection). Additive only.
+//
+// Index strategy:
+//   - moodEntries indexes date + emotion for the daily view and emotion
+//     distribution queries. [date+time] for chronological sort within a day.
+//   - moodSettings is a singleton (id-only).
+db.version(15).stores({
+	moodEntries: 'id, date, emotion, level, activity, [date+time]',
+	moodSettings: 'id',
+});
+
 // Schema version 11 — adds the Mail module (local draft cache).
 // Mail content lives server-side in Stalwart (JMAP). Only drafts are local-first.
 db.version(11).stores({
@@ -586,27 +598,20 @@ function trackPendingChange(table: string, change: Record<string, unknown>): voi
  * for the real write, once for the activity row) would just spam the
  * user via the quota toast.
  */
+/**
+ * @deprecated Replaced by the Domain Event Store (`_events` table).
+ * Module stores now emit semantic events via `emitDomainEvent()`.
+ * This function is a no-op — kept to avoid removing call sites in
+ * the hooks below. The `_activity` table is no longer written to;
+ * use `queryEvents()` from `data/events/event-store.ts` instead.
+ */
 function trackActivity(
-	appId: string,
-	collection: string,
-	recordId: string,
-	op: 'insert' | 'update' | 'delete'
+	_appId: string,
+	_collection: string,
+	_recordId: string,
+	_op: 'insert' | 'update' | 'delete'
 ): void {
-	const row = {
-		appId,
-		collection,
-		recordId,
-		op,
-		createdAt: new Date().toISOString(),
-		userId: getEffectiveUserId(),
-	};
-	setTimeout(() => {
-		db.table('_activity')
-			.add(row)
-			.catch(() => {
-				/* best-effort, see jsdoc */
-			});
-	}, 0);
+	// No-op: replaced by Domain Event Store (see data/events/)
 }
 
 /**

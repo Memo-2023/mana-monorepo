@@ -5,6 +5,7 @@
  */
 
 import { encryptRecord } from '$lib/data/crypto';
+import { emitDomainEvent } from '$lib/data/events';
 import {
 	sleepEntryTable,
 	sleepHygieneLogTable,
@@ -84,6 +85,12 @@ export const sleepStore = {
 		const snapshot = toSleepEntry({ ...newLocal });
 		await encryptRecord('sleepEntries', newLocal);
 		await sleepEntryTable.add(newLocal);
+		emitDomainEvent('SleepLogged', 'sleep', 'sleepEntries', newLocal.id, {
+			entryId: newLocal.id,
+			date: input.date,
+			durationMin: durationMin,
+			quality: input.quality,
+		});
 		return snapshot;
 	},
 

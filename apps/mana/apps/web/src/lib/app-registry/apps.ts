@@ -56,6 +56,7 @@ import {
 	Pulse,
 	Robot,
 	Target,
+	Smiley,
 } from '@mana/shared-icons';
 
 // ── Apps with entity capabilities ───────────────────────────
@@ -912,6 +913,16 @@ registerApp({
 	icon: Flower,
 	views: {
 		list: { load: () => import('$lib/modules/meditate/ListView.svelte') },
+	},
+});
+
+registerApp({
+	id: 'mood',
+	name: 'Mood',
+	color: '#f59e0b',
+	icon: Smiley,
+	views: {
+		list: { load: () => import('$lib/modules/mood/ListView.svelte') },
 	},
 });
 

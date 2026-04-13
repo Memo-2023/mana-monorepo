@@ -523,6 +523,26 @@ export interface QuestionAskedPayload {
 }
 export type QuestionsEventType = 'QuestionAsked';
 
+// ── Meditate ────────────────────────────────────────
+
+export interface MeditationCompletedPayload {
+	sessionId: string;
+	category: string;
+	durationMinutes: number;
+	completed: boolean;
+}
+export type MeditateEventType = 'MeditationCompleted';
+
+// ── Sleep ───────────────────────────────────────────
+
+export interface SleepLoggedPayload {
+	entryId: string;
+	date: string;
+	durationMin: number;
+	quality: number;
+}
+export type SleepEventType = 'SleepLogged';
+
 // ── Body ────────────────────────────────────────────
 
 export interface WorkoutStartedPayload {
@@ -615,6 +635,8 @@ export type ManaEventType =
 	| NewsEventType
 	| RecipesEventType
 	| QuestionsEventType
+	| MeditateEventType
+	| SleepEventType
 	| SocialEventsEventType
 	| BodyEventType
 	| SystemEventType;
@@ -716,6 +738,10 @@ export type ManaEvent =
 	| DomainEvent<'RecipeDeleted', RecipeDeletedPayload>
 	// Questions
 	| DomainEvent<'QuestionAsked', QuestionAskedPayload>
+	// Meditate
+	| DomainEvent<'MeditationCompleted', MeditationCompletedPayload>
+	// Sleep
+	| DomainEvent<'SleepLogged', SleepLoggedPayload>
 	// Social Events
 	| DomainEvent<'SocialEventCreated', SocialEventCreatedPayload>
 	| DomainEvent<'SocialEventDeleted', SocialEventDeletedPayload>

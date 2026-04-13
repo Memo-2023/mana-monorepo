@@ -50,12 +50,39 @@ function emptySnapshot(date: string): DaySnapshot {
 async function buildSnapshot(): Promise<DaySnapshot> {
 	const today = todayStr();
 	const now = new Date().toISOString();
+	const todayStart = `${today}T00:00:00`;
+	const todayEnd = `${today}T23:59:59`;
+
+	// ── Parallel queries — all 5 modules at once ────
+	const [allTasks, blocks, allDrinks, allMeals, nutriGoals, allPlaces] = await Promise.all([
+		db.table<LocalTask>('tasks').toArray(),
+		db
+			.table<LocalTimeBlock>('timeBlocks')
+			.where('startDate')
+			.between(todayStart, todayEnd + '\uffff')
+			.toArray(),
+		db.table<LocalDrinkEntry>('drinkEntries').toArray(),
+		db.table<LocalMeal>('meals').toArray(),
+		db.table<NutriGoal>('goals').toArray(),
+		db.table<LocalPlace>('places').toArray(),
+	]);
+
+	// ── Parallel decryption ─────────────────────────
+	const activeTasks = allTasks.filter((t) => !t.deletedAt);
+	const eventBlocks = blocks.filter(
+		(b) => !b.deletedAt && b.type === 'event' && b.sourceModule === 'calendar'
+	);
+	const todayDrinks = allDrinks.filter((d) => !d.deletedAt && d.date === today);
+	const todayMeals = allMeals.filter((m) => !m.deletedAt && m.date === today);
+
+	const [decryptedTasks, decryptedBlocks, decryptedDrinks, decryptedMeals] = await Promise.all([
+		decryptRecords<LocalTask>('tasks', activeTasks),
+		decryptRecords<LocalTimeBlock>('timeBlocks', eventBlocks),
+		decryptRecords<LocalDrinkEntry>('drinkEntries', todayDrinks),
+		decryptRecords<LocalMeal>('meals', todayMeals),
+	]);
 
 	// ── Tasks ───────────────────────────────────────
-	const allTasks = await db.table<LocalTask>('tasks').toArray();
-	const activeTasks = allTasks.filter((t) => !t.deletedAt);
-	const decryptedTasks = await decryptRecords<LocalTask>('tasks', activeTasks);
-
 	const completedCount = decryptedTasks.filter((t) => t.isCompleted).length;
 	const overdue = decryptedTasks.filter(
 		(t) => !t.isCompleted && t.dueDate != null && (t.dueDate as string) < today
@@ -69,18 +96,6 @@ async function buildSnapshot(): Promise<DaySnapshot> {
 	}));
 
 	// ── Calendar Events ─────────────────────────────
-	const todayStart = `${today}T00:00:00`;
-	const todayEnd = `${today}T23:59:59`;
-	const blocks = await db
-		.table<LocalTimeBlock>('timeBlocks')
-		.where('startDate')
-		.between(todayStart, todayEnd + '\uffff')
-		.toArray();
-	const eventBlocks = blocks.filter(
-		(b) => !b.deletedAt && b.type === 'event' && b.sourceModule === 'calendar'
-	);
-	const decryptedBlocks = await decryptRecords<LocalTimeBlock>('timeBlocks', eventBlocks);
-
 	const eventSummaries: EventSummary[] = decryptedBlocks
 		.sort((a, b) => (a.startDate as string).localeCompare(b.startDate as string))
 		.map((b) => ({
@@ -91,15 +106,10 @@ async function buildSnapshot(): Promise<DaySnapshot> {
 			isAllDay: b.allDay ?? false,
 			calendarId: '',
 		}));
-
 	const upcomingEvents = eventSummaries.filter((e) => e.startTime >= now).slice(0, 5);
 	const nextEvent = upcomingEvents[0] ?? null;
 
 	// ── Drinks ──────────────────────────────────────
-	const allDrinks = await db.table<LocalDrinkEntry>('drinkEntries').toArray();
-	const todayDrinks = allDrinks.filter((d) => !d.deletedAt && d.date === today);
-	const decryptedDrinks = await decryptRecords<LocalDrinkEntry>('drinkEntries', todayDrinks);
-
 	let waterMl = 0;
 	let coffeeMl = 0;
 	let coffeeCount = 0;
@@ -117,10 +127,6 @@ async function buildSnapshot(): Promise<DaySnapshot> {
 	}
 
 	// ── Nutrition ───────────────────────────────────
-	const allMeals = await db.table<LocalMeal>('meals').toArray();
-	const todayMeals = allMeals.filter((m) => !m.deletedAt && m.date === today);
-	const decryptedMeals = await decryptRecords<LocalMeal>('meals', todayMeals);
-
 	let totalCalories = 0;
 	let totalProtein = 0;
 	for (const m of decryptedMeals) {
@@ -130,14 +136,11 @@ async function buildSnapshot(): Promise<DaySnapshot> {
 			totalProtein += n.protein ?? 0;
 		}
 	}
-
-	const nutriGoals = await db.table<NutriGoal>('goals').toArray();
 	const activeGoal = nutriGoals.find((g) => !g.deletedAt);
 	const calorieGoal = activeGoal?.dailyCalories ?? DEFAULT_DAILY_VALUES.calories;
 	const proteinGoal = activeGoal?.dailyProtein;
 
 	// ── Places ──────────────────────────────────────
-	const allPlaces = await db.table<LocalPlace>('places').toArray();
 	const visitedToday = allPlaces.filter(
 		(p) => !p.deletedAt && p.lastVisitedAt && (p.lastVisitedAt as string).startsWith(today)
 	).length;

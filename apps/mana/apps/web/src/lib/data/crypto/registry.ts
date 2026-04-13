@@ -459,6 +459,13 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	sleepHygieneLogs: { enabled: false, fields: [] },
 	sleepHygieneChecks: { enabled: true, fields: ['name', 'description'] },
 	sleepSettings: { enabled: false, fields: [] },
+
+	// ─── Mood ────────────────────────────────────────────────
+	// User-typed content: withWhom (free text about people) and notes are
+	// encrypted. Emotion/level/activity/tags stay plaintext for aggregation
+	// and pattern detection. Settings are structural only.
+	moodEntries: { enabled: true, fields: ['withWhom', 'notes'] },
+	moodSettings: { enabled: false, fields: [] },
 };
 
 /**
