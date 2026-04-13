@@ -426,6 +426,10 @@ db.version(9).stores({
 db.version(10).stores({
 	_events:
 		'++seq, type, meta.appId, meta.timestamp, meta.recordId, [meta.appId+meta.timestamp], [type+meta.timestamp]',
+	// Companion Brain: Goals, Memory, Feedback
+	companionGoals: 'id, moduleId, status, [moduleId+status]',
+	_memory: 'id, category, confidence, lastConfirmed, [category+confidence]',
+	_nudgeOutcomes: '++id, nudgeId, nudgeType, outcome, timestamp, [nudgeType+outcome]',
 });
 
 // Schema version 11 — adds the Mail module (local draft cache).
