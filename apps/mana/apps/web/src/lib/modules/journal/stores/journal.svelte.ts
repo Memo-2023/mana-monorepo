@@ -8,6 +8,7 @@
 import { journalEntryTable } from '../collections';
 import { toJournalEntry } from '../queries';
 import { encryptRecord } from '$lib/data/crypto';
+import { emitDomainEvent } from '$lib/data/events';
 import { transcribeAudio } from '$lib/voice/transcribe';
 import type { JournalEntry, JournalMood, LocalJournalEntry } from '../types';
 
@@ -48,6 +49,12 @@ export const journalStore = {
 		const plaintextSnapshot = toJournalEntry(newLocal);
 		await encryptRecord('journalEntries', newLocal);
 		await journalEntryTable.add(newLocal);
+		emitDomainEvent('JournalEntryCreated', 'journal', 'journalEntries', newLocal.id, {
+			entryId: newLocal.id,
+			title: data.title ?? undefined,
+			mood: data.mood ?? undefined,
+			hasContent: content.length > 0,
+		});
 		return plaintextSnapshot;
 	},
 
@@ -128,6 +135,7 @@ export const journalStore = {
 			deletedAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString(),
 		});
+		emitDomainEvent('JournalEntryDeleted', 'journal', 'journalEntries', id, { entryId: id });
 	},
 
 	async togglePin(id: string) {
@@ -153,6 +161,8 @@ export const journalStore = {
 			mood,
 			updatedAt: new Date().toISOString(),
 		});
+		if (mood)
+			emitDomainEvent('JournalMoodSet', 'journal', 'journalEntries', id, { entryId: id, mood });
 	},
 
 	async archiveEntry(id: string) {

@@ -226,6 +226,118 @@ export type PlacesEventType =
 	| 'TrackingStarted'
 	| 'TrackingStopped';
 
+// ── Habits ──────────────────────────────────────────
+
+export interface HabitLoggedPayload {
+	logId: string;
+	habitId: string;
+	habitTitle: string;
+	note?: string;
+}
+
+export interface HabitCreatedPayload {
+	habitId: string;
+	title: string;
+}
+
+export interface HabitDeletedPayload {
+	habitId: string;
+	title: string;
+}
+
+export type HabitsEventType = 'HabitLogged' | 'HabitCreated' | 'HabitDeleted';
+
+// ── Journal ─────────────────────────────────────────
+
+export interface JournalEntryCreatedPayload {
+	entryId: string;
+	title?: string;
+	mood?: string;
+	hasContent: boolean;
+}
+
+export interface JournalMoodSetPayload {
+	entryId: string;
+	mood: string;
+}
+
+export interface JournalEntryDeletedPayload {
+	entryId: string;
+}
+
+export type JournalEventType = 'JournalEntryCreated' | 'JournalMoodSet' | 'JournalEntryDeleted';
+
+// ── Notes ───────────────────────────────────────────
+
+export interface NoteCreatedPayload {
+	noteId: string;
+	title?: string;
+}
+
+export interface NoteDeletedPayload {
+	noteId: string;
+}
+
+export type NotesEventType = 'NoteCreated' | 'NoteDeleted';
+
+// ── Contacts ────────────────────────────────────────
+
+export interface ContactCreatedPayload {
+	contactId: string;
+	firstName: string;
+	lastName?: string;
+}
+
+export interface ContactDeletedPayload {
+	contactId: string;
+	name: string;
+}
+
+export type ContactsEventType = 'ContactCreated' | 'ContactDeleted';
+
+// ── Body ────────────────────────────────────────────
+
+export interface WorkoutStartedPayload {
+	workoutId: string;
+	title?: string;
+	routineId?: string;
+}
+
+export interface WorkoutFinishedPayload {
+	workoutId: string;
+	title: string;
+	durationMinutes: number;
+	setCount: number;
+}
+
+export interface SetLoggedPayload {
+	setId: string;
+	workoutId: string;
+	exerciseId: string;
+	reps: number;
+	weight: number;
+}
+
+export interface MeasurementLoggedPayload {
+	measurementId: string;
+	type: string;
+	value: number;
+	unit: string;
+}
+
+export interface EnergyCheckLoggedPayload {
+	checkId: string;
+	energy?: number;
+	mood?: number;
+}
+
+export type BodyEventType =
+	| 'WorkoutStarted'
+	| 'WorkoutFinished'
+	| 'SetLogged'
+	| 'MeasurementLogged'
+	| 'EnergyCheckLogged';
+
 // ── System Events (Goals, Companion) ────────────────
 
 export interface GoalReachedPayload {
@@ -253,6 +365,11 @@ export type ManaEventType =
 	| DrinkEventType
 	| NutriphiEventType
 	| PlacesEventType
+	| HabitsEventType
+	| JournalEventType
+	| NotesEventType
+	| ContactsEventType
+	| BodyEventType
 	| SystemEventType;
 
 /**
@@ -291,6 +408,26 @@ export type ManaEvent =
 	| DomainEvent<'LocationLogged', LocationLoggedPayload>
 	| DomainEvent<'TrackingStarted', TrackingStartedPayload>
 	| DomainEvent<'TrackingStopped', TrackingStoppedPayload>
+	// Habits
+	| DomainEvent<'HabitLogged', HabitLoggedPayload>
+	| DomainEvent<'HabitCreated', HabitCreatedPayload>
+	| DomainEvent<'HabitDeleted', HabitDeletedPayload>
+	// Journal
+	| DomainEvent<'JournalEntryCreated', JournalEntryCreatedPayload>
+	| DomainEvent<'JournalMoodSet', JournalMoodSetPayload>
+	| DomainEvent<'JournalEntryDeleted', JournalEntryDeletedPayload>
+	// Notes
+	| DomainEvent<'NoteCreated', NoteCreatedPayload>
+	| DomainEvent<'NoteDeleted', NoteDeletedPayload>
+	// Contacts
+	| DomainEvent<'ContactCreated', ContactCreatedPayload>
+	| DomainEvent<'ContactDeleted', ContactDeletedPayload>
+	// Body
+	| DomainEvent<'WorkoutStarted', WorkoutStartedPayload>
+	| DomainEvent<'WorkoutFinished', WorkoutFinishedPayload>
+	| DomainEvent<'SetLogged', SetLoggedPayload>
+	| DomainEvent<'MeasurementLogged', MeasurementLoggedPayload>
+	| DomainEvent<'EnergyCheckLogged', EnergyCheckLoggedPayload>
 	// System
 	| DomainEvent<'GoalReached', GoalReachedPayload>
 	| DomainEvent<'GoalProgress', GoalProgressPayload>;

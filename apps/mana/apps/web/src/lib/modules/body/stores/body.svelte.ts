@@ -13,6 +13,7 @@
  */
 
 import { encryptRecord } from '$lib/data/crypto';
+import { emitDomainEvent } from '$lib/data/events';
 import { createBlock, updateBlock, deleteBlock } from '$lib/data/time-blocks/service';
 import {
 	bodyExerciseTable,
@@ -183,6 +184,11 @@ export const bodyStore = {
 		const snapshot = toBodyWorkout({ ...newLocal });
 		await encryptRecord('bodyWorkouts', newLocal);
 		await bodyWorkoutTable.add(newLocal);
+		emitDomainEvent('WorkoutStarted', 'body', 'bodyWorkouts', workoutId, {
+			workoutId,
+			title,
+			routineId: input.routineId,
+		});
 		return snapshot;
 	},
 
@@ -204,6 +210,16 @@ export const bodyStore = {
 		if (workout?.timeBlockId) {
 			await updateBlock(workout.timeBlockId, { endDate: now });
 		}
+		const sets = await bodySetTable.where('workoutId').equals(id).toArray();
+		const durationMs = workout?.startedAt
+			? Date.now() - new Date(workout.startedAt as string).getTime()
+			: 0;
+		emitDomainEvent('WorkoutFinished', 'body', 'bodyWorkouts', id, {
+			workoutId: id,
+			title: (workout?.title as string) ?? 'Workout',
+			durationMinutes: Math.round(durationMs / 60000),
+			setCount: sets.filter((s) => !s.deletedAt).length,
+		});
 	},
 
 	async updateWorkout(
@@ -262,6 +278,13 @@ export const bodyStore = {
 		const snapshot = toBodySet({ ...newLocal });
 		await encryptRecord('bodySets', newLocal);
 		await bodySetTable.add(newLocal);
+		emitDomainEvent('SetLogged', 'body', 'bodySets', newLocal.id, {
+			setId: newLocal.id,
+			workoutId: input.workoutId,
+			exerciseId: input.exerciseId,
+			reps: input.reps,
+			weight: input.weight,
+		});
 		return snapshot;
 	},
 
@@ -299,6 +322,12 @@ export const bodyStore = {
 		const snapshot = toBodyMeasurement({ ...newLocal });
 		await encryptRecord('bodyMeasurements', newLocal);
 		await bodyMeasurementTable.add(newLocal);
+		emitDomainEvent('MeasurementLogged', 'body', 'bodyMeasurements', newLocal.id, {
+			measurementId: newLocal.id,
+			type: input.type,
+			value: input.value,
+			unit: input.unit,
+		});
 		return snapshot;
 	},
 
@@ -361,6 +390,11 @@ export const bodyStore = {
 		const snapshot = toBodyCheck({ ...newLocal });
 		await encryptRecord('bodyChecks', newLocal);
 		await bodyCheckTable.add(newLocal);
+		emitDomainEvent('EnergyCheckLogged', 'body', 'bodyChecks', newLocal.id, {
+			checkId: newLocal.id,
+			energy: input.energy,
+			mood: input.mood,
+		});
 		return snapshot;
 	},
 

@@ -18,6 +18,7 @@ import { noteTable } from '../collections';
 import { toNote } from '../queries';
 import type { LocalNote, Note } from '../types';
 import { encryptRecord } from '$lib/data/crypto';
+import { emitDomainEvent } from '$lib/data/events';
 import { transcribeAudio } from '$lib/voice/transcribe';
 
 export const notesStore = {
@@ -36,6 +37,10 @@ export const notesStore = {
 		const plaintextSnapshot = toNote(newLocal);
 		await encryptRecord('notes', newLocal);
 		await noteTable.add(newLocal);
+		emitDomainEvent('NoteCreated', 'notes', 'notes', newLocal.id, {
+			noteId: newLocal.id,
+			title: data.title,
+		});
 		return plaintextSnapshot;
 	},
 
@@ -103,6 +108,7 @@ export const notesStore = {
 			deletedAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString(),
 		});
+		emitDomainEvent('NoteDeleted', 'notes', 'notes', id, { noteId: id });
 	},
 
 	async togglePin(id: string) {

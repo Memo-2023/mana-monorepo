@@ -5,6 +5,7 @@
  * All reads are handled by liveQuery hooks in queries.ts.
  */
 
+import { emitDomainEvent } from '$lib/data/events';
 import { habitTable, habitLogTable } from '../collections';
 import { toHabit } from '../queries';
 import {
@@ -101,6 +102,10 @@ export const habitsStore = {
 		};
 
 		await habitTable.add(newLocal);
+		emitDomainEvent('HabitCreated', 'habits', 'habits', newLocal.id, {
+			habitId: newLocal.id,
+			title: data.title,
+		});
 		return toHabit(newLocal);
 	},
 
@@ -120,9 +125,14 @@ export const habitsStore = {
 	},
 
 	async deleteHabit(id: string) {
+		const habit = await habitTable.get(id);
 		await habitTable.update(id, {
 			deletedAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString(),
+		});
+		emitDomainEvent('HabitDeleted', 'habits', 'habits', id, {
+			habitId: id,
+			title: habit?.title ?? '',
 		});
 		// Also soft-delete all logs and their timeBlocks
 		const logs = await habitLogTable.where('habitId').equals(id).toArray();
@@ -233,6 +243,12 @@ export const habitsStore = {
 		};
 
 		await habitLogTable.add(newLog);
+		emitDomainEvent('HabitLogged', 'habits', 'habitLogs', logId, {
+			logId,
+			habitId,
+			habitTitle: habit?.title ?? '',
+			note,
+		});
 		return newLog;
 	},
 

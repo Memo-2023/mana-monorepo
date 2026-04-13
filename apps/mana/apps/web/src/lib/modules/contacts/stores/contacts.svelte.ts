@@ -10,6 +10,7 @@ import { toContact } from '../queries';
 import { createArchiveOps } from '@mana/shared-stores';
 import { ContactsEvents } from '@mana/shared-utils/analytics';
 import { encryptRecord, decryptRecord } from '$lib/data/crypto';
+import { emitDomainEvent } from '$lib/data/events';
 import type { LocalContact, Contact } from '../types';
 import type { UserProfile } from '$lib/api/profile';
 
@@ -47,6 +48,11 @@ export const contactsStore = {
 		const plaintextSnapshot = toContact(newLocal);
 		await encryptRecord('contacts', newLocal);
 		await contactTable.add(newLocal);
+		emitDomainEvent('ContactCreated', 'contacts', 'contacts', newLocal.id, {
+			contactId: newLocal.id,
+			firstName: data.firstName ?? '',
+			lastName: data.lastName,
+		});
 		ContactsEvents.contactCreated();
 		return plaintextSnapshot;
 	},
@@ -89,9 +95,15 @@ export const contactsStore = {
 	},
 
 	async deleteContact(id: string) {
+		const local = await contactTable.get(id);
+		const decrypted = local ? await decryptRecord('contacts', { ...local }) : null;
 		await contactTable.update(id, {
 			deletedAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString(),
+		});
+		emitDomainEvent('ContactDeleted', 'contacts', 'contacts', id, {
+			contactId: id,
+			name: [decrypted?.firstName, decrypted?.lastName].filter(Boolean).join(' ') || '',
 		});
 		ContactsEvents.contactDeleted();
 	},
