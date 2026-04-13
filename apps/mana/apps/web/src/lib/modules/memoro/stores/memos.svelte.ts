@@ -10,6 +10,7 @@ import { toMemo } from '../queries';
 import { createArchiveOps } from '@mana/shared-stores';
 import { MemoroEvents } from '@mana/shared-utils/analytics';
 import { encryptRecord } from '$lib/data/crypto';
+import { emitDomainEvent } from '$lib/data/events';
 import { transcribeAudio } from '$lib/voice/transcribe';
 import { llmTaskQueue } from '$lib/llm-queue';
 import { generateTitleTask } from '$lib/llm-tasks/generate-title';
@@ -56,6 +57,10 @@ export const memosStore = {
 		const plaintextSnapshot = toMemo(newLocal);
 		await encryptRecord('memos', newLocal);
 		await memoTable.add(newLocal);
+		emitDomainEvent('MemoCreated', 'memoro', 'memos', newLocal.id, {
+			memoId: newLocal.id,
+			fromVoice: false,
+		});
 		MemoroEvents.memoCreated();
 		return plaintextSnapshot;
 	},

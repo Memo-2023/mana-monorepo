@@ -11,6 +11,7 @@ import { toConversation } from '../queries';
 import { createArchiveOps } from '@mana/shared-stores';
 import { ChatEvents } from '@mana/shared-utils/analytics';
 import { encryptRecord } from '$lib/data/crypto';
+import { emitDomainEvent } from '$lib/data/events';
 import type { LocalConversation } from '../types';
 
 /** Archive/soft-delete ops for conversations. */
@@ -42,6 +43,10 @@ export const conversationsStore = {
 		const plaintextSnapshot = toConversation(newLocal);
 		await encryptRecord('conversations', newLocal);
 		await conversationTable.add(newLocal);
+		emitDomainEvent('ChatConversationCreated', 'chat', 'conversations', newLocal.id, {
+			conversationId: newLocal.id,
+			title: data.title,
+		});
 		ChatEvents.conversationCreated();
 		return plaintextSnapshot;
 	},

@@ -16,6 +16,7 @@ import { messageTable, conversationTable } from '../collections';
 import { toMessage } from '../queries';
 import { ChatEvents } from '@mana/shared-utils/analytics';
 import { encryptRecord } from '$lib/data/crypto';
+import { emitDomainEvent } from '$lib/data/events';
 import type { LocalMessage } from '../types';
 
 export const messagesStore = {
@@ -34,6 +35,10 @@ export const messagesStore = {
 		// Touch the conversation's updatedAt
 		await conversationTable.update(conversationId, {
 			updatedAt: new Date().toISOString(),
+		});
+		emitDomainEvent('ChatMessageSent', 'chat', 'messages', newLocal.id, {
+			messageId: newLocal.id,
+			conversationId,
 		});
 		ChatEvents.messageSent();
 		return plaintextSnapshot;

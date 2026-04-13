@@ -11,6 +11,7 @@ import { toFile, toFolder } from '../queries';
 import type { StorageFile, StorageFolder } from '../queries';
 import type { LocalFile, LocalFolder } from '../types';
 import { encryptRecord } from '$lib/data/crypto';
+import { emitDomainEvent } from '$lib/data/events';
 import { StorageEvents } from '@mana/shared-utils/analytics';
 
 let viewMode = $state<'grid' | 'list'>('grid');
@@ -111,6 +112,11 @@ export const filesStore = {
 		};
 
 		await storageFolderTable.add(newFolder);
+		emitDomainEvent('FolderCreated', 'storage', 'storageFolders', newFolder.id, {
+			folderId: newFolder.id,
+			name,
+			parentId,
+		});
 		return toFolder(newFolder);
 	},
 

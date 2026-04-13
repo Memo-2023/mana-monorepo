@@ -6,6 +6,7 @@
  */
 
 import { db } from '$lib/data/database';
+import { emitDomainEvent } from '$lib/data/events';
 import type { Skill } from '../types';
 import { calculateLevel, createDefaultSkill, createActivity } from '../types';
 import type { LocalSkill, LocalActivity } from '../types';
@@ -32,6 +33,10 @@ async function addSkill(data: Partial<Skill>): Promise<Skill> {
 		...localSkill,
 		createdAt: new Date().toISOString(),
 		updatedAt: new Date().toISOString(),
+	});
+	emitDomainEvent('SkillCreated', 'skilltree', 'skills', skill.id, {
+		skillId: skill.id,
+		name: skill.name,
 	});
 	SkillTreeEvents.skillCreated(data.branch || 'custom');
 	return skill;
@@ -116,6 +121,12 @@ async function addXp(
 		});
 	}
 
+	emitDomainEvent('SkillXpAdded', 'skilltree', 'skills', skillId, {
+		skillId,
+		skillName: skill.name,
+		xp,
+		totalXp: newTotalXp,
+	});
 	SkillTreeEvents.xpAdded(xp, leveledUp);
 
 	return { leveledUp, newLevel };

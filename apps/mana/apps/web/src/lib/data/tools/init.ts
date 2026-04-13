@@ -19,6 +19,11 @@ import { dreamsTools } from '$lib/modules/dreams/tools';
 import { cardsTools } from '$lib/modules/cards/tools';
 import { timesTools } from '$lib/modules/times/tools';
 import { socialEventsTools } from '$lib/modules/events/tools';
+import { musicTools } from '$lib/modules/music/tools';
+import { storageTools } from '$lib/modules/storage/tools';
+import { chatTools } from '$lib/modules/chat/tools';
+import { memoroTools } from '$lib/modules/memoro/tools';
+import { skilltreeTools } from '$lib/modules/skilltree/tools';
 
 let initialized = false;
 
@@ -39,5 +44,10 @@ export function initTools(): void {
 	registerTools(cardsTools);
 	registerTools(timesTools);
 	registerTools(socialEventsTools);
+	registerTools(musicTools);
+	registerTools(storageTools);
+	registerTools(chatTools);
+	registerTools(memoroTools);
+	registerTools(skilltreeTools);
 	initialized = true;
 }

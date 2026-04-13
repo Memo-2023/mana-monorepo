@@ -357,6 +357,77 @@ export interface TimerStoppedPayload {
 
 export type TimesEventType = 'TimerStarted' | 'TimerStopped';
 
+// ── Music ───────────────────────────────────────────
+
+export interface SongAddedPayload {
+	songId: string;
+	title: string;
+}
+
+export interface PlaylistCreatedPayload {
+	playlistId: string;
+	name: string;
+}
+
+export type MusicEventType = 'SongAdded' | 'PlaylistCreated';
+
+// ── Storage ─────────────────────────────────────────
+
+export interface FolderCreatedPayload {
+	folderId: string;
+	name: string;
+	parentId?: string;
+}
+
+export interface FileDeletedPayload {
+	fileId: string;
+}
+
+export type StorageEventType = 'FolderCreated' | 'FileDeleted';
+
+// ── Chat ────────────────────────────────────────────
+
+export interface ChatMessageSentPayload {
+	messageId: string;
+	conversationId: string;
+}
+
+export interface ChatConversationCreatedPayload {
+	conversationId: string;
+	title?: string;
+}
+
+export type ChatEventType = 'ChatMessageSent' | 'ChatConversationCreated';
+
+// ── Memoro ──────────────────────────────────────────
+
+export interface MemoCreatedPayload {
+	memoId: string;
+	fromVoice: boolean;
+}
+
+export interface MemoDeletedPayload {
+	memoId: string;
+}
+
+export type MemoroEventType = 'MemoCreated' | 'MemoDeleted';
+
+// ── Skilltree ───────────────────────────────────────
+
+export interface SkillXpAddedPayload {
+	skillId: string;
+	skillName: string;
+	xp: number;
+	totalXp: number;
+}
+
+export interface SkillCreatedPayload {
+	skillId: string;
+	name: string;
+}
+
+export type SkilltreeEventType = 'SkillXpAdded' | 'SkillCreated';
+
 // ── Social Events ───────────────────────────────────
 
 export interface SocialEventCreatedPayload {
@@ -449,6 +520,11 @@ export type ManaEventType =
 	| DreamsEventType
 	| CardsEventType
 	| TimesEventType
+	| MusicEventType
+	| StorageEventType
+	| ChatEventType
+	| MemoroEventType
+	| SkilltreeEventType
 	| SocialEventsEventType
 	| BodyEventType
 	| SystemEventType;
@@ -515,6 +591,21 @@ export type ManaEvent =
 	// Times
 	| DomainEvent<'TimerStarted', TimerStartedPayload>
 	| DomainEvent<'TimerStopped', TimerStoppedPayload>
+	// Music
+	| DomainEvent<'SongAdded', SongAddedPayload>
+	| DomainEvent<'PlaylistCreated', PlaylistCreatedPayload>
+	// Storage
+	| DomainEvent<'FolderCreated', FolderCreatedPayload>
+	| DomainEvent<'FileDeleted', FileDeletedPayload>
+	// Chat
+	| DomainEvent<'ChatMessageSent', ChatMessageSentPayload>
+	| DomainEvent<'ChatConversationCreated', ChatConversationCreatedPayload>
+	// Memoro
+	| DomainEvent<'MemoCreated', MemoCreatedPayload>
+	| DomainEvent<'MemoDeleted', MemoDeletedPayload>
+	// Skilltree
+	| DomainEvent<'SkillXpAdded', SkillXpAddedPayload>
+	| DomainEvent<'SkillCreated', SkillCreatedPayload>
 	// Social Events
 	| DomainEvent<'SocialEventCreated', SocialEventCreatedPayload>
 	| DomainEvent<'SocialEventDeleted', SocialEventDeletedPayload>

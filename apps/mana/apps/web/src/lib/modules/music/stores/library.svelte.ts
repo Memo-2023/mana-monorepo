@@ -7,6 +7,7 @@
 
 import { songTable } from '../collections';
 import { encryptRecord, decryptRecord } from '$lib/data/crypto';
+import { emitDomainEvent } from '$lib/data/events';
 import { createBlock } from '$lib/data/time-blocks/service';
 import { MusicEvents } from '@mana/shared-utils/analytics';
 import type { LocalSong } from '../types';
@@ -87,5 +88,9 @@ export const libraryStore = {
 	async insert(song: LocalSong) {
 		await encryptRecord('songs', song);
 		await songTable.add(song);
+		emitDomainEvent('SongAdded', 'music', 'songs', song.id, {
+			songId: song.id,
+			title: (song.title as string) ?? '',
+		});
 	},
 };
