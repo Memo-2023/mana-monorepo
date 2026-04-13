@@ -105,14 +105,18 @@ async function markActive(streakId: string): Promise<void> {
 		// First ever activation — seed from definition
 		const def = STREAK_DEFS.find((d) => d.id === streakId);
 		if (!def) return;
-		await db.table(TABLE).add({
-			id: streakId,
-			label: def.label,
-			moduleId: def.moduleId,
-			currentStreak: 1,
-			longestStreak: 1,
-			lastActiveDate: today,
-		});
+		try {
+			await db.table(TABLE).add({
+				id: streakId,
+				label: def.label,
+				moduleId: def.moduleId,
+				currentStreak: 1,
+				longestStreak: 1,
+				lastActiveDate: today,
+			});
+		} catch {
+			// Race condition: another event already seeded this streak
+		}
 		return;
 	}
 
