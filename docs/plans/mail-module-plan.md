@@ -1,5 +1,45 @@
 # ManaMail — Module Plan
 
+## Status (2026-04-13)
+
+Phase 1 Code ist committed. Service + Frontend-Modul existieren, aber der Service läuft noch nicht in Production.
+
+### Offene Punkte — Phase 1 Betrieb
+
+- [ ] **Fritz!Box Port-Forwarding** — Ports 25, 587, 465 (TCP) → Mac Mini (192.168.178.131) für eingehende Mails
+- [ ] **Stalwart JMAP-Port verifizieren** — `http://mana-mail:8080` im Docker-Netzwerk erreichbar? Ggf. Port 8080 in `docker-compose.macmini.yml` zum Stalwart-Container hinzufügen
+- [ ] **Docker-Compose Production** — `mana-mail-service` Container zu `docker-compose.macmini.yml` hinzufügen (Port 3042, depends_on: postgres + mana-mail)
+- [ ] **Cloudflare Tunnel** — Route `mail-api.mana.how` → `http://mana-mail-service:3042` in `cloudflared-config.yml`
+- [ ] **Env-Vars Production** — `STALWART_JMAP_URL`, `STALWART_ADMIN_PASSWORD`, `MANA_MAIL_URL` in `.env.macmini` setzen
+- [ ] **DB Schema pushen** — `./scripts/setup-databases.sh mail` auf Production ausführen
+- [ ] **Frontend URL** — `PUBLIC_MANA_MAIL_URL=https://mail-api.mana.how` in Production-Env für die Mana Web App
+- [ ] **Testen** — Account-Provisioning bei User-Registrierung, Thread-Abfrage, Mail-Senden
+
+### Offene Punkte — Phase 2 KI-Features
+
+- [ ] Thread-Zusammenfassungen via `mana-llm` (summary → `mail.thread_metadata`)
+- [ ] Smart Reply — 3 KI-generierte Antwortvorschläge pro Thread
+- [ ] Auto-Kategorisierung — `important` / `newsletter` / `social` / `todo`
+- [ ] Aktions-Extraktion — Termine, Aufgaben, Rechnungen aus Mails erkennen
+- [ ] SSE-Stream `/api/v1/mail/live` für Echtzeit-Benachrichtigungen
+
+### Offene Punkte — Phase 3 Multi-Account
+
+- [ ] Gmail OAuth + Gmail API Integration
+- [ ] Outlook OAuth + Microsoft Graph Integration
+- [ ] Generisches IMAP/SMTP für andere Provider
+- [ ] Unified Inbox über alle Accounts
+
+### Offene Punkte — Phase 4 Erweitert
+
+- [ ] "Später senden" (Scheduled Send)
+- [ ] "Erinnere mich" (Snooze)
+- [ ] Mail-Templates mit Variablen
+- [ ] Mail-Regeln (Auto-Label, Auto-Forward)
+- [ ] Cross-Module-Linking: Mail → Todo, Mail → Kalender, Mail → Kontakte, Mail → Finance
+
+---
+
 ## Motivation
 
 Mana hat bereits eine vollständige Mail-Infrastruktur (Stalwart, mana-notify, DNS/DKIM/SPF), die bisher nur für Transaktionsmails genutzt wird. Ein Mail-Modul macht `@mana.how`-Adressen für jeden User möglich und schafft einen integrierten Mail-Client mit KI-Features — tief verknüpft mit Todo, Kalender, Kontakte und anderen Modulen.
