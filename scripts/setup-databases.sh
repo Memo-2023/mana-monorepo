@@ -84,6 +84,7 @@ PLATFORM_SCHEMAS=(
     "cards"
     "events"
     "news"
+    "mail"
 )
 
 # Check if specific service requested
@@ -132,9 +133,12 @@ setup_service() {
         news|news-ingester)
             push_schema "@mana/news-ingester" "news-ingester"
             ;;
+        mail|mana-mail)
+            push_schema "@mana/mail-service" "mana-mail"
+            ;;
         *)
             echo -e "${RED}Unknown service: $service${NC}"
-            echo "Available services: auth, credits, user, subscriptions, analytics, media, todo, traces, presi, uload, cards, events, news"
+            echo "Available services: auth, credits, user, subscriptions, analytics, media, todo, traces, presi, uload, cards, events, news, mail"
             exit 1
             ;;
     esac

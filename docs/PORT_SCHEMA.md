@@ -23,6 +23,7 @@
 >   collision since search runs on Mac Mini and stt runs on the GPU box)
 > - mana-crawler `3023` (same — Mac Mini, no host collision with image-gen on GPU)
 > - mana-notify `3040`
+> - mana-mail `3042`
 > - mana-sync `3050`
 > - mana-credits `3061`, mana-user `3062`, mana-subscriptions `3063`,
 >   mana-analytics `3064`, mana-events `3065`
@@ -106,7 +107,8 @@ Pure CRUD apps use mana-sync directly.
 | 3038 | nutriphi-server | Hono/Bun | Gemini meal analysis |
 | 3039 | plants-server | Hono/Bun | Gemini plant analysis |
 | 3040 | presi-server | Hono/Bun | Share links |
-| 3041-3059 | *(reserved)* | | |
+| 3042 | mana-mail | Hono/Bun | JMAP proxy to Stalwart, account provisioning |
+| 3043-3059 | *(reserved)* | | |
 
 ## 4000-4099: Misc
 
