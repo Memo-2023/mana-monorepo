@@ -2,345 +2,711 @@
 import Layout from '../layouts/Layout.astro';
 import Footer from '../components/navigation/Footer.astro';
 
-// USP categories with ratings (1-5 stars for usefulness)
-const uspCategories = [
+// Shared icon paths
+const icons = {
+	unified:
+		'M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z',
+	localFirst:
+		'M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01',
+	encryption:
+		'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z',
+	localAi:
+		'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
+	credits:
+		'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+	sync: 'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15',
+	privacy:
+		'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z',
+	modules:
+		'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10',
+	tiers: 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6',
+	i18n: 'M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129',
+	crossmodule:
+		'M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1',
+	opensource: 'M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4',
+};
+
+// ========== SIMPLE VIEW (for normal users) ==========
+const simpleUsps = [
 	{
 		id: 'unified',
-		title: 'Eine Plattform, 40+ Module',
-		subtitle: 'Alles an einem Ort',
+		title: 'Alles in einer App',
+		subtitle: 'Schluss mit App-Chaos',
 		description:
-			'Todo, Kalender, Kontakte, Notizen, Finanzen, Fitness, Musik, KI-Chat, Bildgenerierung und 30+ weitere Module — ein Login, eine Datenbank, null Kontextwechsel.',
-		icon: 'M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z',
+			'Aufgaben, Kalender, Kontakte, Notizen, Finanzen, Fitness, Musik, KI-Assistent und vieles mehr — alles in einer einzigen App. Ein Login, fertig.',
+		icon: icons.unified,
 		gradient: 'from-blue-500 to-cyan-500',
 		rating: 5,
 		details: [
-			'Kein Wechsel zwischen 10 verschiedenen Apps',
-			'Gemeinsame Daten: Kontakt direkt zur Aufgabe verknüpfen',
-			'Cross-Modul Drag & Drop',
-			'Ein Account, ein Abo, alle Features',
+			'Nie wieder zwischen 10 verschiedenen Apps wechseln',
+			'Alles teilt sich dieselben Daten — keine doppelte Eingabe',
+			'Per Drag & Drop Dinge zwischen Bereichen verschieben',
+			'Ein Account, ein Preis, alle Funktionen',
 		],
 	},
 	{
 		id: 'local-first',
-		title: 'Local-First Architektur',
-		subtitle: 'Deine Daten, dein Gerät',
+		title: 'Blitzschnell & offline nutzbar',
+		subtitle: 'Funktioniert auch ohne Internet',
 		description:
-			'Alle Daten werden zuerst lokal in deinem Browser gespeichert (IndexedDB). Die App funktioniert offline und synchronisiert im Hintergrund — du merkst keinen Unterschied.',
-		icon: 'M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01',
+			'Mana speichert alles direkt auf deinem Gerät. Die App reagiert sofort, auch im Flugzeug oder bei schlechtem Empfang. Sobald du wieder online bist, wird automatisch synchronisiert.',
+		icon: icons.localFirst,
 		gradient: 'from-emerald-500 to-teal-500',
 		rating: 5,
 		details: [
-			'Sofortige Reaktionszeiten — kein Warten auf Server',
-			'Offline-fähig: funktioniert auch ohne Internet',
-			'Field-Level Sync mit Last-Write-Wins',
-			'120+ Tabellen in einer lokalen Datenbank',
+			'Keine Ladezeiten — alles reagiert sofort',
+			'Funktioniert komplett ohne Internetverbindung',
+			'Automatische Synchronisation im Hintergrund',
+			'Deine Daten bleiben immer auf deinem Gerät',
 		],
 	},
 	{
 		id: 'encryption',
-		title: 'Ende-zu-Ende Verschlüsselung',
-		subtitle: 'AES-GCM-256 at rest',
+		title: 'Deine Daten, dein Geheimnis',
+		subtitle: 'Verschlüsselt wie ein Tresor',
 		description:
-			'Sensible Inhalte in 27 Tabellen werden mit AES-GCM-256 verschlüsselt, bevor sie IndexedDB erreichen. Optional: Zero-Knowledge-Modus, bei dem selbst wir keinen Zugriff haben.',
-		icon: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z',
+			'Deine persönlichen Inhalte werden verschlüsselt, bevor sie gespeichert werden. Optional kannst du den Zero-Knowledge-Modus aktivieren — dann kann selbst unser Team nichts lesen.',
+		icon: icons.encryption,
 		gradient: 'from-violet-500 to-purple-500',
 		rating: 5,
 		details: [
-			'Master Key via mana-auth, KEK-wrapped',
-			'Zero-Knowledge: Recovery Code lebt nur bei dir',
-			'Verschlüsselung vor dem lokalen Speichern',
-			'Web Crypto API — keine Drittanbieter-Libs',
+			'Alle sensiblen Daten werden automatisch verschlüsselt',
+			'Zero-Knowledge-Modus: Nur du hast den Schlüssel',
+			'Verschlüsselung passiert direkt auf deinem Gerät',
+			'Kein Unternehmen kann deine Daten einsehen',
 		],
 	},
 	{
 		id: 'local-ai',
-		title: 'KI direkt im Browser',
-		subtitle: 'WebGPU-beschleunigt',
+		title: 'KI ohne Cloud',
+		subtitle: 'Dein privater KI-Assistent',
 		description:
-			'Gemma 4 E2B (LLM) und Whisper (Spracherkennung) laufen komplett lokal in deinem Browser via WebGPU. Keine Daten verlassen dein Gerät für lokale KI-Features.',
-		icon: 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
+			'Mana hat einen eingebauten KI-Assistenten und Spracherkennung, die komplett auf deinem Gerät laufen. Deine Gespräche und Notizen verlassen nie deinen Computer.',
+		icon: icons.localAi,
 		gradient: 'from-pink-500 to-rose-500',
 		rating: 4,
 		details: [
-			'Transformers.js v4 mit WebGPU-Beschleunigung',
-			'Voice Memos: Transkription ohne Cloud',
-			'LLM Playground für lokale Inferenz',
-			'Kein Server-Roundtrip für KI-Grundfunktionen',
+			'KI-Chat direkt im Browser — ohne Server',
+			'Sprachnotizen werden lokal in Text umgewandelt',
+			'Deine KI-Daten verlassen nie dein Gerät',
+			'Funktioniert auch ohne Internetverbindung',
 		],
 	},
 	{
 		id: 'credits',
-		title: 'Faires Credit-System',
-		subtitle: 'Pay-per-Value statt Abo-Chaos',
+		title: 'Fair bezahlen',
+		subtitle: 'Nur zahlen was du nutzt',
 		description:
-			'1 Mana = 1 Cent. Credits regenerieren sich täglich und verfallen nie. Keine 10 Abos für 10 Tools — ein System für alles, transparent aufgeschlüsselt.',
-		icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+			'1 Mana = 1 Cent. Deine Credits laden sich jeden Tag automatisch auf und verfallen nie. Keine versteckten Kosten, keine 10 verschiedenen Abos.',
+		icon: icons.credits,
 		gradient: 'from-amber-500 to-orange-500',
 		rating: 4,
 		details: [
-			'Tägliche Regeneration bis zum Speicherlimit',
-			'Einmalige Mana-Tränke ohne Abo',
-			'10% jedes Euro gehen an Klimaschutz',
-			'Volle Kostentransparenz in Echtzeit',
+			'Credits regenerieren sich jeden Tag automatisch',
+			'Einmal kaufen, kein Abo nötig',
+			'10% fliessen in Klimaschutz',
+			'Volle Transparenz: Sieh genau, wofür du zahlst',
 		],
 	},
 	{
 		id: 'sync',
-		title: 'Echtzeit-Synchronisation',
-		subtitle: 'Alle Geräte, immer aktuell',
+		title: 'Überall synchron',
+		subtitle: 'Laptop, Handy, Tablet — immer aktuell',
 		description:
-			'Änderungen werden per Field-Level LWW über mana-sync (Go-Backend) in PostgreSQL zusammengeführt und via SSE an alle verbundenen Geräte verteilt.',
-		icon: 'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15',
+			'Ändere etwas auf dem Laptop und es erscheint sofort auf dem Handy. Mana hält alle deine Geräte automatisch auf dem gleichen Stand.',
+		icon: icons.sync,
 		gradient: 'from-cyan-500 to-blue-500',
 		rating: 4,
 		details: [
-			'Debounced Sync (1 Sekunde) im Hintergrund',
-			'Nur geänderte Felder werden übertragen',
-			'Row-Level Security in PostgreSQL',
-			'SSE-basierte Push-Updates',
+			'Änderungen erscheinen in Echtzeit auf allen Geräten',
+			'Nur das Nötigste wird übertragen — spart Datenvolumen',
+			'Konflikte werden automatisch intelligent gelöst',
+			'Funktioniert auch wenn ein Gerät mal offline war',
 		],
 	},
 	{
 		id: 'privacy',
-		title: 'Datenschutz by Design',
-		subtitle: 'DSGVO-konform, Made in Germany',
+		title: 'Datenschutz ohne Kompromisse',
+		subtitle: 'Kein Tracking, keine Werbung',
 		description:
-			'Umami statt Google Analytics. Eigene Server. Keine Weitergabe an Dritte. Self-Hosted Infrastruktur auf eigenem Mac Mini mit Cloudflare Tunnel.',
-		icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z',
+			'Mana trackt dich nicht, verkauft keine Daten und zeigt keine Werbung. Unsere Server stehen in Deutschland, und wir erfüllen die strengsten Datenschutz-Standards.',
+		icon: icons.privacy,
 		gradient: 'from-green-500 to-emerald-500',
 		rating: 5,
 		details: [
-			'Privacy-first Analytics (Umami)',
-			'Keine Tracking-Cookies, keine Ads',
-			'Self-Hosted Infrastruktur',
+			'Keine Tracking-Cookies, keine Werbung, nie',
+			'Server in Deutschland, DSGVO-konform',
+			'Datenschutz-freundliche Statistiken statt Google Analytics',
 			'Transparente Datenschutz-Dokumentation',
 		],
 	},
 	{
 		id: 'modules',
-		title: 'Modulares Ökosystem',
-		subtitle: 'Nutze was du brauchst',
+		title: 'Nur das, was du brauchst',
+		subtitle: 'Dein persönlicher Werkzeugkasten',
 		description:
-			'Jedes Modul ist eigenständig, aber nahtlos integriert. Produktivität, Kreativität, Wellness, Finanzen, KI — aktiviere nur das, was für dich relevant ist.',
-		icon: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10',
+			'Wähle aus über 40 Modulen genau die aus, die zu deinem Leben passen. Von Aufgaben über Fitness bis Musik — du bestimmst, was auf deinem Dashboard erscheint.',
+		icon: icons.modules,
 		gradient: 'from-indigo-500 to-blue-500',
 		rating: 4,
 		details: [
-			'7 Kategorien: Produktivität, KI, Wissen, Tracking, Wellness, Finanzen, Unterhaltung',
-			'Jedes Modul: Collections, Queries, Stores',
-			'Gemeinsame Datenbank, isolierte Logik',
-			'Tier-basierter Zugang (Guest → Founder)',
+			'Produktivität, Kreativität, Gesundheit, Finanzen & mehr',
+			'Jedes Modul funktioniert eigenständig und zusammen',
+			'Personalisier dein Dashboard nach deinen Wünschen',
+			'Neue Module werden regelmässig hinzugefügt',
 		],
 	},
 	{
 		id: 'tiers',
-		title: 'Offene Zugangsstufen',
-		subtitle: 'Kein Paywall auf Kernfunktionen',
+		title: 'Kostenlos starten',
+		subtitle: 'Kernfunktionen ohne Bezahlschranke',
 		description:
-			'Todo, Kalender, Kontakte und weitere Kernmodule sind frei nutzbar. Beta- und Alpha-Features sind für Early Adopter und Unterstützer zugänglich.',
-		icon: 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6',
+			'Die wichtigsten Module wie Aufgaben, Kalender und Kontakte sind kostenlos nutzbar. Neue Features probierst du als Early Adopter zuerst aus.',
+		icon: icons.tiers,
 		gradient: 'from-yellow-500 to-amber-500',
 		rating: 3,
 		details: [
-			'Guest: Kernmodule kostenlos',
-			'Beta/Alpha: Early-Access zu neuen Features',
-			'Founder: Alle Features + Priority Support',
+			'Kernmodule dauerhaft kostenlos',
+			'Neue Features früher testen als Early Adopter',
 			'Upgrade jederzeit, Downgrade jederzeit',
+			'Keine Vertragsbindung, keine Tricks',
 		],
 	},
 	{
 		id: 'i18n',
 		title: 'Mehrsprachig',
-		subtitle: 'Deutsch, Englisch, Italienisch & mehr',
+		subtitle: 'Nutze Mana in deiner Sprache',
 		description:
-			'Die Plattform und Landing Page sind mehrsprachig angelegt. Deutsch ist die Hauptsprache, Englisch und Italienisch sind verfügbar, weitere folgen.',
-		icon: 'M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129',
+			'Mana spricht Deutsch, Englisch und Italienisch — weitere Sprachen folgen. Die App erkennt deine Sprache automatisch.',
+		icon: icons.i18n,
 		gradient: 'from-teal-500 to-cyan-500',
 		rating: 3,
 		details: [
-			'i18n-Config mit automatischer Spracherkennung',
-			'Alle UI-Strings über Translation Keys',
-			'URL-basiertes Routing (/de/, /en/, /it/)',
-			'Content Collections mit Übersetzungen',
+			'Automatische Spracherkennung',
+			'Aktuell: Deutsch, Englisch, Italienisch',
+			'Weitere Sprachen in Planung',
+			'Auch die Hilfe-Seiten sind übersetzt',
 		],
 	},
 	{
 		id: 'crossmodule',
-		title: 'Cross-Modul Verknüpfungen',
-		subtitle: 'Alles verbunden',
+		title: 'Alles ist verbunden',
+		subtitle: 'Module arbeiten zusammen',
 		description:
-			'Ziehe einen Kontakt auf eine Aufgabe, verknüpfe ein Event mit einem Rezept, oder erstelle aus einer Sprachnotiz automatisch Aufgaben. Module sprechen miteinander.',
-		icon: 'M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1',
+			'Verknüpfe einen Kontakt mit einer Aufgabe, erstelle aus einer Sprachnotiz automatisch To-Dos, oder plane ein Event direkt aus deinem Rezeptbuch. Alles greift ineinander.',
+		icon: icons.crossmodule,
 		gradient: 'from-rose-500 to-pink-500',
 		rating: 4,
 		details: [
-			'Drag & Drop zwischen Modulen',
-			'Entity-Referenzen über gemeinsame IDs',
-			'Dashboard-Widgets aus allen Modulen',
-			'Einheitliche Suche über alle Daten',
+			'Per Drag & Drop Dinge zwischen Modulen verbinden',
+			'Dashboard-Widgets aus allen Bereichen kombinieren',
+			'Universelle Suche findet alles an einem Ort',
+			'Intelligente Vorschläge basierend auf deinen Daten',
 		],
 	},
 	{
 		id: 'opensource',
-		title: 'Transparente Entwicklung',
-		subtitle: 'Devlog, Blueprints, Release Plan',
+		title: 'Offen & transparent',
+		subtitle: 'Du siehst, was wir bauen',
 		description:
-			'Wir entwickeln offen: Der Devlog dokumentiert jede Änderung, Blueprints zeigen die Architektur, und der Release Plan zeigt, was kommt.',
-		icon: 'M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4',
+			'Unser Entwicklungs-Tagebuch ist öffentlich. Du siehst jede Änderung, jeden Plan, und kannst aktiv mitgestalten, welche Features als nächstes kommen.',
+		icon: icons.opensource,
 		gradient: 'from-gray-400 to-slate-500',
 		rating: 3,
 		details: [
-			'Öffentlicher Devlog mit Commit-Statistiken',
-			'Architektur-Blueprints einsehbar',
-			'Release-Plan mit Roadmap',
-			'Community-Feedback fließt direkt ein',
+			'Öffentliches Entwicklungstagebuch (Devlog)',
+			'Roadmap zeigt, was als nächstes kommt',
+			'Dein Feedback beeinflusst die Entwicklung direkt',
+			'Architektur-Dokumente sind einsehbar',
 		],
 	},
 ];
 
-// Rating breakdown summary
-const ratingGroups = [
+// ========== TECH VIEW (for developers/technical users) ==========
+const techUsps = [
+	{
+		id: 'unified',
+		title: 'Unified SvelteKit Monolith',
+		subtitle: 'Ein Build, eine DB, ein Auth-Token',
+		description:
+			'40+ Module unter einer SvelteKit 2 + Svelte 5 (Runes) App. Ein Dexie.js IndexedDB, ein EdDSA JWT Auth-Token, Deployment auf Cloudflare Pages. Turborepo-Monorepo mit pnpm Workspaces.',
+		icon: icons.unified,
+		gradient: 'from-blue-500 to-cyan-500',
+		rating: 5,
+		details: [
+			'SvelteKit 2, Svelte 5 Runes, TailwindCSS, Vite',
+			'120+ Dexie Collections in einer IndexedDB ("mana")',
+			'Cross-Modul Entity Drag & Drop via App Registry',
+			'Turborepo Orchestrierung, pnpm 9.15 Workspaces',
+		],
+	},
+	{
+		id: 'local-first',
+		title: 'Local-First mit Dexie.js',
+		subtitle: 'IndexedDB + Field-Level LWW Sync',
+		description:
+			'Alle Reads/Writes gehen direkt an IndexedDB via Dexie.js. Dexie-Hooks stampen userId und __fieldTimestamps, tracken _pendingChanges mit appId-Tag. Debounced Sync (1s) POST an mana-sync.',
+		icon: icons.localFirst,
+		gradient: 'from-emerald-500 to-teal-500',
+		rating: 5,
+		details: [
+			'Dexie.js liveQuery Hooks fur reaktive UI via $derived',
+			'Field-Level Last-Write-Wins Merge in mana-sync (Go)',
+			'120+ Tabellen, _pendingChanges + _activity Audit-Log',
+			'Offline-Queue mit automatischem Retry + Backoff',
+		],
+	},
+	{
+		id: 'encryption',
+		title: 'AES-GCM-256 At-Rest Encryption',
+		subtitle: 'Web Crypto API, KEK-wrapped Master Key',
+		description:
+			'27 sensitive Tabellen werden mit AES-GCM-256 vor dem IndexedDB-Write verschlüsselt. Master Key aus mana-auth ist KEK-wrapped (MANA_AUTH_KEK env). Explizites encryptRecord()/decryptRecords() per Store — kein Auto-Hook (Web Crypto ist async).',
+		icon: icons.encryption,
+		gradient: 'from-violet-500 to-purple-500',
+		rating: 5,
+		details: [
+			'Web Crypto API nativ — keine Drittanbieter-Crypto-Libs',
+			'Zero-Knowledge: Recovery Code only, Server sieht nichts',
+			'Crypto Registry in crypto/registry.ts mit Field-Allowlist',
+			'encrypt vor table.add(), decrypt nach Dexie Query, vor Type Converter',
+		],
+	},
+	{
+		id: 'local-ai',
+		title: 'Browser-Local AI (WebGPU)',
+		subtitle: 'Transformers.js v4 + Gemma 4 E2B + Whisper',
+		description:
+			'@mana/local-llm: Gemma 4 E2B via Transformers.js v4, WebGPU-beschleunigt. @mana/local-stt: Whisper-basierte Spracherkennung. Kein Server-Roundtrip, CSP-safe, volle In-Browser Inferenz.',
+		icon: icons.localAi,
+		gradient: 'from-pink-500 to-rose-500',
+		rating: 4,
+		details: [
+			'Transformers.js v4 mit WebGPU Compute Shaders',
+			'@mana/local-llm: Gemma 4 E2B, ~2B Parameter im Browser',
+			'@mana/local-stt: Whisper für Memoro Voice-Transkription',
+			'CSP-konfig nötig (worker-src, wasm-unsafe-eval)',
+		],
+	},
+	{
+		id: 'credits',
+		title: 'Mana Credit System',
+		subtitle: '1 Mana = 1 Cent, Daily Regeneration',
+		description:
+			'Credit-basiertes Billing via mana-credits Service. Tägliche Regeneration bis zum Speicherlimit, One-Time Mana-Tränke, transparente Cost-Breakdown. JWT tier Claim gated den Zugang.',
+		icon: icons.credits,
+		gradient: 'from-amber-500 to-orange-500',
+		rating: 4,
+		details: [
+			'mana-credits Service mit REST API',
+			'Tier-Gating via JWT tier Claim + AuthGate Client-Side',
+			'Regeneration-Cap, Overflow-Protection, Audit Trail',
+			'10% Revenue -> Klimaschutz (transparente Aufschlüsselung)',
+		],
+	},
+	{
+		id: 'sync',
+		title: 'mana-sync (Go) + SSE',
+		subtitle: 'Field-Level LWW, PostgreSQL + RLS',
+		description:
+			'Sync-Engine in Go (Port 3050). Debounced 1s, gruppiert _pendingChanges nach appId, POST an mana-sync. Field-Level LWW Merge in PostgreSQL (mana_sync Schema) mit Row-Level Security. SSE Push an verbundene Clients.',
+		icon: icons.sync,
+		gradient: 'from-cyan-500 to-blue-500',
+		rating: 4,
+		details: [
+			'Go-Backend auf Port 3050, PostgreSQL mana_sync Schema',
+			'Field-Level LWW: Nur geänderte Felder mergen',
+			'Row-Level Security (RLS) für Multi-Tenant Isolation',
+			'SSE-basierter Push + Polling Fallback',
+		],
+	},
+	{
+		id: 'privacy',
+		title: 'Self-Hosted, DSGVO, Umami',
+		subtitle: 'Mac Mini + Cloudflare Tunnel, kein Third-Party Tracking',
+		description:
+			'Eigene Infrastruktur auf Mac Mini (Production) via Cloudflare Tunnel. GPU-Server (RTX 3090, LAN) für STT/TTS/Image-Gen. Umami statt Google Analytics. Keine Cookies, keine Ad-Networks.',
+		icon: icons.privacy,
+		gradient: 'from-green-500 to-emerald-500',
+		rating: 5,
+		details: [
+			'Mac Mini Production via ssh mana-server (Cloudflare Tunnel)',
+			'GPU-Server: Windows, RTX 3090, 192.168.178.11 (LAN)',
+			'Umami Analytics (self-hosted auf stats.mana.how)',
+			'MinIO S3-compatible Object Storage (self-hosted)',
+		],
+	},
+	{
+		id: 'modules',
+		title: 'Module Pattern Architecture',
+		subtitle: 'collections.ts + queries.ts + stores/*.svelte.ts',
+		description:
+			'Jedes Modul unter apps/web/src/lib/modules/{name}/. Drei Dateien: collections.ts (Dexie Tables + Seeds), queries.ts (liveQuery Hooks + Type Converter), stores/*.svelte.ts (Mutations mit explizitem encrypt/decrypt).',
+		icon: icons.modules,
+		gradient: 'from-indigo-500 to-blue-500',
+		rating: 4,
+		details: [
+			'collections.ts: Dexie Table Refs, Schema, Seed Data',
+			'queries.ts: useLiveQueryWithDefault(), decryptRecords(), toEntity()',
+			'stores/*.svelte.ts: Mutations, encryptRecord() vor write',
+			'module.config.ts: App Registry Registration, Tier-Gating',
+		],
+	},
+	{
+		id: 'tiers',
+		title: 'Access Tier System',
+		subtitle: 'guest < public < beta < alpha < founder',
+		description:
+			'5-stufiges Tier-System. requiredTier in MANA_APPS Registry (shared-branding), JWT tier Claim, AuthGate Client-Side Enforcement. Admin API: PUT /api/v1/admin/users/:id/tier.',
+		icon: icons.tiers,
+		gradient: 'from-yellow-500 to-amber-500',
+		rating: 3,
+		details: [
+			'MANA_APPS Registry mit requiredTier pro Modul',
+			'JWT Claim: { sub, email, role, sid, tier, exp, iss, aud }',
+			'AuthGate Svelte Component enforcet Tier Client-Side',
+			'Admin API Endpoint fur Tier-Management',
+		],
+	},
+	{
+		id: 'i18n',
+		title: 'i18n mit Astro + SvelteKit',
+		subtitle: 'URL-Routing, Content Collections, Translation Keys',
+		description:
+			'Landing: Astro i18n mit URL-Prefix Routing (/de/, /en/, /it/). Web App: SvelteKit i18n mit Translation Keys. Content Collections unterstützen Übersetzungen per Locale-Ordner.',
+		icon: icons.i18n,
+		gradient: 'from-teal-500 to-cyan-500',
+		rating: 3,
+		details: [
+			'Astro i18n Config: defaultLang "de", 5 Sprachen',
+			'getLangFromUrl() + useTranslations(lang) Pattern',
+			'URL-basiertes Routing: /de/path, /en/path, /it/path',
+			'Content Collections mit per-locale Translation Files',
+		],
+	},
+	{
+		id: 'crossmodule',
+		title: 'Cross-Module Entity System',
+		subtitle: 'App Registry, DnD, Shared Collections',
+		description:
+			'App Registry (apps.ts) deklariert entityCapabilities, viewConfigs und DnD-Targets pro Modul. Shared Dexie DB erlaubt Cross-Referenzen über gemeinsame UUIDs. Dashboard Widget-Grid aus allen Modulen.',
+		icon: icons.crossmodule,
+		gradient: 'from-rose-500 to-pink-500',
+		rating: 4,
+		details: [
+			'App Registry mit Entity Capabilities + View Configs',
+			'Drag & Drop: entityCapabilities.dragTargets pro Modul',
+			'UUID-basierte Cross-Referenzen über Module hinweg',
+			'Dashboard Widget-Grid mit Modul-spezifischen Widgets',
+		],
+	},
+	{
+		id: 'opensource',
+		title: 'Public Devlog & Blueprints',
+		subtitle: 'Astro Content Collections, Release Pipeline',
+		description:
+			'Devlog als Astro Content Collection mit Frontmatter (date, category, commits, readTime). Blueprints dokumentieren Architektur-Entscheidungen. CI: GitHub Actions, CD: Mac Mini self-hosted Runner.',
+		icon: icons.opensource,
+		gradient: 'from-gray-400 to-slate-500',
+		rating: 3,
+		details: [
+			'Devlog: Astro Content Collection + Frontmatter Schema',
+			'CI: GitHub Actions (svelte-check, build, test)',
+			'CD: Self-hosted Mac Mini Runner, Docker Compose',
+			'Monitoring: Grafana, GlitchTip, Umami (self-hosted)',
+		],
+	},
+];
+
+// Rating breakdown for simple view
+const simpleRatingGroups = [
 	{
 		stars: 5,
-		label: 'Herausragend',
+		label: 'Unser Herzstück',
 		color: 'text-emerald-400',
-		bg: 'bg-emerald-500/20',
-		items: uspCategories.filter((u) => u.rating === 5),
+		items: simpleUsps.filter((u) => u.rating === 5),
 	},
 	{
 		stars: 4,
-		label: 'Sehr nützlich',
+		label: 'Richtig stark',
 		color: 'text-blue-400',
-		bg: 'bg-blue-500/20',
-		items: uspCategories.filter((u) => u.rating === 4),
+		items: simpleUsps.filter((u) => u.rating === 4),
 	},
 	{
 		stars: 3,
-		label: 'Nützlich',
+		label: 'Solides Extra',
 		color: 'text-amber-400',
-		bg: 'bg-amber-500/20',
-		items: uspCategories.filter((u) => u.rating === 3),
+		items: simpleUsps.filter((u) => u.rating === 3),
+	},
+];
+
+const techRatingGroups = [
+	{
+		stars: 5,
+		label: 'Core Architecture',
+		color: 'text-emerald-400',
+		items: techUsps.filter((u) => u.rating === 5),
+	},
+	{
+		stars: 4,
+		label: 'Key Systems',
+		color: 'text-blue-400',
+		items: techUsps.filter((u) => u.rating === 4),
+	},
+	{
+		stars: 3,
+		label: 'Supporting',
+		color: 'text-amber-400',
+		items: techUsps.filter((u) => u.rating === 3),
 	},
 ];
 ---
 
-<Layout title="Mana Features - Alle Vorteile der unified Plattform">
+<Layout title="Mana Features - Was Mana besonders macht">
 	<div class="page-wrapper">
 		<section class="hero-section">
 			<div class="hero-glow"></div>
 			<div class="hero-content">
-				<div class="hero-badge">12 USPs, die den Unterschied machen</div>
+				<div class="hero-badge">12 Gründe für Mana</div>
 				<h1 class="hero-title">
 					Was Mana <span class="gradient-text">besonders macht</span>
 				</h1>
-				<p class="hero-subtitle">
-					Eine ehrliche Übersicht aller Alleinstellungsmerkmale — mit Bewertung, wie nützlich jedes
-					Feature im Alltag wirklich ist.
+				<p class="hero-subtitle" id="hero-subtitle-simple">
+					Alle Vorteile auf einen Blick — ehrlich bewertet, verständlich erklärt.
 				</p>
-			</div>
-		</section>
+				<p class="hero-subtitle hidden" id="hero-subtitle-tech">
+					Architektur, Stack und technische Entscheidungen — im Detail.
+				</p>
 
-		<section class="summary-section">
-			<div class="summary-container">
-				<h2 class="summary-title">Bewertungsübersicht</h2>
-				<div class="summary-grid">
-					{
-						ratingGroups.map((group) => (
-							<div class="summary-card">
-								<div class="summary-stars">
-									{Array.from({ length: 5 }).map((_, i) => (
-										<svg
-											class={`summary-star ${i < group.stars ? group.color : 'text-gray-600'}`}
-											fill="currentColor"
-											viewBox="0 0 20 20"
-										>
-											<path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-										</svg>
-									))}
-								</div>
-								<span class={`summary-label ${group.color}`}>{group.label}</span>
-								<div class="summary-items">
-									{group.items.map((item) => (
-										<a href={`#${item.id}`} class="summary-tag">
-											{item.title.split(',')[0]}
-										</a>
-									))}
-								</div>
-							</div>
-						))
-					}
+				<div class="mode-toggle">
+					<button class="toggle-btn active" id="btn-simple" type="button">
+						<svg class="toggle-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+							></path>
+						</svg>
+						Für alle
+					</button>
+					<button class="toggle-btn" id="btn-tech" type="button">
+						<svg class="toggle-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
+						</svg>
+						Technik
+					</button>
 				</div>
 			</div>
 		</section>
 
-		<section class="usps-section">
-			<div class="usps-container">
-				{
-					uspCategories.map((usp, index) => (
-						<article id={usp.id} class="usp-card">
-							<div class="usp-card-inner">
-								<div class="usp-visual">
-									<span class="usp-number">{String(index + 1).padStart(2, '0')}</span>
-									<div class={`usp-icon-ring bg-gradient-to-br ${usp.gradient}`}>
-										<svg class="usp-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-											<path
-												stroke-linecap="round"
-												stroke-linejoin="round"
-												stroke-width="1.5"
-												d={usp.icon}
-											/>
-										</svg>
-									</div>
-								</div>
-								<div class="usp-content">
-									<div class="usp-header">
-										<div>
-											<span class="usp-subtitle">{usp.subtitle}</span>
-											<h3 class="usp-title">{usp.title}</h3>
-										</div>
-										<div class="usp-rating" title={`${usp.rating} von 5 Sternen`}>
-											{Array.from({ length: 5 }).map((_, i) => (
-												<svg
-													class={`usp-star ${i < usp.rating ? 'star-filled' : 'star-empty'}`}
-													fill="currentColor"
-													viewBox="0 0 20 20"
-												>
-													<path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-												</svg>
-											))}
-											<span class="usp-rating-label">
-												{usp.rating === 5
-													? 'Herausragend'
-													: usp.rating === 4
-														? 'Sehr nützlich'
-														: 'Nützlich'}
-											</span>
-										</div>
-									</div>
-
-									<p class="usp-description">{usp.description}</p>
-
-									<ul class="usp-details">
-										{usp.details.map((detail) => (
-											<li class="usp-detail">
-												<svg class="usp-check" viewBox="0 0 20 20" fill="currentColor">
-													<path
-														fill-rule="evenodd"
-														d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-														clip-rule="evenodd"
-													/>
-												</svg>
-												<span>{detail}</span>
-											</li>
+		<div id="view-simple">
+			<section class="summary-section">
+				<div class="summary-container">
+					<h2 class="summary-title">Auf einen Blick</h2>
+					<div class="summary-grid">
+						{
+							simpleRatingGroups.map((group) => (
+								<div class="summary-card">
+									<div class="summary-stars">
+										{Array.from({ length: 5 }).map((_, i) => (
+											<svg
+												class={`summary-star ${i < group.stars ? group.color : 'text-gray-600'}`}
+												fill="currentColor"
+												viewBox="0 0 20 20"
+											>
+												<path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+											</svg>
 										))}
-									</ul>
+									</div>
+									<span class={`summary-label ${group.color}`}>{group.label}</span>
+									<div class="summary-items">
+										{group.items.map((item) => (
+											<a href={`#s-${item.id}`} class="summary-tag">
+												{item.title}
+											</a>
+										))}
+									</div>
 								</div>
-							</div>
-						</article>
-					))
-				}
-			</div>
-		</section>
+							))
+						}
+					</div>
+				</div>
+			</section>
+
+			<section class="usps-section">
+				<div class="usps-container">
+					{
+						simpleUsps.map((usp, index) => (
+							<article id={`s-${usp.id}`} class="usp-card">
+								<div class="usp-card-inner">
+									<div class="usp-visual">
+										<span class="usp-number">{String(index + 1).padStart(2, '0')}</span>
+										<div class={`usp-icon-ring bg-gradient-to-br ${usp.gradient}`}>
+											<svg class="usp-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="1.5"
+													d={usp.icon}
+												/>
+											</svg>
+										</div>
+									</div>
+									<div class="usp-content">
+										<div class="usp-header">
+											<div>
+												<span class="usp-subtitle">{usp.subtitle}</span>
+												<h3 class="usp-title">{usp.title}</h3>
+											</div>
+											<div class="usp-rating" title={`${usp.rating} von 5`}>
+												{Array.from({ length: 5 }).map((_, i) => (
+													<svg
+														class={`usp-star ${i < usp.rating ? 'star-filled' : 'star-empty'}`}
+														fill="currentColor"
+														viewBox="0 0 20 20"
+													>
+														<path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+													</svg>
+												))}
+											</div>
+										</div>
+										<p class="usp-description">{usp.description}</p>
+										<ul class="usp-details">
+											{usp.details.map((detail) => (
+												<li class="usp-detail">
+													<svg class="usp-check" viewBox="0 0 20 20" fill="currentColor">
+														<path
+															fill-rule="evenodd"
+															d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+															clip-rule="evenodd"
+														/>
+													</svg>
+													<span>{detail}</span>
+												</li>
+											))}
+										</ul>
+									</div>
+								</div>
+							</article>
+						))
+					}
+				</div>
+			</section>
+		</div>
+
+		<div id="view-tech" class="hidden">
+			<section class="summary-section">
+				<div class="summary-container">
+					<h2 class="summary-title">Architecture Overview</h2>
+					<div class="tech-stack-bar">
+						<span class="tech-tag">SvelteKit 2</span>
+						<span class="tech-tag">Svelte 5 Runes</span>
+						<span class="tech-tag">Dexie.js</span>
+						<span class="tech-tag">Hono/Bun</span>
+						<span class="tech-tag">Go (Sync)</span>
+						<span class="tech-tag">PostgreSQL</span>
+						<span class="tech-tag">Web Crypto</span>
+						<span class="tech-tag">WebGPU</span>
+						<span class="tech-tag">Transformers.js</span>
+						<span class="tech-tag">MinIO</span>
+						<span class="tech-tag">Turborepo</span>
+						<span class="tech-tag">Cloudflare Pages</span>
+					</div>
+					<div class="summary-grid">
+						{
+							techRatingGroups.map((group) => (
+								<div class="summary-card">
+									<div class="summary-stars">
+										{Array.from({ length: 5 }).map((_, i) => (
+											<svg
+												class={`summary-star ${i < group.stars ? group.color : 'text-gray-600'}`}
+												fill="currentColor"
+												viewBox="0 0 20 20"
+											>
+												<path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+											</svg>
+										))}
+									</div>
+									<span class={`summary-label ${group.color}`}>{group.label}</span>
+									<div class="summary-items">
+										{group.items.map((item) => (
+											<a href={`#t-${item.id}`} class="summary-tag">
+												{item.title.split(' ').slice(0, 3).join(' ')}
+											</a>
+										))}
+									</div>
+								</div>
+							))
+						}
+					</div>
+				</div>
+			</section>
+
+			<section class="usps-section">
+				<div class="usps-container">
+					{
+						techUsps.map((usp, index) => (
+							<article id={`t-${usp.id}`} class="usp-card usp-card-tech">
+								<div class="usp-card-inner">
+									<div class="usp-visual">
+										<span class="usp-number">{String(index + 1).padStart(2, '0')}</span>
+										<div class={`usp-icon-ring bg-gradient-to-br ${usp.gradient}`}>
+											<svg class="usp-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="1.5"
+													d={usp.icon}
+												/>
+											</svg>
+										</div>
+									</div>
+									<div class="usp-content">
+										<div class="usp-header">
+											<div>
+												<span class="usp-subtitle usp-subtitle-mono">{usp.subtitle}</span>
+												<h3 class="usp-title">{usp.title}</h3>
+											</div>
+											<div class="usp-rating" title={`${usp.rating} von 5`}>
+												{Array.from({ length: 5 }).map((_, i) => (
+													<svg
+														class={`usp-star ${i < usp.rating ? 'star-filled' : 'star-empty'}`}
+														fill="currentColor"
+														viewBox="0 0 20 20"
+													>
+														<path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+													</svg>
+												))}
+											</div>
+										</div>
+										<p class="usp-description usp-description-tech">{usp.description}</p>
+										<ul class="usp-details">
+											{usp.details.map((detail) => (
+												<li class="usp-detail usp-detail-mono">
+													<svg class="usp-check" viewBox="0 0 20 20" fill="currentColor">
+														<path
+															fill-rule="evenodd"
+															d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+															clip-rule="evenodd"
+														/>
+													</svg>
+													<span>{detail}</span>
+												</li>
+											))}
+										</ul>
+									</div>
+								</div>
+							</article>
+						))
+					}
+				</div>
+			</section>
+		</div>
 
 		<section class="comparison-section">
 			<div class="comparison-container">
@@ -400,9 +766,9 @@ const ratingGroups = [
 						<div class="comparison-mana-features">
 							<div class="comparison-mana-item">40+ Module inklusive</div>
 							<div class="comparison-mana-item">Ende-zu-Ende verschlüsselt</div>
-							<div class="comparison-mana-item">Lokale KI ohne Cloud</div>
-							<div class="comparison-mana-item">Offline-fähig</div>
-							<div class="comparison-mana-item">Cross-Modul Verknüpfungen</div>
+							<div class="comparison-mana-item">KI ohne Cloud-Abhängigkeit</div>
+							<div class="comparison-mana-item">Offline nutzbar</div>
+							<div class="comparison-mana-item">Alles miteinander verknüpft</div>
 							<div class="comparison-mana-item">Keine Datenweitergabe</div>
 							<div class="comparison-mana-item">DSGVO-konform</div>
 							<div class="comparison-mana-item">Tägliche Credit-Regeneration</div>
@@ -421,8 +787,8 @@ const ratingGroups = [
 			<div class="cta-content">
 				<h2 class="cta-title">Bereit, alles an einem Ort zu haben?</h2>
 				<p class="cta-text">
-					Starte kostenlos und entdecke, wie sich 40+ Module in einer verschlüsselten, lokalen
-					Plattform anfühlen.
+					Starte kostenlos und entdecke, wie sich 40+ Module in einer sicheren, schnellen Plattform
+					anfühlen.
 				</p>
 				<div class="cta-buttons">
 					<a href="https://mana.how" class="cta-primary">Jetzt starten</a>
@@ -446,10 +812,14 @@ const ratingGroups = [
 		color: #e2e8f0;
 	}
 
+	.hidden {
+		display: none !important;
+	}
+
 	/* ==================== Hero ==================== */
 	.hero-section {
 		position: relative;
-		padding: calc(var(--grid-unit) * 5) calc(var(--grid-unit) * 2) calc(var(--grid-unit) * 3);
+		padding: calc(var(--grid-unit) * 5) calc(var(--grid-unit) * 2) calc(var(--grid-unit) * 2);
 		text-align: center;
 		overflow: hidden;
 	}
@@ -504,6 +874,70 @@ const ratingGroups = [
 		line-height: 1.7;
 		max-width: 700px;
 		margin: 0 auto;
+	}
+
+	/* ==================== Mode Toggle ==================== */
+	.mode-toggle {
+		display: inline-flex;
+		margin-top: calc(var(--grid-unit) * 1);
+		background: rgba(255, 255, 255, 0.03);
+		backdrop-filter: blur(10px);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		border-radius: 14px;
+		padding: 5px;
+		gap: 4px;
+	}
+
+	.toggle-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		padding: 12px 24px;
+		border: none;
+		background: transparent;
+		color: #94a3b8;
+		font-size: 0.9375rem;
+		font-weight: 600;
+		border-radius: 10px;
+		cursor: pointer;
+		transition: all 0.3s ease;
+		font-family: inherit;
+	}
+
+	.toggle-btn:hover {
+		color: #cbd5e1;
+	}
+
+	.toggle-btn.active {
+		background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+		color: white;
+		box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+	}
+
+	.toggle-icon {
+		width: 18px;
+		height: 18px;
+	}
+
+	/* ==================== Tech Stack Bar ==================== */
+	.tech-stack-bar {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+		justify-content: center;
+		margin-bottom: calc(var(--grid-unit) * 1);
+	}
+
+	.tech-tag {
+		display: inline-block;
+		padding: 4px 12px;
+		border-radius: 6px;
+		background: rgba(59, 130, 246, 0.1);
+		border: 1px solid rgba(59, 130, 246, 0.2);
+		font-size: 0.75rem;
+		font-weight: 600;
+		color: #60a5fa;
+		font-family: 'SF Mono', 'Fira Code', monospace;
 	}
 
 	/* ==================== Rating Summary ==================== */
@@ -610,6 +1044,10 @@ const ratingGroups = [
 		transform: translateY(-2px);
 	}
 
+	.usp-card-tech {
+		border-color: rgba(59, 130, 246, 0.1);
+	}
+
 	.usp-card-inner {
 		display: grid;
 		grid-template-columns: 120px 1fr;
@@ -668,6 +1106,12 @@ const ratingGroups = [
 		margin-bottom: 4px;
 	}
 
+	.usp-subtitle-mono {
+		font-family: 'SF Mono', 'Fira Code', monospace;
+		font-size: 0.75rem;
+		color: #60a5fa;
+	}
+
 	.usp-title {
 		font-size: 1.5rem;
 		font-weight: 700;
@@ -695,18 +1139,16 @@ const ratingGroups = [
 		color: #374151;
 	}
 
-	.usp-rating-label {
-		font-size: 0.75rem;
-		color: #94a3b8;
-		margin-left: 6px;
-		white-space: nowrap;
-	}
-
 	.usp-description {
 		font-size: 1rem;
 		color: #94a3b8;
 		line-height: 1.7;
 		margin-bottom: 16px;
+	}
+
+	.usp-description-tech {
+		font-size: 0.9375rem;
+		line-height: 1.6;
 	}
 
 	.usp-details {
@@ -725,6 +1167,12 @@ const ratingGroups = [
 		font-size: 0.875rem;
 		color: #cbd5e1;
 		line-height: 1.4;
+	}
+
+	.usp-detail-mono {
+		font-family: 'SF Mono', 'Fira Code', monospace;
+		font-size: 0.8125rem;
+		color: #94a3b8;
 	}
 
 	.usp-check {
@@ -981,7 +1429,7 @@ const ratingGroups = [
 
 	@media (max-width: 768px) {
 		.hero-section {
-			padding: calc(var(--grid-unit) * 4) calc(var(--grid-unit) * 1) calc(var(--grid-unit) * 2);
+			padding: calc(var(--grid-unit) * 4) calc(var(--grid-unit) * 1) calc(var(--grid-unit) * 1.5);
 		}
 
 		.summary-grid {
@@ -1026,5 +1474,58 @@ const ratingGroups = [
 			padding-left: calc(var(--grid-unit) * 0.5);
 			padding-right: calc(var(--grid-unit) * 0.5);
 		}
+
+		.toggle-btn {
+			padding: 10px 16px;
+			font-size: 0.875rem;
+		}
+
+		.tech-stack-bar {
+			gap: 6px;
+		}
+
+		.tech-tag {
+			font-size: 0.6875rem;
+			padding: 3px 8px;
+		}
 	}
 </style>
+
+<script>
+	document.addEventListener('DOMContentLoaded', () => {
+		const btnSimple = document.getElementById('btn-simple');
+		const btnTech = document.getElementById('btn-tech');
+		const viewSimple = document.getElementById('view-simple');
+		const viewTech = document.getElementById('view-tech');
+		const subtitleSimple = document.getElementById('hero-subtitle-simple');
+		const subtitleTech = document.getElementById('hero-subtitle-tech');
+
+		function setMode(mode: 'simple' | 'tech') {
+			if (mode === 'simple') {
+				btnSimple?.classList.add('active');
+				btnTech?.classList.remove('active');
+				viewSimple?.classList.remove('hidden');
+				viewTech?.classList.add('hidden');
+				subtitleSimple?.classList.remove('hidden');
+				subtitleTech?.classList.add('hidden');
+			} else {
+				btnTech?.classList.add('active');
+				btnSimple?.classList.remove('active');
+				viewTech?.classList.remove('hidden');
+				viewSimple?.classList.add('hidden');
+				subtitleTech?.classList.remove('hidden');
+				subtitleSimple?.classList.add('hidden');
+			}
+			localStorage.setItem('features-mode', mode);
+		}
+
+		btnSimple?.addEventListener('click', () => setMode('simple'));
+		btnTech?.addEventListener('click', () => setMode('tech'));
+
+		// Restore saved preference
+		const saved = localStorage.getItem('features-mode');
+		if (saved === 'tech') {
+			setMode('tech');
+		}
+	});
+</script>
