@@ -11,6 +11,7 @@ import type { LocalItem } from '../types';
 import type { ItemStatus } from '../queries';
 import { InventoryEvents } from '@mana/shared-utils/analytics';
 import { encryptRecord } from '$lib/data/crypto';
+import { emitDomainEvent } from '$lib/data/events';
 
 export const itemsStore = {
 	async create(data: {
@@ -49,6 +50,11 @@ export const itemsStore = {
 		const plaintextSnapshot = toItem(newLocal);
 		await encryptRecord('invItems', newLocal);
 		await invItemTable.add(newLocal);
+		emitDomainEvent('InventoryItemCreated', 'inventory', 'inventoryItems', newLocal.id, {
+			itemId: newLocal.id,
+			name: data.name ?? '',
+			category: data.categoryId,
+		});
 		InventoryEvents.itemCreated();
 		return plaintextSnapshot;
 	},

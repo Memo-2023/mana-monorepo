@@ -13,6 +13,7 @@
  */
 
 import { encryptRecord } from '$lib/data/crypto';
+import { emitDomainEvent } from '$lib/data/events';
 import { articleTable } from '../collections';
 import { extractFromUrl } from '../api';
 import { toArticle } from '../queries';
@@ -50,6 +51,10 @@ export const articlesStore = {
 		const snapshot = toArticle(newLocal);
 		await encryptRecord('newsArticles', newLocal);
 		await articleTable.add(newLocal);
+		emitDomainEvent('ArticleSaved', 'news', 'newsArticles', newLocal.id, {
+			articleId: newLocal.id,
+			title: input.title ?? '',
+		});
 		return snapshot;
 	},
 

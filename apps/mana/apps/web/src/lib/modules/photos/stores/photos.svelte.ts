@@ -7,6 +7,7 @@
 
 import { PhotosEvents } from '@mana/shared-utils/analytics';
 import { db } from '$lib/data/database';
+import { emitDomainEvent } from '$lib/data/events';
 import type { LocalFavorite, Photo, PhotoFilters, PhotoStats } from '../types';
 
 const MEDIA_URL = () =>
@@ -181,6 +182,7 @@ export const photoStore = {
 
 			photos = photos.filter((p) => p.id !== mediaId);
 			if (selectedPhoto?.id === mediaId) selectedPhoto = null;
+			emitDomainEvent('PhotoDeleted', 'photos', 'photos', mediaId, { photoId: mediaId });
 			PhotosEvents.photoDeleted();
 			return true;
 		} catch (e) {

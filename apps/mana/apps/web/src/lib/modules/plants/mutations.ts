@@ -9,6 +9,7 @@ import { db } from '$lib/data/database';
 import { toPlant, toWateringSchedule } from './queries';
 import { PlantsEvents } from '@mana/shared-utils/analytics';
 import { encryptRecord, decryptRecord } from '$lib/data/crypto';
+import { emitDomainEvent } from '$lib/data/events';
 import { createBlock } from '$lib/data/time-blocks/service';
 import { uploadPlantPhoto, identifyPlant, type IdentifyResult } from './api';
 import type {
@@ -45,6 +46,11 @@ export const plantMutations = {
 		const plaintextSnapshot = toPlant(newLocal);
 		await encryptRecord('plants', newLocal);
 		await db.table('plants').add(newLocal);
+		emitDomainEvent('PlantCreated', 'plants', 'plants', newLocal.id, {
+			plantId: newLocal.id,
+			name: dto.name,
+			species: dto.scientificName,
+		});
 		PlantsEvents.plantCreated();
 		return plaintextSnapshot;
 	},
@@ -77,6 +83,7 @@ export const plantMutations = {
 			deletedAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString(),
 		});
+		emitDomainEvent('PlantDeleted', 'plants', 'plants', id, { plantId: id });
 		PlantsEvents.plantDeleted();
 	},
 

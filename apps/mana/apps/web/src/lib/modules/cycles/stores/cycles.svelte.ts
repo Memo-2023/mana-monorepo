@@ -6,6 +6,7 @@ import { cycleTable } from '../collections';
 import { toCycle } from '../queries';
 import { daysBetween } from '../utils/phase';
 import { encryptRecord } from '$lib/data/crypto';
+import { emitDomainEvent } from '$lib/data/events';
 import { createBlock, updateBlock, deleteBlock } from '$lib/data/time-blocks/service';
 import type { LocalCycle } from '../types';
 
@@ -68,6 +69,11 @@ export const cyclesStore = {
 		const plaintextSnapshot = toCycle(newLocal);
 		await encryptRecord('cycles', newLocal);
 		await cycleTable.add(newLocal);
+		emitDomainEvent('CycleDayLogged', 'cycles', 'cycleDayLogs', newLocal.id, {
+			logId: newLocal.id,
+			date: newLocal.startDate,
+			flow: null,
+		});
 		return plaintextSnapshot;
 	},
 

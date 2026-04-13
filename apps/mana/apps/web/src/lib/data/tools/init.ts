@@ -24,6 +24,14 @@ import { storageTools } from '$lib/modules/storage/tools';
 import { chatTools } from '$lib/modules/chat/tools';
 import { memoroTools } from '$lib/modules/memoro/tools';
 import { skilltreeTools } from '$lib/modules/skilltree/tools';
+import { cyclesTools } from '$lib/modules/cycles/tools';
+import { firstsTools } from '$lib/modules/firsts/tools';
+import { guidesTools } from '$lib/modules/guides/tools';
+import { inventoryTools } from '$lib/modules/inventory/tools';
+import { plantsTools } from '$lib/modules/plants/tools';
+import { newsTools } from '$lib/modules/news/tools';
+import { recipesTools } from '$lib/modules/recipes/tools';
+import { questionsTools } from '$lib/modules/questions/tools';
 
 let initialized = false;
 
@@ -49,5 +57,13 @@ export function initTools(): void {
 	registerTools(chatTools);
 	registerTools(memoroTools);
 	registerTools(skilltreeTools);
+	registerTools(cyclesTools);
+	registerTools(firstsTools);
+	registerTools(guidesTools);
+	registerTools(inventoryTools);
+	registerTools(plantsTools);
+	registerTools(newsTools);
+	registerTools(recipesTools);
+	registerTools(questionsTools);
 	initialized = true;
 }

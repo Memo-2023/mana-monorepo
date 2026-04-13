@@ -1,6 +1,7 @@
 import { firstTable } from '../collections';
 import { toFirst } from '../queries';
 import { encryptRecord } from '$lib/data/crypto';
+import { emitDomainEvent } from '$lib/data/events';
 import type {
 	First,
 	FirstCategory,
@@ -49,6 +50,11 @@ export const firstsStore = {
 		const plaintextSnapshot = toFirst(newLocal);
 		await encryptRecord('firsts', newLocal);
 		await firstTable.add(newLocal);
+		emitDomainEvent('FirstCreated', 'firsts', 'firsts', newLocal.id, {
+			firstId: newLocal.id,
+			title: data.title ?? '',
+			isLived: false,
+		});
 		return plaintextSnapshot;
 	},
 

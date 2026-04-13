@@ -442,6 +442,87 @@ export interface SocialEventDeletedPayload {
 
 export type SocialEventsEventType = 'SocialEventCreated' | 'SocialEventDeleted';
 
+// ── Cycles ──────────────────────────────────────────
+
+export interface CycleDayLoggedPayload {
+	logId: string;
+	date: string;
+	flow?: string;
+}
+export type CyclesEventType = 'CycleDayLogged';
+
+// ── Firsts ──────────────────────────────────────────
+
+export interface FirstCreatedPayload {
+	firstId: string;
+	title: string;
+	isLived: boolean;
+}
+export type FirstsEventType = 'FirstCreated';
+
+// ── Guides ──────────────────────────────────────────
+
+export interface GuideCreatedPayload {
+	guideId: string;
+	title: string;
+}
+export type GuidesEventType = 'GuideCreated';
+
+// ── Inventory ───────────────────────────────────────
+
+export interface InventoryItemCreatedPayload {
+	itemId: string;
+	name: string;
+	category?: string;
+}
+export type InventoryEventType = 'InventoryItemCreated';
+
+// ── Photos ──────────────────────────────────────────
+
+export interface PhotoDeletedPayload {
+	photoId: string;
+}
+export type PhotosEventType = 'PhotoDeleted';
+
+// ── Plants ──────────────────────────────────────────
+
+export interface PlantCreatedPayload {
+	plantId: string;
+	name: string;
+	species?: string;
+}
+export interface PlantDeletedPayload {
+	plantId: string;
+}
+export type PlantsEventType = 'PlantCreated' | 'PlantDeleted';
+
+// ── News ────────────────────────────────────────────
+
+export interface ArticleSavedPayload {
+	articleId: string;
+	title: string;
+}
+export type NewsEventType = 'ArticleSaved';
+
+// ── Recipes ─────────────────────────────────────────
+
+export interface RecipeCreatedPayload {
+	recipeId: string;
+	title: string;
+}
+export interface RecipeDeletedPayload {
+	recipeId: string;
+}
+export type RecipesEventType = 'RecipeCreated' | 'RecipeDeleted';
+
+// ── Questions ───────────────────────────────────────
+
+export interface QuestionAskedPayload {
+	questionId: string;
+	question: string;
+}
+export type QuestionsEventType = 'QuestionAsked';
+
 // ── Body ────────────────────────────────────────────
 
 export interface WorkoutStartedPayload {
@@ -525,6 +606,15 @@ export type ManaEventType =
 	| ChatEventType
 	| MemoroEventType
 	| SkilltreeEventType
+	| CyclesEventType
+	| FirstsEventType
+	| GuidesEventType
+	| InventoryEventType
+	| PhotosEventType
+	| PlantsEventType
+	| NewsEventType
+	| RecipesEventType
+	| QuestionsEventType
 	| SocialEventsEventType
 	| BodyEventType
 	| SystemEventType;
@@ -606,6 +696,26 @@ export type ManaEvent =
 	// Skilltree
 	| DomainEvent<'SkillXpAdded', SkillXpAddedPayload>
 	| DomainEvent<'SkillCreated', SkillCreatedPayload>
+	// Cycles
+	| DomainEvent<'CycleDayLogged', CycleDayLoggedPayload>
+	// Firsts
+	| DomainEvent<'FirstCreated', FirstCreatedPayload>
+	// Guides
+	| DomainEvent<'GuideCreated', GuideCreatedPayload>
+	// Inventory
+	| DomainEvent<'InventoryItemCreated', InventoryItemCreatedPayload>
+	// Photos
+	| DomainEvent<'PhotoDeleted', PhotoDeletedPayload>
+	// Plants
+	| DomainEvent<'PlantCreated', PlantCreatedPayload>
+	| DomainEvent<'PlantDeleted', PlantDeletedPayload>
+	// News
+	| DomainEvent<'ArticleSaved', ArticleSavedPayload>
+	// Recipes
+	| DomainEvent<'RecipeCreated', RecipeCreatedPayload>
+	| DomainEvent<'RecipeDeleted', RecipeDeletedPayload>
+	// Questions
+	| DomainEvent<'QuestionAsked', QuestionAskedPayload>
 	// Social Events
 	| DomainEvent<'SocialEventCreated', SocialEventCreatedPayload>
 	| DomainEvent<'SocialEventDeleted', SocialEventDeletedPayload>

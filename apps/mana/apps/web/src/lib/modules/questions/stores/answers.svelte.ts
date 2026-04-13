@@ -21,6 +21,7 @@
 
 import { db } from '$lib/data/database';
 import { encryptRecord, decryptRecord } from '$lib/data/crypto';
+import { emitDomainEvent } from '$lib/data/events';
 import { researchApi, type ResearchEvent, type ResearchSource } from '$lib/api/research';
 import type { LocalAnswer, LocalQuestion } from '../types';
 
@@ -47,6 +48,10 @@ async function createManual(input: CreateManualAnswerInput): Promise<string> {
 	};
 	await encryptRecord('answers', row);
 	await db.table('answers').add(row);
+	emitDomainEvent('QuestionAsked', 'questions', 'questions', id, {
+		questionId: id,
+		question: input.content ?? '',
+	});
 	return id;
 }
 

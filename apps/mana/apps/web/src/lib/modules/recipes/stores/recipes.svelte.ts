@@ -5,6 +5,7 @@
  */
 
 import { encryptRecord } from '$lib/data/crypto';
+import { emitDomainEvent } from '$lib/data/events';
 import { recipeTable } from '../collections';
 import { toRecipe } from '../queries';
 import type { LocalRecipe, Difficulty, Ingredient } from '../types';
@@ -40,6 +41,10 @@ export const recipesStore = {
 		const snapshot = toRecipe({ ...newLocal });
 		await encryptRecord('recipes', newLocal);
 		await recipeTable.add(newLocal);
+		emitDomainEvent('RecipeCreated', 'recipes', 'recipes', newLocal.id, {
+			recipeId: newLocal.id,
+			title: input.title ?? '',
+		});
 		return snapshot;
 	},
 
@@ -76,6 +81,7 @@ export const recipesStore = {
 			deletedAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString(),
 		});
+		emitDomainEvent('RecipeDeleted', 'recipes', 'recipes', id, { recipeId: id });
 	},
 
 	async toggleFavorite(id: string) {

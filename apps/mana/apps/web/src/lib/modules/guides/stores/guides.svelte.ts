@@ -9,6 +9,7 @@
 import { guideTable, sectionTable, stepTable, runTable } from '../collections';
 import { toGuide, toSection, toStep, toRun } from '../queries';
 import { encryptRecord, decryptRecord } from '$lib/data/crypto';
+import { emitDomainEvent } from '$lib/data/events';
 import { createBlock, updateBlock, deleteBlock } from '$lib/data/time-blocks/service';
 import type {
 	LocalGuide,
@@ -48,6 +49,10 @@ export const guidesStore = {
 		const snapshot = toGuide({ ...newLocal });
 		await encryptRecord('guides', newLocal);
 		await guideTable.add(newLocal);
+		emitDomainEvent('GuideCreated', 'guides', 'guides', newLocal.id, {
+			guideId: newLocal.id,
+			title: dto.title ?? '',
+		});
 		return snapshot;
 	},
 
