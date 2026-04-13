@@ -5,6 +5,7 @@
 	import { onDestroy, setContext } from 'svelte';
 	import { createReminderScheduler } from '@mana/shared-stores';
 	import { todoReminderSource } from '$lib/modules/todo/reminder-source';
+	import { startEventStore, stopEventStore } from '$lib/data/events/event-store';
 	import KeyboardShortcutsModal from '$lib/components/KeyboardShortcutsModal.svelte';
 	import SessionWarning from '$lib/components/SessionWarning.svelte';
 	import EncryptionIntroBanner from '$lib/components/EncryptionIntroBanner.svelte';
@@ -417,6 +418,7 @@
 			linkLocalStore.initialize(),
 		]);
 		initSharedUload();
+		startEventStore();
 		await dashboardStore.initialize();
 
 		// Start the persistent LLM task queue. Idempotent — safe to call
@@ -517,6 +519,7 @@
 	onDestroy(() => {
 		unifiedSync?.stopAll();
 		reminderScheduler.stop();
+		stopEventStore();
 		guestMode?.destroy();
 		// Fire-and-forget — we don't need to await; the in-flight task
 		// will finish in the background and the next page session will
