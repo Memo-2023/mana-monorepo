@@ -3,7 +3,7 @@ title: 'mana-media als zentrale Bild-Pipeline + Effect-Depth-Fix'
 description: 'Kurzer Tag: Bild-Uploads aller 5 Module routen über mana-media (CAS, Thumbnails, EXIF, Photos-Galerie). Dazu der Fix für effect_update_depth_exceeded der seit dem Unified-App-Switch auf 6 Dashboard-Modulen heumkroch.'
 date: 2026-04-04
 author: 'Till Schneider'
-category: 'fix'
+category: 'bugfix'
 tags:
   ['mana-media', 'cas', 'thumbnails', 'photos', 'svelte5', 'reactivity', 'liveQuery', 'guest-mode']
 featured: false
