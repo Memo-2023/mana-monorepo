@@ -1,17 +1,13 @@
 <!--
-  SceneRenameDialog — modal for creating or renaming a workbench scene.
-
-  Single dialog handles both flows; the parent decides which by passing an
-  initial name (empty for create, current name for rename) and a title.
+  SceneRenameDialog — modal for renaming a workbench scene.
 -->
 <script lang="ts">
 	interface Props {
 		show: boolean;
 		title: string;
 		initialName?: string;
-		initialIcon?: string;
 		confirmLabel?: string;
-		onSubmit: (name: string, icon: string | undefined) => void | Promise<void>;
+		onSubmit: (name: string) => void | Promise<void>;
 		onCancel: () => void;
 	}
 
@@ -19,23 +15,18 @@
 		show,
 		title,
 		initialName = '',
-		initialIcon = '',
 		confirmLabel = 'Speichern',
 		onSubmit,
 		onCancel,
 	}: Props = $props();
 
 	let name = $state('');
-	let icon = $state('');
 	let pending = $state(false);
 	let inputEl = $state<HTMLInputElement | null>(null);
 
-	// Reset local fields each time the dialog opens with new props.
 	$effect(() => {
 		if (show) {
 			name = initialName;
-			icon = initialIcon;
-			// Focus on next tick once the input is mounted.
 			queueMicrotask(() => inputEl?.focus());
 		}
 	});
@@ -45,7 +36,7 @@
 		if (pending || !name.trim()) return;
 		pending = true;
 		try {
-			await onSubmit(name.trim(), icon.trim() || undefined);
+			await onSubmit(name.trim());
 		} finally {
 			pending = false;
 		}
@@ -72,30 +63,18 @@
 		>
 			<h3 id="srd-title" class="srd-title">{title}</h3>
 			<form onsubmit={handleSubmit}>
-				<div class="srd-fields">
-					<label class="srd-field srd-field-icon">
-						<span class="srd-label">Icon</span>
-						<input
-							class="srd-input srd-icon-input"
-							type="text"
-							maxlength="2"
-							placeholder="🏠"
-							bind:value={icon}
-						/>
-					</label>
-					<label class="srd-field srd-field-name">
-						<span class="srd-label">Name</span>
-						<input
-							class="srd-input"
-							type="text"
-							maxlength="40"
-							placeholder="z.B. Deep Work"
-							bind:this={inputEl}
-							bind:value={name}
-							required
-						/>
-					</label>
-				</div>
+				<label class="srd-field">
+					<span class="srd-label">Name</span>
+					<input
+						class="srd-input"
+						type="text"
+						maxlength="40"
+						placeholder="z.B. Deep Work"
+						bind:this={inputEl}
+						bind:value={name}
+						required
+					/>
+				</label>
 				<div class="srd-actions">
 					<button
 						type="button"
@@ -150,22 +129,11 @@
 		color: hsl(var(--color-foreground));
 		margin: 0 0 1rem;
 	}
-	.srd-fields {
-		display: flex;
-		gap: 0.5rem;
-		margin-bottom: 1.25rem;
-	}
 	.srd-field {
 		display: flex;
 		flex-direction: column;
 		gap: 0.25rem;
-	}
-	.srd-field-icon {
-		flex: 0 0 auto;
-		width: 64px;
-	}
-	.srd-field-name {
-		flex: 1;
+		margin-bottom: 1.25rem;
 	}
 	.srd-label {
 		font-size: 0.75rem;
@@ -184,10 +152,6 @@
 	}
 	.srd-input:focus {
 		border-color: hsl(var(--color-primary));
-	}
-	.srd-icon-input {
-		text-align: center;
-		font-size: 1.25rem;
 	}
 	.srd-actions {
 		display: flex;

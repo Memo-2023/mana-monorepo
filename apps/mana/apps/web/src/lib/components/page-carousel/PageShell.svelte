@@ -5,6 +5,7 @@
 -->
 <script lang="ts">
 	import { _ } from 'svelte-i18n';
+	import { onMount } from 'svelte';
 	import { X, CornersOut, CornersIn, CaretLeft, CaretRight } from '@mana/shared-icons';
 	import type { Snippet, Component } from 'svelte';
 
@@ -50,6 +51,19 @@
 		toolbar,
 		children,
 	}: Props = $props();
+
+	// Escape exits maximized mode
+	onMount(() => {
+		function onKeydown(e: KeyboardEvent) {
+			if (e.key === 'Escape' && maximized && onMaximize) {
+				e.preventDefault();
+				e.stopPropagation();
+				onMaximize();
+			}
+		}
+		window.addEventListener('keydown', onKeydown);
+		return () => window.removeEventListener('keydown', onKeydown);
+	});
 
 	const MIN_WIDTH = 280;
 	const MAX_WIDTH = 1200;
@@ -298,10 +312,13 @@
 	.page-shell.maximized {
 		position: fixed;
 		inset: 0;
-		z-index: 50;
+		z-index: 95;
 		width: 100% !important;
-		min-height: 100vh;
+		max-width: none;
+		height: 100dvh !important;
+		min-height: 100dvh;
 		border-radius: 0;
+		border: none;
 		box-shadow: none;
 		animation: fadeInScale 0.2s ease-out;
 	}
@@ -399,6 +416,16 @@
 		flex: 1;
 		overflow-y: auto;
 		min-height: 200px;
+	}
+	.maximized .page-header {
+		max-width: 48rem;
+		margin-inline: auto;
+		width: 100%;
+	}
+	.maximized .page-body {
+		max-width: 48rem;
+		margin-inline: auto;
+		width: 100%;
 	}
 
 	/* Resize handle */

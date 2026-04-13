@@ -101,7 +101,7 @@
 				activeSceneId,
 				pages: carouselPages,
 				onSceneSelect: (id: string) => workbenchScenesStore.setActiveScene(id),
-				onSceneCreate: handleCreateScene,
+				onSceneCreate: (name: string) => workbenchScenesStore.createScene({ name }),
 				onSceneContextMenu: handleSceneContextMenu,
 				onAppClick: scrollToPage,
 				onAppContextMenu: (e: MouseEvent, id: string) => handleTabContextMenu(e, id),
@@ -199,28 +199,19 @@
 	}
 
 	// ── Scene CRUD dialogs ──────────────────────────────────
-	type SceneDialogMode =
-		| { kind: 'create' }
-		| { kind: 'rename'; id: string; name: string; icon?: string };
+	type SceneDialogMode = { kind: 'rename'; id: string; name: string };
 	let sceneDialog = $state<SceneDialogMode | null>(null);
 	let sceneToDelete = $state<{ id: string; name: string } | null>(null);
 
-	function handleCreateScene() {
-		sceneDialog = { kind: 'create' };
-	}
 	function handleRequestRename(id: string) {
 		const scene = scenes.find((s) => s.id === id);
 		if (!scene) return;
-		sceneDialog = { kind: 'rename', id, name: scene.name, icon: scene.icon };
+		sceneDialog = { kind: 'rename', id, name: scene.name };
 	}
-	async function handleSubmitSceneDialog(name: string, icon: string | undefined) {
+	async function handleSubmitSceneDialog(name: string) {
 		const mode = sceneDialog;
 		if (!mode) return;
-		if (mode.kind === 'create') {
-			await workbenchScenesStore.createScene({ name, icon });
-		} else {
-			await workbenchScenesStore.renameScene(mode.id, name, icon);
-		}
+		await workbenchScenesStore.renameScene(mode.id, name);
 		sceneDialog = null;
 	}
 	function handleDuplicateScene(id: string) {
@@ -287,10 +278,9 @@
 
 	<SceneRenameDialog
 		show={sceneDialog !== null}
-		title={sceneDialog?.kind === 'rename' ? 'Szene umbenennen' : 'Neue Szene'}
-		initialName={sceneDialog?.kind === 'rename' ? sceneDialog.name : ''}
-		initialIcon={sceneDialog?.kind === 'rename' ? (sceneDialog.icon ?? '') : ''}
-		confirmLabel={sceneDialog?.kind === 'rename' ? 'Speichern' : 'Erstellen'}
+		title="Szene umbenennen"
+		initialName={sceneDialog?.name ?? ''}
+		confirmLabel="Speichern"
 		onSubmit={handleSubmitSceneDialog}
 		onCancel={() => (sceneDialog = null)}
 	/>

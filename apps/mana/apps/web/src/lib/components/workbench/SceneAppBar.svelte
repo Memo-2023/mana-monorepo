@@ -3,7 +3,8 @@
   Rendered by the layout's bottom-stack via bottomBarStore.
 -->
 <script lang="ts">
-	import { Plus } from '@mana/shared-icons';
+	import { Plus, Check, X } from '@mana/shared-icons';
+	import { tick } from 'svelte';
 	import type { CarouselPage } from '$lib/components/page-carousel/types';
 	import type { WorkbenchScene } from '$lib/types/workbench-scenes';
 
@@ -12,7 +13,7 @@
 		activeSceneId: string | null;
 		pages: CarouselPage[];
 		onSceneSelect: (id: string) => void;
-		onSceneCreate: () => void;
+		onSceneCreate: (name: string) => void;
 		onSceneContextMenu: (e: MouseEvent, scene: WorkbenchScene) => void;
 		onAppClick: (id: string) => void;
 		onAppContextMenu: (e: MouseEvent, id: string) => void;
@@ -30,54 +31,119 @@
 		onAppContextMenu,
 		onAddApp,
 	}: Props = $props();
+
+	let creating = $state(false);
+	let newName = $state('');
+	let inputEl = $state<HTMLInputElement | null>(null);
+
+	async function startCreate() {
+		creating = true;
+		newName = '';
+		await tick();
+		inputEl?.focus();
+	}
+
+	function submitCreate() {
+		const trimmed = newName.trim();
+		if (trimmed) {
+			onSceneCreate(trimmed);
+		}
+		creating = false;
+		newName = '';
+	}
+
+	function cancelCreate() {
+		creating = false;
+		newName = '';
+	}
+
+	function handleInputKeydown(e: KeyboardEvent) {
+		if (e.key === 'Enter') {
+			e.preventDefault();
+			submitCreate();
+		} else if (e.key === 'Escape') {
+			e.preventDefault();
+			cancelCreate();
+		}
+	}
 </script>
 
 <div class="scene-app-bar">
 	{#each scenes as scene (scene.id)}
 		{@const isActive = scene.id === activeSceneId}
-		<button
-			type="button"
-			class="scene-pill"
-			class:active={isActive}
-			onclick={() => onSceneSelect(scene.id)}
-			oncontextmenu={(e) => onSceneContextMenu(e, scene)}
-		>
-			{#if scene.icon}
-				<span class="scene-icon">{scene.icon}</span>
-			{/if}
-			<span class="scene-name">{scene.name}</span>
-		</button>
 
-		<!-- App tabs appear inline right after the active scene pill -->
 		{#if isActive && pages.length > 0}
-			{#each pages as p (p.id)}
-				{@const AppIcon = p.icon}
+			<!-- Active scene + its app tabs wrapped in a visual group -->
+			<div class="scene-group">
 				<button
-					class="app-tab"
-					onclick={() => onAppClick(p.id)}
-					oncontextmenu={(e) => onAppContextMenu(e, p.id)}
+					type="button"
+					class="scene-pill active"
+					onclick={() => onSceneSelect(scene.id)}
+					oncontextmenu={(e) => onSceneContextMenu(e, scene)}
 				>
-					{#if AppIcon}
-						<span class="app-icon" style="color: {p.color}">
-							<AppIcon size={12} weight="fill" />
-						</span>
-					{:else}
-						<span class="app-dot" style="background-color: {p.color}"></span>
-					{/if}
-					<span class="app-title">{p.title}</span>
+					<span class="scene-name">{scene.name}</span>
+					<span class="scene-count">{scene.openApps.length}</span>
 				</button>
-			{/each}
-			<button class="app-add" onclick={onAddApp} title="App hinzufügen">
-				<Plus size={12} />
+				<span class="group-sep"></span>
+				{#each pages as p (p.id)}
+					{@const AppIcon = p.icon}
+					<button
+						class="app-tab"
+						onclick={() => onAppClick(p.id)}
+						oncontextmenu={(e) => onAppContextMenu(e, p.id)}
+					>
+						{#if AppIcon}
+							<span class="app-icon" style="color: {p.color}">
+								<AppIcon size={12} weight="fill" />
+							</span>
+						{:else}
+							<span class="app-dot" style="background-color: {p.color}"></span>
+						{/if}
+						<span class="app-title">{p.title}</span>
+					</button>
+				{/each}
+				<button class="app-add" onclick={onAddApp} title="App hinzufügen">
+					<Plus size={12} />
+				</button>
+			</div>
+		{:else}
+			<button
+				type="button"
+				class="scene-pill"
+				class:active={isActive}
+				onclick={() => onSceneSelect(scene.id)}
+				oncontextmenu={(e) => onSceneContextMenu(e, scene)}
+			>
+				<span class="scene-name">{scene.name}</span>
+				<span class="scene-count">{scene.openApps.length}</span>
 			</button>
-			{#if scenes.length > 1}
-				<span class="bar-sep"></span>
-			{/if}
 		{/if}
 	{/each}
-	<button type="button" class="scene-add" onclick={onSceneCreate} title="Neue Szene">
-		<Plus size={12} />
-	</button>
+
+	{#if creating}
+		<div class="inline-create">
+			<input
+				bind:this={inputEl}
+				class="inline-create-input"
+				type="text"
+				maxlength="40"
+				placeholder="Name…"
+				bind:value={newName}
+				onkeydown={handleInputKeydown}
+				onblur={submitCreate}
+			/>
+			<button class="inline-create-btn confirm" onclick={submitCreate} title="Erstellen">
+				<Check size={14} weight="bold" />
+			</button>
+			<button class="inline-create-btn cancel" onclick={cancelCreate} title="Abbrechen">
+				<X size={14} weight="bold" />
+			</button>
+		</div>
+	{:else}
+		<button type="button" class="scene-add" onclick={startCreate} title="Neue Szene">
+			<Plus size={14} />
+		</button>
+	{/if}
 </div>
 
 <style>
@@ -85,15 +151,15 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		gap: 0.125rem;
-		padding: 0.3125rem 0.625rem;
+		gap: 0.25rem;
+		padding: 0.25rem 0.5rem;
 		margin: 0 auto;
 		width: fit-content;
 		max-width: calc(100vw - 2rem);
 		pointer-events: auto;
 		background: hsl(var(--color-card));
 		border: 1px solid hsl(var(--color-border));
-		border-radius: 0.75rem;
+		border-radius: 9999px;
 		box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
 		overflow-x: auto;
 		scrollbar-width: none;
@@ -101,15 +167,17 @@
 	.scene-app-bar::-webkit-scrollbar {
 		display: none;
 	}
-	.bar-sep {
-		width: 1px;
-		height: 16px;
-		background: hsl(var(--color-border));
-		flex-shrink: 0;
-		margin: 0 0.25rem;
+	.scene-group {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.125rem;
+		background: hsl(var(--color-primary) / 0.1);
+		border: 1.5px solid hsl(var(--color-primary) / 0.25);
+		border-radius: 9999px;
+		padding: 0.1875rem;
 	}
 
-	/* Scene pills — bold group headers */
+	/* Scene pills */
 	.scene-pill {
 		display: inline-flex;
 		align-items: center;
@@ -118,12 +186,10 @@
 		border: none;
 		background: hsl(var(--color-muted) / 0.3);
 		color: hsl(var(--color-muted-foreground));
-		font-size: 0.6875rem;
-		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: 0.03em;
-		padding: 0.3125rem 0.625rem;
-		border-radius: 0.375rem;
+		font-size: 0.9375rem;
+		font-weight: 500;
+		padding: 0.5rem 1rem;
+		border-radius: 9999px;
 		cursor: pointer;
 		transition: all 0.15s;
 		max-width: 140px;
@@ -133,18 +199,25 @@
 		color: hsl(var(--color-foreground));
 	}
 	.scene-pill.active {
-		background: hsl(var(--color-primary) / 0.15);
-		color: hsl(var(--color-primary));
-		box-shadow: inset 0 0 0 1px hsl(var(--color-primary) / 0.25);
-	}
-	.scene-icon {
-		font-size: 0.8125rem;
-		line-height: 1;
+		background: transparent;
+		color: hsl(var(--color-foreground));
+		box-shadow: none;
 	}
 	.scene-name {
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
+	}
+	.scene-count {
+		font-size: 0.9375rem;
+		font-weight: 500;
+		color: hsl(var(--color-muted-foreground));
+	}
+	.group-sep {
+		width: 1px;
+		height: 1.25rem;
+		background: hsl(var(--color-border));
+		flex-shrink: 0;
 	}
 	.scene-add {
 		display: inline-flex;
@@ -155,7 +228,7 @@
 		background: transparent;
 		color: hsl(var(--color-muted-foreground));
 		padding: 0.25rem;
-		border-radius: 0.375rem;
+		border-radius: 9999px;
 		cursor: pointer;
 		transition: all 0.15s;
 	}
@@ -164,13 +237,63 @@
 		color: hsl(var(--color-primary));
 	}
 
+	/* Inline create */
+	.inline-create {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.25rem;
+		flex-shrink: 0;
+	}
+	.inline-create-input {
+		width: 120px;
+		padding: 0.375rem 0.75rem;
+		border-radius: 9999px;
+		border: 1.5px solid hsl(var(--color-primary) / 0.4);
+		background: hsl(var(--color-card));
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: hsl(var(--color-foreground));
+		outline: none;
+		transition: border-color 0.15s;
+	}
+	.inline-create-input:focus {
+		border-color: hsl(var(--color-primary));
+	}
+	.inline-create-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 24px;
+		height: 24px;
+		border: none;
+		border-radius: 9999px;
+		cursor: pointer;
+		transition: all 0.15s;
+		padding: 0;
+	}
+	.inline-create-btn.confirm {
+		background: hsl(var(--color-primary) / 0.15);
+		color: hsl(var(--color-primary));
+	}
+	.inline-create-btn.confirm:hover {
+		background: hsl(var(--color-primary) / 0.25);
+	}
+	.inline-create-btn.cancel {
+		background: transparent;
+		color: hsl(var(--color-muted-foreground));
+	}
+	.inline-create-btn.cancel:hover {
+		background: hsl(var(--color-surface-hover));
+		color: hsl(var(--color-foreground));
+	}
+
 	/* App tabs — lighter, inline after active scene */
 	.app-tab {
 		display: inline-flex;
 		align-items: center;
 		gap: 0.25rem;
-		padding: 0.1875rem 0.375rem;
-		border-radius: 0.3125rem;
+		padding: 0.5rem 1rem;
+		border-radius: 9999px;
 		border: none;
 		background: transparent;
 		color: hsl(var(--color-muted-foreground));
@@ -194,8 +317,8 @@
 		flex-shrink: 0;
 	}
 	.app-title {
-		font-size: 0.6875rem;
-		font-weight: 400;
+		font-size: 0.9375rem;
+		font-weight: 500;
 		max-width: 90px;
 		overflow: hidden;
 		text-overflow: ellipsis;
@@ -207,7 +330,7 @@
 		color: hsl(var(--color-muted-foreground));
 		cursor: pointer;
 		padding: 0.1875rem;
-		border-radius: 0.25rem;
+		border-radius: 9999px;
 		display: flex;
 		align-items: center;
 		transition: all 0.15s;
