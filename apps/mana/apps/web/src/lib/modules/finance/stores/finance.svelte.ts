@@ -10,6 +10,7 @@
 import { transactionTable, categoryTable } from '../collections';
 import { toTransaction, toCategory } from '../queries';
 import { encryptRecord } from '$lib/data/crypto';
+import { emitDomainEvent } from '$lib/data/events';
 import type { LocalTransaction, LocalFinanceCategory, TransactionType } from '../types';
 
 export const financeStore = {
@@ -34,6 +35,12 @@ export const financeStore = {
 		const plaintextSnapshot = toTransaction(newLocal);
 		await encryptRecord('transactions', newLocal);
 		await transactionTable.add(newLocal);
+		emitDomainEvent('TransactionCreated', 'finance', 'transactions', newLocal.id, {
+			transactionId: newLocal.id,
+			amount: data.amount,
+			type: data.type,
+			description: data.description,
+		});
 		return plaintextSnapshot;
 	},
 
@@ -56,6 +63,7 @@ export const financeStore = {
 			deletedAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString(),
 		});
+		emitDomainEvent('TransactionDeleted', 'finance', 'transactions', id, { transactionId: id });
 	},
 
 	async addCategory(data: { name: string; emoji: string; color: string; type: TransactionType }) {

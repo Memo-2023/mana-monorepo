@@ -11,6 +11,7 @@
 import { dreamSymbolTable, dreamTable } from '../collections';
 import { toDream } from '../queries';
 import { encryptRecord } from '$lib/data/crypto';
+import { emitDomainEvent } from '$lib/data/events';
 import { createBlock, deleteBlock } from '$lib/data/time-blocks/service';
 import { transcribeAudio } from '$lib/voice/transcribe';
 import type {
@@ -118,6 +119,12 @@ export const dreamsStore = {
 		await encryptRecord('dreams', newLocal);
 		await dreamTable.add(newLocal);
 		await this.touchSymbols(plaintextSnapshot.symbols, +1);
+		emitDomainEvent('DreamCreated', 'dreams', 'dreams', dreamId, {
+			dreamId,
+			title: data.title ?? undefined,
+			isLucid: data.isLucid ?? false,
+			mood: data.mood ?? undefined,
+		});
 		return plaintextSnapshot;
 	},
 
@@ -304,6 +311,7 @@ export const dreamsStore = {
 			deletedAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString(),
 		});
+		emitDomainEvent('DreamDeleted', 'dreams', 'dreams', id, { dreamId: id });
 	},
 
 	async togglePin(id: string) {

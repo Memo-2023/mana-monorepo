@@ -9,6 +9,7 @@ import { CardsEvents } from '@mana/shared-utils/analytics';
 import { cardTable, cardDeckTable } from '../collections';
 import { toCard } from '../queries';
 import { encryptRecord } from '$lib/data/crypto';
+import { emitDomainEvent } from '$lib/data/events';
 import type { LocalCard, Card, CreateCardInput, UpdateCardInput } from '../types';
 
 let error = $state<string | null>(null);
@@ -44,6 +45,10 @@ export const cardStore = {
 				});
 			}
 
+			emitDomainEvent('CardCreated', 'cards', 'cards', newLocal.id, {
+				cardId: newLocal.id,
+				deckId: input.deckId,
+			});
 			CardsEvents.cardCreated();
 			return plaintextSnapshot;
 		} catch (err: any) {

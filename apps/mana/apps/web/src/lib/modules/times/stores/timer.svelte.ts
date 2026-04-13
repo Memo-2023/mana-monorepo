@@ -8,6 +8,7 @@
 
 import { browser } from '$app/environment';
 import { db } from '$lib/data/database';
+import { emitDomainEvent } from '$lib/data/events';
 import { timeEntryTable, settingsTable } from '$lib/modules/times/collections';
 import { roundDuration } from '$lib/modules/times/utils/rounding';
 import { createBlock, updateBlock, deleteBlock } from '$lib/data/time-blocks/service';
@@ -135,6 +136,11 @@ export const timerStore = {
 		elapsedSeconds = 0;
 		startTicking();
 		startAutoSave();
+		emitDomainEvent('TimerStarted', 'times', 'timeEntries', entryId, {
+			entryId,
+			description: options?.description,
+			projectId: options?.projectId,
+		});
 	},
 
 	/** Stop the running timer */
@@ -168,6 +174,11 @@ export const timerStore = {
 			...runningEntry,
 			duration: roundedDuration,
 		};
+		emitDomainEvent('TimerStopped', 'times', 'timeEntries', runningEntry.id, {
+			entryId: runningEntry.id,
+			durationMinutes: Math.round(roundedDuration / 60),
+			description: runningEntry.description,
+		});
 		stopTicking();
 		runningEntry = null;
 		runningBlock = null;

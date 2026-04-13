@@ -9,6 +9,7 @@ import { db } from '$lib/data/database';
 import { createBlock, updateBlock, deleteBlock } from '$lib/data/time-blocks/service';
 import { timeBlockTable } from '$lib/data/time-blocks/collections';
 import { encryptRecord, decryptRecord } from '$lib/data/crypto';
+import { emitDomainEvent } from '$lib/data/events';
 import type { LocalSocialEvent, LocalEventItem, EventStatus } from '../types';
 import { eventsApi } from '../api';
 import { recordTombstone } from '../tombstones';
@@ -73,6 +74,11 @@ export const eventsStore = {
 			// linked TimeBlock was already encrypted by createBlock above.
 			await encryptRecord('socialEvents', newLocal);
 			await db.table<LocalSocialEvent>('socialEvents').add(newLocal);
+			emitDomainEvent('SocialEventCreated', 'events', 'socialEvents', eventId, {
+				eventId,
+				title: input.title,
+				date: input.startTime.split('T')[0],
+			});
 			return { success: true as const, id: eventId };
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to create event';
@@ -162,6 +168,7 @@ export const eventsStore = {
 				deletedAt: new Date().toISOString(),
 				updatedAt: new Date().toISOString(),
 			});
+			emitDomainEvent('SocialEventDeleted', 'events', 'socialEvents', id, { eventId: id });
 			return { success: true as const };
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to delete event';

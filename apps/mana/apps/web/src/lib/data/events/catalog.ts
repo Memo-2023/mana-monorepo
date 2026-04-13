@@ -295,6 +295,82 @@ export interface ContactDeletedPayload {
 
 export type ContactsEventType = 'ContactCreated' | 'ContactDeleted';
 
+// ── Finance ─────────────────────────────────────────
+
+export interface TransactionCreatedPayload {
+	transactionId: string;
+	amount: number;
+	type: string;
+	category?: string;
+	description?: string;
+}
+
+export interface TransactionDeletedPayload {
+	transactionId: string;
+}
+
+export type FinanceEventType = 'TransactionCreated' | 'TransactionDeleted';
+
+// ── Dreams ──────────────────────────────────────────
+
+export interface DreamCreatedPayload {
+	dreamId: string;
+	title?: string;
+	isLucid: boolean;
+	mood?: string;
+}
+
+export interface DreamDeletedPayload {
+	dreamId: string;
+}
+
+export type DreamsEventType = 'DreamCreated' | 'DreamDeleted';
+
+// ── Cards ───────────────────────────────────────────
+
+export interface CardStudiedPayload {
+	cardId: string;
+	deckId: string;
+	quality: number;
+}
+
+export interface CardCreatedPayload {
+	cardId: string;
+	deckId: string;
+}
+
+export type CardsEventType = 'CardStudied' | 'CardCreated';
+
+// ── Times ───────────────────────────────────────────
+
+export interface TimerStartedPayload {
+	entryId: string;
+	description?: string;
+	projectId?: string;
+}
+
+export interface TimerStoppedPayload {
+	entryId: string;
+	durationMinutes: number;
+	description?: string;
+}
+
+export type TimesEventType = 'TimerStarted' | 'TimerStopped';
+
+// ── Social Events ───────────────────────────────────
+
+export interface SocialEventCreatedPayload {
+	eventId: string;
+	title: string;
+	date?: string;
+}
+
+export interface SocialEventDeletedPayload {
+	eventId: string;
+}
+
+export type SocialEventsEventType = 'SocialEventCreated' | 'SocialEventDeleted';
+
 // ── Body ────────────────────────────────────────────
 
 export interface WorkoutStartedPayload {
@@ -369,6 +445,11 @@ export type ManaEventType =
 	| JournalEventType
 	| NotesEventType
 	| ContactsEventType
+	| FinanceEventType
+	| DreamsEventType
+	| CardsEventType
+	| TimesEventType
+	| SocialEventsEventType
 	| BodyEventType
 	| SystemEventType;
 
@@ -422,6 +503,21 @@ export type ManaEvent =
 	// Contacts
 	| DomainEvent<'ContactCreated', ContactCreatedPayload>
 	| DomainEvent<'ContactDeleted', ContactDeletedPayload>
+	// Finance
+	| DomainEvent<'TransactionCreated', TransactionCreatedPayload>
+	| DomainEvent<'TransactionDeleted', TransactionDeletedPayload>
+	// Dreams
+	| DomainEvent<'DreamCreated', DreamCreatedPayload>
+	| DomainEvent<'DreamDeleted', DreamDeletedPayload>
+	// Cards
+	| DomainEvent<'CardStudied', CardStudiedPayload>
+	| DomainEvent<'CardCreated', CardCreatedPayload>
+	// Times
+	| DomainEvent<'TimerStarted', TimerStartedPayload>
+	| DomainEvent<'TimerStopped', TimerStoppedPayload>
+	// Social Events
+	| DomainEvent<'SocialEventCreated', SocialEventCreatedPayload>
+	| DomainEvent<'SocialEventDeleted', SocialEventDeletedPayload>
 	// Body
 	| DomainEvent<'WorkoutStarted', WorkoutStartedPayload>
 	| DomainEvent<'WorkoutFinished', WorkoutFinishedPayload>
