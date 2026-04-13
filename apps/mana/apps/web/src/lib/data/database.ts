@@ -426,13 +426,17 @@ db.version(9).stores({
 db.version(10).stores({
 	_events:
 		'++seq, type, meta.appId, meta.timestamp, meta.recordId, [meta.appId+meta.timestamp], [type+meta.timestamp]',
-	// Companion Brain: Goals, Memory, Feedback, Chat
+});
+
+// v14 — Companion Brain: Goals, Memory, Feedback, Chat, Rituals.
+// Bumped to v14 (past mail/stretch/meditate/sleep) to ensure schema
+// upgrade runs even if the browser already saw an earlier v10.
+db.version(14).stores({
 	companionGoals: 'id, moduleId, status, [moduleId+status]',
 	_memory: 'id, category, confidence, lastConfirmed, [category+confidence]',
 	_nudgeOutcomes: '++id, nudgeId, nudgeType, outcome, timestamp, [nudgeType+outcome]',
 	companionConversations: 'id, createdAt',
 	companionMessages: 'id, conversationId, role, createdAt, [conversationId+createdAt]',
-	// Rituals
 	rituals: 'id, status, createdAt',
 	ritualSteps: 'id, ritualId, order, [ritualId+order]',
 	ritualLogs: '++id, ritualId, date, [ritualId+date]',

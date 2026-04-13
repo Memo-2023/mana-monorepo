@@ -113,11 +113,12 @@
 <style>
 	.companion-page {
 		display: flex;
-		height: calc(100dvh - var(--bottom-chrome-height, 80px) - 4rem);
-		gap: 1px;
-		background: hsl(var(--color-border));
+		min-height: 400px;
+		height: calc(100dvh - var(--bottom-chrome-height, 80px) - 6rem);
+		border: 1px solid hsl(var(--color-border));
 		border-radius: 1rem;
 		overflow: hidden;
+		background: hsl(var(--color-background));
 	}
 
 	.sidebar {
@@ -243,6 +244,7 @@
 
 	.empty-state {
 		flex: 1;
+		min-height: 300px;
 		display: flex;
 		flex-direction: column;
 		align-items: center;

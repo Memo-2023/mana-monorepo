@@ -6,8 +6,11 @@
  * Can be upgraded to the LLM orchestrator for multi-tier support.
  */
 
-import { conversationTable, messageTable } from '../collections';
+import { db } from '$lib/data/database';
 import type { LocalConversation, LocalMessage } from '../types';
+
+const CONV_TABLE = 'companionConversations';
+const MSG_TABLE = 'companionMessages';
 
 // ── Conversation CRUD ───────────────────────────────
 
@@ -20,19 +23,19 @@ export const chatStore = {
 			createdAt: now,
 			updatedAt: now,
 		};
-		await conversationTable.add(conv);
+		await db.table<LocalConversation>(CONV_TABLE).add(conv);
 		return conv;
 	},
 
 	async renameConversation(id: string, title: string): Promise<void> {
-		await conversationTable.update(id, {
+		await db.table<LocalConversation>(CONV_TABLE).update(id, {
 			title,
 			updatedAt: new Date().toISOString(),
 		});
 	},
 
 	async deleteConversation(id: string): Promise<void> {
-		await conversationTable.update(id, {
+		await db.table<LocalConversation>(CONV_TABLE).update(id, {
 			deletedAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString(),
 		});
@@ -58,10 +61,10 @@ export const chatStore = {
 			toolResult: extra?.toolResult,
 			createdAt: new Date().toISOString(),
 		};
-		await messageTable.add(msg);
+		await db.table<LocalMessage>(MSG_TABLE).add(msg);
 
 		// Touch conversation updatedAt
-		await conversationTable.update(conversationId, {
+		await db.table<LocalConversation>(CONV_TABLE).update(conversationId, {
 			updatedAt: msg.createdAt,
 		});
 
@@ -69,10 +72,14 @@ export const chatStore = {
 	},
 
 	async updateMessageContent(id: string, content: string): Promise<void> {
-		await messageTable.update(id, { content });
+		await db.table<LocalMessage>(MSG_TABLE).update(id, { content });
 	},
 
 	async getMessages(conversationId: string): Promise<LocalMessage[]> {
-		return messageTable.where('conversationId').equals(conversationId).sortBy('createdAt');
+		return db
+			.table<LocalMessage>(MSG_TABLE)
+			.where('conversationId')
+			.equals(conversationId)
+			.sortBy('createdAt');
 	},
 };
