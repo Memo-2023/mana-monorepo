@@ -841,6 +841,23 @@ export const MANA_APPS: ManaApp[] = [
 		status: 'development',
 		requiredTier: 'guest',
 	},
+	{
+		id: 'sleep',
+		name: 'Sleep',
+		description: {
+			de: 'Schlaf-Tracking',
+			en: 'Sleep Tracking',
+		},
+		longDescription: {
+			de: 'Tracke deinen Schlaf mit Zeiten, Qualität und Schlafhygiene. Wochen-Trends, Schlafschuld, Konsistenz-Score und Verknüpfung mit Träumen.',
+			en: 'Track your sleep with times, quality, and sleep hygiene. Weekly trends, sleep debt, consistency score, and dream linking.',
+		},
+		icon: APP_ICONS.sleep,
+		color: '#6366f1',
+		comingSoon: false,
+		status: 'development',
+		requiredTier: 'guest',
+	},
 ];
 
 /**

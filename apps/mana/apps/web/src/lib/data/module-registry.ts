@@ -93,6 +93,7 @@ import { recipesModuleConfig } from '$lib/modules/recipes/module.config';
 import { stretchModuleConfig } from '$lib/modules/stretch/module.config';
 import { mailModuleConfig } from '$lib/modules/mail/module.config';
 import { meditateModuleConfig } from '$lib/modules/meditate/module.config';
+import { sleepModuleConfig } from '$lib/modules/sleep/module.config';
 
 export const MODULE_CONFIGS: readonly ModuleConfig[] = [
 	manaCoreConfig,
@@ -141,6 +142,7 @@ export const MODULE_CONFIGS: readonly ModuleConfig[] = [
 	stretchModuleConfig,
 	mailModuleConfig,
 	meditateModuleConfig,
+	sleepModuleConfig,
 ];
 
 // ─── Derived Maps ──────────────────────────────────────────

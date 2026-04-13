@@ -32,6 +32,7 @@ import { DRINK_GUEST_SEED } from '$lib/modules/drink/collections';
 import { RECIPES_GUEST_SEED } from '$lib/modules/recipes/collections';
 import { STRETCH_GUEST_SEED } from '$lib/modules/stretch/collections';
 import { MEDITATE_GUEST_SEED } from '$lib/modules/meditate/collections';
+import { SLEEP_GUEST_SEED } from '$lib/modules/sleep/collections';
 
 /**
  * Flat list of { tableName, rows } entries. Only modules with non-empty
@@ -68,6 +69,7 @@ register(DRINK_GUEST_SEED);
 register(RECIPES_GUEST_SEED);
 register(STRETCH_GUEST_SEED);
 register(MEDITATE_GUEST_SEED);
+register(SLEEP_GUEST_SEED);
 
 /**
  * Seed all module guest data into empty tables. Idempotent: tables

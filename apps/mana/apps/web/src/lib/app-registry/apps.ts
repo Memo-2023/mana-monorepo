@@ -51,6 +51,7 @@ import {
 	CookingPot,
 	PersonSimpleTaiChi,
 	Envelope,
+	Flower,
 } from '@mana/shared-icons';
 
 // ── Apps with entity capabilities ───────────────────────────
@@ -898,4 +899,24 @@ registerApp({
 				),
 		},
 	],
+});
+
+registerApp({
+	id: 'meditate',
+	name: 'Meditate',
+	color: '#8b5cf6',
+	icon: Flower,
+	views: {
+		list: { load: () => import('$lib/modules/meditate/ListView.svelte') },
+	},
+});
+
+registerApp({
+	id: 'sleep',
+	name: 'Sleep',
+	color: '#6366f1',
+	icon: Moon,
+	views: {
+		list: { load: () => import('$lib/modules/sleep/ListView.svelte') },
+	},
 });

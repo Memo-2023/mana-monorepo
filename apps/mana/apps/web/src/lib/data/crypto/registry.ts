@@ -448,6 +448,17 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	meditatePresets: { enabled: true, fields: ['name', 'description', 'bodyScanSteps'] },
 	meditateSessions: { enabled: true, fields: ['notes'] },
 	meditateSettings: { enabled: false, fields: [] },
+
+	// ─── Sleep ───────────────────────────────────────────────
+	// Health data — GDPR Art. 9 sensitive. Only user-typed text fields
+	// (notes) are encrypted on sleep entries. Quality/duration/interruptions
+	// stay plaintext for stats aggregation. Hygiene check names/descriptions
+	// are encrypted (user-created ones contain personal context). Hygiene
+	// logs and settings are structural only.
+	sleepEntries: { enabled: true, fields: ['notes'] },
+	sleepHygieneLogs: { enabled: false, fields: [] },
+	sleepHygieneChecks: { enabled: true, fields: ['name', 'description'] },
+	sleepSettings: { enabled: false, fields: [] },
 };
 
 /**

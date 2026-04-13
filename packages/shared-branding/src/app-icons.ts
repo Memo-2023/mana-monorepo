@@ -186,6 +186,11 @@ export const APP_ICONS = {
 		// Violet→indigo gradient for the mindfulness/calm theme.
 		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="md" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#8b5cf6"/><stop offset="100%" style="stop-color:#6366f1"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#md)"/><circle cx="50" cy="28" r="7" fill="white"/><path d="M50 36v14" stroke="white" stroke-width="4" stroke-linecap="round"/><path d="M36 44c4 2 9 3 14 3s10-1 14-3" stroke="white" stroke-width="3.5" stroke-linecap="round" fill="none"/><path d="M32 47l-6-5" stroke="white" stroke-width="3" stroke-linecap="round"/><path d="M68 47l6-5" stroke="white" stroke-width="3" stroke-linecap="round"/><path d="M38 56c-6 4-10 8-10 12 0 6 10 10 22 10s22-4 22-10c0-4-4-8-10-12" stroke="white" stroke-width="3.5" stroke-linecap="round" fill="none"/><path d="M42 56l-4 10h24l-4-10" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="white" fill-opacity="0.2"/><circle cx="50" cy="50" r="28" stroke="white" stroke-width="1.5" fill="none" opacity="0.2"/><circle cx="50" cy="50" r="36" stroke="white" stroke-width="1" fill="none" opacity="0.1"/></svg>`
 	),
+	sleep: svgToDataUrl(
+		// Moon with stars — represents sleep / night time.
+		// Indigo→purple gradient for the nighttime/rest theme.
+		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="sl" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#6366f1"/><stop offset="100%" style="stop-color:#7c3aed"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#sl)"/><path d="M62 24c-18 2-32 17-32 35 0 19 16 35 35 35 12 0 22-6 28-14-4 2-9 3-14 3-19 0-35-16-35-35 0-10 4-18 10-24z" fill="white" fill-opacity="0.9"/><circle cx="68" cy="28" r="2.5" fill="white" fill-opacity="0.7"/><circle cx="78" cy="38" r="1.5" fill="white" fill-opacity="0.5"/><circle cx="58" cy="18" r="1.5" fill="white" fill-opacity="0.5"/><circle cx="82" cy="24" r="2" fill="white" fill-opacity="0.6"/></svg>`
+	),
 } as const;
 
 export type AppIconId = keyof typeof APP_ICONS;

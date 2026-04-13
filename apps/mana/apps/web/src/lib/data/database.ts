@@ -426,10 +426,12 @@ db.version(9).stores({
 db.version(10).stores({
 	_events:
 		'++seq, type, meta.appId, meta.timestamp, meta.recordId, [meta.appId+meta.timestamp], [type+meta.timestamp]',
-	// Companion Brain: Goals, Memory, Feedback
+	// Companion Brain: Goals, Memory, Feedback, Chat
 	companionGoals: 'id, moduleId, status, [moduleId+status]',
 	_memory: 'id, category, confidence, lastConfirmed, [category+confidence]',
 	_nudgeOutcomes: '++id, nudgeId, nudgeType, outcome, timestamp, [nudgeType+outcome]',
+	companionConversations: 'id, createdAt',
+	companionMessages: 'id, conversationId, role, createdAt, [conversationId+createdAt]',
 });
 
 // Schema version 11 — adds the Mail module (local draft cache).
@@ -445,6 +447,23 @@ db.version(12).stores({
 	meditatePresets: 'id, category, isPreset, isArchived, order',
 	meditateSessions: 'id, presetId, startedAt, [startedAt+presetId]',
 	meditateSettings: 'id',
+});
+
+// Schema version 13 — adds the Sleep module (sleep tracking with hygiene
+// checklists). Additive only; no prior tables touched.
+//
+// Index strategy:
+//   - sleepEntries indexes date for the daily lookup + quality for the
+//     heatmap view (range scan on date descending).
+//   - sleepHygieneLogs indexes date for the daily upsert.
+//   - sleepHygieneChecks indexes order for the checklist sort, isActive
+//     for filtering active checks.
+//   - sleepSettings is a singleton (id-only index).
+db.version(13).stores({
+	sleepEntries: 'id, date, quality, [date+quality]',
+	sleepHygieneLogs: 'id, date',
+	sleepHygieneChecks: 'id, category, isActive, isPreset, order',
+	sleepSettings: 'id',
 });
 
 // ─── Sync Routing ──────────────────────────────────────────
