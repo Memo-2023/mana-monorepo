@@ -14,6 +14,7 @@
 
 import { db } from '$lib/data/database';
 import { encryptRecord, decryptRecord } from '$lib/data/crypto';
+import { emitDomainEvent } from '$lib/data/events';
 import {
 	uploadMealPhoto,
 	analyzeMealPhoto,
@@ -74,6 +75,15 @@ export const mealMutations = {
 		const encrypted: Record<string, unknown> = { ...row };
 		await encryptRecord('meals', encrypted);
 		await db.table('meals').add(encrypted);
+		emitDomainEvent('MealLogged', 'nutriphi', 'meals', row.id, {
+			mealId: row.id,
+			mealType: dto.mealType,
+			inputType: 'text',
+			description: dto.description,
+			calories: dto.nutrition?.calories,
+			protein: dto.nutrition?.protein,
+			date: row.date,
+		});
 		return row;
 	},
 
@@ -99,6 +109,13 @@ export const mealMutations = {
 		const encrypted: Record<string, unknown> = { ...row };
 		await encryptRecord('meals', encrypted);
 		await db.table('meals').add(encrypted);
+		emitDomainEvent('MealFromPhotoLogged', 'nutriphi', 'meals', row.id, {
+			mealId: row.id,
+			mealType: dto.mealType,
+			photoMediaId: dto.photoMediaId,
+			confidence: dto.confidence,
+			calories: dto.nutrition?.calories,
+		});
 		return row;
 	},
 
@@ -131,8 +148,13 @@ export const mealMutations = {
 	},
 
 	async delete(id: string): Promise<void> {
+		const existing = await db.table<LocalMeal>('meals').get(id);
 		const now = new Date().toISOString();
 		await db.table('meals').update(id, { deletedAt: now, updatedAt: now });
+		emitDomainEvent('MealDeleted', 'nutriphi', 'meals', id, {
+			mealId: id,
+			mealType: existing?.mealType ?? '',
+		});
 	},
 };
 

@@ -10,6 +10,7 @@ import { toTask } from '../queries';
 import type { LocalTask, TaskPriority, Subtask } from '../types';
 import { createBlock, updateBlock, deleteBlock } from '$lib/data/time-blocks/service';
 import { encryptRecord, decryptRecord } from '$lib/data/crypto';
+import { emitDomainEvent } from '$lib/data/events';
 import { transcribeAudio } from '$lib/voice/transcribe';
 import { TodoEvents } from '@mana/shared-utils/analytics';
 import { tagCollection, type LocalTag } from '@mana/shared-stores';
@@ -153,6 +154,14 @@ export const tasksStore = {
 		const plaintextSnapshot = toTask({ ...newLocal });
 		await encryptRecord('tasks', newLocal);
 		await taskTable.add(newLocal);
+		emitDomainEvent('TaskCreated', 'todo', 'tasks', taskId, {
+			taskId,
+			title: plaintextSnapshot.title,
+			dueDate: data.dueDate,
+			priority: data.priority,
+			projectId: data.projectId,
+			labelIds: data.labelIds,
+		});
 		TodoEvents.taskCreated(!!data.dueDate);
 		return plaintextSnapshot;
 	},
@@ -362,6 +371,7 @@ export const tasksStore = {
 
 	async deleteTask(id: string) {
 		const task = await taskTable.get(id);
+		const decrypted = task ? await decryptRecord('tasks', { ...task }) : null;
 		if (task?.scheduledBlockId) {
 			await deleteBlock(task.scheduledBlockId);
 		}
@@ -370,23 +380,43 @@ export const tasksStore = {
 			deletedAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString(),
 		});
+		emitDomainEvent('TaskDeleted', 'todo', 'tasks', id, {
+			taskId: id,
+			title: (decrypted?.title as string) ?? '',
+		});
 		TodoEvents.taskDeleted();
 	},
 
 	async completeTask(id: string) {
+		const task = await taskTable.get(id);
+		const decrypted = task ? await decryptRecord('tasks', { ...task }) : null;
+		const now = new Date().toISOString();
+		const wasOverdue = task?.dueDate != null && (task.dueDate as string) < now.slice(0, 10);
 		await taskTable.update(id, {
 			isCompleted: true,
-			completedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
+			completedAt: now,
+			updatedAt: now,
+		});
+		emitDomainEvent('TaskCompleted', 'todo', 'tasks', id, {
+			taskId: id,
+			title: (decrypted?.title as string) ?? '',
+			projectId: task?.projectId,
+			wasOverdue,
 		});
 		TodoEvents.taskCompleted();
 	},
 
 	async uncompleteTask(id: string) {
+		const task = await taskTable.get(id);
+		const decrypted = task ? await decryptRecord('tasks', { ...task }) : null;
 		await taskTable.update(id, {
 			isCompleted: false,
 			completedAt: null,
 			updatedAt: new Date().toISOString(),
+		});
+		emitDomainEvent('TaskUncompleted', 'todo', 'tasks', id, {
+			taskId: id,
+			title: (decrypted?.title as string) ?? '',
 		});
 	},
 
@@ -408,6 +438,11 @@ export const tasksStore = {
 		};
 		await encryptRecord('tasks', diff);
 		await taskTable.update(id, diff);
+		emitDomainEvent('SubtasksUpdated', 'todo', 'tasks', id, {
+			taskId: id,
+			total: subtasks.length,
+			completed: subtasks.filter((s) => s.isCompleted).length,
+		});
 	},
 
 	async updateLabels(id: string, labelIds: string[]) {

@@ -398,6 +398,36 @@ db.version(8).stores({
 	recipes: 'id, difficulty, isFavorite, *tags',
 });
 
+// Schema version 9 — adds the Stretch module (guided stretching routines
+// with mobility assessments, session tracking, and reminders).
+// Additive only; no prior tables touched.
+//
+// Index strategy:
+//   - stretchExercises indexes bodyRegion + difficulty for the exercise picker
+//     filter strip, isPreset to separate seeds from custom.
+//   - stretchRoutines indexes routineType for the type-based filter tabs,
+//     order for the user's custom sort.
+//   - stretchSessions indexes startedAt for the history timeline view
+//     (range scan descending).
+//   - stretchAssessments indexes assessedAt for the trend chart.
+//   - stretchReminders indexes isActive so the reminder engine can quickly
+//     find enabled reminders without scanning the full table.
+db.version(9).stores({
+	stretchExercises: 'id, bodyRegion, difficulty, isPreset, isArchived, order',
+	stretchRoutines: 'id, routineType, order, isPinned, isPreset',
+	stretchSessions: 'id, routineId, startedAt, [startedAt]',
+	stretchAssessments: 'id, assessedAt',
+	stretchReminders: 'id, isActive',
+});
+
+// v10 — Domain Event Store for the Companion Brain.
+// Append-only log of semantic events emitted by module stores.
+// NOT synced (local intelligence only). Replaces _activity long-term.
+db.version(10).stores({
+	_events:
+		'++seq, type, meta.appId, meta.timestamp, meta.recordId, [meta.appId+meta.timestamp], [type+meta.timestamp]',
+});
+
 // ─── Sync Routing ──────────────────────────────────────────
 // SYNC_APP_MAP, TABLE_TO_SYNC_NAME, TABLE_TO_APP, SYNC_NAME_TO_TABLE,
 // toSyncName() and fromSyncName() are now derived from per-module

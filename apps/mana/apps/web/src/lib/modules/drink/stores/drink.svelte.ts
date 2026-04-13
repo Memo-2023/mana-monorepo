@@ -5,6 +5,7 @@
  */
 
 import { encryptRecord } from '$lib/data/crypto';
+import { emitDomainEvent } from '$lib/data/events';
 import { drinkEntryTable, drinkPresetTable } from '../collections';
 import { toDrinkEntry, toDrinkPreset, todayStr, nowTime } from '../queries';
 import type { LocalDrinkEntry, LocalDrinkPreset, DrinkType } from '../types';
@@ -34,6 +35,15 @@ export const drinkStore = {
 		const snapshot = toDrinkEntry({ ...newLocal });
 		await encryptRecord('drinkEntries', newLocal);
 		await drinkEntryTable.add(newLocal);
+		emitDomainEvent('DrinkLogged', 'drink', 'drinkEntries', newLocal.id, {
+			entryId: newLocal.id,
+			drinkType: input.drinkType,
+			quantityMl: input.quantityMl,
+			name: input.name,
+			date: newLocal.date,
+			time: newLocal.time,
+			fromPreset: !!input.presetId,
+		});
 		return snapshot;
 	},
 
@@ -64,10 +74,18 @@ export const drinkStore = {
 	},
 
 	async deleteEntry(id: string) {
+		const entry = await drinkEntryTable.get(id);
 		await drinkEntryTable.update(id, {
 			deletedAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString(),
 		});
+		if (entry) {
+			emitDomainEvent('DrinkEntryDeleted', 'drink', 'drinkEntries', id, {
+				entryId: id,
+				drinkType: entry.drinkType,
+				quantityMl: entry.quantityMl,
+			});
+		}
 	},
 
 	async undoLastEntry() {
@@ -76,9 +94,13 @@ export const drinkStore = {
 			.filter((e) => !e.deletedAt)
 			.sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? ''));
 		if (active.length > 0) {
-			await drinkEntryTable.update(active[0].id, {
+			const entry = active[0];
+			await drinkEntryTable.update(entry.id, {
 				deletedAt: new Date().toISOString(),
 				updatedAt: new Date().toISOString(),
+			});
+			emitDomainEvent('DrinkEntryUndone', 'drink', 'drinkEntries', entry.id, {
+				entryId: entry.id,
 			});
 		}
 	},

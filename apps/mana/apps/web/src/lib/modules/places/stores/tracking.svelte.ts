@@ -6,6 +6,7 @@
  */
 
 import { decryptRecords, encryptRecord } from '$lib/data/crypto';
+import { emitDomainEvent } from '$lib/data/events';
 import { createBlock } from '$lib/data/time-blocks/service';
 import { locationLogTable, placeTable } from '../collections';
 import { getDistanceKm, findNearestPlace, toPlace } from '../queries';
@@ -48,6 +49,9 @@ function startTracking() {
 
 	error = null;
 	isTracking = true;
+	emitDomainEvent('TrackingStarted', 'places', 'locationLogs', '', {
+		timestamp: new Date().toISOString(),
+	});
 
 	_watchId = navigator.geolocation.watchPosition(
 		async (pos) => {
@@ -79,6 +83,10 @@ function stopTracking() {
 		_watchId = null;
 	}
 	isTracking = false;
+	emitDomainEvent('TrackingStopped', 'places', 'locationLogs', '', {
+		durationMs: 0,
+		logCount: 0,
+	});
 }
 
 async function getCurrentPosition(): Promise<GeolocationPosition | null> {
@@ -135,6 +143,13 @@ async function logPosition(pos: GeolocationPosition) {
 
 	await encryptRecord('locationLogs', log);
 	await locationLogTable.add(log);
+	emitDomainEvent('LocationLogged', 'places', 'locationLogs', log.id, {
+		logId: log.id,
+		lat,
+		lng,
+		placeId: nearest?.id,
+		accuracy: pos.coords.accuracy,
+	});
 
 	// Update visit count on the matched place + create TimeBlock
 	if (nearest) {

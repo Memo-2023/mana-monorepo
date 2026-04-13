@@ -10,6 +10,7 @@
 
 import { db } from '$lib/data/database';
 import { encryptRecord } from '$lib/data/crypto';
+import { emitDomainEvent } from '$lib/data/events';
 import { createBlock, updateBlock, deleteBlock } from '$lib/data/time-blocks/service';
 import { timeBlockTable } from '$lib/data/time-blocks/collections';
 import {
@@ -85,6 +86,16 @@ export const eventsStore = {
 			// reads go through queries.ts which decrypts on the way out.
 			await encryptRecord('events', newLocal);
 			await db.table<LocalEvent>('events').add(newLocal);
+			emitDomainEvent('CalendarEventCreated', 'calendar', 'events', eventId, {
+				eventId,
+				title: input.title,
+				startTime: input.startTime,
+				endTime: input.endTime,
+				isAllDay: input.isAllDay ?? false,
+				isRecurring: !!input.recurrenceRule,
+				calendarId: input.calendarId,
+				location: input.location,
+			});
 			CalendarEvents.eventCreated(!!input.recurrenceRule);
 			return { success: true, data: { id: eventId, timeBlockId } };
 		} catch (e) {
@@ -142,6 +153,10 @@ export const eventsStore = {
 
 			await encryptRecord('events', localData);
 			await db.table('events').update(id, localData);
+			emitDomainEvent('CalendarEventUpdated', 'calendar', 'events', id, {
+				eventId: id,
+				fields: Object.keys(input).filter((k) => input[k as keyof typeof input] !== undefined),
+			});
 			CalendarEvents.eventUpdated();
 			return { success: true };
 		} catch (e) {
@@ -341,6 +356,11 @@ export const eventsStore = {
 			await db.table('events').update(id, {
 				deletedAt: new Date().toISOString(),
 				updatedAt: new Date().toISOString(),
+			});
+			emitDomainEvent('CalendarEventDeleted', 'calendar', 'events', id, {
+				eventId: id,
+				title: event?.title ?? '',
+				wasRecurring: false,
 			});
 			CalendarEvents.eventDeleted();
 			return { success: true };

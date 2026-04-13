@@ -6,6 +6,7 @@
  */
 
 import { encryptRecord, decryptRecord } from '$lib/data/crypto';
+import { emitDomainEvent } from '$lib/data/events';
 import { createBlock } from '$lib/data/time-blocks/service';
 import { placeTable } from '../collections';
 import { toPlace } from '../queries';
@@ -41,6 +42,13 @@ export const placesStore = {
 		const plaintextSnapshot = toPlace({ ...newLocal });
 		await encryptRecord('places', newLocal);
 		await placeTable.add(newLocal);
+		emitDomainEvent('PlaceCreated', 'places', 'places', newLocal.id, {
+			placeId: newLocal.id,
+			name: data.name,
+			category: data.category,
+			lat: data.latitude,
+			lng: data.longitude,
+		});
 		return plaintextSnapshot;
 	},
 
@@ -67,9 +75,15 @@ export const placesStore = {
 	},
 
 	async deletePlace(id: string) {
+		const local = await placeTable.get(id);
+		const decrypted = local ? await decryptRecord('places', { ...local }) : null;
 		await placeTable.update(id, {
 			deletedAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString(),
+		});
+		emitDomainEvent('PlaceDeleted', 'places', 'places', id, {
+			placeId: id,
+			name: (decrypted?.name as string) ?? '',
 		});
 	},
 
@@ -113,6 +127,11 @@ export const placesStore = {
 			sourceId: id,
 			title: placeName,
 			color: '#a855f7',
+		});
+		emitDomainEvent('PlaceVisited', 'places', 'places', id, {
+			placeId: id,
+			name: placeName,
+			visitCount: (local.visitCount ?? 0) + 1,
 		});
 	},
 };
