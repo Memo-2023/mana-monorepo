@@ -54,14 +54,14 @@
 	}
 </script>
 
-{#if showQuickLog}
-	<QuickLog
-		onComplete={() => (showQuickLog = false)}
-		onCancel={() => (showQuickLog = false)}
-	/>
-{:else}
-	<div class="mood-view">
-		<!-- Log CTA -->
+<div class="mood-view">
+	<!-- Inline Quick Log (expand/collapse) -->
+	{#if showQuickLog}
+		<QuickLog
+			onComplete={() => (showQuickLog = false)}
+			onCancel={() => (showQuickLog = false)}
+		/>
+	{:else}
 		<button class="log-cta" onclick={() => (showQuickLog = true)}>
 			<span class="cta-emoji">
 				{#if topEmotion}
@@ -75,6 +75,7 @@
 				{todayEntries.length}/{settings.dailyTarget} Check-ins heute
 			</span>
 		</button>
+	{/if}
 
 		<!-- Today's Entries -->
 		{#if todayEntries.length > 0}
@@ -209,8 +210,7 @@
 				{/each}
 			</div>
 		{/if}
-	</div>
-{/if}
+</div>
 
 <style>
 	.mood-view {
@@ -231,28 +231,26 @@
 	/* ── Log CTA ─────────────────────────────────── */
 	.log-cta {
 		display: flex;
-		flex-direction: column;
 		align-items: center;
-		gap: 0.25rem;
-		padding: 1rem;
+		gap: 0.5rem;
+		padding: 0.625rem 0.75rem;
 		border-radius: 0.75rem;
-		background: linear-gradient(135deg, hsl(40 80% 96%), hsl(350 60% 96%));
-		border: 1px solid hsl(40 60% 88%);
+		background: hsl(var(--color-muted));
+		border: 1px solid hsl(var(--color-border));
 		cursor: pointer;
-		transition: transform 0.15s;
+		transition: transform 0.15s, box-shadow 0.15s;
 		color: hsl(var(--color-foreground));
+		text-align: left;
 	}
 
-	:global(.dark) .log-cta {
-		background: linear-gradient(135deg, hsl(40 30% 12%), hsl(350 25% 14%));
-		border-color: hsl(40 30% 20%);
+	.log-cta:hover {
+		transform: scale(1.02);
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 	}
 
-	.log-cta:hover { transform: scale(1.02); }
-
-	.cta-emoji { font-size: 1.75rem; }
-	.cta-text { font-size: 0.875rem; font-weight: 600; }
-	.cta-sub { font-size: 0.6875rem; color: #f59e0b; font-weight: 500; }
+	.cta-emoji { font-size: 1.375rem; flex-shrink: 0; }
+	.cta-text { font-size: 0.8125rem; font-weight: 600; flex: 1; }
+	.cta-sub { font-size: 0.6875rem; color: #f59e0b; font-weight: 500; flex-shrink: 0; }
 
 	/* ── Today ────────────────────────────────────── */
 	.today-section {

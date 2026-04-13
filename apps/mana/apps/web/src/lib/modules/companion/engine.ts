@@ -1,27 +1,77 @@
 /**
  * Companion Chat Engine — Orchestrates LLM + Context Document + Tool Calling.
  *
- * Flow:
- * 1. Build system prompt from Context Document (projections + streaks)
- * 2. Collect conversation history
- * 3. Send to LLM with tool schemas
- * 4. If LLM returns tool_use → execute tool → feed result back → repeat
- * 5. Return final assistant message
- *
- * Currently uses @mana/local-llm directly (Gemma, browser-local).
- * Tool calling is simulated via JSON extraction since Gemma doesn't
- * natively support function calling — the system prompt instructs the
- * model to output JSON when it wants to call a tool.
+ * Tries local LLM (Gemma via @mana/local-llm) first. If WebGPU is not
+ * available, falls back to the mana-llm server endpoint. Tool calling
+ * uses JSON extraction from the LLM output.
  */
 
-import { generate, getLocalLlmStatus, loadLocalLlm } from '@mana/local-llm';
+import { generate, getLocalLlmStatus, loadLocalLlm, isLocalLlmSupported } from '@mana/local-llm';
 import { generateContextDocument } from '$lib/data/projections/context-document';
 import { getToolsForLlm, executeTool } from '$lib/data/tools';
+import { authStore } from '$lib/stores/auth.svelte';
 import type { DaySnapshot, StreakInfo } from '$lib/data/projections/types';
 import type { LocalMessage } from './types';
 import type { ToolResult } from '$lib/data/tools/types';
 
 const MAX_TOOL_ROUNDS = 3;
+
+type LlmMessage = { role: 'user' | 'assistant' | 'system'; content: string };
+
+/** Try local LLM, fall back to server if WebGPU unavailable. */
+async function callLlm(messages: LlmMessage[], onToken?: (token: string) => void): Promise<string> {
+	// Try local first (WebGPU + Gemma)
+	if (isLocalLlmSupported()) {
+		const status = getLocalLlmStatus();
+		if (status.current.state !== 'ready') {
+			try {
+				await loadLocalLlm();
+			} catch {
+				// Fall through to server
+				return callServerLlm(messages);
+			}
+		}
+		const result = await generate({ messages, temperature: 0.7, maxTokens: 1024, onToken });
+		return result.content;
+	}
+
+	// Fallback: server-side LLM via mana-api
+	return callServerLlm(messages);
+}
+
+async function callServerLlm(messages: LlmMessage[]): Promise<string> {
+	const apiUrl =
+		(typeof window !== 'undefined' &&
+			(window as unknown as Record<string, string>).__PUBLIC_MANA_API_URL__) ||
+		import.meta.env.PUBLIC_MANA_API_URL ||
+		'';
+
+	if (!apiUrl) {
+		return 'LLM nicht verfuegbar — weder WebGPU noch Server-Endpoint konfiguriert.';
+	}
+
+	const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+	try {
+		const token = await authStore.getValidToken();
+		if (token) headers['Authorization'] = `Bearer ${token}`;
+	} catch {
+		// Continue without auth — server will decide
+	}
+
+	const response = await fetch(`${apiUrl}/api/v1/chat/completions`, {
+		method: 'POST',
+		headers,
+		body: JSON.stringify({ messages, model: 'companion' }),
+	});
+
+	if (!response.ok) {
+		const err = await response.text().catch(() => response.statusText);
+		return `Server-Fehler: ${err}`;
+	}
+
+	const data = (await response.json()) as { choices?: { message?: { content?: string } }[] };
+	return data.choices?.[0]?.message?.content ?? 'Keine Antwort vom Server.';
+}
 
 interface EngineResult {
 	content: string;
@@ -107,17 +157,10 @@ export async function runCompanionChat(
 	streaks: StreakInfo[],
 	onToken?: (token: string) => void
 ): Promise<EngineResult> {
-	// Ensure local LLM is loaded
-	const status = getLocalLlmStatus();
-	if (status.current.state !== 'ready') {
-		await loadLocalLlm();
-	}
-
 	const systemPrompt = buildSystemPrompt(day, streaks);
 	const toolCalls: EngineResult['toolCalls'] = [];
 
-	// Build message chain
-	const llmMessages: { role: 'user' | 'assistant' | 'system'; content: string }[] = [
+	const llmMessages: LlmMessage[] = [
 		{ role: 'system', content: systemPrompt },
 		...messagesToLlm(history),
 		{ role: 'user', content: userMessage },
@@ -126,14 +169,7 @@ export async function runCompanionChat(
 	let finalContent = '';
 
 	for (let round = 0; round <= MAX_TOOL_ROUNDS; round++) {
-		const result = await generate({
-			messages: llmMessages,
-			temperature: 0.7,
-			maxTokens: 1024,
-			onToken: round === 0 ? onToken : undefined, // Only stream first round
-		});
-
-		const text = result.content;
+		const text = await callLlm(llmMessages, round === 0 ? onToken : undefined);
 		const toolCall = extractToolCall(text);
 
 		if (!toolCall) {
@@ -168,9 +204,20 @@ export async function runCompanionChat(
 }
 
 /**
- * Check if the Companion Chat is available (LLM loaded or loadable).
+ * Check if the Companion Chat is available.
+ * Returns true if either local LLM or server endpoint is usable.
  */
 export function isCompanionAvailable(): boolean {
-	const status = getLocalLlmStatus();
-	return status.current.state === 'ready' || status.current.state === 'idle';
+	// Local LLM available?
+	if (isLocalLlmSupported()) {
+		const status = getLocalLlmStatus();
+		if (status.current.state === 'ready' || status.current.state === 'idle') return true;
+	}
+	// Server fallback configured?
+	const apiUrl =
+		(typeof window !== 'undefined' &&
+			(window as unknown as Record<string, string>).__PUBLIC_MANA_API_URL__) ||
+		import.meta.env.PUBLIC_MANA_API_URL ||
+		'';
+	return !!apiUrl;
 }

@@ -7,11 +7,13 @@
 	import { todoReminderSource } from '$lib/modules/todo/reminder-source';
 	import { startEventStore, stopEventStore } from '$lib/data/events/event-store';
 	import { initTools } from '$lib/data/tools/init';
+	import { startEventBridge, stopEventBridge } from '$lib/triggers/event-bridge';
 	import KeyboardShortcutsModal from '$lib/components/KeyboardShortcutsModal.svelte';
 	import SessionWarning from '$lib/components/SessionWarning.svelte';
 	import EncryptionIntroBanner from '$lib/components/EncryptionIntroBanner.svelte';
 	import { bottomBarStore } from '$lib/stores/bottom-bar.svelte';
 	import SuggestionToast from '$lib/components/SuggestionToast.svelte';
+	import NudgeToast from '$lib/components/NudgeToast.svelte';
 	import { locale, _ } from 'svelte-i18n';
 	import {
 		PillNavigation,
@@ -421,6 +423,7 @@
 		initSharedUload();
 		startEventStore();
 		initTools();
+		startEventBridge();
 		await dashboardStore.initialize();
 
 		// Start the persistent LLM task queue. Idempotent — safe to call
@@ -522,6 +525,7 @@
 		unifiedSync?.stopAll();
 		reminderScheduler.stop();
 		stopEventStore();
+		stopEventBridge();
 		guestMode?.destroy();
 		// Fire-and-forget — we don't need to await; the in-flight task
 		// will finish in the background and the next page session will
@@ -700,6 +704,12 @@
 				 anyway. Self-gates on visible state. -->
 				<div class="bottom-stack-notification">
 					<SuggestionToast />
+				</div>
+
+				<!-- Companion Brain pulse nudges — water reminders, streak
+				 warnings, morning summary etc. Self-gates on active nudges. -->
+				<div class="bottom-stack-notification">
+					<NudgeToast />
 				</div>
 
 				<!-- QuickInputBar with inline nav toggle — gated by the "search" pill -->
