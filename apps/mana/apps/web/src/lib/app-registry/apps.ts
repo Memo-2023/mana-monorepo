@@ -49,6 +49,8 @@ import {
 	BookOpen,
 	Books,
 	CookingPot,
+	PersonSimpleTaiChi,
+	Envelope,
 } from '@mana/shared-icons';
 
 // ── Apps with entity capabilities ───────────────────────────
@@ -862,6 +864,37 @@ registerApp({
 			action: () =>
 				window.dispatchEvent(
 					new CustomEvent('mana:quick-action', { detail: { app: 'recipes', action: 'new' } })
+				),
+		},
+	],
+});
+
+registerApp({
+	id: 'stretch',
+	name: 'Stretch',
+	color: '#10b981',
+	icon: PersonSimpleTaiChi,
+	views: {
+		list: { load: () => import('$lib/modules/stretch/ListView.svelte') },
+	},
+});
+
+registerApp({
+	id: 'mail',
+	name: 'Mail',
+	color: '#6366f1',
+	icon: Envelope,
+	views: {
+		list: { load: () => import('$lib/modules/mail/ListView.svelte') },
+	},
+	contextMenuActions: [
+		{
+			id: 'new-mail',
+			label: 'Neue Mail',
+			icon: Plus,
+			action: () =>
+				window.dispatchEvent(
+					new CustomEvent('mana:quick-action', { detail: { app: 'mail', action: 'compose' } })
 				),
 		},
 	],

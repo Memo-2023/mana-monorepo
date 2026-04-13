@@ -428,6 +428,21 @@ db.version(10).stores({
 		'++seq, type, meta.appId, meta.timestamp, meta.recordId, [meta.appId+meta.timestamp], [type+meta.timestamp]',
 });
 
+// Schema version 11 — adds the Mail module (local draft cache).
+// Mail content lives server-side in Stalwart (JMAP). Only drafts are local-first.
+db.version(11).stores({
+	mailDrafts: 'id, accountId, replyToMessageId',
+});
+
+// Schema version 12 — adds the Meditate module (guided meditation, breathing
+// exercises, body scans). Presets index category+order for the picker grid.
+// Sessions index startedAt for the history timeline (reverse range scan).
+db.version(12).stores({
+	meditatePresets: 'id, category, isPreset, isArchived, order',
+	meditateSessions: 'id, presetId, startedAt, [startedAt+presetId]',
+	meditateSettings: 'id',
+});
+
 // ─── Sync Routing ──────────────────────────────────────────
 // SYNC_APP_MAP, TABLE_TO_SYNC_NAME, TABLE_TO_APP, SYNC_NAME_TO_TABLE,
 // toSyncName() and fromSyncName() are now derived from per-module

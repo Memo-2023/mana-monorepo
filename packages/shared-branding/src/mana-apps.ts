@@ -323,7 +323,7 @@ export const MANA_APPS: ManaApp[] = [
 		icon: APP_ICONS.mail,
 		color: '#6366f1',
 		comingSoon: false,
-		status: 'planning',
+		status: 'development',
 		requiredTier: 'guest',
 	},
 	{
@@ -781,6 +781,23 @@ export const MANA_APPS: ManaApp[] = [
 		},
 		icon: APP_ICONS.recipes,
 		color: '#f97316',
+		comingSoon: false,
+		status: 'development',
+		requiredTier: 'guest',
+	},
+	{
+		id: 'stretch',
+		name: 'Stretch',
+		description: {
+			de: 'Geführtes Dehnen',
+			en: 'Guided Stretching',
+		},
+		longDescription: {
+			de: 'Bleib flexibel mit Beweglichkeits-Checks, geführten Dehnroutinen, Streak-Tracking und Erinnerungen über den Tag. Morgenroutine, Schreibtisch-Pause oder Abendroutine — alles mit Timer.',
+			en: 'Stay flexible with mobility assessments, guided stretch routines, streak tracking, and reminders throughout your day. Morning routine, desk break, or evening flow — all with a timer.',
+		},
+		icon: APP_ICONS.stretch,
+		color: '#10b981',
 		comingSoon: false,
 		status: 'development',
 		requiredTier: 'guest',

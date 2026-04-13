@@ -418,6 +418,36 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	// Plaintext (intentional): difficulty, tags, servings, times,
 	// isFavorite, photo refs — needed for indexing and filtering.
 	recipes: { enabled: true, fields: ['title', 'description', 'ingredients', 'steps'] },
+
+	// ─── Stretch ──────────────────────────────────────────────
+	// Health/wellness data — GDPR Art. 9 sensitive. Exercise names/descriptions
+	// are encrypted (user-created ones contain personal context). Routines
+	// encrypt the exercises array (contains per-slot notes). Sessions encrypt
+	// the routine name snapshot + user notes. Assessments encrypt the full
+	// test results + pain regions. Reminders encrypt only the user-given name.
+	// Plaintext: bodyRegion, difficulty, routineType, order, timestamps,
+	// bilateral, isPreset, isPinned, isActive, days, time — all needed for
+	// indexing/filtering.
+	stretchExercises: { enabled: true, fields: ['name', 'description'] },
+	stretchRoutines: { enabled: true, fields: ['name', 'description', 'exercises'] },
+	stretchSessions: { enabled: true, fields: ['routineName', 'notes'] },
+	stretchAssessments: { enabled: true, fields: ['tests', 'painRegions', 'notes'] },
+	stretchReminders: { enabled: true, fields: ['name'] },
+
+	// ─── Mail ────────────────────────────────────────────────
+	// Only drafts are stored locally (threads/messages come from server).
+	// Encrypt all user-typed content in drafts.
+	mailDrafts: { enabled: true, fields: ['to', 'cc', 'subject', 'body', 'htmlBody'] },
+
+	// ─── Meditate ────────────────────────────────────────────
+	// Meditation presets encrypt user-typed names, descriptions, and body scan
+	// step text. Sessions encrypt only the optional reflection notes.
+	// Plaintext: category, breathPattern, defaultDurationSec, order, startedAt,
+	// durationSec, completed, moodBefore, moodAfter — needed for stats/filtering.
+	// Settings are structural only (no user-typed text), so encryption is off.
+	meditatePresets: { enabled: true, fields: ['name', 'description', 'bodyScanSteps'] },
+	meditateSessions: { enabled: true, fields: ['notes'] },
+	meditateSettings: { enabled: false, fields: [] },
 };
 
 /**
