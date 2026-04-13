@@ -2,11 +2,12 @@
  * Context Document Generator — Produces a ~500 token text snapshot
  * of the user's current state for use as an LLM system prompt.
  *
- * Combines DaySnapshot + Streaks into a structured markdown string
- * that any LLM tier (local Gemma or cloud) can reason over.
+ * Combines DaySnapshot + Streaks + Memory + Correlations into a
+ * structured markdown string that any LLM tier can reason over.
  */
 
 import type { DaySnapshot, StreakInfo } from './types';
+import type { MemoryFact, Correlation } from '$lib/companion/memory/types';
 
 function formatTime(iso: string): string {
 	try {
@@ -19,11 +20,18 @@ function formatTime(iso: string): string {
 /**
  * Generate a concise user context document.
  *
- * @param day    - Today's snapshot
- * @param streaks - Current streak info
- * @returns Markdown string (~300-500 tokens)
+ * @param day          - Today's snapshot
+ * @param streaks      - Current streak info
+ * @param memory       - Extracted user patterns (optional)
+ * @param correlations - Cross-module correlations (optional)
+ * @returns Markdown string (~300-600 tokens)
  */
-export function generateContextDocument(day: DaySnapshot, streaks: StreakInfo[]): string {
+export function generateContextDocument(
+	day: DaySnapshot,
+	streaks: StreakInfo[],
+	memory: MemoryFact[] = [],
+	correlations: Correlation[] = []
+): string {
 	const lines: string[] = [];
 
 	lines.push(`## Nutzer-Kontext (${day.date})\n`);
@@ -100,6 +108,23 @@ export function generateContextDocument(day: DaySnapshot, streaks: StreakInfo[])
 			if (s.longestStreak > 0) {
 				lines.push(`- ${s.label}: unterbrochen (Rekord: ${s.longestStreak} Tage)`);
 			}
+		}
+	}
+
+	// ── Memory (Patterns & Preferences) ────────────────
+	const highConfMemory = memory.filter((m) => m.confidence >= 0.5);
+	if (highConfMemory.length > 0) {
+		lines.push('\n### Bekannte Muster');
+		for (const m of highConfMemory.slice(0, 6)) {
+			lines.push(`- ${m.content}`);
+		}
+	}
+
+	// ── Correlations ────────────────────────────────────
+	if (correlations.length > 0) {
+		lines.push('\n### Zusammenhaenge');
+		for (const c of correlations.slice(0, 3)) {
+			lines.push(`- ${c.sentence} (r=${c.coefficient})`);
 		}
 	}
 
