@@ -824,6 +824,23 @@ export const MANA_APPS: ManaApp[] = [
 		// calls behind it are credit-gated server-side regardless.
 		requiredTier: 'guest',
 	},
+	{
+		id: 'meditate',
+		name: 'Meditate',
+		description: {
+			de: 'Meditation & Atemübungen',
+			en: 'Meditation & Breathing',
+		},
+		longDescription: {
+			de: 'Meditations-Timer, geführte Atemübungen (Box Breathing, 4-7-8, Wim Hof), Body Scans und Stimmungstracking. Finde deine Ruhe — mit Streak-Tracking und Session-Verlauf.',
+			en: 'Meditation timer, guided breathing exercises (Box Breathing, 4-7-8, Wim Hof), body scans, and mood tracking. Find your calm — with streak tracking and session history.',
+		},
+		icon: APP_ICONS.meditate,
+		color: '#8b5cf6',
+		comingSoon: false,
+		status: 'development',
+		requiredTier: 'guest',
+	},
 ];
 
 /**

@@ -59,3 +59,16 @@ export function getManaCreditsUrl(): string {
 	}
 	return process.env.PUBLIC_MANA_CREDITS_URL || 'http://localhost:3061';
 }
+
+/**
+ * Get the mana-mail service URL.
+ * Hosts mail threads, send, labels, accounts.
+ */
+export function getManaMailUrl(): string {
+	if (browser && typeof window !== 'undefined') {
+		const injected = (window as unknown as { __PUBLIC_MANA_MAIL_URL__?: string })
+			.__PUBLIC_MANA_MAIL_URL__;
+		return injected || 'http://localhost:3042';
+	}
+	return process.env.PUBLIC_MANA_MAIL_URL || 'http://localhost:3042';
+}

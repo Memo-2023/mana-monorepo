@@ -20,8 +20,9 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname mana_platform <<-EO
     CREATE SCHEMA IF NOT EXISTS presi;
     CREATE SCHEMA IF NOT EXISTS uload;
     CREATE SCHEMA IF NOT EXISTS cards;
+    CREATE SCHEMA IF NOT EXISTS mail;
 
     -- Grant schema usage
     GRANT ALL ON SCHEMA auth, credits, gifts, subscriptions, feedback, usr, media,
-        todo, traces, presi, uload, cards TO mana;
+        todo, traces, presi, uload, cards, mail TO mana;
 EOSQL

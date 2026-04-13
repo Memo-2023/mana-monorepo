@@ -87,6 +87,16 @@ export function createAuthRoutes(
 				headers: { 'Content-Type': 'application/json', 'X-Service-Key': config.serviceKey },
 				body: JSON.stringify({ userId: response.user.id, email: body.email }),
 			}).catch(() => {});
+			// Provision mail account (fire-and-forget)
+			fetch(`${config.manaMailUrl}/api/v1/internal/mail/on-user-created`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json', 'X-Service-Key': config.serviceKey },
+				body: JSON.stringify({
+					userId: response.user.id,
+					email: body.email,
+					name: body.name || body.email.split('@')[0],
+				}),
+			}).catch(() => {});
 		}
 
 		return c.json(response);
