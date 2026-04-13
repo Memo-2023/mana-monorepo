@@ -432,6 +432,10 @@ db.version(10).stores({
 	_nudgeOutcomes: '++id, nudgeId, nudgeType, outcome, timestamp, [nudgeType+outcome]',
 	companionConversations: 'id, createdAt',
 	companionMessages: 'id, conversationId, role, createdAt, [conversationId+createdAt]',
+	// Rituals
+	rituals: 'id, status, createdAt',
+	ritualSteps: 'id, ritualId, order, [ritualId+order]',
+	ritualLogs: '++id, ritualId, date, [ritualId+date]',
 });
 
 // Schema version 11 — adds the Mail module (local draft cache).
