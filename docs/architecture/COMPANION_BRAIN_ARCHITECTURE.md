@@ -1091,7 +1091,7 @@ apps/mana/apps/web/src/lib/
       day-snapshot.ts               ✅ useDaySnapshot() — live Tagesaggregation
       streaks.ts                    ✅ useStreaks() — 3 Streak-Typen, 90d Lookback
       context-document.ts           ✅ generateContextDocument() — ~500 Token LLM-Prompt
-      correlations.ts               ⬜ Phase 7 — Statistische Korrelationen
+      correlations.ts               ✅ Phase 7 — Pearson ueber 7 Metriken
       types.ts                      ✅ DaySnapshot, StreakInfo, TaskSummary, EventSummary
       index.ts                      ✅ Barrel Export
     tools/                          ✅ Phase 4
@@ -1115,17 +1115,29 @@ apps/mana/apps/web/src/lib/
       types.ts                      ✅ NudgeOutcome
       tracker.ts                    ✅ recordOutcome(), getOutcomeStats(), getActionRate()
       index.ts                      ✅ Barrel Export
+    memory/                         ✅ Phase 7
+      types.ts                      ✅ MemoryFact, Correlation
+      store.ts                      ✅ recordFact, contradictFact, applyDecay, getFacts
+      extractors.ts                 ✅ 3 Extractors (day-of-week, time-of-day, frequency)
+      index.ts                      ✅ Barrel Export
+    rituals/                        ✅ Phase 6
+      types.ts                      ✅ 6 Step-Typen, 3 Templates
+      store.ts                      ✅ createFromTemplate, CRUD, logs
+      queries.ts                    ✅ useActiveRituals, useAllRituals
+      index.ts                      ✅ Barrel Export
   modules/
-    companion/                      ⬜ Phase 5
-      module.config.ts              ⬜
-      stores/chat.svelte.ts         ⬜
-      stores/rituals.svelte.ts      ⬜ Phase 6
-      queries.ts                    ⬜
+    companion/                      ✅ Phase 5
+      types.ts                      ✅ LocalConversation, LocalMessage
+      collections.ts                ✅ companionConversations, companionMessages
+      stores/chat.svelte.ts         ✅ Conversation + Message CRUD
+      queries.ts                    ✅ useConversations, useMessages
+      engine.ts                     ✅ runCompanionChat (LLM + Tools + Context)
+      index.ts                      ✅ Barrel Export
       components/
-        CompanionChat.svelte        ⬜
-        CompanionFeed.svelte        ⬜
-        RitualRunner.svelte         ⬜ Phase 6
-        GoalCard.svelte             ⬜
+        CompanionChat.svelte        ✅ Chat-UI mit Streaming + Tool-Results
+        RitualRunner.svelte         ✅ Step-by-Step Runner
+        CompanionFeed.svelte        ⬜ Timeline (spaetere Iteration)
+        GoalCard.svelte             ⬜ Goal-Fortschritts-Widget (spaetere Iteration)
     todo/
       tools.ts                      ✅ 3 Tools (create, complete, stats)
       stores/tasks.svelte.ts        ✅ 5 Events (Created, Completed, Uncompleted, Deleted, Subtasks)
@@ -1257,40 +1269,65 @@ Commit: `66dd684bb`
 - Tools pro Modul: Todo (3), Calendar (2), Drink (3), Nutriphi (2), Places (4)
 - Jeder Tool hat eine `message` Feld fuer menschenlesbare Bestaetigung
 
-### Phase 5: Companion Chat (NAECHSTE)
+### Phase 5: Companion Chat — ERLEDIGT (2026-04-13)
 
-1. ⬜ Companion Modul (collections, stores, queries)
-2. ⬜ CompanionChat Svelte-Komponente
-3. ⬜ Chat-Flow: Context Document + Tools + LLM
-4. ⬜ CompanionFeed: Timeline von Nudges + Chat
-5. ⬜ Integration: `runWithTools` im LLM Orchestrator
+Commit: `46db527f8`
 
-**Ziel:** Nutzer kann mit dem System sprechen und Aktionen ausfuehren.
+1. ✅ Companion Modul (types, collections, stores/chat, queries)
+2. ✅ CompanionChat Svelte-Komponente (Streaming, Tool-Results inline)
+3. ✅ Chat-Flow: Context Document als System-Prompt + Tool Schemas + LLM
+4. ✅ `/companion` Route mit Sidebar (Gespraechsliste) + Chat-Area
+5. ⬜ CompanionFeed: Timeline von Nudges + Chat — spaetere UI-Iteration
 
-**Offene Fragen:**
-- Soll der Companion als eigenes Modul mit Route `/companion` leben oder als Overlay?
-- Soll der Chat persistent sein (IndexedDB) oder session-basiert?
-- Wie integriert sich der CompanionFeed mit der bestehenden NotificationBar?
+**Ergebnis:** Nutzer kann mit dem System sprechen und Aktionen ausfuehren.
 
-### Phase 6: Rituale
+**Implementierungsnotizen:**
+- Chat nutzt `@mana/local-llm` (Gemma, browser-lokal) direkt — kein Server-Call
+- Tool Calling via JSON-Block-Extraction (`\`\`\`tool {...}\`\`\``) statt nativem Function-Calling (Gemma unterstuetzt das nicht nativ)
+- Max 3 Tool-Call-Runden pro Nachricht (verhindert Endlos-Loops)
+- Conversations + Messages persistent in IndexedDB (`companionConversations`, `companionMessages`)
+- Entscheidung: Companion lebt als eigenes Modul unter `/companion`, nicht als Overlay
+- Streaming via `onToken` Callback — erster Round streamt, Folgerunden (nach Tool-Call) nicht
 
-1. ⬜ Ritual Datenmodell (steps, logs)
-2. ⬜ RitualRunner Komponente
-3. ⬜ AI-Ritual-Generierung via Companion Chat
-4. ⬜ Vordefinierte Ritual-Templates (Morgen, Abend, Wasser)
+### Phase 6: Rituale — ERLEDIGT (2026-04-13)
 
-**Ziel:** Gefuehrte Routinen die in Module schreiben.
+Commit: `41357b254`
 
-### Phase 7: Memory + Correlations
+1. ✅ Ritual Datenmodell (6 Step-Typen: tool_call, number_input, text_input, mood_picker, info_display, checklist)
+2. ✅ RitualRunner Komponente (Step-Card-UI, Progress-Bar, Tool-Execution)
+3. ⬜ AI-Ritual-Generierung via Companion Chat — spaetere Iteration
+4. ✅ 3 Ritual-Templates (Morgenroutine, Abendroutine, Trink-Check)
+5. ✅ `/companion/rituals` Route mit Template-Picker + Ritual-Liste
 
-1. ⬜ Semantic Memory Store (nutzt vorbereitete `_memory` Tabelle)
-2. ⬜ Regelbasierte Pattern-Extraktion
-3. ⬜ Correlation Engine ueber TimeBlocks
-4. ⬜ Memory + Correlations in Context Document integrieren
-5. ⬜ Feedback Loop: Outcome-Patterns → Memory-Facts
-6. ⬜ LLM-basierte Memory-Extraktion (optional, Tier 1)
+**Ergebnis:** Gefuehrte Routinen die in Module schreiben.
 
-**Ziel:** System lernt ueber Zeit, Insights werden praeziser.
+**Implementierungsnotizen:**
+- Rituale leben in `companion/rituals/` (nicht als eigenes Modul)
+- Steps referenzieren Tools per Name — dieselben Tools die der Chat nutzt
+- `info_display` Steps zeigen Projektionsdaten (Tasks, Events, Drinks, Nutrition, Streaks)
+- Completion-Logs tracken wieviele Steps pro Tag abgeschlossen wurden
+- Templates sind statisch definiert — AI-Generierung wird in Phase 5 integriert
+
+### Phase 7: Memory + Correlations — ERLEDIGT (2026-04-13)
+
+Commit: `87a1dd682`
+
+1. ✅ Semantic Memory Store (`_memory` Tabelle, Confidence-Lifecycle)
+2. ✅ 3 regelbasierte Pattern-Extractors (11 Extraction-Rules ueber 5 Module)
+3. ✅ Correlation Engine (Pearson ueber 7 Metriken, cross-modul)
+4. ✅ Memory + Correlations in Context Document integriert
+5. ✅ Feedback Loop: `_nudgeOutcomes` Tabelle + Tracker (Phase 3)
+6. ⬜ LLM-basierte Memory-Extraktion — spaetere Iteration
+
+**Ergebnis:** System lernt Muster, findet Korrelationen, alles fliesst ins LLM.
+
+**Implementierungsnotizen:**
+- Pattern Extractors: day-of-week (Wochentags-Muster), time-of-day (4h-Peak-Fenster), frequency (Tages-Durchschnitt)
+- Confidence: 0.3 initial, +0.15 pro Bestaetigung, -0.15 bei Widerspruch, Decay nach 30 Tagen
+- Correlations nur cross-modul (gleich-Modul wird uebersprungen, trivial korreliert)
+- Nur Korrelationen mit |r| >= 0.3 und >= 14 Tage Daten werden behalten
+- `extractAllPatterns()` soll taeglich laufen (manuell oder via Scheduled Rule)
+- `computeCorrelations()` berechnet on-demand, nicht persistent gecached
 
 ### Phase 8: Rollout auf weitere Module (Woche 8+)
 
@@ -1327,7 +1364,7 @@ Phase 1 (Events) ──────┬──> Phase 2 (Projections)
                                        Phase 8 (Rollout)
 ```
 
-Phase 1 ist Voraussetzung fuer alles. Phase 2-4 koennen teilweise parallel laufen.
+**Status: Phase 1-7 ERLEDIGT (2026-04-13).** Phase 8 (Rollout) ist der naechste Schritt.
 
 ---
 
@@ -1379,3 +1416,162 @@ Die `_activity`-Tabelle bleibt vorerst bestehen (Sync-Debugging). Langfristig:
 - Morgenroutine-Ritual durchspielen: 5 Steps → Daten in 3 Modulen
 - Wasser-Ziel erreichen: 8x log_drink → GoalReached Event → Nudge
 - Companion-Frage: "Wie war meine Woche?" → Context Document → Antwort
+
+---
+
+## 19. Manuelles Testen (Anleitung)
+
+### Voraussetzungen
+
+```bash
+pnpm run mana:dev   # Startet das Dev-Server auf :5173
+```
+
+Oeffne http://localhost:5173 im Browser (Chrome/Edge mit WebGPU-Support fuer LLM).
+
+### 1. Event Bus verifizieren
+
+Oeffne die Browser DevTools Console und teste:
+
+```javascript
+// Zugriff auf den Event Bus (global via Module-Import im App-Kontext)
+// Am einfachsten: Daten erzeugen und in IndexedDB pruefen
+
+// 1. Erstelle einen Task in der Todo-App
+// 2. Oeffne DevTools → Application → IndexedDB → mana → _events
+// 3. Dort sollte ein Event mit type="TaskCreated" erscheinen
+
+// Alternativ via Console:
+const db = await indexedDB.open('mana');
+// Events sind in der _events Tabelle mit type, payload, meta
+```
+
+**Was zu pruefen ist:**
+- Neuen Task erstellen → `TaskCreated` Event in `_events`
+- Task erledigen → `TaskCompleted` Event
+- Drink loggen → `DrinkLogged` Event
+- Mahlzeit loggen → `MealLogged` Event
+- Ort besuchen → `PlaceVisited` Event
+
+### 2. Projections testen
+
+Die Projections sind live-reaktiv. Am einfachsten via Browser Console:
+
+```javascript
+// DaySnapshot ist eine Svelte-reaktive Query.
+// In einer Svelte-Komponente:
+//   import { useDaySnapshot } from '$lib/data/projections';
+//   const day = useDaySnapshot();
+//   console.log(day.value);
+
+// Zum manuellen Testen: Daten erzeugen und schauen ob DaySnapshot reagiert
+// 1. Gehe zu /drink und logge ein Glas Wasser
+// 2. Die DaySnapshot.drinks.water.ml sollte sich erhoehen
+// 3. Gehe zu /todo und erstelle+erledige einen Task
+// 4. DaySnapshot.tasks.completed sollte steigen
+```
+
+### 3. Companion Chat testen
+
+1. Navigiere zu `/companion`
+2. Klicke "Gespraech starten"
+3. **WICHTIG:** Der Chat nutzt `@mana/local-llm` (Gemma, ~500MB Download).
+   Beim ersten Mal muss das Modell heruntergeladen werden. Das dauert
+   je nach Verbindung 1-5 Minuten. WebGPU muss verfuegbar sein
+   (Chrome 113+, Edge 113+, kein Firefox/Safari).
+4. Teste Nachrichten:
+   - "Wie sieht mein Tag aus?" → Sollte DaySnapshot-Daten zusammenfassen
+   - "Log mir ein Glas Wasser" → Sollte `log_drink` Tool aufrufen
+   - "Erstelle einen Task: Einkaufen gehen" → Sollte `create_task` Tool aufrufen
+   - "Wie viel Wasser habe ich heute getrunken?" → Nutzt Context Document
+
+**Ohne WebGPU (Fallback):** Der Chat wird fehlschlagen wenn kein WebGPU
+verfuegbar ist. In dem Fall die Engine temporaer auf einen Server-Endpoint
+umbauen oder den Chat-Flow mit Mock-Responses testen.
+
+### 4. Rituale testen
+
+1. Navigiere zu `/companion/rituals`
+2. Klicke "+ Neu" → waehle "Morgenroutine"
+3. Klicke den Play-Button neben der erstellten Routine
+4. Der RitualRunner zeigt Step fuer Step:
+   - Step 1: "Glas Wasser trinken" → Klick "Ausfuehren" → loggt 250ml Wasser
+   - Step 2: "Dein Tag auf einen Blick" → zeigt heutige Events
+   - Step 3: "Heutige Tasks" → zeigt faellige Tasks
+   - Step 4: "Deine Streaks" → zeigt Streak-Status
+5. "Weiter" / "Fertig" navigiert durch die Steps
+6. Pruefe in `/drink` ob das Wasser tatsaechlich geloggt wurde
+
+### 5. Goals testen
+
+Goals sind aktuell nur programmatisch testbar (kein UI). Via Console:
+
+```javascript
+// In einer Svelte-Komponente oder via Hot-Module:
+import { goalStore, GOAL_TEMPLATES } from '$lib/companion/goals';
+
+// Goal aus Template erstellen
+const goal = await goalStore.createFromTemplate(GOAL_TEMPLATES[0]); // "8 Glaeser Wasser"
+console.log(goal);
+
+// Jetzt ein Wasser loggen → Goal currentValue sollte steigen
+// (der Goal-Tracker subscribed auf den Event Bus)
+```
+
+### 6. Memory + Correlations testen
+
+Braucht mindestens 7-14 Tage an Daten. Zum Testen mit Seed-Daten:
+
+```javascript
+// Pattern Extraction manuell ausfuehren:
+import { extractAllPatterns } from '$lib/companion/memory';
+await extractAllPatterns();
+
+// Extrahierte Facts pruefen:
+import { memoryStore } from '$lib/companion/memory';
+const facts = await memoryStore.getFacts();
+console.log(facts);
+
+// Correlations berechnen:
+import { computeCorrelations } from '$lib/data/projections';
+const corrs = await computeCorrelations();
+console.log(corrs);
+```
+
+**Hinweis:** Mit weniger als 7 Events pro Typ oder 14 Tagen Daten liefern
+die Extractors und Correlations keine Ergebnisse — das ist beabsichtigt,
+um Rauschen zu vermeiden.
+
+### 7. Pulse Rules testen
+
+Rules laufen ueber den Reminder-Scheduler (30s Intervall). Zum manuellen Test:
+
+```javascript
+import { evaluateRules } from '$lib/companion/rules';
+import { useDaySnapshot } from '$lib/data/projections/day-snapshot';
+import { useStreaks } from '$lib/data/projections/streaks';
+
+// In einer Komponente:
+const day = useDaySnapshot();
+const streaks = useStreaks();
+const nudges = evaluateRules(day.value, streaks.value, []);
+console.log(nudges);
+```
+
+### 8. IndexedDB direkt inspizieren
+
+Alle Companion-Daten liegen in IndexedDB (`mana` Database):
+
+| Tabelle | Inhalt |
+|---------|--------|
+| `_events` | Domain Event Stream (type, payload, meta) |
+| `companionGoals` | Aktive Ziele mit currentValue |
+| `companionConversations` | Chat-Gespraeche |
+| `companionMessages` | Chat-Nachrichten + Tool-Calls |
+| `rituals` | Erstellte Rituale |
+| `ritualSteps` | Ritual-Steps (pro Ritual) |
+| `ritualLogs` | Completion-Logs |
+| `_memory` | Extrahierte Muster (nach extractAllPatterns) |
+| `_nudgeOutcomes` | Nudge-Reaktionen |
+
+Oeffne: DevTools → Application → IndexedDB → mana → [Tabelle]
