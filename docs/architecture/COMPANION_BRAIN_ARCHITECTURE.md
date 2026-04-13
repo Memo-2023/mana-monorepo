@@ -1073,99 +1073,105 @@ Generiertes Ritual:
 
 ---
 
-## 12. Neue Dateien & Ordnerstruktur
+## 12. Dateien & Ordnerstruktur
+
+✅ = implementiert, ⬜ = ausstehend
 
 ```
 apps/mana/apps/web/src/lib/
   data/
-    events/
-      event-bus.ts              — EventBus Singleton
-      event-store.ts            — Persistenz in _events Tabelle
-      emit.ts                   — Helper fuer Module
-      types.ts                  — DomainEvent, EventMeta Interfaces
-      catalog.ts                — Alle Event-Type Definitionen (union type)
-    projections/
-      day-snapshot.ts           — DaySnapshot Aggregation
-      streaks.ts                — Streak-Berechnung
-      correlations.ts           — Statistische Korrelationen
-      context-document.ts       — LLM-Prompt-Generator
-    tools/
-      types.ts                  — ModuleTool Interface
-      registry.ts               — Tool-Sammlung + LLM-Schema-Generator
-      executor.ts               — Tool-Ausfuehrung mit Validierung
+    events/                         ✅ Phase 1
+      event-bus.ts                  ✅ EventBus Singleton (sync dispatch, microtask handlers)
+      event-store.ts                ✅ Persistenz in _events Tabelle (90d TTL, 50k max)
+      emit.ts                       ✅ emitDomainEvent() Helper
+      types.ts                      ✅ DomainEvent, EventMeta, EventBus Interfaces
+      catalog.ts                    ✅ 22 Event-Typen (ManaEvent union type)
+      index.ts                      ✅ Barrel Export
+    projections/                    ✅ Phase 2
+      day-snapshot.ts               ✅ useDaySnapshot() — live Tagesaggregation
+      streaks.ts                    ✅ useStreaks() — 3 Streak-Typen, 90d Lookback
+      context-document.ts           ✅ generateContextDocument() — ~500 Token LLM-Prompt
+      correlations.ts               ⬜ Phase 7 — Statistische Korrelationen
+      types.ts                      ✅ DaySnapshot, StreakInfo, TaskSummary, EventSummary
+      index.ts                      ✅ Barrel Export
+    tools/                          ✅ Phase 4
+      types.ts                      ✅ ModuleTool, ToolParameter, ToolResult, LlmFunctionSchema
+      registry.ts                   ✅ registerTools(), getToolsForLlm()
+      executor.ts                   ✅ executeTool() mit Validierung + Typ-Coercion
+      init.ts                       ✅ initTools() — registriert alle 5 Module
+      index.ts                      ✅ Barrel Export
   companion/
-    rules/
-      types.ts                  — PulseRule, Nudge, RuleContext
-      engine.ts                 — Rule Runner (als ReminderSource)
-      water-reminder.ts
-      streak-warning.ts
-      morning-summary.ts
-      evening-reflection.ts
-      overdue-tasks.ts
-      meal-reminder.ts
-      goal-check.ts
-    feedback/
-      types.ts                  — NudgeOutcome
-      tracker.ts                — Outcome-Recording
-      analyzer.ts               — Pattern-Extraktion aus Outcomes
+    goals/                          ✅ Phase 3
+      types.ts                      ✅ LocalGoal, GoalMetric, GoalTarget, 6 Templates
+      store.ts                      ✅ CRUD + Event-Bus-Subscription fuer Progress
+      queries.ts                    ✅ useActiveGoals(), useAllGoals()
+      index.ts                      ✅ Barrel Export
+    rules/                          ✅ Phase 3
+      types.ts                      ✅ PulseRule, Nudge, NudgeType, RuleContext
+      rules.ts                      ✅ 5 Rules (water, streak, morning, overdue, meal)
+      engine.ts                     ✅ evaluateRules(), createPulseReminderSource()
+      index.ts                      ✅ Barrel Export
+    feedback/                       ✅ Phase 3
+      types.ts                      ✅ NudgeOutcome
+      tracker.ts                    ✅ recordOutcome(), getOutcomeStats(), getActionRate()
+      index.ts                      ✅ Barrel Export
   modules/
-    companion/
-      module.config.ts
-      collections.ts
-      stores/
-        chat.svelte.ts
-        rituals.svelte.ts
-        goals.svelte.ts
-      queries.ts
-      tools.ts
+    companion/                      ⬜ Phase 5
+      module.config.ts              ⬜
+      stores/chat.svelte.ts         ⬜
+      stores/rituals.svelte.ts      ⬜ Phase 6
+      queries.ts                    ⬜
       components/
-        CompanionChat.svelte
-        CompanionFeed.svelte
-        RitualRunner.svelte
-        GoalCard.svelte
+        CompanionChat.svelte        ⬜
+        CompanionFeed.svelte        ⬜
+        RitualRunner.svelte         ⬜ Phase 6
+        GoalCard.svelte             ⬜
     todo/
-      tools.ts                  — NEU: Tool-Definitionen
-      stores/tasks.svelte.ts    — ANPASSEN: emit() Calls
+      tools.ts                      ✅ 3 Tools (create, complete, stats)
+      stores/tasks.svelte.ts        ✅ 5 Events (Created, Completed, Uncompleted, Deleted, Subtasks)
     calendar/
-      tools.ts                  — NEU
-      stores/events.svelte.ts   — ANPASSEN
+      tools.ts                      ✅ 2 Tools (create_event, get_todays_events)
+      stores/events.svelte.ts       ✅ 3 Events (Created, Updated, Deleted)
     drink/
-      tools.ts                  — NEU
-      stores/drink.svelte.ts    — ANPASSEN
+      tools.ts                      ✅ 3 Tools (log, progress, undo)
+      stores/drink.svelte.ts        ✅ 3 Events (Logged, Deleted, Undone)
     nutriphi/
-      tools.ts                  — NEU
-      mutations.ts              — ANPASSEN
+      tools.ts                      ✅ 2 Tools (log_meal, nutrition_summary)
+      mutations.ts                  ✅ 3 Events (Logged, PhotoLogged, Deleted)
     places/
-      tools.ts                  — NEU
-      stores/places.svelte.ts   — ANPASSEN
-      stores/tracking.svelte.ts — ANPASSEN
+      tools.ts                      ✅ 4 Tools (create, visit, get_places, location)
+      stores/places.svelte.ts       ✅ 3 Events (Created, Deleted, Visited)
+      stores/tracking.svelte.ts     ✅ 3 Events (Started, Stopped, LocationLogged)
 ```
 
 ---
 
-## 13. Neue Dexie-Tabellen
+## 13. Dexie-Tabellen
+
+### Implementiert (v10 Schema)
 
 ```typescript
-// In database.ts, naechste Version:
+// Event Store — append-only domain event log
+_events: '++seq, type, meta.appId, meta.timestamp, meta.recordId, [meta.appId+meta.timestamp], [type+meta.timestamp]',
 
-// Event Store (ersetzt _activity langfristig)
-_events: '++seq, type, [meta.appId+meta.timestamp], [meta.type+meta.timestamp], meta.recordId',
+// Goals — companion brain goal tracking
+companionGoals: 'id, moduleId, status, [moduleId+status]',
 
-// Goals
-goals: 'id, moduleId, status, [moduleId+status]',
-goalHistory: '++id, goalId, periodStart',
-
-// Semantic Memory
+// Semantic Memory — extracted user patterns (prepared, not yet populated)
 _memory: 'id, category, confidence, lastConfirmed, [category+confidence]',
 
-// Feedback Loop
+// Feedback Loop — nudge outcome tracking
 _nudgeOutcomes: '++id, nudgeId, nudgeType, outcome, timestamp, [nudgeType+outcome]',
+```
 
-// Companion Chat
+### Noch ausstehend (Phase 5+)
+
+```typescript
+// Companion Chat (Phase 5)
 companionConversations: 'id, createdAt',
 companionMessages: 'id, conversationId, role, createdAt, [conversationId+createdAt]',
 
-// Rituals
+// Rituals (Phase 6)
 rituals: 'id, status, createdAt',
 ritualSteps: 'id, ritualId, order, [ritualId+order]',
 ritualLogs: '++id, ritualId, date, [ritualId+date]',
@@ -1175,74 +1181,116 @@ ritualLogs: '++id, ritualId, date, [ritualId+date]',
 
 ## 14. Implementierungs-Reihenfolge
 
-### Phase 1: Event-Fundament (Woche 1-2)
+### Phase 1: Event-Fundament — ERLEDIGT (2026-04-13)
 
-1. `data/events/` — EventBus, EventStore, emit Helper, Type Catalog
-2. Domain Events fuer 5 Pilot-Module definieren (catalog.ts)
-3. Stores der 5 Module umbauen: `emit()` Calls einfuegen
-4. Event Store Subscriber: `eventBus.onAny()` → `_events` Tabelle
-5. Tests: Events werden korrekt emittiert und persistiert
+Commit: `e927c1f10`
 
-**Ergebnis:** Semantischer Event-Stream fliesst, Dexie-Writes + Events parallel.
+1. ✅ `data/events/` — EventBus, EventStore, emit Helper, Type Catalog
+2. ✅ Domain Events fuer 5 Pilot-Module definiert (catalog.ts, 22 Event-Typen)
+3. ✅ Stores der 5 Module umgebaut: `emit()` Calls eingefuegt
+4. ✅ Event Store Subscriber: `eventBus.onAny()` → `_events` Tabelle (v10 Schema)
+5. ⬜ Tests: noch ausstehend
 
-### Phase 2: Projections (Woche 2-3)
+**Ergebnis:** Semantischer Event-Stream fliesst. 20 Domain Events aus 5 Modulen.
 
-1. DaySnapshot Projection (live Dexie-Queries + Event-Listener)
-2. Streaks Projection (basierend auf Events + TimeBlocks)
-3. Context Document Generator (Template-basiert)
-4. Dashboard-Widget: "Mein Tag" Karte mit DaySnapshot-Daten
+**Implementierungsnotizen:**
+- Events werden im Store emittiert (nicht im Dexie-Hook) — der Store kennt die Semantik
+- `emitDomainEvent()` Helper reduziert Boilerplate auf eine Zeile pro Event
+- Re-Entrancy-Guard im EventBus verhindert Endlos-Loops
+- `_activity` Tabelle bleibt parallel bestehen (Sync-Debugging)
+
+### Phase 2: Projections — ERLEDIGT (2026-04-13)
+
+Commit: `40e1145e9`
+
+1. ✅ DaySnapshot Projection (live Dexie-Queries ueber alle 5 Module)
+2. ✅ Streaks Projection (3 Streak-Definitionen: Wasser, Tasks, Mahlzeiten, 90-Tage Lookback)
+3. ✅ Context Document Generator (Template-basiert, ~300-500 Token)
+4. ⬜ Dashboard-Widget: "Mein Tag" Karte — spaeter in UI-Phase
 
 **Ergebnis:** Zentraler Ueberblick ueber alle 5 Module, live-reaktiv.
 
-### Phase 3: Goals + Pulse (Woche 3-4)
+**Implementierungsnotizen:**
+- Projections nutzen `useLiveQueryWithDefault` aus `@mana/local-store/svelte`
+- DaySnapshot queried 5 Dexie-Tabellen + decrypted in einem buildSnapshot()-Call
+- Streaks berechnen per checkDate() ob ein Tag "zaehlt" (z.B. Wasser-Ziel erreicht)
+- Context Document ist reines String-Template, kein LLM noetig
+- `startEventStore()` in `(app)/+layout.svelte` bei Auth-Ready gewired
 
-1. Goal Datenmodell + Store + Queries
-2. Goal-Tracking via Event-Subscription
-3. Goal-Templates (5 vordefinierte)
-4. Rule Engine mit 5 initialen Rules
-5. Integration in Reminder-Scheduler
-6. Nudge-UI: Toast / Bottom-Sheet
+### Phase 3: Goals + Pulse — ERLEDIGT (2026-04-13)
 
-**Ergebnis:** Nutzer setzt Ziele, bekommt proaktive Nudges.
+Commit: `9066b6c9a`
 
-### Phase 4: Tool Layer (Woche 4-5)
+1. ✅ Goal Datenmodell + Store + Queries (`companion/goals/`)
+2. ✅ Goal-Tracking via Event-Bus-Subscription (auto-increment currentValue)
+3. ✅ 6 Goal-Templates (Wasser, Tasks, Mahlzeiten, Kalorien, Orte, Kaffee-Limit)
+4. ✅ Rule Engine mit 5 Rules (`companion/rules/`)
+5. ✅ ReminderSource-Adapter fuer bestehenden Scheduler
+6. ⬜ Nudge-UI: Toast / Bottom-Sheet — in Phase 5 (Companion Chat)
 
-1. ModuleTool Interface + Registry
-2. tools.ts fuer 5 Pilot-Module
-3. Tool Executor mit Validierung
-4. LLM Function Schema Generator
-5. Integration in LLM Orchestrator (`runWithTools`)
+**Ergebnis:** Goals tracken automatisch, Rules erzeugen Nudges.
 
-**Ergebnis:** LLM kann Module lesen und beschreiben.
+**Implementierungsnotizen:**
+- Goals leben in `companionGoals` Tabelle (v10 Schema), nicht im Core-Modul
+- Goal-Tracker subscribed auf `eventBus.onAny()` und matched per eventType + Filter
+- Perioden-Reset (day/week/month) passiert automatisch beim naechsten Event
+- `GoalReached` Event wird emittiert wenn Ziel erstmals in einer Periode erreicht
+- Rules nutzen localStorage fuer Dismissal-Tracking und Last-Run-Timestamps
+- `_memory` und `_nudgeOutcomes` Tabellen vorbereitet (v10 Schema)
 
-### Phase 5: Companion Chat (Woche 5-6)
+### Phase 4: Tool Layer — ERLEDIGT (2026-04-13)
 
-1. Companion Modul (collections, stores, queries)
-2. CompanionChat Svelte-Komponente
-3. Chat-Flow: Context Document + Tools + LLM
-4. CompanionFeed: Timeline von Nudges + Chat
+Commit: `66dd684bb`
 
-**Ergebnis:** Nutzer kann mit dem System sprechen und Aktionen ausfuehren.
+1. ✅ ModuleTool Interface + Registry (dynamische Registrierung)
+2. ✅ tools.ts fuer 5 Pilot-Module (13 Tools total)
+3. ✅ Tool Executor mit Parameter-Validierung + Typ-Coercion
+4. ✅ LLM Function Schema Generator (`getToolsForLlm()`)
+5. ⬜ Integration in LLM Orchestrator (`runWithTools`) — in Phase 5
 
-### Phase 6: Rituale (Woche 6-7)
+**Ergebnis:** 13 Tools bereit fuer LLM Function-Calling.
 
-1. Ritual Datenmodell (steps, logs)
-2. RitualRunner Komponente
-3. AI-Ritual-Generierung via Companion Chat
-4. Vordefinierte Ritual-Templates (Morgen, Abend, Wasser)
+**Implementierungsnotizen:**
+- Registry nutzt `registerTools()` Pattern statt statische Imports (tree-shaking-freundlich)
+- `initTools()` in `(app)/+layout.svelte` gewired neben `startEventStore()`
+- Executor coerced String→Number und String→Boolean automatisch
+- Tools pro Modul: Todo (3), Calendar (2), Drink (3), Nutriphi (2), Places (4)
+- Jeder Tool hat eine `message` Feld fuer menschenlesbare Bestaetigung
 
-**Ergebnis:** Gefuehrte Routinen die in Module schreiben.
+### Phase 5: Companion Chat (NAECHSTE)
 
-### Phase 7: Memory + Correlations (Woche 7-8)
+1. ⬜ Companion Modul (collections, stores, queries)
+2. ⬜ CompanionChat Svelte-Komponente
+3. ⬜ Chat-Flow: Context Document + Tools + LLM
+4. ⬜ CompanionFeed: Timeline von Nudges + Chat
+5. ⬜ Integration: `runWithTools` im LLM Orchestrator
 
-1. Semantic Memory Tabelle + Store
-2. Regelbasierte Pattern-Extraktion
-3. Correlation Engine ueber TimeBlocks
-4. Memory + Correlations in Context Document
-5. Feedback Loop (NudgeOutcome Tracking)
-6. LLM-basierte Memory-Extraktion (optional, Tier 1)
+**Ziel:** Nutzer kann mit dem System sprechen und Aktionen ausfuehren.
 
-**Ergebnis:** System lernt ueber Zeit, Insights werden praeziser.
+**Offene Fragen:**
+- Soll der Companion als eigenes Modul mit Route `/companion` leben oder als Overlay?
+- Soll der Chat persistent sein (IndexedDB) oder session-basiert?
+- Wie integriert sich der CompanionFeed mit der bestehenden NotificationBar?
+
+### Phase 6: Rituale
+
+1. ⬜ Ritual Datenmodell (steps, logs)
+2. ⬜ RitualRunner Komponente
+3. ⬜ AI-Ritual-Generierung via Companion Chat
+4. ⬜ Vordefinierte Ritual-Templates (Morgen, Abend, Wasser)
+
+**Ziel:** Gefuehrte Routinen die in Module schreiben.
+
+### Phase 7: Memory + Correlations
+
+1. ⬜ Semantic Memory Store (nutzt vorbereitete `_memory` Tabelle)
+2. ⬜ Regelbasierte Pattern-Extraktion
+3. ⬜ Correlation Engine ueber TimeBlocks
+4. ⬜ Memory + Correlations in Context Document integrieren
+5. ⬜ Feedback Loop: Outcome-Patterns → Memory-Facts
+6. ⬜ LLM-basierte Memory-Extraktion (optional, Tier 1)
+
+**Ziel:** System lernt ueber Zeit, Insights werden praeziser.
 
 ### Phase 8: Rollout auf weitere Module (Woche 8+)
 
