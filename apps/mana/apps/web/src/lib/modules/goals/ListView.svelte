@@ -2,12 +2,14 @@
   Goals — Goal cards with progress bars and template picker.
 -->
 <script lang="ts">
-	import { Target, Plus, Play, Pause, Trash } from '@mana/shared-icons';
+	import { Target, Plus, Play, Pause, Trash, PencilSimple } from '@mana/shared-icons';
 	import { goalStore, useAllGoals, GOAL_TEMPLATES } from '$lib/companion/goals';
 	import type { LocalGoal } from '$lib/companion/goals/types';
+	import GoalEditor from './GoalEditor.svelte';
 
 	const goals = useAllGoals();
 	let showTemplates = $state(false);
+	let showEditor = $state(false);
 
 	function progressPercent(goal: LocalGoal): number {
 		if (goal.target.value === 0) return 0;
@@ -27,8 +29,11 @@
 
 <div class="goals-page">
 	<div class="header">
+		<button class="add-btn" onclick={() => (showEditor = true)}>
+			<PencilSimple size={14} weight="bold" /> Eigenes
+		</button>
 		<button class="add-btn" onclick={() => (showTemplates = !showTemplates)}>
-			<Plus size={14} weight="bold" /> Ziel
+			<Plus size={14} weight="bold" /> Vorlage
 		</button>
 	</div>
 
@@ -86,10 +91,14 @@
 		{/each}
 
 		{#if goals.value.length === 0 && !showTemplates}
-			<div class="empty">Keine Ziele aktiv. Tippe + um ein Ziel zu setzen.</div>
+			<div class="empty">
+				Keine Ziele aktiv. Waehle eine Vorlage oder erstelle ein eigenes Ziel.
+			</div>
 		{/if}
 	</div>
 </div>
+
+<GoalEditor show={showEditor} onClose={() => (showEditor = false)} />
 
 <style>
 	.goals-page {

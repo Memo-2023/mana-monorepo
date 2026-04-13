@@ -8,6 +8,7 @@
 	import { startEventStore, stopEventStore } from '$lib/data/events/event-store';
 	import { initTools } from '$lib/data/tools/init';
 	import { startEventBridge, stopEventBridge } from '$lib/triggers/event-bridge';
+	import { startStreakTracker, stopStreakTracker } from '$lib/data/projections/streaks';
 	import KeyboardShortcutsModal from '$lib/components/KeyboardShortcutsModal.svelte';
 	import SessionWarning from '$lib/components/SessionWarning.svelte';
 	import EncryptionIntroBanner from '$lib/components/EncryptionIntroBanner.svelte';
@@ -424,6 +425,7 @@
 		startEventStore();
 		initTools();
 		startEventBridge();
+		startStreakTracker();
 		await dashboardStore.initialize();
 
 		// Start the persistent LLM task queue. Idempotent — safe to call
@@ -526,6 +528,7 @@
 		reminderScheduler.stop();
 		stopEventStore();
 		stopEventBridge();
+		stopStreakTracker();
 		guestMode?.destroy();
 		// Fire-and-forget — we don't need to await; the in-flight task
 		// will finish in the background and the next page session will

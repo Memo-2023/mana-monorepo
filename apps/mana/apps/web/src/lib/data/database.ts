@@ -440,6 +440,7 @@ db.version(14).stores({
 	rituals: 'id, status, createdAt',
 	ritualSteps: 'id, ritualId, order, [ritualId+order]',
 	ritualLogs: '++id, ritualId, date, [ritualId+date]',
+	_streakState: 'id, lastActiveDate',
 });
 
 // Schema version 15 — adds the Mood module (multi-daily mood tracking with

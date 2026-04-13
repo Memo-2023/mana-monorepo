@@ -1,48 +1,46 @@
 /**
- * Streaks — Tracks consecutive-day activity across modules.
+ * Streaks — Event-driven consecutive-day tracking.
  *
- * Each streak definition queries a specific module to check if "today
- * counts" (e.g. water goal reached, at least 1 task completed, etc.).
- * The streak engine then looks backwards through the event store to
- * compute the current streak length.
+ * Persistent state in `_streakState` table. Updated incrementally
+ * via event bus subscription instead of scanning 90 days of history.
+ *
+ * On relevant events (DrinkLogged, TaskCompleted, MealLogged, etc.),
+ * the streak for today is marked active. On each read, we check if
+ * the streak is still consecutive or has been broken.
  *
  * Status:
- *   active    — today or yesterday was active
- *   at_risk   — yesterday was NOT active, but the day before was
- *   broken    — more than 1 day gap
+ *   active   — today is active
+ *   at_risk  — today not yet active, but yesterday was
+ *   broken   — gap > 1 day
  */
 
 import { db } from '../database';
-import { decryptRecords } from '../crypto';
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
-import { DEFAULT_DAILY_GOAL_ML } from '$lib/modules/drink/types';
-import type { LocalTask } from '$lib/modules/todo/types';
-import type { LocalDrinkEntry } from '$lib/modules/drink/types';
-import type { LocalMeal } from '$lib/modules/nutriphi/types';
+import { eventBus } from '../events/event-bus';
+import type { DomainEvent } from '../events/types';
 import type { StreakInfo } from './types';
 
-// ── Helpers ─────────────────────────────────────────
+// ── Persistent State ────────────────────────────────
 
-function dateStr(d: Date): string {
-	return d.toISOString().split('T')[0];
+interface StreakState {
+	id: string;
+	label: string;
+	moduleId: string;
+	currentStreak: number;
+	longestStreak: number;
+	lastActiveDate: string; // YYYY-MM-DD
 }
 
-function daysAgo(n: number): string {
+const TABLE = '_streakState';
+
+function todayStr(): string {
+	return new Date().toISOString().split('T')[0];
+}
+
+function yesterdayStr(): string {
 	const d = new Date();
-	d.setDate(d.getDate() - n);
-	return dateStr(d);
-}
-
-function daysBetween(a: string, b: string): number {
-	const msPerDay = 86400000;
-	return Math.floor((new Date(b).getTime() - new Date(a).getTime()) / msPerDay);
-}
-
-function streakStatus(lastActiveDate: string, today: string): StreakInfo['status'] {
-	const gap = daysBetween(lastActiveDate, today);
-	if (gap <= 0) return 'active'; // today
-	if (gap === 1) return 'at_risk'; // yesterday
-	return 'broken';
+	d.setDate(d.getDate() - 1);
+	return d.toISOString().split('T')[0];
 }
 
 // ── Streak Definitions ──────────────────────────────
@@ -51,109 +49,153 @@ interface StreakDef {
 	id: string;
 	moduleId: string;
 	label: string;
-	/** Check if a given date "counts" as active. */
-	checkDate: (date: string) => Promise<boolean>;
+	/** Domain event types that count as "active" for this streak */
+	triggerEvents: string[];
+	/** Optional: only count events where this payload filter matches */
+	filter?: (payload: Record<string, unknown>) => boolean;
 }
 
-const streakDefs: StreakDef[] = [
+const STREAK_DEFS: StreakDef[] = [
 	{
 		id: 'streak-water-goal',
 		moduleId: 'drink',
 		label: 'Wasser-Ziel',
-		async checkDate(date: string) {
-			const entries = await db.table<LocalDrinkEntry>('drinkEntries').toArray();
-			const dayEntries = entries.filter(
-				(e) => !e.deletedAt && e.date === date && e.drinkType === 'water'
-			);
-			let totalMl = 0;
-			for (const e of dayEntries) totalMl += e.quantityMl ?? 0;
-			return totalMl >= DEFAULT_DAILY_GOAL_ML;
-		},
+		triggerEvents: ['DrinkLogged'],
+		filter: (p) => p.drinkType === 'water',
 	},
 	{
 		id: 'streak-tasks-completed',
 		moduleId: 'todo',
 		label: 'Tasks erledigt',
-		async checkDate(date: string) {
-			const tasks = await db.table<LocalTask>('tasks').toArray();
-			return tasks.some(
-				(t) =>
-					!t.deletedAt &&
-					t.isCompleted &&
-					t.completedAt != null &&
-					(t.completedAt as string).startsWith(date)
-			);
-		},
+		triggerEvents: ['TaskCompleted'],
 	},
 	{
 		id: 'streak-meals-logged',
 		moduleId: 'nutriphi',
 		label: 'Mahlzeiten getrackt',
-		async checkDate(date: string) {
-			const meals = await db.table<LocalMeal>('meals').toArray();
-			return meals.some((m) => !m.deletedAt && m.date === date);
-		},
+		triggerEvents: ['MealLogged', 'MealFromPhotoLogged'],
+	},
+	{
+		id: 'streak-workout',
+		moduleId: 'body',
+		label: 'Workout',
+		triggerEvents: ['WorkoutFinished'],
+	},
+	{
+		id: 'streak-journal',
+		moduleId: 'journal',
+		label: 'Journal',
+		triggerEvents: ['JournalEntryCreated'],
+	},
+	{
+		id: 'streak-meditation',
+		moduleId: 'meditate',
+		label: 'Meditation',
+		triggerEvents: ['MeditationCompleted'],
 	},
 ];
 
-// ── Streak Calculator ───────────────────────────────
+// ── Core Logic ──────────────────────────────────────
 
-const MAX_LOOKBACK = 90; // days
+async function markActive(streakId: string): Promise<void> {
+	const today = todayStr();
+	const existing = await db.table<StreakState>(TABLE).get(streakId);
 
-async function computeStreak(def: StreakDef): Promise<StreakInfo> {
-	const today = dateStr(new Date());
-	let lastActiveDate = '';
-	let currentStreak = 0;
-	let longestStreak = 0;
-	let runningStreak = 0;
-	let streakBroken = false;
-
-	for (let i = 0; i < MAX_LOOKBACK; i++) {
-		const date = daysAgo(i);
-		const active = await def.checkDate(date);
-
-		if (active) {
-			if (!lastActiveDate) lastActiveDate = date;
-			if (!streakBroken) {
-				currentStreak++;
-			}
-			runningStreak++;
-		} else {
-			if (!streakBroken && i > 0) {
-				// First gap ends the current streak
-				streakBroken = true;
-			}
-			if (runningStreak > longestStreak) longestStreak = runningStreak;
-			runningStreak = 0;
-		}
+	if (!existing) {
+		// First ever activation — seed from definition
+		const def = STREAK_DEFS.find((d) => d.id === streakId);
+		if (!def) return;
+		await db.table(TABLE).add({
+			id: streakId,
+			label: def.label,
+			moduleId: def.moduleId,
+			currentStreak: 1,
+			longestStreak: 1,
+			lastActiveDate: today,
+		});
+		return;
 	}
-	if (runningStreak > longestStreak) longestStreak = runningStreak;
-	if (currentStreak > longestStreak) longestStreak = currentStreak;
 
-	return {
-		id: def.id,
-		moduleId: def.moduleId,
-		label: def.label,
-		currentStreak,
-		longestStreak,
-		lastActiveDate: lastActiveDate || today,
-		status: lastActiveDate ? streakStatus(lastActiveDate, today) : 'broken',
-	};
+	if (existing.lastActiveDate === today) return; // Already active today
+
+	const yesterday = yesterdayStr();
+	const isConsecutive = existing.lastActiveDate === yesterday;
+	const newStreak = isConsecutive ? existing.currentStreak + 1 : 1;
+	const newLongest = Math.max(existing.longestStreak, newStreak);
+
+	await db.table(TABLE).update(streakId, {
+		currentStreak: newStreak,
+		longestStreak: newLongest,
+		lastActiveDate: today,
+	});
 }
 
+function computeStatus(state: StreakState): StreakInfo['status'] {
+	const today = todayStr();
+	if (state.lastActiveDate === today) return 'active';
+	if (state.lastActiveDate === yesterdayStr()) return 'at_risk';
+	return 'broken';
+}
+
+// ── Event Bus Subscription ──────────────────────────
+
+let unsubscribe: (() => void) | null = null;
+
+export function startStreakTracker(): void {
+	if (unsubscribe) return;
+
+	unsubscribe = eventBus.onAny((event: DomainEvent) => {
+		for (const def of STREAK_DEFS) {
+			if (!def.triggerEvents.includes(event.type)) continue;
+			if (def.filter && !def.filter(event.payload as Record<string, unknown>)) continue;
+			markActive(def.id);
+		}
+	});
+}
+
+export function stopStreakTracker(): void {
+	unsubscribe?.();
+	unsubscribe = null;
+}
+
+// ── Seed defaults ───────────────────────────────────
+
+async function ensureSeeded(): Promise<void> {
+	const count = await db.table(TABLE).count();
+	if (count > 0) return;
+	// Seed empty states so useStreaks() returns all definitions
+	for (const def of STREAK_DEFS) {
+		await db.table(TABLE).add({
+			id: def.id,
+			label: def.label,
+			moduleId: def.moduleId,
+			currentStreak: 0,
+			longestStreak: 0,
+			lastActiveDate: '',
+		});
+	}
+}
+
+// ── Read API ────────────────────────────────────────
+
 async function buildAllStreaks(): Promise<StreakInfo[]> {
-	return Promise.all(streakDefs.map(computeStreak));
+	await ensureSeeded();
+	const states = await db.table<StreakState>(TABLE).toArray();
+
+	return states.map((s) => ({
+		id: s.id,
+		moduleId: s.moduleId,
+		label: s.label,
+		currentStreak:
+			s.lastActiveDate === todayStr() || s.lastActiveDate === yesterdayStr() ? s.currentStreak : 0, // Reset display if broken
+		longestStreak: s.longestStreak,
+		lastActiveDate: s.lastActiveDate || todayStr(),
+		status: s.lastActiveDate ? computeStatus(s) : 'broken',
+	}));
 }
 
 /**
- * Reactive streak list — updates when underlying tables change.
- *
- * ```svelte
- * const streaks = useStreaks();
- * {#each streaks.value as s}
- *   <p>{s.label}: {s.currentStreak} Tage ({s.status})</p>
- * {/each}
- * ```
+ * Reactive streak list. Reads from `_streakState` table (fast, no scanning).
  */
 export function useStreaks() {
 	return useLiveQueryWithDefault<StreakInfo[]>(buildAllStreaks, []);
