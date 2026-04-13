@@ -1364,7 +1364,107 @@ Phase 1 (Events) ──────┬──> Phase 2 (Projections)
                                        Phase 8 (Rollout)
 ```
 
-**Status: Phase 1-7 ERLEDIGT (2026-04-13).** Phase 8 (Rollout) ist der naechste Schritt.
+**Status: Phase 1-8 ERLEDIGT (2026-04-13).** 29 von ~40 Modulen angebunden.
+
+---
+
+## 15b. Phase 8 Status: Modul-Rollout
+
+### Angebundene Module (29)
+
+| # | Modul | Events | Tools | Batch |
+|---|-------|--------|-------|-------|
+| 1 | Todo | 5 | 3 | Pilot |
+| 2 | Calendar | 3 | 2 | Pilot |
+| 3 | Drink | 3 | 3 | Pilot |
+| 4 | Nutriphi | 3 | 2 | Pilot |
+| 5 | Places | 6 | 4 | Pilot |
+| 6 | Habits | 3 | 3 | Batch 2 |
+| 7 | Journal | 3 | 2 | Batch 2 |
+| 8 | Notes | 2 | 1 | Batch 2 |
+| 9 | Contacts | 2 | 2 | Batch 2 |
+| 10 | Body | 5 | 3 | Batch 2 |
+| 11 | Finance | 2 | 1 | Batch 3 |
+| 12 | Dreams | 2 | 1 | Batch 3 |
+| 13 | Cards | 2 | 1 | Batch 3 |
+| 14 | Times | 2 | 2 | Batch 3 |
+| 15 | Social Events | 2 | 1 | Batch 3 |
+| 16 | Music | 1 | 1 | Batch 4 |
+| 17 | Storage | 1 | 1 | Batch 4 |
+| 18 | Chat | 2 | 1 | Batch 4 |
+| 19 | Memoro | 1 | 1 | Batch 4 |
+| 20 | Skilltree | 2 | 2 | Batch 4 |
+| 21 | Cycles | 1 | 1 | Batch 5 |
+| 22 | Firsts | 1 | 1 | Batch 5 |
+| 23 | Guides | 1 | 1 | Batch 5 |
+| 24 | Inventory | 1 | 1 | Batch 5 |
+| 25 | Photos | 1 | 0 | Batch 5 |
+| 26 | Plants | 2 | 1 | Batch 6 |
+| 27 | News | 1 | 0 | Batch 6 |
+| 28 | Recipes | 2 | 1 | Batch 6 |
+| 29 | Questions | 1 | 0 | Batch 6 |
+| **Total** | | **67** | **47** | |
+
+### Noch fehlende Module (~11)
+
+| Modul | Grund | Prioritaet |
+|-------|-------|-----------|
+| Citycorners | Nischen-Modul (Konstanz-Guide) | Niedrig |
+| Uload | URL-Shortener, wenig Brain-relevant | Niedrig |
+| Calc | Kein persistenter State | Nicht noetig |
+| Moodlit | Ambient-Lighting, kein Tracking | Nicht noetig |
+| Playground | Dev-Tool fuer LLM-Tests | Nicht noetig |
+| Who | Rate-Spiel, kein Tracking | Nicht noetig |
+| Zitare | Zitate (read-only) | Nicht noetig |
+| Context | Kein eigener Store / Mutations | Nicht noetig |
+| Presi | Praesentation-Builder | Niedrig |
+| Meditate | Meditation-Sessions | Mittel |
+| Sleep | Schlaf-Tracking | Mittel |
+
+**Empfehlung:** Meditate und Sleep lohnen sich fuer Correlations (Schlaf vs. Produktivitaet). Die anderen sind entweder read-only, Dev-Tools oder haben keinen persistenten State der fuer das Brain relevant waere.
+
+---
+
+## 15c. Bekannte Altlasten & Optimierungs-Potenzial
+
+### Altlast: `_activity` Tabelle
+
+Die alte `_activity`-Tabelle wird weiterhin parallel zum neuen `_events` Event Store befuellt (via Dexie-Hooks in database.ts). Sie enthaelt nur CRUD-Operationen ohne Semantik. **Kann entfernt werden** sobald alle Debug-Tools und die Activity-Seite auf `_events` umgestellt sind.
+
+**TODO:** `trackActivity()` Calls in database.ts:546-638 entfernen und Activity-Query in activity.ts auf `queryEvents()` umstellen.
+
+### Altlast: Trigger-System duplikation
+
+Das bestehende Trigger-System (`lib/triggers/`) feuert ebenfalls bei Dexie-Writes und hat eigene Actions (logHabit, createTask, createNote). Das Companion Brain hat ein eigenes, maechtigeres System (Domain Events + Goals + Rules). Langfristig sollte das alte Trigger-System in die Rule Engine migriert werden.
+
+**TODO:** Bestehende Automations (`automations` Tabelle) als Pulse Rules abbilden, altes Trigger-System entfernen.
+
+### Optimierung: Streaks-Berechnung
+
+`useStreaks()` in streaks.ts berechnet fuer jeden Streak bis zu 90 Tage zurueck — pro Streak eine separate Dexie-Query pro Tag (worst case: 3 Streaks x 90 Tage = 270 Queries). Fuer die Pilotphase akzeptabel, langfristig sollte das via Event-basierte inkrementelle Berechnung ersetzt werden (Event "DrinkGoalReached" → Streak +1 statt taeglich zurueckschauen).
+
+### Optimierung: DaySnapshot Query-Last
+
+`buildSnapshot()` in day-snapshot.ts queried 5+ Dexie-Tabellen sequentiell + decrypted jeweils. Bei grossen Datenmengen koennte das >100ms dauern. Moegliche Optimierungen:
+- Parallele Queries via `Promise.all()`
+- Caching des Snapshots fuer 30s (statt bei jedem liveQuery-Trigger neu berechnen)
+- Event-basiertes inkrementelles Update statt Full-Scan
+
+### Optimierung: Context Document fuer LLM
+
+Der Context Document Generator ist aktuell ein reines String-Template. Wenn das LLM-Modell besser wird (groesseres Kontextfenster), koennte das Dokument um historische Daten erweitert werden (letzte Woche, Trends). Aktuell auf ~500 Tokens optimiert fuer Gemma 4 E2B (2B Modell).
+
+### Optimierung: Companion Chat ohne WebGPU
+
+Der Chat funktioniert aktuell NUR mit WebGPU (Gemma lokal). Fuer Browser ohne WebGPU (Firefox, Safari) gibt es keinen Fallback. **TODO:** Server-Fallback via `mana-llm` Ollama-Endpoint integrieren, gesteuert ueber den bestehenden LLM Orchestrator Tier-System.
+
+### Feature-Luecke: Goal-UI
+
+Goals haben kein eigenes UI ausser der Workbench "Ziele" Page. Es gibt keine Moeglichkeit fuer den Nutzer, eigene Goals frei zu definieren (nur Templates). **TODO:** Goal-Editor-Modal mit Metric/Target-Builder.
+
+### Feature-Luecke: Pulse Nudge-UI
+
+Pulse Rules erzeugen Nudges, aber diese werden nur als OS-Notifications angezeigt (via Reminder-Scheduler). Es gibt keine In-App-Anzeige. **TODO:** NudgeToast Komponente oder Integration in den CompanionFeed.
 
 ---
 
