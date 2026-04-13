@@ -6,6 +6,7 @@
 	import { createReminderScheduler } from '@mana/shared-stores';
 	import { todoReminderSource } from '$lib/modules/todo/reminder-source';
 	import { startEventStore, stopEventStore } from '$lib/data/events/event-store';
+	import { initTools } from '$lib/data/tools/init';
 	import KeyboardShortcutsModal from '$lib/components/KeyboardShortcutsModal.svelte';
 	import SessionWarning from '$lib/components/SessionWarning.svelte';
 	import EncryptionIntroBanner from '$lib/components/EncryptionIntroBanner.svelte';
@@ -419,6 +420,7 @@
 		]);
 		initSharedUload();
 		startEventStore();
+		initTools();
 		await dashboardStore.initialize();
 
 		// Start the persistent LLM task queue. Idempotent — safe to call
