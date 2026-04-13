@@ -171,6 +171,11 @@ export const APP_ICONS = {
 		// the "guess who's behind the disguise" mechanic. Purple gradient.
 		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="wh" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#a855f7"/><stop offset="100%" style="stop-color:#7c3aed"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#wh)"/><path d="M58 30c-3-2-7-3-11-3-12 0-22 9-22 21 0 7 4 13 9 17l-3 11 11-5c2 0 3 1 5 1 12 0 22-9 22-21 0-7-4-13-11-21z" fill="white" fill-opacity="0.18"/><path d="M50 28c-4 0-8 1-11 3-7 8-11 14-11 21 0 12 10 21 22 21 12 0 22-9 22-21s-10-24-22-24z" fill="white"/><circle cx="44" cy="48" r="2.6" fill="#7c3aed"/><circle cx="60" cy="48" r="2.6" fill="#7c3aed"/><path d="M44 60c2 3 4 4 6 4s4-1 6-4" stroke="#7c3aed" stroke-width="2.5" stroke-linecap="round" fill="none"/><text x="76" y="42" font-family="system-ui" font-size="22" font-weight="700" fill="white" fill-opacity="0.85">?</text></svg>`
 	),
+	recipes: svgToDataUrl(
+		// Cooking pot with steam — represents recipe collection.
+		// Orange→amber gradient for a warm kitchen feel.
+		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="rc" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#f97316"/><stop offset="100%" style="stop-color:#d97706"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#rc)"/><ellipse cx="50" cy="56" rx="24" ry="6" fill="white" fill-opacity="0.2"/><path d="M28 50h44v18a14 14 0 0 1-14 14H42a14 14 0 0 1-14-14V50z" fill="white" fill-opacity="0.9"/><rect x="26" y="47" width="48" height="6" rx="3" fill="white"/><path d="M22 50h-4a2 2 0 0 1 0-4h4" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/><path d="M78 50h4a2 2 0 0 0 0-4h-4" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/><path d="M40 38c0-4 3-6 3-10" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.7"/><path d="M50 36c0-4 3-6 3-10" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.7"/><path d="M60 38c0-4 3-6 3-10" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.7"/></svg>`
+	),
 } as const;
 
 export type AppIconId = keyof typeof APP_ICONS;

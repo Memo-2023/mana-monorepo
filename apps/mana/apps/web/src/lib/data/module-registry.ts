@@ -89,6 +89,7 @@ import { newsModuleConfig } from '$lib/modules/news/module.config';
 import { bodyModuleConfig } from '$lib/modules/body/module.config';
 import { firstsModuleConfig } from '$lib/modules/firsts/module.config';
 import { drinkModuleConfig } from '$lib/modules/drink/module.config';
+import { recipesModuleConfig } from '$lib/modules/recipes/module.config';
 
 export const MODULE_CONFIGS: readonly ModuleConfig[] = [
 	manaCoreConfig,
@@ -133,6 +134,7 @@ export const MODULE_CONFIGS: readonly ModuleConfig[] = [
 	bodyModuleConfig,
 	firstsModuleConfig,
 	drinkModuleConfig,
+	recipesModuleConfig,
 ];
 
 // ─── Derived Maps ──────────────────────────────────────────

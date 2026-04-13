@@ -29,6 +29,7 @@ import { NOTES_GUEST_SEED } from '$lib/modules/notes/collections';
 import { TIMES_GUEST_SEED } from '$lib/modules/times/collections';
 import { PLANTS_GUEST_SEED } from '$lib/modules/plants/collections';
 import { DRINK_GUEST_SEED } from '$lib/modules/drink/collections';
+import { RECIPES_GUEST_SEED } from '$lib/modules/recipes/collections';
 
 /**
  * Flat list of { tableName, rows } entries. Only modules with non-empty
@@ -62,6 +63,7 @@ register(NOTES_GUEST_SEED);
 register(TIMES_GUEST_SEED);
 register(PLANTS_GUEST_SEED);
 register(DRINK_GUEST_SEED);
+register(RECIPES_GUEST_SEED);
 
 /**
  * Seed all module guest data into empty tables. Idempotent: tables

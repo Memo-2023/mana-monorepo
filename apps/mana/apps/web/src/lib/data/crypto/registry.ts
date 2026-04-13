@@ -410,6 +410,14 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	// plaintext for indexing and daily aggregation queries.
 	drinkEntries: { enabled: true, fields: ['name', 'note'] },
 	drinkPresets: { enabled: true, fields: ['name'] },
+
+	// ─── Recipes ─────────────────────────────────────────────
+	// User-typed content (title, description, ingredients list, steps)
+	// encrypted. `ingredients` is Ingredient[] and `steps` is string[] —
+	// aes.ts JSON-stringifies before wrap, same as nutriphi's `foods`.
+	// Plaintext (intentional): difficulty, tags, servings, times,
+	// isFavorite, photo refs — needed for indexing and filtering.
+	recipes: { enabled: true, fields: ['title', 'description', 'ingredients', 'steps'] },
 };
 
 /**

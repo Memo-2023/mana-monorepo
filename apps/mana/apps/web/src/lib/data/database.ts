@@ -392,6 +392,12 @@ db.version(7).stores({
 	drinkPresets: 'id, order, drinkType, isArchived',
 });
 
+// Schema version 8 — adds the Recipes module.
+// *tags is a Dexie MultiEntry index for tag-based filtering.
+db.version(8).stores({
+	recipes: 'id, difficulty, isFavorite, *tags',
+});
+
 // ─── Sync Routing ──────────────────────────────────────────
 // SYNC_APP_MAP, TABLE_TO_SYNC_NAME, TABLE_TO_APP, SYNC_NAME_TO_TABLE,
 // toSyncName() and fromSyncName() are now derived from per-module

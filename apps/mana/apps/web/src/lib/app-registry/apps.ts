@@ -48,6 +48,7 @@ import {
 	PersonSimpleCircle,
 	BookOpen,
 	Books,
+	CookingPot,
 } from '@mana/shared-icons';
 
 // ── Apps with entity capabilities ───────────────────────────
@@ -843,4 +844,25 @@ registerApp({
 	views: {
 		list: { load: () => import('$lib/modules/drink/ListView.svelte') },
 	},
+});
+
+registerApp({
+	id: 'recipes',
+	name: 'Rezepte',
+	color: '#f97316',
+	icon: CookingPot,
+	views: {
+		list: { load: () => import('$lib/modules/recipes/ListView.svelte') },
+	},
+	contextMenuActions: [
+		{
+			id: 'new-recipe',
+			label: 'Neues Rezept',
+			icon: Plus,
+			action: () =>
+				window.dispatchEvent(
+					new CustomEvent('mana:quick-action', { detail: { app: 'recipes', action: 'new' } })
+				),
+		},
+	],
 });

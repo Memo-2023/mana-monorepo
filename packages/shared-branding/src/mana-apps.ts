@@ -769,6 +769,23 @@ export const MANA_APPS: ManaApp[] = [
 		requiredTier: 'guest',
 	},
 	{
+		id: 'recipes',
+		name: 'Rezepte',
+		description: {
+			de: 'Rezeptsammlung',
+			en: 'Recipe Collection',
+		},
+		longDescription: {
+			de: 'Sammle und organisiere deine Lieblingsrezepte — mit Zutaten, Schritten, Fotos und Tags.',
+			en: 'Collect and organize your favorite recipes — with ingredients, steps, photos, and tags.',
+		},
+		icon: APP_ICONS.recipes,
+		color: '#f97316',
+		comingSoon: false,
+		status: 'development',
+		requiredTier: 'guest',
+	},
+	{
 		id: 'who',
 		name: 'Who',
 		description: {
