@@ -52,6 +52,10 @@ import {
 	PersonSimpleTaiChi,
 	Envelope,
 	Flower,
+	SunDim,
+	Pulse,
+	Robot,
+	Target,
 } from '@mana/shared-icons';
 
 // ── Apps with entity capabilities ───────────────────────────
@@ -918,5 +922,47 @@ registerApp({
 	icon: Moon,
 	views: {
 		list: { load: () => import('$lib/modules/sleep/ListView.svelte') },
+	},
+});
+
+// ── Companion Brain Pages ─────────────────────────────
+
+registerApp({
+	id: 'myday',
+	name: 'Mein Tag',
+	color: '#F59E0B',
+	icon: SunDim,
+	views: {
+		list: { load: () => import('$lib/modules/myday/ListView.svelte') },
+	},
+});
+
+registerApp({
+	id: 'eventstream',
+	name: 'Events',
+	color: '#6366F1',
+	icon: Pulse,
+	views: {
+		list: { load: () => import('$lib/modules/eventstream/ListView.svelte') },
+	},
+});
+
+registerApp({
+	id: 'companion',
+	name: 'Companion',
+	color: '#8B5CF6',
+	icon: Robot,
+	views: {
+		list: { load: () => import('$lib/modules/companion/ListView.svelte') },
+	},
+});
+
+registerApp({
+	id: 'goals',
+	name: 'Ziele',
+	color: '#10B981',
+	icon: Target,
+	views: {
+		list: { load: () => import('$lib/modules/goals/ListView.svelte') },
 	},
 });

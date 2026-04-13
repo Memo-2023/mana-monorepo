@@ -858,6 +858,65 @@ export const MANA_APPS: ManaApp[] = [
 		status: 'development',
 		requiredTier: 'guest',
 	},
+
+	// ── Companion Brain ─────────────────────────────────
+
+	{
+		id: 'myday',
+		name: 'Mein Tag',
+		description: { de: 'Tagesueberblick', en: 'Daily Overview' },
+		longDescription: {
+			de: 'Alle wichtigen Daten auf einen Blick: Tasks, Termine, Wasser, Ernaehrung, Streaks.',
+			en: 'All key data at a glance: tasks, events, water, nutrition, streaks.',
+		},
+		icon: APP_ICONS.myday ?? '☀️',
+		color: '#F59E0B',
+		comingSoon: false,
+		status: 'development',
+		requiredTier: 'guest',
+	},
+	{
+		id: 'eventstream',
+		name: 'Events',
+		description: { de: 'Live Event-Stream', en: 'Live Event Stream' },
+		longDescription: {
+			de: 'Echtzeit-Feed aller Aktionen ueber alle Module: Tasks, Drinks, Termine, Mahlzeiten.',
+			en: 'Real-time feed of all actions across modules: tasks, drinks, events, meals.',
+		},
+		icon: APP_ICONS.eventstream ?? '⚡',
+		color: '#6366F1',
+		comingSoon: false,
+		status: 'development',
+		requiredTier: 'guest',
+	},
+	{
+		id: 'companion',
+		name: 'Companion',
+		description: { de: 'AI Assistent', en: 'AI Assistant' },
+		longDescription: {
+			de: 'Dein persoenlicher AI-Begleiter. Fragt nach deinem Tag, erstellt Tasks, loggt Getraenke — alles per Chat.',
+			en: 'Your personal AI companion. Ask about your day, create tasks, log drinks — all via chat.',
+		},
+		icon: APP_ICONS.companion ?? '🤖',
+		color: '#8B5CF6',
+		comingSoon: false,
+		status: 'development',
+		requiredTier: 'guest',
+	},
+	{
+		id: 'goals',
+		name: 'Ziele',
+		description: { de: 'Ziele & Fortschritt', en: 'Goals & Progress' },
+		longDescription: {
+			de: 'Setze moduluebergreifende Ziele (Wasser, Tasks, Kalorien) und tracke deinen Fortschritt automatisch.',
+			en: 'Set cross-module goals (water, tasks, calories) and track progress automatically.',
+		},
+		icon: APP_ICONS.goals ?? '🎯',
+		color: '#10B981',
+		comingSoon: false,
+		status: 'development',
+		requiredTier: 'guest',
+	},
 ];
 
 /**
