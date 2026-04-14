@@ -7,9 +7,10 @@
  * transactions on `mana_sync` (same pattern as the Go server's
  * `withUser`) — tracked as the next PR in `CLAUDE.md`.
  *
- * Input-resolver wiring is also stubbed: `resolvedInputs: []` is handed
- * to the Planner today, so the LLM sees only the mission's concept +
- * objective. Real resolvers land alongside write-back.
+ * Input resolvers (`db/resolvers/`) plug plaintext-safe Mission context
+ * into the prompt per due run. Encrypted tables (notes, kontext, …)
+ * intentionally have no server-side resolver — the Planner only sees
+ * what the user can't unambiguously mark private by design.
  */
 
 import {
@@ -19,7 +20,8 @@ import {
 	type AiPlanOutput,
 	type Mission,
 } from '@mana/shared-ai';
-import { getSql } from '../db/connection';
+import { getSql, type Sql } from '../db/connection';
+import { resolveServerInputs } from '../db/resolvers';
 import { listDueMissions, type ServerMission } from '../db/missions-projection';
 import { appendServerIteration, planToIteration } from '../db/iteration-writer';
 import { PlannerClient } from '../planner/client';
@@ -76,7 +78,7 @@ export async function runTickOnce(config: Config): Promise<TickStats> {
 
 		for (const m of missions) {
 			try {
-				const plan = await planOneMission(m, planner);
+				const plan = await planOneMission(m, planner, sql);
 				if (plan === null) {
 					parseFailures++;
 					continue;
@@ -125,15 +127,17 @@ export async function runTickOnce(config: Config): Promise<TickStats> {
  */
 async function planOneMission(
 	m: ServerMission,
-	planner: PlannerClient
+	planner: PlannerClient,
+	sql: Sql
 ): Promise<AiPlanOutput | null> {
 	const mission = serverMissionToSharedMission(m);
+	// Resolvers skip silently for modules they don't handle (notes / kontext
+	// etc. are encrypted — server can't project them). The Planner then sees
+	// only plaintext-safe context (today: goals), plus concept + objective.
+	const resolvedInputs = await resolveServerInputs(sql, m.inputs, m.userId);
 	const input: AiPlanInput = {
 		mission,
-		// No resolvers yet — the LLM only sees concept + objective +
-		// iteration history. Matches the webapp's behaviour for a mission
-		// with zero linked inputs.
-		resolvedInputs: [],
+		resolvedInputs,
 		availableTools: AI_AVAILABLE_TOOLS,
 	};
 	const messages = buildPlannerPrompt(input);
