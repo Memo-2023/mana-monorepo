@@ -1,7 +1,17 @@
 # BYOK — Bring Your Own Key
 
-> Architecture and implementation plan for user-provided API keys.
-> Status: planning (2026-04-14)
+> Architecture and as-built docs for user-provided API keys.
+> Status: **implemented 2026-04-14** (Phase 1-5 complete, 35 unit tests passing).
+
+## Quick start for users
+
+1. Gehe zu `/settings/ai-keys`
+2. Klicke "Key hinzufuegen", waehle Provider (OpenAI/Anthropic/Gemini/Mistral)
+3. Label eingeben, API-Key einfuegen, optional Modell waehlen
+4. Im Companion-Chat Toolbar → "KI-Modus" → "Dein API-Key"
+5. Kosten + Usage werden pro Key auf der Settings-Page angezeigt
+
+## Architecture summary (as built)
 
 ## Goals
 
@@ -284,33 +294,98 @@ export interface LlmSettings {
 }
 ```
 
-## Implementation order
+## Implementation (as built)
 
-**Phase 1 — Foundation (1.5h)**
-1. Extend LlmTier with 'byok' in shared-llm
-2. Create ByokKey vault (IndexedDB + encrypt/decrypt)
-3. ByokBackend skeleton with provider registry
-4. Wire into orchestrator
+| Phase | Status | Commit |
+|-------|--------|--------|
+| 1. Foundation (LlmTier, ByokBackend, provider abstraction) | ✅ | `a33857fa3` |
+| 2. OpenAI provider | ✅ | `a33857fa3` |
+| 3. Anthropic + Gemini + Mistral providers | ✅ | `a33857fa3` |
+| 4. Settings UI + IndexedDB vault | ✅ | `db8c2574d` |
+| 5. Pricing table + usage tracking | ✅ | `db8c2574d` |
+| Tests (35 unit tests) | ✅ | (this commit) |
 
-**Phase 2 — First provider (30min)**
-5. OpenAI adapter (simplest — CORS ok)
-6. Test via companion chat
+## Deviations from the original plan
 
-**Phase 3 — More providers (1.5h)**
-7. Anthropic adapter (with dangerous-header)
-8. Gemini adapter (different message format)
-9. Mistral adapter (OpenAI-compatible, trivial)
+These things ended up different from what the plan called for:
 
-**Phase 4 — UI (1.5h)**
-10. Settings/ai-keys page
-11. Add + edit + delete key modals
-12. Usage tracking (increment on each call)
+- **Server-proxy fallback dropped.** The plan said "Browser-direct primary,
+  server-proxy fallback on CORS." In practice I kept only browser-direct
+  and left CORS as a user-facing error. All 4 providers support direct
+  browser fetches (Anthropic via `anthropic-dangerous-direct-browser-access`).
 
-**Phase 5 — Polish (30min)**
-13. Pricing table + cost estimation
-14. Companion toolbar dropdown extension (BYOK options)
+- **Sensitive-content opt-in UI not built.** The orchestrator STILL blocks
+  BYOK for `sensitive` content by default — that invariant holds — but
+  there is no UI for users to opt-in per-provider yet. Add when a user
+  actually asks for it.
 
-**Total: ~5h**
+- **Per-task BYOK provider overrides (e.g. `byok:anthropic`) not wired.**
+  The tier-selector in the Companion chat only lets you pick `byok` in
+  aggregate. The resolver currently picks the most-recently-used key
+  across all providers. Extending this to support `byok:{provider}`
+  syntax in `taskOverrides` is a small follow-up.
+
+- **Default-provider setting not surfaced.** The `LlmSettings.byok.defaultProvider`
+  field in the plan isn't in the settings type yet. The resolver uses
+  "most-recently-used" as a proxy, which is actually a reasonable
+  default UX-wise.
+
+## Test coverage
+
+| Area | Tests | File |
+|------|-------|------|
+| `estimateCost` + `formatCost` (pricing) | 14 | `packages/shared-llm/src/pricing.test.ts` |
+| `ByokBackend` (dispatch, resolver, usage callback) | 10 | `packages/shared-llm/src/backends/byok.test.ts` |
+| `byokVault` (CRUD + encryption + defaults) | 11 | `apps/mana/apps/web/src/lib/byok/vault.test.ts` |
+| **Total** | **35** | All passing |
+
+**NOT tested** (would need fetch mocking + SSE parsing):
+- OpenAI adapter (`openai-compat.ts`)
+- Anthropic adapter (different SSE event schema)
+- Gemini adapter (different REST format)
+- Mistral adapter (reuses OpenAI)
+
+These run against real provider APIs in production — manual smoke tests
+are the current verification path.
+
+## Troubleshooting
+
+### "Vault ist gesperrt" on the Settings page
+
+Keys are encrypted with your user master key. Sign out/in to re-derive it,
+or if that fails check `key-provider.ts` → `getActiveKey()`.
+
+### "Kein BYOK-Schluessel konfiguriert" in the Companion
+
+No keys have been added yet. Go to `/settings/ai-keys` and add one.
+
+### CORS error in browser console
+
+Some networks or proxies block direct-to-provider fetches. Options:
+1. Try a different network
+2. Use `mana-server` or `cloud` tier instead (server-proxied)
+3. File an issue — we can add server-proxy fallback per-provider if needed
+
+### Anthropic returns 401 with a valid key
+
+Make sure the key starts with `sk-ant-`. Make sure
+`anthropic-dangerous-direct-browser-access: true` is being sent (it is,
+by default — inspect in DevTools Network tab).
+
+### Gemini key works in Google's API Explorer but not here
+
+Gemini keys are tied to specific Google Cloud projects. Make sure the
+project has the Generative Language API enabled. Free-tier keys may
+have rate limits that trigger 429.
+
+## Follow-ups
+
+Small, fast wins for v2:
+- Per-task provider override syntax (`byok:anthropic`)
+- Settings page for `LlmSettings.byok.defaultProvider`
+- Sensitive-content opt-in toggle per provider
+- Ollama-BYOK (user's self-hosted Ollama)
+- Provider adapter tests with fetch mocking
 
 ## Decisions
 
