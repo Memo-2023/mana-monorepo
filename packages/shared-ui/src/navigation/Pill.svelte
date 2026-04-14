@@ -29,6 +29,10 @@
 		title?: string;
 		/** Extra class names (e.g. drag-source marker) */
 		class?: string;
+		/** Bind the rendered <button>/<a> element for programmatic focus/click. */
+		element?: HTMLButtonElement | HTMLAnchorElement | null;
+		/** Arbitrary data-* attributes to forward (e.g. {'data-menu-trigger': ''}). */
+		data?: Record<string, string>;
 		/** Custom content rendered before the label (e.g. colored tag dot). */
 		leading?: Snippet;
 		/** Custom content rendered after the label. */
@@ -49,6 +53,8 @@
 		oncontextmenu,
 		title,
 		class: className,
+		element = $bindable(null),
+		data,
 		leading,
 		trailing,
 	}: Props = $props();
@@ -72,6 +78,7 @@
 
 {#if href}
 	<a
+		bind:this={element as HTMLAnchorElement}
 		{href}
 		class={[
 			'pill',
@@ -88,11 +95,13 @@
 		title={effectiveTitle}
 		{onclick}
 		{oncontextmenu}
+		{...data}
 	>
 		{@render body()}
 	</a>
 {:else}
 	<button
+		bind:this={element as HTMLButtonElement}
 		type="button"
 		class={[
 			'pill',
@@ -110,6 +119,7 @@
 		{disabled}
 		{onclick}
 		{oncontextmenu}
+		{...data}
 	>
 		{@render body()}
 	</button>

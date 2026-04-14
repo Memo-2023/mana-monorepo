@@ -456,7 +456,7 @@
 
 	// User menu panel state
 	let userMenuOpen = $state(false);
-	let userMenuTrigger = $state<HTMLButtonElement | undefined>(undefined);
+	let userMenuTrigger = $state<HTMLButtonElement | HTMLAnchorElement | null>(null);
 
 	// Close user menu on navigation
 	$effect(() => {
@@ -738,16 +738,14 @@
 					icon: 'cloud',
 					items: syncStatusItems,
 				}}
-				<button
-					type="button"
+				<Pill
+					size="sm"
+					icon="cloud"
+					label={currentSyncLabel}
+					active={activeBarId === 'sync'}
 					onclick={() => toggleBar(syncConfig)}
-					class="pill glass-pill"
-					class:active={activeBarId === 'sync'}
 					title={currentSyncLabel}
-				>
-					<Cloud size={18} weight="bold" class="pill-icon" />
-					<span class="pill-label">{currentSyncLabel}</span>
-				</button>
+				/>
 			{:else if showSyncStatus && syncStatusItems.length > 0}
 				<PillDropdown
 					items={syncStatusItems}
@@ -766,36 +764,29 @@
 					icon: 'user',
 					items: userMenuBarItems,
 				}}
-				<button
-					type="button"
+				<Pill
+					size="sm"
+					icon="user"
+					iconOnly
+					label={userLabel}
+					active={activeBarId === 'user'}
 					onclick={() => toggleBar(userBarConfig)}
-					class="pill glass-pill icon-only"
-					class:active={activeBarId === 'user'}
-					aria-label={userLabel}
-					title={userLabel}
-					data-user-menu-trigger
-				>
-					<User size={18} weight="bold" class="pill-icon" />
-				</button>
+					data={{ 'data-user-menu-trigger': '' }}
+				/>
 			{:else if userEmail || loginHref}
 				{@const userLabel = userEmail ? truncateEmail(userEmail) : guestMenuLabel}
-				<button
-					bind:this={userMenuTrigger}
-					type="button"
+				<Pill
+					size="sm"
+					icon="user"
+					iconOnly
+					label={userLabel}
+					active={userMenuOpen}
 					onclick={() => (userMenuOpen = !userMenuOpen)}
-					class="pill glass-pill icon-only"
-					class:active={userMenuOpen}
-					aria-label={userLabel}
-					title={userLabel}
-					data-user-menu-trigger
-				>
-					<User size={18} weight="bold" class="pill-icon" />
-				</button>
+					bind:element={userMenuTrigger}
+					data={{ 'data-user-menu-trigger': '' }}
+				/>
 			{:else if onLogout && showLogout}
-				<button onclick={onLogout} class="pill glass-pill logout-pill" title="Logout">
-					<SignOut size={18} weight="bold" class="pill-icon" />
-					<span class="pill-label">Logout</span>
-				</button>
+				<Pill size="sm" icon="logout" label="Logout" danger onclick={onLogout} title="Logout" />
 			{/if}
 		</div>
 	</nav>
@@ -822,7 +813,7 @@
 		showLanguageSwitcher={showLanguageSwitcher && languageItems.length > 0}
 		{languageItems}
 		onClose={() => (userMenuOpen = false)}
-		triggerElement={userMenuTrigger}
+		triggerElement={userMenuTrigger ?? undefined}
 	/>
 {/if}
 
@@ -894,76 +885,6 @@
 			padding: 0.375rem 0.75rem;
 			gap: 0.5rem;
 		}
-
-		.pill-label {
-			display: none;
-		}
-
-		.pill {
-			padding: 0.625rem;
-			min-width: 44px;
-			min-height: 44px;
-			justify-content: center;
-		}
-	}
-
-	/* Base pill styles */
-	.pill {
-		display: flex;
-		align-items: center;
-		gap: 0.375rem;
-		padding: 0 0.875rem;
-		height: 36px;
-		border-radius: 9999px;
-		font-size: 0.875rem;
-		font-weight: 500;
-		white-space: nowrap;
-		text-decoration: none;
-		transition: all 0.2s;
-		border: none;
-		cursor: pointer;
-	}
-
-	/* Solid theme-tokened pill (formerly the "glass" frosted pill).
-	   The class name is kept for backwards compatibility. */
-	.glass-pill {
-		background: hsl(var(--color-card));
-		border: 1px solid hsl(var(--color-border));
-		box-shadow:
-			0 1px 2px hsl(0 0% 0% / 0.05),
-			0 2px 6px hsl(0 0% 0% / 0.04);
-		color: hsl(var(--color-foreground));
-	}
-
-	.glass-pill:hover {
-		background: hsl(var(--color-surface-hover));
-		border-color: hsl(var(--color-border-strong, var(--color-border)));
-		transform: translateY(-2px);
-		box-shadow:
-			0 6px 12px hsl(0 0% 0% / 0.08),
-			0 2px 4px hsl(0 0% 0% / 0.05);
-	}
-
-	/* Active state - uses CSS custom property for theming */
-	.pill.active {
-		background: var(--pill-primary-color, var(--color-primary-500, rgba(248, 214, 43, 0.9)));
-		background: color-mix(
-			in srgb,
-			var(--pill-primary-color, var(--color-primary-500, #f8d62b)) 20%,
-			white 80%
-		);
-		border-color: var(--pill-primary-color, var(--color-primary-500, rgba(248, 214, 43, 0.5)));
-		color: #1a1a1a;
-	}
-
-	:global(.dark) .pill.active {
-		background: color-mix(
-			in srgb,
-			var(--pill-primary-color, var(--color-primary-500, #f8d62b)) 30%,
-			transparent 70%
-		);
-		border-color: var(--pill-primary-color, var(--color-primary-500, rgba(248, 214, 43, 0.4)));
-		color: var(--pill-primary-color, var(--color-primary-500, #f8d62b));
 	}
 
 	/* Divider */
@@ -977,30 +898,6 @@
 
 	:global(.dark) .pill-divider {
 		background: rgba(255, 255, 255, 0.2);
-	}
-
-	/* Logout pill */
-	.logout-pill {
-		color: #dc2626;
-	}
-
-	:global(.dark) .logout-pill {
-		color: #ef4444;
-	}
-
-	.logout-pill:hover {
-		background: rgba(220, 38, 38, 0.15);
-		border-color: rgba(220, 38, 38, 0.3);
-	}
-
-	.pill-label {
-		display: inline;
-	}
-
-	/* Icon-only pill: wider than tall so it reads as a pill, not a chip. */
-	.pill.icon-only {
-		gap: 0;
-		padding: 0 1.125rem;
 	}
 
 	/* Progress ring on pill (used for download indicator).
