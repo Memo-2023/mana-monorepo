@@ -10,7 +10,9 @@
 import { db } from '../../database';
 import { decryptRecords } from '../../crypto';
 import { registerInputResolver } from './input-resolvers';
+import { registerInputIndexer } from './input-index';
 import type { InputResolver } from './input-resolvers';
+import type { InputCandidate, InputIndexer } from './input-index';
 
 interface NoteLike {
 	id: string;
@@ -73,13 +75,59 @@ const goalsResolver: InputResolver = async (ref) => {
 	};
 };
 
+// ── Indexers: list candidates for the picker UI ────────────
+
+const notesIndexer: InputIndexer = async () => {
+	const all = await db.table<NoteLike>('notes').toArray();
+	const visible = all.filter((n) => !n.deletedAt);
+	const decrypted = await decryptRecords('notes', visible);
+	return decrypted
+		.map<InputCandidate>((n) => ({
+			module: 'notes',
+			table: 'notes',
+			id: n.id,
+			label: (n.title && n.title.trim()) || '(ohne Titel)',
+			hint: n.content ? `${n.content.slice(0, 60).replace(/\s+/g, ' ')}…` : undefined,
+		}))
+		.slice(0, 200); // cap — Mission picker isn't meant to list thousands
+};
+
+const kontextIndexer: InputIndexer = async () => {
+	const doc = await db.table<KontextDocLike>('kontextDoc').get('singleton');
+	if (!doc) return [];
+	return [
+		{
+			module: 'kontext',
+			table: 'kontextDoc',
+			id: 'singleton',
+			label: 'Kontext-Dokument',
+			hint: 'Dein zentrales Markdown-Dokument',
+		},
+	];
+};
+
+const goalsIndexer: InputIndexer = async () => {
+	const all = await db.table<GoalLike>('companionGoals').toArray();
+	const visible = all.filter((g) => !g.deletedAt);
+	return visible.map<InputCandidate>((g) => ({
+		module: 'goals',
+		table: 'companionGoals',
+		id: g.id,
+		label: g.title ?? 'Goal',
+		hint: `${g.currentValue ?? 0} / ${g.target?.value ?? '?'} (${g.period ?? '—'})`,
+	}));
+};
+
 let registered = false;
 
-/** Register the default resolvers once. Idempotent. */
+/** Register the default resolvers + indexers once. Idempotent. */
 export function registerDefaultInputResolvers(): void {
 	if (registered) return;
 	registerInputResolver('notes', notesResolver);
 	registerInputResolver('kontext', kontextResolver);
 	registerInputResolver('goals', goalsResolver);
+	registerInputIndexer('notes', notesIndexer);
+	registerInputIndexer('kontext', kontextIndexer);
+	registerInputIndexer('goals', goalsIndexer);
 	registered = true;
 }

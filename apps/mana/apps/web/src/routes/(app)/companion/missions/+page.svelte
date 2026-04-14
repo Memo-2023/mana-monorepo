@@ -21,7 +21,8 @@
 	} from '$lib/data/ai/missions/store';
 	import { runMission } from '$lib/data/ai/missions/runner';
 	import { productionDeps } from '$lib/data/ai/missions/setup';
-	import type { Mission, MissionCadence } from '$lib/data/ai/missions/types';
+	import MissionInputPicker from '$lib/components/ai/MissionInputPicker.svelte';
+	import type { Mission, MissionCadence, MissionInputRef } from '$lib/data/ai/missions/types';
 
 	const missions = $derived(useMissions());
 
@@ -36,6 +37,7 @@
 	let formCadenceKind = $state<MissionCadence['kind']>('manual');
 	let formIntervalMin = $state(60);
 	let formDailyHour = $state(9);
+	let formInputs = $state<MissionInputRef[]>([]);
 	let creating = $state(false);
 
 	function buildCadence(): MissionCadence {
@@ -61,11 +63,13 @@
 				title: formTitle.trim(),
 				objective: formObjective.trim(),
 				conceptMarkdown: formConcept,
+				inputs: formInputs,
 				cadence: buildCadence(),
 			});
 			formTitle = '';
 			formObjective = '';
 			formConcept = '';
+			formInputs = [];
 			formCadenceKind = 'manual';
 			showForm = false;
 			selectedId = m.id;
@@ -168,6 +172,11 @@
 					rows="6"
 				></textarea>
 			</label>
+
+			<fieldset>
+				<legend>Inputs (Kontext für die KI)</legend>
+				<MissionInputPicker bind:value={formInputs} />
+			</fieldset>
 
 			<fieldset>
 				<legend>Cadence</legend>
@@ -285,6 +294,14 @@
 					<dd>{describeCadence(selected.cadence)}</dd>
 					<dt>Nächster Run</dt>
 					<dd>{formatRelative(selected.nextRunAt)}</dd>
+					<dt>Inputs</dt>
+					<dd>
+						{#if selected.inputs.length === 0}
+							—
+						{:else}
+							{selected.inputs.map((i) => `${i.module}/${i.id}`).join(', ')}
+						{/if}
+					</dd>
 				</dl>
 
 				{#if selected.conceptMarkdown}
