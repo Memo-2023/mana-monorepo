@@ -1774,8 +1774,15 @@ Code:
   - Iteration-History + pro-Iteration Freitext-Feedback-Textarea
   - `<MissionInputPicker>`-Komponente mit Indexer-Registry, Default-Indexer
     für notes / kontext / goals (symmetrisch zu den Resolvern)
-- [ ] Schritt 7 — Workbench-Timeline-Lens (cross-module AI-Aktivitaet)
-- [ ] Schritt 8 — Server-side `mana-ai` Bun-Service (offline-of-tab Runs)
+- [x] Schritt 7 — Workbench-Timeline-Lens unter `/companion/workbench`
+  - Live-Query `_events` gefiltert auf `actor.kind === 'ai'`
+  - `bucketByIteration` gruppiert Events pro Mission-Iteration, Rationale
+    einmal pro Bucket statt pro Event
+  - Filter: Mission (per query-string) + Modul (dropdown), Deep-Link ins
+    Modul pro Event
+- [x] Schritt 7a — System-Actor-Wrapping für Projections (streaks-Tracker)
+- [ ] Schritt 8 — mana-sync Go + Postgres-Migration für `actor`-Feld
+- [ ] Schritt 9 — Server-side `mana-ai` Bun-Service (offline-of-tab Runs)
 
 ### 20.5a Symmetrische Registries: Resolver vs. Indexer
 
