@@ -40,13 +40,82 @@
 		if (showPicker && pickerEl)
 			pickerEl.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
 	});
+
+	// ── Lazy-mount via IntersectionObserver ─────────────────
+	// Each card mounts a full ListView with its own Dexie liveQuery on
+	// first render. With 5+ open apps that's 5+ parallel IndexedDB reads
+	// + 5+ async chunk fetches before first paint, even though only the
+	// 1-2 cards in the horizontal viewport are actually visible.
+	//
+	// Strategy: render a fixed-size placeholder until the wrapper enters
+	// the viewport (50% horizontal overshoot so the next card is ready
+	// before the user scrolls to it), then swap in the real snippet.
+	// Sticky-cache: once a card has been mounted we never tear it down
+	// — re-running a liveQuery + re-fetching a chunk costs more than
+	// keeping the DOM tree resident. Memory still scales with how many
+	// apps the user has actively scrolled through, not how many they
+	// have open.
+	let mountedIds = $state<Set<string>>(new Set());
+	function markMounted(id: string) {
+		if (mountedIds.has(id)) return;
+		// Replace the Set so $state notices the change.
+		const next = new Set(mountedIds);
+		next.add(id);
+		mountedIds = next;
+	}
+	// Mount the first card eagerly so initial paint always shows
+	// content even before the IntersectionObserver fires its first
+	// callback (which would otherwise leave a 1-frame placeholder
+	// flash on cold load).
+	$effect(() => {
+		if (pages.length > 0) markMounted(pages[0].id);
+	});
+
+	let trackEl = $state<HTMLDivElement | null>(null);
+	$effect(() => {
+		if (!trackEl || typeof IntersectionObserver === 'undefined') return;
+		// Track pages.length so the effect re-runs (and re-observes
+		// freshly-added wrappers) when the user adds or removes an app.
+		// Cheap to tear down and recreate; the IO has no internal state
+		// we care to preserve.
+		void pages.length;
+		const io = new IntersectionObserver(
+			(entries) => {
+				for (const entry of entries) {
+					if (!entry.isIntersecting) continue;
+					const id = (entry.target as HTMLElement).dataset.pageId;
+					if (id) markMounted(id);
+				}
+			},
+			{
+				root: trackEl,
+				// Pre-mount the immediate neighbours so the next card on
+				// either side is ready when the user starts scrolling.
+				rootMargin: '0px 50% 0px 50%',
+				threshold: 0.01,
+			}
+		);
+		const wrappers = trackEl.querySelectorAll<HTMLElement>('[data-page-id]');
+		wrappers.forEach((el) => io.observe(el));
+		return () => io.disconnect();
+	});
 </script>
 
 <div class="carousel-root">
-	<div class="fokus-track" style="--sheet-width: {defaultWidth}px">
+	<div class="fokus-track" style="--sheet-width: {defaultWidth}px" bind:this={trackEl}>
 		{#each pages as p, idx (p.id)}
 			<div class="page-wrapper" role="listitem" data-page-id={p.id}>
-				{@render pageSnippet(p, idx)}
+				{#if mountedIds.has(p.id)}
+					{@render pageSnippet(p, idx)}
+				{:else}
+					<div
+						class="page-placeholder"
+						style="width: {p.widthPx ?? defaultWidth}px;{p.heightPx
+							? ` height: ${p.heightPx}px;`
+							: ''}"
+						aria-hidden="true"
+					></div>
+				{/if}
 			</div>
 		{/each}
 
@@ -93,6 +162,17 @@
 	}
 	.page-wrapper {
 		flex: 0 0 auto;
+	}
+	/* Sized stand-in for a not-yet-mounted card. Matches the card's
+	   widthPx/heightPx so scroll position and the surrounding flex
+	   layout stay stable while the IntersectionObserver decides which
+	   cards to mount. Falls back to 60vh height when heightPx is
+	   absent (the same minimum the empty state uses), which keeps the
+	   track from collapsing on initial paint. */
+	.page-placeholder {
+		min-height: 60vh;
+		border-radius: 1.25rem;
+		background: hsl(var(--color-surface) / 0.4);
 	}
 	.add-card {
 		flex: 0 0 auto;
