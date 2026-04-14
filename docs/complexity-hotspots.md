@@ -1,0 +1,94 @@
+# Cognitive Complexity Hotspots
+
+_Generated 2026-04-14 — heuristic scan (no ESLint deps)_
+
+Complexity = sum of decision points per function (`if`, `for`, `while`, `case`, `catch`, ternary, `&&`, `||`, `??`). Threshold ≥ 10.
+
+**84 functions** exceed threshold across the scanned tree. Showing top 84.
+
+| # | Complexity | Lines | Function | File |
+|---:|---:|---:|---|---|
+| 1 | 77 | 217 | `createEventsRoutes` | `services/mana-events/src/routes/events.ts` |
+| 2 | 65 | 426 | `createTokenManager` | `packages/shared-auth/src/core/tokenManager.ts` |
+| 3 | 43 | 83 | `filteredTasks` | `apps/mana/apps/web/src/lib/modules/todo/components/pages/TodoPage.svelte` |
+| 4 | 42 | 38 | `createContact` | `apps/mana/apps/web/src/lib/modules/contacts/stores/contacts.svelte.ts` |
+| 5 | 42 | 226 | `createRsvpRoutes` | `services/mana-events/src/routes/rsvp.ts` |
+| 6 | 41 | 389 | `createAuthRoutes` | `services/mana-auth/src/routes/auth.ts` |
+| 7 | 38 | 258 | `createCreditService` | `packages/credits/src/createCreditService.ts` |
+| 8 | 35 | 36 | `updateContact` | `apps/mana/apps/web/src/lib/modules/contacts/stores/contacts.svelte.ts` |
+| 9 | 33 | 237 | `createPlayerStore` | `apps/mana/apps/web/src/lib/modules/music/stores/player.svelte.ts` |
+| 10 | 32 | 80 | `logDay` | `apps/mana/apps/web/src/lib/modules/period/stores/dayLogs.svelte.ts` |
+| 11 | 32 | 203 | `createDecksStore` | `apps/mana/apps/web/src/lib/modules/presi/stores/decks.svelte.ts` |
+| 12 | 27 | 200 | `useAiTierItems` | `apps/mana/apps/web/src/lib/components/layout/use-ai-tier-items.svelte.ts` |
+| 13 | 27 | 219 | `createEncryptionVaultRoutes` | `services/mana-auth/src/routes/encryption-vault.ts` |
+| 14 | 25 | 221 | `useTaskForm` | `apps/mana/apps/web/src/lib/modules/todo/composables/useTaskForm.svelte.ts` |
+| 15 | 23 | 39 | `onPhotoSelected` | `apps/mana/apps/web/src/lib/modules/food/ListView.svelte` |
+| 16 | 23 | 80 | `updateTask` | `apps/mana/apps/web/src/lib/modules/todo/stores/tasks.svelte.ts` |
+| 17 | 21 | 143 | `createSettingsRoutes` | `services/mana-auth/src/routes/settings.ts` |
+| 18 | 21 | 59 | `handleKeydown` | `packages/shared-ui/src/command-bar/CommandBar.svelte` |
+| 19 | 21 | 87 | `dropTarget` | `packages/shared-ui/src/dnd/drop-target.ts` |
+| 20 | 21 | 62 | `handleKeydown` | `packages/shared-ui/src/quick-input/InputBar.svelte` |
+| 21 | 20 | 43 | `publishEvent` | `apps/mana/apps/web/src/lib/modules/events/stores/events.svelte.ts` |
+| 22 | 20 | 34 | `handleKeydown` | `apps/mana/apps/web/src/routes/(app)/+layout.svelte` |
+| 23 | 20 | 90 | `passiveDropZone` | `packages/shared-ui/src/dnd/passive-drop.ts` |
+| 24 | 19 | 29 | `syncSnapshotIfPublished` | `apps/mana/apps/web/src/lib/modules/events/stores/events.svelte.ts` |
+| 25 | 18 | 49 | `updateDream` | `apps/mana/apps/web/src/lib/modules/dreams/stores/dreams.svelte.ts` |
+| 26 | 18 | 103 | `uploadRoutes` | `services/mana-media/apps/api/src/routes/upload.ts` |
+| 27 | 17 | 44 | `flushCompleteEvents` | `apps/mana/apps/web/src/lib/data/sync.ts` |
+| 28 | 17 | 40 | `loadPhotos` | `apps/mana/apps/web/src/lib/modules/photos/stores/photos.svelte.ts` |
+| 29 | 17 | 80 | `logPosition` | `apps/mana/apps/web/src/lib/modules/places/stores/tracking.svelte.ts` |
+| 30 | 17 | 56 | `handleQuickSubmit` | `apps/mana/apps/web/src/lib/modules/times/components/EntryForm.svelte` |
+| 31 | 17 | 27 | `handleReanalyze` | `apps/mana/apps/web/src/routes/(app)/food/[id]/+page.svelte` |
+| 32 | 17 | 141 | `dragSource` | `packages/shared-ui/src/dnd/drag-source.ts` |
+| 33 | 16 | 26 | `updateAlarm` | `apps/mana/apps/web/src/lib/modules/times/stores/alarms.svelte.ts` |
+| 34 | 16 | 33 | `saveEdit` | `apps/mana/apps/web/src/routes/(app)/food/[id]/+page.svelte` |
+| 35 | 16 | 118 | `createGeocodeRoutes` | `services/mana-geocoding/src/routes/geocode.ts` |
+| 36 | 15 | 62 | `handleSend` | `apps/mana/apps/web/src/routes/(app)/playground/+page.svelte` |
+| 37 | 15 | 225 | `createBetterAuth` | `services/mana-auth/src/auth/better-auth.config.ts` |
+| 38 | 15 | 42 | `handleKeydown` | `packages/shared-ui/src/organisms/network/NetworkGraph.svelte` |
+| 39 | 14 | 21 | `saveField` | `apps/mana/apps/web/src/lib/modules/contacts/views/DetailView.svelte` |
+| 40 | 14 | 24 | `createAlarm` | `apps/mana/apps/web/src/lib/modules/times/stores/alarms.svelte.ts` |
+| 41 | 14 | 55 | `handleBenchmark` | `apps/mana/apps/web/src/routes/(app)/llm-test/+page.svelte` |
+| 42 | 14 | 198 | `createAdminRoutes` | `services/mana-auth/src/routes/admin.ts` |
+| 43 | 14 | 59 | `handleLogin` | `packages/shared-auth-ui/src/pages/LoginPage.svelte` |
+| 44 | 14 | 42 | `add` | `packages/shared-hono/src/auth.ts` |
+| 45 | 14 | 17 | `handleKeyDown` | `packages/shared-stores/src/keyboard-shortcuts.ts` |
+| 46 | 13 | 28 | `useFoodMealsSince` | `apps/mana/apps/web/src/lib/modules/body/queries.ts` |
+| 47 | 13 | 15 | `updateEvent` | `apps/mana/apps/web/src/lib/modules/events/stores/events.svelte.ts` |
+| 48 | 13 | 22 | `useAllFirsts` | `apps/mana/apps/web/src/lib/modules/firsts/queries.ts` |
+| 49 | 13 | 132 | `createMoodsStore` | `apps/mana/apps/web/src/lib/modules/moodlit/stores/moods.svelte.ts` |
+| 50 | 13 | 62 | `uploadAll` | `apps/mana/apps/web/src/lib/modules/picture/ListView.svelte` |
+| 51 | 13 | 26 | `handleKeydown` | `apps/mana/apps/web/src/routes/(app)/calc/standard/+page.svelte` |
+| 52 | 13 | 71 | `handleRegister` | `packages/shared-auth-ui/src/pages/RegisterPage.svelte` |
+| 53 | 13 | 35 | `handleKeydown` | `packages/shared-ui/src/molecules/FilterDropdown.svelte` |
+| 54 | 12 | 34 | `onSearch` | `apps/mana/apps/web/src/lib/modules/times/quick-input-adapter.ts` |
+| 55 | 12 | 84 | `createSplitStore` | `apps/mana/apps/web/src/lib/splitscreen/store.svelte.ts` |
+| 56 | 12 | 30 | `handleAnalyzePhoto` | `apps/mana/apps/web/src/routes/(app)/food/add/+page.svelte` |
+| 57 | 12 | 96 | `createFeedbackService` | `packages/feedback/src/createFeedbackService.ts` |
+| 58 | 11 | 22 | `onCreate` | `apps/mana/apps/web/src/lib/modules/calendar/quick-input-adapter.ts` |
+| 59 | 11 | 21 | `updatePlace` | `apps/mana/apps/web/src/lib/modules/places/stores/places.svelte.ts` |
+| 60 | 11 | 23 | `saveField` | `apps/mana/apps/web/src/lib/modules/plants/views/DetailView.svelte` |
+| 61 | 11 | 35 | `initFromTask` | `apps/mana/apps/web/src/lib/modules/todo/composables/useTaskForm.svelte.ts` |
+| 62 | 11 | 41 | `execute` | `apps/mana/apps/web/src/lib/modules/todo/tools.ts` |
+| 63 | 11 | 38 | `scored` | `apps/mana/apps/web/src/lib/modules/todo/utils/time-estimator.ts` |
+| 64 | 11 | 124 | `handleAuthReady` | `apps/mana/apps/web/src/routes/(app)/+layout.svelte` |
+| 65 | 11 | 35 | `claimItem` | `apps/mana/apps/web/src/routes/rsvp/[token]/+page.svelte` |
+| 66 | 11 | 28 | `handlePointerMove` | `packages/shared-ui/src/dnd/passive-drop.ts` |
+| 67 | 11 | 44 | `calculatePosition` | `packages/shared-ui/src/molecules/ConfirmationPopover.svelte` |
+| 68 | 11 | 80 | `results` | `packages/shared-ui/src/navigation/GlobalSpotlight.svelte` |
+| 69 | 11 | 74 | `accountLinks` | `packages/shared-ui/src/navigation/PillNavigation.svelte` |
+| 70 | 11 | 29 | `handleCreate` | `packages/shared-uload/src/ShareModal.svelte` |
+| 71 | 10 | 41 | `uploadFile` | `apps/mana/apps/web/src/lib/components/wallpaper/WallpaperPicker.svelte` |
+| 72 | 10 | 41 | `executeCurrentStep` | `apps/mana/apps/web/src/lib/modules/companion/components/RitualRunner.svelte` |
+| 73 | 10 | 20 | `onSearch` | `apps/mana/apps/web/src/lib/modules/contacts/quick-input-adapter.ts` |
+| 74 | 10 | 12 | `createDream` | `apps/mana/apps/web/src/lib/modules/dreams/stores/dreams.svelte.ts` |
+| 75 | 10 | 27 | `mergeSymbols` | `apps/mana/apps/web/src/lib/modules/dreams/stores/dreams.svelte.ts` |
+| 76 | 10 | 12 | `markAsLived` | `apps/mana/apps/web/src/lib/modules/firsts/stores/firsts.svelte.ts` |
+| 77 | 10 | 40 | `logHabit` | `apps/mana/apps/web/src/lib/modules/habits/stores/habits.svelte.ts` |
+| 78 | 10 | 64 | `setSchedule` | `apps/mana/apps/web/src/lib/modules/habits/stores/habits.svelte.ts` |
+| 79 | 10 | 27 | `handleTimerEnd` | `apps/mana/apps/web/src/lib/modules/stretch/components/SessionPlayer.svelte` |
+| 80 | 10 | 14 | `createTask` | `apps/mana/apps/web/src/lib/modules/todo/stores/tasks.svelte.ts` |
+| 81 | 10 | 27 | `handleSuggestFromText` | `apps/mana/apps/web/src/routes/(app)/food/add/+page.svelte` |
+| 82 | 10 | 85 | `redeemGift` | `services/mana-credits/src/services/gift-code.ts` |
+| 83 | 10 | 65 | `deliveryRoutes` | `services/mana-media/apps/api/src/routes/delivery.ts` |
+| 84 | 10 | 25 | `handlePointerMove` | `packages/shared-ui/src/dnd/drop-target.ts` |

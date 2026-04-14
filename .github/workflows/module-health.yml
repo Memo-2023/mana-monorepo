@@ -1,0 +1,44 @@
+name: Module Health
+
+on:
+  schedule:
+    # Mondays 06:00 UTC
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run audits
+        run: |
+          node scripts/audit-modules.mjs
+          node scripts/audit-module-coupling.mjs
+          node scripts/audit-complexity.mjs || true
+          node scripts/build-complexity-map.mjs
+
+      - name: Commit reports if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          PATHS="docs/module-health.md docs/module-coupling.md docs/complexity-hotspots.md docs/complexity-map.html apps/mana/apps/web/static/admin/complexity-map.html"
+          if git diff --quiet $PATHS 2>/dev/null; then
+            echo "No changes to reports."
+            exit 0
+          fi
+          git add $PATHS 2>/dev/null || true
+          git commit -m "chore(audit): weekly module health report
+
+          Co-Authored-By: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
+          git push
