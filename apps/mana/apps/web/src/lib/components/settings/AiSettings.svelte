@@ -19,7 +19,8 @@
 		MODELS,
 		DEFAULT_MODEL,
 	} from '@mana/local-llm';
-	import { Robot, Cpu, HardDrive, Cloud, Warning, CheckCircle } from '@mana/shared-icons';
+	import { Robot, Cpu, HardDrive, Cloud, Warning, CheckCircle, Key } from '@mana/shared-icons';
+	import ByokKeysManager from './ByokKeysManager.svelte';
 
 	const settings = $derived(llmSettingsState.current);
 	const webgpuSupported = isLocalLlmSupported();
@@ -88,6 +89,17 @@
 				'Schneller und stärker als Browser-LLM',
 				'Daten laufen verschlüsselt zu unserem Server',
 				'Keine Inhalte werden gespeichert',
+			],
+		},
+		{
+			tier: 'byok',
+			icon: Key,
+			title: 'Eigener API-Key',
+			subtitle: 'OpenAI, Anthropic, Google Gemini oder Mistral',
+			bullets: [
+				'Direkt aus dem Browser — keine Mana-Server-Zwischenstation',
+				'Du zahlst beim Provider, wir sehen nichts davon',
+				'Schluessel werden verschluesselt in deinem Vault gespeichert',
 			],
 		},
 		{
@@ -227,6 +239,17 @@
 								WebGPU nicht verfügbar in deinem Browser. Funktioniert in Chrome/Edge 113+ oder
 								Safari 18+.
 							</p>
+						{/if}
+
+						{#if card.tier === 'byok' && enabled}
+							<div
+								class="mt-3"
+								onclick={(e) => e.stopPropagation()}
+								onkeydown={(e) => e.stopPropagation()}
+								role="presentation"
+							>
+								<ByokKeysManager />
+							</div>
 						{/if}
 
 						{#if card.tier === 'cloud' && enabled && !settings.cloudConsentGiven}
