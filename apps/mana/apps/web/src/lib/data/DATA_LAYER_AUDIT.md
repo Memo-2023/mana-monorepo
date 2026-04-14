@@ -34,7 +34,7 @@
 | 2         | mana-auth Server Vault: encryption_vaults + RLS + KEK + 11 Tests                    | ✅     | `e9915428c` |
 | 3         | Client Wire-up: vault-client, record-helpers, layout integration                    | ✅     | `354cbcb17` |
 | 4         | Pilot: notes table mit 8 End-to-End Tests                                           | ✅     | `bed08a1aa` |
-| 5         | Rollout: chat, dreams, memoro, contacts, cycles, finance                            | ✅     | `af92720a6` |
+| 5         | Rollout: chat, dreams, memoro, contacts, period, finance                            | ✅     | `af92720a6` |
 | 6.1       | Rollout: cards, presi, inventar, plants                                             | ✅     | `73f294b29` |
 | 6.2 + 6.3 | Settings UI (`/settings/security`) + Encryption Intro Banner                        | ✅     | `6b8e2c717` |
 | Roundup   | DATA_LAYER_AUDIT roll-up vor Phase 7                                                | ✅     | `4bdf4238c` |
@@ -388,8 +388,8 @@ Unlock-Flow (Login auf neuem Gerät):
 | memoro               | `memos`              | `title`, `intro`, `transcript`                                                            | 5        |
 |                      | `memories`           | `title`, `content`                                                                        | 5        |
 | contacts             | `contacts`           | 16 PII-Felder (firstName, lastName, email, phone, mobile, birthday, address, social, ...) | 5        |
-| cycles               | `cycles`             | `notes`                                                                                   | 5        |
-|                      | `cycleDayLogs`       | `notes`, `mood` (symptoms plaintext für Set-Diffs)                                        | 5        |
+| period               | `period`             | `notes`                                                                                   | 5        |
+|                      | `periodDayLogs`      | `notes`, `mood` (symptoms plaintext für Set-Diffs)                                        | 5        |
 | finance              | `transactions`       | `description`, `note`                                                                     | 5        |
 | cards                | `cards`              | `front`, `back`                                                                           | 6.1      |
 |                      | `cardDecks`          | `name`, `description`                                                                     | 6.1      |
@@ -422,7 +422,7 @@ Bestimmte Felder bleiben absichtlich im Klartext, weil sie strukturell gebraucht
 - **`links.originalUrl`** — Public-Redirect-Handler löst `shortCode → 302` ohne async Decrypt auf
 - **`socialEvents` veröffentlicht** — Beim Publish wird die Local-Row decrypted und als Plaintext in den Server-Snapshot gepusht (per Design: shareable RSVP-Page anstatt Confidentiality)
 - **`dreamSymbols.name`** — Wird als unique Lookup-Key in `where('name').equals(...)` benutzt
-- **`cycleDayLogs.symptoms`** — String-Array, das per Set-Diff in `dayLogsStore.logDay` abgeglichen wird
+- **`periodDayLogs.symptoms`** — String-Array, das per Set-Diff in `dayLogsStore.logDay` abgeglichen wird
 - **`plants.healthStatus`, `meals.nutrition`** — Strukturierte Browsing-/Aggregations-Felder
 - **`files.name` / `images.prompt`** — Zwar im Dexie-Schema indexed, aber kein `.where()`-Call-Site benutzt sie; Encryption ist sicher, der Index wird nur ein No-Op für Content-Lookups
 
@@ -495,8 +495,98 @@ Pre-existing Test-Failures (nicht von dieser Audit-Arbeit verursacht):
 - Lazy Sync für selten genutzte Module (Connection Limits geschont)
 - Vollständiger Offline-Support inkl. Online-Resume
 - SSE bevorzugt, Polling als Fallback (mit pipelined parser)
-- Saubere Trennung Detection (`quota-detect.ts`) vs. db-aware Helpers (`quota.ts`) → keine Import-Cycles
+- Saubere Trennung Detection (`quota-detect.ts`) vs. db-aware Helpers (`quota.ts`) → keine Import-Period
 - Encryption-Boundary lebt in dedicated `crypto/` Sub-Modul, völlig entkoppelt vom Sync-Layer
 - Vault-Singleton via `vault-instance.ts` — Layout + Settings + zukünftige UI teilen sich denselben State
 
 Die Datenschicht ist jetzt **production-grade** in den Dimensionen Korrektheit, Sicherheit, **Vertraulichkeit** (inkl. optionaler **Zero-Knowledge-Modus**), Robustheit, Beobachtbarkeit, Performance und Testabdeckung.
+
+## 8. Backup & Restore (Sync-Stream-Export)
+
+Der Sync-Event-Log ist bereits eine saubere, LWW-geordnete, schema-versionierte Serialisierung aller Nutzerdaten — also nutzen wir ihn als Backup-Format statt eine zweite parallele Serializer-Schicht zu bauen.
+
+### Architektur — eine Datei, beide Richtungen
+
+```
+EXPORT                                        IMPORT
+────────────────────────────────────────────  ────────────────────────────────────────────
+mana-sync DB                                  .mana (ZIP)
+ └─ sync_changes WHERE user_id = $1             ├─ events.jsonl   ──┐
+    │                                           └─ manifest.json    │ parseBackup()
+    ▼                                                                ▼
+ WriteBackup(w, userID, createdAt, iter)      authStore.user.id match?   ┐
+    │  streams                                 eventsSha256 match?       │ validate
+    ├─ events.jsonl  (JSON Lines)              schemaVersionMax ≤ client?┘
+    └─ manifest.json                                                     │
+                                                                          ▼
+                                              iterateEvents() → toSyncChange()
+                                                                          │
+                                                                          ▼
+                                              applyServerChanges(appId, batch)
+                                                                          │ (batches of 300)
+                                                                          ▼
+                                                                   IndexedDB (via Dexie hooks, suppressed)
+```
+
+Same-Account-Restore funktioniert ohne Server-Roundtrip: Events liegen schon auf mana-sync, LWW würde sowieso dedupen. Cross-Account-Migration (anderer User auf neuem Gerät) braucht den MK-Transfer-Pfad — siehe Backlog.
+
+### `.mana`-Dateiformat (Version 1)
+
+ZIP-Archiv mit genau zwei Einträgen, beide DEFLATE-komprimiert:
+
+| Entry           | Inhalt                                                                                                                             |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `events.jsonl`  | Eine JSON-Zeile pro `sync_changes`-Row, chronologisch                                                                              |
+| `manifest.json` | Header mit `formatVersion`, `schemaVersion`, `userId`, `eventCount`, `eventsSha256`, `apps[]`, `createdAt`, `schemaVersionMin/Max` |
+
+**Event-Zeile**:
+
+```json
+{"eventId":"uuid","schemaVersion":1,"appId":"todo","table":"tasks","id":"task-1","op":"update","data":{...},"fieldTimestamps":{...},"clientId":"...","createdAt":"2026-..."}
+```
+
+Verschlüsselte Felder bleiben Ciphertext — die `.mana`-Datei ist für die 27 Encryption-Registry-Tabellen **at-rest verschlüsselt**. Plaintext-Felder (IDs, Sort-Keys, Timestamps) stehen lesbar drin (GDPR-Portabilitäts-Anspruch).
+
+### Protokoll-Stability-Contract (M2, pre-launch gehärtet)
+
+Ab v1 sind diese Felder unveränderlich im Event-Shape:
+
+- `eventId: uuid` — stabiler Primary-Key, client-seitiger Dedup
+- `schemaVersion: number` — ermöglicht Migration-Chain für künftige Protokoll-Änderungen
+- `op: "insert" | "update" | "delete"` — Vokabular eingefroren
+- `fields` = kanonisch für LWW-Merges, `data` = Snapshot-only für Inserts
+- Tombstones (Deletes) bleiben für immer in `sync_changes` — sonst kein vollständiges Backup
+
+**Pre-M2-Clients** (kein `schemaVersion` auf dem Wire) werden server-seitig auf v1 geklemmt. Ein Client mit `schemaVersion > MaxSupported` wird mit 400 abgelehnt.
+
+### Encryption-Boundary bleibt intakt
+
+Der Backup-Pfad **berührt nie Plaintext**:
+
+1. Feld-Level-Ciphertext liegt bereits verschlüsselt in `sync_changes.data`
+2. `WriteBackup` liest Bytes 1:1 und streamt sie in den ZIP
+3. Import-Seite ruft `applyServerChanges()` — das gleiche Pfad, den Live-Sync benutzt — was in IndexedDB landet, fließt durch den normalen `decryptRecords()`-Pfad beim Lesen, nicht beim Schreiben
+
+Zero-Knowledge-User: bis zum MK-Transfer-Pfad (M5) können sie sich selbst restoren (gleicher Account, gleicher Recovery-Code schon aktiv) — aber kein Account-Wechsel ohne Recovery-Code.
+
+### Dateien
+
+| Pfad                                                                | Rolle                                                                                    |
+| ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `services/mana-sync/internal/backup/writer.go`                      | Pure `WriteBackup()` — streaming ZIP + sha256-Tee                                        |
+| `services/mana-sync/internal/backup/handler.go`                     | HTTP-Shim für `GET /backup/export` (auth-only, kein billing-gate)                        |
+| `services/mana-sync/internal/backup/writer_test.go`                 | 4 Go-Tests (Round-Trip, empty, legacy-v0-clamping)                                       |
+| `services/mana-sync/internal/store/postgres.go`                     | `StreamAllUserChanges()` — cursor-freier Stream über alle Events eines Users, RLS-scoped |
+| `apps/mana/apps/web/src/lib/data/backup/format.ts`                  | Hand-gerollter ZIP-Parser + sha256-Recompute (nutzt `pako` für Inflate)                  |
+| `apps/mana/apps/web/src/lib/data/backup/import.ts`                  | Replay-Logik: validate → iterate → batch → `applyServerChanges`                          |
+| `apps/mana/apps/web/src/lib/data/backup/format.test.ts`             | 8 Vitest-Tests für den Parser (synthetische PKZIP-Bytes)                                 |
+| `apps/mana/apps/web/src/lib/api/services/backup.ts`                 | Browser-seitiger Download-Helper                                                         |
+| `apps/mana/apps/web/src/routes/(app)/settings/my-data/+page.svelte` | UI: Download + File-Picker + Progress                                                    |
+
+### Offene Punkte (Backup-Backlog)
+
+- **M5 (Cross-Account-Restore)**: `manifest.encryption.mkWrap` mit KEK-wrapped MK befüllen; neuer `POST /me/vault/import-mk` in `mana-auth`; Zero-Knowledge-Pfad via Recovery-Code-Eingabe beim Import
+- **M4b (Bulk-Ingest-Endpoint)**: `POST /sync/{appId}/ingest` damit importierte Events auch server-seitig auf dem neuen Account landen (nur relevant bei Cross-Account)
+- **Signatur**: Ed25519 über `manifest.json` gegen Tampering — heute nur sha256 über events.jsonl
+- **Resumable Download**: Multi-GB-Accounts werden irgendwann fraglich im Browser
+- **`_appliedEventIds` Dedup-Tabelle**: Performance-Optimierung für Re-Import (heute macht LWW den Dedup, aber wir verarbeiten trotzdem jedes Event)

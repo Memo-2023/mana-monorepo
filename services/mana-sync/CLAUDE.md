@@ -132,10 +132,30 @@ Result:   title="Buy eggs", completed=true  (merged — different fields)
 | `GET /sync/{appId}/stream` | GET | JWT + Billing | SSE stream for real-time changes |
 | `GET /ws` | WS | JWT (in-band) | Unified real-time sync (all apps, one connection) |
 | `GET /ws/{appId}` | WS | JWT (in-band) | Legacy per-app sync notifications |
+| `GET /backup/export` | GET | JWT only | **GDPR-grade full-account export** as `.mana` zip (see below) |
 | `GET /health` | GET | No | Health check with connection stats |
 | `GET /metrics` | GET | No | Prometheus metrics |
 
-**Billing gate**: Push, pull, and stream endpoints are wrapped by a billing middleware that checks the user's sync subscription status via `mana-credits`. Returns **402 Payment Required** if sync is not active. Status is cached for 5 minutes per user. Fail-open: if mana-credits is unreachable, sync is allowed.
+**Billing gate**: Push, pull, and stream endpoints are wrapped by a billing middleware that checks the user's sync subscription status via `mana-credits`. Returns **402 Payment Required** if sync is not active. Status is cached for 5 minutes per user. Fail-open: if mana-credits is unreachable, sync is allowed. **`/backup/export` is intentionally outside the billing gate** — GDPR data-portability must always be available.
+
+## Backup / Restore
+
+`GET /backup/export` streams a `.mana` archive (zip) with the user's full `sync_changes` log. Format:
+
+```
+mana-backup-{userId}-{YYYYMMDD-HHMMSS}.mana  (application/zip)
+├── events.jsonl   — one SyncChange per line (chronological)
+└── manifest.json  — formatVersion, schemaVersion, userId, eventCount,
+                     eventsSha256, apps[], createdAt, schemaVersionMin/Max
+```
+
+The zip is built in a single DB pass: `events.jsonl` is written via `io.MultiWriter(entry, sha256)` so the manifest's `eventsSha256` can be filled without a second scan. The client (web) parses the zip with a hand-rolled reader against `pako` deflate, validates `userId` match + sha256, then replays events through `applyServerChanges()` in 300-event batches per `appId`.
+
+Ciphertext (27 encrypted tables, client-side AES-GCM) passes through untouched — the archive is effectively encrypted at rest for sensitive fields.
+
+**Protocol stability (v1, pre-launch):** Once this ships, these event fields are append-only: `eventId`, `schemaVersion`, `op`, `fields` (LWW-canonical) / `data` (insert-snapshot). Tombstones stay in `sync_changes` forever so exports remain complete.
+
+**Split**: pure logic lives in `internal/backup/writer.go::WriteBackup(w, userID, createdAt, iter)`. The HTTP handler (`handler.go`) is a thin shim; tests use a slice-backed iterator so they run without Postgres. See `writer_test.go` (4 cases) + `apps/mana/apps/web/src/lib/data/backup/format.test.ts` (8 cases).
 
 ## Database Schema
 
@@ -176,7 +196,7 @@ cd services/mana-sync
 go test ./... -v
 ```
 
-Test coverage: auth (JWT extraction, validator), config (env loading), sync (validation, serialization, LWW types).
+Test coverage: auth (JWT extraction, validator), config (env loading), sync (validation, serialization, LWW types), backup (ZIP writer round-trip + legacy `schema_version=0` clamping + empty-export manifest).
 
 ## Project Structure
 
@@ -186,6 +206,9 @@ services/mana-sync/
 ├── internal/
 │   ├── auth/jwt.go             — EdDSA JWT validation via JWKS
 │   ├── auth/jwt_test.go        — Token extraction, validator tests
+│   ├── backup/writer.go        — Pure ZIP writer for .mana archives (testable without DB)
+│   ├── backup/writer_test.go   — 4 cases: round-trip, empty, legacy schema_version=0
+│   ├── backup/handler.go       — HTTP shim for GET /backup/export (auth-only)
 │   ├── billing/check.go        — Sync billing status checker (cached, fail-open)
 │   ├── config/config.go        — Environment variable loading
 │   ├── config/config_test.go   — Config defaults and env override tests
@@ -207,6 +230,7 @@ services/mana-sync/
 - Operation types validated (insert/update/delete only)
 - Table and record IDs required on all changes
 - RecordChange failures abort the entire sync (no partial writes)
+- `/backup/export` is auth-only by design (GDPR), but `StreamAllUserChanges` is RLS-scoped to the caller's `user_id` via the same `withUser()` transaction pattern as every other query — cross-user export is impossible at the DB layer
 
 ## Connected Apps (19)
 
