@@ -19,6 +19,8 @@ import { trackFirstContent } from '$lib/stores/funnel-tracking';
 import { fire as fireTrigger } from '$lib/triggers/registry';
 import { checkInlineSuggestion } from '$lib/triggers/inline-suggest';
 import { getEffectiveUserId } from './current-user';
+import { getCurrentActor } from './events/actor';
+import type { Actor } from './events/actor';
 import { isQuotaError, notifyQuotaExceeded } from './quota-detect';
 import {
 	SYNC_APP_MAP,
@@ -104,10 +106,10 @@ db.version(1).stores({
 	cards: 'id, deckId, difficulty, nextReview, order, [deckId+order]',
 	deckTags: 'id, deckId, tagId, [deckId+tagId]',
 
-	// ─── Zitare (appId: 'zitare') ───
-	zitareFavorites: 'id, quoteId',
-	zitareLists: 'id',
-	zitareListTags: 'id, listId, tagId, [listId+tagId]',
+	// ─── Quotes (appId: 'quotes') ───
+	quotesFavorites: 'id, quoteId',
+	quotesLists: 'id',
+	quotesListTags: 'id, listId, tagId, [listId+tagId]',
 
 	// ─── Music (appId: 'music') ───
 	songs: 'id, artist, album, genre, favorite, title, updatedAt',
@@ -367,9 +369,9 @@ db.version(5).stores({
 	bodyWorkouts: 'id, startedAt, endedAt, routineId, timeBlockId, [endedAt+startedAt]',
 });
 
-// v5: Zitare custom quotes — user-created quotes stored locally.
+// v5: Quotes custom quotes — user-created quotes stored locally.
 db.version(5).stores({
-	zitareCustomQuotes: 'id, author, category',
+	customQuotes: 'id, author, category',
 });
 
 // Schema version 6 — Firsts module: track first-time experiences.
@@ -494,10 +496,16 @@ db.version(16).stores({
 	_byokKeys: 'id, provider, isDefault, [provider+isDefault]',
 });
 
-// v17 — Kontext module: a single user-authored markdown document keyed by
-// the fixed id 'singleton'. No indexes beyond the primary key.
+// v17 — Kontext module (user-authored markdown doc keyed by 'singleton')
+// + AI proposals (staged intents awaiting user approval).
+//
+// `pendingProposals` is local-only and does NOT participate in mana-sync —
+// the approved write itself syncs through the normal module path. Indexes
+// support "all pending ordered by creation" (approval inbox) and
+// "all proposals for mission X" (workbench).
 db.version(17).stores({
 	kontextDoc: 'id',
+	pendingProposals: 'id, status, createdAt, missionId, [status+createdAt]',
 });
 
 // ─── Sync Routing ──────────────────────────────────────────
@@ -633,9 +641,25 @@ function trackActivity(
  * Not indexed, not sent to the server in pending-change payloads.
  */
 export const FIELD_TIMESTAMPS_KEY = '__fieldTimestamps';
+/**
+ * Hidden field holding the {@link Actor} that last wrote the record as a
+ * whole. Used by the Workbench UI to badge records the AI has touched.
+ */
+export const LAST_ACTOR_KEY = '__lastActor';
+/**
+ * Hidden field holding the per-field {@link Actor} map, mirroring
+ * `__fieldTimestamps`. Enables "the AI changed the due date, the user
+ * changed the title" attribution when rendering diffs.
+ */
+export const FIELD_ACTORS_KEY = '__fieldActors';
 
 function isInternalKey(key: string): boolean {
-	return key === 'id' || key === FIELD_TIMESTAMPS_KEY;
+	return (
+		key === 'id' ||
+		key === FIELD_TIMESTAMPS_KEY ||
+		key === LAST_ACTOR_KEY ||
+		key === FIELD_ACTORS_KEY
+	);
 }
 
 for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {
@@ -645,6 +669,10 @@ for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {
 		table.hook('creating', function (_primKey, obj) {
 			if (_applyingTables.has(tableName)) return;
 			const now = new Date().toISOString();
+			// Capture the actor synchronously — ambient context is only reliable
+			// inside the caller's microtask, not across the setTimeout'd
+			// trackPendingChange below. Freezing it here is the authoritative step.
+			const actor: Actor = getCurrentActor();
 
 			// Auto-stamp the active user. Module stores never set userId themselves,
 			// preventing accidental impersonation and removing all hardcoded
@@ -655,16 +683,26 @@ for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {
 			}
 
 			// Stamp every real field with the create-time so future LWW comparisons
-			// have a baseline. Mutates obj in place — Dexie persists the mutation.
+			// have a baseline, and with the actor so field-level attribution works.
+			// Mutates obj in place — Dexie persists the mutation.
 			const ft: Record<string, string> = {};
+			const fa: Record<string, Actor> = {};
 			for (const key of Object.keys(obj)) {
 				if (isInternalKey(key)) continue;
 				ft[key] = now;
+				fa[key] = actor;
 			}
 			objRecord[FIELD_TIMESTAMPS_KEY] = ft;
+			objRecord[FIELD_ACTORS_KEY] = fa;
+			objRecord[LAST_ACTOR_KEY] = actor;
 
-			// Build payload for pending-change WITHOUT the internal timestamp map
-			const { [FIELD_TIMESTAMPS_KEY]: _omit, ...dataForSync } = obj as Record<string, unknown>;
+			// Build payload for pending-change WITHOUT the internal bookkeeping fields
+			const {
+				[FIELD_TIMESTAMPS_KEY]: _ft,
+				[FIELD_ACTORS_KEY]: _fa,
+				[LAST_ACTOR_KEY]: _la,
+				...dataForSync
+			} = obj as Record<string, unknown>;
 
 			trackPendingChange(tableName, {
 				appId,
@@ -672,6 +710,7 @@ for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {
 				recordId: obj.id,
 				op: 'insert',
 				data: dataForSync,
+				actor,
 				createdAt: now,
 			});
 			trackActivity(appId, tableName, obj.id, 'insert');
@@ -690,6 +729,7 @@ for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {
 		table.hook('updating', function (modifications, primKey, obj) {
 			if (_applyingTables.has(tableName)) return undefined;
 			const now = new Date().toISOString();
+			const actor: Actor = getCurrentActor();
 			const fields: Record<string, { value: unknown; updatedAt: string }> = {};
 
 			// userId is immutable after creation. Silently strip any attempt to
@@ -698,17 +738,23 @@ for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {
 			const mods = modifications as Record<string, unknown>;
 			if ('userId' in mods) delete mods.userId;
 
-			// Merge field timestamps: keep existing, overwrite for each modified field
+			// Merge field timestamps and field actors: keep existing, overwrite
+			// each modified field with now / current actor.
 			const existingFT =
 				((obj as Record<string, unknown>)[FIELD_TIMESTAMPS_KEY] as
 					| Record<string, string>
 					| undefined) ?? {};
+			const existingFA =
+				((obj as Record<string, unknown>)[FIELD_ACTORS_KEY] as Record<string, Actor> | undefined) ??
+				{};
 			const newFT: Record<string, string> = { ...existingFT };
+			const newFA: Record<string, Actor> = { ...existingFA };
 
 			for (const [key, value] of Object.entries(modifications)) {
 				if (isInternalKey(key)) continue;
 				fields[key] = { value, updatedAt: now };
 				newFT[key] = now;
+				newFA[key] = actor;
 			}
 
 			const op = (modifications as Record<string, unknown>).deletedAt ? 'delete' : 'update';
@@ -718,6 +764,7 @@ for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {
 				recordId: primKey as string,
 				op,
 				fields,
+				actor,
 				deletedAt: (modifications as Record<string, unknown>).deletedAt as string | undefined,
 				createdAt: now,
 			});
@@ -726,8 +773,13 @@ for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {
 
 			// Returning an object from a Dexie 'updating' hook merges it into the
 			// modifications applied to the record — use this to persist the new
-			// per-field timestamps alongside the user's update.
-			return { [FIELD_TIMESTAMPS_KEY]: newFT };
+			// per-field timestamps, per-field actors, and last-actor alongside
+			// the user's update.
+			return {
+				[FIELD_TIMESTAMPS_KEY]: newFT,
+				[FIELD_ACTORS_KEY]: newFA,
+				[LAST_ACTOR_KEY]: actor,
+			};
 		});
 	}
 }
