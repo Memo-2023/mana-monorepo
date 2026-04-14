@@ -1780,6 +1780,10 @@ Code:
     einmal pro Bucket statt pro Event
   - Filter: Mission (per query-string) + Modul (dropdown), Deep-Link ins
     Modul pro Event
+  - **Revert-per-Iteration**: Button pro Bucket, `data/ai/revert/`
+    Registry mit Inverse-Ops für TaskCreated/Completed, CalendarEvent-
+    Created, PlaceCreated, DrinkLogged. Newest-first Reihenfolge,
+    RevertStats-Summary ("X zurückgenommen · Y nicht unterstützt").
 - [x] Schritt 7a — System-Actor-Wrapping für Projections (streaks-Tracker)
 - [x] Schritt 8 — mana-sync Go + Postgres-Migration für `actor`-Feld
   - `sync_changes.actor JSONB` Column (idempotent `ADD COLUMN IF NOT EXISTS`)

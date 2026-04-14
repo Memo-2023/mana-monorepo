@@ -21,7 +21,6 @@ What works end-to-end:
 
 Intentionally **not yet** implemented (future work):
 - [ ] Materialized mission snapshot — full LWW replay per tick is O(N changes). Fine pre-launch; revisit when user count grows.
-- [ ] Revert-per-iteration in the Workbench timeline — would undo the AI's approved writes. Needs per-event-type inverse logic (delete reverts create, uncomplete reverts TaskCompleted, …).
 
 ## Port: 3066
 
