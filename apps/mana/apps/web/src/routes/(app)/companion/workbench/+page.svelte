@@ -9,10 +9,11 @@
   Filters: mission (via query-string `?mission=…`), module (dropdown).
 -->
 <script lang="ts">
-	import { Sparkle, ArrowLeft, ArrowSquareOut } from '@mana/shared-icons';
+	import { Sparkle, ArrowLeft, ArrowSquareOut, ArrowCounterClockwise } from '@mana/shared-icons';
 	import { page } from '$app/stores';
 	import { useAiTimeline, bucketByIteration } from '$lib/data/ai/timeline/queries';
 	import { useMissions } from '$lib/data/ai/missions/queries';
+	import { revertIteration } from '$lib/data/ai/revert/revert-iteration';
 	import type { DomainEvent } from '$lib/data/events/types';
 
 	const missionId = $derived($page.url.searchParams.get('mission') ?? undefined);
@@ -56,6 +57,25 @@
 			day: 'numeric',
 			month: 'short',
 		});
+	}
+
+	let revertingKey = $state<string | null>(null);
+
+	async function handleRevert(bucketKey: string, missionId: string, iterationId: string) {
+		if (!confirm('Alle AI-Writes dieser Iteration zurücknehmen?')) return;
+		revertingKey = bucketKey;
+		try {
+			const stats = await revertIteration(missionId, iterationId);
+			const parts = [`${stats.reverted} zurückgenommen`];
+			if (stats.skippedUnsupported > 0) parts.push(`${stats.skippedUnsupported} nicht unterstützt`);
+			if (stats.failed > 0) parts.push(`${stats.failed} fehlgeschlagen`);
+			alert(parts.join(' · '));
+		} catch (err) {
+			console.error('[workbench] revert failed:', err);
+			alert('Revert fehlgeschlagen — siehe Console.');
+		} finally {
+			revertingKey = null;
+		}
 	}
 </script>
 
@@ -113,6 +133,16 @@
 								<p class="rationale">{b.rationale}</p>
 							{/if}
 						</div>
+						<button
+							type="button"
+							class="revert-btn"
+							title="Alle Writes dieser Iteration zurücknehmen"
+							disabled={revertingKey !== null}
+							onclick={() => handleRevert(b.key, b.missionId, b.iterationId)}
+						>
+							<ArrowCounterClockwise size={14} />
+							<span>{revertingKey === b.key ? 'Läuft…' : 'Revert'}</span>
+						</button>
 					</header>
 					<ul class="events">
 						{#each b.events as e (e.meta.id)}
@@ -216,10 +246,32 @@
 	}
 	.bucket-head {
 		display: grid;
-		grid-template-columns: 4.5rem 1fr;
+		grid-template-columns: 4.5rem 1fr auto;
 		gap: 0.75rem;
 		align-items: start;
 		margin-bottom: 0.5rem;
+	}
+	.revert-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.25rem;
+		padding: 0.25rem 0.5rem;
+		border: 1px solid var(--color-border, #ddd);
+		border-radius: 0.25rem;
+		background: var(--color-bg, #fff);
+		color: var(--color-muted, #666);
+		font: inherit;
+		font-size: 0.75rem;
+		cursor: pointer;
+	}
+	.revert-btn:hover:not(:disabled) {
+		color: #8a1b1b;
+		border-color: #e99;
+		background: #fff0f0;
+	}
+	.revert-btn:disabled {
+		cursor: not-allowed;
+		opacity: 0.5;
 	}
 	.bucket-when {
 		display: flex;
