@@ -4,23 +4,24 @@ Background runner for the AI Workbench. Picks up due Missions from the `mana_syn
 
 Design context: [`docs/architecture/COMPANION_BRAIN_ARCHITECTURE.md` §20](../../docs/architecture/COMPANION_BRAIN_ARCHITECTURE.md).
 
-## Status: v0.1 (scaffold)
+## Status: v0.2 (plans end-to-end, no write-back)
 
-This service is a skeleton. It:
+What works:
 
 - [x] Boots as a Hono/Bun service on port `3066`
 - [x] Exposes `/health` and service-key-gated `/internal/tick`
 - [x] Replays `sync_changes` for `appId='ai' / table='aiMissions'` into live Mission records via field-level LWW (`src/db/missions-projection.ts`)
 - [x] Lists due missions (`state='active' && nextRunAt <= now()`)
-- [x] Has an HTTP client shape for mana-llm (OpenAI-compatible surface)
-- [x] Logs every tick's intent ("would plan mission X")
+- [x] For each due mission: builds the shared `buildPlannerPrompt` from `@mana/shared-ai`, calls `mana-llm` via `/v1/chat/completions`, parses + validates with `parsePlannerResponse`
+- [x] Per-mission try/catch so one flaky LLM response doesn't abort the queue; stats differentiate `plansProduced` vs `parseFailures`
+- [x] Server-side tool allow-list (`src/planner/tools.ts`) mirrors the webapp's `DEFAULT_AI_POLICY` subset where policy === 'propose'
 
 Intentionally **not yet** implemented:
 
-- [ ] Server-side copies of `planner/prompt.ts` + `planner/parser.ts` (today they live in the webapp only)
-- [ ] Input-resolvers server-side (needs projections for notes / kontext / goals, or a mana-sync `GET /internal/record/:id` endpoint)
-- [ ] Write-back path for plan results (see "Open design questions" below)
-- [ ] Per-user Postgres RLS scoping — current read scans cross-user and relies on downstream code honouring `userId`
+- [ ] Input-resolvers server-side — Planner currently sees `resolvedInputs: []` so the LLM only has concept + objective + iteration history. Real resolvers need per-module projections of `sync_changes` (notes, kontext, goals)
+- [ ] Write-back path for plan results — the produced plan is logged, not persisted. Needs an RLS-scoped write helper mirroring mana-sync's `withUser` pattern. See "Open design questions" below; leaning option (a): append iteration with `source: 'server'` so the webapp staging-effect translates each step into a local Proposal.
+- [ ] Per-user Postgres RLS scoping on reads — current read scans cross-user and relies on downstream code honouring `userId`
+- [ ] Contract test between this service's `AI_AVAILABLE_TOOLS` and the webapp's `DEFAULT_AI_POLICY` — drift today = silent degradation
 
 ## Port: 3066
 
