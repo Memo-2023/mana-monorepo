@@ -88,6 +88,11 @@
 				<p class="empty-hint">Noch keine Gespraeche. Starte mit dem + Button.</p>
 			{/if}
 		</div>
+
+		<nav class="sidebar-footer">
+			<a href="/companion/missions">AI Missions →</a>
+			<a href="/companion/rituals">Rituale →</a>
+		</nav>
 	</div>
 
 	<!-- Chat Area -->
@@ -282,5 +287,21 @@
 
 	.start-btn:hover {
 		filter: brightness(1.1);
+	}
+
+	.sidebar-footer {
+		padding: 0.75rem 1rem;
+		border-top: 1px solid var(--color-border, #ddd);
+		display: flex;
+		flex-direction: column;
+		gap: 0.375rem;
+	}
+	.sidebar-footer a {
+		color: var(--color-muted, #888);
+		text-decoration: none;
+		font-size: 0.8125rem;
+	}
+	.sidebar-footer a:hover {
+		color: var(--color-primary, #6b5bff);
 	}
 </style>
