@@ -17,8 +17,11 @@
 import { db } from '../database';
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { eventBus } from '../events/event-bus';
+import { runAsAsync } from '../events/actor';
 import type { DomainEvent } from '../events/types';
 import type { StreakInfo } from './types';
+
+const PROJECTION_ACTOR = { kind: 'system', source: 'projection' } as const;
 
 // ── Persistent State ────────────────────────────────
 
@@ -152,7 +155,10 @@ export function startStreakTracker(): void {
 		for (const def of STREAK_DEFS) {
 			if (!def.triggerEvents.includes(event.type)) continue;
 			if (def.filter && !def.filter(event.payload as Record<string, unknown>)) continue;
-			markActive(def.id);
+			// Derived write — attribute to the projection subsystem, not to
+			// whoever triggered the upstream event. Matters the moment
+			// `_streakState` (or any future derived table) joins sync.
+			void runAsAsync(PROJECTION_ACTOR, () => markActive(def.id));
 		}
 	});
 }
@@ -167,17 +173,20 @@ export function stopStreakTracker(): void {
 async function ensureSeeded(): Promise<void> {
 	const count = await db.table(TABLE).count();
 	if (count > 0) return;
-	// Seed empty states so useStreaks() returns all definitions
-	for (const def of STREAK_DEFS) {
-		await db.table(TABLE).add({
-			id: def.id,
-			label: def.label,
-			moduleId: def.moduleId,
-			currentStreak: 0,
-			longestStreak: 0,
-			lastActiveDate: '',
-		});
-	}
+	// Seed empty states so useStreaks() returns all definitions. Same
+	// attribution reasoning as markActive — this is a subsystem write.
+	await runAsAsync(PROJECTION_ACTOR, async () => {
+		for (const def of STREAK_DEFS) {
+			await db.table(TABLE).add({
+				id: def.id,
+				label: def.label,
+				moduleId: def.moduleId,
+				currentStreak: 0,
+				longestStreak: 0,
+				lastActiveDate: '',
+			});
+		}
+	});
 }
 
 // ── Read API ────────────────────────────────────────
