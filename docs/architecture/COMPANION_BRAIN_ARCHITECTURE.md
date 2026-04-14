@@ -1768,9 +1768,25 @@ Code:
   - `runMission(id, deps)` + `runDueMissions(now, deps)` — injiziert, testbar
   - Default-Input-Resolver für Notes / Kontext / Goals
   - 60-Sekunden-Tick, Overlap-Guard, idempotent
-- [ ] Schritt 6 — Missions-UI (Create/Edit-Form + Iteration-History)
+- [x] Schritt 6 — Missions-UI unter `/companion/missions`
+  - Create-Form mit Konzept-Markdown + Objective + Cadence-Picker
+  - List / Detail mit pause / resume / complete / delete / "Jetzt ausführen"
+  - Iteration-History + pro-Iteration Freitext-Feedback-Textarea
+  - `<MissionInputPicker>`-Komponente mit Indexer-Registry, Default-Indexer
+    für notes / kontext / goals (symmetrisch zu den Resolvern)
 - [ ] Schritt 7 — Workbench-Timeline-Lens (cross-module AI-Aktivitaet)
 - [ ] Schritt 8 — Server-side `mana-ai` Bun-Service (offline-of-tab Runs)
+
+### 20.5a Symmetrische Registries: Resolver vs. Indexer
+
+Zwei parallele Module-Opt-in-Points für die AI-Layer:
+
+| Registry | Richtung | Nutzer | Beispiel |
+|----------|----------|--------|----------|
+| `input-resolvers.ts` | `Ref → Prompt-Text` | Runner (Planner-Kontext) | `notes/abc-123 → "Titel\nContent…"` |
+| `input-index.ts` | `Module → Candidates[]` | UI (Picker) | `notes → [{label:"Idee", hint:"…"}]` |
+
+Beide werden im selben `default-resolvers.ts` zusammen registriert, damit die Paare synchron bleiben. Neues Modul anbinden = `registerInputResolver(name, resolver) + registerInputIndexer(name, indexer)` — keine Änderungen am AI-Core nötig.
 
 ### 20.6 Offene Follow-ups
 

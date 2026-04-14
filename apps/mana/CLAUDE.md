@@ -167,15 +167,17 @@ pnpm test:e2e     # Playwright
 
 Svelte 5 runes are mandatory — no legacy `let count = 0; $: doubled = count * 2`. Always `$state`, `$derived`, `$effect`. See [`.claude/guidelines/sveltekit-web.md`](../../.claude/guidelines/sveltekit-web.md).
 
-## AI Workbench (in progress)
+## AI Workbench
 
-The companion is being rebuilt into a **second actor** that works alongside the human in every module. Foundation shipped 2026-04-14:
+The companion is a **second actor** that works alongside the human in every module. Foundation shipped 2026-04-14, end-to-end pipeline live:
 
 - **Actor attribution** — every event, record, and sync row carries `{ kind: 'user' | 'ai' | 'system' }`. Code: `src/lib/data/events/actor.ts`.
 - **AI policy** — per-tool `auto | propose | deny`. AI-attributed tool calls default to `propose`, which stages an intent in `pendingProposals` instead of writing. Code: `src/lib/data/ai/policy.ts`.
 - **Proposal inbox** — drop `<AiProposalInbox module="todo" />` into any module page to render pending proposals inline as ghost cards with approve/reject. Wired in `/todo` as pilot.
+- **Missions** — long-lived autonomous work items. User creates at `/companion/missions` (title + objective + concept markdown + linked inputs + cadence). Foreground tick in `(app)/+layout.svelte` runs due missions; the Planner (LLM) generates a plan, each step stages a Proposal. Code: `src/lib/data/ai/missions/`.
+- **Input picker** — `<MissionInputPicker>` sources candidates from the `input-index` registry (notes / kontext / goals by default). The Runner resolves them via the parallel `input-resolvers` registry when building Planner prompts.
 
-Full architecture + roadmap (Missions, Runner, Workbench lens, server-side runner): [`docs/architecture/COMPANION_BRAIN_ARCHITECTURE.md` §20](../../docs/architecture/COMPANION_BRAIN_ARCHITECTURE.md).
+Full architecture + still-open work (Workbench timeline lens, mana-sync actor field, server-side runner): [`docs/architecture/COMPANION_BRAIN_ARCHITECTURE.md` §20](../../docs/architecture/COMPANION_BRAIN_ARCHITECTURE.md).
 
 ## Reference Documents
 
