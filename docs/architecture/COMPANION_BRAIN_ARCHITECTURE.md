@@ -1789,7 +1789,15 @@ Code:
   - Webapp-Parität: `SyncChange.actor?` + Push-Payload + `applyServerChanges`
     stempelt `__lastActor` + `__fieldActors` aus eingehenden Changes
     → **cross-device Attribution geschlossen**
-- [ ] Schritt 9 — Server-side `mana-ai` Bun-Service (offline-of-tab Runs)
+- [~] Schritt 9 — Server-side `mana-ai` Bun-Service (v0.1 gerüstet)
+  - `services/mana-ai/` — Hono/Bun auf Port 3066
+  - Field-level LWW-Replay von `sync_changes` (appId='ai') in
+    `db/missions-projection.ts` — serverseitiges Pendant zu
+    `applyServerChanges`
+  - Tick-Loop scannt due Missions, mana-llm HTTP-Client vorhanden
+  - **Offen**: Prompt/Parser-Extraktion nach `@mana/shared-ai`,
+    Input-Resolver serverseitig, Plan-Write-Back-Design (drei
+    Optionen in `services/mana-ai/CLAUDE.md` dokumentiert)
 
 ### 20.5a Symmetrische Registries: Resolver vs. Indexer
 
