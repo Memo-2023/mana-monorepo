@@ -52,8 +52,17 @@ func (s *Store) Migrate(ctx context.Context) error {
 			data JSONB,
 			field_timestamps JSONB DEFAULT '{}',
 			client_id TEXT NOT NULL,
-			created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+			created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+			-- M2: schema_version lets us evolve the Change wire shape over time.
+			-- Default 1 covers rows written before the column existed so the
+			-- backup/restore pipeline can always feed them through a migration
+			-- chain keyed on this value.
+			schema_version INT NOT NULL DEFAULT 1
 		);
+
+		-- Idempotent add for databases created before M2 shipped.
+		ALTER TABLE sync_changes
+			ADD COLUMN IF NOT EXISTS schema_version INT NOT NULL DEFAULT 1;
 
 		CREATE INDEX IF NOT EXISTS idx_sync_changes_user_app
 			ON sync_changes (user_id, app_id, created_at);
@@ -112,7 +121,11 @@ func (s *Store) withUser(ctx context.Context, userID string, fn func(pgx.Tx) err
 // RecordChange stores a client change in the database. The insert is performed
 // inside an RLS-scoped transaction so the user_id column is double-checked
 // against the policy on the way in — a mismatched user_id would fail WITH CHECK.
-func (s *Store) RecordChange(ctx context.Context, appID, tableName, recordID, userID, op, clientID string, data map[string]any, fieldTimestamps map[string]string) error {
+func (s *Store) RecordChange(ctx context.Context, appID, tableName, recordID, userID, op, clientID string, data map[string]any, fieldTimestamps map[string]string, schemaVersion int) error {
+	if schemaVersion <= 0 {
+		schemaVersion = 1
+	}
+
 	dataJSON, err := json.Marshal(data)
 	if err != nil {
 		return fmt.Errorf("marshal data: %w", err)
@@ -125,10 +138,10 @@ func (s *Store) RecordChange(ctx context.Context, appID, tableName, recordID, us
 
 	return s.withUser(ctx, userID, func(tx pgx.Tx) error {
 		query := `
-			INSERT INTO sync_changes (app_id, table_name, record_id, user_id, op, data, field_timestamps, client_id)
-			VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+			INSERT INTO sync_changes (app_id, table_name, record_id, user_id, op, data, field_timestamps, client_id, schema_version)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 		`
-		_, err := tx.Exec(ctx, query, appID, tableName, recordID, userID, op, dataJSON, ftJSON, clientID)
+		_, err := tx.Exec(ctx, query, appID, tableName, recordID, userID, op, dataJSON, ftJSON, clientID, schemaVersion)
 		return err
 	})
 }
@@ -145,7 +158,7 @@ func (s *Store) GetChangesSince(ctx context.Context, userID, appID, tableName, s
 	var changes []ChangeRow
 	err = s.withUser(ctx, userID, func(tx pgx.Tx) error {
 		query := `
-			SELECT id, table_name, record_id, op, data, field_timestamps, client_id, created_at
+			SELECT id, table_name, record_id, op, data, field_timestamps, client_id, created_at, schema_version
 			FROM sync_changes
 			WHERE user_id = $1 AND app_id = $2 AND table_name = $3
 				AND created_at > $4 AND client_id != $5
@@ -162,7 +175,7 @@ func (s *Store) GetChangesSince(ctx context.Context, userID, appID, tableName, s
 			var c ChangeRow
 			var dataJSON, ftJSON []byte
 
-			if err := rows.Scan(&c.ID, &c.TableName, &c.RecordID, &c.Op, &dataJSON, &ftJSON, &c.ClientID, &c.CreatedAt); err != nil {
+			if err := rows.Scan(&c.ID, &c.TableName, &c.RecordID, &c.Op, &dataJSON, &ftJSON, &c.ClientID, &c.CreatedAt, &c.SchemaVersion); err != nil {
 				return err
 			}
 
@@ -194,7 +207,7 @@ func (s *Store) GetAllChangesSince(ctx context.Context, userID, appID, since, ex
 	var changes []ChangeRow
 	err = s.withUser(ctx, userID, func(tx pgx.Tx) error {
 		query := `
-			SELECT id, table_name, record_id, op, data, field_timestamps, client_id, created_at
+			SELECT id, table_name, record_id, op, data, field_timestamps, client_id, created_at, schema_version
 			FROM sync_changes
 			WHERE user_id = $1 AND app_id = $2
 				AND created_at > $3 AND client_id != $4
@@ -211,7 +224,7 @@ func (s *Store) GetAllChangesSince(ctx context.Context, userID, appID, since, ex
 			var c ChangeRow
 			var dataJSON, ftJSON []byte
 
-			if err := rows.Scan(&c.ID, &c.TableName, &c.RecordID, &c.Op, &dataJSON, &ftJSON, &c.ClientID, &c.CreatedAt); err != nil {
+			if err := rows.Scan(&c.ID, &c.TableName, &c.RecordID, &c.Op, &dataJSON, &ftJSON, &c.ClientID, &c.CreatedAt, &c.SchemaVersion); err != nil {
 				return err
 			}
 
@@ -233,8 +246,52 @@ func (s *Store) GetAllChangesSince(ctx context.Context, userID, appID, since, ex
 	return changes, err
 }
 
+// StreamAllUserChanges iterates every sync_changes row owned by userID, across
+// all apps/tables, in chronological order, invoking fn for each row. Designed
+// for the backup/export endpoint — unbounded result set, so rows are streamed
+// via a cursor-free single query (pgx streams rows as they arrive from the
+// server). If fn returns an error, iteration stops and the error is returned.
+func (s *Store) StreamAllUserChanges(ctx context.Context, userID string, fn func(ChangeRow) error) error {
+	return s.withUser(ctx, userID, func(tx pgx.Tx) error {
+		query := `
+			SELECT id, app_id, table_name, record_id, op, data, field_timestamps, client_id, created_at, schema_version
+			FROM sync_changes
+			WHERE user_id = $1
+			ORDER BY created_at ASC, id ASC
+		`
+		rows, err := tx.Query(ctx, query, userID)
+		if err != nil {
+			return fmt.Errorf("query: %w", err)
+		}
+		defer rows.Close()
+
+		for rows.Next() {
+			var c ChangeRow
+			var dataJSON, ftJSON []byte
+			if err := rows.Scan(&c.ID, &c.AppID, &c.TableName, &c.RecordID, &c.Op, &dataJSON, &ftJSON, &c.ClientID, &c.CreatedAt, &c.SchemaVersion); err != nil {
+				return fmt.Errorf("scan: %w", err)
+			}
+			if dataJSON != nil {
+				if err := json.Unmarshal(dataJSON, &c.Data); err != nil {
+					return fmt.Errorf("unmarshal data for record %s: %w", c.RecordID, err)
+				}
+			}
+			if ftJSON != nil {
+				if err := json.Unmarshal(ftJSON, &c.FieldTimestamps); err != nil {
+					return fmt.Errorf("unmarshal field_timestamps for record %s: %w", c.RecordID, err)
+				}
+			}
+			if err := fn(c); err != nil {
+				return err
+			}
+		}
+		return rows.Err()
+	})
+}
+
 // ChangeRow is a row from the sync_changes table.
 type ChangeRow struct {
+	AppID string
 	ID              string
 	TableName       string
 	RecordID        string
@@ -243,4 +300,5 @@ type ChangeRow struct {
 	FieldTimestamps map[string]string
 	ClientID        string
 	CreatedAt       time.Time
+	SchemaVersion   int
 }

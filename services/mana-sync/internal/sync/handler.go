@@ -28,6 +28,41 @@ func NewHandler(s *store.Store, v *auth.Validator, h *ws.Hub) *Handler {
 // maxBodySize is the maximum allowed request body (10 MB).
 const maxBodySize = 10 * 1024 * 1024
 
+// changeFromRow projects a stored sync_changes row onto the wire Change shape.
+// Carries eventId + schemaVersion through so clients can dedup on replay and
+// route through the migration chain.
+func changeFromRow(row store.ChangeRow) Change {
+	sv := row.SchemaVersion
+	if sv <= 0 {
+		sv = 1
+	}
+	c := Change{
+		EventID:       row.ID,
+		SchemaVersion: sv,
+		Table:         row.TableName,
+		ID:            row.RecordID,
+		Op:            row.Op,
+	}
+	switch row.Op {
+	case "insert":
+		c.Data = row.Data
+	case "update":
+		c.Fields = make(map[string]*FieldChange)
+		for field, ts := range row.FieldTimestamps {
+			value, ok := row.Data[field]
+			if !ok {
+				continue
+			}
+			c.Fields[field] = &FieldChange{Value: value, UpdatedAt: ts}
+		}
+	case "delete":
+		if deletedAt, ok := row.Data["deletedAt"].(string); ok {
+			c.DeletedAt = &deletedAt
+		}
+	}
+	return c
+}
+
 // validOps are the allowed sync operation types.
 var validOps = map[string]bool{"insert": true, "update": true, "delete": true}
 
@@ -60,6 +95,18 @@ func (h *Handler) HandleSync(w http.ResponseWriter, r *http.Request) {
 	var changeset Changeset
 	if err := json.NewDecoder(r.Body).Decode(&changeset); err != nil {
 		http.Error(w, "invalid JSON: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Normalize + validate protocol version. Pre-M2 clients omit the field
+	// (treated as v1); a client newer than this build is refused so we don't
+	// silently store events we can't fully interpret.
+	schemaVersion := changeset.SchemaVersion
+	if schemaVersion <= 0 {
+		schemaVersion = 1
+	}
+	if schemaVersion > MaxSupportedSchemaVersion {
+		http.Error(w, fmt.Sprintf("unsupported schemaVersion %d (max %d)", schemaVersion, MaxSupportedSchemaVersion), http.StatusBadRequest)
 		return
 	}
 
@@ -107,7 +154,14 @@ func (h *Handler) HandleSync(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		err := h.store.RecordChange(ctx, appID, change.Table, change.ID, userID, change.Op, clientID, data, fieldTimestamps)
+		// Per-change schemaVersion falls back to the changeset-level value
+		// so a well-formed pre-M2 change nested in an M2 changeset still
+		// lands on the right version.
+		rowSchemaVersion := change.SchemaVersion
+		if rowSchemaVersion <= 0 {
+			rowSchemaVersion = schemaVersion
+		}
+		err := h.store.RecordChange(ctx, appID, change.Table, change.ID, userID, change.Op, clientID, data, fieldTimestamps, rowSchemaVersion)
 		if err != nil {
 			slog.Error("failed to record change", "error", err, "table", change.Table, "id", change.ID)
 			http.Error(w, "failed to record change: "+err.Error(), http.StatusInternalServerError)
@@ -126,34 +180,7 @@ func (h *Handler) HandleSync(w http.ResponseWriter, r *http.Request) {
 	// Convert store rows to sync changes
 	responseChanges := make([]Change, 0, len(serverChanges))
 	for _, row := range serverChanges {
-		c := Change{
-			Table: row.TableName,
-			ID:    row.RecordID,
-			Op:    row.Op,
-		}
-
-		switch row.Op {
-		case "insert":
-			c.Data = row.Data
-		case "update":
-			c.Fields = make(map[string]*FieldChange)
-			for field, ts := range row.FieldTimestamps {
-				value, ok := row.Data[field]
-				if !ok {
-					continue
-				}
-				c.Fields[field] = &FieldChange{
-					Value:     value,
-					UpdatedAt: ts,
-				}
-			}
-		case "delete":
-			if deletedAt, ok := row.Data["deletedAt"].(string); ok {
-				c.DeletedAt = &deletedAt
-			}
-		}
-
-		responseChanges = append(responseChanges, c)
+		responseChanges = append(responseChanges, changeFromRow(row))
 	}
 
 	now := time.Now().UTC().Format(time.RFC3339Nano)
@@ -223,34 +250,7 @@ func (h *Handler) HandlePull(w http.ResponseWriter, r *http.Request) {
 
 	responseChanges := make([]Change, 0, len(serverChanges))
 	for _, row := range serverChanges {
-		c := Change{
-			Table: row.TableName,
-			ID:    row.RecordID,
-			Op:    row.Op,
-		}
-
-		switch row.Op {
-		case "insert":
-			c.Data = row.Data
-		case "update":
-			c.Fields = make(map[string]*FieldChange)
-			for field, ts := range row.FieldTimestamps {
-				value, ok := row.Data[field]
-				if !ok {
-					continue
-				}
-				c.Fields[field] = &FieldChange{
-					Value:     value,
-					UpdatedAt: ts,
-				}
-			}
-		case "delete":
-			if deletedAt, ok := row.Data["deletedAt"].(string); ok {
-				c.DeletedAt = &deletedAt
-			}
-		}
-
-		responseChanges = append(responseChanges, c)
+		responseChanges = append(responseChanges, changeFromRow(row))
 	}
 
 	// When paginating, use last row's timestamp as cursor; otherwise now()

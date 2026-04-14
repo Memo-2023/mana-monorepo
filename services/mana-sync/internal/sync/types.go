@@ -2,14 +2,33 @@ package sync
 
 import "time"
 
+// CurrentSchemaVersion is the protocol version that this build emits for every
+// new change. Bump only with a matching migration registered on both the Go
+// server and the TS client so older events can be replayed forward during
+// import and live sync.
+const CurrentSchemaVersion = 1
+
+// MaxSupportedSchemaVersion is the highest schemaVersion the server will accept
+// from a client today. A client running ahead of the server is refused with
+// 400; the reverse case (server ahead) replays old events through the migration
+// chain on the receiving side.
+const MaxSupportedSchemaVersion = 1
+
 // Change represents a single field-level change to a record.
+//
+// EventID and SchemaVersion are populated on server->client payloads so
+// clients can dedup on replay (import flow) and route events through the
+// migration chain. Client->server pushes leave EventID empty — the server
+// assigns a UUID on insert.
 type Change struct {
-	Table     string                  `json:"table"`
-	ID        string                  `json:"id"`
-	Op        string                  `json:"op"` // "insert", "update", "delete"
-	Fields    map[string]*FieldChange `json:"fields,omitempty"`
-	Data      map[string]any          `json:"data,omitempty"`
-	DeletedAt *string                 `json:"deletedAt,omitempty"`
+	EventID       string                  `json:"eventId,omitempty"`
+	SchemaVersion int                     `json:"schemaVersion,omitempty"`
+	Table         string                  `json:"table"`
+	ID            string                  `json:"id"`
+	Op            string                  `json:"op"` // "insert", "update", "delete"
+	Fields        map[string]*FieldChange `json:"fields,omitempty"`
+	Data          map[string]any          `json:"data,omitempty"`
+	DeletedAt     *string                 `json:"deletedAt,omitempty"`
 }
 
 // FieldChange holds a value and the timestamp when it was last changed.
@@ -19,11 +38,16 @@ type FieldChange struct {
 }
 
 // Changeset is a batch of changes sent by a client.
+//
+// SchemaVersion is the protocol version the client is emitting. Missing/zero
+// is treated as 1 for compatibility with pre-M2 clients; anything above
+// MaxSupportedSchemaVersion is refused.
 type Changeset struct {
-	ClientID string   `json:"clientId"`
-	AppID    string   `json:"appId"`
-	Since    string   `json:"since"` // ISO timestamp
-	Changes  []Change `json:"changes"`
+	ClientID      string   `json:"clientId"`
+	AppID         string   `json:"appId"`
+	Since         string   `json:"since"` // ISO timestamp
+	Changes       []Change `json:"changes"`
+	SchemaVersion int      `json:"schemaVersion,omitempty"`
 }
 
 // SyncResponse is returned after processing a changeset.

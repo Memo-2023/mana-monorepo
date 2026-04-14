@@ -38,6 +38,17 @@ export interface FieldChange {
 }
 
 /**
+ * Wire protocol version this build emits on every push. Bumped together with
+ * a matching migration on both client and mana-sync so older events can be
+ * replayed forward during import and live pulls.
+ *
+ * Pre-M2 events land as v1 (server default). Anything above this on the wire
+ * from the server is an older client talking to a newer one — tolerated and
+ * routed through the migration chain on apply.
+ */
+export const CURRENT_SCHEMA_VERSION = 1;
+
+/**
  * One row of a changeset on the wire. Pending changes (local) and server
  * changes (remote) share the same shape so the validator can be reused.
  *
@@ -45,8 +56,14 @@ export interface FieldChange {
  *   - `op === 'update'` requires `fields` (record-level `data` is ignored).
  *   - `op === 'insert'` requires `data`.
  *   - A `deletedAt` flag implies a soft delete regardless of `op`.
+ *
+ * `eventId` and `schemaVersion` are only populated on server->client payloads.
+ * Clients should use `eventId` to dedup on import replay; `schemaVersion`
+ * decides which migration chain to run before apply.
  */
 export interface SyncChange {
+	eventId?: string;
+	schemaVersion?: number;
 	table: string;
 	id: string;
 	op: SyncOp;
@@ -113,6 +130,8 @@ export function isValidSyncChange(v: unknown): v is SyncChange {
 	if (c.fields !== undefined && !isFieldsMap(c.fields)) return false;
 	if (c.data !== undefined && (typeof c.data !== 'object' || c.data === null)) return false;
 	if (c.deletedAt !== undefined && typeof c.deletedAt !== 'string') return false;
+	if (c.eventId !== undefined && typeof c.eventId !== 'string') return false;
+	if (c.schemaVersion !== undefined && typeof c.schemaVersion !== 'number') return false;
 	return true;
 }
 
@@ -1033,6 +1052,7 @@ export function createUnifiedSync(
 		return {
 			clientId: cid,
 			since,
+			schemaVersion: CURRENT_SCHEMA_VERSION,
 			changes: pending.map((p) => ({
 				table: toSyncName(p.collection),
 				id: p.recordId,
