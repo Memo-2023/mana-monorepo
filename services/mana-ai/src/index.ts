@@ -12,11 +12,16 @@
 
 import { Hono } from 'hono';
 import { loadConfig } from './config';
-import { closeSql } from './db/connection';
+import { closeSql, getSql } from './db/connection';
+import { migrate } from './db/migrate';
 import { runTickOnce, startTick, stopTick, isTickRunning } from './cron/tick';
 import { serviceAuth } from './middleware/service-auth';
 
 const config = loadConfig();
+
+// Apply mana_ai schema migration on boot. Idempotent — safe to call on
+// every restart and after rolling deploys.
+await migrate(getSql(config.syncDatabaseUrl));
 
 const app = new Hono();
 

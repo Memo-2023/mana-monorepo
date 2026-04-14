@@ -11,7 +11,6 @@
  */
 
 import type { Sql } from './connection';
-import { withUser } from './connection';
 
 /**
  * Subset of the Mission shape the server needs. Matches
@@ -41,61 +40,42 @@ interface ChangeRow {
 }
 
 /**
- * Return the distinct user_ids that have ever written an aiMissions row.
+ * Return all currently-active missions whose `nextRunAt` has passed.
  *
- * This is the ONE query that needs to see across users. It runs WITHOUT
- * `withUser`, so the DB role hosting mana-ai either:
- *   - has BYPASSRLS (simplest — ops choice), or
- *   - owns sync_changes and the FORCE RLS policy excludes owner (default
- *     Postgres semantics; requires dropping `FORCE ROW LEVEL SECURITY`)
+ * Reads from the materialized `mana_ai.mission_snapshots` table via a
+ * single indexed WHERE clause — no per-tick LWW replay. The snapshot is
+ * kept up-to-date by `refreshSnapshots(sql)` which the tick calls once
+ * before this.
  *
- * The per-user read paths below scope through RLS normally, so a leaky
- * user_ids discovery is the only cross-user surface this service exposes.
- */
-export async function listMissionUsers(sql: Sql): Promise<string[]> {
-	const rows = await sql<{ user_id: string }[]>`
-		SELECT DISTINCT user_id
-		FROM sync_changes
-		WHERE app_id = 'ai' AND table_name = 'aiMissions'
-	`;
-	return rows.map((r) => r.user_id);
-}
-
-/**
- * Return active missions for a single user whose `nextRunAt` has passed.
- * RLS-scoped via `withUser` — defense-in-depth against a query wandering
- * outside its user.
- */
-async function listDueMissionsForUser(
-	sql: Sql,
-	userId: string,
-	now: string
-): Promise<ServerMission[]> {
-	const rows = await withUser(
-		sql,
-		userId,
-		async (tx) =>
-			tx<ChangeRow[]>`
-			SELECT table_name, record_id, user_id, op, data, field_timestamps, created_at
-			FROM sync_changes
-			WHERE app_id = 'ai' AND table_name = 'aiMissions' AND user_id = ${userId}
-			ORDER BY created_at ASC
-		`
-	);
-	return mergeAndFilter(rows as ChangeRow[], userId, now);
-}
-
-/**
- * Return all currently-active missions whose `nextRunAt` has passed,
- * across every user. Two-phase: discover users (cross-user), then
- * RLS-scope per user.
+ * Fallback: for users whose mission predates the snapshot bootstrap
+ * (e.g. first run after deploy), `refreshSnapshots` inserts a row on
+ * the next tick and this query picks them up on the tick after that —
+ * at most one tick lag, acceptable for a 60s interval.
  *
  * @param now ISO timestamp used as the due-before cutoff.
  */
 export async function listDueMissions(sql: Sql, now: string): Promise<ServerMission[]> {
-	const users = await listMissionUsers(sql);
-	const perUser = await Promise.all(users.map((u) => listDueMissionsForUser(sql, u, now)));
-	return perUser.flat();
+	const rows = await sql<{ user_id: string; record: Record<string, unknown> }[]>`
+		SELECT user_id, record
+		FROM mana_ai.mission_snapshots
+		WHERE record->>'state' = 'active'
+		  AND record->>'nextRunAt' IS NOT NULL
+		  AND record->>'nextRunAt' <= ${now}
+		  AND (record->>'deletedAt') IS NULL
+	`;
+
+	return rows.map(({ user_id, record }) => ({
+		id: String(record.id),
+		userId: user_id,
+		title: String(record.title ?? ''),
+		objective: String(record.objective ?? ''),
+		conceptMarkdown: String(record.conceptMarkdown ?? ''),
+		state: record.state as ServerMission['state'],
+		nextRunAt: record.nextRunAt as string | undefined,
+		inputs: Array.isArray(record.inputs) ? (record.inputs as ServerMission['inputs']) : [],
+		cadence: record.cadence,
+		iterations: Array.isArray(record.iterations) ? record.iterations : [],
+	}));
 }
 
 /**

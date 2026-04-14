@@ -24,6 +24,7 @@ import { getSql, type Sql } from '../db/connection';
 import { resolveServerInputs } from '../db/resolvers';
 import { listDueMissions, type ServerMission } from '../db/missions-projection';
 import { appendServerIteration, planToIteration } from '../db/iteration-writer';
+import { refreshSnapshots } from '../db/snapshot-refresh';
 import { PlannerClient } from '../planner/client';
 import { AI_AVAILABLE_TOOLS, AI_AVAILABLE_TOOL_NAMES } from '../planner/tools';
 import type { Config } from '../config';
@@ -61,6 +62,14 @@ export async function runTickOnce(config: Config): Promise<TickStats> {
 
 	try {
 		const sql = getSql(config.syncDatabaseUrl);
+		// Bring the snapshot table up to date before querying it —
+		// cheap incremental pass, O(new changes since last tick).
+		const refresh = await refreshSnapshots(sql);
+		if (refresh.rowsApplied > 0) {
+			console.log(
+				`[mana-ai tick] snapshot refresh: ${refresh.rowsApplied} rows → ${refresh.newSnapshots} new + ${refresh.updatedSnapshots} updated`
+			);
+		}
 		const missions = await listDueMissions(sql, scannedAt);
 		dueMissionCount = missions.length;
 
