@@ -66,6 +66,7 @@ import {
 	ChatCircleDots,
 	CreditCard,
 	SquaresFour,
+	Scroll,
 } from '@mana/shared-icons';
 
 // ── Apps with entity capabilities ───────────────────────────
@@ -517,6 +518,16 @@ registerApp({
 	},
 	collection: 'conversations',
 	paramKey: 'conversationId',
+});
+
+registerApp({
+	id: 'kontext',
+	name: 'Kontext',
+	color: '#A78B6F',
+	icon: Scroll,
+	views: {
+		list: { load: () => import('$lib/modules/kontext/KontextView.svelte') },
+	},
 });
 
 registerApp({

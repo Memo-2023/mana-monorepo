@@ -466,6 +466,11 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	// and pattern detection. Settings are structural only.
 	moodEntries: { enabled: true, fields: ['withWhom', 'notes'] },
 	moodSettings: { enabled: false, fields: [] },
+
+	// ─── Kontext ─────────────────────────────────────────────
+	// Singleton markdown document ("Was soll Mana über dich wissen?").
+	// Free-form user text — encrypt the content, leave the fixed id plaintext.
+	kontextDoc: { enabled: true, fields: ['content'] },
 };
 
 /**

@@ -494,6 +494,12 @@ db.version(16).stores({
 	_byokKeys: 'id, provider, isDefault, [provider+isDefault]',
 });
 
+// v17 — Kontext module: a single user-authored markdown document keyed by
+// the fixed id 'singleton'. No indexes beyond the primary key.
+db.version(17).stores({
+	kontextDoc: 'id',
+});
+
 // ─── Sync Routing ──────────────────────────────────────────
 // SYNC_APP_MAP, TABLE_TO_SYNC_NAME, TABLE_TO_APP, SYNC_NAME_TO_TABLE,
 // toSyncName() and fromSyncName() are now derived from per-module

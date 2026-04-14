@@ -95,6 +95,7 @@ import { mailModuleConfig } from '$lib/modules/mail/module.config';
 import { meditateModuleConfig } from '$lib/modules/meditate/module.config';
 import { sleepModuleConfig } from '$lib/modules/sleep/module.config';
 import { moodModuleConfig } from '$lib/modules/mood/module.config';
+import { kontextModuleConfig } from '$lib/modules/kontext/module.config';
 
 export const MODULE_CONFIGS: readonly ModuleConfig[] = [
 	manaCoreConfig,
@@ -145,6 +146,7 @@ export const MODULE_CONFIGS: readonly ModuleConfig[] = [
 	meditateModuleConfig,
 	sleepModuleConfig,
 	moodModuleConfig,
+	kontextModuleConfig,
 ];
 
 // ─── Derived Maps ──────────────────────────────────────────
