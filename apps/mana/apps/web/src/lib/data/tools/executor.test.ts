@@ -1,7 +1,22 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import 'fake-indexeddb/auto';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+
+vi.mock('$lib/stores/funnel-tracking', () => ({ trackFirstContent: vi.fn() }));
+vi.mock('$lib/triggers/registry', () => ({ fire: vi.fn() }));
+vi.mock('$lib/triggers/inline-suggest', () => ({
+	checkInlineSuggestion: vi.fn().mockResolvedValue(null),
+}));
+
 import { executeTool } from './executor';
 import { registerTools, getTools } from './registry';
+import { setAiPolicy } from '../ai/policy';
+import { listProposals, approveProposal } from '../ai/proposals/store';
+import { PROPOSALS_TABLE } from '../ai/proposals/types';
+import { db } from '../database';
+import type { Actor } from '../events/actor';
 import type { ModuleTool } from './types';
+
+const AI: Actor = { kind: 'ai', missionId: 'm-1', iterationId: 'it-1', rationale: 'because' };
 
 // Reset registry between tests by reloading — registry uses module-level array
 // Instead, we just register test tools and rely on dedup
@@ -100,5 +115,88 @@ describe('Tool Executor', () => {
 	it('allows optional parameters to be omitted', async () => {
 		const result = await executeTool('test_echo', { text: 'only required' });
 		expect(result.success).toBe(true);
+	});
+});
+
+describe('Tool Executor — AI policy routing', () => {
+	beforeEach(async () => {
+		await db.table(PROPOSALS_TABLE).clear();
+	});
+
+	it('runs a tool directly for user actors regardless of name', async () => {
+		// test_echo has no policy entry — user default is always auto
+		const result = await executeTool('test_echo', { text: 'hi' });
+		expect(result.success).toBe(true);
+		expect(result.message).toBe('echo: hi');
+	});
+
+	it('stages a proposal when ai actor hits a propose-policy tool', async () => {
+		const restore = setAiPolicy({ tools: { test_echo: 'propose' }, defaultForAi: 'propose' });
+		try {
+			const result = await executeTool('test_echo', { text: 'stage-me' }, AI);
+			expect(result.success).toBe(true);
+			expect(result.message).toMatch(/Vorgeschlagen/);
+			expect((result.data as { proposalId: string }).proposalId).toBeTruthy();
+
+			// Tool did NOT run — it was staged
+			const pending = await listProposals({ status: 'pending' });
+			expect(pending).toHaveLength(1);
+			expect(pending[0].rationale).toBe('because');
+			expect(pending[0].missionId).toBe('m-1');
+		} finally {
+			restore();
+		}
+	});
+
+	it('runs directly for ai actor when policy says auto', async () => {
+		const restore = setAiPolicy({ tools: { test_echo: 'auto' }, defaultForAi: 'propose' });
+		try {
+			const result = await executeTool('test_echo', { text: 'direct' }, AI);
+			expect(result.success).toBe(true);
+			expect(result.message).toBe('echo: direct');
+			const pending = await listProposals({ status: 'pending' });
+			expect(pending).toHaveLength(0);
+		} finally {
+			restore();
+		}
+	});
+
+	it('refuses with deny policy', async () => {
+		const restore = setAiPolicy({ tools: { test_echo: 'deny' }, defaultForAi: 'propose' });
+		try {
+			const result = await executeTool('test_echo', { text: 'no' }, AI);
+			expect(result.success).toBe(false);
+			expect(result.message).toMatch(/not available/);
+		} finally {
+			restore();
+		}
+	});
+
+	it('approval runs the staged intent with original actor attribution', async () => {
+		const restore = setAiPolicy({ tools: { test_echo: 'propose' }, defaultForAi: 'propose' });
+		try {
+			const staged = await executeTool('test_echo', { text: 'approved' }, AI);
+			const proposalId = (staged.data as { proposalId: string }).proposalId;
+
+			const { result, proposal } = await approveProposal(proposalId);
+			expect(result.success).toBe(true);
+			expect(result.message).toBe('echo: approved');
+			expect(proposal.status).toBe('approved');
+		} finally {
+			restore();
+		}
+	});
+
+	it('still validates parameters before staging a proposal', async () => {
+		const restore = setAiPolicy({ tools: { test_echo: 'propose' }, defaultForAi: 'propose' });
+		try {
+			const result = await executeTool('test_echo', {}, AI);
+			expect(result.success).toBe(false);
+			expect(result.message).toContain('Missing required parameter');
+			const pending = await listProposals({ status: 'pending' });
+			expect(pending).toHaveLength(0);
+		} finally {
+			restore();
+		}
 	});
 });
