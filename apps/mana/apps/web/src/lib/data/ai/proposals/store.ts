@@ -101,6 +101,29 @@ export async function rejectProposal(id: string, userFeedback?: string): Promise
 		userFeedback,
 	};
 	await table().update(id, updated);
+
+	// Bubble the feedback up to the Mission iteration so the next Planner
+	// pass (which reads `mission.iterations[].userFeedback` — NOT
+	// `pendingProposals.userFeedback`) can course-correct. Lazy-import
+	// to avoid a cycle: mission store ↔ proposal store.
+	if (userFeedback && proposal.missionId && proposal.iterationId) {
+		try {
+			const { addIterationFeedback, getMission } = await import('../missions/store');
+			const mission = await getMission(proposal.missionId);
+			// Merge with any existing feedback on the iteration — different
+			// steps within one iteration can produce different reasons.
+			const existingIt = mission?.iterations.find((it) => it.id === proposal.iterationId);
+			const merged = existingIt?.userFeedback
+				? `${existingIt.userFeedback}\n· ${userFeedback}`
+				: userFeedback;
+			await addIterationFeedback(proposal.missionId, proposal.iterationId, merged);
+		} catch (err) {
+			// Feedback bubble is best-effort — the proposal was still
+			// rejected successfully if this fails.
+			console.error('[rejectProposal] failed to bubble feedback to iteration:', err);
+		}
+	}
+
 	return { ...proposal, ...updated };
 }
 
