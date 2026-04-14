@@ -13,6 +13,7 @@ vi.mock('$lib/triggers/inline-suggest', () => ({
 
 import { db } from '../database';
 import { eventBus } from '../events/event-bus';
+import { USER_ACTOR } from '../events/actor';
 import { startStreakTracker, stopStreakTracker, useStreaks } from './streaks';
 
 const TABLE = '_streakState';
@@ -47,6 +48,7 @@ describe('Streak Tracker', () => {
 				collection: 'tasks',
 				recordId: '1',
 				userId: 'u1',
+				actor: USER_ACTOR,
 			},
 		});
 		await flush();
@@ -72,6 +74,7 @@ describe('Streak Tracker', () => {
 					collection: 'tasks',
 					recordId: `${i}`,
 					userId: 'u1',
+					actor: USER_ACTOR,
 				},
 			});
 		}
@@ -95,6 +98,7 @@ describe('Streak Tracker', () => {
 				collection: 'drinkEntries',
 				recordId: '1',
 				userId: 'u1',
+				actor: USER_ACTOR,
 			},
 		});
 		await flush();
@@ -117,6 +121,7 @@ describe('Streak Tracker', () => {
 				collection: 'drinkEntries',
 				recordId: '1',
 				userId: 'u1',
+				actor: USER_ACTOR,
 			},
 		});
 		await flush();
@@ -139,6 +144,7 @@ describe('Streak Tracker', () => {
 				collection: 'tasks',
 				recordId: '1',
 				userId: 'u1',
+				actor: USER_ACTOR,
 			},
 		});
 		eventBus.emit({
@@ -157,6 +163,7 @@ describe('Streak Tracker', () => {
 				collection: 'meals',
 				recordId: '2',
 				userId: 'u1',
+				actor: USER_ACTOR,
 			},
 		});
 		await flush();

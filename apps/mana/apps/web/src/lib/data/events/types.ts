@@ -7,6 +7,8 @@
  * the LLM Context Builder to work without reverse-engineering field diffs.
  */
 
+import type { Actor } from './actor';
+
 // ── Core Event Shape ────────────────────────────────
 
 export interface DomainEvent<T extends string = string, P = unknown> {
@@ -28,7 +30,9 @@ export interface EventMeta {
 	readonly recordId: string;
 	/** User who triggered this */
 	readonly userId: string;
-	/** Parent event ID (for trigger chains / cascades) */
+	/** Who triggered this write — user, AI, or a derived subsystem. */
+	readonly actor: Actor;
+	/** Parent event ID (for trigger chains / cascades). */
 	readonly causedBy?: string;
 }
 

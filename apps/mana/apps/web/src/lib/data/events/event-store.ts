@@ -53,15 +53,7 @@ interface StoredEvent {
 	seq?: number;
 	type: string;
 	payload: unknown;
-	meta: {
-		id: string;
-		timestamp: string;
-		appId: string;
-		collection: string;
-		recordId: string;
-		userId: string;
-		causedBy?: string;
-	};
+	meta: DomainEvent['meta'];
 }
 
 /** Query persisted events. Most recent first. */

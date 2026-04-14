@@ -16,6 +16,7 @@ vi.mock('$lib/triggers/inline-suggest', () => ({
 
 import { db } from '../database';
 import { computeCorrelations } from './correlations';
+import { USER_ACTOR } from '../events/actor';
 
 const EVENTS_TABLE = '_events';
 
@@ -30,6 +31,7 @@ function makeEvent(type: string, payload: Record<string, unknown>, date: string)
 			collection: 'test',
 			recordId: crypto.randomUUID(),
 			userId: 'user1',
+			actor: USER_ACTOR,
 		},
 	};
 }

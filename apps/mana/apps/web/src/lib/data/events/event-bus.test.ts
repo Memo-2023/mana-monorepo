@@ -9,6 +9,7 @@
 
 import { describe, it, expect, vi } from 'vitest';
 import { createEventBus } from './event-bus';
+import { USER_ACTOR } from './actor';
 import type { DomainEvent } from './types';
 
 function makeEvent(type: string, payload: unknown = {}): DomainEvent {
@@ -22,6 +23,7 @@ function makeEvent(type: string, payload: unknown = {}): DomainEvent {
 			collection: 'test',
 			recordId: '1',
 			userId: 'user1',
+			actor: USER_ACTOR,
 		},
 	};
 }

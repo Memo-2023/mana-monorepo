@@ -13,6 +13,7 @@ vi.mock('$lib/triggers/inline-suggest', () => ({
 
 import { db } from '$lib/data/database';
 import { eventBus } from '$lib/data/events/event-bus';
+import { USER_ACTOR } from '$lib/data/events/actor';
 import { goalStore, startGoalTracker, stopGoalTracker, GOAL_TEMPLATES } from './index';
 import type { LocalGoal } from './types';
 
@@ -77,6 +78,7 @@ describe('goal event tracking', () => {
 				collection: 'tasks',
 				recordId: '1',
 				userId: 'u1',
+				actor: USER_ACTOR,
 			},
 		});
 		await flush();
@@ -102,6 +104,7 @@ describe('goal event tracking', () => {
 				collection: 'drinkEntries',
 				recordId: '1',
 				userId: 'u1',
+				actor: USER_ACTOR,
 			},
 		});
 		await flush();
@@ -120,6 +123,7 @@ describe('goal event tracking', () => {
 				collection: 'drinkEntries',
 				recordId: '2',
 				userId: 'u1',
+				actor: USER_ACTOR,
 			},
 		});
 		await flush();
@@ -144,6 +148,7 @@ describe('goal event tracking', () => {
 				collection: 'tasks',
 				recordId: '1',
 				userId: 'u1',
+				actor: USER_ACTOR,
 			},
 		});
 		await flush();
