@@ -5,14 +5,16 @@
   responses, and shows tool execution results inline.
 -->
 <script lang="ts">
-	import { onMount, tick } from 'svelte';
+	import { tick } from 'svelte';
+	import { marked } from 'marked';
 	import { PaperPlaneRight, Robot, User, Lightning, CircleNotch } from '@mana/shared-icons';
+	import { getLocalLlmStatus } from '@mana/local-llm';
 	import { chatStore } from '../stores/chat.svelte';
-	import { runCompanionChat, isCompanionAvailable } from '../engine';
+	import { runCompanionChat } from '../engine';
 	import { useMessages } from '../queries';
 	import { useDaySnapshot } from '$lib/data/projections/day-snapshot';
 	import { useStreaks } from '$lib/data/projections/streaks';
-	import type { LocalConversation, LocalMessage } from '../types';
+	import type { LocalConversation } from '../types';
 
 	interface Props {
 		conversation: LocalConversation;
@@ -23,11 +25,32 @@
 	const messages = useMessages(conversation.id);
 	const day = useDaySnapshot();
 	const streaks = useStreaks();
+	const llmStatus = getLocalLlmStatus();
 
 	let inputText = $state('');
 	let sending = $state(false);
 	let streamingText = $state('');
 	let messagesEndEl = $state<HTMLDivElement | null>(null);
+
+	marked.setOptions({ gfm: true, breaks: true });
+
+	function renderMarkdown(text: string): string {
+		try {
+			return marked.parse(text, { async: false }) as string;
+		} catch {
+			return text;
+		}
+	}
+
+	let statusLabel = $derived.by(() => {
+		const s = llmStatus.current;
+		if (s.state === 'downloading')
+			return `Modell wird geladen... ${(s.progress * 100).toFixed(0)}%`;
+		if (s.state === 'loading') return s.text || 'Modell wird vorbereitet...';
+		if (s.state === 'checking') return 'WebGPU pruefen...';
+		if (s.state === 'error') return `Fehler: ${s.error}`;
+		return null;
+	});
 
 	async function scrollToBottom() {
 		await tick();
@@ -36,6 +59,10 @@
 
 	$effect(() => {
 		if (messages.value.length > 0) scrollToBottom();
+	});
+
+	$effect(() => {
+		if (streamingText) scrollToBottom();
 	});
 
 	async function handleSend() {
@@ -123,6 +150,9 @@
 						>
 							{msg.content}
 						</span>
+					{:else if msg.role === 'assistant'}
+						<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+						<div class="markdown">{@html renderMarkdown(msg.content)}</div>
 					{:else}
 						{msg.content}
 					{/if}
@@ -130,12 +160,27 @@
 			</div>
 		{/each}
 
-		{#if sending && streamingText}
+		{#if sending}
 			<div class="message assistant">
 				<div class="message-icon">
 					<Robot size={16} weight="bold" />
 				</div>
-				<div class="message-content streaming">{streamingText}</div>
+				<div class="message-content">
+					{#if streamingText}
+						<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+						<div class="markdown streaming">{@html renderMarkdown(streamingText)}</div>
+					{:else if statusLabel}
+						<div class="status-row">
+							<CircleNotch size={14} weight="bold" />
+							<span>{statusLabel}</span>
+						</div>
+					{:else}
+						<div class="status-row">
+							<CircleNotch size={14} weight="bold" />
+							<span>Denkt nach...</span>
+						</div>
+					{/if}
+				</div>
 			</div>
 		{/if}
 
@@ -227,6 +272,78 @@
 		line-height: 1.5;
 		white-space: pre-wrap;
 		word-break: break-word;
+	}
+
+	/* Markdown content reset & styling */
+	.markdown {
+		white-space: normal;
+	}
+	.markdown :global(p) {
+		margin: 0 0 0.5rem 0;
+	}
+	.markdown :global(p:last-child) {
+		margin-bottom: 0;
+	}
+	.markdown :global(strong) {
+		font-weight: 600;
+		color: hsl(var(--color-foreground));
+	}
+	.markdown :global(em) {
+		font-style: italic;
+	}
+	.markdown :global(code) {
+		font-family: ui-monospace, monospace;
+		font-size: 0.8125rem;
+		background: hsl(var(--color-muted) / 0.5);
+		padding: 0.0625rem 0.25rem;
+		border-radius: 0.25rem;
+	}
+	.markdown :global(pre) {
+		background: hsl(var(--color-muted) / 0.5);
+		padding: 0.5rem;
+		border-radius: 0.375rem;
+		overflow-x: auto;
+		margin: 0.375rem 0;
+	}
+	.markdown :global(pre code) {
+		background: transparent;
+		padding: 0;
+	}
+	.markdown :global(ul),
+	.markdown :global(ol) {
+		margin: 0.25rem 0 0.5rem 0;
+		padding-left: 1.25rem;
+	}
+	.markdown :global(li) {
+		margin: 0.125rem 0;
+	}
+	.markdown :global(a) {
+		color: hsl(var(--color-primary));
+		text-decoration: underline;
+	}
+	.markdown :global(h1),
+	.markdown :global(h2),
+	.markdown :global(h3) {
+		font-size: 0.9375rem;
+		font-weight: 600;
+		margin: 0.5rem 0 0.25rem 0;
+	}
+
+	.status-row {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		font-size: 0.8125rem;
+		color: hsl(var(--color-muted-foreground));
+	}
+	.status-row :global(svg) {
+		animation: spin 1s linear infinite;
+	}
+
+	@keyframes spin {
+		to {
+			transform: rotate(360deg);
+		}
 	}
 
 	.message.user .message-content {
