@@ -1760,10 +1760,17 @@ Code:
 - [x] Schritt 1 — Actor-Attribution (Events + Records + Sync-Payload)
 - [x] Schritt 2 — Policy-Config + `pendingProposals` + Propose-Path im Executor
 - [x] Schritt 3 — Ghost-UI im Todo-Pilot (`<AiProposalInbox />`)
-- [ ] Schritt 4 — Missions-Datenmodell + Planner-LLM-Task
-- [ ] Schritt 5 — In-App MissionRunner (Foreground)
-- [ ] Schritt 6 — Workbench-Timeline-Lens (cross-module AI-Aktivitaet)
-- [ ] Schritt 7 — Server-side `mana-ai` / `mana-companion` Bun-Service
+- [x] Schritt 4 — Missions-Datenmodell + Planner-LLM-Task
+  - Dexie `aiMissions` (v18), cross-device synct
+  - `aiPlanTask` als LlmTask (minTier browser, contentClass personal)
+  - Strikter JSON-Parser mit Tool-Allowlist + Rationale-Zwang
+- [x] Schritt 5 — In-App MissionRunner (Foreground-Tick in `(app)/+layout.svelte`)
+  - `runMission(id, deps)` + `runDueMissions(now, deps)` — injiziert, testbar
+  - Default-Input-Resolver für Notes / Kontext / Goals
+  - 60-Sekunden-Tick, Overlap-Guard, idempotent
+- [ ] Schritt 6 — Missions-UI (Create/Edit-Form + Iteration-History)
+- [ ] Schritt 7 — Workbench-Timeline-Lens (cross-module AI-Aktivitaet)
+- [ ] Schritt 8 — Server-side `mana-ai` Bun-Service (offline-of-tab Runs)
 
 ### 20.6 Offene Follow-ups
 
