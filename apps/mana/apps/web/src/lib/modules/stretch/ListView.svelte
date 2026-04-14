@@ -3,16 +3,12 @@
   Streak, quick-start routines, assessment recommendation, recent sessions.
 -->
 <script lang="ts">
-	import { getContext } from 'svelte';
-	import type { Observable } from 'dexie';
-	import type {
-		StretchExercise,
-		StretchRoutine,
-		StretchSession,
-		StretchAssessment,
-		StretchReminder,
-	} from './types';
 	import {
+		useAllStretchExercises,
+		useAllStretchRoutines,
+		useAllStretchSessions,
+		useAllStretchAssessments,
+		useAllStretchReminders,
 		getCurrentStreak,
 		getTodayMinutes,
 		getWeekSessionCount,
@@ -30,38 +26,17 @@
 	import ReminderManager from './components/ReminderManager.svelte';
 	import SessionHistory from './components/SessionHistory.svelte';
 
-	const exercises$: Observable<StretchExercise[]> = getContext('stretchExercises');
-	const routines$: Observable<StretchRoutine[]> = getContext('stretchRoutines');
-	const sessions$: Observable<StretchSession[]> = getContext('stretchSessions');
-	const assessments$: Observable<StretchAssessment[]> = getContext('stretchAssessments');
-	const reminders$: Observable<StretchReminder[]> = getContext('stretchReminders');
+	const exercisesQuery = useAllStretchExercises();
+	const routinesQuery = useAllStretchRoutines();
+	const sessionsQuery = useAllStretchSessions();
+	const assessmentsQuery = useAllStretchAssessments();
+	const remindersQuery = useAllStretchReminders();
 
-	let exercises = $state<StretchExercise[]>([]);
-	let routines = $state<StretchRoutine[]>([]);
-	let sessions = $state<StretchSession[]>([]);
-	let assessments = $state<StretchAssessment[]>([]);
-	let reminders = $state<StretchReminder[]>([]);
-
-	$effect(() => {
-		const sub = exercises$.subscribe((v) => (exercises = v));
-		return () => sub.unsubscribe();
-	});
-	$effect(() => {
-		const sub = routines$.subscribe((v) => (routines = v));
-		return () => sub.unsubscribe();
-	});
-	$effect(() => {
-		const sub = sessions$.subscribe((v) => (sessions = v));
-		return () => sub.unsubscribe();
-	});
-	$effect(() => {
-		const sub = assessments$.subscribe((v) => (assessments = v));
-		return () => sub.unsubscribe();
-	});
-	$effect(() => {
-		const sub = reminders$.subscribe((v) => (reminders = v));
-		return () => sub.unsubscribe();
-	});
+	let exercises = $derived(exercisesQuery.value);
+	let routines = $derived(routinesQuery.value);
+	let sessions = $derived(sessionsQuery.value);
+	let assessments = $derived(assessmentsQuery.value);
+	let reminders = $derived(remindersQuery.value);
 
 	let streak = $derived(getCurrentStreak(sessions));
 	let todayMinutes = $derived(Math.round(getTodayMinutes(sessions)));

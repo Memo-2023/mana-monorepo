@@ -57,6 +57,14 @@ import {
 	Robot,
 	Target,
 	Smiley,
+	Gear,
+	Palette,
+	UserCircle,
+	ShieldCheck,
+	Key,
+	Question,
+	ChatCircleDots,
+	CreditCard,
 } from '@mana/shared-icons';
 
 // ── Apps with entity capabilities ───────────────────────────
@@ -975,5 +983,87 @@ registerApp({
 	icon: Target,
 	views: {
 		list: { load: () => import('$lib/modules/goals/ListView.svelte') },
+	},
+});
+
+// ── System Pages ─────────────────────────────────────
+
+registerApp({
+	id: 'settings',
+	name: 'Einstellungen',
+	color: '#6B7280',
+	icon: Gear,
+	views: {
+		list: { load: () => import('$lib/modules/settings/ListView.svelte') },
+	},
+});
+
+registerApp({
+	id: 'themes',
+	name: 'Themes',
+	color: '#EC4899',
+	icon: Palette,
+	views: {
+		list: { load: () => import('$lib/modules/themes/ListView.svelte') },
+	},
+});
+
+registerApp({
+	id: 'profile',
+	name: 'Profil',
+	color: '#6366F1',
+	icon: UserCircle,
+	views: {
+		list: { load: () => import('$lib/modules/profile/ListView.svelte') },
+	},
+});
+
+registerApp({
+	id: 'admin',
+	name: 'Admin',
+	color: '#EF4444',
+	icon: ShieldCheck,
+	views: {
+		list: { load: () => import('$lib/modules/admin/ListView.svelte') },
+	},
+});
+
+registerApp({
+	id: 'api-keys',
+	name: 'API Keys',
+	color: '#F59E0B',
+	icon: Key,
+	views: {
+		list: { load: () => import('$lib/modules/api-keys/ListView.svelte') },
+	},
+});
+
+registerApp({
+	id: 'help',
+	name: 'Hilfe',
+	color: '#3B82F6',
+	icon: Question,
+	views: {
+		list: { load: () => import('$lib/modules/help/ListView.svelte') },
+	},
+});
+
+registerApp({
+	id: 'feedback',
+	name: 'Feedback',
+	color: '#8B5CF6',
+	icon: ChatCircleDots,
+	views: {
+		list: { load: () => import('$lib/modules/feedback/ListView.svelte') },
+	},
+});
+
+registerApp({
+	id: 'subscription',
+	name: 'Abonnement',
+	color: '#10B981',
+	icon: CreditCard,
+	views: {
+		list: { load: () => import('$lib/modules/subscription/ListView.svelte') },
 	},
 });

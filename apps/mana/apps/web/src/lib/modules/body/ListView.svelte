@@ -6,20 +6,20 @@
   daily energy/sleep/soreness/mood card; recent workouts.
 -->
 <script lang="ts">
-	import { getContext } from 'svelte';
 	import { _ } from 'svelte-i18n';
-	import type { Observable } from 'dexie';
-	import type {
-		BodyExercise,
-		BodyRoutine,
-		BodyWorkout,
-		BodySet,
-		BodyMeasurement,
-		BodyCheck,
-		BodyPhase,
-	} from './types';
-	import type { MealWithNutrition } from '$lib/modules/nutriphi/types';
-	import { getActiveWorkout, getActivePhase } from './queries';
+	import {
+		useAllBodyExercises,
+		useAllBodyRoutines,
+		useAllBodyWorkouts,
+		useAllBodySets,
+		useAllBodyMeasurements,
+		useAllBodyChecks,
+		useAllBodyPhases,
+		useNutriphiMealsSince,
+		dateNDaysAgo,
+		getActiveWorkout,
+		getActivePhase,
+	} from './queries';
 	import { bodyStore } from './stores/body.svelte';
 	import WorkoutLogger from './components/WorkoutLogger.svelte';
 	import MeasurementForm from './components/MeasurementForm.svelte';
@@ -31,56 +31,23 @@
 	import ExerciseProgressionChart from './components/ExerciseProgressionChart.svelte';
 	import CalorieWeightChart from './components/CalorieWeightChart.svelte';
 
-	const exercises$: Observable<BodyExercise[]> = getContext('bodyExercises');
-	const routines$: Observable<BodyRoutine[]> = getContext('bodyRoutines');
-	const workouts$: Observable<BodyWorkout[]> = getContext('bodyWorkouts');
-	const sets$: Observable<BodySet[]> = getContext('bodySets');
-	const measurements$: Observable<BodyMeasurement[]> = getContext('bodyMeasurements');
-	const checks$: Observable<BodyCheck[]> = getContext('bodyChecks');
-	const phases$: Observable<BodyPhase[]> = getContext('bodyPhases');
-	const meals$: Observable<MealWithNutrition[]> = getContext('bodyNutriphiMeals');
+	const exercisesQuery = useAllBodyExercises();
+	const routinesQuery = useAllBodyRoutines();
+	const workoutsQuery = useAllBodyWorkouts();
+	const setsQuery = useAllBodySets();
+	const measurementsQuery = useAllBodyMeasurements();
+	const checksQuery = useAllBodyChecks();
+	const phasesQuery = useAllBodyPhases();
+	const mealsQuery = useNutriphiMealsSince(dateNDaysAgo(56));
 
-	let exercises = $state<BodyExercise[]>([]);
-	let routines = $state<BodyRoutine[]>([]);
-	let workouts = $state<BodyWorkout[]>([]);
-	let sets = $state<BodySet[]>([]);
-	let measurements = $state<BodyMeasurement[]>([]);
-	let checks = $state<BodyCheck[]>([]);
-	let phases = $state<BodyPhase[]>([]);
-	let meals = $state<MealWithNutrition[]>([]);
-
-	$effect(() => {
-		const sub = exercises$.subscribe((v) => (exercises = v));
-		return () => sub.unsubscribe();
-	});
-	$effect(() => {
-		const sub = routines$.subscribe((v) => (routines = v));
-		return () => sub.unsubscribe();
-	});
-	$effect(() => {
-		const sub = workouts$.subscribe((v) => (workouts = v));
-		return () => sub.unsubscribe();
-	});
-	$effect(() => {
-		const sub = sets$.subscribe((v) => (sets = v));
-		return () => sub.unsubscribe();
-	});
-	$effect(() => {
-		const sub = measurements$.subscribe((v) => (measurements = v));
-		return () => sub.unsubscribe();
-	});
-	$effect(() => {
-		const sub = checks$.subscribe((v) => (checks = v));
-		return () => sub.unsubscribe();
-	});
-	$effect(() => {
-		const sub = phases$.subscribe((v) => (phases = v));
-		return () => sub.unsubscribe();
-	});
-	$effect(() => {
-		const sub = meals$.subscribe((v) => (meals = v));
-		return () => sub.unsubscribe();
-	});
+	let exercises = $derived(exercisesQuery.value);
+	let routines = $derived(routinesQuery.value);
+	let workouts = $derived(workoutsQuery.value);
+	let sets = $derived(setsQuery.value);
+	let measurements = $derived(measurementsQuery.value);
+	let checks = $derived(checksQuery.value);
+	let phases = $derived(phasesQuery.value);
+	let meals = $derived(mealsQuery.value);
 
 	let activeWorkout = $derived(getActiveWorkout(workouts));
 	let activePhase = $derived(getActivePhase(phases));

@@ -3,10 +3,11 @@
   Last night summary, week bars, sleep goal, debt, stats, hygiene.
 -->
 <script lang="ts">
-	import { getContext } from 'svelte';
-	import type { Observable } from 'dexie';
-	import type { SleepEntry, SleepHygieneLog, SleepHygieneCheck, SleepSettings } from './types';
 	import {
+		useAllSleepEntries,
+		useAllSleepHygieneLogs,
+		useAllSleepHygieneChecks,
+		useSleepSettings,
 		getLastNight,
 		hasLoggedToday,
 		getAvgDuration,
@@ -25,32 +26,15 @@
 	import MorningLog from './components/MorningLog.svelte';
 	import HygieneChecklist from './components/HygieneChecklist.svelte';
 
-	const entries$: Observable<SleepEntry[]> = getContext('sleepEntries');
-	const hygieneLogs$: Observable<SleepHygieneLog[]> = getContext('sleepHygieneLogs');
-	const hygieneChecks$: Observable<SleepHygieneCheck[]> = getContext('sleepHygieneChecks');
-	const settings$: Observable<SleepSettings | null> = getContext('sleepSettings');
+	const entriesQuery = useAllSleepEntries();
+	const hygieneLogsQuery = useAllSleepHygieneLogs();
+	const hygieneChecksQuery = useAllSleepHygieneChecks();
+	const settingsQuery = useSleepSettings();
 
-	let entries = $state<SleepEntry[]>([]);
-	let hygieneLogs = $state<SleepHygieneLog[]>([]);
-	let hygieneChecks = $state<SleepHygieneCheck[]>([]);
-	let settingsRaw = $state<SleepSettings | null>(null);
-
-	$effect(() => {
-		const sub = entries$.subscribe((v) => (entries = v));
-		return () => sub.unsubscribe();
-	});
-	$effect(() => {
-		const sub = hygieneLogs$.subscribe((v) => (hygieneLogs = v));
-		return () => sub.unsubscribe();
-	});
-	$effect(() => {
-		const sub = hygieneChecks$.subscribe((v) => (hygieneChecks = v));
-		return () => sub.unsubscribe();
-	});
-	$effect(() => {
-		const sub = settings$.subscribe((v) => (settingsRaw = v));
-		return () => sub.unsubscribe();
-	});
+	let entries = $derived(entriesQuery.value);
+	let hygieneLogs = $derived(hygieneLogsQuery.value);
+	let hygieneChecks = $derived(hygieneChecksQuery.value);
+	let settingsRaw = $derived(settingsQuery.value);
 
 	let settings = $derived(getEffectiveSettings(settingsRaw));
 	let lastNight = $derived(getLastNight(entries));

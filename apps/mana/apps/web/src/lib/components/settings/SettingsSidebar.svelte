@@ -5,15 +5,23 @@
 -->
 <script lang="ts">
 	import { MagnifyingGlass, X } from '@mana/shared-icons';
-	import { categories, searchSettings, type CategoryId, type SearchEntry } from './searchIndex';
+	import {
+		categories as defaultCategories,
+		searchSettings,
+		type Category,
+		type CategoryId,
+		type SearchEntry,
+	} from './searchIndex';
 
 	interface Props {
 		activeCategory: CategoryId;
 		onSelect: (id: CategoryId) => void;
 		onJump: (entry: SearchEntry) => void;
+		/** Override the default categories list (e.g. to exclude profile in workbench). */
+		categories?: Category[];
 	}
 
-	let { activeCategory, onSelect, onJump }: Props = $props();
+	let { activeCategory, onSelect, onJump, categories = defaultCategories }: Props = $props();
 
 	let query = $state('');
 	let results = $derived(searchSettings(query));
