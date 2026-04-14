@@ -101,7 +101,8 @@ export class LlmOrchestrator {
 		if (task.minTier === 'none') return true;
 		if (task.runRules) return true;
 
-		const candidates = this.candidateTiers(task);
+		const override = this.settings.taskOverrides[task.name];
+		const candidates = this.candidateTiers(task, override);
 		return candidates.some((t) => {
 			const backend = this.backendsByTier.get(t);
 			return backend?.isAvailable() ?? false;
@@ -117,9 +118,17 @@ export class LlmOrchestrator {
 		const start = performance.now();
 		const attempted: LlmTier[] = [];
 
-		// Rule 1: tier-too-low check
-		const userMaxTier = this.userMaxTier();
-		if (TIER_RANK[task.minTier] > TIER_RANK[userMaxTier]) {
+		// Rule 1: tier-too-low check.
+		// An explicit per-task override counts as opting-in to that tier
+		// even if it isn't in the user's global allowedTiers — that's the
+		// whole point of overrides (e.g. "use BYOK just for the Companion").
+		const override = this.settings.taskOverrides[task.name];
+		const effectiveMaxTier = override
+			? TIER_RANK[override] > TIER_RANK[this.userMaxTier()]
+				? override
+				: this.userMaxTier()
+			: this.userMaxTier();
+		if (TIER_RANK[task.minTier] > TIER_RANK[effectiveMaxTier]) {
 			if (task.runRules) {
 				const value = await task.runRules(input);
 				return {
@@ -129,12 +138,11 @@ export class LlmOrchestrator {
 					attempted: ['none'],
 				};
 			}
-			throw new TierTooLowError(task.name, task.minTier, userMaxTier);
+			throw new TierTooLowError(task.name, task.minTier, effectiveMaxTier);
 		}
 
 		// Rules-2-3: candidate tier list and per-task override
-		const candidates = this.candidateTiers(task);
-		const override = this.settings.taskOverrides[task.name];
+		const candidates = this.candidateTiers(task, override);
 		const orderedTiers = override ? [override].filter((t) => candidates.includes(t)) : candidates;
 
 		// Rule 4-5: try the first runnable tier
@@ -236,17 +244,23 @@ export class LlmOrchestrator {
 
 	/** Candidate tier list after applying rules 1 + 2.
 	 *  - Rule 1: only tiers >= task.minTier
-	 *  - Rule 2: sensitive content excludes mana-server + cloud
+	 *  - Rule 2: sensitive content excludes mana-server + cloud + byok
+	 *  - If a per-task override is given, it's allowed even if not in
+	 *    settings.allowedTiers (explicit per-task opt-in beats global)
 	 *  Also always includes 'none' at the end if the task has runRules. */
-	private candidateTiers<TIn, TOut>(task: LlmTask<TIn, TOut>): LlmTier[] {
-		// Sort by privacy gradient (most private first) so the browser tier
-		// always wins over mana-server when both are enabled, regardless of
-		// the order the user toggled them in settings.
-		let tiers = this.settings.allowedTiers
+	private candidateTiers<TIn, TOut>(task: LlmTask<TIn, TOut>, override?: LlmTier): LlmTier[] {
+		// Start with the user's allowed tiers, plus the override if set
+		// (the override is an explicit per-task opt-in even if the user
+		// hasn't enabled that tier globally).
+		const baseTiers = override
+			? Array.from(new Set([...this.settings.allowedTiers, override]))
+			: this.settings.allowedTiers;
+
+		let tiers = baseTiers
 			.filter((t) => TIER_RANK[t] >= TIER_RANK[task.minTier])
 			.sort((a, b) => TIER_RANK[a] - TIER_RANK[b]);
 
-		// Rule 2: sensitive content backstop
+		// Rule 2: sensitive content backstop — only browser-local stays
 		if (task.contentClass === 'sensitive') {
 			tiers = tiers.filter((t) => t === 'browser');
 		}
