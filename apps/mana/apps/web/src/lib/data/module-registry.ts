@@ -96,6 +96,7 @@ import { meditateModuleConfig } from '$lib/modules/meditate/module.config';
 import { sleepModuleConfig } from '$lib/modules/sleep/module.config';
 import { moodModuleConfig } from '$lib/modules/mood/module.config';
 import { kontextModuleConfig } from '$lib/modules/kontext/module.config';
+import { aiModuleConfig } from '$lib/data/ai/module.config';
 
 export const MODULE_CONFIGS: readonly ModuleConfig[] = [
 	manaCoreConfig,
@@ -147,6 +148,7 @@ export const MODULE_CONFIGS: readonly ModuleConfig[] = [
 	sleepModuleConfig,
 	moodModuleConfig,
 	kontextModuleConfig,
+	aiModuleConfig,
 ];
 
 // ─── Derived Maps ──────────────────────────────────────────

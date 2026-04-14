@@ -508,6 +508,14 @@ db.version(17).stores({
 	pendingProposals: 'id, status, createdAt, missionId, [status+createdAt]',
 });
 
+// v18 — AI Missions: long-lived autonomous work items. Syncs cross-device
+// (unlike `pendingProposals`) so the user can configure a mission on one
+// device and see it run on another. Indexes power the Runner's "due now"
+// query and the Workbench's state filters.
+db.version(18).stores({
+	aiMissions: 'id, state, createdAt, nextRunAt, [state+nextRunAt]',
+});
+
 // ─── Sync Routing ──────────────────────────────────────────
 // SYNC_APP_MAP, TABLE_TO_SYNC_NAME, TABLE_TO_APP, SYNC_NAME_TO_TABLE,
 // toSyncName() and fromSyncName() are now derived from per-module
