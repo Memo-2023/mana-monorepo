@@ -1673,5 +1673,116 @@ Alle Companion-Daten liegen in IndexedDB (`mana` Database):
 | `ritualLogs` | Completion-Logs |
 | `_memory` | Extrahierte Muster (nach extractAllPatterns) |
 | `_nudgeOutcomes` | Nudge-Reaktionen |
+| `pendingProposals` | Staged AI-Intents (siehe §20) |
 
 Oeffne: DevTools → Application → IndexedDB → mana → [Tabelle]
+
+---
+
+## 20. AI Workbench (ab 2026-04-14)
+
+Der Companion wird schrittweise vom **Chatbot-mit-Tools** zum **zweiten Akteur im System**:
+er arbeitet parallel zum Menschen in den bestehenden Modulen, User sieht jede Aenderung
+inline und approved / reverted wo noetig. Fundament laeuft; Missions + Runner folgen.
+
+### 20.1 Actor-Modell
+
+Jeder Write im System traegt ab jetzt einen expliziten Actor. Source of Truth ist die
+Data-Schicht (Events + Records + Sync-Payload), nicht ambient Kontext.
+
+```ts
+type Actor =
+  | { kind: 'user' }
+  | { kind: 'ai'; missionId; iterationId; rationale }
+  | { kind: 'system'; source: 'projection' | 'rule' | 'migration' };
+```
+
+- **Events**: `EventMeta.actor: Actor` (required — kein Legacy-Fallback)
+- **Records**: Dexie-Hooks stempeln `__lastActor` + feldweise `__fieldActors`
+  (parallel zu `__fieldTimestamps`)
+- **Sync-Payload**: `_pendingChanges.actor` geht an mana-sync (Go/Postgres-Migration offen)
+- **Ambient-Hilfe**: `runAs(actor, fn)` an definierten Boundaries — Primitive frieren
+  den Actor synchron ein, bevor er ueber `setTimeout` / `queueMicrotask` verloren geht
+
+Code: `apps/mana/apps/web/src/lib/data/events/actor.ts`
+
+### 20.2 Policy-Layer
+
+AI-Writes werden nicht automatisch ausgefuehrt. Per-Tool-Policy entscheidet:
+
+| Decision | Bedeutung |
+|----------|-----------|
+| `auto`   | Direkt ausfuehren, Actor in Events + Records stempeln |
+| `propose`| Als Proposal in `pendingProposals` stagen, User approved inline |
+| `deny`   | Refuse — Tool niemals fuer AI zugaenglich |
+
+Default (`DEFAULT_AI_POLICY`): lesendes / append-only self-state → `auto`, alles Mutierende
+→ `propose`. User / System Actors umgehen die Policy.
+
+Code: `apps/mana/apps/web/src/lib/data/ai/policy.ts`
+
+### 20.3 Proposals
+
+```ts
+interface Proposal {
+  id, createdAt, expiresAt?, status: 'pending' | 'approved' | 'rejected' | 'expired';
+  actor: { kind: 'ai', missionId, iterationId, rationale };
+  missionId?, iterationId?;           // fuer Workbench-Queries indiziert
+  intent: { kind: 'toolCall', toolName, params };
+  decidedAt?, decidedBy?, userFeedback?;
+}
+```
+
+Proposals sind **lokal only** — sie syncen nicht. Der approved Write syncet
+normal durch den Modulpfad, mit dem AI-Actor attribuiert.
+
+Approval-Flow: `approveProposal(id)` laeuft das gespeicherte Intent unter
+`runAsAsync(aiActor, () => executeToolRaw(...))`. `executeToolRaw` umgeht
+die Policy — sonst wuerde sie das Intent sofort wieder in ein Proposal
+zurueckwerfen.
+
+Code: `apps/mana/apps/web/src/lib/data/ai/proposals/`
+
+### 20.4 Ghost-UI in Pilot-Modul (todo)
+
+`<AiProposalInbox module="todo" />` ist die **opt-in Komponente**: pro Modulseite
+ein Einzeiler. Rendert pending Proposals als dashed Ghost-Karten ueber dem echten
+Content — zero UI wenn keine anstehen. Approve / Reject inline. Filter ueber
+Tool-Registry: Proposal fuer `create_task` landet auf `/todo`, `create_event` auf
+`/calendar`, etc.
+
+Code:
+- `apps/mana/apps/web/src/lib/components/ai/AiProposalInbox.svelte`
+- `apps/mana/apps/web/src/lib/data/ai/proposals/queries.ts`
+
+### 20.5 Roadmap
+
+- [x] Schritt 1 — Actor-Attribution (Events + Records + Sync-Payload)
+- [x] Schritt 2 — Policy-Config + `pendingProposals` + Propose-Path im Executor
+- [x] Schritt 3 — Ghost-UI im Todo-Pilot (`<AiProposalInbox />`)
+- [ ] Schritt 4 — Missions-Datenmodell + Planner-LLM-Task
+- [ ] Schritt 5 — In-App MissionRunner (Foreground)
+- [ ] Schritt 6 — Workbench-Timeline-Lens (cross-module AI-Aktivitaet)
+- [ ] Schritt 7 — Server-side `mana-ai` / `mana-companion` Bun-Service
+
+### 20.6 Offene Follow-ups
+
+- **mana-sync (Go) + Postgres-Migration** fuer `actor`-Feld im pendingChange-Payload
+- **System-Actor** in Projections + Rule-Engine wrappen (heute im User-Kontext)
+- **Inbox-Rollout** auf weitere Module (Kalender, Notes, …) sobald Tools dort
+  in `DEFAULT_AI_POLICY` eingetragen sind
+
+### 20.7 Manueller Test
+
+Browser-Console auf `/todo`:
+
+```js
+const { executeTool } = await import('/src/lib/data/tools/executor');
+await executeTool(
+  'create_task',
+  { title: 'Test von der KI' },
+  { kind: 'ai', missionId: 'demo', iterationId: '1', rationale: 'Beispiel-Proposal' }
+);
+```
+
+Ghost-Karte erscheint sofort ueber der Task-Liste.

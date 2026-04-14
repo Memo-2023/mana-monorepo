@@ -590,3 +590,52 @@ Zero-Knowledge-User: bis zum MK-Transfer-Pfad (M5) können sie sich selbst resto
 - **Signatur**: Ed25519 über `manifest.json` gegen Tampering — heute nur sha256 über events.jsonl
 - **Resumable Download**: Multi-GB-Accounts werden irgendwann fraglich im Browser
 - **`_appliedEventIds` Dedup-Tabelle**: Performance-Optimierung für Re-Import (heute macht LWW den Dedup, aber wir verarbeiten trotzdem jedes Event)
+
+## 9. Actor-Attribution & AI-Workbench (ab 2026-04-14)
+
+Jeder Write — User, AI, Subsystem — trägt ab jetzt einen expliziten `Actor`. Die Data-Schicht ist Source of Truth: ambient Context (`runAs`) ist nur Ergonomie-Schicht an definierten Boundaries, Primitive frieren den Actor synchron ein.
+
+### Schreib-Pfade
+
+```
+User-UI → tool.execute() → DB-Write
+          hook stamps actor from getCurrentActor()  → { kind: 'user' }
+          __lastActor, __fieldActors, Event.meta.actor, _pendingChanges.actor  ← alle tragen actor
+
+AI-Orchestrator → executeTool(name, params, aiActor)
+          → policy.resolvePolicy() === 'propose'
+          → createProposal(...)     [staged in pendingProposals, NICHT geschrieben]
+
+User approved Proposal → approveProposal(id)
+          → runAsAsync(aiActor, () => executeToolRaw(...))
+          → wie User-Pfad, aber alle Stempel = { kind: 'ai', missionId, ... }
+```
+
+### Neu im Record-Schema
+
+| Feld            | Typ                    | Zweck                                                                |
+| --------------- | ---------------------- | -------------------------------------------------------------------- |
+| `__lastActor`   | `Actor`                | Wer hat den Record zuletzt als Ganzes geschrieben (Workbench-Badges) |
+| `__fieldActors` | `Record<field, Actor>` | Parallel zu `__fieldTimestamps`, fuer feldweise Diffs                |
+
+Beide werden vom Dexie-Hook gestempelt. `isInternalKey` strippt sie aus dem Sync-Payload — sie sind rein lokales Bookkeeping.
+
+### Neue Tabellen
+
+| Tabelle            | Sync?        | Inhalt                              |
+| ------------------ | ------------ | ----------------------------------- |
+| `pendingProposals` | Nein (lokal) | Staged AI-Intents awaiting approval |
+
+Proposals syncen **nicht** — der approved Write läuft normal durch den Modulpfad und syncet mit AI-Actor attribuiert. Indexe: `id, status, createdAt, missionId, [status+createdAt]`.
+
+### Policy
+
+`apps/mana/apps/web/src/lib/data/ai/policy.ts` — per-Tool `auto | propose | deny`. User/System Actors umgehen die Policy. Default konservativ: alles Mutierende → `propose`.
+
+### Offene Server-Seite
+
+`_pendingChanges.actor` landet im mana-sync Payload. Der Go-Server muss das Feld annehmen und in Postgres persistieren — separater Migration-Step. Bis dahin verwirft mana-sync das Feld stillschweigend (unknown fields werden ignoriert), cross-device Attribution fehlt.
+
+### Deep-Dive
+
+Architektur-Doku mit Roadmap + manuellen Tests: [`docs/architecture/COMPANION_BRAIN_ARCHITECTURE.md` §20](../../../../../../docs/architecture/COMPANION_BRAIN_ARCHITECTURE.md).

@@ -70,7 +70,8 @@ table.add(encryptedRecord)            ← Dexie write
 Dexie hooks (database.ts):
   - stamp userId
   - stamp __fieldTimestamps per field
-  - record into _pendingChanges  (tagged with appId)
+  - stamp __lastActor + __fieldActors (user / ai / system — see AI Workbench)
+  - record into _pendingChanges  (tagged with appId + actor)
   - record into _activity
         │
         ▼
@@ -166,11 +167,22 @@ pnpm test:e2e     # Playwright
 
 Svelte 5 runes are mandatory — no legacy `let count = 0; $: doubled = count * 2`. Always `$state`, `$derived`, `$effect`. See [`.claude/guidelines/sveltekit-web.md`](../../.claude/guidelines/sveltekit-web.md).
 
+## AI Workbench (in progress)
+
+The companion is being rebuilt into a **second actor** that works alongside the human in every module. Foundation shipped 2026-04-14:
+
+- **Actor attribution** — every event, record, and sync row carries `{ kind: 'user' | 'ai' | 'system' }`. Code: `src/lib/data/events/actor.ts`.
+- **AI policy** — per-tool `auto | propose | deny`. AI-attributed tool calls default to `propose`, which stages an intent in `pendingProposals` instead of writing. Code: `src/lib/data/ai/policy.ts`.
+- **Proposal inbox** — drop `<AiProposalInbox module="todo" />` into any module page to render pending proposals inline as ghost cards with approve/reject. Wired in `/todo` as pilot.
+
+Full architecture + roadmap (Missions, Runner, Workbench lens, server-side runner): [`docs/architecture/COMPANION_BRAIN_ARCHITECTURE.md` §20](../../docs/architecture/COMPANION_BRAIN_ARCHITECTURE.md).
+
 ## Reference Documents
 
 | Path | Purpose |
 |------|---------|
-| [`apps/web/src/lib/data/DATA_LAYER_AUDIT.md`](apps/web/src/lib/data/DATA_LAYER_AUDIT.md) | Data-layer + sync deep dive, encryption rollout, threat model, backlog |
+| [`apps/web/src/lib/data/DATA_LAYER_AUDIT.md`](apps/web/src/lib/data/DATA_LAYER_AUDIT.md) | Data-layer + sync deep dive, encryption rollout, threat model, Actor attribution, backlog |
+| [`docs/architecture/COMPANION_BRAIN_ARCHITECTURE.md`](../../docs/architecture/COMPANION_BRAIN_ARCHITECTURE.md) | Companion brain + AI Workbench (Actor, Policy, Proposals, Missions roadmap) |
 | `apps/docs/src/content/docs/architecture/security.mdx` | User-facing security walkthrough |
 | `apps/docs/src/content/docs/architecture/authentication.mdx` | Auth flow + JWT structure |
 | [Root `CLAUDE.md`](../../CLAUDE.md) | Monorepo overview, services, dev commands, env vars |
