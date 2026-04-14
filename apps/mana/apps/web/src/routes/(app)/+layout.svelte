@@ -6,6 +6,7 @@
 	import { createReminderScheduler } from '@mana/shared-stores';
 	import { todoReminderSource } from '$lib/modules/todo/reminder-source';
 	import { startEventStore, stopEventStore } from '$lib/data/events/event-store';
+	import { startMissionTick, stopMissionTick } from '$lib/data/ai/missions/setup';
 	import { initTools } from '$lib/data/tools/init';
 	import { startEventBridge, stopEventBridge } from '$lib/triggers/event-bridge';
 	import { startStreakTracker, stopStreakTracker } from '$lib/data/projections/streaks';
@@ -509,6 +510,10 @@
 			// routes don't read from it on first paint.
 			void dashboardStore.initialize();
 			reminderScheduler.start();
+			// AI Mission tick — scans pendingProposals/aiMissions on an
+			// interval and runs any that are due. Safe idempotent; see
+			// data/ai/missions/setup.ts.
+			startMissionTick();
 		});
 
 		// Restore nav collapsed state (cheap, keep inline)
@@ -604,6 +609,7 @@
 		stopEventStore();
 		stopEventBridge();
 		stopStreakTracker();
+		stopMissionTick();
 		guestMode?.destroy();
 		// Fire-and-forget — we don't need to await; the in-flight task
 		// will finish in the background and the next page session will
