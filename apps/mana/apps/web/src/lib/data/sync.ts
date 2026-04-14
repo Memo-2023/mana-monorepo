@@ -25,6 +25,7 @@ import {
 } from './database';
 import { isQuotaError, cleanupTombstones, notifyQuotaExceeded } from './quota';
 import { emitSyncTelemetry, categorizeSyncError } from './sync-telemetry';
+import type { Actor } from './events/actor';
 
 // ─── Types ────────────────────────────────────────────────────
 
@@ -70,6 +71,13 @@ export interface SyncChange {
 	fields?: Record<string, FieldChange>;
 	data?: Record<string, unknown>;
 	deletedAt?: string;
+	/**
+	 * Attribution of who triggered the write. Opaque structured value
+	 * that survives the round trip through mana-sync / Postgres via a
+	 * JSONB column. Consumers treat a missing actor as `{ kind: 'user' }`
+	 * for back-compat with pre-actor clients.
+	 */
+	actor?: Actor;
 }
 
 interface PendingChange {
@@ -81,6 +89,7 @@ interface PendingChange {
 	fields?: Record<string, FieldChange>;
 	data?: Record<string, unknown>;
 	deletedAt?: string;
+	actor?: Actor;
 	createdAt: string;
 }
 
@@ -132,6 +141,10 @@ export function isValidSyncChange(v: unknown): v is SyncChange {
 	if (c.deletedAt !== undefined && typeof c.deletedAt !== 'string') return false;
 	if (c.eventId !== undefined && typeof c.eventId !== 'string') return false;
 	if (c.schemaVersion !== undefined && typeof c.schemaVersion !== 'number') return false;
+	// `actor` is opaque — we deliberately don't assert its shape here. A
+	// malformed actor doesn't corrupt data; worst case the Workbench shows
+	// "unknown" for that change.
+	if (c.actor !== undefined && (typeof c.actor !== 'object' || c.actor === null)) return false;
 	return true;
 }
 
@@ -1060,6 +1073,7 @@ export function createUnifiedSync(
 				fields: p.fields,
 				data: p.data,
 				deletedAt: p.deletedAt,
+				actor: p.actor,
 			})),
 		};
 	}

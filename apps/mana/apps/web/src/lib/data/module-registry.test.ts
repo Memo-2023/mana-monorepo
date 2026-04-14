@@ -37,7 +37,16 @@ import { db } from './database';
 // ─── Internal Dexie tables that are intentionally NOT in SYNC_APP_MAP ───
 // These hold local-only state (sync metadata, retry queues, activity log)
 // that must never leave the device.
-const INTERNAL_TABLES = new Set(['_pendingChanges', '_syncMeta', '_eventsTombstones', '_activity']);
+const INTERNAL_TABLES = new Set([
+	'_pendingChanges',
+	'_syncMeta',
+	'_eventsTombstones',
+	'_activity',
+	// Local-only AI Workbench staging; approvals run the underlying tool
+	// which writes via its module's sync path — proposals themselves never
+	// leave the device.
+	'pendingProposals',
+]);
 
 describe('module-registry — structural invariants', () => {
 	it('every appId is unique across module configs', () => {
