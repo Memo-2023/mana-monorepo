@@ -15,6 +15,7 @@
 	import OnboardingModal from '$lib/modules/todo/components/OnboardingModal.svelte';
 	import TodoPage from '$lib/modules/todo/components/pages/TodoPage.svelte';
 	import PagePicker from '$lib/modules/todo/components/pages/PagePicker.svelte';
+	import AiProposalInbox from '$lib/components/ai/AiProposalInbox.svelte';
 	import { todoSettings } from '$lib/modules/todo/stores/settings.svelte';
 	import type { PageConfig } from '$lib/modules/todo/stores/settings.svelte';
 	import { getTaskStats } from '$lib/modules/todo';
@@ -236,6 +237,9 @@
 			</a>
 		</div>
 	</header>
+
+	<!-- AI proposals awaiting approval -->
+	<AiProposalInbox module="todo" />
 
 	<!-- Quick Add -->
 	<div class="quick-add-wrapper">
