@@ -442,14 +442,14 @@ export interface SocialEventDeletedPayload {
 
 export type SocialEventsEventType = 'SocialEventCreated' | 'SocialEventDeleted';
 
-// ── Cycles ──────────────────────────────────────────
+// ── Period ──────────────────────────────────────────
 
-export interface CycleDayLoggedPayload {
+export interface PeriodDayLoggedPayload {
 	logId: string;
 	date: string;
 	flow?: string;
 }
-export type CyclesEventType = 'CycleDayLogged';
+export type PeriodEventType = 'PeriodDayLogged';
 
 // ── Firsts ──────────────────────────────────────────
 
@@ -653,7 +653,7 @@ export type ManaEventType =
 	| ChatEventType
 	| MemoroEventType
 	| SkilltreeEventType
-	| CyclesEventType
+	| PeriodEventType
 	| FirstsEventType
 	| GuidesEventType
 	| InventoryEventType
@@ -746,8 +746,8 @@ export type ManaEvent =
 	// Skilltree
 	| DomainEvent<'SkillXpAdded', SkillXpAddedPayload>
 	| DomainEvent<'SkillCreated', SkillCreatedPayload>
-	// Cycles
-	| DomainEvent<'CycleDayLogged', CycleDayLoggedPayload>
+	// Period
+	| DomainEvent<'PeriodDayLogged', PeriodDayLoggedPayload>
 	// Firsts
 	| DomainEvent<'FirstCreated', FirstCreatedPayload>
 	// Guides

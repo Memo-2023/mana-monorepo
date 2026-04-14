@@ -1,28 +1,28 @@
 <!--
-  Cycles — Workbench ListView
+  Periods — Workbench ListView
   Aktueller Zyklus, heutiger Quick-Log, einfache Statistiken.
 -->
 <script lang="ts">
 	import { _, locale } from 'svelte-i18n';
 	import {
 		formatLogDate,
-		useAllCycles,
+		useAllPeriods,
 		useAllDayLogs,
 		useAllSymptoms,
-		useCurrentCycle,
+		useCurrentPeriod,
 		type RelativeDateLabels,
 	} from './queries';
-	import { cyclesStore } from './stores/cycles.svelte';
+	import { periodsStore } from './stores/periods.svelte';
 	import { dayLogsStore } from './stores/dayLogs.svelte';
-	import { derivePhase, getCycleDayNumber } from './utils/phase';
+	import { derivePhase, getPeriodDayNumber } from './utils/phase';
 	import {
-		computeCycleStats,
+		computePeriodStats,
 		daysUntilNextPeriod,
 		predictFertileWindow,
 		predictNextPeriodStart,
 	} from './utils/prediction';
 	import { FLOW_COLORS, MOOD_COLORS, PHASE_COLORS, type Flow, type Mood } from './types';
-	import CycleCalendar from './components/CycleCalendar.svelte';
+	import PeriodCalendar from './components/PeriodCalendar.svelte';
 	import SymptomManager from './components/SymptomManager.svelte';
 	import type { ViewProps } from '$lib/app-registry';
 	import { toast } from '$lib/stores/toast.svelte';
@@ -33,15 +33,15 @@
 
 	const todayIso = new Date().toISOString().slice(0, 10);
 
-	let cycles$ = useAllCycles();
+	let periods$ = useAllPeriods();
 	let logs$ = useAllDayLogs();
 	let symptoms$ = useAllSymptoms();
-	let current$ = useCurrentCycle();
+	let current$ = useCurrentPeriod();
 
-	let cycles = $derived(cycles$.value);
+	let periods = $derived(periods$.value);
 	let logs = $derived(logs$.value);
 	let symptoms = $derived(symptoms$.value);
-	let currentCycle = $derived(current$.value);
+	let currentPeriod = $derived(current$.value);
 
 	// Locale-aware date formatting: use the active svelte-i18n locale, with
 	// 'de-DE' as a fallback since the project defaults to German.
@@ -51,17 +51,17 @@
 	});
 
 	const relativeLabels = $derived<RelativeDateLabels>({
-		today: $_('cycles.relativeDate.today'),
-		yesterday: $_('cycles.relativeDate.yesterday'),
-		daysAgo: (n: number) => $_('cycles.relativeDate.daysAgo', { values: { days: n } }),
+		today: $_('period.relativeDate.today'),
+		yesterday: $_('period.relativeDate.yesterday'),
+		daysAgo: (n: number) => $_('period.relativeDate.daysAgo', { values: { days: n } }),
 	});
 
-	let phase = $derived(derivePhase(todayIso, cycles));
-	let cycleDay = $derived(currentCycle ? getCycleDayNumber(todayIso, currentCycle) : null);
-	let stats = $derived(computeCycleStats(cycles));
-	let daysUntil = $derived(daysUntilNextPeriod(cycles));
-	let nextPeriod = $derived(predictNextPeriodStart(cycles));
-	let fertile = $derived(predictFertileWindow(cycles));
+	let phase = $derived(derivePhase(todayIso, periods));
+	let periodDay = $derived(currentPeriod ? getPeriodDayNumber(todayIso, currentPeriod) : null);
+	let stats = $derived(computePeriodStats(periods));
+	let daysUntil = $derived(daysUntilNextPeriod(periods));
+	let nextPeriod = $derived(predictNextPeriodStart(periods));
+	let fertile = $derived(predictFertileWindow(periods));
 
 	const FLOWS: Flow[] = ['none', 'spotting', 'light', 'medium', 'heavy'];
 	const MOODS: Mood[] = ['great', 'good', 'neutral', 'low', 'bad'];
@@ -148,21 +148,21 @@
 			return;
 		}
 		const dateStr = new Date(editingDate).toLocaleDateString(dateLocale);
-		const ok = confirm($_('cycles.confirm.deleteEntry', { values: { date: dateStr } }));
+		const ok = confirm($_('period.confirm.deleteEntry', { values: { date: dateStr } }));
 		if (!ok) return;
 		await dayLogsStore.deleteLog(editingLog.id);
 		backToToday();
 	}
 
 	async function startPeriodToday() {
-		await cyclesStore.createCycle({ startDate: todayIso });
+		await periodsStore.createPeriod({ startDate: todayIso });
 		await safeLogDay({ logDate: todayIso, flow: 'medium' });
 		backToToday();
 	}
 
 	async function endPeriodToday() {
-		if (!currentCycle) return;
-		await cyclesStore.setPeriodEnd(currentCycle.id, todayIso);
+		if (!currentPeriod) return;
+		await periodsStore.setPeriodEnd(currentPeriod.id, todayIso);
 	}
 
 	function formatDate(iso: string | null): string {
@@ -180,34 +180,34 @@
 		<div class="phase-top">
 			<span class="phase-dot"></span>
 			<div class="phase-info">
-				<span class="phase-label">{$_(`cycles.phase.${phase}`)}</span>
-				{#if cycleDay}
-					<span class="phase-sub">{$_('cycles.label.cycleDay')} {cycleDay}</span>
+				<span class="phase-label">{$_(`period.phase.${phase}`)}</span>
+				{#if periodDay}
+					<span class="phase-sub">{$_('period.label.periodDay')} {periodDay}</span>
 				{/if}
 			</div>
 			{#if daysUntil !== null}
 				<div class="phase-countdown">
 					{#if daysUntil > 0}
 						<strong>{daysUntil}</strong>
-						<span>{$_('cycles.label.daysUntilPeriod')}</span>
+						<span>{$_('period.label.daysUntilPeriod')}</span>
 					{:else if daysUntil === 0}
-						<strong>{$_('cycles.label.today')}</strong>
-						<span>{$_('cycles.label.predicted')}</span>
+						<strong>{$_('period.label.today')}</strong>
+						<span>{$_('period.label.predicted')}</span>
 					{:else}
 						<strong>{Math.abs(daysUntil)}</strong>
-						<span>{$_('cycles.label.daysOverdue')}</span>
+						<span>{$_('period.label.daysOverdue')}</span>
 					{/if}
 				</div>
 			{/if}
 		</div>
 		<div class="phase-actions">
-			{#if !currentCycle || (currentCycle.periodEndDate && currentCycle.periodEndDate < todayIso && phase !== 'menstruation')}
+			{#if !currentPeriod || (currentPeriod.periodEndDate && currentPeriod.periodEndDate < todayIso && phase !== 'menstruation')}
 				<button class="btn-primary" onclick={startPeriodToday}
-					>{$_('cycles.action.startPeriod')}</button
+					>{$_('period.action.startPeriod')}</button
 				>
-			{:else if currentCycle && !currentCycle.periodEndDate}
+			{:else if currentPeriod && !currentPeriod.periodEndDate}
 				<button class="btn-secondary" onclick={endPeriodToday}
-					>{$_('cycles.action.endPeriod')}</button
+					>{$_('period.action.endPeriod')}</button
 				>
 			{/if}
 		</div>
@@ -216,13 +216,13 @@
 	<!-- Calendar -->
 	<section class="log-section">
 		<div class="section-header">
-			<h3 class="section-label">{$_('cycles.calendar.title')}</h3>
+			<h3 class="section-label">{$_('period.calendar.title')}</h3>
 			<button class="section-action" onclick={() => (calendarOpen = !calendarOpen)}>
 				{calendarOpen ? '−' : '+'}
 			</button>
 		</div>
 		{#if calendarOpen}
-			<CycleCalendar {cycles} {logs} {editingDate} {todayIso} onSelectDay={selectDay} />
+			<PeriodCalendar {periods} {logs} {editingDate} {todayIso} onSelectDay={selectDay} />
 		{/if}
 	</section>
 
@@ -230,16 +230,16 @@
 	{#if isEditingPast}
 		<div class="edit-banner">
 			<span class="edit-banner-label">
-				{$_('cycles.label.editing')}
+				{$_('period.label.editing')}
 				<strong>{new Date(editingDate).toLocaleDateString(dateLocale)}</strong>
 			</span>
 			<div class="edit-banner-actions">
 				{#if editingLog}
 					<button class="banner-btn danger" onclick={deleteEditingLog}
-						>{$_('cycles.action.delete')}</button
+						>{$_('period.action.delete')}</button
 					>
 				{/if}
-				<button class="banner-btn" onclick={backToToday}>{$_('cycles.action.backToToday')}</button>
+				<button class="banner-btn" onclick={backToToday}>{$_('period.action.backToToday')}</button>
 			</div>
 		</div>
 	{/if}
@@ -247,7 +247,7 @@
 	<!-- Flow -->
 	<section class="log-section">
 		<h3 class="section-label">
-			{isEditingPast ? $_('cycles.label.bleeding') : $_('cycles.label.todayBleeding')}
+			{isEditingPast ? $_('period.label.bleeding') : $_('period.label.todayBleeding')}
 		</h3>
 		<div class="row">
 			{#each FLOWS as flow}
@@ -258,7 +258,7 @@
 					onclick={() => setFlow(flow)}
 				>
 					<span class="flow-dot"></span>
-					{$_(`cycles.flow.${flow}`)}
+					{$_(`period.flow.${flow}`)}
 				</button>
 			{/each}
 		</div>
@@ -266,7 +266,7 @@
 
 	<!-- Mood -->
 	<section class="log-section">
-		<h3 class="section-label">{$_('cycles.label.mood')}</h3>
+		<h3 class="section-label">{$_('period.label.mood')}</h3>
 		<div class="row">
 			{#each MOODS as mood}
 				<button
@@ -276,7 +276,7 @@
 					onclick={() => setMood(mood)}
 				>
 					<span class="mood-dot"></span>
-					{$_(`cycles.mood.${mood}`)}
+					{$_(`period.mood.${mood}`)}
 				</button>
 			{/each}
 		</div>
@@ -285,9 +285,9 @@
 	<!-- Symptoms -->
 	<section class="log-section">
 		<div class="section-header">
-			<h3 class="section-label">{$_('cycles.label.symptoms')}</h3>
+			<h3 class="section-label">{$_('period.label.symptoms')}</h3>
 			<button class="section-action" onclick={() => (symptomManagerOpen = true)}>
-				{$_('cycles.symptomManager.open')}
+				{$_('period.symptomManager.open')}
 			</button>
 		</div>
 		{#if symptoms.length > 0}
@@ -309,20 +309,20 @@
 
 	<!-- Temperature & Notes -->
 	<section class="log-section">
-		<h3 class="section-label">{$_('cycles.label.basalAndNotes')}</h3>
+		<h3 class="section-label">{$_('period.label.basalAndNotes')}</h3>
 		<div class="row inputs">
 			<input
 				type="number"
 				step="0.01"
 				class="temp-input"
-				placeholder={$_('cycles.input.temperaturePlaceholder')}
+				placeholder={$_('period.input.temperaturePlaceholder')}
 				bind:value={temperature}
 				onblur={saveTemperature}
 			/>
 			<input
 				type="text"
 				class="notes-input"
-				placeholder={$_('cycles.input.notesPlaceholder')}
+				placeholder={$_('period.input.notesPlaceholder')}
 				bind:value={notesText}
 				onblur={saveNotes}
 			/>
@@ -332,30 +332,30 @@
 	<!-- Stats -->
 	{#if stats.total > 0}
 		<section class="log-section stats">
-			<h3 class="section-label">{$_('cycles.label.stats')}</h3>
+			<h3 class="section-label">{$_('period.label.stats')}</h3>
 			<div class="stats-grid">
 				<div class="stat">
 					<strong>{stats.avg}</strong>
-					<span>{$_('cycles.stats.avgDays')}</span>
+					<span>{$_('period.stats.avgDays')}</span>
 				</div>
 				<div class="stat">
 					<strong>{stats.shortest}</strong>
-					<span>{$_('cycles.stats.shortest')}</span>
+					<span>{$_('period.stats.shortest')}</span>
 				</div>
 				<div class="stat">
 					<strong>{stats.longest}</strong>
-					<span>{$_('cycles.stats.longest')}</span>
+					<span>{$_('period.stats.longest')}</span>
 				</div>
 				<div class="stat">
 					<strong>{stats.total}</strong>
-					<span>{$_('cycles.stats.cycles')}</span>
+					<span>{$_('period.stats.periods')}</span>
 				</div>
 			</div>
 			{#if nextPeriod}
 				<div class="prediction">
-					{$_('cycles.stats.nextPeriod')} <strong>{formatDate(nextPeriod)}</strong>
+					{$_('period.stats.nextPeriod')} <strong>{formatDate(nextPeriod)}</strong>
 					{#if fertile}
-						· {$_('cycles.stats.fertileWindow')}
+						· {$_('period.stats.fertileWindow')}
 						<strong>{formatDate(fertile.start)}</strong> –
 						<strong>{formatDate(fertile.end)}</strong>
 					{/if}
@@ -367,7 +367,7 @@
 	<!-- Recent logs -->
 	{#if logs.length > 0}
 		<section class="log-section">
-			<h3 class="section-label">{$_('cycles.label.recentEntries')}</h3>
+			<h3 class="section-label">{$_('period.label.recentEntries')}</h3>
 			<div class="log-list">
 				{#each logs.slice(0, 10) as log (log.id)}
 					<button
@@ -383,11 +383,11 @@
 									>{formatLogDate(log.logDate, relativeLabels, dateLocale)}</span
 								>
 								{#if log.flow !== 'none'}
-									<span class="log-tag">{$_(`cycles.flow.${log.flow}`)}</span>
+									<span class="log-tag">{$_(`period.flow.${log.flow}`)}</span>
 								{/if}
 								{#if log.mood}
 									<span class="log-tag" style="color: {MOOD_COLORS[log.mood]}"
-										>{$_(`cycles.mood.${log.mood}`)}</span
+										>{$_(`period.mood.${log.mood}`)}</span
 									>
 								{/if}
 							</div>
@@ -401,8 +401,8 @@
 		</section>
 	{/if}
 
-	{#if cycles.length === 0 && logs.length === 0}
-		<p class="empty">{$_('cycles.empty')}</p>
+	{#if periods.length === 0 && logs.length === 0}
+		<p class="empty">{$_('period.empty')}</p>
 	{/if}
 </div>
 

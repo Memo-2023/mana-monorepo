@@ -135,7 +135,7 @@ export const APP_ICONS = {
 	dreams: svgToDataUrl(
 		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="dr" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#6366f1"/><stop offset="100%" style="stop-color:#312e81"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#dr)"/><path d="M62 30a22 22 0 1 0 18 34 18 18 0 0 1-18-34z" fill="white"/><circle cx="32" cy="38" r="1.6" fill="white"/><circle cx="26" cy="58" r="1.2" fill="white" fill-opacity="0.8"/><circle cx="40" cy="68" r="1.4" fill="white" fill-opacity="0.7"/><circle cx="22" cy="46" r="1" fill="white" fill-opacity="0.6"/></svg>`
 	),
-	cycles: svgToDataUrl(
+	period: svgToDataUrl(
 		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="cy" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#ec4899"/><stop offset="100%" style="stop-color:#be185d"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#cy)"/><circle cx="50" cy="50" r="26" stroke="white" stroke-width="4" fill="none"/><path d="M50 24a26 26 0 0 1 22 40" stroke="white" stroke-width="4" stroke-linecap="round" fill="none"/><circle cx="72" cy="64" r="3.5" fill="white"/><circle cx="50" cy="50" r="9" fill="white"/></svg>`
 	),
 	finance: svgToDataUrl(
@@ -153,7 +153,7 @@ export const APP_ICONS = {
 	body: svgToDataUrl(
 		// Dumbbell + heart-pulse hybrid: training (barbell) + body (pulse line).
 		// Red→orange gradient to set it apart from the green health-adjacent
-		// modules (plants, food) and the pink cycles icon.
+		// modules (plants, food) and the pink period icon.
 		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="bd" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#ef4444"/><stop offset="100%" style="stop-color:#f97316"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#bd)"/><rect x="18" y="42" width="6" height="16" rx="2" fill="white"/><rect x="76" y="42" width="6" height="16" rx="2" fill="white"/><rect x="24" y="46" width="4" height="8" rx="1" fill="white" fill-opacity="0.85"/><rect x="72" y="46" width="4" height="8" rx="1" fill="white" fill-opacity="0.85"/><rect x="28" y="48" width="44" height="4" rx="2" fill="white"/><path d="M30 70h12l4-8 6 16 4-10 6 6h12" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>`
 	),
 	firsts: svgToDataUrl(
@@ -200,7 +200,7 @@ export const APP_ICONS = {
 	myday: svgToDataUrl(
 		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="md" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#F59E0B"/><stop offset="100%" style="stop-color:#F97316"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#md)"/><circle cx="50" cy="44" r="16" fill="white" fill-opacity="0.9"/><line x1="50" y1="20" x2="50" y2="26" stroke="white" stroke-width="3" stroke-linecap="round" opacity="0.7"/><line x1="50" y1="62" x2="50" y2="68" stroke="white" stroke-width="3" stroke-linecap="round" opacity="0.7"/><line x1="26" y1="44" x2="32" y2="44" stroke="white" stroke-width="3" stroke-linecap="round" opacity="0.7"/><line x1="68" y1="44" x2="74" y2="44" stroke="white" stroke-width="3" stroke-linecap="round" opacity="0.7"/><rect x="24" y="74" width="52" height="4" rx="2" fill="white" fill-opacity="0.5"/><rect x="30" y="82" width="40" height="3" rx="1.5" fill="white" fill-opacity="0.3"/></svg>`
 	),
-	eventstream: svgToDataUrl(
+	activity: svgToDataUrl(
 		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="es" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#6366F1"/><stop offset="100%" style="stop-color:#8B5CF6"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#es)"/><polyline points="20,55 35,40 50,50 65,30 80,45" fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/><circle cx="35" cy="40" r="3" fill="white"/><circle cx="50" cy="50" r="3" fill="white"/><circle cx="65" cy="30" r="3" fill="white"/><circle cx="80" cy="45" r="3" fill="white"/><rect x="24" y="66" width="52" height="3" rx="1.5" fill="white" fill-opacity="0.4"/><rect x="24" y="74" width="36" height="3" rx="1.5" fill="white" fill-opacity="0.3"/></svg>`
 	),
 	companion: svgToDataUrl(

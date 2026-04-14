@@ -19,7 +19,7 @@ vi.mock('@mana/shared-utils/analytics', () => ({
 
 // Database hooks call into funnel-tracking + trigger registry on every
 // write. They reach for browser-only globals (localStorage), so stub them
-// the same way cycles.integration.test.ts does.
+// the same way period.integration.test.ts does.
 vi.mock('$lib/stores/funnel-tracking', () => ({ trackFirstContent: vi.fn() }));
 vi.mock('$lib/triggers/registry', () => ({ fire: vi.fn() }));
 vi.mock('$lib/triggers/inline-suggest', () => ({

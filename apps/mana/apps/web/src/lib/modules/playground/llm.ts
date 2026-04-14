@@ -4,7 +4,7 @@
  *
  * Lives next to the playground UI rather than in a shared package because
  * the playground is the only consumer right now. If chat / todo enrichment
- * / cycles insights end up calling the same surface in the future, lift
+ * / period insights end up calling the same surface in the future, lift
  * this into `$lib/data/llm-client.ts`.
  *
  * The chunk parser is hand-rolled rather than pulled from a library: the

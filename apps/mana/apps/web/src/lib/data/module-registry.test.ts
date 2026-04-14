@@ -165,7 +165,7 @@ describe('module-registry — pre-refactor snapshot', () => {
 			habits: ['habits', 'habitLogs'],
 			notes: ['notes', 'noteTags'],
 			dreams: ['dreams', 'dreamSymbols', 'dreamTags'],
-			cycles: ['cycles', 'cycleDayLogs', 'cycleSymptoms'],
+			period: ['periods', 'periodDayLogs', 'periodSymptoms'],
 			events: ['socialEvents', 'eventGuests', 'eventInvitations', 'eventItems'],
 			finance: ['transactions', 'financeCategories', 'budgets'],
 			places: ['places', 'locationLogs', 'placeTags'],

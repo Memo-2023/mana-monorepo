@@ -1,5 +1,5 @@
 /**
- * i18n parity test for the cycles module.
+ * i18n parity test for the period module.
  *
  * Ensures all 5 locale files (de/en/it/fr/es) have identical key
  * structure — stub copies of en.json would otherwise drift silently
@@ -41,7 +41,7 @@ const locales = {
 	es: es as Dict,
 };
 
-describe('cycles i18n parity', () => {
+describe('period i18n parity', () => {
 	const referenceKeys = flattenKeys(locales.de);
 
 	test('de has a non-empty set of keys', () => {

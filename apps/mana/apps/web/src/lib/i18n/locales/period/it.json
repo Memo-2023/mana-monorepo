@@ -1,6 +1,6 @@
 {
 	"app": {
-		"name": "Cycles",
+		"name": "Period",
 		"tagline": "Monitoraggio del ciclo mestruale"
 	},
 	"phase": {
@@ -25,7 +25,7 @@
 		"bad": "Cattivo"
 	},
 	"label": {
-		"cycleDay": "Giorno del ciclo",
+		"periodDay": "Giorno del ciclo",
 		"daysUntilPeriod": "giorni al ciclo",
 		"today": "Oggi",
 		"predicted": "previsto",
@@ -53,7 +53,7 @@
 		"avgDays": "Media gg",
 		"shortest": "più breve",
 		"longest": "più lungo",
-		"cycles": "cicli",
+		"period": "cicli",
 		"nextPeriod": "Prossimo ciclo:",
 		"fertileWindow": "Finestra fertile:"
 	},

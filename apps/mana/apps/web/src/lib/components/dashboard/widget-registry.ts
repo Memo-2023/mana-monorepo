@@ -30,7 +30,7 @@ import RecentContactsWidget from '$lib/modules/core/widgets/RecentContactsWidget
 import ActiveTimerWidget from '$lib/modules/core/widgets/ActiveTimerWidget.svelte';
 import NutritionProgressWidget from '$lib/modules/core/widgets/NutritionProgressWidget.svelte';
 import PlantWateringWidget from '$lib/modules/core/widgets/PlantWateringWidget.svelte';
-import CyclesWidget from '$lib/modules/core/widgets/CyclesWidget.svelte';
+import PeriodWidget from '$lib/modules/core/widgets/PeriodWidget.svelte';
 import NewsUnreadWidget from '$lib/modules/news/widgets/NewsUnreadWidget.svelte';
 import BodyStatsWidget from '$lib/modules/body/widgets/BodyStatsWidget.svelte';
 import DayTimelineWidget from './widgets/DayTimelineWidget.svelte';
@@ -59,7 +59,7 @@ export const widgetComponents: Record<WidgetType, Component> = {
 	'plant-watering': PlantWateringWidget,
 	'day-timeline': DayTimelineWidget,
 	'activity-feed': ActivityFeedWidget,
-	cycles: CyclesWidget,
+	period: PeriodWidget,
 	'news-unread': NewsUnreadWidget,
 	'body-stats': BodyStatsWidget,
 };

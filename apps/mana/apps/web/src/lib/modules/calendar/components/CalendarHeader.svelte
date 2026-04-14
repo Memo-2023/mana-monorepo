@@ -49,7 +49,7 @@
 		{ type: 'watering', label: 'Gießen', icon: Drop },
 		{ type: 'sleep', label: 'Schlaf', icon: Moon },
 		{ type: 'practice', label: 'Übung', icon: GraduationCap },
-		{ type: 'cycle', label: 'Zyklus', icon: FlowerLotus },
+		{ type: 'period', label: 'Periode', icon: FlowerLotus },
 		{ type: 'guide', label: 'Guides', icon: Compass },
 		{ type: 'visit', label: 'Besuche', icon: MapPin },
 		{ type: 'study', label: 'Lernen', icon: BookOpen },

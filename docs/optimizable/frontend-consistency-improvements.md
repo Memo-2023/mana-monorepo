@@ -13,7 +13,7 @@ Tracked improvements for UI/styling consistency across the Mana unified app.
 Module ListViews use two different styling approaches:
 
 - **Scoped CSS + `hsl(var(--color-*))` theme tokens** — 27 modules (65%)
-  - todo, notes, drink, contacts, journal, dreams, habits, firsts, calendar, chat, places, inventory, finance, news, body, calc, events, photos, automations, cycles, uload, picture, recipes
+  - todo, notes, drink, contacts, journal, dreams, habits, firsts, calendar, chat, places, inventory, finance, news, body, calc, events, photos, automations, period, uload, picture, recipes
 - **Tailwind utility classes** — 13 modules (35%)
   - food, plants, moodlit, cards, presi, storage, skilltree, context, guides, memoro, who, music, playground, citycorners, questions, times
 

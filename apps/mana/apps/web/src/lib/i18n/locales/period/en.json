@@ -1,6 +1,6 @@
 {
 	"app": {
-		"name": "Cycles",
+		"name": "Period",
 		"tagline": "Menstrual Cycle Tracking"
 	},
 	"phase": {
@@ -25,7 +25,7 @@
 		"bad": "Bad"
 	},
 	"label": {
-		"cycleDay": "Cycle day",
+		"periodDay": "Cycle day",
 		"daysUntilPeriod": "days until period",
 		"today": "Today",
 		"predicted": "predicted",
@@ -53,7 +53,7 @@
 		"avgDays": "Avg days",
 		"shortest": "shortest",
 		"longest": "longest",
-		"cycles": "cycles",
+		"period": "period",
 		"nextPeriod": "Next period:",
 		"fertileWindow": "Fertile window:"
 	},

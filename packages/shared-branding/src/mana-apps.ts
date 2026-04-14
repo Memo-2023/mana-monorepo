@@ -667,8 +667,8 @@ export const MANA_APPS: ManaApp[] = [
 		requiredTier: 'guest',
 	},
 	{
-		id: 'cycles',
-		name: 'Cycles',
+		id: 'period',
+		name: 'Periode',
 		description: {
 			de: 'Menstruationszyklus-Tracking',
 			en: 'Menstrual Cycle Tracking',
@@ -677,7 +677,7 @@ export const MANA_APPS: ManaApp[] = [
 			de: 'Tracke deinen Zyklus mit Blutungstagen, Symptomen, Stimmung und Basaltemperatur. Phasen-Erkennung und Vorhersage für die nächste Periode und das fruchtbare Fenster.',
 			en: 'Track your cycle with flow days, symptoms, mood, and basal temperature. Phase detection and prediction of the next period and fertile window.',
 		},
-		icon: APP_ICONS.cycles,
+		icon: APP_ICONS.period,
 		color: '#ec4899',
 		comingSoon: false,
 		status: 'development',
@@ -894,14 +894,14 @@ export const MANA_APPS: ManaApp[] = [
 		requiredTier: 'guest',
 	},
 	{
-		id: 'eventstream',
-		name: 'Events',
-		description: { de: 'Live Event-Stream', en: 'Live Event Stream' },
+		id: 'activity',
+		name: 'Aktivität',
+		description: { de: 'Live Aktivitäts-Stream', en: 'Live Activity Stream' },
 		longDescription: {
 			de: 'Echtzeit-Feed aller Aktionen ueber alle Module: Tasks, Drinks, Termine, Mahlzeiten.',
 			en: 'Real-time feed of all actions across modules: tasks, drinks, events, meals.',
 		},
-		icon: APP_ICONS.eventstream ?? '⚡',
+		icon: APP_ICONS.activity ?? '⚡',
 		color: '#6366F1',
 		comingSoon: false,
 		status: 'development',

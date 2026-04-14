@@ -1,25 +1,25 @@
 /**
- * Cycles module — collection accessors and guest seed data.
+ * Periods module — collection accessors and guest seed data.
  */
 
 import { db } from '$lib/data/database';
-import type { LocalCycle, LocalCycleDayLog, LocalCycleSymptom } from './types';
+import type { LocalPeriod, LocalPeriodDayLog, LocalPeriodSymptom } from './types';
 
 // ─── Collection Accessors ──────────────────────────────────
 
-export const cycleTable = db.table<LocalCycle>('cycles');
-export const cycleDayLogTable = db.table<LocalCycleDayLog>('cycleDayLogs');
-export const cycleSymptomTable = db.table<LocalCycleSymptom>('cycleSymptoms');
+export const periodTable = db.table<LocalPeriod>('periods');
+export const periodDayLogTable = db.table<LocalPeriodDayLog>('periodDayLogs');
+export const periodSymptomTable = db.table<LocalPeriodSymptom>('periodSymptoms');
 
 // ─── Guest Seed ────────────────────────────────────────────
 
 const today = new Date().toISOString().slice(0, 10);
 const daysAgo = (n: number) => new Date(Date.now() - n * 86_400_000).toISOString().slice(0, 10);
 
-export const CYCLES_GUEST_SEED = {
-	cycles: [
+export const PERIODS_GUEST_SEED = {
+	periods: [
 		{
-			id: 'cycle-prev',
+			id: 'period-prev',
 			startDate: daysAgo(56),
 			periodEndDate: daysAgo(52),
 			endDate: daysAgo(29),
@@ -29,7 +29,7 @@ export const CYCLES_GUEST_SEED = {
 			notes: null,
 		},
 		{
-			id: 'cycle-current',
+			id: 'period-current',
 			startDate: daysAgo(28),
 			periodEndDate: daysAgo(24),
 			endDate: null,
@@ -38,12 +38,12 @@ export const CYCLES_GUEST_SEED = {
 			isArchived: false,
 			notes: 'Aktueller Zyklus',
 		},
-	] satisfies LocalCycle[],
-	cycleDayLogs: [
+	] satisfies LocalPeriod[],
+	periodDayLogs: [
 		{
-			id: 'cycle-log-today',
+			id: 'period-log-today',
 			logDate: today,
-			cycleId: 'cycle-current',
+			periodId: 'period-current',
 			flow: 'none',
 			mood: 'good',
 			energy: 4,
@@ -53,8 +53,8 @@ export const CYCLES_GUEST_SEED = {
 			sexualActivity: null,
 			notes: null,
 		},
-	] satisfies LocalCycleDayLog[],
-	cycleSymptoms: [
+	] satisfies LocalPeriodDayLog[],
+	periodSymptoms: [
 		{
 			id: 'sym-cramps',
 			name: 'Krämpfe',
@@ -125,5 +125,5 @@ export const CYCLES_GUEST_SEED = {
 			color: '#d946ef',
 			count: 0,
 		},
-	] satisfies LocalCycleSymptom[],
+	] satisfies LocalPeriodSymptom[],
 };

@@ -119,15 +119,15 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	// would still leak via the timeBlocks table.
 	events: { enabled: true, fields: ['title', 'description', 'location'] },
 
-	// ─── Cycles ──────────────────────────────────────────────
+	// ─── Period ──────────────────────────────────────────────
 	// Health data — GDPR Art. 9 sensitive personal data category.
 	// `symptoms` stays plaintext: it's a string-array of standardised
 	// labels (cramps, headache, ...) used as a Set in the symptom
 	// counter store; encrypting it would break the diff loop in
 	// dayLogsStore.logDay. `mood` is a single enum but with the same
 	// privacy sensitivity as `notes` — encrypt it.
-	cycles: { enabled: true, fields: ['notes'] },
-	cycleDayLogs: { enabled: true, fields: ['notes', 'mood'] },
+	periods: { enabled: true, fields: ['notes'] },
+	periodDayLogs: { enabled: true, fields: ['notes', 'mood'] },
 
 	// ─── Food ────────────────────────────────────────────
 	// LocalMeal user-typed / AI-generated content → encrypted:
@@ -353,7 +353,7 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	//     plaintext indexes still resolve "which sets did I do" without
 	//     leaking how heavy or how many.
 	//   - bodyChecks.energy/sleep/soreness/mood: 1-5 mood-style ratings with
-	//     the same sensitivity as cycleDayLogs.mood.
+	//     the same sensitivity as periodDayLogs.mood.
 	//   - bodyPhases.startWeight/targetWeight: identical reasoning to
 	//     measurement values.
 	// Plaintext (intentional):

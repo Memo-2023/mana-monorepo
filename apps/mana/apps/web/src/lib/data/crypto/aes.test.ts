@@ -279,7 +279,7 @@ describe('encryption registry', () => {
 		expect(tables).toContain('notes');
 		expect(tables).toContain('memos');
 		expect(tables).toContain('contacts');
-		expect(tables).toContain('cycleDayLogs');
+		expect(tables).toContain('periodDayLogs');
 	});
 
 	it('every registry entry has a non-empty fields list', () => {

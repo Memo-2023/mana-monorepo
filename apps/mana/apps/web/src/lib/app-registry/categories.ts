@@ -3,7 +3,7 @@
  * can find pages by intent rather than scanning an alphabetical list.
  *
  * Five categories (Vorschlag C):
- *   - companion: Companion Brain pages (myday, eventstream, companion, goals)
+ *   - companion: Companion Brain pages (myday, activity, companion, goals)
  *   - life:      Personal / wellness / everyday-life tracking
  *   - work:      Productivity & planning
  *   - creative:  Creative, learning, generation
@@ -40,7 +40,7 @@ export const APP_CATEGORIES: CategoryMeta[] = [
 export const APP_CATEGORY_MAP: Record<string, AppCategory> = {
 	// Companion Brain
 	myday: 'companion',
-	eventstream: 'companion',
+	activity: 'companion',
 	companion: 'companion',
 	goals: 'companion',
 
@@ -50,7 +50,7 @@ export const APP_CATEGORY_MAP: Record<string, AppCategory> = {
 	sleep: 'life',
 	mood: 'life',
 	stretch: 'life',
-	cycles: 'life',
+	period: 'life',
 	dreams: 'life',
 	drink: 'life',
 	meditate: 'life',

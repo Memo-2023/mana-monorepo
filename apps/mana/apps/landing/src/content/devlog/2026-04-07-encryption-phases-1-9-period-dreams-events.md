@@ -1,6 +1,6 @@
 ---
-title: 'Encryption Phasen 1–9: Vault-Ende-zu-Ende + Dreams, Cycles, Events Module'
-description: 'Größter Tag der Woche: AES-GCM-256 Encryption für 27 Tabellen in 9 Phasen ausgerollt, inkl. Zero-Knowledge-Modus mit Recovery-Code. Plus drei neue Module: Dreams (Voice→STT), Cycles (Menstrual-Tracking) und Events (öffentliche RSVP).'
+title: 'Encryption Phasen 1–9: Vault-Ende-zu-Ende + Dreams, Period, Events Module'
+description: 'Größter Tag der Woche: AES-GCM-256 Encryption für 27 Tabellen in 9 Phasen ausgerollt, inkl. Zero-Knowledge-Modus mit Recovery-Code. Plus drei neue Module: Dreams (Voice→STT), Period (Menstrual-Tracking) und Events (öffentliche RSVP).'
 date: 2026-04-07
 author: 'Till Schneider'
 category: 'feature'
@@ -11,7 +11,7 @@ tags:
     'zero-knowledge',
     'recovery-code',
     'dreams',
-    'cycles',
+    'period',
     'events',
     'rsvp',
     'mana-stt',
@@ -39,7 +39,7 @@ workingHours:
 - **At-Rest Encryption** in 9 Phasen ausgerollt: AES-GCM-256 für 27 Tabellen
 - **Zero-Knowledge-Modus** mit User-only Recovery-Code (Mana kann nichts lesen)
 - **Lock-Screen** mit Recovery-Unlock-Modal
-- **Drei neue Module**: Dreams (Traumtagebuch), Cycles (Zyklus-Tracking), Events (öffentliche RSVP)
+- **Drei neue Module**: Dreams (Traumtagebuch), Period (Zyklus-Tracking), Events (öffentliche RSVP)
 - **Data-Layer-Audit Sprints 1–4** abgeschlossen — LWW, retry, atomic cascades, perf, quota, telemetry
 - **mana-stt Voice-Pipeline** für Dreams + Memoro live
 - **Pre-Launch Cleanup** — Schema-Collapse, Ghost-API-Clients raus, RLS auf sync_changes
@@ -100,7 +100,7 @@ Erstes Modul mit aktiver Encryption: **Notes**. Klein, kontrolliert, low-risk. F
 
 ### Phase 5: Rollout auf 6 Module
 
-chat, dreams, memoro, contacts, cycles, finance — alles user-typed Content der eindeutig privat ist.
+chat, dreams, memoro, contacts, period, finance — alles user-typed Content der eindeutig privat ist.
 
 ### Phase 6: Polish + UI
 
@@ -186,7 +186,7 @@ Während die Encryption durch die Phasen lief, entstanden parallel drei neue Mod
 - **Mic-Permission UX** auf macOS — wenn Browser den Prompt nicht zeigt, gibt's einen erklärenden Screen + Force-Retry
 - **Proxy-Toleranz**: octet-stream und invalid form bodies werden vom Voice-Proxy nicht abgewiesen
 
-### Cycles (Menstruelle Zyklus-Tracking)
+### Period (Menstruelle Zyklus-Tracking)
 
 - **Period Auto-Detect**: Start/Ende werden aus Symptomen + Bleeding-Levels abgeleitet
 - **Symptom Management UI**: konfigurierbare Symptome mit Severity
@@ -331,7 +331,7 @@ Vor dem Production-Launch eine größere Aufräumrunde:
 - **`PRE_LAUNCH_CLEANUP.md`** — was wurde entfernt vor Launch und warum
 - **`FILE_BYTES_ENCRYPTION_PLAN.md`** — nächste Encryption-Stufe für Bytes/Bilder
 - **`docs/postmortems/2026-04-07-stt-tunnel-down.md`** — STT-Ausfall Postmortem
-- **`docs/cycles/ROADMAP.md`** — Cycles Feature-Backlog
+- **`docs/period/ROADMAP.md`** — Period Feature-Backlog
 - **`docs/events/PHASE2_ROADMAP.md`** — Events Phase 2 + tech debt
 - GPU Tunnel Setup, STT env wiring docs
 
@@ -344,7 +344,7 @@ Vor dem Production-Launch eine größere Aufräumrunde:
 | Encryption Phasen 1–9 | ~22     | 27 Tabellen, ZK-Modus, Recovery-Code, Lock-Screen, Settings, Tests |
 | Data-Layer Sprints    | ~8      | LWW, retry, cascades, perf, quota, telemetry                       |
 | Dreams Modul          | ~9      | Voice via mana-stt, Symbol-Library, Mic-UX                         |
-| Cycles Modul          | ~12     | Phase-Detection, Symptome, Calendar-View, Widget, i18n             |
+| Period Modul          | ~12     | Phase-Detection, Symptome, Calendar-View, Widget, i18n             |
 | Events Modul          | ~12     | RSVP-Flow, Bring-List, 35 Tests, Playwright, Phase 2               |
 | mana-stt              | ~3      | Voice-Pipeline, Postmortem, GPU-Tunnel                             |
 | Pre-Launch Cleanup    | ~7      | Schema-Collapse, RLS, idempotent startup                           |

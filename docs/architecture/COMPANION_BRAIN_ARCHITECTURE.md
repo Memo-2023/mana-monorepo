@@ -1394,7 +1394,7 @@ Phase 1 (Events) ──────┬──> Phase 2 (Projections)
 | 18 | Chat | 2 | 1 | Batch 4 |
 | 19 | Memoro | 1 | 1 | Batch 4 |
 | 20 | Skilltree | 2 | 2 | Batch 4 |
-| 21 | Cycles | 1 | 1 | Batch 5 |
+| 21 | Period | 1 | 1 | Batch 5 |
 | 22 | Firsts | 1 | 1 | Batch 5 |
 | 23 | Guides | 1 | 1 | Batch 5 |
 | 24 | Inventory | 1 | 1 | Batch 5 |

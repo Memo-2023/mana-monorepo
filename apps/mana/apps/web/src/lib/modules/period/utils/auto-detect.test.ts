@@ -3,12 +3,12 @@ import {
 	detectPeriodEnd,
 	DRY_DAYS_FOR_PERIOD_END,
 	isBleedingFlow,
-	MIN_GAP_FOR_NEW_CYCLE,
-	shouldStartNewCycle,
+	MIN_GAP_FOR_NEW_PERIOD,
+	shouldStartNewPeriod,
 } from './auto-detect';
-import type { Cycle, CycleDayLog, Flow } from '../types';
+import type { Period, PeriodDayLog, Flow } from '../types';
 
-function makeCycle(overrides: Partial<Cycle>): Cycle {
+function makePeriod(overrides: Partial<Period>): Period {
 	return {
 		id: 'c',
 		startDate: '2026-01-01',
@@ -24,11 +24,11 @@ function makeCycle(overrides: Partial<Cycle>): Cycle {
 	};
 }
 
-function makeLog(logDate: string, flow: Flow): CycleDayLog {
+function makeLog(logDate: string, flow: Flow): PeriodDayLog {
 	return {
 		id: `log-${logDate}`,
 		logDate,
-		cycleId: 'c',
+		periodId: 'c',
 		flow,
 		mood: null,
 		energy: null,
@@ -54,76 +54,76 @@ describe('isBleedingFlow', () => {
 	});
 });
 
-describe('shouldStartNewCycle', () => {
+describe('shouldStartNewPeriod', () => {
 	it('returns false for non-bleeding flow', () => {
-		expect(shouldStartNewCycle('2026-04-07', 'none', [])).toBe(false);
-		expect(shouldStartNewCycle('2026-04-07', 'spotting', [])).toBe(false);
+		expect(shouldStartNewPeriod('2026-04-07', 'none', [])).toBe(false);
+		expect(shouldStartNewPeriod('2026-04-07', 'spotting', [])).toBe(false);
 	});
 
-	it('returns true with no existing cycles and bleeding flow', () => {
-		expect(shouldStartNewCycle('2026-04-07', 'medium', [])).toBe(true);
+	it('returns true with no existing periods and bleeding flow', () => {
+		expect(shouldStartNewPeriod('2026-04-07', 'medium', [])).toBe(true);
 	});
 
-	it('returns false when current cycle is still open (no periodEndDate)', () => {
-		const cycles = [makeCycle({ startDate: '2026-04-01' })];
-		// flow during the open period — not a new cycle
-		expect(shouldStartNewCycle('2026-04-03', 'heavy', cycles)).toBe(false);
+	it('returns false when current period is still open (no periodEndDate)', () => {
+		const periods = [makePeriod({ startDate: '2026-04-01' })];
+		// flow during the open period — not a new period
+		expect(shouldStartNewPeriod('2026-04-03', 'heavy', periods)).toBe(false);
 	});
 
 	it('returns false when bleed is too soon after period end', () => {
-		const cycles = [makeCycle({ startDate: '2026-04-01', periodEndDate: '2026-04-05' })];
-		// 9 days after periodEndDate — too soon, probably mid-cycle bleeding
-		expect(shouldStartNewCycle('2026-04-14', 'medium', cycles)).toBe(false);
+		const periods = [makePeriod({ startDate: '2026-04-01', periodEndDate: '2026-04-05' })];
+		// 9 days after periodEndDate — too soon, probably mid-period bleeding
+		expect(shouldStartNewPeriod('2026-04-14', 'medium', periods)).toBe(false);
 	});
 
 	it('returns true when bleed is at least MIN_GAP days after period end', () => {
-		const cycles = [makeCycle({ startDate: '2026-04-01', periodEndDate: '2026-04-05' })];
+		const periods = [makePeriod({ startDate: '2026-04-01', periodEndDate: '2026-04-05' })];
 		const newDate = '2026-04-15'; // 10 days after
-		expect(daysGapForTest(newDate, '2026-04-05')).toBe(MIN_GAP_FOR_NEW_CYCLE);
-		expect(shouldStartNewCycle(newDate, 'medium', cycles)).toBe(true);
+		expect(daysGapForTest(newDate, '2026-04-05')).toBe(MIN_GAP_FOR_NEW_PERIOD);
+		expect(shouldStartNewPeriod(newDate, 'medium', periods)).toBe(true);
 	});
 
-	it('ignores predicted cycles', () => {
-		const cycles = [
-			makeCycle({ id: 'real', startDate: '2026-01-01', periodEndDate: '2026-01-05' }),
-			makeCycle({ id: 'pred', startDate: '2026-04-01', isPredicted: true }),
+	it('ignores predicted periods', () => {
+		const periods = [
+			makePeriod({ id: 'real', startDate: '2026-01-01', periodEndDate: '2026-01-05' }),
+			makePeriod({ id: 'pred', startDate: '2026-04-01', isPredicted: true }),
 		];
-		// 2026-04-15 → with the real cycle far in the past, should start new
-		expect(shouldStartNewCycle('2026-04-15', 'medium', cycles)).toBe(true);
+		// 2026-04-15 → with the real period far in the past, should start new
+		expect(shouldStartNewPeriod('2026-04-15', 'medium', periods)).toBe(true);
 	});
 
-	it('returns false for date before the latest cycle', () => {
-		const cycles = [makeCycle({ startDate: '2026-04-01', periodEndDate: '2026-04-05' })];
+	it('returns false for date before the latest period', () => {
+		const periods = [makePeriod({ startDate: '2026-04-01', periodEndDate: '2026-04-05' })];
 		// Backfilling an old date should never auto-create
-		expect(shouldStartNewCycle('2026-03-10', 'medium', cycles)).toBe(false);
+		expect(shouldStartNewPeriod('2026-03-10', 'medium', periods)).toBe(false);
 	});
 });
 
 describe('detectPeriodEnd', () => {
-	const openCycle = makeCycle({ id: 'c', startDate: '2026-04-01' });
+	const openPeriod = makePeriod({ id: 'c', startDate: '2026-04-01' });
 
 	it('returns null for non-none flow', () => {
-		expect(detectPeriodEnd('2026-04-07', 'light', openCycle, [])).toBeNull();
+		expect(detectPeriodEnd('2026-04-07', 'light', openPeriod, [])).toBeNull();
 	});
 
-	it('returns null without an open cycle', () => {
+	it('returns null without an open period', () => {
 		expect(detectPeriodEnd('2026-04-07', 'none', null, [])).toBeNull();
 	});
 
-	it('returns null when cycle already has periodEndDate', () => {
-		const closed = makeCycle({ id: 'c', startDate: '2026-04-01', periodEndDate: '2026-04-05' });
+	it('returns null when period already has periodEndDate', () => {
+		const closed = makePeriod({ id: 'c', startDate: '2026-04-01', periodEndDate: '2026-04-05' });
 		expect(detectPeriodEnd('2026-04-07', 'none', closed, [])).toBeNull();
 	});
 
-	it('returns null when no bleeding day exists in cycle', () => {
+	it('returns null when no bleeding day exists in period', () => {
 		const logs = [makeLog('2026-04-01', 'none'), makeLog('2026-04-02', 'none')];
-		expect(detectPeriodEnd('2026-04-07', 'none', openCycle, logs)).toBeNull();
+		expect(detectPeriodEnd('2026-04-07', 'none', openPeriod, logs)).toBeNull();
 	});
 
 	it('returns null when not enough dry days have passed', () => {
 		const logs = [makeLog('2026-04-04', 'medium')];
 		// logDate = 2026-04-05 → only 1 day after bleeding
-		expect(detectPeriodEnd('2026-04-05', 'none', openCycle, logs)).toBeNull();
+		expect(detectPeriodEnd('2026-04-05', 'none', openPeriod, logs)).toBeNull();
 	});
 
 	it('returns lastBleedingDay after DRY_DAYS_FOR_PERIOD_END', () => {
@@ -135,7 +135,7 @@ describe('detectPeriodEnd', () => {
 		];
 		// logDate = 2026-04-06 → 2 days after last bleeding (04-04)
 		expect(daysGapForTest('2026-04-06', '2026-04-04')).toBe(DRY_DAYS_FOR_PERIOD_END);
-		expect(detectPeriodEnd('2026-04-06', 'none', openCycle, logs)).toBe('2026-04-04');
+		expect(detectPeriodEnd('2026-04-06', 'none', openPeriod, logs)).toBe('2026-04-04');
 	});
 
 	it('uses the LAST bleeding day, not the first', () => {
@@ -144,7 +144,7 @@ describe('detectPeriodEnd', () => {
 			makeLog('2026-04-02', 'medium'),
 			makeLog('2026-04-03', 'light'),
 		];
-		expect(detectPeriodEnd('2026-04-05', 'none', openCycle, logs)).toBe('2026-04-03');
+		expect(detectPeriodEnd('2026-04-05', 'none', openPeriod, logs)).toBe('2026-04-03');
 	});
 
 	it('ignores logs after the current logDate (chronology safe)', () => {
@@ -155,7 +155,7 @@ describe('detectPeriodEnd', () => {
 			makeLog('2026-04-10', 'medium'), // future log shouldn't affect detection for 04-03
 		];
 		// 2026-04-03 - 2026-04-02 = 1 day → not enough
-		expect(detectPeriodEnd('2026-04-03', 'none', openCycle, logs)).toBeNull();
+		expect(detectPeriodEnd('2026-04-03', 'none', openPeriod, logs)).toBeNull();
 	});
 
 	it('handles spotting as not bleeding (so spotting is not lastBleedingDay)', () => {
@@ -164,7 +164,7 @@ describe('detectPeriodEnd', () => {
 			makeLog('2026-04-02', 'spotting'), // not counted as bleeding
 		];
 		// 2026-04-03 - 2026-04-01 = 2 → trigger, lastBleedingDay = 04-01
-		expect(detectPeriodEnd('2026-04-03', 'none', openCycle, logs)).toBe('2026-04-01');
+		expect(detectPeriodEnd('2026-04-03', 'none', openPeriod, logs)).toBe('2026-04-01');
 	});
 });
 

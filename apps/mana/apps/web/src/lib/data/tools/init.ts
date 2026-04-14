@@ -24,7 +24,7 @@ import { storageTools } from '$lib/modules/storage/tools';
 import { chatTools } from '$lib/modules/chat/tools';
 import { memoroTools } from '$lib/modules/memoro/tools';
 import { skilltreeTools } from '$lib/modules/skilltree/tools';
-import { cyclesTools } from '$lib/modules/cycles/tools';
+import { periodTools } from '$lib/modules/period/tools';
 import { firstsTools } from '$lib/modules/firsts/tools';
 import { guidesTools } from '$lib/modules/guides/tools';
 import { inventoryTools } from '$lib/modules/inventory/tools';
@@ -59,7 +59,7 @@ export function initTools(): void {
 	registerTools(chatTools);
 	registerTools(memoroTools);
 	registerTools(skilltreeTools);
-	registerTools(cyclesTools);
+	registerTools(periodTools);
 	registerTools(firstsTools);
 	registerTools(guidesTools);
 	registerTools(inventoryTools);

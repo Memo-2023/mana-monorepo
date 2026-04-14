@@ -65,6 +65,7 @@ import {
 	Question,
 	ChatCircleDots,
 	CreditCard,
+	SquaresFour,
 } from '@mana/shared-icons';
 
 // ── Apps with entity capabilities ───────────────────────────
@@ -409,12 +410,12 @@ registerApp({
 });
 
 registerApp({
-	id: 'cycles',
-	name: 'Cycles',
+	id: 'period',
+	name: 'Period',
 	color: '#ec4899',
 	icon: GenderFemale,
 	views: {
-		list: { load: () => import('$lib/modules/cycles/ListView.svelte') },
+		list: { load: () => import('$lib/modules/period/ListView.svelte') },
 	},
 	contextMenuActions: [
 		{
@@ -423,18 +424,18 @@ registerApp({
 			icon: Plus,
 			action: () =>
 				window.dispatchEvent(
-					new CustomEvent('mana:quick-action', { detail: { app: 'cycles', action: 'new' } })
+					new CustomEvent('mana:quick-action', { detail: { app: 'period', action: 'new' } })
 				),
 		},
 	],
-	collection: 'cycleDayLogs',
+	collection: 'periodDayLogs',
 	paramKey: 'logId',
 	getDisplayData: (item) => ({
 		title: (item.logDate as string) || 'Tageseintrag',
 		subtitle: (item.flow as string) ?? undefined,
 	}),
 	createItem: async (data) => {
-		const { dayLogsStore } = await import('$lib/modules/cycles/stores/dayLogs.svelte');
+		const { dayLogsStore } = await import('$lib/modules/period/stores/dayLogs.svelte');
 		const log = await dayLogsStore.logDay({
 			logDate: (data.logDate as string) ?? undefined,
 			notes: (data.title as string) ?? null,
@@ -957,12 +958,12 @@ registerApp({
 });
 
 registerApp({
-	id: 'eventstream',
+	id: 'activity',
 	name: 'Events',
 	color: '#6366F1',
 	icon: Pulse,
 	views: {
-		list: { load: () => import('$lib/modules/eventstream/ListView.svelte') },
+		list: { load: () => import('$lib/modules/activity/ListView.svelte') },
 	},
 });
 
@@ -1025,6 +1026,16 @@ registerApp({
 	icon: ShieldCheck,
 	views: {
 		list: { load: () => import('$lib/modules/admin/ListView.svelte') },
+	},
+});
+
+registerApp({
+	id: 'complexity',
+	name: 'Complexity',
+	color: '#0EA5E9',
+	icon: SquaresFour,
+	views: {
+		list: { load: () => import('$lib/modules/complexity/ListView.svelte') },
 	},
 });
 

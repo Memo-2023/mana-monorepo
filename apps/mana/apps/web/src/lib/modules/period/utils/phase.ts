@@ -3,11 +3,11 @@
  */
 
 import {
-	DEFAULT_CYCLE_LENGTH,
-	DEFAULT_LUTEAL_LENGTH,
 	DEFAULT_PERIOD_LENGTH,
-	type Cycle,
-	type CyclePhase,
+	DEFAULT_LUTEAL_LENGTH,
+	DEFAULT_BLEEDING_DAYS,
+	type Period,
+	type PeriodPhase,
 } from '../types';
 
 /** Tage zwischen zwei ISO-Daten (a - b) */
@@ -16,10 +16,10 @@ export function daysBetween(a: string, b: string): number {
 	return Math.round(ms / 86_400_000);
 }
 
-/** Findet den Zyklus, der das gegebene Datum enthält. Cycles müssen nach startDate sortiert sein. */
-export function findCycleForDate(date: string, cycles: Cycle[]): Cycle | null {
-	const sorted = [...cycles].sort((a, b) => a.startDate.localeCompare(b.startDate));
-	let match: Cycle | null = null;
+/** Findet den Zyklus, der das gegebene Datum enthält. Periods müssen nach startDate sortiert sein. */
+export function findPeriodForDate(date: string, periods: Period[]): Period | null {
+	const sorted = [...periods].sort((a, b) => a.startDate.localeCompare(b.startDate));
+	let match: Period | null = null;
 	for (const c of sorted) {
 		if (c.startDate <= date) match = c;
 		else break;
@@ -28,8 +28,8 @@ export function findCycleForDate(date: string, cycles: Cycle[]): Cycle | null {
 }
 
 /** Tag-Nummer innerhalb des Zyklus (Tag 1 = startDate). null wenn date vor dem Zyklus liegt. */
-export function getCycleDayNumber(date: string, cycle: Cycle): number | null {
-	const diff = daysBetween(date, cycle.startDate);
+export function getPeriodDayNumber(date: string, period: Period): number | null {
+	const diff = daysBetween(date, period.startDate);
 	if (diff < 0) return null;
 	return diff + 1;
 }
@@ -39,29 +39,29 @@ export function getCycleDayNumber(date: string, cycle: Cycle): number | null {
  *
  * Heuristik:
  *  - Periode: Tag 1..periodLength
- *  - Eisprung: cycleLength - lutealLength (±1 Tag)
+ *  - Eisprung: periodLength - lutealLength (±1 Tag)
  *  - Vorher = Follikelphase, danach = Lutealphase
  */
 export function derivePhase(
 	date: string,
-	cycles: Cycle[],
-	avgCycleLength = DEFAULT_CYCLE_LENGTH
-): CyclePhase {
-	const cycle = findCycleForDate(date, cycles);
-	if (!cycle) return 'unknown';
+	periods: Period[],
+	avgPeriodLength = DEFAULT_PERIOD_LENGTH
+): PeriodPhase {
+	const period = findPeriodForDate(date, periods);
+	if (!period) return 'unknown';
 
-	const dayNum = getCycleDayNumber(date, cycle);
+	const dayNum = getPeriodDayNumber(date, period);
 	if (dayNum === null) return 'unknown';
 
-	const periodLength =
-		cycle.periodEndDate && cycle.periodEndDate >= cycle.startDate
-			? daysBetween(cycle.periodEndDate, cycle.startDate) + 1
-			: DEFAULT_PERIOD_LENGTH;
+	const bleedingLength =
+		period.periodEndDate && period.periodEndDate >= period.startDate
+			? daysBetween(period.periodEndDate, period.startDate) + 1
+			: DEFAULT_BLEEDING_DAYS;
 
-	const cycleLength = cycle.length ?? avgCycleLength;
-	const ovulationDay = cycleLength - DEFAULT_LUTEAL_LENGTH;
+	const periodLength = period.length ?? avgPeriodLength;
+	const ovulationDay = periodLength - DEFAULT_LUTEAL_LENGTH;
 
-	if (dayNum <= periodLength) return 'menstruation';
+	if (dayNum <= bleedingLength) return 'menstruation';
 	if (Math.abs(dayNum - ovulationDay) <= 1) return 'ovulation';
 	if (dayNum < ovulationDay) return 'follicular';
 	return 'luteal';

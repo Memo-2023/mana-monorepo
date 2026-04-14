@@ -145,7 +145,7 @@
 			"description": "Recent changes across all modules",
 			"empty": "No activity yet"
 		},
-		"cycles": {
+		"period": {
 			"title": "Cycle",
 			"description": "Current phase and countdown to next period",
 			"empty": "No cycle logged yet.",

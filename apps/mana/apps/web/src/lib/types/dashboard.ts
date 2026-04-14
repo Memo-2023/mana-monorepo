@@ -30,7 +30,7 @@ export type WidgetType =
 	| 'plant-watering' // Plants: plants due for watering
 	| 'day-timeline' // TimeBlocks: chronological day timeline
 	| 'activity-feed' // TimeBlocks: recent activity across modules
-	| 'cycles' // Cycles: current phase + days until next period
+	| 'period' // Period: current phase + days until next period
 	| 'news-unread' // News: latest unread curated articles
 	| 'body-stats'; // Body: latest weight + active workout summary
 
@@ -132,7 +132,7 @@ export interface WidgetMeta {
 		| 'times'
 		| 'food'
 		| 'plants'
-		| 'cycles'
+		| 'period'
 		| 'body'
 		| 'mana-auth';
 }
@@ -337,13 +337,13 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
 		allowMultiple: false,
 	},
 	{
-		type: 'cycles',
-		nameKey: 'dashboard.widgets.cycles.title',
-		descriptionKey: 'dashboard.widgets.cycles.description',
+		type: 'period',
+		nameKey: 'dashboard.widgets.period.title',
+		descriptionKey: 'dashboard.widgets.period.description',
 		icon: '🌸',
 		defaultSize: 'small',
 		allowMultiple: false,
-		requiredBackend: 'cycles',
+		requiredBackend: 'period',
 	},
 	{
 		type: 'news-unread',

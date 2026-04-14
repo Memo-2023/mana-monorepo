@@ -55,7 +55,7 @@ describe('WIDGET_REGISTRY', () => {
 			'mana-auth',
 			'food',
 			'plants',
-			'cycles',
+			'period',
 			undefined,
 		];
 		for (const widget of WIDGET_REGISTRY) {

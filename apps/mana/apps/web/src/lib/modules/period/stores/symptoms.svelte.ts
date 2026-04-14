@@ -1,35 +1,35 @@
 /**
- * Symptoms Store — Mutation-Only Service for cycle symptom taxonomy.
+ * Symptoms Store — Mutation-Only Service for period symptom taxonomy.
  */
 
-import { cycleSymptomTable } from '../collections';
-import type { LocalCycleSymptom, SymptomCategory } from '../types';
+import { periodSymptomTable } from '../collections';
+import type { LocalPeriodSymptom, SymptomCategory } from '../types';
 
 export const symptomsStore = {
 	async createSymptom(data: { name: string; category?: SymptomCategory; color?: string | null }) {
-		const newLocal: LocalCycleSymptom = {
+		const newLocal: LocalPeriodSymptom = {
 			id: crypto.randomUUID(),
 			name: data.name.trim(),
 			category: data.category ?? 'physical',
 			color: data.color ?? null,
 			count: 0,
 		};
-		await cycleSymptomTable.add(newLocal);
+		await periodSymptomTable.add(newLocal);
 		return newLocal;
 	},
 
 	async updateSymptom(
 		id: string,
-		data: Partial<Pick<LocalCycleSymptom, 'name' | 'category' | 'color'>>
+		data: Partial<Pick<LocalPeriodSymptom, 'name' | 'category' | 'color'>>
 	) {
-		await cycleSymptomTable.update(id, {
+		await periodSymptomTable.update(id, {
 			...data,
 			updatedAt: new Date().toISOString(),
 		});
 	},
 
 	async deleteSymptom(id: string) {
-		await cycleSymptomTable.update(id, {
+		await periodSymptomTable.update(id, {
 			deletedAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString(),
 		});
@@ -38,10 +38,10 @@ export const symptomsStore = {
 	/** Inkrementiert/dekrementiert die Verwendungszähler für IDs. */
 	async touchSymptoms(ids: string[], delta: number) {
 		for (const id of ids) {
-			const existing = await cycleSymptomTable.get(id);
+			const existing = await periodSymptomTable.get(id);
 			if (!existing) continue;
 			const next = Math.max(0, (existing.count ?? 0) + delta);
-			await cycleSymptomTable.update(id, {
+			await periodSymptomTable.update(id, {
 				count: next,
 				updatedAt: new Date().toISOString(),
 			});

@@ -35,7 +35,7 @@
  *      ✅  color: hsl(var(--color-foreground));
  *      ✅  background: hsl(var(--color-primary) / 0.12);
  *
- *   4. Brand-literal colors (cycles pink, observatory cosmic scenes, the
+ *   4. Brand-literal colors (period pink, observatory cosmic scenes, the
  *      automations/spiral indigo→violet ramp, sport/category palettes, the
  *      photo viewer's near-black backdrop, etc.) deliberately stay as
  *      literal hex/rgba/hsl. They are NOT theme intent — they encode brand

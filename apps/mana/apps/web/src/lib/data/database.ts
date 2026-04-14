@@ -236,10 +236,10 @@ db.version(1).stores({
 	dreamSymbols: 'id, name, count, updatedAt',
 	dreamTags: 'id, dreamId, tagId, [dreamId+tagId]',
 
-	// ─── Cycles (appId: 'cycles') ───
-	cycles: 'id, startDate, endDate, isPredicted, isArchived, updatedAt',
-	cycleDayLogs: 'id, logDate, cycleId, flow, [cycleId+logDate]',
-	cycleSymptoms: 'id, name, category, count, updatedAt',
+	// ─── Period (appId: 'period') ───
+	periods: 'id, startDate, endDate, isPredicted, isArchived, updatedAt',
+	periodDayLogs: 'id, logDate, periodId, flow, [periodId+logDate]',
+	periodSymptoms: 'id, name, category, count, updatedAt',
 
 	// ─── Social Events (appId: 'events') ───
 	// `socialEvents` is named distinctly to avoid colliding with calendar.events.

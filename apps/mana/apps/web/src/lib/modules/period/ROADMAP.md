@@ -1,11 +1,11 @@
-# Cycles Module — Roadmap
+# Periods Module — Roadmap
 
 Ideen für Features, Tests und Refinements, die im aktuellen Sprint nicht gemacht wurden. Sortiert grob nach Aufwand und Impact. Dies ist kein Commitment, sondern ein Ideenspeicher.
 
 ## Was bereits drin ist
 
-- Datenschicht (v7): `cycles`, `cycleDayLogs`, `cycleSymptoms` mit Sync-Registrierung
-- Stores: `cyclesStore`, `dayLogsStore`, `symptomsStore` mit Auto-Close, Upsert, Symptom-Counter
+- Datenschicht (v7): `periods`, `periodDayLogs`, `periodSymptoms` mit Sync-Registrierung
+- Stores: `periodsStore`, `dayLogsStore`, `symptomsStore` mit Auto-Close, Upsert, Symptom-Counter
 - Pure Utils: Phase-Ableitung, Prediction (gleitender Mittelwert), Auto-Start/Auto-End-Detection
 - UI: ListView mit Phase-Karte, Quick-Log (Flow/Mood/Symptome/BBT/Notizen), Kalender-Ansicht, Symptom-Manager, Edit-/Delete-vergangener-Tage-Banner
 - Dashboard-Widget mit Phase + Countdown
@@ -18,14 +18,14 @@ Ideen für Features, Tests und Refinements, die im aktuellen Sprint nicht gemach
 
 - **Keyboard-Shortcuts** in ListView: `1-5` für Flow-Level, `Esc` für "Zurück zu heute", `J/K` für Previous/Next im Log-Verlauf
 - **Date-Picker im Edit-Banner**: `<input type="date">` um direkt zu einem Tag zu springen statt im Kalender suchen zu müssen
-- **Cycle-Notizen-UI**: `cycles.notes` wird gespeichert aber nirgends gerendert. Textarea in der Phase-Karte oder separater Cycle-Detail-View
-- **Funnel-Tracking**: `trackFirstContent('cycles')` beim ersten Log, analog zu anderen Modulen
+- **Period-Notizen-UI**: `periods.notes` wird gespeichert aber nirgends gerendert. Textarea in der Phase-Karte oder separater Period-Detail-View
+- **Funnel-Tracking**: `trackFirstContent('periods')` beim ersten Log, analog zu anderen Modulen
 
 ### Pure-Function-Robustheit
 
 - **Orphaned Symptom-IDs**: Wenn ein Symptom gelöscht wird, bleiben Day-Logs mit toten IDs zurück. Entweder `symptomsStore.deleteSymptom()` entfernt die IDs aus allen Logs, oder die UI filtert `sym?.deletedAt == null` beim Rendern
-- **Manual recalculate button**: `cyclesStore.recalculateCycles()` die alle Zyklen re-validiert (Auto-End auch für Tage nachfeuert, die nicht durch einen `logDay`-Aufruf gingen)
-- **Temperature-Units**: Placeholder in en.json sagt "98.6 °F", gespeichert wird aber als `number` ohne Einheit. Entweder `temperatureUnit: 'C' | 'F'` auf `cycles` oder in `userSettings`
+- **Manual recalculate button**: `periodsStore.recalculatePeriods()` die alle Zyklen re-validiert (Auto-End auch für Tage nachfeuert, die nicht durch einen `logDay`-Aufruf gingen)
+- **Temperature-Units**: Placeholder in en.json sagt "98.6 °F", gespeichert wird aber als `number` ohne Einheit. Entweder `temperatureUnit: 'C' | 'F'` auf `periods` oder in `userSettings`
 
 ### i18n-Details
 
@@ -36,7 +36,7 @@ Ideen für Features, Tests und Refinements, die im aktuellen Sprint nicht gemach
 
 ### BBT-Chart
 
-Liniendiagramm der Basaltemperatur über den aktuellen Zyklus. Daten sind schon da (`cycleDayLogs.temperature`), es fehlt nur ein SVG-Chart-Component.
+Liniendiagramm der Basaltemperatur über den aktuellen Zyklus. Daten sind schon da (`periodDayLogs.temperature`), es fehlt nur ein SVG-Chart-Component.
 
 - Reines SVG, keine Library nötig
 - Markiere Ovulation (erkannter Temperaturanstieg) visuell
@@ -44,7 +44,7 @@ Liniendiagramm der Basaltemperatur über den aktuellen Zyklus. Daten sind schon 
 
 ### History-Seite
 
-`/cycles/history` mit Liste aller Zyklen:
+`/periods/history` mit Liste aller Zyklen:
 
 - Länge pro Zyklus, Durchschnitt, Min/Max
 - Visuelle Bar pro Zyklus (Menstruation rot, Follikular gelb, Ovulation grün, Luteal lila)
@@ -53,19 +53,19 @@ Liniendiagramm der Basaltemperatur über den aktuellen Zyklus. Daten sind schon 
 
 ### Detail-Page pro Tag
 
-`/cycles/log/[date]`:
+`/periods/log/[date]`:
 
 - Vollständiger Editor mit allen Feldern: cervicalMucus-Picker, sexualActivity-Toggle, Energy-Slider
 - Textarea mit mehr Platz für Notizen statt Inline-Input
 - Vergleich mit Vortag / Vorjahr
 
-### Cycle-Notizen-Panel
+### Period-Notizen-Panel
 
-In der Phase-Karte eine ausklappbare Notiz-Sektion pro Zyklus. `cycles.notes` wird aktuell persistiert aber nicht angezeigt.
+In der Phase-Karte eine ausklappbare Notiz-Sektion pro Zyklus. `periods.notes` wird aktuell persistiert aber nicht angezeigt.
 
 ### Pattern-Erkennung (lokal, ohne LLM)
 
-- "Du hast in 4 von 5 Lutealphasen Kopfschmerzen" — reine Aggregation über `cycleDayLogs` + `cycleSymptoms`
+- "Du hast in 4 von 5 Lutealphasen Kopfschmerzen" — reine Aggregation über `periodDayLogs` + `periodSymptoms`
 - "Dein aktueller Zyklus ist {avg + 7} Tage lang — ungewöhnlich lang"
 - "Das fruchtbare Fenster beginnt in 2 Tagen"
 - Eigene Sektion in der ListView unter "Statistik"
@@ -99,13 +99,13 @@ Vollständiger Happy Path über die neu hinzugefügte `e2e/`-Infrastruktur:
 
 Unit-Test mit `fake-indexeddb` der eine alte v6-DB erstellt, die Migration auf v10+ laufen lässt, und prüft:
 
-- `cycles`-Tabellen existieren
+- `periods`-Tabellen existieren
 - Legacy-Daten unverändert
-- `_pendingChanges` korrekt getaggt mit `appId: 'cycles'`
+- `_pendingChanges` korrekt getaggt mit `appId: 'periods'`
 
 ### Guest-Seed-Test
 
-Beim ersten Öffnen als Guest sollten die 10 Default-Symptome angelegt werden. Aktuell ist `CYCLES_GUEST_SEED` exportiert, aber es gibt keinen Test, der prüft dass das Seed-Laden tatsächlich passiert.
+Beim ersten Öffnen als Guest sollten die 10 Default-Symptome angelegt werden. Aktuell ist `PERIODS_GUEST_SEED` exportiert, aber es gibt keinen Test, der prüft dass das Seed-Laden tatsächlich passiert.
 
 ## Langfristig — Produktreife
 
@@ -130,22 +130,22 @@ Beim ersten Öffnen als Guest sollten die 10 Default-Symptome angelegt werden. A
 
 ### Datenschutz-Modus
 
-Cycles ist sensibler als die meisten anderen Module. Optionen:
+Periods ist sensibler als die meisten anderen Module. Optionen:
 
-- **App-Lock**: Extra PIN / Biometrie vor Öffnen von `/cycles`
+- **App-Lock**: Extra PIN / Biometrie vor Öffnen von `/periods`
 - **Versteckter App-Switcher-Eintrag**: Nur über Direkt-URL erreichbar
-- **Lokale Verschlüsselung**: `cycles`-Tabellen mit einem User-Passwort verschlüsseln (würde ein neues Pattern im Repo etablieren, das später auch Memoro/Dreams nutzen könnten)
+- **Lokale Verschlüsselung**: `periods`-Tabellen mit einem User-Passwort verschlüsseln (würde ein neues Pattern im Repo etablieren, das später auch Memoro/Dreams nutzen könnten)
 - **Field-level Sync-Control**: Manche Felder (sexualActivity, detaillierte Notizen) nur lokal halten, andere syncen. Bräuchte Erweiterung von `SYNC_APP_MAP` um Pro-Feld-Regeln
 
 ### Mobile-App
 
-Cycles ist ein klassischer Mobile-First-Use-Case. Ein Expo-Port kann die unified IndexedDB nicht nutzen, müsste die Sync-Brücke als primäre Datenquelle verwenden. Das wäre ein größeres Projekt, lohnt sich aber nach Produkt-Validierung.
+Periods ist ein klassischer Mobile-First-Use-Case. Ein Expo-Port kann die unified IndexedDB nicht nutzen, müsste die Sync-Brücke als primäre Datenquelle verwenden. Das wäre ein größeres Projekt, lohnt sich aber nach Produkt-Validierung.
 
 ## Monitoring / Ops
 
 ### ManaScore-Entry
 
-Modul in `apps/mana/apps/landing/src/content/manascore/cycles.md` eintragen. Initiale Scores (geschätzt):
+Modul in `apps/mana/apps/landing/src/content/manascore/periods.md` eintragen. Initiale Scores (geschätzt):
 
 | Kategorie     | Score | Begründung                                                          |
 | ------------- | ----- | ------------------------------------------------------------------- |
@@ -162,7 +162,7 @@ Modul in `apps/mana/apps/landing/src/content/manascore/cycles.md` eintragen. Ini
 
 ### Ecosystem Health
 
-Nach nächstem `ecosystem-audit.mjs`-Lauf sollte Cycles positiv zählen für:
+Nach nächstem `ecosystem-audit.mjs`-Lauf sollte Periods positiv zählen für:
 
 - Shared Packages (@mana/shared-ui, @mana/local-store, svelte-i18n)
 - i18n-Coverage (5 Locales, alle voll übersetzt, Parity-Test)
@@ -174,7 +174,7 @@ Nach nächstem `ecosystem-audit.mjs`-Lauf sollte Cycles positiv zählen für:
 
 - **FLOW_LABELS / MOOD_LABELS / PHASE_LABELS / CERVICAL_MUCUS_LABELS** in `types.ts` sind seit der i18n-Umstellung unbenutzt — entweder löschen oder als explizite Fallbacks dokumentieren
 - **Module CLAUDE.md** im Ordner anlegen, das die Architektur kurz beschreibt (wie andere Module es haben)
-- **JSDoc-Comments** auf public Store-Methoden erweitern, besonders auf `cyclesStore.createCycle` (Auto-Close-Verhalten ist nicht offensichtlich)
+- **JSDoc-Comments** auf public Store-Methoden erweitern, besonders auf `periodsStore.createPeriod` (Auto-Close-Verhalten ist nicht offensichtlich)
 
 ## Nicht-Ziele (bewusst ausgeklammert)
 

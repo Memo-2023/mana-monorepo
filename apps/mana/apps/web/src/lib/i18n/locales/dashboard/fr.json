@@ -140,7 +140,7 @@
 			"description": "Chronologie de toutes les activités de la journée",
 			"empty": "Rien encore aujourd'hui"
 		},
-		"cycles": {
+		"period": {
 			"title": "Cycle",
 			"description": "Phase actuelle et compte à rebours jusqu'aux prochaines règles",
 			"empty": "Aucun cycle enregistré.",

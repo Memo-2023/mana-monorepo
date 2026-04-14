@@ -1,8 +1,8 @@
 import type { ModuleTool } from '$lib/data/tools/types';
-export const cyclesTools: ModuleTool[] = [
+export const periodTools: ModuleTool[] = [
 	{
-		name: 'log_cycle_day',
-		module: 'cycles',
+		name: 'log_period_day',
+		module: 'period',
 		description: 'Loggt einen Zyklus-Tag (Menstruationszyklus)',
 		parameters: [
 			{
@@ -14,8 +14,8 @@ export const cyclesTools: ModuleTool[] = [
 			},
 		],
 		async execute(params) {
-			const { cyclesStore } = await import('./stores/cycles.svelte');
-			const entry = await cyclesStore.createCycle({});
+			const { periodsStore } = await import('./stores/periods.svelte');
+			const entry = await periodsStore.createPeriod({});
 			return { success: true, data: entry, message: 'Zyklus-Tag geloggt' };
 		},
 	},

@@ -1,39 +1,44 @@
 /**
- * Cycles module — barrel exports.
+ * Periods module — barrel exports.
  */
 
 // ─── Stores ──────────────────────────────────────────────
-export { cyclesStore } from './stores/cycles.svelte';
+export { periodsStore } from './stores/periods.svelte';
 export { dayLogsStore } from './stores/dayLogs.svelte';
 export { symptomsStore } from './stores/symptoms.svelte';
 
 // ─── Queries ─────────────────────────────────────────────
 export {
-	useAllCycles,
-	useCurrentCycle,
+	useAllPeriods,
+	useCurrentPeriod,
 	useAllDayLogs,
 	useDayLog,
 	useAllSymptoms,
-	toCycle,
-	toCycleDayLog,
-	toCycleSymptom,
+	toPeriod,
+	toPeriodDayLog,
+	toPeriodSymptom,
 	groupLogsByMonth,
 	formatLogDate,
 } from './queries';
 export type { RelativeDateLabels } from './queries';
 
 // ─── Utils ───────────────────────────────────────────────
-export { derivePhase, findCycleForDate, getCycleDayNumber, daysBetween } from './utils/phase';
+export { derivePhase, findPeriodForDate, getPeriodDayNumber, daysBetween } from './utils/phase';
 export {
-	averageCycleLength,
+	averagePeriodLength,
 	predictNextPeriodStart,
 	daysUntilNextPeriod,
 	predictFertileWindow,
-	computeCycleStats,
+	computePeriodStats,
 } from './utils/prediction';
 
 // ─── Collections ─────────────────────────────────────────
-export { cycleTable, cycleDayLogTable, cycleSymptomTable, CYCLES_GUEST_SEED } from './collections';
+export {
+	periodTable,
+	periodDayLogTable,
+	periodSymptomTable,
+	PERIODS_GUEST_SEED,
+} from './collections';
 
 // ─── Types & Constants ───────────────────────────────────
 export {
@@ -44,20 +49,20 @@ export {
 	PHASE_COLORS,
 	PHASE_LABELS,
 	CERVICAL_MUCUS_LABELS,
-	DEFAULT_CYCLE_LENGTH,
 	DEFAULT_PERIOD_LENGTH,
+	DEFAULT_BLEEDING_DAYS,
 	DEFAULT_LUTEAL_LENGTH,
 } from './types';
 export type {
-	LocalCycle,
-	LocalCycleDayLog,
-	LocalCycleSymptom,
-	Cycle,
-	CycleDayLog,
-	CycleSymptom,
+	LocalPeriod,
+	LocalPeriodDayLog,
+	LocalPeriodSymptom,
+	Period,
+	PeriodDayLog,
+	PeriodSymptom,
 	Flow,
 	Mood,
 	CervicalMucus,
 	SymptomCategory,
-	CyclePhase,
+	PeriodPhase,
 } from './types';

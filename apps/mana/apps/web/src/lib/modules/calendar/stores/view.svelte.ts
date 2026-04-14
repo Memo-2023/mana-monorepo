@@ -35,7 +35,7 @@ let visibleBlockTypes = $state<Set<TimeBlockType>>(
 		'watering',
 		'sleep',
 		'practice',
-		'cycle',
+		'period',
 		'guide',
 		'visit',
 		'study',

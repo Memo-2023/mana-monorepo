@@ -1,5 +1,5 @@
 /**
- * Cycles module types — Menstruationszyklus-Tracking.
+ * Periods module types — Menstruationszyklus-Tracking.
  */
 
 import type { BaseRecord } from '@mana/local-store';
@@ -8,11 +8,11 @@ export type Flow = 'none' | 'spotting' | 'light' | 'medium' | 'heavy';
 export type Mood = 'great' | 'good' | 'neutral' | 'low' | 'bad';
 export type CervicalMucus = 'dry' | 'sticky' | 'creamy' | 'watery' | 'eggwhite';
 export type SymptomCategory = 'physical' | 'emotional' | 'other';
-export type CyclePhase = 'menstruation' | 'follicular' | 'ovulation' | 'luteal' | 'unknown';
+export type PeriodPhase = 'menstruation' | 'follicular' | 'ovulation' | 'luteal' | 'unknown';
 
 // ─── Local Record Types (Dexie) ───────────────────────────
 
-export interface LocalCycle extends BaseRecord {
+export interface LocalPeriod extends BaseRecord {
 	startDate: string; // ISO YYYY-MM-DD — erster Tag der Periode
 	periodEndDate: string | null; // letzter Tag der Blutung
 	endDate: string | null; // Tag vor dem nächsten Zyklusstart (berechnet)
@@ -23,20 +23,20 @@ export interface LocalCycle extends BaseRecord {
 	timeBlockId?: string | null; // link to timeBlocks table (menstruation phase)
 }
 
-export interface LocalCycleDayLog extends BaseRecord {
+export interface LocalPeriodDayLog extends BaseRecord {
 	logDate: string; // ISO YYYY-MM-DD
-	cycleId: string | null;
+	periodId: string | null;
 	flow: Flow;
 	mood: Mood | null;
 	energy: number | null; // 1..5
 	temperature: number | null; // °C, BBT
 	cervicalMucus: CervicalMucus | null;
-	symptoms: string[]; // cycleSymptom.id refs
+	symptoms: string[]; // periodSymptom.id refs
 	sexualActivity: boolean | null;
 	notes: string | null;
 }
 
-export interface LocalCycleSymptom extends BaseRecord {
+export interface LocalPeriodSymptom extends BaseRecord {
 	name: string;
 	category: SymptomCategory;
 	color: string | null;
@@ -45,7 +45,7 @@ export interface LocalCycleSymptom extends BaseRecord {
 
 // ─── Domain Types ─────────────────────────────────────────
 
-export interface Cycle {
+export interface Period {
 	id: string;
 	startDate: string;
 	periodEndDate: string | null;
@@ -58,10 +58,10 @@ export interface Cycle {
 	updatedAt: string;
 }
 
-export interface CycleDayLog {
+export interface PeriodDayLog {
 	id: string;
 	logDate: string;
-	cycleId: string | null;
+	periodId: string | null;
 	flow: Flow;
 	mood: Mood | null;
 	energy: number | null;
@@ -74,7 +74,7 @@ export interface CycleDayLog {
 	updatedAt: string;
 }
 
-export interface CycleSymptom {
+export interface PeriodSymptom {
 	id: string;
 	name: string;
 	category: SymptomCategory;
@@ -118,7 +118,7 @@ export const MOOD_COLORS: Record<Mood, string> = {
 	bad: '#ef4444',
 };
 
-export const PHASE_LABELS: Record<CyclePhase, string> = {
+export const PHASE_LABELS: Record<PeriodPhase, string> = {
 	menstruation: 'Menstruation',
 	follicular: 'Follikelphase',
 	ovulation: 'Eisprung',
@@ -126,7 +126,7 @@ export const PHASE_LABELS: Record<CyclePhase, string> = {
 	unknown: 'Unbekannt',
 };
 
-export const PHASE_COLORS: Record<CyclePhase, string> = {
+export const PHASE_COLORS: Record<PeriodPhase, string> = {
 	menstruation: '#e11d48',
 	follicular: '#f59e0b',
 	ovulation: '#22c55e',
@@ -142,6 +142,6 @@ export const CERVICAL_MUCUS_LABELS: Record<CervicalMucus, string> = {
 	eggwhite: 'Eiweiß',
 };
 
-export const DEFAULT_CYCLE_LENGTH = 28;
-export const DEFAULT_PERIOD_LENGTH = 5;
+export const DEFAULT_PERIOD_LENGTH = 28;
+export const DEFAULT_BLEEDING_DAYS = 5;
 export const DEFAULT_LUTEAL_LENGTH = 14;

@@ -1,24 +1,24 @@
 <!--
-  Cycle Calendar — Month grid colored by phase, with flow markers.
+  Period Calendar — Month grid colored by phase, with flow markers.
 
   Click a day to switch the editing target. Navigate prev/next month
   with arrow buttons. Week starts on Monday (DE convention).
 -->
 <script lang="ts">
 	import { _, locale } from 'svelte-i18n';
-	import type { Cycle, CycleDayLog, CyclePhase, Flow } from '../types';
+	import type { Period, PeriodDayLog, PeriodPhase, Flow } from '../types';
 	import { FLOW_COLORS, PHASE_COLORS } from '../types';
 	import { derivePhase } from '../utils/phase';
 
 	interface Props {
-		cycles: Cycle[];
-		logs: CycleDayLog[];
+		periods: Period[];
+		logs: PeriodDayLog[];
 		editingDate: string;
 		todayIso: string;
 		onSelectDay: (iso: string) => void;
 	}
 
-	const { cycles, logs, editingDate, todayIso, onSelectDay }: Props = $props();
+	const { periods, logs, editingDate, todayIso, onSelectDay }: Props = $props();
 
 	// ─ Month state ──────────────────────────────────────────
 	// svelte-ignore state_referenced_locally
@@ -28,7 +28,7 @@
 
 	// ─ Logs indexed by date for O(1) lookup ─
 	const logByDate = $derived.by(() => {
-		const map = new Map<string, CycleDayLog>();
+		const map = new Map<string, PeriodDayLog>();
 		for (const log of logs) {
 			map.set(log.logDate, log);
 		}
@@ -40,7 +40,7 @@
 		iso: string;
 		dayOfMonth: number;
 		inCurrentMonth: boolean;
-		phase: CyclePhase;
+		phase: PeriodPhase;
 		flow: Flow | null;
 		isToday: boolean;
 		isEditing: boolean;
@@ -73,7 +73,7 @@
 				iso,
 				dayOfMonth: day,
 				inCurrentMonth: m === viewMonth,
-				phase: derivePhase(iso, cycles),
+				phase: derivePhase(iso, periods),
 				flow: log && log.flow !== 'none' ? log.flow : null,
 				isToday: iso === todayIso,
 				isEditing: iso === editingDate,
@@ -138,14 +138,14 @@
 			class="cal-nav"
 			type="button"
 			onclick={prevMonth}
-			aria-label={$_('cycles.calendar.prev')}>‹</button
+			aria-label={$_('period.calendar.prev')}>‹</button
 		>
 		<button class="cal-title" type="button" onclick={goToToday}>{monthLabel}</button>
 		<button
 			class="cal-nav"
 			type="button"
 			onclick={nextMonth}
-			aria-label={$_('cycles.calendar.next')}>›</button
+			aria-label={$_('period.calendar.next')}>›</button
 		>
 	</div>
 

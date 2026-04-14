@@ -247,7 +247,7 @@ scrape_configs:
           - https://mana.how/journal
           - https://mana.how/dreams
           - https://mana.how/firsts
-          - https://mana.how/cycles
+          - https://mana.how/period
           - https://mana.how/events
           - https://mana.how/finance
           - https://mana.how/places

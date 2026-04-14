@@ -79,7 +79,7 @@ import { habitsModuleConfig } from '$lib/modules/habits/module.config';
 import { notesModuleConfig } from '$lib/modules/notes/module.config';
 import { journalModuleConfig } from '$lib/modules/journal/module.config';
 import { dreamsModuleConfig } from '$lib/modules/dreams/module.config';
-import { cyclesModuleConfig } from '$lib/modules/cycles/module.config';
+import { periodModuleConfig } from '$lib/modules/period/module.config';
 import { eventsModuleConfig } from '$lib/modules/events/module.config';
 import { financeModuleConfig } from '$lib/modules/finance/module.config';
 import { placesModuleConfig } from '$lib/modules/places/module.config';
@@ -129,7 +129,7 @@ export const MODULE_CONFIGS: readonly ModuleConfig[] = [
 	notesModuleConfig,
 	journalModuleConfig,
 	dreamsModuleConfig,
-	cyclesModuleConfig,
+	periodModuleConfig,
 	eventsModuleConfig,
 	financeModuleConfig,
 	placesModuleConfig,

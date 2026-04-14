@@ -140,7 +140,7 @@
 			"description": "Cronologia di tutte le attività della giornata",
 			"empty": "Niente ancora oggi"
 		},
-		"cycles": {
+		"period": {
 			"title": "Ciclo",
 			"description": "Fase attuale e conto alla rovescia per il prossimo ciclo",
 			"empty": "Nessun ciclo registrato.",

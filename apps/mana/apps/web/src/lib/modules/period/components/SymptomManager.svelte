@@ -1,11 +1,11 @@
 <!--
-  Symptom Manager — Modal to create, rename, recolor, and delete cycle symptoms.
+  Symptom Manager — Modal to create, rename, recolor, and delete period symptoms.
 -->
 <script lang="ts">
 	import { _ } from 'svelte-i18n';
 	import { useAllSymptoms } from '../queries';
 	import { symptomsStore } from '../stores/symptoms.svelte';
-	import type { CycleSymptom, SymptomCategory } from '../types';
+	import type { PeriodSymptom, SymptomCategory } from '../types';
 	import { Modal } from '@mana/shared-ui';
 
 	interface Props {
@@ -35,7 +35,7 @@
 		newCategory = 'physical';
 	}
 
-	function startEdit(sym: CycleSymptom) {
+	function startEdit(sym: PeriodSymptom) {
 		editingId = sym.id;
 		editName = sym.name;
 		editCategory = sym.category;
@@ -56,38 +56,38 @@
 		editingId = null;
 	}
 
-	async function handleDelete(sym: CycleSymptom) {
+	async function handleDelete(sym: PeriodSymptom) {
 		const ok = confirm(
-			$_('cycles.confirm.deleteSymptom', { values: { name: sym.name } }) || `"${sym.name}" löschen?`
+			$_('period.confirm.deleteSymptom', { values: { name: sym.name } }) || `"${sym.name}" löschen?`
 		);
 		if (!ok) return;
 		await symptomsStore.deleteSymptom(sym.id);
 	}
 </script>
 
-<Modal {visible} {onClose} title={$_('cycles.symptomManager.title')} maxWidth="md">
+<Modal {visible} {onClose} title={$_('period.symptomManager.title')} maxWidth="md">
 	<div class="sm-content">
 		<!-- Create form -->
 		<form class="sm-create" onsubmit={handleCreate}>
 			<input
 				class="sm-input"
 				type="text"
-				placeholder={$_('cycles.symptomManager.newNamePlaceholder')}
+				placeholder={$_('period.symptomManager.newNamePlaceholder')}
 				bind:value={newName}
 			/>
 			<select class="sm-select" bind:value={newCategory}>
 				{#each CATEGORIES as cat}
-					<option value={cat}>{$_(`cycles.symptomCategory.${cat}`)}</option>
+					<option value={cat}>{$_(`period.symptomCategory.${cat}`)}</option>
 				{/each}
 			</select>
 			<button class="sm-add" type="submit" disabled={!newName.trim()}>
-				{$_('cycles.symptomManager.add')}
+				{$_('period.symptomManager.add')}
 			</button>
 		</form>
 
 		<!-- Symptom list -->
 		{#if symptoms.length === 0}
-			<p class="sm-empty">{$_('cycles.symptomManager.empty')}</p>
+			<p class="sm-empty">{$_('period.symptomManager.empty')}</p>
 		{:else}
 			<ul class="sm-list">
 				{#each symptoms as sym (sym.id)}
@@ -101,15 +101,15 @@
 							/>
 							<select class="sm-select" bind:value={editCategory}>
 								{#each CATEGORIES as cat}
-									<option value={cat}>{$_(`cycles.symptomCategory.${cat}`)}</option>
+									<option value={cat}>{$_(`period.symptomCategory.${cat}`)}</option>
 								{/each}
 							</select>
 							<div class="sm-actions">
 								<button class="sm-btn primary" type="button" onclick={saveEdit}>
-									{$_('cycles.symptomManager.save')}
+									{$_('period.symptomManager.save')}
 								</button>
 								<button class="sm-btn" type="button" onclick={cancelEdit}>
-									{$_('cycles.symptomManager.cancel')}
+									{$_('period.symptomManager.cancel')}
 								</button>
 							</div>
 						{:else}
@@ -120,7 +120,7 @@
 							<div class="sm-info">
 								<span class="sm-name">{sym.name}</span>
 								<span class="sm-cat">
-									{$_(`cycles.symptomCategory.${sym.category}`)}
+									{$_(`period.symptomCategory.${sym.category}`)}
 									{#if sym.count > 0}
 										· {sym.count}
 									{/if}
@@ -128,10 +128,10 @@
 							</div>
 							<div class="sm-actions">
 								<button class="sm-btn" type="button" onclick={() => startEdit(sym)}>
-									{$_('cycles.symptomManager.edit')}
+									{$_('period.symptomManager.edit')}
 								</button>
 								<button class="sm-btn danger" type="button" onclick={() => handleDelete(sym)}>
-									{$_('cycles.symptomManager.delete')}
+									{$_('period.symptomManager.delete')}
 								</button>
 							</div>
 						{/if}

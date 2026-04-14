@@ -1,9 +1,9 @@
 <script lang="ts">
-	import ListView from '$lib/modules/cycles/ListView.svelte';
+	import ListView from '$lib/modules/period/ListView.svelte';
 </script>
 
 <svelte:head>
-	<title>Cycles - Mana</title>
+	<title>Period - Mana</title>
 </svelte:head>
 
 <ListView navigate={() => {}} goBack={() => history.back()} params={{}} />

@@ -1,22 +1,22 @@
 /**
- * Reactive Queries & Pure Helpers for Cycles module.
+ * Reactive Queries & Pure Helpers for Periods module.
  */
 
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
 import { decryptRecord, decryptRecords } from '$lib/data/crypto';
 import type {
-	Cycle,
-	CycleDayLog,
-	CycleSymptom,
-	LocalCycle,
-	LocalCycleDayLog,
-	LocalCycleSymptom,
+	Period,
+	PeriodDayLog,
+	PeriodSymptom,
+	LocalPeriod,
+	LocalPeriodDayLog,
+	LocalPeriodSymptom,
 } from './types';
 
 // ─── Type Converters ───────────────────────────────────────
 
-export function toCycle(local: LocalCycle): Cycle {
+export function toPeriod(local: LocalPeriod): Period {
 	return {
 		id: local.id,
 		startDate: local.startDate,
@@ -31,11 +31,11 @@ export function toCycle(local: LocalCycle): Cycle {
 	};
 }
 
-export function toCycleDayLog(local: LocalCycleDayLog): CycleDayLog {
+export function toPeriodDayLog(local: LocalPeriodDayLog): PeriodDayLog {
 	return {
 		id: local.id,
 		logDate: local.logDate,
-		cycleId: local.cycleId,
+		periodId: local.periodId,
 		flow: local.flow,
 		mood: local.mood,
 		energy: local.energy,
@@ -49,7 +49,7 @@ export function toCycleDayLog(local: LocalCycleDayLog): CycleDayLog {
 	};
 }
 
-export function toCycleSymptom(local: LocalCycleSymptom): CycleSymptom {
+export function toPeriodSymptom(local: LocalPeriodSymptom): PeriodSymptom {
 	return {
 		id: local.id,
 		name: local.name,
@@ -63,65 +63,65 @@ export function toCycleSymptom(local: LocalCycleSymptom): CycleSymptom {
 
 // ─── Live Queries ──────────────────────────────────────────
 
-export function useAllCycles() {
+export function useAllPeriods() {
 	return useLiveQueryWithDefault(async () => {
-		const visible = (await db.table<LocalCycle>('cycles').toArray()).filter(
+		const visible = (await db.table<LocalPeriod>('periods').toArray()).filter(
 			(c) => !c.deletedAt && !c.isArchived
 		);
-		const decrypted = await decryptRecords('cycles', visible);
-		return decrypted.map(toCycle).sort((a, b) => b.startDate.localeCompare(a.startDate));
-	}, [] as Cycle[]);
+		const decrypted = await decryptRecords('periods', visible);
+		return decrypted.map(toPeriod).sort((a, b) => b.startDate.localeCompare(a.startDate));
+	}, [] as Period[]);
 }
 
-export function useCurrentCycle() {
+export function useCurrentPeriod() {
 	return useLiveQueryWithDefault(
 		async () => {
-			const locals = await db.table<LocalCycle>('cycles').toArray();
+			const locals = await db.table<LocalPeriod>('periods').toArray();
 			const real = locals.filter((c) => !c.deletedAt && !c.isArchived && !c.isPredicted);
 			if (real.length === 0) return null;
 			const latest = real.sort((a, b) => b.startDate.localeCompare(a.startDate))[0];
-			const decrypted = await decryptRecord('cycles', { ...latest });
-			return toCycle(decrypted);
+			const decrypted = await decryptRecord('periods', { ...latest });
+			return toPeriod(decrypted);
 		},
-		null as Cycle | null
+		null as Period | null
 	);
 }
 
 export function useAllDayLogs() {
 	return useLiveQueryWithDefault(async () => {
-		const visible = (await db.table<LocalCycleDayLog>('cycleDayLogs').toArray()).filter(
+		const visible = (await db.table<LocalPeriodDayLog>('periodDayLogs').toArray()).filter(
 			(l) => !l.deletedAt
 		);
-		const decrypted = await decryptRecords('cycleDayLogs', visible);
-		return decrypted.map(toCycleDayLog).sort((a, b) => b.logDate.localeCompare(a.logDate));
-	}, [] as CycleDayLog[]);
+		const decrypted = await decryptRecords('periodDayLogs', visible);
+		return decrypted.map(toPeriodDayLog).sort((a, b) => b.logDate.localeCompare(a.logDate));
+	}, [] as PeriodDayLog[]);
 }
 
 export function useDayLog(date: string) {
 	return useLiveQueryWithDefault(
 		async () => {
 			const locals = await db
-				.table<LocalCycleDayLog>('cycleDayLogs')
+				.table<LocalPeriodDayLog>('periodDayLogs')
 				.where('logDate')
 				.equals(date)
 				.toArray();
 			const active = locals.find((l) => !l.deletedAt);
 			if (!active) return null;
-			const decrypted = await decryptRecord('cycleDayLogs', { ...active });
-			return toCycleDayLog(decrypted);
+			const decrypted = await decryptRecord('periodDayLogs', { ...active });
+			return toPeriodDayLog(decrypted);
 		},
-		null as CycleDayLog | null
+		null as PeriodDayLog | null
 	);
 }
 
 export function useAllSymptoms() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalCycleSymptom>('cycleSymptoms').toArray();
+		const locals = await db.table<LocalPeriodSymptom>('periodSymptoms').toArray();
 		return locals
 			.filter((s) => !s.deletedAt)
-			.map(toCycleSymptom)
+			.map(toPeriodSymptom)
 			.sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
-	}, [] as CycleSymptom[]);
+	}, [] as PeriodSymptom[]);
 }
 
 // ─── Pure Helpers ──────────────────────────────────────────
@@ -136,10 +136,10 @@ export interface RelativeDateLabels {
 
 /** Group day logs by localized month label. */
 export function groupLogsByMonth(
-	logs: CycleDayLog[],
+	logs: PeriodDayLog[],
 	dateLocale: string = 'de-DE'
-): Array<{ label: string; logs: CycleDayLog[] }> {
-	const groups = new Map<string, CycleDayLog[]>();
+): Array<{ label: string; logs: PeriodDayLog[] }> {
+	const groups = new Map<string, PeriodDayLog[]>();
 	for (const l of logs) {
 		const date = new Date(l.logDate);
 		const label = date.toLocaleDateString(dateLocale, { month: 'long', year: 'numeric' });

@@ -9,7 +9,7 @@
  *    periodEndDate auf den letzten Bleeding-Tag.
  */
 
-import type { Cycle, CycleDayLog, Flow } from '../types';
+import type { Period, PeriodDayLog, Flow } from '../types';
 import { daysBetween } from './phase';
 
 /** Welche Flow-Werte zählen als "Blutung" (= Periode)? */
@@ -18,7 +18,7 @@ export function isBleedingFlow(flow: Flow): boolean {
 }
 
 /** Mindestabstand (Tage) zwischen Ende einer Periode und Start eines neuen Zyklus. */
-export const MIN_GAP_FOR_NEW_CYCLE = 10;
+export const MIN_GAP_FOR_NEW_PERIOD = 10;
 /** Wieviele zusammenhängende trockene Tage nach Bleeding für Period-End-Detection. */
 export const DRY_DAYS_FOR_PERIOD_END = 2;
 
@@ -28,14 +28,14 @@ export const DRY_DAYS_FOR_PERIOD_END = 2;
  * Ja, wenn:
  *  - flow ist eine echte Blutung (nicht none/spotting), UND
  *  - es gibt keinen Zyklus, ODER der letzte Zyklus hat eine periodEndDate UND
- *    logDate liegt mindestens MIN_GAP_FOR_NEW_CYCLE Tage danach.
+ *    logDate liegt mindestens MIN_GAP_FOR_NEW_PERIOD Tage danach.
  *
  * Verhindert false positives für Tage innerhalb eines bestehenden Zyklus.
  */
-export function shouldStartNewCycle(logDate: string, flow: Flow, cycles: Cycle[]): boolean {
+export function shouldStartNewPeriod(logDate: string, flow: Flow, periods: Period[]): boolean {
 	if (!isBleedingFlow(flow)) return false;
 
-	const real = cycles.filter((c) => !c.isPredicted && !c.isArchived);
+	const real = periods.filter((c) => !c.isPredicted && !c.isArchived);
 	if (real.length === 0) return true;
 
 	const latest = [...real].sort((a, b) => b.startDate.localeCompare(a.startDate))[0];
@@ -43,11 +43,11 @@ export function shouldStartNewCycle(logDate: string, flow: Flow, cycles: Cycle[]
 	// logDate vor dem letzten Zyklus → wir bauen keinen "vergangenen" Zyklus auto
 	if (logDate < latest.startDate) return false;
 
-	// Aktueller Zyklus läuft noch — Blutung gehört dazu (Mid-Cycle-Spotting o.ä.)
+	// Aktueller Zyklus läuft noch — Blutung gehört dazu (Mid-Period-Spotting o.ä.)
 	if (!latest.periodEndDate) return false;
 
 	// Aktueller Zyklus ist abgeschlossen → wenn genug Abstand, ist das eine neue Periode
-	return daysBetween(logDate, latest.periodEndDate) >= MIN_GAP_FOR_NEW_CYCLE;
+	return daysBetween(logDate, latest.periodEndDate) >= MIN_GAP_FOR_NEW_PERIOD;
 }
 
 /**
@@ -65,14 +65,14 @@ export function shouldStartNewCycle(logDate: string, flow: Flow, cycles: Cycle[]
 export function detectPeriodEnd(
 	logDate: string,
 	flow: Flow,
-	openCycle: Cycle | null,
-	logsInCycle: CycleDayLog[]
+	openPeriod: Period | null,
+	logsInPeriod: PeriodDayLog[]
 ): string | null {
 	if (flow !== 'none') return null;
-	if (!openCycle || openCycle.periodEndDate) return null;
+	if (!openPeriod || openPeriod.periodEndDate) return null;
 
 	// Tage des Zyklus nach Datum sortieren, alle bis einschließlich logDate
-	const sorted = [...logsInCycle]
+	const sorted = [...logsInPeriod]
 		.filter((l) => l.logDate <= logDate)
 		.sort((a, b) => a.logDate.localeCompare(b.logDate));
 
