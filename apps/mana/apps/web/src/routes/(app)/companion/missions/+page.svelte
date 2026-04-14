@@ -251,6 +251,13 @@
 				<header class="detail-header">
 					<h2>{selected.title}</h2>
 					<div class="detail-actions">
+						<a
+							href="/companion/workbench?mission={selected.id}"
+							class="workbench-link"
+							title="Aktivität dieser Mission im Workbench"
+						>
+							Workbench →
+						</a>
 						<button type="button" onclick={() => handleRunNow(selected)} disabled={runningNow}>
 							<Play size={14} />
 							<span>{runningNow ? 'Läuft…' : 'Jetzt ausführen'}</span>
@@ -576,6 +583,19 @@
 		display: flex;
 		gap: 0.375rem;
 		flex-wrap: wrap;
+		align-items: center;
+	}
+	.workbench-link {
+		padding: 0.375rem 0.625rem;
+		border: 1px solid var(--color-border, #ddd);
+		border-radius: 0.375rem;
+		text-decoration: none;
+		font-size: 0.8125rem;
+		color: var(--color-muted, #666);
+	}
+	.workbench-link:hover {
+		color: var(--color-primary, #6b5bff);
+		border-color: color-mix(in oklab, var(--color-primary, #6b5bff) 45%, transparent);
 	}
 	.detail-actions button {
 		display: inline-flex;

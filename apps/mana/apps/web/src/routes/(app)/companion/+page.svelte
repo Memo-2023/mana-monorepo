@@ -91,6 +91,7 @@
 
 		<nav class="sidebar-footer">
 			<a href="/companion/missions">AI Missions →</a>
+			<a href="/companion/workbench">Workbench →</a>
 			<a href="/companion/rituals">Rituale →</a>
 		</nav>
 	</div>
