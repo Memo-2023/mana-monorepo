@@ -11,6 +11,8 @@
 		label?: string;
 		/** Hide label (label is still used for aria-label/title). */
 		iconOnly?: boolean;
+		/** Height preset. 'sm' = 36px (PillNav), 'md' = 44px (bar pills). */
+		size?: 'sm' | 'md';
 		/** Active/selected state */
 		active?: boolean;
 		/** Primary accent (e.g. "Erstellen") */
@@ -38,6 +40,7 @@
 		href,
 		label,
 		iconOnly = false,
+		size = 'md',
 		active = false,
 		primary = false,
 		danger = false,
@@ -51,6 +54,7 @@
 	}: Props = $props();
 
 	const IconComp = $derived(icon ? phosphorIcons[icon] : null);
+	const iconPx = $derived(size === 'sm' ? 18 : 20);
 	const ariaLabel = $derived(iconOnly ? label : undefined);
 	const effectiveTitle = $derived(title ?? (iconOnly ? label : undefined));
 </script>
@@ -58,7 +62,7 @@
 {#snippet body()}
 	{#if leading}{@render leading()}{/if}
 	{#if IconComp}
-		<IconComp size={20} weight="bold" class="pill-icon" />
+		<IconComp size={iconPx} weight="bold" class="pill-icon" />
 	{/if}
 	{#if label && !iconOnly}
 		<span class="pill-label">{label}</span>
@@ -69,7 +73,15 @@
 {#if href}
 	<a
 		{href}
-		class={['pill', active && 'active', primary && 'primary', danger && 'danger', className]
+		class={[
+			'pill',
+			`pill-${size}`,
+			iconOnly && 'icon-only',
+			active && 'active',
+			primary && 'primary',
+			danger && 'danger',
+			className,
+		]
 			.filter(Boolean)
 			.join(' ')}
 		aria-label={ariaLabel}
@@ -82,7 +94,15 @@
 {:else}
 	<button
 		type="button"
-		class={['pill', active && 'active', primary && 'primary', danger && 'danger', className]
+		class={[
+			'pill',
+			`pill-${size}`,
+			iconOnly && 'icon-only',
+			active && 'active',
+			primary && 'primary',
+			danger && 'danger',
+			className,
+		]
 			.filter(Boolean)
 			.join(' ')}
 		aria-label={ariaLabel}
@@ -101,7 +121,6 @@
 		align-items: center;
 		gap: 0.375rem;
 		padding: 0 0.875rem;
-		height: 44px;
 		border-radius: 9999px;
 		font-size: 0.875rem;
 		font-weight: 500;
@@ -116,6 +135,20 @@
 		box-shadow:
 			0 1px 2px hsl(0 0% 0% / 0.05),
 			0 2px 6px hsl(0 0% 0% / 0.04);
+	}
+
+	.pill-md {
+		height: 44px;
+	}
+
+	.pill-sm {
+		height: 36px;
+	}
+
+	/* Icon-only pill: wider than tall so it reads as a pill, not a chip. */
+	.pill.icon-only {
+		gap: 0;
+		padding: 0 1.125rem;
 	}
 
 	.pill:hover:not(:disabled) {

@@ -14,6 +14,8 @@
 	import PillDropdown from './PillDropdown.svelte';
 	import PillTabGroup from './PillTabGroup.svelte';
 	import PillTagSelector from './PillTagSelector.svelte';
+	import Pill from './Pill.svelte';
+	import ManaLogoIcon from './ManaLogoIcon.svelte';
 	import AppDrawer from './AppDrawer.svelte';
 	import UserMenuPanel from './UserMenuPanel.svelte';
 	import GlobalSpotlight from './GlobalSpotlight.svelte';
@@ -659,77 +661,38 @@
 						direction={dropdownDirection}
 					/>
 				{:else if isNavItem(element)}
-					<a href={element.href} class="pill glass-pill" class:active={isActive(element.href)}>
-						{#if element.icon}
-							{#if phosphorIcons[element.icon]}
-								{@const IconComponent = phosphorIcons[element.icon]}
-								<IconComponent size={18} weight="bold" class="pill-icon" />
-							{/if}
-						{/if}
-						<span class="pill-label">{element.label}</span>
-					</a>
+					<Pill
+						size="sm"
+						href={element.href}
+						icon={element.icon}
+						label={element.label}
+						active={isActive(element.href)}
+					/>
 				{/if}
 			{/each}
 
 			<!-- Navigation Items -->
 			{#each items as item}
-				{#if item.onClick}
-					<button
-						onclick={item.onClick}
-						oncontextmenu={item.onContextMenu}
-						class="pill glass-pill"
-						class:active={item.active}
-						class:icon-only={item.iconOnly}
-						aria-label={item.iconOnly ? item.label : undefined}
-						title={item.iconOnly ? item.label : undefined}
-					>
-						{#if item.icon}
-							{#if item.icon === 'mana'}
-								<svg class="pill-icon" viewBox="0 0 24 24" fill="currentColor">
-									<path
-										d="M12.3047 1C12.3392 1.04573 19.608 10.6706 19.6084 14.6953C19.6084 18.7293 16.3386 21.9998 12.3047 22C8.27061 22 5 18.7294 5 14.6953C5.00041 10.661 12.3047 1 12.3047 1ZM12.3047 7.3916C12.2811 7.42276 8.65234 12.2288 8.65234 14.2393C8.65241 16.2562 10.2877 17.8916 12.3047 17.8916C14.3217 17.8916 15.957 16.2562 15.957 14.2393C15.957 12.2301 12.3331 7.42917 12.3047 7.3916Z"
-									/>
-								</svg>
-							{:else if item.iconSvg}
-								{@html item.iconSvg}
-							{:else if phosphorIcons[item.icon]}
-								{@const IconComponent = phosphorIcons[item.icon]}
-								<IconComponent size={18} weight="bold" class="pill-icon" />
-							{/if}
+				{@const standardIcon =
+					item.icon && item.icon !== 'mana' && !item.iconSvg ? item.icon : undefined}
+				<Pill
+					size="sm"
+					href={item.onClick ? undefined : item.href}
+					onclick={item.onClick}
+					oncontextmenu={item.onContextMenu}
+					icon={standardIcon}
+					label={item.label}
+					iconOnly={item.iconOnly}
+					active={item.onClick ? item.active : isActive(item.href)}
+				>
+					{#snippet leading()}
+						{#if item.icon === 'mana'}
+							<ManaLogoIcon size={18} class="pill-icon" />
+						{:else if item.iconSvg}
+							{@html item.iconSvg}
 						{/if}
-						{#if !item.iconOnly}
-							<span class="pill-label">{item.label}</span>
-						{/if}
-					</button>
-				{:else}
-					<a
-						href={item.href}
-						oncontextmenu={item.onContextMenu}
-						class="pill glass-pill"
-						class:active={isActive(item.href)}
-						class:icon-only={item.iconOnly}
-						aria-label={item.iconOnly ? item.label : undefined}
-						title={item.iconOnly ? item.label : undefined}
-					>
-						{#if item.icon}
-							{#if item.icon === 'mana'}
-								<svg class="pill-icon" viewBox="0 0 24 24" fill="currentColor">
-									<path
-										d="M12.3047 1C12.3392 1.04573 19.608 10.6706 19.6084 14.6953C19.6084 18.7293 16.3386 21.9998 12.3047 22C8.27061 22 5 18.7294 5 14.6953C5.00041 10.661 12.3047 1 12.3047 1ZM12.3047 7.3916C12.2811 7.42276 8.65234 12.2288 8.65234 14.2393C8.65241 16.2562 10.2877 17.8916 12.3047 17.8916C14.3217 17.8916 15.957 16.2562 15.957 14.2393C15.957 12.2301 12.3331 7.42917 12.3047 7.3916Z"
-									/>
-								</svg>
-							{:else if item.iconSvg}
-								{@html item.iconSvg}
-							{:else if phosphorIcons[item.icon]}
-								{@const IconComponent = phosphorIcons[item.icon]}
-								<IconComponent size={18} weight="bold" class="pill-icon" />
-							{/if}
-						{/if}
-						{#if !item.iconOnly}
-							<span class="pill-label">{item.label}</span>
-						{/if}
-					</a>
-				{/if}
+					{/snippet}
+				</Pill>
 			{/each}
 
 			<!-- Additional Elements (Tab Groups, Dividers, Tag Selectors) -->
@@ -757,15 +720,13 @@
 						direction={dropdownDirection}
 					/>
 				{:else if isNavItem(element)}
-					<a href={element.href} class="pill glass-pill" class:active={isActive(element.href)}>
-						{#if element.icon}
-							{#if phosphorIcons[element.icon]}
-								{@const IconComponent = phosphorIcons[element.icon]}
-								<IconComponent size={18} weight="bold" class="pill-icon" />
-							{/if}
-						{/if}
-						<span class="pill-label">{element.label}</span>
-					</a>
+					<Pill
+						size="sm"
+						href={element.href}
+						icon={element.icon}
+						label={element.label}
+						active={isActive(element.href)}
+					/>
 				{/if}
 			{/each}
 
@@ -944,11 +905,6 @@
 			min-height: 44px;
 			justify-content: center;
 		}
-
-		.pill-icon {
-			width: 1.5rem;
-			height: 1.5rem;
-		}
 	}
 
 	/* Base pill styles */
@@ -1035,12 +991,6 @@
 	.logout-pill:hover {
 		background: rgba(220, 38, 38, 0.15);
 		border-color: rgba(220, 38, 38, 0.3);
-	}
-
-	.pill-icon {
-		width: 1.25rem;
-		height: 1.25rem;
-		flex-shrink: 0;
 	}
 
 	.pill-label {
