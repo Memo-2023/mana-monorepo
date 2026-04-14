@@ -7,6 +7,10 @@
 	import { todoReminderSource } from '$lib/modules/todo/reminder-source';
 	import { startEventStore, stopEventStore } from '$lib/data/events/event-store';
 	import { startMissionTick, stopMissionTick } from '$lib/data/ai/missions/setup';
+	import {
+		startServerIterationStaging,
+		stopServerIterationStaging,
+	} from '$lib/data/ai/missions/server-iteration-staging';
 	import { initTools } from '$lib/data/tools/init';
 	import { startEventBridge, stopEventBridge } from '$lib/triggers/event-bridge';
 	import { startStreakTracker, stopStreakTracker } from '$lib/data/projections/streaks';
@@ -206,33 +210,41 @@
 		authStore.isAuthenticated ? authStore.user?.email || $_('nav.menu') : ''
 	);
 
-	// ── Tags ────────────────────────────────────────────────
+	// ── Bottom-stack single-bar policy ───────────────────────
+	// Only one bar may be open at a time. Opening one closes the others.
 	const allTags = useAllTags();
 	let isTagStripVisible = $state(false);
-	function handleTagStripToggle() {
-		isTagStripVisible = !isTagStripVisible;
-	}
-
-	// ── QuickInputBar visibility (toggled by the "search" pill) ──
-	let isQuickInputVisible = $state(true);
-	function handleQuickInputToggle() {
-		isQuickInputVisible = !isQuickInputVisible;
-	}
-
-	// ── Workbench tab bar visibility (toggled by the "tabs" pill) ──
-	// Controls whether the page-injected bottomBar (SceneAppBar on /) is rendered.
-	let isBottomBarVisible = $state(true);
-	function handleBottomBarToggle() {
-		isBottomBarVisible = !isBottomBarVisible;
-	}
-
-	// ── Dropdown-as-bar ──────────────────────────────────────
-	// Theme / AI tier / Sync / User-menu dropdowns are surfaced as
-	// bars in the bottom stack instead of floating popovers. PillNavigation
-	// calls handleOpenBar with a PillBarConfig (or null to close); we
-	// render the items via PillDropdownBar just above the PillNav.
+	let isQuickInputVisible = $state(false);
+	let isBottomBarVisible = $state(false);
 	let activeBar = $state<PillBarConfig | null>(null);
+
+	function closeAllBars() {
+		isTagStripVisible = false;
+		isQuickInputVisible = false;
+		isBottomBarVisible = false;
+		activeBar = null;
+	}
+
+	function handleTagStripToggle() {
+		const next = !isTagStripVisible;
+		closeAllBars();
+		isTagStripVisible = next;
+	}
+
+	function handleQuickInputToggle() {
+		const next = !isQuickInputVisible;
+		closeAllBars();
+		isQuickInputVisible = next;
+	}
+
+	function handleBottomBarToggle() {
+		const next = !isBottomBarVisible;
+		closeAllBars();
+		isBottomBarVisible = next;
+	}
+
 	function handleOpenBar(config: PillBarConfig | null) {
+		closeAllBars();
 		activeBar = config;
 	}
 	function closeActiveBar() {
@@ -250,10 +262,10 @@
 		isFullscreen
 			? 0
 			: (isCollapsed ? 0 : 80) +
-					(activeBar ? 56 : 0) +
-					(isTagStripVisible ? 44 : 0) +
-					(isQuickInputVisible ? 72 : 0) +
-					(isBottomBarVisible && bottomBarStore.component ? 36 : 0)
+					(activeBar ? 64 : 0) +
+					(isTagStripVisible ? 64 : 0) +
+					(isQuickInputVisible ? 64 : 0) +
+					(isBottomBarVisible && bottomBarStore.component ? 64 : 0)
 	);
 
 	// ── DnD context ─────────────────────────────────────────
@@ -298,11 +310,11 @@
 	let baseNavItems = $derived<PillNavItem[]>([
 		{
 			href: '/',
-			label: $_('nav.tags'),
-			icon: 'tag',
+			label: 'Workbench-Tabs',
+			icon: 'columns',
 			iconOnly: true,
-			onClick: handleTagStripToggle,
-			active: isTagStripVisible,
+			onClick: handleBottomBarToggle,
+			active: isBottomBarVisible,
 		},
 		{
 			href: '/',
@@ -314,11 +326,11 @@
 		},
 		{
 			href: '/',
-			label: 'Workbench-Tabs',
-			icon: 'columns',
+			label: $_('nav.tags'),
+			icon: 'tag',
 			iconOnly: true,
-			onClick: handleBottomBarToggle,
-			active: isBottomBarVisible,
+			onClick: handleTagStripToggle,
+			active: isTagStripVisible,
 		},
 	]);
 
@@ -514,6 +526,11 @@
 			// interval and runs any that are due. Safe idempotent; see
 			// data/ai/missions/setup.ts.
 			startMissionTick();
+			// Staging-effect: subscribes to Mission updates and translates
+			// server-produced iterations (source='server') into local
+			// Proposals. Essential once the mana-ai service is running
+			// alongside; no-op when only the foreground tick is active.
+			startServerIterationStaging();
 		});
 
 		// Restore nav collapsed state (cheap, keep inline)
@@ -610,6 +627,7 @@
 		stopEventBridge();
 		stopStreakTracker();
 		stopMissionTick();
+		stopServerIterationStaging();
 		guestMode?.destroy();
 		// Fire-and-forget — we don't need to await; the in-flight task
 		// will finish in the background and the next page session will
@@ -921,7 +939,7 @@
 					showLogout={authStore.isAuthenticated}
 					loginHref="/login"
 					primaryColor="#6366f1"
-					showAppSwitcher={true}
+					showAppSwitcher={false}
 					showAiTierSelector={true}
 					aiTierItems={aiTier.items}
 					currentAiTierLabel={aiTier.label}
@@ -1017,9 +1035,9 @@
 		display: flex;
 		flex-direction: column;
 		align-items: stretch;
-		/* Uniform small gap between bars instead of each wrapper
-		   providing its own ad-hoc padding-bottom. */
-		gap: 0.25rem;
+		/* Bars stack flush — each bar's own wrapper controls its height,
+		   so visual breathing room comes from inside the bar, not the gap. */
+		gap: 0;
 		pointer-events: none;
 		padding-bottom: env(safe-area-inset-bottom, 0px);
 	}

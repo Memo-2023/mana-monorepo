@@ -35,7 +35,7 @@ export type Actor =
 	| {
 			readonly kind: 'system';
 			/** Subsystem responsible for this derived write. */
-			readonly source: 'projection' | 'rule' | 'migration';
+			readonly source: 'projection' | 'rule' | 'migration' | 'mission-runner';
 	  };
 
 export const USER_ACTOR: Actor = Object.freeze({ kind: 'user' });

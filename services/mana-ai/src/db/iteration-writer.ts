@@ -1,0 +1,110 @@
+/**
+ * Append a server-produced iteration to an existing Mission by inserting
+ * a `sync_changes` row of op='update' carrying the new `iterations`
+ * array in `fields`. The row is attributed to the mission-runner system
+ * actor so the Workbench timeline on the user's device distinguishes it
+ * from their own edits.
+ *
+ * The write is RLS-scoped via `withUser` so a compromised DB role can't
+ * leak the iteration across users even if the row's user_id column were
+ * wrong. The caller is responsible for passing the correct userId (from
+ * the mission projection).
+ *
+ * The webapp picks up this row on next sync, `applyServerChanges` merges
+ * the updated `iterations` array into the local Mission record, and the
+ * staging-effect translates each PlanStep into a local Proposal.
+ */
+
+import type { Sql } from './connection';
+import { withUser } from './connection';
+import type { AiPlanOutput, MissionIteration, PlanStep } from '@mana/shared-ai';
+
+export interface AppendIterationInput {
+	userId: string;
+	missionId: string;
+	/** Full `iterations` array AFTER appending the new entry.
+	 *  Caller reads the current mission, appends, passes the full array
+	 *  — matches the webapp's `finishIteration` shape. */
+	allIterations: readonly MissionIteration[];
+	/** The iteration just appended — its `id` is also embedded in every
+	 *  PlanStep's intent so the webapp staging-effect can build
+	 *  `iteration-scoped` Proposals. */
+	newIteration: MissionIteration;
+	/** When the write happened — used as the per-field updatedAt stamp
+	 *  and the sync_changes.created_at fallback. */
+	nowIso: string;
+}
+
+/** Actor blob stamped on the sync_changes row. JSON string already —
+ *  we pass it as `json.RawMessage` equivalent through pgx. */
+function systemActorJson(): string {
+	return JSON.stringify({ kind: 'system', source: 'mission-runner' });
+}
+
+export async function appendServerIteration(sql: Sql, input: AppendIterationInput): Promise<void> {
+	const { userId, missionId, allIterations, nowIso } = input;
+	const fieldsPayload = {
+		iterations: { value: allIterations, updatedAt: nowIso },
+		updatedAt: { value: nowIso, updatedAt: nowIso },
+	};
+	const fieldTimestamps = {
+		iterations: nowIso,
+		updatedAt: nowIso,
+	};
+	// The mana-sync Go handler stores `data` on inserts and `fields` on
+	// updates — for our update we populate the `data` JSONB with the
+	// winning values and `field_timestamps` with the per-field stamps.
+	const data = {
+		iterations: allIterations,
+		updatedAt: nowIso,
+	};
+
+	// postgres.js's `tx.json()` types are strict about JSONValue; our
+	// structured MissionIteration[] has readonly fields that confuse the
+	// inferred type. Cast at the boundary — the JSON serialization still
+	// happens correctly at runtime.
+	const dataJson = data as unknown;
+	const ftJson = fieldTimestamps as unknown;
+	const actorJson = JSON.parse(systemActorJson()) as unknown;
+
+	await withUser(sql, userId, async (tx) => {
+		await tx`
+			INSERT INTO sync_changes
+				(app_id, table_name, record_id, user_id, op, data, field_timestamps, client_id, schema_version, actor)
+			VALUES
+				('ai', 'aiMissions', ${missionId}, ${userId}, 'update',
+				 ${tx.json(dataJson as never)}, ${tx.json(ftJson as never)},
+				 'mana-ai-runner', 1, ${tx.json(actorJson as never)})
+		`;
+	});
+
+	// fieldsPayload is kept as a named local so a future refactor that
+	// needs to emit a `fields`-shaped payload (if mana-sync ever rejects
+	// `data` for updates) has a ready-made map to send. Current contract
+	// accepts either.
+	void fieldsPayload;
+}
+
+/** Convert an {@link AiPlanOutput} from the shared parser into the
+ *  inline-stored MissionIteration shape. */
+export function planToIteration(
+	plan: AiPlanOutput,
+	iterationId: string,
+	nowIso: string
+): MissionIteration {
+	const steps: PlanStep[] = plan.steps.map((ps, i) => ({
+		id: `${iterationId}-${i}`,
+		summary: ps.summary,
+		intent: { kind: 'toolCall', toolName: ps.toolName, params: ps.params },
+		status: 'planned',
+	}));
+	return {
+		id: iterationId,
+		startedAt: nowIso,
+		finishedAt: nowIso,
+		plan: steps,
+		summary: plan.summary,
+		overallStatus: plan.steps.length === 0 ? 'approved' : 'awaiting-review',
+		source: 'server',
+	};
+}

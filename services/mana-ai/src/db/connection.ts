@@ -29,3 +29,25 @@ export async function closeSql(): Promise<void> {
 		_sql = null;
 	}
 }
+
+/**
+ * Run `fn` inside a transaction scoped to the given user_id via the same
+ * RLS convention mana-sync's Go `withUser` uses: set the session-local
+ * `app.current_user_id` setting so the existing `sync_changes_user_isolation`
+ * policy only exposes that user's rows.
+ *
+ * Empty userIDs are refused up front — an unauthenticated caller must
+ * never reach the DB with an empty RLS scope (which would match every
+ * row the policy allows).
+ */
+export async function withUser<T>(
+	sql: Sql,
+	userId: string,
+	fn: (tx: postgres.TransactionSql) => Promise<T>
+): Promise<T> {
+	if (!userId) throw new Error('withUser: empty userID');
+	return sql.begin(async (tx) => {
+		await tx`SELECT set_config('app.current_user_id', ${userId}, true)`;
+		return fn(tx);
+	}) as Promise<T>;
+}

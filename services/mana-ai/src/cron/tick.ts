@@ -21,6 +21,7 @@ import {
 } from '@mana/shared-ai';
 import { getSql } from '../db/connection';
 import { listDueMissions, type ServerMission } from '../db/missions-projection';
+import { appendServerIteration, planToIteration } from '../db/iteration-writer';
 import { PlannerClient } from '../planner/client';
 import { AI_AVAILABLE_TOOLS, AI_AVAILABLE_TOOL_NAMES } from '../planner/tools';
 import type { Config } from '../config';
@@ -29,6 +30,7 @@ export interface TickStats {
 	scannedAt: string;
 	dueMissionCount: number;
 	plansProduced: number;
+	plansWrittenBack: number;
 	parseFailures: number;
 	errors: string[];
 }
@@ -42,6 +44,7 @@ export async function runTickOnce(config: Config): Promise<TickStats> {
 			scannedAt: new Date().toISOString(),
 			dueMissionCount: 0,
 			plansProduced: 0,
+			plansWrittenBack: 0,
 			parseFailures: 0,
 			errors: ['overlap-skipped'],
 		};
@@ -50,6 +53,7 @@ export async function runTickOnce(config: Config): Promise<TickStats> {
 	const errors: string[] = [];
 	let dueMissionCount = 0;
 	let plansProduced = 0;
+	let plansWrittenBack = 0;
 	let parseFailures = 0;
 	const scannedAt = new Date().toISOString();
 
@@ -59,7 +63,14 @@ export async function runTickOnce(config: Config): Promise<TickStats> {
 		dueMissionCount = missions.length;
 
 		if (missions.length === 0)
-			return { scannedAt, dueMissionCount, plansProduced, parseFailures, errors };
+			return {
+				scannedAt,
+				dueMissionCount,
+				plansProduced,
+				plansWrittenBack,
+				parseFailures,
+				errors,
+			};
 
 		const planner = new PlannerClient(config.manaLlmUrl, config.serviceKey);
 
@@ -71,19 +82,28 @@ export async function runTickOnce(config: Config): Promise<TickStats> {
 					continue;
 				}
 				plansProduced++;
+
+				const nowIso = new Date().toISOString();
+				const iterationId = crypto.randomUUID();
+				const newIteration = planToIteration(plan, iterationId, nowIso);
+				const allIterations = [...m.iterations, newIteration] as (typeof newIteration)[];
+
+				await appendServerIteration(sql, {
+					userId: m.userId,
+					missionId: m.id,
+					allIterations,
+					newIteration,
+					nowIso,
+				});
+				plansWrittenBack++;
+
 				console.log(
-					`[mana-ai tick] mission=${m.id} user=${m.userId} plan=${plan.steps.length}step(s) summary=${JSON.stringify(
-						plan.summary
-					)}`
+					`[mana-ai tick] mission=${m.id} user=${m.userId} plan=${plan.steps.length}step(s) iteration=${iterationId}`
 				);
-				// TODO: write plan back as `Mission.iterations[]` entry with
-				//   `source: 'server'` so the webapp staging-effect can turn
-				//   each PlannedStep into a local Proposal. Requires RLS-
-				//   scoped write helper (see CLAUDE.md, design option A).
 			} catch (err) {
 				const msg = err instanceof Error ? err.message : String(err);
 				errors.push(`mission=${m.id}: ${msg}`);
-				console.error(`[mana-ai tick] mission=${m.id} plan failed:`, msg);
+				console.error(`[mana-ai tick] mission=${m.id} run failed:`, msg);
 			}
 		}
 	} catch (err) {
@@ -94,7 +114,7 @@ export async function runTickOnce(config: Config): Promise<TickStats> {
 		running = false;
 	}
 
-	return { scannedAt, dueMissionCount, plansProduced, parseFailures, errors };
+	return { scannedAt, dueMissionCount, plansProduced, plansWrittenBack, parseFailures, errors };
 }
 
 /**

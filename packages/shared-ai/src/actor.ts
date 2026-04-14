@@ -18,7 +18,7 @@ export type Actor =
 	  }
 	| {
 			readonly kind: 'system';
-			readonly source: 'projection' | 'rule' | 'migration';
+			readonly source: 'projection' | 'rule' | 'migration' | 'mission-runner';
 	  };
 
 export const USER_ACTOR: Actor = Object.freeze({ kind: 'user' });
