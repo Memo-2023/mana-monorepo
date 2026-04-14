@@ -11,6 +11,8 @@ import { generateContextDocument } from '$lib/data/projections/context-document'
 import { getToolsForLlm, executeTool } from '$lib/data/tools';
 import { authStore } from '$lib/stores/auth.svelte';
 import type { DaySnapshot, StreakInfo } from '$lib/data/projections/types';
+import { emitDomainEvent } from '$lib/data/events';
+import { getTool } from '$lib/data/tools/registry';
 import type { LocalMessage } from './types';
 import type { ToolResult } from '$lib/data/tools/types';
 
@@ -230,8 +232,21 @@ export async function runCompanionChat(
 			break;
 		}
 
-		// Execute the tool
+		// Execute the tool with timing
+		const toolStartedAt = Date.now();
 		const toolResult = await executeTool(toolCall.name, toolCall.params);
+		const toolLatencyMs = Date.now() - toolStartedAt;
+
+		// Emit observability event for the tool call
+		const toolDef = getTool(toolCall.name);
+		emitDomainEvent('CompanionToolCalled', 'companion', 'tools', toolCall.name, {
+			tool: toolCall.name,
+			module: toolDef?.module ?? 'unknown',
+			success: toolResult.success,
+			latencyMs: toolLatencyMs,
+			errorMessage: toolResult.success ? undefined : toolResult.message,
+		});
+
 		toolCalls.push({ name: toolCall.name, params: toolCall.params, result: toolResult });
 
 		// Build response text from before/after the tool block

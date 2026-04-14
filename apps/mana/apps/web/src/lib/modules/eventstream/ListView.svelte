@@ -14,6 +14,8 @@
 		ForkKnife,
 		MapPin,
 		Lightning,
+		Robot,
+		ChatCircle,
 	} from '@mana/shared-icons';
 
 	let events = $state<DomainEvent[]>([]);
@@ -31,6 +33,9 @@
 		MealFromPhotoLogged: { icon: ForkKnife, color: '#F97316' },
 		PlaceVisited: { icon: MapPin, color: '#A855F7' },
 		PlaceCreated: { icon: MapPin, color: '#10B981' },
+		CompanionConversationStarted: { icon: ChatCircle, color: '#8B5CF6' },
+		CompanionMessageSent: { icon: ChatCircle, color: '#A78BFA' },
+		CompanionToolCalled: { icon: Robot, color: '#6366F1' },
 	};
 
 	const EVENT_LABELS: Record<string, (p: Record<string, unknown>) => string> = {
@@ -55,6 +60,11 @@
 		TrackingStarted: () => 'Tracking gestartet',
 		TrackingStopped: () => 'Tracking gestoppt',
 		GoalReached: (p) => `Ziel erreicht: "${p.title}"`,
+		CompanionConversationStarted: (p) =>
+			`Companion-Chat gestartet${p.title ? `: "${p.title}"` : ''}`,
+		CompanionMessageSent: (p) =>
+			`${p.role === 'user' ? 'Du' : 'Companion'}: ${p.contentLength} Zeichen`,
+		CompanionToolCalled: (p) => `Tool: ${p.tool}${p.success ? '' : ' (Fehler)'} (${p.latencyMs}ms)`,
 	};
 
 	function formatTime(iso: string): string {

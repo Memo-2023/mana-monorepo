@@ -543,6 +543,33 @@ export interface SleepLoggedPayload {
 }
 export type SleepEventType = 'SleepLogged';
 
+// ── Companion (Chat + Tools) ────────────────────────
+
+export interface CompanionConversationStartedPayload {
+	conversationId: string;
+	title?: string;
+}
+
+export interface CompanionMessageSentPayload {
+	messageId: string;
+	conversationId: string;
+	role: 'user' | 'assistant';
+	contentLength: number;
+}
+
+export interface CompanionToolCalledPayload {
+	tool: string;
+	module: string;
+	success: boolean;
+	latencyMs: number;
+	errorMessage?: string;
+}
+
+export type CompanionEventType =
+	| 'CompanionConversationStarted'
+	| 'CompanionMessageSent'
+	| 'CompanionToolCalled';
+
 // ── Body ────────────────────────────────────────────
 
 export interface WorkoutStartedPayload {
@@ -637,6 +664,7 @@ export type ManaEventType =
 	| QuestionsEventType
 	| MeditateEventType
 	| SleepEventType
+	| CompanionEventType
 	| SocialEventsEventType
 	| BodyEventType
 	| SystemEventType;
@@ -742,6 +770,10 @@ export type ManaEvent =
 	| DomainEvent<'MeditationCompleted', MeditationCompletedPayload>
 	// Sleep
 	| DomainEvent<'SleepLogged', SleepLoggedPayload>
+	// Companion
+	| DomainEvent<'CompanionConversationStarted', CompanionConversationStartedPayload>
+	| DomainEvent<'CompanionMessageSent', CompanionMessageSentPayload>
+	| DomainEvent<'CompanionToolCalled', CompanionToolCalledPayload>
 	// Social Events
 	| DomainEvent<'SocialEventCreated', SocialEventCreatedPayload>
 	| DomainEvent<'SocialEventDeleted', SocialEventDeletedPayload>

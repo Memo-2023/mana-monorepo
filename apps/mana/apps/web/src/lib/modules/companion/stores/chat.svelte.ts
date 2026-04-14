@@ -7,6 +7,7 @@
  */
 
 import { db } from '$lib/data/database';
+import { emitDomainEvent } from '$lib/data/events';
 import type { LocalConversation, LocalMessage } from '../types';
 
 const CONV_TABLE = 'companionConversations';
@@ -24,6 +25,10 @@ export const chatStore = {
 			updatedAt: now,
 		};
 		await db.table<LocalConversation>(CONV_TABLE).add(conv);
+		emitDomainEvent('CompanionConversationStarted', 'companion', CONV_TABLE, conv.id, {
+			conversationId: conv.id,
+			title: conv.title,
+		});
 		return conv;
 	},
 
@@ -67,6 +72,16 @@ export const chatStore = {
 		await db.table<LocalConversation>(CONV_TABLE).update(conversationId, {
 			updatedAt: msg.createdAt,
 		});
+
+		// Emit event only for actual user/assistant messages, not tool plumbing
+		if (role === 'user' || role === 'assistant') {
+			emitDomainEvent('CompanionMessageSent', 'companion', MSG_TABLE, msg.id, {
+				messageId: msg.id,
+				conversationId,
+				role,
+				contentLength: content.length,
+			});
+		}
 
 		return msg;
 	},
