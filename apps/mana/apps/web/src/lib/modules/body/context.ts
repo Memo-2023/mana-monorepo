@@ -17,7 +17,7 @@ import type {
 	BodyCheck,
 	BodyPhase,
 } from './types';
-import type { MealWithNutrition } from '$lib/modules/nutriphi/types';
+import type { MealWithNutrition } from '$lib/modules/food/types';
 
 export const bodyExercisesCtx = createModuleContext<BodyExercise[]>('bodyExercises');
 export const bodyRoutinesCtx = createModuleContext<BodyRoutine[]>('bodyRoutines');
@@ -26,4 +26,4 @@ export const bodySetsCtx = createModuleContext<BodySet[]>('bodySets');
 export const bodyMeasurementsCtx = createModuleContext<BodyMeasurement[]>('bodyMeasurements');
 export const bodyChecksCtx = createModuleContext<BodyCheck[]>('bodyChecks');
 export const bodyPhasesCtx = createModuleContext<BodyPhase[]>('bodyPhases');
-export const bodyNutriphiMealsCtx = createModuleContext<MealWithNutrition[]>('bodyNutriphiMeals');
+export const bodyFoodMealsCtx = createModuleContext<MealWithNutrition[]>('bodyFoodMeals');

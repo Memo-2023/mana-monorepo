@@ -28,7 +28,7 @@
 		{ value: 'TaskCompleted', label: 'Tasks erledigt', module: 'todo' },
 		{ value: 'TaskCreated', label: 'Tasks erstellt', module: 'todo' },
 		{ value: 'DrinkLogged', label: 'Getraenk geloggt', module: 'drink' },
-		{ value: 'MealLogged', label: 'Mahlzeit geloggt', module: 'nutriphi' },
+		{ value: 'MealLogged', label: 'Mahlzeit geloggt', module: 'food' },
 		{ value: 'HabitLogged', label: 'Habit geloggt', module: 'habits' },
 		{ value: 'JournalEntryCreated', label: 'Journal-Eintrag', module: 'journal' },
 		{ value: 'NoteCreated', label: 'Notiz erstellt', module: 'notes' },

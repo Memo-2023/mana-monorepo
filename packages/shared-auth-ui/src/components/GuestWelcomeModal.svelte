@@ -66,7 +66,7 @@
 		news: ['Nachrichten, kuratiert für dich', 'Quelloffen & unabhängig', 'Privat by Design'],
 		arcade: ['Spiele direkt im Browser', 'Quelloffen & unabhängig', 'Privat by Design'],
 		skilltree: ['Dein Fortschritt, sichtbar', 'Quelloffen & unabhängig', 'Privat by Design'],
-		nutriphi: ['Ernährung bewusst leben', 'Quelloffen & unabhängig', 'Privat by Design'],
+		food: ['Ernährung bewusst leben', 'Quelloffen & unabhängig', 'Privat by Design'],
 		wisekeep: ['Wissen bewahren & teilen', 'Quelloffen & unabhängig', 'Privat by Design'],
 		memoro: ['Sprache wird zu Wissen', 'Quelloffen & unabhängig', 'Privat by Design'],
 	};
@@ -99,7 +99,7 @@
 		news: ['News, curated for you', 'Open-source & independent', 'Private by design'],
 		arcade: ['Games right in your browser', 'Open-source & independent', 'Private by design'],
 		skilltree: ['Your progress, visualized', 'Open-source & independent', 'Private by design'],
-		nutriphi: ['Mindful nutrition tracking', 'Open-source & independent', 'Private by design'],
+		food: ['Mindful nutrition tracking', 'Open-source & independent', 'Private by design'],
 		wisekeep: ['Preserve & share knowledge', 'Open-source & independent', 'Private by design'],
 		memoro: ['Voice becomes knowledge', 'Open-source & independent', 'Private by design'],
 	};

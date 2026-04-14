@@ -170,8 +170,8 @@ const APP_DEFINITIONS: AppDefinition[] = [
 		},
 	},
 	{
-		id: 'nutriphi',
-		displayName: 'NutriPhi',
+		id: 'food',
+		displayName: 'Food',
 		score: 63,
 		status: 'beta',
 		categories: {

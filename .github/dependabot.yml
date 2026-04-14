@@ -98,7 +98,7 @@ updates:
       - "automated"
 
   - package-ecosystem: "docker"
-    directory: "/apps/nutriphi/apps/backend"
+    directory: "/apps/food/apps/backend"
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 5

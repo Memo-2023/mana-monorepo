@@ -1,10 +1,10 @@
 ---
 title: 'spiral-db, Planta Bot & Mana Values'
-description: 'spiral-db Pixel-Visualisierung, Planta Bot für Pflanzenidentifikation, NutriPhi Bot Verbesserungen, Mana Values Manifest und diverse Docker-Fixes.'
+description: 'spiral-db Pixel-Visualisierung, Planta Bot für Pflanzenidentifikation, Food Bot Verbesserungen, Mana Values Manifest und diverse Docker-Fixes.'
 date: 2026-02-17
 author: 'Till Schneider'
 category: 'feature'
-tags: ['spiral-db', 'planta', 'nutriphi', 'todo', 'mana-bot', 'wallpaper', 'documentation']
+tags: ['spiral-db', 'planta', 'food', 'todo', 'mana-bot', 'wallpaper', 'documentation']
 featured: false
 commits: 26
 readTime: 10
@@ -25,7 +25,7 @@ Produktiver Tag mit **26 Commits** – neue Packages, Bot-Features und Dokumenta
 
 - **spiral-db** - Pixel-basierte Spiral-Datenbank-Visualisierung
 - **Planta Bot** - KI-Pflanzenidentifikation per Bild-Upload
-- **NutriPhi Bot** - Smartes Meal Feedback
+- **Food Bot** - Smartes Meal Feedback
 - **Mana Bot** - Tägliche Morgenzusammenfassung
 - **Mana Values** - Manifest-Dokumentation
 - **Wallpaper Generator** - Neues Package
@@ -138,7 +138,7 @@ docker compose -f docker-compose.macmini.yml up -d planta-bot
 
 ---
 
-## NutriPhi Bot Verbesserungen
+## Food Bot Verbesserungen
 
 Smartes Meal Feedback mit positiven Aspekten und Verbesserungsvorschlägen.
 
@@ -283,7 +283,7 @@ Sidebar-Mode aus der PillNavigation entfernt – nur noch Bottom-Navigation.
 | ------------------ | ------- | --------------------------------- |
 | **spiral-db**      | 5       | Package + Todo Integration        |
 | **Planta Bot**     | 4       | KI-Pflanzenidentifikation         |
-| **NutriPhi Bot**   | 3       | Smartes Meal Feedback             |
+| **Food Bot**   | 3       | Smartes Meal Feedback             |
 | **Mana Bot**       | 3       | Morning Summary                   |
 | **QR Code**        | 2       | My-Data Export                    |
 | **Wallpaper**      | 2       | Generator Package                 |

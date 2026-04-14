@@ -150,7 +150,7 @@ const customUrl = media.getTransformUrl(result.id, {
 | id | UUID | Primary key |
 | media_id | UUID | FK to media |
 | user_id | UUID | Owner user ID |
-| app | TEXT | Source app (nutriphi, contacts, etc.) |
+| app | TEXT | Source app (food, contacts, etc.) |
 | source_url | TEXT | Original source URL |
 
 ## Processing Pipeline

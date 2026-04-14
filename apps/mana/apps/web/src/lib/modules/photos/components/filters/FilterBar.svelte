@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { photoStore } from '$lib/modules/photos/stores/photos.svelte';
 
-	const apps = ['picture', 'chat', 'contacts', 'nutriphi'];
+	const apps = ['picture', 'chat', 'contacts', 'food'];
 
 	let selectedApps = $state<string[]>([]);
 	let dateFrom = $state('');

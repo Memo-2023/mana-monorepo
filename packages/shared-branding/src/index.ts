@@ -21,7 +21,7 @@ export {
 	UloadLogo,
 	ChatLogo,
 	PresiLogo,
-	NutriPhiLogo,
+	FoodLogo,
 	ZitareLogo,
 	ContactsLogo,
 	CalendarLogo,

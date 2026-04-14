@@ -492,7 +492,7 @@ import { HealthModule } from '@manacore/shared-nestjs-health';
 ```
 
 **Migrierte Backends (12):**
-calendar, chat, clock, contacts, nutriphi, picture, planta, presi, skilltree, storage, todo, zitare
+calendar, chat, clock, contacts, food, picture, planta, presi, skilltree, storage, todo, zitare
 
 ### @manacore/shared-nestjs-setup
 
@@ -514,7 +514,7 @@ await app.listen(process.env.PORT || 3002);
 ```
 
 **Migrierte Backends (8):**
-chat, calendar, contacts, zitare, clock, planta, presi, nutriphi
+chat, calendar, contacts, zitare, clock, planta, presi, food
 
 ### @manacore/shared-tsconfig
 
@@ -641,15 +641,15 @@ Neues Dokument mit API-Übersicht aller Microservices:
 
 ## Bugfixes
 
-| Fix                        | Beschreibung                                                |
-| -------------------------- | ----------------------------------------------------------- |
-| **Docker Healthchecks**    | Node-basierte Healthchecks für mana-core-auth, nutriphi-web |
-| **Matrix Sidebar**         | Gap und Scrolling-Layout gefixt                             |
-| **Matrix Message Input**   | Layout-Verbesserungen                                       |
-| **Matrix Shared Packages** | Fehlende Dependencies im Dockerfile                         |
-| **Matrix Vite Config**     | Inline Config für Docker-Kompatibilität                     |
-| **TTS Bot**                | MP3 Format, keine doppelten Nachrichten                     |
-| **Matrix RoomItem**        | lastMessageTime Validierung                                 |
+| Fix                        | Beschreibung                                            |
+| -------------------------- | ------------------------------------------------------- |
+| **Docker Healthchecks**    | Node-basierte Healthchecks für mana-core-auth, food-web |
+| **Matrix Sidebar**         | Gap und Scrolling-Layout gefixt                         |
+| **Matrix Message Input**   | Layout-Verbesserungen                                   |
+| **Matrix Shared Packages** | Fehlende Dependencies im Dockerfile                     |
+| **Matrix Vite Config**     | Inline Config für Docker-Kompatibilität                 |
+| **TTS Bot**                | MP3 Format, keine doppelten Nachrichten                 |
+| **Matrix RoomItem**        | lastMessageTime Validierung                             |
 
 ---
 

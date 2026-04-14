@@ -122,7 +122,7 @@ export const mealReminderRule: PulseRule = {
 				body: 'Noch keine Mahlzeit heute erfasst.',
 				priority: 'low',
 				actionLabel: 'Mahlzeit loggen',
-				actionRoute: '/nutriphi',
+				actionRoute: '/food',
 			};
 		}
 
@@ -135,7 +135,7 @@ export const mealReminderRule: PulseRule = {
 				body: `Erst ${meals} Mahlzeit(en) heute (${calories.actual} kcal).`,
 				priority: 'low',
 				actionLabel: 'Mahlzeit loggen',
-				actionRoute: '/nutriphi',
+				actionRoute: '/food',
 			};
 		}
 

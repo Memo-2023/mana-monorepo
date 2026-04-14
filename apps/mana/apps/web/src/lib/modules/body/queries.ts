@@ -7,7 +7,7 @@
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { decryptRecords } from '$lib/data/crypto';
 import { db } from '$lib/data/database';
-import type { LocalMeal, MealWithNutrition } from '$lib/modules/nutriphi/types';
+import type { LocalMeal, MealWithNutrition } from '$lib/modules/food/types';
 import type {
 	LocalBodyExercise,
 	LocalBodyRoutine,
@@ -206,11 +206,11 @@ export function useAllBodyPhases() {
 }
 
 /**
- * Cross-module read into the nutriphi `meals` table for the calorie /
+ * Cross-module read into the food `meals` table for the calorie /
  * weight correlation chart. Lives here (instead of consumers calling
- * nutriphi/queries directly) because the body module owns the Body ×
- * Nutriphi integration boundary, and putting the cross-table read in
- * one place keeps the import graph from getting circular if nutriphi
+ * food/queries directly) because the body module owns the Body ×
+ * Food integration boundary, and putting the cross-table read in
+ * one place keeps the import graph from getting circular if food
  * ever wants to reach back the other way.
  *
  * Returns a thinned MealWithNutrition shape — only the fields the
@@ -218,7 +218,7 @@ export function useAllBodyPhases() {
  * `since` is a YYYY-MM-DD lower bound; the chart pulls 8 weeks but
  * the helper is permissive so a future "year view" can extend it.
  */
-export function useNutriphiMealsSince(since: string) {
+export function useFoodMealsSince(since: string) {
 	return useLiveQueryWithDefault(async () => {
 		const locals = await db.table<LocalMeal>('meals').where('date').aboveOrEqual(since).toArray();
 		const visible = locals.filter((m) => !m.deletedAt);

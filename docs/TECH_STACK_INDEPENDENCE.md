@@ -32,7 +32,7 @@
 | **DNS/Tunnel** | Cloudflare Tunnel | Ja | → WireGuard + eigene IP, Caddy/Traefik |
 | **Landing Pages** | Cloudflare Pages | Ja | → Nginx/Caddy auf eigenem Server |
 | **Image Gen** | Replicate (Picture App) | Ja | → mana-image-gen (FLUX.2 klein, bereits vorhanden!) |
-| **Vision** | Google Gemini (NutriPhi, Planta) | Teilweise | → Qwen2.5-VL / LLaVA via Ollama (Qualitätsverlust) |
+| **Vision** | Google Gemini (Food, Planta) | Teilweise | → Qwen2.5-VL / LLaVA via Ollama (Qualitätsverlust) |
 | **LLM** | Azure OpenAI (Context App) | Teilweise | → Ollama mit größerem Modell |
 | **LLM Fallbacks** | OpenRouter, Groq, Together | Ja (optional) | Nur Fallbacks, Ollama ist Primary |
 | **OAuth** | Google OAuth (Contacts Import) | Nein | Nötig für Google Contacts API |
@@ -97,7 +97,7 @@ Brevo ist SPOF für alle Transaktions-Emails (Verifizierung, Passwort-Reset).
 **Status: ✅ ERLEDIGT** (2026-03-24)
 
 Alle 9 Backends nutzen jetzt `@mana/shared-llm` → `mana-llm` Gateway:
-- Auth, Chat, Context, NutriPhi, Planta, Traces, Cards, Bot Services, Matrix Bots
+- Auth, Chat, Context, Food, Planta, Traces, Cards, Bot Services, Matrix Bots
 - Google Gemini als automatischer Fallback wenn Ollama überlastet
 - OpenAI SDK komplett entfernt (Project Doc Bot)
 - Google Gemini SDK entfernt (Cards)
@@ -168,7 +168,7 @@ Ihr nutzt Vite überall (SvelteKit, Astro). Jest 29/30 mit ts-jest ist langsamer
 
 **Aufwand:** 1 Woche | **Impact:** Mittel
 
-NutriPhi und Planta nutzen Google Gemini Vision. Alternativen via Ollama:
+Food und Planta nutzen Google Gemini Vision. Alternativen via Ollama:
 - **Qwen2.5-VL** — Bestes Open-Source Vision Model
 - **LLaVA** — Leichtgewichtiger, gut für Kategorisierung
 

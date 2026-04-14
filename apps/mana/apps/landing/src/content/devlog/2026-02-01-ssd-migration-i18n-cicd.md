@@ -104,7 +104,7 @@ Alle Authentifizierungs-Seiten sind jetzt mehrsprachig.
 - Chat Web
 - Clock Web
 - Contacts Web
-- NutriPhi Web
+- Food Web
 - Picture Web
 - Planta Web
 - Questions Web

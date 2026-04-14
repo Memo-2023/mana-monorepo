@@ -20,7 +20,7 @@ import { setSecurityHeaders } from '@mana/shared-utils/security-headers';
  *   - Glitchtip DSN → client-side error reporting
  *
  * Per-app HTTP backends (todo-api, calendar-api, contacts-api, chat-api,
- * storage-api, cards-api, mukke-api, nutriphi-api, picture-api, presi-api,
+ * storage-api, cards-api, mukke-api, food-api, picture-api, presi-api,
  * zitare-api, clock-api, context-api) were removed in the pre-launch
  * ghost-API cleanup — every product module now talks to mana-sync directly.
  */
@@ -60,7 +60,7 @@ const APP_SUBDOMAINS = new Set([
 	'cards',
 	'storage',
 	'presi',
-	'nutriphi',
+	'food',
 	'photos',
 	'music',
 	'picture',

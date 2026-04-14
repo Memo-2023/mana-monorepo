@@ -316,8 +316,8 @@ export const GUIDES_GUEST_SEED = {
 			id: 'step-ai3-1',
 			guideId: 'guide-ai',
 			sectionId: 'sec-ai-3',
-			title: 'KI in NutriPhi testen',
-			content: 'Fotografiere eine Mahlzeit in NutriPhi und lass die KI die Nährwerte erkennen.',
+			title: 'KI in Food testen',
+			content: 'Fotografiere eine Mahlzeit in Food und lass die KI die Nährwerte erkennen.',
 			order: 0,
 		},
 		// ── Sync > Account ────────────────────────────────

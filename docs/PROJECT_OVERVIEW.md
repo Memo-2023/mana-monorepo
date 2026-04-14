@@ -13,7 +13,7 @@ Dieses Dokument bietet eine umfassende Übersicht über alle Projekte im Manacor
    - [Picture](#picture)
    - [uLoad](#uload)
    - [Chat](#chat)
-   - [Nutriphi](#nutriphi)
+   - [Food](#food)
 3. [Shared Packages](#shared-packages)
 4. [Technologie-Stack](#technologie-stack)
 5. [Entwicklung](#entwicklung)
@@ -50,7 +50,7 @@ pnpm run cards:dev
 pnpm run memoro:dev
 pnpm run picture:dev
 pnpm run uload:dev
-pnpm run nutriphi:dev
+pnpm run food:dev
 ```
 
 ---
@@ -376,11 +376,11 @@ chat/
 
 ---
 
-### Nutriphi
+### Food
 
 **KI-gestützter Ernährungs-Tracker**
 
-Nutriphi ist ein intelligenter Ernährungs-Tracker, der mithilfe von Google Gemini Vision API Fotos von Mahlzeiten analysiert und automatisch Nährwertinformationen extrahiert.
+Food ist ein intelligenter Ernährungs-Tracker, der mithilfe von Google Gemini Vision API Fotos von Mahlzeiten analysiert und automatisch Nährwertinformationen extrahiert.
 
 #### Features
 
@@ -407,12 +407,12 @@ Nutriphi ist ein intelligenter Ernährungs-Tracker, der mithilfe von Google Gemi
 #### Projektstruktur
 
 ```
-nutriphi/
+food/
 ├── apps/
-│   ├── mobile/       # Expo React Native App (@nutriphi/mobile)
-│   ├── web/          # SvelteKit Web App (@nutriphi/web)
-│   └── landing/      # Astro Landing Page (@nutriphi/landing)
-├── server/           # Hono/Bun server (@nutriphi/server)
+│   ├── mobile/       # Expo React Native App (@food/mobile)
+│   ├── web/          # SvelteKit Web App (@food/web)
+│   └── landing/      # Astro Landing Page (@food/landing)
+├── server/           # Hono/Bun server (@food/server)
 ```
 
 #### API Endpoints
@@ -430,16 +430,16 @@ nutriphi/
 
 ```bash
 # Backend starten
-pnpm dev:nutriphi:backend
+pnpm dev:food:backend
 
 # Mobile App starten
-pnpm dev:nutriphi:mobile
+pnpm dev:food:mobile
 
 # Web App starten
-pnpm dev:nutriphi:web
+pnpm dev:food:web
 
 # Landing Page starten
-pnpm dev:nutriphi:landing
+pnpm dev:food:landing
 ```
 
 ---

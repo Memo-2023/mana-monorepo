@@ -20,7 +20,7 @@ const apps = [
 	{ name: 'storage', url: `${BASE}:5178` },
 	{ name: 'presi', url: `${BASE}:5180` },
 	{ name: 'cards', url: `${BASE}:5181` },
-	{ name: 'nutriphi', url: `${BASE}:5182` },
+	{ name: 'food', url: `${BASE}:5182` },
 	{ name: 'skilltree', url: `${BASE}:5183` },
 	{ name: 'photos', url: `${BASE}:5184` },
 	{ name: 'music', url: `${BASE}:5189` },

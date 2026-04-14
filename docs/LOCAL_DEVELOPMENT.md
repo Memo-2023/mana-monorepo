@@ -55,7 +55,7 @@ These apps have server-side compute and support both `local` and `full` modes:
 | Storage | 3016 | 5185 | Yes | Yes |
 | Context | 3020 | 5192 | Yes | Yes |
 | Planta | 3022 | 5191 | Yes | Yes |
-| NutriPhi | 3023 | 5180 | Yes | Yes |
+| Food | 3023 | 5180 | Yes | Yes |
 | Traces | 3026 | mobile | Yes | Yes |
 | Presi | 3008 | 5178 | Yes | Yes |
 | uLoad | 3070 | 5173 | Yes | Yes |
@@ -161,7 +161,7 @@ pnpm setup:db:context     # Setup context database + schema
 pnpm setup:db:storage     # Setup storage database + schema
 pnpm setup:db:mukke       # Setup mukke database + schema
 pnpm setup:db:plants      # Setup plants database + schema
-pnpm setup:db:nutriphi    # Setup nutriphi database + schema
+pnpm setup:db:food    # Setup food database + schema
 pnpm setup:db:questions   # Setup questions database + schema
 pnpm setup:db:traces      # Setup traces database + schema
 ```

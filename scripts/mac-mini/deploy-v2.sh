@@ -92,7 +92,7 @@ sleep 5
 
 # Create all needed databases
 for db in mana_auth mana_credits mana_user mana_subscriptions mana_analytics mana_sync \
-          chat todo calendar contacts storage cards music nutriphi planta \
+          chat todo calendar contacts storage cards music food planta \
           questions traces context citycorners photos presi skilltree; do
     docker compose -f "$COMPOSE_FILE" exec -T postgres \
         psql -U postgres -c "CREATE DATABASE $db;" 2>/dev/null || true

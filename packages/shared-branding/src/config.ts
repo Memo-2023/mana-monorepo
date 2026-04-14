@@ -79,9 +79,9 @@ export const APP_BRANDING: Record<AppId, AppBranding> = {
 		logoStroke: true,
 		logoStrokeWidth: 1.5,
 	},
-	nutriphi: {
-		id: 'nutriphi',
-		name: 'Nutriphi',
+	food: {
+		id: 'food',
+		name: 'Food',
 		tagline: 'AI Nutrition Tracker',
 		primaryColor: '#10b981',
 		secondaryColor: '#34d399',

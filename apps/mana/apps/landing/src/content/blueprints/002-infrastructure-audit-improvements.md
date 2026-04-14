@@ -104,7 +104,7 @@ Dieses Dokument analysiert den aktuellen Zustand der Mana-Infrastruktur auf dem 
 | Clock     | clock-backend     | 3017 | clock     | -                  |
 | Todo      | todo-backend      | 3018 | todo      | -                  |
 | Storage   | storage-backend   | 3019 | storage   | MinIO (Dateien)    |
-| NutriPhi  | nutriphi-backend  | 3023 | nutriphi  | Gemini API         |
+| Food      | food-backend      | 3023 | food      | Gemini API         |
 | SkillTree | skilltree-backend | 3024 | skilltree | -                  |
 
 #### Tier 4: Web-Frontends (11 Services)
@@ -120,7 +120,7 @@ Dieses Dokument analysiert den aktuellen Zustand der Mana-Infrastruktur auf dem 
 | Calendar       | calendar-web   | 5186 | 3016         |
 | Clock          | clock-web      | 5187 | 3017         |
 | Todo           | todo-web       | 5188 | 3018         |
-| NutriPhi       | nutriphi-web   | 5189 | 3023         |
+| Food           | food-web       | 5189 | 3023         |
 | LLM Playground | llm-playground | 5190 | -            |
 | SkillTree      | skilltree-web  | 5195 | 3024         |
 
@@ -137,7 +137,7 @@ Dieses Dokument analysiert den aktuellen Zustand der Mana-Infrastruktur auf dem 
 | Project Doc Bot | mana-matrix-project-doc-bot | 3313       | Dokumentation           |
 | Todo Bot        | mana-matrix-todo-bot        | 3314       | Task Management         |
 | Calendar Bot    | mana-matrix-calendar-bot    | 3315       | Termine                 |
-| NutriPhi Bot    | mana-matrix-nutriphi-bot    | 3316       | Nutrition               |
+| Food Bot        | mana-matrix-food-bot        | 3316       | Nutrition               |
 | Zitare Bot      | mana-matrix-zitare-bot      | 3317       | Quotes                  |
 | Clock Bot       | mana-matrix-clock-bot       | 3318       | Time Tracking           |
 | TTS Bot         | mana-matrix-tts-bot         | 3033       | Text-to-Speech          |
@@ -260,7 +260,7 @@ api-gateway:
 Viele Matrix-Bots teilen ähnlichen Code:
 
 - `matrix-todo-bot` und `matrix-calendar-bot` haben ähnliche Reminder-Logik
-- `matrix-nutriphi-bot` und `matrix-zitare-bot` sind Wrapper für Backends
+- `matrix-food-bot` und `matrix-zitare-bot` sind Wrapper für Backends
 - `matrix-mana-bot` sollte theoretisch alle anderen ersetzen
 
 ### 5. Volume-Fragmentierung
@@ -274,7 +274,7 @@ volumes:
   matrix_project_doc_bot_data:
   matrix_calendar_bot_data:
   matrix_todo_bot_data:
-  matrix_nutriphi_bot_data:
+  matrix_food_bot_data:
   matrix_zitare_bot_data:
   matrix_clock_bot_data:
   matrix_tts_bot_data:
@@ -308,7 +308,7 @@ NEU (Strukturiert):
 │  ├── 3034: contacts-backend                                         │
 │  ├── 3035: storage-backend                                          │
 │  ├── 3036: presi-backend                                            │
-│  ├── 3037: nutriphi-backend                                         │
+│  ├── 3037: food-backend                                         │
 │  └── 3038: skilltree-backend                                        │
 │                                                                      │
 │  4000-4099: Matrix Stack                                             │
@@ -330,7 +330,7 @@ NEU (Strukturiert):
 │  ├── 5014: contacts-web                                             │
 │  ├── 5015: storage-web                                              │
 │  ├── 5016: presi-web                                                │
-│  ├── 5017: nutriphi-web                                             │
+│  ├── 5017: food-web                                             │
 │  ├── 5018: skilltree-web                                            │
 │  └── 5090: llm-playground                                           │
 │                                                                      │
@@ -401,7 +401,7 @@ AKTUELL: 10 separate Bot-Container
 │ matrix-mana-bot      │ matrix-ollama-bot    │ ...         │
 │ matrix-stats-bot     │ matrix-project-doc   │             │
 │ matrix-todo-bot      │ matrix-calendar-bot  │             │
-│ matrix-nutriphi-bot  │ matrix-zitare-bot    │             │
+│ matrix-food-bot  │ matrix-zitare-bot    │             │
 │ matrix-clock-bot     │ matrix-tts-bot       │             │
 └────────────────────────────────────────────────────────────┘
 

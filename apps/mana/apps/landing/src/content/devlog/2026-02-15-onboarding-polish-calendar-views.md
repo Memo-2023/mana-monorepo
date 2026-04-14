@@ -186,7 +186,7 @@ export class TranscriptionService {
 Alle Matrix Bots mit STT-Funktionalität:
 
 - matrix-stt-bot
-- matrix-nutriphi-bot
+- matrix-food-bot
 - matrix-chat-bot (Voice Messages)
 
 ### Environment Variable

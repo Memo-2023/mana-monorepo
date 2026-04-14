@@ -182,8 +182,8 @@ for container in $ALL_PROBLEM_CONTAINERS; do
         mana-app-storage-web) SERVICE_NAME="storage-web" ;;
         mana-app-storage-backend) SERVICE_NAME="storage-backend" ;;
         mana-app-presi-web) SERVICE_NAME="presi-web" ;;
-        mana-app-nutriphi-web) SERVICE_NAME="nutriphi-web" ;;
-        mana-app-nutriphi-backend) SERVICE_NAME="nutriphi-backend" ;;
+        mana-app-food-web) SERVICE_NAME="food-web" ;;
+        mana-app-food-backend) SERVICE_NAME="food-backend" ;;
         mana-app-skilltree-web) SERVICE_NAME="skilltree-web" ;;
         # mana-app-skilltree-backend: REMOVED
         mana-app-photos-web) SERVICE_NAME="photos-web" ;;

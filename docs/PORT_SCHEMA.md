@@ -104,7 +104,7 @@ Pure CRUD apps use mana-sync directly.
 | 3035 | picture-server | Hono/Bun | Replicate AI, generation orchestration |
 | 3036 | cards-server | Hono/Bun | AI card generation |
 | 3037 | mukke-server | Hono/Bun | Audio processing, BPM, ID3 tags |
-| 3038 | nutriphi-server | Hono/Bun | Gemini meal analysis |
+| 3038 | food-server | Hono/Bun | Gemini meal analysis |
 | 3039 | plants-server | Hono/Bun | Gemini plant analysis |
 | 3040 | presi-server | Hono/Bun | Share links |
 | 3042 | mana-mail | Hono/Bun | JMAP proxy to Stalwart, account provisioning |
@@ -128,7 +128,7 @@ Pure CRUD apps use mana-sync directly.
 | 5014 | contacts-web | 3033 contacts-server |
 | 5015 | storage-web | 3034 storage-server |
 | 5016 | presi-web | 3040 presi-server |
-| 5017 | nutriphi-web | 3038 nutriphi-server |
+| 5017 | food-web | 3038 food-server |
 | 5018 | zitare-web | *(local-first only)* |
 | 5019 | photos-web | *(local-first + mana-media)* |
 | 5020 | skilltree-web | *(local-first only)* |

@@ -71,8 +71,8 @@ jobs:
       storage-backend: ${{ steps.changes.outputs.storage-backend }}
       storage-web: ${{ steps.changes.outputs.storage-web }}
       telegram-stats-bot: ${{ steps.changes.outputs.telegram-stats-bot }}
-      nutriphi-backend: ${{ steps.changes.outputs.nutriphi-backend }}
-      nutriphi-web: ${{ steps.changes.outputs.nutriphi-web }}
+      food-backend: ${{ steps.changes.outputs.food-backend }}
+      food-web: ${{ steps.changes.outputs.food-web }}
       skilltree-web: ${{ steps.changes.outputs.skilltree-web }}
       any-changes: ${{ steps.changes.outputs.any-changes }}
     steps:
@@ -109,8 +109,8 @@ jobs:
             echo "storage-backend=true" >> $GITHUB_OUTPUT
             echo "storage-web=true" >> $GITHUB_OUTPUT
             echo "telegram-stats-bot=true" >> $GITHUB_OUTPUT
-            echo "nutriphi-backend=true" >> $GITHUB_OUTPUT
-            echo "nutriphi-web=true" >> $GITHUB_OUTPUT
+            echo "food-backend=true" >> $GITHUB_OUTPUT
+            echo "food-web=true" >> $GITHUB_OUTPUT
             echo "skilltree-web=true" >> $GITHUB_OUTPUT
             echo "any-changes=true" >> $GITHUB_OUTPUT
             exit 0
@@ -151,8 +151,8 @@ jobs:
             echo "storage-backend=true" >> $GITHUB_OUTPUT
             echo "storage-web=true" >> $GITHUB_OUTPUT
             echo "telegram-stats-bot=true" >> $GITHUB_OUTPUT
-            echo "nutriphi-backend=true" >> $GITHUB_OUTPUT
-            echo "nutriphi-web=true" >> $GITHUB_OUTPUT
+            echo "food-backend=true" >> $GITHUB_OUTPUT
+            echo "food-web=true" >> $GITHUB_OUTPUT
             echo "skilltree-web=true" >> $GITHUB_OUTPUT
             echo "any-changes=true" >> $GITHUB_OUTPUT
             exit 0
@@ -341,20 +341,20 @@ jobs:
             echo "telegram-stats-bot=false" >> $GITHUB_OUTPUT
           fi
 
-          # nutriphi-backend
-          NUTRIPHI_BACKEND_CHANGED=$(check_pattern "apps/nutriphi/apps/backend/|apps/nutriphi/packages/")
-          if [ "$COMMON_CHANGED" == "true" ] || [ "$SHARED_AUTH_CHANGED" == "true" ] || [ "$NUTRIPHI_BACKEND_CHANGED" == "true" ]; then
-            echo "nutriphi-backend=true" >> $GITHUB_OUTPUT
+          # food-backend
+          FOOD_BACKEND_CHANGED=$(check_pattern "apps/food/apps/backend/|apps/food/packages/")
+          if [ "$COMMON_CHANGED" == "true" ] || [ "$SHARED_AUTH_CHANGED" == "true" ] || [ "$FOOD_BACKEND_CHANGED" == "true" ]; then
+            echo "food-backend=true" >> $GITHUB_OUTPUT
           else
-            echo "nutriphi-backend=false" >> $GITHUB_OUTPUT
+            echo "food-backend=false" >> $GITHUB_OUTPUT
           fi
 
-          # nutriphi-web
-          NUTRIPHI_WEB_CHANGED=$(check_pattern "apps/nutriphi/apps/web/|apps/nutriphi/packages/")
-          if [ "$COMMON_CHANGED" == "true" ] || [ "$SHARED_AUTH_CHANGED" == "true" ] || [ "$SHARED_UI_CHANGED" == "true" ] || [ "$SHARED_WEB_CHANGED" == "true" ] || [ "$NUTRIPHI_WEB_CHANGED" == "true" ]; then
-            echo "nutriphi-web=true" >> $GITHUB_OUTPUT
+          # food-web
+          FOOD_WEB_CHANGED=$(check_pattern "apps/food/apps/web/|apps/food/packages/")
+          if [ "$COMMON_CHANGED" == "true" ] || [ "$SHARED_AUTH_CHANGED" == "true" ] || [ "$SHARED_UI_CHANGED" == "true" ] || [ "$SHARED_WEB_CHANGED" == "true" ] || [ "$FOOD_WEB_CHANGED" == "true" ]; then
+            echo "food-web=true" >> $GITHUB_OUTPUT
           else
-            echo "nutriphi-web=false" >> $GITHUB_OUTPUT
+            echo "food-web=false" >> $GITHUB_OUTPUT
           fi
 
           # skilltree-backend: REMOVED — migrated to local-first
@@ -406,8 +406,8 @@ jobs:
           echo "| storage-backend | ${{ steps.changes.outputs.storage-backend }} |" >> $GITHUB_STEP_SUMMARY
           echo "| storage-web | ${{ steps.changes.outputs.storage-web }} |" >> $GITHUB_STEP_SUMMARY
           echo "| telegram-stats-bot | ${{ steps.changes.outputs.telegram-stats-bot }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| nutriphi-backend | ${{ steps.changes.outputs.nutriphi-backend }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| nutriphi-web | ${{ steps.changes.outputs.nutriphi-web }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| food-backend | ${{ steps.changes.outputs.food-backend }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| food-web | ${{ steps.changes.outputs.food-web }} |" >> $GITHUB_STEP_SUMMARY
           echo "| skilltree-backend | removed |" >> $GITHUB_STEP_SUMMARY
           echo "| skilltree-web | ${{ steps.changes.outputs.skilltree-web }} |" >> $GITHUB_STEP_SUMMARY
           echo "| zitare-backend | removed |" >> $GITHUB_STEP_SUMMARY
@@ -1173,11 +1173,11 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  build-nutriphi-backend:
-    name: Build nutriphi-backend
+  build-food-backend:
+    name: Build food-backend
     runs-on: ubuntu-latest
     needs: detect-changes
-    if: needs.detect-changes.outputs.nutriphi-backend == 'true'
+    if: needs.detect-changes.outputs.food-backend == 'true'
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-qemu-action@v3
@@ -1190,23 +1190,23 @@ jobs:
       - uses: docker/metadata-action@v5
         id: meta
         with:
-          images: ghcr.io/${{ github.repository_owner }}/nutriphi-backend
+          images: ghcr.io/${{ github.repository_owner }}/food-backend
           tags: type=raw,value=latest
       - uses: docker/build-push-action@v5
         with:
           context: .
-          file: apps/nutriphi/apps/backend/Dockerfile
+          file: apps/food/apps/backend/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  build-nutriphi-web:
-    name: Build nutriphi-web
+  build-food-web:
+    name: Build food-web
     runs-on: ubuntu-latest
     needs: detect-changes
-    if: needs.detect-changes.outputs.nutriphi-web == 'true'
+    if: needs.detect-changes.outputs.food-web == 'true'
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-qemu-action@v3
@@ -1219,12 +1219,12 @@ jobs:
       - uses: docker/metadata-action@v5
         id: meta
         with:
-          images: ghcr.io/${{ github.repository_owner }}/nutriphi-web
+          images: ghcr.io/${{ github.repository_owner }}/food-web
           tags: type=raw,value=latest
       - uses: docker/build-push-action@v5
         with:
           context: .
-          file: apps/nutriphi/apps/web/Dockerfile
+          file: apps/food/apps/web/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.meta.outputs.tags }}

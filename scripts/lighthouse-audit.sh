@@ -17,7 +17,7 @@ APPS=(
   "contacts.mana.how"
   "storage.mana.how"
   "presi.mana.how"
-  "nutriphi.mana.how"
+  "food.mana.how"
   "zitare.mana.how"
   "photos.mana.how"
   "skilltree.mana.how"

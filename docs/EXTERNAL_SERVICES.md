@@ -39,7 +39,7 @@ Dieser Bericht dokumentiert alle externen Dienste im Mana Monorepo und evaluiert
 │  │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐  │   │
 │  │  │ Replicate│ │OpenRouter│ │  Gemini  │ │  Ollama  │ │Azure OAPI│  │   │
 │  │  │ (Picture)│ │  (Chat)  │ │(Planta,  │ │  (Chat)  │ │  (Chat)  │  │   │
-│  │  │  CLOUD   │ │  CLOUD   │ │Nutriphi) │ │  LOCAL   │ │  CLOUD   │  │   │
+│  │  │  CLOUD   │ │  CLOUD   │ │Food) │ │  LOCAL   │ │  CLOUD   │  │   │
 │  │  └──────────┘ └──────────┘ └──────────┘ └──────────┘ └──────────┘  │   │
 │  └─────────────────────────────────────────────────────────────────────┘   │
 │                                                                              │
@@ -84,7 +84,7 @@ Legende: LOCAL = Self-hosted | CLOUD = Externer Dienst | FREE = Kostenlos
 |--------|--------|-------|------------------|-------------------|
 | **Replicate** | Picture | Bildgenerierung (Flux, SDXL, SD) | `PICTURE_REPLICATE_API_TOKEN` | €20-100/Monat |
 | **OpenRouter** | Chat | Cloud LLMs (Claude, GPT, Llama, DeepSeek) | `OPENROUTER_API_KEY` | €10-50/Monat |
-| **Google Gemini** | Planta, Nutriphi, Cards | Vision & Text AI | `GEMINI_API_KEY`, `PLANTA_GEMINI_API_KEY` | €5-20/Monat |
+| **Google Gemini** | Planta, Food, Cards | Vision & Text AI | `GEMINI_API_KEY`, `PLANTA_GEMINI_API_KEY` | €5-20/Monat |
 | **Azure OpenAI** | Chat (Docker) | GPT-4o via Azure | `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_API_KEY` | Optional |
 | **Anthropic** | Mana Games | Claude API | `MANA_GAMES_ANTHROPIC_API_KEY` | Optional |
 | **Ollama** | Chat | Lokale LLMs (Gemma 3, Llama) | `OLLAMA_URL` | ✅ Bereits lokal |
@@ -104,7 +104,7 @@ Legende: LOCAL = Self-hosted | CLOUD = Externer Dienst | FREE = Kostenlos
 - `chat-storage` - User-Uploads
 - `cards-storage` - Card/Deck Assets
 - `plants-storage` - Pflanzenfotos
-- `nutriphi-storage` - Mahlzeitenfotos
+- `food-storage` - Mahlzeitenfotos
 - `presi-storage` - Präsentationsfolien
 - `calendar-storage` - Kalender-Anhänge
 - `contacts-storage` - Kontakt-Avatare
@@ -260,7 +260,7 @@ LLaVA (Large Language and Vision Assistant) kann Gemini Vision für die meisten 
 
 **Use-Cases in Mana:**
 - **Planta:** Pflanzenidentifikation
-- **Nutriphi:** Lebensmittelerkennung, Nährwertschätzung
+- **Food:** Lebensmittelerkennung, Nährwertschätzung
 
 **Installation:**
 
@@ -477,10 +477,10 @@ PICTURE_REPLICATE_API_TOKEN=r8_xxx
 # OpenRouter (Chat)
 OPENROUTER_API_KEY=sk-or-v1-xxx
 
-# Google Gemini (Planta, Nutriphi, Cards)
+# Google Gemini (Planta, Food, Cards)
 GEMINI_API_KEY=AIza...
 PLANTA_GEMINI_API_KEY=AIza...
-NUTRIPHI_GEMINI_API_KEY=AIza...
+FOOD_GEMINI_API_KEY=AIza...
 MANA_GAMES_GOOGLE_GENAI_API_KEY=AIza...
 
 # Ollama (Local - bereits konfiguriert)

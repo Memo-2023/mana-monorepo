@@ -24,7 +24,7 @@ This document defines the URL schema for all mana.how subdomains.
 | **Chat** | chat.mana.how | api.mana.how/chat | Active |
 | **Storage** | storage.mana.how | api.mana.how/storage | Active |
 | **Zitare** | zitare.mana.how | api.mana.how/zitare | Active |
-| **NutriPhi** | nutriphi.mana.how | api.mana.how/nutriphi | Active |
+| **Food** | food.mana.how | api.mana.how/food | Active |
 | **Presi** | presi.mana.how | api.mana.how/presi | Active |
 | **SkillTree** | skilltree.mana.how | api.mana.how/skilltree | Active |
 | **Photos** | photos.mana.how | api.mana.how/photos | Active |
@@ -68,7 +68,7 @@ For web analytics, the following apps are tracked in Umami:
 | `contacts-webapp` | Contacts | contacts.mana.how |
 | `storage-webapp` | Storage | storage.mana.how |
 | `zitare-webapp` | Zitare | zitare.mana.how |
-| `nutriphi-webapp` | NutriPhi | nutriphi.mana.how |
+| `food-webapp` | Food | food.mana.how |
 | `presi-webapp` | Presi | presi.mana.how |
 | `skilltree-webapp` | SkillTree | skilltree.mana.how |
 | `photos-webapp` | Photos | photos.mana.how |

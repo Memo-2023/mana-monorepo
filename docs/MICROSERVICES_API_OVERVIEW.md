@@ -152,7 +152,7 @@ Diese Services sind für Matrix/Telegram konzipiert, nicht als direkte APIs:
 | matrix-project-doc-bot | 3313 | Blog-Generierung |
 | matrix-todo-bot | 3314 | Task Management |
 | matrix-calendar-bot | 3315 | Kalender/Events |
-| matrix-nutriphi-bot | 3316 | Ernährungs-Tracking |
+| matrix-food-bot | 3316 | Ernährungs-Tracking |
 | matrix-zitare-bot | 3317 | Zitate |
 | matrix-clock-bot | 3318 | Timer/Alarme |
 | matrix-tts-bot | 3023 | Sprachausgabe |
@@ -461,6 +461,6 @@ services/
 | 3313 | matrix-project-doc-bot | Bot |
 | 3314 | matrix-todo-bot | Bot |
 | 3315 | matrix-calendar-bot | Bot |
-| 3316 | matrix-nutriphi-bot | Bot |
+| 3316 | matrix-food-bot | Bot |
 | 3317 | matrix-zitare-bot | Bot |
 | 3318 | matrix-clock-bot | Bot |

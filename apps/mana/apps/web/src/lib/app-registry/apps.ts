@@ -604,12 +604,12 @@ registerApp({
 });
 
 registerApp({
-	id: 'nutriphi',
-	name: 'Nutriphi',
+	id: 'food',
+	name: 'Food',
 	color: '#22C55E',
 	icon: ForkKnife,
 	views: {
-		list: { load: () => import('$lib/modules/nutriphi/ListView.svelte') },
+		list: { load: () => import('$lib/modules/food/ListView.svelte') },
 	},
 	contextMenuActions: [
 		{
@@ -618,7 +618,7 @@ registerApp({
 			icon: Plus,
 			action: () =>
 				window.dispatchEvent(
-					new CustomEvent('mana:quick-action', { detail: { app: 'nutriphi', action: 'new' } })
+					new CustomEvent('mana:quick-action', { detail: { app: 'food', action: 'new' } })
 				),
 		},
 	],

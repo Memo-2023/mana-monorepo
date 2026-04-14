@@ -34,7 +34,7 @@ export enum CreditOperationType {
 	AI_RESEARCH_QUICK = 'ai_research_quick',
 	AI_RESEARCH_DEEP = 'ai_research_deep',
 
-	// NutriPhi - Food analysis
+	// Food - Food analysis
 	AI_FOOD_ANALYSIS = 'ai_food_analysis',
 
 	// Cards - AI deck generation
@@ -218,7 +218,7 @@ export const OPERATION_METADATA: Record<CreditOperationType, OperationMetadata> 
 		name: 'Analyze Food Photo',
 		description: 'Analyze nutrition from a food photo',
 		category: CreditCategory.AI,
-		app: 'nutriphi',
+		app: 'food',
 	},
 
 	// Deck Generation

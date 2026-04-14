@@ -1,0 +1,84 @@
+{
+	"app": {
+		"name": "Food",
+		"loading": "Chargement...",
+		"tagline": "Comprendre la nutrition"
+	},
+	"nav": {
+		"dashboard": "Tableau de bord",
+		"meals": "Repas",
+		"goals": "Objectifs",
+		"favorites": "Favoris",
+		"stats": "Statistiques",
+		"settings": "Paramètres"
+	},
+	"meal": {
+		"add": "Ajouter un repas",
+		"edit": "Modifier le repas",
+		"delete": "Supprimer le repas",
+		"photo": "Prendre une photo",
+		"text": "Décrire",
+		"analyzing": "Analyse en cours...",
+		"noMeals": "Pas encore de repas",
+		"breakfast": "Petit-déjeuner",
+		"lunch": "Déjeuner",
+		"dinner": "Dîner",
+		"snack": "En-cas"
+	},
+	"nutrition": {
+		"calories": "Calories",
+		"protein": "Protéines",
+		"carbs": "Glucides",
+		"fat": "Lipides",
+		"fiber": "Fibres",
+		"sugar": "Sucre",
+		"kcal": "kcal",
+		"grams": "g"
+	},
+	"goals": {
+		"daily": "Objectifs quotidiens",
+		"setGoals": "Définir les objectifs",
+		"calories": "Objectif calorique",
+		"protein": "Objectif protéines",
+		"carbs": "Objectif glucides",
+		"fat": "Objectif lipides",
+		"progress": "Progression"
+	},
+	"stats": {
+		"today": "Aujourd'hui",
+		"week": "Cette semaine",
+		"remaining": "Restant",
+		"consumed": "Consommé",
+		"average": "Moyenne"
+	},
+	"favorites": {
+		"add": "Ajouter aux favoris",
+		"remove": "Retirer des favoris",
+		"noFavorites": "Pas de favoris",
+		"useAgain": "Réutiliser"
+	},
+	"common": {
+		"save": "Enregistrer",
+		"cancel": "Annuler",
+		"delete": "Supprimer",
+		"edit": "Modifier",
+		"add": "Ajouter",
+		"close": "Fermer",
+		"search": "Rechercher",
+		"error": "Erreur",
+		"success": "Succès",
+		"loading": "Chargement..."
+	},
+	"errors": {
+		"loadMeals": "Impossible de charger les repas",
+		"analyzeFailed": "L'analyse a échoué",
+		"saveFailed": "Impossible d'enregistrer",
+		"loadGoals": "Impossible de charger les objectifs"
+	},
+	"success": {
+		"mealAdded": "Repas ajouté",
+		"mealDeleted": "Repas supprimé",
+		"goalsSaved": "Objectifs enregistrés",
+		"favoriteAdded": "Ajouté aux favoris"
+	}
+}

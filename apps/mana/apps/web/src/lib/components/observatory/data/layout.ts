@@ -154,7 +154,7 @@ export const APP_POSITIONS: Record<string, { x: number; y: number; lakeId: strin
 	zitare: { x: 640, y: 600, lakeId: 'db-center' },
 	music: { x: 850, y: 610, lakeId: 'db-center' },
 	clock: { x: 880, y: 680, lakeId: 'db-center' },
-	nutriphi: { x: 650, y: 720, lakeId: 'db-center' },
+	food: { x: 650, y: 720, lakeId: 'db-center' },
 
 	// Around Waldsee Ost (db-right)
 	photos: { x: 1110, y: 575, lakeId: 'db-right' },

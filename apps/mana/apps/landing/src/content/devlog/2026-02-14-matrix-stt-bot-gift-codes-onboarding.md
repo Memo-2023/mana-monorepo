@@ -16,7 +16,7 @@ tags:
     'tts',
     'german-voice',
     'emoji-picker',
-    'nutriphi',
+    'food',
     'stats-bot',
   ]
 featured: true
@@ -320,7 +320,7 @@ POST / api / users / me / preferences / emojis;
 
 ---
 
-## NutriPhi Bot Improvements
+## Food Bot Improvements
 
 ### Auto-Analyze Text
 
@@ -449,7 +449,7 @@ Tracking IDs für alle Web-Apps aktualisiert.
 | **Clock Bot**    | 4       | Timer Progress + Topic |
 | **TTS**          | 4       | German Voice + WAV     |
 | **Emoji Picker** | 3       | Recently Used + Sync   |
-| **NutriPhi**     | 5       | Text-Analyse + Fixes   |
+| **Food**         | 5       | Text-Analyse + Fixes   |
 | **Stats Bot**    | 3       | Infra Monitoring       |
 | **Bot Fixes**    | 8       | Loop Prevention + Auth |
 | **Session**      | 2       | Auto-Refresh           |

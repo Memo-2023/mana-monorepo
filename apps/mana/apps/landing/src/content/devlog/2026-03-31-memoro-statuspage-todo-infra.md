@@ -66,14 +66,14 @@ Der Legacy-Code ist eingecheckt als Referenz. Die aktiven Services werden in Sch
 
 Die bestehende Web-App wurde vollständig auf den Monorepo-Stack portiert:
 
-| Phase | Was passiert ist |
-|-------|-----------------|
-| 1 | Package-Struktur: `@memoro/web`, adapter-node, Tailwind v4 + `@manacore/shared-tailwind` |
-| 2 | Auth: `createManaAuthStore()` aus `@manacore/shared-auth-stores`, Google/Apple OAuth entfernt |
-| 3 | Local-First: `memoroStore` mit 7 Collections (memos, tags, spaces, invites, …) |
-| 4 | Guest-Seed: Demo-Daten die sofort geladen werden ohne Login |
-| 5 | Service Layer: `memoService` + `tagService` von Supabase direct auf local-store Collections |
-| 6 | Workspace-Integration: `dev:memoro:*` Scripts, CLAUDE.md Eintrag |
+| Phase | Was passiert ist                                                                              |
+| ----- | --------------------------------------------------------------------------------------------- |
+| 1     | Package-Struktur: `@memoro/web`, adapter-node, Tailwind v4 + `@manacore/shared-tailwind`      |
+| 2     | Auth: `createManaAuthStore()` aus `@manacore/shared-auth-stores`, Google/Apple OAuth entfernt |
+| 3     | Local-First: `memoroStore` mit 7 Collections (memos, tags, spaces, invites, …)                |
+| 4     | Guest-Seed: Demo-Daten die sofort geladen werden ohne Login                                   |
+| 5     | Service Layer: `memoService` + `tagService` von Supabase direct auf local-store Collections   |
+| 6     | Workspace-Integration: `dev:memoro:*` Scripts, CLAUDE.md Eintrag                              |
 
 **Wichtig:** Google/Apple OAuth komplett entfernt — Memoro nutzt ausschließlich mana-auth JWT, wie alle anderen Apps im Ökosystem. Keine externen OAuth-Provider.
 
@@ -113,15 +113,15 @@ Tier 4: Azure Batch Transcription
 
 ### Vergleich: Vorher vs. Nachher
 
-| Aspekt | NestJS (alt) | Hono/Bun (neu) |
-|--------|-------------|----------------|
-| Services | 2 (Backend + Audio-Backend) | 2 (Server + Audio-Server) |
-| LOC (gesamt) | ~12.000 | ~1.800 |
-| Dependencies | 20+ (@nestjs/*, class-validator, …) | 4 (hono, zod, fluent-ffmpeg, …) |
-| Cold Start | ~2-3s | ~50ms |
-| RAM | ~400MB | ~80MB |
-| Auth | Supabase JWT | mana-auth JWT |
-| OAuth | Google + Apple | Keiner (self-sovereign) |
+| Aspekt       | NestJS (alt)                         | Hono/Bun (neu)                  |
+| ------------ | ------------------------------------ | ------------------------------- |
+| Services     | 2 (Backend + Audio-Backend)          | 2 (Server + Audio-Server)       |
+| LOC (gesamt) | ~12.000                              | ~1.800                          |
+| Dependencies | 20+ (@nestjs/\*, class-validator, …) | 4 (hono, zod, fluent-ffmpeg, …) |
+| Cold Start   | ~2-3s                                | ~50ms                           |
+| RAM          | ~400MB                               | ~80MB                           |
+| Auth         | Supabase JWT                         | mana-auth JWT                   |
+| OAuth        | Google + Apple                       | Keiner (self-sovereign)         |
 
 ---
 
@@ -169,12 +169,12 @@ Nach dem Notepad-Redesign von gestern gab es heute mehrere Iteration-Loops auf D
 
 Die Task-Cards wurden weiter bereinigt:
 
-| Vorher | Nachher |
-|--------|---------|
-| Border + Hintergrundfarbe | Kein Border, kein Hintergrund |
-| Checkbox vertikal zentriert | Checkbox am Anfang der ersten Zeile (flex-start) |
-| Titel abgeschnitten (truncate) | Mehrzeilig (word-break) |
-| Hover: translateY + Hintergrund | Kein Hover-Effekt |
+| Vorher                          | Nachher                                          |
+| ------------------------------- | ------------------------------------------------ |
+| Border + Hintergrundfarbe       | Kein Border, kein Hintergrund                    |
+| Checkbox vertikal zentriert     | Checkbox am Anfang der ersten Zeile (flex-start) |
+| Titel abgeschnitten (truncate)  | Mehrzeilig (word-break)                          |
+| Hover: translateY + Hintergrund | Kein Hover-Effekt                                |
 
 **Resultat:** Die Task-Liste liest sich wie echtes Papier — nur der Text, keine UI-Noise.
 
@@ -273,11 +273,11 @@ border: 1px solid var(--border);
 
 Drei Komponenten die über viele Apps hinweg dupliziert waren:
 
-| Komponente | Apps (vorher) | Lösung |
-|-----------|--------------|--------|
-| `LanguageSelector` | contacts, zitare: Custom-Dropdown mit eigenem State | → `PillDropdown` aus shared-ui (wie die anderen 8 Apps) |
-| `ConfirmDialog` | context (4 Stellen), times (3 Stellen): lokale Kopien | → `ConfirmationModal` aus `@manacore/shared-ui` |
-| `AppSlider` | todo, calendar, chat, contacts, presi: statisches `MANA_APPS` | → `getActiveManaApps()` (filtert inaktive Apps) |
+| Komponente         | Apps (vorher)                                                 | Lösung                                                  |
+| ------------------ | ------------------------------------------------------------- | ------------------------------------------------------- |
+| `LanguageSelector` | contacts, zitare: Custom-Dropdown mit eigenem State           | → `PillDropdown` aus shared-ui (wie die anderen 8 Apps) |
+| `ConfirmDialog`    | context (4 Stellen), times (3 Stellen): lokale Kopien         | → `ConfirmationModal` aus `@manacore/shared-ui`         |
+| `AppSlider`        | todo, calendar, chat, contacts, presi: statisches `MANA_APPS` | → `getActiveManaApps()` (filtert inaktive Apps)         |
 
 **–228 Zeilen Netto**, 2 lokale Komponenten gelöscht.
 
@@ -289,12 +289,12 @@ Drei Komponenten die über viele Apps hinweg dupliziert waren:
 
 Die letzten 4 Apps die noch GitHub Container Registry (GHCR) als Image-Quelle nutzten wurden auf das einheitliche lokale Build-Pattern umgestellt:
 
-| App | Vorher | Nachher |
-|-----|--------|---------|
-| chat-web | `ghcr.io/...` | lokaler Build |
+| App       | Vorher        | Nachher       |
+| --------- | ------------- | ------------- |
+| chat-web  | `ghcr.io/...` | lokaler Build |
 | clock-web | `ghcr.io/...` | lokaler Build |
 | presi-web | `ghcr.io/...` | lokaler Build |
-| nutriphi-web | `ghcr.io/...` | lokaler Build |
+| food-web  | `ghcr.io/...` | lokaler Build |
 
 **Einzige Ausnahme:** Umami (externes Projekt) bleibt bei GHCR.
 
@@ -306,13 +306,13 @@ Das Arcade-Backend (AI Browser Games) war noch auf NestJS. Migration auf Hono/Bu
 
 ### Weitere Fixes
 
-| Fix | Beschreibung |
-|-----|-------------|
-| Port-Konflikt | calc-web: Port 5026 → 5031 (kollidierte mit zitare-web) |
-| Cloudflared | Config mit tatsächlichen Container-Ports synchronisiert |
+| Fix            | Beschreibung                                                 |
+| -------------- | ------------------------------------------------------------ |
+| Port-Konflikt  | calc-web: Port 5026 → 5031 (kollidierte mit zitare-web)      |
+| Cloudflared    | Config mit tatsächlichen Container-Ports synchronisiert      |
 | Landings Nginx | `mkdir snippets` vor Copy, status.mana.how vhost hinzugefügt |
-| Prerender 404 | favicon.png 404s bei skilltree + nutriphi unterdrückt |
-| inventar-web | Browser-Error-Tracking Import repariert |
+| Prerender 404  | favicon.png 404s bei skilltree + food unterdrückt            |
+| inventar-web   | Browser-Error-Tracking Import repariert                      |
 
 ---
 
@@ -330,16 +330,16 @@ Drei neue Planungs-/Guidelines-Dokumente:
 
 ## Zusammenfassung
 
-| Bereich | Commits | Highlights |
-|---------|---------|-----------|
-| Memoro Integration | ~25 | Web, Server, Audio-Server ins Monorepo |
-| Status-Page | ~12 | status.mana.how live, Blackbox Exporter, ManaScore-Badges |
-| Todo Polish | ~20 | Paper-Cards, Complete-Animation, Detail-Modal, Kanban-Subtasks |
-| Auth | ~10 | EMAIL_NOT_VERIFIED robust, Resend-Panel, callbackURL Fix |
-| Infra | ~15 | GHCR→lokal, Arcade, Port-Fix, Cloudflared |
-| UI Unification | ~8 | Elevation-System, LanguageSelector, ConfirmDialog, AppSlider |
-| Docs | ~5 | Auth UX Patterns, Bundle Format, Memoro Plan |
-| Fixes | ~3 | Prerender, inventar-web, manacore-web Login-Redirect |
+| Bereich            | Commits | Highlights                                                     |
+| ------------------ | ------- | -------------------------------------------------------------- |
+| Memoro Integration | ~25     | Web, Server, Audio-Server ins Monorepo                         |
+| Status-Page        | ~12     | status.mana.how live, Blackbox Exporter, ManaScore-Badges      |
+| Todo Polish        | ~20     | Paper-Cards, Complete-Animation, Detail-Modal, Kanban-Subtasks |
+| Auth               | ~10     | EMAIL_NOT_VERIFIED robust, Resend-Panel, callbackURL Fix       |
+| Infra              | ~15     | GHCR→lokal, Arcade, Port-Fix, Cloudflared                      |
+| UI Unification     | ~8      | Elevation-System, LanguageSelector, ConfirmDialog, AppSlider   |
+| Docs               | ~5      | Auth UX Patterns, Bundle Format, Memoro Plan                   |
+| Fixes              | ~3      | Prerender, inventar-web, manacore-web Login-Redirect           |
 
 ---
 

@@ -87,7 +87,7 @@ In zwei intensiven Sessions wurde die gesamte Mana-Architektur von einem **API-f
 | Presi | — | ~150 | (existierte schon) |
 | Context | 3020 | 94 | AI Text Generation |
 | Planta | 3022 | 104 | Photo Upload, AI Plant Analysis |
-| NutriPhi | 3023 | 154 | AI Meal Analysis, Recommendations |
+| Food | 3023 | 154 | AI Meal Analysis, Recommendations |
 | Traces | 3026 | 108 | AI Guide Generation, Location Sync |
 | **Σ Compute** | | **~1.537** | | **~40.000 LOC NestJS** |
 
@@ -326,7 +326,7 @@ mana-analytics (Hono, 475 LOC)
 | 7 | Presi | decks, slides | ✅ Komplett |
 | 8 | Picture | images, boards, boardItems, tags, imageTags | ✅ Komplett |
 | 9 | Inventar | collections, items, locations, categories | ✅ Komplett |
-| 10 | NutriPhi | meals, goals, favorites | ✅ Komplett |
+| 10 | Food | meals, goals, favorites | ✅ Komplett |
 | 11 | Planta | plants, plantPhotos, wateringSchedules, wateringLogs | ✅ Komplett |
 | 12 | Storage | files, folders, tags, fileTags | ✅ Komplett |
 | 13 | Chat | conversations, messages, templates | ✅ Komplett |
@@ -363,7 +363,7 @@ shared-feedback-types + shared-feedback-service + shared-feedback-ui  → 3 Pack
 shared-help-types + shared-help-content + shared-help-ui + shared-help-mobile → 4 Packages
 shared-subscription-types + shared-subscription-ui                     → 2 Packages
 credit-operations + shared-credit-service + shared-credit-ui           → 3 Packages
-shared-gpu, nutriphi-database                                          → 2 unbenutzt
+shared-gpu, food-database                                          → 2 unbenutzt
 ```
 
 ### 8.2 Nachher: 43 Packages (-26%)
@@ -374,7 +374,7 @@ shared-gpu, nutriphi-database                                          → 2 unb
 | Help 4→1 | shared-help-{types,content,ui,mobile} | `@mana/help` | -3 |
 | Subscription 2→1 | shared-subscription-{types,ui} | `@mana/subscriptions` | -1 |
 | Credits 3→1 | credit-operations, shared-credit-{service,ui} | `@mana/credits` | -2 |
-| Unbenutzt geloescht | shared-gpu, nutriphi-database | — | -2 |
+| Unbenutzt geloescht | shared-gpu, food-database | — | -2 |
 | NestJS-spezifisch entfernt | shared-nestjs-{auth,health,metrics,setup}, mana-core-nestjs-integration | — | -5 |
 | **Gesamt** | **58** | **43** | **-15** |
 

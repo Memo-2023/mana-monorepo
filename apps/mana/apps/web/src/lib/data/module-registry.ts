@@ -68,7 +68,7 @@ import { citycornersModuleConfig } from '$lib/modules/citycorners/module.config'
 import { timesModuleConfig } from '$lib/modules/times/module.config';
 import { contextModuleConfig } from '$lib/modules/context/module.config';
 import { questionsModuleConfig } from '$lib/modules/questions/module.config';
-import { nutriphiModuleConfig } from '$lib/modules/nutriphi/module.config';
+import { foodModuleConfig } from '$lib/modules/food/module.config';
 import { plantsModuleConfig } from '$lib/modules/plants/module.config';
 import { uloadModuleConfig } from '$lib/modules/uload/module.config';
 import { calcModuleConfig } from '$lib/modules/calc/module.config';
@@ -118,7 +118,7 @@ export const MODULE_CONFIGS: readonly ModuleConfig[] = [
 	timesModuleConfig,
 	contextModuleConfig,
 	questionsModuleConfig,
-	nutriphiModuleConfig,
+	foodModuleConfig,
 	plantsModuleConfig,
 	uloadModuleConfig,
 	calcModuleConfig,

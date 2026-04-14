@@ -58,7 +58,7 @@ Die Architektur-Migration hat alle Apps gleichzeitig verbessert:
 | **Zitare** | 88 | 93 | +5 | Local-First, war schon solide |
 | **Clock** | 85 | 91 | +6 | Local-First + keine Backend-Dependency |
 | **Storage** | 72 | 82 | +10 | Local-First + S3 Server |
-| **NutriPhi** | 70 | 82 | +12 | Local-First + Gemini Server |
+| **Food** | 70 | 82 | +12 | Local-First + Gemini Server |
 | **Planta** | 65 | 78 | +13 | Local-First + Vision Server |
 | **Mukke** | 68 | 80 | +12 | Local-First + S3 Server |
 | **Questions** | 72 | 83 | +11 | Local-First + Search Server |

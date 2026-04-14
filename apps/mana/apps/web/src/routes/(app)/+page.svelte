@@ -15,7 +15,7 @@
 	import { ContextMenu, type ContextMenuItem } from '@mana/shared-ui';
 	import { Pencil, Copy, Trash, Image } from '@mana/shared-icons';
 	import { goto } from '$app/navigation';
-	import { _ } from 'svelte-i18n';
+	import { _, locale } from 'svelte-i18n';
 	import { buildContextMenuItems, createWorkbenchContextMenu } from '$lib/context-menu';
 	import type { WorkbenchScene } from '$lib/types/workbench-scenes';
 
@@ -36,12 +36,27 @@
 	let DEFAULT_WIDTH = $state(DESKTOP_WIDTH);
 
 	onMount(() => {
+		// Coalesce resize events to one update per animation frame.
+		// Without this, dragging the window edge fires `resize` dozens
+		// of times per second and each fire re-derives carouselPages
+		// (and historically re-ran i18n lookups for every open app),
+		// causing visible jank.
+		let rafId: number | null = null;
 		function updateDefaultWidth() {
-			DEFAULT_WIDTH = window.innerWidth < 640 ? window.innerWidth - 32 : DESKTOP_WIDTH;
+			if (rafId !== null) return;
+			rafId = requestAnimationFrame(() => {
+				rafId = null;
+				DEFAULT_WIDTH = window.innerWidth < 640 ? window.innerWidth - 32 : DESKTOP_WIDTH;
+			});
 		}
-		updateDefaultWidth();
+		// Initial measurement is synchronous — we want the first paint
+		// to land with the correct width, not one frame late.
+		DEFAULT_WIDTH = window.innerWidth < 640 ? window.innerWidth - 32 : DESKTOP_WIDTH;
 		window.addEventListener('resize', updateDefaultWidth);
-		return () => window.removeEventListener('resize', updateDefaultWidth);
+		return () => {
+			window.removeEventListener('resize', updateDefaultWidth);
+			if (rafId !== null) cancelAnimationFrame(rafId);
+		};
 	});
 
 	// ── Scene store wiring ──────────────────────────────────
@@ -67,6 +82,22 @@
 	);
 
 	// ── Map openApps → CarouselPage[] ───────────────────────
+	// Title resolution is split into its own derived so that DEFAULT_WIDTH
+	// changes (window resize) don't re-invoke `$_(...)` for every open
+	// app. This derived only re-runs when the set of open apps or the
+	// active locale actually changes.
+	let appTitles = $derived.by(() => {
+		void $locale;
+		const map = new Map<string, string>();
+		for (const a of openApps) {
+			const entry = getApp(a.appId);
+			const k = `apps.${a.appId}`;
+			const t = $_(k);
+			map.set(a.appId, t !== k ? t : (entry?.name ?? a.appId));
+		}
+		return map;
+	});
+
 	let carouselPages = $derived<CarouselPage[]>(
 		openApps.map((a) => {
 			const entry = getApp(a.appId);
@@ -75,11 +106,7 @@
 				maximized: a.maximized,
 				widthPx: a.widthPx ?? DEFAULT_WIDTH,
 				heightPx: a.heightPx,
-				title: (() => {
-					const k = `apps.${a.appId}`;
-					const t = $_(k);
-					return t !== k ? t : (entry?.name ?? a.appId);
-				})(),
+				title: appTitles.get(a.appId) ?? a.appId,
 				color: entry?.color ?? '#6B7280',
 				icon: entry?.icon,
 			};

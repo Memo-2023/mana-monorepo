@@ -76,7 +76,7 @@ export const ui = {
 			'KI-gestützte Karteikarten-App für effektives Lernen und Wissensmanagement',
 		'app.pictus.description': 'Kreativer KI-Bildgenerator für beeindruckende Bilder und Kunstwerke',
 		'app.orakel.description': 'Intelligente KI-Chat-Assistentin für alle Lebenslagen',
-		'app.nutriphi.description': 'Intelligente Ernährungs-App mit KI-gestütztem Foto-Tracking',
+		'app.food.description': 'Intelligente Ernährungs-App mit KI-gestütztem Foto-Tracking',
 		'app.traces.description': 'Entdecke deine Stadt neu mit KI-gestütztem Bewegungs-Tracking',
 
 		// Footer
@@ -156,7 +156,7 @@ export const ui = {
 			'AI-powered flashcard app for effective learning and knowledge management',
 		'app.pictus.description': 'Creative AI image generator for stunning pictures and artwork',
 		'app.orakel.description': 'Intelligent AI chat assistant for all aspects of life',
-		'app.nutriphi.description': 'Smart nutrition app with AI-powered photo tracking',
+		'app.food.description': 'Smart nutrition app with AI-powered photo tracking',
 		'app.traces.description': 'Rediscover your city with AI-powered movement tracking',
 
 		// Footer
@@ -237,7 +237,7 @@ export const ui = {
 		'app.pictus.description':
 			"Generatore di immagini AI creativo per immagini e opere d'arte straordinarie",
 		'app.orakel.description': 'Assistente chat AI intelligente per tutti gli aspetti della vita',
-		'app.nutriphi.description':
+		'app.food.description':
 			'App di nutrizione intelligente con tracciamento fotografico basato su AI',
 		'app.traces.description':
 			'Riscopri la tua città con il tracciamento dei movimenti basato su AI',
@@ -322,7 +322,7 @@ export const ui = {
 		'app.pictus.description':
 			"Générateur d'images IA créatif pour des images et œuvres d'art époustouflantes",
 		'app.orakel.description': 'Assistant de chat IA intelligent pour tous les aspects de la vie',
-		'app.nutriphi.description':
+		'app.food.description':
 			"Application de nutrition intelligente avec suivi photographique basé sur l'IA",
 		'app.traces.description':
 			"Redécouvrez votre ville avec le suivi des déplacements basé sur l'IA",
@@ -405,8 +405,7 @@ export const ui = {
 		'app.pictus.description':
 			'Generador de imágenes IA creativo para imágenes y obras de arte impresionantes',
 		'app.orakel.description': 'Asistente de chat IA inteligente para todos los aspectos de la vida',
-		'app.nutriphi.description':
-			'App de nutrición inteligente con seguimiento fotográfico basado en IA',
+		'app.food.description': 'App de nutrición inteligente con seguimiento fotográfico basado en IA',
 		'app.traces.description': 'Redescubre tu ciudad con seguimiento de movimiento basado en IA',
 
 		// Footer

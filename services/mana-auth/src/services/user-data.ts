@@ -121,7 +121,7 @@ const PROJECT_META: Record<string, { name: string; icon: string }> = {
 	zitare: { name: 'Zitare', icon: '✨' },
 	presi: { name: 'Presi', icon: '📊' },
 	inventory: { name: 'Inventar', icon: '📦' },
-	nutriphi: { name: 'Nutriphi', icon: '🥗' },
+	food: { name: 'Food', icon: '🥗' },
 	plants: { name: 'Plants', icon: '🌱' },
 	storage: { name: 'Storage', icon: '☁️' },
 	questions: { name: 'Questions', icon: '❓' },

@@ -36,7 +36,7 @@ import { z } from 'zod';
 //   - Changing a type               → BUMP (zod parse fails on old client)
 //
 // History:
-//   1 — initial schemas (foods/totalNutrition for nutriphi,
+//   1 — initial schemas (foods/totalNutrition for food,
 //       scientificName/commonNames/etc for plants)
 
 export const AI_SCHEMA_VERSION = '1' as const;
@@ -59,19 +59,21 @@ export interface AiResponseEnvelope<T> {
  * side is stale.
  */
 export class AiSchemaVersionMismatchError extends Error {
-	constructor(
-		public readonly received: string,
-		public readonly expected: AiSchemaVersion = AI_SCHEMA_VERSION
-	) {
+	readonly received: string;
+	readonly expected: AiSchemaVersion;
+
+	constructor(received: string, expected: AiSchemaVersion = AI_SCHEMA_VERSION) {
 		super(
 			`AI wire-format version mismatch: received "${received}", expected "${expected}". ` +
 				`The client and server are out of sync — reload the page or redeploy.`
 		);
 		this.name = 'AiSchemaVersionMismatchError';
+		this.received = received;
+		this.expected = expected;
 	}
 }
 
-// ─── NutriPhi: meal photo / text analysis ────────────────────────
+// ─── Food: meal photo / text analysis ────────────────────────
 
 const AnalyzedFoodSchema = z.object({
 	name: z.string().describe('The food item name in German'),

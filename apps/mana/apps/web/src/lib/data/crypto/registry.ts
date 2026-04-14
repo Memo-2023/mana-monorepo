@@ -129,7 +129,7 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	cycles: { enabled: true, fields: ['notes'] },
 	cycleDayLogs: { enabled: true, fields: ['notes', 'mood'] },
 
-	// ─── NutriPhi ────────────────────────────────────────────
+	// ─── Food ────────────────────────────────────────────
 	// LocalMeal user-typed / AI-generated content → encrypted:
 	//   - description, portionSize: free-text, same sensitivity tier
 	//   - foods: AI-identified food items (array of {name, quantity,
@@ -414,7 +414,7 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	// ─── Recipes ─────────────────────────────────────────────
 	// User-typed content (title, description, ingredients list, steps)
 	// encrypted. `ingredients` is Ingredient[] and `steps` is string[] —
-	// aes.ts JSON-stringifies before wrap, same as nutriphi's `foods`.
+	// aes.ts JSON-stringifies before wrap, same as food's `foods`.
 	// Plaintext (intentional): difficulty, tags, servings, times,
 	// isFavorite, photo refs — needed for indexing and filtering.
 	recipes: { enabled: true, fields: ['title', 'description', 'ingredients', 'steps'] },

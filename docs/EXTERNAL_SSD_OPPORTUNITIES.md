@@ -98,7 +98,7 @@ Centralized media handling for all applications:
 |--------|---------|-----------|
 | `picture-storage` | AI-generated images | 100+ GB |
 | `storage-storage` | User cloud storage | 500+ GB |
-| `nutriphi-storage` | Meal photos | 50+ GB |
+| `food-storage` | Meal photos | 50+ GB |
 | `chat-attachments` | Chat file uploads | 100+ GB |
 | `presi-assets` | Presentation media | 50+ GB |
 

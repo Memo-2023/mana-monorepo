@@ -1,7 +1,7 @@
 <!--
-  CalorieWeightChart — Body × Nutriphi correlation view.
+  CalorieWeightChart — Body × Food correlation view.
 
-  Overlays daily calorie intake (from nutriphi `meals`) against
+  Overlays daily calorie intake (from food `meals`) against
   bodyweight (from `bodyMeasurements`) for the last N days. The
   whole point of having both modules in the same app is being
   able to ask "did the cut work?" without exporting CSVs.
@@ -22,7 +22,7 @@
 -->
 <script lang="ts">
 	import type { BodyMeasurement, BodyPhase } from '../types';
-	import type { MealWithNutrition } from '$lib/modules/nutriphi/types';
+	import type { MealWithNutrition } from '$lib/modules/food/types';
 
 	interface Props {
 		measurements: BodyMeasurement[];

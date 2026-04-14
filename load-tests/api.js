@@ -2,7 +2,7 @@
 /**
  * Load test for `apps/api` — the unified Hono/Bun API server that hosts
  * all 16 product compute modules (calendar, todo, chat, picture, planta,
- * nutriphi, news, traces, moodlit, presi, music, contacts, storage,
+ * food, news, traces, moodlit, presi, music, contacts, storage,
  * context, guides, research) on a single port.
  *
  * Why this script exists

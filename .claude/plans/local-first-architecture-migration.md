@@ -333,7 +333,7 @@ Alle Web-Apps mit CRUD-Datenmodell wurden auf Local-First migriert:
 | **Picture** | images, boards, boardItems, tags, imageTags | Replicate API, Upload, Explore |
 | **Presi** | decks, slides | Share-Links |
 | **Inventar** | collections, items, locations, categories | Nur Sync |
-| **NutriPhi** | meals, goals, favorites | AI-Analyse (Gemini), Recommendations |
+| **Food** | meals, goals, favorites | AI-Analyse (Gemini), Recommendations |
 | **Planta** | plants, plantPhotos, wateringSchedules, wateringLogs | Foto-Upload, AI-Analyse (Gemini) |
 | **Storage** | files, folders, tags, fileTags | Datei-Upload/Download, Shares, Versionen |
 | **Chat** | conversations, messages, templates | LLM Streaming |

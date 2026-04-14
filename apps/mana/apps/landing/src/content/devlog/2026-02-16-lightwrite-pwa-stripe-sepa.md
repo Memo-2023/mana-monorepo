@@ -106,7 +106,7 @@ Progressive Web App Dependencies wurden zu allen SvelteKit Web-Apps hinzugefügt
 | LightWrite | ✅ Aktiviert |
 | Cards      | ✅ Aktiviert |
 | Photos     | ✅ Aktiviert |
-| NutriPhi   | ✅ Aktiviert |
+| Food       | ✅ Aktiviert |
 | Mukke      | ✅ Aktiviert |
 | Reader     | ✅ Aktiviert |
 | Inventory  | ✅ Aktiviert |

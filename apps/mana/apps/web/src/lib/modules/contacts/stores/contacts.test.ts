@@ -1,7 +1,7 @@
 /**
  * Integration tests for contactsStore against a real (fake) IndexedDB.
  *
- * Same harness as body/nutriphi tests: fake-indexeddb + MemoryKeyProvider.
+ * Same harness as body/food tests: fake-indexeddb + MemoryKeyProvider.
  *
  * Focus:
  *   - create persists + encrypts PII (name, email, phone)

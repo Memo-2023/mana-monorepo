@@ -46,7 +46,7 @@ manacore-monorepo/
 │   │   │   └── landing/
 │   │   └── packages/
 │   │
-│   ├── nutriphi/
+│   ├── food/
 │   │   ├── apps/
 │   │   │   ├── backend/
 │   │   │   ├── mobile/
@@ -134,7 +134,7 @@ mkdir -p services
 | `cards/`       | `apps/cards/`       |
 | `memoro/`         | `apps/memoro/`         |
 | `picture/`        | `apps/picture/`        |
-| `nutriphi/`       | `apps/nutriphi/`       |
+| `food/`       | `apps/food/`       |
 | `uload/`          | `apps/uload/`          |
 | `news/`           | `apps/news/`           |
 | `manacore/`       | `apps/manacore/`       |
@@ -146,7 +146,7 @@ git mv maerchenzauber apps/maerchenzauber
 git mv cards apps/cards
 git mv memoro apps/memoro
 git mv picture apps/picture
-git mv nutriphi apps/nutriphi
+git mv food apps/food
 git mv uload apps/uload
 git mv news apps/news
 git mv manacore apps/manacore
@@ -160,7 +160,7 @@ Projects with backends at root level need restructuring:
 | ------------------------ | ----------------------------- |
 | `apps/chat/backend/`     | `apps/chat/apps/backend/`     |
 | `apps/cards/backend/` | `apps/cards/apps/backend/` |
-| `apps/nutriphi/backend/` | `apps/nutriphi/apps/backend/` |
+| `apps/food/backend/` | `apps/food/apps/backend/` |
 
 ```bash
 # Chat: move backend into apps/
@@ -171,9 +171,9 @@ git mv apps/chat/backend apps/chat/apps/backend
 mkdir -p apps/cards/apps
 git mv apps/cards/backend apps/cards/apps/backend
 
-# Nutriphi: move backend into apps/
-mkdir -p apps/nutriphi/apps
-git mv apps/nutriphi/backend apps/nutriphi/apps/backend
+# Food: move backend into apps/
+mkdir -p apps/food/apps
+git mv apps/food/backend apps/food/apps/backend
 ```
 
 ### 2.3 Move mana-core-auth to services/
@@ -231,7 +231,7 @@ No changes needed - turbo.json uses task definitions, not paths.
 		"picture:dev": "turbo run dev --filter=@picture/*...",
 		"uload:dev": "turbo run dev --filter=@uload/*...",
 		"chat:dev": "turbo run dev --filter=@chat/*...",
-		"nutriphi:dev": "turbo run dev --filter=@nutriphi/*...",
+		"food:dev": "turbo run dev --filter=@food/*...",
 		"news:dev": "turbo run dev --filter=@news/*...",
 
 		"dev:maerchenzauber:web": "pnpm --filter @maerchenzauber/web dev",
@@ -266,11 +266,11 @@ No changes needed - turbo.json uses task definitions, not paths.
 		"dev:chat:backend": "pnpm --filter @chat/backend start:dev",
 		"dev:chat:app": "turbo run dev --filter=@chat/web --filter=@chat/backend",
 
-		"dev:nutriphi:mobile": "pnpm --filter @nutriphi/mobile dev",
-		"dev:nutriphi:web": "pnpm --filter @nutriphi/web dev",
-		"dev:nutriphi:landing": "pnpm --filter @nutriphi/landing dev",
-		"dev:nutriphi:backend": "pnpm --filter @nutriphi/backend start:dev",
-		"dev:nutriphi:app": "turbo run dev --filter=@nutriphi/web --filter=@nutriphi/backend",
+		"dev:food:mobile": "pnpm --filter @food/mobile dev",
+		"dev:food:web": "pnpm --filter @food/web dev",
+		"dev:food:landing": "pnpm --filter @food/landing dev",
+		"dev:food:backend": "pnpm --filter @food/backend start:dev",
+		"dev:food:app": "turbo run dev --filter=@food/web --filter=@food/backend",
 
 		"dev:news:mobile": "pnpm --filter @news/mobile dev",
 		"dev:news:web": "pnpm --filter @news/web dev",

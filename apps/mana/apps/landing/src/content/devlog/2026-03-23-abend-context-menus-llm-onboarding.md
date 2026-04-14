@@ -125,7 +125,7 @@ Neues monorepo-weites Package, das die LLM-Integration für alle Backends verein
 - `@chat/backend` — Chat AI-Completions
 - `@zitare/backend` — Zitat-Analyse (vorher eigener Ollama-Service)
 - `@planta/backend` — Pflanzen-Vision-Analyse
-- `@nutriphi/backend` — Ernährungs-Analyse (Gemini)
+- `@food/backend` — Ernährungs-Analyse (Gemini)
 - `mana-core-auth` — AI-Service für Auth-Features
 
 ### Google Gemini Fallback

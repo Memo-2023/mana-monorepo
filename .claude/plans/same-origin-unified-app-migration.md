@@ -29,7 +29,7 @@
 | 12 | **uload** | queries (umfangreich), types | 3 routes (dashboard, links, analytics) | **Done** |
 | 13 | **context** | queries, types | 5 routes (dashboard, spaces, documents) | **Done** |
 | 14 | **questions** | queries, types | 4 routes (list, collections, new, detail) | **Done** |
-| 15 | **nutriphi** | queries, types, constants | 4 routes (dashboard, add, history, goals) | **Done** |
+| 15 | **food** | queries, types, constants | 4 routes (dashboard, add, history, goals) | **Done** |
 | 16 | **storage** | stores (2), queries, types | 7 routes (files, folders, favorites, search, trash) | **Done** |
 | 17 | **cards** | stores (2), components (2), queries | 6 routes (decks, study, explore, progress) | **Done** |
 | 18 | **contacts** | stores (3), queries, types | 3 routes (list, detail/edit) | **Done** |
@@ -109,7 +109,7 @@ Alle Apps die zum ManaCore-Ökosystem gehören und von Shared IndexedDB, Dashboa
 | **times** | Zeiterfassung, Dashboard-Widget |
 | **context** | Dokument-Workspace |
 | **questions** | Research-Assistant |
-| **nutriphi** | Ernährung |
+| **food** | Ernährung |
 | **planta** | Pflanzenpflege |
 | **uload** | URL-Shortener, Links |
 | **calc** | Rechner |
@@ -259,7 +259,7 @@ src/lib/modules/
 ├── times/
 ├── context/
 ├── questions/
-├── nutriphi/
+├── food/
 ├── planta/
 ├── uload/
 ├── calc/
@@ -367,7 +367,7 @@ src/routes/
 │   ├── times/+page.svelte
 │   ├── context/+page.svelte
 │   ├── questions/+page.svelte
-│   ├── nutriphi/+page.svelte
+│   ├── food/+page.svelte
 │   ├── planta/+page.svelte
 │   ├── uload/+page.svelte
 │   ├── calc/+page.svelte
@@ -475,7 +475,7 @@ import { CITYCORNERS_COLLECTIONS } from '$lib/modules/citycorners/collections';
 import { TIMES_COLLECTIONS } from '$lib/modules/times/collections';
 import { CONTEXT_COLLECTIONS } from '$lib/modules/context/collections';
 import { QUESTIONS_COLLECTIONS } from '$lib/modules/questions/collections';
-import { NUTRIPHI_COLLECTIONS } from '$lib/modules/nutriphi/collections';
+import { FOOD_COLLECTIONS } from '$lib/modules/food/collections';
 import { PLANTA_COLLECTIONS } from '$lib/modules/planta/collections';
 import { ULOAD_COLLECTIONS } from '$lib/modules/uload/collections';
 import { CALC_COLLECTIONS } from '$lib/modules/calc/collections';
@@ -521,7 +521,7 @@ db.version(1).stores({
   ...TIMES_COLLECTIONS,
   ...CONTEXT_COLLECTIONS,
   ...QUESTIONS_COLLECTIONS,
-  ...NUTRIPHI_COLLECTIONS,
+  ...FOOD_COLLECTIONS,
   ...PLANTA_COLLECTIONS,
   ...ULOAD_COLLECTIONS,
   ...CALC_COLLECTIONS,
@@ -578,7 +578,7 @@ export const SYNC_APP_MAP: Record<string, string[]> = {
   times:       ['clients', 'tProjects', 'timeEntries', 'tTags', 'tTemplates', 'tSettings'],
   context:     ['spaces', 'documents'],
   questions:   ['qCollections', 'questions', 'answers'],
-  nutriphi:    ['meals', 'goals', 'nFavorites'],
+  food:    ['meals', 'goals', 'nFavorites'],
   planta:      ['plants', 'plantPhotos', 'wateringSchedules', 'wateringLogs'],
   uload:       ['links', 'uTags', 'uFolders', 'linkTags'],
   calc:        ['calculations', 'savedFormulas'],
@@ -769,7 +769,7 @@ Nach Komplexität sortiert — einfachste zuerst, um den Prozess einzuüben:
 | 12 | **uload** | 12 | 10 | Mittel | Hat Backend-Server |
 | 13 | **context** | 10 | 15 | Mittel | Mittlere Komplexität |
 | 14 | **questions** | 10 | 14 | Mittel | Hat Backend-API |
-| 15 | **nutriphi** | 12 | 10 | Mittel | Hat Backend-Server |
+| 15 | **food** | 12 | 10 | Mittel | Hat Backend-Server |
 | 16 | **storage** | 12 | 15 | Mittel | Hat Backend + MinIO |
 | 17 | **cards** | 12 | 18 | Mittel | Hat Backend-Server |
 | 18 | **contacts** | 23 | 39 | Komplex | Backend + Import/Export |

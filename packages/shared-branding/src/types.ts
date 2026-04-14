@@ -8,7 +8,7 @@ export type AppId =
 	| 'uload'
 	| 'chat'
 	| 'presi'
-	| 'nutriphi'
+	| 'food'
 	| 'zitare'
 	| 'picture'
 	| 'contacts'

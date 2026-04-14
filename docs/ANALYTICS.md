@@ -51,7 +51,7 @@ injectUmamiAnalytics(html)    → <script defer src="stats.mana.how/script.js" d
 | Clock | `UMAMI_WEBSITE_ID_CLOCK_LANDING` |
 | Picture | `UMAMI_WEBSITE_ID_PICTURE_LANDING` |
 | Todo | `UMAMI_WEBSITE_ID_TODO_LANDING` |
-| NutriPhi | `UMAMI_WEBSITE_ID_NUTRIPHI_LANDING` |
+| Food | `UMAMI_WEBSITE_ID_FOOD_LANDING` |
 | Presi | `UMAMI_WEBSITE_ID_PRESI_LANDING` |
 | Mukke | `UMAMI_WEBSITE_ID_MUKKE_LANDING` |
 
@@ -72,7 +72,7 @@ injectUmamiAnalytics(html)    → <script defer src="stats.mana.how/script.js" d
 | Questions | `UMAMI_WEBSITE_ID_QUESTIONS` |
 | Zitare | `UMAMI_WEBSITE_ID_ZITARE` |
 | Presi | `UMAMI_WEBSITE_ID_PRESI` |
-| NutriPhi | `UMAMI_WEBSITE_ID_NUTRIPHI` |
+| Food | `UMAMI_WEBSITE_ID_FOOD` |
 | Storage | `UMAMI_WEBSITE_ID_STORAGE` |
 | Photos | `UMAMI_WEBSITE_ID_PHOTOS` |
 | SkillTree | `UMAMI_WEBSITE_ID_SKILLTREE` |

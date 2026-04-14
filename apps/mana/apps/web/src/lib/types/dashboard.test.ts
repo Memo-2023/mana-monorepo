@@ -53,7 +53,7 @@ describe('WIDGET_REGISTRY', () => {
 			'presi',
 			'context',
 			'mana-auth',
-			'nutriphi',
+			'food',
 			'plants',
 			'cycles',
 			undefined,

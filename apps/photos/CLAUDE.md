@@ -2,7 +2,7 @@
 
 ## Overview
 
-**Photos** is a unified photo gallery application for the Mana ecosystem. It aggregates photos from all apps (Picture, Chat, Contacts, NutriPhi, etc.) via the mana-media service, providing a central place to view, organize, and manage photos.
+**Photos** is a unified photo gallery application for the Mana ecosystem. It aggregates photos from all apps (Picture, Chat, Contacts, Food, etc.) via the mana-media service, providing a central place to view, organize, and manage photos.
 
 | App | Dev Port | Prod Port | Prod URL |
 |-----|----------|-----------|----------|
@@ -191,7 +191,7 @@ PUBLIC_MANA_MEDIA_URL=http://localhost:3015
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `apps` | string | Comma-separated app names (picture,chat,nutriphi) |
+| `apps` | string | Comma-separated app names (picture,chat,food) |
 | `mimeType` | string | MIME type filter (image/*, image/jpeg) |
 | `dateFrom` | ISO date | Start date filter |
 | `dateTo` | ISO date | End date filter |

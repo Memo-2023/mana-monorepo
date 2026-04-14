@@ -179,11 +179,11 @@ presi-api.mana.how {
     reverse_proxy 10.0.0.2:3036
 }
 
-nutriphi.mana.how {
+food.mana.how {
     reverse_proxy 10.0.0.2:5017
 }
 
-nutriphi-api.mana.how {
+food-api.mana.how {
     reverse_proxy 10.0.0.2:3037
 }
 

@@ -26,7 +26,7 @@ export type WidgetType =
 	| 'presi-decks' // Presi: recent presentations
 	| 'context-docs' // Context: recent documents & spaces
 	| 'active-timer' // Times: running timer
-	| 'nutrition-progress' // NutriPhi: today's calorie progress
+	| 'nutrition-progress' // Food: today's calorie progress
 	| 'plant-watering' // Plants: plants due for watering
 	| 'day-timeline' // TimeBlocks: chronological day timeline
 	| 'activity-feed' // TimeBlocks: recent activity across modules
@@ -130,7 +130,7 @@ export interface WidgetMeta {
 		| 'presi'
 		| 'context'
 		| 'times'
-		| 'nutriphi'
+		| 'food'
 		| 'plants'
 		| 'cycles'
 		| 'body'
@@ -309,7 +309,7 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
 		icon: '🍽️',
 		defaultSize: 'small',
 		allowMultiple: false,
-		requiredBackend: 'nutriphi',
+		requiredBackend: 'food',
 	},
 	{
 		type: 'plant-watering',

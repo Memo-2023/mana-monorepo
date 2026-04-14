@@ -153,7 +153,7 @@ describe('Streak Tracker', () => {
 			meta: {
 				id: '2',
 				timestamp: new Date().toISOString(),
-				appId: 'nutriphi',
+				appId: 'food',
 				collection: 'meals',
 				recordId: '2',
 				userId: 'u1',

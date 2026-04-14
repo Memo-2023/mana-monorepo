@@ -102,7 +102,7 @@ const APPS_WITH_SSO = [
 	'cards',
 	'matrix',
 	'mukke',
-	'nutriphi',
+	'food',
 	'photos',
 	'picture',
 	'planta',
@@ -264,7 +264,7 @@ GlitchTip (selbst-gehostete Sentry-Alternative) wurde für **alle 15 Backends** 
 | Contacts      | 3034 | #6                |
 | ManaCore Auth | 3001 | #2                |
 | Mukke         | 3010 | #9                |
-| NutriPhi      | 3037 | #11               |
+| Food          | 3037 | #11               |
 | Photos        | 3039 | #12               |
 | Planta        | 3022 | #13               |
 | Presi         | 3036 | #14               |
@@ -300,7 +300,7 @@ Alle 20 aktiven Apps wurden bewertet nach 8 Kategorien (Backend, Frontend, Datab
 | **Picture**   | 81    | Production | Replicate Integration           |
 | **Mukke**     | 80    | Beta       | 113 Tests, Audio Editor         |
 | **Matrix**    | 68    | Production | E2E Encryption                  |
-| **NutriPhi**  | 63    | Beta       | Gemini AI Integration           |
+| **Food**      | 63    | Beta       | Gemini AI Integration           |
 | **Photos**    | 62    | Beta       | mana-media Integration          |
 | **Zitare**    | 62    | Beta       | Deployed auf mana.how           |
 | **Context**   | 60    | Beta       | Neuer Backend (Port 3020)       |

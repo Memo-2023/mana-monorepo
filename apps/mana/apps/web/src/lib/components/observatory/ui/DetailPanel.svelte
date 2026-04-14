@@ -36,7 +36,7 @@
 		presi: 'https://presi.mana.how',
 		music: 'https://music.mana.how',
 		clock: 'https://clock.mana.how',
-		nutriphi: 'https://nutriphi.mana.how',
+		food: 'https://food.mana.how',
 		photos: 'https://photos.mana.how',
 		zitare: 'https://zitare.mana.how',
 		mana: 'https://mana.how',

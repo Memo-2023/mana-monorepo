@@ -53,7 +53,7 @@ Neuer `Analytics Maturity`-Metrik in ManaScore und Custom Event Tracking in 8+ A
 | Storage | Upload, Download, Share, Preview |
 | Photos | Upload, Edit, Album-Create |
 | Context, SkillTree, Planta, Questions | App-spezifische Events |
-| NutriPhi, Cards | Meal-Log, Card-Create |
+| Food, Cards | Meal-Log, Card-Create |
 
 ### Commits
 
@@ -61,7 +61,7 @@ Neuer `Analytics Maturity`-Metrik in ManaScore und Custom Event Tracking in 8+ A
 - `bade0a17` — Storage Event Tracking
 - `3075e515` — Photos Event Tracking
 - `12b3c4f0` — Context, SkillTree, Planta, Questions
-- `1fe8f890` — NutriPhi, Cards
+- `1fe8f890` — Food, Cards
 
 ---
 

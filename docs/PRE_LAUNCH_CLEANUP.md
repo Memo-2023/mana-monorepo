@@ -250,7 +250,7 @@ no external callers exist, and no future external callers can show up
 
 **What was there:** Twelve `*-api.mana.how` Cloudflare Tunnel routes
 (`todo-api`, `calendar-api`, `contacts-api`, `chat-api`, `storage-api`,
-`cards-api`, `music-api`, `nutriphi-api`, `picture-api`, `presi-api`,
+`cards-api`, `music-api`, `food-api`, `picture-api`, `presi-api`,
 `zitare-api`, `clock-api`) plus their matching `lib/api/services/*.ts`
 clients in the unified web app, the matching `__PUBLIC_*_API_URL__`
 runtime injections in `hooks.server.ts`, and the
@@ -290,7 +290,7 @@ needed them.
 - `~/.cloudflared/config.yml` on the Mac Mini lost its 16 dead ingress
   routes (`chat-api`, `todo-api`, `calendar-api`, `clock-api`, `clock-bot`,
   `contacts-api`, `zitare-api`, `skilltree-api`, `plants-api`, `cards-api`,
-  `storage-api`, `presi-api`, `nutriphi-api`, `photos-api`, `mukke-api`,
+  `storage-api`, `presi-api`, `food-api`, `photos-api`, `mukke-api`,
   `picture-api`). The tunnel was reloaded via `kill -HUP <pid>`.
 - After reload, every former 502 returns 404 from the Cloudflare edge
   (no ingress route → no origin → 404), confirming the cleanup is live.
@@ -565,7 +565,7 @@ in one batch.
 - `memoro-api.mana.how` → 404 (no ingress route — see "Memoro server
   detached" entry above; the unified web app does not need it)
 - 12 ghost API hostnames (`todo-api`, `calendar-api`, `contacts-api`,
-  `chat-api`, `storage-api`, `cards-api`, `music-api`, `nutriphi-api`,
+  `chat-api`, `storage-api`, `cards-api`, `music-api`, `food-api`,
   `picture-api`, `presi-api`, `zitare-api`, `clock-api`) → 404 (no
   ingress route — see "Ghost backend API hostnames" entry above)
 

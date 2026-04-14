@@ -87,7 +87,7 @@ hatten die Infrastruktur bereits — sie wurde nur nicht benutzt.
   `@mana/shared-logger`, damit Module ohne extra dependency darauf
   zugreifen können.
 - 7 `console.error` Aufrufe in `apps/api/src/modules/{guides,plants,
-  nutriphi,traces}/routes.ts` durch
+  food,traces}/routes.ts` durch
   `logger.error('module.event_name', { error: ... })` ersetzt. Event-Namen
   folgen `<module>.<event>` Konvention für Filterbarkeit in Sentry/JSON-Logs.
 
@@ -373,7 +373,7 @@ nicht mehr existiert.
   `apps/uload/apps/server`. Beide deployed via
   `docker-compose.macmini.yml`.
 - Alle anderen 17 (`calendar`, `chat`, `todo`, `contacts`, `picture`,
-  `cards`, `plants`, `nutriphi`, `news`, `traces`, `presi`, `storage`,
+  `cards`, `plants`, `food`, `news`, `traces`, `presi`, `storage`,
   `music`, `moodlit`, `context`, `guides`, `questions`) wurden zu
   `apps/api/src/modules/{name}/routes.ts` migriert. Ihre `apps/server/`
   Verzeichnisse existieren nicht mehr.

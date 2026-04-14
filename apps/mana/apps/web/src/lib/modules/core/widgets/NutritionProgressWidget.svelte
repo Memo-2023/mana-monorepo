@@ -106,14 +106,14 @@
 			<div class="mb-2 text-3xl">&#127860;</div>
 			<p class="text-sm text-muted-foreground">Noch keine Mahlzeiten erfasst.</p>
 			<a
-				href="/nutriphi"
+				href="/food"
 				class="mt-3 inline-block rounded-lg bg-primary/10 px-4 py-2 text-sm font-medium text-primary hover:bg-primary/20"
 			>
 				Mahlzeit erfassen
 			</a>
 		</div>
 	{:else}
-		<a href="/nutriphi" class="block rounded-lg p-2 transition-colors hover:bg-surface-hover">
+		<a href="/food" class="block rounded-lg p-2 transition-colors hover:bg-surface-hover">
 			<!-- Progress Ring -->
 			<div class="mb-3 flex items-center justify-center">
 				<div class="relative">

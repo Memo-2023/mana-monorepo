@@ -68,7 +68,7 @@ Der Plan war seit Wochen klar — heute wurde er ausgeführt, in einer langen Se
 ```
 Welle 1 (12 Module):  skilltree, inventar, times, planta,
                       citycorners, photos, presi, uload,
-                      context, questions, nutriphi, calc
+                      context, questions, food, calc
 
 Welle 2 (5 Module):   storage, cards, playground, guides,
                       + restliche Helper

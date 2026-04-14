@@ -6,7 +6,7 @@
  * possible event so the EventStore and Projection Engine can work
  * with full type safety.
  *
- * Pilot modules: Todo, Calendar, Drink, Nutriphi, Places.
+ * Pilot modules: Todo, Calendar, Drink, Food, Places.
  */
 
 import type { DomainEvent } from './types';
@@ -141,7 +141,7 @@ export interface DrinkEntryUndonePayload {
 
 export type DrinkEventType = 'DrinkLogged' | 'DrinkEntryDeleted' | 'DrinkEntryUndone';
 
-// ── Nutriphi ────────────────────────────────────────
+// ── Food ────────────────────────────────────────
 
 export interface MealLoggedPayload {
 	mealId: string;
@@ -174,7 +174,7 @@ export interface NutritionGoalSetPayload {
 	dailyFat?: number;
 }
 
-export type NutriphiEventType =
+export type FoodEventType =
 	| 'MealLogged'
 	| 'MealFromPhotoLogged'
 	| 'MealDeleted'
@@ -638,7 +638,7 @@ export type ManaEventType =
 	| TodoEventType
 	| CalendarEventType
 	| DrinkEventType
-	| NutriphiEventType
+	| FoodEventType
 	| PlacesEventType
 	| HabitsEventType
 	| JournalEventType
@@ -693,7 +693,7 @@ export type ManaEvent =
 	| DomainEvent<'DrinkLogged', DrinkLoggedPayload>
 	| DomainEvent<'DrinkEntryDeleted', DrinkEntryDeletedPayload>
 	| DomainEvent<'DrinkEntryUndone', DrinkEntryUndonePayload>
-	// Nutriphi
+	// Food
 	| DomainEvent<'MealLogged', MealLoggedPayload>
 	| DomainEvent<'MealFromPhotoLogged', MealFromPhotoLoggedPayload>
 	| DomainEvent<'MealDeleted', MealDeletedPayload>

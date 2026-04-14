@@ -66,7 +66,7 @@
 		context: 'Context',
 		general: 'Allgemein',
 		cards: 'Cards',
-		nutriphi: 'NutriPhi',
+		food: 'Food',
 		picture: 'Picture',
 		plants: 'Plants',
 		presi: 'Presi',

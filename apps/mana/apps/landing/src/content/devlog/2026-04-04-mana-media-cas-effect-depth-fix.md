@@ -24,7 +24,7 @@ workingHours:
 
 ## Highlights
 
-- **mana-media** wird zentrale Bild-Pipeline: Picture, Contacts, Planta, Storage, NutriPhi laden Bilder darüber hoch
+- **mana-media** wird zentrale Bild-Pipeline: Picture, Contacts, Planta, Storage, Food laden Bilder darüber hoch
 - **CAS (SHA-256 Dedup)**, **Thumbnails**, **EXIF-Extraktion** automatisch
 - Alle hochgeladenen Bilder erscheinen in der **Photos-Galerie**
 - Fix: `effect_update_depth_exceeded` in 6 Dashboard-Modulen (Resultat des Unified-App-Switches)
@@ -50,7 +50,7 @@ Picture  → S3 direkt             Picture  ─┐
 Contacts → S3 direkt             Contacts ─┤
 Planta   → S3 direkt   ───→      Planta   ─┼─→ mana-media → S3 (CAS) + DB
 Storage  → S3 direkt             Storage  ─┤                 ↓
-NutriPhi → S3 direkt             NutriPhi ─┘             Photos Gallery
+Food → S3 direkt             Food ─┘             Photos Gallery
 ```
 
 ### Implementierung
@@ -72,7 +72,7 @@ mana-media liefert zurück:
 
 ### Nebeneffekt: Photos-Galerie wird automatisch befüllt
 
-Die Photos-App liest aus `mana_media.media WHERE owner_id = ?`. Damit erscheinen jetzt alle Avatare aus Contacts, alle Pflanzen-Fotos aus Planta, alle Mahlzeit-Bilder aus NutriPhi etc. in der Galerie — ohne dass die Module davon wissen.
+Die Photos-App liest aus `mana_media.media WHERE owner_id = ?`. Damit erscheinen jetzt alle Avatare aus Contacts, alle Pflanzen-Fotos aus Planta, alle Mahlzeit-Bilder aus Food etc. in der Galerie — ohne dass die Module davon wissen.
 
 ---
 

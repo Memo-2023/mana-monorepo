@@ -214,31 +214,31 @@ const APP_CONFIGS = [
 		},
 	},
 
-	// Nutriphi Server (Hono/Bun)
+	// Food Server (Hono/Bun)
 	{
-		path: 'apps/nutriphi/apps/server/.env',
+		path: 'apps/food/apps/server/.env',
 		vars: {
 			NODE_ENV: () => 'development',
-			PORT: (env) => env.NUTRIPHI_BACKEND_PORT || '3002',
-			DATABASE_URL: (env) => env.NUTRIPHI_DATABASE_URL,
+			PORT: (env) => env.FOOD_BACKEND_PORT || '3002',
+			DATABASE_URL: (env) => env.FOOD_DATABASE_URL,
 			MANA_AUTH_URL: (env) => env.MANA_AUTH_URL,
-			GEMINI_API_KEY: (env) => env.NUTRIPHI_GEMINI_API_KEY,
-			S3_ENDPOINT: (env) => env.NUTRIPHI_S3_ENDPOINT,
-			S3_ACCESS_KEY_ID: (env) => env.NUTRIPHI_S3_ACCESS_KEY_ID,
-			S3_SECRET_ACCESS_KEY: (env) => env.NUTRIPHI_S3_SECRET_ACCESS_KEY,
-			S3_BUCKET_NAME: (env) => env.NUTRIPHI_S3_BUCKET_NAME,
-			S3_REGION: (env) => env.NUTRIPHI_S3_REGION,
-			S3_PUBLIC_URL: (env) => env.NUTRIPHI_S3_PUBLIC_URL,
+			GEMINI_API_KEY: (env) => env.FOOD_GEMINI_API_KEY,
+			S3_ENDPOINT: (env) => env.FOOD_S3_ENDPOINT,
+			S3_ACCESS_KEY_ID: (env) => env.FOOD_S3_ACCESS_KEY_ID,
+			S3_SECRET_ACCESS_KEY: (env) => env.FOOD_S3_SECRET_ACCESS_KEY,
+			S3_BUCKET_NAME: (env) => env.FOOD_S3_BUCKET_NAME,
+			S3_REGION: (env) => env.FOOD_S3_REGION,
+			S3_PUBLIC_URL: (env) => env.FOOD_S3_PUBLIC_URL,
 		},
 	},
 
-	// Nutriphi Web (SvelteKit)
+	// Food Web (SvelteKit)
 	{
-		path: 'apps/nutriphi/apps/web/.env',
+		path: 'apps/food/apps/web/.env',
 		vars: {
-			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.NUTRIPHI_BACKEND_PORT || '3002'}`,
+			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.FOOD_BACKEND_PORT || '3002'}`,
 			PUBLIC_MANA_AUTH_URL: (env) => env.MANA_AUTH_URL,
-			PUBLIC_MIDDLEWARE_APP_ID: (env) => env.NUTRIPHI_APP_ID || 'nutriphi',
+			PUBLIC_MIDDLEWARE_APP_ID: (env) => env.FOOD_APP_ID || 'food',
 			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
 	},
@@ -729,11 +729,11 @@ const APP_CONFIGS = [
 		},
 	},
 
-	// NutriPhi Landing
+	// Food Landing
 	{
-		path: 'apps/nutriphi/apps/landing/.env',
+		path: 'apps/food/apps/landing/.env',
 		vars: {
-			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_NUTRIPHI_LANDING || '',
+			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_FOOD_LANDING || '',
 		},
 	},
 

@@ -247,7 +247,7 @@ Temporär deaktivierte Services (fehlende Deployments):
 ```yaml
 # Auskommentiert bis Deployment fertig
 # inventory-backend:
-# nutriphi-backend:
+# food-backend:
 # wisekeep-backend:
 ```
 
@@ -423,4 +423,4 @@ userId: text('user_id').notNull();
 1. **GDPR Export UI** - Download-Button im mana.how Dashboard
 2. **Matrix E2EE** - Ende-zu-Ende Verschlüsselung aktivieren
 3. **Alertmanager** - Discord Webhook Integration
-4. **Service Deployments** - Inventory, NutriPhi, WiseKeep
+4. **Service Deployments** - Inventory, Food, WiseKeep

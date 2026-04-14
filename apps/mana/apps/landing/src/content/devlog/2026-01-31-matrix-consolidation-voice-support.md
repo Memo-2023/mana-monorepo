@@ -210,7 +210,7 @@ Strategische Entscheidung: Fokus auf Matrix als einzige Chat-Plattform.
 services/
 ├── telegram-ollama-bot/        # ENTFERNT
 ├── telegram-project-doc-bot/   # ENTFERNT
-├── telegram-nutriphi-bot/      # ENTFERNT
+├── telegram-food-bot/      # ENTFERNT
 ├── telegram-todo-bot/          # ENTFERNT
 └── telegram-zitare-bot/        # ENTFERNT
 ```
@@ -379,5 +379,5 @@ Zahlreiche Fixes für das Monitoring-System.
 
 1. **Matrix E2EE** aktivieren
 2. **Voice Preferences UI** im Manalink Client
-3. **mana-media** mit NutriPhi integrieren
+3. **mana-media** mit Food integrieren
 4. **Matrix Bots CI/CD** Pipeline

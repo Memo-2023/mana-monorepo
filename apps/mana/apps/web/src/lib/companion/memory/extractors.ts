@@ -206,9 +206,9 @@ export async function extractAllPatterns(): Promise<void> {
 		// Calendar patterns
 		extractDayOfWeekPattern('CalendarEventCreated', 'Termine erstellt', 'calendar'),
 
-		// Nutriphi patterns
-		extractTimePreference('MealLogged', 'Mahlzeiten geloggt', 'nutriphi'),
-		extractFrequencyPattern('MealLogged', 'Mahlzeiten', 'nutriphi'),
+		// Food patterns
+		extractTimePreference('MealLogged', 'Mahlzeiten geloggt', 'food'),
+		extractFrequencyPattern('MealLogged', 'Mahlzeiten', 'food'),
 
 		// Places patterns
 		extractDayOfWeekPattern('PlaceVisited', 'Orte besucht', 'places'),

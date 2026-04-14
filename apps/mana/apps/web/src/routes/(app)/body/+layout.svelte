@@ -9,7 +9,7 @@
 		useAllBodyMeasurements,
 		useAllBodyChecks,
 		useAllBodyPhases,
-		useNutriphiMealsSince,
+		useFoodMealsSince,
 		dateNDaysAgo,
 	} from '$lib/modules/body/queries';
 
@@ -22,9 +22,9 @@
 	setContext('bodyMeasurements', useAllBodyMeasurements());
 	setContext('bodyChecks', useAllBodyChecks());
 	setContext('bodyPhases', useAllBodyPhases());
-	// Cross-module read for the Body × Nutriphi correlation chart.
+	// Cross-module read for the Body × Food correlation chart.
 	// 8 weeks back covers a typical cut/bulk cycle and matches the chart default.
-	setContext('bodyNutriphiMeals', useNutriphiMealsSince(dateNDaysAgo(56)));
+	setContext('bodyFoodMeals', useFoodMealsSince(dateNDaysAgo(56)));
 </script>
 
 {@render children()}

@@ -18,7 +18,7 @@ Für jede Domain: **CNAME Record hinzufügen** (oder bestehenden ändern), Proxi
 |--------|-----|------|--------|
 | `it` | CNAME | `bb0ea86d-8253-4a54-838b-107bb7945be9.cfargotunnel.com` | **Neu erstellen** |
 | `citycorners` | CNAME | `bb0ea86d-8253-4a54-838b-107bb7945be9.cfargotunnel.com` | **Neu erstellen** |
-| `nutriphi` | CNAME | `bb0ea86d-8253-4a54-838b-107bb7945be9.cfargotunnel.com` | **Neu erstellen** |
+| `food` | CNAME | `bb0ea86d-8253-4a54-838b-107bb7945be9.cfargotunnel.com` | **Neu erstellen** |
 | `cards` | CNAME | `bb0ea86d-8253-4a54-838b-107bb7945be9.cfargotunnel.com` | **Neu erstellen** |
 | `docs` | CNAME | `bb0ea86d-8253-4a54-838b-107bb7945be9.cfargotunnel.com` | **Neu erstellen** |
 
@@ -41,7 +41,7 @@ Diese Domains zeigen noch auf Cloudflare Pages. Um sie auf Self-Hosted umzustell
 
 ### Reihenfolge
 
-1. **Zuerst:** Neue Domains erstellen (`it`, `citycorners`, `nutriphi`, `cards`, `docs`)
+1. **Zuerst:** Neue Domains erstellen (`it`, `citycorners`, `food`, `cards`, `docs`)
 2. **Danach:** Bestehende Landing-Domains von Pages auf Tunnel migrieren (eine nach der anderen, testen)
 3. **Zuletzt:** Alte CF Pages Projekte löschen (optional, kosten nichts)
 
@@ -93,7 +93,7 @@ Cloudflare Tunnel (bb0ea86d...)
 | `storage.mana.how` | Storage Web | 5015 |
 | `storage-api.mana.how` | Storage API | 3035 |
 | `presi.mana.how` | Presi Web | 5016 |
-| `nutriphi.mana.how` | NutriPhi Web | 5017 |
+| `food.mana.how` | Food Web | 5017 |
 | `photos.mana.how` | Photos Web | 5019 |
 | `mukke.mana.how` | Mukke Web | 5180 |
 | `picture.mana.how` | Picture Web | 5021 |
@@ -110,7 +110,7 @@ Cloudflare Tunnel (bb0ea86d...)
 | `presis.mana.how` | Presi Landing | `/srv/landings/presi` |
 | `clocks.mana.how` | Clock Landing | `/srv/landings/clock` |
 | `cards.mana.how` | Cards Landing | `/srv/landings/cards` |
-| `nutriphi.mana.how` | NutriPhi Landing | `/srv/landings/nutriphi` |
+| `food.mana.how` | Food Landing | `/srv/landings/food` |
 | `citycorners.mana.how` | CityCorners Landing | `/srv/landings/citycorners` |
 | `docs.mana.how` | Dokumentation | `/srv/landings/docs` |
 

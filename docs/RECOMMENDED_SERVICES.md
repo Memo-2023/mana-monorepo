@@ -47,7 +47,7 @@ Diese Dokumentation beschreibt Services, die die bestehende Infrastruktur sinnvo
 │  ├── Contacts        Kontaktverwaltung                                  │
 │  ├── Storage         Cloud-Speicher                                     │
 │  ├── Presi           Präsentationen                                     │
-│  └── NutriPhi        Ernährungstracking                                 │
+│  └── Food        Ernährungstracking                                 │
 ├─────────────────────────────────────────────────────────────────────────┤
 │  MONITORING                                                             │
 │  ├── VictoriaMetrics Zeitreihen-Datenbank für Metriken                  │
@@ -882,7 +882,7 @@ Diese Apps existieren bereits im Monorepo, sind aber noch nicht auf dem Server:
 | Bot | Beschreibung | Code vorhanden |
 |-----|--------------|---------------|
 | `telegram-todo-bot` | Todo-Management via Telegram | ✓ |
-| `telegram-nutriphi-bot` | Ernährung loggen via Telegram | ✓ |
+| `telegram-food-bot` | Ernährung loggen via Telegram | ✓ |
 | `telegram-zitare-bot` | Tägliche Zitate via Telegram | ✓ |
 | `telegram-project-doc-bot` | Projekt-Dokumentation | ✓ |
 
@@ -929,7 +929,7 @@ Diese Apps existieren bereits im Monorepo, sind aber noch nicht auf dem Server:
 6. 🤖 Weitere Telegram Bots
    └── todo-bot
    └── zitare-bot
-   └── nutriphi-bot
+   └── food-bot
 ```
 
 ### Phase 4: Optional (Backlog)

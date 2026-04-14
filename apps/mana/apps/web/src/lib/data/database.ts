@@ -176,10 +176,10 @@ db.version(1).stores({
 	answers: 'id, questionId, isAccepted',
 	questionTags: 'id, questionId, tagId, [questionId+tagId]',
 
-	// ─── NutriPhi (appId: 'nutriphi') ───
+	// ─── Food (appId: 'food') ───
 	meals: 'id, date, mealType, [date+mealType]',
 	goals: 'id',
-	nutriFavorites: 'id, mealType, usageCount',
+	foodFavorites: 'id, mealType, usageCount',
 	mealTags: 'id, mealId, tagId, [mealId+tagId]',
 
 	// ─── Plants (appId: 'plants') ───

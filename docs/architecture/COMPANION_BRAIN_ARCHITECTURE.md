@@ -1,7 +1,7 @@
 # Mana Companion Brain — Architecture & Implementation Plan
 
 > Vollstaendiger Umbau-Plan fuer ein zentrales Intelligenz-System ueber alle Module.
-> Start mit 5 Pilot-Modulen: **Todo, Calendar, Drink, Nutriphi, Places**.
+> Start mit 5 Pilot-Modulen: **Todo, Calendar, Drink, Food, Places**.
 > Stand: April 2026
 
 ---
@@ -30,7 +30,7 @@ Mana hat 40+ Module, die isoliert arbeiten. Der Companion Brain verbindet sie zu
 ```
 +---------------------------------------------------+
 |                  MODULE LAYER                      |
-|  Todo - Calendar - Drink - Nutriphi - Places       |
+|  Todo - Calendar - Drink - Food - Places       |
 |  Jedes Modul emittiert Domain Events via Stores    |
 +------------------------+--------------------------+
                          | emit()
@@ -220,7 +220,7 @@ Felder:
 | `DrinkEntryUndone` | `{ entryId }` | `drinkStore.undoLastEntry()` |
 | `DrinkGoalReached` | `{ date, goalMl, actualMl, drinkType: 'water' }` | Projection erkennt Zielerreichung |
 
-#### Nutriphi Events
+#### Food Events
 
 | Event | Payload | Abgeleitet aus |
 |-------|---------|----------------|
@@ -370,7 +370,7 @@ export interface DaySnapshot {
     total: { ml: number; count: number };
   };
   
-  // Nutriphi
+  // Food
   nutrition: {
     meals: number;
     calories: { actual: number; goal: number; percent: number };
@@ -436,7 +436,7 @@ export interface Correlation {
 - Todo: tasks_completed_count, overdue_count
 - Calendar: events_count, meeting_hours
 - Drink: water_ml, coffee_count, goal_reached (boolean)
-- Nutriphi: calories, protein, meals_count
+- Food: calories, protein, meals_count
 - Places: places_visited, distance_km
 
 ### 4.5 ContactHealth (spaeter, nicht in Pilot)
@@ -529,9 +529,9 @@ eventBus.on('DrinkLogged', (event) => {
 Fuer den Start 10-15 Templates die der Nutzer mit einem Tap aktiviert:
 
 - 8 Glaeser Wasser/Tag (Drink, event_count, DrinkLogged, water)
-- 2000 kcal/Tag (Nutriphi, event_sum, MealLogged, calories)
+- 2000 kcal/Tag (Food, event_sum, MealLogged, calories)
 - 5 Tasks/Tag erledigen (Todo, event_count, TaskCompleted)
-- Alle Mahlzeiten tracken (Nutriphi, event_count, MealLogged, 3/day)
+- Alle Mahlzeiten tracken (Food, event_count, MealLogged, 3/day)
 - Jeden Tag einen neuen Ort besuchen (Places, event_count, PlaceVisited, 1/day)
 
 ---
@@ -743,7 +743,7 @@ export const drinkTools: ModuleTool[] = [
 ];
 
 // modules/calendar/tools.ts — create_event
-// modules/nutriphi/tools.ts — log_meal
+// modules/food/tools.ts — log_meal
 // modules/places/tools.ts — record_visit, create_place
 ```
 
@@ -755,14 +755,14 @@ export const drinkTools: ModuleTool[] = [
 import { todoTools } from '$lib/modules/todo/tools';
 import { calendarTools } from '$lib/modules/calendar/tools';
 import { drinkTools } from '$lib/modules/drink/tools';
-import { nutriphiTools } from '$lib/modules/nutriphi/tools';
+import { foodTools } from '$lib/modules/food/tools';
 import { placesTools } from '$lib/modules/places/tools';
 
 const ALL_TOOLS: ModuleTool[] = [
   ...todoTools,
   ...calendarTools,
   ...drinkTools,
-  ...nutriphiTools,
+  ...foodTools,
   ...placesTools,
 ];
 
@@ -1058,7 +1058,7 @@ User: "Erstell mir eine Morgenroutine"
     v
 LLM + Context Document + Tool Schemas
     |
-    |  LLM sieht: Nutzer hat Drink, Todo, Nutriphi, Calendar aktiv
+    |  LLM sieht: Nutzer hat Drink, Todo, Food, Calendar aktiv
     |  Memory: "Trinkt morgens zuerst Kaffee"
     |  Goals: "8 Glaeser Wasser/Tag"
     |
@@ -1147,7 +1147,7 @@ apps/mana/apps/web/src/lib/
     drink/
       tools.ts                      ✅ 3 Tools (log, progress, undo)
       stores/drink.svelte.ts        ✅ 3 Events (Logged, Deleted, Undone)
-    nutriphi/
+    food/
       tools.ts                      ✅ 2 Tools (log_meal, nutrition_summary)
       mutations.ts                  ✅ 3 Events (Logged, PhotoLogged, Deleted)
     places/
@@ -1266,7 +1266,7 @@ Commit: `66dd684bb`
 - Registry nutzt `registerTools()` Pattern statt statische Imports (tree-shaking-freundlich)
 - `initTools()` in `(app)/+layout.svelte` gewired neben `startEventStore()`
 - Executor coerced String→Number und String→Boolean automatisch
-- Tools pro Modul: Todo (3), Calendar (2), Drink (3), Nutriphi (2), Places (4)
+- Tools pro Modul: Todo (3), Calendar (2), Drink (3), Food (2), Places (4)
 - Jeder Tool hat eine `message` Feld fuer menschenlesbare Bestaetigung
 
 ### Phase 5: Companion Chat — ERLEDIGT (2026-04-13)
@@ -1377,7 +1377,7 @@ Phase 1 (Events) ──────┬──> Phase 2 (Projections)
 | 1 | Todo | 5 | 3 | Pilot |
 | 2 | Calendar | 3 | 2 | Pilot |
 | 3 | Drink | 3 | 3 | Pilot |
-| 4 | Nutriphi | 3 | 2 | Pilot |
+| 4 | Food | 3 | 2 | Pilot |
 | 5 | Places | 6 | 4 | Pilot |
 | 6 | Habits | 3 | 3 | Batch 2 |
 | 7 | Journal | 3 | 2 | Batch 2 |
@@ -1483,7 +1483,7 @@ Pulse Rules erzeugen Nudges, aber diese werden nur als OS-Notifications angezeig
 | Nudge Outcomes | Lokal (Browser) | IndexedDB, nicht synced |
 | Tool Execution | Lokal (Browser) | Writes gehen in Module-Tabellen |
 
-**Invariante:** Sensitive Daten (Journal, Dreams, Finance, Nutriphi) werden **nie** an Tier 2/3 gesendet — erzwungen durch `contentClass: 'sensitive'` im LLM Orchestrator.
+**Invariante:** Sensitive Daten (Journal, Dreams, Finance, Food) werden **nie** an Tier 2/3 gesendet — erzwungen durch `contentClass: 'sensitive'` im LLM Orchestrator.
 
 ---
 

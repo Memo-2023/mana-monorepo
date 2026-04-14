@@ -64,7 +64,7 @@ Jeder einzelne Backend-Service:
 | Kategorie | Backends | Source Files | Empfehlung |
 |-----------|----------|-------------|------------|
 | **Komplex (behalten)** | Chat, Todo, Calendar, Contacts, Storage, Mukke | 60-89 pro Backend | Eigenstaendige Services |
-| **AI-spezialisiert (behalten)** | Picture, Plants, NutriPhi | 30-50 pro Backend | Eigene AI-Pipelines |
+| **AI-spezialisiert (behalten)** | Picture, Plants, Food | 30-50 pro Backend | Eigene AI-Pipelines |
 | **Triviales CRUD (konsolidieren)** | Zitare (20!), Clock (31), Presi, CityCorners, Questions, Context | 20-35 pro Backend | -> 1 Content Service |
 | **Eliminieren** | Photos (mana-media Proxy), Skilltree (Frontend-only) | minimal | Backend loeschen |
 
@@ -379,7 +379,7 @@ Zu granulare Packages (Konsolidierungskandidaten):
 | shared-help-content, shared-help-mobile, shared-help-types, shared-help-ui | `@mana/help` |
 | shared-subscription-types, shared-subscription-ui | `@mana/subscriptions` |
 | shared-nestjs-health, shared-nestjs-metrics, shared-nestjs-setup | `@mana/nestjs-bootstrap` |
-| cards-database, nutriphi-database, spiral-db | Zurueck in die jeweiligen Apps |
+| cards-database, food-database, spiral-db | Zurueck in die jeweiligen Apps |
 
 ### Ziel: ~25-30 Packages statt 55
 
@@ -558,7 +558,7 @@ Diese Technologie-Entscheidungen sind gut und sollten beibehalten werden:
 
 ### Apps (24)
 
-calendar, chat, citycorners, clock, contacts, context, docs, inventar, mana, cards, matrix, mukke, nutriphi, photos, picture, plants, playground, presi, questions, skilltree, storage, todo, traces, zitare
+calendar, chat, citycorners, clock, contacts, context, docs, inventar, mana, cards, matrix, mukke, food, photos, picture, plants, playground, presi, questions, skilltree, storage, todo, traces, zitare
 
 ### Services (17)
 
@@ -566,7 +566,7 @@ it-landing, mana-api-gateway, mana-api-gateway-go, mana-auth, mana-crawler, mana
 
 ### Shared Packages (55)
 
-credit-operations, eslint-config, local-store, mana-core-nestjs-integration, cards-database, notify-client, nutriphi-database, qr-export, shared-api-client, shared-app-onboarding, shared-auth, shared-auth-stores, shared-auth-ui, shared-branding, shared-config, shared-credit-service, shared-credit-ui, shared-drizzle-config, shared-error-tracking, shared-errors, shared-feedback-service, shared-feedback-types, shared-feedback-ui, shared-gpu, shared-help-content, shared-help-mobile, shared-help-types, shared-help-ui, shared-i18n, shared-icons, shared-landing-ui, shared-llm, shared-logger, shared-nestjs-auth, shared-nestjs-health, shared-nestjs-metrics, shared-nestjs-setup, shared-profile-ui, shared-pwa, shared-splitscreen, shared-storage, shared-stores, shared-subscription-types, shared-subscription-ui, shared-tags, shared-tailwind, shared-theme, shared-theme-ui, shared-tsconfig, shared-types, shared-ui, shared-utils, shared-vite-config, spiral-db, test-config, wallpaper-generator
+credit-operations, eslint-config, local-store, mana-core-nestjs-integration, cards-database, notify-client, food-database, qr-export, shared-api-client, shared-app-onboarding, shared-auth, shared-auth-stores, shared-auth-ui, shared-branding, shared-config, shared-credit-service, shared-credit-ui, shared-drizzle-config, shared-error-tracking, shared-errors, shared-feedback-service, shared-feedback-types, shared-feedback-ui, shared-gpu, shared-help-content, shared-help-mobile, shared-help-types, shared-help-ui, shared-i18n, shared-icons, shared-landing-ui, shared-llm, shared-logger, shared-nestjs-auth, shared-nestjs-health, shared-nestjs-metrics, shared-nestjs-setup, shared-profile-ui, shared-pwa, shared-splitscreen, shared-storage, shared-stores, shared-subscription-types, shared-subscription-ui, shared-tags, shared-tailwind, shared-theme, shared-theme-ui, shared-tsconfig, shared-types, shared-ui, shared-utils, shared-vite-config, spiral-db, test-config, wallpaper-generator
 
 ### Games (3)
 
@@ -574,4 +574,4 @@ voxelava, whopixels, worldream
 
 ### Archivierte Apps (apps-archived/)
 
-bauntown, memoro, news, nutriphi, reader, uload, wisekeep
+bauntown, memoro, news, food, reader, uload, wisekeep

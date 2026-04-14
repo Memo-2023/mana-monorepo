@@ -20,7 +20,7 @@ import {
 
 export type IdentifyResult = PlantIdentification;
 
-/** See nutriphi/api.ts for the rationale. */
+/** See food/api.ts for the rationale. */
 function unwrapEnvelope<T>(raw: unknown): T {
 	const env = raw as Partial<AiResponseEnvelope<T>> | null;
 	if (!env || typeof env !== 'object' || !('schemaVersion' in env)) {

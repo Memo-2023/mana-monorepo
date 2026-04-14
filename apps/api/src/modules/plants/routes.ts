@@ -5,7 +5,7 @@
  * module owns the server-only operations: photo upload to mana-media
  * and structured plant identification via the Vercel AI SDK
  * (`generateObject`) using the shared PlantIdentificationSchema in
- * @mana/shared-types. See nutriphi/routes.ts for the rationale behind
+ * @mana/shared-types. See food/routes.ts for the rationale behind
  * the AI SDK + Zod approach.
  */
 
@@ -21,20 +21,20 @@ import {
 import { logger, type AuthVariables } from '@mana/shared-hono';
 
 const LLM_URL = process.env.MANA_LLM_URL || 'http://localhost:3025';
-// See nutriphi/routes.ts for the rationale on the default model and
+// See food/routes.ts for the rationale on the default model and
 // the /v1 base URL.
 const VISION_MODEL = process.env.VISION_MODEL || 'ollama/gemma3:4b';
 
 const llm = createOpenAICompatible({
 	name: 'mana-llm',
 	baseURL: `${LLM_URL}/v1`,
-	// See nutriphi/routes.ts for the rationale on this flag.
+	// See food/routes.ts for the rationale on this flag.
 	supportsStructuredOutputs: true,
 });
 
 const IDENTIFICATION_PROMPT = `Du bist ein Pflanzenexperte. Analysiere das Pflanzenfoto und liefere eine strukturierte Identifikation mit lateinischem Namen, deutschen Trivialnamen, Pflegehinweisen und einer Gesundheitseinschätzung. Antworte auf Deutsch.`;
 
-// See nutriphi/routes.ts for the rationale: this is a forward-compat
+// See food/routes.ts for the rationale: this is a forward-compat
 // hint for Anthropic prompt caching, ignored by Gemini today.
 const SYSTEM_CACHE_HINT = {
 	anthropic: { cacheControl: { type: 'ephemeral' as const } },

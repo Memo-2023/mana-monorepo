@@ -155,7 +155,7 @@ const track = {
 	mana: createModuleTracker('mana'),
 	context: createModuleTracker('context'),
 	skilltree: createModuleTracker('skilltree'),
-	nutriphi: createModuleTracker('nutriphi'),
+	food: createModuleTracker('food'),
 	plants: createModuleTracker('plants'),
 	questions: createModuleTracker('questions'),
 	photos: createModuleTracker('photos'),
@@ -375,17 +375,17 @@ export const SkillTreeEvents = {
 };
 
 /**
- * NutriPhi App Events
+ * Food App Events
  */
-export const NutriPhiEvents = {
+export const FoodEvents = {
 	mealAdded: (mealType: string, inputType: string) =>
-		track.nutriphi('meal_added', { meal_type: mealType, input_type: inputType }),
-	mealDeleted: () => track.nutriphi('meal_deleted'),
-	photoAnalyzed: () => track.nutriphi('photo_analyzed'),
-	textAnalyzed: () => track.nutriphi('text_analyzed'),
-	goalsUpdated: () => track.nutriphi('goals_updated'),
-	favoriteSaved: () => track.nutriphi('favorite_saved'),
-	favoriteUsed: () => track.nutriphi('favorite_used'),
+		track.food('meal_added', { meal_type: mealType, input_type: inputType }),
+	mealDeleted: () => track.food('meal_deleted'),
+	photoAnalyzed: () => track.food('photo_analyzed'),
+	textAnalyzed: () => track.food('text_analyzed'),
+	goalsUpdated: () => track.food('goals_updated'),
+	favoriteSaved: () => track.food('favorite_saved'),
+	favoriteUsed: () => track.food('favorite_used'),
 };
 
 /**

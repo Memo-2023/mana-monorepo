@@ -404,7 +404,7 @@ Unlock-Flow (Login auf neuem Gerät):
 |                      | **`answers`**        | **`content`**                                                                             | **7.2**  |
 | **uload**            | **`links`**          | **`title`, `description`** (`originalUrl` plaintext — Public Redirect)                    | **7.2**  |
 | **context**          | **`documents`**      | **`title`, `content`**                                                                    | **7.2**  |
-| **nutriphi**         | **`meals`**          | **`description`, `portionSize`** (Nutrition-Numbers plaintext für Aggregation)            | **7.2**  |
+| **food**             | **`meals`**          | **`description`, `portionSize`** (Nutrition-Numbers plaintext für Aggregation)            | **7.2**  |
 | **storage**          | **`files`**          | **`name`, `originalName`** (mimeType/size/path plaintext)                                 | **8**    |
 | **picture**          | **`images`**         | **`prompt`, `negativePrompt`** (model/style/format plaintext)                             | **8**    |
 | **music**            | **`songs`**          | **`title`** (artist/album/genre plaintext für Browsing-Aggregation)                       | **8**    |

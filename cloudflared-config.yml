@@ -62,7 +62,7 @@ ingress:
     service: http://localhost:5000
   - hostname: presi.mana.how
     service: http://localhost:5000
-  - hostname: nutriphi.mana.how
+  - hostname: food.mana.how
     service: http://localhost:5000
   - hostname: photos.mana.how
     service: http://localhost:5000

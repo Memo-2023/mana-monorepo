@@ -42,7 +42,7 @@ Außergewöhnlich produktiver Tag (und Nacht!) mit **74 Commits** und mehreren g
 - **mana-search Microservice** - SearXNG Meta-Search + Content Extraction
 - **@manacore/bot-services** - Shared Business Logic Package
 - **matrix-mana-bot** - Unified Gateway Bot für alle Features
-- **4 neue Matrix Bots** - Todo, NutriPhi, Zitare, Clock
+- **4 neue Matrix Bots** - Todo, Food, Zitare, Clock
 - **OIDC Provider** - Matrix SSO via mana-core-auth
 - **VictoriaMetrics** - Monitoring Upgrade mit DuckDB Analytics
 - **App Cleanup** - Demo Mode für Calendar, Todo, Contacts
@@ -365,7 +365,7 @@ Task-Management via Matrix:
 
 **Syntax:** `!todo Einkaufen !p1 @morgen #haushalt`
 
-### matrix-nutriphi-bot
+### matrix-food-bot
 
 Ernährungs-Tracking via Matrix:
 
@@ -514,7 +514,7 @@ apps/calendar/apps/web/src/lib/services/
 │   └── sync-manager.ts         # Bidirektionale Sync
 ```
 
-### NutriPhi: Production Ready
+### Food: Production Ready
 
 - 99 neue Tests (Backend, Web, Shared)
 - Error Handling mit deutschen Meldungen
@@ -561,18 +561,18 @@ apps/calendar/apps/web/src/lib/services/
 
 ## Neue Services
 
-| Service             | Port | Typ       | Beschreibung           |
-| ------------------- | ---- | --------- | ---------------------- |
-| skilltree-backend   | 3024 | NestJS    | Skill-Tracking API     |
-| skilltree-web       | 5195 | SvelteKit | Skill-Tracking UI      |
-| questions-backend   | 3111 | NestJS    | Research Assistant API |
-| questions-web       | 5111 | SvelteKit | Research Assistant UI  |
-| mana-search         | 3021 | NestJS    | Such-Microservice      |
-| matrix-mana-bot     | 3310 | NestJS    | Gateway Bot            |
-| matrix-todo-bot     | 3315 | NestJS    | Todo Bot               |
-| matrix-nutriphi-bot | 3316 | NestJS    | Nutrition Bot          |
-| matrix-zitare-bot   | 3317 | NestJS    | Quotes Bot             |
-| matrix-clock-bot    | 3318 | NestJS    | Timer Bot              |
+| Service           | Port | Typ       | Beschreibung           |
+| ----------------- | ---- | --------- | ---------------------- |
+| skilltree-backend | 3024 | NestJS    | Skill-Tracking API     |
+| skilltree-web     | 5195 | SvelteKit | Skill-Tracking UI      |
+| questions-backend | 3111 | NestJS    | Research Assistant API |
+| questions-web     | 5111 | SvelteKit | Research Assistant UI  |
+| mana-search       | 3021 | NestJS    | Such-Microservice      |
+| matrix-mana-bot   | 3310 | NestJS    | Gateway Bot            |
+| matrix-todo-bot   | 3315 | NestJS    | Todo Bot               |
+| matrix-food-bot   | 3316 | NestJS    | Nutrition Bot          |
+| matrix-zitare-bot | 3317 | NestJS    | Quotes Bot             |
+| matrix-clock-bot  | 3318 | NestJS    | Timer Bot              |
 
 ---
 
@@ -585,12 +585,12 @@ apps/calendar/apps/web/src/lib/services/
 | Matrix Client | 1       | Phase 2 Features                       |
 | mana-search   | 3       | SearXNG, Extraction, Cache             |
 | Bot Services  | 2       | Shared Package + Gateway               |
-| Matrix Bots   | 8       | Todo, NutriPhi, Zitare, Clock          |
+| Matrix Bots   | 8       | Todo, Food, Zitare, Clock              |
 | OIDC          | 6       | Matrix SSO Provider                    |
 | App Cleanup   | 8       | Demo Mode, Feature Removal             |
 | Monitoring    | 2       | VictoriaMetrics, DuckDB                |
-| NutriPhi      | 2       | Tests, Production Ready                |
-| Telegram Bots | 1       | NutriPhi, Todo, Zitare                 |
+| Food          | 2       | Tests, Production Ready                |
+| Telegram Bots | 1       | Food, Todo, Zitare                     |
 | Bugfixes      | 15+     | Auth, Matrix, Docker                   |
 | Documentation | 5       | Monitoring, Services, DevLogs          |
 

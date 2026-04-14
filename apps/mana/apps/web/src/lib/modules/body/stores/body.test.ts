@@ -13,7 +13,7 @@
  *   - logSet assigns the next order index relative to the existing
  *     non-deleted sets in the workout.
  *
- * Same harness as nutriphi/mutations.test.ts: fake-indexeddb + a
+ * Same harness as food/mutations.test.ts: fake-indexeddb + a
  * MemoryKeyProvider seeded with a fresh master key, plus mocks for
  * the browser-only globals the Dexie hooks reach for.
  */

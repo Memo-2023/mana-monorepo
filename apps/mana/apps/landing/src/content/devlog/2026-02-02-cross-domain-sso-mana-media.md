@@ -1,6 +1,6 @@
 ---
 title: 'Cross-Domain SSO, mana-media Integration & Matrix Bots Page'
-description: 'Cross-Subdomain SSO für alle .mana.how Apps, mana-media NutriPhi Integration, neue Bots-Übersichtsseite in Manalink, und mana-llm Production Deployment'
+description: 'Cross-Subdomain SSO für alle .mana.how Apps, mana-media Food Integration, neue Bots-Übersichtsseite in Manalink, und mana-llm Production Deployment'
 date: 2026-02-02
 author: 'Till Schneider'
 category: 'feature'
@@ -13,7 +13,7 @@ tags:
     'bots',
     'mana-llm',
     'production',
-    'nutriphi',
+    'food',
     'calendar',
     'ux',
   ]
@@ -36,7 +36,7 @@ workingHours:
 Produktiver Tag mit **40 Commits** und Fokus auf nahtlose Authentifizierung über alle Apps:
 
 - **Cross-Domain SSO** - Single Sign-On für alle .mana.how Subdomains
-- **mana-media Integration** - NutriPhi mit zentraler Medienverarbeitung
+- **mana-media Integration** - Food mit zentraler Medienverarbeitung
 - **Matrix Bots Page** - Übersicht aller 19 Bots in Manalink
 - **mana-llm Production** - LLM Gateway auf Mac Mini deployed
 - **i18n für Matrix Bots** - Mehrsprachige Bot-Antworten
@@ -91,7 +91,7 @@ Single Sign-On über alle ManaCore Web Apps.
 | Chat       | chat.mana.how       | ✅         |
 | Clock      | clock.mana.how      | ✅         |
 | Contacts   | contacts.mana.how   | ✅         |
-| NutriPhi   | nutriphi.mana.how   | ✅         |
+| Food       | food.mana.how       | ✅         |
 | Picture    | picture.mana.how    | ✅         |
 | Planta     | planta.mana.how     | ✅         |
 | Questions  | questions.mana.how  | ✅         |
@@ -120,13 +120,13 @@ const { user } = await response.json();
 
 ## mana-media Integration
 
-Zentrale Medienverarbeitung mit NutriPhi als erster Integration.
+Zentrale Medienverarbeitung mit Food als erster Integration.
 
-### NutriPhi Integration
+### Food Integration
 
 ```
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│   NutriPhi      │────>│   mana-media    │────>│    MinIO        │
+│   Food      │────>│   mana-media    │────>│    MinIO        │
 │   (Upload)      │     │   (Process)     │     │   (Storage)     │
 └─────────────────┘     └─────────────────┘     └─────────────────┘
          │                      │
@@ -202,7 +202,7 @@ Neue Übersichtsseite mit allen 19 Matrix Bots in Manalink.
 | matrix-calendar-bot  | Productivity | Termine & Erinnerungen |
 | matrix-clock-bot     | Utility      | Timer & Weltzeit       |
 | matrix-contacts-bot  | Productivity | Kontaktverwaltung      |
-| matrix-nutriphi-bot  | Health       | Ernährungs-Tracking    |
+| matrix-food-bot      | Health       | Ernährungs-Tracking    |
 | matrix-picture-bot   | AI           | Bildgenerierung        |
 | matrix-zitare-bot    | Inspiration  | Tägliche Zitate        |
 | matrix-skilltree-bot | Gamification | Skill-Tracking         |
@@ -382,14 +382,14 @@ CREATE INDEX idx_users_matrix_user_id ON users(matrix_user_id);
 
 ## Bugfixes
 
-| Fix                     | Beschreibung                  |
-| ----------------------- | ----------------------------- |
-| **mana-llm SSE**        | Double data prefix            |
-| **contacts-web**        | Runtime URLs statt Build-time |
-| **shared-ui**           | calculateFadeOpacity Export   |
-| **nutriphi Dockerfile** | Fehlende shared packages      |
-| **SessionService**      | Async Methods                 |
-| **JWT Issuer**          | Aligned mit Better Auth       |
+| Fix                 | Beschreibung                  |
+| ------------------- | ----------------------------- |
+| **mana-llm SSE**    | Double data prefix            |
+| **contacts-web**    | Runtime URLs statt Build-time |
+| **shared-ui**       | calculateFadeOpacity Export   |
+| **food Dockerfile** | Fehlende shared packages      |
+| **SessionService**  | Async Methods                 |
+| **JWT Issuer**      | Aligned mit Better Auth       |
 
 ---
 
@@ -398,7 +398,7 @@ CREATE INDEX idx_users_matrix_user_id ON users(matrix_user_id);
 | Bereich              | Commits | Highlights           |
 | -------------------- | ------- | -------------------- |
 | **Cross-Domain SSO** | 5       | 14 Apps mit SSO      |
-| **mana-media**       | 4       | NutriPhi Integration |
+| **mana-media**       | 4       | Food Integration     |
 | **Matrix Bots Page** | 2       | 19 Bots Übersicht    |
 | **mana-llm**         | 2       | Production + SSE Fix |
 | **i18n Bots**        | 2       | DE/EN Support        |

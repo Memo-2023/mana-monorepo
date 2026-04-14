@@ -103,9 +103,7 @@
 
 <div class="stream">
 	{#if events.length === 0}
-		<div class="empty">
-			Noch keine Events. Erstelle Daten in Todo, Kalender, Drink oder Nutriphi.
-		</div>
+		<div class="empty">Noch keine Events. Erstelle Daten in Todo, Kalender, Drink oder Food.</div>
 	{:else}
 		{#each events as event (event.meta.id)}
 			{@const iconDef = EVENT_ICONS[event.type] ?? { icon: Lightning, color: '#6B7280' }}

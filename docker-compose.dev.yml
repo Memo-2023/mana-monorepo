@@ -102,7 +102,7 @@ services:
       mc mb --ignore-existing myminio/picture-storage;
       mc mb --ignore-existing myminio/chat-storage;
       mc mb --ignore-existing myminio/cards-storage;
-      mc mb --ignore-existing myminio/nutriphi-storage;
+      mc mb --ignore-existing myminio/food-storage;
       mc mb --ignore-existing myminio/presi-storage;
       mc mb --ignore-existing myminio/calendar-storage;
       mc mb --ignore-existing myminio/contacts-storage;

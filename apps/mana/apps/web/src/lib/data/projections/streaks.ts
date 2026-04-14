@@ -71,7 +71,7 @@ const STREAK_DEFS: StreakDef[] = [
 	},
 	{
 		id: 'streak-meals-logged',
-		moduleId: 'nutriphi',
+		moduleId: 'food',
 		label: 'Mahlzeiten getrackt',
 		triggerEvents: ['MealLogged', 'MealFromPhotoLogged'],
 	},

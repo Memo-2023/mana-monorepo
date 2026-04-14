@@ -82,7 +82,7 @@ export const mediaReferences = mediaSchema.table(
 			.notNull(),
 		// Owner user ID
 		userId: text('user_id').notNull(),
-		// Source app (nutriphi, contacts, chat, etc.)
+		// Source app (food, contacts, chat, etc.)
 		app: text('app').notNull(),
 		// Optional: reference to the source URL
 		sourceUrl: text('source_url'),

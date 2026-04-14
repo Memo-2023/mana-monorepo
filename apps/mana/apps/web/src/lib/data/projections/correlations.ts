@@ -62,14 +62,14 @@ const METRICS: MetricDef[] = [
 		extract: (days) => countByType(days, 'DrinkLogged', (p) => p.drinkType === 'coffee'),
 	},
 	{
-		id: 'nutriphi:calories',
-		module: 'nutriphi',
+		id: 'food:calories',
+		module: 'food',
 		label: 'Kalorien',
 		extract: (days) => sumByTypeField(days, 'MealLogged', 'calories'),
 	},
 	{
-		id: 'nutriphi:meals',
-		module: 'nutriphi',
+		id: 'food:meals',
+		module: 'food',
 		label: 'Mahlzeiten',
 		extract: (days) => countByType(days, 'MealLogged'),
 	},

@@ -22,7 +22,7 @@
 | 7   | **Presi**       | decks, slides                                        | Ja (Store + Pages umgeschrieben)                             |
 | 8   | **Picture**     | images, boards, boardItems, tags, imageTags          | Ja (Gallery + Boards umgeschrieben)                          |
 | 9   | **Inventar**    | collections, items, locations, categories            | Nein (local-store angelegt, Stores nutzen noch localStorage) |
-| 10  | **NutriPhi**    | meals, goals, favorites                              | Nein (local-store angelegt, Stores nutzen noch API)          |
+| 10  | **Food**        | meals, goals, favorites                              | Nein (local-store angelegt, Stores nutzen noch API)          |
 | 11  | **Planta**      | plants, plantPhotos, wateringSchedules, wateringLogs | Nein (local-store angelegt, Stores nutzen noch API)          |
 | 12  | **Storage**     | files, folders, tags, fileTags                       | Nein (local-store angelegt, Stores nutzen noch API)          |
 | 13  | **Chat**        | conversations, messages, templates                   | Nein (local-store angelegt, Stores nutzen noch API)          |
@@ -108,7 +108,7 @@ Fertige Endpoints: Better Auth nativ, Auth (Register/Login/Logout/Validate), Gui
 
 ```
 # Local-First (Phase 3)
-ce51fd5f feat(apps): migrate Presi, Picture, Inventar, NutriPhi, Planta, Storage
+ce51fd5f feat(apps): migrate Presi, Picture, Inventar, Food, Planta, Storage
 8d880f1f feat(apps): migrate Chat, Questions, Mukke, Context, Photos
 a31ccc6c feat(apps): add local-store to SkilltTree and CityCorners
 7754cf6e refactor(skilltree): replace custom idb → @manacore/local-store

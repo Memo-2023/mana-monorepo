@@ -47,7 +47,7 @@ Jeder Matrix-Bot lief als eigenständiger NestJS-Service mit eigenem Docker-Cont
 | matrix-project-doc-bot | Projekt-Dokumentation                                                | 4013 |
 | matrix-todo-bot        | Aufgabenverwaltung                                                   | 4014 |
 | matrix-calendar-bot    | Kalender                                                             | 4015 |
-| matrix-nutriphi-bot    | Ernährungstracking                                                   | 4016 |
+| matrix-food-bot        | Ernährungstracking                                                   | 4016 |
 | matrix-zitare-bot      | Zitate & Inspiration                                                 | 4017 |
 | matrix-clock-bot       | Timer, Alarme, Weltuhren                                             | 4018 |
 | matrix-tts-bot         | Text-to-Speech                                                       | 4019 |
@@ -224,7 +224,7 @@ Neues Plugin hinzufügen = 3 Schritte:
 
 ### Skeleton (Grundgerüst mit !help, !status)
 
-stats, chat, cards, nutriphi, picture, presi, questions, skilltree, storage, projectdoc, onboarding
+stats, chat, cards, food, picture, presi, questions, skilltree, storage, projectdoc, onboarding
 
 ---
 

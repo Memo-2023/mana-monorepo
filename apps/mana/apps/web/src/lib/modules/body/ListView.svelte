@@ -15,7 +15,7 @@
 		useAllBodyMeasurements,
 		useAllBodyChecks,
 		useAllBodyPhases,
-		useNutriphiMealsSince,
+		useFoodMealsSince,
 		dateNDaysAgo,
 		getActiveWorkout,
 		getActivePhase,
@@ -38,7 +38,7 @@
 	const measurementsQuery = useAllBodyMeasurements();
 	const checksQuery = useAllBodyChecks();
 	const phasesQuery = useAllBodyPhases();
-	const mealsQuery = useNutriphiMealsSince(dateNDaysAgo(56));
+	const mealsQuery = useFoodMealsSince(dateNDaysAgo(56));
 
 	let exercises = $derived(exercisesQuery.value);
 	let routines = $derived(routinesQuery.value);

@@ -616,8 +616,8 @@
 						"type": "prometheus",
 						"uid": "${datasource}"
 					},
-					"expr": "up{job=\"nutriphi-backend\"}",
-					"legendFormat": "NutriPhi",
+					"expr": "up{job=\"food-backend\"}",
+					"legendFormat": "Food",
 					"refId": "L"
 				},
 				{

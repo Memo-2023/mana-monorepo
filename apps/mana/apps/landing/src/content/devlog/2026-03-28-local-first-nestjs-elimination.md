@@ -151,7 +151,7 @@ Für jede App ein minimaler Hono-Server der **nur** die server-seitigen Endpoint
 | Chat     | 137 | LLM Completions + SSE Streaming   |
 | Picture  | 144 | Replicate Image Gen + S3 Upload   |
 | Calendar | 119 | RRULE Expansion + ICS Import      |
-| NutriPhi | 154 | Gemini Meal Analysis              |
+| Food     | 154 | Gemini Meal Analysis              |
 | Planta   | 104 | Gemini Plant Analysis + S3 Upload |
 | Traces   | 108 | AI Guide Generation               |
 | ...      | ... | ...                               |

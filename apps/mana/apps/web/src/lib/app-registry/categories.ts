@@ -55,7 +55,7 @@ export const APP_CATEGORY_MAP: Record<string, AppCategory> = {
 	drink: 'life',
 	meditate: 'life',
 	journal: 'life',
-	nutriphi: 'life',
+	food: 'life',
 	recipes: 'life',
 	plants: 'life',
 	finance: 'life',

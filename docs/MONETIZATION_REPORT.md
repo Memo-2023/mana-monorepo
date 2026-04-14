@@ -24,7 +24,7 @@
 - **Warum:** Knowledge Worker zahlen für Produktivitätstools. AI-Dokumentgenerierung + Versionierung ist ein klarer Produktivitätsgewinn. B2B-fähig.
 - **Empfehlung:** Free (begrenzte AI-Tokens/Monat), Pro (mehr Tokens + alle Modelle), Team (shared Spaces + höhere Limits).
 
-### 4. NutriPhi (AI Nutrition Tracking)
+### 4. Food (AI Nutrition Tracking)
 
 - **Modell:** Credit-System bereits da (5 Credits/Foto, 2/Text, 10/Coaching)
 - **Warum:** Health/Fitness-Markt hat hohe Zahlungsbereitschaft (MyFitnessPal, Yazio machen Millionen). Foto-Analyse ist ein starker Differentiator. Recurring Revenue durch tägliche Nutzung.

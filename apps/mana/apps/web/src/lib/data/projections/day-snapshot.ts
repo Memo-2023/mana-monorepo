@@ -14,12 +14,12 @@ import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '../database';
 import { decryptRecords } from '../crypto';
 import { DEFAULT_DAILY_GOAL_ML } from '$lib/modules/drink/types';
-import { DEFAULT_DAILY_VALUES } from '$lib/modules/nutriphi/constants';
+import { DEFAULT_DAILY_VALUES } from '$lib/modules/food/constants';
 import { trackingStore } from '$lib/modules/places/stores/tracking.svelte';
 import type { LocalTask } from '$lib/modules/todo/types';
 import type { LocalEvent } from '$lib/modules/calendar/types';
 import type { LocalDrinkEntry } from '$lib/modules/drink/types';
-import type { LocalMeal, LocalGoal as NutriGoal } from '$lib/modules/nutriphi/types';
+import type { LocalMeal, LocalGoal as NutriGoal } from '$lib/modules/food/types';
 import type { LocalPlace } from '$lib/modules/places/types';
 import type { LocalTimeBlock } from '../time-blocks/types';
 import type { DaySnapshot, TaskSummary, EventSummary } from './types';
@@ -54,7 +54,7 @@ async function buildSnapshot(): Promise<DaySnapshot> {
 	const todayEnd = `${today}T23:59:59`;
 
 	// ── Parallel queries — all 5 modules at once ────
-	const [allTasks, blocks, allDrinks, allMeals, nutriGoals, allPlaces] = await Promise.all([
+	const [allTasks, blocks, allDrinks, allMeals, foodGoals, allPlaces] = await Promise.all([
 		db.table<LocalTask>('tasks').toArray(),
 		db
 			.table<LocalTimeBlock>('timeBlocks')
@@ -136,7 +136,7 @@ async function buildSnapshot(): Promise<DaySnapshot> {
 			totalProtein += n.protein ?? 0;
 		}
 	}
-	const activeGoal = nutriGoals.find((g) => !g.deletedAt);
+	const activeGoal = foodGoals.find((g) => !g.deletedAt);
 	const calorieGoal = activeGoal?.dailyCalories ?? DEFAULT_DAILY_VALUES.calories;
 	const proteinGoal = activeGoal?.dailyProtein;
 

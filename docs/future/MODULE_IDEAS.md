@@ -19,7 +19,7 @@ recommendation.
 
 **Productivity:** todo, calendar, contacts, notes, habits, times, timeblocks, events
 **Knowledge & learning:** cards, zitare, guides, questions, skilltree, memoro, context
-**Health & self:** nutriphi, cycles, dreams, moodlit, plants
+**Health & self:** food, cycles, dreams, moodlit, plants
 **Media & creative:** chat, picture, presi, music, photos, storage, uload
 **Data & tools:** finance, calc, inventory, places, citycorners, who, news, links, tags, playground
 
@@ -52,7 +52,7 @@ recommendation.
 
 ## Lifestyle & Hobbies
 
-- **recipes** — Recipes (linked to `nutriphi`), meal plan, shopping list generator
+- **recipes** — Recipes (linked to `food`), meal plan, shopping list generator
 - **wardrobe** — Catalog clothing, build outfits, "last worn", wash status
 - **travel** — Trips, itineraries, packing lists, travelogue (combines `places` + `photos`)
 - **packing** — Reusable packing list templates per trip type
@@ -108,10 +108,10 @@ recommendation.
 
 ## Health & Body (additional)
 
-- **drink** — ✅ **Built.** Getränke-Tracker für alle Getränke (Wasser, Kaffee, Tee, Saft, Alkohol etc.). Tages-/Wochenziele, Favoriten, Verlauf. Verknüpfung mit `nutriphi` und `body`.
+- **drink** — ✅ **Built.** Getränke-Tracker für alle Getränke (Wasser, Kaffee, Tee, Saft, Alkohol etc.). Tages-/Wochenziele, Favoriten, Verlauf. Verknüpfung mit `food` und `body`.
 - **stretch** — ✅ **Built.** Geführtes Dehnen mit Timer-Player, Bestandsaufnahme, Routinen, Streaks, Erinnerungen. 22 Seed-Übungen, 5 Preset-Routinen.
 - **breathe** — Atemübungen & Meditation-Timer mit geführten Mustern (Box Breathing, 4-7-8). Sessions-Log verknüpft mit `moodlit`.
-- **fasting** — Intervallfasten-Timer (16:8, 18:6, OMAD, custom). Essensfenster visualisieren, Fasten-Streak. Synergie: `nutriphi` (Mahlzeiten im Essensfenster), `drink` (Wasser während Fastenphase).
+- **fasting** — Intervallfasten-Timer (16:8, 18:6, OMAD, custom). Essensfenster visualisieren, Fasten-Streak. Synergie: `food` (Mahlzeiten im Essensfenster), `drink` (Wasser während Fastenphase).
 - **posture** — Haltungs-Checks zu konfigurierbaren Zeiten ("Sitzt du gerade?"). Foto-basiertes Tracking (Seitenansicht-Selfie → Vorher/Nachher). Übungsbibliothek für Haltungskorrektur. Arbeitsplatz-Ergonomie-Checkliste. Synergie: `stretch` (Routine-Empfehlung), `body` (Kraftübungen für Haltung).
 - **skin** — Hautpflege-Routinen (morgens/abends: Produkte + Reihenfolge). Hautzustand-Logging (Foto + Bewertung: Unreinheiten, Trockenheit, Rötung). Produkt-Bibliothek mit Inhaltsstoffen. Trigger-Tracking (Ernährung, Stress, Schlaf → Hautveränderung).
 - **eyes** — 20-20-20 Regel Reminder (alle 20 Min, 20 Sek, 20 Fuß entfernt schauen). Bildschirmzeit-Logging. Augenübungen (Fokus nah/fern, Kreise, Palming). Synergie: `stretch` (Desk-Break könnte Augenübung enthalten).

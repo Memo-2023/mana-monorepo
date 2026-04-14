@@ -35,7 +35,7 @@ All monitoring tools are publicly accessible - no login required (except GlitchT
 | Picture | https://stats.mana.how/share/273f67fa569940f6b85e7a7a0a003539/picture-webapp |
 | Photos | https://stats.mana.how/share/dc201d685f784716a0b8587376eca7a1/photos-webapp |
 | Storage | https://stats.mana.how/share/392ff51d11f14f0c9d556af1402a3ee6/storage-webapp |
-| NutriPhi | https://stats.mana.how/share/33dfae72f8e24aaa8008cbbceeaf072d/nutriphi-webapp |
+| Food | https://stats.mana.how/share/33dfae72f8e24aaa8008cbbceeaf072d/food-webapp |
 | Planta | https://stats.mana.how/share/1e83a8a67fa84d3995455c21dedbe3a2/plants-webapp |
 | Presi | https://stats.mana.how/share/a1eb8d1fa4d543e6b97ac41351fe1c6f/presi-webapp |
 | Skilltree | https://stats.mana.how/share/5de13e0895ae4a69aa2a834f985be14d/skilltree-webapp |
