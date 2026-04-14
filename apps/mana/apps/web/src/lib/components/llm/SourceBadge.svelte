@@ -14,7 +14,7 @@
 	 *   <SourceBadge tier={result.source} latencyMs={result.latencyMs} />
 	 */
 	import { llmSettingsState, tierLabel, type LlmTier } from '@mana/shared-llm';
-	import { Lightning, Cpu, HardDrive, Cloud } from '@mana/shared-icons';
+	import { Lightning, Cpu, HardDrive, Cloud, Key } from '@mana/shared-icons';
 
 	interface Props {
 		tier: LlmTier;
@@ -38,6 +38,10 @@
 		'mana-server': {
 			color: 'border-blue-500/40 bg-blue-500/10 text-blue-600 dark:text-blue-400',
 			icon: HardDrive, // our infrastructure
+		},
+		byok: {
+			color: 'border-violet-500/40 bg-violet-500/10 text-violet-600 dark:text-violet-400',
+			icon: Key, // user-supplied key
 		},
 		cloud: {
 			color: 'border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400',

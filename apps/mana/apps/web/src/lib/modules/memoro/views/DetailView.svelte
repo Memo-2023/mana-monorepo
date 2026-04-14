@@ -23,6 +23,7 @@
 		none: 'Lokal (regelbasiert)',
 		browser: 'Auf deinem Gerät (Gemma 4 E2B)',
 		'mana-server': 'Mana-Server (Gemma 4 E4B)',
+		byok: 'Dein API-Key',
 		cloud: 'Google Gemini',
 	};
 

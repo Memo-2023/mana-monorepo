@@ -70,6 +70,18 @@ export class LlmOrchestrator {
 		this.settings = settings;
 	}
 
+	/** Register (or replace) a backend at runtime — used by the app
+	 *  to wire up the BYOK backend after initial orchestrator construction,
+	 *  since BYOK needs access to app-side IndexedDB keys. */
+	registerBackend(backend: LlmBackend): void {
+		this.backendsByTier.set(backend.tier, backend);
+	}
+
+	/** Remove a backend (e.g. when the user disables BYOK). */
+	unregisterBackend(tier: LlmTier): void {
+		this.backendsByTier.delete(tier);
+	}
+
 	/** Public read-only view for UI components that want to react to
 	 *  the current settings (e.g. the tier selector). */
 	getSettings(): Readonly<LlmSettings> {

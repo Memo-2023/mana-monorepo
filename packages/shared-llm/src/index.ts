@@ -44,6 +44,26 @@ export { LlmOrchestrator, type LlmOrchestratorOptions } from './orchestrator';
 export { BrowserBackend } from './backends/browser';
 export { CloudBackend, type CloudBackendOptions } from './backends/cloud';
 export { ManaServerBackend, type ManaServerBackendOptions } from './backends/mana-server';
+export {
+	ByokBackend,
+	type ByokBackendOptions,
+	type ByokKeyResolver,
+	type ResolvedByokKey,
+	type ByokUsageCallback,
+} from './backends/byok';
+export {
+	BUILTIN_BYOK_PROVIDERS,
+	openaiProvider,
+	anthropicProvider,
+	geminiProvider,
+	mistralProvider,
+	type ByokProvider,
+	type ByokProviderId,
+	type ByokCallOptions,
+} from './backends/byok-providers';
+
+// Pricing
+export { MODEL_PRICING, estimateCost, formatCost, type ModelPricing } from './pricing';
 
 // Singleton store + Svelte 5 reactive hooks
 export {
