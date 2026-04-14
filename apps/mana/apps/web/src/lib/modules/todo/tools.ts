@@ -70,4 +70,63 @@ export const todoTools: ModuleTool[] = [
 			};
 		},
 	},
+	{
+		name: 'list_tasks',
+		module: 'todo',
+		description:
+			'Listet Tasks mit Titel, Faelligkeit und Prioritaet auf. Nutze diese, wenn der Nutzer fragt welche Tasks er hat oder eine Liste sehen will.',
+		parameters: [
+			{
+				name: 'filter',
+				type: 'string',
+				description: 'Welche Tasks zeigen',
+				required: false,
+				enum: ['open', 'completed', 'overdue', 'today', 'all'],
+			},
+			{
+				name: 'limit',
+				type: 'number',
+				description: 'Maximale Anzahl (default: 20)',
+				required: false,
+			},
+		],
+		async execute(params) {
+			const all = await taskTable.toArray();
+			const active = all.filter((t) => !t.deletedAt);
+			const decrypted = await decryptRecords<LocalTask>('tasks', active);
+			const tasks = decrypted.map(toTask);
+
+			const filter = (params.filter as string) ?? 'open';
+			const today = new Date().toISOString().split('T')[0];
+			let filtered = tasks;
+			if (filter === 'open') filtered = tasks.filter((t) => !t.isCompleted);
+			else if (filter === 'completed') filtered = tasks.filter((t) => t.isCompleted);
+			else if (filter === 'overdue')
+				filtered = tasks.filter(
+					(t) => !t.isCompleted && t.dueDate != null && (t.dueDate as string) < today
+				);
+			else if (filter === 'today')
+				filtered = tasks.filter((t) => !t.isCompleted && (t.dueDate as string) === today);
+
+			const limit = (params.limit as number) ?? 20;
+			const list = filtered.slice(0, limit).map((t) => ({
+				id: t.id,
+				title: t.title,
+				dueDate: t.dueDate,
+				priority: t.priority,
+				isCompleted: t.isCompleted,
+			}));
+
+			return {
+				success: true,
+				data: list,
+				message:
+					list.length === 0
+						? `Keine ${filter} Tasks`
+						: list
+								.map((t) => `• ${t.title}${t.dueDate ? ` (faellig ${t.dueDate})` : ''}`)
+								.join('\n'),
+			};
+		},
+	},
 ];
