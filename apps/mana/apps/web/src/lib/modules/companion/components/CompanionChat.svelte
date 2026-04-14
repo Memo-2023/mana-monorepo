@@ -9,6 +9,13 @@
 	import { marked } from 'marked';
 	import { PaperPlaneRight, Robot, User, Lightning, CircleNotch } from '@mana/shared-icons';
 	import { getLocalLlmStatus } from '@mana/local-llm';
+	import {
+		llmSettingsState,
+		updateLlmSettings,
+		ALL_TIERS,
+		tierLabel,
+		type LlmTier,
+	} from '@mana/shared-llm';
 	import { chatStore } from '../stores/chat.svelte';
 	import { runCompanionChat } from '../engine';
 	import { useMessages } from '../queries';
@@ -51,6 +58,31 @@
 		if (s.state === 'error') return `Fehler: ${s.error}`;
 		return null;
 	});
+
+	// ── AI Tier selector ────────────────────────────
+	// The orchestrator picks the first enabled tier from allowedTiers.
+	// Showing a dropdown that sets taskOverrides['companion.chat']
+	// gives the user fine-grained control per-task without changing
+	// global settings.
+	const llmSettings = $derived(llmSettingsState.current);
+	let currentTier = $derived<LlmTier | 'auto'>(
+		llmSettings.taskOverrides['companion.chat'] ?? 'auto'
+	);
+
+	function onTierChange(tier: LlmTier | 'auto') {
+		const overrides = { ...llmSettings.taskOverrides };
+		if (tier === 'auto') {
+			delete overrides['companion.chat'];
+		} else {
+			overrides['companion.chat'] = tier;
+		}
+		updateLlmSettings({ taskOverrides: overrides });
+	}
+
+	function tierDisplay(tier: LlmTier | 'auto'): string {
+		if (tier === 'auto') return 'Auto';
+		return tierLabel(tier);
+	}
 
 	async function scrollToBottom() {
 		await tick();
@@ -121,6 +153,25 @@
 </script>
 
 <div class="companion-chat">
+	<div class="chat-toolbar">
+		<span class="toolbar-label">KI-Modus:</span>
+		<select
+			class="tier-select"
+			value={currentTier}
+			onchange={(e) => onTierChange((e.target as HTMLSelectElement).value as LlmTier | 'auto')}
+			title="Waehle wo der Companion laeuft (Browser/Server/Cloud)"
+		>
+			<option value="auto"
+				>Auto ({llmSettings.allowedTiers[0]
+					? tierLabel(llmSettings.allowedTiers[0])
+					: 'keine'})</option
+			>
+			{#each ALL_TIERS as tier}
+				<option value={tier}>{tierDisplay(tier)}</option>
+			{/each}
+		</select>
+	</div>
+
 	<div class="messages">
 		{#each messages.value as msg (msg.id)}
 			<div
@@ -212,6 +263,38 @@
 		flex-direction: column;
 		height: 100%;
 		max-height: calc(100dvh - var(--bottom-chrome-height, 80px) - 6rem);
+	}
+
+	.chat-toolbar {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.5rem 0.875rem;
+		border-bottom: 1px solid hsl(var(--color-border));
+		background: hsl(var(--color-card));
+		flex-shrink: 0;
+	}
+
+	.toolbar-label {
+		font-size: 0.75rem;
+		color: hsl(var(--color-muted-foreground));
+	}
+
+	.tier-select {
+		font-size: 0.75rem;
+		padding: 0.25rem 0.5rem;
+		border-radius: 0.375rem;
+		border: 1px solid hsl(var(--color-border));
+		background: hsl(var(--color-background));
+		color: hsl(var(--color-foreground));
+		cursor: pointer;
+		outline: none;
+	}
+	.tier-select:focus {
+		border-color: hsl(var(--color-primary));
+	}
+	.tier-select:hover {
+		background: hsl(var(--color-surface-hover));
 	}
 
 	.messages {
