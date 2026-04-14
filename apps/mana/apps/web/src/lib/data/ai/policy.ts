@@ -21,6 +21,7 @@
 
 import { getTool } from '../tools/registry';
 import type { Actor } from '../events/actor';
+import { AI_PROPOSABLE_TOOL_NAMES } from '@mana/shared-ai';
 
 export type PolicyDecision = 'auto' | 'propose' | 'deny';
 
@@ -33,33 +34,34 @@ export interface AiPolicy {
 	readonly defaultForAi: PolicyDecision;
 }
 
+// ── Auto-executed tools (read-only / append-only self-state) ──────────
+// Kept here as the canonical local-only list — policies that don't mutate
+// user-visible records are webapp-specific and don't need to travel
+// through @mana/shared-ai.
+const AUTO_TOOLS: Record<string, 'auto'> = {
+	get_task_stats: 'auto',
+	list_tasks: 'auto',
+	get_todays_events: 'auto',
+	get_drink_progress: 'auto',
+	nutrition_summary: 'auto',
+	get_places: 'auto',
+	location_log: 'auto',
+	// Append-only self-state logs: AI proposing "did you drink water?" +
+	// user confirming + AI logging it should not require a second approval.
+	log_drink: 'auto',
+	log_meal: 'auto',
+};
+
+// ── Proposable tools derived from the shared canonical list ───────────
+// Keeps the webapp policy and mana-ai's `AI_AVAILABLE_TOOLS` from drifting.
+// Adding a new proposable tool → append to AI_PROPOSABLE_TOOL_NAMES in
+// @mana/shared-ai and both sides pick it up automatically.
+const PROPOSE_TOOLS: Record<string, 'propose'> = Object.fromEntries(
+	AI_PROPOSABLE_TOOL_NAMES.map((name) => [name, 'propose'] as const)
+);
+
 export const DEFAULT_AI_POLICY: AiPolicy = {
-	tools: {
-		// ── Read-only / harmless → auto ───────────────────────
-		get_task_stats: 'auto',
-		list_tasks: 'auto',
-		get_todays_events: 'auto',
-		get_drink_progress: 'auto',
-		nutrition_summary: 'auto',
-		get_places: 'auto',
-		location_log: 'auto',
-
-		// ── Append-only self-state logs → auto ────────────────
-		// These are fast-feedback user-logged values (drink, meal). The AI
-		// proposing "did you drink water?" then the user confirming + AI
-		// logging it should not require a second approval step.
-		log_drink: 'auto',
-		log_meal: 'auto',
-
-		// ── Mutating user-visible records → propose ───────────
-		create_task: 'propose',
-		complete_task: 'propose',
-		complete_tasks_by_title: 'propose',
-		create_event: 'propose',
-		create_place: 'propose',
-		visit_place: 'propose',
-		undo_drink: 'propose',
-	},
+	tools: { ...AUTO_TOOLS, ...PROPOSE_TOOLS },
 	defaultForAi: 'propose',
 };
 

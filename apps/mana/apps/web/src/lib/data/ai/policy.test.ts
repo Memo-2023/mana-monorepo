@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { resolvePolicy, setAiPolicy, DEFAULT_AI_POLICY } from './policy';
 import { registerTools } from '../tools/registry';
+import { AI_PROPOSABLE_TOOL_NAMES } from '@mana/shared-ai';
 import type { Actor } from '../events/actor';
 
 const AI: Actor = { kind: 'ai', missionId: 'm', iterationId: 'i', rationale: 'r' };
@@ -56,5 +57,11 @@ describe('resolvePolicy', () => {
 		expect(resolvePolicy('create_task', AI)).toBe('deny');
 		restore();
 		expect(resolvePolicy('create_task', AI)).toBe('propose');
+	});
+
+	it('every shared-ai proposable tool maps to propose in DEFAULT_AI_POLICY', () => {
+		for (const name of AI_PROPOSABLE_TOOL_NAMES) {
+			expect(DEFAULT_AI_POLICY.tools[name], `${name} should be 'propose'`).toBe('propose');
+		}
 	});
 });

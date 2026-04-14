@@ -1,19 +1,14 @@
 /**
  * Hardcoded allow-list of tools the server-side Planner may propose.
  *
- * The webapp owns the full tool registry (in
- * `apps/mana/apps/web/src/lib/data/tools/registry.ts`) and the policy
- * (`DEFAULT_AI_POLICY` in `data/ai/policy.ts`). This file mirrors the
- * subset where policy === 'propose' so the mana-ai Bun service can
- * build a valid prompt without importing Dexie-bound code.
- *
- * Drift risk: if the webapp adds a new proposable tool and this file
- * isn't updated, the mana-ai Planner simply won't suggest it — graceful
- * degradation. A contract test that compares both lists would be a
- * sensible follow-up.
+ * Parameter shapes live here (the webapp owns the full Dexie-bound
+ * registry); the set of NAMES is shared via `@mana/shared-ai`'s
+ * `AI_PROPOSABLE_TOOL_NAMES`. The module-load assertion at the bottom
+ * guards against drift in either direction — if this file or the shared
+ * list falls out of sync, the service refuses to start.
  */
 
-import type { AvailableTool } from '@mana/shared-ai';
+import { AI_PROPOSABLE_TOOL_SET, type AvailableTool } from '@mana/shared-ai';
 
 export const AI_AVAILABLE_TOOLS: readonly AvailableTool[] = [
 	{
@@ -45,6 +40,19 @@ export const AI_AVAILABLE_TOOLS: readonly AvailableTool[] = [
 		parameters: [{ name: 'taskId', type: 'string', description: 'ID des Tasks', required: true }],
 	},
 	{
+		name: 'complete_tasks_by_title',
+		module: 'todo',
+		description: 'Markiert alle Tasks deren Titel den Substring enthält (case-insensitive)',
+		parameters: [
+			{
+				name: 'titleSubstring',
+				type: 'string',
+				description: 'Teil des Task-Titels',
+				required: true,
+			},
+		],
+	},
+	{
 		name: 'create_event',
 		module: 'calendar',
 		description: 'Erstellt einen Kalender-Event',
@@ -63,6 +71,33 @@ export const AI_AVAILABLE_TOOLS: readonly AvailableTool[] = [
 			{ name: 'category', type: 'string', description: 'Kategorie', required: false },
 		],
 	},
+	{
+		name: 'visit_place',
+		module: 'places',
+		description: 'Vermerkt einen Besuch an einem bereits erfassten Ort',
+		parameters: [{ name: 'placeId', type: 'string', description: 'ID des Ortes', required: true }],
+	},
+	{
+		name: 'undo_drink',
+		module: 'drink',
+		description: 'Macht den letzten Drink-Eintrag rückgängig',
+		parameters: [],
+	},
 ];
 
 export const AI_AVAILABLE_TOOL_NAMES = new Set<string>(AI_AVAILABLE_TOOLS.map((t) => t.name));
+
+// ── Contract check — runs on module load ───────────────────
+// Catches drift between this file and @mana/shared-ai's canonical
+// proposable list. A mismatch means the webapp's policy + mana-ai are
+// about to disagree; better fail fast than ship a silently-degraded AI.
+{
+	const extra = [...AI_AVAILABLE_TOOL_NAMES].filter((n) => !AI_PROPOSABLE_TOOL_SET.has(n));
+	const missing = [...AI_PROPOSABLE_TOOL_SET].filter((n) => !AI_AVAILABLE_TOOL_NAMES.has(n));
+	if (extra.length || missing.length) {
+		throw new Error(
+			`[mana-ai] AI_AVAILABLE_TOOLS drift vs AI_PROPOSABLE_TOOL_NAMES. ` +
+				`extra=${JSON.stringify(extra)} missing=${JSON.stringify(missing)}`
+		);
+	}
+}
