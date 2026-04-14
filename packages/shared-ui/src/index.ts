@@ -159,10 +159,6 @@ export {
 	GlobalSettingsSection,
 } from './settings';
 
-// Command Bar (deprecated - use QuickInputBar)
-export { CommandBar } from './command-bar';
-export type { CommandBarItem } from './command-bar';
-
 // Input Bar
 export {
 	InputBar,

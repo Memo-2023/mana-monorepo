@@ -1,6 +1,6 @@
 /**
  * Syntax-highlight patterns for search/command input surfaces
- * (QuickInputBar, CommandBar). Patterns are locale-aware for date/priority
+ * (QuickInputBar, GlobalSpotlight). Patterns are locale-aware for date/priority
  * keywords; universal patterns (tags, @references, times) apply to every locale.
  */
 

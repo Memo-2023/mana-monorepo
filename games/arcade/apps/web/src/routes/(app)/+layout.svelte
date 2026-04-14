@@ -2,18 +2,17 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { locale } from 'svelte-i18n';
-	import { PillNavigation, CommandBar, SyncIndicator } from '@mana/shared-ui';
+	import { PillNavigation, SyncIndicator } from '@mana/shared-ui';
 	import type {
 		PillNavItem,
 		PillDropdownItem,
-		CommandBarItem,
-		QuickAction,
 		SpotlightAction,
+		ContentSearcher,
 	} from '@mana/shared-ui';
 	import { theme } from '$lib/stores/theme.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
-	import { games, getGameBySlug } from '$lib/data/games';
+	import { games } from '$lib/data/games';
 	import {
 		THEME_DEFINITIONS,
 		DEFAULT_THEME_VARIANTS,
@@ -30,11 +29,7 @@
 	import { gamesOnboarding } from '$lib/stores/app-onboarding.svelte';
 	import { MiniOnboardingModal } from '@mana/shared-ui';
 	import { gamesStore } from '$lib/data/local-store';
-	import {
-		tagLocalStore,
-		tagMutations,
-		useAllTags as useAllSharedTags,
-	} from '@mana/shared-stores';
+	import { tagLocalStore, tagMutations, useAllTags as useAllSharedTags } from '@mana/shared-stores';
 
 	const allTags = useAllSharedTags();
 
@@ -50,56 +45,79 @@
 
 	let { children } = $props();
 
+	// Cmd+K spotlight — nav shortcuts + game search. The PillNavigation
+	// hosts GlobalSpotlight internally, wired via spotlightActions +
+	// contentSearcher below.
 	const spotlightActions: SpotlightAction[] = [
 		{
+			id: 'home',
+			label: 'Alle Spiele',
+			icon: 'gamepad-2',
+			shortcut: '1',
+			category: 'Navigation',
+			onExecute: () => goto('/'),
+		},
+		{
 			id: 'new-game',
-			label: 'Neues Spiel erstellen',
-			icon: 'plus',
-			shortcut: 'N',
+			label: 'Spiel erstellen',
+			icon: 'sparkles',
+			shortcut: '2',
 			category: 'Erstellen',
 			onExecute: () => goto('/create'),
 		},
-		{ id: 'games', label: 'Alle Spiele', category: 'Navigation', onExecute: () => goto('/') },
+		{
+			id: 'community',
+			label: 'Community',
+			icon: 'users',
+			shortcut: '3',
+			category: 'Navigation',
+			onExecute: () => goto('/community'),
+		},
+		{
+			id: 'stats',
+			label: 'Statistiken',
+			icon: 'bar-chart-3',
+			shortcut: '4',
+			category: 'Navigation',
+			onExecute: () => goto('/stats'),
+		},
 		{
 			id: 'settings',
 			label: 'Einstellungen',
+			icon: 'settings',
 			category: 'Navigation',
 			onExecute: () => goto('/settings'),
 		},
 	];
 
-	let commandBarOpen = $state(false);
+	const contentSearcher: ContentSearcher = async (query) => {
+		const q = query.trim().toLowerCase();
+		if (!q) return [];
 
-	const commandBarQuickActions: QuickAction[] = [
-		{ id: 'home', label: 'Alle Spiele', icon: 'gamepad-2', href: '/', shortcut: '1' },
-		{ id: 'create', label: 'Spiel erstellen', icon: 'sparkles', href: '/create', shortcut: '2' },
-		{ id: 'community', label: 'Community', icon: 'users', href: '/community', shortcut: '3' },
-		{ id: 'stats', label: 'Statistiken', icon: 'bar-chart-3', href: '/stats', shortcut: '4' },
-		{ id: 'settings', label: 'Einstellungen', icon: 'settings', href: '/settings' },
-	];
-
-	async function handleCommandBarSearch(query: string): Promise<CommandBarItem[]> {
-		if (!query.trim()) return [];
-		const queryLower = query.toLowerCase();
-
-		return games
+		const hits = games
 			.filter(
-				(g) =>
-					g.title.toLowerCase().includes(queryLower) ||
-					g.tags.some((t) => t.toLowerCase().includes(queryLower))
+				(g) => g.title.toLowerCase().includes(q) || g.tags.some((t) => t.toLowerCase().includes(q))
 			)
-			.slice(0, 10)
-			.map((g) => ({
-				id: `game-${g.slug}`,
-				title: g.title,
-				subtitle: g.tags.join(', '),
-			}));
-	}
+			.slice(0, 10);
 
-	function handleCommandBarSelect(item: CommandBarItem) {
-		const slug = item.id.replace('game-', '');
-		goto(`/play/${slug}`);
-	}
+		if (hits.length === 0) return [];
+
+		return [
+			{
+				appId: 'arcade',
+				appName: 'Spiele',
+				results: hits.map((g, i) => ({
+					id: `game-${g.slug}`,
+					type: 'game',
+					appId: 'arcade',
+					title: g.title,
+					subtitle: g.tags.join(', '),
+					href: `/play/${g.slug}`,
+					score: hits.length - i,
+				})),
+			},
+		];
+	};
 
 	let isCollapsed = $state(false);
 	let isDark = $derived(theme.isDark);
@@ -156,13 +174,6 @@
 		filterHiddenNavItems('arcade', baseNavItems, userSettings.nav?.hiddenNavItems || {})
 	);
 
-	function handleKeydown(event: KeyboardEvent) {
-		if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
-			event.preventDefault();
-			commandBarOpen = true;
-		}
-	}
-
 	function handleCollapsedChange(collapsed: boolean) {
 		isCollapsed = collapsed;
 		collapsedStore.set(collapsed);
@@ -207,8 +218,6 @@
 	}
 </script>
 
-<svelte:window onkeydown={handleKeydown} />
-
 <AuthGate {authStore} {goto} allowGuest={true} onReady={handleAuthReady}>
 	<div class="layout-container">
 		<PillNavigation
@@ -243,6 +252,8 @@
 			helpHref="/help"
 			allAppsHref="/apps"
 			{spotlightActions}
+			{contentSearcher}
+			spotlightPlaceholder="Spiele oder Aktionen suchen..."
 		/>
 
 		<main class="main-content bg-background">
@@ -250,17 +261,6 @@
 				{@render children()}
 			</div>
 		</main>
-
-		<CommandBar
-			bind:open={commandBarOpen}
-			onClose={() => (commandBarOpen = false)}
-			onSearch={handleCommandBarSearch}
-			onSelect={handleCommandBarSelect}
-			quickActions={commandBarQuickActions}
-			placeholder="Spiel suchen..."
-			emptyText="Keine Ergebnisse"
-			searchingText="Suche..."
-		/>
 	</div>
 
 	{#if gamesOnboarding.shouldShow}
