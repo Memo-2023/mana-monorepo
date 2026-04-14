@@ -21,7 +21,6 @@ export interface CreatePreview {
 	subtitle: string;
 }
 
-export interface HighlightPattern {
-	pattern: RegExp;
-	className: string;
-}
+// HighlightPattern lives in ../search-core/highlight; re-exported here for
+// back-compat with older imports.
+export type { HighlightPattern } from '../search-core/highlight';

@@ -2,47 +2,9 @@
 	import { goto } from '$app/navigation';
 	import type { CommandBarItem, QuickAction, CreatePreview } from './CommandBar.types';
 	import { Heart, MagnifyingGlass, Plus } from '@mana/shared-icons';
+	import { getHighlightPatterns, highlightText, SEARCH_DEBOUNCE_MS } from '../search-core';
 
-	// Syntax highlighting patterns for command keywords
-	interface HighlightPattern {
-		pattern: RegExp;
-		className: string;
-	}
-
-	const HIGHLIGHT_PATTERNS: HighlightPattern[] = [
-		// Priority keywords (Todo) - with specific colors per level
-		{ pattern: /(!{3,}|!?dringend)\b/gi, className: 'hl-priority-urgent' },
-		{ pattern: /(!{2}|!?wichtig)\b/gi, className: 'hl-priority-high' },
-		{ pattern: /!?normal\b/gi, className: 'hl-priority-medium' },
-		{ pattern: /!?sp[aä]ter\b/gi, className: 'hl-priority-low' },
-		// Tags
-		{ pattern: /#\w+/g, className: 'hl-tag' },
-		// Projects/Calendars/Companies (@reference)
-		{ pattern: /@\w+/g, className: 'hl-reference' },
-		// Date keywords
-		{
-			pattern:
-				/\b(heute|morgen|übermorgen|montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag|nächsten?\s+\w+|in\s+\d+\s+tagen?)\b/gi,
-			className: 'hl-date',
-		},
-		// Time patterns
-		{ pattern: /\b(\d{1,2}:\d{2}|um\s+\d{1,2}(\s*uhr)?|\d{1,2}\s*uhr)\b/gi, className: 'hl-time' },
-	];
-
-	function highlightText(text: string): string {
-		if (!text) return '';
-
-		let result = text;
-		// Escape HTML first
-		result = result.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-
-		// Apply highlights (process in order, avoiding double-highlighting)
-		for (const { pattern, className } of HIGHLIGHT_PATTERNS) {
-			result = result.replace(pattern, (match) => `<span class="${className}">${match}</span>`);
-		}
-
-		return result;
-	}
+	const HIGHLIGHT_PATTERNS = getHighlightPatterns('de');
 
 	interface Props {
 		open: boolean;
@@ -89,7 +51,7 @@
 	);
 
 	// Highlighted text for overlay
-	let highlightedQuery = $derived(highlightText(searchQuery));
+	let highlightedQuery = $derived(highlightText(searchQuery, HIGHLIGHT_PATTERNS));
 
 	// Check if create option is selected (it's always first when available)
 	let isCreateSelected = $derived(selectedIndex === 0 && createPreview !== null);
@@ -126,7 +88,7 @@
 			} finally {
 				loading = false;
 			}
-		}, 150);
+		}, SEARCH_DEBOUNCE_MS);
 	}
 
 	async function handleCreate() {

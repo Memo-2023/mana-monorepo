@@ -6,8 +6,7 @@
 
 import { SearchRegistry } from './registry';
 import type { GroupedSearchResults } from './types';
-
-const DEBOUNCE_MS = 150;
+import { SEARCH_DEBOUNCE_MS as DEBOUNCE_MS } from '@mana/shared-ui';
 
 export function createSearchEngine() {
 	const registry = new SearchRegistry();

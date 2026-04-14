@@ -1,28 +1,14 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { slide } from 'svelte/transition';
-	import type { QuickInputItem, CreatePreview, HighlightPattern } from './types';
+	import type { QuickInputItem, CreatePreview } from './types';
 	import InputBarContextMenu from './InputBarContextMenu.svelte';
 	import { getInputBarSettingsStore } from './inputBarSettings.svelte';
-	import { getHighlightPatterns } from './highlightPatterns';
+	import { getHighlightPatterns, highlightText, SEARCH_DEBOUNCE_MS } from '../search-core';
+	import type { HighlightPattern } from '../search-core';
 
 	// Settings store
 	const settingsStore = getInputBarSettingsStore();
-
-	function highlightText(text: string, patterns: HighlightPattern[]): string {
-		if (!text) return '';
-
-		let result = text;
-		// Escape HTML first
-		result = result.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-
-		// Apply highlights (process in order, avoiding double-highlighting)
-		for (const { pattern, className } of patterns) {
-			result = result.replace(pattern, (match) => `<span class="${className}">${match}</span>`);
-		}
-
-		return result;
-	}
 
 	interface DefaultOption {
 		id: string;
@@ -242,7 +228,7 @@
 			} finally {
 				loading = false;
 			}
-		}, 150);
+		}, SEARCH_DEBOUNCE_MS);
 	}
 
 	async function triggerDeferredSearch() {
@@ -669,37 +655,11 @@
 		}
 	}
 
-	.app-icon.success-icon {
-		color: hsl(var(--color-success, 142 71% 45%));
-		animation: success-check 0.4s ease-out;
-	}
-
-	@keyframes success-check {
-		0% {
-			transform: scale(0.5);
-			opacity: 0;
-		}
-		50% {
-			transform: scale(1.2);
-		}
-		100% {
-			transform: scale(1);
-			opacity: 1;
-		}
-	}
-
 	.left-action,
 	.right-action {
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		flex-shrink: 0;
-	}
-
-	.app-icon {
-		width: 1.25rem;
-		height: 1.25rem;
-		color: hsl(var(--color-muted-foreground));
 		flex-shrink: 0;
 	}
 

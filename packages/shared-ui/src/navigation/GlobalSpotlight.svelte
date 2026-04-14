@@ -7,6 +7,7 @@
 		ContentSearcher,
 	} from './types';
 	import { createAppNavigationStore } from './appNavigationStore.svelte';
+	import { SEARCH_DEBOUNCE_MS } from '../search-core';
 
 	interface Props {
 		open: boolean;
@@ -160,7 +161,7 @@
 					contentLoading = false;
 				}
 			}
-		}, 150);
+		}, SEARCH_DEBOUNCE_MS);
 	});
 
 	// Group results by category for display

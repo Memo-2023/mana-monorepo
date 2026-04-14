@@ -185,13 +185,11 @@ export {
 	createInputBarSettingsStore,
 	getInputBarSettingsStore,
 } from './quick-input';
-export type {
-	QuickInputItem,
-	QuickAction,
-	CreatePreview,
-	HighlightPattern,
-	InputBarSettings,
-} from './quick-input';
+export type { QuickInputItem, QuickAction, CreatePreview, InputBarSettings } from './quick-input';
+
+// Shared search/command core — highlight patterns, debounce, common helpers.
+export { getHighlightPatterns, highlightText, SEARCH_DEBOUNCE_MS } from './search-core';
+export type { HighlightPattern } from './search-core';
 
 // Pages
 export { default as AppsPage } from './pages/AppsPage.svelte';
