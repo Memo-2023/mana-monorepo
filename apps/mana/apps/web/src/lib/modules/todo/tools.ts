@@ -124,8 +124,43 @@ export const todoTools: ModuleTool[] = [
 					list.length === 0
 						? `Keine ${filter} Tasks`
 						: list
-								.map((t) => `• ${t.title}${t.dueDate ? ` (faellig ${t.dueDate})` : ''}`)
+								.map(
+									(t) =>
+										`• [${t.id}] ${t.title}${t.dueDate ? ` (faellig ${t.dueDate})` : ''}${t.priority === 'high' ? ' [HOHE PRIO]' : ''}`
+								)
 								.join('\n'),
+			};
+		},
+	},
+	{
+		name: 'complete_tasks_by_title',
+		module: 'todo',
+		description:
+			'Markiert alle offenen Tasks mit dem gegebenen Titel als erledigt (case-insensitive Substring-Match). Nutze diese, wenn der Nutzer eine Task per Name erledigen will und du nicht ihre ID kennst.',
+		parameters: [
+			{ name: 'titleMatch', type: 'string', description: 'Titel oder Teil davon', required: true },
+		],
+		async execute(params) {
+			const all = await taskTable.toArray();
+			const active = all.filter((t) => !t.deletedAt && !t.isCompleted);
+			const decrypted = await decryptRecords<LocalTask>('tasks', active);
+			const tasks = decrypted.map(toTask);
+
+			const needle = (params.titleMatch as string).toLowerCase().trim();
+			const matches = tasks.filter((t) => t.title.toLowerCase().includes(needle));
+
+			if (matches.length === 0) {
+				return { success: false, message: `Kein offener Task mit "${params.titleMatch}" gefunden` };
+			}
+
+			for (const t of matches) {
+				await tasksStore.completeTask(t.id);
+			}
+
+			return {
+				success: true,
+				data: { completed: matches.length, titles: matches.map((m) => m.title) },
+				message: `${matches.length} Task(s) erledigt: ${matches.map((m) => m.title).join(', ')}`,
 			};
 		},
 	},

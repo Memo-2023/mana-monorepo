@@ -102,19 +102,30 @@ Wenn der Nutzer fragt:
 - "Erstell mir einen Task X" → \`create_task\` aufrufen
 - "Log 200ml Wasser" → \`log_drink\` aufrufen
 - "Welche Termine heute?" → \`get_todays_events\` aufrufen
+- "Erledige Task X" (per Name) → \`complete_tasks_by_title\` mit titleMatch
 
-Tool-Aufruf in genau diesem Format (NUR JSON, keine Erklaerung davor):
+Tool-Aufruf in genau diesem Format (NUR JSON in einem Code-Block):
 \`\`\`tool
 {"name": "tool_name", "params": {"key": "value"}}
 \`\`\`
 
 Nach dem Tool-Ergebnis bekommst du die Daten zurueck und kannst dem Nutzer antworten.
 
+## ID-Konvention
+
+Listen-Tools (wie \`list_tasks\`) zeigen IDs in eckigen Klammern: \`• [abc123] Task-Titel\`.
+Wenn der Nutzer eine Aktion auf einem Listen-Eintrag will, nutze diese ID fuer den Tool-Aufruf
+(z.B. \`complete_task\` mit \`taskId: "abc123"\`).
+
+Du kannst Tool-Results aus VORHERIGEN Nachrichten referenzieren — sie sind als
+"[Previous tool result]" markiert.
+
 ## Verhalten
 
 - Antworte auf Deutsch
 - Sei kurz und hilfreich
 - **Erfinde keine Daten** — wenn du Listen oder Werte brauchst, RUFE EIN TOOL AUF
+- Zeige dem Nutzer NIE die rohen IDs in eckigen Klammern — die sind nur fuer dich
 - Wenn der Nutzer etwas loggen oder erstellen will, nutze das passende Tool
 - Ermutige den Nutzer bei Fortschritt und Streaks`;
 }
@@ -122,31 +133,65 @@ Nach dem Tool-Ergebnis bekommst du die Daten zurueck und kannst dem Nutzer antwo
 function extractToolCall(
 	text: string
 ): { name: string; params: Record<string, unknown>; before: string; after: string } | null {
-	const toolBlockRegex = /```tool\s*\n?([\s\S]*?)\n?```/;
-	const match = text.match(toolBlockRegex);
-	if (!match) return null;
-
-	try {
-		const parsed = JSON.parse(match[1]) as { name: string; params: Record<string, unknown> };
-		if (!parsed.name) return null;
-		const before = text.slice(0, match.index).trim();
-		const after = text.slice((match.index ?? 0) + match[0].length).trim();
-		return { name: parsed.name, params: parsed.params ?? {}, before, after };
-	} catch {
-		return null;
+	// Try fenced ```tool block first
+	const fenced = /```(?:tool|json)?\s*\n?([\s\S]*?)\n?```/;
+	const fencedMatch = text.match(fenced);
+	if (fencedMatch) {
+		try {
+			const parsed = JSON.parse(fencedMatch[1]) as {
+				name: string;
+				params: Record<string, unknown>;
+			};
+			if (parsed.name) {
+				const before = text.slice(0, fencedMatch.index).trim();
+				const after = text.slice((fencedMatch.index ?? 0) + fencedMatch[0].length).trim();
+				return { name: parsed.name, params: parsed.params ?? {}, before, after };
+			}
+		} catch {
+			// Fall through to bare JSON detection
+		}
 	}
+
+	// Fallback: bare JSON object with "name" and "params" keys
+	const bareJson = /\{\s*"name"\s*:\s*"[^"]+"\s*,\s*"params"\s*:\s*\{[^}]*\}\s*\}/;
+	const bareMatch = text.match(bareJson);
+	if (bareMatch) {
+		try {
+			const parsed = JSON.parse(bareMatch[0]) as { name: string; params: Record<string, unknown> };
+			if (parsed.name) {
+				const before = text.slice(0, bareMatch.index).trim();
+				const after = text.slice((bareMatch.index ?? 0) + bareMatch[0].length).trim();
+				return { name: parsed.name, params: parsed.params ?? {}, before, after };
+			}
+		} catch {
+			// Not valid JSON
+		}
+	}
+
+	return null;
 }
 
 function messagesToLlm(
 	messages: LocalMessage[]
 ): { role: 'user' | 'assistant' | 'system'; content: string }[] {
-	return messages
-		.filter((m) => m.role !== 'tool_result')
-		.map((m) => ({
-			role:
-				m.role === 'tool_result' ? ('user' as const) : (m.role as 'user' | 'assistant' | 'system'),
-			content: m.content,
-		}));
+	const result: { role: 'user' | 'assistant' | 'system'; content: string }[] = [];
+	for (const m of messages) {
+		if (m.role === 'tool_result' && m.toolResult) {
+			// Surface previous tool results to the LLM so it can
+			// reference IDs/data from earlier turns.
+			const data = m.toolResult.data ? `\nData: ${JSON.stringify(m.toolResult.data)}` : '';
+			result.push({
+				role: 'user',
+				content: `[Previous tool result]\n${m.toolResult.message}${data}`,
+			});
+		} else if (m.role === 'assistant' && m.toolCall) {
+			// Skip the empty placeholder messages for tool calls
+			continue;
+		} else if (m.role === 'user' || m.role === 'assistant' || m.role === 'system') {
+			if (m.content) result.push({ role: m.role, content: m.content });
+		}
+	}
+	return result;
 }
 
 /**
