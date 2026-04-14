@@ -1804,9 +1804,14 @@ Code:
   - Webapp-Staging-Effect (`server-iteration-staging.ts`) übersetzt
     eingehende `source:'server'` Iterationen in lokale Proposals pro
     PlanStep mit AI-Actor-Attribution; idempotent via proposalId-Marker
-  - **Offen für Future Work**: Server-side Input-Resolver (notes/kontext
-    Projections), Contract-Test zwischen `AI_AVAILABLE_TOOLS` und Webapp-
-    Policy, Materialized View bei >100 Usern
+  - Server-side Input-Resolver (`db/resolvers/`) für plaintext Tabellen
+    (goals); encrypted Tables bleiben privacy-by-design browser-only
+  - Contract-Test via `@mana/shared-ai`'s `AI_PROPOSABLE_TOOL_NAMES` +
+    Runtime-Drift-Guard im Service
+  - `mana_ai.mission_snapshots` — inkrementeller Snapshot, `listDueMissions`
+    ist ein indexed SELECT statt O(N) LWW-Replay
+
+**Die Workbench-Roadmap ist damit funktional abgeschlossen.**
 
 ### 20.5a Symmetrische Registries: Resolver vs. Indexer
 
