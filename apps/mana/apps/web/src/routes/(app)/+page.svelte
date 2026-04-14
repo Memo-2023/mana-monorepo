@@ -120,6 +120,35 @@
 		if (el) el.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
 	}
 
+	// ── Keyboard shortcuts 1-9 / 0 ─────────────────────────
+	// 1-9 scroll to the Nth open app in the active scene.
+	// 0 opens the new-app picker (which scrolls itself into view).
+	onMount(() => {
+		function onKeydown(e: KeyboardEvent) {
+			if (e.metaKey || e.ctrlKey || e.altKey) return;
+			const target = e.target as HTMLElement | null;
+			if (target) {
+				const tag = target.tagName;
+				if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || target.isContentEditable)
+					return;
+			}
+			if (e.key === '0') {
+				e.preventDefault();
+				showPicker = true;
+				return;
+			}
+			if (e.key >= '1' && e.key <= '9') {
+				const idx = Number(e.key) - 1;
+				const page = carouselPages[idx];
+				if (!page) return;
+				e.preventDefault();
+				scrollToPage(page.id);
+			}
+		}
+		window.addEventListener('keydown', onKeydown);
+		return () => window.removeEventListener('keydown', onKeydown);
+	});
+
 	// ── Register SceneAppBar in the layout's bottom-stack ───
 	// Split into two effects so prop churn (carouselPages re-deriving on
 	// every openApps change) doesn't re-write barComponent. The first

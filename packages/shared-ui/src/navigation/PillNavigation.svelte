@@ -68,6 +68,7 @@
 		SignOut,
 		Sparkle,
 		Spiral,
+		Cards,
 		Sun,
 		Tag,
 		Target,
@@ -103,6 +104,7 @@
 		plus: Plus,
 		columns: Columns,
 		kanban: Columns,
+		tabs: Cards,
 		mic: Microphone,
 		calendar: CalendarBlank,
 		folder: Folder,
@@ -543,6 +545,70 @@
 	function isActive(path: string) {
 		return currentPath === path;
 	}
+
+	// User-menu bar — rendered when barMode is active. Short list: settings,
+	// light/dark/system toggle, theme button.
+	const userMenuBarItems = $derived.by<PillDropdownItem[]>(() => {
+		const out: PillDropdownItem[] = [];
+		if (settingsHref) {
+			out.push({
+				id: 'settings',
+				label: 'Einstellungen',
+				icon: 'settings',
+				onClick: () => {
+					window.location.href = settingsHref;
+				},
+			});
+		}
+		if (onThemeModeChange) {
+			out.push(
+				{
+					id: 'mode-light',
+					label: 'Hell',
+					icon: 'sun',
+					group: 'theme-mode',
+					active: themeMode === 'light',
+					onClick: () => onThemeModeChange('light'),
+				},
+				{
+					id: 'mode-dark',
+					label: 'Dunkel',
+					icon: 'moon',
+					group: 'theme-mode',
+					active: themeMode === 'dark',
+					onClick: () => onThemeModeChange('dark'),
+				},
+				{
+					id: 'mode-system',
+					label: 'System',
+					icon: 'settings',
+					group: 'theme-mode',
+					active: themeMode === 'system',
+					onClick: () => onThemeModeChange('system'),
+				}
+			);
+		}
+		if (themesHref) {
+			out.push({
+				id: 'themes',
+				label: 'Theme',
+				icon: 'palette',
+				onClick: () => {
+					window.location.href = themesHref;
+				},
+			});
+		}
+		if (onLogout && showLogout && userEmail) {
+			out.push({
+				id: 'logout',
+				label: 'Logout',
+				icon: 'logout',
+				danger: true,
+				onClick: () => onLogout(),
+			});
+		}
+		return out;
+	});
 </script>
 
 {#if !(externalCollapsed ?? false)}
@@ -555,7 +621,7 @@
 		aria-label={ariaLabel}
 	>
 		<div class="pill-nav-container">
-			<!-- Logo pill / App Switcher -->
+			<!-- App Switcher (optional) -->
 			{#if showAppSwitcher && appItems.length > 0}
 				<AppDrawer
 					apps={appItems}
@@ -566,14 +632,6 @@
 					{allAppsLabel}
 					triggerLabel={appName}
 				/>
-			{:else}
-				<a href={homeRoute} class="pill glass-pill logo-pill">
-					{#if logo}
-						{@render logo()}
-					{:else}
-						<span class="pill-label font-bold">{appName}</span>
-					{/if}
-				</a>
 			{/if}
 
 			<!-- Prepended Elements (Tab Groups, Dividers, Nav Items, Tag Selectors) -->
@@ -605,7 +663,7 @@
 						{#if element.icon}
 							{#if phosphorIcons[element.icon]}
 								{@const IconComponent = phosphorIcons[element.icon]}
-								<IconComponent size={18} class="pill-icon" />
+								<IconComponent size={18} weight="bold" class="pill-icon" />
 							{/if}
 						{/if}
 						<span class="pill-label">{element.label}</span>
@@ -636,7 +694,7 @@
 								{@html item.iconSvg}
 							{:else if phosphorIcons[item.icon]}
 								{@const IconComponent = phosphorIcons[item.icon]}
-								<IconComponent size={18} class="pill-icon" />
+								<IconComponent size={18} weight="bold" class="pill-icon" />
 							{/if}
 						{/if}
 						{#if !item.iconOnly}
@@ -664,7 +722,7 @@
 								{@html item.iconSvg}
 							{:else if phosphorIcons[item.icon]}
 								{@const IconComponent = phosphorIcons[item.icon]}
-								<IconComponent size={18} class="pill-icon" />
+								<IconComponent size={18} weight="bold" class="pill-icon" />
 							{/if}
 						{/if}
 						{#if !item.iconOnly}
@@ -703,7 +761,7 @@
 						{#if element.icon}
 							{#if phosphorIcons[element.icon]}
 								{@const IconComponent = phosphorIcons[element.icon]}
-								<IconComponent size={18} class="pill-icon" />
+								<IconComponent size={18} weight="bold" class="pill-icon" />
 							{/if}
 						{/if}
 						<span class="pill-label">{element.label}</span>
@@ -726,7 +784,7 @@
 					class:active={activeBarId === 'sync'}
 					title={currentSyncLabel}
 				>
-					<Cloud size={18} class="pill-icon" />
+					<Cloud size={18} weight="bold" class="pill-icon" />
 					<span class="pill-label">{currentSyncLabel}</span>
 				</button>
 			{:else if showSyncStatus && syncStatusItems.length > 0}
@@ -739,7 +797,26 @@
 			{/if}
 
 			<!-- User Menu -->
-			{#if userEmail || loginHref}
+			{#if (userEmail || loginHref) && barMode}
+				{@const userLabel = userEmail ? truncateEmail(userEmail) : guestMenuLabel}
+				{@const userBarConfig = {
+					id: 'user',
+					label: userLabel,
+					icon: 'user',
+					items: userMenuBarItems,
+				}}
+				<button
+					type="button"
+					onclick={() => toggleBar(userBarConfig)}
+					class="pill glass-pill icon-only"
+					class:active={activeBarId === 'user'}
+					aria-label={userLabel}
+					title={userLabel}
+					data-user-menu-trigger
+				>
+					<User size={18} weight="bold" class="pill-icon" />
+				</button>
+			{:else if userEmail || loginHref}
 				{@const userLabel = userEmail ? truncateEmail(userEmail) : guestMenuLabel}
 				<button
 					bind:this={userMenuTrigger}
@@ -749,12 +826,13 @@
 					class:active={userMenuOpen}
 					aria-label={userLabel}
 					title={userLabel}
+					data-user-menu-trigger
 				>
-					<User size={18} class="pill-icon" />
+					<User size={18} weight="bold" class="pill-icon" />
 				</button>
 			{:else if onLogout && showLogout}
 				<button onclick={onLogout} class="pill glass-pill logout-pill" title="Logout">
-					<SignOut size={18} class="pill-icon" />
+					<SignOut size={18} weight="bold" class="pill-icon" />
 					<span class="pill-label">Logout</span>
 				</button>
 			{/if}
@@ -806,7 +884,11 @@
 		left: 0;
 		right: 0;
 		z-index: 1000;
-		padding: 1rem 0 calc(env(safe-area-inset-bottom, 0px) + 0.75rem);
+		/* Unified bar height (see bottomChromeHeight in (app)/+layout.svelte). */
+		height: calc(56px + env(safe-area-inset-bottom, 0px));
+		padding-bottom: env(safe-area-inset-bottom, 0px);
+		display: flex;
+		align-items: center;
 		pointer-events: none;
 		/* Container query context */
 		container-type: inline-size;
@@ -864,8 +946,8 @@
 		}
 
 		.pill-icon {
-			width: 1.25rem;
-			height: 1.25rem;
+			width: 1.5rem;
+			height: 1.5rem;
 		}
 	}
 
@@ -874,7 +956,8 @@
 		display: flex;
 		align-items: center;
 		gap: 0.375rem;
-		padding: 0.5rem 0.875rem;
+		padding: 0 0.875rem;
+		height: 36px;
 		border-radius: 9999px;
 		font-size: 0.875rem;
 		font-weight: 500;
@@ -955,8 +1038,8 @@
 	}
 
 	.pill-icon {
-		width: 1rem;
-		height: 1rem;
+		width: 1.25rem;
+		height: 1.25rem;
 		flex-shrink: 0;
 	}
 
@@ -964,10 +1047,10 @@
 		display: inline;
 	}
 
-	/* Icon-only pill: square-ish shape, no label gap */
+	/* Icon-only pill: wider than tall so it reads as a pill, not a chip. */
 	.pill.icon-only {
 		gap: 0;
-		padding: 0.5rem 0.625rem;
+		padding: 0 1.125rem;
 	}
 
 	/* Progress ring on pill (used for download indicator).

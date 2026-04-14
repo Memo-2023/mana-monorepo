@@ -2,7 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import type { Component, Snippet } from 'svelte';
-	import { onDestroy, setContext } from 'svelte';
+	import { onDestroy, setContext, tick } from 'svelte';
 	import { createReminderScheduler } from '@mana/shared-stores';
 	import { todoReminderSource } from '$lib/modules/todo/reminder-source';
 	import { startEventStore, stopEventStore } from '$lib/data/events/event-store';
@@ -261,7 +261,7 @@
 	const bottomChromeHeight = $derived(
 		isFullscreen
 			? 0
-			: (isCollapsed ? 0 : 80) +
+			: (isCollapsed ? 0 : 56) +
 					(activeBar ? 64 : 0) +
 					(isTagStripVisible ? 64 : 0) +
 					(isQuickInputVisible ? 64 : 0) +
@@ -311,7 +311,7 @@
 		{
 			href: '/',
 			label: 'Workbench-Tabs',
-			icon: 'columns',
+			icon: 'tabs',
 			iconOnly: true,
 			onClick: handleBottomBarToggle,
 			active: isBottomBarVisible,
@@ -372,6 +372,40 @@
 				const route = navRoutes[num - 1];
 				if (route) goto(route);
 			}
+			return;
+		}
+		if (event.ctrlKey || event.metaKey || event.altKey) return;
+		switch (event.key) {
+			case 'q':
+			case 'Q':
+				event.preventDefault();
+				handleBottomBarToggle();
+				return;
+			case 'w':
+			case 'W':
+				event.preventDefault();
+				handleQuickInputToggle();
+				return;
+			case 'e':
+			case 'E':
+				event.preventDefault();
+				handleTagStripToggle();
+				return;
+			case 'r':
+			case 'R':
+				event.preventDefault();
+				(async () => {
+					if (isCollapsed) handleCollapsedChange(false);
+					await tick();
+					document.querySelector<HTMLButtonElement>('[data-user-menu-trigger]')?.click();
+				})();
+				return;
+			case 't':
+			case 'T':
+				event.preventDefault();
+				if (!isCollapsed) closeAllBars();
+				handleCollapsedChange(!isCollapsed);
+				return;
 		}
 	}
 
@@ -870,15 +904,6 @@
 								{:else}
 									<Microphone size={16} weight={localStt.state === 'idle' ? 'regular' : 'fill'} />
 								{/if}
-							</button>
-						{/snippet}
-						{#snippet rightAction()}
-							<button
-								class="pill-nav-toggle"
-								onclick={() => handleCollapsedChange(!isCollapsed)}
-								title={isCollapsed ? 'Navigation einblenden' : 'Navigation ausblenden'}
-							>
-								<span class="pill-nav-toggle-icon" class:collapsed={isCollapsed}>▼</span>
 							</button>
 						{/snippet}
 					</QuickInputBar>
