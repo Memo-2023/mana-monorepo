@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import type { Component, Snippet } from 'svelte';
+	import type { Snippet } from 'svelte';
 	import { onDestroy, setContext } from 'svelte';
 	import { createReminderScheduler } from '@mana/shared-stores';
 	import { todoReminderSource } from '$lib/modules/todo/reminder-source';
@@ -9,7 +9,13 @@
 	import { initTools } from '$lib/data/tools/init';
 	import { startEventBridge, stopEventBridge } from '$lib/triggers/event-bridge';
 	import { startStreakTracker, stopStreakTracker } from '$lib/data/projections/streaks';
+	import { initByok } from '$lib/byok';
+	import KeyboardShortcutsModal from '$lib/components/KeyboardShortcutsModal.svelte';
+	import SessionWarning from '$lib/components/SessionWarning.svelte';
+	import EncryptionIntroBanner from '$lib/components/EncryptionIntroBanner.svelte';
 	import { bottomBarStore } from '$lib/stores/bottom-bar.svelte';
+	import SuggestionToast from '$lib/components/SuggestionToast.svelte';
+	import NudgeToast from '$lib/components/NudgeToast.svelte';
 	import { locale, _ } from 'svelte-i18n';
 	import {
 		PillNavigation,
@@ -32,7 +38,7 @@
 	import type { InputBarAdapter } from '$lib/quick-input/types';
 	import { getAdapterLoader } from '$lib/quick-input/registry';
 	import { createFallbackAdapter } from '$lib/quick-input/fallback-adapter';
-	import { AuthGate } from '@mana/shared-auth-ui';
+	import { AuthGate, GuestWelcomeModal } from '@mana/shared-auth-ui';
 	import { MANA_APPS, hasAppAccess, ACCESS_TIER_LABELS } from '@mana/shared-branding';
 	import type { AccessTier } from '@mana/shared-branding';
 	import { createGuestMode, type GuestMode } from '$lib/stores/guest-mode.svelte';
@@ -73,6 +79,7 @@
 	import { isNavCollapsed as collapsedStore } from '$lib/stores/navigation';
 	import { getPillAppItems } from '@mana/shared-branding';
 	import { onboardingStore } from '$lib/stores/onboarding.svelte';
+	import { OnboardingWizard } from '$lib/components/onboarding';
 	import { STORAGE_KEYS } from '$lib/config/storage-keys';
 	import { SearchRegistry } from '$lib/search/registry';
 	import { registerAllProviders } from '$lib/search/providers';
@@ -82,22 +89,6 @@
 	import { wallpaperStore } from '$lib/stores/wallpaper.svelte';
 
 	let { children }: { children: Snippet } = $props();
-
-	// ── Idle-defer helper ───────────────────────────────────
-	// Runs work when the browser is idle so first interaction isn't
-	// blocked by non-critical init (telemetry, schedulers, side-effect
-	// streams). Falls back to setTimeout on browsers without
-	// requestIdleCallback.
-	function idle(cb: () => void, timeout = 2000) {
-		if (typeof window === 'undefined') return;
-		const ric = (
-			window as unknown as {
-				requestIdleCallback?: (cb: () => void, opts?: { timeout?: number }) => void;
-			}
-		).requestIdleCallback;
-		if (ric) ric(cb, { timeout });
-		else setTimeout(cb, 0);
-	}
 
 	// ── App switcher ────────────────────────────────────────
 	let appItems = $derived(getPillAppItems('mana', undefined, undefined, authStore.user?.tier));
@@ -401,63 +392,6 @@
 	// ── Guest Mode ──────────────────────────────────────────
 	let guestMode = $state<GuestMode | null>(null);
 
-	// ── Lazy-loaded UI (modals, toasts, banners) ────────────
-	// Static imports for these were adding weight to the initial layout
-	// bundle for components that are rarely-to-never visible on first
-	// paint. Each is fetched either on first demand (modals) or shortly
-	// after idle (always-mounted toasts/banners that self-gate).
-	// Permissive prop typing — props are validated at the call site
-	// where {@const} narrows the component back to its concrete type.
-	type AnyComponent = Component<any>;
-	let KeyboardShortcutsModalC = $state<AnyComponent | null>(null);
-	let OnboardingWizardC = $state<AnyComponent | null>(null);
-	let GuestWelcomeModalC = $state<AnyComponent | null>(null);
-	let SessionWarningC = $state<AnyComponent | null>(null);
-	let EncryptionIntroBannerC = $state<AnyComponent | null>(null);
-	let SuggestionToastC = $state<AnyComponent | null>(null);
-	let NudgeToastC = $state<AnyComponent | null>(null);
-
-	// On-demand: only fetch when the user actually opens them.
-	$effect(() => {
-		if (showShortcuts && !KeyboardShortcutsModalC) {
-			import('$lib/components/KeyboardShortcutsModal.svelte').then((m) => {
-				KeyboardShortcutsModalC = m.default;
-			});
-		}
-	});
-	$effect(() => {
-		if (showOnboarding && !OnboardingWizardC) {
-			import('$lib/components/onboarding').then((m) => {
-				OnboardingWizardC = m.OnboardingWizard;
-			});
-		}
-	});
-	$effect(() => {
-		if (guestMode?.showWelcome && !GuestWelcomeModalC) {
-			import('@mana/shared-auth-ui').then((m) => {
-				GuestWelcomeModalC = m.GuestWelcomeModal;
-			});
-		}
-	});
-
-	// Idle-mount: background toasts/banners that self-gate internally.
-	// Deferring the import also defers their transitive deps
-	// (automationsStore, day-snapshot projection, streaks, crypto gate).
-	idle(() => {
-		void import('$lib/components/SuggestionToast.svelte').then((m) => {
-			SuggestionToastC = m.default;
-		});
-		void import('$lib/components/NudgeToast.svelte').then((m) => {
-			NudgeToastC = m.default;
-		});
-		void import('$lib/components/EncryptionIntroBanner.svelte').then((m) => {
-			EncryptionIntroBannerC = m.default;
-		});
-		void import('$lib/components/SessionWarning.svelte').then((m) => {
-			SessionWarningC = m.default;
-		});
-	});
-
 	// ── Onboarding ──────────────────────────────────────────
 	function handleOnboardingComplete() {
 		onboardingStore.complete();
@@ -482,34 +416,33 @@
 		setGuestPromptNavigator((href) => goto(href));
 		if (authStore.isAuthenticated) guestPrompt.clear();
 
-		// Phase A (critical): the local-store inits are required before
-		// liveQueries anywhere downstream (TagStrip, module list views)
-		// can return non-empty results. Keep these awaited.
+		// Phase A: Auth-independent — guests + authenticated
 		await Promise.all([
 			manaStore.initialize(),
 			tagLocalStore.initialize(),
 			linkLocalStore.initialize(),
 		]);
+		initSharedUload();
+		startEventStore();
+		initTools();
+		startEventBridge();
+		startStreakTracker();
+		initByok();
+		await dashboardStore.initialize();
 
-		// Phase A-idle: side-effect streams, telemetry, projection workers.
-		// All idempotent and self-gated; deferring to the next idle frame
-		// lets the first paint + interaction land without waiting on
-		// event-bridge wiring or LLM-queue reclaim work.
-		idle(() => {
-			initSharedUload();
-			startEventStore();
-			initTools();
-			startEventBridge();
-			startStreakTracker();
-			startLlmQueue();
-			startMemoroLlmWatcher();
-			// dashboardStore only drives /dashboard — safe to defer; other
-			// routes don't read from it on first paint.
-			void dashboardStore.initialize();
-			reminderScheduler.start();
-		});
+		// Start the persistent LLM task queue. Idempotent — safe to call
+		// repeatedly. The queue picks up any tasks left in 'pending' state
+		// from previous sessions (and reclaims orphaned 'running' rows
+		// from a crashed session) before going idle. See $lib/llm-queue.ts.
+		startLlmQueue();
 
-		// Restore nav collapsed state (cheap, keep inline)
+		// Module-side LLM result watchers. Each subscribes via Dexie
+		// liveQuery to completed task rows tagged for its module and
+		// writes the results back to the module's own collection
+		// (e.g. memoro auto-titles → memo.title). Idempotent.
+		startMemoroLlmWatcher();
+
+		// Restore nav collapsed state
 		if (typeof localStorage !== 'undefined') {
 			const savedCollapsed = localStorage.getItem(STORAGE_KEYS.NAV_COLLAPSED);
 			if (savedCollapsed === 'true') {
@@ -518,11 +451,10 @@
 			}
 		}
 
-		// Phase B (critical): sync for authenticated users. Data delivery
-		// is user-visible via the pending-count badge, so we keep the
-		// sync engine boot on the critical path.
+		// Phase B: Auth-dependent — sync, settings, onboarding
 		if (authStore.isAuthenticated) {
 			setErrorTrackingUser({ id: authStore.user?.id ?? 'unknown', email: authStore.user?.email });
+			trackReturnVisit();
 			await syncBilling.load();
 			const getToken = () => authStore.getValidToken();
 			unifiedSync = createUnifiedSync(SYNC_SERVER_URL, getToken, syncBilling.active);
@@ -556,21 +488,18 @@
 			// value (0 on a fresh tab) until a sync actually runs.
 			refreshPendingCount();
 
-			// Phase B-idle: settings, onboarding gating and return-visit
-			// telemetry. None of this gates rendering — onboarding shows
-			// via showOnboarding after the store resolves, which is fine
-			// on a delay.
-			idle(async () => {
-				trackReturnVisit();
-				userSettings.load().catch(() => {});
-				await onboardingStore.load();
-				if (onboardingStore.shouldShow) {
-					onboardingStore.start();
-					ManaEvents.onboardingStarted();
-					showOnboarding = true;
-				}
-			});
+			userSettings.load().catch(() => {});
+
+			onboardingStore.load();
+			if (onboardingStore.shouldShow) {
+				onboardingStore.start();
+				ManaEvents.onboardingStarted();
+				showOnboarding = true;
+			}
 		}
+
+		// Phase B2: Start reminder scheduler
+		reminderScheduler.start();
 		// IMPORTANT: do NOT call notificationService.requestPermission() here.
 		// Browsers (Chrome/Firefox) require permission requests to come from
 		// a user gesture. Calling it at mount time queues the prompt until
@@ -701,9 +630,8 @@
 	appName="Mana"
 	locale={($locale || 'de') === 'de' ? 'de' : 'en'}
 >
-	<!-- Onboarding Wizard (auth only) — loaded on demand -->
-	{#if showOnboarding && authStore.isAuthenticated && OnboardingWizardC}
-		{@const OnboardingWizard = OnboardingWizardC}
+	<!-- Onboarding Wizard (auth only) -->
+	{#if showOnboarding && authStore.isAuthenticated}
 		<div
 			class="fixed inset-0 z-50 flex items-center justify-center bg-background/95 backdrop-blur-sm"
 		>
@@ -728,14 +656,10 @@
 
 				<!-- One-time encryption intro — sits at the top of the stack so
 				 it can't be obscured by the QuickInputBar / TagStrip / PillNav.
-				 Self-gates on isVaultUnlocked() so guests never see it.
-				 Lazy-loaded after idle (see $effects above). -->
-				{#if EncryptionIntroBannerC}
-					{@const EncryptionIntroBanner = EncryptionIntroBannerC}
-					<div class="bottom-stack-notification">
-						<EncryptionIntroBanner />
-					</div>
-				{/if}
+				 Self-gates on isVaultUnlocked() so guests never see it. -->
+				<div class="bottom-stack-notification">
+					<EncryptionIntroBanner />
+				</div>
 
 				<!-- Sync pause banner — shown when sync was paused due to insufficient credits -->
 				{#if syncBilling.paused}
@@ -772,10 +696,8 @@
 
 				<!-- Session expiry warning (auth only). Self-gates on the
 				 secondsLeft countdown and only renders inside the stack
-				 when actually warning, so the wrapper is no-op otherwise.
-				 Lazy-loaded after idle. -->
-				{#if authStore.isAuthenticated && SessionWarningC}
-					{@const SessionWarning = SessionWarningC}
+				 when actually warning, so the wrapper is no-op otherwise. -->
+				{#if authStore.isAuthenticated}
 					<div class="bottom-stack-notification">
 						<SessionWarning />
 					</div>
@@ -784,23 +706,16 @@
 				<!-- Cross-module automation suggestions. Lives in the (app)
 				 stack because automationsStore is an (app)-only module
 				 and the toast doesn't make sense on auth/landing pages
-				 anyway. Self-gates on visible state. Lazy-loaded after idle. -->
-				{#if SuggestionToastC}
-					{@const SuggestionToast = SuggestionToastC}
-					<div class="bottom-stack-notification">
-						<SuggestionToast />
-					</div>
-				{/if}
+				 anyway. Self-gates on visible state. -->
+				<div class="bottom-stack-notification">
+					<SuggestionToast />
+				</div>
 
 				<!-- Companion Brain pulse nudges — water reminders, streak
-				 warnings, morning summary etc. Self-gates on active nudges.
-				 Lazy-loaded after idle. -->
-				{#if NudgeToastC}
-					{@const NudgeToast = NudgeToastC}
-					<div class="bottom-stack-notification">
-						<NudgeToast />
-					</div>
-				{/if}
+				 warnings, morning summary etc. Self-gates on active nudges. -->
+				<div class="bottom-stack-notification">
+					<NudgeToast />
+				</div>
 
 				<!-- QuickInputBar with inline nav toggle — gated by the "search" pill -->
 				{#if isQuickInputVisible}
@@ -969,11 +884,8 @@
 			 so it doesn't end up obscured by the QuickInputBar like
 			 EncryptionIntroBanner used to be. -->
 
-		<!-- Keyboard shortcuts modal — loaded on first `?` press -->
-		{#if KeyboardShortcutsModalC}
-			{@const KeyboardShortcutsModal = KeyboardShortcutsModalC}
-			<KeyboardShortcutsModal open={showShortcuts} onclose={() => (showShortcuts = false)} />
-		{/if}
+		<!-- Keyboard shortcuts modal -->
+		<KeyboardShortcutsModal open={showShortcuts} onclose={() => (showShortcuts = false)} />
 	</div>
 
 	<!-- Navigation Context Menu -->
@@ -985,9 +897,8 @@
 		onClose={() => navCtxMenu.close()}
 	/>
 
-	<!-- Guest Welcome Modal — loaded when guest mode activates -->
-	{#if guestMode && GuestWelcomeModalC}
-		{@const GuestWelcomeModal = GuestWelcomeModalC}
+	<!-- Guest Welcome Modal -->
+	{#if guestMode}
 		<GuestWelcomeModal
 			appId="mana"
 			visible={guestMode.showWelcome}

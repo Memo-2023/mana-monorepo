@@ -487,6 +487,13 @@ db.version(13).stores({
 	sleepSettings: 'id',
 });
 
+// v16 — BYOK (Bring Your Own Key) storage for user-provided LLM API keys.
+// Encrypted at rest via the user's master key (AES-GCM). NOT synced.
+// Keys stay device-local — user must add them on each device.
+db.version(16).stores({
+	_byokKeys: 'id, provider, isDefault, [provider+isDefault]',
+});
+
 // ─── Sync Routing ──────────────────────────────────────────
 // SYNC_APP_MAP, TABLE_TO_SYNC_NAME, TABLE_TO_APP, SYNC_NAME_TO_TABLE,
 // toSyncName() and fromSyncName() are now derived from per-module
