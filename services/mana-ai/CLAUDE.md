@@ -17,10 +17,9 @@ What works end-to-end:
 - [x] Server-side tool allow-list (`src/planner/tools.ts`) mirrors the webapp's `DEFAULT_AI_POLICY` `propose` subset
 - [x] **Write-back**: `db/iteration-writer.ts` appends the server-produced iteration to `Mission.iterations[]` via a `sync_changes` INSERT under an RLS-scoped `withUser` transaction. Row is attributed with actor `{kind:'system', source:'mission-runner'}`.
 - [x] Webapp staging effect (`server-iteration-staging.ts`) picks up the synced iteration and translates each PlanStep into a local Proposal with full AI-actor attribution (missionId + iterationId + rationale). Idempotent via durable `proposalId` markers.
+- [x] **Server-side input resolvers** for plaintext tables — `db/resolvers/` with a pluggable registry + single-record LWW replay (`record-replay.ts`). `goals` resolver ships by default. Encrypted tables (notes, kontext, tasks, events, journal, …) are intentionally **not** resolved server-side; those missions depend on the foreground runner which decrypts client-side. See `resolvers/types.ts` for the privacy rationale.
 
 Intentionally **not yet** implemented (future work):
-
-- [ ] Input-resolvers server-side — Planner currently sees `resolvedInputs: []` so the LLM only has concept + objective + iteration history. Real resolvers need per-module projections of `sync_changes` (notes, kontext, goals).
 - [ ] Per-user Postgres RLS scoping on the mission *read* path — current cross-user scan relies on downstream code honouring `userId`. Write path is already RLS-scoped via `withUser`.
 - [ ] Contract test between this service's `AI_AVAILABLE_TOOLS` and the webapp's `DEFAULT_AI_POLICY` — drift today means silent degradation (server won't propose newly-added webapp tools).
 - [ ] Materialized mission snapshot — full LWW replay per tick is O(N changes). Fine pre-launch; revisit when user count grows.
