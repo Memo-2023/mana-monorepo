@@ -23,14 +23,15 @@ export default defineConfig({
 				themeColor: '#6366f1',
 				registerType: 'prompt',
 				preset: 'full',
-				// Disable the service worker in dev. With devEnabled=true (the
-				// default) vite-plugin-pwa registers a SW that aggressively
-				// precaches the route chunks — and after the first dev session
-				// the SW keeps serving the OLD JS even when Vite HMR pushes
-				// new code, so source edits become invisible until the user
-				// manually unregisters the worker in DevTools. The 2026-04-08
-				// dreams mic-button bug took an extra hour to track down for
-				// exactly this reason. Production still gets the full SW.
+				// SW disabled in dev. Reasons:
+				//   1. Workbox precache doesn't run under `vite dev`, so the
+				//      `navigateFallback: '/offline'` rule fires for every
+				//      navigation → users land on the offline page even while
+				//      online. (Observed 2026-04-14.)
+				//   2. The 2026-04-08 dreams mic-button bug: a stuck dev SW
+				//      kept serving old JS chunks through HMR reloads.
+				// Test install prompt + offline behavior via `pnpm build &&
+				// pnpm preview` instead — production SW works correctly.
 				devEnabled: false,
 				shortcuts: [
 					{ name: 'Dashboard', short_name: 'Home', url: '/', description: 'Zum Dashboard' },

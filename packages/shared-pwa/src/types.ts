@@ -139,6 +139,13 @@ export interface ManifestIcon {
  * Full manifest configuration
  */
 export interface ManifestConfig {
+	/**
+	 * Unique manifest identifier. Chrome uses this to correlate the installed
+	 * app with its manifest across `start_url` changes. Strongly recommended
+	 * by the spec since 2023 — omitting it triggers a DevTools warning and
+	 * can suppress the install prompt on re-installs.
+	 */
+	id: string;
 	name: string;
 	short_name: string;
 	description: string;

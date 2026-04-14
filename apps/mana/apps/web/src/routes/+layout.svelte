@@ -15,8 +15,15 @@
 	import OfflineIndicator from '$lib/components/OfflineIndicator.svelte';
 	import PwaUpdatePrompt from '$lib/components/PwaUpdatePrompt.svelte';
 	import AuthRequiredModal from '$lib/components/auth/AuthRequiredModal.svelte';
+	import { pwaInfo } from 'virtual:pwa-info';
 
 	let { children } = $props();
+
+	// vite-plugin-pwa emits the <link rel="manifest"> tag (with the hashed
+	// manifest filename) via this virtual module. Without rendering it into
+	// <svelte:head>, Chrome can't read the manifest → no install prompt,
+	// no install icon in the URL bar, no A2HS on mobile.
+	const webManifestLink = $derived(pwaInfo?.webManifest.linkTag ?? '');
 
 	// Tracks the last user id we pushed into the data layer. Comparing
 	// against this lets us short-circuit identity-update churn during auth
@@ -111,6 +118,10 @@
 		};
 	});
 </script>
+
+<svelte:head>
+	{@html webManifestLink}
+</svelte:head>
 
 {@render children()}
 <SyncConflictToast />

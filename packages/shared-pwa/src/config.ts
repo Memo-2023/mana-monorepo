@@ -62,6 +62,10 @@ export function createPWAConfig(options: PWAConfigOptions): PWAConfig {
 
 	// Build manifest
 	const manifest: ManifestConfig = {
+		// Pin the app identity to the start URL. Without `id`, Chrome derives
+		// one from start_url and warns in DevTools; it also refuses to
+		// re-prompt an install if start_url ever changes.
+		id: startUrl,
 		name,
 		short_name: shortName,
 		description,

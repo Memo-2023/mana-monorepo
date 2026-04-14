@@ -1,64 +1,34 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { _ } from 'svelte-i18n';
+	import { useRegisterSW } from 'virtual:pwa-register/svelte';
 
-	let showPrompt = $state(false);
-	let registration = $state<ServiceWorkerRegistration | null>(null);
-
-	onMount(() => {
-		if (!('serviceWorker' in navigator)) return;
-
-		function onNewSW(reg: ServiceWorkerRegistration) {
-			registration = reg;
-			showPrompt = true;
-		}
-
-		navigator.serviceWorker.ready.then((reg) => {
-			// Already waiting worker present
-			if (reg.waiting) {
-				onNewSW(reg);
-				return;
-			}
-
-			// Watch for new installs
-			reg.addEventListener('updatefound', () => {
-				const newWorker = reg.installing;
-				if (!newWorker) return;
-
-				newWorker.addEventListener('statechange', () => {
-					if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-						onNewSW(reg);
-					}
-				});
-			});
-		});
+	// `useRegisterSW` registers the service worker and exposes two Svelte
+	// stores we actually care about:
+	//   - needRefresh → a new SW is waiting (matches registerType: 'prompt')
+	//   - updateServiceWorker(reload) → skipWaiting + reload page
+	// `offlineReady` is available too if we ever want a "ready for offline"
+	// toast; we don't surface it today to keep the UI quiet.
+	const { needRefresh, updateServiceWorker } = useRegisterSW({
+		immediate: true,
+		onRegisterError(error: unknown) {
+			console.error('[pwa] service worker registration failed', error);
+		},
 	});
 
 	let reloading = false;
 
 	function handleUpdate() {
-		if (!registration?.waiting || reloading) return;
-
-		registration.waiting.postMessage({ type: 'SKIP_WAITING' });
-
-		// Reload once the new SW takes over (once only)
-		navigator.serviceWorker.addEventListener(
-			'controllerchange',
-			() => {
-				if (reloading) return;
-				reloading = true;
-				window.location.reload();
-			},
-			{ once: true }
-		);
+		if (reloading) return;
+		reloading = true;
+		void updateServiceWorker(true);
 	}
 
 	function handleDismiss() {
-		showPrompt = false;
+		needRefresh.set(false);
 	}
 </script>
 
-{#if showPrompt}
+{#if $needRefresh}
 	<div class="update-banner" role="alert">
 		<div class="update-content">
 			<svg class="update-icon" width="18" height="18" viewBox="0 0 256 256" fill="currentColor">
