@@ -2,6 +2,7 @@
 	"name": "@mana/shared-utils",
 	"version": "0.1.0",
 	"private": true,
+	"sideEffects": false,
 	"description": "Shared utility functions for Mana monorepo",
 	"main": "./src/index.ts",
 	"types": "./src/index.ts",

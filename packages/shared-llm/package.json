@@ -2,6 +2,7 @@
 	"name": "@mana/shared-llm",
 	"version": "2.0.0",
 	"private": true,
+	"sideEffects": false,
 	"description": "Tiered LLM orchestrator for Mana — routes tasks across rules / browser-edge / mana-server / cloud backends with explicit user-controlled privacy tiers",
 	"main": "./src/index.ts",
 	"types": "./src/index.ts",
