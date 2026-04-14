@@ -20,6 +20,7 @@
 	const now = new Date();
 	const nowTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
+	// svelte-ignore state_referenced_locally
 	let bedtimeTime = $state(defaultBedtime ?? '23:00');
 	let wakeTimeTime = $state(nowTime);
 	let quality = $state(0);

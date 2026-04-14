@@ -29,6 +29,7 @@
 
 	let { conversation }: Props = $props();
 
+	// svelte-ignore state_referenced_locally
 	const messages = useMessages(conversation.id);
 	const day = useDaySnapshot();
 	const streaks = useStreaks();

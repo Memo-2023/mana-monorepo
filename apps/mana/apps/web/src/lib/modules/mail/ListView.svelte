@@ -109,6 +109,7 @@
 		<div class="mailbox-list">
 			{#each mailStore.mailboxes as mb (mb.id)}
 				<!-- svelte-ignore a11y_no_static_element_interactions -->
+				<!-- svelte-ignore a11y_click_events_have_key_events -->
 				<div
 					class="mailbox-item"
 					class:active={mailStore.activeMailboxId === mb.id}
@@ -140,6 +141,7 @@
 		{:else}
 			{#each mailStore.threads as thread (thread.id)}
 				<!-- svelte-ignore a11y_no_static_element_interactions -->
+				<!-- svelte-ignore a11y_click_events_have_key_events -->
 				<div
 					class="thread-row"
 					class:unread={!thread.isRead}

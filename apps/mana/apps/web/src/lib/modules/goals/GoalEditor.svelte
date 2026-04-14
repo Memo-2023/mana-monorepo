@@ -80,7 +80,13 @@
 {#if show}
 	<div class="backdrop" onclick={onClose} role="presentation" tabindex="-1">
 		<!-- svelte-ignore a11y_click_events_have_key_events -->
-		<div class="editor" role="dialog" aria-modal="true" onclick={(e) => e.stopPropagation()}>
+		<div
+			class="editor"
+			role="dialog"
+			aria-modal="true"
+			tabindex="-1"
+			onclick={(e) => e.stopPropagation()}
+		>
 			<div class="editor-header">
 				<h3>Eigenes Ziel erstellen</h3>
 				<button class="close-btn" onclick={onClose}><X size={16} /></button>
