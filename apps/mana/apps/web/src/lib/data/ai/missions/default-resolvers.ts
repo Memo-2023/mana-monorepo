@@ -118,6 +118,105 @@ const goalsIndexer: InputIndexer = async () => {
 	}));
 };
 
+// ── tasks (todo module, encrypted) ─────────────────────────
+
+interface TaskLike {
+	id: string;
+	title?: string;
+	description?: string;
+	dueDate?: string;
+	isCompleted?: boolean;
+	deletedAt?: string;
+}
+
+const tasksResolver: InputResolver = async (ref) => {
+	const local = await db.table<TaskLike>(ref.table).get(ref.id);
+	if (!local || local.deletedAt) return null;
+	const [decrypted] = await decryptRecords(ref.table, [local]);
+	const status = decrypted.isCompleted ? 'erledigt' : 'offen';
+	const due = decrypted.dueDate ? ` · fällig ${decrypted.dueDate}` : '';
+	const body = decrypted.description ? `\n${decrypted.description}` : '';
+	return {
+		id: ref.id,
+		module: ref.module,
+		table: ref.table,
+		title: decrypted.title,
+		content: `[${status}]${due}${body}`,
+	};
+};
+
+const tasksIndexer: InputIndexer = async () => {
+	const all = await db.table<TaskLike>('tasks').toArray();
+	const visible = all.filter((t) => !t.deletedAt && !t.isCompleted);
+	const decrypted = await decryptRecords('tasks', visible);
+	return decrypted
+		.map<InputCandidate>((t) => ({
+			module: 'todo',
+			table: 'tasks',
+			id: t.id,
+			label: (t.title && t.title.trim()) || '(ohne Titel)',
+			hint: t.dueDate ? `fällig ${t.dueDate}` : undefined,
+		}))
+		.slice(0, 200);
+};
+
+// ── calendar events (encrypted) ────────────────────────────
+
+interface CalEventLike {
+	id: string;
+	title?: string;
+	description?: string;
+	location?: string;
+	startIso?: string;
+	endIso?: string;
+	deletedAt?: string;
+}
+
+const calendarResolver: InputResolver = async (ref) => {
+	const local = await db.table<CalEventLike>(ref.table).get(ref.id);
+	if (!local || local.deletedAt) return null;
+	const [decrypted] = await decryptRecords(ref.table, [local]);
+	const when = decrypted.startIso
+		? decrypted.endIso
+			? `${decrypted.startIso} – ${decrypted.endIso}`
+			: decrypted.startIso
+		: '';
+	const where = decrypted.location ? ` @ ${decrypted.location}` : '';
+	const body = decrypted.description ? `\n${decrypted.description}` : '';
+	return {
+		id: ref.id,
+		module: ref.module,
+		table: ref.table,
+		title: decrypted.title,
+		content: `${when}${where}${body}`,
+	};
+};
+
+const calendarIndexer: InputIndexer = async () => {
+	const all = await db.table<CalEventLike>('events').toArray();
+	// Show upcoming events (next 30 days) first; cap at 200 total.
+	const now = Date.now();
+	const horizon = now + 30 * 24 * 60 * 60_000;
+	const upcoming = all
+		.filter((e) => !e.deletedAt)
+		.filter((e) => !e.startIso || new Date(e.startIso).getTime() >= now - 24 * 60 * 60_000)
+		.sort((a, b) => (a.startIso ?? '').localeCompare(b.startIso ?? ''));
+	const decrypted = await decryptRecords('events', upcoming);
+	return decrypted
+		.map<InputCandidate>((e) => ({
+			module: 'calendar',
+			table: 'events',
+			id: e.id,
+			label: (e.title && e.title.trim()) || '(ohne Titel)',
+			hint: e.startIso
+				? new Date(e.startIso).getTime() < horizon
+					? `bald: ${e.startIso.slice(0, 16)}`
+					: e.startIso.slice(0, 10)
+				: undefined,
+		}))
+		.slice(0, 200);
+};
+
 let registered = false;
 
 /** Register the default resolvers + indexers once. Idempotent. */
@@ -126,8 +225,12 @@ export function registerDefaultInputResolvers(): void {
 	registerInputResolver('notes', notesResolver);
 	registerInputResolver('kontext', kontextResolver);
 	registerInputResolver('goals', goalsResolver);
+	registerInputResolver('todo', tasksResolver);
+	registerInputResolver('calendar', calendarResolver);
 	registerInputIndexer('notes', notesIndexer);
 	registerInputIndexer('kontext', kontextIndexer);
 	registerInputIndexer('goals', goalsIndexer);
+	registerInputIndexer('todo', tasksIndexer);
+	registerInputIndexer('calendar', calendarIndexer);
 	registered = true;
 }
