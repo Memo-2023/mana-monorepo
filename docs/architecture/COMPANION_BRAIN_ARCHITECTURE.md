@@ -1789,15 +1789,20 @@ Code:
   - Webapp-Parität: `SyncChange.actor?` + Push-Payload + `applyServerChanges`
     stempelt `__lastActor` + `__fieldActors` aus eingehenden Changes
     → **cross-device Attribution geschlossen**
-- [~] Schritt 9 — Server-side `mana-ai` Bun-Service (v0.1 gerüstet)
+- [x] Schritt 9 — Server-side `mana-ai` Bun-Service (v0.3, Close-the-Loop)
   - `services/mana-ai/` — Hono/Bun auf Port 3066
-  - Field-level LWW-Replay von `sync_changes` (appId='ai') in
-    `db/missions-projection.ts` — serverseitiges Pendant zu
-    `applyServerChanges`
-  - Tick-Loop scannt due Missions, mana-llm HTTP-Client vorhanden
-  - **Offen**: Prompt/Parser-Extraktion nach `@mana/shared-ai`,
-    Input-Resolver serverseitig, Plan-Write-Back-Design (drei
-    Optionen in `services/mana-ai/CLAUDE.md` dokumentiert)
+  - `@mana/shared-ai` Package als Single-Source-of-Truth für Planner-
+    Prompt + Parser + Typen (Webapp + Service importieren identisch)
+  - Field-level LWW-Replay von `sync_changes` in `db/missions-projection.ts`
+  - Tick-Loop: Due Missions → Planner → mana-llm → Parse → Write-Back
+  - `db/iteration-writer.ts` appendet Server-Iteration via RLS-scoped
+    `withUser` Transaktion mit Actor `{kind:'system', source:'mission-runner'}`
+  - Webapp-Staging-Effect (`server-iteration-staging.ts`) übersetzt
+    eingehende `source:'server'` Iterationen in lokale Proposals pro
+    PlanStep mit AI-Actor-Attribution; idempotent via proposalId-Marker
+  - **Offen für Future Work**: Server-side Input-Resolver (notes/kontext
+    Projections), Contract-Test zwischen `AI_AVAILABLE_TOOLS` und Webapp-
+    Policy, Materialized View bei >100 Usern
 
 ### 20.5a Symmetrische Registries: Resolver vs. Indexer
 

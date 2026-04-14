@@ -4,24 +4,26 @@ Background runner for the AI Workbench. Picks up due Missions from the `mana_syn
 
 Design context: [`docs/architecture/COMPANION_BRAIN_ARCHITECTURE.md` §20](../../docs/architecture/COMPANION_BRAIN_ARCHITECTURE.md).
 
-## Status: v0.2 (plans end-to-end, no write-back)
+## Status: v0.3 (full close-the-loop)
 
-What works:
+What works end-to-end:
 
 - [x] Boots as a Hono/Bun service on port `3066`
 - [x] Exposes `/health` and service-key-gated `/internal/tick`
 - [x] Replays `sync_changes` for `appId='ai' / table='aiMissions'` into live Mission records via field-level LWW (`src/db/missions-projection.ts`)
 - [x] Lists due missions (`state='active' && nextRunAt <= now()`)
-- [x] For each due mission: builds the shared `buildPlannerPrompt` from `@mana/shared-ai`, calls `mana-llm` via `/v1/chat/completions`, parses + validates with `parsePlannerResponse`
-- [x] Per-mission try/catch so one flaky LLM response doesn't abort the queue; stats differentiate `plansProduced` vs `parseFailures`
-- [x] Server-side tool allow-list (`src/planner/tools.ts`) mirrors the webapp's `DEFAULT_AI_POLICY` subset where policy === 'propose'
+- [x] For each due mission: shared `buildPlannerPrompt` (from `@mana/shared-ai`) → mana-llm `/v1/chat/completions` → strict `parsePlannerResponse`
+- [x] Per-mission try/catch so one flaky LLM response doesn't abort the queue; stats differentiate `plansProduced` / `plansWrittenBack` / `parseFailures`
+- [x] Server-side tool allow-list (`src/planner/tools.ts`) mirrors the webapp's `DEFAULT_AI_POLICY` `propose` subset
+- [x] **Write-back**: `db/iteration-writer.ts` appends the server-produced iteration to `Mission.iterations[]` via a `sync_changes` INSERT under an RLS-scoped `withUser` transaction. Row is attributed with actor `{kind:'system', source:'mission-runner'}`.
+- [x] Webapp staging effect (`server-iteration-staging.ts`) picks up the synced iteration and translates each PlanStep into a local Proposal with full AI-actor attribution (missionId + iterationId + rationale). Idempotent via durable `proposalId` markers.
 
-Intentionally **not yet** implemented:
+Intentionally **not yet** implemented (future work):
 
-- [ ] Input-resolvers server-side — Planner currently sees `resolvedInputs: []` so the LLM only has concept + objective + iteration history. Real resolvers need per-module projections of `sync_changes` (notes, kontext, goals)
-- [ ] Write-back path for plan results — the produced plan is logged, not persisted. Needs an RLS-scoped write helper mirroring mana-sync's `withUser` pattern. See "Open design questions" below; leaning option (a): append iteration with `source: 'server'` so the webapp staging-effect translates each step into a local Proposal.
-- [ ] Per-user Postgres RLS scoping on reads — current read scans cross-user and relies on downstream code honouring `userId`
-- [ ] Contract test between this service's `AI_AVAILABLE_TOOLS` and the webapp's `DEFAULT_AI_POLICY` — drift today = silent degradation
+- [ ] Input-resolvers server-side — Planner currently sees `resolvedInputs: []` so the LLM only has concept + objective + iteration history. Real resolvers need per-module projections of `sync_changes` (notes, kontext, goals).
+- [ ] Per-user Postgres RLS scoping on the mission *read* path — current cross-user scan relies on downstream code honouring `userId`. Write path is already RLS-scoped via `withUser`.
+- [ ] Contract test between this service's `AI_AVAILABLE_TOOLS` and the webapp's `DEFAULT_AI_POLICY` — drift today means silent degradation (server won't propose newly-added webapp tools).
+- [ ] Materialized mission snapshot — full LWW replay per tick is O(N changes). Fine pre-launch; revisit when user count grows.
 
 ## Port: 3066
 
