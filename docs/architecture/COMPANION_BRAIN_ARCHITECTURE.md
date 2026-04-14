@@ -1415,7 +1415,7 @@ Phase 1 (Events) ──────┬──> Phase 2 (Projections)
 | Moodlit | Ambient-Lighting, kein Tracking | Nicht noetig |
 | Playground | Dev-Tool fuer LLM-Tests | Nicht noetig |
 | Who | Rate-Spiel, kein Tracking | Nicht noetig |
-| Zitare | Zitate (read-only) | Nicht noetig |
+| Quotes | Zitate (read-only) | Nicht noetig |
 | Context | Kein eigener Store / Mutations | Nicht noetig |
 | Presi | Praesentation-Builder | Niedrig |
 | Meditate | Meditation-Sessions | Mittel |

@@ -14,7 +14,7 @@
 | #   | App             | Collections                                          | Stores umgeschrieben?                                        |
 | --- | --------------- | ---------------------------------------------------- | ------------------------------------------------------------ |
 | 1   | Todo            | tasks, projects, labels, taskLabels, reminders       | Ja (komplett)                                                |
-| 2   | Zitare          | favorites, lists                                     | Ja (komplett)                                                |
+| 2   | Quotes          | favorites, lists                                     | Ja (komplett)                                                |
 | 3   | Calendar        | calendars, events                                    | Ja (komplett)                                                |
 | 4   | Clock           | alarms, timers, worldClocks                          | Ja (komplett)                                                |
 | 5   | Contacts        | contacts                                             | Ja (komplett)                                                |

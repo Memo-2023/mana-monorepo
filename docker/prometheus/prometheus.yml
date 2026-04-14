@@ -229,7 +229,7 @@ scrape_configs:
           - https://mana.how/food
           - https://mana.how/plants
           - https://mana.how/calc
-          - https://mana.how/zitare
+          - https://mana.how/quotes
           - https://mana.how/cards
           - https://mana.how/skilltree
           - https://mana.how/music

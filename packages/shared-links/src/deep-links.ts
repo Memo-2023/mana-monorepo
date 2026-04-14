@@ -54,7 +54,7 @@ const DEEP_LINK_PATTERNS: Record<string, Record<string, string>> = {
 		alarms: '/',
 		timers: '/',
 	},
-	zitare: {
+	quotes: {
 		favorites: '/',
 	},
 };

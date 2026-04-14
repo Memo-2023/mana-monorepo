@@ -11,7 +11,7 @@ No auth service needed. Starts mana-sync + server (if any) + web:
 ```bash
 pnpm dev:todo:local       # sync + server + web
 pnpm dev:chat:local       # sync + server + web
-pnpm dev:zitare:local     # sync + web (no server needed)
+pnpm dev:quotes:local     # sync + web (no server needed)
 pnpm dev:clock:local      # sync + web (no server needed)
 ```
 
@@ -24,7 +24,7 @@ Use this when you need authentication, cross-device sync, or to test the full pr
 ```bash
 pnpm dev:todo:full        # DB setup + auth + sync + server + web
 pnpm dev:chat:full        # DB setup + auth + sync + server + web
-pnpm dev:zitare:full      # auth + sync + web
+pnpm dev:quotes:full      # auth + sync + web
 pnpm dev:calendar:full    # DB setup + auth + sync + server + web
 ```
 
@@ -69,7 +69,7 @@ These apps use only IndexedDB + mana-sync, no server-side compute:
 
 | App | Web Port | `local` | `full` |
 |-----|----------|---------|--------|
-| Zitare | 5107 | Yes | Yes |
+| Quotes | 5107 | Yes | Yes |
 | Clock | 5187 | Yes | Yes |
 | SkilltTree | 5195 | Yes | Yes |
 | Photos | 5189 | Yes | Yes |

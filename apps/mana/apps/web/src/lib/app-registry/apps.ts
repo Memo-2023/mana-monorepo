@@ -552,13 +552,13 @@ registerApp({
 });
 
 registerApp({
-	id: 'zitare',
-	name: 'Zitare',
+	id: 'quotes',
+	name: 'Quotes',
 	color: '#EC4899',
 	icon: Quotes,
 	views: {
-		list: { load: () => import('$lib/modules/zitare/ListView.svelte') },
-		detail: { load: () => import('$lib/modules/zitare/views/DetailView.svelte') },
+		list: { load: () => import('$lib/modules/quotes/ListView.svelte') },
+		detail: { load: () => import('$lib/modules/quotes/views/DetailView.svelte') },
 	},
 });
 

@@ -92,9 +92,9 @@ export const APP_BRANDING: Record<AppId, AppBranding> = {
 		logoStroke: true,
 		logoStrokeWidth: 1.5,
 	},
-	zitare: {
-		id: 'zitare',
-		name: 'Zitare',
+	quotes: {
+		id: 'quotes',
+		name: 'Quotes',
 		tagline: 'Daily Inspiration',
 		primaryColor: '#f59e0b',
 		secondaryColor: '#fbbf24',

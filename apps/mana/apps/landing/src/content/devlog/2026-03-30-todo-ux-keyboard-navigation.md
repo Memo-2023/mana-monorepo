@@ -162,5 +162,5 @@ State wird in localStorage persistiert. Aktuell nur in der Todo-App, geplant als
 ## Nächste Schritte
 
 - Debug-Borders als globales Shared-Package für alle Apps
-- Keyboard-Navigation Pattern in andere Apps übertragen (Zitare, Contacts)
+- Keyboard-Navigation Pattern in andere Apps übertragen (Quotes, Contacts)
 - Tastatur-Shortcut-Hilfe (? oder Ctrl+/) mit Overlay

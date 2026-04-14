@@ -42,7 +42,7 @@ Extrem produktiver Vormittag mit **61 Commits** über **695 Dateien** und netto 
 
 - **Manalink Live** - Matrix-Chat-Client auf Production gebracht und auf link.mana.how deployed
 - **CityCorners** - City Guide für Konstanz mit PWA, i18n, mana-search Integration und 31 Backend-Tests
-- **Spiral-DB** - 174 Tests, kritische PNG-Bugs gefixt, in Zitare und Contacts integriert
+- **Spiral-DB** - 174 Tests, kritische PNG-Bugs gefixt, in Quotes und Contacts integriert
 - **Auth-Migration** - 3 Mobile-Apps (ManaCore, Context, Cards) von Supabase auf mana-core-auth
 - **Massive Cleanup** - 50+ Legacy-Dateien gelöscht, Hetzner-Artefakte entfernt, API-Keys bereinigt
 - **Observability** - Prometheus Metrics für mana-search, mana-media und Synapse
@@ -174,7 +174,7 @@ Umfassende Test-Suite und mehrere kritische Fixes:
 | String zu lang                   | 511-Byte Max-Length Enforcement                         |
 | Index-Ring-Count zu klein        | 6 Bits (2 Pixel) statt 3 Bits für >7 Ring Support       |
 
-### Zitare-Integration
+### Quotes-Integration
 
 Spiral-DB als zweite App (nach Todo) mit pixelbasierter Spiral-Visualisierung:
 
@@ -395,7 +395,7 @@ Umami-Tracking in Todo, Calendar und Contacts erweitert. ANALYTICS.md aktualisie
 | --------------- | ------- | ----------------------------------------------------------------- |
 | Manalink        | 7       | Prod-Ready, Security, Tests, E2EE-Warning, Live Deploy            |
 | CityCorners     | 8       | PWA, i18n, mana-search, Submission Form, 31 Tests                 |
-| Spiral-DB       | 3       | 174 Tests, 8 kritische Bugs gefixt, Zitare + Contacts Integration |
+| Spiral-DB       | 3       | 174 Tests, 8 kritische Bugs gefixt, Quotes + Contacts Integration |
 | Auth-Migration  | 6       | 3 Mobile-Apps, 20 Web-Stores, Supabase-Package entfernt           |
 | Cleanup         | 7       | 50+ Dateien gelöscht, Hetzner weg, API-Keys bereinigt             |
 | Observability   | 5       | 3 neue Services, 15 Backend Metrics, GlitchTip Health             |

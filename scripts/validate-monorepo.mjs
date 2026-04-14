@@ -140,7 +140,7 @@ function checkWorkspaceProtocol(packagePath, packageJson) {
 		'@contacts/',
 		'@todo/',
 		'@cards/',
-		'@zitare/',
+		'@quotes/',
 		'@voxel-lava/',
 		'@mana-games/',
 		'@figgos/',

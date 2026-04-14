@@ -12,7 +12,7 @@ ENV PUBLIC_SYNC_SERVER_URL=$PUBLIC_SYNC_SERVER_URL
 
 COPY apps/mana/apps/web ./apps/mana/apps/web
 COPY apps/calc/packages/shared ./apps/calc/packages/shared
-COPY apps/zitare/packages/content ./apps/zitare/packages/content
+COPY apps/quotes/packages/content ./apps/quotes/packages/content
 COPY packages/shared-uload ./packages/shared-uload
 COPY packages/local-llm ./packages/local-llm
 COPY packages/local-stt ./packages/local-stt
@@ -22,7 +22,7 @@ RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
     pnpm install --no-frozen-lockfile --ignore-scripts
 
 # Build dependencies that need compilation
-WORKDIR /app/apps/zitare/packages/content
+WORKDIR /app/apps/quotes/packages/content
 RUN pnpm build
 
 WORKDIR /app/apps/mana/apps/web

@@ -9,7 +9,7 @@ export type AppId =
 	| 'chat'
 	| 'presi'
 	| 'food'
-	| 'zitare'
+	| 'quotes'
 	| 'picture'
 	| 'contacts'
 	| 'calendar'

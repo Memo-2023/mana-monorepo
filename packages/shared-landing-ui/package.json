@@ -20,7 +20,7 @@
 		"./themes/cards": "./src/themes/cards.css",
 		"./themes/picture": "./src/themes/picture.css",
 		"./themes/chat": "./src/themes/chat.css",
-		"./themes/zitare": "./src/themes/zitare.css",
+		"./themes/quotes": "./src/themes/quotes.css",
 		"./themes/org-classic": "./src/themes/org-classic.css",
 		"./themes/org-warm": "./src/themes/org-warm.css"
 	},

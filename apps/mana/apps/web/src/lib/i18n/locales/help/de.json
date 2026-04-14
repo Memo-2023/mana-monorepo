@@ -2,7 +2,7 @@
 	"faq": {
 		"what_is_mana": {
 			"question": "Was ist Mana?",
-			"answer": "<p><strong>Mana</strong> ist die zentrale Plattform des Mana-Ökosystems:</p><ul><li>Verwalte dein <strong>Konto</strong> und Profil an einem zentralen Ort</li><li>Greife auf alle Mana-Apps zu — Chat, Picture, Zitare, Clock und mehr</li><li>Nutze <strong>Single Sign-On (SSO)</strong>, um dich einmal anzumelden und überall eingeloggt zu sein</li><li>Erstelle und verwalte <strong>Organisationen</strong> für Teamarbeit</li></ul>",
+			"answer": "<p><strong>Mana</strong> ist die zentrale Plattform des Mana-Ökosystems:</p><ul><li>Verwalte dein <strong>Konto</strong> und Profil an einem zentralen Ort</li><li>Greife auf alle Mana-Apps zu — Chat, Picture, Quotes, Clock und mehr</li><li>Nutze <strong>Single Sign-On (SSO)</strong>, um dich einmal anzumelden und überall eingeloggt zu sein</li><li>Erstelle und verwalte <strong>Organisationen</strong> für Teamarbeit</li></ul>",
 			"tags": "mana,plattform,ökosystem"
 		},
 		"sso": {

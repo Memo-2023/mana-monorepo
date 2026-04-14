@@ -18,7 +18,7 @@ recommendation.
 ## Current modules (for reference)
 
 **Productivity:** todo, calendar, contacts, notes, habits, times, timeblocks, events
-**Knowledge & learning:** cards, zitare, guides, questions, skilltree, memoro, context
+**Knowledge & learning:** cards, quotes, guides, questions, skilltree, memoro, context
 **Health & self:** food, period, dreams, moodlit, plants
 **Media & creative:** chat, picture, presi, music, photos, storage, uload
 **Data & tools:** finance, calc, inventory, places, citycorners, who, news, links, tags, playground

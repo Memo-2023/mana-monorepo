@@ -86,7 +86,7 @@ jobs:
   #   - mana-sync: covers Go service pattern
   #   - mana-media: covers Hono + Bun with Sharp/BullMQ
   #   - todo-web: covers most shared-* web packages
-  #   - zitare-web: covers content packages, shared-pwa
+  #   - quotes-web: covers content packages, shared-pwa
   #   - calendar-web: covers calendar shared packages
   #   - todo-backend: covers app backend pattern
   # ===========================================
@@ -114,8 +114,8 @@ jobs:
           - service: todo-web
             dockerfile: apps/todo/apps/web/Dockerfile
             context: .
-          - service: zitare-web
-            dockerfile: apps/zitare/apps/web/Dockerfile
+          - service: quotes-web
+            dockerfile: apps/quotes/apps/web/Dockerfile
             context: .
           - service: calendar-web
             dockerfile: apps/calendar/apps/web/Dockerfile

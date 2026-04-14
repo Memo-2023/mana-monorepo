@@ -328,7 +328,7 @@ Folgende Apps nutzen bereits die zentralen User Settings:
 - Picture (`picture`)
 - Presi (`presi`)
 - Storage (`storage`)
-- Zitare (`zitare`)
+- Quotes (`quotes`)
 
 ## Neue App integrieren
 

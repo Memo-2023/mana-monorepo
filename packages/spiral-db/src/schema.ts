@@ -131,7 +131,7 @@ export function createContactSchema(): SchemaDefinition {
 }
 
 /**
- * Create a schema for Quote items (Zitare app)
+ * Create a schema for Quote items (Quotes app)
  */
 export function createQuoteSchema(): SchemaDefinition {
 	return {
@@ -179,7 +179,7 @@ export const MANA_APP_INDEX: Record<string, number> = {
 	calendar: 1,
 	contacts: 2,
 	chat: 3,
-	zitare: 4,
+	quotes: 4,
 	picture: 5,
 	clock: 6,
 	storage: 7,

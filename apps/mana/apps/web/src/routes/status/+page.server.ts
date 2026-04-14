@@ -9,7 +9,7 @@ interface ServiceStatus {
 }
 
 // The per-app HTTP backends (todo, calendar, contacts, chat, storage,
-// cards, music, food, picture, presi, zitare, clock, context) were
+// cards, music, food, picture, presi, quotes, clock, context) were
 // removed in the pre-launch ghost-API cleanup — every product module now
 // reads/writes the unified Dexie database via mana-sync.
 const SERVICES = [

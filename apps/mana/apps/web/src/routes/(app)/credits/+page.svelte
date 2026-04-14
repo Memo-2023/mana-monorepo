@@ -74,7 +74,7 @@
 		skilltree: 'SkillTree',
 		todo: 'Todo',
 		traces: 'Traces',
-		zitare: 'Zitare',
+		quotes: 'Quotes',
 	};
 
 	function getAppLabel(app: string): string {

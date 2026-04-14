@@ -33,7 +33,7 @@ Diese Domains zeigen noch auf Cloudflare Pages. Um sie auf Self-Hosted umzustell
 |--------|---------|---------------|
 | `chats.mana.how` | CF Pages (`chat-landing`) | Tunnel → `localhost:4400` |
 | `pics.mana.how` | CF Pages (`picture-landing`) | Tunnel → `localhost:4400` |
-| `zitares.mana.how` | CF Pages (`zitare-landing`) | Tunnel → `localhost:4400` |
+| `quotess.mana.how` | CF Pages (`quotes-landing`) | Tunnel → `localhost:4400` |
 | `presis.mana.how` | CF Pages (`presi-landing`) | Tunnel → `localhost:4400` |
 | `clocks.mana.how` | CF Pages (`clocks-landing`) | Tunnel → `localhost:4400` |
 
@@ -106,7 +106,7 @@ Cloudflare Tunnel (bb0ea86d...)
 | `it.mana.how` | IT Souveränität | `/srv/landings/it` |
 | `chats.mana.how` | Chat Landing | `/srv/landings/chat` |
 | `pics.mana.how` | Picture Landing | `/srv/landings/picture` |
-| `zitares.mana.how` | Zitare Landing | `/srv/landings/zitare` |
+| `quotess.mana.how` | Quotes Landing | `/srv/landings/quotes` |
 | `presis.mana.how` | Presi Landing | `/srv/landings/presi` |
 | `clocks.mana.how` | Clock Landing | `/srv/landings/clock` |
 | `cards.mana.how` | Cards Landing | `/srv/landings/cards` |

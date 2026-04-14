@@ -818,7 +818,7 @@ All web apps with backends now use the runtime injection pattern:
 
 - ✅ `chat/apps/web`
 - ✅ `picture/apps/web`
-- ✅ `zitare/apps/web`
+- ✅ `quotes/apps/web`
 - ✅ `contacts/apps/web`
 - ✅ `calendar/apps/web`
 - ✅ `clock/apps/web`

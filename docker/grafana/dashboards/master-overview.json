@@ -643,8 +643,8 @@
 						"type": "prometheus",
 						"uid": "${datasource}"
 					},
-					"expr": "up{job=\"zitare-backend\"}",
-					"legendFormat": "Zitare",
+					"expr": "up{job=\"quotes-backend\"}",
+					"legendFormat": "Quotes",
 					"refId": "O"
 				},
 				{

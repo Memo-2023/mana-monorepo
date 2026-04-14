@@ -318,7 +318,7 @@ mana-analytics (Hono, 475 LOC)
 | # | App | IndexedDB Collections | Stores auf IndexedDB |
 |---|-----|----------------------|---------------------|
 | 1 | Todo | tasks, projects, labels, taskLabels, reminders | ✅ Komplett |
-| 2 | Zitare | favorites, lists | ✅ Komplett |
+| 2 | Quotes | favorites, lists | ✅ Komplett |
 | 3 | Calendar | calendars, events | ✅ Komplett |
 | 4 | Clock | alarms, timers, worldClocks | ✅ Komplett |
 | 5 | Contacts | contacts | ✅ Komplett |

@@ -98,7 +98,7 @@ Single Sign-On über alle ManaCore Web Apps.
 | SkillTree  | skilltree.mana.how  | ✅         |
 | Storage    | storage.mana.how    | ✅         |
 | Todo       | todo.mana.how       | ✅         |
-| Zitare     | zitare.mana.how     | ✅         |
+| Quotes     | quotes.mana.how     | ✅         |
 | Manalink   | manalink.mana.how   | ✅         |
 | Playground | playground.mana.how | ✅         |
 
@@ -204,7 +204,7 @@ Neue Übersichtsseite mit allen 19 Matrix Bots in Manalink.
 | matrix-contacts-bot  | Productivity | Kontaktverwaltung      |
 | matrix-food-bot      | Health       | Ernährungs-Tracking    |
 | matrix-picture-bot   | AI           | Bildgenerierung        |
-| matrix-zitare-bot    | Inspiration  | Tägliche Zitate        |
+| matrix-quotes-bot    | Inspiration  | Tägliche Zitate        |
 | matrix-skilltree-bot | Gamification | Skill-Tracking         |
 | matrix-planta-bot    | Lifestyle    | Pflanzenpflege         |
 | matrix-cards-bot     | Learning     | Lernkarten             |

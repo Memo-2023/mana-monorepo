@@ -43,7 +43,7 @@ Self-hosted, open-source error tracking for all Mana apps using [GlitchTip](http
 | Context | 5 | `https://1ac1bac3-6c75-456e-8857-5048eb0c925c@glitchtip.mana.how/5` |
 | Picture | 6 | `https://a04c991e-0702-4b73-a670-babef3e7c5d1@glitchtip.mana.how/6` |
 | Clock | 7 | `https://4d5ea890-019d-4a98-8e98-34bc3e374e0a@glitchtip.mana.how/7` |
-| Zitare | 8 | `https://53b87191-3d86-4628-a8c7-cb97b3f69e06@glitchtip.mana.how/8` |
+| Quotes | 8 | `https://53b87191-3d86-4628-a8c7-cb97b3f69e06@glitchtip.mana.how/8` |
 
 ### Frontend DSNs
 

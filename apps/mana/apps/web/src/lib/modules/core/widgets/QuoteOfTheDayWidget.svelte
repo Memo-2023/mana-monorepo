@@ -1,21 +1,21 @@
 <script lang="ts">
 	/**
-	 * QuoteOfTheDayWidget — Zufälliges Tageszitat aus Zitare-Favoriten.
+	 * QuoteOfTheDayWidget — Zufälliges Tageszitat aus Quotes-Favoriten.
 	 *
-	 * Liest direkt aus der unified IndexedDB (zitareFavorites table).
+	 * Liest direkt aus der unified IndexedDB (quotesFavorites table).
 	 * Zeigt eine zufällige Favoriten-ID — das vollständige Zitat stammt
-	 * aus dem eingebetteten Zitate-Katalog von Zitare.
+	 * aus dem eingebetteten Zitate-Katalog von Quotes.
 	 */
 
 	import { liveQuery } from 'dexie';
 	import { db } from '$lib/data/database';
 	import type { BaseRecord } from '@mana/local-store';
 
-	interface ZitareFavorite extends BaseRecord {
+	interface QuotesFavorite extends BaseRecord {
 		quoteId: string;
 	}
 
-	let favorite: ZitareFavorite | null = $state(null);
+	let favorite: QuotesFavorite | null = $state(null);
 	let totalFavorites = $state(0);
 	let loading = $state(true);
 
@@ -33,7 +33,7 @@
 
 	$effect(() => {
 		const sub = liveQuery(async () => {
-			const all = await db.table<ZitareFavorite>('zitareFavorites').toArray();
+			const all = await db.table<QuotesFavorite>('quotesFavorites').toArray();
 			return all.filter((f) => !f.deletedAt);
 		}).subscribe({
 			next: (val) => {
@@ -66,14 +66,14 @@
 			<div class="mb-2 text-3xl">&#128161;</div>
 			<p class="text-sm text-muted-foreground">Noch keine Lieblingszitate gespeichert.</p>
 			<a
-				href="/zitare"
+				href="/quotes"
 				class="mt-3 inline-block rounded-lg bg-primary/10 px-4 py-2 text-sm font-medium text-primary hover:bg-primary/20"
 			>
 				Zitate entdecken
 			</a>
 		</div>
 	{:else}
-		<a href="/zitare" class="block rounded-lg p-3 transition-colors hover:bg-surface-hover">
+		<a href="/quotes" class="block rounded-lg p-3 transition-colors hover:bg-surface-hover">
 			<p class="mb-2 text-sm italic text-foreground/80">
 				Favorit #{favorite.quoteId}
 			</p>

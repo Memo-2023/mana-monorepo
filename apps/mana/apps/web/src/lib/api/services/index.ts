@@ -2,7 +2,7 @@
  * API Services barrel.
  *
  * Per-app HTTP backend services (todo, calendar, contacts, chat, storage,
- * cards, music, picture, presi, zitare, clock, context) used to live here
+ * cards, music, picture, presi, quotes, clock, context) used to live here
  * but were removed in the pre-launch ghost-API cleanup — every product
  * module now reads/writes the unified Dexie database via the local-first
  * sync layer (`mana-sync`), and `qr-export` queries Dexie directly.

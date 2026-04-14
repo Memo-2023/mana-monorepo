@@ -194,7 +194,7 @@
 				},
 				{
 					"app": "mana",
-					"file": "routes/(app)/zitare/lists/[id]/+page.svelte",
+					"file": "routes/(app)/quotes/lists/[id]/+page.svelte",
 					"lines": 951
 				},
 				{

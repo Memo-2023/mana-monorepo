@@ -138,7 +138,7 @@ Dieses Dokument analysiert den aktuellen Zustand der Mana-Infrastruktur auf dem 
 | Todo Bot        | mana-matrix-todo-bot        | 3314       | Task Management         |
 | Calendar Bot    | mana-matrix-calendar-bot    | 3315       | Termine                 |
 | Food Bot        | mana-matrix-food-bot        | 3316       | Nutrition               |
-| Zitare Bot      | mana-matrix-zitare-bot      | 3317       | Quotes                  |
+| Quotes Bot      | mana-matrix-quotes-bot      | 3317       | Quotes                  |
 | Clock Bot       | mana-matrix-clock-bot       | 3318       | Time Tracking           |
 | TTS Bot         | mana-matrix-tts-bot         | 3033       | Text-to-Speech          |
 
@@ -260,7 +260,7 @@ api-gateway:
 Viele Matrix-Bots teilen ähnlichen Code:
 
 - `matrix-todo-bot` und `matrix-calendar-bot` haben ähnliche Reminder-Logik
-- `matrix-food-bot` und `matrix-zitare-bot` sind Wrapper für Backends
+- `matrix-food-bot` und `matrix-quotes-bot` sind Wrapper für Backends
 - `matrix-mana-bot` sollte theoretisch alle anderen ersetzen
 
 ### 5. Volume-Fragmentierung
@@ -275,7 +275,7 @@ volumes:
   matrix_calendar_bot_data:
   matrix_todo_bot_data:
   matrix_food_bot_data:
-  matrix_zitare_bot_data:
+  matrix_quotes_bot_data:
   matrix_clock_bot_data:
   matrix_tts_bot_data:
 ```
@@ -401,7 +401,7 @@ AKTUELL: 10 separate Bot-Container
 │ matrix-mana-bot      │ matrix-ollama-bot    │ ...         │
 │ matrix-stats-bot     │ matrix-project-doc   │             │
 │ matrix-todo-bot      │ matrix-calendar-bot  │             │
-│ matrix-food-bot  │ matrix-zitare-bot    │             │
+│ matrix-food-bot  │ matrix-quotes-bot    │             │
 │ matrix-clock-bot     │ matrix-tts-bot       │             │
 └────────────────────────────────────────────────────────────┘
 

@@ -18,7 +18,7 @@ APPS=(
   "storage.mana.how"
   "presi.mana.how"
   "food.mana.how"
-  "zitare.mana.how"
+  "quotes.mana.how"
   "photos.mana.how"
   "skilltree.mana.how"
   "picture.mana.how"

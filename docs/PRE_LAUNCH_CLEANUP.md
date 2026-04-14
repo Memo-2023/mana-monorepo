@@ -170,7 +170,7 @@ exports across modules, which is a real readability win.
 
 **What was there:** `registerAllProviders()` synchronously imported eleven
 search provider modules (one per app: todo, calendar, contacts, chat,
-storage, cards, picture, presi, music, zitare, clock) at the top of the
+storage, cards, picture, presi, music, quotes, clock) at the top of the
 root `(app)` layout. The layout runs on every navigation into the
 authenticated app, so all eleven providers were part of the initial JS
 bundle even though spotlight search is opened on demand.
@@ -251,7 +251,7 @@ no external callers exist, and no future external callers can show up
 **What was there:** Twelve `*-api.mana.how` Cloudflare Tunnel routes
 (`todo-api`, `calendar-api`, `contacts-api`, `chat-api`, `storage-api`,
 `cards-api`, `music-api`, `food-api`, `picture-api`, `presi-api`,
-`zitare-api`, `clock-api`) plus their matching `lib/api/services/*.ts`
+`quotes-api`, `clock-api`) plus their matching `lib/api/services/*.ts`
 clients in the unified web app, the matching `__PUBLIC_*_API_URL__`
 runtime injections in `hooks.server.ts`, and the
 `PUBLIC_*_API_URL_CLIENT` env entries on the `mana-app-web` compose
@@ -273,7 +273,7 @@ needed them.
   instead of going through the per-app HTTP services.
 - Twelve service files deleted: `todo.ts`, `calendar.ts`, `contacts.ts`,
   `chat.ts`, `storage.ts`, `cards.ts`, `music.ts`, `picture.ts`,
-  `presi.ts`, `zitare.ts`, `clock.ts`, `context.ts` plus their `*.test.ts`
+  `presi.ts`, `quotes.ts`, `clock.ts`, `context.ts` plus their `*.test.ts`
   siblings.
 - `apps/mana/apps/web/src/lib/api/services/index.ts` collapsed from a
   thirteen-symbol re-export to just the four genuinely server-bound
@@ -289,7 +289,7 @@ needed them.
   removed.
 - `~/.cloudflared/config.yml` on the Mac Mini lost its 16 dead ingress
   routes (`chat-api`, `todo-api`, `calendar-api`, `clock-api`, `clock-bot`,
-  `contacts-api`, `zitare-api`, `skilltree-api`, `plants-api`, `cards-api`,
+  `contacts-api`, `quotes-api`, `skilltree-api`, `plants-api`, `cards-api`,
   `storage-api`, `presi-api`, `food-api`, `photos-api`, `mukke-api`,
   `picture-api`). The tunnel was reloaded via `kill -HUP <pid>`.
 - After reload, every former 502 returns 404 from the Cloudflare edge
@@ -566,7 +566,7 @@ in one batch.
   detached" entry above; the unified web app does not need it)
 - 12 ghost API hostnames (`todo-api`, `calendar-api`, `contacts-api`,
   `chat-api`, `storage-api`, `cards-api`, `music-api`, `food-api`,
-  `picture-api`, `presi-api`, `zitare-api`, `clock-api`) → 404 (no
+  `picture-api`, `presi-api`, `quotes-api`, `clock-api`) → 404 (no
   ingress route — see "Ghost backend API hostnames" entry above)
 
 **Root-cause lessons for the runbook (now applied):**

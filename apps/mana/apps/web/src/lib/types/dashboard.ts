@@ -17,7 +17,7 @@ export type WidgetType =
 	| 'chat-recent' // Chat API: recent conversations
 	| 'contacts-favorites' // Contacts API: favorite contacts
 	| 'contacts-recent' // Contacts: recently updated
-	| 'zitare-quote' // Zitare API: daily inspiration quote
+	| 'quotes-quote' // Quotes API: daily inspiration quote
 	| 'picture-recent' // Picture API: recent generations
 	| 'cards-progress' // Cards API: learning progress
 	| 'clock-timers' // Clock: active timers and alarms
@@ -122,7 +122,7 @@ export interface WidgetMeta {
 		| 'calendar'
 		| 'chat'
 		| 'contacts'
-		| 'zitare'
+		| 'quotes'
 		| 'picture'
 		| 'cards'
 		| 'storage'
@@ -213,13 +213,13 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
 		requiredBackend: 'contacts',
 	},
 	{
-		type: 'zitare-quote',
-		nameKey: 'dashboard.widgets.zitare.title',
-		descriptionKey: 'dashboard.widgets.zitare.description',
+		type: 'quotes-quote',
+		nameKey: 'dashboard.widgets.quotes.title',
+		descriptionKey: 'dashboard.widgets.quotes.description',
 		icon: '💡',
 		defaultSize: 'medium',
 		allowMultiple: false,
-		requiredBackend: 'zitare',
+		requiredBackend: 'quotes',
 	},
 	{
 		type: 'picture-recent',

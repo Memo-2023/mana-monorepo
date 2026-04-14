@@ -16,7 +16,7 @@ import TasksUpcomingWidget from './widgets/TasksUpcomingWidget.svelte';
 import CalendarEventsWidget from './widgets/CalendarEventsWidget.svelte';
 import ChatRecentWidget from './widgets/ChatRecentWidget.svelte';
 import ContactsFavoritesWidget from './widgets/ContactsFavoritesWidget.svelte';
-import ZitareQuoteWidget from './widgets/ZitareQuoteWidget.svelte';
+import QuoteWidget from './widgets/QuoteWidget.svelte';
 import PictureRecentWidget from './widgets/PictureRecentWidget.svelte';
 import CardsProgressWidget from './widgets/CardsProgressWidget.svelte';
 import ClockTimersWidget from './widgets/ClockTimersWidget.svelte';
@@ -46,7 +46,7 @@ export const widgetComponents: Record<WidgetType, Component> = {
 	'chat-recent': ChatRecentWidget,
 	'contacts-favorites': ContactsFavoritesWidget,
 	'contacts-recent': RecentContactsWidget,
-	'zitare-quote': ZitareQuoteWidget,
+	'quotes-quote': QuoteWidget,
 	'picture-recent': PictureRecentWidget,
 	'cards-progress': CardsProgressWidget,
 	'clock-timers': ClockTimersWidget,

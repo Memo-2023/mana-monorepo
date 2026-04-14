@@ -290,7 +290,7 @@ Heute war auch Aufräumtag. Mit den 25 archivierten Apps von gestern und der Sta
 | Status-Page / Prometheus / Cloudflared | Configs für unified app aktualisiert                                   |
 | Race in status-page-gen                | Lock-File während Generation                                           |
 | Analytics Umami Website-ID             | Nach DB-Reset neue ID gepflegt                                         |
-| `getTagsByIds`                         | Fehlender `allTags` Param in zitare gefixt                             |
+| `getTagsByIds`                         | Fehlender `allTags` Param in quotes gefixt                             |
 | ManaContacts → Kontakte                | Branding-Rename                                                        |
 | AppDrawer → new tab                    | Apps öffnen sich extern statt innerhalb der App                        |
 | `bindclient:Height` → calculated       | Bottom-Chrome-Height berechnet, nicht gemessen                         |

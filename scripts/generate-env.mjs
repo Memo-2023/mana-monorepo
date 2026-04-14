@@ -243,22 +243,22 @@ const APP_CONFIGS = [
 		},
 	},
 
-	// Zitare Backend: REMOVED — migrated to local-first
+	// Quotes Backend: REMOVED — migrated to local-first
 
-	// Zitare Mobile (Expo)
+	// Quotes Mobile (Expo)
 	{
-		path: 'apps/zitare/apps/mobile/.env',
+		path: 'apps/quotes/apps/mobile/.env',
 		vars: {
-			EXPO_PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.ZITARE_BACKEND_PORT || '3007'}`,
+			EXPO_PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.QUOTES_BACKEND_PORT || '3007'}`,
 			EXPO_PUBLIC_MANA_AUTH_URL: (env) => env.MANA_AUTH_URL,
 		},
 	},
 
-	// Zitare Web (SvelteKit)
+	// Quotes Web (SvelteKit)
 	{
-		path: 'apps/zitare/apps/web/.env',
+		path: 'apps/quotes/apps/web/.env',
 		vars: {
-			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.ZITARE_BACKEND_PORT || '3007'}`,
+			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.QUOTES_BACKEND_PORT || '3007'}`,
 			PUBLIC_MANA_AUTH_URL: (env) => env.MANA_AUTH_URL,
 			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
@@ -645,14 +645,14 @@ const APP_CONFIGS = [
 		},
 	},
 
-	// Zitare Telegram Bot
+	// Quotes Telegram Bot
 	{
-		path: 'services/telegram-zitare-bot/.env',
+		path: 'services/telegram-quotes-bot/.env',
 		vars: {
 			NODE_ENV: () => 'development',
-			PORT: (env) => env.ZITARE_BOT_PORT || '3303',
-			TELEGRAM_BOT_TOKEN: (env) => env.ZITARE_BOT_TELEGRAM_TOKEN,
-			DATABASE_URL: (env) => env.ZITARE_BOT_DATABASE_URL,
+			PORT: (env) => env.QUOTES_BOT_PORT || '3303',
+			TELEGRAM_BOT_TOKEN: (env) => env.QUOTES_BOT_TELEGRAM_TOKEN,
+			DATABASE_URL: (env) => env.QUOTES_BOT_DATABASE_URL,
 		},
 	},
 

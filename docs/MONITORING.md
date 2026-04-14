@@ -31,7 +31,7 @@ All monitoring tools are publicly accessible - no login required (except GlitchT
 | Chat | https://stats.mana.how/share/1c43fd9847674f899dc2ebdfbd8960db/chat-webapp |
 | Contacts | https://stats.mana.how/share/d2cc0f019e464a88a49ba365f58b78e7/contacts-webapp |
 | Clock | https://stats.mana.how/share/f893945efea7449382abf04812a54bea/clock-webapp |
-| Zitare | https://stats.mana.how/share/6a86139ad8e2469c97541c40a70397fa/zitare-webapp |
+| Quotes | https://stats.mana.how/share/6a86139ad8e2469c97541c40a70397fa/quotes-webapp |
 | Picture | https://stats.mana.how/share/273f67fa569940f6b85e7a7a0a003539/picture-webapp |
 | Photos | https://stats.mana.how/share/dc201d685f784716a0b8587376eca7a1/photos-webapp |
 | Storage | https://stats.mana.how/share/392ff51d11f14f0c9d556af1402a3ee6/storage-webapp |

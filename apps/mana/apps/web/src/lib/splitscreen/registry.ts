@@ -13,7 +13,7 @@ const SPLIT_APP_ID_LIST = [
 	'chat',
 	'picture',
 	'cards',
-	'zitare',
+	'quotes',
 	'music',
 	'storage',
 	'presi',

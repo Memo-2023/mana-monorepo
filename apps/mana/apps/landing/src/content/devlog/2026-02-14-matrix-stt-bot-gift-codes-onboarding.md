@@ -435,7 +435,7 @@ Tracking IDs für alle Web-Apps aktualisiert.
 | contacts-web | `contacts-prod`  |
 | todo-web     | `todo-prod`      |
 | picture-web  | `picture-prod`   |
-| zitare-web   | `zitare-prod`    |
+| quotes-web   | `quotes-prod`    |
 
 ---
 

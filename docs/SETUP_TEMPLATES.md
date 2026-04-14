@@ -410,7 +410,7 @@ mana-web:
 | 3001 | mana-auth |
 | 3002 | chat-backend |
 | 3006 | picture-backend |
-| 3007 | zitare-backend |
+| 3007 | quotes-backend |
 | 3009 | cards-backend |
 | 3015 | contacts-backend |
 | 3016 | calendar-backend |
@@ -423,7 +423,7 @@ mana-web:
 |------|---------|
 | 5173 | mana-web |
 | 5175 | picture-web |
-| 5177 | zitare-web |
+| 5177 | quotes-web |
 | 5179 | calendar-web |
 | 5184 | contacts-web |
 | 5186 | calendar-web (staging) |

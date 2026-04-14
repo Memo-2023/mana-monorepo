@@ -38,7 +38,7 @@ const SKIP_DIRS = new Set(['node_modules', 'dist', '.svelte-kit', 'build', '.tur
 const SCAN_EXTENSIONS = new Set(['.ts', '.svelte', '.js']);
 
 // Regex to match workspace package imports
-// Matches: @mana/*, @calendar/shared, @todo/shared, @zitare/content, etc.
+// Matches: @mana/*, @calendar/shared, @todo/shared, @quotes/content, etc.
 const IMPORT_REGEX =
 	/(?:import\s+(?:[\s\S]*?\s+from\s+)?|import\s*\()\s*['"](@[a-z-]+\/[a-z-]+)(?:\/[^'"]*)?['"]/g;
 
@@ -59,7 +59,7 @@ const WORKSPACE_SCOPES = new Set([
 	'@storage',
 	'@todo',
 	'@traces',
-	'@zitare',
+	'@quotes',
 	'@mana-core',
 ]);
 

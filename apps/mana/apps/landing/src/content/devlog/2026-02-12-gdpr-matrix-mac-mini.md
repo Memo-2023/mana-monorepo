@@ -191,7 +191,7 @@ services:
       retries: 3
       start_period: 40s
 
-  zitare-backend:
+  quotes-backend:
     healthcheck:
       test: ['CMD', 'wget', '-q', '--spider', 'http://localhost:3007/health']
       # Korrigierter Pfad (vorher /api/health)

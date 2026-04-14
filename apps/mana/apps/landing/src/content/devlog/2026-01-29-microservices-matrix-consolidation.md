@@ -217,7 +217,7 @@ Zentraler Notification-Service für Email, Push, Matrix und Webhooks.
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
 │                 Consumer Apps                                        │
-│   Auth │ Calendar │ Chat │ Picture │ Zitare │ ...                   │
+│   Auth │ Calendar │ Chat │ Picture │ Quotes │ ...                   │
 └─────────────────────────┬───────────────────────────────────────────┘
                           ▼
 ┌─────────────────────────────────────────────────────────────────────┐
@@ -492,7 +492,7 @@ import { HealthModule } from '@manacore/shared-nestjs-health';
 ```
 
 **Migrierte Backends (12):**
-calendar, chat, clock, contacts, food, picture, planta, presi, skilltree, storage, todo, zitare
+calendar, chat, clock, contacts, food, picture, planta, presi, skilltree, storage, todo, quotes
 
 ### @manacore/shared-nestjs-setup
 
@@ -514,7 +514,7 @@ await app.listen(process.env.PORT || 3002);
 ```
 
 **Migrierte Backends (8):**
-chat, calendar, contacts, zitare, clock, planta, presi, food
+chat, calendar, contacts, quotes, clock, planta, presi, food
 
 ### @manacore/shared-tsconfig
 

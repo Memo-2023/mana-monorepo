@@ -9,7 +9,7 @@ import { createPWAConfig } from '@mana/shared-pwa';
 import { MANA_SHARED_PACKAGES, getBuildDefines } from '@mana/shared-vite-config';
 
 /** App-specific shared packages used by migrated modules */
-const APP_SHARED_PACKAGES = ['@zitare/content', '@calc/shared'];
+const APP_SHARED_PACKAGES = ['@quotes/content', '@calc/shared'];
 
 export default defineConfig({
 	plugins: [

@@ -325,7 +325,7 @@ Alle Web-Apps mit CRUD-Datenmodell wurden auf Local-First migriert:
 | App | Collections | Server-Logik verbleibt |
 |---|---|---|
 | **Todo** | tasks, projects, labels, taskLabels, reminders | RRULE, Reminders (Hono/Bun) |
-| **Zitare** | favorites, lists | Nur Sync |
+| **Quotes** | favorites, lists | Nur Sync |
 | **Calendar** | calendars, events | RRULE, Google Calendar OAuth |
 | **Clock** | alarms, timers, worldClocks | Nur Sync |
 | **Cards** | decks, cards | Spaced Repetition, LLM |

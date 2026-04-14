@@ -1,6 +1,6 @@
 ---
-title: 'Storage-Sprint, Passkeys & 2FA, Cross-App Tags, Zitare-Polish & Local-First Planung'
-description: 'Massiver Tag mit 61 Commits: Storage auf ManaScore 87, WebAuthn/Passkeys und TOTP-2FA, Cross-App Tag-System, Zitare-Komplett-Polish, SvelteKit Base-Image, und Local-First Architekturplanung.'
+title: 'Storage-Sprint, Passkeys & 2FA, Cross-App Tags, Quotes-Polish & Local-First Planung'
+description: 'Massiver Tag mit 61 Commits: Storage auf ManaScore 87, WebAuthn/Passkeys und TOTP-2FA, Cross-App Tag-System, Quotes-Komplett-Polish, SvelteKit Base-Image, und Local-First Architekturplanung.'
 date: 2026-03-26
 author: 'Till Schneider'
 category: 'feature'
@@ -11,7 +11,7 @@ tags:
     'passkeys',
     '2fa',
     'tags',
-    'zitare',
+    'quotes',
     'infrastructure',
     'docker',
     'local-first',
@@ -35,12 +35,12 @@ workingHours:
   end: '2026-03-26T22:00'
 ---
 
-Massiver Tag mit **61 Commits** über **329 Dateien** und netto **+16.715 Zeilen** — Storage-Sprint, Auth-Features, Tag-System, Zitare-Polish, Infra und Architekturplanung:
+Massiver Tag mit **61 Commits** über **329 Dateien** und netto **+16.715 Zeilen** — Storage-Sprint, Auth-Features, Tag-System, Quotes-Polish, Infra und Architekturplanung:
 
 - **Storage-App komplett** — Von Score 72 auf 87: Previews, Audio-Player, Skeleton Screens, Sharing, Tagging, i18n, E2E-Tests
 - **Auth: Passkeys & 2FA** — WebAuthn/Passkeys und TOTP-2FA in allen Apps, Google/Apple Login entfernt
 - **Cross-App Tag-System** — Neues Tag-System mit Gruppen und Entity-Links in 18 Apps integriert
-- **Zitare Komplett-Polish** — i18n, Display-Settings, Suche, Filter, Author-Bios, Loading States
+- **Quotes Komplett-Polish** — i18n, Display-Settings, Suche, Filter, Author-Bios, Loading States
 - **Local-First Architektur** — Umfassende Planung für Dexie.js + Go Sync-Server + Hono/Bun
 - **Infra** — SvelteKit Base-Image, build-app.sh Script, Dockerfile-Fixes
 
@@ -162,7 +162,7 @@ Neues, app-übergreifendes Tag-System mit:
 
 ---
 
-## 4. Zitare: Komplett-Polish
+## 4. Quotes: Komplett-Polish
 
 Umfassende Qualitätsverbesserungen für die Zitate-App:
 
@@ -225,7 +225,7 @@ Neues `sveltekit-base:local` Docker-Image mit allen Shared Packages vorinstallie
 - `9c8bae3d` — NestJS Auth: Multiple JWT-Issuers für Docker/Public URL Mismatch
 - `2b0b902b` — Credit-Operations Package Exports auf compiled `dist/` zeigend
 - `5a3ee5c7` — Todo Task UI: Priority-Checkboxes, Drag-Styling, Route-Fix
-- Diverse Dockerfile-Fixes für Zitare, Storage, Todo (fehlende Dependencies, Node Heap Size)
+- Diverse Dockerfile-Fixes für Quotes, Storage, Todo (fehlende Dependencies, Node Heap Size)
 
 ---
 
@@ -236,7 +236,7 @@ Neues `sveltekit-base:local` Docker-Image mit allen Shared Packages vorinstallie
 | **Storage** | Score 72 → 87: Previews, Audio-Player, Sharing, Tagging, E2E-Tests, i18n |
 | **Auth** | Passkeys + TOTP-2FA in allen Apps, Social Login entfernt, 35+ Tests |
 | **Tags** | Cross-App Tag-System in 18 Apps integriert, 37 Backend-Tests |
-| **Zitare** | Komplett i18n, Display-Settings, Suche, Filter, Author-Bios |
+| **Quotes** | Komplett i18n, Display-Settings, Suche, Filter, Author-Bios |
 | **Architektur** | Local-First Planung: Dexie.js + Go Sync + Hono/Bun |
 | **Infra** | SvelteKit Base-Image, build-app.sh, Dockerfile-Fixes |
 | **Gesamt** | 61 Commits, 329 Dateien, +19.553 / -2.838 Zeilen |

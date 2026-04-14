@@ -16,7 +16,7 @@
 | # | App | Modul | Routen | Status |
 |---|-----|-------|--------|--------|
 | 1 | **calc** | collections, components (5 skins), engine, stores, queries | `/calc`, `/calc/standard` | **Done** |
-| 2 | **zitare** | collections, stores (5), components (2), queries | `/zitare` + 6 Sub-Routen | **Done** |
+| 2 | **quotes** | collections, stores (5), components (2), queries | `/quotes` + 6 Sub-Routen | **Done** |
 | 3 | **clock** | collections, stores (6), components (2), queries | `/clock`, `/clock/alarms` | **Done** |
 | 4 | **skilltree** | collections, stores (2), components (9), queries | `/skilltree`, `/skilltree/tree`, `/skilltree/achievements` | **Done** |
 | 5 | **moodlit** | collections, stores (2), components (3), queries | `/moodlit`, `/moodlit/moods`, `/moodlit/sequences` | **Done** |
@@ -97,7 +97,7 @@ Alle Apps die zum ManaCore-Ökosystem gehören und von Shared IndexedDB, Dashboa
 | **chat** | AI-Chat, Cross-App-Referenzen |
 | **picture** | AI-Bilder, Cross-App-Referenzen |
 | **cards** | Lernkarten, Cross-App-Links |
-| **zitare** | Zitate, Dashboard-Widget |
+| **quotes** | Zitate, Dashboard-Widget |
 | **clock** | Uhren/Timer, Dashboard-Widget |
 | **mukke** | Musik, eigenständig aber profitiert von shared Auth |
 | **storage** | Cloud-Dateien, Cross-App-Referenzen |
@@ -247,7 +247,7 @@ src/lib/modules/
 ├── chat/
 ├── picture/
 ├── cards/
-├── zitare/
+├── quotes/
 ├── clock/
 ├── mukke/
 ├── storage/
@@ -330,7 +330,7 @@ src/routes/
 │   │   ├── deck/[id]/+page.svelte
 │   │   └── study/[id]/+page.svelte
 │   │
-│   ├── zitare/
+│   ├── quotes/
 │   │   ├── +page.svelte
 │   │   └── favorites/+page.svelte
 │   │
@@ -463,7 +463,7 @@ import { CONTACTS_COLLECTIONS } from '$lib/modules/contacts/collections';
 import { CHAT_COLLECTIONS } from '$lib/modules/chat/collections';
 import { PICTURE_COLLECTIONS } from '$lib/modules/picture/collections';
 import { CARDS_COLLECTIONS } from '$lib/modules/cards/collections';
-import { ZITARE_COLLECTIONS } from '$lib/modules/zitare/collections';
+import { QUOTES_COLLECTIONS } from '$lib/modules/quotes/collections';
 import { CLOCK_COLLECTIONS } from '$lib/modules/clock/collections';
 import { MUKKE_COLLECTIONS } from '$lib/modules/mukke/collections';
 import { STORAGE_COLLECTIONS } from '$lib/modules/storage/collections';
@@ -509,7 +509,7 @@ db.version(1).stores({
   // ... alle weiteren
   ...PICTURE_COLLECTIONS,
   ...CARDS_COLLECTIONS,
-  ...ZITARE_COLLECTIONS,
+  ...QUOTES_COLLECTIONS,
   ...CLOCK_COLLECTIONS,
   ...MUKKE_COLLECTIONS,
   ...STORAGE_COLLECTIONS,
@@ -566,7 +566,7 @@ export const SYNC_APP_MAP: Record<string, string[]> = {
   chat:        ['conversations', 'messages', 'templates'],
   picture:     ['images', 'boards', 'boardItems', 'tags', 'imageTags'],
   cards:       ['decks', 'cards'],
-  zitare:      ['favorites', 'lists'],
+  quotes:      ['favorites', 'lists'],
   clock:       ['alarms', 'timers', 'worldClocks'],
   mukke:       ['songs', 'playlists', 'playlistSongs', 'mProjects', 'markers'],
   storage:     ['files', 'folders', 'sTags', 'fileTags'],
@@ -756,7 +756,7 @@ Nach Komplexität sortiert — einfachste zuerst, um den Prozess einzuüben:
 | # | App | Routes | Components | Priorität | Grund |
 |---|-----|--------|-----------|-----------|-------|
 | 1 | **calc** | 4 | 8 | Starter | Minimal, keine Backend-Deps |
-| 2 | **zitare** | 8 | 12 | Starter | Einfach, wenig Stores |
+| 2 | **quotes** | 8 | 12 | Starter | Einfach, wenig Stores |
 | 3 | **clock** | 8 | 15 | Starter | Eigenständig, keine API |
 | 4 | **skilltree** | 5 | 6 | Starter | Minimal |
 | 5 | **moodlit** | 6 | 4 | Starter | Minimal |

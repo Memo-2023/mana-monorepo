@@ -9,7 +9,7 @@ export { default as UloadLogo } from './UloadLogo.svelte';
 export { default as ChatLogo } from './ChatLogo.svelte';
 export { default as PresiLogo } from './PresiLogo.svelte';
 export { default as FoodLogo } from './FoodLogo.svelte';
-export { default as ZitareLogo } from './ZitareLogo.svelte';
+export { default as QuotesLogo } from './QuotesLogo.svelte';
 export { default as ContactsLogo } from './ContactsLogo.svelte';
 export { default as CalendarLogo } from './CalendarLogo.svelte';
 export { default as StorageLogo } from './StorageLogo.svelte';

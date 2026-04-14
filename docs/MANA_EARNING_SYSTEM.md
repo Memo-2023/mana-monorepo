@@ -199,7 +199,7 @@ Ein User gilt als "verified" wenn MINDESTENS EINS zutrifft:
 | Deck kopiert | 100 verified User | 30 | 30 |
 | Featured Deck | Team-Auswahl | 50 | 50 |
 
-#### Zitare
+#### Quotes
 
 | Metrik | Threshold | Credits | Max/Monat |
 |--------|-----------|---------|-----------|
@@ -567,7 +567,7 @@ CREATE TABLE community.bounty_pool (
 
 - [ ] **Integration in Content Apps**
   - [ ] Cards: Track deck copies
-  - [ ] Zitare: Track quote submissions/views
+  - [ ] Quotes: Track quote submissions/views
   - [ ] Presi: Track template usage
 
 - [ ] **Admin Dashboard**

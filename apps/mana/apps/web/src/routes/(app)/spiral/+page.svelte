@@ -22,7 +22,7 @@
 		Calendar: 'calendar',
 		Contacts: 'users',
 		Chat: 'message-circle',
-		Zitare: 'quote',
+		Quotes: 'quote',
 		Picture: 'image',
 		Clock: 'clock',
 		Storage: 'hard-drive',

@@ -139,7 +139,7 @@ spotlight.registerActions('todo', [
 
 ### Content-Search-Provider
 
-Spotlight kann jetzt **inhaltlich** suchen — über Provider, die IndexedDB-Tabellen abfragen. Erste Provider live für **picture, presi, mukke, zitare, clock**.
+Spotlight kann jetzt **inhaltlich** suchen — über Provider, die IndexedDB-Tabellen abfragen. Erste Provider live für **picture, presi, mukke, quotes, clock**.
 
 ```typescript
 spotlight.registerSearchProvider('picture', async (query) => {

@@ -314,7 +314,7 @@ services:
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_CREDITS_WEBHOOK_SECRET:-}
       BASE_URL: https://credits.mana.how
-      CORS_ORIGINS: https://mana.how,https://chat.mana.how,https://picture.mana.how,https://todo.mana.how,https://zitare.mana.how,https://calendar.mana.how,https://clock.mana.how,https://contacts.mana.how,https://cards.mana.how,https://presi.mana.how,https://storage.mana.how,https://food.mana.how,https://plants.mana.how,https://music.mana.how,https://context.mana.how,https://photos.mana.how,https://questions.mana.how,https://calc.mana.how
+      CORS_ORIGINS: https://mana.how,https://chat.mana.how,https://picture.mana.how,https://todo.mana.how,https://quotes.mana.how,https://calendar.mana.how,https://clock.mana.how,https://contacts.mana.how,https://cards.mana.how,https://presi.mana.how,https://storage.mana.how,https://food.mana.how,https://plants.mana.how,https://music.mana.how,https://context.mana.how,https://photos.mana.how,https://questions.mana.how,https://calc.mana.how
     ports:
       - "3002:3002"
     healthcheck:
@@ -412,7 +412,7 @@ services:
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana_platform
       MANA_AUTH_URL: http://mana-auth:3001
       MANA_SERVICE_KEY: ${MANA_SERVICE_KEY}
-      CORS_ORIGINS: https://mana.how,https://calc.mana.how,https://calendar.mana.how,https://chat.mana.how,https://clock.mana.how,https://contacts.mana.how,https://context.mana.how,https://cards.mana.how,https://music.mana.how,https://food.mana.how,https://photos.mana.how,https://picture.mana.how,https://plants.mana.how,https://presi.mana.how,https://questions.mana.how,https://storage.mana.how,https://todo.mana.how,https://zitare.mana.how
+      CORS_ORIGINS: https://mana.how,https://calc.mana.how,https://calendar.mana.how,https://chat.mana.how,https://clock.mana.how,https://contacts.mana.how,https://context.mana.how,https://cards.mana.how,https://music.mana.how,https://food.mana.how,https://photos.mana.how,https://picture.mana.how,https://plants.mana.how,https://presi.mana.how,https://questions.mana.how,https://storage.mana.how,https://todo.mana.how,https://quotes.mana.how
     ports:
       - "3062:3062"
     healthcheck:
@@ -806,7 +806,7 @@ services:
       PUBLIC_MANA_CREDITS_URL_CLIENT: https://credits.mana.how
       # Per-app HTTP backend URLs (todo-api, calendar-api, contacts-api,
       # chat-api, storage-api, cards-api, music-api, food-api,
-      # picture-api, presi-api, zitare-api, clock-api, context-api) and
+      # picture-api, presi-api, quotes-api, clock-api, context-api) and
       # the standalone memoro-server URL were removed in the pre-launch
       # ghost-API cleanup — every product module talks to mana-sync
       # directly and the unified `memoro` module is fully local-first.
@@ -846,7 +846,7 @@ services:
       start_period: 20s
 
   # REMOVED standalone web containers — now served by unified mana-web container (mana.how):
-  # chat-web, todo-web, zitare-web, calendar-web, clock-web, contacts-web,
+  # chat-web, todo-web, quotes-web, calendar-web, clock-web, contacts-web,
   # storage-web, presi-web, cards-web, food-web, skilltree-web, photos-web,
   # music-web, citycorners-web, picture-web, inventory-web, calc-web, times-web,
   # uload-web, memoro-web

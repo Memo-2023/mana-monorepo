@@ -212,7 +212,7 @@ services/
 ├── telegram-project-doc-bot/   # ENTFERNT
 ├── telegram-food-bot/      # ENTFERNT
 ├── telegram-todo-bot/          # ENTFERNT
-└── telegram-zitare-bot/        # ENTFERNT
+└── telegram-quotes-bot/        # ENTFERNT
 ```
 
 ### Begründung

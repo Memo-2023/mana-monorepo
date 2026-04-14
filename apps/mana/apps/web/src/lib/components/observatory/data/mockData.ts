@@ -202,8 +202,8 @@ const APP_DEFINITIONS: AppDefinition[] = [
 		},
 	},
 	{
-		id: 'zitare',
-		displayName: 'Zitare',
+		id: 'quotes',
+		displayName: 'Quotes',
 		score: 62,
 		status: 'beta',
 		categories: {

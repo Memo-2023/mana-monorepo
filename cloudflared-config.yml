@@ -50,7 +50,7 @@ ingress:
     service: http://localhost:5000
   - hostname: contacts.mana.how
     service: http://localhost:5000
-  - hostname: zitare.mana.how
+  - hostname: quotes.mana.how
     service: http://localhost:5000
   - hostname: skilltree.mana.how
     service: http://localhost:5000
@@ -158,7 +158,7 @@ ingress:
     service: http://localhost:4400
   - hostname: pics.mana.how
     service: http://localhost:4400
-  - hostname: zitares.mana.how
+  - hostname: quotess.mana.how
     service: http://localhost:4400
   - hostname: presis.mana.how
     service: http://localhost:4400

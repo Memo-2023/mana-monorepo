@@ -48,7 +48,7 @@ Jeder Matrix-Bot lief als eigenständiger NestJS-Service mit eigenem Docker-Cont
 | matrix-todo-bot        | Aufgabenverwaltung                                                   | 4014 |
 | matrix-calendar-bot    | Kalender                                                             | 4015 |
 | matrix-food-bot        | Ernährungstracking                                                   | 4016 |
-| matrix-zitare-bot      | Zitate & Inspiration                                                 | 4017 |
+| matrix-quotes-bot      | Zitate & Inspiration                                                 | 4017 |
 | matrix-clock-bot       | Timer, Alarme, Weltuhren                                             | 4018 |
 | matrix-tts-bot         | Text-to-Speech                                                       | 4019 |
 | matrix-stt-bot         | Speech-to-Text                                                       | 4021 |
@@ -129,7 +129,7 @@ services/mana-matrix-bot/          # 50 Dateien, 7.620 Zeilen Go
 │       ├── calendar/              # !heute, !morgen, !woche, !termine
 │       ├── clock/                 # !timer, !stop, !alarm, !zeit
 │       ├── contacts/              # !kontakte, !suche, !favoriten, !edit
-│       ├── zitare/                # !zitat, !suche, !kategorie, !favoriten
+│       ├── quotes/                # !zitat, !suche, !kategorie, !favoriten
 │       ├── planta/                # !pflanzen, !giessen, !fällig, !historie
 │       ├── ollama/                # AI Chat, !models, !all, !mode
 │       ├── stt/                   # Audio→Text, !language, !model
@@ -215,7 +215,7 @@ Neues Plugin hinzufügen = 3 Schritte:
 | **calendar** | !heute, !morgen, !woche, !termine, !termin, !löschen, !kalender                             | Event creation, Date parsing                    |
 | **clock**    | !timer, !stop, !resume, !reset, !timers, !alarm, !alarme, !zeit                             | Duration parsing (25m, 1h30m)                   |
 | **contacts** | !kontakte, !suche, !favoriten, !kontakt, !neu, !edit, !fav, !delete                         | 16 editierbare Felder, Number-References        |
-| **zitare**   | !zitat, !heute, !suche, !kategorie, !kategorien, !motivation, !favorit, !favoriten, !listen | Categories, Favorites, Lists                    |
+| **quotes**   | !zitat, !heute, !suche, !kategorie, !kategorien, !motivation, !favorit, !favoriten, !listen | Categories, Favorites, Lists                    |
 | **planta**   | !pflanzen, !pflanze, !neu, !giessen, !fällig, !historie, !intervall, !edit, !delete         | Watering schedule, Health tracking              |
 | **ollama**   | AI Chat, !models, !model, !clear, !all, !mode                                               | Chat history, System prompts, Model comparison  |
 | **stt**      | Audio→Text, !language, !model, !status                                                      | Whisper/Voxtral, Language selection             |

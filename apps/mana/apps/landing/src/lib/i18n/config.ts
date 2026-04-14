@@ -70,7 +70,7 @@ export const ui = {
 		'app.maerchenzauber.description': 'Erstelle magische Kindergeschichten mit KI-Unterstützung',
 		'app.moodlit.description':
 			'Deine persönliche KI für emotionales Wohlbefinden und mentale Gesundheit',
-		'app.zitare.description':
+		'app.quotes.description':
 			'Intelligente Zitatverwaltung und Literaturrecherche für akademisches Arbeiten',
 		'app.cards.description':
 			'KI-gestützte Karteikarten-App für effektives Lernen und Wissensmanagement',
@@ -150,7 +150,7 @@ export const ui = {
 			'AI-powered knowledge platform for intelligent learning and documentation',
 		'app.maerchenzauber.description': "Create magical children's stories with AI support",
 		'app.moodlit.description': 'Your personal AI for emotional well-being and mental health',
-		'app.zitare.description':
+		'app.quotes.description':
 			'Intelligent citation management and literature research for academic work',
 		'app.cards.description':
 			'AI-powered flashcard app for effective learning and knowledge management',
@@ -230,7 +230,7 @@ export const ui = {
 			'Piattaforma di conoscenza basata su AI per apprendimento e documentazione intelligenti',
 		'app.maerchenzauber.description': "Crea storie magiche per bambini con il supporto dell'AI",
 		'app.moodlit.description': 'La tua AI personale per il benessere emotivo e la salute mentale',
-		'app.zitare.description':
+		'app.quotes.description':
 			'Gestione intelligente delle citazioni e ricerca bibliografica per lavoro accademico',
 		'app.cards.description':
 			'App di flashcard basata su AI per apprendimento efficace e gestione della conoscenza',
@@ -315,7 +315,7 @@ export const ui = {
 			"Créez des histoires magiques pour enfants avec le soutien de l'IA",
 		'app.moodlit.description':
 			'Votre IA personnelle pour le bien-être émotionnel et la santé mentale',
-		'app.zitare.description':
+		'app.quotes.description':
 			'Gestion intelligente des citations et recherche bibliographique pour le travail académique',
 		'app.cards.description':
 			"Application de cartes mémoire basée sur l'IA pour un apprentissage efficace et la gestion des connaissances",
@@ -398,7 +398,7 @@ export const ui = {
 			'Plataforma de conocimiento impulsada por IA para aprendizaje y documentación inteligentes',
 		'app.maerchenzauber.description': 'Crea historias mágicas para niños con soporte de IA',
 		'app.moodlit.description': 'Tu IA personal para el bienestar emocional y la salud mental',
-		'app.zitare.description':
+		'app.quotes.description':
 			'Gestión inteligente de citas e investigación bibliográfica para trabajo académico',
 		'app.cards.description':
 			'App de tarjetas de memoria impulsada por IA para aprendizaje efectivo y gestión del conocimiento',

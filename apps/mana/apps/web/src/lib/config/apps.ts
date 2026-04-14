@@ -423,9 +423,9 @@ export const appConfigs: Record<string, AppConfig> = {
 	// ============================================
 	// clock: consolidated into times
 
-	zitare: {
-		name: 'zitare',
-		displayName: 'Zitare',
+	quotes: {
+		name: 'quotes',
+		displayName: 'Quotes',
 		tagline: 'Tägliche Inspiration',
 		description: 'Entdecke inspirierende Zitate und Weisheiten für jeden Tag.',
 		logoEmoji: '💡',
@@ -458,7 +458,7 @@ export const appConfigs: Record<string, AppConfig> = {
 			},
 		],
 		dashboardRoute: '/',
-		website: 'https://zitare.mana.how',
+		website: 'https://quotes.mana.how',
 	},
 
 	storage: {
@@ -584,7 +584,7 @@ export const defaultManaConfig: AppConfig = {
 		},
 		{
 			icon: '💡',
-			title: 'Zitare',
+			title: 'Quotes',
 			description: 'Tägliche Inspiration',
 			color: '#F59E0B',
 		},
@@ -631,6 +631,6 @@ export function getAppsByCategory(): {
 			appConfigs.contacts,
 			appConfigs.finance,
 		],
-		utility: [appConfigs.clock, appConfigs.zitare, appConfigs.storage, appConfigs.moodlit],
+		utility: [appConfigs.clock, appConfigs.quotes, appConfigs.storage, appConfigs.moodlit],
 	};
 }

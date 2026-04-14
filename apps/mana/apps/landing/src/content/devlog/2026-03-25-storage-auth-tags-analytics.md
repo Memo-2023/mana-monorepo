@@ -82,7 +82,7 @@ Help-Pages in 10+ bisher fehlende Apps nachgezogen, verbesserte Inhalte für all
 - `dd5c0d50` — Calendar, Todo Help
 - `f0233b8d` — Storage, Chat, Picture Help
 - `7077c0a3` — Help-Pages in 10 Apps
-- `bdab2722` — Shared Translations, Zitare + Mukke Help
+- `bdab2722` — Shared Translations, Quotes + Mukke Help
 
 ---
 
@@ -148,7 +148,7 @@ Help-Pages in 10+ bisher fehlende Apps nachgezogen, verbesserte Inhalte für all
 - ManaScore Extended Codebase-Metrics für alle App-Audits (`b9a9052a`)
 - Fehlende prom-client Dependency in 4 Backends (`422b4f9f`)
 - Onboarding-Modal in 8 Apps aus Flex-Layout rausgeschoben (`491c71e2`)
-- Fehlende Cloudflare-Tunnel-Routes für Zitare, SkillTree, Planta (`d8886346`)
+- Fehlende Cloudflare-Tunnel-Routes für Quotes, SkillTree, Planta (`d8886346`)
 
 ### Dokumentation
 

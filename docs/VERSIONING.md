@@ -33,7 +33,7 @@ All apps follow `MAJOR.MINOR.PATCH`:
 | Chat | 0.3.0 | Stable Beta |
 | Picture | 0.3.0 | Stable Beta |
 | Mukke | 0.2.0 | Beta |
-| Zitare | 0.2.0 | Beta |
+| Quotes | 0.2.0 | Beta |
 | Clock | 0.2.0 | Beta |
 | Food | 0.2.0 | Beta |
 | Cards | 0.2.0 | Beta |

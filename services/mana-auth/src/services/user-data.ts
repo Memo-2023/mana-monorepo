@@ -118,7 +118,7 @@ const PROJECT_META: Record<string, { name: string; icon: string }> = {
 	contacts: { name: 'Kontakte', icon: '👤' },
 	cards: { name: 'Cards', icon: '🃏' },
 	picture: { name: 'ManaPicture', icon: '🎨' },
-	zitare: { name: 'Zitare', icon: '✨' },
+	quotes: { name: 'Quotes', icon: '✨' },
 	presi: { name: 'Presi', icon: '📊' },
 	inventory: { name: 'Inventar', icon: '📦' },
 	food: { name: 'Food', icon: '🥗' },

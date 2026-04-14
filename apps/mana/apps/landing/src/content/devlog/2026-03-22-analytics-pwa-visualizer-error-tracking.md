@@ -203,7 +203,7 @@ export const handleError: HandleClientError = ({ error }) => {
 
 | Apps                                                                                                                                                        |
 | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Calendar, Chat, Clock, Contacts, Context, Manacore, Cards, Matrix, Mukke, Food, Photos, Picture, Planta, Presi, Questions, Skilltree, Storage, Todo, Zitare |
+| Calendar, Chat, Clock, Contacts, Context, Manacore, Cards, Matrix, Mukke, Food, Photos, Picture, Planta, Presi, Questions, Skilltree, Storage, Todo, Quotes |
 
 ### API
 

@@ -24,6 +24,6 @@ export function registerAllProviders(registry: SearchRegistry): void {
 	registry.registerLazy('picture', () => import('./picture').then((m) => m.pictureSearchProvider));
 	registry.registerLazy('presi', () => import('./presi').then((m) => m.presiSearchProvider));
 	registry.registerLazy('music', () => import('./music').then((m) => m.musicSearchProvider));
-	registry.registerLazy('zitare', () => import('./zitare').then((m) => m.zitareSearchProvider));
+	registry.registerLazy('quotes', () => import('./quotes').then((m) => m.quotesSearchProvider));
 	registry.registerLazy('clock', () => import('./clock').then((m) => m.clockSearchProvider));
 }

@@ -129,8 +129,8 @@ export const APP_ROUTES: Record<string, AppRouteConfig> = {
 		],
 	},
 
-	zitare: {
-		appId: 'zitare',
+	quotes: {
+		appId: 'quotes',
 		defaultRoute: '/',
 		availableRoutes: [
 			{ path: '/', label: 'Zitate', icon: 'quote', alwaysVisible: true },

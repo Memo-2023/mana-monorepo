@@ -56,7 +56,7 @@ User loggt sich in Calendar ein → ✓
 User öffnet Todo → ❌ Nicht eingeloggt (SSO fehlgeschlagen)
 ```
 
-10 Apps fehlten in `trustedOrigins`: Mukke, Photos, Planta, Questions, Todo, Traces, Context, Docs, Cards, Zitare.
+10 Apps fehlten in `trustedOrigins`: Mukke, Photos, Planta, Questions, Todo, Traces, Context, Docs, Cards, Quotes.
 
 ### Der Fix
 
@@ -112,7 +112,7 @@ const APPS_WITH_SSO = [
 	'storage',
 	'todo',
 	'traces',
-	'zitare',
+	'quotes',
 ];
 
 it.each(APPS_WITH_SSO)('should include %s.mana.how in trustedOrigins', (appName) => {
@@ -271,7 +271,7 @@ GlitchTip (selbst-gehostete Sentry-Alternative) wurde für **alle 15 Backends** 
 | Skilltree     | 3038 | #16               |
 | Storage       | 3035 | #17               |
 | Todo          | 3031 | #3                |
-| Zitare        | 3007 | #8                |
+| Quotes        | 3007 | #8                |
 
 ### Grafana Dashboard
 
@@ -302,7 +302,7 @@ Alle 20 aktiven Apps wurden bewertet nach 8 Kategorien (Backend, Frontend, Datab
 | **Matrix**    | 68    | Production | E2E Encryption                  |
 | **Food**      | 63    | Beta       | Gemini AI Integration           |
 | **Photos**    | 62    | Beta       | mana-media Integration          |
-| **Zitare**    | 62    | Beta       | Deployed auf mana.how           |
+| **Quotes**    | 62    | Beta       | Deployed auf mana.how           |
 | **Context**   | 60    | Beta       | Neuer Backend (Port 3020)       |
 | **Clock**     | 58    | Beta       | Kein CLAUDE.md, keine Tests     |
 | **Skilltree** | 58    | Beta       | Offline-first PWA               |

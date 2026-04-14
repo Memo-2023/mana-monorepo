@@ -41,7 +41,7 @@ export enum CreditOperationType {
 	AI_DECK_GENERATION = 'ai_deck_generation',
 	AI_CARD_GENERATION = 'ai_card_generation',
 
-	// Zitare - AI explanations
+	// Quotes - AI explanations
 	AI_QUOTE_EXPLANATION = 'ai_quote_explanation',
 
 	// Plants - Plant analysis
@@ -240,7 +240,7 @@ export const OPERATION_METADATA: Record<CreditOperationType, OperationMetadata> 
 		name: 'Explain Quote',
 		description: 'Get an AI explanation of a quote',
 		category: CreditCategory.AI,
-		app: 'zitare',
+		app: 'quotes',
 	},
 
 	// Plants

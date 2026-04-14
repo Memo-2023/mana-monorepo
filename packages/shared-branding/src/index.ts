@@ -22,7 +22,7 @@ export {
 	ChatLogo,
 	PresiLogo,
 	FoodLogo,
-	ZitareLogo,
+	QuotesLogo,
 	ContactsLogo,
 	CalendarLogo,
 	StorageLogo,

@@ -70,7 +70,7 @@ injectUmamiAnalytics(html)    → <script defer src="stats.mana.how/script.js" d
 | Planta | `UMAMI_WEBSITE_ID_PLANTA` |
 | Mukke | `UMAMI_WEBSITE_ID_MUKKE` |
 | Questions | `UMAMI_WEBSITE_ID_QUESTIONS` |
-| Zitare | `UMAMI_WEBSITE_ID_ZITARE` |
+| Quotes | `UMAMI_WEBSITE_ID_QUOTES` |
 | Presi | `UMAMI_WEBSITE_ID_PRESI` |
 | Food | `UMAMI_WEBSITE_ID_FOOD` |
 | Storage | `UMAMI_WEBSITE_ID_STORAGE` |

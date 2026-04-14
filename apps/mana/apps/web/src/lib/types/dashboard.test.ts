@@ -44,7 +44,7 @@ describe('WIDGET_REGISTRY', () => {
 			'calendar',
 			'chat',
 			'contacts',
-			'zitare',
+			'quotes',
 			'picture',
 			'cards',
 			'times',
@@ -73,7 +73,7 @@ describe('WIDGET_REGISTRY', () => {
 		expect(types).toContain('calendar-events');
 		expect(types).toContain('chat-recent');
 		expect(types).toContain('contacts-favorites');
-		expect(types).toContain('zitare-quote');
+		expect(types).toContain('quotes-quote');
 		expect(types).toContain('picture-recent');
 		expect(types).toContain('cards-progress');
 		expect(types).toContain('clock-timers');

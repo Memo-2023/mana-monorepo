@@ -164,7 +164,7 @@ Neuer `getAllOpenTasks()` Service-Call, der `GET /tasks` nutzt und alle offenen 
 
 ### Fehlende Packages in Dockerfiles
 
-9 Web-App-Dockerfiles fehlte das `COPY packages/shared-app-onboarding` Statement, was zu Build-Fehlern führte. Betroffen: Chat, Clock, Mukke, Photos, Picture, Presi, Skilltree, Storage, Zitare.
+9 Web-App-Dockerfiles fehlte das `COPY packages/shared-app-onboarding` Statement, was zu Build-Fehlern führte. Betroffen: Chat, Clock, Mukke, Photos, Picture, Presi, Skilltree, Storage, Quotes.
 
 ### Dockerfile Dependency Validator
 

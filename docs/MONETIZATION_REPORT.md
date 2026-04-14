@@ -120,7 +120,7 @@
 - **Warum:** Messaging ist commodity (WhatsApp, Signal, Telegram = kostenlos). Matrix/Decentralization ist Nische. E2E-Encryption noch nicht fertig.
 - **Empfehlung:** Strategischer Wert im Ökosystem, aber kein Revenue-Driver.
 
-### 18. Zitare (Daily Quotes)
+### 18. Quotes (Daily Quotes)
 
 - **Modell:** Micro-Abo oder Werbung
 - **Warum:** Quotes-Apps monetarisieren schlecht. Geringe Zahlungsbereitschaft. Hohe Churn.

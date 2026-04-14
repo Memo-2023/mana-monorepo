@@ -34,11 +34,11 @@ const MANA_APPS: AppInfo[] = [
 		link_web: 'https://picture.mana.how',
 	},
 	{
-		id: 'zitare',
-		name: 'Zitare',
+		id: 'quotes',
+		name: 'Quotes',
 		description: 'Tägliche Inspirationszitate',
 		icon: 'quote-left',
-		link_web: 'https://zitare.mana.how',
+		link_web: 'https://quotes.mana.how',
 	},
 	{
 		id: 'cards',

@@ -23,7 +23,7 @@ This document defines the URL schema for all mana.how subdomains.
 | **Contacts** | contacts.mana.how | api.mana.how/contacts | Active |
 | **Chat** | chat.mana.how | api.mana.how/chat | Active |
 | **Storage** | storage.mana.how | api.mana.how/storage | Active |
-| **Zitare** | zitare.mana.how | api.mana.how/zitare | Active |
+| **Quotes** | quotes.mana.how | api.mana.how/quotes | Active |
 | **Food** | food.mana.how | api.mana.how/food | Active |
 | **Presi** | presi.mana.how | api.mana.how/presi | Active |
 | **SkillTree** | skilltree.mana.how | api.mana.how/skilltree | Active |
@@ -67,7 +67,7 @@ For web analytics, the following apps are tracked in Umami:
 | `clock-webapp` | Clock | clock.mana.how |
 | `contacts-webapp` | Contacts | contacts.mana.how |
 | `storage-webapp` | Storage | storage.mana.how |
-| `zitare-webapp` | Zitare | zitare.mana.how |
+| `quotes-webapp` | Quotes | quotes.mana.how |
 | `food-webapp` | Food | food.mana.how |
 | `presi-webapp` | Presi | presi.mana.how |
 | `skilltree-webapp` | SkillTree | skilltree.mana.how |
@@ -85,7 +85,7 @@ Convenience redirects for quick access to Web Apps:
 | clok.mana.how | clock.mana.how |
 | con.mana.how | contact.mana.how |
 | pic.mana.how | picture.mana.how |
-| zit.mana.how | zitare.mana.how |
+| zit.mana.how | quotes.mana.how |
 
 ---
 
@@ -105,7 +105,7 @@ pnpm deploy:landing:todo
 pnpm deploy:landing:contacts
 pnpm deploy:landing:chat
 pnpm deploy:landing:picture
-pnpm deploy:landing:zitare
+pnpm deploy:landing:quotes
 
 # Deploy all landing pages
 pnpm deploy:landing:all
@@ -121,7 +121,7 @@ pnpm deploy:landing:all
 | Contacts | contacts-landing | contacts.mana.how |
 | Chat | chats-landing | chats.mana.how |
 | Picture | pictures-landing | pictures.mana.how |
-| Zitare | zitares-landing | zitares.mana.how |
+| Quotes | quotess-landing | quotess.mana.how |
 
 ### Web Apps & APIs
 
@@ -146,7 +146,7 @@ todos.mana.how       CNAME  todos-landing.pages.dev
 contacts.mana.how    CNAME  contacts-landing.pages.dev
 chats.mana.how       CNAME  chats-landing.pages.dev
 pictures.mana.how    CNAME  pictures-landing.pages.dev
-zitares.mana.how     CNAME  zitares-landing.pages.dev
+quotess.mana.how     CNAME  quotess-landing.pages.dev
 ```
 
 ### Short URL Redirects (Cloudflare Redirect Rules or CNAME)
@@ -156,7 +156,7 @@ cal.mana.how   → 301 redirect to calendar.mana.how
 clok.mana.how  → 301 redirect to clock.mana.how
 con.mana.how   → 301 redirect to contact.mana.how
 pic.mana.how   → 301 redirect to picture.mana.how
-zit.mana.how   → 301 redirect to zitare.mana.how
+zit.mana.how   → 301 redirect to quotes.mana.how
 ```
 
 ---

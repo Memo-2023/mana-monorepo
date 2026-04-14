@@ -188,8 +188,8 @@ export const MANA_APPS: ManaApp[] = [
 		requiredTier: 'guest',
 	},
 	{
-		id: 'zitare',
-		name: 'Zitare',
+		id: 'quotes',
+		name: 'Quotes',
 		description: {
 			de: 'Tägliche Inspiration',
 			en: 'Daily Inspiration',
@@ -198,7 +198,7 @@ export const MANA_APPS: ManaApp[] = [
 			de: 'Entdecke inspirierende Zitate und Weisheiten für jeden Tag.',
 			en: 'Discover inspiring quotes and wisdom for every day.',
 		},
-		icon: APP_ICONS.zitare,
+		icon: APP_ICONS.quotes,
 		color: '#f59e0b',
 		comingSoon: false,
 		status: 'beta',

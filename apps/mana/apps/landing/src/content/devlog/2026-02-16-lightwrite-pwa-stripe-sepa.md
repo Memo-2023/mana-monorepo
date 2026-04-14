@@ -98,7 +98,7 @@ Progressive Web App Dependencies wurden zu allen SvelteKit Web-Apps hinzugefügt
 | ManaCore   | ✅ Aktiviert |
 | Chat       | ✅ Aktiviert |
 | Picture    | ✅ Aktiviert |
-| Zitare     | ✅ Aktiviert |
+| Quotes     | ✅ Aktiviert |
 | Calendar   | ✅ Aktiviert |
 | Contacts   | ✅ Aktiviert |
 | Todo       | ✅ Aktiviert |

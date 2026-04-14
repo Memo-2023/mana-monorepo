@@ -110,7 +110,7 @@ Alle Authentifizierungs-Seiten sind jetzt mehrsprachig.
 - Questions Web
 - SkillTree Web
 - Todo Web
-- Zitare Web
+- Quotes Web
 
 ### Implementierung
 
@@ -126,7 +126,7 @@ export const t = derived(locale, ($locale) => {
 
 ### Neue Auth Pages
 
-Fehlende Auth-Pages für Zitare und Planta hinzugefügt:
+Fehlende Auth-Pages für Quotes und Planta hinzugefügt:
 
 - `/login`
 - `/register`

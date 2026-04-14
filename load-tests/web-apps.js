@@ -13,7 +13,7 @@ const apps = [
 	{ name: 'dashboard', url: `${BASE}:5173` },
 	{ name: 'chat', url: `${BASE}:3000` },
 	{ name: 'todo', url: `${BASE}:5188` },
-	{ name: 'zitare', url: `${BASE}:5185` },
+	{ name: 'quotes', url: `${BASE}:5185` },
 	{ name: 'calendar', url: `${BASE}:5186` },
 	{ name: 'clock', url: `${BASE}:5187` },
 	{ name: 'contacts', url: `${BASE}:5176` },

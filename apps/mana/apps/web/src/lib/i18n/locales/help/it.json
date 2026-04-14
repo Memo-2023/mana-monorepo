@@ -2,7 +2,7 @@
 	"faq": {
 		"what_is_mana": {
 			"question": "Cos'e Mana?",
-			"answer": "<p><strong>Mana</strong> e la piattaforma centrale dell'ecosistema Mana:</p><ul><li>Gestisci il tuo <strong>account</strong> e il tuo profilo da un unico posto</li><li>Accedi a tutte le app Mana — Chat, Picture, Zitare, Clock e altre ancora</li><li>Usa il <strong>Single Sign-On (SSO)</strong> per accedere una volta e restare connesso ovunque</li><li>Crea e gestisci <strong>organizzazioni</strong> per il lavoro di squadra</li></ul>",
+			"answer": "<p><strong>Mana</strong> e la piattaforma centrale dell'ecosistema Mana:</p><ul><li>Gestisci il tuo <strong>account</strong> e il tuo profilo da un unico posto</li><li>Accedi a tutte le app Mana — Chat, Picture, Quotes, Clock e altre ancora</li><li>Usa il <strong>Single Sign-On (SSO)</strong> per accedere una volta e restare connesso ovunque</li><li>Crea e gestisci <strong>organizzazioni</strong> per il lavoro di squadra</li></ul>",
 			"tags": "mana,piattaforma,ecosistema"
 		},
 		"sso": {

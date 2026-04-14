@@ -91,7 +91,7 @@ export const APP_CATEGORY_MAP: Record<string, AppCategory> = {
 	cards: 'creative',
 	skilltree: 'creative',
 	guides: 'creative',
-	zitare: 'creative',
+	quotes: 'creative',
 	uload: 'creative',
 	playground: 'creative',
 

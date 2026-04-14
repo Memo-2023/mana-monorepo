@@ -59,7 +59,7 @@ Das bestehende `ContextMenu`-Component aus `@manacore/shared-ui` wurde systemati
 | **Cards**    | Deck-Karten      | Öffnen, Löschen                                                  | `28286d12` |
 | **Photos**   | PhotoGrid        | Anzeigen, Favorit toggle, Löschen                                | `28286d12` |
 | **Photos**   | AlbumGrid        | Öffnen, Löschen                                                  | `28286d12` |
-| **Zitare**   | Favoriten        | Aus Favoriten entfernen, Kopieren, Teilen                        | `28286d12` |
+| **Quotes**   | Favoriten        | Aus Favoriten entfernen, Kopieren, Teilen                        | `28286d12` |
 | **Calendar** | AgendaView       | Bearbeiten, Duplizieren, Löschen                                 | `ecda4535` |
 | **Chat**     | ConversationList | Umbenennen, Archivieren, Löschen                                 | `ecda4535` |
 | **Contacts** | ContactGridView  | Öffnen, Favorit, Anrufen, E-Mail, Löschen                        | `ecda4535` |
@@ -105,7 +105,7 @@ Neues monorepo-weites Package, das die LLM-Integration für alle Backends verein
 
 ```
 ┌──────────────┐  ┌──────────────┐  ┌──────────────┐
-│  Chat Backend │  │ Zitare Backend│  │ Planta Backend│
+│  Chat Backend │  │ Quotes Backend│  │ Planta Backend│
 └──────┬───────┘  └──────┬───────┘  └──────┬───────┘
        │                 │                 │
        ▼                 ▼                 ▼
@@ -123,7 +123,7 @@ Neues monorepo-weites Package, das die LLM-Integration für alle Backends verein
 **48 Dateien geändert**, +2.477 / -1.298 Zeilen. Alle Backends migriert:
 
 - `@chat/backend` — Chat AI-Completions
-- `@zitare/backend` — Zitat-Analyse (vorher eigener Ollama-Service)
+- `@quotes/backend` — Zitat-Analyse (vorher eigener Ollama-Service)
 - `@planta/backend` — Pflanzen-Vision-Analyse
 - `@food/backend` — Ernährungs-Analyse (Gemini)
 - `mana-core-auth` — AI-Service für Auth-Features

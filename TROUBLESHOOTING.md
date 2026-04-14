@@ -34,13 +34,13 @@ Common issues and solutions for the mana-monorepo.
 
 **Root Cause:**
 
-Parent workspace packages (e.g., `apps/zitare/package.json`, `apps/presi/package.json`) have scripts that call `turbo run <task>`, creating an **infinite recursion loop**.
+Parent workspace packages (e.g., `apps/quotes/package.json`, `apps/presi/package.json`) have scripts that call `turbo run <task>`, creating an **infinite recursion loop**.
 
 ### How It Happens
 
 ```
-Root turbo → finds "build" script in apps/zitare/package.json
-  → runs "turbo run build" in zitare
+Root turbo → finds "build" script in apps/quotes/package.json
+  → runs "turbo run build" in quotes
     → finds "build" script again
       → runs "turbo run build" again
         → (infinite loop!)
@@ -49,7 +49,7 @@ Root turbo → finds "build" script in apps/zitare/package.json
 ### ❌ WRONG - Causes Infinite Recursion
 
 ```json
-// apps/zitare/package.json - DON'T DO THIS!
+// apps/quotes/package.json - DON'T DO THIS!
 {
 	"scripts": {
 		"build": "turbo run build", // ❌ WRONG
@@ -73,13 +73,13 @@ Root turbo → finds "build" script in apps/zitare/package.json
 ### ✅ CORRECT - Let Root Turbo Handle Orchestration
 
 ```json
-// apps/zitare/package.json - CORRECT
+// apps/quotes/package.json - CORRECT
 {
 	"scripts": {
 		"dev": "turbo run dev", // ✅ OK for dev (persistent task, scoped)
 		// No build, lint, type-check scripts - handled by root turbo
-		"db:push": "pnpm --filter @zitare/backend db:push", // ✅ OK
-		"db:studio": "pnpm --filter @zitare/backend db:studio" // ✅ OK
+		"db:push": "pnpm --filter @quotes/backend db:push", // ✅ OK
+		"db:studio": "pnpm --filter @quotes/backend db:studio" // ✅ OK
 	}
 }
 ```
@@ -88,7 +88,7 @@ Root turbo → finds "build" script in apps/zitare/package.json
 
 Using `turbo run dev` in parent packages is acceptable because:
 
-1. It's typically run directly on that package (scoped: `pnpm zitare:dev`)
+1. It's typically run directly on that package (scoped: `pnpm quotes:dev`)
 2. Dev tasks are persistent (long-running) and turbo handles them differently
 3. Root never orchestrates `dev` across all packages simultaneously
 
@@ -130,14 +130,14 @@ Tasks orchestrated from root (defined in `turbo.json`):
 
 Parent packages are located at:
 
-- `apps/*/package.json` (e.g., `apps/zitare/package.json`)
+- `apps/*/package.json` (e.g., `apps/quotes/package.json`)
 - `games/*/package.json` (e.g., `games/mana-games/package.json`)
 
 **Do NOT add turbo scripts here!**
 
 Child packages (these are fine):
 
-- `apps/*/apps/*/package.json` (e.g., `apps/zitare/apps/backend/package.json`)
+- `apps/*/apps/*/package.json` (e.g., `apps/quotes/apps/backend/package.json`)
 - `packages/*/package.json` (e.g., `packages/shared-theme/package.json`)
 
 ---
@@ -163,7 +163,7 @@ pnpm run build 2>&1 | tee build.log
 grep -A10 "error during build" build.log
 
 # Build specific package to isolate issue
-pnpm --filter @zitare/backend build
+pnpm --filter @quotes/backend build
 ```
 
 ### Build Times Out in CI

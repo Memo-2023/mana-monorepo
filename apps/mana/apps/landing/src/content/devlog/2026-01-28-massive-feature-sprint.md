@@ -42,7 +42,7 @@ Außergewöhnlich produktiver Tag (und Nacht!) mit **74 Commits** und mehreren g
 - **mana-search Microservice** - SearXNG Meta-Search + Content Extraction
 - **@manacore/bot-services** - Shared Business Logic Package
 - **matrix-mana-bot** - Unified Gateway Bot für alle Features
-- **4 neue Matrix Bots** - Todo, Food, Zitare, Clock
+- **4 neue Matrix Bots** - Todo, Food, Quotes, Clock
 - **OIDC Provider** - Matrix SSO via mana-core-auth
 - **VictoriaMetrics** - Monitoring Upgrade mit DuckDB Analytics
 - **App Cleanup** - Demo Mode für Calendar, Todo, Contacts
@@ -377,7 +377,7 @@ Ernährungs-Tracking via Matrix:
 
 **Voice Transcription** via mana-stt für Sprachnachrichten.
 
-### matrix-zitare-bot
+### matrix-quotes-bot
 
 Tägliche Inspirations-Zitate:
 
@@ -571,7 +571,7 @@ apps/calendar/apps/web/src/lib/services/
 | matrix-mana-bot   | 3310 | NestJS    | Gateway Bot            |
 | matrix-todo-bot   | 3315 | NestJS    | Todo Bot               |
 | matrix-food-bot   | 3316 | NestJS    | Nutrition Bot          |
-| matrix-zitare-bot | 3317 | NestJS    | Quotes Bot             |
+| matrix-quotes-bot | 3317 | NestJS    | Quotes Bot             |
 | matrix-clock-bot  | 3318 | NestJS    | Timer Bot              |
 
 ---
@@ -585,12 +585,12 @@ apps/calendar/apps/web/src/lib/services/
 | Matrix Client | 1       | Phase 2 Features                       |
 | mana-search   | 3       | SearXNG, Extraction, Cache             |
 | Bot Services  | 2       | Shared Package + Gateway               |
-| Matrix Bots   | 8       | Todo, Food, Zitare, Clock              |
+| Matrix Bots   | 8       | Todo, Food, Quotes, Clock              |
 | OIDC          | 6       | Matrix SSO Provider                    |
 | App Cleanup   | 8       | Demo Mode, Feature Removal             |
 | Monitoring    | 2       | VictoriaMetrics, DuckDB                |
 | Food          | 2       | Tests, Production Ready                |
-| Telegram Bots | 1       | Food, Todo, Zitare                     |
+| Telegram Bots | 1       | Food, Todo, Quotes                     |
 | Bugfixes      | 15+     | Auth, Matrix, Docker                   |
 | Documentation | 5       | Monitoring, Services, DevLogs          |
 

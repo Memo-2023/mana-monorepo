@@ -21,7 +21,7 @@ import { setSecurityHeaders } from '@mana/shared-utils/security-headers';
  *
  * Per-app HTTP backends (todo-api, calendar-api, contacts-api, chat-api,
  * storage-api, cards-api, mukke-api, food-api, picture-api, presi-api,
- * zitare-api, clock-api, context-api) were removed in the pre-launch
+ * quotes-api, clock-api, context-api) were removed in the pre-launch
  * ghost-API cleanup — every product module now talks to mana-sync directly.
  */
 
@@ -54,7 +54,7 @@ const APP_SUBDOMAINS = new Set([
 	'chat',
 	'calendar',
 	'contacts',
-	'zitare',
+	'quotes',
 	'skilltree',
 	'plants',
 	'cards',

@@ -59,7 +59,7 @@ SVG ist ideal, da es skalierbar ist und nur eine Datei benötigt:
 | Todo | `#8b5cf6` | `#8b5cf6` → `#7c3aed` |
 | Chat | `#3b82f6` | `#3b82f6` → `#2563eb` |
 | Picture | `#ec4899` | `#ec4899` → `#db2777` |
-| Zitare | `#f59e0b` | `#f59e0b` → `#d97706` |
+| Quotes | `#f59e0b` | `#f59e0b` → `#d97706` |
 | Calendar | `#10b981` | `#10b981` → `#059669` |
 | Contacts | `#6366f1` | `#6366f1` → `#4f46e5` |
 | Mana Games | `#00ff88` | `#00ff88` → `#00cc6a` |

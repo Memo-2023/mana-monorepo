@@ -129,7 +129,7 @@ Pure CRUD apps use mana-sync directly.
 | 5015 | storage-web | 3034 storage-server |
 | 5016 | presi-web | 3040 presi-server |
 | 5017 | food-web | 3038 food-server |
-| 5018 | zitare-web | *(local-first only)* |
+| 5018 | quotes-web | *(local-first only)* |
 | 5019 | photos-web | *(local-first + mana-media)* |
 | 5020 | skilltree-web | *(local-first only)* |
 | 5021 | picture-web | 3035 picture-server |

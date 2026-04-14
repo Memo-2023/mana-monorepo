@@ -136,7 +136,7 @@ export class AppModule {}
 - todo-backend (Port 3004)
 - clock-backend (Port 3005)
 - picture-backend (Port 3006)
-- zitare-backend (Port 3007)
+- quotes-backend (Port 3007)
 - presi-backend (Port 3008)
 - cards-backend (Port 3009)
 - contacts-backend (Port 3010)
@@ -292,7 +292,7 @@ export async function GET() {
 ### Betroffene Apps
 
 - calendar-web, clock-web, contacts-web
-- chat-web, picture-web, zitare-web
+- chat-web, picture-web, quotes-web
 - todo-web, cards-web, manacore-web
 - presi-web, storage-web, food-web
 

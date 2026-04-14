@@ -62,7 +62,7 @@ nur noch bei grossen Multi-App-Builds stoppen.
 
 ### Tier 1: Statische/Local-First Apps (wenig Server-Last)
 
-Apps wie Todo, Calendar, Clock, Zitare, Contacts, etc.
+Apps wie Todo, Calendar, Clock, Quotes, Contacts, etc.
 
 | Metrik | Wert | Begruendung |
 |--------|------|-------------|

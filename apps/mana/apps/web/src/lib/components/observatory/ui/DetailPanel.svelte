@@ -38,7 +38,7 @@
 		clock: 'https://clock.mana.how',
 		food: 'https://food.mana.how',
 		photos: 'https://photos.mana.how',
-		zitare: 'https://zitare.mana.how',
+		quotes: 'https://quotes.mana.how',
 		mana: 'https://mana.how',
 		cards: 'https://cards.mana.how',
 		plants: 'https://plants.mana.how',

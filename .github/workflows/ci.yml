@@ -367,7 +367,7 @@ jobs:
             echo "skilltree-web=false" >> $GITHUB_OUTPUT
           fi
 
-          # zitare-backend: REMOVED — migrated to local-first
+          # quotes-backend: REMOVED — migrated to local-first
 
           # Check if any service needs building
           if grep -q "=true" $GITHUB_OUTPUT; then
@@ -410,7 +410,7 @@ jobs:
           echo "| food-web | ${{ steps.changes.outputs.food-web }} |" >> $GITHUB_STEP_SUMMARY
           echo "| skilltree-backend | removed |" >> $GITHUB_STEP_SUMMARY
           echo "| skilltree-web | ${{ steps.changes.outputs.skilltree-web }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| zitare-backend | removed |" >> $GITHUB_STEP_SUMMARY
+          echo "| quotes-backend | removed |" >> $GITHUB_STEP_SUMMARY
 
   # ===========================================
   # Validation job - runs on PRs
@@ -1263,4 +1263,4 @@ jobs:
           cache-to: type=gha,mode=max
 
   # ===========================================
-  # Zitare Backend: REMOVED — migrated to local-first
+  # Quotes Backend: REMOVED — migrated to local-first

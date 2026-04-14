@@ -143,7 +143,7 @@ Legende: LOCAL = Self-hosted | CLOUD = Externer Dienst | FREE = Kostenlos
 - `picture-landing.pages.dev`
 - `mana-landing.pages.dev`
 - `cards-landing.pages.dev`
-- `zitare-landing.pages.dev`
+- `quotes-landing.pages.dev`
 
 ### 6. Monitoring
 

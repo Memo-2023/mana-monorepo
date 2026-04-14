@@ -15,7 +15,7 @@ For any project with a backend, use the `dev:*:full` command:
 
 ```bash
 pnpm dev:chat:full      # Start chat with auth + database setup
-pnpm dev:zitare:full    # Start zitare with auth + database setup
+pnpm dev:quotes:full    # Start quotes with auth + database setup
 pnpm dev:contacts:full  # Start contacts with auth + database setup
 ```
 
@@ -30,7 +30,7 @@ These commands automatically:
 | Command | Database | Backend Port | Web Port |
 |---------|----------|--------------|----------|
 | `pnpm dev:chat:full` | chat | 3002 | 5173 |
-| `pnpm dev:zitare:full` | zitare | 3007 | 5177 |
+| `pnpm dev:quotes:full` | quotes | 3007 | 5177 |
 | `pnpm dev:contacts:full` | contacts | 3015 | 5184 |
 | `pnpm dev:calendar:full` | calendar | 3014 | 5179 |
 | `pnpm dev:clock:full` | clock | 3017 | 5187 |
@@ -64,7 +64,7 @@ Before running any `dev:*:full` command:
 ```bash
 pnpm setup:db:auth      # Setup mana-core-auth database + schema
 pnpm setup:db:chat      # Setup chat database + schema
-pnpm setup:db:zitare    # Setup zitare database + schema
+pnpm setup:db:quotes    # Setup quotes database + schema
 pnpm setup:db:contacts  # Setup contacts database + schema
 pnpm setup:db:calendar  # Setup calendar database + schema
 pnpm setup:db:clock     # Setup clock database + schema
@@ -86,7 +86,7 @@ This is useful when setting up a fresh environment or after pulling new schema c
 
 On first `pnpm docker:up`, the PostgreSQL container runs `docker/init-db/01-create-databases.sql` which creates all databases:
 
-- mana_platform, chat, zitare, contacts, calendar, clock, todo, cards
+- mana_platform, chat, quotes, contacts, calendar, clock, todo, cards
 - storage, mail, moodlit, finance, inventory, techbase, voxel_lava, figgos
 
 ### Setup Script

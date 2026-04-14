@@ -112,7 +112,7 @@ function getDockerfileCopyPaths(dockerfilePath) {
 	for (const line of lines) {
 		const trimmed = line.trim();
 		// Match COPY statements like: COPY packages/shared-utils ./packages/shared-utils
-		// or COPY apps/zitare/packages/content ./apps/zitare/packages/content
+		// or COPY apps/quotes/packages/content ./apps/quotes/packages/content
 		// or COPY services/mana-auth ./services/mana-auth
 		const copyMatch = trimmed.match(/^COPY\s+((?:packages|apps|services)\/\S+)/);
 		if (copyMatch) {

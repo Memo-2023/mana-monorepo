@@ -47,7 +47,7 @@ export async function collectAppSnapshots(): Promise<AppSnapshot[]> {
 		safeGetAll('events'),
 		safeGetAll('contacts'),
 		safeGetAll('conversations'),
-		safeGetAll('zitareFavorites'),
+		safeGetAll('quotesFavorites'),
 		safeGetAll('images'),
 		safeGetAll('alarms'),
 		safeGetAll('files'),
@@ -108,11 +108,11 @@ export async function collectAppSnapshots(): Promise<AppSnapshot[]> {
 		});
 	}
 
-	// Zitare
+	// Quotes
 	if (favorites.length > 0) {
 		snapshots.push({
-			app: 'Zitare',
-			appIndex: MANA_APP_INDEX.zitare,
+			app: 'Quotes',
+			appIndex: MANA_APP_INDEX.quotes,
 			totalItems: favorites.length,
 			completedItems: 0,
 			favoriteItems: favorites.length,

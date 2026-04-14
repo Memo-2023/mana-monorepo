@@ -275,7 +275,7 @@ Drei Komponenten die über viele Apps hinweg dupliziert waren:
 
 | Komponente         | Apps (vorher)                                                 | Lösung                                                  |
 | ------------------ | ------------------------------------------------------------- | ------------------------------------------------------- |
-| `LanguageSelector` | contacts, zitare: Custom-Dropdown mit eigenem State           | → `PillDropdown` aus shared-ui (wie die anderen 8 Apps) |
+| `LanguageSelector` | contacts, quotes: Custom-Dropdown mit eigenem State           | → `PillDropdown` aus shared-ui (wie die anderen 8 Apps) |
 | `ConfirmDialog`    | context (4 Stellen), times (3 Stellen): lokale Kopien         | → `ConfirmationModal` aus `@manacore/shared-ui`         |
 | `AppSlider`        | todo, calendar, chat, contacts, presi: statisches `MANA_APPS` | → `getActiveManaApps()` (filtert inaktive Apps)         |
 
@@ -308,7 +308,7 @@ Das Arcade-Backend (AI Browser Games) war noch auf NestJS. Migration auf Hono/Bu
 
 | Fix            | Beschreibung                                                 |
 | -------------- | ------------------------------------------------------------ |
-| Port-Konflikt  | calc-web: Port 5026 → 5031 (kollidierte mit zitare-web)      |
+| Port-Konflikt  | calc-web: Port 5026 → 5031 (kollidierte mit quotes-web)      |
 | Cloudflared    | Config mit tatsächlichen Container-Ports synchronisiert      |
 | Landings Nginx | `mkdir snippets` vor Copy, status.mana.how vhost hinzugefügt |
 | Prerender 404  | favicon.png 404s bei skilltree + food unterdrückt            |
@@ -347,5 +347,5 @@ Drei neue Planungs-/Guidelines-Dokumente:
 
 - Memoro Production-Deploy + DNS
 - Status-Page: Alert-Integration (Matrix-Benachrichtigung bei Downtime)
-- Todo: Keyboard-Navigation-Pattern auf andere Apps übertragen (Zitare, Contacts)
+- Todo: Keyboard-Navigation-Pattern auf andere Apps übertragen (Quotes, Contacts)
 - Debug-Borders als globales Shared-Package

@@ -872,7 +872,7 @@ Diese Apps existieren bereits im Monorepo, sind aber noch nicht auf dem Server:
 
 | App | Beschreibung | Status | Priorität |
 |-----|--------------|--------|-----------|
-| **Zitare** | Tägliche Inspirations-Zitate | Backend + Web fertig | Hoch |
+| **Quotes** | Tägliche Inspirations-Zitate | Backend + Web fertig | Hoch |
 | **Picture** | AI-Bildgenerierung | Braucht GPU/API | Mittel |
 | **Cards** | Kartenspiel/Deckbuilding | Backend + Web fertig | Niedrig |
 | **Planta** | Pflanzenpflege-Tracker | In Entwicklung | Niedrig |
@@ -883,7 +883,7 @@ Diese Apps existieren bereits im Monorepo, sind aber noch nicht auf dem Server:
 |-----|--------------|---------------|
 | `telegram-todo-bot` | Todo-Management via Telegram | ✓ |
 | `telegram-food-bot` | Ernährung loggen via Telegram | ✓ |
-| `telegram-zitare-bot` | Tägliche Zitate via Telegram | ✓ |
+| `telegram-quotes-bot` | Tägliche Zitate via Telegram | ✓ |
 | `telegram-project-doc-bot` | Projekt-Dokumentation | ✓ |
 
 ---
@@ -912,7 +912,7 @@ Diese Apps existieren bereits im Monorepo, sind aber noch nicht auf dem Server:
    └── Alle öffentlichen URLs überwachen
    └── Telegram-Benachrichtigung
 
-4. 🚀 Zitare deployen
+4. 🚀 Quotes deployen
    └── Bereits entwickelt
    └── Backend + Web Container hinzufügen
    └── Cloudflare Tunnel Route
@@ -928,7 +928,7 @@ Diese Apps existieren bereits im Monorepo, sind aber noch nicht auf dem Server:
 
 6. 🤖 Weitere Telegram Bots
    └── todo-bot
-   └── zitare-bot
+   └── quotes-bot
    └── food-bot
 ```
 
@@ -952,7 +952,7 @@ Diese Apps existieren bereits im Monorepo, sind aber noch nicht auf dem Server:
 | Backup (restic) | Kritisch | 2h | Datensicherheit | **Sofort** |
 | Loki + Promtail | Kritisch | 1h | Debugging | **Sofort** |
 | Uptime Kuma | Wichtig | 30min | Externe Überwachung | Diese Woche |
-| Zitare | Wichtig | 1h | Bereits entwickelt | Diese Woche |
+| Quotes | Wichtig | 1h | Bereits entwickelt | Diese Woche |
 | Traefik/Caddy | Empfohlen | 2h | Einheitliches Routing | Wenn Zeit |
 | Vault/Infisical | Empfohlen | 4h | Security | Wenn Zeit |
 | Kong | Optional | 4h | API Management | Bei Bedarf |

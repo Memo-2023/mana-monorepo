@@ -232,7 +232,7 @@ export const dashboardStore = {
 				'calendar-events',
 				'chat-recent',
 				'contacts-favorites',
-				'zitare-quote',
+				'quotes-quote',
 				'music-library',
 				'presi-decks',
 				'context-docs',

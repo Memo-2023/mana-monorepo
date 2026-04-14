@@ -161,7 +161,7 @@ const track = {
 	photos: createModuleTracker('photos'),
 	storage: createModuleTracker('storage'),
 	music: createModuleTracker('music'),
-	zitare: createModuleTracker('zitare'),
+	quotes: createModuleTracker('quotes'),
 	presi: createModuleTracker('presi'),
 	subscription: createModuleTracker('subscription'),
 	memoro: createModuleTracker('memoro'),
@@ -460,19 +460,19 @@ export const MusicEvents = {
 };
 
 /**
- * Zitare App Events
+ * Quotes App Events
  */
-export const ZitareEvents = {
-	randomQuoteLoaded: () => track.zitare('random_quote_loaded'),
-	quoteShared: (category: string) => track.zitare('quote_shared', { category }),
-	quoteFavorited: (category: string) => track.zitare('quote_favorited', { category }),
-	quoteUnfavorited: () => track.zitare('quote_unfavorited'),
-	categoryViewed: (category: string) => track.zitare('category_viewed', { category }),
+export const QuotesEvents = {
+	randomQuoteLoaded: () => track.quotes('random_quote_loaded'),
+	quoteShared: (category: string) => track.quotes('quote_shared', { category }),
+	quoteFavorited: (category: string) => track.quotes('quote_favorited', { category }),
+	quoteUnfavorited: () => track.quotes('quote_unfavorited'),
+	categoryViewed: (category: string) => track.quotes('category_viewed', { category }),
 	searchPerformed: (resultsCount: number) =>
-		track.zitare('search_performed', { results: resultsCount }),
-	listCreated: () => track.zitare('list_created'),
-	listDeleted: () => track.zitare('list_deleted'),
-	quoteLanguageChanged: (language: string) => track.zitare('quote_language_changed', { language }),
+		track.quotes('search_performed', { results: resultsCount }),
+	listCreated: () => track.quotes('list_created'),
+	listDeleted: () => track.quotes('list_deleted'),
+	quoteLanguageChanged: (language: string) => track.quotes('quote_language_changed', { language }),
 };
 
 /**

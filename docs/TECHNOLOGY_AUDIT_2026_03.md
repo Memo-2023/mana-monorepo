@@ -65,12 +65,12 @@ Jeder einzelne Backend-Service:
 |-----------|----------|-------------|------------|
 | **Komplex (behalten)** | Chat, Todo, Calendar, Contacts, Storage, Mukke | 60-89 pro Backend | Eigenstaendige Services |
 | **AI-spezialisiert (behalten)** | Picture, Plants, Food | 30-50 pro Backend | Eigene AI-Pipelines |
-| **Triviales CRUD (konsolidieren)** | Zitare (20!), Clock (31), Presi, CityCorners, Questions, Context | 20-35 pro Backend | -> 1 Content Service |
+| **Triviales CRUD (konsolidieren)** | Quotes (20!), Clock (31), Presi, CityCorners, Questions, Context | 20-35 pro Backend | -> 1 Content Service |
 | **Eliminieren** | Photos (mana-media Proxy), Skilltree (Frontend-only) | minimal | Backend loeschen |
 
-### Beispiel: Zitare Backend
+### Beispiel: Quotes Backend
 
-Das Zitare Backend hat **20 TypeScript-Dateien** und genau zwei Features:
+Das Quotes Backend hat **20 TypeScript-Dateien** und genau zwei Features:
 
 ```typescript
 // app.module.ts - Das ist der gesamte Service:
@@ -81,7 +81,7 @@ Das Zitare Backend hat **20 TypeScript-Dateien** und genau zwei Features:
     FavoriteModule,    // CRUD fuer Favoriten
     ListModule,        // CRUD fuer Listen
     HealthModule.forRoot({ serviceName: 'quote-backend' }),
-    MetricsModule.register({ prefix: 'zitare_' }),
+    MetricsModule.register({ prefix: 'quotes_' }),
     AdminModule,
   ],
 })
@@ -517,7 +517,7 @@ Diese Technologie-Entscheidungen sind gut und sollten beibehalten werden:
 | # | Massnahme | Aufwand | Impact |
 |---|-----------|---------|--------|
 | 1 | **mana-sync hardenen** - Tests, Docs, Error Handling | 1 Woche | Datensicherheit |
-| 2 | **7 triviale Backends eliminieren/konsolidieren** (Zitare, Clock, Presi, CityCorners, Questions, Context, Photos) | 1 Woche | -7 Container, -3.500 LOC |
+| 2 | **7 triviale Backends eliminieren/konsolidieren** (Quotes, Clock, Presi, CityCorners, Questions, Context, Photos) | 1 Woche | -7 Container, -3.500 LOC |
 | 3 | **Port-Konflikte loesen** (3025, 3030) | 1 Stunde | Services laufen parallel |
 | 4 | **shared-ui Type-Errors fixen** | 2-3 Tage | Alle Apps type-checken wieder |
 | 5 | **Expo-Versionen alignen** (alle auf SDK 55) | 3-5 Tage | Konsistenz, Security |
@@ -558,7 +558,7 @@ Diese Technologie-Entscheidungen sind gut und sollten beibehalten werden:
 
 ### Apps (24)
 
-calendar, chat, citycorners, clock, contacts, context, docs, inventar, mana, cards, matrix, mukke, food, photos, picture, plants, playground, presi, questions, skilltree, storage, todo, traces, zitare
+calendar, chat, citycorners, clock, contacts, context, docs, inventar, mana, cards, matrix, mukke, food, photos, picture, plants, playground, presi, questions, skilltree, storage, todo, traces, quotes
 
 ### Services (17)
 

@@ -26,7 +26,7 @@
  *   3. NEVER write raw `var(--color-X)` without wrapping with `hsl()`.
  *      The variable holds raw channels, not a valid CSS color. A bare
  *      `color: var(--color-foreground)` is NOT an error — the browser
- *      silently falls back to `inherit`, which is how the early P5 zitare
+ *      silently falls back to `inherit`, which is how the early P5 quotes
  *      regression produced white-on-white text in light mode. Always wrap.
  *
  *      ❌  color: var(--color-foreground);

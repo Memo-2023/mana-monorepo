@@ -44,8 +44,8 @@
 			category: 'AI',
 		},
 		{
-			id: 'zitare',
-			name: 'Zitare',
+			id: 'quotes',
+			name: 'Quotes',
 			description: 'Tägliche Inspiration mit Zitaten',
 			icon: '💡',
 			color: 'bg-yellow-500',
