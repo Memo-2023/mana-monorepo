@@ -1810,6 +1810,11 @@ Code:
     Runtime-Drift-Guard im Service
   - `mana_ai.mission_snapshots` — inkrementeller Snapshot, `listDueMissions`
     ist ein indexed SELECT statt O(N) LWW-Replay
+  - **Observability**: `/metrics` (Prom-Counter für ticks/plans/parse-
+    failures/snapshots + Histogramme für tick-, planner-, HTTP-Latenz)
+    scraped vom `mana-ai`-Job in `docker/prometheus/prometheus.yml`.
+    `/health` als blackbox-internal Probe → surfaces auf **status.mana.how**
+    als „Mana AI Runner".
 
 **Die Workbench-Roadmap ist damit funktional abgeschlossen.**
 

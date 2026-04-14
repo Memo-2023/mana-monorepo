@@ -169,15 +169,16 @@ Svelte 5 runes are mandatory — no legacy `let count = 0; $: doubled = count * 
 
 ## AI Workbench
 
-The companion is a **second actor** that works alongside the human in every module. Foundation shipped 2026-04-14, end-to-end pipeline live:
+The companion is a **second actor** that works alongside the human in every module. Full pipeline live end-to-end:
 
 - **Actor attribution** — every event, record, and sync row carries `{ kind: 'user' | 'ai' | 'system' }`. Code: `src/lib/data/events/actor.ts`.
-- **AI policy** — per-tool `auto | propose | deny`. AI-attributed tool calls default to `propose`, which stages an intent in `pendingProposals` instead of writing. Code: `src/lib/data/ai/policy.ts`.
-- **Proposal inbox** — drop `<AiProposalInbox module="todo" />` into any module page to render pending proposals inline as ghost cards with approve/reject. Wired in `/todo` as pilot.
-- **Missions** — long-lived autonomous work items. User creates at `/companion/missions` (title + objective + concept markdown + linked inputs + cadence). Foreground tick in `(app)/+layout.svelte` runs due missions; the Planner (LLM) generates a plan, each step stages a Proposal. Code: `src/lib/data/ai/missions/`.
-- **Input picker** — `<MissionInputPicker>` sources candidates from the `input-index` registry (notes / kontext / goals by default). The Runner resolves them via the parallel `input-resolvers` registry when building Planner prompts.
+- **AI policy** — per-tool `auto | propose | deny`. Proposable tool names come from `@mana/shared-ai`'s `AI_PROPOSABLE_TOOL_NAMES`; the mana-ai service runs a boot-time drift guard against the same list. Code: `src/lib/data/ai/policy.ts`.
+- **Proposal inbox** — drop `<AiProposalInbox module="…" />` into any module page to render pending proposals inline with approve / freitext-reject buttons. Wired in `/todo`, `/calendar`, `/places`, `/drink`, `/food`.
+- **Missions** — long-lived autonomous work items at `/companion/missions` with concept + objective + linked inputs + cadence. Both the foreground tick AND the server-side `mana-ai` service produce plans; `data/ai/missions/server-iteration-staging.ts` translates server-source iterations into local Proposals on sync.
+- **Input picker** — `<MissionInputPicker>` sources candidates from the `input-index` registry (notes / kontext / goals / tasks / calendar). The Runner resolves via the parallel `input-resolvers` registry. Encrypted tables (notes, tasks, …) decrypt client-side only.
+- **Workbench timeline** — `/companion/workbench` renders every AI-attributed event grouped by mission iteration. Each bucket has a **Revert button** that undoes the iteration's writes via `data/ai/revert/` (TaskCreated → delete, TaskCompleted → uncomplete, etc., newest-first).
 
-Full architecture + still-open work (Workbench timeline lens, mana-sync actor field, server-side runner): [`docs/architecture/COMPANION_BRAIN_ARCHITECTURE.md` §20](../../docs/architecture/COMPANION_BRAIN_ARCHITECTURE.md).
+Full architecture (Planner prompt + parser in `@mana/shared-ai`, server-side runner, Postgres actor column, materialized snapshots, Prometheus metrics + status.mana.how integration): [`docs/architecture/COMPANION_BRAIN_ARCHITECTURE.md` §20](../../docs/architecture/COMPANION_BRAIN_ARCHITECTURE.md).
 
 ## Reference Documents
 
