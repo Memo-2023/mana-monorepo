@@ -19,11 +19,20 @@ What works end-to-end:
 - [x] Webapp staging effect (`server-iteration-staging.ts`) picks up the synced iteration and translates each PlanStep into a local Proposal with full AI-actor attribution (missionId + iterationId + rationale). Idempotent via durable `proposalId` markers.
 - [x] **Server-side input resolvers** for plaintext tables — `db/resolvers/` with a pluggable registry + single-record LWW replay (`record-replay.ts`). `goals` resolver ships by default. Encrypted tables (notes, kontext, tasks, events, journal, …) are intentionally **not** resolved server-side; those missions depend on the foreground runner which decrypts client-side. See `resolvers/types.ts` for the privacy rationale.
 - [x] **Materialized mission snapshots** — `mana_ai.mission_snapshots` table with per-tick incremental refresh (`db/snapshot-refresh.ts`). `listDueMissions` is now a single indexed SELECT; the prior O(N changes) LWW replay stays only in `mergeAndFilter` for tests. Idempotent `migrate()` on boot creates the schema.
+- [x] **Prometheus metrics** on `/metrics` — process defaults with
+      `mana_ai_` prefix + counters (`mana_ai_ticks_total`,
+      `mana_ai_plans_produced_total`, `mana_ai_plans_written_back_total`,
+      `mana_ai_parse_failures_total`, `mana_ai_mission_errors_total`,
+      `mana_ai_snapshots_*`) and histograms (`mana_ai_tick_duration_seconds`,
+      `mana_ai_planner_request_duration_seconds`,
+      `mana_ai_http_request_duration_seconds`). Scraped 30s by
+      `docker/prometheus/prometheus.yml`'s `mana-ai` job. `/health` is
+      also blackbox-probed and surfaces on **status.mana.how** under
+      "Internal" as "Mana AI Runner".
 
 All roadmap items shipped. Future polish (not blockers):
 - Multi-instance deploy with advisory locks on snapshot refresh (today single-process)
 - Read-only `/internal/missions/:userId` endpoint for ops inspection
-- Metrics endpoint for Prometheus (tick latency, plans/hour, parse-failure rate)
 
 ## Port: 3066
 

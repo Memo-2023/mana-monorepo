@@ -123,6 +123,15 @@ scrape_configs:
     metrics_path: '/metrics'
     scrape_interval: 30s
 
+  # Mana AI Service (Bun) — background Mission Runner for the AI Workbench.
+  # Exposes tick stats, planner-request latencies, snapshot refresh
+  # counters, and standard HTTP metrics at /metrics.
+  - job_name: 'mana-ai'
+    static_configs:
+      - targets: ['mana-ai:3066']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
   # ============================================
   # GPU Server (Windows PC, LAN: 192.168.178.11)
   # ============================================
@@ -297,6 +306,8 @@ scrape_configs:
           # Upstream Pelias health, proxied through the wrapper so the
           # blackbox-exporter doesn't need host.docker.internal access.
           - http://mana-geocoding:3018/health/pelias
+          # mana-ai (Mission Runner) — internal-only, no CF tunnel.
+          - http://mana-ai:3066/health
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target

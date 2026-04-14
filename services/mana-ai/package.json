@@ -12,7 +12,8 @@
 		"@mana/shared-ai": "workspace:*",
 		"@mana/shared-hono": "workspace:*",
 		"hono": "^4.7.0",
-		"postgres": "^3.4.5"
+		"postgres": "^3.4.5",
+		"prom-client": "^15.1.3"
 	},
 	"devDependencies": {
 		"typescript": "^5.9.3",

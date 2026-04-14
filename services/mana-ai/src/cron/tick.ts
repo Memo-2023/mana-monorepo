@@ -27,6 +27,17 @@ import { appendServerIteration, planToIteration } from '../db/iteration-writer';
 import { refreshSnapshots } from '../db/snapshot-refresh';
 import { PlannerClient } from '../planner/client';
 import { AI_AVAILABLE_TOOLS, AI_AVAILABLE_TOOL_NAMES } from '../planner/tools';
+import {
+	ticksTotal,
+	tickDuration,
+	plansProducedTotal,
+	plansWrittenBackTotal,
+	parseFailuresTotal,
+	missionErrorsTotal,
+	snapshotsNewTotal,
+	snapshotsUpdatedTotal,
+	snapshotRowsAppliedTotal,
+} from '../metrics';
 import type { Config } from '../config';
 
 export interface TickStats {
@@ -53,6 +64,8 @@ export async function runTickOnce(config: Config): Promise<TickStats> {
 		};
 	}
 	running = true;
+	ticksTotal.inc();
+	const tickEndTimer = tickDuration.startTimer();
 	const errors: string[] = [];
 	let dueMissionCount = 0;
 	let plansProduced = 0;
@@ -65,6 +78,9 @@ export async function runTickOnce(config: Config): Promise<TickStats> {
 		// Bring the snapshot table up to date before querying it —
 		// cheap incremental pass, O(new changes since last tick).
 		const refresh = await refreshSnapshots(sql);
+		snapshotsNewTotal.inc(refresh.newSnapshots);
+		snapshotsUpdatedTotal.inc(refresh.updatedSnapshots);
+		snapshotRowsAppliedTotal.inc(refresh.rowsApplied);
 		if (refresh.rowsApplied > 0) {
 			console.log(
 				`[mana-ai tick] snapshot refresh: ${refresh.rowsApplied} rows → ${refresh.newSnapshots} new + ${refresh.updatedSnapshots} updated`
@@ -90,9 +106,11 @@ export async function runTickOnce(config: Config): Promise<TickStats> {
 				const plan = await planOneMission(m, planner, sql);
 				if (plan === null) {
 					parseFailures++;
+					parseFailuresTotal.inc();
 					continue;
 				}
 				plansProduced++;
+				plansProducedTotal.inc();
 
 				const nowIso = new Date().toISOString();
 				const iterationId = crypto.randomUUID();
@@ -107,6 +125,7 @@ export async function runTickOnce(config: Config): Promise<TickStats> {
 					nowIso,
 				});
 				plansWrittenBack++;
+				plansWrittenBackTotal.inc();
 
 				console.log(
 					`[mana-ai tick] mission=${m.id} user=${m.userId} plan=${plan.steps.length}step(s) iteration=${iterationId}`
@@ -114,6 +133,7 @@ export async function runTickOnce(config: Config): Promise<TickStats> {
 			} catch (err) {
 				const msg = err instanceof Error ? err.message : String(err);
 				errors.push(`mission=${m.id}: ${msg}`);
+				missionErrorsTotal.inc();
 				console.error(`[mana-ai tick] mission=${m.id} run failed:`, msg);
 			}
 		}
@@ -123,6 +143,7 @@ export async function runTickOnce(config: Config): Promise<TickStats> {
 		console.error('[mana-ai tick] scan error:', msg);
 	} finally {
 		running = false;
+		tickEndTimer();
 	}
 
 	return { scannedAt, dueMissionCount, plansProduced, plansWrittenBack, parseFailures, errors };

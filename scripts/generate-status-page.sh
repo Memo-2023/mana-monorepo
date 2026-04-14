@@ -75,6 +75,9 @@ friendly_name() {
     mana-geocoding:*)
       name="Mana Geocoding"
       ;;
+    mana-ai:*)
+      name="Mana AI Runner"
+      ;;
     mana.how/*)
       name="${name#mana.how/}"
       ;;

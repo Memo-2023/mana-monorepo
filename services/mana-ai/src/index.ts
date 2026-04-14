@@ -16,6 +16,7 @@ import { closeSql, getSql } from './db/connection';
 import { migrate } from './db/migrate';
 import { runTickOnce, startTick, stopTick, isTickRunning } from './cron/tick';
 import { serviceAuth } from './middleware/service-auth';
+import { register, httpRequestsTotal, httpRequestDuration } from './metrics';
 
 const config = loadConfig();
 
@@ -25,14 +26,32 @@ await migrate(getSql(config.syncDatabaseUrl));
 
 const app = new Hono();
 
+// HTTP instrumentation — labels by method/path/status, surfaced on /metrics.
+app.use('*', async (c, next) => {
+	const start = Date.now();
+	await next();
+	const duration = (Date.now() - start) / 1000;
+	const path = c.req.routePath || c.req.path;
+	const labels = { method: c.req.method, path, status: c.res.status };
+	httpRequestsTotal.inc(labels);
+	httpRequestDuration.observe(labels, duration);
+});
+
 app.get('/health', (c) =>
 	c.json({
 		ok: true,
 		service: 'mana-ai',
-		version: '0.1.0',
+		version: '0.4.0',
 		tick: { enabled: config.tickEnabled, running: isTickRunning() },
 	})
 );
+
+// Prometheus scrape target. Scraped by docker/prometheus/prometheus.yml's
+// `mana-ai` job every 30s.
+app.get('/metrics', async (c) => {
+	c.header('Content-Type', register.contentType);
+	return c.text(await register.metrics());
+});
 
 // Service-to-service: manually fire a tick for CI / ops / debugging
 // without waiting for the interval.

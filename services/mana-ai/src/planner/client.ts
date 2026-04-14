@@ -7,6 +7,8 @@
  * webapp as source of truth for now while the service matures.
  */
 
+import { plannerLatency } from '../metrics';
+
 export interface PlannerMessages {
 	system: string;
 	user: string;
@@ -26,6 +28,18 @@ export class PlannerClient {
 	async complete(
 		messages: PlannerMessages,
 		opts: { model?: string; temperature?: number } = {}
+	): Promise<PlannerResult> {
+		const endTimer = plannerLatency.startTimer();
+		try {
+			return await this.doComplete(messages, opts);
+		} finally {
+			endTimer();
+		}
+	}
+
+	private async doComplete(
+		messages: PlannerMessages,
+		opts: { model?: string; temperature?: number }
 	): Promise<PlannerResult> {
 		const res = await fetch(`${this.baseUrl}/v1/chat/completions`, {
 			method: 'POST',
