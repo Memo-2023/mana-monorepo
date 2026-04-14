@@ -121,20 +121,34 @@
 	}
 
 	// ── Register SceneAppBar in the layout's bottom-stack ───
+	// Split into two effects so prop churn (carouselPages re-deriving on
+	// every openApps change) doesn't re-write barComponent. The first
+	// effect handles registration/teardown when scenes appear/disappear;
+	// the second pushes fresh props on every reactive tick.
+	let barRegistered = $state(false);
 	$effect(() => {
-		if (scenes.length > 0) {
-			bottomBarStore.set(SceneAppBar, {
-				scenes,
-				activeSceneId,
-				pages: carouselPages,
-				onSceneSelect: (id: string) => workbenchScenesStore.setActiveScene(id),
-				onSceneCreate: (name: string) => workbenchScenesStore.createScene({ name }),
-				onSceneContextMenu: handleSceneContextMenu,
-				onAppClick: scrollToPage,
-				onAppContextMenu: (e: MouseEvent, id: string) => handleTabContextMenu(e, id),
-				onAddApp: () => (showPicker = !showPicker),
-			});
+		const hasScenes = scenes.length > 0;
+		if (hasScenes && !barRegistered) {
+			bottomBarStore.set(SceneAppBar, {});
+			barRegistered = true;
+		} else if (!hasScenes && barRegistered) {
+			bottomBarStore.clear();
+			barRegistered = false;
 		}
+	});
+	$effect(() => {
+		if (!barRegistered) return;
+		bottomBarStore.setProps({
+			scenes,
+			activeSceneId,
+			pages: carouselPages,
+			onSceneSelect: (id: string) => workbenchScenesStore.setActiveScene(id),
+			onSceneCreate: (name: string) => workbenchScenesStore.createScene({ name }),
+			onSceneContextMenu: handleSceneContextMenu,
+			onAppClick: scrollToPage,
+			onAppContextMenu: (e: MouseEvent, id: string) => handleTabContextMenu(e, id),
+			onAddApp: () => (showPicker = !showPicker),
+		});
 	});
 
 	// ── App CRUD (delegated to active scene) ────────────────

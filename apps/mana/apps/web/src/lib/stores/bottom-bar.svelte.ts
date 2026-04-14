@@ -26,6 +26,17 @@ export const bottomBarStore = {
 		barComponent = component;
 		barProps = props;
 	},
+	/**
+	 * Update only the props of the currently-registered bar component.
+	 * Use this from reactive blocks that frequently produce fresh prop
+	 * objects (e.g. derived arrays) — calling `set(...)` in those
+	 * places needlessly re-writes barComponent every tick, which
+	 * notifies subscribers even when the component identity hasn't
+	 * changed.
+	 */
+	setProps(props: Record<string, unknown>) {
+		barProps = props;
+	},
 	clear() {
 		barComponent = null;
 		barProps = {};
