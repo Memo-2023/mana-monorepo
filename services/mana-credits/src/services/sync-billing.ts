@@ -79,6 +79,7 @@ export class SyncBillingService {
 				interval: 'monthly' as BillingInterval,
 				nextChargeAt: null,
 				pausedAt: null,
+				gifted: false,
 			};
 		}
 
@@ -87,6 +88,7 @@ export class SyncBillingService {
 			interval: sub.billingInterval as BillingInterval,
 			nextChargeAt: sub.nextChargeAt?.toISOString() ?? null,
 			pausedAt: sub.pausedAt?.toISOString() ?? null,
+			gifted: sub.isGifted,
 		};
 	}
 
@@ -100,6 +102,10 @@ export class SyncBillingService {
 			.from(syncSubscriptions)
 			.where(eq(syncSubscriptions.userId, userId))
 			.limit(1);
+
+		if (existing?.isGifted) {
+			throw new BadRequestError('Sync is already gifted — no activation needed');
+		}
 
 		if (existing?.active) {
 			throw new BadRequestError('Sync is already active');
@@ -161,6 +167,10 @@ export class SyncBillingService {
 			throw new BadRequestError('Sync is not active');
 		}
 
+		if (sub.isGifted) {
+			throw new BadRequestError('Sync is gifted — contact support to revoke');
+		}
+
 		await this.db
 			.update(syncSubscriptions)
 			.set({
@@ -211,10 +221,17 @@ export class SyncBillingService {
 	async chargeRecurring() {
 		const now = new Date();
 
+		// Gifted subscriptions are skipped — they never get charged.
 		const dueSubscriptions = await this.db
 			.select()
 			.from(syncSubscriptions)
-			.where(and(eq(syncSubscriptions.active, true), lte(syncSubscriptions.nextChargeAt, now)));
+			.where(
+				and(
+					eq(syncSubscriptions.active, true),
+					eq(syncSubscriptions.isGifted, false),
+					lte(syncSubscriptions.nextChargeAt, now)
+				)
+			);
 
 		let charged = 0;
 		let paused = 0;
@@ -259,5 +276,81 @@ export class SyncBillingService {
 		}
 
 		return { charged, paused, errors, total: dueSubscriptions.length };
+	}
+
+	/**
+	 * Grant sync as a gift — no credits charged, no recurring billing.
+	 * Idempotent: re-granting refreshes the giftedAt/giftedBy fields.
+	 */
+	async grantSyncGift(userId: string, grantedBy?: string) {
+		const now = new Date();
+
+		const [existing] = await this.db
+			.select()
+			.from(syncSubscriptions)
+			.where(eq(syncSubscriptions.userId, userId))
+			.limit(1);
+
+		if (existing) {
+			await this.db
+				.update(syncSubscriptions)
+				.set({
+					active: true,
+					isGifted: true,
+					giftedBy: grantedBy ?? null,
+					giftedAt: now,
+					activatedAt: existing.activatedAt ?? now,
+					nextChargeAt: null,
+					pausedAt: null,
+					updatedAt: now,
+				})
+				.where(eq(syncSubscriptions.userId, userId));
+		} else {
+			await this.db.insert(syncSubscriptions).values({
+				userId,
+				active: true,
+				isGifted: true,
+				giftedBy: grantedBy ?? null,
+				giftedAt: now,
+				activatedAt: now,
+				nextChargeAt: null,
+			});
+		}
+
+		return { success: true, userId, gifted: true, active: true };
+	}
+
+	/**
+	 * Revoke a sync gift. Deactivates sync and clears the gift flag.
+	 * If the user wants sync back, they must activate normally (paying credits).
+	 */
+	async revokeSyncGift(userId: string) {
+		const [sub] = await this.db
+			.select()
+			.from(syncSubscriptions)
+			.where(eq(syncSubscriptions.userId, userId))
+			.limit(1);
+
+		if (!sub) {
+			throw new NotFoundError('No sync subscription found for user');
+		}
+
+		if (!sub.isGifted) {
+			throw new BadRequestError('Sync is not gifted — nothing to revoke');
+		}
+
+		await this.db
+			.update(syncSubscriptions)
+			.set({
+				active: false,
+				isGifted: false,
+				giftedBy: null,
+				giftedAt: null,
+				nextChargeAt: null,
+				updatedAt: new Date(),
+			})
+			.where(eq(syncSubscriptions.userId, userId));
+
+		return { success: true, userId, gifted: false, active: false };
 	}
 }

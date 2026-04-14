@@ -24,6 +24,11 @@ export const syncSubscriptions = creditsSchema.table('sync_subscriptions', {
 	activatedAt: timestamp('activated_at', { withTimezone: true }),
 	nextChargeAt: timestamp('next_charge_at', { withTimezone: true }),
 	pausedAt: timestamp('paused_at', { withTimezone: true }),
+	// Gift flag: when true, billing cron skips this row and `active` stays on indefinitely.
+	// Set via admin endpoints; immune to insufficient-credits pauses.
+	isGifted: boolean('is_gifted').default(false).notNull(),
+	giftedBy: text('gifted_by'),
+	giftedAt: timestamp('gifted_at', { withTimezone: true }),
 	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });

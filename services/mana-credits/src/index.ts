@@ -20,6 +20,7 @@ import { healthRoutes } from './routes/health';
 import { createCreditsRoutes } from './routes/credits';
 import { createGiftRoutes } from './routes/gifts';
 import { createSyncRoutes } from './routes/sync';
+import { createAdminRoutes } from './routes/admin';
 import { createInternalRoutes } from './routes/internal';
 import { createWebhookRoutes } from './routes/stripe-webhook';
 
@@ -57,6 +58,10 @@ app.route('/api/v1/credits', createCreditsRoutes(creditsService));
 
 app.use('/api/v1/sync/*', jwtAuth(config.manaAuthUrl));
 app.route('/api/v1/sync', createSyncRoutes(syncBillingService));
+
+// Admin routes (JWT auth + admin role check inside)
+app.use('/api/v1/admin/*', jwtAuth(config.manaAuthUrl));
+app.route('/api/v1/admin', createAdminRoutes(syncBillingService));
 
 // Gift routes (mixed: public GET /:code, JWT for rest)
 app.route('/api/v1/gifts', createGiftRoutes(giftCodeService, config.manaAuthUrl));

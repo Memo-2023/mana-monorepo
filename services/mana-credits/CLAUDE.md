@@ -59,6 +59,16 @@ bun run db:studio  # Open Drizzle Studio
 | POST | `/api/v1/gifts/:code/redeem` | Redeem gift (JWT) |
 | DELETE | `/api/v1/gifts/:id` | Cancel gift (JWT) |
 
+### Admin (JWT auth + `role=admin`)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/v1/admin/sync/:userId` | Get sync status for any user |
+| POST | `/api/v1/admin/sync/:userId/gift` | Grant Cloud Sync as a gift (no credits charged, no recurring billing) |
+| DELETE | `/api/v1/admin/sync/:userId/gift` | Revoke a sync gift (deactivates sync) |
+
+Gifted subscriptions have `is_gifted=true` and are skipped by the billing cron — they stay active indefinitely until revoked. The user-facing `/activate` and `/deactivate` endpoints refuse to touch gifted rows.
+
 ### Internal (X-Service-Key auth)
 
 | Method | Path | Description |
@@ -112,6 +122,8 @@ Local-first CRUD operations (tasks, events, contacts, etc.) are **free** — the
 Cloud Sync is a monthly credit subscription. Users start in local-only mode and opt-in via Settings. Billing intervals: monthly (30), quarterly (90), yearly (360). 1 Credit = 1 Cent.
 
 When credits run out, sync is paused (not deleted). Local data is preserved. User sees an in-app banner and can reactivate after topping up credits.
+
+**Gifted sync**: Admins can grant sync via `POST /api/v1/admin/sync/:userId/gift`. Gifted rows (`is_gifted=true`) are immune to the billing cron and never get paused for insufficient credits. Revoke with `DELETE /api/v1/admin/sync/:userId/gift`.
 
 ## Gift Types
 
