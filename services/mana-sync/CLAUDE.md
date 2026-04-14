@@ -172,9 +172,13 @@ sync_changes (
   data JSONB,
   field_timestamps JSONB DEFAULT '{}',
   client_id TEXT NOT NULL,
-  created_at TIMESTAMPTZ DEFAULT now()
+  created_at TIMESTAMPTZ DEFAULT now(),
+  schema_version INT NOT NULL DEFAULT 1,
+  actor JSONB  -- AI Workbench attribution: { kind: user|ai|system, ... }
 )
 ```
+
+**`actor` column (2026-04-14)**: Opaque JSON blob the webapp stamps on every change to distinguish user writes from autonomous AI writes and derived subsystem writes. Server does NOT parse the shape — just persists + re-emits. Pre-actor clients omit the field; the column is nullable. See `apps/mana/apps/web/src/lib/data/events/actor.ts` for the discriminated union + `COMPANION_BRAIN_ARCHITECTURE.md §20` for the full pipeline.
 
 Indexes: `(user_id, app_id, created_at)`, `(table_name, record_id, created_at)`, `(user_id, app_id, table_name, created_at)`
 

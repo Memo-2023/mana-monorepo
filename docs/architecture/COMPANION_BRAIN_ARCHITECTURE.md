@@ -1781,7 +1781,14 @@ Code:
   - Filter: Mission (per query-string) + Modul (dropdown), Deep-Link ins
     Modul pro Event
 - [x] Schritt 7a — System-Actor-Wrapping für Projections (streaks-Tracker)
-- [ ] Schritt 8 — mana-sync Go + Postgres-Migration für `actor`-Feld
+- [x] Schritt 8 — mana-sync Go + Postgres-Migration für `actor`-Feld
+  - `sync_changes.actor JSONB` Column (idempotent `ADD COLUMN IF NOT EXISTS`)
+  - `Change.Actor json.RawMessage` Wire-Shape, opaque Server-seitig
+  - `RecordChange` + alle drei SELECT-Pfade (GetChangesSince / GetAll /
+    StreamAllUserChanges) lesen/schreiben Actor
+  - Webapp-Parität: `SyncChange.actor?` + Push-Payload + `applyServerChanges`
+    stempelt `__lastActor` + `__fieldActors` aus eingehenden Changes
+    → **cross-device Attribution geschlossen**
 - [ ] Schritt 9 — Server-side `mana-ai` Bun-Service (offline-of-tab Runs)
 
 ### 20.5a Symmetrische Registries: Resolver vs. Indexer
