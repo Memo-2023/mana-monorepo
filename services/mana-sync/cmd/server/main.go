@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/mana/mana-sync/internal/auth"
+	"github.com/mana/mana-sync/internal/backup"
 	"github.com/mana/mana-sync/internal/billing"
 	"github.com/mana/mana-sync/internal/config"
 	"github.com/mana/mana-sync/internal/store"
@@ -64,6 +65,12 @@ func main() {
 	mux.Handle("POST /sync/{appId}", billingMiddleware(http.HandlerFunc(handler.HandleSync)))
 	mux.Handle("GET /sync/{appId}/pull", billingMiddleware(http.HandlerFunc(handler.HandlePull)))
 	mux.Handle("GET /sync/{appId}/stream", billingMiddleware(http.HandlerFunc(handler.HandleStream)))
+
+	// Backup/export — GDPR-grade, auth-only (no billing gate so users can
+	// always retrieve their data). M1 thin slice: streams raw sync_changes
+	// as JSONL. Manifest + zip container land in M3.
+	backupHandler := backup.NewHandler(db, validator)
+	mux.Handle("GET /backup/export", http.HandlerFunc(backupHandler.HandleExport))
 
 	// WebSocket endpoints
 	// Unified: one connection per user, receives all app notifications with appId in payload

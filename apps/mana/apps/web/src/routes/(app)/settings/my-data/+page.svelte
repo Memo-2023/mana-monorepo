@@ -19,6 +19,7 @@
 	import DeleteConfirmationModal from '$lib/components/my-data/DeleteConfirmationModal.svelte';
 	import QRExportModal from '$lib/components/my-data/QRExportModal.svelte';
 	import { myDataService, type UserDataSummary } from '$lib/api/services/my-data';
+	import { backupService } from '$lib/api/services/backup';
 	import type { DeleteUserDataResponse } from '$lib/api/services/admin';
 	import { authStore } from '$lib/stores/auth.svelte';
 
@@ -35,6 +36,22 @@
 
 	// QR Export dialog state
 	let showQRDialog = $state(false);
+
+	// Backup (M1 thin slice) state
+	let backupLoading = $state(false);
+	let backupError = $state<string | null>(null);
+
+	async function handleBackupDownload() {
+		backupLoading = true;
+		backupError = null;
+		try {
+			await backupService.downloadBackup();
+		} catch (e) {
+			backupError = e instanceof Error ? e.message : 'Backup fehlgeschlagen';
+		} finally {
+			backupLoading = false;
+		}
+	}
 
 	async function loadMyData() {
 		loading = true;
@@ -363,6 +380,38 @@
 						<span class="text-muted-foreground">Bis zur Loschung</span>
 					</div>
 				</div>
+			</div>
+		</Card>
+
+		<!-- Backup & Wiederherstellung (M1 thin slice) -->
+		<Card>
+			<div class="p-6">
+				<h3 class="text-lg font-semibold mb-2 flex items-center gap-2">
+					<DownloadSimple size={20} class="text-indigo-500" />
+					Backup & Wiederherstellung
+				</h3>
+				<p class="text-sm text-muted-foreground mb-4">
+					Lade eine vollstandige Kopie deiner synchronisierten Daten als JSONL-Datei herunter. Die
+					Datei enthalt den kompletten Sync-Event-Stream deines Accounts — geeignet fur
+					Account-Migration, Backups oder DSGVO-Datenportabilitat. Sensible Felder bleiben dabei
+					verschlusselt.
+				</p>
+				<div class="flex items-center gap-3">
+					<button
+						onclick={handleBackupDownload}
+						disabled={backupLoading}
+						class="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+					>
+						<DownloadSimple size={16} />
+						<span>{backupLoading ? 'Lade Backup…' : 'Backup herunterladen (.jsonl)'}</span>
+					</button>
+					<span class="text-xs text-muted-foreground">
+						Experimentell — Import folgt in Kurze.
+					</span>
+				</div>
+				{#if backupError}
+					<p class="text-sm text-red-600 mt-3">{backupError}</p>
+				{/if}
 			</div>
 		</Card>
 
