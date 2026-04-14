@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { Tag, Plus, X } from '@mana/shared-icons';
 	import { dragSource } from '../dnd/drag-source';
 	import { passiveDropZone } from '../dnd/passive-drop';
 	import type { DragPayload, DragType } from '../dnd/types';
+	import Pill from './Pill.svelte';
 
 	interface TagItem {
 		id: string;
@@ -73,38 +73,33 @@
 >
 	<div class="tag-strip-container">
 		<!-- Clear Filter Button (always rendered to prevent layout shift) -->
-		<button
-			class="clear-filter-pill glass-tag"
-			class:hidden={!hasSelectedTags}
-			onclick={() => onClear()}
-			title="Filter löschen"
-			disabled={!hasSelectedTags}
-		>
-			<X size={16} weight="bold" />
-			<span class="tag-name">Filter</span>
-		</button>
+		<div class:hidden={!hasSelectedTags} class="filter-slot">
+			<Pill
+				icon="x"
+				label="Filter"
+				danger
+				onclick={() => onClear()}
+				title="Filter löschen"
+				disabled={!hasSelectedTags}
+			/>
+		</div>
 
 		<!-- Tags verwalten Pill -->
-		<button
-			class="manage-pill glass-tag"
+		<Pill
+			icon="tag"
+			label="Tags verwalten"
 			onclick={() => goto(managementHref)}
 			title="Tags verwalten"
-		>
-			<Tag size={18} weight="bold" />
-			<span class="tag-name">Tags verwalten</span>
-		</button>
+		/>
 
 		{#if loading}
 			<div class="loading-state">Lädt...</div>
 		{:else if !hasTags}
-			<button class="empty-state glass-tag" onclick={() => goto(managementHref)}>
-				<span>Keine Tags vorhanden</span>
-				<span class="add-hint">+ Erstellen</span>
-			</button>
+			<Pill label="Keine Tags vorhanden — + Erstellen" onclick={() => goto(managementHref)} />
 		{:else}
 			{#each sortedTags as tag (tag.id)}
 				<button
-					class="tag-pill glass-tag"
+					class="tag-pill"
 					class:selected={isTagSelected(tag.id)}
 					onclick={() => onToggle(tag.id)}
 					title={tag.name}
@@ -127,14 +122,13 @@
 
 			<!-- Create Tag Button -->
 			{#if showCreateButton}
-				<button
-					class="create-pill glass-tag"
+				<Pill
+					icon="plus"
+					label="Neuer Tag"
+					primary
 					onclick={() => goto(resolvedCreateHref)}
 					title="Neuer Tag"
-				>
-					<Plus size={16} weight="bold" />
-					<span class="tag-name">Neuer Tag</span>
-				</button>
+				/>
 			{/if}
 		{/if}
 	</div>
@@ -156,8 +150,11 @@
 		display: flex;
 		flex-direction: column;
 		align-items: stretch;
+		justify-content: center;
 		pointer-events: none;
 		transition: bottom 0.2s ease;
+		/* Tight wrapper around 44px pills (see bottomChromeHeight in (app)/+layout.svelte). */
+		height: 64px;
 	}
 
 	/* When filter strip is also visible, stack above it */
@@ -168,14 +165,14 @@
 	.tag-strip-container {
 		display: flex;
 		align-items: center;
-		gap: 0.75rem;
+		gap: 0.5rem;
 		background: transparent;
 		pointer-events: auto;
 		width: fit-content;
 		max-width: 100%;
 		margin-left: auto;
 		margin-right: auto;
-		padding: 0.5rem 2rem;
+		padding: 0;
 		overflow-x: auto;
 		scrollbar-width: none;
 		-ms-overflow-style: none;
@@ -200,20 +197,33 @@
 		display: none;
 	}
 
-	.tag-pill,
-	.manage-pill,
-	.create-pill,
-	.clear-filter-pill {
-		display: flex;
+	/* Tag pill — matches Pill base, with drag-source and colored dot. */
+	.tag-pill {
+		display: inline-flex;
 		align-items: center;
-		gap: 0.5rem;
-		min-height: 44px;
+		gap: 0.375rem;
+		padding: 0 0.875rem;
+		height: 44px;
+		border-radius: 9999px;
+		font-size: 0.875rem;
+		font-weight: 500;
+		white-space: nowrap;
+		border: 1px solid hsl(var(--color-border));
+		background: hsl(var(--color-card));
+		color: hsl(var(--color-foreground));
+		box-shadow:
+			0 1px 2px hsl(0 0% 0% / 0.05),
+			0 2px 6px hsl(0 0% 0% / 0.04);
 		cursor: pointer;
 		flex-shrink: 0;
 		transition: all 0.15s ease;
 	}
 
-	/* Selected tag state */
+	.tag-pill:hover {
+		background: hsl(var(--color-surface-hover, var(--color-card)));
+		transform: translateY(-1px);
+	}
+
 	.tag-pill.selected {
 		background: var(--tag-color) !important;
 		border-color: var(--tag-color) !important;
@@ -227,107 +237,12 @@
 		color: white;
 	}
 
-	/* Clear filter pill */
-	.clear-filter-pill {
-		color: #ef4444;
-		background: rgba(239, 68, 68, 0.1) !important;
-		border-color: rgba(239, 68, 68, 0.3) !important;
-	}
-
-	.clear-filter-pill .tag-name {
-		color: #ef4444;
-		font-weight: 600;
-	}
-
-	:global(.dark) .clear-filter-pill {
-		color: #f87171;
-		background: rgba(239, 68, 68, 0.15) !important;
-		border-color: rgba(239, 68, 68, 0.3) !important;
-	}
-
-	:global(.dark) .clear-filter-pill .tag-name {
-		color: #f87171;
-	}
-
-	.clear-filter-pill:hover:not(.hidden) {
-		background: rgba(239, 68, 68, 0.2) !important;
-		border-color: rgba(239, 68, 68, 0.5) !important;
-	}
-
-	.clear-filter-pill.hidden {
+	.filter-slot.hidden {
 		visibility: hidden;
 		pointer-events: none;
 	}
 
-	/* Manage pill with neutral style */
-	.manage-pill {
-		color: #374151;
-	}
-
-	.manage-pill .tag-name {
-		color: #374151;
-		font-weight: 500;
-	}
-
-	:global(.dark) .manage-pill {
-		color: #f3f4f6;
-	}
-
-	:global(.dark) .manage-pill .tag-name {
-		color: #f3f4f6;
-	}
-
-	/* Create pill with neutral style */
-	.create-pill {
-		color: #374151;
-	}
-
-	.create-pill .tag-name {
-		color: #374151;
-		font-weight: 500;
-	}
-
-	:global(.dark) .create-pill {
-		color: #f3f4f6;
-	}
-
-	:global(.dark) .create-pill .tag-name {
-		color: #f3f4f6;
-	}
-
-	/* Glass tag styling */
-	.glass-tag {
-		padding: 0.5rem 1rem;
-		border-radius: 9999px;
-		background: rgba(255, 255, 255, 0.85);
-		backdrop-filter: blur(12px);
-		-webkit-backdrop-filter: blur(12px);
-		border: 1px solid rgba(0, 0, 0, 0.1);
-		box-shadow:
-			0 4px 6px -1px rgba(0, 0, 0, 0.1),
-			0 2px 4px -1px rgba(0, 0, 0, 0.06);
-	}
-
-	:global(.dark) .glass-tag {
-		background: rgba(255, 255, 255, 0.12);
-		border: 1px solid rgba(255, 255, 255, 0.15);
-	}
-
-	.glass-tag:hover {
-		transform: scale(1.05);
-		background: rgba(255, 255, 255, 0.95);
-		border-color: rgba(0, 0, 0, 0.15);
-		box-shadow:
-			0 10px 15px -3px rgba(0, 0, 0, 0.1),
-			0 4px 6px -2px rgba(0, 0, 0, 0.05);
-	}
-
-	:global(.dark) .glass-tag:hover {
-		background: rgba(255, 255, 255, 0.2);
-		border-color: rgba(255, 255, 255, 0.25);
-	}
-
-	.glass-tag:active {
+	.tag-pill:active {
 		transform: scale(0.98);
 	}
 
@@ -340,7 +255,7 @@
 	}
 
 	.tag-name {
-		font-size: 0.9375rem;
+		font-size: 0.875rem;
 		font-weight: 500;
 		color: #374151;
 		white-space: nowrap;
@@ -354,26 +269,6 @@
 		font-size: 0.875rem;
 		color: hsl(var(--color-muted-foreground));
 		padding: 0.5rem;
-	}
-
-	.empty-state {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		cursor: pointer;
-		color: #6b7280;
-		font-size: 0.875rem;
-		flex-shrink: 0;
-	}
-
-	:global(.dark) .empty-state {
-		color: #9ca3af;
-	}
-
-	.add-hint {
-		font-size: 0.875rem;
-		color: #8b5cf6;
-		font-weight: 500;
 	}
 
 	/* DnD: Tag is being dragged */
@@ -407,7 +302,7 @@
 		}
 
 		.tag-strip-container {
-			padding: 0.5rem 1rem;
+			padding: 0;
 		}
 	}
 </style>

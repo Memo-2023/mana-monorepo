@@ -30,7 +30,7 @@
 	}
 
 	import type { Snippet } from 'svelte';
-	import { ArrowRight, Check, CheckSquare, Heart, MagnifyingGlass, Plus } from '@mana/shared-icons';
+	import { ArrowRight, Heart, MagnifyingGlass, Plus } from '@mana/shared-icons';
 
 	interface Props {
 		onSearch: (query: string) => Promise<QuickInputItem[]>;
@@ -508,15 +508,6 @@
 			</div>
 		{/if}
 
-		<div class="app-icon" class:success-icon={createSuccess}>
-			{#if createSuccess}
-				<!-- Checkmark icon -->
-				<Check size={20} />
-			{:else}
-				<CheckSquare size={20} />
-			{/if}
-		</div>
-
 		<div class="input-wrapper">
 			<!-- Highlight backdrop (shows colored keywords) -->
 			<div class="input-highlight-backdrop" aria-hidden="true">
@@ -583,10 +574,10 @@
 		left: 0;
 		right: 0;
 		z-index: 90;
-		padding: 0.75rem 1rem;
+		padding: 0.3125rem 1rem;
 		pointer-events: none;
-		/* Fixed height to prevent layout shift when results appear */
-		height: 72px;
+		/* Matches tags/tabbar slot (see bottomChromeHeight in (app)/+layout.svelte). */
+		height: 64px;
 		transition: bottom 0.3s ease;
 	}
 
@@ -599,13 +590,13 @@
 	/* Mobile: tighter padding, full-width input */
 	@media (max-width: 640px) {
 		.quick-input-bar {
-			padding: 0.5rem 0.5rem;
+			padding: 0.3125rem 0.5rem;
 			height: 64px;
 		}
 
 		.input-container {
 			padding: 0.5rem 1rem;
-			height: 48px;
+			height: 54px;
 			gap: 0.5rem;
 		}
 	}

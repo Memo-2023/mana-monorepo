@@ -1,125 +1,7 @@
 <script lang="ts">
 	import type { PillDropdownItem } from './types';
-	import {
-		Archive,
-		Bell,
-		Buildings,
-		CalendarBlank,
-		CaretDown,
-		ChartBar,
-		ChatCircle,
-		Check,
-		CheckCircle,
-		CheckSquare,
-		Clock,
-		Cloud,
-		Columns,
-		Compass,
-		CreditCard,
-		File,
-		FileText,
-		Fire,
-		Folder,
-		Gear,
-		Gift,
-		Globe,
-		GridFour,
-		Heart,
-		House,
-		Key,
-		List,
-		MagnifyingGlass,
-		Microphone,
-		Moon,
-		MusicNote,
-		MusicNotes,
-		Palette,
-		Playlist,
-		Plus,
-		Question,
-		Robot,
-		Scales,
-		ShareFat,
-		ShareNetwork,
-		Shield,
-		SignOut,
-		Sparkle,
-		Spiral,
-		Sun,
-		Tag,
-		Target,
-		Timer,
-		Trash,
-		Tray,
-		Upload,
-		User,
-		Users,
-		Waveform,
-	} from '@mana/shared-icons';
-
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const phosphorIcons: Record<string, any> = {
-		home: House,
-		users: Users,
-		user: User,
-		tag: Tag,
-		heart: Heart,
-		settings: Gear,
-		chat: ChatCircle,
-		'help-circle': Question,
-		help: Question,
-		'share-2': ShareNetwork,
-		bell: Bell,
-		clock: Clock,
-		timer: Timer,
-		target: Target,
-		globe: Globe,
-		inbox: Tray,
-		check: Check,
-		checkCircle: CheckCircle,
-		'check-square': CheckSquare,
-		plus: Plus,
-		columns: Columns,
-		kanban: Columns,
-		mic: Microphone,
-		calendar: CalendarBlank,
-		folder: Folder,
-		archive: Archive,
-		upload: Upload,
-		music: MusicNote,
-		document: File,
-		chart: ChartBar,
-		'bar-chart-3': ChartBar,
-		search: MagnifyingGlass,
-		list: List,
-		compass: Compass,
-		moon: Moon,
-		sun: Sun,
-		logout: SignOut,
-		chevronDown: CaretDown,
-		menu: List,
-		fire: Fire,
-		grid: GridFour,
-		gridSmall: GridFour,
-		palette: Palette,
-		creditCard: CreditCard,
-		building: Buildings,
-		scale: Scales,
-		robot: Robot,
-		key: Key,
-		shield: Shield,
-		gift: Gift,
-		'music-notes': MusicNotes,
-		playlist: Playlist,
-		waveform: Waveform,
-		'file-text': FileText,
-		sparkle: Sparkle,
-		sparkles: Sparkle,
-		spiral: Spiral,
-		share: ShareFat,
-		trash: Trash,
-		cloud: Cloud,
-	};
+	import { phosphorIcons } from './phosphor-icon-map';
+	import Pill from './Pill.svelte';
 
 	interface Props {
 		/** Items to render as pills in the bar */
@@ -189,13 +71,7 @@
 <div class="dropdown-bar-wrapper" class:static={positioning === 'static'}>
 	<div class="dropdown-bar-container">
 		{#if label}
-			<div class="bar-label glass-pill">
-				{#if icon && phosphorIcons[icon]}
-					{@const IconComponent = phosphorIcons[icon]}
-					<IconComponent size={16} />
-				{/if}
-				<span>{label}</span>
-			</div>
+			<Pill {icon} {label} disabled class="bar-label" />
 		{/if}
 
 		{#each renderElements as el (el.id)}
@@ -233,7 +109,7 @@
 								</svg>
 							{:else if gi.icon && phosphorIcons[gi.icon]}
 								{@const GIcon = phosphorIcons[gi.icon]}
-								<GIcon size={16} class="segmented-icon" />
+								<GIcon size={20} weight="bold" class="segmented-icon" />
 							{/if}
 							{#if showLabels}
 								<span class="segmented-label">{gi.label}</span>
@@ -243,24 +119,22 @@
 				</div>
 			{:else}
 				{@const item = el.item}
-				<button
-					type="button"
-					class="bar-pill glass-pill"
-					class:active={item.active}
-					class:primary={item.primary}
-					class:danger={item.danger}
+				<Pill
+					icon={item.imageUrl ? undefined : item.icon}
+					label={item.label}
+					active={item.active}
+					primary={item.primary}
+					danger={item.danger}
 					disabled={item.disabled}
 					onclick={(e) => handleClick(item, e)}
 					title={item.label}
 				>
-					{#if item.imageUrl}
-						<img src={item.imageUrl} alt="" class="bar-img" />
-					{:else if item.icon && phosphorIcons[item.icon]}
-						{@const IconComponent = phosphorIcons[item.icon]}
-						<IconComponent size={16} />
-					{/if}
-					<span>{item.label}</span>
-				</button>
+					{#snippet leading()}
+						{#if item.imageUrl}
+							<img src={item.imageUrl} alt="" class="bar-img" />
+						{/if}
+					{/snippet}
+				</Pill>
 			{/if}
 		{/each}
 	</div>
@@ -271,7 +145,10 @@
 		display: flex;
 		flex-direction: column;
 		align-items: stretch;
+		justify-content: center;
 		pointer-events: none;
+		/* Matches tags/tabbar/quickinput slot (see bottomChromeHeight in (app)/+layout.svelte). */
+		height: 64px;
 	}
 
 	.dropdown-bar-wrapper.static {
@@ -287,7 +164,7 @@
 		max-width: 100%;
 		margin-left: auto;
 		margin-right: auto;
-		padding: 0.5rem 2rem;
+		padding: 0 2rem;
 		overflow-x: auto;
 		scrollbar-width: none;
 		-ms-overflow-style: none;
@@ -311,82 +188,12 @@
 		display: none;
 	}
 
-	.bar-pill {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.375rem;
-		padding: 0.5rem 0.875rem;
-		border-radius: 9999px;
-		font-size: 0.8125rem;
-		font-weight: 500;
-		white-space: nowrap;
-		border: 1px solid hsl(var(--color-border));
-		background: hsl(var(--color-card));
-		color: hsl(var(--color-foreground));
-		cursor: pointer;
-		flex-shrink: 0;
-		transition: all 0.15s ease;
-		box-shadow:
-			0 1px 2px hsl(0 0% 0% / 0.05),
-			0 2px 6px hsl(0 0% 0% / 0.04);
-	}
-
-	.bar-pill:hover:not(:disabled) {
-		background: hsl(var(--color-surface-hover, var(--color-card)));
-		transform: translateY(-1px);
-	}
-
-	.bar-pill:disabled {
-		opacity: 0.5;
-		cursor: not-allowed;
-	}
-
-	.bar-pill.active {
-		background: color-mix(
-			in srgb,
-			var(--pill-primary-color, var(--color-primary-500, #f8d62b)) 20%,
-			white 80%
-		);
-		border-color: var(--pill-primary-color, var(--color-primary-500, rgba(248, 214, 43, 0.5)));
-		color: #1a1a1a;
-	}
-
-	:global(.dark) .bar-pill.active {
-		background: color-mix(
-			in srgb,
-			var(--pill-primary-color, var(--color-primary-500, #f8d62b)) 30%,
-			transparent 70%
-		);
-		color: var(--pill-primary-color, var(--color-primary-500, #f8d62b));
-	}
-
-	.bar-pill.primary {
-		background: var(--pill-primary-color, var(--color-primary-500, #6366f1));
-		border-color: transparent;
-		color: white;
-	}
-
-	.bar-pill.danger {
-		color: #dc2626;
-	}
-
-	:global(.dark) .bar-pill.danger {
-		color: #ef4444;
-	}
-
-	.bar-label {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.375rem;
-		padding: 0.5rem 0.875rem;
-		border-radius: 9999px;
-		font-size: 0.8125rem;
-		font-weight: 600;
-		white-space: nowrap;
-		border: 1px solid hsl(var(--color-border));
-		background: hsl(var(--color-muted, var(--color-card)));
-		color: hsl(var(--color-foreground));
-		flex-shrink: 0;
+	/* .bar-label override: muted background, non-interactive */
+	:global(.bar-label) {
+		opacity: 1 !important;
+		cursor: default !important;
+		background: hsl(var(--color-muted, var(--color-card))) !important;
+		font-weight: 600 !important;
 	}
 
 	.bar-divider {
@@ -423,6 +230,7 @@
 		align-items: center;
 		gap: 0.25rem;
 		padding: 0.25rem;
+		height: 44px;
 		border-radius: 9999px;
 		border: 1px solid hsl(var(--color-border));
 		background: hsl(var(--color-card));
@@ -436,7 +244,9 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		padding: 0.375rem;
+		width: 34px;
+		height: 34px;
+		padding: 0;
 		border: none;
 		background: transparent;
 		border-radius: 9999px;
@@ -466,8 +276,8 @@
 	}
 
 	.segmented-btn :global(.segmented-icon) {
-		width: 1rem;
-		height: 1rem;
+		width: 1.25rem;
+		height: 1.25rem;
 	}
 
 	/* When the group shows labels, give the buttons more padding */

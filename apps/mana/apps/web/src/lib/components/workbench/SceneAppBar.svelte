@@ -68,91 +68,101 @@
 	}
 </script>
 
-<div class="scene-app-bar">
-	{#each scenes as scene (scene.id)}
-		{@const isActive = scene.id === activeSceneId}
+<div class="scene-app-bar-wrapper">
+	<div class="scene-app-bar">
+		{#each scenes as scene (scene.id)}
+			{@const isActive = scene.id === activeSceneId}
 
-		{#if isActive && pages.length > 0}
-			<!-- Active scene + its app tabs wrapped in a visual group -->
-			<div class="scene-group">
+			{#if isActive && pages.length > 0}
+				<!-- Active scene + its app tabs wrapped in a visual group -->
+				<div class="scene-group">
+					<button
+						type="button"
+						class="scene-pill active"
+						onclick={() => onSceneSelect(scene.id)}
+						oncontextmenu={(e) => onSceneContextMenu(e, scene)}
+					>
+						<span class="scene-name">{scene.name}</span>
+						<span class="scene-count">{scene.openApps.length}</span>
+					</button>
+					<span class="group-sep"></span>
+					{#each pages as p (p.id)}
+						{@const AppIcon = p.icon}
+						<button
+							class="app-tab"
+							onclick={() => onAppClick(p.id)}
+							oncontextmenu={(e) => onAppContextMenu(e, p.id)}
+						>
+							{#if AppIcon}
+								<span class="app-icon" style="color: {p.color}">
+									<AppIcon size={12} weight="fill" />
+								</span>
+							{:else}
+								<span class="app-dot" style="background-color: {p.color}"></span>
+							{/if}
+							<span class="app-title">{p.title}</span>
+						</button>
+					{/each}
+					<button class="app-add" onclick={onAddApp} title="App hinzufügen">
+						<Plus size={12} />
+					</button>
+				</div>
+			{:else}
 				<button
 					type="button"
-					class="scene-pill active"
+					class="scene-pill"
+					class:active={isActive}
 					onclick={() => onSceneSelect(scene.id)}
 					oncontextmenu={(e) => onSceneContextMenu(e, scene)}
 				>
 					<span class="scene-name">{scene.name}</span>
 					<span class="scene-count">{scene.openApps.length}</span>
 				</button>
-				<span class="group-sep"></span>
-				{#each pages as p (p.id)}
-					{@const AppIcon = p.icon}
-					<button
-						class="app-tab"
-						onclick={() => onAppClick(p.id)}
-						oncontextmenu={(e) => onAppContextMenu(e, p.id)}
-					>
-						{#if AppIcon}
-							<span class="app-icon" style="color: {p.color}">
-								<AppIcon size={12} weight="fill" />
-							</span>
-						{:else}
-							<span class="app-dot" style="background-color: {p.color}"></span>
-						{/if}
-						<span class="app-title">{p.title}</span>
-					</button>
-				{/each}
-				<button class="app-add" onclick={onAddApp} title="App hinzufügen">
-					<Plus size={12} />
+			{/if}
+		{/each}
+
+		{#if creating}
+			<div class="inline-create">
+				<input
+					bind:this={inputEl}
+					class="inline-create-input"
+					type="text"
+					maxlength="40"
+					placeholder="Name…"
+					bind:value={newName}
+					onkeydown={handleInputKeydown}
+					onblur={submitCreate}
+				/>
+				<button class="inline-create-btn confirm" onclick={submitCreate} title="Erstellen">
+					<Check size={14} weight="bold" />
+				</button>
+				<button class="inline-create-btn cancel" onclick={cancelCreate} title="Abbrechen">
+					<X size={14} weight="bold" />
 				</button>
 			</div>
 		{:else}
-			<button
-				type="button"
-				class="scene-pill"
-				class:active={isActive}
-				onclick={() => onSceneSelect(scene.id)}
-				oncontextmenu={(e) => onSceneContextMenu(e, scene)}
-			>
-				<span class="scene-name">{scene.name}</span>
-				<span class="scene-count">{scene.openApps.length}</span>
+			<button type="button" class="scene-add" onclick={startCreate} title="Neue Szene">
+				<Plus size={14} />
 			</button>
 		{/if}
-	{/each}
-
-	{#if creating}
-		<div class="inline-create">
-			<input
-				bind:this={inputEl}
-				class="inline-create-input"
-				type="text"
-				maxlength="40"
-				placeholder="Name…"
-				bind:value={newName}
-				onkeydown={handleInputKeydown}
-				onblur={submitCreate}
-			/>
-			<button class="inline-create-btn confirm" onclick={submitCreate} title="Erstellen">
-				<Check size={14} weight="bold" />
-			</button>
-			<button class="inline-create-btn cancel" onclick={cancelCreate} title="Abbrechen">
-				<X size={14} weight="bold" />
-			</button>
-		</div>
-	{:else}
-		<button type="button" class="scene-add" onclick={startCreate} title="Neue Szene">
-			<Plus size={14} />
-		</button>
-	{/if}
+	</div>
 </div>
 
 <style>
+	.scene-app-bar-wrapper {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		/* Bar slot (see bottomChromeHeight in (app)/+layout.svelte). */
+		height: 64px;
+	}
+
 	.scene-app-bar {
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		gap: 0.25rem;
-		padding: 0.25rem 0.5rem;
+		padding: 0.125rem 0.5rem;
 		margin: 0 auto;
 		width: fit-content;
 		max-width: calc(100vw - 2rem);
@@ -174,7 +184,7 @@
 		background: hsl(var(--color-primary) / 0.1);
 		border: 1.5px solid hsl(var(--color-primary) / 0.25);
 		border-radius: 9999px;
-		padding: 0.1875rem;
+		padding: 0.125rem;
 	}
 
 	/* Scene pills */
@@ -188,7 +198,8 @@
 		color: hsl(var(--color-muted-foreground));
 		font-size: 0.9375rem;
 		font-weight: 500;
-		padding: 0.5rem 1rem;
+		padding: 0 0.875rem;
+		height: 40px;
 		border-radius: 9999px;
 		cursor: pointer;
 		transition: all 0.15s;
@@ -292,7 +303,8 @@
 		display: inline-flex;
 		align-items: center;
 		gap: 0.25rem;
-		padding: 0.5rem 1rem;
+		padding: 0 0.875rem;
+		height: 40px;
 		border-radius: 9999px;
 		border: none;
 		background: transparent;

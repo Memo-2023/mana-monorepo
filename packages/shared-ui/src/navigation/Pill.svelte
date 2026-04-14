@@ -1,0 +1,172 @@
+<script lang="ts">
+	import type { Snippet } from 'svelte';
+	import { phosphorIcons } from './phosphor-icon-map';
+
+	interface Props {
+		/** Phosphor icon name (see phosphor-icon-map.ts). */
+		icon?: string;
+		/** URL to navigate to. If set, renders an <a>; otherwise a <button>. */
+		href?: string;
+		/** Display label. Use `iconOnly` to hide. */
+		label?: string;
+		/** Hide label (label is still used for aria-label/title). */
+		iconOnly?: boolean;
+		/** Active/selected state */
+		active?: boolean;
+		/** Primary accent (e.g. "Erstellen") */
+		primary?: boolean;
+		/** Destructive style (e.g. Logout) */
+		danger?: boolean;
+		/** Disabled state (button only) */
+		disabled?: boolean;
+		/** Click handler */
+		onclick?: (e: MouseEvent) => void;
+		/** Right-click handler */
+		oncontextmenu?: (e: MouseEvent) => void;
+		/** Tooltip */
+		title?: string;
+		/** Extra class names (e.g. drag-source marker) */
+		class?: string;
+		/** Custom content rendered before the label (e.g. colored tag dot). */
+		leading?: Snippet;
+		/** Custom content rendered after the label. */
+		trailing?: Snippet;
+	}
+
+	let {
+		icon,
+		href,
+		label,
+		iconOnly = false,
+		active = false,
+		primary = false,
+		danger = false,
+		disabled = false,
+		onclick,
+		oncontextmenu,
+		title,
+		class: className,
+		leading,
+		trailing,
+	}: Props = $props();
+
+	const IconComp = $derived(icon ? phosphorIcons[icon] : null);
+	const ariaLabel = $derived(iconOnly ? label : undefined);
+	const effectiveTitle = $derived(title ?? (iconOnly ? label : undefined));
+</script>
+
+{#snippet body()}
+	{#if leading}{@render leading()}{/if}
+	{#if IconComp}
+		<IconComp size={20} weight="bold" class="pill-icon" />
+	{/if}
+	{#if label && !iconOnly}
+		<span class="pill-label">{label}</span>
+	{/if}
+	{#if trailing}{@render trailing()}{/if}
+{/snippet}
+
+{#if href}
+	<a
+		{href}
+		class={['pill', active && 'active', primary && 'primary', danger && 'danger', className]
+			.filter(Boolean)
+			.join(' ')}
+		aria-label={ariaLabel}
+		title={effectiveTitle}
+		{onclick}
+		{oncontextmenu}
+	>
+		{@render body()}
+	</a>
+{:else}
+	<button
+		type="button"
+		class={['pill', active && 'active', primary && 'primary', danger && 'danger', className]
+			.filter(Boolean)
+			.join(' ')}
+		aria-label={ariaLabel}
+		title={effectiveTitle}
+		{disabled}
+		{onclick}
+		{oncontextmenu}
+	>
+		{@render body()}
+	</button>
+{/if}
+
+<style>
+	.pill {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.375rem;
+		padding: 0 0.875rem;
+		height: 44px;
+		border-radius: 9999px;
+		font-size: 0.875rem;
+		font-weight: 500;
+		white-space: nowrap;
+		text-decoration: none;
+		cursor: pointer;
+		flex-shrink: 0;
+		transition: all 0.15s ease;
+		border: 1px solid hsl(var(--color-border));
+		background: hsl(var(--color-card));
+		color: hsl(var(--color-foreground));
+		box-shadow:
+			0 1px 2px hsl(0 0% 0% / 0.05),
+			0 2px 6px hsl(0 0% 0% / 0.04);
+	}
+
+	.pill:hover:not(:disabled) {
+		background: hsl(var(--color-surface-hover, var(--color-card)));
+		border-color: hsl(var(--color-border-strong, var(--color-border)));
+		transform: translateY(-1px);
+	}
+
+	.pill:active:not(:disabled) {
+		transform: translateY(0);
+	}
+
+	.pill:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+
+	.pill.active {
+		background: color-mix(
+			in srgb,
+			var(--pill-primary-color, var(--color-primary-500, #f8d62b)) 20%,
+			white 80%
+		);
+		border-color: var(--pill-primary-color, var(--color-primary-500, rgba(248, 214, 43, 0.5)));
+		color: #1a1a1a;
+	}
+
+	:global(.dark) .pill.active {
+		background: color-mix(
+			in srgb,
+			var(--pill-primary-color, var(--color-primary-500, #f8d62b)) 30%,
+			transparent 70%
+		);
+		color: var(--pill-primary-color, var(--color-primary-500, #f8d62b));
+	}
+
+	.pill.primary {
+		background: var(--pill-primary-color, var(--color-primary-500, #6366f1));
+		border-color: transparent;
+		color: white;
+	}
+
+	.pill.danger {
+		color: #dc2626;
+	}
+
+	:global(.dark) .pill.danger {
+		color: #ef4444;
+	}
+
+	.pill :global(.pill-label) {
+		font-weight: 500;
+	}
+</style>
