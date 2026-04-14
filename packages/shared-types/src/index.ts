@@ -5,25 +5,25 @@
  */
 
 // Theme types
-export * from './theme.ts';
+export * from './theme';
 
 // Auth types
-export * from './auth.ts';
+export * from './auth';
 
 // UI types
-export * from './ui.ts';
+export * from './ui';
 
 // Common utility types
-export * from './common.ts';
+export * from './common';
 
 // Contact types for cross-app integration
-export * from './contact.ts';
+export * from './contact';
 
 // Landing page configuration types
-export * from './landing-config.ts';
+export * from './landing-config';
 
 // AI structured-output Zod schemas (shared between mana-api + web frontend)
-export * from './ai-schemas.ts';
+export * from './ai-schemas';
 
 // API types
 export interface User {

@@ -29,7 +29,7 @@ interface EntrySpec {
  * the parser does not verify it (sha256 on the uncompressed content plays
  * that role at a higher level).
  */
-function buildZip(entries: EntrySpec[]): Uint8Array {
+function buildZip(entries: EntrySpec[]): Uint8Array<ArrayBuffer> {
 	const parts: Uint8Array[] = [];
 	const central: Uint8Array[] = [];
 	let offset = 0;
