@@ -5,25 +5,25 @@
  */
 
 // Theme types
-export * from './theme';
+export * from './theme.js';
 
 // Auth types
-export * from './auth';
+export * from './auth.js';
 
 // UI types
-export * from './ui';
+export * from './ui.js';
 
 // Common utility types
-export * from './common';
+export * from './common.js';
 
 // Contact types for cross-app integration
-export * from './contact';
+export * from './contact.js';
 
 // Landing page configuration types
-export * from './landing-config';
+export * from './landing-config.js';
 
 // AI structured-output Zod schemas (shared between mana-api + web frontend)
-export * from './ai-schemas';
+export * from './ai-schemas.js';
 
 // API types
 export interface User {
