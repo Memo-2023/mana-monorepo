@@ -26,19 +26,13 @@
 package backup
 
 import (
-	"archive/zip"
-	"crypto/sha256"
-	"encoding/hex"
-	"encoding/json"
+	"context"
 	"fmt"
-	"io"
 	"log/slog"
 	"net/http"
-	"sort"
 	"time"
 
 	"github.com/mana/mana-sync/internal/auth"
-	syncproto "github.com/mana/mana-sync/internal/sync"
 	"github.com/mana/mana-sync/internal/store"
 )
 
@@ -58,10 +52,9 @@ func NewHandler(s *store.Store, v *auth.Validator) *Handler {
 	return &Handler{store: s, validator: v}
 }
 
-// exportLine is the on-wire shape of one row inside events.jsonl. Field
-// names mirror the sync-protocol Change shape so the restore side can feed
-// lines straight into applyServerChanges() after running them through the
-// migration chain keyed on schemaVersion.
+// exportLine is the on-wire shape of one row inside events.jsonl. Shared
+// with writer.go so both the HTTP path and the writer tests serialize
+// identically.
 type exportLine struct {
 	EventID         string            `json:"eventId"`
 	SchemaVersion   int               `json:"schemaVersion"`
@@ -75,11 +68,10 @@ type exportLine struct {
 	CreatedAt       string            `json:"createdAt"`
 }
 
-// manifestFile is the header object serialized as manifest.json. Kept small
-// and declarative so tools can parse it without loading events.jsonl.
+// manifestFile is the header object serialized as manifest.json.
 type manifestFile struct {
 	FormatVersion    int      `json:"formatVersion"`
-	SchemaVersion    int      `json:"schemaVersion"` // max event schemaVersion this server knows
+	SchemaVersion    int      `json:"schemaVersion"`
 	UserID           string   `json:"userId"`
 	CreatedAt        string   `json:"createdAt"`
 	EventCount       int      `json:"eventCount"`
@@ -90,8 +82,10 @@ type manifestFile struct {
 	SchemaVersionMax int      `json:"schemaVersionMax,omitempty"`
 }
 
-// HandleExport streams a .mana zip archive containing the user's full
-// sync-event log plus a manifest with integrity hash.
+// HandleExport is an HTTP shim over WriteBackup: it authenticates, sets
+// download headers, and hands the response writer plus a store-backed
+// iterator to the shared writer. Tests talk to WriteBackup directly with
+// a synthetic iterator.
 func (h *Handler) HandleExport(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
@@ -113,133 +107,22 @@ func (h *Handler) HandleExport(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("X-Accel-Buffering", "no")
 	w.Header().Set("Cache-Control", "no-store")
 
-	zw := zip.NewWriter(w)
-	// Only close once — closing writes the central directory, which we need
-	// even if streaming errored partway so the file is at least a valid zip.
-	zipClosed := false
-	closeZip := func() {
-		if zipClosed {
-			return
-		}
-		zipClosed = true
-		if err := zw.Close(); err != nil {
-			slog.Error("backup: zip close failed", "user_id", userID, "error", err)
-		}
-	}
-	defer closeZip()
-
-	// ─── events.jsonl entry ──────────────────────────────────────
-	eventsWriter, err := zw.CreateHeader(&zip.FileHeader{
-		Name:     "events.jsonl",
-		Method:   zip.Deflate,
-		Modified: createdAt,
-	})
-	if err != nil {
-		slog.Error("backup: create events.jsonl entry", "user_id", userID, "error", err)
-		return
-	}
-
-	hasher := sha256.New()
-	// Tee so the deflate entry and the hash both see every byte — the hash
-	// is over the *decompressed* JSONL, which is what the restore side will
-	// re-hash after unzipping.
-	teed := io.MultiWriter(eventsWriter, hasher)
-	encoder := json.NewEncoder(teed)
-
-	var (
-		count      int
-		appSet     = make(map[string]struct{})
-		minVer     int
-		maxVer     int
-	)
-
-	streamErr := h.store.StreamAllUserChanges(r.Context(), userID, func(row store.ChangeRow) error {
-		sv := row.SchemaVersion
-		if sv <= 0 {
-			sv = 1
-		}
-		if count == 0 {
-			minVer = sv
-			maxVer = sv
-		} else {
-			if sv < minVer {
-				minVer = sv
-			}
-			if sv > maxVer {
-				maxVer = sv
-			}
-		}
-		line := exportLine{
-			EventID:         row.ID,
-			SchemaVersion:   sv,
-			AppID:           row.AppID,
-			Table:           row.TableName,
-			RecordID:        row.RecordID,
-			Op:              row.Op,
-			Data:            row.Data,
-			FieldTimestamps: row.FieldTimestamps,
-			ClientID:        row.ClientID,
-			CreatedAt:       row.CreatedAt.UTC().Format(time.RFC3339Nano),
-		}
-		if err := encoder.Encode(line); err != nil {
-			return err
-		}
-		appSet[row.AppID] = struct{}{}
-		count++
-		return nil
-	})
-	if streamErr != nil {
-		slog.Error("backup: stream failed", "user_id", userID, "written", count, "error", streamErr)
-		// Headers are flushed; best we can do is close the zip so the file
-		// isn't corrupt. The manifest won't land, and the absence of it is
+	iter := storeIterator(r.Context(), h.store, userID)
+	if err := WriteBackup(w, userID, createdAt, iter); err != nil {
+		// Headers are flushed so we cannot downgrade to a 500 here; closing
+		// the zip partial is the best we can do. The missing manifest is
 		// itself a signal to the importer that the export was truncated.
+		slog.Error("backup: write failed", "user_id", userID, "error", err)
 		return
 	}
 
-	// ─── manifest.json entry ─────────────────────────────────────
-	apps := make([]string, 0, len(appSet))
-	for a := range appSet {
-		apps = append(apps, a)
-	}
-	sort.Strings(apps)
+	slog.Info("backup export ok", "user_id", userID)
+}
 
-	manifest := manifestFile{
-		FormatVersion:    BackupFormatVersion,
-		SchemaVersion:    syncproto.CurrentSchemaVersion,
-		UserID:           userID,
-		CreatedAt:        createdAt.Format(time.RFC3339Nano),
-		EventCount:       count,
-		EventsSHA256:     hex.EncodeToString(hasher.Sum(nil)),
-		Apps:             apps,
-		ProducedBy:       "mana-sync",
-		SchemaVersionMin: minVer,
-		SchemaVersionMax: maxVer,
+// storeIterator adapts store.Store.StreamAllUserChanges to the RowIterator
+// shape WriteBackup expects, holding the request context in the closure.
+func storeIterator(ctx context.Context, s *store.Store, userID string) RowIterator {
+	return func(fn func(store.ChangeRow) error) error {
+		return s.StreamAllUserChanges(ctx, userID, fn)
 	}
-	manifestBytes, err := json.MarshalIndent(manifest, "", "  ")
-	if err != nil {
-		slog.Error("backup: marshal manifest", "user_id", userID, "error", err)
-		return
-	}
-	manifestWriter, err := zw.CreateHeader(&zip.FileHeader{
-		Name:     "manifest.json",
-		Method:   zip.Deflate,
-		Modified: createdAt,
-	})
-	if err != nil {
-		slog.Error("backup: create manifest entry", "user_id", userID, "error", err)
-		return
-	}
-	if _, err := manifestWriter.Write(manifestBytes); err != nil {
-		slog.Error("backup: write manifest", "user_id", userID, "error", err)
-		return
-	}
-
-	closeZip()
-	slog.Info("backup export ok",
-		"user_id", userID,
-		"rows", count,
-		"apps", len(apps),
-		"schema_min", minVer,
-		"schema_max", maxVer,
-	)
 }
