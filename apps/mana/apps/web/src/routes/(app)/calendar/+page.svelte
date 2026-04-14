@@ -23,6 +23,7 @@
 	import QuickEventPopover from '$lib/modules/calendar/components/QuickEventPopover.svelte';
 
 	import { ShareNetwork } from '@mana/shared-icons';
+	import AiProposalInbox from '$lib/components/ai/AiProposalInbox.svelte';
 	import { ShareModal } from '@mana/shared-uload';
 
 	const calendarsCtx: { readonly value: Calendar[] } = getContext('calendars');
@@ -220,6 +221,9 @@
 <div class="calendar-page">
 	<!-- Header -->
 	<CalendarHeader onNewEvent={handleNewEvent} />
+
+	<!-- AI proposals awaiting approval -->
+	<AiProposalInbox module="calendar" />
 
 	<!-- Calendar view (full width) -->
 	<div class="calendar-content">

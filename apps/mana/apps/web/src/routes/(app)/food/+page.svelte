@@ -8,6 +8,7 @@
 	import { MEAL_TYPE_LABELS, NUTRIENT_INFO, suggestMealType } from '$lib/modules/food/constants';
 	import type { MealWithNutrition, NutritionProgress } from '$lib/modules/food/types';
 	import { Plus, Clock, Fire } from '@mana/shared-icons';
+	import AiProposalInbox from '$lib/components/ai/AiProposalInbox.svelte';
 
 	const allMeals = useAllMeals();
 	const allGoals = useAllGoals();
@@ -43,6 +44,8 @@
 </svelte:head>
 
 <div class="space-y-6">
+	<AiProposalInbox module="food" />
+
 	<!-- Header -->
 	<div class="flex items-center justify-between">
 		<div>
