@@ -20,6 +20,12 @@
 	import QRExportModal from '$lib/components/my-data/QRExportModal.svelte';
 	import { myDataService, type UserDataSummary } from '$lib/api/services/my-data';
 	import { backupService } from '$lib/api/services/backup';
+	import {
+		importBackup,
+		BackupImportError,
+		type ImportProgress,
+		type ImportResult,
+	} from '$lib/data/backup/import';
 	import type { DeleteUserDataResponse } from '$lib/api/services/admin';
 	import { authStore } from '$lib/stores/auth.svelte';
 
@@ -37,7 +43,7 @@
 	// QR Export dialog state
 	let showQRDialog = $state(false);
 
-	// Backup (M1 thin slice) state
+	// Backup download state
 	let backupLoading = $state(false);
 	let backupError = $state<string | null>(null);
 
@@ -50,6 +56,55 @@
 			backupError = e instanceof Error ? e.message : 'Backup fehlgeschlagen';
 		} finally {
 			backupLoading = false;
+		}
+	}
+
+	// Backup import state
+	let importInput = $state<HTMLInputElement | null>(null);
+	let importing = $state(false);
+	let importProgress = $state<ImportProgress | null>(null);
+	let importResult = $state<ImportResult | null>(null);
+	let importError = $state<string | null>(null);
+
+	async function handleImportFileChange(e: Event) {
+		const input = e.currentTarget as HTMLInputElement;
+		const file = input.files?.[0];
+		input.value = '';
+		if (!file) return;
+
+		importing = true;
+		importError = null;
+		importResult = null;
+		importProgress = { phase: 'parsing', applied: 0, total: 0 };
+
+		try {
+			const result = await importBackup(file, {
+				onProgress: (p) => (importProgress = p),
+			});
+			importResult = result;
+		} catch (e) {
+			if (e instanceof BackupImportError) {
+				importError = `${e.kind}: ${e.message}`;
+			} else {
+				importError = e instanceof Error ? e.message : 'Import fehlgeschlagen';
+			}
+		} finally {
+			importing = false;
+		}
+	}
+
+	function importProgressLabel(p: ImportProgress): string {
+		switch (p.phase) {
+			case 'parsing':
+				return 'Archiv wird entpackt…';
+			case 'validating':
+				return 'Manifest & Integritat werden gepruft…';
+			case 'applying':
+				return p.currentAppId
+					? `Wende Events an (${p.applied}/${p.total}) — ${p.currentAppId}`
+					: `Wende Events an (${p.applied}/${p.total})`;
+			case 'done':
+				return `Fertig — ${p.applied} Events eingespielt`;
 		}
 	}
 
@@ -412,6 +467,67 @@
 				{#if backupError}
 					<p class="text-sm text-red-600 mt-3">{backupError}</p>
 				{/if}
+
+				<!-- Import -->
+				<div class="mt-6 pt-6 border-t">
+					<h4 class="font-medium mb-2">Backup einspielen</h4>
+					<p class="text-sm text-muted-foreground mb-3">
+						Wahle eine <code>.mana</code>-Datei aus. Die enthaltenen Events werden in deine lokale
+						Datenbank gespielt — nur Backups deines eigenen Accounts werden akzeptiert.
+					</p>
+					<div class="flex items-center gap-3">
+						<input
+							bind:this={importInput}
+							type="file"
+							accept=".mana,application/zip"
+							onchange={handleImportFileChange}
+							disabled={importing}
+							class="hidden"
+						/>
+						<button
+							onclick={() => importInput?.click()}
+							disabled={importing}
+							class="flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-muted disabled:opacity-50 transition-colors"
+						>
+							<DownloadSimple size={16} class="rotate-180" />
+							<span>{importing ? 'Importiere…' : 'Datei wahlen…'}</span>
+						</button>
+					</div>
+
+					{#if importProgress}
+						<div class="mt-3">
+							<p class="text-sm">{importProgressLabel(importProgress)}</p>
+							{#if importProgress.total > 0}
+								<div class="mt-2 h-2 bg-muted rounded overflow-hidden">
+									<div
+										class="h-full bg-indigo-500 transition-all"
+										style="width: {Math.min(
+											100,
+											Math.round((importProgress.applied / importProgress.total) * 100)
+										)}%"
+									></div>
+								</div>
+							{/if}
+						</div>
+					{/if}
+
+					{#if importResult}
+						<div
+							class="mt-3 p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800"
+						>
+							<p class="text-sm text-green-800 dark:text-green-200">
+								<CheckCircle size={14} class="inline" weight="fill" />
+								{importResult.appliedEvents} Events aus Backup vom
+								{formatDate(importResult.manifest.createdAt)} eingespielt ({importResult.manifest
+									.apps.length} Apps).
+							</p>
+						</div>
+					{/if}
+
+					{#if importError}
+						<p class="text-sm text-red-600 mt-3">{importError}</p>
+					{/if}
+				</div>
 			</div>
 		</Card>
 
