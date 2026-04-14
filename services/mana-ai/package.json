@@ -9,6 +9,7 @@
 		"test": "bun test"
 	},
 	"dependencies": {
+		"@mana/shared-ai": "workspace:*",
 		"@mana/shared-hono": "workspace:*",
 		"hono": "^4.7.0",
 		"postgres": "^3.4.5"
