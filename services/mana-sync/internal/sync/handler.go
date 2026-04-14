@@ -42,6 +42,7 @@ func changeFromRow(row store.ChangeRow) Change {
 		Table:         row.TableName,
 		ID:            row.RecordID,
 		Op:            row.Op,
+		Actor:         row.Actor,
 	}
 	switch row.Op {
 	case "insert":
@@ -161,7 +162,7 @@ func (h *Handler) HandleSync(w http.ResponseWriter, r *http.Request) {
 		if rowSchemaVersion <= 0 {
 			rowSchemaVersion = schemaVersion
 		}
-		err := h.store.RecordChange(ctx, appID, change.Table, change.ID, userID, change.Op, clientID, data, fieldTimestamps, rowSchemaVersion)
+		err := h.store.RecordChange(ctx, appID, change.Table, change.ID, userID, change.Op, clientID, data, fieldTimestamps, rowSchemaVersion, change.Actor)
 		if err != nil {
 			slog.Error("failed to record change", "error", err, "table", change.Table, "id", change.ID)
 			http.Error(w, "failed to record change: "+err.Error(), http.StatusInternalServerError)
@@ -404,7 +405,7 @@ func (h *Handler) HandleStream(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) convertChanges(rows []store.ChangeRow) []Change {
 	changes := make([]Change, 0, len(rows))
 	for _, row := range rows {
-		c := Change{Table: row.TableName, ID: row.RecordID, Op: row.Op}
+		c := Change{Table: row.TableName, ID: row.RecordID, Op: row.Op, Actor: row.Actor}
 		switch row.Op {
 		case "insert":
 			c.Data = row.Data

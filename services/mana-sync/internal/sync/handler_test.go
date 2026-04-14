@@ -298,3 +298,64 @@ func TestFieldChangeRoundTrip(t *testing.T) {
 		t.Errorf("completed value = %v, want true", completedField.Value)
 	}
 }
+
+// TestActorPassthrough verifies that an AI-attributed change round-trips
+// through JSON encoding/decoding with the actor payload intact as opaque
+// bytes — we don't parse the actor shape server-side, just store and re-emit.
+func TestActorPassthrough(t *testing.T) {
+	aiActor := json.RawMessage(`{"kind":"ai","missionId":"m-1","iterationId":"it-1","rationale":"weekly goals review"}`)
+	change := Change{
+		Table: "todos",
+		ID:    "todo-1",
+		Op:    "insert",
+		Data:  map[string]any{"title": "Staged by AI"},
+		Actor: aiActor,
+	}
+
+	encoded, err := json.Marshal(change)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var decoded Change
+	if err := json.Unmarshal(encoded, &decoded); err != nil {
+		t.Fatal(err)
+	}
+
+	if len(decoded.Actor) == 0 {
+		t.Fatal("actor was dropped during round-trip")
+	}
+
+	// Shape-check that the opaque blob still holds the AI payload
+	var shape struct {
+		Kind        string `json:"kind"`
+		MissionID   string `json:"missionId"`
+		IterationID string `json:"iterationId"`
+	}
+	if err := json.Unmarshal(decoded.Actor, &shape); err != nil {
+		t.Fatalf("actor not valid JSON after round-trip: %v", err)
+	}
+	if shape.Kind != "ai" || shape.MissionID != "m-1" || shape.IterationID != "it-1" {
+		t.Errorf("actor shape lost: %+v", shape)
+	}
+}
+
+// TestActorOmittedWhenAbsent verifies that pre-actor clients (no actor
+// field) don't emit a null or empty "actor" key on the wire — the
+// omitempty tag should suppress it entirely.
+func TestActorOmittedWhenAbsent(t *testing.T) {
+	change := Change{
+		Table: "todos",
+		ID:    "todo-1",
+		Op:    "insert",
+		Data:  map[string]any{"title": "Legacy client write"},
+	}
+
+	encoded, err := json.Marshal(change)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if bytes.Contains(encoded, []byte(`"actor"`)) {
+		t.Errorf("absent actor was serialized into payload: %s", encoded)
+	}
+}

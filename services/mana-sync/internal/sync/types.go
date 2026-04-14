@@ -1,6 +1,9 @@
 package sync
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+)
 
 // CurrentSchemaVersion is the protocol version that this build emits for every
 // new change. Bump only with a matching migration registered on both the Go
@@ -29,6 +32,14 @@ type Change struct {
 	Fields        map[string]*FieldChange `json:"fields,omitempty"`
 	Data          map[string]any          `json:"data,omitempty"`
 	DeletedAt     *string                 `json:"deletedAt,omitempty"`
+	// Actor is the opaque JSON object the webapp stamps on every pending
+	// change (see `data/events/actor.ts`): one of `{ kind: 'user' }`,
+	// `{ kind: 'ai', missionId, iterationId, rationale }`, or
+	// `{ kind: 'system', source }`. Stored as-is server-side — the server
+	// doesn't parse the shape, it just persists + re-emits to other
+	// clients so cross-device attribution works. Pre-actor clients omit
+	// the field; the column is nullable.
+	Actor json.RawMessage `json:"actor,omitempty"`
 }
 
 // FieldChange holds a value and the timestamp when it was last changed.
