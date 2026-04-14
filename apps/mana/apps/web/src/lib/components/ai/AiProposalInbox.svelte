@@ -32,6 +32,9 @@
 	const proposals = $derived(useAiProposals({ status: 'pending', module }));
 
 	let busyId = $state<string | null>(null);
+	/** Proposal whose reject-feedback textarea is currently open. */
+	let rejectingId = $state<string | null>(null);
+	let rejectDraft = $state('');
 
 	async function handleApprove(p: Proposal) {
 		busyId = p.id;
@@ -44,10 +47,25 @@
 		}
 	}
 
-	async function handleReject(p: Proposal) {
+	function openRejectForm(p: Proposal) {
+		rejectingId = p.id;
+		rejectDraft = '';
+	}
+
+	function cancelReject() {
+		rejectingId = null;
+		rejectDraft = '';
+	}
+
+	async function confirmReject(p: Proposal) {
 		busyId = p.id;
 		try {
-			await rejectProposal(p.id);
+			// Trimmed feedback, or undefined when empty — downstream planner
+			// sees the field as absent rather than as an empty string.
+			const feedback = rejectDraft.trim().length > 0 ? rejectDraft.trim() : undefined;
+			await rejectProposal(p.id, feedback);
+			rejectingId = null;
+			rejectDraft = '';
 		} catch (err) {
 			console.error('[AiProposalInbox] reject failed:', err);
 		} finally {
@@ -82,28 +100,50 @@
 					<p class="rationale">{p.rationale}</p>
 				{/if}
 
-				<footer class="actions">
-					<button
-						type="button"
-						class="btn reject"
-						disabled={busyId !== null}
-						onclick={() => handleReject(p)}
-						aria-label="Ablehnen"
-					>
-						<X size={16} weight="bold" />
-						<span>Ablehnen</span>
-					</button>
-					<button
-						type="button"
-						class="btn approve"
-						disabled={busyId !== null}
-						onclick={() => handleApprove(p)}
-						aria-label="Übernehmen"
-					>
-						<Check size={16} weight="bold" />
-						<span>Übernehmen</span>
-					</button>
-				</footer>
+				{#if rejectingId === p.id}
+					<form class="reject-form" onsubmit={(e) => (e.preventDefault(), confirmReject(p))}>
+						<label class="reject-label" for={`reject-${p.id}`}>
+							Warum ablehnen? (optional — hilft der KI beim nächsten Versuch)
+						</label>
+						<textarea
+							id={`reject-${p.id}`}
+							bind:value={rejectDraft}
+							rows="2"
+							placeholder="z.B. zu aggressiv, oder: falsches Datum gewählt"
+						></textarea>
+						<div class="reject-actions">
+							<button type="button" class="btn" disabled={busyId !== null} onclick={cancelReject}>
+								Abbrechen
+							</button>
+							<button type="submit" class="btn reject-confirm" disabled={busyId !== null}>
+								Ablehnen
+							</button>
+						</div>
+					</form>
+				{:else}
+					<footer class="actions">
+						<button
+							type="button"
+							class="btn reject"
+							disabled={busyId !== null}
+							onclick={() => openRejectForm(p)}
+							aria-label="Ablehnen"
+						>
+							<X size={16} weight="bold" />
+							<span>Ablehnen</span>
+						</button>
+						<button
+							type="button"
+							class="btn approve"
+							disabled={busyId !== null}
+							onclick={() => handleApprove(p)}
+							aria-label="Übernehmen"
+						>
+							<Check size={16} weight="bold" />
+							<span>Übernehmen</span>
+						</button>
+					</footer>
+				{/if}
 			</article>
 		{/each}
 	</section>
@@ -198,5 +238,38 @@
 
 	.btn.approve:hover:not(:disabled) {
 		background: color-mix(in oklab, var(--color-primary, #6b5bff) 20%, var(--color-bg, #fff));
+	}
+
+	.reject-form {
+		display: flex;
+		flex-direction: column;
+		gap: 0.375rem;
+		margin-top: 0.625rem;
+	}
+	.reject-label {
+		font-size: 0.75rem;
+		color: var(--color-muted, #666);
+	}
+	.reject-form textarea {
+		padding: 0.375rem 0.5rem;
+		border: 1px solid var(--color-border, #ddd);
+		border-radius: 0.375rem;
+		font: inherit;
+		resize: vertical;
+		background: var(--color-bg, #fff);
+		color: var(--color-fg, inherit);
+	}
+	.reject-actions {
+		display: flex;
+		justify-content: flex-end;
+		gap: 0.5rem;
+	}
+	.btn.reject-confirm {
+		background: #fff0f0;
+		border-color: #e99;
+		color: #8a1b1b;
+	}
+	.btn.reject-confirm:hover:not(:disabled) {
+		background: #ffe4e4;
 	}
 </style>
