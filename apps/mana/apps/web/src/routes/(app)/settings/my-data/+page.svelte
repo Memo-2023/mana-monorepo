@@ -391,10 +391,10 @@
 					Backup & Wiederherstellung
 				</h3>
 				<p class="text-sm text-muted-foreground mb-4">
-					Lade eine vollstandige Kopie deiner synchronisierten Daten als JSONL-Datei herunter. Die
-					Datei enthalt den kompletten Sync-Event-Stream deines Accounts — geeignet fur
-					Account-Migration, Backups oder DSGVO-Datenportabilitat. Sensible Felder bleiben dabei
-					verschlusselt.
+					Lade eine vollstandige Kopie deiner synchronisierten Daten als <code>.mana</code>-Archiv
+					(ZIP) herunter. Enthalt den kompletten Sync-Event-Stream plus Manifest mit
+					Integritats-Hash — geeignet fur Account-Migration, Backups oder DSGVO-Datenportabilitat.
+					Sensible Felder bleiben dabei verschlusselt.
 				</p>
 				<div class="flex items-center gap-3">
 					<button
@@ -403,7 +403,7 @@
 						class="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
 					>
 						<DownloadSimple size={16} />
-						<span>{backupLoading ? 'Lade Backup…' : 'Backup herunterladen (.jsonl)'}</span>
+						<span>{backupLoading ? 'Lade Backup…' : 'Backup herunterladen (.mana)'}</span>
 					</button>
 					<span class="text-xs text-muted-foreground">
 						Experimentell — Import folgt in Kurze.

@@ -1,15 +1,20 @@
 /**
- * Backup / Restore API — M1 thin slice.
+ * Backup / Restore API.
  *
- * Talks directly to mana-sync's /backup/export endpoint, which streams every
- * sync_changes row owned by the current user as JSONL (one event per line).
- * The file is immediately usable as input for a future import flow: replaying
- * the events through applyServerChanges() reconstructs the user's entire
- * dataset in a fresh IndexedDB.
+ * Talks directly to mana-sync's /backup/export endpoint, which streams a
+ * .mana archive (zip container) with two entries:
  *
- * Field-level encrypted fields stay ciphertext throughout — the file is safe
- * at rest for those fields. Plaintext fields (IDs, timestamps, sort keys) are
- * visible as-is, which matches the GDPR data-portability expectation.
+ *   events.jsonl   — every sync_changes row, one per line, chronological
+ *   manifest.json  — formatVersion, schemaVersion, userId, eventCount,
+ *                    eventsSha256, app list, timestamps
+ *
+ * The file is immediately usable as input for the future import flow:
+ * replaying events through applyServerChanges() reconstructs the user's
+ * entire dataset in a fresh IndexedDB.
+ *
+ * Field-level encrypted fields stay ciphertext throughout — the file is
+ * safe at rest for those fields. Plaintext fields (IDs, timestamps, sort
+ * keys) are visible as-is, matching the GDPR data-portability expectation.
  */
 
 import { authStore } from '$lib/stores/auth.svelte';
@@ -45,7 +50,7 @@ export const backupService = {
 		const blob = await response.blob();
 		const filename =
 			response.headers.get('Content-Disposition')?.match(/filename="(.+)"/)?.[1] ||
-			`mana-backup-${new Date().toISOString().slice(0, 10)}.jsonl`;
+			`mana-backup-${new Date().toISOString().slice(0, 10)}.mana`;
 
 		const url = URL.createObjectURL(blob);
 		const a = document.createElement('a');
