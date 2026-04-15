@@ -22,6 +22,8 @@ const RESEARCH_POLICY: AiPolicy = {
 
 export const researchTemplate: AgentTemplate = {
 	id: 'research',
+	version: '1',
+	icon: '🔍',
 	label: 'Recherche-Agent',
 	tagline: 'Liest Quellen, schreibt Notizen, destilliert einen Bericht',
 	description: `Gib dem Agent ein Thema und eine Liste von Quellen-URLs. Er:
@@ -32,7 +34,7 @@ export const researchTemplate: AgentTemplate = {
 4. Verlinkt im Bericht zurück auf die Quellen-Notizen
 
 Jede Notiz wird als Vorschlag angelegt — du bestätigst was wirklich gespeichert wird.`,
-	category: 'research',
+	category: 'ai',
 	color: '#0EA5E9',
 	agent: {
 		name: 'Recherche-Agent',

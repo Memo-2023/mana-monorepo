@@ -17,10 +17,13 @@
 	let selected = $state<AgentTemplate | null>(null);
 	let applying = $state(false);
 	let result = $state<{
-		agentName: string;
+		agentName?: string;
 		sceneCreated: boolean;
 		missionCount: number;
-		wasExisting: boolean;
+		wasExistingAgent: boolean;
+		seedCreated: number;
+		seedSkipped: number;
+		seedFailed: number;
 		warnings: readonly string[];
 	} | null>(null);
 	let error = $state<string | null>(null);
@@ -28,6 +31,7 @@
 	// Override toggles — default to the "smart" values we recommend.
 	let optCreateScene = $state(true);
 	let optCreateMissions = $state(true);
+	let optApplySeeds = $state(true);
 	let optStartActive = $state(false); // false = respect paused hint
 
 	function openDetail(t: AgentTemplate) {
@@ -36,7 +40,26 @@
 		error = null;
 		optCreateScene = t.scene !== undefined;
 		optCreateMissions = t.missions !== undefined && t.missions.length > 0;
+		optApplySeeds = t.seeds !== undefined && Object.keys(t.seeds).length > 0;
 		optStartActive = false;
+	}
+
+	function countSeedOutcomes(outcomes: Readonly<Record<string, readonly { outcome: string }[]>>): {
+		created: number;
+		skipped: number;
+		failed: number;
+	} {
+		let created = 0;
+		let skipped = 0;
+		let failed = 0;
+		for (const items of Object.values(outcomes)) {
+			for (const o of items) {
+				if (o.outcome === 'created') created++;
+				else if (o.outcome === 'skipped-exists') skipped++;
+				else failed++;
+			}
+		}
+		return { created, skipped, failed };
 	}
 
 	async function handleApply() {
@@ -47,13 +70,18 @@
 			const r = await applyTemplate(selected, {
 				createScene: optCreateScene,
 				createMissions: optCreateMissions,
+				applySeeds: optApplySeeds,
 				respectPauseHint: !optStartActive,
 			});
+			const seedSums = countSeedOutcomes(r.seedOutcomes);
 			result = {
-				agentName: r.agent.name,
+				agentName: r.agent?.name,
 				sceneCreated: r.sceneId !== undefined,
 				missionCount: r.missionIds.length,
-				wasExisting: r.wasExisting,
+				wasExistingAgent: r.wasExistingAgent,
+				seedCreated: seedSums.created,
+				seedSkipped: seedSums.skipped,
+				seedFailed: seedSums.failed,
 				warnings: r.warnings,
 			};
 		} catch (err) {
@@ -90,15 +118,20 @@
 				style="--accent: {t.color}"
 				onclick={() => openDetail(t)}
 			>
-				<span class="avatar">{t.agent.avatar}</span>
+				<span class="avatar">{t.agent?.avatar ?? t.icon}</span>
 				<span class="label">{t.label}</span>
 				<span class="tagline">{t.tagline}</span>
 				<span class="meta">
+					{#if t.agent}<span class="chip">Agent</span>{/if}
 					{#if t.scene}<span class="chip">Scene</span>{/if}
 					{#if t.missions && t.missions.length > 0}
 						<span class="chip"
 							>{t.missions.length} Mission{t.missions.length !== 1 ? 'en' : ''}</span
 						>
+					{/if}
+					{#if t.seeds}
+						{@const total = Object.values(t.seeds).reduce((s, items) => s + items.length, 0)}
+						<span class="chip">{total} Seed{total !== 1 ? 's' : ''}</span>
 					{/if}
 				</span>
 			</button>
@@ -108,10 +141,14 @@
 	{#if selected}
 		<section class="detail" style="--accent: {selected.color}">
 			<header class="detail-head">
-				<span class="detail-avatar">{selected.agent.avatar}</span>
+				<span class="detail-avatar">{selected.agent?.avatar ?? selected.icon}</span>
 				<div>
 					<h2>{selected.label}</h2>
-					<p class="detail-role">{selected.agent.role}</p>
+					{#if selected.agent}
+						<p class="detail-role">{selected.agent.role}</p>
+					{:else}
+						<p class="detail-role">Workbench-Setup ohne AI-Agent</p>
+					{/if}
 				</div>
 			</header>
 
@@ -161,6 +198,33 @@
 				</section>
 			{/if}
 
+			{#if selected.seeds && Object.keys(selected.seeds).length > 0}
+				<section class="preview">
+					<h3>Seeds</h3>
+					<p class="seed-hint">
+						Vorgefüllte Einträge in deinen Modulen. Werden als neue Records angelegt; bestehende
+						Einträge mit gleicher Seed-ID werden übersprungen (idempotent).
+					</p>
+					<ul class="seeds-preview">
+						{#each Object.entries(selected.seeds) as [moduleName, items]}
+							<li>
+								<strong>{moduleName}</strong>
+								<span class="seed-count">
+									{items.length} Eintr{items.length !== 1 ? 'äge' : 'ag'}
+								</span>
+								<ul class="seed-items">
+									{#each items as item}
+										<li>
+											<code>{(item.data as { name?: string }).name ?? '(unbenannt)'}</code>
+										</li>
+									{/each}
+								</ul>
+							</li>
+						{/each}
+					</ul>
+				</section>
+			{/if}
+
 			<section class="options">
 				<h3>Optionen</h3>
 				{#if selected.scene}
@@ -179,6 +243,12 @@
 						<span>Mission(en) sofort aktivieren (Standard: pausiert)</span>
 					</label>
 				{/if}
+				{#if selected.seeds && Object.keys(selected.seeds).length > 0}
+					<label class="opt">
+						<input type="checkbox" bind:checked={optApplySeeds} />
+						<span>Seed-Daten in Module einpflegen</span>
+					</label>
+				{/if}
 			</section>
 
 			{#if result}
@@ -186,15 +256,24 @@
 					<Check size={16} />
 					<div>
 						<strong>
-							{result.wasExisting
-								? `„${result.agentName}" existierte schon — wiederverwendet.`
-								: `Agent „${result.agentName}" angelegt.`}
+							{#if result.agentName}
+								{result.wasExistingAgent
+									? `„${result.agentName}" existierte schon — wiederverwendet.`
+									: `Agent „${result.agentName}" angelegt.`}
+							{:else}
+								Template angewendet.
+							{/if}
 						</strong>
 						<p>
 							{#if result.sceneCreated}Scene angelegt + aktiviert.{/if}
 							{#if result.missionCount > 0}
 								{result.missionCount} Mission{result.missionCount !== 1 ? 'en' : ''}
 								{optStartActive ? 'aktiviert' : 'pausiert angelegt'}.
+							{/if}
+							{#if result.seedCreated + result.seedSkipped + result.seedFailed > 0}
+								{result.seedCreated} Seed{result.seedCreated !== 1 ? 's' : ''} neu,
+								{result.seedSkipped} bereits vorhanden{#if result.seedFailed > 0}, {result.seedFailed}
+									fehlgeschlagen{/if}.
 							{/if}
 						</p>
 						{#if result.warnings.length > 0}
@@ -508,5 +587,50 @@
 		display: flex;
 		justify-content: space-between;
 		gap: 0.5rem;
+	}
+	.seed-hint {
+		margin: 0 0 0.5rem;
+		font-size: 0.75rem;
+		color: hsl(var(--color-muted-foreground));
+	}
+	.seeds-preview {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0.625rem;
+	}
+	.seeds-preview > li {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+	}
+	.seeds-preview > li > strong {
+		font-size: 0.8125rem;
+		text-transform: lowercase;
+		color: var(--accent);
+	}
+	.seed-count {
+		font-size: 0.75rem;
+		color: hsl(var(--color-muted-foreground));
+	}
+	.seed-items {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.375rem;
+	}
+	.seed-items li {
+		padding: 0.125rem 0.5rem;
+		border-radius: 0.25rem;
+		background: hsl(var(--color-surface));
+		border: 1px solid hsl(var(--color-border));
+		font-size: 0.75rem;
+	}
+	.seed-items code {
+		font-size: 0.75rem;
 	}
 </style>

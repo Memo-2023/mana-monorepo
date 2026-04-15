@@ -1,25 +1,30 @@
 /**
- * Template applicator — turns an AgentTemplate from `@mana/shared-ai`
- * into concrete Dexie records: an Agent, optionally a workbench Scene,
- * optionally starter Missions.
+ * Template applicator — turns a WorkbenchTemplate from `@mana/shared-ai`
+ * into concrete Dexie records: optionally an Agent, optionally a
+ * workbench Scene, optionally starter Missions, optionally module-
+ * scoped seeds.
  *
- * Ordering matters: agent first (so mission.agentId can reference it),
- * then scene (so `setActive` lands on a scene that contains the
- * relevant apps), then missions (so they show up under the agent).
+ * Ordering matters:
+ *   1. Agent (so mission.agentId can reference it)
+ *   2. Scene (so `setActive` lands on the right layout)
+ *   3. Missions (so they show up under the agent)
+ *   4. Seeds per module (runs last because a seed might reference
+ *      the freshly-active scene conceptually but never programmatically)
  *
- * Error semantics: failures bubble up but the ones that happened
- * before are NOT rolled back — user is told what did and didn't land.
- * Pure-transaction semantics aren't worth the wrapper complexity for
- * a 3-step sequence that is already idempotent:
+ * Error semantics: failures bubble up as warnings in the result — they
+ * don't abort later steps. Pure-transaction semantics aren't worth the
+ * wrapper complexity since each step is idempotent-ish on re-apply:
  *   - duplicate agent name → returns existing agent (getOrCreate-ish)
- *   - scene creation is a fresh insert, no dedup needed
- *   - missions use fresh UUIDs, no dedup needed
+ *   - scene creation is a fresh insert (skipped if agent was existing)
+ *   - missions use fresh UUIDs
+ *   - seeds check stableId before creating
  */
 
 import { createAgent, findByName, DuplicateAgentNameError } from './store';
 import { createMission, pauseMission } from '../missions/store';
 import { workbenchScenesStore } from '$lib/stores/workbench-scenes.svelte';
-import type { AgentTemplate } from '@mana/shared-ai';
+import { getSeedHandler, type SeedOutcome } from './seed-registry';
+import type { WorkbenchTemplate, WorkbenchTemplateSeedItem } from '@mana/shared-ai';
 import type { Agent } from './types';
 
 export interface ApplyTemplateOptions {
@@ -28,6 +33,8 @@ export interface ApplyTemplateOptions {
 	createScene?: boolean;
 	/** Create the template's starter missions. Default true. */
 	createMissions?: boolean;
+	/** Apply the template's per-module seeds. Default true. */
+	applySeeds?: boolean;
 	/** When true, starter missions are left in whatever `startPaused`
 	 *  the template declares (usually paused). When false, override to
 	 *  active — Power-User opt-in that skips the "click Play" step. */
@@ -35,70 +42,73 @@ export interface ApplyTemplateOptions {
 }
 
 export interface ApplyTemplateResult {
-	/** The agent that was created — OR the pre-existing agent with the
-	 *  same name that we re-used. `wasExisting` tells you which. */
-	readonly agent: Agent;
-	readonly wasExisting: boolean;
+	/** The agent that was created OR re-used. Undefined when the
+	 *  template had no `agent` part (non-AI templates). */
+	readonly agent?: Agent;
+	/** True when we re-used an existing agent with the same name. */
+	readonly wasExistingAgent: boolean;
 	readonly sceneId?: string;
 	readonly missionIds: readonly string[];
-	/** Any non-fatal errors from the sequence. Agent is guaranteed when
-	 *  this array is empty on agent slot; scene/mission failures still
-	 *  return here so the UI can surface them without blocking. */
+	/** Per-module seed outcomes keyed by module name. */
+	readonly seedOutcomes: Readonly<Record<string, readonly SeedOutcome[]>>;
+	/** Non-fatal warnings from any step; UI surfaces these alongside
+	 *  the success panel. */
 	readonly warnings: readonly string[];
 }
 
 /**
  * Apply a template end-to-end. Returns a result object describing what
- * actually landed in Dexie. Call sites render a success panel or a
- * partial-failure panel based on `warnings` + presence of each field.
+ * actually landed in Dexie. Call sites render a success or partial-
+ * failure panel based on warnings + presence of each field.
  */
 export async function applyTemplate(
-	template: AgentTemplate,
+	template: WorkbenchTemplate,
 	opts: ApplyTemplateOptions = {}
 ): Promise<ApplyTemplateResult> {
 	const {
 		createScene = template.scene !== undefined,
 		createMissions = true,
+		applySeeds = true,
 		respectPauseHint = true,
 	} = opts;
 
 	const warnings: string[] = [];
+	let agent: Agent | undefined;
+	let wasExistingAgent = false;
 
-	// 1. Agent — the only required piece. If duplicate name, re-use the
-	// existing agent (idempotent "apply twice" behavior).
-	let agent: Agent;
-	let wasExisting = false;
-	try {
-		agent = await createAgent({
-			name: template.agent.name,
-			avatar: template.agent.avatar,
-			role: template.agent.role,
-			systemPrompt: template.agent.systemPrompt,
-			memory: template.agent.memory,
-			policy: template.agent.policy,
-			maxTokensPerDay: template.agent.maxTokensPerDay,
-			maxConcurrentMissions: template.agent.maxConcurrentMissions,
-		});
-	} catch (err) {
-		if (err instanceof DuplicateAgentNameError) {
-			const existing = await findByName(template.agent.name);
-			if (!existing) {
+	// 1. Agent (optional) — idempotent via duplicate-name lookup.
+	if (template.agent) {
+		try {
+			agent = await createAgent({
+				name: template.agent.name,
+				avatar: template.agent.avatar,
+				role: template.agent.role,
+				systemPrompt: template.agent.systemPrompt,
+				memory: template.agent.memory,
+				policy: template.agent.policy,
+				maxTokensPerDay: template.agent.maxTokensPerDay,
+				maxConcurrentMissions: template.agent.maxConcurrentMissions,
+			});
+		} catch (err) {
+			if (err instanceof DuplicateAgentNameError) {
+				const existing = await findByName(template.agent.name);
+				if (!existing) throw err;
+				agent = existing;
+				wasExistingAgent = true;
+				warnings.push(
+					`Ein Agent mit Namen "${template.agent.name}" existiert bereits — Template nutzt diesen.`
+				);
+			} else {
 				throw err;
 			}
-			agent = existing;
-			wasExisting = true;
-			warnings.push(
-				`Ein Agent mit Namen "${template.agent.name}" existiert bereits — Template nutzt diesen.`
-			);
-		} else {
-			throw err;
 		}
 	}
 
-	// 2. Scene — skipped on re-apply so we don't generate Scene-Clones
-	// on every click.
+	// 2. Scene — skipped on re-apply (wasExistingAgent) so we don't
+	// generate Scene-Clones on every click. For non-agent templates the
+	// scene is always created (there's no per-apply dedup key).
 	let sceneId: string | undefined;
-	if (createScene && template.scene && !wasExisting) {
+	if (createScene && template.scene && !wasExistingAgent) {
 		try {
 			sceneId = await workbenchScenesStore.createScene({
 				name: template.scene.name,
@@ -111,17 +121,15 @@ export async function applyTemplate(
 				`Scene konnte nicht angelegt werden: ${err instanceof Error ? err.message : String(err)}`
 			);
 		}
-	} else if (createScene && wasExisting) {
+	} else if (createScene && wasExistingAgent) {
 		warnings.push(
 			'Scene übersprungen weil der Agent schon existierte — öffne die Scene manuell falls gewünscht.'
 		);
 	}
 
-	// 3. Missions — paused by default per template hint. Reapply on an
-	// existing agent is idempotent-ish: we create NEW missions (they
-	// have fresh UUIDs) but the UI should make that obvious.
+	// 3. Missions — paused by default per template hint.
 	const missionIds: string[] = [];
-	if (createMissions && template.missions) {
+	if (createMissions && template.missions && agent) {
 		for (const m of template.missions) {
 			try {
 				const mission = await createMission({
@@ -144,11 +152,46 @@ export async function applyTemplate(
 		}
 	}
 
+	// 4. Per-module seeds — applicator looks up a handler for each
+	// module name in the template's `seeds` map. Missing handler =
+	// warning, not fatal (template lists seeds for a module the webapp
+	// doesn't support yet).
+	const seedOutcomes: Record<string, readonly SeedOutcome[]> = {};
+	if (applySeeds && template.seeds) {
+		const seedEntries = Object.entries(template.seeds) as Array<
+			[string, readonly WorkbenchTemplateSeedItem[]]
+		>;
+		for (const [moduleName, items] of seedEntries) {
+			const handler = getSeedHandler(moduleName);
+			if (!handler) {
+				warnings.push(
+					`Seed-Handler für Modul "${moduleName}" nicht registriert — ${items.length} Seed(s) übersprungen.`
+				);
+				continue;
+			}
+			try {
+				const outcomes = await handler.apply(items);
+				seedOutcomes[moduleName] = outcomes;
+				const failures = outcomes.filter((o) => o.outcome === 'failed');
+				for (const f of failures) {
+					warnings.push(
+						`Seed "${f.stableId ?? '(ohne id)'}" in ${moduleName} fehlgeschlagen: ${f.error ?? '(unbekannt)'}`
+					);
+				}
+			} catch (err) {
+				warnings.push(
+					`Seed-Handler für "${moduleName}" hat unerwartet geworfen: ${err instanceof Error ? err.message : String(err)}`
+				);
+			}
+		}
+	}
+
 	return {
 		agent,
-		wasExisting,
+		wasExistingAgent,
 		sceneId,
 		missionIds,
+		seedOutcomes,
 		warnings,
 	};
 }

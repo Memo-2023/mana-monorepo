@@ -10,8 +10,18 @@
 import { researchTemplate } from './research';
 import { contextTemplate } from './context';
 import { todayTemplate } from './today';
+import { calmnessTemplate } from './calmness';
 
 export type {
+	// Generalised names (T1 of workbench-templates plan):
+	WorkbenchTemplate,
+	WorkbenchTemplateAgentPart,
+	WorkbenchTemplateScenePart,
+	WorkbenchTemplateSceneApp,
+	WorkbenchTemplateMissionPart,
+	WorkbenchTemplateSeedItem,
+	WorkbenchTemplateCategory,
+	// Pre-T1 aliases:
 	AgentTemplate,
 	AgentTemplateAgentPart,
 	AgentTemplateScenePart,
@@ -19,9 +29,14 @@ export type {
 	AgentTemplateMissionPart,
 } from './types';
 
-export const ALL_TEMPLATES = [researchTemplate, contextTemplate, todayTemplate] as const;
+export const ALL_TEMPLATES = [
+	researchTemplate,
+	contextTemplate,
+	todayTemplate,
+	calmnessTemplate,
+] as const;
 
-export { researchTemplate, contextTemplate, todayTemplate };
+export { researchTemplate, contextTemplate, todayTemplate, calmnessTemplate };
 
 /** Lookup helper — returns the template matching the given id, or
  *  undefined. Useful for deep-links `/agents/templates?pick=research`. */

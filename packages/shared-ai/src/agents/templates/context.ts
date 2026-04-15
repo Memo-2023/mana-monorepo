@@ -21,6 +21,8 @@ const CONTEXT_POLICY: AiPolicy = {
 
 export const contextTemplate: AgentTemplate = {
 	id: 'context',
+	version: '1',
+	icon: '🧭',
 	label: 'Kontext-Agent',
 	tagline: 'Lernt dich kennen, damit andere Agents besser arbeiten',
 	description: `Der Agent fragt dich gezielt Fragen und destilliert die Antworten
@@ -35,7 +37,7 @@ Was er tut:
 3. Verdichtet deine Antworten zu einem strukturierten Kontext-Update (als Vorschlag)
 
 Alles läuft als Vorschlag — du bestätigst welche Version deines Profils gespeichert wird.`,
-	category: 'context',
+	category: 'ai',
 	color: '#D946EF',
 	agent: {
 		name: 'Kontext-Agent',

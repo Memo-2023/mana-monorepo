@@ -23,6 +23,8 @@ const TODAY_POLICY: AiPolicy = {
 
 export const todayTemplate: AgentTemplate = {
 	id: 'today',
+	version: '1',
+	icon: '🌅',
 	label: 'Today-Agent',
 	tagline: 'Jeden Tag ein Gedicht über das was heute besonderes passierte',
 	description: `Der Agent recherchiert täglich (morgens um 7 Uhr) was an diesem
@@ -39,7 +41,7 @@ Was er tut:
 3. Wählt ein Thema das ihn (oder dich) inspiriert
 4. Schreibt ein kurzes Gedicht (4-8 Zeilen, deutsch)
 5. Schlägt eine Journal-Notiz vor mit Titel "Heute — [Datum]"`,
-	category: 'today',
+	category: 'delight',
 	color: '#F97316',
 	agent: {
 		name: 'Today-Agent',

@@ -83,5 +83,12 @@ export type {
 	AgentTemplateScenePart,
 	AgentTemplateSceneApp,
 	AgentTemplateMissionPart,
+	WorkbenchTemplate,
+	WorkbenchTemplateAgentPart,
+	WorkbenchTemplateScenePart,
+	WorkbenchTemplateSceneApp,
+	WorkbenchTemplateMissionPart,
+	WorkbenchTemplateSeedItem,
+	WorkbenchTemplateCategory,
 } from './agents';
 export { DEFAULT_AGENT_ID, DEFAULT_AGENT_NAME, ALL_TEMPLATES, getTemplateById } from './agents';

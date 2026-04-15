@@ -21,6 +21,12 @@ import { aiPlanTask } from '$lib/llm-tasks/ai-plan';
 import { runDueMissions, type MissionRunnerDeps } from './runner';
 import { registerDefaultInputResolvers } from './default-resolvers';
 import { runAgentsBootstrap } from '../agents/bootstrap';
+// Side-effect imports to populate the seed-handler registry before any
+// template is applied. Keep this list tight — each module pulls its
+// own imports (encryptRecord, Dexie tables, etc.) so adding a seed
+// handler to a rarely-used module slows down the hot path otherwise.
+// See docs/plans/workbench-templates.md §T1.
+import '$lib/modules/meditate/seed';
 import type { AiPlanInput, AiPlanOutput } from './planner/types';
 
 /** Default interval between tick scans. One minute is fine for foreground use. */
