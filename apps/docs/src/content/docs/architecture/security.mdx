@@ -184,6 +184,58 @@ Each row carries the IP address, user-agent, HTTP status code, and a free-form c
 | User loses recovery code | n/a | ❌ Data lost |
 | User loses password but vault is in ZK mode | Recovery via password reset | ❌ Data lost (vault is keyed to recovery code) |
 
+## AI Mission Grants (opt-in, per mission)
+
+By default, AI missions that depend on encrypted data (notes, tasks,
+calendar events, journal entries, your Kontext document) run **only
+when your browser tab is open** — the background runner on our server
+sees ciphertext and physically cannot read them.
+
+Some missions are more useful when they run continuously, even while
+you're offline. For those, you can opt in — per mission, not globally
+— to a **Mission Key-Grant**. Here is exactly what that does:
+
+1. Your browser derives a fresh key that is bound to:
+   - The mission's ID.
+   - The specific table names referenced.
+   - The specific record IDs referenced.
+2. The derived key is wrapped with the mana-ai service's public key
+   and attached to the mission record.
+3. When the mana-ai runner ticks for that mission, it unwraps the
+   key in memory, decrypts **only the allowlisted records**, plans
+   the next iteration, and forgets the key at the end of the tick.
+4. Every decrypt is logged. You see the full log under **Workbench
+   → Datenzugriff**.
+
+Hard constraints — enforced by the code, not by policy:
+
+- **Zero-knowledge users cannot issue grants.** The mana-auth server
+  has no usable master key in ZK mode; the endpoint refuses.
+- **Scope changes invalidate the key cryptographically.** Add a new
+  record to a mission → the derived key is different → the existing
+  grant stops working → you're prompted to re-consent. It is not
+  possible for the runner to "silently expand" its scope.
+- **Grants expire.** Default lifetime is 7 days, renewed on every
+  successful run. Missions that go idle lose their grant automatically;
+  you re-consent on the next edit.
+- **Revocation is one click.** The lock icon in the Workbench removes
+  the grant; the mission keeps its history but stops running
+  server-side until you re-grant.
+- **The runner never writes under a grant** — it only reads. All
+  changes still go through the normal proposal-approve flow you
+  control.
+
+| Threat | Standard | With a Mission Grant | Zero-Knowledge |
+|--------|----------|----------------------|----------------|
+| Mana operator reads an unrelated record of the same user | ⚠️ Could decrypt with KEK | ✅ Cannot — key is scoped | ✅ Cannot |
+| Mana operator reads the granted records of the grant-enabled mission | ⚠️ Could decrypt with KEK | ⚠️ Could decrypt with the grant key + record ciphertext | ✅ Cannot |
+| Court order against Mana for the granted-mission records | ⚠️ Could be compelled | ⚠️ Could be compelled (while grant is active) | ✅ Mana physically cannot comply |
+| Runner RAM-dump during the 60s tick | ⚠️ n/a | ⚠️ Could expose the grant key for one tick window | ✅ n/a |
+
+The tradeoff is deliberate: you exchange a small, scoped privacy
+reduction for autonomy on one mission. Missions without a grant keep
+the full standard / ZK guarantees.
+
 ## Implementation references
 
 For the architectural deep dive, code locations, and the complete rollout history (Phases 1–9 + the backlog sweep), see [`DATA_LAYER_AUDIT.md`](https://github.com/mana-how/mana-monorepo/blob/main/apps/mana/apps/web/src/lib/data/DATA_LAYER_AUDIT.md).

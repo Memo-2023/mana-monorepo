@@ -8,6 +8,7 @@
 	import { useMissions } from '$lib/data/ai/missions/queries';
 	import { revertIteration } from '$lib/data/ai/revert/revert-iteration';
 	import { fetchDecryptAudit, type AuditRow } from '$lib/data/ai/audit/queries';
+	import { isMissionGrantsEnabled } from '$lib/api/config';
 	import type { DomainEvent } from '$lib/data/events/types';
 
 	let moduleFilter = $state<string | null>(null);
@@ -41,6 +42,7 @@
 	}
 
 	// ── Tab switcher: timeline ↔ decrypt audit ─────────────
+	const grantsEnabled = $derived(isMissionGrantsEnabled());
 	let tab = $state<'timeline' | 'audit'>('timeline');
 	let auditRows = $state<AuditRow[]>([]);
 	let auditLoading = $state(false);
@@ -110,16 +112,18 @@
 		>
 			Timeline
 		</button>
-		<button
-			type="button"
-			role="tab"
-			class="tab"
-			class:tab-active={tab === 'audit'}
-			aria-selected={tab === 'audit'}
-			onclick={() => (tab = 'audit')}
-		>
-			Datenzugriff
-		</button>
+		{#if grantsEnabled}
+			<button
+				type="button"
+				role="tab"
+				class="tab"
+				class:tab-active={tab === 'audit'}
+				aria-selected={tab === 'audit'}
+				onclick={() => (tab = 'audit')}
+			>
+				Datenzugriff
+			</button>
+		{/if}
 	</div>
 
 	<div class="filters">

@@ -19,6 +19,7 @@
 	import { productionDeps } from '$lib/data/ai/missions/setup';
 	import MissionInputPicker from '$lib/components/ai/MissionInputPicker.svelte';
 	import MissionGrantDialog from '$lib/components/ai/MissionGrantDialog.svelte';
+	import { isMissionGrantsEnabled } from '$lib/api/config';
 	import type { Mission, MissionCadence, MissionInputRef } from '$lib/data/ai/missions/types';
 
 	const missions = $derived(useMissions());
@@ -106,6 +107,7 @@
 	function hasEncryptedInputs(m: Mission): boolean {
 		return m.inputs.some((i) => ENCRYPTED_SERVER_TABLES.has(i.table));
 	}
+	const grantsEnabled = $derived(isMissionGrantsEnabled());
 	function grantStatus(m: Mission): 'none' | 'active' | 'expired' {
 		if (!m.grant) return 'none';
 		return Date.parse(m.grant.expiresAt) < Date.now() ? 'expired' : 'active';
@@ -305,7 +307,7 @@
 			</details>
 		{/if}
 
-		{#if hasEncryptedInputs(selected)}
+		{#if grantsEnabled && hasEncryptedInputs(selected)}
 			<section class="grant-box">
 				<div class="grant-head">
 					<span class="grant-title">🔑 Server-Zugriff</span>

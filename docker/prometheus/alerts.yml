@@ -465,3 +465,53 @@ groups:
         annotations:
           summary: "LLM responses are slow"
           description: "LLM p95 latency is {{ $value | humanizeDuration }}."
+
+  - name: mana_ai_alerts
+    rules:
+      # mana-ai background runner down
+      - alert: ManaAIServiceDown
+        expr: up{job="mana-ai"} == 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "mana-ai background runner is down"
+          description: "mana-ai has been down for 2+ minutes. Missions fall back to the browser-only Runner — users with closed tabs stop receiving proposals."
+
+      # Grant scope violation — MUST remain at 0 in steady state.
+      # Any increment is a serious signal: either a runtime bug bypassed
+      # the cryptographic scope binding, or a compromised service tried
+      # to decrypt outside its allowlist. Page on first occurrence.
+      - alert: ManaAIGrantScopeViolation
+        expr: increase(mana_ai_grant_scope_violations_total[5m]) > 0
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: "mana-ai Mission Grant scope violation detected"
+          description: "mana-ai attempted to decrypt a record outside a Mission Grant's allowlist on table {{ $labels.table }}. Steady-state value MUST be 0. Investigate: (1) look for a resolver bug on the named table, (2) check recent grant issuance, (3) dump the most recent rows from mana_ai.decrypt_audit WHERE status='scope-violation'."
+
+      # Chronic grant failures — expired TTLs are fine, but a flood of
+      # wrap-rejected / malformed / not-configured means the keypair is
+      # misconfigured or rotated without re-consent.
+      - alert: ManaAIGrantSkipsHigh
+        expr: |
+          sum(rate(mana_ai_grant_skips_total{reason!="expired"}[15m])) > 0.1
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "mana-ai grant skips trending high ({{ $labels.reason }})"
+          description: "mana-ai is skipping grants at {{ $value | humanize }}/s with reason={{ $labels.reason }}. Likely causes: MANA_AI_PRIVATE_KEY_PEM mis-set, keypair out of sync with mana-auth's public key, or client producing malformed grants."
+
+      # Planner parse failures — too many means the prompt / LLM drifted.
+      - alert: ManaAIPlannerParseFailures
+        expr: |
+          sum(rate(mana_ai_parse_failures_total[10m]))
+          / (sum(rate(mana_ai_plans_produced_total[10m])) + sum(rate(mana_ai_parse_failures_total[10m])) + 0.0001) > 0.2
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "mana-ai planner parse-failure rate high"
+          description: "{{ $value | humanizePercentage }} of Planner responses failed to parse — prompt drift or LLM degradation likely."

@@ -85,10 +85,11 @@ Ziel: User kann Grant geben/zurückziehen, UX ist ehrlich.
 
 ### Phase 4 — Rollout (1–2 Tage)
 
-- [ ] **Feature-Flag**: `PUBLIC_AI_MISSION_GRANTS=false` default. Dogfood zuerst (till only), dann beta-tier, dann alpha.
-- [ ] **Status-Page**: blackbox-probe auf `mana-ai` `/health` existiert schon; zusätzlich Alerting auf `mana_ai_grant_scope_violations_total > 0` (darf nie vorkommen).
-- [ ] **Runbook**: Was tun wenn `MANA_AI_PRIVATE_KEY` leaked? → Keypair rotieren, alle Grants invalidieren (simples `UPDATE aiMissions SET grant=null`), User bekommen Re-Consent-Prompts.
-- [ ] **Docs-Update**: [`apps/docs/src/content/docs/architecture/security.mdx`](../../apps/docs/src/content/docs/architecture/security.mdx) — neuer Abschnitt "AI Mission Grants".
+- [x] **Feature-Flag**: `PUBLIC_AI_MISSION_GRANTS=false` default — Dialog + Audit-Tab sind gegated. Dogfood zuerst (till only), dann beta-tier, dann alpha.
+- [x] **Alerting**: `ManaAIGrantScopeViolation` (critical, any increment), `ManaAIGrantSkipsHigh` (warning, non-expired skips), `ManaAIPlannerParseFailures` in `docker/prometheus/alerts.yml`. Status-Page blackbox-probe auf `/health` laeuft bereits.
+- [x] **Runbook**: Keypair-initial + Keypair-Leak-Prozedur + Scope-Violation-Response weiter unten in diesem Dokument.
+- [x] **Docs-Update**: [`apps/docs/src/content/docs/architecture/security.mdx`](../../apps/docs/src/content/docs/architecture/security.mdx) — Abschnitt "AI Mission Grants" inkl. erweiterter Threat-Model-Zeilen.
+- [ ] **Keypair tatsaechlich erzeugen** auf Mac-Mini + in Secrets ablegen (nicht in diesem Repo — out-of-band).
 
 ---
 
@@ -130,6 +131,62 @@ Ziel: User kann Grant geben/zurückziehen, UX ist ehrlich.
 | **Resolver vergisst Audit-Write bei Exception** | Audit-Write im `try` **vor** dem Decrypt; wenn Decrypt failed, Audit-Row hat `{status: 'failed', reason}` |
 
 ---
+
+## Runbook
+
+### Keypair initial erzeugen (einmalig pro Deployment)
+
+```bash
+# Auf dem Mac-Mini (oder einer sicheren Arbeitsumgebung):
+openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out mana-ai.priv.pem
+openssl pkey -in mana-ai.priv.pem -pubout -out mana-ai.pub.pem
+
+# Als Env-Vars exportieren (Docker-Compose env_file / secrets):
+#   MANA_AI_PRIVATE_KEY_PEM  → mana-ai  (niemals ausserhalb des Services!)
+#   MANA_AI_PUBLIC_KEY_PEM   → mana-auth
+
+# Dann im Webapp-Build:
+#   PUBLIC_AI_MISSION_GRANTS=true  (Dialog + Audit-Tab aktivieren)
+```
+
+Beide Services loggen beim Boot ob das Feature aktiv ist; `GET /health`-Status aendert sich nicht.
+
+### "Was tun wenn `MANA_AI_PRIVATE_KEY_PEM` leaked?"
+
+Der Private-Key ist das einzige Geheimnis, das alle aktiven Grants entschluesseln kann. Leakt er, kann ein Angreifer **im Besitz des verschluesselten Grant-Blobs + der verschluesselten Records** den Plaintext rekonstruieren. Ohne die verschluesselten Records allein bringt der Key nichts — aber das ist eine duenne Grenze; im Zweifel: rotieren.
+
+Prozedur:
+
+1. **Neues Keypair erzeugen** (siehe oben). Unter keinen Umstaenden das alte wiederverwenden.
+2. **`MANA_AI_PRIVATE_KEY_PEM`** auf `mana-ai` austauschen → Service neustarten. Alle bestehenden Grants unwrappen ab jetzt mit `wrap-rejected` (neuer Private-Key passt nicht zum alten Wrap).
+3. **`MANA_AI_PUBLIC_KEY_PEM`** auf `mana-auth` austauschen → Service neustarten.
+4. **Alle bestehenden Grants invalidieren** — die sind mit dem alten Public-Key gewrappt und funktionslos. Im Postgres:
+   ```sql
+   UPDATE aiMissions SET grant = NULL
+   WHERE user_id = '<jeder>' AND grant IS NOT NULL;
+   ```
+   (Im Mana-Modell lebt das als `sync_changes`-Row auf `appId='ai'/table='aiMissions'`; einfacher ist eine leise Migration im `mana-sync` Admin-Backend.)
+5. **Audit-Trail** dokumentieren: Zeitpunkt Leak entdeckt / Keys getauscht / Grants invalidiert. Post-Mortem in `docs/postmortems/`.
+6. **User benachrichtigen**: Missions bleiben aktiv, laufen aber nur noch im Vordergrund bis der User den Zugriff erneut erteilt. Das ist nach Plan; Re-Consent-Prompt erscheint automatisch beim naechsten Mission-Edit.
+7. **Monitoring pruefen**: `mana_ai_grant_skips_total{reason="wrap-rejected"}` muss nach Schritt 2 kurz hoch gehen (alte Grants) und dann zurueck auf 0 sobald alle via Schritt 4 entfernt sind.
+
+### Scope-Violation Alarm reagiert
+
+Prometheus-Alert `ManaAIGrantScopeViolation` (critical, see `docker/prometheus/alerts.yml`) feuert bei `mana_ai_grant_scope_violations_total > 0`. Steady-State muss 0 sein — jede Zuendung ist entweder Bug oder Angriff.
+
+1. Letzte Scope-Violations auslesen:
+   ```sql
+   SELECT * FROM mana_ai.decrypt_audit
+   WHERE status = 'scope-violation'
+   ORDER BY ts DESC LIMIT 20;
+   ```
+2. `record_id` pruefen: gehoert die Record tatsaechlich zum User? Falls nein → kompromittierte Mission-Grant-Erzeugung, Nutzer sperren.
+3. Falls ja: Resolver-Bug. `services/mana-ai/src/db/resolvers/encrypted.ts` checken — die HKDF-Bindung sollte der Check eigentlich ueberfluessig machen. Wenn der Runtime-Check greift, stimmt etwas in der Derivation nicht.
+4. Mission temporaer pausieren:
+   ```sql
+   UPDATE aiMissions SET state = 'paused', grant = NULL
+   WHERE id = '<missionId>';
+   ```
 
 ## Nicht-Ziele
 

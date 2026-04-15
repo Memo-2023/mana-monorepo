@@ -75,6 +75,22 @@ export function getManaAiUrl(): string {
 }
 
 /**
+ * Feature flag for the AI Mission Key-Grant UI. When false, the consent
+ * dialog + "Server-Zugriff" box are hidden even on missions with
+ * encrypted inputs — missions simply stay foreground-only. Flip on per-
+ * deployment after the MANA_AI_PUBLIC/PRIVATE_KEY_PEM keypair is
+ * provisioned on both mana-auth and mana-ai.
+ */
+export function isMissionGrantsEnabled(): boolean {
+	if (browser && typeof window !== 'undefined') {
+		const flag = (window as unknown as { __PUBLIC_AI_MISSION_GRANTS__?: string })
+			.__PUBLIC_AI_MISSION_GRANTS__;
+		return flag === 'true';
+	}
+	return process.env.PUBLIC_AI_MISSION_GRANTS === 'true';
+}
+
+/**
  * Get the mana-mail service URL.
  * Hosts mail threads, send, labels, accounts.
  */
