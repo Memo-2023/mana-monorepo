@@ -25,6 +25,9 @@ export const AI_PROPOSABLE_TOOL_NAMES = [
 	'visit_place',
 	'undo_drink',
 	'save_news_article',
+	'update_note',
+	'append_to_note',
+	'add_tag_to_note',
 ] as const;
 
 export type AiProposableToolName = (typeof AI_PROPOSABLE_TOOL_NAMES)[number];

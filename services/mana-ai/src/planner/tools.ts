@@ -104,6 +104,48 @@ export const AI_AVAILABLE_TOOLS: readonly AvailableTool[] = [
 			},
 		],
 	},
+	{
+		name: 'update_note',
+		module: 'notes',
+		description:
+			'Überschreibt Titel und/oder Inhalt einer bestehenden Notiz. Destruktiv — bevorzuge append_to_note oder add_tag_to_note wenn du nur ergänzen willst.',
+		parameters: [
+			{ name: 'noteId', type: 'string', description: 'ID der Notiz', required: true },
+			{ name: 'title', type: 'string', description: 'Neuer Titel', required: false },
+			{
+				name: 'content',
+				type: 'string',
+				description: 'Neuer Inhalt (überschreibt vollständig)',
+				required: false,
+			},
+		],
+	},
+	{
+		name: 'append_to_note',
+		module: 'notes',
+		description:
+			'Hängt Text ans Ende des Inhalts einer bestehenden Notiz an (neue Zeile getrennt). Nicht-destruktiv.',
+		parameters: [
+			{ name: 'noteId', type: 'string', description: 'ID der Notiz', required: true },
+			{ name: 'content', type: 'string', description: 'Text zum Anhängen', required: true },
+		],
+	},
+	{
+		name: 'add_tag_to_note',
+		module: 'notes',
+		description:
+			'Fügt einen Hashtag (z.B. "#Natur") an eine bestehende Notiz an. Idempotent — wenn der Tag schon vorhanden ist, passiert nichts.',
+		parameters: [
+			{ name: 'noteId', type: 'string', description: 'ID der Notiz', required: true },
+			{
+				name: 'tag',
+				type: 'string',
+				description:
+					'Tag-Name (ohne #; z.B. "Natur", "Arbeit"). Leerzeichen werden durch _ ersetzt.',
+				required: true,
+			},
+		],
+	},
 ];
 
 export const AI_AVAILABLE_TOOL_NAMES = new Set<string>(AI_AVAILABLE_TOOLS.map((t) => t.name));
