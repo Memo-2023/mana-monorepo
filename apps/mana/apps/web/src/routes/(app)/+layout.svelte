@@ -1130,39 +1130,6 @@
 		}
 	}
 
-	.pill-nav-toggle {
-		width: 36px;
-		height: 36px;
-		flex-shrink: 0;
-		border-radius: 50%;
-		border: none;
-		background: hsl(var(--color-foreground, 0 0% 90%) / 0.08);
-		color: hsl(var(--color-foreground, 0 0% 90%) / 0.4);
-		cursor: pointer;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		transition:
-			background 0.15s ease,
-			color 0.15s ease;
-		padding: 0;
-	}
-
-	.pill-nav-toggle:hover {
-		background: hsl(var(--color-foreground, 0 0% 90%) / 0.15);
-		color: hsl(var(--color-foreground, 0 0% 90%) / 0.7);
-	}
-
-	.pill-nav-toggle-icon {
-		font-size: 11px;
-		transition: transform 0.3s ease;
-		display: inline-block;
-	}
-
-	.pill-nav-toggle-icon.collapsed {
-		transform: rotate(180deg);
-	}
-
 	.bottom-stack-notification {
 		display: flex;
 		justify-content: center;
