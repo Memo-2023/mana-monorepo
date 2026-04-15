@@ -75,6 +75,7 @@
 
 {#if scene}
 	<div class="scene-header">
+		<!-- prettier-ignore -->
 		<!-- svelte-ignore a11y_no_noninteractive_element_to_interactive_role -->
 		<h1
 			class="scene-name"
@@ -89,6 +90,7 @@
 		>
 			{scene.name}
 		</h1>
+		<!-- prettier-ignore -->
 		<!-- svelte-ignore a11y_no_noninteractive_element_to_interactive_role -->
 		<p
 			class="scene-desc"
@@ -112,7 +114,7 @@
 	.scene-header {
 		width: 420px;
 		max-width: 60vw;
-		padding: 2rem 2.5rem 2rem 0;
+		padding: 2rem 0.25rem 2rem 0;
 		display: flex;
 		flex-direction: column;
 		gap: 0.75rem;
@@ -183,7 +185,7 @@
 	@media (max-width: 639px) {
 		.scene-header {
 			width: 280px;
-			padding: 1.25rem 1.5rem 1.25rem 0;
+			padding: 1.25rem 0.25rem 1.25rem 0;
 			gap: 0.5rem;
 		}
 		.scene-desc {
