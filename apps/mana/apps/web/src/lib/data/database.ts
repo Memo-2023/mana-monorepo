@@ -516,6 +516,26 @@ db.version(18).stores({
 	aiMissions: 'id, state, createdAt, nextRunAt, [state+nextRunAt]',
 });
 
+// v19 — AI Agents: named personas that own Missions, carry policy +
+// memory, and show up as identities in the Workbench timeline.
+// Syncs cross-device so the same agent exists everywhere. Name
+// uniqueness is enforced at write time in the store (Dexie's unique
+// index would error on the default-agent-backfill race between two
+// tabs). See docs/plans/multi-agent-workbench.md §Phase 2b.
+db.version(19).stores({
+	agents: 'id, state, createdAt, name, [state+name]',
+});
+
+// v20 — AI Debug Log: per-iteration capture of the prompt sent to the
+// planner LLM, the raw response, the resolved-inputs the planner saw,
+// and any pre-step output (e.g. web-research). LOCAL-ONLY, never synced
+// (would leak personal context through mana-sync) — that is enforced by
+// keeping it out of every module's SYNC_APP_MAP. Capped to ~50 newest
+// rows by the writer so a long-running tab doesn't bloat IndexedDB.
+db.version(20).stores({
+	_aiDebugLog: 'iterationId, capturedAt',
+});
+
 // ─── Sync Routing ──────────────────────────────────────────
 // SYNC_APP_MAP, TABLE_TO_SYNC_NAME, TABLE_TO_APP, SYNC_NAME_TO_TABLE,
 // toSyncName() and fromSyncName() are now derived from per-module

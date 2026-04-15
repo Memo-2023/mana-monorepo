@@ -42,4 +42,17 @@ export interface PlannedStep {
 export interface AiPlanOutput {
 	readonly steps: readonly PlannedStep[];
 	readonly summary: string;
+	/**
+	 * Optional capture of the prompt + raw response, populated by the
+	 * planner implementation when AI Debug is enabled. The runner reads
+	 * this and persists it locally — never synced.
+	 */
+	readonly debug?: {
+		readonly systemPrompt: string;
+		readonly userPrompt: string;
+		readonly rawResponse: string;
+		readonly latencyMs: number;
+		readonly backendId?: string;
+		readonly model?: string;
+	};
 }

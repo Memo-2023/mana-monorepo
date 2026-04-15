@@ -21,6 +21,8 @@
 	import { productionDeps } from '$lib/data/ai/missions/setup';
 	import MissionInputPicker from '$lib/components/ai/MissionInputPicker.svelte';
 	import MissionGrantDialog from '$lib/components/ai/MissionGrantDialog.svelte';
+	import AiDebugBlock from '$lib/components/ai/AiDebugBlock.svelte';
+	import { isAiDebugEnabled, setAiDebugEnabled } from '$lib/data/ai/missions/debug';
 	import { isMissionGrantsEnabled } from '$lib/api/config';
 	import type { Mission, MissionCadence, MissionInputRef } from '$lib/data/ai/missions/types';
 
@@ -28,6 +30,12 @@
 
 	let mode = $state<'list' | 'create' | 'detail'>('list');
 	let selectedId = $state<string | null>(null);
+	let debugEnabled = $state(isAiDebugEnabled());
+
+	function toggleDebug() {
+		debugEnabled = !debugEnabled;
+		setAiDebugEnabled(debugEnabled);
+	}
 	const selected = $derived(
 		selectedId ? (missions.value.find((m) => m.id === selectedId) ?? null) : null
 	);
@@ -294,6 +302,10 @@
 			<button type="button" onclick={() => handleRunNow(selected)} disabled={runningNow}>
 				<Play size={12} /><span>{runningNow ? 'Läuft…' : 'Jetzt ausführen'}</span>
 			</button>
+			<label class="debug-toggle" title="Erfasst Prompts + Responses lokal pro Iteration">
+				<input type="checkbox" checked={debugEnabled} onchange={toggleDebug} />
+				<span>🔍 Debug</span>
+			</label>
 			{#if selected.state === 'active'}
 				<button type="button" onclick={() => pauseMission(selected.id)}>
 					<Pause size={12} /><span>Pause</span>
@@ -443,6 +455,8 @@
 							</button>
 						</div>
 					{/if}
+
+					<AiDebugBlock iterationId={it.id} />
 
 					{#if it.userFeedback}
 						<blockquote class="fb">{it.userFeedback}</blockquote>
@@ -636,6 +650,22 @@
 	}
 	.detail-actions button.danger {
 		color: hsl(var(--color-error));
+	}
+	.debug-toggle {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.25rem;
+		margin-left: auto;
+		padding: 0.25rem 0.5rem;
+		border: 1px solid hsl(var(--color-border));
+		border-radius: 0.375rem;
+		font-size: 0.75rem;
+		color: hsl(var(--color-muted-foreground));
+		cursor: pointer;
+		user-select: none;
+	}
+	.debug-toggle input {
+		margin: 0;
 	}
 	.meta {
 		display: grid;

@@ -32,7 +32,10 @@ import { executeTool } from '../../tools/executor';
 import { db } from '../../database';
 import { decryptRecords } from '../../crypto';
 import { researchApi } from '$lib/api/research';
+import { isAiDebugEnabled, recordAiDebug, type AiDebugEntry } from './debug';
 import { makeAgentActor, LEGACY_AI_PRINCIPAL, type Actor } from '../../events/actor';
+import { getAgent } from '../agents/store';
+import { DEFAULT_AGENT_NAME } from '../agents/types';
 import type { Mission, MissionIteration, PlanStep } from './types';
 import type { AiPlanInput, AiPlanOutput, PlannedStep, ResolvedInput } from './planner/types';
 
@@ -109,12 +112,15 @@ export async function runMission(
 	// Use the id the store generates so finishIteration updates the same row.
 	const startedIteration = await startIteration(mission.id, { plan: [] });
 	const iterationId = startedIteration.id;
-	// Phase 1: agent identity not yet wired (Phase 2 will). Use the
-	// legacy AI principal so every write is still identity-aware; the
-	// Phase-2 migration will rewrite these to a real agentId.
+
+	// Resolve the owning agent. Missions that pre-date the Multi-Agent
+	// rollout or whose agent was deleted fall back to the legacy
+	// principal + default name — runner still attributes cleanly, UI
+	// renders the work as "Mana".
+	const owningAgent = mission.agentId ? await getAgent(mission.agentId) : null;
 	const aiActor = makeAgentActor({
-		agentId: LEGACY_AI_PRINCIPAL,
-		displayName: 'Mana',
+		agentId: owningAgent?.id ?? LEGACY_AI_PRINCIPAL,
+		displayName: owningAgent?.name ?? DEFAULT_AGENT_NAME,
 		missionId: mission.id,
 		iterationId,
 		rationale: mission.objective,
@@ -161,6 +167,7 @@ export async function runMission(
 		);
 		const baseInputs = await resolveMissionInputs(mission!.inputs);
 		const resolvedInputs: ResolvedInput[] = [...baseInputs];
+		const preStep: AiDebugEntry['preStep'] = { kontextInjected: false };
 
 		// Auto-inject the kontext singleton (if non-empty and not already
 		// linked) so every mission has the user's standing context as
@@ -168,7 +175,10 @@ export async function runMission(
 		const alreadyHasKontext = mission!.inputs.some((i) => i.module === 'kontext');
 		if (!alreadyHasKontext) {
 			const kontextEntry = await loadKontextAsResolvedInput();
-			if (kontextEntry) resolvedInputs.push(kontextEntry);
+			if (kontextEntry) {
+				resolvedInputs.push(kontextEntry);
+				preStep.kontextInjected = true;
+			}
 		}
 
 		// Pre-step web research: if the objective looks like research,
@@ -180,12 +190,20 @@ export async function runMission(
 		if (RESEARCH_TRIGGER.test(mission!.objective)) {
 			await enterPhase('resolving-inputs', 'Web-Recherche…');
 			try {
-				const researchEntry = await runWebResearch(mission!);
-				if (researchEntry) resolvedInputs.push(researchEntry);
+				const research = await runWebResearch(mission!);
+				if (research) {
+					resolvedInputs.push(research.input);
+					preStep.webResearch = {
+						ok: true,
+						sourceCount: research.sourceCount,
+						summary: research.summary,
+					};
+				}
 			} catch (err) {
 				const msg = err instanceof Error ? err.message : String(err);
 				console.warn('[MissionRunner] web-research pre-step failed:', err);
 				await enterPhase('resolving-inputs', `Web-Recherche fehlgeschlagen: ${msg.slice(0, 80)}`);
+				preStep.webResearch = { ok: false, error: msg };
 				resolvedInputs.push({
 					id: 'web-research-error',
 					module: 'research',
@@ -209,8 +227,41 @@ export async function runMission(
 
 		// ── Phase: calling-llm ─────────────────────────────────
 		await enterPhase('calling-llm', 'frage Planner an');
-		const plan = await deps.plan({ mission: mission!, resolvedInputs, availableTools });
+		let plan: AiPlanOutput;
+		try {
+			plan = await deps.plan({ mission: mission!, resolvedInputs, availableTools });
+		} catch (err) {
+			// Capture even the failure for debug visibility before re-throwing.
+			if (isAiDebugEnabled()) {
+				void recordAiDebug({
+					iterationId,
+					missionId: mission!.id,
+					missionTitle: mission!.title,
+					missionObjective: mission!.objective,
+					capturedAt: new Date().toISOString(),
+					resolvedInputs,
+					preStep,
+					plannerError: err instanceof Error ? err.message : String(err),
+				});
+			}
+			throw err;
+		}
 		await checkCancel();
+
+		// Persist debug capture if enabled. Off by default in production
+		// (toggle via Settings or `localStorage.setItem('mana.ai.debug','1')`).
+		if (isAiDebugEnabled()) {
+			void recordAiDebug({
+				iterationId,
+				missionId: mission!.id,
+				missionTitle: mission!.title,
+				missionObjective: mission!.objective,
+				capturedAt: new Date().toISOString(),
+				resolvedInputs,
+				preStep,
+				planner: plan.debug,
+			});
+		}
 
 		// ── Phase: parsing-response ────────────────────────────
 		await enterPhase('parsing-response', `${plan.steps.length} Step(s) erhalten`);
@@ -360,7 +411,13 @@ async function loadKontextAsResolvedInput(): Promise<ResolvedInput | null> {
 /** Run the deep-research pipeline against the mission objective and
  *  collapse its summary + sources into one ResolvedInput formatted so
  *  the planner can copy URLs into save_news_article calls. */
-async function runWebResearch(mission: Mission): Promise<ResolvedInput | null> {
+interface WebResearchOutcome {
+	input: ResolvedInput;
+	sourceCount: number;
+	summary: string;
+}
+
+async function runWebResearch(mission: Mission): Promise<WebResearchOutcome | null> {
 	const result = await researchApi.startSync({
 		// Tag the run with the mission id so backend logs can correlate.
 		questionId: `mission:${mission.id}`,
@@ -387,11 +444,15 @@ async function runWebResearch(mission: Mission): Promise<ResolvedInput | null> {
 	].join('\n');
 
 	return {
-		id: result.id,
-		module: 'research',
-		table: 'researchResults',
-		title: 'Web-Recherche zu diesem Auftrag',
-		content,
+		input: {
+			id: result.id,
+			module: 'research',
+			table: 'researchResults',
+			title: 'Web-Recherche zu diesem Auftrag',
+			content,
+		},
+		sourceCount: sources.length,
+		summary: result.summary,
 	};
 }
 

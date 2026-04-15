@@ -48,6 +48,16 @@ export const aiPlanTask: LlmTask<AiPlanInput, AiPlanOutput> = {
 			maxTokens: 1024,
 		});
 
+		// Always populate debug payload (cheap — strings already in memory).
+		// The runner decides whether to persist it based on the user's
+		// localStorage `mana.ai.debug` toggle.
+		const debug = {
+			systemPrompt: system,
+			userPrompt: user,
+			rawResponse: result.content,
+			latencyMs: result.latencyMs,
+		};
+
 		const knownToolNames = new Set(input.availableTools.map((t) => t.name));
 		const parsed = parsePlannerResponse(result.content, knownToolNames);
 
@@ -55,8 +65,9 @@ export const aiPlanTask: LlmTask<AiPlanInput, AiPlanOutput> = {
 			return {
 				steps: [],
 				summary: `Plan konnte nicht erzeugt werden: ${parsed.reason}`,
+				debug,
 			};
 		}
-		return parsed.value;
+		return { ...parsed.value, debug };
 	},
 };
