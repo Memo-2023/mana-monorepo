@@ -75,5 +75,13 @@ export {
 	type PolicyDecision,
 } from './policy';
 
-export type { Agent, AgentState } from './agents';
-export { DEFAULT_AGENT_ID, DEFAULT_AGENT_NAME } from './agents';
+export type {
+	Agent,
+	AgentState,
+	AgentTemplate,
+	AgentTemplateAgentPart,
+	AgentTemplateScenePart,
+	AgentTemplateSceneApp,
+	AgentTemplateMissionPart,
+} from './agents';
+export { DEFAULT_AGENT_ID, DEFAULT_AGENT_NAME, ALL_TEMPLATES, getTemplateById } from './agents';

@@ -17,8 +17,10 @@
   handle the common "let the agent touch todo but not calendar" case.
 -->
 <script lang="ts">
-	import { ArrowLeft, Plus, Pause, Play, Archive, Trash } from '@mana/shared-icons';
+	import { ArrowLeft, Plus, Pause, Play, Archive, Trash, Sparkle } from '@mana/shared-icons';
+	import { goto } from '$app/navigation';
 	import { useAgents } from '$lib/data/ai/agents/queries';
+	import { DEFAULT_AGENT_ID } from '@mana/shared-ai';
 	import {
 		createAgent,
 		updateAgent,
@@ -215,16 +217,34 @@
 </script>
 
 {#if mode === 'list'}
+	{@const onlyDefaultAgent = agents.value.length === 1 && agents.value[0].id === DEFAULT_AGENT_ID}
 	<div class="pane">
 		<header class="bar">
-			<button type="button" class="primary" onclick={() => (mode = 'create')}>
-				<Plus size={14} /><span>Neuer Agent</span>
+			<button type="button" class="primary" onclick={() => goto('/agents/templates')}>
+				<Sparkle size={14} /><span>Aus Template</span>
+			</button>
+			<button type="button" class="secondary" onclick={() => (mode = 'create')}>
+				<Plus size={14} /><span>Eigener Agent</span>
 			</button>
 		</header>
+
+		{#if onlyDefaultAgent}
+			<button type="button" class="promo" onclick={() => goto('/agents/templates')}>
+				<span class="promo-icon"><Sparkle size={16} weight="fill" /></span>
+				<span class="promo-body">
+					<strong>Starte mit einem Template</strong>
+					<span class="promo-sub">
+						Recherche · Kontext · Today — vorgefertigte Agenten mit passender Scene und
+						Starter-Mission.
+					</span>
+				</span>
+			</button>
+		{/if}
+
 		{#if agents.value.length === 0}
 			<p class="empty">
 				Noch keine Agenten. Ein Default-Agent „Mana" wird beim ersten Login automatisch angelegt;
-				für weitere persona-basierte Agenten klicke auf „Neuer Agent".
+				für weitere persona-basierte Agenten klicke auf „Aus Template" oder „Eigener Agent".
 			</p>
 		{:else}
 			<ul class="m-list">
@@ -446,6 +466,7 @@
 	.bar {
 		display: flex;
 		justify-content: flex-end;
+		gap: 0.375rem;
 	}
 	.primary {
 		display: inline-flex;
@@ -462,6 +483,52 @@
 	}
 	.primary:disabled {
 		opacity: 0.5;
+	}
+	.secondary {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.375rem;
+		padding: 0.375rem 0.75rem;
+		border: 1px solid hsl(var(--color-border));
+		border-radius: 0.375rem;
+		background: hsl(var(--color-surface));
+		color: hsl(var(--color-muted-foreground));
+		cursor: pointer;
+		font: inherit;
+		font-size: 0.8125rem;
+	}
+	.promo {
+		display: flex;
+		gap: 0.625rem;
+		align-items: center;
+		width: 100%;
+		padding: 0.75rem 0.875rem;
+		border: 1px dashed color-mix(in oklab, hsl(var(--color-primary)) 50%, transparent);
+		border-radius: 0.5rem;
+		background: color-mix(in oklab, hsl(var(--color-primary)) 6%, hsl(var(--color-surface)));
+		color: hsl(var(--color-foreground));
+		text-align: left;
+		cursor: pointer;
+		font: inherit;
+	}
+	.promo:hover {
+		background: color-mix(in oklab, hsl(var(--color-primary)) 10%, hsl(var(--color-surface)));
+	}
+	.promo-icon {
+		color: hsl(var(--color-primary));
+		flex-shrink: 0;
+	}
+	.promo-body {
+		display: flex;
+		flex-direction: column;
+		gap: 0.125rem;
+	}
+	.promo-body strong {
+		font-size: 0.875rem;
+	}
+	.promo-sub {
+		font-size: 0.75rem;
+		color: hsl(var(--color-muted-foreground));
 	}
 	.empty {
 		padding: 1.5rem 1rem;
