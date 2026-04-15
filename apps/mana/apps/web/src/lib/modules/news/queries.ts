@@ -85,6 +85,7 @@ export function toPreferences(local: LocalPreferences): Preferences {
 		sourceWeights:
 			local.sourceWeights && typeof local.sourceWeights === 'object' ? local.sourceWeights : {},
 		onboardingCompleted: local.onboardingCompleted ?? false,
+		customFeeds: Array.isArray(local.customFeeds) ? local.customFeeds : [],
 	};
 }
 

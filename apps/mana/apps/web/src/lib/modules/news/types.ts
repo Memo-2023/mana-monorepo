@@ -78,6 +78,16 @@ export interface LocalCategory extends BaseRecord {
  */
 export const PREFERENCES_ID = 'singleton';
 
+export interface CustomFeed {
+	id: string;
+	url: string;
+	title: string;
+	/** Optional topic tag from the standard taxonomy. */
+	topic?: Topic;
+	/** Epoch ms when the user pinned this feed. */
+	pinnedAt: number;
+}
+
 export interface LocalPreferences extends BaseRecord {
 	id: string;
 	selectedTopics: Topic[];
@@ -88,6 +98,12 @@ export interface LocalPreferences extends BaseRecord {
 	/** source slug → weight (default 1.0, range ~0.1 to 3.0). */
 	sourceWeights: Record<string, number>;
 	onboardingCompleted: boolean;
+	/**
+	 * User-subscribed RSS feeds, populated from the News Research module's
+	 * "Pin feed" action. Not ingested centrally — the client fetches these
+	 * on its own schedule (see feed-cache).
+	 */
+	customFeeds?: CustomFeed[];
 }
 
 // ─── Reactions ─────────────────────────────────────────────
@@ -169,6 +185,7 @@ export interface Preferences {
 	topicWeights: Record<string, number>;
 	sourceWeights: Record<string, number>;
 	onboardingCompleted: boolean;
+	customFeeds: CustomFeed[];
 }
 
 export interface Reaction {

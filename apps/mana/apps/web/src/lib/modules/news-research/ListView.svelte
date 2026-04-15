@@ -1,0 +1,430 @@
+<!--
+  News Research — Workbench ListView.
+
+  Compact inline variant of /news-research. One card, scrolled; the user
+  runs discovery, picks feeds, searches articles, pins/saves/exports
+  without leaving the workbench.
+
+  Stateful session is shared with the /news-research route via
+  `researchSessionStore` (sessionStorage-backed), so moving between
+  workbench card and full page keeps results.
+-->
+<script lang="ts">
+	import { goto } from '$app/navigation';
+	import type { ViewProps } from '$lib/app-registry';
+	import { researchSessionStore } from '$lib/modules/news-research/stores/session.svelte';
+	import { articlesStore } from '$lib/modules/news/stores/articles.svelte';
+	import { preferencesStore } from '$lib/modules/news/stores/preferences.svelte';
+	import { usePreferences } from '$lib/modules/news/queries';
+
+	const {}: ViewProps = $props();
+
+	const store = researchSessionStore;
+	const prefs$ = usePreferences();
+	const pinnedUrls = $derived(new Set((prefs$.value?.customFeeds ?? []).map((f) => f.url)));
+
+	let mode = $state<'query' | 'site'>('query');
+	let query = $state('');
+	let siteUrl = $state('');
+	let searchQuery = $state('');
+	let savingUrl = $state<string | null>(null);
+	let saveError = $state<string | null>(null);
+	let copyLabel = $state('Kopieren');
+	let feedsOpen = $state(true);
+
+	function isUrl(s: string): boolean {
+		try {
+			const u = new URL(s.trim());
+			return u.protocol === 'http:' || u.protocol === 'https:';
+		} catch {
+			return false;
+		}
+	}
+
+	async function onDiscover(e: Event) {
+		e.preventDefault();
+		if (mode === 'query' && query.trim().length > 2) {
+			await store.discoverByQuery(query.trim());
+			if (!searchQuery) searchQuery = query.trim();
+		} else if (mode === 'site' && isUrl(siteUrl)) {
+			await store.discoverBySite(siteUrl.trim());
+		}
+	}
+
+	async function onSearch(e: Event) {
+		e.preventDefault();
+		if (!searchQuery.trim()) return;
+		await store.runSearch(searchQuery.trim());
+		feedsOpen = false;
+	}
+
+	async function togglePin(feed: { url: string; title: string | null }) {
+		if (pinnedUrls.has(feed.url)) {
+			const existing = (prefs$.value?.customFeeds ?? []).find((f) => f.url === feed.url);
+			if (existing) await preferencesStore.unpinCustomFeed(existing.id);
+		} else {
+			await preferencesStore.pinCustomFeed({ url: feed.url, title: feed.title ?? feed.url });
+		}
+	}
+
+	async function onSave(articleUrl: string) {
+		savingUrl = articleUrl;
+		saveError = null;
+		try {
+			const article = await articlesStore.saveFromUrl(articleUrl);
+			goto(`/news/${article.id}`);
+		} catch (err) {
+			saveError = err instanceof Error ? err.message : 'Speichern fehlgeschlagen';
+			savingUrl = null;
+		}
+	}
+
+	async function onCopy() {
+		try {
+			await navigator.clipboard.writeText(store.buildAiContext());
+			copyLabel = '✓';
+			setTimeout(() => (copyLabel = 'Kopieren'), 1200);
+		} catch {
+			copyLabel = 'Fehler';
+		}
+	}
+
+	function formatDate(iso: string | null): string {
+		if (!iso) return '';
+		try {
+			return new Date(iso).toLocaleDateString('de-DE', { month: 'short', day: 'numeric' });
+		} catch {
+			return '';
+		}
+	}
+</script>
+
+<div class="wrap">
+	<section class="slot">
+		<div class="mode-switch">
+			<button type="button" class:active={mode === 'query'} onclick={() => (mode = 'query')}
+				>Thema</button
+			>
+			<button type="button" class:active={mode === 'site'} onclick={() => (mode = 'site')}
+				>Website</button
+			>
+			<a class="open-full" href="/news-research" title="Als volle Seite öffnen">↗</a>
+		</div>
+
+		<form onsubmit={onDiscover} class="row">
+			{#if mode === 'query'}
+				<input
+					type="text"
+					placeholder="z.B. KI-Regulierung, Klimawandel"
+					bind:value={query}
+					disabled={store.discovering}
+				/>
+				<button type="submit" disabled={store.discovering || query.trim().length < 3}>
+					{store.discovering ? '…' : 'Finden'}
+				</button>
+			{:else}
+				<input
+					type="url"
+					placeholder="https://…"
+					bind:value={siteUrl}
+					disabled={store.discovering}
+				/>
+				<button type="submit" disabled={store.discovering || !isUrl(siteUrl)}>
+					{store.discovering ? '…' : 'Entdecken'}
+				</button>
+			{/if}
+		</form>
+		{#if store.error}<div class="error">{store.error}</div>{/if}
+	</section>
+
+	{#if store.session.discoveredFeeds.length > 0}
+		<section class="slot">
+			<button type="button" class="collapse" onclick={() => (feedsOpen = !feedsOpen)}>
+				<span
+					>Feeds ({store.session.selectedFeeds.length}/{store.session.discoveredFeeds.length})</span
+				>
+				<span>{feedsOpen ? '▾' : '▸'}</span>
+			</button>
+			{#if feedsOpen}
+				<ul class="feeds">
+					{#each store.session.discoveredFeeds as feed (feed.url)}
+						<li>
+							<label>
+								<input
+									type="checkbox"
+									checked={store.session.selectedFeeds.includes(feed.url)}
+									onchange={() => store.toggleFeed(feed.url)}
+								/>
+								<span class="ft">{feed.title ?? feed.url}</span>
+							</label>
+							<button
+								type="button"
+								class="pin"
+								class:pinned={pinnedUrls.has(feed.url)}
+								onclick={() => togglePin(feed)}
+								title={pinnedUrls.has(feed.url) ? 'Abo entfernen' : 'Abonnieren'}
+							>
+								{pinnedUrls.has(feed.url) ? '★' : '☆'}
+							</button>
+						</li>
+					{/each}
+				</ul>
+			{/if}
+
+			<form onsubmit={onSearch} class="row">
+				<input
+					type="text"
+					placeholder="Artikel filtern"
+					bind:value={searchQuery}
+					disabled={store.searching}
+				/>
+				<button
+					type="submit"
+					disabled={store.searching ||
+						!searchQuery.trim() ||
+						store.session.selectedFeeds.length === 0}
+				>
+					{store.searching ? '…' : 'Suchen'}
+				</button>
+			</form>
+		</section>
+	{/if}
+
+	{#if store.session.results.length > 0}
+		<section class="slot">
+			<div class="results-head">
+				<span>Treffer ({store.session.results.length})</span>
+				<button type="button" class="ctx" onclick={onCopy}>KI-Kontext: {copyLabel}</button>
+			</div>
+			{#if saveError}<div class="error">{saveError}</div>{/if}
+			<ul class="results">
+				{#each store.session.results as a (a.url)}
+					<li>
+						<a href={a.url} target="_blank" rel="noreferrer" class="rt">{a.title}</a>
+						<div class="rm">
+							<span>{formatDate(a.publishedAt)}</span>
+							<span>·</span>
+							<span>Score {a.score}</span>
+							<button
+								type="button"
+								class="save"
+								disabled={savingUrl === a.url}
+								onclick={() => onSave(a.url)}
+							>
+								{savingUrl === a.url ? '…' : 'Speichern'}
+							</button>
+						</div>
+					</li>
+				{/each}
+			</ul>
+		</section>
+	{/if}
+
+	{#if store.session.discoveredFeeds.length === 0 && !store.discovering}
+		<section class="empty">
+			{#if store.session.hasDiscovered && !store.error}
+				Keine passenden Feeds gefunden. Versuche andere Stichworte oder den „Website"-Modus.
+			{:else if !store.session.hasDiscovered}
+				Entdecke zum Thema passende RSS-Feeds, filtere Artikel und übergib sie deiner KI als
+				Kontext.
+			{/if}
+		</section>
+	{/if}
+</div>
+
+<style>
+	.wrap {
+		display: flex;
+		flex-direction: column;
+		gap: 0.65rem;
+		padding: 0.65rem;
+		height: 100%;
+		overflow-y: auto;
+	}
+	.slot {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		padding: 0.55rem;
+		border: 1px solid var(--border, #e5e5e5);
+		border-radius: 0.5rem;
+		background: var(--surface, #fff);
+	}
+	.empty {
+		color: var(--text-muted, #888);
+		font-size: 0.85rem;
+		padding: 0.75rem;
+		text-align: center;
+	}
+	.mode-switch {
+		display: flex;
+		gap: 0.2rem;
+		align-items: center;
+		background: var(--surface-alt, #f4f4f4);
+		padding: 0.2rem;
+		border-radius: 0.4rem;
+	}
+	.mode-switch button {
+		flex: 1;
+		background: transparent;
+		border: none;
+		padding: 0.3rem 0.5rem;
+		border-radius: 0.3rem;
+		cursor: pointer;
+		font-size: 0.8rem;
+		color: var(--text, #333);
+	}
+	.mode-switch button.active {
+		background: var(--surface, #fff);
+		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+	}
+	.open-full {
+		padding: 0 0.4rem;
+		text-decoration: none;
+		color: var(--text-muted, #888);
+		font-size: 0.9rem;
+	}
+	.row {
+		display: flex;
+		gap: 0.35rem;
+	}
+	.row input {
+		flex: 1;
+		min-width: 0;
+		padding: 0.35rem 0.5rem;
+		border: 1px solid var(--border, #e5e5e5);
+		border-radius: 0.35rem;
+		background: var(--surface, #fff);
+		color: var(--text, #333);
+		font-size: 0.85rem;
+	}
+	.row button {
+		padding: 0.35rem 0.7rem;
+		border: none;
+		border-radius: 0.35rem;
+		background: var(--accent, #0891b2);
+		color: white;
+		cursor: pointer;
+		font-size: 0.8rem;
+		white-space: nowrap;
+	}
+	.row button:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+	.collapse {
+		display: flex;
+		justify-content: space-between;
+		background: transparent;
+		border: none;
+		padding: 0.2rem 0;
+		cursor: pointer;
+		font-size: 0.85rem;
+		color: var(--text, #333);
+		font-weight: 500;
+	}
+	.feeds,
+	.results {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0.3rem;
+		max-height: 180px;
+		overflow-y: auto;
+	}
+	.feeds li {
+		display: flex;
+		gap: 0.35rem;
+		align-items: center;
+	}
+	.feeds li label {
+		display: flex;
+		align-items: center;
+		gap: 0.35rem;
+		flex: 1;
+		min-width: 0;
+		cursor: pointer;
+		font-size: 0.8rem;
+	}
+	.ft {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	.pin {
+		background: transparent;
+		border: none;
+		cursor: pointer;
+		font-size: 0.95rem;
+		color: var(--text-muted, #888);
+		padding: 0 0.25rem;
+	}
+	.pin.pinned {
+		color: var(--accent, #0891b2);
+	}
+	.results-head {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		font-size: 0.85rem;
+		font-weight: 500;
+		color: var(--text, #333);
+	}
+	.ctx {
+		background: var(--surface-alt, #f4f4f4);
+		border: 1px solid var(--border, #e5e5e5);
+		border-radius: 0.3rem;
+		padding: 0.2rem 0.5rem;
+		font-size: 0.75rem;
+		cursor: pointer;
+		color: var(--text, #333);
+	}
+	.results li {
+		display: flex;
+		flex-direction: column;
+		gap: 0.2rem;
+		padding: 0.35rem;
+		border: 1px solid var(--border, #eee);
+		border-radius: 0.35rem;
+	}
+	.rt {
+		font-size: 0.85rem;
+		font-weight: 600;
+		color: var(--text, #333);
+		text-decoration: none;
+		line-height: 1.25;
+	}
+	.rt:hover {
+		text-decoration: underline;
+	}
+	.rm {
+		display: flex;
+		gap: 0.3rem;
+		align-items: center;
+		font-size: 0.7rem;
+		color: var(--text-muted, #888);
+	}
+	.save {
+		margin-left: auto;
+		background: transparent;
+		border: 1px solid var(--border, #e5e5e5);
+		border-radius: 0.25rem;
+		padding: 0.1rem 0.4rem;
+		font-size: 0.7rem;
+		cursor: pointer;
+		color: var(--text, #333);
+	}
+	.save:disabled {
+		opacity: 0.5;
+	}
+	.error {
+		background: #fee;
+		border: 1px solid #fcc;
+		color: #900;
+		padding: 0.35rem 0.5rem;
+		border-radius: 0.35rem;
+		font-size: 0.8rem;
+	}
+</style>

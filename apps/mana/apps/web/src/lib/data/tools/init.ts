@@ -30,6 +30,7 @@ import { guidesTools } from '$lib/modules/guides/tools';
 import { inventoryTools } from '$lib/modules/inventory/tools';
 import { plantsTools } from '$lib/modules/plants/tools';
 import { newsTools } from '$lib/modules/news/tools';
+import { newsResearchTools } from '$lib/modules/news-research/tools';
 import { recipesTools } from '$lib/modules/recipes/tools';
 import { questionsTools } from '$lib/modules/questions/tools';
 import { meditateTools } from '$lib/modules/meditate/tools';
@@ -65,6 +66,7 @@ export function initTools(): void {
 	registerTools(inventoryTools);
 	registerTools(plantsTools);
 	registerTools(newsTools);
+	registerTools(newsResearchTools);
 	registerTools(recipesTools);
 	registerTools(questionsTools);
 	registerTools(meditateTools);

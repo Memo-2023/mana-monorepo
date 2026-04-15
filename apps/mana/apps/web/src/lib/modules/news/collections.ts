@@ -31,4 +31,5 @@ export const DEFAULT_PREFERENCES: LocalPreferences = {
 	topicWeights: {},
 	sourceWeights: {},
 	onboardingCompleted: false,
+	customFeeds: [],
 };

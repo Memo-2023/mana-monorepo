@@ -9,7 +9,7 @@
 import { encryptRecord } from '$lib/data/crypto';
 import { preferencesTable, DEFAULT_PREFERENCES } from '../collections';
 import { toPreferences } from '../queries';
-import type { LocalPreferences, Preferences, Topic, Language } from '../types';
+import type { CustomFeed, LocalPreferences, Preferences, Topic, Language } from '../types';
 import { PREFERENCES_ID } from '../types';
 
 async function ensureRow(): Promise<LocalPreferences> {
@@ -95,6 +95,41 @@ export const preferencesStore = {
 		};
 		await encryptRecord('newsPreferences', update);
 		await preferencesTable.update(PREFERENCES_ID, update);
+	},
+
+	async pinCustomFeed(feed: { url: string; title: string; topic?: Topic }): Promise<void> {
+		const row = await ensureRow();
+		const existing = Array.isArray(row.customFeeds) ? row.customFeeds : [];
+		if (existing.some((f) => f.url === feed.url)) return;
+		const next: CustomFeed[] = [
+			...existing,
+			{
+				id: crypto.randomUUID(),
+				url: feed.url,
+				title: feed.title,
+				topic: feed.topic,
+				pinnedAt: Date.now(),
+			},
+		];
+		const diff: Partial<LocalPreferences> = {
+			customFeeds: next,
+			updatedAt: new Date().toISOString(),
+		};
+		await encryptRecord('newsPreferences', diff);
+		await preferencesTable.update(PREFERENCES_ID, diff);
+	},
+
+	async unpinCustomFeed(id: string): Promise<void> {
+		const row = await ensureRow();
+		const existing = Array.isArray(row.customFeeds) ? row.customFeeds : [];
+		const next = existing.filter((f) => f.id !== id);
+		if (next.length === existing.length) return;
+		const diff: Partial<LocalPreferences> = {
+			customFeeds: next,
+			updatedAt: new Date().toISOString(),
+		};
+		await encryptRecord('newsPreferences', diff);
+		await preferencesTable.update(PREFERENCES_ID, diff);
 	},
 
 	async resetWeights(): Promise<void> {

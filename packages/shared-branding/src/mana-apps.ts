@@ -480,6 +480,23 @@ export const MANA_APPS: ManaApp[] = [
 		requiredTier: 'guest',
 	},
 	{
+		id: 'news-research',
+		name: 'News Research',
+		description: {
+			de: 'RSS-Feeds finden & durchsuchen',
+			en: 'Find & search RSS feeds',
+		},
+		longDescription: {
+			de: 'Entdecke zum Thema passende RSS-Feeds, filtere die Artikel nach Stichworten und exportiere die Treffer als KI-Kontext oder in deine Leseliste.',
+			en: 'Discover topic-matched RSS feeds, filter articles by keyword, and export hits as AI context or into your reading list.',
+		},
+		icon: APP_ICONS['news-research'],
+		color: '#0891b2',
+		comingSoon: false,
+		status: 'development',
+		requiredTier: 'guest',
+	},
+	{
 		id: 'calc',
 		name: 'Calc',
 		description: {

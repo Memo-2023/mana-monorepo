@@ -335,7 +335,7 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	newsCategories: { enabled: true, fields: ['name'] },
 	newsPreferences: {
 		enabled: true,
-		fields: ['selectedTopics', 'blockedSources', 'topicWeights', 'sourceWeights'],
+		fields: ['selectedTopics', 'blockedSources', 'topicWeights', 'sourceWeights', 'customFeeds'],
 	},
 	newsReactions: { enabled: true, fields: ['reaction', 'sourceSlug', 'topic'] },
 
