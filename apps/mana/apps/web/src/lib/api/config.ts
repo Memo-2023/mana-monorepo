@@ -61,6 +61,20 @@ export function getManaCreditsUrl(): string {
 }
 
 /**
+ * Get the mana-ai service URL.
+ * Hosts the background Mission Runner, decrypt-audit read endpoint,
+ * Prometheus metrics.
+ */
+export function getManaAiUrl(): string {
+	if (browser && typeof window !== 'undefined') {
+		const injected = (window as unknown as { __PUBLIC_MANA_AI_URL__?: string })
+			.__PUBLIC_MANA_AI_URL__;
+		return injected || 'http://localhost:3066';
+	}
+	return process.env.PUBLIC_MANA_AI_URL || 'http://localhost:3066';
+}
+
+/**
  * Get the mana-mail service URL.
  * Hosts mail threads, send, labels, accounts.
  */

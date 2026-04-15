@@ -15,6 +15,8 @@ export type {
 	MissionInputRef,
 	MissionIteration,
 	MissionState,
+	MissionGrant,
+	GrantDerivation,
 	PlanStep,
 } from '@mana/shared-ai';
 

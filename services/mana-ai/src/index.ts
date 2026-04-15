@@ -11,6 +11,7 @@
  */
 
 import { Hono } from 'hono';
+import { authMiddleware } from '@mana/shared-hono';
 import { loadConfig } from './config';
 import { closeSql, getSql } from './db/connection';
 import { migrate } from './db/migrate';
@@ -18,6 +19,7 @@ import { runTickOnce, startTick, stopTick, isTickRunning } from './cron/tick';
 import { serviceAuth } from './middleware/service-auth';
 import { register, httpRequestsTotal, httpRequestDuration } from './metrics';
 import { configureMissionGrantKey } from './crypto/unwrap-grant';
+import { readDecryptAudit } from './db/audit-read';
 
 const config = loadConfig();
 
@@ -65,6 +67,24 @@ app.use('/internal/*', serviceAuth(config.serviceKey));
 app.post('/internal/tick', async (c) => {
 	const stats = await runTickOnce(config);
 	return c.json(stats);
+});
+
+// ─── User-facing audit read ─────────────────────────────────
+// JWT-gated. Powers the "Mission → Datenzugriff" tab in the webapp
+// Workbench. RLS + withUser ensure the caller only ever sees their own
+// rows even if they try to swap in another userId client-side.
+app.use('/api/v1/me/ai-audit', authMiddleware());
+app.get('/api/v1/me/ai-audit', async (c) => {
+	const userId = (c.get as (key: string) => string)('userId');
+	const missionId = c.req.query('missionId') ?? undefined;
+	const limitRaw = c.req.query('limit');
+	const limit = limitRaw ? parseInt(limitRaw, 10) : undefined;
+
+	const rows = await readDecryptAudit(getSql(config.syncDatabaseUrl), userId, {
+		missionId,
+		limit: Number.isFinite(limit) ? limit : undefined,
+	});
+	return c.json({ rows });
 });
 
 const stopScheduledTick = startTick(config);

@@ -7,6 +7,7 @@
 	import { useAiTimeline, bucketByIteration } from '$lib/data/ai/timeline/queries';
 	import { useMissions } from '$lib/data/ai/missions/queries';
 	import { revertIteration } from '$lib/data/ai/revert/revert-iteration';
+	import { fetchDecryptAudit, type AuditRow } from '$lib/data/ai/audit/queries';
 	import type { DomainEvent } from '$lib/data/events/types';
 
 	let moduleFilter = $state<string | null>(null);
@@ -39,6 +40,45 @@
 		return new Date(iso).toLocaleDateString('de-DE', { day: 'numeric', month: 'short' });
 	}
 
+	// ── Tab switcher: timeline ↔ decrypt audit ─────────────
+	let tab = $state<'timeline' | 'audit'>('timeline');
+	let auditRows = $state<AuditRow[]>([]);
+	let auditLoading = $state(false);
+	let auditError = $state<string | null>(null);
+
+	async function loadAudit() {
+		auditLoading = true;
+		auditError = null;
+		try {
+			auditRows = await fetchDecryptAudit({
+				missionId: missionFilter ?? undefined,
+				limit: 500,
+			});
+		} catch (err) {
+			auditError = err instanceof Error ? err.message : String(err);
+			auditRows = [];
+		} finally {
+			auditLoading = false;
+		}
+	}
+
+	// Reload audit when user switches to audit tab OR changes mission filter
+	// while on it. No effect while on timeline — no need to poll.
+	$effect(() => {
+		if (tab === 'audit') {
+			void loadAudit();
+		}
+	});
+
+	function formatAuditTs(iso: string): string {
+		return new Date(iso).toLocaleString('de-DE', {
+			day: '2-digit',
+			month: '2-digit',
+			hour: '2-digit',
+			minute: '2-digit',
+		});
+	}
+
 	let revertingKey = $state<string | null>(null);
 	async function handleRevert(key: string, missionId: string, iterationId: string) {
 		if (!confirm('Alle AI-Writes dieser Iteration zurücknehmen?')) return;
@@ -59,16 +99,41 @@
 </script>
 
 <div class="wb">
+	<div class="tabs" role="tablist">
+		<button
+			type="button"
+			role="tab"
+			class="tab"
+			class:tab-active={tab === 'timeline'}
+			aria-selected={tab === 'timeline'}
+			onclick={() => (tab = 'timeline')}
+		>
+			Timeline
+		</button>
+		<button
+			type="button"
+			role="tab"
+			class="tab"
+			class:tab-active={tab === 'audit'}
+			aria-selected={tab === 'audit'}
+			onclick={() => (tab = 'audit')}
+		>
+			Datenzugriff
+		</button>
+	</div>
+
 	<div class="filters">
-		<label>
-			<span class="lbl">Modul</span>
-			<select bind:value={moduleFilter}>
-				<option value={null}>alle</option>
-				{#each allModules as m}
-					<option value={m}>{m}</option>
-				{/each}
-			</select>
-		</label>
+		{#if tab === 'timeline'}
+			<label>
+				<span class="lbl">Modul</span>
+				<select bind:value={moduleFilter}>
+					<option value={null}>alle</option>
+					{#each allModules as m}
+						<option value={m}>{m}</option>
+					{/each}
+				</select>
+			</label>
+		{/if}
 		<label>
 			<span class="lbl">Mission</span>
 			<select bind:value={missionFilter}>
@@ -80,7 +145,43 @@
 		</label>
 	</div>
 
-	{#if buckets.length === 0}
+	{#if tab === 'audit'}
+		{#if auditLoading}
+			<p class="empty">Lade Audit…</p>
+		{:else if auditError}
+			<p class="empty error">Fehler: {auditError}</p>
+		{:else if auditRows.length === 0}
+			<p class="empty">
+				Keine serverseitigen Entschlüsselungen. Der mana-ai Runner hat für diese Mission noch keine
+				Records gelesen — entweder ist kein Key-Grant erteilt, oder die Mission nutzt nur plaintext
+				Inputs (goals).
+			</p>
+		{:else}
+			<table class="audit-table">
+				<thead>
+					<tr>
+						<th>Zeit</th>
+						<th>Mission</th>
+						<th>Record</th>
+						<th>Status</th>
+					</tr>
+				</thead>
+				<tbody>
+					{#each auditRows as r (r.id)}
+						<tr class="audit-{r.status}">
+							<td class="audit-ts">{formatAuditTs(r.ts)}</td>
+							<td>{missionTitleById.get(r.missionId) ?? r.missionId}</td>
+							<td><code>{r.tableName}:{r.recordId}</code></td>
+							<td>
+								<span class="audit-pill audit-pill-{r.status}">{r.status}</span>
+								{#if r.reason}<span class="audit-reason">{r.reason}</span>{/if}
+							</td>
+						</tr>
+					{/each}
+				</tbody>
+			</table>
+		{/if}
+	{:else if buckets.length === 0}
 		<p class="empty">
 			Noch keine AI-Aktivität. Sobald eine Mission läuft und Proposals approved werden, erscheinen
 			hier die Änderungen.
@@ -135,6 +236,79 @@
 		flex-direction: column;
 		gap: 0.75rem;
 		padding: 0.75rem 1rem 1.25rem;
+	}
+	.tabs {
+		display: flex;
+		gap: 0;
+		border-bottom: 1px solid hsl(var(--color-border));
+	}
+	.tab {
+		border: none;
+		background: transparent;
+		padding: 0.375rem 0.75rem;
+		font: inherit;
+		font-size: 0.8125rem;
+		color: hsl(var(--color-muted-foreground));
+		cursor: pointer;
+		border-bottom: 2px solid transparent;
+		margin-bottom: -1px;
+	}
+	.tab-active {
+		color: hsl(var(--color-foreground));
+		border-bottom-color: hsl(var(--color-primary));
+		font-weight: 600;
+	}
+	.audit-table {
+		width: 100%;
+		border-collapse: collapse;
+		font-size: 0.8125rem;
+	}
+	.audit-table th,
+	.audit-table td {
+		text-align: left;
+		padding: 0.375rem 0.5rem;
+		border-bottom: 1px solid hsl(var(--color-border));
+	}
+	.audit-table th {
+		font-weight: 600;
+		font-size: 0.6875rem;
+		text-transform: uppercase;
+		color: hsl(var(--color-muted-foreground));
+	}
+	.audit-table code {
+		font-size: 0.75rem;
+		color: hsl(var(--color-muted-foreground));
+	}
+	.audit-ts {
+		white-space: nowrap;
+		font-variant-numeric: tabular-nums;
+	}
+	.audit-pill {
+		display: inline-block;
+		padding: 0.0625rem 0.375rem;
+		border-radius: 999px;
+		font-size: 0.6875rem;
+		font-weight: 600;
+	}
+	.audit-pill-ok {
+		background: #d7f7e3;
+		color: #1b7a3a;
+	}
+	.audit-pill-failed {
+		background: #fde7c8;
+		color: #8a4f00;
+	}
+	.audit-pill-scope-violation {
+		background: #f7d7d7;
+		color: #8a1b1b;
+	}
+	.audit-reason {
+		margin-left: 0.25rem;
+		font-size: 0.6875rem;
+		color: hsl(var(--color-muted-foreground));
+	}
+	.error {
+		color: hsl(var(--color-error));
 	}
 	.filters {
 		display: flex;

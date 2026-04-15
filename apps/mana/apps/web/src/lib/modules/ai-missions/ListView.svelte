@@ -13,10 +13,12 @@
 		completeMission,
 		deleteMission,
 		addIterationFeedback,
+		revokeMissionGrant,
 	} from '$lib/data/ai/missions/store';
 	import { runMission } from '$lib/data/ai/missions/runner';
 	import { productionDeps } from '$lib/data/ai/missions/setup';
 	import MissionInputPicker from '$lib/components/ai/MissionInputPicker.svelte';
+	import MissionGrantDialog from '$lib/components/ai/MissionGrantDialog.svelte';
 	import type { Mission, MissionCadence, MissionInputRef } from '$lib/data/ai/missions/types';
 
 	const missions = $derived(useMissions());
@@ -92,6 +94,27 @@
 		await addIterationFeedback(m.id, iterationId, feedbackDraft.trim());
 		feedbackDraft = '';
 	}
+
+	// ── Key-Grant (server-side execution) ──────────────────
+	const ENCRYPTED_SERVER_TABLES = new Set([
+		'notes',
+		'tasks',
+		'events',
+		'journalEntries',
+		'kontextDoc',
+	]);
+	function hasEncryptedInputs(m: Mission): boolean {
+		return m.inputs.some((i) => ENCRYPTED_SERVER_TABLES.has(i.table));
+	}
+	function grantStatus(m: Mission): 'none' | 'active' | 'expired' {
+		if (!m.grant) return 'none';
+		return Date.parse(m.grant.expiresAt) < Date.now() ? 'expired' : 'active';
+	}
+	function formatGrantExpiry(m: Mission): string {
+		if (!m.grant) return '—';
+		return formatRelative(m.grant.expiresAt);
+	}
+	let grantDialogOpen = $state(false);
 
 	function describeCadence(c: MissionCadence): string {
 		switch (c.kind) {
@@ -280,6 +303,41 @@
 				<summary>Konzept</summary>
 				<pre>{selected.conceptMarkdown}</pre>
 			</details>
+		{/if}
+
+		{#if hasEncryptedInputs(selected)}
+			<section class="grant-box">
+				<div class="grant-head">
+					<span class="grant-title">🔑 Server-Zugriff</span>
+					{#if grantStatus(selected) === 'active'}
+						<span class="grant-pill grant-pill-ok"
+							>aktiv · läuft ab {formatGrantExpiry(selected)}</span
+						>
+					{:else if grantStatus(selected) === 'expired'}
+						<span class="grant-pill grant-pill-warn">abgelaufen</span>
+					{:else}
+						<span class="grant-pill grant-pill-muted">nicht erteilt</span>
+					{/if}
+				</div>
+				<p class="grant-note">
+					{#if grantStatus(selected) === 'active'}
+						Läuft autonom; Zugriff kann jederzeit zurückgezogen werden.
+					{:else}
+						Ohne Zugriff läuft die Mission nur bei offenem Tab.
+					{/if}
+				</p>
+				<div class="grant-actions">
+					{#if selected.grant}
+						<button type="button" class="btn-ghost" onclick={() => revokeMissionGrant(selected.id)}>
+							Zugriff zurückziehen
+						</button>
+					{/if}
+					<button type="button" class="btn-primary" onclick={() => (grantDialogOpen = true)}>
+						{selected.grant ? 'Neu erteilen' : 'Zugriff erteilen'}
+					</button>
+				</div>
+			</section>
+			<MissionGrantDialog mission={selected} bind:open={grantDialogOpen} />
 		{/if}
 
 		<h3 class="section-title">Iterationen</h3>
@@ -580,5 +638,70 @@
 		border-radius: 0.375rem;
 		background: hsl(var(--color-surface));
 		cursor: pointer;
+	}
+	.grant-box {
+		padding: 0.75rem 0.875rem;
+		border: 1px solid hsl(var(--color-border));
+		border-radius: 0.5rem;
+		background: color-mix(in oklab, hsl(var(--color-primary)) 4%, hsl(var(--color-surface)));
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+	.grant-head {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+	.grant-title {
+		font-weight: 600;
+		font-size: 0.8125rem;
+	}
+	.grant-pill {
+		font-size: 0.6875rem;
+		padding: 0.125rem 0.5rem;
+		border-radius: 999px;
+	}
+	.grant-pill-ok {
+		background: #d7f7e3;
+		color: #1b7a3a;
+	}
+	.grant-pill-warn {
+		background: #fde7c8;
+		color: #8a4f00;
+	}
+	.grant-pill-muted {
+		background: hsl(var(--color-surface));
+		color: hsl(var(--color-muted-foreground));
+		border: 1px solid hsl(var(--color-border));
+	}
+	.grant-note {
+		margin: 0;
+		font-size: 0.75rem;
+		color: hsl(var(--color-muted-foreground));
+	}
+	.grant-actions {
+		display: flex;
+		gap: 0.375rem;
+		justify-content: flex-end;
+		flex-wrap: wrap;
+	}
+	.grant-actions .btn-ghost,
+	.grant-actions .btn-primary {
+		padding: 0.25rem 0.625rem;
+		border-radius: 0.375rem;
+		font: inherit;
+		font-size: 0.75rem;
+		cursor: pointer;
+	}
+	.grant-actions .btn-ghost {
+		border: 1px solid hsl(var(--color-border));
+		background: hsl(var(--color-surface));
+		color: hsl(var(--color-foreground));
+	}
+	.grant-actions .btn-primary {
+		border: 1px solid color-mix(in oklab, hsl(var(--color-primary)) 45%, transparent);
+		background: color-mix(in oklab, hsl(var(--color-primary)) 18%, hsl(var(--color-surface)));
+		color: hsl(var(--color-primary));
 	}
 </style>
