@@ -6,7 +6,7 @@
  */
 
 import { kontextDocTable } from '../collections';
-import { encryptRecord } from '$lib/data/crypto';
+import { encryptRecord, decryptRecords } from '$lib/data/crypto';
 import { KONTEXT_SINGLETON_ID, type LocalKontextDoc } from '../types';
 
 export const kontextStore = {
@@ -29,5 +29,14 @@ export const kontextStore = {
 		};
 		await encryptRecord('kontextDoc', diff);
 		await kontextDocTable.update(KONTEXT_SINGLETON_ID, diff);
+	},
+
+	async appendContent(chunk: string): Promise<void> {
+		await this.ensureDoc();
+		const row = await kontextDocTable.get(KONTEXT_SINGLETON_ID);
+		const [decrypted] = row ? await decryptRecords('kontextDoc', [row]) : [];
+		const current = decrypted?.content ?? '';
+		const separator = current.trim() ? '\n\n---\n\n' : '';
+		await this.setContent(`${current}${separator}${chunk}`);
 	},
 };
