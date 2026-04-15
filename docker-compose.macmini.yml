@@ -867,6 +867,16 @@ services:
       PUBLIC_MANA_LLM_URL_CLIENT: https://llm.mana.how
       PUBLIC_MANA_EVENTS_URL: http://mana-events:3065
       PUBLIC_MANA_EVENTS_URL_CLIENT: https://events.mana.how
+      # mana-ai background Mission Runner. Browser calls the audit
+      # endpoint (/api/v1/me/ai-audit) to render the Workbench
+      # "Datenzugriff" tab. SSR doesn't hit this service directly.
+      PUBLIC_MANA_AI_URL: http://mana-ai:3067
+      PUBLIC_MANA_AI_URL_CLIENT: https://mana-ai.mana.how
+      # Feature flag for the Mission Key-Grant consent UI. false → the
+      # dialog + Workbench audit tab stay hidden even on missions with
+      # encrypted inputs. Flip to "true" per deployment once the keypair
+      # is provisioned (see docs/plans/ai-mission-key-grant.md).
+      PUBLIC_AI_MISSION_GRANTS: ${PUBLIC_AI_MISSION_GRANTS:-false}
       # Analytics & Error Tracking
       PUBLIC_UMAMI_WEBSITE_ID: 32777167-e026-4618-933a-3429120b479b
       PUBLIC_GLITCHTIP_DSN: ${GLITCHTIP_DSN_MANA_WEB:-}
