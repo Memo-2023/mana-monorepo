@@ -143,8 +143,8 @@
 		align-items: center;
 		gap: 1rem;
 		padding: 1rem;
-		background: hsl(var(--card));
-		border: 1px solid hsl(var(--border));
+		background: hsl(var(--color-card));
+		border: 1px solid hsl(var(--color-border));
 		border-radius: 1rem;
 	}
 
@@ -162,8 +162,8 @@
 	}
 
 	.chart-card {
-		background: hsl(var(--card));
-		border: 1px solid hsl(var(--border));
+		background: hsl(var(--color-card));
+		border: 1px solid hsl(var(--color-border));
 		border-radius: 1rem;
 		padding: 1.25rem;
 	}
@@ -265,8 +265,8 @@
 		flex-direction: column;
 		gap: 0.375rem;
 		padding: 1rem;
-		background: hsl(var(--card));
-		border: 1px solid hsl(var(--border));
+		background: hsl(var(--color-card));
+		border: 1px solid hsl(var(--color-border));
 		border-radius: 1rem;
 	}
 </style>

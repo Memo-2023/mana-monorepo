@@ -80,7 +80,7 @@
 	.subscription-button--primary {
 		background: rgba(0, 0, 0, 0.05);
 		border: 1px solid rgba(0, 0, 0, 0.1);
-		color: hsl(var(--foreground));
+		color: hsl(var(--color-foreground));
 	}
 
 	:global(.dark) .subscription-button--primary {
@@ -99,7 +99,7 @@
 	.subscription-button--secondary {
 		background: rgba(255, 255, 255, 0.8);
 		border: 1px solid rgba(0, 0, 0, 0.1);
-		color: hsl(var(--foreground));
+		color: hsl(var(--color-foreground));
 	}
 
 	:global(.dark) .subscription-button--secondary {
@@ -116,8 +116,8 @@
 	}
 
 	.subscription-button--accent {
-		background: hsl(var(--primary, 221 83% 53%));
-		border: 1px solid hsl(var(--primary, 221 83% 53%));
+		background: hsl(var(--color-primary, 221 83% 53%));
+		border: 1px solid hsl(var(--color-primary, 221 83% 53%));
 		color: white;
 	}
 

@@ -148,11 +148,11 @@
 	<div class="space-y-4">
 		<div>
 			<h3
-				class="text-xs font-semibold text-[hsl(var(--muted-foreground))] uppercase tracking-wider"
+				class="text-xs font-semibold text-[hsl(var(--color-muted-foreground))] uppercase tracking-wider"
 			>
 				Navigation anpassen
 			</h3>
-			<p class="text-sm text-[hsl(var(--muted-foreground))] mt-1">
+			<p class="text-sm text-[hsl(var(--color-muted-foreground))] mt-1">
 				Versteckte Seiten bleiben über die URL erreichbar
 			</p>
 		</div>
@@ -162,12 +162,12 @@
 				{@const hidden = hiddenItems.includes(item.href)}
 				{@const IconComponent = item.icon ? phosphorIcons[item.icon] : null}
 				<label
-					class="flex items-center justify-between py-2.5 px-3 rounded-lg hover:bg-[hsl(var(--muted))]/50 cursor-pointer transition-colors border border-transparent hover:border-[hsl(var(--border))]"
+					class="flex items-center justify-between py-2.5 px-3 rounded-lg hover:bg-[hsl(var(--color-muted))]/50 cursor-pointer transition-colors border border-transparent hover:border-[hsl(var(--color-border))]"
 				>
 					<span
 						class="flex items-center gap-3 text-sm {hidden
-							? 'text-[hsl(var(--muted-foreground))]'
-							: 'text-[hsl(var(--foreground))]'}"
+							? 'text-[hsl(var(--color-muted-foreground))]'
+							: 'text-[hsl(var(--color-foreground))]'}"
 					>
 						{#if IconComponent}
 							<span class="flex-shrink-0 {hidden ? 'opacity-50' : ''}">
@@ -179,7 +179,7 @@
 					<button
 						type="button"
 						class="relative inline-flex h-5 w-9 items-center rounded-full transition-colors {!hidden
-							? 'bg-[hsl(var(--primary))]'
+							? 'bg-[hsl(var(--color-primary))]'
 							: 'bg-gray-200 dark:bg-gray-700'}"
 						onclick={() => handleToggle(item.href)}
 						aria-label={hidden ? 'Einblenden' : 'Ausblenden'}

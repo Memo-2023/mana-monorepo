@@ -169,7 +169,7 @@
 	.chart-title {
 		font-size: 1rem;
 		font-weight: 600;
-		color: hsl(var(--foreground));
+		color: hsl(var(--color-foreground));
 		margin: 0 0 1rem 0;
 	}
 
@@ -180,7 +180,7 @@
 	}
 
 	.grid-line {
-		stroke: hsl(var(--muted) / 0.3);
+		stroke: hsl(var(--color-muted) / 0.3);
 		stroke-width: 1;
 		stroke-dasharray: 4 4;
 	}
@@ -194,25 +194,25 @@
 	}
 
 	.gradient-start {
-		stop-color: hsl(var(--primary));
+		stop-color: hsl(var(--color-primary));
 		stop-opacity: 0.3;
 	}
 
 	.gradient-end {
-		stop-color: hsl(var(--primary));
+		stop-color: hsl(var(--color-primary));
 		stop-opacity: 0.05;
 	}
 
 	.line-path {
 		fill: none;
-		stroke: hsl(var(--primary));
+		stroke: hsl(var(--color-primary));
 		stroke-width: 2.5;
 		stroke-linecap: round;
 		stroke-linejoin: round;
 	}
 
 	.data-point {
-		fill: hsl(var(--primary));
+		fill: hsl(var(--color-primary));
 		stroke: white;
 		stroke-width: 2;
 		cursor: pointer;
@@ -229,13 +229,13 @@
 
 	.y-label {
 		font-size: 10px;
-		fill: hsl(var(--muted-foreground));
+		fill: hsl(var(--color-muted-foreground));
 		text-anchor: end;
 	}
 
 	.x-label {
 		font-size: 10px;
-		fill: hsl(var(--muted-foreground));
+		fill: hsl(var(--color-muted-foreground));
 		text-anchor: middle;
 	}
 </style>

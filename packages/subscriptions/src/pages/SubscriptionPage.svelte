@@ -195,7 +195,7 @@
 		box-shadow:
 			0 4px 6px -1px rgba(0, 0, 0, 0.1),
 			0 2px 4px -1px rgba(0, 0, 0, 0.06);
-		color: hsl(var(--primary, 221 83% 53%));
+		color: hsl(var(--color-primary, 221 83% 53%));
 	}
 
 	:global(.dark) .subscription-page__icon {
@@ -206,13 +206,13 @@
 	.subscription-page__title {
 		font-size: 1.875rem;
 		font-weight: 600;
-		color: hsl(var(--foreground));
+		color: hsl(var(--color-foreground));
 		margin: 0 0 0.75rem 0;
 	}
 
 	.subscription-page__subtitle {
 		font-size: 1rem;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 		margin: 0;
 	}
 
@@ -223,7 +223,7 @@
 	.subscription-page__section-title {
 		font-size: 1.25rem;
 		font-weight: 600;
-		color: hsl(var(--foreground));
+		color: hsl(var(--color-foreground));
 		margin: 0 0 1.5rem 0;
 	}
 

@@ -123,12 +123,12 @@
 		font-size: 1.5rem;
 		font-weight: 700;
 		line-height: 1.2;
-		color: hsl(var(--foreground));
+		color: hsl(var(--color-foreground));
 	}
 
 	.stat-label {
 		font-size: 0.75rem;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;

@@ -195,7 +195,7 @@
 		margin: 0 0 0.25rem 0;
 		font-size: 0.875rem;
 		font-weight: 500;
-		color: hsl(var(--foreground));
+		color: hsl(var(--color-foreground));
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
@@ -222,7 +222,7 @@
 	}
 
 	.credit-toast__remaining {
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.credit-toast__dismiss {
@@ -235,7 +235,7 @@
 		padding: 0;
 		border: none;
 		background: transparent;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 		cursor: pointer;
 		border-radius: 0.25rem;
 		transition: all 0.15s ease;
@@ -243,7 +243,7 @@
 
 	.credit-toast__dismiss:hover {
 		background: rgba(0, 0, 0, 0.05);
-		color: hsl(var(--foreground));
+		color: hsl(var(--color-foreground));
 	}
 
 	:global(.dark) .credit-toast__dismiss:hover {

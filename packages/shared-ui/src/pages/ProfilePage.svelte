@@ -360,19 +360,19 @@
 	.profile-page__avatar-initials {
 		font-size: 1.5rem;
 		font-weight: 600;
-		color: hsl(var(--primary, 221 83% 53%));
+		color: hsl(var(--color-primary, 221 83% 53%));
 	}
 
 	.profile-page__title {
 		font-size: 1.875rem;
 		font-weight: 600;
-		color: hsl(var(--foreground));
+		color: hsl(var(--color-foreground));
 		margin: 0 0 0.5rem 0;
 	}
 
 	.profile-page__subtitle {
 		font-size: 1rem;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 		margin: 0;
 	}
 
@@ -383,7 +383,7 @@
 	.profile-page__section-title {
 		font-size: 1.125rem;
 		font-weight: 600;
-		color: hsl(var(--foreground));
+		color: hsl(var(--color-foreground));
 		margin: 0 0 1rem 0;
 	}
 
@@ -434,7 +434,7 @@
 	.profile-page__info-icon svg {
 		width: 1.25rem;
 		height: 1.25rem;
-		color: hsl(var(--primary, 221 83% 53%));
+		color: hsl(var(--color-primary, 221 83% 53%));
 	}
 
 	.profile-page__info-content {
@@ -447,13 +447,13 @@
 	.profile-page__info-label {
 		font-size: 0.75rem;
 		font-weight: 500;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.profile-page__info-value {
 		font-size: 0.9375rem;
 		font-weight: 500;
-		color: hsl(var(--foreground));
+		color: hsl(var(--color-foreground));
 		word-break: break-word;
 	}
 
@@ -479,7 +479,7 @@
 		transition: all 0.2s ease;
 		font-size: 0.9375rem;
 		font-weight: 500;
-		color: hsl(var(--foreground));
+		color: hsl(var(--color-foreground));
 		text-align: left;
 	}
 
@@ -501,7 +501,7 @@
 		width: 1.25rem;
 		height: 1.25rem;
 		flex-shrink: 0;
-		color: hsl(var(--primary, 221 83% 53%));
+		color: hsl(var(--color-primary, 221 83% 53%));
 	}
 
 	.profile-page__action-btn--secondary {
@@ -513,7 +513,7 @@
 	}
 
 	.profile-page__action-btn--secondary svg {
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.profile-page__action-btn--danger {
@@ -533,7 +533,7 @@
 	.profile-page__warning {
 		margin: 0.5rem 0 0 0;
 		font-size: 0.75rem;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 		padding-left: 0.5rem;
 	}
 </style>

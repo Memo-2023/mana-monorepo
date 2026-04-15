@@ -85,13 +85,13 @@
 	.progress-title {
 		font-size: 1rem;
 		font-weight: 600;
-		color: hsl(var(--foreground));
+		color: hsl(var(--color-foreground));
 		margin: 0 0 1rem 0;
 	}
 
 	.no-data {
 		font-size: 0.875rem;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 		text-align: center;
 		padding: 2rem;
 	}
@@ -130,7 +130,7 @@
 
 	.name-text {
 		font-size: 0.875rem;
-		color: hsl(var(--foreground));
+		color: hsl(var(--color-foreground));
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
@@ -138,7 +138,7 @@
 
 	.progress-stats {
 		font-size: 0.75rem;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 		flex-shrink: 0;
 	}
 
@@ -151,7 +151,7 @@
 	.progress-bar {
 		flex: 1;
 		height: 8px;
-		background: hsl(var(--muted) / 0.3);
+		background: hsl(var(--color-muted) / 0.3);
 		border-radius: 4px;
 		overflow: hidden;
 		display: flex;
@@ -184,7 +184,7 @@
 	.percentage {
 		font-size: 0.75rem;
 		font-weight: 600;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 		width: 36px;
 		text-align: right;
 		flex-shrink: 0;

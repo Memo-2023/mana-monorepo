@@ -144,7 +144,7 @@
 		transition: all 0.15s ease;
 		font-size: 0.875rem;
 		font-weight: 600;
-		color: hsl(var(--foreground));
+		color: hsl(var(--color-foreground));
 	}
 
 	:global(.dark) .credit-balance__button {
@@ -235,7 +235,7 @@
 		margin: 0;
 		font-size: 0.875rem;
 		font-weight: 600;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.credit-balance__total {
@@ -247,13 +247,13 @@
 	.credit-balance__value--large {
 		font-size: 1.5rem;
 		font-weight: 700;
-		color: hsl(var(--foreground));
+		color: hsl(var(--color-foreground));
 	}
 
 	.credit-balance__free {
 		margin: 0 0 0.75rem 0;
 		font-size: 0.75rem;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.credit-balance__warning {

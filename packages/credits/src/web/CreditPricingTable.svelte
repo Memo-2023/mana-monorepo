@@ -177,14 +177,14 @@
 		margin: 0 0 1rem 0;
 		font-size: 1.125rem;
 		font-weight: 700;
-		color: hsl(var(--foreground));
+		color: hsl(var(--color-foreground));
 	}
 
 	.pricing-table__empty {
 		margin: 0;
 		padding: 1rem;
 		text-align: center;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 		font-size: 0.875rem;
 	}
 
@@ -219,7 +219,7 @@
 		margin: 0;
 		font-size: 0.8125rem;
 		font-weight: 600;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 		text-transform: uppercase;
 		letter-spacing: 0.025em;
 	}
@@ -236,7 +236,7 @@
 		border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 		font-size: 0.75rem;
 		font-weight: 600;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 		text-transform: uppercase;
 		letter-spacing: 0.025em;
 	}
@@ -276,12 +276,12 @@
 	.pricing-table__item-name {
 		font-size: 0.875rem;
 		font-weight: 500;
-		color: hsl(var(--foreground));
+		color: hsl(var(--color-foreground));
 	}
 
 	.pricing-table__item-description {
 		font-size: 0.75rem;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.pricing-table__item-cost {
@@ -305,7 +305,7 @@
 		padding-top: 0.75rem;
 		border-top: 1px solid rgba(0, 0, 0, 0.05);
 		font-size: 0.75rem;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	:global(.dark) .pricing-table__footer {

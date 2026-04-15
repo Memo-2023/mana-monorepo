@@ -183,7 +183,7 @@
 	.toc-title {
 		font-size: 0.875rem;
 		font-weight: 600;
-		color: hsl(var(--foreground));
+		color: hsl(var(--color-foreground));
 		margin: 0 0 1rem 0;
 		padding-bottom: 0.75rem;
 		border-bottom: 1px solid rgba(0, 0, 0, 0.08);
@@ -205,7 +205,7 @@
 		text-align: left;
 		padding: 0.625rem 0.875rem;
 		font-size: 0.875rem;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 		background: transparent;
 		border: none;
 		border-radius: 0.5rem;
@@ -217,13 +217,13 @@
 	}
 
 	.toc-item:hover {
-		color: hsl(var(--foreground));
-		background: hsl(var(--muted) / 0.5);
+		color: hsl(var(--color-foreground));
+		background: hsl(var(--color-muted) / 0.5);
 	}
 
 	.toc-item.active {
-		color: hsl(var(--primary));
-		background: hsl(var(--primary) / 0.12);
+		color: hsl(var(--color-primary));
+		background: hsl(var(--color-primary) / 0.12);
 		font-weight: 600;
 	}
 

@@ -375,7 +375,12 @@
 
 						<!-- Favorite indicator -->
 						{#if node.isFavorite}
-							<circle cx={badgeOffset} cy={-badgeOffset} r="10" fill="hsl(var(--background))" />
+							<circle
+								cx={badgeOffset}
+								cy={-badgeOffset}
+								r="10"
+								fill="hsl(var(--color-background))"
+							/>
 							<text
 								x={badgeOffset}
 								y={-badgeOffset}
@@ -389,7 +394,7 @@
 
 						<!-- Connection count badge -->
 						{#if node.connectionCount > 0}
-							<circle cx={-badgeOffset} cy={-badgeOffset} r="12" fill="hsl(var(--primary))" />
+							<circle cx={-badgeOffset} cy={-badgeOffset} r="12" fill="hsl(var(--color-primary))" />
 							<text
 								x={-badgeOffset}
 								y={-badgeOffset}
@@ -479,7 +484,7 @@
 		height: 100%;
 		position: relative;
 		overflow: hidden;
-		background: hsl(var(--background));
+		background: hsl(var(--color-background));
 	}
 
 	.network-graph-svg {
@@ -493,7 +498,7 @@
 
 	/* Links */
 	.link {
-		stroke: hsl(var(--muted-foreground) / 0.3);
+		stroke: hsl(var(--color-muted-foreground) / 0.3);
 		transition:
 			stroke 0.2s,
 			stroke-width 0.2s,
@@ -501,7 +506,7 @@
 	}
 
 	.link.highlighted {
-		stroke: hsl(var(--primary));
+		stroke: hsl(var(--color-primary));
 		stroke-width: 3 !important;
 	}
 
@@ -510,7 +515,7 @@
 	}
 
 	.link.hovered {
-		stroke: hsl(var(--primary));
+		stroke: hsl(var(--color-primary));
 		stroke-width: 3 !important;
 	}
 
@@ -529,12 +534,12 @@
 	}
 
 	.node.selected .node-circle {
-		stroke: hsl(var(--primary));
+		stroke: hsl(var(--color-primary));
 		stroke-width: 4;
 	}
 
 	.node.connected .node-circle {
-		stroke: hsl(var(--primary) / 0.5);
+		stroke: hsl(var(--color-primary) / 0.5);
 		stroke-width: 2;
 	}
 
@@ -556,13 +561,13 @@
 	}
 
 	.node-label {
-		fill: hsl(var(--foreground));
+		fill: hsl(var(--color-foreground));
 		pointer-events: none;
 		user-select: none;
 	}
 
 	.node-subtitle {
-		fill: hsl(var(--muted-foreground));
+		fill: hsl(var(--color-muted-foreground));
 		pointer-events: none;
 		user-select: none;
 	}
@@ -585,12 +590,12 @@
 	.empty-title {
 		font-size: 1.25rem;
 		font-weight: 600;
-		color: hsl(var(--foreground));
+		color: hsl(var(--color-foreground));
 		margin-bottom: 0.5rem;
 	}
 
 	.empty-description {
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 		max-width: 300px;
 		line-height: 1.5;
 	}
@@ -600,10 +605,10 @@
 		position: absolute;
 		transform: translate(-50%, -100%) translateY(-12px);
 		padding: 0.75rem 1rem;
-		background: hsl(var(--popover));
-		border: 1px solid hsl(var(--border));
+		background: hsl(var(--color-card));
+		border: 1px solid hsl(var(--color-border));
 		border-radius: 0.75rem;
-		box-shadow: 0 4px 12px hsl(var(--foreground) / 0.1);
+		box-shadow: 0 4px 12px hsl(var(--color-foreground) / 0.1);
 		pointer-events: none;
 		z-index: 100;
 		min-width: 200px;
@@ -618,11 +623,11 @@
 		margin-bottom: 0.5rem;
 		font-size: 0.875rem;
 		font-weight: 500;
-		color: hsl(var(--foreground));
+		color: hsl(var(--color-foreground));
 	}
 
 	.tooltip-arrow {
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.tooltip-strength {
@@ -634,25 +639,25 @@
 	}
 
 	.strength-label {
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.strength-value {
 		font-weight: 600;
-		color: hsl(var(--primary));
+		color: hsl(var(--color-primary));
 	}
 
 	.strength-bar {
 		flex: 1;
 		height: 4px;
-		background: hsl(var(--muted));
+		background: hsl(var(--color-muted));
 		border-radius: 2px;
 		overflow: hidden;
 	}
 
 	.strength-fill {
 		height: 100%;
-		background: hsl(var(--primary));
+		background: hsl(var(--color-primary));
 		border-radius: 2px;
 		transition: width 0.2s;
 	}
@@ -667,11 +672,11 @@
 		display: inline-flex;
 		align-items: center;
 		padding: 0.25rem 0.625rem;
-		background: hsl(var(--primary) / 0.1);
-		border: 1px solid hsl(var(--primary) / 0.2);
+		background: hsl(var(--color-primary) / 0.1);
+		border: 1px solid hsl(var(--color-primary) / 0.2);
 		border-radius: 9999px;
 		font-size: 0.75rem;
 		font-weight: 500;
-		color: hsl(var(--primary));
+		color: hsl(var(--color-primary));
 	}
 </style>

@@ -75,7 +75,7 @@
 		margin: 0 0 1rem 0;
 		font-size: 1.25rem;
 		font-weight: 700;
-		color: hsl(var(--foreground));
+		color: hsl(var(--color-foreground));
 	}
 
 	.cost-card__list {
@@ -99,19 +99,19 @@
 		width: 1.125rem;
 		height: 1.125rem;
 		margin-right: 0.5rem;
-		color: hsl(var(--primary, 221 83% 53%));
+		color: hsl(var(--color-primary, 221 83% 53%));
 	}
 
 	.cost-card__action {
 		margin: 0;
 		font-size: 0.875rem;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.cost-card__cost {
 		margin: 0;
 		font-size: 1rem;
 		font-weight: 600;
-		color: hsl(var(--foreground));
+		color: hsl(var(--color-foreground));
 	}
 </style>

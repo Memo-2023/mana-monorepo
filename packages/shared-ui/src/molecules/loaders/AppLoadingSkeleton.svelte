@@ -209,7 +209,7 @@
 <style>
 	.app-loading-skeleton {
 		min-height: 100vh;
-		background: hsl(var(--background));
+		background: hsl(var(--color-background));
 	}
 
 	.app-loading-skeleton.sidebar-layout {
@@ -223,7 +223,7 @@
 		align-items: center;
 		justify-content: space-between;
 		padding: 1rem 2rem;
-		border-bottom: 1px solid hsl(var(--border));
+		border-bottom: 1px solid hsl(var(--color-border));
 	}
 
 	.header-nav {
@@ -273,7 +273,7 @@
 	.centered-card {
 		width: 100%;
 		max-width: 400px;
-		background: hsl(var(--card));
+		background: hsl(var(--color-card));
 		border-radius: 16px;
 		padding: 1.5rem;
 	}
@@ -305,14 +305,14 @@
 
 	.sidebar-skeleton {
 		width: 16rem;
-		border-right: 1px solid hsl(var(--border));
-		background: hsl(var(--card));
+		border-right: 1px solid hsl(var(--color-border));
+		background: hsl(var(--color-card));
 		padding: 1rem;
 	}
 
 	.sidebar-header {
 		padding-bottom: 1rem;
-		border-bottom: 1px solid hsl(var(--border));
+		border-bottom: 1px solid hsl(var(--color-border));
 		margin-bottom: 1rem;
 	}
 
@@ -389,8 +389,8 @@
 		align-items: center;
 		gap: 0.75rem;
 		padding: 0.875rem 1rem;
-		background: hsl(var(--card));
-		border: 1px solid hsl(var(--border));
+		background: hsl(var(--color-card));
+		border: 1px solid hsl(var(--color-border));
 		border-radius: 12px;
 	}
 
@@ -425,8 +425,8 @@
 		align-items: center;
 		gap: 1rem;
 		padding: 1rem;
-		background: hsl(var(--card));
-		border: 1px solid hsl(var(--border));
+		background: hsl(var(--color-card));
+		border: 1px solid hsl(var(--color-border));
 		border-radius: 12px;
 	}
 

@@ -13,26 +13,6 @@
 @layer base {
 	:root {
 		color-scheme: light dark;
-
-		/* shadcn-compat aliases — some shared-ui components (GlobalSettingsSection,
-		   a few auth-ui pieces) use bare `--muted`, `--primary`, etc. instead of
-		   the `--color-*` tokens this app standardized on. Bridge them here so
-		   `bg-[hsl(var(--muted))]` and friends resolve to a real color. */
-		--primary: var(--color-primary);
-		--primary-foreground: var(--color-primary-foreground);
-		--secondary: var(--color-secondary);
-		--secondary-foreground: var(--color-secondary-foreground);
-		--background: var(--color-background);
-		--foreground: var(--color-foreground);
-		--muted: var(--color-muted);
-		--muted-foreground: var(--color-muted-foreground);
-		--border: var(--color-border);
-		--card: var(--color-card);
-		--card-foreground: var(--color-card-foreground);
-		--accent: var(--color-accent);
-		--accent-foreground: var(--color-accent-foreground);
-		--input: var(--color-input);
-		--ring: var(--color-ring);
 	}
 
 	h1 {

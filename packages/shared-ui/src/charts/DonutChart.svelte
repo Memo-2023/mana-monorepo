@@ -164,7 +164,7 @@
 	.donut-title {
 		font-size: 1rem;
 		font-weight: 600;
-		color: hsl(var(--foreground));
+		color: hsl(var(--color-foreground));
 		margin: 0 0 1rem 0;
 	}
 
@@ -206,13 +206,13 @@
 	.center-count {
 		font-size: 28px;
 		font-weight: 700;
-		fill: hsl(var(--foreground));
+		fill: hsl(var(--color-foreground));
 		text-anchor: middle;
 	}
 
 	.center-label {
 		font-size: 12px;
-		fill: hsl(var(--muted-foreground));
+		fill: hsl(var(--color-muted-foreground));
 		text-anchor: middle;
 	}
 
@@ -236,7 +236,7 @@
 
 	.legend-item:hover,
 	.legend-item.active {
-		background: hsl(var(--muted) / 0.3);
+		background: hsl(var(--color-muted) / 0.3);
 	}
 
 	.legend-color {
@@ -248,13 +248,13 @@
 
 	.legend-label {
 		font-size: 0.875rem;
-		color: hsl(var(--foreground));
+		color: hsl(var(--color-foreground));
 		flex: 1;
 	}
 
 	.legend-count {
 		font-size: 0.875rem;
 		font-weight: 600;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 	}
 </style>

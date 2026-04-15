@@ -163,11 +163,11 @@
 	}
 
 	.subscription-card--current {
-		border: 2px solid hsl(var(--primary, 221 83% 53%));
+		border: 2px solid hsl(var(--color-primary, 221 83% 53%));
 	}
 
 	.subscription-card--popular {
-		border: 2px solid hsl(var(--primary, 221 83% 53%));
+		border: 2px solid hsl(var(--color-primary, 221 83% 53%));
 	}
 
 	.subscription-card__badge {
@@ -178,7 +178,7 @@
 		font-size: 0.625rem;
 		font-weight: 600;
 		color: white;
-		background: hsl(var(--primary, 221 83% 53%));
+		background: hsl(var(--color-primary, 221 83% 53%));
 		z-index: 1;
 	}
 
@@ -195,7 +195,7 @@
 		text-align: center;
 		font-size: 1.125rem;
 		font-weight: 600;
-		color: hsl(var(--foreground));
+		color: hsl(var(--color-foreground));
 	}
 
 	.subscription-card__grid {
@@ -233,7 +233,7 @@
 		margin: 0 0 0.25rem 0;
 		font-size: 1.25rem;
 		font-weight: 700;
-		color: hsl(var(--foreground));
+		color: hsl(var(--color-foreground));
 		white-space: nowrap;
 	}
 
@@ -241,21 +241,21 @@
 		margin: 0;
 		font-size: 1rem;
 		font-weight: 700;
-		color: hsl(var(--foreground));
+		color: hsl(var(--color-foreground));
 		white-space: nowrap;
 	}
 
 	.subscription-card__label {
 		margin: 0;
 		font-size: 0.625rem;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 		text-align: center;
 	}
 
 	.subscription-card__sublabel {
 		margin: 0.125rem 0 0 0;
 		font-size: 0.5rem;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	@media (min-width: 640px) {

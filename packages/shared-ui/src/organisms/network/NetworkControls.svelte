@@ -319,10 +319,10 @@
 		align-items: center;
 		gap: 0.75rem;
 		padding: 0.75rem 1rem;
-		background: hsl(var(--card) / 0.8);
+		background: hsl(var(--color-card) / 0.8);
 		backdrop-filter: blur(12px);
 		-webkit-backdrop-filter: blur(12px);
-		border: 1px solid hsl(var(--border) / 0.5);
+		border: 1px solid hsl(var(--color-border) / 0.5);
 		border-radius: 9999px;
 		flex-wrap: wrap;
 	}
@@ -339,17 +339,17 @@
 		left: 0.75rem;
 		top: 50%;
 		transform: translateY(-50%);
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 		pointer-events: none;
 	}
 
 	.search-input {
 		width: 100%;
 		padding: 0.5rem 2rem 0.5rem 2.5rem;
-		border: 1px solid hsl(var(--border));
+		border: 1px solid hsl(var(--color-border));
 		border-radius: 0.5rem;
-		background: hsl(var(--background));
-		color: hsl(var(--foreground));
+		background: hsl(var(--color-background));
+		color: hsl(var(--color-foreground));
 		font-size: 0.875rem;
 		transition:
 			border-color 0.2s,
@@ -358,12 +358,12 @@
 
 	.search-input:focus {
 		outline: none;
-		border-color: hsl(var(--primary));
-		box-shadow: 0 0 0 2px hsl(var(--primary) / 0.1);
+		border-color: hsl(var(--color-primary));
+		box-shadow: 0 0 0 2px hsl(var(--color-primary) / 0.1);
 	}
 
 	.search-input::placeholder {
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.clear-btn {
@@ -374,7 +374,7 @@
 		padding: 0.25rem;
 		background: none;
 		border: none;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 		cursor: pointer;
 		border-radius: 0.25rem;
 		display: flex;
@@ -383,17 +383,17 @@
 	}
 
 	.clear-btn:hover {
-		color: hsl(var(--foreground));
-		background: hsl(var(--muted));
+		color: hsl(var(--color-foreground));
+		background: hsl(var(--color-muted));
 	}
 
 	.control-btn {
 		position: relative;
 		padding: 0.5rem;
-		background: hsl(var(--background));
-		border: 1px solid hsl(var(--border));
+		background: hsl(var(--color-background));
+		border: 1px solid hsl(var(--color-border));
 		border-radius: 0.5rem;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 		cursor: pointer;
 		display: flex;
 		align-items: center;
@@ -402,14 +402,14 @@
 	}
 
 	.control-btn:hover {
-		background: hsl(var(--muted));
-		color: hsl(var(--foreground));
+		background: hsl(var(--color-muted));
+		color: hsl(var(--color-foreground));
 	}
 
 	.control-btn.active {
-		background: hsl(var(--primary) / 0.1);
-		border-color: hsl(var(--primary));
-		color: hsl(var(--primary));
+		background: hsl(var(--color-primary) / 0.1);
+		border-color: hsl(var(--color-primary));
+		color: hsl(var(--color-primary));
 	}
 
 	.filter-badge {
@@ -418,7 +418,7 @@
 		right: -2px;
 		width: 8px;
 		height: 8px;
-		background: hsl(var(--primary));
+		background: hsl(var(--color-primary));
 		border-radius: 50%;
 	}
 
@@ -426,7 +426,7 @@
 		display: flex;
 		gap: 0.25rem;
 		padding-left: 0.5rem;
-		border-left: 1px solid hsl(var(--border));
+		border-left: 1px solid hsl(var(--color-border));
 	}
 
 	.stats {
@@ -435,7 +435,7 @@
 		gap: 0.5rem;
 		margin-left: auto;
 		font-size: 0.75rem;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.stat-divider {
@@ -446,10 +446,10 @@
 	.filter-panel {
 		margin-top: 0.5rem;
 		padding: 0.75rem 1rem;
-		background: hsl(var(--card) / 0.8);
+		background: hsl(var(--color-card) / 0.8);
 		backdrop-filter: blur(12px);
 		-webkit-backdrop-filter: blur(12px);
-		border: 1px solid hsl(var(--border) / 0.5);
+		border: 1px solid hsl(var(--color-border) / 0.5);
 		border-radius: 1rem;
 	}
 
@@ -470,22 +470,22 @@
 	.filter-label {
 		font-size: 0.75rem;
 		font-weight: 500;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.filter-select {
 		padding: 0.5rem 0.75rem;
-		border: 1px solid hsl(var(--border));
+		border: 1px solid hsl(var(--color-border));
 		border-radius: 0.5rem;
-		background: hsl(var(--background));
-		color: hsl(var(--foreground));
+		background: hsl(var(--color-background));
+		color: hsl(var(--color-foreground));
 		font-size: 0.875rem;
 		cursor: pointer;
 	}
 
 	.filter-select:focus {
 		outline: none;
-		border-color: hsl(var(--primary));
+		border-color: hsl(var(--color-primary));
 	}
 
 	.clear-filters-btn {
@@ -493,17 +493,17 @@
 		align-items: center;
 		gap: 0.25rem;
 		padding: 0.5rem 0.75rem;
-		background: hsl(var(--destructive) / 0.1);
-		border: 1px solid hsl(var(--destructive) / 0.2);
+		background: hsl(var(--color-error) / 0.1);
+		border: 1px solid hsl(var(--color-error) / 0.2);
 		border-radius: 0.5rem;
-		color: hsl(var(--destructive));
+		color: hsl(var(--color-error));
 		font-size: 0.875rem;
 		cursor: pointer;
 		transition: all 0.2s;
 	}
 
 	.clear-filters-btn:hover {
-		background: hsl(var(--destructive) / 0.15);
+		background: hsl(var(--color-error) / 0.15);
 	}
 
 	/* Strength slider */
@@ -515,7 +515,7 @@
 		width: 100%;
 		height: 6px;
 		border-radius: 3px;
-		background: hsl(var(--muted));
+		background: hsl(var(--color-muted));
 		appearance: none;
 		cursor: pointer;
 	}
@@ -525,7 +525,7 @@
 		width: 16px;
 		height: 16px;
 		border-radius: 50%;
-		background: hsl(var(--primary));
+		background: hsl(var(--color-primary));
 		cursor: pointer;
 		transition: transform 0.1s;
 	}
@@ -539,7 +539,7 @@
 		height: 16px;
 		border: none;
 		border-radius: 50%;
-		background: hsl(var(--primary));
+		background: hsl(var(--color-primary));
 		cursor: pointer;
 	}
 
@@ -547,17 +547,17 @@
 	.keyboard-help {
 		margin-top: 0.5rem;
 		padding: 0.75rem 1rem;
-		background: hsl(var(--card) / 0.8);
+		background: hsl(var(--color-card) / 0.8);
 		backdrop-filter: blur(12px);
 		-webkit-backdrop-filter: blur(12px);
-		border: 1px solid hsl(var(--border) / 0.5);
+		border: 1px solid hsl(var(--color-border) / 0.5);
 		border-radius: 1rem;
 	}
 
 	.keyboard-help-title {
 		font-size: 0.75rem;
 		font-weight: 600;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 		margin-bottom: 0.5rem;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
@@ -581,18 +581,18 @@
 		justify-content: center;
 		min-width: 1.75rem;
 		padding: 0.25rem 0.5rem;
-		background: hsl(var(--muted));
-		border: 1px solid hsl(var(--border));
+		background: hsl(var(--color-muted));
+		border: 1px solid hsl(var(--color-border));
 		border-radius: 0.375rem;
 		font-family: monospace;
 		font-size: 0.75rem;
 		font-weight: 600;
-		color: hsl(var(--foreground));
+		color: hsl(var(--color-foreground));
 	}
 
 	.shortcut-desc {
 		font-size: 0.8125rem;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	@media (max-width: 640px) {

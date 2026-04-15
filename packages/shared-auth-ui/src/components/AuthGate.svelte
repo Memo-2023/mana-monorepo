@@ -113,22 +113,22 @@
 {#if tierDenied}
 	<div
 		class="flex items-center justify-center min-h-screen p-6"
-		style:background-color="hsl(var(--background, 0 0% 100%))"
+		style:background-color="hsl(var(--color-background, 0 0% 100%))"
 	>
 		<div
 			class="max-w-96 w-full text-center py-10 px-8 rounded-2xl border shadow-sm"
-			style:border-color="hsl(var(--border, 0 0% 90%))"
-			style:background-color="hsl(var(--card, 0 0% 100%))"
+			style:border-color="hsl(var(--color-border, 0 0% 90%))"
+			style:background-color="hsl(var(--color-card, 0 0% 100%))"
 		>
 			{#if appName}
-				<h1 class="text-xl font-bold mb-4" style:color="hsl(var(--foreground, 0 0% 9%))">
+				<h1 class="text-xl font-bold mb-4" style:color="hsl(var(--color-foreground, 0 0% 9%))">
 					{appName}
 				</h1>
 			{/if}
 			<div class="text-5xl mb-4">🔒</div>
 			<p
 				class="text-[0.9375rem] leading-relaxed mb-6"
-				style:color="hsl(var(--muted-foreground, 0 0% 45%))"
+				style:color="hsl(var(--color-muted-foreground, 0 0% 45%))"
 			>
 				{locale === 'en'
 					? `This app is currently in closed `
@@ -137,18 +137,18 @@
 			</p>
 			<div
 				class="flex flex-col gap-2 p-4 rounded-xl mb-6"
-				style:background-color="hsl(var(--muted, 0 0% 96%))"
+				style:background-color="hsl(var(--color-muted, 0 0% 96%))"
 			>
 				<div class="flex justify-between items-center text-sm">
-					<span style:color="hsl(var(--muted-foreground, 0 0% 45%))"
+					<span style:color="hsl(var(--color-muted-foreground, 0 0% 45%))"
 						>{locale === 'en' ? 'Your access:' : 'Dein Zugang:'}</span
 					>
-					<span class="font-semibold" style:color="hsl(var(--foreground, 0 0% 9%))"
+					<span class="font-semibold" style:color="hsl(var(--color-foreground, 0 0% 9%))"
 						>{userTierLabel}</span
 					>
 				</div>
 				<div class="flex justify-between items-center text-sm">
-					<span style:color="hsl(var(--muted-foreground, 0 0% 45%))"
+					<span style:color="hsl(var(--color-muted-foreground, 0 0% 45%))"
 						>{locale === 'en' ? 'Required:' : 'Benötigt:'}</span
 					>
 					<span class="font-semibold text-violet-500">{requiredTierLabel}</span>
@@ -156,8 +156,8 @@
 			</div>
 			<button
 				class="w-full py-2.5 px-4 rounded-lg border-none text-sm font-medium cursor-pointer transition-opacity hover:opacity-90"
-				style:background-color="hsl(var(--primary, 239 84% 67%))"
-				style:color="hsl(var(--primary-foreground, 0 0% 100%))"
+				style:background-color="hsl(var(--color-primary, 239 84% 67%))"
+				style:color="hsl(var(--color-primary-foreground, 0 0% 100%))"
 				onclick={goHome}
 			>
 				{locale === 'en' ? 'Back to overview' : 'Zur Übersicht'}

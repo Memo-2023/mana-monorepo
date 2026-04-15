@@ -203,7 +203,7 @@
 	.heatmap-title {
 		font-size: 1rem;
 		font-weight: 600;
-		color: hsl(var(--foreground));
+		color: hsl(var(--color-foreground));
 		margin: 0 0 1rem 0;
 	}
 
@@ -218,12 +218,12 @@
 
 	.month-label {
 		font-size: 10px;
-		fill: hsl(var(--muted-foreground));
+		fill: hsl(var(--color-muted-foreground));
 	}
 
 	.day-label {
 		font-size: 10px;
-		fill: hsl(var(--muted-foreground));
+		fill: hsl(var(--color-muted-foreground));
 	}
 
 	.cell {
@@ -252,7 +252,7 @@
 
 	.legend-label {
 		font-size: 0.75rem;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.legend-cells {
@@ -268,27 +268,27 @@
 
 	/* Intensity classes using theme primary color */
 	.intensity-0 {
-		fill: hsl(var(--muted) / 0.3);
-		background: hsl(var(--muted) / 0.3);
+		fill: hsl(var(--color-muted) / 0.3);
+		background: hsl(var(--color-muted) / 0.3);
 	}
 
 	.intensity-1 {
-		fill: hsl(var(--primary) / 0.3);
-		background: hsl(var(--primary) / 0.3);
+		fill: hsl(var(--color-primary) / 0.3);
+		background: hsl(var(--color-primary) / 0.3);
 	}
 
 	.intensity-2 {
-		fill: hsl(var(--primary) / 0.5);
-		background: hsl(var(--primary) / 0.5);
+		fill: hsl(var(--color-primary) / 0.5);
+		background: hsl(var(--color-primary) / 0.5);
 	}
 
 	.intensity-3 {
-		fill: hsl(var(--primary) / 0.7);
-		background: hsl(var(--primary) / 0.7);
+		fill: hsl(var(--color-primary) / 0.7);
+		background: hsl(var(--color-primary) / 0.7);
 	}
 
 	.intensity-4 {
-		fill: hsl(var(--primary));
-		background: hsl(var(--primary));
+		fill: hsl(var(--color-primary));
+		background: hsl(var(--color-primary));
 	}
 </style>

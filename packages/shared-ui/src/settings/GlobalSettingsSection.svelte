@@ -118,7 +118,7 @@
 
 	<SettingsCard>
 		<div class="p-5">
-			<p class="text-sm text-[hsl(var(--muted-foreground))] mb-6">{description}</p>
+			<p class="text-sm text-[hsl(var(--color-muted-foreground))] mb-6">{description}</p>
 
 			<div class="space-y-6">
 				{#if showNavVisibility && appId && navItems.length > 0}
@@ -132,19 +132,19 @@
 					<!-- Theme Settings -->
 					<div
 						class="space-y-4 {showNavVisibility && appId
-							? 'pt-4 border-t border-[hsl(var(--border))]'
+							? 'pt-4 border-t border-[hsl(var(--color-border))]'
 							: ''}"
 					>
 						<h3
-							class="text-xs font-semibold text-[hsl(var(--muted-foreground))] uppercase tracking-wider"
+							class="text-xs font-semibold text-[hsl(var(--color-muted-foreground))] uppercase tracking-wider"
 						>
 							Erscheinungsbild
 						</h3>
 
 						<div class="flex items-center justify-between py-2">
 							<div>
-								<p class="font-medium text-[hsl(var(--foreground))]">Farbmodus</p>
-								<p class="text-sm text-[hsl(var(--muted-foreground))]">
+								<p class="font-medium text-[hsl(var(--color-foreground))]">Farbmodus</p>
+								<p class="text-sm text-[hsl(var(--color-muted-foreground))]">
 									Hell, Dunkel oder automatisch
 								</p>
 							</div>
@@ -153,8 +153,8 @@
 									<button
 										class="px-3 py-1.5 text-sm font-medium rounded-lg transition-colors {userSettings
 											.globalSettings.theme.mode === mode
-											? 'bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))]'
-											: 'bg-[hsl(var(--muted))] hover:bg-[hsl(var(--muted))]/80 text-[hsl(var(--foreground))]'}"
+											? 'bg-[hsl(var(--color-primary))] text-[hsl(var(--color-primary-foreground))]'
+											: 'bg-[hsl(var(--color-muted))] hover:bg-[hsl(var(--color-muted))]/80 text-[hsl(var(--color-foreground))]'}"
 										onclick={() => handleThemeModeChange(mode as ThemeMode)}
 									>
 										{mode === 'light' ? 'Hell' : mode === 'dark' ? 'Dunkel' : 'System'}
@@ -164,11 +164,11 @@
 						</div>
 
 						<div
-							class="flex items-center justify-between py-2 border-t border-[hsl(var(--border))]"
+							class="flex items-center justify-between py-2 border-t border-[hsl(var(--color-border))]"
 						>
 							<div>
-								<p class="font-medium text-[hsl(var(--foreground))]">Farbschema</p>
-								<p class="text-sm text-[hsl(var(--muted-foreground))]">
+								<p class="font-medium text-[hsl(var(--color-foreground))]">Farbschema</p>
+								<p class="text-sm text-[hsl(var(--color-muted-foreground))]">
 									Akzentfarbe der Benutzeroberfläche
 								</p>
 							</div>
@@ -177,7 +177,7 @@
 									<button
 										class="w-7 h-7 rounded-full transition-all {scheme.color} {userSettings
 											.globalSettings.theme.colorScheme === scheme.id
-											? 'ring-2 ring-offset-2 ring-[hsl(var(--primary))]'
+											? 'ring-2 ring-offset-2 ring-[hsl(var(--color-primary))]'
 											: 'hover:scale-110'}"
 										onclick={() => handleColorSchemeChange(scheme.id)}
 										title={scheme.label}
@@ -192,19 +192,19 @@
 					<!-- Language Settings -->
 					<div
 						class="space-y-4 {showTheme || (showNavVisibility && appId)
-							? 'pt-4 border-t border-[hsl(var(--border))]'
+							? 'pt-4 border-t border-[hsl(var(--color-border))]'
 							: ''}"
 					>
 						<h3
-							class="text-xs font-semibold text-[hsl(var(--muted-foreground))] uppercase tracking-wider"
+							class="text-xs font-semibold text-[hsl(var(--color-muted-foreground))] uppercase tracking-wider"
 						>
 							Sprache
 						</h3>
 
 						<div class="flex items-center justify-between py-2">
 							<div>
-								<p class="font-medium text-[hsl(var(--foreground))]">Anzeigesprache</p>
-								<p class="text-sm text-[hsl(var(--muted-foreground))]">
+								<p class="font-medium text-[hsl(var(--color-foreground))]">Anzeigesprache</p>
+								<p class="text-sm text-[hsl(var(--color-muted-foreground))]">
 									Sprache der Benutzeroberfläche
 								</p>
 							</div>
@@ -213,8 +213,8 @@
 									<button
 										class="px-2.5 py-1.5 text-sm font-medium rounded-lg transition-colors {userSettings
 											.globalSettings.locale === lang.id
-											? 'bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))]'
-											: 'bg-[hsl(var(--muted))] hover:bg-[hsl(var(--muted))]/80 text-[hsl(var(--foreground))]'}"
+											? 'bg-[hsl(var(--color-primary))] text-[hsl(var(--color-primary-foreground))]'
+											: 'bg-[hsl(var(--color-muted))] hover:bg-[hsl(var(--color-muted))]/80 text-[hsl(var(--color-foreground))]'}"
 										onclick={() => handleLocaleChange(lang.id)}
 									>
 										{lang.label}
@@ -229,11 +229,11 @@
 					<!-- General Settings -->
 					<div
 						class="space-y-4 {showLanguage || showTheme || (showNavVisibility && appId)
-							? 'pt-4 border-t border-[hsl(var(--border))]'
+							? 'pt-4 border-t border-[hsl(var(--color-border))]'
 							: ''}"
 					>
 						<h3
-							class="text-xs font-semibold text-[hsl(var(--muted-foreground))] uppercase tracking-wider"
+							class="text-xs font-semibold text-[hsl(var(--color-muted-foreground))] uppercase tracking-wider"
 						>
 							Allgemein
 						</h3>
@@ -242,13 +242,13 @@
 							<!-- Start Page Selector -->
 							<div class="flex items-center justify-between py-2">
 								<div>
-									<p class="font-medium text-[hsl(var(--foreground))]">Startseite</p>
-									<p class="text-sm text-[hsl(var(--muted-foreground))]">
+									<p class="font-medium text-[hsl(var(--color-foreground))]">Startseite</p>
+									<p class="text-sm text-[hsl(var(--color-muted-foreground))]">
 										Welche Seite beim Öffnen der App angezeigt wird
 									</p>
 								</div>
 								<select
-									class="px-3 py-1.5 text-sm font-medium rounded-lg bg-[hsl(var(--muted))] text-[hsl(var(--foreground))] border-none cursor-pointer appearance-none pr-8 bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23666%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[right_0.5rem_center] bg-[length:1rem]"
+									class="px-3 py-1.5 text-sm font-medium rounded-lg bg-[hsl(var(--color-muted))] text-[hsl(var(--color-foreground))] border-none cursor-pointer appearance-none pr-8 bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23666%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[right_0.5rem_center] bg-[length:1rem]"
 									value={currentStartPage}
 									onchange={handleStartPageChange}
 								>
@@ -264,12 +264,12 @@
 						<!-- Week Start Day -->
 						<div
 							class="flex items-center justify-between py-2 {appId && availableRoutes.length > 1
-								? 'border-t border-[hsl(var(--border))]'
+								? 'border-t border-[hsl(var(--color-border))]'
 								: ''}"
 						>
 							<div>
-								<p class="font-medium text-[hsl(var(--foreground))]">Wochenstart</p>
-								<p class="text-sm text-[hsl(var(--muted-foreground))]">
+								<p class="font-medium text-[hsl(var(--color-foreground))]">Wochenstart</p>
+								<p class="text-sm text-[hsl(var(--color-muted-foreground))]">
 									Erster Tag der Woche in Kalendern
 								</p>
 							</div>
@@ -277,8 +277,8 @@
 								<button
 									class="px-3 py-1.5 text-sm font-medium rounded-lg transition-colors {userSettings
 										.general?.weekStartsOn === 'monday'
-										? 'bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))]'
-										: 'bg-[hsl(var(--muted))] hover:bg-[hsl(var(--muted))]/80 text-[hsl(var(--foreground))]'}"
+										? 'bg-[hsl(var(--color-primary))] text-[hsl(var(--color-primary-foreground))]'
+										: 'bg-[hsl(var(--color-muted))] hover:bg-[hsl(var(--color-muted))]/80 text-[hsl(var(--color-foreground))]'}"
 									onclick={() => handleWeekStartChange('monday')}
 								>
 									Montag
@@ -286,8 +286,8 @@
 								<button
 									class="px-3 py-1.5 text-sm font-medium rounded-lg transition-colors {userSettings
 										.general?.weekStartsOn === 'sunday'
-										? 'bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))]'
-										: 'bg-[hsl(var(--muted))] hover:bg-[hsl(var(--muted))]/80 text-[hsl(var(--foreground))]'}"
+										? 'bg-[hsl(var(--color-primary))] text-[hsl(var(--color-primary-foreground))]'
+										: 'bg-[hsl(var(--color-muted))] hover:bg-[hsl(var(--color-muted))]/80 text-[hsl(var(--color-foreground))]'}"
 									onclick={() => handleWeekStartChange('sunday')}
 								>
 									Sonntag
@@ -297,18 +297,18 @@
 
 						<!-- Sounds Toggle -->
 						<div
-							class="flex items-center justify-between py-2 border-t border-[hsl(var(--border))]"
+							class="flex items-center justify-between py-2 border-t border-[hsl(var(--color-border))]"
 						>
 							<div>
-								<p class="font-medium text-[hsl(var(--foreground))]">Sounds</p>
-								<p class="text-sm text-[hsl(var(--muted-foreground))]">
+								<p class="font-medium text-[hsl(var(--color-foreground))]">Sounds</p>
+								<p class="text-sm text-[hsl(var(--color-muted-foreground))]">
 									Sound-Effekte in allen Apps
 								</p>
 							</div>
 							<button
 								class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors {(userSettings
 									.general?.soundsEnabled ?? true)
-									? 'bg-[hsl(var(--primary))]'
+									? 'bg-[hsl(var(--color-primary))]'
 									: 'bg-gray-200 dark:bg-gray-700'}"
 								onclick={() => handleSoundsChange(!(userSettings.general?.soundsEnabled ?? true))}
 								aria-label="Toggle sound effects"
@@ -326,9 +326,9 @@
 			</div>
 
 			{#if userSettings.syncing}
-				<div class="mt-4 flex items-center gap-2 text-sm text-[hsl(var(--muted-foreground))]">
+				<div class="mt-4 flex items-center gap-2 text-sm text-[hsl(var(--color-muted-foreground))]">
 					<div
-						class="h-4 w-4 animate-spin rounded-full border-2 border-[hsl(var(--primary))] border-t-transparent"
+						class="h-4 w-4 animate-spin rounded-full border-2 border-[hsl(var(--color-primary))] border-t-transparent"
 					></div>
 					<span>Synchronisiere...</span>
 				</div>

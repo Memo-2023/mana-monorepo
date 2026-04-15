@@ -70,7 +70,7 @@
 		onclick={handleToggle}
 		class="relative w-12 h-7 rounded-full border flex-shrink-0 transition-all duration-200
 			{isOn
-			? 'bg-primary border-primary shadow-[0_0_0_2px_hsl(var(--primary)/0.2)] dark:shadow-[0_0_0_2px_hsl(var(--primary)/0.3)]'
+			? 'bg-primary border-primary shadow-[0_0_0_2px_hsl(var(--color-primary)/0.2)] dark:shadow-[0_0_0_2px_hsl(var(--color-primary)/0.3)]'
 			: 'bg-black/[0.08] border-black/10 dark:bg-white/[0.12] dark:border-white/[0.15]'}
 			{!disabled
 			? 'cursor-pointer hover:border-black/20 dark:hover:border-white/25'

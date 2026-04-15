@@ -116,7 +116,7 @@
 		margin: 0;
 		font-size: 1.25rem;
 		font-weight: 700;
-		color: hsl(var(--foreground));
+		color: hsl(var(--color-foreground));
 	}
 
 	.usage-card__value-wrapper {
@@ -139,7 +139,7 @@
 		margin: 0;
 		font-size: 1.25rem;
 		font-weight: 700;
-		color: hsl(var(--foreground));
+		color: hsl(var(--color-foreground));
 	}
 
 	.usage-card__progress-track {
@@ -171,7 +171,7 @@
 		margin: 0;
 		font-size: 0.875rem;
 		font-weight: 500;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.usage-card__plan {
@@ -189,6 +189,6 @@
 		text-align: center;
 		font-size: 0.875rem;
 		font-weight: 500;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 	}
 </style>

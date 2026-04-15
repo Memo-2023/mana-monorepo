@@ -75,7 +75,7 @@
 		background: transparent;
 		cursor: pointer;
 		transition: all 0.2s ease;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.billing-toggle__button--yearly {
@@ -84,7 +84,7 @@
 
 	.billing-toggle__button--active {
 		background: rgba(255, 255, 255, 0.9);
-		color: hsl(var(--primary, 221 83% 53%));
+		color: hsl(var(--color-primary, 221 83% 53%));
 		font-weight: 600;
 		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 	}
@@ -111,6 +111,6 @@
 		font-size: 0.75rem;
 		font-weight: 600;
 		color: white;
-		background: hsl(var(--primary, 221 83% 53%));
+		background: hsl(var(--color-primary, 221 83% 53%));
 	}
 </style>
