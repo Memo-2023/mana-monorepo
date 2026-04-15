@@ -62,7 +62,7 @@ function toScene(local: LocalWorkbenchScene): WorkbenchScene {
 	return {
 		id: local.id,
 		name: local.name,
-		icon: local.icon,
+		description: local.description ?? null,
 		openApps: local.openApps ?? [],
 		order: local.order,
 		wallpaper: local.wallpaper,
@@ -98,7 +98,9 @@ function pickActiveId(scenes: WorkbenchScene[], current: string | null): string 
 
 async function patchScene(
 	id: string,
-	patch: Partial<Pick<LocalWorkbenchScene, 'name' | 'icon' | 'openApps' | 'order' | 'wallpaper'>>
+	patch: Partial<
+		Pick<LocalWorkbenchScene, 'name' | 'description' | 'openApps' | 'order' | 'wallpaper'>
+	>
 ) {
 	// Strip Svelte 5 $state proxies — IndexedDB's structured clone can't serialize them.
 	const clean = $state.snapshot({ ...patch, updatedAt: nowIso() });
@@ -182,7 +184,7 @@ export const workbenchScenesStore = {
 
 	async createScene(opts: {
 		name: string;
-		icon?: string;
+		description?: string | null;
 		seedApps?: WorkbenchSceneApp[];
 		setActive?: boolean;
 	}): Promise<string> {
@@ -192,7 +194,7 @@ export const workbenchScenesStore = {
 		const row: LocalWorkbenchScene = {
 			id,
 			name: opts.name.trim() || 'Neue Szene',
-			icon: opts.icon,
+			description: opts.description ?? null,
 			openApps: opts.seedApps ? ($state.snapshot(opts.seedApps) as WorkbenchSceneApp[]) : [],
 			order: maxOrder + 1,
 			createdAt: now,
@@ -206,10 +208,17 @@ export const workbenchScenesStore = {
 		return id;
 	},
 
-	async renameScene(id: string, name: string, icon?: string) {
+	async renameScene(id: string, name: string, description?: string | null) {
 		const trimmed = name.trim();
 		if (!trimmed) return;
-		await patchScene(id, { name: trimmed, ...(icon !== undefined ? { icon } : {}) });
+		await patchScene(id, {
+			name: trimmed,
+			...(description !== undefined ? { description } : {}),
+		});
+	},
+
+	async setSceneDescription(id: string, description: string | null) {
+		await patchScene(id, { description });
 	},
 
 	async duplicateScene(id: string) {
@@ -217,7 +226,7 @@ export const workbenchScenesStore = {
 		if (!src) return;
 		await this.createScene({
 			name: `${src.name} Kopie`,
-			icon: src.icon,
+			description: src.description ?? null,
 			seedApps: src.openApps,
 			setActive: true,
 		});

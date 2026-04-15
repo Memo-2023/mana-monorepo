@@ -113,9 +113,6 @@
 				oncontextmenu={(e) => openMenu(e, scene)}
 				title={scene.name}
 			>
-				{#if scene.icon}
-					<span class="scene-icon">{scene.icon}</span>
-				{/if}
 				<span class="scene-name">{scene.name}</span>
 			</button>
 		{/each}
@@ -181,10 +178,6 @@
 	}
 	.scene-pill.dragging {
 		opacity: 0.4;
-	}
-	.scene-icon {
-		font-size: 0.95rem;
-		line-height: 1;
 	}
 	.scene-name {
 		overflow: hidden;

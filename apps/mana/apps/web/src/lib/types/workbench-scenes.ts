@@ -25,8 +25,8 @@ export interface WorkbenchSceneApp {
 export interface WorkbenchScene {
 	id: string;
 	name: string;
-	/** Optional emoji shown in the scene tab. */
-	icon?: string;
+	/** Short free-text description shown under the name in the scene header. */
+	description?: string | null;
 	openApps: WorkbenchSceneApp[];
 	/** Sort order in the scene tab bar. */
 	order: number;
