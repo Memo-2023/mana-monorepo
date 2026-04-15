@@ -85,6 +85,11 @@ export const APP_ICONS = {
 	chat: svgToDataUrl(chatSvg),
 	presi: svgToDataUrl(presiSvg),
 	cards: svgToDataUrl(cardsSvg),
+	quiz: svgToDataUrl(
+		// Speech-bubble question mark with a small checkmark — quiz / answer.
+		// Pink→fuchsia gradient to stand apart from the purple Cards icon.
+		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="qz" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#ec4899"/><stop offset="100%" style="stop-color:#a21caf"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#qz)"/><path d="M22 34a8 8 0 0 1 8-8h40a8 8 0 0 1 8 8v24a8 8 0 0 1-8 8H42l-12 10v-10h0a8 8 0 0 1-8-8V34z" fill="white"/><path d="M42 42c0-5 4-8 8-8s8 3 8 8c0 4-4 5-6 7-1 1-2 3-2 5" stroke="#a21caf" stroke-width="3.5" stroke-linecap="round" fill="none"/><circle cx="50" cy="60" r="2.4" fill="#a21caf"/><path d="M60 72l5 5 11-11" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>`
+	),
 	picture: svgToDataUrl(pictureSvg),
 	quotes: svgToDataUrl(quotesSvg),
 	wisekeep: svgToDataUrl(wisekeepSvg),

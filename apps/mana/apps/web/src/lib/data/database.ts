@@ -536,6 +536,18 @@ db.version(20).stores({
 	_aiDebugLog: 'iterationId, capturedAt',
 });
 
+// v21 — Quiz module. Three tables: container (`quizzes`), per-quiz items
+// (`quizQuestions`, indexed on quizId for the play/edit view), and play-
+// through history (`quizAttempts`, indexed on quizId + startedAt for the
+// per-quiz leaderboard view). questionCount lives on `quizzes` as a
+// denormalised counter so the list view doesn't fan out into per-quiz
+// question scans.
+db.version(21).stores({
+	quizzes: 'id, isPinned, isArchived, updatedAt',
+	quizQuestions: 'id, quizId, order, [quizId+order]',
+	quizAttempts: 'id, quizId, startedAt, [quizId+startedAt]',
+});
+
 // ─── Sync Routing ──────────────────────────────────────────
 // SYNC_APP_MAP, TABLE_TO_SYNC_NAME, TABLE_TO_APP, SYNC_NAME_TO_TABLE,
 // toSyncName() and fromSyncName() are now derived from per-module

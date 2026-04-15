@@ -472,6 +472,24 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	// Free-form user text — encrypt the content, leave the fixed id plaintext.
 	kontextDoc: { enabled: true, fields: ['content'] },
 
+	// ─── Quiz ────────────────────────────────────────────────
+	// User-typed text on the container (title, description, category, tags)
+	// plus the whole question payload (questionText, explanation, options).
+	// `options` is QuestionOption[] — aes.ts JSON-stringifies before wrap,
+	// same as food.foods / recipes.ingredients. The correctness flag inside
+	// each option ships encrypted alongside the text, which is intentional:
+	// a passive attacker with raw DB access should not be able to build an
+	// answer key without the user's vault.
+	// Plaintext (intentional): quizId foreign key, order, type discriminator,
+	// questionCount denorm counter, isPinned / isArchived — all needed for
+	// index/sort/filter.
+	quizzes: { enabled: true, fields: ['title', 'description', 'category', 'tags'] },
+	quizQuestions: { enabled: true, fields: ['questionText', 'explanation', 'options'] },
+	// `quizAttempts` is intentionally NOT registered — only boolean `correct`
+	// flags + a numeric score + timestamps + a small text-answer echo for
+	// review. If post-launch review shows textAnswer should be encrypted,
+	// add an entry here with fields: ['answers'].
+
 	// ─── AI Agents ───────────────────────────────────────────
 	// Named AI personas (docs/plans/multi-agent-workbench.md). `name` +
 	// `role` + `avatar` stay plaintext because `name` is the display-key

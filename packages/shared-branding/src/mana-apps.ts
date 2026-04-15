@@ -171,6 +171,23 @@ export const MANA_APPS: ManaApp[] = [
 		requiredTier: 'guest',
 	},
 	{
+		id: 'quiz',
+		name: 'Quiz',
+		description: {
+			de: 'Wissen testen',
+			en: 'Test your knowledge',
+		},
+		longDescription: {
+			de: 'Eigene Quizze bauen und spielen — Single-, Multiple-Choice, Wahr/Falsch oder Freitext.',
+			en: 'Build and play your own quizzes — single/multiple choice, true/false, or free text.',
+		},
+		icon: APP_ICONS.quiz,
+		color: '#ec4899',
+		comingSoon: false,
+		status: 'beta',
+		requiredTier: 'guest',
+	},
+	{
 		id: 'picture',
 		name: 'ManaPicture',
 		description: {
