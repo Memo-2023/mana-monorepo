@@ -32,7 +32,7 @@ import { executeTool } from '../../tools/executor';
 import { db } from '../../database';
 import { decryptRecords } from '../../crypto';
 import { researchApi } from '$lib/api/research';
-import type { Actor } from '../../events/actor';
+import { makeAgentActor, LEGACY_AI_PRINCIPAL, type Actor } from '../../events/actor';
 import type { Mission, MissionIteration, PlanStep } from './types';
 import type { AiPlanInput, AiPlanOutput, PlannedStep, ResolvedInput } from './planner/types';
 
@@ -109,12 +109,16 @@ export async function runMission(
 	// Use the id the store generates so finishIteration updates the same row.
 	const startedIteration = await startIteration(mission.id, { plan: [] });
 	const iterationId = startedIteration.id;
-	const aiActor: Extract<Actor, { kind: 'ai' }> = {
-		kind: 'ai',
+	// Phase 1: agent identity not yet wired (Phase 2 will). Use the
+	// legacy AI principal so every write is still identity-aware; the
+	// Phase-2 migration will rewrite these to a real agentId.
+	const aiActor = makeAgentActor({
+		agentId: LEGACY_AI_PRINCIPAL,
+		displayName: 'Mana',
 		missionId: mission.id,
 		iterationId,
 		rationale: mission.objective,
-	};
+	});
 
 	// Hard timeout: any phase taking longer than ITERATION_TIMEOUT_MS aborts
 	// the run. Wraps the whole pipeline in a Promise.race against a timer.
@@ -170,15 +174,32 @@ export async function runMission(
 		// Pre-step web research: if the objective looks like research,
 		// run the deep-research pipeline (mana-search + mana-llm) and
 		// attach the summary + sources so the planner can decide which
-		// to save via save_news_article. Failures are non-fatal — the
-		// planner still runs with whatever inputs we have.
+		// to save via save_news_article. Failures are non-fatal — we
+		// inject a synthetic "research failed" input instead so the
+		// planner doesn't hallucinate that the search ran.
 		if (RESEARCH_TRIGGER.test(mission!.objective)) {
 			await enterPhase('resolving-inputs', 'Web-Recherche…');
 			try {
 				const researchEntry = await runWebResearch(mission!);
 				if (researchEntry) resolvedInputs.push(researchEntry);
 			} catch (err) {
+				const msg = err instanceof Error ? err.message : String(err);
 				console.warn('[MissionRunner] web-research pre-step failed:', err);
+				await enterPhase('resolving-inputs', `Web-Recherche fehlgeschlagen: ${msg.slice(0, 80)}`);
+				resolvedInputs.push({
+					id: 'web-research-error',
+					module: 'research',
+					table: 'researchResults',
+					title: 'Web-Recherche FEHLGESCHLAGEN',
+					content: [
+						`Die automatische Web-Recherche konnte nicht ausgeführt werden.`,
+						`Fehler: ${msg}`,
+						``,
+						`Wichtig: Du hast aktuell KEINE echten Quellen-URLs.`,
+						`Rufe NICHT save_news_article auf — du würdest URLs erfinden.`,
+						`Lege stattdessen einen kurzen Erinnerungs-Task an, dass die Recherche manuell nachgeholt werden muss.`,
+					].join('\n'),
+				});
 			}
 			await checkCancel();
 		}
