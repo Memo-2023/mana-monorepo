@@ -46,6 +46,11 @@ DB_PASS="${DB_PASS:-devpassword}"
 DB_NAME="${DB_NAME:-mana_platform}"
 TIER="${TIER:-founder}"
 ROLE="${ROLE:-admin}"
+# Initial credit balance for dev accounts. The frontend's credits
+# API falls back to DEFAULT_BALANCE (1000) when a row is missing,
+# which makes local dev silently diverge from prod. Seeding a real
+# row makes credit-gated flows exercise the real code path.
+CREDITS="${CREDITS:-10000}"
 
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -126,6 +131,7 @@ create_user() {
 		-v email="${email}" \
 		-v tier="${TIER}" \
 		-v role="${ROLE}" \
+		-v credits="${CREDITS}" \
 		<<-'SQL'
 			-- access_tier and role are orthogonal: tier gates product
 			-- features per user (public < beta < alpha < founder), role
@@ -151,6 +157,21 @@ create_user() {
 			SET active     = true,
 			    is_gifted  = true,
 			    updated_at = NOW();
+
+			-- Seed a real balance row so credit-gated flows run the
+			-- production code path in dev. shared-hono/credits falls
+			-- back to 1000 when the row is missing, which hides real
+			-- bugs until prod.
+			INSERT INTO credits.balances
+				(user_id, balance, total_earned, total_spent,
+				 version, created_at, updated_at)
+			SELECT id, :'credits'::int, :'credits'::int, 0,
+			       0, NOW(), NOW()
+			FROM auth.users
+			WHERE email = :'email'
+			ON CONFLICT (user_id) DO UPDATE
+			SET balance    = GREATEST(credits.balances.balance, :'credits'::int),
+			    updated_at = NOW();
 		SQL
 
 	# Verify final state and report
@@ -163,14 +184,14 @@ create_user() {
 		return 1
 	fi
 	echo -e "  ${DIM}${row}${NC}"
-	echo -e "  ${GREEN}✓${NC} email=${email}  password=${password}  tier=${TIER}  role=${ROLE}  sync=gifted"
+	echo -e "  ${GREEN}✓${NC} email=${email}  password=${password}  tier=${TIER}  role=${ROLE}  sync=gifted  credits=${CREDITS}"
 }
 
 # ─── Main ────────────────────────────────────────────────────
 if [[ $# -eq 2 ]]; then
 	create_user "$1" "$2"
 else
-	echo -e "${GREEN}Creating default dev users (tier=${TIER}, role=${ROLE}, sync=gifted)…${NC}"
+	echo -e "${GREEN}Creating default dev users (tier=${TIER}, role=${ROLE}, sync=gifted, credits=${CREDITS})…${NC}"
 	create_user "tills95@gmail.com"  "Aa-123456789"
 	create_user "tilljkb@gmail.com"  "Aa-123456789"
 	create_user "rajiehq@gmail.com"  "Aa-123456789"
