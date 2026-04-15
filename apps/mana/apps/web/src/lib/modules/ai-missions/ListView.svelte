@@ -22,6 +22,7 @@
 	import MissionInputPicker from '$lib/components/ai/MissionInputPicker.svelte';
 	import MissionGrantDialog from '$lib/components/ai/MissionGrantDialog.svelte';
 	import AiDebugBlock from '$lib/components/ai/AiDebugBlock.svelte';
+	import AiProposalInbox from '$lib/components/ai/AiProposalInbox.svelte';
 	import { isAiDebugEnabled, setAiDebugEnabled } from '$lib/data/ai/missions/debug';
 	import { isMissionGrantsEnabled } from '$lib/api/config';
 	import type { Mission, MissionCadence, MissionInputRef } from '$lib/data/ai/missions/types';
@@ -391,6 +392,9 @@
 			</section>
 			<MissionGrantDialog mission={selected} bind:open={grantDialogOpen} />
 		{/if}
+
+		<h3 class="section-title">Vorschläge zur Review</h3>
+		<AiProposalInbox missionId={selected.id} />
 
 		<h3 class="section-title">Iterationen</h3>
 		{#if selected.iterations.length === 0}

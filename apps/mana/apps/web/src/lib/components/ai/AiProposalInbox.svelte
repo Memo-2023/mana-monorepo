@@ -23,13 +23,22 @@
 	import type { Proposal } from '$lib/data/ai/proposals/types';
 
 	interface Props {
-		/** Filter proposals to tools belonging to this module (e.g. 'todo'). */
-		module: string;
+		/** Filter proposals to tools belonging to this module (e.g. 'todo').
+		 *  Omit when filtering by mission only — the inbox will then render
+		 *  every pending proposal across modules and add a module badge to
+		 *  each card so the user knows where it'll land on approve. */
+		module?: string;
+		/** Filter to proposals from a specific mission. Combine with `module`
+		 *  to scope to that mission's proposals for a single module. */
+		missionId?: string;
 	}
 
-	let { module }: Props = $props();
+	let { module, missionId }: Props = $props();
 
-	const proposals = $derived(useAiProposals({ status: 'pending', module }));
+	const proposals = $derived(useAiProposals({ status: 'pending', module, missionId }));
+	/** Show module badge whenever the inbox is cross-module (i.e. the
+	 *  caller didn't pin it to a single module). */
+	const showModuleBadge = $derived(!module);
 
 	let busyId = $state<string | null>(null);
 	/** Proposal whose reject-feedback textarea is currently open. */
@@ -92,6 +101,10 @@
 				<header class="header">
 					<Sparkle size={16} weight="fill" />
 					<span class="label">KI schlägt vor</span>
+					{#if showModuleBadge && p.intent.kind === 'toolCall'}
+						{@const mod = getTool(p.intent.toolName)?.module ?? '?'}
+						<span class="module-badge">{mod}</span>
+					{/if}
 				</header>
 
 				<p class="intent">{formatIntent(p)}</p>
@@ -180,6 +193,16 @@
 		font-weight: 600;
 		text-transform: uppercase;
 		letter-spacing: 0.04em;
+	}
+	.module-badge {
+		margin-left: auto;
+		padding: 0.0625rem 0.375rem;
+		border-radius: 0.25rem;
+		background: color-mix(in oklab, var(--color-primary, #6b5bff) 18%, transparent);
+		color: color-mix(in oklab, var(--color-primary, #6b5bff) 90%, var(--color-fg, #000));
+		font-size: 0.6875rem;
+		letter-spacing: 0.02em;
+		text-transform: lowercase;
 	}
 
 	.intent {
