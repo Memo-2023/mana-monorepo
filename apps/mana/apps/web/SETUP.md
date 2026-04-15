@@ -69,7 +69,6 @@ mana-web/
 ├── .env                         # Environment variables
 ├── .env.example                 # Environment template
 ├── svelte.config.js             # SvelteKit configuration
-├── tailwind.config.js           # Tailwind configuration
 ├── vite.config.ts               # Vite configuration
 ├── tsconfig.json                # TypeScript configuration
 └── package.json                 # Dependencies

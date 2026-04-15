@@ -15,7 +15,7 @@
 <ForgotPasswordPage
 	appName="Mana"
 	logo={ManaLogo}
-	primaryColor="#6366f1"
+	primaryColor="hsl(var(--color-primary))"
 	onForgotPassword={handleForgotPassword}
 	{goto}
 	loginPath="/login"

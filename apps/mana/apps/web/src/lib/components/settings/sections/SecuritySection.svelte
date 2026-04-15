@@ -49,7 +49,7 @@
 		onRefresh={async () => {
 			passkeys = await authStore.listPasskeys();
 		}}
-		primaryColor="#6366f1"
+		primaryColor="hsl(var(--color-primary))"
 	/>
 </SettingsPanel>
 
@@ -63,7 +63,7 @@
 			sessions = await authStore.listSessions();
 			sessionsLoading = false;
 		}}
-		primaryColor="#6366f1"
+		primaryColor="hsl(var(--color-primary))"
 	/>
 </SettingsPanel>
 
@@ -73,7 +73,7 @@
 		onEnable={(password) => authStore.enableTwoFactor(password)}
 		onDisable={(password) => authStore.disableTwoFactor(password)}
 		onGenerateBackupCodes={(password) => authStore.generateBackupCodes(password)}
-		primaryColor="#6366f1"
+		primaryColor="hsl(var(--color-primary))"
 	/>
 </SettingsPanel>
 
@@ -86,6 +86,6 @@
 			securityEvents = await authStore.getSecurityEvents();
 			securityEventsLoading = false;
 		}}
-		primaryColor="#6366f1"
+		primaryColor="hsl(var(--color-primary))"
 	/>
 </SettingsPanel>

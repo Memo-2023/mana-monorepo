@@ -39,7 +39,7 @@
 <RegisterPage
 	appName="Mana"
 	logo={ManaLogo}
-	primaryColor="#6366f1"
+	primaryColor="hsl(var(--color-primary))"
 	onSignUp={handleSignUp}
 	onResendVerification={handleResendVerification}
 	{goto}

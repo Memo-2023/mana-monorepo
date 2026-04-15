@@ -32,7 +32,7 @@
 <LoginPage
 	appName="Mana"
 	logo={ManaLogo}
-	primaryColor="#6366f1"
+	primaryColor="hsl(var(--color-primary))"
 	onSignIn={handleSignIn}
 	onResendVerification={handleResendVerification}
 	passkeyAvailable={authStore.isPasskeyAvailable()}

@@ -963,7 +963,7 @@
 					{currentLanguageLabel}
 					showLogout={authStore.isAuthenticated}
 					loginHref="/login"
-					primaryColor="#6366f1"
+					primaryColor="hsl(var(--color-primary))"
 					showAppSwitcher={false}
 					showAiTierSelector={true}
 					aiTierItems={aiTier.items}
