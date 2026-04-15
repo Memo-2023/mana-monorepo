@@ -14,8 +14,10 @@
 	}
 	let { quizId }: Props = $props();
 
+	// svelte-ignore state_referenced_locally
 	const quiz$ = useQuiz(quizId);
 	const quiz = $derived(quiz$.value);
+	// svelte-ignore state_referenced_locally
 	const questions$ = useQuestions(quizId);
 	const questions = $derived(questions$.value);
 

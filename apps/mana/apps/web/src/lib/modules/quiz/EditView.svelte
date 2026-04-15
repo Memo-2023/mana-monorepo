@@ -8,15 +8,17 @@
 	import { quizzesStore } from './stores/quizzes.svelte';
 	import { QUESTION_TYPE_LABELS } from './types';
 	import type { QuestionType, QuestionOption, QuizQuestion } from './types';
-	import { ArrowLeft, Plus, Trash, Check, Play } from '@mana/shared-icons';
+	import { ArrowLeft, Plus, Trash, Check, Play, PencilSimple, X } from '@mana/shared-icons';
 
 	interface Props {
 		quizId: string;
 	}
 	let { quizId }: Props = $props();
 
+	// svelte-ignore state_referenced_locally
 	const quiz$ = useQuiz(quizId);
 	const quiz = $derived(quiz$.value);
+	// svelte-ignore state_referenced_locally
 	const questions$ = useQuestions(quizId);
 	const questions = $derived(questions$.value);
 
@@ -49,7 +51,8 @@
 		});
 	}
 
-	// ── New question form ───────────────────────────────
+	// ── Question form (new OR edit) ─────────────────────
+	let editingId = $state<string | null>(null);
 	let newType = $state<QuestionType>('single');
 	let newText = $state('');
 	let newExplanation = $state('');
@@ -59,30 +62,52 @@
 	]);
 	let newTextAnswer = $state('');
 
-	function resetNewForm() {
-		newText = '';
-		newExplanation = '';
-		newTextAnswer = '';
-		if (newType === 'truefalse') {
-			newOptions = [
+	function defaultOptions(type: QuestionType): QuestionOption[] {
+		if (type === 'truefalse') {
+			return [
 				{ id: 't', text: 'Wahr', isCorrect: true },
 				{ id: 'f', text: 'Falsch', isCorrect: false },
 			];
-		} else if (newType === 'text') {
+		}
+		if (type === 'text') return [];
+		return [
+			{ id: crypto.randomUUID(), text: '', isCorrect: type === 'single' },
+			{ id: crypto.randomUUID(), text: '', isCorrect: false },
+		];
+	}
+
+	function resetNewForm() {
+		editingId = null;
+		newText = '';
+		newExplanation = '';
+		newTextAnswer = '';
+		newOptions = defaultOptions(newType);
+	}
+
+	function onTypeChange() {
+		// Manual onchange so we don't rebuild options on every unrelated rerender
+		// (an $effect on newType would wipe the buffer when loading a question for edit).
+		newOptions = defaultOptions(newType);
+		newTextAnswer = '';
+	}
+
+	function startEdit(q: QuizQuestion) {
+		editingId = q.id;
+		newType = q.type;
+		newText = q.questionText;
+		newExplanation = q.explanation ?? '';
+		if (q.type === 'text') {
+			newTextAnswer = q.options[0]?.text ?? '';
 			newOptions = [];
 		} else {
-			newOptions = [
-				{ id: crypto.randomUUID(), text: '', isCorrect: newType === 'single' },
-				{ id: crypto.randomUUID(), text: '', isCorrect: false },
-			];
+			newTextAnswer = '';
+			newOptions = q.options.map((o) => ({ ...o }));
 		}
 	}
 
-	$effect(() => {
-		// Rebuild option slots when question type changes.
-		newType;
+	function cancelEdit() {
 		resetNewForm();
-	});
+	}
 
 	function toggleNewCorrect(id: string) {
 		if (newType === 'single' || newType === 'truefalse') {
@@ -100,7 +125,7 @@
 		newOptions = newOptions.filter((o) => o.id !== id);
 	}
 
-	async function submitNewQuestion() {
+	async function submitQuestion() {
 		const text = newText.trim();
 		if (!text) return;
 
@@ -116,12 +141,21 @@
 			options = valid.map((o) => ({ ...o, text: o.text.trim() }));
 		}
 
-		await quizzesStore.addQuestion(quizId, {
-			type: newType,
-			questionText: text,
-			options,
-			explanation: newExplanation.trim() || null,
-		});
+		if (editingId) {
+			await quizzesStore.updateQuestion(editingId, {
+				type: newType,
+				questionText: text,
+				options,
+				explanation: newExplanation.trim() || null,
+			});
+		} else {
+			await quizzesStore.addQuestion(quizId, {
+				type: newType,
+				questionText: text,
+				options,
+				explanation: newExplanation.trim() || null,
+			});
+		}
 		resetNewForm();
 	}
 
@@ -198,10 +232,18 @@
 			{:else}
 				<ol class="question-list">
 					{#each questions as q, i (q.id)}
-						<li class="question-item">
+						<li class="question-item" class:editing={editingId === q.id}>
 							<div class="q-header">
 								<span class="q-num">{i + 1}</span>
 								<span class="q-type">{QUESTION_TYPE_LABELS[q.type]}</span>
+								<button
+									class="icon-btn"
+									title="Bearbeiten"
+									aria-label="Bearbeiten"
+									onclick={() => startEdit(q)}
+								>
+									<PencilSimple size={14} />
+								</button>
 								<button
 									class="icon-btn"
 									title="Löschen"
@@ -224,11 +266,22 @@
 			{/if}
 		</section>
 
-		<section class="new-section">
-			<h2>Neue Frage</h2>
+		<section class="new-section" class:is-editing={editingId}>
+			<div class="new-header">
+				<h2>
+					{editingId
+						? `Frage ${questions.findIndex((x) => x.id === editingId) + 1} bearbeiten`
+						: 'Neue Frage'}
+				</h2>
+				{#if editingId}
+					<button class="cancel-btn" onclick={cancelEdit}>
+						<X size={12} /> Abbrechen
+					</button>
+				{/if}
+			</div>
 			<label class="field">
 				<span>Typ</span>
-				<select bind:value={newType}>
+				<select bind:value={newType} onchange={onTypeChange}>
 					<option value="single">Single Choice</option>
 					<option value="multi">Multiple Choice</option>
 					<option value="truefalse">Wahr / Falsch</option>
@@ -295,8 +348,12 @@
 				></textarea>
 			</label>
 
-			<button class="submit-btn" onclick={submitNewQuestion}>
-				<Plus size={14} /> Frage hinzufügen
+			<button class="submit-btn" onclick={submitQuestion}>
+				{#if editingId}
+					<Check size={14} /> Änderungen speichern
+				{:else}
+					<Plus size={14} /> Frage hinzufügen
+				{/if}
 			</button>
 		</section>
 	{/if}
@@ -417,6 +474,10 @@
 		border: 1px solid hsl(var(--color-border));
 		background: hsl(var(--color-surface));
 	}
+	.question-item.editing {
+		border-color: hsl(var(--color-primary));
+		background: hsl(var(--color-primary) / 0.05);
+	}
 	.q-header {
 		display: flex;
 		align-items: center;
@@ -477,6 +538,35 @@
 		padding: 0.75rem;
 		border-radius: 0.5rem;
 		border: 1px dashed hsl(var(--color-border));
+	}
+	.new-section.is-editing {
+		border-style: solid;
+		border-color: hsl(var(--color-primary));
+		background: hsl(var(--color-primary) / 0.03);
+	}
+	.new-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+	}
+	.new-header h2 {
+		margin: 0;
+	}
+	.cancel-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.25rem;
+		background: transparent;
+		border: 1px solid hsl(var(--color-border));
+		color: hsl(var(--color-muted-foreground));
+		padding: 0.25rem 0.625rem;
+		border-radius: 9999px;
+		font-size: 0.75rem;
+		cursor: pointer;
+	}
+	.cancel-btn:hover {
+		color: hsl(var(--color-error));
+		border-color: hsl(var(--color-error));
 	}
 	.field {
 		display: flex;

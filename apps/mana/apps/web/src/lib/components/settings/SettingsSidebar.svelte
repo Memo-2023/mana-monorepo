@@ -1,7 +1,7 @@
 <!--
-  SettingsSidebar — vertical category nav (lg+) and horizontal pill row
-  (mobile), with an inline search field that surfaces a quick result list.
-  Owns the search query; the parent owns the active category.
+  SettingsSidebar — horizontal category chip row with an inline search
+  field that surfaces a quick result list. Owns the search query; the
+  parent owns the active category.
 -->
 <script lang="ts">
 	import { MagnifyingGlass, X } from '@mana/shared-icons';
@@ -17,7 +17,7 @@
 		activeCategory: CategoryId;
 		onSelect: (id: CategoryId) => void;
 		onJump: (entry: SearchEntry) => void;
-		/** Override the default categories list (e.g. to exclude profile in workbench). */
+		/** Override the default categories list. */
 		categories?: Category[];
 	}
 
@@ -78,7 +78,6 @@
 		<div class="no-results">Keine Treffer für „{query}"</div>
 	{/if}
 
-	<!-- Mobile horizontal chips (hidden on lg+ via local media query) -->
 	<div class="chip-row" role="tablist">
 		{#each categories as cat (cat.id)}
 			{@const Icon = cat.icon}
@@ -98,36 +97,6 @@
 			</button>
 		{/each}
 	</div>
-
-	<!-- Desktop vertical sidebar -->
-	<nav class="hidden lg:block">
-		<ul class="cat-list" role="tablist">
-			{#each categories as cat (cat.id)}
-				{@const Icon = cat.icon}
-				{@const isActive = activeCategory === cat.id}
-				{@const dim = query.length > 0 && !highlightedCategoryIds.has(cat.id)}
-				<li>
-					<button
-						type="button"
-						role="tab"
-						aria-selected={isActive}
-						onclick={() => onSelect(cat.id)}
-						class="cat-btn"
-						class:active={isActive}
-						class:dim
-					>
-						<span class="cat-icon" class:icon-active={isActive}>
-							<Icon size={18} />
-						</span>
-						<span class="cat-text">
-							<span class="cat-label">{cat.label}</span>
-							<span class="cat-desc">{cat.description}</span>
-						</span>
-					</button>
-				</li>
-			{/each}
-		</ul>
-	</nav>
 </aside>
 
 <style>
@@ -135,14 +104,6 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.75rem;
-	}
-	@media (min-width: 1024px) {
-		.settings-sidebar {
-			position: sticky;
-			top: 6rem;
-			width: 17rem;
-			flex-shrink: 0;
-		}
 	}
 
 	/* ── Search field ───────────────────────────────────────────────── */
@@ -245,7 +206,7 @@
 		color: hsl(var(--color-muted-foreground));
 	}
 
-	/* ── Mobile chips ───────────────────────────────────────────────── */
+	/* ── Category chips ─────────────────────────────────────────────── */
 	.chip-row {
 		display: flex;
 		gap: 0.5rem;
@@ -256,14 +217,6 @@
 	}
 	.chip-row::-webkit-scrollbar {
 		display: none;
-	}
-	/* Hide the mobile chip row on desktop. A media query inside the
-	   scoped <style> block beats the unscoped Tailwind .lg\:hidden,
-	   which would otherwise lose the specificity battle. */
-	@media (min-width: 1024px) {
-		.chip-row {
-			display: none;
-		}
 	}
 	.chip-btn {
 		flex-shrink: 0;
@@ -291,86 +244,5 @@
 	}
 	.chip-btn.dim {
 		opacity: 0.4;
-	}
-
-	/* ── Desktop sidebar buttons ────────────────────────────────────── */
-	.cat-list {
-		list-style: none;
-		margin: 0;
-		padding: 0;
-		display: flex;
-		flex-direction: column;
-		gap: 0.375rem;
-	}
-	.cat-btn {
-		display: flex;
-		align-items: center;
-		gap: 0.75rem;
-		width: 100%;
-		padding: 0.625rem 0.75rem;
-		background: hsl(var(--color-card));
-		border: 1px solid hsl(var(--color-border));
-		border-radius: 0.875rem;
-		text-align: left;
-		cursor: pointer;
-		color: hsl(var(--color-foreground));
-		transition:
-			background 0.15s,
-			border-color 0.15s,
-			box-shadow 0.15s,
-			transform 0.15s;
-	}
-	.cat-btn:hover {
-		background: hsl(var(--color-surface-hover));
-		border-color: hsl(var(--color-border-strong, var(--color-border)));
-		transform: translateY(-1px);
-	}
-	.cat-btn.active {
-		background: hsl(var(--color-primary) / 0.12);
-		border-color: hsl(var(--color-primary) / 0.35);
-		box-shadow:
-			inset 0 0 0 1px hsl(var(--color-primary) / 0.2),
-			0 2px 6px hsl(var(--color-primary) / 0.12);
-	}
-	.cat-btn.dim {
-		opacity: 0.45;
-	}
-
-	.cat-icon {
-		flex-shrink: 0;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 2.25rem;
-		height: 2.25rem;
-		border-radius: 0.625rem;
-		background: hsl(var(--color-muted) / 0.5);
-		color: hsl(var(--color-muted-foreground));
-		transition:
-			background 0.15s,
-			color 0.15s;
-	}
-	.icon-active {
-		background: hsl(var(--color-primary) / 0.18);
-		color: hsl(var(--color-primary));
-	}
-	.cat-text {
-		display: flex;
-		flex-direction: column;
-		min-width: 0;
-		flex: 1;
-	}
-	.cat-label {
-		font-size: 0.875rem;
-		font-weight: 600;
-		line-height: 1.2;
-	}
-	.cat-desc {
-		margin-top: 0.125rem;
-		font-size: 0.75rem;
-		color: hsl(var(--color-muted-foreground));
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
 	}
 </style>

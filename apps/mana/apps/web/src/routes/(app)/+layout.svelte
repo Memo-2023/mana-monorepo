@@ -746,7 +746,7 @@
 			id: 'settings',
 			label: 'Einstellungen',
 			category: 'Navigation',
-			onExecute: () => goto('/settings'),
+			onExecute: () => goto('/'),
 		},
 	];
 </script>
@@ -974,7 +974,7 @@
 					currentSyncLabel={syncStatus.label}
 					{appItems}
 					{userEmail}
-					settingsHref="/settings"
+					settingsHref="/"
 					manaHref="/mana"
 					profileHref="/profile"
 					spiralHref="/spiral"

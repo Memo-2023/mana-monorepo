@@ -1,7 +1,6 @@
 <!--
-  Settings — Workbench-embedded settings panel with category sidebar,
-  search, and all setting sections (general, AI, security, credits, data).
-  Profile and Themes are separate workbench apps — not duplicated here.
+  Settings — the single home for app settings (general, AI, security,
+  credits, data). Profile and Themes live in their own workbench apps.
 -->
 <script lang="ts">
 	import { onMount } from 'svelte';
@@ -10,19 +9,13 @@
 	import { GlobalSettingsSection } from '@mana/shared-ui';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import SettingsSidebar from '$lib/components/settings/SettingsSidebar.svelte';
-	import {
-		categories,
-		type CategoryId,
-		type SearchEntry,
-	} from '$lib/components/settings/searchIndex';
+	import type { CategoryId, SearchEntry } from '$lib/components/settings/searchIndex';
 	import AiSection from '$lib/components/settings/sections/AiSection.svelte';
 	import SecuritySection from '$lib/components/settings/sections/SecuritySection.svelte';
 	import CreditsSection from '$lib/components/settings/sections/CreditsSection.svelte';
 	import DataSection from '$lib/components/settings/sections/DataSection.svelte';
 	import SettingsPanel from '$lib/components/settings/SettingsPanel.svelte';
 
-	// Filter out 'profile' — it's a separate workbench app now
-	const workbenchCategories = categories.filter((c) => c.id !== 'profile');
 	let activeCategory = $state<CategoryId>('general');
 
 	onMount(() => {
@@ -30,7 +23,6 @@
 	});
 
 	function jumpTo(entry: SearchEntry) {
-		if (entry.category === 'profile') return;
 		activeCategory = entry.category;
 		void tick().then(() => {
 			const target = document.getElementById(entry.anchor);
@@ -44,7 +36,6 @@
 		{activeCategory}
 		onSelect={(id) => (activeCategory = id)}
 		onJump={jumpTo}
-		categories={workbenchCategories}
 	/>
 
 	<div class="settings-content">
@@ -71,21 +62,14 @@
 		padding: 0.75rem;
 		display: flex;
 		flex-direction: column;
-		gap: 0.75rem;
+		gap: 1rem;
 		height: 100%;
 		overflow-y: auto;
 	}
 
-	@media (min-width: 1024px) {
-		.settings-page {
-			flex-direction: row;
-			align-items: flex-start;
-		}
-	}
-
 	.settings-content {
 		min-width: 0;
-		flex: 1;
+		width: 100%;
 		display: flex;
 		flex-direction: column;
 		gap: 1.5rem;

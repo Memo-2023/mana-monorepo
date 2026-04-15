@@ -4,9 +4,9 @@
  * updates both the navigation and the search results.
  */
 import type { Component } from 'svelte';
-import { User, Gear, Robot, ShieldCheck, CurrencyCircleDollar, Cloud } from '@mana/shared-icons';
+import { Gear, Robot, ShieldCheck, CurrencyCircleDollar, Cloud } from '@mana/shared-icons';
 
-export type CategoryId = 'profile' | 'general' | 'ai' | 'security' | 'credits' | 'data';
+export type CategoryId = 'general' | 'ai' | 'security' | 'credits' | 'data';
 
 export interface Category {
 	id: CategoryId;
@@ -18,13 +18,6 @@ export interface Category {
 }
 
 export const categories: Category[] = [
-	{
-		id: 'profile',
-		label: 'Profil',
-		description: 'Persönliche Daten & Konto',
-		icon: User,
-		anchors: ['profile', 'account'],
-	},
 	{
 		id: 'general',
 		label: 'Allgemein',
@@ -72,18 +65,6 @@ export interface SearchEntry {
 }
 
 export const searchIndex: SearchEntry[] = [
-	// Profile
-	{ label: 'E-Mail', keywords: ['email', 'mail'], category: 'profile', anchor: 'profile' },
-	{ label: 'Vorname', keywords: ['name'], category: 'profile', anchor: 'profile' },
-	{ label: 'Nachname', keywords: ['name'], category: 'profile', anchor: 'profile' },
-	{
-		label: 'Konto-Status',
-		keywords: ['rolle', 'role', 'aktiv'],
-		category: 'profile',
-		anchor: 'account',
-	},
-	{ label: 'Benutzer-ID', keywords: ['id', 'uid'], category: 'profile', anchor: 'account' },
-
 	// General
 	{
 		label: 'Theme',
