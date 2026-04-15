@@ -4,7 +4,8 @@
 	"private": true,
 	"type": "module",
 	"exports": {
-		"./themes.css": "./src/themes.css"
+		"./themes.css": "./src/themes.css",
+		"./sources.css": "./src/sources.css"
 	},
 	"scripts": {
 		"lint": "eslint ."

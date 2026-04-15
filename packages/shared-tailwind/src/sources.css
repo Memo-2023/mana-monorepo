@@ -1,0 +1,26 @@
+/**
+ * Shared Tailwind source-scan list.
+ *
+ * Apps that consume our @mana/shared-* UI packages need Tailwind to scan
+ * those packages for utility classes (including arbitrary-value ones like
+ * `bg-[hsl(var(--color-muted))]`). Keeping the `@source` list in each app's
+ * app.css duplicates it and invites off-by-one path bugs — which is exactly
+ * what happened (`../../../../` instead of `../../../../../` meant Tailwind
+ * scanned nothing in shared packages, silently).
+ *
+ * Tailwind v4 resolves `@source` paths relative to the CSS file that
+ * declares them, so centralizing here means consumer apps just do:
+ *
+ *   @import "tailwindcss";
+ *   @import "@mana/shared-tailwind/themes.css";
+ *   @import "@mana/shared-tailwind/sources.css";
+ *
+ * and the paths Just Work regardless of how deep the consuming app lives.
+ */
+
+@source "../../shared-ui/src";
+@source "../../shared-auth-ui/src";
+@source "../../shared-branding/src";
+@source "../../shared-theme-ui/src";
+@source "../../subscriptions/src";
+@source "../../credits/src";
