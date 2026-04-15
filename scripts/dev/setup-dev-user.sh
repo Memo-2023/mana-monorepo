@@ -103,12 +103,22 @@ create_user() {
 			;;
 	esac
 
-	# Step 2: idempotent SQL — verify email + lift tier.
+	# Step 2: idempotent SQL — verify email, lift tier, gift sync.
 	# Quoting note: the table is auth.users (Better Auth schema), columns
 	# are email_verified + access_tier. The access_tier enum lives in the
 	# public schema (Drizzle's pgEnum default), so the cast is just
 	# `::access_tier`, NOT `auth.access_tier`. We bind email + tier as
 	# psql vars to dodge any quoting weirdness.
+	#
+	# The sync_subscriptions upsert makes Cloud Sync work out of the box
+	# for dev accounts. `is_gifted = true` means the recurring-billing
+	# cron in mana-credits skips the row and sync stays on indefinitely —
+	# same effect as if an admin had called POST /api/v1/admin/sync/:id/gift.
+	# Without this, the sync-billing status endpoint returns active=false
+	# and the UI shows "Lokal" even though the Go mana-sync would fail-open
+	# (which makes the inactive indicator a dev-only lie). The sync schema
+	# lives inside mana_platform (credits.sync_subscriptions) — it's only
+	# a separate *service*, not a separate DB.
 	PGPASSWORD="${DB_PASS}" psql -q \
 		-h "${DB_HOST}" -p "${DB_PORT}" -U "${DB_USER}" -d "${DB_NAME}" \
 		-v ON_ERROR_STOP=1 \
@@ -120,6 +130,20 @@ create_user() {
 			    access_tier    = :'tier'::access_tier,
 			    updated_at     = NOW()
 			WHERE email = :'email';
+
+			INSERT INTO credits.sync_subscriptions
+				(user_id, active, billing_interval, amount_charged,
+				 activated_at, is_gifted, gifted_by, gifted_at,
+				 created_at, updated_at)
+			SELECT id, true, 'monthly', 0,
+			       NOW(), true, 'setup-dev-user.sh', NOW(),
+			       NOW(), NOW()
+			FROM auth.users
+			WHERE email = :'email'
+			ON CONFLICT (user_id) DO UPDATE
+			SET active     = true,
+			    is_gifted  = true,
+			    updated_at = NOW();
 		SQL
 
 	# Verify final state and report
