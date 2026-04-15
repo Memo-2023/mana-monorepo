@@ -1527,6 +1527,8 @@ services:
       MANA_SEARCH_URL: http://mana-search:3012
       MANA_CREDITS_URL: http://mana-credits:3002
       MANA_MEDIA_URL: http://mana-media:3011
+      MANA_CRAWLER_URL: http://mana-crawler:3014
+      MANA_LLM_DEFAULT_MODEL: ${MANA_LLM_DEFAULT_MODEL:-gemma3:4b}
       MANA_SERVICE_KEY: ${MANA_SERVICE_KEY}
       APP_ID: mana-api
       # Database (used by modules that have server-side state — research,
