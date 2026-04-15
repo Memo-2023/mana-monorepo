@@ -8,7 +8,7 @@
  * struggles with and which isn't the user's expectation for a news feed.
  */
 
-import type { NormalizedFeedItem } from './rss';
+import type { NormalizedFeedItem } from '@mana/shared-rss';
 
 interface HnItem {
 	id: number;

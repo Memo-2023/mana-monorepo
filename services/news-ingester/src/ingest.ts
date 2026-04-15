@@ -19,9 +19,8 @@ import { sql } from 'drizzle-orm';
 import type { Database } from './db/connection';
 import { curatedArticles, type NewCuratedArticle } from './db/schema';
 import { SOURCES, type NewsSource } from './sources';
-import { fetchFeed, type NormalizedFeedItem } from './parsers/rss';
+import { parseFeedUrl, extractFromUrl, type NormalizedFeedItem } from '@mana/shared-rss';
 import { fetchHackerNews } from './parsers/hn';
-import { fetchAndExtract } from './parsers/readability';
 
 const RETENTION_DAYS = 30;
 
@@ -57,7 +56,7 @@ function readingMinutes(words: number): number {
 
 async function fetchSourceItems(source: NewsSource): Promise<NormalizedFeedItem[]> {
 	if (source.type === 'hn') return fetchHackerNews(source.url);
-	return fetchFeed(source.url);
+	return parseFeedUrl(source.url);
 }
 
 /**
@@ -78,7 +77,7 @@ async function buildRow(
 
 	const initialWords = wordCountOf(content);
 	if (FULL_TEXT_THRESHOLD_WORDS > 0 && initialWords < FULL_TEXT_THRESHOLD_WORDS) {
-		const extracted = await fetchAndExtract(item.url);
+		const extracted = await extractFromUrl(item.url);
 		if (extracted) {
 			content = extracted.content;
 			htmlContent = extracted.htmlContent || htmlContent;

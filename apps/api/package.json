@@ -16,20 +16,18 @@
 		"@ai-sdk/openai-compatible": "^2.0.41",
 		"@mana/media-client": "workspace:*",
 		"@mana/shared-hono": "workspace:*",
+		"@mana/shared-rss": "workspace:*",
 		"@mana/shared-storage": "workspace:*",
 		"@mana/shared-types": "workspace:^",
-		"@mozilla/readability": "^0.5.0",
 		"ai": "^6.0.154",
 		"drizzle-orm": "^0.38.0",
 		"hono": "^4.7.0",
-		"jsdom": "^25.0.0",
 		"postgres": "^3.4.0",
 		"rrule": "^2.8.1",
 		"zod": "^3.23.0"
 	},
 	"devDependencies": {
 		"@types/bun": "latest",
-		"@types/jsdom": "^21.1.0",
 		"drizzle-kit": "^0.30.0",
 		"typescript": "^5.8.0"
 	}

@@ -11,8 +11,7 @@
  */
 
 import { Hono } from 'hono';
-import { Readability } from '@mozilla/readability';
-import { JSDOM } from 'jsdom';
+import { extractFromUrl } from '@mana/shared-rss';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import { sql } from 'drizzle-orm';
 import { getConnection } from '../../lib/db';
@@ -20,54 +19,6 @@ import { getConnection } from '../../lib/db';
 // ─── DB Connection (reads from news.curated_articles) ──────
 
 const db = drizzle(getConnection());
-
-// ─── Extract Service (Readability fallback for ad-hoc URLs) ─
-
-interface ExtractedArticle {
-	title: string;
-	content: string;
-	htmlContent: string;
-	excerpt: string;
-	byline: string | null;
-	siteName: string | null;
-	wordCount: number;
-	readingTimeMinutes: number;
-}
-
-async function extractFromUrl(url: string): Promise<ExtractedArticle> {
-	const response = await fetch(url, {
-		headers: {
-			'User-Agent': 'Mozilla/5.0 (compatible; ManaNews/1.0; +https://mana.how)',
-		},
-	});
-
-	if (!response.ok) {
-		throw new Error(`Failed to fetch URL: ${response.status}`);
-	}
-
-	const html = await response.text();
-	const dom = new JSDOM(html, { url });
-	const reader = new Readability(dom.window.document);
-	const article = reader.parse();
-
-	if (!article) {
-		throw new Error('Could not extract article content');
-	}
-
-	const wordCount = article.textContent.split(/\s+/).filter(Boolean).length;
-	const readingTimeMinutes = Math.max(1, Math.ceil(wordCount / 200));
-
-	return {
-		title: article.title,
-		content: article.textContent,
-		htmlContent: article.content,
-		excerpt: article.excerpt || article.textContent.slice(0, 200),
-		byline: article.byline || null,
-		siteName: article.siteName || null,
-		wordCount,
-		readingTimeMinutes,
-	};
-}
 
 // ─── Routes ─────────────────────────────────────────────────
 
@@ -150,40 +101,33 @@ routes.post('/extract/preview', async (c) => {
 	const { url } = await c.req.json<{ url: string }>();
 	if (!url) return c.json({ error: 'URL is required' }, 400);
 
-	try {
-		const article = await extractFromUrl(url);
-		return c.json(article);
-	} catch (err) {
-		return c.json({ error: err instanceof Error ? err.message : 'Extraction failed' }, 500);
-	}
+	const article = await extractFromUrl(url);
+	if (!article) return c.json({ error: 'Extraction failed' }, 502);
+	return c.json(article);
 });
 
 routes.post('/extract/save', async (c) => {
 	const { url } = await c.req.json<{ url: string }>();
 	if (!url) return c.json({ error: 'URL is required' }, 400);
 
-	try {
-		const extracted = await extractFromUrl(url);
+	const extracted = await extractFromUrl(url);
+	if (!extracted) return c.json({ error: 'Extraction failed' }, 502);
 
-		// Return extracted data — client saves to local-first store.
-		return c.json({
-			id: crypto.randomUUID(),
-			type: 'saved',
-			sourceOrigin: 'user_saved',
-			originalUrl: url,
-			title: extracted.title,
-			content: extracted.content,
-			htmlContent: extracted.htmlContent,
-			excerpt: extracted.excerpt,
-			author: extracted.byline,
-			siteName: extracted.siteName,
-			wordCount: extracted.wordCount,
-			readingTimeMinutes: extracted.readingTimeMinutes,
-			isArchived: false,
-		});
-	} catch (err) {
-		return c.json({ error: err instanceof Error ? err.message : 'Extraction failed' }, 500);
-	}
+	return c.json({
+		id: crypto.randomUUID(),
+		type: 'saved',
+		sourceOrigin: 'user_saved',
+		originalUrl: url,
+		title: extracted.title,
+		content: extracted.content,
+		htmlContent: extracted.htmlContent,
+		excerpt: extracted.excerpt,
+		author: extracted.byline,
+		siteName: extracted.siteName,
+		wordCount: extracted.wordCount,
+		readingTimeMinutes: extracted.readingTimeMinutes,
+		isArchived: false,
+	});
 });
 
 export { routes as newsRoutes };

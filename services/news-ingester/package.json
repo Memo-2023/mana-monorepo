@@ -11,15 +11,12 @@
 		"db:studio": "drizzle-kit studio"
 	},
 	"dependencies": {
-		"@mozilla/readability": "^0.5.0",
+		"@mana/shared-rss": "workspace:*",
 		"drizzle-orm": "^0.38.3",
 		"hono": "^4.7.0",
-		"jsdom": "^25.0.1",
-		"postgres": "^3.4.5",
-		"rss-parser": "^3.13.0"
+		"postgres": "^3.4.5"
 	},
 	"devDependencies": {
-		"@types/jsdom": "^21.1.7",
 		"drizzle-kit": "^0.30.4",
 		"typescript": "^5.9.3"
 	}
