@@ -45,6 +45,7 @@ DB_USER="${DB_USER:-mana}"
 DB_PASS="${DB_PASS:-devpassword}"
 DB_NAME="${DB_NAME:-mana_platform}"
 TIER="${TIER:-founder}"
+ROLE="${ROLE:-admin}"
 
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -124,10 +125,16 @@ create_user() {
 		-v ON_ERROR_STOP=1 \
 		-v email="${email}" \
 		-v tier="${TIER}" \
+		-v role="${ROLE}" \
 		<<-'SQL'
+			-- access_tier and role are orthogonal: tier gates product
+			-- features per user (public < beta < alpha < founder), role
+			-- gates backend admin endpoints (role=admin required for
+			-- e.g. /api/v1/admin/sync/:id/gift). Dev accounts want both.
 			UPDATE auth.users
 			SET email_verified = true,
 			    access_tier    = :'tier'::access_tier,
+			    role           = :'role'::user_role,
 			    updated_at     = NOW()
 			WHERE email = :'email';
 
@@ -156,14 +163,14 @@ create_user() {
 		return 1
 	fi
 	echo -e "  ${DIM}${row}${NC}"
-	echo -e "  ${GREEN}✓${NC} email=${email}  password=${password}  tier=${TIER}"
+	echo -e "  ${GREEN}✓${NC} email=${email}  password=${password}  tier=${TIER}  role=${ROLE}  sync=gifted"
 }
 
 # ─── Main ────────────────────────────────────────────────────
 if [[ $# -eq 2 ]]; then
 	create_user "$1" "$2"
 else
-	echo -e "${GREEN}Creating default dev users (${TIER} tier)…${NC}"
+	echo -e "${GREEN}Creating default dev users (tier=${TIER}, role=${ROLE}, sync=gifted)…${NC}"
 	create_user "tills95@gmail.com"  "Aa-123456789"
 	create_user "tilljkb@gmail.com"  "Aa-123456789"
 	create_user "rajiehq@gmail.com"  "Aa-123456789"
