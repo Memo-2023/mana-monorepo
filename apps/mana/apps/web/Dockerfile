@@ -17,6 +17,7 @@ COPY packages/shared-uload ./packages/shared-uload
 COPY packages/local-llm ./packages/local-llm
 COPY packages/local-stt ./packages/local-stt
 COPY packages/shared-llm ./packages/shared-llm
+COPY packages/shared-ai ./packages/shared-ai
 
 RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
     pnpm install --no-frozen-lockfile --ignore-scripts
