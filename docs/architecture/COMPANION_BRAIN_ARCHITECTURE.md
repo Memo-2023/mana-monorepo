@@ -1794,7 +1794,7 @@ Code:
     stempelt `__lastActor` + `__fieldActors` aus eingehenden Changes
     → **cross-device Attribution geschlossen**
 - [x] Schritt 9 — Server-side `mana-ai` Bun-Service (v0.3, Close-the-Loop)
-  - `services/mana-ai/` — Hono/Bun auf Port 3066
+  - `services/mana-ai (3067
   - `@mana/shared-ai` Package als Single-Source-of-Truth für Planner-
     Prompt + Parser + Typen (Webapp + Service importieren identisch)
   - Field-level LWW-Replay von `sync_changes` in `db/missions-projection.ts`

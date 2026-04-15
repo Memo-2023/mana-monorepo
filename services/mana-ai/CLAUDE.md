@@ -8,7 +8,7 @@ Design context: [`docs/architecture/COMPANION_BRAIN_ARCHITECTURE.md` §20](../..
 
 What works end-to-end:
 
-- [x] Boots as a Hono/Bun service on port `3066`
+- [x] Boots as a Hono/Bun service on port `3067`
 - [x] Exposes `/health` and service-key-gated `/internal/tick`
 - [x] Replays `sync_changes` for `appId='ai' / table='aiMissions'` into live Mission records via field-level LWW (`src/db/missions-projection.ts`)
 - [x] Lists due missions (`state='active' && nextRunAt <= now()`)
@@ -59,7 +59,7 @@ Was offen ist (Phase 3, Frontend):
 - [ ] Feature-Flag `PUBLIC_AI_MISSION_GRANTS=false` default + Rollout (till → beta → alpha).
 - [ ] Produktions-Keypair generieren + in Mac-Mini Secrets ablegen.
 
-## Port: 3066
+## Port: 3067
 
 ## Tech Stack
 
@@ -78,14 +78,14 @@ cd services/mana-ai
 bun run dev
 
 # Smoke test
-curl http://localhost:3066/health
-curl -X POST -H "X-Service-Key: dev-service-key" http://localhost:3066/internal/tick
+curl http://localhost:3067/health
+curl -X POST -H "X-Service-Key: dev-service-key" http://localhost:3067/internal/tick
 ```
 
 ## Environment Variables
 
 ```env
-PORT=3066
+PORT=3067
 SYNC_DATABASE_URL=postgresql://mana:devpassword@localhost:5432/mana_sync
 MANA_LLM_URL=http://localhost:3020
 MANA_SERVICE_KEY=dev-service-key
@@ -98,7 +98,7 @@ TICK_ENABLED=true    # flip to false to boot HTTP-only (for Docker health-check)
 ```
 ┌────────────────────┐
 │  mana-ai (Bun)     │
-│    :3066           │
+│    :3067           │
 │                    │   60s interval
 │  ┌─────────────┐   │────────────────┐
 │  │ tick loop   │   │                │

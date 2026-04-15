@@ -43,7 +43,7 @@ function requireEnv(key: string, fallback?: string): string {
 
 export function loadConfig(): Config {
 	return {
-		port: parseInt(process.env.PORT ?? '3066', 10),
+		port: parseInt(process.env.PORT ?? '3067', 10),
 		syncDatabaseUrl: requireEnv(
 			'SYNC_DATABASE_URL',
 			'postgresql://mana:devpassword@localhost:5432/mana_sync'

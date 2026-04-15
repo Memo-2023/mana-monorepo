@@ -29,9 +29,9 @@ COPY services/mana-ai/tsconfig.json ./services/mana-ai/
 
 WORKDIR /app/services/mana-ai
 
-EXPOSE 3066
+EXPOSE 3067
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
-  CMD bun -e "fetch('http://localhost:3066/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
+  CMD bun -e "fetch('http://localhost:3067/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
 
 CMD ["bun", "run", "src/index.ts"]
