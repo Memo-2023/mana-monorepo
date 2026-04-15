@@ -11,6 +11,7 @@ export type { Actor } from './actor';
 export { USER_ACTOR, isAiActor, isSystemActor } from './actor';
 
 export type {
+	IterationPhase,
 	Mission,
 	MissionCadence,
 	MissionInputRef,

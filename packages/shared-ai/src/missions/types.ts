@@ -41,6 +41,18 @@ export interface PlanStep {
 	readonly status: 'planned' | 'staged' | 'approved' | 'rejected' | 'skipped' | 'failed';
 }
 
+/**
+ * Sub-state of a `running` iteration so the UI can show meaningful
+ * progress instead of a spinner with no context. Set by the runner as
+ * it advances; cleared when the iteration leaves `running`.
+ */
+export type IterationPhase =
+	| 'resolving-inputs'
+	| 'calling-llm'
+	| 'parsing-response'
+	| 'staging-proposals'
+	| 'finalizing';
+
 export interface MissionIteration {
 	readonly id: string;
 	readonly startedAt: string;
@@ -59,6 +71,20 @@ export interface MissionIteration {
 	 * pre-server iterations.
 	 */
 	readonly source?: 'browser' | 'server';
+	/** Sub-status while `overallStatus === 'running'`. Undefined otherwise. */
+	readonly currentPhase?: IterationPhase;
+	/** When the runner advanced into the current phase — for elapsed-in-phase. */
+	readonly phaseStartedAt?: string;
+	/**
+	 * Human-readable detail for the current phase (e.g. "staging 2/5").
+	 * Pure UI hint; not load-bearing.
+	 */
+	readonly phaseDetail?: string;
+	/**
+	 * Set to true by the user clicking "Abbrechen". The runner polls this
+	 * between phases and exits early as `failed` with summary 'cancelled'.
+	 */
+	readonly cancelRequested?: boolean;
 }
 
 export interface Mission {

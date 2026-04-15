@@ -194,19 +194,81 @@ export async function startIteration(
 ): Promise<MissionIteration> {
 	const mission = await getMission(missionId);
 	if (!mission) throw new Error(`Mission not found: ${missionId}`);
+	const now = new Date().toISOString();
 	const iteration: MissionIteration = {
 		id: crypto.randomUUID(),
-		startedAt: new Date().toISOString(),
+		startedAt: now,
 		// Strip $state Proxies from the plan array so structured-clone
 		// doesn't fail when Dexie serialises the row.
 		plan: deepClone(input.plan),
 		overallStatus: 'running',
+		currentPhase: 'resolving-inputs',
+		phaseStartedAt: now,
 	};
 	await table().update(missionId, {
 		iterations: [...mission.iterations, iteration],
-		updatedAt: new Date().toISOString(),
+		updatedAt: now,
 	});
 	return iteration;
+}
+
+/**
+ * Update the running iteration's sub-phase. Best-effort; failures swallowed
+ * so a transient Dexie hiccup doesn't kill the run mid-flight.
+ */
+export async function setIterationPhase(
+	missionId: string,
+	iterationId: string,
+	phase: import('@mana/shared-ai').IterationPhase,
+	detail?: string
+): Promise<void> {
+	try {
+		const mission = await getMission(missionId);
+		if (!mission) return;
+		const now = new Date().toISOString();
+		const updated = mission.iterations.map((it) =>
+			it.id === iterationId
+				? {
+						...it,
+						currentPhase: phase,
+						phaseStartedAt: now,
+						phaseDetail: detail,
+					}
+				: it
+		);
+		await table().update(missionId, { iterations: updated, updatedAt: now });
+	} catch (err) {
+		console.warn('[mission-store] setIterationPhase failed:', err);
+	}
+}
+
+/**
+ * Mark an iteration for cancellation. The runner polls between phases
+ * and exits early as `failed` with summary `'cancelled'`.
+ */
+export async function requestIterationCancel(
+	missionId: string,
+	iterationId: string
+): Promise<void> {
+	const mission = await getMission(missionId);
+	if (!mission) return;
+	const updated = mission.iterations.map((it) =>
+		it.id === iterationId ? { ...it, cancelRequested: true } : it
+	);
+	await table().update(missionId, {
+		iterations: updated,
+		updatedAt: new Date().toISOString(),
+	});
+}
+
+/**
+ * True if the user has clicked Cancel on this still-running iteration.
+ * The runner reads this after each await point.
+ */
+export async function isCancelRequested(missionId: string, iterationId: string): Promise<boolean> {
+	const mission = await getMission(missionId);
+	const it = mission?.iterations.find((x) => x.id === iterationId);
+	return Boolean(it?.cancelRequested);
 }
 
 export interface FinishIterationInput {

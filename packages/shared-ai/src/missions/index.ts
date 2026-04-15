@@ -1,4 +1,5 @@
 export type {
+	IterationPhase,
 	Mission,
 	MissionCadence,
 	MissionInputRef,

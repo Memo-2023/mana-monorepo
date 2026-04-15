@@ -19,13 +19,32 @@
  * code passes those in via the setup module.
  */
 
-import { getMission, startIteration, finishIteration } from './store';
+import {
+	getMission,
+	startIteration,
+	finishIteration,
+	setIterationPhase,
+	isCancelRequested,
+} from './store';
 import { resolveMissionInputs } from './input-resolvers';
 import { getAvailableToolsForAi } from './available-tools';
 import { executeTool } from '../../tools/executor';
 import type { Actor } from '../../events/actor';
 import type { Mission, MissionIteration, PlanStep } from './types';
 import type { AiPlanInput, AiPlanOutput, PlannedStep } from './planner/types';
+
+/** Hard timeout for one mission run. Cancels the in-flight planner call
+ *  and finalises the iteration as failed. 90 s is comfortable for a
+ *  cloud-tier model but short enough that a wedged backend doesn't sit
+ *  in `running` indefinitely. */
+const ITERATION_TIMEOUT_MS = 90_000;
+
+class CancelledError extends Error {
+	constructor(reason: string) {
+		super(reason);
+		this.name = 'CancelledError';
+	}
+}
 
 export interface MissionRunnerDeps {
 	/** Invoke the Planner LLM task with the fully-built input. */
@@ -86,62 +105,132 @@ export async function runMission(
 		rationale: mission.objective,
 	};
 
-	// Gather context
-	const resolvedInputs = await resolveMissionInputs(mission.inputs);
-	const availableTools = getAvailableToolsForAi(aiActor);
+	// Hard timeout: any phase taking longer than ITERATION_TIMEOUT_MS aborts
+	// the run. Wraps the whole pipeline in a Promise.race against a timer.
+	const timeoutPromise = new Promise<never>((_, reject) =>
+		setTimeout(
+			() => reject(new CancelledError(`timeout after ${ITERATION_TIMEOUT_MS / 1000}s`)),
+			ITERATION_TIMEOUT_MS
+		)
+	);
 
-	// Ask the planner
-	let plan: AiPlanOutput;
+	async function checkCancel(): Promise<void> {
+		if (await isCancelRequested(mission!.id, iterationId)) {
+			throw new CancelledError('cancelled by user');
+		}
+	}
+
+	async function runPipeline(): Promise<{
+		recordedSteps: PlanStep[];
+		stagedCount: number;
+		failedCount: number;
+		planSummary: string;
+		planStepCount: number;
+	}> {
+		// ── Phase: resolving-inputs ────────────────────────────
+		await setIterationPhase(
+			mission!.id,
+			iterationId,
+			'resolving-inputs',
+			mission!.inputs.length > 0 ? `${mission!.inputs.length} Input(s)` : 'keine Inputs'
+		);
+		const resolvedInputs = await resolveMissionInputs(mission!.inputs);
+		const availableTools = getAvailableToolsForAi(aiActor);
+		await checkCancel();
+
+		// ── Phase: calling-llm ─────────────────────────────────
+		await setIterationPhase(mission!.id, iterationId, 'calling-llm', 'frage Planner an');
+		const plan = await deps.plan({ mission: mission!, resolvedInputs, availableTools });
+		await checkCancel();
+
+		// ── Phase: parsing-response ────────────────────────────
+		await setIterationPhase(
+			mission!.id,
+			iterationId,
+			'parsing-response',
+			`${plan.steps.length} Step(s) erhalten`
+		);
+		await checkCancel();
+
+		// ── Phase: staging-proposals ───────────────────────────
+		const stage = deps.stageStep ?? defaultStageStep;
+		const recordedSteps: PlanStep[] = [];
+		let stagedCount = 0;
+		let failedCount = 0;
+
+		for (const [i, ps] of plan.steps.entries()) {
+			await setIterationPhase(
+				mission!.id,
+				iterationId,
+				'staging-proposals',
+				`Step ${i + 1} von ${plan.steps.length}`
+			);
+			await checkCancel();
+
+			const outcome = await stage(ps, aiActor);
+			if (outcome.ok) {
+				stagedCount++;
+				recordedSteps.push({
+					id: `${iterationId}-${i}`,
+					summary: ps.summary,
+					intent: { kind: 'toolCall', toolName: ps.toolName, params: ps.params },
+					proposalId: outcome.proposalId || undefined,
+					status: outcome.proposalId ? 'staged' : 'approved',
+				});
+			} else {
+				failedCount++;
+				recordedSteps.push({
+					id: `${iterationId}-${i}`,
+					summary: ps.summary,
+					intent: { kind: 'toolCall', toolName: ps.toolName, params: ps.params },
+					status: 'failed',
+				});
+			}
+		}
+
+		await setIterationPhase(mission!.id, iterationId, 'finalizing');
+		return {
+			recordedSteps,
+			stagedCount,
+			failedCount,
+			planSummary: plan.summary,
+			planStepCount: plan.steps.length,
+		};
+	}
+
+	let recordedSteps: PlanStep[] = [];
+	let stagedCount = 0;
+	let failedCount = 0;
+	let planSummary = '';
+	let planStepCount = 0;
 	try {
-		plan = await deps.plan({ mission, resolvedInputs, availableTools });
+		const result = await Promise.race([runPipeline(), timeoutPromise]);
+		recordedSteps = result.recordedSteps;
+		stagedCount = result.stagedCount;
+		failedCount = result.failedCount;
+		planSummary = result.planSummary;
+		planStepCount = result.planStepCount;
 	} catch (err) {
 		const msg = err instanceof Error ? err.message : String(err);
+		const isCancellation = err instanceof CancelledError;
 		await finishIteration(mission.id, iterationId, {
-			summary: `Planner failed: ${msg}`,
+			summary: isCancellation ? msg : `Planner failed: ${msg}`,
 			overallStatus: 'failed',
 		});
 		return emptyResult(mission, iterationId, 'failed', msg);
 	}
 
-	// Stage each planned step as a Proposal (or auto-execute if policy says so).
-	const stage = deps.stageStep ?? defaultStageStep;
-	const recordedSteps: PlanStep[] = [];
-	let stagedCount = 0;
-	let failedCount = 0;
-
-	for (const [i, ps] of plan.steps.entries()) {
-		const outcome = await stage(ps, aiActor);
-		if (outcome.ok) {
-			stagedCount++;
-			recordedSteps.push({
-				id: `${iterationId}-${i}`,
-				summary: ps.summary,
-				intent: { kind: 'toolCall', toolName: ps.toolName, params: ps.params },
-				proposalId: outcome.proposalId || undefined,
-				status: outcome.proposalId ? 'staged' : 'approved',
-			});
-		} else {
-			failedCount++;
-			recordedSteps.push({
-				id: `${iterationId}-${i}`,
-				summary: ps.summary,
-				intent: { kind: 'toolCall', toolName: ps.toolName, params: ps.params },
-				status: 'failed',
-			});
-		}
-	}
-
 	const overallStatus: MissionIteration['overallStatus'] =
-		plan.steps.length === 0
+		planStepCount === 0
 			? 'approved' // nothing to do is a valid outcome
-			: failedCount === plan.steps.length
+			: failedCount === planStepCount
 				? 'failed'
 				: stagedCount > 0
 					? 'awaiting-review'
 					: 'approved';
 
 	await finishIteration(mission.id, iterationId, {
-		summary: plan.summary,
+		summary: planSummary,
 		overallStatus,
 		plan: recordedSteps,
 	});
@@ -151,10 +240,10 @@ export async function runMission(
 			id: iterationId,
 			startedAt: new Date().toISOString(),
 			plan: recordedSteps,
-			summary: plan.summary,
+			summary: planSummary,
 			overallStatus,
 		},
-		plannedSteps: plan.steps.length,
+		plannedSteps: planStepCount,
 		stagedSteps: stagedCount,
 		failedSteps: failedCount,
 	};

@@ -14,7 +14,9 @@
 		deleteMission,
 		addIterationFeedback,
 		revokeMissionGrant,
+		requestIterationCancel,
 	} from '$lib/data/ai/missions/store';
+	import { onDestroy } from 'svelte';
 	import { runMission } from '$lib/data/ai/missions/runner';
 	import { productionDeps } from '$lib/data/ai/missions/setup';
 	import MissionInputPicker from '$lib/components/ai/MissionInputPicker.svelte';
@@ -151,6 +153,42 @@
 	function openDetail(id: string) {
 		selectedId = id;
 		mode = 'detail';
+	}
+
+	// ── Live elapsed-time ticker for `running` iterations ────────
+	// $state-backed `now` updates every second; any $derived that reads
+	// it gets recomputed, so the UI counter ticks without a Dexie write.
+	let now = $state(Date.now());
+	const tickHandle = setInterval(() => (now = Date.now()), 1000);
+	onDestroy(() => clearInterval(tickHandle));
+
+	function elapsedSeconds(iso: string): number {
+		return Math.max(0, Math.floor((now - new Date(iso).getTime()) / 1000));
+	}
+
+	function formatElapsed(seconds: number): string {
+		if (seconds < 60) return `${seconds}s`;
+		const m = Math.floor(seconds / 60);
+		const s = seconds % 60;
+		return `${m}m ${String(s).padStart(2, '0')}s`;
+	}
+
+	const PHASE_LABELS: Record<string, string> = {
+		'resolving-inputs': 'Lade Inputs',
+		'calling-llm': 'Frage Planner',
+		'parsing-response': 'Validiere Antwort',
+		'staging-proposals': 'Stage Vorschläge',
+		finalizing: 'Schließe ab',
+	};
+
+	let cancelling = $state<string | null>(null);
+	async function handleCancel(missionId: string, iterationId: string) {
+		cancelling = iterationId;
+		try {
+			await requestIterationCancel(missionId, iterationId);
+		} finally {
+			cancelling = null;
+		}
 	}
 </script>
 
@@ -347,11 +385,36 @@
 			<p class="empty">Noch keine Iteration gelaufen.</p>
 		{:else}
 			{#each [...selected.iterations].reverse() as it (it.id)}
-				<article class="it">
+				{@const isRunning = it.overallStatus === 'running'}
+				<article class="it" class:it-running={isRunning}>
 					<header>
 						<span class="it-date">{new Date(it.startedAt).toLocaleString('de-DE')}</span>
 						<span class="badge badge-{it.overallStatus}">{it.overallStatus}</span>
 					</header>
+
+					{#if isRunning}
+						<div class="phase-block">
+							<div class="phase-line">
+								<span class="phase-spinner" aria-hidden="true">⏳</span>
+								<span class="phase-label">
+									{PHASE_LABELS[it.currentPhase ?? ''] ?? it.currentPhase ?? 'Initialisiere'}
+									{#if it.phaseDetail}<span class="phase-detail"> · {it.phaseDetail}</span>{/if}
+								</span>
+								<span class="elapsed">⏱ {formatElapsed(elapsedSeconds(it.startedAt))}</span>
+							</div>
+							<div class="phase-actions">
+								<button
+									type="button"
+									class="cancel-btn"
+									disabled={cancelling === it.id || it.cancelRequested}
+									onclick={() => handleCancel(selected.id, it.id)}
+								>
+									{it.cancelRequested ? 'Wird abgebrochen…' : 'Abbrechen'}
+								</button>
+							</div>
+						</div>
+					{/if}
+
 					{#if it.summary}<p class="it-summary">{it.summary}</p>{/if}
 					{#if it.userFeedback}
 						<blockquote class="fb">{it.userFeedback}</blockquote>
@@ -608,6 +671,77 @@
 	.badge-failed {
 		background: #f7d7d7;
 		color: #8a1b1b;
+	}
+	.badge-running {
+		background: #d7ecff;
+		color: #0a548b;
+	}
+	.it-running {
+		border-color: color-mix(in oklab, #0a548b 35%, hsl(var(--color-border)));
+	}
+	.phase-block {
+		display: flex;
+		flex-direction: column;
+		gap: 0.375rem;
+		padding: 0.5rem 0.625rem;
+		margin: 0.375rem 0;
+		background: color-mix(in oklab, #0a548b 6%, transparent);
+		border-radius: 0.375rem;
+	}
+	.phase-line {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		font-size: 0.8125rem;
+	}
+	.phase-spinner {
+		display: inline-flex;
+		font-size: 0.875rem;
+		animation: phase-pulse 1.4s ease-in-out infinite;
+	}
+	@keyframes phase-pulse {
+		0%,
+		100% {
+			opacity: 0.5;
+		}
+		50% {
+			opacity: 1;
+		}
+	}
+	.phase-label {
+		flex: 1;
+		font-weight: 500;
+	}
+	.phase-detail {
+		color: hsl(var(--color-muted-foreground));
+		font-weight: 400;
+	}
+	.elapsed {
+		font-variant-numeric: tabular-nums;
+		font-size: 0.75rem;
+		color: hsl(var(--color-muted-foreground));
+	}
+	.phase-actions {
+		display: flex;
+		justify-content: flex-end;
+	}
+	.cancel-btn {
+		padding: 0.25rem 0.625rem;
+		border: 1px solid hsl(var(--color-border));
+		border-radius: 0.25rem;
+		background: hsl(var(--color-surface));
+		color: hsl(var(--color-muted-foreground));
+		cursor: pointer;
+		font: inherit;
+		font-size: 0.75rem;
+	}
+	.cancel-btn:hover:not(:disabled) {
+		color: #8a1b1b;
+		border-color: #e99;
+	}
+	.cancel-btn:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
 	}
 	.it-summary {
 		margin: 0 0 0.375rem;
