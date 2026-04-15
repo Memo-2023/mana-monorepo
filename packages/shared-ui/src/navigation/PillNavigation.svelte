@@ -552,6 +552,20 @@
 	// light/dark/system toggle, theme button.
 	const userMenuBarItems = $derived.by<PillDropdownItem[]>(() => {
 		const out: PillDropdownItem[] = [];
+		// Guest → put "Anmelden" first. Everything else in the menu
+		// (settings, theme, logout) is a user-only action or a trivial
+		// toggle, so the login entry should be the obvious call-to-action
+		// at the top of the bar.
+		if (!userEmail && loginHref) {
+			out.push({
+				id: 'login',
+				label: 'Anmelden',
+				icon: 'login',
+				onClick: () => {
+					window.location.href = loginHref;
+				},
+			});
+		}
 		if (settingsHref) {
 			out.push({
 				id: 'settings',
@@ -758,10 +772,14 @@
 			<!-- User Menu -->
 			{#if (userEmail || loginHref) && barMode}
 				{@const userLabel = userEmail ? truncateEmail(userEmail) : guestMenuLabel}
+				<!-- For guests we omit the bar header label: the first item in
+					 userMenuBarItems is the "Anmelden" call-to-action, and a
+					 decorative "Menü" pill sitting to its left just clutters
+					 the bar without adding information. -->
 				{@const userBarConfig = {
 					id: 'user',
-					label: userLabel,
-					icon: 'user',
+					label: userEmail ? userLabel : '',
+					icon: userEmail ? 'user' : undefined,
 					items: userMenuBarItems,
 				}}
 				<Pill
