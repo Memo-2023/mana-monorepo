@@ -471,6 +471,16 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	// Singleton markdown document ("Was soll Mana über dich wissen?").
 	// Free-form user text — encrypt the content, leave the fixed id plaintext.
 	kontextDoc: { enabled: true, fields: ['content'] },
+
+	// ─── AI Agents ───────────────────────────────────────────
+	// Named AI personas (docs/plans/multi-agent-workbench.md). `name` +
+	// `role` + `avatar` stay plaintext because `name` is the display-key
+	// (search + picker + historic Actor.displayName cache) and the role
+	// is a short label. `systemPrompt` + `memory` carry user-specific
+	// context — often referencing private goals / projects / people —
+	// and belong under encryption. Policy + budgets + state are pure
+	// structural fields.
+	agents: { enabled: true, fields: ['systemPrompt', 'memory'] },
 };
 
 /**

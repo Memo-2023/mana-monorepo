@@ -22,6 +22,8 @@ import { MISSIONS_TABLE } from './types';
 import { createProposal } from '../proposals/store';
 import { getMission } from './store';
 import { runAsAsync, makeAgentActor, LEGACY_AI_PRINCIPAL } from '../../events/actor';
+import { getAgent } from '../agents/store';
+import { DEFAULT_AGENT_NAME } from '../agents/types';
 import type { Mission, MissionIteration, PlanStep } from './types';
 
 const processedIterations = new Set<string>();
@@ -91,17 +93,21 @@ async function stageIteration(mission: Mission, iteration: MissionIteration): Pr
 	if (!fresh) return;
 	const stagedStepIds: Record<string, string> = {};
 
+	// Resolve the owning agent once per iteration (not per step) — agent
+	// identity doesn't change mid-iteration. Legacy missions or missions
+	// whose agent was deleted fall back to the legacy principal.
+	const owningAgent = fresh.agentId ? await getAgent(fresh.agentId) : null;
+	const actorAgentId = owningAgent?.id ?? LEGACY_AI_PRINCIPAL;
+	const actorDisplayName = owningAgent?.name ?? DEFAULT_AGENT_NAME;
+
 	for (const step of iteration.plan) {
 		const intent = step.intent;
 		if (intent.kind !== 'toolCall') continue;
 		if (step.proposalId) continue; // already staged
 
-		// Phase 1: server-iteration writes under the legacy AI principal.
-		// Phase 2 will swap this for the mission's owning-agent identity
-		// once agents are wired into the data layer.
 		const actor = makeAgentActor({
-			agentId: LEGACY_AI_PRINCIPAL,
-			displayName: 'Mana',
+			agentId: actorAgentId,
+			displayName: actorDisplayName,
 			missionId: mission.id,
 			iterationId: iteration.id,
 			rationale: step.summary || iteration.summary || mission.objective,

@@ -71,4 +71,9 @@ export {
 	AI_PROPOSABLE_TOOL_NAMES,
 	AI_PROPOSABLE_TOOL_SET,
 	type AiProposableToolName,
+	type AiPolicy,
+	type PolicyDecision,
 } from './policy';
+
+export type { Agent, AgentState } from './agents';
+export { DEFAULT_AGENT_ID, DEFAULT_AGENT_NAME } from './agents';

@@ -20,6 +20,7 @@ import { llmOrchestrator } from '@mana/shared-llm';
 import { aiPlanTask } from '$lib/llm-tasks/ai-plan';
 import { runDueMissions, type MissionRunnerDeps } from './runner';
 import { registerDefaultInputResolvers } from './default-resolvers';
+import { runAgentsBootstrap } from '../agents/bootstrap';
 import type { AiPlanInput, AiPlanOutput } from './planner/types';
 
 /** Default interval between tick scans. One minute is fine for foreground use. */
@@ -46,6 +47,12 @@ let ticking = false;
 export function startMissionTick(intervalMs: number = DEFAULT_TICK_INTERVAL_MS): () => void {
 	if (tickHandle !== null) return stopMissionTick;
 	registerDefaultInputResolvers();
+
+	// Multi-Agent Workbench: ensure a default "Mana" agent exists and
+	// backfill agentId on legacy missions. Fire-and-forget — the runner
+	// itself tolerates missions without an agentId during the migration
+	// window. See docs/plans/multi-agent-workbench.md §Phase 2d.
+	void runAgentsBootstrap();
 
 	const tickOnce = async () => {
 		// Guard against overlap — a slow LLM run could pile up multiple ticks.

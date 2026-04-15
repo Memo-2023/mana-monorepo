@@ -116,6 +116,15 @@ export interface Mission {
 	userId?: string;
 	deletedAt?: string;
 	/**
+	 * Owning agent (Multi-Agent Workbench, Phase 2). Missing on legacy
+	 * records; the default-agent bootstrap backfills them with
+	 * `DEFAULT_AGENT_ID` on first login after rollout. Runner reads this
+	 * to build the Actor; when undefined it falls back to
+	 * `LEGACY_AI_PRINCIPAL` so writes still attribute cleanly during the
+	 * migration window.
+	 */
+	agentId?: string;
+	/**
 	 * Key-Grant for server-side execution on encrypted inputs. When set,
 	 * `mana-ai` can decrypt the referenced records without the user's
 	 * browser tab being open. Absent or expired → server-side Runner
