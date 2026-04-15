@@ -10,6 +10,7 @@
  * its deadline.
  */
 
+import type { MissionGrant } from '@mana/shared-ai';
 import type { Sql } from './connection';
 
 /**
@@ -27,6 +28,9 @@ export interface ServerMission {
 	inputs: { module: string; table: string; id: string }[];
 	cadence: unknown; // opaque — the browser Runner owns cadence math
 	iterations: unknown[]; // opaque — server just reads count
+	/** Present iff the mission has a Key-Grant attached — enables
+	 *  decryption of encrypted-table inputs during this tick. */
+	grant?: MissionGrant;
 }
 
 interface ChangeRow {
@@ -75,6 +79,7 @@ export async function listDueMissions(sql: Sql, now: string): Promise<ServerMiss
 		inputs: Array.isArray(record.inputs) ? (record.inputs as ServerMission['inputs']) : [],
 		cadence: record.cadence,
 		iterations: Array.isArray(record.iterations) ? record.iterations : [],
+		grant: (record.grant ?? undefined) as MissionGrant | undefined,
 	}));
 }
 
@@ -141,6 +146,7 @@ export function mergeAndFilter(
 			inputs: Array.isArray(record.inputs) ? (record.inputs as ServerMission['inputs']) : [],
 			cadence: record.cadence,
 			iterations: Array.isArray(record.iterations) ? record.iterations : [],
+			grant: (record.grant ?? undefined) as MissionGrant | undefined,
 		});
 	}
 	return missions;

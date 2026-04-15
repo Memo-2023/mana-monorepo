@@ -98,3 +98,28 @@ export const snapshotRowsAppliedTotal = new Counter({
 	help: 'Sync-changes rows folded into the snapshot cache.',
 	registers: [register],
 });
+
+// ── Mission Key-Grant (Phase 2+) ──────────────────────────
+
+export const decryptsTotal = new Counter({
+	name: 'mana_ai_decrypts_total',
+	help: 'Server-side field decrypts performed under a Mission grant.',
+	labelNames: ['table'] as const,
+	registers: [register],
+});
+
+/** Must remain at 0 in steady state — any increment indicates a record
+ *  was requested outside the grant's allowlist. Alert on > 0. */
+export const grantScopeViolationsTotal = new Counter({
+	name: 'mana_ai_grant_scope_violations_total',
+	help: 'Decrypt attempts rejected because the record was not on the grant allowlist.',
+	labelNames: ['table'] as const,
+	registers: [register],
+});
+
+export const grantSkipsTotal = new Counter({
+	name: 'mana_ai_grant_skips_total',
+	help: 'Missions skipped because their grant was missing, expired, or unwrappable.',
+	labelNames: ['reason'] as const,
+	registers: [register],
+});

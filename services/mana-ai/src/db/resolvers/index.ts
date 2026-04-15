@@ -9,8 +9,15 @@
 
 import type { Sql } from '../connection';
 import type { MissionInputRef, ResolvedInput } from '@mana/shared-ai';
-import type { ServerInputResolver } from './types';
+import type { ResolverContext, ServerInputResolver } from './types';
 import { goalsResolver } from './goals';
+import {
+	eventsResolver,
+	journalResolver,
+	kontextResolver,
+	notesResolver,
+	tasksResolver,
+} from './encrypted';
 
 const resolvers = new Map<string, ServerInputResolver>();
 
@@ -22,24 +29,34 @@ export function unregisterServerResolver(moduleName: string): void {
 	resolvers.delete(moduleName);
 }
 
-// Seed with the built-in plaintext resolvers. Encrypted modules (notes,
-// kontext, journal, dreams, …) are intentionally NOT registered — the
-// server only sees ciphertext for those tables and can't produce useful
-// Planner context. Missions referencing them should use the foreground
-// runner; see CLAUDE.md → "Privacy constraint" for rationale.
+// Plaintext resolvers run for every mission — no grant needed.
 registerServerResolver('goals', goalsResolver);
+
+// Encrypted resolvers require a currently-valid Mission Grant. Without
+// one they return null per ref; the Planner then runs with fewer inputs
+// and the foreground runner picks up the slack on the user's next
+// browser visit. Encryption registry source: `apps/mana/apps/web/src/
+// lib/data/crypto/registry.ts` — keep the table set here in sync with
+// the set flipped to `enabled: true` there.
+registerServerResolver('notes', notesResolver);
+registerServerResolver('tasks', tasksResolver);
+registerServerResolver('todo', tasksResolver);
+registerServerResolver('calendar', eventsResolver);
+registerServerResolver('journal', journalResolver);
+registerServerResolver('kontext', kontextResolver);
 
 export async function resolveServerInputs(
 	sql: Sql,
 	refs: readonly MissionInputRef[],
-	userId: string
+	userId: string,
+	context: ResolverContext
 ): Promise<ResolvedInput[]> {
 	const results = await Promise.all(
 		refs.map(async (ref) => {
 			const resolver = resolvers.get(ref.module);
 			if (!resolver) return null;
 			try {
-				return await resolver(sql, ref, userId);
+				return await resolver(sql, ref, userId, context);
 			} catch (err) {
 				console.error(
 					`[mana-ai resolver] module=${ref.module} ref=${ref.id} threw:`,
@@ -52,4 +69,4 @@ export async function resolveServerInputs(
 	return results.filter((r): r is ResolvedInput => r !== null);
 }
 
-export type { ServerInputResolver } from './types';
+export type { ResolverContext, ServerInputResolver } from './types';

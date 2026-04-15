@@ -22,14 +22,14 @@ describe('resolveServerInputs', () => {
 		}));
 
 		const refs: MissionInputRef[] = [{ module: 'resolver_test_mod', table: 't', id: 'a' }];
-		const resolved = await resolveServerInputs(stubSql, refs, 'user-1');
+		const resolved = await resolveServerInputs(stubSql, refs, 'user-1', { missionId: 'm' });
 		expect(resolved).toHaveLength(1);
 		expect(resolved[0].content).toBe('content for a');
 	});
 
 	it('skips refs whose module has no registered resolver', async () => {
 		const refs: MissionInputRef[] = [{ module: 'does-not-exist', table: 't', id: 'x' }];
-		const resolved = await resolveServerInputs(stubSql, refs, 'u');
+		const resolved = await resolveServerInputs(stubSql, refs, 'u', { missionId: 'm' });
 		expect(resolved).toEqual([]);
 	});
 
@@ -38,7 +38,7 @@ describe('resolveServerInputs', () => {
 			throw new Error('broken');
 		});
 		const refs: MissionInputRef[] = [{ module: 'resolver_test_boom', table: 't', id: 'x' }];
-		const resolved = await resolveServerInputs(stubSql, refs, 'u');
+		const resolved = await resolveServerInputs(stubSql, refs, 'u', { missionId: 'm' });
 		expect(resolved).toEqual([]);
 	});
 
@@ -54,7 +54,7 @@ describe('resolveServerInputs', () => {
 			{ module: 'unknown', table: 't', id: 'b' },
 			{ module: 'resolver_test_mod', table: 't', id: 'c' },
 		];
-		const resolved = await resolveServerInputs(stubSql, refs, 'u');
+		const resolved = await resolveServerInputs(stubSql, refs, 'u', { missionId: 'm' });
 		expect(resolved).toHaveLength(2);
 	});
 
@@ -63,7 +63,7 @@ describe('resolveServerInputs', () => {
 		// checking the empty-refs path doesn't throw and that an unknown
 		// module still skips — any negative-space test, since we can't
 		// invoke the goals resolver without a live DB here.
-		const resolved = await resolveServerInputs(stubSql, [], 'u');
+		const resolved = await resolveServerInputs(stubSql, [], 'u', { missionId: 'm' });
 		expect(resolved).toEqual([]);
 	});
 });

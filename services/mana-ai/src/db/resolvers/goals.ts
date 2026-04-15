@@ -19,7 +19,7 @@ interface GoalRecord {
 	deletedAt?: string;
 }
 
-export const goalsResolver: ServerInputResolver = async (sql, ref, userId) => {
+export const goalsResolver: ServerInputResolver = async (sql, ref, userId, _context) => {
 	const record = (await replayRecord(
 		sql,
 		userId,

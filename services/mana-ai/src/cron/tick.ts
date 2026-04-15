@@ -37,7 +37,10 @@ import {
 	snapshotsNewTotal,
 	snapshotsUpdatedTotal,
 	snapshotRowsAppliedTotal,
+	grantSkipsTotal,
 } from '../metrics';
+import { unwrapMissionGrant } from '../crypto/unwrap-grant';
+import type { ResolverContext } from '../db/resolvers/types';
 import type { Config } from '../config';
 
 export interface TickStats {
@@ -161,10 +164,15 @@ async function planOneMission(
 	sql: Sql
 ): Promise<AiPlanOutput | null> {
 	const mission = serverMissionToSharedMission(m);
-	// Resolvers skip silently for modules they don't handle (notes / kontext
-	// etc. are encrypted — server can't project them). The Planner then sees
-	// only plaintext-safe context (today: goals), plus concept + objective.
-	const resolvedInputs = await resolveServerInputs(sql, m.inputs, m.userId);
+	// Resolve the mission's Key-Grant (if any) once per tick. An absent
+	// grant is NOT an error — plaintext missions (goals-only) run fine
+	// without one; encrypted-input missions degrade to "null inputs" and
+	// the foreground runner takes over. A present-but-expired / -malformed
+	// grant bumps a metric and otherwise behaves the same. The MDK never
+	// leaves this function's scope; after planning finishes the CryptoKey
+	// reference goes out of scope and gets GC'd.
+	const context = await buildResolverContext(m);
+	const resolvedInputs = await resolveServerInputs(sql, m.inputs, m.userId, context);
 	const input: AiPlanInput = {
 		mission,
 		resolvedInputs,
@@ -181,6 +189,32 @@ async function planOneMission(
 		return null;
 	}
 	return parsed.value;
+}
+
+/**
+ * Build the per-mission ResolverContext. Extracted so the tick flow
+ * stays readable and so unit tests can drive it directly.
+ *
+ * For a mission without a grant, the context has no MDK and no
+ * allowlist — encrypted resolvers return null for their refs, plaintext
+ * resolvers run unchanged. For a mission WITH a grant, we try to unwrap
+ * and build an allowlist; failures bump a metric but never throw.
+ */
+async function buildResolverContext(m: ServerMission): Promise<ResolverContext> {
+	if (!m.grant) return { missionId: m.id };
+
+	const unwrap = await unwrapMissionGrant(m.grant);
+	if (!unwrap.ok) {
+		grantSkipsTotal.inc({ reason: unwrap.reason });
+		console.warn(`[mana-ai tick] mission=${m.id} grant unwrap skipped: reason=${unwrap.reason}`);
+		return { missionId: m.id };
+	}
+
+	return {
+		missionId: m.id,
+		mdk: unwrap.mdk,
+		allowlist: new Set(m.grant.derivation.recordIds),
+	};
 }
 
 /**

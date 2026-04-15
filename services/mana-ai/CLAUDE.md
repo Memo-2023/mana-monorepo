@@ -30,9 +30,34 @@ What works end-to-end:
       also blackbox-probed and surfaces on **status.mana.how** under
       "Internal" as "Mana AI Runner".
 
-All roadmap items shipped. Future polish (not blockers):
+All v0.3 roadmap items shipped. Future polish (not blockers):
 - Multi-instance deploy with advisory locks on snapshot refresh (today single-process)
 - Read-only `/internal/missions/:userId` endpoint for ops inspection
+
+## Status: v0.4 (Mission Key-Grants, in Arbeit)
+
+Opt-in Mechanismus zum Entschluesseln der encrypted Input-Tabellen (notes, tasks, events, journal, kontext) serverseitig. Plan: [`docs/plans/ai-mission-key-grant.md`](../../docs/plans/ai-mission-key-grant.md). Architektur: [`docs/architecture/COMPANION_BRAIN_ARCHITECTURE.md` §21](../../docs/architecture/COMPANION_BRAIN_ARCHITECTURE.md).
+
+Was steht (Phase 0-2, Backend):
+
+- [x] RSA-OAEP-2048 keypair slots — `MANA_AI_PRIVATE_KEY_PEM` (ai) / `MANA_AI_PUBLIC_KEY_PEM` (auth). Ohne Env-Var laeuft der Service unveraendert; Grants werden dann einfach uebersprungen.
+- [x] Canonical HKDF in `@mana/shared-ai` (`missions/grant.ts`). Scope-Binding (tables + recordIds) via `info`-String → Scope-Change = neuer Key = existierender Grant automatisch invalidiert.
+- [x] `POST /api/v1/me/ai-mission-grant` auf mana-auth — leitet MDK ab, RSA-wrapped, lehnt Zero-Knowledge-User ab, TTL-clamped [1h, 30d].
+- [x] `mana_ai.decrypt_audit` Tabelle + RLS (`user_scope` via `app.current_user_id`). Append-only.
+- [x] `crypto/unwrap-grant.ts` — Private-Key-Import, Grant-Entwrapping mit structured reasons (`not-configured` / `expired` / `wrap-rejected` / `malformed`).
+- [x] `crypto/decrypt-value.ts` — Mirror des webapp AES-GCM wire format (`enc:1:<iv>.<ct>`).
+- [x] Encrypted Resolver (`db/resolvers/encrypted.ts`) fuer notes / tasks / calendar / journal / kontext. Checkt recordId-Allowlist, replayt Record, entschluesselt `enc:1:`-Felder, schreibt Audit-Row pro Record.
+- [x] Tick-Loop-Integration (`cron/tick.ts`) — unwrappt Grant pro Mission, baut `ResolverContext` mit `mdk + allowlist`, Key lebt nur waehrend `planOneMission`.
+- [x] Metriken: `mana_ai_decrypts_total{table}`, `mana_ai_grant_scope_violations_total{table}` (Alert > 0!), `mana_ai_grant_skips_total{reason}`.
+
+Was offen ist (Phase 3, Frontend):
+
+- [ ] Webapp `MissionGrantDialog` + Consent-Flow im `/companion/missions`-Editor.
+- [ ] Revoke-Button + "Mission → Datenzugriff" Audit-Tab in `/companion/workbench`.
+- [ ] Scope-Change-UX: neue Records → Re-Consent-Prompt.
+- [ ] `GET /internal/audit?missionId=` Endpoint (read-only) fuer die UI.
+- [ ] Feature-Flag `PUBLIC_AI_MISSION_GRANTS=false` default + Rollout (till → beta → alpha).
+- [ ] Produktions-Keypair generieren + in Mac-Mini Secrets ablegen.
 
 ## Port: 3066
 
