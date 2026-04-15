@@ -2,7 +2,12 @@
 
 Background runner for the AI Workbench. Picks up due Missions from the `mana_sync` Postgres and plans/proposes next steps without requiring an open browser tab. Complements the foreground `startMissionTick` in the webapp (`apps/mana/apps/web/src/lib/data/ai/missions/setup.ts`).
 
-Design context: [`docs/architecture/COMPANION_BRAIN_ARCHITECTURE.md` §20](../../docs/architecture/COMPANION_BRAIN_ARCHITECTURE.md).
+Design context:
+- [`docs/architecture/COMPANION_BRAIN_ARCHITECTURE.md`](../../docs/architecture/COMPANION_BRAIN_ARCHITECTURE.md) §20 (AI Workbench base), §21 (Mission Key-Grants), §22 (Multi-Agent Workbench)
+- [`docs/plans/ai-mission-key-grant.md`](../../docs/plans/ai-mission-key-grant.md) — Shipped (per-mission key-grant for encrypted inputs)
+- [`docs/plans/multi-agent-workbench.md`](../../docs/plans/multi-agent-workbench.md) — Shipped (named agents, per-agent policy/memory, scene lens)
+- [`docs/plans/team-workbench.md`](../../docs/plans/team-workbench.md) — Forward-looking (multi-user + shared team context)
+- [`docs/future/AI_AGENTS_IDEAS.md`](../../docs/future/AI_AGENTS_IDEAS.md) — Unshipped improvement backlog
 
 ## Status: v0.3 (full close-the-loop)
 

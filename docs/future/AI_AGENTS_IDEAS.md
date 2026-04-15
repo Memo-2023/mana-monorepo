@@ -4,6 +4,15 @@ Backlog für das AI-Workbench / Mission-Runner-System (`services/mana-ai`, `@man
 
 Kontext: [`services/mana-ai/CLAUDE.md`](../../services/mana-ai/CLAUDE.md), [`docs/architecture/COMPANION_BRAIN_ARCHITECTURE.md`](../architecture/COMPANION_BRAIN_ARCHITECTURE.md).
 
+Was davon schon gelandet ist:
+- **Punkt 1 (Encrypted-Tables serverseitig)** → Mission-Key-Grant ausgerollt. Plan-Doc: [`../plans/ai-mission-key-grant.md`](../plans/ai-mission-key-grant.md).
+- **Named Agents + per-Agent-Policy + Budget + Observability** (war nicht auf dieser Liste, kam aus den Design-Gesprächen) → Multi-Agent Workbench ausgerollt. Plan-Doc: [`../plans/multi-agent-workbench.md`](../plans/multi-agent-workbench.md).
+
+Was aus dieser Liste noch offen ist: Punkte 2, 3, 4, 5, 6, 7, 8 unten — alle weiterhin relevant.
+
+Forward-looking Plans:
+- **Team-Workbench** (Multi-User + geteilter AI-Kontext): [`../plans/team-workbench.md`](../plans/team-workbench.md).
+
 Sortiert grob nach Impact.
 
 ---
