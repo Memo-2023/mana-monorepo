@@ -31,7 +31,7 @@ import { getAvailableToolsForAi } from './available-tools';
 import { executeTool } from '../../tools/executor';
 import { db } from '../../database';
 import { decryptRecords } from '../../crypto';
-import { researchApi } from '$lib/api/research';
+import { discoverByQuery, searchFeeds } from '$lib/modules/news-research/api';
 import { isAiDebugEnabled, recordAiDebug, type AiDebugEntry } from './debug';
 import { makeAgentActor, LEGACY_AI_PRINCIPAL, type Actor } from '../../events/actor';
 import { getAgent } from '../agents/store';
@@ -418,41 +418,59 @@ interface WebResearchOutcome {
 }
 
 async function runWebResearch(mission: Mission): Promise<WebResearchOutcome | null> {
-	const result = await researchApi.startSync({
-		// Tag the run with the mission id so backend logs can correlate.
-		questionId: `mission:${mission.id}`,
-		title: mission.objective.slice(0, 500),
-		description: mission.conceptMarkdown?.slice(0, 4000),
-		depth: 'quick',
-	});
-	if (result.status === 'error' || !result.summary) return null;
+	// RSS-based news research via news-research module: discoverByQuery
+	// finds matching feeds, searchFeeds ranks recent articles by relevance.
+	// Robust (own infra, no external SearXNG dependency), free (no credits),
+	// and the documented happy-path for the AI companion's news flow.
+	// Detect language hint from objective: German chars/words → de, else en.
+	const objective = mission.objective;
+	const isGerman = /[äöüß]|recherchier|aktuelle|neueste|finde|suche/i.test(objective);
+	const language = isGerman ? 'de' : 'en';
 
-	const sources = await researchApi.listSources(result.id);
-	const sourcesBlock = sources
-		.slice(0, 8)
-		.map((s, i) =>
-			`[${i + 1}] ${s.title || s.url}\n    URL: ${s.url}\n    ${s.snippet ?? ''}`.trim()
+	const discovered = await discoverByQuery(objective, language);
+	const feedUrls = discovered.feeds.slice(0, 10).map((f) => f.url);
+	if (feedUrls.length === 0) {
+		// No feeds discovered — surface as failure so the planner doesn't
+		// pretend it has data. Caller wraps this in a "research failed"
+		// ResolvedInput.
+		throw new Error(
+			`news-research: keine RSS-Feeds für "${objective}" gefunden (${discovered.searched ?? 0} Quellen abgesucht).`
+		);
+	}
+
+	const { articles } = await searchFeeds(feedUrls, objective, { limit: 10 });
+	if (articles.length === 0) {
+		throw new Error(
+			`news-research: ${feedUrls.length} Feeds gefunden, aber 0 Artikel matchen "${objective}".`
+		);
+	}
+
+	const articlesBlock = articles
+		.map((a, i) =>
+			`[${i + 1}] ${a.title}\n    URL: ${a.url}\n    ${a.publishedAt ?? 'unbekannt'} · ${a.feedUrl}\n    ${a.excerpt ?? ''}`.trim()
 		)
 		.join('\n\n');
 
 	const content = [
-		`Zusammenfassung (Tiefe: ${result.depth}):`,
-		result.summary,
+		`Recherche-Ergebnis (RSS, ${feedUrls.length} Feeds, ${articles.length} Treffer):`,
 		'',
-		'Quellen (kopiere die URL beim Aufruf von save_news_article):',
-		sourcesBlock || '(keine Quellen)',
+		'WICHTIG: Für jeden relevanten Artikel rufe save_news_article(url, title, summary) auf.',
+		'Erfinde keine URLs — nutze ausschließlich die hier gelisteten.',
+		'Wähle 3-5 Artikel die am besten zum Mission-Ziel passen.',
+		'',
+		articlesBlock,
 	].join('\n');
 
 	return {
 		input: {
-			id: result.id,
-			module: 'research',
-			table: 'researchResults',
-			title: 'Web-Recherche zu diesem Auftrag',
+			id: `news-research-${Date.now()}`,
+			module: 'news-research',
+			table: 'rssArticles',
+			title: 'News-Recherche (RSS) zu diesem Auftrag',
 			content,
 		},
-		sourceCount: sources.length,
-		summary: result.summary,
+		sourceCount: articles.length,
+		summary: `${articles.length} Artikel aus ${feedUrls.length} Feeds.`,
 	};
 }
 
