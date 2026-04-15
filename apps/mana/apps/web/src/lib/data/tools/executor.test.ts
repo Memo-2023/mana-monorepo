@@ -13,10 +13,16 @@ import { setAiPolicy } from '../ai/policy';
 import { listProposals, approveProposal } from '../ai/proposals/store';
 import { PROPOSALS_TABLE } from '../ai/proposals/types';
 import { db } from '../database';
-import type { Actor } from '../events/actor';
+import { makeAgentActor, LEGACY_AI_PRINCIPAL, type Actor } from '../events/actor';
 import type { ModuleTool } from './types';
 
-const AI: Actor = { kind: 'ai', missionId: 'm-1', iterationId: 'it-1', rationale: 'because' };
+const AI: Actor = makeAgentActor({
+	agentId: LEGACY_AI_PRINCIPAL,
+	displayName: 'Mana',
+	missionId: 'm-1',
+	iterationId: 'it-1',
+	rationale: 'because',
+});
 
 // Reset registry between tests by reloading — registry uses module-level array
 // Instead, we just register test tools and rely on dedup

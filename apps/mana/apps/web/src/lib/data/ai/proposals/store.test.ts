@@ -18,14 +18,15 @@ import {
 	getProposal,
 } from './store';
 import { PROPOSALS_TABLE } from './types';
-import type { Actor } from '../../events/actor';
+import { makeAgentActor, LEGACY_AI_PRINCIPAL, type AiActor } from '../../events/actor';
 
-const AI: Extract<Actor, { kind: 'ai' }> = {
-	kind: 'ai',
+const AI: AiActor = makeAgentActor({
+	agentId: LEGACY_AI_PRINCIPAL,
+	displayName: 'Mana',
 	missionId: 'mission-1',
 	iterationId: 'iter-1',
 	rationale: 'test run',
-};
+});
 
 let executed: { name: string; params: Record<string, unknown> }[] = [];
 

@@ -11,7 +11,7 @@ import { db } from '../../database';
 import { registerTools } from '../../tools/registry';
 import { createProposal } from './store';
 import { PROPOSALS_TABLE } from './types';
-import type { Actor } from '../../events/actor';
+import { makeAgentActor, LEGACY_AI_PRINCIPAL, type AiActor } from '../../events/actor';
 
 // Register two tools in distinct modules so the `module` filter has
 // something to discriminate against.
@@ -36,12 +36,13 @@ registerTools([
 	},
 ]);
 
-const AI: Extract<Actor, { kind: 'ai' }> = {
-	kind: 'ai',
+const AI: AiActor = makeAgentActor({
+	agentId: LEGACY_AI_PRINCIPAL,
+	displayName: 'Mana',
 	missionId: 'm-a',
 	iterationId: 'i-a',
 	rationale: 'r',
-};
+});
 
 beforeEach(async () => {
 	await db.table(PROPOSALS_TABLE).clear();

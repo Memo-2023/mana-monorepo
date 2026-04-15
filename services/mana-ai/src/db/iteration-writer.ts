@@ -17,6 +17,7 @@
 
 import type { Sql } from './connection';
 import { withUser } from './connection';
+import { makeSystemActor, SYSTEM_MISSION_RUNNER } from '@mana/shared-ai';
 import type { AiPlanOutput, MissionIteration, PlanStep } from '@mana/shared-ai';
 
 export interface AppendIterationInput {
@@ -36,9 +37,13 @@ export interface AppendIterationInput {
 }
 
 /** Actor blob stamped on the sync_changes row. JSON string already —
- *  we pass it as `json.RawMessage` equivalent through pgx. */
+ *  we pass it as `json.RawMessage` equivalent through pgx. Uses the
+ *  identity-aware Actor shape from @mana/shared-ai so the webapp's
+ *  timeline can group + filter server-produced iterations alongside
+ *  agent/user writes. Phase 2 will switch this to a per-agent actor
+ *  when the mission carries `agentId`. */
 function systemActorJson(): string {
-	return JSON.stringify({ kind: 'system', source: 'mission-runner' });
+	return JSON.stringify(makeSystemActor(SYSTEM_MISSION_RUNNER));
 }
 
 export async function appendServerIteration(sql: Sql, input: AppendIterationInput): Promise<void> {

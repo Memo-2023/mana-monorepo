@@ -21,7 +21,7 @@ import { db } from '../../database';
 import { MISSIONS_TABLE } from './types';
 import { createProposal } from '../proposals/store';
 import { getMission } from './store';
-import { runAsAsync } from '../../events/actor';
+import { runAsAsync, makeAgentActor, LEGACY_AI_PRINCIPAL } from '../../events/actor';
 import type { Mission, MissionIteration, PlanStep } from './types';
 
 const processedIterations = new Set<string>();
@@ -96,12 +96,16 @@ async function stageIteration(mission: Mission, iteration: MissionIteration): Pr
 		if (intent.kind !== 'toolCall') continue;
 		if (step.proposalId) continue; // already staged
 
-		const actor = {
-			kind: 'ai' as const,
+		// Phase 1: server-iteration writes under the legacy AI principal.
+		// Phase 2 will swap this for the mission's owning-agent identity
+		// once agents are wired into the data layer.
+		const actor = makeAgentActor({
+			agentId: LEGACY_AI_PRINCIPAL,
+			displayName: 'Mana',
 			missionId: mission.id,
 			iterationId: iteration.id,
 			rationale: step.summary || iteration.summary || mission.objective,
-		};
+		});
 
 		// createProposal runs through Dexie hooks under the AI actor — the
 		// row lands in `pendingProposals` and the AiProposalInbox renders

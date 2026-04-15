@@ -2,11 +2,24 @@ import { describe, it, expect } from 'vitest';
 import { resolvePolicy, setAiPolicy, DEFAULT_AI_POLICY } from './policy';
 import { registerTools } from '../tools/registry';
 import { AI_PROPOSABLE_TOOL_NAMES } from '@mana/shared-ai';
-import type { Actor } from '../events/actor';
+import {
+	makeUserActor,
+	makeAgentActor,
+	makeSystemActor,
+	LEGACY_AI_PRINCIPAL,
+	SYSTEM_PROJECTION,
+	type Actor,
+} from '../events/actor';
 
-const AI: Actor = { kind: 'ai', missionId: 'm', iterationId: 'i', rationale: 'r' };
-const USER: Actor = { kind: 'user' };
-const SYSTEM: Actor = { kind: 'system', source: 'projection' };
+const AI: Actor = makeAgentActor({
+	agentId: LEGACY_AI_PRINCIPAL,
+	displayName: 'Mana',
+	missionId: 'm',
+	iterationId: 'i',
+	rationale: 'r',
+});
+const USER: Actor = makeUserActor('u-1', 'Till');
+const SYSTEM: Actor = makeSystemActor(SYSTEM_PROJECTION);
 
 describe('resolvePolicy', () => {
 	it('always returns auto for user actors', () => {

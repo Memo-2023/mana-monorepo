@@ -17,11 +17,11 @@
 import { db } from '../database';
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { eventBus } from '../events/event-bus';
-import { runAsAsync } from '../events/actor';
+import { runAsAsync, makeSystemActor, SYSTEM_PROJECTION } from '../events/actor';
 import type { DomainEvent } from '../events/types';
 import type { StreakInfo } from './types';
 
-const PROJECTION_ACTOR = { kind: 'system', source: 'projection' } as const;
+const PROJECTION_ACTOR = makeSystemActor(SYSTEM_PROJECTION, 'Streak-Tracker');
 
 // ── Persistent State ────────────────────────────────
 

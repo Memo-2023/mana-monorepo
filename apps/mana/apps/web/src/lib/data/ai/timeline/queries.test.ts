@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { bucketByIteration } from './queries';
 import type { DomainEvent } from '../../events/types';
-import { USER_ACTOR } from '../../events/actor';
+import { USER_ACTOR, makeAgentActor, LEGACY_AI_PRINCIPAL } from '../../events/actor';
 
 function aiEvent(
 	missionId: string,
@@ -20,7 +20,13 @@ function aiEvent(
 			collection: 'tasks',
 			recordId: crypto.randomUUID(),
 			userId: 'u1',
-			actor: { kind: 'ai', missionId, iterationId, rationale },
+			actor: makeAgentActor({
+				agentId: LEGACY_AI_PRINCIPAL,
+				displayName: 'Mana',
+				missionId,
+				iterationId,
+				rationale,
+			}),
 		},
 	};
 }

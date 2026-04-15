@@ -1,17 +1,29 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { runAs, runAsAsync, getCurrentActor, USER_ACTOR, isAiActor, isSystemActor } from './actor';
+import {
+	runAs,
+	runAsAsync,
+	getCurrentActor,
+	USER_ACTOR,
+	isAiActor,
+	isSystemActor,
+	makeAgentActor,
+	makeSystemActor,
+	SYSTEM_PROJECTION,
+	LEGACY_AI_PRINCIPAL,
+} from './actor';
 import { emitDomainEvent } from './emit';
 import { eventBus } from './event-bus';
 import type { DomainEvent } from './types';
 
-const AI_ACTOR = {
-	kind: 'ai',
+const AI_ACTOR = makeAgentActor({
+	agentId: LEGACY_AI_PRINCIPAL,
+	displayName: 'Mana',
 	missionId: 'm-1',
 	iterationId: 'i-1',
 	rationale: 'test',
-} as const;
+});
 
-const SYSTEM_ACTOR = { kind: 'system', source: 'projection' } as const;
+const SYSTEM_ACTOR = makeSystemActor(SYSTEM_PROJECTION);
 
 describe('actor context', () => {
 	it('defaults to the user actor', () => {
@@ -42,20 +54,29 @@ describe('actor context', () => {
 	});
 
 	it('supports nesting', () => {
-		runAs({ ...AI_ACTOR, missionId: 'outer' }, () => {
-			expect((getCurrentActor() as { missionId: string }).missionId).toBe('outer');
-			runAs({ ...AI_ACTOR, missionId: 'inner' }, () => {
-				expect((getCurrentActor() as { missionId: string }).missionId).toBe('inner');
-			});
-			expect((getCurrentActor() as { missionId: string }).missionId).toBe('outer');
-		});
+		runAs(
+			makeAgentActor({ ...AI_ACTOR, agentId: AI_ACTOR.principalId, missionId: 'outer' }),
+			() => {
+				expect((getCurrentActor() as { missionId: string }).missionId).toBe('outer');
+				runAs(
+					makeAgentActor({ ...AI_ACTOR, agentId: AI_ACTOR.principalId, missionId: 'inner' }),
+					() => {
+						expect((getCurrentActor() as { missionId: string }).missionId).toBe('inner');
+					}
+				);
+				expect((getCurrentActor() as { missionId: string }).missionId).toBe('outer');
+			}
+		);
 	});
 
 	it('preserves the actor across awaits inside runAsAsync', async () => {
-		await runAsAsync({ ...AI_ACTOR, missionId: 'async' }, async () => {
-			await Promise.resolve();
-			expect((getCurrentActor() as { missionId: string }).missionId).toBe('async');
-		});
+		await runAsAsync(
+			makeAgentActor({ ...AI_ACTOR, agentId: AI_ACTOR.principalId, missionId: 'async' }),
+			async () => {
+				await Promise.resolve();
+				expect((getCurrentActor() as { missionId: string }).missionId).toBe('async');
+			}
+		);
 		expect(getCurrentActor()).toEqual(USER_ACTOR);
 	});
 });

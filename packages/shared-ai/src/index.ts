@@ -7,8 +7,35 @@
  * pure functions here must work in both environments.
  */
 
-export type { Actor } from './actor';
-export { USER_ACTOR, isAiActor, isSystemActor } from './actor';
+export type {
+	Actor,
+	ActorKind,
+	BaseActor,
+	UserActor,
+	AiActor,
+	SystemActor,
+	SystemSource,
+} from './actor';
+export {
+	SYSTEM_PROJECTION,
+	SYSTEM_RULE,
+	SYSTEM_MIGRATION,
+	SYSTEM_STREAM,
+	SYSTEM_MISSION_RUNNER,
+	LEGACY_USER_PRINCIPAL,
+	LEGACY_AI_PRINCIPAL,
+	LEGACY_SYSTEM_PRINCIPAL,
+	LEGACY_DISPLAY_NAME,
+	USER_ACTOR,
+	makeUserActor,
+	makeAgentActor,
+	makeSystemActor,
+	normalizeActor,
+	isUserActor,
+	isAiActor,
+	isSystemActor,
+	isFromMissionRunner,
+} from './actor';
 
 export type {
 	IterationPhase,
