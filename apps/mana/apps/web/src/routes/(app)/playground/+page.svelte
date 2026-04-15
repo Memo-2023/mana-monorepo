@@ -745,7 +745,7 @@
 	.sidebar {
 		width: 220px;
 		flex-shrink: 0;
-		border-right: 1px solid hsl(var(--border));
+		border-right: 1px solid hsl(var(--color-border));
 		display: flex;
 		flex-direction: column;
 		padding: 1rem 0.75rem;
@@ -757,18 +757,18 @@
 		align-items: center;
 		gap: 0.375rem;
 		padding: 0.5rem 0.75rem;
-		border: 1px dashed hsl(var(--border));
+		border: 1px dashed hsl(var(--color-border));
 		border-radius: 0.5rem;
 		background: transparent;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 		font-size: 0.8125rem;
 		cursor: pointer;
 		transition: all 0.15s;
 	}
 	.new-chat-btn:hover {
-		border-color: hsl(var(--border) / 0.8);
-		color: hsl(var(--foreground));
-		background: hsl(var(--muted));
+		border-color: hsl(var(--color-border) / 0.8);
+		color: hsl(var(--color-foreground));
+		background: hsl(var(--color-muted));
 	}
 	.conv-list {
 		display: flex;
@@ -783,18 +783,18 @@
 		border: none;
 		border-radius: 0.375rem;
 		background: transparent;
-		color: hsl(var(--foreground));
+		color: hsl(var(--color-foreground));
 		font-size: 0.75rem;
 		cursor: pointer;
 		text-align: left;
 		transition: background 0.1s;
 	}
 	.conv-item:hover {
-		background: hsl(var(--muted));
+		background: hsl(var(--color-muted));
 	}
 	.conv-item.active {
-		background: hsl(var(--primary) / 0.1);
-		color: hsl(var(--primary));
+		background: hsl(var(--color-primary) / 0.1);
+		color: hsl(var(--color-primary));
 	}
 	.conv-title {
 		flex: 1;
@@ -808,15 +808,15 @@
 		align-items: center;
 		padding: 0.125rem;
 		border-radius: 0.25rem;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 		cursor: pointer;
 	}
 	.conv-item:hover .conv-delete {
 		display: flex;
 	}
 	.conv-delete:hover {
-		color: hsl(var(--destructive));
-		background: hsl(var(--destructive) / 0.1);
+		color: hsl(var(--color-error));
+		background: hsl(var(--color-error) / 0.1);
 	}
 	.sidebar-toggle {
 		display: flex;
@@ -827,12 +827,12 @@
 		border: none;
 		border-radius: 0.375rem;
 		background: transparent;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 		cursor: pointer;
 	}
 	.sidebar-toggle:hover {
-		background: hsl(var(--muted));
-		color: hsl(var(--foreground));
+		background: hsl(var(--color-muted));
+		color: hsl(var(--color-foreground));
 	}
 	.config-bar {
 		margin-bottom: 1rem;
@@ -841,8 +841,8 @@
 		align-items: flex-end;
 		gap: 1rem;
 		border-radius: 0.75rem;
-		border: 1px solid hsl(var(--border));
-		background: hsl(var(--card));
+		border: 1px solid hsl(var(--color-border));
+		background: hsl(var(--color-card));
 		padding: 1rem;
 	}
 	.comparison-selector {
@@ -852,8 +852,8 @@
 		align-items: center;
 		gap: 0.5rem;
 		border-radius: 0.75rem;
-		border: 1px solid hsl(var(--primary) / 0.2);
-		background: hsl(var(--primary) / 0.03);
+		border: 1px solid hsl(var(--color-primary) / 0.2);
+		background: hsl(var(--color-primary) / 0.03);
 		padding: 0.75rem 1rem;
 	}
 	.comparison-grid {

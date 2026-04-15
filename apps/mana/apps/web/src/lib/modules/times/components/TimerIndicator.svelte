@@ -23,14 +23,14 @@
 
 {#if timerStore.isRunning}
 	<div
-		class="flex items-center gap-2 rounded-lg bg-[hsl(var(--primary)/0.1)] px-3 py-1.5 border border-[hsl(var(--primary)/0.2)]"
+		class="flex items-center gap-2 rounded-lg bg-[hsl(var(--color-primary)/0.1)] px-3 py-1.5 border border-[hsl(var(--color-primary)/0.2)]"
 	>
 		<!-- Pulsing dot -->
 		<div class="relative flex h-2 w-2">
 			<span
-				class="absolute inline-flex h-full w-full animate-ping rounded-full bg-[hsl(var(--primary))] opacity-75"
+				class="absolute inline-flex h-full w-full animate-ping rounded-full bg-[hsl(var(--color-primary))] opacity-75"
 			></span>
-			<span class="relative inline-flex h-2 w-2 rounded-full bg-[hsl(var(--primary))]"></span>
+			<span class="relative inline-flex h-2 w-2 rounded-full bg-[hsl(var(--color-primary))]"></span>
 		</div>
 
 		<!-- Project dot + Description -->
@@ -40,12 +40,14 @@
 				style="background-color: {project.color}"
 			></div>
 		{/if}
-		<span class="hidden sm:inline max-w-[120px] truncate text-xs text-[hsl(var(--foreground))]">
+		<span
+			class="hidden sm:inline max-w-[120px] truncate text-xs text-[hsl(var(--color-foreground))]"
+		>
 			{timerStore.runningEntry?.description || $_('timer.running')}
 		</span>
 
 		<!-- Elapsed time -->
-		<span class="duration-display text-xs font-medium text-[hsl(var(--primary))]">
+		<span class="duration-display text-xs font-medium text-[hsl(var(--color-primary))]">
 			{formattedTime}
 		</span>
 

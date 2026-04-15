@@ -69,23 +69,23 @@
 	<!-- Header -->
 	<div class="flex items-center justify-between">
 		<div>
-			<h1 class="text-2xl font-bold text-[hsl(var(--foreground))]">
+			<h1 class="text-2xl font-bold text-[hsl(var(--color-foreground))]">
 				{selectedCollection ? selectedCollection.name : 'Alle Fragen'}
 			</h1>
-			<p class="mt-1 text-sm text-[hsl(var(--muted-foreground))]">
+			<p class="mt-1 text-sm text-[hsl(var(--color-muted-foreground))]">
 				{filteredQuestions.length} Frage{filteredQuestions.length !== 1 ? 'n' : ''}
 			</p>
 		</div>
 		<div class="flex gap-2">
 			<a
 				href="/questions/collections"
-				class="rounded-lg border border-[hsl(var(--border))] px-4 py-2 text-sm font-medium text-[hsl(var(--foreground))] transition-colors hover:bg-[hsl(var(--muted))]"
+				class="rounded-lg border border-[hsl(var(--color-border))] px-4 py-2 text-sm font-medium text-[hsl(var(--color-foreground))] transition-colors hover:bg-[hsl(var(--color-muted))]"
 			>
 				Sammlungen
 			</a>
 			<a
 				href="/questions/new"
-				class="rounded-lg bg-[hsl(var(--primary))] px-4 py-2 text-sm font-medium text-[hsl(var(--primary-foreground))] transition-colors hover:opacity-90"
+				class="rounded-lg bg-[hsl(var(--color-primary))] px-4 py-2 text-sm font-medium text-[hsl(var(--color-primary-foreground))] transition-colors hover:opacity-90"
 			>
 				Neue Frage
 			</a>
@@ -96,19 +96,19 @@
 	<div class="flex gap-3">
 		<div class="relative flex-1">
 			<MagnifyingGlass
-				class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[hsl(var(--muted-foreground))]"
+				class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[hsl(var(--color-muted-foreground))]"
 			/>
 			<input
 				type="text"
 				bind:value={searchQuery}
 				placeholder="Fragen durchsuchen..."
-				class="w-full rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] py-2 pl-10 pr-4 text-sm text-[hsl(var(--foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))]"
+				class="w-full rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] py-2 pl-10 pr-4 text-sm text-[hsl(var(--color-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--color-primary))]"
 			/>
 		</div>
 
 		<select
 			bind:value={statusFilter}
-			class="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] px-3 py-2 text-sm text-[hsl(var(--foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))]"
+			class="rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] px-3 py-2 text-sm text-[hsl(var(--color-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--color-primary))]"
 		>
 			<option value="">Alle Status</option>
 			<option value="open">Offen</option>
@@ -120,7 +120,7 @@
 		{#if collections.length > 0}
 			<select
 				bind:value={selectedCollectionId}
-				class="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] px-3 py-2 text-sm text-[hsl(var(--foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))]"
+				class="rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] px-3 py-2 text-sm text-[hsl(var(--color-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--color-primary))]"
 			>
 				<option value={null}>Alle Sammlungen</option>
 				{#each collections as collection}
@@ -133,16 +133,16 @@
 	<!-- Questions List -->
 	{#if filteredQuestions.length === 0}
 		<div
-			class="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[hsl(var(--border))] py-16"
+			class="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[hsl(var(--color-border))] py-16"
 		>
 			<span class="mb-4 text-5xl">🔍</span>
-			<h2 class="mb-2 text-lg font-semibold text-[hsl(var(--foreground))]">Keine Fragen</h2>
-			<p class="mb-6 text-sm text-[hsl(var(--muted-foreground))]">
+			<h2 class="mb-2 text-lg font-semibold text-[hsl(var(--color-foreground))]">Keine Fragen</h2>
+			<p class="mb-6 text-sm text-[hsl(var(--color-muted-foreground))]">
 				Stelle deine erste Frage und lass die KI recherchieren.
 			</p>
 			<a
 				href="/questions/new"
-				class="rounded-lg bg-[hsl(var(--primary))] px-6 py-2.5 text-sm font-medium text-[hsl(var(--primary-foreground))]"
+				class="rounded-lg bg-[hsl(var(--color-primary))] px-6 py-2.5 text-sm font-medium text-[hsl(var(--color-primary-foreground))]"
 			>
 				Neue Frage
 			</a>
@@ -155,7 +155,7 @@
 
 				<a
 					href="/questions/{question.id}"
-					class="block rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-4 transition-all hover:border-[hsl(var(--primary)/0.3)]"
+					class="block rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4 transition-all hover:border-[hsl(var(--color-primary)/0.3)]"
 				>
 					<div class="flex items-start gap-4">
 						<div class="mt-1">
@@ -167,12 +167,12 @@
 						</div>
 
 						<div class="min-w-0 flex-1">
-							<h3 class="font-medium text-[hsl(var(--foreground))] line-clamp-2">
+							<h3 class="font-medium text-[hsl(var(--color-foreground))] line-clamp-2">
 								{question.title}
 							</h3>
 
 							{#if question.description}
-								<p class="mt-1 text-sm text-[hsl(var(--muted-foreground))] line-clamp-2">
+								<p class="mt-1 text-sm text-[hsl(var(--color-muted-foreground))] line-clamp-2">
 									{question.description}
 								</p>
 							{/if}
@@ -182,13 +182,13 @@
 									<div class="flex gap-1">
 										{#each question.tags.slice(0, 3) as tag}
 											<span
-												class="rounded-full bg-[hsl(var(--muted))] px-2 py-0.5 text-xs text-[hsl(var(--foreground))]"
+												class="rounded-full bg-[hsl(var(--color-muted))] px-2 py-0.5 text-xs text-[hsl(var(--color-foreground))]"
 											>
 												{tag}
 											</span>
 										{/each}
 										{#if question.tags.length > 3}
-											<span class="text-xs text-[hsl(var(--muted-foreground))]"
+											<span class="text-xs text-[hsl(var(--color-muted-foreground))]"
 												>+{question.tags.length - 3}</span
 											>
 										{/if}
@@ -196,12 +196,12 @@
 								{/if}
 
 								<span
-									class="rounded-full bg-[hsl(var(--muted))] px-2 py-0.5 text-xs text-[hsl(var(--muted-foreground))]"
+									class="rounded-full bg-[hsl(var(--color-muted))] px-2 py-0.5 text-xs text-[hsl(var(--color-muted-foreground))]"
 								>
 									{depthLabels[question.researchDepth]}
 								</span>
 
-								<span class="text-xs text-[hsl(var(--muted-foreground))]">
+								<span class="text-xs text-[hsl(var(--color-muted-foreground))]">
 									{formatDate(question.createdAt)}
 								</span>
 							</div>

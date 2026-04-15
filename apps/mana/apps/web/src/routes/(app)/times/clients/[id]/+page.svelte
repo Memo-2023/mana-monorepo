@@ -47,8 +47,10 @@
 
 {#if !client}
 	<div class="flex flex-col items-center justify-center py-20">
-		<p class="text-[hsl(var(--muted-foreground))]">Kunde nicht gefunden.</p>
-		<a href="/times/clients" class="mt-4 text-sm text-[hsl(var(--primary))]">{$_('common.back')}</a>
+		<p class="text-[hsl(var(--color-muted-foreground))]">Kunde nicht gefunden.</p>
+		<a href="/times/clients" class="mt-4 text-sm text-[hsl(var(--color-primary))]"
+			>{$_('common.back')}</a
+		>
 	</div>
 {:else}
 	<div class="space-y-6">
@@ -56,7 +58,7 @@
 		<div>
 			<a
 				href="/times/clients"
-				class="mb-3 inline-flex items-center gap-1 text-sm text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
+				class="mb-3 inline-flex items-center gap-1 text-sm text-[hsl(var(--color-muted-foreground))] hover:text-[hsl(var(--color-foreground))]"
 			>
 				<CaretLeft size={16} />
 				{$_('nav.clients')}
@@ -70,8 +72,8 @@
 					{client.shortCode || client.name.charAt(0).toUpperCase()}
 				</div>
 				<div>
-					<h1 class="text-2xl font-bold text-[hsl(var(--foreground))]">{client.name}</h1>
-					<p class="text-sm text-[hsl(var(--muted-foreground))]">
+					<h1 class="text-2xl font-bold text-[hsl(var(--color-foreground))]">{client.name}</h1>
+					<p class="text-sm text-[hsl(var(--color-muted-foreground))]">
 						{#if client.shortCode}{client.shortCode} ·
 						{/if}
 						{#if client.email}{client.email} ·
@@ -86,26 +88,38 @@
 
 		<!-- Stats -->
 		<div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
-			<div class="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-4">
-				<p class="text-xs text-[hsl(var(--muted-foreground))]">{$_('report.totalHours')}</p>
-				<p class="duration-display mt-1 text-xl font-bold text-[hsl(var(--foreground))]">
+			<div
+				class="rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4"
+			>
+				<p class="text-xs text-[hsl(var(--color-muted-foreground))]">{$_('report.totalHours')}</p>
+				<p class="duration-display mt-1 text-xl font-bold text-[hsl(var(--color-foreground))]">
 					{formatDurationDecimal(totalDuration)}h
 				</p>
 			</div>
-			<div class="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-4">
-				<p class="text-xs text-[hsl(var(--muted-foreground))]">{$_('report.billableHours')}</p>
-				<p class="duration-display mt-1 text-xl font-bold text-[hsl(var(--primary))]">
+			<div
+				class="rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4"
+			>
+				<p class="text-xs text-[hsl(var(--color-muted-foreground))]">
+					{$_('report.billableHours')}
+				</p>
+				<p class="duration-display mt-1 text-xl font-bold text-[hsl(var(--color-primary))]">
 					{formatDurationDecimal(billableDuration)}h
 				</p>
 			</div>
-			<div class="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-4">
-				<p class="text-xs text-[hsl(var(--muted-foreground))]">{$_('nav.projects')}</p>
-				<p class="mt-1 text-xl font-bold text-[hsl(var(--foreground))]">{clientProjects.length}</p>
+			<div
+				class="rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4"
+			>
+				<p class="text-xs text-[hsl(var(--color-muted-foreground))]">{$_('nav.projects')}</p>
+				<p class="mt-1 text-xl font-bold text-[hsl(var(--color-foreground))]">
+					{clientProjects.length}
+				</p>
 			</div>
 			{#if billingValue() !== null}
-				<div class="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-4">
-					<p class="text-xs text-[hsl(var(--muted-foreground))]">Wert</p>
-					<p class="mt-1 text-xl font-bold text-[hsl(var(--primary))]">
+				<div
+					class="rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4"
+				>
+					<p class="text-xs text-[hsl(var(--color-muted-foreground))]">Wert</p>
+					<p class="mt-1 text-xl font-bold text-[hsl(var(--color-primary))]">
 						{billingValue()!.toFixed(0)}
 						{client.billingRate!.currency}
 					</p>
@@ -116,7 +130,7 @@
 		<!-- Projects -->
 		{#if clientProjects.length > 0}
 			<div>
-				<h2 class="mb-3 text-sm font-medium text-[hsl(var(--muted-foreground))]">
+				<h2 class="mb-3 text-sm font-medium text-[hsl(var(--color-muted-foreground))]">
 					{$_('nav.projects')}
 				</h2>
 				<div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
@@ -124,16 +138,20 @@
 						{@const hours = getProjectHours(proj.id)}
 						<a
 							href="/times/projects/{proj.id}"
-							class="entry-item flex items-center gap-3 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-4"
+							class="entry-item flex items-center gap-3 rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4"
 						>
 							<div class="h-3 w-3 rounded-full" style="background-color: {proj.color}"></div>
 							<div class="min-w-0 flex-1">
-								<p class="text-sm font-medium text-[hsl(var(--foreground))]">{proj.name}</p>
+								<p class="text-sm font-medium text-[hsl(var(--color-foreground))]">{proj.name}</p>
 								{#if proj.isBillable}
-									<span class="text-xs text-[hsl(var(--primary))]">{$_('project.billable')}</span>
+									<span class="text-xs text-[hsl(var(--color-primary))]"
+										>{$_('project.billable')}</span
+									>
 								{/if}
 							</div>
-							<span class="duration-display text-sm font-medium text-[hsl(var(--foreground))]">
+							<span
+								class="duration-display text-sm font-medium text-[hsl(var(--color-foreground))]"
+							>
 								{formatDurationCompact(hours)}
 							</span>
 						</a>
@@ -144,7 +162,7 @@
 
 		<!-- Entries -->
 		<div>
-			<h2 class="mb-3 text-sm font-medium text-[hsl(var(--muted-foreground))]">
+			<h2 class="mb-3 text-sm font-medium text-[hsl(var(--color-muted-foreground))]">
 				{$_('nav.entries')} ({formatDurationCompact(totalDuration)})
 			</h2>
 			<EntryList entries={clientEntries} />

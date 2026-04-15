@@ -51,7 +51,7 @@
 	let tree = $derived(getLocationTree(locationsCtx.value));
 
 	const inputClass =
-		'rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] px-3 py-2 text-sm text-[hsl(var(--foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))]';
+		'rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] px-3 py-2 text-sm text-[hsl(var(--color-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--color-primary))]';
 </script>
 
 <svelte:head>
@@ -60,10 +60,10 @@
 
 <div class="mx-auto max-w-2xl space-y-6">
 	<div class="flex items-center justify-between">
-		<h1 class="text-2xl font-bold text-[hsl(var(--foreground))]">Standorte</h1>
+		<h1 class="text-2xl font-bold text-[hsl(var(--color-foreground))]">Standorte</h1>
 		<button
 			onclick={() => startCreate()}
-			class="flex items-center gap-2 rounded-lg bg-[hsl(var(--primary))] px-4 py-2 text-sm font-medium text-[hsl(var(--primary-foreground))]"
+			class="flex items-center gap-2 rounded-lg bg-[hsl(var(--color-primary))] px-4 py-2 text-sm font-medium text-[hsl(var(--color-primary-foreground))]"
 		>
 			<Plus size={20} />
 			Neuer Standort
@@ -71,7 +71,9 @@
 	</div>
 
 	{#if showForm}
-		<div class="rounded-xl border border-[hsl(var(--primary)/0.3)] bg-[hsl(var(--card))] p-4">
+		<div
+			class="rounded-xl border border-[hsl(var(--color-primary)/0.3)] bg-[hsl(var(--color-card))] p-4"
+		>
 			<h3 class="mb-3 text-sm font-semibold">
 				{editingId ? 'Standort bearbeiten' : 'Neuer Standort'}
 			</h3>
@@ -93,13 +95,13 @@
 				<button
 					onclick={save}
 					disabled={!name.trim()}
-					class="rounded-lg bg-[hsl(var(--primary))] px-4 text-sm text-[hsl(var(--primary-foreground))] disabled:opacity-50"
+					class="rounded-lg bg-[hsl(var(--color-primary))] px-4 text-sm text-[hsl(var(--color-primary-foreground))] disabled:opacity-50"
 				>
 					Speichern
 				</button>
 				<button
 					onclick={() => (showForm = false)}
-					class="rounded-lg border border-[hsl(var(--border))] px-3 text-sm"
+					class="rounded-lg border border-[hsl(var(--color-border))] px-3 text-sm"
 				>
 					Abbrechen
 				</button>
@@ -109,37 +111,37 @@
 
 	{#if tree.length === 0}
 		<div
-			class="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[hsl(var(--border))] py-16"
+			class="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[hsl(var(--color-border))] py-16"
 		>
 			<span class="mb-4 text-4xl">📍</span>
-			<p class="text-[hsl(var(--muted-foreground))]">Keine Standorte vorhanden</p>
+			<p class="text-[hsl(var(--color-muted-foreground))]">Keine Standorte vorhanden</p>
 		</div>
 	{:else}
-		<div class="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))]">
+		<div class="rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))]">
 			{#snippet renderTree(locations: Location[], depth: number)}
 				{#each locations as location (location.id)}
-					<div class="border-b border-[hsl(var(--border))] last:border-b-0">
+					<div class="border-b border-[hsl(var(--color-border))] last:border-b-0">
 						<div
 							class="flex items-center gap-2 px-4 py-2.5"
 							style="padding-left: {16 + depth * 24}px"
 						>
 							<span class="text-lg">{location.icon || '📍'}</span>
-							<span class="flex-1 text-sm font-medium text-[hsl(var(--foreground))]"
+							<span class="flex-1 text-sm font-medium text-[hsl(var(--color-foreground))]"
 								>{location.name}</span
 							>
 							<button
 								onclick={() => startCreate(location.id)}
-								class="rounded p-1 text-xs text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--primary))]"
+								class="rounded p-1 text-xs text-[hsl(var(--color-muted-foreground))] hover:text-[hsl(var(--color-primary))]"
 								title="Unterstandort hinzufugen">+</button
 							>
 							<button
 								onclick={() => startEdit(location)}
-								class="rounded p-1 text-xs text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
+								class="rounded p-1 text-xs text-[hsl(var(--color-muted-foreground))] hover:text-[hsl(var(--color-foreground))]"
 								>&#9998;</button
 							>
 							<button
 								onclick={() => deleteLocation(location.id)}
-								class="rounded p-1 text-xs text-[hsl(var(--muted-foreground))] hover:text-red-500"
+								class="rounded p-1 text-xs text-[hsl(var(--color-muted-foreground))] hover:text-red-500"
 								>&times;</button
 							>
 						</div>

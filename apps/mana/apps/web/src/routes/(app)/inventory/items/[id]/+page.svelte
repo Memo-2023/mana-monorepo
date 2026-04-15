@@ -94,7 +94,7 @@
 	}
 
 	const inputClass =
-		'w-full rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] px-3 py-2 text-sm text-[hsl(var(--foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))]';
+		'w-full rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] px-3 py-2 text-sm text-[hsl(var(--color-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--color-primary))]';
 </script>
 
 <svelte:head>
@@ -103,8 +103,8 @@
 
 {#if !item}
 	<div class="text-center py-16">
-		<p class="text-[hsl(var(--muted-foreground))]">Item nicht gefunden</p>
-		<a href="/inventory" class="mt-4 text-[hsl(var(--primary))]">Zuruck</a>
+		<p class="text-[hsl(var(--color-muted-foreground))]">Item nicht gefunden</p>
+		<a href="/inventory" class="mt-4 text-[hsl(var(--color-primary))]">Zuruck</a>
 	</div>
 {:else}
 	<div class="mx-auto max-w-2xl space-y-6">
@@ -114,15 +114,15 @@
 				<button
 					onclick={() =>
 						goto(collection ? `/inventory/collections/${collection.id}` : '/inventory')}
-					class="text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
+					class="text-[hsl(var(--color-muted-foreground))] hover:text-[hsl(var(--color-foreground))]"
 				>
 					<CaretLeft size={20} />
 				</button>
 				{#if !editing}
 					<div>
-						<h1 class="text-2xl font-bold text-[hsl(var(--foreground))]">{item.name}</h1>
+						<h1 class="text-2xl font-bold text-[hsl(var(--color-foreground))]">{item.name}</h1>
 						{#if collection}
-							<p class="text-sm text-[hsl(var(--muted-foreground))]">
+							<p class="text-sm text-[hsl(var(--color-muted-foreground))]">
 								{collection.icon}
 								{collection.name}
 							</p>
@@ -134,18 +134,18 @@
 				{#if editing}
 					<button
 						onclick={() => (editing = false)}
-						class="rounded-lg border border-[hsl(var(--border))] px-3 py-1.5 text-sm"
+						class="rounded-lg border border-[hsl(var(--color-border))] px-3 py-1.5 text-sm"
 						>{$_('common.cancel')}</button
 					>
 					<button
 						onclick={saveEdit}
-						class="rounded-lg bg-[hsl(var(--primary))] px-4 py-1.5 text-sm font-medium text-[hsl(var(--primary-foreground))]"
+						class="rounded-lg bg-[hsl(var(--color-primary))] px-4 py-1.5 text-sm font-medium text-[hsl(var(--color-primary-foreground))]"
 						>{$_('common.save')}</button
 					>
 				{:else}
 					<button
 						onclick={startEditing}
-						class="rounded-lg border border-[hsl(var(--border))] px-3 py-1.5 text-sm text-[hsl(var(--foreground))]"
+						class="rounded-lg border border-[hsl(var(--color-border))] px-3 py-1.5 text-sm text-[hsl(var(--color-foreground))]"
 						>{$_('common.edit')}</button
 					>
 					<button
@@ -160,7 +160,7 @@
 		{#if editing}
 			<!-- Edit Mode -->
 			<div
-				class="space-y-4 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-5"
+				class="space-y-4 rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-5"
 			>
 				<input type="text" bind:value={editName} placeholder="Name" class={inputClass} />
 				<textarea
@@ -174,7 +174,7 @@
 					<div>
 						<label
 							for="inventory-status"
-							class="mb-1 block text-xs font-medium text-[hsl(var(--muted-foreground))]"
+							class="mb-1 block text-xs font-medium text-[hsl(var(--color-muted-foreground))]"
 							>Status</label
 						>
 						<select id="inventory-status" bind:value={editStatus} class={inputClass}>
@@ -184,7 +184,7 @@
 					<div>
 						<label
 							for="inventory-quantity"
-							class="mb-1 block text-xs font-medium text-[hsl(var(--muted-foreground))]"
+							class="mb-1 block text-xs font-medium text-[hsl(var(--color-muted-foreground))]"
 							>Menge</label
 						>
 						<input
@@ -199,7 +199,7 @@
 						<div>
 							<label
 								for="inventory-location"
-								class="mb-1 block text-xs font-medium text-[hsl(var(--muted-foreground))]"
+								class="mb-1 block text-xs font-medium text-[hsl(var(--color-muted-foreground))]"
 								>Standort</label
 							>
 							<select id="inventory-location" bind:value={editLocationId} class={inputClass}>
@@ -214,7 +214,7 @@
 						<div>
 							<label
 								for="inventory-category"
-								class="mb-1 block text-xs font-medium text-[hsl(var(--muted-foreground))]"
+								class="mb-1 block text-xs font-medium text-[hsl(var(--color-muted-foreground))]"
 								>Kategorie</label
 							>
 							<select id="inventory-category" bind:value={editCategoryId} class={inputClass}>
@@ -229,11 +229,14 @@
 
 				{#if collection}
 					<div>
-						<h3 class="mb-2 text-sm font-semibold text-[hsl(var(--foreground))]">Eigene Felder</h3>
+						<h3 class="mb-2 text-sm font-semibold text-[hsl(var(--color-foreground))]">
+							Eigene Felder
+						</h3>
 						<div class="grid gap-3 sm:grid-cols-2">
 							{#each collection.schema.fields.sort((a, b) => a.order - b.order) as field}
 								<div>
-									<span class="mb-1 block text-xs font-medium text-[hsl(var(--muted-foreground))]"
+									<span
+										class="mb-1 block text-xs font-medium text-[hsl(var(--color-muted-foreground))]"
 										>{field.name}</span
 									>
 									<FieldEditor
@@ -254,14 +257,16 @@
 				<div class="flex flex-wrap items-center gap-3">
 					<StatusBadge status={item.status} size="md" />
 					{#if item.quantity > 1}
-						<span class="rounded-full bg-[hsl(var(--muted))] px-3 py-1 text-sm"
+						<span class="rounded-full bg-[hsl(var(--color-muted))] px-3 py-1 text-sm"
 							>&times;{item.quantity}</span
 						>
 					{/if}
 					{#if item.locationId}
 						{@const loc = getLocationById(locationsCtx.value, item.locationId)}
 						{#if loc}
-							<span class="flex items-center gap-1 text-sm text-[hsl(var(--muted-foreground))]">
+							<span
+								class="flex items-center gap-1 text-sm text-[hsl(var(--color-muted-foreground))]"
+							>
 								📍 {getLocationFullPath(locationsCtx.value, loc.id)}
 							</span>
 						{/if}
@@ -269,7 +274,7 @@
 					{#if item.categoryId}
 						{@const cat = getCategoryById(categoriesCtx.value, item.categoryId)}
 						{#if cat}
-							<span class="rounded-full bg-[hsl(var(--muted))] px-2 py-0.5 text-xs"
+							<span class="rounded-full bg-[hsl(var(--color-muted))] px-2 py-0.5 text-xs"
 								>{cat.icon || '🏷️'} {cat.name}</span
 							>
 						{/if}
@@ -277,17 +282,19 @@
 				</div>
 
 				{#if item.description}
-					<p class="text-[hsl(var(--foreground))]">{item.description}</p>
+					<p class="text-[hsl(var(--color-foreground))]">{item.description}</p>
 				{/if}
 
 				<!-- Custom Fields -->
 				{#if collection && collection.schema.fields.length > 0}
-					<div class="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-4">
-						<h3 class="mb-3 text-sm font-semibold text-[hsl(var(--foreground))]">Details</h3>
+					<div
+						class="rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4"
+					>
+						<h3 class="mb-3 text-sm font-semibold text-[hsl(var(--color-foreground))]">Details</h3>
 						<div class="grid gap-2 sm:grid-cols-2">
 							{#each collection.schema.fields.sort((a, b) => a.order - b.order) as field}
 								<div class="flex items-baseline gap-2">
-									<span class="text-xs font-medium text-[hsl(var(--muted-foreground))]"
+									<span class="text-xs font-medium text-[hsl(var(--color-muted-foreground))]"
 										>{field.name}:</span
 									>
 									<FieldRenderer {field} value={item.fieldValues[field.id]} />
@@ -298,24 +305,26 @@
 				{/if}
 
 				<!-- Notes -->
-				<div class="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-4">
-					<h3 class="mb-3 text-sm font-semibold text-[hsl(var(--foreground))]">
+				<div
+					class="rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4"
+				>
+					<h3 class="mb-3 text-sm font-semibold text-[hsl(var(--color-foreground))]">
 						Notizen ({item.notes.length})
 					</h3>
 					<div class="space-y-2">
 						{#each item.notes as note (note.id)}
 							<div
-								class="group flex items-start justify-between rounded-lg bg-[hsl(var(--muted))] p-3"
+								class="group flex items-start justify-between rounded-lg bg-[hsl(var(--color-muted))] p-3"
 							>
 								<div>
-									<p class="text-sm text-[hsl(var(--foreground))]">{note.content}</p>
-									<p class="mt-1 text-xs text-[hsl(var(--muted-foreground))]">
+									<p class="text-sm text-[hsl(var(--color-foreground))]">{note.content}</p>
+									<p class="mt-1 text-xs text-[hsl(var(--color-muted-foreground))]">
 										{new Date(note.createdAt).toLocaleDateString('de-DE')}
 									</p>
 								</div>
 								<button
 									onclick={() => itemsStore.deleteNote(item.id, note.id)}
-									class="text-[hsl(var(--muted-foreground))] opacity-0 hover:text-red-500 group-hover:opacity-100"
+									class="text-[hsl(var(--color-muted-foreground))] opacity-0 hover:text-red-500 group-hover:opacity-100"
 									>&times;</button
 								>
 							</div>
@@ -326,13 +335,13 @@
 							type="text"
 							bind:value={newNote}
 							placeholder="Notiz hinzufugen..."
-							class="flex-1 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] px-3 py-2 text-sm text-[hsl(var(--foreground))]"
+							class="flex-1 rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] px-3 py-2 text-sm text-[hsl(var(--color-foreground))]"
 							onkeydown={(e) => e.key === 'Enter' && addNote()}
 						/>
 						<button
 							onclick={addNote}
 							disabled={!newNote.trim()}
-							class="rounded-lg bg-[hsl(var(--primary))] px-3 py-2 text-sm text-[hsl(var(--primary-foreground))] disabled:opacity-50"
+							class="rounded-lg bg-[hsl(var(--color-primary))] px-3 py-2 text-sm text-[hsl(var(--color-primary-foreground))] disabled:opacity-50"
 							>+</button
 						>
 					</div>

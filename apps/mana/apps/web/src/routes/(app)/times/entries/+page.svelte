@@ -62,10 +62,10 @@
 <div class="space-y-6">
 	<!-- Header -->
 	<div class="flex items-center justify-between">
-		<h1 class="text-2xl font-bold text-[hsl(var(--foreground))]">{$_('nav.entries')}</h1>
+		<h1 class="text-2xl font-bold text-[hsl(var(--color-foreground))]">{$_('nav.entries')}</h1>
 		<button
 			onclick={() => (showEntryForm = true)}
-			class="rounded-lg bg-[hsl(var(--primary))] px-4 py-2 text-sm font-medium text-[hsl(var(--primary-foreground))] transition-colors hover:opacity-90"
+			class="rounded-lg bg-[hsl(var(--color-primary))] px-4 py-2 text-sm font-medium text-[hsl(var(--color-primary-foreground))] transition-colors hover:opacity-90"
 		>
 			+ {$_('entry.manual')}
 		</button>
@@ -77,8 +77,8 @@
 			<button
 				onclick={() => (dateFilter = period as any)}
 				class="rounded-lg px-3 py-1.5 text-sm transition-colors {dateFilter === period
-					? 'bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))]'
-					: 'text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--accent)/0.1)]'}"
+					? 'bg-[hsl(var(--color-primary))] text-[hsl(var(--color-primary-foreground))]'
+					: 'text-[hsl(var(--color-muted-foreground))] hover:bg-[hsl(var(--color-accent)/0.1)]'}"
 			>
 				{period === 'week'
 					? $_('entry.thisWeek')
@@ -90,15 +90,15 @@
 
 		<!-- Totals -->
 		<div class="ml-auto flex items-center gap-4 text-sm">
-			<span class="text-[hsl(var(--muted-foreground))]">
+			<span class="text-[hsl(var(--color-muted-foreground))]">
 				{$_('common.total')}:
-				<span class="duration-display font-medium text-[hsl(var(--foreground))]"
+				<span class="duration-display font-medium text-[hsl(var(--color-foreground))]"
 					>{formatDurationCompact(totalDuration)}</span
 				>
 			</span>
-			<span class="text-[hsl(var(--muted-foreground))]">
+			<span class="text-[hsl(var(--color-muted-foreground))]">
 				{$_('entry.billable')}:
-				<span class="duration-display font-medium text-[hsl(var(--primary))]"
+				<span class="duration-display font-medium text-[hsl(var(--color-primary))]"
 					>{formatDurationCompact(billableDuration)}</span
 				>
 			</span>

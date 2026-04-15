@@ -79,7 +79,7 @@
 		<div class="flex items-center gap-3">
 			<a
 				href="/music/playlists"
-				class="rounded-lg p-1.5 text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--muted))]"
+				class="rounded-lg p-1.5 text-[hsl(var(--color-muted-foreground))] hover:bg-[hsl(var(--color-muted))]"
 			>
 				<ArrowLeft size={20} />
 			</a>
@@ -90,30 +90,30 @@
 							type="text"
 							bind:value={editName}
 							onkeydown={(e) => e.key === 'Enter' && saveName()}
-							class="rounded border border-[hsl(var(--border))] bg-transparent px-2 py-1 text-xl font-bold focus:outline-none focus:ring-1 focus:ring-[hsl(var(--primary))]"
+							class="rounded border border-[hsl(var(--color-border))] bg-transparent px-2 py-1 text-xl font-bold focus:outline-none focus:ring-1 focus:ring-[hsl(var(--color-primary))]"
 						/>
-						<button onclick={saveName} class="text-[hsl(var(--primary))]">
+						<button onclick={saveName} class="text-[hsl(var(--color-primary))]">
 							<Check size={18} />
 						</button>
 						<button
 							onclick={() => (isEditingName = false)}
-							class="text-[hsl(var(--muted-foreground))]"
+							class="text-[hsl(var(--color-muted-foreground))]"
 						>
 							<X size={18} />
 						</button>
 					</div>
 				{:else}
 					<button onclick={startEdit} class="group flex items-center gap-2">
-						<h1 class="text-2xl font-bold text-[hsl(var(--foreground))]">
+						<h1 class="text-2xl font-bold text-[hsl(var(--color-foreground))]">
 							{playlist?.name || 'Playlist'}
 						</h1>
 						<PencilSimple
 							size={16}
-							class="text-[hsl(var(--muted-foreground))] opacity-0 group-hover:opacity-100"
+							class="text-[hsl(var(--color-muted-foreground))] opacity-0 group-hover:opacity-100"
 						/>
 					</button>
 				{/if}
-				<p class="text-sm text-[hsl(var(--muted-foreground))]">
+				<p class="text-sm text-[hsl(var(--color-muted-foreground))]">
 					{songs.length}
 					{songs.length === 1 ? 'Song' : 'Songs'}
 				</p>
@@ -123,7 +123,7 @@
 			{#if songs.length > 0}
 				<button
 					onclick={handlePlayAll}
-					class="flex items-center gap-2 rounded-lg bg-[hsl(var(--primary))] px-4 py-2 text-sm font-medium text-[hsl(var(--primary-foreground))] hover:opacity-90"
+					class="flex items-center gap-2 rounded-lg bg-[hsl(var(--color-primary))] px-4 py-2 text-sm font-medium text-[hsl(var(--color-primary-foreground))] hover:opacity-90"
 				>
 					<Play size={16} weight="fill" />
 					Alle abspielen
@@ -131,14 +131,14 @@
 			{/if}
 			<button
 				onclick={() => (showShare = true)}
-				class="rounded-lg p-2 text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
+				class="rounded-lg p-2 text-[hsl(var(--color-muted-foreground))] hover:text-[hsl(var(--color-foreground))]"
 				title="Kurzlink teilen"
 			>
 				<ShareNetwork size={20} />
 			</button>
 			<button
 				onclick={handleDeletePlaylist}
-				class="rounded-lg p-2 text-[hsl(var(--muted-foreground))] hover:text-red-500"
+				class="rounded-lg p-2 text-[hsl(var(--color-muted-foreground))] hover:text-red-500"
 				title="Playlist loschen"
 			>
 				<Trash size={20} />
@@ -149,12 +149,12 @@
 	<!-- Songs -->
 	{#if songs.length === 0}
 		<div class="flex flex-col items-center justify-center py-16">
-			<MusicNote size={48} class="mb-3 text-[hsl(var(--muted-foreground))]" />
-			<p class="text-[hsl(var(--muted-foreground))]">Keine Songs in dieser Playlist</p>
+			<MusicNote size={48} class="mb-3 text-[hsl(var(--color-muted-foreground))]" />
+			<p class="text-[hsl(var(--color-muted-foreground))]">Keine Songs in dieser Playlist</p>
 		</div>
 	{:else}
 		<div
-			class="overflow-hidden rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))]"
+			class="overflow-hidden rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))]"
 		>
 			{#each songs as song, index (song.id)}
 				<div
@@ -167,15 +167,15 @@
 							handlePlaySong(song, index);
 						}
 					}}
-					class="group flex items-center gap-4 border-b border-[hsl(var(--border))] px-4 py-3 transition-colors last:border-b-0 hover:bg-[hsl(var(--muted))] {playerStore
+					class="group flex items-center gap-4 border-b border-[hsl(var(--color-border))] px-4 py-3 transition-colors last:border-b-0 hover:bg-[hsl(var(--color-muted))] {playerStore
 						.currentSong?.id === song.id
-						? 'bg-[hsl(var(--primary)/0.05)]'
+						? 'bg-[hsl(var(--color-primary)/0.05)]'
 						: ''}"
 				>
 					<div
-						class="relative flex h-10 w-10 shrink-0 items-center justify-center rounded bg-[hsl(var(--muted))]"
+						class="relative flex h-10 w-10 shrink-0 items-center justify-center rounded bg-[hsl(var(--color-muted))]"
 					>
-						<MusicNote size={20} class="text-[hsl(var(--muted-foreground))]" />
+						<MusicNote size={20} class="text-[hsl(var(--color-muted-foreground))]" />
 						{#if playerStore.currentSong?.id === song.id && playerStore.isPlaying}
 							<div class="absolute inset-0 flex items-center justify-center rounded bg-black/40">
 								<Pause size={20} weight="fill" class="text-white" />
@@ -191,21 +191,21 @@
 					<div class="min-w-0 flex-1">
 						<p
 							class="truncate font-medium {playerStore.currentSong?.id === song.id
-								? 'text-[hsl(var(--primary))]'
-								: 'text-[hsl(var(--foreground))]'}"
+								? 'text-[hsl(var(--color-primary))]'
+								: 'text-[hsl(var(--color-foreground))]'}"
 						>
 							{song.title}
 						</p>
-						<p class="truncate text-sm text-[hsl(var(--muted-foreground))]">
+						<p class="truncate text-sm text-[hsl(var(--color-muted-foreground))]">
 							{song.artist ?? 'Unbekannt'}
 						</p>
 					</div>
-					<span class="text-sm text-[hsl(var(--muted-foreground))]">
+					<span class="text-sm text-[hsl(var(--color-muted-foreground))]">
 						{formatDuration(song.duration)}
 					</span>
 					<button
 						onclick={(e) => handleRemoveSong(song.id, e)}
-						class="rounded p-1 text-[hsl(var(--muted-foreground))] opacity-0 transition-opacity hover:text-red-500 group-hover:opacity-100"
+						class="rounded p-1 text-[hsl(var(--color-muted-foreground))] opacity-0 transition-opacity hover:text-red-500 group-hover:opacity-100"
 						title="Aus Playlist entfernen"
 					>
 						<Trash size={16} />

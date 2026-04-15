@@ -116,10 +116,10 @@
 <div class="space-y-6">
 	<!-- Header -->
 	<div class="flex items-center justify-between">
-		<h1 class="text-2xl font-bold text-[hsl(var(--foreground))]">{$_('nav.projects')}</h1>
+		<h1 class="text-2xl font-bold text-[hsl(var(--color-foreground))]">{$_('nav.projects')}</h1>
 		<button
 			onclick={() => (showCreateForm = !showCreateForm)}
-			class="rounded-lg bg-[hsl(var(--primary))] px-4 py-2 text-sm font-medium text-[hsl(var(--primary-foreground))]"
+			class="rounded-lg bg-[hsl(var(--color-primary))] px-4 py-2 text-sm font-medium text-[hsl(var(--color-primary-foreground))]"
 		>
 			+ {$_('project.create')}
 		</button>
@@ -132,18 +132,18 @@
 				e.preventDefault();
 				handleCreate();
 			}}
-			class="rounded-xl border border-[hsl(var(--primary)/0.3)] bg-[hsl(var(--card))] p-4 space-y-3"
+			class="rounded-xl border border-[hsl(var(--color-primary)/0.3)] bg-[hsl(var(--color-card))] p-4 space-y-3"
 		>
 			<input
 				type="text"
 				bind:value={newName}
 				placeholder={$_('project.name')}
-				class="w-full rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] px-4 py-2.5 text-sm text-[hsl(var(--foreground))] focus:border-[hsl(var(--primary))] focus:outline-none"
+				class="w-full rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] px-4 py-2.5 text-sm text-[hsl(var(--color-foreground))] focus:border-[hsl(var(--color-primary))] focus:outline-none"
 			/>
 			<div class="flex gap-2">
 				<select
 					bind:value={newClientId}
-					class="flex-1 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] px-3 py-2 text-sm text-[hsl(var(--foreground))]"
+					class="flex-1 rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] px-3 py-2 text-sm text-[hsl(var(--color-foreground))]"
 				>
 					<option value="">{$_('project.internal')}</option>
 					{#each allClients.value.filter((c) => !c.isArchived) as client}
@@ -151,12 +151,12 @@
 					{/each}
 				</select>
 				<label
-					class="flex items-center gap-2 rounded-lg border border-[hsl(var(--border))] px-3 py-2 text-sm"
+					class="flex items-center gap-2 rounded-lg border border-[hsl(var(--color-border))] px-3 py-2 text-sm"
 				>
 					<input
 						type="checkbox"
 						bind:checked={newIsBillable}
-						class="accent-[hsl(var(--primary))]"
+						class="accent-[hsl(var(--color-primary))]"
 					/>
 					{$_('project.billable')}
 				</label>
@@ -179,12 +179,12 @@
 				<button
 					type="button"
 					onclick={() => (showCreateForm = false)}
-					class="flex-1 rounded-lg border border-[hsl(var(--border))] py-2 text-sm text-[hsl(var(--muted-foreground))]"
+					class="flex-1 rounded-lg border border-[hsl(var(--color-border))] py-2 text-sm text-[hsl(var(--color-muted-foreground))]"
 					>{$_('common.cancel')}</button
 				>
 				<button
 					type="submit"
-					class="flex-1 rounded-lg bg-[hsl(var(--primary))] py-2 text-sm font-medium text-[hsl(var(--primary-foreground))]"
+					class="flex-1 rounded-lg bg-[hsl(var(--color-primary))] py-2 text-sm font-medium text-[hsl(var(--color-primary-foreground))]"
 					>{$_('common.create')}</button
 				>
 			</div>
@@ -194,7 +194,7 @@
 	<!-- Active Projects -->
 	{#if activeProjects.length === 0 && !showCreateForm}
 		<div
-			class="rounded-xl border border-dashed border-[hsl(var(--border))] p-8 text-center text-[hsl(var(--muted-foreground))]"
+			class="rounded-xl border border-dashed border-[hsl(var(--color-border))] p-8 text-center text-[hsl(var(--color-muted-foreground))]"
 		>
 			<p>{$_('project.noProjects')}</p>
 		</div>
@@ -207,7 +207,7 @@
 				{@const hours = getProjectHours(project.id)}
 				{@const budgetPct = getBudgetPercent(project)}
 				<div
-					class="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] overflow-hidden"
+					class="rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] overflow-hidden"
 				>
 					<!-- Color bar -->
 					<div class="h-1" style="background-color: {project.color}"></div>
@@ -222,7 +222,7 @@
 									editName = (e.target as HTMLInputElement).value;
 									autoSaveProject({ name: editName });
 								}}
-								class="w-full rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] px-3 py-2 text-sm text-[hsl(var(--foreground))] focus:outline-none"
+								class="w-full rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] px-3 py-2 text-sm text-[hsl(var(--color-foreground))] focus:outline-none"
 							/>
 							<select
 								value={editClientId}
@@ -230,7 +230,7 @@
 									editClientId = (e.target as HTMLSelectElement).value;
 									autoSaveProject({ clientId: editClientId || null });
 								}}
-								class="w-full rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] px-3 py-2 text-sm"
+								class="w-full rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] px-3 py-2 text-sm"
 							>
 								<option value="">{$_('project.internal')}</option>
 								{#each allClients.value.filter((c) => !c.isArchived) as c}
@@ -262,14 +262,14 @@
 											editIsBillable = !editIsBillable;
 											autoSaveProject({ isBillable: editIsBillable });
 										}}
-										class="accent-[hsl(var(--primary))]"
+										class="accent-[hsl(var(--color-primary))]"
 									/>
 									{$_('project.billable')}
 								</label>
 								<div class="flex gap-2">
 									<button
 										onclick={() => handleArchive(project.id, true)}
-										class="text-xs text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
+										class="text-xs text-[hsl(var(--color-muted-foreground))] hover:text-[hsl(var(--color-foreground))]"
 										>{$_('common.archive')}</button
 									>
 									<button onclick={() => handleDelete(project.id)} class="text-xs text-red-500"
@@ -277,7 +277,7 @@
 									>
 									<button
 										onclick={() => (editingProjectId = null)}
-										class="text-xs text-[hsl(var(--primary))]">{$_('common.close')}</button
+										class="text-xs text-[hsl(var(--color-primary))]">{$_('common.close')}</button
 									>
 								</div>
 							</div>
@@ -287,33 +287,35 @@
 						<button class="w-full p-4 text-left" onclick={() => startEditing(project)}>
 							<div class="flex items-start justify-between">
 								<div>
-									<p class="font-medium text-[hsl(var(--foreground))]">{project.name}</p>
-									<p class="text-xs text-[hsl(var(--muted-foreground))]">
+									<p class="font-medium text-[hsl(var(--color-foreground))]">{project.name}</p>
+									<p class="text-xs text-[hsl(var(--color-muted-foreground))]">
 										{client?.name || $_('project.internal')}
 										{#if project.isBillable}
 											· {$_('project.billable')}
 										{/if}
 									</p>
 								</div>
-								<span class="duration-display text-sm font-medium text-[hsl(var(--foreground))]">
+								<span
+									class="duration-display text-sm font-medium text-[hsl(var(--color-foreground))]"
+								>
 									{formatDurationCompact(hours)}
 								</span>
 							</div>
 							{#if budgetPct !== null}
 								<div class="mt-3">
 									<div
-										class="flex items-center justify-between text-xs text-[hsl(var(--muted-foreground))]"
+										class="flex items-center justify-between text-xs text-[hsl(var(--color-muted-foreground))]"
 									>
 										<span>{$_('project.budget')}</span>
 										<span>{budgetPct}%</span>
 									</div>
-									<div class="mt-1 h-1.5 rounded-full bg-[hsl(var(--muted))]">
+									<div class="mt-1 h-1.5 rounded-full bg-[hsl(var(--color-muted))]">
 										<div
 											class="h-full rounded-full transition-all {budgetPct > 90
 												? 'bg-red-500'
 												: budgetPct > 75
 													? 'bg-amber-500'
-													: 'bg-[hsl(var(--primary))]'}"
+													: 'bg-[hsl(var(--color-primary))]'}"
 											style="width: {budgetPct}%"
 										></div>
 									</div>
@@ -331,7 +333,7 @@
 		<div>
 			<button
 				onclick={() => (showArchived = !showArchived)}
-				class="flex items-center gap-2 text-sm text-[hsl(var(--muted-foreground))]"
+				class="flex items-center gap-2 text-sm text-[hsl(var(--color-muted-foreground))]"
 			>
 				<CaretRight size={20} class="transition-transform {showArchived ? 'rotate-90' : ''}" />
 				{$_('project.archived')} ({archivedProjects.length})
@@ -341,15 +343,15 @@
 				<div class="mt-3 space-y-2">
 					{#each archivedProjects as project}
 						<div
-							class="flex items-center justify-between rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))] px-4 py-3 opacity-60"
+							class="flex items-center justify-between rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] px-4 py-3 opacity-60"
 						>
 							<div class="flex items-center gap-2">
 								<div class="h-3 w-3 rounded-full" style="background-color: {project.color}"></div>
-								<span class="text-sm text-[hsl(var(--foreground))]">{project.name}</span>
+								<span class="text-sm text-[hsl(var(--color-foreground))]">{project.name}</span>
 							</div>
 							<button
 								onclick={() => handleArchive(project.id, false)}
-								class="text-xs text-[hsl(var(--primary))]">{$_('common.unarchive')}</button
+								class="text-xs text-[hsl(var(--color-primary))]">{$_('common.unarchive')}</button
 							>
 						</div>
 					{/each}

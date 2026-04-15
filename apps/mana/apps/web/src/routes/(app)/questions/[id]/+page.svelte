@@ -258,8 +258,8 @@
 
 {#if !question}
 	<div class="py-16 text-center">
-		<p class="text-[hsl(var(--muted-foreground))]">Frage nicht gefunden</p>
-		<a href="/questions" class="mt-4 inline-block text-[hsl(var(--primary))]">Zurueck</a>
+		<p class="text-[hsl(var(--color-muted-foreground))]">Frage nicht gefunden</p>
+		<a href="/questions" class="mt-4 inline-block text-[hsl(var(--color-primary))]">Zurueck</a>
 	</div>
 {:else}
 	<div class="mx-auto max-w-3xl space-y-6">
@@ -267,7 +267,7 @@
 		<div>
 			<a
 				href="/questions"
-				class="mb-4 inline-flex items-center gap-2 text-sm text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
+				class="mb-4 inline-flex items-center gap-2 text-sm text-[hsl(var(--color-muted-foreground))] hover:text-[hsl(var(--color-foreground))]"
 			>
 				<ArrowLeft class="h-4 w-4" />
 				Zurueck zu Fragen
@@ -279,32 +279,32 @@
 						<input
 							type="text"
 							bind:value={editTitle}
-							class="w-full rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] px-4 py-2 text-xl font-bold text-[hsl(var(--foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))]"
+							class="w-full rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] px-4 py-2 text-xl font-bold text-[hsl(var(--color-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--color-primary))]"
 						/>
 						<textarea
 							bind:value={editDescription}
 							placeholder="Beschreibung..."
 							rows="2"
-							class="mt-2 w-full rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] px-4 py-2 text-sm text-[hsl(var(--foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))]"
+							class="mt-2 w-full rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] px-4 py-2 text-sm text-[hsl(var(--color-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--color-primary))]"
 						></textarea>
 						<div class="mt-2 flex gap-2">
 							<button
 								onclick={saveEdit}
-								class="rounded-lg bg-[hsl(var(--primary))] px-3 py-1.5 text-sm font-medium text-[hsl(var(--primary-foreground))]"
+								class="rounded-lg bg-[hsl(var(--color-primary))] px-3 py-1.5 text-sm font-medium text-[hsl(var(--color-primary-foreground))]"
 							>
 								Speichern
 							</button>
 							<button
 								onclick={() => (editing = false)}
-								class="rounded-lg border border-[hsl(var(--border))] px-3 py-1.5 text-sm text-[hsl(var(--foreground))]"
+								class="rounded-lg border border-[hsl(var(--color-border))] px-3 py-1.5 text-sm text-[hsl(var(--color-foreground))]"
 							>
 								Abbrechen
 							</button>
 						</div>
 					{:else}
-						<h1 class="text-2xl font-bold text-[hsl(var(--foreground))]">{question.title}</h1>
+						<h1 class="text-2xl font-bold text-[hsl(var(--color-foreground))]">{question.title}</h1>
 						{#if question.description}
-							<p class="mt-2 text-[hsl(var(--muted-foreground))]">{question.description}</p>
+							<p class="mt-2 text-[hsl(var(--color-muted-foreground))]">{question.description}</p>
 						{/if}
 					{/if}
 
@@ -319,7 +319,7 @@
 
 						<!-- Depth -->
 						<span
-							class="rounded-full bg-[hsl(var(--muted))] px-2 py-0.5 text-xs text-[hsl(var(--muted-foreground))]"
+							class="rounded-full bg-[hsl(var(--color-muted))] px-2 py-0.5 text-xs text-[hsl(var(--color-muted-foreground))]"
 						>
 							{depthLabels[question.researchDepth] ?? question.researchDepth}
 						</span>
@@ -328,7 +328,7 @@
 						{#if question.tags?.length}
 							{#each question.tags as tag}
 								<span
-									class="rounded-full bg-[hsl(var(--muted))] px-2 py-0.5 text-xs text-[hsl(var(--foreground))]"
+									class="rounded-full bg-[hsl(var(--color-muted))] px-2 py-0.5 text-xs text-[hsl(var(--color-foreground))]"
 								>
 									{tag}
 								</span>
@@ -336,7 +336,7 @@
 						{/if}
 
 						<!-- Date -->
-						<span class="text-sm text-[hsl(var(--muted-foreground))]">
+						<span class="text-sm text-[hsl(var(--color-muted-foreground))]">
 							{formatDate(question.createdAt)}
 						</span>
 					</div>
@@ -347,7 +347,7 @@
 					<div class="flex gap-2">
 						<button
 							onclick={startEditing}
-							class="rounded-lg border border-[hsl(var(--border))] p-2 text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
+							class="rounded-lg border border-[hsl(var(--color-border))] p-2 text-[hsl(var(--color-muted-foreground))] hover:text-[hsl(var(--color-foreground))]"
 							title={$_('common.edit')}
 						>
 							<PencilSimple class="h-4 w-4" />
@@ -372,8 +372,8 @@
 					disabled={question.status === status}
 					class="rounded-lg border px-3 py-1.5 text-sm transition-colors
 						{question.status === status
-						? 'border-[hsl(var(--primary))] bg-[hsl(var(--primary)/0.1)] text-[hsl(var(--primary))]'
-						: 'border-[hsl(var(--border))] text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--muted))]'}"
+						? 'border-[hsl(var(--color-primary))] bg-[hsl(var(--color-primary)/0.1)] text-[hsl(var(--color-primary))]'
+						: 'border-[hsl(var(--color-border))] text-[hsl(var(--color-muted-foreground))] hover:bg-[hsl(var(--color-muted))]'}"
 				>
 					{statusLabels[status]?.label}
 				</button>
@@ -381,11 +381,13 @@
 		</div>
 
 		<!-- Deep Research -->
-		<div class="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-5">
+		<div
+			class="rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-5"
+		>
 			<div class="flex items-start justify-between gap-4">
 				<div class="flex-1">
-					<h3 class="text-sm font-semibold text-[hsl(var(--foreground))]">Recherche</h3>
-					<p class="mt-1 text-xs text-[hsl(var(--muted-foreground))]">
+					<h3 class="text-sm font-semibold text-[hsl(var(--color-foreground))]">Recherche</h3>
+					<p class="mt-1 text-xs text-[hsl(var(--color-muted-foreground))]">
 						{#if question.researchDepth === 'quick'}
 							Schnell · 5 Quellen · keine Volltext-Extraktion
 						{:else if question.researchDepth === 'standard'}
@@ -398,14 +400,14 @@
 				{#if researchHandle}
 					<button
 						onclick={cancelResearch}
-						class="rounded-lg border border-[hsl(var(--border))] px-3 py-1.5 text-sm text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
+						class="rounded-lg border border-[hsl(var(--color-border))] px-3 py-1.5 text-sm text-[hsl(var(--color-muted-foreground))] hover:text-[hsl(var(--color-foreground))]"
 					>
 						Stream beenden
 					</button>
 				{:else if (answers as Answer[]).some((a) => a.researchResultId)}
 					<button
 						onclick={rerunResearch}
-						class="inline-flex items-center gap-2 rounded-lg border border-[hsl(var(--border))] px-3 py-1.5 text-sm font-medium text-[hsl(var(--foreground))] hover:bg-[hsl(var(--muted))]"
+						class="inline-flex items-center gap-2 rounded-lg border border-[hsl(var(--color-border))] px-3 py-1.5 text-sm font-medium text-[hsl(var(--color-foreground))] hover:bg-[hsl(var(--color-muted))]"
 					>
 						<ArrowCounterClockwise class="h-4 w-4" />
 						Erneut recherchieren
@@ -413,7 +415,7 @@
 				{:else}
 					<button
 						onclick={startResearchRun}
-						class="inline-flex items-center gap-2 rounded-lg bg-[hsl(var(--primary))] px-3 py-1.5 text-sm font-medium text-[hsl(var(--primary-foreground))] hover:opacity-90"
+						class="inline-flex items-center gap-2 rounded-lg bg-[hsl(var(--color-primary))] px-3 py-1.5 text-sm font-medium text-[hsl(var(--color-primary-foreground))] hover:opacity-90"
 					>
 						<MagnifyingGlass class="h-4 w-4" />
 						Recherche starten
@@ -422,7 +424,7 @@
 			</div>
 
 			{#if researchPhase}
-				<div class="mt-3 flex items-center gap-2 text-sm text-[hsl(var(--muted-foreground))]">
+				<div class="mt-3 flex items-center gap-2 text-sm text-[hsl(var(--color-muted-foreground))]">
 					<CircleNotch class="h-4 w-4 animate-spin" />
 					<span>{phaseLabels[researchPhase] ?? researchPhase}</span>
 					{#if researchSourceCount !== null}
@@ -434,22 +436,26 @@
 
 		<!-- Answers -->
 		<div class="space-y-4">
-			<h2 class="text-lg font-semibold text-[hsl(var(--foreground))]">
+			<h2 class="text-lg font-semibold text-[hsl(var(--color-foreground))]">
 				Antworten ({answers.length})
 			</h2>
 
 			{#if answers.length === 0}
-				<div class="rounded-xl border-2 border-dashed border-[hsl(var(--border))] p-8 text-center">
+				<div
+					class="rounded-xl border-2 border-dashed border-[hsl(var(--color-border))] p-8 text-center"
+				>
 					<span class="mb-2 block text-4xl">📝</span>
-					<p class="text-sm text-[hsl(var(--muted-foreground))]">
+					<p class="text-sm text-[hsl(var(--color-muted-foreground))]">
 						Noch keine Antworten. Fuege die erste Antwort hinzu.
 					</p>
 				</div>
 			{:else}
 				{#each answers as answer (answer.id)}
 					<div
-						class="rounded-xl border bg-[hsl(var(--card))] p-5
-							{answer.isAccepted ? 'border-green-300 dark:border-green-800' : 'border-[hsl(var(--border))]'}"
+						class="rounded-xl border bg-[hsl(var(--color-card))] p-5
+							{answer.isAccepted
+							? 'border-green-300 dark:border-green-800'
+							: 'border-[hsl(var(--color-border))]'}"
 					>
 						{#if answer.isAccepted}
 							<div
@@ -466,7 +472,7 @@
 						/>
 
 						<div class="mt-4 flex items-center justify-between">
-							<span class="text-xs text-[hsl(var(--muted-foreground))]">
+							<span class="text-xs text-[hsl(var(--color-muted-foreground))]">
 								{formatDate(answer.createdAt)}
 							</span>
 							<div class="flex gap-2">
@@ -491,21 +497,23 @@
 			{/if}
 
 			<!-- Add Answer -->
-			<div class="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-5">
-				<h3 class="mb-3 text-sm font-semibold text-[hsl(var(--foreground))]">
+			<div
+				class="rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-5"
+			>
+				<h3 class="mb-3 text-sm font-semibold text-[hsl(var(--color-foreground))]">
 					Antwort hinzufuegen
 				</h3>
 				<textarea
 					bind:value={newAnswer}
 					placeholder="Deine Antwort..."
 					rows="4"
-					class="w-full rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] px-4 py-3 text-sm text-[hsl(var(--foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))]"
+					class="w-full rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] px-4 py-3 text-sm text-[hsl(var(--color-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--color-primary))]"
 				></textarea>
 				<div class="mt-3 flex justify-end">
 					<button
 						onclick={addAnswer}
 						disabled={savingAnswer || !newAnswer.trim()}
-						class="rounded-lg bg-[hsl(var(--primary))] px-4 py-2 text-sm font-medium text-[hsl(var(--primary-foreground))] hover:opacity-90 disabled:opacity-50"
+						class="rounded-lg bg-[hsl(var(--color-primary))] px-4 py-2 text-sm font-medium text-[hsl(var(--color-primary-foreground))] hover:opacity-90 disabled:opacity-50"
 					>
 						{savingAnswer ? 'Speichert...' : 'Antwort senden'}
 					</button>

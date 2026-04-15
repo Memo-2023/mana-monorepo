@@ -36,7 +36,7 @@
 
 {#if entries.length === 0}
 	<div
-		class="rounded-xl border border-dashed border-[hsl(var(--border))] p-8 text-center text-[hsl(var(--muted-foreground))]"
+		class="rounded-xl border border-dashed border-[hsl(var(--color-border))] p-8 text-center text-[hsl(var(--color-muted-foreground))]"
 	>
 		<Clock size={20} class="mx-auto mb-3 opacity-50" />
 		<p>{$_('entry.noEntries')}</p>
@@ -47,10 +47,10 @@
 			<div>
 				<!-- Day Header -->
 				<div class="mb-2 flex items-center justify-between">
-					<h3 class="text-sm font-medium text-[hsl(var(--muted-foreground))]">
+					<h3 class="text-sm font-medium text-[hsl(var(--color-muted-foreground))]">
 						{formatDateHeader(date)}
 					</h3>
-					<span class="duration-display text-sm font-medium text-[hsl(var(--foreground))]">
+					<span class="duration-display text-sm font-medium text-[hsl(var(--color-foreground))]">
 						{formatDurationCompact(getTotalDuration(dayEntries))}
 					</span>
 				</div>

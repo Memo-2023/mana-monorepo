@@ -37,7 +37,7 @@
 	}
 
 	const inputClass =
-		'w-full rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] px-3 py-2 text-sm text-[hsl(var(--foreground))] placeholder:text-[hsl(var(--muted-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))] focus:ring-offset-1';
+		'w-full rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] px-3 py-2 text-sm text-[hsl(var(--color-foreground))] placeholder:text-[hsl(var(--color-muted-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--color-primary))] focus:ring-offset-1';
 </script>
 
 {#if field.type === 'text'}
@@ -66,7 +66,7 @@
 			class="{inputClass} flex-1"
 			oninput={handleInput}
 		/>
-		<span class="flex items-center text-sm text-[hsl(var(--muted-foreground))]">
+		<span class="flex items-center text-sm text-[hsl(var(--color-muted-foreground))]">
 			{field.currencyCode || 'EUR'}
 		</span>
 	</div>
@@ -77,10 +77,10 @@
 		<input
 			type="checkbox"
 			checked={!!value}
-			class="h-4 w-4 rounded border-[hsl(var(--border))] text-[hsl(var(--primary))]"
+			class="h-4 w-4 rounded border-[hsl(var(--color-border))] text-[hsl(var(--color-primary))]"
 			onchange={handleInput}
 		/>
-		<span class="text-sm text-[hsl(var(--foreground))]">{field.name}</span>
+		<span class="text-sm text-[hsl(var(--color-foreground))]">{field.name}</span>
 	</label>
 {:else if field.type === 'select'}
 	<select value={String(value || '')} class={inputClass} onchange={handleSelectChange}>
@@ -103,12 +103,12 @@
 		<div class="flex flex-wrap gap-1">
 			{#each currentTags as tag, i}
 				<span
-					class="inline-flex items-center gap-1 rounded-full bg-[hsl(var(--muted))] px-2 py-0.5 text-xs"
+					class="inline-flex items-center gap-1 rounded-full bg-[hsl(var(--color-muted))] px-2 py-0.5 text-xs"
 				>
 					{tag}
 					<button
 						type="button"
-						class="text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
+						class="text-[hsl(var(--color-muted-foreground))] hover:text-[hsl(var(--color-foreground))]"
 						onclick={() => onchange(currentTags.filter((_, idx) => idx !== i))}>x</button
 					>
 				</span>

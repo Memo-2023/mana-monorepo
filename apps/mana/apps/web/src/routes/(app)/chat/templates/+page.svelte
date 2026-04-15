@@ -112,20 +112,20 @@
 		<div class="flex items-center gap-3">
 			<a
 				href="/chat"
-				class="rounded-lg p-1.5 text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--muted))]"
+				class="rounded-lg p-1.5 text-[hsl(var(--color-muted-foreground))] hover:bg-[hsl(var(--color-muted))]"
 			>
 				<ArrowLeft size={20} />
 			</a>
 			<div>
-				<h1 class="text-2xl font-bold text-[hsl(var(--foreground))]">Vorlagen</h1>
-				<p class="text-sm text-[hsl(var(--muted-foreground))]">
+				<h1 class="text-2xl font-bold text-[hsl(var(--color-foreground))]">Vorlagen</h1>
+				<p class="text-sm text-[hsl(var(--color-muted-foreground))]">
 					Erstelle Vorlagen mit benutzerdefinierten System-Prompts.
 				</p>
 			</div>
 		</div>
 		<button
 			onclick={openCreateForm}
-			class="flex items-center gap-2 rounded-lg bg-[hsl(var(--primary))] px-4 py-2 text-sm font-medium text-[hsl(var(--primary-foreground))] hover:opacity-90"
+			class="flex items-center gap-2 rounded-lg bg-[hsl(var(--color-primary))] px-4 py-2 text-sm font-medium text-[hsl(var(--color-primary-foreground))] hover:opacity-90"
 		>
 			<Plus size={20} />
 			Neue Vorlage
@@ -135,16 +135,16 @@
 	<!-- Templates Grid -->
 	{#if templates.length === 0}
 		<div
-			class="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[hsl(var(--border))] py-16"
+			class="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[hsl(var(--color-border))] py-16"
 		>
-			<FileText size={48} class="mb-4 text-[hsl(var(--muted-foreground))]" />
-			<h2 class="mb-2 text-lg font-semibold text-[hsl(var(--foreground))]">Keine Vorlagen</h2>
-			<p class="mb-6 text-sm text-[hsl(var(--muted-foreground))]">
+			<FileText size={48} class="mb-4 text-[hsl(var(--color-muted-foreground))]" />
+			<h2 class="mb-2 text-lg font-semibold text-[hsl(var(--color-foreground))]">Keine Vorlagen</h2>
+			<p class="mb-6 text-sm text-[hsl(var(--color-muted-foreground))]">
 				Erstelle deine erste Vorlage, um loszulegen.
 			</p>
 			<button
 				onclick={openCreateForm}
-				class="rounded-lg bg-[hsl(var(--primary))] px-6 py-2.5 text-sm font-medium text-[hsl(var(--primary-foreground))]"
+				class="rounded-lg bg-[hsl(var(--color-primary))] px-6 py-2.5 text-sm font-medium text-[hsl(var(--color-primary-foreground))]"
 			>
 				Neue Vorlage
 			</button>
@@ -153,20 +153,20 @@
 		<div class="grid gap-4 sm:grid-cols-2">
 			{#each templates as template (template.id)}
 				<div
-					class="group rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-5 transition-all hover:border-[hsl(var(--primary)/0.3)]"
+					class="group rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-5 transition-all hover:border-[hsl(var(--color-primary)/0.3)]"
 				>
 					<div class="flex items-start justify-between">
 						<div class="flex items-center gap-3">
 							<div class="h-3 w-3 rounded-full" style="background-color: {template.color}"></div>
 							<div>
-								<h3 class="font-semibold text-[hsl(var(--foreground))]">
+								<h3 class="font-semibold text-[hsl(var(--color-foreground))]">
 									{template.name}
 									{#if template.isDefault}
 										<Star size={14} weight="fill" class="ml-1 inline text-yellow-500" />
 									{/if}
 								</h3>
 								{#if template.description}
-									<p class="mt-0.5 text-xs text-[hsl(var(--muted-foreground))] line-clamp-2">
+									<p class="mt-0.5 text-xs text-[hsl(var(--color-muted-foreground))] line-clamp-2">
 										{template.description}
 									</p>
 								{/if}
@@ -176,7 +176,7 @@
 
 					{#if template.documentMode}
 						<span
-							class="mt-2 inline-block rounded bg-[hsl(var(--muted))] px-2 py-0.5 text-[10px] text-[hsl(var(--muted-foreground))]"
+							class="mt-2 inline-block rounded bg-[hsl(var(--color-muted))] px-2 py-0.5 text-[10px] text-[hsl(var(--color-muted-foreground))]"
 						>
 							Dokumentmodus
 						</span>
@@ -185,27 +185,27 @@
 					<div class="mt-4 flex items-center gap-2">
 						<button
 							onclick={() => handleUse(template)}
-							class="flex items-center gap-1.5 rounded-lg bg-[hsl(var(--primary))] px-3 py-1.5 text-xs font-medium text-[hsl(var(--primary-foreground))] hover:opacity-90"
+							class="flex items-center gap-1.5 rounded-lg bg-[hsl(var(--color-primary))] px-3 py-1.5 text-xs font-medium text-[hsl(var(--color-primary-foreground))] hover:opacity-90"
 						>
 							<Play size={14} />
 							Verwenden
 						</button>
 						<button
 							onclick={() => openEditForm(template)}
-							class="rounded-lg p-1.5 text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--muted))]"
+							class="rounded-lg p-1.5 text-[hsl(var(--color-muted-foreground))] hover:bg-[hsl(var(--color-muted))]"
 						>
 							<PencilSimple size={16} />
 						</button>
 						<button
 							onclick={() => handleSetDefault(template.id)}
-							class="rounded-lg p-1.5 text-[hsl(var(--muted-foreground))] hover:text-yellow-500"
+							class="rounded-lg p-1.5 text-[hsl(var(--color-muted-foreground))] hover:text-yellow-500"
 							title="Als Standard setzen"
 						>
 							<Star size={16} weight={template.isDefault ? 'fill' : 'regular'} />
 						</button>
 						<button
 							onclick={() => handleDelete(template.id)}
-							class="rounded-lg p-1.5 text-[hsl(var(--muted-foreground))] hover:text-red-500"
+							class="rounded-lg p-1.5 text-[hsl(var(--color-muted-foreground))] hover:text-red-500"
 						>
 							<Trash size={16} />
 						</button>
@@ -220,15 +220,15 @@
 {#if showForm}
 	<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
 		<div
-			class="w-full max-w-lg rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-6"
+			class="w-full max-w-lg rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-6"
 		>
 			<div class="mb-4 flex items-center justify-between">
-				<h2 class="text-lg font-semibold text-[hsl(var(--foreground))]">
+				<h2 class="text-lg font-semibold text-[hsl(var(--color-foreground))]">
 					{editingId ? 'Vorlage bearbeiten' : 'Neue Vorlage'}
 				</h2>
 				<button
 					onclick={() => (showForm = false)}
-					class="rounded p-1 text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
+					class="rounded p-1 text-[hsl(var(--color-muted-foreground))] hover:text-[hsl(var(--color-foreground))]"
 				>
 					<X size={20} />
 				</button>
@@ -248,7 +248,7 @@
 						type="text"
 						bind:value={formName}
 						required
-						class="w-full rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--background))] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))]"
+						class="w-full rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-background))] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--color-primary))]"
 					/>
 				</div>
 				<div>
@@ -257,7 +257,7 @@
 						id="tpl-desc"
 						type="text"
 						bind:value={formDescription}
-						class="w-full rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--background))] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))]"
+						class="w-full rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-background))] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--color-primary))]"
 					/>
 				</div>
 				<div>
@@ -267,7 +267,7 @@
 						bind:value={formSystemPrompt}
 						required
 						rows="4"
-						class="w-full resize-none rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--background))] px-3 py-2 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))]"
+						class="w-full resize-none rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-background))] px-3 py-2 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--color-primary))]"
 					></textarea>
 				</div>
 				<div>
@@ -279,7 +279,7 @@
 								aria-label="Farbe wählen"
 								onclick={() => (formColor = color)}
 								class="h-7 w-7 rounded-full border-2 transition-transform {formColor === color
-									? 'scale-110 border-[hsl(var(--foreground))]'
+									? 'scale-110 border-[hsl(var(--color-foreground))]'
 									: 'border-transparent hover:scale-105'}"
 								style="background-color: {color}"
 							></button>
@@ -294,14 +294,14 @@
 					<button
 						type="button"
 						onclick={() => (showForm = false)}
-						class="rounded-lg px-4 py-2 text-sm text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
+						class="rounded-lg px-4 py-2 text-sm text-[hsl(var(--color-muted-foreground))] hover:text-[hsl(var(--color-foreground))]"
 					>
 						Abbrechen
 					</button>
 					<button
 						type="submit"
 						disabled={!formName.trim() || !formSystemPrompt.trim()}
-						class="rounded-lg bg-[hsl(var(--primary))] px-4 py-2 text-sm font-medium text-[hsl(var(--primary-foreground))] hover:opacity-90 disabled:opacity-50"
+						class="rounded-lg bg-[hsl(var(--color-primary))] px-4 py-2 text-sm font-medium text-[hsl(var(--color-primary-foreground))] hover:opacity-90 disabled:opacity-50"
 					>
 						{editingId ? $_('common.save') : $_('common.create')}
 					</button>

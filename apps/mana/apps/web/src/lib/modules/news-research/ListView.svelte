@@ -240,18 +240,19 @@
 		padding: 0.65rem;
 		height: 100%;
 		overflow-y: auto;
+		color: hsl(var(--color-foreground));
 	}
 	.slot {
 		display: flex;
 		flex-direction: column;
 		gap: 0.5rem;
 		padding: 0.55rem;
-		border: 1px solid var(--border, #e5e5e5);
+		border: 1px solid hsl(var(--color-border));
 		border-radius: 0.5rem;
-		background: var(--surface, #fff);
+		background: hsl(var(--color-background));
 	}
 	.empty {
-		color: var(--text-muted, #888);
+		color: hsl(var(--color-muted-foreground));
 		font-size: 0.85rem;
 		padding: 0.75rem;
 		text-align: center;
@@ -260,7 +261,7 @@
 		display: flex;
 		gap: 0.2rem;
 		align-items: center;
-		background: var(--surface-alt, #f4f4f4);
+		background: hsl(var(--color-muted));
 		padding: 0.2rem;
 		border-radius: 0.4rem;
 	}
@@ -272,16 +273,17 @@
 		border-radius: 0.3rem;
 		cursor: pointer;
 		font-size: 0.8rem;
-		color: var(--text, #333);
+		color: hsl(var(--color-muted-foreground));
 	}
 	.mode-switch button.active {
-		background: var(--surface, #fff);
+		background: hsl(var(--color-background));
+		color: hsl(var(--color-foreground));
 		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
 	}
 	.open-full {
 		padding: 0 0.4rem;
 		text-decoration: none;
-		color: var(--text-muted, #888);
+		color: hsl(var(--color-muted-foreground));
 		font-size: 0.9rem;
 	}
 	.row {
@@ -292,18 +294,18 @@
 		flex: 1;
 		min-width: 0;
 		padding: 0.35rem 0.5rem;
-		border: 1px solid var(--border, #e5e5e5);
+		border: 1px solid hsl(var(--color-border));
 		border-radius: 0.35rem;
-		background: var(--surface, #fff);
-		color: var(--text, #333);
+		background: hsl(var(--color-background));
+		color: hsl(var(--color-foreground));
 		font-size: 0.85rem;
 	}
 	.row button {
 		padding: 0.35rem 0.7rem;
 		border: none;
 		border-radius: 0.35rem;
-		background: var(--accent, #0891b2);
-		color: white;
+		background: hsl(var(--color-primary));
+		color: hsl(var(--color-primary-foreground, 0 0% 100%));
 		cursor: pointer;
 		font-size: 0.8rem;
 		white-space: nowrap;
@@ -320,7 +322,7 @@
 		padding: 0.2rem 0;
 		cursor: pointer;
 		font-size: 0.85rem;
-		color: var(--text, #333);
+		color: hsl(var(--color-foreground));
 		font-weight: 500;
 	}
 	.feeds,
@@ -347,6 +349,7 @@
 		min-width: 0;
 		cursor: pointer;
 		font-size: 0.8rem;
+		color: hsl(var(--color-foreground));
 	}
 	.ft {
 		overflow: hidden;
@@ -358,11 +361,11 @@
 		border: none;
 		cursor: pointer;
 		font-size: 0.95rem;
-		color: var(--text-muted, #888);
+		color: hsl(var(--color-muted-foreground));
 		padding: 0 0.25rem;
 	}
 	.pin.pinned {
-		color: var(--accent, #0891b2);
+		color: hsl(var(--color-primary));
 	}
 	.results-head {
 		display: flex;
@@ -370,29 +373,29 @@
 		align-items: center;
 		font-size: 0.85rem;
 		font-weight: 500;
-		color: var(--text, #333);
+		color: hsl(var(--color-foreground));
 	}
 	.ctx {
-		background: var(--surface-alt, #f4f4f4);
-		border: 1px solid var(--border, #e5e5e5);
+		background: hsl(var(--color-muted));
+		border: 1px solid hsl(var(--color-border));
 		border-radius: 0.3rem;
 		padding: 0.2rem 0.5rem;
 		font-size: 0.75rem;
 		cursor: pointer;
-		color: var(--text, #333);
+		color: hsl(var(--color-foreground));
 	}
 	.results li {
 		display: flex;
 		flex-direction: column;
 		gap: 0.2rem;
 		padding: 0.35rem;
-		border: 1px solid var(--border, #eee);
+		border: 1px solid hsl(var(--color-border));
 		border-radius: 0.35rem;
 	}
 	.rt {
 		font-size: 0.85rem;
 		font-weight: 600;
-		color: var(--text, #333);
+		color: hsl(var(--color-foreground));
 		text-decoration: none;
 		line-height: 1.25;
 	}
@@ -404,25 +407,25 @@
 		gap: 0.3rem;
 		align-items: center;
 		font-size: 0.7rem;
-		color: var(--text-muted, #888);
+		color: hsl(var(--color-muted-foreground));
 	}
 	.save {
 		margin-left: auto;
 		background: transparent;
-		border: 1px solid var(--border, #e5e5e5);
+		border: 1px solid hsl(var(--color-border));
 		border-radius: 0.25rem;
 		padding: 0.1rem 0.4rem;
 		font-size: 0.7rem;
 		cursor: pointer;
-		color: var(--text, #333);
+		color: hsl(var(--color-foreground));
 	}
 	.save:disabled {
 		opacity: 0.5;
 	}
 	.error {
-		background: #fee;
-		border: 1px solid #fcc;
-		color: #900;
+		background: hsl(var(--color-destructive) / 0.1);
+		border: 1px solid hsl(var(--color-destructive) / 0.4);
+		color: hsl(var(--color-destructive));
 		padding: 0.35rem 0.5rem;
 		border-radius: 0.35rem;
 		font-size: 0.8rem;

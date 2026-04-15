@@ -100,13 +100,13 @@
 	<div>
 		<a
 			href="/questions"
-			class="mb-4 inline-flex items-center gap-2 text-sm text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
+			class="mb-4 inline-flex items-center gap-2 text-sm text-[hsl(var(--color-muted-foreground))] hover:text-[hsl(var(--color-foreground))]"
 		>
 			<ArrowLeft class="h-4 w-4" />
 			Zurueck zu Fragen
 		</a>
-		<h1 class="text-2xl font-bold text-[hsl(var(--foreground))]">Neue Frage</h1>
-		<p class="mt-1 text-sm text-[hsl(var(--muted-foreground))]">
+		<h1 class="text-2xl font-bold text-[hsl(var(--color-foreground))]">Neue Frage</h1>
+		<p class="mt-1 text-sm text-[hsl(var(--color-muted-foreground))]">
 			Stelle eine Frage und lass die KI recherchieren
 		</p>
 	</div>
@@ -122,7 +122,7 @@
 
 		<!-- Question Title -->
 		<div>
-			<label for="title" class="mb-2 block text-sm font-medium text-[hsl(var(--foreground))]">
+			<label for="title" class="mb-2 block text-sm font-medium text-[hsl(var(--color-foreground))]">
 				Deine Frage
 			</label>
 			<input
@@ -130,21 +130,24 @@
 				id="title"
 				bind:value={title}
 				placeholder="Was moechtest du wissen?"
-				class="w-full rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] px-4 py-3 text-lg text-[hsl(var(--foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))]"
+				class="w-full rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] px-4 py-3 text-lg text-[hsl(var(--color-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--color-primary))]"
 			/>
 		</div>
 
 		<!-- Description -->
 		<div>
-			<label for="description" class="mb-2 block text-sm font-medium text-[hsl(var(--foreground))]">
-				Kontext <span class="text-[hsl(var(--muted-foreground))]">(optional)</span>
+			<label
+				for="description"
+				class="mb-2 block text-sm font-medium text-[hsl(var(--color-foreground))]"
+			>
+				Kontext <span class="text-[hsl(var(--color-muted-foreground))]">(optional)</span>
 			</label>
 			<textarea
 				id="description"
 				bind:value={description}
 				placeholder="Zusaetzliche Details oder Kontext..."
 				rows="3"
-				class="w-full rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] px-4 py-3 text-sm text-[hsl(var(--foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))]"
+				class="w-full rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] px-4 py-3 text-sm text-[hsl(var(--color-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--color-primary))]"
 			></textarea>
 		</div>
 
@@ -153,14 +156,14 @@
 			<div>
 				<label
 					for="collection"
-					class="mb-2 block text-sm font-medium text-[hsl(var(--foreground))]"
+					class="mb-2 block text-sm font-medium text-[hsl(var(--color-foreground))]"
 				>
 					Sammlung
 				</label>
 				<select
 					id="collection"
 					bind:value={collectionId}
-					class="w-full rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] px-4 py-2 text-sm text-[hsl(var(--foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))]"
+					class="w-full rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] px-4 py-2 text-sm text-[hsl(var(--color-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--color-primary))]"
 				>
 					<option value={undefined}>Keine Sammlung</option>
 					{#each collections as collection}
@@ -172,19 +175,19 @@
 
 		<!-- Tags -->
 		<div>
-			<label for="tags" class="mb-2 block text-sm font-medium text-[hsl(var(--foreground))]">
+			<label for="tags" class="mb-2 block text-sm font-medium text-[hsl(var(--color-foreground))]">
 				Tags
 			</label>
 			<div class="mb-2 flex flex-wrap gap-2">
 				{#each tags as tag}
 					<span
-						class="inline-flex items-center gap-1 rounded-full bg-[hsl(var(--muted))] px-3 py-1 text-sm text-[hsl(var(--foreground))]"
+						class="inline-flex items-center gap-1 rounded-full bg-[hsl(var(--color-muted))] px-3 py-1 text-sm text-[hsl(var(--color-foreground))]"
 					>
 						{tag}
 						<button
 							type="button"
 							onclick={() => removeTag(tag)}
-							class="ml-1 text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
+							class="ml-1 text-[hsl(var(--color-muted-foreground))] hover:text-[hsl(var(--color-foreground))]"
 						>
 							&times;
 						</button>
@@ -197,13 +200,13 @@
 				bind:value={tagInput}
 				onkeydown={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
 				placeholder="Tag eingeben und Enter druecken"
-				class="w-full rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] px-4 py-2 text-sm text-[hsl(var(--foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))]"
+				class="w-full rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] px-4 py-2 text-sm text-[hsl(var(--color-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--color-primary))]"
 			/>
 		</div>
 
 		<!-- Research Depth -->
 		<div>
-			<span class="mb-2 block text-sm font-medium text-[hsl(var(--foreground))]">
+			<span class="mb-2 block text-sm font-medium text-[hsl(var(--color-foreground))]">
 				Recherchetiefe
 			</span>
 			<div class="grid grid-cols-3 gap-3">
@@ -213,12 +216,12 @@
 						type="button"
 						onclick={() => (researchDepth = option.value)}
 						class="rounded-lg border-2 p-4 text-left transition-all {researchDepth === option.value
-							? 'border-[hsl(var(--primary))] bg-[hsl(var(--primary)/0.05)]'
-							: 'border-[hsl(var(--border))] hover:border-[hsl(var(--primary)/0.3)]'}"
+							? 'border-[hsl(var(--color-primary))] bg-[hsl(var(--color-primary)/0.05)]'
+							: 'border-[hsl(var(--color-border))] hover:border-[hsl(var(--color-primary)/0.3)]'}"
 					>
-						<OptionIcon class="mb-2 h-5 w-5 text-[hsl(var(--primary))]" />
-						<div class="font-medium text-[hsl(var(--foreground))]">{option.label}</div>
-						<div class="mt-1 text-xs text-[hsl(var(--muted-foreground))]">
+						<OptionIcon class="mb-2 h-5 w-5 text-[hsl(var(--color-primary))]" />
+						<div class="font-medium text-[hsl(var(--color-foreground))]">{option.label}</div>
+						<div class="mt-1 text-xs text-[hsl(var(--color-muted-foreground))]">
 							{option.description}
 						</div>
 					</button>
@@ -228,13 +231,16 @@
 
 		<!-- Priority -->
 		<div>
-			<label for="priority" class="mb-2 block text-sm font-medium text-[hsl(var(--foreground))]">
+			<label
+				for="priority"
+				class="mb-2 block text-sm font-medium text-[hsl(var(--color-foreground))]"
+			>
 				Prioritaet
 			</label>
 			<select
 				id="priority"
 				bind:value={priority}
-				class="w-full rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] px-4 py-2 text-sm text-[hsl(var(--foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))]"
+				class="w-full rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] px-4 py-2 text-sm text-[hsl(var(--color-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--color-primary))]"
 			>
 				<option value="low">Niedrig</option>
 				<option value="normal">Normal</option>
@@ -247,14 +253,14 @@
 		<div class="flex gap-3">
 			<a
 				href="/questions"
-				class="flex-1 rounded-lg border border-[hsl(var(--border))] px-4 py-3 text-center text-sm font-medium text-[hsl(var(--foreground))] hover:bg-[hsl(var(--muted))]"
+				class="flex-1 rounded-lg border border-[hsl(var(--color-border))] px-4 py-3 text-center text-sm font-medium text-[hsl(var(--color-foreground))] hover:bg-[hsl(var(--color-muted))]"
 			>
 				Abbrechen
 			</a>
 			<button
 				type="submit"
 				disabled={loading || !title.trim()}
-				class="flex-1 rounded-lg bg-[hsl(var(--primary))] px-4 py-3 text-sm font-medium text-[hsl(var(--primary-foreground))] hover:opacity-90 disabled:opacity-50"
+				class="flex-1 rounded-lg bg-[hsl(var(--color-primary))] px-4 py-3 text-sm font-medium text-[hsl(var(--color-primary-foreground))] hover:opacity-90 disabled:opacity-50"
 			>
 				{loading ? $_('common.creating') : 'Frage stellen'}
 			</button>

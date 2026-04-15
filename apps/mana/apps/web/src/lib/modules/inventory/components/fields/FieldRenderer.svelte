@@ -35,12 +35,12 @@
 </script>
 
 {#if value === undefined || value === null || value === ''}
-	<span class="text-[hsl(var(--muted-foreground))] italic">--</span>
+	<span class="text-[hsl(var(--color-muted-foreground))] italic">--</span>
 {:else if field.type === 'checkbox'}
 	{#if value}
 		<span class="text-green-500">&#10003;</span>
 	{:else}
-		<span class="text-[hsl(var(--muted-foreground))]">&#10007;</span>
+		<span class="text-[hsl(var(--color-muted-foreground))]">&#10007;</span>
 	{/if}
 {:else if field.type === 'currency'}
 	<span>{formatCurrency(value, field.currencyCode)}</span>
@@ -51,7 +51,7 @@
 		href={String(value)}
 		target="_blank"
 		rel="noopener noreferrer"
-		class="text-[hsl(var(--primary))] underline hover:no-underline"
+		class="text-[hsl(var(--color-primary))] underline hover:no-underline"
 	>
 		{String(value)
 			.replace(/^https?:\/\//, '')
@@ -59,14 +59,14 @@
 	</a>
 {:else if field.type === 'select'}
 	<span
-		class="inline-block rounded-full bg-[hsl(var(--accent)/0.15)] px-2 py-0.5 text-xs font-medium text-[hsl(var(--accent-foreground))]"
+		class="inline-block rounded-full bg-[hsl(var(--color-accent)/0.15)] px-2 py-0.5 text-xs font-medium text-[hsl(var(--color-accent-foreground))]"
 	>
 		{String(value)}
 	</span>
 {:else if field.type === 'tags'}
 	<div class="flex flex-wrap gap-1">
 		{#each Array.isArray(value) ? value : [] as tag}
-			<span class="rounded-full bg-[hsl(var(--muted))] px-2 py-0.5 text-xs">{tag}</span>
+			<span class="rounded-full bg-[hsl(var(--color-muted))] px-2 py-0.5 text-xs">{tag}</span>
 		{/each}
 	</div>
 {:else if field.type === 'number'}

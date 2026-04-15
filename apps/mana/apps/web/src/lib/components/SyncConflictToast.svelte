@@ -129,7 +129,7 @@
 
 	.conflict {
 		pointer-events: auto;
-		background: var(--surface, #fff);
+		background: hsl(var(--color-surface));
 		border: 1px solid rgba(245, 158, 11, 0.4);
 		border-left: 4px solid rgb(245, 158, 11);
 		border-radius: 0.5rem;
@@ -198,9 +198,9 @@
 		align-items: center;
 		gap: 0.375rem;
 		padding: 0.375rem 0.75rem;
-		border: 1px solid var(--border, #e5e7eb);
+		border: 1px solid hsl(var(--color-border));
 		border-radius: 0.375rem;
-		background: var(--surface, #fff);
+		background: hsl(var(--color-surface));
 		font-size: 0.8125rem;
 		font-weight: 500;
 		cursor: pointer;
@@ -212,7 +212,7 @@
 	}
 
 	.btn-primary {
-		background: var(--primary, #6366f1);
+		background: hsl(var(--color-primary));
 		color: white;
 		border-color: transparent;
 	}
@@ -223,7 +223,7 @@
 
 	@media (prefers-color-scheme: dark) {
 		.conflict {
-			background: var(--surface, #1f2937);
+			background: hsl(var(--color-surface));
 			border-color: rgba(245, 158, 11, 0.5);
 			border-left-color: rgb(245, 158, 11);
 		}
@@ -234,8 +234,8 @@
 			color: #9ca3af;
 		}
 		.btn {
-			background: var(--surface, #1f2937);
-			border-color: var(--border, #374151);
+			background: hsl(var(--color-surface));
+			border-color: hsl(var(--color-border));
 			color: #e5e7eb;
 		}
 		.btn:hover {

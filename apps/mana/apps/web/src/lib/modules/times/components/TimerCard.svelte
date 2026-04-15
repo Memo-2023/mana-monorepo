@@ -89,7 +89,7 @@
 </script>
 
 <div
-	class="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-6 {timerStore.isRunning
+	class="rounded-2xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-6 {timerStore.isRunning
 		? 'timer-active'
 		: ''}"
 >
@@ -97,8 +97,8 @@
 	<div class="mb-4 text-center">
 		<div
 			class="duration-display text-5xl font-bold {timerStore.isRunning
-				? 'text-[hsl(var(--primary))]'
-				: 'text-[hsl(var(--foreground))]'}"
+				? 'text-[hsl(var(--color-primary))]'
+				: 'text-[hsl(var(--color-foreground))]'}"
 		>
 			{formattedTime}
 		</div>
@@ -111,7 +111,7 @@
 			value={description}
 			oninput={(e) => handleDescriptionChange((e.target as HTMLInputElement).value)}
 			placeholder={$_('timer.whatAreYouWorkingOn')}
-			class="w-full rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] px-4 py-2.5 text-sm text-[hsl(var(--foreground))] placeholder:text-[hsl(var(--muted-foreground))] focus:border-[hsl(var(--primary))] focus:outline-none focus:ring-1 focus:ring-[hsl(var(--primary))]"
+			class="w-full rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] px-4 py-2.5 text-sm text-[hsl(var(--color-foreground))] placeholder:text-[hsl(var(--color-muted-foreground))] focus:border-[hsl(var(--color-primary))] focus:outline-none focus:ring-1 focus:ring-[hsl(var(--color-primary))]"
 		/>
 	</div>
 
@@ -125,7 +125,7 @@
 					const val = (e.target as HTMLSelectElement).value;
 					handleProjectChange(val || null);
 				}}
-				class="w-full rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] px-3 py-2 text-sm text-[hsl(var(--foreground))]"
+				class="w-full rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] px-3 py-2 text-sm text-[hsl(var(--color-foreground))]"
 			>
 				<option value="">{$_('project.noProjects')}</option>
 				{#each activeProjects as project}
@@ -145,8 +145,8 @@
 		<button
 			onclick={handleBillableToggle}
 			class="flex h-9 w-9 items-center justify-center rounded-lg border transition-colors {isBillable
-				? 'border-[hsl(var(--primary))] bg-[hsl(var(--primary)/0.1)] text-[hsl(var(--primary))]'
-				: 'border-[hsl(var(--border))] text-[hsl(var(--muted-foreground))]'}"
+				? 'border-[hsl(var(--color-primary))] bg-[hsl(var(--color-primary)/0.1)] text-[hsl(var(--color-primary))]'
+				: 'border-[hsl(var(--color-border))] text-[hsl(var(--color-muted-foreground))]'}"
 			title={isBillable ? $_('entry.billable') : $_('entry.notBillable')}
 		>
 			<CurrencyDollar size={16} />
@@ -158,7 +158,7 @@
 		onclick={handleStartStop}
 		class="w-full rounded-xl py-3 text-lg font-medium transition-all {timerStore.isRunning
 			? 'bg-red-500 text-white hover:bg-red-600'
-			: 'bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] hover:opacity-90'}"
+			: 'bg-[hsl(var(--color-primary))] text-[hsl(var(--color-primary-foreground))] hover:opacity-90'}"
 	>
 		{#if timerStore.isRunning}
 			<span class="flex items-center justify-center gap-2">
@@ -176,7 +176,7 @@
 	<!-- Running info -->
 	{#if timerStore.isRunning && selectedProject}
 		<div
-			class="mt-3 flex items-center justify-center gap-2 text-xs text-[hsl(var(--muted-foreground))]"
+			class="mt-3 flex items-center justify-center gap-2 text-xs text-[hsl(var(--color-muted-foreground))]"
 		>
 			<div class="project-dot" style="background-color: {selectedProject.color}"></div>
 			<span>{selectedProject.name}</span>

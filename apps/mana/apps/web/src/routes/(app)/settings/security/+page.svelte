@@ -685,10 +685,10 @@
 	}
 
 	.card {
-		border: 1px solid var(--border, #e5e7eb);
+		border: 1px solid hsl(var(--color-border));
 		border-radius: 0.75rem;
 		padding: 1.25rem 1.5rem;
-		background: var(--surface, #fff);
+		background: hsl(var(--color-surface));
 	}
 	.card.danger {
 		border-color: rgba(220, 38, 38, 0.25);
@@ -764,8 +764,8 @@
 		gap: 0.5rem;
 		padding: 0.5rem 1rem;
 		border-radius: 0.5rem;
-		border: 1px solid var(--border, #e5e7eb);
-		background: var(--surface, #fff);
+		border: 1px solid hsl(var(--color-border));
+		background: hsl(var(--color-surface));
 		font-size: 0.9rem;
 		cursor: pointer;
 		font-weight: 500;
@@ -779,7 +779,7 @@
 	}
 
 	.btn-primary {
-		background: var(--primary, #6366f1);
+		background: hsl(var(--color-primary));
 		color: white;
 		border-color: transparent;
 	}
@@ -840,7 +840,7 @@
 	.zk-step {
 		margin-top: 1rem;
 		padding-top: 1rem;
-		border-top: 1px solid var(--border, #e5e7eb);
+		border-top: 1px solid hsl(var(--color-border));
 	}
 
 	.zk-step h3 {
@@ -863,7 +863,7 @@
 		margin: 1rem 0;
 		padding: 1rem 1.25rem;
 		background: var(--surface-muted, #f9fafb);
-		border: 1px solid var(--border, #e5e7eb);
+		border: 1px solid hsl(var(--color-border));
 		border-radius: 0.5rem;
 		font-family: ui-monospace, SFMono-Regular, monospace;
 		font-size: 1rem;
@@ -879,15 +879,15 @@
 		width: 100%;
 		margin: 0.75rem 0;
 		padding: 0.75rem 1rem;
-		border: 1px solid var(--border, #e5e7eb);
+		border: 1px solid hsl(var(--color-border));
 		border-radius: 0.5rem;
 		font-family: ui-monospace, SFMono-Regular, monospace;
 		font-size: 0.95rem;
-		background: var(--surface, #fff);
+		background: hsl(var(--color-surface));
 	}
 
 	.recovery-input:focus {
-		outline: 2px solid var(--primary, #6366f1);
+		outline: 2px solid hsl(var(--color-primary));
 		outline-offset: 1px;
 	}
 
@@ -898,8 +898,8 @@
 
 	@media (prefers-color-scheme: dark) {
 		.card {
-			background: var(--surface, #1f2937);
-			border-color: var(--border, #374151);
+			background: hsl(var(--color-surface));
+			border-color: hsl(var(--color-border));
 		}
 		.table-list li {
 			background: var(--surface-muted, #111827);
@@ -907,7 +907,7 @@
 		.recovery-code,
 		.recovery-input {
 			background: var(--surface-muted, #111827);
-			border-color: var(--border, #374151);
+			border-color: hsl(var(--color-border));
 		}
 	}
 </style>

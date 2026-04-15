@@ -37,15 +37,19 @@
 
 	<!-- Today's Summary -->
 	<div class="flex gap-4">
-		<div class="flex-1 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-4">
-			<p class="text-xs text-[hsl(var(--muted-foreground))]">{$_('common.total')}</p>
-			<p class="duration-display text-2xl font-bold text-[hsl(var(--foreground))]">
+		<div
+			class="flex-1 rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4"
+		>
+			<p class="text-xs text-[hsl(var(--color-muted-foreground))]">{$_('common.total')}</p>
+			<p class="duration-display text-2xl font-bold text-[hsl(var(--color-foreground))]">
 				{formatDurationCompact(todayTotal)}
 			</p>
 		</div>
-		<div class="flex-1 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-4">
-			<p class="text-xs text-[hsl(var(--muted-foreground))]">{$_('entry.billable')}</p>
-			<p class="duration-display text-2xl font-bold text-[hsl(var(--primary))]">
+		<div
+			class="flex-1 rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4"
+		>
+			<p class="text-xs text-[hsl(var(--color-muted-foreground))]">{$_('entry.billable')}</p>
+			<p class="duration-display text-2xl font-bold text-[hsl(var(--color-primary))]">
 				{formatDurationCompact(todayBillable)}
 			</p>
 		</div>
@@ -57,12 +61,12 @@
 	<!-- Today's Entries -->
 	<div>
 		<div class="mb-3 flex items-center justify-between">
-			<h2 class="text-sm font-medium text-[hsl(var(--muted-foreground))]">
+			<h2 class="text-sm font-medium text-[hsl(var(--color-muted-foreground))]">
 				{$_('entry.today')} ({formatDurationCompact(todayTotal)})
 			</h2>
 			<button
 				onclick={() => (showEntryForm = true)}
-				class="rounded-lg border border-[hsl(var(--border))] px-3 py-1.5 text-xs text-[hsl(var(--muted-foreground))] transition-colors hover:border-[hsl(var(--primary)/0.5)] hover:text-[hsl(var(--foreground))]"
+				class="rounded-lg border border-[hsl(var(--color-border))] px-3 py-1.5 text-xs text-[hsl(var(--color-muted-foreground))] transition-colors hover:border-[hsl(var(--color-primary)/0.5)] hover:text-[hsl(var(--color-foreground))]"
 			>
 				+ {$_('entry.manual')}
 			</button>

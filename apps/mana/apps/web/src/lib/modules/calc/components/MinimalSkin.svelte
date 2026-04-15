@@ -77,7 +77,7 @@
 	.minimal-expression {
 		font-family: system-ui, sans-serif;
 		font-size: 14px;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 		opacity: 0.5;
 		min-height: 20px;
 		overflow: hidden;
@@ -89,7 +89,7 @@
 		font-family: system-ui, sans-serif;
 		font-size: 48px;
 		font-weight: 200;
-		color: hsl(var(--foreground));
+		color: hsl(var(--color-foreground));
 		letter-spacing: -1px;
 		overflow: hidden;
 		text-overflow: ellipsis;
@@ -98,7 +98,7 @@
 	}
 
 	.minimal-error {
-		color: hsl(var(--destructive, 0 84% 60%));
+		color: hsl(var(--color-error, 0 84% 60%));
 		font-size: 24px;
 	}
 
@@ -118,31 +118,31 @@
 		cursor: pointer;
 		transition: background 0.15s;
 		background: transparent;
-		color: hsl(var(--foreground));
+		color: hsl(var(--color-foreground));
 	}
 
 	.minimal-btn:hover {
-		background: hsl(var(--muted));
+		background: hsl(var(--color-muted));
 	}
 
 	.minimal-btn:active {
-		background: hsl(var(--muted));
+		background: hsl(var(--color-muted));
 		opacity: 0.7;
 	}
 
 	.minimal-btn-eq {
-		background: hsl(var(--foreground));
-		color: hsl(var(--background));
+		background: hsl(var(--color-foreground));
+		color: hsl(var(--color-background));
 		font-weight: 400;
 	}
 
 	.minimal-btn-eq:hover {
-		background: hsl(var(--foreground));
+		background: hsl(var(--color-foreground));
 		opacity: 0.8;
 	}
 
 	.minimal-btn-clear {
-		color: hsl(var(--destructive, 0 84% 60%));
+		color: hsl(var(--color-error, 0 84% 60%));
 		font-weight: 400;
 	}
 
@@ -155,13 +155,13 @@
 		font-size: 16px;
 		cursor: pointer;
 		background: transparent;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.minimal-copy {
 		background: none;
 		border: none;
-		color: hsl(var(--muted-foreground));
+		color: hsl(var(--color-muted-foreground));
 		opacity: 0.3;
 		font-size: 16px;
 		cursor: pointer;
@@ -173,6 +173,6 @@
 	}
 
 	.minimal-backspace:hover {
-		background: hsl(var(--muted));
+		background: hsl(var(--color-muted));
 	}
 </style>

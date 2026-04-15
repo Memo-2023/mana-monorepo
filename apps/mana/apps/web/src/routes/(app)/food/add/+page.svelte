@@ -243,25 +243,25 @@
 	<div>
 		<a
 			href="/food"
-			class="mb-4 inline-flex items-center gap-2 text-sm text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
+			class="mb-4 inline-flex items-center gap-2 text-sm text-[hsl(var(--color-muted-foreground))] hover:text-[hsl(var(--color-foreground))]"
 		>
 			<ArrowLeft class="h-4 w-4" />
 			Zurueck
 		</a>
-		<h1 class="text-2xl font-bold text-[hsl(var(--foreground))]">Mahlzeit hinzufuegen</h1>
+		<h1 class="text-2xl font-bold text-[hsl(var(--color-foreground))]">Mahlzeit hinzufuegen</h1>
 	</div>
 
 	<!-- Mode Toggle -->
 	<div
-		class="grid grid-cols-2 gap-2 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-1"
+		class="grid grid-cols-2 gap-2 rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-1"
 	>
 		<button
 			type="button"
 			onclick={() => switchMode('text')}
 			class="rounded-md px-4 py-2 text-sm font-medium transition-colors
 				{mode === 'text'
-				? 'bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))]'
-				: 'text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]'}"
+				? 'bg-[hsl(var(--color-primary))] text-[hsl(var(--color-primary-foreground))]'
+				: 'text-[hsl(var(--color-muted-foreground))] hover:text-[hsl(var(--color-foreground))]'}"
 		>
 			Text
 		</button>
@@ -270,8 +270,8 @@
 			onclick={() => switchMode('photo')}
 			class="rounded-md px-4 py-2 text-sm font-medium transition-colors
 				{mode === 'photo'
-				? 'bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))]'
-				: 'text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]'}"
+				? 'bg-[hsl(var(--color-primary))] text-[hsl(var(--color-primary-foreground))]'
+				: 'text-[hsl(var(--color-muted-foreground))] hover:text-[hsl(var(--color-foreground))]'}"
 		>
 			📷 Foto
 		</button>
@@ -285,7 +285,9 @@
 
 	<!-- Photo Capture (only in photo mode) -->
 	{#if mode === 'photo'}
-		<div class="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-6 space-y-4">
+		<div
+			class="rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-6 space-y-4"
+		>
 			<input
 				bind:this={fileInput}
 				type="file"
@@ -299,26 +301,26 @@
 				<button
 					type="button"
 					onclick={() => fileInput?.click()}
-					class="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[hsl(var(--border))] py-12 transition-colors hover:border-[hsl(var(--primary)/0.5)]"
+					class="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[hsl(var(--color-border))] py-12 transition-colors hover:border-[hsl(var(--color-primary)/0.5)]"
 				>
 					<span class="text-4xl">📷</span>
-					<span class="text-sm font-medium text-[hsl(var(--foreground))]">
+					<span class="text-sm font-medium text-[hsl(var(--color-foreground))]">
 						Foto aufnehmen oder hochladen
 					</span>
-					<span class="text-xs text-[hsl(var(--muted-foreground))]">
+					<span class="text-xs text-[hsl(var(--color-muted-foreground))]">
 						Die KI erkennt das Gericht und schätzt die Nährwerte
 					</span>
 				</button>
 			{:else}
 				<div class="space-y-3">
-					<div class="relative overflow-hidden rounded-lg bg-[hsl(var(--muted))]">
+					<div class="relative overflow-hidden rounded-lg bg-[hsl(var(--color-muted))]">
 						<img src={photoPreviewUrl} alt="Mahlzeit" class="max-h-80 w-full object-contain" />
 					</div>
 					<div class="flex gap-2">
 						<button
 							type="button"
 							onclick={() => fileInput?.click()}
-							class="flex-1 rounded-lg border border-[hsl(var(--border))] px-3 py-2 text-sm text-[hsl(var(--foreground))] hover:bg-[hsl(var(--muted))]"
+							class="flex-1 rounded-lg border border-[hsl(var(--color-border))] px-3 py-2 text-sm text-[hsl(var(--color-foreground))] hover:bg-[hsl(var(--color-muted))]"
 						>
 							Anderes Foto
 						</button>
@@ -327,7 +329,7 @@
 								type="button"
 								onclick={handleAnalyzePhoto}
 								disabled={analyzing}
-								class="flex-[2] rounded-lg bg-[hsl(var(--primary))] px-3 py-2 text-sm font-medium text-[hsl(var(--primary-foreground))] hover:opacity-90 disabled:opacity-50"
+								class="flex-[2] rounded-lg bg-[hsl(var(--color-primary))] px-3 py-2 text-sm font-medium text-[hsl(var(--color-primary-foreground))] hover:opacity-90 disabled:opacity-50"
 							>
 								{analyzing ? 'Analysiere…' : '✨ Mit KI analysieren'}
 							</button>
@@ -336,7 +338,7 @@
 								type="button"
 								onclick={handleAnalyzePhoto}
 								disabled={analyzing}
-								class="flex-[2] rounded-lg border border-[hsl(var(--border))] px-3 py-2 text-sm text-[hsl(var(--foreground))] hover:bg-[hsl(var(--muted))] disabled:opacity-50"
+								class="flex-[2] rounded-lg border border-[hsl(var(--color-border))] px-3 py-2 text-sm text-[hsl(var(--color-foreground))] hover:bg-[hsl(var(--color-muted))] disabled:opacity-50"
 							>
 								{analyzing ? 'Analysiere…' : '🔄 Erneut analysieren'}
 							</button>
@@ -361,22 +363,24 @@
 
 					{#if analyzed && aiFoods && aiFoods.length > 0}
 						<div
-							class="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--muted)/0.3)] p-3"
+							class="rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-muted)/0.3)] p-3"
 						>
-							<p class="mb-2 text-xs font-medium text-[hsl(var(--muted-foreground))]">
+							<p class="mb-2 text-xs font-medium text-[hsl(var(--color-muted-foreground))]">
 								Erkannte Bestandteile
 							</p>
 							<ul class="space-y-1">
 								{#each aiFoods as food}
 									<li class="flex items-baseline justify-between gap-2 text-xs">
-										<span class="text-[hsl(var(--foreground))]">
+										<span class="text-[hsl(var(--color-foreground))]">
 											{food.name}
 											{#if food.quantity}
-												<span class="text-[hsl(var(--muted-foreground))]"> · {food.quantity}</span>
+												<span class="text-[hsl(var(--color-muted-foreground))]">
+													· {food.quantity}</span
+												>
 											{/if}
 										</span>
 										{#if food.calories != null}
-											<span class="whitespace-nowrap text-[hsl(var(--muted-foreground))]">
+											<span class="whitespace-nowrap text-[hsl(var(--color-muted-foreground))]">
 												{food.calories} kcal
 											</span>
 										{/if}
@@ -393,12 +397,12 @@
 	<!-- Favorites (only in text mode) -->
 	{#if mode === 'text' && favorites.length > 0}
 		<div>
-			<h3 class="mb-2 text-sm font-medium text-[hsl(var(--foreground))]">Favoriten</h3>
+			<h3 class="mb-2 text-sm font-medium text-[hsl(var(--color-foreground))]">Favoriten</h3>
 			<div class="flex flex-wrap gap-2">
 				{#each favorites as fav (fav.id)}
 					<button
 						onclick={() => applyFavorite(fav)}
-						class="rounded-full border border-[hsl(var(--border))] px-3 py-1.5 text-sm text-[hsl(var(--foreground))] transition-colors hover:bg-[hsl(var(--muted))]"
+						class="rounded-full border border-[hsl(var(--color-border))] px-3 py-1.5 text-sm text-[hsl(var(--color-foreground))] transition-colors hover:bg-[hsl(var(--color-muted))]"
 					>
 						{fav.name}
 					</button>
@@ -407,10 +411,12 @@
 		</div>
 	{/if}
 
-	<div class="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-6 space-y-5">
+	<div
+		class="rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-6 space-y-5"
+	>
 		<!-- Meal Type -->
 		<div>
-			<span class="mb-2 block text-sm font-medium text-[hsl(var(--foreground))]">
+			<span class="mb-2 block text-sm font-medium text-[hsl(var(--color-foreground))]">
 				Mahlzeittyp
 			</span>
 			<div class="grid grid-cols-4 gap-2">
@@ -420,8 +426,8 @@
 						onclick={() => (mealType = type)}
 						class="rounded-lg border-2 px-3 py-2 text-sm transition-all
 							{mealType === type
-							? 'border-[hsl(var(--primary))] bg-[hsl(var(--primary)/0.05)] font-medium'
-							: 'border-[hsl(var(--border))] hover:border-[hsl(var(--primary)/0.3)]'}"
+							? 'border-[hsl(var(--color-primary))] bg-[hsl(var(--color-primary)/0.05)] font-medium'
+							: 'border-[hsl(var(--color-border))] hover:border-[hsl(var(--color-primary)/0.3)]'}"
 					>
 						{MEAL_TYPE_LABELS[type].de}
 					</button>
@@ -432,10 +438,13 @@
 		<!-- Description -->
 		<div>
 			<div class="mb-2 flex items-center justify-between">
-				<label for="meal-desc" class="block text-sm font-medium text-[hsl(var(--foreground))]">
+				<label
+					for="meal-desc"
+					class="block text-sm font-medium text-[hsl(var(--color-foreground))]"
+				>
 					Beschreibung
 					{#if mode === 'photo' && analyzed}
-						<span class="text-xs font-normal text-[hsl(var(--muted-foreground))]"
+						<span class="text-xs font-normal text-[hsl(var(--color-muted-foreground))]"
 							>(KI-Vorschlag, editierbar)</span
 						>
 					{/if}
@@ -445,7 +454,7 @@
 						type="button"
 						onclick={handleSuggestFromText}
 						disabled={textAnalyzing || !description.trim()}
-						class="rounded-md border border-[hsl(var(--border))] px-2.5 py-1 text-xs font-medium text-[hsl(var(--foreground))] transition-colors hover:bg-[hsl(var(--muted))] disabled:opacity-50"
+						class="rounded-md border border-[hsl(var(--color-border))] px-2.5 py-1 text-xs font-medium text-[hsl(var(--color-foreground))] transition-colors hover:bg-[hsl(var(--color-muted))] disabled:opacity-50"
 					>
 						{textAnalyzing ? 'Analysiere…' : '✨ KI-Vorschlag'}
 					</button>
@@ -456,7 +465,7 @@
 				bind:value={description}
 				placeholder="Was hast du gegessen?"
 				rows="3"
-				class="w-full rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] px-4 py-3 text-sm text-[hsl(var(--foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))]"
+				class="w-full rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] px-4 py-3 text-sm text-[hsl(var(--color-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--color-primary))]"
 			></textarea>
 			{#if mode === 'text' && textAnalyzed && textConfidencePct !== null}
 				<div
@@ -477,23 +486,23 @@
 
 		<!-- Nutrition -->
 		<div>
-			<h3 class="mb-3 text-sm font-medium text-[hsl(var(--foreground))]">
+			<h3 class="mb-3 text-sm font-medium text-[hsl(var(--color-foreground))]">
 				Naehrwerte
 				{#if mode === 'photo' && analyzed}
-					<span class="text-xs font-normal text-[hsl(var(--muted-foreground))]"
+					<span class="text-xs font-normal text-[hsl(var(--color-muted-foreground))]"
 						>(KI-Schätzung, editierbar)</span
 					>
 				{:else if mode === 'text' && textAnalyzed}
-					<span class="text-xs font-normal text-[hsl(var(--muted-foreground))]"
+					<span class="text-xs font-normal text-[hsl(var(--color-muted-foreground))]"
 						>(KI-Schätzung, editierbar)</span
 					>
 				{:else}
-					<span class="text-[hsl(var(--muted-foreground))]">(optional)</span>
+					<span class="text-[hsl(var(--color-muted-foreground))]">(optional)</span>
 				{/if}
 			</h3>
 			<div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
 				<div>
-					<label for="n-cal" class="mb-1 block text-xs text-[hsl(var(--muted-foreground))]">
+					<label for="n-cal" class="mb-1 block text-xs text-[hsl(var(--color-muted-foreground))]">
 						Kalorien (kcal)
 					</label>
 					<input
@@ -502,11 +511,11 @@
 						bind:value={calories}
 						min="0"
 						placeholder="0"
-						class="w-full rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] px-3 py-2 text-sm text-[hsl(var(--foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))]"
+						class="w-full rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] px-3 py-2 text-sm text-[hsl(var(--color-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--color-primary))]"
 					/>
 				</div>
 				<div>
-					<label for="n-prot" class="mb-1 block text-xs text-[hsl(var(--muted-foreground))]">
+					<label for="n-prot" class="mb-1 block text-xs text-[hsl(var(--color-muted-foreground))]">
 						Protein (g)
 					</label>
 					<input
@@ -515,11 +524,11 @@
 						bind:value={protein}
 						min="0"
 						placeholder="0"
-						class="w-full rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] px-3 py-2 text-sm text-[hsl(var(--foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))]"
+						class="w-full rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] px-3 py-2 text-sm text-[hsl(var(--color-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--color-primary))]"
 					/>
 				</div>
 				<div>
-					<label for="n-carbs" class="mb-1 block text-xs text-[hsl(var(--muted-foreground))]">
+					<label for="n-carbs" class="mb-1 block text-xs text-[hsl(var(--color-muted-foreground))]">
 						Kohlenhydrate (g)
 					</label>
 					<input
@@ -528,11 +537,11 @@
 						bind:value={carbohydrates}
 						min="0"
 						placeholder="0"
-						class="w-full rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] px-3 py-2 text-sm text-[hsl(var(--foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))]"
+						class="w-full rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] px-3 py-2 text-sm text-[hsl(var(--color-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--color-primary))]"
 					/>
 				</div>
 				<div>
-					<label for="n-fat" class="mb-1 block text-xs text-[hsl(var(--muted-foreground))]">
+					<label for="n-fat" class="mb-1 block text-xs text-[hsl(var(--color-muted-foreground))]">
 						Fett (g)
 					</label>
 					<input
@@ -541,11 +550,11 @@
 						bind:value={fat}
 						min="0"
 						placeholder="0"
-						class="w-full rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] px-3 py-2 text-sm text-[hsl(var(--foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))]"
+						class="w-full rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] px-3 py-2 text-sm text-[hsl(var(--color-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--color-primary))]"
 					/>
 				</div>
 				<div>
-					<label for="n-fiber" class="mb-1 block text-xs text-[hsl(var(--muted-foreground))]">
+					<label for="n-fiber" class="mb-1 block text-xs text-[hsl(var(--color-muted-foreground))]">
 						Ballaststoffe (g)
 					</label>
 					<input
@@ -554,11 +563,11 @@
 						bind:value={fiber}
 						min="0"
 						placeholder="0"
-						class="w-full rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] px-3 py-2 text-sm text-[hsl(var(--foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))]"
+						class="w-full rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] px-3 py-2 text-sm text-[hsl(var(--color-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--color-primary))]"
 					/>
 				</div>
 				<div>
-					<label for="n-sugar" class="mb-1 block text-xs text-[hsl(var(--muted-foreground))]">
+					<label for="n-sugar" class="mb-1 block text-xs text-[hsl(var(--color-muted-foreground))]">
 						Zucker (g)
 					</label>
 					<input
@@ -567,7 +576,7 @@
 						bind:value={sugar}
 						min="0"
 						placeholder="0"
-						class="w-full rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] px-3 py-2 text-sm text-[hsl(var(--foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))]"
+						class="w-full rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] px-3 py-2 text-sm text-[hsl(var(--color-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--color-primary))]"
 					/>
 				</div>
 			</div>
@@ -577,7 +586,7 @@
 		<div class="flex gap-3 pt-2">
 			<a
 				href="/food"
-				class="flex-1 rounded-lg border border-[hsl(var(--border))] px-4 py-3 text-center text-sm font-medium text-[hsl(var(--foreground))] hover:bg-[hsl(var(--muted))]"
+				class="flex-1 rounded-lg border border-[hsl(var(--color-border))] px-4 py-3 text-center text-sm font-medium text-[hsl(var(--color-foreground))] hover:bg-[hsl(var(--color-muted))]"
 			>
 				Abbrechen
 			</a>
@@ -585,7 +594,7 @@
 				type="button"
 				onclick={handleSubmit}
 				disabled={saving || !description.trim() || (mode === 'photo' && !photoMediaId)}
-				class="flex-1 rounded-lg bg-[hsl(var(--primary))] px-4 py-3 text-sm font-medium text-[hsl(var(--primary-foreground))] hover:opacity-90 disabled:opacity-50"
+				class="flex-1 rounded-lg bg-[hsl(var(--color-primary))] px-4 py-3 text-sm font-medium text-[hsl(var(--color-primary-foreground))] hover:opacity-90 disabled:opacity-50"
 			>
 				{saving ? $_('common.saving') : $_('common.save')}
 			</button>

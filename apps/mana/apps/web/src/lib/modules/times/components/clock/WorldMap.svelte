@@ -40,7 +40,7 @@
 		<div class="map-placeholder">
 			<svg viewBox="0 0 800 400" class="map-svg">
 				<!-- Simple world outline -->
-				<rect x="0" y="0" width="800" height="400" fill="hsl(var(--muted))" opacity="0.3" />
+				<rect x="0" y="0" width="800" height="400" fill="hsl(var(--color-muted))" opacity="0.3" />
 
 				<!-- City markers -->
 				{#each cities as city}
@@ -60,7 +60,7 @@
 							cx={x}
 							cy={y}
 							r={isSelected ? 8 : 5}
-							fill={isSelected ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))'}
+							fill={isSelected ? 'hsl(var(--color-primary))' : 'hsl(var(--color-muted-foreground))'}
 							class="cursor-pointer hover:opacity-80 transition-all"
 						/>
 						{#if isSelected}
@@ -69,7 +69,7 @@
 								y={y - 12}
 								text-anchor="middle"
 								font-size="10"
-								fill="hsl(var(--foreground))"
+								fill="hsl(var(--color-foreground))"
 								class="pointer-events-none"
 							>
 								{city.city}
@@ -90,10 +90,10 @@
 	.world-map {
 		width: 100%;
 		height: 300px;
-		background: hsl(var(--card));
+		background: hsl(var(--color-card));
 		border-radius: 12px;
 		overflow: hidden;
-		border: 1px solid hsl(var(--border));
+		border: 1px solid hsl(var(--color-border));
 	}
 
 	.map-placeholder {

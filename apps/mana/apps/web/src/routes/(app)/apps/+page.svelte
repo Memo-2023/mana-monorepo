@@ -8,7 +8,7 @@
 
 <style>
 	.apps-page-wrapper {
-		background-color: hsl(var(--background));
+		background-color: hsl(var(--color-background));
 		min-height: 100%;
 	}
 </style>

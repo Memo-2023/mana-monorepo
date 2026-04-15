@@ -46,7 +46,7 @@
 	}
 
 	const inputClass =
-		'w-full rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] px-4 py-3 text-[hsl(var(--foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))]';
+		'w-full rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] px-4 py-3 text-[hsl(var(--color-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--color-primary))]';
 </script>
 
 <svelte:head>
@@ -54,17 +54,17 @@
 </svelte:head>
 
 {#if !collection}
-	<p class="text-[hsl(var(--muted-foreground))]">Sammlung nicht gefunden</p>
+	<p class="text-[hsl(var(--color-muted-foreground))]">Sammlung nicht gefunden</p>
 {:else}
 	<div class="mx-auto max-w-2xl space-y-6">
 		<div class="flex items-center gap-3">
 			<button
 				onclick={() => goto(`/inventory/collections/${collection.id}`)}
-				class="text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
+				class="text-[hsl(var(--color-muted-foreground))] hover:text-[hsl(var(--color-foreground))]"
 			>
 				<CaretLeft size={20} />
 			</button>
-			<h1 class="text-2xl font-bold text-[hsl(var(--foreground))]">Sammlung bearbeiten</h1>
+			<h1 class="text-2xl font-bold text-[hsl(var(--color-foreground))]">Sammlung bearbeiten</h1>
 		</div>
 
 		<div class="space-y-4">
@@ -73,7 +73,7 @@
 					type="text"
 					bind:value={icon}
 					placeholder="📁"
-					class="h-12 w-12 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] text-center text-2xl"
+					class="h-12 w-12 rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] text-center text-2xl"
 					maxlength="2"
 				/>
 				<input
@@ -92,21 +92,23 @@
 			></textarea>
 
 			<div>
-				<h3 class="mb-3 text-sm font-semibold text-[hsl(var(--foreground))]">Eigene Felder</h3>
+				<h3 class="mb-3 text-sm font-semibold text-[hsl(var(--color-foreground))]">
+					Eigene Felder
+				</h3>
 				<SchemaEditor fields={schema.fields} onchange={(fields) => (schema = { fields })} />
 			</div>
 
 			<div class="flex justify-end gap-3 pt-4">
 				<button
 					onclick={() => goto(`/inventory/collections/${collection.id}`)}
-					class="rounded-lg border border-[hsl(var(--border))] px-4 py-2 text-sm text-[hsl(var(--foreground))]"
+					class="rounded-lg border border-[hsl(var(--color-border))] px-4 py-2 text-sm text-[hsl(var(--color-foreground))]"
 				>
 					Abbrechen
 				</button>
 				<button
 					onclick={handleSave}
 					disabled={!name.trim()}
-					class="rounded-lg bg-[hsl(var(--primary))] px-6 py-2 text-sm font-medium text-[hsl(var(--primary-foreground))] disabled:opacity-50"
+					class="rounded-lg bg-[hsl(var(--color-primary))] px-6 py-2 text-sm font-medium text-[hsl(var(--color-primary-foreground))] disabled:opacity-50"
 				>
 					Speichern
 				</button>

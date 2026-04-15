@@ -56,7 +56,7 @@
 	let sortedCategories = $derived([...categoriesCtx.value].sort((a, b) => a.order - b.order));
 
 	const inputClass =
-		'rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] px-3 py-2 text-sm text-[hsl(var(--foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))]';
+		'rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] px-3 py-2 text-sm text-[hsl(var(--color-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--color-primary))]';
 </script>
 
 <svelte:head>
@@ -65,10 +65,10 @@
 
 <div class="mx-auto max-w-2xl space-y-6">
 	<div class="flex items-center justify-between">
-		<h1 class="text-2xl font-bold text-[hsl(var(--foreground))]">Kategorien</h1>
+		<h1 class="text-2xl font-bold text-[hsl(var(--color-foreground))]">Kategorien</h1>
 		<button
 			onclick={startCreate}
-			class="flex items-center gap-2 rounded-lg bg-[hsl(var(--primary))] px-4 py-2 text-sm font-medium text-[hsl(var(--primary-foreground))]"
+			class="flex items-center gap-2 rounded-lg bg-[hsl(var(--color-primary))] px-4 py-2 text-sm font-medium text-[hsl(var(--color-primary-foreground))]"
 		>
 			<Plus size={16} />
 			Neue Kategorie
@@ -76,7 +76,9 @@
 	</div>
 
 	{#if showForm}
-		<div class="rounded-xl border border-[hsl(var(--primary)/0.3)] bg-[hsl(var(--card))] p-4">
+		<div
+			class="rounded-xl border border-[hsl(var(--color-primary)/0.3)] bg-[hsl(var(--color-card))] p-4"
+		>
 			<div class="flex gap-2">
 				<input
 					type="text"
@@ -95,17 +97,17 @@
 				<input
 					type="color"
 					bind:value={color}
-					class="h-9 w-9 cursor-pointer rounded-lg border border-[hsl(var(--border))]"
+					class="h-9 w-9 cursor-pointer rounded-lg border border-[hsl(var(--color-border))]"
 				/>
 				<button
 					onclick={save}
 					disabled={!name.trim()}
-					class="rounded-lg bg-[hsl(var(--primary))] px-4 text-sm text-[hsl(var(--primary-foreground))] disabled:opacity-50"
+					class="rounded-lg bg-[hsl(var(--color-primary))] px-4 text-sm text-[hsl(var(--color-primary-foreground))] disabled:opacity-50"
 					>{$_('common.save')}</button
 				>
 				<button
 					onclick={() => (showForm = false)}
-					class="rounded-lg border border-[hsl(var(--border))] px-3 text-sm"
+					class="rounded-lg border border-[hsl(var(--color-border))] px-3 text-sm"
 					>{$_('common.cancel')}</button
 				>
 			</div>
@@ -114,30 +116,31 @@
 
 	{#if sortedCategories.length === 0}
 		<div
-			class="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[hsl(var(--border))] py-16"
+			class="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[hsl(var(--color-border))] py-16"
 		>
 			<span class="mb-4 text-4xl">🏷️</span>
-			<p class="text-[hsl(var(--muted-foreground))]">Keine Kategorien vorhanden</p>
+			<p class="text-[hsl(var(--color-muted-foreground))]">Keine Kategorien vorhanden</p>
 		</div>
 	{:else}
 		<div class="grid gap-3 sm:grid-cols-2">
 			{#each sortedCategories as category (category.id)}
 				<div
-					class="group flex items-center gap-3 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] px-4 py-3"
+					class="group flex items-center gap-3 rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] px-4 py-3"
 				>
 					<span class="text-xl">{category.icon || '🏷️'}</span>
 					{#if category.color}
 						<span class="h-3 w-3 rounded-full" style="background-color: {category.color}"></span>
 					{/if}
-					<span class="flex-1 font-medium text-[hsl(var(--foreground))]">{category.name}</span>
+					<span class="flex-1 font-medium text-[hsl(var(--color-foreground))]">{category.name}</span
+					>
 					<button
 						onclick={() => startEdit(category)}
-						class="text-xs text-[hsl(var(--muted-foreground))] opacity-0 hover:text-[hsl(var(--foreground))] group-hover:opacity-100"
+						class="text-xs text-[hsl(var(--color-muted-foreground))] opacity-0 hover:text-[hsl(var(--color-foreground))] group-hover:opacity-100"
 						>&#9998;</button
 					>
 					<button
 						onclick={() => deleteCategory(category.id)}
-						class="text-xs text-[hsl(var(--muted-foreground))] opacity-0 hover:text-red-500 group-hover:opacity-100"
+						class="text-xs text-[hsl(var(--color-muted-foreground))] opacity-0 hover:text-red-500 group-hover:opacity-100"
 						>&times;</button
 					>
 				</div>

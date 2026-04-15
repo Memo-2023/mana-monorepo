@@ -257,18 +257,19 @@
 		display: flex;
 		flex-direction: column;
 		gap: 1.25rem;
+		color: hsl(var(--color-foreground));
 	}
 	.header h1 {
 		margin: 0 0 0.25rem;
 		font-size: 1.5rem;
 	}
 	.hint {
-		color: var(--text-muted, #888);
+		color: hsl(var(--color-muted-foreground));
 		margin: 0;
 	}
 	.block {
-		background: var(--surface, #fff);
-		border: 1px solid var(--border, #e5e5e5);
+		background: hsl(var(--color-background));
+		border: 1px solid hsl(var(--color-border));
 		border-radius: 0.75rem;
 		padding: 1rem;
 		display: flex;
@@ -286,13 +287,13 @@
 		font-size: 1.1rem;
 	}
 	.sub {
-		color: var(--text-muted, #888);
+		color: hsl(var(--color-muted-foreground));
 		font-size: 0.85rem;
 	}
 	.mode-switch {
 		display: inline-flex;
 		gap: 0.25rem;
-		background: var(--surface-alt, #f4f4f4);
+		background: hsl(var(--color-muted));
 		padding: 0.25rem;
 		border-radius: 0.5rem;
 		width: fit-content;
@@ -303,10 +304,11 @@
 		padding: 0.35rem 0.75rem;
 		border-radius: 0.35rem;
 		cursor: pointer;
-		color: var(--text, #333);
+		color: hsl(var(--color-muted-foreground));
 	}
 	.mode-switch button.active {
-		background: var(--surface, #fff);
+		background: hsl(var(--color-background));
+		color: hsl(var(--color-foreground));
 		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
 	}
 	.discover-form,
@@ -318,17 +320,17 @@
 	.search-form input {
 		flex: 1;
 		padding: 0.5rem 0.75rem;
-		border: 1px solid var(--border, #e5e5e5);
+		border: 1px solid hsl(var(--color-border));
 		border-radius: 0.5rem;
-		background: var(--surface, #fff);
-		color: var(--text, #333);
+		background: hsl(var(--color-background));
+		color: hsl(var(--color-foreground));
 	}
 	button[type='submit'] {
 		padding: 0.5rem 1rem;
 		border: none;
 		border-radius: 0.5rem;
-		background: var(--accent, #10b981);
-		color: white;
+		background: hsl(var(--color-primary));
+		color: hsl(var(--color-primary-foreground, 0 0% 100%));
 		cursor: pointer;
 	}
 	button[type='submit']:disabled {
@@ -336,9 +338,9 @@
 		cursor: not-allowed;
 	}
 	.secondary {
-		background: var(--surface-alt, #f4f4f4);
-		color: var(--text, #333);
-		border: 1px solid var(--border, #e5e5e5);
+		background: hsl(var(--color-muted));
+		color: hsl(var(--color-foreground));
+		border: 1px solid hsl(var(--color-border));
 		border-radius: 0.5rem;
 		padding: 0.35rem 0.75rem;
 		cursor: pointer;
@@ -357,6 +359,7 @@
 		align-items: center;
 		gap: 0.5rem;
 		cursor: pointer;
+		color: hsl(var(--color-foreground));
 	}
 	.feed-title {
 		font-weight: 500;
@@ -364,26 +367,26 @@
 	.feed-type,
 	.feed-src {
 		font-size: 0.75rem;
-		color: var(--text-muted, #888);
+		color: hsl(var(--color-muted-foreground));
 	}
 	.pin {
 		margin-left: auto;
 		background: transparent;
-		border: 1px solid var(--border, #e5e5e5);
+		border: 1px solid hsl(var(--color-border));
 		border-radius: 0.35rem;
 		padding: 0.15rem 0.55rem;
 		font-size: 0.75rem;
 		cursor: pointer;
-		color: var(--text, #333);
+		color: hsl(var(--color-foreground));
 	}
 	.pin.pinned {
-		background: var(--accent, #0891b2);
-		color: white;
+		background: hsl(var(--color-primary));
+		color: hsl(var(--color-primary-foreground, 0 0% 100%));
 		border-color: transparent;
 	}
 	.result {
 		padding: 0.75rem;
-		border: 1px solid var(--border, #eee);
+		border: 1px solid hsl(var(--color-border));
 		border-radius: 0.5rem;
 		display: flex;
 		flex-direction: column;
@@ -391,7 +394,7 @@
 	}
 	.r-title {
 		font-weight: 600;
-		color: var(--text, #333);
+		color: hsl(var(--color-foreground));
 		text-decoration: none;
 	}
 	.r-title:hover {
@@ -401,38 +404,38 @@
 		display: flex;
 		gap: 0.4rem;
 		font-size: 0.8rem;
-		color: var(--text-muted, #888);
+		color: hsl(var(--color-muted-foreground));
 		flex-wrap: wrap;
 	}
 	.r-excerpt {
 		margin: 0.25rem 0 0;
-		color: var(--text, #333);
+		color: hsl(var(--color-foreground));
 		font-size: 0.9rem;
 	}
 	.save {
 		align-self: flex-start;
 		background: transparent;
-		border: 1px solid var(--border, #e5e5e5);
+		border: 1px solid hsl(var(--color-border));
 		border-radius: 0.35rem;
 		padding: 0.25rem 0.65rem;
 		font-size: 0.8rem;
 		cursor: pointer;
-		color: var(--text, #333);
+		color: hsl(var(--color-foreground));
 	}
 	.save:disabled {
 		opacity: 0.5;
 		cursor: not-allowed;
 	}
 	.error {
-		background: #fee;
-		border: 1px solid #fcc;
-		color: #900;
+		background: hsl(var(--color-destructive) / 0.1);
+		border: 1px solid hsl(var(--color-destructive) / 0.4);
+		color: hsl(var(--color-destructive));
 		padding: 0.5rem 0.75rem;
 		border-radius: 0.5rem;
 		font-size: 0.9rem;
 	}
 	.empty-hint {
-		color: var(--text-muted, #888);
+		color: hsl(var(--color-muted-foreground));
 		font-size: 0.9rem;
 		padding: 0.5rem 0;
 	}

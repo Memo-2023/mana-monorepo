@@ -114,11 +114,11 @@
 <div class="flex h-full flex-col">
 	<!-- Header -->
 	<div
-		class="flex items-center gap-3 border-b border-[hsl(var(--border))] bg-[hsl(var(--card))] px-4 py-3"
+		class="flex items-center gap-3 border-b border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] px-4 py-3"
 	>
 		<a
 			href="/chat"
-			class="rounded-lg p-1.5 text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--muted))]"
+			class="rounded-lg p-1.5 text-[hsl(var(--color-muted-foreground))] hover:bg-[hsl(var(--color-muted))]"
 		>
 			<ArrowLeft size={20} />
 		</a>
@@ -130,23 +130,23 @@
 						type="text"
 						bind:value={editTitle}
 						onkeydown={(e) => e.key === 'Enter' && saveTitle()}
-						class="flex-1 rounded border border-[hsl(var(--border))] bg-transparent px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-[hsl(var(--primary))]"
+						class="flex-1 rounded border border-[hsl(var(--color-border))] bg-transparent px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-[hsl(var(--color-primary))]"
 					/>
-					<button onclick={saveTitle} class="text-[hsl(var(--primary))]">
+					<button onclick={saveTitle} class="text-[hsl(var(--color-primary))]">
 						<Check size={18} />
 					</button>
-					<button onclick={cancelEditTitle} class="text-[hsl(var(--muted-foreground))]">
+					<button onclick={cancelEditTitle} class="text-[hsl(var(--color-muted-foreground))]">
 						<X size={18} />
 					</button>
 				</div>
 			{:else}
 				<button onclick={startEditTitle} class="group flex items-center gap-1.5 text-left">
-					<h1 class="truncate text-sm font-semibold text-[hsl(var(--foreground))]">
+					<h1 class="truncate text-sm font-semibold text-[hsl(var(--color-foreground))]">
 						{conversation?.title || 'Neue Konversation'}
 					</h1>
 					<PencilSimple
 						size={14}
-						class="shrink-0 text-[hsl(var(--muted-foreground))] opacity-0 group-hover:opacity-100"
+						class="shrink-0 text-[hsl(var(--color-muted-foreground))] opacity-0 group-hover:opacity-100"
 					/>
 				</button>
 			{/if}
@@ -156,22 +156,22 @@
 			<button
 				onclick={togglePin}
 				class="rounded-lg p-1.5 transition-colors {conversation?.isPinned
-					? 'text-[hsl(var(--primary))]'
-					: 'text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]'}"
+					? 'text-[hsl(var(--color-primary))]'
+					: 'text-[hsl(var(--color-muted-foreground))] hover:text-[hsl(var(--color-foreground))]'}"
 				title={conversation?.isPinned ? 'Loslösen' : 'Anpinnen'}
 			>
 				<PushPin size={18} weight={conversation?.isPinned ? 'fill' : 'regular'} />
 			</button>
 			<button
 				onclick={() => (showShare = true)}
-				class="rounded-lg p-1.5 text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
+				class="rounded-lg p-1.5 text-[hsl(var(--color-muted-foreground))] hover:text-[hsl(var(--color-foreground))]"
 				title="Kurzlink teilen"
 			>
 				<ShareNetwork size={18} />
 			</button>
 			<button
 				onclick={handleDelete}
-				class="rounded-lg p-1.5 text-[hsl(var(--muted-foreground))] hover:text-red-500"
+				class="rounded-lg p-1.5 text-[hsl(var(--color-muted-foreground))] hover:text-red-500"
 				title="Loschen"
 			>
 				<Trash size={18} />
@@ -183,7 +183,7 @@
 	<div class="flex-1 overflow-y-auto px-4 py-6">
 		{#if messages.length === 0}
 			<div class="flex h-full items-center justify-center">
-				<p class="text-sm text-[hsl(var(--muted-foreground))]">
+				<p class="text-sm text-[hsl(var(--color-muted-foreground))]">
 					Schreibe eine Nachricht, um die Unterhaltung zu starten.
 				</p>
 			</div>
@@ -193,8 +193,8 @@
 					<div class="flex {msg.sender === 'user' ? 'justify-end' : 'justify-start'}">
 						<div
 							class="max-w-[80%] rounded-2xl px-4 py-2.5 text-sm {msg.sender === 'user'
-								? 'bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))]'
-								: 'bg-[hsl(var(--muted))] text-[hsl(var(--foreground))]'}"
+								? 'bg-[hsl(var(--color-primary))] text-[hsl(var(--color-primary-foreground))]'
+								: 'bg-[hsl(var(--color-muted))] text-[hsl(var(--color-foreground))]'}"
 						>
 							<p class="whitespace-pre-wrap">{msg.messageText}</p>
 							<p class="mt-1 text-[10px] opacity-60">
@@ -210,7 +210,7 @@
 				{#if isSending && streamingText}
 					<div class="flex justify-start">
 						<div
-							class="max-w-[80%] rounded-2xl px-4 py-2.5 text-sm bg-[hsl(var(--muted))] text-[hsl(var(--foreground))]"
+							class="max-w-[80%] rounded-2xl px-4 py-2.5 text-sm bg-[hsl(var(--color-muted))] text-[hsl(var(--color-foreground))]"
 						>
 							<p class="whitespace-pre-wrap">{streamingText}</p>
 							<p class="mt-1 text-[10px] opacity-60">...</p>
@@ -219,7 +219,7 @@
 				{:else if isSending}
 					<div class="flex justify-start">
 						<div
-							class="rounded-2xl px-4 py-2.5 text-sm bg-[hsl(var(--muted))] text-[hsl(var(--muted-foreground))]"
+							class="rounded-2xl px-4 py-2.5 text-sm bg-[hsl(var(--color-muted))] text-[hsl(var(--color-muted-foreground))]"
 						>
 							<span class="thinking-dots">●●●</span>
 						</div>
@@ -230,19 +230,19 @@
 	</div>
 
 	<!-- Input -->
-	<div class="border-t border-[hsl(var(--border))] bg-[hsl(var(--card))] p-4">
+	<div class="border-t border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4">
 		<div class="mx-auto flex max-w-3xl items-end gap-3">
 			<textarea
 				bind:value={inputText}
 				onkeydown={handleKeydown}
 				placeholder="Nachricht schreiben..."
 				rows="1"
-				class="flex-1 resize-none rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--background))] px-4 py-3 text-sm text-[hsl(var(--foreground))] placeholder:text-[hsl(var(--muted-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))]"
+				class="flex-1 resize-none rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-background))] px-4 py-3 text-sm text-[hsl(var(--color-foreground))] placeholder:text-[hsl(var(--color-muted-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--color-primary))]"
 			></textarea>
 			<button
 				onclick={handleSend}
 				disabled={!inputText.trim() || isSending}
-				class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] transition-colors hover:opacity-90 disabled:opacity-50"
+				class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--color-primary))] text-[hsl(var(--color-primary-foreground))] transition-colors hover:opacity-90 disabled:opacity-50"
 			>
 				<PaperPlaneRight size={20} />
 			</button>

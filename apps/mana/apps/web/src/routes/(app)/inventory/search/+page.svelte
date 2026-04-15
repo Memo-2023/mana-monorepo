@@ -20,37 +20,37 @@
 </svelte:head>
 
 <div class="mx-auto max-w-2xl space-y-6">
-	<h1 class="text-2xl font-bold text-[hsl(var(--foreground))]">Suche</h1>
+	<h1 class="text-2xl font-bold text-[hsl(var(--color-foreground))]">Suche</h1>
 
 	<div class="relative">
 		<MagnifyingGlass
 			size={20}
-			class="absolute left-3 top-1/2 -translate-y-1/2 text-[hsl(var(--muted-foreground))]"
+			class="absolute left-3 top-1/2 -translate-y-1/2 text-[hsl(var(--color-muted-foreground))]"
 		/>
 		<!-- svelte-ignore a11y_autofocus -->
 		<input
 			type="text"
 			bind:value={query}
 			placeholder="In allen Items suchen..."
-			class="w-full rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--input))] py-3 pl-11 pr-4 text-lg text-[hsl(var(--foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))]"
+			class="w-full rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] py-3 pl-11 pr-4 text-lg text-[hsl(var(--color-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--color-primary))]"
 			autofocus
 		/>
 	</div>
 
 	{#if query.length >= 2}
-		<p class="text-sm text-[hsl(var(--muted-foreground))]">{results.length} Ergebnisse</p>
+		<p class="text-sm text-[hsl(var(--color-muted-foreground))]">{results.length} Ergebnisse</p>
 		<div class="space-y-2">
 			{#each results as item (item.id)}
 				<button
 					onclick={() => goto(`/inventory/items/${item.id}`)}
-					class="flex w-full items-center gap-4 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))] px-4 py-3 text-left transition-colors hover:border-[hsl(var(--primary)/0.3)]"
+					class="flex w-full items-center gap-4 rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] px-4 py-3 text-left transition-colors hover:border-[hsl(var(--color-primary)/0.3)]"
 				>
 					<div class="flex-1">
 						<div class="flex items-center gap-2">
-							<h3 class="font-medium text-[hsl(var(--foreground))]">{item.name}</h3>
+							<h3 class="font-medium text-[hsl(var(--color-foreground))]">{item.name}</h3>
 							<StatusBadge status={item.status} />
 						</div>
-						<p class="text-xs text-[hsl(var(--muted-foreground))]">
+						<p class="text-xs text-[hsl(var(--color-muted-foreground))]">
 							{getCollectionById(collectionsCtx.value, item.collectionId)?.name || ''}
 						</p>
 					</div>
@@ -58,6 +58,8 @@
 			{/each}
 		</div>
 	{:else if query.length > 0}
-		<p class="text-sm text-[hsl(var(--muted-foreground))]">Mindestens 2 Zeichen eingeben...</p>
+		<p class="text-sm text-[hsl(var(--color-muted-foreground))]">
+			Mindestens 2 Zeichen eingeben...
+		</p>
 	{/if}
 </div>

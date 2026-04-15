@@ -41,13 +41,13 @@
 	<div class="flex items-center gap-3">
 		<a
 			href="/memoro"
-			class="rounded-lg p-1.5 text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--muted))]"
+			class="rounded-lg p-1.5 text-[hsl(var(--color-muted-foreground))] hover:bg-[hsl(var(--color-muted))]"
 		>
 			<ArrowLeft size={20} />
 		</a>
 		<div>
-			<h1 class="text-2xl font-bold text-[hsl(var(--foreground))]">Archiv</h1>
-			<p class="text-sm text-[hsl(var(--muted-foreground))]">
+			<h1 class="text-2xl font-bold text-[hsl(var(--color-foreground))]">Archiv</h1>
+			<p class="text-sm text-[hsl(var(--color-muted-foreground))]">
 				{archivedCtx.value.length} archivierte Memos
 			</p>
 		</div>
@@ -55,8 +55,8 @@
 
 	{#if archivedCtx.value.length === 0}
 		<div class="flex flex-col items-center justify-center py-16">
-			<Microphone size={48} class="mb-4 text-[hsl(var(--muted-foreground))]" />
-			<p class="text-[hsl(var(--muted-foreground))]">Keine archivierten Memos</p>
+			<Microphone size={48} class="mb-4 text-[hsl(var(--color-muted-foreground))]" />
+			<p class="text-[hsl(var(--color-muted-foreground))]">Keine archivierten Memos</p>
 		</div>
 	{:else}
 		<div class="space-y-2">
@@ -66,19 +66,19 @@
 					tabindex="0"
 					onclick={() => handleClick(memo.id)}
 					onkeydown={(e) => e.key === 'Enter' && handleClick(memo.id)}
-					class="group rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-4 transition-all hover:border-[hsl(var(--primary)/0.3)]"
+					class="group rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4 transition-all hover:border-[hsl(var(--color-primary)/0.3)]"
 				>
 					<div class="flex items-start justify-between">
 						<div class="min-w-0 flex-1">
-							<h3 class="truncate font-medium text-[hsl(var(--foreground))]">
+							<h3 class="truncate font-medium text-[hsl(var(--color-foreground))]">
 								{memo.title || 'Unbenanntes Memo'}
 							</h3>
 							{#if memo.intro}
-								<p class="mt-1 text-sm text-[hsl(var(--muted-foreground))] line-clamp-1">
+								<p class="mt-1 text-sm text-[hsl(var(--color-muted-foreground))] line-clamp-1">
 									{memo.intro}
 								</p>
 							{/if}
-							<p class="mt-1 text-xs text-[hsl(var(--muted-foreground))]">
+							<p class="mt-1 text-xs text-[hsl(var(--color-muted-foreground))]">
 								{formatDate(memo.updatedAt)}
 							</p>
 						</div>
@@ -87,14 +87,14 @@
 						>
 							<button
 								onclick={(e) => handleUnarchive(e, memo.id)}
-								class="rounded p-1.5 text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--primary))]"
+								class="rounded p-1.5 text-[hsl(var(--color-muted-foreground))] hover:text-[hsl(var(--color-primary))]"
 								title="Wiederherstellen"
 							>
 								<ArrowCounterClockwise size={16} />
 							</button>
 							<button
 								onclick={(e) => handleDelete(e, memo.id)}
-								class="rounded p-1.5 text-[hsl(var(--muted-foreground))] hover:text-red-500"
+								class="rounded p-1.5 text-[hsl(var(--color-muted-foreground))] hover:text-red-500"
 								title="Endgultig loschen"
 							>
 								<Trash size={16} />

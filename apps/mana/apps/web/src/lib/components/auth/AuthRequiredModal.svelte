@@ -96,8 +96,8 @@
 	.modal {
 		max-width: 30rem;
 		width: 100%;
-		background: var(--surface, #fff);
-		border: 1px solid var(--border, #e5e7eb);
+		background: hsl(var(--color-surface));
+		border: 1px solid hsl(var(--color-border));
 		border-radius: 0.75rem;
 		padding: 1.5rem;
 		box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
@@ -111,19 +111,19 @@
 		margin: 0;
 		font-size: 1.25rem;
 		font-weight: 600;
-		color: var(--foreground, #111);
+		color: hsl(var(--color-foreground));
 	}
 
 	p {
 		margin: 0.75rem 0;
 		font-size: 0.95rem;
 		line-height: 1.5;
-		color: var(--foreground, #222);
+		color: hsl(var(--color-foreground));
 	}
 
 	.hint {
 		font-size: 0.85rem;
-		color: var(--muted-foreground, #666);
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.actions {
@@ -136,23 +136,23 @@
 	.btn {
 		padding: 0.55rem 1.25rem;
 		border-radius: 0.5rem;
-		border: 1px solid var(--border, #e5e7eb);
+		border: 1px solid hsl(var(--color-border));
 		font-size: 0.9rem;
 		font-weight: 500;
 		cursor: pointer;
-		background: var(--surface, #fff);
-		color: var(--foreground, #111);
+		background: hsl(var(--color-surface));
+		color: hsl(var(--color-foreground));
 		transition: background 0.15s ease;
 	}
 
 	.btn:hover {
-		background: var(--surface-hover, #f3f4f6);
+		background: hsl(var(--color-surface-hover));
 	}
 
 	.btn-primary {
-		background: var(--primary, #6366f1);
+		background: hsl(var(--color-primary));
 		color: hsl(var(--color-primary-foreground));
-		border-color: var(--primary, #6366f1);
+		border-color: hsl(var(--color-primary));
 	}
 
 	.btn-primary:hover {

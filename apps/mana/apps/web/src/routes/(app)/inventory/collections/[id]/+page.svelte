@@ -58,8 +58,8 @@
 
 {#if !collection}
 	<div class="text-center py-16">
-		<p class="text-[hsl(var(--muted-foreground))]">Sammlung nicht gefunden</p>
-		<a href="/inventory" class="mt-4 text-[hsl(var(--primary))]">Zuruck</a>
+		<p class="text-[hsl(var(--color-muted-foreground))]">Sammlung nicht gefunden</p>
+		<a href="/inventory" class="mt-4 text-[hsl(var(--color-primary))]">Zuruck</a>
 	</div>
 {:else}
 	<div class="space-y-6">
@@ -68,15 +68,17 @@
 			<div class="flex items-center gap-3">
 				<a
 					href="/inventory"
-					class="text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
+					class="text-[hsl(var(--color-muted-foreground))] hover:text-[hsl(var(--color-foreground))]"
 				>
 					<CaretLeft size={20} />
 				</a>
 				<span class="text-2xl">{collection.icon || '📁'}</span>
 				<div>
-					<h1 class="text-2xl font-bold text-[hsl(var(--foreground))]">{collection.name}</h1>
+					<h1 class="text-2xl font-bold text-[hsl(var(--color-foreground))]">{collection.name}</h1>
 					{#if collection.description}
-						<p class="text-sm text-[hsl(var(--muted-foreground))]">{collection.description}</p>
+						<p class="text-sm text-[hsl(var(--color-muted-foreground))]">
+							{collection.description}
+						</p>
 					{/if}
 				</div>
 			</div>
@@ -84,13 +86,13 @@
 				<ViewModeToggle current={viewStore.viewMode} onchange={(m) => viewStore.setViewMode(m)} />
 				<a
 					href="/inventory/collections/{collection.id}/edit"
-					class="rounded-lg border border-[hsl(var(--border))] p-2 text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
+					class="rounded-lg border border-[hsl(var(--color-border))] p-2 text-[hsl(var(--color-muted-foreground))] hover:text-[hsl(var(--color-foreground))]"
 				>
 					<PencilSimple size={16} />
 				</a>
 				<button
 					onclick={() => (showNewItem = !showNewItem)}
-					class="flex items-center gap-2 rounded-lg bg-[hsl(var(--primary))] px-4 py-2 text-sm font-medium text-[hsl(var(--primary-foreground))]"
+					class="flex items-center gap-2 rounded-lg bg-[hsl(var(--color-primary))] px-4 py-2 text-sm font-medium text-[hsl(var(--color-primary-foreground))]"
 				>
 					<Plus size={16} />
 					Neues Item
@@ -101,13 +103,13 @@
 		<!-- New Item Form -->
 		{#if showNewItem}
 			<div
-				class="rounded-xl border border-[hsl(var(--primary)/0.3)] bg-[hsl(var(--card))] p-4 space-y-3"
+				class="rounded-xl border border-[hsl(var(--color-primary)/0.3)] bg-[hsl(var(--color-card))] p-4 space-y-3"
 			>
 				<input
 					type="text"
 					bind:value={newItemName}
 					placeholder="Item-Name"
-					class="w-full rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] px-4 py-2.5 text-[hsl(var(--foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))]"
+					class="w-full rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] px-4 py-2.5 text-[hsl(var(--color-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--color-primary))]"
 					onkeydown={(e) => e.key === 'Enter' && createItem()}
 				/>
 
@@ -116,7 +118,9 @@
 					<div class="grid gap-3 sm:grid-cols-2">
 						{#each collection.schema.fields.sort((a, b) => a.order - b.order) as field}
 							<div>
-								<span class="mb-1 block text-xs font-medium text-[hsl(var(--muted-foreground))]">
+								<span
+									class="mb-1 block text-xs font-medium text-[hsl(var(--color-muted-foreground))]"
+								>
 									{field.name}{field.required ? ' *' : ''}
 								</span>
 								<FieldEditor
@@ -132,14 +136,14 @@
 				<div class="flex justify-end gap-2">
 					<button
 						onclick={() => (showNewItem = false)}
-						class="rounded-lg border border-[hsl(var(--border))] px-3 py-1.5 text-sm"
+						class="rounded-lg border border-[hsl(var(--color-border))] px-3 py-1.5 text-sm"
 					>
 						Abbrechen
 					</button>
 					<button
 						onclick={createItem}
 						disabled={!newItemName.trim()}
-						class="rounded-lg bg-[hsl(var(--primary))] px-4 py-1.5 text-sm font-medium text-[hsl(var(--primary-foreground))] disabled:opacity-50"
+						class="rounded-lg bg-[hsl(var(--color-primary))] px-4 py-1.5 text-sm font-medium text-[hsl(var(--color-primary-foreground))] disabled:opacity-50"
 					>
 						Erstellen
 					</button>
@@ -150,13 +154,13 @@
 		<!-- Items -->
 		{#if sortedItems.length === 0}
 			<div
-				class="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[hsl(var(--border))] py-16"
+				class="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[hsl(var(--color-border))] py-16"
 			>
 				<span class="mb-4 text-4xl">📭</span>
-				<p class="text-[hsl(var(--muted-foreground))]">Keine Items vorhanden</p>
+				<p class="text-[hsl(var(--color-muted-foreground))]">Keine Items vorhanden</p>
 				<button
 					onclick={() => (showNewItem = true)}
-					class="mt-4 rounded-lg bg-[hsl(var(--primary))] px-4 py-2 text-sm text-[hsl(var(--primary-foreground))]"
+					class="mt-4 rounded-lg bg-[hsl(var(--color-primary))] px-4 py-2 text-sm text-[hsl(var(--color-primary-foreground))]"
 				>
 					Neues Item
 				</button>
@@ -170,10 +174,10 @@
 						onkeydown={(e) => e.key === 'Enter' && goto(`/inventory/items/${item.id}`)}
 						role="button"
 						tabindex="0"
-						class="group cursor-pointer rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-4 text-left"
+						class="group cursor-pointer rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4 text-left"
 					>
 						<div class="flex items-start justify-between">
-							<h3 class="font-semibold text-[hsl(var(--foreground))]">{item.name}</h3>
+							<h3 class="font-semibold text-[hsl(var(--color-foreground))]">{item.name}</h3>
 							<StatusBadge status={item.status} />
 						</div>
 						{#if collection.schema.fields.length > 0}
@@ -181,7 +185,7 @@
 								{#each collection.schema.fields.slice(0, 3) as field}
 									{#if item.fieldValues[field.id] !== undefined}
 										<div class="flex items-baseline gap-2 text-xs">
-											<span class="text-[hsl(var(--muted-foreground))]">{field.name}:</span>
+											<span class="text-[hsl(var(--color-muted-foreground))]">{field.name}:</span>
 											<FieldRenderer {field} value={item.fieldValues[field.id]} />
 										</div>
 									{/if}
@@ -190,7 +194,7 @@
 						{/if}
 						<button
 							onclick={(e) => deleteItem(e, item.id)}
-							class="mt-2 text-xs text-[hsl(var(--muted-foreground))] opacity-0 hover:text-red-500 group-hover:opacity-100"
+							class="mt-2 text-xs text-[hsl(var(--color-muted-foreground))] opacity-0 hover:text-red-500 group-hover:opacity-100"
 						>
 							Loschen
 						</button>
@@ -199,18 +203,21 @@
 			</div>
 		{:else if viewStore.viewMode === 'table'}
 			<!-- Table View -->
-			<div class="overflow-x-auto rounded-xl border border-[hsl(var(--border))]">
+			<div class="overflow-x-auto rounded-xl border border-[hsl(var(--color-border))]">
 				<table class="w-full text-sm">
 					<thead>
-						<tr class="border-b border-[hsl(var(--border))] bg-[hsl(var(--muted))]">
-							<th class="px-4 py-2.5 text-left font-medium text-[hsl(var(--muted-foreground))]"
+						<tr class="border-b border-[hsl(var(--color-border))] bg-[hsl(var(--color-muted))]">
+							<th
+								class="px-4 py-2.5 text-left font-medium text-[hsl(var(--color-muted-foreground))]"
 								>Name</th
 							>
-							<th class="px-4 py-2.5 text-left font-medium text-[hsl(var(--muted-foreground))]"
+							<th
+								class="px-4 py-2.5 text-left font-medium text-[hsl(var(--color-muted-foreground))]"
 								>Status</th
 							>
 							{#each collection.schema.fields as field}
-								<th class="px-4 py-2.5 text-left font-medium text-[hsl(var(--muted-foreground))]"
+								<th
+									class="px-4 py-2.5 text-left font-medium text-[hsl(var(--color-muted-foreground))]"
 									>{field.name}</th
 								>
 							{/each}
@@ -220,10 +227,12 @@
 					<tbody>
 						{#each sortedItems as item (item.id)}
 							<tr
-								class="cursor-pointer border-b border-[hsl(var(--border))] transition-colors hover:bg-[hsl(var(--accent)/0.05)]"
+								class="cursor-pointer border-b border-[hsl(var(--color-border))] transition-colors hover:bg-[hsl(var(--color-accent)/0.05)]"
 								onclick={() => goto(`/inventory/items/${item.id}`)}
 							>
-								<td class="px-4 py-2.5 font-medium text-[hsl(var(--foreground))]">{item.name}</td>
+								<td class="px-4 py-2.5 font-medium text-[hsl(var(--color-foreground))]"
+									>{item.name}</td
+								>
 								<td class="px-4 py-2.5"><StatusBadge status={item.status} /></td>
 								{#each collection.schema.fields as field}
 									<td class="px-4 py-2.5"
@@ -233,7 +242,7 @@
 								<td class="px-4 py-2.5">
 									<button
 										onclick={(e) => deleteItem(e, item.id)}
-										class="text-[hsl(var(--muted-foreground))] hover:text-red-500"
+										class="text-[hsl(var(--color-muted-foreground))] hover:text-red-500"
 									>
 										<Trash size={16} />
 									</button>
@@ -252,15 +261,19 @@
 						onkeydown={(e) => e.key === 'Enter' && goto(`/inventory/items/${item.id}`)}
 						role="button"
 						tabindex="0"
-						class="group flex w-full cursor-pointer items-center gap-4 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))] px-4 py-3 text-left transition-colors hover:border-[hsl(var(--primary)/0.3)]"
+						class="group flex w-full cursor-pointer items-center gap-4 rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] px-4 py-3 text-left transition-colors hover:border-[hsl(var(--color-primary)/0.3)]"
 					>
 						<div class="flex-1 min-w-0">
 							<div class="flex items-center gap-2">
-								<h3 class="font-medium text-[hsl(var(--foreground))] truncate">{item.name}</h3>
+								<h3 class="font-medium text-[hsl(var(--color-foreground))] truncate">
+									{item.name}
+								</h3>
 								<StatusBadge status={item.status} />
 							</div>
 							{#if collection.schema.fields.length > 0}
-								<div class="mt-1 flex flex-wrap gap-3 text-xs text-[hsl(var(--muted-foreground))]">
+								<div
+									class="mt-1 flex flex-wrap gap-3 text-xs text-[hsl(var(--color-muted-foreground))]"
+								>
 									{#each collection.schema.fields.slice(0, 4) as field}
 										{#if item.fieldValues[field.id] !== undefined}
 											<span
@@ -275,12 +288,13 @@
 							{/if}
 						</div>
 						{#if item.quantity > 1}
-							<span class="text-sm text-[hsl(var(--muted-foreground))]">&times;{item.quantity}</span
+							<span class="text-sm text-[hsl(var(--color-muted-foreground))]"
+								>&times;{item.quantity}</span
 							>
 						{/if}
 						<button
 							onclick={(e) => deleteItem(e, item.id)}
-							class="text-[hsl(var(--muted-foreground))] opacity-0 hover:text-red-500 group-hover:opacity-100"
+							class="text-[hsl(var(--color-muted-foreground))] opacity-0 hover:text-red-500 group-hover:opacity-100"
 						>
 							<Trash size={16} />
 						</button>

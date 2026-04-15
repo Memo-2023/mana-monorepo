@@ -124,8 +124,8 @@
 	.modal {
 		max-width: 32rem;
 		width: 100%;
-		background: var(--surface, #fff);
-		border: 1px solid var(--border, #e5e7eb);
+		background: hsl(var(--color-surface));
+		border: 1px solid hsl(var(--color-border));
 		border-radius: 0.75rem;
 		padding: 1.5rem;
 		box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
@@ -152,7 +152,7 @@
 		width: 100%;
 		margin: 1rem 0 0.5rem;
 		padding: 0.75rem 1rem;
-		border: 1px solid var(--border, #e5e7eb);
+		border: 1px solid hsl(var(--color-border));
 		border-radius: 0.5rem;
 		font-family: ui-monospace, SFMono-Regular, monospace;
 		font-size: 1rem;
@@ -162,7 +162,7 @@
 	}
 
 	.recovery-input:focus {
-		outline: 2px solid var(--primary, #6366f1);
+		outline: 2px solid hsl(var(--color-primary));
 		outline-offset: 1px;
 	}
 
@@ -189,8 +189,8 @@
 	.btn {
 		padding: 0.5rem 1.25rem;
 		border-radius: 0.5rem;
-		border: 1px solid var(--border, #e5e7eb);
-		background: var(--surface, #fff);
+		border: 1px solid hsl(var(--color-border));
+		background: hsl(var(--color-surface));
 		font-size: 0.9rem;
 		cursor: pointer;
 		font-weight: 500;
@@ -202,7 +202,7 @@
 	}
 
 	.btn-primary {
-		background: var(--primary, #6366f1);
+		background: hsl(var(--color-primary));
 		color: white;
 		border-color: transparent;
 	}
@@ -214,23 +214,23 @@
 	.help {
 		margin-top: 1.25rem;
 		padding-top: 1rem;
-		border-top: 1px solid var(--border, #e5e7eb);
+		border-top: 1px solid hsl(var(--color-border));
 		font-size: 0.8rem;
 		color: var(--text-secondary, #6b7280);
 	}
 
 	@media (prefers-color-scheme: dark) {
 		.modal {
-			background: var(--surface, #1f2937);
-			border-color: var(--border, #374151);
+			background: hsl(var(--color-surface));
+			border-color: hsl(var(--color-border));
 		}
 		.recovery-input {
 			background: var(--surface-muted, #111827);
-			border-color: var(--border, #374151);
+			border-color: hsl(var(--color-border));
 			color: #f3f4f6;
 		}
 		.help {
-			border-color: var(--border, #374151);
+			border-color: hsl(var(--color-border));
 		}
 	}
 </style>

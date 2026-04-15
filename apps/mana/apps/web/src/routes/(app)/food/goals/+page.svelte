@@ -80,13 +80,13 @@
 	<div>
 		<a
 			href="/food"
-			class="mb-4 inline-flex items-center gap-2 text-sm text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
+			class="mb-4 inline-flex items-center gap-2 text-sm text-[hsl(var(--color-muted-foreground))] hover:text-[hsl(var(--color-foreground))]"
 		>
 			<ArrowLeft class="h-4 w-4" />
 			Zurueck
 		</a>
-		<h1 class="text-2xl font-bold text-[hsl(var(--foreground))]">Tagesziele</h1>
-		<p class="mt-1 text-sm text-[hsl(var(--muted-foreground))]">
+		<h1 class="text-2xl font-bold text-[hsl(var(--color-foreground))]">Tagesziele</h1>
+		<p class="mt-1 text-sm text-[hsl(var(--color-muted-foreground))]">
 			Passe deine taeglichen Naehrwertziele an
 		</p>
 	</div>
@@ -99,12 +99,14 @@
 		</div>
 	{/if}
 
-	<div class="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-6 space-y-5">
+	<div
+		class="rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-6 space-y-5"
+	>
 		<!-- Calories -->
 		<div>
 			<label
 				for="g-cal"
-				class="mb-1 flex items-center gap-2 text-sm font-medium text-[hsl(var(--foreground))]"
+				class="mb-1 flex items-center gap-2 text-sm font-medium text-[hsl(var(--color-foreground))]"
 			>
 				<div
 					class="h-3 w-3 rounded-full"
@@ -118,7 +120,7 @@
 				bind:value={dailyCalories}
 				min="0"
 				step="50"
-				class="w-full rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] px-4 py-2 text-sm text-[hsl(var(--foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))]"
+				class="w-full rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] px-4 py-2 text-sm text-[hsl(var(--color-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--color-primary))]"
 			/>
 		</div>
 
@@ -126,7 +128,7 @@
 		<div>
 			<label
 				for="g-prot"
-				class="mb-1 flex items-center gap-2 text-sm font-medium text-[hsl(var(--foreground))]"
+				class="mb-1 flex items-center gap-2 text-sm font-medium text-[hsl(var(--color-foreground))]"
 			>
 				<div
 					class="h-3 w-3 rounded-full"
@@ -139,7 +141,7 @@
 				type="number"
 				bind:value={dailyProtein}
 				min="0"
-				class="w-full rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] px-4 py-2 text-sm text-[hsl(var(--foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))]"
+				class="w-full rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] px-4 py-2 text-sm text-[hsl(var(--color-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--color-primary))]"
 			/>
 		</div>
 
@@ -147,7 +149,7 @@
 		<div>
 			<label
 				for="g-carbs"
-				class="mb-1 flex items-center gap-2 text-sm font-medium text-[hsl(var(--foreground))]"
+				class="mb-1 flex items-center gap-2 text-sm font-medium text-[hsl(var(--color-foreground))]"
 			>
 				<div
 					class="h-3 w-3 rounded-full"
@@ -160,7 +162,7 @@
 				type="number"
 				bind:value={dailyCarbs}
 				min="0"
-				class="w-full rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] px-4 py-2 text-sm text-[hsl(var(--foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))]"
+				class="w-full rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] px-4 py-2 text-sm text-[hsl(var(--color-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--color-primary))]"
 			/>
 		</div>
 
@@ -168,7 +170,7 @@
 		<div>
 			<label
 				for="g-fat"
-				class="mb-1 flex items-center gap-2 text-sm font-medium text-[hsl(var(--foreground))]"
+				class="mb-1 flex items-center gap-2 text-sm font-medium text-[hsl(var(--color-foreground))]"
 			>
 				<div class="h-3 w-3 rounded-full" style="background-color: {NUTRIENT_INFO.fat.color}"></div>
 				Fett (g)
@@ -178,7 +180,7 @@
 				type="number"
 				bind:value={dailyFat}
 				min="0"
-				class="w-full rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] px-4 py-2 text-sm text-[hsl(var(--foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))]"
+				class="w-full rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] px-4 py-2 text-sm text-[hsl(var(--color-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--color-primary))]"
 			/>
 		</div>
 
@@ -186,7 +188,7 @@
 		<div>
 			<label
 				for="g-fiber"
-				class="mb-1 flex items-center gap-2 text-sm font-medium text-[hsl(var(--foreground))]"
+				class="mb-1 flex items-center gap-2 text-sm font-medium text-[hsl(var(--color-foreground))]"
 			>
 				<div
 					class="h-3 w-3 rounded-full"
@@ -199,7 +201,7 @@
 				type="number"
 				bind:value={dailyFiber}
 				min="0"
-				class="w-full rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] px-4 py-2 text-sm text-[hsl(var(--foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))]"
+				class="w-full rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] px-4 py-2 text-sm text-[hsl(var(--color-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--color-primary))]"
 			/>
 		</div>
 
@@ -207,14 +209,14 @@
 		<div class="flex gap-3 pt-2">
 			<button
 				onclick={resetToDefaults}
-				class="rounded-lg border border-[hsl(var(--border))] px-4 py-2.5 text-sm text-[hsl(var(--foreground))] hover:bg-[hsl(var(--muted))]"
+				class="rounded-lg border border-[hsl(var(--color-border))] px-4 py-2.5 text-sm text-[hsl(var(--color-foreground))] hover:bg-[hsl(var(--color-muted))]"
 			>
 				Standardwerte
 			</button>
 			<button
 				onclick={handleSave}
 				disabled={saving}
-				class="flex-1 rounded-lg bg-[hsl(var(--primary))] px-4 py-2.5 text-sm font-medium text-[hsl(var(--primary-foreground))] hover:opacity-90 disabled:opacity-50"
+				class="flex-1 rounded-lg bg-[hsl(var(--color-primary))] px-4 py-2.5 text-sm font-medium text-[hsl(var(--color-primary-foreground))] hover:opacity-90 disabled:opacity-50"
 			>
 				{saving ? 'Speichert...' : 'Ziele speichern'}
 			</button>
@@ -222,8 +224,10 @@
 	</div>
 
 	<!-- Info -->
-	<div class="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--muted)/0.3)] p-4">
-		<p class="text-sm text-[hsl(var(--muted-foreground))]">
+	<div
+		class="rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-muted)/0.3)] p-4"
+	>
+		<p class="text-sm text-[hsl(var(--color-muted-foreground))]">
 			Die Standardwerte basieren auf einer 2000 kcal Diaet. Passe sie an deine individuellen
 			Beduerfnisse an. Konsultiere bei Bedarf einen Ernaehrungsberater.
 		</p>

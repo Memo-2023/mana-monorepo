@@ -85,7 +85,7 @@
 	}
 </script>
 
-<div class="answer-citations whitespace-pre-wrap text-[hsl(var(--foreground))]">
+<div class="answer-citations whitespace-pre-wrap text-[hsl(var(--color-foreground))]">
 	{#each segments as segment, i (i)}
 		{#if segment.kind === 'text'}{segment.text}{:else}
 			{@const src = sourceForRank(segment.rank)}
@@ -109,18 +109,20 @@
 						onmouseleave={hidePopover}
 					>
 						{#if loading && !src}
-							<span class="text-xs text-[hsl(var(--muted-foreground))]">Lade Quelle…</span>
+							<span class="text-xs text-[hsl(var(--color-muted-foreground))]">Lade Quelle…</span>
 						{:else if loadError}
 							<span class="text-xs text-red-500">Fehler: {loadError}</span>
 						{:else if src}
-							<span class="block text-xs font-semibold text-[hsl(var(--foreground))]">
+							<span class="block text-xs font-semibold text-[hsl(var(--color-foreground))]">
 								{src.title ?? hostFromUrl(src.url)}
 							</span>
-							<span class="mt-1 block text-[10px] uppercase text-[hsl(var(--muted-foreground))]">
+							<span
+								class="mt-1 block text-[10px] uppercase text-[hsl(var(--color-muted-foreground))]"
+							>
 								{hostFromUrl(src.url)}
 							</span>
 							{#if src.snippet}
-								<span class="mt-2 block text-xs text-[hsl(var(--muted-foreground))]">
+								<span class="mt-2 block text-xs text-[hsl(var(--color-muted-foreground))]">
 									{src.snippet}
 								</span>
 							{/if}
@@ -128,12 +130,12 @@
 								href={src.url}
 								target="_blank"
 								rel="noopener noreferrer"
-								class="mt-2 inline-flex items-center gap-1 text-xs text-[hsl(var(--primary))] hover:underline"
+								class="mt-2 inline-flex items-center gap-1 text-xs text-[hsl(var(--color-primary))] hover:underline"
 							>
 								Öffnen <ArrowSquareOut class="h-3 w-3" />
 							</a>
 						{:else if loaded}
-							<span class="text-xs text-[hsl(var(--muted-foreground))]">
+							<span class="text-xs text-[hsl(var(--color-muted-foreground))]">
 								Quelle {segment.rank} nicht gefunden
 							</span>
 						{/if}
@@ -158,8 +160,8 @@
 		padding: 0 0.35em;
 		margin: 0 0.1em;
 		border-radius: 9999px;
-		background: hsl(var(--primary) / 0.15);
-		color: hsl(var(--primary));
+		background: hsl(var(--color-primary) / 0.15);
+		color: hsl(var(--color-primary));
 		font-size: 0.7em;
 		font-weight: 600;
 		line-height: 1.5;
@@ -171,7 +173,7 @@
 
 	.citation-pill:hover,
 	.citation-pill:focus-visible {
-		background: hsl(var(--primary) / 0.3);
+		background: hsl(var(--color-primary) / 0.3);
 		outline: none;
 	}
 
@@ -186,8 +188,8 @@
 		max-width: calc(100vw - 2rem);
 		padding: 0.75rem 0.85rem;
 		border-radius: 0.5rem;
-		border: 1px solid hsl(var(--border));
-		background: hsl(var(--card));
+		border: 1px solid hsl(var(--color-border));
+		background: hsl(var(--color-card));
 		box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
 		text-align: left;
 		white-space: normal;

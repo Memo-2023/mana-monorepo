@@ -132,8 +132,8 @@
 		align-items: flex-start;
 		gap: 0.875rem;
 		padding: 1rem 1.25rem;
-		background: var(--surface, #fff);
-		border: 1px solid var(--border, #e5e7eb);
+		background: hsl(var(--color-surface));
+		border: 1px solid hsl(var(--color-border));
 		border-left: 4px solid rgb(34, 197, 94);
 		border-radius: 0.75rem;
 		box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.18);
@@ -184,7 +184,7 @@
 	.learn-more {
 		margin-top: 0.25rem;
 		font-weight: 500;
-		color: var(--primary, #6366f1);
+		color: hsl(var(--color-primary));
 		text-decoration: none;
 		font-size: 0.9rem;
 	}
@@ -212,8 +212,8 @@
 
 	@media (prefers-color-scheme: dark) {
 		.banner {
-			background: var(--surface, #1f2937);
-			border-color: var(--border, #374151);
+			background: hsl(var(--color-surface));
+			border-color: hsl(var(--color-border));
 			border-left-color: rgb(34, 197, 94);
 		}
 		.banner-body strong {

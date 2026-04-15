@@ -94,13 +94,13 @@
 	<div>
 		<a
 			href="/food"
-			class="mb-4 inline-flex items-center gap-2 text-sm text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
+			class="mb-4 inline-flex items-center gap-2 text-sm text-[hsl(var(--color-muted-foreground))] hover:text-[hsl(var(--color-foreground))]"
 		>
 			<ArrowLeft class="h-4 w-4" />
 			Zurueck
 		</a>
-		<h1 class="text-2xl font-bold text-[hsl(var(--foreground))]">Mahlzeiten-Verlauf</h1>
-		<p class="mt-1 text-sm text-[hsl(var(--muted-foreground))]">
+		<h1 class="text-2xl font-bold text-[hsl(var(--color-foreground))]">Mahlzeiten-Verlauf</h1>
+		<p class="mt-1 text-sm text-[hsl(var(--color-muted-foreground))]">
 			{meals.length} Eintraege insgesamt
 		</p>
 	</div>
@@ -109,24 +109,24 @@
 	<div class="flex gap-3">
 		<div class="relative flex-1">
 			<MagnifyingGlass
-				class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[hsl(var(--muted-foreground))]"
+				class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[hsl(var(--color-muted-foreground))]"
 			/>
 			<input
 				type="text"
 				bind:value={searchQuery}
 				placeholder="Mahlzeiten durchsuchen..."
-				class="w-full rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] py-2 pl-10 pr-4 text-sm text-[hsl(var(--foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))]"
+				class="w-full rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] py-2 pl-10 pr-4 text-sm text-[hsl(var(--color-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--color-primary))]"
 			/>
 		</div>
 		<input
 			type="date"
 			bind:value={selectedDate}
-			class="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] px-3 py-2 text-sm text-[hsl(var(--foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))]"
+			class="rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] px-3 py-2 text-sm text-[hsl(var(--color-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--color-primary))]"
 		/>
 		{#if selectedDate}
 			<button
 				onclick={() => (selectedDate = '')}
-				class="rounded-lg border border-[hsl(var(--border))] px-3 py-2 text-sm text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--muted))]"
+				class="rounded-lg border border-[hsl(var(--color-border))] px-3 py-2 text-sm text-[hsl(var(--color-muted-foreground))] hover:bg-[hsl(var(--color-muted))]"
 			>
 				Reset
 			</button>
@@ -136,11 +136,13 @@
 	<!-- Grouped Meals -->
 	{#if groupedByDate.length === 0}
 		<div
-			class="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[hsl(var(--border))] py-16"
+			class="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[hsl(var(--color-border))] py-16"
 		>
 			<span class="mb-4 text-5xl">📋</span>
-			<h2 class="mb-2 text-lg font-semibold text-[hsl(var(--foreground))]">Keine Eintraege</h2>
-			<p class="text-sm text-[hsl(var(--muted-foreground))]">
+			<h2 class="mb-2 text-lg font-semibold text-[hsl(var(--color-foreground))]">
+				Keine Eintraege
+			</h2>
+			<p class="text-sm text-[hsl(var(--color-muted-foreground))]">
 				{searchQuery || selectedDate
 					? 'Keine Ergebnisse fuer diese Filter.'
 					: 'Noch keine Mahlzeiten erfasst.'}
@@ -151,10 +153,10 @@
 			{#each groupedByDate as group (group.date)}
 				<div>
 					<div class="mb-2 flex items-center justify-between">
-						<h3 class="font-semibold text-[hsl(var(--foreground))]">
+						<h3 class="font-semibold text-[hsl(var(--color-foreground))]">
 							{formatDateHeader(group.date)}
 						</h3>
-						<span class="text-sm text-[hsl(var(--muted-foreground))]">
+						<span class="text-sm text-[hsl(var(--color-muted-foreground))]">
 							{Math.round(group.totalCalories)} kcal
 						</span>
 					</div>
@@ -162,7 +164,7 @@
 					<div class="space-y-2">
 						{#each group.meals as meal (meal.id)}
 							<div
-								class="group flex items-center gap-4 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-3"
+								class="group flex items-center gap-4 rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-3"
 							>
 								<a href="/food/{meal.id}" class="flex min-w-0 flex-1 items-center gap-4">
 									{#if meal.photoThumbnailUrl || meal.photoUrl}
@@ -176,25 +178,25 @@
 									<div class="min-w-0 flex-1">
 										<div class="flex items-center gap-2">
 											<span
-												class="rounded bg-[hsl(var(--muted))] px-1.5 py-0.5 text-[10px] font-medium text-[hsl(var(--muted-foreground))]"
+												class="rounded bg-[hsl(var(--color-muted))] px-1.5 py-0.5 text-[10px] font-medium text-[hsl(var(--color-muted-foreground))]"
 											>
 												{getMealTypeLabel(meal.mealType)}
 											</span>
-											<span class="text-xs text-[hsl(var(--muted-foreground))]">
+											<span class="text-xs text-[hsl(var(--color-muted-foreground))]">
 												{formatTime(meal.createdAt)}
 											</span>
 											{#if meal.inputType === 'photo'}
-												<span class="text-xs text-[hsl(var(--muted-foreground))]">📷</span>
+												<span class="text-xs text-[hsl(var(--color-muted-foreground))]">📷</span>
 											{/if}
 										</div>
-										<p class="mt-1 text-sm text-[hsl(var(--foreground))] truncate">
+										<p class="mt-1 text-sm text-[hsl(var(--color-foreground))] truncate">
 											{meal.description}
 										</p>
 									</div>
 
 									{#if meal.nutrition}
 										<span
-											class="whitespace-nowrap text-sm font-medium text-[hsl(var(--foreground))]"
+											class="whitespace-nowrap text-sm font-medium text-[hsl(var(--color-foreground))]"
 										>
 											{meal.nutrition.calories} kcal
 										</span>
@@ -203,7 +205,7 @@
 
 								<button
 									onclick={() => deleteMeal(meal.id)}
-									class="rounded p-1 text-[hsl(var(--muted-foreground))] opacity-0 transition-opacity hover:text-red-500 group-hover:opacity-100"
+									class="rounded p-1 text-[hsl(var(--color-muted-foreground))] opacity-0 transition-opacity hover:text-red-500 group-hover:opacity-100"
 									title="Loeschen"
 								>
 									<Trash size={16} />

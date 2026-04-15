@@ -23,14 +23,14 @@
 	];
 </script>
 
-<div class="flex rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))]">
+<div class="flex rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))]">
 	{#each modes as mode}
 		<button
 			type="button"
 			onclick={() => onchange(mode.value)}
 			class="p-2 transition-colors {current === mode.value
-				? 'bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))]'
-				: 'text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]'} {mode.value ===
+				? 'bg-[hsl(var(--color-primary))] text-[hsl(var(--color-primary-foreground))]'
+				: 'text-[hsl(var(--color-muted-foreground))] hover:text-[hsl(var(--color-foreground))]'} {mode.value ===
 			'list'
 				? 'rounded-l-lg'
 				: mode.value === 'table'

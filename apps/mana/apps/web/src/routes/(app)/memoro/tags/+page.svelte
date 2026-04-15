@@ -73,20 +73,20 @@
 		<div class="flex items-center gap-3">
 			<a
 				href="/memoro"
-				class="rounded-lg p-1.5 text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--muted))]"
+				class="rounded-lg p-1.5 text-[hsl(var(--color-muted-foreground))] hover:bg-[hsl(var(--color-muted))]"
 			>
 				<ArrowLeft size={20} />
 			</a>
 			<div>
-				<h1 class="text-2xl font-bold text-[hsl(var(--foreground))]">Tags</h1>
-				<p class="text-sm text-[hsl(var(--muted-foreground))]">
+				<h1 class="text-2xl font-bold text-[hsl(var(--color-foreground))]">Tags</h1>
+				<p class="text-sm text-[hsl(var(--color-muted-foreground))]">
 					{tagsCtx.value.length} Tags
 				</p>
 			</div>
 		</div>
 		<button
 			onclick={openCreateForm}
-			class="flex items-center gap-2 rounded-lg bg-[hsl(var(--primary))] px-4 py-2 text-sm font-medium text-[hsl(var(--primary-foreground))] hover:opacity-90"
+			class="flex items-center gap-2 rounded-lg bg-[hsl(var(--color-primary))] px-4 py-2 text-sm font-medium text-[hsl(var(--color-primary-foreground))] hover:opacity-90"
 		>
 			<Plus size={16} />
 			Neuer Tag
@@ -95,16 +95,16 @@
 
 	{#if tagsCtx.value.length === 0}
 		<div
-			class="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[hsl(var(--border))] py-16"
+			class="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[hsl(var(--color-border))] py-16"
 		>
-			<TagIcon size={48} class="mb-4 text-[hsl(var(--muted-foreground))]" />
-			<h2 class="mb-2 text-lg font-semibold text-[hsl(var(--foreground))]">Keine Tags</h2>
-			<p class="mb-6 text-sm text-[hsl(var(--muted-foreground))]">
+			<TagIcon size={48} class="mb-4 text-[hsl(var(--color-muted-foreground))]" />
+			<h2 class="mb-2 text-lg font-semibold text-[hsl(var(--color-foreground))]">Keine Tags</h2>
+			<p class="mb-6 text-sm text-[hsl(var(--color-muted-foreground))]">
 				Erstelle Tags, um deine Memos zu organisieren.
 			</p>
 			<button
 				onclick={openCreateForm}
-				class="rounded-lg bg-[hsl(var(--primary))] px-6 py-2.5 text-sm font-medium text-[hsl(var(--primary-foreground))]"
+				class="rounded-lg bg-[hsl(var(--color-primary))] px-6 py-2.5 text-sm font-medium text-[hsl(var(--color-primary-foreground))]"
 			>
 				Neuer Tag
 			</button>
@@ -113,23 +113,23 @@
 		<div class="space-y-2">
 			{#each tagsCtx.value as tag (tag.id)}
 				<div
-					class="group flex items-center gap-3 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-4"
+					class="group flex items-center gap-3 rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4"
 				>
 					<span
 						class="h-4 w-4 shrink-0 rounded-full"
 						style="background-color: {tag.color || '#888'}"
 					></span>
-					<span class="flex-1 font-medium text-[hsl(var(--foreground))]">{tag.name}</span>
+					<span class="flex-1 font-medium text-[hsl(var(--color-foreground))]">{tag.name}</span>
 					<div class="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
 						<button
 							onclick={() => openEditForm(tag)}
-							class="rounded p-1 text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
+							class="rounded p-1 text-[hsl(var(--color-muted-foreground))] hover:text-[hsl(var(--color-foreground))]"
 						>
 							<PencilSimple size={16} />
 						</button>
 						<button
 							onclick={() => handleDelete(tag.id)}
-							class="rounded p-1 text-[hsl(var(--muted-foreground))] hover:text-red-500"
+							class="rounded p-1 text-[hsl(var(--color-muted-foreground))] hover:text-red-500"
 						>
 							<Trash size={16} />
 						</button>
@@ -144,15 +144,15 @@
 {#if showCreateForm}
 	<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
 		<div
-			class="w-full max-w-sm rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-6"
+			class="w-full max-w-sm rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-6"
 		>
 			<div class="mb-4 flex items-center justify-between">
-				<h2 class="text-lg font-semibold text-[hsl(var(--foreground))]">
+				<h2 class="text-lg font-semibold text-[hsl(var(--color-foreground))]">
 					{editingId ? 'Tag bearbeiten' : 'Neuer Tag'}
 				</h2>
 				<button
 					onclick={() => (showCreateForm = false)}
-					class="rounded p-1 text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
+					class="rounded p-1 text-[hsl(var(--color-muted-foreground))] hover:text-[hsl(var(--color-foreground))]"
 				>
 					<X size={20} />
 				</button>
@@ -171,7 +171,7 @@
 						type="text"
 						bind:value={formName}
 						required
-						class="w-full rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--background))] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))]"
+						class="w-full rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-background))] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--color-primary))]"
 					/>
 				</div>
 				<div>
@@ -183,7 +183,7 @@
 								aria-label="Farbe wählen"
 								onclick={() => (formColor = color)}
 								class="h-7 w-7 rounded-full border-2 transition-transform {formColor === color
-									? 'scale-110 border-[hsl(var(--foreground))]'
+									? 'scale-110 border-[hsl(var(--color-foreground))]'
 									: 'border-transparent hover:scale-105'}"
 								style="background-color: {color}"
 							></button>
@@ -194,14 +194,14 @@
 					<button
 						type="button"
 						onclick={() => (showCreateForm = false)}
-						class="px-4 py-2 text-sm text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
+						class="px-4 py-2 text-sm text-[hsl(var(--color-muted-foreground))] hover:text-[hsl(var(--color-foreground))]"
 					>
 						Abbrechen
 					</button>
 					<button
 						type="submit"
 						disabled={!formName.trim()}
-						class="rounded-lg bg-[hsl(var(--primary))] px-4 py-2 text-sm font-medium text-[hsl(var(--primary-foreground))] hover:opacity-90 disabled:opacity-50"
+						class="rounded-lg bg-[hsl(var(--color-primary))] px-4 py-2 text-sm font-medium text-[hsl(var(--color-primary-foreground))] hover:opacity-90 disabled:opacity-50"
 					>
 						{editingId ? $_('common.save') : $_('common.create')}
 					</button>

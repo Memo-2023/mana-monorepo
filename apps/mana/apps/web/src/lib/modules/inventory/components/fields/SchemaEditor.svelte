@@ -78,12 +78,14 @@
 	}
 
 	const inputClass =
-		'w-full rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] px-3 py-2 text-sm text-[hsl(var(--foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))]';
+		'w-full rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] px-3 py-2 text-sm text-[hsl(var(--color-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--color-primary))]';
 </script>
 
 <div class="space-y-3">
 	{#each fields.sort((a, b) => a.order - b.order) as field, index (field.id)}
-		<div class="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-3">
+		<div
+			class="rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-3"
+		>
 			<div class="flex items-start gap-2">
 				<!-- Reorder buttons -->
 				<div class="flex flex-col gap-0.5 pt-1">
@@ -91,14 +93,14 @@
 						type="button"
 						onclick={() => moveField(field.id, 'up')}
 						disabled={index === 0}
-						class="text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] disabled:opacity-30"
+						class="text-[hsl(var(--color-muted-foreground))] hover:text-[hsl(var(--color-foreground))] disabled:opacity-30"
 						>&#9650;</button
 					>
 					<button
 						type="button"
 						onclick={() => moveField(field.id, 'down')}
 						disabled={index === fields.length - 1}
-						class="text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] disabled:opacity-30"
+						class="text-[hsl(var(--color-muted-foreground))] hover:text-[hsl(var(--color-foreground))] disabled:opacity-30"
 						>&#9660;</button
 					>
 				</div>
@@ -126,7 +128,9 @@
 					</div>
 
 					<div class="flex items-center gap-4">
-						<label class="flex items-center gap-1 text-xs text-[hsl(var(--muted-foreground))]">
+						<label
+							class="flex items-center gap-1 text-xs text-[hsl(var(--color-muted-foreground))]"
+						>
 							<input
 								type="checkbox"
 								checked={field.required || false}
@@ -167,13 +171,13 @@
 							<div class="flex flex-wrap gap-1">
 								{#each field.options || [] as option, i}
 									<span
-										class="inline-flex items-center gap-1 rounded bg-[hsl(var(--muted))] px-2 py-0.5 text-xs"
+										class="inline-flex items-center gap-1 rounded bg-[hsl(var(--color-muted))] px-2 py-0.5 text-xs"
 									>
 										{option}
 										<button
 											type="button"
 											onclick={() => removeOption(field.id, i)}
-											class="text-[hsl(var(--muted-foreground))] hover:text-red-500">x</button
+											class="text-[hsl(var(--color-muted-foreground))] hover:text-red-500">x</button
 										>
 									</span>
 								{/each}
@@ -194,7 +198,7 @@
 								<button
 									type="button"
 									onclick={() => addOption(field.id)}
-									class="rounded bg-[hsl(var(--primary))] px-2 py-1 text-xs text-[hsl(var(--primary-foreground))]"
+									class="rounded bg-[hsl(var(--color-primary))] px-2 py-1 text-xs text-[hsl(var(--color-primary-foreground))]"
 									>+</button
 								>
 							</div>
@@ -206,7 +210,7 @@
 				<button
 					type="button"
 					onclick={() => removeField(field.id)}
-					class="mt-1 text-[hsl(var(--muted-foreground))] hover:text-red-500"
+					class="mt-1 text-[hsl(var(--color-muted-foreground))] hover:text-red-500"
 					title="Feld entfernen"
 				>
 					<Trash size={20} />
@@ -218,7 +222,7 @@
 	<button
 		type="button"
 		onclick={addField}
-		class="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-[hsl(var(--border))] py-3 text-sm text-[hsl(var(--muted-foreground))] transition-colors hover:border-[hsl(var(--primary))] hover:text-[hsl(var(--primary))]"
+		class="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-[hsl(var(--color-border))] py-3 text-sm text-[hsl(var(--color-muted-foreground))] transition-colors hover:border-[hsl(var(--color-primary))] hover:text-[hsl(var(--color-primary))]"
 	>
 		<Plus size={20} />
 		Feld hinzufugen

@@ -94,8 +94,8 @@
 
 {#if !memo}
 	<div class="flex flex-col items-center justify-center py-16">
-		<p class="mb-4 text-[hsl(var(--muted-foreground))]">Memo nicht gefunden</p>
-		<a href="/memoro" class="text-sm text-[hsl(var(--primary))] hover:underline">
+		<p class="mb-4 text-[hsl(var(--color-muted-foreground))]">Memo nicht gefunden</p>
+		<a href="/memoro" class="text-sm text-[hsl(var(--color-primary))] hover:underline">
 			Zuruck zu Memoro
 		</a>
 	</div>
@@ -106,7 +106,7 @@
 			<div class="flex items-center gap-3">
 				<a
 					href="/memoro"
-					class="rounded-lg p-1.5 text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--muted))]"
+					class="rounded-lg p-1.5 text-[hsl(var(--color-muted-foreground))] hover:bg-[hsl(var(--color-muted))]"
 				>
 					<ArrowLeft size={20} />
 				</a>
@@ -117,30 +117,30 @@
 								type="text"
 								bind:value={editTitle}
 								onkeydown={(e) => e.key === 'Enter' && saveTitle()}
-								class="flex-1 rounded border border-[hsl(var(--border))] bg-transparent px-2 py-1 text-xl font-bold focus:outline-none focus:ring-1 focus:ring-[hsl(var(--primary))]"
+								class="flex-1 rounded border border-[hsl(var(--color-border))] bg-transparent px-2 py-1 text-xl font-bold focus:outline-none focus:ring-1 focus:ring-[hsl(var(--color-primary))]"
 							/>
-							<button onclick={saveTitle} class="text-[hsl(var(--primary))]">
+							<button onclick={saveTitle} class="text-[hsl(var(--color-primary))]">
 								<Check size={18} />
 							</button>
 							<button
 								onclick={() => (isEditingTitle = false)}
-								class="text-[hsl(var(--muted-foreground))]"
+								class="text-[hsl(var(--color-muted-foreground))]"
 							>
 								<X size={18} />
 							</button>
 						</div>
 					{:else}
 						<button onclick={startEditTitle} class="group flex items-center gap-2 text-left">
-							<h1 class="text-xl font-bold text-[hsl(var(--foreground))]">
+							<h1 class="text-xl font-bold text-[hsl(var(--color-foreground))]">
 								{memo.title || 'Unbenanntes Memo'}
 							</h1>
 							<PencilSimple
 								size={16}
-								class="shrink-0 text-[hsl(var(--muted-foreground))] opacity-0 group-hover:opacity-100"
+								class="shrink-0 text-[hsl(var(--color-muted-foreground))] opacity-0 group-hover:opacity-100"
 							/>
 						</button>
 					{/if}
-					<p class="text-sm text-[hsl(var(--muted-foreground))]">
+					<p class="text-sm text-[hsl(var(--color-muted-foreground))]">
 						{new Date(memo.createdAt).toLocaleDateString('de-DE', {
 							day: '2-digit',
 							month: 'long',
@@ -159,22 +159,22 @@
 				<button
 					onclick={togglePin}
 					class="rounded-lg p-1.5 transition-colors {memo.isPinned
-						? 'text-[hsl(var(--primary))]'
-						: 'text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]'}"
+						? 'text-[hsl(var(--color-primary))]'
+						: 'text-[hsl(var(--color-muted-foreground))] hover:text-[hsl(var(--color-foreground))]'}"
 					title={memo.isPinned ? 'Loslosen' : 'Anpinnen'}
 				>
 					<PushPin size={18} weight={memo.isPinned ? 'fill' : 'regular'} />
 				</button>
 				<button
 					onclick={handleArchive}
-					class="rounded-lg p-1.5 text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
+					class="rounded-lg p-1.5 text-[hsl(var(--color-muted-foreground))] hover:text-[hsl(var(--color-foreground))]"
 					title="Archivieren"
 				>
 					<Archive size={18} />
 				</button>
 				<button
 					onclick={handleDelete}
-					class="rounded-lg p-1.5 text-[hsl(var(--muted-foreground))] hover:text-red-500"
+					class="rounded-lg p-1.5 text-[hsl(var(--color-muted-foreground))] hover:text-red-500"
 					title="Loschen"
 				>
 					<Trash size={18} />
@@ -185,7 +185,7 @@
 		<!-- Status -->
 		{#if memo.processingStatus !== 'completed'}
 			<div
-				class="rounded-lg bg-[hsl(var(--muted))] px-4 py-2 text-sm text-[hsl(var(--muted-foreground))]"
+				class="rounded-lg bg-[hsl(var(--color-muted))] px-4 py-2 text-sm text-[hsl(var(--color-muted-foreground))]"
 			>
 				Status: {getStatusLabel(memo.processingStatus)}
 			</div>
@@ -196,7 +196,7 @@
 			{#each memoTags as tag (tag.id)}
 				<span
 					class="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium text-white"
-					style="background-color: {tag.color || 'hsl(var(--muted))'}"
+					style="background-color: {tag.color || 'hsl(var(--color-muted))'}"
 				>
 					{tag.name}
 					<button
@@ -210,19 +210,19 @@
 			<div class="relative">
 				<button
 					onclick={() => (showTagPicker = !showTagPicker)}
-					class="flex items-center gap-1 rounded-full border border-dashed border-[hsl(var(--border))] px-2.5 py-1 text-xs text-[hsl(var(--muted-foreground))] hover:border-[hsl(var(--primary))] hover:text-[hsl(var(--primary))]"
+					class="flex items-center gap-1 rounded-full border border-dashed border-[hsl(var(--color-border))] px-2.5 py-1 text-xs text-[hsl(var(--color-muted-foreground))] hover:border-[hsl(var(--color-primary))] hover:text-[hsl(var(--color-primary))]"
 				>
 					<TagIcon size={12} />
 					Tag hinzufugen
 				</button>
 				{#if showTagPicker && availableTags.length > 0}
 					<div
-						class="absolute left-0 top-full z-10 mt-1 w-48 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-2 shadow-lg"
+						class="absolute left-0 top-full z-10 mt-1 w-48 rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-2 shadow-lg"
 					>
 						{#each availableTags as tag (tag.id)}
 							<button
 								onclick={() => handleAddTag(tag.id)}
-								class="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-sm hover:bg-[hsl(var(--muted))]"
+								class="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-sm hover:bg-[hsl(var(--color-muted))]"
 							>
 								<span class="h-3 w-3 rounded-full" style="background-color: {tag.color || '#888'}"
 								></span>
@@ -236,25 +236,29 @@
 
 		<!-- Intro -->
 		{#if memo.intro}
-			<div class="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-5">
+			<div
+				class="rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-5"
+			>
 				<h2
-					class="mb-2 text-sm font-medium uppercase tracking-wide text-[hsl(var(--muted-foreground))]"
+					class="mb-2 text-sm font-medium uppercase tracking-wide text-[hsl(var(--color-muted-foreground))]"
 				>
 					Zusammenfassung
 				</h2>
-				<p class="text-[hsl(var(--foreground))]">{memo.intro}</p>
+				<p class="text-[hsl(var(--color-foreground))]">{memo.intro}</p>
 			</div>
 		{/if}
 
 		<!-- Transcript -->
 		{#if memo.transcript}
-			<div class="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-5">
+			<div
+				class="rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-5"
+			>
 				<h2
-					class="mb-2 text-sm font-medium uppercase tracking-wide text-[hsl(var(--muted-foreground))]"
+					class="mb-2 text-sm font-medium uppercase tracking-wide text-[hsl(var(--color-muted-foreground))]"
 				>
 					Transkript
 				</h2>
-				<p class="whitespace-pre-wrap text-sm leading-relaxed text-[hsl(var(--foreground))]">
+				<p class="whitespace-pre-wrap text-sm leading-relaxed text-[hsl(var(--color-foreground))]">
 					{memo.transcript}
 				</p>
 			</div>
@@ -263,21 +267,23 @@
 		<!-- Memories -->
 		<div>
 			<h2
-				class="mb-3 text-sm font-medium uppercase tracking-wide text-[hsl(var(--muted-foreground))]"
+				class="mb-3 text-sm font-medium uppercase tracking-wide text-[hsl(var(--color-muted-foreground))]"
 			>
 				Erinnerungen ({memories.length})
 			</h2>
 			{#if memories.length === 0}
-				<p class="text-sm text-[hsl(var(--muted-foreground))]">
+				<p class="text-sm text-[hsl(var(--color-muted-foreground))]">
 					Noch keine Erinnerungen fur dieses Memo.
 				</p>
 			{:else}
 				<div class="space-y-3">
 					{#each memories as memory (memory.id)}
-						<div class="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-4">
-							<h3 class="font-medium text-[hsl(var(--foreground))]">{memory.title}</h3>
+						<div
+							class="rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4"
+						>
+							<h3 class="font-medium text-[hsl(var(--color-foreground))]">{memory.title}</h3>
 							{#if memory.content}
-								<p class="mt-1 text-sm text-[hsl(var(--muted-foreground))]">
+								<p class="mt-1 text-sm text-[hsl(var(--color-muted-foreground))]">
 									{memory.content}
 								</p>
 							{/if}

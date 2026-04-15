@@ -45,6 +45,6 @@
 		min-height: 100%;
 		width: 100%;
 		overflow-x: hidden;
-		background-color: hsl(var(--background));
+		background-color: hsl(var(--color-background));
 	}
 </style>

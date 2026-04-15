@@ -107,10 +107,10 @@
 
 <div class="space-y-6">
 	<div class="flex items-center justify-between">
-		<h1 class="text-2xl font-bold text-[hsl(var(--foreground))]">{$_('nav.clients')}</h1>
+		<h1 class="text-2xl font-bold text-[hsl(var(--color-foreground))]">{$_('nav.clients')}</h1>
 		<button
 			onclick={() => (showCreateForm = !showCreateForm)}
-			class="rounded-lg bg-[hsl(var(--primary))] px-4 py-2 text-sm font-medium text-[hsl(var(--primary-foreground))]"
+			class="rounded-lg bg-[hsl(var(--color-primary))] px-4 py-2 text-sm font-medium text-[hsl(var(--color-primary-foreground))]"
 		>
 			+ {$_('client.create')}
 		</button>
@@ -122,20 +122,20 @@
 				e.preventDefault();
 				handleCreate();
 			}}
-			class="rounded-xl border border-[hsl(var(--primary)/0.3)] bg-[hsl(var(--card))] p-4 space-y-3"
+			class="rounded-xl border border-[hsl(var(--color-primary)/0.3)] bg-[hsl(var(--color-card))] p-4 space-y-3"
 		>
 			<div class="flex gap-2">
 				<input
 					type="text"
 					bind:value={newName}
 					placeholder={$_('client.name')}
-					class="flex-1 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] px-4 py-2.5 text-sm text-[hsl(var(--foreground))] focus:border-[hsl(var(--primary))] focus:outline-none"
+					class="flex-1 rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] px-4 py-2.5 text-sm text-[hsl(var(--color-foreground))] focus:border-[hsl(var(--color-primary))] focus:outline-none"
 				/>
 				<input
 					type="text"
 					bind:value={newShortCode}
 					placeholder={$_('client.shortCode')}
-					class="w-24 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] px-3 py-2.5 text-sm text-[hsl(var(--foreground))]"
+					class="w-24 rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] px-3 py-2.5 text-sm text-[hsl(var(--color-foreground))]"
 				/>
 			</div>
 			<div class="flex gap-2">
@@ -143,7 +143,7 @@
 					type="email"
 					bind:value={newEmail}
 					placeholder={$_('client.email')}
-					class="flex-1 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] px-4 py-2.5 text-sm text-[hsl(var(--foreground))]"
+					class="flex-1 rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] px-4 py-2.5 text-sm text-[hsl(var(--color-foreground))]"
 				/>
 				<div class="flex items-center gap-1">
 					<input
@@ -152,9 +152,9 @@
 						min="0"
 						step="5"
 						placeholder="0"
-						class="w-20 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] px-3 py-2.5 text-sm text-center text-[hsl(var(--foreground))]"
+						class="w-20 rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] px-3 py-2.5 text-sm text-center text-[hsl(var(--color-foreground))]"
 					/>
-					<span class="text-xs text-[hsl(var(--muted-foreground))]">/h</span>
+					<span class="text-xs text-[hsl(var(--color-muted-foreground))]">/h</span>
 				</div>
 			</div>
 			<div class="flex flex-wrap gap-2">
@@ -174,12 +174,12 @@
 				<button
 					type="button"
 					onclick={() => (showCreateForm = false)}
-					class="flex-1 rounded-lg border border-[hsl(var(--border))] py-2 text-sm text-[hsl(var(--muted-foreground))]"
+					class="flex-1 rounded-lg border border-[hsl(var(--color-border))] py-2 text-sm text-[hsl(var(--color-muted-foreground))]"
 					>{$_('common.cancel')}</button
 				>
 				<button
 					type="submit"
-					class="flex-1 rounded-lg bg-[hsl(var(--primary))] py-2 text-sm font-medium text-[hsl(var(--primary-foreground))]"
+					class="flex-1 rounded-lg bg-[hsl(var(--color-primary))] py-2 text-sm font-medium text-[hsl(var(--color-primary-foreground))]"
 					>{$_('common.create')}</button
 				>
 			</div>
@@ -188,7 +188,7 @@
 
 	{#if activeClients.length === 0 && !showCreateForm}
 		<div
-			class="rounded-xl border border-dashed border-[hsl(var(--border))] p-8 text-center text-[hsl(var(--muted-foreground))]"
+			class="rounded-xl border border-dashed border-[hsl(var(--color-border))] p-8 text-center text-[hsl(var(--color-muted-foreground))]"
 		>
 			<p>{$_('client.noClients')}</p>
 		</div>
@@ -198,7 +198,7 @@
 				{@const projects = getClientProjects(client.id)}
 				{@const hours = getClientHours(client.id)}
 				<div
-					class="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] overflow-hidden"
+					class="rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] overflow-hidden"
 				>
 					{#if editingClientId === client.id}
 						<div class="p-4 space-y-3">
@@ -210,7 +210,7 @@
 										editName = (e.target as HTMLInputElement).value;
 										autoSave({ name: editName });
 									}}
-									class="flex-1 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] px-3 py-2 text-sm"
+									class="flex-1 rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] px-3 py-2 text-sm"
 								/>
 								<input
 									type="text"
@@ -220,7 +220,7 @@
 										autoSave({ shortCode: editShortCode || null });
 									}}
 									placeholder={$_('client.shortCode')}
-									class="w-24 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] px-3 py-2 text-sm"
+									class="w-24 rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] px-3 py-2 text-sm"
 								/>
 							</div>
 							<div class="flex gap-2">
@@ -232,7 +232,7 @@
 										autoSave({ email: editEmail || null });
 									}}
 									placeholder={$_('client.email')}
-									class="flex-1 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] px-3 py-2 text-sm"
+									class="flex-1 rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] px-3 py-2 text-sm"
 								/>
 								<div class="flex items-center gap-1">
 									<input
@@ -247,9 +247,9 @@
 													editRate > 0 ? { amount: editRate, currency: 'EUR', per: 'hour' } : null,
 											});
 										}}
-										class="w-20 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] px-3 py-2 text-sm text-center"
+										class="w-20 rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] px-3 py-2 text-sm text-center"
 									/>
-									<span class="text-xs text-[hsl(var(--muted-foreground))]">/h</span>
+									<span class="text-xs text-[hsl(var(--color-muted-foreground))]">/h</span>
 								</div>
 							</div>
 							<div class="flex flex-wrap gap-1.5">
@@ -271,14 +271,15 @@
 							<div class="flex justify-end gap-2">
 								<button
 									onclick={() => handleArchive(client.id, true)}
-									class="text-xs text-[hsl(var(--muted-foreground))]">{$_('common.archive')}</button
+									class="text-xs text-[hsl(var(--color-muted-foreground))]"
+									>{$_('common.archive')}</button
 								>
 								<button onclick={() => handleDelete(client.id)} class="text-xs text-red-500"
 									>{$_('common.delete')}</button
 								>
 								<button
 									onclick={() => (editingClientId = null)}
-									class="text-xs text-[hsl(var(--primary))]">{$_('common.close')}</button
+									class="text-xs text-[hsl(var(--color-primary))]">{$_('common.close')}</button
 								>
 							</div>
 						</div>
@@ -294,8 +295,8 @@
 								{client.shortCode || client.name.charAt(0).toUpperCase()}
 							</div>
 							<div class="min-w-0 flex-1">
-								<p class="font-medium text-[hsl(var(--foreground))]">{client.name}</p>
-								<p class="text-xs text-[hsl(var(--muted-foreground))]">
+								<p class="font-medium text-[hsl(var(--color-foreground))]">{client.name}</p>
+								<p class="text-xs text-[hsl(var(--color-muted-foreground))]">
 									{projects.length}
 									{$_('nav.projects')}
 									{#if client.billingRate}
@@ -304,7 +305,9 @@
 									{/if}
 								</p>
 							</div>
-							<span class="duration-display text-sm font-medium text-[hsl(var(--foreground))]">
+							<span
+								class="duration-display text-sm font-medium text-[hsl(var(--color-foreground))]"
+							>
 								{formatDurationCompact(hours)}
 							</span>
 						</button>
@@ -318,7 +321,7 @@
 		<div>
 			<button
 				onclick={() => (showArchived = !showArchived)}
-				class="flex items-center gap-2 text-sm text-[hsl(var(--muted-foreground))]"
+				class="flex items-center gap-2 text-sm text-[hsl(var(--color-muted-foreground))]"
 			>
 				<CaretRight size={20} class="transition-transform {showArchived ? 'rotate-90' : ''}" />
 				{$_('project.archived')} ({archivedClients.length})
@@ -327,7 +330,7 @@
 				<div class="mt-3 space-y-2">
 					{#each archivedClients as client}
 						<div
-							class="flex items-center justify-between rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))] px-4 py-3 opacity-60"
+							class="flex items-center justify-between rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] px-4 py-3 opacity-60"
 						>
 							<div class="flex items-center gap-2">
 								<div
@@ -340,7 +343,7 @@
 							</div>
 							<button
 								onclick={() => handleArchive(client.id, false)}
-								class="text-xs text-[hsl(var(--primary))]">{$_('common.unarchive')}</button
+								class="text-xs text-[hsl(var(--color-primary))]">{$_('common.unarchive')}</button
 							>
 						</div>
 					{/each}
