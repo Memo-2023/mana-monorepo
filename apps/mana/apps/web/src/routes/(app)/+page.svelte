@@ -3,6 +3,7 @@
 	import AppPagePicker from '$lib/components/workbench/AppPagePicker.svelte';
 	import SceneAppBar from '$lib/components/workbench/SceneAppBar.svelte';
 	import SceneRenameDialog from '$lib/components/workbench/scenes/SceneRenameDialog.svelte';
+	import SceneHeader from '$lib/components/workbench/scenes/SceneHeader.svelte';
 	import ConfirmDialog from '$lib/components/workbench/scenes/ConfirmDialog.svelte';
 	import { PageCarousel, type CarouselPage } from '$lib/components/page-carousel';
 	import { getApp, getAppByDragType, isAppAccessible } from '$lib/app-registry';
@@ -269,20 +270,34 @@
 	}
 
 	// ── Scene CRUD dialogs ──────────────────────────────────
-	type SceneDialogMode = { kind: 'rename'; id: string; name: string };
+	type SceneDialogMode = {
+		kind: 'rename';
+		id: string;
+		name: string;
+		description: string;
+	};
 	let sceneDialog = $state<SceneDialogMode | null>(null);
 	let sceneToDelete = $state<{ id: string; name: string } | null>(null);
 
 	function handleRequestRename(id: string) {
 		const scene = scenes.find((s) => s.id === id);
 		if (!scene) return;
-		sceneDialog = { kind: 'rename', id, name: scene.name };
+		sceneDialog = {
+			kind: 'rename',
+			id,
+			name: scene.name,
+			description: scene.description ?? '',
+		};
 	}
-	async function handleSubmitSceneDialog(name: string) {
+	async function handleSubmitSceneDialog(name: string, description: string) {
 		const mode = sceneDialog;
 		if (!mode) return;
-		await workbenchScenesStore.renameScene(mode.id, name);
+		await workbenchScenesStore.renameScene(mode.id, name, description.trim() || null);
 		sceneDialog = null;
+	}
+	function handleEditActiveScene() {
+		const active = workbenchScenesStore.activeScene;
+		if (active) handleRequestRename(active.id);
 	}
 	function handleDuplicateScene(id: string) {
 		workbenchScenesStore.duplicateScene(id);
@@ -336,6 +351,9 @@
 				userTier={authStore.user?.tier}
 			/>
 		{/snippet}
+		{#snippet leading()}
+			<SceneHeader scene={workbenchScenesStore.activeScene} onEdit={handleEditActiveScene} />
+		{/snippet}
 	</PageCarousel>
 
 	<ContextMenu
@@ -348,8 +366,9 @@
 
 	<SceneRenameDialog
 		show={sceneDialog !== null}
-		title="Szene umbenennen"
+		title="Szene bearbeiten"
 		initialName={sceneDialog?.name ?? ''}
+		initialDescription={sceneDialog?.description ?? ''}
 		confirmLabel="Speichern"
 		onSubmit={handleSubmitSceneDialog}
 		onCancel={() => (sceneDialog = null)}

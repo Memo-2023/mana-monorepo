@@ -6,8 +6,9 @@
 		show: boolean;
 		title: string;
 		initialName?: string;
+		initialDescription?: string;
 		confirmLabel?: string;
-		onSubmit: (name: string) => void | Promise<void>;
+		onSubmit: (name: string, description: string) => void | Promise<void>;
 		onCancel: () => void;
 	}
 
@@ -15,18 +16,21 @@
 		show,
 		title,
 		initialName = '',
+		initialDescription = '',
 		confirmLabel = 'Speichern',
 		onSubmit,
 		onCancel,
 	}: Props = $props();
 
 	let name = $state('');
+	let description = $state('');
 	let pending = $state(false);
 	let inputEl = $state<HTMLInputElement | null>(null);
 
 	$effect(() => {
 		if (show) {
 			name = initialName;
+			description = initialDescription;
 			queueMicrotask(() => inputEl?.focus());
 		}
 	});
@@ -36,7 +40,7 @@
 		if (pending || !name.trim()) return;
 		pending = true;
 		try {
-			await onSubmit(name.trim());
+			await onSubmit(name.trim(), description);
 		} finally {
 			pending = false;
 		}
@@ -74,6 +78,16 @@
 						bind:value={name}
 						required
 					/>
+				</label>
+				<label class="srd-field">
+					<span class="srd-label">Beschreibung</span>
+					<textarea
+						class="srd-input srd-textarea"
+						maxlength="240"
+						rows="3"
+						placeholder="Wofür ist diese Szene gedacht?"
+						bind:value={description}
+					></textarea>
 				</label>
 				<div class="srd-actions">
 					<button
@@ -152,6 +166,12 @@
 	}
 	.srd-input:focus {
 		border-color: hsl(var(--color-primary));
+	}
+	.srd-textarea {
+		resize: vertical;
+		min-height: 4rem;
+		font-family: inherit;
+		line-height: 1.45;
 	}
 	.srd-actions {
 		display: flex;
