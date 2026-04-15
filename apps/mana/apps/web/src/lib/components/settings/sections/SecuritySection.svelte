@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { ShieldCheck } from '@mana/shared-icons';
 	import { PasskeyManager, TwoFactorSetup, AuditLog, SessionManager } from '@mana/shared-auth-ui';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import SettingsPanel from '../SettingsPanel.svelte';
+	import SettingsSectionHeader from '../SettingsSectionHeader.svelte';
 
 	let passkeys = $state<any[]>([]);
 	let sessions = $state<any[]>([]);
@@ -27,6 +29,15 @@
 		}
 	});
 </script>
+
+<SettingsPanel>
+	<SettingsSectionHeader
+		icon={ShieldCheck}
+		title="Sicherheit"
+		description="Passkeys, 2FA & Sitzungen"
+		tone="blue"
+	/>
+</SettingsPanel>
 
 <SettingsPanel id="passkeys">
 	<PasskeyManager

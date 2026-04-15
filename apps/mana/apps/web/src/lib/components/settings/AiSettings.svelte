@@ -123,21 +123,7 @@
 	const browserCacheReady = $derived(webgpuSupported && localLlmStatus.current.state === 'ready');
 </script>
 
-<div id="ai-options" class="scroll-mt-24 p-6">
-	<div class="mb-6 flex items-center gap-3">
-		<div
-			class="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-100 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400"
-		>
-			<Robot size={20} />
-		</div>
-		<div>
-			<div class="text-lg font-semibold">KI-Optionen</div>
-			<p class="text-sm text-muted-foreground">
-				Wähle, welche KI-Schichten Mana verwenden darf — von gar keiner bis zu allen
-			</p>
-		</div>
-	</div>
-
+<div>
 	<!-- Tier 0 explainer -->
 	<div class="mb-4 rounded-xl border border-border bg-muted/20 p-4">
 		<div class="flex items-start gap-3">
