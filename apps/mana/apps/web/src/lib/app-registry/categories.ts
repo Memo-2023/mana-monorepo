@@ -2,8 +2,11 @@
  * App Categories — Groups apps in the workbench AppPagePicker so users
  * can find pages by intent rather than scanning an alphabetical list.
  *
- * Five categories (Vorschlag C):
- *   - companion: Companion Brain pages (myday, activity, companion, goals)
+ * Six categories:
+ *   - ai:        AI Workbench — Missions, Workbench timeline, Rituale,
+ *                Policy, Insights, Health, Companion chat. Top of list.
+ *   - companion: Brain projections (myday, activity, goals) — derived
+ *                dashboards that aren't themselves AI-driven
  *   - life:      Personal / wellness / everyday-life tracking
  *   - work:      Productivity & planning
  *   - creative:  Creative, learning, generation
@@ -15,9 +18,9 @@
  */
 
 import type { Component } from 'svelte';
-import { Robot, Heart, Briefcase, Sparkle, Gear } from '@mana/shared-icons';
+import { Robot, Heart, Briefcase, Sparkle, Gear, Brain } from '@mana/shared-icons';
 
-export type AppCategory = 'companion' | 'life' | 'work' | 'creative' | 'system';
+export type AppCategory = 'ai' | 'companion' | 'life' | 'work' | 'creative' | 'system';
 
 export interface CategoryMeta {
 	id: AppCategory;
@@ -27,21 +30,30 @@ export interface CategoryMeta {
 }
 
 export const APP_CATEGORIES: CategoryMeta[] = [
-	{ id: 'companion', label: 'Companion', icon: Robot, order: 0 },
-	{ id: 'life', label: 'Leben', icon: Heart, order: 1 },
-	{ id: 'work', label: 'Arbeit', icon: Briefcase, order: 2 },
-	{ id: 'creative', label: 'Kreativ', icon: Sparkle, order: 3 },
-	{ id: 'system', label: 'System', icon: Gear, order: 4 },
+	{ id: 'ai', label: 'AI', icon: Brain, order: 0 },
+	{ id: 'companion', label: 'Companion', icon: Robot, order: 1 },
+	{ id: 'life', label: 'Leben', icon: Heart, order: 2 },
+	{ id: 'work', label: 'Arbeit', icon: Briefcase, order: 3 },
+	{ id: 'creative', label: 'Kreativ', icon: Sparkle, order: 4 },
+	{ id: 'system', label: 'System', icon: Gear, order: 5 },
 ];
 
 /**
  * appId → AppCategory. Apps not listed here default to 'system'.
  */
 export const APP_CATEGORY_MAP: Record<string, AppCategory> = {
-	// Companion Brain
+	// AI Workbench — the 6 new AI feature apps + companion chat
+	companion: 'ai',
+	'ai-missions': 'ai',
+	'ai-workbench': 'ai',
+	'ai-rituals': 'ai',
+	'ai-policy': 'ai',
+	'ai-insights': 'ai',
+	'ai-health': 'ai',
+
+	// Companion Brain — derived projections that aren't themselves AI
 	myday: 'companion',
 	activity: 'companion',
-	companion: 'companion',
 	goals: 'companion',
 
 	// Leben — personal, wellness, everyday

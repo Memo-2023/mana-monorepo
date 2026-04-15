@@ -35,6 +35,7 @@
 
 	// Collapsed state per category — persist across openings in-session.
 	let collapsed = $state<Record<AppCategory, boolean>>({
+		ai: false,
 		companion: false,
 		life: false,
 		work: false,
