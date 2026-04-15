@@ -1,19 +1,24 @@
 <script lang="ts">
 	import { _ } from 'svelte-i18n';
+	import { browser } from '$app/environment';
+	import { writable, type Writable } from 'svelte/store';
 	import { useRegisterSW } from 'virtual:pwa-register/svelte';
 
-	// `useRegisterSW` registers the service worker and exposes two Svelte
-	// stores we actually care about:
-	//   - needRefresh → a new SW is waiting (matches registerType: 'prompt')
-	//   - updateServiceWorker(reload) → skipWaiting + reload page
-	// `offlineReady` is available too if we ever want a "ready for offline"
-	// toast; we don't surface it today to keep the UI quiet.
-	const { needRefresh, updateServiceWorker } = useRegisterSW({
-		immediate: true,
-		onRegisterError(error: unknown) {
-			console.error('[pwa] service worker registration failed', error);
-		},
-	});
+	// `useRegisterSW` accesses `navigator.serviceWorker` at call time — that
+	// crashes during SvelteKit SSR where `navigator` is undefined. Guard the
+	// call so it only runs in the browser; on the server we hand back a
+	// no-op store + noop updater so downstream code stays happy.
+	const noopRefresh: Writable<boolean> = writable(false);
+	const noopUpdate = async (_?: boolean): Promise<void> => undefined;
+
+	const { needRefresh, updateServiceWorker } = browser
+		? useRegisterSW({
+				immediate: true,
+				onRegisterError(error: unknown) {
+					console.error('[pwa] service worker registration failed', error);
+				},
+			})
+		: { needRefresh: noopRefresh, updateServiceWorker: noopUpdate };
 
 	let reloading = false;
 
