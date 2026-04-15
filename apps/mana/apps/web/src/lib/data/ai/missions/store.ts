@@ -38,6 +38,12 @@ export interface CreateMissionInput {
 
 export async function createMission(input: CreateMissionInput): Promise<Mission> {
 	const now = new Date().toISOString();
+	// `structuredClone` strips Svelte 5 $state Proxies before the record
+	// hits IndexedDB — without it, Dexie throws DataCloneError on the
+	// proxied `inputs` array / `cadence` object that callers pass in
+	// from `$state` bindings (e.g. the MissionInputPicker).
+	const inputsPlain = structuredClone(input.inputs ?? []);
+	const cadencePlain = structuredClone(input.cadence);
 	const mission: Mission = {
 		id: crypto.randomUUID(),
 		createdAt: now,
@@ -45,10 +51,10 @@ export async function createMission(input: CreateMissionInput): Promise<Mission>
 		title: input.title,
 		conceptMarkdown: input.conceptMarkdown,
 		objective: input.objective,
-		inputs: input.inputs ?? [],
-		cadence: input.cadence,
+		inputs: inputsPlain,
+		cadence: cadencePlain,
 		state: 'active',
-		nextRunAt: nextRunForCadence(input.cadence, new Date()),
+		nextRunAt: nextRunForCadence(cadencePlain, new Date()),
 		iterations: [],
 	};
 	await table().add(mission);
@@ -91,8 +97,9 @@ export interface MissionPatch {
 }
 
 export async function updateMission(id: string, patch: MissionPatch): Promise<void> {
+	// Same Proxy-stripping reason as createMission.
 	const mods: Partial<Mission> = {
-		...patch,
+		...structuredClone(patch),
 		updatedAt: new Date().toISOString(),
 	};
 	if (patch.cadence) {
@@ -149,7 +156,9 @@ export async function startIteration(
 	const iteration: MissionIteration = {
 		id: crypto.randomUUID(),
 		startedAt: new Date().toISOString(),
-		plan: input.plan,
+		// Strip $state Proxies from the plan array so structured-clone
+		// doesn't fail when Dexie serialises the row.
+		plan: structuredClone(input.plan),
 		overallStatus: 'running',
 	};
 	await table().update(missionId, {
@@ -181,7 +190,7 @@ export async function finishIteration(
 					finishedAt: new Date().toISOString(),
 					overallStatus: input.overallStatus,
 					...(input.summary !== undefined ? { summary: input.summary } : {}),
-					...(input.plan !== undefined ? { plan: input.plan } : {}),
+					...(input.plan !== undefined ? { plan: structuredClone(input.plan) } : {}),
 				}
 			: it
 	);
