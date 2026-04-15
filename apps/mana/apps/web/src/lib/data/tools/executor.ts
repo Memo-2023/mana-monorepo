@@ -17,7 +17,9 @@ import { getTool } from './registry';
 import { runAsAsync, USER_ACTOR } from '../events/actor';
 import { resolvePolicy } from '../ai/policy';
 import { createProposal } from '../ai/proposals/store';
+import { getAgent } from '../ai/agents/store';
 import type { Actor } from '../events/actor';
+import type { AiPolicy } from '@mana/shared-ai';
 import type { ToolResult } from './types';
 
 export async function executeTool(
@@ -34,7 +36,18 @@ export async function executeTool(
 	if (!validation.ok) return validation.error;
 
 	const effectiveActor: Actor = actor ?? USER_ACTOR;
-	const decision = resolvePolicy(name, effectiveActor);
+
+	// Multi-Agent Workbench (Phase 4): policy lives on the agent. When
+	// the actor is AI, look up the owning agent and use its policy. If
+	// the agent record is missing (legacy write, deleted agent, race),
+	// resolvePolicy falls back to the user-level DEFAULT_AI_POLICY via
+	// its optional-argument default.
+	let agentPolicy: AiPolicy | undefined;
+	if (effectiveActor.kind === 'ai') {
+		const agent = await getAgent(effectiveActor.principalId);
+		agentPolicy = agent?.policy;
+	}
+	const decision = resolvePolicy(name, effectiveActor, agentPolicy);
 
 	if (decision === 'deny') {
 		return {

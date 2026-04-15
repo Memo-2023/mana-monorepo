@@ -19,6 +19,7 @@
 
 import type { Sql } from './connection';
 import { withUser } from './connection';
+import type { AiPolicy } from '@mana/shared-ai';
 
 export interface ServerAgent {
 	id: string;
@@ -31,6 +32,10 @@ export interface ServerAgent {
 	 *  only injects plaintext. */
 	systemPrompt?: string;
 	memory?: string;
+	/** Per-tool auto/propose/deny — drives the server-side tool
+	 *  allowlist when Phase 4 wiring is complete. Plaintext. Undefined
+	 *  on legacy agent records (pre-Phase-2 writes). */
+	policy?: AiPolicy;
 	state: 'active' | 'paused' | 'archived';
 	maxConcurrentMissions: number;
 	maxTokensPerDay?: number;
@@ -238,6 +243,10 @@ function toServerAgent(row: SnapshotRow): ServerAgent {
 		role: String(r.role ?? ''),
 		systemPrompt: typeof r.systemPrompt === 'string' ? r.systemPrompt : undefined,
 		memory: typeof r.memory === 'string' ? r.memory : undefined,
+		policy:
+			r.policy && typeof r.policy === 'object' && !Array.isArray(r.policy)
+				? (r.policy as AiPolicy)
+				: undefined,
 		state: (r.state as ServerAgent['state']) ?? 'active',
 		maxConcurrentMissions: Number(r.maxConcurrentMissions ?? 1),
 		maxTokensPerDay: typeof r.maxTokensPerDay === 'number' ? r.maxTokensPerDay : undefined,

@@ -240,7 +240,7 @@ async function planOneMission(
 	const input: AiPlanInput = {
 		mission,
 		resolvedInputs,
-		availableTools: AI_AVAILABLE_TOOLS,
+		availableTools: filterToolsByAgentPolicy(AI_AVAILABLE_TOOLS, agent),
 	};
 	const messages = withAgentContext(buildPlannerPrompt(input), agent);
 	const result = await planner.complete(messages);
@@ -265,6 +265,31 @@ async function planOneMission(
  * Ciphertext fields (`enc:1:…`) are intentionally skipped — the server
  * doesn't hold the decrypt key; the foreground runner handles those.
  */
+/**
+ * Drop tools that the agent's policy denies, so the Planner never even
+ * sees a tool it can't use. Tools with policy `propose` stay in the
+ * allowlist (they just get proposed rather than auto-run on the user's
+ * device), and `auto` tools stay too. A missing policy or missing
+ * agent leaves the list unchanged.
+ *
+ * Resolution order matches the webapp's `resolvePolicy`:
+ *   tools[name] ?? defaultsByModule[tool.module] ?? defaultForAi
+ */
+function filterToolsByAgentPolicy(
+	tools: readonly import('@mana/shared-ai').AvailableTool[],
+	agent: ServerAgent | null
+): import('@mana/shared-ai').AvailableTool[] {
+	if (!agent?.policy) return tools as import('@mana/shared-ai').AvailableTool[];
+	const policy = agent.policy;
+	return tools.filter((t) => {
+		const byTool = policy.tools[t.name];
+		if (byTool) return byTool !== 'deny';
+		const byModule = policy.defaultsByModule?.[t.module];
+		if (byModule) return byModule !== 'deny';
+		return policy.defaultForAi !== 'deny';
+	});
+}
+
 function withAgentContext(messages: PlannerMessages, agent: ServerAgent | null): PlannerMessages {
 	if (!agent) return messages;
 
