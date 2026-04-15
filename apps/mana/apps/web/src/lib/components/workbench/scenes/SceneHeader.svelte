@@ -10,12 +10,20 @@
 <script lang="ts">
 	import type { WorkbenchScene } from '$lib/types/workbench-scenes';
 	import { workbenchScenesStore } from '$lib/stores/workbench-scenes.svelte';
+	import { Sparkle } from '@mana/shared-icons';
+	import { goto } from '$app/navigation';
 
 	interface Props {
 		scene: WorkbenchScene | null;
 	}
 
 	const { scene }: Props = $props();
+
+	// The seeded default scene is called "Home". Its empty-description
+	// placeholder gets a welcoming line instead of the generic prompt.
+	const descPlaceholder = $derived(
+		scene?.name === 'Home' ? 'Willkommen Zuhause im Mana Hub' : 'Beschreibung hinzufügen…'
+	);
 
 	// We avoid inline mustache interpolation inside the contenteditable
 	// elements because Prettier reformats the template and leaves
@@ -117,11 +125,28 @@
 			role="textbox"
 			aria-label="Szenenbeschreibung"
 			tabindex="0"
-			data-placeholder="Beschreibung hinzufügen…"
+			data-placeholder={descPlaceholder}
 			onkeydown={handleDescKey}
 			onfocus={handleFocus}
 			onblur={(e) => commitDescription(e.currentTarget, scene.description ?? '')}
 		></p>
+
+		<!--
+			Template-Gallery shortcut — persistent discoverability hook
+			directly on the homepage. Small chip-style, deliberately
+			understated so it doesn't compete with the scene-name edit
+			affordance. Appears on every scene so users who land on a
+			fresh device also see the path to pre-built agents.
+		-->
+		<button
+			type="button"
+			class="template-shortcut"
+			onclick={() => goto('/agents/templates')}
+			title="Vorgefertigte AI-Agenten"
+		>
+			<Sparkle size={12} weight="fill" />
+			<span>Agent-Templates</span>
+		</button>
 	</div>
 {/if}
 
@@ -195,6 +220,30 @@
 		opacity: 0.35;
 		font-style: italic;
 		pointer-events: none;
+	}
+
+	.template-shortcut {
+		align-self: flex-start;
+		margin-top: 0.75rem;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.375rem;
+		padding: 0.25rem 0.625rem;
+		border: 1px dashed color-mix(in oklab, hsl(var(--color-primary)) 45%, transparent);
+		border-radius: 999px;
+		background: color-mix(in oklab, hsl(var(--color-primary)) 8%, transparent);
+		color: hsl(var(--color-primary));
+		cursor: pointer;
+		font: inherit;
+		font-size: 0.75rem;
+		font-weight: 500;
+		transition:
+			background 0.15s,
+			border-color 0.15s;
+	}
+	.template-shortcut:hover {
+		background: color-mix(in oklab, hsl(var(--color-primary)) 14%, transparent);
+		border-style: solid;
 	}
 
 	@media (max-width: 639px) {
