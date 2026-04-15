@@ -19,6 +19,20 @@ export interface Config {
 	/** Flip to false to boot the HTTP surface without the background tick
 	 *  — useful for local smoke-tests + Docker image build verification. */
 	tickEnabled: boolean;
+	/**
+	 * PEM-encoded RSA-OAEP-2048 private key for unwrapping Mission Grants.
+	 * Paired with the public key pinned in mana-auth's config. Provision
+	 * via Docker secret / out-of-band env; never commit.
+	 *
+	 * Optional at boot so the service can start without grant support
+	 * (development, legacy deployments). When absent, Missions that
+	 * carry a Grant are skipped with state='grant-missing'.
+	 *
+	 * Generate with:
+	 *   openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out priv.pem
+	 *   openssl pkey -in priv.pem -pubout -out pub.pem
+	 */
+	missionGrantPrivateKeyPem?: string;
 }
 
 function requireEnv(key: string, fallback?: string): string {
@@ -38,5 +52,6 @@ export function loadConfig(): Config {
 		serviceKey: requireEnv('MANA_SERVICE_KEY', 'dev-service-key'),
 		tickIntervalMs: parseInt(process.env.TICK_INTERVAL_MS ?? '60000', 10),
 		tickEnabled: process.env.TICK_ENABLED !== 'false',
+		missionGrantPrivateKeyPem: process.env.MANA_AI_PRIVATE_KEY_PEM || undefined,
 	};
 }

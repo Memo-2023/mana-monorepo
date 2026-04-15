@@ -18,12 +18,14 @@ import { SignupLimitService } from './services/signup-limit';
 import { ApiKeysService } from './services/api-keys';
 import { UserDataService } from './services/user-data';
 import { EncryptionVaultService } from './services/encryption-vault';
+import { MissionGrantService } from './services/encryption-vault/mission-grant';
 import { loadKek } from './services/encryption-vault/kek';
 import { createAuthRoutes } from './routes/auth';
 import { createGuildRoutes } from './routes/guilds';
 import { createApiKeyRoutes, createApiKeyValidationRoute } from './routes/api-keys';
 import { createMeRoutes } from './routes/me';
 import { createEncryptionVaultRoutes } from './routes/encryption-vault';
+import { createAiMissionGrantRoutes } from './routes/ai-mission-grant';
 import { createSettingsRoutes } from './routes/settings';
 import { createAdminRoutes } from './routes/admin';
 
@@ -45,6 +47,10 @@ const signupLimit = new SignupLimitService(db);
 const apiKeysService = new ApiKeysService(db);
 const userDataService = new UserDataService(db, config);
 const encryptionVaultService = new EncryptionVaultService(db);
+const missionGrantService = new MissionGrantService(
+	encryptionVaultService,
+	config.missionGrantPublicKeyPem
+);
 
 // ─── App ────────────────────────────────────────────────────
 
@@ -96,6 +102,12 @@ app.route('/api/v1/me', createMeRoutes(userDataService));
 // Mounted under /me so it inherits the JWT middleware above and shows
 // up in the same self-service surface as the GDPR endpoints.
 app.route('/api/v1/me/encryption-vault', createEncryptionVaultRoutes(encryptionVaultService));
+
+// ─── AI Mission Grant ──────────────────────────────────────
+// Mints per-mission Key-Grants so the mana-ai background runner can
+// decrypt scoped encrypted records. Under /me so it inherits the JWT
+// middleware above. See docs/plans/ai-mission-key-grant.md.
+app.route('/api/v1/me/ai-mission-grant', createAiMissionGrantRoutes(missionGrantService));
 
 // ─── Settings ──────────────────────────────────────────────
 

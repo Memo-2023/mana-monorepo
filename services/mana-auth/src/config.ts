@@ -16,6 +16,15 @@ export interface Config {
 	 *  — in development a deterministic dev KEK is auto-generated so the
 	 *  service still boots, with a loud warning. */
 	encryptionKek: string;
+	/**
+	 * PEM-encoded RSA-OAEP-2048 public key for the mana-ai Mission
+	 * Grant runner. The `/me/ai-mission-grant` endpoint wraps per-
+	 * mission data keys with this public key so only mana-ai (holder
+	 * of the paired private key) can unwrap them. Optional at boot:
+	 * when absent, the endpoint returns 503 so the UI can degrade
+	 * to foreground-only execution.
+	 */
+	missionGrantPublicKeyPem?: string;
 }
 
 export function loadConfig(): Config {
@@ -57,5 +66,6 @@ export function loadConfig(): Config {
 		manaSubscriptionsUrl: env('MANA_SUBSCRIPTIONS_URL', 'http://localhost:3063'),
 		manaMailUrl: env('MANA_MAIL_URL', 'http://localhost:3042'),
 		encryptionKek,
+		missionGrantPublicKeyPem: env('MANA_AI_PUBLIC_KEY_PEM') || undefined,
 	};
 }

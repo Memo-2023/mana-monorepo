@@ -17,12 +17,18 @@ import { migrate } from './db/migrate';
 import { runTickOnce, startTick, stopTick, isTickRunning } from './cron/tick';
 import { serviceAuth } from './middleware/service-auth';
 import { register, httpRequestsTotal, httpRequestDuration } from './metrics';
+import { configureMissionGrantKey } from './crypto/unwrap-grant';
 
 const config = loadConfig();
 
 // Apply mana_ai schema migration on boot. Idempotent — safe to call on
 // every restart and after rolling deploys.
 await migrate(getSql(config.syncDatabaseUrl));
+
+// Install the RSA private key used to unwrap Mission Key-Grants. Absent
+// env var → grants stay disabled (tick loop skips any mission carrying
+// one). See docs/plans/ai-mission-key-grant.md.
+configureMissionGrantKey(config.missionGrantPrivateKeyPem);
 
 const app = new Hono();
 
