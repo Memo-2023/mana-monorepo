@@ -343,7 +343,7 @@
 
 	.session-subtitle {
 		font-size: 0.875rem;
-		color: hsl(var(--theme-muted-foreground, 220 9% 46%));
+		color: hsl(var(--color-muted-foreground, 220 9% 46%));
 		margin: 0;
 	}
 
@@ -354,16 +354,16 @@
 		width: 2.25rem;
 		height: 2.25rem;
 		border-radius: 0.5rem;
-		border: 1px solid hsl(var(--theme-border, 220 13% 91%));
+		border: 1px solid hsl(var(--color-border, 220 13% 91%));
 		background: transparent;
-		color: hsl(var(--theme-muted-foreground, 220 9% 46%));
+		color: hsl(var(--color-muted-foreground, 220 9% 46%));
 		cursor: pointer;
 		transition: all 0.2s;
 	}
 
 	.refresh-button:hover:not(:disabled) {
-		background: hsl(var(--theme-muted, 220 14% 96%));
-		color: hsl(var(--theme-foreground, 220 9% 10%));
+		background: hsl(var(--color-muted, 220 14% 96%));
+		color: hsl(var(--color-foreground, 220 9% 10%));
 	}
 
 	.refresh-button:disabled {
@@ -412,7 +412,7 @@
 	.loading-spinner {
 		width: 2rem;
 		height: 2rem;
-		border: 3px solid hsl(var(--theme-border, 220 13% 91%));
+		border: 3px solid hsl(var(--color-border, 220 13% 91%));
 		border-top-color: var(--primary-color);
 		border-radius: 50%;
 		animation: spin 0.8s linear infinite;
@@ -421,14 +421,14 @@
 	.empty-state {
 		text-align: center;
 		padding: 2rem;
-		color: hsl(var(--theme-muted-foreground, 220 9% 46%));
+		color: hsl(var(--color-muted-foreground, 220 9% 46%));
 		font-size: 0.875rem;
 	}
 
 	.session-list {
 		display: flex;
 		flex-direction: column;
-		border: 1px solid hsl(var(--theme-border, 220 13% 91%));
+		border: 1px solid hsl(var(--color-border, 220 13% 91%));
 		border-radius: 0.75rem;
 		overflow: hidden;
 	}
@@ -438,7 +438,7 @@
 		align-items: flex-start;
 		gap: 0.75rem;
 		padding: 1rem;
-		border-bottom: 1px solid hsl(var(--theme-border, 220 13% 91%));
+		border-bottom: 1px solid hsl(var(--color-border, 220 13% 91%));
 	}
 
 	.session-item:last-child {
@@ -457,8 +457,8 @@
 		width: 2.25rem;
 		height: 2.25rem;
 		border-radius: 0.5rem;
-		background-color: hsl(var(--theme-muted, 220 14% 96%));
-		color: hsl(var(--theme-muted-foreground, 220 9% 46%));
+		background-color: hsl(var(--color-muted, 220 14% 96%));
+		color: hsl(var(--color-muted-foreground, 220 9% 46%));
 	}
 
 	.device-icon {
@@ -498,13 +498,13 @@
 
 	.session-ip {
 		font-size: 0.75rem;
-		color: hsl(var(--theme-muted-foreground, 220 9% 46%));
+		color: hsl(var(--color-muted-foreground, 220 9% 46%));
 		margin-top: 0.125rem;
 	}
 
 	.session-activity {
 		font-size: 0.75rem;
-		color: hsl(var(--theme-muted-foreground, 220 9% 46%));
+		color: hsl(var(--color-muted-foreground, 220 9% 46%));
 		opacity: 0.8;
 	}
 
@@ -516,7 +516,7 @@
 		font-size: 0.8125rem;
 		font-weight: 500;
 		border-radius: 0.375rem;
-		border: 1px solid hsl(var(--theme-border, 220 13% 91%));
+		border: 1px solid hsl(var(--color-border, 220 13% 91%));
 		background: transparent;
 		color: #dc2626;
 		cursor: pointer;

@@ -184,20 +184,20 @@
 		text-align: center;
 		padding: 2rem;
 		border-radius: 1rem;
-		border: 1px solid hsl(var(--theme-border, 220 13% 91%));
-		background: hsl(var(--theme-surface, 0 0% 100%) / 0.5);
+		border: 1px solid hsl(var(--color-border, 220 13% 91%));
+		background: hsl(var(--color-surface, 0 0% 100%) / 0.5);
 	}
 
 	.icon-circle {
 		width: 4rem;
 		height: 4rem;
 		border-radius: 50%;
-		border: 2px solid hsl(var(--theme-border, 220 13% 91%));
+		border: 2px solid hsl(var(--color-border, 220 13% 91%));
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		margin-bottom: 1.25rem;
-		color: hsl(var(--theme-foreground, 220 9% 10%) / 0.7);
+		color: hsl(var(--color-foreground, 220 9% 10%) / 0.7);
 	}
 
 	/* Semantic green kept */
@@ -210,12 +210,12 @@
 		font-size: 1.25rem;
 		font-weight: 600;
 		margin: 0 0 0.5rem;
-		color: hsl(var(--theme-foreground, 220 9% 10%));
+		color: hsl(var(--color-foreground, 220 9% 10%));
 	}
 
 	.onboarding-description {
 		font-size: 0.875rem;
-		color: hsl(var(--theme-muted-foreground, 220 9% 46%));
+		color: hsl(var(--color-muted-foreground, 220 9% 46%));
 		margin: 0 0 1.5rem;
 		line-height: 1.5;
 	}
@@ -245,13 +245,13 @@
 		gap: 0.75rem;
 		padding: 1.25rem;
 		border-radius: 0.75rem;
-		border: 1px solid hsl(var(--theme-border, 220 13% 91%));
-		background: hsl(var(--theme-surface, 0 0% 100%) / 0.5);
+		border: 1px solid hsl(var(--color-border, 220 13% 91%));
+		background: hsl(var(--color-surface, 0 0% 100%) / 0.5);
 		margin-bottom: 1rem;
 	}
 
 	.option-icon {
-		color: hsl(var(--theme-muted-foreground, 220 9% 46%));
+		color: hsl(var(--color-muted-foreground, 220 9% 46%));
 	}
 
 	.option-content {
@@ -262,12 +262,12 @@
 		font-size: 0.9375rem;
 		font-weight: 600;
 		margin: 0 0 0.25rem;
-		color: hsl(var(--theme-foreground, 220 9% 10%));
+		color: hsl(var(--color-foreground, 220 9% 10%));
 	}
 
 	.option-description {
 		font-size: 0.8125rem;
-		color: hsl(var(--theme-muted-foreground, 220 9% 46%));
+		color: hsl(var(--color-muted-foreground, 220 9% 46%));
 		margin: 0;
 		line-height: 1.4;
 	}
@@ -281,7 +281,7 @@
 		font-size: 0.875rem;
 		cursor: pointer;
 		transition: opacity 0.2s;
-		color: hsl(var(--theme-foreground, 220 9% 10%));
+		color: hsl(var(--color-foreground, 220 9% 10%));
 		background: transparent;
 	}
 
@@ -296,7 +296,7 @@
 
 	.hint-text {
 		font-size: 0.8125rem;
-		color: hsl(var(--theme-muted-foreground, 220 9% 46%) / 0.7);
+		color: hsl(var(--color-muted-foreground, 220 9% 46%) / 0.7);
 		margin: 0 0 1.25rem;
 	}
 
@@ -305,14 +305,14 @@
 		border: none;
 		font-size: 0.875rem;
 		font-weight: 500;
-		color: hsl(var(--theme-muted-foreground, 220 9% 46%));
+		color: hsl(var(--color-muted-foreground, 220 9% 46%));
 		cursor: pointer;
 		padding: 0.5rem 1rem;
 		transition: color 0.2s;
 	}
 
 	.skip-button:hover {
-		color: hsl(var(--theme-foreground, 220 9% 10%));
+		color: hsl(var(--color-foreground, 220 9% 10%));
 	}
 
 	.primary-button {
@@ -324,7 +324,7 @@
 		font-size: 0.875rem;
 		cursor: pointer;
 		transition: opacity 0.2s;
-		color: hsl(var(--theme-foreground, 220 9% 10%));
+		color: hsl(var(--color-foreground, 220 9% 10%));
 	}
 
 	.primary-button:hover {

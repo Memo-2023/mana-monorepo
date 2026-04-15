@@ -222,15 +222,15 @@
 	.change-password {
 		padding: 1rem;
 		border-radius: 0.75rem;
-		border: 1px solid hsl(var(--theme-border, 220 13% 91%));
-		background: hsl(var(--theme-surface, 0 0% 100%) / 0.5);
+		border: 1px solid hsl(var(--color-border, 220 13% 91%));
+		background: hsl(var(--color-surface, 0 0% 100%) / 0.5);
 	}
 
 	.section-title {
 		font-size: 1rem;
 		font-weight: 600;
 		margin: 0 0 1rem;
-		color: hsl(var(--theme-foreground, 220 9% 10%));
+		color: hsl(var(--color-foreground, 220 9% 10%));
 	}
 
 	/* Semantic green kept */
@@ -272,7 +272,7 @@
 		font-size: 0.8125rem;
 		font-weight: 500;
 		margin-bottom: 0.375rem;
-		color: hsl(var(--theme-muted-foreground, 220 9% 46%));
+		color: hsl(var(--color-muted-foreground, 220 9% 46%));
 	}
 
 	.input-wrapper {
@@ -283,11 +283,11 @@
 		width: 100%;
 		height: 2.75rem;
 		padding: 0 0.75rem;
-		border: 1px solid hsl(var(--theme-border, 220 13% 91%));
+		border: 1px solid hsl(var(--color-border, 220 13% 91%));
 		border-radius: 0.5rem;
 		font-size: 0.9375rem;
-		background: hsl(var(--theme-background, 0 0% 100%));
-		color: hsl(var(--theme-foreground, 220 9% 10%));
+		background: hsl(var(--color-background, 0 0% 100%));
+		color: hsl(var(--color-foreground, 220 9% 10%));
 		transition:
 			border-color 0.2s,
 			box-shadow 0.2s;
@@ -314,7 +314,7 @@
 		transform: translateY(-50%);
 		background: none;
 		border: none;
-		color: hsl(var(--theme-muted-foreground, 220 9% 46%));
+		color: hsl(var(--color-muted-foreground, 220 9% 46%));
 		cursor: pointer;
 		padding: 0.25rem;
 		display: flex;
@@ -323,13 +323,13 @@
 	}
 
 	.password-toggle:hover {
-		color: hsl(var(--theme-foreground, 220 9% 10%));
+		color: hsl(var(--color-foreground, 220 9% 10%));
 	}
 
 	.field-hint {
 		font-size: 0.75rem;
 		margin: 0.25rem 0 0;
-		color: hsl(var(--theme-muted-foreground, 220 9% 46%) / 0.7);
+		color: hsl(var(--color-muted-foreground, 220 9% 46%) / 0.7);
 	}
 
 	/* Semantic red kept */
@@ -346,7 +346,7 @@
 		font-size: 0.875rem;
 		cursor: pointer;
 		transition: opacity 0.2s;
-		color: hsl(var(--theme-foreground, 220 9% 10%));
+		color: hsl(var(--color-foreground, 220 9% 10%));
 		margin-top: 0.5rem;
 	}
 

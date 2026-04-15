@@ -405,7 +405,7 @@
 		font-size: 1.125rem;
 		font-weight: 600;
 		margin: 0 0 1rem;
-		color: hsl(var(--theme-foreground, 220 9% 10%));
+		color: hsl(var(--color-foreground, 220 9% 10%));
 	}
 
 	/* Warning — semantic amber colors kept */
@@ -469,7 +469,7 @@
 	/* Empty state */
 	.pm-empty {
 		font-size: 0.875rem;
-		color: hsl(var(--theme-muted-foreground, 220 9% 46%));
+		color: hsl(var(--color-muted-foreground, 220 9% 46%));
 		margin: 0 0 1rem;
 	}
 
@@ -485,14 +485,14 @@
 
 	.pm-item {
 		padding: 0.875rem 1rem;
-		background: hsl(var(--theme-muted, 220 14% 96%));
-		border: 1px solid hsl(var(--theme-border, 220 13% 91%));
+		background: hsl(var(--color-muted, 220 14% 96%));
+		border: 1px solid hsl(var(--color-border, 220 13% 91%));
 		border-radius: 0.625rem;
 		transition: border-color 150ms ease;
 	}
 
 	.pm-item:hover {
-		border-color: hsl(var(--theme-foreground, 220 9% 10%) / 0.2);
+		border-color: hsl(var(--color-foreground, 220 9% 10%) / 0.2);
 	}
 
 	/* Item header */
@@ -520,7 +520,7 @@
 	.pm-item-name {
 		font-size: 0.9375rem;
 		font-weight: 500;
-		color: hsl(var(--theme-foreground, 220 9% 10%));
+		color: hsl(var(--color-foreground, 220 9% 10%));
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
@@ -528,7 +528,7 @@
 
 	.pm-item-meta {
 		font-size: 0.75rem;
-		color: hsl(var(--theme-muted-foreground, 220 9% 46%));
+		color: hsl(var(--color-muted-foreground, 220 9% 46%));
 	}
 
 	/* Badges — semantic green/amber colors kept */
@@ -567,7 +567,7 @@
 		gap: 0.375rem;
 		margin-top: 0.625rem;
 		padding-top: 0.625rem;
-		border-top: 1px solid hsl(var(--theme-border, 220 13% 91%));
+		border-top: 1px solid hsl(var(--color-border, 220 13% 91%));
 	}
 
 	/* Buttons */
@@ -603,12 +603,12 @@
 
 	.pm-btn-cancel {
 		background: transparent;
-		color: hsl(var(--theme-muted-foreground, 220 9% 46%));
-		border-color: hsl(var(--theme-border, 220 13% 91%));
+		color: hsl(var(--color-muted-foreground, 220 9% 46%));
+		border-color: hsl(var(--color-border, 220 13% 91%));
 	}
 
 	.pm-btn-cancel:hover:not(:disabled) {
-		background: hsl(var(--theme-muted, 220 14% 96%));
+		background: hsl(var(--color-muted, 220 14% 96%));
 	}
 
 	/* Danger button — semantic red kept */
@@ -624,14 +624,14 @@
 
 	.pm-btn-ghost {
 		background: transparent;
-		color: hsl(var(--theme-muted-foreground, 220 9% 46%));
+		color: hsl(var(--color-muted-foreground, 220 9% 46%));
 		padding: 0.3125rem 0.625rem;
 		font-size: 0.75rem;
 	}
 
 	.pm-btn-ghost:hover:not(:disabled) {
-		background: hsl(var(--theme-muted, 220 14% 96%));
-		color: hsl(var(--theme-foreground, 220 9% 10%));
+		background: hsl(var(--color-muted, 220 14% 96%));
+		color: hsl(var(--color-foreground, 220 9% 10%));
 	}
 
 	/* Danger ghost — semantic red kept */
@@ -665,10 +665,10 @@
 		width: 100%;
 		padding: 0.5rem 0.75rem;
 		font-size: 0.875rem;
-		border: 1px solid hsl(var(--theme-border, 220 13% 91%));
+		border: 1px solid hsl(var(--color-border, 220 13% 91%));
 		border-radius: 0.5rem;
-		background: hsl(var(--theme-background, 0 0% 100%));
-		color: hsl(var(--theme-foreground, 220 9% 10%));
+		background: hsl(var(--color-background, 0 0% 100%));
+		color: hsl(var(--color-foreground, 220 9% 10%));
 		outline: none;
 		transition: border-color 150ms ease;
 		box-sizing: border-box;
@@ -711,7 +711,7 @@
 
 	.pm-confirm-message {
 		font-size: 0.8125rem;
-		color: hsl(var(--theme-muted-foreground, 220 9% 46%));
+		color: hsl(var(--color-muted-foreground, 220 9% 46%));
 		margin: 0 0 0.75rem;
 		line-height: 1.4;
 	}
@@ -725,8 +725,8 @@
 	/* Register form */
 	.pm-register-form {
 		padding: 1rem;
-		background: hsl(var(--theme-muted, 220 14% 96%));
-		border: 1px solid hsl(var(--theme-border, 220 13% 91%));
+		background: hsl(var(--color-muted, 220 14% 96%));
+		border: 1px solid hsl(var(--color-border, 220 13% 91%));
 		border-radius: 0.625rem;
 		display: flex;
 		flex-direction: column;
@@ -736,13 +736,13 @@
 	.pm-register-title {
 		font-size: 0.9375rem;
 		font-weight: 600;
-		color: hsl(var(--theme-foreground, 220 9% 10%));
+		color: hsl(var(--color-foreground, 220 9% 10%));
 		margin: 0;
 	}
 
 	.pm-register-label {
 		font-size: 0.8125rem;
-		color: hsl(var(--theme-muted-foreground, 220 9% 46%));
+		color: hsl(var(--color-muted-foreground, 220 9% 46%));
 	}
 
 	.pm-register-actions {
