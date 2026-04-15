@@ -19,6 +19,11 @@
 		addLabel?: string;
 		page: Snippet<[CarouselPage, number]>;
 		picker?: Snippet;
+		/** Optional content rendered before the first page inside the same
+		 *  scroll track. Used for the scene header on the homepage. Scrolls
+		 *  with the pages (doesn't stay pinned) so it reads as an intro
+		 *  block rather than app chrome. */
+		leading?: Snippet;
 	}
 
 	let {
@@ -33,6 +38,7 @@
 		addLabel = 'Hinzufügen',
 		page: pageSnippet,
 		picker,
+		leading,
 	}: Props = $props();
 
 	let pickerEl = $state<HTMLDivElement | null>(null);
@@ -103,6 +109,9 @@
 
 <div class="carousel-root">
 	<div class="fokus-track" style="--sheet-width: {defaultWidth}px" bind:this={trackEl}>
+		{#if leading}
+			<div class="leading-slot">{@render leading()}</div>
+		{/if}
 		{#each pages as p, idx (p.id)}
 			<div class="page-wrapper" role="listitem" data-page-id={p.id}>
 				{#if mountedIds.has(p.id)}
@@ -162,6 +171,12 @@
 	}
 	.page-wrapper {
 		flex: 0 0 auto;
+	}
+	.leading-slot {
+		flex: 0 0 auto;
+		align-self: stretch;
+		display: flex;
+		align-items: center;
 	}
 	/* Sized stand-in for a not-yet-mounted card. Matches the card's
 	   widthPx/heightPx so scroll position and the surrounding flex
