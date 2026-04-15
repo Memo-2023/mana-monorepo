@@ -1,38 +1,13 @@
 <!--
-  Insights page — local aggregation over `_events` and mission
-  iterations. No server calls; everything comes from Dexie liveQueries.
+  AI Insights app — local aggregation over _events + mission iterations.
 -->
 <script lang="ts">
-	import { PageShell } from '$lib/components/page-carousel';
-	import { COMPANION_PAGE_META } from './page-meta';
 	import { useAiTimeline } from '$lib/data/ai/timeline/queries';
 	import { useMissions } from '$lib/data/ai/missions/queries';
 
-	interface Props {
-		widthPx: number;
-		maximized?: boolean;
-		onClose: () => void;
-		onMaximize: () => void;
-		onResize: (widthPx: number, heightPx?: number) => void;
-		onMoveLeft?: () => void;
-		onMoveRight?: () => void;
-	}
-
-	let {
-		widthPx,
-		maximized = false,
-		onClose,
-		onMaximize,
-		onResize,
-		onMoveLeft,
-		onMoveRight,
-	}: Props = $props();
-
-	const meta = COMPANION_PAGE_META.insights;
 	const events = $derived(useAiTimeline({ limit: 1000 }));
 	const missions = $derived(useMissions());
 
-	// Count events per day across the last 14 days.
 	const perDay = $derived.by(() => {
 		const now = Date.now();
 		const buckets: { day: string; count: number }[] = [];
@@ -49,7 +24,6 @@
 	});
 	const maxPerDay = $derived(Math.max(1, ...perDay.map((b) => b.count)));
 
-	// Aggregate iteration outcomes per mission.
 	const missionStats = $derived.by(() =>
 		missions.value.map((m) => {
 			let approved = 0;
@@ -62,25 +36,15 @@
 				else if (it.overallStatus === 'failed') failed++;
 				else if (it.overallStatus === 'awaiting-review') awaiting++;
 			}
-			return {
-				id: m.id,
-				title: m.title,
-				approved,
-				rejected,
-				failed,
-				awaiting,
-				total: m.iterations.length,
-			};
+			return { id: m.id, title: m.title, approved, rejected, failed, awaiting };
 		})
 	);
 
-	// Top recurring feedback strings from iteration.userFeedback.
 	const topFeedback = $derived.by(() => {
 		const freq = new Map<string, number>();
 		for (const m of missions.value) {
 			for (const it of m.iterations) {
 				if (!it.userFeedback) continue;
-				// Normalize: lowercase + trim. Short strings, no ML tokenizer.
 				const key = it.userFeedback.trim().toLowerCase().slice(0, 80);
 				freq.set(key, (freq.get(key) ?? 0) + 1);
 			}
@@ -91,8 +55,6 @@
 			.map(([text, count]) => ({ text, count }));
 	});
 
-	// Simple approval rate: approved / (approved + rejected), ignoring
-	// awaiting/failed.
 	const approvalRate = $derived.by(() => {
 		let a = 0;
 		let r = 0;
@@ -105,91 +67,75 @@
 	});
 </script>
 
-<PageShell
-	{widthPx}
-	{maximized}
-	{onClose}
-	{onMaximize}
-	{onResize}
-	{onMoveLeft}
-	{onMoveRight}
-	title={meta.title}
-	color={meta.color}
-	icon={meta.icon}
->
-	<div class="ins">
-		<section>
-			<h3>Approval-Rate</h3>
-			{#if approvalRate === null}
-				<p class="empty">Noch nicht genug Daten.</p>
-			{:else}
-				<div class="big">{approvalRate}%</div>
-				<p class="sub">über alle Missions + alle Iterationen</p>
-			{/if}
-		</section>
+<div class="ins">
+	<section>
+		<h3>Approval-Rate</h3>
+		{#if approvalRate === null}
+			<p class="empty">Noch nicht genug Daten.</p>
+		{:else}
+			<div class="big">{approvalRate}%</div>
+			<p class="sub">über alle Missions + alle Iterationen</p>
+		{/if}
+	</section>
 
-		<section>
-			<h3>AI-Events / Tag (14 Tage)</h3>
-			<div class="chart">
-				{#each perDay as b (b.day)}
-					<div class="bar" title={`${b.day}: ${b.count}`}>
-						<span
-							class="fill"
-							style="height: {(b.count / maxPerDay) * 100}%;"
-							class:has-value={b.count > 0}
-						></span>
-					</div>
+	<section>
+		<h3>AI-Events / Tag (14 Tage)</h3>
+		<div class="chart">
+			{#each perDay as b (b.day)}
+				<div class="bar" title={`${b.day}: ${b.count}`}>
+					<span
+						class="fill"
+						style="height: {(b.count / maxPerDay) * 100}%;"
+						class:has-value={b.count > 0}
+					></span>
+				</div>
+			{/each}
+		</div>
+	</section>
+
+	<section>
+		<h3>Pro Mission</h3>
+		{#if missionStats.length === 0}
+			<p class="empty">Keine Missions angelegt.</p>
+		{:else}
+			<ul class="m-stats">
+				{#each missionStats as m (m.id)}
+					<li>
+						<span class="m-title">{m.title}</span>
+						<span class="m-nums">
+							<span class="n ok">{m.approved}</span>·
+							<span class="n ko">{m.rejected}</span>·
+							<span class="n wait">{m.awaiting}</span>·
+							<span class="n err">{m.failed}</span>
+						</span>
+					</li>
 				{/each}
-			</div>
-		</section>
+			</ul>
+			<p class="legend">
+				<span class="n ok">●</span>approved ·
+				<span class="n ko">●</span>rejected ·
+				<span class="n wait">●</span>awaiting ·
+				<span class="n err">●</span>failed
+			</p>
+		{/if}
+	</section>
 
-		<section>
-			<h3>Pro Mission</h3>
-			{#if missionStats.length === 0}
-				<p class="empty">Keine Missions angelegt.</p>
-			{:else}
-				<ul class="m-stats">
-					{#each missionStats as m (m.id)}
-						<li>
-							<span class="m-title">{m.title}</span>
-							<span class="m-nums">
-								<span class="n ok">{m.approved}</span>
-								·
-								<span class="n ko">{m.rejected}</span>
-								·
-								<span class="n wait">{m.awaiting}</span>
-								·
-								<span class="n err">{m.failed}</span>
-							</span>
-						</li>
-					{/each}
-				</ul>
-				<p class="legend">
-					<span class="n ok">●</span>approved ·
-					<span class="n ko">●</span>rejected ·
-					<span class="n wait">●</span>awaiting ·
-					<span class="n err">●</span>failed
-				</p>
-			{/if}
-		</section>
-
-		<section>
-			<h3>Häufigstes Feedback</h3>
-			{#if topFeedback.length === 0}
-				<p class="empty">Noch keine Freitext-Reviews.</p>
-			{:else}
-				<ul class="fb-list">
-					{#each topFeedback as fb}
-						<li>
-							<span class="fb-count">{fb.count}×</span>
-							<span class="fb-text">"{fb.text}"</span>
-						</li>
-					{/each}
-				</ul>
-			{/if}
-		</section>
-	</div>
-</PageShell>
+	<section>
+		<h3>Häufigstes Feedback</h3>
+		{#if topFeedback.length === 0}
+			<p class="empty">Noch keine Freitext-Reviews.</p>
+		{:else}
+			<ul class="fb-list">
+				{#each topFeedback as fb}
+					<li>
+						<span class="fb-count">{fb.count}×</span>
+						<span class="fb-text">"{fb.text}"</span>
+					</li>
+				{/each}
+			</ul>
+		{/if}
+	</section>
+</div>
 
 <style>
 	.ins {
@@ -269,6 +215,7 @@
 	}
 	.n {
 		font-weight: 600;
+		margin: 0 0.125rem;
 	}
 	.n.ok {
 		color: #1b7a3a;

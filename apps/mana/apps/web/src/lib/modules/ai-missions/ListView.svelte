@@ -1,11 +1,10 @@
 <!--
-  Missions page — list ↔ detail in a single panel. Replaces the former
-  /companion/missions sub-route with a master-detail-inline view.
+  AI Missions app — workbench card.
+  Renders inside AppPage, which provides the PageShell + window chrome.
+  Master-detail inline (list ↔ create ↔ detail) in a single panel.
 -->
 <script lang="ts">
-	import { PageShell } from '$lib/components/page-carousel';
 	import { ArrowLeft, Play, Pause, Check, Trash, Plus } from '@mana/shared-icons';
-	import { COMPANION_PAGE_META } from './page-meta';
 	import { useMissions } from '$lib/data/ai/missions/queries';
 	import {
 		createMission,
@@ -20,27 +19,6 @@
 	import MissionInputPicker from '$lib/components/ai/MissionInputPicker.svelte';
 	import type { Mission, MissionCadence, MissionInputRef } from '$lib/data/ai/missions/types';
 
-	interface Props {
-		widthPx: number;
-		maximized?: boolean;
-		onClose: () => void;
-		onMaximize: () => void;
-		onResize: (widthPx: number, heightPx?: number) => void;
-		onMoveLeft?: () => void;
-		onMoveRight?: () => void;
-	}
-
-	let {
-		widthPx,
-		maximized = false,
-		onClose,
-		onMaximize,
-		onResize,
-		onMoveLeft,
-		onMoveRight,
-	}: Props = $props();
-
-	const meta = COMPANION_PAGE_META.missions;
 	const missions = $derived(useMissions());
 
 	let mode = $state<'list' | 'create' | 'detail'>('list');
@@ -49,7 +27,6 @@
 		selectedId ? (missions.value.find((m) => m.id === selectedId) ?? null) : null
 	);
 
-	// ── Create form ────────────────────────────────────────
 	let formTitle = $state('');
 	let formObjective = $state('');
 	let formConcept = $state('');
@@ -97,7 +74,6 @@
 		}
 	}
 
-	// ── Detail actions ─────────────────────────────────────
 	let runningNow = $state(false);
 	async function handleRunNow(m: Mission) {
 		runningNow = true;
@@ -131,13 +107,11 @@
 				return `cron: ${c.expression}`;
 		}
 	}
-
 	function describeState(s: Mission['state']): string {
 		return { active: 'aktiv', paused: 'pausiert', done: 'abgeschlossen', archived: 'archiviert' }[
 			s
 		];
 	}
-
 	function formatRelative(iso: string | undefined): string {
 		if (!iso) return '—';
 		const d = new Date(iso);
@@ -155,209 +129,203 @@
 	}
 </script>
 
-<PageShell
-	{widthPx}
-	{maximized}
-	{onClose}
-	{onMaximize}
-	{onResize}
-	{onMoveLeft}
-	{onMoveRight}
-	title={meta.title}
-	color={meta.color}
-	icon={meta.icon}
->
-	{#if mode === 'list'}
-		<div class="list-pane">
-			<header class="pane-header">
-				<button type="button" class="primary" onclick={() => (mode = 'create')}>
-					<Plus size={14} /><span>Neue Mission</span>
-				</button>
-			</header>
-			{#if missions.value.length === 0}
-				<p class="empty">
-					Keine Missions — lege eine an um die KI dauerhaft für dich arbeiten zu lassen.
-				</p>
-			{:else}
-				<ul class="m-list">
-					{#each missions.value as m (m.id)}
-						<li>
-							<button type="button" class="m-item" onclick={() => openDetail(m.id)}>
-								<span class="m-title">
-									<span class="dot dot-{m.state}"></span>
-									{m.title}
-								</span>
-								<span class="m-meta">
-									<span>{describeCadence(m.cadence)}</span>
-									<span>{m.iterations.length} Iter.</span>
-									{#if m.nextRunAt}
-										<span>next {formatRelative(m.nextRunAt)}</span>
-									{/if}
-								</span>
-							</button>
-						</li>
-					{/each}
-				</ul>
-			{/if}
-		</div>
-	{:else if mode === 'create'}
-		<form class="create" onsubmit={(e) => (e.preventDefault(), handleCreate())}>
-			<button type="button" class="back-btn" onclick={() => (mode = 'list')}>
-				<ArrowLeft size={14} /><span>Abbrechen</span>
+{#if mode === 'list'}
+	<div class="pane">
+		<header class="bar">
+			<button type="button" class="primary" onclick={() => (mode = 'create')}>
+				<Plus size={14} /><span>Neue Mission</span>
 			</button>
-			<label>
-				<span class="lbl">Titel</span>
-				<input bind:value={formTitle} placeholder="z.B. Wöchentlicher Review" required />
-			</label>
-			<label>
-				<span class="lbl">Konkretes Ziel</span>
-				<input bind:value={formObjective} placeholder="Was soll die KI erreichen?" required />
-			</label>
-			<label>
-				<span class="lbl">Konzept (Markdown, optional)</span>
-				<textarea
-					bind:value={formConcept}
-					placeholder="# Rahmen&#10;Erkläre der KI Kontext, Regeln, Grenzen…"
-					rows="5"
-				></textarea>
-			</label>
-			<fieldset>
-				<legend>Inputs (Kontext für die KI)</legend>
-				<MissionInputPicker bind:value={formInputs} />
-			</fieldset>
-			<fieldset>
-				<legend>Cadence</legend>
-				<div class="cadence-row">
-					<label class="inline">
-						<input type="radio" bind:group={formCadenceKind} value="manual" /> Manuell
-					</label>
-					<label class="inline">
-						<input type="radio" bind:group={formCadenceKind} value="interval" /> Intervall
-						{#if formCadenceKind === 'interval'}
-							<input
-								class="inline-num"
-								type="number"
-								bind:value={formIntervalMin}
-								min="5"
-								max="1440"
-							/>
-							<span>min</span>
-						{/if}
-					</label>
-					<label class="inline">
-						<input type="radio" bind:group={formCadenceKind} value="daily" /> Täglich um
-						{#if formCadenceKind === 'daily'}
-							<input class="inline-num" type="number" bind:value={formDailyHour} min="0" max="23" />
-							:00
-						{/if}
-					</label>
-				</div>
-			</fieldset>
-			<div class="form-actions">
-				<button type="submit" class="primary" disabled={creating}>
-					{creating ? 'Erstelle…' : 'Mission anlegen'}
-				</button>
-			</div>
-		</form>
-	{:else if selected}
-		<div class="detail">
-			<button type="button" class="back-btn" onclick={() => (mode = 'list')}>
-				<ArrowLeft size={14} /><span>Liste</span>
-			</button>
-			<h2 class="detail-title">{selected.title}</h2>
-			<div class="detail-actions">
-				<button type="button" onclick={() => handleRunNow(selected)} disabled={runningNow}>
-					<Play size={12} /><span>{runningNow ? 'Läuft…' : 'Jetzt ausführen'}</span>
-				</button>
-				{#if selected.state === 'active'}
-					<button type="button" onclick={() => pauseMission(selected.id)}>
-						<Pause size={12} /><span>Pause</span>
-					</button>
-				{:else if selected.state === 'paused'}
-					<button type="button" onclick={() => resumeMission(selected.id)}>
-						<Play size={12} /><span>Fortsetzen</span>
-					</button>
-				{/if}
-				{#if selected.state !== 'done'}
-					<button type="button" onclick={() => completeMission(selected.id)}>
-						<Check size={12} /><span>Abschließen</span>
-					</button>
-				{/if}
-				<button
-					type="button"
-					class="danger"
-					onclick={() => {
-						if (confirm('Mission löschen?')) {
-							deleteMission(selected.id);
-							mode = 'list';
-							selectedId = null;
-						}
-					}}
-				>
-					<Trash size={12} />
-				</button>
-			</div>
-
-			<dl class="meta">
-				<dt>Ziel</dt>
-				<dd>{selected.objective}</dd>
-				<dt>Cadence</dt>
-				<dd>{describeCadence(selected.cadence)} · {describeState(selected.state)}</dd>
-				<dt>Next</dt>
-				<dd>{formatRelative(selected.nextRunAt)}</dd>
-				<dt>Inputs</dt>
-				<dd>
-					{#if selected.inputs.length === 0}—{:else}
-						{selected.inputs.map((i) => `${i.module}/${i.id}`).join(', ')}
-					{/if}
-				</dd>
-			</dl>
-
-			{#if selected.conceptMarkdown}
-				<details>
-					<summary>Konzept</summary>
-					<pre>{selected.conceptMarkdown}</pre>
-				</details>
-			{/if}
-
-			<h3 class="section-title">Iterationen</h3>
-			{#if selected.iterations.length === 0}
-				<p class="empty">Noch keine Iteration gelaufen.</p>
-			{:else}
-				{#each [...selected.iterations].reverse() as it (it.id)}
-					<article class="it">
-						<header>
-							<span class="it-date">{new Date(it.startedAt).toLocaleString('de-DE')}</span>
-							<span class="badge badge-{it.overallStatus}">{it.overallStatus}</span>
-						</header>
-						{#if it.summary}<p class="it-summary">{it.summary}</p>{/if}
-						{#if it.userFeedback}
-							<blockquote class="fb">{it.userFeedback}</blockquote>
-						{:else if it.overallStatus === 'awaiting-review'}
-							<form
-								class="fb-form"
-								onsubmit={(e) => (e.preventDefault(), handleFeedback(selected, it.id))}
-							>
-								<textarea
-									bind:value={feedbackDraft}
-									placeholder="Feedback für die nächste Iteration…"
-									rows="2"
-								></textarea>
-								<button type="submit" disabled={!feedbackDraft.trim()}>Speichern</button>
-							</form>
-						{/if}
-					</article>
+		</header>
+		{#if missions.value.length === 0}
+			<p class="empty">
+				Keine Missions — lege eine an um die KI dauerhaft für dich arbeiten zu lassen.
+			</p>
+		{:else}
+			<ul class="m-list">
+				{#each missions.value as m (m.id)}
+					<li>
+						<button type="button" class="m-item" onclick={() => openDetail(m.id)}>
+							<span class="m-title">
+								<span class="dot dot-{m.state}"></span>
+								{m.title}
+							</span>
+							<span class="m-meta">
+								<span>{describeCadence(m.cadence)}</span>
+								<span>{m.iterations.length} Iter.</span>
+								{#if m.nextRunAt}
+									<span>next {formatRelative(m.nextRunAt)}</span>
+								{/if}
+							</span>
+						</button>
+					</li>
 				{/each}
-			{/if}
+			</ul>
+		{/if}
+	</div>
+{:else if mode === 'create'}
+	<form class="create" onsubmit={(e) => (e.preventDefault(), handleCreate())}>
+		<button type="button" class="back-btn" onclick={() => (mode = 'list')}>
+			<ArrowLeft size={14} /><span>Abbrechen</span>
+		</button>
+		<label>
+			<span class="lbl">Titel</span>
+			<input bind:value={formTitle} placeholder="z.B. Wöchentlicher Review" required />
+		</label>
+		<label>
+			<span class="lbl">Konkretes Ziel</span>
+			<input bind:value={formObjective} placeholder="Was soll die KI erreichen?" required />
+		</label>
+		<label>
+			<span class="lbl">Konzept (Markdown, optional)</span>
+			<textarea
+				bind:value={formConcept}
+				placeholder="# Rahmen&#10;Erkläre der KI Kontext, Regeln, Grenzen…"
+				rows="5"
+			></textarea>
+		</label>
+		<fieldset>
+			<legend>Inputs (Kontext für die KI)</legend>
+			<MissionInputPicker bind:value={formInputs} />
+		</fieldset>
+		<fieldset>
+			<legend>Cadence</legend>
+			<div class="cadence-row">
+				<label class="inline">
+					<input type="radio" bind:group={formCadenceKind} value="manual" /> Manuell
+				</label>
+				<label class="inline">
+					<input type="radio" bind:group={formCadenceKind} value="interval" /> Intervall
+					{#if formCadenceKind === 'interval'}
+						<input
+							class="inline-num"
+							type="number"
+							bind:value={formIntervalMin}
+							min="5"
+							max="1440"
+						/>
+						<span>min</span>
+					{/if}
+				</label>
+				<label class="inline">
+					<input type="radio" bind:group={formCadenceKind} value="daily" /> Täglich um
+					{#if formCadenceKind === 'daily'}
+						<input class="inline-num" type="number" bind:value={formDailyHour} min="0" max="23" />
+						:00
+					{/if}
+				</label>
+			</div>
+		</fieldset>
+		<div class="form-actions">
+			<button type="submit" class="primary" disabled={creating}>
+				{creating ? 'Erstelle…' : 'Mission anlegen'}
+			</button>
 		</div>
-	{/if}
-</PageShell>
+	</form>
+{:else if selected}
+	<div class="detail">
+		<button type="button" class="back-btn" onclick={() => (mode = 'list')}>
+			<ArrowLeft size={14} /><span>Liste</span>
+		</button>
+		<h2 class="detail-title">{selected.title}</h2>
+		<div class="detail-actions">
+			<button type="button" onclick={() => handleRunNow(selected)} disabled={runningNow}>
+				<Play size={12} /><span>{runningNow ? 'Läuft…' : 'Jetzt ausführen'}</span>
+			</button>
+			{#if selected.state === 'active'}
+				<button type="button" onclick={() => pauseMission(selected.id)}>
+					<Pause size={12} /><span>Pause</span>
+				</button>
+			{:else if selected.state === 'paused'}
+				<button type="button" onclick={() => resumeMission(selected.id)}>
+					<Play size={12} /><span>Fortsetzen</span>
+				</button>
+			{/if}
+			{#if selected.state !== 'done'}
+				<button type="button" onclick={() => completeMission(selected.id)}>
+					<Check size={12} /><span>Abschließen</span>
+				</button>
+			{/if}
+			<button
+				type="button"
+				class="danger"
+				onclick={() => {
+					if (confirm('Mission löschen?')) {
+						deleteMission(selected.id);
+						mode = 'list';
+						selectedId = null;
+					}
+				}}
+			>
+				<Trash size={12} />
+			</button>
+		</div>
+
+		<dl class="meta">
+			<dt>Ziel</dt>
+			<dd>{selected.objective}</dd>
+			<dt>Cadence</dt>
+			<dd>{describeCadence(selected.cadence)} · {describeState(selected.state)}</dd>
+			<dt>Next</dt>
+			<dd>{formatRelative(selected.nextRunAt)}</dd>
+			<dt>Inputs</dt>
+			<dd>
+				{#if selected.inputs.length === 0}—{:else}
+					{selected.inputs.map((i) => `${i.module}/${i.id}`).join(', ')}
+				{/if}
+			</dd>
+		</dl>
+
+		{#if selected.conceptMarkdown}
+			<details>
+				<summary>Konzept</summary>
+				<pre>{selected.conceptMarkdown}</pre>
+			</details>
+		{/if}
+
+		<h3 class="section-title">Iterationen</h3>
+		{#if selected.iterations.length === 0}
+			<p class="empty">Noch keine Iteration gelaufen.</p>
+		{:else}
+			{#each [...selected.iterations].reverse() as it (it.id)}
+				<article class="it">
+					<header>
+						<span class="it-date">{new Date(it.startedAt).toLocaleString('de-DE')}</span>
+						<span class="badge badge-{it.overallStatus}">{it.overallStatus}</span>
+					</header>
+					{#if it.summary}<p class="it-summary">{it.summary}</p>{/if}
+					{#if it.userFeedback}
+						<blockquote class="fb">{it.userFeedback}</blockquote>
+					{:else if it.overallStatus === 'awaiting-review'}
+						<form
+							class="fb-form"
+							onsubmit={(e) => (e.preventDefault(), handleFeedback(selected, it.id))}
+						>
+							<textarea
+								bind:value={feedbackDraft}
+								placeholder="Feedback für die nächste Iteration…"
+								rows="2"
+							></textarea>
+							<button type="submit" disabled={!feedbackDraft.trim()}>Speichern</button>
+						</form>
+					{/if}
+				</article>
+			{/each}
+		{/if}
+	</div>
+{/if}
 
 <style>
-	.pane-header {
+	.pane,
+	.create,
+	.detail {
+		display: flex;
+		flex-direction: column;
+		gap: 0.625rem;
+		padding: 0.75rem 1rem 1.5rem;
+	}
+	.bar {
 		display: flex;
 		justify-content: flex-end;
-		padding: 0.5rem 0.75rem;
 	}
 	.primary {
 		display: inline-flex;
@@ -374,7 +342,6 @@
 	}
 	.primary:disabled {
 		opacity: 0.5;
-		cursor: not-allowed;
 	}
 	.empty {
 		padding: 1.5rem 1rem;
@@ -382,15 +349,10 @@
 		font-size: 0.875rem;
 		text-align: center;
 	}
-	.list-pane {
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-	}
 	.m-list {
 		list-style: none;
 		margin: 0;
-		padding: 0 0.75rem 1rem;
+		padding: 0;
 		display: flex;
 		flex-direction: column;
 		gap: 0.375rem;
@@ -423,7 +385,6 @@
 		width: 0.5rem;
 		height: 0.5rem;
 		border-radius: 999px;
-		flex-shrink: 0;
 	}
 	.dot-active {
 		background: #22c55e;
@@ -442,14 +403,6 @@
 		gap: 0.75rem;
 		font-size: 0.75rem;
 		color: hsl(var(--color-muted-foreground));
-	}
-
-	.create,
-	.detail {
-		display: flex;
-		flex-direction: column;
-		gap: 0.625rem;
-		padding: 0.75rem 1rem 1.5rem;
 	}
 	.back-btn {
 		align-self: flex-start;
@@ -476,7 +429,6 @@
 		font-weight: 600;
 		color: hsl(var(--color-muted-foreground));
 	}
-	.create input[type='text'],
 	.create input:not([type]),
 	.create textarea {
 		padding: 0.375rem 0.5rem;
@@ -510,7 +462,6 @@
 		display: flex;
 		justify-content: flex-end;
 	}
-
 	.detail-title {
 		margin: 0;
 		font-size: 1.125rem;

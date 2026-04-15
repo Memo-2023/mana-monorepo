@@ -1,37 +1,13 @@
 <!--
-  Workbench page — AI activity timeline grouped by mission iteration,
-  with per-bucket Revert button. Replaces /companion/workbench.
+  AI Workbench app — timeline of AI activity, grouped per mission
+  iteration. Per-bucket Revert button.
 -->
 <script lang="ts">
-	import { PageShell } from '$lib/components/page-carousel';
 	import { ArrowSquareOut, ArrowCounterClockwise } from '@mana/shared-icons';
-	import { COMPANION_PAGE_META } from './page-meta';
 	import { useAiTimeline, bucketByIteration } from '$lib/data/ai/timeline/queries';
 	import { useMissions } from '$lib/data/ai/missions/queries';
 	import { revertIteration } from '$lib/data/ai/revert/revert-iteration';
 	import type { DomainEvent } from '$lib/data/events/types';
-
-	interface Props {
-		widthPx: number;
-		maximized?: boolean;
-		onClose: () => void;
-		onMaximize: () => void;
-		onResize: (widthPx: number, heightPx?: number) => void;
-		onMoveLeft?: () => void;
-		onMoveRight?: () => void;
-	}
-
-	let {
-		widthPx,
-		maximized = false,
-		onClose,
-		onMaximize,
-		onResize,
-		onMoveLeft,
-		onMoveRight,
-	}: Props = $props();
-
-	const meta = COMPANION_PAGE_META.workbench;
 
 	let moduleFilter = $state<string | null>(null);
 	let missionFilter = $state<string | null>(null);
@@ -56,7 +32,6 @@
 				: undefined;
 		return title ? `${e.type} · ${title}` : e.type;
 	}
-
 	function formatTime(iso: string) {
 		return new Date(iso).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
 	}
@@ -65,9 +40,9 @@
 	}
 
 	let revertingKey = $state<string | null>(null);
-	async function handleRevert(bucketKey: string, missionId: string, iterationId: string) {
+	async function handleRevert(key: string, missionId: string, iterationId: string) {
 		if (!confirm('Alle AI-Writes dieser Iteration zurücknehmen?')) return;
-		revertingKey = bucketKey;
+		revertingKey = key;
 		try {
 			const stats = await revertIteration(missionId, iterationId);
 			const parts = [`${stats.reverted} zurückgenommen`];
@@ -75,7 +50,7 @@
 			if (stats.failed > 0) parts.push(`${stats.failed} fehlgeschlagen`);
 			alert(parts.join(' · '));
 		} catch (err) {
-			console.error('[workbench] revert failed:', err);
+			console.error(err);
 			alert('Revert fehlgeschlagen — siehe Console.');
 		} finally {
 			revertingKey = null;
@@ -83,89 +58,76 @@
 	}
 </script>
 
-<PageShell
-	{widthPx}
-	{maximized}
-	{onClose}
-	{onMaximize}
-	{onResize}
-	{onMoveLeft}
-	{onMoveRight}
-	title={meta.title}
-	color={meta.color}
-	icon={meta.icon}
->
-	<div class="wb">
-		<div class="filters">
-			<label>
-				<span class="lbl">Modul</span>
-				<select bind:value={moduleFilter}>
-					<option value={null}>alle</option>
-					{#each allModules as m}
-						<option value={m}>{m}</option>
-					{/each}
-				</select>
-			</label>
-			<label>
-				<span class="lbl">Mission</span>
-				<select bind:value={missionFilter}>
-					<option value={null}>alle</option>
-					{#each missions.value as m (m.id)}
-						<option value={m.id}>{m.title}</option>
-					{/each}
-				</select>
-			</label>
-		</div>
-
-		{#if buckets.length === 0}
-			<p class="empty">
-				Noch keine AI-Aktivität{moduleFilter ? ` in ${moduleFilter}` : ''}. Sobald eine Mission
-				läuft und Proposals approved werden, erscheinen hier die Änderungen.
-			</p>
-		{:else}
-			<ol class="timeline">
-				{#each buckets as b (b.key)}
-					<li class="bucket">
-						<header class="bucket-head">
-							<div class="when">
-								<span class="date">{formatDate(b.firstTimestamp)}</span>
-								<span class="time">{formatTime(b.firstTimestamp)}</span>
-							</div>
-							<div class="title-col">
-								<span class="mission-title">
-									{missionTitleById.get(b.missionId) ?? b.missionId}
-								</span>
-								{#if b.rationale}
-									<p class="rationale">{b.rationale}</p>
-								{/if}
-							</div>
-							<button
-								type="button"
-								class="revert"
-								disabled={revertingKey !== null}
-								onclick={() => handleRevert(b.key, b.missionId, b.iterationId)}
-							>
-								<ArrowCounterClockwise size={12} />
-								<span>{revertingKey === b.key ? 'Läuft…' : 'Revert'}</span>
-							</button>
-						</header>
-						<ul class="events">
-							{#each b.events as e (e.meta.id)}
-								<li class="event">
-									<span class="mod">{e.meta.appId}</span>
-									<span class="desc">{describeEvent(e)}</span>
-									<a class="link" href={`/${e.meta.appId}`} title="Zum Modul">
-										<ArrowSquareOut size={11} />
-									</a>
-								</li>
-							{/each}
-						</ul>
-					</li>
+<div class="wb">
+	<div class="filters">
+		<label>
+			<span class="lbl">Modul</span>
+			<select bind:value={moduleFilter}>
+				<option value={null}>alle</option>
+				{#each allModules as m}
+					<option value={m}>{m}</option>
 				{/each}
-			</ol>
-		{/if}
+			</select>
+		</label>
+		<label>
+			<span class="lbl">Mission</span>
+			<select bind:value={missionFilter}>
+				<option value={null}>alle</option>
+				{#each missions.value as m (m.id)}
+					<option value={m.id}>{m.title}</option>
+				{/each}
+			</select>
+		</label>
 	</div>
-</PageShell>
+
+	{#if buckets.length === 0}
+		<p class="empty">
+			Noch keine AI-Aktivität. Sobald eine Mission läuft und Proposals approved werden, erscheinen
+			hier die Änderungen.
+		</p>
+	{:else}
+		<ol class="timeline">
+			{#each buckets as b (b.key)}
+				<li class="bucket">
+					<header class="bucket-head">
+						<div class="when">
+							<span class="date">{formatDate(b.firstTimestamp)}</span>
+							<span class="time">{formatTime(b.firstTimestamp)}</span>
+						</div>
+						<div class="title-col">
+							<span class="mission-title">
+								{missionTitleById.get(b.missionId) ?? b.missionId}
+							</span>
+							{#if b.rationale}
+								<p class="rationale">{b.rationale}</p>
+							{/if}
+						</div>
+						<button
+							type="button"
+							class="revert"
+							disabled={revertingKey !== null}
+							onclick={() => handleRevert(b.key, b.missionId, b.iterationId)}
+						>
+							<ArrowCounterClockwise size={12} />
+							<span>{revertingKey === b.key ? 'Läuft…' : 'Revert'}</span>
+						</button>
+					</header>
+					<ul class="events">
+						{#each b.events as e (e.meta.id)}
+							<li class="event">
+								<span class="mod">{e.meta.appId}</span>
+								<span class="desc">{describeEvent(e)}</span>
+								<a class="link" href={`/${e.meta.appId}`} title="Zum Modul">
+									<ArrowSquareOut size={11} />
+								</a>
+							</li>
+						{/each}
+					</ul>
+				</li>
+			{/each}
+		</ol>
+	{/if}
+</div>
 
 <style>
 	.wb {

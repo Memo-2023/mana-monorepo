@@ -56,6 +56,9 @@ import {
 	Pulse,
 	Robot,
 	Target,
+	Flag,
+	Notebook,
+	Heartbeat,
 	Smiley,
 	Gear,
 	Palette,
@@ -985,6 +988,71 @@ registerApp({
 	icon: Robot,
 	views: {
 		list: { load: () => import('$lib/modules/companion/ListView.svelte') },
+	},
+});
+
+// ── AI Workbench apps — each feature is its own top-level app so it
+// can live alongside other modules in the user's scene. Colors loosely
+// group them: green=missions, amber=audit, pink=rituals, orange=policy,
+// violet=insights, emerald=health.
+
+registerApp({
+	id: 'ai-missions',
+	name: 'AI Missions',
+	color: '#22C55E',
+	icon: Flag,
+	views: {
+		list: { load: () => import('$lib/modules/ai-missions/ListView.svelte') },
+	},
+});
+
+registerApp({
+	id: 'ai-workbench',
+	name: 'AI Workbench',
+	color: '#F59E0B',
+	icon: Notebook,
+	views: {
+		list: { load: () => import('$lib/modules/ai-workbench/ListView.svelte') },
+	},
+});
+
+registerApp({
+	id: 'ai-rituals',
+	name: 'AI Rituale',
+	color: '#EC4899',
+	icon: Lightning,
+	views: {
+		list: { load: () => import('$lib/modules/ai-rituals/ListView.svelte') },
+	},
+});
+
+registerApp({
+	id: 'ai-policy',
+	name: 'AI Policy',
+	color: '#F97316',
+	icon: Flag,
+	views: {
+		list: { load: () => import('$lib/modules/ai-policy/ListView.svelte') },
+	},
+});
+
+registerApp({
+	id: 'ai-insights',
+	name: 'AI Insights',
+	color: '#8B5CF6',
+	icon: Notebook,
+	views: {
+		list: { load: () => import('$lib/modules/ai-insights/ListView.svelte') },
+	},
+});
+
+registerApp({
+	id: 'ai-health',
+	name: 'AI Health',
+	color: '#10B981',
+	icon: Heartbeat,
+	views: {
+		list: { load: () => import('$lib/modules/ai-health/ListView.svelte') },
 	},
 });
 

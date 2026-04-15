@@ -1,42 +1,12 @@
 <!--
-  Policy page — lets the user override per-tool AI policy decisions
-  (auto / propose / deny). Overrides stored in localStorage and merged
-  into `getAiPolicy()` on the fly via `setAiPolicy`.
-
-  Note: the active tool registry (`getTools()`) only contains tools
-  that modules have registered so far in the current session. For the
-  editor to show every tool on first load, the tool-registration
-  modules need to have been initialized — which they are, via
-  `initTools()` in (app)/+layout.svelte.
+  AI Policy app — per-tool 3-way toggle (auto / propose / deny).
+  Overrides stored in localStorage, merged into DEFAULT_AI_POLICY.
 -->
 <script lang="ts">
-	import { PageShell } from '$lib/components/page-carousel';
-	import { COMPANION_PAGE_META } from './page-meta';
 	import { getTools } from '$lib/data/tools/registry';
 	import { DEFAULT_AI_POLICY, setAiPolicy, getAiPolicy } from '$lib/data/ai/policy';
 	import type { PolicyDecision, AiPolicy } from '$lib/data/ai/policy';
 
-	interface Props {
-		widthPx: number;
-		maximized?: boolean;
-		onClose: () => void;
-		onMaximize: () => void;
-		onResize: (widthPx: number, heightPx?: number) => void;
-		onMoveLeft?: () => void;
-		onMoveRight?: () => void;
-	}
-
-	let {
-		widthPx,
-		maximized = false,
-		onClose,
-		onMaximize,
-		onResize,
-		onMoveLeft,
-		onMoveRight,
-	}: Props = $props();
-
-	const meta = COMPANION_PAGE_META.policy;
 	const STORAGE_KEY = 'ai:policyOverrides';
 
 	function loadOverrides(): Record<string, PolicyDecision> {
@@ -49,7 +19,6 @@
 			return {};
 		}
 	}
-
 	function saveOverrides(overrides: Record<string, PolicyDecision>): void {
 		if (typeof localStorage === 'undefined') return;
 		try {
@@ -58,7 +27,6 @@
 			// ignore
 		}
 	}
-
 	function applyPolicy(overrides: Record<string, PolicyDecision>): void {
 		const nextPolicy: AiPolicy = {
 			...DEFAULT_AI_POLICY,
@@ -88,7 +56,6 @@
 		if (overrides[toolName]) return overrides[toolName];
 		return getAiPolicy().tools[toolName] ?? getAiPolicy().defaultForAi;
 	}
-
 	function setDecision(toolName: string, d: PolicyDecision): void {
 		const dflt = DEFAULT_AI_POLICY.tools[toolName] ?? DEFAULT_AI_POLICY.defaultForAi;
 		if (d === dflt) {
@@ -98,75 +65,59 @@
 			overrides = { ...overrides, [toolName]: d };
 		}
 	}
-
 	function resetAll() {
 		if (!confirm('Alle Policy-Überschreibungen zurücksetzen?')) return;
 		overrides = {};
 	}
-
 	const hasOverrides = $derived(Object.keys(overrides).length > 0);
 </script>
 
-<PageShell
-	{widthPx}
-	{maximized}
-	{onClose}
-	{onMaximize}
-	{onResize}
-	{onMoveLeft}
-	{onMoveRight}
-	title={meta.title}
-	color={meta.color}
-	icon={meta.icon}
->
-	<div class="policy">
-		<header class="info">
-			<p>
-				Pro Tool festlegen was passiert wenn die KI es aufruft.
-				<strong>auto</strong> führt sofort aus,
-				<strong>propose</strong> stagt als Vorschlag zur Freigabe,
-				<strong>deny</strong> sperrt das Tool komplett.
-			</p>
-			{#if hasOverrides}
-				<button type="button" class="reset" onclick={resetAll}>
-					Zurücksetzen ({Object.keys(overrides).length})
-				</button>
-			{/if}
-		</header>
+<div class="policy">
+	<header class="info">
+		<p>
+			Pro Tool festlegen was passiert wenn die KI es aufruft.
+			<strong>auto</strong> führt sofort aus, <strong>propose</strong> stagt als Vorschlag,
+			<strong>deny</strong> sperrt das Tool komplett.
+		</p>
+		{#if hasOverrides}
+			<button type="button" class="reset" onclick={resetAll}>
+				Zurücksetzen ({Object.keys(overrides).length})
+			</button>
+		{/if}
+	</header>
 
-		{#each grouped as [mod, list] (mod)}
-			<section>
-				<h3>{mod}</h3>
-				<ul>
-					{#each list as t (t.name)}
-						{@const current = decide(t.name)}
-						{@const overridden = overrides[t.name] !== undefined}
-						<li class:overridden>
-							<div class="t-info">
-								<span class="t-name">{t.name}</span>
-								<span class="t-desc">{t.description}</span>
-							</div>
-							<div class="t-picker" role="radiogroup" aria-label={t.name}>
-								{#each ['auto', 'propose', 'deny'] as PolicyDecision[] as d}
-									<button
-										type="button"
-										class="pill pill-{d}"
-										class:active={current === d}
-										onclick={() => setDecision(t.name, d)}
-										aria-checked={current === d}
-										role="radio"
-									>
-										{d}
-									</button>
-								{/each}
-							</div>
-						</li>
-					{/each}
-				</ul>
-			</section>
-		{/each}
-	</div>
-</PageShell>
+	{#each grouped as [mod, list] (mod)}
+		<section>
+			<h3>{mod}</h3>
+			<ul>
+				{#each list as t (t.name)}
+					{@const current = decide(t.name)}
+					{@const overridden = overrides[t.name] !== undefined}
+					<li class:overridden>
+						<div class="t-info">
+							<span class="t-name">{t.name}</span>
+							<span class="t-desc">{t.description}</span>
+						</div>
+						<div class="t-picker" role="radiogroup" aria-label={t.name}>
+							{#each ['auto', 'propose', 'deny'] as PolicyDecision[] as d}
+								<button
+									type="button"
+									class="pill pill-{d}"
+									class:active={current === d}
+									onclick={() => setDecision(t.name, d)}
+									aria-checked={current === d}
+									role="radio"
+								>
+									{d}
+								</button>
+							{/each}
+						</div>
+					</li>
+				{/each}
+			</ul>
+		</section>
+	{/each}
+</div>
 
 <style>
 	.policy {

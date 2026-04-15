@@ -1,36 +1,12 @@
 <!--
-  Rituals page — guided routines. Wraps the existing RitualRunner
-  component from the companion module.
+  AI Rituals app — guided routines. Wraps the existing RitualRunner.
 -->
 <script lang="ts">
-	import { PageShell } from '$lib/components/page-carousel';
 	import { Plus, Play, Trash } from '@mana/shared-icons';
 	import RitualRunner from '$lib/modules/companion/components/RitualRunner.svelte';
 	import { ritualStore, useAllRituals, RITUAL_TEMPLATES } from '$lib/companion/rituals';
 	import type { LocalRitual } from '$lib/companion/rituals/types';
-	import { COMPANION_PAGE_META } from './page-meta';
 
-	interface Props {
-		widthPx: number;
-		maximized?: boolean;
-		onClose: () => void;
-		onMaximize: () => void;
-		onResize: (widthPx: number, heightPx?: number) => void;
-		onMoveLeft?: () => void;
-		onMoveRight?: () => void;
-	}
-
-	let {
-		widthPx,
-		maximized = false,
-		onClose,
-		onMaximize,
-		onResize,
-		onMoveLeft,
-		onMoveRight,
-	}: Props = $props();
-
-	const meta = COMPANION_PAGE_META.rituals;
 	const rituals = useAllRituals();
 	let activeRitual = $state<LocalRitual | null>(null);
 	let showTemplates = $state(false);
@@ -43,68 +19,55 @@
 	}
 </script>
 
-<PageShell
-	{widthPx}
-	{maximized}
-	{onClose}
-	{onMaximize}
-	{onResize}
-	{onMoveLeft}
-	{onMoveRight}
-	title={meta.title}
-	color={meta.color}
-	icon={meta.icon}
->
-	<div class="r">
-		{#if activeRitual}
-			<button class="back" onclick={() => (activeRitual = null)}>← Zurück</button>
-			<RitualRunner
-				ritual={activeRitual}
-				onComplete={() => (activeRitual = null)}
-				onClose={() => (activeRitual = null)}
-			/>
-		{:else}
-			<header class="bar">
-				<button type="button" class="primary" onclick={() => (showTemplates = !showTemplates)}>
-					<Plus size={14} /><span>Aus Template</span>
-				</button>
-			</header>
+<div class="r">
+	{#if activeRitual}
+		<button class="back" onclick={() => (activeRitual = null)}>← Zurück</button>
+		<RitualRunner
+			ritual={activeRitual}
+			onComplete={() => (activeRitual = null)}
+			onClose={() => (activeRitual = null)}
+		/>
+	{:else}
+		<header class="bar">
+			<button type="button" class="primary" onclick={() => (showTemplates = !showTemplates)}>
+				<Plus size={14} /><span>Aus Template</span>
+			</button>
+		</header>
 
-			{#if showTemplates}
-				<div class="templates">
-					{#each RITUAL_TEMPLATES as t}
-						<button type="button" class="template" onclick={() => createFromTemplate(t.id)}>
-							<strong>{t.title}</strong>
-							<span>{t.description ?? ''}</span>
-						</button>
-					{/each}
-				</div>
-			{/if}
-
-			<ul class="list">
-				{#each rituals.value as r (r.id)}
-					<li class="item">
-						<button type="button" class="item-main" onclick={() => (activeRitual = r)}>
-							<Play size={12} />
-							<span>{r.title}</span>
-						</button>
-						<button
-							type="button"
-							class="item-del"
-							onclick={() => ritualStore.delete(r.id)}
-							title="Löschen"
-						>
-							<Trash size={11} />
-						</button>
-					</li>
+		{#if showTemplates}
+			<div class="templates">
+				{#each RITUAL_TEMPLATES as t}
+					<button type="button" class="template" onclick={() => createFromTemplate(t.id)}>
+						<strong>{t.title}</strong>
+						<span>{t.description ?? ''}</span>
+					</button>
 				{/each}
-				{#if rituals.value.length === 0 && !showTemplates}
-					<li class="empty">Noch keine Rituale — erstelle eines aus einer Vorlage oben.</li>
-				{/if}
-			</ul>
+			</div>
 		{/if}
-	</div>
-</PageShell>
+
+		<ul class="list">
+			{#each rituals.value as r (r.id)}
+				<li class="item">
+					<button type="button" class="item-main" onclick={() => (activeRitual = r)}>
+						<Play size={12} />
+						<span>{r.title}</span>
+					</button>
+					<button
+						type="button"
+						class="item-del"
+						onclick={() => ritualStore.delete(r.id)}
+						title="Löschen"
+					>
+						<Trash size={11} />
+					</button>
+				</li>
+			{/each}
+			{#if rituals.value.length === 0 && !showTemplates}
+				<li class="empty">Noch keine Rituale — erstelle eines aus einer Vorlage oben.</li>
+			{/if}
+		</ul>
+	{/if}
+</div>
 
 <style>
 	.r {
