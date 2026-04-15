@@ -45,7 +45,12 @@ export const aiPlanTask: LlmTask<AiPlanInput, AiPlanOutput> = {
 				{ role: 'user', content: user },
 			],
 			temperature: 0.3,
-			maxTokens: 1024,
+			// 1024 truncates mid-response when the planner proposes 3+ steps with
+			// rich rationales — the reasoning loop amplifies this because a
+			// single round can legitimately stage one step per listed item
+			// (e.g. 10 notes → 10 add_tag_to_note calls). 4096 fits ~15-20
+			// step objects while still fast on browser tier.
+			maxTokens: 4096,
 		});
 
 		// Always populate debug payload (cheap — strings already in memory).
