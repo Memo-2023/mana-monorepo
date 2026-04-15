@@ -17,5 +17,5 @@
 		title="Allgemein"
 		description="Theme, Sprache & Benachrichtigungen"
 	/>
-	<GlobalSettingsSection {userSettings} appId="mana" title="" />
+	<GlobalSettingsSection {userSettings} appId="mana" showTheme={false} title="" />
 </SettingsPanel>
