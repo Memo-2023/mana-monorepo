@@ -416,6 +416,34 @@
 					{/if}
 
 					{#if it.summary}<p class="it-summary">{it.summary}</p>{/if}
+
+					{#if it.overallStatus === 'failed' && it.errorDetails}
+						<details class="err-details">
+							<summary>
+								<span class="err-name">{it.errorDetails.name}</span>
+								{#if it.errorDetails.phase}
+									<span class="err-phase"
+										>in {PHASE_LABELS[it.errorDetails.phase] ?? it.errorDetails.phase}</span
+									>
+								{/if}
+							</summary>
+							<p class="err-message">{it.errorDetails.message}</p>
+							{#if it.errorDetails.stack}
+								<pre class="err-stack">{it.errorDetails.stack}</pre>
+							{/if}
+						</details>
+						<div class="retry-row">
+							<button
+								type="button"
+								class="retry-btn"
+								disabled={runningNow}
+								onclick={() => handleRunNow(selected)}
+							>
+								{runningNow ? 'Läuft…' : '↻ Erneut versuchen'}
+							</button>
+						</div>
+					{/if}
+
 					{#if it.userFeedback}
 						<blockquote class="fb">{it.userFeedback}</blockquote>
 					{:else if it.overallStatus === 'awaiting-review'}
@@ -740,6 +768,68 @@
 		border-color: #e99;
 	}
 	.cancel-btn:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+	.err-details {
+		margin-top: 0.375rem;
+		border: 1px solid #f7d7d7;
+		border-radius: 0.375rem;
+		padding: 0.375rem 0.5rem;
+		background: color-mix(in oklab, #8a1b1b 4%, transparent);
+		font-size: 0.8125rem;
+	}
+	.err-details summary {
+		cursor: pointer;
+		display: flex;
+		gap: 0.375rem;
+		align-items: center;
+	}
+	.err-name {
+		font-family: var(--font-mono, ui-monospace, monospace);
+		font-weight: 600;
+		color: #8a1b1b;
+	}
+	.err-phase {
+		color: hsl(var(--color-muted-foreground));
+		font-size: 0.75rem;
+	}
+	.err-message {
+		margin: 0.375rem 0 0;
+		color: #6a1515;
+		word-break: break-word;
+	}
+	.err-stack {
+		margin: 0.375rem 0 0;
+		padding: 0.375rem 0.5rem;
+		background: hsl(var(--color-surface));
+		border-radius: 0.25rem;
+		font-family: var(--font-mono, ui-monospace, monospace);
+		font-size: 0.6875rem;
+		max-height: 10rem;
+		overflow: auto;
+		white-space: pre-wrap;
+		color: hsl(var(--color-muted-foreground));
+	}
+	.retry-row {
+		display: flex;
+		justify-content: flex-end;
+		margin-top: 0.375rem;
+	}
+	.retry-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.25rem;
+		padding: 0.25rem 0.625rem;
+		border: 1px solid color-mix(in oklab, hsl(var(--color-primary)) 45%, transparent);
+		border-radius: 0.25rem;
+		background: color-mix(in oklab, hsl(var(--color-primary)) 12%, hsl(var(--color-surface)));
+		color: hsl(var(--color-primary));
+		cursor: pointer;
+		font: inherit;
+		font-size: 0.75rem;
+	}
+	.retry-btn:disabled {
 		opacity: 0.5;
 		cursor: not-allowed;
 	}

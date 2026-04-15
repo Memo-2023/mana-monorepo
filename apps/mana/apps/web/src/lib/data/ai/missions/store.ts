@@ -276,6 +276,8 @@ export interface FinishIterationInput {
 	overallStatus: MissionIteration['overallStatus'];
 	/** Replace the plan with the post-run state (steps with proposal ids / final statuses). */
 	plan?: PlanStep[];
+	/** Diagnostic detail for failed iterations — surfaced in the UI. */
+	errorDetails?: MissionIteration['errorDetails'];
 }
 
 export async function finishIteration(
@@ -292,8 +294,16 @@ export async function finishIteration(
 					...it,
 					finishedAt: new Date().toISOString(),
 					overallStatus: input.overallStatus,
+					// Clear in-flight phase markers — the iteration has finalised.
+					currentPhase: undefined,
+					phaseStartedAt: undefined,
+					phaseDetail: undefined,
+					cancelRequested: undefined,
 					...(input.summary !== undefined ? { summary: input.summary } : {}),
 					...(input.plan !== undefined ? { plan: deepClone(input.plan) } : {}),
+					...(input.errorDetails !== undefined
+						? { errorDetails: deepClone(input.errorDetails) }
+						: {}),
 				}
 			: it
 	);

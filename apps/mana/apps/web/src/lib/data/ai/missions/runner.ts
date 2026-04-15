@@ -120,6 +120,18 @@ export async function runMission(
 		}
 	}
 
+	// Track the phase that was last active — so a catch handler can
+	// attribute the error ("calling-llm" vs "parsing-response" is
+	// enough context for most debugging without a stack trace).
+	let lastPhase: import('@mana/shared-ai').IterationPhase | undefined;
+	async function enterPhase(
+		phase: import('@mana/shared-ai').IterationPhase,
+		detail?: string
+	): Promise<void> {
+		lastPhase = phase;
+		await setIterationPhase(mission!.id, iterationId, phase, detail);
+	}
+
 	async function runPipeline(): Promise<{
 		recordedSteps: PlanStep[];
 		stagedCount: number;
@@ -128,9 +140,7 @@ export async function runMission(
 		planStepCount: number;
 	}> {
 		// ── Phase: resolving-inputs ────────────────────────────
-		await setIterationPhase(
-			mission!.id,
-			iterationId,
+		await enterPhase(
 			'resolving-inputs',
 			mission!.inputs.length > 0 ? `${mission!.inputs.length} Input(s)` : 'keine Inputs'
 		);
@@ -139,17 +149,12 @@ export async function runMission(
 		await checkCancel();
 
 		// ── Phase: calling-llm ─────────────────────────────────
-		await setIterationPhase(mission!.id, iterationId, 'calling-llm', 'frage Planner an');
+		await enterPhase('calling-llm', 'frage Planner an');
 		const plan = await deps.plan({ mission: mission!, resolvedInputs, availableTools });
 		await checkCancel();
 
 		// ── Phase: parsing-response ────────────────────────────
-		await setIterationPhase(
-			mission!.id,
-			iterationId,
-			'parsing-response',
-			`${plan.steps.length} Step(s) erhalten`
-		);
+		await enterPhase('parsing-response', `${plan.steps.length} Step(s) erhalten`);
 		await checkCancel();
 
 		// ── Phase: staging-proposals ───────────────────────────
@@ -159,12 +164,7 @@ export async function runMission(
 		let failedCount = 0;
 
 		for (const [i, ps] of plan.steps.entries()) {
-			await setIterationPhase(
-				mission!.id,
-				iterationId,
-				'staging-proposals',
-				`Step ${i + 1} von ${plan.steps.length}`
-			);
+			await enterPhase('staging-proposals', `Step ${i + 1} von ${plan.steps.length}`);
 			await checkCancel();
 
 			const outcome = await stage(ps, aiActor);
@@ -188,7 +188,7 @@ export async function runMission(
 			}
 		}
 
-		await setIterationPhase(mission!.id, iterationId, 'finalizing');
+		await enterPhase('finalizing');
 		return {
 			recordedSteps,
 			stagedCount,
@@ -216,6 +216,12 @@ export async function runMission(
 		await finishIteration(mission.id, iterationId, {
 			summary: isCancellation ? msg : `Planner failed: ${msg}`,
 			overallStatus: 'failed',
+			errorDetails: {
+				name: err instanceof Error ? err.name : 'UnknownError',
+				message: msg,
+				phase: lastPhase,
+				stack: err instanceof Error ? err.stack : undefined,
+			},
 		});
 		return emptyResult(mission, iterationId, 'failed', msg);
 	}

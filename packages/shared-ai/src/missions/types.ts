@@ -71,6 +71,20 @@ export interface MissionIteration {
 	 * pre-server iterations.
 	 */
 	readonly source?: 'browser' | 'server';
+	/**
+	 * Full diagnostic detail for failed iterations. Populated when the
+	 * runner catches an error; omitted on success / cancel.
+	 *
+	 * `phase` is the last phase the iteration was in before failing —
+	 * usually enough to diagnose without a stack trace ("timeout in
+	 * calling-llm" is already actionable).
+	 */
+	readonly errorDetails?: {
+		readonly name: string;
+		readonly message: string;
+		readonly phase?: IterationPhase;
+		readonly stack?: string;
+	};
 	/** Sub-status while `overallStatus === 'running'`. Undefined otherwise. */
 	readonly currentPhase?: IterationPhase;
 	/** When the runner advanced into the current phase — for elapsed-in-phase. */
