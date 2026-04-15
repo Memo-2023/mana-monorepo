@@ -11,6 +11,7 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY services/mana-auth/package.json ./services/mana-auth/
 COPY packages/shared-hono ./packages/shared-hono
 COPY packages/shared-ai ./packages/shared-ai
+COPY packages/shared-logger ./packages/shared-logger
 
 # Install only mana-auth and its workspace deps
 RUN pnpm install --filter @mana/auth... --no-frozen-lockfile --ignore-scripts
