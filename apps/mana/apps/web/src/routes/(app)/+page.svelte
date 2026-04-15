@@ -2,7 +2,6 @@
 	import AppPage from '$lib/components/workbench/AppPage.svelte';
 	import AppPagePicker from '$lib/components/workbench/AppPagePicker.svelte';
 	import SceneAppBar from '$lib/components/workbench/SceneAppBar.svelte';
-	import SceneRenameDialog from '$lib/components/workbench/scenes/SceneRenameDialog.svelte';
 	import SceneHeader from '$lib/components/workbench/scenes/SceneHeader.svelte';
 	import ConfirmDialog from '$lib/components/workbench/scenes/ConfirmDialog.svelte';
 	import { PageCarousel, type CarouselPage } from '$lib/components/page-carousel';
@@ -119,6 +118,32 @@
 		const el = document.querySelector(`[data-page-id="${id}"]`);
 		if (el) el.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
 	}
+
+	function scrollCarouselToStart() {
+		// Reset the horizontal scroll position so the SceneHeader (first
+		// item in the track) is visible — used after switching scenes so
+		// the user lands on the new scene's intro rather than wherever
+		// the previous scene was scrolled to.
+		const track = document.querySelector<HTMLElement>('.fokus-track');
+		track?.scrollTo({ left: 0, behavior: 'smooth' });
+	}
+
+	// ── Reset scroll on scene switch ────────────────────────
+	// Watches activeSceneId. On the first tick (initial mount) we skip
+	// the scroll because that's just the hydration pass — otherwise we
+	// would fight the carousel's own centre-the-first-card layout.
+	let lastSceneId: string | null = null;
+	$effect(() => {
+		const id = activeSceneId;
+		if (lastSceneId === null) {
+			lastSceneId = id;
+			return;
+		}
+		if (id !== lastSceneId) {
+			lastSceneId = id;
+			scrollCarouselToStart();
+		}
+	});
 
 	// ── Keyboard shortcuts 1-9 / 0 ─────────────────────────
 	// 1-9 scroll to the Nth open app in the active scene.
@@ -269,30 +294,25 @@
 	}
 
 	// ── Scene CRUD dialogs ──────────────────────────────────
-	type SceneDialogMode = {
-		kind: 'rename';
-		id: string;
-		name: string;
-		description: string;
-	};
-	let sceneDialog = $state<SceneDialogMode | null>(null);
 	let sceneToDelete = $state<{ id: string; name: string } | null>(null);
 
 	function handleRequestRename(id: string) {
+		// Unified rename path: scroll the carousel to the scene header
+		// and focus its contenteditable <h1>. Previously opened a modal
+		// dialog that read from the store while the live header might
+		// already hold unsaved typing — the two paths could overwrite
+		// each other. Inline is the single source of truth now.
 		const scene = scenes.find((s) => s.id === id);
 		if (!scene) return;
-		sceneDialog = {
-			kind: 'rename',
-			id,
-			name: scene.name,
-			description: scene.description ?? '',
-		};
-	}
-	async function handleSubmitSceneDialog(name: string, description: string) {
-		const mode = sceneDialog;
-		if (!mode) return;
-		await workbenchScenesStore.renameScene(mode.id, name, description.trim() || null);
-		sceneDialog = null;
+		if (id !== activeSceneId) workbenchScenesStore.setActiveScene(id);
+		scrollCarouselToStart();
+		// Next tick: the header is mounted + the scroll has started;
+		// querying now lands on the active scene's h1 which
+		// contenteditable plaintext-only focuses cleanly.
+		setTimeout(() => {
+			const h1 = document.querySelector<HTMLElement>('.scene-header .scene-name[contenteditable]');
+			h1?.focus();
+		}, 120);
 	}
 	function handleDuplicateScene(id: string) {
 		workbenchScenesStore.duplicateScene(id);
@@ -356,16 +376,6 @@
 		y={ctxMenu.state.y}
 		items={ctxMenu.items}
 		onClose={() => ctxMenu.close()}
-	/>
-
-	<SceneRenameDialog
-		show={sceneDialog !== null}
-		title="Szene bearbeiten"
-		initialName={sceneDialog?.name ?? ''}
-		initialDescription={sceneDialog?.description ?? ''}
-		confirmLabel="Speichern"
-		onSubmit={handleSubmitSceneDialog}
-		onCancel={() => (sceneDialog = null)}
 	/>
 
 	<ConfirmDialog
