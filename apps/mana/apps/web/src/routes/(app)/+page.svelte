@@ -16,6 +16,8 @@
 	import { ContextMenu, type ContextMenuItem } from '@mana/shared-ui';
 	import { Pencil, Copy, Trash, Image, Sparkle } from '@mana/shared-icons';
 	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
+	import { tick } from 'svelte';
 	import { _, locale } from 'svelte-i18n';
 	import { buildContextMenuItems, createWorkbenchContextMenu } from '$lib/context-menu';
 	import type { WorkbenchScene } from '$lib/types/workbench-scenes';
@@ -61,8 +63,24 @@
 	});
 
 	// ── Scene store wiring ──────────────────────────────────
-	onMount(() => {
-		workbenchScenesStore.initialize();
+	onMount(async () => {
+		await workbenchScenesStore.initialize();
+		// Deep-link: `/?app=settings` (or any registered appId) opens the
+		// app in the active scene (or focuses it if already open) and
+		// scrolls it into view. Used by command menu, pill-nav settings
+		// link, onboarding CTAs, sync-status banner — anywhere we used
+		// to navigate to `/settings` before the route was removed.
+		const target = $page.url.searchParams.get('app');
+		if (target && getApp(target)) {
+			const already = workbenchScenesStore.openApps.find((a) => a.appId === target);
+			if (!already) await workbenchScenesStore.addApp(target);
+			await tick();
+			scrollToPage(target);
+			// Clean the query out of the URL so refresh doesn't re-trigger.
+			const clean = new URL($page.url);
+			clean.searchParams.delete('app');
+			history.replaceState({}, '', clean);
+		}
 	});
 	onDestroy(() => {
 		workbenchScenesStore.dispose();

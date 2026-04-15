@@ -106,7 +106,7 @@
 </script>
 
 <div>
-	<PageHeader title="Cloud Sync" backHref="/" sticky size="lg" />
+	<PageHeader title="Cloud Sync" backHref="/?app=settings" sticky size="lg" />
 
 	{#if syncBilling.loading}
 		<div class="flex items-center justify-center py-12">
@@ -268,9 +268,7 @@
 
 		<!-- Back link -->
 		<div class="mt-6">
-			<a href="/" class="text-sm text-primary hover:underline">
-				← Zurück
-			</a>
+			<a href="/?app=settings" class="text-sm text-primary hover:underline"> ← Zurück </a>
 		</div>
 	{/if}
 </div>

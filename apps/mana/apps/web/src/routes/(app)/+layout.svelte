@@ -746,7 +746,7 @@
 			id: 'settings',
 			label: 'Einstellungen',
 			category: 'Navigation',
-			onExecute: () => goto('/'),
+			onExecute: () => goto('/?app=settings'),
 		},
 	];
 </script>

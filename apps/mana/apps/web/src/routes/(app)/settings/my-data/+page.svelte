@@ -186,7 +186,7 @@
 	<div class="flex items-center justify-between gap-4">
 		<div>
 			<Breadcrumbs
-				items={[{ label: 'Home', href: '/' }, { label: 'Meine Daten' }]}
+				items={[{ label: 'Einstellungen', href: '/?app=settings' }, { label: 'Meine Daten' }]}
 			/>
 			<h1 class="text-2xl font-bold">Meine Daten</h1>
 			<p class="text-muted-foreground">
