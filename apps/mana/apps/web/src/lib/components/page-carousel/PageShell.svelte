@@ -1,22 +1,29 @@
 <!--
   PageShell — Shared card wrapper for pages in a carousel.
-  Provides: header, resize handle, maximized mode.
+  Provides: header, five preset widths, maximized mode.
   Used by workbench (AppPage) and todo (TodoPage).
 -->
 <script lang="ts">
 	import { _ } from 'svelte-i18n';
 	import { onMount } from 'svelte';
-	import { X, CornersOut, CornersIn, CaretLeft, CaretRight } from '@mana/shared-icons';
+	import {
+		X,
+		CornersOut,
+		CornersIn,
+		CaretLeft,
+		CaretRight,
+		ArrowsOutLineHorizontal,
+	} from '@mana/shared-icons';
 	import type { Snippet, Component } from 'svelte';
+	import { PAGE_WIDTH_PRESETS, nearestPresetIndex } from './width-presets';
 
 	interface Props {
 		widthPx: number;
-		heightPx?: number;
 		maximized?: boolean;
 		onClose: () => void;
 		onMinimize?: () => void;
 		onMaximize?: () => void;
-		onResize?: (widthPx: number, heightPx?: number) => void;
+		onResize?: (widthPx: number) => void;
 		onMoveLeft?: () => void;
 		onMoveRight?: () => void;
 		// Default header
@@ -34,7 +41,6 @@
 
 	let {
 		widthPx,
-		heightPx,
 		maximized = false,
 		onClose,
 		onMaximize,
@@ -65,75 +71,26 @@
 		return () => window.removeEventListener('keydown', onKeydown);
 	});
 
-	const MIN_WIDTH = 280;
-	const MAX_WIDTH = 1200;
-	const MIN_HEIGHT = 200;
-	const MAX_HEIGHT = 2000;
+	let widthMenuOpen = $state(false);
+	let widthBtnEl = $state<HTMLButtonElement | null>(null);
 
-	let resizing = $state(false);
-	let shellEl = $state<HTMLDivElement | null>(null);
+	const activePresetIdx = $derived(nearestPresetIndex(widthPx));
 
-	function handleResizeStart(startX: number, startY: number) {
-		if (!onResize) return;
-		const startWidth = widthPx;
-		const startHeight = heightPx ?? shellEl?.offsetHeight ?? MIN_HEIGHT;
-		resizing = true;
-		document.body.style.userSelect = 'none';
-		document.body.style.cursor = 'nwse-resize';
-
-		function onMove(clientX: number, clientY: number) {
-			const deltaX = clientX - startX;
-			const deltaY = clientY - startY;
-			const newWidth = Math.round(Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, startWidth + deltaX)));
-			const newHeight = Math.round(
-				Math.min(MAX_HEIGHT, Math.max(MIN_HEIGHT, startHeight + deltaY))
-			);
-			onResize!(newWidth, newHeight);
-		}
-
-		function onEnd() {
-			resizing = false;
-			document.body.style.userSelect = '';
-			document.body.style.cursor = '';
-			window.removeEventListener('mousemove', onMouseMove);
-			window.removeEventListener('mouseup', onEnd);
-			window.removeEventListener('touchmove', onTouchMove);
-			window.removeEventListener('touchend', onEnd);
-		}
-
-		function onMouseMove(e: MouseEvent) {
-			onMove(e.clientX, e.clientY);
-		}
-		function onTouchMove(e: TouchEvent) {
-			onMove(e.touches[0].clientX, e.touches[0].clientY);
-		}
-
-		window.addEventListener('mousemove', onMouseMove);
-		window.addEventListener('mouseup', onEnd);
-		window.addEventListener('touchmove', onTouchMove);
-		window.addEventListener('touchend', onEnd);
+	function selectWidth(px: number) {
+		widthMenuOpen = false;
+		onResize?.(px);
 	}
 
-	function onMouseDown(e: MouseEvent) {
-		e.preventDefault();
-		handleResizeStart(e.clientX, e.clientY);
-	}
-
-	function onTouchStartHandle(e: TouchEvent) {
-		e.preventDefault();
-		handleResizeStart(e.touches[0].clientX, e.touches[0].clientY);
+	function handleWidthBtnKey(e: KeyboardEvent) {
+		if (e.key === 'Escape' && widthMenuOpen) {
+			e.preventDefault();
+			widthMenuOpen = false;
+			widthBtnEl?.focus();
+		}
 	}
 </script>
 
-<div
-	bind:this={shellEl}
-	class="page-shell"
-	class:maximized
-	class:resizing
-	style="width: {maximized ? '100%' : `${widthPx}px`}; {heightPx && !maximized
-		? `height: ${heightPx}px; min-height: 0;`
-		: ''}"
->
+<div class="page-shell" class:maximized style="width: {maximized ? '100%' : `${widthPx}px`};">
 	<!-- Header with window actions -->
 	<div class="page-header" oncontextmenu={onContextMenu} role="banner">
 		<div class="header-left">
@@ -191,6 +148,47 @@
 					<CaretRight size={24} weight="bold" />
 				</button>
 			{/if}
+			{#if onResize && !maximized}
+				<div class="width-picker-wrapper">
+					<button
+						bind:this={widthBtnEl}
+						class="window-btn"
+						onclick={(e) => {
+							e.stopPropagation();
+							widthMenuOpen = !widthMenuOpen;
+						}}
+						onkeydown={handleWidthBtnKey}
+						aria-haspopup="menu"
+						aria-expanded={widthMenuOpen}
+						title="Breite ändern"
+					>
+						<ArrowsOutLineHorizontal size={22} weight="bold" />
+					</button>
+					{#if widthMenuOpen}
+						<!-- svelte-ignore a11y_click_events_have_key_events -->
+						<!-- svelte-ignore a11y_no_static_element_interactions -->
+						<div class="width-menu-backdrop" onclick={() => (widthMenuOpen = false)}></div>
+						<div class="width-menu" role="menu">
+							{#each PAGE_WIDTH_PRESETS as preset, idx (preset.widthPx)}
+								<button
+									class="width-opt"
+									class:active={idx === activePresetIdx}
+									role="menuitemradio"
+									aria-checked={idx === activePresetIdx}
+									title={preset.description}
+									onclick={(e) => {
+										e.stopPropagation();
+										selectWidth(preset.widthPx);
+									}}
+								>
+									<span class="width-opt-label">{preset.label}</span>
+									<span class="width-opt-px">{preset.widthPx}px</span>
+								</button>
+							{/each}
+						</div>
+					{/if}
+				</div>
+			{/if}
 			{#if onMaximize}
 				<button
 					class="window-btn"
@@ -228,23 +226,6 @@
 	<div class="page-body">
 		{@render children()}
 	</div>
-
-	<!-- Resize handle -->
-	{#if onResize && !maximized}
-		<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-		<div
-			class="resize-handle"
-			onmousedown={onMouseDown}
-			ontouchstart={onTouchStartHandle}
-			role="separator"
-			aria-orientation="horizontal"
-		>
-			<svg width="10" height="10" viewBox="0 0 10 10">
-				<line x1="9" y1="1" x2="1" y2="9" stroke="currentColor" stroke-width="1.2" />
-				<line x1="9" y1="5" x2="5" y2="9" stroke="currentColor" stroke-width="1.2" />
-			</svg>
-		</div>
-	{/if}
 </div>
 
 <style>
@@ -302,12 +283,6 @@
 		.page-shell {
 			background-image: none;
 		}
-	}
-	.page-shell.resizing {
-		border-color: hsl(var(--color-primary) / 0.55);
-		box-shadow:
-			0 10px 28px hsl(var(--color-primary) / 0.22),
-			0 4px 10px hsl(var(--color-primary) / 0.15);
 	}
 	.page-shell.maximized {
 		position: fixed;
@@ -428,23 +403,59 @@
 		width: 100%;
 	}
 
-	/* Resize handle */
-	.resize-handle {
+	/* Width picker */
+	.width-picker-wrapper {
+		position: relative;
+		display: inline-flex;
+	}
+	.width-menu-backdrop {
+		position: fixed;
+		inset: 0;
+		z-index: 50;
+		background: transparent;
+	}
+	.width-menu {
 		position: absolute;
-		bottom: 0;
+		top: calc(100% + 0.375rem);
 		right: 0;
-		width: 16px;
-		height: 16px;
+		z-index: 60;
+		display: flex;
+		flex-direction: column;
+		min-width: 10rem;
+		padding: 0.25rem;
+		border-radius: 0.5rem;
+		background: hsl(var(--color-card));
+		border: 1px solid hsl(var(--color-border));
+		box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+	}
+	.width-opt {
 		display: flex;
 		align-items: center;
-		justify-content: center;
-		cursor: nwse-resize;
-		color: hsl(var(--color-muted-foreground) / 0.5);
-		transition: color 0.15s;
-		border-radius: 0.25rem 0 0.375rem 0;
-		touch-action: none;
+		justify-content: space-between;
+		gap: 0.75rem;
+		padding: 0.5rem 0.625rem;
+		border: none;
+		background: transparent;
+		border-radius: 0.375rem;
+		font-size: 0.8125rem;
+		color: hsl(var(--color-foreground));
+		cursor: pointer;
+		text-align: left;
+		transition: background 0.1s;
 	}
-	.resize-handle:hover {
+	.width-opt:hover {
+		background: hsl(var(--color-surface-hover, var(--color-muted)));
+	}
+	.width-opt.active {
+		background: hsl(var(--color-primary) / 0.12);
+		color: hsl(var(--color-primary));
+	}
+	.width-opt-label {
+		font-weight: 600;
+	}
+	.width-opt-px {
+		font-variant-numeric: tabular-nums;
+		font-size: 0.6875rem;
 		color: hsl(var(--color-muted-foreground));
 	}
 </style>
