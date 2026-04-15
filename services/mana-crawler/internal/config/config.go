@@ -29,7 +29,7 @@ func Load() *Config {
 
 	return &Config{
 		Port:             envutil.GetInt("PORT", 3023),
-		DatabaseURL:      envutil.Get("DATABASE_URL", "postgresql://mana:devpassword@localhost:5432/mana"),
+		DatabaseURL:      envutil.Get("DATABASE_URL", "postgresql://mana:devpassword@localhost:5432/mana_platform"),
 		RedisHost:        envutil.Get("REDIS_HOST", "localhost"),
 		RedisPort:        envutil.GetInt("REDIS_PORT", 6379),
 		RedisPassword:    envutil.Get("REDIS_PASSWORD", ""),

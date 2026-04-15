@@ -220,7 +220,7 @@
 		"cf:projects:list": "npx wrangler pages project list",
 		"cf:projects:create": "echo 'Creating Cloudflare Pages projects...' && npx wrangler pages project create chat-landing --production-branch=main && npx wrangler pages project create picture-landing --production-branch=main && npx wrangler pages project create mana-landing --production-branch=main && npx wrangler pages project create cards-landing --production-branch=main && npx wrangler pages project create quotes-landing --production-branch=main",
 		"dev:search": "cd services/mana-search && go run ./cmd/server",
-		"dev:crawler": "cd services/mana-crawler && DATABASE_URL=postgresql://mana:devpassword@localhost:5432/mana_platform go run ./cmd/server",
+		"dev:crawler": "cd services/mana-crawler && go run ./cmd/server",
 		"dev:credits": "cd services/mana-credits && bun run --watch src/index.ts",
 		"dev:notify": "cd services/mana-notify && go run ./cmd/server",
 		"questions:dev": "turbo run dev --filter=questions...",
