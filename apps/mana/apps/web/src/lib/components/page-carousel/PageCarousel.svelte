@@ -131,9 +131,15 @@
 				{#if showPicker && picker}
 					{@render picker()}
 				{:else}
-					<button class="add-card alone" onclick={onTogglePicker}>
-						<Plus size={24} /><span class="add-label">{addLabel}</span>
-					</button>
+					<div class="empty-state">
+						<p class="empty-title">Diese Szene ist leer</p>
+						<p class="empty-hint">
+							Füge eine App hinzu, um loszulegen — oder drücke <kbd>0</kbd>.
+						</p>
+						<button class="add-card alone" onclick={onTogglePicker}>
+							<Plus size={24} /><span class="add-label">{addLabel}</span>
+						</button>
+					</div>
 				{/if}
 			</div>
 		{:else if showPicker && picker}
@@ -211,6 +217,38 @@
 		align-items: center;
 		justify-content: center;
 		min-height: 60vh;
+	}
+	.empty-state {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.5rem;
+		max-width: 100%;
+	}
+	.empty-title {
+		margin: 0;
+		font-size: 1.125rem;
+		font-weight: 600;
+		color: hsl(var(--color-foreground));
+	}
+	.empty-hint {
+		margin: 0 0 1rem;
+		font-size: 0.875rem;
+		color: hsl(var(--color-muted-foreground));
+		text-align: center;
+		line-height: 1.5;
+	}
+	.empty-hint kbd {
+		display: inline-block;
+		padding: 0.0625rem 0.375rem;
+		border: 1px solid hsl(var(--color-border));
+		border-bottom-width: 2px;
+		border-radius: 0.25rem;
+		background: hsl(var(--color-surface, var(--color-muted)));
+		font-family:
+			ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+		font-size: 0.75rem;
+		color: hsl(var(--color-foreground));
 	}
 	.add-card.alone {
 		width: 100%;
