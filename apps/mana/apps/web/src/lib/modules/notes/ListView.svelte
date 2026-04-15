@@ -5,6 +5,7 @@
 <script lang="ts">
 	import { useAllNotes, searchNotes, getPreview, formatRelativeTime } from './queries';
 	import { notesStore } from './stores/notes.svelte';
+	import { notesSelectionStore } from './stores/selection.svelte';
 	import type { Note } from './types';
 	import type { ViewProps } from '$lib/app-registry';
 	import { ContextMenu, type ContextMenuItem } from '@mana/shared-ui';
@@ -57,6 +58,24 @@
 			editTitle = live.title;
 			editContent = live.content;
 		}
+	});
+
+	// Cross-module focus signal (e.g. Kontext → "Als Notiz speichern").
+	// The caller populates selectionStore.focusedNoteId; we wait until
+	// the underlying Dexie row is visible via liveQuery (the just-created
+	// note may not be in `notes` on the first effect run because liveQuery
+	// is async), then open it in the editor and scroll it into view.
+	$effect(() => {
+		const id = notesSelectionStore.focusedNoteId;
+		if (!id) return;
+		const target = notes.find((n) => n.id === id);
+		if (!target) return;
+		startEdit(target);
+		notesSelectionStore.clearFocus();
+		queueMicrotask(() => {
+			const el = document.querySelector(`[data-note-id="${id}"]`);
+			el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+		});
 	});
 
 	async function saveEdit() {
@@ -131,6 +150,7 @@
 				<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 				<div
 					class="note-item editing"
+					data-note-id={note.id}
 					onkeydown={(e) => {
 						if (e.key === 'Escape') saveEdit();
 					}}
@@ -158,6 +178,7 @@
 				<!-- Note row -->
 				<button
 					class="note-item"
+					data-note-id={note.id}
 					onclick={() => startEdit(note)}
 					oncontextmenu={(e) => ctxMenu.open(e, note)}
 				>

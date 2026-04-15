@@ -257,6 +257,26 @@ export const workbenchScenesStore = {
 		});
 	},
 
+	/**
+	 * Insert `appId` directly after `anchorAppId` in the active scene.
+	 * Used by cross-module actions like "Kontext → Als Notiz speichern",
+	 * where the target widget should land next to the source rather than
+	 * at the end of the carousel. If the app is already open, its
+	 * position is left untouched (we don't want to yank a widget the
+	 * user is already interacting with). If the anchor isn't in the
+	 * scene, falls back to appending.
+	 */
+	async addAppAfter(appId: string, anchorAppId: string) {
+		await patchActiveScene((apps) => {
+			if (apps.some((a) => a.appId === appId)) return apps;
+			const anchorIdx = apps.findIndex((a) => a.appId === anchorAppId);
+			if (anchorIdx === -1) return [...apps, { appId }];
+			const next = [...apps];
+			next.splice(anchorIdx + 1, 0, { appId });
+			return next;
+		});
+	},
+
 	async removeApp(appId: string) {
 		await patchActiveScene((apps) => apps.filter((a) => a.appId !== appId));
 	},
