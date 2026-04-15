@@ -52,12 +52,23 @@ Was steht (Phase 0-2, Backend):
 
 Was offen ist (Phase 3, Frontend):
 
-- [ ] Webapp `MissionGrantDialog` + Consent-Flow im `/companion/missions`-Editor.
-- [ ] Revoke-Button + "Mission → Datenzugriff" Audit-Tab in `/companion/workbench`.
-- [ ] Scope-Change-UX: neue Records → Re-Consent-Prompt.
-- [ ] `GET /internal/audit?missionId=` Endpoint (read-only) fuer die UI.
-- [ ] Feature-Flag `PUBLIC_AI_MISSION_GRANTS=false` default + Rollout (till → beta → alpha).
-- [ ] Produktions-Keypair generieren + in Mac-Mini Secrets ablegen.
+- [x] Webapp `MissionGrantDialog` + Consent-Flow im Mission-Detail.
+- [x] Revoke-Button + "Datenzugriff" Audit-Tab im Workbench.
+- [x] `GET /api/v1/me/ai-audit` JWT-gated Endpoint live.
+- [x] Feature-Flag `PUBLIC_AI_MISSION_GRANTS` + Cloudflare-Tunnel.
+- [x] Produktions-Keypair auf Mac-Mini unter `secrets/mana-ai/`.
+
+## Status: v0.5 (Multi-Agent Workbench)
+
+Der Runner wird agent-bewusst — Missionen gehoeren einem benannten Agent, Policy und Memory leben auf dem Agent, Concurrency + Budget werden pro Agent respektiert.
+
+- [x] `mana_ai.agent_snapshots` Tabelle (LWW-Projektion von `agents` aus `sync_changes`).
+- [x] `refreshAgentSnapshots` + `loadActiveAgents` parallel zum Mission-Snapshot-Refresh.
+- [x] `ServerMission.agentId` + `ServerAgent.policy` durchgereicht.
+- [x] Tick resolvt pro Mission den Agent, gated `archived`/`paused`/`concurrency`, schreibt iteration unter `makeAgentActor(agent)` Identitaet.
+- [x] `<agent_context>` Prompt-Block mit plaintext `role` + `systemPrompt` + `memory` (ciphertext wird uebersprungen).
+- [x] `filterToolsByAgentPolicy` schneidet `deny`-Tools raus bevor der Planner sie sieht.
+- [x] Metrik `mana_ai_agent_decisions_total{decision}`.
 
 ## Port: 3067
 

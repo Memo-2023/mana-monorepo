@@ -1892,3 +1892,66 @@ Vollstaendiger Plan: [`docs/plans/ai-mission-key-grant.md`](../plans/ai-mission-
 - Cross-User-Missions (pro Grant genau ein User).
 - Automatische Key-Rotation (Master-Key-Rotation invalidiert alle Grants → User re-consented beim naechsten Edit).
 - Grant-Sync-Konflikte (werden ueber normales LWW aufgeloest; bei Scope-Mismatch wirft der Resolver `scope-violation` und die Mission pausiert).
+
+## 22. Multi-Agent Workbench (ab 2026-04-15)
+
+Upgrade von Single-User, Single-AI ("Mana") zu Single-User, Multi-Agent. Missionen gehoeren jetzt einem benannten Agent; Scenes koennen als Lens an einen Agent gebunden werden. Full context + decisions: [`docs/plans/multi-agent-workbench.md`](../plans/multi-agent-workbench.md).
+
+### Datenmodell
+
+```
+Agent {
+  id, name (unique per user), avatar, role,
+  systemPrompt, memory,   // encrypted at rest
+  policy: AiPolicy,       // per-tool + per-module + global default
+  maxConcurrentMissions, maxTokensPerDay,
+  state: active|paused|archived
+}
+
+Mission.agentId?: string      // owning agent; legacy records backfill-stamped
+WorkbenchScene.viewingAsAgentId?: string  // UI lens, does not affect data scope
+
+Actor {
+  kind: 'user' | 'ai' | 'system',
+  principalId: string,        // userId | agentId | 'system:<source>'
+  displayName: string,        // cached at write time — rename doesn't rewrite history
+  // AI-only:
+  missionId?, iterationId?, rationale?
+}
+```
+
+### Identity flow
+
+1. User creates an agent in `/ai-agents`. Default "Mana" agent is auto-bootstrapped on first login and inherits the existing user-level policy.
+2. Missions are created under an agent (`AgentPicker` in the create flow). Legacy missions were backfilled to the default agent via localStorage-sentinelled one-shot migration.
+3. `executor.executeTool` loads `getAgent(actor.principalId).policy` for every AI write; `mana-ai` does the same server-side via `agent_snapshots` (LWW projection mirroring `mission_snapshots`).
+4. Every write stamps `Actor.displayName = agent.name` at write time. Workbench timeline + Revert remain correct even after the agent is renamed or deleted (ghost-agent marker on tab).
+5. `mana-ai` tick filters `AI_AVAILABLE_TOOLS` by agent policy before the prompt, injects plaintext `systemPrompt + memory` in an `<agent_context>` delimiter block (ciphertext fields stay server-invisible by design — foreground runner picks up encrypted context).
+6. Scenes optionally bind `viewingAsAgentId`. Pure UI lens: SceneAppBar shows the agent avatar on the scene tab, Workbench timeline defaults its filter to that agent. No data-scope change.
+
+### Gate order in the server tick
+
+Before an LLM call even happens:
+- `agent.state === 'archived'` → skip silently, bump `agentDecisionsTotal{decision='skipped-archived'}`
+- `agent.state === 'paused'` → same with `skipped-paused`
+- `activeRuns[agentId] >= agent.maxConcurrentMissions` → `skipped-concurrency`, defer to next tick
+- Otherwise → `ran`
+
+Missions without an owning agent don't produce this metric; `plansWrittenBackTotal` is the universal "did we run" counter.
+
+### Scene-Agent binding semantics
+
+`scene.viewingAsAgentId` is a **lens**, not a scope. The open apps in the scene still read the same user data regardless of which agent (if any) is bound. The binding drives:
+- Agent avatar on the scene tab (SceneAppBar)
+- Default `agent` filter in the AI Workbench timeline
+- Default selected agent when creating a mission from a bound scene (future — Phase 8 polish)
+
+This is deliberately orthogonal: one agent can appear in many scenes; one scene can be unbound ("neutral workspace"). Binding is set/changed via the scene context menu → "An Agent binden…" dialog.
+
+### Nicht-Ziele
+
+- **Kein Agent-to-Agent Messaging.** Agents laufen unabhaengig.
+- **Kein Meta-Planner ueber Agents.** Agents erzeugen sich keine Missionen selbst; der User bleibt Mission-Creator.
+- **Keine Team-Features.** Andere User / geteilte Daten kommen in einem separaten Plan nach dieser Iteration.
+- **Keine Agent-Memory-Self-Modification.** Memory wird nur vom User editiert.
+- **Keine Per-Agent-Encryption-Domains.** Alle Agents sehen alle Daten des einen Users. Mission-Key-Grants bleiben per-Mission.

@@ -99,8 +99,16 @@
 		{#each proposals.value as p (p.id)}
 			<article class="card" class:busy={busyId === p.id}>
 				<header class="header">
-					<Sparkle size={16} weight="fill" />
-					<span class="label">KI schlägt vor</span>
+					{#if p.actor?.kind === 'ai'}
+						<span class="agent-chip" title={`Mission: ${p.actor.missionId.slice(0, 8)}…`}>
+							<span class="agent-avatar-dot">🤖</span>
+							<span class="agent-name">{p.actor.displayName}</span>
+						</span>
+						<span class="label">schlägt vor</span>
+					{:else}
+						<Sparkle size={16} weight="fill" />
+						<span class="label">KI schlägt vor</span>
+					{/if}
 					{#if showModuleBadge && p.intent.kind === 'toolCall'}
 						{@const mod = getTool(p.intent.toolName)?.module ?? '?'}
 						<span class="module-badge">{mod}</span>
@@ -203,6 +211,25 @@
 		font-size: 0.6875rem;
 		letter-spacing: 0.02em;
 		text-transform: lowercase;
+	}
+	.agent-chip {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.25rem;
+		padding: 0.0625rem 0.375rem;
+		border-radius: 999px;
+		background: color-mix(in oklab, var(--color-primary, #6b5bff) 12%, transparent);
+		color: color-mix(in oklab, var(--color-primary, #6b5bff) 95%, var(--color-fg, #000));
+		font-size: 0.75rem;
+		text-transform: none;
+		letter-spacing: 0;
+	}
+	.agent-avatar-dot {
+		font-size: 0.875rem;
+		line-height: 1;
+	}
+	.agent-name {
+		font-weight: 600;
 	}
 
 	.intent {

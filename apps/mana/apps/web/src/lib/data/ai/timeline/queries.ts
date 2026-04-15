@@ -57,6 +57,11 @@ export interface TimelineBucket {
 	rationale: string;
 	firstTimestamp: string;
 	events: DomainEvent[];
+	/** Owning Agent — cached off the first AI actor in the bucket. All
+	 *  events in a bucket share the same (agentId, missionId, iterationId)
+	 *  tuple so reading from the first is lossless. */
+	agentId: string;
+	agentDisplayName: string;
 }
 
 export function bucketByIteration(events: readonly DomainEvent[]): TimelineBucket[] {
@@ -79,6 +84,8 @@ export function bucketByIteration(events: readonly DomainEvent[]): TimelineBucke
 				rationale: a.rationale,
 				firstTimestamp: e.meta.timestamp,
 				events: [e],
+				agentId: a.principalId,
+				agentDisplayName: a.displayName,
 			});
 		}
 	}

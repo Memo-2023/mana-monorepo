@@ -6,6 +6,7 @@
 	import { ArrowSquareOut, ArrowCounterClockwise } from '@mana/shared-icons';
 	import { useAiTimeline, bucketByIteration } from '$lib/data/ai/timeline/queries';
 	import { useMissions } from '$lib/data/ai/missions/queries';
+	import { useAgents } from '$lib/data/ai/agents/queries';
 	import { revertIteration } from '$lib/data/ai/revert/revert-iteration';
 	import { fetchDecryptAudit, type AuditRow } from '$lib/data/ai/audit/queries';
 	import { isMissionGrantsEnabled } from '$lib/api/config';
@@ -13,6 +14,7 @@
 
 	let moduleFilter = $state<string | null>(null);
 	let missionFilter = $state<string | null>(null);
+	let agentFilter = $state<string | null>(null);
 
 	const events = $derived(
 		useAiTimeline({
@@ -21,9 +23,18 @@
 			limit: 500,
 		})
 	);
-	const buckets = $derived(bucketByIteration(events.value));
+	const allBuckets = $derived(bucketByIteration(events.value));
+	// Agent filter is applied client-side after bucketing because the
+	// useAiTimeline query is keyed by module/mission only today. If the
+	// volume ever grows large enough for this to matter, push it into
+	// the query.
+	const buckets = $derived(
+		agentFilter ? allBuckets.filter((b) => b.agentId === agentFilter) : allBuckets
+	);
 	const missions = $derived(useMissions());
 	const missionTitleById = $derived(new Map(missions.value.map((m) => [m.id, m.title])));
+	const agents = $derived(useAgents());
+	const agentById = $derived(new Map(agents.value.map((a) => [a.id, a])));
 	const allModules = $derived(Array.from(new Set(events.value.map((e) => e.meta.appId))).sort());
 
 	function describeEvent(e: DomainEvent): string {
@@ -147,6 +158,15 @@
 				{/each}
 			</select>
 		</label>
+		<label>
+			<span class="lbl">Agent</span>
+			<select bind:value={agentFilter}>
+				<option value={null}>alle</option>
+				{#each agents.value as a (a.id)}
+					<option value={a.id}>{a.avatar ?? '🤖'} {a.name}</option>
+				{/each}
+			</select>
+		</label>
 	</div>
 
 	{#if tab === 'audit'}
@@ -193,6 +213,7 @@
 	{:else}
 		<ol class="timeline">
 			{#each buckets as b (b.key)}
+				{@const bucketAgent = agentById.get(b.agentId)}
 				<li class="bucket">
 					<header class="bucket-head">
 						<div class="when">
@@ -201,6 +222,11 @@
 						</div>
 						<div class="title-col">
 							<span class="mission-title">
+								<span class="agent-avatar" title={bucketAgent?.name ?? b.agentDisplayName}>
+									{bucketAgent?.avatar ?? '🤖'}
+								</span>
+								<span class="agent-name">{bucketAgent?.name ?? b.agentDisplayName}</span>
+								<span class="mission-sep">·</span>
 								{missionTitleById.get(b.missionId) ?? b.missionId}
 							</span>
 							{#if b.rationale}
@@ -372,6 +398,17 @@
 	}
 	.when .time {
 		font-size: 0.6875rem;
+	}
+	.agent-avatar {
+		display: inline-block;
+		margin-right: 0.25rem;
+	}
+	.agent-name {
+		font-weight: 600;
+	}
+	.mission-sep {
+		margin: 0 0.25rem;
+		color: hsl(var(--color-muted-foreground));
 	}
 	.mission-title {
 		font-weight: 600;
