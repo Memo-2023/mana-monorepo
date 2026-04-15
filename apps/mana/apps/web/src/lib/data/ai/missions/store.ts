@@ -24,6 +24,19 @@ import type {
 } from './types';
 import { MISSIONS_TABLE } from './types';
 
+/**
+ * Strip Svelte 5 `$state` Proxies (and any other non-cloneable wrapper)
+ * by JSON-roundtripping. Mission payloads are plain JSON values
+ * (strings/numbers/booleans/arrays/objects) so this is lossless and
+ * faster than coordinating `$state.snapshot()` calls in every caller.
+ *
+ * `structuredClone` itself can't traverse Svelte's Proxy in browsers
+ * — it throws DataCloneError on the wrapped array.
+ */
+function deepClone<T>(value: T): T {
+	return JSON.parse(JSON.stringify(value)) as T;
+}
+
 const table = () => db.table<Mission>(MISSIONS_TABLE);
 
 // ── Create ─────────────────────────────────────────────────
@@ -38,12 +51,12 @@ export interface CreateMissionInput {
 
 export async function createMission(input: CreateMissionInput): Promise<Mission> {
 	const now = new Date().toISOString();
-	// `structuredClone` strips Svelte 5 $state Proxies before the record
+	// `deepClone` strips Svelte 5 $state Proxies before the record
 	// hits IndexedDB — without it, Dexie throws DataCloneError on the
 	// proxied `inputs` array / `cadence` object that callers pass in
 	// from `$state` bindings (e.g. the MissionInputPicker).
-	const inputsPlain = structuredClone(input.inputs ?? []);
-	const cadencePlain = structuredClone(input.cadence);
+	const inputsPlain = deepClone(input.inputs ?? []);
+	const cadencePlain = deepClone(input.cadence);
 	const mission: Mission = {
 		id: crypto.randomUUID(),
 		createdAt: now,
@@ -99,7 +112,7 @@ export interface MissionPatch {
 export async function updateMission(id: string, patch: MissionPatch): Promise<void> {
 	// Same Proxy-stripping reason as createMission.
 	const mods: Partial<Mission> = {
-		...structuredClone(patch),
+		...deepClone(patch),
 		updatedAt: new Date().toISOString(),
 	};
 	if (patch.cadence) {
@@ -140,6 +153,34 @@ export async function deleteMission(id: string): Promise<void> {
 	await table().update(id, { deletedAt: new Date().toISOString() });
 }
 
+// ── Key-Grant (server-side execution opt-in) ──────────────
+
+/** Attach a freshly-minted grant to a mission so `mana-ai` can decrypt
+ *  its encrypted inputs server-side. Overwrites any existing grant. The
+ *  blob is produced by `grant-client.requestMissionGrant()` and must NOT
+ *  be constructed client-side — only mana-auth knows the wrap key. */
+export async function setMissionGrant(
+	id: string,
+	grant: import('@mana/shared-ai').MissionGrant
+): Promise<void> {
+	// deepClone strips Svelte Proxy wrappers the caller might have
+	// attached — matches the pattern used in createMission / updateMission.
+	await table().update(id, {
+		grant: deepClone(grant),
+		updatedAt: new Date().toISOString(),
+	});
+}
+
+/** Revoke server-side execution. Leaves the mission otherwise intact —
+ *  the foreground runner still works. Use when the user clicks the 🔒
+ *  icon in the Workbench. */
+export async function revokeMissionGrant(id: string): Promise<void> {
+	await table().update(id, {
+		grant: undefined,
+		updatedAt: new Date().toISOString(),
+	});
+}
+
 // ── Iterations ─────────────────────────────────────────────
 
 export interface StartIterationInput {
@@ -158,7 +199,7 @@ export async function startIteration(
 		startedAt: new Date().toISOString(),
 		// Strip $state Proxies from the plan array so structured-clone
 		// doesn't fail when Dexie serialises the row.
-		plan: structuredClone(input.plan),
+		plan: deepClone(input.plan),
 		overallStatus: 'running',
 	};
 	await table().update(missionId, {
@@ -190,7 +231,7 @@ export async function finishIteration(
 					finishedAt: new Date().toISOString(),
 					overallStatus: input.overallStatus,
 					...(input.summary !== undefined ? { summary: input.summary } : {}),
-					...(input.plan !== undefined ? { plan: structuredClone(input.plan) } : {}),
+					...(input.plan !== undefined ? { plan: deepClone(input.plan) } : {}),
 				}
 			: it
 	);
