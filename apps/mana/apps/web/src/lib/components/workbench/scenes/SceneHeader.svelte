@@ -17,10 +17,29 @@
 
 	const { scene }: Props = $props();
 
-	// Helpers for the contenteditable flow. We don't bind:textContent
-	// because Svelte's bindings re-render while the user is typing and
-	// would fight the caret. Instead we read textContent on blur / key
-	// events and commit once.
+	// We avoid inline mustache interpolation inside the contenteditable
+	// elements because Prettier reformats the template and leaves
+	// literal leading/trailing whitespace inside the element — which
+	// contenteditable preserves as part of its edit buffer. Instead,
+	// we bind element refs and set textContent via $effect whenever the
+	// scene value changes and the user isn't actively editing. This
+	// also lets external updates (e.g. a rename synced from another
+	// device) refresh the visible text without fighting the caret.
+	let nameEl = $state<HTMLHeadingElement | null>(null);
+	let descEl = $state<HTMLParagraphElement | null>(null);
+
+	$effect(() => {
+		if (!nameEl || !scene) return;
+		if (document.activeElement === nameEl) return;
+		if (nameEl.textContent !== scene.name) nameEl.textContent = scene.name;
+	});
+
+	$effect(() => {
+		if (!descEl || !scene) return;
+		if (document.activeElement === descEl) return;
+		const next = scene.description ?? '';
+		if (descEl.textContent !== next) descEl.textContent = next;
+	});
 
 	function commitName(el: HTMLElement, current: string) {
 		const next = (el.textContent ?? '').trim();
@@ -75,9 +94,9 @@
 
 {#if scene}
 	<div class="scene-header">
-		<!-- prettier-ignore -->
 		<!-- svelte-ignore a11y_no_noninteractive_element_to_interactive_role -->
 		<h1
+			bind:this={nameEl}
 			class="scene-name"
 			contenteditable="plaintext-only"
 			spellcheck="false"
@@ -87,12 +106,10 @@
 			onkeydown={handleNameKey}
 			onfocus={handleFocus}
 			onblur={(e) => commitName(e.currentTarget, scene.name)}
-		>
-			{scene.name}
-		</h1>
-		<!-- prettier-ignore -->
+		></h1>
 		<!-- svelte-ignore a11y_no_noninteractive_element_to_interactive_role -->
 		<p
+			bind:this={descEl}
 			class="scene-desc"
 			class:placeholder={!scene.description}
 			contenteditable="plaintext-only"
@@ -104,9 +121,7 @@
 			onkeydown={handleDescKey}
 			onfocus={handleFocus}
 			onblur={(e) => commitDescription(e.currentTarget, scene.description ?? '')}
-		>
-			{scene.description ?? ''}
-		</p>
+		></p>
 	</div>
 {/if}
 
