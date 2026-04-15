@@ -29,9 +29,20 @@ import {
 import { resolveMissionInputs } from './input-resolvers';
 import { getAvailableToolsForAi } from './available-tools';
 import { executeTool } from '../../tools/executor';
+import { db } from '../../database';
+import { decryptRecords } from '../../crypto';
+import { researchApi } from '$lib/api/research';
 import type { Actor } from '../../events/actor';
 import type { Mission, MissionIteration, PlanStep } from './types';
-import type { AiPlanInput, AiPlanOutput, PlannedStep } from './planner/types';
+import type { AiPlanInput, AiPlanOutput, PlannedStep, ResolvedInput } from './planner/types';
+
+/** Heuristic: mission objective text that should trigger a pre-step
+ *  web-research call. Keeps the trigger explicit so unrelated missions
+ *  don't burn credits accidentally. */
+const RESEARCH_TRIGGER = /\b(recherchier|research|news|finde|suche|aktuelle|neueste)/i;
+/** Singleton row id of the kontext doc — kept in sync with
+ *  `modules/kontext/types.ts` (KONTEXT_SINGLETON_ID). */
+const KONTEXT_SINGLETON_ID = 'singleton';
 
 /** Hard timeout for one mission run. Cancels the in-flight planner call
  *  and finalises the iteration as failed. 90 s is comfortable for a
@@ -144,7 +155,34 @@ export async function runMission(
 			'resolving-inputs',
 			mission!.inputs.length > 0 ? `${mission!.inputs.length} Input(s)` : 'keine Inputs'
 		);
-		const resolvedInputs = await resolveMissionInputs(mission!.inputs);
+		const baseInputs = await resolveMissionInputs(mission!.inputs);
+		const resolvedInputs: ResolvedInput[] = [...baseInputs];
+
+		// Auto-inject the kontext singleton (if non-empty and not already
+		// linked) so every mission has the user's standing context as
+		// background. Decrypted client-side; never reaches the server.
+		const alreadyHasKontext = mission!.inputs.some((i) => i.module === 'kontext');
+		if (!alreadyHasKontext) {
+			const kontextEntry = await loadKontextAsResolvedInput();
+			if (kontextEntry) resolvedInputs.push(kontextEntry);
+		}
+
+		// Pre-step web research: if the objective looks like research,
+		// run the deep-research pipeline (mana-search + mana-llm) and
+		// attach the summary + sources so the planner can decide which
+		// to save via save_news_article. Failures are non-fatal — the
+		// planner still runs with whatever inputs we have.
+		if (RESEARCH_TRIGGER.test(mission!.objective)) {
+			await enterPhase('resolving-inputs', 'Web-Recherche…');
+			try {
+				const researchEntry = await runWebResearch(mission!);
+				if (researchEntry) resolvedInputs.push(researchEntry);
+			} catch (err) {
+				console.warn('[MissionRunner] web-research pre-step failed:', err);
+			}
+			await checkCancel();
+		}
+
 		const availableTools = getAvailableToolsForAi(aiActor);
 		await checkCancel();
 
@@ -272,6 +310,67 @@ function emptyResult(
 		plannedSteps: 0,
 		stagedSteps: 0,
 		failedSteps: 0,
+	};
+}
+
+/** Read the kontext singleton + decrypt; returns null if empty/missing. */
+async function loadKontextAsResolvedInput(): Promise<ResolvedInput | null> {
+	try {
+		const local = await db
+			.table<{ id: string; content?: string; deletedAt?: string }>('kontextDoc')
+			.get(KONTEXT_SINGLETON_ID);
+		if (!local || local.deletedAt) return null;
+		const [decrypted] = await decryptRecords('kontextDoc', [local]);
+		const content = decrypted?.content?.trim();
+		if (!content) return null;
+		return {
+			id: KONTEXT_SINGLETON_ID,
+			module: 'kontext',
+			table: 'kontextDoc',
+			title: 'Kontext (Standing)',
+			content,
+		};
+	} catch (err) {
+		console.warn('[MissionRunner] kontext auto-inject failed:', err);
+		return null;
+	}
+}
+
+/** Run the deep-research pipeline against the mission objective and
+ *  collapse its summary + sources into one ResolvedInput formatted so
+ *  the planner can copy URLs into save_news_article calls. */
+async function runWebResearch(mission: Mission): Promise<ResolvedInput | null> {
+	const result = await researchApi.startSync({
+		// Tag the run with the mission id so backend logs can correlate.
+		questionId: `mission:${mission.id}`,
+		title: mission.objective.slice(0, 500),
+		description: mission.conceptMarkdown?.slice(0, 4000),
+		depth: 'quick',
+	});
+	if (result.status === 'error' || !result.summary) return null;
+
+	const sources = await researchApi.listSources(result.id);
+	const sourcesBlock = sources
+		.slice(0, 8)
+		.map((s, i) =>
+			`[${i + 1}] ${s.title || s.url}\n    URL: ${s.url}\n    ${s.snippet ?? ''}`.trim()
+		)
+		.join('\n\n');
+
+	const content = [
+		`Zusammenfassung (Tiefe: ${result.depth}):`,
+		result.summary,
+		'',
+		'Quellen (kopiere die URL beim Aufruf von save_news_article):',
+		sourcesBlock || '(keine Quellen)',
+	].join('\n');
+
+	return {
+		id: result.id,
+		module: 'research',
+		table: 'researchResults',
+		title: 'Web-Recherche zu diesem Auftrag',
+		content,
 	};
 }
 

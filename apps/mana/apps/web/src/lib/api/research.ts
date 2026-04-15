@@ -146,6 +146,18 @@ export const researchApi = {
 		});
 	},
 
+	/**
+	 * Synchronous variant — blocks until the pipeline is done. Used by the
+	 * AI Mission runner for its web-research pre-step where we need the
+	 * sources synchronously before handing off to the planner.
+	 */
+	async startSync(input: StartResearchInput): Promise<ResearchResult> {
+		return jsonRequest('/api/v1/research/start-sync', {
+			method: 'POST',
+			body: JSON.stringify(input),
+		});
+	},
+
 	/** Fetch a single research result row by id. */
 	async get(researchResultId: string): Promise<ResearchResult> {
 		return jsonRequest(`/api/v1/research/${researchResultId}`);

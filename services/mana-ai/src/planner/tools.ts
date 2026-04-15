@@ -83,6 +83,27 @@ export const AI_AVAILABLE_TOOLS: readonly AvailableTool[] = [
 		description: 'Macht den letzten Drink-Eintrag rückgängig',
 		parameters: [],
 	},
+	{
+		name: 'save_news_article',
+		module: 'news',
+		description:
+			'Speichert einen Artikel von einer URL in die Leseliste. URL wird serverseitig per Readability extrahiert.',
+		parameters: [
+			{ name: 'url', type: 'string', description: 'Die Artikel-URL', required: true },
+			{
+				name: 'title',
+				type: 'string',
+				description: 'Anzeigetitel für den Approval-Dialog (informativ)',
+				required: false,
+			},
+			{
+				name: 'summary',
+				type: 'string',
+				description: 'Kurze Begründung warum dieser Artikel relevant ist',
+				required: false,
+			},
+		],
+	},
 ];
 
 export const AI_AVAILABLE_TOOL_NAMES = new Set<string>(AI_AVAILABLE_TOOLS.map((t) => t.name));
