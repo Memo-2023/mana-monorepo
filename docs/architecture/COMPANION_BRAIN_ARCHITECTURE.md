@@ -1850,3 +1850,45 @@ await executeTool(
 ```
 
 Ghost-Karte erscheint sofort ueber der Task-Liste.
+
+## 21. Mission Key-Grant (ab 2026-04-15, in Arbeit)
+
+Opt-in Mechanismus der es `mana-ai` erlaubt, Missions auf **encrypted** Tabellen (notes, tasks, events, journal, kontext) serverseitig auszufuehren — ohne dass ein Browser-Tab des Users offen sein muss. Ohne Grant bleibt der Foreground-Runner zustaendig; das ist der Default und aendert sich nicht.
+
+Vollstaendiger Plan: [`docs/plans/ai-mission-key-grant.md`](../plans/ai-mission-key-grant.md). Ideen-Kontext: [`docs/future/AI_AGENTS_IDEAS.md`](../future/AI_AGENTS_IDEAS.md#1-encrypted-tables-serverseitig-nutzbar-machen).
+
+### Flow
+
+1. **Consent** — User aktiviert Mission mit encrypted Input → `MissionGrantDialog` erklaert Record-Scope und TTL, fragt explizit um Erlaubnis. Zero-Knowledge-User sehen den Dialog nicht; Grant ist dort hart deaktiviert.
+2. **Derivation** — Webapp ruft `deriveMissionDataKey(masterKey, { version, missionId, tables, recordIds })` aus `@mana/shared-ai`. HKDF-SHA256 mit `missionId` als Salt; Scope-Binding im `info`-String → jede Scope-Aenderung erzeugt kryptografisch einen anderen Key, alte Grants werden automatisch ungueltig.
+3. **Wrap** — `mana-auth` `POST /me/ai-mission-grant` wrappt den MDK mit dem RSA-OAEP-2048 Public-Key von `mana-ai` (aus `MANA_AI_PUBLIC_KEY_PEM`). Antwort: `{ wrappedKey, derivation, issuedAt, expiresAt }` → Webapp schreibt das als `Mission.grant`.
+4. **Sync** — Grant-Blob fliesst ueber das normale Sync-System an `mana_sync`. Keine Sonderbehandlung — `wrappedKey` ist bereits RSA-geschuetzt.
+5. **Unwrap** — `mana-ai` holt beim Tick den privaten Key (`MANA_AI_PRIVATE_KEY_PEM`), entwrappt den MDK nur im Prozessspeicher, liest allowlisted Records aus `sync_changes`, entschluesselt, plant.
+6. **Audit** — jede Entschluesselung schreibt eine Zeile in `mana_ai.decrypt_audit` (RLS-scoped auf `app.current_user_id`). User kann das in der Workbench unter "Mission -> Datenzugriff" einsehen.
+7. **Lifecycle** — Grant hat Default-TTL 7 Tage rollend. Revoke via Workbench-Button → `grant=null`, Mission pausiert (`state='grant-revoked'`). Abgelaufen → Runner ueberspringt mit `state='grant-missing'`, Foreground-Runner uebernimmt beim naechsten Tab-Open.
+
+### Komponenten (Status)
+
+| Komponente | Wo | Status |
+|---|---|---|
+| Canonical HKDF + Types | `packages/shared-ai/src/missions/grant.ts` | done (Phase 1a) |
+| `Mission.grant` Feld | `packages/shared-ai/src/missions/types.ts` | done |
+| `mana_ai.decrypt_audit` + RLS | `services/mana-ai/src/db/migrate.ts` | done (Phase 1b) |
+| `MANA_AI_PUBLIC_KEY_PEM` / `MANA_AI_PRIVATE_KEY_PEM` config | auth + ai configs | done (Phase 0) |
+| `POST /me/ai-mission-grant` Endpoint | `services/mana-auth/src/routes/encryption-vault.ts` | Phase 1c |
+| Server-side unwrap helper | `services/mana-ai/src/crypto/unwrap-grant.ts` | Phase 1d |
+| Encrypted input resolver | `services/mana-ai/src/db/resolvers/encrypted.ts` | Phase 2 |
+| Consent UI + Revoke | `apps/mana/apps/web/src/lib/components/ai/MissionGrantDialog.svelte` | Phase 3 |
+
+### Privacy-Garantien
+
+- **Zero-Knowledge-User bleiben Zero-Knowledge.** Die Webapp verweigert das Anlegen eines Grants, wenn `vault.zeroKnowledge=true`. Endpoint pruefts zusaetzlich serverseitig.
+- **Kein Key-Cache.** `mana-ai` entwrappt den MDK pro Tick neu und vergisst ihn im `finally`. Minimiert RAM-Dump-Window auf die Tick-Dauer.
+- **Scope-Verletzung = Crypto-Failure.** Record-IDs sind in die Key-Derivation gebunden. Runtime-Allowlist-Check ist belt+braces, nicht die alleinige Verteidigung.
+- **Keine Write-Grants.** Server staget nur Proposals; User genehmigt wie bisher. Grant = read-only.
+
+### Nicht-Ziele
+
+- Cross-User-Missions (pro Grant genau ein User).
+- Automatische Key-Rotation (Master-Key-Rotation invalidiert alle Grants → User re-consented beim naechsten Edit).
+- Grant-Sync-Konflikte (werden ueber normales LWW aufgeloest; bei Scope-Mismatch wirft der Resolver `scope-violation` und die Mission pausiert).

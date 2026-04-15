@@ -17,6 +17,15 @@ export type {
 	MissionIteration,
 	MissionState,
 	PlanStep,
+	GrantDerivation,
+	GrantDerivationVersion,
+	MissionGrant,
+} from './missions';
+export {
+	GRANT_DERIVATION_VERSION,
+	canonicalInfoString,
+	deriveMissionDataKey,
+	deriveMissionDataKeyRaw,
 } from './missions';
 
 export type {

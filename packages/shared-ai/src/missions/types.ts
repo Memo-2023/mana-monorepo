@@ -75,4 +75,12 @@ export interface Mission {
 	iterations: readonly MissionIteration[];
 	userId?: string;
 	deletedAt?: string;
+	/**
+	 * Key-Grant for server-side execution on encrypted inputs. When set,
+	 * `mana-ai` can decrypt the referenced records without the user's
+	 * browser tab being open. Absent or expired → server-side Runner
+	 * skips the mission (state='grant-missing'), foreground Runner is
+	 * unaffected. See `./grant.ts` and `docs/plans/ai-mission-key-grant.md`.
+	 */
+	grant?: import('./grant').MissionGrant;
 }
