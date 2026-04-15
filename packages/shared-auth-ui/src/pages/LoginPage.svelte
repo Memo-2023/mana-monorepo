@@ -465,10 +465,6 @@
 			setError(result.error || t.signInFailed, 'general');
 		}
 	}
-
-	function skipToForm() {
-		if (emailInput) emailInput.focus();
-	}
 </script>
 
 <svelte:head>
@@ -476,14 +472,6 @@
 	<meta name="theme-color" content={darkBackground} media="(prefers-color-scheme: dark)" />
 	<meta name="theme-color" content={lightBackground} media="(prefers-color-scheme: light)" />
 </svelte:head>
-
-<button
-	class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:bg-black focus:text-white focus:px-4 focus:py-2 focus:rounded-md focus:z-[100] focus:font-medium focus:outline focus:outline-2 focus:outline-white"
-	onclick={skipToForm}
-	type="button"
->
-	{t.skipToForm}
-</button>
 
 <div class="sr-only" aria-live="polite" aria-atomic="true">
 	{successAnnouncement}
@@ -520,7 +508,7 @@
 	{/if}
 
 	<main class="flex-1 flex flex-col items-center justify-center">
-		<div class="w-full max-w-[480px] mx-auto px-4 flex flex-col items-center">
+		<div class="w-full mx-auto px-4 flex flex-col items-center" style:max-width="440px">
 			<!-- Logo Section -->
 			<div class="flex flex-col items-center pt-8 max-[480px]:pt-6 pb-4 anim-fade-in-scale">
 				<div
@@ -543,7 +531,8 @@
 			<!-- Form Section -->
 			<div class="w-full flex justify-center pt-2 pb-8">
 				<div
-					class="w-full max-w-[440px] rounded-2xl p-6 max-[480px]:p-5 border backdrop-blur-[10px] anim-fade-in-up"
+					class="w-full rounded-2xl p-6 border backdrop-blur-[10px] anim-fade-in-up"
+					style:max-width="440px"
 					class:shake={shakeError}
 					style:background-color={isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.7)'}
 					style:border-color={isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}
