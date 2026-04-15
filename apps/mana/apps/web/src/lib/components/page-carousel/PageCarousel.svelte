@@ -119,9 +119,7 @@
 				{:else}
 					<div
 						class="page-placeholder"
-						style="width: {p.widthPx ?? defaultWidth}px;{p.heightPx
-							? ` height: ${p.heightPx}px;`
-							: ''}"
+						style="width: {p.widthPx ?? defaultWidth}px;"
 						aria-hidden="true"
 					></div>
 				{/if}
@@ -179,11 +177,12 @@
 		align-items: center;
 	}
 	/* Sized stand-in for a not-yet-mounted card. Matches the card's
-	   widthPx/heightPx so scroll position and the surrounding flex
-	   layout stay stable while the IntersectionObserver decides which
-	   cards to mount. Falls back to 60vh height when heightPx is
-	   absent (the same minimum the empty state uses), which keeps the
-	   track from collapsing on initial paint. */
+	   widthPx so scroll position and the surrounding flex layout stay
+	   stable while the IntersectionObserver decides which cards to
+	   mount. Height falls back to 60vh (the same minimum the empty
+	   state uses), which keeps the track from collapsing on initial
+	   paint. Card bodies scroll internally — per-card heights were
+	   dropped in favour of a single viewport-height policy. */
 	.page-placeholder {
 		min-height: 60vh;
 		border-radius: 1.25rem;

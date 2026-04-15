@@ -15,11 +15,10 @@
 	interface Props {
 		appId: string;
 		widthPx: number;
-		heightPx?: number;
 		maximized?: boolean;
 		onClose: () => void;
 		onMaximize?: () => void;
-		onResize?: (widthPx: number, heightPx?: number) => void;
+		onResize?: (widthPx: number) => void;
 		onMoveLeft?: () => void;
 		onMoveRight?: () => void;
 		onContextMenu?: (e: MouseEvent) => void;
@@ -28,7 +27,6 @@
 	let {
 		appId,
 		widthPx,
-		heightPx,
 		maximized = false,
 		onClose,
 		onMaximize,
@@ -296,7 +294,6 @@
 	<!-- Base: PageShell with list view (always visible) -->
 	<PageShell
 		{widthPx}
-		{heightPx}
 		{maximized}
 		title={appName}
 		titleHref={`/${appId}`}

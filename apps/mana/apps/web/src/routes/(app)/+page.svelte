@@ -106,7 +106,6 @@
 				id: a.appId,
 				maximized: a.maximized,
 				widthPx: a.widthPx ?? DEFAULT_WIDTH,
-				heightPx: a.heightPx,
 				title: appTitles.get(a.appId) ?? a.appId,
 				color: entry?.color ?? '#6B7280',
 				icon: entry?.icon,
@@ -192,8 +191,8 @@
 	function handleMaximizeApp(id: string) {
 		workbenchScenesStore.toggleMaximizeApp(id);
 	}
-	function handleResize(id: string, widthPx: number, heightPx?: number) {
-		workbenchScenesStore.resizeApp(id, widthPx, heightPx);
+	function handleResize(id: string, widthPx: number) {
+		workbenchScenesStore.resizeApp(id, widthPx);
 	}
 	function handleMoveLeft(id: string) {
 		workbenchScenesStore.moveAppLeft(id);
@@ -329,11 +328,10 @@
 			<AppPage
 				appId={p.id}
 				widthPx={p.widthPx}
-				heightPx={p.heightPx}
 				maximized={p.maximized}
 				onClose={() => handleRemoveApp(p.id)}
 				onMaximize={() => handleMaximizeApp(p.id)}
-				onResize={(w, h) => handleResize(p.id, w, h)}
+				onResize={(w) => handleResize(p.id, w)}
 				onMoveLeft={idx > 0 ? () => handleMoveLeft(p.id) : undefined}
 				onMoveRight={idx < openApps.length - 1 ? () => handleMoveRight(p.id) : undefined}
 				onContextMenu={(e) => handleCardContextMenu(e, p.id, idx)}

@@ -296,12 +296,8 @@ export const workbenchScenesStore = {
 		);
 	},
 
-	async resizeApp(appId: string, widthPx: number, heightPx?: number) {
-		await patchActiveScene((apps) =>
-			apps.map((a) =>
-				a.appId === appId ? { ...a, widthPx, ...(heightPx !== undefined ? { heightPx } : {}) } : a
-			)
-		);
+	async resizeApp(appId: string, widthPx: number) {
+		await patchActiveScene((apps) => apps.map((a) => (a.appId === appId ? { ...a, widthPx } : a)));
 	},
 
 	async moveAppLeft(appId: string) {

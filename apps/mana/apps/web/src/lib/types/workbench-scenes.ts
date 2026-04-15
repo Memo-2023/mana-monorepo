@@ -17,8 +17,8 @@ import type { WallpaperConfig } from '@mana/shared-theme';
 export interface WorkbenchSceneApp {
 	appId: string;
 	maximized?: boolean;
+	/** Width preset in pixels. See PAGE_WIDTH_PRESETS for allowed values. */
 	widthPx?: number;
-	heightPx?: number;
 }
 
 /** A user-defined named layout of the workbench. */
