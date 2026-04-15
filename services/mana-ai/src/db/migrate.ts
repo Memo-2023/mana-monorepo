@@ -89,4 +89,33 @@ export async function migrate(sql: Sql): Promise<void> {
 			END IF;
 		END $$
 	`;
+
+	// ─── Agent snapshots (Multi-Agent Workbench, Phase 3) ────────
+	// Mirrors mission_snapshots: a materialized LWW-merged view of the
+	// agents table from sync_changes. Runner loads agents per-user
+	// per-tick from here instead of replaying the event log each time.
+	// systemPrompt + memory stay as they arrived (encrypted strings for
+	// most users); the runner opts to skip injecting ciphertext rather
+	// than requiring a per-agent Grant.
+	await sql`
+		CREATE TABLE IF NOT EXISTS mana_ai.agent_snapshots (
+			user_id TEXT NOT NULL,
+			agent_id TEXT NOT NULL,
+			record JSONB NOT NULL,
+			last_applied_at TIMESTAMPTZ NOT NULL DEFAULT 'epoch',
+			updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+			PRIMARY KEY (user_id, agent_id)
+		)
+	`;
+
+	await sql`
+		CREATE INDEX IF NOT EXISTS idx_agent_snapshots_user
+		ON mana_ai.agent_snapshots (user_id, last_applied_at)
+	`;
+
+	await sql`
+		CREATE INDEX IF NOT EXISTS idx_agent_snapshots_state
+		ON mana_ai.agent_snapshots ((record->>'state'))
+		WHERE record->>'state' = 'active'
+	`;
 }

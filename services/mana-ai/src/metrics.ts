@@ -123,3 +123,25 @@ export const grantSkipsTotal = new Counter({
 	labelNames: ['reason'] as const,
 	registers: [register],
 });
+
+// ── Multi-Agent Workbench (Phase 3) ───────────────────────
+
+/**
+ * Per-mission decision the tick took with respect to the owning agent.
+ * Possible `decision` values:
+ *   - `ran`                 — mission processed normally under the agent
+ *   - `skipped-paused`      — agent.state === 'paused'
+ *   - `skipped-archived`    — agent.state === 'archived'
+ *   - `skipped-concurrency` — agent's maxConcurrentMissions already hit
+ *                             this tick; retried next tick
+ *
+ * Missions without an owning agent (legacy, pre-Phase-2) don't produce
+ * this metric — that's why `mana_ai_plans_written_back_total` stays
+ * the ground-truth "did we run" counter.
+ */
+export const agentDecisionsTotal = new Counter({
+	name: 'mana_ai_agent_decisions_total',
+	help: 'Per-mission decision the tick made against the owning Agent.',
+	labelNames: ['decision'] as const,
+	registers: [register],
+});

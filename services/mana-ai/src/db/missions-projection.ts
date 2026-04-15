@@ -31,6 +31,11 @@ export interface ServerMission {
 	/** Present iff the mission has a Key-Grant attached — enables
 	 *  decryption of encrypted-table inputs during this tick. */
 	grant?: MissionGrant;
+	/** Owning Agent id (Multi-Agent Workbench). Undefined on legacy
+	 *  missions; tick loads the agent when present to inject
+	 *  systemPrompt + memory into the Planner prompt and to stamp the
+	 *  server-iteration actor with the correct principal. */
+	agentId?: string;
 }
 
 interface ChangeRow {
@@ -80,6 +85,7 @@ export async function listDueMissions(sql: Sql, now: string): Promise<ServerMiss
 		cadence: record.cadence,
 		iterations: Array.isArray(record.iterations) ? record.iterations : [],
 		grant: (record.grant ?? undefined) as MissionGrant | undefined,
+		agentId: typeof record.agentId === 'string' ? record.agentId : undefined,
 	}));
 }
 
@@ -147,6 +153,7 @@ export function mergeAndFilter(
 			cadence: record.cadence,
 			iterations: Array.isArray(record.iterations) ? record.iterations : [],
 			grant: (record.grant ?? undefined) as MissionGrant | undefined,
+			agentId: typeof record.agentId === 'string' ? record.agentId : undefined,
 		});
 	}
 	return missions;

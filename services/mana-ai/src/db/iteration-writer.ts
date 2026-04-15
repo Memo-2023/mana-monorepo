@@ -17,7 +17,13 @@
 
 import type { Sql } from './connection';
 import { withUser } from './connection';
-import { makeSystemActor, SYSTEM_MISSION_RUNNER } from '@mana/shared-ai';
+import {
+	makeAgentActor,
+	makeSystemActor,
+	SYSTEM_MISSION_RUNNER,
+	LEGACY_AI_PRINCIPAL,
+	type Actor,
+} from '@mana/shared-ai';
 import type { AiPlanOutput, MissionIteration, PlanStep } from '@mana/shared-ai';
 
 export interface AppendIterationInput {
@@ -34,16 +40,50 @@ export interface AppendIterationInput {
 	/** When the write happened — used as the per-field updatedAt stamp
 	 *  and the sync_changes.created_at fallback. */
 	nowIso: string;
+	/** Owning Agent context. When provided, the iteration row is
+	 *  attributed to an `ai` actor with the agent's principalId + name;
+	 *  the Workbench timeline on the webapp then groups this writer's
+	 *  output under the right agent. When absent, falls back to the
+	 *  legacy system-actor (Phase 1 shape) so pre-Phase-3 missions
+	 *  still work. */
+	agent?: {
+		id: string;
+		name: string;
+	};
+	/** Iteration id — required when `agent` is set, passed through to
+	 *  the Actor so the revert path can group this write by iteration. */
+	iterationId?: string;
+	/** Rationale for the Actor — defaults to the iteration summary or
+	 *  the mission objective. */
+	rationale?: string;
 }
 
-/** Actor blob stamped on the sync_changes row. JSON string already —
- *  we pass it as `json.RawMessage` equivalent through pgx. Uses the
- *  identity-aware Actor shape from @mana/shared-ai so the webapp's
- *  timeline can group + filter server-produced iterations alongside
- *  agent/user writes. Phase 2 will switch this to a per-agent actor
- *  when the mission carries `agentId`. */
-function systemActorJson(): string {
-	return JSON.stringify(makeSystemActor(SYSTEM_MISSION_RUNNER));
+/** Build the actor blob stamped on the sync_changes row. When the
+ *  mission has an owning agent we attribute the write to that agent;
+ *  otherwise we fall back to the mission-runner system actor so legacy
+ *  missions (no agentId yet) still produce a valid Actor shape. */
+function buildActor(input: AppendIterationInput): Actor {
+	if (input.agent && input.iterationId) {
+		return makeAgentActor({
+			agentId: input.agent.id,
+			displayName: input.agent.name,
+			missionId: input.missionId,
+			iterationId: input.iterationId,
+			rationale: input.rationale ?? '',
+		});
+	}
+	// Legacy path — no agent context. Still identity-aware via the
+	// system principal, just without agent grouping.
+	if (input.iterationId) {
+		return makeAgentActor({
+			agentId: LEGACY_AI_PRINCIPAL,
+			displayName: 'Mana',
+			missionId: input.missionId,
+			iterationId: input.iterationId,
+			rationale: input.rationale ?? '',
+		});
+	}
+	return makeSystemActor(SYSTEM_MISSION_RUNNER);
 }
 
 export async function appendServerIteration(sql: Sql, input: AppendIterationInput): Promise<void> {
@@ -70,7 +110,7 @@ export async function appendServerIteration(sql: Sql, input: AppendIterationInpu
 	// happens correctly at runtime.
 	const dataJson = data as unknown;
 	const ftJson = fieldTimestamps as unknown;
-	const actorJson = JSON.parse(systemActorJson()) as unknown;
+	const actorJson = buildActor(input) as unknown;
 
 	await withUser(sql, userId, async (tx) => {
 		await tx`
