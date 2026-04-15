@@ -295,10 +295,6 @@
 		await workbenchScenesStore.renameScene(mode.id, name, description.trim() || null);
 		sceneDialog = null;
 	}
-	function handleEditActiveScene() {
-		const active = workbenchScenesStore.activeScene;
-		if (active) handleRequestRename(active.id);
-	}
 	function handleDuplicateScene(id: string) {
 		workbenchScenesStore.duplicateScene(id);
 	}
@@ -352,7 +348,7 @@
 			/>
 		{/snippet}
 		{#snippet leading()}
-			<SceneHeader scene={workbenchScenesStore.activeScene} onEdit={handleEditActiveScene} />
+			<SceneHeader scene={workbenchScenesStore.activeScene} />
 		{/snippet}
 	</PageCarousel>
 
