@@ -249,8 +249,8 @@ services:
 
   mana-auth:
     build:
-      context: services/mana-auth
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: services/mana-auth/Dockerfile
     image: mana-auth:local
     container_name: mana-auth
     restart: always
@@ -273,6 +273,11 @@ services:
       # KEK for the encryption-vault feature (Phase 9). Required in production
       # — generate with `openssl rand -base64 32`. See services/mana-auth/CLAUDE.md.
       MANA_AUTH_KEK: ${MANA_AUTH_KEK}
+      # RSA-OAEP-2048 public key of the mana-ai runner. Used to wrap
+      # per-mission data keys in POST /me/ai-mission-grant. Paired with
+      # MANA_AI_PRIVATE_KEY_PEM on the mana-ai service. Absent → endpoint
+      # returns 503 GRANT_NOT_CONFIGURED (graceful degrade).
+      MANA_AI_PUBLIC_KEY_PEM: ${MANA_AI_PUBLIC_KEY_PEM:-}
       MANA_NOTIFY_URL: http://mana-notify:3013
       MAX_DAILY_SIGNUPS: ${MAX_DAILY_SIGNUPS:-0}
       # Must be a superset of TRUSTED_ORIGINS in
@@ -285,6 +290,49 @@ services:
       - "3001:3001"
     healthcheck:
       test: ["CMD", "bun", "-e", "fetch('http://127.0.0.1:3001/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 120s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ============================================
+  # Tier 1a': AI Mission Runner (Hono + Bun)
+  # Background ticker that plans due AI Missions and stages proposals
+  # back to user devices via mana-sync. Opt-in decrypt of encrypted
+  # inputs via the Mission Key-Grant flow (see services/mana-ai/CLAUDE.md
+  # and docs/plans/ai-mission-key-grant.md).
+  # ============================================
+
+  mana-ai:
+    build:
+      context: .
+      dockerfile: services/mana-ai/Dockerfile
+    image: mana-ai:local
+    container_name: mana-ai
+    restart: always
+    mem_limit: 256m
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mana-llm:
+        condition: service_started
+    environment:
+      TZ: Europe/Berlin
+      NODE_ENV: production
+      PORT: 3066
+      SYNC_DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana_sync
+      MANA_LLM_URL: http://mana-llm:3020
+      MANA_SERVICE_KEY: ${MANA_SERVICE_KEY}
+      TICK_INTERVAL_MS: ${MANA_AI_TICK_INTERVAL_MS:-60000}
+      TICK_ENABLED: ${MANA_AI_TICK_ENABLED:-true}
+      # RSA-OAEP-2048 private key paired with MANA_AI_PUBLIC_KEY_PEM on
+      # mana-auth. Used to unwrap per-mission data keys at tick time.
+      # Absent → all grants skip silently with reason="not-configured".
+      MANA_AI_PRIVATE_KEY_PEM: ${MANA_AI_PRIVATE_KEY_PEM:-}
+    ports:
+      - "3066:3066"
+    healthcheck:
+      test: ["CMD", "bun", "-e", "fetch('http://127.0.0.1:3066/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
       interval: 120s
       timeout: 10s
       retries: 3

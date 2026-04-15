@@ -9,6 +9,7 @@ WORKDIR /app
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY services/mana-ai/package.json ./services/mana-ai/
 COPY packages/shared-hono ./packages/shared-hono
+COPY packages/shared-ai ./packages/shared-ai
 
 # Install only mana-ai and its workspace deps
 RUN pnpm install --filter @mana/ai-service... --no-frozen-lockfile --ignore-scripts
