@@ -187,8 +187,8 @@
 		"dev:traces:mobile": "pnpm --filter @traces/mobile dev",
 		"dev:traces:full": "concurrently -n auth,sync,api -c blue,magenta,yellow \"pnpm dev:auth\" \"pnpm dev:sync\" \"pnpm dev:api\"",
 		"dev:landing-builder": "pnpm --filter @mana-landing-builder/service start:dev",
-		"docker:up": "docker compose -f docker-compose.dev.yml --env-file .env.development up -d postgres redis minio minio-init",
-		"docker:up:infra": "docker compose -f docker-compose.dev.yml --env-file .env.development up -d postgres redis minio minio-init",
+		"docker:up": "docker compose -f docker-compose.dev.yml --env-file .env.development up -d postgres redis minio minio-init searxng",
+		"docker:up:infra": "docker compose -f docker-compose.dev.yml --env-file .env.development up -d postgres redis minio minio-init searxng",
 		"docker:up:db": "docker compose -f docker-compose.dev.yml --env-file .env.development up -d postgres redis",
 		"docker:up:auth": "docker compose -f docker-compose.dev.yml --env-file .env.development --profile auth up -d",
 		"docker:up:chat": "docker compose -f docker-compose.dev.yml --env-file .env.development --profile chat up -d",
@@ -219,7 +219,7 @@
 		"cf:login": "npx wrangler login",
 		"cf:projects:list": "npx wrangler pages project list",
 		"cf:projects:create": "echo 'Creating Cloudflare Pages projects...' && npx wrangler pages project create chat-landing --production-branch=main && npx wrangler pages project create picture-landing --production-branch=main && npx wrangler pages project create mana-landing --production-branch=main && npx wrangler pages project create cards-landing --production-branch=main && npx wrangler pages project create quotes-landing --production-branch=main",
-		"dev:search": "cd services/mana-search && go run ./cmd/server",
+		"dev:search": "cd services/mana-search && PORT=3021 SEARXNG_URL=http://localhost:8080 REDIS_HOST=localhost REDIS_PORT=6379 REDIS_PASSWORD=${REDIS_PASSWORD:-devpassword} go run ./cmd/server",
 		"dev:crawler": "cd services/mana-crawler && go run ./cmd/server",
 		"dev:credits": "cd services/mana-credits && bun run --watch src/index.ts",
 		"dev:notify": "cd services/mana-notify && go run ./cmd/server",
@@ -257,7 +257,7 @@
 		"dev:manavoxel:local": "concurrently -n sync,web -c magenta,cyan \"pnpm dev:sync\" \"pnpm dev:manavoxel:web\"",
 		"dev:media": "cd services/mana-media/apps/api && bun run --hot src/index.ts",
 		"dev:geocoding": "cd services/mana-geocoding && bun run --watch src/index.ts",
-		"dev:mana:servers": "concurrently -n auth,sync,api,media,crawler,credits -c blue,magenta,yellow,green,cyan,red \"pnpm dev:auth\" \"pnpm dev:sync\" \"pnpm dev:api\" \"pnpm dev:media\" \"pnpm dev:crawler\" \"pnpm dev:credits\""
+		"dev:mana:servers": "concurrently -n auth,sync,api,media,crawler,credits,search -c blue,magenta,yellow,green,cyan,red,gray \"pnpm dev:auth\" \"pnpm dev:sync\" \"pnpm dev:api\" \"pnpm dev:media\" \"pnpm dev:crawler\" \"pnpm dev:credits\" \"pnpm dev:search\""
 	},
 	"devDependencies": {
 		"@mana/eslint-config": "workspace:*",

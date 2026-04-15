@@ -44,6 +44,31 @@ services:
       timeout: 5s
       retries: 5
 
+  # SearXNG — meta-search engine used by mana-search.
+  # Backend for web-search features (e.g. News Research feed discovery).
+  # Config mounted read-only from the service's own tree so it stays in
+  # sync with the production compose.
+  searxng:
+    image: searxng/searxng:latest
+    container_name: mana-searxng
+    restart: unless-stopped
+    volumes:
+      - ./services/mana-search/searxng/settings.yml:/etc/searxng/settings.yml:ro
+      - ./services/mana-search/searxng/limiter.toml:/etc/searxng/limiter.toml:ro
+    environment:
+      SEARXNG_BASE_URL: http://localhost:8080
+      SEARXNG_SECRET: ${SEARXNG_SECRET:-dev-secret-change-in-production}
+    ports:
+      - "8080:8080"
+    networks:
+      - mana-network
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
   # Mailpit — fake SMTP server for local development.
   # Catches every outbound mail and exposes them via web UI + REST API.
   # Point any service that sends email at SMTP_HOST=mailpit, SMTP_PORT=1025
