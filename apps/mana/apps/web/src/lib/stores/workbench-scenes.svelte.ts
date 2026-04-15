@@ -99,7 +99,10 @@ function pickActiveId(scenes: WorkbenchScene[], current: string | null): string 
 async function patchScene(
 	id: string,
 	patch: Partial<
-		Pick<LocalWorkbenchScene, 'name' | 'description' | 'openApps' | 'order' | 'wallpaper'>
+		Pick<
+			LocalWorkbenchScene,
+			'name' | 'description' | 'openApps' | 'order' | 'wallpaper' | 'viewingAsAgentId'
+		>
 	>
 ) {
 	// Strip Svelte 5 $state proxies — IndexedDB's structured clone can't serialize them.
@@ -219,6 +222,12 @@ export const workbenchScenesStore = {
 
 	async setSceneDescription(id: string, description: string | null) {
 		await patchScene(id, { description });
+	},
+
+	/** Bind the scene to an Agent (or clear the binding). Purely a UI
+	 *  lens — does not affect which data the open apps can see. */
+	async setSceneAgent(id: string, agentId: string | undefined) {
+		await patchScene(id, { viewingAsAgentId: agentId });
 	},
 
 	async duplicateScene(id: string) {

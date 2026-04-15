@@ -7,6 +7,13 @@
 	import { tick } from 'svelte';
 	import type { CarouselPage } from '$lib/components/page-carousel/types';
 	import type { WorkbenchScene } from '$lib/types/workbench-scenes';
+	import { useAgents } from '$lib/data/ai/agents/queries';
+
+	// Resolve each scene's bound agent → avatar + name. Cheap lookup
+	// since all active agents are already in memory from the live-
+	// query. No extra Dexie round-trip per render.
+	const agents = $derived(useAgents({ state: 'active' }));
+	const agentById = $derived(new Map(agents.value.map((a) => [a.id, a])));
 
 	interface Props {
 		scenes: WorkbenchScene[];
@@ -74,6 +81,7 @@
 			{@const isActive = scene.id === activeSceneId}
 
 			{#if isActive && pages.length > 0}
+				{@const boundAgent = scene.viewingAsAgentId ? agentById.get(scene.viewingAsAgentId) : null}
 				<!-- Active scene + its app tabs wrapped in a visual group -->
 				<div class="scene-group">
 					<button
@@ -81,7 +89,11 @@
 						class="scene-pill active"
 						onclick={() => onSceneSelect(scene.id)}
 						oncontextmenu={(e) => onSceneContextMenu(e, scene)}
+						title={boundAgent ? `Agent: ${boundAgent.name}` : undefined}
 					>
+						{#if boundAgent}
+							<span class="scene-agent-avatar">{boundAgent.avatar ?? '🤖'}</span>
+						{/if}
 						<span class="scene-name">{scene.name}</span>
 						<span class="scene-count">{scene.openApps.length}</span>
 					</button>
@@ -108,13 +120,18 @@
 					</button>
 				</div>
 			{:else}
+				{@const boundAgent = scene.viewingAsAgentId ? agentById.get(scene.viewingAsAgentId) : null}
 				<button
 					type="button"
 					class="scene-pill"
 					class:active={isActive}
 					onclick={() => onSceneSelect(scene.id)}
 					oncontextmenu={(e) => onSceneContextMenu(e, scene)}
+					title={boundAgent ? `Agent: ${boundAgent.name}` : undefined}
 				>
+					{#if boundAgent}
+						<span class="scene-agent-avatar">{boundAgent.avatar ?? '🤖'}</span>
+					{/if}
 					<span class="scene-name">{scene.name}</span>
 					<span class="scene-count">{scene.openApps.length}</span>
 				</button>
@@ -218,6 +235,10 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
+	}
+	.scene-agent-avatar {
+		font-size: 0.875rem;
+		line-height: 1;
 	}
 	.scene-count {
 		font-size: 0.9375rem;

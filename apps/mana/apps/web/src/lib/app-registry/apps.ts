@@ -833,6 +833,16 @@ registerApp({
 });
 
 registerApp({
+	id: 'news-research',
+	name: 'News Research',
+	color: '#0891B2',
+	icon: Binoculars,
+	views: {
+		list: { load: () => import('$lib/modules/news-research/ListView.svelte') },
+	},
+});
+
+registerApp({
 	id: 'firsts',
 	name: 'Firsts',
 	color: '#F59E0B',
@@ -1003,6 +1013,16 @@ registerApp({
 	icon: Flag,
 	views: {
 		list: { load: () => import('$lib/modules/ai-missions/ListView.svelte') },
+	},
+});
+
+registerApp({
+	id: 'ai-agents',
+	name: 'AI Agents',
+	color: '#8B5CF6',
+	icon: Flag,
+	views: {
+		list: { load: () => import('$lib/modules/ai-agents/ListView.svelte') },
 	},
 });
 

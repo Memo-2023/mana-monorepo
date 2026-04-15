@@ -4,6 +4,7 @@
 	import SceneAppBar from '$lib/components/workbench/SceneAppBar.svelte';
 	import SceneHeader from '$lib/components/workbench/scenes/SceneHeader.svelte';
 	import ConfirmDialog from '$lib/components/workbench/scenes/ConfirmDialog.svelte';
+	import BindAgentDialog from '$lib/components/workbench/scenes/BindAgentDialog.svelte';
 	import { PageCarousel, type CarouselPage } from '$lib/components/page-carousel';
 	import { getApp, getAppByDragType, isAppAccessible } from '$lib/app-registry';
 	import { onMount, onDestroy } from 'svelte';
@@ -13,7 +14,7 @@
 	import { DragPreview } from '@mana/shared-ui/dnd';
 	import type { DragType } from '@mana/shared-ui/dnd';
 	import { ContextMenu, type ContextMenuItem } from '@mana/shared-ui';
-	import { Pencil, Copy, Trash, Image } from '@mana/shared-icons';
+	import { Pencil, Copy, Trash, Image, Sparkle } from '@mana/shared-icons';
 	import { goto } from '$app/navigation';
 	import { _, locale } from 'svelte-i18n';
 	import { buildContextMenuItems, createWorkbenchContextMenu } from '$lib/context-menu';
@@ -274,6 +275,12 @@
 				action: () => handleDuplicateScene(scene.id),
 			},
 			{
+				id: 'bind-agent',
+				label: scene.viewingAsAgentId ? 'Agent-Bindung ändern…' : 'An Agent binden…',
+				icon: Sparkle,
+				action: () => handleRequestBindAgent(scene.id),
+			},
+			{
 				id: 'wallpaper',
 				label: 'Hintergrund ändern',
 				icon: Image,
@@ -295,6 +302,15 @@
 
 	// ── Scene CRUD dialogs ──────────────────────────────────
 	let sceneToDelete = $state<{ id: string; name: string } | null>(null);
+	let sceneToBindAgent = $state<WorkbenchScene | null>(null);
+	let bindAgentDialogOpen = $state(false);
+
+	function handleRequestBindAgent(id: string) {
+		const scene = scenes.find((s) => s.id === id);
+		if (!scene) return;
+		sceneToBindAgent = scene;
+		bindAgentDialogOpen = true;
+	}
 
 	function handleRequestRename(id: string) {
 		// Unified rename path: scroll the carousel to the scene header
@@ -389,6 +405,8 @@
 		onConfirm={handleConfirmDeleteScene}
 		onCancel={() => (sceneToDelete = null)}
 	/>
+
+	<BindAgentDialog bind:scene={sceneToBindAgent} bind:open={bindAgentDialogOpen} />
 </div>
 
 <style>

@@ -21,6 +21,7 @@
 	import { productionDeps } from '$lib/data/ai/missions/setup';
 	import MissionInputPicker from '$lib/components/ai/MissionInputPicker.svelte';
 	import MissionGrantDialog from '$lib/components/ai/MissionGrantDialog.svelte';
+	import AgentPicker from '$lib/components/ai/AgentPicker.svelte';
 	import AiDebugBlock from '$lib/components/ai/AiDebugBlock.svelte';
 	import AiProposalInbox from '$lib/components/ai/AiProposalInbox.svelte';
 	import { isAiDebugEnabled, setAiDebugEnabled } from '$lib/data/ai/missions/debug';
@@ -48,6 +49,7 @@
 	let formIntervalMin = $state(60);
 	let formDailyHour = $state(9);
 	let formInputs = $state<MissionInputRef[]>([]);
+	let formAgentId = $state<string | undefined>(undefined);
 	let creating = $state(false);
 
 	function buildCadence(): MissionCadence {
@@ -75,11 +77,13 @@
 				conceptMarkdown: formConcept,
 				inputs: formInputs,
 				cadence: buildCadence(),
+				agentId: formAgentId,
 			});
 			formTitle = '';
 			formObjective = '';
 			formConcept = '';
 			formInputs = [];
+			formAgentId = undefined;
 			formCadenceKind = 'manual';
 			selectedId = m.id;
 			mode = 'detail';
@@ -255,6 +259,14 @@
 				rows="5"
 			></textarea>
 		</label>
+		<fieldset>
+			<legend>Agent</legend>
+			<AgentPicker
+				value={formAgentId}
+				onSelect={(id) => (formAgentId = id)}
+				label="Wer führt aus"
+			/>
+		</fieldset>
 		<fieldset>
 			<legend>Inputs (Kontext für die KI)</legend>
 			<MissionInputPicker bind:value={formInputs} />

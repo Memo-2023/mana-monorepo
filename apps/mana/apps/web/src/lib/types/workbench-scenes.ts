@@ -32,6 +32,16 @@ export interface WorkbenchScene {
 	order: number;
 	/** Per-scene wallpaper override. When set, takes priority over globalSettings.wallpaper. */
 	wallpaper?: WallpaperConfig;
+	/**
+	 * Optional Agent this scene is "viewed as" (Multi-Agent Workbench
+	 * Phase 5). Pure UI lens — does NOT restrict which data the open
+	 * apps see. When set, the scene tab shows the agent's avatar, the
+	 * Workbench timeline defaults to this agent's filter, and the
+	 * mission-create flow pre-selects it. Undefined = neutral scene
+	 * (no agent binding); user can pick one explicitly in scene
+	 * settings. See docs/plans/multi-agent-workbench.md §Phase 5d.
+	 */
+	viewingAsAgentId?: string;
 }
 
 /** Dexie row shape (adds the BaseRecord audit fields stamped by hooks). */

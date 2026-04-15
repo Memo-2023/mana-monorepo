@@ -45,6 +45,7 @@ export const APP_CATEGORY_MAP: Record<string, AppCategory> = {
 	// AI Workbench — the 6 new AI feature apps + companion chat
 	companion: 'ai',
 	'ai-missions': 'ai',
+	'ai-agents': 'ai',
 	'ai-workbench': 'ai',
 	'ai-rituals': 'ai',
 	'ai-policy': 'ai',

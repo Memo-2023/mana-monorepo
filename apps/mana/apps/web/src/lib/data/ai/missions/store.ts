@@ -47,6 +47,11 @@ export interface CreateMissionInput {
 	objective: string;
 	inputs?: MissionInputRef[];
 	cadence: MissionCadence;
+	/** Owning agent id. Optional — when omitted, the mission inherits
+	 *  the legacy default agent via the bootstrap migration. Pass an id
+	 *  explicitly from the create UI so new missions land on the right
+	 *  agent from the first write. */
+	agentId?: string;
 }
 
 export async function createMission(input: CreateMissionInput): Promise<Mission> {
@@ -69,6 +74,7 @@ export async function createMission(input: CreateMissionInput): Promise<Mission>
 		state: 'active',
 		nextRunAt: nextRunForCadence(cadencePlain, new Date()),
 		iterations: [],
+		agentId: input.agentId,
 	};
 	await table().add(mission);
 	return mission;
@@ -107,6 +113,7 @@ export interface MissionPatch {
 	objective?: string;
 	inputs?: MissionInputRef[];
 	cadence?: MissionCadence;
+	agentId?: string;
 }
 
 export async function updateMission(id: string, patch: MissionPatch): Promise<void> {
