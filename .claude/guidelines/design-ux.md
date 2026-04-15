@@ -114,9 +114,31 @@ background: white;
 | `--color-muted-foreground` | Sekundärtext, Platzhalter      |
 | `--color-surface`          | Hintergründe                   |
 | `--color-border`           | Rahmen, Trennlinien            |
-| `--color-destructive`      | Lösch-Aktionen, Fehler         |
+| `--color-error`            | Lösch-Aktionen, Fehler         |
 | `--color-success`          | Erfolgsmeldungen               |
 | `--color-warning`          | Warnungen                      |
+
+### ⚠️ Nie bare shadcn-Tokens
+
+Manche Komponenten aus shadcn- oder theme-Vorlagen sprechen bare Token-Namen
+an (`--muted`, `--primary`, `--theme-muted`). **Diese existieren im Mana-Theme
+nicht** und fallen stumm aus — das Theme-Wechseln wird nicht mehr mitgezogen.
+Immer den `--color-*`-Präfix nutzen:
+
+```css
+/* Falsch */
+background: hsl(var(--muted));
+color: var(--foreground, #111);
+border: 1px solid var(--theme-border);
+
+/* Richtig */
+background: hsl(var(--color-muted));
+color: hsl(var(--color-foreground));
+border: 1px solid hsl(var(--color-border));
+```
+
+Der Audit `pnpm audit:theme-tokens` (läuft auch in `lint-staged`) schlägt
+jeden Drift an.
 
 ### Dark Mode
 
@@ -434,7 +456,7 @@ function handleKeydown(e: KeyboardEvent) {
 | Aspekt               | Input-Toggle                   | contenteditable              |
 | -------------------- | ------------------------------ | ---------------------------- |
 | Klicks zum Editieren | 2 (aktivieren + positionieren) | 1 (Cursor an Klick-Position) |
-| DOM-Wechsel          | `<span>` ↔ `<input>`          | Keiner                       |
+| DOM-Wechsel          | `<span>` ↔ `<input>`           | Keiner                       |
 | Mehrzeilig           | Braucht `<textarea>`           | Nativ                        |
 | Styling              | Muss Input an Span anpassen    | Gleich                       |
 

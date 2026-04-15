@@ -23,6 +23,7 @@
 		"audit:coupling": "node scripts/audit-module-coupling.mjs",
 		"audit:complexity": "node scripts/audit-complexity.mjs",
 		"audit:map": "node scripts/build-complexity-map.mjs",
+		"audit:theme-tokens": "node scripts/audit-theme-tokens.mjs",
 		"generate:dockerfiles": "node scripts/generate-dockerfiles.mjs",
 		"setup:env": "node scripts/generate-env.mjs",
 		"setup:secrets": "node scripts/setup-secrets.mjs",
