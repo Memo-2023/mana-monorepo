@@ -379,7 +379,7 @@
 		appItems = [],
 		showAppSwitcher = false,
 		userEmail,
-		settingsHref = '/settings',
+		settingsHref,
 		manaHref,
 		profileHref,
 		loginHref,
@@ -476,13 +476,15 @@
 				active: currentPath === profileHref,
 			});
 		}
-		links.push({
-			id: 'settings',
-			label: 'Einstellungen',
-			icon: 'settings',
-			href: settingsHref,
-			active: currentPath === settingsHref,
-		});
+		if (settingsHref) {
+			links.push({
+				id: 'settings',
+				label: 'Einstellungen',
+				icon: 'settings',
+				href: settingsHref,
+				active: currentPath === settingsHref,
+			});
+		}
 		if (userEmail && manaHref) {
 			links.push({
 				id: 'mana',
