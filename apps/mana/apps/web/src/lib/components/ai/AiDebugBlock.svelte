@@ -44,7 +44,14 @@
 				{:else if d.preStep.webResearch && !d.preStep.webResearch.ok}
 					· Web ❌
 				{/if}
-				{#if d.planner}· {Math.round(d.planner.latencyMs)}ms{/if}
+				{#if d.plannerCalls && d.plannerCalls.length > 0}
+					· {d.plannerCalls.length}× LLM · {Math.round(
+						d.plannerCalls.reduce((a, c) => a + c.latencyMs, 0)
+					)}ms
+				{/if}
+				{#if d.loopSteps && d.loopSteps.length > 0}
+					· {d.loopSteps.length}× Auto-Tool
+				{/if}
 				{#if d.plannerError}· Planner ❌{/if}
 			</span>
 			<button
@@ -86,19 +93,39 @@
 			{/if}
 		</section>
 
-		{#if d.planner}
+		{#if d.loopSteps && d.loopSteps.length > 0}
 			<section>
-				<h5>System Prompt</h5>
-				<pre>{d.planner.systemPrompt}</pre>
+				<h5>Auto-Tool-Ausgaben (Reasoning-Loop)</h5>
+				{#each d.loopSteps as ls, i (i)}
+					<details class="nested">
+						<summary>
+							<code>Runde {ls.loopIndex + 1}</code>
+							{ls.toolName}({JSON.stringify(ls.params)})
+						</summary>
+						<pre>{ls.outputPreview}</pre>
+					</details>
+				{/each}
 			</section>
-			<section>
-				<h5>User Prompt</h5>
-				<pre>{d.planner.userPrompt}</pre>
-			</section>
-			<section>
-				<h5>Raw LLM Response</h5>
-				<pre>{d.planner.rawResponse}</pre>
-			</section>
+		{/if}
+
+		{#if d.plannerCalls && d.plannerCalls.length > 0}
+			{#each d.plannerCalls as call, i (i)}
+				<section>
+					<h5>LLM-Call {i + 1}/{d.plannerCalls.length} · {Math.round(call.latencyMs)}ms</h5>
+					<details class="nested">
+						<summary>System Prompt</summary>
+						<pre>{call.systemPrompt}</pre>
+					</details>
+					<details class="nested" open>
+						<summary>User Prompt</summary>
+						<pre>{call.userPrompt}</pre>
+					</details>
+					<details class="nested" open>
+						<summary>Raw LLM Response</summary>
+						<pre>{call.rawResponse}</pre>
+					</details>
+				</section>
+			{/each}
 		{/if}
 
 		{#if d.plannerError}

@@ -32,7 +32,7 @@ import { executeTool } from '../../tools/executor';
 import { db } from '../../database';
 import { decryptRecords } from '../../crypto';
 import { discoverByQuery, searchFeeds } from '$lib/modules/news-research/api';
-import { isAiDebugEnabled, recordAiDebug, type AiDebugEntry } from './debug';
+import { isAiDebugEnabled, recordAiDebug, type AiDebugEntry, type PlannerCallDebug } from './debug';
 import { makeAgentActor, LEGACY_AI_PRINCIPAL, type Actor } from '../../events/actor';
 import { getAgent } from '../agents/store';
 import { DEFAULT_AGENT_NAME } from '../agents/types';
@@ -43,6 +43,14 @@ import type { AiPlanInput, AiPlanOutput, PlannedStep, ResolvedInput } from './pl
  *  web-research call. Keeps the trigger explicit so unrelated missions
  *  don't burn credits accidentally. */
 const RESEARCH_TRIGGER = /\b(recherchier|research|news|finde|suche|aktuelle|neueste)/i;
+
+/** Reasoning-loop budget. Each LOOP iteration = one planner call + its
+ *  auto-tool executions. The loop exits early when a propose-policy
+ *  step is staged (human must approve before progressing) or the
+ *  planner returns zero steps (it considers this subtask done).
+ *  5 is generous for read-act-refine patterns ("list_notes → tag them")
+ *  without running the LLM bill dry on stuck missions. */
+const MAX_REASONING_LOOP_ITERATIONS = 5;
 /** Singleton row id of the kontext doc — kept in sync with
  *  `modules/kontext/types.ts` (KONTEXT_SINGLETON_ID). */
 const KONTEXT_SINGLETON_ID = 'singleton';
@@ -68,7 +76,16 @@ export interface MissionRunnerDeps {
 }
 
 export type StageOutcome =
-	| { readonly ok: true; readonly proposalId: string }
+	| {
+			readonly ok: true;
+			readonly proposalId: string;
+			/** Full tool-result payload when the step auto-executed (proposalId
+			 *  is empty). The reasoning loop reads this and feeds it back as
+			 *  context for the next planner call so the agent can reason over
+			 *  list/read outputs across steps. */
+			readonly autoData?: unknown;
+			readonly autoMessage?: string;
+	  }
 	| { readonly ok: false; readonly error: string };
 
 /** Default step-staging implementation: policy-gated executor under AI actor. */
@@ -86,8 +103,9 @@ export const defaultStageStep: Required<MissionRunnerDeps>['stageStep'] = async 
 	const data = result.data as { proposalId?: string } | undefined;
 	if (data?.proposalId) return { ok: true, proposalId: data.proposalId };
 	// Policy resolved to 'auto' — no proposal row was created, the tool
-	// ran directly. Treat as ok but without a proposal id to thread back.
-	return { ok: true, proposalId: '' };
+	// ran directly. Return the payload so the reasoning loop can feed it
+	// back into the next planner call.
+	return { ok: true, proposalId: '', autoData: result.data, autoMessage: result.message };
 };
 
 export interface RunMissionResult {
@@ -225,31 +243,153 @@ export async function runMission(
 		const availableTools = getAvailableToolsForAi(aiActor);
 		await checkCancel();
 
-		// ── Phase: calling-llm ─────────────────────────────────
-		await enterPhase('calling-llm', 'frage Planner an');
-		let plan: AiPlanOutput;
-		try {
-			plan = await deps.plan({ mission: mission!, resolvedInputs, availableTools });
-		} catch (err) {
-			// Capture even the failure for debug visibility before re-throwing.
-			if (isAiDebugEnabled()) {
-				void recordAiDebug({
-					iterationId,
-					missionId: mission!.id,
-					missionTitle: mission!.title,
-					missionObjective: mission!.objective,
-					capturedAt: new Date().toISOString(),
-					resolvedInputs,
-					preStep,
-					plannerError: err instanceof Error ? err.message : String(err),
+		// ── Reasoning loop ─────────────────────────────────────
+		// Each pass: call planner → stage steps. Auto-tools run inline
+		// and their outputs become new ResolvedInputs so the NEXT planner
+		// call can reason over them (e.g. list_notes → see titles →
+		// stage add_tag_to_note per note). Loop exits when:
+		//   • planner returns 0 steps                  → agent is done
+		//   • any step requires user approval (propose) → user in the loop
+		//   • budget exhausted (MAX_REASONING_LOOP_ITERATIONS)
+		//   • a step fails hard (not tool-error; executor error)
+		const stage = deps.stageStep ?? defaultStageStep;
+		const loopInputs: ResolvedInput[] = [...resolvedInputs];
+		const recordedSteps: PlanStep[] = [];
+		const plannerCalls: PlannerCallDebug[] = [];
+		const loopStepLog: NonNullable<AiDebugEntry['loopSteps']> = [];
+		let stagedCount = 0;
+		let failedCount = 0;
+		let lastPlanSummary = '';
+		let totalStepCount = 0;
+		let loopIndex = 0;
+		let stepCounter = 0;
+		let humanInLoop = false;
+
+		while (loopIndex < MAX_REASONING_LOOP_ITERATIONS) {
+			// ── Phase: calling-llm ─────────────────────────────
+			await enterPhase(
+				'calling-llm',
+				loopIndex === 0
+					? 'frage Planner an'
+					: `Planner Runde ${loopIndex + 1}/${MAX_REASONING_LOOP_ITERATIONS}`
+			);
+			let plan: AiPlanOutput;
+			try {
+				plan = await deps.plan({ mission: mission!, resolvedInputs: loopInputs, availableTools });
+			} catch (err) {
+				if (isAiDebugEnabled()) {
+					void recordAiDebug({
+						iterationId,
+						missionId: mission!.id,
+						missionTitle: mission!.title,
+						missionObjective: mission!.objective,
+						capturedAt: new Date().toISOString(),
+						resolvedInputs: loopInputs,
+						preStep,
+						plannerCalls,
+						loopSteps: loopStepLog,
+						plannerError: err instanceof Error ? err.message : String(err),
+					});
+				}
+				throw err;
+			}
+			await checkCancel();
+			if (plan.debug) plannerCalls.push(plan.debug);
+			lastPlanSummary = plan.summary;
+			totalStepCount += plan.steps.length;
+
+			if (plan.steps.length === 0) {
+				// Planner has nothing more to do — agent considers this done.
+				break;
+			}
+
+			// ── Phase: parsing-response ────────────────────────
+			await enterPhase('parsing-response', `${plan.steps.length} Step(s) erhalten`);
+			await checkCancel();
+
+			// ── Phase: staging-proposals ───────────────────────
+			const roundOutputs: Array<{ step: PlannedStep; message: string; data: unknown }> = [];
+			for (const [i, ps] of plan.steps.entries()) {
+				await enterPhase(
+					'staging-proposals',
+					`Runde ${loopIndex + 1} · Step ${i + 1}/${plan.steps.length}`
+				);
+				await checkCancel();
+
+				const outcome = await stage(ps, aiActor);
+				const stepId = `${iterationId}-${stepCounter++}`;
+				if (!outcome.ok) {
+					failedCount++;
+					recordedSteps.push({
+						id: stepId,
+						summary: ps.summary,
+						intent: { kind: 'toolCall', toolName: ps.toolName, params: ps.params },
+						status: 'failed',
+					});
+					continue;
+				}
+
+				stagedCount++;
+				if (outcome.proposalId) {
+					// Propose-policy: human must approve. Exit the loop after
+					// this round so we don't stage proposals for hypothetical
+					// follow-up steps that depend on the approval outcome.
+					humanInLoop = true;
+					recordedSteps.push({
+						id: stepId,
+						summary: ps.summary,
+						intent: { kind: 'toolCall', toolName: ps.toolName, params: ps.params },
+						proposalId: outcome.proposalId,
+						status: 'staged',
+					});
+				} else {
+					// Auto-policy: ran inline. Collect output for the next
+					// planner call.
+					recordedSteps.push({
+						id: stepId,
+						summary: ps.summary,
+						intent: { kind: 'toolCall', toolName: ps.toolName, params: ps.params },
+						status: 'approved',
+					});
+					roundOutputs.push({
+						step: ps,
+						message: outcome.autoMessage ?? '(ohne message)',
+						data: outcome.autoData,
+					});
+				}
+			}
+
+			// Log loop outputs for debug-panel visibility.
+			for (const o of roundOutputs) {
+				loopStepLog.push({
+					loopIndex,
+					toolName: o.step.toolName,
+					params: o.step.params,
+					outputPreview: formatToolOutputPreview(o.message, o.data),
 				});
 			}
-			throw err;
-		}
-		await checkCancel();
 
-		// Persist debug capture if enabled. Off by default in production
-		// (toggle via Settings or `localStorage.setItem('mana.ai.debug','1')`).
+			if (humanInLoop) break;
+			if (roundOutputs.length === 0) {
+				// Every step either failed or was proposed — nothing new to
+				// reason over. Prevents an infinite loop when the planner
+				// only suggests proposable tools that keep failing.
+				break;
+			}
+
+			// Feed tool outputs into the next planner call as a synthetic
+			// ResolvedInput so the agent can chain its reasoning.
+			loopInputs.push({
+				id: `loop-outputs-${loopIndex}`,
+				module: 'reasoning-loop',
+				table: 'tool-outputs',
+				title: `Zwischenergebnisse (Runde ${loopIndex + 1})`,
+				content: formatToolOutputsForPrompt(roundOutputs),
+			});
+
+			loopIndex++;
+		}
+
 		if (isAiDebugEnabled()) {
 			void recordAiDebug({
 				iterationId,
@@ -257,45 +397,11 @@ export async function runMission(
 				missionTitle: mission!.title,
 				missionObjective: mission!.objective,
 				capturedAt: new Date().toISOString(),
-				resolvedInputs,
+				resolvedInputs: loopInputs,
 				preStep,
-				planner: plan.debug,
+				plannerCalls,
+				loopSteps: loopStepLog,
 			});
-		}
-
-		// ── Phase: parsing-response ────────────────────────────
-		await enterPhase('parsing-response', `${plan.steps.length} Step(s) erhalten`);
-		await checkCancel();
-
-		// ── Phase: staging-proposals ───────────────────────────
-		const stage = deps.stageStep ?? defaultStageStep;
-		const recordedSteps: PlanStep[] = [];
-		let stagedCount = 0;
-		let failedCount = 0;
-
-		for (const [i, ps] of plan.steps.entries()) {
-			await enterPhase('staging-proposals', `Step ${i + 1} von ${plan.steps.length}`);
-			await checkCancel();
-
-			const outcome = await stage(ps, aiActor);
-			if (outcome.ok) {
-				stagedCount++;
-				recordedSteps.push({
-					id: `${iterationId}-${i}`,
-					summary: ps.summary,
-					intent: { kind: 'toolCall', toolName: ps.toolName, params: ps.params },
-					proposalId: outcome.proposalId || undefined,
-					status: outcome.proposalId ? 'staged' : 'approved',
-				});
-			} else {
-				failedCount++;
-				recordedSteps.push({
-					id: `${iterationId}-${i}`,
-					summary: ps.summary,
-					intent: { kind: 'toolCall', toolName: ps.toolName, params: ps.params },
-					status: 'failed',
-				});
-			}
 		}
 
 		await enterPhase('finalizing');
@@ -303,8 +409,8 @@ export async function runMission(
 			recordedSteps,
 			stagedCount,
 			failedCount,
-			planSummary: plan.summary,
-			planStepCount: plan.steps.length,
+			planSummary: lastPlanSummary,
+			planStepCount: totalStepCount,
 		};
 	}
 
@@ -411,6 +517,44 @@ async function loadKontextAsResolvedInput(): Promise<ResolvedInput | null> {
 /** Run the deep-research pipeline against the mission objective and
  *  collapse its summary + sources into one ResolvedInput formatted so
  *  the planner can copy URLs into save_news_article calls. */
+/** Stringify a tool-output payload for the reasoning loop's next
+ *  prompt. Keeps the blob compact — LLM context windows are finite and
+ *  a raw JSON.stringify of a 200-row Dexie dump wastes tokens. */
+function formatToolOutputsForPrompt(
+	outputs: Array<{ step: PlannedStep; message: string; data: unknown }>
+): string {
+	const lines: string[] = [
+		'Ausgaben der zuletzt ausgeführten Auto-Tools. Nutze diese Daten um die Mission weiterzuführen — z.B. für jede gelistete Notiz einen add_tag_to_note Aufruf pro Notiz.',
+		'',
+	];
+	for (const o of outputs) {
+		lines.push(`### ${o.step.toolName}(${JSON.stringify(o.step.params)})`);
+		lines.push(o.message);
+		if (o.data !== undefined && o.data !== null) {
+			const json = safeStringify(o.data, 4000);
+			lines.push('```json', json, '```');
+		}
+		lines.push('');
+	}
+	return lines.join('\n');
+}
+
+/** Short form for the debug-panel loopSteps log. */
+function formatToolOutputPreview(message: string, data: unknown): string {
+	if (data === undefined || data === null) return message;
+	const json = safeStringify(data, 400);
+	return `${message}\n${json}`;
+}
+
+function safeStringify(value: unknown, limit: number): string {
+	try {
+		const s = JSON.stringify(value, null, 2);
+		return s.length > limit ? s.slice(0, limit) + '\n… (truncated)' : s;
+	} catch {
+		return String(value);
+	}
+}
+
 interface WebResearchOutcome {
 	input: ResolvedInput;
 	sourceCount: number;

@@ -45,7 +45,22 @@ export interface AiDebugEntry {
 		webResearch?: { ok: true; sourceCount: number; summary: string } | { ok: false; error: string };
 		kontextInjected: boolean;
 	};
-	planner?: PlannerCallDebug;
+	/**
+	 * Array because the reasoning loop can call the planner multiple
+	 * times per iteration (once per loop step, until a proposal is
+	 * staged or no more work is returned). Older single-call entries
+	 * written before the loop shipped still parse — readers that
+	 * haven't updated simply take `plannerCalls[0]`.
+	 */
+	plannerCalls?: PlannerCallDebug[];
+	/** Auto-executed tool outputs captured across loop steps — surfaces
+	 *  what the agent "saw" when reasoning across multiple calls. */
+	loopSteps?: Array<{
+		loopIndex: number;
+		toolName: string;
+		params: Record<string, unknown>;
+		outputPreview: string;
+	}>;
 	plannerError?: string;
 }
 
