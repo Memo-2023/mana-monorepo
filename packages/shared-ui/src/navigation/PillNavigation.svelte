@@ -614,6 +614,15 @@
 				},
 			});
 		}
+		// Cloud Sync — only for signed-in users. Folded into the user menu
+		// so the top-level pill row stays short; the status line itself
+		// (e.g. "Cloud Sync aktiv") is disabled and renders as a section
+		// header because PillDropdownBar shows `divider: true, label` as a
+		// labelled separator.
+		if (userEmail && showSyncStatus && syncStatusItems.length > 0) {
+			out.push({ id: 'sync-section', label: 'Sync', divider: true });
+			for (const item of syncStatusItems) out.push(item);
+		}
 		if (onLogout && showLogout && userEmail) {
 			out.push({
 				id: 'logout',
@@ -744,30 +753,12 @@
 				{/if}
 			{/each}
 
-			<!-- Sync Status -->
-			{#if showSyncStatus && syncStatusItems.length > 0 && barMode}
-				{@const syncConfig = {
-					id: 'sync',
-					label: currentSyncLabel,
-					icon: 'cloud',
-					items: syncStatusItems,
-				}}
-				<Pill
-					size="sm"
-					icon="cloud"
-					label={currentSyncLabel}
-					active={activeBarId === 'sync'}
-					onclick={() => toggleBar(syncConfig)}
-					title={currentSyncLabel}
-				/>
-			{:else if showSyncStatus && syncStatusItems.length > 0}
-				<PillDropdown
-					items={syncStatusItems}
-					direction={dropdownDirection}
-					label={currentSyncLabel}
-					icon="cloud"
-				/>
-			{/if}
+			<!-- Sync status lives inside the user menu now (see
+				 userMenuBarItems). We used to render a standalone cloud pill
+				 here but it pushed the nav to 5+ pills on mobile while
+				 duplicating items the user menu panel already shows for
+				 settings / account. Folding into the user menu keeps the
+				 top-level row short and gives sync a real section header. -->
 
 			<!-- User Menu -->
 			{#if (userEmail || loginHref) && barMode}
