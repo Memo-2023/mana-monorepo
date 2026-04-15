@@ -312,7 +312,6 @@
 	.glass-pill:hover {
 		background: hsl(var(--color-surface-hover));
 		border-color: hsl(var(--color-border-strong, var(--color-border)));
-		transform: translateY(-2px);
 		box-shadow:
 			0 6px 12px hsl(0 0% 0% / 0.08),
 			0 2px 4px hsl(0 0% 0% / 0.05);

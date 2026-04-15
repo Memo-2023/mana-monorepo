@@ -164,11 +164,6 @@
 	.pill:hover:not(:disabled) {
 		background: hsl(var(--color-surface-hover, var(--color-card)));
 		border-color: hsl(var(--color-border-strong, var(--color-border)));
-		transform: translateY(-1px);
-	}
-
-	.pill:active:not(:disabled) {
-		transform: translateY(0);
 	}
 
 	.pill:disabled {

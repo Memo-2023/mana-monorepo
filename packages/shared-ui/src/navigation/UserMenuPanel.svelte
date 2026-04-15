@@ -563,7 +563,6 @@
 
 	.chip:hover:not(:disabled) {
 		background: hsl(var(--color-surface-hover, var(--color-muted)));
-		transform: translateY(-1px);
 	}
 
 	.chip:disabled {
