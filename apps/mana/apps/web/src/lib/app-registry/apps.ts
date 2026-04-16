@@ -70,6 +70,7 @@ import {
 	CreditCard,
 	SquaresFour,
 	Scroll,
+	Spiral,
 } from '@mana/shared-icons';
 
 // ── Apps with entity capabilities ───────────────────────────
@@ -1083,6 +1084,16 @@ registerApp({
 	icon: Target,
 	views: {
 		list: { load: () => import('$lib/modules/goals/ListView.svelte') },
+	},
+});
+
+registerApp({
+	id: 'spiral',
+	name: 'Mana Spiral',
+	color: '#6366F1',
+	icon: Spiral,
+	views: {
+		list: { load: () => import('$lib/modules/spiral/ListView.svelte') },
 	},
 });
 

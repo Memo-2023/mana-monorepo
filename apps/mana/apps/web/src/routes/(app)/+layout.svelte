@@ -738,7 +738,7 @@
 			id: 'spiral',
 			label: 'Mana Spiral',
 			category: 'Navigation',
-			onExecute: () => goto('/spiral'),
+			onExecute: () => goto('/?app=spiral'),
 		},
 		{ id: 'credits', label: 'Credits', category: 'Navigation', onExecute: () => goto('/credits') },
 		{ id: 'apps', label: 'Alle Apps', category: 'Navigation', onExecute: () => goto('/apps') },
@@ -976,7 +976,7 @@
 					{userEmail}
 					manaHref="/mana"
 					profileHref="/?app=profile"
-					spiralHref="/spiral"
+					spiralHref="/?app=spiral"
 					creditsHref="/credits"
 					themesHref="/?app=themes"
 					helpHref="/help"

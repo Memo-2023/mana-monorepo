@@ -1,38 +1,24 @@
+<!--
+  Spiral — Workbench-embedded view of the Mana Spiral: a visual
+  fingerprint of all your app activity encoded as colored pixels in
+  a spiral pattern. Extracted from the former /spiral standalone route.
+-->
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { COLORS } from '@mana/spiral-db';
 	import type { ColorDefinition } from '@mana/spiral-db';
-	import SpiralCanvas from '$lib/modules/spiral/components/SpiralCanvas.svelte';
-	import { manaSpiralStore } from '$lib/modules/spiral';
-	import type { AppSnapshot } from '$lib/modules/spiral';
-	import { collectAppSnapshots } from '$lib/modules/spiral';
+	import SpiralCanvas from './components/SpiralCanvas.svelte';
+	import { manaSpiralStore } from './index';
+	import { collectAppSnapshots } from './index';
 
 	const colorsArray: ColorDefinition[] = Object.values(COLORS);
 
-	// UI state
 	let scale = $state(10);
 	let showGrid = $state(false);
 	let selectedPixel = $state<number | null>(null);
 	let isCollecting = $state(false);
 	let fileInput: HTMLInputElement;
 
-	// App icons for display
-	const APP_ICONS: Record<string, string> = {
-		Todo: 'check-square',
-		Calendar: 'calendar',
-		Contacts: 'users',
-		Chat: 'message-circle',
-		Quotes: 'quote',
-		Picture: 'image',
-		Clock: 'clock',
-		Storage: 'hard-drive',
-		Music: 'music',
-		Presi: 'presentation',
-		Context: 'file-text',
-		Cards: 'layers',
-	};
-
-	// Derived
 	let recordsByApp = $derived(manaSpiralStore.getRecordsByApp());
 
 	async function handleCollect() {
@@ -61,7 +47,6 @@
 		const input = e.target as HTMLInputElement;
 		const file = input.files?.[0];
 		if (!file) return;
-
 		const result = await manaSpiralStore.importFromPng(file);
 		if (!result.success) {
 			alert(`Import fehlgeschlagen: ${result.error}`);
@@ -75,22 +60,12 @@
 		}
 	}
 
-	// Auto-collect on mount
 	onMount(() => {
 		handleCollect();
 	});
 </script>
 
-<svelte:head>
-	<title>Mana Spiral</title>
-</svelte:head>
-
 <div class="spiral-page">
-	<header class="page-header">
-		<h1 class="page-title">Mana Spiral</h1>
-		<p class="page-subtitle">Dein digitaler Fussabdruck — alle Apps in einer Spirale</p>
-	</header>
-
 	<div class="content-grid">
 		<!-- Visualization -->
 		<section class="section viz-section">
@@ -245,7 +220,7 @@
 				>
 					PNG herunterladen
 				</button>
-				<button class="btn" onclick={handleImportClick}> PNG importieren </button>
+				<button class="btn" onclick={handleImportClick}>PNG importieren</button>
 				<button
 					class="btn btn-danger"
 					onclick={handleClear}
@@ -279,24 +254,9 @@
 
 <style>
 	.spiral-page {
-		padding: 0;
-	}
-
-	.page-header {
-		margin-bottom: 2rem;
-	}
-
-	.page-title {
-		font-size: 1.75rem;
-		font-weight: 700;
-		color: hsl(var(--color-foreground));
-		margin: 0;
-	}
-
-	.page-subtitle {
-		color: hsl(var(--color-muted-foreground));
-		font-size: 0.875rem;
-		margin: 0.25rem 0 0;
+		padding: 0.75rem;
+		height: 100%;
+		overflow-y: auto;
 	}
 
 	.content-grid {
@@ -330,7 +290,6 @@
 		border-radius: 999px;
 	}
 
-	/* Visualization */
 	.viz-section {
 		display: flex;
 		flex-direction: column;
@@ -408,7 +367,6 @@
 		font-family: monospace;
 	}
 
-	/* Stats */
 	.stats-grid {
 		display: grid;
 		grid-template-columns: repeat(2, 1fr);
@@ -419,12 +377,6 @@
 	@media (min-width: 640px) {
 		.stats-grid {
 			grid-template-columns: repeat(3, 1fr);
-		}
-	}
-
-	@media (min-width: 1024px) {
-		.stats-grid {
-			grid-template-columns: repeat(6, 1fr);
 		}
 	}
 
@@ -450,7 +402,6 @@
 		margin-top: 0.25rem;
 	}
 
-	/* Indigo→violet gradient is the spiral module's literal brand mark */
 	.stat.highlight {
 		background: linear-gradient(135deg, rgb(99 102 241 / 0.2), rgb(139 92 246 / 0.2));
 	}
@@ -462,7 +413,6 @@
 		margin: 0;
 	}
 
-	/* App Breakdown */
 	.app-list {
 		display: flex;
 		flex-direction: column;
@@ -534,7 +484,6 @@
 		margin: 0;
 	}
 
-	/* Color Legend */
 	.color-legend {
 		display: flex;
 		flex-wrap: wrap;
@@ -561,7 +510,6 @@
 		opacity: 0.6;
 	}
 
-	/* Actions */
 	.actions {
 		display: flex;
 		flex-wrap: wrap;
