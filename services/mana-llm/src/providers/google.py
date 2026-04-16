@@ -29,16 +29,16 @@ logger = logging.getLogger(__name__)
 
 # Model mapping: Ollama model → Google Gemini equivalent
 OLLAMA_TO_GEMINI: dict[str, str] = {
-    "gemma3:4b": "gemini-2.0-flash",
-    "gemma3:12b": "gemini-2.0-flash",
+    "gemma3:4b": "gemini-2.5-flash",
+    "gemma3:12b": "gemini-2.5-flash",
     "gemma3:27b": "gemini-2.5-pro",
-    "llava:7b": "gemini-2.0-flash",  # Gemini has native vision
-    "qwen3-vl:4b": "gemini-2.0-flash",  # vision fallback
-    "qwen2.5-coder:7b": "gemini-2.0-flash",
+    "llava:7b": "gemini-2.5-flash",  # Gemini has native vision
+    "qwen3-vl:4b": "gemini-2.5-flash",  # vision fallback
+    "qwen2.5-coder:7b": "gemini-2.5-flash",
     "qwen2.5-coder:14b": "gemini-2.5-pro",
-    "phi3.5:latest": "gemini-2.0-flash",
-    "ministral-3:3b": "gemini-2.0-flash",
-    "deepseek-ocr:latest": "gemini-2.0-flash",
+    "phi3.5:latest": "gemini-2.5-flash",
+    "ministral-3:3b": "gemini-2.5-flash",
+    "deepseek-ocr:latest": "gemini-2.5-flash",
 }
 
 
@@ -47,7 +47,7 @@ class GoogleProvider(LLMProvider):
 
     name = "google"
 
-    def __init__(self, api_key: str, default_model: str = "gemini-2.0-flash"):
+    def __init__(self, api_key: str, default_model: str = "gemini-2.5-flash"):
         self.api_key = api_key
         self.default_model = default_model
         self.client = genai.Client(api_key=api_key)
@@ -219,9 +219,8 @@ class GoogleProvider(LLMProvider):
         """List available Google Gemini models."""
         # Return a static list of commonly used models
         return [
-            ModelInfo(id="google/gemini-2.0-flash", owned_by="google"),
-            ModelInfo(id="google/gemini-2.5-pro", owned_by="google"),
             ModelInfo(id="google/gemini-2.5-flash", owned_by="google"),
+            ModelInfo(id="google/gemini-2.5-pro", owned_by="google"),
         ]
 
     async def embeddings(

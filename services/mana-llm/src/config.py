@@ -30,7 +30,7 @@ class Settings(BaseSettings):
 
     # Google Gemini (Fallback provider)
     google_api_key: str | None = None
-    google_default_model: str = "gemini-2.0-flash"
+    google_default_model: str = "gemini-2.5-flash"
 
     # Auto-fallback: Ollama → Google when Ollama is overloaded/down
     auto_fallback_enabled: bool = True

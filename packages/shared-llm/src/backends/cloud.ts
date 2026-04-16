@@ -27,7 +27,7 @@ export class CloudBackend implements LlmBackend {
 	private readonly defaultModel: string;
 
 	constructor(opts: CloudBackendOptions = {}) {
-		this.defaultModel = opts.defaultModel ?? 'google/gemini-2.0-flash';
+		this.defaultModel = opts.defaultModel ?? 'google/gemini-2.5-flash';
 	}
 
 	isAvailable(): boolean {
