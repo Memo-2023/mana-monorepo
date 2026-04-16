@@ -13,6 +13,8 @@
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
 import { decryptRecords } from '$lib/data/crypto';
+import { filterBySceneScope } from '$lib/stores/scene-scope.svelte';
+import { eventTagOps } from './stores/tags.svelte';
 import type { LocalCalendar, LocalEvent, Calendar, CalendarEvent } from './types';
 import { timeBlockToCalendarEvent } from './types';
 import type { LocalTimeBlock } from '$lib/data/time-blocks/types';
@@ -65,8 +67,13 @@ export function useAllCalendarItems() {
 			eventsById.set(e.id, e);
 		}
 
+		// Scene scope filter: only calendar-sourced blocks are tag-filterable.
+		const scopedBlocks = await filterBySceneScope(decryptedBlocks, async (b) =>
+			b.sourceModule === 'calendar' && b.sourceId ? eventTagOps.getTagIds(b.sourceId) : []
+		);
+
 		// Convert to CalendarEvent, joining event data for calendar blocks
-		return decryptedBlocks.map((block) => {
+		return scopedBlocks.map((block) => {
 			const tb = toTimeBlock(block);
 			const eventData =
 				block.sourceModule === 'calendar' ? (eventsById.get(block.sourceId) ?? null) : null;

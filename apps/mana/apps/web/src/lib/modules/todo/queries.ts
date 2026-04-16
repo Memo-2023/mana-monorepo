@@ -5,6 +5,8 @@
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
 import { decryptRecords } from '$lib/data/crypto';
+import { filterBySceneScope } from '$lib/stores/scene-scope.svelte';
+import { taskTagTable } from './collections';
 import type {
 	LocalTask,
 	LocalBoardView,
@@ -46,7 +48,11 @@ export function useAllTasks() {
 		const locals = await db.table<LocalTask>('tasks').orderBy('order').toArray();
 		const visible = locals.filter((t) => !t.deletedAt);
 		const decrypted = await decryptRecords('tasks', visible);
-		return decrypted.map(toTask);
+		const scoped = await filterBySceneScope(decrypted, async (t) => {
+			const links = await taskTagTable.where('taskId').equals(t.id).toArray();
+			return links.filter((l) => !l.deletedAt).map((l) => l.tagId);
+		});
+		return scoped.map(toTask);
 	}, [] as Task[]);
 }
 

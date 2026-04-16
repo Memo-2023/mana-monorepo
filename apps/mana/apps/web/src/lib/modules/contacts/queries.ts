@@ -5,6 +5,8 @@
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
 import { decryptRecords } from '$lib/data/crypto';
+import { filterBySceneScope } from '$lib/stores/scene-scope.svelte';
+import { contactTagOps } from './stores/tags.svelte';
 import type { LocalContact, Contact, SortField, ContactFilter } from './types';
 
 // ─── Type Converter ───────────────────────────────────────
@@ -55,7 +57,8 @@ export function useAllContacts() {
 			(c) => !c.deletedAt
 		);
 		const decrypted = await decryptRecords('contacts', visible);
-		return decrypted.map(toContact);
+		const scoped = await filterBySceneScope(decrypted, (c) => contactTagOps.getTagIds(c.id));
+		return scoped.map(toContact);
 	}, []);
 }
 
