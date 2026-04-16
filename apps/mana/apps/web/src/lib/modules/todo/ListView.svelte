@@ -13,6 +13,7 @@
 	import { dropTarget, dragSource } from '@mana/shared-ui/dnd';
 	import type { TagDragData } from '@mana/shared-ui/dnd';
 	import { useAllTags, getTagsByIds } from '@mana/shared-stores';
+	import AgentDot from '$lib/components/ai/AgentDot.svelte';
 	import { addTagId } from '$lib/data/tag-mutations';
 	import { useItemContextMenu } from '$lib/data/item-context-menu.svelte';
 	import FloatingInputBar from '$lib/components/FloatingInputBar.svelte';
@@ -171,6 +172,7 @@
 						})}
 				>
 					<span class="task-title" class:completed={task.isCompleted}>{task.title}</span>
+					<AgentDot record={task} />
 				</button>
 				<div class="task-right">
 					{#each taskTags as tag (tag.id)}

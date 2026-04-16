@@ -12,6 +12,7 @@
 	import { useItemContextMenu } from '$lib/data/item-context-menu.svelte';
 	import { PencilSimple, Trash, PushPin } from '@mana/shared-icons';
 	import FloatingInputBar from '$lib/components/FloatingInputBar.svelte';
+	import AgentDot from '$lib/components/ai/AgentDot.svelte';
 
 	let { navigate, goBack, params }: ViewProps = $props();
 
@@ -188,6 +189,7 @@
 					<div class="note-content">
 						<div class="note-top">
 							<span class="note-title">{note.title || 'Unbenannt'}</span>
+							<AgentDot record={note} />
 							{#if note.isPinned}<span class="pin">&#x1f4cc;</span>{/if}
 						</div>
 						{#if note.content}

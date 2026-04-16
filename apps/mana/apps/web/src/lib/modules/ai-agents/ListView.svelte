@@ -17,9 +17,11 @@
   handle the common "let the agent touch todo but not calendar" case.
 -->
 <script lang="ts">
-	import { ArrowLeft, Plus, Pause, Play, Archive, Trash, Sparkle } from '@mana/shared-icons';
+	import { ArrowLeft, Plus, Pause, Play, Archive, Trash, Sparkle, Flag } from '@mana/shared-icons';
 	import { goto } from '$app/navigation';
 	import { useAgents } from '$lib/data/ai/agents/queries';
+	import { useMissions } from '$lib/data/ai/missions/queries';
+	import type { Mission } from '$lib/data/ai/missions/types';
 	import { DEFAULT_AGENT_ID } from '@mana/shared-ai';
 	import {
 		createAgent,
@@ -131,10 +133,17 @@
 		}
 	}
 
+	// ── Missions for this agent ──────────────────────────────
+	const allMissions = $derived(useMissions());
+	const agentMissions = $derived(
+		selected ? allMissions.value.filter((m: Mission) => m.agentId === selected.id) : []
+	);
+
+	function describeMissionState(m: Mission): string {
+		return { active: 'aktiv', paused: 'pausiert', done: 'fertig', archived: 'archiviert' }[m.state];
+	}
+
 	// ── Policy editor ───────────────────────────────────────
-	// We expose a compact form of AiPolicy: the global default +
-	// per-module overrides for the handful of modules that matter.
-	// Per-tool overrides are a power-user knob that can come later.
 	const POLICY_MODULES = ['todo', 'calendar', 'notes', 'kontext', 'finance', 'drink', 'food'];
 	const POLICY_CHOICES: PolicyDecision[] = ['auto', 'propose', 'deny'];
 	const POLICY_LABEL: Record<PolicyDecision, string> = {
@@ -142,6 +151,58 @@
 		propose: 'Vorschlag',
 		deny: 'Verboten',
 	};
+	let policyAdvanced = $state(false);
+
+	/**
+	 * Generate a natural-language summary of the current policy.
+	 * Reads the agent's policy and produces a short German sentence.
+	 */
+	function describePolicyNatural(policy: AiPolicy): string {
+		const parts: string[] = [];
+		const autoTools: string[] = [];
+		const proposeTools: string[] = [];
+		const denyTools: string[] = [];
+
+		for (const [name, decision] of Object.entries(policy.tools)) {
+			if (decision === 'auto') autoTools.push(name);
+			else if (decision === 'deny') denyTools.push(name);
+		}
+
+		// Module overrides
+		const moduleOverrides = Object.entries(policy.defaultsByModule ?? {});
+		for (const [mod, decision] of moduleOverrides) {
+			if (decision === 'auto') parts.push(`${mod}: automatisch`);
+			else if (decision === 'deny') parts.push(`${mod}: gesperrt`);
+		}
+
+		const defaultLabel =
+			policy.defaultForAi === 'auto'
+				? 'automatisch'
+				: policy.defaultForAi === 'deny'
+					? 'gesperrt'
+					: 'Vorschlag';
+
+		const lines: string[] = [];
+		if (denyTools.length > 0) {
+			lines.push(
+				`Gesperrt: ${denyTools.slice(0, 5).join(', ')}${denyTools.length > 5 ? ' …' : ''}`
+			);
+		}
+		if (parts.length > 0) {
+			lines.push(parts.join(' · '));
+		}
+		lines.push(`Alles andere: ${defaultLabel}`);
+		return lines.join('\n');
+	}
+
+	/** Determine which template preset most closely matches the current
+	 *  policy — used to pre-select the simple-mode radio. */
+	function currentPolicyPreset(policy: AiPolicy): string {
+		if (policy.defaultForAi === 'deny') return 'cautious';
+		const hasAutoModules = Object.values(policy.defaultsByModule ?? {}).some((v) => v === 'auto');
+		if (hasAutoModules) return 'aggressive';
+		return 'standard';
+	}
 
 	async function setDefaultForAi(agent: Agent, value: PolicyDecision) {
 		await updateAgent(agent.id, {
@@ -403,73 +464,116 @@
 			</button>
 		</div>
 
+		<!-- ── Missions for this Agent ──────────────────── -->
+		<section class="block">
+			<h3><Flag size={12} /> Missions ({agentMissions.length})</h3>
+			{#if agentMissions.length === 0}
+				<p class="hint">Dieser Agent hat noch keine Missions.</p>
+			{:else}
+				<ul class="mission-list">
+					{#each agentMissions as m (m.id)}
+						<li class="mission-item">
+							<span class="dot dot-{m.state}"></span>
+							<span class="mission-title-text">{m.title}</span>
+							<span class="mission-state">{describeMissionState(m)}</span>
+						</li>
+					{/each}
+				</ul>
+			{/if}
+			<button
+				type="button"
+				class="secondary mission-new-btn"
+				onclick={() => goto(`/agents/templates`)}
+			>
+				<Plus size={12} /><span>Neue Mission für {selected.name}</span>
+			</button>
+		</section>
+
+		<!-- ── Policy ─────────────────────────────────── -->
 		<section class="block">
 			<h3>Policy</h3>
-			<p class="hint">
-				Entscheidet pro Modul was der Agent autonom darf. Tool-spezifische Feinheiten kommen später.
-			</p>
 
-			<div class="policy-row">
-				<span class="lbl">Template übernehmen</span>
-				<select onchange={(e) => applyTemplate(selected, (e.target as HTMLSelectElement).value)}>
-					<option value="">—</option>
-					{#each TEMPLATES as t (t.key)}
-						<option value={t.key}>{t.label}</option>
-					{/each}
-				</select>
+			<!-- Natural language summary -->
+			<pre class="policy-natural">{describePolicyNatural(selected.policy)}</pre>
+
+			<!-- Simple mode: 3 radio presets -->
+			<div class="policy-simple">
+				{#each TEMPLATES as t (t.key)}
+					<label class="radio-card" class:active={currentPolicyPreset(selected.policy) === t.key}>
+						<input
+							type="radio"
+							name="policyPreset"
+							value={t.key}
+							checked={currentPolicyPreset(selected.policy) === t.key}
+							onchange={() => applyTemplate(selected, t.key)}
+						/>
+						<span class="radio-card-label">{t.label}</span>
+					</label>
+				{/each}
 			</div>
 
-			<div class="policy-row">
-				<span class="lbl">Global: wenn kein Modul passt</span>
-				<div class="radio-group">
-					{#each POLICY_CHOICES as c}
-						<label class="radio">
-							<input
-								type="radio"
-								name="defaultForAi"
-								value={c}
-								checked={selected.policy.defaultForAi === c}
-								onchange={() => setDefaultForAi(selected, c)}
-							/>
-							<span>{POLICY_LABEL[c]}</span>
-						</label>
-					{/each}
+			<!-- Advanced toggle -->
+			<button
+				type="button"
+				class="toggle-advanced"
+				onclick={() => (policyAdvanced = !policyAdvanced)}
+			>
+				{policyAdvanced ? '▾ Erweitert ausblenden' : '▸ Erweitert anzeigen'}
+			</button>
+
+			{#if policyAdvanced}
+				<div class="policy-row">
+					<span class="lbl">Global-Default</span>
+					<div class="radio-group">
+						{#each POLICY_CHOICES as c}
+							<label class="radio">
+								<input
+									type="radio"
+									name="defaultForAi"
+									value={c}
+									checked={selected.policy.defaultForAi === c}
+									onchange={() => setDefaultForAi(selected, c)}
+								/>
+								<span>{POLICY_LABEL[c]}</span>
+							</label>
+						{/each}
+					</div>
 				</div>
-			</div>
 
-			<table class="policy-table">
-				<thead>
-					<tr>
-						<th>Modul</th>
-						<th>Entscheidung</th>
-						<th></th>
-					</tr>
-				</thead>
-				<tbody>
-					{#each POLICY_MODULES as mod}
-						{@const current = moduleDecisionOrDefault(selected.policy, mod)}
+				<table class="policy-table">
+					<thead>
 						<tr>
-							<td><code>{mod}</code></td>
-							<td>
-								<select
-									value={current}
-									onchange={(e) => {
-										const v = (e.target as HTMLSelectElement).value;
-										if (!v) clearModuleDefault(selected, mod);
-										else setModuleDefault(selected, mod, v as PolicyDecision);
-									}}
-								>
-									<option value="">Global-Default</option>
-									{#each POLICY_CHOICES as c}
-										<option value={c}>{POLICY_LABEL[c]}</option>
-									{/each}
-								</select>
-							</td>
-							<td></td>
+							<th>Modul</th>
+							<th>Entscheidung</th>
+							<th></th>
 						</tr>
-					{/each}
-				</tbody>
-			</table>
+					</thead>
+					<tbody>
+						{#each POLICY_MODULES as mod}
+							{@const current = moduleDecisionOrDefault(selected.policy, mod)}
+							<tr>
+								<td><code>{mod}</code></td>
+								<td>
+									<select
+										value={current}
+										onchange={(e) => {
+											const v = (e.target as HTMLSelectElement).value;
+											if (!v) clearModuleDefault(selected, mod);
+											else setModuleDefault(selected, mod, v as PolicyDecision);
+										}}
+									>
+										<option value="">Global-Default</option>
+										{#each POLICY_CHOICES as c}
+											<option value={c}>{POLICY_LABEL[c]}</option>
+										{/each}
+									</select>
+								</td>
+								<td></td>
+							</tr>
+						{/each}
+					</tbody>
+				</table>
+			{/if}
 		</section>
 	</div>
 {/if}
@@ -776,5 +880,93 @@
 	}
 	.policy-table code {
 		font-size: 0.75rem;
+	}
+
+	/* ── Missions section ─── */
+	.mission-list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+	}
+	.mission-item {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.25rem 0;
+		font-size: 0.8125rem;
+	}
+	.mission-title-text {
+		flex: 1;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	.mission-state {
+		font-size: 0.6875rem;
+		color: hsl(var(--color-muted-foreground));
+		text-transform: uppercase;
+	}
+	.mission-new-btn {
+		margin-top: 0.375rem;
+	}
+
+	/* ── Policy natural language ─── */
+	.policy-natural {
+		margin: 0;
+		padding: 0.5rem 0.75rem;
+		background: hsl(var(--color-background));
+		border: 1px solid hsl(var(--color-border));
+		border-radius: 0.375rem;
+		font: inherit;
+		font-size: 0.8125rem;
+		line-height: 1.5;
+		white-space: pre-wrap;
+		color: hsl(var(--color-muted-foreground));
+	}
+
+	/* ── Policy simple mode ─── */
+	.policy-simple {
+		display: flex;
+		gap: 0.375rem;
+		flex-wrap: wrap;
+	}
+	.radio-card {
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
+		padding: 0.375rem 0.75rem;
+		border: 1px solid hsl(var(--color-border));
+		border-radius: 0.375rem;
+		font-size: 0.8125rem;
+		cursor: pointer;
+		transition:
+			border-color 0.15s,
+			background 0.15s;
+	}
+	.radio-card.active {
+		border-color: hsl(var(--color-primary));
+		background: color-mix(in oklab, hsl(var(--color-primary)) 8%, transparent);
+	}
+	.radio-card input[type='radio'] {
+		margin: 0;
+	}
+	.radio-card-label {
+		white-space: nowrap;
+	}
+	.toggle-advanced {
+		align-self: flex-start;
+		border: none;
+		background: none;
+		padding: 0.25rem 0;
+		font: inherit;
+		font-size: 0.75rem;
+		color: hsl(var(--color-muted-foreground));
+		cursor: pointer;
+	}
+	.toggle-advanced:hover {
+		color: hsl(var(--color-foreground));
 	}
 </style>
