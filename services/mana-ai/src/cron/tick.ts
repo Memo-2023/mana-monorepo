@@ -47,6 +47,7 @@ import { unwrapMissionGrant } from '../crypto/unwrap-grant';
 import { NewsResearchClient } from '../planner/news-research-client';
 import type { ResolverContext } from '../db/resolvers/types';
 import type { Config } from '../config';
+import { withSpan } from '../tracing';
 
 const ENC_PREFIX = 'enc:1:';
 
@@ -179,7 +180,17 @@ export async function runTickOnce(config: Config): Promise<TickStats> {
 			}
 
 			try {
-				const planResult = await planOneMission(m, planner, sql, agent, config);
+				const planResult = await withSpan(
+					'tick.planMission',
+					{
+						'mission.id': m.id,
+						'mission.title': m.title,
+						'user.id': m.userId,
+						'agent.id': agent?.id ?? 'legacy',
+						'agent.name': agent?.name ?? 'Mana',
+					},
+					() => planOneMission(m, planner, sql, agent, config)
+				);
 				if (planResult === null) {
 					parseFailures++;
 					parseFailuresTotal.inc();

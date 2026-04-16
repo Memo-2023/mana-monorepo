@@ -332,6 +332,7 @@ services:
       # mana-auth. Used to unwrap per-mission data keys at tick time.
       # Absent → all grants skip silently with reason="not-configured".
       MANA_AI_PRIVATE_KEY_PEM: ${MANA_AI_PRIVATE_KEY_PEM:-}
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://tempo:4318
     ports:
       - "3067:3067"
     healthcheck:
@@ -1230,6 +1231,25 @@ services:
       retries: 3
       start_period: 10s
 
+  tempo:
+    image: grafana/tempo:2.6.1
+    container_name: mana-mon-tempo
+    restart: always
+    mem_limit: 256m
+    command: ["-config.file=/etc/tempo/tempo.yaml"]
+    volumes:
+      - ./docker/tempo:/etc/tempo:ro
+      - tempo_data:/var/tempo
+    ports:
+      - "4318:4318"   # OTLP HTTP receiver
+      - "3200:3200"   # Tempo API (for Grafana)
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3200/ready"]
+      interval: 300s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
   loki:
     image: grafana/loki:3.0.0
     container_name: mana-mon-loki
@@ -1666,3 +1686,5 @@ volumes:
     name: mana-loki-data
   stalwart_data:
     name: mana-stalwart-data
+  tempo_data:
+    name: mana-tempo-data

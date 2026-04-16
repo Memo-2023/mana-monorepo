@@ -43,7 +43,6 @@
 		"@mana/shared-icons": "workspace:*",
 		"@mana/shared-stores": "workspace:*",
 		"@mana/shared-tags": "workspace:*",
-		"@mana/subscriptions": "workspace:*",
 		"@mana/shared-tailwind": "workspace:*",
 		"@mana/shared-theme": "workspace:*",
 		"@mana/shared-theme-ui": "workspace:*",
