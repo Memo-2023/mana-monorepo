@@ -58,7 +58,7 @@
 			<span>📊</span>
 			{$_('dashboard.widgets.transactions.title')}
 		</h3>
-		<a href="/credits?tab=transactions" class="text-sm text-primary hover:underline">
+		<a href="/?app=credits&tab=transactions" class="text-sm text-primary hover:underline">
 			{$_('common.view_all')} →
 		</a>
 	</div>

@@ -67,7 +67,7 @@
 		</a>
 
 		<a
-			href="/credits"
+			href="/?app=credits"
 			class="p-4 rounded-xl bg-card border hover:border-primary/50 hover:shadow-md transition-all group"
 		>
 			<div class="flex items-center gap-3">

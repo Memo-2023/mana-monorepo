@@ -1089,12 +1089,12 @@ registerApp({
 });
 
 registerApp({
-	id: 'mana',
-	name: 'Mana',
+	id: 'credits',
+	name: 'Credits & Abo',
 	color: '#F59E0B',
 	icon: Crown,
 	views: {
-		list: { load: () => import('$lib/modules/mana/ListView.svelte') },
+		list: { load: () => import('$lib/modules/credits/ListView.svelte') },
 	},
 });
 

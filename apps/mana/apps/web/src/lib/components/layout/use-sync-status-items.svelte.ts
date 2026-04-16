@@ -39,7 +39,7 @@ export function useSyncStatusItems() {
 				id: 'sync-paused',
 				label: 'Sync pausiert — Credits aufladen',
 				icon: 'bell',
-				onClick: () => goto('/credits?tab=packages'),
+				onClick: () => goto('/?app=credits&tab=packages'),
 			});
 		} else {
 			result.push({

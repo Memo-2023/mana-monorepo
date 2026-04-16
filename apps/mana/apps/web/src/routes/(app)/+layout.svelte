@@ -740,7 +740,12 @@
 			category: 'Navigation',
 			onExecute: () => goto('/?app=spiral'),
 		},
-		{ id: 'credits', label: 'Credits', category: 'Navigation', onExecute: () => goto('/credits') },
+		{
+			id: 'credits',
+			label: 'Credits',
+			category: 'Navigation',
+			onExecute: () => goto('/?app=credits'),
+		},
 		{ id: 'apps', label: 'Alle Apps', category: 'Navigation', onExecute: () => goto('/apps') },
 		{
 			id: 'settings',
@@ -805,7 +810,10 @@
 						>
 							<span>Cloud Sync pausiert — Credits reichen nicht aus.</span>
 							<div class="flex gap-2">
-								<a href="/credits?tab=packages" class="font-medium underline hover:no-underline">
+								<a
+									href="/?app=credits&tab=packages"
+									class="font-medium underline hover:no-underline"
+								>
 									Credits aufladen
 								</a>
 								<a href="/settings/sync" class="font-medium underline hover:no-underline">
@@ -974,10 +982,10 @@
 					currentSyncLabel={syncStatus.label}
 					{appItems}
 					{userEmail}
-					manaHref="/?app=mana"
+					manaHref="/?app=credits"
 					profileHref="/?app=profile"
 					spiralHref="/?app=spiral"
-					creditsHref="/credits"
+					creditsHref="/?app=credits"
 					themesHref="/?app=themes"
 					helpHref="/?app=help"
 					allAppsHref="/apps"

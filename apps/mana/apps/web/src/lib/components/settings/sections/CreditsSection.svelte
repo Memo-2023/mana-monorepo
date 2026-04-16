@@ -31,7 +31,7 @@
 		tone="yellow"
 	>
 		{#snippet action()}
-			<a href="/credits" class="text-sm text-primary hover:underline">Alle Details</a>
+			<a href="/?app=credits" class="text-sm text-primary hover:underline">Alle Details</a>
 		{/snippet}
 	</SettingsSectionHeader>
 
@@ -60,13 +60,13 @@
 
 	<div class="mt-4 flex gap-2">
 		<a
-			href="/credits?tab=packages"
+			href="/?app=credits&tab=packages"
 			class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
 		>
 			Credits kaufen
 		</a>
 		<a
-			href="/credits?tab=transactions"
+			href="/?app=credits&tab=transactions"
 			class="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-surface-hover"
 		>
 			Transaktionen

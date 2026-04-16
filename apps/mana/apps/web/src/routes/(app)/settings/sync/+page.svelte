@@ -198,7 +198,9 @@
 						{#if balance !== null && balance.balance < SYNC_PRICES[selectedInterval]}
 							<p class="mt-2 text-center text-sm text-amber-600 dark:text-amber-400">
 								Nicht genügend Credits.
-								<a href="/credits?tab=packages" class="underline hover:no-underline">Aufladen</a>
+								<a href="/?app=credits&tab=packages" class="underline hover:no-underline"
+									>Aufladen</a
+								>
 							</p>
 						{/if}
 					{/if}

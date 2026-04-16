@@ -134,7 +134,7 @@
 				</p>
 				<div class="mt-8 flex justify-center gap-4">
 					<a
-						href="/credits"
+						href="/?app=credits"
 						class="rounded-lg bg-primary px-6 py-2 font-medium text-primary-foreground hover:bg-primary/90"
 					>
 						Zu meinen Credits
