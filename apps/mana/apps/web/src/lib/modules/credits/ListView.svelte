@@ -138,7 +138,7 @@
 		const canceled = params.get('canceled');
 
 		if (success === 'true') {
-			toast.success('\1');
+			toast.success('Credits erfolgreich gekauft!');
 			history.replaceState({}, '', '/');
 		} else if (canceled === 'true') {
 			toast.error('Kauf wurde abgebrochen');
@@ -304,7 +304,7 @@
 		cancelingSub = true;
 		try {
 			await subscriptionsService.cancelSubscription();
-			toast.success('\1');
+			toast.success('Abo erfolgreich gekündigt');
 			await loadData();
 		} catch (e) {
 			toast.error(e instanceof Error ? e.message : 'Fehler beim Kündigen');
@@ -317,7 +317,7 @@
 		reactivatingSub = true;
 		try {
 			await subscriptionsService.reactivateSubscription();
-			toast.success('\1');
+			toast.success('Abo erfolgreich reaktiviert');
 			await loadData();
 		} catch (e) {
 			toast.error(e instanceof Error ? e.message : 'Fehler beim Reaktivieren');
