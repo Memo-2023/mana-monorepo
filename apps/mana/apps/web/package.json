@@ -73,7 +73,6 @@
 		"@mana/shared-uload": "workspace:*",
 		"@mana/shared-utils": "workspace:*",
 		"@mana/spiral-db": "workspace:*",
-		"@mana/subscriptions": "workspace:*",
 		"@mana/wallpaper-generator": "workspace:*",
 		"@types/pako": "^2.0.4",
 		"@types/suncalc": "^1.9.2",

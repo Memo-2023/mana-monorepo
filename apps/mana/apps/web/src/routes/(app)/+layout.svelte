@@ -302,11 +302,10 @@
 	}
 
 	// ── Navigation ──────────────────────────────────────────
-	// Note: spiral, credits, profile and settings used to live here as
-	// standalone pills but were moved into the user-menu dropdown so the
-	// nav stays compact. They are still routable via the dropdown items
-	// the layout passes as `spiralHref` / `creditsHref` / `profileHref` /
-	// `settingsHref` below.
+	// System pages (spiral, credits, profile, themes, help) are workbench
+	// apps now — no standalone routes. The user-menu dropdown links via
+	// `spiralHref` / `creditsHref` / `profileHref` etc., all pointing to
+	// `/?app=<id>` deep-links.
 	let baseNavItems = $derived<PillNavItem[]>([
 		{
 			href: '/',
@@ -581,6 +580,13 @@
 		// sync engine boot on the critical path.
 		if (authStore.isAuthenticated) {
 			setErrorTrackingUser({ id: authStore.user?.id ?? 'unknown', email: authStore.user?.email });
+			// Multi-Agent Workbench (Phase 1): bind the real user identity
+			// to the ambient Actor so subsequent writes stamp principalId +
+			// displayName correctly instead of 'legacy:user' / 'Du'.
+			const { bindDefaultUser } = await import('$lib/data/events/actor');
+			const uid = authStore.user?.id ?? 'unknown';
+			const name = authStore.user?.name || authStore.user?.email || 'Du';
+			bindDefaultUser(uid, name);
 			await syncBilling.load();
 			const getToken = () => authStore.getValidToken();
 			unifiedSync = createUnifiedSync(SYNC_SERVER_URL, getToken, syncBilling.active);

@@ -287,18 +287,10 @@
 		showAppSwitcher?: boolean;
 		/** User email for user dropdown */
 		userEmail?: string;
-		/** Settings page href */
-		settingsHref?: string;
-		/** Mana/subscription page href */
-		manaHref?: string;
 		/** Profile page href */
 		profileHref?: string;
 		/** Login page href (shown when not logged in) */
 		loginHref?: string;
-		/** All Apps page href */
-		allAppsHref?: string;
-		/** All Apps label (default: "Alle Apps") */
-		allAppsLabel?: string;
 		// A11y Settings
 		/** A11y contrast level */
 		a11yContrast?: 'normal' | 'high';
@@ -379,12 +371,8 @@
 		appItems = [],
 		showAppSwitcher = false,
 		userEmail,
-		settingsHref,
-		manaHref,
 		profileHref,
 		loginHref,
-		allAppsHref,
-		allAppsLabel = 'Alle Apps',
 		a11yContrast = 'normal',
 		onA11yContrastChange,
 		a11yReduceMotion = false,
@@ -476,24 +464,6 @@
 				active: currentPath === profileHref,
 			});
 		}
-		if (settingsHref) {
-			links.push({
-				id: 'settings',
-				label: 'Einstellungen',
-				icon: 'settings',
-				href: settingsHref,
-				active: currentPath === settingsHref,
-			});
-		}
-		if (userEmail && manaHref) {
-			links.push({
-				id: 'mana',
-				label: 'Mana',
-				icon: 'sparkle',
-				href: manaHref,
-				active: currentPath === manaHref,
-			});
-		}
 		if (spiralHref) {
 			links.push({
 				id: 'spiral',
@@ -565,16 +535,6 @@
 				icon: 'login',
 				onClick: () => {
 					window.location.href = loginHref;
-				},
-			});
-		}
-		if (settingsHref) {
-			out.push({
-				id: 'settings',
-				label: 'Einstellungen',
-				icon: 'settings',
-				onClick: () => {
-					window.location.href = settingsHref;
 				},
 			});
 		}
@@ -655,8 +615,6 @@
 					isOpen={appDrawerOpen}
 					onToggle={(open) => (appDrawerOpen = open)}
 					{onOpenInPanel}
-					{allAppsHref}
-					{allAppsLabel}
 					triggerLabel={appName}
 				/>
 			{/if}
