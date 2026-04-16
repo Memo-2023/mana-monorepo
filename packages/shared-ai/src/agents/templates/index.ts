@@ -11,6 +11,8 @@ import { researchTemplate } from './research';
 import { contextTemplate } from './context';
 import { todayTemplate } from './today';
 import { calmnessTemplate } from './calmness';
+import { fitnessTemplate } from './fitness';
+import { deepWorkTemplate } from './deep-work';
 
 export type {
 	// Generalised names (T1 of workbench-templates plan):
@@ -34,9 +36,18 @@ export const ALL_TEMPLATES = [
 	contextTemplate,
 	todayTemplate,
 	calmnessTemplate,
+	fitnessTemplate,
+	deepWorkTemplate,
 ] as const;
 
-export { researchTemplate, contextTemplate, todayTemplate, calmnessTemplate };
+export {
+	researchTemplate,
+	contextTemplate,
+	todayTemplate,
+	calmnessTemplate,
+	fitnessTemplate,
+	deepWorkTemplate,
+};
 
 /** Lookup helper — returns the template matching the given id, or
  *  undefined. Useful for deep-links `/agents/templates?pick=research`. */

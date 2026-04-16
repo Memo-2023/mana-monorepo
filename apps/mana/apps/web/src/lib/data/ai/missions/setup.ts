@@ -27,6 +27,8 @@ import { runAgentsBootstrap } from '../agents/bootstrap';
 // handler to a rarely-used module slows down the hot path otherwise.
 // See docs/plans/workbench-templates.md §T1.
 import '$lib/modules/meditate/seed';
+import '$lib/modules/habits/seed';
+import '$lib/companion/goals/seed';
 import type { AiPlanInput, AiPlanOutput } from './planner/types';
 
 /** Default interval between tick scans. One minute is fine for foreground use. */

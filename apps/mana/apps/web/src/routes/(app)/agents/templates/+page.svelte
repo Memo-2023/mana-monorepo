@@ -15,6 +15,13 @@
 	import { applyTemplate } from '$lib/data/ai/agents/apply-template';
 
 	let selected = $state<AgentTemplate | null>(null);
+	const agentTemplates = ALL_TEMPLATES.filter(
+		(t) => t.category === 'ai' || t.category === 'delight'
+	);
+	const workbenchTemplates = ALL_TEMPLATES.filter(
+		(t) => t.category !== 'ai' && t.category !== 'delight'
+	);
+
 	let applying = $state(false);
 	let result = $state<{
 		agentName?: string;
@@ -93,50 +100,72 @@
 </script>
 
 <svelte:head>
-	<title>Agent-Templates — Mana</title>
+	<title>Templates — Mana</title>
 </svelte:head>
+
+{#snippet templateCard(t: AgentTemplate)}
+	<button
+		type="button"
+		class="card"
+		class:selected={selected?.id === t.id}
+		style="--accent: {t.color}"
+		onclick={() => openDetail(t)}
+	>
+		<span class="avatar">{t.agent?.avatar ?? t.icon}</span>
+		<span class="label">{t.label}</span>
+		<span class="tagline">{t.tagline}</span>
+		<span class="meta">
+			{#if t.agent}<span class="chip">Agent</span>{/if}
+			{#if t.scene}<span class="chip">Scene</span>{/if}
+			{#if t.missions && t.missions.length > 0}
+				<span class="chip">{t.missions.length} Mission{t.missions.length !== 1 ? 'en' : ''}</span>
+			{/if}
+			{#if t.seeds}
+				{@const total = Object.values(t.seeds).reduce((s, items) => s + items.length, 0)}
+				<span class="chip">{total} Seed{total !== 1 ? 's' : ''}</span>
+			{/if}
+		</span>
+	</button>
+{/snippet}
 
 <div class="page">
 	<header class="header">
 		<button type="button" class="back" onclick={() => goto('/')}>
 			<ArrowLeft size={14} /><span>Zurück zum Workbench</span>
 		</button>
-		<h1>Agent-Templates</h1>
+		<h1>Templates</h1>
 		<p class="sub">
-			Vorgefertigte AI-Agenten, die sofort loslaufen. Jedes Template legt einen Agent, eine passende
-			Scene und eine Starter-Mission an — die Mission ist standardmäßig pausiert, damit du bewusst
-			Play drückst.
+			Vorgefertigte Setups für deinen Workbench. Wähle ein Template und du hast in einem Klick eine
+			passende Scene, optionale AI-Agenten und erste Daten in den richtigen Modulen.
 		</p>
 	</header>
 
-	<div class="grid">
-		{#each ALL_TEMPLATES as t (t.id)}
-			<button
-				type="button"
-				class="card"
-				class:selected={selected?.id === t.id}
-				style="--accent: {t.color}"
-				onclick={() => openDetail(t)}
-			>
-				<span class="avatar">{t.agent?.avatar ?? t.icon}</span>
-				<span class="label">{t.label}</span>
-				<span class="tagline">{t.tagline}</span>
-				<span class="meta">
-					{#if t.agent}<span class="chip">Agent</span>{/if}
-					{#if t.scene}<span class="chip">Scene</span>{/if}
-					{#if t.missions && t.missions.length > 0}
-						<span class="chip"
-							>{t.missions.length} Mission{t.missions.length !== 1 ? 'en' : ''}</span
-						>
-					{/if}
-					{#if t.seeds}
-						{@const total = Object.values(t.seeds).reduce((s, items) => s + items.length, 0)}
-						<span class="chip">{total} Seed{total !== 1 ? 's' : ''}</span>
-					{/if}
-				</span>
-			</button>
-		{/each}
-	</div>
+	<section class="section">
+		<div class="section-head">
+			<h2>🤖 Agent-Templates</h2>
+			<p>Benannte AI-Personas mit eigener Policy, Memory und Starter-Mission.</p>
+		</div>
+		<div class="grid">
+			{#each agentTemplates as t (t.id)}
+				{@render templateCard(t)}
+			{/each}
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="section-head">
+			<h2>🎨 Workbench-Templates</h2>
+			<p>
+				Starter-Kits ohne AI — Scene-Layout + vor-gefüllte Habits, Goals und Module-Daten. Du
+				arbeitest selbst, das Template nimmt dir die Einrichtung ab.
+			</p>
+		</div>
+		<div class="grid">
+			{#each workbenchTemplates as t (t.id)}
+				{@render templateCard(t)}
+			{/each}
+		</div>
+	</section>
 
 	{#if selected}
 		<section class="detail" style="--accent: {selected.color}">
@@ -349,6 +378,22 @@
 		color: hsl(var(--color-muted-foreground));
 		max-width: 60ch;
 		line-height: 1.5;
+	}
+	.section {
+		display: flex;
+		flex-direction: column;
+		gap: 0.875rem;
+	}
+	.section-head h2 {
+		margin: 0;
+		font-size: 1.125rem;
+		font-weight: 600;
+	}
+	.section-head p {
+		margin: 0.25rem 0 0;
+		font-size: 0.875rem;
+		color: hsl(var(--color-muted-foreground));
+		max-width: 60ch;
 	}
 	.grid {
 		display: grid;
