@@ -7,8 +7,17 @@ Kontext: [`services/mana-ai/CLAUDE.md`](../../services/mana-ai/CLAUDE.md), [`doc
 Was davon schon gelandet ist:
 - **Punkt 1 (Encrypted-Tables serverseitig)** → Mission-Key-Grant ausgerollt. Plan-Doc: [`../plans/ai-mission-key-grant.md`](../plans/ai-mission-key-grant.md).
 - **Named Agents + per-Agent-Policy + Budget + Observability** (war nicht auf dieser Liste, kam aus den Design-Gesprächen) → Multi-Agent Workbench ausgerollt. Plan-Doc: [`../plans/multi-agent-workbench.md`](../plans/multi-agent-workbench.md).
+- **Punkt 6 (Token Budget pro Mission)** → Serverseitiges Budget-Enforcement mit rolling 24h Window (`ce57e1195`). `mana_ai.token_usage` Tabelle, `skipped-budget` Metrik.
 
-Was aus dieser Liste noch offen ist: Punkte 2, 3, 4, 5, 6, 7, 8 unten — alle weiterhin relevant.
+**Seit 2026-04-16 zusätzlich gelandet** (Architektur-Sprint, siehe [`../reports/ai-agent-architecture-comparison.md`](../reports/ai-agent-architecture-comparison.md)):
+- **SSE Streaming** für Foreground Runner — live Token-Progress im UI (`be81d11dc`)
+- **Dynamic Tool Catalog** — `AI_TOOL_CATALOG` in `@mana/shared-ai` als Single Source of Truth, 29 Tools (`d40a61119`)
+- **Tool-Drift-Fix** — 8 Name/Parameter-Mismatches zwischen Server und Webapp behoben (`56171ff13`)
+- **MCP-Server-Export** — `/api/v1/mcp` Endpoint mit 27/29 funktionalen Tools + sync_changes DB-Ops (`db4dd437b` + `e969324cc` + `04c806fbb`)
+- **Guardrail-Layer** — Pre/Post-Plan + Pre-Execute Checks mit 4 built-in Guards (`fad7f4bea`)
+- **OpenTelemetry Tracing** — Grafana Tempo Backend + mana-ai Spans (`76577869e`)
+
+Was aus dieser Liste noch offen ist: Punkte 2, 3, 4, 5, 7, 8 unten + die neuen Punkte 9, 10, 11.
 
 Forward-looking Plans:
 - **Team-Workbench** (Multi-User + geteilter AI-Kontext): [`../plans/team-workbench.md`](../plans/team-workbench.md).
@@ -136,3 +145,101 @@ Foreground-Runner bleibt primär für encrypted Missions (= Option B ohne Push, 
 - Audit: wo loggen wir serverseitige Decrypts? Eigene Tabelle `mana_ai.decrypt_audit` mit `{missionId, recordId, tickId, timestamp}`, vom User in der Workbench einsehbar.
 - Revocation-UX: ein "🔒 Key zurückziehen"-Button pro Mission in der Workbench → Grant wird gelöscht, Mission pausiert, nächster Tick bemerkt den fehlenden Grant.
 - Prompt-Injection: entschlüsselter User-Content geht in den Planner-Prompt. Braucht stärkere Prompt-Isolation (klare Marker, Output-Validation) — aber das gilt heute schon für Goals.
+
+---
+
+## 9. Agent-to-Agent Delegation
+
+**Problem:** Agents sind isolierte Inseln. Ein "Recherche-Agent" kann keinen "Todo-Agent" bitten, eine Leseaufgabe aus gefundenen Artikeln zu erstellen. Jeder Agent kennt nur seine eigenen Missions und Tools.
+
+**Was die Industrie macht:**
+- **Google A2A**: Agents discovern sich über Agent Cards und delegieren Tasks
+- **OpenAI Agents SDK**: Handoffs als First-class Primitive (kein Orchestrator nötig)
+- **LangGraph**: Edges zwischen Agent-Nodes im StateGraph
+- **CrewAI**: Hierarchical delegation + shared context
+
+**Idee:**
+```typescript
+interface AgentDelegation {
+  fromAgentId: string;
+  toAgentId: string;
+  intent: ToolCallIntent;     // Was soll der andere Agent tun?
+  context: string;             // Warum?
+  policy: 'auto' | 'propose'; // Muss User bestätigen?
+}
+```
+
+Der Planner bekommt ein neues Meta-Tool `delegate_to_agent(agentId, toolName, params, reason)`. Wenn ein Agent dieses Tool aufruft, erstellt der Runner eine neue Mini-Mission für den Ziel-Agent mit den übergebenen Parametern. Das Ergebnis fließt zurück in den Reasoning Loop des aufrufenden Agents.
+
+**Voraussetzungen:**
+- Agent-Discovery: `getAvailableAgents()` mit Capabilities-Metadata
+- Delegation als neuer Proposal-Typ (User sieht: "Agent A möchte Agent B beauftragen")
+- Cycle-Detection (A delegiert an B, B delegiert an A)
+- Budget-Accounting: Tokens des delegierten Calls zählen gegen den aufrufenden Agent
+
+**Aufwand:** Groß (2-3 Sprints). Architekturentscheidung: synchrone Delegation (in derselben Iteration) vs. asynchrone (neue Mission, Ergebnis im nächsten Tick).
+
+**Impact:** Hoch — ermöglicht echte Multi-Agent-Workflows. Voraussetzung für A2A Agent Cards (#10).
+
+## 10. A2A-kompatible Agent Cards
+
+**Problem:** Mana-Agents sind nur intern nutzbar. Externe Systeme (Google ADK, andere MCP-Clients) können sie nicht discovern oder ansprechen.
+
+**Idee:** Jeder Mana-Agent exponiert eine [A2A Agent Card](https://a2a-protocol.org) unter `/.well-known/a2a/agent-card`:
+```json
+{
+  "name": "Mana Recherche-Agent",
+  "description": "Recherchiert Nachrichten und speichert relevante Artikel",
+  "skills": [
+    { "name": "research_news", "inputSchema": {...}, "outputSchema": {...} }
+  ],
+  "security": { "schemes": ["bearer"] }
+}
+```
+
+Externe Agents können dann Tasks an Mana-Agents delegieren via A2A-Protokoll (JSON-RPC oder HTTP REST), authentifiziert über die bestehende API-Key-Infrastruktur.
+
+**Voraussetzungen:** Agent-to-Agent (#9) muss intern stehen, bevor es extern exponiert wird.
+
+**Aufwand:** Mittel (1 Sprint), sobald #9 steht. A2A-Spec ist stabil (v1.0, Linux Foundation).
+
+## 11. Graph-basierte Mission-Workflows
+
+**Problem:** Der Reasoning Loop ist linear (Planner → Steps → optional chained Loop). Komplexe Workflows mit Branching, Parallelisierung oder Conditional Logic sind nicht möglich.
+
+**Idee:** Missions bekommen optional einen DAG (Directed Acyclic Graph):
+```typescript
+interface MissionGraph {
+  nodes: MissionNode[];           // Jeder Node = ein Planner-Call oder Tool-Execution
+  edges: MissionEdge[];           // Conditional routing basierend auf Outputs
+  parallelGroups?: string[][];    // Nodes die parallel laufen können
+}
+```
+
+**Beispiel:** "Analysiere meine Finanzen → erstelle einen Bericht → wenn Ausgaben > Budget: plane Sparmaßnahmen als Tasks".
+
+**Priorität:** Niedrig. Der aktuelle lineare Loop mit Reasoning-Chaining (bis zu 5 Iterationen) deckt ~90% der Use Cases ab. Ein DAG wäre ein Power-User-Feature.
+
+**Aufwand:** Groß (2+ Sprints). Graph-Editor-UI, Execution-Engine, State-Management für parallele Branches, Fehlerbehandlung bei Branch-Failures.
+
+## 12. Agent Long-Term Memory (Embeddings)
+
+**Problem:** Agents haben ein `memory` Markdown-Feld, aber keine strukturierte Langzeit-Erinnerung. Sie können nicht aus vergangenen Iterationen lernen oder ähnliche Situationen wiedererkennen.
+
+**Was die Industrie macht:**
+- **CrewAI**: 4 Memory-Typen (Short-term, Long-term via Embeddings, Entity, Contextual)
+- **OpenAI Agents SDK**: Sessions mit SQLite/Redis Persistenz
+- **LangGraph**: StateGraph mit Checkpointing + Time-Travel
+
+**Idee:** Pro Agent ein Embedding-Store (pgvector oder externer Service):
+- Nach jeder Iteration: Summary + Ergebnis embedden und speichern
+- Vor dem nächsten Planner-Call: Top-K ähnliche vergangene Ergebnisse als Kontext injizieren
+- "Was hat bei ähnlichen Missions funktioniert?" → bessere Pläne über Zeit
+
+**Abhängigkeiten:**
+- Infra-Entscheidung: pgvector (in bestehender Postgres) vs. dedizierter Vector-Store (Qdrant, Milvus)
+- Embedding-Modell: lokal (Gemma 4 E2B via local-llm) vs. Server (mana-llm Embedding-Endpoint)
+
+**Aufwand:** Groß (2+ Sprints). Vector-Store Setup, Embedding-Pipeline, Retrieval-Integration in Planner-Prompt, Memory-Verwaltungs-UI.
+
+**Impact:** Mittel — Agents werden "schlauer" über Zeit. Besonders wertvoll für wiederkehrende Missions (Daily Review, Inbox Triage).
