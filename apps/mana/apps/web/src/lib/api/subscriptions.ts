@@ -103,8 +103,8 @@ export const subscriptionsService = {
 		planId: string,
 		billingInterval: 'month' | 'year'
 	): Promise<{ sessionId: string; url: string }> {
-		const successUrl = `${window.location.origin}/subscription?success=true`;
-		const cancelUrl = `${window.location.origin}/subscription?canceled=true`;
+		const successUrl = `${window.location.origin}/?app=credits&success=true`;
+		const cancelUrl = `${window.location.origin}/?app=credits&canceled=true`;
 
 		return fetchWithAuth('/api/v1/subscriptions/checkout', {
 			method: 'POST',

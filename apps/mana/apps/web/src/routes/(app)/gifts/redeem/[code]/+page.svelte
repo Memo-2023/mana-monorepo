@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { Card, PageHeader } from '@mana/shared-ui';
+	import { toast } from '$lib/stores/toast.svelte';
 	import { giftsService, type GiftCodeInfo } from '$lib/api/gifts';
 
 	let code = $derived($page.params.code ?? '');
@@ -15,8 +16,6 @@
 	let newBalance = $state(0);
 
 	// Toast notification
-	let toastMessage = $state<string | null>(null);
-	let toastType = $state<'success' | 'error'>('success');
 
 	onMount(async () => {
 		await loadGiftInfo();
@@ -49,26 +48,18 @@
 				success = true;
 				receivedCredits = result.credits || 0;
 				newBalance = result.newBalance || 0;
-				showToast(`${receivedCredits} Credits erhalten!`, 'success');
+				toast.success(`${receivedCredits} Credits erhalten!`);
 			} else {
 				error = result.error || 'Einlösen fehlgeschlagen';
-				showToast(error, 'error');
+				toast.error(error);
 			}
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Einlösen fehlgeschlagen';
-			showToast(error, 'error');
+			toast.error(error);
 			console.error('Failed to redeem gift:', e);
 		} finally {
 			redeeming = false;
 		}
-	}
-
-	function showToast(message: string, type: 'success' | 'error') {
-		toastMessage = message;
-		toastType = type;
-		setTimeout(() => {
-			toastMessage = null;
-		}, 4000);
 	}
 
 	function formatDate(dateStr: string): string {
@@ -291,18 +282,6 @@
 		</div>
 	{/if}
 </div>
-
-<!-- Toast Notification -->
-{#if toastMessage}
-	<div
-		class="fixed bottom-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg animate-fade-in {toastType ===
-		'success'
-			? 'bg-green-600 text-white'
-			: 'bg-red-600 text-white'}"
-	>
-		{toastMessage}
-	</div>
-{/if}
 
 <style>
 	@keyframes fade-in {

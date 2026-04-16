@@ -57,7 +57,7 @@
 		error = null;
 		try {
 			await syncBilling.deactivate();
-			showToast('Cloud Sync deaktiviert', 'success');
+			toast.success('Cloud Sync deaktiviert');
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Deaktivierung fehlgeschlagen';
 			toast.error(error);
@@ -72,7 +72,7 @@
 		error = null;
 		try {
 			await syncBilling.changeInterval(selectedInterval);
-			showToast(`Intervall auf ${INTERVAL_LABELS[selectedInterval]} geändert`, 'success');
+			toast.success(`Intervall auf ${INTERVAL_LABELS[selectedInterval]} geändert`);
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Änderung fehlgeschlagen';
 			toast.error(error);

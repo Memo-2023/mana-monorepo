@@ -3,6 +3,7 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { Card, PageHeader } from '@mana/shared-ui';
+	import { toast } from '$lib/stores/toast.svelte';
 	import { ClipboardText, X } from '@mana/shared-icons';
 	import {
 		giftsService,
@@ -32,8 +33,6 @@
 	let cancellingId = $state<string | null>(null);
 
 	// Toast notification
-	let toastMessage = $state<string | null>(null);
-	let toastType = $state<'success' | 'error'>('success');
 
 	// Handle tab from URL params
 	$effect(() => {
@@ -91,7 +90,7 @@
 
 			const result = await giftsService.createGift(request);
 			createdGift = { code: result.code, url: result.url };
-			showToast('Geschenk-Code erstellt!', 'success');
+			toast.success('Geschenk-Code erstellt!');
 
 			// Reset form
 			createCredits = 50;
@@ -103,7 +102,7 @@
 			await loadData();
 		} catch (e) {
 			createError = e instanceof Error ? e.message : 'Erstellen fehlgeschlagen';
-			showToast(createError, 'error');
+			toast.error(createError);
 			console.error('Failed to create gift:', e);
 		} finally {
 			creating = false;
@@ -122,10 +121,10 @@
 		cancellingId = gift.id;
 		try {
 			const result = await giftsService.cancelGift(gift.id);
-			showToast(`${result.refundedCredits} Credits erstattet`, 'success');
+			toast.success(`${result.refundedCredits} Credits erstattet`);
 			await loadData();
 		} catch (e) {
-			showToast(e instanceof Error ? e.message : 'Stornieren fehlgeschlagen', 'error');
+			toast.error(e instanceof Error ? e.message : 'Stornieren fehlgeschlagen');
 			console.error('Failed to cancel gift:', e);
 		} finally {
 			cancellingId = null;
@@ -134,15 +133,7 @@
 
 	function copyToClipboard(text: string) {
 		navigator.clipboard.writeText(text);
-		showToast('In Zwischenablage kopiert', 'success');
-	}
-
-	function showToast(message: string, type: 'success' | 'error') {
-		toastMessage = message;
-		toastType = type;
-		setTimeout(() => {
-			toastMessage = null;
-		}, 4000);
+		toast.success('In Zwischenablage kopiert');
 	}
 
 	function formatCredits(amount: number): string {
@@ -639,18 +630,6 @@
 		{/if}
 	{/if}
 </div>
-
-<!-- Toast Notification -->
-{#if toastMessage}
-	<div
-		class="fixed bottom-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg animate-fade-in {toastType ===
-		'success'
-			? 'bg-green-600 text-white'
-			: 'bg-red-600 text-white'}"
-	>
-		{toastMessage}
-	</div>
-{/if}
 
 <style>
 	@keyframes fade-in {
