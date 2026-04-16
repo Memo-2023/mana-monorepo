@@ -335,8 +335,8 @@ Exportierbar nach Grafana Tempo oder ähnlichem.
 
 | # | Maßnahme | Aufwand | Impact |
 |---|----------|---------|--------|
-| 1 | **Streaming für Foreground Runner** — SSE vom Planner, live Step-Status im UI | Mittel | Hoch — UX-Sprung |
-| 2 | **Dynamisches Tool-Registry** — Module registrieren Tools deklarativ, Server synchronisiert | Mittel | Hoch — Skalierbarkeit |
+| ~~1~~ | ~~**Streaming für Foreground Runner**~~ — ERLEDIGT `be81d11dc` | ~~Mittel~~ | ~~Hoch~~ |
+| ~~2~~ | ~~**Dynamisches Tool-Registry**~~ — ERLEDIGT `d40a61119` | ~~Mittel~~ | ~~Hoch~~ |
 | ~~3~~ | ~~**Budget-Enforcement serverseitig**~~ — ERLEDIGT `ce57e1195` (rolling 24h, token_usage Tabelle) | ~~Klein~~ | ~~Mittel~~ |
 
 ### Mittelfristig (1-3 Monate)
@@ -345,7 +345,7 @@ Exportierbar nach Grafana Tempo oder ähnlichem.
 |---|----------|---------|--------|
 | 4 | **Agent-to-Agent Delegation** — Internes Protokoll, ein Agent kann einen anderen beauftragen | Groß | Hoch — Multi-Agent |
 | ~~5~~ | ~~**MCP-Server-Export**~~ — ERLEDIGT `db4dd437b` + `e969324cc` (29 Tools, 27 mit echten DB-Ops) | ~~Mittel~~ | ~~Hoch~~ |
-| 6 | **Guardrail-Layer** — Pre/Post-Execution Checks | Mittel | Mittel — Sicherheit |
+| ~~6~~ | ~~**Guardrail-Layer**~~ — ERLEDIGT `fad7f4bea` (4 built-in checks) | ~~Mittel~~ | ~~Mittel~~ |
 | ~~7~~ | ~~**OpenTelemetry Tracing**~~ — ERLEDIGT `76577869e` (Tempo + mana-ai spans) | ~~Mittel~~ | ~~Mittel~~ |
 
 ### Langfristig (3-6 Monate)
@@ -411,6 +411,13 @@ Exportierbar nach Grafana Tempo oder ähnlichem.
 2. ~~**Kein Streaming**~~ — ERLEDIGT (`be81d11dc`)
 3. ~~**Statisches Tool-System**~~ — ERLEDIGT (`d40a61119`)
 
-**Die Kernempfehlung:** Mana sollte nicht versuchen, ein General-Purpose-Agent-Framework zu werden (das machen LangGraph/CrewAI besser). Stattdessen die einzigartigen Stärken (Privacy, Local-First, Attribution) ausbauen und gezielt die Industrie-Standards adoptieren: **Agent-Delegation**, **Guardrails**, und **OpenTelemetry Tracing**.
+**Die Kernempfehlung:** Mana sollte nicht versuchen, ein General-Purpose-Agent-Framework zu werden (das machen LangGraph/CrewAI besser). Stattdessen die einzigartigen Stärken (Privacy, Local-First, Attribution) ausbauen und den größten verbleibenden Architektur-Sprung angehen: **Agent-to-Agent Delegation**.
 
-**Stand 2026-04-16:** Alle 3 kurzfristigen Maßnahmen umgesetzt + MCP-Server-Export (#5) + Budget-Enforcement (#3). 5 von 10 Roadmap-Punkten erledigt. Verbleibend: Agent-to-Agent (#4), Guardrails (#6), OTel (#7), A2A Agent Cards (#8), Graph-Workflows (#9), Agent Memory (#10).
+**Stand 2026-04-16:** 7 von 10 Roadmap-Punkten in einer Session umgesetzt:
+- ~~#1 Streaming~~ ✅ · ~~#2 Dynamic Tools~~ ✅ · ~~#3 Budget~~ ✅ · ~~#5 MCP Server~~ ✅ · ~~#6 Guardrails~~ ✅ · ~~#7 OTel~~ ✅ · Tool-Drift-Fix (Bonus)
+
+**Verbleibend (langfristig):**
+- **#4 Agent-to-Agent Delegation** — Internes Protokoll für Agent-Kommunikation. Nächster architektureller Meilenstein.
+- **#8 A2A Agent Cards** — Mana-Agents extern discoverable machen (setzt #4 voraus)
+- **#9 Graph-Workflows** — DAG für komplexe Missions (niedrige Priorität, linearer Loop reicht für 90% der Usecases)
+- **#10 Agent Memory (Embeddings)** — Long-term Memory à la CrewAI (abhängig von Infra-Entscheidung: eigener Vector-Store vs. externe Integration)
