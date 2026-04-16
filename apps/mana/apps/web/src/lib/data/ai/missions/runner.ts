@@ -127,8 +127,28 @@ export interface RunMissionResult {
 	readonly failedSteps: number;
 }
 
+/** Mutex so concurrent runMission calls don't interleave the ambient
+ *  scope context. Queued runs wait until the previous one finishes. */
+let runMutex: Promise<void> = Promise.resolve();
+
 /** Run one iteration of the given mission. */
 export async function runMission(
+	missionId: string,
+	deps: MissionRunnerDeps
+): Promise<RunMissionResult> {
+	// Serialize mission runs so withAgentScope doesn't interleave.
+	let release: () => void;
+	const prev = runMutex;
+	runMutex = new Promise((r) => (release = r));
+	await prev;
+	try {
+		return await runMissionInner(missionId, deps);
+	} finally {
+		release!();
+	}
+}
+
+async function runMissionInner(
 	missionId: string,
 	deps: MissionRunnerDeps
 ): Promise<RunMissionResult> {
@@ -371,8 +391,26 @@ export async function runMission(
 					continue;
 				}
 
-				const outcome = await stage(ps, aiActor);
 				const stepId = `${iterationId}-${stepCounter++}`;
+				let outcome: StageOutcome;
+				try {
+					outcome = await stage(ps, aiActor);
+				} catch (err) {
+					// Tool threw an unhandled exception (Dexie error, vault locked,
+					// network timeout, etc.). Record the step as failed and continue
+					// with the next step so one broken tool doesn't abort the entire
+					// iteration. The error message surfaces in the iteration plan.
+					const errMsg = err instanceof Error ? err.message : String(err);
+					console.error(`[MissionRunner] step ${ps.toolName} threw:`, err);
+					failedCount++;
+					recordedSteps.push({
+						id: stepId,
+						summary: `${ps.summary} (FEHLER: ${errMsg.slice(0, 100)})`,
+						intent: { kind: 'toolCall', toolName: ps.toolName, params: ps.params },
+						status: 'failed',
+					});
+					continue;
+				}
 				if (!outcome.ok) {
 					failedCount++;
 					recordedSteps.push({

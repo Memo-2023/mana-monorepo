@@ -1,21 +1,24 @@
 /**
- * Ambient scope context for AI tool execution.
+ * Scope filtering for AI tool execution.
  *
- * When a mission runs under an agent with scopeTagIds, the runner calls
- * `withAgentScope(tagIds, fn)` around the reasoning loop. Auto-tools
- * like `list_notes` check `getAgentScopeTagIds()` and filter their
- * results to records tagged with at least one of those IDs (plus
- * untagged records, which are globally visible).
+ * Two modes:
+ *   1. **Explicit** (preferred): pass `scopeTagIds` directly to
+ *      `filterByScopeExplicit()`. Race-safe because no shared state.
+ *   2. **Ambient** (convenience for auto-tools): `withAgentScope()`
+ *      sets module-level state; `filterByScope()` reads it. Safe only
+ *      when missions don't run concurrently — the runner must serialize.
  *
- * Pattern mirrors `runAs()` in events/actor.ts — module-level mutable
- * state, single-threaded browser runtime, scoped via try/finally.
+ * Callers that already have the scope (e.g. the reasoning loop itself)
+ * should use the explicit variant. Auto-tools that don't receive scope
+ * as a parameter use the ambient variant.
  */
 
 let currentScopeTagIds: readonly string[] | null = null;
 
 /**
  * Run `fn` with the given scope tag IDs as ambient context. Clears
- * the scope when `fn` completes (or throws).
+ * the scope when `fn` completes (or throws). NOT safe for concurrent
+ * calls — use the mutex in runMission or serialize callers.
  */
 export async function withAgentScope<T>(
 	scopeTagIds: readonly string[] | undefined,
@@ -30,34 +33,43 @@ export async function withAgentScope<T>(
 	}
 }
 
-/**
- * Read the current ambient scope. Returns null when no scope is set
- * (meaning the tool should return everything — General-Agent behavior).
- */
+/** Read the current ambient scope. Null = no filtering. */
 export function getAgentScopeTagIds(): readonly string[] | null {
 	return currentScopeTagIds;
 }
 
 /**
- * Given a list of records + a function that returns their tag IDs,
- * filter down to records that match the ambient scope. Records with
- * no tags pass through (globally visible).
+ * Core filter: keep records whose tags overlap with `scopeTagIds`.
+ * Untagged records (tagIds=[]) always pass through (globally visible).
+ * When `scopeTagIds` is null/empty, returns all records (no filtering).
+ *
+ * This is the explicit, race-safe variant — pass scope directly.
  */
-export async function filterByScope<T>(
+export async function filterByScopeExplicit<T>(
 	records: T[],
+	scopeTagIds: readonly string[] | null | undefined,
 	getTagIdsForRecord: (record: T) => Promise<string[]>
 ): Promise<T[]> {
-	const scope = currentScopeTagIds;
-	if (!scope) return records; // no scope = everything visible
+	if (!scopeTagIds?.length) return records;
 
-	const scopeSet = new Set(scope);
+	const scopeSet = new Set(scopeTagIds);
 	const results: T[] = [];
 	for (const r of records) {
 		const tagIds = await getTagIdsForRecord(r);
-		// Untagged records are globally visible; tagged records must match scope
 		if (tagIds.length === 0 || tagIds.some((id) => scopeSet.has(id))) {
 			results.push(r);
 		}
 	}
 	return results;
+}
+
+/**
+ * Convenience wrapper: reads the ambient scope from `withAgentScope()`.
+ * Use this in auto-tools that don't receive scope explicitly.
+ */
+export async function filterByScope<T>(
+	records: T[],
+	getTagIdsForRecord: (record: T) => Promise<string[]>
+): Promise<T[]> {
+	return filterByScopeExplicit(records, currentScopeTagIds, getTagIdsForRecord);
 }
