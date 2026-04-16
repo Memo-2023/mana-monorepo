@@ -184,7 +184,7 @@ export function useAiTierItems() {
 			id: 'ai-settings',
 			label: 'KI-Einstellungen',
 			icon: 'settings',
-			onClick: () => goto('/?app=settings'),
+			onClick: () => goto('/?app=settings#ai-options'),
 		},
 	]);
 

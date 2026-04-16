@@ -166,7 +166,7 @@
 			id: 'all-themes',
 			label: $_('nav.all_themes'),
 			icon: 'palette',
-			onClick: () => goto('/themes'),
+			onClick: () => goto('/?app=themes'),
 			active: false,
 		},
 	]);
@@ -975,10 +975,10 @@
 					{appItems}
 					{userEmail}
 					manaHref="/mana"
-					profileHref="/profile"
+					profileHref="/?app=profile"
 					spiralHref="/spiral"
 					creditsHref="/credits"
-					themesHref="/themes"
+					themesHref="/?app=themes"
 					helpHref="/help"
 					allAppsHref="/apps"
 					{spotlightActions}

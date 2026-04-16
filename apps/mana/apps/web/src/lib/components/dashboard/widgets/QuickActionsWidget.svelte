@@ -22,7 +22,7 @@
 			descKey: 'dashboard.widgets.quick_actions.feedback_desc',
 		},
 		{
-			href: '/profile',
+			href: '/?app=profile',
 			icon: '👤',
 			labelKey: 'dashboard.widgets.quick_actions.profile',
 			descKey: 'dashboard.widgets.quick_actions.profile_desc',

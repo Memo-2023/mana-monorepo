@@ -302,7 +302,7 @@
 				id: 'wallpaper',
 				label: 'Hintergrund ändern',
 				icon: Image,
-				action: () => goto('/themes'),
+				action: () => goto('/?app=themes'),
 			},
 		];
 		if (scenes.length > 1) {
