@@ -17,17 +17,29 @@
  */
 
 export const AI_PROPOSABLE_TOOL_NAMES = [
+	// ── Todo ──────────────────────────────────
 	'create_task',
 	'complete_task',
 	'complete_tasks_by_title',
+	// ── Calendar ──────────────────────────────
 	'create_event',
+	// ── Places ────────────────────────────────
 	'create_place',
 	'visit_place',
+	// ── Drink ─────────────────────────────────
 	'undo_drink',
+	// ── News ──────────────────────────────────
 	'save_news_article',
+	// ── Notes ─────────────────────────────────
+	'create_note',
 	'update_note',
 	'append_to_note',
 	'add_tag_to_note',
+	// ── Journal ───────────────────────────────
+	'create_journal_entry',
+	// ── Habits ────────────────────────────────
+	'create_habit',
+	'log_habit',
 ] as const;
 
 export type AiProposableToolName = (typeof AI_PROPOSABLE_TOOL_NAMES)[number];

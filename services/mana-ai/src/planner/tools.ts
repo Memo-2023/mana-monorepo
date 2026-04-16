@@ -146,6 +146,68 @@ export const AI_AVAILABLE_TOOLS: readonly AvailableTool[] = [
 			},
 		],
 	},
+
+	// ── Notes: create ────────────────────────────────────────
+	{
+		name: 'create_note',
+		module: 'notes',
+		description: 'Erstellt eine neue Notiz. Gibt die ID der angelegten Notiz zurueck.',
+		parameters: [
+			{ name: 'title', type: 'string', description: 'Titel der Notiz', required: true },
+			{
+				name: 'content',
+				type: 'string',
+				description: 'Inhalt der Notiz (Markdown)',
+				required: false,
+			},
+		],
+	},
+
+	// ── Journal ──────────────────────────────────────────────
+	{
+		name: 'create_journal_entry',
+		module: 'journal',
+		description:
+			'Erstellt einen neuen Tagebuch-Eintrag fuer den heutigen Tag. Gibt die ID zurueck.',
+		parameters: [
+			{
+				name: 'content',
+				type: 'string',
+				description: 'Inhalt des Eintrags (Markdown)',
+				required: true,
+			},
+			{ name: 'title', type: 'string', description: 'Optionaler Titel', required: false },
+			{
+				name: 'mood',
+				type: 'string',
+				description: 'Stimmung',
+				required: false,
+				enum: ['great', 'good', 'neutral', 'bad', 'terrible'],
+			},
+		],
+	},
+
+	// ── Habits ───────────────────────────────────────────────
+	{
+		name: 'create_habit',
+		module: 'habits',
+		description: 'Erstellt einen neuen Habit-Tracker. Gibt die ID des neuen Habits zurueck.',
+		parameters: [
+			{ name: 'title', type: 'string', description: 'Titel des Habits', required: true },
+			{ name: 'icon', type: 'string', description: 'Emoji-Icon', required: true },
+			{ name: 'color', type: 'string', description: 'Hex-Farbe (z.B. #EF4444)', required: true },
+		],
+	},
+	{
+		name: 'log_habit',
+		module: 'habits',
+		description:
+			'Loggt eine Ausfuehrung eines existierenden Habits fuer heute. Optional mit Notiz.',
+		parameters: [
+			{ name: 'habitId', type: 'string', description: 'ID des Habits', required: true },
+			{ name: 'note', type: 'string', description: 'Optionale Notiz zum Log', required: false },
+		],
+	},
 ];
 
 export const AI_AVAILABLE_TOOL_NAMES = new Set<string>(AI_AVAILABLE_TOOLS.map((t) => t.name));
