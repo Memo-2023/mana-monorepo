@@ -21,6 +21,7 @@ import type {
 	WorkbenchScene,
 	WorkbenchSceneApp,
 } from '$lib/types/workbench-scenes';
+import { setSceneScopeTagIds } from './scene-scope.svelte';
 
 const TABLE = 'workbenchScenes';
 const ACTIVE_SCENE_LS_KEY = 'mana:workbench:activeSceneId';
@@ -163,6 +164,9 @@ export const workbenchScenesStore = {
 					activeSceneIdState = next;
 					writeActiveIdToStorage(next);
 				}
+				// Sync scope when scenes reload (init, sync pull, tab focus).
+				const activeScope = visible.find((s) => s.id === (next ?? activeSceneIdState));
+				setSceneScopeTagIds(activeScope?.scopeTagIds);
 				initializedState = true;
 			},
 			error: (err) => {
@@ -183,6 +187,9 @@ export const workbenchScenesStore = {
 		if (!scenesState.some((s) => s.id === id)) return;
 		activeSceneIdState = id;
 		writeActiveIdToStorage(id);
+		// Sync scene scope for module queries
+		const scene = scenesState.find((s) => s.id === id);
+		setSceneScopeTagIds(scene?.scopeTagIds);
 	},
 
 	async createScene(opts: {

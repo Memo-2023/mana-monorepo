@@ -42,6 +42,15 @@ export interface WorkbenchScene {
 	 * settings. See docs/plans/multi-agent-workbench.md §Phase 5d.
 	 */
 	viewingAsAgentId?: string;
+	/**
+	 * Tag-based data scope for this scene (Phase 6). When set, module
+	 * queries in apps rendered within this scene filter records to only
+	 * those tagged with at least one of these global tag IDs (+ untagged
+	 * records which are globally visible). Auto-inferred from the bound
+	 * agent's `scopeTagIds` if the user hasn't overridden it explicitly.
+	 * Undefined = no filtering, everything visible.
+	 */
+	scopeTagIds?: string[];
 }
 
 /** Dexie row shape (adds the BaseRecord audit fields stamped by hooks). */
