@@ -168,7 +168,7 @@
 	}
 
 	.subscription-page__container {
-		max-width: 72rem;
+		max-width: 40rem;
 		margin: 0 auto;
 		padding-bottom: 3rem;
 		width: 100%;
@@ -233,12 +233,6 @@
 		gap: 1rem;
 	}
 
-	@media (min-width: 768px) {
-		.subscription-page__usage-grid {
-			grid-template-columns: 1fr 1fr;
-		}
-	}
-
 	.subscription-page__toggle {
 		display: flex;
 		justify-content: center;
@@ -249,30 +243,5 @@
 		display: grid;
 		grid-template-columns: 1fr;
 		gap: 1.5rem;
-	}
-
-	@media (min-width: 480px) {
-		.subscription-page__cards-grid {
-			grid-template-columns: repeat(2, 1fr);
-		}
-	}
-
-	@media (min-width: 768px) {
-		.subscription-page__cards-grid {
-			grid-template-columns: repeat(2, 1fr);
-			gap: 1.5rem;
-		}
-	}
-
-	@media (min-width: 1024px) {
-		.subscription-page__cards-grid {
-			grid-template-columns: repeat(3, 1fr);
-		}
-	}
-
-	@media (min-width: 1280px) {
-		.subscription-page__cards-grid {
-			grid-template-columns: repeat(4, 1fr);
-		}
 	}
 </style>
