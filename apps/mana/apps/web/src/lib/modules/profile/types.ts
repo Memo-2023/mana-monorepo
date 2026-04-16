@@ -33,9 +33,16 @@ export interface UserContextNutrition {
 	preferences?: string; // freeform
 }
 
+export interface UserContextLeisure {
+	media?: string[]; // ["Podcasts", "Bücher", "Serien"]
+	sports?: string[]; // ["Laufen", "Yoga"]
+	pets?: string; // "Hund, Katze"
+}
+
 export interface UserContextSocial {
 	communication?: string; // "Direkt", "Diplomatisch"
 	workStyle?: string; // "Solo", "Team", "Hybrid"
+	livingSetup?: string; // "Allein", "Mit Partner/in", "WG", "Familie"
 }
 
 export interface InterviewProgress {
@@ -53,6 +60,7 @@ export interface LocalUserContext extends BaseRecord {
 	interests: string[];
 	routine: UserContextRoutine;
 	nutrition: UserContextNutrition;
+	leisure: UserContextLeisure;
 	goals: string[];
 	social: UserContextSocial;
 
@@ -69,6 +77,7 @@ export interface UserContext {
 	interests: string[];
 	routine: UserContextRoutine;
 	nutrition: UserContextNutrition;
+	leisure: UserContextLeisure;
 	goals: string[];
 	social: UserContextSocial;
 	freeform: string;
@@ -85,6 +94,7 @@ export function toUserContext(local: LocalUserContext): UserContext {
 		interests: local.interests ?? [],
 		routine: local.routine ?? {},
 		nutrition: local.nutrition ?? {},
+		leisure: local.leisure ?? {},
 		goals: local.goals ?? [],
 		social: local.social ?? {},
 		freeform: local.freeform ?? '',
@@ -102,6 +112,7 @@ export function emptyUserContext(): LocalUserContext {
 		interests: [],
 		routine: {},
 		nutrition: {},
+		leisure: {},
 		goals: [],
 		social: {},
 		freeform: '',

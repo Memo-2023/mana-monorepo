@@ -14,6 +14,7 @@ import {
 	type UserContextAbout,
 	type UserContextRoutine,
 	type UserContextNutrition,
+	type UserContextLeisure,
 	type UserContextSocial,
 } from '../types';
 
@@ -35,8 +36,8 @@ async function readDecrypted(): Promise<LocalUserContext> {
 export const userContextStore = {
 	ensureDoc,
 
-	/** Replace a full section (about, routine, nutrition, social). */
-	async updateSection<K extends 'about' | 'routine' | 'nutrition' | 'social'>(
+	/** Replace a full section (about, routine, nutrition, leisure, social). */
+	async updateSection<K extends 'about' | 'routine' | 'nutrition' | 'leisure' | 'social'>(
 		section: K,
 		value: K extends 'about'
 			? UserContextAbout
@@ -44,7 +45,9 @@ export const userContextStore = {
 				? UserContextRoutine
 				: K extends 'nutrition'
 					? UserContextNutrition
-					: UserContextSocial
+					: K extends 'leisure'
+						? UserContextLeisure
+						: UserContextSocial
 	): Promise<void> {
 		await ensureDoc();
 		const current = await readDecrypted();
@@ -57,22 +60,42 @@ export const userContextStore = {
 		await userContextTable.update(USER_CONTEXT_SINGLETON_ID, diff);
 	},
 
-	/** Set a single field within a section. */
-	async setField(path: string, value: unknown): Promise<void> {
+	/** Set a single field within a section.
+	 *  When `merge` is true and the value is an array, new items are added
+	 *  to the existing array instead of replacing it (deduped). */
+	async setField(path: string, value: unknown, merge = false): Promise<void> {
 		await ensureDoc();
 		const current = await readDecrypted();
 		const [section, field] = path.split('.') as [keyof LocalUserContext, string];
+
+		let finalValue = value;
+		if (merge && Array.isArray(value)) {
+			// Merge arrays: get existing value, dedupe
+			let existing: unknown[];
+			if (field && typeof current[section] === 'object' && !Array.isArray(current[section])) {
+				existing = ((current[section] as Record<string, unknown>)[field] as unknown[]) ?? [];
+			} else {
+				existing = (current[section] as unknown[]) ?? [];
+			}
+			if (Array.isArray(existing)) {
+				const set = new Set([...existing, ...value]);
+				finalValue = [...set];
+			}
+		}
 
 		let diff: Partial<LocalUserContext>;
 
 		if (field && typeof current[section] === 'object' && !Array.isArray(current[section])) {
 			// Nested field: e.g. 'about.occupation'
 			const sectionObj = { ...(current[section] as Record<string, unknown>) };
-			sectionObj[field] = value;
+			sectionObj[field] = finalValue;
 			diff = { [section]: sectionObj, updatedAt: new Date().toISOString() };
 		} else {
 			// Top-level field: e.g. 'interests', 'goals'
-			diff = { [section]: value, updatedAt: new Date().toISOString() } as Partial<LocalUserContext>;
+			diff = {
+				[section]: finalValue,
+				updatedAt: new Date().toISOString(),
+			} as Partial<LocalUserContext>;
 		}
 
 		await encryptRecord('userContext', diff);

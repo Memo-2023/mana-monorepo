@@ -79,7 +79,7 @@
 		if (!currentQuestion) return;
 		saving = true;
 		try {
-			await userContextStore.setField(currentQuestion.field, inputValue);
+			await userContextStore.setField(currentQuestion.field, inputValue, currentQuestion.merge);
 			await userContextStore.markAnswered(currentQuestion.id);
 			advanceQuestion();
 		} finally {

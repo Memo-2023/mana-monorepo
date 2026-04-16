@@ -158,10 +158,11 @@
 			{/if}
 		</section>
 
-		{#if ctx?.routine && (ctx.routine.wakeUp || ctx.routine.workStart || ctx.routine.bedtime || ctx.routine.workDays?.length)}
-			<section class="section-card">
-				<h3 class="section-title">Tagesablauf</h3>
-				<div class="routine-grid">
+		<!-- Routine -->
+		<section class="section-card">
+			<h3 class="section-title">Tagesablauf</h3>
+			{#if ctx?.routine && (ctx.routine.wakeUp || ctx.routine.workStart || ctx.routine.bedtime)}
+				<div class="routine-grid" onclick={() => onStartInterview()}>
 					{#if ctx.routine.wakeUp}<div class="routine-item">
 							<span class="routine-label">Aufstehen</span><span class="routine-value"
 								>{ctx.routine.wakeUp}</span
@@ -183,35 +184,159 @@
 							>
 						</div>{/if}
 				</div>
+			{:else}
+				<button class="empty-hint" onclick={onStartInterview}
+					>Tagesablauf im Interview ausfüllen</button
+				>
+			{/if}
+		</section>
+
+		<!-- Nutrition -->
+		<section class="section-card">
+			<h3 class="section-title">Ernährung</h3>
+			{#if ctx?.nutrition && (ctx.nutrition.diet || ctx.nutrition.allergies?.length)}
+				<div>
+					{#if ctx.nutrition.diet}<p class="section-text" onclick={() => onStartInterview()}>
+							{ctx.nutrition.diet}
+						</p>{/if}
+					{#if ctx.nutrition.allergies?.length}
+						{#if editingField === 'nutrition.allergies'}
+							<div class="tags-edit">
+								<div class="tags-list">
+									{#each editValue as string[] as tag (tag)}<span class="tag warning"
+											>{tag}<button class="tag-remove" onclick={() => removeEditTag(tag)}
+												>&times;</button
+											></span
+										>{/each}
+								</div>
+								<input
+									type="text"
+									class="edit-input"
+									bind:value={tagInput}
+									placeholder="Allergie + Enter"
+									onkeydown={(e) => {
+										if (e.key === 'Enter' || e.key === ',') {
+											e.preventDefault();
+											addEditTag();
+										}
+									}}
+									onblur={addEditTag}
+								/>
+								<div class="edit-actions">
+									<button class="edit-btn" onclick={cancelEdit}>Abbrechen</button>
+									<button class="edit-btn primary" onclick={() => saveEdit('nutrition.allergies')}
+										>Speichern</button
+									>
+								</div>
+							</div>
+						{:else}
+							<div
+								class="tags-list"
+								onclick={() => startEdit('nutrition.allergies', ctx?.nutrition?.allergies ?? [])}
+							>
+								{#each ctx.nutrition.allergies as a (a)}<span class="tag warning">{a}</span>{/each}
+							</div>
+						{/if}
+					{/if}
+					{#if ctx.nutrition.preferences}<p class="section-detail">
+							{ctx.nutrition.preferences}
+						</p>{/if}
+				</div>
+			{:else}
+				<button class="empty-hint" onclick={onStartInterview}
+					>Ernährung im Interview ausfüllen</button
+				>
+			{/if}
+		</section>
+
+		<!-- Leisure -->
+		{#if ctx?.leisure && (ctx.leisure.media?.length || ctx.leisure.sports?.length || ctx.leisure.pets)}
+			<section class="section-card">
+				<h3 class="section-title">Freizeit</h3>
+				{#if ctx.leisure.sports?.length}
+					<div class="sub-section">
+						<span class="routine-label">Sport</span>
+						<div
+							class="tags-list"
+							onclick={() => startEdit('leisure.sports', ctx?.leisure?.sports ?? [])}
+						>
+							{#each ctx.leisure.sports as s (s)}<span class="tag">{s}</span>{/each}
+						</div>
+					</div>
+				{/if}
+				{#if ctx.leisure.media?.length}
+					<div class="sub-section">
+						<span class="routine-label">Medien</span>
+						<div
+							class="tags-list"
+							onclick={() => startEdit('leisure.media', ctx?.leisure?.media ?? [])}
+						>
+							{#each ctx.leisure.media as m (m)}<span class="tag">{m}</span>{/each}
+						</div>
+					</div>
+				{/if}
+				{#if ctx.leisure.pets}
+					<div class="sub-section">
+						<span class="routine-label">Haustiere</span>
+						<span
+							class="section-text"
+							onclick={() => startEdit('leisure.pets', ctx?.leisure?.pets ?? '')}
+							>{ctx.leisure.pets}</span
+						>
+					</div>
+				{/if}
 			</section>
 		{/if}
 
-		{#if ctx?.nutrition && (ctx.nutrition.diet || ctx.nutrition.allergies?.length)}
-			<section class="section-card">
-				<h3 class="section-title">Ernährung</h3>
-				{#if ctx.nutrition.diet}<p class="section-text">{ctx.nutrition.diet}</p>{/if}
-				{#if ctx.nutrition.allergies?.length}<div class="tags-list">
-						{#each ctx.nutrition.allergies as a (a)}<span class="tag warning">{a}</span>{/each}
-					</div>{/if}
-				{#if ctx.nutrition.preferences}<p class="section-detail">
-						{ctx.nutrition.preferences}
-					</p>{/if}
-			</section>
-		{/if}
-
-		{#if ctx?.goals?.length}
-			<section class="section-card">
-				<h3 class="section-title">Ziele</h3>
+		<!-- Goals -->
+		<section class="section-card">
+			<h3 class="section-title">Ziele</h3>
+			{#if editingField === 'goals'}
+				<div class="tags-edit">
+					<div class="tags-list">
+						{#each editValue as string[] as tag (tag)}<span class="tag accent"
+								>{tag}<button class="tag-remove" onclick={() => removeEditTag(tag)}>&times;</button
+								></span
+							>{/each}
+					</div>
+					<input
+						type="text"
+						class="edit-input"
+						bind:value={tagInput}
+						placeholder="Neues Ziel + Enter"
+						onkeydown={(e) => {
+							if (e.key === 'Enter' || e.key === ',') {
+								e.preventDefault();
+								addEditTag();
+							}
+						}}
+						onblur={addEditTag}
+					/>
+					<div class="edit-actions">
+						<button class="edit-btn" onclick={cancelEdit}>Abbrechen</button>
+						<button class="edit-btn primary" onclick={() => saveEdit('goals')}>Speichern</button>
+					</div>
+				</div>
+			{:else if ctx?.goals?.length}
 				<div class="tags-list" onclick={() => startEdit('goals', ctx?.goals ?? [])}>
 					{#each ctx.goals as goal (goal)}<span class="tag accent">{goal}</span>{/each}
 				</div>
-			</section>
-		{/if}
+			{:else}
+				<button
+					class="empty-hint"
+					onclick={() => {
+						editValue = [];
+						editingField = 'goals';
+					}}>Ziele hinzufügen</button
+				>
+			{/if}
+		</section>
 
-		{#if ctx?.social && (ctx.social.workStyle || ctx.social.communication)}
-			<section class="section-card">
-				<h3 class="section-title">Arbeitsstil</h3>
-				<div class="routine-grid">
+		<!-- Social / Work style -->
+		<section class="section-card">
+			<h3 class="section-title">Arbeitsstil</h3>
+			{#if ctx?.social && (ctx.social.workStyle || ctx.social.communication || ctx.social.livingSetup)}
+				<div class="routine-grid" onclick={() => onStartInterview()}>
 					{#if ctx.social.workStyle}<div class="routine-item">
 							<span class="routine-label">Arbeitsweise</span><span class="routine-value"
 								>{ctx.social.workStyle}</span
@@ -222,18 +347,67 @@
 								>{ctx.social.communication}</span
 							>
 						</div>{/if}
+					{#if ctx.social.livingSetup}<div class="routine-item">
+							<span class="routine-label">Wohnsituation</span><span class="routine-value"
+								>{ctx.social.livingSetup}</span
+							>
+						</div>{/if}
 				</div>
-			</section>
-		{/if}
+			{:else}
+				<button class="empty-hint" onclick={onStartInterview}
+					>Arbeitsstil im Interview ausfüllen</button
+				>
+			{/if}
+		</section>
 
-		{#if ctx?.about?.languages?.length}
-			<section class="section-card">
-				<h3 class="section-title">Sprachen</h3>
-				<div class="tags-list">
+		<!-- Languages -->
+		<section class="section-card">
+			<h3 class="section-title">Sprachen</h3>
+			{#if editingField === 'about.languages'}
+				<div class="tags-edit">
+					<div class="tags-list">
+						{#each editValue as string[] as tag (tag)}<span class="tag"
+								>{tag}<button class="tag-remove" onclick={() => removeEditTag(tag)}>&times;</button
+								></span
+							>{/each}
+					</div>
+					<input
+						type="text"
+						class="edit-input"
+						bind:value={tagInput}
+						placeholder="Sprache + Enter"
+						onkeydown={(e) => {
+							if (e.key === 'Enter' || e.key === ',') {
+								e.preventDefault();
+								addEditTag();
+							}
+						}}
+						onblur={addEditTag}
+					/>
+					<div class="edit-actions">
+						<button class="edit-btn" onclick={cancelEdit}>Abbrechen</button>
+						<button class="edit-btn primary" onclick={() => saveEdit('about.languages')}
+							>Speichern</button
+						>
+					</div>
+				</div>
+			{:else if ctx?.about?.languages?.length}
+				<div
+					class="tags-list"
+					onclick={() => startEdit('about.languages', ctx?.about?.languages ?? [])}
+				>
 					{#each ctx.about.languages as lang (lang)}<span class="tag">{lang}</span>{/each}
 				</div>
-			</section>
-		{/if}
+			{:else}
+				<button
+					class="empty-hint"
+					onclick={() => {
+						editValue = [];
+						editingField = 'about.languages';
+					}}>Sprachen hinzufügen</button
+				>
+			{/if}
+		</section>
 	</div>
 </div>
 
@@ -412,6 +586,16 @@
 	.routine-value {
 		font-size: 0.875rem;
 		font-weight: 500;
+	}
+	.sub-section {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+		padding: 0.25rem 0;
+	}
+	.sub-section + .sub-section {
+		border-top: 1px solid hsl(var(--color-border) / 0.5);
+		padding-top: 0.5rem;
 	}
 	.empty-hint {
 		display: block;

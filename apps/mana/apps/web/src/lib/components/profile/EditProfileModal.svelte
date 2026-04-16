@@ -13,6 +13,9 @@
 	let { show, user, onClose, onSuccess }: Props = $props();
 
 	let name = $state('');
+	let newEmail = $state('');
+	let editingEmail = $state(false);
+	let emailSent = $state(false);
 	let saving = $state(false);
 	let uploadingAvatar = $state(false);
 	let error = $state<string | null>(null);
@@ -26,6 +29,9 @@
 	$effect(() => {
 		if (show && user) {
 			name = user.name || '';
+			newEmail = '';
+			editingEmail = false;
+			emailSent = false;
 			avatarPreview = user.image || null;
 			selectedFile = null;
 			error = null;
@@ -124,6 +130,27 @@
 		} finally {
 			saving = false;
 			uploadingAvatar = false;
+		}
+	}
+
+	async function handleChangeEmail() {
+		if (!newEmail.trim()) {
+			error = 'Bitte gib eine neue E-Mail-Adresse ein';
+			return;
+		}
+		if (newEmail.trim() === user?.email) {
+			error = 'Die neue E-Mail-Adresse muss sich von der aktuellen unterscheiden';
+			return;
+		}
+		saving = true;
+		error = null;
+		try {
+			await profileService.changeEmail({ newEmail: newEmail.trim() });
+			emailSent = true;
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Fehler beim Ändern der E-Mail';
+		} finally {
+			saving = false;
 		}
 	}
 
@@ -236,17 +263,85 @@
 							<p class="mt-2 text-xs text-muted-foreground">JPG, PNG, GIF oder WebP. Max. 5MB.</p>
 						</div>
 
-						<!-- Email (readonly) -->
+						<!-- Email -->
 						<div>
 							<label for="profile-email" class="block text-sm font-medium mb-2">E-Mail</label>
-							<input
-								id="profile-email"
-								type="email"
-								value={user?.email || ''}
-								disabled
-								class="w-full px-3 py-2 border rounded-lg bg-muted text-muted-foreground cursor-not-allowed"
-							/>
-							<p class="mt-1 text-xs text-muted-foreground">E-Mail kann nicht geändert werden</p>
+							{#if editingEmail}
+								{#if emailSent}
+									<div
+										class="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg"
+									>
+										<p class="text-sm text-green-700 dark:text-green-300">
+											Bestätigungs-E-Mail an <strong>{newEmail}</strong> gesendet. Bitte klicke den Link
+											in der E-Mail, um die Änderung abzuschließen.
+										</p>
+									</div>
+									<button
+										type="button"
+										onclick={() => {
+											editingEmail = false;
+											emailSent = false;
+										}}
+										class="mt-2 text-sm text-primary hover:underline"
+									>
+										Zurück
+									</button>
+								{:else}
+									<div class="flex gap-2">
+										<input
+											id="profile-email"
+											type="email"
+											bind:value={newEmail}
+											disabled={saving}
+											placeholder="Neue E-Mail-Adresse"
+											class="flex-1 px-3 py-2 border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50"
+										/>
+										<button
+											type="button"
+											onclick={handleChangeEmail}
+											disabled={saving || !newEmail.trim()}
+											class="px-3 py-2 text-sm bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors whitespace-nowrap"
+										>
+											{saving ? 'Senden...' : 'Bestätigen'}
+										</button>
+									</div>
+									<button
+										type="button"
+										onclick={() => {
+											editingEmail = false;
+											error = null;
+										}}
+										class="mt-1 text-xs text-muted-foreground hover:text-foreground"
+									>
+										Abbrechen
+									</button>
+								{/if}
+							{:else}
+								<div class="flex gap-2">
+									<input
+										id="profile-email"
+										type="email"
+										value={user?.email || ''}
+										disabled
+										class="flex-1 px-3 py-2 border rounded-lg bg-muted text-muted-foreground cursor-not-allowed"
+									/>
+									<button
+										type="button"
+										onclick={() => {
+											editingEmail = true;
+											newEmail = '';
+											error = null;
+										}}
+										disabled={saving || uploadingAvatar}
+										class="px-3 py-2 text-sm border rounded-lg hover:bg-muted transition-colors disabled:opacity-50 whitespace-nowrap"
+									>
+										Ändern
+									</button>
+								</div>
+								<p class="mt-1 text-xs text-muted-foreground">
+									Eine Bestätigungs-E-Mail wird an die neue Adresse gesendet
+								</p>
+							{/if}
 						</div>
 
 						<!-- Name -->

@@ -27,6 +27,8 @@ export interface ContextQuestion {
 	field: string;
 	/** Sort priority within category (lower = asked first). */
 	priority: number;
+	/** If true, array values are merged with existing values instead of replacing. */
+	merge?: boolean;
 }
 
 export interface CategoryMeta {
@@ -236,7 +238,7 @@ export const QUESTIONS: ContextQuestion[] = [
 		question: 'Welche Medien konsumierst du gerne?',
 		hint: 'z.B. Podcasts, Bücher, Serien, YouTube',
 		inputType: 'tags',
-		field: 'about.bio',
+		field: 'leisure.media',
 		priority: 2,
 	},
 	{
@@ -245,7 +247,7 @@ export const QUESTIONS: ContextQuestion[] = [
 		question: 'Treibst du Sport? Wenn ja, welchen?',
 		hint: 'z.B. Laufen, Yoga, Krafttraining, Fußball',
 		inputType: 'tags',
-		field: 'interests',
+		field: 'leisure.sports',
 		priority: 3,
 	},
 
@@ -275,6 +277,7 @@ export const QUESTIONS: ContextQuestion[] = [
 		hint: 'z.B. eine Sprache, ein Instrument, Programmieren',
 		inputType: 'tags',
 		field: 'goals',
+		merge: true,
 		priority: 3,
 	},
 
@@ -285,7 +288,7 @@ export const QUESTIONS: ContextQuestion[] = [
 		question: 'Wie lebst du?',
 		inputType: 'choice',
 		choices: ['Allein', 'Mit Partner/in', 'WG', 'Familie', 'Anderes'],
-		field: 'about.bio',
+		field: 'social.livingSetup',
 		priority: 1,
 	},
 	{
@@ -294,7 +297,7 @@ export const QUESTIONS: ContextQuestion[] = [
 		question: 'Hast du Haustiere?',
 		hint: 'z.B. Hund, Katze, Fische',
 		inputType: 'text',
-		field: 'about.bio',
+		field: 'leisure.pets',
 		priority: 2,
 	},
 ];

@@ -60,8 +60,9 @@ interface UserContextLike {
 	interests?: string[];
 	routine?: { wakeUp?: string; workStart?: string; workEnd?: string; bedtime?: string };
 	nutrition?: { diet?: string; allergies?: string[]; preferences?: string };
+	leisure?: { media?: string[]; sports?: string[]; pets?: string };
 	goals?: string[];
-	social?: { communication?: string; workStyle?: string };
+	social?: { communication?: string; workStyle?: string; livingSetup?: string };
 	freeform?: string;
 }
 
@@ -98,8 +99,14 @@ function buildUserContextText(ctx: UserContextLike): string {
 		if (ctx.nutrition.allergies?.length)
 			lines.push(`Allergien: ${ctx.nutrition.allergies.join(', ')}`);
 	}
+	if (ctx.leisure) {
+		if (ctx.leisure.media?.length) lines.push(`Medien: ${ctx.leisure.media.join(', ')}`);
+		if (ctx.leisure.sports?.length) lines.push(`Sport: ${ctx.leisure.sports.join(', ')}`);
+		if (ctx.leisure.pets) lines.push(`Haustiere: ${ctx.leisure.pets}`);
+	}
 	if (ctx.goals?.length) lines.push(`\nZiele: ${ctx.goals.join(', ')}`);
 	if (ctx.social?.workStyle) lines.push(`Arbeitsweise: ${ctx.social.workStyle}`);
+	if (ctx.social?.livingSetup) lines.push(`Wohnsituation: ${ctx.social.livingSetup}`);
 	if (ctx.freeform?.trim()) lines.push(`\n---\n${ctx.freeform.trim()}`);
 	return lines.join('\n');
 }

@@ -475,7 +475,16 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	// except the fixed id and interview progress is user-typed content.
 	userContext: {
 		enabled: true,
-		fields: ['about', 'interests', 'routine', 'nutrition', 'goals', 'social', 'freeform'],
+		fields: [
+			'about',
+			'interests',
+			'routine',
+			'nutrition',
+			'leisure',
+			'goals',
+			'social',
+			'freeform',
+		],
 	},
 
 	// Per-agent kontext documents — same schema as kontextDoc but keyed
