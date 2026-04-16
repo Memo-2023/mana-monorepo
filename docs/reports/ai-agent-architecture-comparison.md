@@ -344,7 +344,7 @@ Exportierbar nach Grafana Tempo oder ähnlichem.
 | # | Maßnahme | Aufwand | Impact |
 |---|----------|---------|--------|
 | 4 | **Agent-to-Agent Delegation** — Internes Protokoll, ein Agent kann einen anderen beauftragen | Groß | Hoch — Multi-Agent |
-| 5 | **MCP-Server-Export** — Mana-Tools als MCP-Server exponieren | Mittel | Hoch — Ökosystem |
+| ~~5~~ | ~~**MCP-Server-Export**~~ — ERLEDIGT `db4dd437b` + `e969324cc` (29 Tools, 27 mit echten DB-Ops) | ~~Mittel~~ | ~~Hoch~~ |
 | 6 | **Guardrail-Layer** — Pre/Post-Execution Checks | Mittel | Mittel — Sicherheit |
 | 7 | **OpenTelemetry Tracing** — End-to-End Mission Spans | Mittel | Mittel — Debugging |
 

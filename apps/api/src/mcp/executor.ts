@@ -255,17 +255,430 @@ register('create_contact', async (args, userId) => {
 	return ok(`Kontakt "${args.firstName}" erstellt (ID: ${contactId}).`, { id: contactId });
 });
 
-// ── Habits tools ───────────────────────────────────────────────
+register('complete_tasks_by_title', async (args, userId) => {
+	const records = await readLatestRecords(userId, 'todo', 'tasks');
+	const needle = (args.titleMatch as string).toLowerCase().trim();
+	const matches = records.filter(
+		(r) => !r.isCompleted && !r.deletedAt && (r.title as string).toLowerCase().includes(needle)
+	);
+	if (matches.length === 0) return err(`Kein offener Task mit "${args.titleMatch}" gefunden.`);
+
+	const now = nowIso();
+	for (const m of matches) {
+		await writeRecord(
+			userId,
+			'todo',
+			'tasks',
+			m.id as string,
+			'update',
+			{
+				isCompleted: true,
+				completedAt: now,
+				updatedAt: now,
+			},
+			fieldTs(['isCompleted', 'completedAt', 'updatedAt'])
+		);
+	}
+	const titles = matches.map((m) => m.title as string);
+	return ok(`${matches.length} Task(s) erledigt: ${titles.join(', ')}`, {
+		completed: matches.length,
+		titles,
+	});
+});
+
+// ── Calendar tools (write) ────────────────────────────────────
+
+register('create_event', async (args, userId) => {
+	const eventId = crypto.randomUUID();
+	const blockId = crypto.randomUUID();
+	const now = nowIso();
+
+	// Create the timeBlock (unified scheduling model)
+	const blockData = {
+		id: blockId,
+		userId,
+		kind: 'absolute',
+		type: 'event',
+		sourceModule: 'calendar',
+		sourceId: eventId,
+		startDate: args.startTime as string,
+		endDate: args.endTime as string,
+		allDay: (args.isAllDay as boolean) ?? false,
+		title: args.title as string,
+		createdAt: now,
+		updatedAt: now,
+	};
+	await writeRecord(
+		userId,
+		'timeblocks',
+		'timeBlocks',
+		blockId,
+		'insert',
+		blockData,
+		fieldTs(Object.keys(blockData))
+	);
+
+	// Create the event record
+	const eventData = {
+		id: eventId,
+		userId,
+		calendarId: 'default',
+		timeBlockId: blockId,
+		location: (args.location as string) ?? '',
+		description: (args.description as string) ?? '',
+		createdAt: now,
+		updatedAt: now,
+	};
+	await writeRecord(
+		userId,
+		'calendar',
+		'events',
+		eventId,
+		'insert',
+		eventData,
+		fieldTs(Object.keys(eventData))
+	);
+
+	return ok(`Termin "${args.title}" erstellt.`, { id: eventId });
+});
+
+// ── Notes tools (write) ───────────────────────────────────────
+
+register('update_note', async (args, userId) => {
+	const noteId = args.noteId as string;
+	const now = nowIso();
+	const data: Record<string, unknown> = { updatedAt: now };
+	const fields = ['updatedAt'];
+	if (args.title !== undefined) {
+		data.title = args.title;
+		fields.push('title');
+	}
+	if (args.content !== undefined) {
+		data.content = args.content;
+		fields.push('content');
+	}
+
+	await writeRecord(userId, 'notes', 'notes', noteId, 'update', data, fieldTs(fields));
+	return ok(`Notiz ${noteId} aktualisiert.`);
+});
+
+register('append_to_note', async (args, userId) => {
+	// Read current content, append, then write full update
+	const records = await readLatestRecords(userId, 'notes', 'notes');
+	const note = records.find((r) => r.id === args.noteId);
+	if (!note) return err(`Notiz ${args.noteId} nicht gefunden.`);
+
+	const now = nowIso();
+	const newContent = ((note.content as string) ?? '') + '\n' + (args.content as string);
+	await writeRecord(
+		userId,
+		'notes',
+		'notes',
+		args.noteId as string,
+		'update',
+		{
+			content: newContent,
+			updatedAt: now,
+		},
+		fieldTs(['content', 'updatedAt'])
+	);
+	return ok(`Text an Notiz angehängt.`);
+});
+
+register('add_tag_to_note', async (args, userId) => {
+	const tagId = crypto.randomUUID();
+	const now = nowIso();
+	const data = {
+		id: tagId,
+		noteId: args.noteId as string,
+		tagId: (args.tag as string).replace(/\s+/g, '_'),
+		createdAt: now,
+	};
+	await writeRecord(userId, 'notes', 'noteTags', tagId, 'insert', data, fieldTs(Object.keys(data)));
+	return ok(`Tag "#${args.tag}" zur Notiz hinzugefügt.`);
+});
+
+// ── Places tools ──────────────────────────────────────────────
+
+register('create_place', async (args, userId) => {
+	const placeId = crypto.randomUUID();
+	const now = nowIso();
+	const data = {
+		id: placeId,
+		userId,
+		name: args.name as string,
+		latitude: args.latitude as number,
+		longitude: args.longitude as number,
+		category: (args.category as string) ?? 'other',
+		address: (args.address as string) ?? '',
+		visitCount: 0,
+		createdAt: now,
+		updatedAt: now,
+	};
+	await writeRecord(
+		userId,
+		'places',
+		'places',
+		placeId,
+		'insert',
+		data,
+		fieldTs(Object.keys(data))
+	);
+	return ok(`Ort "${args.name}" erstellt.`, { id: placeId });
+});
+
+register('visit_place', async (args, userId) => {
+	const logId = crypto.randomUUID();
+	const now = nowIso();
+	await writeRecord(
+		userId,
+		'places',
+		'locationLogs',
+		logId,
+		'insert',
+		{
+			id: logId,
+			placeId: args.placeId as string,
+			timestamp: now,
+			createdAt: now,
+		},
+		fieldTs(['id', 'placeId', 'timestamp', 'createdAt'])
+	);
+	return ok(`Besuch an Ort ${args.placeId} registriert.`);
+});
+
+register('get_places', async (_args, userId) => {
+	const records = await readLatestRecords(userId, 'places', 'places');
+	const places = records
+		.filter((r) => !r.isArchived)
+		.map((r) => ({ id: r.id, name: r.name, category: r.category, visitCount: r.visitCount }));
+	if (places.length === 0) return ok('Keine Orte gespeichert.');
+	return ok(`${places.length} Orte`, places);
+});
+
+// ── Drink tools ───────────────────────────────────────────────
+
+register('log_drink', async (args, userId) => {
+	const entryId = crypto.randomUUID();
+	const now = nowIso();
+	const today = now.split('T')[0];
+	const data = {
+		id: entryId,
+		userId,
+		drinkType: args.drinkType as string,
+		quantityMl: args.quantityMl as number,
+		name: (args.name as string) ?? (args.drinkType as string),
+		date: today,
+		createdAt: now,
+		updatedAt: now,
+	};
+	await writeRecord(
+		userId,
+		'drink',
+		'drinkEntries',
+		entryId,
+		'insert',
+		data,
+		fieldTs(Object.keys(data))
+	);
+	return ok(`${args.quantityMl}ml ${args.name ?? args.drinkType} geloggt.`);
+});
+
+register('get_drink_progress', async (_args, userId) => {
+	const records = await readLatestRecords(userId, 'drink', 'drinkEntries');
+	const today = new Date().toISOString().split('T')[0];
+	const todayEntries = records.filter((r) => r.date === today);
+	let waterMl = 0,
+		totalMl = 0,
+		coffeeCount = 0;
+	for (const d of todayEntries) {
+		const ml = (d.quantityMl as number) ?? 0;
+		totalMl += ml;
+		if (d.drinkType === 'water') waterMl += ml;
+		if (d.drinkType === 'coffee') coffeeCount++;
+	}
+	return ok(`Heute: ${totalMl}ml gesamt, ${waterMl}ml Wasser, ${coffeeCount} Kaffee`, {
+		water: waterMl,
+		total: totalMl,
+		coffeeCount,
+		entries: todayEntries.length,
+	});
+});
+
+register('undo_drink', async (_args, userId) => {
+	const records = await readLatestRecords(userId, 'drink', 'drinkEntries');
+	const today = new Date().toISOString().split('T')[0];
+	const todayEntries = records
+		.filter((r) => r.date === today)
+		.sort((a, b) => ((b.createdAt as string) ?? '').localeCompare((a.createdAt as string) ?? ''));
+	if (todayEntries.length === 0) return err('Kein Drink-Eintrag zum Rückgängigmachen.');
+	const last = todayEntries[0];
+	const now = nowIso();
+	await writeRecord(
+		userId,
+		'drink',
+		'drinkEntries',
+		last.id as string,
+		'update',
+		{
+			deletedAt: now,
+			updatedAt: now,
+		},
+		fieldTs(['deletedAt', 'updatedAt'])
+	);
+	return ok(`Letzter Drink-Eintrag (${last.name}) rückgängig gemacht.`);
+});
+
+// ── Food tools ────────────────────────────────────────────────
+
+register('log_meal', async (args, userId) => {
+	const mealId = crypto.randomUUID();
+	const now = nowIso();
+	const today = now.split('T')[0];
+	const data = {
+		id: mealId,
+		userId,
+		mealType: args.mealType as string,
+		description: args.description as string,
+		calories: (args.calories as number) ?? null,
+		protein: (args.protein as number) ?? null,
+		date: today,
+		createdAt: now,
+		updatedAt: now,
+	};
+	await writeRecord(userId, 'food', 'meals', mealId, 'insert', data, fieldTs(Object.keys(data)));
+	return ok(`${args.mealType}: "${args.description}" geloggt.`, { id: mealId });
+});
+
+register('nutrition_summary', async (_args, userId) => {
+	const records = await readLatestRecords(userId, 'food', 'meals');
+	const today = new Date().toISOString().split('T')[0];
+	const todayMeals = records.filter((r) => r.date === today);
+	let totalCal = 0,
+		totalProtein = 0;
+	for (const m of todayMeals) {
+		totalCal += (m.calories as number) ?? 0;
+		totalProtein += (m.protein as number) ?? 0;
+	}
+	return ok(`Heute: ${todayMeals.length} Mahlzeiten, ${totalCal} kcal, ${totalProtein}g Protein`, {
+		meals: todayMeals.length,
+		calories: totalCal,
+		protein: totalProtein,
+	});
+});
+
+// ── Journal tools ─────────────────────────────────────────────
+
+register('create_journal_entry', async (args, userId) => {
+	const entryId = crypto.randomUUID();
+	const now = nowIso();
+	const today = now.split('T')[0];
+	const data = {
+		id: entryId,
+		userId,
+		content: args.content as string,
+		title: (args.title as string) ?? '',
+		mood: (args.mood as string) ?? null,
+		entryDate: today,
+		createdAt: now,
+		updatedAt: now,
+	};
+	await writeRecord(
+		userId,
+		'journal',
+		'journalEntries',
+		entryId,
+		'insert',
+		data,
+		fieldTs(Object.keys(data))
+	);
+	return ok(`Journal-Eintrag erstellt.`, { id: entryId });
+});
+
+// ── Habits tools ──────────────────────────────────────────────
 
 register('get_habits', async (_args, userId) => {
 	const records = await readLatestRecords(userId, 'habits', 'habits');
-	const habits = records.map((r) => ({
-		id: r.id as string,
-		title: r.title as string,
-		icon: r.icon as string,
-	}));
+	const habits = records
+		.filter((r) => !r.isArchived)
+		.map((r) => ({ id: r.id, title: r.title, icon: r.icon, color: r.color }));
 	if (habits.length === 0) return ok('Keine Habits.');
 	return ok(`${habits.length} Habits`, habits);
+});
+
+register('create_habit', async (args, userId) => {
+	const habitId = crypto.randomUUID();
+	const now = nowIso();
+	const data = {
+		id: habitId,
+		userId,
+		title: args.title as string,
+		icon: args.icon as string,
+		color: args.color as string,
+		order: 0,
+		createdAt: now,
+		updatedAt: now,
+	};
+	await writeRecord(
+		userId,
+		'habits',
+		'habits',
+		habitId,
+		'insert',
+		data,
+		fieldTs(Object.keys(data))
+	);
+	return ok(`Habit "${args.title}" erstellt.`, { id: habitId });
+});
+
+register('log_habit', async (args, userId) => {
+	const logId = crypto.randomUUID();
+	const blockId = crypto.randomUUID();
+	const now = nowIso();
+	const data = {
+		id: logId,
+		habitId: args.habitId as string,
+		timeBlockId: blockId,
+		note: (args.note as string) ?? '',
+		createdAt: now,
+	};
+	await writeRecord(
+		userId,
+		'habits',
+		'habitLogs',
+		logId,
+		'insert',
+		data,
+		fieldTs(Object.keys(data))
+	);
+	return ok(`Habit geloggt.`);
+});
+
+// ── News tools ────────────────────────────────────────────────
+
+register('save_news_article', async (args, userId) => {
+	const articleId = crypto.randomUUID();
+	const now = nowIso();
+	const data = {
+		id: articleId,
+		userId,
+		url: args.url as string,
+		title: (args.title as string) ?? '',
+		summary: (args.summary as string) ?? '',
+		savedAt: now,
+		createdAt: now,
+		updatedAt: now,
+	};
+	await writeRecord(
+		userId,
+		'news',
+		'savedArticles',
+		articleId,
+		'insert',
+		data,
+		fieldTs(Object.keys(data))
+	);
+	return ok(`Artikel gespeichert: "${args.title || args.url}"`, { id: articleId });
 });
 
 // ── Entry point ────────────────────────────────────────────────
