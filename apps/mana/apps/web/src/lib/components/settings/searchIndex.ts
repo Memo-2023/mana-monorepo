@@ -35,9 +35,9 @@ export const categories: Category[] = [
 	{
 		id: 'security',
 		label: 'Sicherheit',
-		description: 'Passkeys, 2FA & Sitzungen',
+		description: 'Passkeys, 2FA, Verschlüsselung & Sitzungen',
 		icon: ShieldCheck,
-		anchors: ['passkeys', 'sessions', 'two-factor', 'security-log'],
+		anchors: ['passkeys', 'sessions', 'two-factor', 'vault', 'security-log'],
 	},
 	{
 		id: 'credits',
@@ -129,6 +129,12 @@ export const searchIndex: SearchEntry[] = [
 		keywords: ['totp', '2fa', 'mfa'],
 		category: 'security',
 		anchor: 'two-factor',
+	},
+	{
+		label: 'Verschlüsselung',
+		keywords: ['vault', 'encryption', 'aes', 'schlüssel', 'zero-knowledge'],
+		category: 'security',
+		anchor: 'vault',
 	},
 	{
 		label: 'Sicherheits-Log',

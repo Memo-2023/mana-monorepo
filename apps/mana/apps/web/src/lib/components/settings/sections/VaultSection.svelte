@@ -291,13 +291,9 @@
 	const badge = $derived(statusBadge(vaultState));
 </script>
 
-<svelte:head>
-	<title>Sicherheit · Einstellungen · Mana</title>
-</svelte:head>
-
 <div class="security-page">
 	<header>
-		<h1>Sicherheit</h1>
+		<h2>Verschlüsselung</h2>
 		<p class="subtitle">
 			Verschlüsselung deiner Inhalte auf diesem Gerät. Sensitive Felder werden mit AES-GCM-256
 			verschlüsselt, bevor sie in die lokale Datenbank geschrieben werden.

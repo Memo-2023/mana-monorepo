@@ -46,7 +46,7 @@ export function useSyncStatusItems() {
 				id: 'sync-inactive',
 				label: 'Sync aktivieren',
 				icon: 'cloud',
-				onClick: () => goto('/settings/sync'),
+				onClick: () => goto('/?app=settings#cloud-sync'),
 			});
 			result.push({
 				id: 'sync-info',
@@ -61,7 +61,7 @@ export function useSyncStatusItems() {
 			id: 'sync-settings',
 			label: 'Sync-Einstellungen',
 			icon: 'settings',
-			onClick: () => goto('/settings/sync'),
+			onClick: () => goto('/?app=settings#cloud-sync'),
 		});
 
 		return result;

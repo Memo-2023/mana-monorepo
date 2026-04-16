@@ -111,7 +111,7 @@
 				Notizen, Chats, Tagebuch und Kontaktdetails liegen nur als verschlüsselter Blob auf diesem
 				Gerät. Ohne deinen Schlüssel kann sie niemand lesen — nicht mal Mana.
 			</p>
-			<a href="/settings/security" class="learn-more">Mehr erfahren →</a>
+			<a href="/?app=settings#vault" class="learn-more">Mehr erfahren →</a>
 		</div>
 		<button type="button" class="dismiss" onclick={dismiss} aria-label="Hinweis ausblenden">
 			<X size={18} />

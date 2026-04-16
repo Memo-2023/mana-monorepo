@@ -5,6 +5,7 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 	import SettingsPanel from '../SettingsPanel.svelte';
 	import SettingsSectionHeader from '../SettingsSectionHeader.svelte';
+	import VaultSection from './VaultSection.svelte';
 
 	let passkeys = $state<any[]>([]);
 	let sessions = $state<any[]>([]);
@@ -34,7 +35,7 @@
 	<SettingsSectionHeader
 		icon={ShieldCheck}
 		title="Sicherheit"
-		description="Passkeys, 2FA & Sitzungen"
+		description="Passkeys, 2FA, Verschlüsselung & Sitzungen"
 		tone="blue"
 	/>
 </SettingsPanel>
@@ -75,6 +76,10 @@
 		onGenerateBackupCodes={(password) => authStore.generateBackupCodes(password)}
 		primaryColor="hsl(var(--color-primary))"
 	/>
+</SettingsPanel>
+
+<SettingsPanel id="vault">
+	<VaultSection />
 </SettingsPanel>
 
 <SettingsPanel id="security-log">

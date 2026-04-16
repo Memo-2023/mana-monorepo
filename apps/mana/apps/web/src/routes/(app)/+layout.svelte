@@ -821,7 +821,10 @@
 								>
 									Credits aufladen
 								</a>
-								<a href="/settings/sync" class="font-medium underline hover:no-underline">
+								<a
+									href="/?app=settings#cloud-sync"
+									class="font-medium underline hover:no-underline"
+								>
 									Sync-Einstellungen
 								</a>
 							</div>

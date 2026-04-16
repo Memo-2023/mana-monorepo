@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Card, PageHeader } from '@mana/shared-ui';
+	import { Card } from '@mana/shared-ui';
 	import { syncBilling } from '$lib/stores/sync-billing.svelte';
 	import { creditsService, type CreditBalance } from '$lib/api/credits';
 	import type { BillingInterval } from '$lib/api/sync';
@@ -106,8 +106,6 @@
 </script>
 
 <div>
-	<PageHeader title="Cloud Sync" backHref="/?app=settings" sticky size="lg" />
-
 	{#if syncBilling.loading}
 		<div class="flex items-center justify-center py-12">
 			<div
@@ -266,11 +264,6 @@
 					</div>
 				</div>
 			</Card>
-		</div>
-
-		<!-- Back link -->
-		<div class="mt-6">
-			<a href="/?app=settings" class="text-sm text-primary hover:underline"> ← Zurück </a>
 		</div>
 	{/if}
 </div>

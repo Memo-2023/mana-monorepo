@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { Card, PageHeader } from '@mana/shared-ui';
+	import { Card } from '@mana/shared-ui';
 	import {
 		QrCode,
 		DownloadSimple,
@@ -13,7 +13,6 @@
 		CheckCircle,
 		WarningCircle,
 	} from '@mana/shared-icons';
-	import Breadcrumbs from '$lib/components/Breadcrumbs.svelte';
 	import StatCard from '$lib/components/admin/StatCard.svelte';
 	import ProjectDataCard from '$lib/components/admin/ProjectDataCard.svelte';
 	import DeleteConfirmationModal from '$lib/components/my-data/DeleteConfirmationModal.svelte';
@@ -177,20 +176,13 @@
 	});
 </script>
 
-<svelte:head>
-	<title>Meine Daten - Einstellungen</title>
-</svelte:head>
-
 <div class="space-y-6">
 	<!-- Header -->
 	<div class="flex items-center justify-between gap-4">
 		<div>
-			<Breadcrumbs
-				items={[{ label: 'Einstellungen', href: '/?app=settings' }, { label: 'Meine Daten' }]}
-			/>
-			<h1 class="text-2xl font-bold">Meine Daten</h1>
-			<p class="text-muted-foreground">
-				Ubersicht uber alle deine gespeicherten Daten (GDPR/DSGVO)
+			<h2 class="text-lg font-bold">Meine Daten</h2>
+			<p class="text-sm text-muted-foreground">
+				Übersicht über alle deine gespeicherten Daten (GDPR/DSGVO)
 			</p>
 		</div>
 		{#if userData}
