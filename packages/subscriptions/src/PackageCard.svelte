@@ -1,236 +1,127 @@
 <script lang="ts">
 	import type { ManaPackage } from './plans';
-	import SubscriptionButton from './SubscriptionButton.svelte';
 	import ManaIcon from './ManaIcon.svelte';
 
 	interface Props {
 		package: ManaPackage;
 		onSelect: (packageId: string) => void;
-		// i18n labels
 		popularLabel?: string;
-		manaLabel?: string;
-		oneTimeLabel?: string;
 		buyLabel?: string;
 	}
 
-	let {
-		package: pkg,
-		onSelect,
-		popularLabel = 'Popular',
-		manaLabel = 'Mana',
-		oneTimeLabel = 'Einmalig',
-		buyLabel = 'Kaufen',
-	}: Props = $props();
+	let { package: pkg, onSelect, popularLabel = 'Beliebt', buyLabel = 'Kaufen' }: Props = $props();
 
-	function formatPrice(pkg: ManaPackage) {
-		return pkg.priceString || `${pkg.price.toFixed(2).replace('.', ',')}€`;
+	function formatPrice(p: ManaPackage) {
+		return p.priceString || `${p.price.toFixed(2).replace('.', ',')}€`;
 	}
 
-	// Package-specific colors and background sizes
-	function getPackageStyles() {
+	function getColor() {
 		const id = pkg.id.toLowerCase();
-		if (id.includes('small')) return { bg: '#E3F2FD', icon: '#2196F3', bgSize: '45%' };
-		if (id.includes('medium')) return { bg: '#BBDEFB', icon: '#1976D2', bgSize: '60%' };
-		if (id.includes('large')) return { bg: '#90CAF9', icon: '#1565C0', bgSize: '75%' };
-		if (id.includes('giant')) return { bg: '#64B5F6', icon: '#0D47A1', bgSize: '90%' };
-		return { bg: '#E1F5FE', icon: '#0288D1', bgSize: '50%' };
+		if (id.includes('small')) return '#2196F3';
+		if (id.includes('medium')) return '#1976D2';
+		if (id.includes('large')) return '#1565C0';
+		if (id.includes('giant')) return '#0D47A1';
+		return '#0288D1';
 	}
-
-	const packageStyles = $derived(getPackageStyles());
-
-	// Hover state
-	let isHovered = $state(false);
 </script>
 
-<div
-	class="package-card"
-	class:package-card--popular={pkg.popular}
-	onmouseenter={() => (isHovered = true)}
-	onmouseleave={() => (isHovered = false)}
-	role="article"
->
-	{#if pkg.popular}
-		<div class="package-card__badge">
-			{popularLabel}
-		</div>
-	{/if}
-
-	<!-- Package Name -->
-	<h3 class="package-card__title">
-		{pkg.name}
-	</h3>
-
-	<!-- Three column layout -->
-	<div class="package-card__grid">
-		<!-- Mana Icon with background -->
-		<div class="package-card__cell">
-			<div
-				class="package-card__icon-wrapper"
-				style="width: {packageStyles.bgSize}; height: {packageStyles.bgSize}; background-color: {packageStyles.bg};"
-			>
-				<ManaIcon size={32} color={packageStyles.icon} />
-			</div>
-		</div>
-
-		<!-- Mana Amount -->
-		<div class="package-card__cell">
-			<p class="package-card__value">
-				{pkg.manaAmount}
-			</p>
-			<p class="package-card__label">{manaLabel}</p>
-		</div>
-
-		<!-- Price -->
-		<div class="package-card__cell">
-			<p class="package-card__price">
-				{formatPrice(pkg)}
-			</p>
-			<p class="package-card__sublabel">{oneTimeLabel}</p>
-		</div>
+<button class="row" class:popular={pkg.popular} onclick={() => onSelect(pkg.id)}>
+	<div class="icon">
+		<ManaIcon size={20} color={getColor()} />
 	</div>
 
-	<SubscriptionButton
-		label={buyLabel}
-		onclick={() => onSelect(pkg.id)}
-		iconName="arrow-forward-outline"
-		leftIconName="cart-outline"
-		variant={pkg.popular ? 'accent' : 'primary'}
-	/>
-</div>
+	<div class="info">
+		<span class="name">
+			{pkg.name}
+			{#if pkg.popular}
+				<span class="badge">{popularLabel}</span>
+			{/if}
+		</span>
+		<span class="mana">{pkg.manaAmount.toLocaleString('de-DE')} Mana</span>
+	</div>
+
+	<span class="price">{formatPrice(pkg)}</span>
+	<span class="action">{buyLabel}</span>
+</button>
 
 <style>
-	.package-card {
-		position: relative;
-		padding: 1rem;
-		border-radius: 0.75rem;
-		transition: all 0.2s ease;
-		background: rgba(255, 255, 255, 0.85);
-		backdrop-filter: blur(12px);
-		-webkit-backdrop-filter: blur(12px);
-		border: 1px solid rgba(0, 0, 0, 0.1);
-		box-shadow:
-			0 4px 6px -1px rgba(0, 0, 0, 0.1),
-			0 2px 4px -1px rgba(0, 0, 0, 0.06);
-		min-width: 0;
-		overflow: hidden;
-	}
-
-	:global(.dark) .package-card {
-		background: rgba(255, 255, 255, 0.08);
-		border: 1px solid rgba(255, 255, 255, 0.12);
-	}
-
-	.package-card:hover {
-		transform: translateY(-2px);
-		box-shadow:
-			0 10px 15px -3px rgba(0, 0, 0, 0.1),
-			0 4px 6px -2px rgba(0, 0, 0, 0.05);
-	}
-
-	:global(.dark) .package-card:hover {
-		background: rgba(255, 255, 255, 0.12);
-	}
-
-	.package-card--popular {
-		border: 2px solid hsl(var(--color-primary, 221 83% 53%));
-	}
-
-	.package-card__badge {
-		position: absolute;
-		top: 0.75rem;
-		right: 0.75rem;
-		padding: 0.25rem 0.75rem;
-		border-radius: 9999px;
-		font-size: 0.625rem;
-		font-weight: 600;
-		color: white;
-		background: hsl(var(--color-primary, 221 83% 53%));
-		z-index: 1;
-	}
-
-	.package-card__title {
-		margin: 1.5rem 0 1rem 0;
-		text-align: center;
-		font-size: 1.125rem;
-		font-weight: 600;
-		color: hsl(var(--color-foreground));
-	}
-
-	.package-card__grid {
+	.row {
 		display: flex;
-		justify-content: space-between;
-		gap: 0.375rem;
-		margin-bottom: 1.25rem;
-	}
-
-	.package-card__cell {
-		flex: 1;
-		display: flex;
-		flex-direction: column;
 		align-items: center;
-		justify-content: center;
-		padding: 0.5rem;
-		min-height: 70px;
-		min-width: 0;
+		gap: 0.75rem;
+		width: 100%;
+		padding: 0.75rem 1rem;
 		border-radius: 0.75rem;
-		background: rgba(0, 0, 0, 0.03);
+		border: 1px solid hsl(var(--color-border));
+		background: hsl(var(--color-card));
+		cursor: pointer;
+		transition: all 0.15s;
+		text-align: left;
+		color: hsl(var(--color-foreground));
+		font: inherit;
 	}
 
-	:global(.dark) .package-card__cell {
-		background: rgba(255, 255, 255, 0.05);
+	.row:hover {
+		background: hsl(var(--color-surface-hover));
+		border-color: hsl(var(--color-primary) / 0.3);
 	}
 
-	.package-card__icon-wrapper {
+	.row.popular {
+		border-color: hsl(var(--color-primary));
+	}
+
+	.icon {
+		flex-shrink: 0;
+		width: 2rem;
+		height: 2rem;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		border-radius: 0.5rem;
+		background: hsl(var(--color-muted) / 0.5);
 	}
 
-	.package-card__value {
-		margin: 0 0 0.125rem 0;
-		font-size: 1.25rem;
-		font-weight: 700;
-		color: hsl(var(--color-foreground));
-		white-space: nowrap;
+	.info {
+		flex: 1;
+		min-width: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0.125rem;
 	}
 
-	.package-card__price {
-		margin: 0;
-		font-size: 1rem;
-		font-weight: 700;
-		color: hsl(var(--color-foreground));
-		white-space: nowrap;
+	.name {
+		font-size: 0.875rem;
+		font-weight: 600;
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
 	}
 
-	.package-card__label {
-		margin: 0;
+	.mana {
+		font-size: 0.75rem;
+		color: hsl(var(--color-muted-foreground));
+	}
+
+	.badge {
 		font-size: 0.625rem;
-		color: hsl(var(--color-muted-foreground));
-		text-align: center;
+		padding: 0.0625rem 0.375rem;
+		border-radius: 9999px;
+		font-weight: 600;
+		color: white;
+		background: hsl(var(--color-primary));
 	}
 
-	.package-card__sublabel {
-		margin: 0.125rem 0 0 0;
-		font-size: 0.5rem;
-		color: hsl(var(--color-muted-foreground));
+	.price {
+		flex-shrink: 0;
+		font-size: 0.875rem;
+		font-weight: 700;
 	}
 
-	@media (min-width: 640px) {
-		.package-card__value {
-			font-size: 1.5rem;
-		}
-
-		.package-card__price {
-			font-size: 1.25rem;
-		}
-
-		.package-card__label {
-			font-size: 0.75rem;
-		}
-
-		.package-card__sublabel {
-			font-size: 0.625rem;
-		}
+	.action {
+		flex-shrink: 0;
+		font-size: 0.75rem;
+		font-weight: 600;
+		color: hsl(var(--color-primary));
+		white-space: nowrap;
 	}
 </style>

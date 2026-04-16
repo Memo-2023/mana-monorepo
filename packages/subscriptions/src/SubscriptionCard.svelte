@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { SubscriptionPlan } from './plans';
-	import SubscriptionButton from './SubscriptionButton.svelte';
 	import ManaIcon from './ManaIcon.svelte';
 
 	interface Props {
@@ -8,7 +7,6 @@
 		onSelect: (planId: string) => void;
 		isCurrentPlan?: boolean;
 		isLegacy?: boolean;
-		// i18n labels
 		currentPlanLabel?: string;
 		legacyPlanLabel?: string;
 		popularLabel?: string;
@@ -25,254 +23,187 @@
 		onSelect,
 		isCurrentPlan = false,
 		isLegacy = false,
-		currentPlanLabel = 'Current Plan',
-		legacyPlanLabel = 'Legacy Plan',
-		popularLabel = 'Popular',
-		perMonthLabel = 'pro Monat',
-		perYearLabel = 'pro Jahr',
-		monthlyEquivalentLabel = '/Monat',
+		currentPlanLabel = 'Aktuell',
+		legacyPlanLabel = 'Legacy',
+		popularLabel = 'Beliebt',
+		perMonthLabel = '/Mo',
+		perYearLabel = '/Jahr',
 		buyLabel = 'Kaufen',
 		yourPlanLabel = 'Dein Plan',
-		yourLegacyPlanLabel = 'Dein Legacy-Plan',
 	}: Props = $props();
 
-	function formatPrice(plan: SubscriptionPlan) {
-		return plan.priceString || `${plan.price.toFixed(2).replace('.', ',')}€`;
+	function formatPrice(p: SubscriptionPlan) {
+		return p.priceString || `${p.price.toFixed(2).replace('.', ',')}€`;
 	}
 
-	// Tier-specific background colors and sizes for Mana icon
-	function getTierStyles() {
+	function getTierColor() {
 		const id = plan.id.toLowerCase();
-		if (id.includes('free')) return { bg: '#F5F5F5', icon: '#9E9E9E', bgSize: '30%' };
-		if (id.includes('small')) return { bg: '#E3F2FD', icon: '#2196F3', bgSize: '45%' };
-		if (id.includes('medium')) return { bg: '#BBDEFB', icon: '#1976D2', bgSize: '60%' };
-		if (id.includes('large')) return { bg: '#90CAF9', icon: '#1565C0', bgSize: '75%' };
-		if (id.includes('giant')) return { bg: '#64B5F6', icon: '#0D47A1', bgSize: '90%' };
-		return { bg: '#E1F5FE', icon: '#0288D1', bgSize: '50%' };
+		if (id.includes('free')) return '#9E9E9E';
+		if (id.includes('small')) return '#2196F3';
+		if (id.includes('medium')) return '#1976D2';
+		if (id.includes('large')) return '#1565C0';
+		if (id.includes('giant')) return '#0D47A1';
+		return '#0288D1';
 	}
 
-	const tierStyles = $derived(getTierStyles());
-
-	// Hover state
-	let isHovered = $state(false);
+	const isFree = $derived(plan.id.toLowerCase().includes('free'));
 </script>
 
-<div
-	class="subscription-card"
-	class:subscription-card--current={isCurrentPlan}
-	class:subscription-card--popular={plan.popular && !isCurrentPlan}
-	onmouseenter={() => (isHovered = true)}
-	onmouseleave={() => (isHovered = false)}
-	role="article"
+<button
+	class="row"
+	class:current={isCurrentPlan}
+	class:popular={plan.popular && !isCurrentPlan}
+	disabled={isCurrentPlan}
+	onclick={() => onSelect(plan.id)}
 >
-	{#if isCurrentPlan}
-		<div class="subscription-card__badge subscription-card__badge--current">
-			{isLegacy ? legacyPlanLabel : currentPlanLabel}
-		</div>
-	{/if}
-	{#if plan.popular && !isCurrentPlan}
-		<div class="subscription-card__badge subscription-card__badge--popular">
-			{popularLabel}
-		</div>
-	{/if}
-
-	<!-- Tier Name -->
-	<h3 class="subscription-card__title">
-		{plan.name}
-	</h3>
-
-	<!-- Three column layout -->
-	<div class="subscription-card__grid">
-		<!-- Mana Icon with background -->
-		<div class="subscription-card__cell">
-			<div
-				class="subscription-card__icon-wrapper"
-				style="width: {tierStyles.bgSize}; height: {tierStyles.bgSize}; background-color: {tierStyles.bg};"
-			>
-				<ManaIcon size={32} color={tierStyles.icon} />
-			</div>
-		</div>
-
-		<!-- Mana Amount -->
-		<div class="subscription-card__cell">
-			<p class="subscription-card__value">
-				{plan.monthlyMana}
-			</p>
-			<p class="subscription-card__label">{perMonthLabel}</p>
-		</div>
-
-		<!-- Price -->
-		<div class="subscription-card__cell">
-			<p class="subscription-card__price">
-				{formatPrice(plan)}
-			</p>
-			<p class="subscription-card__label">
-				{plan.billingCycle === 'yearly' ? perYearLabel : perMonthLabel}
-			</p>
-			{#if plan.billingCycle === 'yearly' && plan.monthlyEquivalent}
-				<p class="subscription-card__sublabel">
-					({plan.monthlyEquivalent.toFixed(2).replace('.', ',')}€{monthlyEquivalentLabel})
-				</p>
-			{/if}
-		</div>
+	<div class="icon" style="color: {getTierColor()}">
+		<ManaIcon size={20} color={getTierColor()} />
 	</div>
 
-	<!-- Button only show if NOT free plan -->
-	{#if !plan.id.toLowerCase().includes('free')}
-		<SubscriptionButton
-			label={isCurrentPlan ? (isLegacy ? yourLegacyPlanLabel : yourPlanLabel) : buyLabel}
-			onclick={() => onSelect(plan.id)}
-			iconName={isCurrentPlan ? 'checkmark-circle-outline' : 'arrow-forward-outline'}
-			variant={isCurrentPlan ? 'secondary' : plan.popular ? 'accent' : 'primary'}
-			disabled={isCurrentPlan}
-		/>
+	<div class="info">
+		<span class="name">
+			{plan.name}
+			{#if isCurrentPlan}
+				<span class="badge current-badge">{isLegacy ? legacyPlanLabel : currentPlanLabel}</span>
+			{/if}
+			{#if plan.popular && !isCurrentPlan}
+				<span class="badge popular-badge">{popularLabel}</span>
+			{/if}
+		</span>
+		<span class="mana">{plan.monthlyMana} Mana{perMonthLabel}</span>
+	</div>
+
+	<div class="right">
+		{#if isFree}
+			<span class="price free">Kostenlos</span>
+		{:else}
+			<span class="price">{formatPrice(plan)}</span>
+			<span class="period">{plan.billingCycle === 'yearly' ? perYearLabel : perMonthLabel}</span>
+		{/if}
+	</div>
+
+	{#if !isFree && !isCurrentPlan}
+		<span class="action">{buyLabel}</span>
+	{:else if isCurrentPlan}
+		<span class="action muted">{yourPlanLabel}</span>
 	{/if}
-</div>
+</button>
 
 <style>
-	.subscription-card {
-		position: relative;
-		padding: 1.25rem;
-		border-radius: 1rem;
-		transition: all 0.2s ease;
-		background: rgba(255, 255, 255, 0.85);
-		backdrop-filter: blur(12px);
-		-webkit-backdrop-filter: blur(12px);
-		border: 1px solid rgba(0, 0, 0, 0.1);
-		box-shadow:
-			0 4px 6px -1px rgba(0, 0, 0, 0.1),
-			0 2px 4px -1px rgba(0, 0, 0, 0.06);
-		min-width: 0;
-		overflow: hidden;
-	}
-
-	:global(.dark) .subscription-card {
-		background: rgba(255, 255, 255, 0.08);
-		border: 1px solid rgba(255, 255, 255, 0.12);
-	}
-
-	.subscription-card:hover {
-		transform: translateY(-2px);
-		box-shadow:
-			0 10px 15px -3px rgba(0, 0, 0, 0.1),
-			0 4px 6px -2px rgba(0, 0, 0, 0.05);
-	}
-
-	:global(.dark) .subscription-card:hover {
-		background: rgba(255, 255, 255, 0.12);
-	}
-
-	.subscription-card--current {
-		border: 2px solid hsl(var(--color-primary, 221 83% 53%));
-	}
-
-	.subscription-card--popular {
-		border: 2px solid hsl(var(--color-primary, 221 83% 53%));
-	}
-
-	.subscription-card__badge {
-		position: absolute;
-		top: 0.75rem;
-		padding: 0.25rem 0.75rem;
-		border-radius: 9999px;
-		font-size: 0.625rem;
-		font-weight: 600;
-		color: white;
-		background: hsl(var(--color-primary, 221 83% 53%));
-		z-index: 1;
-	}
-
-	.subscription-card__badge--current {
-		left: 0.75rem;
-	}
-
-	.subscription-card__badge--popular {
-		right: 0.75rem;
-	}
-
-	.subscription-card__title {
-		margin: 1.5rem 0 1rem 0;
-		text-align: center;
-		font-size: 1.125rem;
-		font-weight: 600;
-		color: hsl(var(--color-foreground));
-	}
-
-	.subscription-card__grid {
+	.row {
 		display: flex;
-		justify-content: space-between;
-		gap: 0.375rem;
-		margin-bottom: 1.25rem;
-	}
-
-	.subscription-card__cell {
-		flex: 1;
-		display: flex;
-		flex-direction: column;
 		align-items: center;
-		justify-content: center;
-		padding: 0.5rem;
-		min-height: 70px;
-		min-width: 0;
+		gap: 0.75rem;
+		width: 100%;
+		padding: 0.75rem 1rem;
 		border-radius: 0.75rem;
-		background: rgba(0, 0, 0, 0.03);
+		border: 1px solid hsl(var(--color-border));
+		background: hsl(var(--color-card));
+		cursor: pointer;
+		transition: all 0.15s;
+		text-align: left;
+		color: hsl(var(--color-foreground));
+		font: inherit;
 	}
 
-	:global(.dark) .subscription-card__cell {
-		background: rgba(255, 255, 255, 0.05);
+	.row:hover:not(:disabled) {
+		background: hsl(var(--color-surface-hover));
+		border-color: hsl(var(--color-primary) / 0.3);
 	}
 
-	.subscription-card__icon-wrapper {
+	.row:disabled {
+		cursor: default;
+		opacity: 0.8;
+	}
+
+	.row.current {
+		border-color: hsl(var(--color-primary));
+		background: hsl(var(--color-primary) / 0.05);
+	}
+
+	.row.popular {
+		border-color: hsl(var(--color-primary));
+	}
+
+	.icon {
+		flex-shrink: 0;
+		width: 2rem;
+		height: 2rem;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		border-radius: 0.5rem;
+		background: hsl(var(--color-muted) / 0.5);
 	}
 
-	.subscription-card__value {
-		margin: 0 0 0.25rem 0;
-		font-size: 1.25rem;
+	.info {
+		flex: 1;
+		min-width: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0.125rem;
+	}
+
+	.name {
+		font-size: 0.875rem;
+		font-weight: 600;
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
+	}
+
+	.mana {
+		font-size: 0.75rem;
+		color: hsl(var(--color-muted-foreground));
+	}
+
+	.badge {
+		font-size: 0.625rem;
+		padding: 0.0625rem 0.375rem;
+		border-radius: 9999px;
+		font-weight: 600;
+		color: white;
+	}
+
+	.current-badge {
+		background: hsl(var(--color-primary));
+	}
+
+	.popular-badge {
+		background: hsl(var(--color-primary));
+	}
+
+	.right {
+		flex-shrink: 0;
+		text-align: right;
+	}
+
+	.price {
+		display: block;
+		font-size: 0.875rem;
 		font-weight: 700;
-		color: hsl(var(--color-foreground));
-		white-space: nowrap;
 	}
 
-	.subscription-card__price {
-		margin: 0;
-		font-size: 1rem;
-		font-weight: 700;
-		color: hsl(var(--color-foreground));
-		white-space: nowrap;
+	.price.free {
+		color: hsl(var(--color-muted-foreground));
+		font-weight: 500;
 	}
 
-	.subscription-card__label {
-		margin: 0;
+	.period {
 		font-size: 0.625rem;
 		color: hsl(var(--color-muted-foreground));
-		text-align: center;
 	}
 
-	.subscription-card__sublabel {
-		margin: 0.125rem 0 0 0;
-		font-size: 0.5rem;
+	.action {
+		flex-shrink: 0;
+		font-size: 0.75rem;
+		font-weight: 600;
+		color: hsl(var(--color-primary));
+		white-space: nowrap;
+	}
+
+	.action.muted {
 		color: hsl(var(--color-muted-foreground));
-	}
-
-	@media (min-width: 640px) {
-		.subscription-card__value {
-			font-size: 1.5rem;
-		}
-
-		.subscription-card__price {
-			font-size: 1.25rem;
-		}
-
-		.subscription-card__label {
-			font-size: 0.75rem;
-		}
-
-		.subscription-card__sublabel {
-			font-size: 0.625rem;
-		}
+		font-weight: 500;
 	}
 </style>
