@@ -8,13 +8,14 @@ vi.mock('$app/environment', () => ({
 // Mock auth store
 vi.mock('$lib/stores/auth.svelte', () => ({
 	authStore: {
-		getAccessToken: vi.fn().mockResolvedValue('test-token'),
+		getValidToken: vi.fn().mockResolvedValue('test-token'),
 	},
 }));
 
 // Mock config
 vi.mock('./config', () => ({
 	getManaAuthUrl: vi.fn().mockReturnValue('http://localhost:3001'),
+	getManaApiUrl: vi.fn().mockReturnValue('http://localhost:3060'),
 }));
 
 import { profileService, type UserProfile } from './profile';
@@ -137,28 +138,52 @@ describe('profileService', () => {
 		});
 	});
 
-	describe('getAvatarUploadUrl', () => {
-		it('should request presigned URL for avatar upload', async () => {
-			const mockResponse = {
-				uploadUrl: 'https://s3.example.com/upload',
-				fileUrl: 'https://s3.example.com/avatar.png',
-				key: 'avatars/user-1/avatar.png',
-				expiresIn: 3600,
-			};
+	describe('changeEmail', () => {
+		it('should send email change request', async () => {
 			global.fetch = vi.fn().mockResolvedValue({
 				ok: true,
-				json: () => Promise.resolve(mockResponse),
+				json: () => Promise.resolve({ success: true, message: 'Verification email sent' }),
 			});
 
-			const result = await profileService.getAvatarUploadUrl('avatar.png');
+			const result = await profileService.changeEmail({ newEmail: 'new@mana.how' });
 
-			expect(result.uploadUrl).toBe('https://s3.example.com/upload');
+			expect(result.success).toBe(true);
 			expect(global.fetch).toHaveBeenCalledWith(
-				'http://localhost:3001/api/v1/storage/avatar/upload-url',
+				'http://localhost:3001/api/v1/auth/change-email',
 				expect.objectContaining({
 					method: 'POST',
-					body: JSON.stringify({ filename: 'avatar.png' }),
+					body: JSON.stringify({ newEmail: 'new@mana.how' }),
 				})
+			);
+		});
+	});
+
+	describe('uploadAvatar', () => {
+		it('should upload avatar to API and update profile', async () => {
+			const mockFile = new File(['image-data'], 'avatar.png', { type: 'image/png' });
+
+			global.fetch = vi
+				.fn()
+				.mockResolvedValueOnce({
+					ok: true,
+					json: () =>
+						Promise.resolve({ url: 'https://media.mana.how/avatar.png', mediaId: 'media-1' }),
+				})
+				.mockResolvedValueOnce({
+					ok: true,
+					json: () =>
+						Promise.resolve({
+							success: true,
+							user: { id: 'user-1', name: 'Test', email: 'test@mana.how' },
+						}),
+				});
+
+			const result = await profileService.uploadAvatar(mockFile);
+
+			expect(result.success).toBe(true);
+			expect(global.fetch).toHaveBeenCalledWith(
+				'http://localhost:3060/api/v1/storage/avatar/upload',
+				expect.objectContaining({ method: 'POST' })
 			);
 		});
 	});
