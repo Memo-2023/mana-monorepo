@@ -4,8 +4,14 @@
 	"private": true,
 	"type": "module",
 	"exports": {
-		"./themes.css": "./src/themes.css",
-		"./sources.css": "./src/sources.css"
+		"./themes.css": {
+			"style": "./src/themes.css",
+			"default": "./src/themes.css"
+		},
+		"./sources.css": {
+			"style": "./src/sources.css",
+			"default": "./src/sources.css"
+		}
 	},
 	"scripts": {
 		"lint": "eslint ."
