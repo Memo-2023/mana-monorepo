@@ -21,7 +21,7 @@
 
 import { getTool } from '../tools/registry';
 import type { Actor } from '../events/actor';
-import { AI_PROPOSABLE_TOOL_NAMES } from '@mana/shared-ai';
+import { AI_TOOL_CATALOG } from '@mana/shared-ai';
 
 export type PolicyDecision = 'auto' | 'propose' | 'deny';
 
@@ -34,37 +34,15 @@ export interface AiPolicy {
 	readonly defaultForAi: PolicyDecision;
 }
 
-// ── Auto-executed tools (read-only / append-only self-state) ──────────
-// Kept here as the canonical local-only list — policies that don't mutate
-// user-visible records are webapp-specific and don't need to travel
-// through @mana/shared-ai.
-const AUTO_TOOLS: Record<string, 'auto'> = {
-	get_task_stats: 'auto',
-	list_tasks: 'auto',
-	list_notes: 'auto',
-	get_todays_events: 'auto',
-	get_drink_progress: 'auto',
-	nutrition_summary: 'auto',
-	get_places: 'auto',
-	location_log: 'auto',
-	get_habits: 'auto',
-	get_contacts: 'auto',
-	// Append-only self-state logs: AI proposing "did you drink water?" +
-	// user confirming + AI logging it should not require a second approval.
-	log_drink: 'auto',
-	log_meal: 'auto',
-};
-
-// ── Proposable tools derived from the shared canonical list ───────────
-// Keeps the webapp policy and mana-ai's `AI_AVAILABLE_TOOLS` from drifting.
-// Adding a new proposable tool → append to AI_PROPOSABLE_TOOL_NAMES in
-// @mana/shared-ai and both sides pick it up automatically.
-const PROPOSE_TOOLS: Record<string, 'propose'> = Object.fromEntries(
-	AI_PROPOSABLE_TOOL_NAMES.map((name) => [name, 'propose'] as const)
+// ── Per-tool policy derived from the AI Tool Catalog ──────────────────
+// Each tool in the catalog declares its defaultPolicy ('auto' or 'propose').
+// Adding a new tool to the catalog automatically updates this policy map.
+const CATALOG_TOOLS: Record<string, PolicyDecision> = Object.fromEntries(
+	AI_TOOL_CATALOG.map((t) => [t.name, t.defaultPolicy])
 );
 
 export const DEFAULT_AI_POLICY: AiPolicy = {
-	tools: { ...AUTO_TOOLS, ...PROPOSE_TOOLS },
+	tools: CATALOG_TOOLS,
 	defaultForAi: 'propose',
 };
 

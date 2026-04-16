@@ -1,51 +1,23 @@
 /**
- * Canonical list of tool names the AI is allowed to *propose*.
+ * Proposable tool names — derived from the AI Tool Catalog.
  *
- * Both the webapp's `DEFAULT_AI_POLICY` and the server-side
- * `AI_AVAILABLE_TOOLS` list in `services/mana-ai/` derive from here.
+ * Tools with `defaultPolicy: 'propose'` in the catalog are the ones the
+ * server-side planner actively proposes. This file re-exports a derived
+ * array and set for backward compatibility; the source of truth is
+ * `../tools/schemas.ts`.
+ *
  * Adding a new proposable tool:
- *
- *   1. Append its name to {@link AI_PROPOSABLE_TOOL_NAMES}
- *   2. Add the tool with its params to `AI_AVAILABLE_TOOLS` in mana-ai
- *      (the contract test below ensures step 2 isn't forgotten)
- *   3. The webapp's `DEFAULT_AI_POLICY` picks it up automatically
- *
- * Tools NOT in this list default to `'propose'` only if the per-tool
- * policy map lacks an explicit entry. Most `auto` / `deny` decisions
- * stay hardcoded in the webapp policy — this shared list only covers
- * the tools the *server-side* planner actively proposes.
+ *   1. Add its schema to `AI_TOOL_CATALOG` with `defaultPolicy: 'propose'`
+ *   2. Add the `execute` function in the webapp module's `tools.ts`
+ *   3. Done — this list updates automatically
  */
 
-export const AI_PROPOSABLE_TOOL_NAMES = [
-	// ── Todo ──────────────────────────────────
-	'create_task',
-	'complete_task',
-	'complete_tasks_by_title',
-	// ── Calendar ──────────────────────────────
-	'create_event',
-	// ── Places ────────────────────────────────
-	'create_place',
-	'visit_place',
-	// ── Drink ─────────────────────────────────
-	'undo_drink',
-	// ── News ──────────────────────────────────
-	'save_news_article',
-	// ── Notes ─────────────────────────────────
-	'create_note',
-	'update_note',
-	'append_to_note',
-	'add_tag_to_note',
-	// ── Journal ───────────────────────────────
-	'create_journal_entry',
-	// ── Habits ────────────────────────────────
-	'create_habit',
-	'log_habit',
-	// ── News-Research ─────────────────────────
-	'research_news',
-	// ── Contacts ──────────────────────────────
-	'create_contact',
-] as const;
+import { AI_TOOL_CATALOG } from '../tools/schemas';
 
-export type AiProposableToolName = (typeof AI_PROPOSABLE_TOOL_NAMES)[number];
+export const AI_PROPOSABLE_TOOL_NAMES: readonly string[] = AI_TOOL_CATALOG.filter(
+	(t) => t.defaultPolicy === 'propose'
+).map((t) => t.name);
+
+export type AiProposableToolName = string;
 
 export const AI_PROPOSABLE_TOOL_SET: ReadonlySet<string> = new Set(AI_PROPOSABLE_TOOL_NAMES);

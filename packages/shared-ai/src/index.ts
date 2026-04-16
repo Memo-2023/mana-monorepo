@@ -75,6 +75,9 @@ export {
 	type PolicyDecision,
 } from './policy';
 
+export type { ToolSchema } from './tools';
+export { AI_TOOL_CATALOG, AI_TOOL_CATALOG_BY_NAME } from './tools';
+
 export type {
 	Agent,
 	AgentState,
