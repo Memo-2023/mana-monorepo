@@ -15,6 +15,9 @@ import {
 	rateLimitMiddleware,
 } from '@mana/shared-hono';
 
+// MCP server
+import { handleMcpRequest } from './mcp/server';
+
 // Module routes
 import { calendarRoutes } from './modules/calendar/routes';
 import { contactsRoutes } from './modules/contacts/routes';
@@ -47,6 +50,10 @@ app.use('*', cors({ origin: CORS_ORIGINS, credentials: true }));
 app.route('/health', healthRoute('mana-api'));
 app.use('/api/*', rateLimitMiddleware({ max: 200, windowMs: 60_000 }));
 app.use('/api/*', authMiddleware());
+
+// ─── MCP Endpoint ──────────────────────────────────────────
+// Streamable HTTP transport: POST (messages), GET (SSE stream), DELETE (close)
+app.all('/api/v1/mcp', (c) => handleMcpRequest(c.req.raw));
 
 // ─── Module Routes ──────────────────────────────────────────
 app.route('/api/v1/calendar', calendarRoutes);

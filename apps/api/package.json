@@ -15,10 +15,12 @@
 	"dependencies": {
 		"@ai-sdk/openai-compatible": "^2.0.41",
 		"@mana/media-client": "workspace:*",
+		"@mana/shared-ai": "workspace:*",
 		"@mana/shared-hono": "workspace:*",
 		"@mana/shared-rss": "workspace:*",
 		"@mana/shared-storage": "workspace:*",
 		"@mana/shared-types": "workspace:^",
+		"@modelcontextprotocol/sdk": "^1.29.0",
 		"ai": "^6.0.154",
 		"drizzle-orm": "^0.38.0",
 		"hono": "^4.7.0",
