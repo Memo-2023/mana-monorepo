@@ -76,13 +76,13 @@ class GoogleProvider(LLMProvider):
             role = "user" if msg.role == "user" else "model"
 
             if isinstance(msg.content, str):
-                contents.append(types.Content(role=role, parts=[types.Part.from_text(msg.content)]))
+                contents.append(types.Content(role=role, parts=[types.Part.from_text(text=msg.content)]))
             else:
                 # Multimodal content
                 parts: list[types.Part] = []
                 for part in msg.content:
                     if part.type == "text":
-                        parts.append(types.Part.from_text(part.text))
+                        parts.append(types.Part.from_text(text=part.text))
                     elif part.type == "image_url" and part.image_url:
                         url = part.image_url.url
                         if url.startswith("data:"):

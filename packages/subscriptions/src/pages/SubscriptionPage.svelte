@@ -68,11 +68,13 @@
 	<section class="section">
 		<h2 class="section-title">{subscriptionsTitle}</h2>
 		<div class="card-list">
-			<SubscriptionCard
-				plan={subscriptions.find((plan) => plan.id === 'free')}
-				onSelect={onSubscribe}
-				isCurrentPlan={isCurrentPlan('free')}
-			/>
+			{#if subscriptions.find((p) => p.id === 'free')}
+				<SubscriptionCard
+					plan={subscriptions.find((p) => p.id === 'free')!}
+					onSelect={onSubscribe}
+					isCurrentPlan={isCurrentPlan('free')}
+				/>
+			{/if}
 			{#each getSubscriptionPlans() as plan}
 				<SubscriptionCard {plan} onSelect={onSubscribe} isCurrentPlan={isCurrentPlan(plan.id)} />
 			{/each}
