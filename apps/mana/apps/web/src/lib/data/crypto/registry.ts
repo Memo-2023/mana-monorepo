@@ -472,6 +472,10 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	// Free-form user text — encrypt the content, leave the fixed id plaintext.
 	kontextDoc: { enabled: true, fields: ['content'] },
 
+	// Per-agent kontext documents — same schema as kontextDoc but keyed
+	// per agent. Content is free-form markdown.
+	agentKontextDocs: { enabled: true, fields: ['content'] },
+
 	// ─── Quiz ────────────────────────────────────────────────
 	// User-typed text on the container (title, description, category, tags)
 	// plus the whole question payload (questionText, explanation, options).

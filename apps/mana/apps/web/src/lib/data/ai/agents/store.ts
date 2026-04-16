@@ -129,6 +129,7 @@ export interface AgentPatch {
 	policy?: AiPolicy;
 	maxTokensPerDay?: number;
 	maxConcurrentMissions?: number;
+	scopeTagIds?: string[];
 	state?: AgentState;
 }
 

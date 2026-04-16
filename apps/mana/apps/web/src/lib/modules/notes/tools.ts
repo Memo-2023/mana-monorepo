@@ -11,8 +11,10 @@
 
 import type { ModuleTool } from '$lib/data/tools/types';
 import { notesStore } from './stores/notes.svelte';
+import { noteTagOps } from './stores/tags.svelte';
 import { db } from '$lib/data/database';
 import { decryptRecords } from '$lib/data/crypto';
+import { filterByScope } from '$lib/data/ai/scope-context';
 import type { LocalNote } from './types';
 
 const MAX_LIST_LIMIT = 100;
@@ -88,7 +90,11 @@ export const notesTools: ModuleTool[] = [
 			const visible = all.filter((n) => !n.deletedAt && (includeArchived || !n.isArchived));
 			const decrypted = await decryptRecords('notes', visible);
 
-			const rows = decrypted
+			// Agent scope filter: only return notes tagged with the agent's
+			// scope tags (or untagged notes, which are globally visible).
+			const scoped = await filterByScope(decrypted, async (n) => noteTagOps.getTagIds(n.id));
+
+			const rows = scoped
 				.filter((n) => {
 					if (!query) return true;
 					return (

@@ -16,5 +16,5 @@ import type { ModuleConfig } from '$lib/data/module-registry';
 
 export const aiModuleConfig: ModuleConfig = {
 	appId: 'ai',
-	tables: [{ name: 'aiMissions' }, { name: 'agents' }],
+	tables: [{ name: 'aiMissions' }, { name: 'agents' }, { name: 'agentKontextDocs' }],
 };

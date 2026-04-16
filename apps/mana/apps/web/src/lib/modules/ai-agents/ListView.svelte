@@ -33,8 +33,11 @@
 	import { DEFAULT_AI_POLICY } from '$lib/data/ai/policy';
 	import type { Agent } from '$lib/data/ai/agents/types';
 	import type { AiPolicy, PolicyDecision } from '@mana/shared-ai';
+	import { TagSelector } from '@mana/shared-ui';
+	import { useAllTags } from '@mana/shared-stores';
 
 	const agents = $derived(useAgents());
+	const allTags = $derived(useAllTags());
 
 	let mode = $state<'list' | 'create' | 'detail'>('list');
 	let selectedId = $state<string | null>(null);
@@ -83,6 +86,7 @@
 	let editMemory = $state('');
 	let editMaxConcurrent = $state(1);
 	let editMaxTokensPerDay = $state<number | null>(null);
+	let editScopeTagIds = $state<string[]>([]);
 	let lastSyncedId = $state<string | null>(null);
 	let saveError = $state<string | null>(null);
 	let saving = $state(false);
@@ -96,6 +100,7 @@
 			editMemory = selected.memory ?? '';
 			editMaxConcurrent = selected.maxConcurrentMissions;
 			editMaxTokensPerDay = selected.maxTokensPerDay ?? null;
+			editScopeTagIds = [...(selected.scopeTagIds ?? [])];
 			lastSyncedId = selected.id;
 			saveError = null;
 		}
@@ -113,6 +118,7 @@
 				memory: editMemory || undefined,
 				maxConcurrentMissions: editMaxConcurrent,
 				maxTokensPerDay: editMaxTokensPerDay ?? undefined,
+				scopeTagIds: editScopeTagIds.length > 0 ? editScopeTagIds : undefined,
 			});
 		} catch (err) {
 			if (err instanceof DuplicateAgentNameError) {
@@ -355,6 +361,20 @@
 					placeholder="Was der Agent dauerhaft über dich wissen soll."
 				></textarea>
 			</label>
+		</section>
+
+		<section class="block">
+			<h3>Bereiche (Tag-Scope)</h3>
+			<p class="hint">Der Agent sieht nur Records mit diesen Tags. Leer = alles sichtbar.</p>
+			<TagSelector
+				tags={allTags.value}
+				selectedTags={allTags.value.filter((t) => editScopeTagIds.includes(t.id))}
+				onTagsChange={(tags) => {
+					editScopeTagIds = tags.map((t) => t.id);
+				}}
+				placeholder="Bereiche wählen…"
+				addTagLabel="Bereich hinzufügen"
+			/>
 		</section>
 
 		<section class="block">

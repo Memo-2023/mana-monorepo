@@ -47,6 +47,13 @@ export interface Agent {
 	 *  rest. */
 	memory?: string;
 
+	/** Tag-based data scope — the agent sees only records tagged with at
+	 *  least one of these global tags (+ untagged records). Empty array or
+	 *  undefined = agent sees everything (General-Agent). IDs reference
+	 *  the shared `tags` table managed by `@mana/shared-tags`. Plaintext
+	 *  (tag IDs are not sensitive). */
+	scopeTagIds?: string[];
+
 	/** Per-tool allowlist/propose/deny. Replaces the user-level AiPolicy
 	 *  in Phase 4; pre-populated with the default policy at create time
 	 *  so the runner can start reading it even while still consulting

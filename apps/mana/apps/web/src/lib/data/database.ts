@@ -548,6 +548,13 @@ db.version(21).stores({
 	quizAttempts: 'id, quizId, startedAt, [quizId+startedAt]',
 });
 
+// v22 — Notes tag junction (mirrors eventTags/contactTags/taskLabels pattern)
+// + per-agent kontext documents (replaces global singleton auto-inject).
+db.version(22).stores({
+	noteTags: 'id, noteId, tagId, [noteId+tagId]',
+	agentKontextDocs: 'id, agentId',
+});
+
 // ─── Sync Routing ──────────────────────────────────────────
 // SYNC_APP_MAP, TABLE_TO_SYNC_NAME, TABLE_TO_APP, SYNC_NAME_TO_TABLE,
 // toSyncName() and fromSyncName() are now derived from per-module

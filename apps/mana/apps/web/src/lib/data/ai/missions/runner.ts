@@ -32,6 +32,8 @@ import { executeTool } from '../../tools/executor';
 import { db } from '../../database';
 import { decryptRecords } from '../../crypto';
 import { discoverByQuery, searchFeeds } from '$lib/modules/news-research/api';
+import { getAgentKontext } from '../agents/kontext';
+import { withAgentScope } from '../scope-context';
 import { isAiDebugEnabled, recordAiDebug, type AiDebugEntry, type PlannerCallDebug } from './debug';
 import { makeAgentActor, LEGACY_AI_PRINCIPAL, type Actor } from '../../events/actor';
 import { getAgent } from '../agents/store';
@@ -192,12 +194,14 @@ export async function runMission(
 		const resolvedInputs: ResolvedInput[] = [...baseInputs];
 		const preStep: AiDebugEntry['preStep'] = { kontextInjected: false };
 
-		// Auto-inject the kontext singleton (if non-empty and not already
-		// linked) so every mission has the user's standing context as
-		// background. Decrypted client-side; never reaches the server.
+		// Auto-inject agent-specific kontext doc (if non-empty) — replaces
+		// the old global singleton inject. Falls back to the global singleton
+		// when the agent doesn't have its own doc. Decrypted client-side.
 		const alreadyHasKontext = mission!.inputs.some((i) => i.module === 'kontext');
 		if (!alreadyHasKontext) {
-			const kontextEntry = await loadKontextAsResolvedInput();
+			const kontextEntry = owningAgent
+				? await loadAgentKontextAsResolvedInput(owningAgent.id)
+				: await loadKontextAsResolvedInput();
 			if (kontextEntry) {
 				resolvedInputs.push(kontextEntry);
 				preStep.kontextInjected = true;
@@ -449,7 +453,10 @@ export async function runMission(
 	let planSummary = '';
 	let planStepCount = 0;
 	try {
-		const result = await Promise.race([runPipeline(), timeoutPromise]);
+		const result = await Promise.race([
+			withAgentScope(owningAgent?.scopeTagIds, runPipeline),
+			timeoutPromise,
+		]);
 		recordedSteps = result.recordedSteps;
 		stagedCount = result.stagedCount;
 		failedCount = result.failedCount;
@@ -539,6 +546,25 @@ async function loadKontextAsResolvedInput(): Promise<ResolvedInput | null> {
 		};
 	} catch (err) {
 		console.warn('[MissionRunner] kontext auto-inject failed:', err);
+		return null;
+	}
+}
+
+/** Load the agent-specific kontext doc. Falls back to null (caller
+ *  may then fall back to the global singleton if desired). */
+async function loadAgentKontextAsResolvedInput(agentId: string): Promise<ResolvedInput | null> {
+	try {
+		const doc = await getAgentKontext(agentId);
+		if (!doc) return loadKontextAsResolvedInput(); // fallback to global
+		return {
+			id: doc.id,
+			module: 'kontext',
+			table: 'agentKontextDocs',
+			title: 'Agent-Kontext',
+			content: doc.content,
+		};
+	} catch (err) {
+		console.warn('[MissionRunner] agent kontext load failed:', err);
 		return null;
 	}
 }
