@@ -34,6 +34,7 @@
 	} from '@mana/credits';
 	import { ManaEvents } from '@mana/shared-utils/analytics';
 	import { authStore } from '$lib/stores/auth.svelte';
+	import { toast } from '$lib/stores/toast.svelte';
 
 	// ── Credits state ──────────────────────────────────────
 	let balance = $state<CreditBalance | null>(null);
@@ -58,8 +59,6 @@
 	);
 	let costFilter = $state<'all' | 'ai' | 'premium'>('all');
 	let processingPackageId = $state<string | null>(null);
-	let toastMessage = $state<string | null>(null);
-	let toastType = $state<'success' | 'error'>('success');
 
 	// ── Derived pricing data ───────────────────────────────
 	const allOperations = $derived(
@@ -139,10 +138,10 @@
 		const canceled = params.get('canceled');
 
 		if (success === 'true') {
-			showToast('Zahlung erfolgreich!', 'success');
+			toast.success('\1');
 			history.replaceState({}, '', '/');
 		} else if (canceled === 'true') {
-			showToast('Kauf wurde abgebrochen', 'error');
+			toast.error('Kauf wurde abgebrochen');
 			history.replaceState({}, '', '/');
 		}
 
@@ -251,10 +250,7 @@
 			const result = await creditsService.initiatePurchase(pkg.id);
 			window.location.href = result.checkoutUrl;
 		} catch (e) {
-			showToast(
-				e instanceof Error ? e.message : 'Fehler beim Erstellen der Checkout-Session',
-				'error'
-			);
+			toast.error(e instanceof Error ? e.message : 'Fehler beim Erstellen der Checkout-Session');
 		} finally {
 			processingPackageId = null;
 		}
@@ -285,7 +281,7 @@
 			const { url } = await subscriptionsService.createCheckout(plan.id, billingInterval);
 			window.location.href = url;
 		} catch (e) {
-			showToast(e instanceof Error ? e.message : 'Fehler beim Checkout', 'error');
+			toast.error(e instanceof Error ? e.message : 'Fehler beim Checkout');
 		} finally {
 			processingPlanId = null;
 		}
@@ -297,7 +293,7 @@
 			const { url } = await subscriptionsService.openPortal();
 			window.location.href = url;
 		} catch (e) {
-			showToast(e instanceof Error ? e.message : 'Fehler beim Billing-Portal', 'error');
+			toast.error(e instanceof Error ? e.message : 'Fehler beim Billing-Portal');
 		} finally {
 			openingPortal = false;
 		}
@@ -308,10 +304,10 @@
 		cancelingSub = true;
 		try {
 			await subscriptionsService.cancelSubscription();
-			showToast('Abonnement wird zum Ende der Laufzeit gekündigt', 'success');
+			toast.success('\1');
 			await loadData();
 		} catch (e) {
-			showToast(e instanceof Error ? e.message : 'Fehler beim Kündigen', 'error');
+			toast.error(e instanceof Error ? e.message : 'Fehler beim Kündigen');
 		} finally {
 			cancelingSub = false;
 		}
@@ -321,19 +317,13 @@
 		reactivatingSub = true;
 		try {
 			await subscriptionsService.reactivateSubscription();
-			showToast('Abonnement wurde reaktiviert', 'success');
+			toast.success('\1');
 			await loadData();
 		} catch (e) {
-			showToast(e instanceof Error ? e.message : 'Fehler beim Reaktivieren', 'error');
+			toast.error(e instanceof Error ? e.message : 'Fehler beim Reaktivieren');
 		} finally {
 			reactivatingSub = false;
 		}
-	}
-
-	function showToast(message: string, type: 'success' | 'error') {
-		toastMessage = message;
-		toastType = type;
-		setTimeout(() => (toastMessage = null), 4000);
 	}
 </script>
 
@@ -713,10 +703,6 @@
 		{/if}
 	{/if}
 </div>
-
-{#if toastMessage}
-	<div class="toast" class:toast-error={toastType === 'error'}>{toastMessage}</div>
-{/if}
 
 <style>
 	.credits-page {
@@ -1517,34 +1503,5 @@
 	.btn-primary:disabled {
 		opacity: 0.5;
 		cursor: not-allowed;
-	}
-
-	.toast {
-		position: fixed;
-		bottom: 1rem;
-		right: 1rem;
-		z-index: 50;
-		padding: 0.75rem 1rem;
-		background: hsl(142 71% 45%);
-		color: white;
-		border-radius: 0.5rem;
-		box-shadow: 0 4px 12px hsl(0 0% 0% / 0.15);
-		font-size: 0.8125rem;
-		animation: fadeIn 0.2s ease-out;
-	}
-
-	.toast-error {
-		background: hsl(var(--color-error));
-	}
-
-	@keyframes fadeIn {
-		from {
-			opacity: 0;
-			transform: translateY(10px);
-		}
-		to {
-			opacity: 1;
-			transform: translateY(0);
-		}
 	}
 </style>

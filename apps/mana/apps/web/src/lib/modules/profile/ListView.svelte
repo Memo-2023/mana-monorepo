@@ -5,6 +5,7 @@
 	import { onMount } from 'svelte';
 	import { profileService, type UserProfile as ApiUserProfile } from '$lib/api/profile';
 	import { authStore } from '$lib/stores/auth.svelte';
+	import { toast } from '$lib/stores/toast.svelte';
 	import { goto } from '$app/navigation';
 	import {
 		EditProfileModal,
@@ -24,7 +25,6 @@
 	let showEditModal = $state(false);
 	let showPasswordModal = $state(false);
 	let showDeleteModal = $state(false);
-	let toastMessage = $state<string | null>(null);
 
 	onMount(async () => {
 		try {
@@ -45,22 +45,17 @@
 
 	function handleProfileUpdate(user: ApiUserProfile) {
 		apiProfile = user;
-		showToast('Profil erfolgreich aktualisiert');
+		toast.success('Profil erfolgreich aktualisiert');
 	}
 
 	function handlePasswordChange() {
-		showToast('Passwort erfolgreich geändert');
+		toast.success('Passwort erfolgreich geändert');
 	}
 
 	async function handleAccountDeleted() {
-		showToast('Konto wird gelöscht...');
+		toast.info('Konto wird gelöscht...');
 		await authStore.signOut();
 		goto('/login');
-	}
-
-	function showToast(message: string) {
-		toastMessage = message;
-		setTimeout(() => (toastMessage = null), 3000);
 	}
 </script>
 
@@ -154,10 +149,6 @@
 	onClose={() => (showDeleteModal = false)}
 	onSuccess={handleAccountDeleted}
 />
-
-{#if toastMessage}
-	<div class="toast">{toastMessage}</div>
-{/if}
 
 <style>
 	.profile-page {
@@ -288,28 +279,5 @@
 	}
 	.account-btn.danger:hover {
 		background: hsl(var(--color-destructive, 0 84% 60%) / 0.08);
-	}
-	.toast {
-		position: fixed;
-		bottom: 1rem;
-		right: 1rem;
-		z-index: 50;
-		padding: 0.75rem 1rem;
-		background: hsl(142 71% 45%);
-		color: white;
-		border-radius: 0.5rem;
-		box-shadow: 0 4px 12px hsl(0 0% 0% / 0.15);
-		font-size: 0.875rem;
-		animation: fade-in 0.2s ease-out;
-	}
-	@keyframes fade-in {
-		from {
-			opacity: 0;
-			transform: translateY(10px);
-		}
-		to {
-			opacity: 1;
-			transform: translateY(0);
-		}
 	}
 </style>

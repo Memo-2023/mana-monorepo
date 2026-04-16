@@ -3,6 +3,7 @@
 	import { syncBilling } from '$lib/stores/sync-billing.svelte';
 	import { creditsService, type CreditBalance } from '$lib/api/credits';
 	import type { BillingInterval } from '$lib/api/sync';
+	import { toast } from '$lib/stores/toast.svelte';
 	import { onMount } from 'svelte';
 
 	const SYNC_PRICES: Record<BillingInterval, number> = {
@@ -21,10 +22,6 @@
 	let loading = $state(false);
 	let error = $state<string | null>(null);
 	let selectedInterval = $state<BillingInterval>('monthly');
-
-	// Toast
-	let toastMessage = $state<string | null>(null);
-	let toastType = $state<'success' | 'error'>('success');
 
 	onMount(async () => {
 		await Promise.all([syncBilling.load(), loadBalance()]);
@@ -45,10 +42,10 @@
 		try {
 			await syncBilling.activate(selectedInterval);
 			await loadBalance();
-			showToast('Cloud Sync aktiviert!', 'success');
+			toast.success('Cloud Sync aktiviert!');
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Aktivierung fehlgeschlagen';
-			showToast(error, 'error');
+			toast.error(error);
 		} finally {
 			loading = false;
 		}
@@ -63,7 +60,7 @@
 			showToast('Cloud Sync deaktiviert', 'success');
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Deaktivierung fehlgeschlagen';
-			showToast(error, 'error');
+			toast.error(error);
 		} finally {
 			loading = false;
 		}
@@ -78,7 +75,7 @@
 			showToast(`Intervall auf ${INTERVAL_LABELS[selectedInterval]} geändert`, 'success');
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Änderung fehlgeschlagen';
-			showToast(error, 'error');
+			toast.error(error);
 		} finally {
 			loading = false;
 		}
@@ -94,14 +91,6 @@
 			month: '2-digit',
 			year: 'numeric',
 		});
-	}
-
-	function showToast(message: string, type: 'success' | 'error') {
-		toastMessage = message;
-		toastType = type;
-		setTimeout(() => {
-			toastMessage = null;
-		}, 4000);
 	}
 </script>
 
@@ -267,14 +256,3 @@
 		</div>
 	{/if}
 </div>
-
-<!-- Toast Notification -->
-{#if toastMessage}
-	<div
-		class="fixed bottom-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg {toastType === 'success'
-			? 'bg-green-600 text-white'
-			: 'bg-red-600 text-white'}"
-	>
-		{toastMessage}
-	</div>
-{/if}

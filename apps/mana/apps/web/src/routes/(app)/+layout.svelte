@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import type { Component, Snippet } from 'svelte';
+	import ToastContainer from '$lib/components/ToastContainer.svelte';
 	import { onDestroy, setContext, tick } from 'svelte';
 	import { createReminderScheduler } from '@mana/shared-stores';
 	import { todoReminderSource } from '$lib/modules/todo/reminder-source';
@@ -1062,6 +1063,8 @@
 		/>
 	{/if}
 </AuthGate>
+
+<ToastContainer />
 
 <style>
 	.bottom-stack {
