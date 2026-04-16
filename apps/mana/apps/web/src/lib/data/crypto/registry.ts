@@ -467,10 +467,16 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	moodEntries: { enabled: true, fields: ['withWhom', 'notes'] },
 	moodSettings: { enabled: false, fields: [] },
 
-	// ─── Kontext ─────────────────────────────────────────────
-	// Singleton markdown document ("Was soll Mana über dich wissen?").
-	// Free-form user text — encrypt the content, leave the fixed id plaintext.
+	// ─── Kontext (legacy — now web-context, URL-crawl only) ──
 	kontextDoc: { enabled: true, fields: ['content'] },
+
+	// ─── User Context (profile hub) ──────────────────────────
+	// Structured profile sections + freeform markdown. Everything
+	// except the fixed id and interview progress is user-typed content.
+	userContext: {
+		enabled: true,
+		fields: ['about', 'interests', 'routine', 'nutrition', 'goals', 'social', 'freeform'],
+	},
 
 	// Per-agent kontext documents — same schema as kontextDoc but keyed
 	// per agent. Content is free-form markdown.

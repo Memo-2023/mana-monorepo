@@ -16,7 +16,7 @@ Mana implementiert ein **Dual-Runtime AI-Agent-System**:
 | **Foreground Runner** (Browser) | `runner.ts` — Reasoning-Loop mit bis zu 5 Planner-Iterationen, direkte Dexie-Writes, E2E-verschlüsselt |
 | **Background Runner** (mana-ai, Port 3067) | `tick.ts` — 60s Cron-Tick, scannt fällige Missions, plant via mana-llm, schreibt über sync_changes zurück |
 | **Planner** | Shared Prompt-Template (`@mana/shared-ai/src/planner/`) → OpenAI-kompatible API auf mana-llm |
-| **Tool-System** | 13 Tools (todo, calendar, places, notes, news, drink), policy-gated (auto/propose/deny) |
+| **Tool-System** | 29 Tools (11 Module), AI_TOOL_CATALOG + MCP-Server, policy-gated (auto/propose/deny) |
 | **Agents** | Named Personas mit eigener systemPrompt, memory, policy, Budget, Concurrency-Limits |
 | **Proposals** | Mutationen unter `propose`-Policy erzeugen Proposals → User muss approven |
 | **Actor-System** | Jeder Write trägt einen immutablen Actor (user/ai/system) mit frozen displayName |
@@ -115,12 +115,12 @@ Mission (title, objective, inputs, cadence)
 | Dimension | Mana | A2A | MCP | OpenAI SDK | LangGraph | CrewAI |
 |-----------|------|-----|-----|------------|-----------|--------|
 | **Agent-Definition** | Agent(name, role, systemPrompt, memory, policy) | Agent Card (JSON, signiert) | N/A (Protokoll) | Agent(instructions, tools, handoffs) | Node-Funktionen | Agent(role, goal, backstory) |
-| **Tool-Registration** | Hardcoded Allow-List (13 Tools) | Skills in Agent Card | tools/list + tools/call | @function_tool + MCP | Node context | tools= Parameter |
+| **Tool-Registration** | AI_TOOL_CATALOG (29 Tools) + MCP-Server | Skills in Agent Card | tools/list + tools/call | @function_tool + MCP | Node context | tools= Parameter |
 | **Agent↔Agent** | ❌ Nicht vorhanden | ✅ Kernzweck | ❌ Nicht designed dafür | Handoffs | Edges/Routing | Delegation + Hierarchie |
 | **Agent↔Tool** | Policy-gated Executor | Via MCP | ✅ Kernzweck | Function calls + MCP | Node-Aufrufe | Direkte Zuweisung |
 | **State/Memory** | LWW Sync + encrypted IndexedDB | Task contextId | Stateful Sessions | Sessions (SQLite/Redis) | StateGraph + Checkpoints | 4 Memory-Typen |
 | **Orchestrierung** | Dual-Runtime (Browser + Server Cron) | Task Lifecycle | Host koordiniert | Runner Loop | DAG Engine | Sequential/Hierarchical |
-| **Streaming** | ❌ Kein Streaming | SSE, gRPC, JSON-RPC | JSON-RPC Notifications | Built-in | Native Token-Stream | Log-basiert |
+| **Streaming** | ✅ SSE Token-Streaming | SSE, gRPC, JSON-RPC | JSON-RPC Notifications | Built-in | Native Token-Stream | Log-basiert |
 | **Observability** | Prometheus Metrics + Debug Logs | Agent Cards Metadata | Server Logging | Built-in Tracing (OTel) | LangSmith | Built-in Logging |
 | **HITL** | Proposal-System (approve/reject) | INPUT_REQUIRED State | Elicitation | Guardrails | Interrupt/Resume | Task-Guardrails |
 | **Encryption** | ✅ AES-GCM + Key-Grants | ❌ | ❌ | ❌ | ❌ | ❌ |
@@ -337,7 +337,7 @@ Exportierbar nach Grafana Tempo oder ähnlichem.
 |---|----------|---------|--------|
 | 1 | **Streaming für Foreground Runner** — SSE vom Planner, live Step-Status im UI | Mittel | Hoch — UX-Sprung |
 | 2 | **Dynamisches Tool-Registry** — Module registrieren Tools deklarativ, Server synchronisiert | Mittel | Hoch — Skalierbarkeit |
-| 3 | **Budget-Enforcement serverseitig** — Token-Counting pro Agent im tick.ts | Klein | Mittel — Sicherheit |
+| ~~3~~ | ~~**Budget-Enforcement serverseitig**~~ — ERLEDIGT `ce57e1195` (rolling 24h, token_usage Tabelle) | ~~Klein~~ | ~~Mittel~~ |
 
 ### Mittelfristig (1-3 Monate)
 
@@ -408,9 +408,9 @@ Exportierbar nach Grafana Tempo oder ähnlichem.
 
 **Die größten Lücken gegenüber der Industrie:**
 1. **Kein Agent-to-Agent** — Die wichtigste fehlende Capability für echte Multi-Agent-Systeme
-2. **Kein Streaming** — Standard in allen modernen Frameworks, fehlt komplett
-3. **Statisches Tool-System** — Skaliert nicht, wenn neue Module Tools brauchen
+2. ~~**Kein Streaming**~~ — ERLEDIGT (`be81d11dc`)
+3. ~~**Statisches Tool-System**~~ — ERLEDIGT (`d40a61119`)
 
-**Die Kernempfehlung:** Mana sollte nicht versuchen, ein General-Purpose-Agent-Framework zu werden (das machen LangGraph/CrewAI besser). Stattdessen die einzigartigen Stärken (Privacy, Local-First, Attribution) ausbauen und gezielt die Industrie-Standards adoptieren, die den größten UX-Impact haben: **Streaming**, **dynamische Tools**, und **Agent-Delegation**.
+**Die Kernempfehlung:** Mana sollte nicht versuchen, ein General-Purpose-Agent-Framework zu werden (das machen LangGraph/CrewAI besser). Stattdessen die einzigartigen Stärken (Privacy, Local-First, Attribution) ausbauen und gezielt die Industrie-Standards adoptieren: **Agent-Delegation**, **Guardrails**, und **OpenTelemetry Tracing**.
 
-MCP-Kompatibilität als mittelfristiges Ziel ist strategisch richtig — es ist das Protokoll, das sich als Standard für Agent↔Tool durchgesetzt hat (97M Downloads/Monat). A2A für Agent↔Agent ist das natürliche Pendant, aber erst relevant, wenn interne Multi-Agent-Kommunikation steht.
+**Stand 2026-04-16:** Alle 3 kurzfristigen Maßnahmen umgesetzt + MCP-Server-Export (#5) + Budget-Enforcement (#3). 5 von 10 Roadmap-Punkten erledigt. Verbleibend: Agent-to-Agent (#4), Guardrails (#6), OTel (#7), A2A Agent Cards (#8), Graph-Workflows (#9), Agent Memory (#10).

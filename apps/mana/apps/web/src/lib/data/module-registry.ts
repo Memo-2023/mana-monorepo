@@ -97,6 +97,7 @@ import { sleepModuleConfig } from '$lib/modules/sleep/module.config';
 import { moodModuleConfig } from '$lib/modules/mood/module.config';
 import { kontextModuleConfig } from '$lib/modules/kontext/module.config';
 import { quizModuleConfig } from '$lib/modules/quiz/module.config';
+import { profileModuleConfig } from '$lib/modules/profile/module.config';
 import { aiModuleConfig } from '$lib/data/ai/module.config';
 
 export const MODULE_CONFIGS: readonly ModuleConfig[] = [
@@ -150,6 +151,7 @@ export const MODULE_CONFIGS: readonly ModuleConfig[] = [
 	moodModuleConfig,
 	kontextModuleConfig,
 	quizModuleConfig,
+	profileModuleConfig,
 	aiModuleConfig,
 ];
 

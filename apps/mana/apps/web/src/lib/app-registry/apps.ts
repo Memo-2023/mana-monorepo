@@ -526,7 +526,7 @@ registerApp({
 
 registerApp({
 	id: 'kontext',
-	name: 'Kontext',
+	name: 'Web-Context',
 	color: '#A78B6F',
 	icon: Scroll,
 	views: {

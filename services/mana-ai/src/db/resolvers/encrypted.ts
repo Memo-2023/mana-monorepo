@@ -188,3 +188,32 @@ export const kontextResolver = createEncryptedResolver({
 	formatContent: (r) =>
 		truncate(typeof r.content === 'string' ? r.content : JSON.stringify(r.content ?? ''), 1500),
 });
+
+export const userContextResolver = createEncryptedResolver({
+	module: 'profile',
+	appId: 'profile',
+	label: 'Nutzerprofil',
+	formatTitle: () => 'Nutzerprofil',
+	formatContent: (r) => {
+		const parts: string[] = [];
+		// Structured fields are stored as JSON objects within the encrypted record
+		for (const key of [
+			'about',
+			'interests',
+			'routine',
+			'nutrition',
+			'goals',
+			'social',
+			'freeform',
+		]) {
+			const val = r[key];
+			if (!val) continue;
+			if (typeof val === 'string' && val.trim()) {
+				parts.push(val.trim());
+			} else if (typeof val === 'object') {
+				parts.push(JSON.stringify(val));
+			}
+		}
+		return truncate(parts.join('\n'), 2000);
+	},
+});

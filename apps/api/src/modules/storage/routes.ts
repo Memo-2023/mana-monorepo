@@ -106,6 +106,38 @@ routes.get('/files/:id/download', async (c) => {
 	}
 });
 
+// ─── Avatar Upload (profile) ───────────────────────────────
+
+const ALLOWED_AVATAR_TYPES = new Set(['image/jpeg', 'image/png', 'image/gif', 'image/webp']);
+
+routes.post('/avatar/upload', async (c) => {
+	const userId = c.get('userId');
+	const formData = await c.req.formData();
+	const file = formData.get('file') as File | null;
+
+	if (!file) return c.json({ error: 'No file' }, 400);
+	if (file.size > 5 * 1024 * 1024) return c.json({ error: 'Max 5MB' }, 400);
+	if (!ALLOWED_AVATAR_TYPES.has(file.type)) {
+		return c.json({ error: 'Invalid file type. Allowed: JPEG, PNG, GIF, WebP' }, 400);
+	}
+
+	try {
+		const buffer = await file.arrayBuffer();
+		const { uploadImageToMedia } = await import('../../lib/media');
+		const result = await uploadImageToMedia(
+			buffer,
+			`avatar-${userId}.${file.name.split('.').pop()}`,
+			{
+				app: 'profile',
+				userId,
+			}
+		);
+		return c.json({ url: result.urls.thumbnail || result.urls.original, mediaId: result.id }, 201);
+	} catch (_err) {
+		return c.json({ error: 'Avatar upload failed' }, 500);
+	}
+});
+
 // ─── Version Upload ─────────────────────────────────────────
 
 routes.post('/files/:id/versions', async (c) => {

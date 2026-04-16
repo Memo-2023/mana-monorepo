@@ -52,6 +52,72 @@ const kontextResolver: InputResolver = async (ref) => {
 	};
 };
 
+// ── User Context (structured profile + freeform) ──────────
+
+interface UserContextLike {
+	id: string;
+	about?: { bio?: string; occupation?: string; location?: string; languages?: string[] };
+	interests?: string[];
+	routine?: { wakeUp?: string; workStart?: string; workEnd?: string; bedtime?: string };
+	nutrition?: { diet?: string; allergies?: string[]; preferences?: string };
+	goals?: string[];
+	social?: { communication?: string; workStyle?: string };
+	freeform?: string;
+}
+
+const userContextResolver: InputResolver = async (ref) => {
+	const doc = await db.table<UserContextLike>('userContext').get(ref.id);
+	if (!doc) return null;
+	const [decrypted] = await decryptRecords('userContext', [doc]);
+	return {
+		id: ref.id,
+		module: 'profile',
+		table: 'userContext',
+		title: 'Nutzerprofil',
+		content: buildUserContextText(decrypted),
+	};
+};
+
+function buildUserContextText(ctx: UserContextLike): string {
+	const lines: string[] = [];
+	if (ctx.about?.occupation) lines.push(`Beruf: ${ctx.about.occupation}`);
+	if (ctx.about?.location) lines.push(`Ort: ${ctx.about.location}`);
+	if (ctx.about?.languages?.length) lines.push(`Sprachen: ${ctx.about.languages.join(', ')}`);
+	if (ctx.about?.bio) lines.push(`\nBio: ${ctx.about.bio}`);
+	if (ctx.interests?.length) lines.push(`\nInteressen: ${ctx.interests.join(', ')}`);
+	if (ctx.routine) {
+		const r = ctx.routine;
+		const parts = [];
+		if (r.wakeUp) parts.push(`Aufstehen ${r.wakeUp}`);
+		if (r.workStart && r.workEnd) parts.push(`Arbeit ${r.workStart}–${r.workEnd}`);
+		if (r.bedtime) parts.push(`Schlafenszeit ${r.bedtime}`);
+		if (parts.length) lines.push(`\nTagesroutine: ${parts.join(', ')}`);
+	}
+	if (ctx.nutrition) {
+		if (ctx.nutrition.diet) lines.push(`Ernährung: ${ctx.nutrition.diet}`);
+		if (ctx.nutrition.allergies?.length)
+			lines.push(`Allergien: ${ctx.nutrition.allergies.join(', ')}`);
+	}
+	if (ctx.goals?.length) lines.push(`\nZiele: ${ctx.goals.join(', ')}`);
+	if (ctx.social?.workStyle) lines.push(`Arbeitsweise: ${ctx.social.workStyle}`);
+	if (ctx.freeform?.trim()) lines.push(`\n---\n${ctx.freeform.trim()}`);
+	return lines.join('\n');
+}
+
+const userContextIndexer: InputIndexer = async () => {
+	const doc = await db.table<UserContextLike>('userContext').get('singleton');
+	if (!doc) return [];
+	return [
+		{
+			module: 'profile',
+			table: 'userContext',
+			id: 'singleton',
+			label: 'Nutzerprofil',
+			hint: 'Strukturiertes Profil + Freitext-Kontext',
+		},
+	];
+};
+
 interface GoalLike {
 	id: string;
 	title?: string;
@@ -224,11 +290,13 @@ export function registerDefaultInputResolvers(): void {
 	if (registered) return;
 	registerInputResolver('notes', notesResolver);
 	registerInputResolver('kontext', kontextResolver);
+	registerInputResolver('profile', userContextResolver);
 	registerInputResolver('goals', goalsResolver);
 	registerInputResolver('todo', tasksResolver);
 	registerInputResolver('calendar', calendarResolver);
 	registerInputIndexer('notes', notesIndexer);
 	registerInputIndexer('kontext', kontextIndexer);
+	registerInputIndexer('profile', userContextIndexer);
 	registerInputIndexer('goals', goalsIndexer);
 	registerInputIndexer('todo', tasksIndexer);
 	registerInputIndexer('calendar', calendarIndexer);

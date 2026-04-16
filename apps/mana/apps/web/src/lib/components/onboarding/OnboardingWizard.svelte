@@ -8,6 +8,7 @@
 	import AiTierStep from './steps/AiTierStep.svelte';
 	import SyncStep from './steps/SyncStep.svelte';
 	import CreditsStep from './steps/CreditsStep.svelte';
+	import ContextStep from './steps/ContextStep.svelte';
 	import CompleteStep from './steps/CompleteStep.svelte';
 	import { Check } from '@mana/shared-icons';
 
@@ -30,6 +31,7 @@
 	const STEPS = [
 		{ id: 'welcome', label: 'Willkommen', component: WelcomeStep },
 		{ id: 'profile', label: 'Profil', component: ProfileStep },
+		{ id: 'context', label: 'Über dich', component: ContextStep },
 		{ id: 'apps', label: 'Apps', component: AppsStep },
 		{ id: 'ai-tier', label: 'KI', component: AiTierStep },
 		{ id: 'sync', label: 'Sync', component: SyncStep },

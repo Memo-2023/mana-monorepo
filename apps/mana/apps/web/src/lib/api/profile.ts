@@ -4,7 +4,7 @@
  */
 
 import { authStore } from '$lib/stores/auth.svelte';
-import { getManaAuthUrl } from './config';
+import { getManaAuthUrl, getManaApiUrl } from './config';
 
 // Types
 export interface UserProfile {
@@ -32,11 +32,13 @@ export interface DeleteAccountRequest {
 	reason?: string;
 }
 
-export interface AvatarUploadUrlResponse {
-	uploadUrl: string;
-	fileUrl: string;
-	key: string;
-	expiresIn: number;
+export interface ChangeEmailRequest {
+	newEmail: string;
+}
+
+export interface AvatarUploadResponse {
+	url: string;
+	mediaId: string;
 }
 
 // Helper function for authenticated requests
@@ -104,36 +106,31 @@ export const profileService = {
 	},
 
 	/**
-	 * Get presigned URL for avatar upload
+	 * Change email address (sends verification to new email)
 	 */
-	async getAvatarUploadUrl(filename: string): Promise<AvatarUploadUrlResponse> {
-		return fetchWithAuth('/api/v1/storage/avatar/upload-url', {
+	async changeEmail(data: ChangeEmailRequest): Promise<{ success: boolean; message: string }> {
+		return fetchWithAuth('/api/v1/auth/change-email', {
 			method: 'POST',
-			body: JSON.stringify({ filename }),
+			body: JSON.stringify(data),
 		});
 	},
 
 	/**
-	 * Upload avatar file using presigned URL, then update profile
+	 * Upload avatar file directly, then update profile
 	 */
 	async uploadAvatar(file: File): Promise<{ success: boolean; user: UserProfile }> {
-		// 1. Get presigned upload URL
-		const { uploadUrl, fileUrl } = await this.getAvatarUploadUrl(file.name);
+		const token = await authStore.getValidToken();
+		const formData = new FormData();
+		formData.append('file', file);
 
-		// 2. Upload file directly to S3/MinIO
-		const uploadResponse = await fetch(uploadUrl, {
-			method: 'PUT',
-			body: file,
-			headers: {
-				'Content-Type': file.type,
-			},
+		const uploadResponse = await fetch(`${getManaApiUrl()}/api/v1/storage/avatar/upload`, {
+			method: 'POST',
+			headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+			body: formData,
 		});
 
-		if (!uploadResponse.ok) {
-			throw new Error('Avatar-Upload fehlgeschlagen');
-		}
-
-		// 3. Update profile with new image URL
-		return this.updateProfile({ image: fileUrl });
+		if (!uploadResponse.ok) throw new Error('Avatar-Upload fehlgeschlagen');
+		const { url } = (await uploadResponse.json()) as AvatarUploadResponse;
+		return this.updateProfile({ image: url });
 	},
 };

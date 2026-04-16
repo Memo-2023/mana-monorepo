@@ -194,19 +194,9 @@ export async function runMission(
 		const resolvedInputs: ResolvedInput[] = [...baseInputs];
 		const preStep: AiDebugEntry['preStep'] = { kontextInjected: false };
 
-		// Auto-inject agent-specific kontext doc (if non-empty) — replaces
-		// the old global singleton inject. Falls back to the global singleton
-		// when the agent doesn't have its own doc. Decrypted client-side.
-		const alreadyHasKontext = mission!.inputs.some((i) => i.module === 'kontext');
-		if (!alreadyHasKontext) {
-			const kontextEntry = owningAgent
-				? await loadAgentKontextAsResolvedInput(owningAgent.id)
-				: await loadKontextAsResolvedInput();
-			if (kontextEntry) {
-				resolvedInputs.push(kontextEntry);
-				preStep.kontextInjected = true;
-			}
-		}
+		// User context and agent kontext are available as explicit mission
+		// inputs via the input picker — no auto-inject. The user decides
+		// what context the AI sees.
 
 		// Pre-step web research: if the objective looks like research,
 		// run the deep-research pipeline (mana-search + mana-llm) and

@@ -555,6 +555,14 @@ db.version(22).stores({
 	agentKontextDocs: 'id, agentId',
 });
 
+// v23 — User context: structured profile + freeform markdown.
+// Singleton record ('id') holding structured sections (about, interests,
+// routine, nutrition, goals, social), freeform markdown, and interview
+// progress. Replaces kontextDoc as the central "who is the user?" store.
+db.version(23).stores({
+	userContext: 'id',
+});
+
 // ─── Sync Routing ──────────────────────────────────────────
 // SYNC_APP_MAP, TABLE_TO_SYNC_NAME, TABLE_TO_APP, SYNC_NAME_TO_TABLE,
 // toSyncName() and fromSyncName() are now derived from per-module

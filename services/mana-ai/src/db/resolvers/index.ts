@@ -17,6 +17,7 @@ import {
 	kontextResolver,
 	notesResolver,
 	tasksResolver,
+	userContextResolver,
 } from './encrypted';
 
 const resolvers = new Map<string, ServerInputResolver>();
@@ -44,6 +45,7 @@ registerServerResolver('todo', tasksResolver);
 registerServerResolver('calendar', eventsResolver);
 registerServerResolver('journal', journalResolver);
 registerServerResolver('kontext', kontextResolver);
+registerServerResolver('profile', userContextResolver);
 
 export async function resolveServerInputs(
 	sql: Sql,

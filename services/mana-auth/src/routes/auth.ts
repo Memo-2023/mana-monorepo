@@ -367,6 +367,22 @@ export function createAuthRoutes(
 		return c.json(result);
 	});
 
+	app.post('/change-email', async (c) => {
+		const body = await c.req.json();
+		if (!body.newEmail) {
+			return c.json({ error: 'newEmail is required' }, 400);
+		}
+		await auth.api.changeEmail({
+			body: { newEmail: body.newEmail, callbackURL: body.callbackURL },
+			headers: c.req.raw.headers,
+		});
+		security.logEvent({
+			eventType: 'EMAIL_CHANGE_REQUESTED',
+			metadata: { newEmail: body.newEmail },
+		});
+		return c.json({ success: true, message: 'Verification email sent to new address' });
+	});
+
 	app.post('/change-password', async (c) => {
 		const body = await c.req.json();
 		await auth.api.changePassword({
