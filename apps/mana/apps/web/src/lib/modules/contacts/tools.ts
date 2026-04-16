@@ -13,8 +13,15 @@ export const contactsTools: ModuleTool[] = [
 		parameters: [
 			{ name: 'firstName', type: 'string', description: 'Vorname', required: true },
 			{ name: 'lastName', type: 'string', description: 'Nachname', required: false },
-			{ name: 'email', type: 'string', description: 'E-Mail', required: false },
-			{ name: 'phone', type: 'string', description: 'Telefon', required: false },
+			{ name: 'email', type: 'string', description: 'E-Mail-Adresse', required: false },
+			{ name: 'phone', type: 'string', description: 'Telefonnummer', required: false },
+			{ name: 'company', type: 'string', description: 'Firma / Organisation', required: false },
+			{
+				name: 'notes',
+				type: 'string',
+				description: 'Freitext-Notizen zum Kontakt',
+				required: false,
+			},
 		],
 		async execute(params) {
 			const contact = await contactsStore.createContact({
@@ -22,6 +29,8 @@ export const contactsTools: ModuleTool[] = [
 				lastName: params.lastName as string | undefined,
 				email: params.email as string | undefined,
 				phone: params.phone as string | undefined,
+				company: params.company as string | undefined,
+				notes: params.notes as string | undefined,
 			});
 			return { success: true, data: contact, message: `Kontakt "${params.firstName}" erstellt` };
 		},

@@ -69,13 +69,14 @@ export const AI_TOOL_CATALOG: readonly ToolSchema[] = [
 	{
 		name: 'complete_tasks_by_title',
 		module: 'todo',
-		description: 'Markiert alle Tasks deren Titel den Substring enthält (case-insensitive)',
+		description:
+			'Markiert alle offenen Tasks mit dem gegebenen Titel als erledigt (case-insensitive Substring-Match). Nutze diese, wenn der Nutzer eine Task per Name erledigen will und du nicht ihre ID kennst.',
 		defaultPolicy: 'propose',
 		parameters: [
 			{
-				name: 'titleSubstring',
+				name: 'titleMatch',
 				type: 'string',
-				description: 'Teil des Task-Titels',
+				description: 'Titel oder Teil davon',
 				required: true,
 			},
 		],
@@ -115,12 +116,20 @@ export const AI_TOOL_CATALOG: readonly ToolSchema[] = [
 	{
 		name: 'create_event',
 		module: 'calendar',
-		description: 'Erstellt einen Kalender-Event',
+		description: 'Erstellt einen neuen Kalender-Termin',
 		defaultPolicy: 'propose',
 		parameters: [
-			{ name: 'title', type: 'string', description: 'Event-Titel', required: true },
-			{ name: 'startIso', type: 'string', description: 'Start (ISO)', required: true },
-			{ name: 'endIso', type: 'string', description: 'Ende (ISO)', required: false },
+			{ name: 'title', type: 'string', description: 'Titel des Termins', required: true },
+			{
+				name: 'startTime',
+				type: 'string',
+				description: 'Startzeit (ISO 8601)',
+				required: true,
+			},
+			{ name: 'endTime', type: 'string', description: 'Endzeit (ISO 8601)', required: true },
+			{ name: 'isAllDay', type: 'boolean', description: 'Ganztaegig', required: false },
+			{ name: 'location', type: 'string', description: 'Ort', required: false },
+			{ name: 'description', type: 'string', description: 'Beschreibung', required: false },
 		],
 	},
 	{
@@ -138,12 +147,12 @@ export const AI_TOOL_CATALOG: readonly ToolSchema[] = [
 		description: 'Erstellt eine neue Notiz. Gibt die ID der angelegten Notiz zurueck.',
 		defaultPolicy: 'propose',
 		parameters: [
-			{ name: 'title', type: 'string', description: 'Titel der Notiz', required: true },
+			{ name: 'title', type: 'string', description: 'Titel der Notiz', required: false },
 			{
 				name: 'content',
 				type: 'string',
 				description: 'Inhalt der Notiz (Markdown)',
-				required: false,
+				required: true,
 			},
 		],
 	},
@@ -224,11 +233,33 @@ export const AI_TOOL_CATALOG: readonly ToolSchema[] = [
 	{
 		name: 'create_place',
 		module: 'places',
-		description: 'Fügt einen neuen Ort hinzu',
+		description: 'Erstellt einen neuen Ort',
 		defaultPolicy: 'propose',
 		parameters: [
 			{ name: 'name', type: 'string', description: 'Name des Ortes', required: true },
-			{ name: 'category', type: 'string', description: 'Kategorie', required: false },
+			{ name: 'latitude', type: 'number', description: 'Breitengrad', required: true },
+			{ name: 'longitude', type: 'number', description: 'Laengengrad', required: true },
+			{
+				name: 'category',
+				type: 'string',
+				description: 'Kategorie',
+				required: false,
+				enum: [
+					'home',
+					'work',
+					'food',
+					'shopping',
+					'sport',
+					'culture',
+					'nature',
+					'transport',
+					'health',
+					'education',
+					'nightlife',
+					'other',
+				],
+			},
+			{ name: 'address', type: 'string', description: 'Adresse', required: false },
 		],
 	},
 	{
@@ -246,7 +277,7 @@ export const AI_TOOL_CATALOG: readonly ToolSchema[] = [
 		parameters: [],
 	},
 	{
-		name: 'location_log',
+		name: 'get_current_location',
 		module: 'places',
 		description: 'Gibt die aktuelle GPS-Position zurueck (erfordert Standort-Berechtigung)',
 		defaultPolicy: 'auto',
@@ -387,13 +418,13 @@ export const AI_TOOL_CATALOG: readonly ToolSchema[] = [
 		name: 'create_journal_entry',
 		module: 'journal',
 		description:
-			'Erstellt einen neuen Tagebuch-Eintrag fuer den heutigen Tag. Gibt die ID zurueck.',
+			'Erstellt einen neuen Journal-Eintrag mit optionaler Stimmung (dankbar, glücklich, zufrieden, neutral, nachdenklich, traurig, gestresst, wütend)',
 		defaultPolicy: 'propose',
 		parameters: [
 			{
 				name: 'content',
 				type: 'string',
-				description: 'Inhalt des Eintrags (Markdown)',
+				description: 'Inhalt des Eintrags',
 				required: true,
 			},
 			{ name: 'title', type: 'string', description: 'Optionaler Titel', required: false },
@@ -402,7 +433,16 @@ export const AI_TOOL_CATALOG: readonly ToolSchema[] = [
 				type: 'string',
 				description: 'Stimmung',
 				required: false,
-				enum: ['great', 'good', 'neutral', 'bad', 'terrible'],
+				enum: [
+					'dankbar',
+					'glücklich',
+					'zufrieden',
+					'neutral',
+					'nachdenklich',
+					'traurig',
+					'gestresst',
+					'wütend',
+				],
 			},
 		],
 	},

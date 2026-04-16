@@ -83,9 +83,9 @@ export const drinkTools: ModuleTool[] = [
 		},
 	},
 	{
-		name: 'undo_last_drink',
+		name: 'undo_drink',
 		module: 'drink',
-		description: 'Macht den letzten Getraenk-Eintrag rueckgaengig',
+		description: 'Macht den letzten Drink-Eintrag rückgängig',
 		parameters: [],
 		async execute() {
 			await drinkStore.undoLastEntry();

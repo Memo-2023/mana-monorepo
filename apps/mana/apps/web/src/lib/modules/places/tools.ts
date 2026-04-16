@@ -53,9 +53,9 @@ export const placesTools: ModuleTool[] = [
 		},
 	},
 	{
-		name: 'record_visit',
+		name: 'visit_place',
 		module: 'places',
-		description: 'Registriert einen Besuch an einem bekannten Ort',
+		description: 'Vermerkt einen Besuch an einem bereits erfassten Ort',
 		parameters: [{ name: 'placeId', type: 'string', description: 'ID des Ortes', required: true }],
 		async execute(params) {
 			await placesStore.recordVisit(params.placeId as string);
