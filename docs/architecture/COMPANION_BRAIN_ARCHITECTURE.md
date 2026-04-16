@@ -1993,6 +1993,18 @@ Chosen over the deep-research pipeline (`/api/v1/research/start-sync`) because: 
 
 Failures throw explicitly (0 feeds or 0 articles) — the runner catches and injects a "research failed" `ResolvedInput` with the error message so the planner doesn't hallucinate URLs.
 
+#### Server-Side Research (mana-ai, ab v0.6)
+
+The `mana-ai` background runner mirrors the client-side research pre-step. `NewsResearchClient` (`services/mana-ai/src/planner/news-research-client.ts`) calls `mana-api`'s `POST /api/v1/news-research/discover` + `/search` directly over the Docker network (`MANA_API_URL`). The same `RESEARCH_TRIGGER` regex is used; when it matches, results are injected as `ResolvedInput { id: '__web-research__' }` before the planner prompt is built.
+
+Key differences from the client-side path:
+- No SvelteKit context — pure HTTP fetch.
+- 15s timeout on discover, 30s on search (tighter than client because the tick has a 60s cadence).
+- Graceful null on any failure — the planner just runs without research context; tick doesn't crash.
+- No `discoverByQuery` / `searchFeeds` module imports — the client ships those from `@mana/shared-rss`; the server calls the API endpoints which wrap the same logic.
+
+This makes the Recherche-Agent and Today-Agent fully autonomous (no browser tab required). `research_news` is also registered as a proposable tool so the planner can explicitly request additional research as a PlanStep.
+
 ### 23.3 Kontext Auto-Inject
 
 The user's `kontextDoc` singleton is automatically appended to every planner call as a standing-context `ResolvedInput`, unless the mission already links it as an explicit input. Decrypted client-side only — the server-side mana-ai runner skips this (encryption barrier; needs a Key-Grant for server access).

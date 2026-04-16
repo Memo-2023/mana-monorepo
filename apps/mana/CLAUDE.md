@@ -183,7 +183,36 @@ The companion is a **second actor** that works alongside the human in every modu
 - **Scene lens** — workbench scenes can bind to an agent via `scene.viewingAsAgentId` (context menu → "An Agent binden…"). Pure UI lens, not a data-scope change. `SceneAppBar` shows the agent avatar on bound scene tabs.
 - **Workbench timeline** — `/ai-workbench` renders every AI-attributed event grouped by mission iteration with per-**agent** filter, per-module, per-mission. Each bucket header shows agent avatar + name + mission title. Per-bucket **Revert button** undoes the iteration's writes via `data/ai/revert/` (TaskCreated → delete, TaskCompleted → uncomplete, etc., newest-first). Separate **"Datenzugriff"** tab exposes the server-side decrypt audit (for missions with Key-Grants).
 
-Full architecture (Planner prompt + parser in `@mana/shared-ai`, server-side runner, Postgres actor column, materialized snapshots, Multi-Agent gating, Prometheus metrics + status.mana.how integration): [`docs/architecture/COMPANION_BRAIN_ARCHITECTURE.md`](../../docs/architecture/COMPANION_BRAIN_ARCHITECTURE.md) §20 (AI Workbench) + §21 (Mission Grants) + §22 (Multi-Agent Workbench).
+### Tool Coverage (28 tools, 11 modules)
+
+Agents interact with the app through tools — each one either auto (executes silently during reasoning) or propose (creates a Proposal card the user must approve). Canonical list in `@mana/shared-ai/src/policy/proposable-tools.ts`; server-side definitions in `services/mana-ai/src/planner/tools.ts`; webapp auto-tool list in `src/lib/data/ai/policy.ts`.
+
+| Module | Propose | Auto |
+|--------|---------|------|
+| todo | `create_task`, `complete_task`, `complete_tasks_by_title` | `get_task_stats`, `list_tasks` |
+| calendar | `create_event` | `get_todays_events` |
+| notes | `create_note`, `update_note`, `append_to_note`, `add_tag_to_note` | `list_notes` |
+| places | `create_place`, `visit_place` | `get_places`, `location_log` |
+| drink | `undo_drink` | `get_drink_progress`, `log_drink` |
+| food | — | `nutrition_summary`, `log_meal` |
+| news | `save_news_article` | — |
+| news-research | `research_news` | — |
+| journal | `create_journal_entry` | — |
+| habits | `create_habit`, `log_habit` | `get_habits` |
+| contacts | `create_contact` | `get_contacts` |
+
+**Server-side web-research**: mana-ai calls mana-api's `/api/v1/news-research/discover` + `/search` directly before the planner prompt is built (pre-planning injection). Missions with research-keyword objectives get real article URLs + excerpts injected as a synthetic ResolvedInput. See `services/mana-ai/src/planner/news-research-client.ts`.
+
+### Templates
+
+Pre-configured starter-kits at `/agents/templates` — two sections:
+
+- **Agent-Templates** (with AI): Recherche-Agent, Kontext-Agent, Today-Agent
+- **Workbench-Templates** (no AI): Calmness, Fitness, Deep Work
+
+Each template bundles: optional agent + optional scene layout + optional starter missions (paused) + optional per-module seeds. Template shape: `WorkbenchTemplate` in `@mana/shared-ai/src/agents/templates/types.ts`. Applicator: `src/lib/data/ai/agents/apply-template.ts`. Seed-handler registry: `src/lib/data/ai/agents/seed-registry.ts` — modules register via side-effect imports in `missions/setup.ts`. Current handlers: meditate, habits, goals. Plan: [`docs/plans/workbench-templates.md`](../../docs/plans/workbench-templates.md).
+
+Full architecture (Planner prompt + parser in `@mana/shared-ai`, server-side runner, Postgres actor column, materialized snapshots, Multi-Agent gating, server-side web-research, Prometheus metrics + status.mana.how integration): [`docs/architecture/COMPANION_BRAIN_ARCHITECTURE.md`](../../docs/architecture/COMPANION_BRAIN_ARCHITECTURE.md) §20 (AI Workbench) + §21 (Mission Grants) + §22 (Multi-Agent Workbench).
 
 ## Reference Documents
 

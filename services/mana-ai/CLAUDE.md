@@ -75,6 +75,17 @@ Der Runner wird agent-bewusst — Missionen gehoeren einem benannten Agent, Poli
 - [x] `filterToolsByAgentPolicy` schneidet `deny`-Tools raus bevor der Planner sie sieht.
 - [x] Metrik `mana_ai_agent_decisions_total{decision}`.
 
+## Status: v0.6 (Server-side Web-Research + erweiterte Tools)
+
+Der Runner kann jetzt vor dem Planner-Call eigenstaendig Web-Recherche ausfuehren (ohne Browser) und hat Zugriff auf 28 Tools ueber 11 Module.
+
+- [x] `NewsResearchClient` (`planner/news-research-client.ts`) — HTTP-Client fuer `mana-api`'s `/api/v1/news-research/discover` + `/search`. Timeouts 15s/30s, graceful-null bei Fehler.
+- [x] Pre-Planning-Research-Step in `cron/tick.ts` — bei Mission-Objectives mit Research-Keywords (`recherchier|research|news|today|historisch|...`) wird automatisch vor dem Planner-Call RSS-Discovery + Search ausgefuehrt. Ergebnisse als `ResolvedInput` mit `id='__web-research__'` injiziert.
+- [x] `config.manaApiUrl` + Docker-Compose-Wiring (`MANA_API_URL: http://mana-api:3060`, `depends_on: mana-api`).
+- [x] 28 Tools ueber 11 Module (17 propose, 11 auto):
+  - Propose: `create_task`, `complete_task`, `complete_tasks_by_title`, `create_event`, `create_note`, `update_note`, `append_to_note`, `add_tag_to_note`, `create_place`, `visit_place`, `undo_drink`, `save_news_article`, `create_journal_entry`, `create_habit`, `log_habit`, `research_news`, `create_contact`
+  - Auto: `get_task_stats`, `list_tasks`, `list_notes`, `get_todays_events`, `get_drink_progress`, `log_drink`, `nutrition_summary`, `log_meal`, `get_places`, `location_log`, `get_habits`, `get_contacts`
+
 ## Port: 3067
 
 ## Tech Stack

@@ -33,12 +33,13 @@ each one laying foundations the next one relies on:
 | Plan | Status | Scope |
 |---|---|---|
 | [`ai-mission-key-grant.md`](./ai-mission-key-grant.md) | ✅ Shipped | Per-mission RSA-wrapped key grant so `mana-ai` can decrypt allowlisted encrypted records when user opts in. |
-| [`multi-agent-workbench.md`](./multi-agent-workbench.md) | ✅ Shipped | Identity-aware Actor + named AI agents owning missions + per-agent policy + scene lens. |
+| [`multi-agent-workbench.md`](./multi-agent-workbench.md) | ✅ Shipped | Identity-aware Actor + named AI agents owning missions + per-agent policy + scene lens. 28 tools across 11 modules including server-side web-research. |
+| [`workbench-templates.md`](./workbench-templates.md) | ✅ T1 Shipped | Generalised templates: 3 agent-templates + 3 non-AI workbench starter-kits. Seed-handler registry for per-module data seeding. |
 | [`team-workbench.md`](./team-workbench.md) | 📝 Forward-looking | TeamSpace with membership, team-encrypted records, admin lens on team members. Reuses Actor.principalId + key-wrapping patterns from the two above. |
 
 Cross-references:
 
-- Architecture narrative: [`docs/architecture/COMPANION_BRAIN_ARCHITECTURE.md`](../architecture/COMPANION_BRAIN_ARCHITECTURE.md) §20 (AI Workbench base), §21 (Mission Grants), §22 (Multi-Agent)
+- Architecture narrative: [`docs/architecture/COMPANION_BRAIN_ARCHITECTURE.md`](../architecture/COMPANION_BRAIN_ARCHITECTURE.md) §20 (AI Workbench base), §21 (Mission Grants), §22 (Multi-Agent), §23 (Reasoning Loop + Research + Debug)
 - Non-plan ideas backlog: [`docs/future/AI_AGENTS_IDEAS.md`](../future/AI_AGENTS_IDEAS.md)
 - Service-internal notes: [`services/mana-ai/CLAUDE.md`](../../services/mana-ai/CLAUDE.md)
 - Webapp-internal notes: [`apps/mana/CLAUDE.md`](../../apps/mana/CLAUDE.md) → "AI Workbench" section
