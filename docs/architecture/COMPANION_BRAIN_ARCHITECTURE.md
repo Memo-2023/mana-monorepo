@@ -1955,3 +1955,73 @@ This is deliberately orthogonal: one agent can appear in many scenes; one scene 
 - **Keine Team-Features.** Andere User / geteilte Daten kommen in einem separaten Plan nach dieser Iteration.
 - **Keine Agent-Memory-Self-Modification.** Memory wird nur vom User editiert.
 - **Keine Per-Agent-Encryption-Domains.** Alle Agents sehen alle Daten des einen Users. Mission-Key-Grants bleiben per-Mission.
+
+## 23. Reasoning Loop + Research Pre-Step + Debug Log (ab 2026-04-15)
+
+### 23.1 Reasoning Loop
+
+The foreground Runner (`apps/mana/apps/web/src/lib/data/ai/missions/runner.ts`) wraps the plan→stage pipeline in a loop of up to `MAX_REASONING_LOOP_ITERATIONS` (5) rounds per iteration:
+
+```
+while (budget remaining):
+    plan = planner(mission, loopInputs, availableTools)
+    if plan.steps == 0 → break (agent done)
+    for each step:
+        resolve policy
+        auto  → execute inline, collect {autoData, autoMessage}
+        propose → stage proposal, set humanInLoop=true
+        fail  → record step as failed
+    if humanInLoop → break (wait for user approval)
+    if no auto-outputs → break (no progress)
+    loopInputs += synthetic ResolvedInput("Zwischenergebnisse Runde N",
+                    formatted tool outputs as JSON fenced blocks)
+```
+
+This enables read→reason→act missions ("list notes → tag each one") in a single user-triggered run. The `StageOutcome` type carries `autoData` + `autoMessage` so auto-executed tool payloads thread back into the prompt without a second executor call.
+
+**Budget**: 5 loop iterations = 5 LLM calls max. Planner `maxTokens` raised to 4096 to accommodate batch output (up to ~15 step objects). System prompt teaches the planner about the loop: "read-only tools auto-execute, write-tools get staged, emit all batch writes in one plan because staging ends the turn."
+
+### 23.2 Research Pre-Step
+
+Before the planner runs, if the mission objective matches `/recherchier|research|news|finde|suche|aktuelle|neueste/i`, the Runner calls the `news-research` module's RSS pipeline:
+
+1. `discoverByQuery(objective, lang)` — finds matching RSS feeds
+2. `searchFeeds(feedUrls, objective, {limit: 10})` — ranks articles by relevance
+3. Results formatted as a `ResolvedInput` with explicit instructions ("für jeden relevanten Artikel rufe `save_news_article(url)` auf")
+
+Chosen over the deep-research pipeline (`/api/v1/research/start-sync`) because: no credits consumed, faster (~2s vs ~12s), no SearXNG dependency, uses own RSS infrastructure. The deep-research pipeline still exists for the questions module.
+
+Failures throw explicitly (0 feeds or 0 articles) — the runner catches and injects a "research failed" `ResolvedInput` with the error message so the planner doesn't hallucinate URLs.
+
+### 23.3 Kontext Auto-Inject
+
+The user's `kontextDoc` singleton is automatically appended to every planner call as a standing-context `ResolvedInput`, unless the mission already links it as an explicit input. Decrypted client-side only — the server-side mana-ai runner skips this (encryption barrier; needs a Key-Grant for server access).
+
+### 23.4 Debug Log
+
+Per-iteration diagnostic capture in local-only Dexie table `_aiDebugLog` (schema v20, never synced — contains decrypted prompt content). Keyed by `iterationId`, capped at 50 rows.
+
+**Captured per iteration:**
+- `plannerCalls[]` — array (one per loop round): `{systemPrompt, userPrompt, rawResponse, latencyMs}`
+- `loopSteps[]` — auto-executed tool log: `{loopIndex, toolName, params, outputPreview}`
+- `preStep` — web-research outcome or kontext injection state
+- `resolvedInputs[]` — full list the planner saw (grows across loop rounds)
+
+**UI:** `<AiDebugBlock iterationId={id}>` renders an expandable panel under each iteration card:
+- Summary chip: "2× LLM · 4200ms · 1× Auto-Tool"
+- Collapsible sections: Pre-Step, Resolved Inputs (each individually expandable), Auto-Tool outputs, per-LLM-call prompt+response
+- "📋 JSON" button copies the entire debug entry to clipboard
+
+**Toggle:** `localStorage.setItem('mana.ai.debug', '1')`. Defaults to enabled in DEV builds, disabled in production. Checkbox in mission-detail header exposes the toggle without DevTools.
+
+### 23.5 New Proposable Tools
+
+| Tool | Module | Policy | Purpose |
+|------|--------|--------|---------|
+| `save_news_article` | news | propose | Save URL to reading list via Readability extract |
+| `list_notes` | notes | auto | List notes (id, title, excerpt) for planner context |
+| `update_note` | notes | propose | Full overwrite of title/content (destructive) |
+| `append_to_note` | notes | propose | Append text to end of note (non-destructive) |
+| `add_tag_to_note` | notes | propose | Append `#Tag` idempotently (deduplicates, case-insensitive) |
+
+All propose-tools registered in `@mana/shared-ai` `AI_PROPOSABLE_TOOL_NAMES` and mirrored in `services/mana-ai/src/planner/tools.ts` (boot-time drift guard). `AiProposalInbox` mounted on `/news` and `/notes` pages.
