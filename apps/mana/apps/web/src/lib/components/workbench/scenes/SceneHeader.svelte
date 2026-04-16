@@ -12,12 +12,40 @@
 	import { workbenchScenesStore } from '$lib/stores/workbench-scenes.svelte';
 	import { Sparkle } from '@mana/shared-icons';
 	import { goto } from '$app/navigation';
+	import { TagSelector, type Tag } from '@mana/shared-ui';
+	import { useAllTags } from '@mana/shared-stores';
+	import { useAgents } from '$lib/data/ai/agents/queries';
 
 	interface Props {
 		scene: WorkbenchScene | null;
 	}
 
 	const { scene }: Props = $props();
+	const allTags = $derived(useAllTags());
+	const agents = $derived(useAgents());
+
+	// Auto-infer scopeTagIds from bound agent if scene has no explicit override
+	const effectiveScopeTagIds = $derived.by(() => {
+		if (!scene) return [];
+		if (scene.scopeTagIds?.length) return scene.scopeTagIds;
+		if (scene.viewingAsAgentId) {
+			const agent = agents.value.find((a) => a.id === scene.viewingAsAgentId);
+			return agent?.scopeTagIds ?? [];
+		}
+		return [];
+	});
+
+	const selectedScopeTags = $derived<Tag[]>(
+		allTags.value.filter((t) => effectiveScopeTagIds.includes(t.id))
+	);
+
+	async function handleScopeChange(tags: Tag[]) {
+		if (!scene) return;
+		const ids = tags.map((t) => t.id);
+		await workbenchScenesStore.updateScene(scene.id, {
+			scopeTagIds: ids.length > 0 ? ids : undefined,
+		});
+	}
 
 	// The seeded default scene is called "Home". Its empty-description
 	// placeholder gets a welcoming line instead of the generic prompt.
@@ -131,6 +159,20 @@
 			onblur={(e) => commitDescription(e.currentTarget, scene.description ?? '')}
 		></p>
 
+		<!-- Scope tags: filter what this scene shows -->
+		<div class="scope-picker">
+			<TagSelector
+				tags={allTags.value}
+				selectedTags={selectedScopeTags}
+				onTagsChange={handleScopeChange}
+				placeholder={effectiveScopeTagIds.length > 0 ? '' : 'Bereiche filtern…'}
+				addTagLabel="Bereich hinzufügen"
+			/>
+			{#if !scene.scopeTagIds?.length && scene.viewingAsAgentId && effectiveScopeTagIds.length > 0}
+				<span class="scope-hint">via Agent</span>
+			{/if}
+		</div>
+
 		<!--
 			Template-Gallery shortcut — persistent discoverability hook
 			directly on the homepage. Small chip-style, deliberately
@@ -222,6 +264,18 @@
 		pointer-events: none;
 	}
 
+	.scope-picker {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		margin-top: 0.25rem;
+	}
+	.scope-hint {
+		font-size: 0.6875rem;
+		color: hsl(var(--color-muted-foreground));
+		font-style: italic;
+		white-space: nowrap;
+	}
 	.template-shortcut {
 		align-self: flex-start;
 		margin-top: 0.75rem;

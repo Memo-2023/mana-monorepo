@@ -102,7 +102,13 @@ async function patchScene(
 	patch: Partial<
 		Pick<
 			LocalWorkbenchScene,
-			'name' | 'description' | 'openApps' | 'order' | 'wallpaper' | 'viewingAsAgentId'
+			| 'name'
+			| 'description'
+			| 'openApps'
+			| 'order'
+			| 'wallpaper'
+			| 'viewingAsAgentId'
+			| 'scopeTagIds'
 		>
 	>
 ) {
@@ -235,6 +241,21 @@ export const workbenchScenesStore = {
 	 *  lens — does not affect which data the open apps can see. */
 	async setSceneAgent(id: string, agentId: string | undefined) {
 		await patchScene(id, { viewingAsAgentId: agentId });
+	},
+
+	async setSceneScopeTags(id: string, scopeTagIds: string[] | undefined) {
+		await patchScene(id, { scopeTagIds });
+		// Sync reactive scope if this is the active scene
+		if (id === activeSceneIdState) {
+			setSceneScopeTagIds(scopeTagIds);
+		}
+	},
+
+	async updateScene(id: string, patch: Partial<WorkbenchScene>) {
+		await patchScene(id, patch);
+		if (id === activeSceneIdState && patch.scopeTagIds !== undefined) {
+			setSceneScopeTagIds(patch.scopeTagIds);
+		}
 	},
 
 	async duplicateScene(id: string) {
