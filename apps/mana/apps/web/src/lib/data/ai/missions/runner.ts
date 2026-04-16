@@ -57,6 +57,9 @@ const RESEARCH_TRIGGER = /\b(recherchier|research|news|finde|suche|aktuelle|neue
  *  planner returns zero steps (it considers this subtask done).
  *  5 is generous for read-act-refine patterns ("list_notes → tag them")
  *  without running the LLM bill dry on stuck missions. */
+/** Keep in sync with the planner system prompt in
+ *  packages/shared-ai/src/planner/prompt.ts which tells the LLM
+ *  "bis zu 5 Planungsrunden pro Iteration, 1–5 Schritte pro Runde". */
 const MAX_REASONING_LOOP_ITERATIONS = 5;
 
 /** Min interval between Dexie phaseDetail writes during streaming.
@@ -616,10 +619,13 @@ async function loadKontextAsResolvedInput(): Promise<ResolvedInput | null> {
 
 /** Load the agent-specific kontext doc. Falls back to null (caller
  *  may then fall back to the global singleton if desired). */
+/** Load the agent-specific kontext doc. Returns null when the agent
+ *  has no dedicated doc (does NOT fall back to the global singleton —
+ *  kontext injection is explicit via the input picker, not auto). */
 async function loadAgentKontextAsResolvedInput(agentId: string): Promise<ResolvedInput | null> {
 	try {
 		const doc = await getAgentKontext(agentId);
-		if (!doc) return loadKontextAsResolvedInput(); // fallback to global
+		if (!doc) return null;
 		return {
 			id: doc.id,
 			module: 'kontext',
@@ -726,7 +732,9 @@ async function runWebResearch(mission: Mission): Promise<WebResearchOutcome | nu
 
 	return {
 		input: {
-			id: `news-research-${Date.now()}`,
+			// Stable ID so re-running the same mission replaces the prior
+			// research input instead of appending duplicates.
+			id: `news-research-${mission.id}`,
 			module: 'news-research',
 			table: 'rssArticles',
 			title: 'News-Recherche (RSS) zu diesem Auftrag',

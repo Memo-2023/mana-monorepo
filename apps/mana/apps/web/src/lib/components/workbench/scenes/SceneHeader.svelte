@@ -14,7 +14,7 @@
 	import { goto } from '$app/navigation';
 	import { TagSelector, type Tag } from '@mana/shared-ui';
 	import { useAllTags } from '@mana/shared-stores';
-	import { useAgents } from '$lib/data/ai/agents/queries';
+	import { useAgent } from '$lib/data/ai/agents/queries';
 
 	interface Props {
 		scene: WorkbenchScene | null;
@@ -22,16 +22,14 @@
 
 	const { scene }: Props = $props();
 	const allTags = $derived(useAllTags());
-	const agents = $derived(useAgents());
+	// Only load the single bound agent, not the full agent list.
+	const boundAgent = $derived(scene?.viewingAsAgentId ? useAgent(scene.viewingAsAgentId) : null);
 
 	// Auto-infer scopeTagIds from bound agent if scene has no explicit override
 	const effectiveScopeTagIds = $derived.by(() => {
 		if (!scene) return [];
 		if (scene.scopeTagIds?.length) return scene.scopeTagIds;
-		if (scene.viewingAsAgentId) {
-			const agent = agents.value.find((a) => a.id === scene.viewingAsAgentId);
-			return agent?.scopeTagIds ?? [];
-		}
+		if (boundAgent?.value) return boundAgent.value.scopeTagIds ?? [];
 		return [];
 	});
 

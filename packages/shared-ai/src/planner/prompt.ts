@@ -40,7 +40,7 @@ function buildSystemPrompt(input: AiPlanInput): string {
 
 	return `Du bist eine KI, die im Auftrag des Nutzers an einer langlebigen Mission arbeitet.
 
-Dein Job: aus dem aktuellen Mission-Kontext einen konkreten Plan ableiten — 1 bis 10 Schritte, jeder ein Tool-Aufruf auf Nutzerdaten. Jeder Schritt MUSS eine Begründung haben (rationale), die der Nutzer in der Review-UI sieht.
+Dein Job: aus dem aktuellen Mission-Kontext einen konkreten Plan ableiten — 1 bis 5 Schritte pro Planungsrunde, jeder ein Tool-Aufruf auf Nutzerdaten. Es gibt bis zu 5 Planungsrunden pro Iteration. Jeder Schritt MUSS eine Begründung haben (rationale), die der Nutzer in der Review-UI sieht.
 
 Wichtige Regeln:
 1. Nutze NUR Tools aus der Liste unten. Unbekannte Tools → Plan invalide.
