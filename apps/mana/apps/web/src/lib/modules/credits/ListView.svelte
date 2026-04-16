@@ -27,6 +27,7 @@
 		type CreditOperationType,
 	} from '@mana/credits';
 	import { ManaEvents } from '@mana/shared-utils/analytics';
+	import { authStore } from '$lib/stores/auth.svelte';
 
 	let balance = $state<CreditBalance | null>(null);
 	let transactions = $state<CreditTransaction[]>([]);
@@ -135,21 +136,35 @@
 	async function loadData() {
 		loading = true;
 		error = null;
-		try {
-			const [balanceData, transactionsData, packagesData] = await Promise.all([
-				creditsService.getBalance(),
-				creditsService.getTransactions(20),
-				creditsService.getPackages(),
-			]);
-			balance = balanceData;
-			transactions = transactionsData;
-			packages = packagesData.filter((p) => p.active).sort((a, b) => a.sortOrder - b.sortOrder);
-		} catch (e) {
-			error = e instanceof Error ? e.message : $_('common.error_loading');
-			console.error('Failed to load credits data:', e);
-		} finally {
+
+		// API calls require auth — skip for guests, still show costs tab (static data)
+		if (!authStore.isAuthenticated) {
 			loading = false;
+			return;
 		}
+
+		// Load each independently so a single 401/failure doesn't blank the whole page
+		const results = await Promise.allSettled([
+			creditsService.getBalance(),
+			creditsService.getTransactions(20),
+			creditsService.getPackages(),
+		]);
+
+		if (results[0].status === 'fulfilled') balance = results[0].value;
+		if (results[1].status === 'fulfilled') transactions = results[1].value;
+		if (results[2].status === 'fulfilled') {
+			packages = results[2].value.filter((p) => p.active).sort((a, b) => a.sortOrder - b.sortOrder);
+		}
+
+		// Only show error if ALL three failed
+		const allFailed = results.every((r) => r.status === 'rejected');
+		if (allFailed) {
+			const firstErr = results.find((r) => r.status === 'rejected') as PromiseRejectedResult;
+			error =
+				firstErr.reason instanceof Error ? firstErr.reason.message : $_('common.error_loading');
+		}
+
+		loading = false;
 	}
 
 	// ── Helpers ────────────────────────────────────────────

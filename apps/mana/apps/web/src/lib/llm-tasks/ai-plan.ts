@@ -51,6 +51,7 @@ export const aiPlanTask: LlmTask<AiPlanInput, AiPlanOutput> = {
 			// (e.g. 10 notes → 10 add_tag_to_note calls). 4096 fits ~15-20
 			// step objects while still fast on browser tier.
 			maxTokens: 4096,
+			onToken: input.onToken,
 		});
 
 		// Always populate debug payload (cheap — strings already in memory).

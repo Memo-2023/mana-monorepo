@@ -7,13 +7,12 @@
  *
  * The endpoint is `/v1/chat/completions` and the wire format is
  * straight OpenAI SSE: `data: {…}\n\n` lines, terminated by
- * `data: [DONE]`. The hand-rolled parser is the same shape as the
- * existing playground client (apps/mana/apps/web/src/lib/modules/
- * playground/llm.ts) so the two consumers stay aligned and can be
- * unified later if we want.
+ * `data: [DONE]`. The SSE parser lives in `../sse-parser.ts` and is
+ * shared with the playground client.
  */
 
 import { BackendUnreachableError, ProviderBlockedError } from '../errors';
+import { consumeSSEStream } from '../sse-parser';
 import type { LlmTier } from '../tiers';
 import type { GenerateResult, LlmTaskRequest } from '../types';
 
@@ -33,31 +32,20 @@ export function resolveLlmBaseUrl(): string {
 /**
  * Send a chat completion to mana-llm and return the result.
  *
- * Implementation notes:
+ * When `req.onToken` is set, uses SSE streaming (`stream: true`) so
+ * the caller receives per-token callbacks as they arrive — used by the
+ * Mission Runner to show live progress during the "calling-llm" phase.
  *
- * - We use the NON-streaming endpoint (`stream: false`). Curl tests
- *   from the same hostname showed that mana-llm's streaming endpoint
- *   works perfectly when called from outside the browser, but the
- *   browser receives `totalFrames=0` (an empty response body) for
- *   reasons that almost certainly trace back to CORS + credentials
- *   + streaming-body interactions. Non-streaming is a single JSON
- *   response, much friendlier to the browser fetch API.
+ * When `req.onToken` is absent, uses the non-streaming endpoint
+ * (`stream: false`) which returns a single JSON response — simpler and
+ * sufficient for tasks that only care about the final result.
  *
- * - We do NOT pass `credentials: 'include'`. The mana-llm service
- *   doesn't require user auth (the API key middleware accepts
- *   anonymous requests), and `credentials: 'include'` plus
- *   `Access-Control-Allow-Origin: *` is one of the patterns that
- *   silently breaks the response body in browsers. Verified by
- *   comparing curl-from-server (no creds, works) vs browser fetch
- *   (with creds, empty body).
- *
- * - For tasks that registered an `onToken` callback (legacy chat-
- *   style streaming UX), we fire it ONCE with the full content at
- *   the end. That's a degraded streaming experience, but no current
- *   shared-llm caller actually consumes the per-token stream — the
- *   queue + watcher model only cares about the final result. The
- *   playground module uses its own client (apps/.../modules/
- *   playground/llm.ts) which keeps real streaming for live UX.
+ * We do NOT pass `credentials: 'include'` — the mana-llm service
+ * accepts anonymous requests, and `credentials: 'include'` plus
+ * `Access-Control-Allow-Origin: *` silently breaks the response body
+ * in browsers (verified by comparing curl vs browser fetch). The
+ * playground module uses the same no-credentials pattern with
+ * `stream: true` and it works fine.
  *
  * `tier` is only used for error tagging — both 'mana-server' and
  * 'cloud' call the same endpoint with different model strings.
@@ -69,6 +57,7 @@ export async function callManaLlmStreaming(
 ): Promise<GenerateResult> {
 	const url = `${resolveLlmBaseUrl()}/v1/chat/completions`;
 	const start = performance.now();
+	const useStreaming = typeof req.onToken === 'function';
 
 	let res: Response;
 	try {
@@ -80,7 +69,7 @@ export async function callManaLlmStreaming(
 				messages: req.messages,
 				temperature: req.temperature ?? 0.7,
 				max_tokens: req.maxTokens ?? 1024,
-				stream: false,
+				stream: useStreaming,
 			}),
 		});
 	} catch (err) {
@@ -102,6 +91,25 @@ export async function callManaLlmStreaming(
 		throw new BackendUnreachableError(tier, res.status, text);
 	}
 
+	// ── Streaming path: SSE with per-token callbacks ───────────
+	if (useStreaming && res.body) {
+		let usage = { promptTokens: 0, completionTokens: 0, totalTokens: 0 };
+		const content = await consumeSSEStream(res.body, req.onToken, (u) => {
+			usage = {
+				promptTokens: u.promptTokens,
+				completionTokens: u.completionTokens,
+				totalTokens: u.promptTokens + u.completionTokens,
+			};
+		});
+
+		if (!content) {
+			console.warn(`[shared-llm:${tier}] empty streaming content`, { model });
+		}
+
+		return { content, usage, latencyMs: Math.round(performance.now() - start) };
+	}
+
+	// ── Non-streaming path: single JSON response ──────────────
 	let json: {
 		choices?: Array<{
 			message?: { content?: string; reasoning?: string };
@@ -119,25 +127,12 @@ export async function callManaLlmStreaming(
 	// Field ordering: prefer the canonical OpenAI `message.content` first.
 	// If that's empty AND `message.reasoning` is set, fall back to it —
 	// reasoning models like Gemma 4 emit their thought process there
-	// when given too few tokens to also produce a final answer (we hit
-	// this with max_tokens=10 / no system prompt: content was "" while
-	// reasoning had the half-finished thought). For our title task this
-	// rarely happens because the system prompt is directive, but the
-	// fallback is cheap and protects against future tasks that might
-	// trigger longer reasoning chains.
+	// when given too few tokens to also produce a final answer.
 	const choice = json.choices?.[0];
 	const content = choice?.message?.content ?? choice?.message?.reasoning ?? choice?.text ?? '';
 
 	if (!content) {
 		console.warn(`[shared-llm:${tier}] empty completion content`, { model, json });
-	}
-
-	// One-shot "streaming" for any caller that registered onToken: emit
-	// the whole content as a single chunk at the end. The current
-	// orchestrator + queue model never reads tokens incrementally for
-	// remote tiers anyway.
-	if (content && req.onToken) {
-		req.onToken(content);
 	}
 
 	return {

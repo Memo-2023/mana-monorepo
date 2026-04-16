@@ -51,6 +51,11 @@ const RESEARCH_TRIGGER = /\b(recherchier|research|news|finde|suche|aktuelle|neue
  *  5 is generous for read-act-refine patterns ("list_notes → tag them")
  *  without running the LLM bill dry on stuck missions. */
 const MAX_REASONING_LOOP_ITERATIONS = 5;
+
+/** Min interval between Dexie phaseDetail writes during streaming.
+ *  50 tokens/s × 500ms = ~25 tokens between writes — frequent enough
+ *  for the UI to feel live, infrequent enough to avoid Dexie thrashing. */
+const STREAMING_PHASE_THROTTLE_MS = 500;
 /** Singleton row id of the kontext doc — kept in sync with
  *  `modules/kontext/types.ts` (KONTEXT_SINGLETON_ID). */
 const KONTEXT_SINGLETON_ID = 'singleton';
@@ -274,8 +279,32 @@ export async function runMission(
 					: `Planner Runde ${loopIndex + 1}/${MAX_REASONING_LOOP_ITERATIONS}`
 			);
 			let plan: AiPlanOutput;
+
+			// Streaming: show live token progress while waiting for the
+			// planner response. Throttled to avoid Dexie write floods.
+			let streamTokenCount = 0;
+			let lastStreamWrite = 0;
+			const roundLabel = loopIndex === 0 ? '' : ` (Runde ${loopIndex + 1})`;
+			const onToken = (_delta: string) => {
+				streamTokenCount++;
+				const now = Date.now();
+				if (now - lastStreamWrite < STREAMING_PHASE_THROTTLE_MS) return;
+				lastStreamWrite = now;
+				void setIterationPhase(
+					mission!.id,
+					iterationId,
+					'calling-llm',
+					`empfange Plan${roundLabel}… ${streamTokenCount} tokens`
+				);
+			};
+
 			try {
-				plan = await deps.plan({ mission: mission!, resolvedInputs: loopInputs, availableTools });
+				plan = await deps.plan({
+					mission: mission!,
+					resolvedInputs: loopInputs,
+					availableTools,
+					onToken,
+				});
 			} catch (err) {
 				if (isAiDebugEnabled()) {
 					void recordAiDebug({

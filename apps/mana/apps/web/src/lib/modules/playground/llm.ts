@@ -2,15 +2,11 @@
  * Playground LLM client — thin wrapper around mana-llm's OpenAI-compatible
  * `/v1/chat/completions` (streaming) and `/v1/models` endpoints.
  *
- * Lives next to the playground UI rather than in a shared package because
- * the playground is the only consumer right now. If chat / todo enrichment
- * / period insights end up calling the same surface in the future, lift
- * this into `$lib/data/llm-client.ts`.
- *
- * The chunk parser is hand-rolled rather than pulled from a library: the
- * SSE wire format from mana-llm is straight OpenAI (`data: {…}\n\n` lines
- * with a sentinel `[DONE]`), so a 30-line reader is simpler than a dep.
+ * The SSE chunk parser lives in `@mana/shared-llm/sse-parser` and is shared
+ * with the LLM orchestrator's remote backend (backends/remote.ts).
  */
+
+import { consumeSSEStream } from '@mana/shared-llm/sse-parser';
 
 const DEFAULT_LLM_URL = 'http://localhost:3025';
 
@@ -91,49 +87,42 @@ export async function* streamCompletion(opts: CompletionOptions): AsyncGenerator
 		throw new Error(`mana-llm: ${res.status} ${res.statusText}${text ? ` — ${text}` : ''}`);
 	}
 
-	const reader = res.body.getReader();
-	const decoder = new TextDecoder();
-	let buffer = '';
+	// Collect chunks via the shared SSE parser, then yield them.
+	// We use a queue pattern so the async generator can yield chunks as
+	// they arrive from the callback-based consumeSSEStream.
+	const chunks: StreamChunk[] = [];
+	let resolve: (() => void) | null = null;
+	let done = false;
 
-	while (true) {
-		const { value, done } = await reader.read();
-		if (done) break;
-		buffer += decoder.decode(value, { stream: true });
+	const streamPromise = consumeSSEStream(
+		res.body,
+		(content) => {
+			chunks.push({ type: 'delta', content });
+			resolve?.();
+		},
+		(usage) => {
+			chunks.push({
+				type: 'usage',
+				promptTokens: usage.promptTokens,
+				completionTokens: usage.completionTokens,
+			});
+			resolve?.();
+		}
+	).then(() => {
+		done = true;
+		resolve?.();
+	});
 
-		// SSE frames are separated by blank lines. Process complete frames
-		// and leave any partial trailing frame in the buffer for the next
-		// chunk.
-		let sep: number;
-		while ((sep = buffer.indexOf('\n\n')) !== -1) {
-			const frame = buffer.slice(0, sep);
-			buffer = buffer.slice(sep + 2);
-
-			for (const line of frame.split('\n')) {
-				if (!line.startsWith('data:')) continue;
-				const data = line.slice(5).trim();
-				if (!data || data === '[DONE]') continue;
-				try {
-					const json = JSON.parse(data) as {
-						choices?: Array<{ delta?: { content?: string } }>;
-						usage?: { prompt_tokens?: number; completion_tokens?: number };
-					};
-					const delta = json.choices?.[0]?.delta?.content;
-					if (delta) yield { type: 'delta', content: delta };
-
-					// Usage stats — typically in the final chunk
-					if (json.usage?.prompt_tokens != null) {
-						yield {
-							type: 'usage',
-							promptTokens: json.usage.prompt_tokens,
-							completionTokens: json.usage.completion_tokens ?? 0,
-						};
-					}
-				} catch {
-					// Malformed frame — skip silently. mana-llm occasionally
-					// emits keepalive comments and we don't want them to
-					// crash the stream.
-				}
-			}
+	while (!done || chunks.length > 0) {
+		if (chunks.length > 0) {
+			yield chunks.shift()!;
+		} else {
+			await new Promise<void>((r) => {
+				resolve = r;
+			});
 		}
 	}
+
+	// Ensure the stream promise settles (propagate any errors).
+	await streamPromise;
 }

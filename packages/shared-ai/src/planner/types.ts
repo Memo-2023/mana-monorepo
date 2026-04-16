@@ -30,6 +30,13 @@ export interface AiPlanInput {
 	readonly mission: Mission;
 	readonly resolvedInputs: readonly ResolvedInput[];
 	readonly availableTools: readonly AvailableTool[];
+	/**
+	 * Optional streaming callback — called with each token delta as it
+	 * arrives from the LLM. The Runner uses this to show live progress
+	 * during the "calling-llm" phase. Only effective when the backend
+	 * supports streaming (mana-server / cloud tiers).
+	 */
+	readonly onToken?: (delta: string) => void;
 }
 
 export interface PlannedStep {
