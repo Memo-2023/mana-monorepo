@@ -979,7 +979,7 @@
 					spiralHref="/?app=spiral"
 					creditsHref="/credits"
 					themesHref="/?app=themes"
-					helpHref="/help"
+					helpHref="/?app=help"
 					allAppsHref="/apps"
 					{spotlightActions}
 					{contentSearcher}
