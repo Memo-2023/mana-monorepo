@@ -5,8 +5,7 @@
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
 import { decryptRecords } from '$lib/data/crypto';
-import { filterBySceneScope } from '$lib/stores/scene-scope.svelte';
-import { taskTagTable } from './collections';
+import { filterBySceneScopeBatch } from '$lib/stores/scene-scope.svelte';
 import type {
 	LocalTask,
 	LocalBoardView,
@@ -48,10 +47,18 @@ export function useAllTasks() {
 		const locals = await db.table<LocalTask>('tasks').orderBy('order').toArray();
 		const visible = locals.filter((t) => !t.deletedAt);
 		const decrypted = await decryptRecords('tasks', visible);
-		const scoped = await filterBySceneScope(decrypted, async (t) => {
-			const links = await taskTagTable.where('taskId').equals(t.id).toArray();
-			return links.filter((l) => !l.deletedAt).map((l) => l.tagId);
-		});
+		// Batch tag lookup: 1 query instead of N
+		const ids = decrypted.map((t) => t.id);
+		const allLinks =
+			ids.length > 0 ? await db.table('taskLabels').where('taskId').anyOf(ids).toArray() : [];
+		const tagMap = new Map<string, string[]>();
+		for (const l of allLinks) {
+			if (l.deletedAt) continue;
+			const arr = tagMap.get(l.taskId as string);
+			if (arr) arr.push(l.tagId as string);
+			else tagMap.set(l.taskId as string, [l.tagId as string]);
+		}
+		const scoped = filterBySceneScopeBatch(decrypted, (t) => t.id, tagMap);
 		return scoped.map(toTask);
 	}, [] as Task[]);
 }

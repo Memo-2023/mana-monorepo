@@ -71,7 +71,11 @@ const KONTEXT_SINGLETON_ID = 'singleton';
  *  and finalises the iteration as failed. 90 s is comfortable for a
  *  cloud-tier model but short enough that a wedged backend doesn't sit
  *  in `running` indefinitely. */
-const ITERATION_TIMEOUT_MS = 90_000;
+/** 180s gives the reasoning loop (up to 5 LLM calls) enough headroom
+ *  even on slow models. Each call can take 10–30s on Ollama/GPU with
+ *  network latency; the old 90s limit regularly timed out during the
+ *  second loop round. */
+const ITERATION_TIMEOUT_MS = 180_000;
 
 class CancelledError extends Error {
 	constructor(reason: string) {

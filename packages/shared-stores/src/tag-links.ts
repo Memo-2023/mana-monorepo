@@ -42,6 +42,13 @@ export interface TagLinkOpsConfig {
 export interface TagLinkOps {
 	/** Get all tag IDs linked to an entity */
 	getTagIds(entityId: string): Promise<string[]>;
+	/**
+	 * Batch variant: fetch tag IDs for many entities in ONE Dexie query.
+	 * Returns a Map<entityId, tagId[]>. Entities with no tags are absent
+	 * from the map (not present with empty array). Use this in list views
+	 * and scope filters to avoid N+1 queries.
+	 */
+	getTagIdsForMany(entityIds: string[]): Promise<Map<string, string[]>>;
 	/** Add a tag to an entity (no-op if already linked) */
 	addTag(entityId: string, tagId: string): Promise<void>;
 	/** Remove a tag from an entity (soft-delete) */
@@ -64,6 +71,20 @@ export function createTagLinkOps(config: TagLinkOpsConfig): TagLinkOps {
 		async getTagIds(entityId: string): Promise<string[]> {
 			const links = await getActive(entityId);
 			return links.map((l) => l.tagId);
+		},
+
+		async getTagIdsForMany(entityIds: string[]): Promise<Map<string, string[]>> {
+			if (entityIds.length === 0) return new Map();
+			const all = await config.table().where(entityIdField).anyOf(entityIds).toArray();
+			const active = all.filter((r) => !r.deletedAt);
+			const result = new Map<string, string[]>();
+			for (const link of active) {
+				const eid = link[entityIdField] as string;
+				const arr = result.get(eid);
+				if (arr) arr.push(link.tagId);
+				else result.set(eid, [link.tagId]);
+			}
+			return result;
 		},
 
 		async addTag(entityId: string, tagId: string): Promise<void> {

@@ -17,7 +17,7 @@
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
 import { decryptRecords } from '$lib/data/crypto';
-import { filterBySceneScope } from '$lib/stores/scene-scope.svelte';
+import { filterBySceneScopeBatch } from '$lib/stores/scene-scope.svelte';
 import { noteTagOps } from './stores/tags.svelte';
 import type { LocalNote, Note } from './types';
 
@@ -51,7 +51,8 @@ export function useAllNotes() {
 		// Locked vault returns the blobs untouched so the UI can render
 		// a "🔒" placeholder where title/content would be.
 		const decrypted = await decryptRecords('notes', visible);
-		const scoped = await filterBySceneScope(decrypted, (n) => noteTagOps.getTagIds(n.id));
+		const tagMap = await noteTagOps.getTagIdsForMany(decrypted.map((n) => n.id));
+		const scoped = filterBySceneScopeBatch(decrypted, (n) => n.id, tagMap);
 		return scoped.map(toNote).sort((a, b) => {
 			if (a.isPinned !== b.isPinned) return a.isPinned ? -1 : 1;
 			return b.updatedAt.localeCompare(a.updatedAt);

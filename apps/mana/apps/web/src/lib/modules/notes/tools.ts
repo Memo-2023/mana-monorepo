@@ -13,7 +13,7 @@ import type { ModuleTool } from '$lib/data/tools/types';
 import { notesStore } from './stores/notes.svelte';
 import { noteTagOps } from './stores/tags.svelte';
 import { db } from '$lib/data/database';
-import { decryptRecords } from '$lib/data/crypto';
+import { decryptRecords, VaultLockedError } from '$lib/data/crypto';
 import { filterByScope } from '$lib/data/ai/scope-context';
 import type { LocalNote } from './types';
 
@@ -25,11 +25,23 @@ function excerptOf(content: string, max = 140): string {
 	return flat.length <= max ? flat : flat.slice(0, max - 1) + '…';
 }
 
+/** Read + decrypt a single note. Throws a descriptive error when the
+ *  vault is locked instead of returning null (which callers can't
+ *  distinguish from "note doesn't exist"). */
 async function readLocalNote(id: string): Promise<LocalNote | null> {
 	const local = await db.table<LocalNote>('notes').get(id);
 	if (!local || local.deletedAt) return null;
-	const [decrypted] = await decryptRecords('notes', [local]);
-	return decrypted ?? null;
+	try {
+		const [decrypted] = await decryptRecords('notes', [local]);
+		return decrypted ?? null;
+	} catch (err) {
+		if (err instanceof VaultLockedError) {
+			throw new Error(
+				`Vault ist gesperrt — Notiz ${id} kann nicht entschlüsselt werden. Bitte Vault entsperren.`
+			);
+		}
+		throw err;
+	}
 }
 
 export const notesTools: ModuleTool[] = [

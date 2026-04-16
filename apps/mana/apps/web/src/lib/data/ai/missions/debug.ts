@@ -19,6 +19,12 @@ import type { ResolvedInput } from './planner/types';
 const TABLE = '_aiDebugLog';
 const STORAGE_KEY = 'mana.ai.debug';
 const MAX_ENTRIES = 50;
+/** Auto-purge entries older than this to limit exposure of decrypted
+ *  content in the local-only table. */
+const MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+/** Max chars per resolved-input content stored in debug. Longer content
+ *  is truncated to reduce the privacy surface if the device is stolen. */
+const INPUT_CONTENT_LIMIT = 500;
 
 /**
  * Captured by `aiPlanTask` and passed back via the planner output so the
@@ -83,11 +89,28 @@ export function setAiDebugEnabled(enabled: boolean): void {
 	localStorage.setItem(STORAGE_KEY, enabled ? '1' : '0');
 }
 
-/** Persist one debug entry + trim oldest if over cap. Idempotent on
- *  iterationId — re-running an iteration overwrites the prior capture. */
+/** Truncate resolved-input content before persisting so the debug
+ *  table doesn't store full decrypted note/kontext bodies at rest. */
+function sanitizeForStorage(entry: AiDebugEntry): AiDebugEntry {
+	return {
+		...entry,
+		resolvedInputs: entry.resolvedInputs.map((inp) => ({
+			...inp,
+			content:
+				inp.content.length > INPUT_CONTENT_LIMIT
+					? inp.content.slice(0, INPUT_CONTENT_LIMIT) + '\n… (truncated for privacy)'
+					: inp.content,
+		})),
+	};
+}
+
+/** Persist one debug entry + trim oldest if over cap + purge old entries.
+ *  Idempotent on iterationId — re-running an iteration overwrites prior. */
 export async function recordAiDebug(entry: AiDebugEntry): Promise<void> {
 	try {
-		await db.table<AiDebugEntry>(TABLE).put(entry);
+		await db.table<AiDebugEntry>(TABLE).put(sanitizeForStorage(entry));
+
+		// Count-based cap
 		const total = await db.table<AiDebugEntry>(TABLE).count();
 		if (total > MAX_ENTRIES) {
 			const overflow = total - MAX_ENTRIES;
@@ -99,6 +122,17 @@ export async function recordAiDebug(entry: AiDebugEntry): Promise<void> {
 			if (oldest.length) {
 				await db.table<AiDebugEntry>(TABLE).bulkDelete(oldest);
 			}
+		}
+
+		// Time-based purge: drop entries older than MAX_AGE_MS
+		const cutoff = new Date(Date.now() - MAX_AGE_MS).toISOString();
+		const expired = await db
+			.table<AiDebugEntry>(TABLE)
+			.where('capturedAt')
+			.below(cutoff)
+			.primaryKeys();
+		if (expired.length) {
+			await db.table<AiDebugEntry>(TABLE).bulkDelete(expired);
 		}
 	} catch (err) {
 		console.warn('[AiDebug] persist failed:', err);

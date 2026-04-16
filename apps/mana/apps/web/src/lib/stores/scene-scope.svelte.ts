@@ -35,6 +35,33 @@ export function getSceneScopeTagIds(): readonly string[] | undefined {
  * Synchronous if tagIds are already loaded; async variant for
  * junction-table lookups (same signature as the AI version).
  */
+/**
+ * Filter records by the active scene scope using a pre-fetched tag map.
+ * Pass the result of `tagOps.getTagIdsForMany(ids)` to avoid N+1 queries.
+ *
+ * @param getId - extract the record's ID (used as key into tagMap)
+ * @param tagMap - Map<entityId, tagId[]> from getTagIdsForMany()
+ */
+export function filterBySceneScopeBatch<T>(
+	records: T[],
+	getId: (record: T) => string,
+	tagMap: Map<string, string[]>
+): T[] {
+	const scope = _scopeTagIds;
+	if (!scope) return records;
+
+	const scopeSet = new Set(scope);
+	return records.filter((r) => {
+		const tagIds = tagMap.get(getId(r));
+		// Untagged records (not in map or empty) are globally visible
+		if (!tagIds || tagIds.length === 0) return true;
+		return tagIds.some((id) => scopeSet.has(id));
+	});
+}
+
+/**
+ * Legacy per-record variant. Prefer `filterBySceneScopeBatch` for lists.
+ */
 export async function filterBySceneScope<T>(
 	records: T[],
 	getTagIdsForRecord: (record: T) => Promise<string[]>
