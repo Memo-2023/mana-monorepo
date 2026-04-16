@@ -39,6 +39,7 @@
 			password: string
 		) => Promise<{ success: boolean; backupCodes?: string[]; error?: string }>;
 		primaryColor?: string;
+		showTitle?: boolean;
 		translations?: Partial<TwoFactorSetupTranslations>;
 	}
 
@@ -48,6 +49,7 @@
 		onDisable,
 		onGenerateBackupCodes,
 		primaryColor = '#6366f1',
+		showTitle = true,
 		translations = {},
 	}: Props = $props();
 
@@ -168,7 +170,7 @@
 <div class="two-factor-setup">
 	{#if view === 'status'}
 		<div class="section-header">
-			<h3 class="section-title">{t.title}</h3>
+			{#if showTitle}<h3 class="section-title">{t.title}</h3>{/if}
 			<div class="status-badge" class:status-enabled={enabled} class:status-disabled={!enabled}>
 				<span class="status-dot"></span>
 				{enabled ? t.statusEnabled : t.statusDisabled}

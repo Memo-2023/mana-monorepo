@@ -51,6 +51,7 @@
 			passkeys = await authStore.listPasskeys();
 		}}
 		primaryColor="hsl(var(--color-primary))"
+		showTitle={false}
 	/>
 </SettingsPanel>
 
@@ -65,6 +66,7 @@
 			sessionsLoading = false;
 		}}
 		primaryColor="hsl(var(--color-primary))"
+		showTitle={false}
 	/>
 </SettingsPanel>
 
@@ -75,6 +77,7 @@
 		onDisable={(password) => authStore.disableTwoFactor(password)}
 		onGenerateBackupCodes={(password) => authStore.generateBackupCodes(password)}
 		primaryColor="hsl(var(--color-primary))"
+		showTitle={false}
 	/>
 </SettingsPanel>
 
@@ -92,5 +95,6 @@
 			securityEventsLoading = false;
 		}}
 		primaryColor="hsl(var(--color-primary))"
+		showTitle={false}
 	/>
 </SettingsPanel>

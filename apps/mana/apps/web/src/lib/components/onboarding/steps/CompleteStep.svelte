@@ -50,7 +50,7 @@
 		</a>
 
 		<a
-			href="/apps"
+			href="/"
 			class="p-4 rounded-xl bg-card border hover:border-primary/50 hover:shadow-md transition-all group"
 		>
 			<div class="flex items-center gap-3">
@@ -60,8 +60,8 @@
 					<SquaresFour size={20} class="text-blue-600 dark:text-blue-400" />
 				</div>
 				<div>
-					<div class="font-semibold group-hover:text-blue-600 transition-colors">Alle Apps</div>
-					<div class="text-xs text-muted-foreground">Entdecke mehr</div>
+					<div class="font-semibold group-hover:text-blue-600 transition-colors">Workbench</div>
+					<div class="text-xs text-muted-foreground">Deine Apps entdecken</div>
 				</div>
 			</div>
 		</a>
