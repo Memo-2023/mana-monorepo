@@ -746,7 +746,6 @@
 			category: 'Navigation',
 			onExecute: () => goto('/?app=credits'),
 		},
-		{ id: 'apps', label: 'Alle Apps', category: 'Navigation', onExecute: () => goto('/apps') },
 		{
 			id: 'settings',
 			label: 'Einstellungen',
@@ -988,7 +987,6 @@
 					creditsHref="/?app=credits"
 					themesHref="/?app=themes"
 					helpHref="/?app=help"
-					allAppsHref="/apps"
 					{spotlightActions}
 					{contentSearcher}
 					positioning="static"
