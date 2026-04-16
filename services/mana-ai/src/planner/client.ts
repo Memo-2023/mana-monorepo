@@ -17,6 +17,8 @@ export interface PlannerMessages {
 export interface PlannerResult {
 	/** Raw text the LLM returned. Parser lives alongside the caller. */
 	content: string;
+	/** Token usage from the LLM response (if the provider includes it). */
+	usage?: { promptTokens: number; completionTokens: number; totalTokens: number };
 }
 
 export class PlannerClient {
@@ -63,8 +65,16 @@ export class PlannerClient {
 
 		const body = (await res.json()) as {
 			choices?: { message?: { content?: string } }[];
+			usage?: { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number };
 		};
 		const content = body.choices?.[0]?.message?.content ?? '';
-		return { content };
+		const usage = body.usage
+			? {
+					promptTokens: body.usage.prompt_tokens ?? 0,
+					completionTokens: body.usage.completion_tokens ?? 0,
+					totalTokens: body.usage.total_tokens ?? 0,
+				}
+			: undefined;
+		return { content, usage };
 	}
 }

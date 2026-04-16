@@ -145,3 +145,12 @@ export const agentDecisionsTotal = new Counter({
 	labelNames: ['decision'] as const,
 	registers: [register],
 });
+
+// ── Token Budget Enforcement ─────────────────────────────
+
+export const tokensUsedTotal = new Counter({
+	name: 'mana_ai_tokens_used_total',
+	help: 'Total tokens consumed across all planner calls.',
+	labelNames: ['agent_id'] as const,
+	registers: [register],
+});

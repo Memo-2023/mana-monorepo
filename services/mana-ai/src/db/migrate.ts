@@ -118,4 +118,24 @@ export async function migrate(sql: Sql): Promise<void> {
 		ON mana_ai.agent_snapshots ((record->>'state'))
 		WHERE record->>'state' = 'active'
 	`;
+
+	// ─── Token usage tracking (Budget Enforcement) ──────────────
+	// Append-only log of token consumption per planner call. The tick
+	// loop queries the rolling 24h window to enforce Agent.maxTokensPerDay.
+	// Old rows (>48h) are periodically pruned by the tick.
+	await sql`
+		CREATE TABLE IF NOT EXISTS mana_ai.token_usage (
+			id BIGSERIAL PRIMARY KEY,
+			user_id TEXT NOT NULL,
+			agent_id TEXT NOT NULL,
+			mission_id TEXT NOT NULL,
+			tokens_used INT NOT NULL,
+			ts TIMESTAMPTZ NOT NULL DEFAULT now()
+		)
+	`;
+
+	await sql`
+		CREATE INDEX IF NOT EXISTS idx_token_usage_agent_window
+		ON mana_ai.token_usage (user_id, agent_id, ts DESC)
+	`;
 }

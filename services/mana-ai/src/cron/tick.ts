@@ -41,6 +41,7 @@ import {
 	snapshotRowsAppliedTotal,
 	grantSkipsTotal,
 	agentDecisionsTotal,
+	tokensUsedTotal,
 } from '../metrics';
 import { unwrapMissionGrant } from '../crypto/unwrap-grant';
 import { NewsResearchClient } from '../planner/news-research-client';
@@ -166,16 +167,32 @@ export async function runTickOnce(config: Config): Promise<TickStats> {
 					agentDecisionsTotal.inc({ decision: 'skipped-concurrency' });
 					continue;
 				}
+				// Budget enforcement: check rolling 24h token usage.
+				if (agent.maxTokensPerDay != null && agent.maxTokensPerDay >= 0) {
+					const windowUsage = await getAgentTokenUsage24h(sql, m.userId, agent.id);
+					if (windowUsage >= agent.maxTokensPerDay) {
+						agentDecisionsTotal.inc({ decision: 'skipped-budget' });
+						continue;
+					}
+				}
 				activeRuns.set(agent.id, used + 1);
 			}
 
 			try {
-				const plan = await planOneMission(m, planner, sql, agent, config);
-				if (plan === null) {
+				const planResult = await planOneMission(m, planner, sql, agent, config);
+				if (planResult === null) {
 					parseFailures++;
 					parseFailuresTotal.inc();
 					continue;
 				}
+				const { plan, tokensUsed } = planResult;
+
+				// Record token usage for budget tracking
+				if (tokensUsed > 0 && agent) {
+					await recordTokenUsage(sql, m.userId, agent.id, m.id, tokensUsed);
+					tokensUsedTotal.inc({ agent_id: agent.id }, tokensUsed);
+				}
+
 				plansProduced++;
 				plansProducedTotal.inc();
 
@@ -234,7 +251,7 @@ async function planOneMission(
 	sql: Sql,
 	agent: ServerAgent | null,
 	config: Config
-): Promise<AiPlanOutput | null> {
+): Promise<{ plan: AiPlanOutput; tokensUsed: number } | null> {
 	const mission = serverMissionToSharedMission(m);
 	// Resolve the mission's Key-Grant (if any) once per tick. An absent
 	// grant is NOT an error — plaintext missions (goals-only) run fine
@@ -283,7 +300,7 @@ async function planOneMission(
 		);
 		return null;
 	}
-	return parsed.value;
+	return { plan: parsed.value, tokensUsed: result.usage?.totalTokens ?? 0 };
 }
 
 /**
@@ -393,6 +410,34 @@ function serverMissionToSharedMission(m: ServerMission): Mission {
 		iterations: m.iterations as Mission['iterations'],
 		userId: m.userId,
 	};
+}
+
+// ── Token Budget Helpers ──────────────────────────────────────
+
+/** Query the rolling 24h token usage for an agent. */
+async function getAgentTokenUsage24h(sql: Sql, userId: string, agentId: string): Promise<number> {
+	const rows = await sql<{ total: string }[]>`
+		SELECT COALESCE(SUM(tokens_used), 0) AS total
+		FROM mana_ai.token_usage
+		WHERE user_id = ${userId}
+			AND agent_id = ${agentId}
+			AND ts > now() - interval '24 hours'
+	`;
+	return parseInt(rows[0]?.total ?? '0', 10);
+}
+
+/** Record token consumption for budget tracking. */
+async function recordTokenUsage(
+	sql: Sql,
+	userId: string,
+	agentId: string,
+	missionId: string,
+	tokensUsed: number
+): Promise<void> {
+	await sql`
+		INSERT INTO mana_ai.token_usage (user_id, agent_id, mission_id, tokens_used)
+		VALUES (${userId}, ${agentId}, ${missionId}, ${tokensUsed})
+	`;
 }
 
 let handle: ReturnType<typeof setInterval> | null = null;
