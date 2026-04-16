@@ -13,6 +13,9 @@ sse-starlette>=2.2.0
 # Caching (optional)
 redis>=5.2.0
 
+# Google Gemini
+google-genai>=1.0.0
+
 # Metrics
 prometheus-client>=0.21.0
 
