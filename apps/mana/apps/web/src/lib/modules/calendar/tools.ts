@@ -4,8 +4,10 @@
 
 import type { ModuleTool } from '$lib/data/tools/types';
 import { eventsStore } from './stores/events.svelte';
+import { eventTagOps } from './stores/tags.svelte';
 import { db } from '$lib/data/database';
 import { decryptRecords } from '$lib/data/crypto';
+import { filterByScope } from '$lib/data/ai/scope-context';
 import type { LocalTimeBlock } from '$lib/data/time-blocks/types';
 
 export const calendarTools: ModuleTool[] = [
@@ -65,7 +67,10 @@ export const calendarTools: ModuleTool[] = [
 				(b) => !b.deletedAt && b.type === 'event' && b.sourceModule === 'calendar'
 			);
 			const decrypted = await decryptRecords<LocalTimeBlock>('timeBlocks', eventBlocks);
-			const events = decrypted
+			const scoped = await filterByScope(decrypted, async (b) =>
+				b.sourceId ? eventTagOps.getTagIds(b.sourceId) : []
+			);
+			const events = scoped
 				.sort((a, b) => (a.startDate as string).localeCompare(b.startDate as string))
 				.map((b) => ({
 					id: b.sourceId,

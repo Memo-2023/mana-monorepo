@@ -6,7 +6,9 @@
 	import type { Note } from '$lib/modules/notes/types';
 	import { NOTE_COLORS } from '$lib/modules/notes/types';
 	import { notesStore } from '$lib/modules/notes/stores/notes.svelte';
+	import { noteTagOps, useAllTags } from '$lib/modules/notes/stores/tags.svelte';
 	import { formatRelativeTime } from '$lib/modules/notes/queries';
+	import { TagSelector, type Tag } from '@mana/shared-ui';
 
 	const allNotes$: Observable<Note[]> = getContext('notes');
 	let notes = $state<Note[]>([]);
@@ -18,6 +20,17 @@
 
 	let noteId = $derived($page.params.id);
 	let note = $derived(notes.find((n) => n.id === noteId));
+	const allTags = $derived(useAllTags());
+	let noteTags = $state<Tag[]>([]);
+
+	// Sync tags when note changes
+	$effect(() => {
+		if (note && noteId) {
+			noteTagOps.getTagIds(noteId).then((ids: string[]) => {
+				noteTags = allTags.value.filter((t) => ids.includes(t.id));
+			});
+		}
+	});
 
 	let title = $state('');
 	let content = $state('');
@@ -122,6 +135,23 @@
 			bind:value={content}
 			oninput={autoSave}
 		></textarea>
+
+		<!-- Tags -->
+		<div class="tag-row">
+			<TagSelector
+				tags={allTags.value}
+				selectedTags={noteTags}
+				onTagsChange={async (tags) => {
+					noteTags = tags;
+					await noteTagOps.setTags(
+						note.id,
+						tags.map((t) => t.id)
+					);
+				}}
+				placeholder="Tags…"
+				addTagLabel="Tag hinzufügen"
+			/>
+		</div>
 
 		<!-- Color + Actions -->
 		<div class="detail-footer">
@@ -247,6 +277,9 @@
 		color: hsl(var(--color-muted-foreground));
 	}
 
+	.tag-row {
+		padding: 0.5rem 0;
+	}
 	.detail-footer {
 		display: flex;
 		justify-content: space-between;

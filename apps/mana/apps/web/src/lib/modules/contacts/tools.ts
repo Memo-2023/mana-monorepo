@@ -1,7 +1,9 @@
 import type { ModuleTool } from '$lib/data/tools/types';
 import { contactsStore } from './stores/contacts.svelte';
 import { contactTable } from './collections';
+import { contactTagOps } from './stores/tags.svelte';
 import { decryptRecords } from '$lib/data/crypto';
+import { filterByScope } from '$lib/data/ai/scope-context';
 import { toContact } from './queries';
 import type { LocalContact } from './types';
 
@@ -44,7 +46,8 @@ export const contactsTools: ModuleTool[] = [
 			const all = await contactTable.toArray();
 			const active = all.filter((c) => !c.deletedAt && !c.isArchived);
 			const decrypted = await decryptRecords<LocalContact>('contacts', active);
-			const contacts = decrypted.map(toContact);
+			const scoped = await filterByScope(decrypted, async (c) => contactTagOps.getTagIds(c.id));
+			const contacts = scoped.map(toContact);
 			return {
 				success: true,
 				data: contacts.map((c) => ({

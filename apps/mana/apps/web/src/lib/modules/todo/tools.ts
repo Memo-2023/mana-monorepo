@@ -4,9 +4,10 @@
 
 import type { ModuleTool } from '$lib/data/tools/types';
 import { tasksStore } from './stores/tasks.svelte';
-import { taskTable } from './collections';
+import { taskTable, taskTagTable } from './collections';
 import { toTask, getTaskStats } from './queries';
 import { decryptRecords } from '$lib/data/crypto';
+import { filterByScope } from '$lib/data/ai/scope-context';
 import type { LocalTask } from './types';
 
 export const todoTools: ModuleTool[] = [
@@ -94,7 +95,11 @@ export const todoTools: ModuleTool[] = [
 			const all = await taskTable.toArray();
 			const active = all.filter((t) => !t.deletedAt);
 			const decrypted = await decryptRecords<LocalTask>('tasks', active);
-			const tasks = decrypted.map(toTask);
+			const scoped = await filterByScope(decrypted, async (t) => {
+				const links = await taskTagTable.where('taskId').equals(t.id).toArray();
+				return links.filter((l) => !l.deletedAt).map((l) => l.tagId);
+			});
+			const tasks = scoped.map(toTask);
 
 			const filter = (params.filter as string) ?? 'open';
 			const today = new Date().toISOString().split('T')[0];
