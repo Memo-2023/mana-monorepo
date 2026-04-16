@@ -488,6 +488,124 @@ export const AI_TOOL_CATALOG: readonly ToolSchema[] = [
 		parameters: [],
 	},
 
+	// ── MyDay ─────────────────────────────────────────────────
+	{
+		name: 'get_myday_summary',
+		module: 'myday',
+		description:
+			'Gibt eine komplette Tageszusammenfassung zurueck: Tasks, Termine, Trinken, Ernaehrung, Orte, Streaks und aktive Ziele. Nutze dieses Tool zuerst, um den vollen Tageskontext zu bekommen.',
+		defaultPolicy: 'auto',
+		parameters: [],
+	},
+
+	// ── Goals ─────────────────────────────────────────────────
+	{
+		name: 'list_goals',
+		module: 'goals',
+		description:
+			'Listet alle Ziele mit aktuellem Fortschritt auf. Zeigt Titel, Fortschritt, Zielwert, Zeitraum und Status.',
+		defaultPolicy: 'auto',
+		parameters: [
+			{
+				name: 'filter',
+				type: 'string',
+				description: 'Welche Ziele zeigen',
+				required: false,
+				enum: ['active', 'paused', 'completed', 'all'],
+			},
+		],
+	},
+	{
+		name: 'get_goal_progress',
+		module: 'goals',
+		description:
+			'Gibt den detaillierten Fortschritt eines einzelnen Ziels zurueck, inklusive Metrik-Details und Periodeninfo.',
+		defaultPolicy: 'auto',
+		parameters: [{ name: 'goalId', type: 'string', description: 'ID des Ziels', required: true }],
+	},
+	{
+		name: 'create_goal',
+		module: 'goals',
+		description:
+			'Erstellt ein neues Ziel. Kann entweder ein Template verwenden (templateId) oder ein benutzerdefiniertes Ziel erstellen. Verfuegbare Templates: tpl-water-daily, tpl-tasks-daily, tpl-meals-daily, tpl-calories-daily, tpl-places-weekly, tpl-coffee-limit.',
+		defaultPolicy: 'propose',
+		parameters: [
+			{
+				name: 'templateId',
+				type: 'string',
+				description:
+					'ID eines Templates (z.B. "tpl-water-daily"). Wenn gesetzt, werden andere Felder ignoriert.',
+				required: false,
+			},
+			{
+				name: 'title',
+				type: 'string',
+				description: 'Titel des Ziels (nur fuer benutzerdefinierte Ziele)',
+				required: false,
+			},
+			{
+				name: 'description',
+				type: 'string',
+				description: 'Beschreibung',
+				required: false,
+			},
+			{
+				name: 'targetValue',
+				type: 'number',
+				description: 'Zielwert (z.B. 8 fuer "8 Glaeser Wasser")',
+				required: false,
+			},
+			{
+				name: 'period',
+				type: 'string',
+				description: 'Zeitraum',
+				required: false,
+				enum: ['day', 'week', 'month'],
+			},
+			{
+				name: 'comparison',
+				type: 'string',
+				description: 'Vergleich: gte = mindestens, lte = hoechstens',
+				required: false,
+				enum: ['gte', 'lte'],
+			},
+			{
+				name: 'eventType',
+				type: 'string',
+				description:
+					'Domain-Event zum Zaehlen (z.B. "DrinkLogged", "TaskCompleted", "MealLogged", "WorkoutFinished")',
+				required: false,
+			},
+			{
+				name: 'moduleId',
+				type: 'string',
+				description: 'Zugehoeriges Modul (z.B. "drink", "todo", "food", "body")',
+				required: false,
+			},
+		],
+	},
+	{
+		name: 'pause_goal',
+		module: 'goals',
+		description: 'Pausiert ein aktives Ziel. Kann spaeter wieder fortgesetzt werden.',
+		defaultPolicy: 'propose',
+		parameters: [{ name: 'goalId', type: 'string', description: 'ID des Ziels', required: true }],
+	},
+	{
+		name: 'resume_goal',
+		module: 'goals',
+		description: 'Setzt ein pausiertes Ziel fort.',
+		defaultPolicy: 'propose',
+		parameters: [{ name: 'goalId', type: 'string', description: 'ID des Ziels', required: true }],
+	},
+	{
+		name: 'complete_goal',
+		module: 'goals',
+		description: 'Markiert ein Ziel als abgeschlossen.',
+		defaultPolicy: 'propose',
+		parameters: [{ name: 'goalId', type: 'string', description: 'ID des Ziels', required: true }],
+	},
+
 	// ── Contacts ──────────────────────────────────────────────
 	{
 		name: 'create_contact',
@@ -517,6 +635,222 @@ export const AI_TOOL_CATALOG: readonly ToolSchema[] = [
 		name: 'get_contacts',
 		module: 'contacts',
 		description: 'Gibt alle Kontakte zurueck',
+		defaultPolicy: 'auto',
+		parameters: [],
+	},
+
+	// ── Mood ──────────────────────────────────────────────────
+	{
+		name: 'log_mood',
+		module: 'mood',
+		description:
+			'Erfasst einen Mood-Check-in mit Level (1-10), primaerer Emotion und optionalem Kontext.',
+		defaultPolicy: 'propose',
+		parameters: [
+			{
+				name: 'level',
+				type: 'number',
+				description: 'Stimmungs-Level von 1 (schlecht) bis 10 (super)',
+				required: true,
+			},
+			{
+				name: 'emotion',
+				type: 'string',
+				description: 'Primaere Emotion',
+				required: true,
+				enum: [
+					'happy',
+					'calm',
+					'energized',
+					'grateful',
+					'excited',
+					'loved',
+					'hopeful',
+					'neutral',
+					'bored',
+					'tired',
+					'sad',
+					'anxious',
+					'angry',
+					'stressed',
+					'frustrated',
+					'overwhelmed',
+				],
+			},
+			{
+				name: 'activity',
+				type: 'string',
+				description: 'Was machst du gerade?',
+				required: false,
+				enum: [
+					'work',
+					'exercise',
+					'social',
+					'alone',
+					'commute',
+					'eating',
+					'resting',
+					'creative',
+					'outdoors',
+					'screen',
+					'chores',
+					'other',
+				],
+			},
+			{
+				name: 'notes',
+				type: 'string',
+				description: 'Optionale Notiz zum Check-in',
+				required: false,
+			},
+		],
+	},
+	{
+		name: 'get_mood_today',
+		module: 'mood',
+		description: 'Gibt alle heutigen Mood-Eintraege zurueck mit Durchschnitts-Level und Emotionen.',
+		defaultPolicy: 'auto',
+		parameters: [],
+	},
+	{
+		name: 'get_mood_insights',
+		module: 'mood',
+		description:
+			'Gibt Mood-Trends und Muster zurueck: Durchschnitt der letzten 7/30 Tage, haeufigste Emotion, Positiv/Negativ-Verhaeltnis, und welche Aktivitaeten mit guter/schlechter Stimmung korrelieren.',
+		defaultPolicy: 'auto',
+		parameters: [
+			{
+				name: 'days',
+				type: 'number',
+				description: 'Analyse-Zeitraum in Tagen (Standard: 7)',
+				required: false,
+			},
+		],
+	},
+
+	// ── Finance ───────────────────────────────────────────────
+	{
+		name: 'add_transaction',
+		module: 'finance',
+		description: 'Erfasst eine Einnahme oder Ausgabe',
+		defaultPolicy: 'propose',
+		parameters: [
+			{
+				name: 'type',
+				type: 'string',
+				description: 'Art',
+				required: true,
+				enum: ['income', 'expense'],
+			},
+			{ name: 'amount', type: 'number', description: 'Betrag in Euro', required: true },
+			{ name: 'description', type: 'string', description: 'Beschreibung', required: true },
+			{
+				name: 'date',
+				type: 'string',
+				description: 'Datum (YYYY-MM-DD, Standard: heute)',
+				required: false,
+			},
+		],
+	},
+	{
+		name: 'get_month_summary',
+		module: 'finance',
+		description:
+			'Gibt die Finanz-Zusammenfassung fuer einen Monat zurueck: Einnahmen, Ausgaben, Bilanz, Ausgaben pro Kategorie.',
+		defaultPolicy: 'auto',
+		parameters: [
+			{
+				name: 'month',
+				type: 'string',
+				description: 'Monat im Format YYYY-MM (Standard: aktueller Monat)',
+				required: false,
+			},
+		],
+	},
+	{
+		name: 'list_transactions',
+		module: 'finance',
+		description:
+			'Listet die letzten Transaktionen auf. Optional nach Typ (income/expense) und Monat filterbar.',
+		defaultPolicy: 'auto',
+		parameters: [
+			{
+				name: 'type',
+				type: 'string',
+				description: 'Nur income oder expense zeigen',
+				required: false,
+				enum: ['income', 'expense'],
+			},
+			{
+				name: 'month',
+				type: 'string',
+				description: 'Monat im Format YYYY-MM',
+				required: false,
+			},
+			{
+				name: 'limit',
+				type: 'number',
+				description: 'Maximale Anzahl (Standard: 20)',
+				required: false,
+			},
+		],
+	},
+
+	// ── Times ─────────────────────────────────────────────────
+	{
+		name: 'start_timer',
+		module: 'times',
+		description: 'Startet einen Zeitmess-Timer mit optionaler Beschreibung und Projekt.',
+		defaultPolicy: 'propose',
+		parameters: [
+			{
+				name: 'description',
+				type: 'string',
+				description: 'Beschreibung der Taetigkeit',
+				required: false,
+			},
+			{
+				name: 'projectId',
+				type: 'string',
+				description: 'ID eines Projekts (aus list_projects)',
+				required: false,
+			},
+		],
+	},
+	{
+		name: 'stop_timer',
+		module: 'times',
+		description: 'Stoppt den laufenden Timer und speichert den Zeiteintrag.',
+		defaultPolicy: 'propose',
+		parameters: [],
+	},
+	{
+		name: 'get_timer_status',
+		module: 'times',
+		description: 'Gibt den Status des laufenden Timers zurueck (ob aktiv, Dauer, Beschreibung).',
+		defaultPolicy: 'auto',
+		parameters: [],
+	},
+	{
+		name: 'get_time_stats',
+		module: 'times',
+		description:
+			'Gibt Zeiterfassungs-Statistiken zurueck: Stunden heute, diese Woche, und Aufschluesselung nach Projekt.',
+		defaultPolicy: 'auto',
+		parameters: [
+			{
+				name: 'period',
+				type: 'string',
+				description: 'Zeitraum (Standard: week)',
+				required: false,
+				enum: ['today', 'week', 'month'],
+			},
+		],
+	},
+	{
+		name: 'list_projects',
+		module: 'times',
+		description: 'Listet alle aktiven Zeiterfassungs-Projekte mit Kunden-Info auf.',
 		defaultPolicy: 'auto',
 		parameters: [],
 	},

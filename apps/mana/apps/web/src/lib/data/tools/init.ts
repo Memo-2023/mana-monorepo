@@ -35,6 +35,9 @@ import { recipesTools } from '$lib/modules/recipes/tools';
 import { questionsTools } from '$lib/modules/questions/tools';
 import { meditateTools } from '$lib/modules/meditate/tools';
 import { sleepTools } from '$lib/modules/sleep/tools';
+import { mydayTools } from '$lib/modules/myday/tools';
+import { goalsTools } from '$lib/modules/goals/tools';
+import { moodTools } from '$lib/modules/mood/tools';
 
 let initialized = false;
 
@@ -71,5 +74,8 @@ export function initTools(): void {
 	registerTools(questionsTools);
 	registerTools(meditateTools);
 	registerTools(sleepTools);
+	registerTools(mydayTools);
+	registerTools(goalsTools);
+	registerTools(moodTools);
 	initialized = true;
 }
