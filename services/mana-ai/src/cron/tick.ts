@@ -43,10 +43,17 @@ import {
 	agentDecisionsTotal,
 } from '../metrics';
 import { unwrapMissionGrant } from '../crypto/unwrap-grant';
+import { NewsResearchClient } from '../planner/news-research-client';
 import type { ResolverContext } from '../db/resolvers/types';
 import type { Config } from '../config';
 
 const ENC_PREFIX = 'enc:1:';
+
+/** Heuristic: mission objectives that should trigger a pre-planning
+ *  web-research step. Same regex the webapp uses in its reasoning loop
+ *  (`data/ai/missions/runner.ts`). */
+const RESEARCH_TRIGGER =
+	/\b(recherchier|research|news|finde|suche|aktuelle|neueste|today|history|historisch|on this day)/i;
 
 /** True when the value looks like the webapp's AES-GCM wire format. */
 function isCiphertext(value: string | undefined): value is string {
@@ -163,7 +170,7 @@ export async function runTickOnce(config: Config): Promise<TickStats> {
 			}
 
 			try {
-				const plan = await planOneMission(m, planner, sql, agent);
+				const plan = await planOneMission(m, planner, sql, agent, config);
 				if (plan === null) {
 					parseFailures++;
 					parseFailuresTotal.inc();
@@ -225,7 +232,8 @@ async function planOneMission(
 	m: ServerMission,
 	planner: PlannerClient,
 	sql: Sql,
-	agent: ServerAgent | null
+	agent: ServerAgent | null,
+	config: Config
 ): Promise<AiPlanOutput | null> {
 	const mission = serverMissionToSharedMission(m);
 	// Resolve the mission's Key-Grant (if any) once per tick. An absent
@@ -237,6 +245,29 @@ async function planOneMission(
 	// reference goes out of scope and gets GC'd.
 	const context = await buildResolverContext(m);
 	const resolvedInputs = await resolveServerInputs(sql, m.inputs, m.userId, context);
+
+	// Pre-planning research step: when the mission objective matches
+	// research keywords, run RSS discovery + search against mana-api and
+	// inject the results as a synthetic ResolvedInput. This gives the
+	// Planner real sources to reference instead of hallucinating URLs.
+	// Mirrors the webapp's auto-kontext + research pre-step.
+	if (RESEARCH_TRIGGER.test(m.objective) || RESEARCH_TRIGGER.test(m.conceptMarkdown)) {
+		const nrc = new NewsResearchClient(config.manaApiUrl);
+		const research = await nrc.research(m.objective, { language: 'de', limit: 8 });
+		if (research) {
+			resolvedInputs.push({
+				id: '__web-research__',
+				module: 'news-research',
+				table: 'web',
+				title: `Web-Research: "${m.objective.slice(0, 60)}"`,
+				content: research.contextMarkdown,
+			});
+			console.log(
+				`[mana-ai tick] mission=${m.id} pre-research: ${research.feedCount} feeds, ${research.articles.length} articles`
+			);
+		}
+	}
+
 	const input: AiPlanInput = {
 		mission,
 		resolvedInputs,

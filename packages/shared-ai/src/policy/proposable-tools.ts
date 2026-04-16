@@ -40,6 +40,10 @@ export const AI_PROPOSABLE_TOOL_NAMES = [
 	// ── Habits ────────────────────────────────
 	'create_habit',
 	'log_habit',
+	// ── News-Research ─────────────────────────
+	'research_news',
+	// ── Contacts ──────────────────────────────
+	'create_contact',
 ] as const;
 
 export type AiProposableToolName = (typeof AI_PROPOSABLE_TOOL_NAMES)[number];

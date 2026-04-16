@@ -316,12 +316,15 @@ services:
         condition: service_healthy
       mana-llm:
         condition: service_started
+      mana-api:
+        condition: service_healthy
     environment:
       TZ: Europe/Berlin
       NODE_ENV: production
       PORT: 3067
       SYNC_DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana_sync
       MANA_LLM_URL: http://mana-llm:3020
+      MANA_API_URL: http://mana-api:3060
       MANA_SERVICE_KEY: ${MANA_SERVICE_KEY}
       TICK_INTERVAL_MS: ${MANA_AI_TICK_INTERVAL_MS:-60000}
       TICK_ENABLED: ${MANA_AI_TICK_ENABLED:-true}

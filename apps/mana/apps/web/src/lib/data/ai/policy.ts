@@ -48,6 +48,7 @@ const AUTO_TOOLS: Record<string, 'auto'> = {
 	get_places: 'auto',
 	location_log: 'auto',
 	get_habits: 'auto',
+	get_contacts: 'auto',
 	// Append-only self-state logs: AI proposing "did you drink water?" +
 	// user confirming + AI logging it should not require a second approval.
 	log_drink: 'auto',

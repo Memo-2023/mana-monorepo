@@ -12,6 +12,11 @@ export interface Config {
 	syncDatabaseUrl: string;
 	/** mana-llm HTTP endpoint (OpenAI-compatible). */
 	manaLlmUrl: string;
+	/** Unified mana-api (Hono/Bun, port 3060). Hosts module-specific
+	 *  compute endpoints including news-research. Used by the pre-planning
+	 *  research step to feed web-research context into the planner prompt
+	 *  before it produces plan steps. */
+	manaApiUrl: string;
 	/** Shared key for service-to-service calls. */
 	serviceKey: string;
 	/** How often the background tick scans for due Missions, in ms. */
@@ -49,6 +54,7 @@ export function loadConfig(): Config {
 			'postgresql://mana:devpassword@localhost:5432/mana_sync'
 		),
 		manaLlmUrl: requireEnv('MANA_LLM_URL', 'http://localhost:3020'),
+		manaApiUrl: requireEnv('MANA_API_URL', 'http://localhost:3060'),
 		serviceKey: requireEnv('MANA_SERVICE_KEY', 'dev-service-key'),
 		tickIntervalMs: parseInt(process.env.TICK_INTERVAL_MS ?? '60000', 10),
 		tickEnabled: process.env.TICK_ENABLED !== 'false',

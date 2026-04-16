@@ -208,6 +208,54 @@ export const AI_AVAILABLE_TOOLS: readonly AvailableTool[] = [
 			{ name: 'note', type: 'string', description: 'Optionale Notiz zum Log', required: false },
 		],
 	},
+
+	// ── News-Research ────────────────────────────────────────
+	{
+		name: 'research_news',
+		module: 'news-research',
+		description:
+			'Durchsucht RSS-Feeds und Web-Quellen nach relevanten Artikeln zu einem Thema. Gibt gefundene Artikel-URLs + Titel + Zusammenfassung zurueck. Nuetzlich als Vorstufe zu save_news_article.',
+		parameters: [
+			{
+				name: 'query',
+				type: 'string',
+				description: 'Suchbegriff / Thema (z.B. "TypeScript 5.8 release")',
+				required: true,
+			},
+			{
+				name: 'language',
+				type: 'string',
+				description: 'Sprache (z.B. "de" oder "en")',
+				required: false,
+			},
+			{
+				name: 'limit',
+				type: 'number',
+				description: 'Max. Anzahl Ergebnisse (Standard: 10)',
+				required: false,
+			},
+		],
+	},
+
+	// ── Contacts ─────────────────────────────────────────────
+	{
+		name: 'create_contact',
+		module: 'contacts',
+		description: 'Erstellt einen neuen Kontakt. Felder die nicht bekannt sind einfach weglassen.',
+		parameters: [
+			{ name: 'firstName', type: 'string', description: 'Vorname', required: true },
+			{ name: 'lastName', type: 'string', description: 'Nachname', required: false },
+			{ name: 'email', type: 'string', description: 'E-Mail-Adresse', required: false },
+			{ name: 'phone', type: 'string', description: 'Telefonnummer', required: false },
+			{ name: 'company', type: 'string', description: 'Firma / Organisation', required: false },
+			{
+				name: 'notes',
+				type: 'string',
+				description: 'Freitext-Notizen zum Kontakt',
+				required: false,
+			},
+		],
+	},
 ];
 
 export const AI_AVAILABLE_TOOL_NAMES = new Set<string>(AI_AVAILABLE_TOOLS.map((t) => t.name));
