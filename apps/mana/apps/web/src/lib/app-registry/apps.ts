@@ -71,6 +71,7 @@ import {
 	SquaresFour,
 	Scroll,
 	Spiral,
+	Crown,
 } from '@mana/shared-icons';
 
 // ── Apps with entity capabilities ───────────────────────────
@@ -1084,6 +1085,16 @@ registerApp({
 	icon: Target,
 	views: {
 		list: { load: () => import('$lib/modules/goals/ListView.svelte') },
+	},
+});
+
+registerApp({
+	id: 'mana',
+	name: 'Mana',
+	color: '#F59E0B',
+	icon: Crown,
+	views: {
+		list: { load: () => import('$lib/modules/mana/ListView.svelte') },
 	},
 });
 

@@ -1,3 +1,7 @@
+<!--
+  Mana — Workbench-embedded subscription / pricing page.
+  Shows available plans and one-time credit packages.
+-->
 <script lang="ts">
 	import { SubscriptionPage } from '@mana/subscriptions';
 
@@ -14,11 +18,6 @@
 	}
 </script>
 
-<svelte:head>
-	<title>Mana - Mana</title>
-</svelte:head>
-
-<!-- Toast notification -->
 {#if toastMessage}
 	<div
 		class="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-lg bg-amber-600 px-5 py-3 text-sm font-medium text-white shadow-lg"
@@ -42,9 +41,10 @@
 
 <style>
 	.mana-page {
-		min-height: 100%;
+		height: 100%;
 		width: 100%;
+		overflow-y: auto;
 		overflow-x: hidden;
-		background-color: hsl(var(--color-background));
+		padding: 0.75rem;
 	}
 </style>
