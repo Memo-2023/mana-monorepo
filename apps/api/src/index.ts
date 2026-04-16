@@ -13,6 +13,7 @@ import {
 	errorHandler,
 	notFoundHandler,
 	rateLimitMiddleware,
+	type AuthVariables,
 } from '@mana/shared-hono';
 
 // MCP server
@@ -41,7 +42,7 @@ import { whoRoutes } from './modules/who/routes';
 const PORT = parseInt(process.env.PORT || '3060', 10);
 const CORS_ORIGINS = (process.env.CORS_ORIGINS || 'http://localhost:5173').split(',');
 
-const app = new Hono();
+const app = new Hono<{ Variables: AuthVariables }>();
 
 // ─── Global Middleware ──────────────────────────────────────
 app.onError(errorHandler);
@@ -53,7 +54,7 @@ app.use('/api/*', authMiddleware());
 
 // ─── MCP Endpoint ──────────────────────────────────────────
 // Streamable HTTP transport: POST (messages), GET (SSE stream), DELETE (close)
-app.all('/api/v1/mcp', (c) => handleMcpRequest(c.req.raw));
+app.all('/api/v1/mcp', (c) => handleMcpRequest(c.req.raw, c.get('userId')));
 
 // ─── Module Routes ──────────────────────────────────────────
 app.route('/api/v1/calendar', calendarRoutes);

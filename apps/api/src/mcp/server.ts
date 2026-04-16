@@ -39,21 +39,22 @@ function toZodShape(
 /**
  * Create a new McpServer instance with all Mana tools registered.
  */
-function createMcpServer(): McpServer {
+function createMcpServer(userId: string): McpServer {
 	const server = new McpServer({ name: 'mana', version: '1.0.0' }, { capabilities: { tools: {} } });
 
-	// Register all 29 tools from the AI Tool Catalog
+	// Register all 29 tools from the AI Tool Catalog.
+	// userId is bound via closure — each MCP session belongs to one user.
 	for (const tool of AI_TOOL_CATALOG) {
 		const zodShape = toZodShape(tool.parameters);
 		const hasParams = Object.keys(zodShape).length > 0;
 
 		if (hasParams) {
 			server.tool(tool.name, tool.description, zodShape, async (args) => {
-				return executeMcpTool(tool.name, args, 'mcp-user');
+				return executeMcpTool(tool.name, args, userId);
 			});
 		} else {
 			server.tool(tool.name, tool.description, async () => {
-				return executeMcpTool(tool.name, {}, 'mcp-user');
+				return executeMcpTool(tool.name, {}, userId);
 			});
 		}
 	}
@@ -71,7 +72,7 @@ const sessions = new Map<string, WebStandardStreamableHTTPServerTransport>();
  * initialization, and subsequent requests must carry it via the
  * `Mcp-Session-Id` header.
  */
-export async function handleMcpRequest(req: Request): Promise<Response> {
+export async function handleMcpRequest(req: Request, userId: string): Promise<Response> {
 	const sessionId = req.headers.get('mcp-session-id');
 
 	// Existing session — route to its transport
@@ -92,7 +93,7 @@ export async function handleMcpRequest(req: Request): Promise<Response> {
 			},
 		});
 
-		const server = createMcpServer();
+		const server = createMcpServer(userId);
 		await server.connect(transport);
 
 		return transport.handleRequest(req);
