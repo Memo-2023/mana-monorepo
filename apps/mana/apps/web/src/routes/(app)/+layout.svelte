@@ -981,7 +981,6 @@
 					currentSyncLabel={syncStatus.label}
 					{appItems}
 					{userEmail}
-					manaHref="/?app=credits"
 					profileHref="/?app=profile"
 					spiralHref="/?app=spiral"
 					creditsHref="/?app=credits"
