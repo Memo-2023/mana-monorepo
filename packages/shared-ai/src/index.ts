@@ -79,6 +79,19 @@ export type { ToolSchema } from './tools';
 export { AI_TOOL_CATALOG, AI_TOOL_CATALOG_BY_NAME } from './tools';
 
 export type {
+	Guardrail,
+	GuardrailPhase,
+	GuardrailResult,
+	GuardrailCheckResult,
+} from './guardrails';
+export {
+	BUILTIN_GUARDRAILS,
+	runPrePlanGuardrails,
+	runPostPlanGuardrails,
+	runPreExecuteGuardrails,
+} from './guardrails';
+
+export type {
 	Agent,
 	AgentState,
 	AgentTemplate,

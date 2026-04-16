@@ -40,6 +40,11 @@ import { getAgent } from '../agents/store';
 import { DEFAULT_AGENT_NAME } from '../agents/types';
 import type { Mission, MissionIteration, PlanStep } from './types';
 import type { AiPlanInput, AiPlanOutput, PlannedStep, ResolvedInput } from './planner/types';
+import {
+	runPrePlanGuardrails,
+	runPostPlanGuardrails,
+	runPreExecuteGuardrails,
+} from '@mana/shared-ai';
 
 /** Heuristic: mission objective text that should trigger a pre-step
  *  web-research call. Keeps the trigger explicit so unrelated missions
@@ -292,13 +297,20 @@ export async function runMission(
 				);
 			};
 
+			// ── Guardrail: pre-plan ────────────────────────
+			const planInput: AiPlanInput = {
+				mission: mission!,
+				resolvedInputs: loopInputs,
+				availableTools,
+				onToken,
+			};
+			const prePlanCheck = runPrePlanGuardrails(planInput);
+			if (!prePlanCheck.passed) {
+				throw new Error(`Guardrail blocked: ${prePlanCheck.blockReason}`);
+			}
+
 			try {
-				plan = await deps.plan({
-					mission: mission!,
-					resolvedInputs: loopInputs,
-					availableTools,
-					onToken,
-				});
+				plan = await deps.plan(planInput);
 			} catch (err) {
 				if (isAiDebugEnabled()) {
 					void recordAiDebug({
@@ -326,6 +338,12 @@ export async function runMission(
 				break;
 			}
 
+			// ── Guardrail: post-plan ──────────────────────────
+			const postPlanCheck = runPostPlanGuardrails(planInput, plan);
+			if (!postPlanCheck.passed) {
+				throw new Error(`Guardrail blocked plan: ${postPlanCheck.blockReason}`);
+			}
+
 			// ── Phase: parsing-response ────────────────────────
 			await enterPhase('parsing-response', `${plan.steps.length} Step(s) erhalten`);
 			await checkCancel();
@@ -338,6 +356,20 @@ export async function runMission(
 					`Runde ${loopIndex + 1} · Step ${i + 1}/${plan.steps.length}`
 				);
 				await checkCancel();
+
+				// ── Guardrail: pre-execute ─────────────────────
+				const execCheck = runPreExecuteGuardrails(ps);
+				if (!execCheck.passed) {
+					failedCount++;
+					const stepId = `${iterationId}-${stepCounter++}`;
+					recordedSteps.push({
+						id: stepId,
+						summary: `Guardrail: ${execCheck.blockReason}`,
+						intent: { kind: 'toolCall', toolName: ps.toolName, params: ps.params },
+						status: 'failed',
+					});
+					continue;
+				}
 
 				const outcome = await stage(ps, aiActor);
 				const stepId = `${iterationId}-${stepCounter++}`;

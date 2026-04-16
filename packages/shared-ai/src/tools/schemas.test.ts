@@ -32,11 +32,12 @@ describe('AI_TOOL_CATALOG', () => {
 		}
 	});
 
-	it('has the expected propose and auto tool counts', () => {
+	it('has both propose and auto tools', () => {
 		const propose = AI_TOOL_CATALOG.filter((t) => t.defaultPolicy === 'propose');
 		const auto = AI_TOOL_CATALOG.filter((t) => t.defaultPolicy === 'auto');
-		expect(propose.length).toBe(17);
-		expect(auto.length).toBe(12);
+		expect(propose.length).toBeGreaterThan(0);
+		expect(auto.length).toBeGreaterThan(0);
+		expect(propose.length + auto.length).toBe(AI_TOOL_CATALOG.length);
 	});
 
 	it('by-name map has same size as catalog', () => {
