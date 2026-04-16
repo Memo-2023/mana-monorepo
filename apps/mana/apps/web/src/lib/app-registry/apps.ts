@@ -67,7 +67,6 @@ import {
 	Key,
 	Question,
 	ChatCircleDots,
-	CreditCard,
 	SquaresFour,
 	Scroll,
 	Spiral,
@@ -1187,15 +1186,5 @@ registerApp({
 	icon: ChatCircleDots,
 	views: {
 		list: { load: () => import('$lib/modules/feedback/ListView.svelte') },
-	},
-});
-
-registerApp({
-	id: 'subscription',
-	name: 'Abonnement',
-	color: '#10B981',
-	icon: CreditCard,
-	views: {
-		list: { load: () => import('$lib/modules/subscription/ListView.svelte') },
 	},
 });

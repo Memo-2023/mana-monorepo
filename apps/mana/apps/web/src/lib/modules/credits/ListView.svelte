@@ -1,7 +1,7 @@
 <!--
-  Credits & Abo — Workbench-embedded billing hub. Merges the former
-  /credits (balance, transactions, packages, cost breakdown) with
-  /mana (subscription plans) into a single tabbed view.
+  Credits & Abo — Workbench-embedded billing hub. Single place for
+  balance, subscription management, credit purchases, transactions,
+  and cost breakdown.
 
   Stripe redirect handling: after checkout Stripe sends the user back
   to /?app=credits&success=true (or &canceled=true). The workbench
@@ -12,13 +12,19 @@
 	import { _ } from 'svelte-i18n';
 	import { onMount } from 'svelte';
 	import { Card } from '@mana/shared-ui';
-	import { SubscriptionPage } from '@mana/subscriptions';
+	import { Check } from '@mana/shared-icons';
 	import {
 		creditsService,
 		type CreditBalance,
 		type CreditTransaction,
 		type CreditPackage,
 	} from '$lib/api/credits';
+	import {
+		subscriptionsService,
+		type SubscriptionPlan,
+		type CurrentSubscription,
+		type Invoice,
+	} from '$lib/api/subscriptions';
 	import {
 		OPERATION_METADATA,
 		CREDIT_COSTS,
@@ -29,9 +35,22 @@
 	import { ManaEvents } from '@mana/shared-utils/analytics';
 	import { authStore } from '$lib/stores/auth.svelte';
 
+	// ── Credits state ──────────────────────────────────────
 	let balance = $state<CreditBalance | null>(null);
 	let transactions = $state<CreditTransaction[]>([]);
 	let packages = $state<CreditPackage[]>([]);
+
+	// ── Subscription state ─────────────────────────────────
+	let subPlans = $state<SubscriptionPlan[]>([]);
+	let currentSub = $state<CurrentSubscription | null>(null);
+	let invoices = $state<Invoice[]>([]);
+	let billingInterval = $state<'month' | 'year'>('month');
+	let processingPlanId = $state<string | null>(null);
+	let cancelingSub = $state(false);
+	let reactivatingSub = $state(false);
+	let openingPortal = $state(false);
+
+	// ── Shared state ───────────────────────────────────────
 	let loading = $state(true);
 	let error = $state<string | null>(null);
 	let activeTab = $state<'overview' | 'subscriptions' | 'transactions' | 'packages' | 'costs'>(
@@ -109,7 +128,6 @@
 
 	// ── Lifecycle ──────────────────────────────────────────
 	onMount(async () => {
-		// Read URL params for tab selection + Stripe redirect
 		const params = new URLSearchParams(window.location.search);
 		const tab = params.get('tab');
 		if (tab === 'packages') activeTab = 'packages';
@@ -121,8 +139,7 @@
 		const canceled = params.get('canceled');
 
 		if (success === 'true') {
-			showToast('Credits wurden erfolgreich gekauft!', 'success');
-			// Clean Stripe params from URL
+			showToast('Zahlung erfolgreich!', 'success');
 			history.replaceState({}, '', '/');
 		} else if (canceled === 'true') {
 			showToast('Kauf wurde abgebrochen', 'error');
@@ -137,17 +154,18 @@
 		loading = true;
 		error = null;
 
-		// API calls require auth — skip for guests, still show costs tab (static data)
 		if (!authStore.isAuthenticated) {
 			loading = false;
 			return;
 		}
 
-		// Load each independently so a single 401/failure doesn't blank the whole page
 		const results = await Promise.allSettled([
 			creditsService.getBalance(),
 			creditsService.getTransactions(20),
 			creditsService.getPackages(),
+			subscriptionsService.getPlans(),
+			subscriptionsService.getCurrentSubscription(),
+			subscriptionsService.getInvoices(10),
 		]);
 
 		if (results[0].status === 'fulfilled') balance = results[0].value;
@@ -155,8 +173,12 @@
 		if (results[2].status === 'fulfilled') {
 			packages = results[2].value.filter((p) => p.active).sort((a, b) => a.sortOrder - b.sortOrder);
 		}
+		if (results[3].status === 'fulfilled') {
+			subPlans = results[3].value.filter((p) => p.active).sort((a, b) => a.sortOrder - b.sortOrder);
+		}
+		if (results[4].status === 'fulfilled') currentSub = results[4].value;
+		if (results[5].status === 'fulfilled') invoices = results[5].value;
 
-		// Only show error if ALL three failed
 		const allFailed = results.every((r) => r.status === 'rejected');
 		if (allFailed) {
 			const firstErr = results.find((r) => r.status === 'rejected') as PromiseRejectedResult;
@@ -167,7 +189,7 @@
 		loading = false;
 	}
 
-	// ── Helpers ────────────────────────────────────────────
+	// ── Credit helpers ─────────────────────────────────────
 	function formatCredits(amount: number): string {
 		return amount.toLocaleString('de-DE');
 	}
@@ -183,6 +205,14 @@
 			year: 'numeric',
 			hour: '2-digit',
 			minute: '2-digit',
+		});
+	}
+
+	function formatDateShort(dateStr: string): string {
+		return new Date(dateStr).toLocaleDateString('de-DE', {
+			day: '2-digit',
+			month: '2-digit',
+			year: 'numeric',
 		});
 	}
 
@@ -214,6 +244,7 @@
 		}
 	}
 
+	// ── Credit actions ─────────────────────────────────────
 	async function handleBuyPackage(pkg: CreditPackage) {
 		processingPackageId = pkg.id;
 		try {
@@ -229,12 +260,74 @@
 		}
 	}
 
-	function handleSubscribe(planId: string) {
-		showToast(`Abo "${planId}" ausgewählt. Bezahlsystem wird in Kürze integriert.`, 'success');
+	// ── Subscription helpers ───────────────────────────────
+	function getStatusLabel(status: string): string {
+		const map: Record<string, string> = {
+			active: 'Aktiv',
+			canceled: 'Gekündigt',
+			past_due: 'Überfällig',
+			trialing: 'Testphase',
+		};
+		return map[status] || status;
 	}
 
-	function handleBuySubscriptionPackage(packageId: string) {
-		showToast(`Paket "${packageId}" ausgewählt. Bezahlsystem wird in Kürze integriert.`, 'success');
+	function getSavingsPercent(monthly: number, yearly: number): number {
+		const full = monthly * 12;
+		if (full === 0) return 0;
+		return Math.round(((full - yearly) / full) * 100);
+	}
+
+	// ── Subscription actions ───────────────────────────────
+	async function handleSelectPlan(plan: SubscriptionPlan) {
+		if (plan.isDefault) return;
+		processingPlanId = plan.id;
+		try {
+			const { url } = await subscriptionsService.createCheckout(plan.id, billingInterval);
+			window.location.href = url;
+		} catch (e) {
+			showToast(e instanceof Error ? e.message : 'Fehler beim Checkout', 'error');
+		} finally {
+			processingPlanId = null;
+		}
+	}
+
+	async function handleOpenPortal() {
+		openingPortal = true;
+		try {
+			const { url } = await subscriptionsService.openPortal();
+			window.location.href = url;
+		} catch (e) {
+			showToast(e instanceof Error ? e.message : 'Fehler beim Billing-Portal', 'error');
+		} finally {
+			openingPortal = false;
+		}
+	}
+
+	async function handleCancelSub() {
+		if (!confirm('Möchtest du dein Abonnement wirklich kündigen?')) return;
+		cancelingSub = true;
+		try {
+			await subscriptionsService.cancelSubscription();
+			showToast('Abonnement wird zum Ende der Laufzeit gekündigt', 'success');
+			await loadData();
+		} catch (e) {
+			showToast(e instanceof Error ? e.message : 'Fehler beim Kündigen', 'error');
+		} finally {
+			cancelingSub = false;
+		}
+	}
+
+	async function handleReactivateSub() {
+		reactivatingSub = true;
+		try {
+			await subscriptionsService.reactivateSubscription();
+			showToast('Abonnement wurde reaktiviert', 'success');
+			await loadData();
+		} catch (e) {
+			showToast(e instanceof Error ? e.message : 'Fehler beim Reaktivieren', 'error');
+		} finally {
+			reactivatingSub = false;
+		}
 	}
 
 	function showToast(message: string, type: 'success' | 'error') {
@@ -246,9 +339,7 @@
 
 <div class="credits-page">
 	{#if loading}
-		<div class="loading">
-			<div class="spinner"></div>
-		</div>
+		<div class="loading"><div class="spinner"></div></div>
 	{:else if error}
 		<Card>
 			<div class="text-center py-8">
@@ -275,7 +366,7 @@
 
 		<!-- Tabs -->
 		<div class="tab-bar">
-			{#each [{ key: 'overview', label: 'Übersicht' }, { key: 'subscriptions', label: 'Abonnements' }, { key: 'transactions', label: 'Transaktionen' }, { key: 'packages', label: 'Kaufen' }, { key: 'costs', label: 'Kosten' }] as tab}
+			{#each [{ key: 'overview', label: 'Übersicht' }, { key: 'subscriptions', label: 'Abo' }, { key: 'transactions', label: 'Verlauf' }, { key: 'packages', label: 'Kaufen' }, { key: 'costs', label: 'Kosten' }] as tab}
 				<button
 					onclick={() => (activeTab = tab.key as typeof activeTab)}
 					class="tab-btn"
@@ -345,16 +436,155 @@
 
 			<!-- ── Tab: Abonnements ─────────────────────────── -->
 		{:else if activeTab === 'subscriptions'}
-			<SubscriptionPage
-				appName="Mana"
-				onSubscribe={handleSubscribe}
-				onBuyPackage={handleBuySubscriptionPackage}
-				currentPlanId="free"
-				pageTitle="Wähle dein Abo"
-				subscriptionsTitle="Abonnements"
-				packagesTitle="Einmal-Pakete"
-				yearlyDiscount="20% Rabatt"
-			/>
+			<!-- Current subscription status -->
+			{#if currentSub?.subscription}
+				{@const sub = currentSub.subscription}
+				{@const plan = currentSub.plan}
+				<div class="status-card">
+					<div class="status-header">
+						<div>
+							<div class="status-title-row">
+								<span class="sub-plan-name">{plan?.name || 'Aktueller Plan'}</span>
+								<span
+									class="status-badge"
+									class:active={sub.status === 'active'}
+									class:canceled={sub.status === 'canceled'}
+								>
+									{getStatusLabel(sub.status)}
+								</span>
+							</div>
+							<span class="sub-mana">
+								{plan?.monthlyCredits.toLocaleString('de-DE')} Mana / Monat
+							</span>
+						</div>
+						<button class="portal-btn" disabled={openingPortal} onclick={handleOpenPortal}>
+							{openingPortal ? '...' : 'Zahlungsmethode'}
+						</button>
+					</div>
+					<div class="status-details">
+						<div class="detail">
+							<span class="detail-label">Zeitraum</span>
+							<span>{sub.billingInterval === 'year' ? 'Jährlich' : 'Monatlich'}</span>
+						</div>
+						<div class="detail">
+							<span class="detail-label">Periode</span>
+							<span>
+								{formatDateShort(sub.currentPeriodStart)} – {formatDateShort(sub.currentPeriodEnd)}
+							</span>
+						</div>
+						<div class="detail">
+							{#if sub.cancelAtPeriodEnd}
+								<span class="detail-label">Endet am</span>
+								<span class="text-warn">{formatDateShort(sub.currentPeriodEnd)}</span>
+								<button class="link-btn" disabled={reactivatingSub} onclick={handleReactivateSub}>
+									{reactivatingSub ? '...' : 'Reaktivieren'}
+								</button>
+							{:else}
+								<span class="detail-label">Verlängert am</span>
+								<span>{formatDateShort(sub.currentPeriodEnd)}</span>
+								<button class="link-btn danger" disabled={cancelingSub} onclick={handleCancelSub}>
+									{cancelingSub ? '...' : 'Kündigen'}
+								</button>
+							{/if}
+						</div>
+					</div>
+				</div>
+			{:else}
+				<div class="status-card">
+					<div class="status-title-row">
+						<span class="sub-plan-name">Free Plan</span>
+						<span class="status-badge active">Aktuell</span>
+					</div>
+					<span class="sub-mana">150 Mana / Monat</span>
+				</div>
+			{/if}
+
+			<!-- Billing interval toggle -->
+			<div class="interval-toggle">
+				<button
+					class="interval-btn"
+					class:selected={billingInterval === 'month'}
+					onclick={() => (billingInterval = 'month')}>Monatlich</button
+				>
+				<button
+					class="interval-btn"
+					class:selected={billingInterval === 'year'}
+					onclick={() => (billingInterval = 'year')}
+				>
+					Jährlich <span class="save-tag">–17%</span>
+				</button>
+			</div>
+
+			<!-- Plans list -->
+			<div class="plans-list">
+				{#each subPlans as plan}
+					{@const isCurrent = currentSub?.plan?.id === plan.id}
+					{@const price =
+						billingInterval === 'year' ? plan.priceYearlyEuroCents : plan.priceMonthlyEuroCents}
+					<button
+						class="plan-row"
+						class:current={isCurrent}
+						disabled={isCurrent || plan.isDefault || processingPlanId === plan.id}
+						onclick={() => handleSelectPlan(plan)}
+					>
+						<div class="plan-info">
+							<span class="plan-row-name">
+								{plan.name}
+								{#if isCurrent}<span class="current-tag">Dein Plan</span>{/if}
+							</span>
+							<span class="plan-row-mana"
+								>{plan.monthlyCredits.toLocaleString('de-DE')} Mana / Monat</span
+							>
+							{#if plan.features?.length}
+								<span class="plan-features-preview">
+									{plan.features.slice(0, 2).join(' · ')}
+								</span>
+							{/if}
+						</div>
+						<div class="plan-price-col">
+							{#if plan.isDefault}
+								<span class="plan-price-free">Kostenlos</span>
+							{:else}
+								<span class="plan-price-amount">{formatPrice(price)}</span>
+								<span class="plan-price-period"
+									>/ {billingInterval === 'year' ? 'Jahr' : 'Monat'}</span
+								>
+							{/if}
+						</div>
+					</button>
+				{/each}
+			</div>
+
+			<!-- Invoices -->
+			{#if invoices.length > 0}
+				<details class="invoices-details">
+					<summary class="invoices-summary">Rechnungen ({invoices.length})</summary>
+					<div class="invoices-list">
+						{#each invoices as inv}
+							<div class="invoice-row">
+								<div class="invoice-info">
+									<span class="invoice-number">{inv.number || '-'}</span>
+									<span class="invoice-date">{formatDateShort(inv.createdAt)}</span>
+								</div>
+								<div class="invoice-right">
+									<span class="invoice-amount">{formatPrice(inv.amountPaidEuroCents)}</span>
+									<span class="invoice-status" class:paid={inv.status === 'paid'}>
+										{inv.status === 'paid' ? 'Bezahlt' : inv.status}
+									</span>
+									{#if inv.invoicePdfUrl}
+										<a
+											href={inv.invoicePdfUrl}
+											target="_blank"
+											rel="noopener noreferrer"
+											class="pdf-link">PDF</a
+										>
+									{/if}
+								</div>
+							</div>
+						{/each}
+					</div>
+				</details>
+			{/if}
 
 			<!-- ── Tab: Transaktionen ───────────────────────── -->
 		{:else if activeTab === 'transactions'}
@@ -485,9 +715,7 @@
 </div>
 
 {#if toastMessage}
-	<div class="toast" class:toast-error={toastType === 'error'}>
-		{toastMessage}
-	</div>
+	<div class="toast" class:toast-error={toastType === 'error'}>{toastMessage}</div>
 {/if}
 
 <style>
@@ -497,7 +725,7 @@
 		overflow-y: auto;
 		display: flex;
 		flex-direction: column;
-		gap: 1.5rem;
+		gap: 1rem;
 	}
 
 	.loading {
@@ -531,22 +759,22 @@
 
 	.balance-card {
 		text-align: center;
-		padding: 1rem;
+		padding: 0.75rem;
 		background: hsl(var(--color-card));
 		border: 1px solid hsl(var(--color-border));
 		border-radius: 0.75rem;
 	}
 
 	.balance-label {
-		font-size: 0.75rem;
+		font-size: 0.6875rem;
 		color: hsl(var(--color-muted-foreground));
 		margin: 0;
 	}
 
 	.balance-value {
-		font-size: 1.5rem;
+		font-size: 1.25rem;
 		font-weight: 700;
-		margin: 0.25rem 0 0;
+		margin: 0.125rem 0 0;
 		color: hsl(var(--color-foreground));
 	}
 
@@ -569,11 +797,11 @@
 
 	.tab-btn {
 		flex-shrink: 0;
-		padding: 0.5rem 1rem;
+		padding: 0.5rem 0.75rem;
 		margin-bottom: -1px;
 		border: none;
 		background: none;
-		font-size: 0.875rem;
+		font-size: 0.8125rem;
 		color: hsl(var(--color-muted-foreground));
 		cursor: pointer;
 		transition: color 0.15s;
@@ -593,25 +821,19 @@
 	/* ── Overview ────────────────────────────────────────── */
 	.overview-grid {
 		display: grid;
-		gap: 1.5rem;
-	}
-
-	@media (min-width: 1024px) {
-		.overview-grid {
-			grid-template-columns: 1fr 1fr;
-		}
+		gap: 1rem;
 	}
 
 	.card-title {
-		font-size: 1rem;
+		font-size: 0.9375rem;
 		font-weight: 600;
-		margin: 0 0 1rem;
+		margin: 0 0 0.75rem;
 		color: hsl(var(--color-foreground));
 	}
 
 	.empty-hint {
 		color: hsl(var(--color-muted-foreground));
-		font-size: 0.875rem;
+		font-size: 0.8125rem;
 		text-align: center;
 		padding: 1rem;
 		margin: 0;
@@ -620,14 +842,13 @@
 	.tx-list {
 		display: flex;
 		flex-direction: column;
-		gap: 0.25rem;
 	}
 
 	.tx-row {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		padding: 0.5rem 0;
+		padding: 0.375rem 0;
 		border-bottom: 1px solid hsl(var(--color-border));
 	}
 
@@ -638,37 +859,37 @@
 	.tx-left {
 		display: flex;
 		align-items: center;
-		gap: 0.75rem;
+		gap: 0.5rem;
 	}
 
 	.tx-icon {
-		font-size: 1.25rem;
+		font-size: 1rem;
 	}
 
 	.tx-desc {
-		font-size: 0.875rem;
+		font-size: 0.8125rem;
 		font-weight: 500;
 		margin: 0;
 		color: hsl(var(--color-foreground));
 	}
 
 	.tx-date {
-		font-size: 0.75rem;
+		font-size: 0.6875rem;
 		color: hsl(var(--color-muted-foreground));
 		margin: 0;
 	}
 
 	.tx-amount {
 		font-weight: 600;
-		font-size: 0.875rem;
+		font-size: 0.8125rem;
 	}
 
 	.link-btn {
 		display: block;
-		margin-top: 1rem;
+		margin-top: 0.75rem;
 		background: none;
 		border: none;
-		font-size: 0.875rem;
+		font-size: 0.8125rem;
 		color: hsl(var(--color-primary));
 		cursor: pointer;
 		padding: 0;
@@ -678,11 +899,19 @@
 		text-decoration: underline;
 	}
 
+	.link-btn.danger {
+		color: hsl(var(--color-error));
+	}
+
+	.link-btn:disabled {
+		opacity: 0.5;
+	}
+
 	/* ── Quick buy ───────────────────────────────────────── */
 	.quick-buy {
 		display: flex;
 		flex-direction: column;
-		gap: 0.75rem;
+		gap: 0.5rem;
 	}
 
 	.quick-buy-btn {
@@ -690,7 +919,7 @@
 		align-items: center;
 		justify-content: space-between;
 		width: 100%;
-		padding: 0.75rem;
+		padding: 0.625rem;
 		background: hsl(var(--color-card));
 		border: 1px solid hsl(var(--color-border));
 		border-radius: 0.5rem;
@@ -711,11 +940,12 @@
 
 	.pkg-name {
 		font-weight: 500;
+		font-size: 0.8125rem;
 		margin: 0;
 	}
 
 	.pkg-credits {
-		font-size: 0.875rem;
+		font-size: 0.75rem;
 		color: hsl(var(--color-muted-foreground));
 		margin: 0;
 	}
@@ -723,6 +953,316 @@
 	.pkg-price {
 		font-weight: 600;
 		color: hsl(var(--color-primary));
+		font-size: 0.875rem;
+	}
+
+	/* ── Subscription tab ────────────────────────────────── */
+	.status-card {
+		padding: 0.75rem;
+		border: 1px solid hsl(var(--color-border));
+		border-radius: 0.625rem;
+		background: hsl(var(--color-card));
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+	}
+
+	.status-header {
+		display: flex;
+		align-items: flex-start;
+		justify-content: space-between;
+		gap: 0.5rem;
+	}
+
+	.status-title-row {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.sub-plan-name {
+		font-size: 0.875rem;
+		font-weight: 700;
+		color: hsl(var(--color-foreground));
+	}
+
+	.status-badge {
+		font-size: 0.5625rem;
+		font-weight: 600;
+		padding: 0.0625rem 0.375rem;
+		border-radius: 9999px;
+		background: hsl(var(--color-muted) / 0.3);
+		color: hsl(var(--color-muted-foreground));
+	}
+
+	.status-badge.active {
+		background: hsl(142 71% 45% / 0.12);
+		color: hsl(142 71% 45%);
+	}
+
+	.status-badge.canceled {
+		background: hsl(45 93% 47% / 0.12);
+		color: hsl(45 93% 47%);
+	}
+
+	.sub-mana {
+		font-size: 0.6875rem;
+		color: hsl(var(--color-muted-foreground));
+	}
+
+	.portal-btn {
+		flex-shrink: 0;
+		padding: 0.1875rem 0.5rem;
+		border: 1px solid hsl(var(--color-border));
+		border-radius: 0.375rem;
+		background: transparent;
+		font-size: 0.625rem;
+		cursor: pointer;
+		color: hsl(var(--color-foreground));
+	}
+
+	.portal-btn:hover {
+		background: hsl(var(--color-surface-hover));
+	}
+
+	.status-details {
+		display: flex;
+		flex-direction: column;
+		gap: 0.1875rem;
+		margin-top: 0.375rem;
+		padding-top: 0.375rem;
+		border-top: 1px solid hsl(var(--color-border));
+	}
+
+	.detail {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		font-size: 0.6875rem;
+	}
+
+	.detail-label {
+		color: hsl(var(--color-muted-foreground));
+		min-width: 5rem;
+	}
+
+	.text-warn {
+		color: hsl(45 93% 47%);
+	}
+
+	.interval-toggle {
+		display: flex;
+		gap: 0.25rem;
+		justify-content: center;
+		padding: 0.1875rem;
+		background: hsl(var(--color-muted) / 0.2);
+		border-radius: 0.5rem;
+	}
+
+	.interval-btn {
+		padding: 0.3125rem 0.625rem;
+		border: none;
+		border-radius: 0.375rem;
+		background: transparent;
+		font-size: 0.6875rem;
+		font-weight: 500;
+		cursor: pointer;
+		color: hsl(var(--color-muted-foreground));
+	}
+
+	.interval-btn.selected {
+		background: hsl(var(--color-card));
+		color: hsl(var(--color-foreground));
+		box-shadow: 0 1px 3px hsl(0 0% 0% / 0.08);
+	}
+
+	.save-tag {
+		font-size: 0.5625rem;
+		color: hsl(142 71% 45%);
+	}
+
+	.plans-list {
+		display: flex;
+		flex-direction: column;
+		gap: 0.375rem;
+	}
+
+	.plan-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.75rem;
+		width: 100%;
+		padding: 0.625rem 0.75rem;
+		border: 1px solid hsl(var(--color-border));
+		border-radius: 0.625rem;
+		background: hsl(var(--color-card));
+		cursor: pointer;
+		transition: all 0.15s;
+		text-align: left;
+		color: hsl(var(--color-foreground));
+		font: inherit;
+	}
+
+	.plan-row:hover:not(:disabled) {
+		background: hsl(var(--color-surface-hover));
+		border-color: hsl(var(--color-primary) / 0.3);
+	}
+
+	.plan-row:disabled {
+		cursor: default;
+		opacity: 0.8;
+	}
+
+	.plan-row.current {
+		border-color: hsl(var(--color-primary) / 0.35);
+		background: hsl(var(--color-primary) / 0.05);
+	}
+
+	.plan-info {
+		flex: 1;
+		min-width: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0.0625rem;
+	}
+
+	.plan-row-name {
+		font-size: 0.8125rem;
+		font-weight: 600;
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
+	}
+
+	.current-tag {
+		font-size: 0.5625rem;
+		font-weight: 600;
+		color: hsl(var(--color-primary));
+		background: hsl(var(--color-primary) / 0.1);
+		padding: 0.0625rem 0.375rem;
+		border-radius: 9999px;
+	}
+
+	.plan-row-mana {
+		font-size: 0.6875rem;
+		color: hsl(var(--color-primary));
+		font-weight: 500;
+	}
+
+	.plan-features-preview {
+		font-size: 0.625rem;
+		color: hsl(var(--color-muted-foreground));
+	}
+
+	.plan-price-col {
+		flex-shrink: 0;
+		text-align: right;
+	}
+
+	.plan-price-amount {
+		font-size: 0.875rem;
+		font-weight: 700;
+		display: block;
+	}
+
+	.plan-price-free {
+		font-size: 0.8125rem;
+		color: hsl(var(--color-muted-foreground));
+	}
+
+	.plan-price-period {
+		font-size: 0.5625rem;
+		color: hsl(var(--color-muted-foreground));
+	}
+
+	/* ── Invoices ────────────────────────────────────────── */
+	.invoices-details {
+		border: 1px solid hsl(var(--color-border));
+		border-radius: 0.625rem;
+		overflow: hidden;
+	}
+
+	.invoices-summary {
+		padding: 0.625rem 0.75rem;
+		font-size: 0.75rem;
+		font-weight: 600;
+		color: hsl(var(--color-muted-foreground));
+		cursor: pointer;
+		user-select: none;
+	}
+
+	.invoices-summary:hover {
+		color: hsl(var(--color-foreground));
+	}
+
+	.invoices-list {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+		padding: 0 0.75rem 0.75rem;
+	}
+
+	.invoice-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.5rem;
+		padding: 0.375rem 0;
+		border-bottom: 1px solid hsl(var(--color-border));
+	}
+
+	.invoice-row:last-child {
+		border-bottom: none;
+	}
+
+	.invoice-info {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.invoice-number {
+		font-family: monospace;
+		font-size: 0.6875rem;
+	}
+
+	.invoice-date {
+		font-size: 0.625rem;
+		color: hsl(var(--color-muted-foreground));
+	}
+
+	.invoice-right {
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
+	}
+
+	.invoice-amount {
+		font-size: 0.75rem;
+		font-weight: 500;
+	}
+
+	.invoice-status {
+		font-size: 0.5625rem;
+		padding: 0.0625rem 0.375rem;
+		border-radius: 9999px;
+		background: hsl(45 93% 47% / 0.12);
+		color: hsl(45 93% 47%);
+	}
+
+	.invoice-status.paid {
+		background: hsl(142 71% 45% / 0.12);
+		color: hsl(142 71% 45%);
+	}
+
+	.pdf-link {
+		font-size: 0.625rem;
+		color: hsl(var(--color-primary));
+		text-decoration: none;
+	}
+
+	.pdf-link:hover {
+		text-decoration: underline;
 	}
 
 	/* ── Transactions table ──────────────────────────────── */
@@ -736,16 +1276,16 @@
 	}
 
 	.tx-table th {
-		padding: 0 0 0.75rem;
-		font-size: 0.875rem;
+		padding: 0 0 0.5rem;
+		font-size: 0.75rem;
 		font-weight: 500;
 		color: hsl(var(--color-muted-foreground));
 		text-align: left;
 	}
 
 	.tx-table td {
-		padding: 0.75rem 0.5rem 0.75rem 0;
-		font-size: 0.875rem;
+		padding: 0.5rem 0.375rem 0.5rem 0;
+		font-size: 0.8125rem;
 		border-bottom: 1px solid hsl(var(--color-border));
 		color: hsl(var(--color-foreground));
 	}
@@ -755,7 +1295,7 @@
 	}
 
 	.tx-icon-sm {
-		font-size: 1rem;
+		font-size: 0.875rem;
 	}
 
 	.muted {
@@ -777,19 +1317,7 @@
 	/* ── Packages grid ───────────────────────────────────── */
 	.packages-grid {
 		display: grid;
-		gap: 1rem;
-	}
-
-	@media (min-width: 640px) {
-		.packages-grid {
-			grid-template-columns: repeat(2, 1fr);
-		}
-	}
-
-	@media (min-width: 1024px) {
-		.packages-grid {
-			grid-template-columns: repeat(3, 1fr);
-		}
+		gap: 0.75rem;
 	}
 
 	.pkg-card {
@@ -797,40 +1325,40 @@
 	}
 
 	.pkg-card-name {
-		font-size: 1.125rem;
+		font-size: 1rem;
 		font-weight: 700;
 		margin: 0;
 		color: hsl(var(--color-foreground));
 	}
 
 	.pkg-card-desc {
-		font-size: 0.875rem;
+		font-size: 0.8125rem;
 		color: hsl(var(--color-muted-foreground));
 		margin: 0.25rem 0 0;
 	}
 
 	.pkg-card-credits {
-		font-size: 2rem;
+		font-size: 1.75rem;
 		font-weight: 700;
 		color: hsl(var(--color-primary));
-		margin: 1rem 0 0;
+		margin: 0.75rem 0 0;
 	}
 
 	.pkg-card-unit {
-		font-size: 0.875rem;
+		font-size: 0.75rem;
 		color: hsl(var(--color-muted-foreground));
 		margin: 0;
 	}
 
 	.pkg-card-price {
-		font-size: 1.25rem;
+		font-size: 1.125rem;
 		font-weight: 600;
-		margin: 1rem 0 0;
+		margin: 0.75rem 0 0;
 		color: hsl(var(--color-foreground));
 	}
 
 	.pkg-buy-btn {
-		margin-top: 1rem;
+		margin-top: 0.75rem;
 		width: 100%;
 	}
 
@@ -838,13 +1366,13 @@
 	.cost-filters {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.5rem;
+		gap: 0.375rem;
 	}
 
 	.filter-chip {
-		padding: 0.375rem 0.75rem;
+		padding: 0.3125rem 0.625rem;
 		border-radius: 9999px;
-		font-size: 0.875rem;
+		font-size: 0.8125rem;
 		font-weight: 500;
 		border: none;
 		cursor: pointer;
@@ -863,11 +1391,11 @@
 	}
 
 	.info-banner {
-		padding: 1rem;
+		padding: 0.75rem;
 		border-radius: 0.5rem;
 		background: hsl(210 100% 95%);
 		border: 1px solid hsl(210 100% 85%);
-		font-size: 0.875rem;
+		font-size: 0.8125rem;
 		color: hsl(210 50% 30%);
 	}
 
@@ -880,7 +1408,7 @@
 	.cost-groups {
 		display: flex;
 		flex-direction: column;
-		gap: 1rem;
+		gap: 0.75rem;
 	}
 
 	.cost-list {
@@ -892,9 +1420,9 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		padding: 0.75rem 0;
+		padding: 0.5rem 0;
 		border-bottom: 1px solid hsl(var(--color-border));
-		gap: 1rem;
+		gap: 0.75rem;
 	}
 
 	.cost-row:last-child {
@@ -907,35 +1435,35 @@
 	}
 
 	.cost-name {
-		font-size: 0.875rem;
+		font-size: 0.8125rem;
 		font-weight: 500;
 		margin: 0;
 		color: hsl(var(--color-foreground));
 	}
 
 	.cost-desc {
-		font-size: 0.75rem;
+		font-size: 0.6875rem;
 		color: hsl(var(--color-muted-foreground));
-		margin: 0.125rem 0 0;
+		margin: 0.0625rem 0 0;
 	}
 
 	.cost-right {
 		display: flex;
 		align-items: center;
-		gap: 0.75rem;
+		gap: 0.5rem;
 		flex-shrink: 0;
 	}
 
 	.cost-category {
-		font-size: 0.75rem;
+		font-size: 0.6875rem;
 		color: hsl(var(--color-muted-foreground));
 	}
 
 	.cost-badge {
 		display: inline-flex;
-		padding: 0.125rem 0.625rem;
+		padding: 0.0625rem 0.5rem;
 		border-radius: 9999px;
-		font-size: 0.75rem;
+		font-size: 0.6875rem;
 		font-weight: 600;
 		background: hsl(210 100% 95%);
 		color: hsl(210 50% 40%);
@@ -970,7 +1498,7 @@
 	.btn {
 		padding: 0.5rem 1rem;
 		border-radius: 0.5rem;
-		font-size: 0.875rem;
+		font-size: 0.8125rem;
 		font-weight: 500;
 		border: none;
 		cursor: pointer;
@@ -1001,7 +1529,7 @@
 		color: white;
 		border-radius: 0.5rem;
 		box-shadow: 0 4px 12px hsl(0 0% 0% / 0.15);
-		font-size: 0.875rem;
+		font-size: 0.8125rem;
 		animation: fadeIn 0.2s ease-out;
 	}
 
