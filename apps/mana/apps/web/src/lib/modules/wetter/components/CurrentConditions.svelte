@@ -44,18 +44,22 @@
 	<!-- Detail grid -->
 	<div class="detail-grid">
 		<div class="detail">
+			<span class="detail-icon">💨</span>
 			<span class="detail-val">{Math.round(current.windSpeed)} km/h</span>
 			<span class="detail-lbl">Wind {windDirectionLabel(current.windDirection)}</span>
 		</div>
 		<div class="detail">
+			<span class="detail-icon">💧</span>
 			<span class="detail-val">{current.humidity}%</span>
 			<span class="detail-lbl">Feuchtigkeit</span>
 		</div>
 		<div class="detail">
+			<span class="detail-icon">🌡️</span>
 			<span class="detail-val">{Math.round(current.pressure)} hPa</span>
 			<span class="detail-lbl">Luftdruck</span>
 		</div>
 		<div class="detail">
+			<span class="detail-icon">☀️</span>
 			<span class="detail-val">{current.uvIndex}</span>
 			<span class="detail-lbl">UV-Index</span>
 		</div>
@@ -132,6 +136,11 @@
 		padding: 8px 4px;
 		border-radius: 8px;
 		background: var(--card-bg-hover, rgba(255, 255, 255, 0.04));
+	}
+	.detail-icon {
+		font-size: 1rem;
+		line-height: 1;
+		margin-bottom: 1px;
 	}
 	.detail-val {
 		font-size: 0.82rem;
