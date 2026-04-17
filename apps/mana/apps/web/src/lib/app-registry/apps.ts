@@ -74,6 +74,7 @@ import {
 	ShootingStar,
 	CloudSun,
 	Stack,
+	ArrowClockwise,
 } from '@mana/shared-icons';
 
 // ── Apps with entity capabilities ───────────────────────────
@@ -1044,7 +1045,7 @@ registerApp({
 	id: 'rituals',
 	name: 'Rituale',
 	color: '#EC4899',
-	icon: Lightning,
+	icon: ArrowClockwise,
 	views: {
 		list: { load: () => import('$lib/modules/rituals/ListView.svelte') },
 	},
