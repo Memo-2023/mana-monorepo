@@ -71,6 +71,8 @@ import {
 	Scroll,
 	Spiral,
 	Crown,
+	ShootingStar,
+	CloudSun,
 } from '@mana/shared-icons';
 
 // ── Apps with entity capabilities ───────────────────────────
@@ -1170,12 +1172,61 @@ registerApp({
 });
 
 registerApp({
+	id: 'wishes',
+	name: 'Wünsche',
+	color: '#F59E0B',
+	icon: ShootingStar,
+	views: {
+		list: { load: () => import('$lib/modules/wishes/ListView.svelte') },
+		detail: { load: () => import('$lib/modules/wishes/views/DetailView.svelte') },
+	},
+	contextMenuActions: [
+		{
+			id: 'new-wish',
+			label: 'Neuer Wunsch',
+			icon: Plus,
+			action: () =>
+				window.dispatchEvent(
+					new CustomEvent('mana:quick-action', { detail: { app: 'wishes', action: 'new' } })
+				),
+		},
+	],
+	collection: 'wishesItems',
+	paramKey: 'wishId',
+	dragType: 'wish',
+	getDisplayData: (item) => ({
+		title: (item.title as string) || 'Wunsch',
+		subtitle: item.targetPrice
+			? `${(item.targetPrice as number).toLocaleString('de-DE')} €`
+			: undefined,
+	}),
+	createItem: async (data) => {
+		const { wishesStore } = await import('$lib/modules/wishes/stores/wishes.svelte');
+		const wish = await wishesStore.create({
+			title: data.title as string,
+			description: data.description as string | undefined,
+		});
+		return wish.id;
+	},
+});
+
+registerApp({
 	id: 'help',
 	name: 'Hilfe',
 	color: '#3B82F6',
 	icon: Question,
 	views: {
 		list: { load: () => import('$lib/modules/help/ListView.svelte') },
+	},
+});
+
+registerApp({
+	id: 'wetter',
+	name: 'Wetter',
+	color: '#38bdf8',
+	icon: CloudSun,
+	views: {
+		list: { load: () => import('$lib/modules/wetter/ListView.svelte') },
 	},
 });
 
