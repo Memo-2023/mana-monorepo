@@ -20,8 +20,7 @@
 
 	let activeCategory = $state<CategoryId>('general');
 
-	onMount(() => {
-		const hash = window.location.hash?.slice(1);
+	function navigateToHash(hash: string) {
 		if (!hash) return;
 		const cat = categories.find((c) => c.anchors.includes(hash));
 		if (cat) activeCategory = cat.id;
@@ -29,6 +28,33 @@
 			const el = document.getElementById(hash);
 			if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
 		});
+	}
+
+	onMount(() => {
+		const hash = window.location.hash?.slice(1);
+		if (hash) navigateToHash(hash);
+	});
+
+	// React to anchor navigations while already mounted (e.g. deep-link
+	// from companion chat "KI-Einstellungen öffnen" when settings is
+	// already open on a different tab). Listens for both native hashchange
+	// and the custom workbench:navigate-anchor event dispatched by the
+	// workbench deep-link handler.
+	$effect(() => {
+		const onHashChange = () => {
+			const hash = window.location.hash?.slice(1);
+			if (hash) navigateToHash(hash);
+		};
+		const onAnchor = (e: Event) => {
+			const anchor = (e as CustomEvent<{ anchor: string }>).detail?.anchor;
+			if (anchor) navigateToHash(anchor);
+		};
+		window.addEventListener('hashchange', onHashChange);
+		window.addEventListener('workbench:navigate-anchor', onAnchor);
+		return () => {
+			window.removeEventListener('hashchange', onHashChange);
+			window.removeEventListener('workbench:navigate-anchor', onAnchor);
+		};
 	});
 
 	function jumpTo(entry: SearchEntry) {
@@ -68,6 +94,7 @@
 		gap: 1rem;
 		height: 100%;
 		overflow-y: auto;
+		overflow-x: hidden;
 	}
 
 	.settings-content {

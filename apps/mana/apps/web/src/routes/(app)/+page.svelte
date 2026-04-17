@@ -89,15 +89,25 @@
 	$effect(() => {
 		const target = $page.url.searchParams.get('app');
 		if (!target || !getApp(target)) return;
+		const hash = $page.url.hash?.slice(1) || '';
 		// Use queueMicrotask so we don't mutate state during the effect's first run
 		queueMicrotask(async () => {
 			const already = workbenchScenesStore.openApps.find((a) => a.appId === target);
 			if (!already) await workbenchScenesStore.addApp(target);
 			await tick();
 			scrollToPage(target);
+			// Clean the ?app= param but preserve the hash for the target panel
 			const clean = new URL($page.url);
 			clean.searchParams.delete('app');
 			history.replaceState({}, '', clean);
+			// Notify the target panel about the hash anchor (e.g. settings
+			// needs to switch to the right tab and scroll to the section)
+			if (hash) {
+				await tick();
+				window.dispatchEvent(
+					new CustomEvent('workbench:navigate-anchor', { detail: { anchor: hash } })
+				);
+			}
 		});
 	});
 
