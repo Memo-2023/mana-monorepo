@@ -381,6 +381,61 @@ services:
       - "traefik.http.routers.mana-credits.tls=true"
       - "traefik.http.services.mana-credits.loadbalancer.server.port=3002"
 
+  mana-research:
+    build:
+      context: .
+      dockerfile: services/mana-research/Dockerfile
+    image: mana-research:local
+    container_name: mana-research
+    restart: always
+    mem_limit: 256m
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      mana-credits:
+        condition: service_healthy
+      mana-search:
+        condition: service_started
+    environment:
+      TZ: Europe/Berlin
+      NODE_ENV: production
+      PORT: 3068
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana_platform
+      REDIS_URL: redis://redis:6379
+      MANA_AUTH_URL: http://mana-auth:3001
+      MANA_LLM_URL: http://mana-llm:3025
+      MANA_CREDITS_URL: http://mana-credits:3002
+      MANA_SEARCH_URL: http://mana-search:3021
+      MANA_SERVICE_KEY: ${MANA_SERVICE_KEY}
+      CACHE_TTL_SECONDS: 3600
+      BRAVE_API_KEY: ${BRAVE_API_KEY:-}
+      TAVILY_API_KEY: ${TAVILY_API_KEY:-}
+      EXA_API_KEY: ${EXA_API_KEY:-}
+      SERPER_API_KEY: ${SERPER_API_KEY:-}
+      JINA_API_KEY: ${JINA_API_KEY:-}
+      FIRECRAWL_API_KEY: ${FIRECRAWL_API_KEY:-}
+      SCRAPINGBEE_API_KEY: ${SCRAPINGBEE_API_KEY:-}
+      PERPLEXITY_API_KEY: ${PERPLEXITY_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      GOOGLE_GENAI_API_KEY: ${GOOGLE_GENAI_API_KEY:-}
+      CORS_ORIGINS: https://mana.how,https://chat.mana.how,https://research.mana.how
+    ports:
+      - "3068:3068"
+    healthcheck:
+      test: ["CMD", "bun", "-e", "fetch('http://127.0.0.1:3068/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 120s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.mana-research.rule=Host(`research.mana.how`)"
+      - "traefik.http.routers.mana-research.tls=true"
+      - "traefik.http.services.mana-research.loadbalancer.server.port=3068"
+
   mana-events:
     build:
       context: services/mana-events

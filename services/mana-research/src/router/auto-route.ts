@@ -1,0 +1,70 @@
+/**
+ * Auto-router — maps QueryType + available providers to an ordered preference
+ * list. The first provider in the returned list that has a valid API key wins.
+ */
+
+import type { SearchProviderId, ExtractProviderId } from '@mana/shared-research';
+import type { Config } from '../config';
+import type { QueryType } from './classify';
+
+export const SEARCH_ROUTE_MAP: Record<QueryType, SearchProviderId[]> = {
+	news: ['tavily', 'brave', 'serper', 'searxng', 'duckduckgo'],
+	general: ['brave', 'tavily', 'serper', 'searxng', 'duckduckgo'],
+	semantic: ['exa', 'tavily', 'brave', 'searxng'],
+	academic: ['exa', 'searxng', 'brave', 'tavily'],
+	code: ['exa', 'serper', 'brave', 'searxng'],
+	conversational: ['tavily', 'brave', 'serper', 'searxng'],
+};
+
+export const EXTRACT_ROUTE_DEFAULT: ExtractProviderId[] = [
+	'firecrawl',
+	'jina-reader',
+	'readability',
+];
+
+/**
+ * Pick the first provider in `preferences` that has a configured key (or
+ * doesn't need one). Returns `null` if no provider is usable — caller should
+ * fall back to free providers.
+ */
+export function pickSearchProvider(
+	preferences: SearchProviderId[],
+	config: Config,
+	alwaysAvailable: Set<SearchProviderId> = new Set(['searxng', 'duckduckgo'])
+): SearchProviderId | null {
+	const envMap: Record<SearchProviderId, keyof Config['providerKeys'] | null> = {
+		searxng: null,
+		duckduckgo: null,
+		brave: 'brave',
+		tavily: 'tavily',
+		exa: 'exa',
+		serper: 'serper',
+	};
+
+	for (const id of preferences) {
+		if (alwaysAvailable.has(id)) return id;
+		const envKey = envMap[id];
+		if (envKey && config.providerKeys[envKey]) return id;
+	}
+	return null;
+}
+
+export function pickExtractProvider(
+	preferences: ExtractProviderId[],
+	config: Config,
+	alwaysAvailable: Set<ExtractProviderId> = new Set(['readability', 'jina-reader'])
+): ExtractProviderId | null {
+	const envMap: Record<ExtractProviderId, keyof Config['providerKeys'] | null> = {
+		readability: null,
+		'jina-reader': 'jina',
+		firecrawl: 'firecrawl',
+		scrapingbee: 'scrapingbee',
+	};
+
+	for (const id of preferences) {
+		if (alwaysAvailable.has(id)) return id;
+		const envKey = envMap[id];
+		if (envKey && config.providerKeys[envKey]) return id;
+	}
+	return null;
+}

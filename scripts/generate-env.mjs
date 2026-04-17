@@ -75,6 +75,37 @@ const APP_CONFIGS = [
 		},
 	},
 
+	// Mana Research Service (Hono + Bun, Port 3068)
+	{
+		path: 'services/mana-research/.env',
+		vars: {
+			NODE_ENV: () => 'development',
+			PORT: (env) => env.MANA_RESEARCH_PORT || '3068',
+			DATABASE_URL: (env) =>
+				env.MANA_RESEARCH_DATABASE_URL ||
+				'postgresql://mana:devpassword@localhost:5432/mana_platform',
+			REDIS_URL: (env) => env.REDIS_URL || 'redis://localhost:6379',
+			MANA_AUTH_URL: (env) => env.MANA_AUTH_URL || 'http://localhost:3001',
+			MANA_LLM_URL: (env) => env.MANA_LLM_URL || 'http://localhost:3025',
+			MANA_CREDITS_URL: (env) => env.MANA_CREDITS_URL || 'http://localhost:3061',
+			MANA_SEARCH_URL: (env) => env.MANA_SEARCH_URL || 'http://localhost:3021',
+			MANA_SERVICE_KEY: (env) => env.MANA_SERVICE_KEY || 'dev-service-key',
+			CACHE_TTL_SECONDS: (env) => env.MANA_RESEARCH_CACHE_TTL_SECONDS || '3600',
+			CORS_ORIGINS: (env) => env.CORS_ORIGINS || 'http://localhost:5173',
+			BRAVE_API_KEY: (env) => env.BRAVE_API_KEY || '',
+			TAVILY_API_KEY: (env) => env.TAVILY_API_KEY || '',
+			EXA_API_KEY: (env) => env.EXA_API_KEY || '',
+			SERPER_API_KEY: (env) => env.SERPER_API_KEY || '',
+			JINA_API_KEY: (env) => env.JINA_API_KEY || '',
+			FIRECRAWL_API_KEY: (env) => env.FIRECRAWL_API_KEY || '',
+			SCRAPINGBEE_API_KEY: (env) => env.SCRAPINGBEE_API_KEY || '',
+			PERPLEXITY_API_KEY: (env) => env.PERPLEXITY_API_KEY || '',
+			ANTHROPIC_API_KEY: (env) => env.ANTHROPIC_API_KEY || '',
+			OPENAI_API_KEY: (env) => env.OPENAI_API_KEY || '',
+			GOOGLE_GENAI_API_KEY: (env) => env.GOOGLE_GENAI_API_KEY || '',
+		},
+	},
+
 	// Chat Server (Hono/Bun)
 	{
 		path: 'apps/chat/apps/server/.env',

@@ -26,7 +26,8 @@
 > - mana-mail `3042`
 > - mana-sync `3050`
 > - mana-credits `3061`, mana-user `3062`, mana-subscriptions `3063`,
->   mana-analytics `3064`, mana-events `3065`
+>   mana-analytics `3064`, mana-events `3065`, mana-research `3068`
+>   (new 2026-04-17, Bun/Hono, public: `research.mana.how`)
 >
 > **Not deployed:** `mana-voice-bot` (default port `3024`, no scheduled
 > task, no cloudflared route, no launchd plist).

@@ -33,7 +33,7 @@ docs/                # Long-form docs (deployment, hardware, postmortems, etc.)
 
 ### Active services (`services/`)
 
-`mana-auth` (3001), `mana-sync` (3050), `mana-credits`, `mana-user`, `mana-subscriptions`, `mana-analytics`, `mana-search` (3021), `mana-crawler`, `mana-api-gateway`, `mana-notify`, `mana-media`, `mana-llm`, `mana-image-gen`, `mana-video-gen`, `mana-stt`, `mana-tts`, `mana-voice-bot`, `mana-events`, `mana-geocoding` (3018), `mana-landing-builder`, `mana-ai` (3067, background AI Mission Runner — see [`services/mana-ai/CLAUDE.md`](services/mana-ai/CLAUDE.md)). Each non-trivial service has its own `CLAUDE.md`.
+`mana-auth` (3001), `mana-sync` (3050), `mana-credits`, `mana-user`, `mana-subscriptions`, `mana-analytics`, `mana-search` (3021), `mana-crawler`, `mana-api-gateway`, `mana-notify`, `mana-media`, `mana-llm`, `mana-image-gen`, `mana-video-gen`, `mana-stt`, `mana-tts`, `mana-voice-bot`, `mana-events`, `mana-geocoding` (3018), `mana-landing-builder`, `mana-ai` (3067, background AI Mission Runner — see [`services/mana-ai/CLAUDE.md`](services/mana-ai/CLAUDE.md)), `mana-research` (3068, web research provider orchestration across 16+ providers — see [`services/mana-research/CLAUDE.md`](services/mana-research/CLAUDE.md) and [`docs/plans/mana-research-service.md`](docs/plans/mana-research-service.md)). Each non-trivial service has its own `CLAUDE.md`.
 
 ## Coding Guidelines
 
