@@ -11,6 +11,9 @@ import {
 	internalRefundSchema,
 	internalInitSchema,
 	internalRedeemPendingSchema,
+	internalReserveSchema,
+	internalCommitSchema,
+	internalRefundReservationSchema,
 } from '../lib/validation';
 
 export function createInternalRoutes(
@@ -44,6 +47,21 @@ export function createInternalRoutes(
 			const body = internalInitSchema.parse(await c.req.json());
 			const balance = await creditsService.initializeBalance(body.userId);
 			return c.json(balance);
+		})
+		.post('/credits/reserve', async (c) => {
+			const body = internalReserveSchema.parse(await c.req.json());
+			const result = await creditsService.reserve(body.userId, body.amount, body.reason);
+			return c.json(result);
+		})
+		.post('/credits/commit', async (c) => {
+			const body = internalCommitSchema.parse(await c.req.json());
+			const result = await creditsService.commitReservation(body.reservationId, body.description);
+			return c.json(result);
+		})
+		.post('/credits/refund-reservation', async (c) => {
+			const body = internalRefundReservationSchema.parse(await c.req.json());
+			const result = await creditsService.refundReservation(body.reservationId);
+			return c.json(result);
 		})
 		.post('/gifts/redeem-pending', async (c) => {
 			const body = internalRedeemPendingSchema.parse(await c.req.json());

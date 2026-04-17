@@ -74,9 +74,12 @@ Gifted subscriptions have `is_gifted=true` and are skipped by the billing cron �
 | Method | Path | Description |
 |--------|------|-------------|
 | GET | `/api/v1/internal/credits/balance/:userId` | Get user balance |
-| POST | `/api/v1/internal/credits/use` | Use credits for user |
-| POST | `/api/v1/internal/credits/refund` | Refund credits |
+| POST | `/api/v1/internal/credits/use` | Use credits for user (one-shot debit) |
+| POST | `/api/v1/internal/credits/refund` | Refund credits (unrelated to reservations) |
 | POST | `/api/v1/internal/credits/init` | Initialize balance |
+| POST | `/api/v1/internal/credits/reserve` | 2-phase debit: reserve (body: `{ userId, amount, reason }`) → returns `{ reservationId, balance }` |
+| POST | `/api/v1/internal/credits/commit` | 2-phase debit: commit (body: `{ reservationId, description? }`) → ledger entry |
+| POST | `/api/v1/internal/credits/refund-reservation` | 2-phase debit: refund (body: `{ reservationId }`) → restore balance |
 | POST | `/api/v1/internal/gifts/redeem-pending` | Auto-redeem on registration |
 | GET | `/api/v1/internal/sync/status/:userId` | Sync status for server check |
 | POST | `/api/v1/internal/sync/charge-recurring` | Cron trigger for billing |
@@ -106,7 +109,17 @@ Own database: `mana_credits`
 
 Schemas: `credits.*`, `gifts.*`
 
-Tables: balances, transactions, packages, purchases, usage_stats, stripe_customers, gift_codes, gift_redemptions, sync_subscriptions
+Tables: balances, transactions, packages, purchases, usage_stats, stripe_customers, reservations, gift_codes, gift_redemptions, sync_subscriptions
+
+## 2-Phase Debit (Reserve/Commit/Refund)
+
+For services that need to charge only after a downstream call succeeds (e.g. mana-research fanning out to paid API providers), use the `/internal/credits/{reserve,commit,refund-reservation}` flow:
+
+1. `reserve` — atomically deducts balance, creates row in `credits.reservations` with status `reserved`. Returns `reservationId`.
+2. `commit` — marks reservation `committed`, writes transaction ledger entry.
+3. `refund-reservation` — marks reservation `refunded`, restores balance.
+
+One-shot `use` remains for synchronous operations that charge immediately.
 
 ## Credit Operations
 

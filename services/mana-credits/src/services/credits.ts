@@ -7,6 +7,7 @@
 
 import { eq, and, desc } from 'drizzle-orm';
 import { balances, transactions, purchases, packages, usageStats } from '../db/schema/credits';
+import { creditReservations } from '../db/schema/reservations';
 import type { Database } from '../db/connection';
 import type { StripeService } from './stripe';
 import {
@@ -346,5 +347,151 @@ export class CreditsService {
 
 		if (!purchase) throw new NotFoundError('Purchase not found');
 		return purchase;
+	}
+
+	// ─── 2-phase debit (reserve / commit / refund) ─────────────
+	// Used by mana-research for provider calls that should only be charged
+	// after the downstream API succeeds. See services/mana-research.
+
+	async reserve(userId: string, amount: number, reason: string) {
+		if (amount <= 0) throw new BadRequestError('Reservation amount must be positive');
+
+		return await this.db.transaction(async (tx) => {
+			const [current] = await tx
+				.select()
+				.from(balances)
+				.where(eq(balances.userId, userId))
+				.for('update')
+				.limit(1);
+
+			if (!current) throw new NotFoundError('User balance not found');
+			if (current.balance < amount) {
+				throw new InsufficientCreditsError(amount, current.balance);
+			}
+
+			const newBalance = current.balance - amount;
+
+			const updated = await tx
+				.update(balances)
+				.set({
+					balance: newBalance,
+					version: current.version + 1,
+					updatedAt: new Date(),
+				})
+				.where(and(eq(balances.userId, userId), eq(balances.version, current.version)))
+				.returning();
+
+			if (updated.length === 0) {
+				throw new ConflictError('Balance was modified concurrently. Please retry.');
+			}
+
+			const [reservation] = await tx
+				.insert(creditReservations)
+				.values({ userId, amount, reason, status: 'reserved' })
+				.returning();
+
+			return {
+				reservationId: reservation.id,
+				balance: newBalance,
+			};
+		});
+	}
+
+	async commitReservation(reservationId: string, description?: string) {
+		return await this.db.transaction(async (tx) => {
+			const [reservation] = await tx
+				.select()
+				.from(creditReservations)
+				.where(eq(creditReservations.id, reservationId))
+				.for('update')
+				.limit(1);
+
+			if (!reservation) throw new NotFoundError('Reservation not found');
+			if (reservation.status !== 'reserved') {
+				throw new BadRequestError(`Cannot commit reservation in status: ${reservation.status}`);
+			}
+
+			await tx
+				.update(creditReservations)
+				.set({ status: 'committed', resolvedAt: new Date() })
+				.where(eq(creditReservations.id, reservationId));
+
+			const [balance] = await tx
+				.select()
+				.from(balances)
+				.where(eq(balances.userId, reservation.userId))
+				.limit(1);
+
+			const balanceAfter = balance?.balance ?? 0;
+			const balanceBefore = balanceAfter + reservation.amount;
+
+			await tx
+				.update(balances)
+				.set({
+					totalSpent: (balance?.totalSpent ?? 0) + reservation.amount,
+					updatedAt: new Date(),
+				})
+				.where(eq(balances.userId, reservation.userId));
+
+			const [transaction] = await tx
+				.insert(transactions)
+				.values({
+					userId: reservation.userId,
+					type: 'usage',
+					status: 'completed',
+					amount: -reservation.amount,
+					balanceBefore,
+					balanceAfter,
+					appId: reservation.reason.split(':')[0] || 'mana-research',
+					description: description ?? reservation.reason,
+					metadata: { reservationId: reservation.id },
+					completedAt: new Date(),
+				})
+				.returning();
+
+			return { success: true, transactionId: transaction.id };
+		});
+	}
+
+	async refundReservation(reservationId: string) {
+		return await this.db.transaction(async (tx) => {
+			const [reservation] = await tx
+				.select()
+				.from(creditReservations)
+				.where(eq(creditReservations.id, reservationId))
+				.for('update')
+				.limit(1);
+
+			if (!reservation) throw new NotFoundError('Reservation not found');
+			if (reservation.status !== 'reserved') {
+				throw new BadRequestError(`Cannot refund reservation in status: ${reservation.status}`);
+			}
+
+			await tx
+				.update(creditReservations)
+				.set({ status: 'refunded', resolvedAt: new Date() })
+				.where(eq(creditReservations.id, reservationId));
+
+			const [current] = await tx
+				.select()
+				.from(balances)
+				.where(eq(balances.userId, reservation.userId))
+				.for('update')
+				.limit(1);
+
+			if (!current) throw new NotFoundError('User balance not found');
+
+			const newBalance = current.balance + reservation.amount;
+			await tx
+				.update(balances)
+				.set({
+					balance: newBalance,
+					version: current.version + 1,
+					updatedAt: new Date(),
+				})
+				.where(and(eq(balances.userId, reservation.userId), eq(balances.version, current.version)));
+
+			return { success: true, balance: newBalance };
+		});
 	}
 }
