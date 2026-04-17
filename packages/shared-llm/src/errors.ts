@@ -38,16 +38,18 @@ export class NoTierAvailableError extends LlmError {
 		this.name = 'NoTierAvailableError';
 	}
 
-	/** User-friendly German explanation of what went wrong. */
+	/** User-friendly German explanation of what went wrong (Markdown). */
 	getUserMessage(): string {
+		const settingsLink = '[KI-Einstellungen öffnen](/?app=settings#ai-options)';
+
 		if (this.skipped.length === 0 && this.attempted.length === 0) {
-			return 'Kein KI-Modell konfiguriert. Aktiviere ein Modell unter Einstellungen → KI.';
+			return `Kein KI-Modell konfiguriert.\n\n${settingsLink}`;
 		}
 
 		const reasons = this.skipped.map((s) => {
 			switch (s.reason) {
 				case 'no-consent':
-					return `**${tierLabel(s.tier)}**: Cloud-Einwilligung fehlt. Aktiviere sie unter Einstellungen → KI.`;
+					return `**${tierLabel(s.tier)}**: Cloud-Einwilligung fehlt.`;
 				case 'no-backend':
 					return `**${tierLabel(s.tier)}**: Backend nicht registriert.`;
 				case 'not-available':
@@ -60,7 +62,7 @@ export class NoTierAvailableError extends LlmError {
 					return 'Kein KI-Modell konfiguriert.';
 			}
 		});
-		return reasons.join('\n');
+		return `${reasons.join('\n')}\n\n${settingsLink}`;
 	}
 }
 
