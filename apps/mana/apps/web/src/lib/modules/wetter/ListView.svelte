@@ -1,139 +1,155 @@
 <!--
   Wetter — ListView (Workbench panel)
-  Compact weather card showing current conditions, hourly preview,
-  and alerts. Uses the same stores as the full /wetter page.
+  Full weather view with tabs: overview (current + hourly + daily + alerts + nowcast)
+  and source comparison (multi-model). Same functionality as /wetter page.
 -->
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import { weatherStore } from './stores/weather.svelte';
 	import { locationsStore } from './stores/locations.svelte';
 	import { useLocations } from './queries';
-	import { getWeatherIcon, getWeatherLabel, windDirectionLabel } from './weather-icons';
+	import CurrentConditions from './components/CurrentConditions.svelte';
+	import HourlyForecast from './components/HourlyForecast.svelte';
+	import DailyForecast from './components/DailyForecast.svelte';
+	import WeatherAlerts from './components/WeatherAlerts.svelte';
+	import NowcastBar from './components/NowcastBar.svelte';
+	import LocationPicker from './components/LocationPicker.svelte';
+	import SourceComparison from './components/SourceComparison.svelte';
 
 	const locationsQuery = useLocations();
 	let locations = $derived(locationsQuery.value);
+	let selectedLat = $state<number | null>(null);
+	let selectedLon = $state<number | null>(null);
+	let selectedName = $state('');
+	let activeTab = $state<'overview' | 'compare'>('overview');
+
+	function selectLocation(lat: number, lon: number, name: string) {
+		selectedLat = lat;
+		selectedLon = lon;
+		selectedName = name;
+		weatherStore.fetchWeather(lat, lon, name);
+		weatherStore.fetchNowcast(lat, lon);
+	}
+
+	async function saveLocation(name: string, lat: number, lon: number) {
+		await locationsStore.addLocation(name, lat, lon);
+	}
 
 	onMount(() => {
-		// If weather is already loaded, skip. Otherwise load default location.
 		if (weatherStore.weatherData) return;
 
 		const defaultLoc = locations.find((l) => l.isDefault) ?? locations[0];
 		if (defaultLoc) {
-			weatherStore.fetchWeather(defaultLoc.lat, defaultLoc.lon, defaultLoc.name);
-			weatherStore.fetchNowcast(defaultLoc.lat, defaultLoc.lon);
+			selectLocation(defaultLoc.lat, defaultLoc.lon, defaultLoc.name);
 		} else if (navigator.geolocation) {
 			navigator.geolocation.getCurrentPosition(
 				(pos) => {
-					weatherStore.fetchWeather(
-						pos.coords.latitude,
-						pos.coords.longitude,
-						'Aktueller Standort'
-					);
-					weatherStore.fetchNowcast(pos.coords.latitude, pos.coords.longitude);
+					selectLocation(pos.coords.latitude, pos.coords.longitude, 'Aktueller Standort');
 				},
-				() => weatherStore.fetchWeather(52.52, 13.41, 'Berlin'),
+				() => selectLocation(52.52, 13.41, 'Berlin'),
 				{ enableHighAccuracy: true, timeout: 5000 }
 			);
 		} else {
-			weatherStore.fetchWeather(52.52, 13.41, 'Berlin');
+			selectLocation(52.52, 13.41, 'Berlin');
 		}
 	});
 
 	onDestroy(() => {
 		weatherStore.stopAutoRefresh();
 	});
-
-	async function addCurrentAsLocation() {
-		const data = weatherStore.weatherData;
-		if (!data) return;
-		await locationsStore.addLocation(data.location.name, data.location.lat, data.location.lon);
-	}
 </script>
 
-{#if weatherStore.loading && !weatherStore.weatherData}
-	<div class="loading">
-		<span class="loading-icon">🌤</span>
-		<span class="loading-text">Laden...</span>
+<div class="wetter-list">
+	<LocationPicker
+		{locations}
+		{selectedLat}
+		{selectedLon}
+		onSelect={selectLocation}
+		onSave={saveLocation}
+	/>
+
+	<!-- Tab switcher -->
+	<div class="tab-bar">
+		<button
+			class="tab"
+			class:active={activeTab === 'overview'}
+			onclick={() => (activeTab = 'overview')}
+		>
+			Uebersicht
+		</button>
+		<button
+			class="tab"
+			class:active={activeTab === 'compare'}
+			onclick={() => (activeTab = 'compare')}
+		>
+			Quellen-Vergleich
+		</button>
 	</div>
-{:else if weatherStore.weatherData}
-	{@const data = weatherStore.weatherData}
-	{@const c = data.current}
 
-	<!-- Current conditions compact -->
-	<div class="current-compact">
-		<div class="current-main">
-			<span class="icon">{getWeatherIcon(c.weatherCode, c.isDay)}</span>
-			<span class="temp">{Math.round(c.temperature)}°</span>
-			<div class="info">
-				<span class="condition">{getWeatherLabel(c.weatherCode)}</span>
-				<span class="location">{data.location.name}</span>
-			</div>
+	{#if activeTab === 'compare' && selectedLat != null && selectedLon != null}
+		<SourceComparison lat={selectedLat} lon={selectedLon} locationName={selectedName} />
+	{:else if weatherStore.loading && !weatherStore.weatherData}
+		<div class="loading">
+			<span class="loading-icon">🌤</span>
+			<span class="loading-text">Wetterdaten werden geladen...</span>
 		</div>
-		<div class="details">
-			<span>Gefuehlt {Math.round(c.feelsLike)}°</span>
-			<span>💨 {Math.round(c.windSpeed)} km/h {windDirectionLabel(c.windDirection)}</span>
-			<span>💧 {c.humidity}%</span>
-		</div>
-	</div>
+	{:else if weatherStore.error && !weatherStore.weatherData}
+		<div class="error">{weatherStore.error}</div>
+	{:else if weatherStore.weatherData}
+		{@const data = weatherStore.weatherData}
 
-	<!-- Alerts (if any) -->
-	{#if data.alerts.length > 0}
-		<div class="alerts">
-			{#each data.alerts.slice(0, 2) as alert (alert.id)}
-				<div
-					class="alert-badge"
-					class:severe={alert.severity === 'severe' || alert.severity === 'extreme'}
-				>
-					⚠ {alert.event}
-				</div>
-			{/each}
-		</div>
+		<CurrentConditions current={data.current} locationName={data.location.name} />
+
+		<WeatherAlerts alerts={data.alerts} />
+
+		{#if weatherStore.nowcast}
+			<NowcastBar nowcast={weatherStore.nowcast} />
+		{/if}
+
+		{#if data.hourly.length > 0}
+			<HourlyForecast hours={data.hourly} />
+		{/if}
+
+		{#if data.daily.length > 0}
+			<DailyForecast days={data.daily} />
+		{/if}
+
+		{#if weatherStore.loading}
+			<div class="refresh-indicator">Aktualisierung...</div>
+		{/if}
 	{/if}
-
-	<!-- Hourly mini-preview -->
-	{#if data.hourly.length > 0}
-		<div class="hourly-mini">
-			{#each data.hourly.slice(0, 8) as hour (hour.time)}
-				{@const time = new Date(hour.time).toLocaleTimeString('de-DE', { hour: '2-digit' })}
-				<div class="hour-mini">
-					<span class="hm-time">{time}</span>
-					<span class="hm-icon">{getWeatherIcon(hour.weatherCode, hour.isDay)}</span>
-					<span class="hm-temp">{Math.round(hour.temperature)}°</span>
-				</div>
-			{/each}
-		</div>
-	{/if}
-
-	<!-- Daily mini-preview -->
-	{#if data.daily.length > 0}
-		<div class="daily-mini">
-			{#each data.daily.slice(0, 5) as day, idx (day.date)}
-				{@const label =
-					idx === 0
-						? 'Heute'
-						: new Date(day.date).toLocaleDateString('de-DE', { weekday: 'short' })}
-				<div class="day-mini">
-					<span class="dm-day">{label}</span>
-					<span class="dm-icon">{getWeatherIcon(day.weatherCode)}</span>
-					<span class="dm-temps"
-						>{Math.round(day.temperatureMin)}° / {Math.round(day.temperatureMax)}°</span
-					>
-				</div>
-			{/each}
-		</div>
-	{/if}
-
-	<!-- Nowcast summary -->
-	{#if weatherStore.nowcast}
-		<div class="nowcast-mini">
-			<span class="nowcast-text">{weatherStore.nowcast.summary}</span>
-		</div>
-	{/if}
-{:else if weatherStore.error}
-	<div class="error">{weatherStore.error}</div>
-{/if}
+</div>
 
 <style>
+	.wetter-list {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+		padding: 12px;
+	}
+	.tab-bar {
+		display: flex;
+		gap: 4px;
+		background: var(--card-bg, rgba(255, 255, 255, 0.06));
+		border-radius: 10px;
+		padding: 3px;
+	}
+	.tab {
+		flex: 1;
+		padding: 8px 12px;
+		border: none;
+		border-radius: 8px;
+		background: none;
+		color: var(--text-secondary, #9ca3af);
+		font-size: 0.8rem;
+		cursor: pointer;
+		transition: all 0.15s ease;
+	}
+	.tab.active {
+		background: var(--card-bg-hover, rgba(255, 255, 255, 0.1));
+		color: var(--text-primary, #f3f4f6);
+		font-weight: 500;
+	}
 	.loading {
 		display: flex;
 		flex-direction: column;
@@ -149,134 +165,18 @@
 		font-size: 0.8rem;
 		color: var(--text-secondary, #9ca3af);
 	}
-
-	.current-compact {
-		padding: 12px;
-	}
-	.current-main {
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		margin-bottom: 8px;
-	}
-	.icon {
-		font-size: 2.2rem;
-		line-height: 1;
-	}
-	.temp {
-		font-size: 2.5rem;
-		font-weight: 300;
-		line-height: 1;
-		color: var(--text-primary, #f3f4f6);
-	}
-	.info {
-		display: flex;
-		flex-direction: column;
-		gap: 1px;
-		margin-left: 4px;
-	}
-	.condition {
-		font-size: 0.85rem;
-		color: var(--text-primary, #f3f4f6);
-	}
-	.location {
-		font-size: 0.7rem;
-		color: var(--text-secondary, #9ca3af);
-	}
-	.details {
-		display: flex;
-		gap: 12px;
-		font-size: 0.75rem;
-		color: var(--text-secondary, #9ca3af);
-		padding: 0 4px;
-	}
-
-	.alerts {
-		display: flex;
-		gap: 6px;
-		padding: 0 12px 8px;
-		flex-wrap: wrap;
-	}
-	.alert-badge {
-		font-size: 0.7rem;
-		padding: 2px 8px;
-		border-radius: 10px;
-		background: rgba(245, 158, 11, 0.15);
-		color: #f59e0b;
-	}
-	.alert-badge.severe {
-		background: rgba(239, 68, 68, 0.15);
-		color: #ef4444;
-	}
-
-	.hourly-mini {
-		display: flex;
-		gap: 2px;
-		padding: 0 12px 8px;
-		overflow-x: auto;
-	}
-	.hourly-mini::-webkit-scrollbar {
-		height: 0;
-	}
-	.hour-mini {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 2px;
-		min-width: 40px;
-		flex-shrink: 0;
-	}
-	.hm-time {
-		font-size: 0.6rem;
-		color: var(--text-tertiary, #6b7280);
-	}
-	.hm-icon {
-		font-size: 0.9rem;
-	}
-	.hm-temp {
-		font-size: 0.7rem;
-		color: var(--text-primary, #f3f4f6);
-	}
-
-	.daily-mini {
-		display: flex;
-		flex-direction: column;
-		gap: 4px;
-		padding: 4px 12px 8px;
-	}
-	.day-mini {
-		display: flex;
-		align-items: center;
-		gap: 8px;
-	}
-	.dm-day {
-		width: 40px;
-		font-size: 0.75rem;
-		color: var(--text-secondary, #9ca3af);
-	}
-	.dm-icon {
-		font-size: 0.9rem;
-	}
-	.dm-temps {
-		font-size: 0.75rem;
-		color: var(--text-primary, #f3f4f6);
-	}
-
-	.nowcast-mini {
-		padding: 4px 12px 12px;
-	}
-	.nowcast-text {
-		font-size: 0.75rem;
-		color: var(--text-secondary, #9ca3af);
-	}
-
 	.error {
 		padding: 16px;
 		font-size: 0.8rem;
 		color: #ef4444;
 		text-align: center;
 	}
-
+	.refresh-indicator {
+		text-align: center;
+		font-size: 0.75rem;
+		color: var(--text-tertiary, #6b7280);
+		padding: 4px;
+	}
 	@keyframes pulse {
 		0%,
 		100% {
