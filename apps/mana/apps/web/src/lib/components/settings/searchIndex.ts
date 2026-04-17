@@ -4,9 +4,9 @@
  * updates both the navigation and the search results.
  */
 import type { Component } from 'svelte';
-import { Gear, Robot, ShieldCheck, CurrencyCircleDollar, Cloud } from '@mana/shared-icons';
+import { Gear, Robot, ShieldCheck, Cloud } from '@mana/shared-icons';
 
-export type CategoryId = 'general' | 'ai' | 'security' | 'credits' | 'data';
+export type CategoryId = 'general' | 'ai' | 'security' | 'data';
 
 export interface Category {
 	id: CategoryId;
@@ -38,13 +38,6 @@ export const categories: Category[] = [
 		description: 'Passkeys, 2FA, Verschlüsselung & Sitzungen',
 		icon: ShieldCheck,
 		anchors: ['passkeys', 'sessions', 'two-factor', 'vault', 'security-log'],
-	},
-	{
-		id: 'credits',
-		label: 'Credits',
-		description: 'Guthaben & Transaktionen',
-		icon: CurrencyCircleDollar,
-		anchors: ['credits'],
 	},
 	{
 		id: 'data',
@@ -142,21 +135,6 @@ export const searchIndex: SearchEntry[] = [
 		category: 'security',
 		anchor: 'security-log',
 	},
-
-	// Credits
-	{
-		label: 'Credits-Guthaben',
-		keywords: ['balance', 'geld'],
-		category: 'credits',
-		anchor: 'credits',
-	},
-	{
-		label: 'Credits kaufen',
-		keywords: ['buy', 'pakete', 'kaufen'],
-		category: 'credits',
-		anchor: 'credits',
-	},
-	{ label: 'Transaktionen', keywords: ['history'], category: 'credits', anchor: 'credits' },
 
 	// Data
 	{

@@ -15,7 +15,6 @@
 	import GeneralSection from '$lib/components/settings/sections/GeneralSection.svelte';
 	import AiSection from '$lib/components/settings/sections/AiSection.svelte';
 	import SecuritySection from '$lib/components/settings/sections/SecuritySection.svelte';
-	import CreditsSection from '$lib/components/settings/sections/CreditsSection.svelte';
 	import DataSection from '$lib/components/settings/sections/DataSection.svelte';
 
 	let activeCategory = $state<CategoryId>('general');
@@ -76,8 +75,6 @@
 			<AiSection />
 		{:else if activeCategory === 'security'}
 			<SecuritySection />
-		{:else if activeCategory === 'credits'}
-			<CreditsSection />
 		{:else if activeCategory === 'data'}
 			<DataSection />
 		{/if}
