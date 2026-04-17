@@ -368,12 +368,11 @@
 	.form {
 		display: flex;
 		flex-direction: column;
-		gap: 0.85rem;
-		background: var(--color-background, white);
+		gap: 1rem;
 		padding: 1.25rem;
 		border-radius: 0.75rem;
-		max-width: 640px;
 		width: 100%;
+		color: inherit;
 	}
 	header {
 		display: flex;
@@ -382,7 +381,9 @@
 	}
 	header h2 {
 		margin: 0;
-		font-size: 1.2rem;
+		font-size: 1.25rem;
+		font-weight: 600;
+		color: inherit;
 	}
 	.close {
 		background: none;
@@ -392,28 +393,38 @@
 		color: var(--color-text-muted, #64748b);
 		padding: 0 0.25rem;
 	}
+	.close:hover {
+		color: inherit;
+	}
 	label {
 		display: flex;
 		flex-direction: column;
-		gap: 0.25rem;
-		font-size: 0.85rem;
-		color: var(--color-text-muted, #64748b);
+		gap: 0.35rem;
+		font-size: 0.88rem;
+		font-weight: 500;
+		color: inherit;
 	}
 	label.checkbox {
 		flex-direction: row;
 		align-items: center;
 		gap: 0.5rem;
-		color: inherit;
+		font-weight: 400;
 	}
 	input,
 	select,
 	textarea {
-		padding: 0.55rem 0.7rem;
+		padding: 0.6rem 0.75rem;
 		border-radius: 0.45rem;
-		border: 1px solid var(--color-border, rgba(0, 0, 0, 0.12));
-		background: var(--color-surface, transparent);
+		border: 1px solid var(--color-border, rgba(0, 0, 0, 0.18));
+		background: var(--color-background, rgba(255, 255, 255, 0.8));
 		font: inherit;
+		font-weight: 400;
 		color: inherit;
+	}
+	input::placeholder,
+	textarea::placeholder {
+		color: var(--color-text-muted, #94a3b8);
+		opacity: 0.75;
 	}
 	input:focus,
 	select:focus,
@@ -439,9 +450,11 @@
 		gap: 0.4rem;
 	}
 	legend {
-		font-size: 0.85rem;
-		color: var(--color-text-muted, #64748b);
+		font-size: 0.88rem;
+		font-weight: 500;
+		color: inherit;
 		padding: 0;
+		margin-bottom: 0.35rem;
 	}
 	.kind-chips {
 		display: flex;
@@ -488,14 +501,15 @@
 		color: #a855f7;
 	}
 	.details-section {
-		border: 1px solid var(--color-border, rgba(0, 0, 0, 0.08));
+		border: 1px solid var(--color-border, rgba(0, 0, 0, 0.15));
 		border-radius: 0.5rem;
-		padding: 0.5rem 0.75rem;
+		padding: 0.6rem 0.85rem;
 	}
 	.details-section summary {
 		cursor: pointer;
-		font-size: 0.88rem;
+		font-size: 0.92rem;
 		font-weight: 500;
+		color: inherit;
 	}
 	.details-body {
 		margin-top: 0.6rem;
