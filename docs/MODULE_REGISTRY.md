@@ -1,6 +1,6 @@
 # Mana Module Registry
 
-Alle 73 Module der Mana-App (`apps/mana/apps/web/src/lib/modules/`).
+Alle 76 Module der Mana-App (`apps/mana/apps/web/src/lib/modules/`).
 
 ---
 
@@ -79,13 +79,14 @@ Alle 73 Module der Mana-App (`apps/mana/apps/web/src/lib/modules/`).
 | `who` | Who | Mit historischen Persönlichkeiten chatten (Ratespiel) |
 | `news` | News Hub | Kuratierter News-Feed mit persönlicher Leseliste |
 
-## Orte & Natur (3)
+## Orte & Wetter (4)
 
 | Modul | Name | Beschreibung |
 |---|---|---|
 | `places` | Places | Location-Tracking, Orte erstellen, Bewegungshistorie |
 | `plants` | Plants | Pflanzen verwalten mit Gieß-Erinnerungen und Pflege-Logs |
 | `citycorners` | CityCorners | Stadtführer für Konstanz |
+| `wetter` | Wetter | Open-Meteo Wetter, DWD-Warnungen, Regen-Nowcast, Multi-Model-Vergleich |
 
 ## Finanzen (2)
 
@@ -100,6 +101,12 @@ Alle 73 Module der Mana-App (`apps/mana/apps/web/src/lib/modules/`).
 |---|---|---|
 | `myday` | Mein Tag | Tagesübersicht: Tasks, Events, Wasser, Ernährung, Streaks |
 | `activity` | Aktivität | Live-Activity-Stream über alle Module |
+
+## Shopping (1)
+
+| Modul | Name | Beschreibung |
+|---|---|---|
+| `wishes` | Wünsche | Wunschlisten mit Preis-Tracking und Prioritäten |
 
 ## AI-System (8)
 
@@ -119,7 +126,7 @@ Alle 73 Module der Mana-App (`apps/mana/apps/web/src/lib/modules/`).
 | Modul | Name | Beschreibung |
 |---|---|---|
 | `settings` | Settings | App-Einstellungen (General, AI, Security, Credits, Data) |
-| `profile` | Profil | User-Profil, Kontext-Interview, Account |
+| `profile` | Profil | User-Profil, Kontext-Interview (Text/Voice/Gespräch), Account |
 | `themes` | Themes | Theme-Auswahl und Appearance |
 | `admin` | Admin Panel | System-Administration und Monitoring |
 | `api-keys` | API Keys | API-Keys für Third-Party-Integration |
@@ -139,4 +146,4 @@ Alle 73 Module der Mana-App (`apps/mana/apps/web/src/lib/modules/`).
 
 ---
 
-**Gesamt: 72 Module** — davon ~51 public/published und ~21 intern/AI/System.
+**Gesamt: 76 Module** — davon ~54 public/published und ~22 intern/AI/System.
