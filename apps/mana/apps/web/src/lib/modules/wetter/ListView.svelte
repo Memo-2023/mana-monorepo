@@ -35,6 +35,14 @@
 		await locationsStore.addLocation(name, lat, lon);
 	}
 
+	async function removeLocation(id: string) {
+		await locationsStore.removeLocation(id);
+	}
+
+	async function setDefaultLocation(id: string) {
+		await locationsStore.setDefault(id);
+	}
+
 	onMount(() => {
 		if (weatherStore.weatherData) return;
 
@@ -66,6 +74,8 @@
 		{selectedLon}
 		onSelect={selectLocation}
 		onSave={saveLocation}
+		onRemove={removeLocation}
+		onSetDefault={setDefaultLocation}
 	/>
 
 	<!-- Tab switcher -->

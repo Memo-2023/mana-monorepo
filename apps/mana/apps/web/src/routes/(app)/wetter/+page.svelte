@@ -35,6 +35,14 @@
 		await locationsStore.addLocation(name, lat, lon);
 	}
 
+	async function removeLocation(id: string) {
+		await locationsStore.removeLocation(id);
+	}
+
+	async function setDefaultLocation(id: string) {
+		await locationsStore.setDefault(id);
+	}
+
 	// On mount: use default location, or first saved, or GPS
 	onMount(() => {
 		const defaultLoc = locations.find((l) => l.isDefault) ?? locations[0];
@@ -72,6 +80,8 @@
 		{selectedLon}
 		onSelect={selectLocation}
 		onSave={saveLocation}
+		onRemove={removeLocation}
+		onSetDefault={setDefaultLocation}
 	/>
 
 	<!-- Tab switcher -->
