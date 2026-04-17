@@ -563,6 +563,17 @@ db.version(23).stores({
 	userContext: 'id',
 });
 
+// v24 — Wishes module: wishlists with price tracking.
+// wishesItems indexes [listId+order] for the per-list view,
+// status for the active/fulfilled filter tabs.
+// wishesPriceChecks indexes [wishId+checkedAt] for the per-wish
+// price history timeline (reverse range scan).
+db.version(24).stores({
+	wishesItems: 'id, listId, status, priority, category, [listId+order], [status+order]',
+	wishesLists: 'id, order, isArchived',
+	wishesPriceChecks: 'id, wishId, checkedAt, [wishId+checkedAt]',
+});
+
 // v25 — Wetter module: saved locations and user preferences.
 db.version(25).stores({
 	wetterLocations: 'id, isDefault, order',

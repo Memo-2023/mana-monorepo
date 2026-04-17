@@ -35,6 +35,7 @@ import { MEDITATE_GUEST_SEED } from '$lib/modules/meditate/collections';
 import { SLEEP_GUEST_SEED } from '$lib/modules/sleep/collections';
 import { MOOD_GUEST_SEED } from '$lib/modules/mood/collections';
 import { QUIZ_GUEST_SEED } from '$lib/modules/quiz/collections';
+import { WISHES_GUEST_SEED } from '$lib/modules/wishes/collections';
 
 /**
  * Flat list of { tableName, rows } entries. Only modules with non-empty
@@ -74,6 +75,7 @@ register(MEDITATE_GUEST_SEED);
 register(SLEEP_GUEST_SEED);
 register(MOOD_GUEST_SEED);
 register(QUIZ_GUEST_SEED);
+register(WISHES_GUEST_SEED);
 
 /**
  * Seed all module guest data into empty tables. Idempotent: tables
