@@ -6,10 +6,17 @@
 
 import type { LlmTier } from './tiers';
 
+const SETTINGS_LINK = '[KI-Einstellungen öffnen](/?app=settings#ai-options)';
+
 export class LlmError extends Error {
 	constructor(message: string) {
 		super(message);
 		this.name = 'LlmError';
+	}
+
+	/** User-friendly German explanation with settings deep-link (Markdown). */
+	getUserMessage(): string {
+		return `${this.message}\n\n${SETTINGS_LINK}`;
 	}
 }
 
@@ -88,10 +95,13 @@ export class TierTooLowError extends LlmError {
 		public readonly requiredTier: LlmTier,
 		public readonly userTier: LlmTier
 	) {
-		super(
-			`Task '${taskName}' requires tier '${requiredTier}' but user is on '${userTier}'. Activate the higher tier in settings.`
-		);
+		super(`Task '${taskName}' requires tier '${requiredTier}' but user is on '${userTier}'.`);
 		this.name = 'TierTooLowError';
+	}
+
+	getUserMessage(): string {
+		const needed = tierLabel(this.requiredTier);
+		return `Kein KI-Modell aktiviert. Mindestens **${needed}** wird benötigt.\n\n${SETTINGS_LINK}`;
 	}
 }
 
@@ -109,6 +119,10 @@ export class ProviderBlockedError extends LlmError {
 		super(`Provider '${tier}' blocked the request: ${providerMessage}`);
 		this.name = 'ProviderBlockedError';
 	}
+
+	getUserMessage(): string {
+		return `**${tierLabel(this.tier)}** hat die Anfrage blockiert (Inhaltsfilter). Versuche es mit einer anderen Formulierung oder wechsle den Anbieter.\n\n${SETTINGS_LINK}`;
+	}
 }
 
 /** Network/server error from a remote tier (mana-server, cloud). */
@@ -123,6 +137,10 @@ export class BackendUnreachableError extends LlmError {
 		);
 		this.name = 'BackendUnreachableError';
 	}
+
+	getUserMessage(): string {
+		return `**${tierLabel(this.tier)}** ist nicht erreichbar. Prüfe ob der Service läuft.\n\n${SETTINGS_LINK}`;
+	}
 }
 
 /**
@@ -133,5 +151,9 @@ export class EdgeLoadFailedError extends LlmError {
 	constructor(public readonly cause: string) {
 		super(`Edge LLM failed to load: ${cause}`);
 		this.name = 'EdgeLoadFailedError';
+	}
+
+	getUserMessage(): string {
+		return `Browser-Modell konnte nicht geladen werden: ${this.cause}\n\n${SETTINGS_LINK}`;
 	}
 }
