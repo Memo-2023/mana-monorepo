@@ -986,6 +986,23 @@ export const MANA_APPS: ManaApp[] = [
 		status: 'development',
 		requiredTier: 'guest',
 	},
+	{
+		id: 'library',
+		name: 'Bibliothek',
+		description: {
+			de: 'Bücher, Filme, Serien, Comics',
+			en: 'Books, Movies, Series, Comics',
+		},
+		longDescription: {
+			de: 'Protokolliere was du liest und schaust — Bücher, Filme, Serien, Comics. Mit Status, Rating, Fortschritt und Jahresrückblick.',
+			en: 'Log what you read and watch — books, movies, series, comics. With status, rating, progress tracking and year-in-review.',
+		},
+		icon: APP_ICONS.library,
+		color: '#a855f7',
+		comingSoon: false,
+		status: 'development',
+		requiredTier: 'guest',
+	},
 ];
 
 /**

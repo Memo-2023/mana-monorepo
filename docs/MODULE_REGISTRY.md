@@ -1,6 +1,6 @@
 # Mana Module Registry
 
-Alle 72 Module der Mana-App (`apps/mana/apps/web/src/lib/modules/`).
+Alle 73 Module der Mana-App (`apps/mana/apps/web/src/lib/modules/`).
 
 ---
 
@@ -33,7 +33,7 @@ Alle 72 Module der Mana-App (`apps/mana/apps/web/src/lib/modules/`).
 | `mood` | Mood | Stimmungs-Tracking mehrmals täglich mit Kontext und Mustern |
 | `moodlit` | Moodlit | Beruhigende Ambient-Beleuchtung mit animierten Farbverläufen |
 
-## Kreativität & Medien (7)
+## Kreativität & Medien (8)
 
 | Modul | Name | Beschreibung |
 |---|---|---|
@@ -43,6 +43,7 @@ Alle 72 Module der Mana-App (`apps/mana/apps/web/src/lib/modules/`).
 | `presi` | Presi | Präsentationen mit AI-Design-Vorschlägen |
 | `cards` | Cards | AI-generierte Flashcards mit Spaced Repetition |
 | `recipes` | Rezepte | Rezepte sammeln mit Zutaten und Schritten |
+| `library` | Bibliothek | Bücher, Filme, Serien, Comics — Status, Rating, Fortschritt |
 | `storage` | Storage | Cloud-Storage mit Ordnern, Versionierung und Sharing |
 
 ## Wissen & Lernen (7)

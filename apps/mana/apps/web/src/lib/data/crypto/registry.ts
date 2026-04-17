@@ -518,6 +518,25 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	// and belong under encryption. Policy + budgets + state are pure
 	// structural fields.
 	agents: { enabled: true, fields: ['systemPrompt', 'memory'] },
+
+	// ─── Library ─────────────────────────────────────────────
+	// Reading / watching log with a kind discriminator (book / movie /
+	// series / comic) in one table. User-typed text (title, original
+	// title, creators, review, tags) is encrypted; structural fields
+	// (kind, status, year, rating, completedAt, genres, isFavorite,
+	// times, externalIds, details) stay plaintext — they drive the
+	// tab filter, the status chips, the Jahresrückblick query, and
+	// the episode/page progress UI.
+	//
+	// `details` is the discriminated union and sometimes carries
+	// free-text (publisher, director). Those are factual metadata,
+	// not user-typed reflection, so they ship plaintext alongside the
+	// other structural fields. If a future feature adds free-text
+	// notes *inside* details, add that specific path here.
+	libraryEntries: {
+		enabled: true,
+		fields: ['title', 'originalTitle', 'creators', 'review', 'tags'],
+	},
 };
 
 /**
