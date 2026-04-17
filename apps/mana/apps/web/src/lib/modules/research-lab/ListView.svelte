@@ -6,6 +6,7 @@
   is a thin orchestrator over the mana-research service.
 -->
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import ProviderPicker from './components/ProviderPicker.svelte';
 	import CompareColumn from './components/CompareColumn.svelte';
 	import { researchLabStore } from './stores/session.svelte';
@@ -164,7 +165,11 @@
 			</div>
 			<div class="grid">
 				{#each session.lastRun.entries as entry (entry.provider)}
-					<CompareColumn category={session.lastRun.category} {entry} />
+					<CompareColumn
+						category={session.lastRun.category}
+						{entry}
+						runId={session.lastRun.runId}
+					/>
 				{/each}
 			</div>
 		</section>
@@ -177,16 +182,22 @@
 		{:else}
 			<ul class="runs-list">
 				{#each recentRuns.slice(0, 10) as run (run.id)}
-					<li class="run">
-						<span class="run-badge badge-{run.category}">{run.category}</span>
-						<span class="run-query">{run.query}</span>
-						<span class="run-providers">
-							{run.providersRequested.join(', ')}
-						</span>
-						<span class="run-meta">
-							{run.mode}
-							{run.totalCostCredits > 0 ? ` · ${run.totalCostCredits}¢` : ''}
-						</span>
+					<li>
+						<button
+							type="button"
+							class="run run-button"
+							onclick={() => void goto(`/research-lab/runs/${run.id}`)}
+						>
+							<span class="run-badge badge-{run.category}">{run.category}</span>
+							<span class="run-query">{run.query}</span>
+							<span class="run-providers">
+								{run.providersRequested.join(', ')}
+							</span>
+							<span class="run-meta">
+								{run.mode}
+								{run.totalCostCredits > 0 ? ` · ${run.totalCostCredits}¢` : ''}
+							</span>
+						</button>
 					</li>
 				{/each}
 			</ul>
@@ -379,6 +390,19 @@
 		border-radius: 0.375rem;
 		background: hsl(var(--color-surface));
 		font-size: 0.8125rem;
+		color: hsl(var(--color-foreground));
+		text-align: left;
+		width: 100%;
+	}
+	.run-button {
+		cursor: pointer;
+		transition:
+			background 0.15s,
+			border-color 0.15s;
+	}
+	.run-button:hover {
+		background: hsl(var(--color-surface-hover));
+		border-color: hsl(var(--color-border-strong));
 	}
 	.run-badge {
 		padding: 0.125rem 0.375rem;

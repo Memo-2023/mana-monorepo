@@ -130,10 +130,11 @@ export function createResearchRoutes(
 			);
 
 			let totalCost = 0;
+			const resultIds: string[] = [];
 			for (let i = 0; i < providers.length; i++) {
 				const out = settled[i];
 				totalCost += out.meta.costCredits;
-				await storage.addResult({
+				const row = await storage.addResult({
 					runId: run.id,
 					providerId: providers[i].id,
 					success: out.success,
@@ -144,6 +145,7 @@ export function createResearchRoutes(
 					normalizedResult: out.data ?? null,
 					errorCode: out.meta.errorCode ?? null,
 				});
+				resultIds.push(row.id);
 			}
 			if (totalCost > 0) await storage.finalizeRunCost(run.id, totalCost);
 
@@ -155,6 +157,7 @@ export function createResearchRoutes(
 					success: settled[i].success,
 					data: settled[i].data as { answer: AgentAnswer } | undefined,
 					meta: settled[i].meta,
+					resultId: resultIds[i],
 				})),
 			});
 		});

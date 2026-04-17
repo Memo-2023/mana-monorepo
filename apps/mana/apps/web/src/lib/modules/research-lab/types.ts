@@ -57,6 +57,8 @@ export type CompareEntry<T> = {
 	success: boolean;
 	data?: T;
 	meta: ProviderMeta;
+	resultId?: string;
+	userRating?: number | null;
 };
 
 export interface SearchCompareResponse {

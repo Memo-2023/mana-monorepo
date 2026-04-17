@@ -72,6 +72,7 @@ export interface CompareResponse<T> {
 		success: boolean;
 		data?: T;
 		meta: ProviderMeta;
+		resultId?: string;
 	}>;
 }
 

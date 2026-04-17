@@ -3,6 +3,7 @@
   Renders the appropriate card content based on category.
 -->
 <script lang="ts">
+	import * as api from '../api';
 	import type {
 		AgentAnswer,
 		CompareEntry,
@@ -14,9 +15,26 @@
 	interface Props {
 		category: ResearchCategory;
 		entry: CompareEntry<unknown>;
+		runId?: string;
 	}
 
-	const { category, entry }: Props = $props();
+	const { category, entry, runId }: Props = $props();
+
+	let rating = $state(entry.userRating ?? 0);
+	let ratingError = $state<string | null>(null);
+
+	async function setRating(value: number) {
+		if (!runId || !entry.resultId) return;
+		ratingError = null;
+		const prev = rating;
+		rating = value;
+		try {
+			await api.rateResult(runId, entry.resultId, value);
+		} catch (err) {
+			rating = prev;
+			ratingError = err instanceof Error ? err.message : 'Bewertung fehlgeschlagen';
+		}
+	}
 
 	function fmtLatency(ms: number): string {
 		if (ms < 1000) return `${ms}ms`;
@@ -134,6 +152,29 @@
 		</div>
 	{:else}
 		<p class="empty">Keine Daten.</p>
+	{/if}
+
+	{#if runId && entry.resultId && entry.success}
+		<footer class="rate">
+			<span class="rate-label">Bewertung:</span>
+			<div class="stars" role="radiogroup" aria-label="Bewertung">
+				{#each [1, 2, 3, 4, 5] as n}
+					<button
+						type="button"
+						role="radio"
+						aria-checked={rating === n}
+						aria-label={`${n} Stern${n > 1 ? 'e' : ''}`}
+						class:filled={rating >= n}
+						onclick={() => void setRating(n)}
+					>
+						★
+					</button>
+				{/each}
+			</div>
+			{#if ratingError}
+				<span class="rate-error" title={ratingError}>⚠</span>
+			{/if}
+		</footer>
 	{/if}
 </article>
 
@@ -334,5 +375,42 @@
 		margin-top: 0.5rem;
 		font-size: 0.6875rem;
 		color: hsl(var(--color-muted-foreground));
+	}
+
+	.rate {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		margin-top: 0.75rem;
+		padding-top: 0.5rem;
+		border-top: 1px dashed hsl(var(--color-border));
+	}
+	.rate-label {
+		font-size: 0.75rem;
+		color: hsl(var(--color-muted-foreground));
+	}
+	.stars {
+		display: inline-flex;
+		gap: 0.125rem;
+	}
+	.stars button {
+		background: transparent;
+		border: none;
+		padding: 0.125rem 0.1875rem;
+		font-size: 0.9375rem;
+		line-height: 1;
+		color: hsl(var(--color-muted-foreground) / 0.5);
+		cursor: pointer;
+		transition: color 0.15s;
+	}
+	.stars button:hover {
+		color: hsl(var(--color-primary));
+	}
+	.stars button.filled {
+		color: hsl(var(--color-primary));
+	}
+	.rate-error {
+		color: hsl(var(--color-error, 0 84% 40%));
+		font-size: 0.75rem;
 	}
 </style>

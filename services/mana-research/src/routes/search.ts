@@ -86,7 +86,7 @@ export function createSearchRoutes(
 				deps
 			);
 
-			await storage.addResult({
+			const resultRow = await storage.addResult({
 				runId: run.id,
 				providerId,
 				success: out.success,
@@ -110,6 +110,7 @@ export function createSearchRoutes(
 				success: out.success,
 				data: out.data,
 				meta: out.meta,
+				resultId: resultRow.id,
 			});
 		})
 		.post('/compare', async (c) => {
@@ -147,10 +148,11 @@ export function createSearchRoutes(
 			);
 
 			let totalCost = 0;
+			const resultIds: string[] = [];
 			for (let i = 0; i < providers.length; i++) {
 				const out = settled[i];
 				totalCost += out.meta.costCredits;
-				await storage.addResult({
+				const row = await storage.addResult({
 					runId: run.id,
 					providerId: providers[i].id,
 					success: out.success,
@@ -161,6 +163,7 @@ export function createSearchRoutes(
 					normalizedResult: out.data ?? null,
 					errorCode: out.meta.errorCode ?? null,
 				});
+				resultIds.push(row.id);
 			}
 			if (totalCost > 0) await storage.finalizeRunCost(run.id, totalCost);
 
@@ -172,6 +175,7 @@ export function createSearchRoutes(
 					success: settled[i].success,
 					data: settled[i].data as { results: SearchHit[] } | undefined,
 					meta: settled[i].meta,
+					resultId: resultIds[i],
 				})),
 			});
 		});

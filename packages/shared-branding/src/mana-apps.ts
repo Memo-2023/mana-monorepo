@@ -497,6 +497,23 @@ export const MANA_APPS: ManaApp[] = [
 		requiredTier: 'guest',
 	},
 	{
+		id: 'research-lab',
+		name: 'Research Lab',
+		description: {
+			de: 'Web-Research Anbieter Seite-an-Seite vergleichen',
+			en: 'Compare web-research providers side-by-side',
+		},
+		longDescription: {
+			de: 'Schick dieselbe Anfrage parallel an bis zu fünf Anbieter (Brave, Tavily, Exa, Perplexity, Claude, Gemini, OpenAI …) und vergleich Antworten, Latenzen und Kosten in einer Ansicht. Alle Runs werden serverseitig persistiert für spätere Auswertung.',
+			en: 'Send the same query to up to five providers in parallel (Brave, Tavily, Exa, Perplexity, Claude, Gemini, OpenAI …) and compare answers, latency, and cost side-by-side. All runs are persisted server-side for later review.',
+		},
+		icon: APP_ICONS['research-lab'],
+		color: '#8b5cf6',
+		comingSoon: false,
+		status: 'beta',
+		requiredTier: 'beta',
+	},
+	{
 		id: 'calc',
 		name: 'Calc',
 		description: {
