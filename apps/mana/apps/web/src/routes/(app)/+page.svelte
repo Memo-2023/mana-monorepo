@@ -227,6 +227,23 @@
 	// every openApps change) doesn't re-write barComponent. The first
 	// effect handles registration/teardown when scenes appear/disappear;
 	// the second pushes fresh props on every reactive tick.
+	//
+	// Callback identities are stable across ticks — previously these were
+	// inline arrows re-created on every reactive pass, which forced the
+	// bar to see new props every tick even when only the scene/page data
+	// actually changed.
+	function handleBarSceneSelect(id: string) {
+		workbenchScenesStore.setActiveScene(id);
+	}
+	function handleBarSceneCreate(name: string) {
+		workbenchScenesStore.createScene({ name }).catch((err) => {
+			console.error('[workbench] createScene failed:', err);
+		});
+	}
+	function handleBarToggleShowPicker() {
+		showPicker = !showPicker;
+	}
+
 	let barRegistered = $state(false);
 	$effect(() => {
 		const hasScenes = scenes.length > 0;
@@ -244,12 +261,12 @@
 			scenes,
 			activeSceneId,
 			pages: carouselPages,
-			onSceneSelect: (id: string) => workbenchScenesStore.setActiveScene(id),
-			onSceneCreate: (name: string) => workbenchScenesStore.createScene({ name }),
+			onSceneSelect: handleBarSceneSelect,
+			onSceneCreate: handleBarSceneCreate,
 			onSceneContextMenu: handleSceneContextMenu,
 			onAppClick: scrollToPage,
-			onAppContextMenu: (e: MouseEvent, id: string) => handleTabContextMenu(e, id),
-			onAddApp: () => (showPicker = !showPicker),
+			onAppContextMenu: handleTabContextMenu,
+			onAddApp: handleBarToggleShowPicker,
 		});
 	});
 

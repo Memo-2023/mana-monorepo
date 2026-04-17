@@ -78,14 +78,20 @@
 	});
 
 	let trackEl = $state<HTMLDivElement | null>(null);
+	let io = $state<IntersectionObserver | null>(null);
+	// Per-id element refs so we can diff add/remove instead of disconnecting
+	// and re-observing every wrapper on each pages change. Svelte's keyed
+	// {#each} preserves DOM nodes per id, so a given id → element mapping is
+	// stable for the id's lifetime.
+	const observed = new Map<string, HTMLElement>();
+
+	// Create the IntersectionObserver exactly once — when the track element
+	// mounts. Previously the IO was torn down and rebuilt on every
+	// pages.length change, forcing every still-visible wrapper to re-fire
+	// the intersection callback. Now it persists across adds/removes.
 	$effect(() => {
 		if (!trackEl || typeof IntersectionObserver === 'undefined') return;
-		// Track pages.length so the effect re-runs (and re-observes
-		// freshly-added wrappers) when the user adds or removes an app.
-		// Cheap to tear down and recreate; the IO has no internal state
-		// we care to preserve.
-		void pages.length;
-		const io = new IntersectionObserver(
+		const instance = new IntersectionObserver(
 			(entries) => {
 				for (const entry of entries) {
 					if (!entry.isIntersecting) continue;
@@ -101,9 +107,39 @@
 				threshold: 0.01,
 			}
 		);
+		io = instance;
+		return () => {
+			instance.disconnect();
+			observed.clear();
+			io = null;
+		};
+	});
+
+	// Sync the observed set with the current `pages`: observe new wrappers,
+	// unobserve wrappers that were removed. Re-runs only when `pages`
+	// identity (add/remove/reorder) or `io` changes.
+	$effect(() => {
+		const instance = io;
+		if (!instance || !trackEl) return;
+		// Reading pages.length subscribes this effect to additions/removals.
+		void pages.length;
 		const wrappers = trackEl.querySelectorAll<HTMLElement>('[data-page-id]');
-		wrappers.forEach((el) => io.observe(el));
-		return () => io.disconnect();
+		const nextIds = new Set<string>();
+		for (const el of wrappers) {
+			const id = el.dataset.pageId;
+			if (!id) continue;
+			nextIds.add(id);
+			if (!observed.has(id)) {
+				instance.observe(el);
+				observed.set(id, el);
+			}
+		}
+		for (const [id, el] of observed) {
+			if (!nextIds.has(id)) {
+				instance.unobserve(el);
+				observed.delete(id);
+			}
+		}
 	});
 </script>
 
