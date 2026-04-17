@@ -85,7 +85,7 @@
 			class:active={activeTab === 'overview'}
 			onclick={() => (activeTab = 'overview')}
 		>
-			Uebersicht
+			Übersicht
 		</button>
 		<button
 			class="tab"
@@ -108,7 +108,11 @@
 	{:else if weatherStore.weatherData}
 		{@const data = weatherStore.weatherData}
 
-		<CurrentConditions current={data.current} locationName={data.location.name} />
+		<CurrentConditions
+			current={data.current}
+			locationName={data.location.name}
+			fetchedAt={data.fetchedAt}
+		/>
 
 		<WeatherAlerts alerts={data.alerts} />
 

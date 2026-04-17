@@ -1,6 +1,6 @@
 <!--
-  Location picker — saved location chips with delete, GPS button,
-  search with instant-save, and a manage mode to reorder/remove.
+  Location picker — horizontal scrolling saved location chips,
+  GPS/search/manage buttons with labels, manage panel for default/remove.
 -->
 <script lang="ts">
 	import type { WeatherLocation, GeocodingResult } from '../types';
@@ -81,54 +81,52 @@
 </script>
 
 <div class="location-picker">
-	<!-- Saved location chips -->
-	<div class="picker-row">
+	<!-- Saved location chips — horizontal scroll -->
+	{#if locations.length > 0}
+		<div class="chips-scroll">
+			{#each locations as loc (loc.id)}
+				<button
+					class="loc-chip"
+					class:active={isSelected(loc)}
+					onclick={() => onSelect(loc.lat, loc.lon, loc.name)}
+				>
+					{#if loc.isDefault}<span class="default-dot"></span>{/if}
+					{loc.name}
+				</button>
+			{/each}
+		</div>
+	{/if}
+
+	<!-- Action buttons with labels -->
+	<div class="actions-row">
+		<button class="action-btn" onclick={useGps} disabled={locating}>
+			<span class="action-icon">{locating ? '...' : '📍'}</span>
+			<span class="action-label">Standort</span>
+		</button>
+		<button
+			class="action-btn"
+			class:active={showSearch}
+			onclick={() => {
+				showSearch = !showSearch;
+				showManage = false;
+			}}
+		>
+			<span class="action-icon">+</span>
+			<span class="action-label">Hinzufügen</span>
+		</button>
 		{#if locations.length > 0}
-			<div class="location-chips">
-				{#each locations as loc (loc.id)}
-					<button
-						class="loc-chip"
-						class:active={isSelected(loc)}
-						class:is-default={loc.isDefault}
-						onclick={() => onSelect(loc.lat, loc.lon, loc.name)}
-					>
-						{#if loc.isDefault}<span class="default-dot"></span>{/if}
-						{loc.name}
-					</button>
-				{/each}
-			</div>
-		{:else}
-			<span class="no-locations">Keine Orte gespeichert</span>
-		{/if}
-		<div class="picker-actions">
-			<button class="action-btn" onclick={useGps} disabled={locating} title="Aktueller Standort">
-				{locating ? '...' : '📍'}
-			</button>
 			<button
 				class="action-btn"
-				class:active={showSearch}
+				class:active={showManage}
 				onclick={() => {
-					showSearch = !showSearch;
-					showManage = false;
+					showManage = !showManage;
+					showSearch = false;
 				}}
-				title="Stadt hinzufuegen"
 			>
-				+
+				<span class="action-icon">⚙</span>
+				<span class="action-label">Verwalten</span>
 			</button>
-			{#if locations.length > 0}
-				<button
-					class="action-btn manage-btn"
-					class:active={showManage}
-					onclick={() => {
-						showManage = !showManage;
-						showSearch = false;
-					}}
-					title="Orte verwalten"
-				>
-					⚙
-				</button>
-			{/if}
-		</div>
+		{/if}
 	</div>
 
 	<!-- Search panel -->
@@ -138,7 +136,7 @@
 				<input
 					class="search-input"
 					type="text"
-					placeholder="Stadt suchen und speichern..."
+					placeholder="Stadt suchen..."
 					bind:value={searchQuery}
 				/>
 				<button class="search-btn" type="submit" disabled={searching}>
@@ -172,7 +170,7 @@
 							{#if saved}
 								<span class="already-saved">Gespeichert</span>
 							{:else}
-								<span class="save-label">Speichern</span>
+								<span class="save-label">+ Speichern</span>
 							{/if}
 						</div>
 					{/each}
@@ -208,7 +206,7 @@
 					</div>
 				</div>
 			{/each}
-			<p class="manage-hint">★ = Standard-Ort beim Oeffnen</p>
+			<p class="manage-hint">★ = Standard-Ort beim Öffnen</p>
 		</div>
 	{/if}
 </div>
@@ -219,37 +217,37 @@
 		flex-direction: column;
 		gap: 8px;
 	}
-	.picker-row {
+
+	/* Horizontal scrolling chips */
+	.chips-scroll {
 		display: flex;
-		align-items: center;
-		gap: 8px;
+		gap: 6px;
+		overflow-x: auto;
+		scroll-snap-type: x mandatory;
+		-webkit-overflow-scrolling: touch;
+		padding: 2px 0;
 	}
-	.location-chips {
-		display: flex;
-		gap: 4px;
-		flex-wrap: wrap;
-		flex: 1;
-	}
-	.no-locations {
-		font-size: 0.8rem;
-		color: var(--text-tertiary, #6b7280);
-		flex: 1;
+	.chips-scroll::-webkit-scrollbar {
+		height: 0;
 	}
 	.loc-chip {
+		scroll-snap-align: start;
 		display: flex;
 		align-items: center;
-		gap: 4px;
-		padding: 6px 12px;
-		border-radius: 20px;
-		font-size: 0.8rem;
+		gap: 5px;
+		padding: 5px 12px;
+		border-radius: 16px;
+		font-size: 0.78rem;
 		border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.1));
 		background: var(--card-bg, rgba(255, 255, 255, 0.06));
 		color: var(--text-secondary, #9ca3af);
 		cursor: pointer;
 		transition: all 0.15s ease;
+		white-space: nowrap;
+		flex-shrink: 0;
 	}
 	.loc-chip.active {
-		background: var(--accent-subtle, rgba(56, 189, 248, 0.15));
+		background: rgba(56, 189, 248, 0.15);
 		color: #38bdf8;
 		border-color: rgba(56, 189, 248, 0.3);
 	}
@@ -260,31 +258,35 @@
 		background: #38bdf8;
 		flex-shrink: 0;
 	}
-	.picker-actions {
+
+	/* Action buttons with text labels */
+	.actions-row {
 		display: flex;
-		gap: 4px;
-		flex-shrink: 0;
+		gap: 6px;
 	}
 	.action-btn {
-		width: 36px;
-		height: 36px;
-		border-radius: 18px;
+		display: flex;
+		align-items: center;
+		gap: 4px;
+		padding: 5px 10px;
+		border-radius: 8px;
 		border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.1));
 		background: var(--card-bg, rgba(255, 255, 255, 0.06));
 		cursor: pointer;
-		font-size: 1rem;
-		display: flex;
-		align-items: center;
-		justify-content: center;
 		color: var(--text-secondary, #9ca3af);
+		transition: all 0.15s ease;
 	}
 	.action-btn:hover,
 	.action-btn.active {
 		background: var(--card-bg-hover, rgba(255, 255, 255, 0.1));
 		color: var(--text-primary, #f3f4f6);
 	}
-	.manage-btn {
+	.action-icon {
 		font-size: 0.85rem;
+		line-height: 1;
+	}
+	.action-label {
+		font-size: 0.72rem;
 	}
 
 	/* Panels */
