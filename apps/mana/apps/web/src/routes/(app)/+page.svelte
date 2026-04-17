@@ -82,6 +82,25 @@
 			history.replaceState({}, '', clean);
 		}
 	});
+	// Reactive deep-link: handles `/?app=…` navigations that happen
+	// while the page is already mounted (e.g. clicking a link inside
+	// the companion chat). onMount only fires once; this $effect
+	// re-runs whenever the URL search params change.
+	$effect(() => {
+		const target = $page.url.searchParams.get('app');
+		if (!target || !getApp(target)) return;
+		// Use queueMicrotask so we don't mutate state during the effect's first run
+		queueMicrotask(async () => {
+			const already = workbenchScenesStore.openApps.find((a) => a.appId === target);
+			if (!already) await workbenchScenesStore.addApp(target);
+			await tick();
+			scrollToPage(target);
+			const clean = new URL($page.url);
+			clean.searchParams.delete('app');
+			history.replaceState({}, '', clean);
+		});
+	});
+
 	onDestroy(() => {
 		workbenchScenesStore.dispose();
 		bottomBarStore.clear();
