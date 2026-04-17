@@ -230,6 +230,13 @@ export const workbenchScenesStore = {
 	dispose() {
 		subscription?.unsubscribe();
 		subscription = null;
+		subscribeRetryCount = 0;
+		// Reset the init flag so a subsequent mount (navigate-away → back)
+		// re-runs `initialize()` with a fresh subscription. Leave
+		// `scenesState` / `activeSceneIdState` untouched — re-mount keeps
+		// the in-memory snapshot so the UI doesn't flash empty while
+		// Dexie's liveQuery re-emits.
+		initializedState = false;
 	},
 
 	// ── Scene CRUD ───────────────────────────────────────────

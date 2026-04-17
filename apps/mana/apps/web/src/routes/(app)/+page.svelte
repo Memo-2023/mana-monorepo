@@ -63,45 +63,35 @@
 	});
 
 	// ── Scene store wiring ──────────────────────────────────
-	onMount(async () => {
-		await workbenchScenesStore.initialize();
-		// Deep-link: `/?app=settings` (or any registered appId) opens the
-		// app in the active scene (or focuses it if already open) and
-		// scrolls it into view. Used by command menu, pill-nav settings
-		// link, onboarding CTAs, sync-status banner — anywhere we used
-		// to navigate to `/settings` before the route was removed.
-		const target = $page.url.searchParams.get('app');
-		if (target && getApp(target)) {
-			const already = workbenchScenesStore.openApps.find((a) => a.appId === target);
-			if (!already) await workbenchScenesStore.addApp(target);
-			await tick();
-			scrollToPage(target);
-			// Clean the query out of the URL so refresh doesn't re-trigger.
-			const clean = new URL($page.url);
-			clean.searchParams.delete('app');
-			history.replaceState({}, '', clean);
-		}
+	onMount(() => {
+		workbenchScenesStore.initialize();
 	});
-	// Reactive deep-link: handles `/?app=…` navigations that happen
-	// while the page is already mounted (e.g. clicking a link inside
-	// the companion chat). onMount only fires once; this $effect
-	// re-runs whenever the URL search params change.
+
+	// Deep-link handler — runs on initial mount AND on post-mount URL
+	// changes (e.g. a link inside the companion chat). Gated on
+	// `initialized` so the addApp() call always hits a seeded store —
+	// on cold load the effect fires before initialize() completes and
+	// comes back in when the store is ready. Used by command menu,
+	// pill-nav settings link, onboarding CTAs, sync-status banner —
+	// anywhere we used to navigate to `/settings` before the route
+	// was removed.
 	$effect(() => {
+		if (!workbenchScenesStore.initialized) return;
 		const target = $page.url.searchParams.get('app');
 		if (!target || !getApp(target)) return;
 		const hash = $page.url.hash?.slice(1) || '';
-		// Use queueMicrotask so we don't mutate state during the effect's first run
+		// Use queueMicrotask so we don't mutate state during the effect's first run.
 		queueMicrotask(async () => {
 			const already = workbenchScenesStore.openApps.find((a) => a.appId === target);
 			if (!already) await workbenchScenesStore.addApp(target);
 			await tick();
 			scrollToPage(target);
-			// Clean the ?app= param but preserve the hash for the target panel
+			// Clean the ?app= param but preserve the hash for the target panel.
 			const clean = new URL($page.url);
 			clean.searchParams.delete('app');
 			history.replaceState({}, '', clean);
 			// Notify the target panel about the hash anchor (e.g. settings
-			// needs to switch to the right tab and scroll to the section)
+			// needs to switch to the right tab and scroll to the section).
 			if (hash) {
 				await tick();
 				window.dispatchEvent(
