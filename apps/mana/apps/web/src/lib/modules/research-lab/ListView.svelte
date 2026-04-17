@@ -84,6 +84,11 @@
 				persistent speichern.
 			</p>
 		</div>
+		<div class="header-actions">
+			<button type="button" class="keys-link" onclick={() => void goto('/research-lab/keys')}>
+				🔑 API-Keys
+			</button>
+		</div>
 		<div class="mode-toggle" role="tablist">
 			{#each ['search', 'extract', 'agent'] as const as m}
 				<button
@@ -234,6 +239,27 @@
 		font-size: 0.875rem;
 		color: hsl(var(--color-muted-foreground));
 		max-width: 40rem;
+	}
+
+	.header-actions {
+		display: flex;
+		gap: 0.5rem;
+	}
+	.keys-link {
+		padding: 0.375rem 0.75rem;
+		border: 1px solid hsl(var(--color-border));
+		border-radius: 0.375rem;
+		background: hsl(var(--color-surface));
+		color: hsl(var(--color-foreground));
+		font-size: 0.8125rem;
+		cursor: pointer;
+		transition:
+			background 0.15s,
+			border-color 0.15s;
+	}
+	.keys-link:hover {
+		background: hsl(var(--color-surface-hover));
+		border-color: hsl(var(--color-border-strong));
 	}
 
 	.mode-toggle {

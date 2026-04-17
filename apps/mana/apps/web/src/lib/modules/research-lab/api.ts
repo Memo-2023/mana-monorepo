@@ -113,3 +113,39 @@ export function rateResult(
 		body: JSON.stringify({ rating, notes }),
 	});
 }
+
+// ─── BYO-Keys provider configs ──────────────────────────────
+
+export interface ProviderConfigDto {
+	id: string;
+	providerId: string;
+	enabled: boolean;
+	dailyBudgetCredits: number | null;
+	monthlyBudgetCredits: number | null;
+	maskedKey: string | null;
+	hasKey: boolean;
+	updatedAt?: string;
+}
+
+export function listProviderConfigs(): Promise<{ configs: ProviderConfigDto[] }> {
+	return request<{ configs: ProviderConfigDto[] }>('/api/v1/provider-configs');
+}
+
+export function upsertProviderConfig(input: {
+	providerId: string;
+	apiKey?: string;
+	enabled?: boolean;
+	dailyBudgetCredits?: number | null;
+	monthlyBudgetCredits?: number | null;
+}): Promise<ProviderConfigDto> {
+	return request<ProviderConfigDto>('/api/v1/provider-configs', {
+		method: 'POST',
+		body: JSON.stringify(input),
+	});
+}
+
+export function deleteProviderConfig(providerId: string): Promise<{ success: boolean }> {
+	return request<{ success: boolean }>(`/api/v1/provider-configs/${providerId}`, {
+		method: 'DELETE',
+	});
+}

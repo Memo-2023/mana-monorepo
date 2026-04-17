@@ -21,9 +21,11 @@ import { createExtractRoutes } from './routes/extract';
 import { createResearchRoutes } from './routes/research';
 import { createProvidersRoutes } from './routes/providers';
 import { createRunsRoutes } from './routes/runs';
+import { createProviderConfigRoutes } from './routes/provider-configs';
 import { buildRegistry } from './providers/registry';
 import { RunStorage } from './storage/runs';
 import { ConfigStorage } from './storage/configs';
+import { AsyncJobStorage } from './storage/async-jobs';
 import { CreditsClient } from './clients/mana-credits';
 import { ManaSearchClient } from './clients/mana-search';
 import { ManaLlmClient } from './clients/mana-llm';
@@ -45,6 +47,7 @@ const credits = new CreditsClient({
 
 const runStorage = new RunStorage(db);
 const configStorage = new ConfigStorage(db);
+const asyncStorage = new AsyncJobStorage(db);
 const registry = buildRegistry({ manaSearch });
 
 const executorDeps = {
@@ -86,10 +89,16 @@ app.use('/api/v1/extract/*', jwtAuth(config.manaAuthUrl));
 app.route('/api/v1/extract', createExtractRoutes(registry, runStorage, executorDeps, config));
 
 app.use('/api/v1/research/*', jwtAuth(config.manaAuthUrl));
-app.route('/api/v1/research', createResearchRoutes(registry, runStorage, executorDeps, config));
+app.route(
+	'/api/v1/research',
+	createResearchRoutes(registry, runStorage, executorDeps, config, asyncStorage, credits)
+);
 
 app.use('/api/v1/runs/*', jwtAuth(config.manaAuthUrl));
 app.route('/api/v1/runs', createRunsRoutes(runStorage));
+
+app.use('/api/v1/provider-configs/*', jwtAuth(config.manaAuthUrl));
+app.route('/api/v1/provider-configs', createProviderConfigRoutes(db));
 
 // Service-to-service (X-Service-Key auth) — wired up in Phase 3 when mana-ai migrates
 app.use('/api/v1/internal/*', serviceAuth(config.serviceKey));

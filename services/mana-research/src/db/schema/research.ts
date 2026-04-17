@@ -129,3 +129,39 @@ export type EvalResult = typeof evalResults.$inferSelect;
 export type NewEvalResult = typeof evalResults.$inferInsert;
 export type ProviderConfig = typeof providerConfigs.$inferSelect;
 export type ProviderStat = typeof providerStats.$inferSelect;
+
+export const asyncJobStatusEnum = pgEnum('research_async_status', [
+	'queued',
+	'running',
+	'completed',
+	'failed',
+	'cancelled',
+]);
+
+/** Long-running research tasks (openai-deep-research). User submits, polls. */
+export const asyncJobs = researchSchema.table(
+	'async_jobs',
+	{
+		id: uuid('id').primaryKey().defaultRandom(),
+		userId: text('user_id').notNull(),
+		providerId: text('provider_id').notNull(),
+		externalId: text('external_id'),
+		status: asyncJobStatusEnum('status').notNull().default('queued'),
+		query: text('query').notNull(),
+		options: jsonb('options'),
+		reservationId: text('reservation_id'),
+		costCredits: integer('cost_credits').notNull().default(0),
+		result: jsonb('result'),
+		errorMessage: text('error_message'),
+		runId: uuid('run_id').references(() => evalRuns.id, { onDelete: 'set null' }),
+		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+		updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+	},
+	(t) => ({
+		userIdx: index('async_jobs_user_idx').on(t.userId, t.createdAt),
+		statusIdx: index('async_jobs_status_idx').on(t.status),
+	})
+);
+
+export type AsyncJob = typeof asyncJobs.$inferSelect;
+export type NewAsyncJob = typeof asyncJobs.$inferInsert;

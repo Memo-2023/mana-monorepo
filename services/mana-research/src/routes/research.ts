@@ -13,9 +13,13 @@ import type { HonoEnv } from '../lib/hono-env';
 import type { ProviderRegistry } from '../providers/registry';
 import { getAgent } from '../providers/registry';
 import type { RunStorage } from '../storage/runs';
-import { BadRequestError } from '../lib/errors';
+import type { AsyncJobStorage } from '../storage/async-jobs';
+import type { CreditsClient } from '../clients/mana-credits';
+import { BadRequestError, NotFoundError } from '../lib/errors';
 import type { Config } from '../config';
 import { pickAgent } from '../router/auto-route';
+import { priceFor } from '../lib/pricing';
+import { pollDeepResearch, submitDeepResearch } from '../providers/agent/openai-deep-research';
 
 const MAX_COMPARE_AGENTS = 4;
 
@@ -31,12 +35,21 @@ const compareBodySchema = z.object({
 	options: agentOptionsSchema.optional(),
 });
 
+const asyncSubmitBodySchema = z.object({
+	query: z.string().min(1).max(4000),
+	options: agentOptionsSchema.optional(),
+});
+
 export function createResearchRoutes(
 	registry: ProviderRegistry,
 	storage: RunStorage,
 	deps: ExecutorDeps,
-	config: Config
+	config: Config,
+	asyncStorage: AsyncJobStorage,
+	credits: CreditsClient
 ) {
+	const PROVIDER_ID = 'openai-deep-research' as const;
+
 	return new Hono<HonoEnv>()
 		.post('/', async (c) => {
 			const user = c.get('user');
@@ -160,5 +173,154 @@ export function createResearchRoutes(
 					resultId: resultIds[i],
 				})),
 			});
+		})
+		.post('/async', async (c) => {
+			const user = c.get('user');
+			const body = asyncSubmitBodySchema.parse(await c.req.json());
+
+			const apiKey = config.providerKeys.openai;
+			if (!apiKey) {
+				throw new BadRequestError(
+					'openai-deep-research requires OPENAI_API_KEY on the server or via BYO key'
+				);
+			}
+
+			const price = priceFor(PROVIDER_ID, 'research');
+			const reservation = await credits.reserve(
+				user.userId,
+				price,
+				`research:${PROVIDER_ID}:submit`
+			);
+
+			try {
+				const submission = await submitDeepResearch(body.query, body.options ?? {}, apiKey);
+				const job = await asyncStorage.create({
+					userId: user.userId,
+					providerId: PROVIDER_ID,
+					externalId: submission.externalId,
+					status: submission.status,
+					query: body.query,
+					options: body.options ?? {},
+					reservationId: reservation.reservationId,
+					costCredits: price,
+				});
+				return c.json({
+					taskId: job.id,
+					status: job.status,
+					providerId: PROVIDER_ID,
+					costCredits: price,
+				});
+			} catch (err) {
+				await credits.refund(reservation.reservationId).catch(() => {});
+				throw err;
+			}
+		})
+		.get('/async/:id', async (c) => {
+			const user = c.get('user');
+			const job = await asyncStorage.get(c.req.param('id'), user.userId);
+			if (!job) throw new NotFoundError('Task not found');
+
+			// Short-circuit terminal states.
+			if (job.status === 'completed' || job.status === 'failed' || job.status === 'cancelled') {
+				return c.json({
+					taskId: job.id,
+					status: job.status,
+					query: job.query,
+					providerId: job.providerId,
+					costCredits: job.costCredits,
+					createdAt: job.createdAt,
+					updatedAt: job.updatedAt,
+					result: job.result,
+					error: job.errorMessage,
+				});
+			}
+
+			// Poll upstream.
+			if (!job.externalId) {
+				throw new BadRequestError('Task has no external id yet');
+			}
+			const apiKey = config.providerKeys.openai;
+			if (!apiKey) {
+				return c.json({
+					taskId: job.id,
+					status: job.status,
+					query: job.query,
+					providerId: job.providerId,
+					costCredits: job.costCredits,
+					createdAt: job.createdAt,
+					updatedAt: job.updatedAt,
+					error: 'OPENAI_API_KEY is no longer configured; cannot poll',
+				});
+			}
+
+			const poll = await pollDeepResearch(job.externalId, apiKey).catch((err: Error) => ({
+				status: 'failed' as const,
+				error: err.message,
+			}));
+
+			if (poll.status === 'completed' && poll.answer) {
+				const answer = { ...poll.answer, query: job.query };
+				await asyncStorage.updateStatus(job.id, {
+					status: 'completed',
+					result: { answer },
+				});
+				if (job.reservationId) {
+					await credits
+						.commit(job.reservationId, `research ${job.providerId}`)
+						.catch((err) => console.warn('[async] commit failed:', err));
+				}
+				return c.json({
+					taskId: job.id,
+					status: 'completed',
+					query: job.query,
+					providerId: job.providerId,
+					costCredits: job.costCredits,
+					createdAt: job.createdAt,
+					updatedAt: new Date(),
+					result: { answer },
+				});
+			}
+
+			if (poll.status === 'failed') {
+				await asyncStorage.updateStatus(job.id, {
+					status: 'failed',
+					errorMessage: poll.error ?? 'unknown',
+				});
+				if (job.reservationId) {
+					await credits
+						.refund(job.reservationId)
+						.catch((err) => console.warn('[async] refund failed:', err));
+				}
+				return c.json({
+					taskId: job.id,
+					status: 'failed',
+					query: job.query,
+					providerId: job.providerId,
+					costCredits: 0,
+					createdAt: job.createdAt,
+					updatedAt: new Date(),
+					error: poll.error,
+				});
+			}
+
+			// queued / running — update touch and return current
+			if (poll.status !== job.status) {
+				await asyncStorage.updateStatus(job.id, { status: poll.status });
+			}
+			return c.json({
+				taskId: job.id,
+				status: poll.status,
+				query: job.query,
+				providerId: job.providerId,
+				costCredits: job.costCredits,
+				createdAt: job.createdAt,
+				updatedAt: new Date(),
+			});
+		})
+		.get('/async', async (c) => {
+			const user = c.get('user');
+			const limit = Math.min(parseInt(c.req.query('limit') ?? '25', 10), 100);
+			const jobs = await asyncStorage.list(user.userId, limit);
+			return c.json({ tasks: jobs });
 		});
 }
