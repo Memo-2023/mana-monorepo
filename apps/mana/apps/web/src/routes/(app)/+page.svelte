@@ -254,24 +254,40 @@
 	});
 
 	// ── App CRUD (delegated to active scene) ────────────────
+	// Surface Dexie write failures — a silent rejection (quota, structured
+	// clone) must not leave the picker closed while the new page never
+	// actually lands, which previously looked like a frozen workbench until
+	// the user reloaded.
 	function handleAddApp(appId: string) {
-		workbenchScenesStore.addApp(appId);
 		showPicker = false;
+		workbenchScenesStore.addApp(appId).catch((err) => {
+			console.error('[workbench] addApp failed:', err);
+		});
 	}
 	function handleRemoveApp(id: string) {
-		workbenchScenesStore.removeApp(id);
+		workbenchScenesStore.removeApp(id).catch((err) => {
+			console.error('[workbench] removeApp failed:', err);
+		});
 	}
 	function handleMaximizeApp(id: string) {
-		workbenchScenesStore.toggleMaximizeApp(id);
+		workbenchScenesStore.toggleMaximizeApp(id).catch((err) => {
+			console.error('[workbench] toggleMaximizeApp failed:', err);
+		});
 	}
 	function handleResize(id: string, widthPx: number) {
-		workbenchScenesStore.resizeApp(id, widthPx);
+		workbenchScenesStore.resizeApp(id, widthPx).catch((err) => {
+			console.error('[workbench] resizeApp failed:', err);
+		});
 	}
 	function handleMoveLeft(id: string) {
-		workbenchScenesStore.moveAppLeft(id);
+		workbenchScenesStore.moveAppLeft(id).catch((err) => {
+			console.error('[workbench] moveAppLeft failed:', err);
+		});
 	}
 	function handleMoveRight(id: string) {
-		workbenchScenesStore.moveAppRight(id);
+		workbenchScenesStore.moveAppRight(id).catch((err) => {
+			console.error('[workbench] moveAppRight failed:', err);
+		});
 	}
 	// ── Card / tab context menus ────────────────────────────
 	const ctxMenu = createWorkbenchContextMenu();

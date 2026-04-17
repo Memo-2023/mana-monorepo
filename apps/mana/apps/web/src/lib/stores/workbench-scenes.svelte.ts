@@ -39,6 +39,8 @@ let activeSceneIdState = $state<string | null>(null);
 let initializedState = $state(false);
 
 let subscription: Subscription | null = null;
+let subscribeRetryCount = 0;
+const MAX_SUBSCRIBE_RETRIES = 3;
 
 function readActiveIdFromStorage(): string | null {
 	if (!browser) return null;
@@ -67,6 +69,8 @@ function toScene(local: LocalWorkbenchScene): WorkbenchScene {
 		openApps: local.openApps ?? [],
 		order: local.order,
 		wallpaper: local.wallpaper,
+		viewingAsAgentId: local.viewingAsAgentId,
+		scopeTagIds: local.scopeTagIds,
 	};
 }
 
@@ -120,11 +124,75 @@ async function patchScene(
 async function patchActiveScene(fn: (apps: WorkbenchSceneApp[]) => WorkbenchSceneApp[]) {
 	const id = activeSceneIdState;
 	if (!id) return;
-	const current = scenesState.find((s) => s.id === id);
-	if (!current) return;
-	// Snapshot before handing to the mutator so callers operate on plain objects.
-	const plainApps = $state.snapshot(current.openApps) as WorkbenchSceneApp[];
-	await patchScene(id, { openApps: fn(plainApps) });
+	// Read fresh from Dexie inside a rw-transaction so two rapid writes (e.g.
+	// user adds app A then app B before the liveQuery has echoed the first
+	// change back into scenesState) can't clobber each other with a stale
+	// [...oldApps, X] snapshot.
+	await db.transaction('rw', TABLE, async () => {
+		const row = await db.table<LocalWorkbenchScene>(TABLE).get(id);
+		if (!row || row.deletedAt) return;
+		const plainApps = (row.openApps ?? []) as WorkbenchSceneApp[];
+		const next = fn(plainApps);
+		if (next === plainApps) return;
+		await db.table<LocalWorkbenchScene>(TABLE).update(id, {
+			openApps: next,
+			updatedAt: nowIso(),
+		});
+	});
+}
+
+/**
+ * Subscribe to the workbenchScenes Dexie liveQuery. Wrapped so we can
+ * re-invoke it on transient errors (e.g. DatabaseClosed during another
+ * tab's schema upgrade) — otherwise the subscription dies silently and
+ * local writes land in IndexedDB but never reach `scenesState`, leaving
+ * the user with a "frozen" workbench that only a full reload fixes.
+ *
+ * The `next` handler is individually try/catched so a single malformed
+ * row (bad enum, missing field) can't kill the whole reactive chain.
+ */
+function openSubscription(): void {
+	subscription = liveQuery(() => db.table<LocalWorkbenchScene>(TABLE).toArray()).subscribe({
+		next: (rows) => {
+			try {
+				const visible = rows
+					.filter((r) => !r.deletedAt)
+					.sort((a, b) => a.order - b.order)
+					.map(toScene);
+				scenesState = visible;
+
+				const next = pickActiveId(visible, activeSceneIdState);
+				if (next !== activeSceneIdState) {
+					activeSceneIdState = next;
+					writeActiveIdToStorage(next);
+				}
+				// Sync scope when scenes reload (init, sync pull, tab focus).
+				const activeScope = visible.find((s) => s.id === (next ?? activeSceneIdState));
+				try {
+					setSceneScopeTagIds(activeScope?.scopeTagIds);
+				} catch (scopeErr) {
+					console.error('[workbench-scenes] setSceneScopeTagIds failed:', scopeErr);
+				}
+				initializedState = true;
+				subscribeRetryCount = 0;
+			} catch (err) {
+				console.error('[workbench-scenes] error processing rows:', err);
+				initializedState = true;
+			}
+		},
+		error: (err) => {
+			console.error('[workbench-scenes] liveQuery failed:', err);
+			initializedState = true;
+			subscription = null;
+			if (subscribeRetryCount < MAX_SUBSCRIBE_RETRIES) {
+				subscribeRetryCount++;
+				const delay = 500 * subscribeRetryCount;
+				setTimeout(() => {
+					if (!subscription) openSubscription();
+				}, delay);
+			}
+		},
+	});
 }
 
 // ─── Public store ─────────────────────────────────────────────
@@ -156,30 +224,7 @@ export const workbenchScenesStore = {
 		}
 
 		activeSceneIdState = readActiveIdFromStorage();
-
-		subscription = liveQuery(() => db.table<LocalWorkbenchScene>(TABLE).toArray()).subscribe({
-			next: (rows) => {
-				const visible = rows
-					.filter((r) => !r.deletedAt)
-					.sort((a, b) => a.order - b.order)
-					.map(toScene);
-				scenesState = visible;
-
-				const next = pickActiveId(visible, activeSceneIdState);
-				if (next !== activeSceneIdState) {
-					activeSceneIdState = next;
-					writeActiveIdToStorage(next);
-				}
-				// Sync scope when scenes reload (init, sync pull, tab focus).
-				const activeScope = visible.find((s) => s.id === (next ?? activeSceneIdState));
-				setSceneScopeTagIds(activeScope?.scopeTagIds);
-				initializedState = true;
-			},
-			error: (err) => {
-				console.error('[workbench-scenes] liveQuery failed:', err);
-				initializedState = true;
-			},
-		});
+		openSubscription();
 	},
 
 	dispose() {
