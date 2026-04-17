@@ -1041,12 +1041,12 @@ registerApp({
 });
 
 registerApp({
-	id: 'ai-rituals',
-	name: 'AI Rituale',
+	id: 'rituals',
+	name: 'Rituale',
 	color: '#EC4899',
 	icon: Lightning,
 	views: {
-		list: { load: () => import('$lib/modules/ai-rituals/ListView.svelte') },
+		list: { load: () => import('$lib/modules/rituals/ListView.svelte') },
 	},
 });
 

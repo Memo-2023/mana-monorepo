@@ -18,7 +18,7 @@ Alle 73 Module der Mana-App (`apps/mana/apps/web/src/lib/modules/`).
 | `inventory` | Inventory | Besitz verwalten mit Fotos, Quittungen, Garantien |
 | `calc` | Calc | Taschenrechner (Standard, Scientific, Programmer, Unit-Conversion) |
 
-## Gesundheit & Wellness (10)
+## Gesundheit & Wellness (11)
 
 | Modul | Name | Beschreibung |
 |---|---|---|
@@ -30,6 +30,7 @@ Alle 73 Module der Mana-App (`apps/mana/apps/web/src/lib/modules/`).
 | `period` | Periode | Menstruations-Tracking mit Vorhersagen und Phasen-Erkennung |
 | `stretch` | Stretch | Mobility-Assessments und geführte Dehn-Routinen |
 | `meditate` | Meditate | Meditations-Timer, Atemübungen, Body-Scans |
+| `rituals` | Rituale | Geführte Sequenzen — utility (Daten-Erfassung) + ceremony (Präsenz) |
 | `mood` | Mood | Stimmungs-Tracking mehrmals täglich mit Kontext und Mustern |
 | `moodlit` | Moodlit | Beruhigende Ambient-Beleuchtung mit animierten Farbverläufen |
 
@@ -100,7 +101,7 @@ Alle 73 Module der Mana-App (`apps/mana/apps/web/src/lib/modules/`).
 | `myday` | Mein Tag | Tagesübersicht: Tasks, Events, Wasser, Ernährung, Streaks |
 | `activity` | Aktivität | Live-Activity-Stream über alle Module |
 
-## AI-System (9)
+## AI-System (8)
 
 | Modul | Name | Beschreibung |
 |---|---|---|
@@ -109,7 +110,6 @@ Alle 73 Module der Mana-App (`apps/mana/apps/web/src/lib/modules/`).
 | `ai-missions` | AI Missions | Langlebige autonome AI-Aufträge |
 | `ai-agents` | AI Agents | AI-Agenten erstellen und verwalten |
 | `ai-policy` | AI Policy | Tool-Execution-Policies konfigurieren |
-| `ai-rituals` | AI Rituals | AI-gesteuerte Routinen und Rituale |
 | `ai-health` | AI Health | AI-System-Monitoring und Metriken |
 | `ai-insights` | AI Insights | AI-generierte Insights aus User-Daten |
 | `news-research` | News Research | RSS-Feed-Discovery und Keyword-Suche |

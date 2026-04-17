@@ -17,6 +17,7 @@ export const ritualStore = {
 			title: template.title,
 			description: template.description,
 			trigger: template.trigger,
+			category: template.category ?? 'utility',
 			status: 'active',
 			createdAt: now,
 			updatedAt: now,
@@ -44,6 +45,7 @@ export const ritualStore = {
 		title: string;
 		description?: string;
 		trigger: LocalRitual['trigger'];
+		category?: LocalRitual['category'];
 	}): Promise<LocalRitual> {
 		const now = new Date().toISOString();
 		const ritual: LocalRitual = {
@@ -51,6 +53,7 @@ export const ritualStore = {
 			title: input.title,
 			description: input.description,
 			trigger: input.trigger,
+			category: input.category ?? 'utility',
 			status: 'active',
 			createdAt: now,
 			updatedAt: now,

@@ -5,13 +5,13 @@
   displays projection data. Tracks progress and logs completion.
 -->
 <script lang="ts">
-	import { Check, ArrowRight, Drop, Lightning, ListChecks } from '@mana/shared-icons';
+	import { Check, ArrowRight, Lightning } from '@mana/shared-icons';
 	import { executeTool } from '$lib/data/tools';
 	import { useDaySnapshot } from '$lib/data/projections/day-snapshot';
 	import { useStreaks } from '$lib/data/projections/streaks';
 	import { ritualStore } from '$lib/companion/rituals/store';
-	import type { LocalRitual, LocalRitualStep } from '$lib/companion/rituals/types';
-	import { onMount } from 'svelte';
+	import type { LocalRitual, LocalRitualStep, BreathPattern } from '$lib/companion/rituals/types';
+	import { onMount, onDestroy } from 'svelte';
 
 	interface Props {
 		ritual: LocalRitual;
@@ -31,12 +31,102 @@
 	let inputValue = $state<string | number>('');
 	let executing = $state(false);
 
+	// Ceremony step runtime state
+	let timerRemaining = $state<number | null>(null);
+	let timerHandle: ReturnType<typeof setInterval> | null = null;
+	let breathPhase = $state<'inhale' | 'hold1' | 'exhale' | 'hold2' | null>(null);
+	let breathCycle = $state(0);
+	let breathHandle: ReturnType<typeof setTimeout> | null = null;
+
 	let currentStep = $derived(steps[currentStepIdx]);
 	let isLastStep = $derived(currentStepIdx >= steps.length - 1);
 	let progress = $derived(steps.length > 0 ? (completedSteps.size / steps.length) * 100 : 0);
 
+	function stopTimer() {
+		if (timerHandle) {
+			clearInterval(timerHandle);
+			timerHandle = null;
+		}
+		timerRemaining = null;
+	}
+
+	function stopBreath() {
+		if (breathHandle) {
+			clearTimeout(breathHandle);
+			breathHandle = null;
+		}
+		breathPhase = null;
+		breathCycle = 0;
+	}
+
+	function startTimer(durationSec: number) {
+		stopTimer();
+		timerRemaining = durationSec;
+		timerHandle = setInterval(() => {
+			if (timerRemaining == null) return;
+			timerRemaining -= 1;
+			if (timerRemaining <= 0) {
+				stopTimer();
+				completeStep();
+			}
+		}, 1000);
+	}
+
+	const BREATH_PRESETS: Record<
+		Exclude<BreathPattern, 'custom'>,
+		{ inhaleSec: number; hold1Sec: number; exhaleSec: number; hold2Sec: number }
+	> = {
+		box: { inhaleSec: 4, hold1Sec: 4, exhaleSec: 4, hold2Sec: 4 },
+		'4-7-8': { inhaleSec: 4, hold1Sec: 7, exhaleSec: 8, hold2Sec: 0 },
+		coherent: { inhaleSec: 5, hold1Sec: 0, exhaleSec: 5, hold2Sec: 0 },
+	};
+
+	function startBreath() {
+		if (currentStep?.config.type !== 'breath') return;
+		const cfg = currentStep.config;
+		const timings = cfg.pattern === 'custom' ? cfg.timings : BREATH_PRESETS[cfg.pattern];
+		if (!timings) return;
+		stopBreath();
+		breathCycle = 0;
+
+		const runPhase = (
+			phase: 'inhale' | 'hold1' | 'exhale' | 'hold2',
+			nextPhase: 'inhale' | 'hold1' | 'exhale' | 'hold2' | 'cycle-end',
+			durationSec: number
+		) => {
+			breathPhase = phase;
+			if (durationSec <= 0) {
+				dispatchNext(nextPhase);
+				return;
+			}
+			breathHandle = setTimeout(() => dispatchNext(nextPhase), durationSec * 1000);
+		};
+
+		const dispatchNext = (step: 'inhale' | 'hold1' | 'exhale' | 'hold2' | 'cycle-end') => {
+			if (step === 'hold1') runPhase('hold1', 'exhale', timings.hold1Sec);
+			else if (step === 'exhale') runPhase('exhale', 'hold2', timings.exhaleSec);
+			else if (step === 'hold2') runPhase('hold2', 'cycle-end', timings.hold2Sec);
+			else if (step === 'cycle-end') {
+				breathCycle += 1;
+				if (breathCycle >= cfg.cycles) {
+					stopBreath();
+					completeStep();
+				} else {
+					runPhase('inhale', 'hold1', timings.inhaleSec);
+				}
+			} else if (step === 'inhale') runPhase('inhale', 'hold1', timings.inhaleSec);
+		};
+
+		runPhase('inhale', 'hold1', timings.inhaleSec);
+	}
+
 	onMount(async () => {
 		steps = await ritualStore.getSteps(ritual.id);
+	});
+
+	onDestroy(() => {
+		stopTimer();
+		stopBreath();
 	});
 
 	async function executeCurrentStep() {
@@ -87,6 +177,10 @@
 	}
 
 	function nextStep() {
+		// Leaving the current step — tear down any running ceremony runtime
+		stopTimer();
+		stopBreath();
+
 		if (isLastStep) {
 			ritualStore.logCompletion(ritual.id, completedSteps.size, steps.length);
 			onComplete();
@@ -94,8 +188,9 @@
 		}
 		stepResult = null;
 		currentStepIdx++;
-		// Auto-complete info_display steps
-		if (currentStep?.config.type === 'info_display') {
+		// Auto-complete steps that don't require an action
+		const t = currentStep?.config.type;
+		if (t === 'info_display' || t === 'presence' || t === 'media') {
 			completeStep();
 		}
 	}
@@ -207,6 +302,118 @@
 							{/each}
 						{/if}
 					</div>
+				{:else if currentStep.config.type === 'presence'}
+					{#if currentStep.config.body}
+						<p class="presence-body">{currentStep.config.body}</p>
+					{/if}
+					{#if currentStep.config.durationSec}
+						{#if timerRemaining == null && !completedSteps.has(currentStepIdx)}
+							<button
+								class="step-action"
+								onclick={() =>
+									currentStep?.config.type === 'presence' &&
+									currentStep.config.durationSec &&
+									startTimer(currentStep.config.durationSec)}
+							>
+								Starten ({currentStep.config.durationSec}s)
+							</button>
+						{:else if timerRemaining != null}
+							<div class="timer-display">
+								<span class="timer-num">{timerRemaining}s</span>
+								<button
+									class="nav-skip"
+									onclick={() => {
+										stopTimer();
+										completeStep();
+									}}
+								>
+									Weiter
+								</button>
+							</div>
+						{:else}
+							<div class="step-done"><Check size={20} weight="bold" /> Pause gehalten</div>
+						{/if}
+					{:else}
+						<button class="step-action" onclick={completeStep}>Bereit</button>
+					{/if}
+				{:else if currentStep.config.type === 'breath'}
+					{#if breathPhase == null && !completedSteps.has(currentStepIdx)}
+						<p class="presence-body">
+							{#if currentStep.config.pattern === 'box'}
+								Box-Atmung (4-4-4-4): einatmen, halten, ausatmen, halten.
+							{:else if currentStep.config.pattern === '4-7-8'}
+								4-7-8: 4 Sek. einatmen, 7 Sek. halten, 8 Sek. ausatmen.
+							{:else if currentStep.config.pattern === 'coherent'}
+								Kohärent: langsam 5 Sek. rein, 5 Sek. raus.
+							{:else}
+								Eigenes Muster.
+							{/if}
+						</p>
+						<button class="step-action" onclick={startBreath}>
+							Starten — {currentStep.config.cycles} Zyklen
+						</button>
+					{:else if breathPhase != null}
+						<div class="breath-display">
+							<div class="breath-circle" data-phase={breathPhase}></div>
+							<div class="breath-label">
+								{#if breathPhase === 'inhale'}Einatmen{/if}
+								{#if breathPhase === 'hold1'}Halten{/if}
+								{#if breathPhase === 'exhale'}Ausatmen{/if}
+								{#if breathPhase === 'hold2'}Halten{/if}
+							</div>
+							<div class="breath-cycle">
+								Zyklus {breathCycle + 1} / {currentStep.config.cycles}
+							</div>
+							<button
+								class="nav-skip"
+								onclick={() => {
+									stopBreath();
+									completeStep();
+								}}
+							>
+								Früher beenden
+							</button>
+						</div>
+					{:else}
+						<div class="step-done"><Check size={20} weight="bold" /> Atmung abgeschlossen</div>
+					{/if}
+				{:else if currentStep.config.type === 'media'}
+					{#if currentStep.config.imageUrl}
+						<img
+							src={currentStep.config.imageUrl}
+							alt={currentStep.config.caption ?? ''}
+							class="media-image"
+						/>
+					{/if}
+					{#if currentStep.config.caption}
+						<p class="media-caption">{currentStep.config.caption}</p>
+					{/if}
+					{#if currentStep.config.durationSec}
+						{#if timerRemaining == null && !completedSteps.has(currentStepIdx)}
+							<button
+								class="step-action"
+								onclick={() =>
+									currentStep?.config.type === 'media' &&
+									currentStep.config.durationSec &&
+									startTimer(currentStep.config.durationSec)}
+							>
+								Starten ({currentStep.config.durationSec}s)
+							</button>
+						{:else if timerRemaining != null}
+							<div class="timer-display">
+								<span class="timer-num">{timerRemaining}s</span>
+								<button
+									class="nav-skip"
+									onclick={() => {
+										stopTimer();
+										completeStep();
+									}}
+								>
+									Weiter
+								</button>
+							</div>
+						{/if}
+					{/if}
 				{/if}
 			</div>
 
@@ -418,6 +625,91 @@
 	}
 
 	.close-btn:hover {
+		color: hsl(var(--color-foreground));
+	}
+
+	/* ── Ceremony step types ─────────────────────── */
+
+	.presence-body {
+		margin: 0;
+		font-size: 0.95rem;
+		line-height: 1.5;
+		color: hsl(var(--color-foreground));
+		white-space: pre-wrap;
+	}
+
+	.timer-display {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+	}
+
+	.timer-num {
+		font-size: 2rem;
+		font-weight: 600;
+		font-variant-numeric: tabular-nums;
+		color: hsl(var(--color-primary));
+	}
+
+	.breath-display {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.6rem;
+		padding: 1rem 0;
+	}
+
+	.breath-circle {
+		width: 120px;
+		height: 120px;
+		border-radius: 50%;
+		background: radial-gradient(
+			circle,
+			hsl(var(--color-primary) / 0.3),
+			hsl(var(--color-primary) / 0.1)
+		);
+		border: 2px solid hsl(var(--color-primary) / 0.5);
+		transition: transform 4s ease-in-out;
+		transform: scale(0.7);
+	}
+	.breath-circle[data-phase='inhale'] {
+		transform: scale(1.15);
+		transition: transform 4s ease-in-out;
+	}
+	.breath-circle[data-phase='hold1'] {
+		transform: scale(1.15);
+	}
+	.breath-circle[data-phase='exhale'] {
+		transform: scale(0.7);
+		transition: transform 5s ease-in-out;
+	}
+	.breath-circle[data-phase='hold2'] {
+		transform: scale(0.7);
+	}
+
+	.breath-label {
+		font-size: 1.1rem;
+		font-weight: 500;
+		color: hsl(var(--color-foreground));
+	}
+
+	.breath-cycle {
+		font-size: 0.8rem;
+		color: hsl(var(--color-muted-foreground));
+	}
+
+	.media-image {
+		width: 100%;
+		max-height: 240px;
+		object-fit: cover;
+		border-radius: 0.5rem;
+	}
+
+	.media-caption {
+		margin: 0;
+		font-style: italic;
+		text-align: center;
 		color: hsl(var(--color-foreground));
 	}
 </style>
