@@ -49,6 +49,8 @@ const PUBLIC_MANA_CREDITS_URL_CLIENT =
 	process.env.PUBLIC_MANA_CREDITS_URL_CLIENT || process.env.PUBLIC_MANA_CREDITS_URL || '';
 const PUBLIC_MANA_AI_URL_CLIENT =
 	process.env.PUBLIC_MANA_AI_URL_CLIENT || process.env.PUBLIC_MANA_AI_URL || '';
+const PUBLIC_MANA_RESEARCH_URL_CLIENT =
+	process.env.PUBLIC_MANA_RESEARCH_URL_CLIENT || process.env.PUBLIC_MANA_RESEARCH_URL || '';
 // Feature flag for the Mission Key-Grant UI (server-side execution of
 // encrypted missions). Default off — flip to 'true' per deployment once
 // the MANA_AI_PUBLIC/PRIVATE_KEY_PEM pair is provisioned on both services.
@@ -133,6 +135,7 @@ window.__PUBLIC_MANA_EVENTS_URL__ = ${JSON.stringify(PUBLIC_MANA_EVENTS_URL_CLIE
 window.__PUBLIC_MANA_API_URL__ = ${JSON.stringify(PUBLIC_MANA_API_URL_CLIENT)};
 window.__PUBLIC_MANA_CREDITS_URL__ = ${JSON.stringify(PUBLIC_MANA_CREDITS_URL_CLIENT)};
 window.__PUBLIC_MANA_AI_URL__ = ${JSON.stringify(PUBLIC_MANA_AI_URL_CLIENT)};
+window.__PUBLIC_MANA_RESEARCH_URL__ = ${JSON.stringify(PUBLIC_MANA_RESEARCH_URL_CLIENT)};
 window.__PUBLIC_AI_MISSION_GRANTS__ = ${JSON.stringify(PUBLIC_AI_MISSION_GRANTS)};
 window.__PUBLIC_GLITCHTIP_DSN__ = ${JSON.stringify(PUBLIC_GLITCHTIP_DSN)};
 </script>`;

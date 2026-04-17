@@ -75,6 +75,7 @@ import {
 	CloudSun,
 	Stack,
 	ArrowClockwise,
+	Flask,
 } from '@mana/shared-icons';
 
 // ── Apps with entity capabilities ───────────────────────────
@@ -844,6 +845,16 @@ registerApp({
 	icon: Binoculars,
 	views: {
 		list: { load: () => import('$lib/modules/news-research/ListView.svelte') },
+	},
+});
+
+registerApp({
+	id: 'research-lab',
+	name: 'Research Lab',
+	color: '#8B5CF6',
+	icon: Flask,
+	views: {
+		list: { load: () => import('$lib/modules/research-lab/ListView.svelte') },
 	},
 });
 

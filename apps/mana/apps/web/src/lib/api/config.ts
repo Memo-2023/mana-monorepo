@@ -75,6 +75,20 @@ export function getManaAiUrl(): string {
 }
 
 /**
+ * Get the mana-research service URL (Bun/Hono, port 3068 in dev).
+ * Hosts the unified web-research provider orchestration — search, extract,
+ * and research-agent endpoints with side-by-side comparison support.
+ */
+export function getManaResearchUrl(): string {
+	if (browser && typeof window !== 'undefined') {
+		const injected = (window as unknown as { __PUBLIC_MANA_RESEARCH_URL__?: string })
+			.__PUBLIC_MANA_RESEARCH_URL__;
+		return injected || 'http://localhost:3068';
+	}
+	return process.env.PUBLIC_MANA_RESEARCH_URL || 'http://localhost:3068';
+}
+
+/**
  * Feature flag for the AI Mission Key-Grant UI. When false, the consent
  * dialog + "Server-Zugriff" box are hidden even on missions with
  * encrypted inputs — missions simply stay foreground-only. Flip on per-
