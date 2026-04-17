@@ -49,8 +49,13 @@
 
 <div class="library-shell">
 	<div class="controls">
-		<div class="tabs-row">
-			<KindTabs active={activeKind} {counts} onselect={(k) => (activeKind = k)} />
+		<div class="search-row">
+			<input
+				type="search"
+				class="search"
+				bind:value={searchQuery}
+				placeholder="Suche nach Titel oder Creator…"
+			/>
 			<button
 				type="button"
 				class="create-btn"
@@ -62,6 +67,8 @@
 			</button>
 		</div>
 
+		<KindTabs active={activeKind} {counts} onselect={(k) => (activeKind = k)} />
+
 		<div class="filter-row">
 			<StatusFilter active={activeStatus} onselect={(s) => (activeStatus = s)} />
 			<label class="fav-toggle">
@@ -69,13 +76,6 @@
 				<span>Nur Favoriten</span>
 			</label>
 		</div>
-
-		<input
-			type="search"
-			class="search"
-			bind:value={searchQuery}
-			placeholder="Suche nach Titel oder Creator…"
-		/>
 	</div>
 
 	{#if showCreate}
@@ -146,14 +146,10 @@
 		gap: 0.75rem;
 		margin-bottom: 1.5rem;
 	}
-	.tabs-row {
+	.search-row {
 		display: flex;
 		align-items: center;
 		gap: 0.75rem;
-	}
-	.tabs-row :global(.tabs) {
-		flex: 1;
-		min-width: 0;
 	}
 	.create-btn {
 		padding: 0.45rem 0.9rem;
@@ -191,13 +187,14 @@
 		cursor: pointer;
 	}
 	.search {
+		flex: 1;
+		min-width: 0;
 		padding: 0.55rem 0.85rem;
 		border-radius: 0.5rem;
 		border: 1px solid var(--color-border, rgba(0, 0, 0, 0.1));
 		background: var(--color-surface, transparent);
 		font: inherit;
 		color: inherit;
-		max-width: 320px;
 	}
 	.search:focus {
 		outline: 2px solid #a855f7;
