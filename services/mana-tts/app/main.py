@@ -42,6 +42,17 @@ from .piper_service import (
     PIPER_VOICES,
     is_piper_loaded,
 )
+from .orpheus_service import (
+    synthesize_orpheus,
+    is_orpheus_loaded,
+    ORPHEUS_VOICES,
+    DEFAULT_VOICE as DEFAULT_ORPHEUS_VOICE,
+)
+from .zonos_service import (
+    synthesize_zonos,
+    is_zonos_loaded,
+    EMOTION_PRESETS as ZONOS_EMOTIONS,
+)
 
 # Configure logging
 logging.basicConfig(
@@ -203,6 +214,8 @@ async def health_check():
         models_loaded={
             "kokoro": is_kokoro_loaded(),
             "f5": is_f5_loaded(),
+            "orpheus": is_orpheus_loaded(),
+            "zonos": is_zonos_loaded(),
         },
         auth_required=REQUIRE_AUTH,
     )
@@ -526,6 +539,160 @@ async def synthesize_with_f5(
         # Clean up temp file
         if temp_file_path:
             cleanup_temp_file(temp_file_path)
+
+
+# ============================================================================
+# Orpheus TTS Endpoint (German, high-quality)
+# ============================================================================
+
+
+class OrpheusRequest(BaseModel):
+    """Request for Orpheus TTS synthesis."""
+
+    text: str = Field(..., description="Text to synthesize (German)", max_length=5000)
+    voice: str = Field(DEFAULT_ORPHEUS_VOICE, description="Speaker voice")
+    output_format: str = Field("wav", description="Output format (wav, mp3)")
+    temperature: float = Field(0.6, ge=0.1, le=1.5, description="Sampling temperature")
+
+
+@app.post("/synthesize/orpheus")
+async def synthesize_with_orpheus(
+    request: OrpheusRequest,
+    auth: AuthResult = Depends(verify_api_key),
+):
+    """
+    Synthesize German speech using Orpheus TTS.
+
+    High-quality German synthesis with natural intonation.
+    Not optimized for real-time — designed for pre-generation.
+    """
+    if not request.text.strip():
+        raise HTTPException(status_code=400, detail="Text cannot be empty")
+
+    if len(request.text) > MAX_TEXT_LENGTH:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Text exceeds maximum length of {MAX_TEXT_LENGTH} characters",
+        )
+
+    output_format = request.output_format.lower()
+    if output_format not in SUPPORTED_FORMATS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unsupported format. Use one of: {SUPPORTED_FORMATS}",
+        )
+
+    try:
+        result = await synthesize_orpheus(
+            text=request.text,
+            voice=request.voice,
+            temperature=request.temperature,
+        )
+
+        audio_bytes, content_type = convert_audio(
+            result.audio,
+            result.sample_rate,
+            output_format,
+        )
+
+        return Response(
+            content=audio_bytes,
+            media_type=content_type,
+            headers={
+                "X-Model": "orpheus-german",
+                "X-Voice": result.voice,
+                "X-Duration": str(result.duration),
+                "X-Sample-Rate": str(result.sample_rate),
+            },
+        )
+
+    except RuntimeError as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    except Exception as e:
+        logger.error(f"Orpheus synthesis error: {e}")
+        raise HTTPException(status_code=500, detail=f"Orpheus synthesis failed: {e}")
+
+
+# ============================================================================
+# Zonos TTS Endpoint (Multilingual, expressive)
+# ============================================================================
+
+
+class ZonosRequest(BaseModel):
+    """Request for Zonos TTS synthesis."""
+
+    text: str = Field(..., description="Text to synthesize", max_length=5000)
+    language: str = Field("de", description="Language code")
+    emotion: str = Field("friendly", description="Emotion preset: neutral, friendly, warm, curious")
+    speaking_rate: float = Field(13.0, ge=5.0, le=25.0, description="Phonemes per second")
+    pitch_std: float = Field(20.0, ge=5.0, le=50.0, description="Pitch variation in Hz")
+    output_format: str = Field("wav", description="Output format (wav, mp3)")
+
+
+@app.post("/synthesize/zonos")
+async def synthesize_with_zonos(
+    request: ZonosRequest,
+    auth: AuthResult = Depends(verify_api_key),
+):
+    """
+    Synthesize speech using Zonos TTS by Zyphra.
+
+    Expressive multilingual synthesis with emotion control.
+    Trained on 200k hours — explicit German support.
+    """
+    if not request.text.strip():
+        raise HTTPException(status_code=400, detail="Text cannot be empty")
+
+    if len(request.text) > MAX_TEXT_LENGTH:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Text exceeds maximum length of {MAX_TEXT_LENGTH} characters",
+        )
+
+    output_format = request.output_format.lower()
+    if output_format not in SUPPORTED_FORMATS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unsupported format. Use one of: {SUPPORTED_FORMATS}",
+        )
+
+    if request.emotion not in ZONOS_EMOTIONS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unknown emotion. Use one of: {list(ZONOS_EMOTIONS.keys())}",
+        )
+
+    try:
+        result = await synthesize_zonos(
+            text=request.text,
+            language=request.language,
+            emotion=request.emotion,
+            speaking_rate=request.speaking_rate,
+            pitch_std=request.pitch_std,
+        )
+
+        audio_bytes, content_type = convert_audio(
+            result.audio,
+            result.sample_rate,
+            output_format,
+        )
+
+        return Response(
+            content=audio_bytes,
+            media_type=content_type,
+            headers={
+                "X-Model": "zonos-v0.1",
+                "X-Emotion": result.emotion,
+                "X-Duration": str(result.duration),
+                "X-Sample-Rate": str(result.sample_rate),
+            },
+        )
+
+    except RuntimeError as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    except Exception as e:
+        logger.error(f"Zonos synthesis error: {e}")
+        raise HTTPException(status_code=500, detail=f"Zonos synthesis failed: {e}")
 
 
 # ============================================================================

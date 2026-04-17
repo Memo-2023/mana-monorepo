@@ -16,6 +16,8 @@ Text-to-Speech microservice. Wraps Kokoro (English presets), Piper (German, loca
 | **Framework** | FastAPI |
 | **English (preset)** | Kokoro-82M (`kokoro_service.py`) |
 | **German (local)** | Piper ONNX with `kerstin_low.onnx` and `thorsten_medium.onnx` voices (`piper_service.py`) |
+| **German (high-quality)** | Orpheus-3B German finetune (`orpheus_service.py`) — best for pre-generation |
+| **Multilingual (expressive)** | Zonos v0.1 by Zyphra (`zonos_service.py`) — emotion control, 200k hours training |
 | **Voice cloning** | F5-TTS on CUDA (`f5_service.py`) |
 | **Audio I/O** | `soundfile`, `pydub` |
 | **Auth** | Per-key + internal-key API auth (`auth.py`) + JWT via mana-auth (`external_auth.py`) |
@@ -43,6 +45,8 @@ Public URL: `https://gpu-tts.mana.how`.
 | DELETE | `/voices/{voice_id}` | Delete a custom voice |
 | POST | `/synthesize/kokoro` | Kokoro synthesis (English presets) |
 | POST | `/synthesize` | F5-TTS voice cloning |
+| POST | `/synthesize/orpheus` | Orpheus synthesis (German, high-quality, pre-generation) |
+| POST | `/synthesize/zonos` | Zonos synthesis (multilingual, expressive, emotion control) |
 | POST | `/synthesize/auto` | Routing helper — picks the right backend for the requested voice |
 
 All non-health endpoints require `Authorization: Bearer <token>` (per-app key, internal key, or mana-auth JWT).
@@ -58,6 +62,12 @@ All non-health endpoints require `Authorization: Bearer <token>` (per-app key, i
 - `de_thorsten` (male)
 
 Fallback to Edge TTS cloud voices if Piper isn't loaded.
+
+### Orpheus-3B German (high-quality pre-generation)
+~8 GB VRAM. German finetune (`Kartoffel/Orpheus-3B_german_natural-v0.1`). Natural intonation, built-in speaker voices (tara, leo, emma, ...). Best quality for pre-generating static audio files. Not real-time.
+
+### Zonos v0.1 (expressive multilingual)
+~5 GB VRAM. By Zyphra, trained on 200k hours. Explicit German support. Fine-grained control: emotion (neutral/friendly/warm/curious), speaking rate, pitch variation. Can clone voices from 5s reference audio.
 
 ### F5-TTS (voice cloning)
 ~6 GB. Requires reference audio + transcript. Higher quality, slower. Custom voices live in `voices/` (reference audio + transcript per voice ID).
@@ -84,6 +94,8 @@ services/mana-tts/
 │   ├── kokoro_service.py   # Kokoro (English presets)
 │   ├── piper_service.py    # Piper (German, local ONNX)
 │   ├── f5_service.py       # F5-TTS (voice cloning, CUDA)
+│   ├── orpheus_service.py  # Orpheus-3B German (high-quality)
+│   ├── zonos_service.py    # Zonos v0.1 (expressive multilingual)
 │   ├── voice_manager.py    # Custom voice registry
 │   ├── audio_utils.py      # Format conversion, resampling
 │   ├── auth.py             # API-key auth

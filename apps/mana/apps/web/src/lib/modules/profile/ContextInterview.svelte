@@ -2,7 +2,7 @@
   Context Interview — Guided question flow that populates userContext.
 -->
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import { useUserContext } from './queries';
 	import { userContextStore } from './stores/user-context.svelte';
 	import {
@@ -11,14 +11,19 @@
 		getProgress,
 		type ContextCategory,
 		type ContextQuestion,
+		type QuestionInputType,
 	} from './questions';
+	import { useInterviewTts, VOICES } from './use-interview-tts.svelte';
+	import { useLocalStt } from '$lib/components/voice/use-local-stt.svelte';
 
 	interface Props {
 		limitCategories?: ContextCategory[];
 		compact?: boolean;
+		/** If set, auto-start this voice level on mount. */
+		initialVoiceLevel?: 'voice' | 'conversation';
 	}
 
-	let { limitCategories, compact = false }: Props = $props();
+	let { limitCategories, compact = false, initialVoiceLevel }: Props = $props();
 
 	let ctx$ = useUserContext();
 	let ctx = $derived(ctx$.value);
@@ -29,8 +34,27 @@
 	let saving = $state(false);
 	let tagInput = $state('');
 
+	// ── Voice mode ──────────────────────────────────────
+	// 'off' = text only, 'voice' = TTS+STT per question, 'conversation' = auto-save + auto-advance
+	type VoiceLevel = 'off' | 'voice' | 'conversation';
+	const tts = useInterviewTts();
+	const stt = useLocalStt({ language: 'de' });
+	let voiceLevel = $state<VoiceLevel>('off');
+	let voiceMode = $derived(voiceLevel !== 'off');
+	let conversationMode = $derived(voiceLevel === 'conversation');
+	let voiceFlowActive = $state(false);
+	const VOICE_INPUT_TYPES: QuestionInputType[] = ['text', 'textarea', 'tags'];
+
 	onMount(() => {
 		void userContextStore.ensureDoc();
+		if (initialVoiceLevel) {
+			voiceLevel = initialVoiceLevel;
+		}
+	});
+
+	onDestroy(() => {
+		tts.stop();
+		if (stt.state === 'recording') stt.cancel();
 	});
 
 	let categories = $derived(
@@ -39,6 +63,9 @@
 	let categoryQuestions = $derived(getQuestionsByCategory(activeCategory));
 	let currentQuestion = $derived(
 		categoryQuestions[currentQuestionIdx] as ContextQuestion | undefined
+	);
+	let currentSupportsVoice = $derived(
+		currentQuestion ? VOICE_INPUT_TYPES.includes(currentQuestion.inputType) : false
 	);
 	let progress = $derived(getProgress(ctx?.interview?.answeredIds ?? []));
 	let answeredSet = $derived(new Set(ctx?.interview?.answeredIds ?? []));
@@ -71,8 +98,83 @@
 	}
 
 	function selectCategory(key: ContextCategory) {
+		cancelVoiceFlow();
 		activeCategory = key;
 		currentQuestionIdx = 0;
+	}
+
+	// ── Voice flow: TTS → STT → fill input ──────────────
+	async function runVoiceFlow() {
+		if (!currentQuestion || !currentSupportsVoice) return;
+		voiceFlowActive = true;
+
+		// Step 1: Play pre-rendered question audio (falls back to Web Speech API)
+		await tts.speak(currentQuestion.id, currentQuestion.question);
+
+		// Step 2: Start mic recording (STT)
+		if (!voiceFlowActive) return; // cancelled during TTS
+		stt.toggle(); // starts recording
+	}
+
+	// Watch STT text — when transcription completes, fill the input.
+	// In conversation mode: auto-save + auto-advance to next question.
+	$effect(() => {
+		if (stt.state === 'idle' && stt.text && voiceFlowActive) {
+			applyVoiceTranscript(stt.text);
+			voiceFlowActive = false;
+			if (conversationMode) {
+				// Auto-save and advance after a brief pause so the user sees the transcript
+				setTimeout(() => handleAnswer(), 600);
+			}
+		}
+	});
+
+	// Auto-start voice flow when question changes in voice mode.
+	// Track only the question id to avoid re-triggering when ctx data updates.
+	let prevVoiceQuestionId = $state('');
+	$effect(() => {
+		const qid = currentQuestion?.id ?? '';
+		const shouldRun = voiceMode && currentSupportsVoice && qid && qid !== prevVoiceQuestionId;
+		if (shouldRun) {
+			prevVoiceQuestionId = qid;
+			const timeout = setTimeout(() => runVoiceFlow(), 300);
+			return () => clearTimeout(timeout);
+		}
+	});
+
+	function applyVoiceTranscript(transcript: string) {
+		if (!currentQuestion) return;
+		if (currentQuestion.inputType === 'tags') {
+			// Split transcript into tags by comma, "und", or line breaks
+			const parts = transcript
+				.split(/[,\n]|\bund\b/i)
+				.map((s) => s.trim())
+				.filter(Boolean);
+			const current = Array.isArray(inputValue) ? (inputValue as string[]) : [];
+			const merged = [...current];
+			for (const part of parts) {
+				if (!merged.includes(part)) merged.push(part);
+			}
+			inputValue = merged;
+		} else {
+			// text / textarea — replace content
+			inputValue = transcript;
+		}
+	}
+
+	function toggleMicForCurrentQuestion() {
+		if (stt.state === 'recording') {
+			stt.toggle(); // stop → transcribe
+		} else if (stt.state === 'idle') {
+			voiceFlowActive = true;
+			stt.toggle(); // start recording
+		}
+	}
+
+	function cancelVoiceFlow() {
+		voiceFlowActive = false;
+		tts.stop();
+		if (stt.state === 'recording') stt.cancel();
 	}
 
 	async function handleAnswer() {
@@ -94,6 +196,7 @@
 	}
 
 	function advanceQuestion() {
+		cancelVoiceFlow();
 		if (currentQuestionIdx < categoryQuestions.length - 1) {
 			currentQuestionIdx++;
 		} else {
@@ -150,7 +253,73 @@
 		<div class="progress-bar">
 			<div class="progress-fill" style:width="{progress.percent}%"></div>
 		</div>
-		<p class="progress-text">{progress.answered} von {progress.total} Fragen beantwortet</p>
+		<div class="progress-row">
+			<p class="progress-text">{progress.answered} von {progress.total} Fragen beantwortet</p>
+			{#if tts.isSupported}
+				<div class="voice-controls">
+					<div class="voice-toggles">
+						<button
+							class="voice-toggle"
+							class:active={voiceLevel === 'voice'}
+							onclick={() => {
+								voiceLevel = voiceLevel === 'voice' ? 'off' : 'voice';
+								if (voiceLevel === 'off') cancelVoiceFlow();
+							}}
+							title="Voice-Modus: Fragen werden vorgelesen, Antworten per Sprache"
+						>
+							<svg
+								width="14"
+								height="14"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+							>
+								<path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+								<path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+							</svg>
+							<span>Voice</span>
+						</button>
+						<button
+							class="voice-toggle"
+							class:active={voiceLevel === 'conversation'}
+							onclick={() => {
+								voiceLevel = voiceLevel === 'conversation' ? 'off' : 'conversation';
+								if (voiceLevel === 'off') cancelVoiceFlow();
+							}}
+							title="Gesprächs-Modus: Fließendes Interview — Antworten werden automatisch gespeichert"
+						>
+							<svg
+								width="14"
+								height="14"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+							>
+								<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+							</svg>
+							<span>Gespräch</span>
+						</button>
+					</div>
+					{#if voiceMode}
+						<select
+							class="voice-picker"
+							value={tts.voice}
+							onchange={(e) => tts.setVoice(e.currentTarget.value as any)}
+						>
+							{#each VOICES as v (v.key)}
+								<option value={v.key}>{v.label}</option>
+							{/each}
+						</select>
+					{/if}
+				</div>
+			{/if}
+		</div>
 	{/if}
 
 	<div class="categories">
@@ -167,29 +336,133 @@
 		{/each}
 	</div>
 
+	{#if conversationMode}
+		<div class="conversation-banner">
+			<span>Gesprächs-Modus aktiv — Antworten werden automatisch gespeichert</span>
+			<button
+				class="banner-stop"
+				onclick={() => {
+					voiceLevel = 'off';
+					cancelVoiceFlow();
+				}}>Beenden</button
+			>
+		</div>
+	{/if}
+
 	{#if currentQuestion}
 		<div class="question-card">
-			<h3 class="question-text">{currentQuestion.question}</h3>
+			<div class="question-header">
+				<h3 class="question-text">{currentQuestion.question}</h3>
+				{#if tts.speaking}
+					<span class="voice-indicator speaking" title="Liest vor...">
+						<svg
+							width="18"
+							height="18"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+						>
+							<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+							<path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+						</svg>
+					</span>
+				{/if}
+			</div>
 			{#if currentQuestion.hint}<p class="question-hint">{currentQuestion.hint}</p>{/if}
+
+			{#if stt.state === 'recording'}
+				<div class="voice-status recording">
+					<span class="rec-dot"></span>
+					Aufnahme läuft... ({Math.floor(stt.elapsedMs / 1000)}s)
+					<button class="voice-stop-btn" onclick={() => stt.toggle()}>Stopp</button>
+				</div>
+			{:else if stt.state === 'transcribing'}
+				<div class="voice-status transcribing">
+					<span class="spinner-small"></span>
+					Transkribiere...
+				</div>
+			{:else if stt.state === 'loading'}
+				<div class="voice-status loading">
+					<span class="spinner-small"></span>
+					Lade Sprachmodell...
+				</div>
+			{/if}
 
 			<div class="input-area">
 				{#if currentQuestion.inputType === 'text'}
-					<input
-						type="text"
-						class="text-input"
-						bind:value={inputValue}
-						placeholder={currentQuestion.hint ?? ''}
-						disabled={saving}
-						onkeydown={(e) => e.key === 'Enter' && handleAnswer()}
-					/>
+					<div class="input-with-mic">
+						<input
+							type="text"
+							class="text-input"
+							bind:value={inputValue}
+							placeholder={currentQuestion.hint ?? ''}
+							disabled={saving}
+							onkeydown={(e) => e.key === 'Enter' && handleAnswer()}
+						/>
+						{#if stt.isSupported}
+							<button
+								class="mic-btn"
+								class:recording={stt.state === 'recording'}
+								onclick={toggleMicForCurrentQuestion}
+								disabled={saving || stt.state === 'transcribing' || stt.state === 'loading'}
+								title={stt.state === 'recording' ? 'Aufnahme stoppen' : 'Per Sprache antworten'}
+							>
+								<svg
+									width="16"
+									height="16"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+								>
+									<path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+									<path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+									<line x1="12" y1="19" x2="12" y2="23"></line>
+									<line x1="8" y1="23" x2="16" y2="23"></line>
+								</svg>
+							</button>
+						{/if}
+					</div>
 				{:else if currentQuestion.inputType === 'textarea'}
-					<textarea
-						class="textarea-input"
-						bind:value={inputValue}
-						placeholder={currentQuestion.hint ?? ''}
-						disabled={saving}
-						rows="3"
-					></textarea>
+					<div class="textarea-with-mic">
+						<textarea
+							class="textarea-input"
+							bind:value={inputValue}
+							placeholder={currentQuestion.hint ?? ''}
+							disabled={saving}
+							rows="3"
+						></textarea>
+						{#if stt.isSupported}
+							<button
+								class="mic-btn textarea-mic"
+								class:recording={stt.state === 'recording'}
+								onclick={toggleMicForCurrentQuestion}
+								disabled={saving || stt.state === 'transcribing' || stt.state === 'loading'}
+								title={stt.state === 'recording' ? 'Aufnahme stoppen' : 'Per Sprache antworten'}
+							>
+								<svg
+									width="16"
+									height="16"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+								>
+									<path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+									<path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+									<line x1="12" y1="19" x2="12" y2="23"></line>
+									<line x1="8" y1="23" x2="16" y2="23"></line>
+								</svg>
+							</button>
+						{/if}
+					</div>
 				{:else if currentQuestion.inputType === 'time'}
 					<input type="time" class="time-input" bind:value={inputValue} disabled={saving} />
 				{:else if currentQuestion.inputType === 'choice'}
@@ -214,15 +487,42 @@
 									>{/each}
 							</div>
 						{/if}
-						<input
-							type="text"
-							class="text-input"
-							bind:value={tagInput}
-							placeholder={currentQuestion.hint ?? 'Eingabe + Enter'}
-							disabled={saving}
-							onkeydown={handleTagKeydown}
-							onblur={addTag}
-						/>
+						<div class="input-with-mic">
+							<input
+								type="text"
+								class="text-input"
+								bind:value={tagInput}
+								placeholder={currentQuestion.hint ?? 'Eingabe + Enter'}
+								disabled={saving}
+								onkeydown={handleTagKeydown}
+								onblur={addTag}
+							/>
+							{#if stt.isSupported}
+								<button
+									class="mic-btn"
+									class:recording={stt.state === 'recording'}
+									onclick={toggleMicForCurrentQuestion}
+									disabled={saving || stt.state === 'transcribing' || stt.state === 'loading'}
+									title={stt.state === 'recording' ? 'Aufnahme stoppen' : 'Per Sprache antworten'}
+								>
+									<svg
+										width="16"
+										height="16"
+										viewBox="0 0 24 24"
+										fill="none"
+										stroke="currentColor"
+										stroke-width="2"
+										stroke-linecap="round"
+										stroke-linejoin="round"
+									>
+										<path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+										<path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+										<line x1="12" y1="19" x2="12" y2="23"></line>
+										<line x1="8" y1="23" x2="16" y2="23"></line>
+									</svg>
+								</button>
+							{/if}
+						</div>
 					</div>
 				{:else if currentQuestion.inputType === 'weekdays'}
 					<div class="weekdays">
@@ -563,5 +863,218 @@
 	.compact .question-card {
 		border: none;
 		padding: 0;
+	}
+
+	/* ── Voice mode ────────────────────────────── */
+	.progress-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.5rem;
+	}
+	.voice-controls {
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
+	}
+	.voice-toggles {
+		display: flex;
+		gap: 0.25rem;
+	}
+	.voice-picker {
+		padding: 0.25rem 0.5rem;
+		border: 1px solid hsl(var(--color-border));
+		border-radius: 999px;
+		background: transparent;
+		color: hsl(var(--color-foreground));
+		font-size: 0.6875rem;
+		outline: none;
+		cursor: pointer;
+	}
+	.voice-picker:focus {
+		border-color: hsl(var(--color-primary));
+	}
+	.voice-toggle {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.375rem;
+		padding: 0.25rem 0.625rem;
+		border: 1px solid hsl(var(--color-border));
+		border-radius: 999px;
+		background: transparent;
+		color: hsl(var(--color-muted-foreground));
+		font-size: 0.6875rem;
+		cursor: pointer;
+		transition:
+			background 0.15s,
+			border-color 0.15s,
+			color 0.15s;
+		white-space: nowrap;
+	}
+	.voice-toggle:hover {
+		background: hsl(var(--color-surface-hover));
+	}
+	.voice-toggle.active {
+		background: hsl(var(--color-primary) / 0.1);
+		border-color: hsl(var(--color-primary));
+		color: hsl(var(--color-primary));
+	}
+	.question-header {
+		display: flex;
+		align-items: flex-start;
+		gap: 0.5rem;
+	}
+	.question-header .question-text {
+		flex: 1;
+	}
+	.voice-indicator {
+		flex-shrink: 0;
+		display: flex;
+		align-items: center;
+		color: hsl(var(--color-primary));
+	}
+	.voice-indicator.speaking {
+		animation: pulse-voice 1s ease-in-out infinite;
+	}
+	@keyframes pulse-voice {
+		0%,
+		100% {
+			opacity: 1;
+		}
+		50% {
+			opacity: 0.4;
+		}
+	}
+	.voice-status {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.5rem 0.75rem;
+		border-radius: 0.5rem;
+		font-size: 0.8125rem;
+	}
+	.voice-status.recording {
+		background: hsl(0 70% 50% / 0.08);
+		color: hsl(0 70% 45%);
+	}
+	.voice-status.transcribing,
+	.voice-status.loading {
+		background: hsl(var(--color-primary) / 0.08);
+		color: hsl(var(--color-primary));
+	}
+	.rec-dot {
+		width: 0.5rem;
+		height: 0.5rem;
+		border-radius: 50%;
+		background: hsl(0 70% 50%);
+		animation: pulse-rec 1s ease-in-out infinite;
+	}
+	@keyframes pulse-rec {
+		0%,
+		100% {
+			opacity: 1;
+			transform: scale(1);
+		}
+		50% {
+			opacity: 0.5;
+			transform: scale(1.3);
+		}
+	}
+	.voice-stop-btn {
+		margin-left: auto;
+		padding: 0.25rem 0.625rem;
+		border: 1px solid currentColor;
+		border-radius: 999px;
+		background: transparent;
+		color: inherit;
+		font-size: 0.75rem;
+		cursor: pointer;
+	}
+	.spinner-small {
+		width: 0.875rem;
+		height: 0.875rem;
+		border: 2px solid currentColor;
+		border-top-color: transparent;
+		border-radius: 50%;
+		animation: spin 0.6s linear infinite;
+	}
+	@keyframes spin {
+		to {
+			transform: rotate(360deg);
+		}
+	}
+	.input-with-mic {
+		display: flex;
+		gap: 0.375rem;
+		align-items: center;
+	}
+	.input-with-mic .text-input {
+		flex: 1;
+	}
+	.textarea-with-mic {
+		position: relative;
+	}
+	.textarea-with-mic .textarea-input {
+		width: 100%;
+	}
+	.mic-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 2.25rem;
+		height: 2.25rem;
+		border: 1px solid hsl(var(--color-border));
+		border-radius: 0.5rem;
+		background: transparent;
+		color: hsl(var(--color-muted-foreground));
+		cursor: pointer;
+		flex-shrink: 0;
+		transition:
+			background 0.15s,
+			border-color 0.15s,
+			color 0.15s;
+	}
+	.mic-btn:hover:not(:disabled) {
+		background: hsl(var(--color-surface-hover));
+		color: hsl(var(--color-foreground));
+	}
+	.mic-btn.recording {
+		background: hsl(0 70% 50% / 0.1);
+		border-color: hsl(0 70% 50%);
+		color: hsl(0 70% 45%);
+		animation: pulse-rec 1s ease-in-out infinite;
+	}
+	.mic-btn:disabled {
+		opacity: 0.4;
+		cursor: not-allowed;
+	}
+	.textarea-mic {
+		position: absolute;
+		right: 0.375rem;
+		bottom: 0.375rem;
+	}
+	.conversation-banner {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.5rem;
+		padding: 0.5rem 0.75rem;
+		border-radius: 0.5rem;
+		background: hsl(var(--color-primary) / 0.08);
+		color: hsl(var(--color-primary));
+		font-size: 0.75rem;
+	}
+	.banner-stop {
+		padding: 0.25rem 0.625rem;
+		border: 1px solid hsl(var(--color-primary) / 0.3);
+		border-radius: 999px;
+		background: transparent;
+		color: hsl(var(--color-primary));
+		font-size: 0.6875rem;
+		cursor: pointer;
+		white-space: nowrap;
+	}
+	.banner-stop:hover {
+		background: hsl(var(--color-primary) / 0.1);
 	}
 </style>
