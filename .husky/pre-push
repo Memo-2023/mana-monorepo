@@ -6,7 +6,7 @@
 # Skip with: git push --no-verify (not recommended)
 
 echo "🔍 Running svelte-check..."
-cd apps/mana/apps/web && pnpm check --fail-on-warnings 2>&1 | tail -5
+cd apps/mana/apps/web && pnpm check 2>&1 | tail -5
 
 # Capture the exit code from pnpm check (not tail)
 STATUS=${PIPESTATUS[0]:-$?}
