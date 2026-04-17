@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import CoverImage from '../components/CoverImage.svelte';
-	import StatusBadge from '../components/StatusBadge.svelte';
 	import RatingStars from '../components/RatingStars.svelte';
 	import EntryForm from '../components/EntryForm.svelte';
+	import ProgressControls from '../components/ProgressControls.svelte';
 	import { KIND_LABELS, STATUS_LABELS, BOOK_FORMAT_LABELS } from '../constants';
 	import { libraryEntriesStore } from '../stores/entries.svelte';
 	import type { LibraryEntry, LibraryStatus } from '../types';
@@ -31,6 +31,20 @@
 		await libraryEntriesStore.deleteEntry(entry.id);
 		goto('/library');
 	}
+
+	async function onRestart() {
+		await libraryEntriesStore.restartEntry(entry.id);
+	}
+
+	const restartLabel = $derived.by(() => {
+		switch (entry.kind) {
+			case 'book':
+			case 'comic':
+				return 'Nochmal lesen';
+			default:
+				return 'Nochmal sehen';
+		}
+	});
 </script>
 
 <div class="detail">
@@ -91,10 +105,20 @@
 					{/each}
 				</div>
 
-				{#if entry.times > 0}
-					<p class="times">
-						{entry.kind === 'book' || entry.kind === 'comic' ? 'Gelesen' : 'Gesehen'}: {entry.times}×
-					</p>
+				{#if entry.times > 0 || entry.status === 'completed'}
+					<div class="times-row">
+						{#if entry.times > 0}
+							<span class="times">
+								{entry.kind === 'book' || entry.kind === 'comic' ? 'Gelesen' : 'Gesehen'}:
+								{entry.times}×
+							</span>
+						{/if}
+						{#if entry.status === 'completed'}
+							<button type="button" class="restart" onclick={onRestart}>
+								↻ {restartLabel}
+							</button>
+						{/if}
+					</div>
 				{/if}
 
 				{#if entry.genres.length > 0 || entry.tags.length > 0}
@@ -167,6 +191,8 @@
 						<dd>{entry.completedAt}</dd>
 					{/if}
 				</dl>
+
+				<ProgressControls {entry} />
 
 				{#if entry.review}
 					<section class="review">
@@ -296,9 +322,28 @@
 		color: #a855f7;
 		border-color: #a855f7;
 	}
+	.times-row {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		margin-top: 0.2rem;
+	}
 	.times {
 		font-size: 0.85rem;
 		color: var(--color-text-muted, #64748b);
+	}
+	.restart {
+		padding: 0.3rem 0.75rem;
+		border-radius: 0.4rem;
+		border: 1px solid #a855f7;
+		background: transparent;
+		color: #a855f7;
+		cursor: pointer;
+		font: inherit;
+		font-size: 0.8rem;
+	}
+	.restart:hover {
+		background: color-mix(in srgb, #a855f7 10%, transparent);
 	}
 	.tag-row {
 		display: flex;

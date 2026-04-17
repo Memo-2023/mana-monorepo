@@ -2,10 +2,13 @@
 
 ## Status (2026-04-17)
 
-**M1 Skelett: DONE.** Modul registriert, Dexie v26 angelegt, Encryption-Registry
-eingetragen, Route `/library` mountet einen minimalen Listen-View. Guest-Seed mit
-je einem Eintrag pro `kind` (Dune, Arrival, Severance, Saga) vorhanden.
-Nächster Schritt: M2 (volles CRUD + Form + Grid + DetailView).
+**M1 Skelett: DONE** (commit 8c6502d0f) — Modul registriert, Dexie v26, Encryption-Registry, Route mountet, Guest-Seed (Dune, Arrival, Severance, Saga).
+
+**M2 CRUD / Grid / Detail: DONE** (commit 364178496) — KindTabs, StatusFilter, RatingStars, EntryCard, EntryForm (Create + Edit, typ-spezifische Details-Accordion), GridView, DetailView, `/library/entry/[id]`-Route.
+
+**M3 Fortschritt: DONE** — `ProgressControls.svelte`: Seiten-Slider für Bücher (auto-completes bei 100%), Episode-Tracker für Serien (abhakbare Folgen pro Staffel), Issue-Bumper für Comics. `libraryEntriesStore.restartEntry` + "Nochmal"-Button im DetailView für abgeschlossene Einträge.
+
+Nächster Schritt: M4 (Cover-Upload via `uload`) oder M6 (AI-Tools).
 
 Vor M2 entschieden:
 - Audiobooks: `kind='book'` mit `details.format='audio'` (nicht eigener `kind`).
@@ -212,8 +215,8 @@ Missionen wie *"Trage meine letzten 5 gesehenen Filme ein"* können dann über d
 ## Reihenfolge (Milestones)
 
 1. **M1 — Skelett [DONE 2026-04-17]**: types, collections, module.config, Registry-Eintrag, Dexie-Migration (v26), leere Route. *Ziel: App zeigt leeres Modul an, nichts crasht.*
-2. **M2 — CRUD**: entries-Store, EntryForm, GridView, DetailView. Manuelles Anlegen/Editieren funktioniert für alle 4 `kind`s. Cover via URL.
-3. **M3 — Fortschritt**: Status-Wechsel, Rating, times-Counter, Episode-Tracker für Serien, Seiten-Slider für Bücher. Guest-Seed komplett.
+2. **M2 — CRUD [DONE 2026-04-17]**: entries-Store, EntryForm, GridView, DetailView. Manuelles Anlegen/Editieren funktioniert für alle 4 `kind`s. Cover via URL.
+3. **M3 — Fortschritt [DONE 2026-04-17]**: Status-Wechsel, Rating, times-Counter, Episode-Tracker für Serien, Seiten-Slider für Bücher, Issue-Bumper für Comics, Nochmal-Button.
 4. **M4 — Cover-Upload**: Integration mit `uload`. Encryption-Registry final.
 5. **M5 — Stats + Dashboard-Widget**: useStats, kleiner Widget für Dashboard.
 6. **M6 — AI-Tools**: list/create/complete/rate Tools, Shared-AI-Policy.

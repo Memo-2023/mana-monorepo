@@ -145,6 +145,26 @@ export const libraryEntriesStore = {
 		}
 	},
 
+	/**
+	 * "Nochmal" — re-start a completed entry. Leaves `times` alone (it was
+	 * already incremented when the entry was marked complete); resets
+	 * `startedAt` to today, clears `completedAt`, flips status back to
+	 * 'active'. For series, the per-episode watched list is preserved so
+	 * the user has a record of the previous run-through (and can reset
+	 * individual episodes via the tracker if they want).
+	 */
+	async restartEntry(id: string) {
+		const existing = await libraryEntryTable.get(id);
+		if (!existing) return;
+		const nowDate = new Date().toISOString().slice(0, 10);
+		await libraryEntryTable.update(id, {
+			status: 'active',
+			startedAt: nowDate,
+			completedAt: null,
+			updatedAt: new Date().toISOString(),
+		});
+	},
+
 	async rate(id: string, rating: number | null) {
 		await libraryEntryTable.update(id, {
 			rating,
