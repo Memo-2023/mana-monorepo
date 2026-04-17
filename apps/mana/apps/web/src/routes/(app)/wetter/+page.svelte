@@ -14,15 +14,19 @@
 	import WeatherAlerts from '$lib/modules/wetter/components/WeatherAlerts.svelte';
 	import NowcastBar from '$lib/modules/wetter/components/NowcastBar.svelte';
 	import LocationPicker from '$lib/modules/wetter/components/LocationPicker.svelte';
+	import SourceComparison from '$lib/modules/wetter/components/SourceComparison.svelte';
 
 	const locationsQuery = useLocations();
 	let locations = $derived(locationsQuery.value);
 	let selectedLat = $state<number | null>(null);
 	let selectedLon = $state<number | null>(null);
+	let selectedName = $state('');
+	let activeTab = $state<'overview' | 'compare'>('overview');
 
 	function selectLocation(lat: number, lon: number, name: string) {
 		selectedLat = lat;
 		selectedLon = lon;
+		selectedName = name;
 		weatherStore.fetchWeather(lat, lon, name);
 		weatherStore.fetchNowcast(lat, lon);
 	}
@@ -70,7 +74,27 @@
 		onSave={saveLocation}
 	/>
 
-	{#if weatherStore.loading && !weatherStore.weatherData}
+	<!-- Tab switcher -->
+	<div class="tab-bar">
+		<button
+			class="tab"
+			class:active={activeTab === 'overview'}
+			onclick={() => (activeTab = 'overview')}
+		>
+			Uebersicht
+		</button>
+		<button
+			class="tab"
+			class:active={activeTab === 'compare'}
+			onclick={() => (activeTab = 'compare')}
+		>
+			Quellen-Vergleich
+		</button>
+	</div>
+
+	{#if activeTab === 'compare' && selectedLat != null && selectedLon != null}
+		<SourceComparison lat={selectedLat} lon={selectedLon} locationName={selectedName} />
+	{:else if weatherStore.loading && !weatherStore.weatherData}
 		<div class="loading-state">
 			<span class="loading-icon">🌤</span>
 			<span class="loading-text">Wetterdaten werden geladen...</span>
@@ -120,6 +144,29 @@
 		max-width: 600px;
 		margin: 0 auto;
 		padding: 16px;
+	}
+	.tab-bar {
+		display: flex;
+		gap: 4px;
+		background: var(--card-bg, rgba(255, 255, 255, 0.06));
+		border-radius: 10px;
+		padding: 3px;
+	}
+	.tab {
+		flex: 1;
+		padding: 8px 12px;
+		border: none;
+		border-radius: 8px;
+		background: none;
+		color: var(--text-secondary, #9ca3af);
+		font-size: 0.8rem;
+		cursor: pointer;
+		transition: all 0.15s ease;
+	}
+	.tab.active {
+		background: var(--card-bg-hover, rgba(255, 255, 255, 0.1));
+		color: var(--text-primary, #f3f4f6);
+		font-weight: 500;
 	}
 	.loading-state {
 		display: flex;

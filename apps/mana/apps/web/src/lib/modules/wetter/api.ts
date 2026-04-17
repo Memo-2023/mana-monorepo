@@ -169,3 +169,40 @@ export async function geocode(query: string): Promise<GeocodingResult[]> {
 	const raw = await post<{ results: GeocodingResult[] }>('/geocode', { query });
 	return raw.results ?? [];
 }
+
+// ─── Model Comparison ──────────────────────────────────────
+
+export interface ModelComparison {
+	id: string;
+	label: string;
+	description: string;
+	source: string;
+	error: boolean;
+	current: {
+		temperature_2m?: number;
+		apparent_temperature?: number;
+		weather_code?: number;
+		wind_speed_10m?: number;
+		precipitation?: number;
+		relative_humidity_2m?: number;
+		is_day?: number;
+	} | null;
+	daily: {
+		time?: string[];
+		temperature_2m_min?: number[];
+		temperature_2m_max?: number[];
+		weather_code?: number[];
+		precipitation_sum?: number[];
+		precipitation_probability_max?: number[];
+	} | null;
+}
+
+export interface CompareResponse {
+	models: ModelComparison[];
+	alerts: WeatherAlert[];
+	fetchedAt: number;
+}
+
+export async function getComparison(lat: number, lon: number): Promise<CompareResponse> {
+	return post<CompareResponse>('/compare', { lat, lon });
+}

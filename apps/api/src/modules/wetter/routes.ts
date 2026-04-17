@@ -343,4 +343,80 @@ routes.get('/radar-tiles', (c) => {
 	});
 });
 
+// ─── Multi-Model Comparison ────────────────────────────────
+// Fetches the same location from multiple weather models in parallel
+// so the frontend can show a side-by-side comparison.
+
+const COMPARE_MODELS = [
+	{ id: 'icon_d2', label: 'DWD ICON-D2', description: '2km, Deutschland', source: 'DWD' },
+	{ id: 'icon_eu', label: 'DWD ICON-EU', description: '6.5km, Europa', source: 'DWD' },
+	{ id: 'ecmwf_ifs025', label: 'ECMWF IFS', description: '25km, Global', source: 'ECMWF' },
+	{ id: 'gfs_seamless', label: 'GFS', description: '25km, Global', source: 'NOAA' },
+	{
+		id: 'best_match',
+		label: 'Open-Meteo Best Match',
+		description: 'Automatisch bestes Modell',
+		source: 'Open-Meteo',
+	},
+] as const;
+
+const COMPARE_CURRENT = [
+	'temperature_2m',
+	'apparent_temperature',
+	'weather_code',
+	'wind_speed_10m',
+	'precipitation',
+	'relative_humidity_2m',
+	'is_day',
+].join(',');
+const COMPARE_DAILY = [
+	'temperature_2m_min',
+	'temperature_2m_max',
+	'weather_code',
+	'precipitation_sum',
+	'precipitation_probability_max',
+].join(',');
+
+routes.post('/compare', async (c) => {
+	const { lat, lon } = await c.req.json<{ lat: number; lon: number }>();
+	if (lat == null || lon == null) return c.json({ error: 'lat and lon required' }, 400);
+
+	const key = `compare:${coordKey(lat, lon)}`;
+	const cached = getCached(key);
+	if (cached) return c.json(cached);
+
+	const results = await Promise.all(
+		COMPARE_MODELS.map(async (model) => {
+			try {
+				const url = `${OPEN_METEO_BASE}/forecast?latitude=${lat}&longitude=${lon}&current=${COMPARE_CURRENT}&daily=${COMPARE_DAILY}&models=${model.id}&timezone=auto&forecast_days=7`;
+				const res = await fetch(url);
+				if (!res.ok) return { ...model, error: true, current: null, daily: null };
+				const data = (await res.json()) as {
+					current?: Record<string, unknown>;
+					daily?: Record<string, unknown[]>;
+				};
+				return { ...model, error: false, current: data.current ?? null, daily: data.daily ?? null };
+			} catch {
+				return { ...model, error: true, current: null, daily: null };
+			}
+		})
+	);
+
+	// Also fetch DWD alerts + nowcast for context
+	let alerts: unknown[] = [];
+	try {
+		const alertRes = await fetch(DWD_WARNINGS_URL, { headers: { Accept: 'application/json' } });
+		if (alertRes.ok) {
+			const raw = await alertRes.json();
+			alerts = extractNearbyAlerts(raw, lat, lon);
+		}
+	} catch {
+		/* noop */
+	}
+
+	const payload = { models: results, alerts, fetchedAt: Date.now() };
+	setCache(key, payload, WEATHER_TTL);
+	return c.json(payload);
+});
+
 export { routes as wetterRoutes };
