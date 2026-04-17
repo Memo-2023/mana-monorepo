@@ -13,6 +13,7 @@
 		CaretLeft,
 		CaretRight,
 		ArrowsOutLineHorizontal,
+		Question,
 	} from '@mana/shared-icons';
 	import type { Snippet, Component } from 'svelte';
 	import { PAGE_WIDTH_PRESETS, nearestPresetIndex } from './width-presets';
@@ -26,6 +27,8 @@
 		onResize?: (widthPx: number) => void;
 		onMoveLeft?: () => void;
 		onMoveRight?: () => void;
+		onHelp?: () => void;
+		helpOpen?: boolean;
 		// Default header
 		title?: string;
 		titleHref?: string;
@@ -47,6 +50,8 @@
 		onResize,
 		onMoveLeft,
 		onMoveRight,
+		onHelp,
+		helpOpen = false,
 		onContextMenu,
 		title = '',
 		titleHref,
@@ -124,6 +129,19 @@
 			{/if}
 		</div>
 		<div class="window-actions">
+			{#if onHelp}
+				<button
+					class="window-btn"
+					class:window-btn-active={helpOpen}
+					onclick={(e) => {
+						e.stopPropagation();
+						onHelp();
+					}}
+					title="Info"
+				>
+					<Question size={22} weight="bold" />
+				</button>
+			{/if}
 			{#if onMoveLeft}
 				<button
 					class="window-btn"
@@ -401,6 +419,11 @@
 		max-width: 48rem;
 		margin-inline: auto;
 		width: 100%;
+	}
+
+	.window-btn-active {
+		background: hsl(var(--color-primary) / 0.12);
+		color: hsl(var(--color-primary));
 	}
 
 	/* Width picker */

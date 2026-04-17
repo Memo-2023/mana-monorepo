@@ -6,10 +6,16 @@ import type { DragType } from '@mana/shared-ui/dnd';
 import { linkMutations, buildCachedData } from '@mana/shared-links';
 import { MANA_APPS, hasAppAccess, type AccessTier } from '@mana/shared-branding';
 import type { AppDescriptor, DropResult } from './types';
+import { MODULE_HELP } from './help-content';
 
 const apps = new Map<string, AppDescriptor>();
 
 export function registerApp(descriptor: AppDescriptor): void {
+	// Auto-attach help content from the central help-content map
+	// if the descriptor doesn't already have one.
+	if (!descriptor.help && MODULE_HELP[descriptor.id]) {
+		descriptor.help = MODULE_HELP[descriptor.id];
+	}
 	apps.set(descriptor.id, descriptor);
 }
 

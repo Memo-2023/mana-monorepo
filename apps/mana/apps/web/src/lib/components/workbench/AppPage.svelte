@@ -45,6 +45,10 @@
 	});
 	let appColor = $derived(app?.color ?? '#6B7280');
 
+	// ── Help ────────────────────────────────────────────────
+	let helpOpen = $state(false);
+	let helpData = $derived(app?.help);
+
 	// ── Cross-module drop target ────────────────────────────
 	let acceptedDropTypes = $derived(app?.acceptsDropFrom ?? []);
 
@@ -305,8 +309,36 @@
 		{onMoveLeft}
 		{onMoveRight}
 		{onContextMenu}
+		onHelp={helpData ? () => (helpOpen = !helpOpen) : undefined}
+		{helpOpen}
 	>
-		{#if loadError}
+		{#if helpOpen && helpData}
+			<div class="help-view">
+				<p class="help-desc">{helpData.description}</p>
+
+				{#if helpData.features && helpData.features.length > 0}
+					<div class="help-section">
+						<h3 class="help-section-title">Features</h3>
+						<ul class="help-list">
+							{#each helpData.features as feature}
+								<li>{feature}</li>
+							{/each}
+						</ul>
+					</div>
+				{/if}
+
+				{#if helpData.tips && helpData.tips.length > 0}
+					<div class="help-section">
+						<h3 class="help-section-title">Tipps</h3>
+						<ul class="help-list help-list-tips">
+							{#each helpData.tips as tip}
+								<li>{tip}</li>
+							{/each}
+						</ul>
+					</div>
+				{/if}
+			</div>
+		{:else if loadError}
 			<div class="load-state">
 				<p>App konnte nicht geladen werden</p>
 			</div>
@@ -385,6 +417,68 @@
 	:global(.app-page-wrapper.mana-drop-target-success) :global(.page-shell) {
 		outline: 2px solid hsl(var(--color-success) / 0.5);
 		outline-offset: -2px;
+	}
+
+	.help-view {
+		padding: 1rem 1.125rem 1.5rem;
+		animation: helpFadeIn 0.2s ease-out;
+		overflow-y: auto;
+		height: 100%;
+	}
+	.help-desc {
+		font-size: 0.8125rem;
+		line-height: 1.65;
+		color: hsl(var(--color-foreground));
+		margin: 0;
+	}
+	.help-section {
+		margin-top: 1rem;
+	}
+	.help-section-title {
+		font-size: 0.6875rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		color: hsl(var(--color-muted-foreground));
+		margin: 0 0 0.5rem;
+	}
+	.help-list {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		display: flex;
+		flex-direction: column;
+		gap: 0.375rem;
+	}
+	.help-list li {
+		font-size: 0.8125rem;
+		line-height: 1.55;
+		color: hsl(var(--color-foreground));
+		padding-left: 0.875rem;
+		position: relative;
+	}
+	.help-list li::before {
+		content: '';
+		position: absolute;
+		left: 0;
+		top: 0.5em;
+		width: 4px;
+		height: 4px;
+		border-radius: 50%;
+		background: hsl(var(--color-muted-foreground) / 0.4);
+	}
+	.help-list-tips li::before {
+		background: hsl(var(--color-primary) / 0.6);
+	}
+	@keyframes helpFadeIn {
+		from {
+			opacity: 0;
+			transform: translateY(4px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
 	}
 
 	.load-state {

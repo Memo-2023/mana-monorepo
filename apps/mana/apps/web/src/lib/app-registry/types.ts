@@ -57,6 +57,12 @@ export interface AppDescriptor {
 
 	// -- Context Menu (optional) --
 	contextMenuActions?: AppContextMenuAction[];
+
+	// -- Help (optional) --
+	help?: {
+		description: string;
+		features?: string[];
+	};
 }
 
 export interface DropResult {
