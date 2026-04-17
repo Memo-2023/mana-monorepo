@@ -107,6 +107,7 @@ export const APP_CATEGORY_MAP: Record<string, AppCategory> = {
 	guides: 'creative',
 	quotes: 'creative',
 	uload: 'creative',
+	library: 'creative',
 	playground: 'creative',
 
 	// System — settings, admin, meta

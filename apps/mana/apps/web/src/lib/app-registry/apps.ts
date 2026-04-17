@@ -73,6 +73,7 @@ import {
 	Crown,
 	ShootingStar,
 	CloudSun,
+	Stack,
 } from '@mana/shared-icons';
 
 // ── Apps with entity capabilities ───────────────────────────
@@ -1238,4 +1239,28 @@ registerApp({
 	views: {
 		list: { load: () => import('$lib/modules/feedback/ListView.svelte') },
 	},
+});
+
+registerApp({
+	id: 'library',
+	name: 'Bibliothek',
+	color: '#a855f7',
+	icon: Stack,
+	views: {
+		// Detail view uses the route-based pattern (/library/entry/[id]); the
+		// workbench detail-slot (ViewProps params/navigate) pattern is not
+		// wired up yet. Clicks on a card in the list view navigate via goto().
+		list: { load: () => import('$lib/modules/library/ListView.svelte') },
+	},
+	contextMenuActions: [
+		{
+			id: 'new-entry',
+			label: 'Neuer Eintrag',
+			icon: Plus,
+			action: () =>
+				window.dispatchEvent(
+					new CustomEvent('mana:quick-action', { detail: { app: 'library', action: 'new' } })
+				),
+		},
+	],
 });
