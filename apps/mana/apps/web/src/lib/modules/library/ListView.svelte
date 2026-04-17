@@ -48,18 +48,19 @@
 </script>
 
 <div class="library-shell">
-	<header class="library-header">
-		<div class="title-row">
-			<div>
-				<h1>Bibliothek</h1>
-				<p class="muted">Bücher, Filme, Serien, Comics — was du liest und schaust.</p>
-			</div>
-			<button type="button" class="create-btn" onclick={() => (showCreate = true)}> + Neu </button>
-		</div>
-	</header>
-
 	<div class="controls">
-		<KindTabs active={activeKind} {counts} onselect={(k) => (activeKind = k)} />
+		<div class="tabs-row">
+			<KindTabs active={activeKind} {counts} onselect={(k) => (activeKind = k)} />
+			<button
+				type="button"
+				class="create-btn"
+				class:active={showCreate}
+				onclick={() => (showCreate = !showCreate)}
+				aria-expanded={showCreate}
+			>
+				{showCreate ? '× Schließen' : '+ Neu'}
+			</button>
+		</div>
 
 		<div class="filter-row">
 			<StatusFilter active={activeStatus} onselect={(s) => (activeStatus = s)} />
@@ -77,6 +78,47 @@
 		/>
 	</div>
 
+	{#if showCreate}
+		<div class="inline-create">
+			<EntryForm
+				mode="create"
+				initial={presetKind()
+					? ({
+							kind: presetKind()!,
+							status: 'planned',
+							title: '',
+							originalTitle: null,
+							creators: [],
+							year: null,
+							coverUrl: null,
+							coverMediaId: null,
+							rating: null,
+							review: null,
+							tags: [],
+							genres: [],
+							startedAt: null,
+							completedAt: null,
+							isFavorite: false,
+							times: 0,
+							externalIds: null,
+							details:
+								presetKind() === 'book'
+									? { kind: 'book' }
+									: presetKind() === 'movie'
+										? { kind: 'movie' }
+										: presetKind() === 'series'
+											? { kind: 'series', watched: [] }
+											: { kind: 'comic' },
+							createdAt: '',
+							updatedAt: '',
+							id: '',
+						} as LibraryEntry)
+					: undefined}
+				onclose={() => (showCreate = false)}
+			/>
+		</div>
+	{/if}
+
 	{#if entries$.loading}
 		<p class="muted center">Lädt…</p>
 	{:else}
@@ -84,77 +126,11 @@
 	{/if}
 </div>
 
-{#if showCreate}
-	<div
-		class="overlay"
-		role="dialog"
-		aria-modal="true"
-		aria-label="Neuer Bibliothekseintrag"
-		tabindex="-1"
-		onclick={(e) => {
-			if (e.target === e.currentTarget) showCreate = false;
-		}}
-		onkeydown={(e) => {
-			if (e.key === 'Escape') showCreate = false;
-		}}
-	>
-		<EntryForm
-			mode="create"
-			initial={presetKind()
-				? ({
-						kind: presetKind()!,
-						status: 'planned',
-						title: '',
-						originalTitle: null,
-						creators: [],
-						year: null,
-						coverUrl: null,
-						coverMediaId: null,
-						rating: null,
-						review: null,
-						tags: [],
-						genres: [],
-						startedAt: null,
-						completedAt: null,
-						isFavorite: false,
-						times: 0,
-						externalIds: null,
-						details:
-							presetKind() === 'book'
-								? { kind: 'book' }
-								: presetKind() === 'movie'
-									? { kind: 'movie' }
-									: presetKind() === 'series'
-										? { kind: 'series', watched: [] }
-										: { kind: 'comic' },
-						createdAt: '',
-						updatedAt: '',
-						id: '',
-					} as LibraryEntry)
-				: undefined}
-			onclose={() => (showCreate = false)}
-		/>
-	</div>
-{/if}
-
 <style>
 	.library-shell {
 		max-width: 1100px;
 		margin: 0 auto;
 		padding: 1.5rem;
-	}
-	.library-header {
-		margin-bottom: 1.5rem;
-	}
-	.title-row {
-		display: flex;
-		align-items: flex-start;
-		justify-content: space-between;
-		gap: 1rem;
-	}
-	.library-header h1 {
-		margin: 0 0 0.25rem 0;
-		font-size: 1.75rem;
 	}
 	.muted {
 		color: var(--color-text-muted, #64748b);
@@ -164,25 +140,40 @@
 		text-align: center;
 		margin-top: 2rem;
 	}
+	.controls {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+		margin-bottom: 1.5rem;
+	}
+	.tabs-row {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+	}
+	.tabs-row :global(.tabs) {
+		flex: 1;
+		min-width: 0;
+	}
 	.create-btn {
-		padding: 0.5rem 1.15rem;
+		padding: 0.45rem 0.9rem;
 		border-radius: 0.55rem;
-		border: none;
+		border: 1px solid #a855f7;
 		background: #a855f7;
 		color: white;
 		cursor: pointer;
 		font: inherit;
 		font-weight: 500;
 		white-space: nowrap;
+		flex-shrink: 0;
 	}
 	.create-btn:hover {
 		background: #9333ea;
+		border-color: #9333ea;
 	}
-	.controls {
-		display: flex;
-		flex-direction: column;
-		gap: 0.75rem;
-		margin-bottom: 1.5rem;
+	.create-btn.active {
+		background: transparent;
+		color: #a855f7;
 	}
 	.filter-row {
 		display: flex;
@@ -213,15 +204,10 @@
 		outline-offset: 1px;
 		border-color: transparent;
 	}
-	.overlay {
-		position: fixed;
-		inset: 0;
-		background: rgba(0, 0, 0, 0.55);
-		display: flex;
-		align-items: flex-start;
-		justify-content: center;
-		padding: 4vh 1rem;
-		overflow-y: auto;
-		z-index: 100;
+	.inline-create {
+		margin-bottom: 1.25rem;
+		border: 1px solid color-mix(in srgb, #a855f7 30%, transparent);
+		border-radius: 0.75rem;
+		background: color-mix(in srgb, #a855f7 4%, transparent);
 	}
 </style>
