@@ -179,6 +179,9 @@
 		cursor: pointer;
 		transition: background 0.15s;
 		min-height: 44px;
+		user-select: none;
+		-webkit-user-select: none;
+		-webkit-touch-callout: none;
 	}
 	.conv-item:hover {
 		background: hsl(var(--color-surface-hover));

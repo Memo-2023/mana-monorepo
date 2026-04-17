@@ -634,6 +634,9 @@
 		border-radius: 0.25rem;
 		cursor: pointer;
 		transition: background 0.15s;
+		user-select: none;
+		-webkit-user-select: none;
+		-webkit-touch-callout: none;
 	}
 	.dream-item:hover {
 		background: hsl(var(--color-surface-hover));
@@ -764,6 +767,9 @@
 		border: 1px solid hsl(var(--color-primary) / 0.3);
 		border-radius: 0.375rem;
 		background: hsl(var(--color-primary) / 0.03);
+		user-select: text;
+		-webkit-user-select: text;
+		-webkit-touch-callout: default;
 	}
 	.dream-item.editing:hover {
 		background: hsl(var(--color-primary) / 0.03);

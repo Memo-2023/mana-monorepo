@@ -52,7 +52,7 @@
 </script>
 
 <div
-	class="group flex items-start gap-3 rounded-lg border border-transparent px-3 transition-colors hover:border-border hover:bg-card {compact
+	class="group flex select-none items-start gap-3 rounded-lg border border-transparent px-3 transition-colors [-webkit-touch-callout:none] hover:border-border hover:bg-card {compact
 		? 'py-1.5'
 		: 'py-2.5'}"
 	role="button"

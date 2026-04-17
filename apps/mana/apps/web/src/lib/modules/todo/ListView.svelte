@@ -245,6 +245,9 @@
 		cursor: pointer;
 		transition: background 0.15s;
 		border-radius: 0.25rem;
+		user-select: none;
+		-webkit-user-select: none;
+		-webkit-touch-callout: none;
 	}
 	.task-item:hover {
 		background: hsl(var(--color-surface-hover));

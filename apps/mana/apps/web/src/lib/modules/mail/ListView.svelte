@@ -337,6 +337,9 @@
 		cursor: pointer;
 		transition: background 0.15s;
 		color: hsl(var(--color-muted-foreground));
+		user-select: none;
+		-webkit-user-select: none;
+		-webkit-touch-callout: none;
 	}
 	.thread-row:hover {
 		background: hsl(var(--color-muted));

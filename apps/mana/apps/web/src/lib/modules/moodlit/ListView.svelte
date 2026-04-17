@@ -220,7 +220,7 @@
 		<button
 			onclick={() => (fullscreenMood = mood)}
 			oncontextmenu={(e) => ctxMenu.open(e, mood)}
-			class="mood-card group relative aspect-[4/3] w-full overflow-hidden rounded-xl border-2 border-transparent transition-all duration-200 hover:border-white/40 focus:outline-none"
+			class="mood-card group relative aspect-[4/3] w-full select-none overflow-hidden rounded-xl border-2 border-transparent transition-all duration-200 [-webkit-touch-callout:none] hover:border-white/40 focus:outline-none"
 			style="--mood-color: {mood.colors[0]}"
 		>
 			<div

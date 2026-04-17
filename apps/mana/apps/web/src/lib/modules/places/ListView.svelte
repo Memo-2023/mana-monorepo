@@ -900,6 +900,9 @@
 		text-align: left;
 		transition: background 0.15s;
 		width: 100%;
+		user-select: none;
+		-webkit-user-select: none;
+		-webkit-touch-callout: none;
 	}
 
 	.place-item:hover {

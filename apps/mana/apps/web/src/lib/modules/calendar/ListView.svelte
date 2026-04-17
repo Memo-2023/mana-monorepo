@@ -309,6 +309,9 @@
 		cursor: pointer;
 		border-radius: 0.25rem;
 		transition: background 0.15s;
+		user-select: none;
+		-webkit-user-select: none;
+		-webkit-touch-callout: none;
 	}
 	.event-row:hover {
 		background: hsl(var(--color-surface-hover));

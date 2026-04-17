@@ -915,6 +915,9 @@
 		background: transparent;
 		cursor: pointer;
 		transition: all 0.15s;
+		user-select: none;
+		-webkit-user-select: none;
+		-webkit-touch-callout: none;
 	}
 	.entry-card:hover {
 		background: hsl(var(--color-surface-hover));
@@ -1088,6 +1091,9 @@
 		cursor: default;
 		border-color: hsl(var(--color-primary) / 0.3);
 		background: hsl(var(--color-primary) / 0.03);
+		user-select: text;
+		-webkit-user-select: text;
+		-webkit-touch-callout: default;
 	}
 	.entry-card.editing:hover,
 	.entry-card.converting:hover {

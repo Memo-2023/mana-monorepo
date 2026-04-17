@@ -237,6 +237,9 @@
 		cursor: pointer;
 		text-align: left;
 		transition: background 0.15s;
+		user-select: none;
+		-webkit-user-select: none;
+		-webkit-touch-callout: none;
 	}
 	.contact-item:hover {
 		background: hsl(var(--color-surface-hover));
