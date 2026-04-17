@@ -51,6 +51,10 @@ app.notFound(notFoundHandler);
 app.use('*', cors({ origin: CORS_ORIGINS, credentials: true }));
 app.route('/health', healthRoute('mana-api'));
 app.use('/api/*', rateLimitMiddleware({ max: 200, windowMs: 60_000 }));
+
+// Public routes — no auth required (weather data is public)
+app.route('/api/v1/wetter', wetterRoutes);
+
 app.use('/api/*', authMiddleware());
 
 // ─── MCP Endpoint ──────────────────────────────────────────
@@ -76,7 +80,6 @@ app.route('/api/v1/traces', tracesRoutes);
 app.route('/api/v1/presi', presiRoutes);
 app.route('/api/v1/research', researchRoutes);
 app.route('/api/v1/who', whoRoutes);
-app.route('/api/v1/wetter', wetterRoutes);
 
 // ─── Server Info ────────────────────────────────────────────
 console.log(`mana-api starting on port ${PORT}...`);
