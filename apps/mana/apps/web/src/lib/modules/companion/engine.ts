@@ -11,7 +11,7 @@
  * routes through text-completion).
  */
 
-import { llmOrchestrator } from '@mana/shared-llm';
+import { llmOrchestrator, NoTierAvailableError } from '@mana/shared-llm';
 import { isLocalLlmSupported, getLocalLlmStatus, loadLocalLlm } from '@mana/local-llm';
 import { companionChatTask } from '$lib/llm-tasks/companion-chat';
 import { generateContextDocument } from '$lib/data/projections/context-document';
@@ -54,8 +54,11 @@ async function callLlm(messages: LlmMessage[], onToken?: (token: string) => void
 		});
 		return result.value.content;
 	} catch (err) {
+		if (err instanceof NoTierAvailableError) {
+			return err.getUserMessage();
+		}
 		const msg = err instanceof Error ? err.message : String(err);
-		return `LLM nicht verfuegbar: ${msg}`;
+		return `LLM nicht verfügbar: ${msg}`;
 	}
 }
 

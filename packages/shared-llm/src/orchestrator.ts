@@ -41,6 +41,7 @@ import {
 	NoTierAvailableError,
 	ProviderBlockedError,
 	TierTooLowError,
+	type SkippedTier,
 } from './errors';
 import type { LlmTask } from './task';
 import type { LlmTier } from './tiers';
@@ -146,6 +147,7 @@ export class LlmOrchestrator {
 		const orderedTiers = override ? [override].filter((t) => candidates.includes(t)) : candidates;
 
 		// Rule 4-5: try the first runnable tier
+		const skipped: SkippedTier[] = [];
 		for (const tier of orderedTiers) {
 			if (tier === 'none') {
 				if (task.runRules) {
@@ -164,21 +166,25 @@ export class LlmOrchestrator {
 			// Cloud-consent gate
 			if (tier === 'cloud' && !this.settings.cloudConsentGiven) {
 				attempted.push('cloud');
+				skipped.push({ tier: 'cloud', reason: 'no-consent' });
 				continue;
 			}
 
 			const backend = this.backendsByTier.get(tier);
 			if (!backend) {
 				attempted.push(tier);
+				skipped.push({ tier, reason: 'no-backend' });
 				continue;
 			}
 			if (!backend.isAvailable()) {
 				attempted.push(tier);
+				skipped.push({ tier, reason: 'not-available' });
 				continue;
 			}
 			const ready = await backend.isReady();
 			if (!ready) {
 				attempted.push(tier);
+				skipped.push({ tier, reason: 'not-ready' });
 				continue;
 			}
 
@@ -226,11 +232,15 @@ export class LlmOrchestrator {
 					throw err;
 				}
 				// Unknown error — try the next tier in the list
+				skipped.push({ tier, reason: 'runtime-error' });
 				continue;
 			}
 		}
 
-		throw new NoTierAvailableError(task.name, attempted);
+		if (attempted.length === 0) {
+			skipped.push({ tier: 'none' as LlmTier, reason: 'no-tiers-configured' });
+		}
+		throw new NoTierAvailableError(task.name, attempted, skipped);
 	}
 
 	/** Highest tier in the user's allowedTiers list (by rank). */

@@ -13,14 +13,69 @@ export class LlmError extends Error {
 	}
 }
 
+/** Why a specific tier was skipped. */
+export type TierSkipReason =
+	| 'no-consent'
+	| 'no-backend'
+	| 'not-available'
+	| 'not-ready'
+	| 'no-tiers-configured'
+	| 'runtime-error';
+
+export interface SkippedTier {
+	tier: LlmTier;
+	reason: TierSkipReason;
+}
+
 /** No tier from the user's preference list was able to run the task. */
 export class NoTierAvailableError extends LlmError {
 	constructor(
 		public readonly taskName: string,
-		public readonly attempted: LlmTier[]
+		public readonly attempted: LlmTier[],
+		public readonly skipped: SkippedTier[] = []
 	) {
 		super(`No tier could run task '${taskName}' (attempted: ${attempted.join(', ') || 'none'})`);
 		this.name = 'NoTierAvailableError';
+	}
+
+	/** User-friendly German explanation of what went wrong. */
+	getUserMessage(): string {
+		if (this.skipped.length === 0 && this.attempted.length === 0) {
+			return 'Kein KI-Modell konfiguriert. Aktiviere ein Modell unter Einstellungen → KI.';
+		}
+
+		const reasons = this.skipped.map((s) => {
+			switch (s.reason) {
+				case 'no-consent':
+					return `**${tierLabel(s.tier)}**: Cloud-Einwilligung fehlt. Aktiviere sie unter Einstellungen → KI.`;
+				case 'no-backend':
+					return `**${tierLabel(s.tier)}**: Backend nicht registriert.`;
+				case 'not-available':
+					return `**${tierLabel(s.tier)}**: Nicht verfügbar (Service läuft nicht oder WebGPU nicht unterstützt).`;
+				case 'not-ready':
+					return `**${tierLabel(s.tier)}**: Modell noch nicht geladen.`;
+				case 'runtime-error':
+					return `**${tierLabel(s.tier)}**: Fehler bei der Ausführung.`;
+				case 'no-tiers-configured':
+					return 'Kein KI-Modell konfiguriert.';
+			}
+		});
+		return reasons.join('\n');
+	}
+}
+
+function tierLabel(tier: LlmTier): string {
+	switch (tier) {
+		case 'browser':
+			return 'Browser (lokal)';
+		case 'mana-server':
+			return 'Mana Server';
+		case 'cloud':
+			return 'Cloud (Gemini)';
+		case 'byok':
+			return 'Eigener API-Key';
+		default:
+			return String(tier);
 	}
 }
 
