@@ -38,6 +38,8 @@ import { sleepTools } from '$lib/modules/sleep/tools';
 import { mydayTools } from '$lib/modules/myday/tools';
 import { goalsTools } from '$lib/modules/goals/tools';
 import { moodTools } from '$lib/modules/mood/tools';
+import { wishesTools } from '$lib/modules/wishes/tools';
+import { wetterTools } from '$lib/modules/wetter/tools';
 
 let initialized = false;
 
@@ -77,5 +79,7 @@ export function initTools(): void {
 	registerTools(mydayTools);
 	registerTools(goalsTools);
 	registerTools(moodTools);
+	registerTools(wishesTools);
+	registerTools(wetterTools);
 	initialized = true;
 }

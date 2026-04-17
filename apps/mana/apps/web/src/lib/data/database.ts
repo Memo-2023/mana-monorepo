@@ -563,6 +563,24 @@ db.version(23).stores({
 	userContext: 'id',
 });
 
+// v25 — Wetter module: saved locations and user preferences.
+db.version(25).stores({
+	wetterLocations: 'id, isDefault, order',
+	wetterSettings: 'id',
+});
+
+// v26 — Library module: single-table media log with a `kind` discriminator.
+// v24 + v25 are reserved for the wishes + wetter modules being developed
+// in parallel; library jumps to v26 to avoid colliding with those.
+// Index strategy:
+//   - kind indexes the tab filter (book / movie / series / comic) — hottest path.
+//   - status powers the "Läuft / Fertig / Geplant" filter strip.
+//   - completedAt gives the Jahresrückblick a cheap range scan of completed items.
+//   - isFavorite supports the favourites-only toggle without a full-table filter.
+db.version(26).stores({
+	libraryEntries: 'id, kind, status, completedAt, isFavorite',
+});
+
 // ─── Sync Routing ──────────────────────────────────────────
 // SYNC_APP_MAP, TABLE_TO_SYNC_NAME, TABLE_TO_APP, SYNC_NAME_TO_TABLE,
 // toSyncName() and fromSyncName() are now derived from per-module

@@ -854,6 +854,38 @@ export const AI_TOOL_CATALOG: readonly ToolSchema[] = [
 		defaultPolicy: 'auto',
 		parameters: [],
 	},
+
+	// ── Wetter ───────────────────────────────────────────────────
+	{
+		name: 'get_weather',
+		module: 'wetter',
+		description:
+			'Gibt aktuelle Wetterbedingungen und 7-Tage-Vorhersage fuer einen Ort zurueck. Akzeptiert Ortsname oder Koordinaten.',
+		defaultPolicy: 'auto',
+		parameters: [
+			{
+				name: 'location',
+				type: 'string',
+				description: 'Ortsname (z.B. "Berlin") oder "lat,lon" Koordinaten',
+				required: true,
+			},
+		],
+	},
+	{
+		name: 'get_rain_forecast',
+		module: 'wetter',
+		description:
+			'Gibt eine Minuten-Regenprognose (Nowcast) und aktive Wetterwarnungen fuer einen Ort zurueck.',
+		defaultPolicy: 'auto',
+		parameters: [
+			{
+				name: 'location',
+				type: 'string',
+				description: 'Ortsname oder "lat,lon" Koordinaten',
+				required: true,
+			},
+		],
+	},
 ];
 
 // ═══════════════════════════════════════════════════════════════

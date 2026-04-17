@@ -969,6 +969,23 @@ export const MANA_APPS: ManaApp[] = [
 		status: 'development',
 		requiredTier: 'guest',
 	},
+	{
+		id: 'wetter',
+		name: 'Wetter',
+		description: {
+			de: 'Wetter & Regenradar',
+			en: 'Weather & Rain Radar',
+		},
+		longDescription: {
+			de: 'Aktuelle Wetterdaten, Vorhersage und Regenradar fuer die DACH-Region. DWD-Warnungen und Minuten-Niederschlagsprognose.',
+			en: 'Current weather, forecast, and rain radar for the DACH region. DWD alerts and minute-level precipitation nowcast.',
+		},
+		icon: APP_ICONS.wetter,
+		color: '#38bdf8',
+		comingSoon: false,
+		status: 'development',
+		requiredTier: 'guest',
+	},
 ];
 
 /**

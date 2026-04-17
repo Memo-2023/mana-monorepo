@@ -98,6 +98,8 @@ import { moodModuleConfig } from '$lib/modules/mood/module.config';
 import { kontextModuleConfig } from '$lib/modules/kontext/module.config';
 import { quizModuleConfig } from '$lib/modules/quiz/module.config';
 import { profileModuleConfig } from '$lib/modules/profile/module.config';
+import { libraryModuleConfig } from '$lib/modules/library/module.config';
+import { wetterModuleConfig } from '$lib/modules/wetter/module.config';
 import { aiModuleConfig } from '$lib/data/ai/module.config';
 
 export const MODULE_CONFIGS: readonly ModuleConfig[] = [
@@ -152,6 +154,8 @@ export const MODULE_CONFIGS: readonly ModuleConfig[] = [
 	kontextModuleConfig,
 	quizModuleConfig,
 	profileModuleConfig,
+	libraryModuleConfig,
+	wetterModuleConfig,
 	aiModuleConfig,
 ];
 
