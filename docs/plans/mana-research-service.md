@@ -430,17 +430,21 @@ Klassifikation ist optional und fällt bei LLM-Timeout auf `'general'` zurück.
 - [x] Run-Listen-Endpoints bereits in Phase 1 geliefert
 - [x] ~~Nightly-Job~~: Live-Aggregation im `addResult()`-Pfad via `onConflictDoUpdate` genügt für Phase 2.
 
-### Phase 3 — Research Agents + mana-ai Migration (≈ 1–2 Wochen)
+### Phase 3a — Sync Research Agents ✅ (2026-04-17)
 
-- [ ] Provider-Adapter:
+- [x] Provider-Adapter (via direct HTTP, keine SDK-Deps):
   - `PerplexitySonarProvider` (4 Modelle: sonar, sonar-pro, sonar-reasoning, sonar-deep-research)
-  - `ClaudeWebSearchProvider` (via Anthropic SDK + tool-use)
-  - `OpenAIResponsesProvider` (via OpenAI SDK + `web_search_preview` tool)
-  - `GeminiGroundingProvider` (via google-genai SDK mit Search-Grounding)
-  - `OpenAIDeepResearchProvider` — **async**, via BullMQ/inline Job-Queue, Response-Endpoint `GET /v1/research/tasks/:id`
-- [ ] `POST /v1/research` + `POST /v1/research/compare`
-- [ ] Auto-Router für `conversational`-Queries → Agent-Mode
-- [ ] `mana-llm` um Anthropic- und OpenAI-Provider erweitern (nur für Claude/OpenAI Agents; restlicher LLM-Workflow bleibt Ollama-first)
+  - `ClaudeWebSearchProvider` (Anthropic Messages API mit `web_search_20250305` Tool)
+  - `OpenAIResponsesProvider` (OpenAI Responses API mit `web_search_preview` Tool)
+  - `GeminiGroundingProvider` (Google GenAI v1beta mit Google-Search-Grounding)
+- [x] `POST /v1/research` + `POST /v1/research/compare`
+- [x] Agent-Auto-Router (`pickAgent` wählt ersten Provider mit Key: perplexity → gemini → openai → claude → deep-research)
+- [x] Agents in `/v1/providers` + `/v1/providers/health` integriert
+
+### Phase 3b — Async + Migrationen (offen)
+
+- [ ] `OpenAIDeepResearchProvider` — async, via Job-Queue, `GET /v1/research/tasks/:id` Polling-Endpoint
+- [ ] Auto-Router für `conversational`-Queries → Agent-Mode in `/v1/search` (aktuell separate Endpoints)
 - [ ] **Migration:** `apps/api/src/modules/news-research/routes.ts` wird zum dünnen Adapter auf `mana-research`
 - [ ] **Migration:** `services/mana-ai/src/planner/news-research-client.ts` ruft jetzt `mana-research` direkt statt `mana-api`
 - [ ] **Migration:** `research_news`-Tool bekommt Option `depth: 'shallow' | 'deep'`; `deep` ruft Agent-Mode

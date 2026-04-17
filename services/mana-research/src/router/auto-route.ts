@@ -3,7 +3,7 @@
  * list. The first provider in the returned list that has a valid API key wins.
  */
 
-import type { SearchProviderId, ExtractProviderId } from '@mana/shared-research';
+import type { AgentProviderId, ExtractProviderId, SearchProviderId } from '@mana/shared-research';
 import type { Config } from '../config';
 import type { QueryType } from './classify';
 
@@ -65,6 +65,32 @@ export function pickExtractProvider(
 		if (alwaysAvailable.has(id)) return id;
 		const envKey = envMap[id];
 		if (envKey && config.providerKeys[envKey]) return id;
+	}
+	return null;
+}
+
+/**
+ * Preference order for agents when caller doesn't specify one. Cheaper +
+ * fastest first, then better quality if keys are available.
+ */
+export const AGENT_DEFAULT_ORDER: AgentProviderId[] = [
+	'perplexity-sonar', // best plug-and-play, moderate cost
+	'gemini-grounding', // cheap with Google Search
+	'openai-responses', // Responses API + web_search_preview
+	'claude-web-search', // high quality, higher cost
+	'openai-deep-research', // last: async, very expensive
+];
+
+export function pickAgent(config: Config): AgentProviderId | null {
+	const envMap: Record<AgentProviderId, keyof Config['providerKeys']> = {
+		'perplexity-sonar': 'perplexity',
+		'claude-web-search': 'anthropic',
+		'openai-responses': 'openai',
+		'gemini-grounding': 'googleGenai',
+		'openai-deep-research': 'openai',
+	};
+	for (const id of AGENT_DEFAULT_ORDER) {
+		if (config.providerKeys[envMap[id]]) return id;
 	}
 	return null;
 }

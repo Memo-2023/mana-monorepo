@@ -16,7 +16,7 @@ export function createProvidersRoutes(registry: ProviderRegistry, config: Config
 			return c.json({
 				search: list.search.map((p) => ({ ...p, pricing: PROVIDER_PRICING[p.id] })),
 				extract: list.extract.map((p) => ({ ...p, pricing: PROVIDER_PRICING[p.id] })),
-				agent: list.agent,
+				agent: list.agent.map((p) => ({ ...p, pricing: PROVIDER_PRICING[p.id] })),
 			});
 		})
 		.get('/health', (c) => {
@@ -46,6 +46,11 @@ export function createProvidersRoutes(registry: ProviderRegistry, config: Config
 				'jina-reader': !!keys.jina,
 				firecrawl: !!keys.firecrawl,
 				scrapingbee: !!keys.scrapingbee,
+				'perplexity-sonar': !!keys.perplexity,
+				'claude-web-search': !!keys.anthropic,
+				'openai-responses': !!keys.openai,
+				'openai-deep-research': !!keys.openai,
+				'gemini-grounding': !!keys.googleGenai,
 			};
 
 			const list = listProviders(registry);
@@ -60,6 +65,13 @@ export function createProvidersRoutes(registry: ProviderRegistry, config: Config
 				...list.extract.map((p) => ({
 					id: p.id,
 					category: 'extract' as const,
+					requiresApiKey: p.requiresApiKey,
+					serverKeyAvailable: !!keyMap[p.id],
+					status: check(p.id, p.requiresApiKey, !!keyMap[p.id]),
+				})),
+				...list.agent.map((p) => ({
+					id: p.id,
+					category: 'agent' as const,
 					requiresApiKey: p.requiresApiKey,
 					serverKeyAvailable: !!keyMap[p.id],
 					status: check(p.id, p.requiresApiKey, !!keyMap[p.id]),

@@ -32,8 +32,9 @@ bun run db:studio
 ## Phases
 
 - **Phase 1** ✅ — 4 search providers (`searxng`, `duckduckgo`, `brave`, `tavily`), `/v1/search`, `/v1/search/compare`, `/v1/runs`, `/v1/providers`, `mana-credits` reserve/commit/refund.
-- **Phase 2 (current)** ✅ — +2 search providers (`exa`, `serper`), 3 extract providers (`readability`, `jina-reader`, `firecrawl`), `/v1/extract`, `/v1/extract/compare`, query classifier + auto-router, `/v1/providers/health`.
-- **Phase 3** — Research agents (`perplexity-sonar`, `claude-web-search`, `openai-responses`, `gemini-grounding`, `openai-deep-research`). mana-ai migration to use this service.
+- **Phase 2** ✅ — +2 search providers (`exa`, `serper`), 3 extract providers (`readability`, `jina-reader`, `firecrawl`), `/v1/extract`, `/v1/extract/compare`, query classifier + auto-router, `/v1/providers/health`.
+- **Phase 3a (current)** ✅ — 4 sync research agents (`perplexity-sonar`, `claude-web-search`, `openai-responses`, `gemini-grounding`), `/v1/research`, `/v1/research/compare`, agent auto-router.
+- **Phase 3b** — `openai-deep-research` (async via job queue), mana-ai migration to call mana-research, `research_news` tool gets `depth: shallow|deep` option, mana-api news-research becomes thin adapter.
 - **Phase 4** — Research Lab UI + Settings for BYO-keys.
 
 ## API Endpoints
@@ -46,6 +47,8 @@ bun run db:studio
 | POST | `/api/v1/search/compare` | Fan-out to N providers (max 5), persist eval_run. Body: `{ query, providers[], options? }`. |
 | POST | `/api/v1/extract` | Single-provider extract, auto-routed if `provider` omitted. Body: `{ url, provider?, options? }`. |
 | POST | `/api/v1/extract/compare` | Fan-out to N extract providers (max 4). Body: `{ url, providers[], options? }`. |
+| POST | `/api/v1/research` | Single-agent research. Auto-routed if `provider` omitted. Body: `{ query, provider?, options? }`. |
+| POST | `/api/v1/research/compare` | Fan-out to N agents (max 4). Body: `{ query, providers[], options? }`. |
 | GET | `/api/v1/runs` | List user's eval runs. Query: `?limit=50&offset=0`. |
 | GET | `/api/v1/runs/:id` | Run + all results. |
 | POST | `/api/v1/runs/:runId/results/:resultId/rate` | Body: `{ rating: 1-5, notes? }`. |
@@ -83,6 +86,16 @@ Reserved for Phase 3 when `mana-ai` migrates to call this service directly. `/ap
 | `readability` | — | 0 | Wraps `mana-search /extract` (go-readability). |
 | `jina-reader` | optional `JINA_API_KEY` | 1 | `r.jina.ai`, JS-rendering + PDF, Markdown out. |
 | `firecrawl` | `FIRECRAWL_API_KEY` | 10 | Playwright-based, best for JS-heavy sites. Self-hostable. |
+
+### Research Agents (4 sync, 1 async planned)
+
+| Provider | Key | Cost | Notes |
+|---|---|---|---|
+| `perplexity-sonar` | `PERPLEXITY_API_KEY` | 50 | 4 models: sonar, sonar-pro, sonar-reasoning, sonar-deep-research. Best plug-and-play. |
+| `gemini-grounding` | `GOOGLE_GENAI_API_KEY` | 100 | Gemini + Google Search grounding. Single-step. |
+| `openai-responses` | `OPENAI_API_KEY` | 200 | Responses API with `web_search_preview` tool. Multi-step. |
+| `claude-web-search` | `ANTHROPIC_API_KEY` | 200 | Claude + `web_search_20250305` tool, up to 5 searches/call. |
+| `openai-deep-research` | `OPENAI_API_KEY` | 1000 | ⏳ Phase 3b — async, returns taskId to poll. |
 
 ## Auto-routing
 

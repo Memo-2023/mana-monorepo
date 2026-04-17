@@ -18,6 +18,7 @@ import { serviceAuth } from './middleware/service-auth';
 import { healthRoutes } from './routes/health';
 import { createSearchRoutes } from './routes/search';
 import { createExtractRoutes } from './routes/extract';
+import { createResearchRoutes } from './routes/research';
 import { createProvidersRoutes } from './routes/providers';
 import { createRunsRoutes } from './routes/runs';
 import { buildRegistry } from './providers/registry';
@@ -83,6 +84,9 @@ app.route(
 
 app.use('/api/v1/extract/*', jwtAuth(config.manaAuthUrl));
 app.route('/api/v1/extract', createExtractRoutes(registry, runStorage, executorDeps, config));
+
+app.use('/api/v1/research/*', jwtAuth(config.manaAuthUrl));
+app.route('/api/v1/research', createResearchRoutes(registry, runStorage, executorDeps, config));
 
 app.use('/api/v1/runs/*', jwtAuth(config.manaAuthUrl));
 app.route('/api/v1/runs', createRunsRoutes(runStorage));

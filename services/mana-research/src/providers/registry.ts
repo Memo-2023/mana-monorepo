@@ -7,6 +7,7 @@ import type {
 	ExtractProvider,
 	ExtractProviderId,
 	ProviderId,
+	ResearchAgent,
 	SearchProvider,
 	SearchProviderId,
 } from '@mana/shared-research';
@@ -21,10 +22,15 @@ import { createTavilyProvider } from './search/tavily';
 import { createFirecrawlProvider } from './extract/firecrawl';
 import { createJinaReaderProvider } from './extract/jina-reader';
 import { createReadabilityProvider } from './extract/readability';
+import { createPerplexitySonarProvider } from './agent/perplexity-sonar';
+import { createClaudeWebSearchProvider } from './agent/claude-web-search';
+import { createOpenAIResponsesProvider } from './agent/openai-responses';
+import { createGeminiGroundingProvider } from './agent/gemini-grounding';
 
 export interface ProviderRegistry {
 	search: Map<SearchProviderId, SearchProvider>;
 	extract: Map<ExtractProviderId, ExtractProvider>;
+	agent: Map<AgentProviderId, ResearchAgent>;
 }
 
 export function buildRegistry(deps: { manaSearch: ManaSearchClient }): ProviderRegistry {
@@ -41,7 +47,13 @@ export function buildRegistry(deps: { manaSearch: ManaSearchClient }): ProviderR
 	extract.set('jina-reader', createJinaReaderProvider());
 	extract.set('firecrawl', createFirecrawlProvider());
 
-	return { search, extract };
+	const agent = new Map<AgentProviderId, ResearchAgent>();
+	agent.set('perplexity-sonar', createPerplexitySonarProvider());
+	agent.set('claude-web-search', createClaudeWebSearchProvider());
+	agent.set('openai-responses', createOpenAIResponsesProvider());
+	agent.set('gemini-grounding', createGeminiGroundingProvider());
+
+	return { search, extract, agent };
 }
 
 export function getSearchProvider(registry: ProviderRegistry, id: string): SearchProvider {
@@ -64,6 +76,16 @@ export function getExtractProvider(registry: ProviderRegistry, id: string): Extr
 	return provider;
 }
 
+export function getAgent(registry: ProviderRegistry, id: string): ResearchAgent {
+	const provider = registry.agent.get(id as AgentProviderId);
+	if (!provider) {
+		throw new BadRequestError(`Unknown research agent: ${id}`, {
+			available: [...registry.agent.keys()],
+		});
+	}
+	return provider;
+}
+
 export function listProviders(registry: ProviderRegistry) {
 	return {
 		search: [...registry.search.values()].map((p) => ({
@@ -78,7 +100,12 @@ export function listProviders(registry: ProviderRegistry) {
 			requiresApiKey: p.requiresApiKey,
 			capabilities: p.capabilities,
 		})),
-		agent: [] as Array<{ id: AgentProviderId; category: 'agent'; requiresApiKey: boolean }>,
+		agent: [...registry.agent.values()].map((p) => ({
+			id: p.id,
+			category: 'agent' as const,
+			requiresApiKey: p.requiresApiKey,
+			capabilities: p.capabilities,
+		})),
 	};
 }
 
