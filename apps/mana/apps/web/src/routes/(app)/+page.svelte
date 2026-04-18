@@ -413,7 +413,7 @@
 		bindAgentDialogOpen = true;
 	}
 
-	function handleRequestRename(id: string) {
+	async function handleRequestRename(id: string) {
 		// Unified rename path: scroll the carousel to the scene header
 		// and focus its contenteditable <h1>. Previously opened a modal
 		// dialog that read from the store while the live header might
@@ -423,13 +423,13 @@
 		if (!scene) return;
 		if (id !== activeSceneId) workbenchScenesStore.setActiveScene(id);
 		scrollCarouselToStart();
-		// Next tick: the header is mounted + the scroll has started;
-		// querying now lands on the active scene's h1 which
-		// contenteditable plaintext-only focuses cleanly.
-		setTimeout(() => {
-			const h1 = document.querySelector<HTMLElement>('.scene-header .scene-name[contenteditable]');
-			h1?.focus();
-		}, 120);
+		// Await Svelte's flush so the activeScene → SceneHeader re-render
+		// has landed before we query. Previously we used a 120 ms
+		// setTimeout, which was brittle on slower hardware and sometimes
+		// fired before the header was updated, focusing the old scene's h1.
+		await tick();
+		const h1 = document.querySelector<HTMLElement>('.scene-header .scene-name[contenteditable]');
+		h1?.focus();
 	}
 	function handleDuplicateScene(id: string) {
 		workbenchScenesStore.duplicateScene(id);
