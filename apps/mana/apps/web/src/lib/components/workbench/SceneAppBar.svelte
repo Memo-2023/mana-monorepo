@@ -3,7 +3,7 @@
   Rendered by the layout's bottom-stack via bottomBarStore.
 -->
 <script lang="ts">
-	import { Plus, Check, X } from '@mana/shared-icons';
+	import { Plus, Check, X, Funnel } from '@mana/shared-icons';
 	import { tick } from 'svelte';
 	import type { CarouselPage } from '$lib/components/page-carousel/types';
 	import type { WorkbenchScene } from '$lib/types/workbench-scenes';
@@ -82,6 +82,7 @@
 
 			{#if isActive && pages.length > 0}
 				{@const boundAgent = scene.viewingAsAgentId ? agentById.get(scene.viewingAsAgentId) : null}
+				{@const hasScope = (scene.scopeTagIds?.length ?? 0) > 0}
 				<!-- Active scene + its app tabs wrapped in a visual group -->
 				<div class="scene-group">
 					<button
@@ -95,6 +96,11 @@
 							<span class="scene-agent-avatar">{boundAgent.avatar ?? '🤖'}</span>
 						{/if}
 						<span class="scene-name">{scene.name}</span>
+						{#if hasScope}
+							<span class="scope-badge" title="Bereichsfilter aktiv">
+								<Funnel size={10} weight="fill" />
+							</span>
+						{/if}
 						<span class="scene-count">{scene.openApps.length}</span>
 					</button>
 					<span class="group-sep"></span>
@@ -121,6 +127,7 @@
 				</div>
 			{:else}
 				{@const boundAgent = scene.viewingAsAgentId ? agentById.get(scene.viewingAsAgentId) : null}
+				{@const hasScope = (scene.scopeTagIds?.length ?? 0) > 0}
 				<button
 					type="button"
 					class="scene-pill"
@@ -133,6 +140,11 @@
 						<span class="scene-agent-avatar">{boundAgent.avatar ?? '🤖'}</span>
 					{/if}
 					<span class="scene-name">{scene.name}</span>
+					{#if hasScope}
+						<span class="scope-badge" title="Bereichsfilter aktiv">
+							<Funnel size={10} weight="fill" />
+						</span>
+					{/if}
 					<span class="scene-count">{scene.openApps.length}</span>
 				</button>
 			{/if}
@@ -244,6 +256,14 @@
 		font-size: 0.9375rem;
 		font-weight: 500;
 		color: hsl(var(--color-muted-foreground));
+	}
+	.scope-badge {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		color: hsl(var(--color-primary));
+		opacity: 0.8;
+		flex-shrink: 0;
 	}
 	.group-sep {
 		width: 1px;
