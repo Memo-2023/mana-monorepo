@@ -25,6 +25,8 @@ import { setSceneScopeTagIds } from './scene-scope.svelte';
 
 const TABLE = 'workbenchScenes';
 const ACTIVE_SCENE_LS_KEY = 'mana:workbench:activeSceneId';
+const MRU_LS_KEY = 'mana:workbench:sceneMru';
+const MRU_CAP = 5;
 
 const DEFAULT_HOME_APPS: WorkbenchSceneApp[] = [
 	{ appId: 'todo' },
@@ -56,6 +58,30 @@ function writeActiveIdToStorage(id: string | null) {
 	try {
 		if (id) localStorage.setItem(ACTIVE_SCENE_LS_KEY, id);
 		else localStorage.removeItem(ACTIVE_SCENE_LS_KEY);
+	} catch {
+		/* storage quota / disabled — ignore */
+	}
+}
+
+function readMruFromStorage(): string[] {
+	if (!browser) return [];
+	try {
+		const raw = localStorage.getItem(MRU_LS_KEY);
+		if (!raw) return [];
+		const parsed = JSON.parse(raw);
+		return Array.isArray(parsed) ? parsed.filter((v): v is string => typeof v === 'string') : [];
+	} catch {
+		return [];
+	}
+}
+
+/** Push `id` to the front of the MRU list, dedup, cap. Per-device only. */
+function bumpMru(id: string) {
+	if (!browser) return;
+	try {
+		const current = readMruFromStorage();
+		const next = [id, ...current.filter((x) => x !== id)].slice(0, MRU_CAP);
+		localStorage.setItem(MRU_LS_KEY, JSON.stringify(next));
 	} catch {
 		/* storage quota / disabled — ignore */
 	}
@@ -95,7 +121,15 @@ async function ensureSeedScene(): Promise<string> {
 
 function pickActiveId(scenes: WorkbenchScene[], current: string | null): string | null {
 	if (scenes.length === 0) return null;
-	if (current && scenes.some((s) => s.id === current)) return current;
+	const ids = new Set(scenes.map((s) => s.id));
+	if (current && ids.has(current)) return current;
+	// Fall back to the most recent scene (local per-device MRU) that still
+	// exists, so deleting or sync-pulling away from the current scene
+	// restores the user's last-used workbench rather than jumping them to
+	// whatever happens to sort first.
+	for (const id of readMruFromStorage()) {
+		if (ids.has(id)) return id;
+	}
 	return scenes[0].id;
 }
 
@@ -165,6 +199,7 @@ function openSubscription(): void {
 				if (next !== activeSceneIdState) {
 					activeSceneIdState = next;
 					writeActiveIdToStorage(next);
+					if (next) bumpMru(next);
 				}
 				// Sync scope when scenes reload (init, sync pull, tab focus).
 				const activeScope = visible.find((s) => s.id === (next ?? activeSceneIdState));
@@ -245,6 +280,7 @@ export const workbenchScenesStore = {
 		if (!scenesState.some((s) => s.id === id)) return;
 		activeSceneIdState = id;
 		writeActiveIdToStorage(id);
+		bumpMru(id);
 		// Sync scene scope for module queries
 		const scene = scenesState.find((s) => s.id === id);
 		setSceneScopeTagIds(scene?.scopeTagIds);
@@ -272,6 +308,7 @@ export const workbenchScenesStore = {
 		if (opts.setActive !== false) {
 			activeSceneIdState = id;
 			writeActiveIdToStorage(id);
+			bumpMru(id);
 		}
 		return id;
 	},
@@ -340,10 +377,22 @@ export const workbenchScenesStore = {
 		if (fromIdx === -1 || toIdx === -1) return;
 		const [moved] = ordered.splice(fromIdx, 1);
 		ordered.splice(toIdx, 0, moved);
-		// Renumber and persist only the rows whose order actually changed.
-		await Promise.all(
-			ordered.map((s, i) => (s.order === i ? null : patchScene(s.id, { order: i })))
-		);
+		// Atomic renumber — one rw-transaction over all changed rows so a
+		// partial failure can't leave the scene list with gapped or
+		// duplicated orders visible to other tabs. Only writes rows whose
+		// order actually changed.
+		const now = nowIso();
+		await db.transaction('rw', TABLE, async () => {
+			const writes: Promise<unknown>[] = [];
+			for (let i = 0; i < ordered.length; i++) {
+				const s = ordered[i];
+				if (s.order === i) continue;
+				writes.push(
+					db.table<LocalWorkbenchScene>(TABLE).update(s.id, { order: i, updatedAt: now })
+				);
+			}
+			await Promise.all(writes);
+		});
 	},
 
 	// ── Per-scene app mutations (operate on the active scene) ─
