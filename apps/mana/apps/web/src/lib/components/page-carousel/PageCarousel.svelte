@@ -54,7 +54,7 @@
 	// 1-2 cards in the horizontal viewport are actually visible.
 	//
 	// Strategy: render a fixed-size placeholder until the wrapper enters
-	// the viewport (50% horizontal overshoot so the next card is ready
+	// the viewport (with horizontal overshoot so the next card is ready
 	// before the user scrolls to it), then swap in the real snippet.
 	//
 	// LRU cache: keep the MAX_MOUNTED most-recently-intersected cards
@@ -64,6 +64,12 @@
 	// scrolls through. The cap is set high enough to cover typical
 	// working sets (3–6 apps) with headroom.
 	const MAX_MOUNTED = 8;
+	/** Pre-mount cards this far (horizontal, each side) outside the viewport
+	 *  so the neighbour is ready when the user starts scrolling. */
+	const PREMOUNT_MARGIN = '0px 50% 0px 50%';
+	/** Intersection ratio at which we consider a card "visible enough" to
+	 *  mount. Kept tiny so even a sliver-visible card counts. */
+	const INTERSECTION_THRESHOLD = 0.01;
 	let mountedIds = $state<Set<string>>(new Set());
 	function markMounted(id: string) {
 		// Set preserves insertion order → MRU sits at the back. Already-MRU
@@ -112,10 +118,8 @@
 			},
 			{
 				root: trackEl,
-				// Pre-mount the immediate neighbours so the next card on
-				// either side is ready when the user starts scrolling.
-				rootMargin: '0px 50% 0px 50%',
-				threshold: 0.01,
+				rootMargin: PREMOUNT_MARGIN,
+				threshold: INTERSECTION_THRESHOLD,
 			}
 		);
 		io = instance;
