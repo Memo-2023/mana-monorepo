@@ -109,6 +109,7 @@ export const APP_CATEGORY_MAP: Record<string, AppCategory> = {
 	uload: 'creative',
 	library: 'creative',
 	playground: 'creative',
+	quiz: 'creative',
 
 	// System — settings, admin, meta
 	settings: 'system',

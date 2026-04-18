@@ -76,6 +76,7 @@ import {
 	Stack,
 	ArrowClockwise,
 	Flask,
+	Exam,
 } from '@mana/shared-icons';
 
 // ── Apps with entity capabilities ───────────────────────────
@@ -1275,4 +1276,40 @@ registerApp({
 				),
 		},
 	],
+});
+
+registerApp({
+	id: 'quiz',
+	name: 'Quiz',
+	color: '#ec4899',
+	icon: Exam,
+	views: {
+		// Edit (/quiz/[id]/edit) and Play (/quiz/[id]/play) use route-based
+		// navigation via goto(); the workbench detail-slot isn't wired yet.
+		list: { load: () => import('$lib/modules/quiz/ListView.svelte') },
+	},
+	contextMenuActions: [
+		{
+			id: 'new-quiz',
+			label: 'Neues Quiz',
+			icon: Plus,
+			action: () =>
+				window.dispatchEvent(
+					new CustomEvent('mana:quick-action', { detail: { app: 'quiz', action: 'new' } })
+				),
+		},
+	],
+	collection: 'quizzes',
+	paramKey: 'quizId',
+	getDisplayData: (item) => ({
+		title: (item.title as string) || 'Quiz',
+		subtitle: (item.category as string) || undefined,
+	}),
+	createItem: async (data) => {
+		const { quizzesStore } = await import('$lib/modules/quiz/stores/quizzes.svelte');
+		const quiz = await quizzesStore.createQuiz({
+			title: (data.title as string) || 'Neues Quiz',
+		});
+		return quiz.id;
+	},
 });
