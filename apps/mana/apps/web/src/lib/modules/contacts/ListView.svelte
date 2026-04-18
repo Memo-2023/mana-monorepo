@@ -17,6 +17,8 @@
 	import { useAllTags, getTagsByIds } from '@mana/shared-stores';
 	import { addTagId } from '$lib/data/tag-mutations';
 	import { useItemContextMenu } from '$lib/data/item-context-menu.svelte';
+	import ScopeEmptyState from '$lib/components/workbench/ScopeEmptyState.svelte';
+	import { hasActiveSceneScope } from '$lib/stores/scene-scope.svelte';
 
 	let { navigate, goBack, params }: ViewProps = $props();
 
@@ -175,7 +177,11 @@
 		{/each}
 
 		{#if filtered().length === 0}
-			<p class="empty">Keine Kontakte gefunden</p>
+			{#if hasActiveSceneScope()}
+				<ScopeEmptyState label="Kontakte" />
+			{:else}
+				<p class="empty">Keine Kontakte gefunden</p>
+			{/if}
 		{/if}
 	</div>
 

@@ -13,6 +13,8 @@
 	import { PencilSimple, Trash, PushPin } from '@mana/shared-icons';
 	import FloatingInputBar from '$lib/components/FloatingInputBar.svelte';
 	import AgentDot from '$lib/components/ai/AgentDot.svelte';
+	import ScopeEmptyState from '$lib/components/workbench/ScopeEmptyState.svelte';
+	import { hasActiveSceneScope } from '$lib/stores/scene-scope.svelte';
 
 	let { navigate, goBack, params }: ViewProps = $props();
 
@@ -212,7 +214,11 @@
 	</div>
 
 	{#if notes.length === 0}
-		<p class="empty">Erstelle deine erste Notiz.</p>
+		{#if hasActiveSceneScope()}
+			<ScopeEmptyState label="Notizen" />
+		{:else}
+			<p class="empty">Erstelle deine erste Notiz.</p>
+		{/if}
 	{/if}
 
 	<FloatingInputBar

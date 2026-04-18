@@ -17,6 +17,8 @@
 	import { useItemContextMenu } from '$lib/data/item-context-menu.svelte';
 	import { transcribeAudio } from '$lib/voice/transcribe';
 	import FloatingInputBar from '$lib/components/FloatingInputBar.svelte';
+	import ScopeEmptyState from '$lib/components/workbench/ScopeEmptyState.svelte';
+	import { hasActiveSceneScope } from '$lib/stores/scene-scope.svelte';
 
 	let { navigate, goBack, params }: ViewProps = $props();
 
@@ -219,7 +221,11 @@
 		{/each}
 
 		{#if upcomingEvents.length === 0}
-			<p class="empty">Keine Termine</p>
+			{#if hasActiveSceneScope()}
+				<ScopeEmptyState label="Termine" />
+			{:else}
+				<p class="empty">Keine Termine</p>
+			{/if}
 		{/if}
 	</div>
 

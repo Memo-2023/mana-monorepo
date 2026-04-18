@@ -17,6 +17,8 @@
 	import { addTagId } from '$lib/data/tag-mutations';
 	import { useItemContextMenu } from '$lib/data/item-context-menu.svelte';
 	import FloatingInputBar from '$lib/components/FloatingInputBar.svelte';
+	import ScopeEmptyState from '$lib/components/workbench/ScopeEmptyState.svelte';
+	import { hasActiveSceneScope } from '$lib/stores/scene-scope.svelte';
 
 	let { navigate, goBack, params }: ViewProps = $props();
 
@@ -197,7 +199,11 @@
 		{/each}
 
 		{#if sorted.length === 0}
-			<p class="empty">Keine Aufgaben</p>
+			{#if hasActiveSceneScope()}
+				<ScopeEmptyState label="Aufgaben" />
+			{:else}
+				<p class="empty">Keine Aufgaben</p>
+			{/if}
 		{/if}
 	</div>
 

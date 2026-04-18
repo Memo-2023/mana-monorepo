@@ -21,6 +21,14 @@ export function getSceneScopeTagIds(): readonly string[] | undefined {
 }
 
 /**
+ * True when the active scene is filtering by at least one scope tag.
+ * Reactive — safe to read inside a $derived or template.
+ */
+export function hasActiveSceneScope(): boolean {
+	return !!_scopeTagIds?.length;
+}
+
+/**
  * Batch filter using a pre-fetched tag map. Preferred for list queries
  * (1 Dexie call instead of N).
  */
