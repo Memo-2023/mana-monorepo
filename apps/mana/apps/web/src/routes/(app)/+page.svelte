@@ -21,6 +21,8 @@
 	import { _, locale } from 'svelte-i18n';
 	import { buildContextMenuItems, createWorkbenchContextMenu } from '$lib/context-menu';
 	import type { WorkbenchScene } from '$lib/types/workbench-scenes';
+	import { toast } from '$lib/stores/toast.svelte';
+	import { dev } from '$app/environment';
 
 	function resolveEntity(type: string, data: Record<string, unknown>) {
 		const app = getAppByDragType(type as DragType);
@@ -65,6 +67,29 @@
 	// ── Scene store wiring ──────────────────────────────────
 	onMount(() => {
 		workbenchScenesStore.initialize();
+	});
+
+	// Dev-only safety net: vite-plugin-pwa is disabled in dev (see
+	// vite.config.ts), but a stale Service Worker from a previous `pnpm
+	// preview`/build session still controls the origin and silently serves
+	// cached HTML — including wrong routes like `/email-verified` at `/`.
+	// We surface it instead of leaving the user guessing at a broken-looking
+	// dev build.
+	onMount(() => {
+		if (!dev || typeof navigator === 'undefined' || !('serviceWorker' in navigator)) return;
+		navigator.serviceWorker.getRegistrations().then((regs) => {
+			if (regs.length === 0) return;
+			console.warn(
+				'[workbench] stale Service Worker detected in dev — unregistering',
+				regs.map((r) => r.scope)
+			);
+			toast.warning(
+				'Stale Service Worker erkannt — wird deregistriert. Danach einmal hart neu laden (Cmd+Shift+R).'
+			);
+			Promise.all(regs.map((r) => r.unregister())).catch(() => {
+				// best-effort — user can still manually clear via DevTools
+			});
+		});
 	});
 
 	// Deep-link handler — runs on initial mount AND on post-mount URL
@@ -226,9 +251,9 @@
 		workbenchScenesStore.setActiveScene(id);
 	}
 	function handleBarSceneCreate(name: string) {
-		workbenchScenesStore.createScene({ name }).catch((err) => {
-			console.error('[workbench] createScene failed:', err);
-		});
+		workbenchScenesStore
+			.createScene({ name })
+			.catch(reportWorkbenchError('createScene', 'Szene konnte nicht erstellt werden'));
 	}
 	function handleBarToggleShowPicker() {
 		showPicker = !showPicker;
@@ -265,36 +290,42 @@
 	// clone) must not leave the picker closed while the new page never
 	// actually lands, which previously looked like a frozen workbench until
 	// the user reloaded.
+	function reportWorkbenchError(op: string, userMessage: string) {
+		return (err: unknown) => {
+			console.error(`[workbench] ${op} failed:`, err);
+			toast.error(userMessage);
+		};
+	}
 	function handleAddApp(appId: string) {
 		showPicker = false;
-		workbenchScenesStore.addApp(appId).catch((err) => {
-			console.error('[workbench] addApp failed:', err);
-		});
+		workbenchScenesStore
+			.addApp(appId)
+			.catch(reportWorkbenchError('addApp', 'App konnte nicht hinzugefügt werden'));
 	}
 	function handleRemoveApp(id: string) {
-		workbenchScenesStore.removeApp(id).catch((err) => {
-			console.error('[workbench] removeApp failed:', err);
-		});
+		workbenchScenesStore
+			.removeApp(id)
+			.catch(reportWorkbenchError('removeApp', 'App konnte nicht entfernt werden'));
 	}
 	function handleMaximizeApp(id: string) {
-		workbenchScenesStore.toggleMaximizeApp(id).catch((err) => {
-			console.error('[workbench] toggleMaximizeApp failed:', err);
-		});
+		workbenchScenesStore
+			.toggleMaximizeApp(id)
+			.catch(reportWorkbenchError('toggleMaximizeApp', 'Größenänderung nicht gespeichert'));
 	}
 	function handleResize(id: string, widthPx: number) {
-		workbenchScenesStore.resizeApp(id, widthPx).catch((err) => {
-			console.error('[workbench] resizeApp failed:', err);
-		});
+		workbenchScenesStore
+			.resizeApp(id, widthPx)
+			.catch(reportWorkbenchError('resizeApp', 'Größenänderung nicht gespeichert'));
 	}
 	function handleMoveLeft(id: string) {
-		workbenchScenesStore.moveAppLeft(id).catch((err) => {
-			console.error('[workbench] moveAppLeft failed:', err);
-		});
+		workbenchScenesStore
+			.moveAppLeft(id)
+			.catch(reportWorkbenchError('moveAppLeft', 'Reihenfolge nicht gespeichert'));
 	}
 	function handleMoveRight(id: string) {
-		workbenchScenesStore.moveAppRight(id).catch((err) => {
-			console.error('[workbench] moveAppRight failed:', err);
-		});
+		workbenchScenesStore
+			.moveAppRight(id)
+			.catch(reportWorkbenchError('moveAppRight', 'Reihenfolge nicht gespeichert'));
 	}
 	// ── Card / tab context menus ────────────────────────────
 	const ctxMenu = createWorkbenchContextMenu();
