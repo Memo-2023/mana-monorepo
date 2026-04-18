@@ -106,6 +106,22 @@ const APP_CONFIGS = [
 		},
 	},
 
+	// Mana Events Service (Hono + Bun, Port 3065)
+	{
+		path: 'services/mana-events/.env',
+		vars: {
+			PORT: (env) => env.MANA_EVENTS_PORT || '3065',
+			DATABASE_URL: (env) =>
+				env.MANA_EVENTS_DATABASE_URL ||
+				'postgresql://mana:devpassword@localhost:5432/mana_platform',
+			MANA_AUTH_URL: (env) => env.MANA_AUTH_URL || 'http://localhost:3001',
+			CORS_ORIGINS: (env) => env.CORS_ORIGINS || 'http://localhost:5173',
+			MANA_RESEARCH_URL: (env) => env.MANA_RESEARCH_URL || 'http://localhost:3068',
+			MANA_LLM_URL: (env) => env.MANA_LLM_URL || 'http://localhost:3025',
+			MEETUP_API_KEY: (env) => env.MEETUP_API_KEY || '',
+		},
+	},
+
 	// Chat Server (Hono/Bun)
 	{
 		path: 'apps/chat/apps/server/.env',

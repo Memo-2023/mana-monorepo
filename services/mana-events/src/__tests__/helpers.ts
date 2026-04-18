@@ -42,7 +42,6 @@ const TEST_CONFIG: Config = {
 	},
 	manaResearchUrl: 'http://localhost:3068',
 	manaLlmUrl: 'http://localhost:3025',
-	eventbriteApiKey: null,
 	meetupApiKey: null,
 };
 

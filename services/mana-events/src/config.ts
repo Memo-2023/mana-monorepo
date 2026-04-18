@@ -18,8 +18,7 @@ export interface Config {
 	// External service URLs for event discovery
 	manaResearchUrl: string;
 	manaLlmUrl: string;
-	// Platform API keys (optional — providers gracefully skip when unconfigured)
-	eventbriteApiKey: string | null;
+	// Platform API key (optional — provider gracefully skips when unconfigured)
 	meetupApiKey: string | null;
 }
 
@@ -46,7 +45,6 @@ export function loadConfig(): Config {
 		},
 		manaResearchUrl: process.env.MANA_RESEARCH_URL || 'http://localhost:3068',
 		manaLlmUrl: process.env.MANA_LLM_URL || 'http://localhost:3025',
-		eventbriteApiKey: process.env.EVENTBRITE_API_KEY || null,
 		meetupApiKey: process.env.MEETUP_API_KEY || null,
 	};
 }

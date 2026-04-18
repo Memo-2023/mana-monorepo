@@ -29,7 +29,14 @@ describe('Provider registry', () => {
 });
 
 describe('Eventbrite provider', () => {
-	it('returns empty with error when API key is not set', async () => {
+	it('requires a region label', async () => {
+		const provider = getProvider('eventbrite')!;
+		const result = await provider.fetchEvents('', 'Test');
+		expect(result.events).toHaveLength(0);
+		expect(result.error).toContain('Region label');
+	});
+
+	it('requires external service config', async () => {
 		const provider = getProvider('eventbrite')!;
 		const result = await provider.fetchEvents('', 'Test', {
 			lat: 47.997,
@@ -38,15 +45,7 @@ describe('Eventbrite provider', () => {
 			regionLabel: 'Freiburg',
 		});
 		expect(result.events).toHaveLength(0);
-		expect(result.error).toContain('EVENTBRITE_API_KEY');
-	});
-
-	it('gracefully handles missing coordinates (after API key check)', async () => {
-		// Without API key, the key check fires first — that's the expected behavior
-		const provider = getProvider('eventbrite')!;
-		const result = await provider.fetchEvents('', 'Test');
-		expect(result.events).toHaveLength(0);
-		expect(result.error).toBeTruthy();
+		expect(result.error).toContain('config');
 	});
 });
 
