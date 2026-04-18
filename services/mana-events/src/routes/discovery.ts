@@ -38,8 +38,8 @@ const interestCreateSchema = z.object({
 });
 
 const sourceCreateSchema = z.object({
-	type: z.enum(['ical', 'website']),
-	url: z.string().url().max(2000),
+	type: z.enum(['ical', 'website', 'eventbrite', 'meetup']),
+	url: z.string().url().max(2000).optional(), // optional for platform providers
 	name: z.string().min(1).max(200),
 	regionId: z.string().uuid(),
 	crawlIntervalHours: z.number().int().min(1).max(168).optional(), // max 7 days

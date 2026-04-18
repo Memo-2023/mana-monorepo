@@ -15,9 +15,12 @@ export interface Config {
 		// Hard cap on total RSVPs per token
 		rsvpMaxPerToken: number;
 	};
-	// Phase 2: external service URLs for event discovery
+	// External service URLs for event discovery
 	manaResearchUrl: string;
 	manaLlmUrl: string;
+	// Platform API keys (optional — providers gracefully skip when unconfigured)
+	eventbriteApiKey: string | null;
+	meetupApiKey: string | null;
 }
 
 export function loadConfig(): Config {
@@ -43,5 +46,7 @@ export function loadConfig(): Config {
 		},
 		manaResearchUrl: process.env.MANA_RESEARCH_URL || 'http://localhost:3068',
 		manaLlmUrl: process.env.MANA_LLM_URL || 'http://localhost:3025',
+		eventbriteApiKey: process.env.EVENTBRITE_API_KEY || null,
+		meetupApiKey: process.env.MEETUP_API_KEY || null,
 	};
 }

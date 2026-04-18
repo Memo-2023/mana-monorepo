@@ -13,19 +13,25 @@
 
 import { and, eq, lt, or, isNull, sql } from 'drizzle-orm';
 import type { Database } from '../db/connection';
-import { discoverySources, discoveredEvents } from '../db/schema/discovery';
-import { parseIcalFeed } from './ical-parser';
-import { extractEventsFromWebsite } from './website-extractor';
+import { discoverySources, discoveredEvents, discoveryRegions } from '../db/schema/discovery';
+import { getProvider, type ExternalServiceConfig } from './providers';
 import { computeDedupeHash } from './deduplicator';
 import type { NormalizedEvent } from './types';
 
 const MAX_ERROR_COUNT = 5;
 
-/** Find all sources due for a crawl. */
+/** Find all sources due for a crawl, joined with their region for context. */
 async function getDueSources(db: Database) {
 	return db
-		.select()
+		.select({
+			source: discoverySources,
+			regionLat: discoveryRegions.lat,
+			regionLon: discoveryRegions.lon,
+			regionRadiusKm: discoveryRegions.radiusKm,
+			regionLabel: discoveryRegions.label,
+		})
 		.from(discoverySources)
+		.leftJoin(discoveryRegions, eq(discoverySources.regionId, discoveryRegions.id))
 		.where(
 			and(
 				eq(discoverySources.isActive, true),
@@ -37,39 +43,48 @@ async function getDueSources(db: Database) {
 		);
 }
 
-/** External service URLs for Phase 2 website extraction. */
+/** External service URLs for website extraction + LLM. */
 interface CrawlConfig {
 	manaResearchUrl: string;
 	manaLlmUrl: string;
 }
 
-/** Crawl a single source and return normalized events. */
+/** Crawl a single source via its provider and return normalized events. */
 async function crawlSource(
 	source: typeof discoverySources.$inferSelect,
-	config?: CrawlConfig
+	config?: CrawlConfig,
+	regionCtx?: {
+		lat: number | null;
+		lon: number | null;
+		radiusKm: number | null;
+		label: string | null;
+	}
 ): Promise<{ events: NormalizedEvent[]; error?: string }> {
+	const provider = getProvider(source.type);
+	if (!provider) {
+		return { events: [], error: `Unknown source type: ${source.type}` };
+	}
+
+	if (!source.url && !['eventbrite', 'meetup'].includes(source.type)) {
+		return { events: [], error: 'No URL configured' };
+	}
+
 	try {
-		switch (source.type) {
-			case 'ical': {
-				if (!source.url) return { events: [], error: 'No URL configured' };
-				const events = await parseIcalFeed(source.url, source.name);
-				return { events };
-			}
-			case 'website': {
-				if (!source.url) return { events: [], error: 'No URL configured' };
-				if (!config)
-					return { events: [], error: 'Missing research/LLM config for website extraction' };
-				const events = await extractEventsFromWebsite(
-					source.url,
-					source.name,
-					config.manaResearchUrl,
-					config.manaLlmUrl
-				);
-				return { events };
-			}
-			default:
-				return { events: [], error: `Unsupported source type: ${source.type}` };
-		}
+		const ctx =
+			regionCtx?.lat != null
+				? {
+						lat: regionCtx.lat!,
+						lon: regionCtx.lon!,
+						radiusKm: regionCtx.radiusKm ?? 25,
+						regionLabel: regionCtx.label ?? undefined,
+					}
+				: undefined;
+
+		const extConfig: ExternalServiceConfig | undefined = config
+			? { manaResearchUrl: config.manaResearchUrl, manaLlmUrl: config.manaLlmUrl }
+			: undefined;
+
+		return await provider.fetchEvents(source.url ?? '', source.name, ctx, extConfig);
 	} catch (err) {
 		const message = err instanceof Error ? err.message : 'Unknown error';
 		return { events: [], error: message };
@@ -137,9 +152,15 @@ async function upsertEvents(
 async function processSource(
 	db: Database,
 	source: typeof discoverySources.$inferSelect,
-	config?: CrawlConfig
+	config?: CrawlConfig,
+	regionCtx?: {
+		lat: number | null;
+		lon: number | null;
+		radiusKm: number | null;
+		label: string | null;
+	}
 ): Promise<void> {
-	const { events, error } = await crawlSource(source, config);
+	const { events, error } = await crawlSource(source, config, regionCtx);
 	const now = new Date();
 
 	if (error) {
@@ -194,8 +215,13 @@ async function cleanupExpiredEvents(db: Database): Promise<number> {
 export async function runCrawlTick(db: Database, config?: CrawlConfig): Promise<void> {
 	try {
 		const due = await getDueSources(db);
-		for (const source of due) {
-			await processSource(db, source, config);
+		for (const row of due) {
+			await processSource(db, row.source, config, {
+				lat: row.regionLat,
+				lon: row.regionLon,
+				radiusKm: row.regionRadiusKm,
+				label: row.regionLabel,
+			});
 		}
 
 		const expired = await cleanupExpiredEvents(db);
@@ -237,16 +263,29 @@ export async function crawlSourceNow(
 	sourceId: string,
 	config?: CrawlConfig
 ): Promise<{ upserted: number; error?: string }> {
-	const sources = await db
-		.select()
+	const rows = await db
+		.select({
+			source: discoverySources,
+			regionLat: discoveryRegions.lat,
+			regionLon: discoveryRegions.lon,
+			regionRadiusKm: discoveryRegions.radiusKm,
+			regionLabel: discoveryRegions.label,
+		})
 		.from(discoverySources)
+		.leftJoin(discoveryRegions, eq(discoverySources.regionId, discoveryRegions.id))
 		.where(eq(discoverySources.id, sourceId))
 		.limit(1);
 
-	if (!sources[0]) return { upserted: 0, error: 'Source not found' };
+	if (!rows[0]) return { upserted: 0, error: 'Source not found' };
 
-	const source = sources[0];
-	const { events, error } = await crawlSource(source, config);
+	const { source } = rows[0];
+	const regionCtx = {
+		lat: rows[0].regionLat,
+		lon: rows[0].regionLon,
+		radiusKm: rows[0].regionRadiusKm,
+		label: rows[0].regionLabel,
+	};
+	const { events, error } = await crawlSource(source, config, regionCtx);
 	const now = new Date();
 
 	if (error) {

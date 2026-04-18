@@ -20,9 +20,11 @@ export interface DiscoveryInterest {
 	createdAt: string;
 }
 
+export type SourceType = 'ical' | 'website' | 'eventbrite' | 'meetup';
+
 export interface DiscoverySource {
 	id: string;
-	type: 'ical' | 'website';
+	type: SourceType;
 	url: string | null;
 	name: string;
 	regionId: string | null;

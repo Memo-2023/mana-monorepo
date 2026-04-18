@@ -95,8 +95,8 @@ export async function getSources(): Promise<DiscoverySource[]> {
 }
 
 export async function createSource(input: {
-	type: 'ical' | 'website';
-	url: string;
+	type: 'ical' | 'website' | 'eventbrite' | 'meetup';
+	url?: string;
 	name: string;
 	regionId: string;
 	crawlIntervalHours?: number;
