@@ -886,6 +886,71 @@ export const AI_TOOL_CATALOG: readonly ToolSchema[] = [
 			},
 		],
 	},
+
+	// ── Event Discovery ─────────────────────────────────────────
+	{
+		name: 'discover_events',
+		module: 'events',
+		description:
+			'Sucht oeffentliche Veranstaltungen in den konfigurierten Regionen des Nutzers. Gibt Events mit Titel, Datum, Ort, Kategorie und Quelle zurueck.',
+		defaultPolicy: 'auto',
+		parameters: [
+			{
+				name: 'query',
+				type: 'string',
+				description: 'Optionaler Suchtext (z.B. "Jazz Konzerte")',
+				required: false,
+			},
+			{
+				name: 'category',
+				type: 'string',
+				description: 'Kategorie-Filter',
+				required: false,
+				enum: [
+					'music',
+					'theater',
+					'art',
+					'tech',
+					'sport',
+					'food',
+					'family',
+					'nature',
+					'education',
+					'community',
+					'nightlife',
+					'market',
+					'other',
+				],
+			},
+			{
+				name: 'days_ahead',
+				type: 'number',
+				description: 'Wie viele Tage voraus suchen (Standard: 14)',
+				required: false,
+			},
+		],
+	},
+	{
+		name: 'suggest_event',
+		module: 'events',
+		description:
+			'Schlaegt dem Nutzer ein entdecktes Event vor. Erstellt ein Proposal das der Nutzer bestaetigen muss, um das Event in seinen Kalender zu uebernehmen.',
+		defaultPolicy: 'propose',
+		parameters: [
+			{
+				name: 'discovered_event_id',
+				type: 'string',
+				description: 'ID des entdeckten Events',
+				required: true,
+			},
+			{
+				name: 'reason',
+				type: 'string',
+				description: 'Begruendung warum dieses Event relevant ist',
+				required: false,
+			},
+		],
+	},
 ];
 
 // ═══════════════════════════════════════════════════════════════

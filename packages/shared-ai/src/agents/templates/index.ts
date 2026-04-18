@@ -13,6 +13,7 @@ import { todayTemplate } from './today';
 import { calmnessTemplate } from './calmness';
 import { fitnessTemplate } from './fitness';
 import { deepWorkTemplate } from './deep-work';
+import { eventScoutTemplate } from './event-scout';
 
 export type {
 	// Generalised names (T1 of workbench-templates plan):
@@ -38,6 +39,7 @@ export const ALL_TEMPLATES = [
 	calmnessTemplate,
 	fitnessTemplate,
 	deepWorkTemplate,
+	eventScoutTemplate,
 ] as const;
 
 export {
@@ -47,6 +49,7 @@ export {
 	calmnessTemplate,
 	fitnessTemplate,
 	deepWorkTemplate,
+	eventScoutTemplate,
 };
 
 /** Lookup helper — returns the template matching the given id, or
