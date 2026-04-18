@@ -87,7 +87,10 @@ function bumpMru(id: string) {
 	}
 }
 
-function toScene(local: LocalWorkbenchScene): WorkbenchScene {
+/** Exported for unit tests — converts a Dexie row to the public shape.
+ *  Regression guard: this previously dropped `viewingAsAgentId` and
+ *  `scopeTagIds`, silently breaking SceneAppBar's agent badge. */
+export function toScene(local: LocalWorkbenchScene): WorkbenchScene {
 	return {
 		id: local.id,
 		name: local.name,
@@ -119,7 +122,10 @@ async function ensureSeedScene(): Promise<string> {
 	return id;
 }
 
-function pickActiveId(scenes: WorkbenchScene[], current: string | null): string | null {
+/** Exported for unit tests — resolves the active scene id against the
+ *  available list, falling back to per-device MRU and finally to the
+ *  first sort-ordered scene. */
+export function pickActiveId(scenes: WorkbenchScene[], current: string | null): string | null {
 	if (scenes.length === 0) return null;
 	const ids = new Set(scenes.map((s) => s.id));
 	if (current && ids.has(current)) return current;
