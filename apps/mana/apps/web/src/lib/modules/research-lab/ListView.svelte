@@ -77,13 +77,10 @@
 
 <div class="lab">
 	<header class="lab-header">
-		<div>
-			<h2>Research Lab</h2>
-			<p class="subtitle">
-				Gleiche Anfrage parallel an mehrere Anbieter schicken, Antworten nebeneinander vergleichen,
-				persistent speichern.
-			</p>
-		</div>
+		<p class="subtitle">
+			Gleiche Anfrage parallel an mehrere Anbieter schicken, Antworten nebeneinander vergleichen,
+			persistent speichern.
+		</p>
 		<div class="header-actions">
 			<button type="button" class="keys-link" onclick={() => void goto('/research-lab/keys')}>
 				🔑 API-Keys
@@ -225,20 +222,16 @@
 	.lab-header {
 		display: flex;
 		justify-content: space-between;
-		align-items: flex-start;
+		align-items: center;
 		gap: 1rem;
 		flex-wrap: wrap;
 	}
-	.lab-header h2 {
-		margin: 0;
-		font-size: 1.25rem;
-		font-weight: 600;
-	}
 	.subtitle {
-		margin: 0.25rem 0 0;
+		margin: 0;
 		font-size: 0.875rem;
 		color: hsl(var(--color-muted-foreground));
 		max-width: 40rem;
+		flex: 1 1 20rem;
 	}
 
 	.header-actions {
