@@ -746,6 +746,227 @@ export const MODULE_HELP: Record<string, ModuleHelp> = {
 			'Starte einfach: z.B. "Wenn ein neuer Kontakt erstellt wird, erstelle eine Aufgabe zum Kennenlernen"',
 		],
 	},
+	activity: {
+		description:
+			'Live-Stream aller Events aus allen Modulen — Aufgaben erledigt, Termine erstellt, Gewohnheiten geloggt, Getränke getrunken. Zeigt, was gerade in deinem System passiert.',
+		features: [
+			'Chronologische Ansicht aller Domain-Events',
+			'Filtert pro Modul (Todo, Kalender, Trinken, Essen, …)',
+			'Zeigt Actor: User, AI-Agent oder System-Source',
+			'Verlinkt direkt zum ursprünglichen Eintrag',
+		],
+		tips: [
+			'Nützlich, um zu sehen was die AI-Agents im Hintergrund tun',
+			'Events sind unveränderlich — das ist dein Audit-Log',
+		],
+	},
+	admin: {
+		description:
+			'Interne Admin-Tools für Benutzer-, Tier- und System-Verwaltung. Nur für Accounts mit role=admin sichtbar.',
+		features: [
+			'User-Liste mit Such- und Tier-Edit',
+			'Per-User Daten-Übersicht (GDPR)',
+			'Access-Tier-Management (guest/public/beta/alpha/founder)',
+			'User-Daten löschen (Right to be forgotten)',
+		],
+	},
+	'ai-health': {
+		description:
+			'Status der AI-Infrastruktur: Ollama-Erreichbarkeit, Cloud-Provider-Keys, Mission-Runner-Gesundheit.',
+		features: [
+			'Ping-Status für mana-llm und Ollama',
+			'Key-Check für OpenAI/Anthropic/Google (wenn konfiguriert)',
+			'Mission-Runner-Status (läuft der Background-Tick?)',
+			'Letzte LLM-Calls mit Latenz + Fehlerrate',
+		],
+		tips: [
+			'Rot? → Service neu starten oder Key prüfen',
+			'Gelb? → Provider ist erreichbar aber langsam',
+		],
+	},
+	'ai-insights': {
+		description:
+			'AI-generierte Einsichten über deine Daten — Patterns, Trends, ungenutzte Verbindungen, Impulse. Datenschutz: alles läuft lokal oder mit deinen Keys.',
+		features: [
+			'Automatische Wochen-/Monats-Rückblicke',
+			'Cross-Module-Patterns (z.B. "du schläfst schlechter an Tagen mit vielen Meetings")',
+			'Vorschläge für neue Missionen oder Rituale',
+			'Bearbeitbare Einsichten — du kannst Falschaussagen korrigieren',
+		],
+		tips: ['Je mehr Module aktiv genutzt werden, desto aussagekräftiger werden die Einsichten'],
+	},
+	'ai-policy': {
+		description:
+			'Editor für AI-Tool-Policies pro Agent: Was darf die AI automatisch, was muss sie vorschlagen, was ist verboten.',
+		features: [
+			'Per-Tool: auto | propose | deny',
+			'Pro-Agent-Konfiguration (Mana, Recherche-Agent, Kontext-Agent, …)',
+			'Defaults aus @mana/shared-ai AI_PROPOSABLE_TOOL_NAMES',
+			'Export/Import von Policy-Profilen',
+		],
+		tips: [
+			'"auto" für lesende Tools (list_notes, get_tasks_stats, …)',
+			'"propose" für schreibende Tools — so bleibt das Proposal-Inbox die Single Source of Truth',
+			'"deny" wenn du einem Agent die Mutation komplett verbieten willst',
+		],
+	},
+	'api-keys': {
+		description:
+			'Persönliche API-Keys für externen Zugriff auf deine Mana-Daten. Jeder Key hat einen Scope-Satz und ein Rate-Limit.',
+		features: [
+			'Key mit beliebigem Namen erstellen',
+			'Scopes pro Key (z.B. read:tasks, write:notes)',
+			'Rate-Limit pro Stunde konfigurierbar',
+			'Secret wird genau einmal angezeigt — danach nur Prefix',
+			'Widerruf jederzeit möglich',
+		],
+		tips: [
+			'Nach Erstellung sofort kopieren — der Secret ist später nicht mehr sichtbar',
+			'Scopes knapp halten: lieber mehrere Keys mit minimalen Rechten als einen Universal-Key',
+		],
+	},
+	companion: {
+		description:
+			'Dein AI-Companion — der Chat-Zugang zu Mana. Stellt Fragen über deine Daten, erstellt Aufgaben/Notizen per Freitext, führt Research-Missions aus.',
+		features: [
+			'Chat mit vollem Kontext über alle deine Module',
+			'Tool-Use: Der Companion schlägt Änderungen vor (Todo, Kalender, Notizen, …) — du bestätigst',
+			'Missions: Longrunning-Aufgaben mit Wiederholung und Budget',
+			'Scene-Lens: binde Szenen an einen spezifischen Agent',
+		],
+		tips: [
+			'Ziehe ein Modul in den Chat um es als Kontext zu übergeben',
+			'"Plane meine Woche" — nutzt Kalender + Todo + Habits zusammen',
+			'Für tiefe Recherche: `research_news` Tool mit `depth: "deep"`',
+		],
+	},
+	complexity: {
+		description:
+			'Treemap der Codebase — Fläche = Lines of Code, Farbe = git churn. Dev-Tool, nur für Admin-Accounts sichtbar.',
+		features: [
+			'Interaktive Treemap (zoomen, filtern)',
+			'Hotspot-Erkennung: hohe Churn + hohe LOC = Refactor-Kandidat',
+			'Per-Modul-Breakdown',
+			'Generiert via `pnpm audit:map`',
+		],
+		tips: ['Zum Updaten der Daten: `pnpm audit:map` im Monorepo laufen lassen'],
+	},
+	credits: {
+		description:
+			'Credits-Konto und Abo-Verwaltung. Mana-Credits bezahlen AI-Anfragen, Sync, Premium-Research. 1 Credit ≈ 1 Cent.',
+		features: [
+			'Aktuelles Guthaben + Gesamt verdient/ausgegeben',
+			'Transaktions-Historie (Purchase, Usage, Refund, Gift)',
+			'Credit-Pakete kaufen (Stripe)',
+			'Cloud-Sync abonnieren/verwalten',
+			'Geschenk-Codes einlösen',
+		],
+		tips: [
+			'Niedrige Credits? → Sync pausiert, lokale Daten bleiben erhalten',
+			'Geschenk-Codes laufen automatisch ab, wenn nicht eingelöst',
+		],
+	},
+	feedback: {
+		description:
+			'Schnelles Feedback an das Mana-Team. Bug melden, Feature wünschen, allgemein Dampf ablassen — alles mit einem Klick.',
+		features: [
+			'Kategorie: Bug / Feature / Anderes',
+			'Optional Screenshot + Kontext-Metadaten anhängen',
+			'Sendet an die Mana-Feedback-Inbox',
+			'Status-Updates per E-Mail wenn gewünscht',
+		],
+	},
+	help: {
+		description:
+			'Zentrale Hilfe-Seite mit FAQ, Anleitungen und Support-Infos. Erklärt übergreifende Konzepte wie Lokal-First, Verschlüsselung, Sync und Tiers.',
+		features: [
+			'FAQ zu den häufigsten Fragen',
+			'Getting-Started-Guides',
+			'Konzepte: Scenes, Module, AI-Workbench, Rituals',
+			'Support-Kontakt',
+		],
+		tips: ['Jedes Modul hat zusätzlich sein eigenes ?-Icon mit kontextueller Hilfe'],
+	},
+	news: {
+		description:
+			'Kuratierter News-Feed aus vertrauenswürdigen Quellen. 7 Themen (Tech, Wissenschaft, Weltgeschehen, Wirtschaft, Kultur, Gesundheit, Politik). Alle 15 Minuten aktualisiert.',
+		features: [
+			'Thema-Filter + Sprachauswahl (DE/EN)',
+			'Eigene Abos über Custom-Feeds',
+			'Artikel in Leseliste speichern (verschlüsselt)',
+			'AI-Tool: `save_news_article`',
+			'Schwester-Modul: /research-lab für tiefere Recherche',
+		],
+		tips: [
+			'Ziehe einen Artikel auf Notizen um eine Zusammenfassung zu erstellen',
+			'Für Nicht-RSS-Quellen: Research Lab mit Deep-Research nutzen',
+		],
+	},
+	profile: {
+		description:
+			'Dein persönliches Profil — der Kontext-Doc, den alle AI-Agents als Basis nutzen. Wer bist du, was willst du, was sollte Mana über dich wissen.',
+		features: [
+			'Kontext-Doc (Markdown, verschlüsselt)',
+			'Interview-Modus: Mana fragt dich Schritt für Schritt',
+			'Voice-Interview (TTS) für entspanntes Durchsprechen',
+			'Wird in jede Mission auto-injiziert',
+		],
+		tips: [
+			'Kurz + konkret: Namen, Rollen, Ziele, Vorlieben, No-Gos',
+			'Updaten wenn sich Kontext ändert — z.B. neuer Job, neues Projekt',
+		],
+	},
+	rituals: {
+		description:
+			'Tägliche oder wöchentliche Rituale als geführte Zeremonien. Morgendroutine, Abend-Reflexion, Wochen-Rückblick — Schritt für Schritt.',
+		features: [
+			'Zeremonie-Steps: Prompt-Frage, Notiz, Habit, Tag-Edit, Atemübung',
+			'Zeitplan: täglich/wöchentlich/manuell',
+			'Verknüpfung mit Habits, Notizen, Goals',
+			'Verschlüsselte Antworten',
+		],
+		tips: [
+			'Starte klein: 2–3 Steps, 2 Minuten',
+			'Der Wochen-Rückblick profitiert stark von AI-Insights als ersten Step',
+		],
+	},
+	settings: {
+		description:
+			'Zentrale App-Einstellungen. Allgemein, KI, Sicherheit (Vault/ZK-Mode), Daten, Sync.',
+		features: [
+			'Allgemein: Sprache, Zeitzone, Datumsformat',
+			'KI-Optionen: welche LLM-Schichten (lokal, Cloud, alle) darf Mana nutzen',
+			'Sicherheit: Vault-Status, Recovery-Code, Zero-Knowledge-Mode',
+			'Daten: Export als JSON, kompletter Daten-Löschung (GDPR)',
+			'Sync: Cloud-Sync aktivieren/deaktivieren, Intervall ändern',
+		],
+		tips: [
+			'Zero-Knowledge-Mode: nur du kannst deine Daten entschlüsseln — Recovery-Code gut aufbewahren',
+			'KI-Einstellungen können pro Agent überschrieben werden',
+		],
+	},
+	spiral: {
+		description:
+			'Mana Spiral — visueller Fingerabdruck deiner Aktivität als farbiger Pixel-Spiral-Plot. Zeigt auf einen Blick, wie dein System-Rhythmus aussieht.',
+		features: [
+			'Pixel pro Tag pro Modul',
+			'Farben codieren Modul-Art (Aufgaben, Habits, Notizen, Essen, …)',
+			'Monats- oder Jahresansicht',
+			'Klick auf Pixel → Details des Tags',
+		],
+		tips: ['Lücken zeigen Pausen — gut oder schlecht je nach Kontext'],
+	},
+	themes: {
+		description:
+			'Theme-Picker für das Erscheinungsbild der App. Light, Dark, Auto + farbliche Akzent-Varianten.',
+		features: [
+			'Light / Dark / System-Auto',
+			'Akzentfarben (Lume Gold Default)',
+			'Kontrast-Varianten für Accessibility',
+			'Theme-Preview bevor du umschaltest',
+		],
+		tips: ['System-Auto folgt deinem OS-Dark-Mode automatisch zur richtigen Uhrzeit'],
+	},
 	'research-lab': {
 		description:
 			'Web-Research-Anbieter Seite-an-Seite vergleichen: gleiche Query an bis zu fünf Provider parallel, Antworten + Latenz + Kosten nebeneinander. Alle Runs werden serverseitig persistiert für spätere Auswertung.',
