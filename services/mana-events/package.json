@@ -12,10 +12,11 @@
 		"db:studio": "drizzle-kit studio"
 	},
 	"dependencies": {
-		"hono": "^4.7.0",
 		"drizzle-orm": "^0.38.3",
-		"postgres": "^3.4.5",
+		"hono": "^4.7.0",
 		"jose": "^6.1.2",
+		"node-ical": "^0.26.0",
+		"postgres": "^3.4.5",
 		"zod": "^3.24.0"
 	},
 	"devDependencies": {

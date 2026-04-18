@@ -3463,6 +3463,9 @@ importers:
       jose:
         specifier: ^6.1.2
         version: 6.2.2
+      node-ical:
+        specifier: ^0.26.0
+        version: 0.26.0
       postgres:
         specifier: ^3.4.5
         version: 3.4.9
@@ -6787,6 +6790,10 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.9':
     resolution: {integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==}
+
+  '@js-temporal/polyfill@0.5.1':
+    resolution: {integrity: sha512-hloP58zRVCRSpgDxmqCWJNlizAlUgJFqG2ypq79DCvyv9tHjRYMDOcPFjzfl/A1/YxDvRCZz8wvZvmapQnKwFQ==}
+    engines: {node: '>=12'}
 
   '@ljharb/through@2.3.14':
     resolution: {integrity: sha512-ajBvlKpWucBB17FuQYUShqpqy8GRgYEpJW0vWJbUu1CV9lWyrDCapy0lScU8T8Z6qn49sSwJB3+M+evYIdGg+A==}
@@ -13490,6 +13497,9 @@ packages:
     resolution: {integrity: sha512-qQKT4zQxXl8lLwBtHMWwaTcGfFOZviOJet3Oy/xmGk2gZH677CJM9EvtfdSkgWcATZhj/55JZ0rmy3myCT5lsA==}
     hasBin: true
 
+  jsbi@4.3.2:
+    resolution: {integrity: sha512-9fqMSQbhJykSeii05nxKl4m6Eqn2P6rOlYiS+C5Dr/HPIU/7yZxu5qzbs40tgaFORiw2Amd0mirjxatXYMkIew==}
+
   jsc-safe-url@0.2.4:
     resolution: {integrity: sha512-0wM3YBWtYePOjfyXQH5MWQ8H7sdk5EXSwZvmSLKk2RboVQ2Bu239jycHDz5J/8Blf3K0Qnoy2b6xD+z10MFB+Q==}
 
@@ -14552,6 +14562,10 @@ packages:
   node-gyp-build-optional-packages@5.2.2:
     resolution: {integrity: sha512-s+w+rBWnpTMwSFbaE0UXsRlg7hU4FjekKU4eyAih5T8nJuNZT1nNsskXpxmeqSK9UzkBl6UgRlnKc8hz8IEqOw==}
     hasBin: true
+
+  node-ical@0.26.0:
+    resolution: {integrity: sha512-tJZY2fMb38Gbj0P05zHMWBr90MslhGZ1qEbOWYnokBYPPX/lYskL/0NnWoeiXTBNod+kRRcTOjxAeB20kfvKyw==}
+    engines: {node: '>=20'}
 
   node-int64@0.4.0:
     resolution: {integrity: sha512-O5lz91xSOeoXP6DulyHfllpq+Eg00MWitZIbtPfoSEvqIHdl5gfcY6hYzDWnj0qD5tz52PI08u9qUvSVeUBeHw==}
@@ -15969,6 +15983,9 @@ packages:
     resolution: {integrity: sha512-nLTrUKm2UyiL7rlhapu/Zl45FwNgkZGaCpZbIHajDYgwlJCOzLSk+cIPAnsEqV955GjILJnKbdQC1nVPz+gAYQ==}
     engines: {node: '>= 18'}
 
+  rrule-temporal@1.5.2:
+    resolution: {integrity: sha512-I5rAiZfRlMh0vuG23HrGBMLZOSiQO7H1Uq8l9qyfA6oTD5j+UMRwpRs4aVU4XdaFhgN1p3K+cHelG8KvLTTm+g==}
+
   rrule@2.8.1:
     resolution: {integrity: sha512-hM3dHSBMeaJ0Ktp7W38BJZ7O1zOgaFEsn41PDk+yHoEtfLV+PoJt9E9xAlZiWgf/iqEqionN0ebHFZIDAp+iGw==}
 
@@ -16618,6 +16635,12 @@ packages:
   temp-dir@2.0.0:
     resolution: {integrity: sha512-aoBAniQmmwtcKp/7BzsH8Cxzv8OL736p7v1ihGb5e9DJ9kTwGWHrQrVB5+lfVDzfGrdRzXch+ig7LHaY1JTOrg==}
     engines: {node: '>=8'}
+
+  temporal-polyfill@0.3.2:
+    resolution: {integrity: sha512-TzHthD/heRK947GNiSu3Y5gSPpeUDH34+LESnfsq8bqpFhsB79HFBX8+Z834IVX68P3EUyRPZK5bL/1fh437Eg==}
+
+  temporal-spec@0.3.1:
+    resolution: {integrity: sha512-B4TUhezh9knfSIMwt7RVggApDRJZo73uZdj8AacL2mZ8RP5KtLianh2MXxL06GN9ESYiIsiuoLQhgVfwe55Yhw==}
 
   tempy@0.6.0:
     resolution: {integrity: sha512-G13vtMYPT/J8A4X2SjdtBTphZlrp1gKv6hZiOjw14RCWg6GbHuQBGtjlx75xLbYV/wEc0D7G5K4rxKP/cXk8Bw==}
@@ -22112,6 +22135,10 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
+
+  '@js-temporal/polyfill@0.5.1':
+    dependencies:
+      jsbi: 4.3.2
 
   '@ljharb/through@2.3.14':
     dependencies:
@@ -32512,6 +32539,8 @@ snapshots:
     dependencies:
       argparse: 2.0.1
 
+  jsbi@4.3.2: {}
+
   jsc-safe-url@0.2.4: {}
 
   jsdom@25.0.1:
@@ -34093,6 +34122,11 @@ snapshots:
     dependencies:
       detect-libc: 2.1.2
     optional: true
+
+  node-ical@0.26.0:
+    dependencies:
+      rrule-temporal: 1.5.2
+      temporal-polyfill: 0.3.2
 
   node-int64@0.4.0: {}
 
@@ -36082,6 +36116,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  rrule-temporal@1.5.2:
+    dependencies:
+      '@js-temporal/polyfill': 0.5.1
+
   rrule@2.8.1:
     dependencies:
       tslib: 2.8.1
@@ -36875,6 +36913,12 @@ snapshots:
       bintrees: 1.0.2
 
   temp-dir@2.0.0: {}
+
+  temporal-polyfill@0.3.2:
+    dependencies:
+      temporal-spec: 0.3.1
+
+  temporal-spec@0.3.1: {}
 
   tempy@0.6.0:
     dependencies:

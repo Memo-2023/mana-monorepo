@@ -15,6 +15,9 @@ export interface Config {
 		// Hard cap on total RSVPs per token
 		rsvpMaxPerToken: number;
 	};
+	// Phase 2: external service URLs for event discovery
+	manaResearchUrl: string;
+	manaLlmUrl: string;
 }
 
 export function loadConfig(): Config {
@@ -38,5 +41,7 @@ export function loadConfig(): Config {
 			rsvpPerTokenPerHour: parseInt(process.env.RSVP_RATE_LIMIT || '60', 10),
 			rsvpMaxPerToken: parseInt(process.env.RSVP_MAX_PER_TOKEN || '500', 10),
 		},
+		manaResearchUrl: process.env.MANA_RESEARCH_URL || 'http://localhost:3068',
+		manaLlmUrl: process.env.MANA_LLM_URL || 'http://localhost:3025',
 	};
 }

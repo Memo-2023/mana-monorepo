@@ -7,5 +7,5 @@ export default defineConfig({
 	dbCredentials: {
 		url: process.env.DATABASE_URL || 'postgresql://mana:devpassword@localhost:5432/mana_platform',
 	},
-	schemaFilter: ['events'],
+	schemaFilter: ['events', 'event_discovery'],
 });

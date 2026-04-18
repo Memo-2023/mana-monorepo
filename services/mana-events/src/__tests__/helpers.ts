@@ -40,6 +40,8 @@ const TEST_CONFIG: Config = {
 		rsvpPerTokenPerHour: 5,
 		rsvpMaxPerToken: 20,
 	},
+	manaResearchUrl: 'http://localhost:3068',
+	manaLlmUrl: 'http://localhost:3025',
 };
 
 /**
@@ -71,6 +73,12 @@ export function buildTestApp(overrides: Partial<Config> = {}): TestApp {
 		async wipe() {
 			// Cascade FK from events_published handles public_rsvps + rate buckets
 			await db.execute(sql`DELETE FROM events.events_published`);
+			// Discovery tables — cascade handles discovered_events + user_actions
+			await db.execute(sql`DELETE FROM event_discovery.discovery_user_actions`);
+			await db.execute(sql`DELETE FROM event_discovery.discovered_events`);
+			await db.execute(sql`DELETE FROM event_discovery.discovery_sources`);
+			await db.execute(sql`DELETE FROM event_discovery.discovery_interests`);
+			await db.execute(sql`DELETE FROM event_discovery.discovery_regions`);
 		},
 	};
 }

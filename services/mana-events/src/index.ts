@@ -14,6 +14,7 @@ import { createApp } from './app';
 import { loadConfig } from './config';
 import { getDb } from './db/connection';
 import { startRateBucketSweeper } from './lib/cleanup';
+import { startCrawlScheduler } from './discovery/crawl-scheduler';
 
 const config = loadConfig();
 const db = getDb(config.databaseUrl);
@@ -21,6 +22,12 @@ const db = getDb(config.databaseUrl);
 // Background cleanup of stale rate-limit buckets so they don't
 // accumulate for the lifetime of long-published events.
 startRateBucketSweeper(db);
+
+// Event discovery — crawl sources (iCal feeds, websites) every 15 minutes.
+startCrawlScheduler(db, {
+	manaResearchUrl: config.manaResearchUrl,
+	manaLlmUrl: config.manaLlmUrl,
+});
 
 console.log(`mana-events starting on port ${config.port}...`);
 

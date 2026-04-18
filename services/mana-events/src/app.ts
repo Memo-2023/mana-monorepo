@@ -12,6 +12,8 @@ import { jwtAuth } from './middleware/jwt-auth';
 import { healthRoutes } from './routes/health';
 import { createEventsRoutes } from './routes/events';
 import { createRsvpRoutes } from './routes/rsvp';
+import { createDiscoveryRoutes } from './routes/discovery';
+import { createDiscoveryFeedRoutes } from './routes/discovery-feed';
 
 /**
  * Build the Hono app. The auth middleware is injected so tests can swap
@@ -41,6 +43,11 @@ export function createApp(
 	// Authenticated host endpoints
 	app.use('/api/v1/events/*', authMiddleware);
 	app.route('/api/v1/events', createEventsRoutes(db));
+
+	// Discovery endpoints (all authenticated)
+	app.use('/api/v1/discovery/*', authMiddleware);
+	app.route('/api/v1/discovery', createDiscoveryRoutes(db, config));
+	app.route('/api/v1/discovery', createDiscoveryFeedRoutes(db));
 
 	return app;
 }

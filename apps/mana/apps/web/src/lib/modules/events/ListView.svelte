@@ -4,6 +4,7 @@
 	import { eventsStore } from './stores/events.svelte';
 	import { drainTombstones } from './tombstones';
 	import EventCard from './components/EventCard.svelte';
+	import DiscoveryTab from './components/DiscoveryTab.svelte';
 	import type { SocialEvent } from './types';
 	import type { ViewProps } from '$lib/app-registry';
 
@@ -12,6 +13,8 @@
 	const upcoming = useUpcomingEvents();
 	const past = usePastEvents();
 	const guestsByEvent = useGuestsByEvent();
+
+	let activeTab = $state<'mine' | 'discover'>('mine');
 
 	// Retry any orphaned server snapshots from previous failed deletes.
 	onMount(() => {
@@ -60,55 +63,72 @@
 </svelte:head>
 
 <div class="events-page">
-	<header class="events-header">
-		<p class="page-subtitle">
-			{(upcoming.value ?? []).length} bevorstehend · {(past.value ?? []).length} vergangen
-		</p>
-		<button class="new-btn" onclick={() => (showCreate = !showCreate)}>
-			{showCreate ? 'Abbrechen' : '+ Neues Event'}
+	<div class="tab-bar">
+		<button class="tab" class:active={activeTab === 'mine'} onclick={() => (activeTab = 'mine')}>
+			Meine Events
 		</button>
-	</header>
+		<button
+			class="tab"
+			class:active={activeTab === 'discover'}
+			onclick={() => (activeTab = 'discover')}
+		>
+			Entdecken
+		</button>
+	</div>
 
-	{#if showCreate}
-		<form class="create-form" onsubmit={handleCreate}>
-			<input
-				class="input"
-				bind:value={newTitle}
-				placeholder="Worum geht's? (z. B. Geburtstag Anna)"
-				required
-			/>
-			<div class="form-row">
-				<input class="input" type="date" bind:value={newDate} required />
-				<input class="input" type="time" bind:value={newTime} />
-				<input class="input" bind:value={newLocation} placeholder="Ort (optional)" />
-			</div>
-			<button type="submit" class="action-btn primary">Event anlegen</button>
-		</form>
-	{/if}
+	{#if activeTab === 'mine'}
+		<header class="events-header">
+			<p class="page-subtitle">
+				{(upcoming.value ?? []).length} bevorstehend · {(past.value ?? []).length} vergangen
+			</p>
+			<button class="new-btn" onclick={() => (showCreate = !showCreate)}>
+				{showCreate ? 'Abbrechen' : '+ Neues Event'}
+			</button>
+		</header>
 
-	<section class="event-section">
-		<h2 class="section-title">Bevorstehend</h2>
-		{#if (upcoming.value ?? []).length === 0}
-			<p class="empty">Keine bevorstehenden Events. Zeit für eine Party?</p>
-		{:else}
-			<div class="event-list">
-				{#each upcoming.value ?? [] as event (event.id)}
-					{@const summary = summarizeRsvps(guestsByEvent.value?.get(event.id) ?? [])}
-					<EventCard {event} {summary} onclick={() => open(event)} />
-				{/each}
-			</div>
+		{#if showCreate}
+			<form class="create-form" onsubmit={handleCreate}>
+				<input
+					class="input"
+					bind:value={newTitle}
+					placeholder="Worum geht's? (z. B. Geburtstag Anna)"
+					required
+				/>
+				<div class="form-row">
+					<input class="input" type="date" bind:value={newDate} required />
+					<input class="input" type="time" bind:value={newTime} />
+					<input class="input" bind:value={newLocation} placeholder="Ort (optional)" />
+				</div>
+				<button type="submit" class="action-btn primary">Event anlegen</button>
+			</form>
 		{/if}
-	</section>
 
-	{#if (past.value ?? []).length > 0}
 		<section class="event-section">
-			<h2 class="section-title">Vergangen</h2>
-			<div class="event-list">
-				{#each past.value ?? [] as event (event.id)}
-					<EventCard {event} onclick={() => open(event)} />
-				{/each}
-			</div>
+			<h2 class="section-title">Bevorstehend</h2>
+			{#if (upcoming.value ?? []).length === 0}
+				<p class="empty">Keine bevorstehenden Events. Zeit fur eine Party?</p>
+			{:else}
+				<div class="event-list">
+					{#each upcoming.value ?? [] as event (event.id)}
+						{@const summary = summarizeRsvps(guestsByEvent.value?.get(event.id) ?? [])}
+						<EventCard {event} {summary} onclick={() => open(event)} />
+					{/each}
+				</div>
+			{/if}
 		</section>
+
+		{#if (past.value ?? []).length > 0}
+			<section class="event-section">
+				<h2 class="section-title">Vergangen</h2>
+				<div class="event-list">
+					{#each past.value ?? [] as event (event.id)}
+						<EventCard {event} onclick={() => open(event)} />
+					{/each}
+				</div>
+			</section>
+		{/if}
+	{:else}
+		<DiscoveryTab />
 	{/if}
 </div>
 
@@ -120,6 +140,30 @@
 		padding: 1rem;
 		max-width: 880px;
 		margin: 0 auto;
+	}
+	.tab-bar {
+		display: flex;
+		gap: 0;
+		border-bottom: 1px solid hsl(var(--color-border));
+	}
+	.tab {
+		padding: 0.5rem 1rem;
+		border: none;
+		background: none;
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: hsl(var(--color-muted-foreground));
+		cursor: pointer;
+		border-bottom: 2px solid transparent;
+		margin-bottom: -1px;
+		font-family: inherit;
+	}
+	.tab.active {
+		color: hsl(var(--color-foreground));
+		border-bottom-color: hsl(var(--color-primary));
+	}
+	.tab:hover:not(.active) {
+		color: hsl(var(--color-foreground));
 	}
 	.events-header {
 		display: flex;
