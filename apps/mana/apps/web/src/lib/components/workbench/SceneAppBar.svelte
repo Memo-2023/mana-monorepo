@@ -8,12 +8,38 @@
 	import type { CarouselPage } from '$lib/components/page-carousel/types';
 	import type { WorkbenchScene } from '$lib/types/workbench-scenes';
 	import { useAgents } from '$lib/data/ai/agents/queries';
+	import { useAllTags } from '@mana/shared-stores';
+	import { workbenchScenesStore } from '$lib/stores/workbench-scenes.svelte';
 
 	// Resolve each scene's bound agent → avatar + name. Cheap lookup
 	// since all active agents are already in memory from the live-
 	// query. No extra Dexie round-trip per render.
 	const agents = $derived(useAgents({ state: 'active' }));
 	const agentById = $derived(new Map(agents.value.map((a) => [a.id, a])));
+
+	// Tag name lookup for the scope-badge tooltip. Same liveQuery that
+	// SceneHeader already uses — no extra Dexie round-trip.
+	const allTags = $derived(useAllTags());
+	const tagNameById = $derived(new Map((allTags.value ?? []).map((t) => [t.id, t.name] as const)));
+
+	function scopeTitle(scopeTagIds: readonly string[] | undefined): string {
+		const names = (scopeTagIds ?? [])
+			.map((id) => tagNameById.get(id))
+			.filter((n): n is string => !!n);
+		return names.length > 0
+			? `Bereich: ${names.join(', ')} — klicken zum Aufheben`
+			: 'Bereichsfilter aktiv — klicken zum Aufheben';
+	}
+
+	async function handleClearScope(e: MouseEvent | KeyboardEvent, sceneId: string) {
+		e.stopPropagation();
+		if ('key' in e) e.preventDefault();
+		try {
+			await workbenchScenesStore.setSceneScopeTags(sceneId, undefined);
+		} catch (err) {
+			console.error('[workbench] setSceneScopeTags failed:', err);
+		}
+	}
 
 	interface Props {
 		scenes: WorkbenchScene[];
@@ -141,7 +167,18 @@
 					{/if}
 					<span class="scene-name">{scene.name}</span>
 					{#if hasScope}
-						<span class="scope-badge" title="Bereichsfilter aktiv">
+						<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+						<span
+							class="scope-badge"
+							role="button"
+							tabindex="0"
+							aria-label="Bereich aufheben"
+							title={scopeTitle(scene.scopeTagIds)}
+							onclick={(e) => handleClearScope(e, scene.id)}
+							onkeydown={(e) => {
+								if (e.key === 'Enter' || e.key === ' ') handleClearScope(e, scene.id);
+							}}
+						>
 							<Funnel size={10} weight="fill" />
 						</span>
 					{/if}
@@ -264,6 +301,19 @@
 		color: hsl(var(--color-primary));
 		opacity: 0.8;
 		flex-shrink: 0;
+		cursor: pointer;
+		padding: 0.125rem;
+		margin: -0.125rem;
+		border-radius: 9999px;
+		transition:
+			opacity 0.15s,
+			background 0.15s;
+	}
+	.scope-badge:hover,
+	.scope-badge:focus-visible {
+		opacity: 1;
+		background: color-mix(in oklab, hsl(var(--color-primary)) 18%, transparent);
+		outline: none;
 	}
 	.group-sep {
 		width: 1px;
