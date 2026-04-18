@@ -133,6 +133,7 @@ export async function executeResearch(
 
 function makeError(providerId: ProviderId, t0: number, err: Error): ExecuteResearchOutput {
 	const code = (err as { code?: string }).code ?? err.name ?? 'ERROR';
+	console.warn(`[executor.research] ${providerId} failed:`, err.message, err);
 	return {
 		success: false,
 		meta: {

@@ -55,6 +55,24 @@ export function createClaudeWebSearchProvider(): ResearchAgent {
 
 			const model = options.model ?? DEFAULT_MODEL;
 
+			// Claude Opus 4.7 deprecated the `temperature` param; only set it
+			// when the caller explicitly asked for one (older Sonnet/Haiku
+			// accept it but Opus 4.7 rejects with 400 invalid_request_error).
+			const body: Record<string, unknown> = {
+				model,
+				max_tokens: options.maxTokens ?? 2048,
+				system: options.systemPrompt,
+				messages: [{ role: 'user', content: query }],
+				tools: [
+					{
+						type: 'web_search_20250305',
+						name: 'web_search',
+						max_uses: DEFAULT_MAX_SEARCHES,
+					},
+				],
+			};
+			if (options.temperature !== undefined) body.temperature = options.temperature;
+
 			const res = await fetch('https://api.anthropic.com/v1/messages', {
 				method: 'POST',
 				headers: {
@@ -62,20 +80,7 @@ export function createClaudeWebSearchProvider(): ResearchAgent {
 					'anthropic-version': '2023-06-01',
 					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify({
-					model,
-					max_tokens: options.maxTokens ?? 2048,
-					temperature: options.temperature ?? 0.3,
-					system: options.systemPrompt,
-					messages: [{ role: 'user', content: query }],
-					tools: [
-						{
-							type: 'web_search_20250305',
-							name: 'web_search',
-							max_uses: DEFAULT_MAX_SEARCHES,
-						},
-					],
-				}),
+				body: JSON.stringify(body),
 				signal: ctx.signal,
 			});
 
