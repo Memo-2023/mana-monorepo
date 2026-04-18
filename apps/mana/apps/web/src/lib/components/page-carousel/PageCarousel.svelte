@@ -56,17 +56,28 @@
 	// Strategy: render a fixed-size placeholder until the wrapper enters
 	// the viewport (50% horizontal overshoot so the next card is ready
 	// before the user scrolls to it), then swap in the real snippet.
-	// Sticky-cache: once a card has been mounted we never tear it down
-	// — re-running a liveQuery + re-fetching a chunk costs more than
-	// keeping the DOM tree resident. Memory still scales with how many
-	// apps the user has actively scrolled through, not how many they
-	// have open.
+	//
+	// LRU cache: keep the MAX_MOUNTED most-recently-intersected cards
+	// mounted and let older ones drop back to a placeholder. Re-mounting
+	// a re-intersected card costs one more liveQuery + chunk request,
+	// but memory now stays bounded regardless of how many apps the user
+	// scrolls through. The cap is set high enough to cover typical
+	// working sets (3–6 apps) with headroom.
+	const MAX_MOUNTED = 8;
 	let mountedIds = $state<Set<string>>(new Set());
 	function markMounted(id: string) {
-		if (mountedIds.has(id)) return;
-		// Replace the Set so $state notices the change.
+		// Set preserves insertion order → MRU sits at the back. Already-MRU
+		// is a no-op so we don't churn reactivity on every intersect tick.
+		if (Array.from(mountedIds).at(-1) === id) return;
 		const next = new Set(mountedIds);
+		// delete+add re-seats the id at the back of insertion order.
+		next.delete(id);
 		next.add(id);
+		while (next.size > MAX_MOUNTED) {
+			const oldest = next.values().next().value;
+			if (!oldest) break;
+			next.delete(oldest);
+		}
 		mountedIds = next;
 	}
 	// Mount the first card eagerly so initial paint always shows
