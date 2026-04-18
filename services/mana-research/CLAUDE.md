@@ -4,6 +4,7 @@ Web research orchestration service. Bundles 16+ providers (search, extract, agen
 
 **Plan:** [`docs/plans/mana-research-service.md`](../../docs/plans/mana-research-service.md)
 **Related analysis:** [`docs/reports/web-research-capabilities.md`](../../docs/reports/web-research-capabilities.md)
+**API-Keys Setup-Guide:** [`API_KEYS.md`](./API_KEYS.md) — step-by-step per provider, pricing, signup URLs
 
 ## Tech Stack
 
