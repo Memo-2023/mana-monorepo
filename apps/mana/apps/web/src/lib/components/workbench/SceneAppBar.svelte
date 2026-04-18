@@ -123,7 +123,18 @@
 						{/if}
 						<span class="scene-name">{scene.name}</span>
 						{#if hasScope}
-							<span class="scope-badge" title="Bereichsfilter aktiv">
+							<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+							<span
+								class="scope-badge"
+								role="button"
+								tabindex="0"
+								aria-label="Bereich aufheben"
+								title={scopeTitle(scene.scopeTagIds)}
+								onclick={(e) => handleClearScope(e, scene.id)}
+								onkeydown={(e) => {
+									if (e.key === 'Enter' || e.key === ' ') handleClearScope(e, scene.id);
+								}}
+							>
 								<Funnel size={10} weight="fill" />
 							</span>
 						{/if}

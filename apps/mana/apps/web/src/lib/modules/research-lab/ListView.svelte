@@ -77,15 +77,6 @@
 
 <div class="lab">
 	<header class="lab-header">
-		<p class="subtitle">
-			Gleiche Anfrage parallel an mehrere Anbieter schicken, Antworten nebeneinander vergleichen,
-			persistent speichern.
-		</p>
-		<div class="header-actions">
-			<button type="button" class="keys-link" onclick={() => void goto('/research-lab/keys')}>
-				🔑 API-Keys
-			</button>
-		</div>
 		<div class="mode-toggle" role="tablist">
 			{#each ['search', 'extract', 'agent'] as const as m}
 				<button
@@ -205,6 +196,12 @@
 			</ul>
 		{/if}
 	</section>
+
+	<footer class="lab-footer">
+		<button type="button" class="keys-link" onclick={() => void goto('/research-lab/keys')}>
+			🔑 Eigene API-Keys verwalten
+		</button>
+	</footer>
 </div>
 
 <style>
@@ -221,38 +218,36 @@
 
 	.lab-header {
 		display: flex;
-		justify-content: space-between;
+		justify-content: flex-start;
 		align-items: center;
 		gap: 1rem;
 		flex-wrap: wrap;
 	}
-	.subtitle {
-		margin: 0;
-		font-size: 0.875rem;
-		color: hsl(var(--color-muted-foreground));
-		max-width: 40rem;
-		flex: 1 1 20rem;
-	}
 
-	.header-actions {
+	.lab-footer {
+		margin-top: 1rem;
+		padding-top: 1rem;
+		border-top: 1px solid hsl(var(--color-border));
 		display: flex;
-		gap: 0.5rem;
+		justify-content: flex-end;
 	}
 	.keys-link {
-		padding: 0.375rem 0.75rem;
+		padding: 0.5rem 0.875rem;
 		border: 1px solid hsl(var(--color-border));
 		border-radius: 0.375rem;
 		background: hsl(var(--color-surface));
-		color: hsl(var(--color-foreground));
+		color: hsl(var(--color-muted-foreground));
 		font-size: 0.8125rem;
 		cursor: pointer;
 		transition:
 			background 0.15s,
-			border-color 0.15s;
+			border-color 0.15s,
+			color 0.15s;
 	}
 	.keys-link:hover {
 		background: hsl(var(--color-surface-hover));
 		border-color: hsl(var(--color-border-strong));
+		color: hsl(var(--color-foreground));
 	}
 
 	.mode-toggle {

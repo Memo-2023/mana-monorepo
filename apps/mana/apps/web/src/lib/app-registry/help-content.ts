@@ -746,4 +746,23 @@ export const MODULE_HELP: Record<string, ModuleHelp> = {
 			'Starte einfach: z.B. "Wenn ein neuer Kontakt erstellt wird, erstelle eine Aufgabe zum Kennenlernen"',
 		],
 	},
+	'research-lab': {
+		description:
+			'Web-Research-Anbieter Seite-an-Seite vergleichen: gleiche Query an bis zu fünf Provider parallel, Antworten + Latenz + Kosten nebeneinander. Alle Runs werden serverseitig persistiert für spätere Auswertung.',
+		features: [
+			'Drei Modi: Suche (6 Provider wie Brave, Tavily, Exa, Serper, SearXNG, DuckDuckGo)',
+			'Extrakt (Firecrawl, Jina Reader, Readability) — eine URL, drei Extraktoren',
+			'Agent (Perplexity Sonar, Claude web_search, OpenAI Responses, Gemini Grounding)',
+			'Auto-Router: ohne Provider-Auswahl klassifiziert ein Regex-/LLM-Mix die Query und wählt den besten Anbieter',
+			'1–5 Sterne pro Ergebnis bewerten — deine Ratings persistieren zur späteren Auswertung',
+			'BYO-Keys: eigene API-Keys hinterlegen, deine Calls gehen direkt ohne Credits-Verbrauch',
+			'Runs-Historie klickbar mit Detail-View für jeden vergangenen Vergleich',
+		],
+		tips: [
+			'Lass den Provider leer → Auto-Router wählt je nach Query-Typ (News → Tavily, Paper → Exa, allgemein → Brave)',
+			'"Suche" für Links + Snippets, "Extrakt" für Volltext einer URL, "Agent" für synthetisierte Antwort mit Zitaten',
+			'Cmd/Ctrl+Enter startet den Vergleich ohne Klick',
+			'Eigene API-Keys unter "🔑 API-Keys" — überschreiben den Server-Key und kosten dich keine Credits',
+		],
+	},
 };
