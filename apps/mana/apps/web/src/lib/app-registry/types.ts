@@ -59,9 +59,12 @@ export interface AppDescriptor {
 	contextMenuActions?: AppContextMenuAction[];
 
 	// -- Help (optional) --
+	// Kept in sync with ModuleHelp in help-content.ts; AppPage renders
+	// the tips section when present.
 	help?: {
 		description: string;
 		features?: string[];
+		tips?: string[];
 	};
 }
 

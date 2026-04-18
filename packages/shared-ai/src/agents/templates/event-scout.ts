@@ -85,7 +85,7 @@ du entscheidest was in deinen Kalender kommt.
 
 **Voraussetzung:** Mindestens eine Region und Interessen muessen im Events-Modul
 unter dem Tab "Entdecken" eingerichtet sein.`,
-			cadence: { kind: 'daily' },
+			cadence: { kind: 'daily', atHour: 8, atMinute: 0 },
 			startPaused: true,
 		},
 	],

@@ -167,6 +167,29 @@ pnpm test:e2e     # Playwright
 
 Svelte 5 runes are mandatory — no legacy `let count = 0; $: doubled = count * 2`. Always `$state`, `$derived`, `$effect`. See [`.claude/guidelines/sveltekit-web.md`](../../.claude/guidelines/sveltekit-web.md).
 
+## Scene Scope
+
+Each workbench scene can carry `scopeTagIds` — a per-scene tag filter that module queries honour via `filterBySceneScopeBatch` from `$lib/stores/scene-scope.svelte`. When the filter hides everything, users need to see why.
+
+**When a module wires the scope filter, wire the empty state too:**
+
+```svelte
+<script lang="ts">
+  import ScopeEmptyState from '$lib/components/workbench/ScopeEmptyState.svelte';
+  import { hasActiveSceneScope } from '$lib/stores/scene-scope.svelte';
+</script>
+
+{#if items.length === 0}
+  {#if hasActiveSceneScope()}
+    <ScopeEmptyState label="Aufgaben" />
+  {:else}
+    <p class="empty">Noch keine Aufgaben</p>
+  {/if}
+{/if}
+```
+
+`ScopeEmptyState` renders a subdued "Bereichsfilter verbergen alles" message plus a one-click "Bereich zurücksetzen" button that calls `workbenchScenesStore.setSceneScopeTags(activeSceneId, undefined)`. `SceneAppBar` already shows a Funnel badge on scoped scene pills; the module doesn't need to duplicate that signal. Plan: [`docs/plans/scene-scope-empty-state.md`](../../docs/plans/scene-scope-empty-state.md).
+
 ## AI Workbench
 
 The companion is a **second actor** that works alongside the human in every module. Full pipeline live end-to-end:
