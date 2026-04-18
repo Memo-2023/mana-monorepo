@@ -1,20 +1,22 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { Card } from '@mana/shared-ui';
 	import {
 		QrCode,
 		DownloadSimple,
-		Info,
+		UploadSimple,
 		ShieldCheck,
 		CurrencyCircleDollar,
 		Clock,
 		Warning,
 		CheckCircle,
 		WarningCircle,
+		FolderOpen,
+		FileText,
 	} from '@mana/shared-icons';
-	import StatCard from '$lib/components/admin/StatCard.svelte';
-	import ProjectDataCard from '$lib/components/admin/ProjectDataCard.svelte';
+	import SettingsPanel from '../SettingsPanel.svelte';
+	import SettingsSectionHeader from '../SettingsSectionHeader.svelte';
+	import { getApp } from '$lib/app-registry';
 	import DeleteConfirmationModal from '$lib/components/my-data/DeleteConfirmationModal.svelte';
 	import QRExportModal from '$lib/components/my-data/QRExportModal.svelte';
 	import { myDataService, type UserDataSummary } from '$lib/api/services/my-data';
@@ -33,18 +35,21 @@
 	let error = $state<string | null>(null);
 	let exporting = $state(false);
 
-	// Delete dialog state
 	let showDeleteDialog = $state(false);
 	let deleting = $state(false);
 	let deleteResult = $state<DeleteUserDataResponse | null>(null);
 	let deleteError = $state<string | null>(null);
 
-	// QR Export dialog state
 	let showQRDialog = $state(false);
 
-	// Backup download state
 	let backupLoading = $state(false);
 	let backupError = $state<string | null>(null);
+
+	let importInput = $state<HTMLInputElement | null>(null);
+	let importing = $state(false);
+	let importProgress = $state<ImportProgress | null>(null);
+	let importResult = $state<ImportResult | null>(null);
+	let importError = $state<string | null>(null);
 
 	async function handleBackupDownload() {
 		backupLoading = true;
@@ -57,13 +62,6 @@
 			backupLoading = false;
 		}
 	}
-
-	// Backup import state
-	let importInput = $state<HTMLInputElement | null>(null);
-	let importing = $state(false);
-	let importProgress = $state<ImportProgress | null>(null);
-	let importResult = $state<ImportResult | null>(null);
-	let importError = $state<string | null>(null);
 
 	async function handleImportFileChange(e: Event) {
 		const input = e.currentTarget as HTMLInputElement;
@@ -97,7 +95,7 @@
 			case 'parsing':
 				return 'Archiv wird entpackt…';
 			case 'validating':
-				return 'Manifest & Integritat werden gepruft…';
+				return 'Manifest & Integrität werden geprüft…';
 			case 'applying':
 				return p.currentAppId
 					? `Wende Events an (${p.applied}/${p.total}) — ${p.currentAppId}`
@@ -129,7 +127,6 @@
 			await myDataService.downloadMyData();
 		} catch (e) {
 			console.error('Export failed:', e);
-			// Could show toast here
 		} finally {
 			exporting = false;
 		}
@@ -152,7 +149,6 @@
 
 	async function handleDeleteModalClose() {
 		if (deleteResult) {
-			// After successful deletion, sign out and redirect
 			await authStore.signOut();
 			goto('/');
 		} else {
@@ -171,398 +167,393 @@
 		});
 	}
 
+	function formatNum(n: number): string {
+		return n.toLocaleString('de-DE');
+	}
+
+	function formatRelativeTime(dateStr: string | undefined): string {
+		if (!dateStr) return '—';
+		const diffMs = Date.now() - new Date(dateStr).getTime();
+		const diffMins = Math.floor(diffMs / 60000);
+		const diffHours = Math.floor(diffMs / 3600000);
+		const diffDays = Math.floor(diffMs / 86400000);
+		if (diffMins < 1) return 'gerade eben';
+		if (diffMins < 60) return `vor ${diffMins} Min`;
+		if (diffHours < 24) return `vor ${diffHours} Std`;
+		if (diffDays < 7) return `vor ${diffDays} Tagen`;
+		return new Date(dateStr).toLocaleDateString('de-DE');
+	}
+
 	onMount(() => {
 		loadMyData();
 	});
 </script>
 
-<div class="space-y-6">
-	<!-- Header -->
-	<div class="flex items-center justify-between gap-4">
-		<div>
-			<h2 class="text-lg font-bold">Meine Daten</h2>
-			<p class="text-sm text-muted-foreground">
-				Übersicht über alle deine gespeicherten Daten (GDPR/DSGVO)
-			</p>
-		</div>
-		{#if userData}
-			<div class="flex items-center gap-2">
-				<button
-					onclick={() => (showQRDialog = true)}
-					class="flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-muted transition-colors"
-					title="Als QR-Code exportieren"
-				>
-					<QrCode size={16} />
-					<span>QR-Code</span>
-				</button>
-				<button
-					onclick={handleExport}
-					disabled={exporting}
-					class="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors"
-				>
-					{#if exporting}
-						<svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-							<circle
-								class="opacity-25"
-								cx="12"
-								cy="12"
-								r="10"
-								stroke="currentColor"
-								stroke-width="4"
-							></circle>
-							<path
-								class="opacity-75"
-								fill="currentColor"
-								d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-							></path>
-						</svg>
-					{:else}
-						<DownloadSimple size={16} />
-					{/if}
-					<span>{exporting ? 'Exportiere...' : 'Daten exportieren'}</span>
-				</button>
-			</div>
-		{/if}
-	</div>
-
-	<!-- DSGVO Info Banner -->
-	<div
-		class="rounded-lg border bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 p-4"
+<!-- Profil & Konto ────────────────────────────────────────── -->
+<SettingsPanel id="my-data">
+	<SettingsSectionHeader
+		icon={FileText}
+		title="Meine Daten (DSGVO)"
+		description="Übersicht über alle deine gespeicherten Daten"
+		tone="purple"
 	>
-		<div class="flex items-start gap-3">
-			<Info size={20} class="text-blue-500 mt-0.5 shrink-0" />
-			<div class="flex-1">
-				<p class="text-sm text-blue-800 dark:text-blue-200">
-					Hier siehst du alle Daten, die wir uber dich speichern. Mehr Informationen findest du in
-					unserer
-					<a
-						href="https://mana-landing.pages.dev/datenschutz"
-						target="_blank"
-						rel="noopener"
-						class="underline font-medium hover:text-blue-600"
+		{#snippet action()}
+			{#if userData}
+				<div class="header-actions">
+					<button
+						type="button"
+						class="btn-ghost"
+						onclick={() => (showQRDialog = true)}
+						title="Als QR-Code exportieren"
 					>
-						Datenschutzerklarung
-					</a>. Wir verwenden <strong>keine Tracking-Cookies</strong> – unsere Analyse erfolgt vollstandig
-					anonym via Umami.
-				</p>
-			</div>
-		</div>
-	</div>
+						<QrCode size={14} />
+						<span>QR</span>
+					</button>
+					<button type="button" class="btn-primary-sm" onclick={handleExport} disabled={exporting}>
+						<DownloadSimple size={14} />
+						<span>{exporting ? 'Exportiere…' : 'Exportieren'}</span>
+					</button>
+				</div>
+			{/if}
+		{/snippet}
+	</SettingsSectionHeader>
 
 	{#if loading}
-		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-			{#each Array(4) as _}
-				<div class="rounded-lg border bg-card p-6 shadow-sm animate-pulse">
-					<div class="h-4 bg-muted rounded w-20 mb-2"></div>
-					<div class="h-8 bg-muted rounded w-16"></div>
-				</div>
-			{/each}
-		</div>
+		<div class="spinner-wrap"><div class="spinner"></div></div>
 	{:else if error}
-		<div
-			class="rounded-lg border border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20 p-6 text-center"
-		>
-			<p class="text-red-600 dark:text-red-400 mb-4">{error}</p>
-			<button
-				onclick={loadMyData}
-				class="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90"
-			>
-				Erneut versuchen
-			</button>
+		<div class="error-state">
+			<p class="error-text">{error}</p>
+			<button type="button" class="btn-primary-sm" onclick={loadMyData}> Erneut versuchen </button>
 		</div>
 	{:else if userData}
-		<!-- User Info Card -->
-		<Card>
-			<div class="p-6">
-				<div class="flex items-start gap-4">
-					<div class="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
-						<span class="text-2xl font-bold text-primary">
-							{(userData.user.name || userData.user.email)[0].toUpperCase()}
+		<div class="rows">
+			<div class="row user-row">
+				<div class="avatar">
+					<span>{(userData.user.name || userData.user.email)[0].toUpperCase()}</span>
+				</div>
+				<div class="row-info">
+					<p class="row-title">{userData.user.name || 'Kein Name'}</p>
+					<p class="row-desc">{userData.user.email}</p>
+				</div>
+				<div class="badges">
+					<span class="badge role-{userData.user.role}">{userData.user.role}</span>
+					{#if userData.user.emailVerified}
+						<span class="badge success">
+							<CheckCircle size={12} weight="fill" />
+							verifiziert
 						</span>
-					</div>
-					<div class="flex-1">
-						<h2 class="text-xl font-semibold">{userData.user.name || 'Kein Name'}</h2>
-						<p class="text-muted-foreground">{userData.user.email}</p>
-						<div class="flex items-center gap-4 mt-2">
-							<span
-								class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium
-								{userData.user.role === 'admin'
-									? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-									: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'}"
-							>
-								{userData.user.role}
-							</span>
-							{#if userData.user.emailVerified}
-								<span class="text-xs text-green-600 flex items-center gap-1">
-									<CheckCircle size={12} weight="fill" />
-									Email verifiziert
-								</span>
-							{:else}
-								<span class="text-xs text-yellow-600 flex items-center gap-1">
-									<WarningCircle size={12} weight="fill" />
-									Email nicht verifiziert
-								</span>
-							{/if}
-						</div>
-						<p class="text-xs text-muted-foreground mt-2">
-							Registriert am {formatDate(userData.user.createdAt)}
-						</p>
-					</div>
-				</div>
-			</div>
-		</Card>
-
-		<!-- Stats Overview -->
-		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-			<StatCard title="Gesamt-Entitaten" value={userData.totals.totalEntities} icon="chart" />
-			<StatCard
-				title="Projekte mit Daten"
-				value="{userData.totals.projectsWithData} / {userData.projects.length}"
-				icon="activity"
-			/>
-			<StatCard title="Credits" value={userData.credits.balance} icon="chart" />
-			<StatCard title="Sessions" value={userData.auth.sessionsCount} icon="users" />
-		</div>
-
-		<!-- Auth & Credits Details -->
-		<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-			<!-- Auth Data -->
-			<Card>
-				<div class="p-6">
-					<h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
-						<ShieldCheck size={20} class="text-blue-500" />
-						Authentifizierung
-					</h3>
-					<div class="space-y-3">
-						<div class="flex items-center justify-between">
-							<span class="text-sm text-muted-foreground">Aktive Sessions</span>
-							<span class="font-mono">{userData.auth.sessionsCount}</span>
-						</div>
-						<div class="flex items-center justify-between">
-							<span class="text-sm text-muted-foreground">Verknupfte Accounts</span>
-							<span class="font-mono">{userData.auth.accountsCount}</span>
-						</div>
-						<div class="flex items-center justify-between">
-							<span class="text-sm text-muted-foreground">2FA aktiviert</span>
-							<span class={userData.auth.has2FA ? 'text-green-500' : 'text-muted-foreground'}>
-								{userData.auth.has2FA ? 'Ja' : 'Nein'}
-							</span>
-						</div>
-						<div class="flex items-center justify-between">
-							<span class="text-sm text-muted-foreground">Letzter Login</span>
-							<span class="text-sm">
-								{userData.auth.lastLoginAt ? formatDate(userData.auth.lastLoginAt) : '-'}
-							</span>
-						</div>
-					</div>
-				</div>
-			</Card>
-
-			<!-- Credits Data -->
-			<Card>
-				<div class="p-6">
-					<h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
-						<CurrencyCircleDollar size={20} class="text-yellow-500" />
-						Credits
-					</h3>
-					<div class="space-y-3">
-						<div class="flex items-center justify-between">
-							<span class="text-sm text-muted-foreground">Aktueller Stand</span>
-							<span class="font-mono font-bold text-lg">{userData.credits.balance}</span>
-						</div>
-						<div class="flex items-center justify-between">
-							<span class="text-sm text-muted-foreground">Gesamt verdient</span>
-							<span class="font-mono text-green-600">+{userData.credits.totalEarned}</span>
-						</div>
-						<div class="flex items-center justify-between">
-							<span class="text-sm text-muted-foreground">Gesamt ausgegeben</span>
-							<span class="font-mono text-red-500">-{userData.credits.totalSpent}</span>
-						</div>
-						<div class="flex items-center justify-between">
-							<span class="text-sm text-muted-foreground">Transaktionen</span>
-							<span class="font-mono">{userData.credits.transactionsCount}</span>
-						</div>
-					</div>
-				</div>
-			</Card>
-		</div>
-
-		<!-- Project Data -->
-		<div>
-			<h3 class="text-lg font-semibold mb-4">Projektdaten</h3>
-			<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-				{#each userData.projects as project}
-					<ProjectDataCard {project} />
-				{/each}
-			</div>
-		</div>
-
-		<!-- Aufbewahrungsfristen -->
-		<Card>
-			<div class="p-6">
-				<h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
-					<Clock size={20} class="text-gray-500" />
-					Aufbewahrungsfristen
-				</h3>
-				<p class="text-sm text-muted-foreground mb-4">So lange speichern wir deine Daten:</p>
-				<div class="space-y-2 text-sm">
-					<div class="flex justify-between py-2 border-b">
-						<span>Benutzerkonto & Profil</span>
-						<span class="text-muted-foreground">Bis zur Loschung</span>
-					</div>
-					<div class="flex justify-between py-2 border-b">
-						<span>Sessions & Login-Historie</span>
-						<span class="text-muted-foreground">90 Tage nach Ablauf</span>
-					</div>
-					<div class="flex justify-between py-2 border-b">
-						<span>Credit-Transaktionen</span>
-						<span class="text-muted-foreground">10 Jahre (gesetzlich)</span>
-					</div>
-					<div class="flex justify-between py-2 border-b">
-						<span>Security-Logs</span>
-						<span class="text-muted-foreground">1 Jahr</span>
-					</div>
-					<div class="flex justify-between py-2">
-						<span>Projektdaten (Chat, Todo, etc.)</span>
-						<span class="text-muted-foreground">Bis zur Loschung</span>
-					</div>
-				</div>
-			</div>
-		</Card>
-
-		<!-- Backup & Wiederherstellung (M1 thin slice) -->
-		<Card>
-			<div class="p-6">
-				<h3 class="text-lg font-semibold mb-2 flex items-center gap-2">
-					<DownloadSimple size={20} class="text-indigo-500" />
-					Backup & Wiederherstellung
-				</h3>
-				<p class="text-sm text-muted-foreground mb-4">
-					Lade eine vollstandige Kopie deiner synchronisierten Daten als <code>.mana</code>-Archiv
-					(ZIP) herunter. Enthalt den kompletten Sync-Event-Stream plus Manifest mit
-					Integritats-Hash — geeignet fur Account-Migration, Backups oder DSGVO-Datenportabilitat.
-					Sensible Felder bleiben dabei verschlusselt.
-				</p>
-				<div class="flex items-center gap-3">
-					<button
-						onclick={handleBackupDownload}
-						disabled={backupLoading}
-						class="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
-					>
-						<DownloadSimple size={16} />
-						<span>{backupLoading ? 'Lade Backup…' : 'Backup herunterladen (.mana)'}</span>
-					</button>
-					<span class="text-xs text-muted-foreground">
-						Experimentell — Import folgt in Kurze.
-					</span>
-				</div>
-				{#if backupError}
-					<p class="text-sm text-red-600 mt-3">{backupError}</p>
-				{/if}
-
-				<!-- Import -->
-				<div class="mt-6 pt-6 border-t">
-					<h4 class="font-medium mb-2">Backup einspielen</h4>
-					<p class="text-sm text-muted-foreground mb-3">
-						Wahle eine <code>.mana</code>-Datei aus. Die enthaltenen Events werden in deine lokale
-						Datenbank gespielt — nur Backups deines eigenen Accounts werden akzeptiert.
-					</p>
-					<div class="flex items-center gap-3">
-						<input
-							bind:this={importInput}
-							type="file"
-							accept=".mana,application/zip"
-							onchange={handleImportFileChange}
-							disabled={importing}
-							class="hidden"
-						/>
-						<button
-							onclick={() => importInput?.click()}
-							disabled={importing}
-							class="flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-muted disabled:opacity-50 transition-colors"
-						>
-							<DownloadSimple size={16} class="rotate-180" />
-							<span>{importing ? 'Importiere…' : 'Datei wahlen…'}</span>
-						</button>
-					</div>
-
-					{#if importProgress}
-						<div class="mt-3">
-							<p class="text-sm">{importProgressLabel(importProgress)}</p>
-							{#if importProgress.total > 0}
-								<div class="mt-2 h-2 bg-muted rounded overflow-hidden">
-									<div
-										class="h-full bg-indigo-500 transition-all"
-										style="width: {Math.min(
-											100,
-											Math.round((importProgress.applied / importProgress.total) * 100)
-										)}%"
-									></div>
-								</div>
-							{/if}
-						</div>
-					{/if}
-
-					{#if importResult}
-						<div
-							class="mt-3 p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800"
-						>
-							<p class="text-sm text-green-800 dark:text-green-200">
-								<CheckCircle size={14} class="inline" weight="fill" />
-								{importResult.appliedEvents} Events aus Backup vom
-								{formatDate(importResult.manifest.createdAt)} eingespielt ({importResult.manifest
-									.apps.length} Apps).
-							</p>
-						</div>
-					{/if}
-
-					{#if importError}
-						<p class="text-sm text-red-600 mt-3">{importError}</p>
+					{:else}
+						<span class="badge warn">
+							<WarningCircle size={12} weight="fill" />
+							nicht verifiziert
+						</span>
 					{/if}
 				</div>
 			</div>
-		</Card>
 
-		<!-- Danger Zone -->
-		<Card>
-			<div class="p-6 border-t-4 border-red-500">
-				<div class="flex items-center gap-3 mb-4">
-					<div
-						class="h-10 w-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center"
-					>
-						<Warning size={20} class="text-red-600" />
-					</div>
-					<div>
-						<h3 class="text-lg font-semibold text-red-600">Gefahrenzone</h3>
-						<p class="text-sm text-muted-foreground">Diese Aktionen sind unwiderruflich</p>
-					</div>
+			<div class="row">
+				<div class="row-info">
+					<p class="row-title">Registriert am</p>
 				</div>
-
-				<div
-					class="rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/10 p-4"
-				>
-					<div class="flex items-center justify-between">
-						<div>
-							<p class="font-medium text-red-700 dark:text-red-400">Alle meine Daten loschen</p>
-							<p class="text-sm text-muted-foreground mt-1">
-								Loscht dein Konto und alle damit verbundenen Daten dauerhaft aus allen Projekten.
-								Diese Aktion kann nicht ruckgangig gemacht werden.
-							</p>
-						</div>
-						<button
-							onclick={() => (showDeleteDialog = true)}
-							class="ml-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors whitespace-nowrap"
-						>
-							Daten loschen
-						</button>
-					</div>
-				</div>
+				<span class="row-meta">{formatDate(userData.user.createdAt)}</span>
 			</div>
-		</Card>
+
+			<div class="row">
+				<div class="row-info">
+					<p class="row-title">Gesamt-Entitäten</p>
+					<p class="row-desc">Datensätze über alle Apps hinweg</p>
+				</div>
+				<span class="value">{formatNum(userData.totals.totalEntities)}</span>
+			</div>
+
+			<div class="row">
+				<div class="row-info">
+					<p class="row-title">Projekte mit Daten</p>
+				</div>
+				<span class="value">
+					{userData.totals.projectsWithData} / {userData.projects.length}
+				</span>
+			</div>
+		</div>
+
+		<p class="footnote">
+			Keine Tracking-Cookies — anonyme Analyse via Umami. Details in der
+			<a
+				href="https://mana-landing.pages.dev/datenschutz"
+				target="_blank"
+				rel="noopener"
+				class="inline-link">Datenschutzerklärung</a
+			>.
+		</p>
 	{/if}
-</div>
+</SettingsPanel>
 
-<!-- Delete Confirmation Modal -->
+{#if userData}
+	<!-- Authentifizierung ──────────────────────────────────── -->
+	<SettingsPanel id="auth-data">
+		<SettingsSectionHeader
+			icon={ShieldCheck}
+			title="Authentifizierung"
+			description="Sessions, Accounts & 2FA"
+			tone="blue"
+		/>
+		<div class="rows">
+			<div class="row">
+				<div class="row-info"><p class="row-title">Aktive Sessions</p></div>
+				<span class="value">{userData.auth.sessionsCount}</span>
+			</div>
+			<div class="row">
+				<div class="row-info"><p class="row-title">Verknüpfte Accounts</p></div>
+				<span class="value">{userData.auth.accountsCount}</span>
+			</div>
+			<div class="row">
+				<div class="row-info"><p class="row-title">Zwei-Faktor (2FA)</p></div>
+				<span class="badge" class:success={userData.auth.has2FA}>
+					{userData.auth.has2FA ? 'Aktiviert' : 'Deaktiviert'}
+				</span>
+			</div>
+			<div class="row">
+				<div class="row-info"><p class="row-title">Letzter Login</p></div>
+				<span class="row-meta">
+					{userData.auth.lastLoginAt ? formatDate(userData.auth.lastLoginAt) : '—'}
+				</span>
+			</div>
+		</div>
+	</SettingsPanel>
+
+	<!-- Credits ────────────────────────────────────────────── -->
+	<SettingsPanel id="credits-data">
+		<SettingsSectionHeader
+			icon={CurrencyCircleDollar}
+			title="Credits"
+			description="Guthaben & Transaktionen"
+			tone="yellow"
+		/>
+		<div class="rows">
+			<div class="row">
+				<div class="row-info"><p class="row-title">Aktueller Stand</p></div>
+				<span class="value emphasized">{formatNum(userData.credits.balance)}</span>
+			</div>
+			<div class="row">
+				<div class="row-info"><p class="row-title">Gesamt verdient</p></div>
+				<span class="value success-text">+{formatNum(userData.credits.totalEarned)}</span>
+			</div>
+			<div class="row">
+				<div class="row-info"><p class="row-title">Gesamt ausgegeben</p></div>
+				<span class="value danger-text">−{formatNum(userData.credits.totalSpent)}</span>
+			</div>
+			<div class="row">
+				<div class="row-info"><p class="row-title">Transaktionen</p></div>
+				<span class="value">{userData.credits.transactionsCount}</span>
+			</div>
+		</div>
+	</SettingsPanel>
+
+	<!-- Projektdaten ───────────────────────────────────────── -->
+	<SettingsPanel id="project-data">
+		<SettingsSectionHeader
+			icon={FolderOpen}
+			title="Projektdaten"
+			description="Datensätze pro App"
+		/>
+		<table class="project-table">
+			<thead>
+				<tr>
+					<th class="col-app">App</th>
+					<th class="col-num">Einträge</th>
+					<th class="col-time">Letzte Aktivität</th>
+				</tr>
+			</thead>
+			<tbody>
+				{#each userData.projects as project (project.projectId)}
+					{@const AppIcon = getApp(project.projectId)?.icon}
+					<tr class:unavailable={!project.available}>
+						<td class="col-app">
+							<div class="app-cell">
+								<span
+									class="dot"
+									class:active={project.available && project.totalCount > 0}
+									class:empty={project.available && project.totalCount === 0}
+									class:error={!project.available}
+									title={project.available
+										? project.totalCount > 0
+											? 'Aktiv'
+											: 'Keine Daten'
+										: project.error || 'Nicht verfügbar'}
+								></span>
+								<span class="app-icon">
+									{#if AppIcon}
+										<AppIcon size={16} weight="regular" />
+									{:else}
+										{project.icon}
+									{/if}
+								</span>
+								<span class="app-name">{project.projectName}</span>
+							</div>
+						</td>
+						<td class="col-num">
+							{#if project.available}
+								{formatNum(project.totalCount)}
+							{:else}
+								<span class="muted">—</span>
+							{/if}
+						</td>
+						<td class="col-time">
+							{#if project.available}
+								<span class="muted">{formatRelativeTime(project.lastActivityAt)}</span>
+							{:else}
+								<span class="muted err">{project.error || 'nicht erreichbar'}</span>
+							{/if}
+						</td>
+					</tr>
+				{/each}
+			</tbody>
+		</table>
+	</SettingsPanel>
+
+	<!-- Aufbewahrungsfristen ───────────────────────────────── -->
+	<SettingsPanel id="retention">
+		<SettingsSectionHeader
+			icon={Clock}
+			title="Aufbewahrungsfristen"
+			description="Wie lange wir deine Daten speichern"
+		/>
+		<div class="rows">
+			<div class="row">
+				<div class="row-info"><p class="row-title">Benutzerkonto & Profil</p></div>
+				<span class="row-meta">Bis zur Löschung</span>
+			</div>
+			<div class="row">
+				<div class="row-info"><p class="row-title">Sessions & Login-Historie</p></div>
+				<span class="row-meta">90 Tage nach Ablauf</span>
+			</div>
+			<div class="row">
+				<div class="row-info"><p class="row-title">Credit-Transaktionen</p></div>
+				<span class="row-meta">10 Jahre (gesetzlich)</span>
+			</div>
+			<div class="row">
+				<div class="row-info"><p class="row-title">Security-Logs</p></div>
+				<span class="row-meta">1 Jahr</span>
+			</div>
+			<div class="row">
+				<div class="row-info"><p class="row-title">Projektdaten (Chat, Todo, …)</p></div>
+				<span class="row-meta">Bis zur Löschung</span>
+			</div>
+		</div>
+	</SettingsPanel>
+
+	<!-- Backup & Wiederherstellung ─────────────────────────── -->
+	<SettingsPanel id="backup">
+		<SettingsSectionHeader
+			icon={DownloadSimple}
+			title="Backup & Wiederherstellung"
+			description="Vollständige Kopie deiner synchronisierten Daten als .mana-Archiv"
+			tone="indigo"
+		/>
+		<div class="rows">
+			<div class="row">
+				<div class="row-info">
+					<p class="row-title">Backup herunterladen</p>
+					<p class="row-desc">
+						ZIP mit Event-Stream + Integritäts-Hash. Sensible Felder bleiben verschlüsselt.
+					</p>
+				</div>
+				<button
+					type="button"
+					class="btn-primary-sm"
+					onclick={handleBackupDownload}
+					disabled={backupLoading}
+				>
+					<DownloadSimple size={14} />
+					<span>{backupLoading ? 'Lade…' : 'Herunterladen'}</span>
+				</button>
+			</div>
+			<div class="row">
+				<div class="row-info">
+					<p class="row-title">Backup einspielen</p>
+					<p class="row-desc">Nur Backups deines eigenen Accounts werden akzeptiert.</p>
+				</div>
+				<button
+					type="button"
+					class="btn-secondary-sm"
+					onclick={() => importInput?.click()}
+					disabled={importing}
+				>
+					<UploadSimple size={14} />
+					<span>{importing ? 'Importiere…' : 'Datei wählen…'}</span>
+				</button>
+			</div>
+		</div>
+
+		<input
+			bind:this={importInput}
+			type="file"
+			accept=".mana,application/zip"
+			onchange={handleImportFileChange}
+			disabled={importing}
+			class="hidden-input"
+		/>
+
+		{#if backupError}
+			<p class="error-text">{backupError}</p>
+		{/if}
+
+		{#if importProgress}
+			<div class="import-progress">
+				<p class="progress-label">{importProgressLabel(importProgress)}</p>
+				{#if importProgress.total > 0}
+					<div class="progress-bar">
+						<div
+							class="progress-fill"
+							style="width: {Math.min(
+								100,
+								Math.round((importProgress.applied / importProgress.total) * 100)
+							)}%"
+						></div>
+					</div>
+				{/if}
+			</div>
+		{/if}
+
+		{#if importResult}
+			<p class="success-text">
+				<CheckCircle size={14} weight="fill" />
+				{importResult.appliedEvents} Events aus Backup vom {formatDate(
+					importResult.manifest.createdAt
+				)} eingespielt ({importResult.manifest.apps.length} Apps).
+			</p>
+		{/if}
+
+		{#if importError}
+			<p class="error-text">{importError}</p>
+		{/if}
+	</SettingsPanel>
+
+	<!-- Gefahrenzone ───────────────────────────────────────── -->
+	<SettingsPanel id="danger-zone">
+		<SettingsSectionHeader
+			icon={Warning}
+			title="Gefahrenzone"
+			description="Unwiderrufliche Aktionen"
+			tone="red"
+		/>
+		<div class="rows">
+			<div class="row">
+				<div class="row-info">
+					<p class="row-title">Alle meine Daten löschen</p>
+					<p class="row-desc">
+						Löscht dein Konto und alle verbundenen Daten dauerhaft aus allen Projekten. Kann nicht
+						rückgängig gemacht werden.
+					</p>
+				</div>
+				<button type="button" class="btn-danger" onclick={() => (showDeleteDialog = true)}>
+					Daten löschen
+				</button>
+			</div>
+		</div>
+	</SettingsPanel>
+{/if}
+
 <DeleteConfirmationModal
 	show={showDeleteDialog}
 	userEmail={userData?.user.email || ''}
@@ -573,5 +564,442 @@
 	onClose={handleDeleteModalClose}
 />
 
-<!-- QR Export Modal -->
 <QRExportModal show={showQRDialog} {userData} onClose={() => (showQRDialog = false)} />
+
+<style>
+	.rows {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+		padding: 0.75rem 0;
+		border-bottom: 1px solid hsl(var(--color-border));
+	}
+
+	.row:last-child {
+		border-bottom: none;
+	}
+
+	.row-info {
+		min-width: 0;
+		flex: 1;
+	}
+
+	.row-title {
+		margin: 0;
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: hsl(var(--color-foreground));
+	}
+
+	.row-desc {
+		margin: 0;
+		font-size: 0.75rem;
+		color: hsl(var(--color-muted-foreground));
+	}
+
+	.row-meta {
+		font-size: 0.8125rem;
+		color: hsl(var(--color-muted-foreground));
+		flex-shrink: 0;
+	}
+
+	.inline-link {
+		color: hsl(var(--color-primary));
+		text-decoration: none;
+	}
+
+	.inline-link:hover {
+		text-decoration: underline;
+	}
+
+	/* User row with avatar */
+	.user-row {
+		gap: 0.875rem;
+	}
+
+	.avatar {
+		width: 2.5rem;
+		height: 2.5rem;
+		border-radius: 9999px;
+		background: hsl(var(--color-primary) / 0.12);
+		color: hsl(var(--color-primary));
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 1rem;
+		font-weight: 700;
+		flex-shrink: 0;
+	}
+
+	.badges {
+		display: flex;
+		gap: 0.375rem;
+		flex-shrink: 0;
+	}
+
+	/* Badges */
+	.badge {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.25rem;
+		padding: 0.2rem 0.5rem;
+		font-size: 0.6875rem;
+		font-weight: 600;
+		border-radius: 9999px;
+		background: hsl(var(--color-muted));
+		color: hsl(var(--color-muted-foreground));
+		text-transform: lowercase;
+		letter-spacing: 0.01em;
+	}
+
+	.badge.success {
+		background: hsl(142 76% 36% / 0.12);
+		color: hsl(142 71% 32%);
+	}
+
+	.badge.warn {
+		background: hsl(38 92% 50% / 0.15);
+		color: hsl(32 80% 38%);
+	}
+
+	.badge.role-admin {
+		background: hsl(0 84% 60% / 0.12);
+		color: hsl(0 72% 45%);
+	}
+
+	.badge.role-user {
+		background: hsl(var(--color-muted));
+		color: hsl(var(--color-muted-foreground));
+	}
+
+	/* Values */
+	.value {
+		font-size: 0.9375rem;
+		font-weight: 600;
+		color: hsl(var(--color-foreground));
+		font-variant-numeric: tabular-nums;
+		flex-shrink: 0;
+	}
+
+	.value.emphasized {
+		font-size: 1.125rem;
+	}
+
+	.value.success-text {
+		color: hsl(142 71% 32%);
+	}
+
+	.value.danger-text {
+		color: hsl(0 72% 50%);
+	}
+
+	/* Header action buttons */
+	.header-actions {
+		display: flex;
+		gap: 0.375rem;
+		align-items: center;
+	}
+
+	.btn-ghost,
+	.btn-primary-sm,
+	.btn-secondary-sm {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.375rem;
+		padding: 0.375rem 0.75rem;
+		font-size: 0.8125rem;
+		font-weight: 500;
+		border-radius: 0.5rem;
+		border: 1px solid transparent;
+		cursor: pointer;
+		transition: all 0.15s;
+		white-space: nowrap;
+	}
+
+	.btn-ghost {
+		background: transparent;
+		border-color: hsl(var(--color-border));
+		color: hsl(var(--color-foreground));
+	}
+
+	.btn-ghost:hover {
+		background: hsl(var(--color-surface-hover));
+	}
+
+	.btn-primary-sm {
+		background: hsl(var(--color-primary));
+		color: hsl(var(--color-primary-foreground));
+	}
+
+	.btn-primary-sm:hover:not(:disabled) {
+		opacity: 0.9;
+	}
+
+	.btn-secondary-sm {
+		background: hsl(var(--color-muted));
+		color: hsl(var(--color-foreground));
+	}
+
+	.btn-secondary-sm:hover:not(:disabled) {
+		background: hsl(var(--color-surface-hover));
+	}
+
+	.btn-primary-sm:disabled,
+	.btn-secondary-sm:disabled,
+	.btn-ghost:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+
+	.btn-danger {
+		padding: 0.5rem 0.875rem;
+		font-size: 0.8125rem;
+		font-weight: 600;
+		border-radius: 0.5rem;
+		background: transparent;
+		border: 1px solid hsl(0 84% 60% / 0.4);
+		color: hsl(0 72% 50%);
+		cursor: pointer;
+		transition: all 0.15s;
+		flex-shrink: 0;
+	}
+
+	.btn-danger:hover {
+		background: hsl(0 84% 60% / 0.08);
+	}
+
+	/* Project table — breaks out of the panel padding edge-to-edge */
+	.project-table {
+		width: calc(100% + 3rem);
+		margin: 0 -1.5rem;
+		table-layout: fixed;
+		border-collapse: collapse;
+		font-size: 0.8125rem;
+	}
+
+	@media (min-width: 640px) {
+		.project-table {
+			width: calc(100% + 3.5rem);
+			margin: 0 -1.75rem;
+		}
+	}
+
+	.project-table thead th {
+		text-align: left;
+		padding: 0.5rem 0.5rem 0.625rem;
+		font-size: 0.6875rem;
+		font-weight: 600;
+		color: hsl(var(--color-muted-foreground));
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		border-bottom: 1px solid hsl(var(--color-border));
+	}
+
+	.project-table tbody td {
+		padding: 0.5rem;
+		border-bottom: 1px solid hsl(var(--color-border));
+		vertical-align: middle;
+	}
+
+	.project-table thead th:first-child,
+	.project-table tbody td:first-child {
+		padding-left: 1.5rem;
+	}
+
+	.project-table thead th:last-child,
+	.project-table tbody td:last-child {
+		padding-right: 1.5rem;
+	}
+
+	@media (min-width: 640px) {
+		.project-table thead th:first-child,
+		.project-table tbody td:first-child {
+			padding-left: 1.75rem;
+		}
+		.project-table thead th:last-child,
+		.project-table tbody td:last-child {
+			padding-right: 1.75rem;
+		}
+	}
+
+	.project-table tbody tr:last-child td {
+		border-bottom: none;
+	}
+
+	.project-table tbody tr:hover {
+		background: hsl(var(--color-surface-hover) / 0.5);
+	}
+
+	.project-table tr.unavailable {
+		opacity: 0.55;
+	}
+
+	.col-app {
+		width: auto;
+	}
+
+	.app-cell {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		min-width: 0;
+	}
+
+	.col-num {
+		text-align: right;
+		font-variant-numeric: tabular-nums;
+		font-weight: 500;
+		white-space: nowrap;
+		width: 5rem;
+	}
+
+	.col-time {
+		text-align: right;
+		white-space: nowrap;
+		width: 9rem;
+	}
+
+	.project-table th.col-num,
+	.project-table th.col-time {
+		text-align: right;
+	}
+
+	.dot {
+		width: 0.5rem;
+		height: 0.5rem;
+		border-radius: 9999px;
+		background: hsl(var(--color-border));
+		flex-shrink: 0;
+	}
+
+	.dot.active {
+		background: hsl(142 71% 45%);
+	}
+
+	.dot.empty {
+		background: hsl(var(--color-muted-foreground) / 0.35);
+	}
+
+	.dot.error {
+		background: hsl(0 72% 55%);
+	}
+
+	.app-icon {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 1.25rem;
+		height: 1.25rem;
+		font-size: 1rem;
+		line-height: 1;
+		color: hsl(var(--color-muted-foreground));
+		flex-shrink: 0;
+	}
+
+	.app-name {
+		font-weight: 500;
+		color: hsl(var(--color-foreground));
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.muted {
+		color: hsl(var(--color-muted-foreground));
+	}
+
+	.muted.err {
+		color: hsl(0 72% 50%);
+	}
+
+	/* Import progress */
+	.hidden-input {
+		display: none;
+	}
+
+	.import-progress {
+		margin-top: 1rem;
+	}
+
+	.progress-label {
+		margin: 0 0 0.5rem;
+		font-size: 0.8125rem;
+		color: hsl(var(--color-foreground));
+	}
+
+	.progress-bar {
+		height: 0.375rem;
+		background: hsl(var(--color-muted));
+		border-radius: 9999px;
+		overflow: hidden;
+	}
+
+	.progress-fill {
+		height: 100%;
+		background: hsl(var(--color-primary));
+		transition: width 0.2s;
+	}
+
+	/* States */
+	.footnote {
+		margin: 1.25rem 0 0;
+		padding-top: 1rem;
+		border-top: 1px solid hsl(var(--color-border));
+		font-size: 0.75rem;
+		color: hsl(var(--color-muted-foreground));
+		line-height: 1.5;
+	}
+
+	.error-state {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.75rem;
+		padding: 2rem 1rem;
+	}
+
+	.error-text {
+		margin: 0.75rem 0 0;
+		font-size: 0.8125rem;
+		color: hsl(0 72% 50%);
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
+	}
+
+	.success-text {
+		margin: 0.75rem 0 0;
+		font-size: 0.8125rem;
+		color: hsl(142 71% 32%);
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
+	}
+
+	.spinner-wrap {
+		display: flex;
+		justify-content: center;
+		padding: 2.5rem 0;
+	}
+
+	.spinner {
+		width: 2rem;
+		height: 2rem;
+		border-radius: 50%;
+		border: 3px solid hsl(var(--color-primary));
+		border-top-color: transparent;
+		animation: spin 0.8s linear infinite;
+	}
+
+	@keyframes spin {
+		to {
+			transform: rotate(360deg);
+		}
+	}
+</style>

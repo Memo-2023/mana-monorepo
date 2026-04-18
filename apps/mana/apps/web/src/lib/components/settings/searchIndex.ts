@@ -42,9 +42,18 @@ export const categories: Category[] = [
 	{
 		id: 'data',
 		label: 'Daten & Sync',
-		description: 'Cloud-Sync, Export & DSGVO',
+		description: 'Cloud-Sync, Export, Backup & DSGVO',
 		icon: Cloud,
-		anchors: ['cloud-sync', 'my-data'],
+		anchors: [
+			'cloud-sync',
+			'my-data',
+			'auth-data',
+			'credits-data',
+			'project-data',
+			'retention',
+			'backup',
+			'danger-zone',
+		],
 	},
 ];
 
@@ -139,7 +148,7 @@ export const searchIndex: SearchEntry[] = [
 	// Data
 	{
 		label: 'Cloud Sync',
-		keywords: ['sync', 'backup', 'geräte'],
+		keywords: ['sync', 'geräte'],
 		category: 'data',
 		anchor: 'cloud-sync',
 	},
@@ -150,10 +159,40 @@ export const searchIndex: SearchEntry[] = [
 		anchor: 'my-data',
 	},
 	{
-		label: 'Konto löschen',
-		keywords: ['delete', 'gdpr', 'dsgvo'],
+		label: 'Authentifizierung',
+		keywords: ['sessions', '2fa', 'login'],
 		category: 'data',
-		anchor: 'my-data',
+		anchor: 'auth-data',
+	},
+	{
+		label: 'Credits & Transaktionen',
+		keywords: ['guthaben', 'transaktionen'],
+		category: 'data',
+		anchor: 'credits-data',
+	},
+	{
+		label: 'Projektdaten',
+		keywords: ['projekte', 'apps', 'statistik'],
+		category: 'data',
+		anchor: 'project-data',
+	},
+	{
+		label: 'Aufbewahrungsfristen',
+		keywords: ['retention', 'dsgvo', 'fristen'],
+		category: 'data',
+		anchor: 'retention',
+	},
+	{
+		label: 'Backup & Wiederherstellung',
+		keywords: ['backup', 'restore', 'import', 'archiv', '.mana'],
+		category: 'data',
+		anchor: 'backup',
+	},
+	{
+		label: 'Konto löschen',
+		keywords: ['delete', 'gdpr', 'dsgvo', 'gefahrenzone'],
+		category: 'data',
+		anchor: 'danger-zone',
 	},
 ];
 

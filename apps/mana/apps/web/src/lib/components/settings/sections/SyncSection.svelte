@@ -1,10 +1,12 @@
 <script lang="ts">
-	import { Card } from '@mana/shared-ui';
+	import { onMount } from 'svelte';
+	import { CloudCheck, Pause, Cloud } from '@mana/shared-icons';
 	import { syncBilling } from '$lib/stores/sync-billing.svelte';
 	import { creditsService, type CreditBalance } from '$lib/api/credits';
 	import type { BillingInterval } from '$lib/api/sync';
 	import { toast } from '$lib/stores/toast.svelte';
-	import { onMount } from 'svelte';
+	import SettingsPanel from '../SettingsPanel.svelte';
+	import SettingsSectionHeader from '../SettingsSectionHeader.svelte';
 
 	const SYNC_PRICES: Record<BillingInterval, number> = {
 		monthly: 30,
@@ -18,10 +20,21 @@
 		yearly: 'Jährlich',
 	};
 
+	const INTERVAL_HINTS: Record<BillingInterval, string> = {
+		monthly: 'jeden Monat abgerechnet · ~1 Credit/Tag',
+		quarterly: 'alle 3 Monate abgerechnet',
+		yearly: 'einmal jährlich abgerechnet',
+	};
+
 	let balance = $state<CreditBalance | null>(null);
 	let loading = $state(false);
 	let error = $state<string | null>(null);
 	let selectedInterval = $state<BillingInterval>('monthly');
+
+	const insufficientCredits = $derived(
+		balance !== null && balance.balance < SYNC_PRICES[selectedInterval]
+	);
+	const intervalChanged = $derived(syncBilling.active && selectedInterval !== syncBilling.interval);
 
 	onMount(async () => {
 		await Promise.all([syncBilling.load(), loadBalance()]);
@@ -94,165 +107,334 @@
 	}
 </script>
 
-<div>
+<SettingsPanel id="cloud-sync">
+	<SettingsSectionHeader
+		icon={Cloud}
+		title="Cloud Sync"
+		description="Synchronisiere deine Daten über alle Geräte"
+		tone="blue"
+	/>
+
 	{#if syncBilling.loading}
-		<div class="flex items-center justify-center py-12">
-			<div
-				class="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"
-			></div>
+		<div class="spinner-wrap">
+			<div class="spinner"></div>
 		</div>
 	{:else}
-		<div class="grid gap-6 lg:grid-cols-2">
-			<!-- Status Card -->
-			<Card>
-				<div class="p-6">
-					<h2 class="text-lg font-semibold mb-4">Status</h2>
-
-					<div class="flex items-center gap-3 mb-6">
-						<div
-							class="flex h-12 w-12 items-center justify-center rounded-full {syncBilling.active
-								? 'bg-green-100 dark:bg-green-900/20'
-								: syncBilling.paused
-									? 'bg-amber-100 dark:bg-amber-900/20'
-									: 'bg-surface'}"
-						>
-							<span class="text-2xl"
-								>{syncBilling.active ? '🔄' : syncBilling.paused ? '⏸️' : '☁️'}</span
-							>
-						</div>
-						<div>
-							<p class="text-xl font-bold">
-								{#if syncBilling.active}
-									Aktiv
-								{:else if syncBilling.paused}
-									Pausiert
-								{:else}
-									Inaktiv
-								{/if}
-							</p>
-							{#if syncBilling.active && syncBilling.nextChargeAt}
-								<p class="text-sm text-muted-foreground">
-									Nächste Abbuchung: {formatDate(syncBilling.nextChargeAt)}
-								</p>
-							{:else if syncBilling.paused}
-								<p class="text-sm text-amber-600 dark:text-amber-400">
-									Credits reichen nicht aus — lade Credits auf um fortzufahren
-								</p>
-							{:else}
-								<p class="text-sm text-muted-foreground">
-									Deine Daten sind nur lokal auf diesem Gerät gespeichert
-								</p>
-							{/if}
-						</div>
-					</div>
-
-					{#if balance}
-						<div class="rounded-lg bg-surface p-4 mb-6">
-							<div class="flex justify-between items-center">
-								<span class="text-sm text-muted-foreground">Verfügbare Credits</span>
-								<span class="text-lg font-bold text-primary">{formatCredits(balance.balance)}</span>
-							</div>
-						</div>
-					{/if}
-
-					{#if error}
-						<div class="mb-4 rounded-lg bg-red-50 dark:bg-red-900/20 p-4">
-							<p class="text-sm text-red-800 dark:text-red-200">{error}</p>
-						</div>
-					{/if}
-
-					{#if syncBilling.active}
-						<button
-							onclick={handleDeactivate}
-							disabled={loading}
-							class="w-full rounded-lg border border-red-300 dark:border-red-700 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors disabled:opacity-50"
-						>
-							{loading ? 'Wird deaktiviert...' : 'Cloud Sync deaktivieren'}
-						</button>
-					{:else}
-						<button
-							onclick={handleActivate}
-							disabled={loading ||
-								(balance !== null && balance.balance < SYNC_PRICES[selectedInterval])}
-							class="w-full rounded-lg bg-primary py-3 font-semibold text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
-						>
-							{#if loading}
-								Wird aktiviert...
-							{:else}
-								Cloud Sync aktivieren ({SYNC_PRICES[selectedInterval]} Credits)
-							{/if}
-						</button>
-						{#if balance !== null && balance.balance < SYNC_PRICES[selectedInterval]}
-							<p class="mt-2 text-center text-sm text-amber-600 dark:text-amber-400">
-								Nicht genügend Credits.
-								<a href="/?app=credits&tab=packages" class="underline hover:no-underline"
-									>Aufladen</a
-								>
-							</p>
+		<div class="rows">
+			<div class="row">
+				<div class="row-info">
+					<p class="row-title">Status</p>
+					<p class="row-desc">
+						{#if syncBilling.active && syncBilling.nextChargeAt}
+							Nächste Abbuchung am {formatDate(syncBilling.nextChargeAt)}
+						{:else if syncBilling.active}
+							Synchronisiert verschlüsselt über alle Geräte
+						{:else if syncBilling.paused}
+							Credits reichen nicht aus — lade Credits auf um fortzufahren
+						{:else}
+							Deine Daten sind nur lokal auf diesem Gerät gespeichert
 						{/if}
-					{/if}
+					</p>
 				</div>
-			</Card>
+				<span class="badge" class:active={syncBilling.active} class:paused={syncBilling.paused}>
+					{#if syncBilling.active}
+						<CloudCheck size={14} weight="fill" />
+						Aktiv
+					{:else if syncBilling.paused}
+						<Pause size={14} weight="fill" />
+						Pausiert
+					{:else}
+						<Cloud size={14} />
+						Inaktiv
+					{/if}
+				</span>
+			</div>
 
-			<!-- Interval Selection Card -->
-			<Card>
-				<div class="p-6">
-					<h2 class="text-lg font-semibold mb-4">Abrechnungsintervall</h2>
-
-					<div class="space-y-3">
-						{#each ['monthly', 'quarterly', 'yearly'] as const as iv}
-							<label
-								class="flex items-center justify-between rounded-lg border p-4 cursor-pointer transition-colors {selectedInterval ===
-								iv
-									? 'border-primary bg-primary/5'
-									: 'border-border hover:bg-surface'}"
-							>
-								<div class="flex items-center gap-3">
-									<input
-										type="radio"
-										name="interval"
-										value={iv}
-										checked={selectedInterval === iv}
-										onchange={() => (selectedInterval = iv)}
-										class="h-4 w-4 text-primary"
-									/>
-									<div>
-										<p class="font-medium">{INTERVAL_LABELS[iv]}</p>
-										<p class="text-sm text-muted-foreground">
-											{iv === 'monthly'
-												? '~1 Credit/Tag'
-												: iv === 'quarterly'
-													? '3 Monate'
-													: '12 Monate'}
-										</p>
-									</div>
-								</div>
-								<span class="text-lg font-bold text-primary">{SYNC_PRICES[iv]}</span>
-							</label>
-						{/each}
+			{#if balance}
+				<div class="row">
+					<div class="row-info">
+						<p class="row-title">Verfügbare Credits</p>
+						<p class="row-desc">
+							<a class="inline-link" href="/?app=credits&tab=packages">Credits aufladen</a>
+						</p>
 					</div>
+					<span class="value">{formatCredits(balance.balance)}</span>
+				</div>
+			{/if}
 
-					{#if syncBilling.active && selectedInterval !== syncBilling.interval}
+			<div class="row">
+				<div class="row-info">
+					<p class="row-title">Abrechnungsintervall</p>
+					<p class="row-desc">
+						{SYNC_PRICES[selectedInterval]} Credits · {INTERVAL_HINTS[selectedInterval]}
+					</p>
+				</div>
+				<div class="btn-group">
+					{#each ['monthly', 'quarterly', 'yearly'] as const as iv}
 						<button
-							onclick={handleChangeInterval}
-							disabled={loading}
-							class="mt-4 w-full rounded-lg bg-surface py-2 font-medium text-foreground hover:bg-surface-hover border border-border transition-colors disabled:opacity-50"
+							class="choice-btn"
+							class:active={selectedInterval === iv}
+							onclick={() => (selectedInterval = iv)}
 						>
-							{loading ? 'Wird geändert...' : `Auf ${INTERVAL_LABELS[selectedInterval]} wechseln`}
+							{iv === 'monthly' ? 'Monat' : iv === 'quarterly' ? 'Quartal' : 'Jahr'}
 						</button>
-						<p class="mt-2 text-center text-xs text-muted-foreground">
-							Änderung gilt ab der nächsten Abbuchung
-						</p>
-					{/if}
-
-					<div class="mt-6 rounded-lg bg-blue-50 dark:bg-blue-950/30 p-4">
-						<p class="text-sm text-blue-800 dark:text-blue-200">
-							Cloud Sync synchronisiert deine Daten verschlüsselt über alle Geräte. Deine lokalen
-							Daten bleiben immer erhalten — auch wenn Sync pausiert oder deaktiviert wird.
-						</p>
-					</div>
+					{/each}
 				</div>
-			</Card>
+			</div>
 		</div>
+
+		{#if error}
+			<p class="error-text">{error}</p>
+		{/if}
+
+		<div class="actions">
+			{#if syncBilling.active}
+				{#if intervalChanged}
+					<button class="btn-secondary" onclick={handleChangeInterval} disabled={loading}>
+						{loading ? 'Wird geändert…' : `Auf ${INTERVAL_LABELS[selectedInterval]} wechseln`}
+					</button>
+					<p class="muted-hint">Änderung gilt ab der nächsten Abbuchung</p>
+				{/if}
+				<button class="btn-danger" onclick={handleDeactivate} disabled={loading}>
+					{loading ? 'Wird deaktiviert…' : 'Cloud Sync deaktivieren'}
+				</button>
+			{:else}
+				<button
+					class="btn-primary"
+					onclick={handleActivate}
+					disabled={loading || insufficientCredits}
+				>
+					{#if loading}
+						Wird aktiviert…
+					{:else}
+						Aktivieren · {SYNC_PRICES[selectedInterval]} Credits
+					{/if}
+				</button>
+				{#if insufficientCredits}
+					<p class="warn-hint">
+						Nicht genügend Credits. <a href="/?app=credits&tab=packages">Aufladen</a>
+					</p>
+				{/if}
+			{/if}
+		</div>
+
+		<p class="footnote">
+			Cloud Sync synchronisiert deine Daten verschlüsselt über alle Geräte. Lokale Daten bleiben
+			immer erhalten — auch wenn Sync pausiert oder deaktiviert wird.
+		</p>
 	{/if}
-</div>
+</SettingsPanel>
+
+<style>
+	.rows {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+		padding: 0.75rem 0;
+		border-bottom: 1px solid hsl(var(--color-border));
+	}
+
+	.row:last-child {
+		border-bottom: none;
+	}
+
+	.row-info {
+		min-width: 0;
+		flex: 1;
+	}
+
+	.row-title {
+		margin: 0;
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: hsl(var(--color-foreground));
+	}
+
+	.row-desc {
+		margin: 0;
+		font-size: 0.75rem;
+		color: hsl(var(--color-muted-foreground));
+	}
+
+	.inline-link {
+		color: hsl(var(--color-primary));
+		text-decoration: none;
+	}
+
+	.inline-link:hover {
+		text-decoration: underline;
+	}
+
+	.btn-group {
+		display: flex;
+		gap: 0.25rem;
+		flex-shrink: 0;
+	}
+
+	.choice-btn {
+		padding: 0.375rem 0.625rem;
+		font-size: 0.8125rem;
+		font-weight: 500;
+		border-radius: 0.5rem;
+		border: none;
+		cursor: pointer;
+		transition: all 0.15s;
+		background: hsl(var(--color-muted));
+		color: hsl(var(--color-foreground));
+	}
+
+	.choice-btn:hover {
+		opacity: 0.8;
+	}
+
+	.choice-btn.active {
+		background: hsl(var(--color-primary));
+		color: hsl(var(--color-primary-foreground));
+	}
+
+	.badge {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.375rem;
+		padding: 0.25rem 0.625rem;
+		font-size: 0.75rem;
+		font-weight: 600;
+		border-radius: 9999px;
+		background: hsl(var(--color-muted));
+		color: hsl(var(--color-muted-foreground));
+		flex-shrink: 0;
+	}
+
+	.badge.active {
+		background: hsl(142 76% 36% / 0.12);
+		color: hsl(142 71% 32%);
+	}
+
+	.badge.paused {
+		background: hsl(38 92% 50% / 0.15);
+		color: hsl(32 80% 38%);
+	}
+
+	.value {
+		font-size: 0.9375rem;
+		font-weight: 600;
+		color: hsl(var(--color-foreground));
+		font-variant-numeric: tabular-nums;
+		flex-shrink: 0;
+	}
+
+	.actions {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		margin-top: 1.25rem;
+	}
+
+	.btn-primary,
+	.btn-secondary,
+	.btn-danger {
+		padding: 0.625rem 1rem;
+		font-size: 0.875rem;
+		font-weight: 600;
+		border-radius: 0.5rem;
+		border: 1px solid transparent;
+		cursor: pointer;
+		transition: all 0.15s;
+	}
+
+	.btn-primary {
+		background: hsl(var(--color-primary));
+		color: hsl(var(--color-primary-foreground));
+	}
+
+	.btn-primary:hover:not(:disabled) {
+		opacity: 0.9;
+	}
+
+	.btn-secondary {
+		background: hsl(var(--color-muted));
+		color: hsl(var(--color-foreground));
+	}
+
+	.btn-secondary:hover:not(:disabled) {
+		background: hsl(var(--color-surface-hover));
+	}
+
+	.btn-danger {
+		background: transparent;
+		border-color: hsl(0 84% 60% / 0.4);
+		color: hsl(0 72% 50%);
+	}
+
+	.btn-danger:hover:not(:disabled) {
+		background: hsl(0 84% 60% / 0.08);
+	}
+
+	.btn-primary:disabled,
+	.btn-secondary:disabled,
+	.btn-danger:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+
+	.error-text {
+		margin: 0.75rem 0 0;
+		font-size: 0.8125rem;
+		color: hsl(0 72% 50%);
+	}
+
+	.warn-hint {
+		margin: 0;
+		font-size: 0.75rem;
+		color: hsl(32 80% 38%);
+		text-align: center;
+	}
+
+	.warn-hint a {
+		color: inherit;
+		text-decoration: underline;
+	}
+
+	.muted-hint {
+		margin: -0.25rem 0 0;
+		font-size: 0.75rem;
+		color: hsl(var(--color-muted-foreground));
+		text-align: center;
+	}
+
+	.footnote {
+		margin: 1.25rem 0 0;
+		padding-top: 1rem;
+		border-top: 1px solid hsl(var(--color-border));
+		font-size: 0.75rem;
+		color: hsl(var(--color-muted-foreground));
+		line-height: 1.5;
+	}
+
+	.spinner-wrap {
+		display: flex;
+		justify-content: center;
+		padding: 2.5rem 0;
+	}
+
+	.spinner {
+		width: 2rem;
+		height: 2rem;
+		border-radius: 50%;
+		border: 3px solid hsl(var(--color-primary));
+		border-top-color: transparent;
+		animation: spin 0.8s linear infinite;
+	}
+
+	@keyframes spin {
+		to {
+			transform: rotate(360deg);
+		}
+	}
+</style>
