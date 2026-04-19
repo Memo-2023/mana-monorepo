@@ -37,33 +37,11 @@ import {
 	sendMagicLinkEmail,
 } from '../email/send';
 import { sourceAppStore, passwordResetRedirectStore } from './stores';
+import { TRUSTED_ORIGINS } from './sso-origins';
 
-/**
- * Single source of truth for SSO trusted origins.
- *
- * Better Auth rejects any cross-origin auth request whose Origin header
- * isn't in this list — silent login failure on mis-configured apps. When
- * adding a new top-level domain (NOT a path under mana.how), update both:
- *
- *   1. This array
- *   2. The `mana-auth` `CORS_ORIGINS` env var in
- *      `docker-compose.macmini.yml` (must be a superset of this list)
- *
- * `sso-config.spec.ts` enforces both invariants. The unified app under
- * `mana.how` does NOT need per-module subdomains here — modules are routed
- * by path on the same origin.
- */
-export const TRUSTED_ORIGINS: string[] = [
-	// Unified app — all productivity apps live under mana.how
-	'https://mana.how',
-	'https://auth.mana.how',
-	// Separate apps (not part of the unified app)
-	'https://arcade.mana.how', // Games
-	'https://whopxl.mana.how', // Games
-	// Local development
-	'http://localhost:3001',
-	'http://localhost:5173',
-];
+// Re-export so existing imports (`import { TRUSTED_ORIGINS } from './better-auth.config'`)
+// keep working. New code should import from './sso-origins' directly.
+export { TRUSTED_ORIGINS };
 
 /**
  * JWT Custom Payload Interface

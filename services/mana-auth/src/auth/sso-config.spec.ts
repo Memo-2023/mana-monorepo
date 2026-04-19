@@ -26,7 +26,7 @@
 import { describe, it, expect } from 'bun:test';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { TRUSTED_ORIGINS } from './better-auth.config';
+import { TRUSTED_ORIGINS } from './sso-origins';
 
 const REPO_ROOT = join(import.meta.dir, '../../../..');
 const COMPOSE_FILE = join(REPO_ROOT, 'docker-compose.macmini.yml');
@@ -106,21 +106,18 @@ describe('SSO ↔ docker-compose CORS_ORIGINS consistency', () => {
 		expect(missing).toEqual([]);
 	});
 
-	it('reports CORS_ORIGINS entries that are NOT in trustedOrigins (dead drift)', () => {
-		// This is a soft assertion — extra entries don't break the SSO
-		// loop, but they're a sign of stale config that should be cleaned
-		// up. We log them so they're visible in CI without failing the
-		// build. Convert to a hard expect() once the cleanup ships.
+	it('mana-auth CORS_ORIGINS contains NO entries outside trustedOrigins (no dead drift)', () => {
+		// Hard-fail on extras: if CORS lists an origin Better Auth doesn't
+		// trust, the server accepts the preflight but then silently rejects
+		// the auth request — worst-of-both-worlds. Tightened from a warning
+		// to a hard assertion on 2026-04-19 per audit.
+		// Fix: either add the origin to TRUSTED_ORIGINS (in sso-origins.ts)
+		// or remove it from the mana-auth CORS_ORIGINS in
+		// docker-compose.macmini.yml.
 		const extras = corsOrigins.filter(
 			(o) =>
 				o.startsWith('https://') && !TRUSTED_ORIGINS.includes(o as (typeof TRUSTED_ORIGINS)[number])
 		);
-		if (extras.length > 0) {
-			console.warn(
-				`[sso-config.spec] mana-auth CORS_ORIGINS contains ${extras.length} origin(s) not in trustedOrigins (likely stale post-consolidation): ${extras.join(', ')}`
-			);
-		}
-		// No assertion — see comment above. Will be tightened once
-		// audit item from REFACTORING_AUDIT_2026_04.md lands.
+		expect(extras).toEqual([]);
 	});
 });

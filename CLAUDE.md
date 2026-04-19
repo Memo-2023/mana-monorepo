@@ -112,9 +112,9 @@ Default new user-typed fields to **encrypt**; default new IDs/timestamps/sort-ke
 All servers use `@mana/shared-hono` with `authMiddleware()`. Tokens are EdDSA JWTs issued by `mana-auth` with claims `{sub, email, role, sid, tier, exp, iss, aud}`. Cross-app SSO works across `*.mana.how`. See [`.claude/guidelines/authentication.md`](.claude/guidelines/authentication.md) and `services/mana-auth/`.
 
 **Adding an app to SSO** requires updating *all three*:
-1. `trustedOrigins` in `services/mana-auth/src/auth/better-auth.config.ts`
+1. `PRODUCTION_TRUSTED_ORIGINS` in `services/mana-auth/src/auth/sso-origins.ts` (the SSOT — better-auth.config.ts re-exports from here)
 2. `CORS_ORIGINS` for mana-auth in `docker-compose.macmini.yml`
-3. Run `pnpm test -- src/auth/sso-config.spec.ts` from `services/mana-auth/`
+3. Run `bun test src/auth/sso-config.spec.ts` from `services/mana-auth/` — now hard-fails on drift in either direction
 
 ### Access tiers
 
