@@ -1,11 +1,19 @@
 /**
- * Quiz tools — AI-accessible read + write over the encrypted quiz tables.
+ * Quiz tools — AI-accessible CRUD over the encrypted quiz tables.
  *
- * - `create_quiz`       (propose) — mints an empty quiz shell.
- * - `add_quiz_question` (propose) — appends a question; options payload is
- *   shape-dependent on the question type (see description in the catalog).
- * - `list_quizzes`      (auto)    — returns decrypted metadata so the planner
- *   can reference an existing quiz when extending it.
+ * Propose (needs user approval):
+ *   - create_quiz            — mint an empty quiz shell
+ *   - update_quiz            — edit title/description/category/pin/archive
+ *   - add_quiz_question      — append a question (options shape depends on type)
+ *   - update_quiz_question   — edit text / type+options / explanation
+ *   - delete_quiz_question   — soft-delete a question + recount
+ *
+ * Auto (read-only context):
+ *   - list_quizzes           — decrypted metadata summary
+ *   - get_quiz_questions     — full decrypted question list for a quiz
+ *   - get_quiz_stats         — attemptCount, avgScore, bestScore, lastAttemptAt
+ *
+ * delete_quiz is deliberately absent — too destructive to hand to the agent.
  */
 
 import type { ModuleTool } from '$lib/data/tools/types';
