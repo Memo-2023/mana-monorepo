@@ -41,7 +41,7 @@ export default [
 			// Config files (tool-specific, not part of app code)
 			'**/drizzle.config.ts',
 			'playwright.config.ts',
-			'vitest.config.ts',
+			'**/vitest.config.{ts,js,mjs}',
 			'tests/**',
 
 			// Documentation examples

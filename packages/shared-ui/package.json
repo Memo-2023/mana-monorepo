@@ -45,7 +45,8 @@
 	"scripts": {
 		"lint": "eslint .",
 		"test": "vitest run",
-		"test:watch": "vitest"
+		"test:watch": "vitest",
+		"test:coverage": "vitest run --coverage"
 	},
 	"peerDependencies": {
 		"svelte": "^5.0.0"
@@ -69,6 +70,7 @@
 		"@types/d3-selection": "^3.0.11",
 		"@types/d3-transition": "^3.0.9",
 		"@types/d3-zoom": "^3.0.8",
+		"@vitest/coverage-v8": "^4.1.2",
 		"jsdom": "^29.0.1",
 		"vitest": "^4.1.2"
 	}

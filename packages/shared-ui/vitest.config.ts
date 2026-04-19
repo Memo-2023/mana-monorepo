@@ -11,6 +11,13 @@ export default defineConfig({
 		clearMocks: true,
 		mockReset: true,
 		restoreMocks: true,
+		coverage: {
+			provider: 'v8',
+			reporter: ['text', 'lcov', 'json-summary'],
+			reportsDirectory: './coverage',
+			include: ['src/**/*.{ts,svelte}'],
+			exclude: ['src/**/*.{test,spec}.{ts,js}', 'src/**/*.d.ts', 'src/test/**', 'src/**/index.ts'],
+		},
 	},
 	resolve: {
 		conditions: ['browser'],

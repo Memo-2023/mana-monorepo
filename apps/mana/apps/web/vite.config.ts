@@ -104,5 +104,20 @@ export default defineConfig({
 	// crash on `test.afterAll()` because they expect a Playwright runner.
 	test: {
 		exclude: ['**/node_modules/**', '**/dist/**', '**/build/**', 'e2e/**', 'tests/e2e/**'],
+		coverage: {
+			provider: 'v8',
+			reporter: ['text', 'lcov', 'json-summary'],
+			reportsDirectory: './coverage',
+			include: ['src/**/*.{ts,svelte}'],
+			exclude: [
+				'src/**/*.{test,spec}.{ts,js}',
+				'src/**/*.d.ts',
+				'src/**/__tests__/**',
+				'src/**/__mocks__/**',
+				'src/routes/**/+{page,layout,server,error}.{ts,svelte}',
+				'src/app.d.ts',
+				'src/hooks.*.ts',
+			],
+		},
 	},
 });

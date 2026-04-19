@@ -449,8 +449,32 @@ jobs:
       - name: Lint
         run: pnpm run lint
 
-      - name: Test
-        run: pnpm run test || true
+      # Coverage is produced but not yet gating — we're establishing a baseline
+      # before flipping to hard-fail. `continue-on-error: true` surfaces a
+      # proper failure signal in the PR (unlike `|| true`, which silently
+      # swallowed everything) but still lets the overall job pass.
+      # Flip to blocking by removing `continue-on-error` once the suite is
+      # green on main for a full week. Tracked in docs/plans/concern-4-coverage.md.
+      - name: Test (with coverage)
+        id: tests
+        continue-on-error: true
+        run: pnpm run test:coverage
+
+      - name: Annotate test failure (non-blocking)
+        if: steps.tests.outcome == 'failure'
+        run: |
+          echo "::warning title=Test suite failed::pnpm run test:coverage returned a non-zero exit code. Coverage artifacts were still uploaded. See the 'Test (with coverage)' step above for details."
+
+      - name: Upload coverage reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ github.run_id }}
+          path: |
+            **/coverage/lcov.info
+            **/coverage/coverage-summary.json
+          if-no-files-found: warn
+          retention-days: 14
 
       - name: Security Audit
         run: |

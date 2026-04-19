@@ -9,18 +9,61 @@
 | **SvelteKit Web** | Vitest | `vitest.config.ts` | `*.test.ts` |
 | **E2E** | Playwright | `playwright.config.ts` | `e2e/*.spec.ts` |
 
-## Coverage Requirements
+## Coverage
 
-```javascript
-// Target: 80% for all new code
-coverageThresholds: {
-  global: {
+### Running coverage locally
+
+```bash
+# From any Vitest package with a test:coverage script
+pnpm run test:coverage
+
+# Across the whole monorepo (turbo orchestrates)
+pnpm run test:coverage
+```
+
+Each package emits `coverage/` with:
+- `lcov.info` — consumed by CI artifact upload and external tools
+- `coverage-summary.json` — machine-readable totals
+- `lcov-report/` — browsable HTML report
+
+### Vitest config template
+
+Packages that need coverage add this block to `vitest.config.ts` and declare `@vitest/coverage-v8` as a devDep:
+
+```ts
+test: {
+  coverage: {
+    provider: 'v8',
+    reporter: ['text', 'lcov', 'json-summary'],
+    reportsDirectory: './coverage',
+    include: ['src/**/*.{ts,svelte}'],
+    exclude: ['src/**/*.{test,spec}.ts', 'src/**/*.d.ts', 'src/**/index.ts'],
+  },
+},
+```
+
+Add a script:
+
+```json
+"test:coverage": "vitest run --coverage"
+```
+
+### CI
+
+`.github/workflows/ci.yml` runs `pnpm run test:coverage` and uploads `**/coverage/lcov.info` + `coverage-summary.json` as an artifact (14-day retention). The step is currently non-blocking via `continue-on-error: true` — we are establishing a baseline before flipping to a hard-fail gate. Remove that flag once the suite is green on main.
+
+### Targets (aspirational, not yet enforced)
+
+```ts
+// Target once we flip coverage to blocking: 80% for all new code
+coverage: {
+  thresholds: {
+    lines: 80,
     branches: 80,
     functions: 80,
-    lines: 80,
     statements: 80,
   },
-}
+},
 ```
 
 ## Test File Organization

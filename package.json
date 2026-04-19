@@ -8,6 +8,7 @@
 		"dev": "turbo run dev",
 		"build": "turbo run build",
 		"test": "turbo run test",
+		"test:coverage": "turbo run test:coverage",
 		"lint": "turbo run lint",
 		"lint:root": "eslint . --cache",
 		"lint:fix": "eslint . --fix --cache",
