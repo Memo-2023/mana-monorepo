@@ -206,7 +206,7 @@ The companion is a **second actor** that works alongside the human in every modu
 - **Scene lens** — workbench scenes can bind to an agent via `scene.viewingAsAgentId` (context menu → "An Agent binden…"). Pure UI lens, not a data-scope change. `SceneAppBar` shows the agent avatar on bound scene tabs.
 - **Workbench timeline** — `/ai-workbench` renders every AI-attributed event grouped by mission iteration with per-**agent** filter, per-module, per-mission. Each bucket header shows agent avatar + name + mission title. Per-bucket **Revert button** undoes the iteration's writes via `data/ai/revert/` (TaskCreated → delete, TaskCompleted → uncomplete, etc., newest-first). Separate **"Datenzugriff"** tab exposes the server-side decrypt audit (for missions with Key-Grants).
 
-### Tool Coverage (32 tools, 12 modules)
+### Tool Coverage (37 tools, 12 modules)
 
 Agents interact with the app through tools — each one either auto (executes silently during reasoning) or propose (creates a Proposal card the user must approve). Canonical list in `@mana/shared-ai/src/policy/proposable-tools.ts`; server-side definitions in `services/mana-ai/src/planner/tools.ts`; webapp auto-tool list in `src/lib/data/ai/policy.ts`.
 
@@ -223,7 +223,7 @@ Agents interact with the app through tools — each one either auto (executes si
 | journal | `create_journal_entry` | — |
 | habits | `create_habit`, `log_habit` | `get_habits` |
 | contacts | `create_contact` | `get_contacts` |
-| quiz | `create_quiz`, `add_quiz_question` | `list_quizzes` |
+| quiz | `create_quiz`, `update_quiz`, `add_quiz_question`, `update_quiz_question`, `delete_quiz_question` | `list_quizzes`, `get_quiz_questions`, `get_quiz_stats` |
 
 **Server-side web-research**: mana-ai calls mana-api's `/api/v1/news-research/discover` + `/search` directly before the planner prompt is built (pre-planning injection). Missions with research-keyword objectives get real article URLs + excerpts injected as a synthetic ResolvedInput. See `services/mana-ai/src/planner/news-research-client.ts`.
 

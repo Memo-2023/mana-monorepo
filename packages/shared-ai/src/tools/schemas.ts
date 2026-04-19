@@ -975,6 +975,31 @@ export const AI_TOOL_CATALOG: readonly ToolSchema[] = [
 		],
 	},
 	{
+		name: 'update_quiz',
+		module: 'quiz',
+		description:
+			'Aktualisiert Metadaten eines bestehenden Quiz. Nur die mitgegebenen Felder werden geschrieben. Leerstring bei description/category loescht den Wert',
+		defaultPolicy: 'propose',
+		parameters: [
+			{ name: 'quizId', type: 'string', description: 'ID des Quiz', required: true },
+			{ name: 'title', type: 'string', description: 'Neuer Titel', required: false },
+			{ name: 'description', type: 'string', description: 'Neue Beschreibung', required: false },
+			{ name: 'category', type: 'string', description: 'Neue Kategorie', required: false },
+			{
+				name: 'isPinned',
+				type: 'boolean',
+				description: 'Quiz oben anpinnen',
+				required: false,
+			},
+			{
+				name: 'isArchived',
+				type: 'boolean',
+				description: 'Quiz archivieren (aus Liste ausblenden)',
+				required: false,
+			},
+		],
+	},
+	{
 		name: 'add_quiz_question',
 		module: 'quiz',
 		description:
@@ -1005,6 +1030,50 @@ export const AI_TOOL_CATALOG: readonly ToolSchema[] = [
 		],
 	},
 	{
+		name: 'update_quiz_question',
+		module: 'quiz',
+		description:
+			'Aktualisiert eine vorhandene Frage. Beim Aendern der Antworten muessen type + optionsJson zusammen uebergeben werden (gleiches Format wie bei add_quiz_question). Text und Erklaerung koennen unabhaengig geaendert werden',
+		defaultPolicy: 'propose',
+		parameters: [
+			{ name: 'questionId', type: 'string', description: 'ID der Frage', required: true },
+			{
+				name: 'questionText',
+				type: 'string',
+				description: 'Neue Fragestellung',
+				required: false,
+			},
+			{
+				name: 'type',
+				type: 'string',
+				description: 'Neuer Fragetyp (wenn optionsJson mitgegeben wird)',
+				required: false,
+				enum: ['single', 'multi', 'truefalse', 'text'],
+			},
+			{
+				name: 'optionsJson',
+				type: 'string',
+				description: 'Neue Antwortdaten — Format abhaengig vom type',
+				required: false,
+			},
+			{
+				name: 'explanation',
+				type: 'string',
+				description: 'Neue Erklaerung (Leerstring loescht)',
+				required: false,
+			},
+		],
+	},
+	{
+		name: 'delete_quiz_question',
+		module: 'quiz',
+		description: 'Loescht eine Frage aus einem Quiz',
+		defaultPolicy: 'propose',
+		parameters: [
+			{ name: 'questionId', type: 'string', description: 'ID der Frage', required: true },
+		],
+	},
+	{
 		name: 'list_quizzes',
 		module: 'quiz',
 		description:
@@ -1024,6 +1093,22 @@ export const AI_TOOL_CATALOG: readonly ToolSchema[] = [
 				required: false,
 			},
 		],
+	},
+	{
+		name: 'get_quiz_questions',
+		module: 'quiz',
+		description:
+			'Liest alle Fragen eines Quiz (id, order, type, questionText, options, explanation). Nutze dies bevor du weitere Fragen ergaenzt, um Duplikate zu vermeiden',
+		defaultPolicy: 'auto',
+		parameters: [{ name: 'quizId', type: 'string', description: 'ID des Quiz', required: true }],
+	},
+	{
+		name: 'get_quiz_stats',
+		module: 'quiz',
+		description:
+			'Gibt Statistiken zu einem Quiz zurueck: Anzahl der Versuche, Durchschnitts-Score, bester Score, letzter Versuch. Nuetzlich fuer adaptive Missionen (Schwachstellen erkennen)',
+		defaultPolicy: 'auto',
+		parameters: [{ name: 'quizId', type: 'string', description: 'ID des Quiz', required: true }],
 	},
 ];
 

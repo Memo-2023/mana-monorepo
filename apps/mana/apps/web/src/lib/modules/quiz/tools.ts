@@ -10,10 +10,16 @@
 
 import type { ModuleTool } from '$lib/data/tools/types';
 import { quizzesStore } from './stores/quizzes.svelte';
-import { toQuiz } from './queries';
+import { toQuiz, toQuestion } from './queries';
 import { db } from '$lib/data/database';
 import { decryptRecords, VaultLockedError } from '$lib/data/crypto';
-import type { LocalQuiz, QuestionOption, QuestionType } from './types';
+import type {
+	LocalQuiz,
+	LocalQuizQuestion,
+	LocalQuizAttempt,
+	QuestionOption,
+	QuestionType,
+} from './types';
 
 const MAX_LIST_LIMIT = 100;
 const DEFAULT_LIST_LIMIT = 30;
@@ -93,6 +99,22 @@ async function readLocalQuiz(id: string): Promise<LocalQuiz | null> {
 	}
 }
 
+async function readLocalQuestion(id: string): Promise<LocalQuizQuestion | null> {
+	const local = await db.table<LocalQuizQuestion>('quizQuestions').get(id);
+	if (!local || local.deletedAt) return null;
+	try {
+		const [decrypted] = await decryptRecords('quizQuestions', [local]);
+		return decrypted ?? null;
+	} catch (err) {
+		if (err instanceof VaultLockedError) {
+			throw new Error(
+				`Vault ist gesperrt — Frage ${id} kann nicht entschlüsselt werden. Bitte Vault entsperren.`
+			);
+		}
+		throw err;
+	}
+}
+
 export const quizTools: ModuleTool[] = [
 	{
 		name: 'create_quiz',
@@ -126,6 +148,54 @@ export const quizTools: ModuleTool[] = [
 				success: true,
 				data: quiz,
 				message: `Quiz "${quiz.title}" erstellt`,
+			};
+		},
+	},
+	{
+		name: 'update_quiz',
+		module: 'quiz',
+		description:
+			'Aktualisiert Metadaten eines bestehenden Quiz. Nur die mitgegebenen Felder werden geschrieben',
+		parameters: [
+			{ name: 'quizId', type: 'string', description: 'ID des Quiz', required: true },
+			{ name: 'title', type: 'string', description: 'Neuer Titel', required: false },
+			{ name: 'description', type: 'string', description: 'Neue Beschreibung', required: false },
+			{ name: 'category', type: 'string', description: 'Neue Kategorie', required: false },
+			{ name: 'isPinned', type: 'boolean', description: 'Quiz anpinnen', required: false },
+			{ name: 'isArchived', type: 'boolean', description: 'Quiz archivieren', required: false },
+		],
+		async execute(params) {
+			const quizId = String(params.quizId ?? '');
+			const existing = await readLocalQuiz(quizId);
+			if (!existing) return { success: false, message: `Quiz ${quizId} nicht gefunden` };
+
+			const diff: Partial<
+				Pick<LocalQuiz, 'title' | 'description' | 'category' | 'isPinned' | 'isArchived'>
+			> = {};
+
+			if (typeof params.title === 'string') {
+				const t = params.title.trim();
+				if (!t) return { success: false, message: 'title darf nicht leer sein' };
+				diff.title = t;
+			}
+			if (typeof params.description === 'string') {
+				diff.description = params.description === '' ? null : params.description;
+			}
+			if (typeof params.category === 'string') {
+				diff.category = params.category === '' ? null : params.category;
+			}
+			if (typeof params.isPinned === 'boolean') diff.isPinned = params.isPinned;
+			if (typeof params.isArchived === 'boolean') diff.isArchived = params.isArchived;
+
+			if (Object.keys(diff).length === 0) {
+				return { success: false, message: 'Kein Feld zum Aktualisieren angegeben' };
+			}
+
+			await quizzesStore.updateQuiz(quizId, diff);
+			return {
+				success: true,
+				data: { quizId, fields: Object.keys(diff) },
+				message: `Quiz "${diff.title ?? existing.title}" aktualisiert`,
 			};
 		},
 	},
@@ -191,6 +261,107 @@ export const quizTools: ModuleTool[] = [
 				success: true,
 				data: { quizId, questionCount: newCount },
 				message: `Frage #${newCount} zu "${existing.title}" hinzugefügt`,
+			};
+		},
+	},
+	{
+		name: 'update_quiz_question',
+		module: 'quiz',
+		description:
+			'Aktualisiert eine vorhandene Frage. Beim Ändern der Antworten müssen type + optionsJson zusammen übergeben werden. Text und Erklärung können unabhängig geändert werden',
+		parameters: [
+			{ name: 'questionId', type: 'string', description: 'ID der Frage', required: true },
+			{ name: 'questionText', type: 'string', description: 'Neue Fragestellung', required: false },
+			{
+				name: 'type',
+				type: 'string',
+				description: 'Neuer Fragetyp (wenn optionsJson mitgegeben wird)',
+				required: false,
+				enum: ['single', 'multi', 'truefalse', 'text'],
+			},
+			{
+				name: 'optionsJson',
+				type: 'string',
+				description: 'Neue Antwortdaten — Format abhängig vom type',
+				required: false,
+			},
+			{
+				name: 'explanation',
+				type: 'string',
+				description: 'Neue Erklärung (Leerstring löscht)',
+				required: false,
+			},
+		],
+		async execute(params) {
+			const questionId = String(params.questionId ?? '');
+			const existing = await readLocalQuestion(questionId);
+			if (!existing) return { success: false, message: `Frage ${questionId} nicht gefunden` };
+
+			const diff: Partial<
+				Pick<LocalQuizQuestion, 'type' | 'questionText' | 'options' | 'explanation'>
+			> = {};
+
+			if (typeof params.questionText === 'string') {
+				const t = params.questionText.trim();
+				if (!t) return { success: false, message: 'questionText darf nicht leer sein' };
+				diff.questionText = t;
+			}
+
+			if (typeof params.explanation === 'string') {
+				diff.explanation = params.explanation === '' ? null : params.explanation;
+			}
+
+			const hasOptions = typeof params.optionsJson === 'string';
+			const hasType = typeof params.type === 'string';
+
+			if (hasOptions) {
+				const targetType = hasType ? (params.type as QuestionType) : existing.type;
+				if (!['single', 'multi', 'truefalse', 'text'].includes(targetType)) {
+					return { success: false, message: `Unbekannter Fragetyp: ${targetType}` };
+				}
+				const parsed = parseQuestionOptions(targetType, String(params.optionsJson));
+				if ('error' in parsed) return { success: false, message: parsed.error };
+				diff.options = parsed.options;
+				if (hasType) diff.type = targetType;
+			} else if (hasType) {
+				return {
+					success: false,
+					message:
+						'type ohne optionsJson zu ändern ist nicht erlaubt — die Antworten würden nicht mehr zum Typ passen',
+				};
+			}
+
+			if (Object.keys(diff).length === 0) {
+				return { success: false, message: 'Kein Feld zum Aktualisieren angegeben' };
+			}
+
+			await quizzesStore.updateQuestion(questionId, diff);
+			return {
+				success: true,
+				data: { questionId, fields: Object.keys(diff) },
+				message: 'Frage aktualisiert',
+			};
+		},
+	},
+	{
+		name: 'delete_quiz_question',
+		module: 'quiz',
+		description: 'Löscht eine Frage aus einem Quiz',
+		parameters: [
+			{ name: 'questionId', type: 'string', description: 'ID der Frage', required: true },
+		],
+		async execute(params) {
+			const questionId = String(params.questionId ?? '');
+			const existing = await readLocalQuestion(questionId);
+			if (!existing) return { success: false, message: `Frage ${questionId} nicht gefunden` };
+
+			const parentQuiz = await readLocalQuiz(existing.quizId);
+			await quizzesStore.deleteQuestion(questionId);
+
+			return {
+				success: true,
+				data: { questionId, quizId: existing.quizId },
+				message: parentQuiz ? `Frage aus "${parentQuiz.title}" entfernt` : 'Frage entfernt',
 			};
 		},
 	},
@@ -261,6 +432,92 @@ export const quizTools: ModuleTool[] = [
 				}
 				throw err;
 			}
+		},
+	},
+	{
+		name: 'get_quiz_questions',
+		module: 'quiz',
+		description:
+			'Liest alle Fragen eines Quiz (id, order, type, questionText, options, explanation). Nutze dies bevor du weitere Fragen ergänzt, um Duplikate zu vermeiden',
+		parameters: [{ name: 'quizId', type: 'string', description: 'ID des Quiz', required: true }],
+		async execute(params) {
+			const quizId = String(params.quizId ?? '');
+			const existing = await readLocalQuiz(quizId);
+			if (!existing) return { success: false, message: `Quiz ${quizId} nicht gefunden` };
+
+			try {
+				const visible = (
+					await db
+						.table<LocalQuizQuestion>('quizQuestions')
+						.where('quizId')
+						.equals(quizId)
+						.toArray()
+				).filter((q) => !q.deletedAt);
+				const decrypted = await decryptRecords('quizQuestions', visible);
+				const questions = decrypted.map(toQuestion).sort((a, b) => a.order - b.order);
+
+				return {
+					success: true,
+					data: { quizId, quizTitle: existing.title, questions, total: questions.length },
+					message: `${questions.length} Frage(n) aus "${existing.title}" gelistet`,
+				};
+			} catch (err) {
+				if (err instanceof VaultLockedError) {
+					return {
+						success: false,
+						message: 'Vault ist gesperrt — Fragen können nicht entschlüsselt werden',
+					};
+				}
+				throw err;
+			}
+		},
+	},
+	{
+		name: 'get_quiz_stats',
+		module: 'quiz',
+		description:
+			'Gibt Statistiken zu einem Quiz zurück: Anzahl der Versuche, Durchschnitts-Score, bester Score, letzter Versuch',
+		parameters: [{ name: 'quizId', type: 'string', description: 'ID des Quiz', required: true }],
+		async execute(params) {
+			const quizId = String(params.quizId ?? '');
+			const existing = await readLocalQuiz(quizId);
+			if (!existing) return { success: false, message: `Quiz ${quizId} nicht gefunden` };
+
+			const all = await db
+				.table<LocalQuizAttempt>('quizAttempts')
+				.where('quizId')
+				.equals(quizId)
+				.toArray();
+			const completed = all.filter((a) => !a.deletedAt && a.finishedAt !== null);
+
+			const attemptCount = completed.length;
+			const avgScore =
+				attemptCount > 0 ? completed.reduce((sum, a) => sum + (a.score ?? 0), 0) / attemptCount : 0;
+			const bestScore = attemptCount > 0 ? Math.max(...completed.map((a) => a.score ?? 0)) : 0;
+			const lastAttemptAt =
+				attemptCount > 0
+					? completed
+							.map((a) => a.finishedAt as string)
+							.sort()
+							.reverse()[0]
+					: null;
+
+			return {
+				success: true,
+				data: {
+					quizId,
+					quizTitle: existing.title,
+					questionCount: existing.questionCount ?? 0,
+					attemptCount,
+					avgScore: Number(avgScore.toFixed(3)),
+					bestScore: Number(bestScore.toFixed(3)),
+					lastAttemptAt,
+				},
+				message:
+					attemptCount === 0
+						? `"${existing.title}" wurde noch nicht gespielt`
+						: `"${existing.title}" — ${attemptCount} Versuch(e), ⌀ ${Math.round(avgScore * 100)} %, beste ${Math.round(bestScore * 100)} %`,
+			};
 		},
 	},
 ];
