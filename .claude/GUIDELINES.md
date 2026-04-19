@@ -15,6 +15,7 @@ This directory contains comprehensive guidelines for working in the Mana Univers
 | [Expo Mobile](./guidelines/expo-mobile.md) | React Native, NativeWind, navigation |
 | [Authentication](./guidelines/authentication.md) | Mana Core Auth integration |
 | [Design & UX](./guidelines/design-ux.md) | UI patterns, animations, accessibility |
+| [AI Tools](./guidelines/ai-tools.md) | Adding AI tools to a module (catalog + executor + registration) |
 
 ## Core Principles
 

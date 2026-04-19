@@ -51,6 +51,7 @@ Always consult before changing code:
 | [`.claude/guidelines/error-handling.md`](.claude/guidelines/error-handling.md) | Result types, error codes |
 | [`.claude/guidelines/testing.md`](.claude/guidelines/testing.md) | Vitest, mock factories |
 | [`.claude/guidelines/design-ux.md`](.claude/guidelines/design-ux.md) | UI patterns, a11y |
+| [`.claude/guidelines/ai-tools.md`](.claude/guidelines/ai-tools.md) | Adding AI tools to a module |
 
 ## Development Quick Start
 
