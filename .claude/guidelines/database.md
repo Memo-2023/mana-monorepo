@@ -85,6 +85,60 @@ export class DatabaseModule implements OnModuleDestroy {
 }
 ```
 
+## Schema Isolation (`pgSchema`)
+
+**CRITICAL**: Every service and app that shares the `mana_platform` database MUST namespace its tables under its own PostgreSQL schema using `pgSchema('<name>').table(...)`. Never use raw `pgTable()` in this monorepo.
+
+### Why
+
+`mana_platform` is the one shared database for all services (see root `CLAUDE.md`). Without a schema prefix, a new `users` table in one service would collide with `users` in another. The Postgres schema acts as a namespace and as an RLS boundary — it's the mechanism by which `mana-auth`'s `auth.users` and e.g. `mana-credits`' `credits.balances` coexist cleanly.
+
+### Pattern
+
+```typescript
+// src/db/schema/auth.ts
+import { pgSchema, text, timestamp, boolean } from 'drizzle-orm/pg-core';
+
+// One schema instance per file (or per service — export from index.ts).
+export const authSchema = pgSchema('auth');
+
+// Tables hang off the schema, NOT off `pgTable`.
+export const users = authSchema.table('users', {
+	id: text('id').primaryKey(),
+	email: text('email').unique().notNull(),
+	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+});
+```
+
+### Schema naming
+
+| Service              | Schema                      |
+| -------------------- | --------------------------- |
+| `mana-auth`          | `auth`                      |
+| `mana-credits`       | `credits`                   |
+| `mana-user`          | `usr`                       |
+| `mana-events`        | `events`, `event_discovery` |
+| `mana-mail`          | `mail`                      |
+| `mana-research`      | `research`                  |
+| `mana-subscriptions` | `subscriptions`             |
+| `mana-analytics`     | `feedback`                  |
+
+New services: pick a short, unambiguous name (`auth`, not `mana_auth_schema`), add it here, and keep it stable — renaming a schema is a breaking migration.
+
+### The `mana_sync` exception
+
+`mana_sync` is its own database (not part of `mana_platform`), and its tables are append-only write-heavy. It uses raw `pgTable()` — no multi-schema tenancy. Service-owned projections on top of `mana_sync` (e.g. `mana-ai` → `mana_ai.mission_snapshots`) DO use `pgSchema()` to stay out of the core sync engine's namespace.
+
+### Verification
+
+Before merging a change that adds a new Drizzle schema file, confirm with:
+
+```bash
+rg "pgTable\(" services/ apps/api/ packages/ --type ts
+```
+
+Any hit that's not inside `mana-sync` is a violation. There's no automated lint rule yet — adding one is tracked in the architecture audit.
+
 ## Schema Design
 
 ### File Organization
@@ -126,7 +180,7 @@ See [Authentication Guidelines](./authentication.md#user-id-format) for details.
 ```typescript
 // src/db/schema/files.schema.ts
 import {
-	pgTable,
+	pgSchema,
 	uuid,
 	varchar,
 	text,
@@ -134,10 +188,14 @@ import {
 	timestamp,
 	bigint,
 	integer,
+	index,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
-export const files = pgTable(
+// Namespace this service's tables — see "Schema Isolation" above.
+export const storageSchema = pgSchema('storage');
+
+export const files = storageSchema.table(
 	'files',
 	{
 		// Primary key - always UUID with auto-generation
