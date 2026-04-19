@@ -10,6 +10,21 @@
 import type { Context, Next } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import { createRemoteJWKSet, jwtVerify } from 'jose';
+import type { AccessTier } from './types';
+
+const VALID_TIERS: ReadonlySet<AccessTier> = new Set([
+	'guest',
+	'public',
+	'beta',
+	'alpha',
+	'founder',
+]);
+
+function readTierClaim(raw: unknown): AccessTier {
+	return typeof raw === 'string' && VALID_TIERS.has(raw as AccessTier)
+		? (raw as AccessTier)
+		: 'public';
+}
 
 const AUTH_URL = () => process.env.MANA_AUTH_URL ?? 'http://localhost:3001';
 const SERVICE_KEY = () => process.env.MANA_SERVICE_KEY ?? '';
@@ -65,6 +80,7 @@ export function authMiddleware() {
 			c.set('userId', process.env.DEV_USER_ID ?? '00000000-0000-0000-0000-000000000000');
 			c.set('userEmail', 'dev@example.com');
 			c.set('userRole', 'user');
+			c.set('userTier', readTierClaim(process.env.DEV_USER_TIER ?? 'founder'));
 			return next();
 		}
 
@@ -88,10 +104,12 @@ export function authMiddleware() {
 				throw new HTTPException(401, { message: 'Token missing subject claim' });
 			}
 
+			const claims = payload as Record<string, unknown>;
 			c.set('userId', payload.sub);
-			c.set('userEmail', (payload as Record<string, unknown>).email ?? '');
-			c.set('userRole', (payload as Record<string, unknown>).role ?? 'user');
-			c.set('sessionId', (payload as Record<string, unknown>).sid ?? '');
+			c.set('userEmail', claims.email ?? '');
+			c.set('userRole', claims.role ?? 'user');
+			c.set('userTier', readTierClaim(claims.tier));
+			c.set('sessionId', claims.sid ?? '');
 			return next();
 		} catch (err) {
 			if (err instanceof HTTPException) throw err;

@@ -13,6 +13,7 @@ import {
 	errorHandler,
 	notFoundHandler,
 	rateLimitMiddleware,
+	requireTier,
 	type AuthVariables,
 } from '@mana/shared-hono';
 
@@ -57,8 +58,35 @@ app.route('/api/v1/wetter', wetterRoutes);
 
 app.use('/api/*', authMiddleware());
 
+// ─── Tier Gating ────────────────────────────────────────────
+// Defense-in-depth on top of per-route credits validation.
+// Routes that call LLMs, image-gen, or external search APIs are gated
+// to `beta`+ so that unauthenticated guest fallbacks (tier='public'
+// from a missing claim) can't hit paid infrastructure.
+// Pure CRUD modules (calendar, contacts, music, storage, todo, news,
+// presi, moodlit) rely on authMiddleware alone — users access only
+// their own records.
+const RESOURCE_MODULES = [
+	'chat',
+	'context',
+	'food',
+	'guides',
+	'news-research',
+	'picture',
+	'plants',
+	'research',
+	'traces',
+	'who',
+] as const;
+for (const mod of RESOURCE_MODULES) {
+	app.use(`/api/v1/${mod}/*`, requireTier('beta'));
+}
+
 // ─── MCP Endpoint ──────────────────────────────────────────
 // Streamable HTTP transport: POST (messages), GET (SSE stream), DELETE (close)
+// MCP exposes the full tool catalog including LLM/research tools, so it
+// gets the same minimum tier.
+app.use('/api/v1/mcp', requireTier('beta'));
 app.all('/api/v1/mcp', (c) => handleMcpRequest(c.req.raw, c.get('userId')));
 
 // ─── Module Routes ──────────────────────────────────────────

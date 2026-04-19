@@ -33,6 +33,7 @@
  */
 
 export { authMiddleware, serviceAuthMiddleware } from './auth';
+export { requireTier, hasTier, getTierLevel } from './tier';
 export { createDb } from './db';
 export type { DbOptions } from './db';
 export { healthRoute } from './health';
@@ -43,4 +44,4 @@ export type { CreditBalance, CreditValidationResult } from './credits';
 export { rateLimitMiddleware } from './rate-limit';
 export { requestLogger, initLogger } from './logger';
 export { logger } from '@mana/shared-logger';
-export type { CurrentUserData, AuthVariables } from './types';
+export type { CurrentUserData, AuthVariables, AccessTier } from './types';

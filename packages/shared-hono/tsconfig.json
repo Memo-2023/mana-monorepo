@@ -8,7 +8,7 @@
 		"skipLibCheck": true,
 		"outDir": "dist",
 		"declaration": true,
-		"types": ["node"]
+		"types": ["node", "bun"]
 	},
 	"include": ["src/**/*.ts"]
 }

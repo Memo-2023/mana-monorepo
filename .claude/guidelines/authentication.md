@@ -656,6 +656,25 @@ Response:
 }
 ```
 
+## Server-Side Tier Gating
+
+The JWT carries a `tier` claim (`guest | public | beta | alpha | founder`) sourced from `auth.users.access_tier`. Client-side `AuthGate` enforcement is not enough — a user can still call the API directly with their token. For any endpoint that consumes shared infrastructure (LLM calls, external search, image/video generation), add a server-side `requireTier` gate on top of `authMiddleware`.
+
+```typescript
+import { authMiddleware, requireTier } from '@mana/shared-hono';
+
+app.use('/api/*', authMiddleware());
+app.use('/api/v1/research/*', requireTier('beta'));
+app.use('/api/v1/picture/*', requireTier('beta'));
+```
+
+Rules:
+- Apply at the module-group level in `index.ts`, not inside handlers — easy to audit in one place.
+- `requireTier` always runs after `authMiddleware`; it relies on the `userTier` context variable the middleware sets.
+- Missing / unknown `tier` claims default to `public`, so a malformed JWT cannot accidentally grant `alpha`.
+- Pure CRUD modules that only expose a user's own records don't need a tier gate — the access check is ownership, not tier.
+- `DEV_BYPASS_AUTH=true` sets `userTier=founder` by default; override with `DEV_USER_TIER=<tier>` when testing rejection paths locally.
+
 ## Development Bypass
 
 For local development, you can bypass auth:
@@ -663,6 +682,7 @@ For local development, you can bypass auth:
 ```env
 DEV_BYPASS_AUTH=true
 DEV_USER_ID=dev-user-123
+DEV_USER_TIER=founder   # optional — defaults to founder
 ```
 
 The guard will inject a mock user:
@@ -673,6 +693,7 @@ request.user = {
   userId: process.env.DEV_USER_ID || 'dev-user',
   email: 'dev@example.com',
   role: 'user',
+  tier: process.env.DEV_USER_TIER || 'founder',
 };
 ```
 
