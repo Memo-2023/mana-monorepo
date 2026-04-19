@@ -951,6 +951,80 @@ export const AI_TOOL_CATALOG: readonly ToolSchema[] = [
 			},
 		],
 	},
+
+	// ── Quiz ──────────────────────────────────────────────────
+	{
+		name: 'create_quiz',
+		module: 'quiz',
+		description: 'Erstellt ein neues leeres Quiz mit Titel und optionaler Kategorie',
+		defaultPolicy: 'propose',
+		parameters: [
+			{ name: 'title', type: 'string', description: 'Titel des Quiz', required: true },
+			{
+				name: 'description',
+				type: 'string',
+				description: 'Optionale Beschreibung',
+				required: false,
+			},
+			{
+				name: 'category',
+				type: 'string',
+				description: 'Optionale Kategorie (z.B. "Geografie")',
+				required: false,
+			},
+		],
+	},
+	{
+		name: 'add_quiz_question',
+		module: 'quiz',
+		description:
+			'Fuegt einem bestehenden Quiz eine Frage hinzu. optionsJson-Format ist abhaengig vom type: single/multi => JSON-Array [{"text":"...","correct":true|false}] mit mindestens zwei Eintraegen und mindestens einem correct:true; truefalse => "true" oder "false" als korrekte Antwort; text => die erwartete Antwort als Klartext (Case-insensitive verglichen)',
+		defaultPolicy: 'propose',
+		parameters: [
+			{ name: 'quizId', type: 'string', description: 'ID des Quiz', required: true },
+			{
+				name: 'type',
+				type: 'string',
+				description: 'Fragetyp',
+				required: true,
+				enum: ['single', 'multi', 'truefalse', 'text'],
+			},
+			{ name: 'questionText', type: 'string', description: 'Die Fragestellung', required: true },
+			{
+				name: 'optionsJson',
+				type: 'string',
+				description: 'Antwortdaten — Format abhaengig von type (siehe Tool-Beschreibung)',
+				required: true,
+			},
+			{
+				name: 'explanation',
+				type: 'string',
+				description: 'Optionale Erklaerung, die nach dem Beantworten angezeigt wird',
+				required: false,
+			},
+		],
+	},
+	{
+		name: 'list_quizzes',
+		module: 'quiz',
+		description:
+			'Listet vorhandene Quizze (id, title, category, questionCount) damit du sie referenzieren kannst',
+		defaultPolicy: 'auto',
+		parameters: [
+			{
+				name: 'limit',
+				type: 'number',
+				description: 'Maximale Anzahl (Standard 30, max 100)',
+				required: false,
+			},
+			{
+				name: 'query',
+				type: 'string',
+				description: 'Case-insensitive Substring-Filter auf Titel oder Kategorie',
+				required: false,
+			},
+		],
+	},
 ];
 
 // ═══════════════════════════════════════════════════════════════
