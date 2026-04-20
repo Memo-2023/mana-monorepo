@@ -6,7 +6,6 @@
 	import { searchNotes, getPreview, formatRelativeTime } from '$lib/modules/notes/queries';
 	import { notesStore } from '$lib/modules/notes/stores/notes.svelte';
 	import { NOTE_COLORS } from '$lib/modules/notes/types';
-	import AiProposalInbox from '$lib/components/ai/AiProposalInbox.svelte';
 
 	const allNotes$: Observable<Note[]> = getContext('notes');
 
@@ -52,7 +51,6 @@
 </svelte:head>
 
 <div class="notes-page">
-	<AiProposalInbox module="notes" />
 	<header class="notes-header">
 		<div>
 			<h1 class="notes-title">Notes</h1>

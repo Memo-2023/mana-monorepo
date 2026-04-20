@@ -18,7 +18,7 @@ import Dexie, { type EntityTable } from 'dexie';
 import { trackFirstContent } from '$lib/stores/funnel-tracking';
 import { fire as fireTrigger } from '$lib/triggers/registry';
 import { checkInlineSuggestion } from '$lib/triggers/inline-suggest';
-import { getEffectiveUserId } from './current-user';
+import { getEffectiveUserId, GUEST_USER_ID } from './current-user';
 import { getCurrentActor } from './events/actor';
 import type { Actor } from './events/actor';
 import { isQuotaError, notifyQuotaExceeded } from './quota-detect';
@@ -607,6 +607,50 @@ db.version(27).stores({
 	invoiceSettings: 'id',
 });
 
+// v28 — Spaces foundation: stamp every sync-relevant record with
+// `spaceId`, `authorId`, `visibility` so queries can be partitioned by
+// Space (Better Auth organization) instead of by user. See
+// `docs/plans/spaces-foundation.md`.
+//
+// No schema/index changes in this version — the new fields live on the
+// record shape only. The scope wrapper (follow-up task) can still
+// partition via `.filter(r => r.spaceId === ...)`; indexes for hot tables
+// will land per-table in follow-up migrations once the scope layer ships.
+//
+// Sentinel: `_personal:<userId>` is used as a placeholder until the
+// bootstrap step resolves it to the real personal-space organization id
+// returned by Better Auth. The bootstrap runs once per login and rewrites
+// every sentinel across every table in one pass.
+db.version(28).upgrade(async (tx) => {
+	// Touch only sync-relevant tables — the `_`-prefixed infra tables
+	// (`_pendingChanges`, `_syncMeta`, `_activity`, `_eventsTombstones`)
+	// don't belong to a space.
+	const appTableNames = new Set<string>();
+	for (const tables of Object.values(SYNC_APP_MAP)) {
+		for (const t of tables) appTableNames.add(t);
+	}
+
+	for (const table of tx.db.tables) {
+		if (!appTableNames.has(table.name)) continue;
+		await tx
+			.table(table.name)
+			.toCollection()
+			.modify((record: Record<string, unknown>) => {
+				const ownerId =
+					typeof record.userId === 'string' && record.userId ? record.userId : GUEST_USER_ID;
+				if (record.spaceId === undefined || record.spaceId === null) {
+					record.spaceId = `_personal:${ownerId}`;
+				}
+				if (record.authorId === undefined || record.authorId === null) {
+					record.authorId = ownerId;
+				}
+				if (record.visibility === undefined || record.visibility === null) {
+					record.visibility = 'space';
+				}
+			});
+	}
+});
+
 // ─── Sync Routing ──────────────────────────────────────────
 // SYNC_APP_MAP, TABLE_TO_SYNC_NAME, TABLE_TO_APP, SYNC_NAME_TO_TABLE,
 // toSyncName() and fromSyncName() are now derived from per-module
@@ -781,6 +825,23 @@ for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {
 				objRecord.userId = getEffectiveUserId();
 			}
 
+			// Auto-stamp the Space-scope fields. Until the scope bootstrap
+			// (see `./scope/active-space.svelte.ts`) resolves the user's
+			// personal-space id from Better Auth, new records carry a
+			// deterministic sentinel `_personal:<userId>` that the bootstrap
+			// rewrites in a single pass. Module stores set spaceId explicitly
+			// once they start writing into non-personal spaces — this stamp
+			// only fills the gap.
+			if (objRecord.spaceId === undefined || objRecord.spaceId === null) {
+				objRecord.spaceId = `_personal:${objRecord.userId as string}`;
+			}
+			if (objRecord.authorId === undefined || objRecord.authorId === null) {
+				objRecord.authorId = objRecord.userId as string;
+			}
+			if (objRecord.visibility === undefined || objRecord.visibility === null) {
+				objRecord.visibility = 'space';
+			}
+
 			// Stamp every real field with the create-time so future LWW comparisons
 			// have a baseline, and with the actor so field-level attribution works.
 			// Mutates obj in place — Dexie persists the mutation.
@@ -836,6 +897,15 @@ for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {
 			// never re-parent records to a different user.
 			const mods = modifications as Record<string, unknown>;
 			if ('userId' in mods) delete mods.userId;
+
+			// spaceId and authorId are likewise immutable. Moving a record
+			// between spaces is a different operation (delete + re-create)
+			// because it affects encryption key, sync partition and
+			// permission-matrix resolution. visibility, by contrast, CAN
+			// flip (user toggles a record to 'private' and back), so it is
+			// left as a normal field.
+			if ('spaceId' in mods) delete mods.spaceId;
+			if ('authorId' in mods) delete mods.authorId;
 
 			// Merge field timestamps and field actors: keep existing, overwrite
 			// each modified field with now / current actor.

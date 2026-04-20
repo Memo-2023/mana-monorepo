@@ -18,7 +18,6 @@
 	import { reactionsStore } from '$lib/modules/news/stores/reactions.svelte';
 	import { articlesStore } from '$lib/modules/news/stores/articles.svelte';
 	import { feedCacheStore } from '$lib/modules/news/stores/feed-cache.svelte';
-	import AiProposalInbox from '$lib/components/ai/AiProposalInbox.svelte';
 	import {
 		ALL_TOPICS,
 		type Topic,
@@ -147,7 +146,6 @@
 </svelte:head>
 
 <div class="news-page">
-	<AiProposalInbox module="news" />
 	{#if !isOnboarded}
 		<!-- ─── Onboarding ───────────────────────────────────── -->
 		<header class="hero">
