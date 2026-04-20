@@ -131,13 +131,7 @@ New services: pick a short, unambiguous name (`auth`, not `mana_auth_schema`), a
 
 ### Verification
 
-Before merging a change that adds a new Drizzle schema file, confirm with:
-
-```bash
-rg "pgTable\(" services/ apps/api/ packages/ --type ts
-```
-
-Any hit that's not inside `mana-sync` is a violation. There's no automated lint rule yet — adding one is tracked in the architecture audit.
+Enforced by `pnpm run validate:pg-schema` (`scripts/validate-pg-schema-isolation.mjs`), wired into the CI `validate` job. Scans every TypeScript file under `services/`, `apps/api/`, and `packages/` for raw `pgTable(` call sites and fails the PR if any are found. Imports of the symbol are ignored — only actual call sites are violations.
 
 ## Schema Design
 

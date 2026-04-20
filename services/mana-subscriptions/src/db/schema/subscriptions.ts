@@ -6,7 +6,6 @@
 
 import {
 	pgSchema,
-	pgTable,
 	uuid,
 	integer,
 	text,

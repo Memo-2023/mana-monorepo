@@ -20,6 +20,7 @@
 		"check:status": "bash scripts/check-status.sh",
 		"validate:dockerfiles": "node scripts/validate-dockerfiles.mjs",
 		"validate:turbo": "node scripts/validate-no-recursive-turbo.mjs",
+		"validate:pg-schema": "node scripts/validate-pg-schema-isolation.mjs",
 		"check:crypto": "node scripts/audit-crypto-registry.mjs",
 		"check:crypto:seed": "node scripts/audit-crypto-registry.mjs --seed",
 		"audit:deps": "node scripts/audit-workspace-deps.mjs",
