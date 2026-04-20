@@ -10,5 +10,9 @@
 		"outDir": "dist",
 		"declaration": true
 	},
-	"include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.svelte"]
+	"include": ["src/**/*.ts", "src/**/*.tsx"],
+	// src/web/ imports .svelte components — tsc can't parse those. The
+	// Svelte consumer layer is type-checked by svelte-check in apps that
+	// consume this package, not by tsc here.
+	"exclude": ["src/web/**"]
 }

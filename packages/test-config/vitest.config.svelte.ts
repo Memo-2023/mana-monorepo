@@ -57,7 +57,8 @@ export default defineConfig({
 				branches: 80,
 				statements: 80,
 			},
-			all: true,
+			// Vitest 4 removed `all: true` — including uncovered files in the
+			// report is now the default, so the option is gone.
 		},
 
 		// Test timeout

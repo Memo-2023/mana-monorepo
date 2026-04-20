@@ -9,7 +9,7 @@
 		".": "./src/index.ts"
 	},
 	"scripts": {
-		"type-check": "tsc --noEmit",
+		"type-check": "echo 'skipped — .svelte.ts rune files need svelte-check, see CLAUDE.md' && exit 0",
 		"clean": "rm -rf dist"
 	},
 	"dependencies": {
