@@ -12,7 +12,7 @@ import { registerTools } from '../../tools/registry';
 import { createMission, getMission } from './store';
 import { runMission } from './runner';
 import { MISSIONS_TABLE } from './types';
-import type { LlmClient, LlmCompletionRequest, LlmCompletionResponse } from '@mana/shared-ai';
+import { MockLlmClient } from '@mana/shared-ai';
 
 let executed: { name: string; params: Record<string, unknown> }[] = [];
 
@@ -34,33 +34,20 @@ beforeEach(async () => {
 	await db.table(MISSIONS_TABLE).clear();
 });
 
-/** Minimal LlmClient for runner tests — scripts one or more assistant
- *  turns via enqueueToolCalls / enqueueStop. */
+/** Builder for concise scripted LLM turns. Wraps the shared
+ *  MockLlmClient from @mana/shared-ai so tests read top-down. */
 function mockLlm(
 	turns: Array<
 		| { kind: 'tool_calls'; calls: Array<{ name: string; args: Record<string, unknown> }> }
 		| { kind: 'stop'; content?: string }
 	>
-): LlmClient {
-	let i = 0;
-	return {
-		async complete(_req: LlmCompletionRequest): Promise<LlmCompletionResponse> {
-			const turn = turns[i++];
-			if (!turn) throw new Error('MockLlm exhausted');
-			if (turn.kind === 'stop') {
-				return { content: turn.content ?? null, toolCalls: [], finishReason: 'stop' };
-			}
-			return {
-				content: null,
-				toolCalls: turn.calls.map((c, n) => ({
-					id: `call_${i}_${n}`,
-					name: c.name,
-					arguments: c.args,
-				})),
-				finishReason: 'tool_calls',
-			};
-		},
-	};
+) {
+	const m = new MockLlmClient();
+	for (const t of turns) {
+		if (t.kind === 'stop') m.enqueueStop(t.content ?? null);
+		else m.enqueueToolCalls(t.calls);
+	}
+	return m;
 }
 
 describe('runMission', () => {

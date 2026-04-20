@@ -82,6 +82,7 @@ export type {
 export {
 	buildPlannerPrompt,
 	buildSystemPrompt,
+	MockLlmClient,
 	parsePlannerResponse,
 	runPlannerLoop,
 } from './planner';

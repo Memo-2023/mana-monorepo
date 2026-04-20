@@ -10,6 +10,8 @@ export type { AiPlanInput, AiPlanOutput, AvailableTool, PlannedStep, ResolvedInp
 export { buildSystemPrompt } from './system-prompt';
 export type { SystemPromptInput, SystemPromptOutput } from './system-prompt';
 export { runPlannerLoop } from './loop';
+export { MockLlmClient } from './mock-llm';
+export type { MockLlmTurn } from './mock-llm';
 export type {
 	ChatMessage,
 	ChatRole,
