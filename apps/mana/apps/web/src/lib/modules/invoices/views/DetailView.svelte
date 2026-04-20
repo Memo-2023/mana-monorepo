@@ -6,8 +6,10 @@
 	import { goto } from '$app/navigation';
 	import StatusBadge from '../components/StatusBadge.svelte';
 	import { invoicesStore } from '../stores/invoices.svelte';
+	import { invoiceSettingsStore } from '../stores/settings.svelte';
+	import { renderInvoicePdfBlob } from '../pdf/renderer';
 	import { formatAmount } from '../queries';
-	import type { Invoice } from '../types';
+	import type { Invoice, InvoiceSettings } from '../types';
 	import { STATUS_LABELS } from '../constants';
 
 	interface Props {
@@ -18,6 +20,62 @@
 
 	let actionError = $state<string | null>(null);
 	let busy = $state(false);
+
+	// ─── PDF preview ─────────────────────────────────────────
+	// Render lazily on mount, whenever the invoice content changes, or after
+	// a mutation (status transitions don't re-render the PDF body but do
+	// change the output — e.g. paid watermark in M4+). Revoke the previous
+	// blob URL before creating a new one so we don't leak memory.
+	let pdfUrl = $state<string | null>(null);
+	let pdfError = $state<string | null>(null);
+	let renderingPdf = $state(false);
+
+	async function renderPdf() {
+		renderingPdf = true;
+		pdfError = null;
+		try {
+			const settings: InvoiceSettings = await invoiceSettingsStore.get();
+			const blob = await renderInvoicePdfBlob(invoice, settings);
+			if (pdfUrl) URL.revokeObjectURL(pdfUrl);
+			pdfUrl = URL.createObjectURL(blob);
+		} catch (e) {
+			pdfError = e instanceof Error ? e.message : 'PDF-Rendering fehlgeschlagen';
+		} finally {
+			renderingPdf = false;
+		}
+	}
+
+	// Re-render when invoice id or updatedAt changes (mutations bump updatedAt).
+	$effect(() => {
+		void invoice.id;
+		void invoice.updatedAt;
+		renderPdf();
+	});
+
+	// Blob URLs leak memory until revoked. Clean up on unmount.
+	$effect(() => {
+		return () => {
+			if (pdfUrl) URL.revokeObjectURL(pdfUrl);
+		};
+	});
+
+	async function downloadPdf() {
+		try {
+			const settings: InvoiceSettings = await invoiceSettingsStore.get();
+			const blob = await renderInvoicePdfBlob(invoice, settings);
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement('a');
+			a.href = url;
+			a.download = `Rechnung-${invoice.number}.pdf`;
+			document.body.appendChild(a);
+			a.click();
+			a.remove();
+			// Revoke after the browser has started the download.
+			setTimeout(() => URL.revokeObjectURL(url), 1000);
+		} catch (e) {
+			pdfError = e instanceof Error ? e.message : 'Download fehlgeschlagen';
+		}
+	}
 
 	async function run(label: string, fn: () => Promise<void>) {
 		actionError = null;
@@ -91,6 +149,7 @@
 				Als bezahlt markieren
 			</button>
 		{/if}
+		<button class="btn" onclick={downloadPdf}>PDF herunterladen</button>
 		<button class="btn" onclick={onDuplicate} disabled={busy}>Duplizieren</button>
 		{#if invoice.status !== 'paid' && invoice.status !== 'void'}
 			<button class="btn btn-danger" onclick={onVoid} disabled={busy}> Stornieren </button>
@@ -104,80 +163,103 @@
 		<div class="error">{actionError}</div>
 	{/if}
 
-	<section class="block">
-		<h3>Empfänger</h3>
-		<div class="client">
-			<div class="client-name">{invoice.clientSnapshot.name}</div>
-			{#if invoice.clientSnapshot.address}
-				<pre class="client-address">{invoice.clientSnapshot.address}</pre>
-			{/if}
-			{#if invoice.clientSnapshot.email}
-				<div class="client-meta">{invoice.clientSnapshot.email}</div>
-			{/if}
-			{#if invoice.clientSnapshot.vatNumber}
-				<div class="client-meta">MwSt-Nr.: {invoice.clientSnapshot.vatNumber}</div>
+	<section class="block pdf-preview-block">
+		<div class="preview-head">
+			<h3>Vorschau</h3>
+			{#if renderingPdf}
+				<span class="preview-status">Rendert …</span>
 			{/if}
 		</div>
+		{#if pdfError}
+			<div class="error">PDF-Fehler: {pdfError}</div>
+		{:else if pdfUrl}
+			<iframe
+				class="pdf-frame"
+				src={pdfUrl}
+				title="Vorschau Rechnung {invoice.number}"
+				loading="lazy"
+			></iframe>
+		{/if}
 	</section>
 
-	<section class="block">
-		<h3>Positionen</h3>
-		<table class="lines">
-			<thead>
-				<tr>
-					<th>Position</th>
-					<th>Menge</th>
-					<th>Einzelpreis</th>
-					<th>MwSt.</th>
-					<th class="right">Netto</th>
-				</tr>
-			</thead>
-			<tbody>
-				{#each invoice.lines as line (line.id)}
+	<details class="raw-details">
+		<summary>Strukturierte Daten anzeigen</summary>
+
+		<section class="block">
+			<h3>Empfänger</h3>
+			<div class="client">
+				<div class="client-name">{invoice.clientSnapshot.name}</div>
+				{#if invoice.clientSnapshot.address}
+					<pre class="client-address">{invoice.clientSnapshot.address}</pre>
+				{/if}
+				{#if invoice.clientSnapshot.email}
+					<div class="client-meta">{invoice.clientSnapshot.email}</div>
+				{/if}
+				{#if invoice.clientSnapshot.vatNumber}
+					<div class="client-meta">MwSt-Nr.: {invoice.clientSnapshot.vatNumber}</div>
+				{/if}
+			</div>
+		</section>
+
+		<section class="block">
+			<h3>Positionen</h3>
+			<table class="lines">
+				<thead>
 					<tr>
-						<td>
-							<div>{line.title}</div>
-							{#if line.description}<div class="muted">{line.description}</div>{/if}
-						</td>
-						<td>{line.quantity}{line.unit ? ` ${line.unit}` : ''}</td>
-						<td>{formatAmount(line.unitPrice, invoice.currency)}</td>
-						<td>{line.vatRate}%</td>
-						<td class="right">
-							{formatAmount(line.quantity * line.unitPrice, invoice.currency)}
-						</td>
+						<th>Position</th>
+						<th>Menge</th>
+						<th>Einzelpreis</th>
+						<th>MwSt.</th>
+						<th class="right">Netto</th>
 					</tr>
+				</thead>
+				<tbody>
+					{#each invoice.lines as line (line.id)}
+						<tr>
+							<td>
+								<div>{line.title}</div>
+								{#if line.description}<div class="muted">{line.description}</div>{/if}
+							</td>
+							<td>{line.quantity}{line.unit ? ` ${line.unit}` : ''}</td>
+							<td>{formatAmount(line.unitPrice, invoice.currency)}</td>
+							<td>{line.vatRate}%</td>
+							<td class="right">
+								{formatAmount(line.quantity * line.unitPrice, invoice.currency)}
+							</td>
+						</tr>
+					{/each}
+				</tbody>
+			</table>
+		</section>
+
+		<section class="block totals-block">
+			<h3>Summe</h3>
+			<dl class="totals">
+				<dt>Netto</dt>
+				<dd>{formatAmount(invoice.totals.net, invoice.currency)}</dd>
+				{#each invoice.totals.vatBreakdown as b (b.rate)}
+					<dt>MwSt. {b.rate}%</dt>
+					<dd>{formatAmount(b.tax, invoice.currency)}</dd>
 				{/each}
-			</tbody>
-		</table>
-	</section>
-
-	<section class="block totals-block">
-		<h3>Summe</h3>
-		<dl class="totals">
-			<dt>Netto</dt>
-			<dd>{formatAmount(invoice.totals.net, invoice.currency)}</dd>
-			{#each invoice.totals.vatBreakdown as b (b.rate)}
-				<dt>MwSt. {b.rate}%</dt>
-				<dd>{formatAmount(b.tax, invoice.currency)}</dd>
-			{/each}
-			<dt class="gross">Total</dt>
-			<dd class="gross">{formatAmount(invoice.totals.gross, invoice.currency)}</dd>
-		</dl>
-	</section>
-
-	{#if invoice.notes}
-		<section class="block">
-			<h3>Notizen</h3>
-			<p class="prose">{invoice.notes}</p>
+				<dt class="gross">Total</dt>
+				<dd class="gross">{formatAmount(invoice.totals.gross, invoice.currency)}</dd>
+			</dl>
 		</section>
-	{/if}
 
-	{#if invoice.terms}
-		<section class="block">
-			<h3>Zahlungsbedingungen</h3>
-			<p class="prose">{invoice.terms}</p>
-		</section>
-	{/if}
+		{#if invoice.notes}
+			<section class="block">
+				<h3>Notizen</h3>
+				<p class="prose">{invoice.notes}</p>
+			</section>
+		{/if}
+
+		{#if invoice.terms}
+			<section class="block">
+				<h3>Zahlungsbedingungen</h3>
+				<p class="prose">{invoice.terms}</p>
+			</section>
+		{/if}
+	</details>
 
 	<footer class="meta">
 		<div>Status: {STATUS_LABELS[invoice.status].de}</div>
@@ -267,6 +349,48 @@
 	.btn-danger {
 		color: #b91c1c;
 		border-color: #fecaca;
+	}
+
+	.pdf-preview-block {
+		gap: 0.5rem;
+	}
+
+	.preview-head {
+		display: flex;
+		justify-content: space-between;
+		align-items: baseline;
+	}
+
+	.preview-status {
+		font-size: 0.8rem;
+		color: var(--color-text-muted, #64748b);
+	}
+
+	.pdf-frame {
+		width: 100%;
+		height: 860px;
+		border: 1px solid var(--color-border, #e2e8f0);
+		border-radius: 0.4rem;
+		background: var(--color-surface-muted, #f8fafc);
+	}
+
+	.raw-details {
+		border: 1px solid var(--color-border, #e2e8f0);
+		border-radius: 0.5rem;
+		padding: 0.75rem 1rem;
+	}
+
+	.raw-details summary {
+		cursor: pointer;
+		font-size: 0.85rem;
+		color: var(--color-text-muted, #64748b);
+		user-select: none;
+	}
+
+	.raw-details[open] summary {
+		margin-bottom: 1rem;
+		padding-bottom: 0.5rem;
+		border-bottom: 1px solid var(--color-border, #e2e8f0);
 	}
 
 	.error {
