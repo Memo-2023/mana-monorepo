@@ -1216,6 +1216,113 @@ export const AI_TOOL_CATALOG: readonly ToolSchema[] = [
 		defaultPolicy: 'auto',
 		parameters: [],
 	},
+
+	// ── Library ───────────────────────────────────────────────
+	{
+		name: 'create_library_entry',
+		module: 'library',
+		description:
+			'Erstellt einen neuen Eintrag in der Bibliothek (Buch, Film, Serie oder Comic). Default-Status ist "planned" falls nicht anders angegeben.',
+		defaultPolicy: 'propose',
+		parameters: [
+			{
+				name: 'kind',
+				type: 'string',
+				description: 'Art des Eintrags',
+				required: true,
+				enum: ['book', 'movie', 'series', 'comic'],
+			},
+			{ name: 'title', type: 'string', description: 'Titel', required: true },
+			{
+				name: 'creators',
+				type: 'string',
+				description: 'Autor/Regisseur/Creator, mehrere durch Komma trennen',
+				required: false,
+			},
+			{ name: 'year', type: 'number', description: 'Erscheinungsjahr', required: false },
+			{
+				name: 'status',
+				type: 'string',
+				description: 'Anfangsstatus',
+				required: false,
+				enum: ['planned', 'active', 'completed', 'paused', 'dropped'],
+			},
+			{
+				name: 'rating',
+				type: 'number',
+				description: 'Bewertung 1-5 (nur bei completed sinnvoll)',
+				required: false,
+			},
+			{
+				name: 'tags',
+				type: 'string',
+				description: 'Tags durch Komma getrennt',
+				required: false,
+			},
+			{
+				name: 'genres',
+				type: 'string',
+				description: 'Genres durch Komma getrennt',
+				required: false,
+			},
+		],
+	},
+	{
+		name: 'update_library_entry_status',
+		module: 'library',
+		description:
+			'Aendert den Status eines Bibliotheks-Eintrags (planned/active/completed/paused/dropped). Setzt beim Wechsel auf "active" automatisch startedAt, bei "completed" completedAt.',
+		defaultPolicy: 'propose',
+		parameters: [
+			{ name: 'entryId', type: 'string', description: 'ID des Eintrags', required: true },
+			{
+				name: 'status',
+				type: 'string',
+				description: 'Neuer Status',
+				required: true,
+				enum: ['planned', 'active', 'completed', 'paused', 'dropped'],
+			},
+		],
+	},
+	{
+		name: 'rate_library_entry',
+		module: 'library',
+		description: 'Setzt die Bewertung (1-5) eines Bibliotheks-Eintrags.',
+		defaultPolicy: 'propose',
+		parameters: [
+			{ name: 'entryId', type: 'string', description: 'ID des Eintrags', required: true },
+			{ name: 'rating', type: 'number', description: 'Bewertung 1 bis 5', required: true },
+		],
+	},
+	{
+		name: 'list_library_entries',
+		module: 'library',
+		description:
+			'Listet Bibliotheks-Eintraege (id, kind, title, status, rating). Optional nach Art und Status filterbar.',
+		defaultPolicy: 'auto',
+		parameters: [
+			{
+				name: 'kind',
+				type: 'string',
+				description: 'Nur eine Art zeigen',
+				required: false,
+				enum: ['book', 'movie', 'series', 'comic'],
+			},
+			{
+				name: 'status',
+				type: 'string',
+				description: 'Nur einen Status zeigen',
+				required: false,
+				enum: ['planned', 'active', 'completed', 'paused', 'dropped'],
+			},
+			{
+				name: 'limit',
+				type: 'number',
+				description: 'Maximale Anzahl (Standard 30)',
+				required: false,
+			},
+		],
+	},
 ];
 
 // ═══════════════════════════════════════════════════════════════

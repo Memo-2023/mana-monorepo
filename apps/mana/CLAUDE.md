@@ -210,7 +210,7 @@ The companion is a **second actor** that works alongside the human in every modu
 - **Scene lens** — workbench scenes can bind to an agent via `scene.viewingAsAgentId` (context menu → "An Agent binden…"). Pure UI lens, not a data-scope change. `SceneAppBar` shows the agent avatar on bound scene tabs.
 - **Workbench timeline** — `/ai-workbench` renders every AI-attributed event grouped by mission iteration with per-**agent** filter, per-module, per-mission. Each bucket header shows agent avatar + name + mission title. Per-bucket **Revert button** undoes the iteration's writes via `data/ai/revert/` (TaskCreated → delete, TaskCompleted → uncomplete, etc., newest-first). Separate **"Datenzugriff"** tab exposes the server-side decrypt audit (for missions with Key-Grants).
 
-### Tool Coverage (59 tools, 19 modules)
+### Tool Coverage (67 tools, 21 modules)
 
 Agents interact with the app through tools — each one either auto (executes silently during reasoning) or propose (creates a Proposal card the user must approve). Source of truth: `AI_TOOL_CATALOG` in `@mana/shared-ai/src/tools/schemas.ts` — both webapp policy (`src/lib/data/ai/policy.ts`) and server-side planner (`services/mana-ai/src/planner/tools.ts`) derive from it automatically, so drift is structurally impossible.
 
@@ -235,6 +235,8 @@ Agents interact with the app through tools — each one either auto (executes si
 | finance | `add_transaction` | `get_month_summary`, `list_transactions` |
 | times | `start_timer`, `stop_timer` | `get_time_stats`, `get_timer_status`, `list_projects` |
 | wetter | — | `get_weather`, `get_rain_forecast` |
+| invoices | `create_invoice`, `mark_invoice_paid` | `list_invoices`, `get_invoice_stats` |
+| library | `create_library_entry`, `update_library_entry_status`, `rate_library_entry` | `list_library_entries` |
 
 **Server-side web-research**: mana-ai calls mana-api's `/api/v1/news-research/discover` + `/search` directly before the planner prompt is built (pre-planning injection). Missions with research-keyword objectives get real article URLs + excerpts injected as a synthetic ResolvedInput. See `services/mana-ai/src/planner/news-research-client.ts`.
 
