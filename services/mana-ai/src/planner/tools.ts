@@ -1,34 +1,23 @@
 /**
- * Server-side tool list — derived from the AI Tool Catalog.
+ * Server-side tool surface — derived from the shared AI_TOOL_CATALOG.
  *
- * The full schema definitions now live in `@mana/shared-ai/src/tools/schemas.ts`.
- * This file filters the catalog to the proposable subset (tools the server-side
- * planner may suggest) and provides the name sets used by the parser and drift guard.
+ * The server offers only `propose`-default (write) tools to the planner.
+ * Read-only tools (`list_*`, `get_*`) are intentionally hidden because
+ * the server cannot execute them — it has no Dexie access, and stubbing
+ * a "recorded" response back would let the LLM hallucinate that it saw
+ * real data and plan against it. The foreground runner, which DOES
+ * execute reads, handles read-then-act chains.
  *
- * Adding a new tool: add it to `AI_TOOL_CATALOG` in `@mana/shared-ai` — this
- * file picks it up automatically.
+ * Each server-produced iteration captures the LLM's planned write-tool
+ * calls as PlanStep entries. The user's client applies them on sync.
  */
 
-import { AI_TOOL_CATALOG, AI_PROPOSABLE_TOOL_SET, type AvailableTool } from '@mana/shared-ai';
+import { AI_TOOL_CATALOG } from '@mana/shared-ai';
+import type { ToolSchema } from '@mana/shared-ai';
 
-/** Tools the server-side planner may propose (defaultPolicy === 'propose'). */
-export const AI_AVAILABLE_TOOLS: readonly AvailableTool[] = AI_TOOL_CATALOG.filter(
+/** Write-tools the server planner may reference. */
+export const SERVER_TOOLS: readonly ToolSchema[] = AI_TOOL_CATALOG.filter(
 	(t) => t.defaultPolicy === 'propose'
 );
 
-export const AI_AVAILABLE_TOOL_NAMES = new Set<string>(AI_AVAILABLE_TOOLS.map((t) => t.name));
-
-// ── Contract check — runs on module load ───────────────────
-// Both sides now derive from the same catalog, so drift is structurally
-// impossible. This lightweight guard catches regressions if the derivation
-// logic is ever accidentally changed.
-{
-	const extra = [...AI_AVAILABLE_TOOL_NAMES].filter((n) => !AI_PROPOSABLE_TOOL_SET.has(n));
-	const missing = [...AI_PROPOSABLE_TOOL_SET].filter((n) => !AI_AVAILABLE_TOOL_NAMES.has(n));
-	if (extra.length || missing.length) {
-		throw new Error(
-			`[mana-ai] AI_AVAILABLE_TOOLS drift vs AI_PROPOSABLE_TOOL_NAMES. ` +
-				`extra=${JSON.stringify(extra)} missing=${JSON.stringify(missing)}`
-		);
-	}
-}
+export const SERVER_TOOL_NAMES = new Set<string>(SERVER_TOOLS.map((t) => t.name));
