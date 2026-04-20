@@ -661,6 +661,17 @@ db.version(29).stores({
 	pendingProposals: null,
 });
 
+// v30 — Local-only marker for server-iteration execution. When mana-ai
+// plans a mission iteration in the background, it syncs down with
+// source='server' and plan[].status='planned'. A sync-listener on the
+// client (data/ai/missions/server-iteration-executor.ts) runs those
+// planned tool_calls locally and flips the status. This marker table
+// guarantees idempotency across sync replays and page reloads — once
+// an iteration id lands here, the listener skips it. Never synced.
+db.version(30).stores({
+	_serverIterationExecutions: 'iterationId, missionId, executedAt',
+});
+
 // ─── Sync Routing ──────────────────────────────────────────
 // SYNC_APP_MAP, TABLE_TO_SYNC_NAME, TABLE_TO_APP, SYNC_NAME_TO_TABLE,
 // toSyncName() and fromSyncName() are now derived from per-module

@@ -8,6 +8,10 @@
 	import { todoReminderSource } from '$lib/modules/todo/reminder-source';
 	import { startEventStore, stopEventStore } from '$lib/data/events/event-store';
 	import { startMissionTick, stopMissionTick } from '$lib/data/ai/missions/setup';
+	import {
+		startServerIterationExecutor,
+		stopServerIterationExecutor,
+	} from '$lib/data/ai/missions/server-iteration-executor';
 	import { initTools } from '$lib/data/tools/init';
 	import { startEventBridge, stopEventBridge } from '$lib/triggers/event-bridge';
 	import { startStreakTracker, stopStreakTracker } from '$lib/data/projections/streaks';
@@ -536,6 +540,9 @@
 			// interval and runs any that are due. Safe idempotent; see
 			// data/ai/missions/setup.ts.
 			startMissionTick();
+			// Apply server-planned iterations locally on sync — see
+			// data/ai/missions/server-iteration-executor.ts.
+			startServerIterationExecutor();
 		});
 
 		// Restore nav collapsed state (cheap, keep inline)
@@ -650,6 +657,7 @@
 		stopStreakTracker();
 		stopGoalTracker();
 		stopMissionTick();
+		stopServerIterationExecutor();
 		guestMode?.destroy();
 		// Fire-and-forget — we don't need to await; the in-flight task
 		// will finish in the background and the next page session will
