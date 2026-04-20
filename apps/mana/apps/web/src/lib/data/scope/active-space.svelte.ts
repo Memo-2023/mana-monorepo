@@ -9,14 +9,15 @@
  * See docs/plans/spaces-foundation.md §5.
  */
 
-import type { SpaceType } from '@mana/shared-types';
-import { isSpaceType } from '@mana/shared-types';
+import type { SpaceType, SpaceTier } from '@mana/shared-types';
+import { isSpaceType, isSpaceTier } from '@mana/shared-types';
 
 export interface ActiveSpace {
 	id: string;
 	slug: string;
 	name: string;
 	type: SpaceType;
+	tier: SpaceTier;
 	role: string;
 }
 
@@ -46,6 +47,22 @@ export function setActiveSpace(space: ActiveSpace | null): void {
 	active = space;
 	status = space ? 'ready' : 'idle';
 	lastError = null;
+}
+
+/**
+ * The tier to use for app-access gating right now. Prefers the active
+ * Space's tier; falls back to the caller-supplied user tier for the
+ * bootstrap window where the active space isn't loaded yet.
+ *
+ * Callers pass their own user-tier fallback (usually `authStore.user?.tier`)
+ * rather than having this module reach into auth — keeps the scope
+ * layer free of UI-auth dependencies.
+ */
+export function getEffectiveTier(userFallback: SpaceTier | string | undefined): SpaceTier {
+	const space = active;
+	if (space?.tier && isSpaceTier(space.tier)) return space.tier;
+	if (typeof userFallback === 'string' && isSpaceTier(userFallback)) return userFallback;
+	return 'guest';
 }
 
 /**
@@ -147,13 +164,15 @@ async function setActiveOnServer(organizationId: string): Promise<void> {
  * hooks landed, and 'personal' is the safest default.
  */
 function rawToActiveSpace(raw: RawOrg, role: string): ActiveSpace {
-	const meta = (raw.metadata ?? {}) as { type?: unknown };
+	const meta = (raw.metadata ?? {}) as { type?: unknown; tier?: unknown };
 	const type: SpaceType = isSpaceType(meta.type) ? meta.type : 'personal';
+	const tier: SpaceTier = isSpaceTier(meta.tier) ? meta.tier : 'public';
 	return {
 		id: raw.id,
 		slug: raw.slug ?? '',
 		name: raw.name,
 		type,
+		tier,
 		role,
 	};
 }

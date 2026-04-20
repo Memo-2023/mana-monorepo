@@ -13,6 +13,7 @@
 
 import { and, eq } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
+import { isSpaceTier, type SpaceTier } from '@mana/shared-types';
 import { organizations, members } from '../db/schema/organizations';
 import type { Database } from '../db/connection';
 import { buildSpaceMetadata } from './metadata';
@@ -111,7 +112,7 @@ export function dbSlugTaken(db: Database): SlugTakenLookup {
  */
 export async function createPersonalSpaceFor(
 	db: Database,
-	user: { id: string; email: string; name?: string | null }
+	user: { id: string; email: string; name?: string | null; accessTier?: string | null }
 ): Promise<{ organizationId: string; slug: string; created: boolean }> {
 	// Idempotency guard — check for existing personal space via member join.
 	const existing = await db
@@ -133,12 +134,19 @@ export async function createPersonalSpaceFor(
 	const memberId = nanoid();
 	const displayName = user.name?.trim() || user.email.split('@', 1)[0] || 'Personal';
 
+	// Carry the user's existing access tier onto the personal Space so
+	// the user→space tier migration doesn't downgrade anyone. A founder
+	// account setting up their first space stays at founder in that
+	// space. Invalid or missing values default to 'public' — matches the
+	// Better Auth user.accessTier default.
+	const inheritedTier: SpaceTier = isSpaceTier(user.accessTier) ? user.accessTier : 'public';
+
 	await db.transaction(async (tx) => {
 		await tx.insert(organizations).values({
 			id: orgId,
 			name: displayName,
 			slug,
-			metadata: buildSpaceMetadata('personal'),
+			metadata: buildSpaceMetadata('personal', { tier: inheritedTier }),
 			logo: null,
 		});
 		await tx.insert(members).values({

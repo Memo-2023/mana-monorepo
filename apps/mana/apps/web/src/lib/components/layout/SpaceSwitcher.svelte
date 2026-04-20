@@ -12,7 +12,7 @@
 
 	import { getActiveSpace, loadActiveSpace, type ActiveSpace } from '$lib/data/scope';
 	import { SPACE_TYPE_LABELS } from '@mana/shared-branding';
-	import { isSpaceType } from '@mana/shared-types';
+	import { isSpaceType, isSpaceTier } from '@mana/shared-types';
 	import SpaceCreateDialog from './SpaceCreateDialog.svelte';
 
 	interface Props {
@@ -49,12 +49,14 @@
 				metadata?: unknown;
 			}>;
 			spaces = raw.map((o) => {
-				const meta = (o.metadata ?? {}) as { type?: unknown };
+				const meta = (o.metadata ?? {}) as { type?: unknown; tier?: unknown };
 				const type = isSpaceType(meta.type) ? meta.type : 'personal';
+				const tier = isSpaceTier(meta.tier) ? meta.tier : 'public';
 				return {
 					id: o.id,
 					slug: o.slug ?? '',
 					name: o.name,
+					tier,
 					type,
 					role: 'member', // real role comes via /get-active-member; not needed for display
 				};

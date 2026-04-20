@@ -226,6 +226,7 @@ export function createBetterAuth(databaseUrl: string) {
 							id: user.id,
 							email: user.email,
 							name: user.name,
+							accessTier: (user as { accessTier?: string | null }).accessTier,
 						});
 					},
 				},

@@ -54,6 +54,7 @@
 	import { useSyncStatusItems } from '$lib/components/layout/use-sync-status-items.svelte';
 	import RouteTierGate from '$lib/components/layout/RouteTierGate.svelte';
 	import SpaceSwitcher from '$lib/components/layout/SpaceSwitcher.svelte';
+	import { getEffectiveTier } from '$lib/data/scope';
 	import { useLocalStt } from '$lib/components/voice/use-local-stt.svelte';
 	import { Microphone, Stop } from '@mana/shared-icons';
 	import {
@@ -108,7 +109,10 @@
 	}
 
 	// ── App switcher ────────────────────────────────────────
-	let appItems = $derived(getPillAppItems('mana', undefined, undefined, authStore.user?.tier));
+	// Prefer the active Space's tier for gating — falls back to the user
+	// tier only during the bootstrap window where no space has loaded.
+	let effectiveTier = $derived(getEffectiveTier(authStore.user?.tier));
+	let appItems = $derived(getPillAppItems('mana', undefined, undefined, effectiveTier));
 
 	// ── Per-route tier gate ─────────────────────────────────
 	// AuthGate (the wrapping component) only checks tiers onMount and only
@@ -130,15 +134,14 @@
 	});
 	let routeBlocked = $derived.by(() => {
 		if (!routeAppId) return false;
-		const tier = authStore.user?.tier ?? 'guest';
-		return !hasAppAccess(tier, routeAppId.requiredTier);
+		return !hasAppAccess(effectiveTier, routeAppId.requiredTier);
 	});
 	let routeTierLabels = $derived.by(() => {
 		const labels = ACCESS_TIER_LABELS[($locale || 'de') === 'de' ? 'de' : 'en'];
-		const userTier = (authStore.user?.tier ?? 'guest') as AccessTier;
+		const tier = effectiveTier as AccessTier;
 		const required = routeAppId?.requiredTier ?? ('public' as AccessTier);
 		return {
-			user: labels[userTier] ?? userTier,
+			user: labels[tier] ?? tier,
 			required: labels[required] ?? required,
 		};
 	});

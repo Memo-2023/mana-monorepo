@@ -68,20 +68,41 @@ describe('assertModuleAllowed', () => {
 	});
 
 	it('allows any module in a personal space', () => {
-		setActiveSpace({ id: 'x', slug: '@me', name: 'Me', type: 'personal', role: 'owner' });
+		setActiveSpace({
+			id: 'x',
+			slug: '@me',
+			name: 'Me',
+			type: 'personal',
+			tier: 'founder',
+			role: 'owner',
+		});
 		expect(() => assertModuleAllowed('todo')).not.toThrow();
 		expect(() => assertModuleAllowed('mood')).not.toThrow();
 		expect(() => assertModuleAllowed('club-finance')).not.toThrow();
 	});
 
 	it('rejects personal-only modules in a brand space', () => {
-		setActiveSpace({ id: 'y', slug: '@e', name: 'E', type: 'brand', role: 'owner' });
+		setActiveSpace({
+			id: 'y',
+			slug: '@e',
+			name: 'E',
+			type: 'brand',
+			tier: 'public',
+			role: 'owner',
+		});
 		// mood is not in the brand allowlist
 		expect(() => assertModuleAllowed('mood')).toThrow(ModuleNotInSpaceError);
 	});
 
 	it('allows whitelisted modules in a brand space', () => {
-		setActiveSpace({ id: 'y', slug: '@e', name: 'E', type: 'brand', role: 'owner' });
+		setActiveSpace({
+			id: 'y',
+			slug: '@e',
+			name: 'E',
+			type: 'brand',
+			tier: 'public',
+			role: 'owner',
+		});
 		expect(() => assertModuleAllowed('social-relay')).not.toThrow();
 		expect(() => assertModuleAllowed('mail')).not.toThrow();
 	});

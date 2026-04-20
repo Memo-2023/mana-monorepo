@@ -203,8 +203,55 @@ export function isModuleAllowedInSpace(moduleId: SpaceModuleId, spaceType: Space
  * for our Space extension. `type` is required; other fields accumulate as
  * features land (voiceDoc, legalEntity, uid, aiPersonaId, …).
  */
+/**
+ * The access tiers a Space can have. Gates module access via
+ * `requiredTier` on each ManaApp.
+ *
+ * Ordered from least to most access. A higher tier implies access to
+ * everything a lower tier can reach.
+ */
+export type SpaceTier = 'guest' | 'public' | 'beta' | 'alpha' | 'founder';
+
+export const SPACE_TIERS: readonly SpaceTier[] = [
+	'guest',
+	'public',
+	'beta',
+	'alpha',
+	'founder',
+] as const;
+
+const TIER_LEVEL: Record<SpaceTier, number> = {
+	guest: 0,
+	public: 1,
+	beta: 2,
+	alpha: 3,
+	founder: 4,
+};
+
+export function isSpaceTier(value: unknown): value is SpaceTier {
+	return typeof value === 'string' && (SPACE_TIERS as readonly string[]).includes(value);
+}
+
+/**
+ * Check whether a Space's tier is high enough to meet a required tier.
+ * Both undefined/invalid tiers are treated as 'guest' (least access).
+ */
+export function spaceTierMeets(actual: SpaceTier | undefined, required: SpaceTier): boolean {
+	const a = actual && isSpaceTier(actual) ? TIER_LEVEL[actual] : 0;
+	const r = TIER_LEVEL[required];
+	return a >= r;
+}
+
 export interface SpaceMetadata {
 	type: SpaceType;
+	/**
+	 * Access tier for this Space. Gates which modules / features the
+	 * Space can use via ManaApp.requiredTier. Defaults to 'public'.
+	 * The signup hook stamps the user's prior user-level tier onto the
+	 * personal Space so no one loses access during the user→space tier
+	 * migration.
+	 */
+	tier?: SpaceTier;
 	voiceDoc?: string;
 	legalEntity?: string;
 	uid?: string;

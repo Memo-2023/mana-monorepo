@@ -15,6 +15,7 @@ export {
 	getActiveSpaceError,
 	setActiveSpace,
 	loadActiveSpace,
+	getEffectiveTier,
 	type ActiveSpace,
 	type ActiveSpaceStatus,
 } from './active-space.svelte';
