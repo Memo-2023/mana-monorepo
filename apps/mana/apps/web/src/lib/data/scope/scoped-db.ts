@@ -41,21 +41,22 @@ export class ModuleNotInSpaceError extends Error {
 
 /**
  * Return the set of spaceId values a record must match to be considered
- * "in scope" right now. Normally just the active space, but during the
- * sentinel window (v28 upgrade ran, bootstrap hasn't reconciled yet) we
- * also accept the user's personal sentinel so records written between
- * v28 landing and the first bootstrap don't vanish from the UI.
+ * "in scope" right now.
+ *
+ * Lenient during boot: if the active space hasn't loaded yet, falls back
+ * to the user's personal sentinel so records stamped by the v28
+ * migration still render. Returns `[]` only when truly unauthenticated
+ * — that yields an empty-filter (matches nothing), which is the safest
+ * thing a wrapper can do pre-login.
  */
 export function getInScopeSpaceIds(): string[] {
 	const active = getActiveSpaceId();
-	if (!active) throw new ScopeNotReadyError();
 	const userId = getCurrentUserId();
-	const ids = [active];
-	if (userId) {
-		const sentinel = personalSpaceSentinel(userId);
-		if (!ids.includes(sentinel)) ids.push(sentinel);
+	const sentinel = userId ? personalSpaceSentinel(userId) : null;
+	if (active) {
+		return sentinel && sentinel !== active ? [active, sentinel] : [active];
 	}
-	return ids;
+	return sentinel ? [sentinel] : [];
 }
 
 /**

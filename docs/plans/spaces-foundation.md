@@ -317,6 +317,28 @@ Via `SPACE_MODULES` in Nicht-Personal-Spaces gar nicht erst erreichbar. Kein Cod
 
 ---
 
+## Bekannte Altlast: `spaceId`-Namenskollision
+
+Vier bestehende Dexie-Tabellen nutzen das Feld `spaceId` bereits für das
+**ältere** Context-Space-Konzept (chat-/memoro-interne Kontext-Ordner,
+nicht das neue Multi-Tenancy-Space):
+
+- `conversations` (chat) — `spaceId` → `contextSpaces.id`
+- `documents` (context) — `spaceId` → `contextSpaces.id`
+- `spaceMembers` (memoro) — `spaceId` → `contextSpaces.id`
+- `memoSpaces` (memoro) — `spaceId` → `contextSpaces.id`
+
+Die v28-Migration hat diese Tabellen **nicht korrumpiert**, weil der
+Stamping-Code nur fehlende `spaceId`-Felder setzt (`if undefined/null`).
+Bestehende Records mit Context-Space-Referenzen sind unverändert.
+
+**Follow-up**: Rename `spaceId` → `contextSpaceId` auf diesen vier Tabellen
++ ihren Modulen + Dexie-v29-Migration, damit das Namensfeld eindeutig der
+neuen Space-Primitive gehört. Bis dahin ist der Scope-Wrapper für diese
+Tabellen nicht verwendbar — entweder Kollision erst fixen oder das
+Wrapper-Filter per Modul-Ausnahme deaktivieren. Calendar, Todo, Notes etc.
+sind nicht betroffen.
+
 ## Offene Fragen
 
 - **Slug-Uniqueness-Kollision**: User Till mit `@till` kollidiert mit potentiellem Brand `@till`. Lösungsraum: Slugs global unique (einfach, aber Race um beliebte Namen) vs. Slug-Präfixe (`@user/till` vs. `@org/till` — hässlich). Vorschlag: global unique, First-Come-First-Served, User-Slug bei Signup aus E-Mail-Local-Part + Suffix bei Kollision.

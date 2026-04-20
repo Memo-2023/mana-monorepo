@@ -12,6 +12,7 @@
 
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
+import { scopedForModule, applyVisibility } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
 import { filterBySceneScopeBatch } from '$lib/stores/scene-scope.svelte';
 import { eventTagOps } from './stores/tags.svelte';
@@ -41,8 +42,9 @@ export function toCalendar(local: LocalCalendar): Calendar {
 /** All calendars, auto-updates on any change. */
 export function useAllCalendars() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalCalendar>('calendars').toArray();
-		return locals.filter((c) => !c.deletedAt).map(toCalendar);
+		const locals = await scopedForModule<LocalCalendar, string>('calendar', 'calendars').toArray();
+		const visible = applyVisibility(locals).filter((c) => !c.deletedAt);
+		return visible.map(toCalendar);
 	}, [] as Calendar[]);
 }
 
@@ -53,14 +55,19 @@ export function useAllCalendars() {
 export function useAllCalendarItems() {
 	return useLiveQueryWithDefault(async () => {
 		// Fetch all non-deleted timeBlocks (filter on plaintext deletedAt
-		// before paying the per-row decrypt cost)
-		const blocks = await db.table<LocalTimeBlock>('timeBlocks').toArray();
-		const visibleBlocks = blocks.filter((b) => !b.deletedAt);
+		// before paying the per-row decrypt cost). Scope filter narrows to
+		// the active space + visibility filter drops records the user isn't
+		// allowed to see inside a shared space.
+		const blocks = await scopedForModule<LocalTimeBlock, string>(
+			'calendar',
+			'timeBlocks'
+		).toArray();
+		const visibleBlocks = applyVisibility(blocks).filter((b) => !b.deletedAt);
 		const decryptedBlocks = await decryptRecords('timeBlocks', visibleBlocks);
 
 		// Fetch all non-deleted events for joining with calendar-type blocks
-		const events = await db.table<LocalEvent>('events').toArray();
-		const visibleEvents = events.filter((e) => !e.deletedAt);
+		const events = await scopedForModule<LocalEvent, string>('calendar', 'events').toArray();
+		const visibleEvents = applyVisibility(events).filter((e) => !e.deletedAt);
 		const decryptedEvents = await decryptRecords('events', visibleEvents);
 		const eventsById = new Map<string, LocalEvent>();
 		for (const e of decryptedEvents) {

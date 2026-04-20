@@ -25,13 +25,15 @@ export type Visibility = 'space' | 'private';
  * sync engine is scope-aware. Until then this is the authoritative
  * check the UI uses to decide what to show.
  */
-export function applyVisibility<T extends { visibility?: unknown; authorId?: unknown }>(
-	records: T[]
-): T[] {
+export function applyVisibility<T>(records: T[]): T[] {
+	// T is unconstrained so TypeScript infers it exactly as the input
+	// type; visibility/authorId are read via a duck-typed runtime check
+	// so any record shape works without forcing the constraint through.
 	const me = getCurrentUserId();
 	return records.filter((r) => {
-		if (r.visibility !== 'private') return true;
-		return typeof r.authorId === 'string' && r.authorId === me;
+		const rec = r as { visibility?: unknown; authorId?: unknown };
+		if (rec.visibility !== 'private') return true;
+		return typeof rec.authorId === 'string' && rec.authorId === me;
 	});
 }
 
