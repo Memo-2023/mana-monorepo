@@ -87,8 +87,10 @@ describe('toolToFunctionSchema', () => {
 			description: 'Broken',
 			defaultPolicy: 'auto',
 			parameters: [
+				// `fruit` is genuinely not a JSON Schema type — the catalog-typo
+				// guard exists to catch accidental one-off strings like this.
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-				{ name: 'p', type: 'array' as any, description: 'p', required: true },
+				{ name: 'p', type: 'fruit' as any, description: 'p', required: true },
 			],
 		};
 		expect(() => toolToFunctionSchema(tool)).toThrow(/Unsupported parameter type/);

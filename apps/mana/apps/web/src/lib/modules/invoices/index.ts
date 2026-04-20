@@ -40,6 +40,8 @@ export { generateSCORReference, QRBillError } from './pdf/qr-bill';
 export { invoicesStore } from './stores/invoices.svelte';
 export { invoiceSettingsStore, ensureSettings } from './stores/settings.svelte';
 
+export { invoicesTools } from './tools';
+
 export type {
 	LocalInvoice,
 	LocalInvoiceLine,

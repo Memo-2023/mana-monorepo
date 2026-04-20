@@ -21,7 +21,10 @@ export interface ModuleTool {
 
 export interface ToolParameter {
 	name: string;
-	type: 'string' | 'number' | 'boolean';
+	/** JSON Schema primitive types. `array` / `object` used by tools that
+	 *  accept structured payloads (e.g. invoice line items) — parsing
+	 *  is the tool's responsibility inside execute(). */
+	type: 'string' | 'number' | 'boolean' | 'array' | 'object';
 	description: string;
 	required: boolean;
 	enum?: string[];

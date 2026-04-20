@@ -1110,6 +1110,112 @@ export const AI_TOOL_CATALOG: readonly ToolSchema[] = [
 		defaultPolicy: 'auto',
 		parameters: [{ name: 'quizId', type: 'string', description: 'ID des Quiz', required: true }],
 	},
+
+	// ── Invoices ─────────────────────────────────────────────
+	{
+		name: 'create_invoice',
+		module: 'invoices',
+		description:
+			'Erstellt eine neue Rechnung als Entwurf. Setzt Kunde (Name + optional Adresse + E-Mail), Positionen (Titel, Menge, Einzelpreis in Hauptwaehrung), Faelligkeit. Nummer wird automatisch vergeben.',
+		defaultPolicy: 'propose',
+		parameters: [
+			{
+				name: 'clientName',
+				type: 'string',
+				description: 'Name des Kunden (erforderlich)',
+				required: true,
+			},
+			{
+				name: 'clientEmail',
+				type: 'string',
+				description: 'E-Mail-Adresse des Kunden',
+				required: false,
+			},
+			{
+				name: 'clientAddress',
+				type: 'string',
+				description: 'Postanschrift des Kunden (mehrzeilig, Strasse + Nr, dann PLZ Ort)',
+				required: false,
+			},
+			{
+				name: 'subject',
+				type: 'string',
+				description: 'Kurzer Betreff (z.B. "Beratung April")',
+				required: false,
+			},
+			{
+				name: 'currency',
+				type: 'string',
+				description: 'Waehrung (Standard: CHF)',
+				required: false,
+				enum: ['CHF', 'EUR', 'USD'],
+			},
+			{
+				name: 'dueDate',
+				type: 'string',
+				description: 'Faelligkeitsdatum (YYYY-MM-DD). Ohne Angabe: +30 Tage ab heute.',
+				required: false,
+			},
+			{
+				name: 'lines',
+				type: 'array',
+				description:
+					'Array von Positionen: [{ title: string, quantity: number, unitPrice: number (in Hauptwaehrung, z.B. 150.00), vatRate?: number, unit?: string }]. Mindestens eine Position.',
+				required: true,
+			},
+		],
+	},
+	{
+		name: 'mark_invoice_paid',
+		module: 'invoices',
+		description:
+			'Markiert eine versendete oder ueberfaellige Rechnung als bezahlt. paidAt ist optional (Standard: heute, fuer rueckdatierte Eingaenge ein fruehes Datum setzen).',
+		defaultPolicy: 'propose',
+		parameters: [
+			{
+				name: 'invoiceId',
+				type: 'string',
+				description: 'ID der Rechnung (aus list_invoices)',
+				required: true,
+			},
+			{
+				name: 'paidAt',
+				type: 'string',
+				description: 'Zahlungsdatum (ISO oder YYYY-MM-DD). Standard: jetzt.',
+				required: false,
+			},
+		],
+	},
+	{
+		name: 'list_invoices',
+		module: 'invoices',
+		description:
+			'Listet Rechnungen auf. Optional nach Status (draft/sent/paid/overdue/void) und Limit gefiltert. Gibt ID, Nummer, Kunde, Status, Betrag, Faelligkeit zurueck.',
+		defaultPolicy: 'auto',
+		parameters: [
+			{
+				name: 'status',
+				type: 'string',
+				description: 'Nur diesen Status zeigen',
+				required: false,
+				enum: ['draft', 'sent', 'paid', 'overdue', 'void'],
+			},
+			{
+				name: 'limit',
+				type: 'number',
+				description: 'Maximale Anzahl (Standard: 20)',
+				required: false,
+			},
+		],
+	},
+	{
+		name: 'get_invoice_stats',
+		module: 'invoices',
+		description:
+			'Gibt Rechnungs-Kennzahlen zurueck: offene Summe, ueberfaellige Summe, YTD fakturiert + bezahlt (pro Waehrung, in Hauptwaehrung als Gleitkomma).',
+		defaultPolicy: 'auto',
+		parameters: [],
+	},
 ];
 
 // ═══════════════════════════════════════════════════════════════

@@ -16,9 +16,14 @@
 
 import type { ToolSchema } from './schemas';
 
-/** OpenAI-compatible JSON-Schema property type. */
+/** OpenAI-compatible JSON-Schema property type. `array` / `object` are
+ *  emitted without a nested `items` / `properties` schema — tools that
+ *  take structured payloads describe the expected shape inside their
+ *  human-readable description and parse in the executor. Tightening to
+ *  a full JSON-Schema tree would be strictly better but isn't required
+ *  by the OpenAI / Anthropic function-calling specs. */
 export interface JsonSchemaProperty {
-	type: 'string' | 'number' | 'integer' | 'boolean';
+	type: 'string' | 'number' | 'integer' | 'boolean' | 'array' | 'object';
 	description?: string;
 	enum?: readonly string[];
 }
@@ -53,6 +58,8 @@ function mapParamType(t: string): JsonSchemaProperty['type'] {
 		case 'number':
 		case 'integer':
 		case 'boolean':
+		case 'array':
+		case 'object':
 			return t;
 		default:
 			// Unknown types in the catalog are a bug, but don't silently
