@@ -37,6 +37,42 @@ import { wrapValue, unwrapValue, isEncrypted } from './aes';
 import { getActiveKey, isVaultUnlocked, waitForActiveKey } from './key-provider';
 import { getEncryptedFields } from './registry';
 import { getCurrentUserId } from '../current-user';
+import { getActiveSpace } from '../scope/active-space.svelte';
+
+/**
+ * Phase-1 Spaces decision: personal-Space data is encrypted with the
+ * user's master key (E2E as today); shared-Space data (brand/club/family
+ * /team/practice) is plaintext at rest and protected by server RLS only.
+ *
+ * Deciding at write time:
+ *   - spaceId is the `_personal:<userId>` sentinel → personal, encrypt.
+ *     Happens during the bootstrap window before reconcileSentinels() has
+ *     rewritten the placeholder to the real personal-space id.
+ *   - Active space is resolved and type='personal' → encrypt.
+ *   - Active space is any other type → skip.
+ *   - Record has no spaceId at all (legacy rows, guest mode) → encrypt
+ *     (safer default; personal-space is what the app defaults to).
+ *
+ * A shared-Space encryption-with-shared-key scheme will replace this
+ * later; see docs/plans/spaces-foundation.md §"Shared-space encryption".
+ */
+function isPersonalScope(record: Record<string, unknown>): boolean {
+	const spaceId = record.spaceId;
+	if (typeof spaceId === 'string' && spaceId.startsWith('_personal:')) {
+		return true;
+	}
+	const active = getActiveSpace();
+	if (active && active.type !== 'personal') {
+		// Only skip when we can confidently say the write belongs to a
+		// shared space. If the record's spaceId matches some other space's
+		// id, the check would need a lookup — for now the active-space
+		// type is the authoritative signal at write time.
+		if (typeof spaceId === 'string' && spaceId === active.id) {
+			return false;
+		}
+	}
+	return true;
+}
 
 /** Thrown by encryptRecord when no key is available. Module stores
  *  catch this to surface "vault locked" UI. */
@@ -131,6 +167,13 @@ export async function encryptRecord<T extends object>(tableName: string, record:
 	const fields = getEncryptedFields(tableName);
 	if (!fields) return record;
 	const view = record as unknown as Record<string, unknown>;
+
+	// Phase-1 Spaces: shared-Space records skip encryption so co-members
+	// can read them (they don't have the author's master key). Personal
+	// data stays E2E.
+	if (!isPersonalScope(view)) {
+		return record;
+	}
 
 	if (import.meta.env.DEV) devCheckRegistryShape(tableName, view, fields);
 

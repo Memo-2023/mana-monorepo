@@ -259,23 +259,25 @@ func (s *Store) RecordChange(ctx context.Context, appID, tableName, recordID, us
 // GetChangesSince returns changes for a user+app+table since a given timestamp,
 // excluding changes from the requesting client (to avoid echo).
 // The limit parameter controls maximum rows returned (caller should pass limit+1 to detect hasMore).
-func (s *Store) GetChangesSince(ctx context.Context, userID, appID, tableName, since, excludeClientID string, limit int) ([]ChangeRow, error) {
+// spaceIDs is the caller's Space membership list — rows whose space_id matches any of these
+// are also returned (in addition to rows the caller authored).
+func (s *Store) GetChangesSince(ctx context.Context, userID, appID, tableName, since, excludeClientID string, limit int, spaceIDs []string) ([]ChangeRow, error) {
 	sinceTime, err := time.Parse(time.RFC3339Nano, since)
 	if err != nil {
 		sinceTime = time.Unix(0, 0)
 	}
 
 	var changes []ChangeRow
-	err = s.withUser(ctx, userID, func(tx pgx.Tx) error {
+	err = s.withUserAndMemberships(ctx, userID, spaceIDs, func(tx pgx.Tx) error {
 		query := `
 			SELECT id, table_name, record_id, op, data, field_timestamps, client_id, created_at, schema_version, space_id, actor
 			FROM sync_changes
-			WHERE user_id = $1 AND app_id = $2 AND table_name = $3
+			WHERE (user_id = $1 OR space_id = ANY($7)) AND app_id = $2 AND table_name = $3
 				AND created_at > $4 AND client_id != $5
 			ORDER BY created_at ASC
 			LIMIT $6
 		`
-		rows, err := tx.Query(ctx, query, userID, appID, tableName, sinceTime, excludeClientID, limit)
+		rows, err := tx.Query(ctx, query, userID, appID, tableName, sinceTime, excludeClientID, limit, spaceIDs)
 		if err != nil {
 			return err
 		}
@@ -315,23 +317,25 @@ func (s *Store) GetChangesSince(ctx context.Context, userID, appID, tableName, s
 }
 
 // GetAllChangesSince returns changes across all tables for a user+app.
-func (s *Store) GetAllChangesSince(ctx context.Context, userID, appID, since, excludeClientID string) ([]ChangeRow, error) {
+// spaceIDs is the caller's Space membership list — rows whose space_id matches any of these
+// are also returned (in addition to rows the caller authored).
+func (s *Store) GetAllChangesSince(ctx context.Context, userID, appID, since, excludeClientID string, spaceIDs []string) ([]ChangeRow, error) {
 	sinceTime, err := time.Parse(time.RFC3339Nano, since)
 	if err != nil {
 		sinceTime = time.Unix(0, 0)
 	}
 
 	var changes []ChangeRow
-	err = s.withUser(ctx, userID, func(tx pgx.Tx) error {
+	err = s.withUserAndMemberships(ctx, userID, spaceIDs, func(tx pgx.Tx) error {
 		query := `
 			SELECT id, table_name, record_id, op, data, field_timestamps, client_id, created_at, schema_version, space_id, actor
 			FROM sync_changes
-			WHERE user_id = $1 AND app_id = $2
+			WHERE (user_id = $1 OR space_id = ANY($5)) AND app_id = $2
 				AND created_at > $3 AND client_id != $4
 			ORDER BY created_at ASC
 			LIMIT 5000
 		`
-		rows, err := tx.Query(ctx, query, userID, appID, sinceTime, excludeClientID)
+		rows, err := tx.Query(ctx, query, userID, appID, sinceTime, excludeClientID, spaceIDs)
 		if err != nil {
 			return err
 		}

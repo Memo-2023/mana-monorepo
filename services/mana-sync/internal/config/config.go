@@ -10,6 +10,7 @@ type Config struct {
 	Port           int
 	DatabaseURL    string
 	JWKSUrl        string // mana-auth JWKS endpoint for JWT validation
+	ManaAuthURL    string // mana-auth base URL for internal APIs (Space memberships)
 	CORSOrigins    string
 	ManaCreditsURL string // mana-credits service URL for billing checks
 	ServiceKey     string // Service-to-service auth key
@@ -23,6 +24,7 @@ func Load() *Config {
 		Port:           port,
 		DatabaseURL:    getEnv("DATABASE_URL", "postgresql://mana:devpassword@localhost:5432/mana_sync"),
 		JWKSUrl:        getEnv("JWKS_URL", "http://localhost:3001/api/auth/jwks"),
+		ManaAuthURL:    getEnv("MANA_AUTH_URL", "http://localhost:3001"),
 		CORSOrigins:    getEnv("CORS_ORIGINS", "http://localhost:5173,http://localhost:5188"),
 		ManaCreditsURL: getEnv("MANA_CREDITS_URL", "http://localhost:3061"),
 		ServiceKey:     getEnv("MANA_SERVICE_KEY", "dev-service-key"),

@@ -16,6 +16,7 @@ import (
 	"github.com/mana/mana-sync/internal/backup"
 	"github.com/mana/mana-sync/internal/billing"
 	"github.com/mana/mana-sync/internal/config"
+	"github.com/mana/mana-sync/internal/memberships"
 	"github.com/mana/mana-sync/internal/store"
 	syncHandler "github.com/mana/mana-sync/internal/sync"
 	"github.com/mana/mana-sync/internal/ws"
@@ -55,8 +56,14 @@ func main() {
 	billingChecker := billing.NewChecker(cfg.ManaCreditsURL, cfg.ServiceKey)
 	billingMiddleware := billingChecker.Middleware(validator)
 
+	// Initialize Space-membership lookup against mana-auth. The handler
+	// passes the caller's membership list into every sync query so the
+	// multi-member RLS policy lets co-members of a shared Space see each
+	// other's records.
+	membershipLookup := memberships.New(cfg.ManaAuthURL, cfg.ServiceKey)
+
 	// Initialize sync handler
-	handler := syncHandler.NewHandler(db, validator, hub)
+	handler := syncHandler.NewHandler(db, validator, hub, membershipLookup)
 
 	// Set up routes
 	mux := http.NewServeMux()

@@ -9,20 +9,34 @@ import (
 	"time"
 
 	"github.com/mana/mana-sync/internal/auth"
+	"github.com/mana/mana-sync/internal/memberships"
 	"github.com/mana/mana-sync/internal/store"
 	"github.com/mana/mana-sync/internal/ws"
 )
 
 // Handler handles sync HTTP endpoints.
 type Handler struct {
-	store     *store.Store
-	validator *auth.Validator
-	hub       *ws.Hub
+	store       *store.Store
+	validator   *auth.Validator
+	hub         *ws.Hub
+	memberships *memberships.Lookup
 }
 
 // NewHandler creates a new sync handler.
-func NewHandler(s *store.Store, v *auth.Validator, h *ws.Hub) *Handler {
-	return &Handler{store: s, validator: v, hub: h}
+// memberships may be nil — if so, the handler treats every user as
+// having no shared-space memberships (same as pre-Spaces behavior).
+func NewHandler(s *store.Store, v *auth.Validator, h *ws.Hub, m *memberships.Lookup) *Handler {
+	return &Handler{store: s, validator: v, hub: h, memberships: m}
+}
+
+// spaceIDsFor returns the Space membership list for the caller, or an
+// empty slice if no lookup is configured. Used to populate the session
+// config the multi-member RLS policy reads.
+func (h *Handler) spaceIDsFor(userID string) []string {
+	if h.memberships == nil {
+		return nil
+	}
+	return h.memberships.For(userID)
 }
 
 // maxBodySize is the maximum allowed request body (10 MB).
@@ -210,7 +224,7 @@ func (h *Handler) HandleSync(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get server changes since client's last sync (excluding client's own changes)
-	serverChanges, err := h.store.GetAllChangesSince(ctx, userID, appID, changeset.Since, clientID)
+	serverChanges, err := h.store.GetAllChangesSince(ctx, userID, appID, changeset.Since, clientID, h.spaceIDsFor(userID))
 	if err != nil {
 		slog.Error("failed to get server changes", "error", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
@@ -275,7 +289,7 @@ func (h *Handler) HandlePull(w http.ResponseWriter, r *http.Request) {
 
 	ctx := r.Context()
 	const batchLimit = 1000
-	serverChanges, err := h.store.GetChangesSince(ctx, userID, appID, collection, since, clientID, batchLimit+1)
+	serverChanges, err := h.store.GetChangesSince(ctx, userID, appID, collection, since, clientID, batchLimit+1, h.spaceIDsFor(userID))
 	if err != nil {
 		slog.Error("failed to get changes", "error", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
@@ -374,8 +388,9 @@ func (h *Handler) HandleStream(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Initial sync: send pending changes since cursor for each collection
+	memberSpaceIDs := h.spaceIDsFor(userID)
 	for _, coll := range collections {
-		changes, err := h.store.GetChangesSince(ctx, userID, appID, coll, since, clientID, batchLimit+1)
+		changes, err := h.store.GetChangesSince(ctx, userID, appID, coll, since, clientID, batchLimit+1, memberSpaceIDs)
 		if err != nil {
 			slog.Error("SSE initial pull failed", "error", err, "collection", coll)
 			cursors[coll] = now // Default to now on error
@@ -416,7 +431,7 @@ func (h *Handler) HandleStream(w http.ResponseWriter, r *http.Request) {
 				if cursor == "" {
 					cursor = since
 				}
-				changes, err := h.store.GetChangesSince(ctx, userID, appID, table, cursor, clientID, batchLimit+1)
+				changes, err := h.store.GetChangesSince(ctx, userID, appID, table, cursor, clientID, batchLimit+1, memberSpaceIDs)
 				if err != nil || len(changes) == 0 {
 					continue
 				}

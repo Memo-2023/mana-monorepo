@@ -136,6 +136,29 @@ app.get('/api/v1/internal/org/:orgId/member/:userId', async (c) => {
 	return c.json({ isMember: !!member, role: member?.role || '' });
 });
 
+/**
+ * List every Space (organization) the given user is a member of. Used by
+ * mana-sync to pass the current user's space-membership list into the
+ * `app.current_user_space_ids` session setting so the multi-member RLS
+ * policy can let space co-members read each other's records.
+ *
+ * Returns a flat array of organization ids — mana-sync doesn't care
+ * about names/roles here, only the set. Cached 5 min client-side.
+ */
+app.get('/api/v1/internal/users/:userId/memberships', async (c) => {
+	const { userId } = c.req.param();
+	const { members } = await import('./db/schema/organizations');
+	const { eq } = await import('drizzle-orm');
+	const rows = await db
+		.select({ organizationId: members.organizationId, role: members.role })
+		.from(members)
+		.where(eq(members.userId, userId));
+	return c.json({
+		userId,
+		memberships: rows.map((r) => ({ organizationId: r.organizationId, role: r.role })),
+	});
+});
+
 // ─── Login Page (OIDC) ─────────────────────────────────────
 
 app.get('/login', (c) => {
