@@ -174,15 +174,15 @@
 	.trigger {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.5rem;
-		padding: 0.375rem 0.625rem;
-		border-radius: var(--radius-md, 6px);
-		background: var(--color-surface-2, transparent);
+		gap: 0.375rem;
+		padding: 0.25rem 0.5rem;
+		border-radius: 999px;
+		background: transparent;
 		border: 1px solid var(--color-border, hsl(0 0% 88%));
 		color: var(--color-text, inherit);
-		font-size: 0.875rem;
+		font-size: 0.8125rem;
 		cursor: pointer;
-		min-width: 8rem;
+		height: 32px;
 		transition: background-color 120ms ease;
 	}
 
@@ -195,7 +195,7 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
-		max-width: 10rem;
+		max-width: 7rem;
 	}
 
 	.chev {
@@ -236,7 +236,9 @@
 
 	.dropdown {
 		position: absolute;
-		top: calc(100% + 4px);
+		/* Open upward because the switcher sits inside the bottom-fixed
+			 PillNav — a downward dropdown would land off-screen. */
+		bottom: calc(100% + 4px);
 		left: 0;
 		min-width: 14rem;
 		background: var(--color-surface-1, white);

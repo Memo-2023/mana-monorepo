@@ -269,6 +269,12 @@
 		prependElements?: PillNavElement[];
 		/** Additional elements (tab groups, dividers) to show after nav items */
 		elements?: PillNavElement[];
+		/**
+		 * Snippet rendered at the very start of the bar, before the app
+		 * switcher. Lets the host drop a custom component (e.g. Space
+		 * switcher) into the nav without adding more dedicated props.
+		 */
+		startSlot?: import('svelte').Snippet;
 		/** Show logout button */
 		showLogout?: boolean;
 		/** Theme variant dropdown items */
@@ -355,6 +361,7 @@
 		primaryColor,
 		prependElements = [],
 		elements = [],
+		startSlot,
 		showLogout = true,
 		themeVariantItems = [],
 		currentThemeVariantLabel = 'Theme',
@@ -608,6 +615,12 @@
 		aria-label={ariaLabel}
 	>
 		<div class="pill-nav-container">
+			<!-- Host-provided start slot (e.g. Space switcher). Rendered
+				 before the app drawer so it anchors the left edge of the bar. -->
+			{#if startSlot}
+				{@render startSlot()}
+			{/if}
+
 			<!-- App Switcher (optional) -->
 			{#if showAppSwitcher && appItems.length > 0}
 				<AppDrawer

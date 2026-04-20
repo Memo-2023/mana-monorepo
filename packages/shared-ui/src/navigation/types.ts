@@ -202,6 +202,14 @@ export interface PillNavigationProps {
 	prependElements?: PillNavElement[];
 	/** Additional elements to show after nav items (tab groups, dividers) */
 	elements?: PillNavElement[];
+	/**
+	 * Snippet rendered at the very start of the pill bar, before the app
+	 * switcher and any prepend elements. Lets the host drop an arbitrary
+	 * Svelte component (e.g. a Space switcher) into the bar without
+	 * adding another dedicated prop surface. Keep the rendered content
+	 * short — it's first-in-line real estate.
+	 */
+	startSlot?: Snippet;
 	/** Bottom offset from viewport bottom (default: '0px'). Use to position above other fixed bars. */
 	bottomOffset?: string;
 }

@@ -981,7 +981,13 @@
 					{spotlightActions}
 					{contentSearcher}
 					positioning="static"
-				/>
+				>
+					{#snippet startSlot()}
+						{#if authStore.isAuthenticated}
+							<SpaceSwitcher locale={$locale === 'en' ? 'en' : 'de'} />
+						{/if}
+					{/snippet}
+				</PillNavigation>
 			</div>
 		{/if}
 
@@ -1000,11 +1006,6 @@
 			class="pt-2"
 		>
 			<div class="mx-auto max-w-7xl px-3 py-2 sm:px-6 sm:py-3 lg:px-8">
-				{#if authStore.isAuthenticated}
-					<div class="space-bar">
-						<SpaceSwitcher locale={$locale === 'en' ? 'en' : 'de'} />
-					</div>
-				{/if}
 				{#if routeBlocked && routeAppId}
 					<RouteTierGate
 						appName={routeAppId.name}
@@ -1054,12 +1055,6 @@
 <ToastContainer />
 
 <style>
-	.space-bar {
-		display: flex;
-		justify-content: flex-end;
-		margin-bottom: 0.5rem;
-	}
-
 	.bottom-stack {
 		position: fixed;
 		bottom: 0;
