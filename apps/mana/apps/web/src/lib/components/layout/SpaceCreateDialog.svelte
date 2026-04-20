@@ -223,7 +223,9 @@
 		position: fixed;
 		inset: 0;
 		background: rgba(0, 0, 0, 0.4);
-		z-index: 200;
+		/* Above the PillNav (z=1000) and the SpaceSwitcher menu (z=1501)
+			 so opening the dialog cleanly covers the nav chrome. */
+		z-index: 1600;
 		border: 0;
 	}
 
@@ -235,11 +237,12 @@
 		width: min(540px, 92vw);
 		max-height: 86vh;
 		overflow-y: auto;
-		background: var(--color-surface-1, white);
-		color: var(--color-text, inherit);
-		border-radius: var(--radius-lg, 10px);
+		background: hsl(var(--color-card, 0 0% 100%));
+		color: hsl(var(--color-foreground, 0 0% 10%));
+		border: 1px solid hsl(var(--color-border, 0 0% 88%));
+		border-radius: 12px;
 		box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
-		z-index: 201;
+		z-index: 1601;
 	}
 
 	form {
