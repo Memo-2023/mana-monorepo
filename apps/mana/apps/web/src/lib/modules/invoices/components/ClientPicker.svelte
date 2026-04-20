@@ -45,9 +45,14 @@
 				source: 'contact' as ClientSource,
 				name: c.displayName ?? 'Unbenannter Kontakt',
 				email: c.email,
-				address: [c.street, c.postalCode && c.city ? `${c.postalCode} ${c.city}` : null]
-					.filter(Boolean)
-					.join('\n'),
+				// Contacts already have structured fields — map them over directly
+				// so picking a contact populates Strasse/PLZ/Ort without lossy
+				// string-joining.
+				street: c.street ?? undefined,
+				zip: c.postalCode ?? undefined,
+				city: c.city ?? undefined,
+				country: c.country ?? undefined,
+				address: undefined as string | undefined,
 			}));
 		const fromClients = invoiceClients
 			.filter((c) => c.name.toLowerCase().includes(q))
@@ -56,7 +61,11 @@
 				source: 'invoice-client' as ClientSource,
 				name: c.name,
 				email: c.email,
-				address: c.address,
+				street: undefined as string | undefined,
+				zip: undefined as string | undefined,
+				city: undefined as string | undefined,
+				country: undefined as string | undefined,
+				address: c.address ?? undefined,
 			}));
 		return [...fromContacts, ...fromClients].slice(0, 8);
 	});
@@ -66,7 +75,11 @@
 		clientSource = s.source;
 		snapshot = {
 			name: s.name,
-			address: s.address ?? undefined,
+			street: s.street,
+			zip: s.zip,
+			city: s.city,
+			country: s.country,
+			address: s.address,
 			email: s.email ?? undefined,
 		};
 		query = s.name;
@@ -111,15 +124,46 @@
 		{/if}
 	</label>
 
-	<label class="field">
-		<span class="label">Adresse</span>
-		<textarea
-			rows="3"
-			placeholder="Bahnhofstrasse 1&#10;8000 Zürich"
-			value={snapshot.address ?? ''}
-			oninput={(e) => (snapshot = { ...snapshot, address: e.currentTarget.value || undefined })}
-		></textarea>
-	</label>
+	<div class="address-grid">
+		<label class="field street">
+			<span class="label">Strasse + Nr.</span>
+			<input
+				type="text"
+				placeholder="Bahnhofstrasse 1"
+				value={snapshot.street ?? ''}
+				oninput={(e) => (snapshot = { ...snapshot, street: e.currentTarget.value || undefined })}
+			/>
+		</label>
+		<label class="field zip">
+			<span class="label">PLZ</span>
+			<input
+				type="text"
+				placeholder="8000"
+				value={snapshot.zip ?? ''}
+				oninput={(e) => (snapshot = { ...snapshot, zip: e.currentTarget.value || undefined })}
+			/>
+		</label>
+		<label class="field city">
+			<span class="label">Ort</span>
+			<input
+				type="text"
+				placeholder="Zürich"
+				value={snapshot.city ?? ''}
+				oninput={(e) => (snapshot = { ...snapshot, city: e.currentTarget.value || undefined })}
+			/>
+		</label>
+		<label class="field country">
+			<span class="label">Land</span>
+			<input
+				type="text"
+				placeholder="CH"
+				maxlength="2"
+				value={snapshot.country ?? ''}
+				oninput={(e) =>
+					(snapshot = { ...snapshot, country: e.currentTarget.value.toUpperCase() || undefined })}
+			/>
+		</label>
+	</div>
 
 	<label class="field">
 		<span class="label">E-Mail</span>
@@ -161,17 +205,12 @@
 		color: var(--color-text-muted, #64748b);
 	}
 
-	.field input,
-	.field textarea {
+	.field input {
 		padding: 0.5rem 0.65rem;
 		border: 1px solid var(--color-border, #e2e8f0);
 		border-radius: 0.4rem;
 		font-size: 0.95rem;
 		font-family: inherit;
-	}
-
-	.field textarea {
-		resize: vertical;
 	}
 
 	.suggest {
@@ -217,5 +256,28 @@
 	.suggest-source {
 		font-size: 0.75rem;
 		color: var(--color-text-muted, #64748b);
+	}
+
+	.address-grid {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 0.5rem;
+	}
+
+	.address-grid .street {
+		grid-column: 1 / -1;
+	}
+
+	.address-grid .zip {
+		grid-column: 1;
+	}
+
+	.address-grid .city {
+		grid-column: 2;
+	}
+
+	.address-grid .country {
+		grid-column: 1 / -1;
+		max-width: 10rem;
 	}
 </style>

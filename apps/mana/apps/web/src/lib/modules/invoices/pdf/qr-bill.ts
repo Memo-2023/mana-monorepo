@@ -144,10 +144,22 @@ export function buildQRBillData(invoice: Invoice, settings: InvoiceSettings): Da
 		throw new QRBillError('Die hinterlegte IBAN ist ungültig.', 'invalid-iban');
 	}
 
-	const creditorAddr = parseAddress(settings.senderAddress);
+	// Prefer the structured fields set in SenderProfileForm. If empty
+	// (pre-migration settings / minimal onboarding), fall back to parsing
+	// the legacy free-text address so QR-Bills keep working for users who
+	// haven't opened the new form yet.
+	const creditorAddr: StructuredAddress | null =
+		settings.senderStreet && settings.senderZip && settings.senderCity
+			? {
+					street: settings.senderStreet,
+					zip: settings.senderZip,
+					city: settings.senderCity,
+					country: settings.senderCountry || 'CH',
+				}
+			: parseAddress(settings.senderAddress);
 	if (!creditorAddr) {
 		throw new QRBillError(
-			'Absender-Adresse konnte nicht geparst werden (erwartet: Strasse + Nummer, dann "PLZ Ort").',
+			'Absender-Adresse fehlt oder konnte nicht geparst werden. Trage Strasse, PLZ und Ort in den Einstellungen ein.',
 			'unparseable-sender-address'
 		);
 	}
@@ -157,9 +169,20 @@ export function buildQRBillData(invoice: Invoice, settings: InvoiceSettings): Da
 		throw new QRBillError('Rechnungsbetrag muss grösser als 0 sein.', 'missing-amount');
 	}
 
-	const debtorAddr = parseAddress(invoice.clientSnapshot.address);
-	// Debtor is optional per spec; if the client address doesn't parse, we
-	// still emit the QR-Bill without a debtor (user can fill it in by hand).
+	// Client side: same preference order — structured fields first, then
+	// legacy free-text. Debtor is optional per spec; if neither path
+	// produces a structured address, we still emit the QR-Bill without a
+	// debtor so the user can fill it in when paying.
+	const snap = invoice.clientSnapshot;
+	const debtorAddr: StructuredAddress | null =
+		snap.street && snap.zip && snap.city
+			? {
+					street: snap.street,
+					zip: snap.zip,
+					city: snap.city,
+					country: snap.country || 'CH',
+				}
+			: parseAddress(snap.address);
 
 	// Prefer the reference persisted on the invoice (set at create time) so
 	// the reference is stable even if invoice.number is later edited. Fall

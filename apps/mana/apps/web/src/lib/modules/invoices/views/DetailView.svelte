@@ -212,7 +212,16 @@
 			<h3>Empfänger</h3>
 			<div class="client">
 				<div class="client-name">{invoice.clientSnapshot.name}</div>
-				{#if invoice.clientSnapshot.address}
+				{#if invoice.clientSnapshot.street && invoice.clientSnapshot.city}
+					<div class="client-address">
+						{invoice.clientSnapshot.street}<br />
+						{invoice.clientSnapshot.zip ?? ''}
+						{invoice.clientSnapshot.city}
+						{#if invoice.clientSnapshot.country && invoice.clientSnapshot.country !== 'CH'}
+							<br />{invoice.clientSnapshot.country}
+						{/if}
+					</div>
+				{:else if invoice.clientSnapshot.address}
 					<pre class="client-address">{invoice.clientSnapshot.address}</pre>
 				{/if}
 				{#if invoice.clientSnapshot.email}

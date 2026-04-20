@@ -151,6 +151,11 @@ export const invoicesTools: ModuleTool[] = [
 				return { success: false, message: 'Kundenname fehlt.' };
 			}
 			const currency = (params.currency as Currency) ?? 'CHF';
+			// Keep the raw string on `address` (legacy fallback) — the QR-Bill
+			// builder's heuristic parser lifts structured fields out of it on
+			// render. A future iteration can ask the LLM for structured fields
+			// directly via more tool params, but today the one-shot address
+			// string is what planners tend to produce.
 			const snapshot: InvoiceClientSnapshot = {
 				name: clientName,
 				address: (params.clientAddress as string | undefined)?.trim() || undefined,

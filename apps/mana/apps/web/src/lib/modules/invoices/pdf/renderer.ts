@@ -220,7 +220,18 @@ function renderHeader(
 	});
 	leftY -= FONT_SIZE.brand * LINE_HEIGHT.tight;
 
-	const senderBody = [settings.senderAddress, settings.senderEmail, settings.senderIban]
+	// Prefer the structured fields (post-migration) over the legacy blob.
+	// Falls back to senderAddress so users who haven't opened the updated
+	// settings form still get their address on the PDF.
+	const structuredAddress =
+		settings.senderStreet && settings.senderZip && settings.senderCity
+			? `${settings.senderStreet}\n${settings.senderZip} ${settings.senderCity}`
+			: '';
+	const senderBody = [
+		structuredAddress || settings.senderAddress,
+		settings.senderEmail,
+		settings.senderIban,
+	]
 		.filter(Boolean)
 		.join('\n');
 	leftY = drawBlock(ctx, senderBody, ctx.leftX, leftY, {
@@ -276,8 +287,16 @@ function renderRecipient(ctx: RenderContext, invoice: Invoice, y: number): numbe
 	});
 	y -= FONT_SIZE.body * LINE_HEIGHT.tight;
 
-	if (invoice.clientSnapshot.address) {
-		y = drawBlock(ctx, invoice.clientSnapshot.address, ctx.leftX, y, {
+	// Prefer structured fields; fall back to the legacy free-text blob.
+	const snap = invoice.clientSnapshot;
+	const addressBlock =
+		snap.street && snap.city
+			? [snap.street, `${snap.zip ?? ''} ${snap.city}`.trim()]
+					.concat(snap.country && snap.country !== 'CH' ? [snap.country] : [])
+					.join('\n')
+			: (snap.address ?? '');
+	if (addressBlock) {
+		y = drawBlock(ctx, addressBlock, ctx.leftX, y, {
 			maxWidth: ctx.contentWidth * 0.55,
 		});
 	}

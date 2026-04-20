@@ -10,6 +10,10 @@ function makeSettings(overrides: Partial<InvoiceSettings> = {}): InvoiceSettings
 		id: 'invoice-settings',
 		senderName: 'Muster AG',
 		senderAddress: 'Bahnhofstrasse 1\n8000 Zürich',
+		senderStreet: null,
+		senderZip: null,
+		senderCity: null,
+		senderCountry: 'CH',
 		senderEmail: 'hello@muster.ch',
 		senderVatNumber: null,
 		senderIban: 'CH9300762011623852957',
@@ -172,6 +176,57 @@ describe('buildQRBillData', () => {
 		});
 		const data = buildQRBillData(invoice, makeSettings());
 		expect(data.debtor).toBeUndefined();
+	});
+
+	it('prefers structured sender fields over legacy senderAddress', () => {
+		// Post-migration settings: structured fields set, legacy blob junky.
+		// QR-Bill should use the structured source — legacy is the fallback,
+		// not a co-equal override.
+		const data = buildQRBillData(
+			makeInvoice(),
+			makeSettings({
+				senderAddress: 'this is garbage and should be ignored',
+				senderStreet: 'Musterweg 42',
+				senderZip: '3000',
+				senderCity: 'Bern',
+				senderCountry: 'CH',
+			})
+		);
+		expect(data.creditor.address).toBe('Musterweg 42');
+		expect(data.creditor.zip).toBe('3000');
+		expect(data.creditor.city).toBe('Bern');
+	});
+
+	it('prefers structured client fields over snapshot.address', () => {
+		const invoice = makeInvoice({
+			clientSnapshot: {
+				name: 'Strukturiert AG',
+				address: 'muss ignoriert werden',
+				street: 'Hauptgasse 7',
+				zip: '4000',
+				city: 'Basel',
+				country: 'CH',
+			},
+		});
+		const data = buildQRBillData(invoice, makeSettings());
+		expect(data.debtor?.address).toBe('Hauptgasse 7');
+		expect(data.debtor?.zip).toBe('4000');
+		expect(data.debtor?.city).toBe('Basel');
+	});
+
+	it('falls back to legacy senderAddress when structured fields are empty', () => {
+		// Existing users who haven't opened the updated settings form still
+		// get a working QR-Bill from their free-text address.
+		const data = buildQRBillData(
+			makeInvoice(),
+			makeSettings({
+				senderAddress: 'Bahnhofstrasse 1\n8000 Zürich',
+				senderStreet: null,
+				senderZip: null,
+				senderCity: null,
+			})
+		);
+		expect(data.creditor.address).toBe('Bahnhofstrasse 1');
 	});
 
 	it('parses multi-line street with house number on line 1', () => {

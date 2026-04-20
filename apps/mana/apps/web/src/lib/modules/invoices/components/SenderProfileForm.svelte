@@ -63,6 +63,10 @@
 			await invoiceSettingsStore.update({
 				senderName: settings.senderName,
 				senderAddress: settings.senderAddress,
+				senderStreet: settings.senderStreet,
+				senderZip: settings.senderZip,
+				senderCity: settings.senderCity,
+				senderCountry: settings.senderCountry,
 				senderEmail: settings.senderEmail,
 				senderVatNumber: settings.senderVatNumber,
 				senderIban: settings.senderIban,
@@ -160,10 +164,62 @@
 				<input type="text" bind:value={settings.senderName} required />
 			</label>
 
-			<label class="field">
-				<span>Adresse *</span>
-				<textarea rows="3" bind:value={settings.senderAddress} required></textarea>
-			</label>
+			<div class="grid-2">
+				<label class="field">
+					<span>Strasse + Nr. *</span>
+					<input
+						type="text"
+						placeholder="Bahnhofstrasse 1"
+						value={settings.senderStreet ?? ''}
+						oninput={(e) => settings && (settings.senderStreet = e.currentTarget.value || null)}
+					/>
+				</label>
+				<label class="field">
+					<span>PLZ *</span>
+					<input
+						type="text"
+						placeholder="8000"
+						value={settings.senderZip ?? ''}
+						oninput={(e) => settings && (settings.senderZip = e.currentTarget.value || null)}
+					/>
+				</label>
+			</div>
+
+			<div class="grid-2">
+				<label class="field">
+					<span>Ort *</span>
+					<input
+						type="text"
+						placeholder="Zürich"
+						value={settings.senderCity ?? ''}
+						oninput={(e) => settings && (settings.senderCity = e.currentTarget.value || null)}
+					/>
+				</label>
+				<label class="field">
+					<span>Land</span>
+					<input
+						type="text"
+						placeholder="CH"
+						maxlength="2"
+						value={settings.senderCountry ?? 'CH'}
+						oninput={(e) =>
+							settings && (settings.senderCountry = e.currentTarget.value.toUpperCase() || 'CH')}
+					/>
+				</label>
+			</div>
+
+			<details class="legacy-address">
+				<summary>Abweichende Adresse im PDF anzeigen (Freitext-Fallback)</summary>
+				<p class="hint">
+					Wird nur verwendet, wenn die strukturierten Felder oben leer sind. Nützlich für Postfächer
+					/ c/o-Adressen, die nicht ins Strasse+PLZ+Ort-Schema passen.
+				</p>
+				<textarea
+					rows="3"
+					placeholder="Postfach 123&#10;8021 Zürich"
+					bind:value={settings.senderAddress}
+				></textarea>
+			</details>
 
 			<div class="grid-2">
 				<label class="field">
@@ -450,5 +506,30 @@
 	.hint-warn {
 		font-size: 0.8rem;
 		color: #92400e;
+	}
+
+	.legacy-address {
+		border: 1px solid var(--color-border, #e2e8f0);
+		border-radius: 0.4rem;
+		padding: 0.5rem 0.75rem;
+	}
+
+	.legacy-address summary {
+		cursor: pointer;
+		font-size: 0.85rem;
+		color: var(--color-text-muted, #64748b);
+	}
+
+	.legacy-address[open] summary {
+		margin-bottom: 0.5rem;
+	}
+
+	.legacy-address textarea {
+		width: 100%;
+		padding: 0.5rem 0.65rem;
+		border: 1px solid var(--color-border, #e2e8f0);
+		border-radius: 0.4rem;
+		font-size: 0.95rem;
+		font-family: inherit;
 	}
 </style>

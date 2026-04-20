@@ -88,11 +88,12 @@ Alle 76 Module der Mana-App (`apps/mana/apps/web/src/lib/modules/`).
 | `citycorners` | CityCorners | Stadtführer für Konstanz |
 | `wetter` | Wetter | Open-Meteo Wetter, DWD-Warnungen, Regen-Nowcast, Multi-Model-Vergleich |
 
-## Finanzen (2)
+## Finanzen (3)
 
 | Modul | Name | Beschreibung |
 |---|---|---|
 | `finance` | Finance | Einnahmen/Ausgaben-Tracking mit Kategorien und Budgets |
+| `invoices` | Rechnungen | Rechnungen stellen (PDF + Schweizer QR-Bill), Mail-Versand, Zahlungs-Tracking. Bezahlte Rechnungen erscheinen automatisch als Einnahme im Finance-Modul. |
 | `credits` | Credits & Abo | Credit-Verwaltung und Subscription-Management |
 
 ## Tagesübersicht (2)

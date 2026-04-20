@@ -623,9 +623,15 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	// and are the most sensitive fields in the module (appear on every PDF
 	// the user issues). logoMediaId / accentColor / number sequence state
 	// are plaintext — structural, no privacy value.
+	// Structured address fields (senderStreet/Zip/City/Country) get the
+	// same treatment as the legacy senderAddress blob.
 	invoiceSettings: entry<LocalInvoiceSettings>([
 		'senderName',
 		'senderAddress',
+		'senderStreet',
+		'senderZip',
+		'senderCity',
+		'senderCountry',
 		'senderEmail',
 		'senderVatNumber',
 		'senderIban',

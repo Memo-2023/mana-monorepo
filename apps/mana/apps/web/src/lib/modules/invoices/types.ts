@@ -75,7 +75,18 @@ export interface InvoiceTotals {
  */
 export interface InvoiceClientSnapshot {
 	name: string;
+	/**
+	 * Legacy free-text multi-line address. Kept for backward compatibility
+	 * with invoices created before the structured-address migration and for
+	 * users who don't want to fill in five fields for a one-off client.
+	 * When structured fields are set, they take precedence for the QR-Bill.
+	 */
 	address?: string;
+	/** Structured address — preferred source for QR-Bill rendering. */
+	street?: string;
+	zip?: string;
+	city?: string;
+	country?: string;
 	email?: string;
 	vatNumber?: string;
 }
@@ -136,9 +147,16 @@ export interface LocalInvoiceClient extends BaseRecord {
  * Dexie hook stamps userId as usual.
  */
 export interface LocalInvoiceSettings extends BaseRecord {
-	// Sender profile
+	// Sender profile — structured fields are preferred for QR-Bill;
+	// senderAddress (legacy free-text) remains a fallback so existing
+	// settings don't break until the user opens the form and fills in
+	// the split fields.
 	senderName: string;
 	senderAddress: string;
+	senderStreet?: string | null;
+	senderZip?: string | null;
+	senderCity?: string | null;
+	senderCountry?: string | null;
 	senderEmail: string;
 	senderVatNumber?: string | null;
 	senderIban: string;
@@ -214,6 +232,10 @@ export interface InvoiceSettings {
 	id: string;
 	senderName: string;
 	senderAddress: string;
+	senderStreet: string | null;
+	senderZip: string | null;
+	senderCity: string | null;
+	senderCountry: string | null;
 	senderEmail: string;
 	senderVatNumber: string | null;
 	senderIban: string;

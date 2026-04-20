@@ -18,6 +18,8 @@ import { emitDomainEvent } from '$lib/data/events';
 import { invoiceTable } from '../collections';
 import { computeInvoiceTotals } from '../totals';
 import { generateSCORReference } from '../pdf/qr-bill';
+import { financeStore } from '$lib/modules/finance/stores/finance.svelte';
+import { CURRENCIES } from '../constants';
 import type {
 	LocalInvoice,
 	LocalInvoiceLine,
@@ -203,6 +205,28 @@ export const invoicesStore = {
 			number: existing.number,
 			paidAt: stamp,
 		});
+
+		// Cross-module: upsert a finance income transaction so paid invoices
+		// show up in the user's Finance-Übersicht without a separate manual
+		// entry. Best-effort — if the finance-side encryption isn't ready
+		// (first-boot race), we log and move on; the invoice write already
+		// succeeded and sync will propagate.
+		try {
+			const { decryptRecords } = await import('$lib/data/crypto');
+			const [decrypted] = (await decryptRecords('invoices', [existing])) as LocalInvoice[];
+			const currency = (decrypted.currency ?? existing.currency) as Currency;
+			const minor = CURRENCIES[currency]?.minorUnit ?? 100;
+			const amount = (decrypted.totals?.gross ?? existing.totals.gross) / minor;
+			await financeStore.upsertTransactionFromInvoice({
+				invoiceId: id,
+				amount,
+				description: `Rechnung ${existing.number} — ${decrypted.clientSnapshot?.name ?? '—'}`,
+				date: stamp.slice(0, 10),
+				note: `Auto-Eintrag aus Rechnung ${existing.number} (${currency})`,
+			});
+		} catch (e) {
+			console.warn('[invoices] finance cross-link failed, transaction not created:', e);
+		}
 	},
 
 	/**
@@ -225,6 +249,14 @@ export const invoicesStore = {
 			invoiceId: id,
 			number: existing.number,
 		});
+		// Voiding doesn't touch the finance side because voiding a paid
+		// invoice isn't allowed (credit-note path, Phase 2); and unpaid
+		// invoices never created a finance row to begin with. Guard is
+		// here so a future unfreeze of the paid→void edge doesn't
+		// silently leave the finance row dangling.
+		if (existing.status === 'sent' || existing.status === 'overdue') {
+			// No-op — there's no finance row yet.
+		}
 	},
 
 	/**
