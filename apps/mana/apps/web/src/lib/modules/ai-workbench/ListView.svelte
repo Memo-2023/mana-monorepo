@@ -15,6 +15,7 @@
 	let moduleFilter = $state<string | null>(null);
 	let missionFilter = $state<string | null>(null);
 	let agentFilter = $state<string | null>(null);
+	let timeRangeFilter = $state<'24h' | '7d' | 'all'>('all');
 
 	const events = $derived(
 		useAiTimeline({
@@ -24,12 +25,19 @@
 		})
 	);
 	const allBuckets = $derived(bucketByIteration(events.value));
-	// Agent filter is applied client-side after bucketing because the
-	// useAiTimeline query is keyed by module/mission only today. If the
-	// volume ever grows large enough for this to matter, push it into
-	// the query.
+	// Agent + time-range filters are applied client-side after bucketing
+	// because the useAiTimeline query is keyed by module/mission only
+	// today. If the volume ever grows large enough for this to matter,
+	// push them into the query.
 	const buckets = $derived(
-		agentFilter ? allBuckets.filter((b) => b.agentId === agentFilter) : allBuckets
+		allBuckets
+			.filter((b) => (agentFilter ? b.agentId === agentFilter : true))
+			.filter((b) => {
+				if (timeRangeFilter === 'all') return true;
+				const ageMs = Date.now() - new Date(b.firstTimestamp).getTime();
+				const cutoff = timeRangeFilter === '24h' ? 86_400_000 : 7 * 86_400_000;
+				return ageMs <= cutoff;
+			})
 	);
 	const missions = $derived(useMissions());
 	const missionTitleById = $derived(new Map(missions.value.map((m) => [m.id, m.title])));
@@ -167,6 +175,21 @@
 				{/each}
 			</select>
 		</label>
+		{#if tab === 'timeline'}
+			<div class="range-group" role="tablist" aria-label="Zeitraum">
+				{#each [{ id: '24h', label: '24h' }, { id: '7d', label: '7T' }, { id: 'all', label: 'alle' }] as const as opt}
+					<button
+						type="button"
+						class="range-btn"
+						class:range-active={timeRangeFilter === opt.id}
+						aria-pressed={timeRangeFilter === opt.id}
+						onclick={() => (timeRangeFilter = opt.id)}
+					>
+						{opt.label}
+					</button>
+				{/each}
+			</div>
+		{/if}
 	</div>
 
 	{#if tab === 'audit'}
@@ -228,6 +251,9 @@
 								<span class="agent-name">{bucketAgent?.name ?? b.agentDisplayName}</span>
 								<span class="mission-sep">·</span>
 								{missionTitleById.get(b.missionId) ?? b.missionId}
+								<span class="event-count" title="{b.events.length} Änderungen in dieser Iteration"
+									>{b.events.length}</span
+								>
 							</span>
 							{#if b.rationale}
 								<p class="rationale">{b.rationale}</p>
@@ -238,9 +264,10 @@
 							class="revert"
 							disabled={revertingKey !== null}
 							onclick={() => handleRevert(b.key, b.missionId, b.iterationId)}
+							title="Alle Änderungen dieser Iteration zurücknehmen"
 						>
-							<ArrowCounterClockwise size={12} />
-							<span>{revertingKey === b.key ? 'Läuft…' : 'Revert'}</span>
+							<ArrowCounterClockwise size={13} weight="bold" />
+							<span>{revertingKey === b.key ? 'Läuft…' : 'Rückgängig'}</span>
 						</button>
 					</header>
 					<ul class="events">
@@ -362,6 +389,43 @@
 		font: inherit;
 		font-size: 0.8125rem;
 	}
+	.range-group {
+		display: inline-flex;
+		gap: 0.125rem;
+		margin-left: auto;
+		background: hsl(var(--color-muted));
+		border-radius: 0.375rem;
+		padding: 0.125rem;
+	}
+	.range-btn {
+		padding: 0.25rem 0.5rem;
+		border: none;
+		background: transparent;
+		color: hsl(var(--color-muted-foreground));
+		font: inherit;
+		font-size: 0.75rem;
+		cursor: pointer;
+		border-radius: 0.25rem;
+	}
+	.range-btn:hover {
+		background: hsl(var(--color-surface));
+	}
+	.range-active {
+		background: hsl(var(--color-surface));
+		color: hsl(var(--color-foreground));
+		font-weight: 600;
+	}
+	.event-count {
+		display: inline-block;
+		margin-left: 0.5rem;
+		padding: 0 0.375rem;
+		font-size: 0.6875rem;
+		font-weight: 600;
+		color: hsl(var(--color-muted-foreground));
+		background: hsl(var(--color-muted));
+		border-radius: 999px;
+		font-variant-numeric: tabular-nums;
+	}
 	.empty {
 		color: hsl(var(--color-muted-foreground));
 		font-size: 0.875rem;
@@ -423,20 +487,31 @@
 	.revert {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.25rem;
-		padding: 0.25rem 0.5rem;
+		gap: 0.375rem;
+		padding: 0.4rem 0.75rem;
 		border: 1px solid hsl(var(--color-border));
-		border-radius: 0.25rem;
+		border-radius: 0.375rem;
 		background: hsl(var(--color-surface));
-		color: hsl(var(--color-muted-foreground));
+		color: hsl(var(--color-foreground));
 		font: inherit;
-		font-size: 0.6875rem;
+		font-size: 0.75rem;
+		font-weight: 500;
 		cursor: pointer;
+		transition:
+			background 0.15s,
+			border-color 0.15s,
+			color 0.15s;
+		align-self: start;
+		white-space: nowrap;
 	}
 	.revert:hover:not(:disabled) {
-		color: #8a1b1b;
-		border-color: #e99;
-		background: #fff0f0;
+		color: hsl(0 72% 45%);
+		border-color: hsl(0 72% 60%);
+		background: hsl(0 72% 95%);
+	}
+	.revert:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
 	}
 	.events {
 		list-style: none;
