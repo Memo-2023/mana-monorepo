@@ -69,3 +69,14 @@ export {
 
 // Types
 export type { AppId, AppBranding, LogoProps, AppLogoWithNameProps } from './types';
+
+// Spaces (multi-tenancy primitive — see docs/plans/spaces-foundation.md)
+export {
+	SPACE_TYPES,
+	SPACE_TYPE_LABELS,
+	SPACE_TYPE_DESCRIPTIONS,
+	SPACE_MODULE_ALLOWLIST,
+	isModuleAllowedInSpace,
+	type SpaceType,
+	type SpaceModuleId,
+} from './spaces';
