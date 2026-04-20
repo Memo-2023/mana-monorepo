@@ -236,6 +236,12 @@ export const APP_ICONS = {
 		// Emerald→teal sits next to finance green in the Arbeit & Finanzen row.
 		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="iv" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#059669"/><stop offset="100%" style="stop-color:#14b8a6"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#iv)"/><path d="M28 22h34l14 14v42a4 4 0 0 1-4 4H28a4 4 0 0 1-4-4V26a4 4 0 0 1 4-4z" fill="white" fill-opacity="0.95"/><path d="M62 22v10a4 4 0 0 0 4 4h10" fill="none" stroke="#059669" stroke-width="2" stroke-opacity="0.35"/><rect x="32" y="44" width="24" height="3" rx="1" fill="#059669" fill-opacity="0.6"/><rect x="32" y="52" width="20" height="3" rx="1" fill="#059669" fill-opacity="0.45"/><rect x="32" y="60" width="28" height="3" rx="1" fill="#059669" fill-opacity="0.6"/><rect x="60" y="58" width="14" height="14" rx="1" fill="#059669"/><rect x="62" y="60" width="3" height="3" fill="white"/><rect x="69" y="60" width="3" height="3" fill="white"/><rect x="62" y="67" width="3" height="3" fill="white"/><rect x="66" y="64" width="2" height="2" fill="white"/><rect x="69" y="67" width="3" height="3" fill="white"/></svg>`
 	),
+	broadcast: svgToDataUrl(
+		// Megaphone / loudspeaker with three radiating sound arcs.
+		// Indigo→cyan gradient sets it apart from mail (blue) and invoices
+		// (emerald) while staying in the "communication" colour family.
+		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="bc" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#6366f1"/><stop offset="100%" style="stop-color:#06b6d4"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#bc)"/><path d="M32 42v16l14 4v-24l-14 4z" fill="white" fill-opacity="0.95"/><path d="M46 38l26-10v44l-26-10z" fill="white"/><path d="M42 62v14a3 3 0 0 0 3 3h4a3 3 0 0 0 3-3V64" fill="white" fill-opacity="0.85"/><path d="M78 40c4 2 6 5 6 10s-2 8-6 10" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" opacity="0.8"/><path d="M84 32c6 3 10 9 10 18s-4 15-10 18" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" opacity="0.5"/></svg>`
+	),
 } as const;
 
 export type AppIconId = keyof typeof APP_ICONS;

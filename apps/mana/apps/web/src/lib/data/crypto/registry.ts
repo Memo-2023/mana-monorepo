@@ -83,6 +83,11 @@ import type {
 	LocalInvoiceClient,
 	LocalInvoiceSettings,
 } from '../../modules/invoices/types';
+import type {
+	LocalCampaign,
+	LocalBroadcastTemplate,
+	LocalBroadcastSettings,
+} from '../../modules/broadcast/types';
 
 export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	// ─── Chat ────────────────────────────────────────────────
@@ -617,6 +622,42 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 		'vatNumber',
 		'iban',
 		'notes',
+	]),
+
+	// ─── Broadcast ─────────────────────────────────────────
+	// Newsletter / campaign content. Every field the user typed — subject,
+	// body JSON/HTML, audience filter values, sender profile — is sensitive
+	// *until sent*. Post-send the content itself becomes semi-public (it
+	// went out to N recipients), but pre-send the draft is confidential
+	// marketing copy. Audience definitions always stay sensitive — the
+	// recipient graph is a leakable business secret (who's on the list).
+	//
+	// Plaintext (intentional):
+	//   - status, scheduledAt, sentAt, templateId, serverJobId: structural,
+	//     indexed for the "drafts vs scheduled vs sent" filter.
+	//   - stats: cached counters mirrored from the server tracking tables;
+	//     not sensitive by design (they describe aggregate behaviour).
+	//   - isBuiltIn on templates: controls whether the user can delete the
+	//     row; structural, no privacy value.
+	//   - dnsCheck on settings: public DNS state, not user-typed content.
+	broadcastCampaigns: entry<LocalCampaign>([
+		'name',
+		'subject',
+		'preheader',
+		'fromName',
+		'fromEmail',
+		'replyTo',
+		'content',
+		'audience',
+	]),
+	broadcastTemplates: entry<LocalBroadcastTemplate>(['name', 'description', 'subject', 'content']),
+	broadcastSettings: entry<LocalBroadcastSettings>([
+		'defaultFromName',
+		'defaultFromEmail',
+		'defaultReplyTo',
+		'defaultFooter',
+		'legalAddress',
+		'unsubscribeLandingCopy',
 	]),
 
 	// Singleton sender profile. The user's legal address + IBAN live here

@@ -1021,6 +1021,23 @@ export const MANA_APPS: ManaApp[] = [
 		requiredTier: 'guest',
 	},
 	{
+		id: 'broadcast',
+		name: 'Broadcasts',
+		description: {
+			de: 'Newsletter & Kampagnen',
+			en: 'Newsletters & campaigns',
+		},
+		longDescription: {
+			de: 'Newsletter und Ankündigungen an Kontaktgruppen versenden — mit Rich-Text-Editor, Open/Click-Tracking, DSGVO-konformem Unsubscribe und Kampagnen-Statistik.',
+			en: 'Send newsletters and announcements to contact segments — with a rich-text editor, open/click tracking, GDPR-compliant unsubscribe, and per-campaign stats.',
+		},
+		icon: APP_ICONS.broadcast,
+		color: '#6366f1',
+		comingSoon: false,
+		status: 'development',
+		requiredTier: 'alpha',
+	},
+	{
 		id: 'invoices',
 		name: 'Rechnungen',
 		description: {
