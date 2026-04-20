@@ -21,6 +21,9 @@
 		"check": "svelte-check --tsconfig ./tsconfig.json",
 		"lint": "eslint ."
 	},
+	"dependencies": {
+		"@mana/shared-types": "workspace:*"
+	},
 	"devDependencies": {
 		"svelte": "^5.0.0",
 		"svelte-check": "^4.0.0",

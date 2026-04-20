@@ -29,6 +29,9 @@ export * from './landing-config';
 // AI structured-output Zod schemas (shared between mana-api + web frontend)
 export * from './ai-schemas';
 
+// Space types (multi-tenancy primitive — see docs/plans/spaces-foundation.md)
+export * from './spaces';
+
 // API types
 export interface User {
 	id: string;

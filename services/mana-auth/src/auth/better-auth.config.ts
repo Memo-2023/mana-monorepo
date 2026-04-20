@@ -38,6 +38,7 @@ import {
 } from '../email/send';
 import { sourceAppStore, passwordResetRedirectStore } from './stores';
 import { TRUSTED_ORIGINS } from './sso-origins';
+import { assertValidSpaceMetadataForCreate, assertSpaceIsDeletable } from '../spaces';
 
 // Re-export so existing imports (`import { TRUSTED_ORIGINS } from './better-auth.config'`)
 // keep working. New code should import from './sso-origins' directly.
@@ -279,6 +280,21 @@ export function createBetterAuth(databaseUrl: string) {
 						inviter?.user?.name || 'Ein Teammitglied',
 						inviteUrl
 					);
+				},
+
+				/**
+				 * Spaces — enforce that every organization carries a valid
+				 * `metadata.type` (the Space type), and block deletion of the
+				 * user's personal space. See docs/plans/spaces-foundation.md
+				 * and ../spaces/metadata.ts.
+				 */
+				organizationHooks: {
+					beforeCreateOrganization: async ({ organization }) => {
+						assertValidSpaceMetadataForCreate(organization.metadata);
+					},
+					beforeDeleteOrganization: async ({ organization }) => {
+						assertSpaceIsDeletable(organization.metadata);
+					},
 				},
 
 				// Custom roles and permissions

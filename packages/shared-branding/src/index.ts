@@ -71,12 +71,16 @@ export {
 export type { AppId, AppBranding, LogoProps, AppLogoWithNameProps } from './types';
 
 // Spaces (multi-tenancy primitive — see docs/plans/spaces-foundation.md)
+// Canonical types live in @mana/shared-types; branding adds only UI strings.
 export {
 	SPACE_TYPES,
 	SPACE_TYPE_LABELS,
 	SPACE_TYPE_DESCRIPTIONS,
 	SPACE_MODULE_ALLOWLIST,
 	isModuleAllowedInSpace,
+	isSpaceType,
+	parseSpaceMetadata,
 	type SpaceType,
 	type SpaceModuleId,
+	type SpaceMetadata,
 } from './spaces';
