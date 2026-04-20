@@ -347,6 +347,9 @@
 		display: flex;
 		align-items: center;
 		gap: 0.3rem;
+		flex: 1 1 auto;
+		min-width: 0;
+		overflow: hidden;
 	}
 	.header-icon {
 		flex-shrink: 0;
@@ -365,6 +368,10 @@
 		font-weight: 600;
 		color: hsl(var(--color-foreground));
 		transform: translateY(1px);
+		min-width: 0;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 	a.page-title-link {
 		text-decoration: none;
