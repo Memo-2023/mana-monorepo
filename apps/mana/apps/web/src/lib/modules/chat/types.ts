@@ -8,7 +8,7 @@ export interface LocalConversation extends BaseRecord {
 	title?: string | null;
 	modelId?: string | null;
 	templateId?: string | null;
-	spaceId?: string | null;
+	contextSpaceId?: string | null;
 	conversationMode: 'free' | 'guided' | 'template';
 	documentMode: boolean;
 	isArchived: boolean;
@@ -38,7 +38,7 @@ export interface Conversation {
 	id: string;
 	modelId: string;
 	templateId?: string;
-	spaceId?: string;
+	contextSpaceId?: string;
 	conversationMode: 'free' | 'guided' | 'template';
 	documentMode: boolean;
 	title?: string;

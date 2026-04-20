@@ -39,7 +39,7 @@ export interface LocalContextSpace extends BaseRecord {
 }
 
 export interface LocalDocument extends BaseRecord {
-	spaceId?: string | null;
+	contextSpaceId?: string | null;
 	title: string;
 	content: string;
 	type: DocumentType;

@@ -56,8 +56,10 @@
 					<span>{typeIcons[doc.type ?? 'text'] ?? '📄'}</span>
 					<div class="min-w-0 flex-1">
 						<p class="truncate text-sm font-medium">{doc.title}</p>
-						{#if getSpaceName(doc.spaceId)}
-							<p class="truncate text-xs text-muted-foreground">{getSpaceName(doc.spaceId)}</p>
+						{#if getSpaceName(doc.contextSpaceId)}
+							<p class="truncate text-xs text-muted-foreground">
+								{getSpaceName(doc.contextSpaceId)}
+							</p>
 						{/if}
 					</div>
 					<span class="flex-shrink-0 text-xs text-muted-foreground">

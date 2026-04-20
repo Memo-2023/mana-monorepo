@@ -29,7 +29,7 @@ export const CONTEXT_GUEST_SEED = {
 	documents: [
 		{
 			id: 'doc-welcome',
-			spaceId: DEMO_SPACE_ID,
+			contextSpaceId: DEMO_SPACE_ID,
 			title: 'Willkommen bei Context',
 			content:
 				'Context ist dein KI-gestütztes Dokumenten-Management. Erstelle Texte, sammle Kontexte und nutze KI-Prompts.\n\nMelde dich an, um deine Dokumente zu synchronisieren.',
@@ -40,7 +40,7 @@ export const CONTEXT_GUEST_SEED = {
 		},
 		{
 			id: 'doc-prompt',
-			spaceId: DEMO_SPACE_ID,
+			contextSpaceId: DEMO_SPACE_ID,
 			title: 'Beispiel-Prompt',
 			content: 'Fasse den folgenden Text in 3 Stichpunkten zusammen:\n\n{text}',
 			type: 'prompt' as const,

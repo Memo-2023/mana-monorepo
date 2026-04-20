@@ -27,7 +27,7 @@ export function toConversation(local: LocalConversation): Conversation {
 		id: local.id,
 		modelId: local.modelId ?? '',
 		templateId: local.templateId ?? undefined,
-		spaceId: local.spaceId ?? undefined,
+		contextSpaceId: local.contextSpaceId ?? undefined,
 		conversationMode: local.conversationMode,
 		documentMode: local.documentMode,
 		title: local.title ?? undefined,
@@ -131,8 +131,11 @@ export function sortConversations(list: Conversation[]): Conversation[] {
 }
 
 /** Filter conversations by space. */
-export function filterBySpace(conversations: Conversation[], spaceId: string): Conversation[] {
-	return conversations.filter((c) => c.spaceId === spaceId);
+export function filterByContextSpace(
+	conversations: Conversation[],
+	contextSpaceId: string
+): Conversation[] {
+	return conversations.filter((c) => c.contextSpaceId === contextSpaceId);
 }
 
 /** Filter conversations by search query on title. */

@@ -24,7 +24,7 @@ export const conversationsStore = {
 	async create(data: {
 		modelId?: string;
 		templateId?: string;
-		spaceId?: string;
+		contextSpaceId?: string;
 		mode?: 'free' | 'guided' | 'template';
 		documentMode?: boolean;
 		title?: string;
@@ -34,7 +34,7 @@ export const conversationsStore = {
 			title: data.title ?? null,
 			modelId: data.modelId ?? null,
 			templateId: data.templateId ?? null,
-			spaceId: data.spaceId ?? null,
+			contextSpaceId: data.contextSpaceId ?? null,
 			conversationMode: data.mode ?? 'free',
 			documentMode: data.documentMode ?? false,
 			isArchived: false,

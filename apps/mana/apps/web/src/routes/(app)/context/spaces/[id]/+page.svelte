@@ -42,7 +42,7 @@
 		const id = crypto.randomUUID();
 		const row: LocalDocument = {
 			id,
-			spaceId,
+			contextSpaceId: spaceId,
 			title: 'Neues Dokument',
 			content: '# Neues Dokument\n\n',
 			type: 'text',

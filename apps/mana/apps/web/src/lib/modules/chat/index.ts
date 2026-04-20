@@ -14,7 +14,7 @@ export {
 	toTemplate,
 	toMessage,
 	sortConversations,
-	filterBySpace,
+	filterByContextSpace,
 	filterBySearch,
 	splitPinned,
 } from './queries';

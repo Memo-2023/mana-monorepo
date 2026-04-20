@@ -62,14 +62,14 @@ export interface LocalSpace extends BaseRecord {
 }
 
 export interface LocalSpaceMember extends BaseRecord {
-	spaceId: string;
+	contextSpaceId: string;
 	userId: string;
 	role: 'owner' | 'member';
 }
 
 export interface LocalMemoSpace extends BaseRecord {
 	memoId: string;
-	spaceId: string;
+	contextSpaceId: string;
 }
 
 // ─── View Types ────────────────────────────────────────────

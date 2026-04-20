@@ -672,6 +672,72 @@ db.version(30).stores({
 	_serverIterationExecutions: 'iterationId, missionId, executedAt',
 });
 
+// v31 — Rename the legacy `spaceId` field to `contextSpaceId` on four
+// tables that owned the term before the multi-tenancy Spaces foundation
+// arrived (v28):
+//   - conversations (chat module's reference to a context-space folder)
+//   - documents      (context module's parent context-space)
+//   - spaceMembers   (memoro's members of a context-space)
+//   - memoSpaces     (memoro's memo ↔ context-space join)
+//
+// The v28 upgrade did NOT overwrite pre-existing `spaceId` values, so
+// records in these tables still carry context-space references under
+// the old name. After this migration, `spaceId` belongs exclusively to
+// the multi-tenancy primitive; the context-space reference has its own
+// disambiguated field. Scope queries that previously would have been
+// confused by the collision now work cleanly.
+//
+// The upgrade also stamps the fresh `spaceId` with the personal-space
+// sentinel for these rows so they immediately participate in scope
+// filtering instead of staying invisible until the next write.
+//
+// See docs/plans/spaces-foundation.md §"Legacy spaceId collision".
+db.version(31)
+	.stores({
+		conversations: 'id, isArchived, isPinned, contextSpaceId, templateId, updatedAt',
+		documents: 'id, contextSpaceId, type, pinned, title, [contextSpaceId+type], updatedAt',
+		spaceMembers: 'id, contextSpaceId, userId',
+		memoSpaces: 'id, memoId, contextSpaceId',
+	})
+	.upgrade(async (tx) => {
+		const tables = ['conversations', 'documents', 'spaceMembers', 'memoSpaces'] as const;
+		for (const name of tables) {
+			await tx
+				.table(name)
+				.toCollection()
+				.modify((record: Record<string, unknown>) => {
+					if (record.contextSpaceId !== undefined) return;
+					const legacy = record.spaceId;
+					if (typeof legacy === 'string' && legacy && !legacy.startsWith('_personal:')) {
+						// Genuine context-space reference — move to the new field name.
+						record.contextSpaceId = legacy;
+					} else {
+						record.contextSpaceId = null;
+					}
+					const ownerId =
+						typeof record.userId === 'string' && record.userId ? record.userId : GUEST_USER_ID;
+					// Reset spaceId so scope filtering matches the user's personal
+					// space (post-bootstrap it's rewritten to the real personal-space id).
+					record.spaceId = `_personal:${ownerId}`;
+				});
+		}
+	});
+
+// v32 — Broadcast module: 1:N email campaigns (newsletters).
+// See docs/plans/broadcast-module.md. Three tables:
+//   - broadcastCampaigns: the campaigns themselves. status + scheduledAt
+//     indexed because the two hot queries are "show me drafts" and
+//     "what's scheduled in the next 24h" (server cron picks those up).
+//   - broadcastTemplates: reusable content templates. isBuiltIn indexed
+//     so the picker can split user-created vs. shipped-with-app.
+//   - broadcastSettings: singleton per user (sender defaults + DNS check
+//     cache). id is the BROADCAST_SETTINGS_ID sentinel.
+db.version(32).stores({
+	broadcastCampaigns: 'id, status, scheduledAt, sentAt',
+	broadcastTemplates: 'id, isBuiltIn',
+	broadcastSettings: 'id',
+});
+
 // ─── Sync Routing ──────────────────────────────────────────
 // SYNC_APP_MAP, TABLE_TO_SYNC_NAME, TABLE_TO_APP, SYNC_NAME_TO_TABLE,
 // toSyncName() and fromSyncName() are now derived from per-module

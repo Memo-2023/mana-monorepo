@@ -35,7 +35,7 @@ export function toDocument(local: LocalDocument): Document {
 		title: local.title,
 		content: local.content,
 		type: local.type,
-		space_id: local.spaceId ?? null,
+		space_id: local.contextSpaceId ?? null,
 		user_id: 'local',
 		created_at: local.createdAt ?? new Date().toISOString(),
 		updated_at: local.updatedAt ?? new Date().toISOString(),
@@ -73,13 +73,13 @@ export function useAllDocuments() {
 	}, [] as Document[]);
 }
 
-/** Documents for a specific space. Auto-updates on any change. */
-export function useSpaceDocuments(spaceId: string) {
+/** Documents for a specific context-space. Auto-updates on any change. */
+export function useSpaceDocuments(contextSpaceId: string) {
 	return useLiveQueryWithDefault(async () => {
 		const locals = await db
 			.table<LocalDocument>('documents')
-			.where('spaceId')
-			.equals(spaceId)
+			.where('contextSpaceId')
+			.equals(contextSpaceId)
 			.toArray();
 		const visible = locals.filter((d) => !d.deletedAt);
 		const decrypted = await decryptRecords('documents', visible);
