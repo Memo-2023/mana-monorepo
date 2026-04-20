@@ -6,6 +6,7 @@
 	import { goalStore, useAllGoals, GOAL_TEMPLATES } from '$lib/companion/goals';
 	import type { LocalGoal } from '$lib/companion/goals/types';
 	import GoalEditor from './GoalEditor.svelte';
+	import AiProposalInbox from '$lib/components/ai/AiProposalInbox.svelte';
 
 	const goals = useAllGoals();
 	let showTemplates = $state(false);
@@ -28,6 +29,8 @@
 </script>
 
 <div class="goals-page">
+	<AiProposalInbox module="goals" />
+
 	<div class="header">
 		<button class="add-btn" onclick={() => (showEditor = true)}>
 			<PencilSimple size={14} weight="bold" /> Eigenes

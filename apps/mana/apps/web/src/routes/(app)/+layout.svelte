@@ -15,6 +15,7 @@
 	import { initTools } from '$lib/data/tools/init';
 	import { startEventBridge, stopEventBridge } from '$lib/triggers/event-bridge';
 	import { startStreakTracker, stopStreakTracker } from '$lib/data/projections/streaks';
+	import { startGoalTracker, stopGoalTracker } from '$lib/companion/goals';
 	import { initByok } from '$lib/byok';
 	import { bottomBarStore } from '$lib/stores/bottom-bar.svelte';
 	import { locale, _ } from 'svelte-i18n';
@@ -549,6 +550,7 @@
 			initTools();
 			startEventBridge();
 			startStreakTracker();
+			startGoalTracker();
 			initByok();
 			startLlmQueue();
 			startMemoroLlmWatcher();
@@ -667,6 +669,7 @@
 		stopEventStore();
 		stopEventBridge();
 		stopStreakTracker();
+		stopGoalTracker();
 		stopMissionTick();
 		stopServerIterationStaging();
 		guestMode?.destroy();

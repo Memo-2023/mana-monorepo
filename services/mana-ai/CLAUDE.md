@@ -77,14 +77,29 @@ Der Runner wird agent-bewusst — Missionen gehoeren einem benannten Agent, Poli
 
 ## Status: v0.6 (Server-side Web-Research + erweiterte Tools)
 
-Der Runner kann jetzt vor dem Planner-Call eigenstaendig Web-Recherche ausfuehren (ohne Browser) und hat Zugriff auf 28 Tools ueber 11 Module.
+Der Runner kann jetzt vor dem Planner-Call eigenstaendig Web-Recherche ausfuehren (ohne Browser). Serverseitig werden 31 propose-Tools ueber 16 Module vom Planner vorgeschlagen (auto-Tools laufen ausschliesslich in der Webapp-Reasoning-Loop — der Server sieht nur propose).
 
 - [x] `NewsResearchClient` (`planner/news-research-client.ts`) — HTTP-Client fuer `mana-api`'s `/api/v1/news-research/discover` + `/search`. Timeouts 15s/30s, graceful-null bei Fehler.
 - [x] Pre-Planning-Research-Step in `cron/tick.ts` — bei Mission-Objectives mit Research-Keywords (`recherchier|research|news|today|historisch|...`) wird automatisch vor dem Planner-Call RSS-Discovery + Search ausgefuehrt. Ergebnisse als `ResolvedInput` mit `id='__web-research__'` injiziert.
 - [x] `config.manaApiUrl` + Docker-Compose-Wiring (`MANA_API_URL: http://mana-api:3060`, `depends_on: mana-api`).
-- [x] 28 Tools ueber 11 Module (17 propose, 11 auto):
-  - Propose: `create_task`, `complete_task`, `complete_tasks_by_title`, `create_event`, `create_note`, `update_note`, `append_to_note`, `add_tag_to_note`, `create_place`, `visit_place`, `undo_drink`, `save_news_article`, `create_journal_entry`, `create_habit`, `log_habit`, `research_news`, `create_contact`
-  - Auto: `get_task_stats`, `list_tasks`, `list_notes`, `get_todays_events`, `get_drink_progress`, `log_drink`, `nutrition_summary`, `log_meal`, `get_places`, `location_log`, `get_habits`, `get_contacts`
+- [x] 31 propose-Tools ueber 16 Module (Server-Sicht — auto-Tools sind nur in der Webapp):
+  - todo: `create_task`, `complete_task`, `complete_tasks_by_title`
+  - calendar: `create_event`
+  - notes: `create_note`, `update_note`, `append_to_note`, `add_tag_to_note`
+  - places: `create_place`, `visit_place`
+  - drink: `undo_drink`
+  - news: `save_news_article`
+  - news-research: `research_news`
+  - journal: `create_journal_entry`
+  - habits: `create_habit`, `log_habit`
+  - contacts: `create_contact`
+  - quiz: `create_quiz`, `update_quiz`, `add_quiz_question`, `update_quiz_question`, `delete_quiz_question`
+  - goals: `create_goal`, `pause_goal`, `resume_goal`, `complete_goal`
+  - mood: `log_mood`
+  - events: `suggest_event`
+  - finance: `add_transaction`
+  - times: `start_timer`, `stop_timer`
+- [x] Volle Tool-Liste inkl. der 28 auto-Tools: siehe `apps/mana/CLAUDE.md` §Tool Coverage. Einzige Wahrheitsquelle ist `AI_TOOL_CATALOG` in `@mana/shared-ai/src/tools/schemas.ts`; beide Seiten deriven daraus, Drift-Guard in `src/planner/tools.ts` blockt Regressionen.
 
 ## Port: 3067
 

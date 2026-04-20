@@ -206,16 +206,16 @@ The companion is a **second actor** that works alongside the human in every modu
 - **Scene lens** — workbench scenes can bind to an agent via `scene.viewingAsAgentId` (context menu → "An Agent binden…"). Pure UI lens, not a data-scope change. `SceneAppBar` shows the agent avatar on bound scene tabs.
 - **Workbench timeline** — `/ai-workbench` renders every AI-attributed event grouped by mission iteration with per-**agent** filter, per-module, per-mission. Each bucket header shows agent avatar + name + mission title. Per-bucket **Revert button** undoes the iteration's writes via `data/ai/revert/` (TaskCreated → delete, TaskCompleted → uncomplete, etc., newest-first). Separate **"Datenzugriff"** tab exposes the server-side decrypt audit (for missions with Key-Grants).
 
-### Tool Coverage (37 tools, 12 modules)
+### Tool Coverage (59 tools, 19 modules)
 
-Agents interact with the app through tools — each one either auto (executes silently during reasoning) or propose (creates a Proposal card the user must approve). Canonical list in `@mana/shared-ai/src/policy/proposable-tools.ts`; server-side definitions in `services/mana-ai/src/planner/tools.ts`; webapp auto-tool list in `src/lib/data/ai/policy.ts`.
+Agents interact with the app through tools — each one either auto (executes silently during reasoning) or propose (creates a Proposal card the user must approve). Source of truth: `AI_TOOL_CATALOG` in `@mana/shared-ai/src/tools/schemas.ts` — both webapp policy (`src/lib/data/ai/policy.ts`) and server-side planner (`services/mana-ai/src/planner/tools.ts`) derive from it automatically, so drift is structurally impossible.
 
 | Module | Propose | Auto |
 |--------|---------|------|
 | todo | `create_task`, `complete_task`, `complete_tasks_by_title` | `get_task_stats`, `list_tasks` |
 | calendar | `create_event` | `get_todays_events` |
 | notes | `create_note`, `update_note`, `append_to_note`, `add_tag_to_note` | `list_notes` |
-| places | `create_place`, `visit_place` | `get_places`, `location_log` |
+| places | `create_place`, `visit_place` | `get_places`, `get_current_location` |
 | drink | `undo_drink` | `get_drink_progress`, `log_drink` |
 | food | — | `nutrition_summary`, `log_meal` |
 | news | `save_news_article` | — |
@@ -224,6 +224,13 @@ Agents interact with the app through tools — each one either auto (executes si
 | habits | `create_habit`, `log_habit` | `get_habits` |
 | contacts | `create_contact` | `get_contacts` |
 | quiz | `create_quiz`, `update_quiz`, `add_quiz_question`, `update_quiz_question`, `delete_quiz_question` | `list_quizzes`, `get_quiz_questions`, `get_quiz_stats` |
+| goals | `create_goal`, `pause_goal`, `resume_goal`, `complete_goal` | `list_goals`, `get_goal_progress` |
+| mood | `log_mood` | `get_mood_today`, `get_mood_insights` |
+| myday | — | `get_myday_summary` |
+| events | `suggest_event` | `discover_events` |
+| finance | `add_transaction` | `get_month_summary`, `list_transactions` |
+| times | `start_timer`, `stop_timer` | `get_time_stats`, `get_timer_status`, `list_projects` |
+| wetter | — | `get_weather`, `get_rain_forecast` |
 
 **Server-side web-research**: mana-ai calls mana-api's `/api/v1/news-research/discover` + `/search` directly before the planner prompt is built (pre-planning injection). Missions with research-keyword objectives get real article URLs + excerpts injected as a synthetic ResolvedInput. See `services/mana-ai/src/planner/news-research-client.ts`.
 
