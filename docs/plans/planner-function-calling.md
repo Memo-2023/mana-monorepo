@@ -252,6 +252,7 @@ Kein Datenschutz-Unterschied — Encrypted Tables bleiben verschlüsselt, Execut
 - **Dry-Run-Mode** — „simuliere was passieren würde". Optional. Für jetzt reicht manual-Cadence + Revert.
 - **Typed Tool-Params** — Generierung von TS-Types aus dem Catalog. Separater PR.
 - **Browser-local LLM als Planner** — `@mana/local-llm` (Gemma via transformers.js) unterstützt Tool-Calling nicht zuverlässig. Bleibt Out-of-Scope.
+- **shared-llm Tool-Call-Integration** (deferred 2026-04-20) — der webapp- und server-LlmClient sprechen aktuell direkt gegen mana-llm (`/v1/chat/completions`), an `LlmOrchestrator` vorbei. Damit verpassen Planner-Calls die Tier-Routing-Logik (BYOK / browser → server → cloud Fallback, per-task-Override). Ursprünglich Teil des Plans, aber die konkreten Vorteile sind gering: Browser-local Gemma unterstützt Function-Calling nicht zuverlässig (fällt als Tool-Tier eh aus), und BYOK/Cloud über mana-llm-Proxy ist mit Direct-Fetch funktional äquivalent. Einstiegspunkt für später: `LlmBackend`-Interface in `packages/shared-llm/src/types.ts` um `tools`/`toolCalls` erweitern, Backends durchreichen, Adapter `createLlmClientFromOrchestrator(task)` bauen. ~6 h Aufwand wenn der Use-Case konkret wird.
 
 ## PR-Struktur-Vorschlag
 
