@@ -48,6 +48,71 @@ export class VaultLockedError extends Error {
 }
 
 /**
+ * Dev-only registry-vs-record shape check.
+ *
+ * Called from encryptRecord when `import.meta.env.DEV` is truthy (Vite
+ * strips the call in production builds). Catches the most common silent
+ * failure mode: a registry entry names a field the record doesn't have,
+ * because of a case typo. Without this warning, the field stays plaintext
+ * forever and no error is ever thrown.
+ *
+ * False-positive strategy:
+ *   - We only warn on close matches (case-insensitive). An optional field
+ *     that happens to be omitted from a given write won't light up.
+ *   - A record that has NONE of the registered fields is also flagged,
+ *     which catches wrong-table-name call sites.
+ *
+ * Throttled per (tableName, field) pair so liveQuery loops don't spam.
+ */
+const _registryWarnings = new Set<string>();
+function devCheckRegistryShape(
+	tableName: string,
+	record: Record<string, unknown>,
+	fields: readonly string[]
+): void {
+	const recordKeys = Object.keys(record);
+	const recordKeySet = new Set(recordKeys);
+	const lcMap = new Map<string, string>();
+	for (const k of recordKeys) lcMap.set(k.toLowerCase(), k);
+
+	let exactHits = 0;
+	for (const field of fields) {
+		if (recordKeySet.has(field)) {
+			exactHits++;
+			continue;
+		}
+		// Case-insensitive near-miss → almost certainly a typo in the registry.
+		const near = lcMap.get(field.toLowerCase());
+		if (near && near !== field) {
+			const key = `${tableName}.${field}`;
+			if (!_registryWarnings.has(key)) {
+				_registryWarnings.add(key);
+				console.error(
+					`[mana-crypto] DEV: registry field '${field}' not on ${tableName} record, ` +
+						`but case-insensitive match '${near}' exists. Registry typo? ` +
+						`This field is SILENTLY staying plaintext in production.`
+				);
+			}
+		}
+	}
+
+	// Record has no registered field at all — probably wrong tableName or
+	// a record shape that diverged from the type the registry was written for.
+	if (exactHits === 0 && recordKeys.length > 0) {
+		const key = `${tableName}:no-fields`;
+		if (!_registryWarnings.has(key)) {
+			_registryWarnings.add(key);
+			console.warn(
+				`[mana-crypto] DEV: encryptRecord('${tableName}', ...) called but the record ` +
+					`has none of the registered fields [${fields.join(', ')}]. ` +
+					`Keys on record: [${recordKeys.slice(0, 10).join(', ')}${recordKeys.length > 10 ? ', …' : ''}]. ` +
+					`Wrong table name?`
+			);
+		}
+	}
+}
+
+/**
  * Encrypts the configured fields of `record` in place. Returns the
  * same record reference for chaining. No-op if the table is not in
  * the registry, the registry entry is disabled, or every configured
@@ -66,6 +131,8 @@ export async function encryptRecord<T extends object>(tableName: string, record:
 	const fields = getEncryptedFields(tableName);
 	if (!fields) return record;
 	const view = record as unknown as Record<string, unknown>;
+
+	if (import.meta.env.DEV) devCheckRegistryShape(tableName, view, fields);
 
 	// Build the work list first so we don't half-encrypt a record on
 	// vault-locked failure mid-loop.

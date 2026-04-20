@@ -28,6 +28,19 @@
  *   - When in doubt about a free-form field, encrypt it
  *   - When in doubt about a structural field, leave it plaintext (the
  *     query layer needs it)
+ *
+ * Authoring pattern — use `entry<LocalType>()` for type-safety:
+ *
+ *   import type { LocalNote } from '$lib/modules/notes/types';
+ *   notes: entry<LocalNote>(['title', 'content']),
+ *
+ * TypeScript rejects field names that don't exist on the row type. This
+ * catches the #1 silent-failure mode: a registry typo (wrong case, wrong
+ * name) → the field quietly ships in plaintext forever, with no error
+ * anywhere. Plain object-literal entries (`{ enabled, fields }`) still
+ * compile — migrate them opportunistically, new entries should always use
+ * the helper. A dev-only runtime check in `record-helpers.ts` catches
+ * typos for untyped entries as a fallback.
  */
 
 export interface EncryptionConfig {
@@ -37,15 +50,39 @@ export interface EncryptionConfig {
 	readonly enabled: boolean;
 }
 
+/**
+ * Type-safe registry entry. Pass the Local* row type explicitly — TypeScript
+ * rejects field names that don't exist on the type, catching the most common
+ * silent failure mode (registry typo → field stays plaintext forever).
+ *
+ *   import type { LocalMessage } from '$lib/modules/chat/types';
+ *   messages: entry<LocalMessage>(['messageText']),
+ *
+ * Object-literal entries still work (untyped) so this can be adopted
+ * incrementally, one module at a time. New entries should always use `entry`.
+ */
+export function entry<T extends object>(
+	fields: readonly (keyof T & string)[],
+	opts: { enabled?: boolean } = {}
+): EncryptionConfig {
+	return { enabled: opts.enabled ?? true, fields };
+}
+
+// Typed imports for migrated entries. Kept as `import type` so this file
+// produces no runtime dependencies on the module tree — the registry must
+// stay bootable during Dexie schema init, before any module code runs.
+import type { LocalMessage, LocalConversation, LocalTemplate } from '../../modules/chat/types';
+import type { LocalNote } from '../../modules/notes/types';
+import type { LocalDream, LocalDreamSymbol } from '../../modules/dreams/types';
+import type { LocalJournalEntry } from '../../modules/journal/types';
+import type { LocalMemo } from '../../modules/memoro/types';
+
 export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	// ─── Chat ────────────────────────────────────────────────
 	// Phase 5: messageText is the highest-value target in the entire app.
-	messages: { enabled: true, fields: ['messageText'] },
-	conversations: { enabled: true, fields: ['title'] },
-	chatTemplates: {
-		enabled: true,
-		fields: ['name', 'description', 'systemPrompt', 'initialQuestion'],
-	},
+	messages: entry<LocalMessage>(['messageText']),
+	conversations: entry<LocalConversation>(['title']),
+	chatTemplates: entry<LocalTemplate>(['name', 'description', 'systemPrompt', 'initialQuestion']),
 
 	// ─── Who (LLM character guessing game) ──────────────────
 	// Conversation content + the revealed character name + free-form
@@ -57,31 +94,35 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	// ─── Notes ───────────────────────────────────────────────
 	// Phase 4 pilot — first table flipped to enabled:true. The schema
 	// uses `title` + `content` (no separate `body` column).
-	notes: { enabled: true, fields: ['title', 'content'] },
+	notes: entry<LocalNote>(['title', 'content']),
 
 	// ─── Journal ─────────────────────────────────────────────
 	// Daily freeform entries — title and content are the user-typed parts.
 	// entryDate, mood (enum), tags (string[]), isPinned/isArchived/isFavorite,
 	// wordCount stay plaintext for indexing, sorting, and insights.
-	journalEntries: { enabled: true, fields: ['title', 'content'] },
+	journalEntries: entry<LocalJournalEntry>(['title', 'content']),
 
 	// ─── Dreams ──────────────────────────────────────────────
 	// LocalDream uses content + transcript + interpretation, no `notes`.
-	dreams: {
-		enabled: true,
-		fields: ['title', 'content', 'transcript', 'interpretation', 'aiInterpretation', 'location'],
-	},
+	dreams: entry<LocalDream>([
+		'title',
+		'content',
+		'transcript',
+		'interpretation',
+		'aiInterpretation',
+		'location',
+	]),
 	// Symbol `name` stays plaintext — it's used as the unique lookup key
 	// in touchSymbols / updateSymbol via where('name').equals(...). Only
 	// the user-written `meaning` (which is the actually sensitive part)
 	// is encrypted.
-	dreamSymbols: { enabled: true, fields: ['meaning'] },
+	dreamSymbols: entry<LocalDreamSymbol>(['meaning']),
 
 	// ─── Memoro ──────────────────────────────────────────────
 	// Voice transcripts are typically the largest plaintext blobs in the
 	// whole app — encrypting them yields the biggest disk-footprint win
 	// of any single field.
-	memos: { enabled: true, fields: ['title', 'intro', 'transcript'] },
+	memos: entry<LocalMemo>(['title', 'intro', 'transcript']),
 	memories: { enabled: true, fields: ['title', 'content'] },
 
 	// ─── Contacts ────────────────────────────────────────────
