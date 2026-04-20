@@ -1,8 +1,8 @@
 /**
  * Production wiring for the Mission Runner.
  *
- * Connects the dependency-injected `runMission` to the real LlmOrchestrator
- * (via `aiPlanTask`) and drives `runDueMissions` on a foreground interval.
+ * Connects the dependency-injected runner to the real mana-llm client
+ * and drives `runDueMissions` on a foreground interval.
  *
  * Use pattern:
  *
@@ -10,14 +10,12 @@
  *   import { startMissionTick } from '$lib/data/ai/missions/setup';
  *   onMount(() => startMissionTick());
  *
- * The tick is intentionally foreground-only: the Runner requires the
- * LlmOrchestrator which needs WebGPU / network. A background service for
- * offline-of-tab execution is tracked as Phase 7 — see
- * COMPANION_BRAIN_ARCHITECTURE.md §20.5.
+ * The tick is intentionally foreground-only for now — a background
+ * service worker for offline-of-tab execution is tracked as Phase 7;
+ * see COMPANION_BRAIN_ARCHITECTURE.md §20.5.
  */
 
-import { llmOrchestrator } from '@mana/shared-llm';
-import { aiPlanTask } from '$lib/llm-tasks/ai-plan';
+import { createManaLlmClient } from './llm-client';
 import { runDueMissions, type MissionRunnerDeps } from './runner';
 import { registerDefaultInputResolvers } from './default-resolvers';
 import { runAgentsBootstrap } from '../agents/bootstrap';
@@ -29,20 +27,13 @@ import { runAgentsBootstrap } from '../agents/bootstrap';
 import '$lib/modules/meditate/seed';
 import '$lib/modules/habits/seed';
 import '$lib/companion/goals/seed';
-import type { AiPlanInput, AiPlanOutput } from './planner/types';
 
 /** Default interval between tick scans. One minute is fine for foreground use. */
 const DEFAULT_TICK_INTERVAL_MS = 60_000;
 
-/** Swap-in planner that routes through the real LLM orchestrator. */
-const productionPlan = async (input: AiPlanInput): Promise<AiPlanOutput> => {
-	const result = await llmOrchestrator.run(aiPlanTask, input);
-	return result.value;
-};
-
 export const productionDeps: MissionRunnerDeps = {
-	plan: productionPlan,
-	// stageStep defaults to the policy-gated executor — nothing to override here.
+	llm: createManaLlmClient(),
+	// model + executeTool defaults handled inside the runner.
 };
 
 let tickHandle: ReturnType<typeof setInterval> | null = null;

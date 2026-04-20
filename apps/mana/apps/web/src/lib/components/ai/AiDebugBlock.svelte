@@ -44,13 +44,14 @@
 				{:else if d.preStep.webResearch && !d.preStep.webResearch.ok}
 					· Web ❌
 				{/if}
-				{#if d.plannerCalls && d.plannerCalls.length > 0}
-					· {d.plannerCalls.length}× LLM · {Math.round(
-						d.plannerCalls.reduce((a, c) => a + c.latencyMs, 0)
-					)}ms
+				{#if d.rounds}
+					· {d.rounds} Runde{d.rounds === 1 ? '' : 'n'}
 				{/if}
-				{#if d.loopSteps && d.loopSteps.length > 0}
-					· {d.loopSteps.length}× Auto-Tool
+				{#if d.messages}
+					· {d.messages.length} Messages
+				{/if}
+				{#if d.stopReason && d.stopReason !== 'assistant-stop'}
+					· {d.stopReason}
 				{/if}
 				{#if d.plannerError}· Planner ❌{/if}
 			</span>
@@ -93,39 +94,32 @@
 			{/if}
 		</section>
 
-		{#if d.loopSteps && d.loopSteps.length > 0}
+		{#if d.messages && d.messages.length > 0}
 			<section>
-				<h5>Auto-Tool-Ausgaben (Reasoning-Loop)</h5>
-				{#each d.loopSteps as ls, i (i)}
-					<details class="nested">
+				<h5>Chat-Verlauf ({d.messages.length} Messages · {d.rounds ?? '?'} Runden)</h5>
+				{#each d.messages as m, i (i)}
+					<details class="nested" open={m.role === 'assistant' || m.role === 'tool'}>
 						<summary>
-							<code>Runde {ls.loopIndex + 1}</code>
-							{ls.toolName}({JSON.stringify(ls.params)})
+							<code>{m.role}</code>
+							{#if m.toolCalls && m.toolCalls.length > 0}
+								tool_calls: {m.toolCalls.map((c) => c.name).join(', ')}
+							{:else if m.toolCallId}
+								tool_result (id: {m.toolCallId})
+							{:else}
+								{typeof m.content === 'string' ? m.content.slice(0, 100) : ''}
+							{/if}
 						</summary>
-						<pre>{ls.outputPreview}</pre>
+						{#if m.content}
+							<pre>{m.content}</pre>
+						{/if}
+						{#if m.toolCalls && m.toolCalls.length > 0}
+							{#each m.toolCalls as call (call.id)}
+								<pre>{call.name}({JSON.stringify(call.arguments, null, 2)})</pre>
+							{/each}
+						{/if}
 					</details>
 				{/each}
 			</section>
-		{/if}
-
-		{#if d.plannerCalls && d.plannerCalls.length > 0}
-			{#each d.plannerCalls as call, i (i)}
-				<section>
-					<h5>LLM-Call {i + 1}/{d.plannerCalls.length} · {Math.round(call.latencyMs)}ms</h5>
-					<details class="nested">
-						<summary>System Prompt</summary>
-						<pre>{call.systemPrompt}</pre>
-					</details>
-					<details class="nested" open>
-						<summary>User Prompt</summary>
-						<pre>{call.userPrompt}</pre>
-					</details>
-					<details class="nested" open>
-						<summary>Raw LLM Response</summary>
-						<pre>{call.rawResponse}</pre>
-					</details>
-				</section>
-			{/each}
 		{/if}
 
 		{#if d.plannerError}

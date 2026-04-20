@@ -1,22 +1,21 @@
 /**
- * Tool Executor — validates parameters, resolves AI policy, and runs or
- * stages the tool by name.
+ * Tool Executor — validates parameters, resolves AI policy, runs the tool.
  *
- * Call paths:
- *   - User action from the UI: `executeTool(name, params)` with no actor
- *     → ambient `USER_ACTOR`, policy returns `auto`, tool runs directly.
- *   - AI in the companion orchestrator: `executeTool(name, params, aiActor)`
- *     → policy resolves per-tool; `propose` writes a Proposal and returns
- *       a success result carrying the proposal id, `auto` executes, `deny`
- *       refuses.
- *   - Approval path: proposal store calls `executeToolRaw(name, params)`
- *     under `runAsAsync(aiActor, ...)` — same validation, but no policy.
+ * Policy semantics post-migration to native function-calling:
+ *   - `auto` — execute directly under the actor's scope
+ *   - `deny` — refuse with a ToolResult error (the runner turns this into
+ *     a tool-message the LLM can react to)
+ *
+ * There is no proposal/approval gate in this pipeline anymore; the
+ * Workbench Timeline plus per-iteration Revert is the user's review
+ * surface. Tools flagged as `propose` in the catalog are treated as
+ * `auto` here — the distinction only matters as legacy metadata that
+ * higher layers (UI, analytics) may still read.
  */
 
 import { getTool } from './registry';
 import { runAsAsync, USER_ACTOR } from '../events/actor';
 import { resolvePolicy } from '../ai/policy';
-import { createProposal } from '../ai/proposals/store';
 import { getAgent } from '../ai/agents/store';
 import type { Actor } from '../events/actor';
 import type { AiPolicy } from '@mana/shared-ai';
@@ -37,11 +36,9 @@ export async function executeTool(
 
 	const effectiveActor: Actor = actor ?? USER_ACTOR;
 
-	// Multi-Agent Workbench (Phase 4): policy lives on the agent. When
-	// the actor is AI, look up the owning agent and use its policy. If
-	// the agent record is missing (legacy write, deleted agent, race),
-	// resolvePolicy falls back to the user-level DEFAULT_AI_POLICY via
-	// its optional-argument default.
+	// Agent-scoped policy: the AI actor may have a per-agent policy
+	// override. If the agent record is missing (deleted / legacy /
+	// race), resolvePolicy falls back to the user-level default.
 	let agentPolicy: AiPolicy | undefined;
 	if (effectiveActor.kind === 'ai') {
 		const agent = await getAgent(effectiveActor.principalId);
@@ -56,25 +53,7 @@ export async function executeTool(
 		};
 	}
 
-	if (decision === 'propose') {
-		// Only ai actors can hit `propose` — resolvePolicy short-circuits
-		// user/system to `auto`. Narrow defensively in case policy is swapped.
-		if (effectiveActor.kind !== 'ai') {
-			return { success: false, message: `propose policy requires an AI actor` };
-		}
-		const proposal = await createProposal({
-			actor: effectiveActor,
-			intent: { kind: 'toolCall', toolName: name, params },
-			rationale: effectiveActor.rationale,
-		});
-		return {
-			success: true,
-			data: { proposalId: proposal.id, status: 'pending' },
-			message: `Vorgeschlagen: "${name}" wartet auf Freigabe.`,
-		};
-	}
-
-	// decision === 'auto'
+	// `auto` or `propose` both execute here — see file-level comment.
 	return runAsAsync(effectiveActor, () => runValidatedTool(tool, params));
 }
 

@@ -14,7 +14,7 @@
 
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '../../database';
-import type { ResolvedInput } from './planner/types';
+import type { ChatMessage, LoopStopReason, ResolvedInput } from '@mana/shared-ai';
 
 const TABLE = '_aiDebugLog';
 const STORAGE_KEY = 'mana.ai.debug';
@@ -25,19 +25,6 @@ const MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 /** Max chars per resolved-input content stored in debug. Longer content
  *  is truncated to reduce the privacy surface if the device is stolen. */
 const INPUT_CONTENT_LIMIT = 500;
-
-/**
- * Captured by `aiPlanTask` and passed back via the planner output so the
- * runner can record it without the planner needing to know about Dexie.
- */
-export interface PlannerCallDebug {
-	readonly systemPrompt: string;
-	readonly userPrompt: string;
-	readonly rawResponse: string;
-	readonly latencyMs: number;
-	readonly backendId?: string;
-	readonly model?: string;
-}
 
 export interface AiDebugEntry {
 	/** Primary key — one row per iteration. */
@@ -51,22 +38,14 @@ export interface AiDebugEntry {
 		webResearch?: { ok: true; sourceCount: number; summary: string } | { ok: false; error: string };
 		kontextInjected: boolean;
 	};
-	/**
-	 * Array because the reasoning loop can call the planner multiple
-	 * times per iteration (once per loop step, until a proposal is
-	 * staged or no more work is returned). Older single-call entries
-	 * written before the loop shipped still parse — readers that
-	 * haven't updated simply take `plannerCalls[0]`.
-	 */
-	plannerCalls?: PlannerCallDebug[];
-	/** Auto-executed tool outputs captured across loop steps — surfaces
-	 *  what the agent "saw" when reasoning across multiple calls. */
-	loopSteps?: Array<{
-		loopIndex: number;
-		toolName: string;
-		params: Record<string, unknown>;
-		outputPreview: string;
-	}>;
+	/** Full chat history of the planner loop: system + user + every
+	 *  assistant turn (with tool_calls) + every tool-message result.
+	 *  Replaces the pre-migration plannerCalls[]/loopSteps structure. */
+	messages?: ChatMessage[];
+	/** Number of planner rounds consumed inside this iteration. */
+	rounds?: number;
+	/** Why the loop terminated (assistant-stop, max-rounds, …). */
+	stopReason?: LoopStopReason;
 	plannerError?: string;
 }
 
