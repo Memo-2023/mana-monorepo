@@ -72,6 +72,15 @@ func (s *Store) Migrate(ctx context.Context) error {
 		ALTER TABLE sync_changes
 			ADD COLUMN IF NOT EXISTS actor JSONB;
 
+		-- Idempotent add for databases created before the Spaces foundation.
+		-- Nullable so pre-v28 clients (which don't stamp a spaceId) can
+		-- keep pushing. The RLS policy is intentionally NOT space-aware
+		-- yet — user_id remains the primary guard. Multi-member scoping
+		-- for shared spaces will add a second policy in a follow-up.
+		-- See docs/plans/spaces-foundation.md.
+		ALTER TABLE sync_changes
+			ADD COLUMN IF NOT EXISTS space_id TEXT;
+
 		CREATE INDEX IF NOT EXISTS idx_sync_changes_user_app
 			ON sync_changes (user_id, app_id, created_at);
 
@@ -80,6 +89,13 @@ func (s *Store) Migrate(ctx context.Context) error {
 
 		CREATE INDEX IF NOT EXISTS idx_sync_changes_since
 			ON sync_changes (user_id, app_id, table_name, created_at);
+
+		-- Fast "all changes for a space since X" queries once shared spaces
+		-- go live. Safe to create with nullable space_id — Postgres partial
+		-- indexes skip NULLs unless asked otherwise.
+		CREATE INDEX IF NOT EXISTS idx_sync_changes_user_space_app_since
+			ON sync_changes (user_id, space_id, app_id, created_at)
+			WHERE space_id IS NOT NULL;
 
 		ALTER TABLE sync_changes ENABLE ROW LEVEL SECURITY;
 		-- FORCE makes RLS apply even to the table owner so that the application
@@ -130,10 +146,15 @@ func (s *Store) withUser(ctx context.Context, userID string, fn func(pgx.Tx) err
 // inside an RLS-scoped transaction so the user_id column is double-checked
 // against the policy on the way in — a mismatched user_id would fail WITH CHECK.
 //
+// `spaceID` is the Better Auth organization id the record belongs to.
+// Pass empty string for pre-v28 callers; the column is nullable so mixed
+// populations of pre- and post-v28 clients are fine. When multi-member
+// space RLS lands, empty space_id rows will need a one-off backfill.
+//
 // `actor` is the opaque JSON blob the webapp stamps on every change (see
 // `data/events/actor.ts`). Pass nil for pre-actor callers; the column is
 // nullable and cross-device consumers treat a missing actor as `user`.
-func (s *Store) RecordChange(ctx context.Context, appID, tableName, recordID, userID, op, clientID string, data map[string]any, fieldTimestamps map[string]string, schemaVersion int, actor json.RawMessage) error {
+func (s *Store) RecordChange(ctx context.Context, appID, tableName, recordID, userID, spaceID, op, clientID string, data map[string]any, fieldTimestamps map[string]string, schemaVersion int, actor json.RawMessage) error {
 	if schemaVersion <= 0 {
 		schemaVersion = 1
 	}
@@ -156,12 +177,20 @@ func (s *Store) RecordChange(ctx context.Context, appID, tableName, recordID, us
 		actorJSON = []byte(actor)
 	}
 
+	// pgx interprets a Go empty string as empty, not NULL — use *string so
+	// an unset space_id lands as a real SQL NULL and the partial index
+	// skips the row.
+	var spaceIDParam *string
+	if spaceID != "" {
+		spaceIDParam = &spaceID
+	}
+
 	return s.withUser(ctx, userID, func(tx pgx.Tx) error {
 		query := `
-			INSERT INTO sync_changes (app_id, table_name, record_id, user_id, op, data, field_timestamps, client_id, schema_version, actor)
-			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+			INSERT INTO sync_changes (app_id, table_name, record_id, user_id, space_id, op, data, field_timestamps, client_id, schema_version, actor)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
 		`
-		_, err := tx.Exec(ctx, query, appID, tableName, recordID, userID, op, dataJSON, ftJSON, clientID, schemaVersion, actorJSON)
+		_, err := tx.Exec(ctx, query, appID, tableName, recordID, userID, spaceIDParam, op, dataJSON, ftJSON, clientID, schemaVersion, actorJSON)
 		return err
 	})
 }
@@ -178,7 +207,7 @@ func (s *Store) GetChangesSince(ctx context.Context, userID, appID, tableName, s
 	var changes []ChangeRow
 	err = s.withUser(ctx, userID, func(tx pgx.Tx) error {
 		query := `
-			SELECT id, table_name, record_id, op, data, field_timestamps, client_id, created_at, schema_version, actor
+			SELECT id, table_name, record_id, op, data, field_timestamps, client_id, created_at, schema_version, space_id, actor
 			FROM sync_changes
 			WHERE user_id = $1 AND app_id = $2 AND table_name = $3
 				AND created_at > $4 AND client_id != $5
@@ -194,11 +223,15 @@ func (s *Store) GetChangesSince(ctx context.Context, userID, appID, tableName, s
 		for rows.Next() {
 			var c ChangeRow
 			var dataJSON, ftJSON, actorJSON []byte
+			var spaceID *string
 
-			if err := rows.Scan(&c.ID, &c.TableName, &c.RecordID, &c.Op, &dataJSON, &ftJSON, &c.ClientID, &c.CreatedAt, &c.SchemaVersion, &actorJSON); err != nil {
+			if err := rows.Scan(&c.ID, &c.TableName, &c.RecordID, &c.Op, &dataJSON, &ftJSON, &c.ClientID, &c.CreatedAt, &c.SchemaVersion, &spaceID, &actorJSON); err != nil {
 				return err
 			}
 
+			if spaceID != nil {
+				c.SpaceID = *spaceID
+			}
 			if dataJSON != nil {
 				if err := json.Unmarshal(dataJSON, &c.Data); err != nil {
 					return fmt.Errorf("unmarshal data for record %s: %w", c.RecordID, err)
@@ -230,7 +263,7 @@ func (s *Store) GetAllChangesSince(ctx context.Context, userID, appID, since, ex
 	var changes []ChangeRow
 	err = s.withUser(ctx, userID, func(tx pgx.Tx) error {
 		query := `
-			SELECT id, table_name, record_id, op, data, field_timestamps, client_id, created_at, schema_version, actor
+			SELECT id, table_name, record_id, op, data, field_timestamps, client_id, created_at, schema_version, space_id, actor
 			FROM sync_changes
 			WHERE user_id = $1 AND app_id = $2
 				AND created_at > $3 AND client_id != $4
@@ -246,11 +279,15 @@ func (s *Store) GetAllChangesSince(ctx context.Context, userID, appID, since, ex
 		for rows.Next() {
 			var c ChangeRow
 			var dataJSON, ftJSON, actorJSON []byte
+			var spaceID *string
 
-			if err := rows.Scan(&c.ID, &c.TableName, &c.RecordID, &c.Op, &dataJSON, &ftJSON, &c.ClientID, &c.CreatedAt, &c.SchemaVersion, &actorJSON); err != nil {
+			if err := rows.Scan(&c.ID, &c.TableName, &c.RecordID, &c.Op, &dataJSON, &ftJSON, &c.ClientID, &c.CreatedAt, &c.SchemaVersion, &spaceID, &actorJSON); err != nil {
 				return err
 			}
 
+			if spaceID != nil {
+				c.SpaceID = *spaceID
+			}
 			if dataJSON != nil {
 				if err := json.Unmarshal(dataJSON, &c.Data); err != nil {
 					return fmt.Errorf("unmarshal data for record %s: %w", c.RecordID, err)
@@ -280,7 +317,7 @@ func (s *Store) GetAllChangesSince(ctx context.Context, userID, appID, since, ex
 func (s *Store) StreamAllUserChanges(ctx context.Context, userID string, fn func(ChangeRow) error) error {
 	return s.withUser(ctx, userID, func(tx pgx.Tx) error {
 		query := `
-			SELECT id, app_id, table_name, record_id, op, data, field_timestamps, client_id, created_at, schema_version, actor
+			SELECT id, app_id, table_name, record_id, op, data, field_timestamps, client_id, created_at, schema_version, space_id, actor
 			FROM sync_changes
 			WHERE user_id = $1
 			ORDER BY created_at ASC, id ASC
@@ -294,8 +331,12 @@ func (s *Store) StreamAllUserChanges(ctx context.Context, userID string, fn func
 		for rows.Next() {
 			var c ChangeRow
 			var dataJSON, ftJSON, actorJSON []byte
-			if err := rows.Scan(&c.ID, &c.AppID, &c.TableName, &c.RecordID, &c.Op, &dataJSON, &ftJSON, &c.ClientID, &c.CreatedAt, &c.SchemaVersion, &actorJSON); err != nil {
+			var spaceID *string
+			if err := rows.Scan(&c.ID, &c.AppID, &c.TableName, &c.RecordID, &c.Op, &dataJSON, &ftJSON, &c.ClientID, &c.CreatedAt, &c.SchemaVersion, &spaceID, &actorJSON); err != nil {
 				return fmt.Errorf("scan: %w", err)
+			}
+			if spaceID != nil {
+				c.SpaceID = *spaceID
 			}
 			if dataJSON != nil {
 				if err := json.Unmarshal(dataJSON, &c.Data); err != nil {
@@ -330,6 +371,10 @@ type ChangeRow struct {
 	ClientID        string
 	CreatedAt       time.Time
 	SchemaVersion   int
+	// SpaceID is empty for pre-v28 rows. Consumers use it to partition
+	// the reader cache per space; an empty string means "implicit personal"
+	// until the bootstrap reconciliation fills it in.
+	SpaceID string
 	// Actor is nil for rows written by pre-actor clients. Consumers on
 	// other devices render a missing actor as "user".
 	Actor json.RawMessage

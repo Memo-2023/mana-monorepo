@@ -100,6 +100,14 @@ interface PendingChange {
 	deletedAt?: string;
 	actor?: Actor;
 	createdAt: string;
+	/**
+	 * The Space (Better Auth organization id) the record belongs to. Stamped
+	 * on the pending-change row at write time so the server gets it as a
+	 * first-class column even for updates (where it isn't in `fields`
+	 * because it's immutable). Empty string / undefined means "pre-v28
+	 * record" — the server tolerates NULL on the column.
+	 */
+	spaceId?: string;
 }
 
 interface SyncMeta {
@@ -1120,6 +1128,7 @@ export function createUnifiedSync(
 				data: p.data,
 				deletedAt: p.deletedAt,
 				actor: p.actor,
+				spaceId: p.spaceId,
 			})),
 		};
 	}

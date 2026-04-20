@@ -28,6 +28,38 @@ func NewHandler(s *store.Store, v *auth.Validator, h *ws.Hub) *Handler {
 // maxBodySize is the maximum allowed request body (10 MB).
 const maxBodySize = 10 * 1024 * 1024
 
+// extractSpaceID pulls the Space id out of an incoming change payload. The
+// protocol preference is:
+//
+//  1. Top-level `spaceId` (v28+ clients stamp it explicitly — cheap to parse).
+//  2. `data.spaceId` — present on inserts from pre-protocol clients that only
+//     send the full record object.
+//  3. `fields.spaceId.value` — present on updates that happen to touch the
+//     scope field (rare; spaceId is marked immutable in the Dexie updating
+//     hook, so in practice this branch only covers edge cases).
+//
+// Returns the empty string when none of the above yield a usable value. An
+// empty string lands as SQL NULL in the space_id column so partial indexes
+// keep skipping legacy rows cleanly.
+func extractSpaceID(change Change) string {
+	if change.SpaceID != "" {
+		return change.SpaceID
+	}
+	if change.Data != nil {
+		if v, ok := change.Data["spaceId"].(string); ok && v != "" {
+			return v
+		}
+	}
+	if change.Fields != nil {
+		if fc, ok := change.Fields["spaceId"]; ok && fc != nil {
+			if v, ok := fc.Value.(string); ok && v != "" {
+				return v
+			}
+		}
+	}
+	return ""
+}
+
 // changeFromRow projects a stored sync_changes row onto the wire Change shape.
 // Carries eventId + schemaVersion through so clients can dedup on replay and
 // route through the migration chain.
@@ -42,6 +74,7 @@ func changeFromRow(row store.ChangeRow) Change {
 		Table:         row.TableName,
 		ID:            row.RecordID,
 		Op:            row.Op,
+		SpaceID:       row.SpaceID,
 		Actor:         row.Actor,
 	}
 	switch row.Op {
@@ -162,7 +195,13 @@ func (h *Handler) HandleSync(w http.ResponseWriter, r *http.Request) {
 		if rowSchemaVersion <= 0 {
 			rowSchemaVersion = schemaVersion
 		}
-		err := h.store.RecordChange(ctx, appID, change.Table, change.ID, userID, change.Op, clientID, data, fieldTimestamps, rowSchemaVersion, change.Actor)
+		// spaceId for this change: prefer the top-level field (post-v28
+		// clients stamp it explicitly), fall back to data.spaceId for
+		// inserts and fields.spaceId.value for updates so pre-protocol
+		// clients still get indexed correctly. Empty string lands as SQL
+		// NULL via RecordChange.
+		spaceID := extractSpaceID(change)
+		err := h.store.RecordChange(ctx, appID, change.Table, change.ID, userID, spaceID, change.Op, clientID, data, fieldTimestamps, rowSchemaVersion, change.Actor)
 		if err != nil {
 			slog.Error("failed to record change", "error", err, "table", change.Table, "id", change.ID)
 			http.Error(w, "failed to record change: "+err.Error(), http.StatusInternalServerError)

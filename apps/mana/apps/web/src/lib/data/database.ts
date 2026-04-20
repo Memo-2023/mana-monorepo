@@ -882,6 +882,7 @@ for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {
 				data: dataForSync,
 				actor,
 				createdAt: now,
+				spaceId: typeof objRecord.spaceId === 'string' ? (objRecord.spaceId as string) : undefined,
 			});
 			trackActivity(appId, tableName, obj.id, 'insert');
 			trackFirstContent(appId);
@@ -937,6 +938,14 @@ for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {
 			}
 
 			const op = (modifications as Record<string, unknown>).deletedAt ? 'delete' : 'update';
+			// spaceId is immutable and therefore not in `fields` for updates —
+			// but the server wants it as a first-class column on every row.
+			// Read it from the pre-update record so the pending-change row
+			// carries the right space for routing even when only a title changed.
+			const existingSpaceId =
+				typeof (obj as Record<string, unknown>).spaceId === 'string'
+					? ((obj as Record<string, unknown>).spaceId as string)
+					: undefined;
 			trackPendingChange(tableName, {
 				appId,
 				collection: tableName,
@@ -946,6 +955,7 @@ for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {
 				actor,
 				deletedAt: (modifications as Record<string, unknown>).deletedAt as string | undefined,
 				createdAt: now,
+				spaceId: existingSpaceId,
 			});
 			trackActivity(appId, tableName, primKey as string, op);
 			fireTrigger(appId, tableName, op, modifications as Record<string, unknown>);

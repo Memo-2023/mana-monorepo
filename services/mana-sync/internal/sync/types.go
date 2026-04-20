@@ -32,6 +32,13 @@ type Change struct {
 	Fields        map[string]*FieldChange `json:"fields,omitempty"`
 	Data          map[string]any          `json:"data,omitempty"`
 	DeletedAt     *string                 `json:"deletedAt,omitempty"`
+	// SpaceID is the Better Auth organization id the record belongs to.
+	// Stamped client-side by the Dexie v28 hook from the user's active
+	// space (or the `_personal:<userId>` sentinel during the bootstrap
+	// window). Stored server-side in the space_id column so future
+	// queries can partition by space. Pre-v28 clients omit it; the
+	// column is nullable. See docs/plans/spaces-foundation.md.
+	SpaceID string `json:"spaceId,omitempty"`
 	// Actor is the opaque JSON object the webapp stamps on every pending
 	// change (see `data/events/actor.ts`): one of `{ kind: 'user' }`,
 	// `{ kind: 'ai', missionId, iterationId, rationale }`, or
