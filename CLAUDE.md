@@ -83,7 +83,13 @@ Quality:
 pnpm run build
 pnpm run type-check
 pnpm run format
+pnpm run validate:all   # turbo recursion + pgSchema + crypto registry — run before push
+pnpm run test:coverage  # emit v8 coverage under per-package coverage/
 ```
+
+`validate:all` is the local mirror of the CI `validate` job — it runs in
+seconds and fails fast on any of the three invariant checks. Use it as a
+pre-push gate.
 
 ## Key Architecture Notes
 
