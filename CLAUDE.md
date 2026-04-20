@@ -9,7 +9,7 @@ pnpm workspace monorepo with two consolidated tops:
 - **`apps/mana/apps/web`** — unified SvelteKit frontend serving 27+ product modules under `mana.how`. One build, one IndexedDB, one auth session, one deployment.
 - **`apps/api`** (`@mana/api`) — unified Hono/Bun backend API server. Consolidates per-module compute servers; routes registered under `/api/v1/{module}/*`.
 
-Per-product directories under `apps/{product}/` still exist for landing pages, mobile apps, and product-specific packages, but the active web frontend and API both live in the two consolidated apps above.
+Per-product directories under `apps/{product}/` still exist for landing pages and product-specific packages, but the active web frontend and API both live in the two consolidated apps above. The only remaining mobile app is `apps/memoro/apps/mobile` (Expo SDK 55) — all other per-product mobile apps were removed on 2026-04-20.
 
 - **Package Manager:** pnpm 9.15.0
 - **Build System:** Turborepo
@@ -20,9 +20,10 @@ Per-product directories under `apps/{product}/` still exist for landing pages, m
 
 ```
 apps/
-├── mana/            # Unified frontend (SvelteKit web + Expo mobile + Astro landing)
+├── mana/            # Unified frontend (SvelteKit web + Astro landing)
 ├── api/             # Unified backend API (Hono/Bun) — @mana/api
-├── {product}/       # Per-product landing pages, mobile apps, packages
+├── memoro/apps/     # Only remaining mobile app (Expo SDK 55)
+├── {product}/       # Per-product landing pages, packages
 │                    # Standalone (own container, not unified): manavoxel
 games/               # arcade, voxelava, whopixels, worldream
 services/            # Backend services (Hono/Bun, Go, Python) — see list below

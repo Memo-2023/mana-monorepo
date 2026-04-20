@@ -9,9 +9,13 @@ Project-level guidance for `apps/mana/`. For monorepo-wide patterns (auth, servi
 ```
 apps/mana/apps/
 ├── web/        # SvelteKit 2 + Svelte 5 unified app — the main surface
-├── mobile/     # Expo / React Native (lower priority, may lag)
 └── landing/    # Astro static landing → Cloudflare Pages
 ```
+
+Note: `apps/mana/apps/mobile/` was removed on 2026-04-20 along with five
+other product mobile apps (cards, chat, context, picture, traces). The
+only remaining Expo/React Native surface in the repo is `apps/memoro/
+apps/mobile/`.
 
 ## Module System
 
@@ -163,7 +167,7 @@ pnpm test:e2e     # Playwright
 - **Encryption**: AES-GCM-256 via Web Crypto, server-wrapped MK with optional zero-knowledge
 - **Local AI**: `@mana/local-llm` (Gemma 4 E2B, WebGPU) + `@mana/local-stt` (Whisper, WebGPU) — both run entirely in-browser via transformers.js
 - **Testing**: Vitest, Playwright
-- **Mobile**: Expo, Expo Router, NativeWind, EAS Build
+- **Mobile**: removed (see note at top) — Expo stack lives only in `apps/memoro/apps/mobile/` now
 
 Svelte 5 runes are mandatory — no legacy `let count = 0; $: doubled = count * 2`. Always `$state`, `$derived`, `$effect`. See [`.claude/guidelines/sveltekit-web.md`](../../.claude/guidelines/sveltekit-web.md).
 
