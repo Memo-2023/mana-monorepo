@@ -80,7 +80,6 @@
 	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import { isNavCollapsed as collapsedStore } from '$lib/stores/navigation';
 	import { getPillAppItems } from '@mana/shared-branding';
-	import { onboardingStore } from '$lib/stores/onboarding.svelte';
 	import { STORAGE_KEYS } from '$lib/config/storage-keys';
 	import { SearchRegistry } from '$lib/search/registry';
 	import { registerAllProviders } from '$lib/search/providers';
@@ -146,7 +145,6 @@
 	// ── UI State ────────────────────────────────────────────
 	let isCollapsed = $state(false);
 	let showShortcuts = $state(false);
-	let showOnboarding = $state(false);
 
 	// ── Theme ───────────────────────────────────────────────
 	let isDark = $derived(theme.isDark);
@@ -459,7 +457,6 @@
 	// where {@const} narrows the component back to its concrete type.
 	type AnyComponent = Component<any>;
 	let KeyboardShortcutsModalC = $state<AnyComponent | null>(null);
-	let OnboardingWizardC = $state<AnyComponent | null>(null);
 	let GuestWelcomeModalC = $state<AnyComponent | null>(null);
 	let SessionWarningC = $state<AnyComponent | null>(null);
 	let EncryptionIntroBannerC = $state<AnyComponent | null>(null);
@@ -471,13 +468,6 @@
 		if (showShortcuts && !KeyboardShortcutsModalC) {
 			import('$lib/components/KeyboardShortcutsModal.svelte').then((m) => {
 				KeyboardShortcutsModalC = m.default;
-			});
-		}
-	});
-	$effect(() => {
-		if (showOnboarding && !OnboardingWizardC) {
-			import('$lib/components/onboarding').then((m) => {
-				OnboardingWizardC = m.OnboardingWizard;
 			});
 		}
 	});
@@ -506,19 +496,6 @@
 			SessionWarningC = m.default;
 		});
 	});
-
-	// ── Onboarding ──────────────────────────────────────────
-	function handleOnboardingComplete() {
-		onboardingStore.complete();
-		ManaEvents.onboardingCompleted();
-		showOnboarding = false;
-	}
-
-	function handleOnboardingSkip() {
-		ManaEvents.onboardingSkipped(onboardingStore.currentStep);
-		onboardingStore.skip();
-		showOnboarding = false;
-	}
 
 	// ── Auth Ready (replaces monolith onMount) ──────────────
 	async function handleAuthReady() {
@@ -623,19 +600,10 @@
 			// value (0 on a fresh tab) until a sync actually runs.
 			refreshPendingCount();
 
-			// Phase B-idle: settings, onboarding gating and return-visit
-			// telemetry. None of this gates rendering — onboarding shows
-			// via showOnboarding after the store resolves, which is fine
-			// on a delay.
+			// Phase B-idle: settings + return-visit telemetry. Non-gating.
 			idle(async () => {
 				trackReturnVisit();
 				userSettings.load().catch(() => {});
-				await onboardingStore.load();
-				if (onboardingStore.shouldShow) {
-					onboardingStore.start();
-					ManaEvents.onboardingStarted();
-					showOnboarding = true;
-				}
 			});
 		}
 		// IMPORTANT: do NOT call notificationService.requestPermission() here.
@@ -775,16 +743,6 @@
 	appName="Mana"
 	locale={($locale || 'de') === 'de' ? 'de' : 'en'}
 >
-	<!-- Onboarding Wizard (auth only) — loaded on demand -->
-	{#if showOnboarding && authStore.isAuthenticated && OnboardingWizardC}
-		{@const OnboardingWizard = OnboardingWizardC}
-		<div
-			class="fixed inset-0 z-50 flex items-center justify-center bg-background/95 backdrop-blur-sm"
-		>
-			<OnboardingWizard onComplete={handleOnboardingComplete} onSkip={handleOnboardingSkip} />
-		</div>
-	{/if}
-
 	<div class="min-h-screen" class:bg-background={!wallpaperStore.hasWallpaper}>
 		<WallpaperLayer config={wallpaperStore.effective} />
 
