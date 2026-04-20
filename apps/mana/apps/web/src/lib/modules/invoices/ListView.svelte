@@ -1,56 +1,158 @@
 <!--
-  Invoices — ListView (M1 skeleton)
-  Empty state + "+ Neu"-button placeholder. M2 brings the full list, filter
-  chips, and stats cards. Plan: docs/plans/invoices-module.md.
+  Invoices — ListView (M2)
+  Status filter + stats cards (open / overdue / invoiced YTD / paid YTD) +
+  search + row navigation. FAB → /invoices/new, settings icon → /invoices/settings.
 -->
 <script lang="ts">
-	import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
-	import { decryptRecords } from '$lib/data/crypto';
-	import { invoiceTable } from './collections';
-	import { STATUS_LABELS, STATUS_COLORS, CURRENCIES } from './constants';
-	import type { LocalInvoice } from './types';
+	import { goto } from '$app/navigation';
+	import { useAllInvoices, computeStats, formatAmount, searchInvoices } from './queries';
+	import { STATUS_LABELS } from './constants';
+	import StatusBadge from './components/StatusBadge.svelte';
+	import type { Invoice, InvoiceStatus, Currency } from './types';
 
-	const invoices$ = useLiveQueryWithDefault(async () => {
-		const rows = await invoiceTable.toArray();
-		const visible = rows.filter((r) => !r.deletedAt);
-		return (await decryptRecords('invoices', visible)) as LocalInvoice[];
-	}, [] as LocalInvoice[]);
-	const invoices = $derived(invoices$.value);
+	const invoices$ = useAllInvoices();
+	const invoices = $derived(invoices$.value ?? []);
 
-	function formatAmount(minor: number, currency: keyof typeof CURRENCIES): string {
-		const { symbol, minorUnit } = CURRENCIES[currency];
-		const value = minor / minorUnit;
-		return `${symbol} ${value.toFixed(2)}`;
+	let activeStatus = $state<InvoiceStatus | 'all'>('all');
+	let searchQuery = $state('');
+
+	const currentYear = new Date().getFullYear();
+	const stats = $derived(computeStats(invoices, currentYear));
+
+	const filtered = $derived.by(() => {
+		let out = invoices;
+		if (activeStatus !== 'all') out = out.filter((i) => i.status === activeStatus);
+		if (searchQuery.trim()) out = searchInvoices(out, searchQuery.trim());
+		return out;
+	});
+
+	function openInvoice(i: Invoice) {
+		goto(`/invoices/${i.id}`);
 	}
+
+	/** Show the first currency that has any activity, falling back to CHF. */
+	function primaryCurrency(map: Record<Currency, number>): Currency {
+		for (const c of ['CHF', 'EUR', 'USD'] as Currency[]) {
+			if (map[c] > 0) return c;
+		}
+		return 'CHF';
+	}
+
+	const openCurrency = $derived(primaryCurrency(stats.openByCurrency));
+	const overdueCurrency = $derived(primaryCurrency(stats.overdueByCurrency));
+	const ytdCurrency = $derived(primaryCurrency(stats.invoicedYtdByCurrency));
 </script>
 
 <div class="invoices-shell">
 	<header class="head">
 		<div>
 			<h1>Rechnungen</h1>
-			<p class="subtitle">Outbound-Finance — Rechnungen stellen und verfolgen</p>
+			<p class="subtitle">Rechnungen stellen und Zahlungen verfolgen</p>
 		</div>
-		<button class="btn-primary" type="button" disabled title="M2">+ Neu</button>
+		<div class="head-actions">
+			<button
+				class="btn-icon"
+				type="button"
+				title="Einstellungen"
+				aria-label="Einstellungen"
+				onclick={() => goto('/invoices/settings')}
+			>
+				⚙
+			</button>
+			<button class="btn-primary" type="button" onclick={() => goto('/invoices/new')}>
+				+ Neue Rechnung
+			</button>
+		</div>
 	</header>
+
+	<section class="stats">
+		<div class="stat">
+			<div class="stat-label">Offen</div>
+			<div class="stat-value">{formatAmount(stats.openByCurrency[openCurrency], openCurrency)}</div>
+			<div class="stat-sub">
+				{stats.totalByStatus.sent + stats.totalByStatus.overdue} Rechnungen
+			</div>
+		</div>
+		<div class="stat stat-warn" class:empty={stats.overdueByCurrency[overdueCurrency] === 0}>
+			<div class="stat-label">Überfällig</div>
+			<div class="stat-value">
+				{formatAmount(stats.overdueByCurrency[overdueCurrency], overdueCurrency)}
+			</div>
+			<div class="stat-sub">{stats.totalByStatus.overdue} Rechnungen</div>
+		</div>
+		<div class="stat">
+			<div class="stat-label">Fakturiert {currentYear}</div>
+			<div class="stat-value">
+				{formatAmount(stats.invoicedYtdByCurrency[ytdCurrency], ytdCurrency)}
+			</div>
+		</div>
+		<div class="stat">
+			<div class="stat-label">Bezahlt {currentYear}</div>
+			<div class="stat-value">
+				{formatAmount(stats.paidYtdByCurrency[ytdCurrency], ytdCurrency)}
+			</div>
+		</div>
+	</section>
+
+	<section class="filters">
+		<div class="chips">
+			<button
+				class="chip"
+				class:active={activeStatus === 'all'}
+				onclick={() => (activeStatus = 'all')}
+			>
+				Alle <span class="count">{invoices.length}</span>
+			</button>
+			{#each ['draft', 'sent', 'overdue', 'paid', 'void'] as status (status)}
+				<button
+					class="chip"
+					class:active={activeStatus === status}
+					onclick={() => (activeStatus = status as InvoiceStatus)}
+				>
+					{STATUS_LABELS[status as InvoiceStatus].de}
+					<span class="count">{stats.totalByStatus[status as InvoiceStatus]}</span>
+				</button>
+			{/each}
+		</div>
+		<input
+			class="search"
+			type="search"
+			placeholder="Suchen (Nummer, Kunde, Betreff)"
+			bind:value={searchQuery}
+		/>
+	</section>
 
 	{#if invoices.length === 0}
 		<div class="empty">
 			<div class="empty-icon">📄</div>
 			<h2>Noch keine Rechnungen</h2>
-			<p>Stelle deine erste Rechnung mit automatischem PDF-Export und Schweizer QR-Bill.</p>
-			<p class="note">M1 Skelett — Erstellen-Flow folgt in M2.</p>
+			<p>Stelle deine erste Rechnung — inklusive PDF-Export und Schweizer QR-Bill (M5).</p>
+			<button class="btn-primary" onclick={() => goto('/invoices/new')}>
+				Erste Rechnung erstellen
+			</button>
+		</div>
+	{:else if filtered.length === 0}
+		<div class="empty">
+			<p>Keine Rechnungen gefunden.</p>
 		</div>
 	{:else}
-		<ul class="list">
-			{#each invoices as invoice (invoice.id)}
-				<li class="row">
-					<span class="number">{invoice.number}</span>
-					<span class="client">{invoice.clientSnapshot?.name ?? '—'}</span>
-					<span class="amount">{formatAmount(invoice.totals.gross, invoice.currency)}</span>
-					<span class="status" style="--dot: {STATUS_COLORS[invoice.status]}">
-						<span class="dot"></span>
-						{STATUS_LABELS[invoice.status].de}
-					</span>
+		<ul class="list" role="list">
+			{#each filtered as invoice (invoice.id)}
+				<li>
+					<button class="row" onclick={() => openInvoice(invoice)}>
+						<span class="number">{invoice.number}</span>
+						<span class="client">
+							<span class="client-name">{invoice.clientSnapshot.name}</span>
+							{#if invoice.subject}
+								<span class="client-subject">{invoice.subject}</span>
+							{/if}
+						</span>
+						<span class="date">{invoice.dueDate}</span>
+						<span class="amount">
+							{formatAmount(invoice.totals.gross, invoice.currency)}
+						</span>
+						<span class="status"><StatusBadge status={invoice.status} /></span>
+					</button>
 				</li>
 			{/each}
 		</ul>
@@ -60,7 +162,7 @@
 <style>
 	.invoices-shell {
 		padding: 1.5rem;
-		max-width: 1000px;
+		max-width: 1100px;
 		margin: 0 auto;
 	}
 
@@ -69,6 +171,8 @@
 		justify-content: space-between;
 		align-items: flex-end;
 		margin-bottom: 1.5rem;
+		gap: 1rem;
+		flex-wrap: wrap;
 	}
 
 	.head h1 {
@@ -83,19 +187,126 @@
 		font-size: 0.9rem;
 	}
 
+	.head-actions {
+		display: flex;
+		gap: 0.5rem;
+		align-items: center;
+	}
+
 	.btn-primary {
 		background: #059669;
 		color: white;
-		padding: 0.5rem 1rem;
-		border-radius: 0.5rem;
+		padding: 0.55rem 1.1rem;
+		border-radius: 0.4rem;
 		border: 0;
 		font-weight: 500;
 		cursor: pointer;
+		font-size: 0.95rem;
 	}
 
-	.btn-primary:disabled {
-		opacity: 0.5;
-		cursor: not-allowed;
+	.btn-icon {
+		width: 2.25rem;
+		height: 2.25rem;
+		background: white;
+		border: 1px solid var(--color-border, #e2e8f0);
+		border-radius: 0.4rem;
+		cursor: pointer;
+		font-size: 1rem;
+	}
+
+	.stats {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+		gap: 0.75rem;
+		margin-bottom: 1rem;
+	}
+
+	.stat {
+		padding: 0.9rem 1rem;
+		background: var(--color-surface, #fff);
+		border: 1px solid var(--color-border, #e2e8f0);
+		border-radius: 0.5rem;
+	}
+
+	.stat-label {
+		font-size: 0.8rem;
+		color: var(--color-text-muted, #64748b);
+		text-transform: uppercase;
+		letter-spacing: 0.03em;
+	}
+
+	.stat-value {
+		margin-top: 0.25rem;
+		font-size: 1.3rem;
+		font-weight: 600;
+		font-variant-numeric: tabular-nums;
+	}
+
+	.stat-sub {
+		margin-top: 0.15rem;
+		font-size: 0.8rem;
+		color: var(--color-text-muted, #64748b);
+	}
+
+	.stat-warn:not(.empty) {
+		border-color: #fecaca;
+		background: #fef2f2;
+	}
+
+	.stat-warn:not(.empty) .stat-value {
+		color: #b91c1c;
+	}
+
+	.filters {
+		display: flex;
+		gap: 1rem;
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: 1rem;
+		flex-wrap: wrap;
+	}
+
+	.chips {
+		display: flex;
+		gap: 0.4rem;
+		flex-wrap: wrap;
+	}
+
+	.chip {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
+		padding: 0.35rem 0.75rem;
+		background: white;
+		border: 1px solid var(--color-border, #e2e8f0);
+		border-radius: 999px;
+		cursor: pointer;
+		font-size: 0.85rem;
+	}
+
+	.chip.active {
+		background: #065f46;
+		color: white;
+		border-color: #065f46;
+	}
+
+	.chip .count {
+		background: rgba(0, 0, 0, 0.08);
+		padding: 0 0.4rem;
+		border-radius: 999px;
+		font-size: 0.75rem;
+	}
+
+	.chip.active .count {
+		background: rgba(255, 255, 255, 0.2);
+	}
+
+	.search {
+		padding: 0.45rem 0.75rem;
+		border: 1px solid var(--color-border, #e2e8f0);
+		border-radius: 0.4rem;
+		font-size: 0.9rem;
+		min-width: 240px;
 	}
 
 	.empty {
@@ -117,14 +328,8 @@
 	}
 
 	.empty p {
-		margin: 0.25rem 0;
+		margin: 0.25rem 0 1rem;
 		font-size: 0.9rem;
-	}
-
-	.note {
-		margin-top: 1rem !important;
-		font-size: 0.8rem;
-		opacity: 0.7;
 	}
 
 	.list {
@@ -138,13 +343,22 @@
 
 	.row {
 		display: grid;
-		grid-template-columns: 7rem 1fr auto 7rem;
+		grid-template-columns: 7rem 1fr auto 7rem 7rem;
 		gap: 1rem;
 		align-items: center;
+		width: 100%;
 		padding: 0.75rem 1rem;
 		background: var(--color-surface, #fff);
 		border: 1px solid var(--color-border, #e2e8f0);
 		border-radius: 0.5rem;
+		cursor: pointer;
+		text-align: left;
+		font: inherit;
+	}
+
+	.row:hover {
+		border-color: #059669;
+		background: #f0fdf4;
 	}
 
 	.number {
@@ -154,25 +368,30 @@
 	}
 
 	.client {
+		display: flex;
+		flex-direction: column;
+		min-width: 0;
+	}
+
+	.client-name {
 		font-weight: 500;
+	}
+
+	.client-subject {
+		font-size: 0.8rem;
+		color: var(--color-text-muted, #64748b);
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.date,
+	.amount {
+		font-variant-numeric: tabular-nums;
+		font-size: 0.9rem;
 	}
 
 	.amount {
-		font-variant-numeric: tabular-nums;
 		font-weight: 500;
-	}
-
-	.status {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.4rem;
-		font-size: 0.85rem;
-	}
-
-	.status .dot {
-		width: 8px;
-		height: 8px;
-		border-radius: 50%;
-		background: var(--dot);
 	}
 </style>

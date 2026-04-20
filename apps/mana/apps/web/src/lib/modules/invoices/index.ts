@@ -21,6 +21,22 @@ export {
 	INVOICE_SETTINGS_ID,
 } from './constants';
 
+export {
+	useAllInvoices,
+	useInvoiceClients,
+	toInvoice,
+	toInvoiceClient,
+	filterByStatus,
+	searchInvoices,
+	computeStats,
+	formatAmount,
+} from './queries';
+
+export { computeLineTotal, computeInvoiceTotals, EMPTY_TOTALS } from './totals';
+
+export { invoicesStore } from './stores/invoices.svelte';
+export { invoiceSettingsStore, ensureSettings } from './stores/settings.svelte';
+
 export type {
 	LocalInvoice,
 	LocalInvoiceLine,
@@ -37,3 +53,6 @@ export type {
 	Currency,
 	ClientSource,
 } from './types';
+
+export type { InvoiceStats } from './queries';
+export type { CreateInvoiceInput } from './stores/invoices.svelte';
