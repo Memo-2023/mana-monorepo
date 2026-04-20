@@ -144,6 +144,11 @@
 				{/each}
 			{/if}
 			<hr />
+			{#if active && active.type !== 'personal'}
+				<a class="item manage" href="/spaces/members" onclick={() => (open = false)}>
+					{locale === 'de' ? 'Mitglieder verwalten …' : 'Manage members …'}
+				</a>
+			{/if}
 			<button
 				type="button"
 				class="item create"
@@ -289,6 +294,10 @@
 
 	.item.create {
 		color: var(--color-primary, hsl(230 80% 50%));
+	}
+
+	.item.manage {
+		color: var(--color-text-muted, hsl(0 0% 45%));
 	}
 
 	.empty,
