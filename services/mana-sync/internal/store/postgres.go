@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -106,6 +107,32 @@ func (s *Store) Migrate(ctx context.Context) error {
 		CREATE POLICY sync_changes_user_isolation ON sync_changes
 			USING (user_id = current_setting('app.current_user_id', true))
 			WITH CHECK (user_id = current_setting('app.current_user_id', true));
+
+		-- Shared-space read policy: a user can also read rows whose
+		-- space_id appears in app.current_user_space_ids (comma-
+		-- separated). Populated from the caller's Space memberships at
+		-- transaction start via withUser. Today the list is typically
+		-- empty (every space has a single member = the author), so this
+		-- policy is a no-op and user_id_isolation is the only guard. The
+		-- moment shared spaces go live, the caller starts passing real
+		-- membership lists and this policy activates without any
+		-- further migration.
+		--
+		-- WITH CHECK is intentionally absent: writes still require the
+		-- row's user_id to match the caller (author integrity). Members
+		-- read, owner/author writes.
+		DROP POLICY IF EXISTS sync_changes_space_member_read ON sync_changes;
+		CREATE POLICY sync_changes_space_member_read ON sync_changes
+			FOR SELECT
+			USING (
+				space_id IS NOT NULL
+				AND space_id = ANY(
+					string_to_array(
+						coalesce(current_setting('app.current_user_space_ids', true), ''),
+						','
+					)
+				)
+			);
 	`
 
 	_, err := s.pool.Exec(ctx, query)
@@ -114,12 +141,30 @@ func (s *Store) Migrate(ctx context.Context) error {
 
 // withUser runs fn inside a transaction scoped to the given user_id.
 // All RLS-protected reads and writes performed via the supplied tx will be
-// confined to rows owned by userID. The session-local app.current_user_id
-// setting is reset automatically when the transaction ends.
+// confined to rows owned by userID OR rows whose space_id is in the
+// caller's space-membership list. The session-local app.current_user_id
+// and app.current_user_space_ids settings are reset automatically when
+// the transaction ends.
 //
-// Empty userIDs are rejected up-front so an unauthenticated request can never
-// reach the database with an empty RLS scope (which would match every row).
+// Empty userIDs are rejected up-front so an unauthenticated request can
+// never reach the database with an empty RLS scope (which would match
+// every row). Empty memberships are fine — today they're the norm
+// because every space has exactly one member (the author).
 func (s *Store) withUser(ctx context.Context, userID string, fn func(pgx.Tx) error) error {
+	return s.withUserAndMemberships(ctx, userID, nil, fn)
+}
+
+// withUserAndMemberships is the explicit form: pass the caller's Space
+// membership list so records from shared spaces resolve via the
+// sync_changes_space_member_read policy. The comma-separated join is
+// safe against injection because pgx parameterizes the value — Postgres
+// string_to_array then splits it on commas inside the policy.
+func (s *Store) withUserAndMemberships(
+	ctx context.Context,
+	userID string,
+	spaceIDs []string,
+	fn func(pgx.Tx) error,
+) error {
 	if userID == "" {
 		return fmt.Errorf("withUser: empty userID")
 	}
@@ -134,6 +179,22 @@ func (s *Store) withUser(ctx context.Context, userID string, fn func(pgx.Tx) err
 	// SET LOCAL — SET LOCAL itself does not accept bind parameters.
 	if _, err := tx.Exec(ctx, "SELECT set_config('app.current_user_id', $1, true)", userID); err != nil {
 		return fmt.Errorf("set rls user: %w", err)
+	}
+	// Filter out empty strings that would otherwise make the comma list
+	// match rows with space_id = '' (which we never produce, but defense
+	// in depth is cheap here).
+	clean := make([]string, 0, len(spaceIDs))
+	for _, id := range spaceIDs {
+		if id != "" {
+			clean = append(clean, id)
+		}
+	}
+	if _, err := tx.Exec(
+		ctx,
+		"SELECT set_config('app.current_user_space_ids', $1, true)",
+		strings.Join(clean, ","),
+	); err != nil {
+		return fmt.Errorf("set rls space ids: %w", err)
 	}
 
 	if err := fn(tx); err != nil {
