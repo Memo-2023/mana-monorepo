@@ -4,6 +4,7 @@
 
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
+import { scopedForModule } from '$lib/data/scope';
 import type { LocalCalculation, LocalSavedFormula } from './types';
 import type { Calculation, SavedFormula } from '@calc/shared';
 
@@ -39,7 +40,10 @@ export function toSavedFormula(local: LocalSavedFormula): SavedFormula {
 /** All calculations (history), newest first. */
 export function useAllCalculations() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalCalculation>('calculations').toArray();
+		const locals = await scopedForModule<LocalCalculation, string>(
+			'calc',
+			'calculations'
+		).toArray();
 		return locals
 			.filter((c) => !c.deletedAt)
 			.map(toCalculation)
@@ -50,7 +54,10 @@ export function useAllCalculations() {
 /** All saved formulas. */
 export function useAllSavedFormulas() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalSavedFormula>('savedFormulas').toArray();
+		const locals = await scopedForModule<LocalSavedFormula, string>(
+			'calc',
+			'savedFormulas'
+		).toArray();
 		return locals.filter((f) => !f.deletedAt).map(toSavedFormula);
 	}, []);
 }

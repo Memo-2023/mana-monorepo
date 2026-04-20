@@ -107,6 +107,27 @@ export function scopedForModule<T, PK>(
 }
 
 /**
+ * Apply the scope filter to an existing Dexie Collection produced by an
+ * indexed query. Use this when a module needs the performance of an
+ * indexed `where(...)` and wants to narrow the result to the active
+ * space as the second step.
+ *
+ *   const recent = await scopedAnd(
+ *     db.table<LocalMeal>('meals').where('date').aboveOrEqual(since),
+ *   ).toArray();
+ *
+ * The wrapper accepts any Collection so the caller can freely build
+ * compound queries with `.or()`, `.and()`, `.reverse()` first.
+ */
+export function scopedAnd<T, PK>(collection: Collection<T, PK>): Collection<T, PK> {
+	const ids = getInScopeSpaceIds();
+	return collection.and((record) => {
+		const r = record as { spaceId?: unknown };
+		return typeof r.spaceId === 'string' && ids.includes(r.spaceId);
+	});
+}
+
+/**
  * Read a single record by primary key with a scope check. Returns undefined
  * if the record doesn't exist OR if its spaceId isn't in the current
  * in-scope set — i.e. the user manipulated a URL parameter and tried to

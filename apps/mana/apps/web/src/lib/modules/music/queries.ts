@@ -4,6 +4,7 @@
 
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
+import { scopedForModule } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
 import type {
 	LocalSong,
@@ -71,7 +72,7 @@ export function toProject(local: LocalProject): Project {
 /** All songs, sorted by title. */
 export function useAllSongs() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalSong>('songs').toArray();
+		const locals = await scopedForModule<LocalSong, string>('music', 'songs').toArray();
 		const visible = locals.filter((s) => !s.deletedAt);
 		// title is encrypted on disk; sort needs the plaintext value.
 		const decrypted = await decryptRecords('songs', visible);
@@ -82,7 +83,10 @@ export function useAllSongs() {
 /** All playlists, sorted by name. */
 export function useAllPlaylists() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalPlaylist>('mukkePlaylists').toArray();
+		const locals = await scopedForModule<LocalPlaylist, string>(
+			'music',
+			'mukkePlaylists'
+		).toArray();
 		const visible = locals.filter((p) => !p.deletedAt);
 		const decrypted = await decryptRecords('mukkePlaylists', visible);
 		return decrypted.map(toPlaylist).sort((a, b) => a.name.localeCompare(b.name));
@@ -92,7 +96,10 @@ export function useAllPlaylists() {
 /** All playlist-song associations. */
 export function useAllPlaylistSongs() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalPlaylistSong>('playlistSongs').toArray();
+		const locals = await scopedForModule<LocalPlaylistSong, string>(
+			'music',
+			'playlistSongs'
+		).toArray();
 		return locals.filter((ps) => !ps.deletedAt);
 	}, []);
 }
@@ -100,7 +107,7 @@ export function useAllPlaylistSongs() {
 /** All projects, sorted by title. */
 export function useAllProjects() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalProject>('mukkeProjects').toArray();
+		const locals = await scopedForModule<LocalProject, string>('music', 'mukkeProjects').toArray();
 		return locals
 			.filter((p) => !p.deletedAt)
 			.map(toProject)

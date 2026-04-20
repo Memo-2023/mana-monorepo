@@ -8,6 +8,7 @@
 
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
+import { scopedForModule } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
 import type {
 	LocalPlaygroundSnippet,
@@ -85,7 +86,10 @@ export function toMessage(local: LocalPlaygroundMessage): PlaygroundConversation
 
 export function useAllConversations() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalPlaygroundConversation>('playgroundConversations').toArray();
+		const locals = await scopedForModule<LocalPlaygroundConversation, string>(
+			'playground',
+			'playgroundConversations'
+		).toArray();
 		const visible = locals.filter((c) => !c.deletedAt);
 		const decrypted = await decryptRecords<LocalPlaygroundConversation>(
 			'playgroundConversations',

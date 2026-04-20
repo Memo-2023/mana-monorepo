@@ -6,6 +6,7 @@
 
 import { liveQuery } from 'dexie';
 import { db } from '$lib/data/database';
+import { scopedForModule } from '$lib/data/scope';
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import type {
 	LocalClient,
@@ -171,21 +172,21 @@ export function toWorldClock(local: LocalWorldClock): WorldClock {
 
 export function useAllClients() {
 	return liveQuery(async () => {
-		const locals = await db.table<LocalClient>('timeClients').toArray();
+		const locals = await scopedForModule<LocalClient, string>('times', 'timeClients').toArray();
 		return locals.filter((c) => !c.deletedAt).map(toClient);
 	});
 }
 
 export function useAllProjects() {
 	return liveQuery(async () => {
-		const locals = await db.table<LocalProject>('timeProjects').toArray();
+		const locals = await scopedForModule<LocalProject, string>('times', 'timeProjects').toArray();
 		return locals.filter((p) => !p.deletedAt).map(toProject);
 	});
 }
 
 export function useAllTimeEntries() {
 	return liveQuery(async () => {
-		const locals = await db.table<LocalTimeEntry>('timeEntries').toArray();
+		const locals = await scopedForModule<LocalTimeEntry, string>('times', 'timeEntries').toArray();
 		const active = locals.filter((e) => !e.deletedAt);
 
 		// Batch-fetch all related timeBlocks
@@ -205,14 +206,14 @@ export { useAllTags } from '@mana/shared-stores';
 
 export function useAllTemplates() {
 	return liveQuery(async () => {
-		const locals = await db.table<LocalTemplate>('timeTemplates').toArray();
+		const locals = await scopedForModule<LocalTemplate, string>('times', 'timeTemplates').toArray();
 		return locals.filter((t) => !t.deletedAt).map(toTemplate);
 	});
 }
 
 export function useSettings() {
 	return liveQuery(async () => {
-		const locals = await db.table<LocalSettings>('timeSettings').toArray();
+		const locals = await scopedForModule<LocalSettings, string>('times', 'timeSettings').toArray();
 		const active = locals.filter((s) => !s.deletedAt);
 		return active.length > 0 ? toSettings(active[0]) : null;
 	});
@@ -223,7 +224,7 @@ export function useSettings() {
 /** All alarms as raw observable. */
 export function allAlarms$() {
 	return liveQuery(async () => {
-		const locals = await db.table<LocalAlarm>('timeAlarms').toArray();
+		const locals = await scopedForModule<LocalAlarm, string>('times', 'timeAlarms').toArray();
 		return locals.filter((a) => !a.deletedAt).map(toAlarm);
 	});
 }
@@ -231,7 +232,10 @@ export function allAlarms$() {
 /** All countdown timers as raw observable. */
 export function allCountdownTimers$() {
 	return liveQuery(async () => {
-		const locals = await db.table<LocalCountdownTimer>('timeCountdownTimers').toArray();
+		const locals = await scopedForModule<LocalCountdownTimer, string>(
+			'times',
+			'timeCountdownTimers'
+		).toArray();
 		return locals.filter((t) => !t.deletedAt).map(toCountdownTimer);
 	});
 }
@@ -252,7 +256,7 @@ export function allWorldClocks$() {
 /** All alarms, auto-updates on any change. Returns { value, loading, error }. */
 export function useAllAlarms() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalAlarm>('timeAlarms').toArray();
+		const locals = await scopedForModule<LocalAlarm, string>('times', 'timeAlarms').toArray();
 		return locals.filter((a) => !a.deletedAt).map(toAlarm);
 	}, [] as Alarm[]);
 }
@@ -260,7 +264,10 @@ export function useAllAlarms() {
 /** All countdown timers, auto-updates on any change. Returns { value, loading, error }. */
 export function useAllCountdownTimers() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalCountdownTimer>('timeCountdownTimers').toArray();
+		const locals = await scopedForModule<LocalCountdownTimer, string>(
+			'times',
+			'timeCountdownTimers'
+		).toArray();
 		return locals.filter((t) => !t.deletedAt).map(toCountdownTimer);
 	}, [] as Timer[]);
 }

@@ -4,11 +4,12 @@
 
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
+import { scopedForModule } from '$lib/data/scope';
 import type { WeatherLocation, WeatherSettings } from './types';
 
 export function useLocations() {
 	return useLiveQueryWithDefault(
-		() => db.table<WeatherLocation>('wetterLocations').orderBy('order').toArray(),
+		() => scopedForModule<WeatherLocation, string>('wetter', 'wetterLocations').sortBy('order'),
 		[] as WeatherLocation[]
 	);
 }

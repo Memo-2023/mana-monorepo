@@ -4,6 +4,7 @@
 
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
+import { scopedForModule } from '$lib/data/scope';
 import { decryptRecord, decryptRecords } from '$lib/data/crypto';
 import type {
 	Period,
@@ -65,9 +66,9 @@ export function toPeriodSymptom(local: LocalPeriodSymptom): PeriodSymptom {
 
 export function useAllPeriods() {
 	return useLiveQueryWithDefault(async () => {
-		const visible = (await db.table<LocalPeriod>('periods').toArray()).filter(
-			(c) => !c.deletedAt && !c.isArchived
-		);
+		const visible = (
+			await scopedForModule<LocalPeriod, string>('period', 'periods').toArray()
+		).filter((c) => !c.deletedAt && !c.isArchived);
 		const decrypted = await decryptRecords('periods', visible);
 		return decrypted.map(toPeriod).sort((a, b) => b.startDate.localeCompare(a.startDate));
 	}, [] as Period[]);
@@ -76,7 +77,7 @@ export function useAllPeriods() {
 export function useCurrentPeriod() {
 	return useLiveQueryWithDefault(
 		async () => {
-			const locals = await db.table<LocalPeriod>('periods').toArray();
+			const locals = await scopedForModule<LocalPeriod, string>('period', 'periods').toArray();
 			const real = locals.filter((c) => !c.deletedAt && !c.isArchived && !c.isPredicted);
 			if (real.length === 0) return null;
 			const latest = real.sort((a, b) => b.startDate.localeCompare(a.startDate))[0];
@@ -89,9 +90,9 @@ export function useCurrentPeriod() {
 
 export function useAllDayLogs() {
 	return useLiveQueryWithDefault(async () => {
-		const visible = (await db.table<LocalPeriodDayLog>('periodDayLogs').toArray()).filter(
-			(l) => !l.deletedAt
-		);
+		const visible = (
+			await scopedForModule<LocalPeriodDayLog, string>('period', 'periodDayLogs').toArray()
+		).filter((l) => !l.deletedAt);
 		const decrypted = await decryptRecords('periodDayLogs', visible);
 		return decrypted.map(toPeriodDayLog).sort((a, b) => b.logDate.localeCompare(a.logDate));
 	}, [] as PeriodDayLog[]);
@@ -116,7 +117,10 @@ export function useDayLog(date: string) {
 
 export function useAllSymptoms() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalPeriodSymptom>('periodSymptoms').toArray();
+		const locals = await scopedForModule<LocalPeriodSymptom, string>(
+			'period',
+			'periodSymptoms'
+		).toArray();
 		return locals
 			.filter((s) => !s.deletedAt)
 			.map(toPeriodSymptom)

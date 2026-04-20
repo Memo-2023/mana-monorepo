@@ -7,6 +7,7 @@
 
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
+import { scopedForModule } from '$lib/data/scope';
 import type { LocalCity, LocalLocation, LocalFavorite } from './types';
 
 // ─── Live Query Hooks ─────────────────────────────────────
@@ -19,7 +20,7 @@ import type { LocalCity, LocalLocation, LocalFavorite } from './types';
 /** All cities, sorted by name. Auto-updates on any change. */
 export function useAllCities() {
 	return useLiveQueryWithDefault(async () => {
-		const all = await db.table<LocalCity>('cities').toArray();
+		const all = await scopedForModule<LocalCity, string>('citycorners', 'cities').toArray();
 		return all.filter((c) => !c.deletedAt).sort((a, b) => a.name.localeCompare(b.name));
 	}, [] as LocalCity[]);
 }
@@ -27,7 +28,10 @@ export function useAllCities() {
 /** All locations, sorted by name. Auto-updates on any change. */
 export function useAllLocations() {
 	return useLiveQueryWithDefault(async () => {
-		const all = await db.table<LocalLocation>('ccLocations').toArray();
+		const all = await scopedForModule<LocalLocation, string>(
+			'citycorners',
+			'ccLocations'
+		).toArray();
 		return all.filter((l) => !l.deletedAt).sort((a, b) => a.name.localeCompare(b.name));
 	}, [] as LocalLocation[]);
 }
@@ -35,7 +39,10 @@ export function useAllLocations() {
 /** All favorites. Auto-updates on any change. */
 export function useAllFavorites() {
 	return useLiveQueryWithDefault(async () => {
-		const all = await db.table<LocalFavorite>('ccFavorites').toArray();
+		const all = await scopedForModule<LocalFavorite, string>(
+			'citycorners',
+			'ccFavorites'
+		).toArray();
 		return all.filter((f) => !f.deletedAt);
 	}, [] as LocalFavorite[]);
 }

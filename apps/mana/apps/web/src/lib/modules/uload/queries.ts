@@ -8,6 +8,7 @@
 import { liveQuery } from 'dexie';
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
+import { scopedForModule } from '$lib/data/scope';
 import { decryptRecord, decryptRecords } from '$lib/data/crypto';
 import type { LocalLink, LocalTag, LocalFolder, LocalLinkTag } from './types';
 
@@ -133,7 +134,7 @@ export function toLinkTag(local: LocalLinkTag): LinkTag {
 
 export function allLinks$() {
 	return liveQuery(async () => {
-		const locals = await db.table<LocalLink>('links').toArray();
+		const locals = await scopedForModule<LocalLink, string>('uload', 'links').toArray();
 		const visible = locals.filter((l) => !l.deletedAt);
 		const decrypted = await decryptRecords('links', visible);
 		return decrypted.map(toLink);
@@ -142,21 +143,21 @@ export function allLinks$() {
 
 export function allTags$() {
 	return liveQuery(async () => {
-		const locals = await db.table<LocalTag>('uloadTags').toArray();
+		const locals = await scopedForModule<LocalTag, string>('uload', 'uloadTags').toArray();
 		return locals.filter((t) => !t.deletedAt).map(toTag);
 	});
 }
 
 export function allFolders$() {
 	return liveQuery(async () => {
-		const locals = await db.table<LocalFolder>('uloadFolders').toArray();
+		const locals = await scopedForModule<LocalFolder, string>('uload', 'uloadFolders').toArray();
 		return locals.filter((f) => !f.deletedAt).map(toFolder);
 	});
 }
 
 export function allLinkTags$() {
 	return liveQuery(async () => {
-		const locals = await db.table<LocalLinkTag>('linkTags').toArray();
+		const locals = await scopedForModule<LocalLinkTag, string>('uload', 'linkTags').toArray();
 		return locals.filter((lt) => !lt.deletedAt).map(toLinkTag);
 	});
 }
@@ -165,7 +166,7 @@ export function allLinkTags$() {
 
 export function useAllLinks() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalLink>('links').toArray();
+		const locals = await scopedForModule<LocalLink, string>('uload', 'links').toArray();
 		const visible = locals.filter((l) => !l.deletedAt);
 		const decrypted = await decryptRecords('links', visible);
 		return decrypted.map(toLink);
@@ -174,21 +175,23 @@ export function useAllLinks() {
 
 export function useAllTags() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalTag>('uloadTags').toArray();
+		const locals = await scopedForModule<LocalTag, string>('uload', 'uloadTags').toArray();
 		return locals.filter((t) => !t.deletedAt).map(toTag);
 	}, [] as Tag[]);
 }
 
 export function useAllFolders() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalFolder>('uloadFolders').orderBy('order').toArray();
+		const locals = await scopedForModule<LocalFolder, string>('uload', 'uloadFolders').sortBy(
+			'order'
+		);
 		return locals.filter((f) => !f.deletedAt).map(toFolder);
 	}, [] as Folder[]);
 }
 
 export function useAllLinkTags() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalLinkTag>('linkTags').toArray();
+		const locals = await scopedForModule<LocalLinkTag, string>('uload', 'linkTags').toArray();
 		return locals.filter((lt) => !lt.deletedAt).map(toLinkTag);
 	}, [] as LinkTag[]);
 }

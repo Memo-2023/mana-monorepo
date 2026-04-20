@@ -5,6 +5,7 @@
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { decryptRecords } from '$lib/data/crypto';
 import { db } from '$lib/data/database';
+import { scopedForModule } from '$lib/data/scope';
 import type { LocalRecipe, Recipe, Difficulty } from './types';
 
 // ─── Type Converter ──────────────────────────────────────
@@ -35,7 +36,7 @@ export function toRecipe(local: LocalRecipe): Recipe {
 
 export function useAllRecipes() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalRecipe>('recipes').toArray();
+		const locals = await scopedForModule<LocalRecipe, string>('recipes', 'recipes').toArray();
 		const visible = locals.filter((r) => !r.deletedAt);
 		const decrypted = await decryptRecords('recipes', visible);
 		return decrypted.map(toRecipe);

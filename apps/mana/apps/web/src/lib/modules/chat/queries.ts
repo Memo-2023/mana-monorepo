@@ -9,6 +9,7 @@
 
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
+import { scopedForModule } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
 import type {
 	LocalConversation,
@@ -69,9 +70,9 @@ export function toMessage(local: LocalMessage): Message {
 /** All non-archived conversations, sorted by pinned first then updatedAt desc. */
 export function useAllConversations() {
 	return useLiveQueryWithDefault(async () => {
-		const visible = (await db.table<LocalConversation>('conversations').toArray()).filter(
-			(c) => !c.deletedAt && !c.isArchived
-		);
+		const visible = (
+			await scopedForModule<LocalConversation, string>('chat', 'conversations').toArray()
+		).filter((c) => !c.deletedAt && !c.isArchived);
 		const decrypted = await decryptRecords('conversations', visible);
 		return sortConversations(decrypted.map(toConversation));
 	}, [] as Conversation[]);
@@ -80,9 +81,9 @@ export function useAllConversations() {
 /** All archived conversations, sorted by updatedAt desc. */
 export function useArchivedConversations() {
 	return useLiveQueryWithDefault(async () => {
-		const visible = (await db.table<LocalConversation>('conversations').toArray()).filter(
-			(c) => !c.deletedAt && c.isArchived
-		);
+		const visible = (
+			await scopedForModule<LocalConversation, string>('chat', 'conversations').toArray()
+		).filter((c) => !c.deletedAt && c.isArchived);
 		const decrypted = await decryptRecords('conversations', visible);
 		return decrypted
 			.map(toConversation)
@@ -93,9 +94,9 @@ export function useArchivedConversations() {
 /** All templates, sorted by name. */
 export function useAllTemplates() {
 	return useLiveQueryWithDefault(async () => {
-		const visible = (await db.table<LocalTemplate>('chatTemplates').toArray()).filter(
-			(t) => !t.deletedAt
-		);
+		const visible = (
+			await scopedForModule<LocalTemplate, string>('chat', 'chatTemplates').toArray()
+		).filter((t) => !t.deletedAt);
 		const decrypted = await decryptRecords('chatTemplates', visible);
 		return decrypted.map(toTemplate).sort((a, b) => a.name.localeCompare(b.name));
 	}, [] as Template[]);

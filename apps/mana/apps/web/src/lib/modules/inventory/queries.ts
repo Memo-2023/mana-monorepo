@@ -6,6 +6,7 @@
 
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
+import { scopedForModule } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
 import type { LocalCollection, LocalItem, LocalLocation, LocalCategory } from './types';
 
@@ -161,14 +162,19 @@ export function toCategory(local: LocalCategory): Category {
 
 export function useAllCollections() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalCollection>('invCollections').toArray();
+		const locals = await scopedForModule<LocalCollection, string>(
+			'inventory',
+			'invCollections'
+		).toArray();
 		return locals.filter((c) => !c.deletedAt).map(toCollection);
 	}, []);
 }
 
 export function useAllItems() {
 	return useLiveQueryWithDefault(async () => {
-		const visible = (await db.table<LocalItem>('invItems').toArray()).filter((i) => !i.deletedAt);
+		const visible = (
+			await scopedForModule<LocalItem, string>('inventory', 'invItems').toArray()
+		).filter((i) => !i.deletedAt);
 		const decrypted = await decryptRecords('invItems', visible);
 		return decrypted.map(toItem);
 	}, []);
@@ -176,14 +182,20 @@ export function useAllItems() {
 
 export function useAllLocations() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalLocation>('invLocations').toArray();
+		const locals = await scopedForModule<LocalLocation, string>(
+			'inventory',
+			'invLocations'
+		).toArray();
 		return locals.filter((l) => !l.deletedAt).map(toLocation);
 	}, []);
 }
 
 export function useAllCategories() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalCategory>('invCategories').toArray();
+		const locals = await scopedForModule<LocalCategory, string>(
+			'inventory',
+			'invCategories'
+		).toArray();
 		return locals.filter((c) => !c.deletedAt).map(toCategory);
 	}, []);
 }

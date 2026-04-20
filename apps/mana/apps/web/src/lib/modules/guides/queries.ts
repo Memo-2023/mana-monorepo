@@ -7,6 +7,7 @@
 
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
+import { scopedForModule } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
 import type {
 	LocalGuide,
@@ -78,7 +79,7 @@ export function toRun(local: LocalRun): Run {
 
 export function useAllGuides() {
 	return useLiveQueryWithDefault(async () => {
-		const all = await db.table<LocalGuide>('guides').toArray();
+		const all = await scopedForModule<LocalGuide, string>('guides', 'guides').toArray();
 		const visible = all.filter((g) => !g.deletedAt);
 		const decrypted = await decryptRecords('guides', visible);
 		return decrypted.map(toGuide).sort((a, b) => a.order - b.order);
@@ -138,7 +139,7 @@ export function useLatestRun(guideId: () => string) {
 
 export function useRunsByGuide() {
 	return useLiveQueryWithDefault(async () => {
-		const all = await db.table<LocalRun>('runs').toArray();
+		const all = await scopedForModule<LocalRun, string>('guides', 'runs').toArray();
 		const visible = all.filter((r) => !r.deletedAt);
 		const map = new Map<string, Run>();
 		// Keep only the latest run per guide

@@ -4,6 +4,7 @@
 
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
+import { scopedForModule } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
 // `useAllTags` re-exports the shared-tags hook below; the actual tag
 // objects flowing through this module are the shared shape, not the
@@ -68,7 +69,7 @@ export function toSpace(local: LocalSpace): Space {
 /** All non-archived memos, sorted by pinned first then createdAt desc. */
 export function useAllMemos() {
 	return useLiveQueryWithDefault(async () => {
-		const visible = (await db.table<LocalMemo>('memos').toArray()).filter(
+		const visible = (await scopedForModule<LocalMemo, string>('memoro', 'memos').toArray()).filter(
 			(m) => !m.deletedAt && !m.isArchived
 		);
 		const decrypted = await decryptRecords('memos', visible);
@@ -79,7 +80,7 @@ export function useAllMemos() {
 /** All archived memos, sorted by updatedAt desc. */
 export function useArchivedMemos() {
 	return useLiveQueryWithDefault(async () => {
-		const visible = (await db.table<LocalMemo>('memos').toArray()).filter(
+		const visible = (await scopedForModule<LocalMemo, string>('memoro', 'memos').toArray()).filter(
 			(m) => !m.deletedAt && m.isArchived
 		);
 		const decrypted = await decryptRecords('memos', visible);
@@ -106,7 +107,7 @@ export { useAllTags } from '@mana/shared-stores';
 /** All memo-tag associations. */
 export function useAllMemoTags() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalMemoTag>('memoTags').toArray();
+		const locals = await scopedForModule<LocalMemoTag, string>('memoro', 'memoTags').toArray();
 		return locals.filter((mt) => !mt.deletedAt);
 	}, [] as LocalMemoTag[]);
 }
@@ -114,7 +115,7 @@ export function useAllMemoTags() {
 /** All spaces. */
 export function useAllSpaces() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalSpace>('memoroSpaces').toArray();
+		const locals = await scopedForModule<LocalSpace, string>('memoro', 'memoroSpaces').toArray();
 		return locals.filter((s) => !s.deletedAt).map(toSpace);
 	}, [] as Space[]);
 }

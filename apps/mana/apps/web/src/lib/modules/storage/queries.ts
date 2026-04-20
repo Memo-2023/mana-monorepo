@@ -6,6 +6,7 @@
 
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
+import { scopedForModule } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
 import type { LocalFile, LocalFolder, LocalFileTag } from './types';
 
@@ -107,7 +108,7 @@ export function toTag(local: {
 /** All non-deleted files, sorted by name. Auto-updates on any change. */
 export function useAllFiles() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalFile>('files').toArray();
+		const locals = await scopedForModule<LocalFile, string>('storage', 'files').toArray();
 		const visible = locals.filter((f) => !f.isDeleted && !f.deletedAt);
 		// name + originalName are encrypted on disk; sort needs plaintext.
 		const decrypted = await decryptRecords('files', visible);
@@ -118,7 +119,10 @@ export function useAllFiles() {
 /** All non-deleted folders, sorted by name. Auto-updates on any change. */
 export function useAllFolders() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalFolder>('storageFolders').toArray();
+		const locals = await scopedForModule<LocalFolder, string>(
+			'storage',
+			'storageFolders'
+		).toArray();
 		return locals
 			.filter((f) => !f.isDeleted && !f.deletedAt)
 			.map(toFolder)

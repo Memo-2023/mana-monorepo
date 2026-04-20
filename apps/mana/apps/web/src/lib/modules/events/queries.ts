@@ -6,6 +6,7 @@
 
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
+import { scopedForModule } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
 import { timeBlockTable } from '$lib/data/time-blocks/collections';
 import type { LocalTimeBlock } from '$lib/data/time-blocks/types';
@@ -87,7 +88,10 @@ export function toEventGuest(local: LocalEventGuest): EventGuest {
 /** All non-deleted events, joined with their TimeBlock for time fields. */
 export function useAllEvents() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalSocialEvent>('socialEvents').toArray();
+		const locals = await scopedForModule<LocalSocialEvent, string>(
+			'events',
+			'socialEvents'
+		).toArray();
 		const visible = locals.filter((e) => !e.deletedAt);
 		const active = await decryptRecords('socialEvents', visible);
 		const blocks = await timeBlockTable.bulkGet(active.map((e) => e.timeBlockId));
@@ -98,7 +102,10 @@ export function useAllEvents() {
 /** Upcoming events (startTime >= now), sorted ascending. */
 export function useUpcomingEvents() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalSocialEvent>('socialEvents').toArray();
+		const locals = await scopedForModule<LocalSocialEvent, string>(
+			'events',
+			'socialEvents'
+		).toArray();
 		const visible = locals.filter((e) => !e.deletedAt && e.status !== 'cancelled');
 		const active = await decryptRecords('socialEvents', visible);
 		const blocks = await timeBlockTable.bulkGet(active.map((e) => e.timeBlockId));
@@ -113,7 +120,10 @@ export function useUpcomingEvents() {
 /** Past events. */
 export function usePastEvents() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalSocialEvent>('socialEvents').toArray();
+		const locals = await scopedForModule<LocalSocialEvent, string>(
+			'events',
+			'socialEvents'
+		).toArray();
 		const visible = locals.filter((e) => !e.deletedAt);
 		const active = await decryptRecords('socialEvents', visible);
 		const blocks = await timeBlockTable.bulkGet(active.map((e) => e.timeBlockId));
@@ -145,7 +155,7 @@ export function useEvent(eventId: () => string) {
 export function useGuestsByEvent() {
 	return useLiveQueryWithDefault(
 		async () => {
-			const all = await db.table<LocalEventGuest>('eventGuests').toArray();
+			const all = await scopedForModule<LocalEventGuest, string>('events', 'eventGuests').toArray();
 			const visible = all.filter((g) => !g.deletedAt);
 			const decrypted = await decryptRecords('eventGuests', visible);
 			const map = new Map<string, EventGuest[]>();

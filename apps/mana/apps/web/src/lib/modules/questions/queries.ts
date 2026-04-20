@@ -6,6 +6,7 @@
 
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
+import { scopedForModule } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
 import type { LocalCollection, LocalQuestion, LocalAnswer } from './types';
 
@@ -103,7 +104,10 @@ export function toAnswer(local: LocalAnswer): Answer {
 /** All collections, sorted by sortOrder. Auto-updates on any change. */
 export function useAllCollections() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalCollection>('qCollections').toArray();
+		const locals = await scopedForModule<LocalCollection, string>(
+			'questions',
+			'qCollections'
+		).toArray();
 		return locals
 			.filter((c) => !c.deletedAt)
 			.sort((a, b) => a.sortOrder - b.sortOrder)
@@ -114,7 +118,7 @@ export function useAllCollections() {
 /** All questions. Auto-updates on any change. */
 export function useAllQuestions() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalQuestion>('questions').toArray();
+		const locals = await scopedForModule<LocalQuestion, string>('questions', 'questions').toArray();
 		const visible = locals.filter((q) => !q.deletedAt);
 		const decrypted = await decryptRecords('questions', visible);
 		return decrypted.map(toQuestion);
@@ -124,7 +128,7 @@ export function useAllQuestions() {
 /** All answers for a given question. */
 export function useAnswersByQuestion(questionId: string) {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalAnswer>('answers').toArray();
+		const locals = await scopedForModule<LocalAnswer, string>('questions', 'answers').toArray();
 		const visible = locals.filter((a) => !a.deletedAt && a.questionId === questionId);
 		const decrypted = await decryptRecords('answers', visible);
 		return decrypted.map(toAnswer);

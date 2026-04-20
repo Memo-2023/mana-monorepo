@@ -4,6 +4,7 @@
 
 import { liveQuery } from 'dexie';
 import { db } from '$lib/data/database';
+import { scopedForModule } from '$lib/data/scope';
 import type { LocalFavorite, LocalQuoteList, LocalCustomQuote } from './types';
 
 // ─── Domain Types ─────────────────────────────────────────
@@ -73,7 +74,10 @@ export function toQuoteList(local: LocalQuoteList): QuoteList {
 /** All favorites. Auto-updates on any change. */
 export function useAllFavorites() {
 	return liveQuery(async () => {
-		const locals = await db.table<LocalFavorite>('quotesFavorites').toArray();
+		const locals = await scopedForModule<LocalFavorite, string>(
+			'quotes',
+			'quotesFavorites'
+		).toArray();
 		return locals.filter((f) => !f.deletedAt).map(toFavorite);
 	});
 }
@@ -81,7 +85,7 @@ export function useAllFavorites() {
 /** All lists. Auto-updates on any change. */
 export function useAllLists() {
 	return liveQuery(async () => {
-		const locals = await db.table<LocalQuoteList>('quotesLists').toArray();
+		const locals = await scopedForModule<LocalQuoteList, string>('quotes', 'quotesLists').toArray();
 		return locals.filter((l) => !l.deletedAt).map(toQuoteList);
 	});
 }
@@ -89,7 +93,10 @@ export function useAllLists() {
 /** All custom quotes. Auto-updates on any change. */
 export function useAllCustomQuotes() {
 	return liveQuery(async () => {
-		const locals = await db.table<LocalCustomQuote>('customQuotes').toArray();
+		const locals = await scopedForModule<LocalCustomQuote, string>(
+			'quotes',
+			'customQuotes'
+		).toArray();
 		return locals.filter((q) => !q.deletedAt).map(toCustomQuote);
 	});
 }

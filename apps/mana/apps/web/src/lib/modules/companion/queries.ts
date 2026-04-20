@@ -4,12 +4,16 @@
 
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
+import { scopedForModule } from '$lib/data/scope';
 import type { LocalConversation, LocalMessage } from './types';
 
 export function useConversations() {
 	return useLiveQueryWithDefault<LocalConversation[]>(async () => {
 		try {
-			const all = await db.table<LocalConversation>('companionConversations').toArray();
+			const all = await scopedForModule<LocalConversation, string>(
+				'companion',
+				'companionConversations'
+			).toArray();
 			return all.filter((c) => !c.deletedAt).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
 		} catch {
 			return [];

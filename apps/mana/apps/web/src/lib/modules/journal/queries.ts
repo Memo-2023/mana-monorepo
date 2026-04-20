@@ -8,6 +8,7 @@
 
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
+import { scopedForModule } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
 import type { JournalEntry, JournalMood, LocalJournalEntry } from './types';
 
@@ -35,9 +36,9 @@ export function toJournalEntry(local: LocalJournalEntry): JournalEntry {
 
 export function useAllJournalEntries() {
 	return useLiveQueryWithDefault(async () => {
-		const visible = (await db.table<LocalJournalEntry>('journalEntries').toArray()).filter(
-			(e) => !e.deletedAt && !e.isArchived
-		);
+		const visible = (
+			await scopedForModule<LocalJournalEntry, string>('journal', 'journalEntries').toArray()
+		).filter((e) => !e.deletedAt && !e.isArchived);
 		const decrypted = await decryptRecords('journalEntries', visible);
 		return decrypted.map(toJournalEntry).sort((a, b) => {
 			if (a.isPinned !== b.isPinned) return a.isPinned ? -1 : 1;

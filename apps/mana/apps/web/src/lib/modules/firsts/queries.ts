@@ -1,5 +1,6 @@
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
+import { scopedForModule } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
 import type { First, FirstStatus, LocalFirst } from './types';
 
@@ -35,9 +36,9 @@ export function toFirst(local: LocalFirst): First {
 
 export function useAllFirsts() {
 	return useLiveQueryWithDefault(async () => {
-		const visible = (await db.table<LocalFirst>('firsts').toArray()).filter(
-			(f) => !f.deletedAt && !f.isArchived
-		);
+		const visible = (
+			await scopedForModule<LocalFirst, string>('firsts', 'firsts').toArray()
+		).filter((f) => !f.deletedAt && !f.isArchived);
 		const decrypted = await decryptRecords('firsts', visible);
 		return decrypted.map(toFirst).sort((a, b) => {
 			if (a.isPinned !== b.isPinned) return a.isPinned ? -1 : 1;
@@ -58,9 +59,9 @@ export function useAllFirsts() {
 
 export function useDreams() {
 	return useLiveQueryWithDefault(async () => {
-		const visible = (await db.table<LocalFirst>('firsts').toArray()).filter(
-			(f) => !f.deletedAt && !f.isArchived && f.status === 'dream'
-		);
+		const visible = (
+			await scopedForModule<LocalFirst, string>('firsts', 'firsts').toArray()
+		).filter((f) => !f.deletedAt && !f.isArchived && f.status === 'dream');
 		const decrypted = await decryptRecords('firsts', visible);
 		return decrypted.map(toFirst).sort((a, b) => {
 			const pDiff = (b.priority ?? 0) - (a.priority ?? 0);
@@ -72,9 +73,9 @@ export function useDreams() {
 
 export function useLivedFirsts() {
 	return useLiveQueryWithDefault(async () => {
-		const visible = (await db.table<LocalFirst>('firsts').toArray()).filter(
-			(f) => !f.deletedAt && !f.isArchived && f.status === 'lived'
-		);
+		const visible = (
+			await scopedForModule<LocalFirst, string>('firsts', 'firsts').toArray()
+		).filter((f) => !f.deletedAt && !f.isArchived && f.status === 'lived');
 		const decrypted = await decryptRecords('firsts', visible);
 		return decrypted
 			.map(toFirst)
@@ -84,9 +85,9 @@ export function useLivedFirsts() {
 
 export function useFirstsByPerson(personId: string) {
 	return useLiveQueryWithDefault(async () => {
-		const visible = (await db.table<LocalFirst>('firsts').toArray()).filter(
-			(f) => !f.deletedAt && !f.isArchived && f.personIds?.includes(personId)
-		);
+		const visible = (
+			await scopedForModule<LocalFirst, string>('firsts', 'firsts').toArray()
+		).filter((f) => !f.deletedAt && !f.isArchived && f.personIds?.includes(personId));
 		const decrypted = await decryptRecords('firsts', visible);
 		return decrypted.map(toFirst);
 	}, [] as First[]);

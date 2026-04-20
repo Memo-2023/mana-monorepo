@@ -5,6 +5,7 @@
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { decryptRecords } from '$lib/data/crypto';
 import { db } from '$lib/data/database';
+import { scopedForModule } from '$lib/data/scope';
 import type { LocalDrinkEntry, LocalDrinkPreset, DrinkEntry, DrinkPreset } from './types';
 
 // ─── Type Converters ──────────────────────────────────────
@@ -58,7 +59,9 @@ export function useAllDrinkEntries() {
 
 export function useAllDrinkPresets() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalDrinkPreset>('drinkPresets').orderBy('order').toArray();
+		const locals = await scopedForModule<LocalDrinkPreset, string>('drink', 'drinkPresets').sortBy(
+			'order'
+		);
 		const visible = locals.filter((p) => !p.deletedAt);
 		const decrypted = await decryptRecords('drinkPresets', visible);
 		return decrypted.map(toDrinkPreset);

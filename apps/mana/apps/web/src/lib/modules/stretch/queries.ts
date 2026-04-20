@@ -7,6 +7,7 @@
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { decryptRecords } from '$lib/data/crypto';
 import { db } from '$lib/data/database';
+import { scopedForModule } from '$lib/data/scope';
 import type {
 	LocalStretchExercise,
 	LocalStretchRoutine,
@@ -109,7 +110,10 @@ export function toStretchReminder(local: LocalStretchReminder): StretchReminder 
 
 export function useAllStretchExercises() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalStretchExercise>('stretchExercises').toArray();
+		const locals = await scopedForModule<LocalStretchExercise, string>(
+			'stretch',
+			'stretchExercises'
+		).toArray();
 		const visible = locals.filter((e) => !e.deletedAt);
 		const decrypted = await decryptRecords('stretchExercises', visible);
 		return decrypted.map(toStretchExercise).sort((a, b) => a.order - b.order);
@@ -118,7 +122,10 @@ export function useAllStretchExercises() {
 
 export function useAllStretchRoutines() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalStretchRoutine>('stretchRoutines').toArray();
+		const locals = await scopedForModule<LocalStretchRoutine, string>(
+			'stretch',
+			'stretchRoutines'
+		).toArray();
 		const visible = locals.filter((r) => !r.deletedAt);
 		const decrypted = await decryptRecords('stretchRoutines', visible);
 		return decrypted.map(toStretchRoutine).sort((a, b) => a.order - b.order);
@@ -127,7 +134,10 @@ export function useAllStretchRoutines() {
 
 export function useAllStretchSessions() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalStretchSession>('stretchSessions').toArray();
+		const locals = await scopedForModule<LocalStretchSession, string>(
+			'stretch',
+			'stretchSessions'
+		).toArray();
 		const visible = locals.filter((s) => !s.deletedAt);
 		const decrypted = await decryptRecords('stretchSessions', visible);
 		return decrypted.map(toStretchSession).sort((a, b) => b.startedAt.localeCompare(a.startedAt));
@@ -136,7 +146,10 @@ export function useAllStretchSessions() {
 
 export function useAllStretchAssessments() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalStretchAssessment>('stretchAssessments').toArray();
+		const locals = await scopedForModule<LocalStretchAssessment, string>(
+			'stretch',
+			'stretchAssessments'
+		).toArray();
 		const visible = locals.filter((a) => !a.deletedAt);
 		const decrypted = await decryptRecords('stretchAssessments', visible);
 		return decrypted
@@ -147,7 +160,10 @@ export function useAllStretchAssessments() {
 
 export function useAllStretchReminders() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalStretchReminder>('stretchReminders').toArray();
+		const locals = await scopedForModule<LocalStretchReminder, string>(
+			'stretch',
+			'stretchReminders'
+		).toArray();
 		const visible = locals.filter((r) => !r.deletedAt);
 		const decrypted = await decryptRecords('stretchReminders', visible);
 		return decrypted.map(toStretchReminder);

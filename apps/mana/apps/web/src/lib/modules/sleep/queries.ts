@@ -7,6 +7,7 @@
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { decryptRecords } from '$lib/data/crypto';
 import { db } from '$lib/data/database';
+import { scopedForModule } from '$lib/data/scope';
 import type {
 	LocalSleepEntry,
 	LocalSleepHygieneLog,
@@ -84,7 +85,10 @@ export function toSleepSettings(local: LocalSleepSettings): SleepSettings {
 
 export function useAllSleepEntries() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalSleepEntry>('sleepEntries').toArray();
+		const locals = await scopedForModule<LocalSleepEntry, string>(
+			'sleep',
+			'sleepEntries'
+		).toArray();
 		const visible = locals.filter((e) => !e.deletedAt);
 		const decrypted = await decryptRecords('sleepEntries', visible);
 		return decrypted.map(toSleepEntry).sort((a, b) => b.date.localeCompare(a.date));
@@ -93,7 +97,10 @@ export function useAllSleepEntries() {
 
 export function useAllSleepHygieneLogs() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalSleepHygieneLog>('sleepHygieneLogs').toArray();
+		const locals = await scopedForModule<LocalSleepHygieneLog, string>(
+			'sleep',
+			'sleepHygieneLogs'
+		).toArray();
 		const visible = locals.filter((l) => !l.deletedAt);
 		return visible.map(toSleepHygieneLog).sort((a, b) => b.date.localeCompare(a.date));
 	}, [] as SleepHygieneLog[]);
@@ -101,7 +108,10 @@ export function useAllSleepHygieneLogs() {
 
 export function useAllSleepHygieneChecks() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalSleepHygieneCheck>('sleepHygieneChecks').toArray();
+		const locals = await scopedForModule<LocalSleepHygieneCheck, string>(
+			'sleep',
+			'sleepHygieneChecks'
+		).toArray();
 		const visible = locals.filter((c) => !c.deletedAt);
 		const decrypted = await decryptRecords('sleepHygieneChecks', visible);
 		return decrypted.map(toSleepHygieneCheck).sort((a, b) => a.order - b.order);
@@ -111,7 +121,10 @@ export function useAllSleepHygieneChecks() {
 export function useSleepSettings() {
 	return useLiveQueryWithDefault(
 		async () => {
-			const locals = await db.table<LocalSleepSettings>('sleepSettings').toArray();
+			const locals = await scopedForModule<LocalSleepSettings, string>(
+				'sleep',
+				'sleepSettings'
+			).toArray();
 			const row = locals.find((s) => !s.deletedAt);
 			return row ? toSleepSettings(row) : null;
 		},

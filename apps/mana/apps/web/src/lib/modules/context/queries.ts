@@ -8,6 +8,7 @@
 
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
+import { scopedForModule } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
 import type { LocalContextSpace, LocalDocument, Space, Document, DocumentType } from './types';
 
@@ -49,7 +50,10 @@ export function toDocument(local: LocalDocument): Document {
 /** All spaces, sorted by name. Auto-updates on any change. */
 export function useAllSpaces() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalContextSpace>('contextSpaces').toArray();
+		const locals = await scopedForModule<LocalContextSpace, string>(
+			'context',
+			'contextSpaces'
+		).toArray();
 		return locals
 			.filter((s) => !s.deletedAt)
 			.map(toSpace)
@@ -60,7 +64,7 @@ export function useAllSpaces() {
 /** All documents, sorted by updated_at desc. Auto-updates on any change. */
 export function useAllDocuments() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalDocument>('documents').toArray();
+		const locals = await scopedForModule<LocalDocument, string>('context', 'documents').toArray();
 		const visible = locals.filter((d) => !d.deletedAt);
 		const decrypted = await decryptRecords('documents', visible);
 		return decrypted

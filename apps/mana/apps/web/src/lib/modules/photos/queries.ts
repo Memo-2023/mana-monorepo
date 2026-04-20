@@ -6,6 +6,7 @@
 
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
+import { scopedForModule } from '$lib/data/scope';
 import type { LocalAlbum, LocalAlbumItem, LocalFavorite, Album, AlbumItem } from './types';
 
 // ─── Type Converters ───────────────────────────────────────
@@ -42,7 +43,7 @@ export function toAlbumItem(local: LocalAlbumItem): AlbumItem {
 /** All albums. Auto-updates on any change. */
 export function useAllAlbums() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalAlbum>('albums').toArray();
+		const locals = await scopedForModule<LocalAlbum, string>('photos', 'albums').toArray();
 		return locals.filter((a) => !a.deletedAt).map(toAlbum);
 	}, []);
 }
@@ -50,7 +51,7 @@ export function useAllAlbums() {
 /** All album items. Auto-updates on any change. */
 export function useAllAlbumItems() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalAlbumItem>('albumItems').toArray();
+		const locals = await scopedForModule<LocalAlbumItem, string>('photos', 'albumItems').toArray();
 		return locals.filter((i) => !i.deletedAt).map(toAlbumItem);
 	}, []);
 }
@@ -58,7 +59,10 @@ export function useAllAlbumItems() {
 /** All favorites. Auto-updates on any change. */
 export function useAllFavorites() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalFavorite>('photoFavorites').toArray();
+		const locals = await scopedForModule<LocalFavorite, string>(
+			'photos',
+			'photoFavorites'
+		).toArray();
 		return locals.filter((f) => !f.deletedAt);
 	}, []);
 }

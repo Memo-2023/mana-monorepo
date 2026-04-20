@@ -6,6 +6,7 @@
 
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
+import { scopedForModule } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
 import type {
 	LocalMeal,
@@ -43,7 +44,7 @@ export function toMealWithNutrition(local: LocalMeal): MealWithNutrition {
 /** All meals, auto-updates on any change. */
 export function useAllMeals() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalMeal>('meals').toArray();
+		const locals = await scopedForModule<LocalMeal, string>('food', 'meals').toArray();
 		const visible = locals.filter((m) => !m.deletedAt);
 		const decrypted = await decryptRecords('meals', visible);
 		return decrypted.map(toMealWithNutrition);
@@ -65,7 +66,7 @@ export async function loadMealById(id: string): Promise<MealWithNutrition | null
 /** All goals, auto-updates on any change. */
 export function useAllGoals() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalGoal>('goals').toArray();
+		const locals = await scopedForModule<LocalGoal, string>('food', 'goals').toArray();
 		return locals.filter((g) => !g.deletedAt);
 	}, [] as LocalGoal[]);
 }
@@ -73,7 +74,7 @@ export function useAllGoals() {
 /** All favorites, auto-updates on any change. */
 export function useAllFavorites() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalFavorite>('foodFavorites').toArray();
+		const locals = await scopedForModule<LocalFavorite, string>('food', 'foodFavorites').toArray();
 		return locals.filter((f) => !f.deletedAt);
 	}, [] as LocalFavorite[]);
 }

@@ -8,6 +8,7 @@
 
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
+import { scopedForModule } from '$lib/data/scope';
 import type { LocalSkill, LocalActivity, LocalAchievement } from './types';
 import type { Skill, Activity, SkillBranch, UserStats } from './types';
 import { BRANCH_INFO } from './types';
@@ -47,7 +48,7 @@ export function toActivity(local: LocalActivity): Activity {
 /** All skills, auto-updates on any change. */
 export function useAllSkills() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalSkill>('skills').toArray();
+		const locals = await scopedForModule<LocalSkill, string>('skilltree', 'skills').toArray();
 		return locals.filter((s) => !s.deletedAt).map(toSkill);
 	}, [] as Skill[]);
 }
@@ -55,7 +56,10 @@ export function useAllSkills() {
 /** All activities, auto-updates on any change. */
 export function useAllActivities() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalActivity>('activities').toArray();
+		const locals = await scopedForModule<LocalActivity, string>(
+			'skilltree',
+			'activities'
+		).toArray();
 		return locals.filter((a) => !a.deletedAt).map(toActivity);
 	}, [] as Activity[]);
 }
@@ -63,7 +67,10 @@ export function useAllActivities() {
 /** All achievements (raw local records), auto-updates on any change. */
 export function useAllAchievements() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalAchievement>('achievements').toArray();
+		const locals = await scopedForModule<LocalAchievement, string>(
+			'skilltree',
+			'achievements'
+		).toArray();
 		return locals.filter((a) => !a.deletedAt);
 	}, [] as LocalAchievement[]);
 }

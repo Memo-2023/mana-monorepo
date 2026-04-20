@@ -5,6 +5,7 @@
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { decryptRecords } from '$lib/data/crypto';
 import { db } from '$lib/data/database';
+import { scopedForModule } from '$lib/data/scope';
 import type { LocalMailDraft, MailDraft } from './types';
 
 // ─── Draft Converter ────────────────────────────────────────
@@ -29,7 +30,7 @@ export function toMailDraft(local: LocalMailDraft): MailDraft {
 
 export function useAllDrafts() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalMailDraft>('mailDrafts').toArray();
+		const locals = await scopedForModule<LocalMailDraft, string>('mail', 'mailDrafts').toArray();
 		const visible = locals.filter((d) => !d.deletedAt);
 		const decrypted = await decryptRecords('mailDrafts', visible);
 		return decrypted.map(toMailDraft);

@@ -7,6 +7,7 @@
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { decryptRecords } from '$lib/data/crypto';
 import { db } from '$lib/data/database';
+import { scopedForModule } from '$lib/data/scope';
 import type { LocalMeal, MealWithNutrition } from '$lib/modules/food/types';
 import type {
 	LocalBodyExercise,
@@ -131,7 +132,10 @@ export function toBodyPhase(local: LocalBodyPhase): BodyPhase {
 
 export function useAllBodyExercises() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalBodyExercise>('bodyExercises').toArray();
+		const locals = await scopedForModule<LocalBodyExercise, string>(
+			'body',
+			'bodyExercises'
+		).toArray();
 		const visible = locals.filter((e) => !e.deletedAt);
 		const decrypted = await decryptRecords('bodyExercises', visible);
 		return decrypted.map(toBodyExercise).sort((a, b) => a.name.localeCompare(b.name));
@@ -140,7 +144,9 @@ export function useAllBodyExercises() {
 
 export function useAllBodyRoutines() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalBodyRoutine>('bodyRoutines').orderBy('order').toArray();
+		const locals = await scopedForModule<LocalBodyRoutine, string>('body', 'bodyRoutines').sortBy(
+			'order'
+		);
 		const visible = locals.filter((r) => !r.deletedAt);
 		const decrypted = await decryptRecords('bodyRoutines', visible);
 		return decrypted.map(toBodyRoutine);
@@ -149,7 +155,10 @@ export function useAllBodyRoutines() {
 
 export function useAllBodyWorkouts() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalBodyWorkout>('bodyWorkouts').toArray();
+		const locals = await scopedForModule<LocalBodyWorkout, string>(
+			'body',
+			'bodyWorkouts'
+		).toArray();
 		const visible = locals.filter((w) => !w.deletedAt);
 		const decrypted = await decryptRecords('bodyWorkouts', visible);
 		return decrypted.map(toBodyWorkout).sort((a, b) => b.startedAt.localeCompare(a.startedAt));
@@ -158,7 +167,7 @@ export function useAllBodyWorkouts() {
 
 export function useAllBodySets() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalBodySet>('bodySets').toArray();
+		const locals = await scopedForModule<LocalBodySet, string>('body', 'bodySets').toArray();
 		const visible = locals.filter((s) => !s.deletedAt);
 		const decrypted = await decryptRecords('bodySets', visible);
 		return decrypted.map(toBodySet);
@@ -180,7 +189,10 @@ export function useSetsForWorkout(workoutId: string) {
 
 export function useAllBodyMeasurements() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalBodyMeasurement>('bodyMeasurements').toArray();
+		const locals = await scopedForModule<LocalBodyMeasurement, string>(
+			'body',
+			'bodyMeasurements'
+		).toArray();
 		const visible = locals.filter((m) => !m.deletedAt);
 		const decrypted = await decryptRecords('bodyMeasurements', visible);
 		return decrypted.map(toBodyMeasurement).sort((a, b) => b.date.localeCompare(a.date));
@@ -189,7 +201,7 @@ export function useAllBodyMeasurements() {
 
 export function useAllBodyChecks() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalBodyCheck>('bodyChecks').toArray();
+		const locals = await scopedForModule<LocalBodyCheck, string>('body', 'bodyChecks').toArray();
 		const visible = locals.filter((c) => !c.deletedAt);
 		const decrypted = await decryptRecords('bodyChecks', visible);
 		return decrypted.map(toBodyCheck).sort((a, b) => b.date.localeCompare(a.date));
@@ -198,7 +210,7 @@ export function useAllBodyChecks() {
 
 export function useAllBodyPhases() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalBodyPhase>('bodyPhases').toArray();
+		const locals = await scopedForModule<LocalBodyPhase, string>('body', 'bodyPhases').toArray();
 		const visible = locals.filter((p) => !p.deletedAt);
 		const decrypted = await decryptRecords('bodyPhases', visible);
 		return decrypted.map(toBodyPhase).sort((a, b) => b.startDate.localeCompare(a.startDate));

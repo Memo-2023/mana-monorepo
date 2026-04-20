@@ -5,6 +5,7 @@
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { decryptRecords } from '$lib/data/crypto';
 import { db } from '$lib/data/database';
+import { scopedForModule } from '$lib/data/scope';
 import type { LocalLibraryEntry, LibraryEntry, LibraryKind, LibraryStatus } from './types';
 
 // ─── Type Converter ──────────────────────────────────────
@@ -40,7 +41,10 @@ export function toLibraryEntry(local: LocalLibraryEntry): LibraryEntry {
 
 export function useAllEntries() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalLibraryEntry>('libraryEntries').toArray();
+		const locals = await scopedForModule<LocalLibraryEntry, string>(
+			'library',
+			'libraryEntries'
+		).toArray();
 		const visible = locals.filter((e) => !e.deletedAt);
 		const decrypted = await decryptRecords('libraryEntries', visible);
 		return decrypted.map(toLibraryEntry);

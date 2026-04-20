@@ -6,6 +6,7 @@
 
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
+import { scopedForModule } from '$lib/data/scope';
 import { decryptRecord, decryptRecords } from '$lib/data/crypto';
 import type { LocalDeck, LocalSlide, Deck, Slide } from './types';
 
@@ -40,7 +41,9 @@ export function toSlide(local: LocalSlide): Slide {
 /** All decks, sorted by updatedAt descending. Auto-updates on any change. */
 export function useAllDecks() {
 	return useLiveQueryWithDefault(async () => {
-		const visible = (await db.table<LocalDeck>('presiDecks').toArray()).filter((d) => !d.deletedAt);
+		const visible = (
+			await scopedForModule<LocalDeck, string>('presi', 'presiDecks').toArray()
+		).filter((d) => !d.deletedAt);
 		const decrypted = await decryptRecords('presiDecks', visible);
 		return decrypted
 			.map(toDeck)

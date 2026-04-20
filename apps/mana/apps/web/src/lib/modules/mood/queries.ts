@@ -5,6 +5,7 @@
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { decryptRecords } from '$lib/data/crypto';
 import { db } from '$lib/data/database';
+import { scopedForModule, applyVisibility } from '$lib/data/scope';
 import type {
 	LocalMoodEntry,
 	LocalMoodSettings,
@@ -46,8 +47,8 @@ export function toMoodSettings(local: LocalMoodSettings): MoodSettings {
 
 export function useAllMoodEntries() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalMoodEntry>('moodEntries').toArray();
-		const visible = locals.filter((e) => !e.deletedAt);
+		const locals = await scopedForModule<LocalMoodEntry, string>('mood', 'moodEntries').toArray();
+		const visible = applyVisibility(locals).filter((e) => !e.deletedAt);
 		const decrypted = await decryptRecords('moodEntries', visible);
 		return decrypted.map(toMoodEntry).sort((a, b) => {
 			const cmp = b.date.localeCompare(a.date);
@@ -57,11 +58,17 @@ export function useAllMoodEntries() {
 }
 
 export function useMoodSettings() {
-	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalMoodSettings>('moodSettings').toArray();
-		const row = locals.find((s) => !s.deletedAt);
-		return row ? toMoodSettings(row) : null;
-	}, null as MoodSettings | null);
+	return useLiveQueryWithDefault(
+		async () => {
+			const locals = await scopedForModule<LocalMoodSettings, string>(
+				'mood',
+				'moodSettings'
+			).toArray();
+			const row = applyVisibility(locals).find((s) => !s.deletedAt);
+			return row ? toMoodSettings(row) : null;
+		},
+		null as MoodSettings | null
+	);
 }
 
 // ─── Pure Helpers ───────────────────────────────────────────
@@ -142,7 +149,11 @@ export function getEmotionDistribution(
 }
 
 /** Positive vs negative ratio. */
-export function getValenceRatio(entries: MoodEntry[]): { positive: number; negative: number; neutral: number } {
+export function getValenceRatio(entries: MoodEntry[]): {
+	positive: number;
+	negative: number;
+	neutral: number;
+} {
 	let positive = 0;
 	let negative = 0;
 	let neutral = 0;

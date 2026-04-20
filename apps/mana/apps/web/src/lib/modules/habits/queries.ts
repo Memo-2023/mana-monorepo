@@ -6,6 +6,7 @@
 
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
+import { scopedForModule } from '$lib/data/scope';
 import type { LocalHabit, LocalHabitLog, Habit, HabitLog } from './types';
 import type { LocalTimeBlock } from '$lib/data/time-blocks/types';
 
@@ -44,14 +45,14 @@ export function toHabitLog(local: LocalHabitLog, block?: LocalTimeBlock | null):
 
 export function useAllHabits() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalHabit>('habits').orderBy('order').toArray();
+		const locals = await scopedForModule<LocalHabit, string>('habits', 'habits').sortBy('order');
 		return locals.filter((h) => !h.deletedAt).map(toHabit);
 	}, [] as Habit[]);
 }
 
 export function useAllHabitLogs() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalHabitLog>('habitLogs').toArray();
+		const locals = await scopedForModule<LocalHabitLog, string>('habits', 'habitLogs').toArray();
 		const active = locals.filter((l) => !l.deletedAt);
 
 		// Batch-fetch all related timeBlocks

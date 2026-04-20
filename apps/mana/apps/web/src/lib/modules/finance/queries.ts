@@ -4,6 +4,7 @@
 
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
+import { scopedForModule } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
 import type {
 	LocalTransaction,
@@ -45,9 +46,9 @@ export function toCategory(local: LocalFinanceCategory): FinanceCategory {
 
 export function useAllTransactions() {
 	return useLiveQueryWithDefault(async () => {
-		const visible = (await db.table<LocalTransaction>('transactions').toArray()).filter(
-			(t) => !t.deletedAt
-		);
+		const visible = (
+			await scopedForModule<LocalTransaction, string>('finance', 'transactions').toArray()
+		).filter((t) => !t.deletedAt);
 		const decrypted = await decryptRecords('transactions', visible);
 		return decrypted
 			.map(toTransaction)
@@ -57,7 +58,10 @@ export function useAllTransactions() {
 
 export function useAllCategories() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalFinanceCategory>('financeCategories').toArray();
+		const locals = await scopedForModule<LocalFinanceCategory, string>(
+			'finance',
+			'financeCategories'
+		).toArray();
 		return locals
 			.filter((c) => !c.deletedAt)
 			.map(toCategory)

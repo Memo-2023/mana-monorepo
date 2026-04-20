@@ -8,6 +8,7 @@
 
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
+import { scopedForModule } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
 import type { Tag } from '@mana/shared-tags';
 import type {
@@ -99,7 +100,9 @@ export function toWateringLog(local: LocalWateringLog): WateringLog {
 /** All plants. Auto-updates on any change. */
 export function useAllPlants() {
 	return useLiveQueryWithDefault(async () => {
-		const visible = (await db.table<LocalPlant>('plants').toArray()).filter((p) => !p.deletedAt);
+		const visible = (
+			await scopedForModule<LocalPlant, string>('plants', 'plants').toArray()
+		).filter((p) => !p.deletedAt);
 		const decrypted = await decryptRecords('plants', visible);
 		return decrypted.map(toPlant);
 	}, []);
@@ -108,7 +111,10 @@ export function useAllPlants() {
 /** All plant photos. Auto-updates on any change. */
 export function useAllPlantPhotos() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalPlantPhoto>('plantPhotos').toArray();
+		const locals = await scopedForModule<LocalPlantPhoto, string>(
+			'plants',
+			'plantPhotos'
+		).toArray();
 		return locals.filter((p) => !p.deletedAt).map(toPlantPhoto);
 	}, []);
 }
@@ -116,7 +122,10 @@ export function useAllPlantPhotos() {
 /** All watering schedules. Auto-updates on any change. */
 export function useAllWateringSchedules() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalWateringSchedule>('wateringSchedules').toArray();
+		const locals = await scopedForModule<LocalWateringSchedule, string>(
+			'plants',
+			'wateringSchedules'
+		).toArray();
 		return locals.filter((s) => !s.deletedAt).map(toWateringSchedule);
 	}, []);
 }
@@ -124,7 +133,10 @@ export function useAllWateringSchedules() {
 /** All watering logs. Auto-updates on any change. */
 export function useAllWateringLogs() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalWateringLog>('wateringLogs').toArray();
+		const locals = await scopedForModule<LocalWateringLog, string>(
+			'plants',
+			'wateringLogs'
+		).toArray();
 		return locals.filter((l) => !l.deletedAt).map(toWateringLog);
 	}, []);
 }
@@ -132,7 +144,7 @@ export function useAllWateringLogs() {
 /** All plant↔tag junctions (active only). */
 export function useAllPlantTags() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalPlantTag>('plantTags').toArray();
+		const locals = await scopedForModule<LocalPlantTag, string>('plants', 'plantTags').toArray();
 		return locals.filter((t) => !t.deletedAt);
 	}, []);
 }

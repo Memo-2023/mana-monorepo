@@ -4,6 +4,7 @@
 
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
+import { scopedForModule } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
 import type {
 	LocalWish,
@@ -68,7 +69,9 @@ export function toPriceCheck(local: LocalPriceCheck): PriceCheck {
 
 export function useAllWishes() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalWish>('wishesItems').orderBy('order').toArray();
+		const locals = await scopedForModule<LocalWish, string>('wishes', 'wishesItems').sortBy(
+			'order'
+		);
 		const visible = locals.filter((w) => !w.deletedAt);
 		const decrypted = await decryptRecords('wishesItems', visible);
 		return decrypted.map(toWish);
@@ -77,7 +80,9 @@ export function useAllWishes() {
 
 export function useAllLists() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalWishList>('wishesLists').orderBy('order').toArray();
+		const locals = await scopedForModule<LocalWishList, string>('wishes', 'wishesLists').sortBy(
+			'order'
+		);
 		const visible = locals.filter((l) => !l.deletedAt && !l.isArchived);
 		return visible.map(toWishList);
 	}, [] as WishList[]);

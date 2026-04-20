@@ -4,6 +4,7 @@
 
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
+import { scopedForModule } from '$lib/data/scope';
 import type { LocalMood, LocalSequence, Mood } from './types';
 
 // ─── Helpers ──────────────────────────────────────────────
@@ -26,7 +27,7 @@ export function getMoodById(moods: Mood[], id: string): Mood | undefined {
 /** All moods, sorted by name. */
 export function useAllMoods() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalMood>('moods').toArray();
+		const locals = await scopedForModule<LocalMood, string>('moodlit', 'moods').toArray();
 		return locals.filter((m) => !m.deletedAt);
 	}, []);
 }
@@ -34,7 +35,7 @@ export function useAllMoods() {
 /** All sequences, sorted by name. */
 export function useAllSequences() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalSequence>('sequences').toArray();
+		const locals = await scopedForModule<LocalSequence, string>('moodlit', 'sequences').toArray();
 		return locals.filter((s) => !s.deletedAt);
 	}, []);
 }

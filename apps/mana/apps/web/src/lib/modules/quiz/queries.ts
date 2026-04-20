@@ -9,6 +9,7 @@
 
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
+import { scopedForModule } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
 import type {
 	LocalQuiz,
@@ -69,7 +70,7 @@ export function toAttempt(local: LocalQuizAttempt): QuizAttempt {
 
 export function useAllQuizzes() {
 	return useLiveQueryWithDefault(async () => {
-		const visible = (await db.table<LocalQuiz>('quizzes').toArray()).filter(
+		const visible = (await scopedForModule<LocalQuiz, string>('quiz', 'quizzes').toArray()).filter(
 			(q) => !q.deletedAt && !q.isArchived
 		);
 		const decrypted = await decryptRecords('quizzes', visible);

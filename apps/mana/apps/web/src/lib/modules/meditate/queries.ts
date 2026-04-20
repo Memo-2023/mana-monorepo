@@ -7,6 +7,7 @@
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { decryptRecords } from '$lib/data/crypto';
 import { db } from '$lib/data/database';
+import { scopedForModule } from '$lib/data/scope';
 import type {
 	LocalMeditatePreset,
 	LocalMeditateSession,
@@ -93,7 +94,10 @@ export function useAllSessions() {
 export function useSettings() {
 	return useLiveQueryWithDefault(
 		async () => {
-			const locals = await db.table<LocalMeditateSettings>('meditateSettings').toArray();
+			const locals = await scopedForModule<LocalMeditateSettings, string>(
+				'meditate',
+				'meditateSettings'
+			).toArray();
 			if (locals.length === 0) return null;
 			return toMeditateSettings(locals[0]);
 		},

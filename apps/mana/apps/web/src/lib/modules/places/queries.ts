@@ -4,6 +4,7 @@
 
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
+import { scopedForModule } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
 import type { LocalPlace, LocalLocationLog, Place, LocationLog } from './types';
 
@@ -46,7 +47,7 @@ export function toLocationLog(local: LocalLocationLog): LocationLog {
 
 export function useAllPlaces() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalPlace>('places').toArray();
+		const locals = await scopedForModule<LocalPlace, string>('places', 'places').toArray();
 		const visible = locals.filter((p) => !p.deletedAt);
 		const decrypted = await decryptRecords<LocalPlace>('places', visible);
 		return decrypted.map(toPlace);
