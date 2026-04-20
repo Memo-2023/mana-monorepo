@@ -5,6 +5,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import StatusBadge from '../components/StatusBadge.svelte';
+	import SendModal from '../components/SendModal.svelte';
 	import { invoicesStore } from '../stores/invoices.svelte';
 	import { invoiceSettingsStore } from '../stores/settings.svelte';
 	import { renderInvoicePdfBlob, qrBillStatus } from '../pdf/renderer';
@@ -30,12 +31,15 @@
 	let pdfError = $state<string | null>(null);
 	let renderingPdf = $state(false);
 	let qrWarning = $state<string | null>(null);
+	let showSendModal = $state(false);
+	let settingsCache = $state<InvoiceSettings | null>(null);
 
 	async function renderPdf() {
 		renderingPdf = true;
 		pdfError = null;
 		try {
 			const settings: InvoiceSettings = await invoiceSettingsStore.get();
+			settingsCache = settings;
 			// Compute QR-Bill eligibility first so we can show a warning even
 			// if the rest of the PDF renders fine. The renderer will silently
 			// omit the Zahlteil when not eligible.
@@ -49,6 +53,13 @@
 		} finally {
 			renderingPdf = false;
 		}
+	}
+
+	async function openSendModal() {
+		// Ensure settings are loaded before showing the modal — the send
+		// flow needs them for the template + the PDF re-render.
+		if (!settingsCache) settingsCache = await invoiceSettingsStore.get();
+		showSendModal = true;
 	}
 
 	// Re-render when invoice id or updatedAt changes (mutations bump updatedAt).
@@ -146,9 +157,8 @@
 	<div class="actions">
 		{#if invoice.status === 'draft'}
 			<button class="btn" onclick={onEdit}>Bearbeiten</button>
-			<button class="btn btn-primary" onclick={onMarkSent} disabled={busy}>
-				Als versendet markieren
-			</button>
+			<button class="btn btn-primary" onclick={openSendModal}>Per Mail versenden</button>
+			<button class="btn" onclick={onMarkSent} disabled={busy}>Als versendet markieren</button>
 		{/if}
 		{#if invoice.status === 'sent' || invoice.status === 'overdue'}
 			<button class="btn btn-primary" onclick={onMarkPaid} disabled={busy}>
@@ -280,6 +290,10 @@
 		{#if invoice.paidAt}<div>Bezahlt: {new Date(invoice.paidAt).toLocaleString()}</div>{/if}
 	</footer>
 </article>
+
+{#if showSendModal && settingsCache}
+	<SendModal {invoice} settings={settingsCache} onClose={() => (showSendModal = false)} />
+{/if}
 
 <style>
 	.detail {
