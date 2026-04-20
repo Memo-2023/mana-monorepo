@@ -558,6 +558,25 @@
 			const uid = authStore.user?.id ?? 'unknown';
 			const name = authStore.user?.name || authStore.user?.email || 'Du';
 			bindDefaultUser(uid, name);
+
+			// Spaces foundation: resolve the user's active Space from Better
+			// Auth before sync runs so pending-change rows get stamped with a
+			// real organization id (not the `_personal:<userId>` sentinel the
+			// v28 migration leaves behind). Failure is non-fatal — the scope
+			// wrapper falls back to the sentinel, sync still pushes with a
+			// NULL space_id, and the next boot retries. See
+			// docs/plans/spaces-foundation.md.
+			try {
+				const { loadActiveSpace, reconcileSentinels } = await import('$lib/data/scope');
+				await loadActiveSpace();
+				const rewritten = await reconcileSentinels();
+				if (rewritten > 0) {
+					console.info(`[spaces] reconciled ${rewritten} sentinel records to active space`);
+				}
+			} catch (err) {
+				console.warn('[spaces] active-space boot failed — sync will use sentinel scope', err);
+			}
+
 			await syncBilling.load();
 			const getToken = () => authStore.getValidToken();
 			unifiedSync = createUnifiedSync(SYNC_SERVER_URL, getToken, syncBilling.active);
