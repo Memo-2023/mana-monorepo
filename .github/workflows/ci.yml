@@ -437,17 +437,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Validate monorepo best practices
-        run: pnpm run validate:monorepo
-
-      - name: Validate no recursive turbo calls
-        run: pnpm run validate:turbo
-
-      - name: Validate pgSchema isolation (no raw pgTable)
-        run: pnpm run validate:pg-schema
-
-      - name: Audit crypto registry (Dexie ↔ registry ↔ allowlist)
-        run: pnpm run check:crypto
+      - name: Validate monorepo invariants (turbo + pgSchema + crypto)
+        run: pnpm run validate:all
 
       - name: Type check
         run: pnpm run type-check
