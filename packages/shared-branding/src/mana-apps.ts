@@ -1020,6 +1020,23 @@ export const MANA_APPS: ManaApp[] = [
 		status: 'development',
 		requiredTier: 'guest',
 	},
+	{
+		id: 'invoices',
+		name: 'Rechnungen',
+		description: {
+			de: 'Rechnungen stellen mit QR-Bill',
+			en: 'Issue invoices with Swiss QR-Bill',
+		},
+		longDescription: {
+			de: 'Rechnungen an Kunden stellen — mit PDF-Export, Schweizer QR-Rechnung, Mehrwertsteuer und Zahlungsverfolgung. Ergänzt das Finance-Modul um die Outbound-Seite.',
+			en: 'Issue invoices to clients — with PDF export, Swiss QR-Bill, VAT handling and payment tracking. Adds the outbound side to the Finance module.',
+		},
+		icon: APP_ICONS.invoices,
+		color: '#059669',
+		comingSoon: false,
+		status: 'development',
+		requiredTier: 'alpha',
+	},
 ];
 
 /**

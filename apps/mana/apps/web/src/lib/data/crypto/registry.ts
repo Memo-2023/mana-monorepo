@@ -78,6 +78,11 @@ import type { LocalNote } from '../../modules/notes/types';
 import type { LocalDream, LocalDreamSymbol } from '../../modules/dreams/types';
 import type { LocalJournalEntry } from '../../modules/journal/types';
 import type { LocalMemo } from '../../modules/memoro/types';
+import type {
+	LocalInvoice,
+	LocalInvoiceClient,
+	LocalInvoiceSettings,
+} from '../../modules/invoices/types';
 
 export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	// ─── Chat ────────────────────────────────────────────────
@@ -580,6 +585,54 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 		enabled: true,
 		fields: ['title', 'originalTitle', 'creators', 'review', 'tags'],
 	},
+
+	// ─── Invoices ────────────────────────────────────────────
+	// Outbound finance. Sensitive surface is non-trivial: client name and
+	// address, the free-text subject/notes/terms, and the line items
+	// themselves (title/description carry service names or project codes
+	// that leak who the user works for + what they're paid to do).
+	//
+	// Plaintext (intentional):
+	//   - number, status, clientId, clientSource, currency, issueDate,
+	//     dueDate, sentAt, paidAt, referenceNumber, pdfBlobKey: all
+	//     structural, used for indexing/filter/aggregation.
+	//   - totals (net/vat/gross): kept plaintext so the dashboard's
+	//     "open" and "overdue" sums can be computed in a liveQuery
+	//     without decrypting every row. The sum-across-customers is
+	//     business-useful info the user sees at a glance; encrypting it
+	//     would defeat the local-first reactive layer.
+	//   - lines is encrypted as a whole blob (see below): the numeric
+	//     subfields would be plaintext-eligible, but serialising the
+	//     whole array in one pass keeps the encryption boundary simple
+	//     and lets per-line titles travel encrypted alongside.
+	invoices: entry<LocalInvoice>(['clientSnapshot', 'subject', 'notes', 'terms', 'lines']),
+
+	// Optional per-user client book. Everything user-typed is sensitive —
+	// name, postal address, email, VAT number, IBAN, free-text notes.
+	// defaultCurrency / defaultDueDays stay plaintext (structural enums).
+	invoiceClients: entry<LocalInvoiceClient>([
+		'name',
+		'address',
+		'email',
+		'vatNumber',
+		'iban',
+		'notes',
+	]),
+
+	// Singleton sender profile. The user's legal address + IBAN live here
+	// and are the most sensitive fields in the module (appear on every PDF
+	// the user issues). logoMediaId / accentColor / number sequence state
+	// are plaintext — structural, no privacy value.
+	invoiceSettings: entry<LocalInvoiceSettings>([
+		'senderName',
+		'senderAddress',
+		'senderEmail',
+		'senderVatNumber',
+		'senderIban',
+		'senderBic',
+		'footer',
+		'defaultTerms',
+	]),
 };
 
 /**

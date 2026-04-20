@@ -592,6 +592,21 @@ db.version(26).stores({
 	libraryEntries: 'id, kind, status, completedAt, isFavorite',
 });
 
+// v27 — Invoices module: outbound finance (issuing invoices to clients).
+// See docs/plans/invoices-module.md. Three tables:
+//   - invoices: the invoice records (status/dueDate/clientId indexed for
+//     the "overdue per client" + "open per status" queries that drive the
+//     ListView + dashboard widgets).
+//   - invoiceClients: optional per-user client book; only userId needed
+//     since listing is always scoped to the current user.
+//   - invoiceSettings: singleton sender profile (one row per user, id is
+//     the stable sentinel INVOICE_SETTINGS_ID so sync dedupes on it).
+db.version(27).stores({
+	invoices: 'id, number, status, clientId, issueDate, dueDate',
+	invoiceClients: 'id',
+	invoiceSettings: 'id',
+});
+
 // ─── Sync Routing ──────────────────────────────────────────
 // SYNC_APP_MAP, TABLE_TO_SYNC_NAME, TABLE_TO_APP, SYNC_NAME_TO_TABLE,
 // toSyncName() and fromSyncName() are now derived from per-module
