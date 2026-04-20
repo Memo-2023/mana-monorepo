@@ -21,6 +21,7 @@ from src.models import (
     ModelsResponse,
 )
 from src.providers import ProviderRouter
+from src.providers.errors import ProviderError
 from src.streaming import stream_chat_completion
 from src.utils.cache import close_redis
 from src.utils.metrics import get_metrics, record_llm_error, record_llm_request
@@ -180,6 +181,15 @@ async def chat_completions(
         logger.error(f"Invalid request: {e}")
         record_llm_error(provider, model, "invalid_request")
         raise HTTPException(status_code=400, detail=str(e))
+    except ProviderError as e:
+        logger.warning(
+            f"Provider error on {provider}/{model}: kind={e.kind} detail={e}"
+        )
+        record_llm_error(provider, model, e.kind)
+        raise HTTPException(
+            status_code=e.http_status,
+            detail={"kind": e.kind, "message": str(e)},
+        )
     except Exception as e:
         logger.error(f"Chat completion failed: {e}")
         record_llm_error(provider, model, "server_error")

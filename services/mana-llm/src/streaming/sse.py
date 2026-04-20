@@ -6,6 +6,7 @@ from collections.abc import AsyncIterator
 
 from src.models import ChatCompletionRequest, ChatCompletionStreamResponse
 from src.providers import ProviderRouter
+from src.providers.errors import ProviderError
 
 logger = logging.getLogger(__name__)
 
@@ -29,9 +30,18 @@ async def stream_chat_completion(
         # Send final [DONE] marker
         yield {"data": "[DONE]"}
 
+    except ProviderError as e:
+        logger.warning(f"Streaming provider error: kind={e.kind} detail={e}")
+        error_data = {
+            "error": {
+                "message": str(e),
+                "type": e.kind,
+            }
+        }
+        yield {"data": json.dumps(error_data)}
+        yield {"data": "[DONE]"}
     except Exception as e:
         logger.error(f"Streaming error: {e}")
-        # Send error as SSE event
         error_data = {
             "error": {
                 "message": str(e),

@@ -24,8 +24,85 @@ from src.models import (
 )
 
 from .base import LLMProvider
+from .errors import (
+    ProviderAuthError,
+    ProviderBlockedError,
+    ProviderError,
+    ProviderRateLimitError,
+    ProviderTruncatedError,
+)
 
 logger = logging.getLogger(__name__)
+
+
+def _unwrap_gemini_response(response: Any, gemini_model: str) -> str:
+    """Validate a non-streaming Gemini response and return its text.
+
+    Raises a structured ProviderError if the response was blocked,
+    truncated, or otherwise produced no usable text. The SDK's
+    ``response.text`` accessor silently returns an empty string in all
+    of those cases, which downstream consumers (e.g. the planner
+    parser) cannot distinguish from a well-formed empty completion.
+    """
+    candidates = getattr(response, "candidates", None) or []
+    candidate = candidates[0] if candidates else None
+    finish_reason = getattr(candidate, "finish_reason", None)
+    # SDK sometimes exposes the enum name on `.name`, sometimes it's a string.
+    finish_name = getattr(finish_reason, "name", None) or (
+        str(finish_reason) if finish_reason is not None else None
+    )
+    # Strip the leading enum prefix if present (e.g. "FinishReason.SAFETY").
+    if finish_name and "." in finish_name:
+        finish_name = finish_name.rsplit(".", 1)[-1]
+
+    text = response.text or ""
+
+    if finish_name in {"SAFETY", "RECITATION", "PROHIBITED_CONTENT", "SPII", "BLOCKLIST"}:
+        # Pull the first safety rating that actually blocked if present.
+        ratings = getattr(candidate, "safety_ratings", None) or []
+        blocked = [
+            getattr(r, "category", None)
+            for r in ratings
+            if getattr(r, "blocked", False)
+        ]
+        detail = ", ".join(str(c) for c in blocked if c) or None
+        logger.warning(
+            "Gemini response blocked (model=%s, reason=%s, detail=%s)",
+            gemini_model,
+            finish_name,
+            detail,
+        )
+        raise ProviderBlockedError(reason=finish_name, detail=detail)
+
+    if finish_name == "MAX_TOKENS":
+        logger.warning(
+            "Gemini response truncated at max_tokens (model=%s)", gemini_model
+        )
+        raise ProviderTruncatedError(partial_text=text or None)
+
+    if not text and finish_name not in (None, "STOP"):
+        # Unknown finish reason, empty text — surface instead of silent "".
+        raise ProviderError(
+            f"Gemini returned no content (finish_reason={finish_name})"
+        )
+
+    return text
+
+
+def _wrap_gemini_call_error(err: Exception, gemini_model: str) -> ProviderError:
+    """Translate a raw Google SDK exception into a structured ProviderError.
+
+    The SDK uses google.genai.errors.* but we avoid importing them at
+    top level to keep the provider optional. String-match the class
+    name instead.
+    """
+    cls_name = type(err).__name__
+    msg = str(err) or cls_name
+    if "Auth" in cls_name or "PermissionDenied" in cls_name or "Unauthenticated" in cls_name:
+        return ProviderAuthError(f"Gemini auth failed for {gemini_model}: {msg}")
+    if "ResourceExhausted" in cls_name or "RateLimit" in cls_name or "429" in msg:
+        return ProviderRateLimitError(f"Gemini rate-limited for {gemini_model}: {msg}")
+    return ProviderError(f"Gemini call failed for {gemini_model}: {msg}")
 
 # Model mapping: Ollama model → Google Gemini equivalent
 OLLAMA_TO_GEMINI: dict[str, str] = {
@@ -129,13 +206,18 @@ class GoogleProvider(LLMProvider):
 
         logger.debug(f"Google Gemini request: {gemini_model}, messages: {len(contents)}")
 
-        response = await self.client.aio.models.generate_content(
-            model=gemini_model,
-            contents=contents,
-            config=gen_config,
-        )
+        try:
+            response = await self.client.aio.models.generate_content(
+                model=gemini_model,
+                contents=contents,
+                config=gen_config,
+            )
+        except ProviderError:
+            raise
+        except Exception as err:
+            raise _wrap_gemini_call_error(err, gemini_model) from err
 
-        content = response.text or ""
+        content = _unwrap_gemini_response(response, gemini_model)
         usage_meta = response.usage_metadata
 
         return ChatCompletionResponse(
@@ -187,13 +269,22 @@ class GoogleProvider(LLMProvider):
             ],
         )
 
-        async for chunk in await self.client.aio.models.generate_content_stream(
-            model=gemini_model,
-            contents=contents,
-            config=gen_config,
-        ):
+        last_chunk: Any = None
+        emitted_any_text = False
+        try:
+            stream = await self.client.aio.models.generate_content_stream(
+                model=gemini_model,
+                contents=contents,
+                config=gen_config,
+            )
+        except Exception as err:
+            raise _wrap_gemini_call_error(err, gemini_model) from err
+
+        async for chunk in stream:
+            last_chunk = chunk
             text = chunk.text
             if text:
+                emitted_any_text = True
                 yield ChatCompletionStreamResponse(
                     model=f"google/{gemini_model}",
                     choices=[
@@ -203,6 +294,12 @@ class GoogleProvider(LLMProvider):
                         )
                     ],
                 )
+
+        # Post-stream check: if the stream ended without emitting any text,
+        # surface the structured reason instead of quietly closing with an
+        # empty "stop". Matches _unwrap_gemini_response semantics.
+        if not emitted_any_text and last_chunk is not None:
+            _unwrap_gemini_response(last_chunk, gemini_model)
 
         # Final chunk
         yield ChatCompletionStreamResponse(
