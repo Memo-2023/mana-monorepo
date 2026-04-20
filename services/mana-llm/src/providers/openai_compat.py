@@ -19,6 +19,8 @@ from src.models import (
     MessageResponse,
     ModelInfo,
     StreamChoice,
+    ToolCall,
+    ToolCallFunction,
     Usage,
 )
 
@@ -27,8 +29,36 @@ from .base import LLMProvider
 logger = logging.getLogger(__name__)
 
 
+def _tool_calls_from_openai(raw: list[dict[str, Any]] | None) -> list[ToolCall] | None:
+    """Normalise an OpenAI-spec ``tool_calls`` array into our model shape."""
+    if not raw:
+        return None
+    calls: list[ToolCall] = []
+    for c in raw:
+        fn = c.get("function") or {}
+        name = fn.get("name")
+        if not name:
+            continue
+        calls.append(
+            ToolCall(
+                id=c.get("id") or "",
+                function=ToolCallFunction(
+                    name=name,
+                    arguments=fn.get("arguments") or "{}",
+                ),
+            )
+        )
+    return calls or None
+
+
 class OpenAICompatProvider(LLMProvider):
     """OpenAI-compatible API provider (OpenRouter, Groq, Together, etc.)."""
+
+    # OpenRouter/Groq/Together all expose tool_calls per the OpenAI spec;
+    # individual models within those services may or may not support it,
+    # but the request shape is uniform. The upstream returns a proper
+    # error for unsupported models — no silent downgrade here.
+    supports_tools = True
 
     def __init__(
         self,
@@ -60,23 +90,53 @@ class OpenAICompatProvider(LLMProvider):
         return self._client
 
     def _convert_messages(self, request: ChatCompletionRequest) -> list[dict[str, Any]]:
-        """Convert internal message format to OpenAI format."""
-        messages = []
+        """Convert internal message format to OpenAI format.
+
+        The OpenAI chat-completions endpoint is the source of truth for
+        this shape, so most fields pass through verbatim — including
+        ``role='tool'`` messages with ``tool_call_id`` + ``content`` and
+        assistant messages carrying ``tool_calls[]``.
+        """
+        messages: list[dict[str, Any]] = []
         for msg in request.messages:
-            if isinstance(msg.content, str):
-                messages.append({"role": msg.role, "content": msg.content})
+            out: dict[str, Any] = {"role": msg.role}
+
+            if msg.tool_call_id:
+                out["tool_call_id"] = msg.tool_call_id
+
+            if msg.tool_calls:
+                out["tool_calls"] = [
+                    {
+                        "id": c.id,
+                        "type": c.type,
+                        "function": {
+                            "name": c.function.name,
+                            "arguments": c.function.arguments,
+                        },
+                    }
+                    for c in msg.tool_calls
+                ]
+
+            if msg.content is None:
+                # Assistant tool-call messages have null content per spec.
+                out["content"] = None
+            elif isinstance(msg.content, str):
+                out["content"] = msg.content
             else:
-                # Handle multimodal content
                 content_parts = []
                 for part in msg.content:
                     if part.type == "text":
                         content_parts.append({"type": "text", "text": part.text})
                     elif part.type == "image_url":
-                        content_parts.append({
-                            "type": "image_url",
-                            "image_url": {"url": part.image_url.url},
-                        })
-                messages.append({"role": msg.role, "content": content_parts})
+                        content_parts.append(
+                            {
+                                "type": "image_url",
+                                "image_url": {"url": part.image_url.url},
+                            }
+                        )
+                out["content"] = content_parts
+
+            messages.append(out)
         return messages
 
     async def chat_completion(
@@ -104,6 +164,17 @@ class OpenAICompatProvider(LLMProvider):
             payload["presence_penalty"] = request.presence_penalty
         if request.stop:
             payload["stop"] = request.stop
+        if request.tools:
+            payload["tools"] = [
+                {"type": "function", "function": t.function.model_dump()}
+                for t in request.tools
+            ]
+        if request.tool_choice is not None:
+            payload["tool_choice"] = (
+                request.tool_choice
+                if isinstance(request.tool_choice, str)
+                else request.tool_choice.model_dump()
+            )
 
         logger.debug(f"{self.name} request: {model}, messages: {len(request.messages)}")
 
@@ -117,7 +188,12 @@ class OpenAICompatProvider(LLMProvider):
             choices=[
                 Choice(
                     index=choice.get("index", 0),
-                    message=MessageResponse(content=choice["message"]["content"]),
+                    message=MessageResponse(
+                        content=choice["message"].get("content"),
+                        tool_calls=_tool_calls_from_openai(
+                            choice["message"].get("tool_calls")
+                        ),
+                    ),
                     finish_reason=choice.get("finish_reason", "stop"),
                 )
                 for choice in data.get("choices", [])
@@ -154,6 +230,17 @@ class OpenAICompatProvider(LLMProvider):
             payload["presence_penalty"] = request.presence_penalty
         if request.stop:
             payload["stop"] = request.stop
+        if request.tools:
+            payload["tools"] = [
+                {"type": "function", "function": t.function.model_dump()}
+                for t in request.tools
+            ]
+        if request.tool_choice is not None:
+            payload["tool_choice"] = (
+                request.tool_choice
+                if isinstance(request.tool_choice, str)
+                else request.tool_choice.model_dump()
+            )
 
         logger.debug(f"{self.name} streaming request: {model}")
 
@@ -190,6 +277,9 @@ class OpenAICompatProvider(LLMProvider):
                             delta=DeltaContent(
                                 role=delta.get("role"),
                                 content=delta.get("content"),
+                                tool_calls=_tool_calls_from_openai(
+                                    delta.get("tool_calls")
+                                ),
                             ),
                             finish_reason=choice.get("finish_reason"),
                         )

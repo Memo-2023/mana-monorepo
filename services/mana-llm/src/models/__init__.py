@@ -1,6 +1,13 @@
 """Pydantic models for OpenAI-compatible API."""
 
-from .requests import ChatCompletionRequest, EmbeddingRequest
+from .requests import (
+    ChatCompletionRequest,
+    EmbeddingRequest,
+    FunctionSpec,
+    Message,
+    ToolChoice,
+    ToolSpec,
+)
 from .responses import (
     ChatCompletionResponse,
     ChatCompletionStreamResponse,
@@ -12,6 +19,8 @@ from .responses import (
     ModelInfo,
     ModelsResponse,
     StreamChoice,
+    ToolCall,
+    ToolCallFunction,
     Usage,
 )
 
@@ -24,9 +33,15 @@ __all__ = [
     "EmbeddingData",
     "EmbeddingRequest",
     "EmbeddingResponse",
+    "FunctionSpec",
+    "Message",
     "MessageResponse",
     "ModelInfo",
     "ModelsResponse",
     "StreamChoice",
+    "ToolCall",
+    "ToolCallFunction",
+    "ToolChoice",
+    "ToolSpec",
     "Usage",
 ]

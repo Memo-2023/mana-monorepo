@@ -19,6 +19,21 @@ class LLMProvider(ABC):
 
     name: str = "base"
 
+    # Set to True if the provider supports OpenAI-style `tools` + `tool_calls`
+    # for chat completions. The router rejects tool-bearing requests routed
+    # to providers without support rather than silently dropping the tools.
+    # Provider adapters may further narrow this per-model if needed.
+    supports_tools: bool = False
+
+    def model_supports_tools(self, model: str) -> bool:
+        """Check if a specific model within this provider supports tools.
+
+        Default: falls back to the provider-wide flag. Providers with a
+        mixed capability surface (e.g. Ollama — depends on the local
+        model) override this.
+        """
+        return self.supports_tools
+
     @abstractmethod
     async def chat_completion(
         self,

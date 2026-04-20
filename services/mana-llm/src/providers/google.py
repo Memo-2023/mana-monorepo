@@ -1,6 +1,8 @@
 """Google Gemini provider for mana-llm (fallback when Ollama is unavailable)."""
 
+import json
 import logging
+import uuid
 from collections.abc import AsyncIterator
 from typing import Any
 
@@ -20,6 +22,9 @@ from src.models import (
     MessageResponse,
     ModelInfo,
     StreamChoice,
+    ToolCall,
+    ToolCallFunction,
+    ToolSpec,
     Usage,
 )
 
@@ -35,14 +40,66 @@ from .errors import (
 logger = logging.getLogger(__name__)
 
 
-def _unwrap_gemini_response(response: Any, gemini_model: str) -> str:
-    """Validate a non-streaming Gemini response and return its text.
+def _build_gemini_tools(tools: list[ToolSpec] | None) -> list[types.Tool] | None:
+    """Translate our ToolSpec list into Gemini ``types.Tool`` declarations."""
+    if not tools:
+        return None
+    declarations: list[types.FunctionDeclaration] = []
+    for t in tools:
+        declarations.append(
+            types.FunctionDeclaration(
+                name=t.function.name,
+                description=t.function.description,
+                parameters=t.function.parameters or None,
+            )
+        )
+    return [types.Tool(function_declarations=declarations)]
 
-    Raises a structured ProviderError if the response was blocked,
-    truncated, or otherwise produced no usable text. The SDK's
-    ``response.text`` accessor silently returns an empty string in all
-    of those cases, which downstream consumers (e.g. the planner
-    parser) cannot distinguish from a well-formed empty completion.
+
+def _extract_tool_calls(candidate: Any) -> list[ToolCall] | None:
+    """Pull any ``function_call`` parts off a candidate into ToolCalls.
+
+    Gemini emits tool calls as ``content.parts[i].function_call`` with a
+    ``FunctionCall(name, args)`` where ``args`` is a dict (not a JSON
+    string). We normalise to OpenAI shape: arguments are JSON-encoded
+    strings so downstream handlers can treat all providers the same.
+    """
+    if candidate is None:
+        return None
+    content = getattr(candidate, "content", None)
+    parts = getattr(content, "parts", None) or []
+    calls: list[ToolCall] = []
+    for part in parts:
+        fc = getattr(part, "function_call", None)
+        if fc is None:
+            continue
+        name = getattr(fc, "name", None)
+        if not name:
+            continue
+        args = getattr(fc, "args", None) or {}
+        # Gemini's args are already dict-shaped; serialise to JSON string.
+        try:
+            arguments_json = json.dumps(dict(args), ensure_ascii=False)
+        except (TypeError, ValueError):
+            arguments_json = json.dumps({}, ensure_ascii=False)
+        calls.append(
+            ToolCall(
+                id=f"call_{uuid.uuid4().hex[:12]}",
+                function=ToolCallFunction(name=name, arguments=arguments_json),
+            )
+        )
+    return calls or None
+
+
+def _unwrap_gemini_response(
+    response: Any, gemini_model: str
+) -> tuple[str, list[ToolCall] | None, str]:
+    """Validate a non-streaming Gemini response.
+
+    Returns ``(text, tool_calls, finish_reason)``. Raises a structured
+    ``ProviderError`` if the response was blocked, truncated, or
+    otherwise produced no usable payload. ``response.text`` silently
+    returns ``""`` on blocked responses — we refuse to propagate that.
     """
     candidates = getattr(response, "candidates", None) or []
     candidate = candidates[0] if candidates else None
@@ -56,6 +113,7 @@ def _unwrap_gemini_response(response: Any, gemini_model: str) -> str:
         finish_name = finish_name.rsplit(".", 1)[-1]
 
     text = response.text or ""
+    tool_calls = _extract_tool_calls(candidate)
 
     if finish_name in {"SAFETY", "RECITATION", "PROHIBITED_CONTENT", "SPII", "BLOCKLIST"}:
         # Pull the first safety rating that actually blocked if present.
@@ -80,13 +138,37 @@ def _unwrap_gemini_response(response: Any, gemini_model: str) -> str:
         )
         raise ProviderTruncatedError(partial_text=text or None)
 
-    if not text and finish_name not in (None, "STOP"):
-        # Unknown finish reason, empty text — surface instead of silent "".
+    if not text and not tool_calls and finish_name not in (None, "STOP"):
+        # Unknown finish reason, nothing to return — surface instead of "".
         raise ProviderError(
             f"Gemini returned no content (finish_reason={finish_name})"
         )
 
-    return text
+    # Normalise the finish_reason to our OpenAI-compatible vocabulary.
+    openai_finish = "stop"
+    if tool_calls:
+        openai_finish = "tool_calls"
+    elif finish_name == "MAX_TOKENS":
+        openai_finish = "length"
+    return text, tool_calls, openai_finish
+
+
+def _lookup_tool_name(messages: list[Any], tool_call_id: str | None) -> str | None:
+    """Find the tool name for a given ``tool_call_id``.
+
+    OpenAI's tool-message carries only the id; the matching name lives
+    on the preceding assistant message's ``tool_calls[]``. We scan from
+    the end (most recent assistant turn) backwards.
+    """
+    if not tool_call_id:
+        return None
+    for m in reversed(messages):
+        if m.role != "assistant" or not m.tool_calls:
+            continue
+        for call in m.tool_calls:
+            if call.id == tool_call_id:
+                return call.function.name
+    return None
 
 
 def _wrap_gemini_call_error(err: Exception, gemini_model: str) -> ProviderError:
@@ -123,6 +205,8 @@ class GoogleProvider(LLMProvider):
     """Google Gemini API provider."""
 
     name = "google"
+    # Gemini 2.x supports OpenAI-style function calling across all listed models.
+    supports_tools = True
 
     def __init__(self, api_key: str, default_model: str = "gemini-2.5-flash"):
         self.api_key = api_key
@@ -138,43 +222,98 @@ class GoogleProvider(LLMProvider):
     ) -> tuple[str | None, list[types.Content]]:
         """Convert OpenAI-format messages to Google Gemini format.
 
-        Returns (system_instruction, contents).
+        Returns (system_instruction, contents). Handles text, multimodal
+        image content, assistant messages carrying ``tool_calls``, and
+        ``tool`` result messages (mapped to Gemini ``function_response``
+        parts — Gemini has no ``tool`` role, function responses ride on
+        a ``user`` turn).
         """
         system_instruction: str | None = None
         contents: list[types.Content] = []
 
         for msg in request.messages:
             if msg.role == "system":
-                # Gemini uses system_instruction separately
                 if isinstance(msg.content, str):
                     system_instruction = msg.content
                 continue
 
-            role = "user" if msg.role == "user" else "model"
-
-            if isinstance(msg.content, str):
-                contents.append(types.Content(role=role, parts=[types.Part.from_text(text=msg.content)]))
-            else:
-                # Multimodal content
-                parts: list[types.Part] = []
-                for part in msg.content:
-                    if part.type == "text":
-                        parts.append(types.Part.from_text(text=part.text))
-                    elif part.type == "image_url" and part.image_url:
-                        url = part.image_url.url
-                        if url.startswith("data:"):
-                            # Parse data URI: data:image/jpeg;base64,<data>
-                            header, b64_data = url.split(",", 1)
-                            mime_type = header.split(":")[1].split(";")[0]
-                            import base64
-
-                            image_bytes = base64.b64decode(b64_data)
-                            parts.append(
-                                types.Part.from_bytes(data=image_bytes, mime_type=mime_type)
+            # Tool result message → function_response Part on a user turn.
+            if msg.role == "tool":
+                # The content is the stringified tool result. We also need
+                # a tool name — the OpenAI spec carries it on the matching
+                # assistant tool_call, keyed by tool_call_id. We don't
+                # track that back-reference here, so we pull the name
+                # from the preceding assistant message's tool_calls.
+                name = _lookup_tool_name(request.messages, msg.tool_call_id)
+                if not name:
+                    continue  # orphan tool message — skip silently
+                payload: Any
+                if isinstance(msg.content, str):
+                    try:
+                        payload = json.loads(msg.content)
+                        if not isinstance(payload, dict):
+                            payload = {"result": payload}
+                    except (TypeError, ValueError):
+                        payload = {"result": msg.content}
+                else:
+                    payload = {"result": ""}
+                contents.append(
+                    types.Content(
+                        role="user",
+                        parts=[
+                            types.Part.from_function_response(
+                                name=name, response=payload
                             )
-                        else:
-                            # URL-based image - use as URI
-                            parts.append(types.Part.from_uri(file_uri=url, mime_type="image/jpeg"))
+                        ],
+                    )
+                )
+                continue
+
+            role = "user" if msg.role == "user" else "model"
+            parts: list[types.Part] = []
+
+            if msg.role == "assistant" and msg.tool_calls:
+                for call in msg.tool_calls:
+                    try:
+                        args_obj = json.loads(call.function.arguments or "{}")
+                    except (TypeError, ValueError):
+                        args_obj = {}
+                    parts.append(
+                        types.Part(
+                            function_call=types.FunctionCall(
+                                name=call.function.name, args=args_obj
+                            )
+                        )
+                    )
+
+            if msg.content is not None:
+                if isinstance(msg.content, str):
+                    parts.append(types.Part.from_text(text=msg.content))
+                else:
+                    for part in msg.content:
+                        if part.type == "text":
+                            parts.append(types.Part.from_text(text=part.text))
+                        elif part.type == "image_url" and part.image_url:
+                            url = part.image_url.url
+                            if url.startswith("data:"):
+                                header, b64_data = url.split(",", 1)
+                                mime_type = header.split(":")[1].split(";")[0]
+                                import base64
+
+                                image_bytes = base64.b64decode(b64_data)
+                                parts.append(
+                                    types.Part.from_bytes(
+                                        data=image_bytes, mime_type=mime_type
+                                    )
+                                )
+                            else:
+                                parts.append(
+                                    types.Part.from_uri(
+                                        file_uri=url, mime_type="image/jpeg"
+                                    )
+                                )
+
+            if parts:
                 contents.append(types.Content(role=role, parts=parts))
 
         return system_instruction, contents
@@ -199,6 +338,10 @@ class GoogleProvider(LLMProvider):
             stop_seqs = request.stop if isinstance(request.stop, list) else [request.stop]
             config["stop_sequences"] = stop_seqs
 
+        gemini_tools = _build_gemini_tools(request.tools)
+        if gemini_tools:
+            config["tools"] = gemini_tools
+
         gen_config = types.GenerateContentConfig(
             system_instruction=system_instruction,
             **config,
@@ -217,7 +360,9 @@ class GoogleProvider(LLMProvider):
         except Exception as err:
             raise _wrap_gemini_call_error(err, gemini_model) from err
 
-        content = _unwrap_gemini_response(response, gemini_model)
+        content, tool_calls, finish_reason = _unwrap_gemini_response(
+            response, gemini_model
+        )
         usage_meta = response.usage_metadata
 
         return ChatCompletionResponse(
@@ -225,8 +370,11 @@ class GoogleProvider(LLMProvider):
             choices=[
                 Choice(
                     index=0,
-                    message=MessageResponse(content=content),
-                    finish_reason="stop",
+                    message=MessageResponse(
+                        content=content or None,
+                        tool_calls=tool_calls,
+                    ),
+                    finish_reason=finish_reason,
                 )
             ],
             usage=Usage(
@@ -252,6 +400,10 @@ class GoogleProvider(LLMProvider):
             config["max_output_tokens"] = request.max_tokens
         if request.top_p is not None:
             config["top_p"] = request.top_p
+
+        gemini_tools = _build_gemini_tools(request.tools)
+        if gemini_tools:
+            config["tools"] = gemini_tools
 
         gen_config = types.GenerateContentConfig(
             system_instruction=system_instruction,
@@ -297,7 +449,10 @@ class GoogleProvider(LLMProvider):
 
         # Post-stream check: if the stream ended without emitting any text,
         # surface the structured reason instead of quietly closing with an
-        # empty "stop". Matches _unwrap_gemini_response semantics.
+        # empty "stop". Matches _unwrap_gemini_response semantics. We
+        # discard the return value here — the streaming path produces its
+        # content chunk-by-chunk above, so we only need this call for its
+        # side-effect of raising on SAFETY / RECITATION / MAX_TOKENS.
         if not emitted_any_text and last_chunk is not None:
             _unwrap_gemini_response(last_chunk, gemini_model)
 

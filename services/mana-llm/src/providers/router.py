@@ -17,6 +17,7 @@ from src.models import (
 )
 
 from .base import LLMProvider
+from .errors import ProviderCapabilityError
 from .ollama import OllamaProvider
 from .openai_compat import OpenAICompatProvider
 
@@ -154,6 +155,23 @@ class ProviderRouter:
         )
         return await google.chat_completion(request, gemini_model)
 
+    def _check_tool_capability(
+        self, provider: LLMProvider, model_name: str, request: ChatCompletionRequest
+    ) -> None:
+        """Refuse tool-bearing requests for providers/models without tool support.
+
+        Silent downgrade (dropping the `tools` payload) is more dangerous
+        than an explicit error — the caller would get plain text back and
+        have no way to tell the tools never reached the model.
+        """
+        if not request.tools:
+            return
+        if not provider.model_supports_tools(model_name):
+            raise ProviderCapabilityError(
+                f"{provider.name}/{model_name} does not support tool calling. "
+                "Choose a tool-capable model (e.g. gemini-2.5-flash, llama3.1:*)"
+            )
+
     async def chat_completion(
         self,
         request: ChatCompletionRequest,
@@ -164,6 +182,7 @@ class ProviderRouter:
         # Non-Ollama providers: direct routing, no fallback
         if provider_name != "ollama":
             provider = self._get_provider(provider_name)
+            self._check_tool_capability(provider, model_name, request)
             logger.info(f"Routing chat completion to {provider_name}/{model_name}")
             return await provider.chat_completion(request, model_name)
 
@@ -176,6 +195,7 @@ class ProviderRouter:
 
         # Try Ollama first
         provider = self._get_provider("ollama")
+        self._check_tool_capability(provider, model_name, request)
         logger.info(f"Routing chat completion to ollama/{model_name}")
         self._ollama_concurrent += 1
 
@@ -199,6 +219,7 @@ class ProviderRouter:
         # Non-Ollama: direct
         if provider_name != "ollama":
             provider = self._get_provider(provider_name)
+            self._check_tool_capability(provider, model_name, request)
             logger.info(f"Routing streaming to {provider_name}/{model_name}")
             async for chunk in provider.chat_completion_stream(request, model_name):
                 yield chunk
@@ -219,6 +240,7 @@ class ProviderRouter:
             return
 
         provider = self._get_provider("ollama")
+        self._check_tool_capability(provider, model_name, request)
         logger.info(f"Routing streaming to ollama/{model_name}")
         self._ollama_concurrent += 1
 

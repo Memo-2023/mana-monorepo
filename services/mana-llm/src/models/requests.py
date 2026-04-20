@@ -28,11 +28,64 @@ class ImageContent(BaseModel):
 MessageContent = str | list[TextContent | ImageContent]
 
 
-class Message(BaseModel):
-    """A single message in the conversation."""
+class ToolCallFunction(BaseModel):
+    """The function portion of a tool_call on an assistant message."""
 
-    role: Literal["system", "user", "assistant"]
-    content: MessageContent
+    name: str
+    # Arguments are passed as a JSON string (OpenAI spec). Providers may
+    # emit structured args natively; the adapter serialises them here.
+    arguments: str
+
+
+class ToolCall(BaseModel):
+    """A tool invocation the assistant decided to make."""
+
+    id: str
+    type: Literal["function"] = "function"
+    function: ToolCallFunction
+
+
+class Message(BaseModel):
+    """A single message in the conversation.
+
+    `tool` messages carry the result of a previously-requested tool call
+    back into the context; they must reference the originating call via
+    ``tool_call_id``. Assistant messages may contain either plain
+    ``content`` or ``tool_calls`` (or both, though providers typically
+    only emit one at a time).
+    """
+
+    role: Literal["system", "user", "assistant", "tool"]
+    content: MessageContent | None = None
+    tool_call_id: str | None = None
+    tool_calls: list[ToolCall] | None = None
+
+
+class FunctionSpec(BaseModel):
+    """OpenAI-style function declaration."""
+
+    name: str
+    description: str
+    # JSON Schema for the function's parameters. Kept as a dict here to
+    # stay loose; providers translate it to their native shape.
+    parameters: dict[str, Any] = Field(default_factory=dict)
+
+
+class ToolSpec(BaseModel):
+    """A tool the model may call. Only ``function`` tools are supported."""
+
+    type: Literal["function"] = "function"
+    function: FunctionSpec
+
+
+class ToolChoiceFunction(BaseModel):
+    """Force-pick a specific function for ``tool_choice``."""
+
+    type: Literal["function"] = "function"
+    function: dict[str, str]  # {"name": "tool_name"}
+
+
+ToolChoice = Literal["auto", "none", "required"] | ToolChoiceFunction
 
 
 class ResponseFormat(BaseModel):
@@ -63,6 +116,8 @@ class ChatCompletionRequest(BaseModel):
     presence_penalty: float | None = Field(default=None, ge=-2.0, le=2.0)
     stop: str | list[str] | None = None
     response_format: ResponseFormat | None = None
+    tools: list[ToolSpec] | None = None
+    tool_choice: ToolChoice | None = None
 
 
 class EmbeddingRequest(BaseModel):

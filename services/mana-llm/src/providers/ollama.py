@@ -20,12 +20,74 @@ from src.models import (
     MessageResponse,
     ModelInfo,
     StreamChoice,
+    ToolCall,
+    ToolCallFunction,
     Usage,
 )
 
 from .base import LLMProvider
 
+# Ollama emits tool_calls under /api/chat as:
+#   {"message":{"content":"", "tool_calls":[{"function":{"name":"x","arguments":{...}}}]}}
+# Arguments arrive as a dict — we normalise to a JSON string to match
+# the OpenAI-spec shape our downstream code expects.
+
+# Ollama models known to support tool-calling reliably (as of 0.3+).
+# Everything else: we still pass `tools` to the API (it ignores them on
+# incompatible models), but the assistant response will be plain text.
+# A shared-ai-level capability check rejects these cases before the call.
+TOOL_CAPABLE_OLLAMA_PATTERNS: tuple[str, ...] = (
+    "llama3.1",
+    "llama3.2",
+    "llama3.3",
+    "qwen2.5",
+    "qwen3",
+    "mistral",
+    "mixtral",
+    "command-r",
+    "firefunction",
+)
+
 logger = logging.getLogger(__name__)
+
+
+def _safe_parse_args(raw: str | None) -> dict[str, Any]:
+    """Best-effort parse of a JSON-encoded arguments string."""
+    if not raw:
+        return {}
+    try:
+        parsed = json.loads(raw)
+    except (TypeError, ValueError):
+        return {}
+    return parsed if isinstance(parsed, dict) else {}
+
+
+def _tool_calls_from_ollama(raw: list[dict[str, Any]] | None) -> list[ToolCall] | None:
+    """Normalise Ollama's tool_calls into our ToolCall model."""
+    if not raw:
+        return None
+    import uuid
+
+    calls: list[ToolCall] = []
+    for idx, c in enumerate(raw):
+        fn = c.get("function") or {}
+        name = fn.get("name")
+        if not name:
+            continue
+        args = fn.get("arguments")
+        if isinstance(args, dict):
+            arguments_json = json.dumps(args, ensure_ascii=False)
+        elif isinstance(args, str):
+            arguments_json = args
+        else:
+            arguments_json = "{}"
+        calls.append(
+            ToolCall(
+                id=c.get("id") or f"call_{uuid.uuid4().hex[:12]}",
+                function=ToolCallFunction(name=name, arguments=arguments_json),
+            )
+        )
+    return calls or None
 
 
 def _strip_json_fences(content: str) -> str:
@@ -53,6 +115,17 @@ class OllamaProvider(LLMProvider):
     """Ollama LLM provider."""
 
     name = "ollama"
+    supports_tools = True
+
+    def model_supports_tools(self, model: str) -> bool:
+        """Narrow tool capability to models trained for function calling.
+
+        Ollama accepts the ``tools`` payload even for incompatible models
+        but silently drops it — the assistant just replies in prose. We
+        reject those requests upfront so callers get a clear error.
+        """
+        lower = model.lower()
+        return any(pattern in lower for pattern in TOOL_CAPABLE_OLLAMA_PATTERNS)
 
     def __init__(self, base_url: str | None = None, timeout: int | None = None):
         self.base_url = (base_url or settings.ollama_url).rstrip("/")
@@ -70,37 +143,56 @@ class OllamaProvider(LLMProvider):
         return self._client
 
     def _convert_messages(self, request: ChatCompletionRequest) -> list[dict[str, Any]]:
-        """Convert OpenAI message format to Ollama format."""
-        messages = []
+        """Convert OpenAI message format to Ollama format.
+
+        Ollama's ``/api/chat`` uses the OpenAI shape for assistant
+        ``tool_calls`` and ``tool`` result messages (with args as objects
+        rather than JSON strings on output — input still accepts JSON
+        strings), so we largely pass them through.
+        """
+        messages: list[dict[str, Any]] = []
         for msg in request.messages:
-            if isinstance(msg.content, str):
-                messages.append({"role": msg.role, "content": msg.content})
+            out: dict[str, Any] = {"role": msg.role}
+
+            if msg.tool_calls:
+                out["tool_calls"] = [
+                    {
+                        "function": {
+                            "name": c.function.name,
+                            # Ollama accepts either stringified JSON or
+                            # already-parsed objects; send parsed for
+                            # better compatibility with older models.
+                            "arguments": _safe_parse_args(c.function.arguments),
+                        }
+                    }
+                    for c in msg.tool_calls
+                ]
+
+            if msg.content is None:
+                out["content"] = ""
+            elif isinstance(msg.content, str):
+                out["content"] = msg.content
             else:
-                # Handle multimodal content (vision)
-                text_parts = []
-                images = []
+                text_parts: list[str] = []
+                images: list[str] = []
                 for part in msg.content:
                     if part.type == "text":
                         text_parts.append(part.text)
                     elif part.type == "image_url":
                         url = part.image_url.url
-                        # Extract base64 data from data URL
                         if url.startswith("data:"):
-                            # Format: data:image/png;base64,<base64_data>
                             base64_data = url.split(",", 1)[1] if "," in url else url
                             images.append(base64_data)
                         else:
-                            # HTTP URL - Ollama expects base64, so we'd need to fetch
-                            # For now, log warning and skip
-                            logger.warning(f"HTTP image URLs not supported, skipping: {url[:50]}...")
-
-                message_data: dict[str, Any] = {
-                    "role": msg.role,
-                    "content": " ".join(text_parts),
-                }
+                            logger.warning(
+                                "HTTP image URLs not supported, skipping: %s...",
+                                url[:50],
+                            )
+                out["content"] = " ".join(text_parts)
                 if images:
-                    message_data["images"] = images
-                messages.append(message_data)
+                    out["images"] = images
+
+            messages.append(out)
         return messages
 
     async def chat_completion(
@@ -152,23 +244,39 @@ class OllamaProvider(LLMProvider):
         if options:
             payload["options"] = options
 
+        if request.tools:
+            payload["tools"] = [
+                {"type": "function", "function": t.function.model_dump()}
+                for t in request.tools
+            ]
+
         logger.debug(f"Ollama request: {model}, messages: {len(request.messages)}")
 
         response = await self.client.post("/api/chat", json=payload)
         response.raise_for_status()
         data = response.json()
 
+        message = data.get("message", {})
+        tool_calls = _tool_calls_from_ollama(message.get("tool_calls"))
         # Defensive fence-stripping: even with `format` set, some older
         # Ollama versions still emit ```json ... ``` wrappers for vision
         # models. Strip them so strict downstream parsers see clean JSON.
-        content = _strip_json_fences(data["message"]["content"])
+        raw_content = message.get("content", "") or ""
+        content = _strip_json_fences(raw_content) if raw_content else ""
+
+        finish_reason = "tool_calls" if tool_calls else (
+            "stop" if data.get("done") else None
+        )
 
         return ChatCompletionResponse(
             model=f"ollama/{model}",
             choices=[
                 Choice(
-                    message=MessageResponse(content=content),
-                    finish_reason="stop" if data.get("done") else None,
+                    message=MessageResponse(
+                        content=content or None,
+                        tool_calls=tool_calls,
+                    ),
+                    finish_reason=finish_reason,
                 )
             ],
             usage=Usage(
@@ -203,6 +311,12 @@ class OllamaProvider(LLMProvider):
 
         if options:
             payload["options"] = options
+
+        if request.tools:
+            payload["tools"] = [
+                {"type": "function", "function": t.function.model_dump()}
+                for t in request.tools
+            ]
 
         logger.debug(f"Ollama streaming request: {model}")
 

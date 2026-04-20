@@ -15,11 +15,27 @@ class Usage(BaseModel):
     total_tokens: int = 0
 
 
+class ToolCallFunction(BaseModel):
+    """Function portion of a tool_call the assistant produced."""
+
+    name: str
+    arguments: str  # JSON-encoded (OpenAI spec)
+
+
+class ToolCall(BaseModel):
+    """A tool invocation the assistant decided to make."""
+
+    id: str
+    type: Literal["function"] = "function"
+    function: ToolCallFunction
+
+
 class MessageResponse(BaseModel):
     """Response message from the model."""
 
     role: Literal["assistant"] = "assistant"
-    content: str
+    content: str | None = None
+    tool_calls: list[ToolCall] | None = None
 
 
 class Choice(BaseModel):
@@ -27,7 +43,9 @@ class Choice(BaseModel):
 
     index: int = 0
     message: MessageResponse
-    finish_reason: Literal["stop", "length", "content_filter"] | None = "stop"
+    finish_reason: (
+        Literal["stop", "length", "content_filter", "tool_calls"] | None
+    ) = "stop"
 
 
 class ChatCompletionResponse(BaseModel):
@@ -46,6 +64,7 @@ class DeltaContent(BaseModel):
 
     role: Literal["assistant"] | None = None
     content: str | None = None
+    tool_calls: list[ToolCall] | None = None
 
 
 class StreamChoice(BaseModel):
@@ -53,7 +72,9 @@ class StreamChoice(BaseModel):
 
     index: int = 0
     delta: DeltaContent
-    finish_reason: Literal["stop", "length", "content_filter"] | None = None
+    finish_reason: (
+        Literal["stop", "length", "content_filter", "tool_calls"] | None
+    ) = None
 
 
 class ChatCompletionStreamResponse(BaseModel):
