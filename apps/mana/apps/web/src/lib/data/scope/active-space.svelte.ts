@@ -11,6 +11,7 @@
 
 import type { SpaceType, SpaceTier } from '@mana/shared-types';
 import { isSpaceType, isSpaceTier } from '@mana/shared-types';
+import { authFetch } from './auth-fetch';
 
 export interface ActiveSpace {
 	id: string;
@@ -129,8 +130,11 @@ export const __endpoints = {
 };
 
 async function fetchActiveMember(): Promise<ActiveSpace | null> {
-	const res = await fetch(__endpoints.active, { credentials: 'include' });
-	if (res.status === 404) return null; // no active org
+	const res = await authFetch(__endpoints.active);
+	// Better Auth returns 400/404 when no organization is active yet —
+	// treat both as "not active" so the bootstrap can fall through to
+	// auto-activation.
+	if (res.status === 404 || res.status === 400) return null;
 	if (!res.ok) throw new Error(`get-active-member failed: ${res.status}`);
 	const raw = (await res.json()) as {
 		role?: string;
@@ -141,17 +145,15 @@ async function fetchActiveMember(): Promise<ActiveSpace | null> {
 }
 
 async function fetchOrganizations(): Promise<ActiveSpace[]> {
-	const res = await fetch(__endpoints.list, { credentials: 'include' });
+	const res = await authFetch(__endpoints.list);
 	if (!res.ok) throw new Error(`organization/list failed: ${res.status}`);
 	const raws = (await res.json()) as RawOrg[];
 	return raws.map((r) => rawToActiveSpace(r, 'owner'));
 }
 
 async function setActiveOnServer(organizationId: string): Promise<void> {
-	const res = await fetch(__endpoints.setActive, {
+	const res = await authFetch(__endpoints.setActive, {
 		method: 'POST',
-		credentials: 'include',
-		headers: { 'content-type': 'application/json' },
 		body: JSON.stringify({ organizationId }),
 	});
 	if (!res.ok) throw new Error(`organization/set-active failed: ${res.status}`);

@@ -11,7 +11,7 @@
 	 */
 
 	import { onDestroy } from 'svelte';
-	import { getActiveSpace, loadActiveSpace, type ActiveSpace } from '$lib/data/scope';
+	import { getActiveSpace, loadActiveSpace, authFetch, type ActiveSpace } from '$lib/data/scope';
 	import { SPACE_TYPE_LABELS } from '@mana/shared-branding';
 	import { isSpaceType, isSpaceTier } from '@mana/shared-types';
 	import SpaceCreateDialog from './SpaceCreateDialog.svelte';
@@ -57,7 +57,7 @@
 		loadingList = true;
 		loadError = null;
 		try {
-			const res = await fetch('/api/auth/organization/list', { credentials: 'include' });
+			const res = await authFetch('/api/auth/organization/list');
 			if (!res.ok) throw new Error(`list failed: ${res.status}`);
 			const raw = (await res.json()) as Array<{
 				id: string;
@@ -97,10 +97,8 @@
 		}
 		switching = true;
 		try {
-			const res = await fetch('/api/auth/organization/set-active', {
+			const res = await authFetch('/api/auth/organization/set-active', {
 				method: 'POST',
-				credentials: 'include',
-				headers: { 'content-type': 'application/json' },
 				body: JSON.stringify({ organizationId: id }),
 			});
 			if (!res.ok) throw new Error(`set-active failed: ${res.status}`);

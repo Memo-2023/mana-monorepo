@@ -16,7 +16,7 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { SPACE_TYPE_LABELS } from '@mana/shared-branding';
 	import { isSpaceType, type SpaceType } from '@mana/shared-types';
-	import { loadActiveSpace } from '$lib/data/scope';
+	import { loadActiveSpace, authFetch } from '$lib/data/scope';
 
 	interface InvitationPayload {
 		id: string;
@@ -52,9 +52,8 @@
 		loading = true;
 		loadError = null;
 		try {
-			const res = await fetch(
-				`/api/auth/organization/get-invitation?id=${encodeURIComponent(invitationId)}`,
-				{ credentials: 'include' }
+			const res = await authFetch(
+				`/api/auth/organization/get-invitation?id=${encodeURIComponent(invitationId)}`
 			);
 			if (!res.ok) {
 				throw new Error(`Einladung nicht gefunden (${res.status})`);
@@ -82,20 +81,16 @@
 		submitting = true;
 		actionError = null;
 		try {
-			const res = await fetch('/api/auth/organization/accept-invitation', {
+			const res = await authFetch('/api/auth/organization/accept-invitation', {
 				method: 'POST',
-				credentials: 'include',
-				headers: { 'content-type': 'application/json' },
 				body: JSON.stringify({ invitationId }),
 			});
 			if (!res.ok) {
 				throw new Error(await res.text());
 			}
 			// Activate the newly-joined space so the dashboard opens inside it.
-			await fetch('/api/auth/organization/set-active', {
+			await authFetch('/api/auth/organization/set-active', {
 				method: 'POST',
-				credentials: 'include',
-				headers: { 'content-type': 'application/json' },
 				body: JSON.stringify({ organizationId: invitation.organizationId }),
 			});
 			await loadActiveSpace({ force: true });
@@ -111,10 +106,8 @@
 		submitting = true;
 		actionError = null;
 		try {
-			const res = await fetch('/api/auth/organization/reject-invitation', {
+			const res = await authFetch('/api/auth/organization/reject-invitation', {
 				method: 'POST',
-				credentials: 'include',
-				headers: { 'content-type': 'application/json' },
 				body: JSON.stringify({ invitationId }),
 			});
 			if (!res.ok) throw new Error(await res.text());

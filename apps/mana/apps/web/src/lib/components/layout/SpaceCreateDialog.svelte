@@ -11,7 +11,7 @@
 
 	import { SPACE_TYPES, SPACE_TYPE_LABELS, SPACE_TYPE_DESCRIPTIONS } from '@mana/shared-branding';
 	import type { SpaceType } from '@mana/shared-types';
-	import { loadActiveSpace } from '$lib/data/scope';
+	import { loadActiveSpace, authFetch } from '$lib/data/scope';
 
 	interface Props {
 		open: boolean;
@@ -74,10 +74,8 @@
 		if (legalEntity.trim()) metadata.legalEntity = legalEntity.trim();
 
 		try {
-			const res = await fetch('/api/auth/organization/create', {
+			const res = await authFetch('/api/auth/organization/create', {
 				method: 'POST',
-				credentials: 'include',
-				headers: { 'content-type': 'application/json' },
 				body: JSON.stringify({
 					name: name.trim(),
 					slug: derivedSlug || undefined,
@@ -90,10 +88,8 @@
 			}
 			const created = (await res.json()) as { id: string };
 			// Activate the new space so the user lands inside it on reload.
-			await fetch('/api/auth/organization/set-active', {
+			await authFetch('/api/auth/organization/set-active', {
 				method: 'POST',
-				credentials: 'include',
-				headers: { 'content-type': 'application/json' },
 				body: JSON.stringify({ organizationId: created.id }),
 			});
 			await loadActiveSpace({ force: true });

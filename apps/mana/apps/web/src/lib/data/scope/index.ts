@@ -33,3 +33,5 @@ export {
 } from './scoped-db';
 
 export { applyVisibility, isVisibleToCurrentUser, type Visibility } from './visibility';
+
+export { authFetch, authBaseUrl } from './auth-fetch';

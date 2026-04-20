@@ -12,7 +12,7 @@
 	 */
 
 	import { onMount } from 'svelte';
-	import { getActiveSpace } from '$lib/data/scope';
+	import { getActiveSpace, authFetch } from '$lib/data/scope';
 	import { SPACE_TYPE_LABELS } from '@mana/shared-branding';
 
 	interface Member {
@@ -52,13 +52,11 @@
 		loadError = null;
 		try {
 			const [memRes, invRes] = await Promise.all([
-				fetch(
-					`/api/auth/organization/list-members?organizationId=${encodeURIComponent(activeSpace.id)}`,
-					{ credentials: 'include' }
+				authFetch(
+					`/api/auth/organization/list-members?organizationId=${encodeURIComponent(activeSpace.id)}`
 				),
-				fetch(
-					`/api/auth/organization/list-invitations?organizationId=${encodeURIComponent(activeSpace.id)}`,
-					{ credentials: 'include' }
+				authFetch(
+					`/api/auth/organization/list-invitations?organizationId=${encodeURIComponent(activeSpace.id)}`
 				),
 			]);
 			if (memRes.ok) {
@@ -92,10 +90,8 @@
 		inviteError = null;
 		inviteSuccess = null;
 		try {
-			const res = await fetch('/api/auth/organization/invite-member', {
+			const res = await authFetch('/api/auth/organization/invite-member', {
 				method: 'POST',
-				credentials: 'include',
-				headers: { 'content-type': 'application/json' },
 				body: JSON.stringify({
 					email: inviteEmail.trim(),
 					role: inviteRole,
@@ -117,10 +113,8 @@
 	}
 
 	async function cancelInvitation(id: string) {
-		const res = await fetch('/api/auth/organization/cancel-invitation', {
+		const res = await authFetch('/api/auth/organization/cancel-invitation', {
 			method: 'POST',
-			credentials: 'include',
-			headers: { 'content-type': 'application/json' },
 			body: JSON.stringify({ invitationId: id }),
 		});
 		if (res.ok) await refresh();
@@ -129,10 +123,8 @@
 	async function removeMember(userId: string) {
 		if (!activeSpace) return;
 		if (!confirm('Mitglied wirklich entfernen?')) return;
-		const res = await fetch('/api/auth/organization/remove-member', {
+		const res = await authFetch('/api/auth/organization/remove-member', {
 			method: 'POST',
-			credentials: 'include',
-			headers: { 'content-type': 'application/json' },
 			body: JSON.stringify({ memberIdOrEmail: userId, organizationId: activeSpace.id }),
 		});
 		if (res.ok) await refresh();
