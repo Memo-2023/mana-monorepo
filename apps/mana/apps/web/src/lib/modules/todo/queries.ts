@@ -4,6 +4,7 @@
 
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
+import { scopedForModule, applyVisibility } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
 import { filterBySceneScopeBatch } from '$lib/stores/scene-scope.svelte';
 import type {
@@ -44,8 +45,11 @@ export function toTask(local: LocalTask): Task {
 
 export function useAllTasks() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalTask>('tasks').orderBy('order').toArray();
-		const visible = locals.filter((t) => !t.deletedAt);
+		// Scope-first, then in-memory sort by `order`. sortBy is O(n) — fine
+		// for a user's own task list; if it ever becomes hot, add a
+		// [spaceId+order] compound index in a follow-up Dexie version.
+		const locals = await scopedForModule<LocalTask, string>('todo', 'tasks').sortBy('order');
+		const visible = applyVisibility(locals).filter((t) => !t.deletedAt);
 		const decrypted = await decryptRecords('tasks', visible);
 		// Batch tag lookup: 1 query instead of N
 		const ids = decrypted.map((t) => t.id);
@@ -68,22 +72,26 @@ export { useAllTags as useAllLabels } from '@mana/shared-stores';
 
 export function useAllBoardViews() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalBoardView>('boardViews').orderBy('order').toArray();
-		return locals.filter((v) => !v.deletedAt);
+		const locals = await scopedForModule<LocalBoardView, string>('todo', 'boardViews').sortBy(
+			'order'
+		);
+		return applyVisibility(locals).filter((v) => !v.deletedAt);
 	}, [] as LocalBoardView[]);
 }
 
 export function useAllReminders() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalReminder>('reminders').toArray();
-		return locals.filter((r) => !r.deletedAt);
+		const locals = await scopedForModule<LocalReminder, string>('todo', 'reminders').toArray();
+		return applyVisibility(locals).filter((r) => !r.deletedAt);
 	}, [] as LocalReminder[]);
 }
 
 export function useAllProjects() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalTodoProject>('todoProjects').orderBy('order').toArray();
-		return locals.filter((p) => !p.deletedAt);
+		const locals = await scopedForModule<LocalTodoProject, string>('todo', 'todoProjects').sortBy(
+			'order'
+		);
+		return applyVisibility(locals).filter((p) => !p.deletedAt);
 	}, [] as LocalTodoProject[]);
 }
 

@@ -105,3 +105,23 @@ export function scopedForModule<T, PK>(
 	assertModuleAllowed(moduleId);
 	return scopedTable<T, PK>(tableName);
 }
+
+/**
+ * Read a single record by primary key with a scope check. Returns undefined
+ * if the record doesn't exist OR if its spaceId isn't in the current
+ * in-scope set — i.e. the user manipulated a URL parameter and tried to
+ * peek at a record from a space they don't have active.
+ *
+ * Uses the Dexie primary-key fast path under the hood; the scope check
+ * is a single field comparison on the one row returned.
+ */
+export async function scopedGet<T>(tableName: string, id: string | number): Promise<T | undefined> {
+	const record = (await db.table(tableName).get(id)) as T | undefined;
+	if (!record) return undefined;
+	const rec = record as { spaceId?: unknown };
+	const ids = getInScopeSpaceIds();
+	if (typeof rec.spaceId !== 'string' || !ids.includes(rec.spaceId)) {
+		return undefined;
+	}
+	return record;
+}

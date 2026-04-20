@@ -24,6 +24,7 @@ export { reconcileSentinels, personalSpaceSentinel } from './bootstrap';
 export {
 	scopedTable,
 	scopedForModule,
+	scopedGet,
 	assertModuleAllowed,
 	getInScopeSpaceIds,
 	ScopeNotReadyError,

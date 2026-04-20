@@ -16,6 +16,7 @@
 
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
+import { scopedForModule, scopedGet, applyVisibility } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
 import { filterBySceneScopeBatch } from '$lib/stores/scene-scope.svelte';
 import { noteTagOps } from './stores/tags.svelte';
@@ -44,10 +45,10 @@ export function useAllNotes() {
 		// Filter on plaintext metadata first — none of these fields are
 		// in the encryption registry, so they stay readable even with
 		// the vault locked. Cuts the decrypt workload to only what the
-		// view actually renders.
-		const visible = (await db.table<LocalNote>('notes').toArray()).filter(
-			(n) => !n.deletedAt && !n.isArchived
-		);
+		// view actually renders. Scope + visibility filters run before
+		// decrypt for the same reason.
+		const raw = await scopedForModule<LocalNote, string>('notes', 'notes').toArray();
+		const visible = applyVisibility(raw).filter((n) => !n.deletedAt && !n.isArchived);
 		// Locked vault returns the blobs untouched so the UI can render
 		// a "🔒" placeholder where title/content would be.
 		const decrypted = await decryptRecords('notes', visible);
@@ -64,7 +65,9 @@ export function useAllNotes() {
 export function useNote(id: string) {
 	return useLiveQueryWithDefault(
 		async () => {
-			const local = await db.table<LocalNote>('notes').get(id);
+			// scopedGet returns undefined if the note belongs to another
+			// space — protects against URL-manipulated deep links.
+			const local = await scopedGet<LocalNote>('notes', id);
 			if (!local || local.deletedAt) return null;
 			const [decrypted] = await decryptRecords('notes', [local]);
 			return decrypted ? toNote(decrypted) : null;

@@ -4,6 +4,7 @@
 
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
+import { scopedForModule, applyVisibility } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
 import { filterBySceneScopeBatch } from '$lib/stores/scene-scope.svelte';
 import { contactTagOps } from './stores/tags.svelte';
@@ -53,9 +54,8 @@ export function toContact(local: LocalContact): Contact {
 
 export function useAllContacts() {
 	return useLiveQueryWithDefault(async () => {
-		const visible = (await db.table<LocalContact>('contacts').toArray()).filter(
-			(c) => !c.deletedAt
-		);
+		const raw = await scopedForModule<LocalContact, string>('contacts', 'contacts').toArray();
+		const visible = applyVisibility(raw).filter((c) => !c.deletedAt);
 		const decrypted = await decryptRecords('contacts', visible);
 		const tagMap = await contactTagOps.getTagIdsForMany(decrypted.map((c) => c.id));
 		const scoped = filterBySceneScopeBatch(decrypted, (c) => c.id, tagMap);
