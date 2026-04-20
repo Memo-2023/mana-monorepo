@@ -73,10 +73,21 @@ export function createServerLlmClient(opts: ServerLlmClientOptions): LlmClient {
 			const choice = data.choices?.[0];
 			if (!choice) throw new Error('mana-llm response had no choices');
 
+			const usage = data.usage
+				? {
+						promptTokens: data.usage.prompt_tokens ?? 0,
+						completionTokens: data.usage.completion_tokens ?? 0,
+						totalTokens:
+							data.usage.total_tokens ??
+							(data.usage.prompt_tokens ?? 0) + (data.usage.completion_tokens ?? 0),
+					}
+				: undefined;
+
 			return {
 				content: choice.message?.content ?? null,
 				toolCalls: (choice.message?.tool_calls ?? []).map(fromWireToolCall),
 				finishReason: normaliseFinishReason(choice.finish_reason),
+				usage,
 			};
 		},
 	};
@@ -121,6 +132,11 @@ interface ChatCompletionResponseShape {
 		};
 		finish_reason?: string | null;
 	}>;
+	usage?: {
+		prompt_tokens?: number;
+		completion_tokens?: number;
+		total_tokens?: number;
+	};
 }
 
 function fromWireToolCall(raw: {

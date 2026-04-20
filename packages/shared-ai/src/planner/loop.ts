@@ -48,10 +48,19 @@ export interface LlmCompletionRequest {
 
 export type LlmFinishReason = 'stop' | 'tool_calls' | 'length' | 'content_filter';
 
+export interface TokenUsage {
+	readonly promptTokens: number;
+	readonly completionTokens: number;
+	readonly totalTokens: number;
+}
+
 export interface LlmCompletionResponse {
 	readonly content: string | null;
 	readonly toolCalls: readonly ToolCallRequest[];
 	readonly finishReason: LlmFinishReason;
+	/** Token counts for this one call — propagated from the provider
+	 *  response when available. Summed across rounds in PlannerLoopResult. */
+	readonly usage?: TokenUsage;
 }
 
 export interface LlmClient {
@@ -95,6 +104,10 @@ export interface PlannerLoopResult {
 	 *  every assistant/tool turn). Never synced — contains decrypted
 	 *  user content. */
 	readonly messages: readonly ChatMessage[];
+	/** Accumulated token usage across every LLM round. Zero counts when
+	 *  the provider didn't report usage. Consumers use this for budget
+	 *  tracking (mana-ai's per-agent daily limit) and cost telemetry. */
+	readonly usage: TokenUsage;
 }
 
 // ─── The loop ───────────────────────────────────────────────────────
@@ -124,6 +137,8 @@ export async function runPlannerLoop(opts: {
 	let summary: string | null = null;
 	let stopReason: LoopStopReason = 'max-rounds';
 	let rounds = 0;
+	let promptTokens = 0;
+	let completionTokens = 0;
 
 	while (rounds < maxRounds) {
 		rounds++;
@@ -133,6 +148,11 @@ export async function runPlannerLoop(opts: {
 			model: input.model,
 			temperature: input.temperature,
 		});
+
+		if (response.usage) {
+			promptTokens += response.usage.promptTokens;
+			completionTokens += response.usage.completionTokens;
+		}
 
 		// Append the assistant turn to history before we execute any
 		// tools — the LLM needs to see its own prior tool_calls alongside
@@ -181,5 +201,10 @@ export async function runPlannerLoop(opts: {
 		summary,
 		stopReason,
 		messages,
+		usage: {
+			promptTokens,
+			completionTokens,
+			totalTokens: promptTokens + completionTokens,
+		},
 	};
 }

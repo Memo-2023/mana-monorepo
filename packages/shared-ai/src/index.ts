@@ -76,6 +76,7 @@ export type {
 	ResolvedInput,
 	SystemPromptInput,
 	SystemPromptOutput,
+	TokenUsage,
 	ToolCallRequest,
 	ToolResult,
 } from './planner';

@@ -23,6 +23,7 @@ export type {
 	LoopStopReason,
 	PlannerLoopInput,
 	PlannerLoopResult,
+	TokenUsage,
 	ToolCallRequest,
 	ToolResult,
 } from './loop';

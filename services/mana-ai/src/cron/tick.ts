@@ -343,10 +343,7 @@ async function planOneMission(
 					rationale: '',
 				})),
 			},
-			// TODO: extract token usage from the loop's trailing LLM
-			// message once the client exposes it (currently 0 — budget
-			// enforcement on the server is effectively disabled).
-			tokensUsed: 0,
+			tokensUsed: loopResult.usage.totalTokens,
 		};
 	} catch (err) {
 		const msg = err instanceof Error ? err.message : String(err);

@@ -105,8 +105,17 @@ export function createManaLlmClient(opts: ManaLlmClientOptions = {}): LlmClient 
 			const content = choice.message?.content ?? null;
 			const toolCalls = (choice.message?.tool_calls ?? []).map(fromWireToolCall);
 			const finishReason = normaliseFinishReason(choice.finish_reason);
+			const usage = data.usage
+				? {
+						promptTokens: data.usage.prompt_tokens ?? 0,
+						completionTokens: data.usage.completion_tokens ?? 0,
+						totalTokens:
+							data.usage.total_tokens ??
+							(data.usage.prompt_tokens ?? 0) + (data.usage.completion_tokens ?? 0),
+					}
+				: undefined;
 
-			return { content, toolCalls, finishReason };
+			return { content, toolCalls, finishReason, usage };
 		},
 	};
 }
@@ -153,6 +162,11 @@ interface ChatCompletionResponseShape {
 		};
 		finish_reason?: string | null;
 	}>;
+	usage?: {
+		prompt_tokens?: number;
+		completion_tokens?: number;
+		total_tokens?: number;
+	};
 }
 
 function fromWireToolCall(raw: {
