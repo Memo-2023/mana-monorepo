@@ -56,6 +56,7 @@ describe('WIDGET_REGISTRY', () => {
 			'food',
 			'plants',
 			'period',
+			'body',
 			undefined,
 		];
 		for (const widget of WIDGET_REGISTRY) {

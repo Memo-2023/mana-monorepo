@@ -32,7 +32,8 @@ export type WidgetType =
 	| 'activity-feed' // TimeBlocks: recent activity across modules
 	| 'period' // Period: current phase + days until next period
 	| 'news-unread' // News: latest unread curated articles
-	| 'body-stats'; // Body: latest weight + active workout summary
+	| 'body-stats' // Body: latest weight + active workout summary
+	| 'invoices-open'; // Invoices: open/overdue totals + oldest overdue
 
 /**
  * Widget size - maps to CSS Grid columns
@@ -361,6 +362,14 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
 		defaultSize: 'small',
 		allowMultiple: false,
 		requiredBackend: 'body',
+	},
+	{
+		type: 'invoices-open',
+		nameKey: 'dashboard.widgets.invoices_open.title',
+		descriptionKey: 'dashboard.widgets.invoices_open.description',
+		icon: '📄',
+		defaultSize: 'medium',
+		allowMultiple: false,
 	},
 ];
 

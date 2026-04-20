@@ -33,6 +33,7 @@ import PlantWateringWidget from '$lib/modules/core/widgets/PlantWateringWidget.s
 import PeriodWidget from '$lib/modules/core/widgets/PeriodWidget.svelte';
 import NewsUnreadWidget from '$lib/modules/news/widgets/NewsUnreadWidget.svelte';
 import BodyStatsWidget from '$lib/modules/body/widgets/BodyStatsWidget.svelte';
+import InvoicesOpenWidget from '$lib/modules/invoices/widgets/InvoicesOpenWidget.svelte';
 import DayTimelineWidget from './widgets/DayTimelineWidget.svelte';
 import ActivityFeedWidget from './widgets/ActivityFeedWidget.svelte';
 
@@ -62,4 +63,5 @@ export const widgetComponents: Record<WidgetType, Component> = {
 	period: PeriodWidget,
 	'news-unread': NewsUnreadWidget,
 	'body-stats': BodyStatsWidget,
+	'invoices-open': InvoicesOpenWidget,
 };
