@@ -17,6 +17,7 @@ import { encryptRecord } from '$lib/data/crypto';
 import { emitDomainEvent } from '$lib/data/events';
 import { invoiceTable } from '../collections';
 import { computeInvoiceTotals } from '../totals';
+import { generateSCORReference } from '../pdf/qr-bill';
 import type {
 	LocalInvoice,
 	LocalInvoiceLine,
@@ -63,6 +64,12 @@ export const invoicesStore = {
 		const lines = input.lines ?? [];
 		const totals = computeInvoiceTotals(lines);
 
+		// Pre-compute the SCOR reference so it's stable across re-renders of
+		// the PDF — the number is derived from invoice.number, which is
+		// already locked in at this point. Only used for CHF/EUR QR-Bills;
+		// other currencies ignore it.
+		const referenceNumber = generateSCORReference(number);
+
 		const newLocal: LocalInvoice = {
 			id: crypto.randomUUID(),
 			number,
@@ -79,7 +86,7 @@ export const invoicesStore = {
 			subject: input.subject ?? null,
 			notes: input.notes ?? null,
 			terms: input.terms ?? defaults.terms,
-			referenceNumber: null,
+			referenceNumber,
 			pdfBlobKey: null,
 			totals,
 		};

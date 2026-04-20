@@ -46,6 +46,7 @@ import {
 	SPACE,
 	LINE_HEIGHT,
 } from './templates/default';
+import { attachQRBillToPdf, buildQRBillData, QRBillError } from './qr-bill';
 
 // ─── Small geometry helpers ────────────────────────────────
 
@@ -480,13 +481,25 @@ function renderFooter(ctx: RenderContext, settings: InvoiceSettings): void {
 
 // ─── Public API ───────────────────────────────────────────
 
+export interface RenderOptions {
+	/**
+	 * Attach the Swiss QR-Bill at the bottom of the last page when the
+	 * invoice is eligible (CHF/EUR + valid IBAN + parseable addresses).
+	 * Defaults to true. Set to false for draft previews where the user
+	 * hasn't filled settings yet and you want a fast, non-rasterising
+	 * render path.
+	 */
+	includeQRBill?: boolean;
+}
+
 /**
  * Render an invoice to PDF bytes. Call-site is responsible for wrapping the
  * output into a Blob, iframe URL, or File attachment.
  */
 export async function renderInvoicePdf(
 	invoice: Invoice,
-	settings: InvoiceSettings
+	settings: InvoiceSettings,
+	opts?: RenderOptions
 ): Promise<Uint8Array> {
 	const doc = await PDFDocument.create();
 	doc.setTitle(`Rechnung ${invoice.number}`);
@@ -531,6 +544,24 @@ export async function renderInvoicePdf(
 	const firstCtx: RenderContext = { ...ctx, page: firstPage };
 	renderFooter(firstCtx, settings);
 
+	// Swiss QR-Bill overlay, bottom 105mm of the last page. Only attached
+	// if the invoice is eligible (CHF/EUR + valid IBAN + parseable
+	// addresses). Non-eligible invoices just get the plain PDF; the UI
+	// surfaces a warning separately via qrBillStatus().
+	if (opts?.includeQRBill !== false) {
+		try {
+			await attachQRBillToPdf(doc, invoice, settings);
+		} catch (err) {
+			if (err instanceof QRBillError) {
+				// Silently omit — the DetailView calls qrBillStatus() to show the
+				// user why the Zahlteil is missing. We don't want PDF generation
+				// to fail just because the IBAN isn't set yet.
+			} else {
+				throw err;
+			}
+		}
+	}
+
 	return await doc.save();
 }
 
@@ -540,10 +571,34 @@ export async function renderInvoicePdf(
  */
 export async function renderInvoicePdfBlob(
 	invoice: Invoice,
-	settings: InvoiceSettings
+	settings: InvoiceSettings,
+	opts?: RenderOptions
 ): Promise<Blob> {
-	const bytes = await renderInvoicePdf(invoice, settings);
+	const bytes = await renderInvoicePdf(invoice, settings, opts);
 	// `.slice(0)` copies into a fresh ArrayBuffer-backed Uint8Array so the
 	// Blob constructor types match (SharedArrayBuffer is not a BlobPart).
 	return new Blob([bytes.slice(0) as BlobPart], { type: 'application/pdf' });
+}
+
+// ─── QR-Bill status for UI ───────────────────────────────
+
+/**
+ * Returns `{ ok: true }` if the invoice is QR-Bill-eligible, or
+ * `{ ok: false, message, reason }` describing what's missing so the UI
+ * can show a targeted hint. Does NOT render — pure validation, cheap to
+ * call on every form change.
+ */
+export function qrBillStatus(
+	invoice: Invoice,
+	settings: InvoiceSettings
+): { ok: true } | { ok: false; message: string; reason: QRBillError['reason'] } {
+	try {
+		buildQRBillData(invoice, settings);
+		return { ok: true };
+	} catch (err) {
+		if (err instanceof QRBillError) {
+			return { ok: false, message: err.message, reason: err.reason };
+		}
+		throw err;
+	}
 }

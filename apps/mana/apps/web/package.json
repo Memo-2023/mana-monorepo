@@ -89,6 +89,7 @@
 		"svelte-dnd-action": "^0.9.68",
 		"svelte-i18n": "^4.0.0",
 		"svelte-sonner": "^1.0.5",
+		"swissqrbill": "^4.3.0",
 		"zod": "^3.25.76"
 	},
 	"type": "module"

@@ -34,6 +34,9 @@ export {
 
 export { computeLineTotal, computeInvoiceTotals, EMPTY_TOTALS } from './totals';
 
+export { renderInvoicePdf, renderInvoicePdfBlob, qrBillStatus } from './pdf/renderer';
+export { generateSCORReference, QRBillError } from './pdf/qr-bill';
+
 export { invoicesStore } from './stores/invoices.svelte';
 export { invoiceSettingsStore, ensureSettings } from './stores/settings.svelte';
 

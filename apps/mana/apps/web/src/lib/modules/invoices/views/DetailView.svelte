@@ -7,7 +7,7 @@
 	import StatusBadge from '../components/StatusBadge.svelte';
 	import { invoicesStore } from '../stores/invoices.svelte';
 	import { invoiceSettingsStore } from '../stores/settings.svelte';
-	import { renderInvoicePdfBlob } from '../pdf/renderer';
+	import { renderInvoicePdfBlob, qrBillStatus } from '../pdf/renderer';
 	import { formatAmount } from '../queries';
 	import type { Invoice, InvoiceSettings } from '../types';
 	import { STATUS_LABELS } from '../constants';
@@ -29,12 +29,18 @@
 	let pdfUrl = $state<string | null>(null);
 	let pdfError = $state<string | null>(null);
 	let renderingPdf = $state(false);
+	let qrWarning = $state<string | null>(null);
 
 	async function renderPdf() {
 		renderingPdf = true;
 		pdfError = null;
 		try {
 			const settings: InvoiceSettings = await invoiceSettingsStore.get();
+			// Compute QR-Bill eligibility first so we can show a warning even
+			// if the rest of the PDF renders fine. The renderer will silently
+			// omit the Zahlteil when not eligible.
+			const status = qrBillStatus(invoice, settings);
+			qrWarning = status.ok ? null : status.message;
 			const blob = await renderInvoicePdfBlob(invoice, settings);
 			if (pdfUrl) URL.revokeObjectURL(pdfUrl);
 			pdfUrl = URL.createObjectURL(blob);
@@ -170,6 +176,13 @@
 				<span class="preview-status">Rendert …</span>
 			{/if}
 		</div>
+		{#if qrWarning}
+			<div class="warning">
+				<strong>QR-Rechnung nicht eingefügt:</strong>
+				{qrWarning}
+				<a href="/invoices/settings">Einstellungen öffnen →</a>
+			</div>
+		{/if}
 		{#if pdfError}
 			<div class="error">PDF-Fehler: {pdfError}</div>
 		{:else if pdfUrl}
@@ -353,6 +366,25 @@
 
 	.pdf-preview-block {
 		gap: 0.5rem;
+	}
+
+	.warning {
+		background: #fffbeb;
+		border: 1px solid #fde68a;
+		color: #92400e;
+		padding: 0.65rem 0.9rem;
+		border-radius: 0.4rem;
+		font-size: 0.85rem;
+		display: flex;
+		gap: 0.5rem;
+		flex-wrap: wrap;
+		align-items: center;
+	}
+
+	.warning a {
+		color: #92400e;
+		font-weight: 500;
+		text-decoration: underline;
 	}
 
 	.preview-head {
