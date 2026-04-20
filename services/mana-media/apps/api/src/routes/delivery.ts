@@ -70,7 +70,12 @@ export function deliveryRoutes(
 
 		c.header('Content-Type', mimeTypes[format]);
 		c.header('Cache-Control', 'public, max-age=31536000');
-		return c.body(transformedBuffer);
+		// Hono 4.7 types `c.body()` as `Uint8Array<ArrayBuffer>` (strict,
+		// not ArrayBufferLike). Node's `Buffer<ArrayBufferLike>` and
+		// `new Uint8Array(buffer, ...)` views both carry the loose
+		// ArrayBufferLike tag. `Uint8Array.from()` copies into a fresh
+		// ArrayBuffer which satisfies the strict type.
+		return c.body(Uint8Array.from(transformedBuffer));
 	});
 
 	return app;
