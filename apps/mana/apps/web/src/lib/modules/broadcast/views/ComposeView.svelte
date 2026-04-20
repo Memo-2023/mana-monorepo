@@ -13,8 +13,10 @@
 	import { goto } from '$app/navigation';
 	import AudienceBuilder from '../audience/AudienceBuilder.svelte';
 	import Editor from '../editor/Editor.svelte';
+	import PreviewTabs from '../preview/PreviewTabs.svelte';
 	import { broadcastCampaignsStore } from '../stores/campaigns.svelte';
-	import type { Campaign, CampaignContent, AudienceDefinition } from '../types';
+	import { broadcastSettingsStore } from '../stores/settings.svelte';
+	import type { Campaign, CampaignContent, AudienceDefinition, BroadcastSettings } from '../types';
 
 	interface Props {
 		existing?: Campaign;
@@ -45,6 +47,16 @@
 	let saving = $state(false);
 	let error = $state<string | null>(null);
 	let savedAt = $state<string | null>(null);
+	let settings = $state<BroadcastSettings | null>(null);
+
+	// Load settings once for the Preflight preview. Defaults to the
+	// current row so the preview reflects what the user just typed in
+	// Settings without an extra reload.
+	$effect(() => {
+		broadcastSettingsStore.get().then((s) => {
+			settings = s;
+		});
+	});
 
 	// ─── Save ───────────────────────────────────────────────────
 	async function save() {
@@ -187,15 +199,50 @@
 		</section>
 	{:else if step === 3}
 		<section class="step-panel">
-			<div class="placeholder">
-				<h3>Preflight</h3>
-				<p>Spam-Score, DNS-Checks und Empfänger-Übersicht folgen in M3/M8.</p>
-				<p class="hint">
-					Empfänger: <strong>{audience.estimatedCount}</strong><br />
-					Betreff: <strong>{subject || '—'}</strong><br />
-					Absender: <strong>{fromName} &lt;{fromEmail}&gt;</strong>
-				</p>
+			<!-- Preflight checks — caught early so the user can fix before M4 send. -->
+			<div class="preflight-checks">
+				<h3>Vor dem Versand</h3>
+				<ul class="check-list">
+					<li class:ok={subject.trim().length > 0} class:warn={!subject.trim()}>
+						<span class="icon">{subject.trim() ? '✓' : '!'}</span>
+						Betreff {subject.trim() ? 'gesetzt' : 'fehlt'}
+						{#if subject.trim().length > 0}
+							<small>— {subject}</small>
+						{/if}
+					</li>
+					<li class:ok={audience.estimatedCount > 0} class:warn={audience.estimatedCount === 0}>
+						<span class="icon">{audience.estimatedCount > 0 ? '✓' : '!'}</span>
+						{audience.estimatedCount} Empfänger
+						{#if audience.estimatedCount === 0}
+							<small>— kein Empfänger matched die Filter</small>
+						{/if}
+					</li>
+					<li class:ok={!!fromEmail && fromEmail.includes('@')} class:warn={!fromEmail}>
+						<span class="icon">{fromEmail.includes('@') ? '✓' : '!'}</span>
+						Absender
+						<small>— {fromName} &lt;{fromEmail || '—'}&gt;</small>
+					</li>
+					<li
+						class:ok={!!settings?.legalAddress?.trim()}
+						class:warn={!settings?.legalAddress?.trim()}
+					>
+						<span class="icon">{settings?.legalAddress?.trim() ? '✓' : '!'}</span>
+						Impressum
+						{#if !settings?.legalAddress?.trim()}
+							<small
+								>— Pflicht laut DSGVO.
+								<a href="/broadcasts/settings">In Einstellungen ergänzen →</a>
+							</small>
+						{/if}
+					</li>
+				</ul>
 			</div>
+
+			{#if settings}
+				<PreviewTabs campaign={{ subject, preheader, fromName, fromEmail }} {content} {settings} />
+			{:else}
+				<p class="loading">Lade Einstellungen …</p>
+			{/if}
 		</section>
 	{:else if step === 4}
 		<section class="step-panel">
@@ -374,12 +421,6 @@
 		color: var(--color-text, #0f172a);
 	}
 
-	.placeholder .hint {
-		margin-top: 1rem;
-		text-align: left;
-		display: inline-block;
-	}
-
 	.btn-primary {
 		background: #6366f1;
 		color: white;
@@ -402,5 +443,80 @@
 		border-radius: 0.4rem;
 		cursor: pointer;
 		font-size: 0.9rem;
+	}
+
+	.preflight-checks {
+		background: var(--color-surface-muted, #f8fafc);
+		border: 1px solid var(--color-border, #e2e8f0);
+		border-radius: 0.5rem;
+		padding: 1rem 1.25rem;
+	}
+
+	.preflight-checks h3 {
+		margin: 0 0 0.75rem;
+		font-size: 0.95rem;
+		font-weight: 600;
+	}
+
+	.check-list {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0.4rem;
+	}
+
+	.check-list li {
+		display: flex;
+		align-items: baseline;
+		gap: 0.5rem;
+		font-size: 0.9rem;
+	}
+
+	.check-list .icon {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 1.25rem;
+		height: 1.25rem;
+		border-radius: 50%;
+		font-size: 0.75rem;
+		font-weight: 600;
+		flex-shrink: 0;
+	}
+
+	.check-list li.ok .icon {
+		background: #dcfce7;
+		color: #15803d;
+	}
+
+	.check-list li.warn .icon {
+		background: #fef3c7;
+		color: #92400e;
+	}
+
+	.check-list li.warn {
+		color: #92400e;
+	}
+
+	.check-list small {
+		color: var(--color-text-muted, #64748b);
+		font-size: 0.85rem;
+	}
+
+	.check-list li.warn small {
+		color: #92400e;
+	}
+
+	.check-list a {
+		color: #6366f1;
+		text-decoration: underline;
+	}
+
+	.loading {
+		padding: 2rem;
+		text-align: center;
+		color: var(--color-text-muted, #64748b);
 	}
 </style>
