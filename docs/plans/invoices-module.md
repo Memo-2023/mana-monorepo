@@ -2,29 +2,27 @@
 
 ## Status (2026-04-20)
 
-**M1–M7 DONE** — solo-tauglich, ohne Logo-Upload + AI-Tools.
+**Alle Milestones DONE** — Modul ist solo-produktiv.
 
 | Milestone | Commit | Notes |
 |---|---|---|
 | M1 Skelett | `2cf89ce26` | Modul registriert, Dexie v27, Encryption-Registry, leere ListView |
 | M2 CRUD | `8d00ee069` | Store, Totals, Status-Maschine, ListView mit Stats-Cards, Routes |
-| M3 Settings | in M2 | SenderProfileForm fertig, **Logo-Upload offen** (uload-Integration nötig) |
+| M3 Settings + Logo | `76060b063` | SenderProfileForm, Logo-Upload via mana-media, im PDF-Header embedded |
 | M4 PDF Basic | `2dc298a79` | pdf-lib, pagination, preview + download |
 | M5 QR-Rechnung | `5af23d30b` | swissqrbill/svg + PNG-Overlay, SCOR auto, address-parser-Heuristik |
 | M6 Versand | `08b7ac16b` | SendModal mit mailto + PDF-Download + Confirm → status sent |
-| M7 Dashboard | pending commit | InvoicesOpenWidget mit Offen/Überfällig + Top-3 älteste überfällig |
+| M7 Dashboard | `2ee3a1a93` | InvoicesOpenWidget mit Offen/Überfällig + Top-3 älteste überfällig |
+| M8 AI-Tools | `a4bc7d2ee` | create_invoice, mark_paid, list_invoices, get_invoice_stats |
 
-**Tests (45+ green):** totals math, SCOR + address-parser (swissqrbill `isSCORReferenceValid` roundtrip), mail template + mailto encoding.
+**Tests (59+ green):** totals math, SCOR + address-parser (swissqrbill `isSCORReferenceValid` roundtrip), mail template + mailto encoding, shared-ai function-schema round-trip, mana-ai planner drift-guard.
 
-**Offene Arbeit vor "produktiv einsetzbar":**
-- **M3-Polish:** Logo-Upload via uload → erscheint im PDF-Header
-- **M8 AI-Tools:** `create_invoice` (propose), `mark_paid` (propose), `list_invoices` (auto), `get_invoice_stats` (auto) — braucht Planner-Drift-Guard-Update
+**Offene Phase-2/3-Punkte (nicht blockierend für Solo-Einsatz):**
 - **Nummernkreis-Multi-Device-Kollision:** dokumentiert als gap (pragmatisch, solo-MVP-tauglich)
 - **Strukturierte Adressen:** Heuristik-Parser deckt Standard-CH/DE ab; komplexere Adressen fehlen → User sieht in Warning, was fehlt
 - **Bezahlte Rechnung → finance-Transaktion:** Cross-Modul-Hook, Phase 3
 - **camt.053 Bankabgleich:** Phase 2
-
-Nächster Schritt: M3 Logo-Upload ODER M8 AI-Tools ODER Real-World-Dogfooding (erste eigene Rechnung an einen echten Kunden).
+- **Browser-Smoke-Test:** SSR im Repo während Spaces-Refactor broken für alle Module — sobald das geheilt ist, erste echte Rechnung stellen.
 
 ---
 
