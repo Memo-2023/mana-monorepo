@@ -75,8 +75,19 @@ export {
 	type PolicyDecision,
 } from './policy';
 
-export type { ToolSchema } from './tools';
-export { AI_TOOL_CATALOG, AI_TOOL_CATALOG_BY_NAME } from './tools';
+export type {
+	FunctionSpec,
+	JsonSchemaObject,
+	JsonSchemaProperty,
+	ToolSchema,
+	ToolSpec,
+} from './tools';
+export {
+	AI_TOOL_CATALOG,
+	AI_TOOL_CATALOG_BY_NAME,
+	toolToFunctionSchema,
+	toolsToFunctionSchemas,
+} from './tools';
 
 export type {
 	Guardrail,
