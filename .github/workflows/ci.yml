@@ -440,6 +440,9 @@ jobs:
       - name: Validate monorepo best practices
         run: pnpm run validate:monorepo
 
+      - name: Audit crypto registry (Dexie ↔ registry ↔ allowlist)
+        run: pnpm run check:crypto
+
       - name: Type check
         run: pnpm run type-check
 

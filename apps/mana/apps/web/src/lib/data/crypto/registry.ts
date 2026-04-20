@@ -3,9 +3,11 @@
  * tables get encrypted.
  *
  * Strict allowlist semantics: anything not listed here stays plaintext.
- * Adding a new module = adding an entry here. Forgetting to add a field
- * means it ships in plaintext, which is the safer failure mode than the
- * inverse (a typo'd field name silently failing to decrypt).
+ * Adding a new module = adding an entry here OR an entry in
+ * `plaintext-allowlist.ts` (explicit "this table genuinely holds no
+ * sensitive data"). The `pnpm run check:crypto` audit script enforces
+ * that every Dexie table appears in exactly one of the two — forgetting
+ * a new table now fails CI instead of silently shipping plaintext.
  *
  * Why a central registry instead of per-module config?
  *   - One pull request to audit ahead of a release: "what is encrypted?"
