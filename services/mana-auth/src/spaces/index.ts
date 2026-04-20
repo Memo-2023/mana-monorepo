@@ -13,3 +13,11 @@ export {
 	assertSpaceIsDeletable,
 	buildSpaceMetadata,
 } from './metadata';
+
+export {
+	createPersonalSpaceFor,
+	candidateSlugFromEmail,
+	resolveUniqueSlug,
+	dbSlugTaken,
+	type SlugTakenLookup,
+} from './personal-space';

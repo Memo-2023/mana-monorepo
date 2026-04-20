@@ -38,7 +38,11 @@ import {
 } from '../email/send';
 import { sourceAppStore, passwordResetRedirectStore } from './stores';
 import { TRUSTED_ORIGINS } from './sso-origins';
-import { assertValidSpaceMetadataForCreate, assertSpaceIsDeletable } from '../spaces';
+import {
+	assertValidSpaceMetadataForCreate,
+	assertSpaceIsDeletable,
+	createPersonalSpaceFor,
+} from '../spaces';
 
 // Re-export so existing imports (`import { TRUSTED_ORIGINS } from './better-auth.config'`)
 // keep working. New code should import from './sso-origins' directly.
@@ -200,6 +204,32 @@ export function createBetterAuth(databaseUrl: string) {
 		session: {
 			expiresIn: 60 * 60 * 24 * 7, // 7 days
 			updateAge: 60 * 60 * 24, // Update session once per day
+		},
+
+		/**
+		 * Database hooks — lifecycle callbacks for core tables.
+		 *
+		 * `user.create.after` runs after a successful signup and provisions
+		 * the user's personal Space (a Better Auth organization of type
+		 * `personal`). Every user needs one because modules store private
+		 * data like mood, dreams, sleep there. Failure propagates: an
+		 * orphan user without a personal space is a worse state than a
+		 * retry-able signup error.
+		 *
+		 * See docs/plans/spaces-foundation.md and ../spaces/personal-space.ts.
+		 */
+		databaseHooks: {
+			user: {
+				create: {
+					after: async (user) => {
+						await createPersonalSpaceFor(db, {
+							id: user.id,
+							email: user.email,
+							name: user.name,
+						});
+					},
+				},
+			},
 		},
 
 		// Base URL for callbacks and redirects
