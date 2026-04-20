@@ -60,12 +60,31 @@ export type {
 	AiPlanInput,
 	AiPlanOutput,
 	AvailableTool,
+	ChatMessage,
+	ChatRole,
+	ExecutedCall,
+	LlmClient,
+	LlmCompletionRequest,
+	LlmCompletionResponse,
+	LlmFinishReason,
+	LoopStopReason,
 	ParseResult,
 	PlannedStep,
+	PlannerLoopInput,
+	PlannerLoopResult,
 	PlannerMessages,
 	ResolvedInput,
+	SystemPromptInput,
+	SystemPromptOutput,
+	ToolCallRequest,
+	ToolResult,
 } from './planner';
-export { buildPlannerPrompt, parsePlannerResponse } from './planner';
+export {
+	buildPlannerPrompt,
+	buildSystemPrompt,
+	parsePlannerResponse,
+	runPlannerLoop,
+} from './planner';
 
 export {
 	AI_PROPOSABLE_TOOL_NAMES,
