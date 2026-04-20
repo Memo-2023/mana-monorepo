@@ -8,10 +8,6 @@
 	import { todoReminderSource } from '$lib/modules/todo/reminder-source';
 	import { startEventStore, stopEventStore } from '$lib/data/events/event-store';
 	import { startMissionTick, stopMissionTick } from '$lib/data/ai/missions/setup';
-	import {
-		startServerIterationStaging,
-		stopServerIterationStaging,
-	} from '$lib/data/ai/missions/server-iteration-staging';
 	import { initTools } from '$lib/data/tools/init';
 	import { startEventBridge, stopEventBridge } from '$lib/triggers/event-bridge';
 	import { startStreakTracker, stopStreakTracker } from '$lib/data/projections/streaks';
@@ -539,11 +535,6 @@
 			// interval and runs any that are due. Safe idempotent; see
 			// data/ai/missions/setup.ts.
 			startMissionTick();
-			// Staging-effect: subscribes to Mission updates and translates
-			// server-produced iterations (source='server') into local
-			// Proposals. Essential once the mana-ai service is running
-			// alongside; no-op when only the foreground tick is active.
-			startServerIterationStaging();
 		});
 
 		// Restore nav collapsed state (cheap, keep inline)
@@ -639,7 +630,6 @@
 		stopStreakTracker();
 		stopGoalTracker();
 		stopMissionTick();
-		stopServerIterationStaging();
 		guestMode?.destroy();
 		// Fire-and-forget — we don't need to await; the in-flight task
 		// will finish in the background and the next page session will

@@ -15,7 +15,7 @@
  */
 
 import type { MissionInputRef } from './types';
-import type { ResolvedInput } from './planner/types';
+import type { ResolvedInput } from '@mana/shared-ai';
 
 export type InputResolver = (ref: MissionInputRef) => Promise<ResolvedInput | null>;
 

@@ -651,6 +651,16 @@ db.version(28).upgrade(async (tx) => {
 	}
 });
 
+// v29 — Drop the legacy `pendingProposals` table. Proposals are no
+// longer created: the planner executes tool_calls directly under the
+// AI actor, and the Workbench Timeline plus per-iteration revert is
+// the review surface. Passing `null` to .stores() deletes the table on
+// open. Safe because the system hasn't shipped; no user data is lost.
+// See docs/plans/planner-function-calling.md.
+db.version(29).stores({
+	pendingProposals: null,
+});
+
 // ─── Sync Routing ──────────────────────────────────────────
 // SYNC_APP_MAP, TABLE_TO_SYNC_NAME, TABLE_TO_APP, SYNC_NAME_TO_TABLE,
 // toSyncName() and fromSyncName() are now derived from per-module
