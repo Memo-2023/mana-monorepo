@@ -19,6 +19,7 @@
 		"format:check": "prettier --config .prettierrc.json --check \"**/*.{ts,tsx,js,jsx,json,md,svelte,astro}\"",
 		"check:status": "bash scripts/check-status.sh",
 		"validate:dockerfiles": "node scripts/validate-dockerfiles.mjs",
+		"validate:turbo": "node scripts/validate-no-recursive-turbo.mjs",
 		"check:crypto": "node scripts/audit-crypto-registry.mjs",
 		"check:crypto:seed": "node scripts/audit-crypto-registry.mjs --seed",
 		"audit:deps": "node scripts/audit-workspace-deps.mjs",

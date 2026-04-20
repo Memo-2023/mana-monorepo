@@ -130,7 +130,9 @@ MinIO (Docker, S3-compatible) in both local and prod. Console: http://localhost:
 
 ### Turborepo: avoid recursive turbo calls
 
-**CRITICAL**: Parent workspace packages (e.g. `apps/chat/package.json`) must NEVER define `type-check`, `build`, or `lint` scripts that call `turbo run <task>`. Root turbo already orchestrates those — defining them in children causes infinite recursion (10+ minute hangs, thousands of duplicate tasks). Only `dev` is OK to delegate to turbo from a parent package, since it's persistent and typically scoped.
+**CRITICAL**: Parent workspace packages (e.g. `apps/chat/package.json`) must NEVER define `type-check`, `build`, `lint`, `test`, `test:coverage`, or `check` scripts that call `turbo run <task>`. Root turbo already orchestrates those — defining them in children causes infinite recursion (10+ minute hangs, thousands of duplicate tasks). Only `dev` is OK to delegate to turbo from a parent package, since it's persistent and typically scoped.
+
+Enforced by `pnpm run validate:turbo` (`scripts/validate-no-recursive-turbo.mjs`), wired into the CI `validate` job — a new `turbo run build` inside a non-root package.json now fails the PR.
 
 ## Shared Packages (`packages/`)
 

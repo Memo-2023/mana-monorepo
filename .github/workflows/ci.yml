@@ -440,6 +440,9 @@ jobs:
       - name: Validate monorepo best practices
         run: pnpm run validate:monorepo
 
+      - name: Validate no recursive turbo calls
+        run: pnpm run validate:turbo
+
       - name: Audit crypto registry (Dexie ↔ registry ↔ allowlist)
         run: pnpm run check:crypto
 
