@@ -4,33 +4,21 @@
  * This package contains common TypeScript types used across all projects.
  */
 
-// Re-exports without file extensions. shared-types is consumed in
-// bundler-mode tsconfigs across the monorepo; explicit `.ts` extensions
-// require `allowImportingTsExtensions` on every downstream, which broke
-// `shared-auth` and silently hid in the postinstall behind `|| true`.
-// Theme types
-export * from './theme';
-
-// Auth types
-export * from './auth';
-
-// UI types
-export * from './ui';
-
-// Common utility types
-export * from './common';
-
-// Contact types for cross-app integration
-export * from './contact';
-
-// Landing page configuration types
-export * from './landing-config';
-
-// AI structured-output Zod schemas (shared between mana-api + web frontend)
-export * from './ai-schemas';
-
-// Space types (multi-tenancy primitive — see docs/plans/spaces-foundation.md)
-export * from './spaces';
+// Re-exports carry explicit `.ts` extensions. Previously they were
+// extension-less to stay happy with bundler-mode tsconfigs, but
+// tooling that runs Node's ESM loader over this file (e.g. Tailwind
+// v4's module resolver when it follows imports out of @source-scanned
+// packages like shared-branding) needs extensions to resolve relative
+// paths. All downstream tsconfigs use `moduleResolution: "bundler"`
+// which accepts `.ts` suffixes without `allowImportingTsExtensions`.
+export * from './theme.ts';
+export * from './auth.ts';
+export * from './ui.ts';
+export * from './common.ts';
+export * from './contact.ts';
+export * from './landing-config.ts';
+export * from './ai-schemas.ts';
+export * from './spaces.ts';
 
 // API types
 export interface User {
