@@ -3,6 +3,7 @@
 		"target": "ES2022",
 		"module": "ESNext",
 		"moduleResolution": "bundler",
+		"allowImportingTsExtensions": true,
 		"lib": ["ES2022", "DOM", "DOM.Iterable"],
 		"strict": true,
 		"esModuleInterop": true,
@@ -12,7 +13,9 @@
 		"declaration": true,
 		"declarationMap": true,
 		"outDir": "./dist",
-		"rootDir": "./src"
+		"rootDir": "./src",
+		"noEmit": false,
+		"rewriteRelativeImportExtensions": true
 	},
 	"include": ["src/**/*"],
 	"exclude": ["node_modules", "dist"]

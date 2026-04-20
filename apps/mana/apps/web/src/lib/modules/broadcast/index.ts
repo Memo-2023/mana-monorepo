@@ -5,6 +5,28 @@
 export { campaignTable, templateTable, settingsTable, BROADCAST_GUEST_SEED } from './collections';
 
 export {
+	useAllCampaigns,
+	useAllTemplates,
+	toCampaign,
+	toTemplate,
+	toSettings,
+	filterByStatus,
+	searchCampaigns,
+	computeStats,
+	formatRate,
+} from './queries';
+
+export {
+	matchContact,
+	filterAudience,
+	countAudience,
+	describeAudience,
+} from './audience/segment-builder';
+
+export { broadcastCampaignsStore } from './stores/campaigns.svelte';
+export { broadcastSettingsStore, ensureSettings } from './stores/settings.svelte';
+
+export {
 	STATUS_LABELS,
 	STATUS_COLORS,
 	BROADCAST_SETTINGS_ID,
