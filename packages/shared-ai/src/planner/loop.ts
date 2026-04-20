@@ -63,6 +63,10 @@ export interface LlmClient {
 export interface PlannerLoopInput {
 	readonly systemPrompt: string;
 	readonly userPrompt: string;
+	/** Optional prior conversation turns inserted between the system
+	 *  prompt and the new user turn. Used by the companion chat to
+	 *  preserve multi-turn history; missions leave this empty. */
+	readonly priorMessages?: readonly ChatMessage[];
 	readonly tools: readonly ToolSchema[];
 	readonly model: string;
 	readonly temperature?: number;
@@ -113,6 +117,7 @@ export async function runPlannerLoop(opts: {
 
 	const messages: ChatMessage[] = [
 		{ role: 'system', content: input.systemPrompt },
+		...(input.priorMessages ?? []),
 		{ role: 'user', content: input.userPrompt },
 	];
 	const executedCalls: ExecutedCall[] = [];
