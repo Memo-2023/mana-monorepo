@@ -1,9 +1,9 @@
 import { Hono } from 'hono';
+import type { AuthVariables } from '@mana/shared-hono';
 import type { AnalyticsService } from '../services/analytics';
-import type { AuthUser } from '../middleware/jwt-auth';
 
 export function createAnalyticsRoutes(analyticsService: AnalyticsService) {
-	return new Hono<{ Variables: { user: AuthUser } }>()
+	return new Hono<{ Variables: AuthVariables }>()
 		.get('/:linkId', async (c) => {
 			const linkId = c.req.param('linkId');
 			const stats = await analyticsService.getClickStats(linkId);

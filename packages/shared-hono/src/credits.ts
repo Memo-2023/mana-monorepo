@@ -42,7 +42,7 @@ async function callCredits<T>(path: string, options: RequestInit = {}): Promise<
 			},
 		});
 		if (!res.ok) return null;
-		return res.json();
+		return (await res.json()) as T;
 	} catch (error) {
 		console.error('[credits] Request failed:', error);
 		return null;

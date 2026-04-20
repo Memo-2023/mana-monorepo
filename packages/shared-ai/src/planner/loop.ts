@@ -10,7 +10,8 @@
  * ``onToolCall`` callback. The loop itself stays pure.
  */
 
-import type { ToolSchema, ToolSpec } from '../tools/function-schema';
+import type { ToolSchema } from '../tools/schemas';
+import type { ToolSpec } from '../tools/function-schema';
 import { toolsToFunctionSchemas } from '../tools/function-schema';
 
 // ─── Chat-message contract ──────────────────────────────────────────

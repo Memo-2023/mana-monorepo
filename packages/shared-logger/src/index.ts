@@ -15,7 +15,10 @@ declare const __DEV__: boolean | undefined;
 const isDevelopment =
 	typeof __DEV__ !== 'undefined' ? __DEV__ : process.env.NODE_ENV === 'development';
 
-const isBrowser = typeof window !== 'undefined';
+// Use a globalThis indirection instead of `typeof window` so this module
+// stays compilable under tsconfigs that don't pull in the DOM lib (e.g.
+// Bun-only services consuming shared-logger via workspace source imports).
+const isBrowser = typeof (globalThis as { window?: unknown }).window !== 'undefined';
 
 const useJson =
 	process.env.LOGGER_FORMAT === 'json' ||

@@ -85,23 +85,30 @@ export function decodeBytes(base64: string): Uint8Array {
 
 const SYNC_SERVER_URL = import.meta.env.PUBLIC_SYNC_SERVER_URL || 'http://localhost:3050';
 
+// @mana/local-store's CollectionDef.guestSeed expects `T[]` (the seed
+// array itself), not a lazy producer. The previous three arrow-wrappers
+// looked lazy but the framework never awaited them — it iterated them
+// as `seed.length`, which against a function silently yielded 0 (dead
+// seed). Evaluate once and share.
+const guestSeed = generateGuestWorld();
+
 export const gameStore = createLocalStore({
 	appId: 'manavoxel',
 	collections: [
 		{
 			name: 'worlds',
 			indexes: ['creatorId', 'isPublished', 'name', 'template'],
-			guestSeed: () => generateGuestWorld().worlds,
+			guestSeed: guestSeed.worlds,
 		},
 		{
 			name: 'areas',
 			indexes: ['worldId', 'type', '[worldId+name]'],
-			guestSeed: () => generateGuestWorld().areas,
+			guestSeed: guestSeed.areas,
 		},
 		{
 			name: 'items',
 			indexes: ['creatorId', 'rarity', 'isPublished', 'name'],
-			guestSeed: () => generateGuestWorld().items,
+			guestSeed: guestSeed.items,
 		},
 		{
 			name: 'inventories',
