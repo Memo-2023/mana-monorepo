@@ -49,6 +49,7 @@
 	import { useAiTierItems } from '$lib/components/layout/use-ai-tier-items.svelte';
 	import { useSyncStatusItems } from '$lib/components/layout/use-sync-status-items.svelte';
 	import RouteTierGate from '$lib/components/layout/RouteTierGate.svelte';
+	import SpaceSwitcher from '$lib/components/layout/SpaceSwitcher.svelte';
 	import { useLocalStt } from '$lib/components/voice/use-local-stt.svelte';
 	import { Microphone, Stop } from '@mana/shared-icons';
 	import {
@@ -988,6 +989,11 @@
 			class="pt-2"
 		>
 			<div class="mx-auto max-w-7xl px-3 py-2 sm:px-6 sm:py-3 lg:px-8">
+				{#if authStore.isAuthenticated}
+					<div class="space-bar">
+						<SpaceSwitcher locale={$locale === 'en' ? 'en' : 'de'} />
+					</div>
+				{/if}
 				{#if routeBlocked && routeAppId}
 					<RouteTierGate
 						appName={routeAppId.name}
@@ -1037,6 +1043,12 @@
 <ToastContainer />
 
 <style>
+	.space-bar {
+		display: flex;
+		justify-content: flex-end;
+		margin-bottom: 0.5rem;
+	}
+
 	.bottom-stack {
 		position: fixed;
 		bottom: 0;
