@@ -28,7 +28,7 @@ import { listDueMissions, type ServerMission } from '../db/missions-projection';
 import { loadActiveAgents, refreshAgentSnapshots, type ServerAgent } from '../db/agents-projection';
 import { appendServerIteration, planToIteration } from '../db/iteration-writer';
 import { refreshSnapshots } from '../db/snapshot-refresh';
-import { createServerLlmClient } from '../planner/llm-client';
+import { createServerLlmClient, ProviderCallError } from '../planner/llm-client';
 import { SERVER_TOOLS } from '../planner/tools';
 import {
 	ticksTotal,
@@ -43,6 +43,9 @@ import {
 	grantSkipsTotal,
 	agentDecisionsTotal,
 	tokensUsedTotal,
+	toolCallsTotal,
+	plannerRoundsHistogram,
+	providerErrorsTotal,
 } from '../metrics';
 import { unwrapMissionGrant } from '../crypto/unwrap-grant';
 import { NewsResearchClient } from '../planner/news-research-client';
@@ -333,6 +336,21 @@ async function planOneMission(
 			}),
 		});
 
+		// Observability: one counter tick per tool_call + one histogram
+		// sample for round consumption. `policy` is pulled off the
+		// catalog entry so a later change to Gemini-default flipping
+		// auto→propose would show up in the labels without code changes.
+		plannerRoundsHistogram.observe(loopResult.rounds);
+		for (const ec of loopResult.executedCalls) {
+			const catalogEntry = SERVER_TOOLS.find((t) => t.name === ec.call.name);
+			const policy = catalogEntry?.defaultPolicy ?? 'propose';
+			// Server-side execution is always deferred to the client —
+			// the onToolCall stub returns success without running
+			// anything. Real execution metrics will come from the
+			// webapp runner once it emits its own Prom surface.
+			toolCallsTotal.inc({ tool: ec.call.name, policy, outcome: 'deferred' });
+		}
+
 		return {
 			plan: {
 				summary: loopResult.summary ?? '',
@@ -347,9 +365,21 @@ async function planOneMission(
 		};
 	} catch (err) {
 		const msg = err instanceof Error ? err.message : String(err);
+		if (err instanceof ProviderCallError) {
+			const provider = inferProviderFromModel('google/gemini-2.5-flash');
+			providerErrorsTotal.inc({ provider, kind: err.kind });
+		}
 		console.warn(`[mana-ai tick] mission=${m.id} planner loop failed: ${msg}`);
 		return null;
 	}
+}
+
+/** Parse provider name off a `provider/model` string. Used purely for
+ *  metric labelling — falls back to `'unknown'` so a misconfigured
+ *  model id doesn't crash the counter. */
+function inferProviderFromModel(model: string): string {
+	const [provider] = model.split('/', 1);
+	return provider || 'unknown';
 }
 
 /**

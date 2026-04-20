@@ -16,6 +16,20 @@ import type {
 	ToolCallRequest,
 } from '@mana/shared-ai';
 
+/** Thrown when mana-llm returns a non-2xx status. ``kind`` mirrors the
+ *  structured ProviderError vocabulary (blocked / truncated / auth /
+ *  rate_limit / capability / unknown) so downstream metrics can label
+ *  without re-parsing the message. */
+export class ProviderCallError extends Error {
+	constructor(
+		message: string,
+		public readonly kind: string
+	) {
+		super(message);
+		this.name = 'ProviderCallError';
+	}
+}
+
 export interface ServerLlmClientOptions {
 	readonly baseUrl: string;
 	readonly serviceKey: string;
@@ -65,8 +79,34 @@ export function createServerLlmClient(opts: ServerLlmClientOptions): LlmClient {
 			clearTimeout(timeout);
 
 			if (!res.ok) {
-				const detail = await res.text().catch(() => '');
-				throw new Error(`mana-llm ${res.status}: ${detail.slice(0, 500)}`);
+				// mana-llm surfaces structured errors from the provider
+				// layer (see services/mana-llm/src/providers/errors.py):
+				// `{ detail: { kind, message } }` for 422 / 429 / 502 /
+				// 400, plain string detail for everything else. Preserve
+				// `kind` on the thrown error so callers (tick metrics)
+				// can label provider_errors_total without re-parsing.
+				let kind = 'unknown';
+				let message = `mana-llm ${res.status}`;
+				try {
+					const body = (await res.json()) as {
+						detail?: string | { kind?: string; message?: string };
+					};
+					if (typeof body.detail === 'string') {
+						message = `${message}: ${body.detail.slice(0, 500)}`;
+					} else if (body.detail && typeof body.detail === 'object') {
+						kind = body.detail.kind ?? 'unknown';
+						message = `${message} (${kind}): ${body.detail.message ?? ''}`;
+					}
+				} catch {
+					// body wasn't JSON — fall back to plain text
+					try {
+						const text = await res.text();
+						if (text) message = `${message}: ${text.slice(0, 500)}`;
+					} catch {
+						/* already exhausted body stream */
+					}
+				}
+				throw new ProviderCallError(message, kind);
 			}
 
 			const data = (await res.json()) as ChatCompletionResponseShape;

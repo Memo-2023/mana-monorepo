@@ -154,3 +154,55 @@ export const tokensUsedTotal = new Counter({
 	labelNames: ['agent_id'] as const,
 	registers: [register],
 });
+
+// ── Function-Calling Planner (post-migration) ────────────
+
+/**
+ * Per-tool outcome counter.
+ *
+ * `policy` is the catalog default (auto / propose) — the server-side
+ * surface offers only propose-tools, so in practice this is always
+ * `propose`, but the label stays for forward-compatibility with
+ * a future web-runner integration.
+ *
+ * `outcome` values:
+ *   - `success`  — the onToolCall callback returned `success: true`
+ *                  (used in environments that actually execute)
+ *   - `failure`  — onToolCall returned `success: false`
+ *   - `deferred` — the server-side stub; the tool_call is recorded
+ *                  for client-side application on sync (the ONLY
+ *                  value the mana-ai tick emits today)
+ */
+export const toolCallsTotal = new Counter({
+	name: 'mana_ai_tool_calls_total',
+	help: 'Total tool_calls produced by the planner and handled.',
+	labelNames: ['tool', 'policy', 'outcome'] as const,
+	registers: [register],
+});
+
+/**
+ * Distribution of how many planner rounds a single iteration consumed.
+ * 1 = LLM went straight to a terminal answer; runs close to the hard
+ * cap (5) mean the planner is struggling. Buckets line up with the
+ * fixed 5-round ceiling so Grafana's heatmap is trivially readable.
+ */
+export const plannerRoundsHistogram = new Histogram({
+	name: 'mana_ai_planner_rounds',
+	help: 'Number of reasoning rounds consumed per iteration.',
+	buckets: [1, 2, 3, 4, 5],
+	registers: [register],
+});
+
+/**
+ * Structured provider errors returned from mana-llm. `kind` mirrors
+ * the ProviderError hierarchy in services/mana-llm/src/providers/errors.py
+ * (blocked / truncated / auth / rate_limit / capability / unknown).
+ * `provider` is inferred from the model id (google / openrouter /
+ * ollama / …).
+ */
+export const providerErrorsTotal = new Counter({
+	name: 'mana_ai_provider_errors_total',
+	help: 'Structured provider errors surfaced from mana-llm.',
+	labelNames: ['provider', 'kind'] as const,
+	registers: [register],
+});
