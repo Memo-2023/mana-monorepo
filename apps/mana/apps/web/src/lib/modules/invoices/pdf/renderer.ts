@@ -33,7 +33,14 @@
  * Inter/Roboto via fetch in M7 when we care about brand typography.
  */
 
-import { PDFDocument, StandardFonts, rgb, type PDFPage, type PDFFont } from 'pdf-lib';
+import {
+	PDFDocument,
+	StandardFonts,
+	rgb,
+	type PDFPage,
+	type PDFFont,
+	type PDFImage,
+} from 'pdf-lib';
 import type { Invoice, InvoiceSettings } from '../types';
 import { CURRENCIES } from '../constants';
 import {
@@ -45,8 +52,10 @@ import {
 	LINE_COLS,
 	SPACE,
 	LINE_HEIGHT,
+	mm,
 } from './templates/default';
 import { attachQRBillToPdf, buildQRBillData, QRBillError } from './qr-bill';
+import { loadLogo } from './logo';
 
 // ─── Small geometry helpers ────────────────────────────────
 
@@ -178,9 +187,33 @@ function formatAmount(minor: number, currency: keyof typeof CURRENCIES): string 
 
 // ─── Section renderers ────────────────────────────────────
 
-function renderHeader(ctx: RenderContext, invoice: Invoice, settings: InvoiceSettings): number {
-	// Left: sender
+function renderHeader(
+	ctx: RenderContext,
+	invoice: Invoice,
+	settings: InvoiceSettings,
+	logo: PDFImage | null
+): number {
 	let leftY = ctx.y;
+
+	// Logo sits top-left, above the sender block. Max 25mm tall, 45% of
+	// content-width wide; aspect ratio preserved (scale by the tighter
+	// constraint). Leaves ~3mm breathing room before sender name.
+	if (logo) {
+		const maxH = mm(25);
+		const maxW = ctx.contentWidth * 0.45;
+		const { width: naturalW, height: naturalH } = logo.scale(1);
+		const scale = Math.min(maxW / naturalW, maxH / naturalH, 1);
+		const w = naturalW * scale;
+		const h = naturalH * scale;
+		ctx.page.drawImage(logo, {
+			x: ctx.leftX,
+			y: leftY - h,
+			width: w,
+			height: h,
+		});
+		leftY -= h + mm(3);
+	}
+
 	drawText(ctx, settings.senderName || '—', ctx.leftX, leftY, {
 		size: FONT_SIZE.brand,
 		font: ctx.bold,
@@ -508,10 +541,25 @@ export async function renderInvoicePdf(
 	doc.setProducer('pdf-lib');
 	doc.setCreationDate(new Date());
 
-	const [regular, bold] = await Promise.all([
+	const [regular, bold, logoData] = await Promise.all([
 		doc.embedFont(StandardFonts.Helvetica),
 		doc.embedFont(StandardFonts.HelveticaBold),
+		loadLogo(settings.logoMediaId),
 	]);
+
+	// Embed the logo once (shared image resource across any future pages
+	// that draw it). Silent on failure — missing logos just skip the slot.
+	let logo: PDFImage | null = null;
+	if (logoData) {
+		try {
+			logo =
+				logoData.kind === 'png'
+					? await doc.embedPng(logoData.bytes)
+					: await doc.embedJpg(logoData.bytes);
+		} catch {
+			logo = null;
+		}
+	}
 
 	const page = doc.addPage([A4.width, A4.height]);
 	const leftX = MARGIN.left;
@@ -528,7 +576,7 @@ export async function renderInvoicePdf(
 		contentWidth: rightX - leftX,
 	};
 
-	ctx.y = renderHeader(ctx, invoice, settings);
+	ctx.y = renderHeader(ctx, invoice, settings, logo);
 	ctx.y = renderRecipient(ctx, invoice, ctx.y);
 	ctx.y = renderSubject(ctx, invoice, ctx.y);
 	const linesResult = renderLinesTable(ctx, invoice);
