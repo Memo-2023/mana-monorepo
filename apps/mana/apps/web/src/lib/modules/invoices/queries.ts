@@ -4,7 +4,7 @@
 
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { decryptRecords } from '$lib/data/crypto';
-import { db } from '$lib/data/database';
+import { scopedForModule } from '$lib/data/scope';
 import type {
 	LocalInvoice,
 	LocalInvoiceClient,
@@ -78,7 +78,7 @@ export function toInvoiceClient(local: LocalInvoiceClient): InvoiceClient {
  */
 export function useAllInvoices() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalInvoice>('invoices').toArray();
+		const locals = await scopedForModule<LocalInvoice, string>('invoices', 'invoices').toArray();
 		const visible = locals.filter((i) => !i.deletedAt);
 		const decrypted = await decryptRecords('invoices', visible);
 		const today = new Date().toISOString().slice(0, 10);
@@ -96,7 +96,10 @@ export function useAllInvoices() {
 
 export function useInvoiceClients() {
 	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalInvoiceClient>('invoiceClients').toArray();
+		const locals = await scopedForModule<LocalInvoiceClient, string>(
+			'invoices',
+			'invoiceClients'
+		).toArray();
 		const visible = locals.filter((c) => !c.deletedAt);
 		const decrypted = await decryptRecords('invoiceClients', visible);
 		return decrypted.map(toInvoiceClient).sort((a, b) => a.name.localeCompare(b.name));
