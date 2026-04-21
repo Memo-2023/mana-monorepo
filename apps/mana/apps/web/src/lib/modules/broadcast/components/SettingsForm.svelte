@@ -8,6 +8,7 @@
 -->
 <script lang="ts">
 	import { broadcastSettingsStore } from '../stores/settings.svelte';
+	import DnsCheckBanner from './DnsCheckBanner.svelte';
 	import type { BroadcastSettings } from '../types';
 
 	let settings = $state<BroadcastSettings | null>(null);
@@ -105,6 +106,8 @@
 				></textarea>
 			</label>
 		</section>
+
+		<DnsCheckBanner {settings} />
 
 		<section class="section">
 			<h3>Standard-Footer</h3>

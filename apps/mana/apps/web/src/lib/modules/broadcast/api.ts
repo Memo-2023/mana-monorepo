@@ -108,6 +108,39 @@ export async function sendCampaign(
 }
 
 /**
+ * Run a DNS authentication check for the user's sending domain.
+ * Returns null on auth / 404 so the UI can treat "service down" and
+ * "nothing to report" the same way.
+ */
+export interface DnsCheckResult {
+	domain: string;
+	spf: { status: 'ok' | 'missing' | 'wrong' | 'weak'; record: string | null; message: string };
+	dkim: {
+		status: 'ok' | 'missing' | 'wrong' | 'weak';
+		record: string | null;
+		selector: string;
+		message: string;
+	};
+	dmarc: { status: 'ok' | 'missing' | 'wrong' | 'weak'; record: string | null; message: string };
+	checkedAt: string;
+	suggested: {
+		spfAdd: string;
+		dmarcRecord: string;
+	};
+}
+
+export async function runDnsCheck(domain: string, selector?: string): Promise<DnsCheckResult> {
+	const params = new URLSearchParams({ domain });
+	if (selector) params.set('selector', selector);
+	const res = await fetchWithAuth(`/api/v1/mail/dns-check?${params.toString()}`);
+	if (!res.ok) {
+		const errorText = await res.text();
+		throw new Error(`DNS-Check fehlgeschlagen (${res.status}): ${errorText}`);
+	}
+	return (await res.json()) as DnsCheckResult;
+}
+
+/**
  * Fetch aggregate stats for a campaign from mana-mail. Safe to poll on a
  * timer from the DetailView (M7) — server returns cached rollups.
  */

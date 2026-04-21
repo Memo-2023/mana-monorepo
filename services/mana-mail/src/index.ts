@@ -26,6 +26,7 @@ import { createInternalRoutes } from './routes/internal';
 import { createBroadcastSendRoutes } from './routes/broadcast-send';
 import { createBroadcastTrackRoutes } from './routes/broadcast-track';
 import { createBroadcastStatsRoutes } from './routes/broadcast-stats';
+import { createBroadcastDnsRoutes } from './routes/broadcast-dns';
 
 // ─── Bootstrap ──────────────────────────────────────────────
 
@@ -80,6 +81,7 @@ app.route(
 	createBroadcastSendRoutes(broadcastOrchestrator, config.broadcast.maxRecipientsPerCampaign)
 );
 app.route('/api/v1/mail', createBroadcastStatsRoutes(db));
+app.route('/api/v1/mail', createBroadcastDnsRoutes(config.stalwart.domain));
 app.route('/api/v1/mail', createLabelRoutes(mailService));
 app.route('/api/v1/mail', createAccountRoutes(accountService));
 app.route('/api/v1/mail/messages', createMessageRoutes(mailService));
