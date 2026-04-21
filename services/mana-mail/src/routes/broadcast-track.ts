@@ -57,7 +57,7 @@ export function createBroadcastTrackRoutes(db: Database, trackingSecret: string,
 	 * GET /track/open/:token — 1×1 pixel. Always returns the pixel even
 	 * on bad tokens so there's no signal to whoever's probing.
 	 */
-	app.get('/track/open/:token', async (c) => {
+	app.get('/open/:token', async (c) => {
 		const token = c.req.param('token');
 		const payload = verifyToken(token, trackingSecret);
 		if (!payload) return pixelResponse();
@@ -86,7 +86,7 @@ export function createBroadcastTrackRoutes(db: Database, trackingSecret: string,
 	 * graceful-fall-through on verification failure so a broken token
 	 * doesn't strand the recipient on a dead page.
 	 */
-	app.get('/track/click/:token', async (c) => {
+	app.get('/click/:token', async (c) => {
 		const token = c.req.param('token');
 		const targetUrl = c.req.query('url');
 		if (!targetUrl) return c.text('missing url', 400);
@@ -121,7 +121,7 @@ export function createBroadcastTrackRoutes(db: Database, trackingSecret: string,
 	 * so a plain anchor link works for older clients — but we still
 	 * persist the unsubscribe on GET because the user actively clicked.
 	 */
-	app.get('/track/unsubscribe/:token', async (c) => {
+	app.get('/unsubscribe/:token', async (c) => {
 		const token = c.req.param('token');
 		const payload = verifyToken(token, trackingSecret);
 		if (!payload) {
@@ -160,7 +160,7 @@ export function createBroadcastTrackRoutes(db: Database, trackingSecret: string,
 	 * Same effect as GET but returns 204 so the client doesn't show a
 	 * page (Gmail/Apple-Mail's native button calls this).
 	 */
-	app.post('/track/unsubscribe/:token', async (c) => {
+	app.post('/unsubscribe/:token', async (c) => {
 		const token = c.req.param('token');
 		const payload = verifyToken(token, trackingSecret);
 		if (!payload) return c.text('', 400);
