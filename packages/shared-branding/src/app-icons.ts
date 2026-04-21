@@ -231,6 +231,12 @@ export const APP_ICONS = {
 		// gradient sits next to music/photos/picture in the Kreativität & Medien row.
 		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="lb" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#a855f7"/><stop offset="100%" style="stop-color:#d946ef"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#lb)"/><rect x="22" y="28" width="10" height="44" rx="2" fill="white" fill-opacity="0.95"/><rect x="34" y="24" width="10" height="48" rx="2" fill="white" fill-opacity="0.8"/><rect x="46" y="30" width="10" height="42" rx="2" fill="white" fill-opacity="0.95"/><rect x="58" y="28" width="22" height="44" rx="3" fill="white"/><rect x="62" y="34" width="4" height="4" fill="#a855f7"/><rect x="72" y="34" width="4" height="4" fill="#a855f7"/><rect x="62" y="44" width="4" height="4" fill="#a855f7"/><rect x="72" y="44" width="4" height="4" fill="#a855f7"/><rect x="62" y="54" width="4" height="4" fill="#a855f7"/><rect x="72" y="54" width="4" height="4" fill="#a855f7"/><rect x="62" y="64" width="4" height="4" fill="#a855f7"/><rect x="72" y="64" width="4" height="4" fill="#a855f7"/><rect x="20" y="74" width="62" height="4" rx="2" fill="white" fill-opacity="0.5"/></svg>`
 	),
+	articles: svgToDataUrl(
+		// Bookmark ribbon tucked into a folded document corner — "Für später
+		// gemerkt". Orange→amber gradient sets it apart from news (emerald)
+		// and news-research (cyan) in the Wissen & Recherche row.
+		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="ar" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#f97316"/><stop offset="100%" style="stop-color:#f59e0b"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#ar)"/><path d="M28 22h30l18 18v38a4 4 0 0 1-4 4H28a4 4 0 0 1-4-4V26a4 4 0 0 1 4-4z" fill="white" fill-opacity="0.95"/><path d="M58 22v14a4 4 0 0 0 4 4h14" fill="none" stroke="#f97316" stroke-width="2" stroke-opacity="0.35"/><rect x="32" y="48" width="26" height="3" rx="1.5" fill="#f97316" fill-opacity="0.6"/><rect x="32" y="56" width="22" height="3" rx="1.5" fill="#f97316" fill-opacity="0.45"/><rect x="32" y="64" width="24" height="3" rx="1.5" fill="#f97316" fill-opacity="0.6"/><path d="M62 54v22l8-6 8 6V54a4 4 0 0 0-4-4h-8a4 4 0 0 0-4 4z" fill="#f97316"/></svg>`
+	),
 	invoices: svgToDataUrl(
 		// Document with a QR-code corner (CH QR-Bill) + a diagonal amount line.
 		// Emerald→teal sits next to finance green in the Arbeit & Finanzen row.

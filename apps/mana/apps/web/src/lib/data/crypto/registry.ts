@@ -88,6 +88,7 @@ import type {
 	LocalBroadcastTemplate,
 	LocalBroadcastSettings,
 } from '../../modules/broadcast/types';
+import type { LocalArticle, LocalHighlight } from '../../modules/articles/types';
 
 export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	// ─── Chat ────────────────────────────────────────────────
@@ -571,6 +572,44 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	// and belong under encryption. Policy + budgets + state are pure
 	// structural fields.
 	agents: { enabled: true, fields: ['systemPrompt', 'memory'] },
+
+	// ─── Articles (Pocket-style read-it-later) ──────────────
+	// Reading-behaviour data — same sensitivity class as newsArticles.
+	// Encrypted:
+	//   - title / excerpt / content / htmlContent / author: the Readability
+	//     extract body. Leaking this would be the same as leaking the user's
+	//     bookmark history + full article texts.
+	//   - userNote: the user's own note about the saved article.
+	// Plaintext (intentional):
+	//   - originalUrl: dedupe key. Indexed + used by saveFromUrl to avoid
+	//     duplicate ingestion. Same rationale as newsArticles.originalUrl /
+	//     uLoad.links.originalUrl.
+	//   - siteName: powers the "group by source" view and stays cheap to
+	//     aggregate without decrypting every row. Not a secret — the site
+	//     name is recoverable from originalUrl anyway.
+	//   - imageUrl: opaque pointer; the bytes are already public at that URL.
+	//   - status / readingProgress / isFavorite / savedAt / readAt /
+	//     wordCount / readingTimeMinutes / publishedAt / extractedVersion:
+	//     all structural, needed for filtering/sorting/stats.
+	//
+	// Highlights carry the marked text + the surrounding context fragments
+	// (re-anchor substrates). Both are fragments of the encrypted content
+	// and are themselves encrypted. Offsets + color + articleId are
+	// structural — the reader needs them for range scans and rendering.
+	//
+	// articleTags is intentionally NOT registered — pure FK junction
+	// (articleId, tagId), zero user-typed content. Tag names live in
+	// globalTags, which has its own encryption policy. Lives on the
+	// plaintext-allowlist alongside noteTags / eventTags / placeTags.
+	articles: entry<LocalArticle>([
+		'title',
+		'excerpt',
+		'content',
+		'htmlContent',
+		'author',
+		'userNote',
+	]),
+	articleHighlights: entry<LocalHighlight>(['text', 'note', 'contextBefore', 'contextAfter']),
 
 	// ─── Library ─────────────────────────────────────────────
 	// Reading / watching log with a kind discriminator (book / movie /

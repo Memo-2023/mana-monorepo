@@ -22,6 +22,7 @@ export const PLAINTEXT_ALLOWLIST: readonly string[] = [
 	'aiMissions', // TODO: audit
 	'albumItems', // TODO: audit
 	'albums', // TODO: audit
+	'articleTags', // FK-only junction into globalTags (articleId, tagId). Tag names live in globalTags.
 	'automations', // TODO: audit
 	'boardViews', // TODO: audit
 	'budgets', // TODO: audit
@@ -72,7 +73,6 @@ export const PLAINTEXT_ALLOWLIST: readonly string[] = [
 	'mukkeProjects', // TODO: audit
 	'newsCachedFeed', // TODO: audit
 	'noteTags', // TODO: audit
-	'pendingProposals', // TODO: audit
 	'periodSymptoms', // TODO: audit
 	'photoFavorites', // TODO: audit
 	'photoMediaTags', // TODO: audit

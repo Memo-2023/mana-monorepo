@@ -738,6 +738,23 @@ db.version(32).stores({
 	broadcastSettings: 'id',
 });
 
+// v33 — Articles module: Pocket-style read-it-later.
+// See docs/plans/articles-module.md. Three tables:
+//   - articles: saved URLs + extracted Readability content. `originalUrl`
+//     indexed for O(1) dedupe at save time. `status` + `savedAt` drive
+//     the ListView's main filter + sort. `isFavorite` + `siteName` are
+//     indexed for the "favourites" + "group by source" views.
+//   - articleHighlights: per-selection rows. [articleId+startOffset]
+//     gives sorted range scans per article for the reader overlay.
+//   - articleTags: pure junction into globalTags (appId 'tags').
+//     [articleId+tagId] matches the pattern used by noteTags / eventTags
+//     / contactTags / placeTags and is what `createTagLinkOps` expects.
+db.version(33).stores({
+	articles: 'id, userId, status, savedAt, isFavorite, siteName, originalUrl',
+	articleHighlights: 'id, userId, articleId, [articleId+startOffset]',
+	articleTags: 'id, userId, articleId, tagId, [articleId+tagId]',
+});
+
 // ─── Sync Routing ──────────────────────────────────────────
 // SYNC_APP_MAP, TABLE_TO_SYNC_NAME, TABLE_TO_APP, SYNC_NAME_TO_TABLE,
 // toSyncName() and fromSyncName() are now derived from per-module

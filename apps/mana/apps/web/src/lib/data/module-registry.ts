@@ -99,6 +99,7 @@ import { kontextModuleConfig } from '$lib/modules/kontext/module.config';
 import { quizModuleConfig } from '$lib/modules/quiz/module.config';
 import { profileModuleConfig } from '$lib/modules/profile/module.config';
 import { libraryModuleConfig } from '$lib/modules/library/module.config';
+import { articlesModuleConfig } from '$lib/modules/articles/module.config';
 import { invoicesModuleConfig } from '$lib/modules/invoices/module.config';
 import { broadcastModuleConfig } from '$lib/modules/broadcast/module.config';
 import { wetterModuleConfig } from '$lib/modules/wetter/module.config';
@@ -157,6 +158,7 @@ export const MODULE_CONFIGS: readonly ModuleConfig[] = [
 	quizModuleConfig,
 	profileModuleConfig,
 	libraryModuleConfig,
+	articlesModuleConfig,
 	invoicesModuleConfig,
 	broadcastModuleConfig,
 	wetterModuleConfig,
