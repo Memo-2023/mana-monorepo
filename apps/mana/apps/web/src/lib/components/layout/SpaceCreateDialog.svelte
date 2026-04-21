@@ -215,14 +215,22 @@
 {/if}
 
 <style>
+	/* Theme-token driven throughout — mirrors @mana/shared-ui Pill so
+		 the dialog lives in the same visual language and adapts to dark
+		 mode automatically. */
+
 	.backdrop {
 		position: fixed;
 		inset: 0;
-		background: rgba(0, 0, 0, 0.4);
-		/* Above the PillNav (z=1000) and the SpaceSwitcher menu (z=1501)
-			 so opening the dialog cleanly covers the nav chrome. */
+		background: rgba(0, 0, 0, 0.5);
+		/* Above PillNav (z=1000) and SpaceSwitcher menu (z=1501) so
+			 opening the dialog cleanly covers the nav chrome. */
 		z-index: 1600;
 		border: 0;
+	}
+
+	:global(.dark) .backdrop {
+		background: rgba(0, 0, 0, 0.65);
 	}
 
 	.dialog {
@@ -233,11 +241,11 @@
 		width: min(540px, 92vw);
 		max-height: 86vh;
 		overflow-y: auto;
-		background: hsl(var(--color-card, 0 0% 100%));
-		color: hsl(var(--color-foreground, 0 0% 10%));
-		border: 1px solid hsl(var(--color-border, 0 0% 88%));
-		border-radius: 12px;
-		box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+		background: hsl(var(--color-card));
+		color: hsl(var(--color-foreground));
+		border: 1px solid hsl(var(--color-border));
+		border-radius: 14px;
+		box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
 		z-index: 1601;
 	}
 
@@ -245,7 +253,7 @@
 		padding: 1.25rem;
 		display: flex;
 		flex-direction: column;
-		gap: 0.875rem;
+		gap: 1rem;
 	}
 
 	header {
@@ -259,6 +267,7 @@
 		font-size: 1.125rem;
 		font-weight: 600;
 		margin: 0;
+		color: hsl(var(--color-foreground));
 	}
 
 	.close {
@@ -267,7 +276,14 @@
 		font-size: 1.5rem;
 		line-height: 1;
 		cursor: pointer;
-		color: var(--color-text-muted, hsl(0 0% 45%));
+		color: hsl(var(--color-muted-foreground, 0 0% 50%));
+		padding: 0 0.25rem;
+		border-radius: 6px;
+	}
+
+	.close:hover {
+		background: hsl(var(--color-muted, 0 0% 94%));
+		color: hsl(var(--color-foreground));
 	}
 
 	.type-picker {
@@ -277,10 +293,12 @@
 	}
 
 	.type-picker legend {
-		font-size: 0.8125rem;
+		font-size: 0.75rem;
 		font-weight: 500;
-		color: var(--color-text-muted, hsl(0 0% 45%));
+		color: hsl(var(--color-muted-foreground, 0 0% 50%));
 		margin-bottom: 0.5rem;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
 	}
 
 	.type-grid {
@@ -289,20 +307,32 @@
 		gap: 0.5rem;
 	}
 
+	/* Every type card has a visible border + background, not just the
+		 active one. Previously inactive cards looked like loose text. */
 	.type-option {
 		display: flex;
 		flex-direction: column;
 		gap: 0.25rem;
-		padding: 0.625rem 0.75rem;
-		border: 1px solid var(--color-border, hsl(0 0% 88%));
-		border-radius: var(--radius-md, 6px);
+		padding: 0.75rem 0.875rem;
+		border: 1px solid hsl(var(--color-border));
+		background: hsl(var(--color-background, var(--color-card)));
+		border-radius: 10px;
 		cursor: pointer;
 		transition: all 120ms ease;
 	}
 
+	.type-option:hover {
+		border-color: hsl(var(--color-border-strong, var(--color-foreground) / 0.3));
+		background: hsl(var(--color-muted, var(--color-card)));
+	}
+
 	.type-option.active {
-		border-color: var(--color-primary, hsl(230 80% 50%));
-		background: var(--color-surface-2, hsl(230 80% 97%));
+		border-color: var(--pill-primary-color, hsl(var(--color-primary, 230 80% 55%)));
+		background: color-mix(
+			in srgb,
+			var(--pill-primary-color, hsl(var(--color-primary, 230 80% 55%))) 12%,
+			transparent
+		);
 	}
 
 	.type-option input {
@@ -310,91 +340,124 @@
 	}
 
 	.type-name {
-		font-weight: 500;
+		font-weight: 600;
 		font-size: 0.875rem;
+		color: hsl(var(--color-foreground));
 	}
 
 	.type-desc {
 		font-size: 0.75rem;
-		color: var(--color-text-muted, hsl(0 0% 45%));
+		color: hsl(var(--color-muted-foreground, 0 0% 50%));
 		line-height: 1.35;
 	}
 
 	.field {
 		display: flex;
 		flex-direction: column;
-		gap: 0.25rem;
+		gap: 0.375rem;
 	}
 
-	.field span {
-		font-size: 0.8125rem;
+	.field > span {
+		font-size: 0.75rem;
 		font-weight: 500;
-		color: var(--color-text-muted, hsl(0 0% 45%));
+		color: hsl(var(--color-muted-foreground, 0 0% 50%));
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
 	}
 
 	.field input,
 	.field textarea {
-		padding: 0.5rem 0.625rem;
-		border: 1px solid var(--color-border, hsl(0 0% 88%));
-		border-radius: var(--radius-md, 6px);
-		background: var(--color-surface-1, white);
-		color: var(--color-text, inherit);
+		padding: 0.5rem 0.75rem;
+		border: 1px solid hsl(var(--color-border));
+		border-radius: 8px;
+		background: hsl(var(--color-input, var(--color-background, var(--color-card))));
+		color: hsl(var(--color-foreground));
 		font: inherit;
 		font-size: 0.875rem;
+		transition: border-color 120ms ease;
+	}
+
+	.field textarea {
+		resize: vertical;
+		min-height: 3.5rem;
+	}
+
+	.field input::placeholder,
+	.field textarea::placeholder {
+		color: hsl(var(--color-muted-foreground, 0 0% 50%) / 0.7);
 	}
 
 	.field input:focus,
 	.field textarea:focus {
 		outline: none;
-		border-color: var(--color-primary, hsl(230 80% 50%));
+		border-color: var(--pill-primary-color, hsl(var(--color-primary, 230 80% 55%)));
+		box-shadow: 0 0 0 3px
+			color-mix(
+				in srgb,
+				var(--pill-primary-color, hsl(var(--color-primary, 230 80% 55%))) 20%,
+				transparent
+			);
 	}
 
 	.hint {
 		font-size: 0.75rem;
-		color: var(--color-text-muted, hsl(0 0% 50%));
+		color: hsl(var(--color-muted-foreground, 0 0% 55%));
 	}
 
 	.error {
-		padding: 0.5rem 0.625rem;
-		background: hsl(0 70% 96%);
-		color: hsl(0 60% 40%);
-		border-radius: var(--radius-md, 6px);
+		padding: 0.625rem 0.75rem;
+		background: color-mix(in srgb, hsl(0 70% 55%) 12%, transparent);
+		color: hsl(0 70% 55%);
+		border: 1px solid color-mix(in srgb, hsl(0 70% 55%) 30%, transparent);
+		border-radius: 8px;
 		font-size: 0.8125rem;
+	}
+
+	:global(.dark) .error {
+		color: hsl(0 80% 72%);
+		background: color-mix(in srgb, hsl(0 70% 50%) 20%, transparent);
+		border-color: color-mix(in srgb, hsl(0 70% 50%) 40%, transparent);
 	}
 
 	footer {
 		display: flex;
 		justify-content: flex-end;
 		gap: 0.5rem;
-		margin-top: 0.25rem;
+		margin-top: 0.5rem;
 	}
 
 	footer button {
-		padding: 0.5rem 1rem;
-		border-radius: var(--radius-md, 6px);
+		padding: 0.5rem 1.125rem;
+		border-radius: 8px;
 		border: 1px solid transparent;
 		font: inherit;
 		font-size: 0.875rem;
+		font-weight: 500;
 		cursor: pointer;
+		transition: all 120ms ease;
 	}
 
 	.primary {
-		background: var(--color-primary, hsl(230 80% 50%));
-		color: white;
+		background: var(--pill-primary-color, hsl(var(--color-primary, 230 80% 55%)));
+		color: hsl(var(--color-primary-foreground, 0 0% 100%));
+	}
+
+	.primary:hover:not(:disabled) {
+		filter: brightness(1.05);
 	}
 
 	.primary:disabled {
-		opacity: 0.55;
+		opacity: 0.5;
 		cursor: not-allowed;
 	}
 
 	.secondary {
 		background: transparent;
-		border-color: var(--color-border, hsl(0 0% 88%));
-		color: var(--color-text, inherit);
+		border-color: hsl(var(--color-border));
+		color: hsl(var(--color-foreground));
 	}
 
 	.secondary:hover:not(:disabled) {
-		background: var(--color-surface-2, hsl(0 0% 96%));
+		background: hsl(var(--color-muted, 0 0% 94%));
 	}
 </style>
