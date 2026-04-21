@@ -248,6 +248,18 @@ export const APP_ICONS = {
 		// (emerald) while staying in the "communication" colour family.
 		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="bc" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#6366f1"/><stop offset="100%" style="stop-color:#06b6d4"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#bc)"/><path d="M32 42v16l14 4v-24l-14 4z" fill="white" fill-opacity="0.95"/><path d="M46 38l26-10v44l-26-10z" fill="white"/><path d="M42 62v14a3 3 0 0 0 3 3h4a3 3 0 0 0 3-3V64" fill="white" fill-opacity="0.85"/><path d="M78 40c4 2 6 5 6 10s-2 8-6 10" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" opacity="0.8"/><path d="M84 32c6 3 10 9 10 18s-4 15-10 18" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" opacity="0.5"/></svg>`
 	),
+	agents: svgToDataUrl(
+		// Smiling robot head with antenna dot — represents the AI agents that
+		// carry out autonomous missions. Violet→fuchsia gradient sits next to
+		// companion in the AI Workbench family.
+		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="ag" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#8b5cf6"/><stop offset="100%" style="stop-color:#d946ef"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#ag)"/><line x1="50" y1="20" x2="50" y2="28" stroke="white" stroke-width="3" stroke-linecap="round"/><circle cx="50" cy="18" r="3" fill="white"/><rect x="24" y="30" width="52" height="40" rx="10" fill="white"/><circle cx="38" cy="48" r="5" fill="#8b5cf6"/><circle cx="62" cy="48" r="5" fill="#8b5cf6"/><circle cx="39" cy="47" r="1.5" fill="white"/><circle cx="63" cy="47" r="1.5" fill="white"/><path d="M38 60c3 3 7 4 12 4s9-1 12-4" stroke="#8b5cf6" stroke-width="3" stroke-linecap="round" fill="none"/><rect x="34" y="72" width="10" height="8" rx="2" fill="white" fill-opacity="0.9"/><rect x="56" y="72" width="10" height="8" rx="2" fill="white" fill-opacity="0.9"/><line x1="22" y1="46" x2="28" y2="46" stroke="white" stroke-width="3" stroke-linecap="round" opacity="0.7"/><line x1="72" y1="46" x2="78" y2="46" stroke="white" stroke-width="3" stroke-linecap="round" opacity="0.7"/></svg>`
+	),
+	timeline: svgToDataUrl(
+		// Vertical event-dots with connecting line — timeline/history axis.
+		// Amber→orange gradient so it stands apart from the blue Activity icon
+		// while still reading as "chronological" in the AI Workbench family.
+		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="tl" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#f59e0b"/><stop offset="100%" style="stop-color:#ea580c"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#tl)"/><line x1="34" y1="22" x2="34" y2="78" stroke="white" stroke-width="3" stroke-linecap="round" opacity="0.55"/><circle cx="34" cy="30" r="5" fill="white"/><circle cx="34" cy="50" r="5" fill="white"/><circle cx="34" cy="70" r="5" fill="white"/><rect x="44" y="26" width="32" height="8" rx="2" fill="white" fill-opacity="0.95"/><rect x="44" y="46" width="26" height="8" rx="2" fill="white" fill-opacity="0.8"/><rect x="44" y="66" width="30" height="8" rx="2" fill="white" fill-opacity="0.9"/></svg>`
+	),
 } as const;
 
 export type AppIconId = keyof typeof APP_ICONS;

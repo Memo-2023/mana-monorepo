@@ -1071,6 +1071,40 @@ export const MANA_APPS: ManaApp[] = [
 		status: 'development',
 		requiredTier: 'alpha',
 	},
+	{
+		id: 'agents',
+		name: 'Agents',
+		description: {
+			de: 'KI-Agenten verwalten',
+			en: 'Manage AI agents',
+		},
+		longDescription: {
+			de: 'Lege mehrere KI-Agenten an — jeder mit eigenem Namen, Avatar, System-Prompt, Memory und Tool-Policy. Agents führen autonome Missions aus und schreiben unter ihrer eigenen Identität.',
+			en: 'Create multiple AI agents — each with its own name, avatar, system prompt, memory and tool policy. Agents run autonomous missions and write under their own identity.',
+		},
+		icon: APP_ICONS.agents,
+		color: '#8b5cf6',
+		comingSoon: false,
+		status: 'beta',
+		requiredTier: 'beta',
+	},
+	{
+		id: 'timeline',
+		name: 'Timeline',
+		description: {
+			de: 'Was wurde wann getan',
+			en: 'What happened when',
+		},
+		longDescription: {
+			de: 'Chronologische Übersicht aller Einträge über alle Module — Tasks, Events, Kalender, KI-Missionen. Mit Akteur-Filter (User vs. KI vs. System) und Analytics-Ansicht.',
+			en: 'A chronological view of every record across every module — tasks, events, calendar, AI missions. With actor filter (user / AI / system) and analytics drill-down.',
+		},
+		icon: APP_ICONS.timeline,
+		color: '#f59e0b',
+		comingSoon: false,
+		status: 'beta',
+		requiredTier: 'beta',
+	},
 ];
 
 /**
@@ -1162,6 +1196,9 @@ const APP_URL_OVERRIDES: Partial<Record<AppIconId, { dev: string; prod: string }
 	mana: { dev: 'http://localhost:5173', prod: 'https://mana.how' },
 	// Standalone apps on their own subdomain / port.
 	arcade: { dev: 'http://localhost:5201', prod: 'https://arcade.mana.how' },
+	// The broadcast module's route is `/broadcasts` (plural) but the icon
+	// + id stay singular to match the `lib/modules/broadcast/` folder.
+	broadcast: { dev: 'http://localhost:5173/broadcasts', prod: 'https://mana.how/broadcasts' },
 };
 
 export const APP_URLS: Record<AppIconId, { dev: string; prod: string }> = Object.fromEntries(

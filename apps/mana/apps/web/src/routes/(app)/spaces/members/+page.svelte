@@ -12,6 +12,7 @@
 	 */
 
 	import { onMount } from 'svelte';
+	import { PageHeader } from '@mana/shared-ui';
 	import { getActiveSpace, authFetch } from '$lib/data/scope';
 	import { SPACE_TYPE_LABELS } from '@mana/shared-branding';
 
@@ -143,17 +144,18 @@
 </script>
 
 <div class="container">
-	<header class="page-head">
-		<h1>Mitglieder</h1>
-		{#if activeSpace}
-			<p class="subtitle">
-				<strong>{activeSpace.name}</strong>
-				<span class="type-chip" data-type={activeSpace.type}
-					>{SPACE_TYPE_LABELS.de[activeSpace.type]}</span
-				>
-			</p>
-		{/if}
-	</header>
+	<PageHeader
+		title="Mitglieder"
+		description={activeSpace
+			? `${activeSpace.name} · ${SPACE_TYPE_LABELS.de[activeSpace.type]}`
+			: undefined}
+		backHref="/"
+		size="lg"
+	>
+		{#snippet breadcrumb()}
+			<a href="/">Workbench</a> <span class="crumb-sep">›</span> Mitglieder verwalten
+		{/snippet}
+	</PageHeader>
 
 	{#if !activeSpace}
 		<p class="empty">Lade aktiven Space …</p>
@@ -263,87 +265,15 @@
 		 instead of falling back to hardcoded white. */
 
 	.container {
-		max-width: 640px;
+		max-width: 720px;
 		margin: 0 auto;
-		padding: 1.5rem 1rem 4rem;
+		padding: 0 1rem 4rem;
 		color: hsl(var(--color-foreground));
 	}
 
-	.page-head {
-		margin-bottom: 1.5rem;
-	}
-
-	.page-head h1 {
-		font-size: 1.5rem;
-		font-weight: 600;
-		margin: 0 0 0.25rem;
-		color: hsl(var(--color-foreground));
-	}
-
-	.subtitle {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		margin: 0;
-		color: hsl(var(--color-muted-foreground, 0 0% 55%));
-		font-size: 0.875rem;
-	}
-
-	.type-chip {
-		font-size: 0.6875rem;
-		padding: 0.125rem 0.5rem;
-		border-radius: 9999px;
-		background: hsl(var(--color-muted, 0 0% 94%));
-		color: hsl(var(--color-muted-foreground, 0 0% 45%));
-		text-transform: uppercase;
-		letter-spacing: 0.02em;
-		font-weight: 500;
-	}
-
-	.type-chip[data-type='brand'] {
-		background: hsl(260 60% 95%);
-		color: hsl(260 55% 35%);
-	}
-	.type-chip[data-type='club'] {
-		background: hsl(160 45% 93%);
-		color: hsl(160 55% 28%);
-	}
-	.type-chip[data-type='family'] {
-		background: hsl(30 70% 93%);
-		color: hsl(30 55% 35%);
-	}
-	.type-chip[data-type='team'] {
-		background: hsl(210 55% 93%);
-		color: hsl(210 55% 32%);
-	}
-	.type-chip[data-type='practice'] {
-		background: hsl(340 50% 94%);
-		color: hsl(340 50% 38%);
-	}
-
-	:global(.dark) .type-chip {
-		background: hsl(var(--color-muted, 0 0% 20%));
-		color: hsl(var(--color-muted-foreground, 0 0% 75%));
-	}
-	:global(.dark) .type-chip[data-type='brand'] {
-		background: hsl(260 40% 25%);
-		color: hsl(260 80% 85%);
-	}
-	:global(.dark) .type-chip[data-type='club'] {
-		background: hsl(160 35% 20%);
-		color: hsl(160 70% 80%);
-	}
-	:global(.dark) .type-chip[data-type='family'] {
-		background: hsl(30 40% 22%);
-		color: hsl(30 80% 82%);
-	}
-	:global(.dark) .type-chip[data-type='team'] {
-		background: hsl(210 40% 22%);
-		color: hsl(210 70% 82%);
-	}
-	:global(.dark) .type-chip[data-type='practice'] {
-		background: hsl(340 35% 23%);
-		color: hsl(340 65% 82%);
+	.crumb-sep {
+		margin: 0 0.25rem;
+		opacity: 0.5;
 	}
 
 	.hint-card {
