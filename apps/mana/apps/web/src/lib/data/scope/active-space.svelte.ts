@@ -67,18 +67,45 @@ export function getEffectiveTier(userFallback: SpaceTier | string | undefined): 
 }
 
 /**
- * Resolve the user's active space from Better Auth. Idempotent — safe to
- * call multiple times; successive calls short-circuit when `status === 'ready'`.
+ * LocalStorage hint: the last organization id the user explicitly
+ * switched to. Persists the choice across reloads even when Better
+ * Auth's cross-origin Set-Cookie (dev: localhost:5173 → localhost:3001
+ * with SameSite=Lax) doesn't reliably update the session's
+ * activeOrganizationId. Without this, a brand/family switch gets
+ * reverted to Personal on every refresh.
+ */
+const ACTIVE_SPACE_HINT_KEY = 'mana.scope.activeSpaceId';
+
+function readActiveSpaceHint(): string | null {
+	if (typeof localStorage === 'undefined') return null;
+	try {
+		return localStorage.getItem(ACTIVE_SPACE_HINT_KEY);
+	} catch {
+		return null;
+	}
+}
+
+export function writeActiveSpaceHint(id: string | null): void {
+	if (typeof localStorage === 'undefined') return;
+	try {
+		if (id) localStorage.setItem(ACTIVE_SPACE_HINT_KEY, id);
+		else localStorage.removeItem(ACTIVE_SPACE_HINT_KEY);
+	} catch {
+		// ignore quota / sandbox errors
+	}
+}
+
+/**
+ * Resolve the user's active space. Order of truth:
+ *   1. Server-side active member (get-active-member) — trustworthy when
+ *      Better Auth's activeOrganizationId landed in the session.
+ *   2. Client-side hint from localStorage — survives cookie drops across
+ *      page reloads in dev. If present, we call set-active to re-sync
+ *      the server to match.
+ *   3. Personal space fallback — brand-new session, no previous choice.
  *
- * Flow:
- *   1. GET /api/auth/organization/get-active-member
- *      If it returns a member object → use it.
- *   2. Otherwise GET /api/auth/organization/list, find the personal space
- *      by metadata.type === 'personal', POST /set-active to activate it.
- *   3. Write the result into the reactive `active` state.
- *
- * Errors are captured in `lastError` and status flips to 'error'. Callers
- * can retry by calling `loadActiveSpace({ force: true })`.
+ * Errors captured in `lastError`; status flips to 'error'. Callers can
+ * retry via `loadActiveSpace({ force: true })`.
  */
 export async function loadActiveSpace(opts: { force?: boolean } = {}): Promise<ActiveSpace | null> {
 	if (!opts.force && status === 'ready') return active;
@@ -91,18 +118,28 @@ export async function loadActiveSpace(opts: { force?: boolean } = {}): Promise<A
 		if (member) {
 			active = member;
 			status = 'ready';
+			writeActiveSpaceHint(member.id);
 			return member;
 		}
 
-		// No active org on the session — activate the personal space.
+		// Server says no active org. Two reasons we might still know one:
+		//   (a) the user switched to a non-personal space earlier and the
+		//       hint survived in localStorage even though the cookie didn't.
+		//   (b) it's truly a fresh session, in which case we activate
+		//       Personal.
 		const orgs = await fetchOrganizations();
-		const personal = orgs.find((o) => o.type === 'personal');
-		if (!personal) {
-			throw new Error('No personal space found — signup hook may not have run');
+		const hintId = readActiveSpaceHint();
+		const hinted = hintId ? orgs.find((o) => o.id === hintId) : null;
+
+		const chosen = hinted ?? orgs.find((o) => o.type === 'personal') ?? null;
+		if (!chosen) {
+			throw new Error('No accessible space found — signup hook may not have run');
 		}
-		await setActiveOnServer(personal.id);
-		active = { ...personal, role: 'owner' };
+
+		await setActiveOnServer(chosen.id);
+		active = { ...chosen, role: hinted ? hinted.role : 'owner' };
 		status = 'ready';
+		writeActiveSpaceHint(chosen.id);
 		return active;
 	} catch (err) {
 		lastError = err instanceof Error ? err.message : String(err);

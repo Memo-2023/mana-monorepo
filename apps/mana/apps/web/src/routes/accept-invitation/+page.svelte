@@ -16,7 +16,7 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { SPACE_TYPE_LABELS } from '@mana/shared-branding';
 	import { isSpaceType, type SpaceType } from '@mana/shared-types';
-	import { loadActiveSpace, authFetch } from '$lib/data/scope';
+	import { loadActiveSpace, authFetch, writeActiveSpaceHint } from '$lib/data/scope';
 
 	interface InvitationPayload {
 		id: string;
@@ -93,6 +93,8 @@
 				method: 'POST',
 				body: JSON.stringify({ organizationId: invitation.organizationId }),
 			});
+			// localStorage fallback for cross-origin cookie drops.
+			writeActiveSpaceHint(invitation.organizationId);
 			await loadActiveSpace({ force: true });
 			goto('/');
 		} catch (err) {

@@ -11,7 +11,7 @@
 
 	import { SPACE_TYPES, SPACE_TYPE_LABELS, SPACE_TYPE_DESCRIPTIONS } from '@mana/shared-branding';
 	import type { SpaceType } from '@mana/shared-types';
-	import { loadActiveSpace, authFetch } from '$lib/data/scope';
+	import { loadActiveSpace, authFetch, writeActiveSpaceHint } from '$lib/data/scope';
 
 	interface Props {
 		open: boolean;
@@ -92,6 +92,9 @@
 				method: 'POST',
 				body: JSON.stringify({ organizationId: created.id }),
 			});
+			// Persist the choice in localStorage as a fallback against
+			// cross-origin cookie drops in dev.
+			writeActiveSpaceHint(created.id);
 			await loadActiveSpace({ force: true });
 			if (typeof window !== 'undefined') window.location.reload();
 		} catch (err) {

@@ -11,7 +11,13 @@
 	 */
 
 	import { onDestroy } from 'svelte';
-	import { getActiveSpace, loadActiveSpace, authFetch, type ActiveSpace } from '$lib/data/scope';
+	import {
+		getActiveSpace,
+		loadActiveSpace,
+		authFetch,
+		writeActiveSpaceHint,
+		type ActiveSpace,
+	} from '$lib/data/scope';
 	import { SPACE_TYPE_LABELS } from '@mana/shared-branding';
 	import { isSpaceType, isSpaceTier } from '@mana/shared-types';
 	import SpaceCreateDialog from './SpaceCreateDialog.svelte';
@@ -102,6 +108,10 @@
 				body: JSON.stringify({ organizationId: id }),
 			});
 			if (!res.ok) throw new Error(`set-active failed: ${res.status}`);
+			// Persist the user's explicit choice so the reload-time
+			// bootstrap can recover it even if Better Auth's cross-origin
+			// Set-Cookie was dropped by the browser (dev SameSite=Lax).
+			writeActiveSpaceHint(id);
 			await loadActiveSpace({ force: true });
 			if (typeof window !== 'undefined') window.location.reload();
 		} catch (err) {
