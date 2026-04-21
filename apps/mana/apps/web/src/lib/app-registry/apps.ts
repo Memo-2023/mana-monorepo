@@ -1166,6 +1166,36 @@ registerApp({
 });
 
 registerApp({
+	id: 'admin-users',
+	name: 'Admin · Users',
+	color: '#EF4444',
+	icon: AddressBook,
+	views: {
+		list: { load: () => import('$lib/modules/admin-users/ListView.svelte') },
+	},
+});
+
+registerApp({
+	id: 'admin-system',
+	name: 'Admin · System',
+	color: '#EF4444',
+	icon: HardDrives,
+	views: {
+		list: { load: () => import('$lib/modules/admin-system/ListView.svelte') },
+	},
+});
+
+registerApp({
+	id: 'admin-user-data',
+	name: 'Admin · User Data',
+	color: '#EF4444',
+	icon: File,
+	views: {
+		list: { load: () => import('$lib/modules/admin-user-data/ListView.svelte') },
+	},
+});
+
+registerApp({
 	id: 'complexity',
 	name: 'Complexity',
 	color: '#0EA5E9',
@@ -1285,6 +1315,50 @@ registerApp({
 	icon: UserCircle,
 	views: {
 		list: { load: () => import('$lib/modules/spaces/ListView.svelte') },
+	},
+});
+
+// ── Module-Settings Cards ────────────────────────────
+// Per-module settings/preferences as workbench cards so they can be
+// dropped into any scene without a subroute.
+
+registerApp({
+	id: 'broadcast-settings',
+	name: 'Broadcast · Settings',
+	color: '#6366f1',
+	icon: Gear,
+	views: {
+		list: { load: () => import('$lib/modules/broadcast-settings/ListView.svelte') },
+	},
+});
+
+registerApp({
+	id: 'invoices-settings',
+	name: 'Invoices · Settings',
+	color: '#059669',
+	icon: Gear,
+	views: {
+		list: { load: () => import('$lib/modules/invoices-settings/ListView.svelte') },
+	},
+});
+
+registerApp({
+	id: 'uload-settings',
+	name: 'uLoad · Settings',
+	color: '#0EA5E9',
+	icon: Gear,
+	views: {
+		list: { load: () => import('$lib/modules/uload-settings/ListView.svelte') },
+	},
+});
+
+registerApp({
+	id: 'news-preferences',
+	name: 'News · Preferences',
+	color: '#10B981',
+	icon: Gear,
+	views: {
+		list: { load: () => import('$lib/modules/news-preferences/ListView.svelte') },
 	},
 });
 
