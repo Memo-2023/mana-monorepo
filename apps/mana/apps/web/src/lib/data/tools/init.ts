@@ -43,6 +43,7 @@ import { wetterTools } from '$lib/modules/wetter/tools';
 import { quizTools } from '$lib/modules/quiz/tools';
 import { invoicesTools } from '$lib/modules/invoices/tools';
 import { libraryTools } from '$lib/modules/library/tools';
+import { broadcastTools } from '$lib/modules/broadcast/tools';
 
 let initialized = false;
 
@@ -87,5 +88,6 @@ export function initTools(): void {
 	registerTools(quizTools);
 	registerTools(invoicesTools);
 	registerTools(libraryTools);
+	registerTools(broadcastTools);
 	initialized = true;
 }

@@ -1323,6 +1323,79 @@ export const AI_TOOL_CATALOG: readonly ToolSchema[] = [
 			},
 		],
 	},
+
+	// ── Broadcast (Newsletter) ───────────────────────────────
+	{
+		name: 'create_campaign_draft',
+		module: 'broadcast',
+		description:
+			'Erstellt einen Newsletter-/Kampagnen-Entwurf mit Name, Betreff, optionalem Preheader und fertigem HTML-Body. Empfaengerliste bleibt leer — der Nutzer waehlt sie in der UI. Gibt die ID zurueck.',
+		defaultPolicy: 'propose',
+		parameters: [
+			{
+				name: 'name',
+				type: 'string',
+				description: 'Interner Arbeitstitel der Kampagne',
+				required: true,
+			},
+			{
+				name: 'subject',
+				type: 'string',
+				description: 'E-Mail-Betreff (was im Posteingang steht)',
+				required: true,
+			},
+			{
+				name: 'preheader',
+				type: 'string',
+				description: 'Vorschau-Text neben dem Betreff in Gmail',
+				required: false,
+			},
+			{
+				name: 'htmlContent',
+				type: 'string',
+				description:
+					'Body als HTML. Erlaubte Tags: p, h1, h2, h3, ul, ol, li, a, strong, em, br. Links verwenden href="https://…".',
+				required: true,
+			},
+		],
+	},
+	{
+		name: 'list_campaigns',
+		module: 'broadcast',
+		description:
+			'Listet Kampagnen (id, name, subject, status, Empfaengerzahl, sentAt) — optional nach Status gefiltert.',
+		defaultPolicy: 'auto',
+		parameters: [
+			{
+				name: 'status',
+				type: 'string',
+				description: 'Nur diesen Status zeigen',
+				required: false,
+				enum: ['draft', 'scheduled', 'sending', 'sent', 'cancelled'],
+			},
+			{
+				name: 'limit',
+				type: 'number',
+				description: 'Maximale Anzahl (Standard 20)',
+				required: false,
+			},
+		],
+	},
+	{
+		name: 'get_campaign_stats',
+		module: 'broadcast',
+		description:
+			'Gibt Kennzahlen zu einer Kampagne zurueck: Oeffnungsrate, Klickrate, Bounce-Rate, Abmelderate (jeweils 0..1).',
+		defaultPolicy: 'auto',
+		parameters: [
+			{
+				name: 'campaignId',
+				type: 'string',
+				description: 'ID der Kampagne (aus list_campaigns)',
+				required: true,
+			},
+		],
+	},
 ];
 
 // ═══════════════════════════════════════════════════════════════

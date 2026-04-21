@@ -29,6 +29,8 @@ export { broadcastSettingsStore, ensureSettings } from './stores/settings.svelte
 export { renderEmailHtml } from './render/email-html';
 export { renderPlainText } from './render/plain-text';
 
+export { broadcastTools } from './tools';
+
 export {
 	STATUS_LABELS,
 	STATUS_COLORS,

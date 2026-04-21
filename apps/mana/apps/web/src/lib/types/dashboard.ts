@@ -33,7 +33,8 @@ export type WidgetType =
 	| 'period' // Period: current phase + days until next period
 	| 'news-unread' // News: latest unread curated articles
 	| 'body-stats' // Body: latest weight + active workout summary
-	| 'invoices-open'; // Invoices: open/overdue totals + oldest overdue
+	| 'invoices-open' // Invoices: open/overdue totals + oldest overdue
+	| 'broadcasts'; // Broadcast: YTD counts + last sent + next scheduled
 
 /**
  * Widget size - maps to CSS Grid columns
@@ -368,6 +369,14 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
 		nameKey: 'dashboard.widgets.invoices_open.title',
 		descriptionKey: 'dashboard.widgets.invoices_open.description',
 		icon: '📄',
+		defaultSize: 'medium',
+		allowMultiple: false,
+	},
+	{
+		type: 'broadcasts',
+		nameKey: 'dashboard.widgets.broadcasts.title',
+		descriptionKey: 'dashboard.widgets.broadcasts.description',
+		icon: '📣',
 		defaultSize: 'medium',
 		allowMultiple: false,
 	},
