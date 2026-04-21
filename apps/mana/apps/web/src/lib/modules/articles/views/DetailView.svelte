@@ -10,8 +10,10 @@
 -->
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { useArticle } from '../queries';
+	import { TagField } from '@mana/shared-ui';
+	import { useArticle, useArticleTagIds } from '../queries';
 	import { articlesStore } from '../stores/articles.svelte';
+	import { articleTagOps, useAllTags } from '../stores/tags.svelte';
 	import ReaderView from '../components/ReaderView.svelte';
 	import HighlightLayer from '../components/HighlightLayer.svelte';
 
@@ -26,6 +28,12 @@
 	// the old one.
 	const article$ = $derived.by(() => useArticle(id));
 	const article = $derived(article$.value);
+
+	// Tags: globally-available tag pool + the ids linked to *this* article.
+	// TagField takes the full pool + selected ids; on change we fan-out
+	// through articleTagOps.setTags which handles add/remove diff internally.
+	const allTags$ = useAllTags();
+	const tagIds$ = $derived.by(() => useArticleTagIds(id));
 
 	// Typography state — per-session only for now. Persisting into userSettings
 	// comes later; M2 just gets the UX loop working.
@@ -73,6 +81,11 @@
 			await articlesStore.setStatus(article.id, 'reading');
 		}
 		await articlesStore.setProgress(article.id, progress);
+	}
+
+	async function onTagsChange(ids: string[]) {
+		if (!article) return;
+		await articleTagOps.setTags(article.id, ids);
 	}
 </script>
 
@@ -171,6 +184,15 @@
 				{#if article.author}<span>· {article.author}</span>{/if}
 				{#if article.readingTimeMinutes}<span>· {article.readingTimeMinutes} min</span>{/if}
 				{#if article.wordCount}<span>· {article.wordCount} Wörter</span>{/if}
+			</div>
+			<div class="tags-row">
+				<TagField
+					tags={allTags$.value}
+					selectedIds={tagIds$.value}
+					onChange={onTagsChange}
+					addLabel="Tag"
+					placeholder="Tag suchen oder erstellen…"
+				/>
 			</div>
 		</div>
 
@@ -317,6 +339,9 @@
 		display: flex;
 		gap: 0.3rem;
 		flex-wrap: wrap;
+	}
+	.tags-row {
+		margin-top: 0.75rem;
 	}
 	.actionbar {
 		position: sticky;

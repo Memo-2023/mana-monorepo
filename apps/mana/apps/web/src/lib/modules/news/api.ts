@@ -83,39 +83,7 @@ export async function fetchFeed(
 	return (await response.json()) as FeedArticleDto[];
 }
 
-// ─── Ad-hoc URL extraction ─────────────────────────────────
-
-export interface ExtractedArticleDto {
-	id: string;
-	type: 'saved';
-	sourceOrigin: 'user_saved';
-	originalUrl: string;
-	title: string;
-	content: string;
-	htmlContent: string;
-	excerpt: string;
-	author: string | null;
-	siteName: string | null;
-	wordCount: number;
-	readingTimeMinutes: number;
-	isArchived: boolean;
-}
-
-export async function extractFromUrl(
-	url: string,
-	fetchImpl: typeof fetch = fetch
-): Promise<ExtractedArticleDto> {
-	const response = await fetchImpl(`${getManaApiUrl()}/api/v1/news/extract/save`, {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json',
-			...(await authHeader()),
-		},
-		body: JSON.stringify({ url }),
-	});
-	if (!response.ok) {
-		const text = await response.text();
-		throw new Error(`extractFromUrl failed: ${response.status} ${text}`);
-	}
-	return (await response.json()) as ExtractedArticleDto;
-}
+// Ad-hoc URL extraction moved to the `articles` module in M5 — see
+// `modules/articles/api.ts` and `modules/articles/stores/articles.svelte.ts`.
+// The `/api/v1/news/extract/*` routes in apps/api are kept for now as
+// a legacy surface; the `news-research` module still relies on them.

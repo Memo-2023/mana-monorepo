@@ -13,7 +13,7 @@
 	import { goto } from '$app/navigation';
 	import type { ViewProps } from '$lib/app-registry';
 	import { researchSessionStore } from '$lib/modules/news-research/stores/session.svelte';
-	import { articlesStore } from '$lib/modules/news/stores/articles.svelte';
+	import { articlesStore } from '$lib/modules/articles/stores/articles.svelte';
 	import { preferencesStore } from '$lib/modules/news/stores/preferences.svelte';
 	import { usePreferences } from '$lib/modules/news/queries';
 
@@ -71,8 +71,8 @@
 		savingUrl = articleUrl;
 		saveError = null;
 		try {
-			const article = await articlesStore.saveFromUrl(articleUrl);
-			goto(`/news/${article.id}`);
+			const { article } = await articlesStore.saveFromUrl(articleUrl);
+			goto(`/articles/${article.id}`);
 		} catch (err) {
 			saveError = err instanceof Error ? err.message : 'Speichern fehlgeschlagen';
 			savingUrl = null;

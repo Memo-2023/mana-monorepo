@@ -42,7 +42,7 @@ export { preferencesStore } from './stores/preferences.svelte';
 export { reactionsStore } from './stores/reactions.svelte';
 export { feedCacheStore } from './stores/feed-cache.svelte';
 
-export { fetchFeed, extractFromUrl } from './api';
+export { fetchFeed } from './api';
 export type { FeedArticleDto, FeedQuery } from './api';
 
 export { SOURCES_META, SOURCE_META_BY_SLUG, sourcesForTopic, TOPIC_LABELS } from './sources-meta';

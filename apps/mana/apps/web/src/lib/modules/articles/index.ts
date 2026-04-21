@@ -10,6 +10,8 @@ export {
 	useAllArticles,
 	useArticle,
 	useArticleHighlights,
+	useArticleTagIds,
+	useArticleTagMap,
 	toArticle,
 	toHighlight,
 	filterByStatus,

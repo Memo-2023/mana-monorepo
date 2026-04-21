@@ -1,12 +1,13 @@
 /**
  * Articles store — the user's saved reading list.
  *
- * Two paths in:
- *   - saveFromCurated(article)  copies a row from the local pool
- *     mirror into the encrypted reading list. Used when the user
- *     hits "speichern" on a feed card.
- *   - saveFromUrl(url)  hits POST /api/v1/news/extract/save and
- *     stores the result. Used by /news/add for ad-hoc URLs.
+ * Now single-purpose: saveFromCurated copies a row from the local pool
+ * mirror into the encrypted reading list (hit when the user presses
+ * "speichern" on a feed card). The ad-hoc URL path (`saveFromUrl` +
+ * the `type: 'saved'` discriminator) moved to the Articles module in
+ * M5 — see `modules/articles/migrations/from-news.ts` for the one-off
+ * data migration and `modules/articles/stores/articles.svelte.ts` for
+ * the replacement flow.
  *
  * All other operations (read/archive/favorite/delete) are plain
  * updates against `newsArticles`.
@@ -15,7 +16,6 @@
 import { encryptRecord } from '$lib/data/crypto';
 import { emitDomainEvent } from '$lib/data/events';
 import { articleTable } from '../collections';
-import { extractFromUrl } from '../api';
 import { toArticle } from '../queries';
 import type { Article, LocalArticle, LocalCachedArticle } from '../types';
 
@@ -55,35 +55,6 @@ export const articlesStore = {
 			articleId: newLocal.id,
 			title: input.title ?? '',
 		});
-		return snapshot;
-	},
-
-	async saveFromUrl(url: string): Promise<Article> {
-		const extracted = await extractFromUrl(url);
-		const newLocal: LocalArticle = {
-			id: crypto.randomUUID(),
-			type: 'saved',
-			sourceCuratedId: null,
-			originalUrl: extracted.originalUrl,
-			title: extracted.title,
-			excerpt: extracted.excerpt,
-			content: extracted.content,
-			htmlContent: extracted.htmlContent,
-			author: extracted.author,
-			siteName: extracted.siteName,
-			sourceSlug: null,
-			imageUrl: null,
-			categoryId: null,
-			wordCount: extracted.wordCount,
-			readingTimeMinutes: extracted.readingTimeMinutes,
-			publishedAt: null,
-			isArchived: false,
-			isRead: false,
-			isFavorite: false,
-		};
-		const snapshot = toArticle(newLocal);
-		await encryptRecord('newsArticles', newLocal);
-		await articleTable.add(newLocal);
 		return snapshot;
 	},
 

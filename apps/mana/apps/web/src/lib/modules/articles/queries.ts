@@ -9,6 +9,7 @@
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { decryptRecords } from '$lib/data/crypto';
 import { scopedForModule, scopedGet } from '$lib/data/scope';
+import { articleTagOps } from './stores/tags.svelte';
 import type { LocalArticle, LocalHighlight, Article, Highlight, ArticleStatus } from './types';
 
 // ─── Type Converters ─────────────────────────────────────
@@ -81,6 +82,27 @@ export function useArticle(id: string) {
 			return decrypted ? toArticle(decrypted) : null;
 		},
 		null as Article | null
+	);
+}
+
+/**
+ * Tag IDs currently linked to this article. Live — reacts to both
+ * `articleTags` junction writes and tag CRUD on the global `tags`
+ * table, so the DetailView's TagField stays in sync with both sides.
+ */
+export function useArticleTagIds(articleId: string) {
+	return useLiveQueryWithDefault(async () => articleTagOps.getTagIds(articleId), [] as string[]);
+}
+
+/**
+ * Batched tag-id lookup for the ListView. Returns a Map keyed by
+ * articleId; entries with no tags are absent from the map. Single
+ * Dexie query regardless of how many articles are shown.
+ */
+export function useArticleTagMap(articleIds: string[]) {
+	return useLiveQueryWithDefault(
+		async () => articleTagOps.getTagIdsForMany(articleIds),
+		new Map<string, string[]>()
 	);
 }
 
