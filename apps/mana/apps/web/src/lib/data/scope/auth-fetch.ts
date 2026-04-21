@@ -15,12 +15,19 @@
 import { browser } from '$app/environment';
 
 export function authBaseUrl(): string {
+	// Browser: read the runtime-injected URL, fall back to localhost dev.
+	// `process` is not defined in browsers, so the env-var branch below
+	// MUST stay inside the server-side path to avoid a ReferenceError.
 	if (browser && typeof window !== 'undefined') {
 		const injected = (window as unknown as { __PUBLIC_MANA_AUTH_URL__?: string })
 			.__PUBLIC_MANA_AUTH_URL__;
-		if (injected) return injected.replace(/\/$/, '');
+		return (injected || 'http://localhost:3001').replace(/\/$/, '');
 	}
-	return (process.env.PUBLIC_MANA_AUTH_URL || 'http://localhost:3001').replace(/\/$/, '');
+	// SSR: Node has `process.env`.
+	const fromEnv =
+		(typeof process !== 'undefined' && process.env?.PUBLIC_MANA_AUTH_URL) ||
+		'http://localhost:3001';
+	return fromEnv.replace(/\/$/, '');
 }
 
 /**
