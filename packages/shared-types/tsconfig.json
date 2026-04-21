@@ -3,6 +3,12 @@
 		"target": "ES2022",
 		"module": "ESNext",
 		"moduleResolution": "bundler",
+		// src/index.ts re-exports with explicit .ts extensions (needed so
+		// Tailwind's module resolver can follow the package out of its
+		// bundler when scanning branded components). noEmit:true means
+		// the rewrite flag isn't needed — this is the matching compiler
+		// opt-in that lets tsc see the .ts imports without erroring.
+		"allowImportingTsExtensions": true,
 		"lib": ["ES2022"],
 		"strict": true,
 		"esModuleInterop": true,

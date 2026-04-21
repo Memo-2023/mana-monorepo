@@ -3,6 +3,10 @@
 		"target": "ES2022",
 		"module": "ESNext",
 		"moduleResolution": "bundler",
+		// shared-types re-exports with explicit .ts paths (Tailwind v4
+		// module resolver needs them). Consumers need this opt-in;
+		// noEmit:true means no rewrite flag is required.
+		"allowImportingTsExtensions": true,
 		"strict": true,
 		"esModuleInterop": true,
 		"skipLibCheck": true,
