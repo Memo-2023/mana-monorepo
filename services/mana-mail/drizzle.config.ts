@@ -7,5 +7,8 @@ export default defineConfig({
 	dbCredentials: {
 		url: process.env.DATABASE_URL || 'postgresql://mana:devpassword@localhost:5432/mana_platform',
 	},
-	schemaFilter: ['mail'],
+	// Scope to just the schemas mana-mail owns. Other services (mana-auth,
+	// mana-research) manage their own pgSchemas; pushing all would
+	// accidentally drop foreign rows on each service's next migration.
+	schemaFilter: ['mail', 'broadcast'],
 });

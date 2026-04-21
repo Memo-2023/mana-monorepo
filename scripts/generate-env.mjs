@@ -122,6 +122,32 @@ const APP_CONFIGS = [
 		},
 	},
 
+	// Mana Mail Service (Hono + Bun, Port 3042)
+	// Stalwart proxy + 1:1 send via JMAP + broadcast (newsletter) via bulk-send.
+	{
+		path: 'services/mana-mail/.env',
+		vars: {
+			PORT: (env) => env.MANA_MAIL_PORT || '3042',
+			DATABASE_URL: (env) =>
+				env.MANA_MAIL_DATABASE_URL || 'postgresql://mana:devpassword@localhost:5432/mana_platform',
+			MANA_AUTH_URL: (env) => env.MANA_AUTH_URL || 'http://localhost:3001',
+			MANA_SERVICE_KEY: (env) => env.MANA_SERVICE_KEY || 'dev-service-key',
+			BASE_URL: (env) => env.MANA_MAIL_BASE_URL || 'http://localhost:3042',
+			CORS_ORIGINS: (env) => env.CORS_ORIGINS || 'http://localhost:5173',
+			STALWART_JMAP_URL: (env) => env.STALWART_JMAP_URL || 'http://localhost:8080',
+			STALWART_ADMIN_USER: (env) => env.STALWART_ADMIN_USER || 'admin',
+			STALWART_ADMIN_PASSWORD: (env) => env.STALWART_ADMIN_PASSWORD || 'ChangeMe123!',
+			MAIL_DOMAIN: (env) => env.MAIL_DOMAIN || 'mana.how',
+			// Broadcast / newsletter config — generated secrets rotate at deploy.
+			BROADCAST_TRACKING_SECRET: (env) =>
+				env.BROADCAST_TRACKING_SECRET || 'dev-broadcast-tracking-secret-NOT-for-prod',
+			BROADCAST_MAX_RECIPIENTS_PER_CAMPAIGN: (env) =>
+				env.BROADCAST_MAX_RECIPIENTS_PER_CAMPAIGN || '5000',
+			BROADCAST_MAX_RECIPIENTS_PER_HOUR: (env) => env.BROADCAST_MAX_RECIPIENTS_PER_HOUR || '500',
+			BROADCAST_SEND_THROTTLE_MS: (env) => env.BROADCAST_SEND_THROTTLE_MS || '150',
+		},
+	},
+
 	// Chat Server (Hono/Bun)
 	{
 		path: 'apps/chat/apps/server/.env',
