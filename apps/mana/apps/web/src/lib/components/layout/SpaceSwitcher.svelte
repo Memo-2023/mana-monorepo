@@ -211,7 +211,7 @@
 		<div class="menu-divider"></div>
 
 		{#if active && active.type !== 'personal'}
-			<a class="menu-item menu-link" href="/spaces/members" onclick={closeDropdown} role="menuitem">
+			<a class="menu-item menu-link" href="/spaces" onclick={closeDropdown} role="menuitem">
 				<span class="icon-placeholder" aria-hidden="true">
 					<svg viewBox="0 0 24 24" width="16" height="16">
 						<path

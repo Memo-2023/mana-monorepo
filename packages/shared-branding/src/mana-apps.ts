@@ -1105,6 +1105,23 @@ export const MANA_APPS: ManaApp[] = [
 		status: 'beta',
 		requiredTier: 'beta',
 	},
+	{
+		id: 'spaces',
+		name: 'Spaces',
+		description: {
+			de: 'Geteilte Bereiche & Mitglieder',
+			en: 'Shared spaces & members',
+		},
+		longDescription: {
+			de: 'Verwalte den aktiven Space und seine Mitglieder — lade Personen per E-Mail ein, vergib Rollen (Admin/Mitglied) und widerrufe offene Einladungen. Personal-Spaces zeigen nur den Hinweis, dass sie bewusst nur für dich sind; geteilte Spaces (Familie, Team, Marke, Verein, Praxis) bekommen das volle Member-Management.',
+			en: 'Manage the active Space and its members — invite people by email, assign roles (admin/member) and revoke pending invitations. Personal spaces are single-user by design; shared spaces (family, team, brand, club, practice) get full member management.',
+		},
+		icon: APP_ICONS.spaces,
+		color: '#14b8a6',
+		comingSoon: false,
+		status: 'beta',
+		requiredTier: 'beta',
+	},
 ];
 
 /**

@@ -1279,6 +1279,16 @@ registerApp({
 });
 
 registerApp({
+	id: 'spaces',
+	name: 'Spaces',
+	color: '#14b8a6',
+	icon: UserCircle,
+	views: {
+		list: { load: () => import('$lib/modules/spaces/ListView.svelte') },
+	},
+});
+
+registerApp({
 	id: 'quiz',
 	name: 'Quiz',
 	color: '#ec4899',

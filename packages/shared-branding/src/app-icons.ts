@@ -260,6 +260,13 @@ export const APP_ICONS = {
 		// while still reading as "chronological" in the AI Workbench family.
 		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="tl" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#f59e0b"/><stop offset="100%" style="stop-color:#ea580c"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#tl)"/><line x1="34" y1="22" x2="34" y2="78" stroke="white" stroke-width="3" stroke-linecap="round" opacity="0.55"/><circle cx="34" cy="30" r="5" fill="white"/><circle cx="34" cy="50" r="5" fill="white"/><circle cx="34" cy="70" r="5" fill="white"/><rect x="44" y="26" width="32" height="8" rx="2" fill="white" fill-opacity="0.95"/><rect x="44" y="46" width="26" height="8" rx="2" fill="white" fill-opacity="0.8"/><rect x="44" y="66" width="30" height="8" rx="2" fill="white" fill-opacity="0.9"/></svg>`
 	),
+	spaces: svgToDataUrl(
+		// Three people-silhouettes clustered in the tile — the Spaces primitive
+		// is about shared workspaces, so the icon emphasises "group". Teal→indigo
+		// gradient sits next to contacts (green) and chat (indigo) in the
+		// communication family without competing with either.
+		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="sp" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#14b8a6"/><stop offset="100%" style="stop-color:#6366f1"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#sp)"/><circle cx="30" cy="38" r="9" fill="white" fill-opacity="0.85"/><path d="M14 70c0-9 7-16 16-16s16 7 16 16v4H14v-4z" fill="white" fill-opacity="0.85"/><circle cx="70" cy="38" r="9" fill="white" fill-opacity="0.85"/><path d="M54 70c0-9 7-16 16-16s16 7 16 16v4H54v-4z" fill="white" fill-opacity="0.85"/><circle cx="50" cy="32" r="11" fill="white"/><path d="M30 76c0-11 9-20 20-20s20 9 20 20v4H30v-4z" fill="white"/></svg>`
+	),
 } as const;
 
 export type AppIconId = keyof typeof APP_ICONS;
