@@ -258,10 +258,15 @@
 </div>
 
 <style>
+	/* Theme-token driven — mirrors @mana/shared-ui Pill so panels and
+		 inputs follow whatever theme is active (light / dark / variants)
+		 instead of falling back to hardcoded white. */
+
 	.container {
 		max-width: 640px;
 		margin: 0 auto;
-		padding: 1rem;
+		padding: 1.5rem 1rem 4rem;
+		color: hsl(var(--color-foreground));
 	}
 
 	.page-head {
@@ -272,6 +277,7 @@
 		font-size: 1.5rem;
 		font-weight: 600;
 		margin: 0 0 0.25rem;
+		color: hsl(var(--color-foreground));
 	}
 
 	.subtitle {
@@ -279,63 +285,93 @@
 		align-items: center;
 		gap: 0.5rem;
 		margin: 0;
-		color: var(--color-text-muted, hsl(0 0% 45%));
+		color: hsl(var(--color-muted-foreground, 0 0% 55%));
 		font-size: 0.875rem;
 	}
 
 	.type-chip {
 		font-size: 0.6875rem;
 		padding: 0.125rem 0.5rem;
-		border-radius: var(--radius-sm, 4px);
-		background: var(--color-surface-2, hsl(0 0% 94%));
-		color: var(--color-text-muted, hsl(0 0% 45%));
+		border-radius: 9999px;
+		background: hsl(var(--color-muted, 0 0% 94%));
+		color: hsl(var(--color-muted-foreground, 0 0% 45%));
 		text-transform: uppercase;
 		letter-spacing: 0.02em;
+		font-weight: 500;
 	}
 
 	.type-chip[data-type='brand'] {
-		background: hsl(260 70% 94%);
-		color: hsl(260 60% 35%);
+		background: hsl(260 60% 95%);
+		color: hsl(260 55% 35%);
 	}
 	.type-chip[data-type='club'] {
-		background: hsl(160 50% 92%);
-		color: hsl(160 60% 28%);
+		background: hsl(160 45% 93%);
+		color: hsl(160 55% 28%);
 	}
 	.type-chip[data-type='family'] {
-		background: hsl(30 80% 92%);
-		color: hsl(30 60% 35%);
+		background: hsl(30 70% 93%);
+		color: hsl(30 55% 35%);
 	}
 	.type-chip[data-type='team'] {
-		background: hsl(210 60% 92%);
-		color: hsl(210 60% 32%);
+		background: hsl(210 55% 93%);
+		color: hsl(210 55% 32%);
 	}
 	.type-chip[data-type='practice'] {
-		background: hsl(340 50% 92%);
-		color: hsl(340 55% 38%);
+		background: hsl(340 50% 94%);
+		color: hsl(340 50% 38%);
+	}
+
+	:global(.dark) .type-chip {
+		background: hsl(var(--color-muted, 0 0% 20%));
+		color: hsl(var(--color-muted-foreground, 0 0% 75%));
+	}
+	:global(.dark) .type-chip[data-type='brand'] {
+		background: hsl(260 40% 25%);
+		color: hsl(260 80% 85%);
+	}
+	:global(.dark) .type-chip[data-type='club'] {
+		background: hsl(160 35% 20%);
+		color: hsl(160 70% 80%);
+	}
+	:global(.dark) .type-chip[data-type='family'] {
+		background: hsl(30 40% 22%);
+		color: hsl(30 80% 82%);
+	}
+	:global(.dark) .type-chip[data-type='team'] {
+		background: hsl(210 40% 22%);
+		color: hsl(210 70% 82%);
+	}
+	:global(.dark) .type-chip[data-type='practice'] {
+		background: hsl(340 35% 23%);
+		color: hsl(340 65% 82%);
 	}
 
 	.hint-card {
-		background: var(--color-surface-2, hsl(0 0% 97%));
-		border: 1px solid var(--color-border, hsl(0 0% 88%));
-		border-radius: var(--radius-md, 6px);
+		background: hsl(var(--color-muted, 0 0% 97%));
+		border: 1px solid hsl(var(--color-border));
+		border-radius: 10px;
 		padding: 1rem;
 		font-size: 0.875rem;
-		color: var(--color-text-muted, hsl(0 0% 45%));
+		color: hsl(var(--color-muted-foreground, 0 0% 50%));
 		line-height: 1.5;
 	}
 
 	.panel {
-		background: var(--color-surface-1, white);
-		border: 1px solid var(--color-border, hsl(0 0% 88%));
-		border-radius: var(--radius-md, 6px);
-		padding: 1rem;
+		background: hsl(var(--color-card));
+		border: 1px solid hsl(var(--color-border));
+		border-radius: 12px;
+		padding: 1.125rem;
 		margin-bottom: 1rem;
+		box-shadow: 0 1px 2px hsl(0 0% 0% / 0.04);
 	}
 
 	.panel h2 {
-		font-size: 0.9375rem;
-		font-weight: 600;
+		font-size: 0.75rem;
+		font-weight: 500;
 		margin: 0 0 0.75rem;
+		color: hsl(var(--color-muted-foreground, 0 0% 50%));
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
 	}
 
 	.invite-form {
@@ -351,24 +387,47 @@
 
 	.invite-form input,
 	.invite-form select {
-		padding: 0.5rem 0.625rem;
-		border: 1px solid var(--color-border, hsl(0 0% 88%));
-		border-radius: var(--radius-md, 6px);
-		background: var(--color-surface-1, white);
-		color: var(--color-text, inherit);
+		padding: 0.5rem 0.75rem;
+		border: 1px solid hsl(var(--color-border));
+		border-radius: 8px;
+		background: hsl(var(--color-input, var(--color-background, var(--color-card))));
+		color: hsl(var(--color-foreground));
 		font: inherit;
 		font-size: 0.875rem;
+		transition: border-color 120ms ease;
+	}
+
+	.invite-form input::placeholder {
+		color: hsl(var(--color-muted-foreground, 0 0% 50%) / 0.7);
+	}
+
+	.invite-form input:focus,
+	.invite-form select:focus {
+		outline: none;
+		border-color: var(--pill-primary-color, hsl(var(--color-primary, 230 80% 55%)));
+		box-shadow: 0 0 0 3px
+			color-mix(
+				in srgb,
+				var(--pill-primary-color, hsl(var(--color-primary, 230 80% 55%))) 20%,
+				transparent
+			);
 	}
 
 	.invite-form button {
-		padding: 0.5rem 1rem;
-		background: var(--color-primary, hsl(230 80% 50%));
-		color: white;
+		padding: 0.5rem 1.125rem;
+		background: var(--pill-primary-color, hsl(var(--color-primary, 230 80% 55%)));
+		color: hsl(var(--color-primary-foreground, 0 0% 100%));
 		border: 0;
-		border-radius: var(--radius-md, 6px);
+		border-radius: 8px;
 		font: inherit;
 		font-size: 0.875rem;
+		font-weight: 500;
 		cursor: pointer;
+		transition: filter 120ms ease;
+	}
+
+	.invite-form button:hover:not(:disabled) {
+		filter: brightness(1.05);
 	}
 
 	.invite-form button:disabled {
@@ -377,19 +436,27 @@
 	}
 
 	.error {
-		color: hsl(0 60% 42%);
+		color: hsl(0 70% 55%);
 		font-size: 0.8125rem;
 		margin: 0.5rem 0 0;
+	}
+
+	:global(.dark) .error {
+		color: hsl(0 80% 72%);
 	}
 
 	.success {
-		color: hsl(140 50% 34%);
+		color: hsl(140 50% 40%);
 		font-size: 0.8125rem;
 		margin: 0.5rem 0 0;
 	}
 
+	:global(.dark) .success {
+		color: hsl(140 60% 65%);
+	}
+
 	.empty {
-		color: var(--color-text-muted, hsl(0 0% 45%));
+		color: hsl(var(--color-muted-foreground, 0 0% 50%));
 		font-size: 0.875rem;
 		margin: 0;
 	}
@@ -409,75 +476,93 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		padding: 0.625rem 0.75rem;
-		border-radius: var(--radius-md, 6px);
-		background: var(--color-surface-2, hsl(0 0% 97%));
+		gap: 0.75rem;
+		padding: 0.75rem 0.875rem;
+		border-radius: 10px;
+		background: hsl(var(--color-muted, 0 0% 97%));
+		border: 1px solid hsl(var(--color-border) / 0.5);
 	}
 
 	.member-info {
 		display: flex;
 		align-items: center;
 		gap: 0.75rem;
+		min-width: 0;
+		flex: 1;
 	}
 
 	.avatar {
 		width: 2rem;
 		height: 2rem;
 		border-radius: 50%;
-		background: var(--color-primary, hsl(230 80% 50%));
-		color: white;
+		background: var(--pill-primary-color, hsl(var(--color-primary, 230 80% 55%)));
+		color: hsl(var(--color-primary-foreground, 0 0% 100%));
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		font-size: 0.875rem;
-		font-weight: 500;
+		font-size: 0.8125rem;
+		font-weight: 600;
+		flex-shrink: 0;
 	}
 
 	.member-name {
 		font-size: 0.875rem;
 		font-weight: 500;
+		color: hsl(var(--color-foreground));
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
 
 	.member-meta,
 	.invite-meta {
 		font-size: 0.75rem;
-		color: var(--color-text-muted, hsl(0 0% 45%));
+		color: hsl(var(--color-muted-foreground, 0 0% 55%));
 	}
 
 	.invite-email {
 		font-size: 0.875rem;
 		font-weight: 500;
+		color: hsl(var(--color-foreground));
 	}
 
 	.member-actions {
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
+		flex-shrink: 0;
 	}
 
 	.role-badge {
 		font-size: 0.6875rem;
 		padding: 0.125rem 0.5rem;
-		border-radius: var(--radius-sm, 4px);
-		background: var(--color-surface-1, white);
-		border: 1px solid var(--color-border, hsl(0 0% 88%));
-		color: var(--color-text-muted, hsl(0 0% 45%));
+		border-radius: 9999px;
+		background: hsl(var(--color-card));
+		border: 1px solid hsl(var(--color-border));
+		color: hsl(var(--color-muted-foreground, 0 0% 50%));
 		text-transform: uppercase;
+		letter-spacing: 0.02em;
+		font-weight: 500;
 	}
 
 	.remove-btn {
 		padding: 0.25rem 0.625rem;
 		background: transparent;
-		border: 1px solid var(--color-border, hsl(0 0% 88%));
-		border-radius: var(--radius-sm, 4px);
-		color: var(--color-text-muted, hsl(0 0% 45%));
+		border: 1px solid hsl(var(--color-border));
+		border-radius: 6px;
+		color: hsl(var(--color-muted-foreground, 0 0% 55%));
 		font: inherit;
 		font-size: 0.75rem;
 		cursor: pointer;
+		transition:
+			color 120ms ease,
+			border-color 120ms ease,
+			background 120ms ease;
 	}
 
 	.remove-btn:hover {
-		color: hsl(0 60% 42%);
-		border-color: hsl(0 60% 80%);
+		color: hsl(0 70% 55%);
+		border-color: color-mix(in srgb, hsl(0 70% 55%) 40%, transparent);
+		background: color-mix(in srgb, hsl(0 70% 55%) 8%, transparent);
 	}
 </style>
