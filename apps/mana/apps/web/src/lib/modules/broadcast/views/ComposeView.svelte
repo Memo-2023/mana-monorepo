@@ -16,6 +16,8 @@
 	import PreviewTabs from '../preview/PreviewTabs.svelte';
 	import { broadcastCampaignsStore } from '../stores/campaigns.svelte';
 	import { broadcastSettingsStore } from '../stores/settings.svelte';
+	import { sendCampaign } from '../api';
+	import { useAllContacts } from '$lib/modules/contacts/queries';
 	import type { Campaign, CampaignContent, AudienceDefinition, BroadcastSettings } from '../types';
 
 	interface Props {
@@ -93,6 +95,63 @@
 
 	function onCancel() {
 		goto(isEdit && existing ? `/broadcasts/${existing.id}` : '/broadcasts');
+	}
+
+	// ─── Send ──────────────────────────────────────────────────
+	const contacts$ = useAllContacts();
+	const contacts = $derived(contacts$.value ?? []);
+	let sendState = $state<'idle' | 'confirming' | 'sending' | 'done'>('idle');
+	let sendResult = $state<{
+		delivered: number;
+		failed: number;
+		errors: Array<{ email: string; reason: string }>;
+	} | null>(null);
+
+	async function doSend() {
+		if (!existing || !settings) return;
+		sendState = 'sending';
+		error = null;
+		try {
+			// Save first so the server-side campaign row uses the latest
+			// metadata + content.
+			await save();
+			const result = await sendCampaign(
+				{
+					...existing,
+					subject,
+					preheader: preheader || null,
+					fromName,
+					fromEmail,
+					audience,
+					content,
+				},
+				settings,
+				contacts
+			);
+			await broadcastCampaignsStore.applyServerStatus(existing.id, {
+				status: 'sent',
+				sentAt: new Date().toISOString(),
+				stats: {
+					totalRecipients: result.accepted,
+					sent: result.delivered,
+					delivered: result.delivered,
+					bounced: 0,
+					opened: 0,
+					clicked: 0,
+					unsubscribed: 0,
+					lastSyncedAt: new Date().toISOString(),
+				},
+			});
+			sendResult = {
+				delivered: result.delivered,
+				failed: result.failed,
+				errors: result.errors,
+			};
+			sendState = 'done';
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Versand fehlgeschlagen';
+			sendState = 'idle';
+		}
 	}
 </script>
 
@@ -245,15 +304,85 @@
 			{/if}
 		</section>
 	{:else if step === 4}
-		<section class="step-panel">
-			<div class="placeholder">
-				<h3>Senden</h3>
-				<p>
-					Der Bulk-Send-Flow (Jetzt / Später) landet in M4 sobald mana-mail's <code>/bulk-send</code
-					>-Endpoint steht.
-				</p>
-				<button class="btn-primary" disabled>Jetzt senden (M4)</button>
-			</div>
+		<section class="step-panel send-panel">
+			{#if sendState === 'idle'}
+				<div class="send-card">
+					<h3>Jetzt senden</h3>
+					<p>
+						<strong>{audience.estimatedCount}</strong> Empfänger erhalten die Kampagne
+						<strong>„{subject}"</strong>
+						von <strong>{fromName}</strong>.
+					</p>
+					<p class="hint">
+						Der Versand läuft synchron und dauert je nach Liste 10–60 Sekunden. Du siehst jede Mail
+						in deinem „Gesendet"-Ordner (pro Empfänger ein Eintrag).
+					</p>
+					<div class="send-actions">
+						<button type="button" class="btn-ghost" onclick={() => (step = 3)}>
+							Zurück zum Check
+						</button>
+						<button
+							type="button"
+							class="btn-primary"
+							onclick={() => (sendState = 'confirming')}
+							disabled={!audienceReady || !contentReady}
+						>
+							Jetzt an {audience.estimatedCount} Empfänger senden
+						</button>
+					</div>
+				</div>
+			{:else if sendState === 'confirming'}
+				<div class="send-card confirm-card">
+					<h3>Sicher?</h3>
+					<p>
+						Die Kampagne geht an <strong>{audience.estimatedCount}</strong> Empfänger. Nach dem Versand
+						kannst du nichts mehr ändern — wenn dir ein Fehler auffällt, musst du eine neue Kampagne als
+						Korrektur schicken.
+					</p>
+					<div class="send-actions">
+						<button type="button" class="btn-ghost" onclick={() => (sendState = 'idle')}>
+							Abbrechen
+						</button>
+						<button type="button" class="btn-primary btn-danger" onclick={doSend}>
+							Ja, {audience.estimatedCount} Mails senden
+						</button>
+					</div>
+				</div>
+			{:else if sendState === 'sending'}
+				<div class="send-card sending-card">
+					<div class="spinner"></div>
+					<h3>Versand läuft …</h3>
+					<p>
+						Wir schicken {audience.estimatedCount} Mails raus. Bitte Fenster offen lassen.
+					</p>
+				</div>
+			{:else if sendState === 'done' && sendResult}
+				<div class="send-card done-card">
+					<div class="done-icon">✓</div>
+					<h3>Versand abgeschlossen</h3>
+					<p>
+						<strong>{sendResult.delivered}</strong> Mails versendet
+						{#if sendResult.failed > 0}
+							· <strong class="failed-count">{sendResult.failed} Fehler</strong>
+						{/if}
+					</p>
+					{#if sendResult.errors.length > 0}
+						<details class="error-details">
+							<summary>Fehler anzeigen ({sendResult.errors.length})</summary>
+							<ul>
+								{#each sendResult.errors as err (err.email)}
+									<li><code>{err.email}</code> — {err.reason}</li>
+								{/each}
+							</ul>
+						</details>
+					{/if}
+					<div class="send-actions">
+						<button type="button" class="btn-primary" onclick={() => goto('/broadcasts')}>
+							Zur Übersicht
+						</button>
+					</div>
+				</div>
+			{/if}
 		</section>
 	{/if}
 </div>
@@ -406,21 +535,6 @@
 		font-size: 0.9rem;
 	}
 
-	.placeholder {
-		background: var(--color-surface-muted, #f8fafc);
-		border: 1px dashed var(--color-border, #e2e8f0);
-		border-radius: 0.5rem;
-		padding: 2rem;
-		text-align: center;
-		color: var(--color-text-muted, #64748b);
-	}
-
-	.placeholder h3 {
-		margin: 0 0 0.5rem;
-		font-size: 1.05rem;
-		color: var(--color-text, #0f172a);
-	}
-
 	.btn-primary {
 		background: #6366f1;
 		color: white;
@@ -518,5 +632,116 @@
 		padding: 2rem;
 		text-align: center;
 		color: var(--color-text-muted, #64748b);
+	}
+
+	.send-panel {
+		align-items: center;
+	}
+
+	.send-card {
+		background: var(--color-surface, #fff);
+		border: 1px solid var(--color-border, #e2e8f0);
+		border-radius: 0.75rem;
+		padding: 2rem;
+		max-width: 540px;
+		width: 100%;
+		text-align: center;
+	}
+
+	.send-card h3 {
+		margin: 0 0 0.75rem;
+		font-size: 1.15rem;
+		font-weight: 600;
+	}
+
+	.send-card p {
+		margin: 0.5rem 0;
+		color: var(--color-text-muted, #64748b);
+	}
+
+	.send-card .hint {
+		font-size: 0.85rem;
+		margin-top: 1rem;
+	}
+
+	.send-actions {
+		display: flex;
+		gap: 0.5rem;
+		justify-content: center;
+		margin-top: 1.5rem;
+	}
+
+	.btn-danger {
+		background: #dc2626 !important;
+	}
+
+	.confirm-card {
+		border-color: #fecaca;
+		background: #fef2f2;
+	}
+
+	.sending-card .spinner {
+		width: 2rem;
+		height: 2rem;
+		border: 3px solid var(--color-border, #e2e8f0);
+		border-top-color: #6366f1;
+		border-radius: 50%;
+		margin: 0 auto 1rem;
+		animation: spin 0.8s linear infinite;
+	}
+
+	@keyframes spin {
+		to {
+			transform: rotate(360deg);
+		}
+	}
+
+	.done-card {
+		border-color: #bbf7d0;
+	}
+
+	.done-icon {
+		width: 3rem;
+		height: 3rem;
+		margin: 0 auto 0.75rem;
+		border-radius: 50%;
+		background: #22c55e;
+		color: white;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 1.5rem;
+		font-weight: 600;
+	}
+
+	.failed-count {
+		color: #b91c1c;
+	}
+
+	.error-details {
+		margin-top: 1rem;
+		text-align: left;
+		background: #fef2f2;
+		border: 1px solid #fecaca;
+		border-radius: 0.4rem;
+		padding: 0.75rem 1rem;
+	}
+
+	.error-details summary {
+		cursor: pointer;
+		font-size: 0.9rem;
+		color: #991b1b;
+	}
+
+	.error-details ul {
+		margin: 0.75rem 0 0;
+		padding-left: 1.5rem;
+		font-size: 0.85rem;
+	}
+
+	.error-details code {
+		background: white;
+		padding: 0.1rem 0.3rem;
+		border-radius: 0.2rem;
 	}
 </style>

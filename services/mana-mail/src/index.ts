@@ -15,6 +15,7 @@ import { serviceAuth } from './middleware/service-auth';
 import { JmapClient } from './services/jmap-client';
 import { AccountService } from './services/account-service';
 import { MailService } from './services/mail-service';
+import { BroadcastOrchestrator } from './services/broadcast-orchestrator';
 import { healthRoutes } from './routes/health';
 import { createThreadRoutes } from './routes/threads';
 import { createMessageRoutes } from './routes/messages';
@@ -22,6 +23,9 @@ import { createSendRoutes } from './routes/send';
 import { createLabelRoutes } from './routes/labels';
 import { createAccountRoutes } from './routes/accounts';
 import { createInternalRoutes } from './routes/internal';
+import { createBroadcastSendRoutes } from './routes/broadcast-send';
+import { createBroadcastTrackRoutes } from './routes/broadcast-track';
+import { createBroadcastStatsRoutes } from './routes/broadcast-stats';
 
 // ─── Bootstrap ──────────────────────────────────────────────
 
@@ -32,6 +36,13 @@ const db = getDb(config.databaseUrl);
 const jmapClient = new JmapClient(config.stalwart);
 const accountService = new AccountService(db, config.stalwart);
 const mailService = new MailService(db, jmapClient, accountService);
+const broadcastOrchestrator = new BroadcastOrchestrator(
+	db,
+	jmapClient,
+	accountService,
+	config.broadcast.trackingSecret,
+	config.baseUrl
+);
 
 // ─── App ────────────────────────────────────────────────────
 
@@ -50,10 +61,24 @@ app.use(
 // Health check (no auth)
 app.route('/health', healthRoutes);
 
+// Public tracking routes — NO auth. Recipients click these from
+// emails without being logged in. Mounted under /api/v1/track/* so
+// they sit outside the /api/v1/mail/* JWT middleware. Registered
+// BEFORE the JWT middleware to avoid middleware leakage.
+app.route(
+	'/api/v1/track',
+	createBroadcastTrackRoutes(db, config.broadcast.trackingSecret, config.baseUrl)
+);
+
 // User-facing routes (JWT auth)
 app.use('/api/v1/mail/*', jwtAuth(config.manaAuthUrl));
 app.route('/api/v1/mail', createThreadRoutes(mailService));
 app.route('/api/v1/mail', createSendRoutes(mailService));
+app.route(
+	'/api/v1/mail',
+	createBroadcastSendRoutes(broadcastOrchestrator, config.broadcast.maxRecipientsPerCampaign)
+);
+app.route('/api/v1/mail', createBroadcastStatsRoutes(db));
 app.route('/api/v1/mail', createLabelRoutes(mailService));
 app.route('/api/v1/mail', createAccountRoutes(accountService));
 app.route('/api/v1/mail/messages', createMessageRoutes(mailService));

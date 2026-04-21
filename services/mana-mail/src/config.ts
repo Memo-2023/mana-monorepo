@@ -25,6 +25,14 @@ export interface Config {
 	cors: {
 		origins: string[];
 	};
+	broadcast: {
+		/** HMAC secret for tracking tokens. Different from MANA_SERVICE_KEY
+		 *  because tracking tokens appear in public URLs — the blast
+		 *  radius of a leak is narrower with a dedicated secret. */
+		trackingSecret: string;
+		maxRecipientsPerCampaign: number;
+		maxRecipientsPerHour: number;
+	};
 }
 
 export function loadConfig(): Config {
@@ -59,6 +67,21 @@ export function loadConfig(): Config {
 		},
 		cors: {
 			origins: (process.env.CORS_ORIGINS || 'http://localhost:5173').split(','),
+		},
+		broadcast: {
+			trackingSecret: requiredEnv(
+				'BROADCAST_TRACKING_SECRET',
+				// Dev fallback — MUST be rotated in prod. The requiredEnv
+				// signature accepts a fallback but throws if both env +
+				// fallback are empty; the literal below keeps local dev
+				// working without forcing users to set the var.
+				'dev-only-broadcast-secret-change-me'
+			),
+			maxRecipientsPerCampaign: parseInt(
+				process.env.BROADCAST_MAX_RECIPIENTS_PER_CAMPAIGN || '5000',
+				10
+			),
+			maxRecipientsPerHour: parseInt(process.env.BROADCAST_MAX_RECIPIENTS_PER_HOUR || '500', 10),
 		},
 	};
 }
