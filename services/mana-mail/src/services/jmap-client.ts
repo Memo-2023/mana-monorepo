@@ -252,6 +252,13 @@ export class JmapClient {
 			htmlBody?: string;
 			inReplyTo?: string;
 			references?: string[];
+			/**
+			 * Extra headers to add to the outgoing mail. Keys should be
+			 * the header name (e.g. "List-Unsubscribe"); values are the
+			 * string header value. Used for RFC 8058 one-click unsubscribe.
+			 * JMAP's property convention is `header:<Name>:asText`.
+			 */
+			extraHeaders?: Record<string, string>;
 		}
 	): Promise<string> {
 		const emailId = `draft-${Date.now()}`;
@@ -286,6 +293,13 @@ export class JmapClient {
 		if (email.bcc) emailCreate.bcc = email.bcc;
 		if (email.inReplyTo) emailCreate.inReplyTo = email.inReplyTo;
 		if (email.references) emailCreate.references = email.references;
+		// Custom headers via JMAP's `header:<Name>:asText` convention.
+		// Used for RFC 8058 (List-Unsubscribe + List-Unsubscribe-Post).
+		if (email.extraHeaders) {
+			for (const [name, value] of Object.entries(email.extraHeaders)) {
+				emailCreate[`header:${name}:asText`] = value;
+			}
+		}
 
 		const responses = await this.call(
 			[

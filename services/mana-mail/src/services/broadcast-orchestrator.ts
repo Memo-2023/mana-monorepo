@@ -14,6 +14,7 @@
  * live in Dexie (local-first) and the server never sees them decrypted.
  */
 
+import { eq, and } from 'drizzle-orm';
 import juice from 'juice';
 import type { Database } from '../db/connection';
 import { campaigns, sends, type NewBroadcastSend } from '../db/schema';
@@ -131,6 +132,22 @@ export class BroadcastOrchestrator {
 	}
 
 	/**
+	 * Fetch the set of email addresses this user's audience has
+	 * unsubscribed from previous campaigns. Lowercased so a later case-
+	 * insensitive compare works. Scope is per-user, not per-campaign —
+	 * once someone unsubscribes from you, they're out of every future
+	 * campaign you send, not just the one they unsubscribed via.
+	 */
+	private async loadUnsubscribedEmails(userId: string): Promise<Set<string>> {
+		const rows = await this.db
+			.selectDistinct({ email: sends.recipientEmail })
+			.from(sends)
+			.innerJoin(campaigns, eq(sends.campaignId, campaigns.id))
+			.where(and(eq(campaigns.userId, userId), eq(sends.status, 'unsubscribed')));
+		return new Set(rows.map((r) => r.email.toLowerCase()));
+	}
+
+	/**
 	 * Run the bulk send. Returns aggregate stats. Blocks for the duration
 	 * of the send (MVP — see module header).
 	 */
@@ -149,10 +166,24 @@ export class BroadcastOrchestrator {
 			throw new Error('No mail account configured for this user');
 		}
 
+		// Compliance gate: drop anyone who's ever unsubscribed from this
+		// user. Done BEFORE any send rows are written so the dashboard
+		// counts reflect "tatsächlich versandt" rather than "geplant".
+		const unsubscribed = await this.loadUnsubscribedEmails(input.userId);
+		const originalCount = input.recipients.length;
+		const recipients = input.recipients.filter((r) => !unsubscribed.has(r.email.toLowerCase()));
+		const skipped = originalCount - recipients.length;
+
+		if (recipients.length === 0) {
+			throw new Error('Alle Empfänger haben sich abgemeldet — nichts zu senden.');
+		}
+
 		const now = new Date();
 
 		// 1. Persist campaign row (mirror of the webapp's campaign for
-		//    server-side tracking joins).
+		//    server-side tracking joins). totalRecipients reflects the
+		//    post-skip count so open/click rates aren't artificially
+		//    lowered by "virtual sends" that never happened.
 		await this.db
 			.insert(campaigns)
 			.values({
@@ -162,23 +193,31 @@ export class BroadcastOrchestrator {
 				fromEmail: input.fromEmail,
 				fromName: input.fromName,
 				sentAt: now,
-				totalRecipients: input.recipients.length,
+				totalRecipients: recipients.length,
 			})
 			.onConflictDoNothing();
 
 		const inlinedHtml = this.inlineOnce(input.htmlBody);
 		const result: BulkSendResult = {
 			campaignId: input.campaignId,
-			accepted: input.recipients.length,
+			accepted: recipients.length,
 			delivered: 0,
 			failed: 0,
-			errors: [],
+			errors:
+				skipped > 0
+					? [
+							{
+								email: '(skipped)',
+								reason: `${skipped} Empfänger übersprungen — haben sich vorher abgemeldet`,
+							},
+						]
+					: [],
 		};
 
 		// 2. Loop. One send row per recipient, written first (status=queued)
 		//    so a crash mid-loop leaves the DB truthful about who got a
 		//    mail attempt.
-		for (const recipient of input.recipients) {
+		for (const recipient of recipients) {
 			const sendId = crypto.randomUUID();
 			const nonce = generateNonce();
 			const sendRow: NewBroadcastSend = {
@@ -205,12 +244,21 @@ export class BroadcastOrchestrator {
 				.replaceAll('[Abmelde-Link wird beim Versand eingefügt]', textUnsubUrl);
 
 			try {
+				// RFC 8058: `List-Unsubscribe: <https://…>` + the POST
+				// header together tell Gmail / Apple Mail to show the
+				// native "Abmelden"-button in the header. Without this
+				// pair, they fall back to just the body link.
+				const listUnsubUrl = `${this.baseUrl}/api/v1/track/unsubscribe/${textToken}`;
 				await this.jmap.submitEmail(account.stalwartAccountId, {
 					from: { name: input.fromName, email: input.fromEmail },
 					to: [{ name: recipient.name ?? null, email: recipient.email }],
 					subject: input.subject,
 					textBody: text,
 					htmlBody: html,
+					extraHeaders: {
+						'List-Unsubscribe': `<${listUnsubUrl}>`,
+						'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+					},
 				});
 				await this.db
 					.update(sends)

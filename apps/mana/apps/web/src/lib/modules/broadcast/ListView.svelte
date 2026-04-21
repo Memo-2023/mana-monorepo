@@ -12,12 +12,10 @@
 	const campaigns = $derived(campaigns$.value ?? []);
 
 	function openCampaign(id: string, status: string) {
-		// Drafts go straight to edit; sent/scheduled to a detail view
-		// (detail lands in M7; until then, edit is the entry for drafts
-		// and we bounce sent ones back to the list — see canEdit guard
-		// in the edit route).
+		// Drafts open in the compose flow for editing; everything else
+		// opens the read-only DetailView with stats.
 		if (status === 'draft') goto(`/broadcasts/${id}/edit`);
-		else goto(`/broadcasts/${id}/edit`);
+		else goto(`/broadcasts/${id}`);
 	}
 
 	function onNewCampaign() {
