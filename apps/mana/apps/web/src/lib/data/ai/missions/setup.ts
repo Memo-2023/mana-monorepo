@@ -15,18 +15,33 @@
  * see COMPANION_BRAIN_ARCHITECTURE.md §20.5.
  */
 
+import { browser } from '$app/environment';
 import { createManaLlmClient } from './llm-client';
 import { runDueMissions, type MissionRunnerDeps } from './runner';
 import { registerDefaultInputResolvers } from './default-resolvers';
 import { runAgentsBootstrap } from '../agents/bootstrap';
-// Side-effect imports to populate the seed-handler registry before any
-// template is applied. Keep this list tight — each module pulls its
-// own imports (encryptRecord, Dexie tables, etc.) so adding a seed
-// handler to a rarely-used module slows down the hot path otherwise.
-// See docs/plans/workbench-templates.md §T1.
-import '$lib/modules/meditate/seed';
-import '$lib/modules/habits/seed';
-import '$lib/companion/goals/seed';
+
+/**
+ * Populate the seed-handler registry. Each import pulls the module's
+ * Dexie table accessors (via collections.ts → db.table()) at evaluation
+ * time — which crashes SSR when the eager module graph races
+ * database.ts's own evaluation and observes `db` as still-undefined.
+ * We therefore defer the imports to the browser and run them before the
+ * first mission tick kicks off — earliest any template applicator would
+ * need them.
+ *
+ * See docs/plans/workbench-templates.md §T1.
+ */
+let seedsRegistered = false;
+async function ensureSeedsRegistered(): Promise<void> {
+	if (seedsRegistered || !browser) return;
+	seedsRegistered = true;
+	await Promise.all([
+		import('$lib/modules/meditate/seed'),
+		import('$lib/modules/habits/seed'),
+		import('$lib/companion/goals/seed'),
+	]);
+}
 
 /** Default interval between tick scans. One minute is fine for foreground use. */
 const DEFAULT_TICK_INTERVAL_MS = 60_000;
@@ -46,6 +61,12 @@ let ticking = false;
 export function startMissionTick(intervalMs: number = DEFAULT_TICK_INTERVAL_MS): () => void {
 	if (tickHandle !== null) return stopMissionTick;
 	registerDefaultInputResolvers();
+
+	// Populate the seed-handler registry before any template is applied.
+	// Client-only — SSR never needs the handlers. Fire-and-forget because
+	// templates can't be applied for a handful of microtasks after boot,
+	// and the template applicator itself awaits the registry.
+	void ensureSeedsRegistered();
 
 	// Multi-Agent Workbench: ensure a default "Mana" agent exists and
 	// backfill agentId on legacy missions. Fire-and-forget — the runner
