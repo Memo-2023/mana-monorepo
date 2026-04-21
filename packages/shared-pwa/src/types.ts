@@ -21,6 +21,36 @@ export interface PWAShortcut {
 }
 
 /**
+ * Web Share Target API configuration. When an installed PWA declares
+ * a share target, the OS share sheet offers the app as a destination
+ * for URLs / text / titles. The browser invokes `action` with the
+ * selected data mapped to the `params` field names.
+ *
+ * Reference: https://www.w3.org/TR/web-share-target/
+ * Browser support: Chromium (Android + desktop installed PWAs).
+ * Safari / Firefox ignore the field gracefully.
+ */
+export interface PWAShareTargetParams {
+	/** Query/form param that carries the shared page title. */
+	title?: string;
+	/** Query/form param for free-form shared text. */
+	text?: string;
+	/** Query/form param for the shared URL. */
+	url?: string;
+}
+
+export interface PWAShareTarget {
+	/** In-app URL the browser should navigate to with the shared payload. */
+	action: string;
+	/** HTTP method. GET maps data to query params, POST to form data. */
+	method?: 'GET' | 'POST';
+	/** Required for method=POST — typical value: 'multipart/form-data'. */
+	enctype?: string;
+	/** Maps the spec's title/text/url slots onto your own param names. */
+	params: PWAShareTargetParams;
+}
+
+/**
  * Configuration options for createPWAConfig
  */
 export interface PWAConfigOptions {
@@ -66,6 +96,13 @@ export interface PWAConfigOptions {
 	 * App shortcuts for quick actions
 	 */
 	shortcuts?: PWAShortcut[];
+
+	/**
+	 * Web Share Target config. Installed PWA becomes a destination in
+	 * the OS share sheet for URLs / text / titles. Ignored by browsers
+	 * that don't support the spec (Safari / Firefox).
+	 */
+	shareTarget?: PWAShareTarget;
 
 	/**
 	 * App categories for store listings
@@ -165,6 +202,12 @@ export interface ManifestConfig {
 		url: string;
 		icons?: Array<{ src: string; sizes: string }>;
 	}>;
+	share_target?: {
+		action: string;
+		method: 'GET' | 'POST';
+		enctype?: string;
+		params: PWAShareTargetParams;
+	};
 }
 
 /**

@@ -46,6 +46,8 @@ export type {
 	PWAConfigOptions,
 	PWAConfig,
 	PWAShortcut,
+	PWAShareTarget,
+	PWAShareTargetParams,
 	WorkboxPreset,
 	ManifestConfig,
 	ManifestIcon,

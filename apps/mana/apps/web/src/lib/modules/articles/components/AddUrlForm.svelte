@@ -2,7 +2,9 @@
   AddUrlForm — paste URL → preview → save.
 
   Flow:
-    1. User pastes (or types) a URL
+    1. User pastes (or types) a URL, OR the page is opened with a URL
+       pre-filled via query string (?url=… / ?text=… / ?title=…). The
+       Web Share Target + bookmarklet both land here that way.
     2. On "Vorschau abrufen": check scope-local dedupe first; if found,
        offer "öffnen" instead of re-extracting (saves one round-trip).
        Otherwise call /api/v1/articles/extract and render the preview.
@@ -10,9 +12,15 @@
        articlesStore.saveFromExtracted — no second server call.
     4. Navigate into the new article so the user lands directly in the
        reader view.
+
+  Pre-filled URLs auto-trigger the preview on mount so the three-click
+  "share from browser → saved" flow really is three clicks: share →
+  pick Mana → hit "In Leseliste speichern".
 -->
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
+	import { onMount } from 'svelte';
 	import { articlesStore } from '../stores/articles.svelte';
 	import { extractArticle, type ExtractedArticle } from '../api';
 	import type { Article } from '../types';
@@ -30,6 +38,29 @@
 	function focusOnMount(node: HTMLInputElement) {
 		node.focus();
 	}
+
+	/**
+	 * Extract the first URL-shaped token from a string — some share
+	 * senders (Chrome Android, WhatsApp) stuff the URL into the `text`
+	 * slot instead of `url`, often prefixed with the page title.
+	 */
+	function firstUrl(text: string): string {
+		const m = text.match(/https?:\/\/\S+/i);
+		return m ? m[0] : '';
+	}
+
+	onMount(() => {
+		const params = $page.url.searchParams;
+		const fromUrl = params.get('url')?.trim() ?? '';
+		const fromText = params.get('text')?.trim() ?? '';
+		const candidate = fromUrl || firstUrl(fromText);
+		if (candidate) {
+			url = candidate;
+			// Fire-and-forget — the handler is idempotent enough that a
+			// stray second click does no harm.
+			void handlePreview();
+		}
+	});
 
 	function reset() {
 		preview = null;

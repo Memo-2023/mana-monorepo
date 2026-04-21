@@ -79,9 +79,20 @@
 				<h1>Artikel</h1>
 				<p class="subtitle">Später lesen — gespeicherte Web-Artikel, offline verfügbar.</p>
 			</div>
-			<button type="button" class="add-btn" onclick={() => goto('/articles/add')}>
-				+ Neu speichern
-			</button>
+			<div class="header-actions">
+				<button
+					type="button"
+					class="icon-btn"
+					title="Einstellungen — Bookmarklet + Share-Target"
+					aria-label="Artikel-Einstellungen"
+					onclick={() => goto('/articles/settings')}
+				>
+					⚙
+				</button>
+				<button type="button" class="add-btn" onclick={() => goto('/articles/add')}>
+					+ Neu speichern
+				</button>
+			</div>
 		</div>
 
 		<div class="filter-row" role="tablist" aria-label="Filter">
@@ -174,6 +185,26 @@
 	.header h1 {
 		margin: 0 0 0.25rem 0;
 		font-size: 1.75rem;
+	}
+	.header-actions {
+		display: flex;
+		gap: 0.4rem;
+		align-items: center;
+		flex-shrink: 0;
+	}
+	.icon-btn {
+		padding: 0.5rem 0.65rem;
+		border-radius: 0.55rem;
+		border: 1px solid var(--color-border, rgba(0, 0, 0, 0.15));
+		background: transparent;
+		color: inherit;
+		font: inherit;
+		cursor: pointer;
+		font-size: 1rem;
+		line-height: 1;
+	}
+	.icon-btn:hover {
+		border-color: var(--color-border-strong, rgba(0, 0, 0, 0.3));
 	}
 	.add-btn {
 		padding: 0.5rem 1rem;

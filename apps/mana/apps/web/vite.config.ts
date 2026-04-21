@@ -49,6 +49,17 @@ export default defineConfig({
 					},
 					{ name: 'Chat', short_name: 'Chat', url: '/chat', description: 'Chat öffnen' },
 				],
+				// Web Share Target — installed PWA shows up in the OS share
+				// sheet as "Mana" and lands on /articles/add with the URL
+				// pre-filled (AddUrlForm reads ?url + ?text + ?title). The
+				// `text` param is listed alongside `url` because some
+				// senders (Chrome Android, WhatsApp) stuff the URL into the
+				// text field.
+				shareTarget: {
+					action: '/articles/add',
+					method: 'GET',
+					params: { title: 'title', text: 'text', url: 'url' },
+				},
 			})
 		),
 	],

@@ -48,6 +48,7 @@ export function createPWAConfig(options: PWAConfigOptions): PWAConfig {
 		backgroundColor = DEFAULT_BACKGROUND_COLOR,
 		preset = 'standard',
 		shortcuts = [],
+		shareTarget,
 		categories = DEFAULT_CATEGORIES,
 		includeAssets = [],
 		globIgnores = [],
@@ -89,6 +90,17 @@ export function createPWAConfig(options: PWAConfigOptions): PWAConfig {
 			url: shortcut.url,
 			icons: [{ src: 'pwa-192x192.png', sizes: '192x192' }],
 		}));
+	}
+
+	// Web Share Target — lets installed PWAs appear in the OS share
+	// sheet. Browsers that don't support the spec ignore the field.
+	if (shareTarget) {
+		manifest.share_target = {
+			action: shareTarget.action,
+			method: shareTarget.method ?? 'GET',
+			enctype: shareTarget.enctype,
+			params: shareTarget.params,
+		};
 	}
 
 	// Build workbox config
