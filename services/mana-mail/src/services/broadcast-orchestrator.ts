@@ -21,6 +21,7 @@ import { campaigns, sends, type NewBroadcastSend } from '../db/schema';
 import type { AccountService } from './account-service';
 import type { JmapClient } from './jmap-client';
 import { generateNonce, signToken } from './tracking-token';
+import { rewriteClickLinks } from './link-rewriter';
 
 export interface BulkRecipient {
 	email: string;
@@ -60,7 +61,15 @@ export class BroadcastOrchestrator {
 		private jmap: JmapClient,
 		private accountService: AccountService,
 		private trackingSecret: string,
-		private baseUrl: string
+		private baseUrl: string,
+		/**
+		 * Milliseconds to sleep between JMAP submits. Protects the user's
+		 * Stalwart + any downstream relay from being hammered by a 5000-
+		 * recipient campaign. Default 150ms = ~6/sec = ~360/min, safely
+		 * below most provider rate limits without making a 50-person
+		 * newsletter feel slow.
+		 */
+		private sendThrottleMs: number = 150
 	) {}
 
 	/**
@@ -119,6 +128,17 @@ export class BroadcastOrchestrator {
 
 		let html = replaceAll(inlinedHtml);
 
+		// Rewrite <a href="http(s)://…"> to go through the click-tracking
+		// endpoint. The already-substituted unsubscribe + web-view URLs
+		// are themselves tracking endpoints and must not be double-wrapped.
+		const rewriteResult = rewriteClickLinks(
+			html,
+			token,
+			this.baseUrl,
+			new Set([unsubscribeUrl, webViewUrl])
+		);
+		html = rewriteResult.html;
+
 		// Inject the open pixel just before </body>. No-op for malformed
 		// HTML — we still send.
 		const pixel = `<img src="${openPixelUrl}" width="1" height="1" alt="" style="display:block;border:0;width:1px;height:1px;">`;
@@ -129,6 +149,10 @@ export class BroadcastOrchestrator {
 		}
 
 		return { html, text: '', unsubscribeUrl, webViewUrl };
+	}
+
+	private sleep(ms: number): Promise<void> {
+		return new Promise((r) => setTimeout(r, ms));
 	}
 
 	/**
@@ -276,6 +300,13 @@ export class BroadcastOrchestrator {
 					.where(eqSendId(sendId));
 				result.failed++;
 				result.errors.push({ email: recipient.email, reason });
+			}
+
+			// Throttle between sends so the loop doesn't DDoS our own
+			// Stalwart + any downstream relay. Skip the sleep on the
+			// last iteration — nobody's watching after the final send.
+			if (this.sendThrottleMs > 0) {
+				await this.sleep(this.sendThrottleMs);
 			}
 		}
 

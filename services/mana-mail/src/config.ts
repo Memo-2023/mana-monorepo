@@ -32,6 +32,10 @@ export interface Config {
 		trackingSecret: string;
 		maxRecipientsPerCampaign: number;
 		maxRecipientsPerHour: number;
+		/** Sleep between JMAP submits during bulk-send. Protects Stalwart
+		 *  + downstream relays from being hammered. Set via env var
+		 *  BROADCAST_SEND_THROTTLE_MS (default 150ms). */
+		sendThrottleMs: number;
 	};
 }
 
@@ -82,6 +86,7 @@ export function loadConfig(): Config {
 				10
 			),
 			maxRecipientsPerHour: parseInt(process.env.BROADCAST_MAX_RECIPIENTS_PER_HOUR || '500', 10),
+			sendThrottleMs: parseInt(process.env.BROADCAST_SEND_THROTTLE_MS || '150', 10),
 		},
 	};
 }

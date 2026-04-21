@@ -41,7 +41,8 @@ const broadcastOrchestrator = new BroadcastOrchestrator(
 	jmapClient,
 	accountService,
 	config.broadcast.trackingSecret,
-	config.baseUrl
+	config.baseUrl,
+	config.broadcast.sendThrottleMs
 );
 
 // ─── App ────────────────────────────────────────────────────
