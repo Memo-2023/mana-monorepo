@@ -2,7 +2,21 @@
 
 ## Status (2026-04-21)
 
-Proposed. Noch nichts gebaut.
+**M1 Skelett: DONE** (commit `3357e88a1`) — Modul registriert, Dexie v33, Encryption-Registry-Einträge (articles + articleHighlights verschlüsselt, articleTags auf Plaintext-Allowlist als FK-Junction ins globale Tag-System), App-Registry + orangefarbenes Icon, Route mountet, Empty-State ListView.
+
+**M2 URL-Save + Reader: DONE** (commit `3357e88a1`) — `POST /api/v1/articles/extract` (ein Endpoint statt zwei — Client cached die Preview und vermeidet doppelten Server-Fetch), AddUrlForm mit scope-aware Dedupe, DetailView mit ReaderView (Serif/Sans, Light/Sepia/Dark, Size-Slider), auto-getrackter Reading-Progress mit Scroll-Restore.
+
+**M3 Highlights: DONE** (commit `3357e88a1`) — TreeWalker-basierte Plain-Text-Offset-Resolution (`lib/offsets.ts`), `highlightsStore`, Floating `HighlightMenu` mit Create/Edit-Modi, `HighlightLayer`-Orchestrator der Overlays bei jedem Highlights- oder HTML-Change unwrap+re-applies (Range.surroundContents pro Text-Node-Slice). Vier Farben mit Dark-Mode-angepassten Alpha-Werten.
+
+**M4 Tags + Filter: DONE** (commit `04293ed5e`) — `useArticleTagIds` / `useArticleTagMap` Live-Queries gegen `articleTagOps`. DetailView bekommt `<TagField>` aus `@mana/shared-ui` mit globalem Tag-Pool; `onChange` → `articleTagOps.setTags(id, ids)`. ListView: 6 Filter-Chips (Alle / Ungelesen / In Arbeit / Gelesen / Favoriten / Archiv) mit Live-Counts, `<TagChip>` auf jeder Karte, neue `.status-reading`-Pill, Favoriten-Stern.
+
+**M5 Migration von news:type='saved': DONE** (commit `04293ed5e`) — Boot-gated Migration in `modules/articles/migrations/from-news.ts` (localStorage-Sentinel `mana:articles:from-news-migration:v1`), decrypt→re-encrypt zwischen den beiden Field-Allowlists, Status-Mapping `isArchived→archived` / `isRead→finished` / sonst `unread`, Source-Rows werden soft-deletet. News-Code deprecated: `saveFromUrl` + `extractFromUrl` entfernt, `save_news_article` AI-Tool behält seinen Namen (wegen Mission-History) und leitet intern aufs `articles`-Modul um. `/news/add` + `/news/saved` sind Redirects. `news-research` „Speichern"-Buttons routen auf `/articles/[id]`.
+
+**M6 AI-Tools: DONE** (commit pending) — 5 neue Einträge im `AI_TOOL_CATALOG` (`shared-ai/src/tools/schemas.ts`): `list_articles` (auto), `save_article` / `archive_article` / `tag_article` / `add_article_highlight` (alle propose). `modules/articles/tools.ts` enthält die `execute`-Funktionen, registriert in `data/tools/init.ts`. `tag_article` dedupliziert case-insensitive über den globalen Pool und legt Tags via `tagMutations.createTag` an falls nötig. `add_article_highlight` snappt auf die erste wörtliche Fundstelle in `article.content` und lehnt den Call ab wenn der Text nicht exakt vorkommt (kein Orphan-Highlight). Policy/Executor/Server-Planner leiten sich automatisch aus dem Katalog ab.
+
+**Hinweis AiProposalInbox:** Der apps/mana/CLAUDE.md-Abschnitt erwähnt `<AiProposalInbox module="articles" />` als Inline-Mount, aber die Komponente existiert im aktuellen Codebase nicht — nach dem `pendingProposals`-Table-Drop in Dexie v29 wurde die Proposal-Darstellung auf `server-iteration-staging` + den Cross-Module-Inbox im Mission-Detail-View umgestellt. Articles-Proposals tauchen dort automatisch auf. Falls die Inline-Komponente wieder reaktiviert wird, muss nur der Mount in `ListView.svelte` ergänzt werden.
+
+Nächster Schritt: M7 (Share-Target + Bookmarklet) oder M8 (HighlightsView + Stats + Dashboard-Widget).
 
 ## Ziel
 

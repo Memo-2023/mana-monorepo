@@ -31,6 +31,7 @@ import { inventoryTools } from '$lib/modules/inventory/tools';
 import { plantsTools } from '$lib/modules/plants/tools';
 import { newsTools } from '$lib/modules/news/tools';
 import { newsResearchTools } from '$lib/modules/news-research/tools';
+import { articlesTools } from '$lib/modules/articles/tools';
 import { recipesTools } from '$lib/modules/recipes/tools';
 import { questionsTools } from '$lib/modules/questions/tools';
 import { meditateTools } from '$lib/modules/meditate/tools';
@@ -76,6 +77,7 @@ export function initTools(): void {
 	registerTools(plantsTools);
 	registerTools(newsTools);
 	registerTools(newsResearchTools);
+	registerTools(articlesTools);
 	registerTools(recipesTools);
 	registerTools(questionsTools);
 	registerTools(meditateTools);
