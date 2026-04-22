@@ -2,7 +2,7 @@
 
 **Datum:** 2026-04-22
 **Anlass:** Googles Launch am 2026-04-21 — zwei autonome Research-Agenten auf Basis von Gemini 3.1 Pro, verfügbar als Public Preview über die Gemini API.
-**Status:** Schritt 1 + 2 geliefert. Schritt 3 (MCP-Server) geplant, nicht implementiert.
+**Status:** Schritt 1 + 2 geliefert und **deployt auf Mac-Mini** (2026-04-22 18:21 MESZ). `MANA_AI_DEEP_RESEARCH_ENABLED=false` — Feature ist dark, Infra bereit. Schritt 3 (MCP-Server) geplant, nicht implementiert.
 
 ## TL;DR
 
@@ -411,6 +411,26 @@ DELETE FROM mana_ai.mission_research_jobs WHERE submitted_at < now() - interval 
 ```
 
 Die upstream-Tasks bleiben bei Google, aber wir lassen sie einfach laufen (Google berechnet sie trotzdem — aber das ist der Compute-Kosten-Sunk-Cost, nicht der Hebel).
+
+### 6.4 Deploy-Log — 2026-04-22 (Mac-Mini)
+
+Erst-Deploy von Schritt 1 + 2 auf dem Produktions-Mac-Mini. Alles, was von der Standard-Konfiguration abwich:
+
+- **`mana-research` war auf Mac-Mini noch nie gestartet** — Service ist zwar in `docker-compose.macmini.yml` definiert, aber nie hochgezogen. Erst-Boot via `docker compose ... up -d mana-research`.
+- **`research.*` Schema existierte nicht in `mana_platform`** — das Drizzle-Push läuft **nicht** automatisch beim Service-Boot. Manuell nachgezogen:
+  ```bash
+  docker exec mana-research bun run db:push
+  ```
+  Ergebnis: 5 Tabellen (`async_jobs`, `eval_results`, `eval_runs`, `provider_configs`, `provider_stats`).
+- **`GOOGLE_GENAI_API_KEY` fehlte in `.env`** — lokalen Key aus `.env.secrets` nach `/Users/mana/projects/mana-monorepo/.env` übertragen. Backup: `.env.bak.pre-gemini-deep-research`.
+- **Redis-NOAUTH-Spam**: mana-research hatte `REDIS_URL: redis://redis:6379` ohne Passwort-Credentials, Redis läuft aber mit `--requirepass`. Cache degradierte graceful, aber Log-Noise. Fix: commit `4867300d0` — `REDIS_URL: redis://:${REDIS_PASSWORD:-redis123}@redis:6379`.
+- **Smoke-Test**: Submit über `POST /api/v1/internal/research/async` (Standard-Tier, 300 credits, Test-User ohne Wallet-Eintrag) → HTTP 500 in mana-credits (`credits.reserve failed: 404 Not Found`). **Erwartetes Ergebnis** — beweist den Chain `X-Service-Key → dispatch → googleGenai apiKey → credits.reserve` bis zum mana-credits-HTTP-Call. Kein Fehler in unserem neuen Code.
+
+Bekannte offene Punkte nach Deploy:
+
+- `mana-llm` (Port 3025) hat dieselbe Redis-ohne-Passwort-Config. Out-of-Scope für diesen Deploy, aber dokumentiert hier für einen separaten Fix.
+- `/api/v1/providers/health` listet async-Provider nicht (weil sie nicht in der `buildRegistry()`-Map stehen). Health-Seite-Lücke, kein funktionaler Fehler.
+- Für den ersten echten Test-Run braucht es (a) einen User mit Credits in `credits.balances` und (b) `MANA_AI_DEEP_RESEARCH_ENABLED=true` + mana-ai-Restart.
 
 ## 7. Empfehlung
 
