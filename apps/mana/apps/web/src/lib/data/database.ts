@@ -936,6 +936,36 @@ function isInternalKey(key: string): boolean {
 	);
 }
 
+/**
+ * Tables whose rows are scoped to a specific user rather than to a
+ * Space. These are singletons or small lookups tied to the signed-in
+ * identity (preferences, the profile hub, per-user templates). The
+ * creating-hook continues to stamp `userId` on these; data tables
+ * (tasks, events, tags, …) stopped carrying `userId` in Phase 2c of
+ * the space-scoped data model rollout — attribution there lives on
+ * the Actor fields (`__lastActor` / `__fieldActors`) and tenancy on
+ * `spaceId`.
+ *
+ * Keeping this list explicit instead of inferring by naming
+ * convention: the audit in docs/plans/space-scoped-data-model.md
+ * appendix enumerates exactly which tables need user-level stamping,
+ * and a typo here would silently re-introduce `userId` on a data
+ * table.
+ */
+const USER_LEVEL_TABLES: ReadonlySet<string> = new Set([
+	'userSettings',
+	'userContext',
+	'newsPreferences',
+	'meditateSettings',
+	'sleepSettings',
+	'moodSettings',
+	'timeSettings',
+	'invoiceSettings',
+	'broadcastSettings',
+	'wetterSettings',
+	'userTagPresets',
+]);
+
 for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {
 	for (const tableName of tables) {
 		const table = db.table(tableName);
@@ -948,12 +978,20 @@ for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {
 			// trackPendingChange below. Freezing it here is the authoritative step.
 			const actor: Actor = getCurrentActor();
 
-			// Auto-stamp the active user. Module stores never set userId themselves,
-			// preventing accidental impersonation and removing all hardcoded
-			// 'guest'/'local' fallbacks scattered across query files.
+			// Auto-stamp the active user. Module stores never set userId
+			// themselves. After Phase 2c, user-level tables (userSettings,
+			// invoiceSettings, userTagPresets, …) continue to carry a
+			// userId column because their records are primarily scoped to
+			// the user, not a Space. Data tables (tasks, events, tags, …)
+			// no longer get userId stamped — attribution on data records
+			// lives on the Actor fields (__lastActor / __fieldActors) and
+			// tenancy on spaceId.
 			const objRecord = obj as Record<string, unknown>;
-			if (objRecord.userId === undefined || objRecord.userId === null) {
-				objRecord.userId = getEffectiveUserId();
+			const effectiveUserId = getEffectiveUserId();
+			if (USER_LEVEL_TABLES.has(tableName)) {
+				if (objRecord.userId === undefined || objRecord.userId === null) {
+					objRecord.userId = effectiveUserId;
+				}
 			}
 
 			// Auto-stamp the Space-scope fields. Until the scope bootstrap
@@ -962,12 +1000,13 @@ for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {
 			// deterministic sentinel `_personal:<userId>` that the bootstrap
 			// rewrites in a single pass. Module stores set spaceId explicitly
 			// once they start writing into non-personal spaces — this stamp
-			// only fills the gap.
+			// only fills the gap. Sentinel uses `effectiveUserId` directly
+			// now that `userId` may not be present on the record itself.
 			if (objRecord.spaceId === undefined || objRecord.spaceId === null) {
-				objRecord.spaceId = `_personal:${objRecord.userId as string}`;
+				objRecord.spaceId = `_personal:${effectiveUserId}`;
 			}
 			if (objRecord.authorId === undefined || objRecord.authorId === null) {
-				objRecord.authorId = objRecord.userId as string;
+				objRecord.authorId = effectiveUserId;
 			}
 			if (objRecord.visibility === undefined || objRecord.visibility === null) {
 				objRecord.visibility = 'space';
