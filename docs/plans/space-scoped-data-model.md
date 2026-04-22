@@ -18,7 +18,7 @@ _Supersedes [`per-space-vs-user-global-tags.md`](./per-space-vs-user-global-tags
 | 2d.6 | Settings → Tag-Presets management UI | `0f8fbb381` |
 | 2e | Encryption flip (enabled:true on 4 tables) | `09e6a8b9d` |
 | 2c | Creating-hook: stop stamping userId on data tables | `e9b9544ea` |
-| 2e-followup | At-rest encrypt sweep (post-unlock, per-table sentinel) | `c413ab7dd` ⚠️ |
+| 2e-followup | At-rest encrypt sweep (post-unlock, per-table sentinel) | `af4fd2776` (was `c413ab7dd`, reverted + restored) |
 | 2c-followup #1 | Dexie v35 hard userId-drop on data tables + drop dead indexes | `f4c66241c` |
 | 2c-followup #2 | Dexie v36 strip spaceId/authorId/visibility from user-level tables | `ce5d1f1a2` |
 
@@ -32,11 +32,12 @@ lint-staged rollback races (see `feedback_git_workflow.md`):
   change). The bundle-audit files are legit too; the Space-switch work
   is the second half of the diff.
 
-- `c413ab7dd test(mana-research): fixture-based tests …` — contains
-  the 2e-followup payload (at-rest encrypt sweep:
-  `lib/data/crypto/at-rest-sweep.ts` + layout unlock wiring). The
-  mana-research test files are legit too; the at-rest sweep is
-  `apps/mana/apps/web/…` changes in the diff.
+- `c413ab7dd test(mana-research): fixture-based tests …` — contained
+  the 2e-followup payload (at-rest encrypt sweep). Later **reverted**
+  by `c31dcdd66` and the re-apply (`3a7bc7f1c`) only restored the
+  mana-research test files, dropping my sweep payload. Restored in
+  its own commit `af4fd2776` with the correct message + plan-doc
+  shipping-log updated to point there.
 
 Both commits' code is correct and typechecks cleanly. Grep for
 `runAtRestEncryptSweep` / `onActiveSpaceChanged` to find the actual
