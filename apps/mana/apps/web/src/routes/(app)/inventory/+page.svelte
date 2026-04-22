@@ -85,7 +85,7 @@
 					tabindex="0"
 					onclick={() => handleCollectionClick(collection)}
 					onkeydown={(e) => e.key === 'Enter' && handleCollectionClick(collection)}
-					class="group rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-5 text-left transition-all hover:border-[hsl(var(--color-primary)/0.3)]"
+					class="group rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-5 text-left transition-colors hover:border-[hsl(var(--color-primary)/0.3)]"
 				>
 					<div class="flex items-start justify-between">
 						<div class="flex items-center gap-3">

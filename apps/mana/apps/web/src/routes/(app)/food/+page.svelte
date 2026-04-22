@@ -89,7 +89,7 @@
 			</p>
 			<div class="mt-2 h-1.5 overflow-hidden rounded-full bg-[hsl(var(--color-muted))]">
 				<div
-					class="h-full rounded-full transition-all {getProgressColor(
+					class="h-full rounded-full transition-[width] {getProgressColor(
 						progress.calories.percentage
 					)}"
 					style="width: {Math.min(progress.calories.percentage, 100)}%"
@@ -116,7 +116,9 @@
 			</p>
 			<div class="mt-2 h-1.5 overflow-hidden rounded-full bg-[hsl(var(--color-muted))]">
 				<div
-					class="h-full rounded-full transition-all {getProgressColor(progress.protein.percentage)}"
+					class="h-full rounded-full transition-[width] {getProgressColor(
+						progress.protein.percentage
+					)}"
 					style="width: {Math.min(progress.protein.percentage, 100)}%"
 				></div>
 			</div>
@@ -143,7 +145,9 @@
 			</p>
 			<div class="mt-2 h-1.5 overflow-hidden rounded-full bg-[hsl(var(--color-muted))]">
 				<div
-					class="h-full rounded-full transition-all {getProgressColor(progress.carbs.percentage)}"
+					class="h-full rounded-full transition-[width] {getProgressColor(
+						progress.carbs.percentage
+					)}"
 					style="width: {Math.min(progress.carbs.percentage, 100)}%"
 				></div>
 			</div>
@@ -165,7 +169,7 @@
 			</p>
 			<div class="mt-2 h-1.5 overflow-hidden rounded-full bg-[hsl(var(--color-muted))]">
 				<div
-					class="h-full rounded-full transition-all {getProgressColor(progress.fat.percentage)}"
+					class="h-full rounded-full transition-[width] {getProgressColor(progress.fat.percentage)}"
 					style="width: {Math.min(progress.fat.percentage, 100)}%"
 				></div>
 			</div>
@@ -204,7 +208,7 @@
 				{#each todaysMeals as meal (meal.id)}
 					<a
 						href="/food/{meal.id}"
-						class="block rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4 transition-all hover:border-[hsl(var(--color-primary)/0.3)]"
+						class="block rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4 transition-colors hover:border-[hsl(var(--color-primary)/0.3)]"
 					>
 						<div class="flex items-start gap-3">
 							{#if meal.photoThumbnailUrl || meal.photoUrl}
@@ -264,14 +268,14 @@
 	<div class="flex gap-3">
 		<a
 			href="/food/goals"
-			class="flex-1 rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4 text-center transition-all hover:border-[hsl(var(--color-primary)/0.3)]"
+			class="flex-1 rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4 text-center transition-colors hover:border-[hsl(var(--color-primary)/0.3)]"
 		>
 			<span class="text-2xl">🎯</span>
 			<p class="mt-1 text-sm font-medium text-[hsl(var(--color-foreground))]">Ziele</p>
 		</a>
 		<a
 			href="/food/history"
-			class="flex-1 rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4 text-center transition-all hover:border-[hsl(var(--color-primary)/0.3)]"
+			class="flex-1 rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4 text-center transition-colors hover:border-[hsl(var(--color-primary)/0.3)]"
 		>
 			<span class="text-2xl">📊</span>
 			<p class="mt-1 text-sm font-medium text-[hsl(var(--color-foreground))]">Verlauf</p>

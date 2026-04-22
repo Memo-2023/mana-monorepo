@@ -212,7 +212,7 @@
 			<div class="grid grid-cols-1 gap-3 md:grid-cols-2">
 				{#each filteredDocuments as doc (doc.id)}
 					<div
-						class="group rounded-xl border border-border-strong bg-white p-4 transition-all hover:shadow-md dark:border-border dark:bg-card"
+						class="group rounded-xl border border-border-strong bg-white p-4 transition-colors hover:shadow-md dark:border-border dark:bg-card"
 					>
 						<div class="flex items-start justify-between">
 							<a href="/context/documents/{doc.id}" class="min-w-0 flex-1">

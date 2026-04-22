@@ -226,7 +226,7 @@
 		<!-- Share + Favorite buttons overlay -->
 		<div class="absolute right-4 top-4 flex gap-2">
 			<button
-				class="flex h-10 w-10 items-center justify-center rounded-full bg-black/30 text-white backdrop-blur-sm transition-all hover:bg-black/50"
+				class="flex h-10 w-10 items-center justify-center rounded-full bg-black/30 text-white backdrop-blur-sm transition-colors hover:bg-black/50"
 				onclick={handleShare}
 				title={$_('detail.share')}
 			>
@@ -239,7 +239,7 @@
 
 			{#if authStore.isAuthenticated}
 				<button
-					class="flex h-10 w-10 items-center justify-center rounded-full bg-black/30 backdrop-blur-sm transition-all hover:bg-black/50"
+					class="flex h-10 w-10 items-center justify-center rounded-full bg-black/30 backdrop-blur-sm transition-colors hover:bg-black/50"
 					onclick={() => favoritesStore.toggle(location!.id)}
 					title={favoriteIds.has(location.id) ? $_('favorites.remove') : $_('favorites.add')}
 				>

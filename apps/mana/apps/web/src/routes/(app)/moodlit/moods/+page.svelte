@@ -165,7 +165,7 @@
 						: `linear-gradient(135deg, ${mood.colors.join(', ')})`}
 				<button
 					onclick={() => (fullscreenMood = mood)}
-					class="mood-card group relative aspect-[16/10] w-full overflow-hidden rounded-2xl border-[3px] border-transparent transition-all duration-200 hover:border-border/40 focus:outline-none focus:ring-2 focus:ring-primary/50"
+					class="mood-card group relative aspect-[16/10] w-full overflow-hidden rounded-2xl border-[3px] border-transparent transition-colors duration-200 hover:border-border/40 focus:outline-none focus:ring-2 focus:ring-primary/50"
 					style="--mood-color: {mood.colors[0]}"
 				>
 					<div
@@ -197,7 +197,7 @@
 									deleteMood(mood);
 								}
 							}}
-							class="absolute right-2 top-2 rounded-full bg-black/20 p-1.5 text-foreground opacity-0 backdrop-blur-sm transition-all hover:bg-black/40 hover:text-white group-hover:opacity-100 cursor-pointer"
+							class="absolute right-2 top-2 rounded-full bg-black/20 p-1.5 text-foreground opacity-0 backdrop-blur-sm transition-colors hover:bg-black/40 hover:text-white group-hover:opacity-100 cursor-pointer"
 						>
 							<X size={14} />
 						</div>

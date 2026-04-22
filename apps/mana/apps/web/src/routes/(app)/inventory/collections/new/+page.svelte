@@ -66,7 +66,7 @@
 				{#each DEFAULT_TEMPLATES as template}
 					<button
 						onclick={() => selectTemplate(template)}
-						class="rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4 text-left transition-all hover:border-[hsl(var(--color-primary)/0.3)]"
+						class="rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4 text-left transition-colors hover:border-[hsl(var(--color-primary)/0.3)]"
 					>
 						<div class="flex items-center gap-3">
 							<span class="text-2xl">{template.icon}</span>

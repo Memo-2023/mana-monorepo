@@ -64,7 +64,7 @@
 		{#each buttons as row}
 			{#each row as btn}
 				<button
-					class="h-14 rounded-xl border border-border transition-all active:scale-95 text-lg {getButtonClass(
+					class="h-14 rounded-xl border border-border transition-[transform,colors,box-shadow] active:scale-95 text-lg {getButtonClass(
 						btn
 					)}"
 					onclick={() => handleButton(btn)}
@@ -76,7 +76,7 @@
 	</div>
 
 	<button
-		class="mt-2 w-full h-10 rounded-lg bg-muted/50 text-muted-foreground hover:bg-muted transition-all text-sm"
+		class="mt-2 w-full h-10 rounded-lg bg-muted/50 text-muted-foreground hover:bg-muted transition-colors text-sm"
 		onclick={onBackspace}
 	>
 		← Löschen

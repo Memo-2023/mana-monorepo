@@ -107,7 +107,7 @@
 </script>
 
 <div
-	class="entry-item rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] transition-all {isExpanded
+	class="entry-item rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] transition-[box-shadow] {isExpanded
 		? 'ring-1 ring-[hsl(var(--color-primary)/0.3)]'
 		: ''}"
 >

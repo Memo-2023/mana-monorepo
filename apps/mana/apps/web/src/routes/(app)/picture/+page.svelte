@@ -193,7 +193,7 @@
 				{#each filteredImages as img (img.id)}
 					<button
 						onclick={() => (selectedImage = img)}
-						class="group relative overflow-hidden rounded-lg border border-border bg-card transition-all hover:shadow-lg hover:border-primary/50"
+						class="group relative overflow-hidden rounded-lg border border-border bg-card transition-[border-color,box-shadow] hover:shadow-lg hover:border-primary/50"
 					>
 						{#if img.publicUrl}
 							<img

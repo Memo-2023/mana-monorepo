@@ -35,7 +35,7 @@
 	{#if authStore.isAuthenticated}
 		<a
 			href="/citycorners/add-city"
-			class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-white shadow-md transition-all hover:bg-primary/90 hover:shadow-lg"
+			class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-white shadow-md transition-colors hover:bg-primary/90 hover:shadow-lg"
 			title={$_('cities.add')}
 		>
 			<Plus size={20} weight="bold" />

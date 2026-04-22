@@ -76,7 +76,7 @@
 	</div>
 	<a
 		href="/citycorners/cities/{citySlug}/add"
-		class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-white shadow-md transition-all hover:bg-primary/90 hover:shadow-lg"
+		class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-white shadow-md transition-colors hover:bg-primary/90 hover:shadow-lg"
 		title={$_('add.title')}
 	>
 		<Plus size={20} weight="bold" />
@@ -217,7 +217,7 @@
 
 				{#if authStore.isAuthenticated}
 					<button
-						class="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-black/30 backdrop-blur-sm transition-all hover:bg-black/50"
+						class="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-black/30 backdrop-blur-sm transition-colors hover:bg-black/50"
 						onclick={(e) => handleFavoriteToggle(e, location.id)}
 						title={favoriteIds.has(location.id) ? $_('favorites.remove') : $_('favorites.add')}
 					>

@@ -93,7 +93,7 @@
 		<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 			{#each allBoards.value as board (board.id)}
 				<div
-					class="group relative overflow-hidden rounded-lg border border-border bg-card transition-all hover:shadow-lg hover:border-primary/50"
+					class="group relative overflow-hidden rounded-lg border border-border bg-card transition-[border-color,box-shadow] hover:shadow-lg hover:border-primary/50"
 				>
 					<!-- Thumbnail -->
 					<button

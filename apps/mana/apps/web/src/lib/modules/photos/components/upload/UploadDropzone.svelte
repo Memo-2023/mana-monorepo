@@ -45,7 +45,7 @@
 </script>
 
 <div
-	class="flex cursor-pointer flex-col items-center rounded-xl border-2 border-dashed p-12 text-center transition-all {dragActive
+	class="flex cursor-pointer flex-col items-center rounded-xl border-2 border-dashed p-12 text-center transition-colors {dragActive
 		? 'border-primary bg-primary/5 border-solid'
 		: 'border-border bg-background-card hover:border-primary'}"
 	ondragover={handleDragOver}

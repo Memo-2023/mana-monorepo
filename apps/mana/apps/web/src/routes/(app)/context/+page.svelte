@@ -94,7 +94,7 @@
 				{#each pinnedSpaces as space}
 					<a
 						href="/context/spaces/{space.id}"
-						class="rounded-xl border border-border-strong bg-white p-4 transition-all hover:shadow-md dark:border-border dark:bg-card"
+						class="rounded-xl border border-border-strong bg-white p-4 transition-colors hover:shadow-md dark:border-border dark:bg-card"
 					>
 						<div class="flex items-center gap-3">
 							<span
@@ -128,7 +128,7 @@
 				{#each recentDocs as doc}
 					<a
 						href="/context/documents/{doc.id}"
-						class="group rounded-xl border border-border-strong bg-white p-4 transition-all hover:shadow-md dark:border-border dark:bg-card"
+						class="group rounded-xl border border-border-strong bg-white p-4 transition-colors hover:shadow-md dark:border-border dark:bg-card"
 					>
 						<div class="flex items-start justify-between">
 							<div class="min-w-0 flex-1">

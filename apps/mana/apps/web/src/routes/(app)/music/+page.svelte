@@ -116,7 +116,7 @@
 			<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
 				{#each projectsCtx.value.slice(0, 6) as project (project.id)}
 					<div
-						class="rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4 transition-all hover:border-[hsl(var(--color-primary)/0.3)]"
+						class="rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4 transition-colors hover:border-[hsl(var(--color-primary)/0.3)]"
 					>
 						<h3 class="font-medium text-[hsl(var(--color-foreground))]">{project.title}</h3>
 						{#if project.description}

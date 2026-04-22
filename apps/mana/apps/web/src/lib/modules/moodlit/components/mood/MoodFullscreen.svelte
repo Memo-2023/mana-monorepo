@@ -235,7 +235,7 @@
 			<div class="flex-1 flex items-center justify-center pointer-events-auto">
 				<button
 					type="button"
-					class="p-6 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm transition-all hover:scale-110"
+					class="p-6 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm transition-[transform,colors,box-shadow] hover:scale-110"
 					onclick={(e) => {
 						e.stopPropagation();
 						togglePlay();

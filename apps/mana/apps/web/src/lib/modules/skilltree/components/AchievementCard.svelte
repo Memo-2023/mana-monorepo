@@ -18,7 +18,7 @@
 </script>
 
 <div
-	class="relative rounded-xl border p-4 transition-all duration-200 {achievement.unlocked
+	class="relative rounded-xl border p-4 transition-colors duration-200 {achievement.unlocked
 		? `${rarity.bgColor} ${rarity.borderColor}`
 		: 'border-border/50 bg-card/30'} {achievement.unlocked
 		? 'hover:-translate-y-0.5 hover:shadow-lg'
@@ -69,7 +69,7 @@
 					</div>
 					<div class="mt-1 h-1.5 overflow-hidden rounded-full bg-muted">
 						<div
-							class="h-full rounded-full bg-gradient-to-r from-gray-500 to-gray-400 transition-all duration-300"
+							class="h-full rounded-full bg-gradient-to-r from-gray-500 to-gray-400 transition-[width] duration-300"
 							style="width: {progressPercent}%"
 						></div>
 					</div>

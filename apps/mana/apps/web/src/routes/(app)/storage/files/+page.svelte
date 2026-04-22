@@ -159,7 +159,7 @@
 		<div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
 			{#each folders as folder (folder.id)}
 				<button
-					class="group flex flex-col items-center gap-2 rounded-xl border border-border bg-card p-4 transition-all hover:border-primary/50 hover:shadow-md"
+					class="group flex flex-col items-center gap-2 rounded-xl border border-border bg-card p-4 transition-[border-color,box-shadow] hover:border-primary/50 hover:shadow-md"
 					onclick={() => handleFolderClick(folder)}
 				>
 					<div
@@ -178,7 +178,7 @@
 			{/each}
 			{#each files as file (file.id)}
 				<div
-					class="group flex flex-col items-center gap-2 rounded-xl border border-border bg-card p-4 transition-all hover:border-primary/50 hover:shadow-md"
+					class="group flex flex-col items-center gap-2 rounded-xl border border-border bg-card p-4 transition-[border-color,box-shadow] hover:border-primary/50 hover:shadow-md"
 				>
 					<div class="flex h-12 w-12 items-center justify-center rounded-lg bg-muted text-2xl">
 						{#if file.mimeType.startsWith('image/')}📷

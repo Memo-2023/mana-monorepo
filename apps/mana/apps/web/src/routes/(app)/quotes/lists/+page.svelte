@@ -106,7 +106,7 @@
 			{#each allLists.value as list (list.id)}
 				<a
 					href="/quotes/lists/{list.id}"
-					class="block p-6 bg-surface-elevated rounded-2xl hover:shadow-lg transition-all group"
+					class="block p-6 bg-surface-elevated rounded-2xl hover:shadow-lg transition-colors group"
 				>
 					<div class="flex items-start justify-between">
 						<div>

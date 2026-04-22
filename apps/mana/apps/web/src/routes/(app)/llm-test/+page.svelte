@@ -620,7 +620,7 @@
 				{#if progress !== null}
 					<div class="mt-3 h-2 overflow-hidden rounded-full bg-muted">
 						<div
-							class="h-full rounded-full bg-primary transition-all duration-300"
+							class="h-full rounded-full bg-primary transition-[width] duration-300"
 							style="width: {Math.round(progress * 100)}%"
 						></div>
 					</div>
@@ -1110,7 +1110,7 @@
 						</div>
 						<div class="h-2 overflow-hidden rounded-full bg-muted">
 							<div
-								class="h-full rounded-full bg-primary transition-all duration-300"
+								class="h-full rounded-full bg-primary transition-[width] duration-300"
 								style="width: {Math.round((benchmarkCurrentRun / benchmarkIterations) * 100)}%"
 							></div>
 						</div>

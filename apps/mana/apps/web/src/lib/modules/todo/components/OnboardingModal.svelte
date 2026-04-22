@@ -75,7 +75,7 @@
 				<div class="mb-6 flex gap-1.5">
 					{#each steps as _, i}
 						<div
-							class="h-1.5 rounded-full transition-all {i === step
+							class="h-1.5 rounded-full transition-[width,background-color] {i === step
 								? 'w-6 bg-primary'
 								: i < step
 									? 'w-1.5 bg-primary/40'

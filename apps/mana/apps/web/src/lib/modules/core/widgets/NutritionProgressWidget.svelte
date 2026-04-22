@@ -137,7 +137,7 @@
 							stroke-linecap="round"
 							stroke-dasharray={CIRCUMFERENCE}
 							stroke-dashoffset={strokeOffset}
-							class="transition-all duration-500"
+							class="transition-[stroke-dashoffset,stroke] duration-500"
 						/>
 					</svg>
 					<div class="absolute inset-0 flex flex-col items-center justify-center">

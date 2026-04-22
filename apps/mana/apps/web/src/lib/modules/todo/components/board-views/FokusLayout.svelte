@@ -37,7 +37,7 @@
 						onkeydown={(e) => e.key === 'Enter' && onOpenTask(task)}
 						role="button"
 						tabindex="0"
-						class="group flex cursor-pointer items-center gap-4 rounded-xl border border-border bg-card p-4 transition-all hover:shadow-md"
+						class="group flex cursor-pointer items-center gap-4 rounded-xl border border-border bg-card p-4 transition-colors hover:shadow-md"
 						style="border-left: 4px solid {getPriorityColor(task.priority)}"
 					>
 						<button

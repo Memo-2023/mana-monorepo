@@ -157,8 +157,7 @@
 		<!-- Skin picker toggle -->
 		<div class="mb-3 flex items-center justify-between">
 			<button
-				class="text-xs rounded-full border px-3 py-1.5 transition-all
-					{showSkinPicker
+				class="text-xs rounded-full border px-3 py-1.5 transition-colors {showSkinPicker
 					? 'border-pink-500 bg-pink-500 text-white'
 					: 'border-border bg-card text-muted-foreground hover:bg-muted'}"
 				onclick={() => (showSkinPicker = !showSkinPicker)}
@@ -177,8 +176,9 @@
 				<div class="grid grid-cols-5 gap-2">
 					{#each CALCULATOR_SKINS as skin}
 						<button
-							class="rounded-lg border p-2 text-center transition-all
-								{activeSkin === skin.id ? 'border-pink-500 bg-pink-500/10' : 'border-transparent hover:bg-muted'}"
+							class="rounded-lg border p-2 text-center transition-colors {activeSkin === skin.id
+								? 'border-pink-500 bg-pink-500/10'
+								: 'border-transparent hover:bg-muted'}"
 							onclick={() => setSkin(skin.id)}
 						>
 							<div class="text-sm font-medium text-foreground">{skin.label}</div>

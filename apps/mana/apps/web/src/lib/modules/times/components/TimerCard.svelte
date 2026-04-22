@@ -156,7 +156,7 @@
 	<!-- Start/Stop Button -->
 	<button
 		onclick={handleStartStop}
-		class="w-full rounded-xl py-3 text-lg font-medium transition-all {timerStore.isRunning
+		class="w-full rounded-xl py-3 text-lg font-medium transition-colors {timerStore.isRunning
 			? 'bg-red-500 text-white hover:bg-red-600'
 			: 'bg-[hsl(var(--color-primary))] text-[hsl(var(--color-primary-foreground))] hover:opacity-90'}"
 	>

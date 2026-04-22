@@ -215,7 +215,8 @@
 					<button
 						type="button"
 						onclick={() => (researchDepth = option.value)}
-						class="rounded-lg border-2 p-4 text-left transition-all {researchDepth === option.value
+						class="rounded-lg border-2 p-4 text-left transition-colors {researchDepth ===
+						option.value
 							? 'border-[hsl(var(--color-primary))] bg-[hsl(var(--color-primary)/0.05)]'
 							: 'border-[hsl(var(--color-border))] hover:border-[hsl(var(--color-primary)/0.3)]'}"
 					>

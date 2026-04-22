@@ -48,7 +48,7 @@
 		{#each quickLinks as link}
 			<a
 				href={link.href}
-				class="rounded-xl border border-border bg-card p-6 transition-all hover:border-primary/50 hover:shadow-lg group"
+				class="rounded-xl border border-border bg-card p-6 transition-[border-color,box-shadow] hover:border-primary/50 hover:shadow-lg group"
 			>
 				<div class="flex flex-col items-center gap-3 text-center">
 					<div

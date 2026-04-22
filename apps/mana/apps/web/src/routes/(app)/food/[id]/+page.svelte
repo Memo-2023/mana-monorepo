@@ -337,8 +337,8 @@
 								<button
 									type="button"
 									onclick={() => (editMealType = type)}
-									class="rounded-lg border-2 px-3 py-2 text-sm transition-all
-										{editMealType === type
+									class="rounded-lg border-2 px-3 py-2 text-sm transition-colors {editMealType ===
+									type
 										? 'border-[hsl(var(--color-primary))] bg-[hsl(var(--color-primary)/0.05)] font-medium'
 										: 'border-[hsl(var(--color-border))] hover:border-[hsl(var(--color-primary)/0.3)]'}"
 								>

@@ -141,7 +141,7 @@
 		<div class="space-y-3">
 			{#each collections as collection (collection.id)}
 				<div
-					class="flex items-center gap-4 rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4 transition-all hover:border-[hsl(var(--color-primary)/0.3)]"
+					class="flex items-center gap-4 rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4 transition-colors hover:border-[hsl(var(--color-primary)/0.3)]"
 				>
 					<!-- Icon & Color -->
 					<div

@@ -72,7 +72,7 @@
 			{#each filteredGuides as guide}
 				{@const cat = GUIDE_CATEGORIES[guide.category]}
 				<div
-					class="group flex items-center gap-4 rounded-xl border border-border bg-card p-4 transition-all hover:border-primary/50 hover:shadow-md"
+					class="group flex items-center gap-4 rounded-xl border border-border bg-card p-4 transition-[border-color,box-shadow] hover:border-primary/50 hover:shadow-md"
 				>
 					<div
 						class="{cat.color} flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white"

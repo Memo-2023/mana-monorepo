@@ -87,7 +87,7 @@
 		<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
 			{#each projectsCtx.value as project (project.id)}
 				<div
-					class="group rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4 transition-all hover:border-[hsl(var(--color-primary)/0.3)]"
+					class="group rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4 transition-colors hover:border-[hsl(var(--color-primary)/0.3)]"
 				>
 					<div class="flex items-start justify-between">
 						<h3 class="font-medium text-[hsl(var(--color-foreground))]">{project.title}</h3>

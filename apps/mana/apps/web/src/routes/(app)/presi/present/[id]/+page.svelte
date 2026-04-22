@@ -194,7 +194,7 @@
 							<!-- svelte-ignore a11y_consider_explicit_label -->
 							<button
 								onclick={() => goToSlide(index)}
-								class="w-2 h-2 rounded-full transition-all"
+								class="w-2 h-2 rounded-full transition-[width,background-color]"
 								class:bg-primary-500={index === currentSlideIndex}
 								class:w-4={index === currentSlideIndex}
 								class:bg-muted={index !== currentSlideIndex}

@@ -31,7 +31,11 @@
 
 	<!-- Daily Quote Card -->
 	{#if quotesStore.currentQuote}
-		<div class="mb-8 transition-all duration-300 {isRefreshing ? 'opacity-50 scale-95' : ''}">
+		<div
+			class="mb-8 transition-[transform,colors,box-shadow] duration-300 {isRefreshing
+				? 'opacity-50 scale-95'
+				: ''}"
+		>
 			<QuoteCard
 				quote={quotesStore.currentQuote}
 				size="large"

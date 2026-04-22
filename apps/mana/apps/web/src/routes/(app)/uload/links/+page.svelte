@@ -241,7 +241,7 @@
 			<div class="space-y-3">
 				{#each filteredLinks as link (link.id)}
 					<div
-						class="group rounded-xl border border-border-strong bg-white p-4 shadow-sm transition-all hover:shadow-md dark:border-border dark:bg-card"
+						class="group rounded-xl border border-border-strong bg-white p-4 shadow-sm transition-colors hover:shadow-md dark:border-border dark:bg-card"
 					>
 						<div class="flex items-center justify-between">
 							{#if selectMode}
@@ -291,7 +291,7 @@
 							<div class="ml-4 flex items-center gap-1">
 								<a
 									href="/uload/analytics/{link.id}"
-									class="flex items-center gap-1 rounded-lg px-2 py-1.5 text-sm font-medium opacity-60 transition-all hover:bg-muted hover:opacity-100 dark:hover:bg-muted"
+									class="flex items-center gap-1 rounded-lg px-2 py-1.5 text-sm font-medium opacity-60 transition-colors hover:bg-muted hover:opacity-100 dark:hover:bg-muted"
 									title="Analytics"
 								>
 									<ChartBar size={16} />
@@ -299,14 +299,14 @@
 								</a>
 								<button
 									onclick={() => copyShortUrl(link.shortCode)}
-									class="rounded-lg p-2 opacity-0 transition-all hover:bg-muted group-hover:opacity-100 dark:hover:bg-muted"
+									class="rounded-lg p-2 opacity-0 transition-colors hover:bg-muted group-hover:opacity-100 dark:hover:bg-muted"
 									title="Link kopieren"
 								>
 									<Copy size={16} />
 								</button>
 								<button
 									onclick={() => toggleActive(link)}
-									class="rounded-lg p-2 opacity-0 transition-all hover:bg-muted group-hover:opacity-100 dark:hover:bg-muted"
+									class="rounded-lg p-2 opacity-0 transition-colors hover:bg-muted group-hover:opacity-100 dark:hover:bg-muted"
 									title={link.isActive ? 'Deaktivieren' : 'Aktivieren'}
 								>
 									<Lightning
@@ -316,7 +316,7 @@
 								</button>
 								<button
 									onclick={() => deleteLink(link)}
-									class="rounded-lg p-2 opacity-0 transition-all hover:bg-red-50 hover:text-red-600 group-hover:opacity-100 dark:hover:bg-red-900/20"
+									class="rounded-lg p-2 opacity-0 transition-colors hover:bg-red-50 hover:text-red-600 group-hover:opacity-100 dark:hover:bg-red-900/20"
 									title="Loeschen"
 								>
 									<Trash size={16} />

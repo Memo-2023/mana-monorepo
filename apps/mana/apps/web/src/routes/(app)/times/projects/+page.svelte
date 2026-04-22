@@ -311,7 +311,7 @@
 									</div>
 									<div class="mt-1 h-1.5 rounded-full bg-[hsl(var(--color-muted))]">
 										<div
-											class="h-full rounded-full transition-all {budgetPct > 90
+											class="h-full rounded-full transition-[width] {budgetPct > 90
 												? 'bg-red-500'
 												: budgetPct > 75
 													? 'bg-amber-500'

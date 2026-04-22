@@ -61,7 +61,7 @@
 							cy={y}
 							r={isSelected ? 8 : 5}
 							fill={isSelected ? 'hsl(var(--color-primary))' : 'hsl(var(--color-muted-foreground))'}
-							class="cursor-pointer hover:opacity-80 transition-all"
+							class="cursor-pointer hover:opacity-80 transition-opacity"
 						/>
 						{#if isSelected}
 							<text

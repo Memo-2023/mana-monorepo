@@ -133,7 +133,7 @@
 								tabindex="0"
 								onclick={() => handleConversationClick(conv.id)}
 								onkeydown={(e) => e.key === 'Enter' && handleConversationClick(conv.id)}
-								class="group flex items-center gap-3 rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-3 transition-all hover:border-[hsl(var(--color-primary)/0.3)]"
+								class="group flex items-center gap-3 rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-3 transition-colors hover:border-[hsl(var(--color-primary)/0.3)]"
 							>
 								<ChatCircle size={20} class="shrink-0 text-[hsl(var(--color-primary))]" />
 								<div class="min-w-0 flex-1">
@@ -185,7 +185,7 @@
 								tabindex="0"
 								onclick={() => handleConversationClick(conv.id)}
 								onkeydown={(e) => e.key === 'Enter' && handleConversationClick(conv.id)}
-								class="group flex items-center gap-3 rounded-lg border border-transparent p-3 transition-all hover:border-[hsl(var(--color-border))] hover:bg-[hsl(var(--color-card))]"
+								class="group flex items-center gap-3 rounded-lg border border-transparent p-3 transition-colors hover:border-[hsl(var(--color-border))] hover:bg-[hsl(var(--color-card))]"
 							>
 								<ChatCircle size={20} class="shrink-0 text-[hsl(var(--color-muted-foreground))]" />
 								<div class="min-w-0 flex-1">

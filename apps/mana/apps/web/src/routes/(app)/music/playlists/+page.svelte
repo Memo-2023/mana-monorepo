@@ -84,7 +84,7 @@
 			{#each playlistsCtx.value as playlist (playlist.id)}
 				<a
 					href="/music/playlists/{playlist.id}"
-					class="group relative rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4 transition-all hover:border-[hsl(var(--color-primary)/0.3)]"
+					class="group relative rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4 transition-colors hover:border-[hsl(var(--color-primary)/0.3)]"
 				>
 					<div
 						class="mb-3 flex aspect-square items-center justify-center overflow-hidden rounded-lg bg-[hsl(var(--color-muted))]"

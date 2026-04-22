@@ -78,7 +78,7 @@
 			</div>
 			<div class="h-3 overflow-hidden rounded-full bg-muted">
 				<div
-					class="h-full rounded-full bg-gradient-to-r from-yellow-500 to-yellow-400 transition-all duration-500"
+					class="h-full rounded-full bg-gradient-to-r from-yellow-500 to-yellow-400 transition-[width] duration-500"
 					style="width: {completion}%"
 				></div>
 			</div>

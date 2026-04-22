@@ -116,7 +116,7 @@
 		<div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
 			{#each tags.value as tag (tag.id)}
 				<div
-					class="group rounded-xl border border-border/10 bg-muted/5 p-4 transition-all hover:bg-muted/8"
+					class="group rounded-xl border border-border/10 bg-muted/5 p-4 transition-colors hover:bg-muted/8"
 				>
 					{#if editingTag?.id === tag.id}
 						<div class="space-y-3">
@@ -152,13 +152,13 @@
 								<span class="text-sm text-muted-foreground">{getUsageCount(tag.id)} Links</span>
 								<button
 									onclick={() => (editingTag = { id: tag.id, name: tag.name, color: tag.color })}
-									class="rounded p-1 text-muted-foreground opacity-0 transition-all hover:bg-muted/10 hover:text-white group-hover:opacity-100"
+									class="rounded p-1 text-muted-foreground opacity-0 transition-colors hover:bg-muted/10 hover:text-white group-hover:opacity-100"
 								>
 									<PencilSimple size={16} />
 								</button>
 								<button
 									onclick={() => deleteTag(tag)}
-									class="rounded p-1 text-muted-foreground opacity-0 transition-all hover:bg-red-900/20 hover:text-red-400 group-hover:opacity-100"
+									class="rounded p-1 text-muted-foreground opacity-0 transition-colors hover:bg-red-900/20 hover:text-red-400 group-hover:opacity-100"
 								>
 									<Trash size={16} />
 								</button>

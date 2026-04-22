@@ -55,7 +55,7 @@
 
 <button
 	type="button"
-	class="mood-card group relative w-full overflow-hidden rounded-2xl transition-all duration-200 hover:scale-[1.02] hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary/50"
+	class="mood-card group relative w-full overflow-hidden rounded-2xl transition-[transform,colors,box-shadow] duration-200 hover:scale-[1.02] hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary/50"
 	class:ring-2={isActive}
 	class:ring-primary={isActive}
 	onclick={handleClick}

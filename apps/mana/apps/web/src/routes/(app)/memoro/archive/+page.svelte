@@ -66,7 +66,7 @@
 					tabindex="0"
 					onclick={() => handleClick(memo.id)}
 					onkeydown={(e) => e.key === 'Enter' && handleClick(memo.id)}
-					class="group rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4 transition-all hover:border-[hsl(var(--color-primary)/0.3)]"
+					class="group rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4 transition-colors hover:border-[hsl(var(--color-primary)/0.3)]"
 				>
 					<div class="flex items-start justify-between">
 						<div class="min-w-0 flex-1">

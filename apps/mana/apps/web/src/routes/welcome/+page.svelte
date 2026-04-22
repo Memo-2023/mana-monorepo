@@ -77,7 +77,7 @@
 				<div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
 					{#each appConfig.features as feature}
 						<div
-							class="group cursor-default rounded-2xl border-2 border-gray-200 bg-white p-6 shadow-md transition-all duration-300 hover:scale-105 hover:shadow-xl dark:border-gray-700 dark:bg-gray-800"
+							class="group cursor-default rounded-2xl border-2 border-gray-200 bg-white p-6 shadow-md transition-[transform,colors,box-shadow] duration-300 hover:scale-105 hover:shadow-xl dark:border-gray-700 dark:bg-gray-800"
 							style="border-left: 4px solid {feature.color}"
 						>
 							<div class="mb-4 flex items-center gap-3">

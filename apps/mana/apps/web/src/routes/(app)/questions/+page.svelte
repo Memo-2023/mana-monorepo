@@ -155,7 +155,7 @@
 
 				<a
 					href="/questions/{question.id}"
-					class="block rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4 transition-all hover:border-[hsl(var(--color-primary)/0.3)]"
+					class="block rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4 transition-colors hover:border-[hsl(var(--color-primary)/0.3)]"
 				>
 					<div class="flex items-start gap-4">
 						<div class="mt-1">

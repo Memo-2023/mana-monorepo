@@ -150,7 +150,7 @@
 		<div class="grid grid-cols-1 gap-3 md:grid-cols-2">
 			{#each filteredSpaces as space (space.id)}
 				<div
-					class="group rounded-xl border border-border-strong bg-white p-4 transition-all hover:shadow-md dark:border-border dark:bg-card"
+					class="group rounded-xl border border-border-strong bg-white p-4 transition-colors hover:shadow-md dark:border-border dark:bg-card"
 				>
 					<div class="flex items-start justify-between">
 						<a href="/context/spaces/{space.id}" class="min-w-0 flex-1">

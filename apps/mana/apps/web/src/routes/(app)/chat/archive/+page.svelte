@@ -66,7 +66,7 @@
 					tabindex="0"
 					onclick={() => handleClick(conv.id)}
 					onkeydown={(e) => e.key === 'Enter' && handleClick(conv.id)}
-					class="group flex items-center gap-3 rounded-lg border border-transparent p-3 transition-all hover:border-[hsl(var(--color-border))] hover:bg-[hsl(var(--color-card))]"
+					class="group flex items-center gap-3 rounded-lg border border-transparent p-3 transition-colors hover:border-[hsl(var(--color-border))] hover:bg-[hsl(var(--color-card))]"
 				>
 					<ChatCircle size={20} class="shrink-0 text-[hsl(var(--color-muted-foreground))]" />
 					<div class="min-w-0 flex-1">

@@ -54,7 +54,7 @@
 			href="https://www.openstreetmap.org/#map=14/{lat}/{lng}"
 			target="_blank"
 			rel="noopener noreferrer"
-			class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-background-card border border-border text-foreground-secondary shadow-sm transition-all hover:text-primary hover:border-primary"
+			class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-background-card border border-border text-foreground-secondary shadow-sm transition-colors hover:text-primary hover:border-primary"
 			title={$_('map.openInMaps')}
 		>
 			<GlobeSimple size={20} />

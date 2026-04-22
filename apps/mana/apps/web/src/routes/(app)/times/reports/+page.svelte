@@ -152,11 +152,11 @@
 			</h3>
 			<div class="flex h-4 overflow-hidden rounded-full">
 				<div
-					class="bg-[hsl(var(--color-primary))] transition-all"
+					class="bg-[hsl(var(--color-primary))] transition-[width]"
 					style="width: {(billableDuration / totalDuration) * 100}%"
 				></div>
 				<div
-					class="bg-[hsl(var(--color-muted))] transition-all"
+					class="bg-[hsl(var(--color-muted))] transition-[width]"
 					style="width: {(nonBillableDuration / totalDuration) * 100}%"
 				></div>
 			</div>
@@ -189,7 +189,7 @@
 						</div>
 						<div class="mt-1 h-2 rounded-full bg-[hsl(var(--color-muted))]">
 							<div
-								class="h-full rounded-full transition-all"
+								class="h-full rounded-full transition-[width]"
 								style="width: {(item.duration / maxProjectDuration) *
 									100}%; background-color: {item.color}"
 							></div>
@@ -213,7 +213,7 @@
 					<div class="flex flex-1 flex-col items-center gap-1">
 						<div class="w-full flex flex-col justify-end" style="height: 100px;">
 							<div
-								class="w-full rounded-t bg-[hsl(var(--color-primary))] transition-all"
+								class="w-full rounded-t bg-[hsl(var(--color-primary))] transition-[height]"
 								style="height: {maxDailyDuration > 0
 									? (day.duration / maxDailyDuration) * 100
 									: 0}%"

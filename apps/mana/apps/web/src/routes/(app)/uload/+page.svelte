@@ -279,7 +279,7 @@
 				</a>
 				<button
 					onclick={() => (showCreateForm = !showCreateForm)}
-					class="rounded-lg bg-indigo-600 px-4 py-2 font-medium text-white shadow-lg transition-all hover:scale-105 hover:bg-indigo-700"
+					class="rounded-lg bg-indigo-600 px-4 py-2 font-medium text-white shadow-lg transition-[transform,colors,box-shadow] hover:scale-105 hover:bg-indigo-700"
 				>
 					{showCreateForm ? '- Ausblenden' : '+ Neuer Link'}
 				</button>
@@ -490,7 +490,7 @@
 			<div class="space-y-3">
 				{#each filteredLinks as link (link.id)}
 					<div
-						class="group rounded-xl border border-border-strong bg-white p-4 shadow-sm transition-all hover:shadow-md dark:border-border dark:bg-card"
+						class="group rounded-xl border border-border-strong bg-white p-4 shadow-sm transition-colors hover:shadow-md dark:border-border dark:bg-card"
 					>
 						<div class="flex items-center justify-between">
 							<div class="min-w-0 flex-1">
@@ -545,7 +545,7 @@
 							<div class="ml-4 flex items-center gap-1">
 								<a
 									href="/uload/analytics/{link.id}"
-									class="flex items-center gap-1 rounded-lg px-2 py-1.5 text-sm font-medium opacity-60 transition-all hover:bg-muted hover:opacity-100 dark:hover:bg-muted"
+									class="flex items-center gap-1 rounded-lg px-2 py-1.5 text-sm font-medium opacity-60 transition-colors hover:bg-muted hover:opacity-100 dark:hover:bg-muted"
 									title="Analytics"
 								>
 									<ChartBar size={16} />
@@ -553,28 +553,28 @@
 								</a>
 								<button
 									onclick={() => copyShortUrl(link.shortCode)}
-									class="rounded-lg p-2 opacity-0 transition-all hover:bg-muted group-hover:opacity-100 dark:hover:bg-muted"
+									class="rounded-lg p-2 opacity-0 transition-colors hover:bg-muted group-hover:opacity-100 dark:hover:bg-muted"
 									title="Link kopieren"
 								>
 									<Copy size={16} />
 								</button>
 								<button
 									onclick={() => (qrLink = link)}
-									class="rounded-lg p-2 opacity-0 transition-all hover:bg-muted group-hover:opacity-100 dark:hover:bg-muted"
+									class="rounded-lg p-2 opacity-0 transition-colors hover:bg-muted group-hover:opacity-100 dark:hover:bg-muted"
 									title="QR-Code"
 								>
 									<QrCode size={16} />
 								</button>
 								<button
 									onclick={() => openEdit(link)}
-									class="rounded-lg p-2 opacity-0 transition-all hover:bg-muted group-hover:opacity-100 dark:hover:bg-muted"
+									class="rounded-lg p-2 opacity-0 transition-colors hover:bg-muted group-hover:opacity-100 dark:hover:bg-muted"
 									title={$_('common.edit')}
 								>
 									<PencilSimple size={16} />
 								</button>
 								<button
 									onclick={() => toggleActive(link)}
-									class="rounded-lg p-2 opacity-0 transition-all hover:bg-muted group-hover:opacity-100 dark:hover:bg-muted"
+									class="rounded-lg p-2 opacity-0 transition-colors hover:bg-muted group-hover:opacity-100 dark:hover:bg-muted"
 									title={link.isActive ? 'Deaktivieren' : 'Aktivieren'}
 								>
 									<Lightning
@@ -584,7 +584,7 @@
 								</button>
 								<button
 									onclick={() => deleteLink(link)}
-									class="rounded-lg p-2 opacity-0 transition-all hover:bg-red-50 hover:text-red-600 group-hover:opacity-100 dark:hover:bg-red-900/20"
+									class="rounded-lg p-2 opacity-0 transition-colors hover:bg-red-50 hover:text-red-600 group-hover:opacity-100 dark:hover:bg-red-900/20"
 									title="Loeschen"
 								>
 									<Trash size={16} />
