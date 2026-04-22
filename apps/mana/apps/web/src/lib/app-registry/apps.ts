@@ -1318,50 +1318,6 @@ registerApp({
 	},
 });
 
-// ── Module-Settings Cards ────────────────────────────
-// Per-module settings/preferences as workbench cards so they can be
-// dropped into any scene without a subroute.
-
-registerApp({
-	id: 'broadcast-settings',
-	name: 'Broadcast · Settings',
-	color: '#6366f1',
-	icon: Gear,
-	views: {
-		list: { load: () => import('$lib/modules/broadcast-settings/ListView.svelte') },
-	},
-});
-
-registerApp({
-	id: 'invoices-settings',
-	name: 'Invoices · Settings',
-	color: '#059669',
-	icon: Gear,
-	views: {
-		list: { load: () => import('$lib/modules/invoices-settings/ListView.svelte') },
-	},
-});
-
-registerApp({
-	id: 'uload-settings',
-	name: 'uLoad · Settings',
-	color: '#0EA5E9',
-	icon: Gear,
-	views: {
-		list: { load: () => import('$lib/modules/uload-settings/ListView.svelte') },
-	},
-});
-
-registerApp({
-	id: 'news-preferences',
-	name: 'News · Preferences',
-	color: '#10B981',
-	icon: Gear,
-	views: {
-		list: { load: () => import('$lib/modules/news-preferences/ListView.svelte') },
-	},
-});
-
 registerApp({
 	id: 'quiz',
 	name: 'Quiz',
