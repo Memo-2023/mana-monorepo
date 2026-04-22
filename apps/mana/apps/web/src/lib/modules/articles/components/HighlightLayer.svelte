@@ -154,13 +154,22 @@
 	}
 
 	$effect(() => {
-		if (!scroller) return;
-		scroller.addEventListener('mouseup', onSelectionEnd);
-		scroller.addEventListener('click', onClick);
+		// Snapshot the element ref at setup time. `scroller` is a reactive
+		// prop: when the parent navigates away and re-mounts the Reader,
+		// it first pushes `scroller = null`, then `scroller = newEl`.
+		// Reading `scroller` inside the teardown returned below would
+		// observe whichever value is live *at teardown*, not the one we
+		// attached listeners to — which caused
+		// "Cannot read properties of null (reading 'removeEventListener')"
+		// on back-navigation between two article detail views.
+		const el = scroller;
+		if (!el) return;
+		el.addEventListener('mouseup', onSelectionEnd);
+		el.addEventListener('click', onClick);
 		document.addEventListener('mousedown', onMousedown);
 		return () => {
-			scroller.removeEventListener('mouseup', onSelectionEnd);
-			scroller.removeEventListener('click', onClick);
+			el.removeEventListener('mouseup', onSelectionEnd);
+			el.removeEventListener('click', onClick);
 			document.removeEventListener('mousedown', onMousedown);
 		};
 	});
