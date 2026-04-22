@@ -1,28 +1,25 @@
 <!--
-  AddUrlForm — paste URL → preview → save.
+  AddUrlForm — three paths in, one preview/save UI out:
 
-  Flow:
-    1. User pastes (or types) a URL, OR the page is opened with a URL
-       pre-filled via query string (?url=… / ?text=… / ?title=…). The
-       Web Share Target + bookmarklet both land here that way.
-    2. On "Vorschau abrufen": check scope-local dedupe first; if found,
-       offer "öffnen" instead of re-extracting (saves one round-trip).
-       Otherwise call /api/v1/articles/extract and render the preview.
-    3. On "Speichern": the already-extracted payload is persisted via
-       articlesStore.saveFromExtracted — no second server call.
-    4. Navigate into the new article so the user lands directly in the
-       reader view.
+    1. User types / pastes a URL manually.
+    2. `?url=…` query (Web Share Target, bookmarklet v1) — auto-fills
+       the input and triggers server-side fetch + Readability.
+    3. `?source=bookmarklet` (bookmarklet v2) — waits for the opener
+       tab to postMessage the rendered HTML over, then runs the
+       browser-HTML extract path. This bypasses cookie-consent walls
+       and soft paywalls because the HTML already came from the user's
+       own authenticated session.
 
-  Pre-filled URLs auto-trigger the preview on mount so the three-click
-  "share from browser → saved" flow really is three clicks: share →
-  pick Mana → hit "In Leseliste speichern".
+  If the server-side extract returns `warning: 'probable_consent_wall'`
+  we keep the preview but add a prominent CTA suggesting the user try
+  the browser-HTML path instead.
 -->
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import { articlesStore } from '../stores/articles.svelte';
-	import { extractArticle, type ExtractedArticle } from '../api';
+	import { extractArticle, extractFromHtml, type ExtractedArticle } from '../api';
 	import type { Article } from '../types';
 
 	let url = $state('');
@@ -49,8 +46,103 @@
 		return m ? m[0] : '';
 	}
 
+	// ─── Bookmarklet-v2 handshake ─────────────────────────
+	//
+	// When the settings bookmarklet opens Mana with ?source=bookmarklet,
+	// the opener tab wants to push its rendered HTML over via
+	// postMessage so we can extract WITH the user's cookies/consent
+	// already applied. Protocol:
+	//
+	//   Mana (us)            Opener (the article site)
+	//    │                    │
+	//    │  mana-ready        │
+	//    │ ─────────────────→ │
+	//    │                    │
+	//    │        mana-html   │
+	//    │ ←───────────────── │   { url, html, title }
+	//    │                    │
+	//
+	// We only TRUST the `html` payload — we don't navigate using it, we
+	// hand it to our own backend at /api/v1/articles/extract/html which
+	// sanitises via Readability. Origin of the sender is free to be
+	// anything (that's the whole point) so we don't gate on it.
+
+	let messageHandler: ((e: MessageEvent) => void) | null = null;
+	let bookmarkletTimeout: ReturnType<typeof setTimeout> | null = null;
+
+	async function handleBookmarkletHtml(payload: { url: string; html: string; title?: string }) {
+		const trimmed = payload.url.trim();
+		if (!trimmed) {
+			error = 'Bookmarklet hat keine URL mitgeschickt.';
+			return;
+		}
+		url = trimmed;
+		reset();
+		loading = true;
+		try {
+			const alreadySaved = await articlesStore.findByUrl(trimmed);
+			if (alreadySaved) {
+				duplicate = alreadySaved;
+				return;
+			}
+			const extracted = await extractFromHtml(trimmed, payload.html);
+			await persistOrShowWarning(extracted);
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Extraktion fehlgeschlagen.';
+		} finally {
+			loading = false;
+		}
+	}
+
+	function armBookmarkletHandshake() {
+		if (typeof window === 'undefined') return;
+		messageHandler = (e: MessageEvent) => {
+			const data = e.data as { type?: string; url?: string; html?: string; title?: string } | null;
+			if (
+				!data ||
+				data.type !== 'mana-html' ||
+				typeof data.url !== 'string' ||
+				typeof data.html !== 'string'
+			) {
+				return;
+			}
+			// One-shot — disarm so a misbehaving parent can't flood us.
+			if (messageHandler) window.removeEventListener('message', messageHandler);
+			messageHandler = null;
+			if (bookmarkletTimeout) {
+				clearTimeout(bookmarkletTimeout);
+				bookmarkletTimeout = null;
+			}
+			void handleBookmarkletHtml({ url: data.url, html: data.html, title: data.title });
+		};
+		window.addEventListener('message', messageHandler);
+		// Tell the opener we're ready to receive. targetOrigin '*' is fine
+		// here — the payload in THIS direction is just a readiness ping,
+		// no data worth origin-gating.
+		try {
+			window.opener?.postMessage({ type: 'mana-ready' }, '*');
+		} catch {
+			// Opener may be cross-origin closed — fall through to timeout.
+		}
+		// Bail out if nothing arrives within 30s so the UI doesn't sit
+		// spinning forever when the user re-opened this page from a stale
+		// bookmarklet-v2 link without an opener tab.
+		loading = true;
+		bookmarkletTimeout = setTimeout(() => {
+			if (loading && !preview && !duplicate && !error) {
+				loading = false;
+				error =
+					'Bookmarklet-Handshake ist fehlgeschlagen. Öffne das Bookmarklet aus dem Browser-Tab in dem der Artikel läuft.';
+			}
+		}, 30_000);
+	}
+
 	onMount(() => {
 		const params = $page.url.searchParams;
+		if (params.get('source') === 'bookmarklet') {
+			armBookmarkletHandshake();
+			return;
+		}
 		const fromUrl = params.get('url')?.trim() ?? '';
 		const fromText = params.get('text')?.trim() ?? '';
 		const candidate = fromUrl || firstUrl(fromText);
@@ -58,7 +150,18 @@
 			url = candidate;
 			// Fire-and-forget — the handler is idempotent enough that a
 			// stray second click does no harm.
-			void handlePreview();
+			void handleSubmit();
+		}
+	});
+
+	onDestroy(() => {
+		if (messageHandler && typeof window !== 'undefined') {
+			window.removeEventListener('message', messageHandler);
+			messageHandler = null;
+		}
+		if (bookmarkletTimeout) {
+			clearTimeout(bookmarkletTimeout);
+			bookmarkletTimeout = null;
 		}
 	});
 
@@ -68,7 +171,7 @@
 		error = null;
 	}
 
-	async function handlePreview() {
+	async function handleSubmit() {
 		reset();
 		const trimmed = url.trim();
 		if (!trimmed) {
@@ -89,7 +192,8 @@
 				duplicate = alreadySaved;
 				return;
 			}
-			preview = await extractArticle(trimmed);
+			const extracted = await extractArticle(trimmed);
+			await persistOrShowWarning(extracted);
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Extraktion fehlgeschlagen.';
 		} finally {
@@ -97,23 +201,43 @@
 		}
 	}
 
-	async function handleSave() {
-		if (!preview) return;
+	/**
+	 * Normal path: extract succeeded cleanly → persist + navigate to the
+	 * reader so the user never has to press a second "Save" button.
+	 * Fallback: if the server flagged a probable consent wall, stop and
+	 * surface the preview + warning card so the user can decide whether
+	 * to keep the teaser anyway or re-save via the HTML bookmarklet.
+	 */
+	async function persistOrShowWarning(extracted: ExtractedArticle) {
+		if (extracted.warning === 'probable_consent_wall') {
+			preview = extracted;
+			return;
+		}
+		await persistAndGo(extracted);
+	}
+
+	async function persistAndGo(extracted: ExtractedArticle) {
 		saving = true;
 		try {
-			const saved = await articlesStore.saveFromExtracted(preview);
+			const saved = await articlesStore.saveFromExtracted(extracted);
 			goto(`/articles/${saved.id}`);
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Speichern fehlgeschlagen.';
 			saving = false;
 		}
 	}
+
+	/** Consent-wall path only: user saw the warning and still wants to keep this. */
+	async function saveDespiteWarning() {
+		if (!preview) return;
+		await persistAndGo(preview);
+	}
 </script>
 
 <div class="add-shell">
 	<header class="header">
 		<h1>Artikel speichern</h1>
-		<p class="subtitle">URL einfügen, Vorschau prüfen, speichern.</p>
+		<p class="subtitle">URL einfügen — Mana extrahiert + speichert direkt.</p>
 	</header>
 
 	<div class="input-row">
@@ -122,15 +246,32 @@
 			class="url-input"
 			bind:value={url}
 			placeholder="https://…"
+			disabled={loading || saving}
 			onkeydown={(e) => {
-				if (e.key === 'Enter') handlePreview();
+				if (e.key === 'Enter') handleSubmit();
 			}}
 			use:focusOnMount
 		/>
-		<button type="button" class="primary" disabled={loading} onclick={handlePreview}>
-			{loading ? 'Lädt…' : 'Vorschau abrufen'}
+		<button type="button" class="primary" disabled={loading || saving} onclick={handleSubmit}>
+			{#if saving}Speichere…{:else if loading}Lädt…{:else}Speichern{/if}
 		</button>
 	</div>
+
+	{#if (loading || saving) && !error && !preview && !duplicate}
+		<div class="loading-block" role="status">
+			<span class="spinner" aria-hidden="true"></span>
+			<div class="loading-text">
+				<p class="loading-headline">
+					{saving ? 'Speichere in deine Leseliste…' : 'Server extrahiert den Artikel…'}
+				</p>
+				<p class="loading-sub">
+					{saving
+						? 'Gleich weiter zum Reader.'
+						: 'Dauert normalerweise 2–5 Sekunden. Nach 25 Sekunden geben wir auf.'}
+				</p>
+			</div>
+		</div>
+	{/if}
 
 	{#if error}
 		<p class="error">{error}</p>
@@ -150,6 +291,25 @@
 	{/if}
 
 	{#if preview}
+		<!--
+		  Preview-Karte erscheint nur noch im Warning-Fall (Consent-Wall).
+		  Happy-Path geht direkt zu persistAndGo() und navigiert weg, bevor
+		  das Template diesen Block überhaupt rendert.
+		-->
+		<div class="consent-warning" role="alert">
+			<p class="cw-headline">Cookie-Wand erkannt</p>
+			<p class="cw-body">
+				Der Server hat wahrscheinlich nicht den Artikel bekommen, sondern nur den
+				Cookie-Zustimmungs-Dialog der Seite — er hat keine Session / Cookies. Lösung: das
+				<strong>Browser-HTML-Bookmarklet</strong> aus
+				<a href="/articles/settings">Einstellungen</a> benutzen. Läuft in deinem Tab wo du schon zugestimmt
+				hast und schickt Mana das echte Artikel-HTML.
+			</p>
+			<p class="cw-body cw-body-muted">
+				Falls du den Teaser trotzdem speichern willst — OK, kannst du später nochmal mit dem
+				HTML-Bookmarklet überschreiben.
+			</p>
+		</div>
 		<article class="preview">
 			<h2 class="preview-title">{preview.title}</h2>
 			<div class="preview-meta">
@@ -162,8 +322,8 @@
 				<p class="preview-excerpt">{preview.excerpt}</p>
 			{/if}
 			<div class="preview-actions">
-				<button type="button" class="primary" disabled={saving} onclick={handleSave}>
-					{saving ? 'Speichere…' : 'In Leseliste speichern'}
+				<button type="button" class="primary" disabled={saving} onclick={saveDespiteWarning}>
+					{saving ? 'Speichere…' : 'Trotzdem speichern'}
 				</button>
 				<button type="button" class="secondary" onclick={reset} disabled={saving}>
 					Abbrechen
@@ -245,6 +405,71 @@
 		background: rgba(239, 68, 68, 0.1);
 		color: #ef4444;
 		font-size: 0.9rem;
+	}
+	.loading-block {
+		display: flex;
+		gap: 0.8rem;
+		align-items: center;
+		padding: 0.75rem 0.95rem;
+		border-radius: 0.55rem;
+		border: 1px solid color-mix(in srgb, #f97316 30%, transparent);
+		background: color-mix(in srgb, #f97316 5%, transparent);
+	}
+	.spinner {
+		width: 1rem;
+		height: 1rem;
+		border-radius: 50%;
+		border: 2px solid color-mix(in srgb, #f97316 30%, transparent);
+		border-top-color: #f97316;
+		animation: spin 0.8s linear infinite;
+		flex-shrink: 0;
+	}
+	@keyframes spin {
+		to {
+			transform: rotate(360deg);
+		}
+	}
+	.loading-text {
+		display: flex;
+		flex-direction: column;
+		gap: 0.1rem;
+	}
+	.loading-headline {
+		margin: 0;
+		font-weight: 500;
+		font-size: 0.92rem;
+	}
+	.loading-sub {
+		margin: 0;
+		color: var(--color-text-muted, #64748b);
+		font-size: 0.82rem;
+	}
+	.consent-warning {
+		margin-top: 1rem;
+		padding: 0.85rem 1rem;
+		border: 1px solid color-mix(in srgb, #f59e0b 35%, transparent);
+		border-radius: 0.55rem;
+		background: color-mix(in srgb, #f59e0b 8%, transparent);
+	}
+	.cw-headline {
+		margin: 0 0 0.35rem 0;
+		font-weight: 600;
+		font-size: 0.95rem;
+	}
+	.cw-body {
+		margin: 0 0 0.45rem 0;
+		font-size: 0.88rem;
+		line-height: 1.5;
+	}
+	.cw-body:last-child {
+		margin-bottom: 0;
+	}
+	.cw-body-muted {
+		color: var(--color-text-muted, #64748b);
+	}
+	.consent-warning a {
+		color: #ea580c;
+		text-decoration: underline;
 	}
 	.preview,
 	.duplicate {
