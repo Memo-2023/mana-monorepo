@@ -162,20 +162,7 @@ export async function pollGeminiDeepResearch(
 	}
 
 	const data = (await res.json()) as GeminiInteractionPollResponse;
-	return parseInteractionResponse(data);
-}
 
-/**
- * Pure parser for the `/v1beta/interactions/:id` response. Extracted so
- * the edge cases (flat `outputs` array, url_citation annotations, usage
- * field names) can be unit-tested without mocking global fetch.
- *
- * Exported for tests only — production callers should go through
- * pollGeminiDeepResearch().
- */
-export function parseInteractionResponse(
-	data: GeminiInteractionPollResponse
-): GeminiDeepPollResult {
 	if (data.status === 'queued') return { status: 'queued' };
 	if (data.status === 'in_progress') return { status: 'running' };
 	if (data.status === 'failed' || data.status === 'incomplete' || data.status === 'cancelled') {
