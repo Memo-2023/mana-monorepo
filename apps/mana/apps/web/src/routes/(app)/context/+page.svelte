@@ -43,25 +43,25 @@
 	<!-- Stats -->
 	<div class="mb-8 grid grid-cols-2 gap-4 md:grid-cols-4">
 		<div
-			class="rounded-xl border border-gray-200 bg-white p-4 text-center dark:border-gray-700 dark:bg-gray-800"
+			class="rounded-xl border border-border-strong bg-white p-4 text-center dark:border-border dark:bg-card"
 		>
 			<div class="text-2xl font-bold">{spaces.length}</div>
 			<div class="mt-1 text-xs opacity-60">Spaces</div>
 		</div>
 		<div
-			class="rounded-xl border border-gray-200 bg-white p-4 text-center dark:border-gray-700 dark:bg-gray-800"
+			class="rounded-xl border border-border-strong bg-white p-4 text-center dark:border-border dark:bg-card"
 		>
 			<div class="text-2xl font-bold">{stats.total}</div>
 			<div class="mt-1 text-xs opacity-60">Dokumente</div>
 		</div>
 		<div
-			class="rounded-xl border border-gray-200 bg-white p-4 text-center dark:border-gray-700 dark:bg-gray-800"
+			class="rounded-xl border border-border-strong bg-white p-4 text-center dark:border-border dark:bg-card"
 		>
 			<div class="text-2xl font-bold">{stats.totalWords.toLocaleString()}</div>
 			<div class="mt-1 text-xs opacity-60">Woerter</div>
 		</div>
 		<div
-			class="rounded-xl border border-gray-200 bg-white p-4 text-center dark:border-gray-700 dark:bg-gray-800"
+			class="rounded-xl border border-border-strong bg-white p-4 text-center dark:border-border dark:bg-card"
 		>
 			<div class="text-2xl font-bold">{stats.text}/{stats.context}/{stats.prompt}</div>
 			<div class="mt-1 text-xs opacity-60">Text/Kontext/Prompt</div>
@@ -79,7 +79,7 @@
 		</a>
 		<a
 			href="/context/documents"
-			class="flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700"
+			class="flex items-center gap-2 rounded-lg border border-border-strong px-4 py-2 text-sm font-medium transition-colors hover:bg-muted dark:border-border dark:hover:bg-muted"
 		>
 			<FileText size={16} />
 			Alle Dokumente
@@ -94,7 +94,7 @@
 				{#each pinnedSpaces as space}
 					<a
 						href="/context/spaces/{space.id}"
-						class="rounded-xl border border-gray-200 bg-white p-4 transition-all hover:shadow-md dark:border-gray-700 dark:bg-gray-800"
+						class="rounded-xl border border-border-strong bg-white p-4 transition-all hover:shadow-md dark:border-border dark:bg-card"
 					>
 						<div class="flex items-center gap-3">
 							<span
@@ -128,7 +128,7 @@
 				{#each recentDocs as doc}
 					<a
 						href="/context/documents/{doc.id}"
-						class="group rounded-xl border border-gray-200 bg-white p-4 transition-all hover:shadow-md dark:border-gray-700 dark:bg-gray-800"
+						class="group rounded-xl border border-border-strong bg-white p-4 transition-all hover:shadow-md dark:border-border dark:bg-card"
 					>
 						<div class="flex items-start justify-between">
 							<div class="min-w-0 flex-1">
@@ -159,7 +159,7 @@
 									e.preventDefault();
 									handleTogglePinDoc(doc.id);
 								}}
-								class="ml-2 rounded p-1 opacity-0 transition-opacity hover:bg-gray-100 group-hover:opacity-100 dark:hover:bg-gray-700"
+								class="ml-2 rounded p-1 opacity-0 transition-opacity hover:bg-muted group-hover:opacity-100 dark:hover:bg-muted"
 								title={doc.pinned ? 'Loslassen' : 'Anheften'}
 							>
 								{doc.pinned ? '&#9733;' : '&#9734;'}
@@ -168,7 +168,7 @@
 						<div class="mt-2 flex items-center gap-3 text-xs opacity-40">
 							{#if doc.metadata?.tags && doc.metadata.tags.length > 0}
 								{#each doc.metadata.tags.slice(0, 3) as tag}
-									<span class="rounded bg-gray-100 px-1.5 py-0.5 dark:bg-gray-700">{tag}</span>
+									<span class="rounded bg-muted px-1.5 py-0.5 dark:bg-muted">{tag}</span>
 								{/each}
 							{/if}
 							<span class="ml-auto">
@@ -181,7 +181,7 @@
 		</section>
 	{:else}
 		<div
-			class="rounded-xl border-2 border-dashed border-gray-300 p-12 text-center dark:border-gray-600"
+			class="rounded-xl border-2 border-dashed border-border-strong p-12 text-center dark:border-border"
 		>
 			<FileText size={48} class="mx-auto mb-4 opacity-20" />
 			<h3 class="text-lg font-medium opacity-60">Noch keine Dokumente</h3>

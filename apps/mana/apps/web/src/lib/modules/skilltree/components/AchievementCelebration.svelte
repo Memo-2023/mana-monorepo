@@ -70,7 +70,7 @@
 			<p class="mb-2 text-xl font-semibold text-white">{result.achievement.name}</p>
 
 			<!-- Description -->
-			<p class="mb-4 text-gray-400">{result.achievement.description}</p>
+			<p class="mb-4 text-muted-foreground">{result.achievement.description}</p>
 
 			<!-- Rarity + XP reward -->
 			<div class="inline-flex items-center gap-3">
@@ -84,7 +84,7 @@
 			</div>
 
 			<!-- Click to close -->
-			<p class="mt-6 text-sm text-gray-500">Klicken zum Schließen</p>
+			<p class="mt-6 text-sm text-muted-foreground">Klicken zum Schließen</p>
 		</div>
 	</div>
 </div>

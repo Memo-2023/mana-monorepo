@@ -58,7 +58,7 @@
 			{#snippet actions()}
 				<a
 					href="/organizations"
-					class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+					class="text-sm text-muted-foreground hover:text-muted-foreground dark:text-muted-foreground dark:hover:text-foreground"
 				>
 					Back
 				</a>
@@ -94,21 +94,21 @@
 		{#if activeTab === 'overview'}
 			<div class="grid gap-6 md:grid-cols-2">
 				<Card>
-					<h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Details</h3>
+					<h3 class="text-lg font-semibold text-foreground dark:text-white mb-4">Details</h3>
 					<dl class="space-y-3 text-sm">
 						<div>
-							<dt class="text-gray-500 dark:text-gray-400">Name</dt>
-							<dd class="font-medium text-gray-900 dark:text-white">{org.name}</dd>
+							<dt class="text-muted-foreground dark:text-muted-foreground">Name</dt>
+							<dd class="font-medium text-foreground dark:text-white">{org.name}</dd>
 						</div>
 						{#if org.slug}
 							<div>
-								<dt class="text-gray-500 dark:text-gray-400">Slug</dt>
-								<dd class="font-medium text-gray-900 dark:text-white">{org.slug}</dd>
+								<dt class="text-muted-foreground dark:text-muted-foreground">Slug</dt>
+								<dd class="font-medium text-foreground dark:text-white">{org.slug}</dd>
 							</div>
 						{/if}
 						<div>
-							<dt class="text-gray-500 dark:text-gray-400">Created</dt>
-							<dd class="font-medium text-gray-900 dark:text-white">
+							<dt class="text-muted-foreground dark:text-muted-foreground">Created</dt>
+							<dd class="font-medium text-foreground dark:text-white">
 								{new Date(org.createdAt).toLocaleDateString()}
 							</dd>
 						</div>
@@ -116,7 +116,7 @@
 				</Card>
 
 				<Card>
-					<h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Landing Page</h3>
+					<h3 class="text-lg font-semibold text-foreground dark:text-white mb-4">Landing Page</h3>
 					{#if org.metadata?.landingPage?.enabled}
 						<div class="space-y-2">
 							<p class="text-sm text-green-600 dark:text-green-400 flex items-center gap-2">
@@ -135,7 +135,9 @@
 							{/if}
 						</div>
 					{:else}
-						<p class="text-sm text-gray-500 dark:text-gray-400">Not configured yet</p>
+						<p class="text-sm text-muted-foreground dark:text-muted-foreground">
+							Not configured yet
+						</p>
 					{/if}
 					<div class="mt-4">
 						<a href="/organizations/{data.orgId}/landing">
@@ -146,7 +148,7 @@
 			</div>
 		{:else if activeTab === 'members'}
 			<Card>
-				<div class="py-8 text-center text-sm text-gray-500 dark:text-gray-400">
+				<div class="py-8 text-center text-sm text-muted-foreground dark:text-muted-foreground">
 					Member management coming soon.
 				</div>
 			</Card>

@@ -53,7 +53,7 @@
 	}
 
 	const inputClass =
-		'w-full rounded-lg border border-gray-300 bg-white px-4 py-3 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200 dark:border-gray-600 dark:bg-gray-700';
+		'w-full rounded-lg border border-border-strong bg-white px-4 py-3 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200 dark:border-border dark:bg-muted';
 </script>
 
 <svelte:head>
@@ -78,7 +78,7 @@
 	<!-- Create Form -->
 	{#if showCreateForm}
 		<div
-			class="mb-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800"
+			class="mb-6 rounded-xl border border-border-strong bg-white p-6 shadow-sm dark:border-border dark:bg-card"
 		>
 			<h3 class="mb-4 text-lg font-semibold">Neuen Space erstellen</h3>
 			<div class="space-y-4">
@@ -119,7 +119,7 @@
 				<div class="flex justify-end gap-2">
 					<button
 						onclick={() => (showCreateForm = false)}
-						class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700"
+						class="rounded-lg border border-border-strong px-4 py-2 text-sm font-medium hover:bg-muted dark:border-border dark:hover:bg-muted"
 					>
 						Abbrechen
 					</button>
@@ -142,7 +142,7 @@
 			type="text"
 			bind:value={searchQuery}
 			placeholder="Spaces durchsuchen..."
-			class="w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-9 pr-4 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200 dark:border-gray-600 dark:bg-gray-700"
+			class="w-full rounded-lg border border-border-strong bg-white py-2.5 pl-9 pr-4 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200 dark:border-border dark:bg-muted"
 		/>
 	</div>
 
@@ -150,7 +150,7 @@
 		<div class="grid grid-cols-1 gap-3 md:grid-cols-2">
 			{#each filteredSpaces as space (space.id)}
 				<div
-					class="group rounded-xl border border-gray-200 bg-white p-4 transition-all hover:shadow-md dark:border-gray-700 dark:bg-gray-800"
+					class="group rounded-xl border border-border-strong bg-white p-4 transition-all hover:shadow-md dark:border-border dark:bg-card"
 				>
 					<div class="flex items-start justify-between">
 						<a href="/context/spaces/{space.id}" class="min-w-0 flex-1">
@@ -173,7 +173,7 @@
 						>
 							<button
 								onclick={() => handleTogglePin(space.id)}
-								class="rounded p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700"
+								class="rounded p-1.5 hover:bg-muted dark:hover:bg-muted"
 								title={space.pinned ? 'Loslassen' : 'Anheften'}
 							>
 								{space.pinned ? '&#9733;' : '&#9734;'}
@@ -199,7 +199,7 @@
 		</div>
 	{:else}
 		<div
-			class="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-300 py-16 text-center dark:border-gray-600"
+			class="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-border-strong py-16 text-center dark:border-border"
 		>
 			<Plus size={48} class="mb-4 opacity-20" />
 			<h2 class="text-lg font-medium opacity-60">Noch keine Spaces</h2>
@@ -227,7 +227,7 @@
 		role="presentation"
 	>
 		<div
-			class="w-full max-w-sm rounded-xl bg-white p-6 shadow-2xl dark:bg-gray-800"
+			class="w-full max-w-sm rounded-xl bg-white p-6 shadow-2xl dark:bg-card"
 			onclick={(e) => e.stopPropagation()}
 			role="none"
 		>
@@ -239,7 +239,7 @@
 			<div class="mt-4 flex justify-end gap-2">
 				<button
 					onclick={() => (deleteTarget = null)}
-					class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700"
+					class="rounded-lg border border-border-strong px-4 py-2 text-sm font-medium hover:bg-muted dark:border-border dark:hover:bg-muted"
 				>
 					Abbrechen
 				</button>

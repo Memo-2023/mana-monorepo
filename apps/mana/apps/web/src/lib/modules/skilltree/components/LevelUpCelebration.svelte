@@ -66,7 +66,7 @@
 			<h2 class="mb-2 text-3xl font-bold text-white level-up-text">LEVEL UP!</h2>
 
 			<!-- Skill name -->
-			<p class="mb-4 text-xl text-gray-300">{skillName}</p>
+			<p class="mb-4 text-xl text-foreground/90">{skillName}</p>
 
 			<!-- New level badge -->
 			<div
@@ -90,7 +90,7 @@
 			</div>
 
 			<!-- Click to close -->
-			<p class="mt-6 text-sm text-gray-500">Klicken zum Schließen</p>
+			<p class="mt-6 text-sm text-muted-foreground">Klicken zum Schließen</p>
 		</div>
 	</div>
 </div>

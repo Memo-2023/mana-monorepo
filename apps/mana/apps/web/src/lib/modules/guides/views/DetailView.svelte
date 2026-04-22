@@ -143,8 +143,8 @@
 			<div class="meta">
 				<div class="meta-badges">
 					<span class="badge {catInfo.color}">{catInfo.label}</span>
-					<span class="badge bg-white/10">{DIFFICULTY_LABELS[guide.difficulty]}</span>
-					<span class="badge bg-white/10">{guide.estimatedMinutes} min</span>
+					<span class="badge bg-muted/10">{DIFFICULTY_LABELS[guide.difficulty]}</span>
+					<span class="badge bg-muted/10">{guide.estimatedMinutes} min</span>
 				</div>
 				<h1 class="title">{guide.title}</h1>
 				<p class="description">{guide.description}</p>

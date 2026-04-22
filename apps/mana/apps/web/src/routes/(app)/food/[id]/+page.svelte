@@ -523,6 +523,6 @@
 		aria-label="Bild schließen"
 	>
 		<img src={meal.photoUrl} alt={meal.description} class="max-h-full max-w-full object-contain" />
-		<span class="absolute right-4 top-4 text-3xl text-white/80">×</span>
+		<span class="absolute right-4 top-4 text-3xl text-foreground">×</span>
 	</button>
 {/if}

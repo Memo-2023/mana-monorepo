@@ -116,20 +116,20 @@
 	{:else}
 		<!-- Space Header -->
 		<div
-			class="mb-6 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800"
+			class="mb-6 rounded-xl border border-border-strong bg-white p-6 dark:border-border dark:bg-card"
 		>
 			{#if editingName}
 				<div class="space-y-3">
 					<input
 						type="text"
 						bind:value={editName}
-						class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-xl font-bold focus:border-indigo-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
+						class="w-full rounded-lg border border-border-strong bg-white px-3 py-2 text-xl font-bold focus:border-indigo-500 focus:outline-none dark:border-border dark:bg-muted"
 					/>
 					<textarea
 						bind:value={editDescription}
 						rows="2"
 						placeholder="Beschreibung..."
-						class="w-full resize-none rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
+						class="w-full resize-none rounded-lg border border-border-strong bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none dark:border-border dark:bg-muted"
 					></textarea>
 					<div class="flex gap-2">
 						<button
@@ -139,7 +139,7 @@
 							<Check size={14} /> Speichern
 						</button>
 						<button
-							class="flex items-center gap-1 rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700"
+							class="flex items-center gap-1 rounded-lg border border-border-strong px-3 py-1.5 text-sm font-medium hover:bg-muted dark:border-border dark:hover:bg-muted"
 							onclick={cancelEdit}
 						>
 							<X size={14} /> Abbrechen
@@ -159,7 +159,7 @@
 						</div>
 					</div>
 					<button
-						class="rounded-lg p-2 opacity-60 transition-colors hover:bg-gray-100 hover:opacity-100 dark:hover:bg-gray-700"
+						class="rounded-lg p-2 opacity-60 transition-colors hover:bg-muted hover:opacity-100 dark:hover:bg-muted"
 						onclick={startEdit}
 						title={$_('common.edit')}
 					>
@@ -176,7 +176,7 @@
 					<button
 						class="rounded-lg px-3 py-1.5 text-sm transition-colors {typeFilter === filter.value
 							? 'bg-indigo-600 text-white'
-							: 'opacity-60 hover:bg-gray-100 dark:hover:bg-gray-700'}"
+							: 'opacity-60 hover:bg-muted dark:hover:bg-muted'}"
 						onclick={() => (typeFilter = filter.value)}
 					>
 						{filter.label}
@@ -194,7 +194,7 @@
 						type="text"
 						bind:value={searchQuery}
 						placeholder={$_('common.search')}
-						class="w-48 rounded-lg border border-gray-300 bg-white py-1.5 pl-8 pr-3 text-sm focus:border-indigo-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
+						class="w-48 rounded-lg border border-border-strong bg-white py-1.5 pl-8 pr-3 text-sm focus:border-indigo-500 focus:outline-none dark:border-border dark:bg-muted"
 					/>
 				</div>
 				<button
@@ -212,7 +212,7 @@
 			<div class="grid grid-cols-1 gap-3 md:grid-cols-2">
 				{#each filteredDocuments as doc (doc.id)}
 					<div
-						class="group rounded-xl border border-gray-200 bg-white p-4 transition-all hover:shadow-md dark:border-gray-700 dark:bg-gray-800"
+						class="group rounded-xl border border-border-strong bg-white p-4 transition-all hover:shadow-md dark:border-border dark:bg-card"
 					>
 						<div class="flex items-start justify-between">
 							<a href="/context/documents/{doc.id}" class="min-w-0 flex-1">
@@ -243,7 +243,7 @@
 							>
 								<button
 									onclick={() => handleTogglePinDoc(doc.id)}
-									class="rounded p-1 hover:bg-gray-100 dark:hover:bg-gray-700"
+									class="rounded p-1 hover:bg-muted dark:hover:bg-muted"
 									title={doc.pinned ? 'Loslassen' : 'Anheften'}
 								>
 									{doc.pinned ? '&#9733;' : '&#9734;'}
@@ -265,7 +265,7 @@
 			</div>
 		{:else}
 			<div
-				class="rounded-xl border-2 border-dashed border-gray-300 p-12 text-center dark:border-gray-600"
+				class="rounded-xl border-2 border-dashed border-border-strong p-12 text-center dark:border-border"
 			>
 				<p class="opacity-60">Keine Dokumente in diesem Space</p>
 				<button

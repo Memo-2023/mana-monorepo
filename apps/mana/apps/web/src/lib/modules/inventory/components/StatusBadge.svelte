@@ -21,7 +21,7 @@
 		lent: 'bg-amber-100 text-amber-800 dark:bg-amber-900/20 dark:text-amber-400',
 		stored: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400',
 		for_sale: 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400',
-		disposed: 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400',
+		disposed: 'bg-muted text-foreground dark:bg-card/20 dark:text-muted-foreground',
 	};
 </script>
 

@@ -61,17 +61,17 @@
 	aria-modal="true"
 >
 	<div
-		class="w-full max-w-md rounded-t-2xl sm:rounded-2xl border border-gray-700 bg-gray-800 p-6 shadow-xl max-h-[95vh] sm:max-h-[90vh] sm:mx-4"
+		class="w-full max-w-md rounded-t-2xl sm:rounded-2xl border border-border bg-card p-6 shadow-xl max-h-[95vh] sm:max-h-[90vh] sm:mx-4"
 	>
 		<!-- Header -->
 		<div class="mb-6 flex items-center justify-between">
 			<div>
 				<h2 class="text-xl font-bold text-white">XP hinzufügen</h2>
-				<p class="text-sm text-gray-400">{skill.name} (Lvl {skill.level})</p>
+				<p class="text-sm text-muted-foreground">{skill.name} (Lvl {skill.level})</p>
 			</div>
 			<button
 				onclick={onClose}
-				class="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-700 hover:text-white"
+				class="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-white"
 			>
 				<X class="h-5 w-5" />
 			</button>
@@ -80,7 +80,7 @@
 		<form onsubmit={handleSubmit} class="space-y-4">
 			<!-- Quick XP Presets -->
 			<div>
-				<span class="mb-2 block text-sm font-medium text-gray-300"> Schnellauswahl </span>
+				<span class="mb-2 block text-sm font-medium text-foreground/90"> Schnellauswahl </span>
 				<div class="flex flex-wrap gap-2">
 					{#each xpPresets as preset}
 						<button
@@ -89,7 +89,7 @@
 							class="rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors {xp ===
 							preset.value
 								? 'border-emerald-500 bg-emerald-500/20 text-emerald-400'
-								: 'border-gray-600 bg-gray-700/50 text-gray-300 hover:border-gray-500'}"
+								: 'border-border bg-muted/50 text-foreground/90 hover:border-border-strong'}"
 						>
 							{preset.label}
 						</button>
@@ -99,7 +99,7 @@
 
 			<!-- Custom XP -->
 			<div>
-				<label for="xp" class="mb-1 block text-sm font-medium text-gray-300">
+				<label for="xp" class="mb-1 block text-sm font-medium text-foreground/90">
 					<Lightning class="mr-1 inline h-4 w-4 text-yellow-500" />
 					XP Menge
 				</label>
@@ -109,13 +109,13 @@
 					bind:value={xp}
 					min="1"
 					max="1000"
-					class="w-full rounded-lg border border-gray-600 bg-gray-700 px-4 py-2 text-white placeholder-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+					class="w-full rounded-lg border border-border bg-muted px-4 py-2 text-white placeholder:text-muted-foreground/60 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
 				/>
 			</div>
 
 			<!-- Description -->
 			<div>
-				<label for="description" class="mb-1 block text-sm font-medium text-gray-300">
+				<label for="description" class="mb-1 block text-sm font-medium text-foreground/90">
 					Was hast du gemacht?
 				</label>
 				<input
@@ -123,14 +123,14 @@
 					type="text"
 					bind:value={description}
 					placeholder="z.B. Tutorial abgeschlossen"
-					class="w-full rounded-lg border border-gray-600 bg-gray-700 px-4 py-2 text-white placeholder-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+					class="w-full rounded-lg border border-border bg-muted px-4 py-2 text-white placeholder:text-muted-foreground/60 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
 				/>
 			</div>
 
 			<!-- Duration (optional) -->
 			<div>
-				<label for="duration" class="mb-1 block text-sm font-medium text-gray-300">
-					<Clock class="mr-1 inline h-4 w-4 text-gray-400" />
+				<label for="duration" class="mb-1 block text-sm font-medium text-foreground/90">
+					<Clock class="mr-1 inline h-4 w-4 text-muted-foreground" />
 					Dauer (optional, Minuten)
 				</label>
 				<input
@@ -139,17 +139,17 @@
 					bind:value={duration}
 					min="1"
 					placeholder="z.B. 30"
-					class="w-full rounded-lg border border-gray-600 bg-gray-700 px-4 py-2 text-white placeholder-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+					class="w-full rounded-lg border border-border bg-muted px-4 py-2 text-white placeholder:text-muted-foreground/60 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
 				/>
 			</div>
 
 			<!-- Preview -->
-			<div class="rounded-lg bg-gray-700/50 p-3">
+			<div class="rounded-lg bg-muted/50 p-3">
 				<div class="flex items-center justify-between text-sm">
-					<span class="text-gray-400">Vorschau</span>
+					<span class="text-muted-foreground">Vorschau</span>
 					<span class="font-medium text-emerald-400">+{xp} XP</span>
 				</div>
-				<div class="mt-1 text-xs text-gray-500">
+				<div class="mt-1 text-xs text-muted-foreground">
 					Neuer Stand: {(skill.totalXp + xp).toLocaleString()} XP
 				</div>
 			</div>
@@ -159,7 +159,7 @@
 				<button
 					type="button"
 					onclick={onClose}
-					class="flex-1 rounded-lg border border-gray-600 bg-transparent px-4 py-2 font-medium text-gray-300 transition-colors hover:bg-gray-700"
+					class="flex-1 rounded-lg border border-border bg-transparent px-4 py-2 font-medium text-foreground/90 transition-colors hover:bg-muted"
 				>
 					{$_('common.cancel')}
 				</button>

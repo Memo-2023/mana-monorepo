@@ -109,7 +109,7 @@
 			>
 				<div class="text-4xl mb-3">{data.icon}</div>
 				<h2 class="text-xl font-semibold mb-1">{$_(data.labelKey)}</h2>
-				<p class="text-white/80 text-sm">
+				<p class="text-foreground text-sm">
 					{$_('categories.quotes', { values: { count: data.count } })}
 				</p>
 			</button>

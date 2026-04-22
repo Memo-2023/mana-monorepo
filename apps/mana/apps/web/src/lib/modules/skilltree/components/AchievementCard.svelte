@@ -20,7 +20,7 @@
 <div
 	class="relative rounded-xl border p-4 transition-all duration-200 {achievement.unlocked
 		? `${rarity.bgColor} ${rarity.borderColor}`
-		: 'border-gray-700/50 bg-gray-800/30'} {achievement.unlocked
+		: 'border-border/50 bg-card/30'} {achievement.unlocked
 		? 'hover:-translate-y-0.5 hover:shadow-lg'
 		: 'opacity-70'}"
 >
@@ -36,34 +36,38 @@
 		<div
 			class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full {achievement.unlocked
 				? 'bg-yellow-500/20'
-				: 'bg-gray-700/50'}"
+				: 'bg-muted/50'}"
 		>
 			{#if achievement.unlocked}
 				<Trophy class="h-6 w-6 text-yellow-400" />
 			{:else}
-				<Lock class="h-6 w-6 text-gray-500" />
+				<Lock class="h-6 w-6 text-muted-foreground" />
 			{/if}
 		</div>
 
 		<div class="min-w-0 flex-1">
 			<!-- Name -->
-			<h3 class="font-semibold {achievement.unlocked ? 'text-white' : 'text-gray-400'}">
+			<h3 class="font-semibold {achievement.unlocked ? 'text-white' : 'text-muted-foreground'}">
 				{achievement.name}
 			</h3>
 
 			<!-- Description -->
-			<p class="mt-0.5 text-sm {achievement.unlocked ? 'text-gray-300' : 'text-gray-500'}">
+			<p
+				class="mt-0.5 text-sm {achievement.unlocked
+					? 'text-foreground/90'
+					: 'text-muted-foreground'}"
+			>
 				{achievement.description}
 			</p>
 
 			<!-- Progress bar (if not unlocked) -->
 			{#if !achievement.unlocked}
 				<div class="mt-2">
-					<div class="flex items-center justify-between text-xs text-gray-500">
+					<div class="flex items-center justify-between text-xs text-muted-foreground">
 						<span>{achievement.progress} / {achievement.condition.threshold}</span>
 						<span>{progressPercent}%</span>
 					</div>
-					<div class="mt-1 h-1.5 overflow-hidden rounded-full bg-gray-700">
+					<div class="mt-1 h-1.5 overflow-hidden rounded-full bg-muted">
 						<div
 							class="h-full rounded-full bg-gradient-to-r from-gray-500 to-gray-400 transition-all duration-300"
 							style="width: {progressPercent}%"
@@ -77,13 +81,13 @@
 				<span
 					class="flex items-center gap-1 {achievement.unlocked
 						? 'text-yellow-400'
-						: 'text-gray-500'}"
+						: 'text-muted-foreground'}"
 				>
 					<Star class="h-3 w-3" />
 					+{achievement.xpReward} XP
 				</span>
 				{#if achievement.unlocked && achievement.unlockedAt}
-					<span class="text-gray-500">
+					<span class="text-muted-foreground">
 						{new Date(achievement.unlockedAt).toLocaleDateString('de-DE')}
 					</span>
 				{/if}

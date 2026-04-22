@@ -31,10 +31,10 @@
 	);
 
 	const statusIcons = {
-		open: { icon: Clock, color: 'text-gray-500' },
+		open: { icon: Clock, color: 'text-muted-foreground' },
 		researching: { icon: CircleNotch, color: 'text-blue-500' },
 		answered: { icon: CheckCircle, color: 'text-green-500' },
-		archived: { icon: Archive, color: 'text-gray-400' },
+		archived: { icon: Archive, color: 'text-muted-foreground' },
 	};
 
 	const depthLabels: Record<ResearchDepth, string> = {
@@ -151,7 +151,7 @@
 		<div class="space-y-3">
 			{#each filteredQuestions as question (question.id)}
 				{@const StatusIcon = statusIcons[question.status]?.icon || Clock}
-				{@const statusColor = statusIcons[question.status]?.color || 'text-gray-500'}
+				{@const statusColor = statusIcons[question.status]?.color || 'text-muted-foreground'}
 
 				<a
 					href="/questions/{question.id}"
@@ -214,7 +214,7 @@
 									? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
 									: question.priority === 'high'
 										? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
-										: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'}"
+										: 'bg-muted text-muted-foreground/70 dark:bg-card dark:text-muted-foreground'}"
 							>
 								{question.priority}
 							</span>

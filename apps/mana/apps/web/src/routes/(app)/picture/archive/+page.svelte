@@ -66,7 +66,7 @@
 					>
 						<button
 							onclick={() => handleRestore(img)}
-							class="rounded-lg bg-white/90 p-2 text-foreground hover:bg-white transition-colors"
+							class="rounded-lg bg-muted/90 p-2 text-foreground hover:bg-white transition-colors"
 							title="Wiederherstellen"
 						>
 							<ArrowCounterClockwise size={18} />

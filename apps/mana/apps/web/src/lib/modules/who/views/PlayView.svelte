@@ -116,17 +116,17 @@
 
 <div class="flex h-full flex-col">
 	<!-- Header -->
-	<header class="flex items-center gap-2 border-b border-white/5 px-3 py-2">
+	<header class="flex items-center gap-2 border-b border-border/5 px-3 py-2">
 		<button
 			type="button"
-			class="rounded p-1.5 text-white/60 hover:bg-white/5 hover:text-white/90"
+			class="rounded p-1.5 text-muted-foreground hover:bg-muted/5 hover:text-foreground"
 			onclick={onBack}
 			aria-label="Zurück"
 		>
 			←
 		</button>
 		<div class="flex-1">
-			<div class="text-sm font-medium text-white/90">
+			<div class="text-sm font-medium text-foreground">
 				{#if game?.status === 'won'}
 					✅ {game.revealedName}
 				{:else if game?.status === 'surrendered'}
@@ -135,7 +135,7 @@
 					Wer bin ich?
 				{/if}
 			</div>
-			<div class="text-[11px] text-white/40">
+			<div class="text-[11px] text-muted-foreground">
 				{#if game}
 					{game.deckId} · {difficultyEmoji(game.difficulty)} · {game.messageCount} Fragen
 				{/if}
@@ -144,14 +144,14 @@
 		{#if game?.status === 'playing'}
 			<button
 				type="button"
-				class="rounded px-2 py-1 text-xs text-white/60 hover:bg-white/5 hover:text-white/90"
+				class="rounded px-2 py-1 text-xs text-muted-foreground hover:bg-muted/5 hover:text-foreground"
 				onclick={() => (showGuessModal = true)}
 			>
 				Tippen
 			</button>
 			<button
 				type="button"
-				class="rounded px-2 py-1 text-xs text-white/40 hover:bg-white/5 hover:text-white/70"
+				class="rounded px-2 py-1 text-xs text-muted-foreground hover:bg-muted/5 hover:text-foreground"
 				onclick={surrender}
 			>
 				Aufgeben
@@ -162,7 +162,7 @@
 	<!-- Result banner (post-game only) -->
 	{#if game && game.status !== 'playing'}
 		<div
-			class="border-b border-white/5 px-4 py-3 {game.status === 'won'
+			class="border-b border-border/5 px-4 py-3 {game.status === 'won'
 				? 'bg-emerald-500/10'
 				: 'bg-amber-500/10'}"
 		>
@@ -170,7 +170,7 @@
 				<p class="text-sm font-medium text-emerald-300">
 					Erraten in {game.messageCount} Nachrichten!
 				</p>
-				<p class="mt-0.5 text-xs text-white/60">
+				<p class="mt-0.5 text-xs text-muted-foreground">
 					Das war {game.revealedName}.
 				</p>
 			{:else}
@@ -182,7 +182,9 @@
 	<!-- Messages scroll -->
 	<div bind:this={scrollContainer} class="flex-1 overflow-y-auto px-3 py-4">
 		{#if messages.length === 0}
-			<div class="flex h-full items-center justify-center text-center text-sm text-white/40">
+			<div
+				class="flex h-full items-center justify-center text-center text-sm text-muted-foreground"
+			>
 				<p>
 					Stell die erste Frage.<br />
 					Versuche, die Persönlichkeit durch geschickte Fragen herauszufinden.
@@ -200,7 +202,7 @@
 							</div>
 						{:else}
 							<div
-								class="max-w-[80%] whitespace-pre-wrap rounded-lg bg-white/5 px-3 py-2 text-sm leading-relaxed text-white/90"
+								class="max-w-[80%] whitespace-pre-wrap rounded-lg bg-muted/5 px-3 py-2 text-sm leading-relaxed text-foreground"
 							>
 								{msg.content}
 							</div>
@@ -219,14 +221,14 @@
 
 	<!-- Input or notes -->
 	{#if game?.status === 'playing'}
-		<div class="border-t border-white/5 p-3">
+		<div class="border-t border-border/5 p-3">
 			<div class="mx-auto flex max-w-2xl items-end gap-2">
 				<textarea
 					bind:value={inputText}
 					onkeydown={onInputKeydown}
 					placeholder="Frag mich etwas…"
 					rows="1"
-					class="flex-1 resize-none rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white/90 placeholder-white/30 focus:border-purple-400/50 focus:outline-none"
+					class="flex-1 resize-none rounded-lg border border-border/10 bg-muted/5 px-3 py-2 text-sm text-foreground placeholder-white/30 focus:border-purple-400/50 focus:outline-none"
 					disabled={sending}
 				></textarea>
 				<button
@@ -240,9 +242,12 @@
 			</div>
 		</div>
 	{:else if game}
-		<div class="border-t border-white/5 p-3">
+		<div class="border-t border-border/5 p-3">
 			<div class="mx-auto max-w-2xl">
-				<label for="who-notes" class="mb-1 block text-[11px] uppercase tracking-wide text-white/40">
+				<label
+					for="who-notes"
+					class="mb-1 block text-[11px] uppercase tracking-wide text-muted-foreground"
+				>
 					Notiz {notesDirty ? '(speichert…)' : ''}
 				</label>
 				<textarea
@@ -251,7 +256,7 @@
 					oninput={onNotesInput}
 					placeholder="Notiz zum Spiel…"
 					rows="2"
-					class="w-full resize-none rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white/90 placeholder-white/30 focus:border-white/20 focus:outline-none"
+					class="w-full resize-none rounded-lg border border-border/10 bg-muted/5 px-3 py-2 text-sm text-foreground placeholder-white/30 focus:border-border/20 focus:outline-none"
 				></textarea>
 			</div>
 		</div>
@@ -266,9 +271,9 @@
 		onkeydown={(e) => e.key === 'Escape' && (showGuessModal = false)}
 		role="presentation"
 	>
-		<div class="w-full max-w-md rounded-lg bg-zinc-900 p-5">
-			<h3 class="mb-3 text-base font-medium text-white/90">Wer ist es?</h3>
-			<p class="mb-3 text-xs text-white/50">
+		<div class="w-full max-w-md rounded-lg bg-card p-5">
+			<h3 class="mb-3 text-base font-medium text-foreground">Wer ist es?</h3>
+			<p class="mb-3 text-xs text-muted-foreground">
 				Wenn die KI deine Vermutung nicht erkannt hat, kannst du den Namen hier direkt eintragen.
 			</p>
 			<!-- svelte-ignore a11y_autofocus -->
@@ -277,13 +282,13 @@
 				bind:value={guessText}
 				onkeydown={(e) => e.key === 'Enter' && submitGuess()}
 				placeholder="z.B. Marie Curie"
-				class="mb-3 w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white/90 placeholder-white/30 focus:border-purple-400/50 focus:outline-none"
+				class="mb-3 w-full rounded-lg border border-border/10 bg-muted/5 px-3 py-2 text-sm text-foreground placeholder-white/30 focus:border-purple-400/50 focus:outline-none"
 				autofocus
 			/>
 			<div class="flex justify-end gap-2">
 				<button
 					type="button"
-					class="rounded px-3 py-1.5 text-sm text-white/60 hover:bg-white/5"
+					class="rounded px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted/5"
 					onclick={() => {
 						showGuessModal = false;
 						guessText = '';

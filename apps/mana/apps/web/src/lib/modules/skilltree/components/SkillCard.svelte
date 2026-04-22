@@ -21,7 +21,7 @@
 
 	function getLevelColor(level: number): string {
 		const colors = [
-			'text-gray-400',
+			'text-muted-foreground',
 			'text-blue-400',
 			'text-purple-400',
 			'text-pink-400',
@@ -33,7 +33,7 @@
 </script>
 
 <div
-	class="skill-card group relative overflow-hidden rounded-xl border border-gray-700 bg-gray-800/50 p-4"
+	class="skill-card group relative overflow-hidden rounded-xl border border-border bg-card/50 p-4"
 >
 	<!-- Branch Indicator -->
 	<div
@@ -45,14 +45,14 @@
 	<div class="mb-3 flex items-start justify-between pl-3">
 		<div>
 			<h3 class="text-lg font-semibold text-white">{skill.name}</h3>
-			<p class="text-sm text-gray-400">{branchInfo.name}</p>
+			<p class="text-sm text-muted-foreground">{branchInfo.name}</p>
 		</div>
 		<div class="flex items-center gap-1">
 			{#each Array(skill.level) as _, i}
 				<Star class="h-4 w-4 fill-yellow-500 text-yellow-500" />
 			{/each}
 			{#each Array(5 - skill.level) as _, i}
-				<Star class="h-4 w-4 text-gray-600" />
+				<Star class="h-4 w-4 text-muted-foreground/70" />
 			{/each}
 		</div>
 	</div>
@@ -60,7 +60,7 @@
 	<!-- Level Badge -->
 	<div class="mb-3 pl-3">
 		<span
-			class="inline-flex items-center gap-1 rounded-full bg-gray-700/50 px-3 py-1 text-sm {getLevelColor(
+			class="inline-flex items-center gap-1 rounded-full bg-muted/50 px-3 py-1 text-sm {getLevelColor(
 				skill.level
 			)}"
 		>
@@ -71,8 +71,8 @@
 	<!-- XP Progress -->
 	<div class="mb-4 pl-3">
 		<div class="mb-1 flex justify-between text-sm">
-			<span class="text-gray-400">XP</span>
-			<span class="text-gray-300">
+			<span class="text-muted-foreground">XP</span>
+			<span class="text-foreground/90">
 				{skill.totalXp.toLocaleString()}
 				{#if !isMaxLevel}
 					/ {nextLevelXp.toLocaleString()}
@@ -86,7 +86,7 @@
 
 	<!-- Description -->
 	{#if skill.description}
-		<p class="mb-4 pl-3 text-sm text-gray-400 line-clamp-2">{skill.description}</p>
+		<p class="mb-4 pl-3 text-sm text-muted-foreground line-clamp-2">{skill.description}</p>
 	{/if}
 
 	<!-- Actions -->
@@ -100,7 +100,7 @@
 		</button>
 		<button
 			onclick={onEdit}
-			class="rounded-lg bg-gray-600/20 p-2 text-gray-400 opacity-0 transition-all hover:bg-gray-600/30 hover:text-white group-hover:opacity-100"
+			class="rounded-lg bg-muted/20 p-2 text-muted-foreground opacity-0 transition-all hover:bg-muted/30 hover:text-white group-hover:opacity-100"
 			title={$_('common.edit')}
 		>
 			<PencilSimple class="h-4 w-4" />

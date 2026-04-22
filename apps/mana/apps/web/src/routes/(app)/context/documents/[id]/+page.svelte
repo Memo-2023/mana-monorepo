@@ -135,7 +135,7 @@
 
 		<!-- Editor -->
 		<div
-			class="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800"
+			class="rounded-xl border border-border-strong bg-white p-6 dark:border-border dark:bg-card"
 		>
 			<!-- Title -->
 			<input
@@ -148,7 +148,7 @@
 
 			<!-- Type + Tags bar -->
 			<div
-				class="mb-4 flex flex-wrap items-center gap-3 border-b border-gray-100 pb-4 dark:border-gray-700"
+				class="mb-4 flex flex-wrap items-center gap-3 border-b border-border-strong pb-4 dark:border-border"
 			>
 				<div class="flex gap-1">
 					{#each typeOptions as opt}
@@ -156,7 +156,7 @@
 							class="rounded-md px-2.5 py-1 text-xs font-medium transition-colors {editType ===
 							opt.value
 								? 'bg-indigo-600 text-white'
-								: 'bg-gray-100 opacity-60 hover:opacity-100 dark:bg-gray-700'}"
+								: 'bg-muted opacity-60 hover:opacity-100 dark:bg-muted'}"
 							onclick={() => {
 								editType = opt.value;
 								scheduleAutoSave();
@@ -166,7 +166,7 @@
 						</button>
 					{/each}
 				</div>
-				<div class="h-4 w-px bg-gray-200 dark:bg-gray-600"></div>
+				<div class="h-4 w-px bg-muted dark:bg-muted"></div>
 				<input
 					type="text"
 					bind:value={editTags}
@@ -214,7 +214,7 @@
 		role="presentation"
 	>
 		<div
-			class="w-full max-w-sm rounded-xl bg-white p-6 shadow-2xl dark:bg-gray-800"
+			class="w-full max-w-sm rounded-xl bg-white p-6 shadow-2xl dark:bg-card"
 			onclick={(e) => e.stopPropagation()}
 			role="none"
 		>
@@ -223,7 +223,7 @@
 			<div class="mt-4 flex justify-end gap-2">
 				<button
 					onclick={() => (showDeleteConfirm = false)}
-					class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700"
+					class="rounded-lg border border-border-strong px-4 py-2 text-sm font-medium hover:bg-muted dark:border-border dark:hover:bg-muted"
 				>
 					Abbrechen
 				</button>

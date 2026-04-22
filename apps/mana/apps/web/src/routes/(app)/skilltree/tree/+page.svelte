@@ -59,14 +59,14 @@
 	<title>Skill Tree View - SkillTree</title>
 </svelte:head>
 
-<div class="min-h-screen bg-gray-900 text-white">
+<div class="min-h-screen bg-card text-white">
 	<!-- Header -->
-	<header class="border-b border-gray-800 bg-gray-900/80 backdrop-blur-sm sticky top-0 z-40">
+	<header class="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-40">
 		<div class="mx-auto max-w-7xl px-4 py-4">
 			<div class="flex items-center gap-4">
 				<a
 					href="/skilltree"
-					class="flex items-center gap-2 rounded-lg px-3 py-2 text-gray-400 transition-colors hover:bg-gray-800 hover:text-white"
+					class="flex items-center gap-2 rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:bg-card hover:text-white"
 				>
 					<ArrowLeft class="h-5 w-5" />
 					Zurück
@@ -79,7 +79,9 @@
 	<main class="p-4">
 		{#if skills.length === 0}
 			<div class="mt-16 text-center">
-				<p class="text-gray-400">Noch keine Skills vorhanden. Erstelle zuerst einige Skills!</p>
+				<p class="text-muted-foreground">
+					Noch keine Skills vorhanden. Erstelle zuerst einige Skills!
+				</p>
 				<a
 					href="/skilltree"
 					class="mt-4 inline-block rounded-lg bg-emerald-600 px-4 py-2 font-medium text-white hover:bg-emerald-500"
@@ -93,7 +95,7 @@
 				{#each Object.entries(BRANCH_INFO) as [branch, info]}
 					{@const count = skills.filter((s) => s.branch === branch).length}
 					{#if count > 0}
-						<div class="flex items-center gap-2 rounded-full bg-gray-800 px-3 py-1.5 text-sm">
+						<div class="flex items-center gap-2 rounded-full bg-card px-3 py-1.5 text-sm">
 							<span class="h-3 w-3 rounded-full" style="background-color: {info.color}"></span>
 							{info.name} ({count})
 						</div>
@@ -255,7 +257,7 @@
 						>
 							{level}
 						</div>
-						<span class="text-gray-400">{name}</span>
+						<span class="text-muted-foreground">{name}</span>
 					</div>
 				{/each}
 			</div>

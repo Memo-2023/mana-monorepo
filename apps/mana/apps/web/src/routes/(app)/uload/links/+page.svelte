@@ -122,7 +122,7 @@
 	}
 
 	const inputSmClass =
-		'w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700';
+		'w-full rounded-lg border border-border-strong bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none dark:border-border dark:bg-muted';
 </script>
 
 <svelte:head>
@@ -134,11 +134,7 @@
 		<!-- Header -->
 		<div class="mb-6 flex items-center justify-between">
 			<div class="flex items-center gap-3">
-				<a
-					href="/uload"
-					class="rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-700"
-					title="Zurueck"
-				>
+				<a href="/uload" class="rounded-lg p-2 hover:bg-muted dark:hover:bg-muted" title="Zurueck">
 					<ArrowLeft size={20} />
 				</a>
 				<div>
@@ -159,9 +155,9 @@
 							selectedIds = selectedIds;
 						}
 					}}
-					class="rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium transition-colors {selectMode
+					class="rounded-lg border border-border-strong px-3 py-2 text-sm font-medium transition-colors {selectMode
 						? 'bg-indigo-600 text-white'
-						: 'hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700'}"
+						: 'hover:bg-muted dark:border-border dark:hover:bg-muted'}"
 				>
 					{selectMode ? 'Fertig' : 'Auswaehlen'}
 				</button>
@@ -176,7 +172,7 @@
 					type="text"
 					bind:value={searchQuery}
 					placeholder="Links durchsuchen..."
-					class="w-60 rounded-lg border border-gray-300 bg-white py-2 pl-8 pr-3 text-sm focus:border-indigo-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
+					class="w-60 rounded-lg border border-border-strong bg-white py-2 pl-8 pr-3 text-sm focus:border-indigo-500 focus:outline-none dark:border-border dark:bg-muted"
 				/>
 			</div>
 			<select bind:value={selectedStatus} class={inputSmClass} style="max-width: 140px">
@@ -226,12 +222,12 @@
 		{#if allLinks.loading}
 			<div class="space-y-3">
 				{#each Array(5) as _}
-					<div class="h-20 animate-pulse rounded-xl bg-gray-100 dark:bg-gray-800"></div>
+					<div class="h-20 animate-pulse rounded-xl bg-muted dark:bg-card"></div>
 				{/each}
 			</div>
 		{:else if filteredLinks.length === 0}
 			<div
-				class="rounded-xl border-2 border-dashed border-gray-300 p-12 text-center dark:border-gray-600"
+				class="rounded-xl border-2 border-dashed border-border-strong p-12 text-center dark:border-border"
 			>
 				<LinkIcon size={48} class="mx-auto mb-4 opacity-20" />
 				<p class="text-lg font-medium opacity-60">Keine Links gefunden</p>
@@ -245,7 +241,7 @@
 			<div class="space-y-3">
 				{#each filteredLinks as link (link.id)}
 					<div
-						class="group rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition-all hover:shadow-md dark:border-gray-700 dark:bg-gray-800"
+						class="group rounded-xl border border-border-strong bg-white p-4 shadow-sm transition-all hover:shadow-md dark:border-border dark:bg-card"
 					>
 						<div class="flex items-center justify-between">
 							{#if selectMode}
@@ -261,7 +257,7 @@
 									<span
 										class="inline-block h-2 w-2 shrink-0 rounded-full {link.isActive
 											? 'bg-green-500'
-											: 'bg-gray-400'}"
+											: 'bg-muted'}"
 									></span>
 									<h3 class="truncate font-semibold">{link.title || link.shortCode}</h3>
 									<span
@@ -295,7 +291,7 @@
 							<div class="ml-4 flex items-center gap-1">
 								<a
 									href="/uload/analytics/{link.id}"
-									class="flex items-center gap-1 rounded-lg px-2 py-1.5 text-sm font-medium opacity-60 transition-all hover:bg-gray-100 hover:opacity-100 dark:hover:bg-gray-700"
+									class="flex items-center gap-1 rounded-lg px-2 py-1.5 text-sm font-medium opacity-60 transition-all hover:bg-muted hover:opacity-100 dark:hover:bg-muted"
 									title="Analytics"
 								>
 									<ChartBar size={16} />
@@ -303,17 +299,20 @@
 								</a>
 								<button
 									onclick={() => copyShortUrl(link.shortCode)}
-									class="rounded-lg p-2 opacity-0 transition-all hover:bg-gray-100 group-hover:opacity-100 dark:hover:bg-gray-700"
+									class="rounded-lg p-2 opacity-0 transition-all hover:bg-muted group-hover:opacity-100 dark:hover:bg-muted"
 									title="Link kopieren"
 								>
 									<Copy size={16} />
 								</button>
 								<button
 									onclick={() => toggleActive(link)}
-									class="rounded-lg p-2 opacity-0 transition-all hover:bg-gray-100 group-hover:opacity-100 dark:hover:bg-gray-700"
+									class="rounded-lg p-2 opacity-0 transition-all hover:bg-muted group-hover:opacity-100 dark:hover:bg-muted"
 									title={link.isActive ? 'Deaktivieren' : 'Aktivieren'}
 								>
-									<Lightning size={16} class={link.isActive ? 'text-green-500' : 'text-gray-400'} />
+									<Lightning
+										size={16}
+										class={link.isActive ? 'text-green-500' : 'text-muted-foreground'}
+									/>
 								</button>
 								<button
 									onclick={() => deleteLink(link)}

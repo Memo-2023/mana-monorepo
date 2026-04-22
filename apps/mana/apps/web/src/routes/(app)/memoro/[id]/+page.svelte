@@ -201,7 +201,7 @@
 					{tag.name}
 					<button
 						onclick={() => handleRemoveTag(tag.id)}
-						class="ml-0.5 rounded-full hover:bg-white/20"
+						class="ml-0.5 rounded-full hover:bg-muted/20"
 					>
 						<X size={12} />
 					</button>

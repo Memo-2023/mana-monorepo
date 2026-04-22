@@ -20,8 +20,10 @@
 	<Card>
 		<div class="py-12 text-center">
 			<span class="mb-4 block text-6xl">🏢</span>
-			<h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">No organizations yet</h3>
-			<p class="mb-6 text-sm text-gray-500 dark:text-gray-400">
+			<h3 class="mb-2 text-lg font-semibold text-foreground dark:text-white">
+				No organizations yet
+			</h3>
+			<p class="mb-6 text-sm text-muted-foreground dark:text-muted-foreground">
 				Create your first organization to get started
 			</p>
 			<Button variant="primary">Create Organization</Button>

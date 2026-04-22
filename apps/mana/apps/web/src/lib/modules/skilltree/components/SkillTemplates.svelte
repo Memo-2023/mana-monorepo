@@ -112,7 +112,7 @@
 	role="dialog"
 	aria-modal="true"
 >
-	<div class="w-full max-w-2xl rounded-2xl border border-gray-700 bg-gray-800 p-6 shadow-xl my-8">
+	<div class="w-full max-w-2xl rounded-2xl border border-border bg-card p-6 shadow-xl my-8">
 		<!-- Header -->
 		<div class="mb-6 flex items-center justify-between">
 			<div class="flex items-center gap-2">
@@ -121,13 +121,13 @@
 			</div>
 			<button
 				onclick={onClose}
-				class="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-700 hover:text-white"
+				class="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-white"
 			>
 				<X class="h-5 w-5" />
 			</button>
 		</div>
 
-		<p class="mb-6 text-gray-400">
+		<p class="mb-6 text-muted-foreground">
 			Starte schnell mit vorgefertigten Skill-Sets. Wähle eine Vorlage und füge einzelne Skills oder
 			alle auf einmal hinzu.
 		</p>
@@ -135,15 +135,15 @@
 		<!-- Template List -->
 		<div class="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
 			{#each Object.entries(templates) as [name, skills]}
-				<div class="rounded-xl border border-gray-700 bg-gray-900/50 overflow-hidden">
+				<div class="rounded-xl border border-border bg-card/50 overflow-hidden">
 					<!-- Template Header -->
-					<div class="flex items-center justify-between p-4 hover:bg-gray-800/50 transition-colors">
+					<div class="flex items-center justify-between p-4 hover:bg-card/50 transition-colors">
 						<button
 							onclick={() => (selectedTemplate = selectedTemplate === name ? null : name)}
 							class="flex-1 text-left"
 						>
 							<h3 class="font-semibold text-white">{name}</h3>
-							<p class="text-sm text-gray-400">{skills.length} Skills</p>
+							<p class="text-sm text-muted-foreground">{skills.length} Skills</p>
 						</button>
 						<div class="flex items-center gap-2">
 							<button
@@ -155,7 +155,7 @@
 							</button>
 							<button
 								onclick={() => (selectedTemplate = selectedTemplate === name ? null : name)}
-								class="text-gray-500 text-xl px-2"
+								class="text-muted-foreground text-xl px-2"
 							>
 								{selectedTemplate === name ? '−' : '+'}
 							</button>
@@ -164,10 +164,10 @@
 
 					<!-- Expanded Skills -->
 					{#if selectedTemplate === name}
-						<div class="border-t border-gray-700 p-4 space-y-2">
+						<div class="border-t border-border p-4 space-y-2">
 							{#each skills as skill}
 								{@const isAdded = addedSkills.has(skill.name)}
-								<div class="flex items-center justify-between rounded-lg bg-gray-800/50 px-3 py-2">
+								<div class="flex items-center justify-between rounded-lg bg-card/50 px-3 py-2">
 									<div class="flex items-center gap-3">
 										<span
 											class="h-3 w-3 rounded-full"
@@ -175,7 +175,7 @@
 										></span>
 										<div>
 											<span class="font-medium text-white">{skill.name}</span>
-											<span class="text-gray-400 text-sm"> - {skill.description}</span>
+											<span class="text-muted-foreground text-sm"> - {skill.description}</span>
 										</div>
 									</div>
 									<button
@@ -183,7 +183,7 @@
 										disabled={isAdded || adding}
 										class="rounded-lg p-1.5 transition-colors {isAdded
 											? 'bg-emerald-600/20 text-emerald-400'
-											: 'bg-gray-700 text-gray-300 hover:bg-gray-600'}"
+											: 'bg-muted text-foreground/90 hover:bg-muted'}"
 									>
 										{#if isAdded}
 											<Check size={16} />
@@ -203,7 +203,7 @@
 		<div class="mt-6 flex justify-end">
 			<button
 				onclick={onClose}
-				class="rounded-lg bg-gray-700 px-4 py-2 font-medium text-white transition-colors hover:bg-gray-600"
+				class="rounded-lg bg-muted px-4 py-2 font-medium text-white transition-colors hover:bg-muted"
 			>
 				Fertig
 			</button>

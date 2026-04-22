@@ -105,7 +105,7 @@
 					>
 						<h3 class="font-semibold text-white truncate">{plant.name}</h3>
 						{#if plant.commonName}
-							<p class="text-xs text-white/70 truncate">{plant.commonName}</p>
+							<p class="text-xs text-foreground truncate">{plant.commonName}</p>
 						{/if}
 						{#if getWateringText(plant.id)}
 							<div class="water-status {getWateringClass(plant.id)} mt-1">

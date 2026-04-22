@@ -42,13 +42,13 @@
 
 <div class="min-h-screen">
 	<!-- Header -->
-	<header class="border-b border-gray-800 bg-gray-900/80 backdrop-blur-sm sticky top-0 z-40">
+	<header class="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-40">
 		<div class="mx-auto max-w-7xl px-4 py-4">
 			<div class="flex items-center justify-between">
 				<div class="flex items-center gap-3">
 					<a
 						href="/skilltree"
-						class="flex items-center gap-2 rounded-lg px-3 py-2 text-gray-400 transition-colors hover:bg-gray-800 hover:text-white"
+						class="flex items-center gap-2 rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:bg-card hover:text-white"
 					>
 						<ArrowLeft class="h-5 w-5" />
 					</a>
@@ -71,12 +71,12 @@
 
 	<main class="mx-auto max-w-7xl px-4 py-8">
 		<!-- Progress overview -->
-		<div class="mb-8 rounded-xl border border-gray-700 bg-gray-800/50 p-6">
+		<div class="mb-8 rounded-xl border border-border bg-card/50 p-6">
 			<div class="flex items-center justify-between mb-3">
 				<h2 class="text-lg font-semibold text-white">Fortschritt</h2>
 				<span class="text-2xl font-bold text-yellow-400">{completion}%</span>
 			</div>
-			<div class="h-3 overflow-hidden rounded-full bg-gray-700">
+			<div class="h-3 overflow-hidden rounded-full bg-muted">
 				<div
 					class="h-full rounded-full bg-gradient-to-r from-yellow-500 to-yellow-400 transition-all duration-500"
 					style="width: {completion}%"
@@ -100,8 +100,8 @@
 				onclick={() => (selectedCategory = 'all')}
 				class="rounded-full px-4 py-2 text-sm font-medium transition-colors {selectedCategory ===
 				'all'
-					? 'bg-yellow-500 text-gray-900'
-					: 'bg-gray-800 text-gray-300 hover:bg-gray-700'}"
+					? 'bg-yellow-500 text-foreground'
+					: 'bg-card text-foreground/90 hover:bg-muted'}"
 			>
 				Alle ({achievements.length})
 			</button>
@@ -111,8 +111,8 @@
 					onclick={() => (selectedCategory = category)}
 					class="rounded-full px-4 py-2 text-sm font-medium transition-colors {selectedCategory ===
 					category
-						? 'bg-yellow-500 text-gray-900'
-						: 'bg-gray-800 text-gray-300 hover:bg-gray-700'}"
+						? 'bg-yellow-500 text-foreground'
+						: 'bg-card text-foreground/90 hover:bg-muted'}"
 				>
 					{info.name} ({count})
 				</button>
@@ -123,7 +123,7 @@
 					onclick={() => (showOnlyUnlocked = !showOnlyUnlocked)}
 					class="rounded-full px-4 py-2 text-sm font-medium transition-colors {showOnlyUnlocked
 						? 'bg-yellow-500/20 text-yellow-400'
-						: 'bg-gray-800 text-gray-300 hover:bg-gray-700'}"
+						: 'bg-card text-foreground/90 hover:bg-muted'}"
 				>
 					{showOnlyUnlocked ? 'Nur freigeschaltete' : 'Alle zeigen'}
 				</button>
@@ -133,13 +133,11 @@
 		<!-- Achievement grid -->
 		{#if filteredAchievements().length === 0}
 			<div class="mt-16 text-center">
-				<div
-					class="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-gray-800"
-				>
-					<Trophy class="h-12 w-12 text-gray-600" />
+				<div class="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-card">
+					<Trophy class="h-12 w-12 text-muted-foreground/70" />
 				</div>
-				<h2 class="mb-2 text-xl font-semibold text-gray-300">Keine Achievements gefunden</h2>
-				<p class="text-gray-500">
+				<h2 class="mb-2 text-xl font-semibold text-foreground/90">Keine Achievements gefunden</h2>
+				<p class="text-muted-foreground">
 					{showOnlyUnlocked
 						? 'Du hast in dieser Kategorie noch keine Achievements freigeschaltet.'
 						: 'Keine Achievements in dieser Kategorie.'}

@@ -116,7 +116,7 @@
 
 <svelte:head><title>Presenting: {currentDeck?.title || 'Loading...'}</title></svelte:head>
 
-<div class="fixed inset-0 bg-slate-900 text-white flex flex-col">
+<div class="fixed inset-0 bg-card text-white flex flex-col">
 	{#if currentSlide}
 		<div
 			class="absolute top-0 left-0 right-0 z-10 p-4 flex items-center justify-between bg-gradient-to-b from-black/50 to-transparent transition-opacity duration-300"
@@ -125,18 +125,18 @@
 		>
 			<div class="flex items-center gap-4">
 				<h1 class="text-lg font-medium truncate max-w-xs">{currentDeck?.title}</h1>
-				<span class="text-sm text-slate-400"
+				<span class="text-sm text-muted-foreground"
 					>Slide {currentSlideIndex + 1} of {currentSlides.length}</span
 				>
 			</div>
-			<button onclick={exitPresentation} class="p-2 hover:bg-white/10 rounded-lg transition-colors"
+			<button onclick={exitPresentation} class="p-2 hover:bg-muted/10 rounded-lg transition-colors"
 				><X class="w-6 h-6" /></button
 			>
 		</div>
 
 		<div class="flex-1 flex items-center justify-center p-8 pt-20 pb-32">
 			<div
-				class="w-full max-w-6xl aspect-video bg-slate-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col items-center justify-center p-12"
+				class="w-full max-w-6xl aspect-video bg-card rounded-2xl shadow-2xl overflow-hidden flex flex-col items-center justify-center p-12"
 			>
 				{#if currentSlide.content.imageUrl}
 					<img
@@ -151,7 +151,7 @@
 							>
 								{currentSlide.content.title}
 							</h2>{/if}
-						{#if currentSlide.content.body}<p class="text-xl md:text-2xl text-slate-300 mb-8">
+						{#if currentSlide.content.body}<p class="text-xl md:text-2xl text-foreground/90 mb-8">
 								{currentSlide.content.body}
 							</p>{/if}
 						{#if currentSlide.content.bulletPoints?.length}
@@ -175,10 +175,10 @@
 		>
 			<div class="max-w-4xl mx-auto flex items-center justify-between">
 				<div class="flex items-center gap-4">
-					<button onclick={toggleTimer} class="p-2 hover:bg-white/10 rounded-lg transition-colors">
+					<button onclick={toggleTimer} class="p-2 hover:bg-muted/10 rounded-lg transition-colors">
 						{#if isTimerRunning}<Pause class="w-5 h-5" />{:else}<Play class="w-5 h-5" />{/if}
 					</button>
-					<div class="flex items-center gap-2 text-slate-300">
+					<div class="flex items-center gap-2 text-foreground/90">
 						<Clock class="w-4 h-4" /><span class="font-mono">{formatTime(elapsedSeconds)}</span>
 					</div>
 				</div>
@@ -186,7 +186,7 @@
 					<button
 						onclick={prevSlide}
 						disabled={currentSlideIndex === 0}
-						class="p-3 hover:bg-white/10 rounded-lg transition-colors disabled:opacity-30"
+						class="p-3 hover:bg-muted/10 rounded-lg transition-colors disabled:opacity-30"
 						><CaretLeft class="w-6 h-6" /></button
 					>
 					<div class="flex items-center gap-2 px-4">
@@ -197,27 +197,27 @@
 								class="w-2 h-2 rounded-full transition-all"
 								class:bg-primary-500={index === currentSlideIndex}
 								class:w-4={index === currentSlideIndex}
-								class:bg-slate-500={index !== currentSlideIndex}
+								class:bg-muted={index !== currentSlideIndex}
 							></button>
 						{/each}
 					</div>
 					<button
 						onclick={nextSlide}
 						disabled={currentSlideIndex === currentSlides.length - 1}
-						class="p-3 hover:bg-white/10 rounded-lg transition-colors disabled:opacity-30"
+						class="p-3 hover:bg-muted/10 rounded-lg transition-colors disabled:opacity-30"
 						><CaretRight class="w-6 h-6" /></button
 					>
 				</div>
 				<div class="flex items-center gap-2">
 					<button
 						onclick={() => (showNotes = !showNotes)}
-						class="p-2 hover:bg-white/10 rounded-lg transition-colors"
+						class="p-2 hover:bg-muted/10 rounded-lg transition-colors"
 					>
 						{#if showNotes}<EyeSlash class="w-5 h-5" />{:else}<Eye class="w-5 h-5" />{/if}
 					</button>
 					<button
 						onclick={toggleFullscreen}
-						class="p-2 hover:bg-white/10 rounded-lg transition-colors"
+						class="p-2 hover:bg-muted/10 rounded-lg transition-colors"
 					>
 						{#if isFullscreen}<ArrowsIn class="w-5 h-5" />{:else}<ArrowsOut class="w-5 h-5" />{/if}
 					</button>
@@ -226,7 +226,7 @@
 		</div>
 	{:else}
 		<div class="flex-1 flex items-center justify-center">
-			<p class="text-slate-400">No slides in this deck</p>
+			<p class="text-muted-foreground">No slides in this deck</p>
 		</div>
 	{/if}
 </div>

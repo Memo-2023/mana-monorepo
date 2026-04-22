@@ -248,9 +248,9 @@
 	}
 
 	const inputClass =
-		'w-full rounded-lg border border-gray-300 bg-white px-4 py-3 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200 dark:border-gray-600 dark:bg-gray-700';
+		'w-full rounded-lg border border-border-strong bg-white px-4 py-3 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200 dark:border-border dark:bg-muted';
 	const inputSmClass =
-		'w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700';
+		'w-full rounded-lg border border-border-strong bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none dark:border-border dark:bg-muted';
 </script>
 
 <svelte:head>
@@ -273,7 +273,7 @@
 			<div class="flex items-center gap-2">
 				<a
 					href="/uload/links"
-					class="rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700"
+					class="rounded-lg border border-border-strong px-3 py-2 text-sm font-medium hover:bg-muted dark:border-border dark:hover:bg-muted"
 				>
 					Alle Links
 				</a>
@@ -289,7 +289,7 @@
 		<!-- Create Form -->
 		{#if showCreateForm}
 			<div
-				class="mb-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800"
+				class="mb-6 rounded-xl border border-border-strong bg-white p-6 shadow-sm dark:border-border dark:bg-card"
 			>
 				<div class="grid gap-4 md:grid-cols-2">
 					<div class="md:col-span-2">
@@ -447,7 +447,7 @@
 					type="text"
 					bind:value={searchQuery}
 					placeholder="Links durchsuchen..."
-					class="w-60 rounded-lg border border-gray-300 bg-white py-2 pl-8 pr-3 text-sm focus:border-indigo-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
+					class="w-60 rounded-lg border border-border-strong bg-white py-2 pl-8 pr-3 text-sm focus:border-indigo-500 focus:outline-none dark:border-border dark:bg-muted"
 				/>
 			</div>
 			<select bind:value={selectedStatus} class={inputSmClass} style="max-width: 140px">
@@ -469,12 +469,12 @@
 		{#if allLinks.loading}
 			<div class="space-y-3">
 				{#each Array(3) as _}
-					<div class="h-20 animate-pulse rounded-xl bg-gray-100 dark:bg-gray-800"></div>
+					<div class="h-20 animate-pulse rounded-xl bg-muted dark:bg-card"></div>
 				{/each}
 			</div>
 		{:else if filteredLinks.length === 0}
 			<div
-				class="rounded-xl border-2 border-dashed border-gray-300 p-12 text-center dark:border-gray-600"
+				class="rounded-xl border-2 border-dashed border-border-strong p-12 text-center dark:border-border"
 			>
 				<LinkIcon size={48} class="mx-auto mb-4 opacity-20" />
 				<p class="text-lg font-medium opacity-60">Noch keine Links</p>
@@ -490,7 +490,7 @@
 			<div class="space-y-3">
 				{#each filteredLinks as link (link.id)}
 					<div
-						class="group rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition-all hover:shadow-md dark:border-gray-700 dark:bg-gray-800"
+						class="group rounded-xl border border-border-strong bg-white p-4 shadow-sm transition-all hover:shadow-md dark:border-border dark:bg-card"
 					>
 						<div class="flex items-center justify-between">
 							<div class="min-w-0 flex-1">
@@ -498,7 +498,7 @@
 									<span
 										class="inline-block h-2 w-2 shrink-0 rounded-full {link.isActive
 											? 'bg-green-500'
-											: 'bg-gray-400'}"
+											: 'bg-muted'}"
 									></span>
 									<h3 class="truncate font-semibold">{link.title || link.shortCode}</h3>
 									<span
@@ -545,7 +545,7 @@
 							<div class="ml-4 flex items-center gap-1">
 								<a
 									href="/uload/analytics/{link.id}"
-									class="flex items-center gap-1 rounded-lg px-2 py-1.5 text-sm font-medium opacity-60 transition-all hover:bg-gray-100 hover:opacity-100 dark:hover:bg-gray-700"
+									class="flex items-center gap-1 rounded-lg px-2 py-1.5 text-sm font-medium opacity-60 transition-all hover:bg-muted hover:opacity-100 dark:hover:bg-muted"
 									title="Analytics"
 								>
 									<ChartBar size={16} />
@@ -553,31 +553,34 @@
 								</a>
 								<button
 									onclick={() => copyShortUrl(link.shortCode)}
-									class="rounded-lg p-2 opacity-0 transition-all hover:bg-gray-100 group-hover:opacity-100 dark:hover:bg-gray-700"
+									class="rounded-lg p-2 opacity-0 transition-all hover:bg-muted group-hover:opacity-100 dark:hover:bg-muted"
 									title="Link kopieren"
 								>
 									<Copy size={16} />
 								</button>
 								<button
 									onclick={() => (qrLink = link)}
-									class="rounded-lg p-2 opacity-0 transition-all hover:bg-gray-100 group-hover:opacity-100 dark:hover:bg-gray-700"
+									class="rounded-lg p-2 opacity-0 transition-all hover:bg-muted group-hover:opacity-100 dark:hover:bg-muted"
 									title="QR-Code"
 								>
 									<QrCode size={16} />
 								</button>
 								<button
 									onclick={() => openEdit(link)}
-									class="rounded-lg p-2 opacity-0 transition-all hover:bg-gray-100 group-hover:opacity-100 dark:hover:bg-gray-700"
+									class="rounded-lg p-2 opacity-0 transition-all hover:bg-muted group-hover:opacity-100 dark:hover:bg-muted"
 									title={$_('common.edit')}
 								>
 									<PencilSimple size={16} />
 								</button>
 								<button
 									onclick={() => toggleActive(link)}
-									class="rounded-lg p-2 opacity-0 transition-all hover:bg-gray-100 group-hover:opacity-100 dark:hover:bg-gray-700"
+									class="rounded-lg p-2 opacity-0 transition-all hover:bg-muted group-hover:opacity-100 dark:hover:bg-muted"
 									title={link.isActive ? 'Deaktivieren' : 'Aktivieren'}
 								>
-									<Lightning size={16} class={link.isActive ? 'text-green-500' : 'text-gray-400'} />
+									<Lightning
+										size={16}
+										class={link.isActive ? 'text-green-500' : 'text-muted-foreground'}
+									/>
 								</button>
 								<button
 									onclick={() => deleteLink(link)}
@@ -605,7 +608,7 @@
 		role="presentation"
 	>
 		<div
-			class="w-full max-w-lg rounded-xl bg-white p-6 shadow-2xl dark:bg-gray-800"
+			class="w-full max-w-lg rounded-xl bg-white p-6 shadow-2xl dark:bg-card"
 			onclick={(e) => e.stopPropagation()}
 			role="none"
 		>
@@ -613,7 +616,7 @@
 				<h3 class="text-lg font-semibold">Link bearbeiten</h3>
 				<button
 					onclick={() => (editingLink = null)}
-					class="rounded-lg p-1 hover:bg-gray-100 dark:hover:bg-gray-700"
+					class="rounded-lg p-1 hover:bg-muted dark:hover:bg-muted"
 				>
 					<X size={20} />
 				</button>
@@ -636,7 +639,7 @@
 					</div>
 				</div>
 
-				<div class="border-t border-gray-200 pt-4 dark:border-gray-700">
+				<div class="border-t border-border-strong pt-4 dark:border-border">
 					<p class="mb-2 text-sm font-medium opacity-70">UTM-Parameter</p>
 					<div class="grid gap-3 md:grid-cols-3">
 						<input
@@ -660,7 +663,7 @@
 					</div>
 				</div>
 
-				<div class="border-t border-gray-200 pt-4 dark:border-gray-700">
+				<div class="border-t border-border-strong pt-4 dark:border-border">
 					<p class="mb-2 text-sm font-medium opacity-70">Erweitert</p>
 					<div class="grid gap-3 md:grid-cols-3">
 						<div>
@@ -701,7 +704,7 @@
 			<div class="mt-6 flex justify-end gap-2">
 				<button
 					onclick={() => (editingLink = null)}
-					class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700"
+					class="rounded-lg border border-border-strong px-4 py-2 text-sm font-medium hover:bg-muted dark:border-border dark:hover:bg-muted"
 				>
 					Abbrechen
 				</button>
@@ -727,7 +730,7 @@
 		role="presentation"
 	>
 		<div
-			class="w-full max-w-sm rounded-xl bg-white p-6 shadow-2xl dark:bg-gray-800"
+			class="w-full max-w-sm rounded-xl bg-white p-6 shadow-2xl dark:bg-card"
 			onclick={(e) => e.stopPropagation()}
 			role="none"
 		>
@@ -735,7 +738,7 @@
 				<h3 class="text-lg font-semibold">QR-Code</h3>
 				<button
 					onclick={() => (qrLink = null)}
-					class="rounded-lg p-1 hover:bg-gray-100 dark:hover:bg-gray-700"
+					class="rounded-lg p-1 hover:bg-muted dark:hover:bg-muted"
 				>
 					<X size={20} />
 				</button>
@@ -753,7 +756,7 @@
 				<div class="flex w-full gap-2">
 					<button
 						onclick={() => copyShortUrl(qrLink!.shortCode)}
-						class="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700"
+						class="flex-1 rounded-lg border border-border-strong px-4 py-2 text-sm font-medium hover:bg-muted dark:border-border dark:hover:bg-muted"
 					>
 						Link kopieren
 					</button>

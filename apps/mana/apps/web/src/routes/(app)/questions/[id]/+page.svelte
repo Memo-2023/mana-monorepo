@@ -130,7 +130,7 @@
 	const statusLabels: Record<string, { label: string; color: string }> = {
 		open: {
 			label: 'Offen',
-			color: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
+			color: 'bg-muted text-muted-foreground dark:bg-card dark:text-foreground/90',
 		},
 		researching: {
 			label: 'Recherche',
@@ -142,7 +142,7 @@
 		},
 		archived: {
 			label: 'Archiviert',
-			color: 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400',
+			color: 'bg-muted text-muted-foreground dark:bg-card dark:text-muted-foreground',
 		},
 	};
 

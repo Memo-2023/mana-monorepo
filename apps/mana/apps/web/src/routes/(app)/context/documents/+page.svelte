@@ -106,7 +106,7 @@
 				<button
 					class="rounded-lg px-3 py-1.5 text-sm transition-colors {typeFilter === filter.value
 						? 'bg-indigo-600 text-white'
-						: 'opacity-60 hover:bg-gray-100 dark:hover:bg-gray-700'}"
+						: 'opacity-60 hover:bg-muted dark:hover:bg-muted'}"
 					onclick={() => (typeFilter = filter.value)}
 				>
 					{filter.label}
@@ -129,7 +129,7 @@
 				type="text"
 				bind:value={searchQuery}
 				placeholder="Dokumente durchsuchen..."
-				class="w-full rounded-lg border border-gray-300 bg-white py-2 pl-8 pr-3 text-sm focus:border-indigo-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
+				class="w-full rounded-lg border border-border-strong bg-white py-2 pl-8 pr-3 text-sm focus:border-indigo-500 focus:outline-none dark:border-border dark:bg-muted"
 			/>
 		</div>
 	</div>
@@ -141,7 +141,7 @@
 				<button
 					class="rounded-full px-2 py-1 text-xs transition-colors {tagFilter.includes(tag)
 						? 'bg-indigo-600 text-white'
-						: 'bg-gray-100 opacity-60 hover:opacity-100 dark:bg-gray-700'}"
+						: 'bg-muted opacity-60 hover:opacity-100 dark:bg-muted'}"
 					onclick={() => toggleTag(tag)}
 				>
 					{tag}
@@ -155,7 +155,7 @@
 		<div class="grid grid-cols-1 gap-3 md:grid-cols-2">
 			{#each filteredDocuments as doc (doc.id)}
 				<div
-					class="group rounded-xl border border-gray-200 bg-white p-4 transition-all hover:shadow-md dark:border-gray-700 dark:bg-gray-800"
+					class="group rounded-xl border border-border-strong bg-white p-4 transition-all hover:shadow-md dark:border-border dark:bg-card"
 				>
 					<div class="flex items-start justify-between">
 						<a href="/context/documents/{doc.id}" class="min-w-0 flex-1">
@@ -186,7 +186,7 @@
 						>
 							<button
 								onclick={() => handleTogglePin(doc.id)}
-								class="rounded p-1 hover:bg-gray-100 dark:hover:bg-gray-700"
+								class="rounded p-1 hover:bg-muted dark:hover:bg-muted"
 								title={doc.pinned ? 'Loslassen' : 'Anheften'}
 							>
 								{doc.pinned ? '&#9733;' : '&#9734;'}
@@ -203,7 +203,7 @@
 					<div class="mt-2 flex items-center gap-3 text-xs opacity-40">
 						{#if doc.metadata?.tags && doc.metadata.tags.length > 0}
 							{#each doc.metadata.tags.slice(0, 3) as tag}
-								<span class="rounded bg-gray-100 px-1.5 py-0.5 dark:bg-gray-700">{tag}</span>
+								<span class="rounded bg-muted px-1.5 py-0.5 dark:bg-muted">{tag}</span>
 							{/each}
 						{/if}
 						<span class="ml-auto">
@@ -222,7 +222,7 @@
 		</div>
 	{:else}
 		<div
-			class="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-300 py-16 text-center dark:border-gray-600"
+			class="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-border-strong py-16 text-center dark:border-border"
 		>
 			<FileText size={48} class="mb-4 opacity-20" />
 			<h2 class="text-lg font-medium opacity-60">Noch keine Dokumente</h2>
@@ -250,7 +250,7 @@
 		role="presentation"
 	>
 		<div
-			class="w-full max-w-sm rounded-xl bg-white p-6 shadow-2xl dark:bg-gray-800"
+			class="w-full max-w-sm rounded-xl bg-white p-6 shadow-2xl dark:bg-card"
 			onclick={(e) => e.stopPropagation()}
 			role="none"
 		>
@@ -259,7 +259,7 @@
 			<div class="mt-4 flex justify-end gap-2">
 				<button
 					onclick={() => (deleteTarget = null)}
-					class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700"
+					class="rounded-lg border border-border-strong px-4 py-2 text-sm font-medium hover:bg-muted dark:border-border dark:hover:bg-muted"
 				>
 					Abbrechen
 				</button>

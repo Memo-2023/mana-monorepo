@@ -125,9 +125,8 @@
 	}
 
 	async function handleExport() {
-		const { skillTable, activityTable, achievementTable } = await import(
-			'$lib/modules/skilltree/collections'
-		);
+		const { skillTable, activityTable, achievementTable } =
+			await import('$lib/modules/skilltree/collections');
 		const [allSkillsData, allActivitiesData, allAchievementsData] = await Promise.all([
 			skillTable.toArray(),
 			activityTable.toArray(),
@@ -159,9 +158,8 @@
 			try {
 				const text = await file.text();
 				const data = JSON.parse(text);
-				const { skillTable, activityTable, achievementTable } = await import(
-					'$lib/modules/skilltree/collections'
-				);
+				const { skillTable, activityTable, achievementTable } =
+					await import('$lib/modules/skilltree/collections');
 				if (data.skills) await skillTable.bulkPut(data.skills);
 				if (data.activities) await activityTable.bulkPut(data.activities);
 				if (data.achievements) await achievementTable.bulkPut(data.achievements);
@@ -181,7 +179,7 @@
 
 <div class="min-h-screen">
 	<!-- Header -->
-	<header class="border-b border-gray-800 bg-gray-900/80 backdrop-blur-sm sticky top-0 z-40">
+	<header class="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-40">
 		<div class="mx-auto max-w-7xl px-4 py-4">
 			<div class="flex items-center justify-between">
 				<div class="flex items-center gap-3">
@@ -192,13 +190,13 @@
 					<!-- Achievements -->
 					<a
 						href="/skilltree/achievements"
-						class="relative rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-800 hover:text-yellow-400"
+						class="relative rounded-lg p-2 text-muted-foreground transition-colors hover:bg-card hover:text-yellow-400"
 						title="Achievements"
 					>
 						<Trophy class="h-5 w-5" />
 						{#if achievementStats.unlocked > 0}
 							<span
-								class="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-yellow-500 text-[10px] font-bold text-gray-900"
+								class="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-yellow-500 text-[10px] font-bold text-foreground"
 							>
 								{achievementStats.unlocked}
 							</span>
@@ -207,7 +205,7 @@
 					<!-- Tree View -->
 					<a
 						href="/skilltree/tree"
-						class="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-800 hover:text-emerald-400"
+						class="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-card hover:text-emerald-400"
 						title="Skill-Tree Ansicht"
 					>
 						<Graph class="h-5 w-5" />
@@ -215,7 +213,7 @@
 					<!-- Templates -->
 					<button
 						onclick={() => (showTemplatesModal = true)}
-						class="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-800 hover:text-yellow-500"
+						class="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-card hover:text-yellow-500"
 						title="Skill-Vorlagen"
 					>
 						<Sparkle class="h-5 w-5" />
@@ -223,14 +221,14 @@
 					<!-- Export/Import -->
 					<button
 						onclick={handleExport}
-						class="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-800 hover:text-white"
+						class="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-card hover:text-white"
 						title="Daten exportieren"
 					>
 						<DownloadSimple class="h-5 w-5" />
 					</button>
 					<button
 						onclick={handleImport}
-						class="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-800 hover:text-white"
+						class="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-card hover:text-white"
 						title="Daten importieren"
 					>
 						<UploadSimple class="h-5 w-5" />
@@ -260,7 +258,7 @@
 					class="rounded-full px-4 py-2 text-sm font-medium transition-colors {selectedBranch ===
 					'all'
 						? 'bg-emerald-600 text-white'
-						: 'bg-gray-800 text-gray-300 hover:bg-gray-700'}"
+						: 'bg-card text-foreground/90 hover:bg-muted'}"
 				>
 					Alle ({skills.length})
 				</button>
@@ -272,7 +270,7 @@
 							class="rounded-full px-4 py-2 text-sm font-medium transition-colors {selectedBranch ===
 							branch
 								? 'bg-emerald-600 text-white'
-								: 'bg-gray-800 text-gray-300 hover:bg-gray-700'}"
+								: 'bg-card text-foreground/90 hover:bg-muted'}"
 						>
 							{info.name} ({count})
 						</button>
@@ -284,13 +282,13 @@
 		<!-- Skills Grid -->
 		{#if filteredSkills.length === 0}
 			<div class="mt-16 text-center">
-				<div
-					class="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-gray-800"
-				>
-					<Tree class="h-12 w-12 text-gray-600" />
+				<div class="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-card">
+					<Tree class="h-12 w-12 text-muted-foreground/70" />
 				</div>
-				<h2 class="mb-2 text-xl font-semibold text-gray-300">Noch keine Skills</h2>
-				<p class="mb-6 text-gray-500">Füge deinen ersten Skill hinzu und beginne dein Abenteuer!</p>
+				<h2 class="mb-2 text-xl font-semibold text-foreground/90">Noch keine Skills</h2>
+				<p class="mb-6 text-muted-foreground">
+					Füge deinen ersten Skill hinzu und beginne dein Abenteuer!
+				</p>
 				<button
 					onclick={() => (showAddSkillModal = true)}
 					class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-6 py-3 font-medium text-white transition-colors hover:bg-emerald-500"
@@ -323,7 +321,7 @@
 					{#each getRecentActivities(activities).slice(0, 5) as activity}
 						{@const skill = getSkillById(skills, activity.skillId)}
 						{#if skill}
-							<div class="flex items-center justify-between rounded-lg bg-gray-800/50 px-4 py-3">
+							<div class="flex items-center justify-between rounded-lg bg-card/50 px-4 py-3">
 								<div class="flex items-center gap-3">
 									<div
 										class="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-900/50 text-sm font-medium text-emerald-400"
@@ -332,10 +330,10 @@
 									</div>
 									<div>
 										<span class="font-medium text-white">{skill.name}</span>
-										<span class="text-gray-400"> - {activity.description}</span>
+										<span class="text-muted-foreground"> - {activity.description}</span>
 									</div>
 								</div>
-								<span class="text-sm text-gray-500">
+								<span class="text-sm text-muted-foreground">
 									{new Date(activity.timestamp).toLocaleDateString('de-DE')}
 								</span>
 							</div>

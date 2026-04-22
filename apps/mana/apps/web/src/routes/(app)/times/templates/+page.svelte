@@ -157,7 +157,7 @@
 							style="background-color: {project.color}"
 						></div>
 					{:else}
-						<div class="h-3 w-3 shrink-0 rounded-full bg-gray-400"></div>
+						<div class="h-3 w-3 shrink-0 rounded-full bg-muted"></div>
 					{/if}
 					<div class="min-w-0 flex-1">
 						<p class="text-sm font-medium text-[hsl(var(--color-foreground))]">{template.name}</p>
