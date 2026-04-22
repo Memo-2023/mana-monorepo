@@ -25,6 +25,35 @@ import type {
 } from './types';
 import { toUserTagPreset } from './types';
 
+// Minimal duck-typed local shapes for the tag tables. Full types live
+// in @mana/shared-stores but the fields we write are a strict subset —
+// importing the shared-stores type from a data-layer module would create
+// an awkward dependency direction.
+interface LocalTagShape {
+	id: string;
+	spaceId: string;
+	userId?: string;
+	name: string;
+	color: string;
+	icon?: string | null;
+	groupId?: string | null;
+	sortOrder: number;
+	createdAt: string;
+	updatedAt: string;
+}
+
+interface LocalTagGroupShape {
+	id: string;
+	spaceId: string;
+	userId?: string;
+	name: string;
+	color: string;
+	icon?: string | null;
+	sortOrder: number;
+	createdAt: string;
+	updatedAt: string;
+}
+
 const table = db.table<LocalUserTagPreset>('userTagPresets');
 
 function now(): string {
@@ -107,5 +136,153 @@ export const tagPresetsStore = {
 		const [decrypted] = await decryptRecords('userTagPresets', [existing]);
 		const next = [...(decrypted?.tags ?? []), entry];
 		await this.updatePreset(id, { tags: next });
+	},
+
+	/**
+	 * One-shot-copy a preset's entries into a target Space as fresh
+	 * globalTags rows (+ tagGroups for each distinct groupName). No
+	 * live link — renaming the preset afterwards does not rename the
+	 * applied tags. Returns the number of tags created.
+	 *
+	 * Stamps `spaceId` explicitly on every written row so the write
+	 * lands in the target Space even if the user's active-space
+	 * context is still the source Space when this runs (SpaceCreateDialog
+	 * flow: create Space → apply preset → activate Space → reload).
+	 */
+	async applyPresetToSpace(presetId: string, targetSpaceId: string): Promise<number> {
+		const existing = await table.get(presetId);
+		if (!existing) throw new Error(`Preset ${presetId} not found`);
+		const [decrypted] = await decryptRecords('userTagPresets', [existing]);
+		if (!decrypted) return 0;
+
+		const userId = getEffectiveUserId();
+		const timestamp = now();
+
+		// Build a groupName → new groupId map so multiple tag entries
+		// sharing the same groupName land in the same freshly-created
+		// tagGroups row.
+		const groupMap = new Map<string, string>();
+		const groupsToWrite: LocalTagGroupShape[] = [];
+		for (const entry of decrypted.tags ?? []) {
+			if (!entry.groupName || groupMap.has(entry.groupName)) continue;
+			const groupId = crypto.randomUUID();
+			groupMap.set(entry.groupName, groupId);
+			groupsToWrite.push({
+				id: groupId,
+				spaceId: targetSpaceId,
+				userId,
+				name: entry.groupName,
+				color: '#6b7280',
+				icon: null,
+				sortOrder: groupMap.size - 1,
+				createdAt: timestamp,
+				updatedAt: timestamp,
+			});
+		}
+
+		const tagsToWrite: LocalTagShape[] = [];
+		let sortOrder = 0;
+		for (const entry of decrypted.tags ?? []) {
+			tagsToWrite.push({
+				id: crypto.randomUUID(),
+				spaceId: targetSpaceId,
+				userId,
+				name: entry.name,
+				color: entry.color,
+				icon: entry.icon ?? null,
+				groupId: entry.groupName ? (groupMap.get(entry.groupName) ?? null) : null,
+				sortOrder: sortOrder++,
+				createdAt: timestamp,
+				updatedAt: timestamp,
+			});
+		}
+
+		// Encrypt + write each row. The Dexie creating-hook stamps
+		// __lastActor / __fieldActors automatically; spaceId is
+		// pre-populated here so the hook leaves it alone.
+		await db.transaction('rw', db.table('globalTags'), db.table('tagGroups'), async () => {
+			for (const group of groupsToWrite) {
+				await encryptRecord('tagGroups', group);
+				await db.table('tagGroups').add(group);
+			}
+			for (const tag of tagsToWrite) {
+				await encryptRecord('globalTags', tag);
+				await db.table('globalTags').add(tag);
+			}
+		});
+
+		return tagsToWrite.length;
+	},
+
+	/**
+	 * Copy every tag + tagGroup from `sourceSpaceId` into
+	 * `targetSpaceId` with fresh ids. Used by the "copy tags from my
+	 * current Space" convenience in SpaceCreateDialog so solo-Space
+	 * users don't have to build a named preset before they can inherit
+	 * their personal taxonomy.
+	 */
+	async copyTagsBetweenSpaces(sourceSpaceId: string, targetSpaceId: string): Promise<number> {
+		const [rawTags, rawGroups] = await Promise.all([
+			db.table<LocalTagShape>('globalTags').toArray(),
+			db.table<LocalTagGroupShape>('tagGroups').toArray(),
+		]);
+
+		const sourceTags = rawTags.filter(
+			(t) => t.spaceId === sourceSpaceId && !(t as unknown as { deletedAt?: string }).deletedAt
+		);
+		const sourceGroups = rawGroups.filter(
+			(g) => g.spaceId === sourceSpaceId && !(g as unknown as { deletedAt?: string }).deletedAt
+		);
+
+		if (sourceTags.length === 0 && sourceGroups.length === 0) return 0;
+
+		const decryptedTags = await decryptRecords<LocalTagShape>('globalTags', sourceTags);
+		const decryptedGroups = await decryptRecords<LocalTagGroupShape>('tagGroups', sourceGroups);
+
+		const userId = getEffectiveUserId();
+		const timestamp = now();
+
+		const groupIdMap = new Map<string, string>();
+		const groupsToWrite: LocalTagGroupShape[] = decryptedGroups.map((g) => {
+			const newId = crypto.randomUUID();
+			groupIdMap.set(g.id, newId);
+			return {
+				id: newId,
+				spaceId: targetSpaceId,
+				userId,
+				name: g.name,
+				color: g.color,
+				icon: g.icon ?? null,
+				sortOrder: g.sortOrder,
+				createdAt: timestamp,
+				updatedAt: timestamp,
+			};
+		});
+
+		const tagsToWrite: LocalTagShape[] = decryptedTags.map((t) => ({
+			id: crypto.randomUUID(),
+			spaceId: targetSpaceId,
+			userId,
+			name: t.name,
+			color: t.color,
+			icon: t.icon ?? null,
+			groupId: t.groupId ? (groupIdMap.get(t.groupId) ?? null) : null,
+			sortOrder: t.sortOrder,
+			createdAt: timestamp,
+			updatedAt: timestamp,
+		}));
+
+		await db.transaction('rw', db.table('globalTags'), db.table('tagGroups'), async () => {
+			for (const group of groupsToWrite) {
+				await encryptRecord('tagGroups', group);
+				await db.table('tagGroups').add(group);
+			}
+			for (const tag of tagsToWrite) {
+				await encryptRecord('globalTags', tag);
+				await db.table('globalTags').add(tag);
+			}
+		});
+
+		return tagsToWrite.length;
 	},
 };
