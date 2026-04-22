@@ -564,16 +564,16 @@
 		border-radius: 999px;
 	}
 	.dot-active {
-		background: #22c55e;
+		background: hsl(var(--color-success));
 	}
 	.dot-paused {
-		background: #f59e0b;
+		background: hsl(var(--color-warning));
 	}
 	.dot-done {
-		background: #6b7280;
+		background: hsl(var(--color-muted-foreground));
 	}
 	.dot-archived {
-		background: #374151;
+		background: hsl(var(--color-muted-foreground) / 0.5);
 	}
 	.m-meta {
 		display: flex;
@@ -730,24 +730,24 @@
 		text-transform: uppercase;
 	}
 	.badge-awaiting-review {
-		background: #fef0c9;
-		color: #8a5a00;
+		background: hsl(var(--color-warning) / 0.18);
+		color: hsl(var(--color-warning));
 	}
 	.badge-approved {
-		background: #d7f7e3;
-		color: #1b7a3a;
+		background: hsl(var(--color-success) / 0.18);
+		color: hsl(var(--color-success));
 	}
 	.badge-rejected,
 	.badge-failed {
-		background: #f7d7d7;
-		color: #8a1b1b;
+		background: hsl(var(--color-error) / 0.18);
+		color: hsl(var(--color-error));
 	}
 	.badge-running {
-		background: #d7ecff;
-		color: #0a548b;
+		background: hsl(var(--color-primary) / 0.18);
+		color: hsl(var(--color-primary));
 	}
 	.it-running {
-		border-color: color-mix(in oklab, #0a548b 35%, hsl(var(--color-border)));
+		border-color: color-mix(in oklab, hsl(var(--color-primary)) 35%, hsl(var(--color-border)));
 	}
 	.phase-block {
 		display: flex;
@@ -755,7 +755,7 @@
 		gap: 0.375rem;
 		padding: 0.5rem 0.625rem;
 		margin: 0.375rem 0;
-		background: color-mix(in oklab, #0a548b 6%, transparent);
+		background: hsl(var(--color-primary) / 0.08);
 		border-radius: 0.375rem;
 	}
 	.phase-line {
@@ -806,8 +806,8 @@
 		font-size: 0.75rem;
 	}
 	.cancel-btn:hover:not(:disabled) {
-		color: #8a1b1b;
-		border-color: #e99;
+		color: hsl(var(--color-error));
+		border-color: hsl(var(--color-error) / 0.5);
 	}
 	.cancel-btn:disabled {
 		opacity: 0.5;
@@ -815,10 +815,10 @@
 	}
 	.err-details {
 		margin-top: 0.375rem;
-		border: 1px solid #f7d7d7;
+		border: 1px solid hsl(var(--color-error) / 0.3);
 		border-radius: 0.375rem;
 		padding: 0.375rem 0.5rem;
-		background: color-mix(in oklab, #8a1b1b 4%, transparent);
+		background: hsl(var(--color-error) / 0.05);
 		font-size: 0.8125rem;
 	}
 	.err-details summary {
@@ -830,7 +830,7 @@
 	.err-name {
 		font-family: var(--font-mono, ui-monospace, monospace);
 		font-weight: 600;
-		color: #8a1b1b;
+		color: hsl(var(--color-error));
 	}
 	.err-phase {
 		color: hsl(var(--color-muted-foreground));
@@ -838,7 +838,7 @@
 	}
 	.err-message {
 		margin: 0.375rem 0 0;
-		color: #6a1515;
+		color: hsl(var(--color-error));
 		word-break: break-word;
 	}
 	.err-stack {
@@ -931,12 +931,12 @@
 		border-radius: 999px;
 	}
 	.grant-pill-ok {
-		background: #d7f7e3;
-		color: #1b7a3a;
+		background: hsl(var(--color-success) / 0.18);
+		color: hsl(var(--color-success));
 	}
 	.grant-pill-warn {
-		background: #fde7c8;
-		color: #8a4f00;
+		background: hsl(var(--color-warning) / 0.18);
+		color: hsl(var(--color-warning));
 	}
 	.grant-pill-muted {
 		background: hsl(var(--color-surface));

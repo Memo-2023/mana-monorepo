@@ -33,7 +33,7 @@
 	}
 
 	function gradientStyle(colors: string[]): string {
-		if (colors.length === 0) return 'background: #333';
+		if (colors.length === 0) return 'background: hsl(var(--color-muted))';
 		if (colors.length === 1) return `background: ${colors[0]}`;
 		return `background: linear-gradient(135deg, ${colors.join(', ')})`;
 	}
@@ -178,7 +178,7 @@
 							{#if newColors.length > 1}
 								<button
 									type="button"
-									class="absolute -right-1 -top-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-red-500 text-[8px] text-white"
+									class="absolute -right-1 -top-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-error text-[8px] text-white"
 									onclick={() => removeColor(i)}>x</button
 								>
 							{/if}
@@ -206,7 +206,7 @@
 				<!-- Save -->
 				<button
 					type="button"
-					class="rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+					class="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
 					disabled={!newName.trim() || newColors.length === 0}
 					onclick={handleCreate}
 				>
@@ -220,7 +220,8 @@
 		<button
 			onclick={() => (fullscreenMood = mood)}
 			oncontextmenu={(e) => ctxMenu.open(e, mood)}
-			class="mood-card group relative aspect-[4/3] w-full select-none overflow-hidden rounded-xl border-2 border-transparent transition-all duration-200 [-webkit-touch-callout:none] hover:border-white/40 focus:outline-none"
+			class="mood-card group relative aspect-[4/3] w-full select-none overflow-hidden rounded-xl border-2 border-transparent [-webkit-touch-callout:none] focus:outline-none"
+			style:transition="border-color 0.2s, transform 0.2s"
 			style="--mood-color: {mood.colors[0]}"
 		>
 			<div
@@ -252,6 +253,13 @@
 />
 
 <style>
+	/* Mood cards always sit on a vivid colour gradient, so the hover ring
+	   is intentionally white (brand literal, not theme-intent — see
+	   packages/shared-tailwind/src/themes.css §4). */
+	.mood-card:hover {
+		border-color: rgba(255, 255, 255, 0.4);
+	}
+
 	.anim-gradient {
 		animation: gradient-shift 8s ease infinite;
 	}

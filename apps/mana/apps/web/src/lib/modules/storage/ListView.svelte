@@ -55,17 +55,20 @@
 
 	{#snippet listHeader()}
 		{#if rootFolders.length > 0}
-			<h3 class="mb-2 text-xs font-medium text-white/50">Ordner</h3>
+			<h3 class="mb-2 text-xs font-medium text-muted-foreground">Ordner</h3>
 			{#each rootFolders as folder (folder.id)}
 				<div
-					class="flex min-h-[44px] items-center gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-white/5"
+					class="flex min-h-[44px] items-center gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-muted/50"
 				>
-					<span class="text-sm" style="color: {folder.color ?? '#6b7280'}">&#128193;</span>
-					<span class="truncate text-sm text-white/70">{folder.name}</span>
+					<span
+						class="text-sm"
+						style="color: {folder.color ?? 'hsl(var(--color-muted-foreground))'}">&#128193;</span
+					>
+					<span class="truncate text-sm text-foreground/90">{folder.name}</span>
 				</div>
 			{/each}
 		{/if}
-		<h3 class="mb-2 mt-3 text-xs font-medium text-white/50">Zuletzt</h3>
+		<h3 class="mb-2 mt-3 text-xs font-medium text-muted-foreground">Zuletzt</h3>
 	{/snippet}
 
 	{#snippet item(file)}
@@ -76,11 +79,11 @@
 					_siblingIds: recentFiles.map((f) => f.id),
 					_siblingKey: 'fileId',
 				})}
-			class="flex w-full min-h-[44px] items-center gap-2 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-white/5"
+			class="flex w-full min-h-[44px] items-center gap-2 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-muted/50"
 		>
 			<span class="text-sm">{@html fileIcon(file.mimeType)}</span>
-			<span class="min-w-0 flex-1 truncate text-sm text-white/70">{file.name}</span>
-			<span class="shrink-0 text-xs text-white/30">{formatSize(file.size)}</span>
+			<span class="min-w-0 flex-1 truncate text-sm text-foreground/90">{file.name}</span>
+			<span class="shrink-0 text-xs text-muted-foreground/70">{formatSize(file.size)}</span>
 		</button>
 	{/snippet}
 </BaseListView>

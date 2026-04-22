@@ -60,14 +60,14 @@
 		<div class="flex items-center justify-between gap-2">
 			<a
 				href="/context/documents"
-				class="text-xs text-white/50 transition-colors hover:text-white/80"
+				class="text-xs text-muted-foreground transition-colors hover:text-foreground"
 			>
 				Alle Dokumente &rarr;
 			</a>
 			<button
 				type="button"
 				onclick={handleCreateDocument}
-				class="flex items-center gap-1.5 rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-indigo-700"
+				class="flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90"
 			>
 				<span aria-hidden="true">+</span>
 				Neues Dokument
@@ -82,30 +82,30 @@
 
 	{#snippet listHeader()}
 		{#if pinnedSpaces.length > 0}
-			<h3 class="mb-2 text-xs font-medium text-white/50">Angepinnte Spaces</h3>
+			<h3 class="mb-2 text-xs font-medium text-muted-foreground">Angepinnte Spaces</h3>
 			{#each pinnedSpaces as space (space.id)}
-				<div class="mb-1 min-h-[44px] rounded-md px-3 py-2 transition-colors hover:bg-white/5">
-					<p class="text-sm font-medium text-white/80">{space.name}</p>
+				<div class="mb-1 min-h-[44px] rounded-md px-3 py-2 transition-colors hover:bg-muted/50">
+					<p class="text-sm font-medium text-foreground">{space.name}</p>
 					{#if space.description}
-						<p class="truncate text-xs text-white/30">{space.description}</p>
+						<p class="truncate text-xs text-muted-foreground/70">{space.description}</p>
 					{/if}
 				</div>
 			{/each}
 		{/if}
-		<h3 class="mb-2 mt-3 text-xs font-medium text-white/50">Zuletzt bearbeitet</h3>
+		<h3 class="mb-2 mt-3 text-xs font-medium text-muted-foreground">Zuletzt bearbeitet</h3>
 	{/snippet}
 
 	{#snippet item(doc)}
 		<a
 			href="/context/documents/{doc.id}"
-			class="flex min-h-[44px] items-center gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-white/5"
+			class="flex min-h-[44px] items-center gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-muted/50"
 		>
 			<span class="text-sm">{@html typeIcons[doc.type] ?? '&#128196;'}</span>
 			<div class="min-w-0 flex-1">
-				<p class="truncate text-sm text-white/70">{doc.title || 'Unbenannt'}</p>
+				<p class="truncate text-sm text-foreground/90">{doc.title || 'Unbenannt'}</p>
 			</div>
 			{#if doc.pinned}
-				<span class="text-xs text-white/30">&#128204;</span>
+				<span class="text-xs text-muted-foreground/70">&#128204;</span>
 			{/if}
 		</a>
 	{/snippet}

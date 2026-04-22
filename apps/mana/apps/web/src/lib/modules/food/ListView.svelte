@@ -146,8 +146,8 @@
 		{#snippet toolbar()}
 			<!-- Calorie progress -->
 			<div class="text-center">
-				<p class="text-2xl font-light text-white/90">{Math.round(totalCalories)}</p>
-				<p class="text-xs text-white/40">
+				<p class="text-2xl font-light text-foreground">{Math.round(totalCalories)}</p>
+				<p class="text-xs text-muted-foreground">
 					{#if goal}
 						von {goal.dailyCalories} kcal
 					{:else}
@@ -155,12 +155,10 @@
 					{/if}
 				</p>
 				{#if goal}
-					<div class="mx-auto mt-2 h-1.5 w-32 rounded-full bg-white/10">
+					<div class="mx-auto mt-2 h-1.5 w-32 rounded-full bg-muted">
 						<div
-							class="h-full rounded-full transition-all {calorieProgress >= 100
-								? 'bg-green-400'
-								: 'bg-blue-400'}"
-							style="width: {calorieProgress}%"
+							class="h-full rounded-full {calorieProgress >= 100 ? 'bg-success' : 'bg-primary'}"
+							style="width: {calorieProgress}%; transition: width 0.3s ease;"
 						></div>
 					</div>
 				{/if}
@@ -174,7 +172,7 @@
 					onkeydown={onTextKeydown}
 					placeholder="Was hast du gegessen?"
 					disabled={quickSaving}
-					class="flex-1 rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white/90 placeholder:text-white/30 focus:border-white/20 focus:outline-none disabled:opacity-50"
+					class="flex-1 rounded-md border border-border bg-muted/30 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-ring focus:outline-none disabled:opacity-50"
 				/>
 				<button
 					type="button"
@@ -182,7 +180,7 @@
 					disabled={!quickText.trim() || quickSaving}
 					aria-label="Mahlzeit speichern"
 					title="Speichern"
-					class="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white/70 transition-colors hover:bg-white/10 disabled:opacity-30"
+					class="rounded-md border border-border bg-muted/30 px-3 py-2 text-sm text-foreground/80 transition-colors hover:bg-muted disabled:opacity-30"
 				>
 					{quickSaving ? '…' : '↵'}
 				</button>
@@ -196,25 +194,25 @@
 						disabled={photoUploading}
 						aria-label="Foto hinzufuegen"
 						title="Foto"
-						class="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white/70 transition-colors hover:bg-white/10 disabled:opacity-30"
+						class="rounded-md border border-border bg-muted/30 px-3 py-2 text-sm text-foreground/80 transition-colors hover:bg-muted disabled:opacity-30"
 					>
 						{photoUploading ? '...' : '📷'}
 					</button>
 					{#if showPhotoMenu}
 						<div
-							class="absolute bottom-full right-0 z-10 mb-1 flex flex-col overflow-hidden rounded-lg border border-white/10 bg-[hsl(var(--color-card))] shadow-lg"
+							class="absolute bottom-full right-0 z-10 mb-1 flex flex-col overflow-hidden rounded-lg border border-border bg-card shadow-lg"
 						>
 							<button
 								type="button"
 								onclick={openCamera}
-								class="flex items-center gap-2 whitespace-nowrap px-4 py-2.5 text-left text-sm text-white/80 transition-colors hover:bg-white/10"
+								class="flex items-center gap-2 whitespace-nowrap px-4 py-2.5 text-left text-sm text-foreground transition-colors hover:bg-muted"
 							>
 								<span>📸</span> Kamera
 							</button>
 							<button
 								type="button"
 								onclick={openGallery}
-								class="flex items-center gap-2 whitespace-nowrap px-4 py-2.5 text-left text-sm text-white/80 transition-colors hover:bg-white/10"
+								class="flex items-center gap-2 whitespace-nowrap px-4 py-2.5 text-left text-sm text-foreground transition-colors hover:bg-muted"
 							>
 								<span>🖼️</span> Mediathek
 							</button>
@@ -250,19 +248,19 @@
 		{#snippet item(meal)}
 			<a
 				href="/food/{meal.id}"
-				class="mb-1 block min-h-[44px] rounded-md px-3 py-2 transition-colors hover:bg-white/5"
+				class="mb-1 block min-h-[44px] rounded-md px-3 py-2 transition-colors hover:bg-muted/50"
 			>
 				<div class="flex items-center justify-between gap-3">
 					<div class="min-w-0 flex-1">
 						<div class="flex items-center gap-2">
-							<span class="text-xs text-white/50"
+							<span class="text-xs text-muted-foreground"
 								>{mealTypeLabels[meal.mealType] ?? meal.mealType}</span
 							>
 							{#if meal.inputType === 'photo'}
-								<span class="text-xs text-white/40">📷</span>
+								<span class="text-xs text-muted-foreground/80">📷</span>
 							{/if}
 						</div>
-						<p class="truncate text-sm text-white/70">{meal.description}</p>
+						<p class="truncate text-sm text-foreground/90">{meal.description}</p>
 					</div>
 					{#if meal.photoThumbnailUrl || meal.photoUrl}
 						<img
@@ -273,7 +271,7 @@
 						/>
 					{/if}
 					{#if meal.nutrition}
-						<span class="whitespace-nowrap text-xs text-white/50"
+						<span class="whitespace-nowrap text-xs text-muted-foreground"
 							>{Math.round(meal.nutrition.calories)} kcal</span
 						>
 					{/if}

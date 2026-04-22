@@ -21,6 +21,7 @@
 		"validate:dockerfiles": "node scripts/validate-dockerfiles.mjs",
 		"validate:turbo": "node scripts/validate-no-recursive-turbo.mjs",
 		"validate:pg-schema": "node scripts/validate-pg-schema-isolation.mjs",
+		"validate:theme-tokens": "node scripts/validate-theme-tokens.mjs",
 		"validate:all": "pnpm run validate:turbo && pnpm run validate:pg-schema && pnpm run check:crypto",
 		"check:crypto": "node scripts/audit-crypto-registry.mjs",
 		"check:crypto:seed": "node scripts/audit-crypto-registry.mjs --seed",

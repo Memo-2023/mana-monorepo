@@ -261,7 +261,7 @@
 		{/snippet}
 
 		{#snippet listHeader()}
-			<h3 class="mb-2 text-xs font-medium text-white/50">Zuletzt gehört</h3>
+			<h3 class="mb-2 text-xs font-medium text-muted-foreground">Zuletzt gehört</h3>
 		{/snippet}
 
 		{#snippet item(song)}
@@ -272,18 +272,18 @@
 						_siblingIds: recentlyPlayed.map((s) => s.id),
 						_siblingKey: 'songId',
 					})}
-				class="flex w-full min-h-[44px] items-center gap-3 rounded-md px-2 py-1.5 transition-colors hover:bg-white/5 cursor-pointer text-left"
+				class="flex w-full min-h-[44px] items-center gap-3 rounded-md px-2 py-1.5 transition-colors hover:bg-muted/50 cursor-pointer text-left"
 			>
 				<div
-					class="flex h-8 w-8 shrink-0 items-center justify-center rounded bg-white/10 text-xs text-white/30"
+					class="flex h-8 w-8 shrink-0 items-center justify-center rounded bg-muted text-xs text-muted-foreground"
 				>
 					&#9835;
 				</div>
 				<div class="min-w-0 flex-1">
-					<p class="truncate text-sm text-white/80">{song.title}</p>
-					<p class="truncate text-xs text-white/40">{song.artist ?? 'Unbekannt'}</p>
+					<p class="truncate text-sm text-foreground">{song.title}</p>
+					<p class="truncate text-xs text-muted-foreground">{song.artist ?? 'Unbekannt'}</p>
 				</div>
-				<span class="text-xs text-white/30">{formatDuration(song.duration)}</span>
+				<span class="text-xs text-muted-foreground/70">{formatDuration(song.duration)}</span>
 			</button>
 		{/snippet}
 	</BaseListView>
