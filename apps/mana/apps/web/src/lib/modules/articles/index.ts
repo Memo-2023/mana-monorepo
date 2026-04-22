@@ -10,13 +10,17 @@ export {
 	useAllArticles,
 	useArticle,
 	useArticleHighlights,
+	useAllHighlights,
 	useArticleTagIds,
 	useArticleTagMap,
+	useStats,
 	toArticle,
 	toHighlight,
 	filterByStatus,
 	searchArticles,
 } from './queries';
+
+export type { ArticlesStats, SiteCount, HighlightWithArticle } from './queries';
 
 export { articleTable, articleHighlightTable, articleTagTable } from './collections';
 

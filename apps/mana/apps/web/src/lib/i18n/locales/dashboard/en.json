@@ -155,6 +155,10 @@
 			"title": "News",
 			"description": "Top articles from your curated feed"
 		},
+		"articles_unread": {
+			"title": "Articles",
+			"description": "Unread articles from your reading list"
+		},
 		"body_stats": {
 			"title": "Body",
 			"description": "Latest weight and training status"

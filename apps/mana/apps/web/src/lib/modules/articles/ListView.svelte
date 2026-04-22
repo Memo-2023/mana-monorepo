@@ -83,6 +83,15 @@
 				<button
 					type="button"
 					class="icon-btn"
+					title="Highlights — alle markierten Stellen"
+					aria-label="Highlights anzeigen"
+					onclick={() => goto('/articles/highlights')}
+				>
+					✎
+				</button>
+				<button
+					type="button"
+					class="icon-btn"
 					title="Einstellungen — Bookmarklet + Share-Target"
 					aria-label="Artikel-Einstellungen"
 					onclick={() => goto('/articles/settings')}

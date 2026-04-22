@@ -32,6 +32,7 @@ export type WidgetType =
 	| 'activity-feed' // TimeBlocks: recent activity across modules
 	| 'period' // Period: current phase + days until next period
 	| 'news-unread' // News: latest unread curated articles
+	| 'articles-unread' // Articles: saved read-it-later articles
 	| 'body-stats' // Body: latest weight + active workout summary
 	| 'invoices-open' // Invoices: open/overdue totals + oldest overdue
 	| 'broadcasts'; // Broadcast: YTD counts + last sent + next scheduled
@@ -352,6 +353,14 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
 		nameKey: 'dashboard.widgets.news_unread.title',
 		descriptionKey: 'dashboard.widgets.news_unread.description',
 		icon: '📰',
+		defaultSize: 'small',
+		allowMultiple: false,
+	},
+	{
+		type: 'articles-unread',
+		nameKey: 'dashboard.widgets.articles_unread.title',
+		descriptionKey: 'dashboard.widgets.articles_unread.description',
+		icon: '📚',
 		defaultSize: 'small',
 		allowMultiple: false,
 	},

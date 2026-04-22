@@ -32,6 +32,7 @@ import NutritionProgressWidget from '$lib/modules/core/widgets/NutritionProgress
 import PlantWateringWidget from '$lib/modules/core/widgets/PlantWateringWidget.svelte';
 import PeriodWidget from '$lib/modules/core/widgets/PeriodWidget.svelte';
 import NewsUnreadWidget from '$lib/modules/news/widgets/NewsUnreadWidget.svelte';
+import ArticlesUnreadWidget from '$lib/modules/articles/widgets/ArticlesUnreadWidget.svelte';
 import BodyStatsWidget from '$lib/modules/body/widgets/BodyStatsWidget.svelte';
 import InvoicesOpenWidget from '$lib/modules/invoices/widgets/InvoicesOpenWidget.svelte';
 import BroadcastsWidget from '$lib/modules/broadcast/widgets/BroadcastsWidget.svelte';
@@ -63,6 +64,7 @@ export const widgetComponents: Record<WidgetType, Component> = {
 	'activity-feed': ActivityFeedWidget,
 	period: PeriodWidget,
 	'news-unread': NewsUnreadWidget,
+	'articles-unread': ArticlesUnreadWidget,
 	'body-stats': BodyStatsWidget,
 	'invoices-open': InvoicesOpenWidget,
 	broadcasts: BroadcastsWidget,

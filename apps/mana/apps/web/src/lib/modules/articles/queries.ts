@@ -106,6 +106,149 @@ export function useArticleTagMap(articleIds: string[]) {
 	);
 }
 
+export interface SiteCount {
+	siteName: string;
+	count: number;
+}
+
+export interface ArticlesStats {
+	total: number;
+	unread: number;
+	reading: number;
+	finished: number;
+	archived: number;
+	favorites: number;
+	savedThisWeek: number;
+	finishedThisWeek: number;
+	topSites: SiteCount[];
+	totalHighlights: number;
+}
+
+const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+
+/**
+ * Aggregate stats for the dashboard widget + stats section. One live
+ * query over scope-filtered articles + highlights; decrypts only the
+ * articles (needed for title-based top-sites grouping).
+ */
+export function useStats() {
+	return useLiveQueryWithDefault(
+		async () => {
+			const [articleRows, highlightRows] = await Promise.all([
+				scopedForModule<LocalArticle, string>('articles', 'articles').toArray(),
+				scopedForModule<LocalHighlight, string>('articles', 'articleHighlights').toArray(),
+			]);
+			const visible = articleRows.filter((a) => !a.deletedAt);
+			const decrypted = await decryptRecords('articles', visible);
+
+			const now = Date.now();
+			const weekAgo = now - WEEK_MS;
+
+			const byStatus: Record<ArticleStatus, number> = {
+				unread: 0,
+				reading: 0,
+				finished: 0,
+				archived: 0,
+			};
+			let favorites = 0;
+			let savedThisWeek = 0;
+			let finishedThisWeek = 0;
+			const siteCounts = new Map<string, number>();
+
+			for (const a of decrypted) {
+				byStatus[a.status] = (byStatus[a.status] ?? 0) + 1;
+				if (a.isFavorite) favorites++;
+				const savedTs = a.savedAt ? Date.parse(a.savedAt) : NaN;
+				if (Number.isFinite(savedTs) && savedTs >= weekAgo) savedThisWeek++;
+				const readTs = a.readAt ? Date.parse(a.readAt) : NaN;
+				if (Number.isFinite(readTs) && readTs >= weekAgo) finishedThisWeek++;
+				if (a.siteName) {
+					siteCounts.set(a.siteName, (siteCounts.get(a.siteName) ?? 0) + 1);
+				}
+			}
+
+			const topSites: SiteCount[] = [...siteCounts.entries()]
+				.map(([siteName, count]) => ({ siteName, count }))
+				.sort((a, b) => b.count - a.count)
+				.slice(0, 5);
+
+			const totalHighlights = highlightRows.filter((h) => !h.deletedAt).length;
+
+			return {
+				total: decrypted.length,
+				unread: byStatus.unread,
+				reading: byStatus.reading,
+				finished: byStatus.finished,
+				archived: byStatus.archived,
+				favorites,
+				savedThisWeek,
+				finishedThisWeek,
+				topSites,
+				totalHighlights,
+			} satisfies ArticlesStats;
+		},
+		{
+			total: 0,
+			unread: 0,
+			reading: 0,
+			finished: 0,
+			archived: 0,
+			favorites: 0,
+			savedThisWeek: 0,
+			finishedThisWeek: 0,
+			topSites: [],
+			totalHighlights: 0,
+		} as ArticlesStats
+	);
+}
+
+/**
+ * Cross-article highlights query for `/articles/highlights`. Fetches
+ * all articles + all highlights in the active scope, pairs them up,
+ * and returns rows shaped for rendering as a chronological collection.
+ * Articles without highlights are excluded.
+ */
+export interface HighlightWithArticle {
+	highlight: Highlight;
+	article: Pick<Article, 'id' | 'title' | 'siteName' | 'originalUrl'>;
+}
+
+export function useAllHighlights() {
+	return useLiveQueryWithDefault(async () => {
+		const [articleRows, highlightRows] = await Promise.all([
+			scopedForModule<LocalArticle, string>('articles', 'articles').toArray(),
+			scopedForModule<LocalHighlight, string>('articles', 'articleHighlights').toArray(),
+		]);
+		const liveArticles = articleRows.filter((a) => !a.deletedAt);
+		const liveHighlights = highlightRows.filter((h) => !h.deletedAt);
+		if (liveHighlights.length === 0) return [] as HighlightWithArticle[];
+
+		const [decArticles, decHighlights] = await Promise.all([
+			decryptRecords('articles', liveArticles),
+			decryptRecords('articleHighlights', liveHighlights),
+		]);
+
+		const byId = new Map(decArticles.map((a) => [a.id, toArticle(a)]));
+
+		return decHighlights
+			.map((h) => {
+				const art = byId.get(h.articleId);
+				if (!art) return null;
+				return {
+					highlight: toHighlight(h),
+					article: {
+						id: art.id,
+						title: art.title,
+						siteName: art.siteName,
+						originalUrl: art.originalUrl,
+					},
+				} satisfies HighlightWithArticle;
+			})
+			.filter((r): r is HighlightWithArticle => r !== null)
+			.sort((a, b) => (b.highlight.createdAt ?? '').localeCompare(a.highlight.createdAt ?? ''));
+	}, [] as HighlightWithArticle[]);
+}
+
 export function useArticleHighlights(articleId: string) {
 	return useLiveQueryWithDefault(async () => {
 		// scopedForModule returns the scope-filtered Collection; we narrow

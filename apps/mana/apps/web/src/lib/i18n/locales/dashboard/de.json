@@ -155,6 +155,10 @@
 			"title": "News",
 			"description": "Top-Artikel aus deinem kuratierten Feed"
 		},
+		"articles_unread": {
+			"title": "Artikel",
+			"description": "Ungelesene Artikel aus deiner Leseliste"
+		},
 		"body_stats": {
 			"title": "Body",
 			"description": "Aktuelles Gewicht und Trainings-Status"
