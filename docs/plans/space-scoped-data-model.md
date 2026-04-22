@@ -13,16 +13,31 @@ _Supersedes [`per-space-vs-user-global-tags.md`](./per-space-vs-user-global-tags
 | 2d.2 | kontextDoc per-Space (store + queries + AI-runner resolver) | `8a82f3c54` |
 | 2d.3 | SpaceType-aware default agent bootstrap | `a36e543e4` |
 | 2d.4 | onActiveSpaceChanged subscriber + per-Space localStorage + scene filter | `3b85d7d3d` ⚠️ |
+| 2d.5a | applyPresetToSpace + copyTagsBetweenSpaces helpers | `596e5a742` |
+| 2d.5b | SpaceCreateDialog tag-source picker | `81a426af2` |
+| 2d.6 | Settings → Tag-Presets management UI | `0f8fbb381` |
+| 2e | Encryption flip (enabled:true on 4 tables) | `09e6a8b9d` |
+| 2c | Creating-hook: stop stamping userId on data tables | `e9b9544ea` |
+| 2e-followup | At-rest encrypt sweep (post-unlock, per-table sentinel) | `c413ab7dd` ⚠️ |
 
-⚠️ **2d.4 attribution note**: The 2d.4 changes (active-space handler
-API + per-Space workbench-scenes localStorage + scene spaceId filter +
-runAgentsBootstrap-on-space-change wiring) landed inside the
-`chore(bundle): add bundle-size audit + snapshot inventory` commit by
-accident. A parallel terminal session's `git add -A` scooped up the
-2d.4 diff during a lint-staged rollback race. The code is correct and
-tests pass; the commit message just understates its contents. Future
-searches for 2d.4 should include commit `3b85d7d3d` alongside the
-others — the scope/workbench/setup file changes there are the 2d.4
+⚠️ **2d.4 + 2e-followup attribution note**: Two commits absorbed
+Space-scoped work under unrelated titles due to parallel-session
+lint-staged rollback races (see `feedback_git_workflow.md`):
+
+- `3b85d7d3d chore(bundle): add bundle-size audit …` — contains the
+  2d.4 payload (active-space handler API + per-Space workbench-scenes
+  localStorage + scene spaceId filter + runAgentsBootstrap on Space
+  change). The bundle-audit files are legit too; the Space-switch work
+  is the second half of the diff.
+
+- `c413ab7dd test(mana-research): fixture-based tests …` — contains
+  the 2e-followup payload (at-rest encrypt sweep:
+  `lib/data/crypto/at-rest-sweep.ts` + layout unlock wiring). The
+  mana-research test files are legit too; the at-rest sweep is
+  `apps/mana/apps/web/…` changes in the diff.
+
+Both commits' code is correct and typechecks cleanly. Grep for
+`runAtRestEncryptSweep` / `onActiveSpaceChanged` to find the actual
 payload.
 
 ## Decision
