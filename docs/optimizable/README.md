@@ -25,6 +25,7 @@ Each topic has its own tracker. Status as of 2026-04-22.
 | Frontend theming | [frontend-consistency-improvements.md](frontend-consistency-improvements.md) | Theming migration SHIPPED (ListViews, transition-all, a11y). i18n + icon bloat + cross-surface parity still OPEN. |
 | i18n coverage | [i18n-migration-inventory.md](i18n-migration-inventory.md) | 65 / 78 modules hardcode German. Per-module work. |
 | Test health | [test-health.md](test-health.md) | 34 / 653 tests failing (spaces-foundation WIP). 66 / 78 modules without any tests. |
+| Manual test backlog | [manual-test-backlog.md](manual-test-backlog.md) | Code-complete features still waiting on a human click-through before release. |
 | Bundle size | [bundle-analysis.md](bundle-analysis.md) | /invoices split SHIPPED (-516 KB). Icons + layout OPEN. |
 | Foundation services | [foundation-layer-improvements.md](foundation-layer-improvements.md) | Contacts/Todo/Calendar architecture notes. |
 | AI Workbench audit | [ai-workbench-audit-2026-04-16.md](ai-workbench-audit-2026-04-16.md) | Point-in-time audit snapshot. |
