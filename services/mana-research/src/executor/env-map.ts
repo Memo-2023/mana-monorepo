@@ -17,6 +17,8 @@ export function mapEnvKey(providerId: ProviderId): keyof Config['providerKeys'] 
 		'openai-responses': 'openai',
 		'openai-deep-research': 'openai',
 		'gemini-grounding': 'googleGenai',
+		'gemini-deep-research': 'googleGenai',
+		'gemini-deep-research-max': 'googleGenai',
 		'jina-reader': 'jina',
 		firecrawl: 'firecrawl',
 		scrapingbee: 'scrapingbee',

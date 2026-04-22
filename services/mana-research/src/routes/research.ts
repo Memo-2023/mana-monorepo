@@ -20,8 +20,19 @@ import type { Config } from '../config';
 import { pickAgent } from '../router/auto-route';
 import { priceFor } from '../lib/pricing';
 import { pollDeepResearch, submitDeepResearch } from '../providers/agent/openai-deep-research';
+import {
+	pollGeminiDeepResearch,
+	submitGeminiDeepResearch,
+} from '../providers/agent/gemini-deep-research';
 
 const MAX_COMPARE_AGENTS = 4;
+
+const ASYNC_PROVIDER_IDS = [
+	'openai-deep-research',
+	'gemini-deep-research',
+	'gemini-deep-research-max',
+] as const;
+type AsyncProviderId = (typeof ASYNC_PROVIDER_IDS)[number];
 
 const researchBodySchema = z.object({
 	query: z.string().min(1).max(2000),
@@ -37,8 +48,58 @@ const compareBodySchema = z.object({
 
 const asyncSubmitBodySchema = z.object({
 	query: z.string().min(1).max(4000),
+	provider: z.enum(ASYNC_PROVIDER_IDS).optional().default('openai-deep-research'),
 	options: agentOptionsSchema.optional(),
 });
+
+interface AsyncDispatch {
+	apiKey: string | null;
+	missingKeyMessage: string;
+	submit(
+		query: string,
+		options: { systemPrompt?: string; maxTokens?: number; model?: string },
+		apiKey: string,
+		signal?: AbortSignal
+	): Promise<{ externalId: string; status: 'queued' | 'running' }>;
+	poll(
+		externalId: string,
+		apiKey: string,
+		signal?: AbortSignal
+	): Promise<{
+		status: 'queued' | 'running' | 'completed' | 'failed';
+		answer?: import('@mana/shared-research').AgentAnswer;
+		error?: string;
+	}>;
+}
+
+function dispatchAsync(providerId: AsyncProviderId, config: Config): AsyncDispatch {
+	switch (providerId) {
+		case 'openai-deep-research':
+			return {
+				apiKey: config.providerKeys.openai ?? null,
+				missingKeyMessage:
+					'openai-deep-research requires OPENAI_API_KEY on the server or via BYO key',
+				submit: (q, o, k, s) => submitDeepResearch(q, o, k, s),
+				poll: (id, k, s) => pollDeepResearch(id, k, s),
+			};
+		case 'gemini-deep-research':
+			return {
+				apiKey: config.providerKeys.googleGenai ?? null,
+				missingKeyMessage:
+					'gemini-deep-research requires GOOGLE_GENAI_API_KEY on the server or via BYO key',
+				submit: (q, o, k, s) => submitGeminiDeepResearch('standard', q, o, k, s),
+				poll: (id, k, s) => pollGeminiDeepResearch('standard', id, k, s),
+			};
+		case 'gemini-deep-research-max':
+			return {
+				apiKey: config.providerKeys.googleGenai ?? null,
+				missingKeyMessage:
+					'gemini-deep-research-max requires GOOGLE_GENAI_API_KEY on the server or via BYO key',
+				submit: (q, o, k, s) => submitGeminiDeepResearch('max', q, o, k, s),
+				poll: (id, k, s) => pollGeminiDeepResearch('max', id, k, s),
+			};
+	}
+}
 
 export function createResearchRoutes(
 	registry: ProviderRegistry,
@@ -48,8 +109,6 @@ export function createResearchRoutes(
 	asyncStorage: AsyncJobStorage,
 	credits: CreditsClient
 ) {
-	const PROVIDER_ID = 'openai-deep-research' as const;
-
 	return new Hono<HonoEnv>()
 		.post('/', async (c) => {
 			const user = c.get('user');
@@ -178,25 +237,24 @@ export function createResearchRoutes(
 			const user = c.get('user');
 			const body = asyncSubmitBodySchema.parse(await c.req.json());
 
-			const apiKey = config.providerKeys.openai;
-			if (!apiKey) {
-				throw new BadRequestError(
-					'openai-deep-research requires OPENAI_API_KEY on the server or via BYO key'
-				);
+			const providerId = body.provider;
+			const dispatch = dispatchAsync(providerId, config);
+			if (!dispatch.apiKey) {
+				throw new BadRequestError(dispatch.missingKeyMessage);
 			}
 
-			const price = priceFor(PROVIDER_ID, 'research');
+			const price = priceFor(providerId, 'research');
 			const reservation = await credits.reserve(
 				user.userId,
 				price,
-				`research:${PROVIDER_ID}:submit`
+				`research:${providerId}:submit`
 			);
 
 			try {
-				const submission = await submitDeepResearch(body.query, body.options ?? {}, apiKey);
+				const submission = await dispatch.submit(body.query, body.options ?? {}, dispatch.apiKey);
 				const job = await asyncStorage.create({
 					userId: user.userId,
-					providerId: PROVIDER_ID,
+					providerId,
 					externalId: submission.externalId,
 					status: submission.status,
 					query: body.query,
@@ -207,7 +265,7 @@ export function createResearchRoutes(
 				return c.json({
 					taskId: job.id,
 					status: job.status,
-					providerId: PROVIDER_ID,
+					providerId,
 					costCredits: price,
 				});
 			} catch (err) {
@@ -239,8 +297,12 @@ export function createResearchRoutes(
 			if (!job.externalId) {
 				throw new BadRequestError('Task has no external id yet');
 			}
-			const apiKey = config.providerKeys.openai;
-			if (!apiKey) {
+			const jobProviderId = job.providerId as AsyncProviderId;
+			if (!(ASYNC_PROVIDER_IDS as readonly string[]).includes(jobProviderId)) {
+				throw new BadRequestError(`Unknown async provider on job: ${job.providerId}`);
+			}
+			const dispatch = dispatchAsync(jobProviderId, config);
+			if (!dispatch.apiKey) {
 				return c.json({
 					taskId: job.id,
 					status: job.status,
@@ -249,11 +311,11 @@ export function createResearchRoutes(
 					costCredits: job.costCredits,
 					createdAt: job.createdAt,
 					updatedAt: job.updatedAt,
-					error: 'OPENAI_API_KEY is no longer configured; cannot poll',
+					error: `${dispatch.missingKeyMessage.replace(' requires ', ' is missing ')}; cannot poll`,
 				});
 			}
 
-			const poll = await pollDeepResearch(job.externalId, apiKey).catch((err: Error) => ({
+			const poll = await dispatch.poll(job.externalId, dispatch.apiKey).catch((err: Error) => ({
 				status: 'failed' as const,
 				error: err.message,
 			}));

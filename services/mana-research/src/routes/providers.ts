@@ -51,6 +51,8 @@ export function createProvidersRoutes(registry: ProviderRegistry, config: Config
 				'openai-responses': !!keys.openai,
 				'openai-deep-research': !!keys.openai,
 				'gemini-grounding': !!keys.googleGenai,
+				'gemini-deep-research': !!keys.googleGenai,
+				'gemini-deep-research-max': !!keys.googleGenai,
 			};
 
 			const list = listProviders(registry);

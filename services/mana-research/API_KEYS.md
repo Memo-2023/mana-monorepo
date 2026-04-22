@@ -19,7 +19,7 @@ Alle Provider, die in `mana-research` einen externen API-Key brauchen, wo du den
 | [Jina Reader](#5-jina-reader)           | `JINA_API_KEY`         | $0.02/1M Tokens                | 1M Tokens/Monat + unauthed       | Extract              | niedrig (läuft auch ohne Key) |
 | [Firecrawl](#6-firecrawl)               | `FIRECRAWL_API_KEY`    | $16 = 2000 Credits PAYG        | 500 Credits Signup               | Extract (JS-Render)  | mittel                        |
 | [Perplexity Sonar](#7-perplexity-sonar) | `PERPLEXITY_API_KEY`   | $5 Token-Credit + $5/1k Suchen | Keiner                           | Agent                | ⭐ hoch                       |
-| [Google Gemini](#8-google-gemini)       | `GOOGLE_GENAI_API_KEY` | Token + per-Grounding          | großzügig (`gemini-2.0-flash`)   | Agent                | ⭐ hoch                       |
+| [Google Gemini](#8-google-gemini)       | `GOOGLE_GENAI_API_KEY` | Token + per-Grounding          | großzügig (`gemini-2.0-flash`)   | Agent + Async        | ⭐ hoch                       |
 | [Anthropic Claude](#9-anthropic-claude) | `ANTHROPIC_API_KEY`    | $10/1k web_search + Tokens     | Variabel ($5 Guthaben bei Start) | Agent                | hoch                          |
 | [OpenAI](#10-openai)                    | `OPENAI_API_KEY`       | Token + per-Tool               | Nein (ab ~2024)                  | Agent + Async        | hoch                          |
 | [ScrapingBee](#11-scrapingbee-deferred) | `SCRAPINGBEE_API_KEY`  | ab $49/Mo                      | 1000 Credits Signup              | Extract              | ❌ **deferred** (Abo-Pflicht) |
@@ -217,7 +217,17 @@ Eine typische Anfrage kostet ~$0.01–0.10.
 - Grounding-Query: $35/1000 Suchen
 - `gemini-1.5-pro`: teurer
 
+**Deep Research & Deep Research Max (derselbe Key):**
+Seit 2026-04-21 deckt derselbe `GOOGLE_GENAI_API_KEY` auch die zwei neuen
+async Agents ab — `gemini-deep-research` (~$1–3/Task, Standard) und
+`gemini-deep-research-max` (~$3–7/Task, nächtliche Tiefenrecherche). Beide
+laufen über die Interactions API mit `background=true` und sind im Service
+über `POST /v1/research/async { provider: "gemini-deep-research" | "gemini-deep-research-max" }`
+erreichbar. Preview-Status — Rate-Limits niedrig, Modell-IDs enden auf
+`-preview-04-2026`. Details: [`docs/reports/gemini-deep-research.md`](../../docs/reports/gemini-deep-research.md).
+
 **Dokumentation:** https://ai.google.dev/gemini-api/docs/api-key
+**Deep-Research-Doku:** https://ai.google.dev/gemini-api/docs/deep-research
 
 **Env-Var:** `GOOGLE_GENAI_API_KEY=AIza...`
 

@@ -78,16 +78,23 @@ export const AGENT_DEFAULT_ORDER: AgentProviderId[] = [
 	'gemini-grounding', // cheap with Google Search
 	'openai-responses', // Responses API + web_search_preview
 	'claude-web-search', // high quality, higher cost
-	'openai-deep-research', // last: async, very expensive
+	// Async agents (openai-deep-research, gemini-deep-research,
+	// gemini-deep-research-max) are explicitly NOT in this list — they
+	// run via /v1/research/async with its own dispatch.
 ];
 
 export function pickAgent(config: Config): AgentProviderId | null {
+	// Async agents (openai-deep-research, gemini-deep-research*) are only
+	// reachable via POST /v1/research/async, so they are intentionally
+	// absent from AGENT_DEFAULT_ORDER and therefore never auto-picked here.
 	const envMap: Record<AgentProviderId, keyof Config['providerKeys']> = {
 		'perplexity-sonar': 'perplexity',
 		'claude-web-search': 'anthropic',
 		'openai-responses': 'openai',
 		'gemini-grounding': 'googleGenai',
 		'openai-deep-research': 'openai',
+		'gemini-deep-research': 'googleGenai',
+		'gemini-deep-research-max': 'googleGenai',
 	};
 	for (const id of AGENT_DEFAULT_ORDER) {
 		if (config.providerKeys[envMap[id]]) return id;

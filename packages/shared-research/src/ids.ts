@@ -20,6 +20,8 @@ export const AGENT_PROVIDER_IDS = [
 	'openai-responses',
 	'gemini-grounding',
 	'openai-deep-research',
+	'gemini-deep-research',
+	'gemini-deep-research-max',
 ] as const;
 
 export type SearchProviderId = (typeof SEARCH_PROVIDER_IDS)[number];

@@ -19,6 +19,7 @@ import { healthRoutes } from './routes/health';
 import { createSearchRoutes } from './routes/search';
 import { createExtractRoutes } from './routes/extract';
 import { createResearchRoutes } from './routes/research';
+import { createInternalResearchRoutes } from './routes/internal-research';
 import { createProvidersRoutes } from './routes/providers';
 import { createRunsRoutes } from './routes/runs';
 import { createProviderConfigRoutes } from './routes/provider-configs';
@@ -100,9 +101,11 @@ app.route('/api/v1/runs', createRunsRoutes(runStorage));
 app.use('/api/v1/provider-configs/*', jwtAuth(config.manaAuthUrl));
 app.route('/api/v1/provider-configs', createProviderConfigRoutes(db));
 
-// Service-to-service (X-Service-Key auth) — wired up in Phase 3 when mana-ai migrates
+// Service-to-service (X-Service-Key auth). Callers pass the target user
+// in X-User-Id so credit accounting still lands on the right wallet.
 app.use('/api/v1/internal/*', serviceAuth(config.serviceKey));
 app.get('/api/v1/internal/health', (c) => c.json({ ok: true }));
+app.route('/api/v1/internal/research', createInternalResearchRoutes(config, asyncStorage, credits));
 
 // ─── Start ──────────────────────────────────────────────────
 

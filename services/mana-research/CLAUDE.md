@@ -34,8 +34,8 @@ bun run db:studio
 
 - **Phase 1** ✅ — 4 search providers (`searxng`, `duckduckgo`, `brave`, `tavily`), `/v1/search`, `/v1/search/compare`, `/v1/runs`, `/v1/providers`, `mana-credits` reserve/commit/refund.
 - **Phase 2** ✅ — +2 search providers (`exa`, `serper`), 3 extract providers (`readability`, `jina-reader`, `firecrawl`), `/v1/extract`, `/v1/extract/compare`, query classifier + auto-router, `/v1/providers/health`.
-- **Phase 3a (current)** ✅ — 4 sync research agents (`perplexity-sonar`, `claude-web-search`, `openai-responses`, `gemini-grounding`), `/v1/research`, `/v1/research/compare`, agent auto-router.
-- **Phase 3b** — `openai-deep-research` (async via job queue), mana-ai migration to call mana-research, `research_news` tool gets `depth: shallow|deep` option, mana-api news-research becomes thin adapter.
+- **Phase 3a** ✅ — 4 sync research agents (`perplexity-sonar`, `claude-web-search`, `openai-responses`, `gemini-grounding`), `/v1/research`, `/v1/research/compare`, agent auto-router.
+- **Phase 3b (current)** ✅ — async agents `openai-deep-research`, `gemini-deep-research`, `gemini-deep-research-max` via `research.async_jobs` queue. User-facing `/v1/research/async`, service-to-service `/v1/internal/research/async` (used by mana-ai's cross-tick deep-research flow). See [`docs/reports/gemini-deep-research.md`](../../docs/reports/gemini-deep-research.md).
 - **Phase 4** — Research Lab UI + Settings for BYO-keys.
 
 ## API Endpoints
@@ -65,7 +65,15 @@ bun run db:studio
 
 ### Service-to-service (X-Service-Key)
 
-Reserved for Phase 3 when `mana-ai` migrates to call this service directly. `/api/v1/internal/health` exists as a placeholder.
+All `/api/v1/internal/*` routes require `X-Service-Key: <MANA_SERVICE_KEY>`. Endpoints that touch per-user state additionally require `X-User-Id: <userId>` so credit reservations + eval-run rows land on the right user.
+
+| Method | Path | Description |
+|---|---|---|
+| GET | `/api/v1/internal/health` | Placeholder health probe. |
+| POST | `/api/v1/internal/research/async` | Submit async research job. Body: `{ query, provider, options? }` where `provider ∈ { openai-deep-research, gemini-deep-research, gemini-deep-research-max }`. Requires `X-User-Id`. |
+| GET | `/api/v1/internal/research/async/:id` | Poll status / read completed result. Requires `X-User-Id` (same user as submit). |
+
+Caller today: **mana-ai** (`ManaResearchClient`), which fires deep-research-max tasks from the tick-loop's pre-planning step for missions that opt in via `DEEP_RESEARCH_TRIGGER`.
 
 ## Providers
 
@@ -96,7 +104,9 @@ Reserved for Phase 3 when `mana-ai` migrates to call this service directly. `/ap
 | `gemini-grounding` | `GOOGLE_GENAI_API_KEY` | 100 | Gemini + Google Search grounding. Single-step. |
 | `openai-responses` | `OPENAI_API_KEY` | 200 | Responses API with `web_search_preview` tool. Multi-step. |
 | `claude-web-search` | `ANTHROPIC_API_KEY` | 200 | Claude + `web_search_20250305` tool, up to 5 searches/call. |
-| `openai-deep-research` | `OPENAI_API_KEY` | 1000 | ⏳ Phase 3b — async, returns taskId to poll. |
+| `openai-deep-research` | `OPENAI_API_KEY` | 1000 | async, returns taskId to poll. |
+| `gemini-deep-research` | `GOOGLE_GENAI_API_KEY` | 300 | async, Gemini 3.1 Pro preview (04-2026). Standard tier, ~minutes. |
+| `gemini-deep-research-max` | `GOOGLE_GENAI_API_KEY` | 1500 | async, Gemini 3.1 Pro preview (04-2026). Max tier, up to 60 min, deep synthesis. |
 
 ## Auto-routing
 

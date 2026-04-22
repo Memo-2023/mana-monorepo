@@ -31,6 +31,12 @@ export const PROVIDER_PRICING: Record<
 	'openai-responses': { research: 200 },
 	'gemini-grounding': { research: 100 },
 	'openai-deep-research': { research: 1000 },
+	// Gemini Deep Research (preview-04-2026). Google lists $1–3 per standard
+	// task and $3–7 per Max task. 1 credit ≈ 1 cent EUR, so $3 ≈ 300 credits
+	// and a Max task can hit ~$7 ≈ 700 credits with markup → start
+	// conservative (see docs/reports/gemini-deep-research.md §4).
+	'gemini-deep-research': { research: 300 },
+	'gemini-deep-research-max': { research: 1500 },
 };
 
 export function priceFor(
