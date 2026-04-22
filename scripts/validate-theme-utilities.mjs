@@ -100,7 +100,14 @@ function validate() {
 
 	for (const rel of paths) {
 		const abs = join(REPO_ROOT, rel);
-		const src = readFileSync(abs, 'utf8');
+		// Skip files that git knows about but haven't landed on disk yet —
+		// common mid-rename/mid-move state in multi-terminal sessions.
+		let src;
+		try {
+			src = readFileSync(abs, 'utf8');
+		} catch {
+			continue;
+		}
 		const lines = src.split('\n');
 
 		const brandOverlay = BRAND_OVERLAY_FILES.has(rel);

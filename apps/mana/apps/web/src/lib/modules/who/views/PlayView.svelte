@@ -163,18 +163,18 @@
 	{#if game && game.status !== 'playing'}
 		<div
 			class="border-b border-border/5 px-4 py-3 {game.status === 'won'
-				? 'bg-emerald-500/10'
-				: 'bg-amber-500/10'}"
+				? 'bg-success/10'
+				: 'bg-warning/10'}"
 		>
 			{#if game.status === 'won'}
-				<p class="text-sm font-medium text-emerald-300">
+				<p class="text-sm font-medium text-success">
 					Erraten in {game.messageCount} Nachrichten!
 				</p>
 				<p class="mt-0.5 text-xs text-muted-foreground">
 					Das war {game.revealedName}.
 				</p>
 			{:else}
-				<p class="text-sm font-medium text-amber-300">Spiel beendet — aufgegeben.</p>
+				<p class="text-sm font-medium text-warning">Spiel beendet — aufgegeben.</p>
 			{/if}
 		</div>
 	{/if}
@@ -214,7 +214,7 @@
 	</div>
 
 	{#if error}
-		<div class="border-t border-red-500/20 bg-red-500/10 px-3 py-2 text-xs text-red-300">
+		<div class="border-t border-error/20 bg-error/10 px-3 py-2 text-xs text-error">
 			{error}
 		</div>
 	{/if}
@@ -228,7 +228,7 @@
 					onkeydown={onInputKeydown}
 					placeholder="Frag mich etwas…"
 					rows="1"
-					class="flex-1 resize-none rounded-lg border border-border/10 bg-muted/5 px-3 py-2 text-sm text-foreground placeholder-white/30 focus:border-purple-400/50 focus:outline-none"
+					class="flex-1 resize-none rounded-lg border border-border/10 bg-muted/5 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-primary/50 focus:outline-none"
 					disabled={sending}
 				></textarea>
 				<button
@@ -282,7 +282,7 @@
 				bind:value={guessText}
 				onkeydown={(e) => e.key === 'Enter' && submitGuess()}
 				placeholder="z.B. Marie Curie"
-				class="mb-3 w-full rounded-lg border border-border/10 bg-muted/5 px-3 py-2 text-sm text-foreground placeholder-white/30 focus:border-purple-400/50 focus:outline-none"
+				class="mb-3 w-full rounded-lg border border-border/10 bg-muted/5 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-primary/50 focus:outline-none"
 				autofocus
 			/>
 			<div class="flex justify-end gap-2">

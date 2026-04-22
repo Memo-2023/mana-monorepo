@@ -49,9 +49,10 @@ Files: `lib/modules/citycorners/types.ts`
 
 ### `who` — historical-persona guessing game
 
-| Purpose      | Colors                                                                          | Why literal                                                  |
-| ------------ | ------------------------------------------------------------------------------- | ------------------------------------------------------------ |
-| Deck accents | `#a855f7` historical, `#ec4899` women, `#f59e0b` antiquity, `#0ea5e9` inventors | Per-deck identity; colour primes the player about era/theme. |
+| Purpose                          | Colors                                                                          | Why literal                                                                                                                                                                                  |
+| -------------------------------- | ------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Deck accents                     | `#a855f7` historical, `#ec4899` women, `#f59e0b` antiquity, `#0ea5e9` inventors | Per-deck identity; colour primes the player about era/theme.                                                                                                                                 |
+| User chat bubble + submit button | `bg-purple-500/30`, `bg-purple-500`, `hover:bg-purple-600`                      | Module's primary identity colour (ties to the historical deck); stays literal across themes. Semantic status colours (won/surrendered/error) migrated to `success`/`warning`/`error` tokens. |
 
 Files: `lib/modules/who/ListView.svelte`, `lib/modules/who/views/PlayView.svelte`
 
