@@ -573,6 +573,42 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	// structural fields.
 	agents: { enabled: true, fields: ['systemPrompt', 'memory'] },
 
+	// ─── AI Missions ─────────────────────────────────────────
+	// docs/plans/space-scoped-data-model.md §2a — declared with
+	// enabled:false during prep so the audit script is happy; flips to
+	// true in 2c alongside the Dexie v35 encryption migration.
+	//
+	// User-typed content on missions: `title` (display label the user
+	// types at create time), `conceptMarkdown` (free-form context the
+	// planner reads), `objective` (the actionable goal string). State,
+	// cadence, inputs (FK-only), nextRunAt, iterations, agentId all
+	// stay plaintext — needed for the Runner's "due now" index walk
+	// and mission-detail filters.
+	aiMissions: { enabled: false, fields: ['title', 'conceptMarkdown', 'objective'] },
+
+	// ─── Tags (shared-stores) ────────────────────────────────
+	// docs/plans/space-scoped-data-model.md §2a — declared with
+	// enabled:false during prep; flips to true in 2c. Tag names like
+	// "Therapie" or "Finanzen-privat" can leak personal categorization,
+	// so they belong under encryption. `color` + `icon` + `groupId` +
+	// `sortOrder` stay plaintext: they're visual metadata + the group
+	// FK, none of which leak sensitive taxonomy. `name` is NOT indexed
+	// for .where() lookups today, so encrypting it is safe — dedupe-
+	// within-space lookups go through the new [spaceId+name] index after
+	// Phase 2b and run over already-decrypted rows in the scoped store.
+	globalTags: { enabled: false, fields: ['name'] },
+	tagGroups: { enabled: false, fields: ['name'] },
+
+	// ─── Workbench Scenes ────────────────────────────────────
+	// docs/plans/space-scoped-data-model.md §2a — declared with
+	// enabled:false during prep; flips to true in 2c. `name` is the
+	// user-visible scene label ("Heute", "Q2-Launch") and `description`
+	// is the short subtitle — both are user-typed free text that can
+	// leak Space-specific context. openApps / order / wallpaper /
+	// viewingAsAgentId / scopeTagIds stay plaintext (structural /
+	// indexed / foreign-key data).
+	workbenchScenes: { enabled: false, fields: ['name', 'description'] },
+
 	// ─── Articles (Pocket-style read-it-later) ──────────────
 	// Reading-behaviour data — same sensitivity class as newsArticles.
 	// Encrypted:

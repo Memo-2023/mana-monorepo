@@ -19,7 +19,6 @@
 export const PLAINTEXT_ALLOWLIST: readonly string[] = [
 	'achievements', // TODO: audit
 	'activities', // TODO: audit
-	'aiMissions', // TODO: audit
 	'albumItems', // TODO: audit
 	'albums', // TODO: audit
 	'articleTags', // FK-only junction into globalTags (articleId, tagId). Tag names live in globalTags.
@@ -50,7 +49,6 @@ export const PLAINTEXT_ALLOWLIST: readonly string[] = [
 	'fileTags', // TODO: audit
 	'financeCategories', // TODO: audit
 	'foodFavorites', // TODO: audit
-	'globalTags', // TODO: audit
 	'goals', // TODO: audit
 	'guideCollections', // TODO: audit
 	'guideTags', // TODO: audit
@@ -99,7 +97,6 @@ export const PLAINTEXT_ALLOWLIST: readonly string[] = [
 	'songTags', // TODO: audit
 	'spaceMembers', // TODO: audit
 	'storageFolders', // TODO: audit
-	'tagGroups', // TODO: audit
 	'taskLabels', // TODO: audit
 	'timeAlarms', // TODO: audit
 	'timeBlockTags', // TODO: audit
@@ -121,5 +118,4 @@ export const PLAINTEXT_ALLOWLIST: readonly string[] = [
 	'wishesItems', // TODO: audit
 	'wishesLists', // TODO: audit
 	'wishesPriceChecks', // TODO: audit
-	'workbenchScenes', // TODO: audit
 ];
