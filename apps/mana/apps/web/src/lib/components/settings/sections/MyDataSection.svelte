@@ -20,13 +20,7 @@
 	import DeleteConfirmationModal from '$lib/components/my-data/DeleteConfirmationModal.svelte';
 	import QRExportModal from '$lib/components/my-data/QRExportModal.svelte';
 	import { myDataService, type UserDataSummary } from '$lib/api/services/my-data';
-	import { backupService } from '$lib/api/services/backup';
-	import {
-		importBackup,
-		BackupImportError,
-		type ImportProgress,
-		type ImportResult,
-	} from '$lib/data/backup/import';
+	import ExportImportPanel from '$lib/components/my-data/ExportImportPanel.svelte';
 	import type { DeleteUserDataResponse } from '$lib/api/services/admin';
 	import { authStore } from '$lib/stores/auth.svelte';
 
@@ -41,69 +35,6 @@
 	let deleteError = $state<string | null>(null);
 
 	let showQRDialog = $state(false);
-
-	let backupLoading = $state(false);
-	let backupError = $state<string | null>(null);
-
-	let importInput = $state<HTMLInputElement | null>(null);
-	let importing = $state(false);
-	let importProgress = $state<ImportProgress | null>(null);
-	let importResult = $state<ImportResult | null>(null);
-	let importError = $state<string | null>(null);
-
-	async function handleBackupDownload() {
-		backupLoading = true;
-		backupError = null;
-		try {
-			await backupService.downloadBackup();
-		} catch (e) {
-			backupError = e instanceof Error ? e.message : 'Backup fehlgeschlagen';
-		} finally {
-			backupLoading = false;
-		}
-	}
-
-	async function handleImportFileChange(e: Event) {
-		const input = e.currentTarget as HTMLInputElement;
-		const file = input.files?.[0];
-		input.value = '';
-		if (!file) return;
-
-		importing = true;
-		importError = null;
-		importResult = null;
-		importProgress = { phase: 'parsing', applied: 0, total: 0 };
-
-		try {
-			const result = await importBackup(file, {
-				onProgress: (p) => (importProgress = p),
-			});
-			importResult = result;
-		} catch (e) {
-			if (e instanceof BackupImportError) {
-				importError = `${e.kind}: ${e.message}`;
-			} else {
-				importError = e instanceof Error ? e.message : 'Import fehlgeschlagen';
-			}
-		} finally {
-			importing = false;
-		}
-	}
-
-	function importProgressLabel(p: ImportProgress): string {
-		switch (p.phase) {
-			case 'parsing':
-				return 'Archiv wird entpackt…';
-			case 'validating':
-				return 'Manifest & Integrität werden geprüft…';
-			case 'applying':
-				return p.currentAppId
-					? `Wende Events an (${p.applied}/${p.total}) — ${p.currentAppId}`
-					: `Wende Events an (${p.applied}/${p.total})`;
-			case 'done':
-				return `Fertig — ${p.applied} Events eingespielt`;
-		}
-	}
 
 	async function loadMyData() {
 		loading = true;
@@ -442,92 +373,8 @@
 		</div>
 	</SettingsPanel>
 
-	<!-- Backup & Wiederherstellung ─────────────────────────── -->
-	<SettingsPanel id="backup">
-		<SettingsSectionHeader
-			icon={DownloadSimple}
-			title="Backup & Wiederherstellung"
-			description="Vollständige Kopie deiner synchronisierten Daten als .mana-Archiv"
-			tone="indigo"
-		/>
-		<div class="rows">
-			<div class="row">
-				<div class="row-info">
-					<p class="row-title">Backup herunterladen</p>
-					<p class="row-desc">
-						ZIP mit Event-Stream + Integritäts-Hash. Sensible Felder bleiben verschlüsselt.
-					</p>
-				</div>
-				<button
-					type="button"
-					class="btn-primary-sm"
-					onclick={handleBackupDownload}
-					disabled={backupLoading}
-				>
-					<DownloadSimple size={14} />
-					<span>{backupLoading ? 'Lade…' : 'Herunterladen'}</span>
-				</button>
-			</div>
-			<div class="row">
-				<div class="row-info">
-					<p class="row-title">Backup einspielen</p>
-					<p class="row-desc">Nur Backups deines eigenen Accounts werden akzeptiert.</p>
-				</div>
-				<button
-					type="button"
-					class="btn-secondary-sm"
-					onclick={() => importInput?.click()}
-					disabled={importing}
-				>
-					<UploadSimple size={14} />
-					<span>{importing ? 'Importiere…' : 'Datei wählen…'}</span>
-				</button>
-			</div>
-		</div>
-
-		<input
-			bind:this={importInput}
-			type="file"
-			accept=".mana,application/zip"
-			onchange={handleImportFileChange}
-			disabled={importing}
-			class="hidden-input"
-		/>
-
-		{#if backupError}
-			<p class="error-text">{backupError}</p>
-		{/if}
-
-		{#if importProgress}
-			<div class="import-progress">
-				<p class="progress-label">{importProgressLabel(importProgress)}</p>
-				{#if importProgress.total > 0}
-					<div class="progress-bar">
-						<div
-							class="progress-fill"
-							style="width: {Math.min(
-								100,
-								Math.round((importProgress.applied / importProgress.total) * 100)
-							)}%"
-						></div>
-					</div>
-				{/if}
-			</div>
-		{/if}
-
-		{#if importResult}
-			<p class="success-text">
-				<CheckCircle size={14} weight="fill" />
-				{importResult.appliedEvents} Events aus Backup vom {formatDate(
-					importResult.manifest.createdAt
-				)} eingespielt ({importResult.manifest.apps.length} Apps).
-			</p>
-		{/if}
-
-		{#if importError}
-			<p class="error-text">{importError}</p>
-		{/if}
-	</SettingsPanel>
+	<!-- Export & Import ─────────────────────────────────────── -->
+	<ExportImportPanel />
 
 	<!-- Gefahrenzone ───────────────────────────────────────── -->
 	<SettingsPanel id="danger-zone">

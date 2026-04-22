@@ -501,95 +501,95 @@ Pre-existing Test-Failures (nicht von dieser Audit-Arbeit verursacht):
 
 Die Datenschicht ist jetzt **production-grade** in den Dimensionen Korrektheit, Sicherheit, **Vertraulichkeit** (inkl. optionaler **Zero-Knowledge-Modus**), Robustheit, Beobachtbarkeit, Performance und Testabdeckung.
 
-## 8. Backup & Restore (Sync-Stream-Export)
+## 8. Data Export / Import (v2, ab 2026-04-22)
 
-Der Sync-Event-Log ist bereits eine saubere, LWW-geordnete, schema-versionierte Serialisierung aller Nutzerdaten — also nutzen wir ihn als Backup-Format statt eine zweite parallele Serializer-Schicht zu bauen.
+Pre-launch Umbau: der alte server-seitige Sync-Stream-Export (`GET /backup/export`) ist weg. Data-Export ist jetzt **rein client-driven** — der Webapp liest seine lokale Dexie, entschlüsselt pro Feld, baut ein portables Snapshot-Archiv und bietet optional einen Passphrase-Wrap an.
 
-### Architektur — eine Datei, beide Richtungen
+### Warum Client-driven
+
+- **Zero-Knowledge-User** halten ihren Vault-Key ausschließlich client-seitig — ein Server-Exporter kann für sie prinzipiell kein Klartext-Archiv erzeugen.
+- **GDPR Art. 20** (Datenportabilität) erwartet ein maschinenlesbares Format, das der Nutzer außerhalb des Anbieters auswerten kann. Ciphertext-Blob, den nur eine laufende Mana-Installation wieder aufschließen kann, erfüllt das nicht.
+- **Modul-selektives Export** (nur Todo + Notes, nicht alles) ist intrinsisch eine Client-Entscheidung. Der Server hat kein Business zu wissen, welche Subset ein User rausgibt.
+
+### Architektur
 
 ```
 EXPORT                                        IMPORT
 ────────────────────────────────────────────  ────────────────────────────────────────────
-mana-sync DB                                  .mana (ZIP)
- └─ sync_changes WHERE user_id = $1             ├─ events.jsonl   ──┐
-    │                                           └─ manifest.json    │ parseBackup()
-    ▼                                                                ▼
- WriteBackup(w, userID, createdAt, iter)      authStore.user.id match?   ┐
-    │  streams                                 eventsSha256 match?       │ validate
-    ├─ events.jsonl  (JSON Lines)              schemaVersionMax ≤ client?┘
-    └─ manifest.json                                                     │
-                                                                          ▼
-                                              iterateEvents() → toSyncChange()
-                                                                          │
-                                                                          ▼
-                                              applyServerChanges(appId, batch)
-                                                                          │ (batches of 300)
-                                                                          ▼
-                                                                   IndexedDB (via Dexie hooks, suppressed)
+Dexie (this device, this session's vault)    .mana Archiv
+ └─ iterate MODULE_CONFIGS[*].tables            ├─ manifest.json
+    │                                           ├─ data/*.jsonl         (oder)
+    ▼                                           └─ data.sealed          (AES-GCM-gewrapped)
+ decryptRecords(table, rows)                      │
+    │                                             ▼
+    ▼                                           readBackup() → parseManifest()
+ build manifest + data/*.jsonl                    │
+    │   optional:                                 ▼ (falls gesealed)
+    ▼   seal(passphrase, innerBody)            unseal(passphrase, sealed, wrap)
+  buildBackup / buildSealedBackup                 │
+    │                                             ▼
+    ▼                                           applyClientBackup:
+  .mana ZIP (hand-gerollt + pako deflate)        delete row.userId  (adoption durch Hook)
+                                                 encryptRecord(table, row)  ← mit ZIEL-Account-Key
+                                                 db.table(table).bulkPut(prepared)
 ```
 
-Same-Account-Restore funktioniert ohne Server-Roundtrip: Events liegen schon auf mana-sync, LWW würde sowieso dedupen. Cross-Account-Migration (anderer User auf neuem Gerät) braucht den MK-Transfer-Pfad — siehe Backlog.
+**Cross-Account-Restore funktioniert**, ohne dass ein Master-Key transferiert werden muss: Export entschlüsselt, Import re-verschlüsselt mit dem _neuen_ Vault-Key. Zero-Knowledge-User, die ihren Recovery-Code verloren haben, können sich so auch selbst wieder rein-restoren.
 
-### `.mana`-Dateiformat (Version 1)
+### `.mana`-Format (v2)
 
-ZIP-Archiv mit genau zwei Einträgen, beide DEFLATE-komprimiert:
+Hand-gerollter ZIP (PKZIP, Store + Deflate via `pako`), genau ein stabiler Header, zwei Payload-Formen:
 
-| Entry           | Inhalt                                                                                                                             |
-| --------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `events.jsonl`  | Eine JSON-Zeile pro `sync_changes`-Row, chronologisch                                                                              |
-| `manifest.json` | Header mit `formatVersion`, `schemaVersion`, `userId`, `eventCount`, `eventsSha256`, `apps[]`, `createdAt`, `schemaVersionMin/Max` |
+| Entry                | Plain-Export   | Sealed-Export  |
+| -------------------- | -------------- | -------------- |
+| `manifest.json`      | ✅ lesbar      | ✅ lesbar      |
+| `data/{table}.jsonl` | ✅ Plain-JSONL | —              |
+| `data.sealed`        | —              | ✅ AES-GCM-256 |
+| `README.txt`         | optional       | optional       |
 
-**Event-Zeile**:
+`manifest.json` trägt `formatVersion: 2`, `schemaVersion` (Dexie `db.verno`), `producedBy`, `exportedAt`, `userId`, `scope` (`full` oder `filtered` mit `appIds[]`), `rowCounts`, `fieldsPlaintext: true` und — bei Sealed — den `passphrase`-Block mit KDF-Parametern (`pbkdf2-sha256`, 600k Iterationen, 16-byte Salt, 12-byte IV).
+
+**JSONL-Zeile** (Plain):
 
 ```json
-{"eventId":"uuid","schemaVersion":1,"appId":"todo","table":"tasks","id":"task-1","op":"update","data":{...},"fieldTimestamps":{...},"clientId":"...","createdAt":"2026-..."}
+{"id":"task-1","userId":"...","title":"Einkaufen","order":3,"createdAt":"...","__fieldTimestamps":{...}}
 ```
 
-Verschlüsselte Felder bleiben Ciphertext — die `.mana`-Datei ist für die 27 Encryption-Registry-Tabellen **at-rest verschlüsselt**. Plaintext-Felder (IDs, Sort-Keys, Timestamps) stehen lesbar drin (GDPR-Portabilitäts-Anspruch).
+Verschlüsselte Felder aus der Encryption-Registry sind **hier im Klartext** — der Sinn des Exports. Wer das Archiv trotzdem verschlüsselt haben will, aktiviert den Passphrase-Wrap.
 
-### Protokoll-Stability-Contract (M2, pre-launch gehärtet)
+### Passphrase-Seal
 
-Ab v1 sind diese Felder unveränderlich im Event-Shape:
-
-- `eventId: uuid` — stabiler Primary-Key, client-seitiger Dedup
-- `schemaVersion: number` — ermöglicht Migration-Chain für künftige Protokoll-Änderungen
-- `op: "insert" | "update" | "delete"` — Vokabular eingefroren
-- `fields` = kanonisch für LWW-Merges, `data` = Snapshot-only für Inserts
-- Tombstones (Deletes) bleiben für immer in `sync_changes` — sonst kein vollständiges Backup
-
-**Pre-M2-Clients** (kein `schemaVersion` auf dem Wire) werden server-seitig auf v1 geklemmt. Ein Client mit `schemaVersion > MaxSupported` wird mit 400 abgelehnt.
-
-### Encryption-Boundary bleibt intakt
-
-Der Backup-Pfad **berührt nie Plaintext**:
-
-1. Feld-Level-Ciphertext liegt bereits verschlüsselt in `sync_changes.data`
-2. `WriteBackup` liest Bytes 1:1 und streamt sie in den ZIP
-3. Import-Seite ruft `applyServerChanges()` — das gleiche Pfad, den Live-Sync benutzt — was in IndexedDB landet, fließt durch den normalen `decryptRecords()`-Pfad beim Lesen, nicht beim Schreiben
-
-Zero-Knowledge-User: bis zum MK-Transfer-Pfad (M5) können sie sich selbst restoren (gleicher Account, gleicher Recovery-Code schon aktiv) — aber kein Account-Wechsel ohne Recovery-Code.
+- **KDF**: PBKDF2-SHA256, 600 000 Iterationen (OWASP 2024)
+- **Cipher**: AES-GCM-256
+- **Integrity**: GCM-AuthTag + separater sha256 über den Plaintext-Body → bei falscher Passphrase wirft `unseal()` `PassphraseError` (mit freundlicher Meldung), bei echter Korruption `BackupParseError`
+- **Min-Länge**: UI erzwingt 12 Zeichen vor dem Aufruf
 
 ### Dateien
 
-| Pfad                                                                | Rolle                                                                                    |
-| ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| `services/mana-sync/internal/backup/writer.go`                      | Pure `WriteBackup()` — streaming ZIP + sha256-Tee                                        |
-| `services/mana-sync/internal/backup/handler.go`                     | HTTP-Shim für `GET /backup/export` (auth-only, kein billing-gate)                        |
-| `services/mana-sync/internal/backup/writer_test.go`                 | 4 Go-Tests (Round-Trip, empty, legacy-v0-clamping)                                       |
-| `services/mana-sync/internal/store/postgres.go`                     | `StreamAllUserChanges()` — cursor-freier Stream über alle Events eines Users, RLS-scoped |
-| `apps/mana/apps/web/src/lib/data/backup/format.ts`                  | Hand-gerollter ZIP-Parser + sha256-Recompute (nutzt `pako` für Inflate)                  |
-| `apps/mana/apps/web/src/lib/data/backup/import.ts`                  | Replay-Logik: validate → iterate → batch → `applyServerChanges`                          |
-| `apps/mana/apps/web/src/lib/data/backup/format.test.ts`             | 8 Vitest-Tests für den Parser (synthetische PKZIP-Bytes)                                 |
-| `apps/mana/apps/web/src/lib/api/services/backup.ts`                 | Browser-seitiger Download-Helper                                                         |
-| `apps/mana/apps/web/src/routes/(app)/settings/my-data/+page.svelte` | UI: Download + File-Picker + Progress                                                    |
+| Pfad                                                                           | Rolle                                                                |
+| ------------------------------------------------------------------------------ | -------------------------------------------------------------------- |
+| `apps/mana/apps/web/src/lib/data/backup/v2/format.ts`                          | PKZIP-Writer + Reader, Manifest-Schema, CRC32, sha256-Helper         |
+| `apps/mana/apps/web/src/lib/data/backup/v2/passphrase.ts`                      | `seal()` / `unseal()` — PBKDF2 + AES-GCM via Web Crypto              |
+| `apps/mana/apps/web/src/lib/data/backup/v2/export.ts`                          | `buildClientBackup()` — walk MODULE_CONFIGS → decryptRecords → JSONL |
+| `apps/mana/apps/web/src/lib/data/backup/v2/import.ts`                          | `applyClientBackup()` — strip userId → encryptRecord → `bulkPut`     |
+| `apps/mana/apps/web/src/lib/components/my-data/ExportImportPanel.svelte`       | UI: Modul-Auswahl, Passphrase-Toggle, Progress, Sealed-File-Prompt   |
+| `apps/mana/apps/web/src/lib/components/settings/sections/MyDataSection.svelte` | Mount-Point in Settings                                              |
 
-### Offene Punkte (Backup-Backlog)
+### Encryption-Boundary
 
-- **M5 (Cross-Account-Restore)**: `manifest.encryption.mkWrap` mit KEK-wrapped MK befüllen; neuer `POST /me/vault/import-mk` in `mana-auth`; Zero-Knowledge-Pfad via Recovery-Code-Eingabe beim Import
-- **M4b (Bulk-Ingest-Endpoint)**: `POST /sync/{appId}/ingest` damit importierte Events auch server-seitig auf dem neuen Account landen (nur relevant bei Cross-Account)
-- **Signatur**: Ed25519 über `manifest.json` gegen Tampering — heute nur sha256 über events.jsonl
-- **Resumable Download**: Multi-GB-Accounts werden irgendwann fraglich im Browser
-- **`_appliedEventIds` Dedup-Tabelle**: Performance-Optimierung für Re-Import (heute macht LWW den Dedup, aber wir verarbeiten trotzdem jedes Event)
+Der neue Pfad **bricht die at-rest Boundary bewusst**: der Exporter entschlüsselt, bevor er in die JSONL schreibt. Das ist ausdrücklich Teil der Zweckbestimmung (Portabilität). Wer das nicht will, sealt mit Passphrase — dann ist das Archiv `.sealed` und außerhalb von Mana unbrauchbar, aber auch für jemanden mit Zugriff auf die Datei ohne Passphrase.
+
+### Schema-Compat
+
+Der Importer akzeptiert Archive mit `schemaVersion ∈ [current - 2, current]`. Exports aus der Zukunft (User hat Mana downgegradet) werden abgelehnt. Unbekannte Tabellen (Modul wurde seither entfernt) werden still übersprungen, nicht als Fehler behandelt.
+
+### Ausdrücklich nicht übernommen aus v1
+
+- Kein server-seitiger `/backup/export` mehr — Route + `services/mana-sync/internal/backup/` wurde in einem Rutsch entfernt, keine Parallelpfade.
+- Keine `sync_changes`-Event-Stream-Serialisierung im Archiv — direkter Dexie-Snapshot ist für den Use-Case "Daten mitnehmen / sichern" ehrlicher und kleiner.
+- Kein MK-Wrap-Transfer — Cross-Account funktioniert durch Re-Encryption mit dem Ziel-Vault-Key, nicht durch Key-Transplant.
+
+Plan: [`docs/plans/data-export-v2.md`](../../../../../../docs/plans/data-export-v2.md).
 
 ## 9. Actor-Attribution & AI-Workbench (ab 2026-04-14)
 
