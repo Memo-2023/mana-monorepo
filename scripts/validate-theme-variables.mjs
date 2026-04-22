@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Audit Theme Tokens
+ * Validate theme CSS variable names.
  *
  * The Mana theme system standardizes on `--color-*` CSS custom properties
  * (defined in `packages/shared-tailwind/src/themes.css`). Earlier, components
@@ -10,12 +10,15 @@
  * references silently fell back to nothing (or to literal fallbacks) and
  * stopped tracking the active theme variant.
  *
- * This audit greps Svelte/CSS/TS source files for those legacy patterns
+ * This check greps Svelte/CSS/TS source files for those legacy patterns
  * and fails if any remain. Run in CI and lint-staged so the drift can't
  * sneak back in.
  *
+ * Companion check: `validate-theme-utilities.mjs` enforces theme-token
+ * Tailwind classes (e.g. `text-foreground` instead of `text-white/80`).
+ *
  * Usage:
- *   node scripts/audit-theme-tokens.mjs
+ *   node scripts/validate-theme-variables.mjs
  */
 
 import { readdirSync, statSync, readFileSync } from 'fs';

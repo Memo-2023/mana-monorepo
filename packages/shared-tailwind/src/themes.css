@@ -35,12 +35,15 @@
  *      ✅  color: hsl(var(--color-foreground));
  *      ✅  background: hsl(var(--color-primary) / 0.12);
  *
- *   4. Brand-literal colors (period pink, observatory cosmic scenes, the
- *      automations/spiral indigo→violet ramp, sport/category palettes, the
- *      photo viewer's near-black backdrop, etc.) deliberately stay as
- *      literal hex/rgba/hsl. They are NOT theme intent — they encode brand
- *      or domain semantics that must look the same under every theme
- *      variant. Don't migrate them to tokens.
+ *   4. Brand-literal colors (period pink, photo-viewer near-black backdrop,
+ *      skilltree branch accents, spiral indigo→violet ramp, calc retro
+ *      skins, etc.) deliberately stay as literal hex/rgba/hsl. They are
+ *      NOT theme intent — they encode brand or domain semantics that must
+ *      look the same under every theme variant. Don't migrate them to
+ *      tokens. The complete inventory with per-module rationale lives in
+ *      packages/shared-tailwind/brand-literals.md — add to that register
+ *      when introducing a new literal, or prefer a theme token if the
+ *      colour is not domain-semantic.
  *
  *   5. Token names are stable. There is intentionally NO `--color-info`,
  *      `--color-text`, `--color-destructive`, `--color-surface`, or
