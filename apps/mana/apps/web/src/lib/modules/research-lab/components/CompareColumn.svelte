@@ -20,8 +20,16 @@
 
 	const { category, entry, runId }: Props = $props();
 
+	// Local optimistic rating — seed from the current entry, then keep in sync
+	// via $effect when the parent swaps the prop. The seed-only read of
+	// entry.userRating is intentional; the $effect covers prop updates.
+	// svelte-ignore state_referenced_locally
 	let rating = $state(entry.userRating ?? 0);
 	let ratingError = $state<string | null>(null);
+
+	$effect(() => {
+		rating = entry.userRating ?? 0;
+	});
 
 	async function setRating(value: number) {
 		if (!runId || !entry.resultId) return;

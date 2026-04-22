@@ -135,6 +135,8 @@
 				class="toggle"
 				class:on={userSettings.general?.soundsEnabled ?? true}
 				onclick={() => setSounds(!(userSettings.general?.soundsEnabled ?? true))}
+				aria-label="Sounds ein- oder ausschalten"
+				aria-pressed={userSettings.general?.soundsEnabled ?? true}
 			>
 				<span class="toggle-knob"></span>
 			</button>

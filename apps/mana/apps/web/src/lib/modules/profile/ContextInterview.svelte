@@ -562,6 +562,8 @@
 						class:active={i === currentQuestionIdx}
 						class:answered={answeredSet.has(categoryQuestions[i].id)}
 						onclick={() => (currentQuestionIdx = i)}
+						aria-label="Frage {i + 1}"
+						aria-current={i === currentQuestionIdx ? 'step' : undefined}
 					></button>
 				{/each}
 			</div>

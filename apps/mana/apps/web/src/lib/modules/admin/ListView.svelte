@@ -26,6 +26,9 @@
 
 	let { initialTab = 'overview' }: Props = $props();
 
+	// initialTab is an entry-point default only — we deliberately ignore later prop
+	// changes because the user may have switched tabs since mount.
+	// svelte-ignore state_referenced_locally
 	let activeTab = $state<TabId>(initialTab);
 	let isAdmin = $derived(authStore.user?.role === 'admin');
 

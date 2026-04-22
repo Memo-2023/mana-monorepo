@@ -65,6 +65,18 @@
 		5: 'Fr',
 		6: 'Sa',
 	};
+
+	// Enter / Space on a non-button click-target counts as activation, same
+	// as a button would. Used to make the "tap a section to edit" surfaces
+	// keyboard-accessible without rewriting the whole card layout.
+	function onActivate(handler: () => void) {
+		return (e: KeyboardEvent) => {
+			if (e.key === 'Enter' || e.key === ' ') {
+				e.preventDefault();
+				handler();
+			}
+		};
+	}
 </script>
 
 <div class="overview">
@@ -108,9 +120,15 @@
 						<button class="edit-btn primary" onclick={() => saveEdit('about.bio')}>Speichern</button
 						>
 					</div>
-				{:else}<p class="section-text" onclick={() => startEdit('about.bio', ctx?.about?.bio)}>
+				{:else}<div
+						class="section-text"
+						role="button"
+						tabindex="0"
+						onclick={() => startEdit('about.bio', ctx?.about?.bio)}
+						onkeydown={onActivate(() => startEdit('about.bio', ctx?.about?.bio))}
+					>
 						{ctx?.about?.bio}
-					</p>{/if}
+					</div>{/if}
 			</section>
 		{/if}
 
@@ -144,7 +162,13 @@
 					</div>
 				</div>
 			{:else if ctx?.interests?.length}
-				<div class="tags-list" onclick={() => startEdit('interests', ctx?.interests ?? [])}>
+				<div
+					class="tags-list"
+					role="button"
+					tabindex="0"
+					onclick={() => startEdit('interests', ctx?.interests ?? [])}
+					onkeydown={onActivate(() => startEdit('interests', ctx?.interests ?? []))}
+				>
 					{#each ctx.interests as tag (tag)}<span class="tag">{tag}</span>{/each}
 				</div>
 			{:else}
@@ -162,7 +186,13 @@
 		<section class="section-card">
 			<h3 class="section-title">Tagesablauf</h3>
 			{#if ctx?.routine && (ctx.routine.wakeUp || ctx.routine.workStart || ctx.routine.bedtime)}
-				<div class="routine-grid" onclick={() => onStartInterview()}>
+				<div
+					class="routine-grid"
+					role="button"
+					tabindex="0"
+					onclick={() => onStartInterview()}
+					onkeydown={onActivate(() => onStartInterview())}
+				>
 					{#if ctx.routine.wakeUp}<div class="routine-item">
 							<span class="routine-label">Aufstehen</span><span class="routine-value"
 								>{ctx.routine.wakeUp}</span
@@ -196,9 +226,15 @@
 			<h3 class="section-title">Ernährung</h3>
 			{#if ctx?.nutrition && (ctx.nutrition.diet || ctx.nutrition.allergies?.length)}
 				<div>
-					{#if ctx.nutrition.diet}<p class="section-text" onclick={() => onStartInterview()}>
+					{#if ctx.nutrition.diet}<div
+							class="section-text"
+							role="button"
+							tabindex="0"
+							onclick={() => onStartInterview()}
+							onkeydown={onActivate(() => onStartInterview())}
+						>
 							{ctx.nutrition.diet}
-						</p>{/if}
+						</div>{/if}
 					{#if ctx.nutrition.allergies?.length}
 						{#if editingField === 'nutrition.allergies'}
 							<div class="tags-edit">
@@ -232,7 +268,12 @@
 						{:else}
 							<div
 								class="tags-list"
+								role="button"
+								tabindex="0"
 								onclick={() => startEdit('nutrition.allergies', ctx?.nutrition?.allergies ?? [])}
+								onkeydown={onActivate(() =>
+									startEdit('nutrition.allergies', ctx?.nutrition?.allergies ?? [])
+								)}
 							>
 								{#each ctx.nutrition.allergies as a (a)}<span class="tag warning">{a}</span>{/each}
 							</div>
@@ -258,7 +299,10 @@
 						<span class="routine-label">Sport</span>
 						<div
 							class="tags-list"
+							role="button"
+							tabindex="0"
 							onclick={() => startEdit('leisure.sports', ctx?.leisure?.sports ?? [])}
+							onkeydown={onActivate(() => startEdit('leisure.sports', ctx?.leisure?.sports ?? []))}
 						>
 							{#each ctx.leisure.sports as s (s)}<span class="tag">{s}</span>{/each}
 						</div>
@@ -269,7 +313,10 @@
 						<span class="routine-label">Medien</span>
 						<div
 							class="tags-list"
+							role="button"
+							tabindex="0"
 							onclick={() => startEdit('leisure.media', ctx?.leisure?.media ?? [])}
+							onkeydown={onActivate(() => startEdit('leisure.media', ctx?.leisure?.media ?? []))}
 						>
 							{#each ctx.leisure.media as m (m)}<span class="tag">{m}</span>{/each}
 						</div>
@@ -280,7 +327,10 @@
 						<span class="routine-label">Haustiere</span>
 						<span
 							class="section-text"
+							role="button"
+							tabindex="0"
 							onclick={() => startEdit('leisure.pets', ctx?.leisure?.pets ?? '')}
+							onkeydown={onActivate(() => startEdit('leisure.pets', ctx?.leisure?.pets ?? ''))}
 							>{ctx.leisure.pets}</span
 						>
 					</div>
@@ -318,7 +368,13 @@
 					</div>
 				</div>
 			{:else if ctx?.goals?.length}
-				<div class="tags-list" onclick={() => startEdit('goals', ctx?.goals ?? [])}>
+				<div
+					class="tags-list"
+					role="button"
+					tabindex="0"
+					onclick={() => startEdit('goals', ctx?.goals ?? [])}
+					onkeydown={onActivate(() => startEdit('goals', ctx?.goals ?? []))}
+				>
 					{#each ctx.goals as goal (goal)}<span class="tag accent">{goal}</span>{/each}
 				</div>
 			{:else}
@@ -336,7 +392,13 @@
 		<section class="section-card">
 			<h3 class="section-title">Arbeitsstil</h3>
 			{#if ctx?.social && (ctx.social.workStyle || ctx.social.communication || ctx.social.livingSetup)}
-				<div class="routine-grid" onclick={() => onStartInterview()}>
+				<div
+					class="routine-grid"
+					role="button"
+					tabindex="0"
+					onclick={() => onStartInterview()}
+					onkeydown={onActivate(() => onStartInterview())}
+				>
 					{#if ctx.social.workStyle}<div class="routine-item">
 							<span class="routine-label">Arbeitsweise</span><span class="routine-value"
 								>{ctx.social.workStyle}</span
@@ -394,7 +456,10 @@
 			{:else if ctx?.about?.languages?.length}
 				<div
 					class="tags-list"
+					role="button"
+					tabindex="0"
 					onclick={() => startEdit('about.languages', ctx?.about?.languages ?? [])}
+					onkeydown={onActivate(() => startEdit('about.languages', ctx?.about?.languages ?? []))}
 				>
 					{#each ctx.about.languages as lang (lang)}<span class="tag">{lang}</span>{/each}
 				</div>

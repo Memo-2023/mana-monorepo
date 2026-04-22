@@ -314,9 +314,6 @@
 	.source-item.error {
 		border-color: rgba(239, 68, 68, 0.3);
 	}
-	.source-item.inactive {
-		opacity: 0.5;
-	}
 	.source-info {
 		flex: 1;
 		min-width: 0;
@@ -341,14 +338,6 @@
 		border-radius: 0.25rem;
 		background: rgba(239, 68, 68, 0.15);
 		color: rgb(220, 38, 38);
-	}
-	.inactive-badge {
-		font-size: 0.625rem;
-		font-weight: 600;
-		padding: 0.0625rem 0.375rem;
-		border-radius: 0.25rem;
-		background: hsl(var(--color-muted));
-		color: hsl(var(--color-muted-foreground));
 	}
 	.source-error {
 		font-size: 0.6875rem;

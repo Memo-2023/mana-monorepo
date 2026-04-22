@@ -88,8 +88,8 @@
 				placeholder="Stadt oder Region suchen..."
 			/>
 			<div class="radius-row">
-				<label class="radius-label">Radius: {radiusKm} km</label>
-				<input type="range" min="5" max="100" step="5" bind:value={radiusKm} />
+				<label class="radius-label" for="region-radius">Radius: {radiusKm} km</label>
+				<input id="region-radius" type="range" min="5" max="100" step="5" bind:value={radiusKm} />
 			</div>
 			{#if suggestions.length > 0}
 				<ul class="suggestions">

@@ -294,9 +294,6 @@
 			transform: translateY(0);
 		}
 	}
-	.animate-fade-in {
-		animation: fade-in 0.2s ease-out;
-	}
 	@keyframes bounce-once {
 		0%,
 		100% {
