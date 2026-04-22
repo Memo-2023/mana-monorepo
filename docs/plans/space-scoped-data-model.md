@@ -19,6 +19,8 @@ _Supersedes [`per-space-vs-user-global-tags.md`](./per-space-vs-user-global-tags
 | 2e | Encryption flip (enabled:true on 4 tables) | `09e6a8b9d` |
 | 2c | Creating-hook: stop stamping userId on data tables | `e9b9544ea` |
 | 2e-followup | At-rest encrypt sweep (post-unlock, per-table sentinel) | `c413ab7dd` ⚠️ |
+| 2c-followup #1 | Dexie v35 hard userId-drop on data tables + drop dead indexes | `f4c66241c` |
+| 2c-followup #2 | Dexie v36 strip spaceId/authorId/visibility from user-level tables | `ce5d1f1a2` |
 
 ⚠️ **2d.4 + 2e-followup attribution note**: Two commits absorbed
 Space-scoped work under unrelated titles due to parallel-session
@@ -495,6 +497,29 @@ and the `userId` → Actor attribution cleanup).
 - **Deprecated** by this doc:
   [`per-space-vs-user-global-tags.md`](./per-space-vs-user-global-tags.md)
   — delete in Phase 8.
+
+### Backend coherence (audited 2026-04-22 post-migration)
+
+mana-sync uses a **single-table event-sourcing** model: every change
+from every client collection lands in one Postgres `sync_changes`
+table with a `table_name` discriminator. There are no per-collection
+tables on the server side — no `tasks` table, no `tags` table, no
+`agents` table. The 7 newly-migrated client tables therefore do NOT
+need their own server-side DDL.
+
+What matters server-side: the `sync_changes` table has a `space_id
+TEXT` column with a partial index and a `sync_changes_space_member_read`
+RLS policy that filters by Space membership. The handler extracts
+`spaceId` from the client payload (top-level, `data.spaceId`, or
+`fields.spaceId.value`) and passes it through `RecordChange()` into
+the RLS-wrapped insert.
+
+All seven of our newly-scoped client tables were already in
+SYNC_APP_MAP before this migration; their writes just started
+carrying `spaceId` more consistently. No backend changes required.
+See `services/mana-sync/internal/store/postgres.go` (lines 45–135 for
+schema + RLS) and `services/mana-sync/internal/sync/handler.go`
+(`extractSpaceID` helper, ~line 58) for the pattern.
 
 ---
 
