@@ -4,10 +4,13 @@
 # Setup: see docs/MAC_MINI_RUNNER_SETUP.md
 #
 # Flow:
-#   Push → main : Detects changed services → rebuilds & restarts only those containers
+#   Push → main : Detects changed services across the FULL push range
+#                 (github.event.before..sha), rebuilds & restarts only
+#                 those containers.
 #
-# The runner executes directly on the Mac Mini, so it has access to
-# Docker, docker-compose, and the local project directory.
+# Service → path mapping lives in one array (SERVICE_SOURCES) — add a
+# new service by adding one line. The Deploy job reads a single
+# `services` output, so no per-service wiring in two places.
 
 name: CD Mac Mini
 
@@ -25,29 +28,27 @@ on:
         options:
           - all
           - mana-auth
-          - mana-sync
-          - mana-media
-          - mana-notify
-          - mana-api-gateway
-          - mana-crawler
+          - mana-ai
           - mana-credits
+          - mana-research
+          - mana-events
+          - mana-geocoding
+          - mana-user
+          - mana-subscriptions
+          - mana-analytics
           - mana-search
-          - chat-backend
-          - chat-web
-          - todo-backend
-          - todo-web
-          - calendar-backend
-          - calendar-web
-          - clock-web
-          - contacts-backend
-          - contacts-web
-          - music-backend
-          - music-web
-          - storage-backend
-          - storage-web
+          - mana-sync
+          - mana-notify
+          - mana-crawler
+          - mana-api-gateway
+          - mana-media
+          - mana-llm
+          - mana-landing-builder
+          - mana-web
+          - mana-api
+          - manavoxel-web
           - memoro-server
           - memoro-audio-server
-          - memoro-web
 
 concurrency:
   group: cd-macmini
@@ -69,30 +70,7 @@ jobs:
     runs-on: self-hosted
     if: github.event_name == 'push'
     outputs:
-      mana-auth: ${{ steps.changes.outputs.mana-auth }}
-      mana-sync: ${{ steps.changes.outputs.mana-sync }}
-      mana-media: ${{ steps.changes.outputs.mana-media }}
-      mana-notify: ${{ steps.changes.outputs.mana-notify }}
-      mana-api-gateway: ${{ steps.changes.outputs.mana-api-gateway }}
-      mana-crawler: ${{ steps.changes.outputs.mana-crawler }}
-      mana-credits: ${{ steps.changes.outputs.mana-credits }}
-      mana-search: ${{ steps.changes.outputs.mana-search }}
-      chat-backend: ${{ steps.changes.outputs.chat-backend }}
-      chat-web: ${{ steps.changes.outputs.chat-web }}
-      todo-backend: ${{ steps.changes.outputs.todo-backend }}
-      todo-web: ${{ steps.changes.outputs.todo-web }}
-      calendar-backend: ${{ steps.changes.outputs.calendar-backend }}
-      calendar-web: ${{ steps.changes.outputs.calendar-web }}
-      clock-web: ${{ steps.changes.outputs.clock-web }}
-      contacts-backend: ${{ steps.changes.outputs.contacts-backend }}
-      contacts-web: ${{ steps.changes.outputs.contacts-web }}
-      music-backend: ${{ steps.changes.outputs.music-backend }}
-      music-web: ${{ steps.changes.outputs.music-web }}
-      storage-backend: ${{ steps.changes.outputs.storage-backend }}
-      storage-web: ${{ steps.changes.outputs.storage-web }}
-      memoro-server: ${{ steps.changes.outputs.memoro-server }}
-      memoro-audio-server: ${{ steps.changes.outputs.memoro-audio-server }}
-      memoro-web: ${{ steps.changes.outputs.memoro-web }}
+      services: ${{ steps.changes.outputs.services }}
       any-changes: ${{ steps.changes.outputs.any-changes }}
     steps:
       - name: Check for changes
@@ -100,76 +78,115 @@ jobs:
         run: |
           cd "${{ env.PROJECT_DIR }}"
 
-          # Get changed files between previous and current commit
-          CHANGED=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || echo "")
+          # Compare the full push range, not just the tip. github.event.before
+          # is the commit main pointed at BEFORE this push — so a push of N
+          # commits lands with before = HEAD~N. Previously we only looked at
+          # HEAD~1 HEAD, which made pushes of more than one commit silently
+          # drop all-but-the-tip's changes.
+          BEFORE="${{ github.event.before }}"
+          AFTER="${{ github.sha }}"
+          if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            # First push to the branch / force-push with no shared history.
+            # Fall back to the last commit only — better than failing open.
+            echo "No valid 'before' SHA (first push or force reset), using HEAD~1"
+            CHANGED=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || echo "")
+          else
+            # Make sure we actually have the 'before' commit locally. The
+            # self-hosted runner works in a long-lived clone that usually does,
+            # but a forced push to a rebased branch can leave it missing.
+            if ! git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+              echo "Fetching origin to resolve $BEFORE..."
+              git fetch origin main --no-tags --quiet || true
+            fi
+            CHANGED=$(git diff --name-only "$BEFORE" "$AFTER" 2>/dev/null || git diff --name-only HEAD~1 HEAD)
+          fi
 
-          # Shared packages trigger rebuilds for all services that use them
+          # Shared packages trigger rebuilds for all web services that import
+          # them. Go services use packages/shared-go/ and are handled per-svc.
           SHARED_CHANGED="false"
-          if echo "$CHANGED" | grep -qE "^packages/(shared-ui|shared-theme|shared-icons|shared-tailwind|shared-auth|shared-branding|shared-i18n|shared-utils|shared-types)/"; then
+          if echo "$CHANGED" | grep -qE "^packages/(shared-ui|shared-theme|shared-icons|shared-tailwind|shared-auth|shared-branding|shared-i18n|shared-utils|shared-types|shared-pwa|shared-vite-config)/"; then
             SHARED_CHANGED="true"
           fi
 
-          check_changes() {
-            local name=$1
-            shift
-            local result="false"
-            for path in "$@"; do
+          # Root-level SvelteKit base Dockerfile or pnpm-lock also force a
+          # web-app rebuild — the per-app Dockerfiles do FROM sveltekit-base.
+          WEB_BASE_CHANGED="false"
+          if echo "$CHANGED" | grep -qE "^(docker/Dockerfile.sveltekit-base|pnpm-lock.yaml)$"; then
+            WEB_BASE_CHANGED="true"
+          fi
+
+          # Service → source paths. One line per compose service. Space-
+          # separated paths are OR'd: any of them matching triggers a rebuild.
+          # Keep names aligned with `docker compose config --services`.
+          SERVICE_SOURCES=(
+            "mana-auth|services/mana-auth/"
+            "mana-ai|services/mana-ai/"
+            "mana-credits|services/mana-credits/"
+            "mana-research|services/mana-research/"
+            "mana-events|services/mana-events/"
+            "mana-geocoding|services/mana-geocoding/"
+            "mana-user|services/mana-user/"
+            "mana-subscriptions|services/mana-subscriptions/"
+            "mana-analytics|services/mana-analytics/"
+            "mana-search|services/mana-search/ packages/shared-go/"
+            "mana-sync|services/mana-sync/ packages/shared-go/"
+            "mana-notify|services/mana-notify/ packages/shared-go/"
+            "mana-crawler|services/mana-crawler/ packages/shared-go/"
+            "mana-api-gateway|services/mana-api-gateway/ packages/shared-go/"
+            "mana-media|services/mana-media/"
+            "mana-llm|services/mana-llm/"
+            "mana-landing-builder|services/mana-landing-builder/ packages/shared-landing-ui/ packages/shared-types/"
+            "mana-web|apps/mana/apps/web/ apps/mana/packages/"
+            "mana-api|apps/api/"
+            "manavoxel-web|apps/manavoxel/apps/web/ apps/manavoxel/packages/"
+            "memoro-server|apps/memoro/apps/server/ apps/memoro/packages/"
+            "memoro-audio-server|apps/memoro/apps/audio-server/"
+          )
+
+          echo "Changed files (first 40):"
+          echo "$CHANGED" | head -40
+          echo ""
+          echo "Shared web packages changed: $SHARED_CHANGED"
+          echo "SvelteKit base changed: $WEB_BASE_CHANGED"
+          echo ""
+
+          SERVICES=""
+          for entry in "${SERVICE_SOURCES[@]}"; do
+            name="${entry%%|*}"
+            paths="${entry#*|}"
+
+            hit="false"
+            for path in $paths; do
               if echo "$CHANGED" | grep -q "^$path"; then
-                result="true"
+                hit="true"
                 break
               fi
             done
-            # Shared package changes trigger rebuild
-            if [ "$SHARED_CHANGED" == "true" ]; then
-              result="true"
-            fi
-            echo "$name=$result" >> $GITHUB_OUTPUT
-            echo "  $name: $result"
-          }
 
-          echo "Changed files:"
-          echo "$CHANGED" | head -20
-          echo ""
-          echo "Shared packages changed: $SHARED_CHANGED"
-          echo ""
+            # Web services also rebuild on shared-package or base-image churn
+            case "$name" in
+              *-web|mana-api|mana-landing-builder)
+                if [ "$SHARED_CHANGED" = "true" ] || [ "$WEB_BASE_CHANGED" = "true" ]; then
+                  hit="true"
+                fi
+                ;;
+            esac
 
-          check_changes "mana-auth"          "services/mana-auth/"
-          check_changes "mana-sync"          "services/mana-sync/" "packages/shared-go/"
-          check_changes "mana-media"         "services/mana-media/"
-          check_changes "mana-notify"        "services/mana-notify/" "packages/shared-go/"
-          check_changes "mana-api-gateway"   "services/mana-api-gateway/" "packages/shared-go/"
-          check_changes "mana-crawler"       "services/mana-crawler/" "packages/shared-go/"
-          check_changes "mana-credits"       "services/mana-credits/"
-          check_changes "mana-search"        "services/mana-search/" "packages/shared-go/"
-          check_changes "chat-backend"      "apps/chat/apps/backend/" "apps/chat/packages/"
-          check_changes "chat-web"          "apps/chat/apps/web/" "apps/chat/packages/"
-          check_changes "todo-backend"      "apps/todo/apps/backend/" "apps/todo/packages/"
-          check_changes "todo-web"          "apps/todo/apps/web/" "apps/todo/packages/"
-          check_changes "calendar-backend"  "apps/calendar/apps/backend/" "apps/calendar/packages/"
-          check_changes "calendar-web"      "apps/calendar/apps/web/" "apps/calendar/packages/"
-          # clock-backend: REMOVED — migrated to local-first
-          check_changes "clock-web"         "apps/clock/apps/web/" "apps/clock/packages/"
-          check_changes "contacts-backend"  "apps/contacts/apps/backend/" "apps/contacts/packages/"
-          check_changes "contacts-web"      "apps/contacts/apps/web/" "apps/contacts/packages/"
-          check_changes "music-backend"     "apps/mukke/apps/backend/" "apps/mukke/packages/"
-          check_changes "music-web"         "apps/mukke/apps/web/" "apps/mukke/packages/"
-          check_changes "storage-backend"   "apps/storage/apps/backend/" "apps/storage/packages/"
-          check_changes "storage-web"       "apps/storage/apps/web/" "apps/storage/packages/"
-          check_changes "memoro-server"     "apps/memoro/apps/server/" "apps/memoro/packages/"
-          check_changes "memoro-audio-server" "apps/memoro/apps/audio-server/"
-          check_changes "memoro-web"        "apps/memoro/apps/web/" "apps/memoro/packages/"
-          check_changes "mana-landing-builder" "services/mana-landing-builder/" "packages/shared-types/" "packages/shared-landing-ui/"
-
-          # Check if anything needs deploying
-          ANY="false"
-          for svc in mana-auth mana-sync mana-media mana-notify mana-api-gateway mana-crawler mana-credits mana-search chat-backend chat-web todo-backend todo-web calendar-backend calendar-web clock-web contacts-backend contacts-web music-backend music-web storage-backend storage-web memoro-server memoro-audio-server memoro-web mana-landing-builder; do
-            val=$(grep "^$svc=" $GITHUB_OUTPUT | tail -1 | cut -d= -f2)
-            if [ "$val" == "true" ]; then
-              ANY="true"
-              break
+            if [ "$hit" = "true" ]; then
+              SERVICES="$SERVICES $name"
+              echo "  ✓ $name"
             fi
           done
-          echo "any-changes=$ANY" >> $GITHUB_OUTPUT
+
+          # Trim leading whitespace
+          SERVICES="${SERVICES# }"
+          ANY="false"
+          [ -n "$SERVICES" ] && ANY="true"
+
+          echo ""
+          echo "Deploy list: ${SERVICES:-<none>}"
+          echo "services=$SERVICES" >> "$GITHUB_OUTPUT"
+          echo "any-changes=$ANY" >> "$GITHUB_OUTPUT"
 
   # ===========================================
   # Deploy changed services
@@ -210,50 +227,23 @@ jobs:
         id: services
         run: |
           cd "${{ env.PROJECT_DIR }}"
-          SERVICES=""
-
           if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
             INPUT="${{ inputs.service }}"
             if [ "$INPUT" == "all" ]; then
               echo "Manual deploy: all services"
               echo "deploy-all=true" >> $GITHUB_OUTPUT
+              echo "services=" >> $GITHUB_OUTPUT
               exit 0
-            else
-              SERVICES="$INPUT"
             fi
+            echo "services=$INPUT" >> $GITHUB_OUTPUT
+            echo "deploy-all=false" >> $GITHUB_OUTPUT
+            echo "Services to deploy: $INPUT"
           else
-            # Build list from detected changes
-            if [ "${{ needs.detect-changes.outputs.mana-auth }}" == "true" ]; then SERVICES="$SERVICES mana-auth"; fi
-            if [ "${{ needs.detect-changes.outputs.mana-sync }}" == "true" ]; then SERVICES="$SERVICES mana-sync"; fi
-            if [ "${{ needs.detect-changes.outputs.mana-media }}" == "true" ]; then SERVICES="$SERVICES mana-media"; fi
-            if [ "${{ needs.detect-changes.outputs.mana-notify }}" == "true" ]; then SERVICES="$SERVICES mana-notify"; fi
-            if [ "${{ needs.detect-changes.outputs.mana-api-gateway }}" == "true" ]; then SERVICES="$SERVICES mana-api-gateway"; fi
-            if [ "${{ needs.detect-changes.outputs.mana-crawler }}" == "true" ]; then SERVICES="$SERVICES mana-crawler"; fi
-            if [ "${{ needs.detect-changes.outputs.mana-credits }}" == "true" ]; then SERVICES="$SERVICES mana-credits"; fi
-            if [ "${{ needs.detect-changes.outputs.mana-search }}" == "true" ]; then SERVICES="$SERVICES mana-search"; fi
-            if [ "${{ needs.detect-changes.outputs.chat-backend }}" == "true" ]; then SERVICES="$SERVICES chat-backend"; fi
-            if [ "${{ needs.detect-changes.outputs.chat-web }}" == "true" ]; then SERVICES="$SERVICES chat-web"; fi
-            if [ "${{ needs.detect-changes.outputs.todo-backend }}" == "true" ]; then SERVICES="$SERVICES todo-backend"; fi
-            if [ "${{ needs.detect-changes.outputs.todo-web }}" == "true" ]; then SERVICES="$SERVICES todo-web"; fi
-            if [ "${{ needs.detect-changes.outputs.calendar-backend }}" == "true" ]; then SERVICES="$SERVICES calendar-backend"; fi
-            if [ "${{ needs.detect-changes.outputs.calendar-web }}" == "true" ]; then SERVICES="$SERVICES calendar-web"; fi
-            # clock-backend: REMOVED
-            if [ "${{ needs.detect-changes.outputs.clock-web }}" == "true" ]; then SERVICES="$SERVICES clock-web"; fi
-            if [ "${{ needs.detect-changes.outputs.contacts-backend }}" == "true" ]; then SERVICES="$SERVICES contacts-backend"; fi
-            if [ "${{ needs.detect-changes.outputs.contacts-web }}" == "true" ]; then SERVICES="$SERVICES contacts-web"; fi
-            if [ "${{ needs.detect-changes.outputs.music-backend }}" == "true" ]; then SERVICES="$SERVICES music-backend"; fi
-            if [ "${{ needs.detect-changes.outputs.music-web }}" == "true" ]; then SERVICES="$SERVICES music-web"; fi
-            if [ "${{ needs.detect-changes.outputs.storage-backend }}" == "true" ]; then SERVICES="$SERVICES storage-backend"; fi
-            if [ "${{ needs.detect-changes.outputs.storage-web }}" == "true" ]; then SERVICES="$SERVICES storage-web"; fi
-            if [ "${{ needs.detect-changes.outputs.memoro-server }}" == "true" ]; then SERVICES="$SERVICES memoro-server"; fi
-            if [ "${{ needs.detect-changes.outputs.memoro-audio-server }}" == "true" ]; then SERVICES="$SERVICES memoro-audio-server"; fi
-            if [ "${{ needs.detect-changes.outputs.memoro-web }}" == "true" ]; then SERVICES="$SERVICES memoro-web"; fi
-            if [ "${{ needs.detect-changes.outputs.mana-landing-builder }}" == "true" ]; then SERVICES="$SERVICES mana-landing-builder"; fi
+            SERVICES="${{ needs.detect-changes.outputs.services }}"
+            echo "services=$SERVICES" >> $GITHUB_OUTPUT
+            echo "deploy-all=false" >> $GITHUB_OUTPUT
+            echo "Services to deploy: $SERVICES"
           fi
-
-          echo "services=$SERVICES" >> $GITHUB_OUTPUT
-          echo "deploy-all=false" >> $GITHUB_OUTPUT
-          echo "Services to deploy: $SERVICES"
 
       - name: Build shared base image
         run: |
@@ -266,7 +256,7 @@ jobs:
             NEEDS_WEB_BASE=true
           else
             for svc in $SERVICES; do
-              case "$svc" in *-web) NEEDS_WEB_BASE=true; break ;; esac
+              case "$svc" in *-web|mana-api|mana-landing-builder) NEEDS_WEB_BASE=true; break ;; esac
             done
           fi
 
@@ -330,37 +320,42 @@ jobs:
           cd "${{ env.PROJECT_DIR }}"
           source scripts/deploy-metrics.sh
 
-          # Service -> health URL mapping
+          # Service → internal health URL (localhost, post-deploy curl on the
+          # Mac Mini). Services without an entry here get a "no health endpoint
+          # configured" skip — check_health_timed handles it gracefully.
           health_url_for() {
             case "$1" in
-              mana-auth)         echo "http://localhost:3001/health" ;;
-              chat-backend)      echo "http://localhost:3030/health" ;;
-              chat-web)          echo "http://localhost:5010/health" ;;
-              todo-backend)      echo "http://localhost:3031/health" ;;
-              todo-web)          echo "http://localhost:5011/health" ;;
-              calendar-backend)  echo "http://localhost:3032/health" ;;
-              calendar-web)      echo "http://localhost:5012/health" ;;
-              # clock-backend: REMOVED
-              clock-web)         echo "http://localhost:5013/health" ;;
-              contacts-backend)  echo "http://localhost:3034/health" ;;
-              contacts-web)      echo "http://localhost:5014/health" ;;
-              music-backend)     echo "http://localhost:3010/health" ;;
-              music-web)         echo "http://localhost:5180/health" ;;
-              storage-backend)   echo "http://localhost:3035/api/v1/health" ;;
-              storage-web)       echo "http://localhost:5015/health" ;;
-              memoro-server)     echo "http://localhost:3015/health" ;;
-              memoro-audio-server) echo "http://localhost:3016/health" ;;
-              memoro-web)        echo "http://localhost:5038/health" ;;
-              *)                 echo "" ;;
+              mana-auth)           echo "http://localhost:3001/health" ;;
+              mana-ai)             echo "http://localhost:3067/health" ;;
+              mana-credits)        echo "http://localhost:3002/health" ;;
+              mana-research)       echo "http://localhost:3068/health" ;;
+              mana-geocoding)      echo "http://localhost:3018/health" ;;
+              mana-user)           echo "http://localhost:3062/health" ;;
+              mana-subscriptions)  echo "http://localhost:3063/health" ;;
+              mana-analytics)      echo "http://localhost:3064/health" ;;
+              mana-search)         echo "http://localhost:3012/health" ;;
+              mana-sync)           echo "http://localhost:3050/health" ;;
+              mana-notify)         echo "http://localhost:3013/health" ;;
+              mana-crawler)        echo "http://localhost:3014/health" ;;
+              mana-api-gateway)    echo "http://localhost:3016/health" ;;
+              mana-media)          echo "http://localhost:3011/health" ;;
+              mana-llm)            echo "http://localhost:3025/health" ;;
+              mana-events)         echo "http://localhost:3065/health" ;;
+              mana-api)            echo "http://localhost:3060/health" ;;
+              mana-web)            echo "http://localhost:5000/health" ;;
+              manavoxel-web)       echo "http://localhost:5028/health" ;;
+              memoro-server)       echo "http://localhost:3015/health" ;;
+              *)                   echo "" ;;
             esac
           }
 
-          # Only check services that were actually deployed
           DEPLOY_ALL="${{ steps.services.outputs.deploy-all }}"
           SERVICES="${{ steps.services.outputs.services }}"
 
+          # On "deploy all", health-check a representative set (add more as
+          # endpoints stabilise). Per-push deploys only check what was rebuilt.
           if [ "$DEPLOY_ALL" == "true" ]; then
-            SERVICES="mana-auth chat-backend chat-web todo-backend todo-web calendar-backend calendar-web clock-web contacts-backend contacts-web music-backend music-web storage-backend storage-web memoro-server memoro-audio-server memoro-web"
+            SERVICES="mana-auth mana-ai mana-credits mana-research mana-user mana-subscriptions mana-analytics mana-sync mana-api-gateway mana-api mana-web"
           fi
 
           HEALTH_RESULTS=""
