@@ -49,6 +49,19 @@ import {
 } from '../metrics';
 import { unwrapMissionGrant } from '../crypto/unwrap-grant';
 import { NewsResearchClient } from '../planner/news-research-client';
+import { ManaResearchClient, type DeepResearchProvider } from '../clients/mana-research';
+import {
+	deletePendingResearchJob,
+	getPendingResearchJob,
+	insertPendingResearchJob,
+	touchPendingResearchJob,
+} from '../db/research-jobs';
+import {
+	researchJobsSubmittedTotal,
+	researchJobsCompletedTotal,
+	researchJobsFailedTotal,
+	researchJobsPendingSkipsTotal,
+} from '../metrics';
 import type { ResolverContext } from '../db/resolvers/types';
 import type { Config } from '../config';
 import { withSpan } from '../tracing';
@@ -60,6 +73,15 @@ const ENC_PREFIX = 'enc:1:';
  *  (`data/ai/missions/runner.ts`). */
 const RESEARCH_TRIGGER =
 	/\b(recherchier|research|news|finde|suche|aktuelle|neueste|today|history|historisch|on this day)/i;
+
+/** Strict opt-in for the expensive async deep-research path (Gemini
+ *  Deep Research Max, ~$3–7 per task). Only matches explicit wording
+ *  so users must deliberately ask for it in the mission objective.
+ *  Gated further by `config.deepResearchEnabled` at the tick level. */
+const DEEP_RESEARCH_TRIGGER =
+	/\b(deep research|tiefe recherche|umfassende recherche|hintergrundrecherche|deep dive)\b/i;
+
+const DEEP_RESEARCH_PROVIDER: DeepResearchProvider = 'gemini-deep-research-max';
 
 /** True when the value looks like the webapp's AES-GCM wire format. */
 function isCiphertext(value: string | undefined): value is string {
@@ -198,7 +220,13 @@ export async function runTickOnce(config: Config): Promise<TickStats> {
 					},
 					() => planOneMission(m, llm, sql, agent, config)
 				);
-				if (planResult === null) {
+				if (planResult.outcome === 'skipped') {
+					// Deep-research job still running — pick this mission
+					// back up on the next tick. No plan produced, no
+					// parse-failure accounting.
+					continue;
+				}
+				if (planResult.outcome === 'failed') {
 					parseFailures++;
 					parseFailuresTotal.inc();
 					continue;
@@ -270,13 +298,18 @@ export async function runTickOnce(config: Config): Promise<TickStats> {
  * (see planner/tools.ts) to keep the LLM from fabricating "read
  * results".
  */
+type PlanMissionOutcome =
+	| { outcome: 'planned'; plan: { summary: string; steps: PlannedStep[] }; tokensUsed: number }
+	| { outcome: 'skipped'; reason: 'research-pending' }
+	| { outcome: 'failed' };
+
 async function planOneMission(
 	m: ServerMission,
 	llm: ReturnType<typeof createServerLlmClient>,
 	sql: Sql,
 	agent: ServerAgent | null,
 	config: Config
-): Promise<{ plan: { summary: string; steps: PlannedStep[] }; tokensUsed: number } | null> {
+): Promise<PlanMissionOutcome> {
 	const mission = serverMissionToSharedMission(m);
 	// Resolve the mission's Key-Grant (if any) once per tick. An absent
 	// grant is NOT an error — plaintext missions (goals-only) run fine
@@ -286,8 +319,28 @@ async function planOneMission(
 	const context = await buildResolverContext(m);
 	const resolvedInputs = await resolveServerInputs(sql, m.inputs, m.userId, context);
 
-	// Pre-planning research step (unchanged from pre-migration).
-	if (RESEARCH_TRIGGER.test(m.objective) || RESEARCH_TRIGGER.test(m.conceptMarkdown)) {
+	// ─── Deep research pre-planning (opt-in, cross-tick) ─────────
+	// A pending job means a previous tick submitted an async research
+	// task; we poll here. A completed result is injected as a
+	// ResolvedInput and the plan proceeds normally; queued/running
+	// means we bail this tick and try again next time. No pending job
+	// + the opt-in trigger fires → we submit and bail.
+	const deepInput = await handleDeepResearch(m, sql, config);
+	if (deepInput === 'pending') {
+		return { outcome: 'skipped', reason: 'research-pending' };
+	}
+	if (deepInput) {
+		resolvedInputs.push(deepInput);
+	}
+
+	// Shallow pre-planning research step (RSS-based, synchronous). We
+	// still run this when deep research didn't fire — same behaviour
+	// as before. Skipped when deep research already supplied a
+	// __web-research__ block so we don't double-feed the planner.
+	if (
+		!deepInput &&
+		(RESEARCH_TRIGGER.test(m.objective) || RESEARCH_TRIGGER.test(m.conceptMarkdown))
+	) {
 		const nrc = new NewsResearchClient(config.manaApiUrl);
 		const research = await nrc.research(m.objective, { language: 'de', limit: 8 });
 		if (research) {
@@ -352,6 +405,7 @@ async function planOneMission(
 		}
 
 		return {
+			outcome: 'planned',
 			plan: {
 				summary: loopResult.summary ?? '',
 				steps: loopResult.executedCalls.map((ec) => ({
@@ -370,8 +424,122 @@ async function planOneMission(
 			providerErrorsTotal.inc({ provider, kind: err.kind });
 		}
 		console.warn(`[mana-ai tick] mission=${m.id} planner loop failed: ${msg}`);
+		return { outcome: 'failed' };
+	}
+}
+
+/**
+ * Cross-tick state machine for the deep-research pre-planning path.
+ *
+ * Return value:
+ *   - `'pending'`: a job is currently queued/running upstream; caller
+ *     must skip this mission for this tick.
+ *   - a ResolvedInput: a job just completed, feed it into the planner.
+ *   - `null`: no deep-research involvement — fall through to the
+ *     existing shallow path.
+ */
+async function handleDeepResearch(
+	m: ServerMission,
+	sql: Sql,
+	config: Config
+): Promise<
+	'pending' | { id: string; module: string; table: string; title: string; content: string } | null
+> {
+	const client = new ManaResearchClient(config.manaResearchUrl, config.serviceKey);
+	const existing = await getPendingResearchJob(sql, m.userId, m.id);
+
+	if (existing) {
+		const poll = await client.poll(m.userId, existing.taskId);
+		if (!poll) {
+			// Transport failure — keep the job around, try again next tick.
+			await touchPendingResearchJob(sql, m.userId, m.id);
+			researchJobsPendingSkipsTotal.inc();
+			return 'pending';
+		}
+
+		if (poll.status === 'queued' || poll.status === 'running') {
+			await touchPendingResearchJob(sql, m.userId, m.id);
+			researchJobsPendingSkipsTotal.inc();
+			return 'pending';
+		}
+
+		if (poll.status === 'failed' || poll.status === 'cancelled') {
+			await deletePendingResearchJob(sql, m.userId, m.id);
+			researchJobsFailedTotal.inc({ provider: existing.providerId });
+			console.warn(
+				`[mana-ai tick] mission=${m.id} deep-research failed (${existing.providerId}): ${poll.error ?? poll.status}`
+			);
+			// Fall through to shallow pre-planning this tick.
+			return null;
+		}
+
+		// completed
+		await deletePendingResearchJob(sql, m.userId, m.id);
+		researchJobsCompletedTotal.inc({ provider: existing.providerId });
+		const answer = poll.result?.answer;
+		if (!answer || !answer.answer) {
+			console.warn(`[mana-ai tick] mission=${m.id} deep-research completed without body`);
+			return null;
+		}
+		console.log(
+			`[mana-ai tick] mission=${m.id} deep-research done (${existing.providerId}): ` +
+				`${answer.citations.length} citations, ${answer.answer.length} chars`
+		);
+		return {
+			id: '__web-research__',
+			module: 'news-research',
+			table: 'web',
+			title: `Deep Research: "${m.objective.slice(0, 60)}"`,
+			content: formatDeepResearchContext(m.objective, answer),
+		};
+	}
+
+	// No existing job. Do we want to submit one?
+	if (!config.deepResearchEnabled) return null;
+	if (!DEEP_RESEARCH_TRIGGER.test(m.objective) && !DEEP_RESEARCH_TRIGGER.test(m.conceptMarkdown)) {
 		return null;
 	}
+
+	const submission = await client.submit(m.userId, m.objective, DEEP_RESEARCH_PROVIDER);
+	if (!submission) {
+		// Submit failed — fall through to shallow so the mission still runs.
+		console.warn(
+			`[mana-ai tick] mission=${m.id} deep-research submit failed, falling back to shallow`
+		);
+		return null;
+	}
+	await insertPendingResearchJob(sql, m.userId, m.id, submission.taskId, submission.providerId);
+	researchJobsSubmittedTotal.inc({ provider: submission.providerId });
+	researchJobsPendingSkipsTotal.inc();
+	console.log(
+		`[mana-ai tick] mission=${m.id} deep-research submitted ` +
+			`(${submission.providerId}, task=${submission.taskId.slice(0, 16)}…, ${submission.costCredits}c)`
+	);
+	return 'pending';
+}
+
+/**
+ * Render the deep-research answer into the same markdown-shape the
+ * shallow pre-research step produces, so downstream planner prompts
+ * don't need to distinguish the two sources.
+ */
+function formatDeepResearchContext(
+	query: string,
+	answer: import('@mana/shared-research').AgentAnswer
+): string {
+	const lines: string[] = [`# Deep-Research: "${query}"`, '', answer.answer.trim(), ''];
+	if (answer.citations.length > 0) {
+		lines.push('## Quellen');
+		for (const c of answer.citations) {
+			lines.push(`- [${c.title}](${c.url})${c.snippet ? ` — ${c.snippet}` : ''}`);
+		}
+		lines.push('');
+	}
+	lines.push(
+		'---',
+		'Nutze diese Quellen fuer deinen Plan. Verwende nur URLs die oben stehen; erfinde keine.'
+	);
+	return lines.join('\n');
 }
 
 /** Parse provider name off a `provider/model` string. Used purely for

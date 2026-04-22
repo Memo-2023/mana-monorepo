@@ -2538,6 +2538,9 @@ importers:
       '@mana/shared-hono':
         specifier: workspace:*
         version: link:../../packages/shared-hono
+      '@mana/shared-research':
+        specifier: workspace:*
+        version: link:../../packages/shared-research
       '@opentelemetry/api':
         specifier: ^1.9.0
         version: 1.9.1

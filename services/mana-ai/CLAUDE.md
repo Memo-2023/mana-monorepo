@@ -75,6 +75,28 @@ Der Runner wird agent-bewusst — Missionen gehoeren einem benannten Agent, Poli
 - [x] `filterToolsByAgentPolicy` schneidet `deny`-Tools raus bevor der Planner sie sieht.
 - [x] Metrik `mana_ai_agent_decisions_total{decision}`.
 
+## Status: v0.7 (Cross-Tick Deep Research, 2026-04-22)
+
+Opt-in asynchroner Deep-Research-Pfad für Missions, die explizit tiefe Recherche wollen. Ruft `mana-research`'s neue Gemini-Deep-Research-Max-Provider (`gemini-deep-research` / `gemini-deep-research-max`) über den internen Service-to-Service-Endpunkt `/api/v1/internal/research/async` auf. Weil Max bis zu 60 min läuft und unser Tick 60 s, läuft das über Ticks hinweg.
+
+- [x] `ManaResearchClient` (`clients/mana-research.ts`) — HTTP-Client für mana-research's interne async-Endpoints. `X-Service-Key` + `X-User-Id`. Graceful-null bei Fehler.
+- [x] `mana_ai.mission_research_jobs` Tabelle — ein Row pro pending Job pro Mission, PK `(user_id, mission_id)`. Präsenz = "läuft gerade". Nach `completed`/`failed` wird gelöscht.
+- [x] Cross-Tick State-Machine in `cron/tick.ts` (`handleDeepResearch`):
+  - Pending Job → poll → `queued`/`running` skip, `completed` inject Result, `failed` fall-through zu Shallow
+  - Kein Job + `DEEP_RESEARCH_TRIGGER` + `config.deepResearchEnabled` → submit + insert → skip
+- [x] Neuer Trigger `DEEP_RESEARCH_TRIGGER` ist **strenger** als der heutige `RESEARCH_TRIGGER` — matcht nur "deep research", "tiefe recherche", "umfassende recherche", "hintergrundrecherche", "deep dive". Zusätzlich per ENV gegated (`MANA_AI_DEEP_RESEARCH_ENABLED=true`, default off).
+- [x] `planOneMission` Rückgabetyp ist jetzt eine Discriminated Union `{outcome:'planned'|'skipped'|'failed'}`. `'skipped'` (= research pending) wird **nicht** als parse-failure gezählt.
+- [x] Metriken: `mana_ai_research_jobs_submitted_total{provider}`, `_completed_total{provider}`, `_failed_total{provider}`, `_pending_skips_total`.
+- [x] Docker-Compose: `MANA_RESEARCH_URL`, `MANA_AI_DEEP_RESEARCH_ENABLED`, `depends_on: mana-research`.
+- [x] `@mana/shared-research` als workspace-dep + `type-check` script in `package.json`.
+
+Bewusst nicht gemacht (offen):
+- Mission-Config-Flag in der Webapp. Trigger ist heute Regex-basiert, nicht explizit konfigurierbar. Das reicht für den Pilot; wenn wir öffnen, brauchen wir eine UI-Checkbox im Mission-Detail.
+- Image-Output (`charts`, Nano-Banana). Steckt in `providerRaw`, wird nicht im Answer-Text gerendert.
+- Streaming-Thought-Summaries. Würde eine eigene SSE-Brücke zum Frontend brauchen.
+
+Details zum Deep-Research-Flow: [`docs/reports/gemini-deep-research.md`](../../docs/reports/gemini-deep-research.md) §3.2.
+
 ## Status: v0.6 (Server-side Web-Research + erweiterte Tools)
 
 Der Runner kann jetzt vor dem Planner-Call eigenstaendig Web-Recherche ausfuehren (ohne Browser). Serverseitig werden 31 propose-Tools ueber 16 Module vom Planner vorgeschlagen (auto-Tools laufen ausschliesslich in der Webapp-Reasoning-Loop — der Server sieht nur propose).
@@ -130,6 +152,9 @@ curl -X POST -H "X-Service-Key: dev-service-key" http://localhost:3067/internal/
 PORT=3067
 SYNC_DATABASE_URL=postgresql://mana:devpassword@localhost:5432/mana_sync
 MANA_LLM_URL=http://localhost:3020
+MANA_API_URL=http://localhost:3060        # news-research (RSS, shallow)
+MANA_RESEARCH_URL=http://localhost:3068   # gemini-deep-research (deep, v0.7+)
+MANA_AI_DEEP_RESEARCH_ENABLED=false       # opt-in gate for Max tasks
 MANA_SERVICE_KEY=dev-service-key
 TICK_INTERVAL_MS=60000
 TICK_ENABLED=true    # flip to false to boot HTTP-only (for Docker health-check)
@@ -217,11 +242,23 @@ services/mana-ai/
 ├── src/
 │   ├── index.ts                    — Hono bootstrap + tick scheduler wiring
 │   ├── config.ts                   — Env loading
-│   ├── cron/tick.ts                — Scan loop, overlap-guarded
+│   ├── cron/tick.ts                — Scan loop, overlap-guarded. v0.7: cross-tick
+│   │                                 deep-research state machine in
+│   │                                 handleDeepResearch()
+│   ├── clients/
+│   │   └── mana-research.ts        — v0.7: HTTP client for mana-research's
+│   │                                 internal /research/async endpoints
 │   ├── db/
 │   │   ├── connection.ts           — postgres.js pool
-│   │   └── missions-projection.ts  — sync_changes → Mission LWW replay
-│   ├── planner/client.ts           — mana-llm HTTP client (OpenAI-compatible)
+│   │   ├── migrate.ts              — schema bootstrap (mission_snapshots,
+│   │   │                             decrypt_audit, agent_snapshots,
+│   │   │                             token_usage, mission_research_jobs)
+│   │   ├── missions-projection.ts  — sync_changes → Mission LWW replay
+│   │   └── research-jobs.ts        — v0.7: CRUD for mission_research_jobs
+│   ├── planner/
+│   │   ├── llm-client.ts           — mana-llm HTTP client (OpenAI-compatible)
+│   │   └── news-research-client.ts — mana-api RSS-based news-research
+│   │                                 (shallow pre-planning step)
 │   └── middleware/service-auth.ts  — X-Service-Key gate for /internal/*
 ├── Dockerfile
 ├── package.json

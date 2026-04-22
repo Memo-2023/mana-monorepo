@@ -119,6 +119,30 @@ export async function migrate(sql: Sql): Promise<void> {
 		WHERE record->>'state' = 'active'
 	`;
 
+	// ─── Pending deep-research jobs ──────────────────────────────
+	// When a mission's pre-planning step kicks off a long-running
+	// research task on mana-research (gemini-deep-research[-max] or
+	// openai-deep-research), we record it here so the NEXT tick knows
+	// to poll instead of re-submitting. One row per (user, mission)
+	// while the job is outstanding; the row is DELETED as soon as the
+	// job completes / fails, so presence == "a job is pending".
+	await sql`
+		CREATE TABLE IF NOT EXISTS mana_ai.mission_research_jobs (
+			user_id TEXT NOT NULL,
+			mission_id TEXT NOT NULL,
+			task_id TEXT NOT NULL,
+			provider_id TEXT NOT NULL,
+			submitted_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+			last_polled_at TIMESTAMPTZ,
+			PRIMARY KEY (user_id, mission_id)
+		)
+	`;
+
+	await sql`
+		CREATE INDEX IF NOT EXISTS idx_mission_research_jobs_user
+		ON mana_ai.mission_research_jobs (user_id, submitted_at DESC)
+	`;
+
 	// ─── Token usage tracking (Budget Enforcement) ──────────────
 	// Append-only log of token consumption per planner call. The tick
 	// loop queries the rolling 24h window to enforce Agent.maxTokensPerDay.

@@ -17,6 +17,14 @@ export interface Config {
 	 *  research step to feed web-research context into the planner prompt
 	 *  before it produces plan steps. */
 	manaApiUrl: string;
+	/** mana-research HTTP endpoint (Hono/Bun, port 3068). Hosts the
+	 *  async-research submit/poll endpoints that the deep-research pre-
+	 *  planning path delegates to for multi-minute Gemini tasks. */
+	manaResearchUrl: string;
+	/** Opt-in gate for the deep-research pre-planning path. Default off
+	 *  — deep runs cost $1–7 per mission, so we only want them triggered
+	 *  when explicitly enabled on the server. */
+	deepResearchEnabled: boolean;
 	/** Shared key for service-to-service calls. */
 	serviceKey: string;
 	/** How often the background tick scans for due Missions, in ms. */
@@ -55,6 +63,8 @@ export function loadConfig(): Config {
 		),
 		manaLlmUrl: requireEnv('MANA_LLM_URL', 'http://localhost:3020'),
 		manaApiUrl: requireEnv('MANA_API_URL', 'http://localhost:3060'),
+		manaResearchUrl: requireEnv('MANA_RESEARCH_URL', 'http://localhost:3068'),
+		deepResearchEnabled: process.env.MANA_AI_DEEP_RESEARCH_ENABLED === 'true',
 		serviceKey: requireEnv('MANA_SERVICE_KEY', 'dev-service-key'),
 		tickIntervalMs: parseInt(process.env.TICK_INTERVAL_MS ?? '60000', 10),
 		tickEnabled: process.env.TICK_ENABLED !== 'false',

@@ -72,6 +72,35 @@ export const missionErrorsTotal = new Counter({
 	registers: [register],
 });
 
+// ── Deep research (async cross-tick pre-planning) ─────────
+
+export const researchJobsSubmittedTotal = new Counter({
+	name: 'mana_ai_research_jobs_submitted_total',
+	help: 'Deep-research jobs submitted to mana-research (per tick).',
+	labelNames: ['provider'] as const,
+	registers: [register],
+});
+
+export const researchJobsCompletedTotal = new Counter({
+	name: 'mana_ai_research_jobs_completed_total',
+	help: 'Deep-research jobs that returned completed results to the planner.',
+	labelNames: ['provider'] as const,
+	registers: [register],
+});
+
+export const researchJobsFailedTotal = new Counter({
+	name: 'mana_ai_research_jobs_failed_total',
+	help: 'Deep-research jobs that returned failed/cancelled/timeout.',
+	labelNames: ['provider'] as const,
+	registers: [register],
+});
+
+export const researchJobsPendingSkipsTotal = new Counter({
+	name: 'mana_ai_research_jobs_pending_skips_total',
+	help: 'Tick iterations skipped because a deep-research job is still running.',
+	registers: [register],
+});
+
 export const plannerLatency = new Histogram({
 	name: 'mana_ai_planner_request_duration_seconds',
 	help: 'Latency of calls to the mana-llm backend.',
