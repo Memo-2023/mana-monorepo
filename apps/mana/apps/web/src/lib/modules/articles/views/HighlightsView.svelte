@@ -73,23 +73,13 @@
 	<title>Highlights — Artikel — Mana</title>
 </svelte:head>
 
-<div class="shell">
-	<header class="header">
-		<div class="header-row">
-			<div>
-				<h1>Highlights</h1>
-				<p class="subtitle">Alle markierten Stellen aus deinen gespeicherten Artikeln.</p>
-			</div>
-			<button type="button" class="back" onclick={() => goto('/articles')}>← Zurück</button>
+<div class="highlights-view">
+	{#if rows.length > 0}
+		<div class="actions">
+			<button type="button" class="ghost" onclick={copyMarkdown}>{exportLabel}</button>
+			<button type="button" class="ghost" onclick={downloadMarkdown}>Als .md herunterladen</button>
 		</div>
-		{#if rows.length > 0}
-			<div class="actions">
-				<button type="button" class="ghost" onclick={copyMarkdown}>{exportLabel}</button>
-				<button type="button" class="ghost" onclick={downloadMarkdown}>Als .md herunterladen</button
-				>
-			</div>
-		{/if}
-	</header>
+	{/if}
 
 	{#if rows$.loading}
 		<p class="muted center">Lädt…</p>
@@ -99,7 +89,6 @@
 			<p class="empty-sub">
 				Markier eine Textstelle in einem gespeicherten Artikel — sie erscheint hier automatisch.
 			</p>
-			<button type="button" class="cta" onclick={() => goto('/articles')}>Zur Leseliste</button>
 		</div>
 	{:else}
 		<div class="groups">
@@ -142,60 +131,27 @@
 </div>
 
 <style>
-	.shell {
-		max-width: 800px;
-		margin: 0 auto;
-		padding: 1.5rem;
-	}
-	.header {
-		margin-bottom: 1.25rem;
-	}
-	.header-row {
+	.highlights-view {
 		display: flex;
-		justify-content: space-between;
-		align-items: flex-start;
-		gap: 1rem;
+		flex-direction: column;
+		gap: 1.25rem;
 	}
-	.header h1 {
-		margin: 0 0 0.25rem 0;
-		font-size: 1.75rem;
-	}
-	.subtitle {
-		margin: 0;
-		color: var(--color-text-muted, #64748b);
-		font-size: 0.95rem;
-	}
-	.back,
-	.ghost,
-	.cta {
+	.ghost {
 		font: inherit;
 		padding: 0.45rem 0.85rem;
 		border-radius: 0.5rem;
 		cursor: pointer;
-	}
-	.back,
-	.ghost {
 		background: transparent;
 		color: inherit;
 		border: 1px solid var(--color-border, rgba(0, 0, 0, 0.15));
 	}
-	.back:hover,
 	.ghost:hover {
 		border-color: var(--color-border-strong, rgba(0, 0, 0, 0.3));
 	}
 	.actions {
-		margin-top: 0.9rem;
 		display: flex;
 		gap: 0.4rem;
 		flex-wrap: wrap;
-	}
-	.cta {
-		border: 1px solid #f97316;
-		background: #f97316;
-		color: white;
-	}
-	.cta:hover {
-		background: #ea580c;
 	}
 	.muted {
 		color: var(--color-text-muted, #64748b);

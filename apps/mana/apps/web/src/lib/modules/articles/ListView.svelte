@@ -6,13 +6,23 @@
   getTagIdsForMany to avoid N+1.
 -->
 <script lang="ts">
-	import { goto } from '$app/navigation';
-	import { TagChip } from '@mana/shared-ui';
+	import { page } from '$app/stores';
+	import { onMount, untrack } from 'svelte';
+	import ArticleCard from './components/ArticleCard.svelte';
+	import HomeSectionWeiterlesen from './components/HomeSectionWeiterlesen.svelte';
 	import { useAllArticles, useArticleTagMap } from './queries';
 	import { useAllTags } from './stores/tags.svelte';
 	import type { Article } from './types';
 
 	type Filter = 'all' | 'unread' | 'reading' | 'finished' | 'favorites' | 'archived';
+	const ALLOWED_FILTERS: Filter[] = [
+		'all',
+		'unread',
+		'reading',
+		'finished',
+		'favorites',
+		'archived',
+	];
 
 	const FILTERS: { id: Filter; label: string }[] = [
 		{ id: 'all', label: 'Alle' },
@@ -23,30 +33,83 @@
 		{ id: 'archived', label: 'Archiv' },
 	];
 
+	interface Props {
+		/** Pre-selected filter (Workbench / Tab-Shell context). Wenn gesetzt,
+		 *  überstimmt er den URL-Query-Param. */
+		initialFilter?: Filter;
+	}
+	let { initialFilter }: Props = $props();
+
 	const articles$ = useAllArticles();
 	const articles = $derived(articles$.value);
 
 	const tagMap$ = $derived.by(() => useArticleTagMap(articles.map((a) => a.id)));
 	const allTags$ = useAllTags();
 
-	let filter = $state<Filter>('all');
+	// initialFilter ist ein einmaliger Seed (Shell-Tabs mounten ListView
+	// immer frisch — es gibt keinen Case wo der Prop sich live ändert).
+	// untrack() sagt Svelte explizit, dass das kein state_referenced_locally-
+	// Unfall ist.
+	let filter = $state<Filter>(untrack(() => initialFilter ?? 'all'));
+	let siteFilter = $state<string | null>(null);
+	let tagFilter = $state<string | null>(null);
+
+	// Deep-link support via Query-Param — nur wenn KEIN initialFilter-Prop
+	// gesetzt wurde (sonst gewinnt die Shell). In der Shell wird die
+	// ListView ohne URL-Sync gerendert; die direkten /articles/list-
+	// Routen dagegen haben die Params.
+	onMount(() => {
+		if (initialFilter) {
+			untrack(() => {
+				siteFilter = null;
+				tagFilter = null;
+			});
+			return;
+		}
+		const params = $page.url.searchParams;
+		const f = params.get('filter');
+		if (f && (ALLOWED_FILTERS as string[]).includes(f)) {
+			filter = f as Filter;
+		}
+		siteFilter = params.get('site') || null;
+		tagFilter = params.get('tag') || null;
+	});
+
+	// Continue-Reading-Strip: erscheint nur wenn Filter 'all' oder 'reading'
+	// ist — auf anderen Filtern ist es verwirrend (ungelesen / archiv etc.
+	// haben nichts mit "weiterlesen" zu tun).
+	const readingArticles = $derived(articles.filter((a) => a.status === 'reading'));
+	const showContinueReading = $derived(
+		readingArticles.length > 0 && (filter === 'all' || filter === 'reading')
+	);
+
+	function matchesStatus(a: Article, f: Filter): boolean {
+		switch (f) {
+			case 'all':
+				return a.status !== 'archived';
+			case 'unread':
+				return a.status === 'unread';
+			case 'reading':
+				return a.status === 'reading';
+			case 'finished':
+				return a.status === 'finished';
+			case 'favorites':
+				return a.isFavorite && a.status !== 'archived';
+			case 'archived':
+				return a.status === 'archived';
+		}
+	}
 
 	const filtered = $derived.by(() => {
-		const a = articles;
-		switch (filter) {
-			case 'all':
-				return a.filter((x) => x.status !== 'archived');
-			case 'unread':
-				return a.filter((x) => x.status === 'unread');
-			case 'reading':
-				return a.filter((x) => x.status === 'reading');
-			case 'finished':
-				return a.filter((x) => x.status === 'finished');
-			case 'favorites':
-				return a.filter((x) => x.isFavorite && x.status !== 'archived');
-			case 'archived':
-				return a.filter((x) => x.status === 'archived');
+		let result = articles.filter((a) => matchesStatus(a, filter));
+		if (siteFilter) {
+			const needle = siteFilter.toLowerCase();
+			result = result.filter((a) => (a.siteName ?? '').toLowerCase() === needle);
 		}
+		if (tagFilter) {
+			result = result.filter((a) => (tagMap$.value.get(a.id) ?? []).includes(tagFilter!));
+		}
+		return result;
 	});
 
 	const counts = $derived.by(() => ({
@@ -67,43 +130,23 @@
 			.filter((t): t is (typeof all)[number] => !!t);
 	}
 
-	function openArticle(a: Article) {
-		goto(`/articles/${a.id}`);
+	function clearSiteFilter() {
+		siteFilter = null;
 	}
+	function clearTagFilter() {
+		tagFilter = null;
+	}
+	const tagFilterLabel = $derived(
+		tagFilter ? (allTags$.value.find((t) => t.id === tagFilter)?.name ?? tagFilter) : null
+	);
 </script>
 
-<div class="articles-shell">
-	<header class="header">
-		<div class="header-row">
-			<div>
-				<h1>Artikel</h1>
-				<p class="subtitle">Später lesen — gespeicherte Web-Artikel, offline verfügbar.</p>
-			</div>
-			<div class="header-actions">
-				<button
-					type="button"
-					class="icon-btn"
-					title="Highlights — alle markierten Stellen"
-					aria-label="Highlights anzeigen"
-					onclick={() => goto('/articles/highlights')}
-				>
-					✎
-				</button>
-				<button
-					type="button"
-					class="icon-btn"
-					title="Einstellungen — Bookmarklet + Share-Target"
-					aria-label="Artikel-Einstellungen"
-					onclick={() => goto('/articles/settings')}
-				>
-					⚙
-				</button>
-				<button type="button" class="add-btn" onclick={() => goto('/articles/add')}>
-					+ Neu speichern
-				</button>
-			</div>
-		</div>
+<div class="list-view">
+	{#if showContinueReading}
+		<HomeSectionWeiterlesen articles={readingArticles} />
+	{/if}
 
+	<div class="filter-bar">
 		<div class="filter-row" role="tablist" aria-label="Filter">
 			{#each FILTERS as f (f.id)}
 				<button
@@ -119,7 +162,22 @@
 				</button>
 			{/each}
 		</div>
-	</header>
+
+		{#if siteFilter || tagFilter}
+			<div class="sub-filters" aria-label="Zusatz-Filter">
+				{#if siteFilter}
+					<button type="button" class="sub-filter" onclick={clearSiteFilter}>
+						Quelle: {siteFilter} <span class="x">×</span>
+					</button>
+				{/if}
+				{#if tagFilter}
+					<button type="button" class="sub-filter" onclick={clearTagFilter}>
+						Tag: {tagFilterLabel} <span class="x">×</span>
+					</button>
+				{/if}
+			</div>
+		{/if}
+	</div>
 
 	{#if articles$.loading}
 		<p class="muted center">Lädt…</p>
@@ -127,12 +185,9 @@
 		<div class="empty-state">
 			<p class="empty-headline">Noch nichts gespeichert.</p>
 			<p class="empty-sub">
-				URL einfügen, der Server extrahiert den Artikel mit Readability, alles bleibt verschlüsselt
-				offline verfügbar.
+				Geh auf die Übersicht und füge oben eine URL ein — der Server extrahiert den Artikel mit
+				Readability, alles bleibt verschlüsselt offline verfügbar.
 			</p>
-			<button type="button" class="add-btn" onclick={() => goto('/articles/add')}>
-				Erste URL speichern
-			</button>
 		</div>
 	{:else if filtered.length === 0}
 		<div class="empty-state">
@@ -142,33 +197,8 @@
 	{:else}
 		<ul class="article-list">
 			{#each filtered as article (article.id)}
-				{@const articleTags = tagsFor(article)}
 				<li>
-					<button type="button" class="article-card" onclick={() => openArticle(article)}>
-						<div class="meta">
-							{#if article.siteName}
-								<span class="site">{article.siteName}</span>
-							{/if}
-							{#if article.readingTimeMinutes}
-								<span class="reading-time">{article.readingTimeMinutes} min</span>
-							{/if}
-							<span class="status status-{article.status}">{article.status}</span>
-							{#if article.isFavorite}
-								<span class="fav" title="Favorit">★</span>
-							{/if}
-						</div>
-						<div class="title">{article.title}</div>
-						{#if article.excerpt}
-							<div class="excerpt">{article.excerpt}</div>
-						{/if}
-						{#if articleTags.length > 0}
-							<div class="tags">
-								{#each articleTags as tag (tag.id)}
-									<TagChip name={tag.name} color={tag.color} />
-								{/each}
-							</div>
-						{/if}
-					</button>
+					<ArticleCard {article} tags={tagsFor(article)} />
 				</li>
 			{/each}
 		</ul>
@@ -176,86 +206,55 @@
 </div>
 
 <style>
-	.articles-shell {
-		max-width: 900px;
-		margin: 0 auto;
-		padding: 1.5rem;
-	}
-	.header {
-		margin-bottom: 1.25rem;
-	}
-	.header-row {
+	.list-view {
 		display: flex;
-		align-items: flex-start;
-		justify-content: space-between;
+		flex-direction: column;
 		gap: 1rem;
-		margin-bottom: 1rem;
 	}
-	.header h1 {
-		margin: 0 0 0.25rem 0;
-		font-size: 1.75rem;
-	}
-	.header-actions {
+	.filter-bar {
 		display: flex;
-		gap: 0.4rem;
-		align-items: center;
-		flex-shrink: 0;
-	}
-	.icon-btn {
-		padding: 0.5rem 0.65rem;
-		border-radius: 0.55rem;
-		border: 1px solid var(--color-border, rgba(0, 0, 0, 0.15));
-		background: transparent;
-		color: inherit;
-		font: inherit;
-		cursor: pointer;
-		font-size: 1rem;
-		line-height: 1;
-	}
-	.icon-btn:hover {
-		border-color: var(--color-border-strong, rgba(0, 0, 0, 0.3));
-	}
-	.add-btn {
-		padding: 0.5rem 1rem;
-		border-radius: 0.55rem;
-		border: 1px solid #f97316;
-		background: #f97316;
-		color: white;
-		font: inherit;
-		font-weight: 500;
-		cursor: pointer;
-		white-space: nowrap;
-		flex-shrink: 0;
-	}
-	.add-btn:hover {
-		background: #ea580c;
-		border-color: #ea580c;
-	}
-	.subtitle {
-		color: var(--color-text-muted, #64748b);
-		margin: 0;
-		font-size: 0.95rem;
+		flex-direction: column;
+		gap: 0.5rem;
 	}
 	.filter-row {
 		display: flex;
 		gap: 0.35rem;
-		flex-wrap: wrap;
+		flex-wrap: nowrap;
+		overflow-x: auto;
+		/* Schmale Scrollbar, damit die Chips auch auf Mobile ohne Umbruch
+		 * erreichbar bleiben. `scroll-snap-type` macht das Scroll-Gefühl
+		 * snappy — Chip für Chip einrasten statt frei gleiten. */
+		scroll-snap-type: x proximity;
+		scrollbar-width: thin;
+		/* Ein kleiner Fade am rechten Rand wäre schön, verzichten wir   */
+		/* drauf — spart Komplexität, Browser zeigt seine native overflow-*/
+		/* affordance.                                                    */
+		padding-bottom: 0.25rem;
+		margin-bottom: -0.25rem;
 	}
 	.filter-chip {
 		font: inherit;
 		font-size: 0.85rem;
 		padding: 0.35rem 0.75rem;
 		border-radius: 999px;
-		border: 1px solid var(--color-border, rgba(0, 0, 0, 0.12));
-		background: transparent;
+		/* Nicht-aktive Chips: leichte Hintergrund-Füllung + sichtbarer
+		 * Border, damit sie klar als tappable Elements lesbar sind.
+		 * currentColor-basierte Mixes adaptieren automatisch an Light/
+		 * Sepia/Dark-Themes. */
+		border: 1px solid color-mix(in srgb, currentColor 18%, transparent);
+		background: color-mix(in srgb, currentColor 5%, transparent);
 		color: inherit;
 		cursor: pointer;
 		display: inline-flex;
 		align-items: center;
 		gap: 0.4rem;
+		flex-shrink: 0;
+		scroll-snap-align: start;
+		white-space: nowrap;
 	}
 	.filter-chip:hover {
-		border-color: var(--color-border-strong, rgba(0, 0, 0, 0.25));
+		border-color: color-mix(in srgb, currentColor 35%, transparent);
+		background: color-mix(in srgb, currentColor 9%, transparent);
 	}
 	.filter-chip.active {
 		background: #f97316;
@@ -268,6 +267,32 @@
 		padding: 0 0.35rem;
 		background: color-mix(in srgb, currentColor 15%, transparent);
 		border-radius: 999px;
+	}
+	.sub-filters {
+		display: flex;
+		gap: 0.35rem;
+		flex-wrap: wrap;
+		margin-top: 0.6rem;
+	}
+	.sub-filter {
+		font: inherit;
+		font-size: 0.78rem;
+		padding: 0.2rem 0.55rem;
+		border-radius: 999px;
+		border: 1px solid color-mix(in srgb, #f97316 40%, transparent);
+		background: color-mix(in srgb, #f97316 10%, transparent);
+		color: #ea580c;
+		cursor: pointer;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.3rem;
+	}
+	.sub-filter .x {
+		opacity: 0.7;
+		font-weight: 600;
+	}
+	.sub-filter:hover .x {
+		opacity: 1;
 	}
 	.muted {
 		color: var(--color-text-muted, #64748b);
@@ -300,75 +325,5 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.5rem;
-	}
-	.article-card {
-		width: 100%;
-		text-align: left;
-		padding: 0.85rem 1rem;
-		border: 1px solid var(--color-border, rgba(0, 0, 0, 0.1));
-		border-radius: 0.6rem;
-		background: var(--color-surface, transparent);
-		color: inherit;
-		font: inherit;
-		cursor: pointer;
-		display: flex;
-		flex-direction: column;
-		gap: 0.35rem;
-	}
-	.article-card:hover {
-		border-color: var(--color-border-strong, rgba(0, 0, 0, 0.2));
-	}
-	.meta {
-		display: flex;
-		gap: 0.6rem;
-		font-size: 0.75rem;
-		color: var(--color-text-muted, #64748b);
-		align-items: center;
-	}
-	.site {
-		font-weight: 500;
-	}
-	.status {
-		padding: 0.08rem 0.45rem;
-		border-radius: 999px;
-		font-size: 0.7rem;
-		background: rgba(239, 68, 68, 0.1);
-		color: #ef4444;
-	}
-	.status-finished {
-		background: rgba(16, 185, 129, 0.1);
-		color: #10b981;
-	}
-	.status-reading {
-		background: rgba(249, 115, 22, 0.12);
-		color: #f97316;
-	}
-	.status-archived {
-		background: rgba(100, 116, 139, 0.15);
-		color: #64748b;
-	}
-	.fav {
-		color: #f59e0b;
-	}
-	.title {
-		font-weight: 600;
-		font-size: 1rem;
-		line-height: 1.35;
-	}
-	.excerpt {
-		color: var(--color-text-muted, #64748b);
-		font-size: 0.88rem;
-		line-height: 1.4;
-		overflow: hidden;
-		display: -webkit-box;
-		-webkit-line-clamp: 2;
-		line-clamp: 2;
-		-webkit-box-orient: vertical;
-	}
-	.tags {
-		display: flex;
-		gap: 0.3rem;
-		flex-wrap: wrap;
-		margin-top: 0.1rem;
 	}
 </style>
