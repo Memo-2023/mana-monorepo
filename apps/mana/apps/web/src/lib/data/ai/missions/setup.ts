@@ -20,6 +20,7 @@ import { createManaLlmClient } from './llm-client';
 import { runDueMissions, type MissionRunnerDeps } from './runner';
 import { registerDefaultInputResolvers } from './default-resolvers';
 import { runAgentsBootstrap } from '../agents/bootstrap';
+import { onActiveSpaceChanged } from '../../scope/active-space.svelte';
 
 /**
  * Populate the seed-handler registry. Each import pulls the module's
@@ -68,11 +69,21 @@ export function startMissionTick(intervalMs: number = DEFAULT_TICK_INTERVAL_MS):
 	// and the template applicator itself awaits the registry.
 	void ensureSeedsRegistered();
 
-	// Multi-Agent Workbench: ensure a default "Mana" agent exists and
-	// backfill agentId on legacy missions. Fire-and-forget — the runner
-	// itself tolerates missions without an agentId during the migration
-	// window. See docs/plans/multi-agent-workbench.md §Phase 2d.
+	// Multi-Agent Workbench: ensure a default agent exists (space-aware
+	// since Phase 2d.3 — "Mana" in Personal, "Familien-Helfer" in
+	// Family, etc.) and backfill agentId on legacy missions.
+	// Fire-and-forget — the runner itself tolerates missions without an
+	// agentId during the migration window. See
+	// docs/plans/multi-agent-workbench.md §Phase 2d and
+	// docs/plans/space-scoped-data-model.md §2d.4.
 	void runAgentsBootstrap();
+	// And re-run when the active Space flips so every Space the user
+	// visits lands its own default agent the first time they land there.
+	// Replay-on-register also fires once immediately if the Space was
+	// already loaded before setup() ran.
+	onActiveSpaceChanged(() => {
+		void runAgentsBootstrap();
+	});
 
 	const tickOnce = async () => {
 		// Guard against overlap — a slow LLM run could pile up multiple ticks.

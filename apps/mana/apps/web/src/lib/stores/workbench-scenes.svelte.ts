@@ -22,11 +22,27 @@ import type {
 	WorkbenchSceneApp,
 } from '$lib/types/workbench-scenes';
 import { setSceneScopeTagIds } from './scene-scope.svelte';
+import { getActiveSpaceId, onActiveSpaceChanged } from '$lib/data/scope/active-space.svelte';
+import { getInScopeSpaceIds } from '$lib/data/scope/scoped-db';
 
 const TABLE = 'workbenchScenes';
-const ACTIVE_SCENE_LS_KEY = 'mana:workbench:activeSceneId';
-const MRU_LS_KEY = 'mana:workbench:sceneMru';
+
+// Per-Space localStorage keys. Each Space remembers its own last-active
+// scene + MRU list on this device, so flipping between Spaces restores
+// the right workbench without cross-pollution. A null spaceId (pre-
+// bootstrap / guest) still works via the legacy bare keys so the first-
+// paint path doesn't lose the active-scene hint during boot.
+const ACTIVE_SCENE_LS_KEY_BASE = 'mana:workbench:activeSceneId';
+const MRU_LS_KEY_BASE = 'mana:workbench:sceneMru';
 const MRU_CAP = 5;
+
+function activeSceneKey(spaceId: string | null): string {
+	return spaceId ? `${ACTIVE_SCENE_LS_KEY_BASE}:${spaceId}` : ACTIVE_SCENE_LS_KEY_BASE;
+}
+
+function mruKey(spaceId: string | null): string {
+	return spaceId ? `${MRU_LS_KEY_BASE}:${spaceId}` : MRU_LS_KEY_BASE;
+}
 
 const DEFAULT_HOME_APPS: WorkbenchSceneApp[] = [
 	{ appId: 'todo' },
@@ -47,7 +63,7 @@ const MAX_SUBSCRIBE_RETRIES = 3;
 function readActiveIdFromStorage(): string | null {
 	if (!browser) return null;
 	try {
-		return localStorage.getItem(ACTIVE_SCENE_LS_KEY);
+		return localStorage.getItem(activeSceneKey(getActiveSpaceId()));
 	} catch {
 		return null;
 	}
@@ -56,8 +72,9 @@ function readActiveIdFromStorage(): string | null {
 function writeActiveIdToStorage(id: string | null) {
 	if (!browser) return;
 	try {
-		if (id) localStorage.setItem(ACTIVE_SCENE_LS_KEY, id);
-		else localStorage.removeItem(ACTIVE_SCENE_LS_KEY);
+		const key = activeSceneKey(getActiveSpaceId());
+		if (id) localStorage.setItem(key, id);
+		else localStorage.removeItem(key);
 	} catch {
 		/* storage quota / disabled — ignore */
 	}
@@ -66,7 +83,7 @@ function writeActiveIdToStorage(id: string | null) {
 function readMruFromStorage(): string[] {
 	if (!browser) return [];
 	try {
-		const raw = localStorage.getItem(MRU_LS_KEY);
+		const raw = localStorage.getItem(mruKey(getActiveSpaceId()));
 		if (!raw) return [];
 		const parsed = JSON.parse(raw);
 		return Array.isArray(parsed) ? parsed.filter((v): v is string => typeof v === 'string') : [];
@@ -75,13 +92,13 @@ function readMruFromStorage(): string[] {
 	}
 }
 
-/** Push `id` to the front of the MRU list, dedup, cap. Per-device only. */
+/** Push `id` to the front of the MRU list, dedup, cap. Per-device-per-Space. */
 function bumpMru(id: string) {
 	if (!browser) return;
 	try {
 		const current = readMruFromStorage();
 		const next = [id, ...current.filter((x) => x !== id)].slice(0, MRU_CAP);
-		localStorage.setItem(MRU_LS_KEY, JSON.stringify(next));
+		localStorage.setItem(mruKey(getActiveSpaceId()), JSON.stringify(next));
 	} catch {
 		/* storage quota / disabled — ignore */
 	}
@@ -195,8 +212,18 @@ function openSubscription(): void {
 	subscription = liveQuery(() => db.table<LocalWorkbenchScene>(TABLE).toArray()).subscribe({
 		next: (rows) => {
 			try {
+				// Filter by active Space before any UI sees the rows — scenes
+				// stamped against a different spaceId live in the same Dexie
+				// table but aren't part of this Space's workbench. Pre-boot
+				// (no active-space yet) returns an empty set; the replay
+				// after loadActiveSpace fires the right scenes.
+				const inScopeIds = getInScopeSpaceIds();
 				const visible = rows
-					.filter((r) => !r.deletedAt)
+					.filter((r) => {
+						if (r.deletedAt) return false;
+						const spaceId = (r as { spaceId?: unknown }).spaceId;
+						return typeof spaceId === 'string' && inScopeIds.includes(spaceId);
+					})
 					.sort((a, b) => a.order - b.order)
 					.map(toScene);
 				scenesState = visible;
@@ -259,6 +286,10 @@ export const workbenchScenesStore = {
 		if (!browser || initializedState) return;
 
 		// Seed a Home scene on first run so the UI never has zero scenes.
+		// We can't safely check "none in this Space" until the active-
+		// space handler replays — the guard is "no scenes anywhere", same
+		// as before. Per-Space seeding happens inside onSpaceChanged
+		// below.
 		const count = await db.table(TABLE).count();
 		if (count === 0) {
 			await ensureSeedScene();
@@ -266,6 +297,33 @@ export const workbenchScenesStore = {
 
 		activeSceneIdState = readActiveIdFromStorage();
 		openSubscription();
+
+		// Register a handler that refreshes per-Space state whenever the
+		// active Space flips. Replay-on-register fires once immediately if
+		// a Space is already loaded, so the initial state is correct
+		// regardless of which store finishes initializing first.
+		onActiveSpaceChanged(async (space) => {
+			// Update activeSceneIdState from the new Space's LS key. The
+			// liveQuery is already re-running because getInScopeSpaceIds()
+			// returns a different set, but the local activeSceneIdState
+			// needs an explicit re-read.
+			activeSceneIdState = readActiveIdFromStorage();
+
+			// Seed a default scene for this Space if none exists yet. Runs
+			// on the first visit to every Shared/Brand/Family/Team Space a
+			// user joins, so the workbench never shows empty.
+			if (space) {
+				const anyInSpace = await db
+					.table<LocalWorkbenchScene>(TABLE)
+					.filter((r) => {
+						if (r.deletedAt) return false;
+						const spaceId = (r as { spaceId?: unknown }).spaceId;
+						return spaceId === space.id;
+					})
+					.first();
+				if (!anyInSpace) await ensureSeedScene();
+			}
+		});
 	},
 
 	dispose() {

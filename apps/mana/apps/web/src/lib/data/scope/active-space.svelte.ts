@@ -28,6 +28,48 @@ let active = $state<ActiveSpace | null>(null);
 let status = $state<ActiveSpaceStatus>('idle');
 let lastError = $state<string | null>(null);
 
+// ─── Change-handler subscribers ───────────────────────────────────
+//
+// Other stores (workbench scenes, AI agents bootstrap, future Space-
+// aware caches) register here and get notified whenever the active
+// Space flips. Handlers are fire-and-forget: they can be async, but
+// the space-switch flow does not wait for them. This keeps the
+// primary path (user clicks a Space in the switcher) responsive, and
+// lets each registered module own its own error handling.
+//
+// Newly-registered handlers are immediately replayed with the current
+// active Space (if any) so they don't miss the first activation when
+// the registration happens after loadActiveSpace already resolved.
+
+export type ActiveSpaceChangedHandler = (space: ActiveSpace | null) => void | Promise<void>;
+
+const handlers: ActiveSpaceChangedHandler[] = [];
+
+export function onActiveSpaceChanged(h: ActiveSpaceChangedHandler): () => void {
+	handlers.push(h);
+	if (active && status === 'ready') {
+		try {
+			void h(active);
+		} catch (err) {
+			console.error('[active-space] handler replay failed:', err);
+		}
+	}
+	return () => {
+		const i = handlers.indexOf(h);
+		if (i >= 0) handlers.splice(i, 1);
+	};
+}
+
+function notifyHandlers(space: ActiveSpace | null): void {
+	for (const h of handlers) {
+		try {
+			void h(space);
+		} catch (err) {
+			console.error('[active-space] handler failed:', err);
+		}
+	}
+}
+
 export function getActiveSpace(): ActiveSpace | null {
 	return active;
 }
@@ -45,9 +87,11 @@ export function getActiveSpaceError(): string | null {
 }
 
 export function setActiveSpace(space: ActiveSpace | null): void {
+	const prevId = active?.id;
 	active = space;
 	status = space ? 'ready' : 'idle';
 	lastError = null;
+	if (space?.id !== prevId) notifyHandlers(space);
 }
 
 /**
@@ -113,12 +157,14 @@ export async function loadActiveSpace(opts: { force?: boolean } = {}): Promise<A
 	status = 'loading';
 	lastError = null;
 
+	const prevId = active?.id;
 	try {
 		const member = await fetchActiveMember();
 		if (member) {
 			active = member;
 			status = 'ready';
 			writeActiveSpaceHint(member.id);
+			if (member.id !== prevId) notifyHandlers(member);
 			return member;
 		}
 
@@ -140,6 +186,7 @@ export async function loadActiveSpace(opts: { force?: boolean } = {}): Promise<A
 		active = { ...chosen, role: hinted ? hinted.role : 'owner' };
 		status = 'ready';
 		writeActiveSpaceHint(chosen.id);
+		if (active.id !== prevId) notifyHandlers(active);
 		return active;
 	} catch (err) {
 		lastError = err instanceof Error ? err.message : String(err);
