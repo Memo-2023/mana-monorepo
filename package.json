@@ -33,6 +33,7 @@
 		"audit:complexity": "node scripts/audit-complexity.mjs",
 		"audit:map": "node scripts/build-complexity-map.mjs",
 		"audit:i18n-coverage": "node scripts/audit-i18n-coverage.mjs",
+		"audit:port-drift": "node scripts/audit-port-drift.mjs",
 		"generate:dockerfiles": "node scripts/generate-dockerfiles.mjs",
 		"setup:env": "node scripts/generate-env.mjs",
 		"setup:secrets": "node scripts/setup-secrets.mjs",
