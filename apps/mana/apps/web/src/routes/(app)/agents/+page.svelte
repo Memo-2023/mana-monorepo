@@ -9,6 +9,9 @@
 	 */
 
 	import ListView from '$lib/modules/ai-agents/ListView.svelte';
+	import { RoutePage } from '$lib/components/shell';
 </script>
 
-<ListView />
+<RoutePage appId="ai-agents">
+	<ListView />
+</RoutePage>

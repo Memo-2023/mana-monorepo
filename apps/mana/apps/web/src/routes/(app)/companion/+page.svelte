@@ -5,6 +5,7 @@
 	import { chatStore } from '$lib/modules/companion/stores/chat.svelte';
 	import { useConversations } from '$lib/modules/companion/queries';
 	import type { LocalConversation } from '$lib/modules/companion/types';
+	import { RoutePage } from '$lib/components/shell';
 
 	const conversations = useConversations();
 
@@ -41,80 +42,82 @@
 	<title>Companion - Mana</title>
 </svelte:head>
 
-<div class="companion-page">
-	<!-- Sidebar -->
-	<div class="sidebar">
-		<div class="sidebar-header">
-			<div class="sidebar-title">
-				<Robot size={20} weight="bold" />
-				<span>Companion</span>
+<RoutePage appId="companion">
+	<div class="companion-page">
+		<!-- Sidebar -->
+		<div class="sidebar">
+			<div class="sidebar-header">
+				<div class="sidebar-title">
+					<Robot size={20} weight="bold" />
+					<span>Companion</span>
+				</div>
+				<button class="new-btn" onclick={handleNewConversation} title="Neues Gespraech">
+					<Plus size={16} weight="bold" />
+				</button>
 			</div>
-			<button class="new-btn" onclick={handleNewConversation} title="Neues Gespraech">
-				<Plus size={16} weight="bold" />
-			</button>
-		</div>
 
-		<div class="conversation-list">
-			{#each conversations.value as conv (conv.id)}
-				<button
-					class="conversation-item"
-					class:active={activeConversation?.id === conv.id}
-					onclick={() => (activeConversation = conv)}
-				>
-					<span class="conv-title">{conv.title}</span>
-					<!-- svelte-ignore a11y_no_static_element_interactions -->
-					<span
-						class="conv-delete"
-						role="button"
-						tabindex="-1"
-						onclick={(e) => {
-							e.stopPropagation();
-							handleDeleteConversation(conv.id);
-						}}
-						onkeydown={(e) => {
-							if (e.key === 'Enter') {
+			<div class="conversation-list">
+				{#each conversations.value as conv (conv.id)}
+					<button
+						class="conversation-item"
+						class:active={activeConversation?.id === conv.id}
+						onclick={() => (activeConversation = conv)}
+					>
+						<span class="conv-title">{conv.title}</span>
+						<!-- svelte-ignore a11y_no_static_element_interactions -->
+						<span
+							class="conv-delete"
+							role="button"
+							tabindex="-1"
+							onclick={(e) => {
 								e.stopPropagation();
 								handleDeleteConversation(conv.id);
-							}
-						}}
-						title="Loeschen"
-					>
-						<Trash size={12} />
-					</span>
-				</button>
-			{/each}
+							}}
+							onkeydown={(e) => {
+								if (e.key === 'Enter') {
+									e.stopPropagation();
+									handleDeleteConversation(conv.id);
+								}
+							}}
+							title="Loeschen"
+						>
+							<Trash size={12} />
+						</span>
+					</button>
+				{/each}
 
-			{#if conversations.value.length === 0}
-				<p class="empty-hint">Noch keine Gespraeche. Starte mit dem + Button.</p>
-			{/if}
+				{#if conversations.value.length === 0}
+					<p class="empty-hint">Noch keine Gespraeche. Starte mit dem + Button.</p>
+				{/if}
+			</div>
+
+			<nav class="sidebar-footer">
+				<a href="/companion/missions">AI Missions →</a>
+				<a href="/companion/workbench">Workbench →</a>
+				<a href="/companion/rituals">Rituale →</a>
+			</nav>
 		</div>
 
-		<nav class="sidebar-footer">
-			<a href="/companion/missions">AI Missions →</a>
-			<a href="/companion/workbench">Workbench →</a>
-			<a href="/companion/rituals">Rituale →</a>
-		</nav>
+		<!-- Chat Area -->
+		<div class="chat-area">
+			{#if activeConversation}
+				{#key activeConversation.id}
+					<CompanionChat conversation={activeConversation} />
+				{/key}
+			{:else}
+				<div class="empty-state">
+					<Robot size={48} weight="thin" />
+					<h2>Mana Companion</h2>
+					<p>
+						Dein persoenlicher Assistent. Frag nach deinem Tag, lass Tasks erstellen oder Getraenke
+						loggen.
+					</p>
+					<button class="start-btn" onclick={handleNewConversation}> Gespraech starten </button>
+				</div>
+			{/if}
+		</div>
 	</div>
-
-	<!-- Chat Area -->
-	<div class="chat-area">
-		{#if activeConversation}
-			{#key activeConversation.id}
-				<CompanionChat conversation={activeConversation} />
-			{/key}
-		{:else}
-			<div class="empty-state">
-				<Robot size={48} weight="thin" />
-				<h2>Mana Companion</h2>
-				<p>
-					Dein persoenlicher Assistent. Frag nach deinem Tag, lass Tasks erstellen oder Getraenke
-					loggen.
-				</p>
-				<button class="start-btn" onclick={handleNewConversation}> Gespraech starten </button>
-			</div>
-		{/if}
-	</div>
-</div>
+</RoutePage>
 
 <style>
 	.companion-page {

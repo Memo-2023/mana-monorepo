@@ -6,6 +6,7 @@
 	import { searchNotes, getPreview, formatRelativeTime } from '$lib/modules/notes/queries';
 	import { notesStore } from '$lib/modules/notes/stores/notes.svelte';
 	import { NOTE_COLORS } from '$lib/modules/notes/types';
+	import { RoutePage } from '$lib/components/shell';
 
 	const allNotes$: Observable<Note[]> = getContext('notes');
 
@@ -50,121 +51,123 @@
 	<title>Notes - Mana</title>
 </svelte:head>
 
-<div class="notes-page">
-	<header class="notes-header">
-		<div>
-			<h1 class="notes-title">Notes</h1>
-			{#if isLoaded}
-				<div class="notes-stats">{notes.length} Notizen</div>
-			{/if}
-		</div>
-	</header>
-
-	<!-- Search + Add -->
-	<div class="toolbar">
-		<input
-			class="search-input"
-			type="text"
-			placeholder="Notizen durchsuchen..."
-			bind:value={searchQuery}
-		/>
-		<button class="add-btn" onclick={() => (showCreate = !showCreate)}>+ Neue Notiz</button>
-	</div>
-
-	<!-- Create Form -->
-	{#if showCreate}
-		<form class="create-form" onsubmit={handleCreate}>
-			<!-- svelte-ignore a11y_autofocus -->
-			<input
-				class="create-title"
-				type="text"
-				placeholder="Titel..."
-				bind:value={newTitle}
-				autofocus
-			/>
-			<textarea
-				class="create-content"
-				placeholder="Schreibe etwas..."
-				bind:value={newContent}
-				rows="4"
-			></textarea>
-			<div class="create-footer">
-				<div class="color-row">
-					{#each NOTE_COLORS as c}
-						<!-- svelte-ignore a11y_consider_explicit_label -->
-						<button
-							type="button"
-							class="color-dot"
-							class:selected={newColor === c}
-							style:background={c ?? 'hsl(var(--color-muted-foreground))'}
-							style:opacity={c ? 1 : 0.4}
-							onclick={() => (newColor = c)}
-						></button>
-					{/each}
-				</div>
-				<div class="create-actions">
-					<button type="button" class="btn-cancel" onclick={() => (showCreate = false)}
-						>Abbrechen</button
-					>
-					<button type="submit" class="btn-save">Erstellen</button>
-				</div>
-			</div>
-		</form>
-	{/if}
-
-	{#if isLoaded}
-		<!-- Pinned -->
-		{#if pinnedNotes.length > 0}
-			<section class="section">
-				<h2 class="section-label">Angepinnt</h2>
-				<div class="notes-grid">
-					{#each pinnedNotes as note (note.id)}
-						<a
-							href="/notes/{note.id}"
-							class="note-card"
-							style:border-top-color={note.color ?? 'transparent'}
-						>
-							<div class="card-title">{note.title || 'Unbenannt'}</div>
-							<div class="card-preview">{getPreview(note.content, 120)}</div>
-							<div class="card-meta">{formatRelativeTime(note.updatedAt)}</div>
-						</a>
-					{/each}
-				</div>
-			</section>
-		{/if}
-
-		<!-- All -->
-		{#if unpinnedNotes.length > 0}
-			<section class="section">
-				{#if pinnedNotes.length > 0}
-					<h2 class="section-label">Weitere</h2>
+<RoutePage appId="notes">
+	<div class="notes-page">
+		<header class="notes-header">
+			<div>
+				<h1 class="notes-title">Notes</h1>
+				{#if isLoaded}
+					<div class="notes-stats">{notes.length} Notizen</div>
 				{/if}
-				<div class="notes-grid">
-					{#each unpinnedNotes as note (note.id)}
-						<a
-							href="/notes/{note.id}"
-							class="note-card"
-							style:border-top-color={note.color ?? 'transparent'}
+			</div>
+		</header>
+
+		<!-- Search + Add -->
+		<div class="toolbar">
+			<input
+				class="search-input"
+				type="text"
+				placeholder="Notizen durchsuchen..."
+				bind:value={searchQuery}
+			/>
+			<button class="add-btn" onclick={() => (showCreate = !showCreate)}>+ Neue Notiz</button>
+		</div>
+
+		<!-- Create Form -->
+		{#if showCreate}
+			<form class="create-form" onsubmit={handleCreate}>
+				<!-- svelte-ignore a11y_autofocus -->
+				<input
+					class="create-title"
+					type="text"
+					placeholder="Titel..."
+					bind:value={newTitle}
+					autofocus
+				/>
+				<textarea
+					class="create-content"
+					placeholder="Schreibe etwas..."
+					bind:value={newContent}
+					rows="4"
+				></textarea>
+				<div class="create-footer">
+					<div class="color-row">
+						{#each NOTE_COLORS as c}
+							<!-- svelte-ignore a11y_consider_explicit_label -->
+							<button
+								type="button"
+								class="color-dot"
+								class:selected={newColor === c}
+								style:background={c ?? 'hsl(var(--color-muted-foreground))'}
+								style:opacity={c ? 1 : 0.4}
+								onclick={() => (newColor = c)}
+							></button>
+						{/each}
+					</div>
+					<div class="create-actions">
+						<button type="button" class="btn-cancel" onclick={() => (showCreate = false)}
+							>Abbrechen</button
 						>
-							<div class="card-title">{note.title || 'Unbenannt'}</div>
-							<div class="card-preview">{getPreview(note.content, 120)}</div>
-							<div class="card-meta">{formatRelativeTime(note.updatedAt)}</div>
-						</a>
-					{/each}
+						<button type="submit" class="btn-save">Erstellen</button>
+					</div>
 				</div>
-			</section>
+			</form>
 		{/if}
 
-		{#if notes.length === 0 && !showCreate}
-			<div class="empty">
-				<p>Noch keine Notizen.</p>
-				<button class="add-btn" onclick={() => (showCreate = true)}>Erste Notiz erstellen</button>
-			</div>
+		{#if isLoaded}
+			<!-- Pinned -->
+			{#if pinnedNotes.length > 0}
+				<section class="section">
+					<h2 class="section-label">Angepinnt</h2>
+					<div class="notes-grid">
+						{#each pinnedNotes as note (note.id)}
+							<a
+								href="/notes/{note.id}"
+								class="note-card"
+								style:border-top-color={note.color ?? 'transparent'}
+							>
+								<div class="card-title">{note.title || 'Unbenannt'}</div>
+								<div class="card-preview">{getPreview(note.content, 120)}</div>
+								<div class="card-meta">{formatRelativeTime(note.updatedAt)}</div>
+							</a>
+						{/each}
+					</div>
+				</section>
+			{/if}
+
+			<!-- All -->
+			{#if unpinnedNotes.length > 0}
+				<section class="section">
+					{#if pinnedNotes.length > 0}
+						<h2 class="section-label">Weitere</h2>
+					{/if}
+					<div class="notes-grid">
+						{#each unpinnedNotes as note (note.id)}
+							<a
+								href="/notes/{note.id}"
+								class="note-card"
+								style:border-top-color={note.color ?? 'transparent'}
+							>
+								<div class="card-title">{note.title || 'Unbenannt'}</div>
+								<div class="card-preview">{getPreview(note.content, 120)}</div>
+								<div class="card-meta">{formatRelativeTime(note.updatedAt)}</div>
+							</a>
+						{/each}
+					</div>
+				</section>
+			{/if}
+
+			{#if notes.length === 0 && !showCreate}
+				<div class="empty">
+					<p>Noch keine Notizen.</p>
+					<button class="add-btn" onclick={() => (showCreate = true)}>Erste Notiz erstellen</button>
+				</div>
+			{/if}
+		{:else}
+			<div class="loading">Laden...</div>
 		{/if}
-	{:else}
-		<div class="loading">Laden...</div>
-	{/if}
-</div>
+	</div>
+</RoutePage>
 
 <style>
 	.notes-page {

@@ -4,6 +4,7 @@
 	import { useAllCalculations } from '$lib/modules/calc/queries';
 	import { CALCULATOR_SKINS } from '@calc/shared/constants';
 	import type { CalculatorSkin } from '@calc/shared';
+	import { RoutePage } from '$lib/components/shell';
 	import {
 		ModernSkin,
 		HP35Skin,
@@ -152,89 +153,92 @@
 
 <svelte:window onkeydown={handleKeydown} />
 
-<div class="calculator-page">
-	<div class="calculator-column">
-		<!-- Skin picker toggle -->
-		<div class="mb-3 flex items-center justify-between">
-			<button
-				class="text-xs rounded-full border px-3 py-1.5 transition-colors {showSkinPicker
-					? 'border-pink-500 bg-pink-500 text-white'
-					: 'border-border bg-card text-muted-foreground hover:bg-muted'}"
-				onclick={() => (showSkinPicker = !showSkinPicker)}
-			>
-				🎨 {CALCULATOR_SKINS.find((s) => s.id === activeSkin)?.label || 'Modern'}
-				{#if CALCULATOR_SKINS.find((s) => s.id === activeSkin)?.year}
-					<span class="opacity-60">({CALCULATOR_SKINS.find((s) => s.id === activeSkin)?.year})</span
-					>
-				{/if}
-			</button>
+<RoutePage appId="calc" backHref="/calc">
+	<div class="calculator-page">
+		<div class="calculator-column">
+			<!-- Skin picker toggle -->
+			<div class="mb-3 flex items-center justify-between">
+				<button
+					class="text-xs rounded-full border px-3 py-1.5 transition-colors {showSkinPicker
+						? 'border-pink-500 bg-pink-500 text-white'
+						: 'border-border bg-card text-muted-foreground hover:bg-muted'}"
+					onclick={() => (showSkinPicker = !showSkinPicker)}
+				>
+					🎨 {CALCULATOR_SKINS.find((s) => s.id === activeSkin)?.label || 'Modern'}
+					{#if CALCULATOR_SKINS.find((s) => s.id === activeSkin)?.year}
+						<span class="opacity-60"
+							>({CALCULATOR_SKINS.find((s) => s.id === activeSkin)?.year})</span
+						>
+					{/if}
+				</button>
+			</div>
+
+			<!-- Skin picker panel -->
+			{#if showSkinPicker}
+				<div class="mb-4 rounded-xl border border-border bg-card p-3">
+					<div class="grid grid-cols-5 gap-2">
+						{#each CALCULATOR_SKINS as skin}
+							<button
+								class="rounded-lg border p-2 text-center transition-colors {activeSkin === skin.id
+									? 'border-pink-500 bg-pink-500/10'
+									: 'border-transparent hover:bg-muted'}"
+								onclick={() => setSkin(skin.id)}
+							>
+								<div class="text-sm font-medium text-foreground">{skin.label}</div>
+								{#if skin.year}
+									<div class="text-xs text-muted-foreground">{skin.year}</div>
+								{/if}
+							</button>
+						{/each}
+					</div>
+				</div>
+			{/if}
+
+			<!-- Active Skin -->
+			{#if activeSkin === 'modern'}
+				<ModernSkin {...skinProps} />
+			{:else if activeSkin === 'hp35'}
+				<HP35Skin {...skinProps} />
+			{:else if activeSkin === 'casio-fx'}
+				<CasioSkin {...skinProps} />
+			{:else if activeSkin === 'ti84'}
+				<TI84Skin {...skinProps} />
+			{:else if activeSkin === 'minimal'}
+				<MinimalSkin {...skinProps} />
+			{/if}
 		</div>
 
-		<!-- Skin picker panel -->
-		{#if showSkinPicker}
-			<div class="mb-4 rounded-xl border border-border bg-card p-3">
-				<div class="grid grid-cols-5 gap-2">
-					{#each CALCULATOR_SKINS as skin}
+		<!-- History Sidebar -->
+		<div class="history">
+			<h3 class="mb-3 text-sm font-medium text-muted-foreground">Verlauf</h3>
+			{#if recentHistory.length === 0}
+				<p class="text-xs text-muted-foreground/60">Noch keine Berechnungen</p>
+			{:else}
+				<div class="space-y-2">
+					{#each recentHistory as calc}
 						<button
-							class="rounded-lg border p-2 text-center transition-colors {activeSkin === skin.id
-								? 'border-pink-500 bg-pink-500/10'
-								: 'border-transparent hover:bg-muted'}"
-							onclick={() => setSkin(skin.id)}
+							class="w-full rounded-lg p-2 text-left transition-colors hover:bg-muted/50 group"
+							onclick={() => {
+								expression = calc.result;
+								display = calc.result;
+								hasResult = true;
+							}}
 						>
-							<div class="text-sm font-medium text-foreground">{skin.label}</div>
-							{#if skin.year}
-								<div class="text-xs text-muted-foreground">{skin.year}</div>
-							{/if}
+							<div class="truncate font-mono text-xs text-muted-foreground">{calc.expression}</div>
+							<div class="font-mono text-sm font-medium text-foreground">= {calc.result}</div>
 						</button>
 					{/each}
 				</div>
-			</div>
-		{/if}
-
-		<!-- Active Skin -->
-		{#if activeSkin === 'modern'}
-			<ModernSkin {...skinProps} />
-		{:else if activeSkin === 'hp35'}
-			<HP35Skin {...skinProps} />
-		{:else if activeSkin === 'casio-fx'}
-			<CasioSkin {...skinProps} />
-		{:else if activeSkin === 'ti84'}
-			<TI84Skin {...skinProps} />
-		{:else if activeSkin === 'minimal'}
-			<MinimalSkin {...skinProps} />
-		{/if}
+				<button
+					class="mt-3 text-xs text-muted-foreground transition-colors hover:text-foreground"
+					onclick={() => calculationsStore.clearHistory()}
+				>
+					Verlauf löschen
+				</button>
+			{/if}
+		</div>
 	</div>
-
-	<!-- History Sidebar -->
-	<div class="history">
-		<h3 class="mb-3 text-sm font-medium text-muted-foreground">Verlauf</h3>
-		{#if recentHistory.length === 0}
-			<p class="text-xs text-muted-foreground/60">Noch keine Berechnungen</p>
-		{:else}
-			<div class="space-y-2">
-				{#each recentHistory as calc}
-					<button
-						class="w-full rounded-lg p-2 text-left transition-colors hover:bg-muted/50 group"
-						onclick={() => {
-							expression = calc.result;
-							display = calc.result;
-							hasResult = true;
-						}}
-					>
-						<div class="truncate font-mono text-xs text-muted-foreground">{calc.expression}</div>
-						<div class="font-mono text-sm font-medium text-foreground">= {calc.result}</div>
-					</button>
-				{/each}
-			</div>
-			<button
-				class="mt-3 text-xs text-muted-foreground transition-colors hover:text-foreground"
-				onclick={() => calculationsStore.clearHistory()}
-			>
-				Verlauf löschen
-			</button>
-		{/if}
-	</div>
-</div>
+</RoutePage>
 
 <style>
 	.calculator-page {

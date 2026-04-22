@@ -11,6 +11,7 @@
 	import { QUOTES, type Quote } from '@quotes/content';
 	import QuoteCard from '$lib/modules/quotes/components/QuoteCard.svelte';
 	import { MagnifyingGlass, X, PencilSimple, Plus, ListBullets, Trash } from '@mana/shared-icons';
+	import { RoutePage } from '$lib/components/shell';
 
 	const allQuotes = QUOTES;
 	const allLists: { readonly value: QuoteList[] } = getContext('lists');
@@ -164,267 +165,269 @@
 	<title>{list?.name || $_('common.list')} - Quotes</title>
 </svelte:head>
 
-{#if !list}
-	<div class="error-state">
-		<h2>{$_('lists.detail.notFound')}</h2>
-		<p>{$_('lists.detail.notFoundDescription')}</p>
-		<a href="/quotes/lists" class="cta-button">{$_('lists.detail.backToLists')}</a>
-	</div>
-{:else}
-	<div class="list-detail-page">
-		<!-- Header -->
-		<div class="header-container">
-			<div class="breadcrumb">
-				<a href="/quotes/lists">{$_('lists.detail.breadcrumb')}</a>
-				<span class="separator">/</span>
-				<span>{list.name}</span>
-			</div>
+<RoutePage appId="quotes" backHref="/quotes/lists" title="Liste">
+	{#if !list}
+		<div class="error-state">
+			<h2>{$_('lists.detail.notFound')}</h2>
+			<p>{$_('lists.detail.notFoundDescription')}</p>
+			<a href="/quotes/lists" class="cta-button">{$_('lists.detail.backToLists')}</a>
+		</div>
+	{:else}
+		<div class="list-detail-page">
+			<!-- Header -->
+			<div class="header-container">
+				<div class="breadcrumb">
+					<a href="/quotes/lists">{$_('lists.detail.breadcrumb')}</a>
+					<span class="separator">/</span>
+					<span>{list.name}</span>
+				</div>
 
-			<div class="header-row">
-				<div class="header-content">
-					<h2>{list.name}</h2>
-					{#if list.description}
-						<p class="description">{list.description}</p>
-					{/if}
-					<div class="meta">
-						<span>{$_('lists.quoteCount', { values: { count: listQuotes.length } })}</span>
-						<span class="separator">•</span>
-						<span
-							>{$_('lists.detail.lastEdited', {
-								values: { date: formatDate(list.updatedAt) },
-							})}</span
+				<div class="header-row">
+					<div class="header-content">
+						<h2>{list.name}</h2>
+						{#if list.description}
+							<p class="description">{list.description}</p>
+						{/if}
+						<div class="meta">
+							<span>{$_('lists.quoteCount', { values: { count: listQuotes.length } })}</span>
+							<span class="separator">•</span>
+							<span
+								>{$_('lists.detail.lastEdited', {
+									values: { date: formatDate(list.updatedAt) },
+								})}</span
+							>
+						</div>
+					</div>
+
+					<div class="header-actions">
+						{#if listQuotes.length > 0}
+							<button class="icon-btn" onclick={toggleSearch} aria-label={$_('common.search')}>
+								{#if isSearchOpen}
+									<X size={20} />
+								{:else}
+									<MagnifyingGlass size={20} />
+								{/if}
+							</button>
+						{/if}
+
+						<button
+							class="icon-btn"
+							onclick={openEditModal}
+							aria-label={$_('lists.detail.editModal.title')}
 						>
+							<PencilSimple size={20} />
+						</button>
+
+						<button
+							class="icon-btn add-btn"
+							onclick={openAddQuotesModal}
+							aria-label={$_('lists.detail.addQuotes')}
+						>
+							<Plus size={20} weight="bold" />
+						</button>
 					</div>
 				</div>
 
-				<div class="header-actions">
-					{#if listQuotes.length > 0}
-						<button class="icon-btn" onclick={toggleSearch} aria-label={$_('common.search')}>
-							{#if isSearchOpen}
-								<X size={20} />
-							{:else}
-								<MagnifyingGlass size={20} />
-							{/if}
-						</button>
-					{/if}
-
-					<button
-						class="icon-btn"
-						onclick={openEditModal}
-						aria-label={$_('lists.detail.editModal.title')}
-					>
-						<PencilSimple size={20} />
-					</button>
-
-					<button
-						class="icon-btn add-btn"
-						onclick={openAddQuotesModal}
-						aria-label={$_('lists.detail.addQuotes')}
-					>
-						<Plus size={20} weight="bold" />
-					</button>
-				</div>
+				{#if isSearchOpen}
+					<div class="search-bar">
+						<input
+							type="text"
+							placeholder={$_('lists.detail.searchPlaceholder')}
+							bind:value={searchTerm}
+							class="search"
+						/>
+					</div>
+				{/if}
 			</div>
 
-			{#if isSearchOpen}
-				<div class="search-bar">
-					<input
-						type="text"
-						placeholder={$_('lists.detail.searchPlaceholder')}
-						bind:value={searchTerm}
-						class="search"
-					/>
+			<!-- Quotes Grid -->
+			{#if listQuotes.length === 0}
+				<div class="empty-state">
+					<div class="empty-icon">
+						<ListBullets size={64} />
+					</div>
+					<h3>{$_('lists.detail.emptyTitle')}</h3>
+					<p>{$_('lists.detail.emptyDescription')}</p>
+					<button class="cta-button" onclick={openAddQuotesModal}>
+						<Plus size={20} weight="bold" />
+						{$_('lists.detail.addQuotes')}
+					</button>
+				</div>
+			{:else if filteredQuotes.length === 0}
+				<div class="empty-state">
+					<div class="empty-icon">
+						<MagnifyingGlass size={64} />
+					</div>
+					<h3>{$_('lists.detail.noSearchResults')}</h3>
+					<p>{$_('lists.detail.noSearchResultsDescription')}</p>
+				</div>
+			{:else}
+				<div class="quotes-grid">
+					{#each filteredQuotes as quote (quote.id)}
+						<div class="quote-wrapper">
+							<QuoteCard {quote} />
+							<button
+								class="remove-btn"
+								onclick={() => handleRemoveQuote(quote.id)}
+								disabled={removingQuoteId === quote.id}
+								aria-label={$_('lists.detail.remove')}
+							>
+								{#if removingQuoteId === quote.id}
+									<div
+										class="w-4 h-4 border-2 border-red-400 border-t-transparent rounded-full animate-spin"
+									></div>
+								{:else}
+									<X size={16} />
+								{/if}
+								{$_('lists.detail.remove')}
+							</button>
+						</div>
+					{/each}
+				</div>
+			{/if}
+
+			{#if isSearchOpen && filteredQuotes.length > 0}
+				<div class="floating-results">
+					{$_('lists.detail.floatingResults', {
+						values: { filtered: filteredQuotes.length, total: listQuotes.length },
+					})}
 				</div>
 			{/if}
 		</div>
+	{/if}
 
-		<!-- Quotes Grid -->
-		{#if listQuotes.length === 0}
-			<div class="empty-state">
-				<div class="empty-icon">
-					<ListBullets size={64} />
-				</div>
-				<h3>{$_('lists.detail.emptyTitle')}</h3>
-				<p>{$_('lists.detail.emptyDescription')}</p>
-				<button class="cta-button" onclick={openAddQuotesModal}>
-					<Plus size={20} weight="bold" />
-					{$_('lists.detail.addQuotes')}
-				</button>
-			</div>
-		{:else if filteredQuotes.length === 0}
-			<div class="empty-state">
-				<div class="empty-icon">
-					<MagnifyingGlass size={64} />
-				</div>
-				<h3>{$_('lists.detail.noSearchResults')}</h3>
-				<p>{$_('lists.detail.noSearchResultsDescription')}</p>
-			</div>
-		{:else}
-			<div class="quotes-grid">
-				{#each filteredQuotes as quote (quote.id)}
-					<div class="quote-wrapper">
-						<QuoteCard {quote} />
-						<button
-							class="remove-btn"
-							onclick={() => handleRemoveQuote(quote.id)}
-							disabled={removingQuoteId === quote.id}
-							aria-label={$_('lists.detail.remove')}
-						>
-							{#if removingQuoteId === quote.id}
-								<div
-									class="w-4 h-4 border-2 border-red-400 border-t-transparent rounded-full animate-spin"
-								></div>
-							{:else}
-								<X size={16} />
-							{/if}
-							{$_('lists.detail.remove')}
-						</button>
-					</div>
-				{/each}
-			</div>
-		{/if}
-
-		{#if isSearchOpen && filteredQuotes.length > 0}
-			<div class="floating-results">
-				{$_('lists.detail.floatingResults', {
-					values: { filtered: filteredQuotes.length, total: listQuotes.length },
-				})}
-			</div>
-		{/if}
-	</div>
-{/if}
-
-<!-- Edit List Modal -->
-{#if showEditModal}
-	<div class="modal-overlay" onclick={closeEditModal} role="presentation">
-		<!-- svelte-ignore a11y_click_events_have_key_events -->
-		<div
-			class="modal"
-			onclick={(e) => e.stopPropagation()}
-			role="dialog"
-			aria-modal="true"
-			tabindex="-1"
-		>
-			<div class="modal-header">
-				<h3>{$_('lists.detail.editModal.title')}</h3>
-				<button class="close-btn" onclick={closeEditModal} aria-label={$_('common.close')}>
-					<X size={24} />
-				</button>
-			</div>
-
-			<div class="modal-body">
-				<div class="form-group">
-					<label for="edit-name">{$_('lists.nameLabel')} *</label>
-					<input
-						id="edit-name"
-						type="text"
-						bind:value={editName}
-						class="form-input"
-						maxlength="50"
-					/>
+	<!-- Edit List Modal -->
+	{#if showEditModal}
+		<div class="modal-overlay" onclick={closeEditModal} role="presentation">
+			<!-- svelte-ignore a11y_click_events_have_key_events -->
+			<div
+				class="modal"
+				onclick={(e) => e.stopPropagation()}
+				role="dialog"
+				aria-modal="true"
+				tabindex="-1"
+			>
+				<div class="modal-header">
+					<h3>{$_('lists.detail.editModal.title')}</h3>
+					<button class="close-btn" onclick={closeEditModal} aria-label={$_('common.close')}>
+						<X size={24} />
+					</button>
 				</div>
 
-				<div class="form-group">
-					<label for="edit-description">{$_('lists.descriptionLabel')}</label>
-					<textarea
-						id="edit-description"
-						bind:value={editDescription}
-						class="form-textarea"
-						rows="3"
-						maxlength="200"
-					></textarea>
-				</div>
-
-				<button class="danger-btn" onclick={handleDeleteList}>
-					<Trash size={20} />
-					{$_('lists.detail.editModal.deleteList')}
-				</button>
-			</div>
-
-			<div class="modal-footer">
-				<button class="btn btn-secondary" onclick={closeEditModal}>{$_('common.cancel')}</button>
-				<button
-					class="btn btn-primary"
-					onclick={handleUpdateList}
-					disabled={!editName.trim() || isSaving}
-				>
-					{#if isSaving}
-						<div
-							class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin inline-block mr-1"
-						></div>
-					{/if}
-					{$_('common.save')}
-				</button>
-			</div>
-		</div>
-	</div>
-{/if}
-
-<!-- Add Quotes Modal -->
-{#if showAddQuotesModal}
-	<!-- svelte-ignore a11y_interactive_supports_focus -->
-	<div
-		class="modal-overlay"
-		onclick={closeAddQuotesModal}
-		onkeydown={(e) => e.key === 'Escape' && closeAddQuotesModal()}
-		tabindex="-1"
-		role="presentation"
-	>
-		<!-- svelte-ignore a11y_click_events_have_key_events -->
-		<div
-			class="modal modal-large"
-			onclick={(e) => e.stopPropagation()}
-			role="dialog"
-			aria-modal="true"
-		>
-			<div class="modal-header">
-				<h3>{$_('lists.detail.addModal.title')}</h3>
-				<button class="close-btn" onclick={closeAddQuotesModal} aria-label={$_('common.close')}>
-					<X size={24} />
-				</button>
-			</div>
-
-			<div class="modal-body quote-selection">
-				{#each availableQuotes.slice(0, 50) as quote (quote.id)}
-					<label class="quote-option">
+				<div class="modal-body">
+					<div class="form-group">
+						<label for="edit-name">{$_('lists.nameLabel')} *</label>
 						<input
-							type="checkbox"
-							checked={selectedQuoteIds.has(quote.id)}
-							onchange={() => toggleQuoteSelection(quote.id)}
+							id="edit-name"
+							type="text"
+							bind:value={editName}
+							class="form-input"
+							maxlength="50"
 						/>
-						<div class="quote-preview">
-							<p class="quote-text">"{quotesStore.getText(quote)}"</p>
-							<p class="quote-author">--- {quote.author}</p>
-						</div>
-					</label>
-				{/each}
-			</div>
+					</div>
 
-			<div class="modal-footer">
-				<div class="selected-count">
-					{$_('lists.detail.addModal.selected', { values: { count: selectedQuoteIds.size } })}
+					<div class="form-group">
+						<label for="edit-description">{$_('lists.descriptionLabel')}</label>
+						<textarea
+							id="edit-description"
+							bind:value={editDescription}
+							class="form-textarea"
+							rows="3"
+							maxlength="200"
+						></textarea>
+					</div>
+
+					<button class="danger-btn" onclick={handleDeleteList}>
+						<Trash size={20} />
+						{$_('lists.detail.editModal.deleteList')}
+					</button>
 				</div>
-				<div class="footer-actions">
-					<button class="btn btn-secondary" onclick={closeAddQuotesModal}
-						>{$_('common.cancel')}</button
-					>
+
+				<div class="modal-footer">
+					<button class="btn btn-secondary" onclick={closeEditModal}>{$_('common.cancel')}</button>
 					<button
 						class="btn btn-primary"
-						onclick={handleAddQuotes}
-						disabled={selectedQuoteIds.size === 0 || isAdding}
+						onclick={handleUpdateList}
+						disabled={!editName.trim() || isSaving}
 					>
-						{#if isAdding}
+						{#if isSaving}
 							<div
 								class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin inline-block mr-1"
 							></div>
 						{/if}
-						{$_('lists.detail.addModal.submit', { values: { count: selectedQuoteIds.size } })}
+						{$_('common.save')}
 					</button>
 				</div>
 			</div>
 		</div>
-	</div>
-{/if}
+	{/if}
+
+	<!-- Add Quotes Modal -->
+	{#if showAddQuotesModal}
+		<!-- svelte-ignore a11y_interactive_supports_focus -->
+		<div
+			class="modal-overlay"
+			onclick={closeAddQuotesModal}
+			onkeydown={(e) => e.key === 'Escape' && closeAddQuotesModal()}
+			tabindex="-1"
+			role="presentation"
+		>
+			<!-- svelte-ignore a11y_click_events_have_key_events -->
+			<div
+				class="modal modal-large"
+				onclick={(e) => e.stopPropagation()}
+				role="dialog"
+				aria-modal="true"
+			>
+				<div class="modal-header">
+					<h3>{$_('lists.detail.addModal.title')}</h3>
+					<button class="close-btn" onclick={closeAddQuotesModal} aria-label={$_('common.close')}>
+						<X size={24} />
+					</button>
+				</div>
+
+				<div class="modal-body quote-selection">
+					{#each availableQuotes.slice(0, 50) as quote (quote.id)}
+						<label class="quote-option">
+							<input
+								type="checkbox"
+								checked={selectedQuoteIds.has(quote.id)}
+								onchange={() => toggleQuoteSelection(quote.id)}
+							/>
+							<div class="quote-preview">
+								<p class="quote-text">"{quotesStore.getText(quote)}"</p>
+								<p class="quote-author">--- {quote.author}</p>
+							</div>
+						</label>
+					{/each}
+				</div>
+
+				<div class="modal-footer">
+					<div class="selected-count">
+						{$_('lists.detail.addModal.selected', { values: { count: selectedQuoteIds.size } })}
+					</div>
+					<div class="footer-actions">
+						<button class="btn btn-secondary" onclick={closeAddQuotesModal}
+							>{$_('common.cancel')}</button
+						>
+						<button
+							class="btn btn-primary"
+							onclick={handleAddQuotes}
+							disabled={selectedQuoteIds.size === 0 || isAdding}
+						>
+							{#if isAdding}
+								<div
+									class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin inline-block mr-1"
+								></div>
+							{/if}
+							{$_('lists.detail.addModal.submit', { values: { count: selectedQuoteIds.size } })}
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	{/if}
+</RoutePage>
 
 <style>
 	.list-detail-page {

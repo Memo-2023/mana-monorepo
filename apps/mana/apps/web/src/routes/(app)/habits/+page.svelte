@@ -6,6 +6,7 @@
 	import { todayStr, getLogsForDate } from '$lib/modules/habits/queries';
 	import HabitBoard from '$lib/modules/habits/components/HabitBoard.svelte';
 	import DayTimeline from '$lib/modules/habits/components/DayTimeline.svelte';
+	import { RoutePage } from '$lib/components/shell';
 
 	const allHabits$: Observable<Habit[]> = getContext('habits');
 	const allLogs$: Observable<HabitLog[]> = getContext('habitLogs');
@@ -39,34 +40,36 @@
 	<title>Habits - Mana</title>
 </svelte:head>
 
-<div class="habits-page">
-	<header class="habits-header">
-		<div>
-			<h1 class="habits-title">Habits</h1>
-			{#if isLoaded}
-				<div class="habits-stats">
-					<span>{habits.filter((h) => !h.isArchived).length} Habits</span>
-					<span>{todayLogs.length} Einträge heute</span>
-				</div>
-			{/if}
-		</div>
-	</header>
+<RoutePage appId="habits">
+	<div class="habits-page">
+		<header class="habits-header">
+			<div>
+				<h1 class="habits-title">Habits</h1>
+				{#if isLoaded}
+					<div class="habits-stats">
+						<span>{habits.filter((h) => !h.isArchived).length} Habits</span>
+						<span>{todayLogs.length} Einträge heute</span>
+					</div>
+				{/if}
+			</div>
+		</header>
 
-	{#if isLoaded}
-		<section class="board-section">
-			<HabitBoard {habits} {logs} onDetail={handleDetail} />
-		</section>
-
-		{#if todayLogs.length > 0}
-			<section class="timeline-section">
-				<h2 class="section-title">Heute</h2>
-				<DayTimeline {logs} {habits} date={today} />
+		{#if isLoaded}
+			<section class="board-section">
+				<HabitBoard {habits} {logs} onDetail={handleDetail} />
 			</section>
+
+			{#if todayLogs.length > 0}
+				<section class="timeline-section">
+					<h2 class="section-title">Heute</h2>
+					<DayTimeline {logs} {habits} date={today} />
+				</section>
+			{/if}
+		{:else}
+			<div class="loading">Laden...</div>
 		{/if}
-	{:else}
-		<div class="loading">Laden...</div>
-	{/if}
-</div>
+	</div>
+</RoutePage>
 
 <style>
 	.habits-page {

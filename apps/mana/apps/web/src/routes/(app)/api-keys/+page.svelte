@@ -4,6 +4,7 @@
 	import { Check, Copy, Info, Key, Plus, Prohibit } from '@mana/shared-icons';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { apiKeysService, type ApiKey, type ApiKeyWithSecret } from '$lib/api/api-keys';
+	import { RoutePage } from '$lib/components/shell';
 
 	// State
 	let loading = $state(true);
@@ -124,177 +125,179 @@
 	}
 </script>
 
-<div>
-	<PageHeader
-		title="API Keys"
-		description="Manage your API keys for programmatic access to STT and TTS services"
-		size="lg"
-	>
-		{#snippet actions()}
-			<Button onclick={() => (showCreateModal = true)}>
-				<Plus size={16} class="mr-2" />
-				Create API Key
-			</Button>
-		{/snippet}
-	</PageHeader>
+<RoutePage appId="api-keys">
+	<div>
+		<PageHeader
+			title="API Keys"
+			description="Manage your API keys for programmatic access to STT and TTS services"
+			size="lg"
+		>
+			{#snippet actions()}
+				<Button onclick={() => (showCreateModal = true)}>
+					<Plus size={16} class="mr-2" />
+					Create API Key
+				</Button>
+			{/snippet}
+		</PageHeader>
 
-	{#if loading}
-		<div class="flex items-center justify-center py-12">
-			<div
-				class="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"
-			></div>
-		</div>
-	{:else}
-		<div class="space-y-6">
-			{#if error}
+		{#if loading}
+			<div class="flex items-center justify-center py-12">
 				<div
-					class="rounded-lg bg-red-50 p-4 text-sm text-red-800 dark:bg-red-900/20 dark:text-red-400"
-				>
-					{error}
-				</div>
-			{/if}
-
-			<!-- Active Keys -->
-			<Card>
-				<div class="p-6">
-					<div class="flex items-center gap-3 mb-6">
-						<div
-							class="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400"
-						>
-							<Key size={20} />
-						</div>
-						<div>
-							<h2 class="text-lg font-semibold">Active Keys</h2>
-							<p class="text-sm text-muted-foreground">
-								{activeKeys.length} active key{activeKeys.length !== 1 ? 's' : ''}
-							</p>
-						</div>
+					class="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"
+				></div>
+			</div>
+		{:else}
+			<div class="space-y-6">
+				{#if error}
+					<div
+						class="rounded-lg bg-red-50 p-4 text-sm text-red-800 dark:bg-red-900/20 dark:text-red-400"
+					>
+						{error}
 					</div>
+				{/if}
 
-					{#if activeKeys.length === 0}
-						<div class="text-center py-8 text-muted-foreground">
-							<Key size={48} class="mx-auto mb-4 opacity-50" />
-							<p class="font-medium">No API keys yet</p>
-							<p class="text-sm mt-1">Create your first API key to get started</p>
-						</div>
-					{:else}
-						<div class="space-y-3">
-							{#each activeKeys as key (key.id)}
-								<div class="flex items-center justify-between p-4 rounded-lg bg-surface-hover">
-									<div class="flex-1 min-w-0">
-										<div class="flex items-center gap-2 flex-wrap">
-											<span class="font-medium">{key.name}</span>
-											<Badge variant="default">{key.scopes.join(', ')}</Badge>
-											<Badge variant="info">{key.rateLimitRequests}/min</Badge>
-										</div>
-										<div
-											class="flex items-center gap-4 mt-1 text-sm text-muted-foreground flex-wrap"
-										>
-											<code class="bg-muted px-2 py-0.5 rounded font-mono text-xs"
-												>{key.keyPrefix}</code
-											>
-											<span>Created: {formatDate(key.createdAt)}</span>
-											<span>Last used: {formatDate(key.lastUsedAt)}</span>
-										</div>
-									</div>
-									<Button
-										variant="danger"
-										size="sm"
-										loading={revoking === key.id}
-										onclick={() => handleRevoke(key.id)}
-									>
-										{revoking === key.id ? 'Revoking...' : 'Revoke'}
-									</Button>
-								</div>
-							{/each}
-						</div>
-					{/if}
-				</div>
-			</Card>
-
-			<!-- Revoked Keys (if any) -->
-			{#if revokedKeys.length > 0}
+				<!-- Active Keys -->
 				<Card>
 					<div class="p-6">
 						<div class="flex items-center gap-3 mb-6">
 							<div
-								class="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400"
+								class="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400"
 							>
-								<Prohibit size={20} />
+								<Key size={20} />
 							</div>
 							<div>
-								<h2 class="text-lg font-semibold">Revoked Keys</h2>
+								<h2 class="text-lg font-semibold">Active Keys</h2>
 								<p class="text-sm text-muted-foreground">
-									{revokedKeys.length} revoked key{revokedKeys.length !== 1 ? 's' : ''}
+									{activeKeys.length} active key{activeKeys.length !== 1 ? 's' : ''}
 								</p>
 							</div>
 						</div>
 
-						<div class="space-y-3">
-							{#each revokedKeys as key (key.id)}
-								<div
-									class="flex items-center justify-between p-4 rounded-lg bg-surface-hover opacity-60"
-								>
-									<div class="flex-1 min-w-0">
-										<div class="flex items-center gap-2">
-											<span class="font-medium line-through">{key.name}</span>
-											<Badge variant="danger">Revoked</Badge>
-										</div>
-										<div class="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
-											<code class="bg-muted px-2 py-0.5 rounded font-mono text-xs"
-												>{key.keyPrefix}</code
+						{#if activeKeys.length === 0}
+							<div class="text-center py-8 text-muted-foreground">
+								<Key size={48} class="mx-auto mb-4 opacity-50" />
+								<p class="font-medium">No API keys yet</p>
+								<p class="text-sm mt-1">Create your first API key to get started</p>
+							</div>
+						{:else}
+							<div class="space-y-3">
+								{#each activeKeys as key (key.id)}
+									<div class="flex items-center justify-between p-4 rounded-lg bg-surface-hover">
+										<div class="flex-1 min-w-0">
+											<div class="flex items-center gap-2 flex-wrap">
+												<span class="font-medium">{key.name}</span>
+												<Badge variant="default">{key.scopes.join(', ')}</Badge>
+												<Badge variant="info">{key.rateLimitRequests}/min</Badge>
+											</div>
+											<div
+												class="flex items-center gap-4 mt-1 text-sm text-muted-foreground flex-wrap"
 											>
-											<span>Revoked: {formatDate(key.revokedAt)}</span>
+												<code class="bg-muted px-2 py-0.5 rounded font-mono text-xs"
+													>{key.keyPrefix}</code
+												>
+												<span>Created: {formatDate(key.createdAt)}</span>
+												<span>Last used: {formatDate(key.lastUsedAt)}</span>
+											</div>
 										</div>
+										<Button
+											variant="danger"
+											size="sm"
+											loading={revoking === key.id}
+											onclick={() => handleRevoke(key.id)}
+										>
+											{revoking === key.id ? 'Revoking...' : 'Revoke'}
+										</Button>
 									</div>
-								</div>
-							{/each}
-						</div>
+								{/each}
+							</div>
+						{/if}
 					</div>
 				</Card>
-			{/if}
 
-			<!-- Usage Instructions -->
-			<Card>
-				<div class="p-6">
-					<div class="flex items-center gap-3 mb-6">
-						<div
-							class="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
-						>
-							<Info size={20} />
-						</div>
-						<div>
-							<h2 class="text-lg font-semibold">How to Use</h2>
-							<p class="text-sm text-muted-foreground">Include your API key in requests</p>
-						</div>
-					</div>
+				<!-- Revoked Keys (if any) -->
+				{#if revokedKeys.length > 0}
+					<Card>
+						<div class="p-6">
+							<div class="flex items-center gap-3 mb-6">
+								<div
+									class="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400"
+								>
+									<Prohibit size={20} />
+								</div>
+								<div>
+									<h2 class="text-lg font-semibold">Revoked Keys</h2>
+									<p class="text-sm text-muted-foreground">
+										{revokedKeys.length} revoked key{revokedKeys.length !== 1 ? 's' : ''}
+									</p>
+								</div>
+							</div>
 
-					<div class="space-y-4">
-						<div>
-							<p class="text-sm font-medium mb-2">Speech-to-Text (STT)</p>
-							<pre class="bg-muted p-3 rounded-lg text-sm overflow-x-auto"><code
-									>curl -X POST https://gpu-stt.mana.how/transcribe \
+							<div class="space-y-3">
+								{#each revokedKeys as key (key.id)}
+									<div
+										class="flex items-center justify-between p-4 rounded-lg bg-surface-hover opacity-60"
+									>
+										<div class="flex-1 min-w-0">
+											<div class="flex items-center gap-2">
+												<span class="font-medium line-through">{key.name}</span>
+												<Badge variant="danger">Revoked</Badge>
+											</div>
+											<div class="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
+												<code class="bg-muted px-2 py-0.5 rounded font-mono text-xs"
+													>{key.keyPrefix}</code
+												>
+												<span>Revoked: {formatDate(key.revokedAt)}</span>
+											</div>
+										</div>
+									</div>
+								{/each}
+							</div>
+						</div>
+					</Card>
+				{/if}
+
+				<!-- Usage Instructions -->
+				<Card>
+					<div class="p-6">
+						<div class="flex items-center gap-3 mb-6">
+							<div
+								class="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
+							>
+								<Info size={20} />
+							</div>
+							<div>
+								<h2 class="text-lg font-semibold">How to Use</h2>
+								<p class="text-sm text-muted-foreground">Include your API key in requests</p>
+							</div>
+						</div>
+
+						<div class="space-y-4">
+							<div>
+								<p class="text-sm font-medium mb-2">Speech-to-Text (STT)</p>
+								<pre class="bg-muted p-3 rounded-lg text-sm overflow-x-auto"><code
+										>curl -X POST https://gpu-stt.mana.how/transcribe \
   -H "X-API-Key: sk_live_your_key_here" \
   -F "audio=@audio.mp3"</code
-								></pre>
-						</div>
+									></pre>
+							</div>
 
-						<div>
-							<p class="text-sm font-medium mb-2">Text-to-Speech (TTS)</p>
-							<pre class="bg-muted p-3 rounded-lg text-sm overflow-x-auto"><code
-									>curl -X POST https://tts-api.mana.how/synthesize/kokoro \
+							<div>
+								<p class="text-sm font-medium mb-2">Text-to-Speech (TTS)</p>
+								<pre class="bg-muted p-3 rounded-lg text-sm overflow-x-auto"><code
+										>curl -X POST https://tts-api.mana.how/synthesize/kokoro \
   -H "X-API-Key: sk_live_your_key_here" \
   -H "Content-Type: application/json" \
   -d '{{ text: 'Hello world', voice: 'af_heart' }}' \
   --output speech.wav</code
-								></pre>
+									></pre>
+							</div>
 						</div>
 					</div>
-				</div>
-			</Card>
-		</div>
-	{/if}
-</div>
+				</Card>
+			</div>
+		{/if}
+	</div>
+</RoutePage>
 
 <!-- Create API Key Modal -->
 {#if showCreateModal}

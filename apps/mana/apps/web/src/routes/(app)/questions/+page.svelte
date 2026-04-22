@@ -8,6 +8,7 @@
 	} from '$lib/modules/questions/queries';
 	import type { QuestionStatus, ResearchDepth } from '$lib/modules/questions/types';
 	import { MagnifyingGlass, Clock, CheckCircle, CircleNotch, Archive } from '@mana/shared-icons';
+	import { RoutePage } from '$lib/components/shell';
 
 	const allQuestions = useAllQuestions();
 	const allCollections = useAllCollections();
@@ -65,163 +66,165 @@
 	<title>Fragen - Mana</title>
 </svelte:head>
 
-<div class="space-y-6">
-	<!-- Header -->
-	<div class="flex items-center justify-between">
-		<div>
-			<h1 class="text-2xl font-bold text-[hsl(var(--color-foreground))]">
-				{selectedCollection ? selectedCollection.name : 'Alle Fragen'}
-			</h1>
-			<p class="mt-1 text-sm text-[hsl(var(--color-muted-foreground))]">
-				{filteredQuestions.length} Frage{filteredQuestions.length !== 1 ? 'n' : ''}
-			</p>
-		</div>
-		<div class="flex gap-2">
-			<a
-				href="/questions/collections"
-				class="rounded-lg border border-[hsl(var(--color-border))] px-4 py-2 text-sm font-medium text-[hsl(var(--color-foreground))] transition-colors hover:bg-[hsl(var(--color-muted))]"
-			>
-				Sammlungen
-			</a>
-			<a
-				href="/questions/new"
-				class="rounded-lg bg-[hsl(var(--color-primary))] px-4 py-2 text-sm font-medium text-[hsl(var(--color-primary-foreground))] transition-colors hover:opacity-90"
-			>
-				Neue Frage
-			</a>
-		</div>
-	</div>
-
-	<!-- Search and Filters -->
-	<div class="flex gap-3">
-		<div class="relative flex-1">
-			<MagnifyingGlass
-				class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[hsl(var(--color-muted-foreground))]"
-			/>
-			<input
-				type="text"
-				bind:value={searchQuery}
-				placeholder="Fragen durchsuchen..."
-				class="w-full rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] py-2 pl-10 pr-4 text-sm text-[hsl(var(--color-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--color-primary))]"
-			/>
+<RoutePage appId="questions">
+	<div class="space-y-6">
+		<!-- Header -->
+		<div class="flex items-center justify-between">
+			<div>
+				<h1 class="text-2xl font-bold text-[hsl(var(--color-foreground))]">
+					{selectedCollection ? selectedCollection.name : 'Alle Fragen'}
+				</h1>
+				<p class="mt-1 text-sm text-[hsl(var(--color-muted-foreground))]">
+					{filteredQuestions.length} Frage{filteredQuestions.length !== 1 ? 'n' : ''}
+				</p>
+			</div>
+			<div class="flex gap-2">
+				<a
+					href="/questions/collections"
+					class="rounded-lg border border-[hsl(var(--color-border))] px-4 py-2 text-sm font-medium text-[hsl(var(--color-foreground))] transition-colors hover:bg-[hsl(var(--color-muted))]"
+				>
+					Sammlungen
+				</a>
+				<a
+					href="/questions/new"
+					class="rounded-lg bg-[hsl(var(--color-primary))] px-4 py-2 text-sm font-medium text-[hsl(var(--color-primary-foreground))] transition-colors hover:opacity-90"
+				>
+					Neue Frage
+				</a>
+			</div>
 		</div>
 
-		<select
-			bind:value={statusFilter}
-			class="rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] px-3 py-2 text-sm text-[hsl(var(--color-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--color-primary))]"
-		>
-			<option value="">Alle Status</option>
-			<option value="open">Offen</option>
-			<option value="researching">Recherche</option>
-			<option value="answered">Beantwortet</option>
-			<option value="archived">Archiviert</option>
-		</select>
+		<!-- Search and Filters -->
+		<div class="flex gap-3">
+			<div class="relative flex-1">
+				<MagnifyingGlass
+					class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[hsl(var(--color-muted-foreground))]"
+				/>
+				<input
+					type="text"
+					bind:value={searchQuery}
+					placeholder="Fragen durchsuchen..."
+					class="w-full rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] py-2 pl-10 pr-4 text-sm text-[hsl(var(--color-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--color-primary))]"
+				/>
+			</div>
 
-		{#if collections.length > 0}
 			<select
-				bind:value={selectedCollectionId}
+				bind:value={statusFilter}
 				class="rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] px-3 py-2 text-sm text-[hsl(var(--color-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--color-primary))]"
 			>
-				<option value={null}>Alle Sammlungen</option>
-				{#each collections as collection}
-					<option value={collection.id}>{collection.name}</option>
-				{/each}
+				<option value="">Alle Status</option>
+				<option value="open">Offen</option>
+				<option value="researching">Recherche</option>
+				<option value="answered">Beantwortet</option>
+				<option value="archived">Archiviert</option>
 			</select>
-		{/if}
-	</div>
 
-	<!-- Questions List -->
-	{#if filteredQuestions.length === 0}
-		<div
-			class="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[hsl(var(--color-border))] py-16"
-		>
-			<span class="mb-4 text-5xl">🔍</span>
-			<h2 class="mb-2 text-lg font-semibold text-[hsl(var(--color-foreground))]">Keine Fragen</h2>
-			<p class="mb-6 text-sm text-[hsl(var(--color-muted-foreground))]">
-				Stelle deine erste Frage und lass die KI recherchieren.
-			</p>
-			<a
-				href="/questions/new"
-				class="rounded-lg bg-[hsl(var(--color-primary))] px-6 py-2.5 text-sm font-medium text-[hsl(var(--color-primary-foreground))]"
-			>
-				Neue Frage
-			</a>
-		</div>
-	{:else}
-		<div class="space-y-3">
-			{#each filteredQuestions as question (question.id)}
-				{@const StatusIcon = statusIcons[question.status]?.icon || Clock}
-				{@const statusColor = statusIcons[question.status]?.color || 'text-muted-foreground'}
-
-				<a
-					href="/questions/{question.id}"
-					class="block rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4 transition-colors hover:border-[hsl(var(--color-primary)/0.3)]"
+			{#if collections.length > 0}
+				<select
+					bind:value={selectedCollectionId}
+					class="rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] px-3 py-2 text-sm text-[hsl(var(--color-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--color-primary))]"
 				>
-					<div class="flex items-start gap-4">
-						<div class="mt-1">
-							<StatusIcon
-								class="h-5 w-5 {statusColor} {question.status === 'researching'
-									? 'animate-spin'
-									: ''}"
-							/>
-						</div>
+					<option value={null}>Alle Sammlungen</option>
+					{#each collections as collection}
+						<option value={collection.id}>{collection.name}</option>
+					{/each}
+				</select>
+			{/if}
+		</div>
 
-						<div class="min-w-0 flex-1">
-							<h3 class="font-medium text-[hsl(var(--color-foreground))] line-clamp-2">
-								{question.title}
-							</h3>
+		<!-- Questions List -->
+		{#if filteredQuestions.length === 0}
+			<div
+				class="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[hsl(var(--color-border))] py-16"
+			>
+				<span class="mb-4 text-5xl">🔍</span>
+				<h2 class="mb-2 text-lg font-semibold text-[hsl(var(--color-foreground))]">Keine Fragen</h2>
+				<p class="mb-6 text-sm text-[hsl(var(--color-muted-foreground))]">
+					Stelle deine erste Frage und lass die KI recherchieren.
+				</p>
+				<a
+					href="/questions/new"
+					class="rounded-lg bg-[hsl(var(--color-primary))] px-6 py-2.5 text-sm font-medium text-[hsl(var(--color-primary-foreground))]"
+				>
+					Neue Frage
+				</a>
+			</div>
+		{:else}
+			<div class="space-y-3">
+				{#each filteredQuestions as question (question.id)}
+					{@const StatusIcon = statusIcons[question.status]?.icon || Clock}
+					{@const statusColor = statusIcons[question.status]?.color || 'text-muted-foreground'}
 
-							{#if question.description}
-								<p class="mt-1 text-sm text-[hsl(var(--color-muted-foreground))] line-clamp-2">
-									{question.description}
-								</p>
-							{/if}
+					<a
+						href="/questions/{question.id}"
+						class="block rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4 transition-colors hover:border-[hsl(var(--color-primary)/0.3)]"
+					>
+						<div class="flex items-start gap-4">
+							<div class="mt-1">
+								<StatusIcon
+									class="h-5 w-5 {statusColor} {question.status === 'researching'
+										? 'animate-spin'
+										: ''}"
+								/>
+							</div>
 
-							<div class="mt-3 flex flex-wrap items-center gap-3">
-								{#if question.tags?.length}
-									<div class="flex gap-1">
-										{#each question.tags.slice(0, 3) as tag}
-											<span
-												class="rounded-full bg-[hsl(var(--color-muted))] px-2 py-0.5 text-xs text-[hsl(var(--color-foreground))]"
-											>
-												{tag}
-											</span>
-										{/each}
-										{#if question.tags.length > 3}
-											<span class="text-xs text-[hsl(var(--color-muted-foreground))]"
-												>+{question.tags.length - 3}</span
-											>
-										{/if}
-									</div>
+							<div class="min-w-0 flex-1">
+								<h3 class="font-medium text-[hsl(var(--color-foreground))] line-clamp-2">
+									{question.title}
+								</h3>
+
+								{#if question.description}
+									<p class="mt-1 text-sm text-[hsl(var(--color-muted-foreground))] line-clamp-2">
+										{question.description}
+									</p>
 								{/if}
 
-								<span
-									class="rounded-full bg-[hsl(var(--color-muted))] px-2 py-0.5 text-xs text-[hsl(var(--color-muted-foreground))]"
-								>
-									{depthLabels[question.researchDepth]}
-								</span>
+								<div class="mt-3 flex flex-wrap items-center gap-3">
+									{#if question.tags?.length}
+										<div class="flex gap-1">
+											{#each question.tags.slice(0, 3) as tag}
+												<span
+													class="rounded-full bg-[hsl(var(--color-muted))] px-2 py-0.5 text-xs text-[hsl(var(--color-foreground))]"
+												>
+													{tag}
+												</span>
+											{/each}
+											{#if question.tags.length > 3}
+												<span class="text-xs text-[hsl(var(--color-muted-foreground))]"
+													>+{question.tags.length - 3}</span
+												>
+											{/if}
+										</div>
+									{/if}
 
-								<span class="text-xs text-[hsl(var(--color-muted-foreground))]">
-									{formatDate(question.createdAt)}
-								</span>
+									<span
+										class="rounded-full bg-[hsl(var(--color-muted))] px-2 py-0.5 text-xs text-[hsl(var(--color-muted-foreground))]"
+									>
+										{depthLabels[question.researchDepth]}
+									</span>
+
+									<span class="text-xs text-[hsl(var(--color-muted-foreground))]">
+										{formatDate(question.createdAt)}
+									</span>
+								</div>
 							</div>
-						</div>
 
-						{#if question.priority !== 'normal'}
-							<span
-								class="rounded-full px-2 py-0.5 text-xs font-medium
+							{#if question.priority !== 'normal'}
+								<span
+									class="rounded-full px-2 py-0.5 text-xs font-medium
 								{question.priority === 'urgent'
-									? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-									: question.priority === 'high'
-										? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
-										: 'bg-muted text-muted-foreground/70 dark:bg-card dark:text-muted-foreground'}"
-							>
-								{question.priority}
-							</span>
-						{/if}
-					</div>
-				</a>
-			{/each}
-		</div>
-	{/if}
-</div>
+										? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+										: question.priority === 'high'
+											? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
+											: 'bg-muted text-muted-foreground/70 dark:bg-card dark:text-muted-foreground'}"
+								>
+									{question.priority}
+								</span>
+							{/if}
+						</div>
+					</a>
+				{/each}
+			</div>
+		{/if}
+	</div>
+</RoutePage>

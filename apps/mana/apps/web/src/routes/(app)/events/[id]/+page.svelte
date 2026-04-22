@@ -2,6 +2,7 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import DetailView from '$lib/modules/events/views/DetailView.svelte';
+	import { RoutePage } from '$lib/components/shell';
 
 	const eventId = $derived($page.params.id ?? '');
 
@@ -18,4 +19,6 @@
 	}
 </script>
 
-<DetailView {navigate} {goBack} params={{ eventId }} />
+<RoutePage appId="events" backHref="/events" title="Event">
+	<DetailView {navigate} {goBack} params={{ eventId }} />
+</RoutePage>

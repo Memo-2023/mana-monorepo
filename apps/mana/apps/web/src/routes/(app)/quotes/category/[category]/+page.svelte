@@ -7,6 +7,7 @@
 	import { quotesSettings } from '$lib/modules/quotes/stores/settings.svelte';
 	import QuoteCard from '$lib/modules/quotes/components/QuoteCard.svelte';
 	import { CaretLeft, MagnifyingGlass } from '@mana/shared-icons';
+	import { RoutePage } from '$lib/components/shell';
 
 	// Get category from URL
 	let category = $derived($page.params.category as Category);
@@ -68,61 +69,66 @@
 	>
 </svelte:head>
 
-<div class="max-w-3xl mx-auto">
-	<!-- Back button -->
-	<button
-		onclick={() => goto('/quotes/categories')}
-		class="flex items-center gap-2 text-foreground-secondary hover:text-foreground mb-6 transition-colors"
-	>
-		<CaretLeft size={20} />
-		{$_('categories.title')}
-	</button>
+<RoutePage appId="quotes" backHref="/quotes" title="Kategorie">
+	<div class="max-w-3xl mx-auto">
+		<!-- Back button -->
+		<button
+			onclick={() => goto('/quotes/categories')}
+			class="flex items-center gap-2 text-foreground-secondary hover:text-foreground mb-6 transition-colors"
+		>
+			<CaretLeft size={20} />
+			{$_('categories.title')}
+		</button>
 
-	{#if isValidCategory}
-		<h1 class="text-3xl font-bold text-foreground mb-2">{$_(categoryLabels[category])}</h1>
-		<p class="text-foreground-secondary mb-6">
-			{$_('categories.quotes', { values: { count: quotes.length } })}
-		</p>
+		{#if isValidCategory}
+			<h1 class="text-3xl font-bold text-foreground mb-2">{$_(categoryLabels[category])}</h1>
+			<p class="text-foreground-secondary mb-6">
+				{$_('categories.quotes', { values: { count: quotes.length } })}
+			</p>
 
-		<!-- Search & Sort Bar -->
-		<div class="flex gap-3 mb-8">
-			<div class="relative flex-1">
-				<div class="absolute left-3 top-1/2 -translate-y-1/2 text-foreground-muted">
-					<MagnifyingGlass size={16} />
+			<!-- Search & Sort Bar -->
+			<div class="flex gap-3 mb-8">
+				<div class="relative flex-1">
+					<div class="absolute left-3 top-1/2 -translate-y-1/2 text-foreground-muted">
+						<MagnifyingGlass size={16} />
+					</div>
+					<input
+						type="text"
+						placeholder={$_('categories.searchInCategory')}
+						bind:value={searchTerm}
+						class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-surface-elevated border border-border text-foreground text-sm focus:outline-none focus:border-primary transition-colors"
+					/>
 				</div>
-				<input
-					type="text"
-					placeholder={$_('categories.searchInCategory')}
-					bind:value={searchTerm}
-					class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-surface-elevated border border-border text-foreground text-sm focus:outline-none focus:border-primary transition-colors"
-				/>
+				<select
+					bind:value={sortBy}
+					class="px-3 py-2.5 rounded-xl bg-surface-elevated border border-border text-foreground text-sm"
+				>
+					<option value="default">{$_('categories.sortByDefault')}</option>
+					<option value="author">{$_('categories.sortByAuthor')}</option>
+				</select>
 			</div>
-			<select
-				bind:value={sortBy}
-				class="px-3 py-2.5 rounded-xl bg-surface-elevated border border-border text-foreground text-sm"
-			>
-				<option value="default">{$_('categories.sortByDefault')}</option>
-				<option value="author">{$_('categories.sortByAuthor')}</option>
-			</select>
-		</div>
 
-		{#if displayedQuotes.length === 0 && searchTerm.length >= 2}
-			<div class="text-center py-12">
-				<p class="text-foreground-secondary">{$_('search.noResults')}</p>
-			</div>
+			{#if displayedQuotes.length === 0 && searchTerm.length >= 2}
+				<div class="text-center py-12">
+					<p class="text-foreground-secondary">{$_('search.noResults')}</p>
+				</div>
+			{:else}
+				<div class="space-y-6">
+					{#each displayedQuotes as quote (quote.id)}
+						<QuoteCard {quote} showSource={quotesSettings.showSource} />
+					{/each}
+				</div>
+			{/if}
 		{:else}
-			<div class="space-y-6">
-				{#each displayedQuotes as quote (quote.id)}
-					<QuoteCard {quote} showSource={quotesSettings.showSource} />
-				{/each}
+			<div class="text-center py-12">
+				<p class="text-foreground-secondary">{$_('categories.notFound')}</p>
+				<button
+					onclick={() => goto('/quotes/categories')}
+					class="mt-4 text-primary hover:underline"
+				>
+					{$_('categories.backToCategories')}
+				</button>
 			</div>
 		{/if}
-	{:else}
-		<div class="text-center py-12">
-			<p class="text-foreground-secondary">{$_('categories.notFound')}</p>
-			<button onclick={() => goto('/quotes/categories')} class="mt-4 text-primary hover:underline">
-				{$_('categories.backToCategories')}
-			</button>
-		</div>
-	{/if}
-</div>
+	</div>
+</RoutePage>

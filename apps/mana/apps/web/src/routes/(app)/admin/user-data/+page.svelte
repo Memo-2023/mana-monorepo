@@ -4,6 +4,9 @@
 	 * The per-user detail route /admin/user-data/[userId] stays route-based.
 	 */
 	import ListView from '$lib/modules/admin/ListView.svelte';
+	import { RoutePage } from '$lib/components/shell';
 </script>
 
-<ListView initialTab="user-data" />
+<RoutePage appId="admin">
+	<ListView initialTab="user-data" />
+</RoutePage>

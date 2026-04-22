@@ -3,6 +3,7 @@
 	import { Card, Button, PageHeader } from '@mana/shared-ui';
 	import { getOrganization } from '$lib/api/services/landing';
 	import { onMount } from 'svelte';
+	import { RoutePage } from '$lib/components/shell';
 
 	let { data } = $props();
 
@@ -37,121 +38,123 @@
 	});
 </script>
 
-{#if loading}
-	<div class="flex items-center justify-center py-20">
-		<div
-			class="h-8 w-8 animate-spin rounded-full border-4 border-primary-600 border-t-transparent"
-		></div>
-	</div>
-{:else if error}
-	<Card>
-		<div class="py-12 text-center">
-			<p class="text-red-500">{error}</p>
-			<a href="/organizations" class="mt-4 inline-block text-sm text-primary-600 hover:underline">
-				Back to organizations
-			</a>
+<RoutePage appId="organizations" backHref="/organizations" title="Organisation">
+	{#if loading}
+		<div class="flex items-center justify-center py-20">
+			<div
+				class="h-8 w-8 animate-spin rounded-full border-4 border-primary-600 border-t-transparent"
+			></div>
 		</div>
-	</Card>
-{:else if org}
-	<div class="space-y-6">
-		<PageHeader title={org.name} description={org.slug ? `${org.slug}.mana.how` : 'Organization'}>
-			{#snippet actions()}
-				<a
-					href="/organizations"
-					class="text-sm text-muted-foreground hover:text-muted-foreground dark:text-muted-foreground dark:hover:text-foreground"
-				>
-					Back
+	{:else if error}
+		<Card>
+			<div class="py-12 text-center">
+				<p class="text-red-500">{error}</p>
+				<a href="/organizations" class="mt-4 inline-block text-sm text-primary-600 hover:underline">
+					Back to organizations
 				</a>
-			{/snippet}
-		</PageHeader>
+			</div>
+		</Card>
+	{:else if org}
+		<div class="space-y-6">
+			<PageHeader title={org.name} description={org.slug ? `${org.slug}.mana.how` : 'Organization'}>
+				{#snippet actions()}
+					<a
+						href="/organizations"
+						class="text-sm text-muted-foreground hover:text-muted-foreground dark:text-muted-foreground dark:hover:text-foreground"
+					>
+						Back
+					</a>
+				{/snippet}
+			</PageHeader>
 
-		<!-- Tabs -->
-		<nav class="flex gap-1 border-b pb-px">
-			{#each tabs as tab}
-				{@const active = activeTab === tab.id}
-				<button
-					onclick={() => {
-						if (tab.id === 'landing') {
-							window.location.href = `/organizations/${data.orgId}/landing`;
-						} else {
-							activeTab = tab.id;
-						}
-					}}
-					class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-t-lg transition-colors
+			<!-- Tabs -->
+			<nav class="flex gap-1 border-b pb-px">
+				{#each tabs as tab}
+					{@const active = activeTab === tab.id}
+					<button
+						onclick={() => {
+							if (tab.id === 'landing') {
+								window.location.href = `/organizations/${data.orgId}/landing`;
+							} else {
+								activeTab = tab.id;
+							}
+						}}
+						class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-t-lg transition-colors
 						{active
-						? 'text-primary border-b-2 border-primary -mb-px bg-primary/5'
-						: 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}"
-				>
-					<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						{@html icons[tab.id]}
-					</svg>
-					{tab.label}
-				</button>
-			{/each}
-		</nav>
+							? 'text-primary border-b-2 border-primary -mb-px bg-primary/5'
+							: 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}"
+					>
+						<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							{@html icons[tab.id]}
+						</svg>
+						{tab.label}
+					</button>
+				{/each}
+			</nav>
 
-		<!-- Tab Content -->
-		{#if activeTab === 'overview'}
-			<div class="grid gap-6 md:grid-cols-2">
-				<Card>
-					<h3 class="text-lg font-semibold text-foreground dark:text-white mb-4">Details</h3>
-					<dl class="space-y-3 text-sm">
-						<div>
-							<dt class="text-muted-foreground dark:text-muted-foreground">Name</dt>
-							<dd class="font-medium text-foreground dark:text-white">{org.name}</dd>
-						</div>
-						{#if org.slug}
+			<!-- Tab Content -->
+			{#if activeTab === 'overview'}
+				<div class="grid gap-6 md:grid-cols-2">
+					<Card>
+						<h3 class="text-lg font-semibold text-foreground dark:text-white mb-4">Details</h3>
+						<dl class="space-y-3 text-sm">
 							<div>
-								<dt class="text-muted-foreground dark:text-muted-foreground">Slug</dt>
-								<dd class="font-medium text-foreground dark:text-white">{org.slug}</dd>
+								<dt class="text-muted-foreground dark:text-muted-foreground">Name</dt>
+								<dd class="font-medium text-foreground dark:text-white">{org.name}</dd>
 							</div>
-						{/if}
-						<div>
-							<dt class="text-muted-foreground dark:text-muted-foreground">Created</dt>
-							<dd class="font-medium text-foreground dark:text-white">
-								{new Date(org.createdAt).toLocaleDateString()}
-							</dd>
-						</div>
-					</dl>
-				</Card>
-
-				<Card>
-					<h3 class="text-lg font-semibold text-foreground dark:text-white mb-4">Landing Page</h3>
-					{#if org.metadata?.landingPage?.enabled}
-						<div class="space-y-2">
-							<p class="text-sm text-green-600 dark:text-green-400 flex items-center gap-2">
-								<span class="h-2 w-2 rounded-full bg-green-500"></span>
-								Active
-							</p>
-							{#if org.metadata.landingPage.publishedUrl}
-								<a
-									href={org.metadata.landingPage.publishedUrl}
-									target="_blank"
-									rel="noopener noreferrer"
-									class="text-sm text-primary-600 hover:underline"
-								>
-									{org.metadata.landingPage.publishedUrl}
-								</a>
+							{#if org.slug}
+								<div>
+									<dt class="text-muted-foreground dark:text-muted-foreground">Slug</dt>
+									<dd class="font-medium text-foreground dark:text-white">{org.slug}</dd>
+								</div>
 							{/if}
+							<div>
+								<dt class="text-muted-foreground dark:text-muted-foreground">Created</dt>
+								<dd class="font-medium text-foreground dark:text-white">
+									{new Date(org.createdAt).toLocaleDateString()}
+								</dd>
+							</div>
+						</dl>
+					</Card>
+
+					<Card>
+						<h3 class="text-lg font-semibold text-foreground dark:text-white mb-4">Landing Page</h3>
+						{#if org.metadata?.landingPage?.enabled}
+							<div class="space-y-2">
+								<p class="text-sm text-green-600 dark:text-green-400 flex items-center gap-2">
+									<span class="h-2 w-2 rounded-full bg-green-500"></span>
+									Active
+								</p>
+								{#if org.metadata.landingPage.publishedUrl}
+									<a
+										href={org.metadata.landingPage.publishedUrl}
+										target="_blank"
+										rel="noopener noreferrer"
+										class="text-sm text-primary-600 hover:underline"
+									>
+										{org.metadata.landingPage.publishedUrl}
+									</a>
+								{/if}
+							</div>
+						{:else}
+							<p class="text-sm text-muted-foreground dark:text-muted-foreground">
+								Not configured yet
+							</p>
+						{/if}
+						<div class="mt-4">
+							<a href="/organizations/{data.orgId}/landing">
+								<Button variant="primary" size="sm">Configure Landing Page</Button>
+							</a>
 						</div>
-					{:else}
-						<p class="text-sm text-muted-foreground dark:text-muted-foreground">
-							Not configured yet
-						</p>
-					{/if}
-					<div class="mt-4">
-						<a href="/organizations/{data.orgId}/landing">
-							<Button variant="primary" size="sm">Configure Landing Page</Button>
-						</a>
+					</Card>
+				</div>
+			{:else if activeTab === 'members'}
+				<Card>
+					<div class="py-8 text-center text-sm text-muted-foreground dark:text-muted-foreground">
+						Member management coming soon.
 					</div>
 				</Card>
-			</div>
-		{:else if activeTab === 'members'}
-			<Card>
-				<div class="py-8 text-center text-sm text-muted-foreground dark:text-muted-foreground">
-					Member management coming soon.
-				</div>
-			</Card>
-		{/if}
-	</div>
-{/if}
+			{/if}
+		</div>
+	{/if}
+</RoutePage>

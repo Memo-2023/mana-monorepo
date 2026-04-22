@@ -12,6 +12,7 @@
 	import SessionCard from '$lib/modules/meditate/components/SessionCard.svelte';
 	import StatsOverview from '$lib/modules/meditate/components/StatsOverview.svelte';
 	import SessionPlayer from '$lib/modules/meditate/components/SessionPlayer.svelte';
+	import { RoutePage } from '$lib/components/shell';
 
 	const presetsQuery = getContext<{ value: MeditatePreset[] }>('meditatePresets');
 	const sessionsQuery = getContext<{ value: MeditateSession[] }>('meditateSessions');
@@ -44,46 +45,48 @@
 	<SessionPlayer preset={activePreset} onComplete={handleComplete} onCancel={handleCancel} />
 {/if}
 
-<div class="page">
-	<header class="page-header">
-		<h1 class="page-title">Meditate</h1>
-		<p class="page-subtitle">Finde deine Ruhe</p>
-	</header>
+<RoutePage appId="meditate">
+	<div class="page">
+		<header class="page-header">
+			<h1 class="page-title">Meditate</h1>
+			<p class="page-subtitle">Finde deine Ruhe</p>
+		</header>
 
-	<!-- Stats -->
-	{#if sessions.length > 0}
-		<section class="section">
-			<StatsOverview {sessions} />
-		</section>
-	{/if}
+		<!-- Stats -->
+		{#if sessions.length > 0}
+			<section class="section">
+				<StatsOverview {sessions} />
+			</section>
+		{/if}
 
-	<!-- Presets -->
-	<section class="section">
-		<div class="section-header">
-			<h2 class="section-title">Meditationen</h2>
-		</div>
-		<div class="preset-list">
-			{#each presets as preset (preset.id)}
-				<PresetCard {preset} onStart={startSession} />
-			{/each}
-		</div>
-	</section>
-
-	<!-- Recent sessions -->
-	{#if recentSessions.length > 0}
+		<!-- Presets -->
 		<section class="section">
 			<div class="section-header">
-				<h2 class="section-title">Letzte Sessions</h2>
-				<a href="/meditate/history" class="section-link">Alle →</a>
+				<h2 class="section-title">Meditationen</h2>
 			</div>
-			<div class="session-list">
-				{#each recentSessions as session (session.id)}
-					<SessionCard {session} {presets} />
+			<div class="preset-list">
+				{#each presets as preset (preset.id)}
+					<PresetCard {preset} onStart={startSession} />
 				{/each}
 			</div>
 		</section>
-	{/if}
-</div>
+
+		<!-- Recent sessions -->
+		{#if recentSessions.length > 0}
+			<section class="section">
+				<div class="section-header">
+					<h2 class="section-title">Letzte Sessions</h2>
+					<a href="/meditate/history" class="section-link">Alle →</a>
+				</div>
+				<div class="session-list">
+					{#each recentSessions as session (session.id)}
+						<SessionCard {session} {presets} />
+					{/each}
+				</div>
+			</section>
+		{/if}
+	</div>
+</RoutePage>
 
 <style>
 	.page {

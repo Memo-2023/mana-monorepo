@@ -12,6 +12,7 @@
 	import { preferencesStore } from '$lib/modules/news/stores/preferences.svelte';
 	import { ALL_TOPICS, type Topic } from '$lib/modules/news/types';
 	import { sourcesForTopic, TOPIC_LABELS } from '$lib/modules/news/sources-meta';
+	import { RoutePage } from '$lib/components/shell';
 
 	const prefs$ = usePreferences();
 	const prefs = $derived(prefs$.value);
@@ -42,42 +43,46 @@
 	<title>Quellen — News — Mana</title>
 </svelte:head>
 
-<div class="page">
-	<header class="header">
-		<button type="button" class="back" onclick={() => goto('/news/preferences')}
-			>← Einstellungen</button
-		>
-		<h1>Quellen</h1>
-		<p class="hint">
-			{prefs.blockedSources.length} blockiert. Tippe auf eine Quelle um sie ein- oder auszublenden.
-		</p>
-	</header>
+<RoutePage appId="news" backHref="/news">
+	<div class="page">
+		<header class="header">
+			<button type="button" class="back" onclick={() => goto('/news/preferences')}
+				>← Einstellungen</button
+			>
+			<h1>Quellen</h1>
+			<p class="hint">
+				{prefs.blockedSources.length} blockiert. Tippe auf eine Quelle um sie ein- oder auszublenden.
+			</p>
+		</header>
 
-	{#each visibleTopics as topic}
-		<section class="topic-section">
-			<h2>
-				{TOPIC_LABELS[topic].emoji}
-				{TOPIC_LABELS[topic].de}
-			</h2>
-			<div class="source-grid">
-				{#each sourcesForTopic(topic) as src}
-					{@const blocked = isBlocked(src.slug)}
-					{@const weight = weightOf(src.slug)}
-					<button type="button" class="source" class:blocked onclick={() => toggle(src.slug)}>
-						<span class="name">{src.name}</span>
-						<span class="meta">
-							<span class="lang">{src.language}</span>
-							<span class="weight" title="Gewicht: {weight.toFixed(2)}">{weightLabel(weight)}</span>
-							{#if blocked}
-								<span class="state">blockiert</span>
-							{/if}
-						</span>
-					</button>
-				{/each}
-			</div>
-		</section>
-	{/each}
-</div>
+		{#each visibleTopics as topic}
+			<section class="topic-section">
+				<h2>
+					{TOPIC_LABELS[topic].emoji}
+					{TOPIC_LABELS[topic].de}
+				</h2>
+				<div class="source-grid">
+					{#each sourcesForTopic(topic) as src}
+						{@const blocked = isBlocked(src.slug)}
+						{@const weight = weightOf(src.slug)}
+						<button type="button" class="source" class:blocked onclick={() => toggle(src.slug)}>
+							<span class="name">{src.name}</span>
+							<span class="meta">
+								<span class="lang">{src.language}</span>
+								<span class="weight" title="Gewicht: {weight.toFixed(2)}"
+									>{weightLabel(weight)}</span
+								>
+								{#if blocked}
+									<span class="state">blockiert</span>
+								{/if}
+							</span>
+						</button>
+					{/each}
+				</div>
+			</section>
+		{/each}
+	</div>
+</RoutePage>
 
 <style>
 	.page {

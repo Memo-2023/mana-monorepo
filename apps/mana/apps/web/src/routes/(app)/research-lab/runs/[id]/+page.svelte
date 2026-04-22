@@ -8,6 +8,7 @@
 	import * as api from '$lib/modules/research-lab/api';
 	import CompareColumn from '$lib/modules/research-lab/components/CompareColumn.svelte';
 	import type { CompareEntry, RunSummary } from '$lib/modules/research-lab/types';
+	import { RoutePage } from '$lib/components/shell';
 
 	const runId = $derived($page.params.id);
 
@@ -81,39 +82,41 @@
 	<title>Research Run · Mana</title>
 </svelte:head>
 
-<div class="page">
-	<header class="header">
-		<button type="button" class="back" onclick={() => void goto('/research-lab')}>
-			← Zurück zum Lab
-		</button>
-		{#if run}
-			<div class="meta">
-				<span class="badge badge-{run.category}">{run.category}</span>
-				<span class="mode">{run.mode}</span>
-				{#if run.totalCostCredits > 0}
-					<span class="cost">{run.totalCostCredits}¢</span>
-				{/if}
-				<span class="time">{formatDate(run.createdAt)}</span>
+<RoutePage appId="research-lab" backHref="/research-lab" title="Run">
+	<div class="page">
+		<header class="header">
+			<button type="button" class="back" onclick={() => void goto('/research-lab')}>
+				← Zurück zum Lab
+			</button>
+			{#if run}
+				<div class="meta">
+					<span class="badge badge-{run.category}">{run.category}</span>
+					<span class="mode">{run.mode}</span>
+					{#if run.totalCostCredits > 0}
+						<span class="cost">{run.totalCostCredits}¢</span>
+					{/if}
+					<span class="time">{formatDate(run.createdAt)}</span>
+				</div>
+			{/if}
+		</header>
+
+		{#if loading}
+			<p class="loading">Lade Run …</p>
+		{:else if error}
+			<div class="error">{error}</div>
+		{:else if run}
+			<h1 class="query">{run.query}</h1>
+			<p class="providers-line">
+				{run.providersRequested.length} Anbieter · Run <code>{run.id.slice(0, 8)}</code>
+			</p>
+			<div class="grid">
+				{#each entries as entry (entry.resultId)}
+					<CompareColumn category={run.category} {entry} {runId} />
+				{/each}
 			</div>
 		{/if}
-	</header>
-
-	{#if loading}
-		<p class="loading">Lade Run …</p>
-	{:else if error}
-		<div class="error">{error}</div>
-	{:else if run}
-		<h1 class="query">{run.query}</h1>
-		<p class="providers-line">
-			{run.providersRequested.length} Anbieter · Run <code>{run.id.slice(0, 8)}</code>
-		</p>
-		<div class="grid">
-			{#each entries as entry (entry.resultId)}
-				<CompareColumn category={run.category} {entry} {runId} />
-			{/each}
-		</div>
-	{/if}
-</div>
+	</div>
+</RoutePage>
 
 <style>
 	.page {

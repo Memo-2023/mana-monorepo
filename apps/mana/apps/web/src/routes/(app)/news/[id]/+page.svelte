@@ -20,6 +20,7 @@
 	import { articlesStore } from '$lib/modules/news/stores/articles.svelte';
 	import { reactionsStore } from '$lib/modules/news/stores/reactions.svelte';
 	import type { LocalCachedArticle, Article } from '$lib/modules/news/types';
+	import { RoutePage } from '$lib/components/shell';
 
 	const id = $derived($page.params.id ?? '');
 
@@ -103,64 +104,65 @@
 	<title>{title || 'Lese-Ansicht'} — Mana</title>
 </svelte:head>
 
-<div class="reader-shell" style:--reader-font-size="{fontSize}rem">
-	<header class="reader-bar">
-		<button type="button" class="bar-btn" onclick={() => goto('/news')}>← Zurück</button>
-		<div class="bar-spacer"></div>
-		<button
-			type="button"
-			class="bar-btn"
-			onclick={() => (fontSize = Math.max(0.875, fontSize - 0.0625))}
-			title="Kleiner"
-		>
-			A−
-		</button>
-		<button
-			type="button"
-			class="bar-btn"
-			onclick={() => (fontSize = Math.min(1.25, fontSize + 0.0625))}
-			title="Größer"
-		>
-			A+
-		</button>
-		{#if loaded?.kind === 'curated'}
-			<button type="button" class="bar-btn primary" onclick={saveAndStay}>❤️ Speichern</button>
-		{/if}
-	</header>
-
-	{#if !loaded}
-		<div class="placeholder">Lade…</div>
-	{:else if loaded.kind === 'missing'}
-		<div class="placeholder">
-			<p>Artikel nicht gefunden.</p>
-			<button type="button" class="bar-btn" onclick={() => goto('/news')}>Zurück zum Feed</button>
-		</div>
-	{:else}
-		<article class="reader">
-			{#if meta?.imageUrl}
-				<img class="hero-image" src={meta.imageUrl} alt="" />
+<RoutePage appId="news" backHref="/news" title="Artikel">
+	<div class="reader-shell" style:--reader-font-size="{fontSize}rem">
+		<header class="reader-bar">
+			<button type="button" class="bar-btn" onclick={() => goto('/news')}>← Zurück</button>
+			<div class="bar-spacer"></div>
+			<button
+				type="button"
+				class="bar-btn"
+				onclick={() => (fontSize = Math.max(0.875, fontSize - 0.0625))}
+				title="Kleiner"
+			>
+				A−
+			</button>
+			<button
+				type="button"
+				class="bar-btn"
+				onclick={() => (fontSize = Math.min(1.25, fontSize + 0.0625))}
+				title="Größer"
+			>
+				A+
+			</button>
+			{#if loaded?.kind === 'curated'}
+				<button type="button" class="bar-btn primary" onclick={saveAndStay}>❤️ Speichern</button>
 			{/if}
-			<h1 class="reader-title">{title}</h1>
-			<div class="reader-meta">
-				{#if meta?.siteName}
-					<span class="site">{meta.siteName}</span>
-				{/if}
-				{#if meta?.author}
-					<span>·</span>
-					<span>{meta.author}</span>
-				{/if}
-				{#if meta?.publishedAt}
-					<span>·</span>
-					<span>{formatRelativeTime(meta.publishedAt)}</span>
-				{/if}
-				{#if meta?.readingTimeMinutes}
-					<span>·</span>
-					<span>{meta.readingTimeMinutes} min</span>
-				{/if}
-			</div>
+		</header>
 
-			{#if html}
-				<!--
+		{#if !loaded}
+			<div class="placeholder">Lade…</div>
+		{:else if loaded.kind === 'missing'}
+			<div class="placeholder">
+				<p>Artikel nicht gefunden.</p>
+				<button type="button" class="bar-btn" onclick={() => goto('/news')}>Zurück zum Feed</button>
+			</div>
+		{:else}
+			<article class="reader">
+				{#if meta?.imageUrl}
+					<img class="hero-image" src={meta.imageUrl} alt="" />
+				{/if}
+				<h1 class="reader-title">{title}</h1>
+				<div class="reader-meta">
+					{#if meta?.siteName}
+						<span class="site">{meta.siteName}</span>
+					{/if}
+					{#if meta?.author}
+						<span>·</span>
+						<span>{meta.author}</span>
+					{/if}
+					{#if meta?.publishedAt}
+						<span>·</span>
+						<span>{formatRelativeTime(meta.publishedAt)}</span>
+					{/if}
+					{#if meta?.readingTimeMinutes}
+						<span>·</span>
+						<span>{meta.readingTimeMinutes} min</span>
+					{/if}
+				</div>
+
+				{#if html}
+					<!--
 					Curated pool stores Mozilla Readability HTML which is
 					already a stripped-down article DOM. We render it as-is
 					through Svelte's @html. Source: news.curated_articles in
@@ -168,25 +170,26 @@
 					so the trust boundary is "we trust our own ingester
 					output", same as for chat/messages and notes/content.
 				-->
-				<div class="reader-content prose">{@html html}</div>
-			{:else if plain}
-				<div class="reader-content prose">
-					{#each plain.split('\n\n') as para}
-						<p>{para}</p>
-					{/each}
-				</div>
-			{/if}
+					<div class="reader-content prose">{@html html}</div>
+				{:else if plain}
+					<div class="reader-content prose">
+						{#each plain.split('\n\n') as para}
+							<p>{para}</p>
+						{/each}
+					</div>
+				{/if}
 
-			{#if meta?.originalUrl}
-				<footer class="reader-footer">
-					<a class="external-link" href={meta.originalUrl} target="_blank" rel="noreferrer">
-						Original öffnen ↗
-					</a>
-				</footer>
-			{/if}
-		</article>
-	{/if}
-</div>
+				{#if meta?.originalUrl}
+					<footer class="reader-footer">
+						<a class="external-link" href={meta.originalUrl} target="_blank" rel="noreferrer">
+							Original öffnen ↗
+						</a>
+					</footer>
+				{/if}
+			</article>
+		{/if}
+	</div>
+</RoutePage>
 
 <style>
 	.reader-shell {

@@ -15,6 +15,7 @@
 	import NowcastBar from '$lib/modules/wetter/components/NowcastBar.svelte';
 	import LocationPicker from '$lib/modules/wetter/components/LocationPicker.svelte';
 	import SourceComparison from '$lib/modules/wetter/components/SourceComparison.svelte';
+	import { RoutePage } from '$lib/components/shell';
 
 	const locationsQuery = useLocations();
 	let locations = $derived(locationsQuery.value);
@@ -73,82 +74,84 @@
 	<title>Wetter - Mana</title>
 </svelte:head>
 
-<div class="wetter-view">
-	<LocationPicker
-		{locations}
-		{selectedLat}
-		{selectedLon}
-		onSelect={selectLocation}
-		onSave={saveLocation}
-		onRemove={removeLocation}
-		onSetDefault={setDefaultLocation}
-	/>
-
-	<!-- Tab switcher -->
-	<div class="tab-bar">
-		<button
-			class="tab"
-			class:active={activeTab === 'overview'}
-			onclick={() => (activeTab = 'overview')}
-		>
-			Übersicht
-		</button>
-		<button
-			class="tab"
-			class:active={activeTab === 'compare'}
-			onclick={() => (activeTab = 'compare')}
-		>
-			Quellen-Vergleich
-		</button>
-	</div>
-
-	{#if activeTab === 'compare' && selectedLat != null && selectedLon != null}
-		<SourceComparison lat={selectedLat} lon={selectedLon} locationName={selectedName} />
-	{:else if weatherStore.loading && !weatherStore.weatherData}
-		<div class="loading-state">
-			<span class="loading-icon">🌤</span>
-			<span class="loading-text">Wetterdaten werden geladen...</span>
-		</div>
-	{:else if weatherStore.error && !weatherStore.weatherData}
-		<div class="error-state">
-			<span class="error-text">{weatherStore.error}</span>
-			{#if selectedLat != null && selectedLon != null}
-				<button
-					class="retry-btn"
-					onclick={() => selectLocation(selectedLat!, selectedLon!, 'Erneut versuchen')}
-				>
-					Erneut versuchen
-				</button>
-			{/if}
-		</div>
-	{:else if weatherStore.weatherData}
-		{@const data = weatherStore.weatherData}
-
-		<CurrentConditions
-			current={data.current}
-			locationName={data.location.name}
-			fetchedAt={data.fetchedAt}
+<RoutePage appId="wetter">
+	<div class="wetter-view">
+		<LocationPicker
+			{locations}
+			{selectedLat}
+			{selectedLon}
+			onSelect={selectLocation}
+			onSave={saveLocation}
+			onRemove={removeLocation}
+			onSetDefault={setDefaultLocation}
 		/>
 
-		<WeatherAlerts alerts={data.alerts} />
+		<!-- Tab switcher -->
+		<div class="tab-bar">
+			<button
+				class="tab"
+				class:active={activeTab === 'overview'}
+				onclick={() => (activeTab = 'overview')}
+			>
+				Übersicht
+			</button>
+			<button
+				class="tab"
+				class:active={activeTab === 'compare'}
+				onclick={() => (activeTab = 'compare')}
+			>
+				Quellen-Vergleich
+			</button>
+		</div>
 
-		{#if weatherStore.nowcast}
-			<NowcastBar nowcast={weatherStore.nowcast} />
-		{/if}
+		{#if activeTab === 'compare' && selectedLat != null && selectedLon != null}
+			<SourceComparison lat={selectedLat} lon={selectedLon} locationName={selectedName} />
+		{:else if weatherStore.loading && !weatherStore.weatherData}
+			<div class="loading-state">
+				<span class="loading-icon">🌤</span>
+				<span class="loading-text">Wetterdaten werden geladen...</span>
+			</div>
+		{:else if weatherStore.error && !weatherStore.weatherData}
+			<div class="error-state">
+				<span class="error-text">{weatherStore.error}</span>
+				{#if selectedLat != null && selectedLon != null}
+					<button
+						class="retry-btn"
+						onclick={() => selectLocation(selectedLat!, selectedLon!, 'Erneut versuchen')}
+					>
+						Erneut versuchen
+					</button>
+				{/if}
+			</div>
+		{:else if weatherStore.weatherData}
+			{@const data = weatherStore.weatherData}
 
-		{#if data.hourly.length > 0}
-			<HourlyForecast hours={data.hourly} />
-		{/if}
+			<CurrentConditions
+				current={data.current}
+				locationName={data.location.name}
+				fetchedAt={data.fetchedAt}
+			/>
 
-		{#if data.daily.length > 0}
-			<DailyForecast days={data.daily} />
-		{/if}
+			<WeatherAlerts alerts={data.alerts} />
 
-		{#if weatherStore.loading}
-			<div class="refresh-indicator">Aktualisierung...</div>
+			{#if weatherStore.nowcast}
+				<NowcastBar nowcast={weatherStore.nowcast} />
+			{/if}
+
+			{#if data.hourly.length > 0}
+				<HourlyForecast hours={data.hourly} />
+			{/if}
+
+			{#if data.daily.length > 0}
+				<DailyForecast days={data.daily} />
+			{/if}
+
+			{#if weatherStore.loading}
+				<div class="refresh-indicator">Aktualisierung...</div>
+			{/if}
 		{/if}
-	{/if}
-</div>
+	</div>
+</RoutePage>
 
 <style>
 	.wetter-view {

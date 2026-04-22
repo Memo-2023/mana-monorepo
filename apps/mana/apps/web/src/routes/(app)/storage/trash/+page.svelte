@@ -6,6 +6,7 @@
 	import { liveQuery } from 'dexie';
 	import { db } from '$lib/data/database';
 	import { decryptRecords } from '$lib/data/crypto';
+	import { RoutePage } from '$lib/components/shell';
 
 	// Live query for deleted items (not permanently deleted). file.name
 	// is encrypted on disk, so decrypt the visible set before the trash
@@ -69,92 +70,94 @@
 	<title>Papierkorb - Storage - Mana</title>
 </svelte:head>
 
-<div class="mx-auto max-w-5xl">
-	<div class="mb-6 flex items-center justify-between">
-		<div class="flex items-center gap-3">
-			<Trash size={24} class="text-muted-foreground" />
-			<h1 class="text-2xl font-bold text-foreground">Papierkorb</h1>
+<RoutePage appId="storage" backHref="/storage">
+	<div class="mx-auto max-w-5xl">
+		<div class="mb-6 flex items-center justify-between">
+			<div class="flex items-center gap-3">
+				<Trash size={24} class="text-muted-foreground" />
+				<h1 class="text-2xl font-bold text-foreground">Papierkorb</h1>
+			</div>
+
+			{#if files.length > 0 || folders.length > 0}
+				<button
+					class="flex items-center gap-2 rounded-lg bg-destructive px-3 py-1.5 text-sm text-white"
+					onclick={handleEmptyTrash}
+				>
+					<Warning size={16} />
+					Papierkorb leeren
+				</button>
+			{/if}
 		</div>
 
-		{#if files.length > 0 || folders.length > 0}
-			<button
-				class="flex items-center gap-2 rounded-lg bg-destructive px-3 py-1.5 text-sm text-white"
-				onclick={handleEmptyTrash}
-			>
-				<Warning size={16} />
-				Papierkorb leeren
-			</button>
+		{#if files.length === 0 && folders.length === 0}
+			<div class="flex flex-col items-center justify-center py-16 text-center">
+				<div class="mb-4 text-5xl">🗑️</div>
+				<h3 class="mb-2 text-lg font-semibold text-foreground">Papierkorb ist leer</h3>
+				<p class="text-sm text-muted-foreground">Geloschte Dateien und Ordner erscheinen hier.</p>
+			</div>
+		{:else}
+			<div class="flex flex-col gap-2">
+				{#each folders as folder (folder.id)}
+					<div
+						class="flex items-center justify-between rounded-lg border border-border bg-card px-4 py-3"
+					>
+						<div class="flex items-center gap-3">
+							<span class="text-xl">📁</span>
+							<div>
+								<div class="text-sm font-medium text-foreground">{folder.name}</div>
+								<div class="text-xs text-muted-foreground">
+									Geloscht am {formatDate(folder.updatedAt)}
+								</div>
+							</div>
+						</div>
+						<div class="flex items-center gap-2">
+							<button
+								class="flex items-center gap-1 rounded-md border border-border px-3 py-1 text-xs text-foreground transition-colors hover:border-primary hover:text-primary"
+								onclick={() => handleRestore(folder.id, 'folder')}
+							>
+								<ArrowCounterClockwise size={14} />
+								Wiederherstellen
+							</button>
+							<button
+								class="rounded-md px-2 py-1 text-xs text-destructive hover:underline"
+								onclick={() => handlePermanentDelete(folder.id, 'folder')}
+							>
+								Endgultig loschen
+							</button>
+						</div>
+					</div>
+				{/each}
+				{#each files as file (file.id)}
+					<div
+						class="flex items-center justify-between rounded-lg border border-border bg-card px-4 py-3"
+					>
+						<div class="flex items-center gap-3">
+							<span class="text-xl">📄</span>
+							<div>
+								<div class="text-sm font-medium text-foreground">{file.name}</div>
+								<div class="text-xs text-muted-foreground">
+									Geloscht am {formatDate(file.updatedAt)}
+								</div>
+							</div>
+						</div>
+						<div class="flex items-center gap-2">
+							<button
+								class="flex items-center gap-1 rounded-md border border-border px-3 py-1 text-xs text-foreground transition-colors hover:border-primary hover:text-primary"
+								onclick={() => handleRestore(file.id, 'file')}
+							>
+								<ArrowCounterClockwise size={14} />
+								Wiederherstellen
+							</button>
+							<button
+								class="rounded-md px-2 py-1 text-xs text-destructive hover:underline"
+								onclick={() => handlePermanentDelete(file.id, 'file')}
+							>
+								Endgultig loschen
+							</button>
+						</div>
+					</div>
+				{/each}
+			</div>
 		{/if}
 	</div>
-
-	{#if files.length === 0 && folders.length === 0}
-		<div class="flex flex-col items-center justify-center py-16 text-center">
-			<div class="mb-4 text-5xl">🗑️</div>
-			<h3 class="mb-2 text-lg font-semibold text-foreground">Papierkorb ist leer</h3>
-			<p class="text-sm text-muted-foreground">Geloschte Dateien und Ordner erscheinen hier.</p>
-		</div>
-	{:else}
-		<div class="flex flex-col gap-2">
-			{#each folders as folder (folder.id)}
-				<div
-					class="flex items-center justify-between rounded-lg border border-border bg-card px-4 py-3"
-				>
-					<div class="flex items-center gap-3">
-						<span class="text-xl">📁</span>
-						<div>
-							<div class="text-sm font-medium text-foreground">{folder.name}</div>
-							<div class="text-xs text-muted-foreground">
-								Geloscht am {formatDate(folder.updatedAt)}
-							</div>
-						</div>
-					</div>
-					<div class="flex items-center gap-2">
-						<button
-							class="flex items-center gap-1 rounded-md border border-border px-3 py-1 text-xs text-foreground transition-colors hover:border-primary hover:text-primary"
-							onclick={() => handleRestore(folder.id, 'folder')}
-						>
-							<ArrowCounterClockwise size={14} />
-							Wiederherstellen
-						</button>
-						<button
-							class="rounded-md px-2 py-1 text-xs text-destructive hover:underline"
-							onclick={() => handlePermanentDelete(folder.id, 'folder')}
-						>
-							Endgultig loschen
-						</button>
-					</div>
-				</div>
-			{/each}
-			{#each files as file (file.id)}
-				<div
-					class="flex items-center justify-between rounded-lg border border-border bg-card px-4 py-3"
-				>
-					<div class="flex items-center gap-3">
-						<span class="text-xl">📄</span>
-						<div>
-							<div class="text-sm font-medium text-foreground">{file.name}</div>
-							<div class="text-xs text-muted-foreground">
-								Geloscht am {formatDate(file.updatedAt)}
-							</div>
-						</div>
-					</div>
-					<div class="flex items-center gap-2">
-						<button
-							class="flex items-center gap-1 rounded-md border border-border px-3 py-1 text-xs text-foreground transition-colors hover:border-primary hover:text-primary"
-							onclick={() => handleRestore(file.id, 'file')}
-						>
-							<ArrowCounterClockwise size={14} />
-							Wiederherstellen
-						</button>
-						<button
-							class="rounded-md px-2 py-1 text-xs text-destructive hover:underline"
-							onclick={() => handlePermanentDelete(file.id, 'file')}
-						>
-							Endgultig loschen
-						</button>
-					</div>
-				</div>
-			{/each}
-		</div>
-	{/if}
-</div>
+</RoutePage>

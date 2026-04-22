@@ -8,6 +8,7 @@
 	import type { Collection } from '$lib/modules/inventory/queries';
 	import type { CollectionSchema, FieldDefinition } from '$lib/modules/inventory/constants';
 	import SchemaEditor from '$lib/modules/inventory/components/fields/SchemaEditor.svelte';
+	import { RoutePage } from '$lib/components/shell';
 
 	const collectionsCtx: { readonly value: Collection[] } = getContext('collections');
 
@@ -53,66 +54,68 @@
 	<title>Sammlung bearbeiten - Inventar - Mana</title>
 </svelte:head>
 
-{#if !collection}
-	<p class="text-[hsl(var(--color-muted-foreground))]">Sammlung nicht gefunden</p>
-{:else}
-	<div class="mx-auto max-w-2xl space-y-6">
-		<div class="flex items-center gap-3">
-			<button
-				onclick={() => goto(`/inventory/collections/${collection.id}`)}
-				class="text-[hsl(var(--color-muted-foreground))] hover:text-[hsl(var(--color-foreground))]"
-			>
-				<CaretLeft size={20} />
-			</button>
-			<h1 class="text-2xl font-bold text-[hsl(var(--color-foreground))]">Sammlung bearbeiten</h1>
-		</div>
-
-		<div class="space-y-4">
-			<div class="flex gap-3">
-				<input
-					type="text"
-					bind:value={icon}
-					placeholder="📁"
-					class="h-12 w-12 rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] text-center text-2xl"
-					maxlength="2"
-				/>
-				<input
-					type="text"
-					bind:value={name}
-					placeholder="Sammlungsname"
-					class="{inputClass} flex-1"
-				/>
-			</div>
-
-			<textarea
-				bind:value={description}
-				placeholder="Beschreibung (optional)"
-				rows="2"
-				class={inputClass}
-			></textarea>
-
-			<div>
-				<h3 class="mb-3 text-sm font-semibold text-[hsl(var(--color-foreground))]">
-					Eigene Felder
-				</h3>
-				<SchemaEditor fields={schema.fields} onchange={(fields) => (schema = { fields })} />
-			</div>
-
-			<div class="flex justify-end gap-3 pt-4">
+<RoutePage appId="inventory" backHref="/inventory" title="Sammlung">
+	{#if !collection}
+		<p class="text-[hsl(var(--color-muted-foreground))]">Sammlung nicht gefunden</p>
+	{:else}
+		<div class="mx-auto max-w-2xl space-y-6">
+			<div class="flex items-center gap-3">
 				<button
 					onclick={() => goto(`/inventory/collections/${collection.id}`)}
-					class="rounded-lg border border-[hsl(var(--color-border))] px-4 py-2 text-sm text-[hsl(var(--color-foreground))]"
+					class="text-[hsl(var(--color-muted-foreground))] hover:text-[hsl(var(--color-foreground))]"
 				>
-					Abbrechen
+					<CaretLeft size={20} />
 				</button>
-				<button
-					onclick={handleSave}
-					disabled={!name.trim()}
-					class="rounded-lg bg-[hsl(var(--color-primary))] px-6 py-2 text-sm font-medium text-[hsl(var(--color-primary-foreground))] disabled:opacity-50"
-				>
-					Speichern
-				</button>
+				<h1 class="text-2xl font-bold text-[hsl(var(--color-foreground))]">Sammlung bearbeiten</h1>
+			</div>
+
+			<div class="space-y-4">
+				<div class="flex gap-3">
+					<input
+						type="text"
+						bind:value={icon}
+						placeholder="📁"
+						class="h-12 w-12 rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] text-center text-2xl"
+						maxlength="2"
+					/>
+					<input
+						type="text"
+						bind:value={name}
+						placeholder="Sammlungsname"
+						class="{inputClass} flex-1"
+					/>
+				</div>
+
+				<textarea
+					bind:value={description}
+					placeholder="Beschreibung (optional)"
+					rows="2"
+					class={inputClass}
+				></textarea>
+
+				<div>
+					<h3 class="mb-3 text-sm font-semibold text-[hsl(var(--color-foreground))]">
+						Eigene Felder
+					</h3>
+					<SchemaEditor fields={schema.fields} onchange={(fields) => (schema = { fields })} />
+				</div>
+
+				<div class="flex justify-end gap-3 pt-4">
+					<button
+						onclick={() => goto(`/inventory/collections/${collection.id}`)}
+						class="rounded-lg border border-[hsl(var(--color-border))] px-4 py-2 text-sm text-[hsl(var(--color-foreground))]"
+					>
+						Abbrechen
+					</button>
+					<button
+						onclick={handleSave}
+						disabled={!name.trim()}
+						class="rounded-lg bg-[hsl(var(--color-primary))] px-6 py-2 text-sm font-medium text-[hsl(var(--color-primary-foreground))] disabled:opacity-50"
+					>
+						Speichern
+					</button>
+				</div>
 			</div>
 		</div>
-	</div>
-{/if}
+	{/if}
+</RoutePage>

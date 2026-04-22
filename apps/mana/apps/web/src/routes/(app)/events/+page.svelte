@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import ListView from '$lib/modules/events/ListView.svelte';
+	import { RoutePage } from '$lib/components/shell';
 
 	function navigate(viewName: string, params: Record<string, unknown> = {}) {
 		if (viewName === 'detail' && params.eventId) {
@@ -13,4 +14,6 @@
 	}
 </script>
 
-<ListView {navigate} {goBack} params={{}} />
+<RoutePage appId="events">
+	<ListView {navigate} {goBack} params={{}} />
+</RoutePage>

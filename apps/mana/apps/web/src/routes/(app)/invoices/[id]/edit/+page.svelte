@@ -2,6 +2,7 @@
 	import { page } from '$app/stores';
 	import { useAllInvoices } from '$lib/modules/invoices/queries';
 	import InvoiceForm from '$lib/modules/invoices/components/InvoiceForm.svelte';
+	import { RoutePage } from '$lib/components/shell';
 
 	const invoices$ = useAllInvoices();
 	const invoices = $derived(invoices$.value ?? []);
@@ -14,31 +15,33 @@
 	<title>Rechnung bearbeiten - Mana</title>
 </svelte:head>
 
-<div class="page">
-	{#if !invoice && invoices$.value !== undefined}
-		<div class="not-found">
-			<p>Rechnung nicht gefunden.</p>
-			<a href="/invoices">Zurück zur Übersicht</a>
-		</div>
-	{:else if invoice && !canEdit}
-		<div class="not-editable">
-			<h2>Rechnung kann nicht bearbeitet werden</h2>
-			<p>
-				Nur Entwürfe sind editierbar. Diese Rechnung hat Status
-				<strong>{invoice.status}</strong>. Um eine versendete Rechnung zu ändern, storniere sie und
-				dupliziere sie als neuen Entwurf.
-			</p>
-			<a href="/invoices/{invoice.id}">Zurück zum Detail</a>
-		</div>
-	{:else if invoice}
-		<header class="head">
-			<h1>Rechnung {invoice.number} bearbeiten</h1>
-		</header>
-		<InvoiceForm existing={invoice} />
-	{:else}
-		<div class="loading">Lädt …</div>
-	{/if}
-</div>
+<RoutePage appId="invoices" backHref="/invoices" title="Rechnung">
+	<div class="page">
+		{#if !invoice && invoices$.value !== undefined}
+			<div class="not-found">
+				<p>Rechnung nicht gefunden.</p>
+				<a href="/invoices">Zurück zur Übersicht</a>
+			</div>
+		{:else if invoice && !canEdit}
+			<div class="not-editable">
+				<h2>Rechnung kann nicht bearbeitet werden</h2>
+				<p>
+					Nur Entwürfe sind editierbar. Diese Rechnung hat Status
+					<strong>{invoice.status}</strong>. Um eine versendete Rechnung zu ändern, storniere sie
+					und dupliziere sie als neuen Entwurf.
+				</p>
+				<a href="/invoices/{invoice.id}">Zurück zum Detail</a>
+			</div>
+		{:else if invoice}
+			<header class="head">
+				<h1>Rechnung {invoice.number} bearbeiten</h1>
+			</header>
+			<InvoiceForm existing={invoice} />
+		{:else}
+			<div class="loading">Lädt …</div>
+		{/if}
+	</div>
+</RoutePage>
 
 <style>
 	.page {

@@ -8,6 +8,7 @@
 	import * as api from '$lib/modules/research-lab/api';
 	import type { ProviderConfigDto } from '$lib/modules/research-lab/api';
 	import type { ProviderInfo, ProvidersCatalog } from '$lib/modules/research-lab/types';
+	import { RoutePage } from '$lib/components/shell';
 
 	let catalog = $state<ProvidersCatalog | null>(null);
 	let configs = $state<ProviderConfigDto[]>([]);
@@ -125,108 +126,110 @@
 	<title>Research Keys · Mana</title>
 </svelte:head>
 
-<div class="page">
-	<header class="header">
-		<button type="button" class="back" onclick={() => void goto('/research-lab')}>
-			← Zurück zum Lab
-		</button>
-		<div class="title">
-			<h1>Research-Keys</h1>
-			<p class="subtitle">
-				Eigene API-Keys hinterlegen — deine Aufrufe gehen direkt an den Anbieter, ohne Credits zu
-				verbrauchen. Leer lassen, um den Server-Key (falls konfiguriert) weiter zu nutzen.
-			</p>
-		</div>
-	</header>
+<RoutePage appId="research-lab" backHref="/research-lab">
+	<div class="page">
+		<header class="header">
+			<button type="button" class="back" onclick={() => void goto('/research-lab')}>
+				← Zurück zum Lab
+			</button>
+			<div class="title">
+				<h1>Research-Keys</h1>
+				<p class="subtitle">
+					Eigene API-Keys hinterlegen — deine Aufrufe gehen direkt an den Anbieter, ohne Credits zu
+					verbrauchen. Leer lassen, um den Server-Key (falls konfiguriert) weiter zu nutzen.
+				</p>
+			</div>
+		</header>
 
-	{#if error}
-		<div class="error">{error}</div>
-	{/if}
+		{#if error}
+			<div class="error">{error}</div>
+		{/if}
 
-	{#if loading}
-		<p class="loading">Lade …</p>
-	{:else}
-		{#each flatProviders() as provider (provider.id)}
-			{@const cfg = configFor(provider.id)}
-			{@const form = forms[provider.id]}
-			<section class="row">
-				<div class="provider-info">
-					<h3>{provider.id}</h3>
-					<span class="badge badge-{provider.category}">{provider.category}</span>
-					{#if cfg?.hasKey}
-						<span class="mask" title="Hinterlegter Key">{cfg.maskedKey}</span>
-					{:else}
-						<span class="mask mask-empty">kein eigener Key</span>
-					{/if}
-				</div>
-
-				{#if form}
-					<div class="field">
-						<label>
-							API-Key
-							<input
-								type="password"
-								autocomplete="new-password"
-								placeholder={cfg?.hasKey ? 'Leer lassen zum Beibehalten' : 'sk-…'}
-								bind:value={form.apiKey}
-							/>
-						</label>
-					</div>
-					<div class="field narrow">
-						<label>
-							Tagesbudget (¢)
-							<input
-								type="number"
-								min="0"
-								step="10"
-								placeholder="unbegrenzt"
-								bind:value={form.dailyBudget}
-							/>
-						</label>
-					</div>
-					<div class="field narrow">
-						<label>
-							Monatsbudget (¢)
-							<input
-								type="number"
-								min="0"
-								step="100"
-								placeholder="unbegrenzt"
-								bind:value={form.monthlyBudget}
-							/>
-						</label>
-					</div>
-					<div class="field toggle">
-						<label>
-							<input type="checkbox" bind:checked={form.enabled} />
-							Aktiv
-						</label>
-					</div>
-					<div class="actions">
-						<button
-							type="button"
-							class="primary"
-							disabled={savingFor === provider.id}
-							onclick={() => void save(provider.id)}
-						>
-							{savingFor === provider.id ? 'Speichere…' : 'Speichern'}
-						</button>
-						{#if cfg}
-							<button
-								type="button"
-								class="danger"
-								disabled={savingFor === provider.id}
-								onclick={() => void remove(provider.id)}
-							>
-								Löschen
-							</button>
+		{#if loading}
+			<p class="loading">Lade …</p>
+		{:else}
+			{#each flatProviders() as provider (provider.id)}
+				{@const cfg = configFor(provider.id)}
+				{@const form = forms[provider.id]}
+				<section class="row">
+					<div class="provider-info">
+						<h3>{provider.id}</h3>
+						<span class="badge badge-{provider.category}">{provider.category}</span>
+						{#if cfg?.hasKey}
+							<span class="mask" title="Hinterlegter Key">{cfg.maskedKey}</span>
+						{:else}
+							<span class="mask mask-empty">kein eigener Key</span>
 						{/if}
 					</div>
-				{/if}
-			</section>
-		{/each}
-	{/if}
-</div>
+
+					{#if form}
+						<div class="field">
+							<label>
+								API-Key
+								<input
+									type="password"
+									autocomplete="new-password"
+									placeholder={cfg?.hasKey ? 'Leer lassen zum Beibehalten' : 'sk-…'}
+									bind:value={form.apiKey}
+								/>
+							</label>
+						</div>
+						<div class="field narrow">
+							<label>
+								Tagesbudget (¢)
+								<input
+									type="number"
+									min="0"
+									step="10"
+									placeholder="unbegrenzt"
+									bind:value={form.dailyBudget}
+								/>
+							</label>
+						</div>
+						<div class="field narrow">
+							<label>
+								Monatsbudget (¢)
+								<input
+									type="number"
+									min="0"
+									step="100"
+									placeholder="unbegrenzt"
+									bind:value={form.monthlyBudget}
+								/>
+							</label>
+						</div>
+						<div class="field toggle">
+							<label>
+								<input type="checkbox" bind:checked={form.enabled} />
+								Aktiv
+							</label>
+						</div>
+						<div class="actions">
+							<button
+								type="button"
+								class="primary"
+								disabled={savingFor === provider.id}
+								onclick={() => void save(provider.id)}
+							>
+								{savingFor === provider.id ? 'Speichere…' : 'Speichern'}
+							</button>
+							{#if cfg}
+								<button
+									type="button"
+									class="danger"
+									disabled={savingFor === provider.id}
+									onclick={() => void remove(provider.id)}
+								>
+									Löschen
+								</button>
+							{/if}
+						</div>
+					{/if}
+				</section>
+			{/each}
+		{/if}
+	</div>
+</RoutePage>
 
 <style>
 	.page {

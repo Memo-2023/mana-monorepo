@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import UploadDropzone from '$lib/modules/photos/components/upload/UploadDropzone.svelte';
 	import { X } from '@mana/shared-icons';
+	import { RoutePage } from '$lib/components/shell';
 
 	const MEDIA_URL = import.meta.env.PUBLIC_MANA_MEDIA_URL || 'http://localhost:3015';
 
@@ -82,92 +83,94 @@
 	<title>Upload | Photos - Mana</title>
 </svelte:head>
 
-<div class="upload-page">
-	<header class="page-header">
-		<h1 class="text-2xl font-bold">Upload Photos</h1>
-	</header>
+<RoutePage appId="photos" backHref="/photos">
+	<div class="upload-page">
+		<header class="page-header">
+			<h1 class="text-2xl font-bold">Upload Photos</h1>
+		</header>
 
-	<UploadDropzone onFilesSelected={handleFilesSelected} />
+		<UploadDropzone onFilesSelected={handleFilesSelected} />
 
-	{#if files.length > 0}
-		<div class="upload-list">
-			<div class="flex justify-between items-center mb-4">
-				<span class="text-sm text-muted-foreground">
-					{files.length}
-					{files.length === 1 ? 'file' : 'files'}
-				</span>
-				<div class="flex gap-2">
-					{#if files.some((f) => f.status === 'success')}
-						<button class="btn btn-ghost" onclick={clearCompleted}> Clear completed </button>
-					{/if}
-					<button
-						class="btn btn-primary"
-						onclick={uploadAll}
-						disabled={uploading || files.every((f) => f.status !== 'pending')}
-					>
-						{#if uploading}
-							Uploading...
-						{:else}
-							Upload All
+		{#if files.length > 0}
+			<div class="upload-list">
+				<div class="flex justify-between items-center mb-4">
+					<span class="text-sm text-muted-foreground">
+						{files.length}
+						{files.length === 1 ? 'file' : 'files'}
+					</span>
+					<div class="flex gap-2">
+						{#if files.some((f) => f.status === 'success')}
+							<button class="btn btn-ghost" onclick={clearCompleted}> Clear completed </button>
 						{/if}
-					</button>
+						<button
+							class="btn btn-primary"
+							onclick={uploadAll}
+							disabled={uploading || files.every((f) => f.status !== 'pending')}
+						>
+							{#if uploading}
+								Uploading...
+							{:else}
+								Upload All
+							{/if}
+						</button>
+					</div>
+				</div>
+
+				<div class="file-grid">
+					{#each files as file, index}
+						<div
+							class="file-item"
+							class:success={file.status === 'success'}
+							class:error={file.status === 'error'}
+						>
+							<img src={file.preview} alt="" class="file-preview" />
+							<div class="file-overlay">
+								{#if file.status === 'pending'}
+									<button class="remove-btn" onclick={() => removeFile(index)}>
+										<X size={20} />
+									</button>
+								{:else if file.status === 'uploading'}
+									<div class="progress-ring">
+										<svg viewBox="0 0 36 36">
+											<path
+												class="progress-bg"
+												d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+											/>
+											<path
+												class="progress-bar"
+												stroke-dasharray="{file.progress}, 100"
+												d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+											/>
+										</svg>
+									</div>
+								{:else if file.status === 'success'}
+									<div class="status-icon success">
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											width="24"
+											height="24"
+											viewBox="0 0 24 24"
+											fill="none"
+											stroke="currentColor"
+											stroke-width="2"
+										>
+											<polyline points="20 6 9 17 4 12" />
+										</svg>
+									</div>
+								{:else if file.status === 'error'}
+									<div class="status-icon error" title={file.error}>
+										<X size={20} />
+									</div>
+								{/if}
+							</div>
+							<div class="file-name">{file.file.name}</div>
+						</div>
+					{/each}
 				</div>
 			</div>
-
-			<div class="file-grid">
-				{#each files as file, index}
-					<div
-						class="file-item"
-						class:success={file.status === 'success'}
-						class:error={file.status === 'error'}
-					>
-						<img src={file.preview} alt="" class="file-preview" />
-						<div class="file-overlay">
-							{#if file.status === 'pending'}
-								<button class="remove-btn" onclick={() => removeFile(index)}>
-									<X size={20} />
-								</button>
-							{:else if file.status === 'uploading'}
-								<div class="progress-ring">
-									<svg viewBox="0 0 36 36">
-										<path
-											class="progress-bg"
-											d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-										/>
-										<path
-											class="progress-bar"
-											stroke-dasharray="{file.progress}, 100"
-											d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-										/>
-									</svg>
-								</div>
-							{:else if file.status === 'success'}
-								<div class="status-icon success">
-									<svg
-										xmlns="http://www.w3.org/2000/svg"
-										width="24"
-										height="24"
-										viewBox="0 0 24 24"
-										fill="none"
-										stroke="currentColor"
-										stroke-width="2"
-									>
-										<polyline points="20 6 9 17 4 12" />
-									</svg>
-								</div>
-							{:else if file.status === 'error'}
-								<div class="status-icon error" title={file.error}>
-									<X size={20} />
-								</div>
-							{/if}
-						</div>
-						<div class="file-name">{file.file.name}</div>
-					</div>
-				{/each}
-			</div>
-		</div>
-	{/if}
-</div>
+		{/if}
+	</div>
+</RoutePage>
 
 <style>
 	.upload-page {

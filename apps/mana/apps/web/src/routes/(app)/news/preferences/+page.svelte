@@ -8,6 +8,7 @@
 	import { preferencesStore } from '$lib/modules/news/stores/preferences.svelte';
 	import { ALL_TOPICS, type Topic, type Language } from '$lib/modules/news/types';
 	import { TOPIC_LABELS } from '$lib/modules/news/sources-meta';
+	import { RoutePage } from '$lib/components/shell';
 
 	const prefs$ = usePreferences();
 	const prefs = $derived(prefs$.value);
@@ -47,79 +48,81 @@
 	<title>News-Einstellungen — Mana</title>
 </svelte:head>
 
-<div class="pane">
-	<header class="bar">
-		<div class="title">
-			<strong>News-Einstellungen</strong>
-			<span class="sub">Themen · Sprachen · Gewichtungen</span>
-		</div>
-	</header>
+<RoutePage appId="news" backHref="/news">
+	<div class="pane">
+		<header class="bar">
+			<div class="title">
+				<strong>News-Einstellungen</strong>
+				<span class="sub">Themen · Sprachen · Gewichtungen</span>
+			</div>
+		</header>
 
-	<section class="card">
-		<h2>Themen</h2>
-		<p class="hint">Welche Themen sollen im Feed auftauchen?</p>
-		<div class="grid">
-			{#each ALL_TOPICS as topic}
+		<section class="card">
+			<h2>Themen</h2>
+			<p class="hint">Welche Themen sollen im Feed auftauchen?</p>
+			<div class="grid">
+				{#each ALL_TOPICS as topic}
+					<button
+						type="button"
+						class="pill"
+						class:selected={prefs.selectedTopics.includes(topic)}
+						onclick={() => toggleTopic(topic)}
+					>
+						<span class="emoji">{TOPIC_LABELS[topic].emoji}</span>
+						<span>{TOPIC_LABELS[topic].de}</span>
+					</button>
+				{/each}
+			</div>
+		</section>
+
+		<section class="card">
+			<h2>Sprachen</h2>
+			<div class="row">
 				<button
 					type="button"
 					class="pill"
-					class:selected={prefs.selectedTopics.includes(topic)}
-					onclick={() => toggleTopic(topic)}
+					class:selected={prefs.preferredLanguages.includes('de')}
+					onclick={() => toggleLang('de')}
 				>
-					<span class="emoji">{TOPIC_LABELS[topic].emoji}</span>
-					<span>{TOPIC_LABELS[topic].de}</span>
+					🇩🇪 Deutsch
 				</button>
-			{/each}
-		</div>
-	</section>
+				<button
+					type="button"
+					class="pill"
+					class:selected={prefs.preferredLanguages.includes('en')}
+					onclick={() => toggleLang('en')}
+				>
+					🇬🇧 English
+				</button>
+			</div>
+		</section>
 
-	<section class="card">
-		<h2>Sprachen</h2>
-		<div class="row">
-			<button
-				type="button"
-				class="pill"
-				class:selected={prefs.preferredLanguages.includes('de')}
-				onclick={() => toggleLang('de')}
-			>
-				🇩🇪 Deutsch
+		<section class="card">
+			<h2>Quellen</h2>
+			<p class="hint">
+				Du blockst aktuell <strong>{prefs.blockedSources.length}</strong> Quellen.
+			</p>
+			<a class="btn-link" href="/news/sources">Quellen verwalten →</a>
+		</section>
+
+		<section class="card">
+			<h2>Gelernte Gewichtungen</h2>
+			<p class="hint">
+				Über Reaktionen lernt der Feed deine Vorlieben:
+				{topicWeightCount} Themen-Gewichte, {sourceWeightCount} Quellen-Gewichte.
+			</p>
+			<button type="button" class="btn-secondary" onclick={resetWeights}>Zurücksetzen</button>
+		</section>
+
+		<section class="card">
+			<h2>Onboarding</h2>
+			<p class="hint">Themen, Sprachen und Quellen neu wählen.</p>
+			<button type="button" class="btn-secondary" onclick={rerunOnboarding}>
+				Onboarding neu starten
 			</button>
-			<button
-				type="button"
-				class="pill"
-				class:selected={prefs.preferredLanguages.includes('en')}
-				onclick={() => toggleLang('en')}
-			>
-				🇬🇧 English
-			</button>
-		</div>
-	</section>
-
-	<section class="card">
-		<h2>Quellen</h2>
-		<p class="hint">
-			Du blockst aktuell <strong>{prefs.blockedSources.length}</strong> Quellen.
-		</p>
-		<a class="btn-link" href="/news/sources">Quellen verwalten →</a>
-	</section>
-
-	<section class="card">
-		<h2>Gelernte Gewichtungen</h2>
-		<p class="hint">
-			Über Reaktionen lernt der Feed deine Vorlieben:
-			{topicWeightCount} Themen-Gewichte, {sourceWeightCount} Quellen-Gewichte.
-		</p>
-		<button type="button" class="btn-secondary" onclick={resetWeights}>Zurücksetzen</button>
-	</section>
-
-	<section class="card">
-		<h2>Onboarding</h2>
-		<p class="hint">Themen, Sprachen und Quellen neu wählen.</p>
-		<button type="button" class="btn-secondary" onclick={rerunOnboarding}>
-			Onboarding neu starten
-		</button>
-	</section>
-</div>
+		</section>
+	</div>
+</RoutePage>
 
 <style>
 	.pane {

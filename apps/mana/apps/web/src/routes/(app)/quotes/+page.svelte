@@ -5,6 +5,7 @@
 	import { QuotesEvents } from '@mana/shared-utils/analytics';
 	import QuoteCard from '$lib/modules/quotes/components/QuoteCard.svelte';
 	import { ArrowsClockwise } from '@mana/shared-icons';
+	import { RoutePage } from '$lib/components/shell';
 
 	let isRefreshing = $state(false);
 
@@ -22,45 +23,47 @@
 	<title>Quotes - {$_('home.dailyQuote')}</title>
 </svelte:head>
 
-<div class="max-w-2xl mx-auto">
-	<!-- Header -->
-	<div class="text-center mb-8">
-		<h1 class="text-3xl font-bold text-foreground mb-2">{$_('home.dailyQuote')}</h1>
-		<p class="text-foreground-secondary">{$_('app.tagline')}</p>
-	</div>
-
-	<!-- Daily Quote Card -->
-	{#if quotesStore.currentQuote}
-		<div
-			class="mb-8 transition-[transform,colors,box-shadow] duration-300 {isRefreshing
-				? 'opacity-50 scale-95'
-				: ''}"
-		>
-			<QuoteCard
-				quote={quotesStore.currentQuote}
-				size="large"
-				showCategory={quotesSettings.showCategory}
-				showSource={quotesSettings.showSource}
-			/>
+<RoutePage appId="quotes">
+	<div class="max-w-2xl mx-auto">
+		<!-- Header -->
+		<div class="text-center mb-8">
+			<h1 class="text-3xl font-bold text-foreground mb-2">{$_('home.dailyQuote')}</h1>
+			<p class="text-foreground-secondary">{$_('app.tagline')}</p>
 		</div>
-	{/if}
 
-	<!-- New Quote Button -->
-	<div class="text-center">
-		<button
-			onclick={loadNewQuote}
-			disabled={isRefreshing}
-			class="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-full font-medium hover:bg-primary-hover transition-colors disabled:opacity-50"
-		>
-			<ArrowsClockwise size={20} class={isRefreshing ? 'animate-spin' : ''} />
-			{$_('home.newQuote')}
-		</button>
-	</div>
+		<!-- Daily Quote Card -->
+		{#if quotesStore.currentQuote}
+			<div
+				class="mb-8 transition-[transform,colors,box-shadow] duration-300 {isRefreshing
+					? 'opacity-50 scale-95'
+					: ''}"
+			>
+				<QuoteCard
+					quote={quotesStore.currentQuote}
+					size="large"
+					showCategory={quotesSettings.showCategory}
+					showSource={quotesSettings.showSource}
+				/>
+			</div>
+		{/if}
 
-	<!-- Quote Stats -->
-	<div class="mt-12 text-center">
-		<p class="text-sm text-foreground-muted">
-			{quotesStore.totalCount} Zitate in 10 Kategorien
-		</p>
+		<!-- New Quote Button -->
+		<div class="text-center">
+			<button
+				onclick={loadNewQuote}
+				disabled={isRefreshing}
+				class="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-full font-medium hover:bg-primary-hover transition-colors disabled:opacity-50"
+			>
+				<ArrowsClockwise size={20} class={isRefreshing ? 'animate-spin' : ''} />
+				{$_('home.newQuote')}
+			</button>
+		</div>
+
+		<!-- Quote Stats -->
+		<div class="mt-12 text-center">
+			<p class="text-sm text-foreground-muted">
+				{quotesStore.totalCount} Zitate in 10 Kategorien
+			</p>
+		</div>
 	</div>
-</div>
+</RoutePage>

@@ -6,13 +6,16 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
+	import { RoutePage } from '$lib/components/shell';
 
 	onMount(() => {
 		goto('/articles', { replaceState: true });
 	});
 </script>
 
-<p class="redirect">Verschoben nach <a href="/articles">/articles</a>…</p>
+<RoutePage appId="news" backHref="/news">
+	<p class="redirect">Verschoben nach <a href="/articles">/articles</a>…</p>
+</RoutePage>
 
 <style>
 	.redirect {

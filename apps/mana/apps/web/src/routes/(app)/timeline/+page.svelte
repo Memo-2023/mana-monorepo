@@ -23,6 +23,7 @@
 	} from '@mana/shared-icons';
 	import { format, addDays, subDays, isToday, isTomorrow, isYesterday } from 'date-fns';
 	import { de } from 'date-fns/locale';
+	import { RoutePage } from '$lib/components/shell';
 
 	let currentDate = $state(new Date());
 	let showFilters = $state(false);
@@ -101,118 +102,120 @@
 	}
 </script>
 
-<div class="timeline-page">
-	<!-- Header -->
-	<header class="timeline-header">
-		<div class="header-left">
-			<h1 class="header-title">{formatHeaderDate(currentDate)}</h1>
-			<div class="nav-buttons">
-				<button onclick={() => (currentDate = subDays(currentDate, 1))} class="nav-btn">
-					<CaretLeft size={18} />
-				</button>
-				<button onclick={() => (currentDate = new Date())} class="today-btn">Heute</button>
-				<button onclick={() => (currentDate = addDays(currentDate, 1))} class="nav-btn">
-					<CaretRight size={18} />
+<RoutePage appId="timeline">
+	<div class="timeline-page">
+		<!-- Header -->
+		<header class="timeline-header">
+			<div class="header-left">
+				<h1 class="header-title">{formatHeaderDate(currentDate)}</h1>
+				<div class="nav-buttons">
+					<button onclick={() => (currentDate = subDays(currentDate, 1))} class="nav-btn">
+						<CaretLeft size={18} />
+					</button>
+					<button onclick={() => (currentDate = new Date())} class="today-btn">Heute</button>
+					<button onclick={() => (currentDate = addDays(currentDate, 1))} class="nav-btn">
+						<CaretRight size={18} />
+					</button>
+				</div>
+			</div>
+
+			<div class="header-right">
+				{#if totalSeconds > 0}
+					<span class="total-duration">{formatDuration(totalSeconds)} erfasst</span>
+				{/if}
+				<button
+					class="filter-btn"
+					class:active={visibleTypes.size < 6}
+					onclick={() => (showFilters = !showFilters)}
+				>
+					<Funnel size={16} />
 				</button>
 			</div>
-		</div>
+		</header>
 
-		<div class="header-right">
-			{#if totalSeconds > 0}
-				<span class="total-duration">{formatDuration(totalSeconds)} erfasst</span>
-			{/if}
-			<button
-				class="filter-btn"
-				class:active={visibleTypes.size < 6}
-				onclick={() => (showFilters = !showFilters)}
-			>
-				<Funnel size={16} />
-			</button>
-		</div>
-	</header>
-
-	{#if showFilters}
-		<div class="filter-bar">
-			{#each typeConfig as cfg}
-				{@const active = visibleTypes.has(cfg.type)}
-				{@const Icon = cfg.icon}
-				<button class="filter-chip" class:active onclick={() => toggleType(cfg.type)}>
-					<Icon size={14} />
-					{cfg.label}
-				</button>
-			{/each}
-		</div>
-	{/if}
-
-	<!-- Timeline content -->
-	<div class="timeline-content">
-		{#if blocks.length === 0}
-			<div class="empty">
-				<Clock size={48} class="empty-icon" />
-				<p>{isToday(currentDate) ? 'Noch nichts heute' : 'Keine Einträge an diesem Tag'}</p>
-			</div>
-		{:else}
-			<div class="timeline-list">
-				{#each blocks as block, i (block.id)}
-					{@const duration = getBlockDuration(block)}
-					{@const habitIcon =
-						block.type === 'habit' && block.icon ? getIconComponent(block.icon) : null}
-					{@const typeCfg = typeConfig.find((c) => c.type === block.type)}
-
-					<div class="timeline-item" class:live={block.isLive}>
-						<!-- Time column -->
-						<div class="time-col">
-							<span class="time-label">{format(new Date(block.startDate), 'HH:mm')}</span>
-						</div>
-
-						<!-- Dot + line -->
-						<div class="dot-col">
-							<div
-								class="dot"
-								class:live={block.isLive}
-								style="background: {block.color || getTypeColor(block.type)}"
-							></div>
-							{#if i < blocks.length - 1}
-								<div class="connector-line"></div>
-							{/if}
-						</div>
-
-						<!-- Content -->
-						<div class="content-col">
-							<div class="item-header">
-								{#if habitIcon}
-									{@const HabitIcon = habitIcon}
-									<HabitIcon size={16} style="color: {block.color || '#6b7280'}" />
-								{:else if typeCfg}
-									{@const TypeIcon = typeCfg.icon}
-									<TypeIcon size={16} class="item-type-icon" />
-								{/if}
-								<span class="item-title">{block.title}</span>
-								{#if block.linkedBlockId}
-									<span class="linked-badge">erledigt</span>
-								{/if}
-								{#if block.isLive}
-									<span class="live-badge">live</span>
-								{/if}
-							</div>
-
-							<div class="item-meta">
-								<span>{formatBlockTime(block)}</span>
-								{#if duration > 0}
-									<span class="duration-pill">{formatDuration(duration)}</span>
-								{/if}
-							</div>
-
-							{#if block.description}
-								<p class="item-description">{block.description}</p>
-							{/if}
-						</div>
-					</div>
+		{#if showFilters}
+			<div class="filter-bar">
+				{#each typeConfig as cfg}
+					{@const active = visibleTypes.has(cfg.type)}
+					{@const Icon = cfg.icon}
+					<button class="filter-chip" class:active onclick={() => toggleType(cfg.type)}>
+						<Icon size={14} />
+						{cfg.label}
+					</button>
 				{/each}
 			</div>
 		{/if}
+
+		<!-- Timeline content -->
+		<div class="timeline-content">
+			{#if blocks.length === 0}
+				<div class="empty">
+					<Clock size={48} class="empty-icon" />
+					<p>{isToday(currentDate) ? 'Noch nichts heute' : 'Keine Einträge an diesem Tag'}</p>
+				</div>
+			{:else}
+				<div class="timeline-list">
+					{#each blocks as block, i (block.id)}
+						{@const duration = getBlockDuration(block)}
+						{@const habitIcon =
+							block.type === 'habit' && block.icon ? getIconComponent(block.icon) : null}
+						{@const typeCfg = typeConfig.find((c) => c.type === block.type)}
+
+						<div class="timeline-item" class:live={block.isLive}>
+							<!-- Time column -->
+							<div class="time-col">
+								<span class="time-label">{format(new Date(block.startDate), 'HH:mm')}</span>
+							</div>
+
+							<!-- Dot + line -->
+							<div class="dot-col">
+								<div
+									class="dot"
+									class:live={block.isLive}
+									style="background: {block.color || getTypeColor(block.type)}"
+								></div>
+								{#if i < blocks.length - 1}
+									<div class="connector-line"></div>
+								{/if}
+							</div>
+
+							<!-- Content -->
+							<div class="content-col">
+								<div class="item-header">
+									{#if habitIcon}
+										{@const HabitIcon = habitIcon}
+										<HabitIcon size={16} style="color: {block.color || '#6b7280'}" />
+									{:else if typeCfg}
+										{@const TypeIcon = typeCfg.icon}
+										<TypeIcon size={16} class="item-type-icon" />
+									{/if}
+									<span class="item-title">{block.title}</span>
+									{#if block.linkedBlockId}
+										<span class="linked-badge">erledigt</span>
+									{/if}
+									{#if block.isLive}
+										<span class="live-badge">live</span>
+									{/if}
+								</div>
+
+								<div class="item-meta">
+									<span>{formatBlockTime(block)}</span>
+									{#if duration > 0}
+										<span class="duration-pill">{formatDuration(duration)}</span>
+									{/if}
+								</div>
+
+								{#if block.description}
+									<p class="item-description">{block.description}</p>
+								{/if}
+							</div>
+						</div>
+					{/each}
+				</div>
+			{/if}
+		</div>
 	</div>
-</div>
+</RoutePage>
 
 <style>
 	.timeline-page {

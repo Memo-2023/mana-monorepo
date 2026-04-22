@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { useAllCampaigns } from '$lib/modules/broadcast/queries';
 	import DetailView from '$lib/modules/broadcast/views/DetailView.svelte';
+	import { RoutePage } from '$lib/components/shell';
 
 	const campaigns$ = useAllCampaigns();
 	const campaigns = $derived(campaigns$.value ?? []);
@@ -23,16 +24,18 @@
 	<title>{campaign?.name ?? 'Kampagne'} - Mana</title>
 </svelte:head>
 
-{#if !campaign && campaigns$.value !== undefined}
-	<div class="not-found">
-		<p>Kampagne nicht gefunden.</p>
-		<a href="/broadcasts">Zurück zur Übersicht</a>
-	</div>
-{:else if campaign && campaign.status !== 'draft'}
-	<DetailView {campaign} />
-{:else}
-	<div class="loading">Lädt …</div>
-{/if}
+<RoutePage appId="broadcasts" backHref="/broadcasts" title="Broadcast">
+	{#if !campaign && campaigns$.value !== undefined}
+		<div class="not-found">
+			<p>Kampagne nicht gefunden.</p>
+			<a href="/broadcasts">Zurück zur Übersicht</a>
+		</div>
+	{:else if campaign && campaign.status !== 'draft'}
+		<DetailView {campaign} />
+	{:else}
+		<div class="loading">Lädt …</div>
+	{/if}
+</RoutePage>
 
 <style>
 	.not-found,

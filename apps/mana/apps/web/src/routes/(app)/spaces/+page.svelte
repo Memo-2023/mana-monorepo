@@ -8,6 +8,9 @@
 	 */
 
 	import ListView from '$lib/modules/spaces/ListView.svelte';
+	import { RoutePage } from '$lib/components/shell';
 </script>
 
-<ListView />
+<RoutePage appId="spaces">
+	<ListView />
+</RoutePage>

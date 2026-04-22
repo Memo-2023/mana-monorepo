@@ -9,6 +9,7 @@
 		Calendar,
 		Percent,
 	} from '@mana/shared-icons';
+	import { RoutePage } from '$lib/components/shell';
 
 	const quickLinks = [
 		{
@@ -74,44 +75,46 @@
 	<title>Calc - Mana</title>
 </svelte:head>
 
-<div class="mx-auto max-w-3xl">
-	<header class="mb-8">
-		<h1 class="text-2xl font-bold text-foreground">Calc</h1>
-		<p class="text-muted-foreground mt-1 text-sm">Dein Taschenrechner-Hub</p>
-	</header>
+<RoutePage appId="calc">
+	<div class="mx-auto max-w-3xl">
+		<header class="mb-8">
+			<h1 class="text-2xl font-bold text-foreground">Calc</h1>
+			<p class="text-muted-foreground mt-1 text-sm">Dein Taschenrechner-Hub</p>
+		</header>
 
-	<!-- Quick display -->
-	<div class="mb-8 rounded-xl border border-border bg-card p-6">
-		<div class="flex items-center gap-4">
-			<div class="rounded-full bg-primary/10 p-3">
-				<Calculator size={32} class="text-primary" />
-			</div>
-			<div>
-				<div class="text-4xl font-bold tabular-nums font-mono text-foreground">0</div>
-				<div class="text-muted-foreground text-sm">Wähle einen Rechner-Modus</div>
+		<!-- Quick display -->
+		<div class="mb-8 rounded-xl border border-border bg-card p-6">
+			<div class="flex items-center gap-4">
+				<div class="rounded-full bg-primary/10 p-3">
+					<Calculator size={32} class="text-primary" />
+				</div>
+				<div>
+					<div class="text-4xl font-bold tabular-nums font-mono text-foreground">0</div>
+					<div class="text-muted-foreground text-sm">Wähle einen Rechner-Modus</div>
+				</div>
 			</div>
 		</div>
-	</div>
 
-	<!-- Quick Links Grid -->
-	<div class="grid grid-cols-2 gap-4 md:grid-cols-4">
-		{#each quickLinks as link}
-			<a
-				href={link.href}
-				class="rounded-xl border border-border bg-card p-4 transition-[border-color,box-shadow] hover:border-primary/50 hover:shadow-lg group"
-			>
-				<div class="flex flex-col items-center gap-3 text-center">
-					<div
-						class="{link.color} rounded-full p-3 text-white transition-transform group-hover:scale-110"
-					>
-						<link.icon size={24} />
+		<!-- Quick Links Grid -->
+		<div class="grid grid-cols-2 gap-4 md:grid-cols-4">
+			{#each quickLinks as link}
+				<a
+					href={link.href}
+					class="rounded-xl border border-border bg-card p-4 transition-[border-color,box-shadow] hover:border-primary/50 hover:shadow-lg group"
+				>
+					<div class="flex flex-col items-center gap-3 text-center">
+						<div
+							class="{link.color} rounded-full p-3 text-white transition-transform group-hover:scale-110"
+						>
+							<link.icon size={24} />
+						</div>
+						<div>
+							<div class="font-medium text-foreground">{link.label}</div>
+							<div class="text-xs text-muted-foreground">{link.description}</div>
+						</div>
 					</div>
-					<div>
-						<div class="font-medium text-foreground">{link.label}</div>
-						<div class="text-xs text-muted-foreground">{link.description}</div>
-					</div>
-				</div>
-			</a>
-		{/each}
+				</a>
+			{/each}
+		</div>
 	</div>
-</div>
+</RoutePage>

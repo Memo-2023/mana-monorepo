@@ -11,6 +11,7 @@
 	import { articlesStore } from '$lib/modules/articles/stores/articles.svelte';
 	import { preferencesStore } from '$lib/modules/news/stores/preferences.svelte';
 	import { usePreferences } from '$lib/modules/news/queries';
+	import { RoutePage } from '$lib/components/shell';
 
 	let mode = $state<'query' | 'site'>('query');
 	let query = $state('');
@@ -101,153 +102,155 @@
 	<title>News Research — Mana</title>
 </svelte:head>
 
-<div class="page">
-	<header class="header">
-		<h1>News Research</h1>
-		<p class="hint">
-			Finde RSS-Feeds zu deinem Thema, filtere Artikel und übergib das Ergebnis deiner KI als
-			Kontext.
-		</p>
-	</header>
+<RoutePage appId="news-research">
+	<div class="page">
+		<header class="header">
+			<h1>News Research</h1>
+			<p class="hint">
+				Finde RSS-Feeds zu deinem Thema, filtere Artikel und übergib das Ergebnis deiner KI als
+				Kontext.
+			</p>
+		</header>
 
-	<section class="block">
-		<div class="mode-switch">
-			<button type="button" class:active={mode === 'query'} onclick={() => (mode = 'query')}
-				>Thema-Suche</button
-			>
-			<button type="button" class:active={mode === 'site'} onclick={() => (mode = 'site')}
-				>Von Website</button
-			>
-		</div>
-
-		<form onsubmit={onDiscover} class="discover-form">
-			{#if mode === 'query'}
-				<input
-					type="text"
-					placeholder="z.B. Klimawandel, KI-Regulierung, Mars-Missionen"
-					bind:value={query}
-					disabled={store.discovering}
-				/>
-				<button type="submit" disabled={store.discovering || query.trim().length < 3}>
-					{store.discovering ? 'Suche…' : 'Feeds finden'}
-				</button>
-			{:else}
-				<input
-					type="url"
-					placeholder="https://example.com"
-					bind:value={siteUrl}
-					disabled={store.discovering}
-				/>
-				<button type="submit" disabled={store.discovering || !isUrl(siteUrl)}>
-					{store.discovering ? 'Suche…' : 'Feeds entdecken'}
-				</button>
-			{/if}
-		</form>
-
-		{#if store.error}
-			<div class="error">{store.error}</div>
-		{/if}
-
-		{#if store.session.hasDiscovered && store.session.discoveredFeeds.length === 0 && !store.discovering && !store.error}
-			<div class="empty-hint">
-				Keine passenden Feeds gefunden. Versuche andere Stichworte oder den „Von Website"-Modus.
-			</div>
-		{/if}
-	</section>
-
-	{#if store.session.discoveredFeeds.length > 0}
 		<section class="block">
-			<div class="block-head">
-				<h2>Gefundene Feeds ({store.session.discoveredFeeds.length})</h2>
-				<span class="sub">{store.session.selectedFeeds.length} ausgewählt</span>
+			<div class="mode-switch">
+				<button type="button" class:active={mode === 'query'} onclick={() => (mode = 'query')}
+					>Thema-Suche</button
+				>
+				<button type="button" class:active={mode === 'site'} onclick={() => (mode = 'site')}
+					>Von Website</button
+				>
 			</div>
-			<ul class="feed-list">
-				{#each store.session.discoveredFeeds as feed (feed.url)}
-					<li>
-						<label>
-							<input
-								type="checkbox"
-								checked={store.session.selectedFeeds.includes(feed.url)}
-								onchange={() => store.toggleFeed(feed.url)}
-							/>
-							<span class="feed-title">{feed.title ?? feed.url}</span>
-							<span class="feed-type">{feed.type}</span>
-							{#if feed.sourceHit}<span class="feed-src">{feed.sourceHit}</span>{/if}
+
+			<form onsubmit={onDiscover} class="discover-form">
+				{#if mode === 'query'}
+					<input
+						type="text"
+						placeholder="z.B. Klimawandel, KI-Regulierung, Mars-Missionen"
+						bind:value={query}
+						disabled={store.discovering}
+					/>
+					<button type="submit" disabled={store.discovering || query.trim().length < 3}>
+						{store.discovering ? 'Suche…' : 'Feeds finden'}
+					</button>
+				{:else}
+					<input
+						type="url"
+						placeholder="https://example.com"
+						bind:value={siteUrl}
+						disabled={store.discovering}
+					/>
+					<button type="submit" disabled={store.discovering || !isUrl(siteUrl)}>
+						{store.discovering ? 'Suche…' : 'Feeds entdecken'}
+					</button>
+				{/if}
+			</form>
+
+			{#if store.error}
+				<div class="error">{store.error}</div>
+			{/if}
+
+			{#if store.session.hasDiscovered && store.session.discoveredFeeds.length === 0 && !store.discovering && !store.error}
+				<div class="empty-hint">
+					Keine passenden Feeds gefunden. Versuche andere Stichworte oder den „Von Website"-Modus.
+				</div>
+			{/if}
+		</section>
+
+		{#if store.session.discoveredFeeds.length > 0}
+			<section class="block">
+				<div class="block-head">
+					<h2>Gefundene Feeds ({store.session.discoveredFeeds.length})</h2>
+					<span class="sub">{store.session.selectedFeeds.length} ausgewählt</span>
+				</div>
+				<ul class="feed-list">
+					{#each store.session.discoveredFeeds as feed (feed.url)}
+						<li>
+							<label>
+								<input
+									type="checkbox"
+									checked={store.session.selectedFeeds.includes(feed.url)}
+									onchange={() => store.toggleFeed(feed.url)}
+								/>
+								<span class="feed-title">{feed.title ?? feed.url}</span>
+								<span class="feed-type">{feed.type}</span>
+								{#if feed.sourceHit}<span class="feed-src">{feed.sourceHit}</span>{/if}
+								<button
+									type="button"
+									class="pin"
+									class:pinned={pinnedUrls.has(feed.url)}
+									onclick={(e) => {
+										e.preventDefault();
+										togglePin(feed);
+									}}
+									title={pinnedUrls.has(feed.url) ? 'Abo entfernen' : 'Als Abo speichern'}
+								>
+									{pinnedUrls.has(feed.url) ? '★ Abonniert' : '☆ Abonnieren'}
+								</button>
+							</label>
+						</li>
+					{/each}
+				</ul>
+
+				<form onsubmit={onSearch} class="search-form">
+					<input
+						type="text"
+						placeholder="Artikel nach Stichworten filtern"
+						bind:value={searchQuery}
+						disabled={store.searching}
+					/>
+					<button
+						type="submit"
+						disabled={store.searching ||
+							!searchQuery.trim() ||
+							store.session.selectedFeeds.length === 0}
+					>
+						{store.searching ? 'Suche…' : 'Artikel suchen'}
+					</button>
+				</form>
+			</section>
+		{/if}
+
+		{#if store.session.results.length > 0}
+			<section class="block">
+				<div class="block-head">
+					<h2>Ergebnisse ({store.session.results.length})</h2>
+					<button type="button" class="secondary" onclick={onCopy}>{copyLabel}</button>
+				</div>
+				{#if saveError}
+					<div class="error">{saveError}</div>
+				{/if}
+				<ul class="result-list">
+					{#each store.session.results as article (article.url)}
+						<li class="result">
+							<a href={article.url} target="_blank" rel="noreferrer" class="r-title"
+								>{article.title}</a
+							>
+							<div class="r-meta">
+								<span>{formatDate(article.publishedAt)}</span>
+								<span>·</span>
+								<span class="r-score">Score {article.score}</span>
+								<span>·</span>
+								<span class="r-feed">{article.feedUrl}</span>
+							</div>
+							{#if article.excerpt}
+								<p class="r-excerpt">{article.excerpt}</p>
+							{/if}
 							<button
 								type="button"
-								class="pin"
-								class:pinned={pinnedUrls.has(feed.url)}
-								onclick={(e) => {
-									e.preventDefault();
-									togglePin(feed);
-								}}
-								title={pinnedUrls.has(feed.url) ? 'Abo entfernen' : 'Als Abo speichern'}
+								class="save"
+								disabled={savingUrl === article.url}
+								onclick={() => onSave(article.url)}
 							>
-								{pinnedUrls.has(feed.url) ? '★ Abonniert' : '☆ Abonnieren'}
+								{savingUrl === article.url ? 'Speichere…' : 'In Leseliste speichern'}
 							</button>
-						</label>
-					</li>
-				{/each}
-			</ul>
-
-			<form onsubmit={onSearch} class="search-form">
-				<input
-					type="text"
-					placeholder="Artikel nach Stichworten filtern"
-					bind:value={searchQuery}
-					disabled={store.searching}
-				/>
-				<button
-					type="submit"
-					disabled={store.searching ||
-						!searchQuery.trim() ||
-						store.session.selectedFeeds.length === 0}
-				>
-					{store.searching ? 'Suche…' : 'Artikel suchen'}
-				</button>
-			</form>
-		</section>
-	{/if}
-
-	{#if store.session.results.length > 0}
-		<section class="block">
-			<div class="block-head">
-				<h2>Ergebnisse ({store.session.results.length})</h2>
-				<button type="button" class="secondary" onclick={onCopy}>{copyLabel}</button>
-			</div>
-			{#if saveError}
-				<div class="error">{saveError}</div>
-			{/if}
-			<ul class="result-list">
-				{#each store.session.results as article (article.url)}
-					<li class="result">
-						<a href={article.url} target="_blank" rel="noreferrer" class="r-title"
-							>{article.title}</a
-						>
-						<div class="r-meta">
-							<span>{formatDate(article.publishedAt)}</span>
-							<span>·</span>
-							<span class="r-score">Score {article.score}</span>
-							<span>·</span>
-							<span class="r-feed">{article.feedUrl}</span>
-						</div>
-						{#if article.excerpt}
-							<p class="r-excerpt">{article.excerpt}</p>
-						{/if}
-						<button
-							type="button"
-							class="save"
-							disabled={savingUrl === article.url}
-							onclick={() => onSave(article.url)}
-						>
-							{savingUrl === article.url ? 'Speichere…' : 'In Leseliste speichern'}
-						</button>
-					</li>
-				{/each}
-			</ul>
-		</section>
-	{/if}
-</div>
+						</li>
+					{/each}
+				</ul>
+			</section>
+		{/if}
+	</div>
+</RoutePage>
 
 <style>
 	.page {

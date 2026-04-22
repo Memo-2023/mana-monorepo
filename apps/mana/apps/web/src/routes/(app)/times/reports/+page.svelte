@@ -3,6 +3,7 @@
 	import { _ } from 'svelte-i18n';
 	import type { TimeEntry, Project, Client } from '$lib/modules/times/types';
 	import { exportEntriesToCSV } from '$lib/modules/times/utils/export';
+	import { RoutePage } from '$lib/components/shell';
 	import {
 		getTotalDuration,
 		getBillableDuration,
@@ -82,148 +83,152 @@
 	<title>{$_('nav.reports')} | Times</title>
 </svelte:head>
 
-<div class="space-y-6">
-	<!-- Header -->
-	<div class="flex items-center justify-between">
-		<h1 class="text-2xl font-bold text-[hsl(var(--color-foreground))]">{$_('nav.reports')}</h1>
-		<div class="flex items-center gap-2">
-			<div class="flex gap-1">
-				{#each ['week', 'month'] as p}
-					<button
-						onclick={() => (period = p as any)}
-						class="rounded-lg px-3 py-1.5 text-sm transition-colors {period === p
-							? 'bg-[hsl(var(--color-primary))] text-[hsl(var(--color-primary-foreground))]'
-							: 'text-[hsl(var(--color-muted-foreground))] hover:bg-[hsl(var(--color-accent)/0.1)]'}"
-					>
-						{p === 'week' ? $_('entry.thisWeek') : $_('entry.thisMonth')}
-					</button>
-				{/each}
+<RoutePage appId="times" backHref="/times">
+	<div class="space-y-6">
+		<!-- Header -->
+		<div class="flex items-center justify-between">
+			<h1 class="text-2xl font-bold text-[hsl(var(--color-foreground))]">{$_('nav.reports')}</h1>
+			<div class="flex items-center gap-2">
+				<div class="flex gap-1">
+					{#each ['week', 'month'] as p}
+						<button
+							onclick={() => (period = p as any)}
+							class="rounded-lg px-3 py-1.5 text-sm transition-colors {period === p
+								? 'bg-[hsl(var(--color-primary))] text-[hsl(var(--color-primary-foreground))]'
+								: 'text-[hsl(var(--color-muted-foreground))] hover:bg-[hsl(var(--color-accent)/0.1)]'}"
+						>
+							{p === 'week' ? $_('entry.thisWeek') : $_('entry.thisMonth')}
+						</button>
+					{/each}
+				</div>
+				<button
+					onclick={() => exportEntriesToCSV(entries(), allProjects.value, allClients.value)}
+					class="rounded-lg border border-[hsl(var(--color-border))] px-3 py-1.5 text-sm text-[hsl(var(--color-muted-foreground))] hover:text-[hsl(var(--color-foreground))]"
+				>
+					CSV Export
+				</button>
 			</div>
-			<button
-				onclick={() => exportEntriesToCSV(entries(), allProjects.value, allClients.value)}
-				class="rounded-lg border border-[hsl(var(--color-border))] px-3 py-1.5 text-sm text-[hsl(var(--color-muted-foreground))] hover:text-[hsl(var(--color-foreground))]"
+		</div>
+
+		<!-- Stats Grid -->
+		<div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+			<div
+				class="rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4"
 			>
-				CSV Export
-			</button>
-		</div>
-	</div>
-
-	<!-- Stats Grid -->
-	<div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
-		<div
-			class="rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4"
-		>
-			<p class="text-xs text-[hsl(var(--color-muted-foreground))]">{$_('report.totalHours')}</p>
-			<p class="duration-display mt-1 text-2xl font-bold text-[hsl(var(--color-foreground))]">
-				{formatDurationDecimal(totalDuration)}h
-			</p>
-		</div>
-		<div
-			class="rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4"
-		>
-			<p class="text-xs text-[hsl(var(--color-muted-foreground))]">{$_('report.billableHours')}</p>
-			<p class="duration-display mt-1 text-2xl font-bold text-[hsl(var(--color-primary))]">
-				{formatDurationDecimal(billableDuration)}h
-			</p>
-		</div>
-		<div
-			class="rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4"
-		>
-			<p class="text-xs text-[hsl(var(--color-muted-foreground))]">{$_('report.avgPerDay')}</p>
-			<p class="duration-display mt-1 text-2xl font-bold text-[hsl(var(--color-foreground))]">
-				{formatDurationCompact(Math.round(avgPerDay))}
-			</p>
-		</div>
-		<div
-			class="rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4"
-		>
-			<p class="text-xs text-[hsl(var(--color-muted-foreground))]">{$_('nav.entries')}</p>
-			<p class="mt-1 text-2xl font-bold text-[hsl(var(--color-foreground))]">{entryCount}</p>
-		</div>
-	</div>
-
-	<!-- Billable Breakdown -->
-	{#if totalDuration > 0}
-		<div
-			class="rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4"
-		>
-			<h3 class="mb-3 text-sm font-medium text-[hsl(var(--color-foreground))]">
-				{$_('entry.billable')} vs. {$_('entry.notBillable')}
-			</h3>
-			<div class="flex h-4 overflow-hidden rounded-full">
-				<div
-					class="bg-[hsl(var(--color-primary))] transition-[width]"
-					style="width: {(billableDuration / totalDuration) * 100}%"
-				></div>
-				<div
-					class="bg-[hsl(var(--color-muted))] transition-[width]"
-					style="width: {(nonBillableDuration / totalDuration) * 100}%"
-				></div>
+				<p class="text-xs text-[hsl(var(--color-muted-foreground))]">{$_('report.totalHours')}</p>
+				<p class="duration-display mt-1 text-2xl font-bold text-[hsl(var(--color-foreground))]">
+					{formatDurationDecimal(totalDuration)}h
+				</p>
 			</div>
-			<div class="mt-2 flex justify-between text-xs text-[hsl(var(--color-muted-foreground))]">
-				<span>{$_('entry.billable')}: {formatDurationCompact(billableDuration)}</span>
-				<span>{$_('entry.notBillable')}: {formatDurationCompact(nonBillableDuration)}</span>
+			<div
+				class="rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4"
+			>
+				<p class="text-xs text-[hsl(var(--color-muted-foreground))]">
+					{$_('report.billableHours')}
+				</p>
+				<p class="duration-display mt-1 text-2xl font-bold text-[hsl(var(--color-primary))]">
+					{formatDurationDecimal(billableDuration)}h
+				</p>
+			</div>
+			<div
+				class="rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4"
+			>
+				<p class="text-xs text-[hsl(var(--color-muted-foreground))]">{$_('report.avgPerDay')}</p>
+				<p class="duration-display mt-1 text-2xl font-bold text-[hsl(var(--color-foreground))]">
+					{formatDurationCompact(Math.round(avgPerDay))}
+				</p>
+			</div>
+			<div
+				class="rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4"
+			>
+				<p class="text-xs text-[hsl(var(--color-muted-foreground))]">{$_('nav.entries')}</p>
+				<p class="mt-1 text-2xl font-bold text-[hsl(var(--color-foreground))]">{entryCount}</p>
 			</div>
 		</div>
-	{/if}
 
-	<!-- Hours by Project -->
-	{#if projectBreakdown().length > 0}
-		<div
-			class="rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4"
-		>
-			<h3 class="mb-3 text-sm font-medium text-[hsl(var(--color-foreground))]">
-				{$_('report.byProject')}
-			</h3>
-			<div class="space-y-3">
-				{#each projectBreakdown() as item}
-					<div>
-						<div class="flex items-center justify-between text-sm">
-							<div class="flex items-center gap-2">
-								<div class="h-3 w-3 rounded-full" style="background-color: {item.color}"></div>
-								<span class="text-[hsl(var(--color-foreground))]">{item.name}</span>
+		<!-- Billable Breakdown -->
+		{#if totalDuration > 0}
+			<div
+				class="rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4"
+			>
+				<h3 class="mb-3 text-sm font-medium text-[hsl(var(--color-foreground))]">
+					{$_('entry.billable')} vs. {$_('entry.notBillable')}
+				</h3>
+				<div class="flex h-4 overflow-hidden rounded-full">
+					<div
+						class="bg-[hsl(var(--color-primary))] transition-[width]"
+						style="width: {(billableDuration / totalDuration) * 100}%"
+					></div>
+					<div
+						class="bg-[hsl(var(--color-muted))] transition-[width]"
+						style="width: {(nonBillableDuration / totalDuration) * 100}%"
+					></div>
+				</div>
+				<div class="mt-2 flex justify-between text-xs text-[hsl(var(--color-muted-foreground))]">
+					<span>{$_('entry.billable')}: {formatDurationCompact(billableDuration)}</span>
+					<span>{$_('entry.notBillable')}: {formatDurationCompact(nonBillableDuration)}</span>
+				</div>
+			</div>
+		{/if}
+
+		<!-- Hours by Project -->
+		{#if projectBreakdown().length > 0}
+			<div
+				class="rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4"
+			>
+				<h3 class="mb-3 text-sm font-medium text-[hsl(var(--color-foreground))]">
+					{$_('report.byProject')}
+				</h3>
+				<div class="space-y-3">
+					{#each projectBreakdown() as item}
+						<div>
+							<div class="flex items-center justify-between text-sm">
+								<div class="flex items-center gap-2">
+									<div class="h-3 w-3 rounded-full" style="background-color: {item.color}"></div>
+									<span class="text-[hsl(var(--color-foreground))]">{item.name}</span>
+								</div>
+								<span class="duration-display text-[hsl(var(--color-muted-foreground))]">
+									{formatDurationCompact(item.duration)}
+								</span>
 							</div>
-							<span class="duration-display text-[hsl(var(--color-muted-foreground))]">
-								{formatDurationCompact(item.duration)}
-							</span>
+							<div class="mt-1 h-2 rounded-full bg-[hsl(var(--color-muted))]">
+								<div
+									class="h-full rounded-full transition-[width]"
+									style="width: {(item.duration / maxProjectDuration) *
+										100}%; background-color: {item.color}"
+								></div>
+							</div>
 						</div>
-						<div class="mt-1 h-2 rounded-full bg-[hsl(var(--color-muted))]">
-							<div
-								class="h-full rounded-full transition-[width]"
-								style="width: {(item.duration / maxProjectDuration) *
-									100}%; background-color: {item.color}"
-							></div>
-						</div>
-					</div>
-				{/each}
+					{/each}
+				</div>
 			</div>
-		</div>
-	{/if}
+		{/if}
 
-	<!-- Daily Hours -->
-	{#if period === 'week' && dailyBreakdown().length > 0}
-		<div
-			class="rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4"
-		>
-			<h3 class="mb-3 text-sm font-medium text-[hsl(var(--color-foreground))]">
-				{$_('report.byDay')}
-			</h3>
-			<div class="flex items-end gap-2" style="height: 120px;">
-				{#each dailyBreakdown() as day}
-					<div class="flex flex-1 flex-col items-center gap-1">
-						<div class="w-full flex flex-col justify-end" style="height: 100px;">
-							<div
-								class="w-full rounded-t bg-[hsl(var(--color-primary))] transition-[height]"
-								style="height: {maxDailyDuration > 0
-									? (day.duration / maxDailyDuration) * 100
-									: 0}%"
-								title={formatDurationCompact(day.duration)}
-							></div>
+		<!-- Daily Hours -->
+		{#if period === 'week' && dailyBreakdown().length > 0}
+			<div
+				class="rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4"
+			>
+				<h3 class="mb-3 text-sm font-medium text-[hsl(var(--color-foreground))]">
+					{$_('report.byDay')}
+				</h3>
+				<div class="flex items-end gap-2" style="height: 120px;">
+					{#each dailyBreakdown() as day}
+						<div class="flex flex-1 flex-col items-center gap-1">
+							<div class="w-full flex flex-col justify-end" style="height: 100px;">
+								<div
+									class="w-full rounded-t bg-[hsl(var(--color-primary))] transition-[height]"
+									style="height: {maxDailyDuration > 0
+										? (day.duration / maxDailyDuration) * 100
+										: 0}%"
+									title={formatDurationCompact(day.duration)}
+								></div>
+							</div>
+							<span class="text-[10px] text-[hsl(var(--color-muted-foreground))]">{day.label}</span>
 						</div>
-						<span class="text-[10px] text-[hsl(var(--color-muted-foreground))]">{day.label}</span>
-					</div>
-				{/each}
+					{/each}
+				</div>
 			</div>
-		</div>
-	{/if}
-</div>
+		{/if}
+	</div>
+</RoutePage>

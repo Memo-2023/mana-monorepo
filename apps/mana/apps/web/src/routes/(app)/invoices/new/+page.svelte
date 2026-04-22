@@ -1,19 +1,22 @@
 <script lang="ts">
 	import InvoiceForm from '$lib/modules/invoices/components/InvoiceForm.svelte';
+	import { RoutePage } from '$lib/components/shell';
 </script>
 
 <svelte:head>
 	<title>Neue Rechnung - Mana</title>
 </svelte:head>
 
-<div class="page">
-	<header class="head">
-		<h1>Neue Rechnung</h1>
-		<p class="subtitle">Entwurf erstellen — wird nach dem Speichern noch nicht versendet.</p>
-	</header>
+<RoutePage appId="invoices" backHref="/invoices">
+	<div class="page">
+		<header class="head">
+			<h1>Neue Rechnung</h1>
+			<p class="subtitle">Entwurf erstellen — wird nach dem Speichern noch nicht versendet.</p>
+		</header>
 
-	<InvoiceForm />
-</div>
+		<InvoiceForm />
+	</div>
+</RoutePage>
 
 <style>
 	.page {

@@ -7,6 +7,7 @@
 		getDocumentStats,
 	} from '$lib/modules/context/queries';
 	import { documentTable } from '$lib/modules/context/collections';
+	import { RoutePage } from '$lib/components/shell';
 
 	const allSpaces = useAllSpaces();
 	const allDocuments = useAllDocuments();
@@ -34,167 +35,169 @@
 	<title>Context - Mana</title>
 </svelte:head>
 
-<div class="mx-auto max-w-5xl">
-	<header class="mb-8">
-		<h1 class="text-2xl font-bold">Context</h1>
-		<p class="mt-1 text-sm opacity-60">Dein Wissensmanagement Hub</p>
-	</header>
+<RoutePage appId="context">
+	<div class="mx-auto max-w-5xl">
+		<header class="mb-8">
+			<h1 class="text-2xl font-bold">Context</h1>
+			<p class="mt-1 text-sm opacity-60">Dein Wissensmanagement Hub</p>
+		</header>
 
-	<!-- Stats -->
-	<div class="mb-8 grid grid-cols-2 gap-4 md:grid-cols-4">
-		<div
-			class="rounded-xl border border-border-strong bg-white p-4 text-center dark:border-border dark:bg-card"
-		>
-			<div class="text-2xl font-bold">{spaces.length}</div>
-			<div class="mt-1 text-xs opacity-60">Spaces</div>
-		</div>
-		<div
-			class="rounded-xl border border-border-strong bg-white p-4 text-center dark:border-border dark:bg-card"
-		>
-			<div class="text-2xl font-bold">{stats.total}</div>
-			<div class="mt-1 text-xs opacity-60">Dokumente</div>
-		</div>
-		<div
-			class="rounded-xl border border-border-strong bg-white p-4 text-center dark:border-border dark:bg-card"
-		>
-			<div class="text-2xl font-bold">{stats.totalWords.toLocaleString()}</div>
-			<div class="mt-1 text-xs opacity-60">Woerter</div>
-		</div>
-		<div
-			class="rounded-xl border border-border-strong bg-white p-4 text-center dark:border-border dark:bg-card"
-		>
-			<div class="text-2xl font-bold">{stats.text}/{stats.context}/{stats.prompt}</div>
-			<div class="mt-1 text-xs opacity-60">Text/Kontext/Prompt</div>
-		</div>
-	</div>
-
-	<!-- Quick Actions -->
-	<div class="mb-8 flex gap-3">
-		<a
-			href="/context/spaces"
-			class="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700"
-		>
-			<Folder size={16} />
-			Spaces
-		</a>
-		<a
-			href="/context/documents"
-			class="flex items-center gap-2 rounded-lg border border-border-strong px-4 py-2 text-sm font-medium transition-colors hover:bg-muted dark:border-border dark:hover:bg-muted"
-		>
-			<FileText size={16} />
-			Alle Dokumente
-		</a>
-	</div>
-
-	<!-- Pinned Spaces -->
-	{#if pinnedSpaces.length > 0}
-		<section class="mb-8">
-			<h2 class="mb-4 text-lg font-semibold">Angeheftete Spaces</h2>
-			<div class="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
-				{#each pinnedSpaces as space}
-					<a
-						href="/context/spaces/{space.id}"
-						class="rounded-xl border border-border-strong bg-white p-4 transition-colors hover:shadow-md dark:border-border dark:bg-card"
-					>
-						<div class="flex items-center gap-3">
-							<span
-								class="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-100 text-lg font-bold text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300"
-							>
-								{space.prefix || space.name[0]?.toUpperCase() || 'S'}
-							</span>
-							<div>
-								<h3 class="font-semibold">{space.name}</h3>
-								{#if space.description}
-									<p class="text-xs opacity-60 line-clamp-1">{space.description}</p>
-								{/if}
-							</div>
-						</div>
-					</a>
-				{/each}
+		<!-- Stats -->
+		<div class="mb-8 grid grid-cols-2 gap-4 md:grid-cols-4">
+			<div
+				class="rounded-xl border border-border-strong bg-white p-4 text-center dark:border-border dark:bg-card"
+			>
+				<div class="text-2xl font-bold">{spaces.length}</div>
+				<div class="mt-1 text-xs opacity-60">Spaces</div>
 			</div>
-		</section>
-	{/if}
+			<div
+				class="rounded-xl border border-border-strong bg-white p-4 text-center dark:border-border dark:bg-card"
+			>
+				<div class="text-2xl font-bold">{stats.total}</div>
+				<div class="mt-1 text-xs opacity-60">Dokumente</div>
+			</div>
+			<div
+				class="rounded-xl border border-border-strong bg-white p-4 text-center dark:border-border dark:bg-card"
+			>
+				<div class="text-2xl font-bold">{stats.totalWords.toLocaleString()}</div>
+				<div class="mt-1 text-xs opacity-60">Woerter</div>
+			</div>
+			<div
+				class="rounded-xl border border-border-strong bg-white p-4 text-center dark:border-border dark:bg-card"
+			>
+				<div class="text-2xl font-bold">{stats.text}/{stats.context}/{stats.prompt}</div>
+				<div class="mt-1 text-xs opacity-60">Text/Kontext/Prompt</div>
+			</div>
+		</div>
 
-	<!-- Recent Documents -->
-	{#if recentDocs.length > 0}
-		<section>
-			<div class="mb-4 flex items-center justify-between">
-				<h2 class="text-lg font-semibold">Zuletzt bearbeitet</h2>
-				<a href="/context/documents" class="text-sm text-indigo-600 hover:underline"
-					>Alle anzeigen</a
-				>
-			</div>
-			<div class="grid grid-cols-1 gap-3 md:grid-cols-2">
-				{#each recentDocs as doc}
-					<a
-						href="/context/documents/{doc.id}"
-						class="group rounded-xl border border-border-strong bg-white p-4 transition-colors hover:shadow-md dark:border-border dark:bg-card"
-					>
-						<div class="flex items-start justify-between">
-							<div class="min-w-0 flex-1">
-								<div class="flex items-center gap-2">
-									<span
-										class="rounded px-1.5 py-0.5 text-[10px] font-medium uppercase {doc.type ===
-										'text'
-											? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
-											: doc.type === 'context'
-												? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
-												: 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300'}"
-									>
-										{doc.type}
-									</span>
-									{#if doc.pinned}
-										<span class="text-xs opacity-40">Angeheftet</span>
-									{/if}
-								</div>
-								<h3 class="mt-1 truncate font-semibold">{doc.title}</h3>
-								{#if doc.content}
-									<p class="mt-0.5 truncate text-xs opacity-50">
-										{doc.content.slice(0, 100)}
-									</p>
-								{/if}
-							</div>
-							<button
-								onclick={(e) => {
-									e.preventDefault();
-									handleTogglePinDoc(doc.id);
-								}}
-								class="ml-2 rounded p-1 opacity-0 transition-opacity hover:bg-muted group-hover:opacity-100 dark:hover:bg-muted"
-								title={doc.pinned ? 'Loslassen' : 'Anheften'}
-							>
-								{doc.pinned ? '&#9733;' : '&#9734;'}
-							</button>
-						</div>
-						<div class="mt-2 flex items-center gap-3 text-xs opacity-40">
-							{#if doc.metadata?.tags && doc.metadata.tags.length > 0}
-								{#each doc.metadata.tags.slice(0, 3) as tag}
-									<span class="rounded bg-muted px-1.5 py-0.5 dark:bg-muted">{tag}</span>
-								{/each}
-							{/if}
-							<span class="ml-auto">
-								{new Date(doc.updated_at).toLocaleDateString('de')}
-							</span>
-						</div>
-					</a>
-				{/each}
-			</div>
-		</section>
-	{:else}
-		<div
-			class="rounded-xl border-2 border-dashed border-border-strong p-12 text-center dark:border-border"
-		>
-			<FileText size={48} class="mx-auto mb-4 opacity-20" />
-			<h3 class="text-lg font-medium opacity-60">Noch keine Dokumente</h3>
-			<p class="mt-1 text-sm opacity-40">
-				Erstelle deinen ersten Space und beginne mit dem Schreiben.
-			</p>
+		<!-- Quick Actions -->
+		<div class="mb-8 flex gap-3">
 			<a
 				href="/context/spaces"
-				class="mt-4 inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+				class="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700"
 			>
-				<Plus size={16} />
-				Ersten Space erstellen
+				<Folder size={16} />
+				Spaces
+			</a>
+			<a
+				href="/context/documents"
+				class="flex items-center gap-2 rounded-lg border border-border-strong px-4 py-2 text-sm font-medium transition-colors hover:bg-muted dark:border-border dark:hover:bg-muted"
+			>
+				<FileText size={16} />
+				Alle Dokumente
 			</a>
 		</div>
-	{/if}
-</div>
+
+		<!-- Pinned Spaces -->
+		{#if pinnedSpaces.length > 0}
+			<section class="mb-8">
+				<h2 class="mb-4 text-lg font-semibold">Angeheftete Spaces</h2>
+				<div class="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+					{#each pinnedSpaces as space}
+						<a
+							href="/context/spaces/{space.id}"
+							class="rounded-xl border border-border-strong bg-white p-4 transition-colors hover:shadow-md dark:border-border dark:bg-card"
+						>
+							<div class="flex items-center gap-3">
+								<span
+									class="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-100 text-lg font-bold text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300"
+								>
+									{space.prefix || space.name[0]?.toUpperCase() || 'S'}
+								</span>
+								<div>
+									<h3 class="font-semibold">{space.name}</h3>
+									{#if space.description}
+										<p class="text-xs opacity-60 line-clamp-1">{space.description}</p>
+									{/if}
+								</div>
+							</div>
+						</a>
+					{/each}
+				</div>
+			</section>
+		{/if}
+
+		<!-- Recent Documents -->
+		{#if recentDocs.length > 0}
+			<section>
+				<div class="mb-4 flex items-center justify-between">
+					<h2 class="text-lg font-semibold">Zuletzt bearbeitet</h2>
+					<a href="/context/documents" class="text-sm text-indigo-600 hover:underline"
+						>Alle anzeigen</a
+					>
+				</div>
+				<div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+					{#each recentDocs as doc}
+						<a
+							href="/context/documents/{doc.id}"
+							class="group rounded-xl border border-border-strong bg-white p-4 transition-colors hover:shadow-md dark:border-border dark:bg-card"
+						>
+							<div class="flex items-start justify-between">
+								<div class="min-w-0 flex-1">
+									<div class="flex items-center gap-2">
+										<span
+											class="rounded px-1.5 py-0.5 text-[10px] font-medium uppercase {doc.type ===
+											'text'
+												? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
+												: doc.type === 'context'
+													? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
+													: 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300'}"
+										>
+											{doc.type}
+										</span>
+										{#if doc.pinned}
+											<span class="text-xs opacity-40">Angeheftet</span>
+										{/if}
+									</div>
+									<h3 class="mt-1 truncate font-semibold">{doc.title}</h3>
+									{#if doc.content}
+										<p class="mt-0.5 truncate text-xs opacity-50">
+											{doc.content.slice(0, 100)}
+										</p>
+									{/if}
+								</div>
+								<button
+									onclick={(e) => {
+										e.preventDefault();
+										handleTogglePinDoc(doc.id);
+									}}
+									class="ml-2 rounded p-1 opacity-0 transition-opacity hover:bg-muted group-hover:opacity-100 dark:hover:bg-muted"
+									title={doc.pinned ? 'Loslassen' : 'Anheften'}
+								>
+									{doc.pinned ? '&#9733;' : '&#9734;'}
+								</button>
+							</div>
+							<div class="mt-2 flex items-center gap-3 text-xs opacity-40">
+								{#if doc.metadata?.tags && doc.metadata.tags.length > 0}
+									{#each doc.metadata.tags.slice(0, 3) as tag}
+										<span class="rounded bg-muted px-1.5 py-0.5 dark:bg-muted">{tag}</span>
+									{/each}
+								{/if}
+								<span class="ml-auto">
+									{new Date(doc.updated_at).toLocaleDateString('de')}
+								</span>
+							</div>
+						</a>
+					{/each}
+				</div>
+			</section>
+		{:else}
+			<div
+				class="rounded-xl border-2 border-dashed border-border-strong p-12 text-center dark:border-border"
+			>
+				<FileText size={48} class="mx-auto mb-4 opacity-20" />
+				<h3 class="text-lg font-medium opacity-60">Noch keine Dokumente</h3>
+				<p class="mt-1 text-sm opacity-40">
+					Erstelle deinen ersten Space und beginne mit dem Schreiben.
+				</p>
+				<a
+					href="/context/spaces"
+					class="mt-4 inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+				>
+					<Plus size={16} />
+					Ersten Space erstellen
+				</a>
+			</div>
+		{/if}
+	</div>
+</RoutePage>

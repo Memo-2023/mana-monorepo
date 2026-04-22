@@ -6,6 +6,7 @@
 	import { documentTable } from '$lib/modules/context/collections';
 	import { encryptRecord } from '$lib/data/crypto';
 	import type { DocumentType } from '$lib/modules/context/types';
+	import { RoutePage } from '$lib/components/shell';
 
 	let showDeleteConfirm = $state(false);
 	let saving = $state(false);
@@ -90,150 +91,155 @@
 	<title>{doc?.title || 'Dokument'} - Context - Mana</title>
 </svelte:head>
 
-<div class="mx-auto max-w-4xl pb-24">
-	{#if !doc}
-		<div class="py-12 text-center opacity-60">Lade Dokument...</div>
-	{:else}
-		<!-- Breadcrumb -->
-		<div class="mb-4 flex items-center justify-between">
-			<div class="flex items-center gap-2 text-sm">
-				{#if doc.space_id}
-					<a
-						href="/context/spaces/{doc.space_id}"
-						class="flex items-center gap-1 opacity-60 hover:opacity-100"
-					>
-						<ArrowLeft size={14} />
-						Zurueck zum Space
-					</a>
-				{:else}
-					<a href="/context/documents" class="flex items-center gap-1 opacity-60 hover:opacity-100">
-						<ArrowLeft size={14} />
-						Alle Dokumente
-					</a>
-				{/if}
-			</div>
-
-			<div class="flex items-center gap-2">
-				{#if saving}
-					<span class="text-xs opacity-40">Speichert...</span>
-				{/if}
-				<button
-					onclick={handleSave}
-					class="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700"
-				>
-					Speichern
-				</button>
-				<button
-					class="rounded-lg p-2 opacity-60 transition-colors hover:bg-red-50 hover:text-red-600 hover:opacity-100 dark:hover:bg-red-900/20"
-					onclick={() => (showDeleteConfirm = true)}
-					title="Dokument loeschen"
-				>
-					<Trash size={18} />
-				</button>
-			</div>
-		</div>
-
-		<!-- Editor -->
-		<div
-			class="rounded-xl border border-border-strong bg-white p-6 dark:border-border dark:bg-card"
-		>
-			<!-- Title -->
-			<input
-				type="text"
-				bind:value={editTitle}
-				oninput={scheduleAutoSave}
-				placeholder="Dokumenttitel"
-				class="mb-4 w-full border-none bg-transparent text-2xl font-bold outline-none placeholder:opacity-30"
-			/>
-
-			<!-- Type + Tags bar -->
-			<div
-				class="mb-4 flex flex-wrap items-center gap-3 border-b border-border-strong pb-4 dark:border-border"
-			>
-				<div class="flex gap-1">
-					{#each typeOptions as opt}
-						<button
-							class="rounded-md px-2.5 py-1 text-xs font-medium transition-colors {editType ===
-							opt.value
-								? 'bg-indigo-600 text-white'
-								: 'bg-muted opacity-60 hover:opacity-100 dark:bg-muted'}"
-							onclick={() => {
-								editType = opt.value;
-								scheduleAutoSave();
-							}}
+<RoutePage appId="context" backHref="/context/documents" title="Dokument">
+	<div class="mx-auto max-w-4xl pb-24">
+		{#if !doc}
+			<div class="py-12 text-center opacity-60">Lade Dokument...</div>
+		{:else}
+			<!-- Breadcrumb -->
+			<div class="mb-4 flex items-center justify-between">
+				<div class="flex items-center gap-2 text-sm">
+					{#if doc.space_id}
+						<a
+							href="/context/spaces/{doc.space_id}"
+							class="flex items-center gap-1 opacity-60 hover:opacity-100"
 						>
-							{opt.label}
-						</button>
-					{/each}
+							<ArrowLeft size={14} />
+							Zurueck zum Space
+						</a>
+					{:else}
+						<a
+							href="/context/documents"
+							class="flex items-center gap-1 opacity-60 hover:opacity-100"
+						>
+							<ArrowLeft size={14} />
+							Alle Dokumente
+						</a>
+					{/if}
 				</div>
-				<div class="h-4 w-px bg-muted dark:bg-muted"></div>
+
+				<div class="flex items-center gap-2">
+					{#if saving}
+						<span class="text-xs opacity-40">Speichert...</span>
+					{/if}
+					<button
+						onclick={handleSave}
+						class="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700"
+					>
+						Speichern
+					</button>
+					<button
+						class="rounded-lg p-2 opacity-60 transition-colors hover:bg-red-50 hover:text-red-600 hover:opacity-100 dark:hover:bg-red-900/20"
+						onclick={() => (showDeleteConfirm = true)}
+						title="Dokument loeschen"
+					>
+						<Trash size={18} />
+					</button>
+				</div>
+			</div>
+
+			<!-- Editor -->
+			<div
+				class="rounded-xl border border-border-strong bg-white p-6 dark:border-border dark:bg-card"
+			>
+				<!-- Title -->
 				<input
 					type="text"
-					bind:value={editTags}
+					bind:value={editTitle}
 					oninput={scheduleAutoSave}
-					placeholder="Tags (komma-getrennt)"
-					class="flex-1 border-none bg-transparent text-sm outline-none placeholder:opacity-30"
+					placeholder="Dokumenttitel"
+					class="mb-4 w-full border-none bg-transparent text-2xl font-bold outline-none placeholder:opacity-30"
 				/>
+
+				<!-- Type + Tags bar -->
+				<div
+					class="mb-4 flex flex-wrap items-center gap-3 border-b border-border-strong pb-4 dark:border-border"
+				>
+					<div class="flex gap-1">
+						{#each typeOptions as opt}
+							<button
+								class="rounded-md px-2.5 py-1 text-xs font-medium transition-colors {editType ===
+								opt.value
+									? 'bg-indigo-600 text-white'
+									: 'bg-muted opacity-60 hover:opacity-100 dark:bg-muted'}"
+								onclick={() => {
+									editType = opt.value;
+									scheduleAutoSave();
+								}}
+							>
+								{opt.label}
+							</button>
+						{/each}
+					</div>
+					<div class="h-4 w-px bg-muted dark:bg-muted"></div>
+					<input
+						type="text"
+						bind:value={editTags}
+						oninput={scheduleAutoSave}
+						placeholder="Tags (komma-getrennt)"
+						class="flex-1 border-none bg-transparent text-sm outline-none placeholder:opacity-30"
+					/>
+				</div>
+
+				<!-- Content -->
+				<textarea
+					bind:value={editContent}
+					oninput={scheduleAutoSave}
+					rows="20"
+					placeholder="Schreibe hier..."
+					class="w-full resize-none border-none bg-transparent font-mono text-sm leading-relaxed outline-none placeholder:opacity-30"
+				></textarea>
 			</div>
 
-			<!-- Content -->
-			<textarea
-				bind:value={editContent}
-				oninput={scheduleAutoSave}
-				rows="20"
-				placeholder="Schreibe hier..."
-				class="w-full resize-none border-none bg-transparent font-mono text-sm leading-relaxed outline-none placeholder:opacity-30"
-			></textarea>
-		</div>
+			<!-- Document metadata -->
+			<div class="mt-4 flex items-center gap-4 text-xs opacity-40">
+				{#if doc.short_id}
+					<span>ID: {doc.short_id}</span>
+				{/if}
+				{#if doc.metadata?.word_count}
+					<span>{doc.metadata.word_count} Woerter</span>
+				{/if}
+				<span>
+					Erstellt: {new Date(doc.created_at).toLocaleDateString('de')}
+				</span>
+				<span>
+					Aktualisiert: {new Date(doc.updated_at).toLocaleDateString('de')}
+				</span>
+			</div>
+		{/if}
+	</div>
 
-		<!-- Document metadata -->
-		<div class="mt-4 flex items-center gap-4 text-xs opacity-40">
-			{#if doc.short_id}
-				<span>ID: {doc.short_id}</span>
-			{/if}
-			{#if doc.metadata?.word_count}
-				<span>{doc.metadata.word_count} Woerter</span>
-			{/if}
-			<span>
-				Erstellt: {new Date(doc.created_at).toLocaleDateString('de')}
-			</span>
-			<span>
-				Aktualisiert: {new Date(doc.updated_at).toLocaleDateString('de')}
-			</span>
+	<!-- Delete Confirmation -->
+	{#if showDeleteConfirm}
+		<div
+			class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+			onclick={() => (showDeleteConfirm = false)}
+			onkeydown={(e) => e.key === 'Escape' && (showDeleteConfirm = false)}
+			tabindex="-1"
+			role="presentation"
+		>
+			<div
+				class="w-full max-w-sm rounded-xl bg-white p-6 shadow-2xl dark:bg-card"
+				onclick={(e) => e.stopPropagation()}
+				role="none"
+			>
+				<h3 class="text-lg font-semibold">Dokument loeschen?</h3>
+				<p class="mt-2 text-sm opacity-60">Das Dokument wird unwiderruflich geloescht.</p>
+				<div class="mt-4 flex justify-end gap-2">
+					<button
+						onclick={() => (showDeleteConfirm = false)}
+						class="rounded-lg border border-border-strong px-4 py-2 text-sm font-medium hover:bg-muted dark:border-border dark:hover:bg-muted"
+					>
+						Abbrechen
+					</button>
+					<button
+						onclick={handleDelete}
+						class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+					>
+						Loeschen
+					</button>
+				</div>
+			</div>
 		</div>
 	{/if}
-</div>
-
-<!-- Delete Confirmation -->
-{#if showDeleteConfirm}
-	<div
-		class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-		onclick={() => (showDeleteConfirm = false)}
-		onkeydown={(e) => e.key === 'Escape' && (showDeleteConfirm = false)}
-		tabindex="-1"
-		role="presentation"
-	>
-		<div
-			class="w-full max-w-sm rounded-xl bg-white p-6 shadow-2xl dark:bg-card"
-			onclick={(e) => e.stopPropagation()}
-			role="none"
-		>
-			<h3 class="text-lg font-semibold">Dokument loeschen?</h3>
-			<p class="mt-2 text-sm opacity-60">Das Dokument wird unwiderruflich geloescht.</p>
-			<div class="mt-4 flex justify-end gap-2">
-				<button
-					onclick={() => (showDeleteConfirm = false)}
-					class="rounded-lg border border-border-strong px-4 py-2 text-sm font-medium hover:bg-muted dark:border-border dark:hover:bg-muted"
-				>
-					Abbrechen
-				</button>
-				<button
-					onclick={handleDelete}
-					class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
-				>
-					Loeschen
-				</button>
-			</div>
-		</div>
-	</div>
-{/if}
+</RoutePage>

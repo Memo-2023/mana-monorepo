@@ -25,6 +25,7 @@
 		type LocalCachedArticle,
 	} from '$lib/modules/news/types';
 	import { TOPIC_LABELS, sourcesForTopic } from '$lib/modules/news/sources-meta';
+	import { RoutePage } from '$lib/components/shell';
 
 	const prefs$ = usePreferences();
 	const pool$ = useCachedFeed();
@@ -145,245 +146,247 @@
 	<title>News — Mana</title>
 </svelte:head>
 
-<div class="news-page">
-	{#if !isOnboarded}
-		<!-- ─── Onboarding ───────────────────────────────────── -->
-		<header class="hero">
-			<h1>Willkommen beim News Hub</h1>
-			<p>In drei Schritten baust du dir deinen persönlichen Newsfeed.</p>
-		</header>
+<RoutePage appId="news">
+	<div class="news-page">
+		{#if !isOnboarded}
+			<!-- ─── Onboarding ───────────────────────────────────── -->
+			<header class="hero">
+				<h1>Willkommen beim News Hub</h1>
+				<p>In drei Schritten baust du dir deinen persönlichen Newsfeed.</p>
+			</header>
 
-		<div class="steps">
-			<span class="step" class:active={onboardingStep === 1}>1. Themen</span>
-			<span class="step" class:active={onboardingStep === 2}>2. Sprache</span>
-			<span class="step" class:active={onboardingStep === 3}>3. Quellen</span>
-		</div>
-
-		{#if onboardingStep === 1}
-			<section class="step-panel">
-				<h2>Was interessiert dich?</h2>
-				<p class="hint">Wähle mindestens zwei Themen.</p>
-				<div class="topic-grid">
-					{#each ALL_TOPICS as topic}
-						<button
-							type="button"
-							class="topic-pill"
-							class:selected={pickedTopics.includes(topic)}
-							onclick={() => toggleTopic(topic)}
-						>
-							<span class="topic-emoji">{TOPIC_LABELS[topic].emoji}</span>
-							<span>{TOPIC_LABELS[topic].de}</span>
-						</button>
-					{/each}
-				</div>
-				<div class="actions">
-					<button
-						type="button"
-						class="btn-primary"
-						disabled={pickedTopics.length < 2}
-						onclick={() => (onboardingStep = 2)}
-					>
-						Weiter
-					</button>
-				</div>
-			</section>
-		{:else if onboardingStep === 2}
-			<section class="step-panel">
-				<h2>In welchen Sprachen liest du?</h2>
-				<div class="lang-row">
-					<button
-						type="button"
-						class="lang-pill"
-						class:selected={pickedLanguages.includes('de')}
-						onclick={() => toggleLang('de')}
-					>
-						🇩🇪 Deutsch
-					</button>
-					<button
-						type="button"
-						class="lang-pill"
-						class:selected={pickedLanguages.includes('en')}
-						onclick={() => toggleLang('en')}
-					>
-						🇬🇧 English
-					</button>
-				</div>
-				<div class="actions">
-					<button type="button" class="btn-secondary" onclick={() => (onboardingStep = 1)}>
-						Zurück
-					</button>
-					<button
-						type="button"
-						class="btn-primary"
-						disabled={pickedLanguages.length === 0}
-						onclick={() => (onboardingStep = 3)}
-					>
-						Weiter
-					</button>
-				</div>
-			</section>
-		{:else}
-			<section class="step-panel">
-				<h2>Quellen aus deinen Themen</h2>
-				<p class="hint">
-					Tippe eine Quelle an um sie auszublenden. Du kannst das jederzeit ändern.
-				</p>
-				<div class="sources-list">
-					{#each pickedTopics as topic}
-						<div class="topic-block">
-							<h3>
-								{TOPIC_LABELS[topic].emoji}
-								{TOPIC_LABELS[topic].de}
-							</h3>
-							<div class="source-row">
-								{#each sourcesForTopic(topic) as src}
-									<button
-										type="button"
-										class="source-chip"
-										class:blocked={pickedBlocked.includes(src.slug)}
-										onclick={() => toggleBlocked(src.slug)}
-									>
-										{src.name}
-										<span class="lang">·{src.language}</span>
-									</button>
-								{/each}
-							</div>
-						</div>
-					{/each}
-				</div>
-				<div class="actions">
-					<button type="button" class="btn-secondary" onclick={() => (onboardingStep = 2)}>
-						Zurück
-					</button>
-					<button
-						type="button"
-						class="btn-primary"
-						onclick={finishOnboarding}
-						disabled={onboardingSubmitting}
-					>
-						{onboardingSubmitting ? 'Speichere…' : 'Fertig'}
-					</button>
-				</div>
-			</section>
-		{/if}
-	{:else}
-		<!-- ─── Feed ─────────────────────────────────────────── -->
-		<header class="feed-header">
-			<div>
-				<h1>News</h1>
-				<div class="meta">
-					{ranked.length} Artikel
-					{#if feedCacheStore.lastError}
-						· <span class="error">Fehler beim Laden</span>
-					{/if}
-				</div>
+			<div class="steps">
+				<span class="step" class:active={onboardingStep === 1}>1. Themen</span>
+				<span class="step" class:active={onboardingStep === 2}>2. Sprache</span>
+				<span class="step" class:active={onboardingStep === 3}>3. Quellen</span>
 			</div>
-			<div class="header-actions">
-				<button
-					type="button"
-					class="icon-btn"
-					onclick={manualRefresh}
-					disabled={feedCacheStore.inFlight}
-					title="Neu laden"
-				>
-					{feedCacheStore.inFlight ? '…' : '↻'}
-				</button>
-				<a class="icon-btn" href="/news/saved" title="Gespeichert">📑</a>
-				<a class="icon-btn" href="/news/preferences" title="Einstellungen">⚙</a>
-			</div>
-		</header>
 
-		<!-- Topic filter strip -->
-		<div class="topic-strip">
-			{#each prefs.selectedTopics as topic}
-				<span class="topic-tag">
-					{TOPIC_LABELS[topic].emoji}
-					{TOPIC_LABELS[topic].de}
-				</span>
-			{/each}
-		</div>
-
-		{#if ranked.length === 0}
-			<div class="empty">
-				{#if pool.length === 0}
-					<p>Lade Artikel…</p>
-				{:else}
-					<p>Keine neuen Artikel zu deinen Themen.</p>
-					<p class="hint">Probiere "↻" oder erweitere deine Themen.</p>
-				{/if}
-			</div>
-		{:else}
-			<div class="card-grid">
-				{#each ranked as scored (scored.article.id)}
-					{@const article = scored.article}
-					{@const isSaved = interestedIds.has(article.id)}
-					<article class="card">
-						{#if article.imageUrl}
+			{#if onboardingStep === 1}
+				<section class="step-panel">
+					<h2>Was interessiert dich?</h2>
+					<p class="hint">Wähle mindestens zwei Themen.</p>
+					<div class="topic-grid">
+						{#each ALL_TOPICS as topic}
 							<button
 								type="button"
-								class="card-image-btn"
-								onclick={() => openReader(article)}
-								aria-label="Artikel öffnen"
+								class="topic-pill"
+								class:selected={pickedTopics.includes(topic)}
+								onclick={() => toggleTopic(topic)}
 							>
-								<img src={article.imageUrl} alt="" loading="lazy" />
+								<span class="topic-emoji">{TOPIC_LABELS[topic].emoji}</span>
+								<span>{TOPIC_LABELS[topic].de}</span>
 							</button>
+						{/each}
+					</div>
+					<div class="actions">
+						<button
+							type="button"
+							class="btn-primary"
+							disabled={pickedTopics.length < 2}
+							onclick={() => (onboardingStep = 2)}
+						>
+							Weiter
+						</button>
+					</div>
+				</section>
+			{:else if onboardingStep === 2}
+				<section class="step-panel">
+					<h2>In welchen Sprachen liest du?</h2>
+					<div class="lang-row">
+						<button
+							type="button"
+							class="lang-pill"
+							class:selected={pickedLanguages.includes('de')}
+							onclick={() => toggleLang('de')}
+						>
+							🇩🇪 Deutsch
+						</button>
+						<button
+							type="button"
+							class="lang-pill"
+							class:selected={pickedLanguages.includes('en')}
+							onclick={() => toggleLang('en')}
+						>
+							🇬🇧 English
+						</button>
+					</div>
+					<div class="actions">
+						<button type="button" class="btn-secondary" onclick={() => (onboardingStep = 1)}>
+							Zurück
+						</button>
+						<button
+							type="button"
+							class="btn-primary"
+							disabled={pickedLanguages.length === 0}
+							onclick={() => (onboardingStep = 3)}
+						>
+							Weiter
+						</button>
+					</div>
+				</section>
+			{:else}
+				<section class="step-panel">
+					<h2>Quellen aus deinen Themen</h2>
+					<p class="hint">
+						Tippe eine Quelle an um sie auszublenden. Du kannst das jederzeit ändern.
+					</p>
+					<div class="sources-list">
+						{#each pickedTopics as topic}
+							<div class="topic-block">
+								<h3>
+									{TOPIC_LABELS[topic].emoji}
+									{TOPIC_LABELS[topic].de}
+								</h3>
+								<div class="source-row">
+									{#each sourcesForTopic(topic) as src}
+										<button
+											type="button"
+											class="source-chip"
+											class:blocked={pickedBlocked.includes(src.slug)}
+											onclick={() => toggleBlocked(src.slug)}
+										>
+											{src.name}
+											<span class="lang">·{src.language}</span>
+										</button>
+									{/each}
+								</div>
+							</div>
+						{/each}
+					</div>
+					<div class="actions">
+						<button type="button" class="btn-secondary" onclick={() => (onboardingStep = 2)}>
+							Zurück
+						</button>
+						<button
+							type="button"
+							class="btn-primary"
+							onclick={finishOnboarding}
+							disabled={onboardingSubmitting}
+						>
+							{onboardingSubmitting ? 'Speichere…' : 'Fertig'}
+						</button>
+					</div>
+				</section>
+			{/if}
+		{:else}
+			<!-- ─── Feed ─────────────────────────────────────────── -->
+			<header class="feed-header">
+				<div>
+					<h1>News</h1>
+					<div class="meta">
+						{ranked.length} Artikel
+						{#if feedCacheStore.lastError}
+							· <span class="error">Fehler beim Laden</span>
 						{/if}
-						<div class="card-body" class:is-saved={isSaved}>
-							<div class="card-meta">
-								<span class="source">{article.siteName}</span>
-								<span class="dot">·</span>
-								<span>{formatRelativeTime(article.publishedAt)}</span>
-								{#if article.readingTimeMinutes}
-									<span class="dot">·</span>
-									<span>{article.readingTimeMinutes} min</span>
-								{/if}
-								{#if isSaved}
-									<span class="saved-badge" title="In deiner Leseliste">❤️ gespeichert</span>
-								{/if}
-							</div>
-							<button type="button" class="card-title-btn" onclick={() => openReader(article)}>
-								{article.title}
-							</button>
-							{#if article.excerpt}
-								<p class="card-excerpt">{article.excerpt}</p>
-							{/if}
-							<div class="card-actions">
-								<button
-									type="button"
-									class="reaction-btn interested"
-									class:active={isSaved}
-									onclick={() => react(article, 'interested')}
-									title={isSaved
-										? 'Schon gespeichert — nochmal klicken bestätigt nur'
-										: 'In Leseliste speichern + mehr davon zeigen'}
-									disabled={isSaved}
-								>
-									❤️ {isSaved ? 'Gespeichert' : 'Interessiert'}
-								</button>
-								<button
-									type="button"
-									class="reaction-btn not-interested"
-									onclick={() => react(article, 'not_interested')}
-									title="Weniger davon"
-								>
-									👎 Nicht für mich
-								</button>
-								<button
-									type="button"
-									class="reaction-btn block"
-									onclick={() => react(article, 'source_blocked')}
-									title="Quelle ausblenden"
-								>
-									🚫 {article.siteName}
-								</button>
-							</div>
-						</div>
-					</article>
+					</div>
+				</div>
+				<div class="header-actions">
+					<button
+						type="button"
+						class="icon-btn"
+						onclick={manualRefresh}
+						disabled={feedCacheStore.inFlight}
+						title="Neu laden"
+					>
+						{feedCacheStore.inFlight ? '…' : '↻'}
+					</button>
+					<a class="icon-btn" href="/news/saved" title="Gespeichert">📑</a>
+					<a class="icon-btn" href="/news/preferences" title="Einstellungen">⚙</a>
+				</div>
+			</header>
+
+			<!-- Topic filter strip -->
+			<div class="topic-strip">
+				{#each prefs.selectedTopics as topic}
+					<span class="topic-tag">
+						{TOPIC_LABELS[topic].emoji}
+						{TOPIC_LABELS[topic].de}
+					</span>
 				{/each}
 			</div>
+
+			{#if ranked.length === 0}
+				<div class="empty">
+					{#if pool.length === 0}
+						<p>Lade Artikel…</p>
+					{:else}
+						<p>Keine neuen Artikel zu deinen Themen.</p>
+						<p class="hint">Probiere "↻" oder erweitere deine Themen.</p>
+					{/if}
+				</div>
+			{:else}
+				<div class="card-grid">
+					{#each ranked as scored (scored.article.id)}
+						{@const article = scored.article}
+						{@const isSaved = interestedIds.has(article.id)}
+						<article class="card">
+							{#if article.imageUrl}
+								<button
+									type="button"
+									class="card-image-btn"
+									onclick={() => openReader(article)}
+									aria-label="Artikel öffnen"
+								>
+									<img src={article.imageUrl} alt="" loading="lazy" />
+								</button>
+							{/if}
+							<div class="card-body" class:is-saved={isSaved}>
+								<div class="card-meta">
+									<span class="source">{article.siteName}</span>
+									<span class="dot">·</span>
+									<span>{formatRelativeTime(article.publishedAt)}</span>
+									{#if article.readingTimeMinutes}
+										<span class="dot">·</span>
+										<span>{article.readingTimeMinutes} min</span>
+									{/if}
+									{#if isSaved}
+										<span class="saved-badge" title="In deiner Leseliste">❤️ gespeichert</span>
+									{/if}
+								</div>
+								<button type="button" class="card-title-btn" onclick={() => openReader(article)}>
+									{article.title}
+								</button>
+								{#if article.excerpt}
+									<p class="card-excerpt">{article.excerpt}</p>
+								{/if}
+								<div class="card-actions">
+									<button
+										type="button"
+										class="reaction-btn interested"
+										class:active={isSaved}
+										onclick={() => react(article, 'interested')}
+										title={isSaved
+											? 'Schon gespeichert — nochmal klicken bestätigt nur'
+											: 'In Leseliste speichern + mehr davon zeigen'}
+										disabled={isSaved}
+									>
+										❤️ {isSaved ? 'Gespeichert' : 'Interessiert'}
+									</button>
+									<button
+										type="button"
+										class="reaction-btn not-interested"
+										onclick={() => react(article, 'not_interested')}
+										title="Weniger davon"
+									>
+										👎 Nicht für mich
+									</button>
+									<button
+										type="button"
+										class="reaction-btn block"
+										onclick={() => react(article, 'source_blocked')}
+										title="Quelle ausblenden"
+									>
+										🚫 {article.siteName}
+									</button>
+								</div>
+							</div>
+						</article>
+					{/each}
+				</div>
+			{/if}
 		{/if}
-	{/if}
-</div>
+	</div>
+</RoutePage>
 
 <style>
 	.news-page {

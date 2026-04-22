@@ -34,6 +34,7 @@
 		Graph,
 		Trophy,
 	} from '@mana/shared-icons';
+	import { RoutePage } from '$lib/components/shell';
 
 	// Reactive live queries — auto-update when IndexedDB changes
 	const allSkills = useAllSkills();
@@ -177,173 +178,175 @@
 	<title>SkillTree</title>
 </svelte:head>
 
-<div class="min-h-screen">
-	<!-- Header -->
-	<header class="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-40">
-		<div class="mx-auto max-w-7xl px-4 py-4">
-			<div class="flex items-center justify-between">
-				<div class="flex items-center gap-3">
-					<Tree class="h-8 w-8 text-emerald-500" />
-					<h1 class="text-2xl font-bold text-white">SkillTree</h1>
-				</div>
-				<div class="flex items-center gap-2">
-					<!-- Achievements -->
-					<a
-						href="/skilltree/achievements"
-						class="relative rounded-lg p-2 text-muted-foreground transition-colors hover:bg-card hover:text-yellow-400"
-						title="Achievements"
-					>
-						<Trophy class="h-5 w-5" />
-						{#if achievementStats.unlocked > 0}
-							<span
-								class="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-yellow-500 text-[10px] font-bold text-foreground"
-							>
-								{achievementStats.unlocked}
-							</span>
-						{/if}
-					</a>
-					<!-- Tree View -->
-					<a
-						href="/skilltree/tree"
-						class="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-card hover:text-emerald-400"
-						title="Skill-Tree Ansicht"
-					>
-						<Graph class="h-5 w-5" />
-					</a>
-					<!-- Templates -->
-					<button
-						onclick={() => (showTemplatesModal = true)}
-						class="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-card hover:text-yellow-500"
-						title="Skill-Vorlagen"
-					>
-						<Sparkle class="h-5 w-5" />
-					</button>
-					<!-- Export/Import -->
-					<button
-						onclick={handleExport}
-						class="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-card hover:text-white"
-						title="Daten exportieren"
-					>
-						<DownloadSimple class="h-5 w-5" />
-					</button>
-					<button
-						onclick={handleImport}
-						class="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-card hover:text-white"
-						title="Daten importieren"
-					>
-						<UploadSimple class="h-5 w-5" />
-					</button>
-					<!-- Add Skill -->
-					<button
-						onclick={() => (showAddSkillModal = true)}
-						class="flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 font-medium text-white transition-colors hover:bg-emerald-500"
-					>
-						<Plus class="h-5 w-5" />
-						<span class="hidden sm:inline">Skill hinzufügen</span>
-					</button>
-				</div>
-			</div>
-		</div>
-	</header>
-
-	<main class="mx-auto max-w-7xl px-4 py-8">
-		<!-- Stats Overview -->
-		<StatsOverview />
-
-		<!-- Branch Filter -->
-		<div class="mb-6 mt-8">
-			<div class="flex flex-wrap gap-2">
-				<button
-					onclick={() => (selectedBranch = 'all')}
-					class="rounded-full px-4 py-2 text-sm font-medium transition-colors {selectedBranch ===
-					'all'
-						? 'bg-emerald-600 text-white'
-						: 'bg-card text-foreground/90 hover:bg-muted'}"
-				>
-					Alle ({skills.length})
-				</button>
-				{#each Object.entries(BRANCH_INFO) as [branch, info]}
-					{@const count = skills.filter((s) => s.branch === branch).length}
-					{#if count > 0 || branch !== 'custom'}
-						<button
-							onclick={() => (selectedBranch = branch as SkillBranch)}
-							class="rounded-full px-4 py-2 text-sm font-medium transition-colors {selectedBranch ===
-							branch
-								? 'bg-emerald-600 text-white'
-								: 'bg-card text-foreground/90 hover:bg-muted'}"
+<RoutePage appId="skilltree">
+	<div class="min-h-screen">
+		<!-- Header -->
+		<header class="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-40">
+			<div class="mx-auto max-w-7xl px-4 py-4">
+				<div class="flex items-center justify-between">
+					<div class="flex items-center gap-3">
+						<Tree class="h-8 w-8 text-emerald-500" />
+						<h1 class="text-2xl font-bold text-white">SkillTree</h1>
+					</div>
+					<div class="flex items-center gap-2">
+						<!-- Achievements -->
+						<a
+							href="/skilltree/achievements"
+							class="relative rounded-lg p-2 text-muted-foreground transition-colors hover:bg-card hover:text-yellow-400"
+							title="Achievements"
 						>
-							{info.name} ({count})
-						</button>
-					{/if}
-				{/each}
-			</div>
-		</div>
-
-		<!-- Skills Grid -->
-		{#if filteredSkills.length === 0}
-			<div class="mt-16 text-center">
-				<div class="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-card">
-					<Tree class="h-12 w-12 text-muted-foreground/70" />
-				</div>
-				<h2 class="mb-2 text-xl font-semibold text-foreground/90">Noch keine Skills</h2>
-				<p class="mb-6 text-muted-foreground">
-					Füge deinen ersten Skill hinzu und beginne dein Abenteuer!
-				</p>
-				<button
-					onclick={() => (showAddSkillModal = true)}
-					class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-6 py-3 font-medium text-white transition-colors hover:bg-emerald-500"
-				>
-					<Plus class="h-5 w-5" />
-					Ersten Skill erstellen
-				</button>
-			</div>
-		{:else}
-			<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-				{#each filteredSkills as skill (skill.id)}
-					<SkillCard
-						{skill}
-						onAddXp={() => openAddXpModal(skill)}
-						onEdit={() => openEditModal(skill)}
-						onDelete={() => skillStore.deleteSkill(skill.id)}
-					/>
-				{/each}
-			</div>
-		{/if}
-
-		<!-- Recent Activity -->
-		{#if getRecentActivities(activities).length > 0}
-			<div class="mt-12">
-				<h2 class="mb-4 flex items-center gap-2 text-lg font-semibold text-white">
-					<Lightning class="h-5 w-5 text-yellow-500" />
-					Letzte Aktivitäten
-				</h2>
-				<div class="space-y-2">
-					{#each getRecentActivities(activities).slice(0, 5) as activity}
-						{@const skill = getSkillById(skills, activity.skillId)}
-						{#if skill}
-							<div class="flex items-center justify-between rounded-lg bg-card/50 px-4 py-3">
-								<div class="flex items-center gap-3">
-									<div
-										class="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-900/50 text-sm font-medium text-emerald-400"
-									>
-										+{activity.xpEarned}
-									</div>
-									<div>
-										<span class="font-medium text-white">{skill.name}</span>
-										<span class="text-muted-foreground"> - {activity.description}</span>
-									</div>
-								</div>
-								<span class="text-sm text-muted-foreground">
-									{new Date(activity.timestamp).toLocaleDateString('de-DE')}
+							<Trophy class="h-5 w-5" />
+							{#if achievementStats.unlocked > 0}
+								<span
+									class="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-yellow-500 text-[10px] font-bold text-foreground"
+								>
+									{achievementStats.unlocked}
 								</span>
-							</div>
+							{/if}
+						</a>
+						<!-- Tree View -->
+						<a
+							href="/skilltree/tree"
+							class="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-card hover:text-emerald-400"
+							title="Skill-Tree Ansicht"
+						>
+							<Graph class="h-5 w-5" />
+						</a>
+						<!-- Templates -->
+						<button
+							onclick={() => (showTemplatesModal = true)}
+							class="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-card hover:text-yellow-500"
+							title="Skill-Vorlagen"
+						>
+							<Sparkle class="h-5 w-5" />
+						</button>
+						<!-- Export/Import -->
+						<button
+							onclick={handleExport}
+							class="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-card hover:text-white"
+							title="Daten exportieren"
+						>
+							<DownloadSimple class="h-5 w-5" />
+						</button>
+						<button
+							onclick={handleImport}
+							class="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-card hover:text-white"
+							title="Daten importieren"
+						>
+							<UploadSimple class="h-5 w-5" />
+						</button>
+						<!-- Add Skill -->
+						<button
+							onclick={() => (showAddSkillModal = true)}
+							class="flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 font-medium text-white transition-colors hover:bg-emerald-500"
+						>
+							<Plus class="h-5 w-5" />
+							<span class="hidden sm:inline">Skill hinzufügen</span>
+						</button>
+					</div>
+				</div>
+			</div>
+		</header>
+
+		<main class="mx-auto max-w-7xl px-4 py-8">
+			<!-- Stats Overview -->
+			<StatsOverview />
+
+			<!-- Branch Filter -->
+			<div class="mb-6 mt-8">
+				<div class="flex flex-wrap gap-2">
+					<button
+						onclick={() => (selectedBranch = 'all')}
+						class="rounded-full px-4 py-2 text-sm font-medium transition-colors {selectedBranch ===
+						'all'
+							? 'bg-emerald-600 text-white'
+							: 'bg-card text-foreground/90 hover:bg-muted'}"
+					>
+						Alle ({skills.length})
+					</button>
+					{#each Object.entries(BRANCH_INFO) as [branch, info]}
+						{@const count = skills.filter((s) => s.branch === branch).length}
+						{#if count > 0 || branch !== 'custom'}
+							<button
+								onclick={() => (selectedBranch = branch as SkillBranch)}
+								class="rounded-full px-4 py-2 text-sm font-medium transition-colors {selectedBranch ===
+								branch
+									? 'bg-emerald-600 text-white'
+									: 'bg-card text-foreground/90 hover:bg-muted'}"
+							>
+								{info.name} ({count})
+							</button>
 						{/if}
 					{/each}
 				</div>
 			</div>
-		{/if}
-	</main>
-</div>
+
+			<!-- Skills Grid -->
+			{#if filteredSkills.length === 0}
+				<div class="mt-16 text-center">
+					<div class="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-card">
+						<Tree class="h-12 w-12 text-muted-foreground/70" />
+					</div>
+					<h2 class="mb-2 text-xl font-semibold text-foreground/90">Noch keine Skills</h2>
+					<p class="mb-6 text-muted-foreground">
+						Füge deinen ersten Skill hinzu und beginne dein Abenteuer!
+					</p>
+					<button
+						onclick={() => (showAddSkillModal = true)}
+						class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-6 py-3 font-medium text-white transition-colors hover:bg-emerald-500"
+					>
+						<Plus class="h-5 w-5" />
+						Ersten Skill erstellen
+					</button>
+				</div>
+			{:else}
+				<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+					{#each filteredSkills as skill (skill.id)}
+						<SkillCard
+							{skill}
+							onAddXp={() => openAddXpModal(skill)}
+							onEdit={() => openEditModal(skill)}
+							onDelete={() => skillStore.deleteSkill(skill.id)}
+						/>
+					{/each}
+				</div>
+			{/if}
+
+			<!-- Recent Activity -->
+			{#if getRecentActivities(activities).length > 0}
+				<div class="mt-12">
+					<h2 class="mb-4 flex items-center gap-2 text-lg font-semibold text-white">
+						<Lightning class="h-5 w-5 text-yellow-500" />
+						Letzte Aktivitäten
+					</h2>
+					<div class="space-y-2">
+						{#each getRecentActivities(activities).slice(0, 5) as activity}
+							{@const skill = getSkillById(skills, activity.skillId)}
+							{#if skill}
+								<div class="flex items-center justify-between rounded-lg bg-card/50 px-4 py-3">
+									<div class="flex items-center gap-3">
+										<div
+											class="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-900/50 text-sm font-medium text-emerald-400"
+										>
+											+{activity.xpEarned}
+										</div>
+										<div>
+											<span class="font-medium text-white">{skill.name}</span>
+											<span class="text-muted-foreground"> - {activity.description}</span>
+										</div>
+									</div>
+									<span class="text-sm text-muted-foreground">
+										{new Date(activity.timestamp).toLocaleDateString('de-DE')}
+									</span>
+								</div>
+							{/if}
+						{/each}
+					</div>
+				</div>
+			{/if}
+		</main>
+	</div>
+</RoutePage>
 
 <!-- Modals -->
 {#if showAddSkillModal}

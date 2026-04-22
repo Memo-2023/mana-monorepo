@@ -3,6 +3,7 @@
 	import { decksStore } from '$lib/modules/presi/stores/decks.svelte';
 	import { useAllDecks } from '$lib/modules/presi/queries';
 	import { Plus, Presentation, Trash, Clock } from '@mana/shared-icons';
+	import { RoutePage } from '$lib/components/shell';
 
 	let showCreateModal = $state(false);
 	let showDeleteModal = $state(false);
@@ -58,89 +59,93 @@
 	<title>Presi - Presentations</title>
 </svelte:head>
 
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-	<div class="flex items-center justify-between mb-8">
-		<div>
-			<h1 class="text-2xl font-bold text-foreground dark:text-white">My Presentations</h1>
-			<p class="text-muted-foreground/70 dark:text-muted-foreground mt-1">
-				Create and manage your slide decks
-			</p>
-		</div>
-		<button
-			onclick={() => (showCreateModal = true)}
-			class="flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors"
-		>
-			<Plus class="w-5 h-5" />
-			New Deck
-		</button>
-	</div>
-
-	{#if decks.length === 0}
-		<div class="text-center py-16">
-			<div
-				class="mx-auto w-16 h-16 bg-muted dark:bg-card rounded-full flex items-center justify-center mb-4"
-			>
-				<Presentation class="w-8 h-8 text-muted-foreground" />
+<RoutePage appId="presi">
+	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+		<div class="flex items-center justify-between mb-8">
+			<div>
+				<h1 class="text-2xl font-bold text-foreground dark:text-white">My Presentations</h1>
+				<p class="text-muted-foreground/70 dark:text-muted-foreground mt-1">
+					Create and manage your slide decks
+				</p>
 			</div>
-			<h2 class="text-lg font-medium text-foreground dark:text-white mb-2">No presentations yet</h2>
-			<p class="text-muted-foreground/70 dark:text-muted-foreground mb-4">
-				Create your first deck to get started
-			</p>
 			<button
 				onclick={() => (showCreateModal = true)}
-				class="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors"
+				class="flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors"
 			>
 				<Plus class="w-5 h-5" />
-				Create Deck
+				New Deck
 			</button>
 		</div>
-	{:else}
-		<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-			{#each decks as deck (deck.id)}
+
+		{#if decks.length === 0}
+			<div class="text-center py-16">
 				<div
-					class="group bg-white dark:bg-card rounded-xl shadow-sm border border-border-strong dark:border-border overflow-hidden hover:shadow-md transition-shadow"
+					class="mx-auto w-16 h-16 bg-muted dark:bg-card rounded-full flex items-center justify-center mb-4"
 				>
-					<a href="/presi/deck/{deck.id}" class="block">
-						<div
-							class="aspect-video bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center"
-						>
-							<Presentation class="w-12 h-12 text-foreground" />
-						</div>
-						<div class="p-4">
-							<h3 class="font-semibold text-foreground dark:text-white truncate">{deck.title}</h3>
-							{#if deck.description}
-								<p
-									class="text-sm text-muted-foreground/70 dark:text-muted-foreground mt-1 line-clamp-2"
-								>
-									{deck.description}
-								</p>
-							{/if}
-							<div
-								class="flex items-center gap-4 mt-3 text-xs text-muted-foreground dark:text-muted-foreground"
-							>
-								<span class="flex items-center gap-1">
-									<Clock class="w-3.5 h-3.5" />
-									{formatDate(deck.updatedAt)}
-								</span>
-							</div>
-						</div>
-					</a>
-					<div class="px-4 pb-4 flex justify-end">
-						<button
-							onclick={(e) => {
-								e.preventDefault();
-								confirmDelete({ id: deck.id, title: deck.title });
-							}}
-							class="p-2 text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
-						>
-							<Trash class="w-4 h-4" />
-						</button>
-					</div>
+					<Presentation class="w-8 h-8 text-muted-foreground" />
 				</div>
-			{/each}
-		</div>
-	{/if}
-</div>
+				<h2 class="text-lg font-medium text-foreground dark:text-white mb-2">
+					No presentations yet
+				</h2>
+				<p class="text-muted-foreground/70 dark:text-muted-foreground mb-4">
+					Create your first deck to get started
+				</p>
+				<button
+					onclick={() => (showCreateModal = true)}
+					class="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors"
+				>
+					<Plus class="w-5 h-5" />
+					Create Deck
+				</button>
+			</div>
+		{:else}
+			<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+				{#each decks as deck (deck.id)}
+					<div
+						class="group bg-white dark:bg-card rounded-xl shadow-sm border border-border-strong dark:border-border overflow-hidden hover:shadow-md transition-shadow"
+					>
+						<a href="/presi/deck/{deck.id}" class="block">
+							<div
+								class="aspect-video bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center"
+							>
+								<Presentation class="w-12 h-12 text-foreground" />
+							</div>
+							<div class="p-4">
+								<h3 class="font-semibold text-foreground dark:text-white truncate">{deck.title}</h3>
+								{#if deck.description}
+									<p
+										class="text-sm text-muted-foreground/70 dark:text-muted-foreground mt-1 line-clamp-2"
+									>
+										{deck.description}
+									</p>
+								{/if}
+								<div
+									class="flex items-center gap-4 mt-3 text-xs text-muted-foreground dark:text-muted-foreground"
+								>
+									<span class="flex items-center gap-1">
+										<Clock class="w-3.5 h-3.5" />
+										{formatDate(deck.updatedAt)}
+									</span>
+								</div>
+							</div>
+						</a>
+						<div class="px-4 pb-4 flex justify-end">
+							<button
+								onclick={(e) => {
+									e.preventDefault();
+									confirmDelete({ id: deck.id, title: deck.title });
+								}}
+								class="p-2 text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+							>
+								<Trash class="w-4 h-4" />
+							</button>
+						</div>
+					</div>
+				{/each}
+			</div>
+		{/if}
+	</div>
+</RoutePage>
 
 <!-- Create Deck Modal -->
 {#if showCreateModal}

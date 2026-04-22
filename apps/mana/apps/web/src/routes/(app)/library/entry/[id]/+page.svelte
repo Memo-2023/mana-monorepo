@@ -2,6 +2,7 @@
 	import { page } from '$app/state';
 	import DetailView from '$lib/modules/library/views/DetailView.svelte';
 	import { useAllEntries } from '$lib/modules/library/queries';
+	import { RoutePage } from '$lib/components/shell';
 
 	const entries$ = useAllEntries();
 	const entry = $derived(entries$.value.find((e) => e.id === page.params.id));
@@ -11,16 +12,18 @@
 	<title>{entry?.title ?? 'Bibliothek'} - Mana</title>
 </svelte:head>
 
-{#if entries$.loading}
-	<p class="loading">Lädt…</p>
-{:else if !entry}
-	<div class="not-found">
-		<p>Eintrag nicht gefunden.</p>
-		<a href="/library">← Zurück zur Bibliothek</a>
-	</div>
-{:else}
-	<DetailView {entry} />
-{/if}
+<RoutePage appId="library" backHref="/library" title="Eintrag">
+	{#if entries$.loading}
+		<p class="loading">Lädt…</p>
+	{:else if !entry}
+		<div class="not-found">
+			<p>Eintrag nicht gefunden.</p>
+			<a href="/library">← Zurück zur Bibliothek</a>
+		</div>
+	{:else}
+		<DetailView {entry} />
+	{/if}
+</RoutePage>
 
 <style>
 	.loading,

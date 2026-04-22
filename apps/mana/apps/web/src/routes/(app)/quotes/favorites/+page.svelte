@@ -10,6 +10,7 @@
 	import QuoteCard from '$lib/modules/quotes/components/QuoteCard.svelte';
 	import { ContextMenu, type ContextMenuItem } from '@mana/shared-ui';
 	import { Heart, User } from '@mana/shared-icons';
+	import { RoutePage } from '$lib/components/shell';
 
 	const allFavorites: { readonly value: Favorite[] } = getContext('favorites');
 
@@ -79,58 +80,60 @@
 	<title>Quotes - {$_('favorites.title')}</title>
 </svelte:head>
 
-<div class="max-w-3xl mx-auto">
-	<div class="flex items-center gap-3 mb-8">
-		<h1 class="text-3xl font-bold text-foreground">{$_('favorites.title')}</h1>
-		{#if authStore.isAuthenticated && favoriteQuotes.length > 0}
-			<span class="px-2.5 py-0.5 rounded-full text-sm font-medium bg-primary/10 text-primary">
-				{favoriteQuotes.length}
-			</span>
+<RoutePage appId="quotes" backHref="/quotes">
+	<div class="max-w-3xl mx-auto">
+		<div class="flex items-center gap-3 mb-8">
+			<h1 class="text-3xl font-bold text-foreground">{$_('favorites.title')}</h1>
+			{#if authStore.isAuthenticated && favoriteQuotes.length > 0}
+				<span class="px-2.5 py-0.5 rounded-full text-sm font-medium bg-primary/10 text-primary">
+					{favoriteQuotes.length}
+				</span>
+			{/if}
+		</div>
+
+		{#if !authStore.isAuthenticated}
+			<!-- Not logged in -->
+			<div class="text-center py-12 bg-surface-elevated rounded-2xl">
+				<User size={20} class="mx-auto text-foreground-muted mb-4" />
+				<p class="text-foreground-secondary mb-4">{$_('favorites.loginPrompt')}</p>
+				<button
+					onclick={() => goto('/login')}
+					class="px-6 py-2 bg-primary text-white rounded-full font-medium hover:bg-primary-hover transition-colors"
+				>
+					{$_('auth.login')}
+				</button>
+			</div>
+		{:else if favoriteQuotes.length === 0}
+			<!-- Empty state -->
+			<div class="text-center py-12 bg-surface-elevated rounded-2xl">
+				<Heart size={20} class="mx-auto text-foreground-muted mb-4" />
+				<p class="text-lg font-medium text-foreground mb-2">{$_('favorites.empty')}</p>
+				<p class="text-foreground-secondary">{$_('favorites.emptyDescription')}</p>
+			</div>
+		{:else}
+			<!-- Favorites list -->
+			<div class="space-y-6">
+				{#each favoriteQuotes as quote (quote.id)}
+					<div oncontextmenu={(e) => handleContextMenu(e, quote)} role="listitem">
+						<QuoteCard
+							{quote}
+							showCategory={quotesSettings.showCategory}
+							showSource={quotesSettings.showSource}
+						/>
+					</div>
+				{/each}
+			</div>
 		{/if}
 	</div>
 
-	{#if !authStore.isAuthenticated}
-		<!-- Not logged in -->
-		<div class="text-center py-12 bg-surface-elevated rounded-2xl">
-			<User size={20} class="mx-auto text-foreground-muted mb-4" />
-			<p class="text-foreground-secondary mb-4">{$_('favorites.loginPrompt')}</p>
-			<button
-				onclick={() => goto('/login')}
-				class="px-6 py-2 bg-primary text-white rounded-full font-medium hover:bg-primary-hover transition-colors"
-			>
-				{$_('auth.login')}
-			</button>
-		</div>
-	{:else if favoriteQuotes.length === 0}
-		<!-- Empty state -->
-		<div class="text-center py-12 bg-surface-elevated rounded-2xl">
-			<Heart size={20} class="mx-auto text-foreground-muted mb-4" />
-			<p class="text-lg font-medium text-foreground mb-2">{$_('favorites.empty')}</p>
-			<p class="text-foreground-secondary">{$_('favorites.emptyDescription')}</p>
-		</div>
-	{:else}
-		<!-- Favorites list -->
-		<div class="space-y-6">
-			{#each favoriteQuotes as quote (quote.id)}
-				<div oncontextmenu={(e) => handleContextMenu(e, quote)} role="listitem">
-					<QuoteCard
-						{quote}
-						showCategory={quotesSettings.showCategory}
-						showSource={quotesSettings.showSource}
-					/>
-				</div>
-			{/each}
-		</div>
-	{/if}
-</div>
-
-<ContextMenu
-	visible={contextMenuVisible}
-	x={contextMenuX}
-	y={contextMenuY}
-	items={getContextMenuItems()}
-	onClose={() => {
-		contextMenuVisible = false;
-		contextMenuQuote = null;
-	}}
-/>
+	<ContextMenu
+		visible={contextMenuVisible}
+		x={contextMenuX}
+		y={contextMenuY}
+		items={getContextMenuItems()}
+		onClose={() => {
+			contextMenuVisible = false;
+			contextMenuQuote = null;
+		}}
+	/>
+</RoutePage>

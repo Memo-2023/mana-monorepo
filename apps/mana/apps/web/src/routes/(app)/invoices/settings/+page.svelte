@@ -4,21 +4,24 @@
 -->
 <script lang="ts">
 	import SenderProfileForm from '$lib/modules/invoices/components/SenderProfileForm.svelte';
+	import { RoutePage } from '$lib/components/shell';
 </script>
 
 <svelte:head>
 	<title>Rechnungs-Einstellungen — Mana</title>
 </svelte:head>
 
-<div class="pane">
-	<header class="bar">
-		<div class="title">
-			<strong>Rechnungs-Einstellungen</strong>
-			<span class="sub">Absender, Nummernkreis und Standards</span>
-		</div>
-	</header>
-	<SenderProfileForm />
-</div>
+<RoutePage appId="invoices" backHref="/invoices">
+	<div class="pane">
+		<header class="bar">
+			<div class="title">
+				<strong>Rechnungs-Einstellungen</strong>
+				<span class="sub">Absender, Nummernkreis und Standards</span>
+			</div>
+		</header>
+		<SenderProfileForm />
+	</div>
+</RoutePage>
 
 <style>
 	.pane {

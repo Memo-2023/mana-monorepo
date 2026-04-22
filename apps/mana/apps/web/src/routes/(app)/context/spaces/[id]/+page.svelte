@@ -13,6 +13,7 @@
 	import { contextSpaceTable, documentTable } from '$lib/modules/context/collections';
 	import { encryptRecord } from '$lib/data/crypto';
 	import type { DocumentType, LocalDocument } from '$lib/modules/context/types';
+	import { RoutePage } from '$lib/components/shell';
 
 	let editingName = $state(false);
 	let editName = $state('');
@@ -100,182 +101,184 @@
 	<title>{space?.name || 'Space'} - Context - Mana</title>
 </svelte:head>
 
-<div class="mx-auto max-w-4xl">
-	<!-- Breadcrumb -->
-	<div class="mb-4 flex items-center gap-2 text-sm">
-		<a href="/context/spaces" class="flex items-center gap-1 opacity-60 hover:opacity-100">
-			<ArrowLeft size={14} />
-			Spaces
-		</a>
-		<span class="opacity-40">/</span>
-		<span class="font-medium">{space?.name || '...'}</span>
-	</div>
+<RoutePage appId="context" backHref="/context/spaces" title="Space">
+	<div class="mx-auto max-w-4xl">
+		<!-- Breadcrumb -->
+		<div class="mb-4 flex items-center gap-2 text-sm">
+			<a href="/context/spaces" class="flex items-center gap-1 opacity-60 hover:opacity-100">
+				<ArrowLeft size={14} />
+				Spaces
+			</a>
+			<span class="opacity-40">/</span>
+			<span class="font-medium">{space?.name || '...'}</span>
+		</div>
 
-	{#if !space}
-		<div class="py-12 text-center opacity-60">Lade...</div>
-	{:else}
-		<!-- Space Header -->
-		<div
-			class="mb-6 rounded-xl border border-border-strong bg-white p-6 dark:border-border dark:bg-card"
-		>
-			{#if editingName}
-				<div class="space-y-3">
-					<input
-						type="text"
-						bind:value={editName}
-						class="w-full rounded-lg border border-border-strong bg-white px-3 py-2 text-xl font-bold focus:border-indigo-500 focus:outline-none dark:border-border dark:bg-muted"
-					/>
-					<textarea
-						bind:value={editDescription}
-						rows="2"
-						placeholder="Beschreibung..."
-						class="w-full resize-none rounded-lg border border-border-strong bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none dark:border-border dark:bg-muted"
-					></textarea>
-					<div class="flex gap-2">
-						<button
-							class="flex items-center gap-1 rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700"
-							onclick={saveEdit}
-						>
-							<Check size={14} /> Speichern
-						</button>
-						<button
-							class="flex items-center gap-1 rounded-lg border border-border-strong px-3 py-1.5 text-sm font-medium hover:bg-muted dark:border-border dark:hover:bg-muted"
-							onclick={cancelEdit}
-						>
-							<X size={14} /> Abbrechen
-						</button>
-					</div>
-				</div>
-			{:else}
-				<div class="flex items-start justify-between">
-					<div>
-						<h1 class="text-xl font-bold">{space.name}</h1>
-						{#if space.description}
-							<p class="mt-1 text-sm opacity-60">{space.description}</p>
-						{/if}
-						<div class="mt-3 flex gap-4 text-xs opacity-50">
-							<span>{stats.total} Dokumente</span>
-							<span>{stats.totalWords.toLocaleString()} Woerter</span>
+		{#if !space}
+			<div class="py-12 text-center opacity-60">Lade...</div>
+		{:else}
+			<!-- Space Header -->
+			<div
+				class="mb-6 rounded-xl border border-border-strong bg-white p-6 dark:border-border dark:bg-card"
+			>
+				{#if editingName}
+					<div class="space-y-3">
+						<input
+							type="text"
+							bind:value={editName}
+							class="w-full rounded-lg border border-border-strong bg-white px-3 py-2 text-xl font-bold focus:border-indigo-500 focus:outline-none dark:border-border dark:bg-muted"
+						/>
+						<textarea
+							bind:value={editDescription}
+							rows="2"
+							placeholder="Beschreibung..."
+							class="w-full resize-none rounded-lg border border-border-strong bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none dark:border-border dark:bg-muted"
+						></textarea>
+						<div class="flex gap-2">
+							<button
+								class="flex items-center gap-1 rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700"
+								onclick={saveEdit}
+							>
+								<Check size={14} /> Speichern
+							</button>
+							<button
+								class="flex items-center gap-1 rounded-lg border border-border-strong px-3 py-1.5 text-sm font-medium hover:bg-muted dark:border-border dark:hover:bg-muted"
+								onclick={cancelEdit}
+							>
+								<X size={14} /> Abbrechen
+							</button>
 						</div>
 					</div>
+				{:else}
+					<div class="flex items-start justify-between">
+						<div>
+							<h1 class="text-xl font-bold">{space.name}</h1>
+							{#if space.description}
+								<p class="mt-1 text-sm opacity-60">{space.description}</p>
+							{/if}
+							<div class="mt-3 flex gap-4 text-xs opacity-50">
+								<span>{stats.total} Dokumente</span>
+								<span>{stats.totalWords.toLocaleString()} Woerter</span>
+							</div>
+						</div>
+						<button
+							class="rounded-lg p-2 opacity-60 transition-colors hover:bg-muted hover:opacity-100 dark:hover:bg-muted"
+							onclick={startEdit}
+							title={$_('common.edit')}
+						>
+							<PencilSimple size={18} />
+						</button>
+					</div>
+				{/if}
+			</div>
+
+			<!-- Toolbar -->
+			<div class="mb-4 flex items-center justify-between gap-4">
+				<div class="flex gap-2">
+					{#each typeFilters as filter}
+						<button
+							class="rounded-lg px-3 py-1.5 text-sm transition-colors {typeFilter === filter.value
+								? 'bg-indigo-600 text-white'
+								: 'opacity-60 hover:bg-muted dark:hover:bg-muted'}"
+							onclick={() => (typeFilter = filter.value)}
+						>
+							{filter.label}
+						</button>
+					{/each}
+				</div>
+
+				<div class="flex items-center gap-2">
+					<div class="relative">
+						<MagnifyingGlass
+							size={14}
+							class="absolute left-2.5 top-1/2 -translate-y-1/2 opacity-40"
+						/>
+						<input
+							type="text"
+							bind:value={searchQuery}
+							placeholder={$_('common.search')}
+							class="w-48 rounded-lg border border-border-strong bg-white py-1.5 pl-8 pr-3 text-sm focus:border-indigo-500 focus:outline-none dark:border-border dark:bg-muted"
+						/>
+					</div>
 					<button
-						class="rounded-lg p-2 opacity-60 transition-colors hover:bg-muted hover:opacity-100 dark:hover:bg-muted"
-						onclick={startEdit}
-						title={$_('common.edit')}
+						class="flex items-center gap-1 rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700"
+						onclick={handleCreateDocument}
 					>
-						<PencilSimple size={18} />
+						<Plus size={14} />
+						Neues Dokument
+					</button>
+				</div>
+			</div>
+
+			<!-- Documents -->
+			{#if filteredDocuments.length > 0}
+				<div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+					{#each filteredDocuments as doc (doc.id)}
+						<div
+							class="group rounded-xl border border-border-strong bg-white p-4 transition-colors hover:shadow-md dark:border-border dark:bg-card"
+						>
+							<div class="flex items-start justify-between">
+								<a href="/context/documents/{doc.id}" class="min-w-0 flex-1">
+									<div class="flex items-center gap-2">
+										<span
+											class="rounded px-1.5 py-0.5 text-[10px] font-medium uppercase {doc.type ===
+											'text'
+												? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
+												: doc.type === 'context'
+													? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
+													: 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300'}"
+										>
+											{doc.type}
+										</span>
+										{#if doc.pinned}
+											<span class="text-xs opacity-40">Angeheftet</span>
+										{/if}
+									</div>
+									<h3 class="mt-1 truncate font-semibold">{doc.title}</h3>
+									{#if doc.content}
+										<p class="mt-0.5 truncate text-xs opacity-50">
+											{doc.content.slice(0, 100)}
+										</p>
+									{/if}
+								</a>
+								<div
+									class="ml-2 flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100"
+								>
+									<button
+										onclick={() => handleTogglePinDoc(doc.id)}
+										class="rounded p-1 hover:bg-muted dark:hover:bg-muted"
+										title={doc.pinned ? 'Loslassen' : 'Anheften'}
+									>
+										{doc.pinned ? '&#9733;' : '&#9734;'}
+									</button>
+									<button
+										onclick={() => handleDeleteDoc(doc.id)}
+										class="rounded p-1 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
+										title="Loeschen"
+									>
+										&times;
+									</button>
+								</div>
+							</div>
+							<div class="mt-2 text-xs opacity-40">
+								{new Date(doc.updated_at).toLocaleDateString('de')}
+							</div>
+						</div>
+					{/each}
+				</div>
+			{:else}
+				<div
+					class="rounded-xl border-2 border-dashed border-border-strong p-12 text-center dark:border-border"
+				>
+					<p class="opacity-60">Keine Dokumente in diesem Space</p>
+					<button
+						class="mt-4 flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 mx-auto"
+						onclick={handleCreateDocument}
+					>
+						<Plus size={16} />
+						Erstes Dokument erstellen
 					</button>
 				</div>
 			{/if}
-		</div>
-
-		<!-- Toolbar -->
-		<div class="mb-4 flex items-center justify-between gap-4">
-			<div class="flex gap-2">
-				{#each typeFilters as filter}
-					<button
-						class="rounded-lg px-3 py-1.5 text-sm transition-colors {typeFilter === filter.value
-							? 'bg-indigo-600 text-white'
-							: 'opacity-60 hover:bg-muted dark:hover:bg-muted'}"
-						onclick={() => (typeFilter = filter.value)}
-					>
-						{filter.label}
-					</button>
-				{/each}
-			</div>
-
-			<div class="flex items-center gap-2">
-				<div class="relative">
-					<MagnifyingGlass
-						size={14}
-						class="absolute left-2.5 top-1/2 -translate-y-1/2 opacity-40"
-					/>
-					<input
-						type="text"
-						bind:value={searchQuery}
-						placeholder={$_('common.search')}
-						class="w-48 rounded-lg border border-border-strong bg-white py-1.5 pl-8 pr-3 text-sm focus:border-indigo-500 focus:outline-none dark:border-border dark:bg-muted"
-					/>
-				</div>
-				<button
-					class="flex items-center gap-1 rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700"
-					onclick={handleCreateDocument}
-				>
-					<Plus size={14} />
-					Neues Dokument
-				</button>
-			</div>
-		</div>
-
-		<!-- Documents -->
-		{#if filteredDocuments.length > 0}
-			<div class="grid grid-cols-1 gap-3 md:grid-cols-2">
-				{#each filteredDocuments as doc (doc.id)}
-					<div
-						class="group rounded-xl border border-border-strong bg-white p-4 transition-colors hover:shadow-md dark:border-border dark:bg-card"
-					>
-						<div class="flex items-start justify-between">
-							<a href="/context/documents/{doc.id}" class="min-w-0 flex-1">
-								<div class="flex items-center gap-2">
-									<span
-										class="rounded px-1.5 py-0.5 text-[10px] font-medium uppercase {doc.type ===
-										'text'
-											? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
-											: doc.type === 'context'
-												? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
-												: 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300'}"
-									>
-										{doc.type}
-									</span>
-									{#if doc.pinned}
-										<span class="text-xs opacity-40">Angeheftet</span>
-									{/if}
-								</div>
-								<h3 class="mt-1 truncate font-semibold">{doc.title}</h3>
-								{#if doc.content}
-									<p class="mt-0.5 truncate text-xs opacity-50">
-										{doc.content.slice(0, 100)}
-									</p>
-								{/if}
-							</a>
-							<div
-								class="ml-2 flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100"
-							>
-								<button
-									onclick={() => handleTogglePinDoc(doc.id)}
-									class="rounded p-1 hover:bg-muted dark:hover:bg-muted"
-									title={doc.pinned ? 'Loslassen' : 'Anheften'}
-								>
-									{doc.pinned ? '&#9733;' : '&#9734;'}
-								</button>
-								<button
-									onclick={() => handleDeleteDoc(doc.id)}
-									class="rounded p-1 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
-									title="Loeschen"
-								>
-									&times;
-								</button>
-							</div>
-						</div>
-						<div class="mt-2 text-xs opacity-40">
-							{new Date(doc.updated_at).toLocaleDateString('de')}
-						</div>
-					</div>
-				{/each}
-			</div>
-		{:else}
-			<div
-				class="rounded-xl border-2 border-dashed border-border-strong p-12 text-center dark:border-border"
-			>
-				<p class="opacity-60">Keine Dokumente in diesem Space</p>
-				<button
-					class="mt-4 flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 mx-auto"
-					onclick={handleCreateDocument}
-				>
-					<Plus size={16} />
-					Erstes Dokument erstellen
-				</button>
-			</div>
 		{/if}
-	{/if}
-</div>
+	</div>
+</RoutePage>

@@ -13,6 +13,7 @@
 	import { goto } from '$app/navigation';
 	import { ALL_TEMPLATES, type AgentTemplate } from '@mana/shared-ai';
 	import { applyTemplate } from '$lib/data/ai/agents/apply-template';
+	import { RoutePage } from '$lib/components/shell';
 
 	let selected = $state<AgentTemplate | null>(null);
 	const agentTemplates = ALL_TEMPLATES.filter(
@@ -128,217 +129,219 @@
 	</button>
 {/snippet}
 
-<div class="page">
-	<header class="header">
-		<button type="button" class="back" onclick={() => goto('/')}>
-			<ArrowLeft size={14} /><span>Zurück zum Workbench</span>
-		</button>
-		<h1>Templates</h1>
-		<p class="sub">
-			Vorgefertigte Setups für deinen Workbench. Wähle ein Template und du hast in einem Klick eine
-			passende Scene, optionale AI-Agenten und erste Daten in den richtigen Modulen.
-		</p>
-	</header>
-
-	<section class="section">
-		<div class="section-head">
-			<h2>🤖 Agent-Templates</h2>
-			<p>Benannte AI-Personas mit eigener Policy, Memory und Starter-Mission.</p>
-		</div>
-		<div class="grid">
-			{#each agentTemplates as t (t.id)}
-				{@render templateCard(t)}
-			{/each}
-		</div>
-	</section>
-
-	<section class="section">
-		<div class="section-head">
-			<h2>🎨 Workbench-Templates</h2>
-			<p>
-				Starter-Kits ohne AI — Scene-Layout + vor-gefüllte Habits, Goals und Module-Daten. Du
-				arbeitest selbst, das Template nimmt dir die Einrichtung ab.
+<RoutePage appId="ai-agents" backHref="/agents">
+	<div class="page">
+		<header class="header">
+			<button type="button" class="back" onclick={() => goto('/')}>
+				<ArrowLeft size={14} /><span>Zurück zum Workbench</span>
+			</button>
+			<h1>Templates</h1>
+			<p class="sub">
+				Vorgefertigte Setups für deinen Workbench. Wähle ein Template und du hast in einem Klick
+				eine passende Scene, optionale AI-Agenten und erste Daten in den richtigen Modulen.
 			</p>
-		</div>
-		<div class="grid">
-			{#each workbenchTemplates as t (t.id)}
-				{@render templateCard(t)}
-			{/each}
-		</div>
-	</section>
+		</header>
 
-	{#if selected}
-		<section class="detail" style="--accent: {selected.color}">
-			<header class="detail-head">
-				<span class="detail-avatar">{selected.agent?.avatar ?? selected.icon}</span>
-				<div>
-					<h2>{selected.label}</h2>
-					{#if selected.agent}
-						<p class="detail-role">{selected.agent.role}</p>
-					{:else}
-						<p class="detail-role">Workbench-Setup ohne AI-Agent</p>
-					{/if}
-				</div>
-			</header>
+		<section class="section">
+			<div class="section-head">
+				<h2>🤖 Agent-Templates</h2>
+				<p>Benannte AI-Personas mit eigener Policy, Memory und Starter-Mission.</p>
+			</div>
+			<div class="grid">
+				{#each agentTemplates as t (t.id)}
+					{@render templateCard(t)}
+				{/each}
+			</div>
+		</section>
 
-			<div class="detail-desc">{selected.description}</div>
+		<section class="section">
+			<div class="section-head">
+				<h2>🎨 Workbench-Templates</h2>
+				<p>
+					Starter-Kits ohne AI — Scene-Layout + vor-gefüllte Habits, Goals und Module-Daten. Du
+					arbeitest selbst, das Template nimmt dir die Einrichtung ab.
+				</p>
+			</div>
+			<div class="grid">
+				{#each workbenchTemplates as t (t.id)}
+					{@render templateCard(t)}
+				{/each}
+			</div>
+		</section>
 
-			{#if selected.scene}
-				<section class="preview">
-					<h3>Scene-Layout</h3>
-					<p class="preview-name">
-						<strong>{selected.scene.name}</strong>
-						{#if selected.scene.description}
-							— {selected.scene.description}{/if}
-					</p>
-					<ul class="apps-preview">
-						{#each selected.scene.openApps as app (app.appId)}
-							<li>
-								<code>{app.appId}</code>
-								{#if app.widthPx}<span class="app-w">{app.widthPx}px</span>{/if}
-							</li>
-						{/each}
-					</ul>
-				</section>
-			{/if}
-
-			{#if selected.missions && selected.missions.length > 0}
-				<section class="preview">
-					<h3>Starter-Missionen</h3>
-					<ul class="missions-preview">
-						{#each selected.missions as m}
-							<li>
-								<strong>{m.title}</strong>
-								<p>{m.objective}</p>
-								<span class="cadence">
-									{#if m.cadence.kind === 'manual'}manuell auslösen
-									{:else if m.cadence.kind === 'daily'}täglich {m.cadence.atHour}:{String(
-											m.cadence.atMinute
-										).padStart(2, '0')}
-									{:else if m.cadence.kind === 'weekly'}wöchentlich, Tag {m.cadence.dayOfWeek} um {m
-											.cadence.atHour}:00
-									{:else if m.cadence.kind === 'interval'}alle {m.cadence.everyMinutes} Minuten
-									{:else}cron: {m.cadence.expression}
-									{/if}
-								</span>
-							</li>
-						{/each}
-					</ul>
-				</section>
-			{/if}
-
-			{#if selected.seeds && Object.keys(selected.seeds).length > 0}
-				<section class="preview">
-					<h3>Seeds</h3>
-					<p class="seed-hint">
-						Vorgefüllte Einträge in deinen Modulen. Werden als neue Records angelegt; bestehende
-						Einträge mit gleicher Seed-ID werden übersprungen (idempotent).
-					</p>
-					<ul class="seeds-preview">
-						{#each Object.entries(selected.seeds) as [moduleName, items]}
-							<li>
-								<strong>{moduleName}</strong>
-								<span class="seed-count">
-									{items.length} Eintr{items.length !== 1 ? 'äge' : 'ag'}
-								</span>
-								<ul class="seed-items">
-									{#each items as item}
-										<li>
-											<code>{(item.data as { name?: string }).name ?? '(unbenannt)'}</code>
-										</li>
-									{/each}
-								</ul>
-							</li>
-						{/each}
-					</ul>
-				</section>
-			{/if}
-
-			<section class="options">
-				<h3>Optionen</h3>
-				{#if selected.scene}
-					<label class="opt">
-						<input type="checkbox" bind:checked={optCreateScene} />
-						<span>Scene „{selected.scene.name}" anlegen und direkt öffnen</span>
-					</label>
-				{/if}
-				{#if selected.missions && selected.missions.length > 0}
-					<label class="opt">
-						<input type="checkbox" bind:checked={optCreateMissions} />
-						<span>Starter-Mission(en) mit anlegen</span>
-					</label>
-					<label class="opt" class:disabled={!optCreateMissions}>
-						<input type="checkbox" bind:checked={optStartActive} disabled={!optCreateMissions} />
-						<span>Mission(en) sofort aktivieren (Standard: pausiert)</span>
-					</label>
-				{/if}
-				{#if selected.seeds && Object.keys(selected.seeds).length > 0}
-					<label class="opt">
-						<input type="checkbox" bind:checked={optApplySeeds} />
-						<span>Seed-Daten in Module einpflegen</span>
-					</label>
-				{/if}
-			</section>
-
-			{#if result}
-				<div class="result success">
-					<Check size={16} />
+		{#if selected}
+			<section class="detail" style="--accent: {selected.color}">
+				<header class="detail-head">
+					<span class="detail-avatar">{selected.agent?.avatar ?? selected.icon}</span>
 					<div>
-						<strong>
-							{#if result.agentName}
-								{result.wasExistingAgent
-									? `„${result.agentName}" existierte schon — wiederverwendet.`
-									: `Agent „${result.agentName}" angelegt.`}
-							{:else}
-								Template angewendet.
-							{/if}
-						</strong>
-						<p>
-							{#if result.sceneCreated}Scene angelegt + aktiviert.{/if}
-							{#if result.missionCount > 0}
-								{result.missionCount} Mission{result.missionCount !== 1 ? 'en' : ''}
-								{optStartActive ? 'aktiviert' : 'pausiert angelegt'}.
-							{/if}
-							{#if result.seedCreated + result.seedSkipped + result.seedFailed > 0}
-								{result.seedCreated} Seed{result.seedCreated !== 1 ? 's' : ''} neu,
-								{result.seedSkipped} bereits vorhanden{#if result.seedFailed > 0}, {result.seedFailed}
-									fehlgeschlagen{/if}.
-							{/if}
-						</p>
-						{#if result.warnings.length > 0}
-							<ul class="warnings">
-								{#each result.warnings as w}
-									<li>⚠ {w}</li>
-								{/each}
-							</ul>
+						<h2>{selected.label}</h2>
+						{#if selected.agent}
+							<p class="detail-role">{selected.agent.role}</p>
+						{:else}
+							<p class="detail-role">Workbench-Setup ohne AI-Agent</p>
 						{/if}
 					</div>
-				</div>
-				<div class="result-actions">
-					<button type="button" class="btn-ghost" onclick={() => (selected = null)}>
-						Weiteres Template auswählen
-					</button>
-					<button type="button" class="btn-primary" onclick={() => goto('/')}>
-						Zum Workbench
-					</button>
-				</div>
-			{:else}
-				{#if error}
-					<div class="result error">
-						<strong>Konnte Template nicht anwenden</strong>
-						<p>{error}</p>
+				</header>
+
+				<div class="detail-desc">{selected.description}</div>
+
+				{#if selected.scene}
+					<section class="preview">
+						<h3>Scene-Layout</h3>
+						<p class="preview-name">
+							<strong>{selected.scene.name}</strong>
+							{#if selected.scene.description}
+								— {selected.scene.description}{/if}
+						</p>
+						<ul class="apps-preview">
+							{#each selected.scene.openApps as app (app.appId)}
+								<li>
+									<code>{app.appId}</code>
+									{#if app.widthPx}<span class="app-w">{app.widthPx}px</span>{/if}
+								</li>
+							{/each}
+						</ul>
+					</section>
+				{/if}
+
+				{#if selected.missions && selected.missions.length > 0}
+					<section class="preview">
+						<h3>Starter-Missionen</h3>
+						<ul class="missions-preview">
+							{#each selected.missions as m}
+								<li>
+									<strong>{m.title}</strong>
+									<p>{m.objective}</p>
+									<span class="cadence">
+										{#if m.cadence.kind === 'manual'}manuell auslösen
+										{:else if m.cadence.kind === 'daily'}täglich {m.cadence.atHour}:{String(
+												m.cadence.atMinute
+											).padStart(2, '0')}
+										{:else if m.cadence.kind === 'weekly'}wöchentlich, Tag {m.cadence.dayOfWeek} um {m
+												.cadence.atHour}:00
+										{:else if m.cadence.kind === 'interval'}alle {m.cadence.everyMinutes} Minuten
+										{:else}cron: {m.cadence.expression}
+										{/if}
+									</span>
+								</li>
+							{/each}
+						</ul>
+					</section>
+				{/if}
+
+				{#if selected.seeds && Object.keys(selected.seeds).length > 0}
+					<section class="preview">
+						<h3>Seeds</h3>
+						<p class="seed-hint">
+							Vorgefüllte Einträge in deinen Modulen. Werden als neue Records angelegt; bestehende
+							Einträge mit gleicher Seed-ID werden übersprungen (idempotent).
+						</p>
+						<ul class="seeds-preview">
+							{#each Object.entries(selected.seeds) as [moduleName, items]}
+								<li>
+									<strong>{moduleName}</strong>
+									<span class="seed-count">
+										{items.length} Eintr{items.length !== 1 ? 'äge' : 'ag'}
+									</span>
+									<ul class="seed-items">
+										{#each items as item}
+											<li>
+												<code>{(item.data as { name?: string }).name ?? '(unbenannt)'}</code>
+											</li>
+										{/each}
+									</ul>
+								</li>
+							{/each}
+						</ul>
+					</section>
+				{/if}
+
+				<section class="options">
+					<h3>Optionen</h3>
+					{#if selected.scene}
+						<label class="opt">
+							<input type="checkbox" bind:checked={optCreateScene} />
+							<span>Scene „{selected.scene.name}" anlegen und direkt öffnen</span>
+						</label>
+					{/if}
+					{#if selected.missions && selected.missions.length > 0}
+						<label class="opt">
+							<input type="checkbox" bind:checked={optCreateMissions} />
+							<span>Starter-Mission(en) mit anlegen</span>
+						</label>
+						<label class="opt" class:disabled={!optCreateMissions}>
+							<input type="checkbox" bind:checked={optStartActive} disabled={!optCreateMissions} />
+							<span>Mission(en) sofort aktivieren (Standard: pausiert)</span>
+						</label>
+					{/if}
+					{#if selected.seeds && Object.keys(selected.seeds).length > 0}
+						<label class="opt">
+							<input type="checkbox" bind:checked={optApplySeeds} />
+							<span>Seed-Daten in Module einpflegen</span>
+						</label>
+					{/if}
+				</section>
+
+				{#if result}
+					<div class="result success">
+						<Check size={16} />
+						<div>
+							<strong>
+								{#if result.agentName}
+									{result.wasExistingAgent
+										? `„${result.agentName}" existierte schon — wiederverwendet.`
+										: `Agent „${result.agentName}" angelegt.`}
+								{:else}
+									Template angewendet.
+								{/if}
+							</strong>
+							<p>
+								{#if result.sceneCreated}Scene angelegt + aktiviert.{/if}
+								{#if result.missionCount > 0}
+									{result.missionCount} Mission{result.missionCount !== 1 ? 'en' : ''}
+									{optStartActive ? 'aktiviert' : 'pausiert angelegt'}.
+								{/if}
+								{#if result.seedCreated + result.seedSkipped + result.seedFailed > 0}
+									{result.seedCreated} Seed{result.seedCreated !== 1 ? 's' : ''} neu,
+									{result.seedSkipped} bereits vorhanden{#if result.seedFailed > 0}, {result.seedFailed}
+										fehlgeschlagen{/if}.
+								{/if}
+							</p>
+							{#if result.warnings.length > 0}
+								<ul class="warnings">
+									{#each result.warnings as w}
+										<li>⚠ {w}</li>
+									{/each}
+								</ul>
+							{/if}
+						</div>
+					</div>
+					<div class="result-actions">
+						<button type="button" class="btn-ghost" onclick={() => (selected = null)}>
+							Weiteres Template auswählen
+						</button>
+						<button type="button" class="btn-primary" onclick={() => goto('/')}>
+							Zum Workbench
+						</button>
+					</div>
+				{:else}
+					{#if error}
+						<div class="result error">
+							<strong>Konnte Template nicht anwenden</strong>
+							<p>{error}</p>
+						</div>
+					{/if}
+					<div class="apply-row">
+						<button type="button" class="btn-primary" onclick={handleApply} disabled={applying}>
+							<Play size={14} />
+							<span>{applying ? 'Lege an…' : `Template „${selected.label}" anwenden`}</span>
+						</button>
 					</div>
 				{/if}
-				<div class="apply-row">
-					<button type="button" class="btn-primary" onclick={handleApply} disabled={applying}>
-						<Play size={14} />
-						<span>{applying ? 'Lege an…' : `Template „${selected.label}" anwenden`}</span>
-					</button>
-				</div>
-			{/if}
-		</section>
-	{/if}
-</div>
+			</section>
+		{/if}
+	</div>
+</RoutePage>
 
 <style>
 	.page {

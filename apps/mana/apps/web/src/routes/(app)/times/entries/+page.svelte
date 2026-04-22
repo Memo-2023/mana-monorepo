@@ -12,6 +12,7 @@
 	import { viewStore } from '$lib/modules/times/stores/view.svelte';
 	import EntryList from '$lib/modules/times/components/EntryList.svelte';
 	import EntryForm from '$lib/modules/times/components/EntryForm.svelte';
+	import { RoutePage } from '$lib/components/shell';
 
 	const allTimeEntries = getContext<{ value: TimeEntry[] }>('timeEntries');
 
@@ -59,55 +60,57 @@
 	<title>{$_('nav.entries')} | Times</title>
 </svelte:head>
 
-<div class="space-y-6">
-	<!-- Header -->
-	<div class="flex items-center justify-between">
-		<h1 class="text-2xl font-bold text-[hsl(var(--color-foreground))]">{$_('nav.entries')}</h1>
-		<button
-			onclick={() => (showEntryForm = true)}
-			class="rounded-lg bg-[hsl(var(--color-primary))] px-4 py-2 text-sm font-medium text-[hsl(var(--color-primary-foreground))] transition-colors hover:opacity-90"
-		>
-			+ {$_('entry.manual')}
-		</button>
-	</div>
-
-	<!-- Filters -->
-	<div class="flex items-center gap-2">
-		{#each ['week', 'month', 'all'] as period}
+<RoutePage appId="times" backHref="/times">
+	<div class="space-y-6">
+		<!-- Header -->
+		<div class="flex items-center justify-between">
+			<h1 class="text-2xl font-bold text-[hsl(var(--color-foreground))]">{$_('nav.entries')}</h1>
 			<button
-				onclick={() => (dateFilter = period as any)}
-				class="rounded-lg px-3 py-1.5 text-sm transition-colors {dateFilter === period
-					? 'bg-[hsl(var(--color-primary))] text-[hsl(var(--color-primary-foreground))]'
-					: 'text-[hsl(var(--color-muted-foreground))] hover:bg-[hsl(var(--color-accent)/0.1)]'}"
+				onclick={() => (showEntryForm = true)}
+				class="rounded-lg bg-[hsl(var(--color-primary))] px-4 py-2 text-sm font-medium text-[hsl(var(--color-primary-foreground))] transition-colors hover:opacity-90"
 			>
-				{period === 'week'
-					? $_('entry.thisWeek')
-					: period === 'month'
-						? $_('entry.thisMonth')
-						: 'Alle'}
+				+ {$_('entry.manual')}
 			</button>
-		{/each}
-
-		<!-- Totals -->
-		<div class="ml-auto flex items-center gap-4 text-sm">
-			<span class="text-[hsl(var(--color-muted-foreground))]">
-				{$_('common.total')}:
-				<span class="duration-display font-medium text-[hsl(var(--color-foreground))]"
-					>{formatDurationCompact(totalDuration)}</span
-				>
-			</span>
-			<span class="text-[hsl(var(--color-muted-foreground))]">
-				{$_('entry.billable')}:
-				<span class="duration-display font-medium text-[hsl(var(--color-primary))]"
-					>{formatDurationCompact(billableDuration)}</span
-				>
-			</span>
 		</div>
+
+		<!-- Filters -->
+		<div class="flex items-center gap-2">
+			{#each ['week', 'month', 'all'] as period}
+				<button
+					onclick={() => (dateFilter = period as any)}
+					class="rounded-lg px-3 py-1.5 text-sm transition-colors {dateFilter === period
+						? 'bg-[hsl(var(--color-primary))] text-[hsl(var(--color-primary-foreground))]'
+						: 'text-[hsl(var(--color-muted-foreground))] hover:bg-[hsl(var(--color-accent)/0.1)]'}"
+				>
+					{period === 'week'
+						? $_('entry.thisWeek')
+						: period === 'month'
+							? $_('entry.thisMonth')
+							: 'Alle'}
+				</button>
+			{/each}
+
+			<!-- Totals -->
+			<div class="ml-auto flex items-center gap-4 text-sm">
+				<span class="text-[hsl(var(--color-muted-foreground))]">
+					{$_('common.total')}:
+					<span class="duration-display font-medium text-[hsl(var(--color-foreground))]"
+						>{formatDurationCompact(totalDuration)}</span
+					>
+				</span>
+				<span class="text-[hsl(var(--color-muted-foreground))]">
+					{$_('entry.billable')}:
+					<span class="duration-display font-medium text-[hsl(var(--color-primary))]"
+						>{formatDurationCompact(billableDuration)}</span
+					>
+				</span>
+			</div>
+		</div>
+
+		<!-- Entry List -->
+		<EntryList entries={filteredEntries()} />
 	</div>
 
-	<!-- Entry List -->
-	<EntryList entries={filteredEntries()} />
-</div>
-
-<!-- Manual Entry Form -->
-<EntryForm visible={showEntryForm} onClose={() => (showEntryForm = false)} />
+	<!-- Manual Entry Form -->
+	<EntryForm visible={showEntryForm} onClose={() => (showEntryForm = false)} />
+</RoutePage>

@@ -13,6 +13,7 @@
 		groupByDate,
 	} from '$lib/modules/finance/queries';
 	import { financeStore } from '$lib/modules/finance/stores/finance.svelte';
+	import { RoutePage } from '$lib/components/shell';
 
 	const txs$: Observable<Transaction[]> = getContext('transactions');
 	const cats$: Observable<FinanceCategory[]> = getContext('financeCategories');
@@ -92,149 +93,156 @@
 	<title>Finance - Mana</title>
 </svelte:head>
 
-<div class="finance-page">
-	<header class="page-header">
-		<h1 class="page-title">Finance</h1>
-	</header>
+<RoutePage appId="finance">
+	<div class="finance-page">
+		<header class="page-header">
+			<h1 class="page-title">Finance</h1>
+		</header>
 
-	<!-- Month Navigation -->
-	<div class="month-nav">
-		<button class="nav-btn" onclick={prevMonth}>&larr;</button>
-		<span class="month-label">{monthLabel}</span>
-		<button class="nav-btn" onclick={nextMonth}>&rarr;</button>
-	</div>
-
-	{#if isLoaded}
-		<!-- Summary Cards -->
-		<div class="summary-cards">
-			<div class="summary-card">
-				<span class="card-label">Einnahmen</span>
-				<span class="card-value income">+{formatCurrency(income)}</span>
-			</div>
-			<div class="summary-card">
-				<span class="card-label">Ausgaben</span>
-				<span class="card-value expense">-{formatCurrency(expenses)}</span>
-			</div>
-			<div class="summary-card highlight">
-				<span class="card-label">Bilanz</span>
-				<span class="card-value" class:income={balance >= 0} class:expense={balance < 0}>
-					{balance >= 0 ? '+' : ''}{formatCurrency(balance)}
-				</span>
-			</div>
+		<!-- Month Navigation -->
+		<div class="month-nav">
+			<button class="nav-btn" onclick={prevMonth}>&larr;</button>
+			<span class="month-label">{monthLabel}</span>
+			<button class="nav-btn" onclick={nextMonth}>&rarr;</button>
 		</div>
 
-		<!-- Category Breakdown -->
-		{#if spending.size > 0}
-			<section class="section">
-				<h2 class="section-title">Ausgaben nach Kategorie</h2>
-				<div class="cat-breakdown">
-					{#each expenseCategories as cat (cat.id)}
-						{@const amount = spending.get(cat.id) ?? 0}
-						{#if amount > 0}
-							<div class="cat-bar-row">
-								<span class="cat-emoji">{cat.emoji}</span>
-								<span class="cat-name">{cat.name}</span>
-								<div class="cat-bar-bg">
-									<div
-										class="cat-bar-fill"
-										style:width="{(amount / maxSpend) * 100}%"
-										style:background={cat.color}
-									></div>
+		{#if isLoaded}
+			<!-- Summary Cards -->
+			<div class="summary-cards">
+				<div class="summary-card">
+					<span class="card-label">Einnahmen</span>
+					<span class="card-value income">+{formatCurrency(income)}</span>
+				</div>
+				<div class="summary-card">
+					<span class="card-label">Ausgaben</span>
+					<span class="card-value expense">-{formatCurrency(expenses)}</span>
+				</div>
+				<div class="summary-card highlight">
+					<span class="card-label">Bilanz</span>
+					<span class="card-value" class:income={balance >= 0} class:expense={balance < 0}>
+						{balance >= 0 ? '+' : ''}{formatCurrency(balance)}
+					</span>
+				</div>
+			</div>
+
+			<!-- Category Breakdown -->
+			{#if spending.size > 0}
+				<section class="section">
+					<h2 class="section-title">Ausgaben nach Kategorie</h2>
+					<div class="cat-breakdown">
+						{#each expenseCategories as cat (cat.id)}
+							{@const amount = spending.get(cat.id) ?? 0}
+							{#if amount > 0}
+								<div class="cat-bar-row">
+									<span class="cat-emoji">{cat.emoji}</span>
+									<span class="cat-name">{cat.name}</span>
+									<div class="cat-bar-bg">
+										<div
+											class="cat-bar-fill"
+											style:width="{(amount / maxSpend) * 100}%"
+											style:background={cat.color}
+										></div>
+									</div>
+									<span class="cat-amount">{formatCurrency(amount)}</span>
 								</div>
-								<span class="cat-amount">{formatCurrency(amount)}</span>
-							</div>
-						{/if}
-					{/each}
-				</div>
-			</section>
-		{/if}
+							{/if}
+						{/each}
+					</div>
+				</section>
+			{/if}
 
-		<!-- Add Button -->
-		<button class="add-btn" onclick={() => (showAdd = !showAdd)}>
-			{showAdd ? 'Abbrechen' : '+ Transaktion hinzufügen'}
-		</button>
+			<!-- Add Button -->
+			<button class="add-btn" onclick={() => (showAdd = !showAdd)}>
+				{showAdd ? 'Abbrechen' : '+ Transaktion hinzufügen'}
+			</button>
 
-		<!-- Add Form -->
-		{#if showAdd}
-			<form class="add-form" onsubmit={handleAdd}>
-				<div class="type-toggle">
-					<button
-						type="button"
-						class="type-btn"
-						class:active={addType === 'expense'}
-						onclick={() => (addType = 'expense')}>Ausgabe</button
-					>
-					<button
-						type="button"
-						class="type-btn inc"
-						class:active={addType === 'income'}
-						onclick={() => (addType = 'income')}>Einnahme</button
-					>
-				</div>
-				<div class="amount-row">
-					<!-- svelte-ignore a11y_autofocus -->
-					<input
-						class="amount-input"
-						type="text"
-						inputmode="decimal"
-						placeholder="0,00"
-						bind:value={addAmount}
-						autofocus
-					/>
-					<span class="currency">\u20ac</span>
-				</div>
-				<input class="desc-input" type="text" placeholder="Beschreibung..." bind:value={addDesc} />
-				<div class="cat-chips">
-					{#each filteredCats as cat (cat.id)}
+			<!-- Add Form -->
+			{#if showAdd}
+				<form class="add-form" onsubmit={handleAdd}>
+					<div class="type-toggle">
 						<button
 							type="button"
-							class="cat-chip"
-							class:selected={addCatId === cat.id}
-							onclick={() => (addCatId = addCatId === cat.id ? null : cat.id)}
+							class="type-btn"
+							class:active={addType === 'expense'}
+							onclick={() => (addType = 'expense')}>Ausgabe</button
 						>
-							{cat.emoji}
-							{cat.name}
-						</button>
-					{/each}
-				</div>
-				<button type="submit" class="submit-btn" disabled={!addAmount || !addDesc.trim()}
-					>Hinzufügen</button
-				>
-			</form>
-		{/if}
-
-		<!-- Transaction History -->
-		{#if monthTxs.length > 0}
-			<section class="section">
-				<h2 class="section-title">Transaktionen</h2>
-				<div class="tx-list">
-					{#each [...grouped.entries()] as [date, dayTxs] (date)}
-						<div class="day-header">{formatDateLabel(date)}</div>
-						{#each dayTxs as tx (tx.id)}
-							{@const cat = tx.categoryId ? catMap.get(tx.categoryId) : null}
-							<div class="tx-row">
-								<span class="tx-emoji">{cat?.emoji ?? '\ud83d\udcb3'}</span>
-								<div class="tx-details">
-									<span class="tx-desc">{tx.description}</span>
-									{#if cat}<span class="tx-cat">{cat.name}</span>{/if}
-								</div>
-								<span
-									class="tx-amount"
-									class:income={tx.type === 'income'}
-									class:expense={tx.type === 'expense'}
-								>
-									{tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}
-								</span>
-							</div>
+						<button
+							type="button"
+							class="type-btn inc"
+							class:active={addType === 'income'}
+							onclick={() => (addType = 'income')}>Einnahme</button
+						>
+					</div>
+					<div class="amount-row">
+						<!-- svelte-ignore a11y_autofocus -->
+						<input
+							class="amount-input"
+							type="text"
+							inputmode="decimal"
+							placeholder="0,00"
+							bind:value={addAmount}
+							autofocus
+						/>
+						<span class="currency">\u20ac</span>
+					</div>
+					<input
+						class="desc-input"
+						type="text"
+						placeholder="Beschreibung..."
+						bind:value={addDesc}
+					/>
+					<div class="cat-chips">
+						{#each filteredCats as cat (cat.id)}
+							<button
+								type="button"
+								class="cat-chip"
+								class:selected={addCatId === cat.id}
+								onclick={() => (addCatId = addCatId === cat.id ? null : cat.id)}
+							>
+								{cat.emoji}
+								{cat.name}
+							</button>
 						{/each}
-					{/each}
-				</div>
-			</section>
+					</div>
+					<button type="submit" class="submit-btn" disabled={!addAmount || !addDesc.trim()}
+						>Hinzufügen</button
+					>
+				</form>
+			{/if}
+
+			<!-- Transaction History -->
+			{#if monthTxs.length > 0}
+				<section class="section">
+					<h2 class="section-title">Transaktionen</h2>
+					<div class="tx-list">
+						{#each [...grouped.entries()] as [date, dayTxs] (date)}
+							<div class="day-header">{formatDateLabel(date)}</div>
+							{#each dayTxs as tx (tx.id)}
+								{@const cat = tx.categoryId ? catMap.get(tx.categoryId) : null}
+								<div class="tx-row">
+									<span class="tx-emoji">{cat?.emoji ?? '\ud83d\udcb3'}</span>
+									<div class="tx-details">
+										<span class="tx-desc">{tx.description}</span>
+										{#if cat}<span class="tx-cat">{cat.name}</span>{/if}
+									</div>
+									<span
+										class="tx-amount"
+										class:income={tx.type === 'income'}
+										class:expense={tx.type === 'expense'}
+									>
+										{tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}
+									</span>
+								</div>
+							{/each}
+						{/each}
+					</div>
+				</section>
+			{/if}
+		{:else}
+			<div class="loading">Laden...</div>
 		{/if}
-	{:else}
-		<div class="loading">Laden...</div>
-	{/if}
-</div>
+	</div>
+</RoutePage>
 
 <style>
 	.finance-page {

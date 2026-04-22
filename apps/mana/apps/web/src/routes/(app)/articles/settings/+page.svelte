@@ -20,6 +20,7 @@
 -->
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { RoutePage } from '$lib/components/shell';
 
 	// `origin` at render time — server-side rendering has no window, so
 	// we read it client-side after mount. The bookmarklets embed the
@@ -81,99 +82,101 @@
 	<title>Artikel-Einstellungen — Mana</title>
 </svelte:head>
 
-<div class="settings-shell">
-	<header class="header">
-		<h1>Artikel-Einstellungen</h1>
-		<p class="subtitle">Schnellwege, um Artikel aus dem Browser in die Leseliste zu bekommen.</p>
-	</header>
+<RoutePage appId="articles" backHref="/articles">
+	<div class="settings-shell">
+		<header class="header">
+			<h1>Artikel-Einstellungen</h1>
+			<p class="subtitle">Schnellwege, um Artikel aus dem Browser in die Leseliste zu bekommen.</p>
+		</header>
 
-	<section class="card card-recommended">
-		<div class="badge">Empfohlen</div>
-		<h2>Browser-HTML-Bookmarklet</h2>
-		<p>
-			Dieses Bookmarklet nimmt den <strong>schon gerenderten HTML-Inhalt</strong> aus deinem Browser-Tab
-			(inkl. aller Cookies, die du gesetzt hast) und schickt ihn an Mana. Damit klappen auch Seiten mit
-			Cookie-Wänden (Golem, Spiegel, Zeit, Heise …) und weichen Paywalls.
-		</p>
-		<div class="bookmarklet-row">
-			{#if bookmarkletV2}
-				<a class="bookmarklet" href={bookmarkletV2} onclick={(e) => e.preventDefault()}>
-					+ In Mana speichern (HTML)
-				</a>
-			{:else}
-				<span class="muted">Bookmarklet wird geladen…</span>
-			{/if}
-			<button
-				type="button"
-				class="copy-btn"
-				onclick={() => copySnippet(bookmarkletV2, 'v2')}
-				disabled={!bookmarkletV2}
-			>
-				{copyV2Label}
-			</button>
-		</div>
-		<details class="snippet-details">
-			<summary>Quellcode anzeigen</summary>
-			<pre class="snippet">{bookmarkletV2}</pre>
-		</details>
-		<p class="hint">
-			Öffnet einen neuen Tab mit Mana, der Mana-Tab bekommt das HTML per
-			<code>postMessage</code> von deinem Artikel-Tab. Braucht erlaubte Popups für diese Domain (Browser
-			fragt beim ersten Mal).
-		</p>
-	</section>
-
-	<section class="card">
-		<h2>URL-Bookmarklet (klassisch)</h2>
-		<p>
-			Schickt nur die URL an Mana, der Server lädt + extrahiert dann selbst. Schnell auf einfachen
-			Blogs / Wikis; scheitert auf Seiten hinter DSGVO-Zustimmungs-Dialogen.
-		</p>
-		<div class="bookmarklet-row">
-			{#if bookmarkletV1}
-				<a
-					class="bookmarklet bookmarklet-secondary"
-					href={bookmarkletV1}
-					onclick={(e) => e.preventDefault()}
+		<section class="card card-recommended">
+			<div class="badge">Empfohlen</div>
+			<h2>Browser-HTML-Bookmarklet</h2>
+			<p>
+				Dieses Bookmarklet nimmt den <strong>schon gerenderten HTML-Inhalt</strong> aus deinem Browser-Tab
+				(inkl. aller Cookies, die du gesetzt hast) und schickt ihn an Mana. Damit klappen auch Seiten
+				mit Cookie-Wänden (Golem, Spiegel, Zeit, Heise …) und weichen Paywalls.
+			</p>
+			<div class="bookmarklet-row">
+				{#if bookmarkletV2}
+					<a class="bookmarklet" href={bookmarkletV2} onclick={(e) => e.preventDefault()}>
+						+ In Mana speichern (HTML)
+					</a>
+				{:else}
+					<span class="muted">Bookmarklet wird geladen…</span>
+				{/if}
+				<button
+					type="button"
+					class="copy-btn"
+					onclick={() => copySnippet(bookmarkletV2, 'v2')}
+					disabled={!bookmarkletV2}
 				>
-					+ In Mana speichern (URL)
-				</a>
-			{:else}
-				<span class="muted">Bookmarklet wird geladen…</span>
-			{/if}
-			<button
-				type="button"
-				class="copy-btn"
-				onclick={() => copySnippet(bookmarkletV1, 'v1')}
-				disabled={!bookmarkletV1}
-			>
-				{copyV1Label}
-			</button>
-		</div>
-		<details class="snippet-details">
-			<summary>Quellcode anzeigen</summary>
-			<pre class="snippet">{bookmarkletV1}</pre>
-		</details>
-		<p class="hint">
-			Funktioniert in jedem Desktop-Browser. In Safari: Lesezeichen mit beliebiger URL anlegen und
-			die URL dann durch das Snippet ersetzen.
-		</p>
-	</section>
+					{copyV2Label}
+				</button>
+			</div>
+			<details class="snippet-details">
+				<summary>Quellcode anzeigen</summary>
+				<pre class="snippet">{bookmarkletV2}</pre>
+			</details>
+			<p class="hint">
+				Öffnet einen neuen Tab mit Mana, der Mana-Tab bekommt das HTML per
+				<code>postMessage</code> von deinem Artikel-Tab. Braucht erlaubte Popups für diese Domain (Browser
+				fragt beim ersten Mal).
+			</p>
+		</section>
 
-	<section class="card">
-		<h2>Share-Target (Android / Chromium)</h2>
-		<p>
-			Wenn du Mana als App installierst (Browser-Menü „Zum Startbildschirm hinzufügen"), taucht
-			„Mana" in deinem OS-Share-Sheet auf. Teilen aus dem Browser oder einer anderen App → Mana
-			auswählen → Artikel wird direkt in der Leseliste vorgeschlagen.
-		</p>
-		<p class="hint">
-			Benutzt dieselbe URL-Route wie das klassische Bookmarklet oben — für cookie-gewalled Seiten
-			lieber das HTML-Bookmarklet verwenden. iOS-Safari unterstützt die Web-Share-Target-API derzeit
-			nicht.
-		</p>
-	</section>
-</div>
+		<section class="card">
+			<h2>URL-Bookmarklet (klassisch)</h2>
+			<p>
+				Schickt nur die URL an Mana, der Server lädt + extrahiert dann selbst. Schnell auf einfachen
+				Blogs / Wikis; scheitert auf Seiten hinter DSGVO-Zustimmungs-Dialogen.
+			</p>
+			<div class="bookmarklet-row">
+				{#if bookmarkletV1}
+					<a
+						class="bookmarklet bookmarklet-secondary"
+						href={bookmarkletV1}
+						onclick={(e) => e.preventDefault()}
+					>
+						+ In Mana speichern (URL)
+					</a>
+				{:else}
+					<span class="muted">Bookmarklet wird geladen…</span>
+				{/if}
+				<button
+					type="button"
+					class="copy-btn"
+					onclick={() => copySnippet(bookmarkletV1, 'v1')}
+					disabled={!bookmarkletV1}
+				>
+					{copyV1Label}
+				</button>
+			</div>
+			<details class="snippet-details">
+				<summary>Quellcode anzeigen</summary>
+				<pre class="snippet">{bookmarkletV1}</pre>
+			</details>
+			<p class="hint">
+				Funktioniert in jedem Desktop-Browser. In Safari: Lesezeichen mit beliebiger URL anlegen und
+				die URL dann durch das Snippet ersetzen.
+			</p>
+		</section>
+
+		<section class="card">
+			<h2>Share-Target (Android / Chromium)</h2>
+			<p>
+				Wenn du Mana als App installierst (Browser-Menü „Zum Startbildschirm hinzufügen"), taucht
+				„Mana" in deinem OS-Share-Sheet auf. Teilen aus dem Browser oder einer anderen App → Mana
+				auswählen → Artikel wird direkt in der Leseliste vorgeschlagen.
+			</p>
+			<p class="hint">
+				Benutzt dieselbe URL-Route wie das klassische Bookmarklet oben — für cookie-gewalled Seiten
+				lieber das HTML-Bookmarklet verwenden. iOS-Safari unterstützt die Web-Share-Target-API
+				derzeit nicht.
+			</p>
+		</section>
+	</div>
+</RoutePage>
 
 <style>
 	.settings-shell {

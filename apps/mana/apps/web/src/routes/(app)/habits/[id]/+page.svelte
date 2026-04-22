@@ -5,6 +5,7 @@
 	import type { Observable } from 'dexie';
 	import type { Habit, HabitLog } from '$lib/modules/habits/types';
 	import HabitDetail from '$lib/modules/habits/components/HabitDetail.svelte';
+	import { RoutePage } from '$lib/components/shell';
 
 	const allHabits$: Observable<Habit[]> = getContext('habits');
 	const allLogs$: Observable<HabitLog[]> = getContext('habitLogs');
@@ -34,18 +35,20 @@
 	<title>{habit ? habit.title : 'Habit'} - Mana</title>
 </svelte:head>
 
-<div class="detail-page">
-	{#if habit}
-		<HabitDetail {habit} {logs} onBack={handleBack} />
-	{:else if habits.length > 0}
-		<div class="not-found">
-			<p>Habit nicht gefunden.</p>
-			<button onclick={handleBack}>Zurück</button>
-		</div>
-	{:else}
-		<div class="loading">Laden...</div>
-	{/if}
-</div>
+<RoutePage appId="habits" backHref="/habits" title="Gewohnheit">
+	<div class="detail-page">
+		{#if habit}
+			<HabitDetail {habit} {logs} onBack={handleBack} />
+		{:else if habits.length > 0}
+			<div class="not-found">
+				<p>Habit nicht gefunden.</p>
+				<button onclick={handleBack}>Zurück</button>
+			</div>
+		{:else}
+			<div class="loading">Laden...</div>
+		{/if}
+	</div>
+</RoutePage>
 
 <style>
 	.detail-page {

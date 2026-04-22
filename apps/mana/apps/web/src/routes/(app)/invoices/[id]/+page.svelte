@@ -2,6 +2,7 @@
 	import { page } from '$app/stores';
 	import { useAllInvoices } from '$lib/modules/invoices/queries';
 	import DetailView from '$lib/modules/invoices/views/DetailView.svelte';
+	import { RoutePage } from '$lib/components/shell';
 
 	const invoices$ = useAllInvoices();
 	const invoices = $derived(invoices$.value ?? []);
@@ -13,16 +14,18 @@
 	<title>{invoice?.number ?? 'Rechnung'} - Mana</title>
 </svelte:head>
 
-{#if invoice}
-	<DetailView {invoice} />
-{:else if invoices$.value !== undefined}
-	<div class="not-found">
-		<p>Rechnung nicht gefunden.</p>
-		<a href="/invoices">Zurück zur Übersicht</a>
-	</div>
-{:else}
-	<div class="loading">Lädt …</div>
-{/if}
+<RoutePage appId="invoices" backHref="/invoices" title="Rechnung">
+	{#if invoice}
+		<DetailView {invoice} />
+	{:else if invoices$.value !== undefined}
+		<div class="not-found">
+			<p>Rechnung nicht gefunden.</p>
+			<a href="/invoices">Zurück zur Übersicht</a>
+		</div>
+	{:else}
+		<div class="loading">Lädt …</div>
+	{/if}
+</RoutePage>
 
 <style>
 	.not-found,

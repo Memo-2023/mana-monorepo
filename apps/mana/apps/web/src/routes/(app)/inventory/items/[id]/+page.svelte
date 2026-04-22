@@ -22,6 +22,7 @@
 	import FieldRenderer from '$lib/modules/inventory/components/fields/FieldRenderer.svelte';
 	import FieldEditor from '$lib/modules/inventory/components/fields/FieldEditor.svelte';
 	import StatusBadge from '$lib/modules/inventory/components/StatusBadge.svelte';
+	import { RoutePage } from '$lib/components/shell';
 
 	const collectionsCtx: { readonly value: Collection[] } = getContext('collections');
 	const itemsCtx: { readonly value: Item[] } = getContext('items');
@@ -101,252 +102,256 @@
 	<title>{item?.name || 'Item'} - Inventar - Mana</title>
 </svelte:head>
 
-{#if !item}
-	<div class="text-center py-16">
-		<p class="text-[hsl(var(--color-muted-foreground))]">Item nicht gefunden</p>
-		<a href="/inventory" class="mt-4 text-[hsl(var(--color-primary))]">Zuruck</a>
-	</div>
-{:else}
-	<div class="mx-auto max-w-2xl space-y-6">
-		<!-- Header -->
-		<div class="flex items-center justify-between">
-			<div class="flex items-center gap-3">
-				<button
-					onclick={() =>
-						goto(collection ? `/inventory/collections/${collection.id}` : '/inventory')}
-					class="text-[hsl(var(--color-muted-foreground))] hover:text-[hsl(var(--color-foreground))]"
-				>
-					<CaretLeft size={20} />
-				</button>
-				{#if !editing}
-					<div>
-						<h1 class="text-2xl font-bold text-[hsl(var(--color-foreground))]">{item.name}</h1>
-						{#if collection}
-							<p class="text-sm text-[hsl(var(--color-muted-foreground))]">
-								{collection.icon}
-								{collection.name}
-							</p>
-						{/if}
-					</div>
-				{/if}
-			</div>
-			<div class="flex gap-2">
-				{#if editing}
-					<button
-						onclick={() => (editing = false)}
-						class="rounded-lg border border-[hsl(var(--color-border))] px-3 py-1.5 text-sm"
-						>{$_('common.cancel')}</button
-					>
-					<button
-						onclick={saveEdit}
-						class="rounded-lg bg-[hsl(var(--color-primary))] px-4 py-1.5 text-sm font-medium text-[hsl(var(--color-primary-foreground))]"
-						>{$_('common.save')}</button
-					>
-				{:else}
-					<button
-						onclick={startEditing}
-						class="rounded-lg border border-[hsl(var(--color-border))] px-3 py-1.5 text-sm text-[hsl(var(--color-foreground))]"
-						>{$_('common.edit')}</button
-					>
-					<button
-						onclick={deleteItem}
-						class="rounded-lg border border-red-300 px-3 py-1.5 text-sm text-red-500 hover:bg-red-50 dark:border-red-800 dark:hover:bg-red-900/20"
-						>Loschen</button
-					>
-				{/if}
-			</div>
+<RoutePage appId="inventory" backHref="/inventory" title="Objekt">
+	{#if !item}
+		<div class="text-center py-16">
+			<p class="text-[hsl(var(--color-muted-foreground))]">Item nicht gefunden</p>
+			<a href="/inventory" class="mt-4 text-[hsl(var(--color-primary))]">Zuruck</a>
 		</div>
-
-		{#if editing}
-			<!-- Edit Mode -->
-			<div
-				class="space-y-4 rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-5"
-			>
-				<input type="text" bind:value={editName} placeholder="Name" class={inputClass} />
-				<textarea
-					bind:value={editDescription}
-					placeholder="Beschreibung"
-					rows="2"
-					class={inputClass}
-				></textarea>
-
-				<div class="grid gap-4 sm:grid-cols-2">
-					<div>
-						<label
-							for="inventory-status"
-							class="mb-1 block text-xs font-medium text-[hsl(var(--color-muted-foreground))]"
-							>Status</label
-						>
-						<select id="inventory-status" bind:value={editStatus} class={inputClass}>
-							{#each statuses as s}<option value={s}>{statusLabels[s]}</option>{/each}
-						</select>
-					</div>
-					<div>
-						<label
-							for="inventory-quantity"
-							class="mb-1 block text-xs font-medium text-[hsl(var(--color-muted-foreground))]"
-							>Menge</label
-						>
-						<input
-							id="inventory-quantity"
-							type="number"
-							bind:value={editQuantity}
-							min="1"
-							class={inputClass}
-						/>
-					</div>
-					{#if locationsCtx.value.length > 0}
+	{:else}
+		<div class="mx-auto max-w-2xl space-y-6">
+			<!-- Header -->
+			<div class="flex items-center justify-between">
+				<div class="flex items-center gap-3">
+					<button
+						onclick={() =>
+							goto(collection ? `/inventory/collections/${collection.id}` : '/inventory')}
+						class="text-[hsl(var(--color-muted-foreground))] hover:text-[hsl(var(--color-foreground))]"
+					>
+						<CaretLeft size={20} />
+					</button>
+					{#if !editing}
 						<div>
-							<label
-								for="inventory-location"
-								class="mb-1 block text-xs font-medium text-[hsl(var(--color-muted-foreground))]"
-								>Standort</label
-							>
-							<select id="inventory-location" bind:value={editLocationId} class={inputClass}>
-								<option value={undefined}>-- Kein Standort --</option>
-								{#each locationsCtx.value as loc}
-									<option value={loc.id}>{loc.path ? `${loc.path}/` : ''}{loc.name}</option>
-								{/each}
-							</select>
-						</div>
-					{/if}
-					{#if categoriesCtx.value.length > 0}
-						<div>
-							<label
-								for="inventory-category"
-								class="mb-1 block text-xs font-medium text-[hsl(var(--color-muted-foreground))]"
-								>Kategorie</label
-							>
-							<select id="inventory-category" bind:value={editCategoryId} class={inputClass}>
-								<option value={undefined}>-- Keine Kategorie --</option>
-								{#each categoriesCtx.value as cat}
-									<option value={cat.id}>{cat.name}</option>
-								{/each}
-							</select>
+							<h1 class="text-2xl font-bold text-[hsl(var(--color-foreground))]">{item.name}</h1>
+							{#if collection}
+								<p class="text-sm text-[hsl(var(--color-muted-foreground))]">
+									{collection.icon}
+									{collection.name}
+								</p>
+							{/if}
 						</div>
 					{/if}
 				</div>
-
-				{#if collection}
-					<div>
-						<h3 class="mb-2 text-sm font-semibold text-[hsl(var(--color-foreground))]">
-							Eigene Felder
-						</h3>
-						<div class="grid gap-3 sm:grid-cols-2">
-							{#each collection.schema.fields.sort((a, b) => a.order - b.order) as field}
-								<div>
-									<span
-										class="mb-1 block text-xs font-medium text-[hsl(var(--color-muted-foreground))]"
-										>{field.name}</span
-									>
-									<FieldEditor
-										{field}
-										value={editFields[field.id]}
-										onchange={(v) => (editFields = { ...editFields, [field.id]: v })}
-									/>
-								</div>
-							{/each}
-						</div>
-					</div>
-				{/if}
+				<div class="flex gap-2">
+					{#if editing}
+						<button
+							onclick={() => (editing = false)}
+							class="rounded-lg border border-[hsl(var(--color-border))] px-3 py-1.5 text-sm"
+							>{$_('common.cancel')}</button
+						>
+						<button
+							onclick={saveEdit}
+							class="rounded-lg bg-[hsl(var(--color-primary))] px-4 py-1.5 text-sm font-medium text-[hsl(var(--color-primary-foreground))]"
+							>{$_('common.save')}</button
+						>
+					{:else}
+						<button
+							onclick={startEditing}
+							class="rounded-lg border border-[hsl(var(--color-border))] px-3 py-1.5 text-sm text-[hsl(var(--color-foreground))]"
+							>{$_('common.edit')}</button
+						>
+						<button
+							onclick={deleteItem}
+							class="rounded-lg border border-red-300 px-3 py-1.5 text-sm text-red-500 hover:bg-red-50 dark:border-red-800 dark:hover:bg-red-900/20"
+							>Loschen</button
+						>
+					{/if}
+				</div>
 			</div>
-		{:else}
-			<!-- View Mode -->
-			<div class="space-y-4">
-				<!-- Status & Meta -->
-				<div class="flex flex-wrap items-center gap-3">
-					<StatusBadge status={item.status} size="md" />
-					{#if item.quantity > 1}
-						<span class="rounded-full bg-[hsl(var(--color-muted))] px-3 py-1 text-sm"
-							>&times;{item.quantity}</span
-						>
-					{/if}
-					{#if item.locationId}
-						{@const loc = getLocationById(locationsCtx.value, item.locationId)}
-						{#if loc}
-							<span
-								class="flex items-center gap-1 text-sm text-[hsl(var(--color-muted-foreground))]"
+
+			{#if editing}
+				<!-- Edit Mode -->
+				<div
+					class="space-y-4 rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-5"
+				>
+					<input type="text" bind:value={editName} placeholder="Name" class={inputClass} />
+					<textarea
+						bind:value={editDescription}
+						placeholder="Beschreibung"
+						rows="2"
+						class={inputClass}
+					></textarea>
+
+					<div class="grid gap-4 sm:grid-cols-2">
+						<div>
+							<label
+								for="inventory-status"
+								class="mb-1 block text-xs font-medium text-[hsl(var(--color-muted-foreground))]"
+								>Status</label
 							>
-								📍 {getLocationFullPath(locationsCtx.value, loc.id)}
-							</span>
-						{/if}
-					{/if}
-					{#if item.categoryId}
-						{@const cat = getCategoryById(categoriesCtx.value, item.categoryId)}
-						{#if cat}
-							<span class="rounded-full bg-[hsl(var(--color-muted))] px-2 py-0.5 text-xs"
-								>{cat.icon || '🏷️'} {cat.name}</span
+							<select id="inventory-status" bind:value={editStatus} class={inputClass}>
+								{#each statuses as s}<option value={s}>{statusLabels[s]}</option>{/each}
+							</select>
+						</div>
+						<div>
+							<label
+								for="inventory-quantity"
+								class="mb-1 block text-xs font-medium text-[hsl(var(--color-muted-foreground))]"
+								>Menge</label
 							>
+							<input
+								id="inventory-quantity"
+								type="number"
+								bind:value={editQuantity}
+								min="1"
+								class={inputClass}
+							/>
+						</div>
+						{#if locationsCtx.value.length > 0}
+							<div>
+								<label
+									for="inventory-location"
+									class="mb-1 block text-xs font-medium text-[hsl(var(--color-muted-foreground))]"
+									>Standort</label
+								>
+								<select id="inventory-location" bind:value={editLocationId} class={inputClass}>
+									<option value={undefined}>-- Kein Standort --</option>
+									{#each locationsCtx.value as loc}
+										<option value={loc.id}>{loc.path ? `${loc.path}/` : ''}{loc.name}</option>
+									{/each}
+								</select>
+							</div>
 						{/if}
+						{#if categoriesCtx.value.length > 0}
+							<div>
+								<label
+									for="inventory-category"
+									class="mb-1 block text-xs font-medium text-[hsl(var(--color-muted-foreground))]"
+									>Kategorie</label
+								>
+								<select id="inventory-category" bind:value={editCategoryId} class={inputClass}>
+									<option value={undefined}>-- Keine Kategorie --</option>
+									{#each categoriesCtx.value as cat}
+										<option value={cat.id}>{cat.name}</option>
+									{/each}
+								</select>
+							</div>
+						{/if}
+					</div>
+
+					{#if collection}
+						<div>
+							<h3 class="mb-2 text-sm font-semibold text-[hsl(var(--color-foreground))]">
+								Eigene Felder
+							</h3>
+							<div class="grid gap-3 sm:grid-cols-2">
+								{#each collection.schema.fields.sort((a, b) => a.order - b.order) as field}
+									<div>
+										<span
+											class="mb-1 block text-xs font-medium text-[hsl(var(--color-muted-foreground))]"
+											>{field.name}</span
+										>
+										<FieldEditor
+											{field}
+											value={editFields[field.id]}
+											onchange={(v) => (editFields = { ...editFields, [field.id]: v })}
+										/>
+									</div>
+								{/each}
+							</div>
+						</div>
 					{/if}
 				</div>
+			{:else}
+				<!-- View Mode -->
+				<div class="space-y-4">
+					<!-- Status & Meta -->
+					<div class="flex flex-wrap items-center gap-3">
+						<StatusBadge status={item.status} size="md" />
+						{#if item.quantity > 1}
+							<span class="rounded-full bg-[hsl(var(--color-muted))] px-3 py-1 text-sm"
+								>&times;{item.quantity}</span
+							>
+						{/if}
+						{#if item.locationId}
+							{@const loc = getLocationById(locationsCtx.value, item.locationId)}
+							{#if loc}
+								<span
+									class="flex items-center gap-1 text-sm text-[hsl(var(--color-muted-foreground))]"
+								>
+									📍 {getLocationFullPath(locationsCtx.value, loc.id)}
+								</span>
+							{/if}
+						{/if}
+						{#if item.categoryId}
+							{@const cat = getCategoryById(categoriesCtx.value, item.categoryId)}
+							{#if cat}
+								<span class="rounded-full bg-[hsl(var(--color-muted))] px-2 py-0.5 text-xs"
+									>{cat.icon || '🏷️'} {cat.name}</span
+								>
+							{/if}
+						{/if}
+					</div>
 
-				{#if item.description}
-					<p class="text-[hsl(var(--color-foreground))]">{item.description}</p>
-				{/if}
+					{#if item.description}
+						<p class="text-[hsl(var(--color-foreground))]">{item.description}</p>
+					{/if}
 
-				<!-- Custom Fields -->
-				{#if collection && collection.schema.fields.length > 0}
+					<!-- Custom Fields -->
+					{#if collection && collection.schema.fields.length > 0}
+						<div
+							class="rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4"
+						>
+							<h3 class="mb-3 text-sm font-semibold text-[hsl(var(--color-foreground))]">
+								Details
+							</h3>
+							<div class="grid gap-2 sm:grid-cols-2">
+								{#each collection.schema.fields.sort((a, b) => a.order - b.order) as field}
+									<div class="flex items-baseline gap-2">
+										<span class="text-xs font-medium text-[hsl(var(--color-muted-foreground))]"
+											>{field.name}:</span
+										>
+										<FieldRenderer {field} value={item.fieldValues[field.id]} />
+									</div>
+								{/each}
+							</div>
+						</div>
+					{/if}
+
+					<!-- Notes -->
 					<div
 						class="rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4"
 					>
-						<h3 class="mb-3 text-sm font-semibold text-[hsl(var(--color-foreground))]">Details</h3>
-						<div class="grid gap-2 sm:grid-cols-2">
-							{#each collection.schema.fields.sort((a, b) => a.order - b.order) as field}
-								<div class="flex items-baseline gap-2">
-									<span class="text-xs font-medium text-[hsl(var(--color-muted-foreground))]"
-										>{field.name}:</span
+						<h3 class="mb-3 text-sm font-semibold text-[hsl(var(--color-foreground))]">
+							Notizen ({item.notes.length})
+						</h3>
+						<div class="space-y-2">
+							{#each item.notes as note (note.id)}
+								<div
+									class="group flex items-start justify-between rounded-lg bg-[hsl(var(--color-muted))] p-3"
+								>
+									<div>
+										<p class="text-sm text-[hsl(var(--color-foreground))]">{note.content}</p>
+										<p class="mt-1 text-xs text-[hsl(var(--color-muted-foreground))]">
+											{new Date(note.createdAt).toLocaleDateString('de-DE')}
+										</p>
+									</div>
+									<button
+										onclick={() => itemsStore.deleteNote(item.id, note.id)}
+										class="text-[hsl(var(--color-muted-foreground))] opacity-0 hover:text-red-500 group-hover:opacity-100"
+										>&times;</button
 									>
-									<FieldRenderer {field} value={item.fieldValues[field.id]} />
 								</div>
 							{/each}
 						</div>
-					</div>
-				{/if}
-
-				<!-- Notes -->
-				<div
-					class="rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4"
-				>
-					<h3 class="mb-3 text-sm font-semibold text-[hsl(var(--color-foreground))]">
-						Notizen ({item.notes.length})
-					</h3>
-					<div class="space-y-2">
-						{#each item.notes as note (note.id)}
-							<div
-								class="group flex items-start justify-between rounded-lg bg-[hsl(var(--color-muted))] p-3"
+						<div class="mt-3 flex gap-2">
+							<input
+								type="text"
+								bind:value={newNote}
+								placeholder="Notiz hinzufugen..."
+								class="flex-1 rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] px-3 py-2 text-sm text-[hsl(var(--color-foreground))]"
+								onkeydown={(e) => e.key === 'Enter' && addNote()}
+							/>
+							<button
+								onclick={addNote}
+								disabled={!newNote.trim()}
+								class="rounded-lg bg-[hsl(var(--color-primary))] px-3 py-2 text-sm text-[hsl(var(--color-primary-foreground))] disabled:opacity-50"
+								>+</button
 							>
-								<div>
-									<p class="text-sm text-[hsl(var(--color-foreground))]">{note.content}</p>
-									<p class="mt-1 text-xs text-[hsl(var(--color-muted-foreground))]">
-										{new Date(note.createdAt).toLocaleDateString('de-DE')}
-									</p>
-								</div>
-								<button
-									onclick={() => itemsStore.deleteNote(item.id, note.id)}
-									class="text-[hsl(var(--color-muted-foreground))] opacity-0 hover:text-red-500 group-hover:opacity-100"
-									>&times;</button
-								>
-							</div>
-						{/each}
-					</div>
-					<div class="mt-3 flex gap-2">
-						<input
-							type="text"
-							bind:value={newNote}
-							placeholder="Notiz hinzufugen..."
-							class="flex-1 rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] px-3 py-2 text-sm text-[hsl(var(--color-foreground))]"
-							onkeydown={(e) => e.key === 'Enter' && addNote()}
-						/>
-						<button
-							onclick={addNote}
-							disabled={!newNote.trim()}
-							class="rounded-lg bg-[hsl(var(--color-primary))] px-3 py-2 text-sm text-[hsl(var(--color-primary-foreground))] disabled:opacity-50"
-							>+</button
-						>
+						</div>
 					</div>
 				</div>
-			</div>
-		{/if}
-	</div>
-{/if}
+			{/if}
+		</div>
+	{/if}
+</RoutePage>

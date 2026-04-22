@@ -8,6 +8,7 @@
 	import { decryptRecords } from '$lib/data/crypto';
 	import { useAllLinks, useAllTags, useAllFolders } from '$lib/modules/uload';
 	import { toast } from 'svelte-sonner';
+	import { RoutePage } from '$lib/components/shell';
 
 	const links = useAllLinks();
 	const tags = useAllTags();
@@ -54,53 +55,55 @@
 	<title>uLoad-Einstellungen — Mana</title>
 </svelte:head>
 
-<div class="pane">
-	<header class="bar">
-		<div class="title">
-			<strong>uLoad-Einstellungen</strong>
-			<span class="sub">Datenübersicht · Export · Gefahrenzone</span>
-		</div>
-	</header>
-
-	<section class="panel">
-		<h2>Daten</h2>
-		<div class="stats">
-			<div class="stat">
-				<p class="stat-value">{links.value?.length ?? 0}</p>
-				<p class="stat-label">Links</p>
+<RoutePage appId="uload" backHref="/uload">
+	<div class="pane">
+		<header class="bar">
+			<div class="title">
+				<strong>uLoad-Einstellungen</strong>
+				<span class="sub">Datenübersicht · Export · Gefahrenzone</span>
 			</div>
-			<div class="stat">
-				<p class="stat-value">{tags.value?.length ?? 0}</p>
-				<p class="stat-label">Tags</p>
-			</div>
-			<div class="stat">
-				<p class="stat-value">{folders.value?.length ?? 0}</p>
-				<p class="stat-label">Ordner</p>
-			</div>
-		</div>
-	</section>
+		</header>
 
-	<section class="panel">
-		<h2>Daten exportieren</h2>
-		<p class="hint">Alle Links, Tags und Ordner als JSON-Datei herunterladen.</p>
-		<button type="button" class="btn" onclick={exportData}>
-			<DownloadSimple size={16} />
-			JSON exportieren
-		</button>
-	</section>
+		<section class="panel">
+			<h2>Daten</h2>
+			<div class="stats">
+				<div class="stat">
+					<p class="stat-value">{links.value?.length ?? 0}</p>
+					<p class="stat-label">Links</p>
+				</div>
+				<div class="stat">
+					<p class="stat-value">{tags.value?.length ?? 0}</p>
+					<p class="stat-label">Tags</p>
+				</div>
+				<div class="stat">
+					<p class="stat-value">{folders.value?.length ?? 0}</p>
+					<p class="stat-label">Ordner</p>
+				</div>
+			</div>
+		</section>
 
-	<section class="panel danger">
-		<h2>Gefahrenzone</h2>
-		<p class="hint">
-			Löscht alle lokalen uLoad-Daten (Links, Tags, Ordner). Synchronisierte Daten auf dem Server
-			bleiben erhalten.
-		</p>
-		<button type="button" class="btn danger" onclick={clearAllData}>
-			<Trash size={16} />
-			Alle Daten löschen
-		</button>
-	</section>
-</div>
+		<section class="panel">
+			<h2>Daten exportieren</h2>
+			<p class="hint">Alle Links, Tags und Ordner als JSON-Datei herunterladen.</p>
+			<button type="button" class="btn" onclick={exportData}>
+				<DownloadSimple size={16} />
+				JSON exportieren
+			</button>
+		</section>
+
+		<section class="panel danger">
+			<h2>Gefahrenzone</h2>
+			<p class="hint">
+				Löscht alle lokalen uLoad-Daten (Links, Tags, Ordner). Synchronisierte Daten auf dem Server
+				bleiben erhalten.
+			</p>
+			<button type="button" class="btn danger" onclick={clearAllData}>
+				<Trash size={16} />
+				Alle Daten löschen
+			</button>
+		</section>
+	</div>
+</RoutePage>
 
 <style>
 	.pane {

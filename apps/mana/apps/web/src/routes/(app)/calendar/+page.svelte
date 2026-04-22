@@ -24,6 +24,7 @@
 
 	import { ShareNetwork } from '@mana/shared-icons';
 	import { ShareModal } from '@mana/shared-uload';
+	import { RoutePage } from '$lib/components/shell';
 
 	const calendarsCtx: { readonly value: Calendar[] } = getContext('calendars');
 	const eventsCtx: { readonly value: CalendarEvent[] } = getContext('calendarEvents');
@@ -217,30 +218,32 @@
 	<title>Kalender - Mana</title>
 </svelte:head>
 
-<div class="calendar-page">
-	<!-- Header -->
-	<CalendarHeader onNewEvent={handleNewEvent} />
+<RoutePage appId="calendar">
+	<div class="calendar-page">
+		<!-- Header -->
+		<CalendarHeader onNewEvent={handleNewEvent} />
 
-	<!-- Calendar view (full width) -->
-	<div class="calendar-content">
-		{#if calendarViewStore.viewType === 'week'}
-			<WeekView onEventClick={handleEventClick} onQuickCreate={handleQuickCreate} />
-		{:else if calendarViewStore.viewType === 'month'}
-			<MonthView
-				onEventClick={handleEventClick}
-				onDayClick={(day) => {
-					calendarViewStore.setDate(day);
-					calendarViewStore.setViewType('week');
-				}}
-			/>
-		{:else}
-			<AgendaView onEventClick={handleEventClick} />
-		{/if}
+		<!-- Calendar view (full width) -->
+		<div class="calendar-content">
+			{#if calendarViewStore.viewType === 'week'}
+				<WeekView onEventClick={handleEventClick} onQuickCreate={handleQuickCreate} />
+			{:else if calendarViewStore.viewType === 'month'}
+				<MonthView
+					onEventClick={handleEventClick}
+					onDayClick={(day) => {
+						calendarViewStore.setDate(day);
+						calendarViewStore.setViewType('week');
+					}}
+				/>
+			{:else}
+				<AgendaView onEventClick={handleEventClick} />
+			{/if}
+		</div>
+
+		<!-- Floating Date Strip (above PillNav/InputBar) -->
+		<DateStrip />
 	</div>
-
-	<!-- Floating Date Strip (above PillNav/InputBar) -->
-	<DateStrip />
-</div>
+</RoutePage>
 
 <!-- Quick Event Popover (inline in calendar grid) -->
 {#if showQuickCreate}

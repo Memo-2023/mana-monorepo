@@ -9,6 +9,7 @@
 	import PhotoDetailModal from '$lib/modules/photos/components/gallery/PhotoDetailModal.svelte';
 	import type { Album, AlbumItem, Photo } from '$lib/modules/photos/types';
 	import { CaretLeft, Trash } from '@mana/shared-icons';
+	import { RoutePage } from '$lib/components/shell';
 
 	const allAlbums: { readonly value: Album[] } = getContext('albums');
 	const allAlbumItems: { readonly value: AlbumItem[] } = getContext('albumItems');
@@ -40,53 +41,59 @@
 	<title>{currentAlbum?.name || 'Album'} | Photos - Mana</title>
 </svelte:head>
 
-<div class="album-detail-page">
-	{#if !currentAlbum}
-		<div class="loading-state">
-			<div class="animate-pulse text-muted-foreground">Loading...</div>
-		</div>
-	{:else}
-		<header class="page-header">
-			<div class="flex items-center gap-3">
-				<button class="icon-btn" onclick={() => goto('/photos/albums')} title="Back">
-					<CaretLeft size={20} />
-				</button>
-				<div>
-					<h1 class="text-2xl font-bold">{currentAlbum.name}</h1>
-					{#if currentAlbum.description}
-						<p class="text-sm text-muted-foreground">{currentAlbum.description}</p>
-					{/if}
-				</div>
-			</div>
-			<div class="flex items-center gap-2">
-				<span class="text-sm text-muted-foreground">
-					{albumPhotos.length} items
-				</span>
-				<button class="icon-btn text-destructive" onclick={handleDeleteAlbum} title="Delete album">
-					<Trash size={20} />
-				</button>
-			</div>
-		</header>
-
-		{#if albumPhotos.length === 0}
-			<div class="empty-state">
-				<p class="text-muted-foreground">No photos in this album yet.</p>
+<RoutePage appId="photos" backHref="/photos/albums" title="Album">
+	<div class="album-detail-page">
+		{#if !currentAlbum}
+			<div class="loading-state">
+				<div class="animate-pulse text-muted-foreground">Loading...</div>
 			</div>
 		{:else}
-			<PhotoGrid
-				photos={albumPhotos}
-				loading={false}
-				hasMore={false}
-				onPhotoClick={handlePhotoClick}
-				onLoadMore={() => {}}
-			/>
-		{/if}
-	{/if}
+			<header class="page-header">
+				<div class="flex items-center gap-3">
+					<button class="icon-btn" onclick={() => goto('/photos/albums')} title="Back">
+						<CaretLeft size={20} />
+					</button>
+					<div>
+						<h1 class="text-2xl font-bold">{currentAlbum.name}</h1>
+						{#if currentAlbum.description}
+							<p class="text-sm text-muted-foreground">{currentAlbum.description}</p>
+						{/if}
+					</div>
+				</div>
+				<div class="flex items-center gap-2">
+					<span class="text-sm text-muted-foreground">
+						{albumPhotos.length} items
+					</span>
+					<button
+						class="icon-btn text-destructive"
+						onclick={handleDeleteAlbum}
+						title="Delete album"
+					>
+						<Trash size={20} />
+					</button>
+				</div>
+			</header>
 
-	{#if photoStore.selectedPhoto}
-		<PhotoDetailModal photo={photoStore.selectedPhoto} onClose={handleCloseModal} />
-	{/if}
-</div>
+			{#if albumPhotos.length === 0}
+				<div class="empty-state">
+					<p class="text-muted-foreground">No photos in this album yet.</p>
+				</div>
+			{:else}
+				<PhotoGrid
+					photos={albumPhotos}
+					loading={false}
+					hasMore={false}
+					onPhotoClick={handlePhotoClick}
+					onLoadMore={() => {}}
+				/>
+			{/if}
+		{/if}
+
+		{#if photoStore.selectedPhoto}
+			<PhotoDetailModal photo={photoStore.selectedPhoto} onClose={handleCloseModal} />
+		{/if}
+	</div>
+</RoutePage>
 
 <style>
 	.album-detail-page {

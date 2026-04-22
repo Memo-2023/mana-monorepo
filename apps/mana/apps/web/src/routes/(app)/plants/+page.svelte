@@ -12,6 +12,7 @@
 		isWateringOverdue,
 	} from '$lib/modules/plants/queries';
 	import type { Plant, PlantPhoto, WateringSchedule } from '$lib/modules/plants/types';
+	import { RoutePage } from '$lib/components/shell';
 
 	const allPlants: { readonly value: Plant[] } = getContext('plants');
 	const allPlantPhotos: { readonly value: PlantPhoto[] } = getContext('plantPhotos');
@@ -63,71 +64,73 @@
 	<title>{$_('plants.nav.plants')} - Plants</title>
 </svelte:head>
 
-<div class="space-y-6">
-	<div class="flex items-center justify-between">
-		<h1 class="text-2xl font-bold">{$_('plants.nav.plants')}</h1>
-		<a href="/plants/add" class="btn btn-success">{$_('plants.plant.add')}</a>
-	</div>
-
-	{#if plants.length === 0}
-		<div class="text-center py-12">
-			<div class="text-6xl mb-4">🌱</div>
-			<h2 class="text-xl font-semibold mb-2">{$_('plants.plant.noPlants')}</h2>
-			<p class="text-muted-foreground mb-4">{$_('plants.app.tagline')}</p>
-			<a href="/plants/add" class="btn btn-success">{$_('plants.plant.addFirst')}</a>
+<RoutePage appId="plants">
+	<div class="space-y-6">
+		<div class="flex items-center justify-between">
+			<h1 class="text-2xl font-bold">{$_('plants.nav.plants')}</h1>
+			<a href="/plants/add" class="btn btn-success">{$_('plants.plant.add')}</a>
 		</div>
-	{:else}
-		<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-			{#each plants as plant (plant.id)}
-				{@const primaryPhoto = getPrimaryPhoto(allPlantPhotos.value, plant.id)}
-				<!-- Outer is a div with role=link so we can nest a real
+
+		{#if plants.length === 0}
+			<div class="text-center py-12">
+				<div class="text-6xl mb-4">🌱</div>
+				<h2 class="text-xl font-semibold mb-2">{$_('plants.plant.noPlants')}</h2>
+				<p class="text-muted-foreground mb-4">{$_('plants.app.tagline')}</p>
+				<a href="/plants/add" class="btn btn-success">{$_('plants.plant.addFirst')}</a>
+			</div>
+		{:else}
+			<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+				{#each plants as plant (plant.id)}
+					{@const primaryPhoto = getPrimaryPhoto(allPlantPhotos.value, plant.id)}
+					<!-- Outer is a div with role=link so we can nest a real
 					 <button> inside without violating HTML's "no interactive
 					 inside interactive" rule. Keyboard nav: Enter/Space opens. -->
-				<div
-					role="link"
-					tabindex="0"
-					class="card plant-card text-left"
-					onclick={() => goto(`/plants/${plant.id}`)}
-					onkeydown={(e) => {
-						if (e.key === 'Enter' || e.key === ' ') {
-							e.preventDefault();
-							goto(`/plants/${plant.id}`);
-						}
-					}}
-				>
-					{#if primaryPhoto?.publicUrl}
-						<img src={primaryPhoto.publicUrl} alt={plant.name} />
-					{:else}
-						<div class="flex h-full w-full items-center justify-center bg-muted text-4xl">🌿</div>
-					{/if}
 					<div
-						class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3"
+						role="link"
+						tabindex="0"
+						class="card plant-card text-left"
+						onclick={() => goto(`/plants/${plant.id}`)}
+						onkeydown={(e) => {
+							if (e.key === 'Enter' || e.key === ' ') {
+								e.preventDefault();
+								goto(`/plants/${plant.id}`);
+							}
+						}}
 					>
-						<h3 class="font-semibold text-white truncate">{plant.name}</h3>
-						{#if plant.commonName}
-							<p class="text-xs text-foreground truncate">{plant.commonName}</p>
+						{#if primaryPhoto?.publicUrl}
+							<img src={primaryPhoto.publicUrl} alt={plant.name} />
+						{:else}
+							<div class="flex h-full w-full items-center justify-center bg-muted text-4xl">🌿</div>
 						{/if}
-						{#if getWateringText(plant.id)}
-							<div class="water-status {getWateringClass(plant.id)} mt-1">
-								<span>{getWateringText(plant.id)}</span>
-							</div>
+						<div
+							class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3"
+						>
+							<h3 class="font-semibold text-white truncate">{plant.name}</h3>
+							{#if plant.commonName}
+								<p class="text-xs text-foreground truncate">{plant.commonName}</p>
+							{/if}
+							{#if getWateringText(plant.id)}
+								<div class="water-status {getWateringClass(plant.id)} mt-1">
+									<span>{getWateringText(plant.id)}</span>
+								</div>
+							{/if}
+						</div>
+						{#if shouldShowWaterButton(plant.id)}
+							<button
+								type="button"
+								class="absolute top-2 right-2 rounded-full bg-blue-500 px-3 py-1 text-xs text-white hover:bg-blue-600"
+								onclick={(e) => handleWater(plant.id, e)}
+								title={$_('plants.watering.water')}
+							>
+								{$_('plants.watering.water')}
+							</button>
 						{/if}
 					</div>
-					{#if shouldShowWaterButton(plant.id)}
-						<button
-							type="button"
-							class="absolute top-2 right-2 rounded-full bg-blue-500 px-3 py-1 text-xs text-white hover:bg-blue-600"
-							onclick={(e) => handleWater(plant.id, e)}
-							title={$_('plants.watering.water')}
-						>
-							{$_('plants.watering.water')}
-						</button>
-					{/if}
-				</div>
-			{/each}
-		</div>
-	{/if}
-</div>
+				{/each}
+			</div>
+		{/if}
+	</div>
+</RoutePage>
 
 <style>
 	.plant-card {

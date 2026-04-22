@@ -21,6 +21,7 @@
 	import { Clock, TrendUp, Fire, Target } from '@mana/shared-icons';
 	import { format, subDays } from 'date-fns';
 	import { de } from 'date-fns/locale';
+	import { RoutePage } from '$lib/components/shell';
 
 	let periodDays = $state(7);
 
@@ -62,150 +63,153 @@
 	let maxDailySeconds = $derived(Math.max(1, ...daily.map((d) => d.totalSeconds)));
 </script>
 
-<div class="analytics-page">
-	<header class="analytics-header">
-		<h1 class="header-title">Zeitanalyse</h1>
-		<div class="period-selector">
-			{#each [7, 14, 30] as days}
-				<button
-					class="period-btn"
-					class:active={periodDays === days}
-					onclick={() => (periodDays = days)}
-				>
-					{days}T
-				</button>
-			{/each}
-		</div>
-	</header>
+<RoutePage appId="timeline" backHref="/timeline">
+	<div class="analytics-page">
+		<header class="analytics-header">
+			<h1 class="header-title">Zeitanalyse</h1>
+			<div class="period-selector">
+				{#each [7, 14, 30] as days}
+					<button
+						class="period-btn"
+						class:active={periodDays === days}
+						onclick={() => (periodDays = days)}
+					>
+						{days}T
+					</button>
+				{/each}
+			</div>
+		</header>
 
-	<div class="analytics-grid">
-		<!-- Summary cards -->
-		<div class="summary-row">
-			<div class="stat-card">
-				<Clock size={20} class="stat-icon" />
-				<div class="stat-content">
-					<span class="stat-value">{totalHours}h</span>
-					<span class="stat-label">Gesamt</span>
+		<div class="analytics-grid">
+			<!-- Summary cards -->
+			<div class="summary-row">
+				<div class="stat-card">
+					<Clock size={20} class="stat-icon" />
+					<div class="stat-content">
+						<span class="stat-value">{totalHours}h</span>
+						<span class="stat-label">Gesamt</span>
+					</div>
+				</div>
+				<div class="stat-card">
+					<Fire size={20} class="stat-icon" />
+					<div class="stat-content">
+						<span class="stat-value">{streak}</span>
+						<span class="stat-label">Tage Streak</span>
+					</div>
+				</div>
+				<div class="stat-card">
+					<Target size={20} class="stat-icon" />
+					<div class="stat-content">
+						<span class="stat-value">{adherence.adherencePercent}%</span>
+						<span class="stat-label">Plan-Treue</span>
+					</div>
+				</div>
+				<div class="stat-card">
+					<TrendUp size={20} class="stat-icon" />
+					<div class="stat-content">
+						<span class="stat-value">{periodBlocks.length}</span>
+						<span class="stat-label">Einträge</span>
+					</div>
 				</div>
 			</div>
-			<div class="stat-card">
-				<Fire size={20} class="stat-icon" />
-				<div class="stat-content">
-					<span class="stat-value">{streak}</span>
-					<span class="stat-label">Tage Streak</span>
-				</div>
-			</div>
-			<div class="stat-card">
-				<Target size={20} class="stat-icon" />
-				<div class="stat-content">
-					<span class="stat-value">{adherence.adherencePercent}%</span>
-					<span class="stat-label">Plan-Treue</span>
-				</div>
-			</div>
-			<div class="stat-card">
-				<TrendUp size={20} class="stat-icon" />
-				<div class="stat-content">
-					<span class="stat-value">{periodBlocks.length}</span>
-					<span class="stat-label">Einträge</span>
-				</div>
-			</div>
-		</div>
 
-		<!-- Type breakdown (donut-like horizontal bars) -->
-		<div class="card">
-			<h2 class="card-title">Zeitverteilung</h2>
-			{#if typeBreakdown.length === 0}
-				<p class="empty-text">Keine Daten im Zeitraum</p>
-			{:else}
-				<div class="breakdown-list">
-					{#each typeBreakdown as item}
-						<div class="breakdown-item">
-							<div class="breakdown-header">
-								<span class="breakdown-dot" style="background: {item.color}"></span>
-								<span class="breakdown-label">{item.label}</span>
-								<span class="breakdown-value">{formatHours(item.totalSeconds)}</span>
-								<span class="breakdown-percent">{Math.round(item.percentage)}%</span>
+			<!-- Type breakdown (donut-like horizontal bars) -->
+			<div class="card">
+				<h2 class="card-title">Zeitverteilung</h2>
+				{#if typeBreakdown.length === 0}
+					<p class="empty-text">Keine Daten im Zeitraum</p>
+				{:else}
+					<div class="breakdown-list">
+						{#each typeBreakdown as item}
+							<div class="breakdown-item">
+								<div class="breakdown-header">
+									<span class="breakdown-dot" style="background: {item.color}"></span>
+									<span class="breakdown-label">{item.label}</span>
+									<span class="breakdown-value">{formatHours(item.totalSeconds)}</span>
+									<span class="breakdown-percent">{Math.round(item.percentage)}%</span>
+								</div>
+								<div class="breakdown-bar-bg">
+									<div
+										class="breakdown-bar"
+										style="width: {item.percentage}%; background: {item.color}"
+									></div>
+								</div>
 							</div>
-							<div class="breakdown-bar-bg">
-								<div
-									class="breakdown-bar"
-									style="width: {item.percentage}%; background: {item.color}"
-								></div>
+						{/each}
+					</div>
+				{/if}
+			</div>
+
+			<!-- Daily bars -->
+			<div class="card">
+				<h2 class="card-title">Tagesverteilung</h2>
+				<div class="daily-chart">
+					{#each daily as day}
+						{@const barHeight =
+							maxDailySeconds > 0 ? (day.totalSeconds / maxDailySeconds) * 100 : 0}
+						<div class="daily-col">
+							<div class="daily-bar-container">
+								<div class="daily-bar" style="height: {barHeight}%">
+									{#if day.totalSeconds > 0}
+										<span class="daily-value">{formatHours(day.totalSeconds)}</span>
+									{/if}
+								</div>
 							</div>
+							<span class="daily-label">
+								{format(new Date(day.date), 'EEE', { locale: de })}
+							</span>
 						</div>
 					{/each}
 				</div>
-			{/if}
-		</div>
-
-		<!-- Daily bars -->
-		<div class="card">
-			<h2 class="card-title">Tagesverteilung</h2>
-			<div class="daily-chart">
-				{#each daily as day}
-					{@const barHeight = maxDailySeconds > 0 ? (day.totalSeconds / maxDailySeconds) * 100 : 0}
-					<div class="daily-col">
-						<div class="daily-bar-container">
-							<div class="daily-bar" style="height: {barHeight}%">
-								{#if day.totalSeconds > 0}
-									<span class="daily-value">{formatHours(day.totalSeconds)}</span>
-								{/if}
-							</div>
-						</div>
-						<span class="daily-label">
-							{format(new Date(day.date), 'EEE', { locale: de })}
-						</span>
-					</div>
-				{/each}
 			</div>
-		</div>
 
-		<!-- Habit heatmap -->
-		<div class="card">
-			<h2 class="card-title">Habit-Aktivität (90 Tage)</h2>
-			<div class="heatmap">
-				{#each heatmap as cell}
-					<div
-						class="heatmap-cell"
-						class:intensity-0={cell.intensity === 0}
-						class:intensity-1={cell.intensity === 1}
-						class:intensity-2={cell.intensity === 2}
-						class:intensity-3={cell.intensity === 3}
-						class:intensity-4={cell.intensity === 4}
-						title="{cell.date}: {cell.count} Habits"
-					></div>
-				{/each}
-			</div>
-		</div>
-
-		<!-- Plan adherence -->
-		{#if adherence.totalScheduled > 0}
+			<!-- Habit heatmap -->
 			<div class="card">
-				<h2 class="card-title">Plan vs Realität</h2>
-				<div class="adherence-stats">
-					<div class="adherence-item">
-						<span class="adherence-value">{adherence.totalScheduled}</span>
-						<span class="adherence-label">Geplant</span>
-					</div>
-					<div class="adherence-item">
-						<span class="adherence-value">{adherence.totalCompleted}</span>
-						<span class="adherence-label">Erledigt</span>
-					</div>
-					<div class="adherence-item">
-						<span class="adherence-value">{adherence.adherencePercent}%</span>
-						<span class="adherence-label">Treue</span>
-					</div>
-					{#if adherence.averageDelayMinutes > 0}
-						<div class="adherence-item">
-							<span class="adherence-value">{adherence.averageDelayMinutes}m</span>
-							<span class="adherence-label">Ø Abweichung</span>
-						</div>
-					{/if}
+				<h2 class="card-title">Habit-Aktivität (90 Tage)</h2>
+				<div class="heatmap">
+					{#each heatmap as cell}
+						<div
+							class="heatmap-cell"
+							class:intensity-0={cell.intensity === 0}
+							class:intensity-1={cell.intensity === 1}
+							class:intensity-2={cell.intensity === 2}
+							class:intensity-3={cell.intensity === 3}
+							class:intensity-4={cell.intensity === 4}
+							title="{cell.date}: {cell.count} Habits"
+						></div>
+					{/each}
 				</div>
 			</div>
-		{/if}
+
+			<!-- Plan adherence -->
+			{#if adherence.totalScheduled > 0}
+				<div class="card">
+					<h2 class="card-title">Plan vs Realität</h2>
+					<div class="adherence-stats">
+						<div class="adherence-item">
+							<span class="adherence-value">{adherence.totalScheduled}</span>
+							<span class="adherence-label">Geplant</span>
+						</div>
+						<div class="adherence-item">
+							<span class="adherence-value">{adherence.totalCompleted}</span>
+							<span class="adherence-label">Erledigt</span>
+						</div>
+						<div class="adherence-item">
+							<span class="adherence-value">{adherence.adherencePercent}%</span>
+							<span class="adherence-label">Treue</span>
+						</div>
+						{#if adherence.averageDelayMinutes > 0}
+							<div class="adherence-item">
+								<span class="adherence-value">{adherence.averageDelayMinutes}m</span>
+								<span class="adherence-label">Ø Abweichung</span>
+							</div>
+						{/if}
+					</div>
+				</div>
+			{/if}
+		</div>
 	</div>
-</div>
+</RoutePage>
 
 <style>
 	.analytics-page {

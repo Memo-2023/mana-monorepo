@@ -9,6 +9,7 @@
 	import { noteTagOps, useAllTags } from '$lib/modules/notes/stores/tags.svelte';
 	import { formatRelativeTime } from '$lib/modules/notes/queries';
 	import { TagSelector, type Tag } from '@mana/shared-ui';
+	import { RoutePage } from '$lib/components/shell';
 
 	const allNotes$: Observable<Note[]> = getContext('notes');
 	let notes = $state<Note[]>([]);
@@ -93,98 +94,100 @@
 	<title>{note ? note.title || 'Notiz' : 'Notiz'} - Mana</title>
 </svelte:head>
 
-<div class="note-detail">
-	{#if note}
-		<header class="detail-header">
-			<button class="back-btn" onclick={handleBack} aria-label="Aktion">
-				<svg
-					width="20"
-					height="20"
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="2"
-				>
-					<polyline points="15 18 9 12 15 6"></polyline>
-				</svg>
-			</button>
-			<div class="header-meta">{formatRelativeTime(note.updatedAt)}</div>
-			<div class="header-actions">
-				<button
-					class="action-icon"
-					class:active={note.isPinned}
-					onclick={handleTogglePin}
-					title={note.isPinned ? 'Lösen' : 'Anpinnen'}
-				>
-					&#x1f4cc;
+<RoutePage appId="notes" backHref="/notes" title="Notiz">
+	<div class="note-detail">
+		{#if note}
+			<header class="detail-header">
+				<button class="back-btn" onclick={handleBack} aria-label="Aktion">
+					<svg
+						width="20"
+						height="20"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+					>
+						<polyline points="15 18 9 12 15 6"></polyline>
+					</svg>
 				</button>
-			</div>
-		</header>
-
-		<input
-			class="detail-title"
-			type="text"
-			placeholder="Titel..."
-			bind:value={title}
-			oninput={autoSave}
-		/>
-
-		<textarea
-			class="detail-content"
-			placeholder="Schreibe etwas..."
-			bind:value={content}
-			oninput={autoSave}
-		></textarea>
-
-		<!-- Tags -->
-		<div class="tag-row">
-			<TagSelector
-				tags={allTags.value}
-				selectedTags={noteTags}
-				onTagsChange={async (tags) => {
-					noteTags = tags;
-					await noteTagOps.setTags(
-						note.id,
-						tags.map((t) => t.id)
-					);
-				}}
-				placeholder="Tags…"
-				addTagLabel="Tag hinzufügen"
-			/>
-		</div>
-
-		<!-- Color + Actions -->
-		<div class="detail-footer">
-			<div class="color-row">
-				{#each NOTE_COLORS as c}
-					<!-- svelte-ignore a11y_consider_explicit_label -->
+				<div class="header-meta">{formatRelativeTime(note.updatedAt)}</div>
+				<div class="header-actions">
 					<button
-						type="button"
-						class="color-dot"
-						class:selected={note.color === c}
-						style:background={c ?? 'hsl(var(--color-muted-foreground))'}
-						style:opacity={c ? 1 : 0.4}
-						onclick={() => handleColorChange(c)}
-					></button>
-				{/each}
+						class="action-icon"
+						class:active={note.isPinned}
+						onclick={handleTogglePin}
+						title={note.isPinned ? 'Lösen' : 'Anpinnen'}
+					>
+						&#x1f4cc;
+					</button>
+				</div>
+			</header>
+
+			<input
+				class="detail-title"
+				type="text"
+				placeholder="Titel..."
+				bind:value={title}
+				oninput={autoSave}
+			/>
+
+			<textarea
+				class="detail-content"
+				placeholder="Schreibe etwas..."
+				bind:value={content}
+				oninput={autoSave}
+			></textarea>
+
+			<!-- Tags -->
+			<div class="tag-row">
+				<TagSelector
+					tags={allTags.value}
+					selectedTags={noteTags}
+					onTagsChange={async (tags) => {
+						noteTags = tags;
+						await noteTagOps.setTags(
+							note.id,
+							tags.map((t) => t.id)
+						);
+					}}
+					placeholder="Tags…"
+					addTagLabel="Tag hinzufügen"
+				/>
 			</div>
-			<div class="danger-actions">
-				{#if !confirmDelete}
-					<button class="delete-btn" onclick={() => (confirmDelete = true)}>Löschen</button>
-				{:else}
-					<button class="delete-btn confirm" onclick={handleDelete}>Wirklich löschen?</button>
-				{/if}
+
+			<!-- Color + Actions -->
+			<div class="detail-footer">
+				<div class="color-row">
+					{#each NOTE_COLORS as c}
+						<!-- svelte-ignore a11y_consider_explicit_label -->
+						<button
+							type="button"
+							class="color-dot"
+							class:selected={note.color === c}
+							style:background={c ?? 'hsl(var(--color-muted-foreground))'}
+							style:opacity={c ? 1 : 0.4}
+							onclick={() => handleColorChange(c)}
+						></button>
+					{/each}
+				</div>
+				<div class="danger-actions">
+					{#if !confirmDelete}
+						<button class="delete-btn" onclick={() => (confirmDelete = true)}>Löschen</button>
+					{:else}
+						<button class="delete-btn confirm" onclick={handleDelete}>Wirklich löschen?</button>
+					{/if}
+				</div>
 			</div>
-		</div>
-	{:else if notes.length > 0}
-		<div class="not-found">
-			<p>Notiz nicht gefunden.</p>
-			<button onclick={handleBack}>Zurück</button>
-		</div>
-	{:else}
-		<div class="loading">Laden...</div>
-	{/if}
-</div>
+		{:else if notes.length > 0}
+			<div class="not-found">
+				<p>Notiz nicht gefunden.</p>
+				<button onclick={handleBack}>Zurück</button>
+			</div>
+		{:else}
+			<div class="loading">Laden...</div>
+		{/if}
+	</div>
+</RoutePage>
 
 <style>
 	.note-detail {

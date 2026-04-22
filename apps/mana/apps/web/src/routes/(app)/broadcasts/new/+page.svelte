@@ -7,6 +7,7 @@
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import { broadcastCampaignsStore } from '$lib/modules/broadcast/stores/campaigns.svelte';
+	import { RoutePage } from '$lib/components/shell';
 
 	let error = $state<string | null>(null);
 
@@ -24,14 +25,16 @@
 	<title>Neue Kampagne - Mana</title>
 </svelte:head>
 
-<div class="page">
-	{#if error}
-		<div class="error">{error}</div>
-		<a href="/broadcasts">Zurück</a>
-	{:else}
-		<p class="loading">Kampagne wird angelegt …</p>
-	{/if}
-</div>
+<RoutePage appId="broadcasts" backHref="/broadcasts">
+	<div class="page">
+		{#if error}
+			<div class="error">{error}</div>
+			<a href="/broadcasts">Zurück</a>
+		{:else}
+			<p class="loading">Kampagne wird angelegt …</p>
+		{/if}
+	</div>
+</RoutePage>
 
 <style>
 	.page {

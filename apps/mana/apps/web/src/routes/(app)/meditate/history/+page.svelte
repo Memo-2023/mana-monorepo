@@ -11,6 +11,7 @@
 	import { CATEGORY_LABELS } from '$lib/modules/meditate/types';
 	import SessionCard from '$lib/modules/meditate/components/SessionCard.svelte';
 	import { getTotalMinutes, getTotalSessions } from '$lib/modules/meditate/queries';
+	import { RoutePage } from '$lib/components/shell';
 
 	const presetsQuery = getContext<{ value: MeditatePreset[] }>('meditatePresets');
 	const sessionsQuery = getContext<{ value: MeditateSession[] }>('meditateSessions');
@@ -32,48 +33,50 @@
 	<title>Meditation History - Mana</title>
 </svelte:head>
 
-<div class="page">
-	<header class="page-header">
-		<a href="/meditate" class="back-link">← Meditate</a>
-		<h1 class="page-title">Verlauf</h1>
-		<p class="page-subtitle">{totalCount} Sessions · {totalMin} Minuten</p>
-	</header>
+<RoutePage appId="meditate" backHref="/meditate">
+	<div class="page">
+		<header class="page-header">
+			<a href="/meditate" class="back-link">← Meditate</a>
+			<h1 class="page-title">Verlauf</h1>
+			<p class="page-subtitle">{totalCount} Sessions · {totalMin} Minuten</p>
+		</header>
 
-	<!-- Filter -->
-	<div class="filter-bar">
-		<button
-			type="button"
-			class="filter-btn"
-			class:active={categoryFilter === 'all'}
-			onclick={() => (categoryFilter = 'all')}
-		>
-			Alle
-		</button>
-		{#each Object.entries(CATEGORY_LABELS) as [key, label]}
+		<!-- Filter -->
+		<div class="filter-bar">
 			<button
 				type="button"
 				class="filter-btn"
-				class:active={categoryFilter === key}
-				onclick={() => (categoryFilter = key as MeditateCategory)}
+				class:active={categoryFilter === 'all'}
+				onclick={() => (categoryFilter = 'all')}
 			>
-				{label.de}
+				Alle
 			</button>
-		{/each}
-	</div>
-
-	<!-- Session list -->
-	{#if filtered.length === 0}
-		<div class="empty">
-			<p class="empty-text">Noch keine Sessions.</p>
-		</div>
-	{:else}
-		<div class="session-list">
-			{#each filtered as session (session.id)}
-				<SessionCard {session} {presets} />
+			{#each Object.entries(CATEGORY_LABELS) as [key, label]}
+				<button
+					type="button"
+					class="filter-btn"
+					class:active={categoryFilter === key}
+					onclick={() => (categoryFilter = key as MeditateCategory)}
+				>
+					{label.de}
+				</button>
 			{/each}
 		</div>
-	{/if}
-</div>
+
+		<!-- Session list -->
+		{#if filtered.length === 0}
+			<div class="empty">
+				<p class="empty-text">Noch keine Sessions.</p>
+			</div>
+		{:else}
+			<div class="session-list">
+				{#each filtered as session (session.id)}
+					<SessionCard {session} {presets} />
+				{/each}
+			</div>
+		{/if}
+	</div>
+</RoutePage>
 
 <style>
 	.page {

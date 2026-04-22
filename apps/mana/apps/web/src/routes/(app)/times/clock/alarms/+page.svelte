@@ -4,6 +4,7 @@
 	import { PageHeader, toast } from '@mana/shared-ui';
 	import { alarmsStore } from '$lib/modules/times/stores/alarms.svelte';
 	import { type Alarm, ALARM_SOUNDS, DEFAULT_ALARM_PRESETS } from '$lib/modules/times/types';
+	import { RoutePage } from '$lib/components/shell';
 
 	// Get live query data from layout context
 	const allAlarms: { readonly value: Alarm[] } = getContext('alarms');
@@ -147,188 +148,191 @@
 	<title>Wecker - Clock - Mana</title>
 </svelte:head>
 
-<PageHeader title={$_('alarm.title')} size="md" centered />
+<RoutePage appId="times" backHref="/times/clock">
+	<PageHeader title={$_('alarm.title')} size="md" centered />
 
-<div class="space-y-4">
-	<!-- Quick Create Form -->
-	<div class="quick-create">
-		<input type="time" class="time-input-inline" bind:value={newTime} />
-		<input type="text" class="label-input" placeholder="Bezeichnung" bind:value={newLabel} />
-		<button
-			class="text-xs text-muted-foreground hover:text-foreground transition-colors px-2"
-			onclick={() => (showOptions = !showOptions)}
-			title="Wiederholung"
-		>
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				class="h-4 w-4"
-				class:text-primary={newRepeatDays.length > 0}
-				viewBox="0 0 20 20"
-				fill="currentColor"
+	<div class="space-y-4">
+		<!-- Quick Create Form -->
+		<div class="quick-create">
+			<input type="time" class="time-input-inline" bind:value={newTime} />
+			<input type="text" class="label-input" placeholder="Bezeichnung" bind:value={newLabel} />
+			<button
+				class="text-xs text-muted-foreground hover:text-foreground transition-colors px-2"
+				onclick={() => (showOptions = !showOptions)}
+				title="Wiederholung"
 			>
-				<path
-					fill-rule="evenodd"
-					d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
-					clip-rule="evenodd"
-				/>
-			</svg>
-		</button>
-		<button class="btn btn-primary btn-sm" onclick={handleQuickCreate}> + </button>
-	</div>
-
-	{#if showOptions}
-		<div class="day-selector-compact">
-			{#each dayNames as day, i}
-				<button
-					type="button"
-					class:active={newRepeatDays.includes(i)}
-					onclick={() => toggleNewDay(i)}
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					class="h-4 w-4"
+					class:text-primary={newRepeatDays.length > 0}
+					viewBox="0 0 20 20"
+					fill="currentColor"
 				>
-					{day}
-				</button>
-			{/each}
+					<path
+						fill-rule="evenodd"
+						d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
+						clip-rule="evenodd"
+					/>
+				</svg>
+			</button>
+			<button class="btn btn-primary btn-sm" onclick={handleQuickCreate}> + </button>
 		</div>
-	{/if}
 
-	<!-- Default Alarm Presets (Grid) -->
-	<div class="alarm-grid">
-		{#each DEFAULT_ALARM_PRESETS as preset}
-			{@const existingAlarm = findAlarmForPreset(preset.time)}
-			{@const isActive = existingAlarm?.enabled ?? false}
-			<div
-				class="alarm-tile"
-				class:active={isActive}
-				role="button"
-				tabindex="0"
-				onclick={() => togglePreset(preset.time, preset.label)}
-				onkeydown={(e) => e.key === 'Enter' && togglePreset(preset.time, preset.label)}
-			>
-				<div class="text-xl font-light text-foreground tabular-nums text-center">
-					{preset.time}
-				</div>
-				<div class="text-[10px] text-muted-foreground text-center truncate mt-0.5">
-					{existingAlarm?.label || preset.label}
-				</div>
-			</div>
-		{/each}
-	</div>
-
-	<!-- Custom Alarms (Grid) -->
-	{#if allAlarms.value.filter((a) => !DEFAULT_ALARM_PRESETS.some((p) => p.time === a.time.slice(0, 5))).length > 0}
-		{@const customAlarms = allAlarms.value.filter(
-			(a) => !DEFAULT_ALARM_PRESETS.some((p) => p.time === a.time.slice(0, 5))
-		)}
-		<div class="mt-4">
-			<h2 class="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wide">
-				{$_('alarm.custom')}
-			</h2>
-			<div class="alarm-grid">
-				{#each customAlarms as alarm (alarm.id)}
-					<div
-						class="alarm-tile"
-						class:active={alarm.enabled}
-						role="button"
-						tabindex="0"
-						onclick={() => handleToggle(alarm.id)}
-						onkeydown={(e) => e.key === 'Enter' && handleToggle(alarm.id)}
+		{#if showOptions}
+			<div class="day-selector-compact">
+				{#each dayNames as day, i}
+					<button
+						type="button"
+						class:active={newRepeatDays.includes(i)}
+						onclick={() => toggleNewDay(i)}
 					>
-						<div class="text-xl font-light text-foreground tabular-nums text-center">
-							{alarm.time.slice(0, 5)}
-						</div>
-						<div class="text-[10px] text-muted-foreground text-center truncate mt-0.5">
-							{alarm.label || getRepeatText(alarm.repeatDays)}
-						</div>
-					</div>
+						{day}
+					</button>
 				{/each}
 			</div>
-		</div>
-	{/if}
+		{/if}
 
-	<!-- Edit Modal -->
-	{#if showEditModal}
-		<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-			<div class="card w-full max-w-md">
-				<h2 class="mb-4 text-xl font-semibold">{$_('alarm.edit')}</h2>
-
-				<form
-					onsubmit={(e) => {
-						e.preventDefault();
-						handleEditSubmit();
-					}}
+		<!-- Default Alarm Presets (Grid) -->
+		<div class="alarm-grid">
+			{#each DEFAULT_ALARM_PRESETS as preset}
+				{@const existingAlarm = findAlarmForPreset(preset.time)}
+				{@const isActive = existingAlarm?.enabled ?? false}
+				<div
+					class="alarm-tile"
+					class:active={isActive}
+					role="button"
+					tabindex="0"
+					onclick={() => togglePreset(preset.time, preset.label)}
+					onkeydown={(e) => e.key === 'Enter' && togglePreset(preset.time, preset.label)}
 				>
-					<!-- Time -->
-					<div class="mb-4">
-						<label for="alarm-time" class="mb-1 block text-sm font-medium">{$_('alarm.time')}</label
-						>
-						<input id="alarm-time" type="time" class="input time-input" bind:value={editTime} />
+					<div class="text-xl font-light text-foreground tabular-nums text-center">
+						{preset.time}
 					</div>
-
-					<!-- Label -->
-					<div class="mb-4">
-						<label for="alarm-label" class="mb-1 block text-sm font-medium"
-							>{$_('alarm.label')}</label
-						>
-						<input
-							id="alarm-label"
-							type="text"
-							class="input"
-							placeholder="Arbeit, Sport, etc."
-							bind:value={editLabel}
-						/>
+					<div class="text-[10px] text-muted-foreground text-center truncate mt-0.5">
+						{existingAlarm?.label || preset.label}
 					</div>
-
-					<!-- Repeat Days -->
-					<div class="mb-4">
-						<span class="mb-2 block text-sm font-medium">{$_('alarm.repeat')}</span>
-						<div class="day-selector">
-							{#each dayNames as day, i}
-								<button
-									type="button"
-									class:active={editRepeatDays.includes(i)}
-									onclick={() => toggleEditDay(i)}
-								>
-									{day}
-								</button>
-							{/each}
-						</div>
-					</div>
-
-					<!-- Sound -->
-					<div class="mb-4">
-						<label for="alarm-sound" class="mb-1 block text-sm font-medium"
-							>{$_('alarm.sound')}</label
-						>
-						<select id="alarm-sound" class="input" bind:value={editSound}>
-							{#each ALARM_SOUNDS as sound}
-								<option value={sound.id}>{sound.nameDE}</option>
-							{/each}
-						</select>
-					</div>
-
-					<!-- Snooze -->
-					<div class="mb-6">
-						<label for="alarm-snooze" class="mb-1 block text-sm font-medium"
-							>{$_('alarm.snooze')}</label
-						>
-						<select id="alarm-snooze" class="input" bind:value={editSnoozeMinutes}>
-							<option value={5}>5 Minuten</option>
-							<option value={10}>10 Minuten</option>
-							<option value={15}>15 Minuten</option>
-							<option value={30}>30 Minuten</option>
-						</select>
-					</div>
-
-					<!-- Actions -->
-					<div class="flex gap-3">
-						<button type="button" class="btn btn-secondary flex-1" onclick={closeEditModal}>
-							{$_('common.cancel')}
-						</button>
-						<button type="submit" class="btn btn-primary flex-1">
-							{$_('common.save')}
-						</button>
-					</div>
-				</form>
-			</div>
+				</div>
+			{/each}
 		</div>
-	{/if}
-</div>
+
+		<!-- Custom Alarms (Grid) -->
+		{#if allAlarms.value.filter((a) => !DEFAULT_ALARM_PRESETS.some((p) => p.time === a.time.slice(0, 5))).length > 0}
+			{@const customAlarms = allAlarms.value.filter(
+				(a) => !DEFAULT_ALARM_PRESETS.some((p) => p.time === a.time.slice(0, 5))
+			)}
+			<div class="mt-4">
+				<h2 class="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wide">
+					{$_('alarm.custom')}
+				</h2>
+				<div class="alarm-grid">
+					{#each customAlarms as alarm (alarm.id)}
+						<div
+							class="alarm-tile"
+							class:active={alarm.enabled}
+							role="button"
+							tabindex="0"
+							onclick={() => handleToggle(alarm.id)}
+							onkeydown={(e) => e.key === 'Enter' && handleToggle(alarm.id)}
+						>
+							<div class="text-xl font-light text-foreground tabular-nums text-center">
+								{alarm.time.slice(0, 5)}
+							</div>
+							<div class="text-[10px] text-muted-foreground text-center truncate mt-0.5">
+								{alarm.label || getRepeatText(alarm.repeatDays)}
+							</div>
+						</div>
+					{/each}
+				</div>
+			</div>
+		{/if}
+
+		<!-- Edit Modal -->
+		{#if showEditModal}
+			<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+				<div class="card w-full max-w-md">
+					<h2 class="mb-4 text-xl font-semibold">{$_('alarm.edit')}</h2>
+
+					<form
+						onsubmit={(e) => {
+							e.preventDefault();
+							handleEditSubmit();
+						}}
+					>
+						<!-- Time -->
+						<div class="mb-4">
+							<label for="alarm-time" class="mb-1 block text-sm font-medium"
+								>{$_('alarm.time')}</label
+							>
+							<input id="alarm-time" type="time" class="input time-input" bind:value={editTime} />
+						</div>
+
+						<!-- Label -->
+						<div class="mb-4">
+							<label for="alarm-label" class="mb-1 block text-sm font-medium"
+								>{$_('alarm.label')}</label
+							>
+							<input
+								id="alarm-label"
+								type="text"
+								class="input"
+								placeholder="Arbeit, Sport, etc."
+								bind:value={editLabel}
+							/>
+						</div>
+
+						<!-- Repeat Days -->
+						<div class="mb-4">
+							<span class="mb-2 block text-sm font-medium">{$_('alarm.repeat')}</span>
+							<div class="day-selector">
+								{#each dayNames as day, i}
+									<button
+										type="button"
+										class:active={editRepeatDays.includes(i)}
+										onclick={() => toggleEditDay(i)}
+									>
+										{day}
+									</button>
+								{/each}
+							</div>
+						</div>
+
+						<!-- Sound -->
+						<div class="mb-4">
+							<label for="alarm-sound" class="mb-1 block text-sm font-medium"
+								>{$_('alarm.sound')}</label
+							>
+							<select id="alarm-sound" class="input" bind:value={editSound}>
+								{#each ALARM_SOUNDS as sound}
+									<option value={sound.id}>{sound.nameDE}</option>
+								{/each}
+							</select>
+						</div>
+
+						<!-- Snooze -->
+						<div class="mb-6">
+							<label for="alarm-snooze" class="mb-1 block text-sm font-medium"
+								>{$_('alarm.snooze')}</label
+							>
+							<select id="alarm-snooze" class="input" bind:value={editSnoozeMinutes}>
+								<option value={5}>5 Minuten</option>
+								<option value={10}>10 Minuten</option>
+								<option value={15}>15 Minuten</option>
+								<option value={30}>30 Minuten</option>
+							</select>
+						</div>
+
+						<!-- Actions -->
+						<div class="flex gap-3">
+							<button type="button" class="btn btn-secondary flex-1" onclick={closeEditModal}>
+								{$_('common.cancel')}
+							</button>
+							<button type="submit" class="btn btn-primary flex-1">
+								{$_('common.save')}
+							</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		{/if}
+	</div>
+</RoutePage>

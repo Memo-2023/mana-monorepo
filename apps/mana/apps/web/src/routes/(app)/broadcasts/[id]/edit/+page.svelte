@@ -2,6 +2,7 @@
 	import { page } from '$app/stores';
 	import { useAllCampaigns } from '$lib/modules/broadcast/queries';
 	import ComposeView from '$lib/modules/broadcast/views/ComposeView.svelte';
+	import { RoutePage } from '$lib/components/shell';
 
 	const campaigns$ = useAllCampaigns();
 	const campaigns = $derived(campaigns$.value ?? []);
@@ -14,25 +15,27 @@
 	<title>{campaign?.name ?? 'Kampagne'} - Mana</title>
 </svelte:head>
 
-{#if !campaign && campaigns$.value !== undefined}
-	<div class="not-found">
-		<p>Kampagne nicht gefunden.</p>
-		<a href="/broadcasts">Zurück zur Übersicht</a>
-	</div>
-{:else if campaign && !canEdit}
-	<div class="not-editable">
-		<h2>Kampagne kann nicht bearbeitet werden</h2>
-		<p>
-			Status: <strong>{campaign.status}</strong>. Nur Entwürfe sind editierbar. Dupliziere die
-			Kampagne, um eine neue Version zu erstellen.
-		</p>
-		<a href="/broadcasts">Zurück</a>
-	</div>
-{:else if campaign}
-	<ComposeView existing={campaign} />
-{:else}
-	<div class="loading">Lädt …</div>
-{/if}
+<RoutePage appId="broadcasts" backHref="/broadcasts" title="Broadcast">
+	{#if !campaign && campaigns$.value !== undefined}
+		<div class="not-found">
+			<p>Kampagne nicht gefunden.</p>
+			<a href="/broadcasts">Zurück zur Übersicht</a>
+		</div>
+	{:else if campaign && !canEdit}
+		<div class="not-editable">
+			<h2>Kampagne kann nicht bearbeitet werden</h2>
+			<p>
+				Status: <strong>{campaign.status}</strong>. Nur Entwürfe sind editierbar. Dupliziere die
+				Kampagne, um eine neue Version zu erstellen.
+			</p>
+			<a href="/broadcasts">Zurück</a>
+		</div>
+	{:else if campaign}
+		<ComposeView existing={campaign} />
+	{:else}
+		<div class="loading">Lädt …</div>
+	{/if}
+</RoutePage>
 
 <style>
 	.not-found,

@@ -3,6 +3,7 @@
 	import { _ } from 'svelte-i18n';
 	import { QuotesEvents } from '@mana/shared-utils/analytics';
 	import { CATEGORIES, getQuotesByCategory, type Category } from '@quotes/content';
+	import { RoutePage } from '$lib/components/shell';
 
 	// Category data with icons and gradients
 	const categoryData: Record<
@@ -94,25 +95,27 @@
 	<title>Quotes - {$_('categories.title')}</title>
 </svelte:head>
 
-<div class="max-w-4xl mx-auto">
-	<h1 class="text-3xl font-bold text-foreground mb-8">{$_('categories.title')}</h1>
+<RoutePage appId="quotes" backHref="/quotes">
+	<div class="max-w-4xl mx-auto">
+		<h1 class="text-3xl font-bold text-foreground mb-8">{$_('categories.title')}</h1>
 
-	<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-		{#each CATEGORIES as category}
-			{@const data = categoryData[category]}
-			<button
-				onclick={() => {
-					QuotesEvents.categoryViewed(category);
-					goto(`/quotes/category/${category}`);
-				}}
-				class="group p-6 rounded-2xl bg-gradient-to-br {data.gradient} text-white text-left transition-transform hover:scale-105 hover:shadow-xl"
-			>
-				<div class="text-4xl mb-3">{data.icon}</div>
-				<h2 class="text-xl font-semibold mb-1">{$_(data.labelKey)}</h2>
-				<p class="text-foreground text-sm">
-					{$_('categories.quotes', { values: { count: data.count } })}
-				</p>
-			</button>
-		{/each}
+		<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+			{#each CATEGORIES as category}
+				{@const data = categoryData[category]}
+				<button
+					onclick={() => {
+						QuotesEvents.categoryViewed(category);
+						goto(`/quotes/category/${category}`);
+					}}
+					class="group p-6 rounded-2xl bg-gradient-to-br {data.gradient} text-white text-left transition-transform hover:scale-105 hover:shadow-xl"
+				>
+					<div class="text-4xl mb-3">{data.icon}</div>
+					<h2 class="text-xl font-semibold mb-1">{$_(data.labelKey)}</h2>
+					<p class="text-foreground text-sm">
+						{$_('categories.quotes', { values: { count: data.count } })}
+					</p>
+				</button>
+			{/each}
+		</div>
 	</div>
-</div>
+</RoutePage>

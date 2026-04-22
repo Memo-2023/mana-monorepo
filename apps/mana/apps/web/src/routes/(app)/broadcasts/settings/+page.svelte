@@ -4,21 +4,24 @@
 -->
 <script lang="ts">
 	import SettingsForm from '$lib/modules/broadcast/components/SettingsForm.svelte';
+	import { RoutePage } from '$lib/components/shell';
 </script>
 
 <svelte:head>
 	<title>Broadcast-Einstellungen — Mana</title>
 </svelte:head>
 
-<div class="pane">
-	<header class="bar">
-		<div class="title">
-			<strong>Broadcast-Einstellungen</strong>
-			<span class="sub">Sender-Defaults, Impressum und Footer</span>
-		</div>
-	</header>
-	<SettingsForm />
-</div>
+<RoutePage appId="broadcasts" backHref="/broadcasts">
+	<div class="pane">
+		<header class="bar">
+			<div class="title">
+				<strong>Broadcast-Einstellungen</strong>
+				<span class="sub">Sender-Defaults, Impressum und Footer</span>
+			</div>
+		</header>
+		<SettingsForm />
+	</div>
+</RoutePage>
 
 <style>
 	.pane {

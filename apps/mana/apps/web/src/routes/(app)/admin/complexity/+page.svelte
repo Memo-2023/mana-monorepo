@@ -6,6 +6,9 @@
 	 */
 
 	import ListView from '$lib/modules/complexity/ListView.svelte';
+	import { RoutePage } from '$lib/components/shell';
 </script>
 
-<ListView />
+<RoutePage appId="complexity">
+	<ListView />
+</RoutePage>

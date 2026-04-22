@@ -3,6 +3,7 @@
 	import LandingEditor from '$lib/components/landing/LandingEditor.svelte';
 	import { getOrganization } from '$lib/api/services/landing';
 	import { onMount } from 'svelte';
+	import { RoutePage } from '$lib/components/shell';
 
 	let { data } = $props();
 
@@ -21,40 +22,45 @@
 	});
 </script>
 
-{#if loading}
-	<div class="flex items-center justify-center py-20">
-		<div
-			class="h-8 w-8 animate-spin rounded-full border-4 border-primary-600 border-t-transparent"
-		></div>
-	</div>
-{:else if error}
-	<div class="py-12 text-center">
-		<p class="text-red-500">{error}</p>
-		<a
-			href="/organizations/{data.orgId}"
-			class="mt-4 inline-block text-sm text-primary-600 hover:underline"
-		>
-			Back to organization
-		</a>
-	</div>
-{:else if org}
-	<div class="space-y-6">
-		<PageHeader title="Landing Page" description="Configure the public landing page for {org.name}">
-			{#snippet actions()}
-				<a
-					href="/organizations/{data.orgId}"
-					class="text-sm text-muted-foreground hover:text-muted-foreground dark:text-muted-foreground dark:hover:text-foreground"
-				>
-					Back to {org.name}
-				</a>
-			{/snippet}
-		</PageHeader>
+<RoutePage appId="organizations" backHref="/organizations" title="Organisation">
+	{#if loading}
+		<div class="flex items-center justify-center py-20">
+			<div
+				class="h-8 w-8 animate-spin rounded-full border-4 border-primary-600 border-t-transparent"
+			></div>
+		</div>
+	{:else if error}
+		<div class="py-12 text-center">
+			<p class="text-red-500">{error}</p>
+			<a
+				href="/organizations/{data.orgId}"
+				class="mt-4 inline-block text-sm text-primary-600 hover:underline"
+			>
+				Back to organization
+			</a>
+		</div>
+	{:else if org}
+		<div class="space-y-6">
+			<PageHeader
+				title="Landing Page"
+				description="Configure the public landing page for {org.name}"
+			>
+				{#snippet actions()}
+					<a
+						href="/organizations/{data.orgId}"
+						class="text-sm text-muted-foreground hover:text-muted-foreground dark:text-muted-foreground dark:hover:text-foreground"
+					>
+						Back to {org.name}
+					</a>
+				{/snippet}
+			</PageHeader>
 
-		<LandingEditor
-			orgId={data.orgId}
-			orgSlug={org.slug || ''}
-			initialConfig={org.metadata?.landingPage}
-			existingMetadata={org.metadata || {}}
-		/>
-	</div>
-{/if}
+			<LandingEditor
+				orgId={data.orgId}
+				orgSlug={org.slug || ''}
+				initialConfig={org.metadata?.landingPage}
+				existingMetadata={org.metadata || {}}
+			/>
+		</div>
+	{/if}
+</RoutePage>

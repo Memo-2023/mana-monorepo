@@ -10,6 +10,7 @@
 	import { createMockEcosystem } from '$lib/components/observatory/data/mockData';
 	import { LAKES, RIVERS } from '$lib/components/observatory/data/layout';
 	import type { AppData } from '$lib/components/observatory/data/types';
+	import { RoutePage } from '$lib/components/shell';
 
 	type Tab = 'scene' | 'plants' | 'lakes' | 'rivers' | 'leaderboard' | 'compare' | 'trends';
 	let activeTab = $state<Tab>('scene');
@@ -39,162 +40,164 @@
 	];
 </script>
 
-<div class="observatory-page">
-	<!-- Tab bar -->
-	<div class="tab-bar">
-		{#each tabs as tab}
-			<button
-				type="button"
-				class="tab-btn"
-				class:active={activeTab === tab.id}
-				onclick={() => (activeTab = tab.id)}
-			>
-				{tab.label}
-				{#if tab.count}
-					<span class="tab-count">{tab.count}</span>
+<RoutePage appId="observatory">
+	<div class="observatory-page">
+		<!-- Tab bar -->
+		<div class="tab-bar">
+			{#each tabs as tab}
+				<button
+					type="button"
+					class="tab-btn"
+					class:active={activeTab === tab.id}
+					onclick={() => (activeTab = tab.id)}
+				>
+					{tab.label}
+					{#if tab.count}
+						<span class="tab-count">{tab.count}</span>
+					{/if}
+				</button>
+			{/each}
+		</div>
+
+		<!-- Tab content -->
+		{#if activeTab === 'scene'}
+			<div class="scene-container">
+				<SeenplatteScene />
+			</div>
+		{:else if activeTab === 'plants'}
+			<div class="gallery-section">
+				<div class="gallery-header">
+					<h2 class="gallery-title">Alle Pflanzen</h2>
+					<p class="gallery-subtitle">
+						Jede App im Mana-Okosystem als Pflanze — Grosse und Art spiegeln den ManaScore wider
+					</p>
+				</div>
+
+				{#if matureApps.length}
+					<div class="gallery-group">
+						<h3 class="group-label">
+							<span class="group-dot" style="background: #34d399"></span>
+							Mature
+						</h3>
+						<div class="gallery-scroll">
+							{#each matureApps as app (app.id)}
+								<PlantCard {app} onclick={() => (selectedApp = app)} />
+							{/each}
+						</div>
+					</div>
 				{/if}
-			</button>
-		{/each}
+
+				{#if productionApps.length}
+					<div class="gallery-group">
+						<h3 class="group-label">
+							<span class="group-dot" style="background: #60a5fa"></span>
+							Production
+						</h3>
+						<div class="gallery-scroll">
+							{#each productionApps as app (app.id)}
+								<PlantCard {app} onclick={() => (selectedApp = app)} />
+							{/each}
+						</div>
+					</div>
+				{/if}
+
+				{#if betaApps.length}
+					<div class="gallery-group">
+						<h3 class="group-label">
+							<span class="group-dot" style="background: #fbbf24"></span>
+							Beta
+						</h3>
+						<div class="gallery-scroll">
+							{#each betaApps as app (app.id)}
+								<PlantCard {app} onclick={() => (selectedApp = app)} />
+							{/each}
+						</div>
+					</div>
+				{/if}
+
+				{#if alphaApps.length}
+					<div class="gallery-group">
+						<h3 class="group-label">
+							<span class="group-dot" style="background: #f97316"></span>
+							Alpha
+						</h3>
+						<div class="gallery-scroll">
+							{#each alphaApps as app (app.id)}
+								<PlantCard {app} onclick={() => (selectedApp = app)} />
+							{/each}
+						</div>
+					</div>
+				{/if}
+			</div>
+		{:else if activeTab === 'lakes'}
+			<div class="gallery-section">
+				<div class="gallery-header">
+					<h2 class="gallery-title">Alle Seen</h2>
+					<p class="gallery-subtitle">
+						Infrastruktur-Services als Gewasser — Klarheit und Fullstand zeigen den Systemzustand
+					</p>
+				</div>
+
+				<div class="gallery-scroll lakes-scroll">
+					{#each lakes as lake (lake.id)}
+						<LakeCard {lake} />
+					{/each}
+				</div>
+			</div>
+		{:else if activeTab === 'rivers'}
+			<div class="gallery-section">
+				<div class="gallery-header">
+					<h2 class="gallery-title">Alle Flusse</h2>
+					<p class="gallery-subtitle">
+						Datenstrome zwischen den Seen — Geschwindigkeit und Breite zeigen den Durchsatz
+					</p>
+				</div>
+
+				<div class="gallery-scroll">
+					{#each rivers as river (river.id)}
+						<RiverCard {river} />
+					{/each}
+				</div>
+			</div>
+		{:else if activeTab === 'leaderboard'}
+			<div class="gallery-section">
+				<div class="gallery-header">
+					<h2 class="gallery-title">Rangliste</h2>
+					<p class="gallery-subtitle">
+						Alle Apps sortiert nach Score — klicke auf Spalten zum Sortieren, auf Zeilen fur Details
+					</p>
+				</div>
+
+				<Leaderboard apps={sortedApps} onselect={(app) => (selectedApp = app)} />
+			</div>
+		{:else if activeTab === 'compare'}
+			<div class="gallery-section">
+				<div class="gallery-header">
+					<h2 class="gallery-title">Vergleich</h2>
+					<p class="gallery-subtitle">
+						Wahle bis zu 4 Apps und vergleiche ihre Starken und Schwachen direkt
+					</p>
+				</div>
+
+				<CompareView {apps} />
+			</div>
+		{:else if activeTab === 'trends'}
+			<div class="gallery-section">
+				<div class="gallery-header">
+					<h2 class="gallery-title">Trends</h2>
+					<p class="gallery-subtitle">
+						Score-Entwicklung aller Apps uber die Zeit — hover uber eine Linie fur Details
+					</p>
+				</div>
+
+				<TrendsChart {apps} />
+			</div>
+		{/if}
 	</div>
 
-	<!-- Tab content -->
-	{#if activeTab === 'scene'}
-		<div class="scene-container">
-			<SeenplatteScene />
-		</div>
-	{:else if activeTab === 'plants'}
-		<div class="gallery-section">
-			<div class="gallery-header">
-				<h2 class="gallery-title">Alle Pflanzen</h2>
-				<p class="gallery-subtitle">
-					Jede App im Mana-Okosystem als Pflanze — Grosse und Art spiegeln den ManaScore wider
-				</p>
-			</div>
-
-			{#if matureApps.length}
-				<div class="gallery-group">
-					<h3 class="group-label">
-						<span class="group-dot" style="background: #34d399"></span>
-						Mature
-					</h3>
-					<div class="gallery-scroll">
-						{#each matureApps as app (app.id)}
-							<PlantCard {app} onclick={() => (selectedApp = app)} />
-						{/each}
-					</div>
-				</div>
-			{/if}
-
-			{#if productionApps.length}
-				<div class="gallery-group">
-					<h3 class="group-label">
-						<span class="group-dot" style="background: #60a5fa"></span>
-						Production
-					</h3>
-					<div class="gallery-scroll">
-						{#each productionApps as app (app.id)}
-							<PlantCard {app} onclick={() => (selectedApp = app)} />
-						{/each}
-					</div>
-				</div>
-			{/if}
-
-			{#if betaApps.length}
-				<div class="gallery-group">
-					<h3 class="group-label">
-						<span class="group-dot" style="background: #fbbf24"></span>
-						Beta
-					</h3>
-					<div class="gallery-scroll">
-						{#each betaApps as app (app.id)}
-							<PlantCard {app} onclick={() => (selectedApp = app)} />
-						{/each}
-					</div>
-				</div>
-			{/if}
-
-			{#if alphaApps.length}
-				<div class="gallery-group">
-					<h3 class="group-label">
-						<span class="group-dot" style="background: #f97316"></span>
-						Alpha
-					</h3>
-					<div class="gallery-scroll">
-						{#each alphaApps as app (app.id)}
-							<PlantCard {app} onclick={() => (selectedApp = app)} />
-						{/each}
-					</div>
-				</div>
-			{/if}
-		</div>
-	{:else if activeTab === 'lakes'}
-		<div class="gallery-section">
-			<div class="gallery-header">
-				<h2 class="gallery-title">Alle Seen</h2>
-				<p class="gallery-subtitle">
-					Infrastruktur-Services als Gewasser — Klarheit und Fullstand zeigen den Systemzustand
-				</p>
-			</div>
-
-			<div class="gallery-scroll lakes-scroll">
-				{#each lakes as lake (lake.id)}
-					<LakeCard {lake} />
-				{/each}
-			</div>
-		</div>
-	{:else if activeTab === 'rivers'}
-		<div class="gallery-section">
-			<div class="gallery-header">
-				<h2 class="gallery-title">Alle Flusse</h2>
-				<p class="gallery-subtitle">
-					Datenstrome zwischen den Seen — Geschwindigkeit und Breite zeigen den Durchsatz
-				</p>
-			</div>
-
-			<div class="gallery-scroll">
-				{#each rivers as river (river.id)}
-					<RiverCard {river} />
-				{/each}
-			</div>
-		</div>
-	{:else if activeTab === 'leaderboard'}
-		<div class="gallery-section">
-			<div class="gallery-header">
-				<h2 class="gallery-title">Rangliste</h2>
-				<p class="gallery-subtitle">
-					Alle Apps sortiert nach Score — klicke auf Spalten zum Sortieren, auf Zeilen fur Details
-				</p>
-			</div>
-
-			<Leaderboard apps={sortedApps} onselect={(app) => (selectedApp = app)} />
-		</div>
-	{:else if activeTab === 'compare'}
-		<div class="gallery-section">
-			<div class="gallery-header">
-				<h2 class="gallery-title">Vergleich</h2>
-				<p class="gallery-subtitle">
-					Wahle bis zu 4 Apps und vergleiche ihre Starken und Schwachen direkt
-				</p>
-			</div>
-
-			<CompareView {apps} />
-		</div>
-	{:else if activeTab === 'trends'}
-		<div class="gallery-section">
-			<div class="gallery-header">
-				<h2 class="gallery-title">Trends</h2>
-				<p class="gallery-subtitle">
-					Score-Entwicklung aller Apps uber die Zeit — hover uber eine Linie fur Details
-				</p>
-			</div>
-
-			<TrendsChart {apps} />
-		</div>
-	{/if}
-</div>
-
-<!-- Detail panel (shared across tabs) -->
-<DetailPanel app={selectedApp} onclose={() => (selectedApp = null)} />
+	<!-- Detail panel (shared across tabs) -->
+	<DetailPanel app={selectedApp} onclose={() => (selectedApp = null)} />
+</RoutePage>
 
 <style>
 	.observatory-page {
