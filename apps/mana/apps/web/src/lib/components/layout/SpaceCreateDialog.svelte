@@ -12,6 +12,9 @@
 	import { SPACE_TYPES, SPACE_TYPE_LABELS, SPACE_TYPE_DESCRIPTIONS } from '@mana/shared-branding';
 	import type { SpaceType } from '@mana/shared-types';
 	import { loadActiveSpace, authFetch, writeActiveSpaceHint } from '$lib/data/scope';
+	import { getActiveSpace } from '$lib/data/scope/active-space.svelte';
+	import { useUserTagPresets } from '$lib/data/tag-presets/queries';
+	import { tagPresetsStore } from '$lib/data/tag-presets/store.svelte';
 
 	interface Props {
 		open: boolean;
@@ -30,6 +33,29 @@
 	let legalEntity = $state('');
 	let submitting = $state(false);
 	let error = $state<string | null>(null);
+
+	// ── Tag-set seeding ──────────────────────────────────────────
+	// 'empty' = the new Space starts without any tags.
+	// 'copy-current' = clones the user's current Space tags as a one-shot.
+	// <presetId> = applies the named preset's frozen snapshot.
+	//
+	// Default depends on the active Space: if the user is currently in
+	// Personal, "copy-current" is a sensible default (most users manage
+	// their tag taxonomy there). Inside a shared Space, "empty" is safer
+	// so the user doesn't unintentionally leak Team/Family tag taxonomy
+	// into the new Space.
+	const activeSpace = $derived(getActiveSpace());
+	const presets = $derived(useUserTagPresets());
+	let tagSource = $state<'empty' | 'copy-current' | string>('empty');
+
+	$effect(() => {
+		// Pick a sensible default for tagSource whenever the active Space
+		// (re)loads. User can still flip it manually.
+		if (tagSource !== 'empty') return;
+		const defaultPreset = presets.value.find((p) => p.isDefault);
+		if (defaultPreset) tagSource = defaultPreset.id;
+		else if (activeSpace?.type === 'personal') tagSource = 'copy-current';
+	});
 
 	/**
 	 * Keep `slug` in sync with `name` until the user edits the slug
@@ -87,6 +113,26 @@
 				throw new Error(text || `create failed: ${res.status}`);
 			}
 			const created = (await res.json()) as { id: string };
+
+			// Seed tags BEFORE activating the Space so copyTagsBetweenSpaces
+			// can still read from the current active Space as the source.
+			// applyPresetToSpace reads the preset from the user-level
+			// userTagPresets table (active-space-agnostic) so it works
+			// either way. Seeding failures are caught and surfaced but
+			// don't undo the Space creation — the user can seed later from
+			// inside the new Space.
+			try {
+				const sourceSpaceId = activeSpace?.id;
+				if (tagSource === 'copy-current' && sourceSpaceId) {
+					await tagPresetsStore.copyTagsBetweenSpaces(sourceSpaceId, created.id);
+				} else if (tagSource !== 'empty' && tagSource !== 'copy-current') {
+					await tagPresetsStore.applyPresetToSpace(tagSource, created.id);
+				}
+			} catch (seedErr) {
+				console.error('[SpaceCreateDialog] tag-seeding failed:', seedErr);
+				// Deliberately non-fatal — proceed with activation.
+			}
+
 			// Activate the new space so the user lands inside it on reload.
 			await authFetch('/api/auth/organization/set-active', {
 				method: 'POST',
@@ -194,6 +240,31 @@
 					<input type="text" bind:value={legalEntity} placeholder="GmbH / AG / Verein …" />
 				</label>
 			{/if}
+
+			<label class="field">
+				<span>{locale === 'de' ? 'Tag-Set' : 'Tag set'}</span>
+				<select bind:value={tagSource}>
+					<option value="empty">{locale === 'de' ? 'Leer starten' : 'Start empty'}</option>
+					{#if activeSpace}
+						<option value="copy-current">
+							{locale === 'de'
+								? `Aus „${activeSpace.name}" kopieren`
+								: `Copy from "${activeSpace.name}"`}
+						</option>
+					{/if}
+					{#each presets.value as preset (preset.id)}
+						<option value={preset.id}>
+							{preset.name} ({preset.tags.length}
+							{locale === 'de' ? 'Tags' : 'tags'})
+						</option>
+					{/each}
+				</select>
+				<small class="hint">
+					{locale === 'de'
+						? 'Tags werden einmalig kopiert — der neue Space entwickelt sich unabhängig weiter.'
+						: 'Tags get one-shot-copied — the new Space then evolves independently.'}
+				</small>
+			</label>
 
 			{#if error}
 				<div class="error">{error}</div>
@@ -369,7 +440,8 @@
 	}
 
 	.field input,
-	.field textarea {
+	.field textarea,
+	.field select {
 		padding: 0.5rem 0.75rem;
 		border: 1px solid hsl(var(--color-border));
 		border-radius: 8px;
@@ -391,7 +463,8 @@
 	}
 
 	.field input:focus,
-	.field textarea:focus {
+	.field textarea:focus,
+	.field select:focus {
 		outline: none;
 		border-color: var(--pill-primary-color, hsl(var(--color-primary, 230 80% 55%)));
 		box-shadow: 0 0 0 3px
