@@ -1,14 +1,18 @@
 /**
- * Kontext module — reactive query for the singleton document.
+ * Kontext module — reactive query for the active-Space document.
  *
  * Content is encrypted at rest. Returns null until first write; the
  * view calls kontextStore.ensureDoc() on mount to materialise the row.
+ *
+ * Per-Space since Phase 2d.2: each Space has its own kontextDoc;
+ * Personal-Space's legacy singleton row is matched by the in-scope
+ * set's inclusion of the `_personal:<userId>` sentinel.
  */
 
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
-import { db } from '$lib/data/database';
 import { decryptRecords } from '$lib/data/crypto';
-import { KONTEXT_SINGLETON_ID, type KontextDoc, type LocalKontextDoc } from './types';
+import { scopedTable } from '$lib/data/scope/scoped-db';
+import type { KontextDoc, LocalKontextDoc } from './types';
 
 export function toKontextDoc(local: LocalKontextDoc): KontextDoc {
 	return {
@@ -22,9 +26,10 @@ export function toKontextDoc(local: LocalKontextDoc): KontextDoc {
 export function useKontextDoc() {
 	return useLiveQueryWithDefault(
 		async () => {
-			const local = await db.table<LocalKontextDoc>('kontextDoc').get(KONTEXT_SINGLETON_ID);
-			if (!local || local.deletedAt) return null;
-			const [decrypted] = await decryptRecords('kontextDoc', [local]);
+			const rows = await scopedTable<LocalKontextDoc, string>('kontextDoc').toArray();
+			const match = rows.find((r) => !r.deletedAt);
+			if (!match) return null;
+			const [decrypted] = await decryptRecords('kontextDoc', [match]);
 			return decrypted ? toKontextDoc(decrypted) : null;
 		},
 		null as KontextDoc | null

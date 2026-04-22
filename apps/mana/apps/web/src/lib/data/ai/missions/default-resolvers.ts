@@ -9,6 +9,7 @@
 
 import { db } from '../../database';
 import { decryptRecords } from '../../crypto';
+import { scopedTable } from '../../scope/scoped-db';
 import { registerInputResolver } from './input-resolvers';
 import { registerInputIndexer } from './input-index';
 import type { InputResolver } from './input-resolvers';
@@ -166,15 +167,21 @@ const notesIndexer: InputIndexer = async () => {
 };
 
 const kontextIndexer: InputIndexer = async () => {
-	const doc = await db.table<KontextDocLike>('kontextDoc').get('singleton');
-	if (!doc) return [];
+	// Per-Space since Phase 2d.2: the kontextDoc for the active Space is
+	// the only candidate we surface to the picker. Personal-Space's legacy
+	// singleton row is matched via the `_personal:<userId>` sentinel in
+	// scopedTable's getInScopeSpaceIds(); Shared/Brand/Family Spaces that
+	// haven't yet authored a kontextDoc simply return an empty list.
+	const rows = await scopedTable<KontextDocLike, string>('kontextDoc').toArray();
+	const match = rows[0];
+	if (!match) return [];
 	return [
 		{
 			module: 'kontext',
 			table: 'kontextDoc',
-			id: 'singleton',
+			id: match.id,
 			label: 'Kontext-Dokument',
-			hint: 'Dein zentrales Markdown-Dokument',
+			hint: 'Dein zentrales Markdown-Dokument für diesen Space',
 		},
 	];
 };
