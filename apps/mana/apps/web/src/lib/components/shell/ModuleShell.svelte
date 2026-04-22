@@ -1,7 +1,23 @@
 <!--
-  PageShell — Shared card wrapper for pages in a carousel.
-  Provides: header, five preset widths, maximized mode.
-  Used by workbench (AppPage) and todo (TodoPage).
+  ModuleShell — Canonical card shell for every Mana module surface.
+
+  Replaces the old PageShell + AppPage split. A single component serves
+  both rendering paths:
+
+    variant="card"  — width-sized, sits in a PageCarousel next to siblings.
+                      Window actions (close / move / resize / maximize)
+                      belong here. This is what the homepage and the
+                      legacy per-module carousels (e.g. /todo) use.
+
+    variant="fill"  — fills the main content area. Sub-routes
+                      (/picture, /picture/generate, /library, …) use
+                      this. Back-button replaces the close button when
+                      a backHref is provided. No carousel window
+                      actions.
+
+  Visual chrome (paper-texture, soft border, rounded corners, shadow,
+  header bar) is identical across both variants so the homepage and
+  sub-routes read as the same system.
 -->
 <script lang="ts">
 	import { _ } from 'svelte-i18n';
@@ -13,52 +29,74 @@
 		CaretLeft,
 		CaretRight,
 		ArrowsOutLineHorizontal,
+		ArrowLeft,
 		Question,
 	} from '@mana/shared-icons';
 	import type { Snippet, Component } from 'svelte';
-	import { PAGE_WIDTH_PRESETS, nearestPresetIndex } from './width-presets';
+	import { PAGE_WIDTH_PRESETS, nearestPresetIndex } from '../page-carousel/width-presets';
 
 	interface Props {
-		widthPx: number;
+		// Layout mode
+		variant?: 'card' | 'fill';
+		/** Required for variant="card" unless maximized. */
+		widthPx?: number;
 		maximized?: boolean;
-		onClose: () => void;
-		onMinimize?: () => void;
-		onMaximize?: () => void;
-		onResize?: (widthPx: number) => void;
-		onMoveLeft?: () => void;
-		onMoveRight?: () => void;
-		onHelp?: () => void;
-		helpOpen?: boolean;
-		// Default header
+
+		// Header content
 		title?: string;
 		titleHref?: string;
 		color?: string;
 		icon?: Component;
+
+		// Card-mode actions (carousel window chrome)
+		onClose?: () => void;
+		onMaximize?: () => void;
+		onResize?: (widthPx: number) => void;
+		onMoveLeft?: () => void;
+		onMoveRight?: () => void;
+
+		// Fill-mode actions (route navigation)
+		/** If provided, renders a back arrow in the header that navigates to this URL. */
+		backHref?: string;
+		/** Custom back handler. Takes precedence over backHref — use for history.back() or custom logic. */
+		onBack?: () => void;
+
+		// Shared
+		onHelp?: () => void;
+		helpOpen?: boolean;
 		onContextMenu?: (e: MouseEvent) => void;
-		// Snippet overrides
+
+		// Snippets
 		header_left?: Snippet;
 		badge?: Snippet;
+		/** Renders to the right of the title, before the window actions.
+		 *  Use for view-specific controls (e.g. credit badge on /picture/generate). */
+		actions?: Snippet;
 		toolbar?: Snippet;
 		children: Snippet;
 	}
 
 	let {
+		variant = 'card',
 		widthPx,
 		maximized = false,
+		title = '',
+		titleHref,
+		color = '#6B7280',
+		icon: IconComponent,
 		onClose,
 		onMaximize,
 		onResize,
 		onMoveLeft,
 		onMoveRight,
+		backHref,
+		onBack,
 		onHelp,
 		helpOpen = false,
 		onContextMenu,
-		title = '',
-		titleHref,
-		color = '#6B7280',
-		icon: IconComponent,
 		header_left,
 		badge,
+		actions,
 		toolbar,
 		children,
 	}: Props = $props();
@@ -79,7 +117,7 @@
 	let widthMenuOpen = $state(false);
 	let widthBtnEl = $state<HTMLButtonElement | null>(null);
 
-	const activePresetIdx = $derived(nearestPresetIndex(widthPx));
+	const activePresetIdx = $derived(typeof widthPx === 'number' ? nearestPresetIndex(widthPx) : 0);
 
 	function selectWidth(px: number) {
 		widthMenuOpen = false;
@@ -93,12 +131,33 @@
 			widthBtnEl?.focus();
 		}
 	}
+
+	// ── Derived layout style ────────────────────────────────
+	// Card: width is whatever the carousel drag-resizes it to.
+	// Fill: width is 100% of the main container; layout's max-w-7xl caps it.
+	const widthStyle = $derived(
+		variant === 'card' ? `width: ${maximized ? '100%' : `${widthPx ?? 480}px`};` : 'width: 100%;'
+	);
+
+	const showCardActions = $derived(variant === 'card');
+	const showBackButton = $derived(variant === 'fill' && (backHref || onBack));
 </script>
 
-<div class="page-shell" class:maximized style="width: {maximized ? '100%' : `${widthPx}px`};">
-	<!-- Header with window actions -->
-	<div class="page-header" oncontextmenu={onContextMenu} role="banner">
+<div class="module-shell" class:maximized class:fill={variant === 'fill'} style={widthStyle}>
+	<!-- Header with window actions / back button -->
+	<div class="shell-header" oncontextmenu={onContextMenu} role="banner">
 		<div class="header-left">
+			{#if showBackButton}
+				{#if onBack}
+					<button class="back-btn" onclick={onBack} title="Zurück">
+						<ArrowLeft size={16} weight="bold" />
+					</button>
+				{:else if backHref}
+					<a class="back-btn" href={backHref} title="Zurück">
+						<ArrowLeft size={16} weight="bold" />
+					</a>
+				{/if}
+			{/if}
 			{#if header_left}
 				{@render header_left()}
 			{:else}
@@ -111,7 +170,7 @@
 				{/if}
 				{#if titleHref}
 					<a
-						class="page-title page-title-link"
+						class="shell-title shell-title-link"
 						href={titleHref}
 						target="_blank"
 						rel="noopener noreferrer"
@@ -121,14 +180,18 @@
 						{title}
 					</a>
 				{:else}
-					<span class="page-title">{title}</span>
+					<span class="shell-title">{title}</span>
 				{/if}
 			{/if}
 			{#if badge}
 				{@render badge()}
 			{/if}
 		</div>
+
 		<div class="window-actions">
+			{#if actions}
+				{@render actions()}
+			{/if}
 			{#if onHelp}
 				<button
 					class="window-btn"
@@ -142,7 +205,7 @@
 					<Question size={22} weight="bold" />
 				</button>
 			{/if}
-			{#if onMoveLeft}
+			{#if showCardActions && onMoveLeft}
 				<button
 					class="window-btn"
 					onclick={(e) => {
@@ -154,7 +217,7 @@
 					<CaretLeft size={24} weight="bold" />
 				</button>
 			{/if}
-			{#if onMoveRight}
+			{#if showCardActions && onMoveRight}
 				<button
 					class="window-btn"
 					onclick={(e) => {
@@ -166,7 +229,7 @@
 					<CaretRight size={24} weight="bold" />
 				</button>
 			{/if}
-			{#if onResize && !maximized}
+			{#if showCardActions && onResize && !maximized}
 				<div class="width-picker-wrapper">
 					<button
 						bind:this={widthBtnEl}
@@ -222,16 +285,18 @@
 						/>{/if}
 				</button>
 			{/if}
-			<button
-				class="window-btn window-btn-close"
-				onclick={(e) => {
-					e.stopPropagation();
-					onClose();
-				}}
-				title={$_('common.close')}
-			>
-				<X size={24} weight="bold" />
-			</button>
+			{#if showCardActions && onClose}
+				<button
+					class="window-btn window-btn-close"
+					onclick={(e) => {
+						e.stopPropagation();
+						onClose();
+					}}
+					title={$_('common.close')}
+				>
+					<X size={24} weight="bold" />
+				</button>
+			{/if}
 		</div>
 	</div>
 
@@ -241,32 +306,21 @@
 	{/if}
 
 	<!-- Body -->
-	<div class="page-body">
+	<div class="shell-body">
 		{@render children()}
 	</div>
 </div>
 
 <style>
-	/* P5: theme-token migration. The workbench paper card now follows the
-	   active theme variant, incl. a per-theme paper-grain texture applied
-	   via background-blend-mode (more robust than a ::before overlay +
-	   mix-blend-mode + opacity combo, which had invisibility issues in
-	   dark mode and stacking-context quirks). CSS vars come from
-	   applyThemeToDocument() in @mana/shared-theme — swap one line in
-	   THEME_DEFINITIONS to change the texture for a whole theme. */
-	.page-shell {
+	/* Paper card: active-theme-aware texture applied via background-blend-mode.
+	   CSS vars come from applyThemeToDocument() in @mana/shared-theme.
+	   See git log of PageShell.svelte for the blend-mode rationale — the
+	   ::before overlay pattern failed in dark mode due to stacking-context
+	   quirks. */
+	.module-shell {
 		flex: 0 0 auto;
-		/* Default page height fills the viewport between the workbench
-		   top padding and the bottom chrome (pill nav + tag strip +
-		   bottom bar). Two CSS vars cascade from the layout's <main>:
-		    - --bottom-chrome-height reacts to pill-nav collapse, tag
-		      strip visibility and bottom-bar mount state
-		    - --workbench-reserved-y collapses the py-* wrapper padding
-		      plus a small buffer into a single "non-chrome vertical"
-		      number so this calc doesn't have to mirror DOM padding
-		   `dvh` accounts for mobile Safari's retractable address bar.
-		   An inline `height: {px}px` style from the resize-drag prop
-		   overrides this value (same specificity rule as before). */
+		/* Height calc uses layout-supplied CSS vars (--bottom-chrome-height,
+		   --workbench-reserved-y) from routes/(app)/+layout.svelte's <main>. */
 		height: calc(100dvh - var(--bottom-chrome-height, 80px) - var(--workbench-reserved-y, 2.5rem));
 		min-height: 320px;
 		max-width: calc(100vw - 2rem);
@@ -275,9 +329,6 @@
 		background-size: var(--paper-size, 240px 240px);
 		background-repeat: repeat;
 		background-blend-mode: var(--paper-blend-mode, multiply);
-		/* Soft black border — 12% in light mode, bumped to 28% in dark
-		   mode (see :global(.dark) override below) where a low-alpha
-		   black would otherwise vanish into the background. */
 		border: 2px solid hsl(0 0% 0% / 0.12);
 		border-radius: 1.25rem;
 		box-shadow:
@@ -289,20 +340,23 @@
 		overflow: hidden;
 		position: relative;
 	}
+	/* Fill variant: no fade-in-from-side (that was a carousel affordance),
+	   and max-width drops since the layout already caps at max-w-7xl. */
+	.module-shell.fill {
+		animation: fadeIn 0.2s ease-out;
+		max-width: none;
+	}
 	/* Dark-mode border needs more alpha to stay visible against the
 	   dark card background. */
-	:global(.dark) .page-shell {
+	:global(.dark) .module-shell {
 		border-color: hsl(0 0% 0% / 0.28);
 	}
-
-	/* A11y: users who asked for reduced transparency/contrast drop the
-	   texture entirely — solid card only. */
 	@media (prefers-contrast: more) {
-		.page-shell {
+		.module-shell {
 			background-image: none;
 		}
 	}
-	.page-shell.maximized {
+	.module-shell.maximized {
 		position: fixed;
 		inset: 0;
 		z-index: 95;
@@ -335,9 +389,23 @@
 			transform: translateX(0);
 		}
 	}
+	/* Fill variant enters from below, not from the side. */
+	.module-shell.fill {
+		animation-name: fadeInUp;
+	}
+	@keyframes fadeInUp {
+		from {
+			opacity: 0;
+			transform: translateY(8px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
 
 	/* Header */
-	.page-header {
+	.shell-header {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
@@ -351,6 +419,25 @@
 		min-width: 0;
 		overflow: hidden;
 	}
+	.back-btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 28px;
+		height: 28px;
+		border-radius: 50%;
+		border: none;
+		background: transparent;
+		color: hsl(var(--color-muted-foreground));
+		cursor: pointer;
+		transition: all 0.15s;
+		text-decoration: none;
+		flex-shrink: 0;
+	}
+	.back-btn:hover {
+		background: hsl(var(--color-surface-hover, var(--color-muted)));
+		color: hsl(var(--color-foreground));
+	}
 	.header-icon {
 		flex-shrink: 0;
 		display: flex;
@@ -363,7 +450,7 @@
 		border-radius: 9999px;
 		flex-shrink: 0;
 	}
-	.page-title {
+	.shell-title {
 		font-size: 0.95rem;
 		font-weight: 600;
 		color: hsl(var(--color-foreground));
@@ -373,12 +460,12 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 	}
-	a.page-title-link {
+	a.shell-title-link {
 		text-decoration: none;
 		cursor: pointer;
 		transition: color 0.15s;
 	}
-	a.page-title-link:hover {
+	a.shell-title-link:hover {
 		color: hsl(var(--color-primary));
 		text-decoration: underline;
 	}
@@ -403,34 +490,33 @@
 		transition: all 0.15s;
 	}
 	.window-btn:hover {
-		background: hsl(var(--color-surface-hover));
+		background: hsl(var(--color-surface-hover, var(--color-muted)));
 		color: hsl(var(--color-foreground));
 	}
 	.window-btn-close:hover {
 		background: hsl(var(--color-error) / 0.15);
 		color: hsl(var(--color-error));
 	}
+	.window-btn-active {
+		background: hsl(var(--color-primary) / 0.12);
+		color: hsl(var(--color-primary));
+	}
 
 	/* Body */
-	.page-body {
+	.shell-body {
 		flex: 1;
 		overflow-y: auto;
 		min-height: 200px;
 	}
-	.maximized .page-header {
+	.maximized .shell-header {
 		max-width: 48rem;
 		margin-inline: auto;
 		width: 100%;
 	}
-	.maximized .page-body {
+	.maximized .shell-body {
 		max-width: 48rem;
 		margin-inline: auto;
 		width: 100%;
-	}
-
-	.window-btn-active {
-		background: hsl(var(--color-primary) / 0.12);
-		color: hsl(var(--color-primary));
 	}
 
 	/* Width picker */

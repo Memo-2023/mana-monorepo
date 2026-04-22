@@ -1,6 +1,6 @@
 <!--
   AI Missions app — workbench card.
-  Renders inside AppPage, which provides the PageShell + window chrome.
+  Renders inside AppPage, which provides the ModuleShell + window chrome.
   Master-detail inline (list ↔ create ↔ detail) in a single panel.
 -->
 <script lang="ts">

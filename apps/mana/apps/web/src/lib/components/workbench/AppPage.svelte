@@ -6,7 +6,7 @@
 <script lang="ts">
 	import { X, CaretUp, CaretDown, ArrowLeft, SpinnerGap } from '@mana/shared-icons';
 	import { _ } from 'svelte-i18n';
-	import { PageShell } from '$lib/components/page-carousel';
+	import { ModuleShell } from '$lib/components/shell';
 	import { getApp, getAppByDragType, canDrop, executeDrop } from '$lib/app-registry';
 	import type { Component } from 'svelte';
 	import { dropTarget } from '@mana/shared-ui/dnd';
@@ -295,8 +295,8 @@
 		canDrop: (p) => canDrop(p.type, appId),
 	}}
 >
-	<!-- Base: PageShell with list view (always visible) -->
-	<PageShell
+	<!-- Base: ModuleShell with list view (always visible) -->
+	<ModuleShell
 		{widthPx}
 		{maximized}
 		title={appName}
@@ -351,7 +351,7 @@
 				<SpinnerGap size={24} class="spinner" />
 			</div>
 		{/if}
-	</PageShell>
+	</ModuleShell>
 
 	<!-- Overlay: Detail view floating above -->
 	{#if overlay?.component || closing}
@@ -409,12 +409,12 @@
 	.app-page-wrapper {
 		position: relative;
 	}
-	:global(.app-page-wrapper.mana-drop-target-hover) :global(.page-shell) {
+	:global(.app-page-wrapper.mana-drop-target-hover) :global(.module-shell) {
 		outline: 2px solid hsl(var(--color-primary) / 0.5);
 		outline-offset: -2px;
 		box-shadow: 0 0 20px rgba(139, 92, 246, 0.15);
 	}
-	:global(.app-page-wrapper.mana-drop-target-success) :global(.page-shell) {
+	:global(.app-page-wrapper.mana-drop-target-success) :global(.module-shell) {
 		outline: 2px solid hsl(var(--color-success) / 0.5);
 		outline-offset: -2px;
 	}

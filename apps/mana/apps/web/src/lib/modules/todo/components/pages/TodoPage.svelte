@@ -18,7 +18,7 @@
 		Leaf,
 		Heart,
 	} from '@mana/shared-icons';
-	import { PageShell } from '$lib/components/page-carousel';
+	import { ModuleShell } from '$lib/components/shell';
 
 	interface Props {
 		pageId: string;
@@ -223,13 +223,12 @@
 	}
 </script>
 
-<PageShell
+<ModuleShell
 	{widthPx}
 	{maximized}
 	color={displayColor}
 	icon={IconComponent}
 	{onClose}
-	{onMinimize}
 	{onMaximize}
 	{onResize}
 >
@@ -310,7 +309,7 @@
 			</div>
 		{/if}
 	</div>
-</PageShell>
+</ModuleShell>
 
 <style>
 	.header-icon {

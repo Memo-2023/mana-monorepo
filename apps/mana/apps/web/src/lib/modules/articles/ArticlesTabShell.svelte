@@ -90,7 +90,7 @@
 		flex-direction: column;
 		gap: 1rem;
 		/* Innen-Padding als Single-Source-of-Truth. In Workbench-Karten */
-		/* hat PageShell's `.page-body` null padding — ohne das hier würde */
+		/* hat ModuleShell's `.shell-body` null padding — ohne das hier würde */
 		/* der QuickAdd-Input direkt am Card-Rand kleben. Im Route-Kontext */
 		/* liegt dieses Padding innerhalb des (app)-Layout-Wrappers und   */
 		/* ergibt insgesamt ein ruhig gespaciedes Bild.                    */

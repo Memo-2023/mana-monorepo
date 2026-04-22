@@ -1001,7 +1001,7 @@
 
 		<!-- Main content.
 			 Publish layout offsets as CSS variables so descendants (esp.
-			 PageShell in the carousel) can compute their available
+			 ModuleShell in the carousel) can compute their available
 			 height against viewport + bottom chrome without prop
 			 drilling. `--workbench-top-offset` must match the vertical
 			 padding on the inner max-w-7xl wrapper below. -->

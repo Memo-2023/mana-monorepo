@@ -1,6 +1,6 @@
 <!--
   ContactPage — A single page in the contacts carousel.
-  Shows a filtered/sorted contact list inside a PageShell.
+  Shows a filtered/sorted contact list inside a ModuleShell.
 -->
 <script lang="ts">
 	import { isToday, differenceInDays, startOfDay, setYear } from 'date-fns';
@@ -19,7 +19,7 @@
 		MapPin,
 		Clock,
 	} from '@mana/shared-icons';
-	import { PageShell } from '$lib/components/page-carousel';
+	import { ModuleShell } from '$lib/components/shell';
 	import type { Contact } from '../../types';
 	import { SELF_CONTACT_ID } from '../../collections';
 	import {
@@ -211,14 +211,13 @@
 	}
 </script>
 
-<PageShell
+<ModuleShell
 	{widthPx}
 	{maximized}
 	title={meta.title}
 	color={meta.color}
 	icon={meta.icon}
 	{onClose}
-	{onMinimize}
 	{onMaximize}
 	{onResize}
 >
@@ -252,7 +251,7 @@
 			{/each}
 		{/if}
 	</div>
-</PageShell>
+</ModuleShell>
 
 {#snippet profileCard(contact: Contact)}
 	<button

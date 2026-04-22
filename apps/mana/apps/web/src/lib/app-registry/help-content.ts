@@ -1,8 +1,8 @@
 /**
  * Per-module help content — description, features, tips.
  *
- * Rendered inline in the page-body when the user clicks the help (?)
- * icon in the PageShell header. Keyed by appId.
+ * Rendered inline in the shell body when the user clicks the help (?)
+ * icon in the ModuleShell header. Keyed by appId.
  */
 
 export interface ModuleHelp {
