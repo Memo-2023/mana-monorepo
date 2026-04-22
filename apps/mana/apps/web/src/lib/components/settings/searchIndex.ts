@@ -4,9 +4,9 @@
  * updates both the navigation and the search results.
  */
 import type { Component } from 'svelte';
-import { Gear, Robot, ShieldCheck, Cloud } from '@mana/shared-icons';
+import { Gear, Robot, ShieldCheck, Cloud, Tag } from '@mana/shared-icons';
 
-export type CategoryId = 'general' | 'ai' | 'security' | 'data';
+export type CategoryId = 'general' | 'ai' | 'security' | 'data' | 'tag-presets';
 
 export interface Category {
 	id: CategoryId;
@@ -54,6 +54,13 @@ export const categories: Category[] = [
 			'backup',
 			'danger-zone',
 		],
+	},
+	{
+		id: 'tag-presets',
+		label: 'Tag-Presets',
+		description: 'Tag-Sets für neue Spaces',
+		icon: Tag,
+		anchors: ['tag-presets'],
 	},
 ];
 

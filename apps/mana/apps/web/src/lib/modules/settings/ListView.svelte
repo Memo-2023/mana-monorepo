@@ -16,6 +16,7 @@
 	import AiSection from '$lib/components/settings/sections/AiSection.svelte';
 	import SecuritySection from '$lib/components/settings/sections/SecuritySection.svelte';
 	import DataSection from '$lib/components/settings/sections/DataSection.svelte';
+	import TagPresetsSection from '$lib/components/settings/sections/TagPresetsSection.svelte';
 
 	let activeCategory = $state<CategoryId>('general');
 
@@ -77,6 +78,8 @@
 			<SecuritySection />
 		{:else if activeCategory === 'data'}
 			<DataSection />
+		{:else if activeCategory === 'tag-presets'}
+			<TagPresetsSection />
 		{/if}
 	</div>
 
