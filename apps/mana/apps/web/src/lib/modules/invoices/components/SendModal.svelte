@@ -19,7 +19,6 @@
 	import { untrack } from 'svelte';
 	import type { Invoice, InvoiceSettings } from '../types';
 	import { buildInvoiceMailDraft, mailDraftToMailto, looksLikeEmail } from '../mail-template';
-	import { renderInvoicePdfBlob } from '../pdf/renderer';
 	import { invoicesStore } from '../stores/invoices.svelte';
 
 	interface Props {
@@ -49,6 +48,10 @@
 			// 1. Download the PDF so the user can attach it. We don't wait for
 			//    them to confirm download — the browser's download toast is
 			//    visible in parallel with the mail compose window.
+			// Dynamic import keeps pdf-lib + swissqrbill out of the route bundle;
+			// by the time SendModal is mounted the user has already accepted a
+			// small lazy-load delay on the parent DetailView.
+			const { renderInvoicePdfBlob } = await import('../pdf/renderer');
 			const blob = await renderInvoicePdfBlob(invoice, settings);
 			const pdfUrl = URL.createObjectURL(blob);
 			const a = document.createElement('a');

@@ -17,7 +17,7 @@ import { encryptRecord } from '$lib/data/crypto';
 import { emitDomainEvent } from '$lib/data/events';
 import { invoiceTable } from '../collections';
 import { computeInvoiceTotals } from '../totals';
-import { generateSCORReference } from '../pdf/qr-bill';
+import { generateSCORReference } from '../pdf/scor';
 import { financeStore } from '$lib/modules/finance/stores/finance.svelte';
 import { CURRENCIES } from '../constants';
 import type {

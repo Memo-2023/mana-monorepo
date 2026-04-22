@@ -36,6 +36,7 @@
 		"audit:port-drift": "node scripts/audit-port-drift.mjs",
 		"audit:test-coverage": "node scripts/audit-test-coverage.mjs",
 		"audit:bundle": "node scripts/audit-bundle.mjs",
+		"audit:icon-usage": "node scripts/audit-icon-usage.mjs",
 		"audit:all": "pnpm run audit:port-drift && pnpm run audit:i18n-coverage --summary && pnpm run audit:test-coverage --summary",
 		"generate:dockerfiles": "node scripts/generate-dockerfiles.mjs",
 		"setup:env": "node scripts/generate-env.mjs",

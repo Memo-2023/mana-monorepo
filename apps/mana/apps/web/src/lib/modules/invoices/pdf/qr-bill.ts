@@ -41,11 +41,16 @@
 
 import type { PDFDocument } from 'pdf-lib';
 import { SwissQRBill } from 'swissqrbill/svg';
-import { isIBANValid, calculateSCORReferenceChecksum } from 'swissqrbill/utils';
+import { isIBANValid } from 'swissqrbill/utils';
 import type { Data } from 'swissqrbill/types';
 import type { Invoice, InvoiceSettings } from '../types';
 import { CURRENCIES } from '../constants';
 import { A4, mm } from './templates/default';
+// Re-export so existing callers keep working, but prefer importing from
+// './scor' directly (keeps swissqrbill/svg + pdf-lib out of the callers'
+// bundle when they only need the reference string).
+import { generateSCORReference } from './scor';
+export { generateSCORReference };
 
 export class QRBillError extends Error {
 	constructor(
@@ -61,31 +66,6 @@ export class QRBillError extends Error {
 		super(message);
 		this.name = 'QRBillError';
 	}
-}
-
-// ─── SCOR reference ──────────────────────────────────────
-
-/**
- * Generate an ISO 11649 Creditor Reference (SCOR) for the invoice. Uses
- * the invoice number as payload so the reference is stable across re-
- * renders. Format: `RF{check}{payload}`.
- *
- *   invoice.number "2026-0042" → payload "20260042" → RF{check}20260042
- *
- * Non-alphanumerics are stripped (the spec allows only [0-9A-Z] in the
- * payload). The payload is truncated to 21 chars (SCOR max).
- */
-export function generateSCORReference(invoiceNumber: string): string {
-	const payload = invoiceNumber
-		.replace(/[^0-9A-Za-z]/g, '')
-		.toUpperCase()
-		.slice(0, 21);
-	if (!payload) {
-		// Degenerate input (e.g. all dashes) — fall back to a literal.
-		return `RF${calculateSCORReferenceChecksum('INVOICE')}INVOICE`;
-	}
-	const checksum = calculateSCORReferenceChecksum(payload);
-	return `RF${checksum}${payload}`;
 }
 
 // ─── Address parsing ─────────────────────────────────────

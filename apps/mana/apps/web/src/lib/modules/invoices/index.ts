@@ -34,8 +34,12 @@ export {
 
 export { computeLineTotal, computeInvoiceTotals, EMPTY_TOTALS } from './totals';
 
-export { renderInvoicePdf, renderInvoicePdfBlob, qrBillStatus } from './pdf/renderer';
-export { generateSCORReference, QRBillError } from './pdf/qr-bill';
+// Deliberately NOT re-exporting the PDF renderer from here: it pulls
+// pdf-lib + swissqrbill/svg (~350 KB) and would force every consumer of
+// the module's barrel into a fat bundle. Use `await import(
+// '$lib/modules/invoices/pdf/renderer')` at the call site instead.
+export { generateSCORReference } from './pdf/scor';
+export { QRBillError } from './pdf/qr-bill';
 
 export { invoicesStore } from './stores/invoices.svelte';
 export { invoiceSettingsStore, ensureSettings } from './stores/settings.svelte';

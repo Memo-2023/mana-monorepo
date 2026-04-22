@@ -8,10 +8,18 @@
 	import SendModal from '../components/SendModal.svelte';
 	import { invoicesStore } from '../stores/invoices.svelte';
 	import { invoiceSettingsStore } from '../stores/settings.svelte';
-	import { renderInvoicePdfBlob, qrBillStatus } from '../pdf/renderer';
 	import { formatAmount } from '../queries';
 	import type { Invoice, InvoiceSettings } from '../types';
 	import { STATUS_LABELS } from '../constants';
+
+	// Dynamic import — pdf-lib + swissqrbill together are ~350 KB, only needed
+	// when a user actually opens an invoice (or sends one). Lazy-loading them
+	// drops the /invoices/[id] route bundle from 534 KB to ~180 KB.
+	let rendererMod: typeof import('../pdf/renderer') | null = null;
+	async function getRenderer() {
+		rendererMod ??= await import('../pdf/renderer');
+		return rendererMod;
+	}
 
 	interface Props {
 		invoice: Invoice;
@@ -40,6 +48,7 @@
 		try {
 			const settings: InvoiceSettings = await invoiceSettingsStore.get();
 			settingsCache = settings;
+			const { renderInvoicePdfBlob, qrBillStatus } = await getRenderer();
 			// Compute QR-Bill eligibility first so we can show a warning even
 			// if the rest of the PDF renders fine. The renderer will silently
 			// omit the Zahlteil when not eligible.
@@ -79,6 +88,7 @@
 	async function downloadPdf() {
 		try {
 			const settings: InvoiceSettings = await invoiceSettingsStore.get();
+			const { renderInvoicePdfBlob } = await getRenderer();
 			const blob = await renderInvoicePdfBlob(invoice, settings);
 			const url = URL.createObjectURL(blob);
 			const a = document.createElement('a');
