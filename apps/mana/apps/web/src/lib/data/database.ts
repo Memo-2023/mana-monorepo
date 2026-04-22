@@ -852,6 +852,49 @@ db.version(35)
 		}
 	});
 
+// v36 — Phase 2c-followup #2: strip the Space-scope fields from
+// user-level singleton tables. v28 blanket-stamped every row with
+// `spaceId=_personal:<userId>` + `authorId` + `visibility`, but
+// user-level tables (userSettings, invoiceSettings, …) are genuinely
+// user-scoped — they're never queried through scopedTable. Those
+// fields were dead weight + a subtle invariant violation ("user-level
+// table with a spaceId stamp is either user-level or space-level,
+// pick one"). Hook was updated in the same commit to stop stamping
+// them on user-level tables going forward; this upgrade cleans up
+// the historical rows.
+//
+// Grep verified: zero callers use `scopedTable(<user-level-table>)`
+// or `.where('spaceId')` against these tables, so dropping is safe.
+// No schema change — the columns weren't indexed on user-level
+// tables, so there's nothing to re-declare in .stores().
+db.version(36).upgrade(async (tx) => {
+	const USER_LEVEL = [
+		'userSettings',
+		'userContext',
+		'newsPreferences',
+		'meditateSettings',
+		'sleepSettings',
+		'moodSettings',
+		'timeSettings',
+		'invoiceSettings',
+		'broadcastSettings',
+		'wetterSettings',
+		'userTagPresets',
+	];
+
+	for (const name of USER_LEVEL) {
+		if (!tx.db.tables.find((t) => t.name === name)) continue;
+		await tx
+			.table(name)
+			.toCollection()
+			.modify((record: Record<string, unknown>) => {
+				if ('spaceId' in record) delete record.spaceId;
+				if ('authorId' in record) delete record.authorId;
+				if ('visibility' in record) delete record.visibility;
+			});
+	}
+});
+
 // ─── Sync Routing ──────────────────────────────────────────
 // SYNC_APP_MAP, TABLE_TO_SYNC_NAME, TABLE_TO_APP, SYNC_NAME_TO_TABLE,
 // toSyncName() and fromSyncName() are now derived from per-module
@@ -1058,28 +1101,37 @@ for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {
 			// tenancy on spaceId.
 			const objRecord = obj as Record<string, unknown>;
 			const effectiveUserId = getEffectiveUserId();
-			if (USER_LEVEL_TABLES.has(tableName)) {
+			const isUserLevel = USER_LEVEL_TABLES.has(tableName);
+
+			if (isUserLevel) {
 				if (objRecord.userId === undefined || objRecord.userId === null) {
 					objRecord.userId = effectiveUserId;
 				}
-			}
-
-			// Auto-stamp the Space-scope fields. Until the scope bootstrap
-			// (see `./scope/active-space.svelte.ts`) resolves the user's
-			// personal-space id from Better Auth, new records carry a
-			// deterministic sentinel `_personal:<userId>` that the bootstrap
-			// rewrites in a single pass. Module stores set spaceId explicitly
-			// once they start writing into non-personal spaces — this stamp
-			// only fills the gap. Sentinel uses `effectiveUserId` directly
-			// now that `userId` may not be present on the record itself.
-			if (objRecord.spaceId === undefined || objRecord.spaceId === null) {
-				objRecord.spaceId = `_personal:${effectiveUserId}`;
-			}
-			if (objRecord.authorId === undefined || objRecord.authorId === null) {
-				objRecord.authorId = effectiveUserId;
-			}
-			if (objRecord.visibility === undefined || objRecord.visibility === null) {
-				objRecord.visibility = 'space';
+				// User-level tables DON'T get Space-scope fields — they're
+				// genuinely user-scoped, not tenant-scoped. v28 stamped
+				// them anyway as a byproduct of the blanket migration;
+				// Phase 2c-followup removed those fields retroactively
+				// (see v36 below). Skipping the stamps here keeps future
+				// rows clean.
+			} else {
+				// Auto-stamp the Space-scope fields on data tables. Until
+				// the scope bootstrap (see `./scope/active-space.svelte.ts`)
+				// resolves the user's personal-space id from Better Auth,
+				// new records carry a deterministic sentinel
+				// `_personal:<userId>` that the bootstrap rewrites in a
+				// single pass. Module stores set spaceId explicitly once
+				// they start writing into non-personal spaces — this stamp
+				// only fills the gap. Sentinel uses `effectiveUserId`
+				// directly since `userId` isn't on data records anymore.
+				if (objRecord.spaceId === undefined || objRecord.spaceId === null) {
+					objRecord.spaceId = `_personal:${effectiveUserId}`;
+				}
+				if (objRecord.authorId === undefined || objRecord.authorId === null) {
+					objRecord.authorId = effectiveUserId;
+				}
+				if (objRecord.visibility === undefined || objRecord.visibility === null) {
+					objRecord.visibility = 'space';
+				}
 			}
 
 			// Stamp every real field with the create-time so future LWW comparisons
