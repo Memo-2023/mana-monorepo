@@ -60,15 +60,28 @@ them):
 
 ### In scope (become Space-scoped)
 
+Confirmed by Phase 1 audit (see appendix at bottom of this doc):
+
 - `globalTags` + `tagGroups` — add `spaceId`, drop `userId`, encrypt
   `name` + `icon`.
 - `workbenchScenes` — add `spaceId`. Layout + `scopeTagIds` stay.
+  Encrypt `title`.
 - `aiAgents` — add `spaceId`. Bootstrap runs per Space.
 - `aiMissions` — add `spaceId`. Follows agents.
-- `kontextDoc` (the planner-injected user bio singleton) — becomes
-  per-Space: each Space has at most one `kontextDoc`. Keyed off
-  `[spaceId, type: 'kontextDoc']`.
-- Anything else Phase 1's audit turns up.
+- `kontextDoc` — reshape from user-level singleton to per-Space
+  (one per Space, keyed `[spaceId, type: 'kontextDoc']`).
+- `agentKontextDocs` (v22, per-agent context docs — added by audit)
+  — add `spaceId` via agent FK lookup. Ordered: migrate `aiAgents`
+  first, then backfill `agentKontextDocs.spaceId` from the parent.
+
+### Also in scope: drop `userId` across all already-migrated tables
+
+The Phase 1 audit found that **all 46 previously-migrated
+space-scoped tables still carry `userId`** (redundant with Actor
+attribution). To satisfy the "no table has both `userId` and
+`spaceId`" invariant, Phase 2 drops `userId` from every data-record
+table, not just the 7 newly-migrated ones. This is a ~53-table
+sweep, mechanically identical per table, so the work scales cheaply.
 
 ### Stays user-level (identity / preferences)
 
@@ -445,3 +458,104 @@ and the `userId` → Actor attribution cleanup).
 - **Deprecated** by this doc:
   [`per-space-vs-user-global-tags.md`](./per-space-vs-user-global-tags.md)
   — delete in Phase 8.
+
+---
+
+## Appendix — Phase 1 audit results (2026-04-22)
+
+Source: full audit of `apps/mana/apps/web/src/lib/data/database.ts`,
+`crypto/registry.ts`, `crypto/plaintext-allowlist.ts`. Conclusion:
+**no surprises that block Phase 2**, with the two scope adjustments
+already folded into the In-scope section above.
+
+### To-migrate (7 tables)
+
+| Table | Current columns | Needs Actor? | Notes |
+|---|---|---|---|
+| `globalTags` | id, name, groupId, color, icon, sortOrder, **userId**, NO spaceId | ✗ — stamping needed | Add `spaceId`. Drop `userId`. Encrypt `name` + `icon`. |
+| `tagGroups` | id, name, color, **userId**, NO spaceId | ✗ — stamping needed | Add `spaceId`. Drop `userId`. Encrypt `name`. |
+| `workbenchScenes` | id, title, layout, scopeTagIds?, order, **userId**, NO spaceId | ✗ — stamping needed | Add `spaceId`. Drop `userId`. Encrypt `title`. |
+| `aiAgents` | id, name, state, systemPrompt🔒, memory🔒, **userId**, NO spaceId | ✗ — stamping needed | Add `spaceId`. Drop `userId`. Name stays plaintext (display key). |
+| `aiMissions` | id, state, createdAt, nextRunAt, **userId**, NO spaceId | ✗ — stamping needed | Add `spaceId`. Drop `userId`. |
+| `kontextDoc` | id (singleton), content🔒 | ✗ — stamping needed | **Reshape**: `[spaceId, type: 'kontextDoc']` PK. Pre-migration singleton becomes Personal-Space's kontextDoc. Other Spaces start without one. |
+| `agentKontextDocs` | id, agentId, content🔒, NO spaceId | ✗ — stamping needed | Added by audit. Backfill `spaceId` via parent-agent lookup. Not in original plan. |
+
+Legend: 🔒 = already encrypted in crypto registry.
+
+### Already space-scoped (46 tables) — userId cleanup sweep
+
+All 46 tables migrated during the Spaces-Foundation sprint carry
+**both** `spaceId` and `userId`. Phase 2 drops the redundant
+`userId` — the migration helper runs over every table in this set
+mechanically.
+
+Sample (full list derived at implementation time from the Dexie
+schema registry): `tasks`, `events`, `notes`, `contacts`,
+`conversations`, `documents`, `dreams`, `memos`, `meditations`,
+`images`, `files`, `skills`, `plants`, `songs`, `ccLocations`,
+`places`, `presiDecks`, `cardDecks`, `articles` (v33), …
+
+The creating-hook in `database.ts` is updated to stop stamping
+`userId` on these tables (Phase 2). Attribution reads from
+`__lastActor` everywhere.
+
+### User-level (10 existing + 1 new) — NO change
+
+| Table | Purpose |
+|---|---|
+| `userSettings` | user-wide UI defaults (theme, locale) |
+| `userContext` | profile hub (about, interests, routine, goals, social) |
+| `newsPreferences` | feed subscriptions + learned weights |
+| `meditateSettings` | meditation prefs |
+| `sleepSettings` | sleep-tracking prefs |
+| `moodSettings` | mood-logging prefs |
+| `timeSettings` | time-tracking prefs |
+| `invoiceSettings` | sender profile (legal address, IBAN) |
+| `broadcastSettings` | newsletter sender defaults |
+| `wetterSettings` | weather prefs |
+| `userTagPresets` *(new in Phase 2)* | user-level templates for Space-seeding |
+
+`userContext` is **not** the same as `kontextDoc` — the former is
+the user's profile hub (identity-level bio/interests), the latter
+is the AI-planner-injected context (moves per-Space). They serve
+different roles. No collision.
+
+### Junction tables (19) — all parents space-scoped ✓
+
+No dangling references. Every junction inherits `spaceId` from its
+parent once parents are migrated.
+
+`taskLabels` · `eventTags` · `contactTags` · `conversationTags` ·
+`documentTags` · `imageTags` · `fileTags` · `photoMediaTags` ·
+`memoTags` · `mealTags` · `plantTags` · `songTags` · `skillTags` ·
+`ccLocationTags` · `placeTags` · `presiDeckTags` · `deckTags` ·
+`articleTags` · `noteTags` · `timeBlockTags`
+
+(`taskLabels` points at `globalTags` — after `globalTags` gets
+`spaceId`, the junction's `[taskId+labelId]` pair is implicitly
+within-Space via the parent task's spaceId.)
+
+### Internal / infrastructure (10) — special handling
+
+| Table | Handling |
+|---|---|
+| `_pendingChanges` | Add `spaceId` column from pending-change payload so sync routes know the partition. |
+| `_syncMeta` | Infra-level; no spaceId. |
+| `_activity` | Deprecated, superseded by `_events`. Leave read-only. |
+| `_events` | Local-only domain event store. Event metadata already carries `appId` + `recordId`; no spaceId needed at event layer (materialized downstream). |
+| `_eventsTombstones` | Sync tombstones; no spaceId (appId+collection+recordId sufficient). |
+| `_memory`, `_nudgeOutcomes` | Companion-brain local memory; never synced. No spaceId. |
+| `_byokKeys` | BYOK master-key storage. Device-local, encrypted. User-level by nature. |
+| `_aiDebugLog` | Per-iteration LLM debug capture. Capped. **Never synced** (leaks decrypted content). No spaceId. |
+| `_streakState` | Companion engagement tracker. Local-only. |
+| `_serverIterationExecutions` | Idempotency marker for server-source AI iterations. Local-only. |
+
+### Scope summary
+
+- **To-migrate**: 7 tables (add `spaceId` + drop `userId` + encrypt as noted)
+- **userId sweep**: 46 already-space-scoped tables (drop `userId` only)
+- **User-level**: 10 existing + 1 new (`userTagPresets`) — no change to these
+- **Junctions**: 19 — all parents space-scoped, no action needed
+- **Internal/infra**: 10 — handled per table-type, mostly no action
+
+**No blockers.** Phase 2 can proceed.
