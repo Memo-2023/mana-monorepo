@@ -71,6 +71,15 @@
 				if (state.status === 'unlocked') {
 					console.info('[mana-crypto] vault unlocked successfully');
 					needsRecoveryCode = false;
+					// Post-unlock: run the one-shot at-rest encryption
+					// sweep over tables whose encryption was flipped
+					// after they already had plaintext rows. Guarded by
+					// a per-table localStorage sentinel so it's idempotent
+					// and cheap on every subsequent unlock. Fire-and-
+					// forget — a failed sweep logs but never blocks.
+					void import('$lib/data/crypto/at-rest-sweep').then(({ runAtRestEncryptSweep }) =>
+						runAtRestEncryptSweep()
+					);
 					return;
 				}
 				if (state.status === 'awaiting-recovery-code') {
