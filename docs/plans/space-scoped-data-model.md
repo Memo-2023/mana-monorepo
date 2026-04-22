@@ -3,6 +3,28 @@
 _Started 2026-04-22._
 _Supersedes [`per-space-vs-user-global-tags.md`](./per-space-vs-user-global-tags.md) — the earlier "defer" recommendation was made under "ship fast" assumptions; this plan assumes pre-live + unlimited resources, i.e. we build the clean architecture now without legacy residues._
 
+## Shipping log
+
+| Phase | Purpose | Commit |
+| --- | --- | --- |
+| 2a | Crypto-registry prep (enabled:false for globalTags/tagGroups/workbenchScenes/aiMissions) | `766ad2ea8` |
+| 2b | Dexie v34: userTagPresets table + compound indexes on globalTags/tagGroups | `07e35d79f` |
+| 2d.1 | userTagPresets CRUD store + move into encryption registry | `35d9e023a` |
+| 2d.2 | kontextDoc per-Space (store + queries + AI-runner resolver) | `8a82f3c54` |
+| 2d.3 | SpaceType-aware default agent bootstrap | `a36e543e4` |
+| 2d.4 | onActiveSpaceChanged subscriber + per-Space localStorage + scene filter | `3b85d7d3d` ⚠️ |
+
+⚠️ **2d.4 attribution note**: The 2d.4 changes (active-space handler
+API + per-Space workbench-scenes localStorage + scene spaceId filter +
+runAgentsBootstrap-on-space-change wiring) landed inside the
+`chore(bundle): add bundle-size audit + snapshot inventory` commit by
+accident. A parallel terminal session's `git add -A` scooped up the
+2d.4 diff during a lint-staged rollback race. The code is correct and
+tests pass; the commit message just understates its contents. Future
+searches for 2d.4 should include commit `3b85d7d3d` alongside the
+others — the scope/workbench/setup file changes there are the 2d.4
+payload.
+
 ## Decision
 
 Everything that the user creates — tags, tag-groups, workbench scenes,
