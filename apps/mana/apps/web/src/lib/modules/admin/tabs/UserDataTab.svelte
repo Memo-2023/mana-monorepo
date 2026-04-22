@@ -1,21 +1,13 @@
 <!--
-  Admin → User Data — workbench card.
-
-  Real API-backed user list (adminService.getUsers) with search and
-  pagination. Opens the existing detail route /admin/user-data/[userId]
-  when the user clicks "Daten anzeigen" — that page stays route-based
-  because it's an entity-detail view keyed by id.
-
-  Admin-gated inline.
+  Admin → User Data tab.
+  Real API-backed user browser (adminService.getUsers). The per-user
+  detail route /admin/user-data/[userId] stays route-based.
 -->
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { authStore } from '$lib/stores/auth.svelte';
 	import { adminService, type UserListItem } from '$lib/api/services/admin';
-	import { MagnifyingGlass, ShieldWarning } from '@mana/shared-icons';
-
-	let isAdmin = $derived(authStore.user?.role === 'admin');
+	import { MagnifyingGlass } from '@mana/shared-icons';
 
 	let users = $state<UserListItem[]>([]);
 	let loading = $state(true);
@@ -29,7 +21,6 @@
 	let totalPages = $derived(Math.ceil(total / limit));
 
 	async function loadUsers() {
-		if (!isAdmin) return;
 		loading = true;
 		error = null;
 
@@ -78,155 +69,125 @@
 	}
 
 	onMount(() => {
-		if (isAdmin) loadUsers();
-		else loading = false;
+		loadUsers();
 	});
 </script>
 
-{#if !isAdmin}
-	<div class="admin-gate">
-		<ShieldWarning size={40} />
-		<h3>Admin-only</h3>
-		<p>Der Nutzerdaten-Browser ist nur für Admin-Nutzer sichtbar.</p>
-	</div>
-{:else}
-	<div class="pane">
-		<header class="bar">
-			<div class="title">
-				<strong>Nutzerdaten</strong>
-				<span class="sub">{total} Nutzer</span>
-			</div>
-			<div class="search">
-				<MagnifyingGlass size={16} />
-				<input
-					type="text"
-					placeholder="Email oder Name…"
-					bind:value={searchQuery}
-					oninput={handleSearch}
-				/>
-			</div>
-		</header>
-
-		<div class="panel">
-			{#if loading}
-				<div class="loading">
-					{#each Array(5) as _}
-						<div class="loading-row">
-							<div class="avatar-skel"></div>
-							<div class="meta-skel">
-								<div class="bar-skel short"></div>
-								<div class="bar-skel"></div>
-							</div>
-						</div>
-					{/each}
-				</div>
-			{:else if error}
-				<div class="error-box">
-					<p>{error}</p>
-					<button type="button" onclick={() => loadUsers()}>Erneut versuchen</button>
-				</div>
-			{:else if users.length === 0}
-				<p class="empty">Keine Nutzer gefunden.</p>
-			{:else}
-				<div class="table-wrap">
-					<table>
-						<thead>
-							<tr>
-								<th>Nutzer</th>
-								<th>Rolle</th>
-								<th>Registriert</th>
-								<th>Letzte Aktivität</th>
-								<th></th>
-							</tr>
-						</thead>
-						<tbody>
-							{#each users as user}
-								<tr>
-									<td>
-										<div class="user-cell">
-											<div class="avatar">
-												{(user.name || user.email)[0].toUpperCase()}
-											</div>
-											<div>
-												<p class="user-name">{user.name || '—'}</p>
-												<p class="user-email">{user.email}</p>
-											</div>
-										</div>
-									</td>
-									<td>
-										<span class="role-badge" class:role-admin={user.role === 'admin'}>
-											{user.role}
-										</span>
-									</td>
-									<td class="muted">{formatDate(user.createdAt)}</td>
-									<td class="muted">{formatRelativeTime(user.lastActiveAt)}</td>
-									<td class="action-cell">
-										<button
-											type="button"
-											onclick={() => goto(`/admin/user-data/${user.id}`)}
-											class="view-btn"
-										>
-											Daten anzeigen
-										</button>
-									</td>
-								</tr>
-							{/each}
-						</tbody>
-					</table>
-				</div>
-
-				{#if totalPages > 1}
-					<div class="pagination">
-						<button
-							type="button"
-							onclick={() => {
-								page = Math.max(1, page - 1);
-								loadUsers();
-							}}
-							disabled={page === 1}>Zurück</button
-						>
-						<span>Seite {page} von {totalPages}</span>
-						<button
-							type="button"
-							onclick={() => {
-								page = Math.min(totalPages, page + 1);
-								loadUsers();
-							}}
-							disabled={page === totalPages}>Weiter</button
-						>
-					</div>
-				{/if}
-			{/if}
+<div class="user-data-tab">
+	<div class="bar">
+		<div class="title">
+			<strong>Nutzerdaten</strong>
+			<span class="sub">{total} Nutzer</span>
+		</div>
+		<div class="search">
+			<MagnifyingGlass size={16} />
+			<input
+				type="text"
+				placeholder="Email oder Name…"
+				bind:value={searchQuery}
+				oninput={handleSearch}
+			/>
 		</div>
 	</div>
-{/if}
+
+	<div class="panel">
+		{#if loading}
+			<div class="loading">
+				{#each Array(5) as _}
+					<div class="loading-row">
+						<div class="avatar-skel"></div>
+						<div class="meta-skel">
+							<div class="bar-skel short"></div>
+							<div class="bar-skel"></div>
+						</div>
+					</div>
+				{/each}
+			</div>
+		{:else if error}
+			<div class="error-box">
+				<p>{error}</p>
+				<button type="button" onclick={() => loadUsers()}>Erneut versuchen</button>
+			</div>
+		{:else if users.length === 0}
+			<p class="empty">Keine Nutzer gefunden.</p>
+		{:else}
+			<div class="table-wrap">
+				<table>
+					<thead>
+						<tr>
+							<th>Nutzer</th>
+							<th>Rolle</th>
+							<th>Registriert</th>
+							<th>Letzte Aktivität</th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+						{#each users as user}
+							<tr>
+								<td>
+									<div class="user-cell">
+										<div class="avatar">
+											{(user.name || user.email)[0].toUpperCase()}
+										</div>
+										<div>
+											<p class="user-name">{user.name || '—'}</p>
+											<p class="user-email">{user.email}</p>
+										</div>
+									</div>
+								</td>
+								<td>
+									<span class="role-badge" class:role-admin={user.role === 'admin'}>
+										{user.role}
+									</span>
+								</td>
+								<td class="muted">{formatDate(user.createdAt)}</td>
+								<td class="muted">{formatRelativeTime(user.lastActiveAt)}</td>
+								<td class="action-cell">
+									<button
+										type="button"
+										onclick={() => goto(`/admin/user-data/${user.id}`)}
+										class="view-btn"
+									>
+										Daten anzeigen
+									</button>
+								</td>
+							</tr>
+						{/each}
+					</tbody>
+				</table>
+			</div>
+
+			{#if totalPages > 1}
+				<div class="pagination">
+					<button
+						type="button"
+						onclick={() => {
+							page = Math.max(1, page - 1);
+							loadUsers();
+						}}
+						disabled={page === 1}>Zurück</button
+					>
+					<span>Seite {page} von {totalPages}</span>
+					<button
+						type="button"
+						onclick={() => {
+							page = Math.min(totalPages, page + 1);
+							loadUsers();
+						}}
+						disabled={page === totalPages}>Weiter</button
+					>
+				</div>
+			{/if}
+		{/if}
+	</div>
+</div>
 
 <style>
-	.admin-gate {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		gap: 0.75rem;
-		padding: 2rem;
-		text-align: center;
-		height: 100%;
-		color: hsl(var(--color-muted-foreground));
-	}
-
-	.admin-gate h3 {
-		font-size: 1rem;
-		font-weight: 500;
-		margin: 0;
-		color: hsl(var(--color-foreground));
-	}
-
-	.pane {
-		padding: 1rem;
+	.user-data-tab {
 		display: flex;
 		flex-direction: column;
 		gap: 1rem;
-		color: hsl(var(--color-foreground));
 	}
 
 	.bar {

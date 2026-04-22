@@ -1166,36 +1166,6 @@ registerApp({
 });
 
 registerApp({
-	id: 'admin-users',
-	name: 'Admin · Users',
-	color: '#EF4444',
-	icon: AddressBook,
-	views: {
-		list: { load: () => import('$lib/modules/admin-users/ListView.svelte') },
-	},
-});
-
-registerApp({
-	id: 'admin-system',
-	name: 'Admin · System',
-	color: '#EF4444',
-	icon: HardDrives,
-	views: {
-		list: { load: () => import('$lib/modules/admin-system/ListView.svelte') },
-	},
-});
-
-registerApp({
-	id: 'admin-user-data',
-	name: 'Admin · User Data',
-	color: '#EF4444',
-	icon: File,
-	views: {
-		list: { load: () => import('$lib/modules/admin-user-data/ListView.svelte') },
-	},
-});
-
-registerApp({
 	id: 'complexity',
 	name: 'Complexity',
 	color: '#0EA5E9',

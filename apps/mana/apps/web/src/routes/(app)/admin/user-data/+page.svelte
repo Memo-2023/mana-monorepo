@@ -1,11 +1,9 @@
 <script lang="ts">
 	/**
-	 * /admin/user-data — renders the workbench-card ListView.
-	 * Admin-role guard lives in the parent layout and inside the ListView.
+	 * /admin/user-data — deep-links into the User Data tab of the admin card.
 	 * The per-user detail route /admin/user-data/[userId] stays route-based.
 	 */
-
-	import ListView from '$lib/modules/admin-user-data/ListView.svelte';
+	import ListView from '$lib/modules/admin/ListView.svelte';
 </script>
 
-<ListView />
+<ListView initialTab="user-data" />

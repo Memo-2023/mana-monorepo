@@ -1,18 +1,12 @@
 <!--
-  Admin → Users — workbench card.
-
-  User search + paginated table. Reads from the same mock dataset the
-  legacy /admin/users route used; swap in `adminService.getUsers` once a
-  dedicated role-update endpoint ships.
-
-  Admin-gated inline so the card self-hides for non-admin users in
-  whatever workbench scene they picked.
+  Admin → Users tab.
+  Mock user search + paginated table (swap in adminService.getUsers once
+  a dedicated role-update endpoint ships).
 -->
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { authStore } from '$lib/stores/auth.svelte';
 	import UserTable from '$lib/components/admin/UserTable.svelte';
-	import { MagnifyingGlass, ShieldWarning } from '@mana/shared-icons';
+	import { MagnifyingGlass } from '@mana/shared-icons';
 
 	interface User {
 		id: string;
@@ -22,8 +16,6 @@
 		lastActiveAt?: string;
 		role: string;
 	}
-
-	let isAdmin = $derived(authStore.user?.role === 'admin');
 
 	let users = $state<User[]>([]);
 	let loading = $state(true);
@@ -53,10 +45,6 @@
 	});
 
 	onMount(async () => {
-		if (!isAdmin) {
-			loading = false;
-			return;
-		}
 		try {
 			await new Promise((resolve) => setTimeout(resolve, 500));
 			users = [
@@ -107,82 +95,48 @@
 	});
 </script>
 
-{#if !isAdmin}
-	<div class="admin-gate">
-		<ShieldWarning size={40} class="text-muted-foreground" />
-		<h3>Admin-only</h3>
-		<p>Die Nutzerverwaltung ist nur für Admin-Nutzer sichtbar.</p>
+<div class="users-tab">
+	<div class="bar">
+		<div class="title">
+			<strong>Users</strong>
+			<span class="sub">{filteredUsers.length} / {users.length}</span>
+		</div>
+		<div class="search">
+			<MagnifyingGlass size={16} />
+			<input type="text" placeholder="Suche…" bind:value={searchQuery} />
+		</div>
 	</div>
-{:else}
-	<div class="pane">
-		<header class="bar">
-			<div class="title">
-				<strong>Users</strong>
-				<span class="sub">{filteredUsers.length} / {users.length}</span>
-			</div>
-			<div class="search">
-				<MagnifyingGlass size={16} />
-				<input type="text" placeholder="Suche…" bind:value={searchQuery} />
-			</div>
-		</header>
 
-		<UserTable users={paginatedUsers} {loading} />
+	<UserTable users={paginatedUsers} {loading} />
 
-		{#if totalPages > 1}
-			<div class="pagination">
-				<span>Seite {currentPage} von {totalPages}</span>
-				<div class="buttons">
-					<button
-						type="button"
-						onclick={() => (currentPage = Math.max(1, currentPage - 1))}
-						disabled={currentPage === 1}>Zurück</button
-					>
-					<button
-						type="button"
-						onclick={() => (currentPage = Math.min(totalPages, currentPage + 1))}
-						disabled={currentPage === totalPages}>Weiter</button
-					>
-				</div>
+	{#if totalPages > 1}
+		<div class="pagination">
+			<span>Seite {currentPage} von {totalPages}</span>
+			<div class="buttons">
+				<button
+					type="button"
+					onclick={() => (currentPage = Math.max(1, currentPage - 1))}
+					disabled={currentPage === 1}>Zurück</button
+				>
+				<button
+					type="button"
+					onclick={() => (currentPage = Math.min(totalPages, currentPage + 1))}
+					disabled={currentPage === totalPages}>Weiter</button
+				>
 			</div>
-		{/if}
+		</div>
+	{/if}
 
-		{#if error}
-			<p class="error">{error}</p>
-		{/if}
-	</div>
-{/if}
+	{#if error}
+		<p class="error">{error}</p>
+	{/if}
+</div>
 
 <style>
-	.admin-gate {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		gap: 0.75rem;
-		padding: 2rem;
-		text-align: center;
-		height: 100%;
-	}
-
-	.admin-gate h3 {
-		font-size: 1rem;
-		font-weight: 500;
-		margin: 0;
-	}
-
-	.admin-gate p {
-		font-size: 0.875rem;
-		color: hsl(var(--color-muted-foreground));
-		max-width: 24rem;
-		margin: 0;
-	}
-
-	.pane {
-		padding: 1rem;
+	.users-tab {
 		display: flex;
 		flex-direction: column;
 		gap: 1rem;
-		color: hsl(var(--color-foreground));
 	}
 
 	.bar {

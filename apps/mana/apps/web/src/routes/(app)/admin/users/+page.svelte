@@ -1,10 +1,8 @@
 <script lang="ts">
 	/**
-	 * /admin/users — renders the workbench-card ListView.
-	 * Admin-role guard lives in the parent layout and inside the ListView.
+	 * /admin/users — deep-links into the Users tab of the admin card.
 	 */
-
-	import ListView from '$lib/modules/admin-users/ListView.svelte';
+	import ListView from '$lib/modules/admin/ListView.svelte';
 </script>
 
-<ListView />
+<ListView initialTab="users" />

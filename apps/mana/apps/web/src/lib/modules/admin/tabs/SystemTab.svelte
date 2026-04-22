@@ -1,16 +1,10 @@
 <!--
-  Admin → System — workbench card.
-
-  Service-health grid + quick-links to Grafana/Prometheus/Umami +
-  environment info. Self-hides for non-admin users.
-
-  Service list is still mock data — swap for a /api/admin/health sweep
-  once the endpoint exists.
+  Admin → System tab.
+  Service-health grid + monitoring quick-links + environment info.
 -->
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { authStore } from '$lib/stores/auth.svelte';
-	import { ArrowSquareOut, ShieldWarning } from '@mana/shared-icons';
+	import { ArrowSquareOut } from '@mana/shared-icons';
 	import QuickLinks from '$lib/components/admin/QuickLinks.svelte';
 
 	interface ServiceHealth {
@@ -20,7 +14,6 @@
 		lastCheck?: string;
 	}
 
-	let isAdmin = $derived(authStore.user?.role === 'admin');
 	let services = $state<ServiceHealth[]>([]);
 	let loading = $state(true);
 
@@ -66,10 +59,6 @@
 	};
 
 	onMount(async () => {
-		if (!isAdmin) {
-			loading = false;
-			return;
-		}
 		await new Promise((resolve) => setTimeout(resolve, 500));
 		services = [
 			{ name: 'Mana Core Auth', status: 'healthy', url: 'https://auth.mana.how' },
@@ -91,126 +80,91 @@
 	let totalCount = $derived(services.length);
 </script>
 
-{#if !isAdmin}
-	<div class="admin-gate">
-		<ShieldWarning size={40} />
-		<h3>Admin-only</h3>
-		<p>Die System-Übersicht ist nur für Admin-Nutzer sichtbar.</p>
-	</div>
-{:else}
-	<div class="pane">
-		<section class="panel">
-			<header class="panel-header">
-				<h3>System Status</h3>
-				{#if !loading}
-					<div class="status-summary">
-						<span
-							class="dot"
-							style:background={healthyCount === totalCount
-								? statusColors.healthy
-								: statusColors.degraded}
-						></span>
-						<span class="status-count">{healthyCount}/{totalCount} healthy</span>
-					</div>
-				{/if}
-			</header>
-
-			{#if loading}
-				<div class="grid">
-					{#each Array(8) as _}
-						<div class="skeleton"></div>
-					{/each}
-				</div>
-			{:else}
-				<div class="grid">
-					{#each services as service}
-						<div class="service">
-							<span class="dot" style:background={statusColors[service.status]}></span>
-							<div class="service-info">
-								<p class="service-name">{service.name}</p>
-								<p class="service-status">{statusLabels[service.status]}</p>
-							</div>
-							{#if service.url !== '-'}
-								<a href={service.url} target="_blank" rel="noopener noreferrer" class="link">
-									<ArrowSquareOut size={14} />
-								</a>
-							{/if}
-						</div>
-					{/each}
+<div class="system-tab">
+	<section class="panel">
+		<header class="panel-header">
+			<h3>System Status</h3>
+			{#if !loading}
+				<div class="status-summary">
+					<span
+						class="dot"
+						style:background={healthyCount === totalCount
+							? statusColors.healthy
+							: statusColors.degraded}
+					></span>
+					<span class="status-count">{healthyCount}/{totalCount} healthy</span>
 				</div>
 			{/if}
-		</section>
+		</header>
 
-		<QuickLinks links={monitoringLinks} />
+		{#if loading}
+			<div class="grid">
+				{#each Array(8) as _}
+					<div class="skeleton"></div>
+				{/each}
+			</div>
+		{:else}
+			<div class="grid">
+				{#each services as service}
+					<div class="service">
+						<span class="dot" style:background={statusColors[service.status]}></span>
+						<div class="service-info">
+							<p class="service-name">{service.name}</p>
+							<p class="service-status">{statusLabels[service.status]}</p>
+						</div>
+						{#if service.url !== '-'}
+							<a href={service.url} target="_blank" rel="noopener noreferrer" class="link">
+								<ArrowSquareOut size={14} />
+							</a>
+						{/if}
+					</div>
+				{/each}
+			</div>
+		{/if}
+	</section>
 
-		<section class="panel">
-			<h3>Environment</h3>
-			<div class="env-grid">
-				<div class="env-col">
-					<div class="env-row">
-						<span class="env-label">Server</span>
-						<code>Mac Mini (mana.how)</code>
-					</div>
-					<div class="env-row">
-						<span class="env-label">Domain</span>
-						<code>*.mana.how</code>
-					</div>
-					<div class="env-row">
-						<span class="env-label">SSL</span>
-						<code class="ok">Caddy (Auto)</code>
-					</div>
+	<QuickLinks links={monitoringLinks} />
+
+	<section class="panel">
+		<h3>Environment</h3>
+		<div class="env-grid">
+			<div class="env-col">
+				<div class="env-row">
+					<span class="env-label">Server</span>
+					<code>Mac Mini (mana.how)</code>
 				</div>
-				<div class="env-col">
-					<div class="env-row">
-						<span class="env-label">Database</span>
-						<code>PostgreSQL 16</code>
-					</div>
-					<div class="env-row">
-						<span class="env-label">Cache</span>
-						<code>Redis 7</code>
-					</div>
-					<div class="env-row">
-						<span class="env-label">Tunnel</span>
-						<code>Cloudflare</code>
-					</div>
+				<div class="env-row">
+					<span class="env-label">Domain</span>
+					<code>*.mana.how</code>
+				</div>
+				<div class="env-row">
+					<span class="env-label">SSL</span>
+					<code class="ok">Caddy (Auto)</code>
 				</div>
 			</div>
-		</section>
-	</div>
-{/if}
+			<div class="env-col">
+				<div class="env-row">
+					<span class="env-label">Database</span>
+					<code>PostgreSQL 16</code>
+				</div>
+				<div class="env-row">
+					<span class="env-label">Cache</span>
+					<code>Redis 7</code>
+				</div>
+				<div class="env-row">
+					<span class="env-label">Tunnel</span>
+					<code>Cloudflare</code>
+				</div>
+			</div>
+		</div>
+	</section>
+</div>
 
 <style>
-	.admin-gate {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		gap: 0.75rem;
-		padding: 2rem;
-		text-align: center;
-		height: 100%;
-		color: hsl(var(--color-muted-foreground));
-	}
-
-	.admin-gate h3 {
-		font-size: 1rem;
-		font-weight: 500;
-		margin: 0;
-		color: hsl(var(--color-foreground));
-	}
-
-	.admin-gate p {
-		font-size: 0.875rem;
-		max-width: 24rem;
-		margin: 0;
-	}
-
-	.pane {
-		padding: 1rem;
+	.system-tab {
 		display: flex;
 		flex-direction: column;
 		gap: 1rem;
-		color: hsl(var(--color-foreground));
 	}
 
 	.panel {

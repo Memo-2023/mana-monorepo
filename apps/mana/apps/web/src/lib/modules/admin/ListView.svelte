@@ -1,264 +1,150 @@
 <!--
-  Admin — Workbench-embedded admin dashboard with stats, security overview,
-  and quick links to monitoring tools.
+  Admin — workbench card with tabs.
+
+  One card, four tabs: Overview / Users / System / User Data. Having all
+  admin surfaces under one id keeps the scene-picker uncluttered while
+  letting power-users arrange them inside the workbench like any other
+  card. The `initialTab` prop lets the /admin/* route wrappers deep-link
+  directly to a tab.
+
+  Admin-role guard lives here at the container level so a non-admin
+  sees one gate-screen, not four.
 -->
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import StatCard from '$lib/components/admin/StatCard.svelte';
-	import QuickLinks from '$lib/components/admin/QuickLinks.svelte';
-	import { adminService, type AdminStats } from '$lib/api/services/admin';
+	import { authStore } from '$lib/stores/auth.svelte';
+	import { ShieldWarning } from '@mana/shared-icons';
+	import OverviewTab from './tabs/OverviewTab.svelte';
+	import UsersTab from './tabs/UsersTab.svelte';
+	import SystemTab from './tabs/SystemTab.svelte';
+	import UserDataTab from './tabs/UserDataTab.svelte';
 
-	let stats = $state<AdminStats | null>(null);
-	let loading = $state(true);
-	let error = $state<string | null>(null);
+	type TabId = 'overview' | 'users' | 'system' | 'user-data';
 
-	const quickLinks = [
-		{
-			name: 'Grafana Dashboard',
-			url: 'https://grafana.mana.how',
-			description: 'System & Backend Metrics',
-			icon: 'grafana' as const,
-		},
-		{
-			name: 'Umami Analytics',
-			url: 'https://stats.mana.how',
-			description: 'Web Analytics',
-			icon: 'analytics' as const,
-		},
-		{
-			name: 'Docker Dashboard',
-			url: 'https://grafana.mana.how/d/backends-docker',
-			description: 'Container Metrics',
-			icon: 'docker' as const,
-		},
-		{
-			name: 'System Overview',
-			url: 'https://grafana.mana.how/d/system-overview',
-			description: 'CPU, Memory, Disk',
-			icon: 'grafana' as const,
-		},
+	interface Props {
+		initialTab?: TabId;
+	}
+
+	let { initialTab = 'overview' }: Props = $props();
+
+	let activeTab = $state<TabId>(initialTab);
+	let isAdmin = $derived(authStore.user?.role === 'admin');
+
+	const tabs: { id: TabId; label: string }[] = [
+		{ id: 'overview', label: 'Overview' },
+		{ id: 'users', label: 'Users' },
+		{ id: 'system', label: 'System' },
+		{ id: 'user-data', label: 'User Data' },
 	];
-
-	onMount(async () => {
-		const result = await adminService.getStats();
-		if (result.error) {
-			error = result.error;
-		} else {
-			stats = result.data;
-		}
-		loading = false;
-	});
-
-	let userGrowthPercent = $derived(
-		stats
-			? Math.round((stats.newUsers7d / Math.max(stats.totalUsers - stats.newUsers7d, 1)) * 100)
-			: 0
-	);
 </script>
 
-<div class="admin-page">
-	<!-- Stats Grid -->
-	<div class="stats-grid">
-		<StatCard title="Total Users" value={stats?.totalUsers ?? '-'} icon="users" {loading} />
-		<StatCard
-			title="New Users (7d)"
-			value={stats?.newUsers7d ?? '-'}
-			change={userGrowthPercent}
-			changeLabel="vs previous"
-			icon="users"
-			{loading}
-		/>
-		<StatCard
-			title="Active Sessions"
-			value={stats?.activeSessions ?? '-'}
-			icon="activity"
-			{loading}
-		/>
-		<StatCard
-			title="Unique Users (24h)"
-			value={stats?.uniqueUsers24h ?? '-'}
-			icon="clock"
-			{loading}
-		/>
+{#if !isAdmin}
+	<div class="admin-gate">
+		<ShieldWarning size={40} />
+		<h3>Admin-only</h3>
+		<p>Das Admin-Dashboard ist nur für Admin-Nutzer sichtbar.</p>
 	</div>
+{:else}
+	<div class="admin-card">
+		<div class="tabs" role="tablist" aria-label="Admin sections">
+			{#each tabs as tab}
+				<button
+					type="button"
+					role="tab"
+					class="tab"
+					class:active={activeTab === tab.id}
+					aria-selected={activeTab === tab.id}
+					onclick={() => (activeTab = tab.id)}
+				>
+					{tab.label}
+				</button>
+			{/each}
+		</div>
 
-	<!-- Security & Quick Links -->
-	<div class="panels">
-		<!-- Security Overview -->
-		<div class="panel">
-			<h3 class="panel-title">Security (Last 7 Days)</h3>
-			{#if loading}
-				<div class="loading-rows">
-					<div class="loading-bar"></div>
-					<div class="loading-bar short"></div>
-				</div>
-			{:else if stats}
-				<div class="security-rows">
-					<div class="security-row">
-						<div class="security-label">
-							<span class="dot green"></span>
-							<span>Successful Logins</span>
-						</div>
-						<span class="security-value">{stats.loginSuccess7d}</span>
-					</div>
-					<div class="security-row">
-						<div class="security-label">
-							<span class="dot red"></span>
-							<span>Failed Logins</span>
-						</div>
-						<span class="security-value">{stats.loginFailed7d}</span>
-					</div>
-					<div class="security-divider"></div>
-					<div class="security-row">
-						<span class="security-muted">Success Rate</span>
-						<span class="security-rate">
-							{stats.loginSuccess7d + stats.loginFailed7d > 0
-								? Math.round(
-										(stats.loginSuccess7d / (stats.loginSuccess7d + stats.loginFailed7d)) * 100
-									)
-								: '—'}%
-						</span>
-					</div>
-				</div>
+		<div class="tab-content">
+			{#if activeTab === 'overview'}
+				<OverviewTab />
+			{:else if activeTab === 'users'}
+				<UsersTab />
+			{:else if activeTab === 'system'}
+				<SystemTab />
+			{:else if activeTab === 'user-data'}
+				<UserDataTab />
 			{/if}
 		</div>
-
-		<QuickLinks links={quickLinks} />
 	</div>
-
-	{#if error}
-		<div class="error-box">
-			<p>{error}</p>
-		</div>
-	{/if}
-</div>
+{/if}
 
 <style>
-	.admin-page {
-		padding: 0.75rem;
+	.admin-gate {
 		display: flex;
 		flex-direction: column;
-		gap: 1rem;
+		align-items: center;
+		justify-content: center;
+		gap: 0.75rem;
+		padding: 2rem;
+		text-align: center;
 		height: 100%;
-		overflow-y: auto;
-	}
-
-	.stats-grid {
-		display: grid;
-		grid-template-columns: repeat(2, 1fr);
-		gap: 0.625rem;
-	}
-
-	.panels {
-		display: flex;
-		flex-direction: column;
-		gap: 0.75rem;
-	}
-
-	.panel {
-		padding: 0.875rem;
-		border: 1px solid hsl(var(--color-border));
-		border-radius: 0.625rem;
-		background: hsl(var(--color-card));
-	}
-
-	.panel-title {
-		font-size: 0.875rem;
-		font-weight: 600;
-		color: hsl(var(--color-foreground));
-		margin-bottom: 0.75rem;
-	}
-
-	.loading-rows {
-		display: flex;
-		flex-direction: column;
-		gap: 0.75rem;
-	}
-
-	.loading-bar {
-		height: 0.875rem;
-		background: hsl(var(--color-muted) / 0.3);
-		border-radius: 0.25rem;
-		animation: pulse 1.5s ease-in-out infinite;
-	}
-
-	.loading-bar.short {
-		width: 75%;
-	}
-
-	@keyframes pulse {
-		0%,
-		100% {
-			opacity: 1;
-		}
-		50% {
-			opacity: 0.5;
-		}
-	}
-
-	.security-rows {
-		display: flex;
-		flex-direction: column;
-		gap: 0.625rem;
-	}
-
-	.security-row {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-	}
-
-	.security-label {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		font-size: 0.8125rem;
-	}
-
-	.dot {
-		width: 0.5rem;
-		height: 0.5rem;
-		border-radius: 50%;
-	}
-
-	.dot.green {
-		background: hsl(142 71% 45%);
-	}
-
-	.dot.red {
-		background: hsl(0 84% 60%);
-	}
-
-	.security-value {
-		font-family: monospace;
-		font-size: 0.8125rem;
-	}
-
-	.security-divider {
-		border-top: 1px solid hsl(var(--color-border));
-		padding-top: 0.375rem;
-	}
-
-	.security-muted {
-		font-size: 0.8125rem;
 		color: hsl(var(--color-muted-foreground));
 	}
 
-	.security-rate {
-		font-size: 0.8125rem;
+	.admin-gate h3 {
+		font-size: 1rem;
 		font-weight: 500;
-		color: hsl(142 71% 45%);
+		margin: 0;
+		color: hsl(var(--color-foreground));
 	}
 
-	.error-box {
-		padding: 0.75rem;
-		border: 1px solid hsl(0 84% 60% / 0.3);
-		border-radius: 0.5rem;
-		background: hsl(0 84% 60% / 0.08);
+	.admin-gate p {
+		font-size: 0.875rem;
+		max-width: 24rem;
+		margin: 0;
 	}
 
-	.error-box p {
-		font-size: 0.8125rem;
-		color: hsl(0 84% 60%);
+	.admin-card {
+		display: flex;
+		flex-direction: column;
+		height: 100%;
+		padding: 1rem;
+		gap: 1rem;
+		color: hsl(var(--color-foreground));
+	}
+
+	.tabs {
+		display: flex;
+		gap: 0.25rem;
+		border-bottom: 1px solid hsl(var(--color-border));
+		padding-bottom: 0;
+		overflow-x: auto;
+	}
+
+	.tab {
+		padding: 0.5rem 0.875rem;
+		background: transparent;
+		border: 0;
+		border-bottom: 2px solid transparent;
+		margin-bottom: -1px;
+		color: hsl(var(--color-muted-foreground));
+		font: inherit;
+		font-size: 0.875rem;
+		font-weight: 500;
+		cursor: pointer;
+		transition:
+			color 120ms ease,
+			border-color 120ms ease;
+		white-space: nowrap;
+	}
+
+	.tab:hover {
+		color: hsl(var(--color-foreground));
+	}
+
+	.tab.active {
+		color: hsl(var(--color-foreground));
+		border-bottom-color: var(--pill-primary-color, hsl(var(--color-primary, 230 80% 55%)));
+	}
+
+	.tab-content {
+		flex: 1;
+		min-height: 0;
 	}
 </style>
