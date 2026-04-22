@@ -755,6 +755,33 @@ db.version(33).stores({
 	articleTags: 'id, userId, articleId, tagId, [articleId+tagId]',
 });
 
+// v34 — Phase 2b of the space-scoped data model migration.
+// See docs/plans/space-scoped-data-model.md.
+//
+// Adds two things:
+//
+// 1. `userTagPresets` — user-level templates for seeding tags into newly-
+//    created Spaces. Deliberately user-scoped, NOT space-scoped: the UI
+//    that picks a preset runs from ANY Space when the user creates a new
+//    one, so filtering by active-space would hide presets created elsewhere.
+//    Indexed on `userId` for the trivial "my presets" query and on
+//    `isDefault` so the preset picker can highlight the default.
+//    Intentionally NOT added to SYNC_APP_MAP yet — cross-device sync for
+//    presets is a Phase 2d concern once the store API lands.
+//
+// 2. `[spaceId+sortOrder]` + `[spaceId+name]` compound indexes on
+//    `globalTags` + `tagGroups`. Tags/tagGroups already carry `spaceId`
+//    (v28 stamped, creating-hook keeps stamping) — the compound indexes
+//    let the per-Space "sorted tag list" and "dedup-by-name-within-space"
+//    queries skip the client-side filter that `scopedForModule` does today.
+//    Plain `spaceId` is redundant in a compound index, so the existing
+//    `id` + `name` + `groupId` indexes stay as first-tuple indexes.
+db.version(34).stores({
+	userTagPresets: 'id, userId, isDefault, updatedAt',
+	globalTags: 'id, name, groupId, [spaceId+sortOrder], [spaceId+name]',
+	tagGroups: 'id, [spaceId+sortOrder]',
+});
+
 // ─── Sync Routing ──────────────────────────────────────────
 // SYNC_APP_MAP, TABLE_TO_SYNC_NAME, TABLE_TO_APP, SYNC_NAME_TO_TABLE,
 // toSyncName() and fromSyncName() are now derived from per-module

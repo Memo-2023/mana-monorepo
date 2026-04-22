@@ -111,6 +111,7 @@ export const PLAINTEXT_ALLOWLIST: readonly string[] = [
 	'uloadFolders', // TODO: audit
 	'uloadTags', // TODO: audit
 	'userSettings', // TODO: audit
+	'userTagPresets', // v34 table — intent is to encrypt (tag-preset names + inline tag names are sensitive); declared plaintext here for 2b so the audit passes, moves to ENCRYPTION_REGISTRY in Phase 2d alongside the store API
 	'wateringLogs', // TODO: audit
 	'wateringSchedules', // TODO: audit
 	'wetterLocations', // TODO: audit
