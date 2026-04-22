@@ -1,6 +1,6 @@
 # Workbench cards over subroutes — migration plan
 
-_Started 2026-04-21._
+_Started 2026-04-21. Scope revised 2026-04-22 after the first batch landed._
 
 ## Why
 
@@ -13,148 +13,184 @@ via `registerApp()` in `apps/mana/apps/web/src/lib/app-registry/apps.ts`
 so the list/detail view shows up when the user drops the app into a
 scene.
 
-Secondary surfaces — admin panels, per-module settings, filtered
-lists (archive/favorites), preference editors — were historically
-built as dedicated subroutes (`/admin/users`, `/broadcasts/settings`,
-`/news/preferences`, …). That forces a URL round-trip and fragments
-the UX: you can't have "members" and "broadcast settings" side-by-side
-in the same scene without flipping tabs.
+After the first pass (Batch 1 + 2, 9 new cards) the scene-picker got
+noticeably cluttered. User feedback 2026-04-22:
 
-**Convention going forward:** secondary surfaces ship as workbench
-cards first. If a subroute already exists and should stay navigable by
-URL, we keep the route as a thin wrapper that renders the same
-ListView the workbench uses.
+> *"finde das doch nicht so gut mit einzelnen Karten für alles —
+> dadurch haben wir sehr viele pages in der workbench"*
 
-## Pattern
+The revised principle is sharper than "everything as a card":
 
-For every surface being migrated:
+**Cards are for daily workflows.** Config and power-user panels are
+either a) fused into a single tabbed card per domain, or b) stay as
+routes opened from the parent module's ⚙ button.
+
+## Decision matrix
+
+| Surface type | Example | Ship as |
+| --- | --- | --- |
+| Operative daily view | `spaces` (member list), `todo`, `calendar` | Single-view card |
+| Multi-surface power-user domain | `admin` (overview / users / system / user-data) | One card with internal tabs |
+| Per-module configuration | `broadcasts/settings`, `news/preferences` | Route, opened from module via ⚙ |
+| Entity detail | `notes/[id]`, `admin/user-data/[userId]` | Route (URL = entity id) |
+| Deeply nested flow | `citycorners/cities/[slug]/…` | Route tree |
+| Auth-critical | `/login`, `/register` | Route with SSR redirect |
+
+## Patterns
+
+### Single-view card
 
 ```
 apps/mana/apps/web/src/
-├── lib/modules/{id}/
-│   └── ListView.svelte              # self-contained pane
-├── lib/app-registry/apps.ts         # registerApp({ id, views: { list } })
-└── routes/(app)/{path}/+page.svelte # thin wrapper: `<ListView />`
+├── lib/modules/{id}/ListView.svelte        # self-contained pane
+├── lib/app-registry/apps.ts                # registerApp({ id, views: { list } })
+└── routes/(app)/{path}/+page.svelte        # thin wrapper: <ListView />
 ```
 
-Rules of thumb:
+Use when the module has **one primary surface** users interact with
+daily (e.g. `spaces` member list).
 
-- **Pane chrome:** ListView wraps its own content in a `.pane`
-  container with `max-width: 720px` (or similar) and theme tokens
+### Tabbed card (fused domain)
+
+```
+lib/modules/admin/
+├── ListView.svelte                         # tab container + role guard
+└── tabs/
+    ├── OverviewTab.svelte
+    ├── UsersTab.svelte
+    ├── SystemTab.svelte
+    └── UserDataTab.svelte
+```
+
+`ListView` takes an `initialTab` prop so route wrappers can deep-link
+to a tab (`/admin/users` → `<ListView initialTab="users" />`). One role
+guard at the container level, one card id in the registry.
+
+Use when a domain has **several sibling surfaces** that belong
+together conceptually and would otherwise each need their own card.
+
+### Route-only (config / settings)
+
+```
+routes/(app)/{module}/settings/+page.svelte  # self-contained page
+```
+
+Opened from the parent module's ⚙ button. No card, no registry entry.
+
+Use for **one-time configuration** surfaces that the user touches once
+and forgets. Cards are for things you come back to.
+
+## Rules of thumb
+
+- **Pane chrome:** card ListViews wrap their own content in a `.pane`
+  container with `max-width: 720px` (or similar) + theme tokens
   (`hsl(var(--color-foreground))`, `hsl(var(--color-card))`,
   `hsl(var(--color-border))`). No `<PageHeader>` — the workbench
-  provides scene chrome, and the route wrapper works without one.
-- **No MANA_APPS entry** for power-user cards (admin/settings).
-  MANA_APPS is the app-drawer; admin panels shouldn't appear there.
-  Only add a MANA_APPS entry when the surface is user-facing
-  (e.g. `spaces`).
-- **Admin-role guard inline** for admin cards: the workbench doesn't
-  run the `/admin/+layout.svelte` guard, so each admin ListView
-  checks `authStore.user?.role === 'admin'` and renders a fallback
-  `Admin-only` gate-screen for non-admins.
-- **Wrap existing form components** where the subroute was already
-  thin (e.g. `/broadcasts/settings` delegated to `SettingsForm`); the
-  ListView just wraps that component + a small bar heading.
-- **Route wrapper is 10 lines:**
+  provides scene chrome; the route wrapper works without one.
+- **Role guards at the container level** for tabbed domain cards — one
+  gate-screen, not one per tab.
+- **No MANA_APPS entry** for power-user cards (admin). MANA_APPS is
+  the app-drawer; admin panels shouldn't appear there. Only add a
+  MANA_APPS entry when the surface is user-facing (e.g. `spaces`).
+- **Route wrapper is short:**
   ```svelte
   <script lang="ts">
     import ListView from '$lib/modules/{id}/ListView.svelte';
   </script>
   <ListView />
   ```
+  or, for tabbed-card deep-links:
+  ```svelte
+  <ListView initialTab="users" />
+  ```
 
-## Out of scope (stay as routes)
+## Shipped
 
-- Detail pages with `[id]` parameters — the URL is the entity
-  identifier (`notes/[id]`, `contacts/[id]`, `events/[id]`,
-  `admin/user-data/[userId]`, `broadcasts/[id]/edit`, …).
-- Deeply nested flows — `citycorners/cities/[slug]/locations/[id]`
-  etc. Every level as a card would explode the registry and break
-  deep-linking.
-- Auth-critical pages needing SSR redirects — login/register/recovery.
+### Batch 1 — Spaces card (commit `88eca8a75`, 2026-04-21)
 
-## Shipped batches
-
-### Batch 1 — Spaces (commit `88eca8a75`, 2026-04-21)
-
-| Card id  | Route              | Module folder        |
-| -------- | ------------------ | -------------------- |
-| `spaces` | `/spaces` (new canonical) + `/spaces/members` (legacy alias) | `lib/modules/spaces/` |
+| Card id  | Route                                                        | Module               |
+| -------- | ------------------------------------------------------------ | -------------------- |
+| `spaces` | `/spaces` (canonical) + `/spaces/members` (legacy alias)     | `lib/modules/spaces/` |
 
 Also: `APP_ICONS.spaces` + MANA_APPS entry + `SpaceSwitcher` link
-updated to `/spaces`.
+updated to `/spaces`. Daily-workflow surface (managing Space members)
+— classic single-view card.
 
-### Batch 2 — Admin + Module Settings (commit `92fe23d46`, 2026-04-21)
+### Batch 2 — Admin panels + module settings (commit `92fe23d46`, 2026-04-21) — SUPERSEDED
 
-Admin cards (role-gated inline):
+Created 4 admin sub-cards + 4 settings cards. See superseding commits
+below.
 
-| Card id             | Route                  | Source                              |
-| ------------------- | ---------------------- | ----------------------------------- |
-| `admin-users`       | `/admin/users`         | extracted from route                |
-| `admin-system`      | `/admin/system`        | extracted from route                |
-| `admin-user-data`   | `/admin/user-data`     | extracted from route                |
-| _(existing)_        | `/admin/complexity`    | route now wraps `complexity` module |
+### Batch 3 — Admin cleanup (commit `5bf3ea8cb`, 2026-04-21)
 
-Module settings cards:
+`/admin/+layout.svelte` shrunk to auth-guard only — nav tabs + overview
+duplication removed since each `/admin/*` was a thin wrapper.
 
-| Card id              | Route                   | Source                                    |
-| -------------------- | ----------------------- | ----------------------------------------- |
-| `broadcast-settings` | `/broadcasts/settings`  | wraps `broadcast/components/SettingsForm` |
-| `invoices-settings`  | `/invoices/settings`    | wraps `invoices/components/SenderProfileForm` |
-| `uload-settings`     | `/uload/settings`       | extracted from route                      |
-| `news-preferences`   | `/news/preferences`     | extracted from route                      |
+### Batch 4 — Revise scope (2026-04-22)
 
-## Backlog
+Two superseding commits in response to scene-picker clutter:
 
-### High-value next batch (archive/filtered-list surfaces)
+**commit `3e65637fc`** — revert settings cards to routes:
 
-All of these are single-view pages inside existing modules — the
-content is self-contained and benefits from being scene-composable
-next to the module's main ListView.
+- Delete `lib/modules/{broadcast-settings, invoices-settings,
+  uload-settings, news-preferences}/`
+- Restore each settings route's original content
+- Remove 4 registerApp entries
 
-- `chat/archive`, `chat/templates`
-- `memoro/archive`, `memoro/tags`
-- `picture/archive`, `picture/board`
-- `storage/favorites`, `storage/trash`, `storage/search`
-- `photos/favorites`, `photos/albums`, `photos/upload`
-- `quotes/categories`, `quotes/favorites`, `quotes/lists`
-- `news/saved`, `news/sources`, `news/add`
-- `meditate/history`, `food/history`, `food/goals`, `food/add`
-- `plants/tags`, `plants/add`
-- `moodlit/moods`, `moodlit/sequences`
-- `cards/decks`, `cards/explore`, `cards/progress`
-- `music/library`, `music/playlists`, `music/projects`
-- `inventory/categories`, `inventory/locations`, `inventory/search`,
-  `inventory/collections`
-- `skilltree/achievements`, `skilltree/tree`
-- `calendar/calendars`
-- `uload/tags`, `uload/links`, `uload/analytics/[id]` _(detail — skip)_
-- `times/clients`, `times/projects`, `times/reports`,
-  `times/templates`, `times/entries`, `times/clock`
-- `agents/templates`
-- `timeline/analytics`
-- `research-lab/keys`
+**commit `43b4570e6`** — fuse admin cards into one tabbed card:
 
-### Second-tier (settings-style, likely worth migrating)
+- New `lib/modules/admin/tabs/{Overview, Users, System, UserData}Tab.svelte`
+- `admin/ListView.svelte` becomes a tab container with role guard +
+  `initialTab` prop
+- `/admin/users`, `/admin/system`, `/admin/user-data` routes pass the
+  right `initialTab`
+- Delete `lib/modules/admin-{users, system, user-data}/`
+- Remove 3 registerApp entries
+- Complexity stays its own card (iframe, pre-existed separately)
 
-- `todo/settings` (367 lines — non-trivial, worth a separate batch)
+Net: the scene-picker gained 1 card (`spaces`) for this whole migration.
 
-### Admin-adjacent (not yet migrated)
+## Backlog — revised
 
-- `organizations`, `teams` — technically post-Spaces these routes are
-  dead ends (users are told to use Spaces instead). Either migrate
-  to cards or delete.
-- `gifts`, `gifts/redeem` — probably keep as routes (shareable)
-- `feedback`, `observatory`, `llm-test`, `tags` — already registered
-  as cards or thin enough to leave.
+The original backlog proposed 35+ individual sub-page cards. Per the
+new decision matrix, most of those are better off as **routes** (rare
+config) or **tabs within the module's existing card** (archives /
+filtered lists) rather than as new cards.
 
-## Open questions
+### To migrate into the module's existing card as tabs
 
-- Should the `/admin/+layout.svelte` nav tabs be removed once every
-  sub-page is a card? Cards make the sidebar nav redundant, but the
-  admin role guard still lives in the layout so removing it means
-  moving that guard somewhere else. _Decision deferred until the
-  full admin batch is shipped._
-- Do we want a convention for registering _sibling_ views of the
-  same module (e.g. `chat-archive` alongside `chat`)? Current pattern
-  uses separate ids. Works, but clutters the registry.
+Examples where a module has multiple daily-use surfaces that would
+benefit from fusion:
+
+- `times`: `clients`, `projects`, `reports`, `templates`, `entries`,
+  `clock` — natural candidate, many sibling surfaces
+- `news`: list vs. `saved` vs. `sources` — could be tabs
+- `storage`: `files`, `favorites`, `search`, `trash` — tab view
+- `quotes`: feed vs. `categories` vs. `favorites` vs. `lists`
+- `cards`: list vs. `decks` vs. `explore` vs. `progress`
+- `inventory`: `collections`, `categories`, `locations`, `search`
+- `music`: library / playlists / projects
+- `citycorners`: map / favorites (the detail routes stay)
+- `skilltree`: tree / achievements
+
+### To leave as routes (config or rare-use)
+
+- `broadcasts/settings`, `invoices/settings`, `uload/settings`,
+  `news/preferences`, `todo/settings` (shipped as routes again)
+- `agents/templates`, `calendar/calendars`, `chat/templates`
+- `news/add`, `plants/add`, `food/add`, `photos/upload`
+- `research-lab/keys`, `memoro/tags`, `plants/tags`, `uload/tags`
+- `timeline/analytics` (probably a tab of `timeline` eventually)
+- `gifts`, `gifts/redeem/[code]` (shareable URLs, keep as routes)
+- `organizations`, `teams` (post-Spaces these routes are dead ends —
+  either redirect to `/spaces` or delete)
+
+### Open questions
+
+- Do we want a convention for per-module tab wiring? The admin card
+  established `initialTab` prop + `tabs/*Tab.svelte` subfolder.
+  Formalising this in a helper or documenting it in the module
+  pattern would make future tab fusions consistent.
+- Should the tabbed admin card also pick up `complexity` as a 5th
+  tab? It's the only admin-adjacent surface still living outside the
+  fused card. Iframe height constraints argued against it for now.
