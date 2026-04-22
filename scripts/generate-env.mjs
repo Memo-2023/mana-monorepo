@@ -75,6 +75,31 @@ const APP_CONFIGS = [
 		},
 	},
 
+	// Unified Mana API (Hono + Bun, Port 3060) — consolidates per-module servers
+	{
+		path: 'apps/api/.env',
+		vars: {
+			NODE_ENV: () => 'development',
+			PORT: (env) => env.MANA_API_PORT || '3060',
+			MANA_AUTH_URL: (env) => env.MANA_AUTH_URL || 'http://localhost:3001',
+			MANA_LLM_URL: (env) => env.MANA_LLM_URL || 'http://localhost:3025',
+			MANA_SEARCH_URL: (env) => env.MANA_SEARCH_URL || 'http://localhost:3021',
+			MANA_CREDITS_URL: (env) => env.MANA_CREDITS_URL || 'http://localhost:3061',
+			MANA_MEDIA_URL: (env) => env.MANA_MEDIA_URL || 'http://localhost:3015',
+			MANA_CRAWLER_URL: (env) => env.MANA_CRAWLER_URL || 'http://localhost:3014',
+			MANA_IMAGE_GEN_URL: (env) => env.MANA_IMAGE_GEN_URL || '',
+			MANA_SERVICE_KEY: (env) => env.MANA_SERVICE_KEY || 'dev-service-key',
+			DATABASE_URL: (env) =>
+				env.MANA_API_DATABASE_URL || 'postgresql://mana:devpassword@localhost:5432/mana_platform',
+			CORS_ORIGINS: (env) => env.CORS_ORIGINS || 'http://localhost:5173',
+			APP_ID: () => 'mana-api',
+			LOGGER_FORMAT: (env) => env.LOGGER_FORMAT || 'pretty',
+			// Picture module providers
+			OPENAI_API_KEY: (env) => env.OPENAI_API_KEY || '',
+			REPLICATE_API_TOKEN: (env) => env.REPLICATE_API_TOKEN || '',
+		},
+	},
+
 	// Mana Research Service (Hono + Bun, Port 3068)
 	{
 		path: 'services/mana-research/.env',
