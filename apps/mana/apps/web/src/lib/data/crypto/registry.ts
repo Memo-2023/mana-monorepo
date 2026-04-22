@@ -586,6 +586,17 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	// and mission-detail filters.
 	aiMissions: { enabled: false, fields: ['title', 'conceptMarkdown', 'objective'] },
 
+	// ─── User-level Tag Presets ──────────────────────────────
+	// Named templates the user applies when creating a new Space. The
+	// preset `name` (e.g. "Mein Standard") and the entire `tags` array
+	// (which contains per-entry tag names) are user-authored personal
+	// content that leaks categorization intent — encrypt both. `userId`,
+	// `isDefault`, timestamps stay plaintext for the indexed query path.
+	// AES wrapping handles `tags` as an array via JSON-stringify (same
+	// pattern as food.foods / recipes.ingredients).
+	// See docs/plans/space-scoped-data-model.md §5.
+	userTagPresets: { enabled: true, fields: ['name', 'tags'] },
+
 	// ─── Tags (shared-stores) ────────────────────────────────
 	// docs/plans/space-scoped-data-model.md §2a — declared with
 	// enabled:false during prep; flips to true in 2c. Tag names like
