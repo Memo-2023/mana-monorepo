@@ -137,17 +137,17 @@
 					_siblingIds: sorted.map((l) => l.id),
 					_siblingKey: 'linkId',
 				})}
-			class="mb-1 w-full min-h-[44px] text-left rounded-md px-3 py-2 transition-colors hover:bg-white/5 cursor-pointer"
+			class="mb-1 w-full min-h-[44px] text-left rounded-md px-3 py-2 transition-colors hover:bg-muted/50 cursor-pointer"
 		>
 			<div class="flex items-center justify-between">
-				<p class="truncate text-sm font-medium text-white/80">
+				<p class="truncate text-sm font-medium text-foreground">
 					{link.title || link.shortCode}
 				</p>
-				<span class="shrink-0 text-xs text-white/40">{link.clickCount}</span>
+				<span class="shrink-0 text-xs text-muted-foreground">{link.clickCount}</span>
 			</div>
-			<p class="truncate text-xs text-white/30">{hostname(link.originalUrl)}</p>
+			<p class="truncate text-xs text-muted-foreground/70">{hostname(link.originalUrl)}</p>
 			{#if link.customCode}
-				<p class="text-xs text-blue-400/60">/{link.customCode}</p>
+				<p class="text-xs text-primary/70">/{link.customCode}</p>
 			{/if}
 		</button>
 	{/snippet}

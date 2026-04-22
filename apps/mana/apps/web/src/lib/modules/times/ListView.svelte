@@ -101,8 +101,8 @@
 			<button
 				onclick={handleStartStop}
 				class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md transition-colors {timerStore.isRunning
-					? 'bg-red-500/80 text-white hover:bg-red-500'
-					: 'bg-white/10 text-white/50 hover:bg-green-500/80 hover:text-white'}"
+					? 'bg-error/80 text-white hover:bg-error'
+					: 'bg-muted text-muted-foreground hover:bg-success/80 hover:text-white'}"
 			>
 				{#if timerStore.isRunning}
 					<Stop size={14} weight="fill" />
@@ -115,12 +115,12 @@
 				value={description}
 				oninput={(e) => handleDescriptionInput((e.target as HTMLInputElement).value)}
 				placeholder="Was trackst du?"
-				class="min-w-0 flex-1 rounded-md border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs text-white/90 placeholder:text-white/30 focus:border-white/20 focus:outline-none"
+				class="min-w-0 flex-1 rounded-md border border-border bg-muted/30 px-2.5 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/60 focus:border-ring focus:outline-none"
 			/>
 			{#if timerStore.isRunning}
-				<div class="flex h-7 items-center gap-1.5 rounded-full bg-green-500/10 px-2.5">
-					<div class="h-1.5 w-1.5 animate-pulse rounded-full bg-green-400"></div>
-					<span class="font-mono text-xs text-green-400">
+				<div class="flex h-7 items-center gap-1.5 rounded-full bg-success/10 px-2.5">
+					<div class="h-1.5 w-1.5 animate-pulse rounded-full bg-success"></div>
+					<span class="font-mono text-xs text-success">
 						{formatDuration(timerStore.elapsedSeconds)}
 					</span>
 				</div>
@@ -132,21 +132,21 @@
 		<span class="flex-1"
 			>Heute: {todayEntries.length} Eintr{todayEntries.length === 1 ? 'ag' : 'age'}</span
 		>
-		<span class="font-medium text-white/60">{fmtCompact(totalToday)}</span>
+		<span class="font-medium text-foreground/80">{fmtCompact(totalToday)}</span>
 	{/snippet}
 
 	{#snippet item(entry)}
 		<button
 			onclick={() => navigate('detail', { entryId: entry.id })}
-			class="mb-1 w-full min-h-[44px] rounded-md px-3 py-2 text-left transition-colors hover:bg-white/5"
+			class="mb-1 w-full min-h-[44px] rounded-md px-3 py-2 text-left transition-colors hover:bg-muted/50"
 		>
 			<div class="flex items-center justify-between">
-				<p class="truncate text-sm text-white/80">
+				<p class="truncate text-sm text-foreground">
 					{entry.description || 'Ohne Beschreibung'}
 				</p>
-				<span class="shrink-0 text-xs text-white/50">{fmtCompact(entry.duration)}</span>
+				<span class="shrink-0 text-xs text-muted-foreground">{fmtCompact(entry.duration)}</span>
 			</div>
-			<p class="text-xs text-white/30">{projectName(entry.projectId)}</p>
+			<p class="text-xs text-muted-foreground/70">{projectName(entry.projectId)}</p>
 		</button>
 	{/snippet}
 </BaseListView>

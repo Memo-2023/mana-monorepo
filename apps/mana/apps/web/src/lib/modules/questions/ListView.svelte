@@ -59,10 +59,10 @@
 	const collections = $derived(collectionsQuery.value);
 
 	const statusColors: Record<string, string> = {
-		open: 'bg-blue-500/20 text-blue-300',
-		researching: 'bg-amber-500/20 text-amber-300',
-		answered: 'bg-green-500/20 text-green-300',
-		archived: 'bg-white/10 text-white/40',
+		open: 'bg-primary/20 text-primary',
+		researching: 'bg-warning/20 text-warning',
+		answered: 'bg-success/20 text-success',
+		archived: 'bg-muted text-muted-foreground',
 	};
 
 	const statusLabels: Record<string, string> = {
@@ -82,12 +82,12 @@
 <BaseListView items={sorted} getKey={(q) => q.id} emptyTitle="Keine offenen Fragen">
 	{#snippet toolbar()}
 		<div class="flex items-center justify-between">
-			<span class="text-xs text-white/40"
+			<span class="text-xs text-muted-foreground"
 				>{questions.length} Fragen · {collections.length} Sammlungen</span
 			>
 			<button
 				type="button"
-				class="text-xs text-white/50 transition-colors hover:text-white/80"
+				class="text-xs text-muted-foreground transition-colors hover:text-foreground"
 				onclick={() => (creating = !creating)}
 			>
 				{creating ? 'Abbrechen' : '+ Neue Frage'}
@@ -95,23 +95,23 @@
 		</div>
 
 		{#if creating}
-			<form class="flex flex-col gap-2 rounded-lg bg-white/5 p-3" onsubmit={handleCreate}>
+			<form class="flex flex-col gap-2 rounded-lg bg-muted/30 p-3" onsubmit={handleCreate}>
 				<input
 					type="text"
 					bind:value={newTitle}
 					placeholder="Was möchtest du herausfinden?"
 					required
-					class="rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white placeholder:text-white/30 focus:border-white/20 focus:outline-none"
+					class="rounded-md border border-border bg-muted/30 px-3 py-1.5 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-ring focus:outline-none"
 				/>
 				<input
 					type="text"
 					bind:value={newDescription}
 					placeholder="Kontext / Details (optional)"
-					class="rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white placeholder:text-white/30 focus:border-white/20 focus:outline-none"
+					class="rounded-md border border-border bg-muted/30 px-3 py-1.5 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-ring focus:outline-none"
 				/>
 				<button
 					type="submit"
-					class="rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+					class="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
 					disabled={!newTitle.trim()}
 				>
 					Frage stellen
@@ -133,10 +133,10 @@
 					_siblingIds: sorted.map((q) => q.id),
 					_siblingKey: 'questionId',
 				})}
-			class="mb-2 w-full text-left rounded-md border border-white/10 px-3 py-2.5 transition-colors hover:bg-white/5 cursor-pointer min-h-[44px]"
+			class="mb-2 w-full text-left rounded-md border border-border px-3 py-2.5 transition-colors hover:bg-muted/50 cursor-pointer min-h-[44px]"
 		>
 			<div class="flex items-start justify-between gap-2">
-				<p class="text-sm font-medium text-white/80">{question.title}</p>
+				<p class="text-sm font-medium text-foreground">{question.title}</p>
 				<span
 					class="shrink-0 rounded px-1.5 py-0.5 text-[10px] {statusColors[question.status] ?? ''}"
 				>
@@ -144,12 +144,14 @@
 				</span>
 			</div>
 			{#if question.description}
-				<p class="mt-1 truncate text-xs text-white/30">{question.description}</p>
+				<p class="mt-1 truncate text-xs text-muted-foreground/70">{question.description}</p>
 			{/if}
 			{#if question.tags.length > 0}
 				<div class="mt-1 flex gap-1">
 					{#each question.tags.slice(0, 3) as tag}
-						<span class="rounded bg-white/5 px-1.5 py-0.5 text-[10px] text-white/40">{tag}</span>
+						<span class="rounded bg-muted/50 px-1.5 py-0.5 text-[10px] text-muted-foreground"
+							>{tag}</span
+						>
 					{/each}
 				</div>
 			{/if}

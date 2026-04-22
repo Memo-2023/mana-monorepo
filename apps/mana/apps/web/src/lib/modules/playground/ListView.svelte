@@ -91,10 +91,10 @@
 	<!-- Model selector -->
 	<select
 		bind:value={selectedModel}
-		class="rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white/70 focus:border-white/20 focus:outline-none"
+		class="rounded-md border border-border bg-muted/30 px-3 py-1.5 text-sm text-foreground/90 focus:border-ring focus:outline-none"
 	>
 		{#each modelOptions as model}
-			<option value={model.id} class="bg-neutral-900">{model.label} ({model.provider})</option>
+			<option value={model.id} class="bg-card">{model.label} ({model.provider})</option>
 		{/each}
 	</select>
 
@@ -103,21 +103,23 @@
 		{#each messages as msg}
 			<div
 				class="mb-2 min-h-[44px] rounded-md px-3 py-2 {msg.role === 'user'
-					? 'bg-white/5'
-					: 'bg-blue-500/10'}"
+					? 'bg-muted/30'
+					: 'bg-primary/10'}"
 			>
-				<p class="text-[10px] text-white/30">{msg.role === 'user' ? 'Du' : modelLabel}</p>
+				<p class="text-[10px] text-muted-foreground/70">
+					{msg.role === 'user' ? 'Du' : modelLabel}
+				</p>
 				{#if msg.content}
-					<p class="whitespace-pre-wrap text-sm text-white/70">{msg.content}</p>
+					<p class="whitespace-pre-wrap text-sm text-foreground/90">{msg.content}</p>
 				{:else}
-					<p class="text-sm text-white/30">…</p>
+					<p class="text-sm text-muted-foreground/70">…</p>
 				{/if}
 			</div>
 		{/each}
 
 		{#if messages.length === 0}
 			<div class="flex h-full items-center justify-center">
-				<p class="text-sm text-white/30">Schreib einen Prompt...</p>
+				<p class="text-sm text-muted-foreground/70">Schreib einen Prompt...</p>
 			</div>
 		{/if}
 	</div>
@@ -133,20 +135,20 @@
 		<input
 			bind:value={prompt}
 			placeholder="Prompt eingeben..."
-			class="flex-1 rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white placeholder:text-white/30 focus:border-white/20 focus:outline-none"
+			class="flex-1 rounded-md border border-border bg-muted/30 px-3 py-1.5 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-ring focus:outline-none"
 		/>
 		{#if isLoading}
 			<button
 				type="button"
 				onclick={stop}
-				class="rounded-md bg-red-500/20 px-3 py-1.5 text-sm text-red-200 transition-colors hover:bg-red-500/30"
+				class="rounded-md bg-error/20 px-3 py-1.5 text-sm text-error transition-colors hover:bg-error/30"
 				>Stop</button
 			>
 		{:else}
 			<button
 				type="submit"
 				disabled={!prompt.trim()}
-				class="rounded-md bg-white/10 px-3 py-1.5 text-sm text-white/70 transition-colors hover:bg-white/15 disabled:opacity-50"
+				class="rounded-md bg-muted px-3 py-1.5 text-sm text-foreground/80 transition-colors hover:bg-muted/80 disabled:opacity-50"
 				>&#9654;</button
 			>
 		{/if}

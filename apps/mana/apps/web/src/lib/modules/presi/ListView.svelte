@@ -57,10 +57,10 @@
 <BaseListView items={decks} getKey={(d) => d.id} emptyTitle="Keine Präsentationen">
 	{#snippet toolbar()}
 		<div class="flex items-center justify-between">
-			<span class="text-xs text-white/40">{decks.length} Präsentationen</span>
+			<span class="text-xs text-muted-foreground">{decks.length} Präsentationen</span>
 			<button
 				type="button"
-				class="text-xs text-white/50 transition-colors hover:text-white/80"
+				class="text-xs text-muted-foreground transition-colors hover:text-foreground"
 				onclick={() => (creating = !creating)}
 			>
 				{creating ? 'Abbrechen' : '+ Neue Präsentation'}
@@ -68,23 +68,23 @@
 		</div>
 
 		{#if creating}
-			<form class="flex flex-col gap-2 rounded-lg bg-white/5 p-3" onsubmit={handleCreate}>
+			<form class="flex flex-col gap-2 rounded-lg bg-muted/30 p-3" onsubmit={handleCreate}>
 				<input
 					type="text"
 					bind:value={newTitle}
 					placeholder="Titel (z. B. Q2 Review)"
 					required
-					class="rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white placeholder:text-white/30 focus:border-white/20 focus:outline-none"
+					class="rounded-md border border-border bg-muted/30 px-3 py-1.5 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-ring focus:outline-none"
 				/>
 				<input
 					type="text"
 					bind:value={newDescription}
 					placeholder="Beschreibung (optional)"
-					class="rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white placeholder:text-white/30 focus:border-white/20 focus:outline-none"
+					class="rounded-md border border-border bg-muted/30 px-3 py-1.5 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-ring focus:outline-none"
 				/>
 				<button
 					type="submit"
-					class="rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+					class="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
 					disabled={!newTitle.trim()}
 				>
 					Präsentation erstellen
@@ -105,17 +105,17 @@
 					_siblingIds: decks.map((d) => d.id),
 					_siblingKey: 'deckId',
 				})}
-			class="mb-2 w-full rounded-md border border-white/10 px-3 py-2.5 text-left transition-colors hover:bg-white/5 min-h-[44px]"
+			class="mb-2 w-full rounded-md border border-border px-3 py-2.5 text-left transition-colors hover:bg-muted/50 min-h-[44px]"
 		>
-			<p class="truncate text-sm font-medium text-white/80">{deck.title}</p>
-			<div class="mt-1 flex items-center gap-2 text-xs text-white/40">
+			<p class="truncate text-sm font-medium text-foreground">{deck.title}</p>
+			<div class="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
 				<span>{slideCount(deck.id)} Folien</span>
 				{#if deck.isPublic}
-					<span class="rounded bg-white/10 px-1.5 py-0.5 text-[10px]">Öffentlich</span>
+					<span class="rounded bg-muted px-1.5 py-0.5 text-[10px]">Öffentlich</span>
 				{/if}
 			</div>
 			{#if deck.description}
-				<p class="mt-1 truncate text-xs text-white/30">{deck.description}</p>
+				<p class="mt-1 truncate text-xs text-muted-foreground/70">{deck.description}</p>
 			{/if}
 		</button>
 	{/snippet}

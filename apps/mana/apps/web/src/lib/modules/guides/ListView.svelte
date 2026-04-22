@@ -85,7 +85,7 @@
 		<input
 			bind:value={query}
 			placeholder="Guides durchsuchen..."
-			class="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/30 focus:border-white/20 focus:outline-none"
+			class="rounded-md border border-border bg-muted/30 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-ring focus:outline-none"
 		/>
 
 		<!-- Category filter + create toggle -->
@@ -97,8 +97,8 @@
 						onclick={() => (activeCategory = cat.id)}
 						class="rounded-full px-3 py-1 text-xs transition-colors
 							{activeCategory === cat.id
-							? 'bg-white/15 text-white'
-							: 'bg-white/5 text-white/50 hover:bg-white/10'}"
+							? 'bg-primary/20 text-primary'
+							: 'bg-muted/30 text-muted-foreground hover:bg-muted'}"
 					>
 						{cat.label}
 					</button>
@@ -106,7 +106,7 @@
 			</div>
 			<button
 				type="button"
-				class="shrink-0 text-xs text-white/50 transition-colors hover:text-white/80"
+				class="shrink-0 text-xs text-muted-foreground transition-colors hover:text-foreground"
 				onclick={() => (creating = !creating)}
 			>
 				{creating ? 'Abbrechen' : '+ Neuer Guide'}
@@ -114,17 +114,17 @@
 		</div>
 
 		{#if creating}
-			<form class="flex flex-col gap-2 rounded-lg bg-white/5 p-3" onsubmit={handleCreate}>
+			<form class="flex flex-col gap-2 rounded-lg bg-muted/30 p-3" onsubmit={handleCreate}>
 				<input
 					type="text"
 					bind:value={newTitle}
 					placeholder="Guide-Titel"
 					required
-					class="rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white placeholder:text-white/30 focus:border-white/20 focus:outline-none"
+					class="rounded-md border border-border bg-muted/30 px-3 py-1.5 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-ring focus:outline-none"
 				/>
 				<select
 					bind:value={newCategory}
-					class="rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white focus:border-white/20 focus:outline-none"
+					class="rounded-md border border-border bg-muted/30 px-3 py-1.5 text-sm text-foreground focus:border-ring focus:outline-none"
 				>
 					{#each Object.entries(GUIDE_CATEGORIES) as [key, info] (key)}
 						<option value={key}>{info.label}</option>
@@ -132,7 +132,7 @@
 				</select>
 				<button
 					type="submit"
-					class="rounded-md bg-teal-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-50"
+					class="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
 					disabled={!newTitle.trim()}
 				>
 					Guide erstellen
@@ -152,28 +152,28 @@
 		{@const progress = getStepProgress(run ?? null, totalSteps)}
 		<button
 			onclick={() => openGuide(guide)}
-			class="mb-2 w-full rounded-md border border-white/5 bg-white/5 p-3 text-left transition-colors hover:bg-white/10"
+			class="mb-2 w-full rounded-md border border-border bg-muted/30 p-3 text-left transition-colors hover:bg-muted"
 		>
 			<div class="mb-1 flex items-center gap-2">
 				<span class="inline-block h-2 w-2 rounded-full {meta.color}"></span>
-				<span class="text-xs text-white/40">{meta.label}</span>
-				<span class="ml-auto text-xs text-white/30">{guide.estimatedMinutes} min</span>
+				<span class="text-xs text-muted-foreground">{meta.label}</span>
+				<span class="ml-auto text-xs text-muted-foreground/70">{guide.estimatedMinutes} min</span>
 			</div>
-			<h3 class="text-sm font-medium text-white/90">{guide.title}</h3>
-			<p class="mt-0.5 text-xs text-white/50">{guide.description}</p>
+			<h3 class="text-sm font-medium text-foreground">{guide.title}</h3>
+			<p class="mt-0.5 text-xs text-muted-foreground">{guide.description}</p>
 			<div class="mt-1.5 flex items-center gap-2">
-				<span class="text-[10px] uppercase tracking-wide text-white/30">
+				<span class="text-[10px] uppercase tracking-wide text-muted-foreground/70">
 					{DIFFICULTY_LABELS[guide.difficulty]}
 				</span>
 				{#if run}
 					{#if run.completedAt}
-						<span class="ml-auto text-[10px] font-medium text-green-400">Abgeschlossen</span>
+						<span class="ml-auto text-[10px] font-medium text-success">Abgeschlossen</span>
 					{:else if totalSteps > 0}
 						<div class="ml-auto flex items-center gap-1.5">
-							<div class="h-1 w-12 rounded-full bg-white/10">
-								<div class="h-full rounded-full bg-teal-400" style="width: {progress}%"></div>
+							<div class="h-1 w-12 rounded-full bg-muted">
+								<div class="h-full rounded-full bg-primary" style="width: {progress}%"></div>
 							</div>
-							<span class="text-[10px] text-white/30">{progress}%</span>
+							<span class="text-[10px] text-muted-foreground/70">{progress}%</span>
 						</div>
 					{/if}
 				{/if}

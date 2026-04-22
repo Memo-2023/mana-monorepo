@@ -56,20 +56,21 @@
 					_siblingIds: locations.map((l) => l.id),
 					_siblingKey: 'locationId',
 				})}
-			class="flex w-full min-h-[44px] items-start gap-2 rounded-md px-2 py-2 transition-colors hover:bg-white/5 cursor-pointer text-left"
+			class="flex w-full min-h-[44px] items-start gap-2 rounded-md px-2 py-2 transition-colors hover:bg-muted/50 cursor-pointer text-left"
 		>
 			<div
 				class="mt-0.5 h-2.5 w-2.5 shrink-0 rounded-full"
-				style="background: {CATEGORY_COLORS[location.category] ?? '#666'}"
+				style="background: {CATEGORY_COLORS[location.category] ??
+					'hsl(var(--color-muted-foreground))'}"
 			></div>
 			<div class="min-w-0 flex-1">
 				<div class="flex items-center gap-1">
-					<p class="truncate text-sm text-white/80">{location.name}</p>
+					<p class="truncate text-sm text-foreground">{location.name}</p>
 					{#if favoriteIds.has(location.id)}
-						<span class="text-xs text-yellow-400">&#9733;</span>
+						<span class="text-xs text-warning">&#9733;</span>
 					{/if}
 				</div>
-				<p class="text-xs text-white/40">
+				<p class="text-xs text-muted-foreground">
 					{categoryLabels[location.category] ?? location.category}
 				</p>
 			</div>

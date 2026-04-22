@@ -58,10 +58,10 @@
 	}
 
 	const statusColors: Record<string, string> = {
-		pending: 'bg-yellow-500/20 text-yellow-300',
-		processing: 'bg-blue-500/20 text-blue-300',
-		completed: 'bg-green-500/20 text-green-300',
-		failed: 'bg-red-500/20 text-red-300',
+		pending: 'bg-warning/20 text-warning',
+		processing: 'bg-primary/20 text-primary',
+		completed: 'bg-success/20 text-success',
+		failed: 'bg-error/20 text-error',
 	};
 </script>
 
@@ -80,26 +80,26 @@
 						_siblingIds: sorted.map((m) => m.id),
 						_siblingKey: 'memoId',
 					})}
-				class="mb-2 w-full rounded-md border border-white/10 px-3 py-2.5 text-left transition-colors hover:bg-white/5 min-h-[44px]"
+				class="mb-2 w-full rounded-md border border-border px-3 py-2.5 text-left transition-colors hover:bg-muted/50 min-h-[44px]"
 			>
 				<div class="flex items-start justify-between gap-2">
 					<div class="min-w-0 flex-1">
 						<div class="flex items-center gap-1">
 							{#if memo.isPinned}
-								<span class="text-xs text-white/30">&#128204;</span>
+								<span class="text-xs text-muted-foreground/70">&#128204;</span>
 							{/if}
-							<p class="truncate text-sm font-medium text-white/80">
+							<p class="truncate text-sm font-medium text-foreground">
 								{memo.title || 'Unbenanntes Memo'}
 							</p>
 						</div>
 						{#if memo.intro}
-							<p class="mt-0.5 truncate text-xs text-white/40">{memo.intro}</p>
+							<p class="mt-0.5 truncate text-xs text-muted-foreground">{memo.intro}</p>
 						{/if}
 					</div>
 					<div class="flex items-center gap-1.5 shrink-0">
 						{#if memo.transcriptModel && memo.processingStatus === 'completed'}
 							<span
-								class="rounded px-1 py-0.5 text-[9px] bg-white/5 text-white/30"
+								class="rounded px-1 py-0.5 text-[9px] bg-muted text-muted-foreground"
 								title="STT-Pipeline"
 							>
 								{memo.transcriptModel}

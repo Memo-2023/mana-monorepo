@@ -119,25 +119,25 @@
 	<div class="flex h-full flex-col gap-6 p-3 sm:p-4">
 		<!-- Header -->
 		<div>
-			<h1 class="text-2xl font-bold text-white/90">Who?</h1>
-			<p class="mt-1 text-sm text-white/60">
+			<h1 class="text-2xl font-bold text-foreground">Who?</h1>
+			<p class="mt-1 text-sm text-muted-foreground">
 				Errate die historische Persönlichkeit. Eine KI verkörpert sie ohne den Namen zu verraten.
 			</p>
 		</div>
 
 		<!-- Deck picker -->
 		<section>
-			<h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-white/50">
+			<h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
 				Neues Spiel starten
 			</h2>
 			{#if loadingDecks}
 				<div class="grid gap-3 sm:grid-cols-2">
 					{#each Array(4) as _, i (i)}
-						<div class="h-24 animate-pulse rounded-lg bg-white/5"></div>
+						<div class="h-24 animate-pulse rounded-lg bg-muted/30"></div>
 					{/each}
 				</div>
 			{:else if decks.length === 0}
-				<p class="text-sm text-white/40">Keine Decks verfügbar.</p>
+				<p class="text-sm text-muted-foreground">Keine Decks verfügbar.</p>
 			{:else}
 				<div class="grid gap-3 sm:grid-cols-2">
 					{#each decks as deck (deck.id)}
@@ -145,23 +145,23 @@
 							type="button"
 							onclick={() => startGame(deck.id)}
 							disabled={starting !== null}
-							class="group flex flex-col items-start gap-2 rounded-lg border border-white/10 bg-white/[0.02] p-4 text-left transition hover:border-white/20 hover:bg-white/[0.05] disabled:cursor-wait disabled:opacity-50"
+							class="group flex flex-col items-start gap-2 rounded-lg border border-border bg-muted/20 p-4 text-left transition hover:border-border-strong hover:bg-muted/40 disabled:cursor-wait disabled:opacity-50"
 							style="border-left: 3px solid {deckColor(deck.id)}"
 						>
 							<div class="flex w-full items-center justify-between">
-								<span class="text-base font-medium text-white/90">{deck.name.de}</span>
+								<span class="text-base font-medium text-foreground">{deck.name.de}</span>
 								<span
-									class="rounded-full bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-wide text-white/50"
+									class="rounded-full bg-muted px-2 py-0.5 text-[10px] uppercase tracking-wide text-muted-foreground"
 								>
 									{difficultyLabel(deck.difficulty)}
 								</span>
 							</div>
-							<p class="text-xs text-white/60">{deck.description.de}</p>
-							<p class="text-[11px] text-white/40">
+							<p class="text-xs text-muted-foreground">{deck.description.de}</p>
+							<p class="text-[11px] text-muted-foreground/70">
 								{deck.characterCount} Personen · {deck.categories.join(', ')}
 							</p>
 							{#if starting === deck.id}
-								<p class="text-xs text-white/70">Starte…</p>
+								<p class="text-xs text-foreground/80">Starte…</p>
 							{/if}
 						</button>
 					{/each}
@@ -172,30 +172,30 @@
 		<!-- Past games -->
 		{#if games.length > 0}
 			<section>
-				<h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-white/50">
+				<h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
 					Vergangene Spiele
 				</h2>
-				<ul class="divide-y divide-white/5 rounded-lg border border-white/10 bg-white/[0.02]">
+				<ul class="divide-y divide-border rounded-lg border border-border bg-muted/20">
 					{#each games as game (game.id)}
 						<li class="flex items-center gap-3 px-3 py-2.5">
 							<span class="text-lg">{statusEmoji(game.status)}</span>
 							<button type="button" class="flex-1 text-left" onclick={() => openGame(game.id)}>
-								<div class="text-sm text-white/90">
+								<div class="text-sm text-foreground">
 									{#if game.revealedName}
 										<span class="font-medium">{game.revealedName}</span>
 									{:else if game.status === 'playing'}
-										<span class="text-white/60">Laufendes Spiel</span>
+										<span class="text-muted-foreground">Laufendes Spiel</span>
 									{:else}
-										<span class="text-white/60">Aufgegeben</span>
+										<span class="text-muted-foreground">Aufgegeben</span>
 									{/if}
 								</div>
-								<div class="text-[11px] text-white/40">
+								<div class="text-[11px] text-muted-foreground/70">
 									{game.deckId} · {game.messageCount} Nachrichten · {gameStatusLabel(game.status)}
 								</div>
 							</button>
 							<button
 								type="button"
-								class="rounded p-1 text-white/30 hover:bg-white/5 hover:text-white/60"
+								class="rounded p-1 text-muted-foreground/70 hover:bg-muted hover:text-foreground"
 								onclick={() => deleteGame(game.id)}
 								title="Löschen"
 							>
@@ -208,7 +208,7 @@
 		{/if}
 
 		{#if error}
-			<div class="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">
+			<div class="rounded-lg border border-error/30 bg-error/10 p-3 text-sm text-error">
 				{error}
 			</div>
 		{/if}

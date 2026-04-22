@@ -74,7 +74,7 @@
 		<div class="flex items-center justify-end">
 			<button
 				type="button"
-				class="text-xs text-white/50 transition-colors hover:text-white/80"
+				class="text-xs text-muted-foreground transition-colors hover:text-foreground"
 				onclick={() => (creating = !creating)}
 			>
 				{creating
@@ -84,13 +84,13 @@
 		</div>
 
 		{#if creating}
-			<form class="flex flex-col gap-2 rounded-lg bg-white/5 p-3" onsubmit={handleCreate}>
+			<form class="flex flex-col gap-2 rounded-lg bg-muted/30 p-3" onsubmit={handleCreate}>
 				<input
 					type="text"
 					bind:value={newName}
 					placeholder={$_('plants.create.namePlaceholder', { default: 'Name (z. B. Monstera)' })}
 					required
-					class="rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white placeholder:text-white/30 focus:border-white/20 focus:outline-none"
+					class="rounded-md border border-border bg-muted/30 px-3 py-1.5 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-ring focus:outline-none"
 				/>
 				<input
 					type="text"
@@ -98,11 +98,11 @@
 					placeholder={$_('plants.create.scientificPlaceholder', {
 						default: 'Botanischer Name (optional)',
 					})}
-					class="rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white placeholder:text-white/30 focus:border-white/20 focus:outline-none"
+					class="rounded-md border border-border bg-muted/30 px-3 py-1.5 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-ring focus:outline-none"
 				/>
 				<button
 					type="submit"
-					class="rounded-md bg-green-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
+					class="rounded-md bg-success px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-success/90 disabled:cursor-not-allowed disabled:opacity-50"
 					disabled={!newName.trim()}
 				>
 					{$_('plants.create.save', { default: 'Pflanze anlegen' })}
@@ -114,12 +114,12 @@
 	{#snippet header()}
 		<span>{$_('plants.list.count', { values: { count: plants.length } })}</span>
 		{#if dueForWatering.length > 0}
-			<span class="text-blue-400"
+			<span class="text-primary"
 				>{$_('plants.list.dueWatering', { values: { count: dueForWatering.length } })}</span
 			>
 		{/if}
 		{#if needsAttention.length > 0}
-			<span class="text-amber-400"
+			<span class="text-warning"
 				>{$_('plants.list.needsCare', { values: { count: needsAttention.length } })}</span
 			>
 		{/if}
@@ -135,24 +135,24 @@
 					_siblingIds: plants.map((p) => p.id),
 					_siblingKey: 'plantId',
 				})}
-			class="mb-2 w-full rounded-md border border-white/10 px-3 py-2.5 text-left transition-colors hover:bg-white/5 min-h-[44px]"
+			class="mb-2 w-full rounded-md border border-border px-3 py-2.5 text-left transition-colors hover:bg-muted/50 min-h-[44px]"
 		>
 			<div class="flex items-center gap-2">
 				<span class="text-sm">
 					{@html healthIcons[plant.healthStatus ?? 'healthy'] ?? '&#127793;'}
 				</span>
 				<div class="min-w-0 flex-1">
-					<p class="truncate text-sm font-medium text-white/80">{plant.name}</p>
+					<p class="truncate text-sm font-medium text-foreground">{plant.name}</p>
 					{#if plant.scientificName}
-						<p class="truncate text-xs italic text-white/30">{plant.scientificName}</p>
+						<p class="truncate text-xs italic text-muted-foreground/70">{plant.scientificName}</p>
 					{/if}
 				</div>
 				{#if waterDue}
-					<span class="text-xs text-blue-400">&#128167;</span>
+					<span class="text-xs text-primary">&#128167;</span>
 				{/if}
 			</div>
 			{#if schedule}
-				<p class="mt-1 text-xs text-white/30">
+				<p class="mt-1 text-xs text-muted-foreground/70">
 					{$_('plants.list.everyXDays', { values: { days: schedule.frequencyDays } })}
 				</p>
 			{/if}

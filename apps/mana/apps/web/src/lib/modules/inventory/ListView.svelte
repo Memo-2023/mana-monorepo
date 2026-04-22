@@ -108,17 +108,17 @@
 					_siblingIds: collections.map((c) => c.id),
 					_siblingKey: 'collectionId',
 				})}
-			class="mb-2 w-full rounded-md border border-white/10 px-3 py-2.5 text-left transition-colors hover:bg-white/5 min-h-[44px]"
+			class="mb-2 w-full rounded-md border border-border px-3 py-2.5 text-left transition-colors hover:bg-muted/50 min-h-[44px]"
 		>
 			<div class="flex items-center gap-2">
 				{#if collection.icon}
 					<span class="text-sm">{collection.icon}</span>
 				{/if}
-				<p class="flex-1 truncate text-sm font-medium text-white/80">{collection.name}</p>
-				<span class="text-xs text-white/40">{itemsInCollection(collection.id)}</span>
+				<p class="flex-1 truncate text-sm font-medium text-foreground">{collection.name}</p>
+				<span class="text-xs text-muted-foreground">{itemsInCollection(collection.id)}</span>
 			</div>
 			{#if collection.description}
-				<p class="mt-1 truncate text-xs text-white/30">{collection.description}</p>
+				<p class="mt-1 truncate text-xs text-muted-foreground/70">{collection.description}</p>
 			{/if}
 		</button>
 	{/snippet}

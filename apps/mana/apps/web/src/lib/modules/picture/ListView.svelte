@@ -242,7 +242,7 @@
 		{/snippet}
 
 		{#snippet item(image)}
-			<div class="group relative aspect-square overflow-hidden rounded-md bg-white/5">
+			<div class="group relative aspect-square overflow-hidden rounded-md bg-muted/50">
 				{#if image.publicUrl}
 					<img
 						src={image.publicUrl}
@@ -251,12 +251,12 @@
 						loading="lazy"
 					/>
 				{:else}
-					<div class="flex h-full items-center justify-center text-white/20 text-xs">
+					<div class="flex h-full items-center justify-center text-muted-foreground/60 text-xs">
 						{image.format ?? 'img'}
 					</div>
 				{/if}
 				{#if image.isFavorite}
-					<span class="absolute right-1 top-1 text-xs text-yellow-400">&#9733;</span>
+					<span class="absolute right-1 top-1 text-xs text-warning">&#9733;</span>
 				{/if}
 			</div>
 		{/snippet}
@@ -334,7 +334,7 @@
 		object-fit: cover;
 	}
 	.upload-thumb.success {
-		outline: 2px solid #22c55e;
+		outline: 2px solid hsl(var(--color-success));
 		outline-offset: -2px;
 	}
 	.upload-thumb.error {
