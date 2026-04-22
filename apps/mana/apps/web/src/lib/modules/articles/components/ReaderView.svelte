@@ -96,7 +96,11 @@
 <style>
 	.reader {
 		overflow-y: auto;
-		padding: 1.5rem clamp(1rem, 5vw, 3rem) 4rem;
+		/* Generous bottom padding — clears the floating toolbar (~4rem of  */
+		/* height + chrome) AND leaves a comfortable "you've reached the   */
+		/* end" gap so the last paragraph isn't visually attached to the   */
+		/* bar when the user hits the bottom of the scroll.                */
+		padding: 1.5rem clamp(1rem, 5vw, 3rem) 14rem;
 		font-size: var(--reader-font-size);
 		line-height: 1.65;
 		max-width: 700px;
