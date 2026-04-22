@@ -782,6 +782,76 @@ db.version(34).stores({
 	tagGroups: 'id, [spaceId+sortOrder]',
 });
 
+// v35 — Phase 2c follow-up: hard drop of the `userId` column from
+// every data-record row, and drop the now-unused userId indexes on
+// the articles module tables.
+//
+// Phase 2c (commit e9b9544ea) stopped the creating-hook from stamping
+// `userId` on new writes to data tables, leaving existing rows
+// untouched (mixed state). This migration completes the cleanup: the
+// `no table has both userId AND spaceId` invariant from the plan is
+// now truly met on data records.
+//
+// Migration shape:
+//   1. Re-declare articles / articleHighlights / articleTags without
+//      the `userId` index so the dropped column stops showing in the
+//      Dexie schema. The other indexes stay the same.
+//   2. Upgrade function: iterate every table in SYNC_APP_MAP that is
+//      NOT in USER_LEVEL_TABLES (see below), and `delete record.userId`
+//      on every row.
+//
+// User-level tables (userSettings, userContext, newsPreferences,
+// meditateSettings, sleepSettings, moodSettings, timeSettings,
+// invoiceSettings, broadcastSettings, wetterSettings, userTagPresets)
+// keep their userId — their ownership model is user-scoped by design.
+//
+// This migration is destructive at the row level (field is removed).
+// Downstream converters (tags-local's toTag / toTagGroup, calc's
+// toCalculation / toSavedFormula) already fall back to `'guest'` /
+// `''` when userId is absent, so public-type consumers don't break.
+// Rollback plan: revert to v34 + restore-from-backup; the `userId`
+// field can't be recovered from a forward revert alone.
+db.version(35)
+	.stores({
+		articles: 'id, status, savedAt, isFavorite, siteName, originalUrl',
+		articleHighlights: 'id, articleId, [articleId+startOffset]',
+		articleTags: 'id, articleId, tagId, [articleId+tagId]',
+	})
+	.upgrade(async (tx) => {
+		// Mirror of USER_LEVEL_TABLES below — duplicated here because the
+		// hook-registration loop hasn't run yet when the upgrade fires
+		// (Dexie applies upgrades before `db.table(...).hook()` calls).
+		// Keep this list in sync with the one at the hook site.
+		const USER_LEVEL = new Set([
+			'userSettings',
+			'userContext',
+			'newsPreferences',
+			'meditateSettings',
+			'sleepSettings',
+			'moodSettings',
+			'timeSettings',
+			'invoiceSettings',
+			'broadcastSettings',
+			'wetterSettings',
+			'userTagPresets',
+		]);
+
+		const dataTables = new Set<string>();
+		for (const tables of Object.values(SYNC_APP_MAP)) {
+			for (const t of tables) if (!USER_LEVEL.has(t)) dataTables.add(t);
+		}
+
+		for (const name of dataTables) {
+			if (!tx.db.tables.find((t) => t.name === name)) continue;
+			await tx
+				.table(name)
+				.toCollection()
+				.modify((record: Record<string, unknown>) => {
+					if ('userId' in record) delete record.userId;
+				});
+		}
+	});
+
 // ─── Sync Routing ──────────────────────────────────────────
 // SYNC_APP_MAP, TABLE_TO_SYNC_NAME, TABLE_TO_APP, SYNC_NAME_TO_TABLE,
 // toSyncName() and fromSyncName() are now derived from per-module
