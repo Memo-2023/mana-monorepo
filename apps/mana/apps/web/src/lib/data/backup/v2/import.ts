@@ -124,12 +124,17 @@ export async function applyClientBackup(
 
 		const prepared: Record<string, unknown>[] = [];
 		for (const row of rows) {
-			// Strip the source user's id so the Dexie creating-hook stamps
-			// the current session's userId. This is what makes cross-account
-			// restores work correctly — the imported rows are "adopted" by
-			// the importing user.
+			// Strip the source identity fields so the Dexie creating-hook
+			// stamps the current session's ids. Without this, cross-account
+			// restores would leave rows bound to the source user's personal
+			// space (`_personal:<old-userId>`) and invisible after RLS — so
+			// we clear `spaceId` on data tables (re-stamped to
+			// `_personal:<new-userId>`), `userId` on user-level tables
+			// (userSettings, …), and `authorId` wherever it appears.
 			const clone = { ...row } as Record<string, unknown>;
 			delete clone.userId;
+			delete clone.spaceId;
+			delete clone.authorId;
 			await encryptRecord(table, clone);
 			prepared.push(clone);
 		}
