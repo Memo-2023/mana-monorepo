@@ -407,7 +407,12 @@ services:
       NODE_ENV: production
       PORT: 3068
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana_platform
-      REDIS_URL: redis://redis:6379
+      # Redis requires auth (see redis service `--requirepass`). Without the
+      # password here the cache layer degrades to every-request-missing with
+      # NOAUTH log spam. Cache misses are not fatal (the executor just
+      # proxies straight to the upstream provider), but the log noise
+      # drowns out real errors in grafana/glitchtip.
+      REDIS_URL: redis://:${REDIS_PASSWORD:-redis123}@redis:6379
       MANA_AUTH_URL: http://mana-auth:3001
       MANA_LLM_URL: http://mana-llm:3025
       MANA_CREDITS_URL: http://mana-credits:3002
