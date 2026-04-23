@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
 	import { Gear } from '@mana/shared-icons';
 	import type { ThemeMode, WeekStartDay } from '@mana/shared-theme';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
+	import { onboardingStatus } from '$lib/stores/onboarding-status.svelte';
 	import SettingsPanel from '../SettingsPanel.svelte';
 	import SettingsSectionHeader from '../SettingsSectionHeader.svelte';
 
@@ -47,6 +49,20 @@
 
 	async function setSounds(enabled: boolean) {
 		await userSettings.updateGeneral({ soundsEnabled: enabled });
+	}
+
+	let restartingOnboarding = $state(false);
+
+	async function restartOnboarding() {
+		if (restartingOnboarding) return;
+		restartingOnboarding = true;
+		try {
+			await onboardingStatus.reset();
+			await goto('/onboarding/name');
+		} catch (err) {
+			console.error('[settings] restart onboarding failed:', err);
+			restartingOnboarding = false;
+		}
 	}
 </script>
 
@@ -139,6 +155,21 @@
 				aria-pressed={userSettings.general?.soundsEnabled ?? true}
 			>
 				<span class="toggle-knob"></span>
+			</button>
+		</div>
+
+		<div class="row">
+			<div class="row-info">
+				<p class="row-title">Onboarding erneut durchlaufen</p>
+				<p class="row-desc">Name, Look und Module neu wählen</p>
+			</div>
+			<button
+				type="button"
+				class="restart-btn"
+				onclick={restartOnboarding}
+				disabled={restartingOnboarding}
+			>
+				{restartingOnboarding ? 'Starte…' : 'Starten'}
 			</button>
 		</div>
 	</div>
@@ -263,5 +294,29 @@
 
 	.toggle.on .toggle-knob {
 		transform: translateX(1.25rem);
+	}
+
+	.restart-btn {
+		padding: 0.375rem 0.875rem;
+		border: 1px solid hsl(var(--color-border));
+		background: hsl(var(--color-surface, var(--color-background)));
+		color: hsl(var(--color-foreground));
+		font-size: 0.8125rem;
+		font-weight: 500;
+		border-radius: 0.5rem;
+		cursor: pointer;
+		transition:
+			background 0.15s ease,
+			border-color 0.15s ease;
+	}
+
+	.restart-btn:hover:not(:disabled) {
+		background: hsl(var(--color-muted) / 0.3);
+		border-color: hsl(var(--color-primary) / 0.4);
+	}
+
+	.restart-btn:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
 	}
 </style>
