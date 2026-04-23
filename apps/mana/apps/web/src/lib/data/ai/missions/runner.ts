@@ -42,6 +42,7 @@ import type { Mission, MissionIteration, PlanStep } from './types';
 import {
 	AI_TOOL_CATALOG_BY_NAME,
 	buildSystemPrompt,
+	compactHistory,
 	runPlannerLoop,
 	runPrePlanGuardrails,
 	runPreExecuteGuardrails,
@@ -61,6 +62,12 @@ const RESEARCH_TRIGGER = /\b(recherchier|research|news|finde|suche|aktuelle|neue
  *  LLM call plus whatever tool executions its output triggered. Matches
  *  the shared-ai default; re-declared here for clarity. */
 const MAX_PLANNER_ROUNDS = 5;
+
+/** Context-window ceiling for the compactor. Matches gemini-2.5-flash's
+ *  1M-token budget. Missions can accumulate many iterations over time
+ *  and — with read-heavy reasoning — chatty tool results; the compactor
+ *  folds pre-tail turns at 92% so we never hit a 400 from the provider. */
+const COMPACT_MAX_CTX = 1_000_000;
 
 /** Hard timeout for one mission run. 180 s is comfortable for a cloud
  *  model doing up to 5 reasoning rounds; anything longer means a wedged
@@ -273,6 +280,20 @@ async function runMissionInner(
 				// pre-execute guardrail can reason about state built up by
 				// prior steps in the same round.
 				isParallelSafe: (name) => AI_TOOL_CATALOG_BY_NAME.get(name)?.defaultPolicy === 'auto',
+				// Fold older turns into a compact-summary at 92% of
+				// maxContextTokens. Same LlmClient + model as the
+				// planner; one extra LLM call, but only when usage
+				// actually approaches the ceiling.
+				compactor: {
+					maxContextTokens: COMPACT_MAX_CTX,
+					compact: async (msgs) => {
+						const res = await compactHistory(msgs, {
+							llm: deps.llm,
+							model: deps.model ?? 'google/gemini-2.5-flash',
+						});
+						return { messages: res.messages, compactedTurns: res.compactedTurns };
+					},
+				},
 			},
 			onToolCall: async (call: ToolCallRequest): Promise<ToolResult> => {
 				await checkCancel();

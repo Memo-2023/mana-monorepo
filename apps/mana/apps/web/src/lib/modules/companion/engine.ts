@@ -15,6 +15,7 @@ import {
 	runPlannerLoop,
 	AI_TOOL_CATALOG,
 	AI_TOOL_CATALOG_BY_NAME,
+	compactHistory,
 	type ChatMessage,
 	type ToolCallRequest,
 	type ToolResult,
@@ -28,6 +29,17 @@ import type { DaySnapshot, StreakInfo } from '$lib/data/projections/types';
 import type { LocalMessage } from './types';
 
 const MAX_TOOL_ROUNDS = 3;
+
+/**
+ * Context-window ceiling for the compactor. gemini-2.5-flash supports
+ * 1M tokens; the Companion chat rarely gets anywhere near that because
+ * we cap rounds at 3, but long chat histories plus chatty tool results
+ * (list_tasks on a power user) can still push us toward it. Kept as a
+ * module constant rather than env-wired — the webapp's Vite build would
+ * need a PUBLIC_ prefix and local-first apps shouldn't ship that kind
+ * of flag to the browser when the default already works.
+ */
+const COMPACT_MAX_CTX = 1_000_000;
 
 const llm = createManaLlmClient();
 
@@ -110,6 +122,16 @@ export async function runCompanionChat(
 				// Writes (propose policy) stay sequential to preserve
 				// user-visible intent order in the proposal inbox.
 				isParallelSafe: (name) => AI_TOOL_CATALOG_BY_NAME.get(name)?.defaultPolicy === 'auto',
+				// Fold the middle of messages into a compact-summary at
+				// 92% of the model's context window. Mirrors the mana-ai
+				// wiring; one call to the same LLM client, same model.
+				compactor: {
+					maxContextTokens: COMPACT_MAX_CTX,
+					compact: async (msgs) => {
+						const res = await compactHistory(msgs, { llm, model: 'google/gemini-2.5-flash' });
+						return { messages: res.messages, compactedTurns: res.compactedTurns };
+					},
+				},
 			},
 			onToolCall: async (call: ToolCallRequest): Promise<ToolResult> => {
 				const startedAt = Date.now();
