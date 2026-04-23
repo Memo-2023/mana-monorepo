@@ -26,7 +26,9 @@ export type ModuleId =
 	| 'contacts'
 	| 'articles'
 	| 'missions'
-	| 'tags';
+	| 'tags'
+	// — M5 (me-images + reference-based image generation) —
+	| 'me';
 
 /**
  * `user-space` — operates on the caller's data within a specific Space.

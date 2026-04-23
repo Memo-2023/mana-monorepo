@@ -12,6 +12,7 @@
 
 import { registerHabitsTools } from './habits.ts';
 import { registerJournalTools } from './journal.ts';
+import { registerMeTools } from './me.ts';
 import { registerNotesTools } from './notes.ts';
 import { registerSpacesTools } from './spaces.ts';
 import { registerTodoTools } from './todo.ts';
@@ -19,6 +20,7 @@ import { registerTodoTools } from './todo.ts';
 export function registerAllModules(): void {
 	registerHabitsTools();
 	registerJournalTools();
+	registerMeTools();
 	registerNotesTools();
 	registerSpacesTools();
 	registerTodoTools();
@@ -27,6 +29,7 @@ export function registerAllModules(): void {
 export {
 	registerHabitsTools,
 	registerJournalTools,
+	registerMeTools,
 	registerNotesTools,
 	registerSpacesTools,
 	registerTodoTools,
