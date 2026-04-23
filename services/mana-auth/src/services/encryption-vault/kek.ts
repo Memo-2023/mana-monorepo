@@ -24,6 +24,8 @@
  *   column gets a new `kek_id` value to mark which KEK produced it.
  */
 
+import { logger } from '@mana/shared-hono';
+
 const KEK_LENGTH_BYTES = 32; // AES-256
 const IV_LENGTH_BYTES = 12; // AES-GCM standard
 const MK_LENGTH_BYTES = 32; // user master key is also AES-256
@@ -52,10 +54,7 @@ export async function loadKek(base64: string): Promise<void> {
 	// Loud warning if the dev fallback KEK (32 zero bytes) is in use —
 	// catches accidental production deploys without a real secret.
 	if (raw.every((b) => b === 0)) {
-		console.warn(
-			'\n⚠️  mana-auth: USING DEV KEK (32 zero bytes). ' +
-				'Set MANA_AUTH_KEK to a real value before production.\n'
-		);
+		logger.warn('mana-auth: USING DEV KEK (32 zero bytes). Set MANA_AUTH_KEK before production.');
 	}
 
 	_kek = await crypto.subtle.importKey(

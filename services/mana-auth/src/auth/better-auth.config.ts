@@ -20,6 +20,7 @@ import { jwt } from 'better-auth/plugins/jwt';
 import { organization } from 'better-auth/plugins/organization';
 import { twoFactor } from 'better-auth/plugins/two-factor';
 import { magicLink } from 'better-auth/plugins/magic-link';
+import { passkey } from '@better-auth/passkey';
 import { getDb } from '../db/connection';
 import { organizations, members, invitations } from '../db/schema/organizations';
 import {
@@ -29,6 +30,7 @@ import {
 	verificationTokens,
 	jwks,
 	twoFactorAuth,
+	passkeys,
 } from '../db/schema/auth';
 import {
 	sendPasswordResetEmail,
@@ -79,12 +81,24 @@ export interface JWTCustomPayload {
 }
 
 /**
+ * WebAuthn configuration for the passkey plugin. Kept as a separate
+ * argument so the call site (src/index.ts) can wire it in from the
+ * loaded config without coupling better-auth.config.ts to config.ts.
+ */
+export interface BetterAuthWebAuthnOptions {
+	rpId: string;
+	rpName: string;
+	origin: string | string[];
+}
+
+/**
  * Create Better Auth instance
  *
  * @param databaseUrl - PostgreSQL connection URL
+ * @param webauthn - WebAuthn settings for the passkey plugin
  * @returns Better Auth instance
  */
-export function createBetterAuth(databaseUrl: string) {
+export function createBetterAuth(databaseUrl: string, webauthn: BetterAuthWebAuthnOptions) {
 	const db = getDb(databaseUrl);
 
 	return betterAuth({
@@ -108,6 +122,11 @@ export function createBetterAuth(databaseUrl: string) {
 
 				// Two-Factor Authentication table
 				twoFactor: twoFactorAuth,
+
+				// Passkey plugin table — Drizzle field names match
+				// @better-auth/passkey's plugin schema (see src/db/schema/
+				// auth.ts comment for the alignment rationale).
+				passkey: passkeys,
 			},
 		}),
 
@@ -427,6 +446,30 @@ export function createBetterAuth(databaseUrl: string) {
 					await sendMagicLinkEmail(email, url);
 				},
 				expiresIn: 600, // 10 minutes
+			}),
+
+			/**
+			 * Passkey plugin — WebAuthn registration + authentication.
+			 *
+			 * rpID is the effective domain the credential binds to. For
+			 * cross-subdomain SSO on `*.mana.how`, this MUST be `mana.how`
+			 * (the bare apex), not any subdomain — otherwise a passkey
+			 * registered on app.mana.how won't work on calendar.mana.how.
+			 * In dev this resolves to `localhost`.
+			 *
+			 * `origin` is the full URL(s) where WebAuthn calls are made
+			 * from; a mismatch causes a SecurityError on verify. We pass
+			 * every CORS origin by default.
+			 *
+			 * Note: passkeys don't replace passwords in this build — every
+			 * account keeps its password, and passkey is additive. This
+			 * sidesteps the "user lost all passkeys" recovery-flow that
+			 * passwordless-only accounts would require.
+			 */
+			passkey({
+				rpID: webauthn.rpId,
+				rpName: webauthn.rpName,
+				origin: webauthn.origin,
 			}),
 		],
 	});

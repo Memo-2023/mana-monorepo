@@ -3,6 +3,7 @@
  */
 
 import { eq, and, gte, desc, sql } from 'drizzle-orm';
+import { logger } from '@mana/shared-hono';
 import type { Database } from '../db/connection';
 
 // Security events — fire-and-forget, never throw
@@ -56,11 +57,11 @@ export class SecurityEventsService {
 			// Audit logging is non-critical, so we never throw — but actually
 			// surface the error message so the failure mode is debuggable
 			// instead of a silent warn that hides the real cause.
-			console.warn(
-				'Failed to log security event (non-critical):',
-				params.eventType,
-				error instanceof Error ? error.message : error
-			);
+			logger.warn('security.logEvent failed (non-critical)', {
+				eventType: params.eventType,
+				userId: params.userId,
+				error: error instanceof Error ? error.message : String(error),
+			});
 		}
 	}
 
@@ -112,11 +113,10 @@ export class AccountLockoutService {
 			// user log in than block them on a transient DB hiccup), but
 			// surface the cause so the next bug doesn't take 4 hours to
 			// find like this one did.
-			console.warn(
-				'checkLockout failed (fail-open):',
+			logger.warn('lockout.checkLockout failed (fail-open)', {
 				email,
-				error instanceof Error ? error.message : error
-			);
+				error: error instanceof Error ? error.message : String(error),
+			});
 			return { locked: false };
 		}
 	}
@@ -134,11 +134,11 @@ export class AccountLockoutService {
 				VALUES (${email}, ${successful}, ${ipAddress ?? null}, NOW())`
 			);
 		} catch (error) {
-			console.warn(
-				'Failed to record login attempt (non-critical):',
+			logger.warn('lockout.recordAttempt failed (non-critical)', {
 				email,
-				error instanceof Error ? error.message : error
-			);
+				successful,
+				error: error instanceof Error ? error.message : String(error),
+			});
 		}
 	}
 

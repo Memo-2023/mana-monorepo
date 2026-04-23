@@ -441,6 +441,11 @@
 			scheduleTimeout(() => goto(successRedirect), 600);
 		} else if (result.error === 'Passkey authentication was cancelled') {
 			// User cancelled - don't show error
+		} else if (result.errorCode === 'PASSKEY_NOT_ENABLED') {
+			// Server hasn't provisioned passkey auth yet. Quietly skip —
+			// the passkey button shouldn't have been shown in the first
+			// place (capability gating does that), but conditional UI
+			// triggered on mount can still land here.
 		} else {
 			setError(result.error || t.signInFailed, 'general');
 		}

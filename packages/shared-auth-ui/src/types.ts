@@ -41,10 +41,33 @@ export interface AuthServiceInterface {
  * locale-dependent.
  */
 export type AuthErrorCode =
+	// Credential flows
 	| 'INVALID_CREDENTIALS'
 	| 'EMAIL_NOT_VERIFIED'
-	| 'RATE_LIMITED'
+	| 'EMAIL_ALREADY_REGISTERED'
+	| 'WEAK_PASSWORD'
+	// Throttling
 	| 'ACCOUNT_LOCKED'
+	| 'SIGNUP_LIMIT_REACHED'
+	| 'RATE_LIMITED'
+	// Tokens
+	| 'TOKEN_EXPIRED'
+	| 'TOKEN_INVALID'
+	// Two-factor
+	| 'TWO_FACTOR_REQUIRED'
+	| 'TWO_FACTOR_FAILED'
+	// Passkeys
+	| 'PASSKEY_NOT_ENABLED'
+	| 'PASSKEY_CANCELLED'
+	| 'PASSKEY_VERIFICATION_FAILED'
+	// Input / generic
+	| 'VALIDATION'
+	| 'UNAUTHORIZED'
+	| 'NOT_FOUND'
+	// Infra
+	| 'SERVICE_UNAVAILABLE'
+	| 'INTERNAL'
+	// Client-side only (no server match)
 	| 'NETWORK_ERROR'
 	| 'UNKNOWN';
 

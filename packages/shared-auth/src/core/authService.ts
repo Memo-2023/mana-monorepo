@@ -3,6 +3,8 @@ import type {
 	AuthServiceInterface,
 	AuthEndpoints,
 	AuthResult,
+	AuthErrorCode,
+	PasskeyCapability,
 	TokenRefreshResult,
 	UserData,
 	StorageKeys,
@@ -64,6 +66,7 @@ const DEFAULT_ENDPOINTS: AuthEndpoints = {
 	passkeyAuthOptions: '/api/v1/auth/passkeys/authenticate/options',
 	passkeyAuthVerify: '/api/v1/auth/passkeys/authenticate/verify',
 	passkeyList: '/api/v1/auth/passkeys',
+	passkeyCapability: '/api/v1/auth/passkeys/capability',
 };
 
 /**
@@ -76,6 +79,12 @@ export function createAuthService(config: AuthServiceConfig): AuthServiceInterfa
 
 	// Callback for token refresh events
 	let onTokenRefreshCallback: ((userData: UserData) => void) | null = null;
+
+	// Passkey-capability cache: one-time probe per service instance.
+	// Deduplicates concurrent callers via `inFlight`. See
+	// getPasskeyCapability() for the rationale.
+	let passkeyCapabilityCache: PasskeyCapability | null = null;
+	let passkeyCapabilityInFlight: Promise<PasskeyCapability> | null = null;
 
 	const service = {
 		/**
@@ -158,21 +167,8 @@ export function createAuthService(config: AuthServiceConfig): AuthServiceInterfa
 				});
 
 				if (!response.ok) {
-					const errorData = await response.json();
-
-					if (response.status === 409) {
-						return {
-							success: false,
-							error:
-								errorData.code === 'EMAIL_ALREADY_REGISTERED'
-									? 'EMAIL_ALREADY_REGISTERED'
-									: 'Email already in use',
-						};
-					} else if (response.status === 400) {
-						return { success: false, error: errorData.message || 'Invalid email or password' };
-					}
-
-					return { success: false, error: errorData.message || 'Sign up failed' };
+					const errorData = await response.json().catch(() => ({}));
+					return service.handleAuthError(response.status, errorData);
 				}
 
 				const data = await response.json();
@@ -228,13 +224,8 @@ export function createAuthService(config: AuthServiceConfig): AuthServiceInterfa
 				});
 
 				if (!response.ok) {
-					const errorData = await response.json();
-
-					if (errorData.message?.includes('rate limit')) {
-						return { success: false, error: 'Too many attempts. Please wait before trying again.' };
-					}
-
-					return { success: false, error: errorData.message || 'Password reset failed' };
+					const errorData = await response.json().catch(() => ({}));
+					return service.handleAuthError(response.status, errorData);
 				}
 
 				trackAuth('password_reset_requested');
@@ -260,17 +251,8 @@ export function createAuthService(config: AuthServiceConfig): AuthServiceInterfa
 				});
 
 				if (!response.ok) {
-					const errorData = await response.json();
-
-					if (errorData.message?.includes('expired')) {
-						return { success: false, error: 'Reset link has expired. Please request a new one.' };
-					}
-
-					if (errorData.message?.includes('invalid')) {
-						return { success: false, error: 'Invalid reset link. Please request a new one.' };
-					}
-
-					return { success: false, error: errorData.message || 'Password reset failed' };
+					const errorData = await response.json().catch(() => ({}));
+					return service.handleAuthError(response.status, errorData);
 				}
 
 				return { success: true };
@@ -297,11 +279,8 @@ export function createAuthService(config: AuthServiceConfig): AuthServiceInterfa
 				});
 
 				if (!response.ok) {
-					const errorData = await response.json();
-					return {
-						success: false,
-						error: errorData.message || 'Failed to resend verification email',
-					};
+					const errorData = await response.json().catch(() => ({}));
+					return service.handleAuthError(response.status, errorData);
 				}
 
 				return { success: true };
@@ -370,11 +349,83 @@ export function createAuthService(config: AuthServiceConfig): AuthServiceInterfa
 		},
 
 		/**
-		 * Check if WebAuthn/Passkeys are supported in this browser
+		 * Check if WebAuthn/Passkeys are supported in this browser.
+		 *
+		 * Browser-only gate — does NOT tell you whether the server has
+		 * the passkey plugin wired up. Use `getPasskeyCapability()` for
+		 * the full gate before rendering UI; this stays as a cheap
+		 * pre-check that avoids an HTTP round-trip when WebAuthn isn't
+		 * available at all (e.g. in a non-browser runtime).
 		 */
 		isPasskeyAvailable(): boolean {
 			if (typeof window === 'undefined') return false;
 			return !!window.PublicKeyCredential;
+		},
+
+		/**
+		 * Probe both browser + server support for passkeys.
+		 *
+		 * Cached for the lifetime of the service instance so the login
+		 * page can call this on mount + the settings page can call it
+		 * when the security tab opens without re-hitting the server.
+		 *
+		 * The cache deliberately doesn't persist across page reloads —
+		 * a fresh tab means a fresh probe. Server capability can change
+		 * after a deploy and we want that to take effect without the
+		 * user having to clear their storage.
+		 */
+		async getPasskeyCapability(): Promise<PasskeyCapability> {
+			if (passkeyCapabilityCache) return passkeyCapabilityCache;
+			if (passkeyCapabilityInFlight) return passkeyCapabilityInFlight;
+
+			passkeyCapabilityInFlight = (async (): Promise<PasskeyCapability> => {
+				const browser = typeof window !== 'undefined' && !!window.PublicKeyCredential;
+
+				let conditionalUI = false;
+				if (browser) {
+					const PKC = window.PublicKeyCredential as unknown as {
+						isConditionalMediationAvailable?: () => Promise<boolean>;
+					};
+					if (typeof PKC.isConditionalMediationAvailable === 'function') {
+						try {
+							conditionalUI = await PKC.isConditionalMediationAvailable();
+						} catch {
+							conditionalUI = false;
+						}
+					}
+				}
+
+				let server = false;
+				let rpId: string | null = null;
+				try {
+					const res = await fetch(`${baseUrl}${endpoints.passkeyCapability}`);
+					if (res.ok) {
+						const data = (await res.json()) as { enabled?: boolean; rpId?: string | null };
+						server = !!data.enabled;
+						rpId = data.rpId ?? null;
+					}
+				} catch {
+					// Network error → server disabled from the client's POV.
+					// Don't log — the probe runs on every app boot and a flaky
+					// network shouldn't spam the error tracker.
+				}
+
+				const capability: PasskeyCapability = {
+					browser,
+					conditionalUI,
+					server,
+					available: browser && server,
+					rpId,
+				};
+				passkeyCapabilityCache = capability;
+				return capability;
+			})();
+
+			try {
+				return await passkeyCapabilityInFlight;
+			} finally {
+				passkeyCapabilityInFlight = null;
+			}
 		},
 
 		/**
@@ -456,7 +507,15 @@ export function createAuthService(config: AuthServiceConfig): AuthServiceInterfa
 
 				if (!optionsRes.ok) {
 					const err = await optionsRes.json().catch(() => ({}));
-					return { success: false, error: err.message || 'Failed to get authentication options' };
+					// PASSKEY_NOT_ENABLED is a feature gate, not an error. The
+					// login page may call this on mount for conditional UI; we
+					// must not log anything or the error tracker fires on
+					// every visitor. The caller branches on `code`.
+					return {
+						success: false,
+						error: err.message || 'Failed to get authentication options',
+						code: err.error as AuthErrorCode | undefined,
+					};
 				}
 
 				const { options: webauthnOptions, challengeId } = await optionsRes.json();
@@ -1054,34 +1113,72 @@ export function createAuthService(config: AuthServiceConfig): AuthServiceInterfa
 		},
 
 		/**
-		 * Handle authentication errors
+		 * Handle authentication errors from the mana-auth wrapper.
+		 *
+		 * As of the auth-errors refactor, the server returns a structured
+		 * envelope:
+		 *
+		 *   { error: AuthErrorCode, message: string, status: number,
+		 *     retryAfterSec?: number }
+		 *
+		 * `error` is a stable machine-readable code the UI switches on
+		 * (and translates). `message` is a localised, user-safe fallback
+		 * for codes the UI doesn't recognise yet (forward-compat).
+		 *
+		 * The legacy string-matching heuristics below are kept for
+		 * resilience against a) handlers that haven't been refactored
+		 * yet and b) Better Auth native endpoints the client still calls
+		 * directly (passkey options, /api/auth/* fallbacks).
 		 */
 		handleAuthError(status: number, errorData: Record<string, unknown>): AuthResult {
-			if (status === 401) {
-				const isFirebaseUserNeedsReset =
-					String(errorData.message).includes('Firebase user detected') ||
-					String(errorData.message).includes('password reset required') ||
-					errorData.code === 'FIREBASE_USER_PASSWORD_RESET_REQUIRED';
+			// New envelope: trust `error` as the canonical code.
+			const envelopeCode = typeof errorData.error === 'string' ? errorData.error : undefined;
+			const envelopeMessage = typeof errorData.message === 'string' ? errorData.message : undefined;
+			const retryAfterSec =
+				typeof errorData.retryAfterSec === 'number' ? errorData.retryAfterSec : undefined;
 
-				if (isFirebaseUserNeedsReset) {
+			if (envelopeCode && /^[A-Z_]+$/.test(envelopeCode)) {
+				return {
+					success: false,
+					error: envelopeCode,
+					code: envelopeCode as AuthResult['code'],
+					retryAfter: retryAfterSec,
+				};
+			}
+
+			// Legacy paths: infer from status + message heuristics.
+			if (status === 401) {
+				const message = String(errorData.message || '');
+				const code = errorData.code;
+
+				if (
+					message.includes('Firebase user detected') ||
+					message.includes('password reset required') ||
+					code === 'FIREBASE_USER_PASSWORD_RESET_REQUIRED'
+				) {
 					return { success: false, error: 'FIREBASE_USER_PASSWORD_RESET_REQUIRED' };
 				}
 
-				const isEmailNotConfirmed =
-					String(errorData.message).includes('Email not confirmed') ||
-					String(errorData.message).includes('Email not verified') ||
-					errorData.code === 'EMAIL_NOT_VERIFIED';
-
-				if (isEmailNotConfirmed) {
-					return { success: false, error: 'EMAIL_NOT_VERIFIED' };
+				if (
+					message.includes('Email not confirmed') ||
+					message.includes('Email not verified') ||
+					code === 'EMAIL_NOT_VERIFIED'
+				) {
+					return { success: false, error: 'EMAIL_NOT_VERIFIED', code: 'EMAIL_NOT_VERIFIED' };
 				}
 
-				return { success: false, error: 'INVALID_CREDENTIALS' };
-			} else if (status === 403) {
-				return { success: false, error: 'EMAIL_NOT_VERIFIED' };
+				return {
+					success: false,
+					error: 'INVALID_CREDENTIALS',
+					code: 'INVALID_CREDENTIALS',
+				};
 			}
 
-			return { success: false, error: String(errorData.message) || 'Authentication failed' };
+			if (status === 403) {
+				return { success: false, error: 'EMAIL_NOT_VERIFIED', code: 'EMAIL_NOT_VERIFIED' };
+			}
+
+			return { success: false, error: envelopeMessage || 'Authentication failed' };
 		},
 
 		/**

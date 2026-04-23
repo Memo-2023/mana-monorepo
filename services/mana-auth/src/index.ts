@@ -10,10 +10,16 @@ import { cors } from 'hono/cors';
 import { loadConfig } from './config';
 import { getDb } from './db/connection';
 import { createBetterAuth } from './auth/better-auth.config';
-import { serviceErrorHandler as errorHandler } from '@mana/shared-hono';
+import {
+	serviceErrorHandler as errorHandler,
+	initLogger,
+	requestLogger,
+	logger,
+} from '@mana/shared-hono';
 import { jwtAuth } from './middleware/jwt-auth';
 import { serviceAuth } from './middleware/service-auth';
 import { SecurityEventsService, AccountLockoutService } from './services/security';
+import { PasskeyRateLimitService } from './services/passkey-rate-limit';
 import { SignupLimitService } from './services/signup-limit';
 import { ApiKeysService } from './services/api-keys';
 import { UserDataService } from './services/user-data';
@@ -21,6 +27,7 @@ import { EncryptionVaultService } from './services/encryption-vault';
 import { MissionGrantService } from './services/encryption-vault/mission-grant';
 import { loadKek } from './services/encryption-vault/kek';
 import { createAuthRoutes } from './routes/auth';
+import { createPasskeyRoutes } from './routes/passkeys';
 import { createGuildRoutes } from './routes/guilds';
 import { createApiKeyRoutes, createApiKeyValidationRoute } from './routes/api-keys';
 import { createMeRoutes } from './routes/me';
@@ -34,9 +41,10 @@ import { createInternalPersonasRoutes } from './routes/internal-personas';
 
 // ─── Bootstrap ──────────────────────────────────────────────
 
+initLogger('mana-auth');
 const config = loadConfig();
 const db = getDb(config.databaseUrl);
-const auth = createBetterAuth(config.databaseUrl);
+const auth = createBetterAuth(config.databaseUrl, config.webauthn);
 
 // Load the Key Encryption Key before any vault operation can run.
 // Top-level await is supported by Bun. Throws if MANA_AUTH_KEK is
@@ -46,6 +54,14 @@ await loadKek(config.encryptionKek);
 // Initialize services
 const security = new SecurityEventsService(db);
 const lockout = new AccountLockoutService(db);
+const passkeyRateLimit = new PasskeyRateLimitService();
+// Periodic sweep of expired passkey rate-limit buckets. 5 min cadence
+// is short enough that high IP churn doesn't balloon memory, long
+// enough that the overhead is negligible. setInterval + unref so the
+// sweep doesn't keep the process alive on shutdown (Bun implements
+// unref but Node typings don't always pick it up — the optional
+// chain makes it safe).
+setInterval(() => passkeyRateLimit.sweep(), 5 * 60 * 1000)?.unref?.();
 const signupLimit = new SignupLimitService(db);
 const apiKeysService = new ApiKeysService(db);
 const userDataService = new UserDataService(db, config);
@@ -60,6 +76,7 @@ const missionGrantService = new MissionGrantService(
 const app = new Hono();
 
 app.onError(errorHandler);
+app.use('*', requestLogger());
 app.use(
 	'*',
 	cors({
@@ -84,6 +101,10 @@ app.get('/.well-known/openid-configuration', async (c) => auth.handler(c.req.raw
 // ─── Custom Auth Endpoints ──────────────────────────────────
 
 app.route('/api/v1/auth', createAuthRoutes(auth, config, security, lockout, signupLimit));
+app.route(
+	'/api/v1/auth/passkeys',
+	createPasskeyRoutes(auth, config, config.webauthn, security, lockout, passkeyRateLimit)
+);
 
 // ─── Guilds ─────────────────────────────────────────────────
 
@@ -188,6 +209,6 @@ app.get('/login', (c) => {
 
 // ─── Start ──────────────────────────────────────────────────
 
-console.log(`mana-auth starting on port ${config.port}...`);
+logger.info(`mana-auth starting on port ${config.port}`);
 
 export default { port: config.port, fetch: app.fetch };

@@ -35,7 +35,7 @@
 	primaryColor="hsl(var(--color-primary))"
 	onSignIn={handleSignIn}
 	onResendVerification={handleResendVerification}
-	passkeyAvailable={authStore.isPasskeyAvailable()}
+	passkeyAvailable={authStore.passkeyAvailable === true}
 	onSignInWithPasskey={() => authStore.signInWithPasskey()}
 	onVerifyTwoFactor={(code, trust) => authStore.verifyTwoFactor(code, trust)}
 	onVerifyBackupCode={(code) => authStore.verifyBackupCode(code)}

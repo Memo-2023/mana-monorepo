@@ -391,7 +391,10 @@ export class UserDataService {
 			this.db
 				.select({
 					id: passkeys.id,
-					friendlyName: passkeys.friendlyName,
+					// Renamed from friendlyName in the passkey-bootstrap migration.
+					// Alias back to `friendlyName` here so the GDPR export contract
+					// with the client stays stable.
+					friendlyName: passkeys.name,
 					deviceType: passkeys.deviceType,
 					createdAt: passkeys.createdAt,
 					lastUsedAt: passkeys.lastUsedAt,

@@ -25,6 +25,18 @@ export interface Config {
 	 * to foreground-only execution.
 	 */
 	missionGrantPublicKeyPem?: string;
+	/** WebAuthn passkey settings. `rpId` is the effective domain the
+	 *  authenticator binds credentials to — `mana.how` in prod (scopes
+	 *  passkeys across all subdomains) and `localhost` in dev. `origin`
+	 *  is the URL where the browser made the WebAuthn call; mismatches
+	 *  cause the verification step to fail with `invalid origin`. `name`
+	 *  is shown to the user in the authenticator prompt ("Register a
+	 *  passkey for Mana"). */
+	webauthn: {
+		rpId: string;
+		rpName: string;
+		origin: string | string[];
+	};
 }
 
 export function loadConfig(): Config {
@@ -49,6 +61,23 @@ export function loadConfig(): Config {
 		encryptionKek = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=';
 	}
 
+	const corsOrigins = env('CORS_ORIGINS', 'http://localhost:5173').split(',');
+
+	// WebAuthn: derive sensible defaults from the auth service's
+	// BASE_URL + COOKIE_DOMAIN so a dev never has to set three extra
+	// env vars. In prod, override explicitly.
+	//
+	// rpId must be the bare effective domain (no protocol, no port).
+	// A mismatch between rpId and the client's origin hostname causes
+	// SecurityError at registration time. Deriving rpId from
+	// COOKIE_DOMAIN (already stripped of its leading dot for the shared
+	// cookie) keeps it honest — `.mana.how` → `mana.how` — and falls
+	// back to the hostname of BASE_URL.
+	const cookieDomain = env('COOKIE_DOMAIN');
+	const defaultRpId = cookieDomain
+		? cookieDomain.replace(/^\./, '')
+		: new URL(env('BASE_URL', 'http://localhost:3001')).hostname;
+
 	return {
 		port: parseInt(env('PORT', '3001'), 10),
 		databaseUrl: env('DATABASE_URL', 'postgresql://mana:devpassword@localhost:5432/mana_platform'),
@@ -57,15 +86,23 @@ export function loadConfig(): Config {
 			'postgresql://mana:devpassword@localhost:5432/mana_sync'
 		),
 		baseUrl: env('BASE_URL', 'http://localhost:3001'),
-		cookieDomain: env('COOKIE_DOMAIN'),
+		cookieDomain,
 		nodeEnv,
 		serviceKey: env('MANA_SERVICE_KEY', 'dev-service-key'),
-		cors: { origins: env('CORS_ORIGINS', 'http://localhost:5173').split(',') },
+		cors: { origins: corsOrigins },
 		manaNotifyUrl: env('MANA_NOTIFY_URL', 'http://localhost:3013'),
 		manaCreditsUrl: env('MANA_CREDITS_URL', 'http://localhost:3061'),
 		manaSubscriptionsUrl: env('MANA_SUBSCRIPTIONS_URL', 'http://localhost:3063'),
 		manaMailUrl: env('MANA_MAIL_URL', 'http://localhost:3042'),
 		encryptionKek,
 		missionGrantPublicKeyPem: env('MANA_AI_PUBLIC_KEY_PEM') || undefined,
+		webauthn: {
+			rpId: env('WEBAUTHN_RP_ID', defaultRpId),
+			rpName: env('WEBAUTHN_RP_NAME', 'Mana'),
+			// Pass every CORS origin as allowed WebAuthn origin by default
+			// so the same passkey works from any app subdomain. Override
+			// with WEBAUTHN_ORIGIN to restrict further.
+			origin: env('WEBAUTHN_ORIGIN') ? env('WEBAUTHN_ORIGIN').split(',') : corsOrigins,
+		},
 	};
 }

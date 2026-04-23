@@ -153,7 +153,16 @@ export const jwks = authSchema.table('jwks', {
 	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
-// Passkeys table (WebAuthn credentials)
+// Passkeys table (WebAuthn credentials).
+// Field names match `@better-auth/passkey`'s expected schema so the
+// Drizzle adapter can write/read directly without a translation layer.
+// Notably: the TS field is `credentialID` (capital I/D) even though
+// the SQL column stays snake_case; the plugin dereferences by TS name.
+// `transports` is a comma-separated string (not jsonb) because the
+// plugin stores the AuthenticatorTransport[] as a CSV.
+// `name` (was `friendlyName`) is user-provided.
+// `lastUsedAt` is ours — populated by the wrapper on successful
+// authentication; the plugin itself doesn't touch it.
 export const passkeys = authSchema.table(
 	'passkeys',
 	{
@@ -161,13 +170,14 @@ export const passkeys = authSchema.table(
 		userId: text('user_id')
 			.references(() => users.id, { onDelete: 'cascade' })
 			.notNull(),
-		credentialId: text('credential_id').unique().notNull(), // base64url-encoded
+		credentialID: text('credential_id').unique().notNull(), // base64url-encoded
 		publicKey: text('public_key').notNull(), // base64url-encoded COSE public key
 		counter: integer('counter').default(0).notNull(), // signature counter
 		deviceType: text('device_type').notNull(), // 'singleDevice' | 'multiDevice'
 		backedUp: boolean('backed_up').default(false).notNull(),
-		transports: jsonb('transports').$type<string[]>(), // ['internal', 'hybrid', etc.]
-		friendlyName: text('friendly_name'),
+		transports: text('transports'), // CSV of AuthenticatorTransport values
+		name: text('name'),
+		aaguid: text('aaguid'), // authenticator AAGUID (optional)
 		lastUsedAt: timestamp('last_used_at', { withTimezone: true }),
 		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 	},

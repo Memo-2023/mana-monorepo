@@ -105,6 +105,30 @@ export function createManaAuthStore(config: ManaAuthStoreConfig = {}) {
 	let loading = $state(true);
 	let initialized = $state(false);
 
+	// Passkey capability — one-time probe on first access, cached on
+	// the authService itself. The boolean `passkeyAvailable` derived
+	// here is what the LoginPage + SecuritySection gate their UI on.
+	// Seeded to `null` so the UI can distinguish "not yet probed"
+	// from "probed and disabled".
+	let passkeyAvailable = $state<boolean | null>(null);
+	let passkeyProbePromise: Promise<void> | null = null;
+
+	function ensurePasskeyProbe() {
+		if (passkeyAvailable !== null || passkeyProbePromise) return;
+		const authService = getAuthService();
+		if (!authService) return;
+		passkeyProbePromise = (async () => {
+			try {
+				const cap = await authService.getPasskeyCapability();
+				passkeyAvailable = cap.available;
+			} catch {
+				passkeyAvailable = false;
+			} finally {
+				passkeyProbePromise = null;
+			}
+		})();
+	}
+
 	return {
 		// Getters
 		get user() {
@@ -186,6 +210,21 @@ export function createManaAuthStore(config: ManaAuthStoreConfig = {}) {
 			return authService.isPasskeyAvailable();
 		},
 
+		/**
+		 * Reactive flag: `true` once we've probed the server and both
+		 * browser + server support passkeys, `false` when either side
+		 * has said no, `null` while the probe hasn't resolved yet
+		 * (initial mount). The LoginPage gates its passkey button on
+		 * `=== true` so a slow probe doesn't flash the button in.
+		 *
+		 * Triggers the probe lazily on first read so apps that never
+		 * show passkey UI never pay the network round-trip.
+		 */
+		get passkeyAvailable(): boolean | null {
+			ensurePasskeyProbe();
+			return passkeyAvailable;
+		},
+
 		async signInWithPasskey(options?: { conditional?: boolean }) {
 			const authService = getAuthService();
 			if (!authService) return { success: false, error: 'Auth not available on server' };
@@ -207,12 +246,23 @@ export function createManaAuthStore(config: ManaAuthStoreConfig = {}) {
 			if (!authService) return { success: false, error: 'Auth not available on server' };
 			try {
 				const result = await authService.signIn(email, password);
-				if (!result.success) return { success: false, error: result.error || 'Login failed' };
+				if (!result.success) {
+					return {
+						success: false,
+						error: result.error || 'Login failed',
+						errorCode: result.code,
+						retryAfter: result.retryAfter,
+					};
+				}
 				user = await authService.getUserFromToken();
 				await handleAuthenticated();
 				return { success: true };
 			} catch (error) {
-				return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+				return {
+					success: false,
+					error: error instanceof Error ? error.message : 'Unknown error',
+					errorCode: 'UNKNOWN' as const,
+				};
 			}
 		},
 
@@ -228,6 +278,8 @@ export function createManaAuthStore(config: ManaAuthStoreConfig = {}) {
 					return {
 						success: false,
 						error: result.error || 'Signup failed',
+						errorCode: result.code,
+						retryAfter: result.retryAfter,
 						needsVerification: false,
 					};
 				if (result.needsVerification) return { success: true, needsVerification: true };

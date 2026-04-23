@@ -77,11 +77,50 @@ export interface UserData {
 }
 
 /**
- * Authentication result from sign in/up
+ * Machine-readable auth error codes. Mirrors `AuthErrorCode` in
+ * `services/mana-auth/src/lib/auth-errors.ts`. Kept as a string union
+ * (not enum) so the server and client type can evolve independently
+ * without a cross-package dependency.
+ *
+ * When the server adds a new code, add it here too — otherwise TS
+ * exhaustiveness checks in the UI still pass but the client can't
+ * surface a tailored message.
+ */
+export type AuthErrorCode =
+	| 'INVALID_CREDENTIALS'
+	| 'EMAIL_NOT_VERIFIED'
+	| 'EMAIL_ALREADY_REGISTERED'
+	| 'WEAK_PASSWORD'
+	| 'ACCOUNT_LOCKED'
+	| 'SIGNUP_LIMIT_REACHED'
+	| 'RATE_LIMITED'
+	| 'TOKEN_EXPIRED'
+	| 'TOKEN_INVALID'
+	| 'TWO_FACTOR_REQUIRED'
+	| 'TWO_FACTOR_FAILED'
+	| 'PASSKEY_NOT_ENABLED'
+	| 'PASSKEY_CANCELLED'
+	| 'PASSKEY_VERIFICATION_FAILED'
+	| 'VALIDATION'
+	| 'UNAUTHORIZED'
+	| 'NOT_FOUND'
+	| 'SERVICE_UNAVAILABLE'
+	| 'INTERNAL';
+
+/**
+ * Authentication result from sign in/up.
+ *
+ * `error` is a human-readable message (from the server's localised
+ * message field) that the UI can show as-is. `code` is the stable,
+ * switchable identifier — UIs that want per-code i18n should branch on
+ * it and render their own translation, falling back to `error` when
+ * the code is unknown (forward-compat with future codes).
  */
 export interface AuthResult {
 	success: boolean;
 	error?: string;
+	/** Machine-readable error code; absent on success. */
+	code?: AuthErrorCode;
 	needsVerification?: boolean;
 	twoFactorRedirect?: boolean;
 	retryAfter?: number;
@@ -164,6 +203,25 @@ export interface AuthEndpoints {
 	passkeyAuthOptions: string;
 	passkeyAuthVerify: string;
 	passkeyList: string;
+	passkeyCapability: string;
+}
+
+/**
+ * Passkey capability — combines browser WebAuthn support with the
+ * server's "is the passkey plugin enabled" gate. The UI should only
+ * render passkey affordances when `available` is true.
+ */
+export interface PasskeyCapability {
+	/** `window.PublicKeyCredential` is present */
+	browser: boolean;
+	/** `PublicKeyCredential.isConditionalMediationAvailable()` resolved true */
+	conditionalUI: boolean;
+	/** The server's /capability endpoint returned `enabled: true` */
+	server: boolean;
+	/** Alias for `browser && server` — the common gate for UI rendering. */
+	available: boolean;
+	/** The WebAuthn Relying Party ID the server uses. Null when not enabled. */
+	rpId: string | null;
 }
 
 /**
@@ -232,6 +290,8 @@ export interface AuthServiceInterface {
 
 	// Passkeys
 	isPasskeyAvailable(): boolean;
+	/** Full browser + server capability probe. Memoised per-service. */
+	getPasskeyCapability(): Promise<PasskeyCapability>;
 	registerPasskey(friendlyName?: string): Promise<AuthResult>;
 	signInWithPasskey(options?: { conditional?: boolean }): Promise<AuthResult>;
 	listPasskeys(): Promise<any[]>;

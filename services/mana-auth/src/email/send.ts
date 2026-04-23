@@ -4,6 +4,8 @@
  * which handles SMTP, retries, and queuing.
  */
 
+import { logger } from '@mana/shared-hono';
+
 const NOTIFY_URL = process.env.MANA_NOTIFY_URL || 'http://localhost:3013';
 const SERVICE_KEY = process.env.MANA_SERVICE_KEY || 'dev-service-key';
 
@@ -24,12 +26,21 @@ async function send(to: string, subject: string, html: string): Promise<boolean>
 			}),
 		});
 		if (!res.ok) {
-			console.error('mana-notify error:', res.status, await res.text());
+			logger.error('mana-notify returned non-ok', {
+				status: res.status,
+				body: await res.text(),
+				recipient: to,
+				subject,
+			});
 			return false;
 		}
 		return true;
 	} catch (error) {
-		console.error('Failed to send via mana-notify:', error);
+		logger.error('mana-notify fetch failed', {
+			error: error instanceof Error ? { message: error.message, stack: error.stack } : error,
+			recipient: to,
+			subject,
+		});
 		return false;
 	}
 }
