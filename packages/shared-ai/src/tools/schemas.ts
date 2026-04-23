@@ -1518,6 +1518,159 @@ export const AI_TOOL_CATALOG: readonly ToolSchema[] = [
 			},
 		],
 	},
+
+	// ── Website ───────────────────────────────────────────────
+	{
+		name: 'create_website',
+		module: 'website',
+		description:
+			'Erstellt eine neue Website im aktiven Space mit einer Startseite. Gibt siteId und homePageId zurueck.',
+		defaultPolicy: 'propose',
+		parameters: [
+			{
+				name: 'name',
+				type: 'string',
+				description: 'Anzeigename der Website',
+				required: true,
+			},
+			{
+				name: 'slug',
+				type: 'string',
+				description: '2-40 Kleinbuchstaben/Zahlen/Bindestrich — wird Teil der URL (/s/{slug})',
+				required: true,
+			},
+		],
+	},
+	{
+		name: 'apply_website_template',
+		module: 'website',
+		description:
+			'Erstellt eine neue Website aus einem Template (portfolio, personal-linktree, event, blank). Kopiert alle Seiten und Bloecke mit neuen IDs.',
+		defaultPolicy: 'propose',
+		parameters: [
+			{
+				name: 'templateId',
+				type: 'string',
+				description: 'Template-Kennung',
+				required: true,
+				enum: ['portfolio', 'personal-linktree', 'event', 'blank'],
+			},
+			{ name: 'name', type: 'string', description: 'Website-Name', required: true },
+			{ name: 'slug', type: 'string', description: 'URL-Slug', required: true },
+		],
+	},
+	{
+		name: 'create_website_page',
+		module: 'website',
+		description:
+			'Fuegt einer existierenden Website eine neue Seite hinzu (z.B. /ueber-uns, /kontakt).',
+		defaultPolicy: 'propose',
+		parameters: [
+			{ name: 'siteId', type: 'string', description: 'ID der Website', required: true },
+			{
+				name: 'path',
+				type: 'string',
+				description: 'URL-Pfad mit fuehrendem Slash (z.B. /ueber-uns)',
+				required: true,
+			},
+			{ name: 'title', type: 'string', description: 'Seitentitel', required: true },
+		],
+	},
+	{
+		name: 'add_website_block',
+		module: 'website',
+		description:
+			'Fuegt einer Seite einen neuen Block hinzu. Block-Typen: hero, richText, cta, image, gallery, faq, form, moduleEmbed, columns, spacer. `props` ist ein JSON-Objekt mit den typ-spezifischen Feldern.',
+		defaultPolicy: 'propose',
+		parameters: [
+			{ name: 'pageId', type: 'string', description: 'ID der Zielseite', required: true },
+			{
+				name: 'type',
+				type: 'string',
+				description: 'Block-Typ',
+				required: true,
+				enum: [
+					'hero',
+					'richText',
+					'cta',
+					'image',
+					'gallery',
+					'faq',
+					'form',
+					'moduleEmbed',
+					'columns',
+					'spacer',
+				],
+			},
+			{
+				name: 'props',
+				type: 'object',
+				description:
+					'Typ-spezifische Eigenschaften. Leer = verwendet die Defaults. Beispiel fuer hero: { title, subtitle, ctaLabel, ctaHref }.',
+				required: false,
+			},
+			{
+				name: 'parentBlockId',
+				type: 'string',
+				description:
+					'Falls der Block in einem Container liegt (z.B. columns), die ID des Containers.',
+				required: false,
+			},
+			{
+				name: 'slotKey',
+				type: 'string',
+				description: 'Slot-Key innerhalb des Containers, z.B. col-0 / col-1.',
+				required: false,
+			},
+		],
+	},
+	{
+		name: 'update_website_block',
+		module: 'website',
+		description:
+			'Aktualisiert die props eines Blocks. `patch` ist ein JSON-Objekt mit nur den zu aendernden Feldern — alles andere bleibt unveraendert.',
+		defaultPolicy: 'propose',
+		parameters: [
+			{ name: 'blockId', type: 'string', description: 'ID des Blocks', required: true },
+			{
+				name: 'patch',
+				type: 'object',
+				description: 'Die zu aendernden props-Felder',
+				required: true,
+			},
+		],
+	},
+	{
+		name: 'publish_website',
+		module: 'website',
+		description:
+			'Veroeffentlicht die aktuelle Draft-Version der Website unter /s/{slug}. Vorher sollte der Inhalt vom Nutzer geprueft werden.',
+		defaultPolicy: 'propose',
+		parameters: [{ name: 'siteId', type: 'string', description: 'ID der Website', required: true }],
+	},
+	{
+		name: 'list_websites',
+		module: 'website',
+		description:
+			'Listet alle Websites im aktiven Space (id, slug, name, published-Status). Auto-Policy: laeuft waehrend Planning.',
+		defaultPolicy: 'auto',
+		parameters: [],
+	},
+	{
+		name: 'list_website_pages',
+		module: 'website',
+		description: 'Listet die Seiten einer Website (id, path, title, order). Auto-Policy.',
+		defaultPolicy: 'auto',
+		parameters: [{ name: 'siteId', type: 'string', description: 'ID der Website', required: true }],
+	},
+	{
+		name: 'list_website_blocks',
+		module: 'website',
+		description:
+			'Listet die Bloecke einer Seite (id, type, parentBlockId, order, props-Snapshot). Auto-Policy.',
+		defaultPolicy: 'auto',
+		parameters: [{ name: 'pageId', type: 'string', description: 'ID der Seite', required: true }],
+	},
 ];
 
 // ═══════════════════════════════════════════════════════════════

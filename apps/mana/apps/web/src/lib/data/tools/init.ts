@@ -45,6 +45,7 @@ import { quizTools } from '$lib/modules/quiz/tools';
 import { invoicesTools } from '$lib/modules/invoices/tools';
 import { libraryTools } from '$lib/modules/library/tools';
 import { broadcastTools } from '$lib/modules/broadcast/tools';
+import { websiteTools } from '$lib/modules/website/tools';
 
 let initialized = false;
 
@@ -91,5 +92,6 @@ export function initTools(): void {
 	registerTools(invoicesTools);
 	registerTools(libraryTools);
 	registerTools(broadcastTools);
+	registerTools(websiteTools);
 	initialized = true;
 }

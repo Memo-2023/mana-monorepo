@@ -1339,10 +1339,9 @@ registerApp({
 			id: 'new-site',
 			label: 'Neue Website',
 			icon: Plus,
-			action: () =>
-				window.dispatchEvent(
-					new CustomEvent('mana:quick-action', { detail: { app: 'website', action: 'new' } })
-				),
+			action: () => {
+				window.location.href = '/website/new';
+			},
 		},
 	],
 });

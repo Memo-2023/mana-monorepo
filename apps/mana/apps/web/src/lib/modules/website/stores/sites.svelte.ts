@@ -1,8 +1,9 @@
 import { emitDomainEvent } from '$lib/data/events';
 import { authStore } from '$lib/stores/auth.svelte';
 import { getActiveSpaceId } from '$lib/data/scope';
-import { websitesTable, websitePagesTable } from '../collections';
+import { websitesTable, websitePagesTable, websiteBlocksTable } from '../collections';
 import { toWebsite } from '../queries';
+import { getTemplate, type SiteTemplate } from '../templates';
 import {
 	publishSnapshot,
 	unpublishSnapshot,
@@ -10,7 +11,7 @@ import {
 	PublishError,
 	type PublishResult,
 } from '../publish';
-import type { LocalWebsite, LocalWebsitePage, ThemeConfig } from '../types';
+import type { LocalWebsite, LocalWebsitePage, LocalWebsiteBlock, ThemeConfig } from '../types';
 import {
 	DEFAULT_THEME,
 	DEFAULT_NAV,
@@ -39,6 +40,13 @@ export class DuplicateSlugError extends Error {
 	constructor(slug: string) {
 		super(`A site with slug "${slug}" already exists in this space.`);
 		this.name = 'DuplicateSlugError';
+	}
+}
+
+export class UnknownTemplateError extends Error {
+	constructor(templateId: string) {
+		super(`Unknown template "${templateId}"`);
+		this.name = 'UnknownTemplateError';
 	}
 }
 
@@ -182,6 +190,120 @@ export const sitesStore = {
 		});
 
 		emitDomainEvent('WebsiteUnpublished', 'website', 'websites', id, { siteId: id });
+	},
+
+	/**
+	 * Clone a starter template into a new site. Template pages + blocks
+	 * are inserted with fresh UUIDs; the template's `localId` graph is
+	 * rewritten to the new parentBlockId chain so container → child
+	 * relationships survive.
+	 */
+	async applyTemplate(
+		templateId: string,
+		input: { slug: string; name: string }
+	): Promise<{ siteId: string; homePageId: string }> {
+		if (!isValidSlug(input.slug)) {
+			throw new InvalidSlugError(input.slug);
+		}
+		const existing = await websitesTable.where('slug').equals(input.slug).toArray();
+		if (existing.some((s) => !s.deletedAt)) {
+			throw new DuplicateSlugError(input.slug);
+		}
+
+		const template: SiteTemplate | undefined = getTemplate(templateId);
+		if (!template) throw new UnknownTemplateError(templateId);
+
+		const now = new Date().toISOString();
+		const siteId = crypto.randomUUID();
+
+		const newSite: LocalWebsite = {
+			id: siteId,
+			slug: input.slug,
+			name: input.name,
+			theme: DEFAULT_THEME,
+			navConfig: {
+				items: template.pages.map((p) => ({ label: p.title, pagePath: p.path })),
+			},
+			footerConfig: DEFAULT_FOOTER,
+			settings: DEFAULT_SETTINGS,
+			publishedVersion: null,
+			draftUpdatedAt: now,
+			createdAt: now,
+			updatedAt: now,
+		};
+
+		const pageRows: LocalWebsitePage[] = [];
+		const blockRows: LocalWebsiteBlock[] = [];
+		let homePageId: string | null = null;
+
+		for (const page of template.pages) {
+			const pageId = crypto.randomUUID();
+			if (page.path === '/' || !homePageId) homePageId = pageId;
+			pageRows.push({
+				id: pageId,
+				siteId,
+				path: page.path,
+				title: page.title,
+				seo: {},
+				order: page.order,
+				createdAt: now,
+				updatedAt: now,
+			});
+
+			// Resolve template-local parent refs → real UUIDs in a second pass.
+			const idMap = new Map<string, string>();
+			for (const block of page.blocks) {
+				idMap.set(block.localId, crypto.randomUUID());
+			}
+
+			let order = 1024;
+			for (const block of page.blocks) {
+				const id = idMap.get(block.localId)!;
+				const parentId = block.parentLocalId ? (idMap.get(block.parentLocalId) ?? null) : null;
+				blockRows.push({
+					id,
+					pageId,
+					parentBlockId: parentId,
+					slotKey: block.slotKey ?? null,
+					type: block.type,
+					props: block.props,
+					schemaVersion: 1,
+					order,
+					createdAt: now,
+					updatedAt: now,
+				});
+				order += 1024;
+			}
+		}
+
+		if (!homePageId) {
+			// Edge case: a template with zero pages. Shouldn't happen
+			// (blank has one page) but guard anyway.
+			homePageId = crypto.randomUUID();
+			pageRows.push({
+				id: homePageId,
+				siteId,
+				path: '/',
+				title: 'Start',
+				seo: {},
+				order: 1024,
+				createdAt: now,
+				updatedAt: now,
+			});
+		}
+
+		await websitesTable.add(newSite);
+		if (pageRows.length > 0) await websitePagesTable.bulkAdd(pageRows);
+		if (blockRows.length > 0) await websiteBlocksTable.bulkAdd(blockRows);
+
+		emitDomainEvent('WebsiteCreated', 'website', 'websites', siteId, {
+			siteId,
+			slug: input.slug,
+			name: input.name,
+			templateId,
+		});
+
+		return { siteId, homePageId };
 	},
 
 	/**
