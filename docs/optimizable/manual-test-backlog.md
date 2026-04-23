@@ -115,6 +115,15 @@ Each entry carries:
 
 ---
 
+### Website Builder — end-to-end smoke across M1–M7
+
+- **Priority:** 🔴 release blocker (new feature surface, no browser validation yet)
+- **Shipped:** folded into `54a12ffd5` + `89258eb45` (M1+M2), `7a4f8894e` (M3), `57be0f61b` (M4), `13efae8cd` (M5), `3eca5ac20` (M6), folded into `4fc9d6c59` + `d518169ce` (M7). Plan: [`docs/plans/website-builder.md`](../plans/website-builder.md). Memory: `project_website_builder.md`.
+- **Why it's here:** ~7000 lines of code, 11 block types, 3 Postgres tables, `/metrics` endpoint, hooks-rewrite, dns-verify, analytics injection. Unit + type-checks green but nothing has run against real Postgres + mana-sync + mana-media + a browser. Blind spots: Dexie v37→v41 upgrade, SSR render, CF-friendly cache headers, same-origin form submit proxy, custom-domain `dns.resolveTxt` against real resolvers, `event.url.pathname` rewrite semantics in SvelteKit.
+- **Steps:** full walkthrough at [`docs/plans/website-builder-smoketest.md`](../plans/website-builder-smoketest.md) — 10 scenarios (create/publish, block-coverage, forms, module-embed, templates/AI, subdomain, custom-domain, rollback/analytics, metrics/GC, edge-cases). Brings up dev-stack, applies three SQL migrations, walks through `/website` → edit → publish → `/s/<slug>` → custom host.
+
+---
+
 ### Articles — PWA share-target
 
 - **Priority:** 🟡 nice to have
