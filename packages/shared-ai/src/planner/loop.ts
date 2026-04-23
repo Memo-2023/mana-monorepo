@@ -144,6 +144,35 @@ export interface PlannerLoopInput {
 	 * constant-time lookups are expected (registry hit, name-prefix check).
 	 */
 	readonly isParallelSafe?: (toolName: string) => boolean;
+	/**
+	 * Context-window compactor wiring (Claude-Code `wU2` pattern).
+	 *
+	 * When set AND usage crosses the threshold, the loop replaces the
+	 * middle of the message history with a compact summary before the
+	 * next LLM call. The compact summary is persisted in the returned
+	 * `messages` — unlike reminders, this IS part of the canonical
+	 * history because raw turns got dropped.
+	 *
+	 * Contract:
+	 *   - `maxContextTokens`: provider ceiling; compactor skips when unset
+	 *     (matches `shouldCompact()`'s safe-bail behaviour).
+	 *   - `compact`: async callback that performs the compaction. Pass
+	 *     `compactHistory` from this package or an adapter that uses a
+	 *     cheaper model (e.g. Haiku) for the compactor's LLM call.
+	 *   - `threshold`: optional override, default 0.92.
+	 *
+	 * Compaction fires at MOST once per loop run — once a round has been
+	 * compacted, we don't re-trigger until the next run, even if the
+	 * fresh history hits the threshold again (defence-in-depth against
+	 * a runaway tool that keeps bloating turns).
+	 */
+	readonly compactor?: {
+		readonly maxContextTokens: number;
+		readonly threshold?: number;
+		readonly compact: (
+			messages: readonly ChatMessage[]
+		) => Promise<{ readonly messages: readonly ChatMessage[]; readonly compactedTurns: number }>;
+	};
 }
 
 /** Max concurrent tool executions per round. Mirrors Claude Code's gW5
@@ -206,9 +235,29 @@ export async function runPlannerLoop(opts: {
 	let rounds = 0;
 	let promptTokens = 0;
 	let completionTokens = 0;
+	let compactionsDone = 0;
 
 	while (rounds < maxRounds) {
 		rounds++;
+
+		// Context-window compactor (Claude-Code `wU2`): check BEFORE the
+		// next LLM call whether the previous round's usage crossed the
+		// threshold; if so, replace the middle of `messages` with a
+		// compact summary. Fire at most once per loop run so a runaway
+		// tool can't keep re-triggering.
+		if (input.compactor && compactionsDone === 0) {
+			const total = promptTokens + completionTokens;
+			const cap = input.compactor.maxContextTokens;
+			const threshold = input.compactor.threshold ?? 0.92;
+			if (cap > 0 && total > 0 && total / cap >= threshold) {
+				const compactResult = await input.compactor.compact(messages);
+				if (compactResult.compactedTurns > 0) {
+					messages.length = 0;
+					for (const m of compactResult.messages) messages.push(m);
+					compactionsDone++;
+				}
+			}
+		}
 
 		// Per-round reminder injection: ask the channel for transient
 		// hints, wrap each in <reminder> tags, and prepend them as system
@@ -277,10 +326,11 @@ export async function runPlannerLoop(opts: {
 		// In both modes we append to `messages` in the LLM's original
 		// call order, not completion order, so the debug-log stays linear.
 		const calls = response.toolCalls;
+		const parallelSafePredicate = input.isParallelSafe;
 		const allParallelSafe =
-			!!input.isParallelSafe &&
+			!!parallelSafePredicate &&
 			calls.length > 1 &&
-			calls.every((c) => input.isParallelSafe!(c.name));
+			calls.every((c) => parallelSafePredicate(c.name));
 
 		if (allParallelSafe) {
 			for (let i = 0; i < calls.length; i += PARALLEL_TOOL_BATCH_SIZE) {

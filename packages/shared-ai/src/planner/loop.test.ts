@@ -328,6 +328,190 @@ describe('runPlannerLoop — parallel reads', () => {
 	});
 });
 
+describe('runPlannerLoop — compactor', () => {
+	it('does not compact below the threshold', async () => {
+		const llm = new MockLlmClient();
+		(llm as unknown as { queue: unknown[] }).queue.push({
+			content: null,
+			toolCalls: [{ id: 'c1', name: 'list_things', arguments: {} }],
+			finishReason: 'tool_calls',
+			usage: { promptTokens: 500, completionTokens: 0, totalTokens: 500 }, // 50%
+		});
+		llm.enqueueStop('done');
+
+		const compactSpy = vi.fn();
+		await runPlannerLoop({
+			llm,
+			input: {
+				systemPrompt: 's',
+				userPrompt: 'u',
+				tools,
+				model: 'm',
+				compactor: {
+					maxContextTokens: 1000,
+					compact: async (m) => {
+						compactSpy();
+						return { messages: m, compactedTurns: 0 };
+					},
+				},
+			},
+			onToolCall: async () => ({ success: true, message: 'ok' }),
+		});
+
+		expect(compactSpy).not.toHaveBeenCalled();
+	});
+
+	it('fires when usage crosses the threshold and replaces messages', async () => {
+		const llm = new MockLlmClient();
+		// Round 1: tool call that reports 92% of the 1000-token budget
+		(llm as unknown as { queue: unknown[] }).queue.push({
+			content: null,
+			toolCalls: [{ id: 'c1', name: 'list_things', arguments: {} }],
+			finishReason: 'tool_calls',
+			usage: { promptTokens: 920, completionTokens: 0, totalTokens: 920 },
+		});
+		// Round 2: after compaction fires, the LLM stops
+		llm.enqueueStop('done');
+
+		let compactorInput: readonly { role: string; content?: string | null }[] = [];
+		await runPlannerLoop({
+			llm,
+			input: {
+				systemPrompt: 's-prompt',
+				userPrompt: 'u-prompt',
+				tools,
+				model: 'm',
+				compactor: {
+					maxContextTokens: 1000,
+					compact: async (m) => {
+						compactorInput = m;
+						return {
+							messages: [
+								{ role: 'system', content: 's-prompt' },
+								{ role: 'user', content: 'u-prompt' },
+								{ role: 'assistant', content: '<compact-summary>FOLDED</compact-summary>' },
+							],
+							compactedTurns: 2,
+						};
+					},
+				},
+			},
+			onToolCall: async () => ({ success: true, message: 'ok' }),
+		});
+
+		// The compactor received the full post-round-1 history
+		expect(compactorInput.length).toBeGreaterThan(2);
+		// The round-2 LLM request saw the compacted history, not the raw one
+		const round2Seen = llm.calls[1].messages;
+		expect(round2Seen).toHaveLength(3);
+		expect(round2Seen[2].content).toContain('FOLDED');
+	});
+
+	it('fires at most once per run', async () => {
+		const llm = new MockLlmClient();
+		for (let i = 0; i < 4; i++) {
+			(llm as unknown as { queue: unknown[] }).queue.push({
+				content: null,
+				toolCalls: [{ id: `c${i}`, name: 'list_things', arguments: {} }],
+				finishReason: 'tool_calls',
+				usage: { promptTokens: 950, completionTokens: 0, totalTokens: 950 }, // always over threshold
+			});
+		}
+		llm.enqueueStop('done');
+
+		let compactCallCount = 0;
+		await runPlannerLoop({
+			llm,
+			input: {
+				systemPrompt: 's',
+				userPrompt: 'u',
+				tools,
+				model: 'm',
+				maxRounds: 10,
+				compactor: {
+					maxContextTokens: 1000,
+					compact: async () => {
+						compactCallCount++;
+						return {
+							messages: [
+								{ role: 'system', content: 's' },
+								{ role: 'user', content: 'u' },
+								{ role: 'assistant', content: '<compact>' },
+							],
+							compactedTurns: 2,
+						};
+					},
+				},
+			},
+			onToolCall: async () => ({ success: true, message: 'ok' }),
+		});
+
+		expect(compactCallCount).toBe(1);
+	});
+
+	it('bails out silently when maxContextTokens is 0', async () => {
+		const llm = new MockLlmClient();
+		(llm as unknown as { queue: unknown[] }).queue.push({
+			content: 'done',
+			toolCalls: [],
+			finishReason: 'stop',
+			usage: { promptTokens: 9_999, completionTokens: 0, totalTokens: 9_999 },
+		});
+
+		const compactSpy = vi.fn();
+		await runPlannerLoop({
+			llm,
+			input: {
+				systemPrompt: 's',
+				userPrompt: 'u',
+				tools,
+				model: 'm',
+				compactor: {
+					maxContextTokens: 0, // disabled
+					compact: async (m) => {
+						compactSpy();
+						return { messages: m, compactedTurns: 0 };
+					},
+				},
+			},
+			onToolCall: async () => ({ success: true, message: 'ok' }),
+		});
+
+		expect(compactSpy).not.toHaveBeenCalled();
+	});
+
+	it('skips when the compactor returns 0 compacted turns', async () => {
+		const llm = new MockLlmClient();
+		(llm as unknown as { queue: unknown[] }).queue.push({
+			content: null,
+			toolCalls: [{ id: 'c1', name: 'list_things', arguments: {} }],
+			finishReason: 'tool_calls',
+			usage: { promptTokens: 950, completionTokens: 0, totalTokens: 950 },
+		});
+		llm.enqueueStop('done');
+
+		await runPlannerLoop({
+			llm,
+			input: {
+				systemPrompt: 's',
+				userPrompt: 'u',
+				tools,
+				model: 'm',
+				compactor: {
+					maxContextTokens: 1000,
+					compact: async (m) => ({ messages: m, compactedTurns: 0 }),
+				},
+			},
+			onToolCall: async () => ({ success: true, message: 'ok' }),
+		});
+
+		// Round 2 should have seen the ORIGINAL history (untouched by the
+		// no-op compactor) — just system + user + assistant + tool
+		const round2Seen = llm.calls[1].messages;
+		expect(round2Seen).toHaveLength(4);
+	});
+});
+
 describe('runPlannerLoop — reminderChannel', () => {
 	it('injects reminders as transient system messages on the LLM call', async () => {
 		const llm = new MockLlmClient().enqueueStop('done');
