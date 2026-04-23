@@ -45,15 +45,15 @@ export const publishedSnapshots = websiteSchema.table(
 		/** True for the row served to the public. Exactly one per slug. */
 		isCurrent: boolean('is_current').notNull().default(false),
 		publishedAt: timestamp('published_at', { withTimezone: true }).defaultNow().notNull(),
-		/** User who pressed the publish button. */
-		publishedBy: uuid('published_by').notNull(),
+		/** User who pressed the publish button. Better-Auth nanoid, not UUID. */
+		publishedBy: text('published_by').notNull(),
 		/**
 		 * Space the site belongs to. Nullable in M2 because mana-auth
 		 * doesn't yet thread the active space into JWT claims — the
 		 * client can pass it via `X-Mana-Space`, but we don't hard-require
 		 * it until server-side membership check lands (M6).
 		 */
-		spaceId: uuid('space_id'),
+		spaceId: text('space_id'),
 	},
 	(table) => [
 		index('published_snapshots_site_idx').on(table.siteId, table.publishedAt),
@@ -121,7 +121,8 @@ export const customDomains = websiteSchema.table(
 		verifiedAt: timestamp('verified_at', { withTimezone: true }),
 		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 		updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
-		createdBy: uuid('created_by').notNull(),
+		/** Better-Auth nanoid, not UUID. */
+		createdBy: text('created_by').notNull(),
 	},
 	(table) => [index('custom_domains_site_idx').on(table.siteId, table.status)]
 	// A partial unique index on (hostname) WHERE status='verified' lives

@@ -70,7 +70,10 @@ routes.post('/sites/:id/publish', async (c) => {
 	// embed the active space in JWT claims). Nullable — full membership
 	// check lands in M6; M2 stores whatever the client declares.
 	const spaceIdHeader = c.req.header('X-Mana-Space');
-	const spaceId = spaceIdHeader && /^[0-9a-f-]{36}$/i.test(spaceIdHeader) ? spaceIdHeader : null;
+	// Better-Auth nanoid format: 32 URL-safe base64 chars. Keep this lax
+	// (no hard length) so it doesn't drift if nanoid config changes.
+	const spaceId =
+		spaceIdHeader && /^[A-Za-z0-9_-]{16,64}$/.test(spaceIdHeader) ? spaceIdHeader : null;
 	const siteId = c.req.param('id');
 
 	if (!siteId) {
@@ -177,7 +180,10 @@ routes.post('/sites/:id/publish', async (c) => {
 		}
 		websitePublishTotal.inc({ result: 'error' });
 		publishTimer();
-		throw err;
+		console.error('[website/publish] unhandled error', err);
+		return errorResponse(c, err instanceof Error ? err.message : 'Publish failed', 500, {
+			code: 'PUBLISH_FAILED',
+		});
 	}
 });
 
