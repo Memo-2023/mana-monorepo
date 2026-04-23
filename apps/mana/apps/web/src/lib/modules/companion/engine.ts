@@ -123,12 +123,14 @@ export async function runCompanionChat(
 				// user-visible intent order in the proposal inbox.
 				isParallelSafe: (name) => AI_TOOL_CATALOG_BY_NAME.get(name)?.defaultPolicy === 'auto',
 				// Fold the middle of messages into a compact-summary at
-				// 92% of the model's context window. Mirrors the mana-ai
-				// wiring; one call to the same LLM client, same model.
+				// 92% of the model's context window. compactHistory
+				// defaults to DEFAULT_COMPACT_MODEL (gemini-2.5-flash-lite)
+				// — cheaper than the planner's own model. Summarisation
+				// doesn't need the same tier as reasoning.
 				compactor: {
 					maxContextTokens: COMPACT_MAX_CTX,
 					compact: async (msgs) => {
-						const res = await compactHistory(msgs, { llm, model: 'google/gemini-2.5-flash' });
+						const res = await compactHistory(msgs, { llm });
 						return { messages: res.messages, compactedTurns: res.compactedTurns };
 					},
 				},

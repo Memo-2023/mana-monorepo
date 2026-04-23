@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
 	COMPACT_SYSTEM_PROMPT,
 	DEFAULT_COMPACT_KEEP_RECENT,
+	DEFAULT_COMPACT_MODEL,
 	DEFAULT_COMPACT_THRESHOLD,
 	compactHistory,
 	parseCompactSummary,
@@ -189,6 +190,46 @@ describe('compactHistory', () => {
 		expect(res.summary.goal).toBe('X');
 		expect(res.summary.currentProgress).toBe('Y');
 		expect(res.usage).toEqual({ promptTokens: 100, completionTokens: 30 });
+	});
+
+	it('defaults to DEFAULT_COMPACT_MODEL when model is omitted (fast-tier routing)', async () => {
+		const history = buildHistory(3, 4);
+		const seenModels: string[] = [];
+		const capturingLlm = {
+			async complete(req: { model: string }) {
+				seenModels.push(req.model);
+				return {
+					content: '## Goal\n\n## Decisions\n\n## Tools Called\n\n## Current Progress\n',
+					toolCalls: [],
+					finishReason: 'stop' as const,
+				};
+			},
+		};
+
+		await compactHistory(history, { llm: capturingLlm }); // no explicit model
+
+		expect(seenModels).toHaveLength(1);
+		expect(seenModels[0]).toBe(DEFAULT_COMPACT_MODEL);
+		expect(DEFAULT_COMPACT_MODEL).toBe('google/gemini-2.5-flash-lite');
+	});
+
+	it('honours an explicit model override', async () => {
+		const history = buildHistory(3, 4);
+		const seenModels: string[] = [];
+		const capturingLlm = {
+			async complete(req: { model: string }) {
+				seenModels.push(req.model);
+				return {
+					content: '## Goal\n\n## Decisions\n\n## Tools Called\n\n## Current Progress\n',
+					toolCalls: [],
+					finishReason: 'stop' as const,
+				};
+			},
+		};
+
+		await compactHistory(history, { llm: capturingLlm, model: 'custom/override-model' });
+
+		expect(seenModels[0]).toBe('custom/override-model');
 	});
 
 	it('respects a custom keepRecent value', async () => {

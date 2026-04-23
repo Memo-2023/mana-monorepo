@@ -38,6 +38,21 @@ export const DEFAULT_COMPACT_THRESHOLD = 0.92;
 export const DEFAULT_COMPACT_KEEP_RECENT = 4;
 
 /**
+ * Cheap "fast-tier" model the compactor runs on by default. Matches
+ * Claude Code's pattern of routing utility tasks (summarisation,
+ * topic detection, session-summary) to Haiku instead of burning the
+ * primary-tier budget on them.
+ *
+ * google/gemini-2.5-flash-lite is ~3–5x cheaper than gemini-2.5-flash
+ * with near-identical summarisation quality. Consumers that need
+ * something different (cost policy, offline fallback to Ollama) can
+ * override per-call via `CompactHistoryOptions.model`.
+ *
+ * Format follows mana-llm's `provider/model` convention.
+ */
+export const DEFAULT_COMPACT_MODEL = 'google/gemini-2.5-flash-lite';
+
+/**
  * Decide whether to compact based on token usage against a ceiling.
  * Returns false on missing inputs so the caller can skip silently when
  * the provider doesn't report usage (which is common for local models).
@@ -122,7 +137,11 @@ export function renderCompactSummary(s: CompactSummary): string {
 
 export interface CompactHistoryOptions {
 	readonly llm: LlmClient;
-	readonly model: string;
+	/** Model to summarise with. Defaults to `DEFAULT_COMPACT_MODEL`
+	 *  (gemini-2.5-flash-lite) — cheaper than the primary planner
+	 *  model, which is the whole point: summarisation doesn't need
+	 *  the same tier as reasoning + tool-calling. */
+	readonly model?: string;
 	/** How many most-recent turns to preserve verbatim. Default 4. */
 	readonly keepRecent?: number;
 	/** Upper bound on compactor-LLM temperature — we want summarisation,
@@ -222,7 +241,7 @@ export async function compactHistory(
 	const response = await opts.llm.complete({
 		messages: compactRequestMessages,
 		tools: [],
-		model: opts.model,
+		model: opts.model ?? DEFAULT_COMPACT_MODEL,
 		temperature: opts.temperature ?? 0.2,
 	});
 

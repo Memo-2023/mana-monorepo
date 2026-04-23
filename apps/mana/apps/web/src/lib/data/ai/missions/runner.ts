@@ -281,16 +281,15 @@ async function runMissionInner(
 				// prior steps in the same round.
 				isParallelSafe: (name) => AI_TOOL_CATALOG_BY_NAME.get(name)?.defaultPolicy === 'auto',
 				// Fold older turns into a compact-summary at 92% of
-				// maxContextTokens. Same LlmClient + model as the
-				// planner; one extra LLM call, but only when usage
-				// actually approaches the ceiling.
+				// maxContextTokens. compactHistory defaults to
+				// DEFAULT_COMPACT_MODEL (gemini-2.5-flash-lite) —
+				// cheaper than the planner's primary model, which
+				// matters because the compactor fires exactly when
+				// token spend is highest.
 				compactor: {
 					maxContextTokens: COMPACT_MAX_CTX,
 					compact: async (msgs) => {
-						const res = await compactHistory(msgs, {
-							llm: deps.llm,
-							model: deps.model ?? 'google/gemini-2.5-flash',
-						});
+						const res = await compactHistory(msgs, { llm: deps.llm });
 						return { messages: res.messages, compactedTurns: res.compactedTurns };
 					},
 				},

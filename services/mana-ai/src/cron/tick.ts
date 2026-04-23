@@ -396,15 +396,19 @@ async function planOneMission(
 	const plannerModel = 'google/gemini-2.5-flash';
 
 	// Claude-Code wU2 pattern: fold the middle of messages into a structured
-	// summary once cumulative tokens cross 92% of maxContextTokens. Uses
-	// the same LLM + model as the planner itself; later we can route this
-	// to a cheaper model (Haiku tier) when mana-llm supports it.
+	// summary once cumulative tokens cross 92% of maxContextTokens.
+	//
+	// compactHistory defaults to DEFAULT_COMPACT_MODEL
+	// (gemini-2.5-flash-lite) — cheaper than the planner's own model.
+	// Summarisation doesn't need the same reasoning tier as tool-calling,
+	// and the compactor runs exactly when token spend is highest, so the
+	// cheaper route saves tokens where they matter.
 	const compactor =
 		config.compactMaxContextTokens > 0
 			? {
 					maxContextTokens: config.compactMaxContextTokens,
 					compact: async (msgs: Parameters<typeof compactHistory>[0]) => {
-						const result = await compactHistory(msgs, { llm, model: plannerModel });
+						const result = await compactHistory(msgs, { llm });
 						if (result.compactedTurns > 0) {
 							compactionsTriggeredTotal.inc();
 							compactedTurnsHistogram.observe(result.compactedTurns);

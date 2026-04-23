@@ -88,6 +88,7 @@ export {
 	compactHistory,
 	COMPACT_SYSTEM_PROMPT,
 	DEFAULT_COMPACT_KEEP_RECENT,
+	DEFAULT_COMPACT_MODEL,
 	DEFAULT_COMPACT_THRESHOLD,
 	MockLlmClient,
 	parseCompactSummary,
