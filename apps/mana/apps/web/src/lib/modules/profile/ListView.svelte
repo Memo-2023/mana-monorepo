@@ -211,6 +211,12 @@
 					</div>
 
 					<div class="account-actions">
+						<button class="account-btn" onclick={() => goto('/profile/me-images')}>
+							Meine Bilder
+							<span class="account-btn-hint">
+								Gesichts- und Ganzkörperbilder für KI-Bildgenerierung
+							</span>
+						</button>
 						<button class="account-btn" onclick={() => (showEditModal = true)}>
 							Profil bearbeiten
 						</button>
@@ -365,7 +371,8 @@
 	}
 	.account-btn {
 		display: flex;
-		align-items: center;
+		flex-direction: column;
+		align-items: flex-start;
 		width: 100%;
 		padding: 0.625rem 1rem;
 		border: 1px solid hsl(var(--color-border));
@@ -375,6 +382,12 @@
 		font-size: 0.8125rem;
 		cursor: pointer;
 		transition: background 0.15s;
+		text-align: left;
+	}
+	.account-btn-hint {
+		margin-top: 0.125rem;
+		font-size: 0.75rem;
+		color: hsl(var(--color-muted-foreground));
 	}
 	.account-btn:hover {
 		background: hsl(var(--color-surface-hover));

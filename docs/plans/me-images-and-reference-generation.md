@@ -58,7 +58,7 @@ Jedes `meImage` hat ein `usage.aiReference: boolean` Flag. Default beim Upload: 
 
 ```
 ┌─ Client (SvelteKit) ────────────────────────────────────┐
-│  /settings/me-images (Upload + Toggles)                 │
+│  /profile/me-images (Upload + Toggles)                 │
 │  picture/GeneratorForm (Reference-Picker)               │
 │  Dexie: meImages (encrypted label/tags/kind)            │
 └──────┬──────────────────────────────────────────────────┘
@@ -205,7 +205,7 @@ Python/FastAPI-Seite bekommt einen `POST /edit` Endpoint, der IP-Adapter oder Pu
 
 ## UI: zwei Touchpoints
 
-### 1. `/settings/me-images` (neu)
+### 1. `/profile/me-images` (neu)
 
 - 2 prominente Slots oben: **Gesicht** (quadratisch, 512×512 empfohlen) und **Ganzkörper** (portrait, min 1024 hoch)
 - Darunter Grid für zusätzliche Referenzen (Drag-and-Drop, Multi-Select-Upload — Pattern aus `picture/ListView.svelte:165-217` klauen)
@@ -295,7 +295,7 @@ Soft-first/Hard-follow-up-Regel (siehe Memory):
   - [ ] Sync-Schema registrieren
   - [ ] Upload-Wrapper nutzt bestehenden `picture/upload`-Endpoint mit `app=me` (neuer Bucket `me-storage` in MinIO)
 
-- **M2 — UI Route `/settings/me-images`** (~1 Tag)
+- **M2 — UI Route `/profile/me-images`** (~1 Tag)
   - [ ] Route + ModuleShell-Wrapping (wie andere Settings-Routen)
   - [ ] Slot-Komponenten für Face/Fullbody, Grid für Reste
   - [ ] Drag-and-Drop-Upload + Multi-File
@@ -342,7 +342,7 @@ Soft-first/Hard-follow-up-Regel (siehe Memory):
 3. **OpenAI Ref-Image-Format**: Original-Format durchreichen (PNG/JPG/WEBP — OpenAI akzeptiert alle). Keine Server-Konvertierung.
 4. **Credit-Kosten für Multi-Ref-Edits**: identisch zu `/generate`, pro Output-Bild, unabhängig von Reference-Anzahl.
 5. **`profile.aiUsesReferenceImages`-Default**: `true` (globaler Panic-Kill-Switch; Pro-Bild-Opt-in ist die eigentliche Hürde).
-6. **Alter Avatar-Upload-Pfad**: bleibt in M1 unangetastet; M2 biegt `EditProfileModal` auf `/settings/me-images` um und räumt den toten Endpoint-Call weg.
+6. **Alter Avatar-Upload-Pfad**: bleibt in M1 unangetastet; M2 biegt `EditProfileModal` auf `/profile/me-images` um und räumt den toten Endpoint-Call weg.
 
 ## Verweise
 
