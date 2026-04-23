@@ -528,23 +528,11 @@
 	}
 
 	// User-menu bar — rendered when barMode is active. Short list: settings,
-	// light/dark/system toggle, theme button.
+	// light/dark/system toggle, theme button. For guests the "Anmelden"
+	// CTA lives as a visible pill in the nav row itself (see below), so
+	// we don't duplicate it inside the opened bar.
 	const userMenuBarItems = $derived.by<PillDropdownItem[]>(() => {
 		const out: PillDropdownItem[] = [];
-		// Guest → put "Anmelden" first. Everything else in the menu
-		// (settings, theme, logout) is a user-only action or a trivial
-		// toggle, so the login entry should be the obvious call-to-action
-		// at the top of the bar.
-		if (!userEmail && loginHref) {
-			out.push({
-				id: 'login',
-				label: 'Anmelden',
-				icon: 'login',
-				onClick: () => {
-					window.location.href = loginHref;
-				},
-			});
-		}
 		if (onThemeModeChange) {
 			out.push(
 				{
@@ -769,6 +757,13 @@
 				/>
 			{:else if onLogout && showLogout}
 				<Pill size="sm" icon="logout" label="Logout" danger onclick={onLogout} title="Logout" />
+			{/if}
+
+			<!-- Guest CTA: visible "Anmelden" pill right next to the user
+				 menu icon, so signing in doesn't require opening the menu
+				 first. Kept out of the menu's bar to avoid duplication. -->
+			{#if !userEmail && loginHref}
+				<Pill size="sm" href={loginHref} icon="login" label="Anmelden" primary />
 			{/if}
 		</div>
 	</nav>
