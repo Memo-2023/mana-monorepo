@@ -23,6 +23,8 @@ export {
 export type { CompactHistoryOptions, CompactHistoryResult, CompactSummary } from './compact';
 export { MAX_SUB_AGENT_DEPTH, SubAgentRecursionError, runSubAgent } from './sub-agent';
 export type { RunSubAgentInput, SubAgentResult, SubAgentType } from './sub-agent';
+export { TASK_TOOL_NAME, TASK_TOOL_SCHEMA, createTaskToolHandler } from './task-tool';
+export type { TaskToolHandler, TaskToolHandlerOptions } from './task-tool';
 export { MockLlmClient } from './mock-llm';
 export type { MockLlmTurn } from './mock-llm';
 export type {

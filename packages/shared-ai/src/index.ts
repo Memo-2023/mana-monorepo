@@ -90,6 +90,7 @@ export {
 	DEFAULT_COMPACT_KEEP_RECENT,
 	DEFAULT_COMPACT_MODEL,
 	DEFAULT_COMPACT_THRESHOLD,
+	createTaskToolHandler,
 	MAX_SUB_AGENT_DEPTH,
 	MockLlmClient,
 	parseCompactSummary,
@@ -99,6 +100,8 @@ export {
 	runSubAgent,
 	shouldCompact,
 	SubAgentRecursionError,
+	TASK_TOOL_NAME,
+	TASK_TOOL_SCHEMA,
 } from './planner';
 export type {
 	CompactHistoryOptions,
@@ -107,6 +110,8 @@ export type {
 	RunSubAgentInput,
 	SubAgentResult,
 	SubAgentType,
+	TaskToolHandler,
+	TaskToolHandlerOptions,
 } from './planner';
 
 export {
