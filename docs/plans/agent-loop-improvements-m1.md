@@ -1,10 +1,11 @@
-# Agent-Loop Improvements — M1
+# Agent-Loop Improvements — M1 + M2 (core)
 
-_Started 2026-04-23._
+_Started 2026-04-23. M1 + M2 core abgeschlossen 2026-04-23 (13 Commits)._
 
-Drei kleine, voneinander unabhängige Verbesserungen am Mana-Agent-Stack,
-abgeleitet aus der Claude-Code-Architektur-Analyse. Alle drei zusammen
-~1.5 Arbeitstage, mit hohem qualitativem und Sicherheits-Impact.
+Ursprünglich drei M1-Verbesserungen (Policy-Gate, Reminder-Channel,
+Parallel-Reads). In derselben Session nachgezogen: M2 Context-Compressor
+inkl. Producer-Integration (siehe unten), weil die Reminder-Channel-
+Infrastruktur das passende Vehikel dafür war.
 
 **Hintergrund:**
 - [`docs/reports/claude-code-architecture.md`](../reports/claude-code-architecture.md) — wie Claude Code intern aufgebaut ist
@@ -370,16 +371,50 @@ Die drei Verbesserungen sind bewusst *klein*. Der Plan ist:
 
 ## Exit-Kriterien für M1
 
-- [ ] `evaluatePolicy()` existiert in `@mana/tool-registry`, wird von beiden Consumern aufgerufen.
-- [ ] `POLICY_ENFORCE=true` läuft eine Woche in Staging ohne False-Positive-Rate > 1 %.
-- [ ] `runPlannerLoop` hat `reminderChannel`-API, Tests grün, mindestens ein Real-Producer live (z. B. Token-Budget-Reminder in `mana-ai`).
-- [ ] Multi-Read-Mission in `mana-ai` zeigt messbare Wall-Clock-Verkürzung in der Metrik `mana_ai_tick_duration_seconds` (Ziel: -30 % p95 bei Research-Missions).
+- [x] `evaluatePolicy()` existiert in `@mana/tool-registry`, wird von beiden Consumern aufgerufen. (`e5d230e59`)
+- [ ] `POLICY_MODE=enforce` läuft eine Woche in Staging ohne False-Positive-Rate > 1 %. **Blockiert durch Ops-Soak** — Metrik-Infrastruktur komplett (`mana_mcp_policy_decisions_total{decision,reason,mode}`, Prometheus-Scrape `d087b4744`, Grafana-Dashboard `004b3b7fc`).
+- [x] `runPlannerLoop` hat `reminderChannel`-API, Tests grün, mindestens ein Real-Producer live. (`e5d230e59` API + `faa472be9` tokenBudgetReminder + `8f283726b` retryLoopReminder + `72f7978ed` compactedReminder — drei Producer live)
+- [~] Parallel-Read-Speedup in `mana-ai`: **ursprüngliches Kriterium war falsch formuliert**. Server-Tools in `mana-ai` sind per `SERVER_TOOLS`-Filter ALLE propose-policy, also greift Parallelisierung dort nicht. Ersetzt durch: **Webapp Companion/Mission-Runner parallelisiert auto-policy-Reads** (`54a12ffd5`). Wall-Clock-Messung via `mana_mcp_tool_duration_seconds` + Companion-Chat-Domain-Events, formale Messung nicht durchgeführt (domain-events sind nicht promscraped).
+
+## Abgeschlossen: 2026-04-23
+
+13 Commits, 154 Tests grün. Siehe [`claude-code-architecture.md`](../reports/claude-code-architecture.md) + [`mana-agent-improvements-from-claude-code.md`](../reports/mana-agent-improvements-from-claude-code.md) für Design-Hintergrund.
+
+## M2 — Context-Compressor
+
+M2 war im ursprünglichen Bericht als eigener 3-5-Tage-Block gedacht. Wir
+haben die Kern-Primitive in derselben Session mitgenommen, weil die
+Reminder-Channel-Infrastruktur aus M1 das Vehikel ist, über das der
+Compactor dem LLM mitteilt, dass komprimiert wurde.
+
+### M2 Umfang & Stand
+
+| Teil       | Inhalt                                                                      | Status |
+|------------|------------------------------------------------------------------------------|--------|
+| M2.1       | `compactHistory()` + `shouldCompact()` + Prompt/Parser in `@mana/shared-ai`  | ✅ `13361eb08` |
+| M2.2       | Trigger + Splice in `runPlannerLoop` (`compactor` option, fire-once policy)  | ✅ `3d8214a14` |
+| M2.3       | `mana-ai` Mission-Runner Wiring, `MANA_AI_COMPACT_MAX_CTX` env, 2 Metriken   | ✅ `83a4606a9` |
+| M2.4       | Webapp Companion + Mission-Runner Wiring                                     | ✅ `703ef69ca` |
+| M2-Bonus   | `LoopState.compactionsDone` + `compactedReminder` Producer (info-severity)   | ✅ `72f7978ed` |
+| **M2.5**   | **Haiku-Tier in `mana-llm`** — Compactor auf billigerem Modell routen         | ⏳ offen, rein Kostenoptimierung, nicht blockiert |
+
+### M2-Konfiguration
+
+| Env                         | Default       | Wirkung |
+|-----------------------------|---------------|---------|
+| `MANA_AI_COMPACT_MAX_CTX`   | `1000000`     | 1M-Token-Ceiling matching gemini-2.5-flash. Trigger bei 92%. `0` = Compactor aus. |
+
+### M2-Metriken
+
+- `mana_ai_compactions_triggered_total` — Counter pro Firing
+- `mana_ai_compacted_turns` — Histogram, Anzahl gefalteter middle-Turns pro Event (<3 = Config-Problem)
+
+## Offene Polish-Items aus M1
+
+Nicht blockiert durch M2, aber noch pending:
+
+- **allowDestructive aus mana-auth-Profil** — heute hardcoded `[]` in `mana-mcp/mcp-adapter.ts::settingsFor()`. Ohne das macht `POLICY_MODE=enforce` für destruktive Tools nur "alles blockiert" Sinn. Braucht Profil-Endpoint in mana-auth + Settings-UI + mana-mcp-Laden pro Session.
 
 ## Danach
 
-M2 (Context-Compressor + Haiku-Tier) und M3 (In-Process Sub-Agents +
-Persona-Runner) bauen auf allen drei M1-Primitiven auf — besonders der
-Reminder-Channel ist das Vehikel, über das M2's Compactor dem LLM mitteilen
-kann, dass komprimiert wurde. Details: siehe
-[`docs/reports/mana-agent-improvements-from-claude-code.md`](../reports/mana-agent-improvements-from-claude-code.md)
-§12 Roadmap.
+M3 (In-Process Sub-Agents + Persona-Runner) baut auf allen M1+M2-Primitiven auf. Details: [`mana-agent-improvements-from-claude-code.md`](../reports/mana-agent-improvements-from-claude-code.md) §12 Roadmap.
