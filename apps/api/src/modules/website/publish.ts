@@ -11,7 +11,7 @@ import { z } from 'zod';
 import { and, desc, eq } from 'drizzle-orm';
 import type { AuthVariables } from '@mana/shared-hono';
 import { errorResponse, validationError } from '../../lib/responses';
-import { db, publishedSnapshots } from './schema';
+import { db, publishedSnapshots, submissions } from './schema';
 import { isValidSlug } from './reserved-slugs';
 
 const routes = new Hono<{ Variables: AuthVariables }>();
@@ -241,6 +241,63 @@ routes.post('/sites/:id/rollback/:snapshotId', async (c) => {
 	});
 
 	return c.json({ rolledBack: true, slug: target[0].slug });
+});
+
+// ─── GET /sites/:id/submissions ─────────────────────────
+// Owner-only list of inbox submissions for a site.
+
+routes.get('/sites/:id/submissions', async (c) => {
+	const siteId = c.req.param('id');
+	if (!siteId) return errorResponse(c, 'siteId required', 400);
+
+	const rows = await db
+		.select({
+			id: submissions.id,
+			siteId: submissions.siteId,
+			blockId: submissions.blockId,
+			payload: submissions.payload,
+			targetModule: submissions.targetModule,
+			status: submissions.status,
+			errorMessage: submissions.errorMessage,
+			createdAt: submissions.createdAt,
+		})
+		.from(submissions)
+		.where(eq(submissions.siteId, siteId))
+		.orderBy(desc(submissions.createdAt))
+		.limit(200);
+
+	return c.json({
+		submissions: rows.map((r) => ({
+			id: r.id,
+			blockId: r.blockId,
+			payload: r.payload,
+			targetModule: r.targetModule,
+			status: r.status,
+			errorMessage: r.errorMessage,
+			createdAt: r.createdAt.toISOString(),
+		})),
+	});
+});
+
+// ─── DELETE /sites/:id/submissions/:submissionId ───────
+
+routes.delete('/sites/:id/submissions/:submissionId', async (c) => {
+	const siteId = c.req.param('id');
+	const submissionId = c.req.param('submissionId');
+	if (!siteId || !submissionId) {
+		return errorResponse(c, 'siteId + submissionId required', 400);
+	}
+
+	const deleted = await db
+		.delete(submissions)
+		.where(and(eq(submissions.id, submissionId), eq(submissions.siteId, siteId)))
+		.returning({ id: submissions.id });
+
+	if (deleted.length === 0) {
+		return errorResponse(c, 'Submission not found', 404, { code: 'NOT_FOUND' });
+	}
+
+	return c.json({ deleted: true });
 });
 
 export const websitePublishRoutes = routes;

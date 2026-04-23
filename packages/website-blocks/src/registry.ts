@@ -7,6 +7,8 @@ import { ctaBlockSpec } from './cta';
 import { faqBlockSpec } from './faq';
 import { columnsBlockSpec } from './columns';
 import { galleryBlockSpec } from './gallery';
+import { formBlockSpec } from './form';
+import { moduleEmbedBlockSpec } from './moduleEmbed';
 
 /**
  * The block registry — single source of truth for every block type the
@@ -23,6 +25,8 @@ export const BLOCK_SPECS: readonly BlockSpec<unknown>[] = [
 	imageBlockSpec,
 	galleryBlockSpec,
 	faqBlockSpec,
+	formBlockSpec,
+	moduleEmbedBlockSpec,
 	columnsBlockSpec,
 	spacerBlockSpec,
 ] as unknown as readonly BlockSpec<unknown>[];

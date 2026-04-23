@@ -10,8 +10,10 @@ import { Hono } from 'hono';
 import { and, eq } from 'drizzle-orm';
 import { db, publishedSnapshots } from './schema';
 import { errorResponse } from '../../lib/responses';
+import { websiteSubmitRoutes } from './submit';
 
 const routes = new Hono();
+routes.route('/', websiteSubmitRoutes);
 
 /**
  * GET /api/v1/website/public/sites/:slug

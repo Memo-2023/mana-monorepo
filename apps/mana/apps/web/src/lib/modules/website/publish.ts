@@ -16,6 +16,7 @@
 
 import { getManaApiUrl } from '$lib/api/config';
 import { websitesTable, websitePagesTable, websiteBlocksTable } from './collections';
+import { resolveEmbed } from './embeds';
 import type {
 	LocalWebsite,
 	LocalWebsiteBlock,
@@ -25,6 +26,7 @@ import type {
 	SiteSettings,
 	PageSeo,
 } from './types';
+import type { ModuleEmbedProps } from '@mana/website-blocks';
 
 // ─── Snapshot shape ──────────────────────────────────────
 
@@ -127,11 +129,31 @@ export async function buildSnapshot(siteId: string): Promise<DraftSnapshot> {
 		blocks: buildBlockTree(blocksByPage.get(p.id) ?? []),
 	}));
 
+	// Pre-resolve moduleEmbed blocks: walk the tree, fetch source data
+	// from Dexie, inline into block.props. The public renderer serves
+	// the snapshot without further lookups. See plan §M4.
+	for (const page of pages) {
+		await resolveEmbedsInTree(page.blocks);
+	}
+
 	return {
 		version: SNAPSHOT_VERSION,
 		site: toSnapshotSite(site),
 		pages,
 	};
+}
+
+async function resolveEmbedsInTree(nodes: SnapshotBlockNode[]): Promise<void> {
+	for (const node of nodes) {
+		if (node.type === 'moduleEmbed') {
+			const props = node.props as ModuleEmbedProps;
+			const resolved = await resolveEmbed(props);
+			node.props = { ...props, resolved };
+		}
+		if (node.children.length > 0) {
+			await resolveEmbedsInTree(node.children);
+		}
+	}
 }
 
 function toSnapshotSite(site: LocalWebsite): SnapshotSite {
@@ -280,6 +302,44 @@ export async function fetchSnapshotHistory(
 	}
 	const body = (await res.json()) as { snapshots: SnapshotHistoryEntry[] };
 	return body.snapshots;
+}
+
+export interface SubmissionEntry {
+	id: string;
+	blockId: string;
+	payload: Record<string, unknown>;
+	targetModule: string;
+	status: string;
+	errorMessage: string | null;
+	createdAt: string;
+}
+
+export async function fetchSubmissions(siteId: string, jwt: string): Promise<SubmissionEntry[]> {
+	const res = await fetch(`${getManaApiUrl()}/api/v1/website/sites/${siteId}/submissions`, {
+		headers: { Authorization: `Bearer ${jwt}` },
+	});
+	if (!res.ok) {
+		throw new PublishError(`Submissions fetch failed (${res.status})`, 'UNKNOWN', res.status);
+	}
+	const body = (await res.json()) as { submissions: SubmissionEntry[] };
+	return body.submissions;
+}
+
+export async function deleteSubmission(
+	siteId: string,
+	submissionId: string,
+	jwt: string
+): Promise<void> {
+	const res = await fetch(
+		`${getManaApiUrl()}/api/v1/website/sites/${siteId}/submissions/${submissionId}`,
+		{
+			method: 'DELETE',
+			headers: { Authorization: `Bearer ${jwt}` },
+		}
+	);
+	if (!res.ok && res.status !== 404) {
+		throw new PublishError(`Delete submission failed (${res.status})`, 'UNKNOWN', res.status);
+	}
 }
 
 export async function rollbackSnapshot(

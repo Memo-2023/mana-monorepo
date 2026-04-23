@@ -61,9 +61,42 @@ export const publishedSnapshots = websiteSchema.table(
 	]
 );
 
+/**
+ * Form submissions inbox. Every POST to /public/submit/:siteId/:blockId
+ * lands here. `payload` is nulled after successful delivery to the
+ * target module (M4.x); M4 first-pass keeps it indefinitely so the
+ * owner sees it in the submissions UI.
+ */
+export const submissions = websiteSchema.table(
+	'submissions',
+	{
+		id: uuid('id').defaultRandom().primaryKey(),
+		siteId: uuid('site_id').notNull(),
+		/** No FK — blocks live in Dexie + the sync pool, not here. */
+		blockId: uuid('block_id').notNull(),
+		/** JSON object — keys match the block's declared field names. */
+		payload: jsonb('payload').notNull(),
+		/** Denormalized at submit time so target routing survives block edits. */
+		targetModule: text('target_module').notNull(),
+		/** `'inbox'` in M4; expand when we wire contacts/notify handlers. */
+		targetAction: text('target_action').notNull(),
+		/** FK into the target module's record once delivered (M4.x). */
+		targetRecordId: uuid('target_record_id'),
+		/** 'received' | 'delivered' | 'failed'. */
+		status: text('status').notNull(),
+		errorMessage: text('error_message'),
+		ip: text('ip'),
+		userAgent: text('user_agent'),
+		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+	},
+	(table) => [index('submissions_site_created_idx').on(table.siteId, table.createdAt)]
+);
+
 export const db = drizzle(getConnection(), {
-	schema: { publishedSnapshots },
+	schema: { publishedSnapshots, submissions },
 });
 
 export type PublishedSnapshotRow = typeof publishedSnapshots.$inferSelect;
 export type NewPublishedSnapshot = typeof publishedSnapshots.$inferInsert;
+export type SubmissionRow = typeof submissions.$inferSelect;
+export type NewSubmission = typeof submissions.$inferInsert;
