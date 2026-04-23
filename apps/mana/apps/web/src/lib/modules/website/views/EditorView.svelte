@@ -37,6 +37,12 @@
 		selectedBlockId ? (pageBlocks.find((b) => b.id === selectedBlockId) ?? null) : null
 	);
 
+	const selectedSiblings = $derived.by(() => {
+		if (!selectedBlock) return [];
+		const parentId = selectedBlock.parentBlockId ?? null;
+		return pageBlocks.filter((b) => (b.parentBlockId ?? null) === parentId);
+	});
+
 	// Clear selection when switching page.
 	$effect(() => {
 		// eslint-disable-next-line @typescript-eslint/no-unused-expressions
@@ -102,7 +108,11 @@
 
 		<aside class="wb-editor__right">
 			{#if selectedBlock}
-				<BlockInspector block={selectedBlock} onDeleted={() => (selectedBlockId = null)} />
+				<BlockInspector
+					block={selectedBlock}
+					siblings={selectedSiblings}
+					onDeleted={() => (selectedBlockId = null)}
+				/>
 			{:else}
 				<p class="wb-editor__inspector-empty">
 					Wähle einen Block in der Vorschau, um ihn zu bearbeiten.

@@ -8,10 +8,15 @@
 
 	interface Props {
 		block: WebsiteBlock;
+		siblings: WebsiteBlock[];
 		onDeleted?: () => void;
 	}
 
-	let { block, onDeleted }: Props = $props();
+	let { block, siblings, onDeleted }: Props = $props();
+
+	const siblingIndex = $derived(siblings.findIndex((b) => b.id === block.id));
+	const canMoveUp = $derived(siblingIndex > 0);
+	const canMoveDown = $derived(siblingIndex >= 0 && siblingIndex < siblings.length - 1);
 
 	const spec = $derived(getBlockSpec(block.type));
 
@@ -57,6 +62,16 @@
 		onDeleted?.();
 	}
 
+	async function onMoveUp() {
+		if (!canMoveUp) return;
+		await blocksStore.moveBlockUp(block.id);
+	}
+
+	async function onMoveDown() {
+		if (!canMoveDown) return;
+		await blocksStore.moveBlockDown(block.id);
+	}
+
 	function asRegistryBlock(b: WebsiteBlock): Block<unknown> {
 		return {
 			id: b.id,
@@ -77,7 +92,34 @@
 				<p class="wb-inspector__kind">{spec.category}</p>
 				<h3>{spec.label}</h3>
 			</div>
-			<button class="wb-inspector__delete" onclick={onDelete} title="Block löschen"> × </button>
+			<div class="wb-inspector__actions">
+				<button
+					class="wb-inspector__action"
+					onclick={onMoveUp}
+					disabled={!canMoveUp}
+					title="Nach oben verschieben"
+					aria-label="Nach oben verschieben"
+				>
+					↑
+				</button>
+				<button
+					class="wb-inspector__action"
+					onclick={onMoveDown}
+					disabled={!canMoveDown}
+					title="Nach unten verschieben"
+					aria-label="Nach unten verschieben"
+				>
+					↓
+				</button>
+				<button
+					class="wb-inspector__action wb-inspector__action--delete"
+					onclick={onDelete}
+					title="Block löschen"
+					aria-label="Block löschen"
+				>
+					×
+				</button>
+			</div>
 		</header>
 
 		<div class="wb-inspector__body">
@@ -121,22 +163,43 @@
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
 	}
-	.wb-inspector__delete {
+	.wb-inspector__actions {
+		display: flex;
+		gap: 0.25rem;
+		flex: 0 0 auto;
+	}
+	.wb-inspector__action {
 		background: transparent;
 		border: 1px solid rgba(255, 255, 255, 0.12);
 		color: inherit;
-		padding: 0.1rem 0.5rem;
-		font-size: 1.15rem;
+		width: 1.75rem;
+		height: 1.75rem;
+		padding: 0;
+		font-size: 0.9rem;
 		line-height: 1;
 		border-radius: 0.375rem;
 		cursor: pointer;
 		opacity: 0.7;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
 	}
-	.wb-inspector__delete:hover {
+	.wb-inspector__action:hover:not(:disabled) {
+		background: rgba(99, 102, 241, 0.15);
+		border-color: rgba(99, 102, 241, 0.4);
+		opacity: 1;
+	}
+	.wb-inspector__action:disabled {
+		opacity: 0.25;
+		cursor: not-allowed;
+	}
+	.wb-inspector__action--delete {
+		font-size: 1.15rem;
+	}
+	.wb-inspector__action--delete:hover:not(:disabled) {
 		background: rgba(248, 113, 113, 0.15);
 		border-color: rgba(248, 113, 113, 0.5);
 		color: rgb(248, 113, 113);
-		opacity: 1;
 	}
 	.wb-inspector__body {
 		flex: 1 1 auto;

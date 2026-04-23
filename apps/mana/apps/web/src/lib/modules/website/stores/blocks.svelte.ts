@@ -160,4 +160,46 @@ export const blocksStore = {
 		});
 		await touchSiteForPage(existing.pageId);
 	},
+
+	/**
+	 * Swap the block with its previous sibling (same page + parent). No-op
+	 * if the block is already first or not found.
+	 */
+	async moveBlockUp(id: string) {
+		const siblings = await orderedSiblings(id);
+		if (!siblings) return;
+		const { ordered, idx } = siblings;
+		if (idx <= 0) return;
+		const prev = ordered[idx - 1];
+		const prevPrev = idx >= 2 ? ordered[idx - 2] : null;
+		await this.reorderBlock(id, prevPrev?.order ?? null, prev.order);
+	},
+
+	/**
+	 * Swap the block with its next sibling (same page + parent). No-op if
+	 * the block is already last or not found.
+	 */
+	async moveBlockDown(id: string) {
+		const siblings = await orderedSiblings(id);
+		if (!siblings) return;
+		const { ordered, idx } = siblings;
+		if (idx < 0 || idx >= ordered.length - 1) return;
+		const next = ordered[idx + 1];
+		const nextNext = idx + 2 < ordered.length ? ordered[idx + 2] : null;
+		await this.reorderBlock(id, next.order, nextNext?.order ?? null);
+	},
 };
+
+async function orderedSiblings(
+	id: string
+): Promise<{ ordered: LocalWebsiteBlock[]; idx: number } | null> {
+	const block = await websiteBlocksTable.get(id);
+	if (!block) return null;
+	const parentId = block.parentBlockId ?? null;
+	const all = await websiteBlocksTable.where('pageId').equals(block.pageId).toArray();
+	const ordered = all
+		.filter((b) => !b.deletedAt && (b.parentBlockId ?? null) === parentId)
+		.sort((a, b) => a.order - b.order || a.id.localeCompare(b.id));
+	const idx = ordered.findIndex((b) => b.id === id);
+	return { ordered, idx };
+}
