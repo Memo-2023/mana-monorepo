@@ -14,7 +14,16 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 COMPOSE_FILE="$PROJECT_ROOT/docker-compose.macmini.yml"
+ENV_FILE="$PROJECT_ROOT/.env.macmini"
 DOCKER="${DOCKER_CMD:-/usr/local/bin/docker}"
+
+# Explicit --env-file flag keeps this script aligned with deploy.sh /
+# restart.sh / the CD workflow (all use .env.macmini). Without it compose
+# falls back to .env in the project root — which used to be a separate
+# file holding a superset of secrets, and missing that file meant mana-
+# auth started with an empty MANA_AUTH_KEK. Server was reconciled
+# 2026-04-23; this flag keeps it that way.
+COMPOSE_ARGS=(-f "$COMPOSE_FILE" --env-file "$ENV_FILE")
 
 # Minimum free memory (in MB) needed for a Docker build
 BUILD_MEM_THRESHOLD_MB=3000
@@ -188,7 +197,7 @@ build_services() {
   done
 
   echo "=== Building: ${services[*]} ==="
-  $DOCKER compose -f "$COMPOSE_FILE" build --no-cache "${services[@]}" 2>&1
+  $DOCKER compose "${COMPOSE_ARGS[@]}" build --no-cache "${services[@]}" 2>&1
   echo ""
   echo "=== Restarting: ${services[*]} ==="
   # Tear down existing containers BEFORE the up cycle. We hit "container
@@ -206,13 +215,13 @@ build_services() {
   #   3. `up -d --remove-orphans` then creates a clean new container
   #      and silences the "Found orphan containers" warning we kept
   #      seeing for the unrelated mana-game-whopixels leftover.
-  $DOCKER compose -f "$COMPOSE_FILE" rm -fs "${services[@]}" 2>&1 \
+  $DOCKER compose "${COMPOSE_ARGS[@]}" rm -fs "${services[@]}" 2>&1 \
     | grep -v 'No stopped containers' || true
   for svc in "${services[@]}"; do
     # Map compose service name → container_name from the compose config.
     # Falls back to the service name itself if container_name isn't set.
     local cname
-    cname=$($DOCKER compose -f "$COMPOSE_FILE" config 2>/dev/null \
+    cname=$($DOCKER compose "${COMPOSE_ARGS[@]}" config 2>/dev/null \
       | awk -v s="$svc:" '
           $0 ~ "^  "s {found=1; next}
           found && /^  [a-z]/ {found=0}
@@ -228,7 +237,7 @@ build_services() {
       echo "$orphans" | xargs -r $DOCKER rm -f 2>/dev/null || true
     fi
   done
-  $DOCKER compose -f "$COMPOSE_FILE" up -d --no-deps --remove-orphans "${services[@]}" 2>&1
+  $DOCKER compose "${COMPOSE_ARGS[@]}" up -d --no-deps --remove-orphans "${services[@]}" 2>&1
 }
 
 # --- Main ---
@@ -273,7 +282,7 @@ case "$1" in
   --all-web)
     build_base_images
     # Find all web services in compose
-    WEB_SERVICES=$($DOCKER compose -f "$COMPOSE_FILE" config --services 2>/dev/null | grep '\-web$' || true)
+    WEB_SERVICES=$($DOCKER compose "${COMPOSE_ARGS[@]}" config --services 2>/dev/null | grep '\-web$' || true)
     if [ -n "$WEB_SERVICES" ]; then
       build_services $WEB_SERVICES
     else
@@ -291,7 +300,7 @@ echo "=== Build complete ==="
 # Show status of built services
 for svc in "$@"; do
   if [ "$svc" != "--base" ] && [ "$svc" != "--all-web" ]; then
-    STATUS=$($DOCKER compose -f "$COMPOSE_FILE" ps --format '{{.Name}}\t{{.Status}}' "$svc" 2>/dev/null || echo "$svc: unknown")
+    STATUS=$($DOCKER compose "${COMPOSE_ARGS[@]}" ps --format '{{.Name}}\t{{.Status}}' "$svc" 2>/dev/null || echo "$svc: unknown")
     echo "  $STATUS"
   fi
 done
