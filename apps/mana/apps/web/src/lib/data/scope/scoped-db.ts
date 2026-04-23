@@ -19,7 +19,7 @@
 
 import type { Collection, Table } from 'dexie';
 import { db } from '../database';
-import { getCurrentUserId } from '../current-user';
+import { getEffectiveUserId } from '../current-user';
 import { getActiveSpaceId } from './active-space.svelte';
 import { personalSpaceSentinel } from './bootstrap';
 import { isModuleAllowedInSpace, type SpaceModuleId, type SpaceType } from '@mana/shared-types';
@@ -43,20 +43,27 @@ export class ModuleNotInSpaceError extends Error {
  * Return the set of spaceId values a record must match to be considered
  * "in scope" right now.
  *
- * Lenient during boot: if the active space hasn't loaded yet, falls back
- * to the user's personal sentinel so records stamped by the v28
- * migration still render. Returns `[]` only when truly unauthenticated
- * — that yields an empty-filter (matches nothing), which is the safest
- * thing a wrapper can do pre-login.
+ * Always uses `getEffectiveUserId()` (which returns the GUEST_USER_ID
+ * sentinel `'guest'` when no user is signed in) so the filter we apply
+ * here matches what the creating-hook in `database.ts` stamps on new
+ * rows. The hook always stamps `_personal:${effectiveUserId}` — if the
+ * filter used `getCurrentUserId()` (which is null for guests), guest-
+ * mode data would be written but never readable until sign-in, which
+ * breaks the first-run "try the app without an account" flow.
+ *
+ * Authenticated path returns either `[active]` (Space-loaded) or
+ * `[active, sentinel]` when both differ (covers the bootstrap window
+ * where a row was stamped with the personal sentinel before
+ * `loadActiveSpace` resolved the real organisation id).
  */
 export function getInScopeSpaceIds(): string[] {
 	const active = getActiveSpaceId();
-	const userId = getCurrentUserId();
-	const sentinel = userId ? personalSpaceSentinel(userId) : null;
+	const effectiveUserId = getEffectiveUserId();
+	const sentinel = personalSpaceSentinel(effectiveUserId);
 	if (active) {
-		return sentinel && sentinel !== active ? [active, sentinel] : [active];
+		return sentinel !== active ? [active, sentinel] : [active];
 	}
-	return sentinel ? [sentinel] : [];
+	return [sentinel];
 }
 
 /**

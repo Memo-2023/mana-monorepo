@@ -7,8 +7,14 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { applyVisibility, isVisibleToCurrentUser } from './visibility';
 import { personalSpaceSentinel } from './bootstrap';
-import { assertModuleAllowed, ModuleNotInSpaceError, ScopeNotReadyError } from './scoped-db';
+import {
+	assertModuleAllowed,
+	getInScopeSpaceIds,
+	ModuleNotInSpaceError,
+	ScopeNotReadyError,
+} from './scoped-db';
 import { setActiveSpace } from './active-space.svelte';
+import { setCurrentUserId } from '../current-user';
 import * as currentUser from '../current-user';
 
 describe('personalSpaceSentinel', () => {
@@ -18,6 +24,62 @@ describe('personalSpaceSentinel', () => {
 
 	it('is consistent for the same user', () => {
 		expect(personalSpaceSentinel('u1')).toBe(personalSpaceSentinel('u1'));
+	});
+});
+
+describe('getInScopeSpaceIds', () => {
+	// getInScopeSpaceIds reads `getEffectiveUserId()`, which closes over
+	// the module-level `currentUserId` inside current-user.ts. Spying on
+	// the exported `getCurrentUserId` doesn't intercept that closure —
+	// we need the real setter to change the underlying state.
+	beforeEach(() => {
+		setActiveSpace(null);
+		setCurrentUserId(null);
+	});
+
+	afterEach(() => {
+		setActiveSpace(null);
+		setCurrentUserId(null);
+	});
+
+	it('returns the guest sentinel when no one is signed in (guest-mode)', () => {
+		// Regression guard: before the fix, this returned [] which
+		// invisibly hid every guest-created row even though the write
+		// path stamped them with `_personal:guest`. Result: empty scene,
+		// "App hinzufügen" silently no-op'd because activeSceneIdState
+		// resolved to null.
+		expect(getInScopeSpaceIds()).toEqual(['_personal:guest']);
+	});
+
+	it("returns the user's sentinel when signed in without active space", () => {
+		setCurrentUserId('user-abc');
+		expect(getInScopeSpaceIds()).toEqual(['_personal:user-abc']);
+	});
+
+	it('returns [active, sentinel] when a non-personal Space is active', () => {
+		setCurrentUserId('user-abc');
+		setActiveSpace({
+			id: 'space-xyz',
+			slug: 'family',
+			name: 'Family',
+			type: 'family',
+			tier: 'public',
+			role: 'owner',
+		});
+		expect(getInScopeSpaceIds().sort()).toEqual(['_personal:user-abc', 'space-xyz'].sort());
+	});
+
+	it('collapses to [active] when active IS the personal sentinel', () => {
+		setCurrentUserId('user-abc');
+		setActiveSpace({
+			id: '_personal:user-abc',
+			slug: 'personal',
+			name: 'Personal',
+			type: 'personal',
+			tier: 'public',
+			role: 'owner',
+		});
+		expect(getInScopeSpaceIds()).toEqual(['_personal:user-abc']);
 	});
 });
 
