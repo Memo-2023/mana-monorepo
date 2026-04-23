@@ -226,6 +226,196 @@ routes.post('/generate', async (c) => {
 	}
 });
 
+// ─── Reference-based Image Edits (OpenAI /v1/images/edits) ─────────
+//
+// Takes 1..MAX_REFERENCE_IMAGES media ids from the caller (expected to
+// come from meImages — plan M1, filtered by usage.aiReference=true on
+// the client), verifies ownership under the `me` app-tag, downloads the
+// raw bytes from mana-media, and forwards a multipart POST to OpenAI's
+// `/v1/images/edits`. Generated outputs are pushed back into mana-media
+// under app='picture' so the Dexie picture-store can pin them exactly
+// like a text-to-image result.
+//
+// Only gpt-image-1 / gpt-image-2 are wired here — they accept multi-
+// image input natively. Replicate/local fallback is a later milestone.
+
+// OpenAI gpt-image-1 / gpt-image-2 accept up to 16 reference images per
+// edit call. We clamp at 4 to keep credit exposure + upload payload size
+// predictable while still covering the common "face + fullbody + outfit"
+// workflow the plan targets.
+const MAX_REFERENCE_IMAGES = 4;
+
+routes.post('/generate-with-reference', async (c) => {
+	const userId = c.get('userId');
+	const body = (await c.req.json()) as {
+		prompt?: string;
+		referenceMediaIds?: string[];
+		model?: string;
+		quality?: string;
+		size?: OpenAiSize;
+		n?: number;
+	};
+
+	const prompt = (body.prompt ?? '').trim();
+	if (!prompt) return c.json({ error: 'prompt required' }, 400);
+
+	const refIds = Array.isArray(body.referenceMediaIds)
+		? body.referenceMediaIds.filter((id): id is string => typeof id === 'string' && id.length > 0)
+		: [];
+	if (refIds.length === 0) return c.json({ error: 'referenceMediaIds required' }, 400);
+	if (refIds.length > MAX_REFERENCE_IMAGES) {
+		return c.json(
+			{ error: `Too many references (max ${MAX_REFERENCE_IMAGES})`, limit: MAX_REFERENCE_IMAGES },
+			400
+		);
+	}
+
+	if (!OPENAI_API_KEY) {
+		return c.json({ error: 'OpenAI image edits not configured' }, 503);
+	}
+
+	const model = body.model ?? 'openai/gpt-image-2';
+	if (!model.startsWith('openai/')) {
+		// Edits routing for non-OpenAI backends (local FLUX+PuLID, Replicate)
+		// is future work — plan M5. Fail loud rather than silently downgrading.
+		return c.json({ error: `Model ${model} not supported for edits`, model }, 400);
+	}
+	const openaiModel = model.slice('openai/'.length) || 'gpt-image-2';
+	const quality = (body.quality as 'low' | 'medium' | 'high' | undefined) ?? 'medium';
+	const size: OpenAiSize = body.size ?? '1024x1024';
+	const effectiveBatch = Math.max(1, Math.min(4, Number(body.n) || 1));
+
+	// Credits: same per-output tarif as /generate. References don't add
+	// a surcharge — OpenAI doesn't bill extra for input images, so we
+	// don't either (plan decision #4).
+	const cost = creditsFor(model, quality) * effectiveBatch;
+	const validation = await validateCredits(userId, 'AI_IMAGE_GENERATION', cost);
+	if (!validation.hasCredits) {
+		return c.json({ error: 'Insufficient credits', required: cost }, 402);
+	}
+
+	// Ownership check before we spend credits or burn OpenAI quota.
+	// meImages are tagged `app='me'` at upload time by the profile
+	// module; a mediaId that isn't in the caller's set is either stale
+	// or malicious, treat both as 404.
+	try {
+		const { verifyMediaOwnership } = await import('../../lib/media');
+		await verifyMediaOwnership(userId, refIds, 'me');
+	} catch (err) {
+		const e = err as Error & { status?: number; missing?: string[] };
+		if (e.status === 404) {
+			return c.json({ error: 'Reference media not found', missing: e.missing }, 404);
+		}
+		return c.json({ error: 'Ownership check failed' }, 502);
+	}
+
+	// Fetch reference buffers in parallel. The mana-media /file route is
+	// public, so no auth header needed — ownership was already verified.
+	let referenceBlobs: Array<{ blob: Blob; filename: string }>;
+	try {
+		const { getMediaBuffer } = await import('../../lib/media');
+		const buffers = await Promise.all(refIds.map((id) => getMediaBuffer(id)));
+		referenceBlobs = buffers.map((b, i) => {
+			const ext = b.mimeType.split('/')[1]?.split(';')[0] ?? 'png';
+			return {
+				blob: new Blob([b.buffer], { type: b.mimeType }),
+				filename: `ref-${i}.${ext === 'jpeg' ? 'jpg' : ext}`,
+			};
+		});
+	} catch (_err) {
+		return c.json({ error: 'Failed to fetch reference media' }, 502);
+	}
+
+	// Multipart POST to OpenAI. FormData auto-sets Content-Type with a
+	// boundary; setting it manually would break parsing on OpenAI's end.
+	const formData = new FormData();
+	formData.append('model', openaiModel);
+	formData.append('prompt', prompt);
+	formData.append('size', size);
+	formData.append('quality', quality);
+	formData.append('n', String(effectiveBatch));
+	// gpt-image-* accepts a repeated `image` field for multi-reference.
+	for (const ref of referenceBlobs) {
+		formData.append('image', ref.blob, ref.filename);
+	}
+
+	let generatedBuffers: ArrayBuffer[];
+	try {
+		const res = await fetch('https://api.openai.com/v1/images/edits', {
+			method: 'POST',
+			headers: { Authorization: `Bearer ${OPENAI_API_KEY}` },
+			body: formData,
+		});
+		if (!res.ok) {
+			const detail = await res.text().catch(() => '');
+			return c.json({ error: 'OpenAI image edit failed', detail: detail.slice(0, 500) }, 502);
+		}
+		const data = (await res.json()) as { data?: Array<{ b64_json?: string }> };
+		const blobs = (data.data ?? []).map((d) => d.b64_json).filter((b): b is string => !!b);
+		if (blobs.length === 0) return c.json({ error: 'OpenAI returned no image data' }, 502);
+		generatedBuffers = blobs.map((b64) => {
+			const bin = Buffer.from(b64, 'base64');
+			return bin.buffer.slice(bin.byteOffset, bin.byteOffset + bin.byteLength) as ArrayBuffer;
+		});
+	} catch (_err) {
+		return c.json({ error: 'OpenAI image edit failed' }, 502);
+	}
+
+	// Success path: consume credits, then upload the new images.
+	// Credits are consumed before the mana-media upload so a mana-media
+	// outage doesn't let the user retry free of charge after the model
+	// already ran (OpenAI already billed us).
+	await consumeCredits(userId, 'AI_IMAGE_GENERATION', cost, `Image edit: ${prompt.slice(0, 50)}`);
+
+	try {
+		const { uploadImageToMedia } = await import('../../lib/media');
+		const images: Array<{ imageUrl: string; mediaId: string; thumbnailUrl?: string }> = [];
+		const ts = Date.now();
+		let idx = 0;
+		for (const buf of generatedBuffers) {
+			const media = await uploadImageToMedia(buf, `edit-${ts}-${idx}.png`, {
+				app: 'picture',
+				userId,
+			});
+			images.push({
+				imageUrl: media.urls.original,
+				mediaId: media.id,
+				thumbnailUrl: media.urls.thumbnail,
+			});
+			idx++;
+		}
+
+		return c.json({
+			images,
+			prompt,
+			model,
+			referenceMediaIds: refIds,
+			mode: 'edit',
+			// Back-compat: first image exposed at top level too, matching /generate.
+			imageUrl: images[0]?.imageUrl,
+			mediaId: images[0]?.mediaId,
+			thumbnailUrl: images[0]?.thumbnailUrl,
+		});
+	} catch (_err) {
+		// OpenAI already produced images and credits were consumed — degrade
+		// to returning the base64 inline so the client can still persist
+		// them locally rather than losing the generation entirely.
+		const inlineImages = generatedBuffers.map((buf, i) => ({
+			mediaId: `inline-${Date.now()}-${i}`,
+			imageUrl: `data:image/png;base64,${Buffer.from(buf).toString('base64')}`,
+		}));
+		return c.json({
+			images: inlineImages,
+			prompt,
+			model,
+			referenceMediaIds: refIds,
+			mode: 'edit',
+			warning: 'mana-media upload failed, images returned inline',
+			imageUrl: inlineImages[0]?.imageUrl,
+		});
+	}
+});
+
 // ─── Image Upload (server-only: S3) ─────────────────────────
 
 routes.post('/upload', async (c) => {
