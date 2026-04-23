@@ -13,6 +13,7 @@
 import { registerHabitsTools } from './habits.ts';
 import { registerJournalTools } from './journal.ts';
 import { registerMeTools } from './me.ts';
+import { registerMoodTools } from './mood.ts';
 import { registerNotesTools } from './notes.ts';
 import { registerSpacesTools } from './spaces.ts';
 import { registerTodoTools } from './todo.ts';
@@ -21,6 +22,7 @@ export function registerAllModules(): void {
 	registerHabitsTools();
 	registerJournalTools();
 	registerMeTools();
+	registerMoodTools();
 	registerNotesTools();
 	registerSpacesTools();
 	registerTodoTools();
@@ -30,6 +32,7 @@ export {
 	registerHabitsTools,
 	registerJournalTools,
 	registerMeTools,
+	registerMoodTools,
 	registerNotesTools,
 	registerSpacesTools,
 	registerTodoTools,

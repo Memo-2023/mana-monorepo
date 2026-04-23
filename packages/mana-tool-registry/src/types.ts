@@ -27,6 +27,7 @@ export type ModuleId =
 	| 'articles'
 	| 'missions'
 	| 'tags'
+	| 'mood'
 	// — M5 (me-images + reference-based image generation) —
 	| 'me';
 
