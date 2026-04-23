@@ -84,3 +84,11 @@ export {
 	type SpaceModuleId,
 	type SpaceMetadata,
 } from './spaces';
+
+// Onboarding templates (see docs/plans/onboarding-flow.md)
+export {
+	ONBOARDING_TEMPLATES,
+	resolveModulesForTemplates,
+	type OnboardingTemplate,
+	type OnboardingTemplateId,
+} from './onboarding-templates';
