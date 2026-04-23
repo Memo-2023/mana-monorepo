@@ -43,9 +43,12 @@ import {
 	AI_TOOL_CATALOG_BY_NAME,
 	buildSystemPrompt,
 	compactHistory,
+	createTaskToolHandler,
 	runPlannerLoop,
 	runPrePlanGuardrails,
 	runPreExecuteGuardrails,
+	TASK_TOOL_NAME,
+	TASK_TOOL_SCHEMA,
 	type ChatMessage,
 	type LlmClient,
 	type ResolvedInput,
@@ -266,12 +269,54 @@ async function runMissionInner(
 			agentMemory: owningAgent?.memory ?? null,
 		});
 
+		// Regular tool dispatcher — shared between the planner loop
+		// and any sub-agent spawned via the `task` tool, so both
+		// routes go through the same guardrail + executor + actor
+		// attribution path.
+		const dispatchTool = async (call: ToolCallRequest): Promise<ToolResult> => {
+			await checkCancel();
+			await enterPhase('staging-proposals', call.name);
+
+			const execCheck = runPreExecuteGuardrails({
+				summary: call.name,
+				toolName: call.name,
+				params: call.arguments,
+				rationale: mission!.objective,
+			});
+			if (!execCheck.passed) {
+				return { success: false, message: `Guardrail: ${execCheck.blockReason}` };
+			}
+
+			try {
+				return await runToolCall(call.name, call.arguments, aiActor);
+			} catch (err) {
+				const msg = err instanceof Error ? err.message : String(err);
+				console.error(`[MissionRunner] tool ${call.name} threw:`, err);
+				return { success: false, message: `Tool execution failed: ${msg}` };
+			}
+		};
+
+		// `task` tool handler: the mission planner can spawn a
+		// research/plan/general sub-agent, which returns one string
+		// summary. parentDepth=0 here; the sub-agent itself refuses
+		// to launch another one. Cheap-tier model since sub-agents
+		// are summarisation-heavy by construction.
+		const taskHandler = createTaskToolHandler({
+			llm: deps.llm,
+			model: 'google/gemini-2.5-flash-lite',
+			parentDepth: 0,
+			parentTools: availableTools,
+			parentOnToolCall: dispatchTool,
+		});
+
+		const toolsWithTask = [...availableTools, TASK_TOOL_SCHEMA];
+
 		const loopResult = await runPlannerLoop({
 			llm: deps.llm,
 			input: {
 				systemPrompt,
 				userPrompt,
-				tools: availableTools,
+				tools: toolsWithTask,
 				model: deps.model ?? 'google/gemini-2.5-flash',
 				maxRounds: MAX_PLANNER_ROUNDS,
 				// Fan-out read tools when the planner requests several in
@@ -295,31 +340,13 @@ async function runMissionInner(
 				},
 			},
 			onToolCall: async (call: ToolCallRequest): Promise<ToolResult> => {
-				await checkCancel();
-				await enterPhase('staging-proposals', call.name);
-
-				// Pre-execute guardrail per call. Failures come back as
-				// tool-messages so the LLM can choose a different path.
-				const execCheck = runPreExecuteGuardrails({
-					summary: call.name,
-					toolName: call.name,
-					params: call.arguments,
-					rationale: mission!.objective,
-				});
-				if (!execCheck.passed) {
-					return {
-						success: false,
-						message: `Guardrail: ${execCheck.blockReason}`,
-					};
+				// Route `task` calls to the sub-agent handler; everything
+				// else goes through the regular dispatcher (guardrail +
+				// executor + actor attribution).
+				if (call.name === TASK_TOOL_NAME) {
+					return taskHandler.handle(call);
 				}
-
-				try {
-					return await runToolCall(call.name, call.arguments, aiActor);
-				} catch (err) {
-					const msg = err instanceof Error ? err.message : String(err);
-					console.error(`[MissionRunner] tool ${call.name} threw:`, err);
-					return { success: false, message: `Tool execution failed: ${msg}` };
-				}
+				return dispatchTool(call);
 			},
 		});
 

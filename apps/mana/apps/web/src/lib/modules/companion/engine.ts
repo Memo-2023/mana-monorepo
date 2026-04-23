@@ -16,6 +16,9 @@ import {
 	AI_TOOL_CATALOG,
 	AI_TOOL_CATALOG_BY_NAME,
 	compactHistory,
+	createTaskToolHandler,
+	TASK_TOOL_NAME,
+	TASK_TOOL_SCHEMA,
 	type ChatMessage,
 	type ToolCallRequest,
 	type ToolResult,
@@ -106,6 +109,44 @@ export async function runCompanionChat(
 	const priorMessages = historyToChatMessages(history);
 	const toolCalls: EngineResult['toolCalls'] = [];
 
+	// The parent tool catalog the sub-agent may filter down from.
+	// TASK_TOOL_SCHEMA itself is NOT in parentTools — a sub-agent can't
+	// launch a nested sub-agent by construction (recursion guard).
+	const toolsWithTask = [...AI_TOOL_CATALOG, TASK_TOOL_SCHEMA];
+
+	// Local dispatcher the planner's loop invokes and — via the task
+	// handler's parentOnToolCall — also any sub-agent. Hoisted so the
+	// task handler can close over it before the loop sets the branch.
+	const dispatchTool = async (call: ToolCallRequest): Promise<ToolResult> => {
+		const startedAt = Date.now();
+		const toolResult = await executeTool(call.name, call.arguments);
+		const latencyMs = Date.now() - startedAt;
+
+		const toolDef = getTool(call.name);
+		emitDomainEvent('CompanionToolCalled', 'companion', 'tools', call.name, {
+			tool: call.name,
+			module: toolDef?.module ?? 'unknown',
+			success: toolResult.success,
+			latencyMs,
+			errorMessage: toolResult.success ? undefined : toolResult.message,
+		});
+
+		toolCalls.push({ name: call.name, params: call.arguments, result: toolResult });
+		return toolResult;
+	};
+
+	// Sub-agent handler bound to this session. parentDepth = 0 means
+	// the sub-agent itself will refuse to launch another one (recursion
+	// guard inside runSubAgent). Model is the cheap tier — sub-agents
+	// are summarisation-heavy so flash-lite is the right default.
+	const taskHandler = createTaskToolHandler({
+		llm,
+		model: 'google/gemini-2.5-flash-lite',
+		parentDepth: 0,
+		parentTools: AI_TOOL_CATALOG,
+		parentOnToolCall: dispatchTool,
+	});
+
 	try {
 		const result = await runPlannerLoop({
 			llm,
@@ -113,7 +154,7 @@ export async function runCompanionChat(
 				systemPrompt,
 				userPrompt: userMessage,
 				priorMessages,
-				tools: AI_TOOL_CATALOG,
+				tools: toolsWithTask,
 				model: 'google/gemini-2.5-flash',
 				maxRounds: MAX_TOOL_ROUNDS,
 				temperature: 0.7,
@@ -136,21 +177,14 @@ export async function runCompanionChat(
 				},
 			},
 			onToolCall: async (call: ToolCallRequest): Promise<ToolResult> => {
-				const startedAt = Date.now();
-				const toolResult = await executeTool(call.name, call.arguments);
-				const latencyMs = Date.now() - startedAt;
-
-				const toolDef = getTool(call.name);
-				emitDomainEvent('CompanionToolCalled', 'companion', 'tools', call.name, {
-					tool: call.name,
-					module: toolDef?.module ?? 'unknown',
-					success: toolResult.success,
-					latencyMs,
-					errorMessage: toolResult.success ? undefined : toolResult.message,
-				});
-
-				toolCalls.push({ name: call.name, params: call.arguments, result: toolResult });
-				return toolResult;
+				// Route `task` calls into the sub-agent handler. Everything
+				// else goes through the regular executor.
+				if (call.name === TASK_TOOL_NAME) {
+					const result = await taskHandler.handle(call);
+					toolCalls.push({ name: call.name, params: call.arguments, result });
+					return result;
+				}
+				return dispatchTool(call);
 			},
 		});
 
