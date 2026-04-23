@@ -49,7 +49,23 @@ function makeState(overrides: Partial<LoopState> = {}): LoopState {
 		round: 1,
 		toolCallCount: 0,
 		usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
+		recentCalls: [],
 		...overrides,
+	};
+}
+
+function mkExecutedCall(
+	success: boolean,
+	toolName = 'create_thing'
+): {
+	round: number;
+	call: { id: string; name: string; arguments: Record<string, unknown> };
+	result: { success: boolean; message: string };
+} {
+	return {
+		round: 1,
+		call: { id: crypto.randomUUID(), name: toolName, arguments: {} },
+		result: { success, message: success ? 'ok' : 'boom' },
 	};
 }
 
@@ -121,21 +137,50 @@ describe('tokenBudgetReminder', () => {
 
 describe('retryLoopReminder', () => {
 	it('is silent before round 3', () => {
-		expect(retryLoopReminder({ round: 2, lastFailures: [true, true] })).toBeNull();
+		expect(
+			retryLoopReminder({
+				round: 2,
+				recentCalls: [mkExecutedCall(false), mkExecutedCall(false)],
+			})
+		).toBeNull();
 	});
 
 	it('warns when the last 2 calls failed at round >= 3', () => {
-		const msg = retryLoopReminder({ round: 3, lastFailures: [true, true] });
+		const msg = retryLoopReminder({
+			round: 3,
+			recentCalls: [mkExecutedCall(false), mkExecutedCall(false)],
+		});
 		expect(msg).not.toBeNull();
 		expect(msg).toContain('fehlgeschlagen');
 	});
 
 	it('stays silent when only one of the last 2 failed', () => {
-		expect(retryLoopReminder({ round: 4, lastFailures: [false, true] })).toBeNull();
+		expect(
+			retryLoopReminder({
+				round: 4,
+				recentCalls: [mkExecutedCall(true), mkExecutedCall(false)],
+			})
+		).toBeNull();
 	});
 
-	it('stays silent with fewer than 2 failures recorded', () => {
-		expect(retryLoopReminder({ round: 5, lastFailures: [true] })).toBeNull();
+	it('stays silent with fewer than 2 calls recorded', () => {
+		expect(retryLoopReminder({ round: 5, recentCalls: [mkExecutedCall(false)] })).toBeNull();
+	});
+
+	it('looks only at the TAIL 2 — a flaky run with intermittent success is not a retry loop', () => {
+		// 5 calls: F, F, F, OK, F → tail-2 is [OK, F] → silent
+		expect(
+			retryLoopReminder({
+				round: 5,
+				recentCalls: [
+					mkExecutedCall(false),
+					mkExecutedCall(false),
+					mkExecutedCall(false),
+					mkExecutedCall(true),
+					mkExecutedCall(false),
+				],
+			})
+		).toBeNull();
 	});
 });
 
@@ -162,6 +207,40 @@ describe('buildReminderChannel', () => {
 		);
 		expect(out).toHaveLength(1);
 		expect(out[0]).toContain('90%');
+	});
+
+	it('fires retryLoopReminder end-to-end through the channel', () => {
+		const channel = buildReminderChannel({
+			agent: makeAgent({ maxTokensPerDay: 1_000_000 }), // budget silent
+			mission: makeMission(),
+			pretickUsage24h: 0,
+		});
+		const out = channel(
+			makeState({
+				round: 4,
+				recentCalls: [mkExecutedCall(false), mkExecutedCall(false)],
+			})
+		);
+		expect(out).toHaveLength(1);
+		expect(out[0]).toContain('fehlgeschlagen');
+	});
+
+	it('can fire budget + retry together (composition)', () => {
+		const channel = buildReminderChannel({
+			agent: makeAgent({ maxTokensPerDay: 10_000 }),
+			mission: makeMission(),
+			pretickUsage24h: 9_000,
+		});
+		const out = channel(
+			makeState({
+				round: 3,
+				usage: { promptTokens: 500, completionTokens: 500, totalTokens: 1_000 },
+				recentCalls: [mkExecutedCall(false), mkExecutedCall(false)],
+			})
+		);
+		expect(out).toHaveLength(2);
+		expect(out[0]).toContain('ausgeschoepft'); // budget first
+		expect(out[1]).toContain('fehlgeschlagen'); // retry second
 	});
 
 	it('uses the updated totalTokens each round (re-evaluated)', () => {

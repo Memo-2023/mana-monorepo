@@ -9,7 +9,7 @@ export type { AiPlanInput, AiPlanOutput, AvailableTool, PlannedStep, ResolvedInp
 // coexist within the atomic PR.
 export { buildSystemPrompt } from './system-prompt';
 export type { SystemPromptInput, SystemPromptOutput } from './system-prompt';
-export { runPlannerLoop } from './loop';
+export { runPlannerLoop, LOOP_STATE_RECENT_CALLS_WINDOW, PARALLEL_TOOL_BATCH_SIZE } from './loop';
 export { MockLlmClient } from './mock-llm';
 export type { MockLlmTurn } from './mock-llm';
 export type {

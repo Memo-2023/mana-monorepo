@@ -396,6 +396,62 @@ describe('runPlannerLoop — reminderChannel', () => {
 		expect(reminders[0].content).toBe('<reminder>round-2</reminder>');
 	});
 
+	it('exposes recentCalls as a sliding window, oldest-first', async () => {
+		// 7 rounds, each with one tool call, so by round 7 we have 6 prior
+		// results — the window must cap at LOOP_STATE_RECENT_CALLS_WINDOW = 5.
+		const llm = new MockLlmClient();
+		for (let i = 0; i < 7; i++) {
+			llm.enqueueToolCalls([{ name: 'list_things', args: { i } }]);
+		}
+		llm.enqueueStop();
+
+		const windowsSeen: Array<Array<{ i: unknown; ok: boolean }>> = [];
+		await runPlannerLoop({
+			llm,
+			input: {
+				systemPrompt: 's',
+				userPrompt: 'u',
+				tools,
+				model: 'm',
+				maxRounds: 10,
+				reminderChannel: (state) => {
+					windowsSeen.push(
+						state.recentCalls.map((ec) => ({
+							i: ec.call.arguments.i,
+							ok: ec.result.success,
+						}))
+					);
+					return [];
+				},
+			},
+			onToolCall: async (call) => ({
+				success: true,
+				message: `ok-${call.arguments.i}`,
+			}),
+		});
+
+		// Round 1 → window empty
+		expect(windowsSeen[0]).toEqual([]);
+		// Round 2 → one prior call
+		expect(windowsSeen[1]).toEqual([{ i: 0, ok: true }]);
+		// Round 6 → five prior calls, oldest-first
+		expect(windowsSeen[5]).toEqual([
+			{ i: 0, ok: true },
+			{ i: 1, ok: true },
+			{ i: 2, ok: true },
+			{ i: 3, ok: true },
+			{ i: 4, ok: true },
+		]);
+		// Round 7 → window slides; i=0 drops off, i=5 is newest
+		expect(windowsSeen[6]).toEqual([
+			{ i: 1, ok: true },
+			{ i: 2, ok: true },
+			{ i: 3, ok: true },
+			{ i: 4, ok: true },
+			{ i: 5, ok: true },
+		]);
+	});
+
 	it('surfaces loop state — toolCallCount and lastCall — to the channel', async () => {
 		const llm = new MockLlmClient()
 			.enqueueToolCalls([{ name: 'list_things', args: {} }])

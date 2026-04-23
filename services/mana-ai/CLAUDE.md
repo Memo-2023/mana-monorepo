@@ -101,8 +101,8 @@ Details zum Deep-Research-Flow: [`docs/reports/gemini-deep-research.md`](../../d
 
 Claude-Code-inspirierte Primitive in `runPlannerLoop` (live in `@mana/shared-ai`, siehe [`docs/plans/agent-loop-improvements-m1.md`](../../docs/plans/agent-loop-improvements-m1.md)) und deren Konsumierung hier:
 
-- [x] `reminderChannel` wired via `buildReminderChannel()` in `src/planner/reminders.ts`. Erster Live-Producer: `tokenBudgetReminder` — warnt ab 75% Tagesbudget, eskaliert ab 100% mit "JETZT abschliessen"-Prompt. Round-usage wird on-the-fly drauf addiert, so dass der Warn-Level mitwandert.
-- [x] `retryLoopReminder` — Shape fertig, aber dormant: LoopState exponiert heute nur `lastCall`, nicht ein Failure-Window. Aktiviert automatisch sobald shared-ai LoopState um `recentResults` erweitert.
+- [x] `reminderChannel` wired via `buildReminderChannel()` in `src/planner/reminders.ts`. Live-Producer 1: `tokenBudgetReminder` — warnt ab 75% Tagesbudget, eskaliert ab 100% mit "JETZT abschliessen"-Prompt. Round-usage wird on-the-fly drauf addiert, so dass der Warn-Level mitwandert.
+- [x] `retryLoopReminder` live — feuert ab Round 3 wenn die letzten 2 Tool-Calls beide fehlschlugen. Liest das `recentCalls`-Sliding-Window (5 Einträge, oldest-first) aus `LoopState`.
 - [x] `POLICY_MODE` env (off/log-only/enforce, default log-only) für die mana-ai-seitige Freitext-Inspection (`detectInjectionMarker`). Rate-Limit und destructive-opt-in sind hier NICHT aktiv — tools werden nur als PlanSteps aufgezeichnet, die echte Enforcement passiert im Webapp-Client.
 - [ ] Parallel-Reads im Server-Tick haben keinen Effekt, weil `SERVER_TOOLS` per Konstruktion propose-only ist. Könnte relevant werden sobald mana-ai die vollständige tool-registry absorbiert (M4 des Personas-Plans).
 

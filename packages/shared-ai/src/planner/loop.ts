@@ -69,6 +69,12 @@ export interface LlmClient {
 
 // ─── Loop input / result ────────────────────────────────────────────
 
+/** Sliding-window size for `LoopState.recentCalls`. Capped so the
+ *  reminder channel stays cheap and hint-producers can only reason
+ *  over the last handful of calls, which is what retry-loop-style
+ *  heuristics need. */
+export const LOOP_STATE_RECENT_CALLS_WINDOW = 5;
+
 /**
  * Transient loop state surfaced to the reminderChannel. The reminder
  * callback is pure — it reads this snapshot and returns hints; it does
@@ -86,6 +92,14 @@ export interface LoopState {
 	/** The most recent ExecutedCall, or undefined in round 1. Handy for
 	 *  "the last tool failed — warn the LLM" producers. */
 	readonly lastCall?: ExecutedCall;
+	/**
+	 * Sliding window of the last N (= `LOOP_STATE_RECENT_CALLS_WINDOW`)
+	 * ExecutedCalls in source order, oldest first. Used by producers
+	 * that need more than the single-last signal — retry-loop detection
+	 * (N consecutive failures), burst detection (many calls to the same
+	 * tool), and similar. Empty in round 1; grows up to the cap.
+	 */
+	readonly recentCalls: readonly ExecutedCall[];
 }
 
 /**
@@ -202,6 +216,7 @@ export async function runPlannerLoop(opts: {
 		// — the reminders are ephemeral steering, not conversation.
 		let requestMessages: readonly ChatMessage[] = messages;
 		if (input.reminderChannel) {
+			const recentCalls = executedCalls.slice(-LOOP_STATE_RECENT_CALLS_WINDOW);
 			const state: LoopState = {
 				round: rounds,
 				toolCallCount: executedCalls.length,
@@ -211,6 +226,7 @@ export async function runPlannerLoop(opts: {
 					totalTokens: promptTokens + completionTokens,
 				},
 				lastCall: executedCalls[executedCalls.length - 1],
+				recentCalls,
 			};
 			const reminders = input.reminderChannel(state);
 			if (reminders.length > 0) {

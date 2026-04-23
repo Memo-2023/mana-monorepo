@@ -69,17 +69,22 @@ export function tokenBudgetReminder(ctx: ReminderContext, roundUsage: number): s
 /**
  * Nudge the planner to end when it is clearly iterating without new
  * information: 3+ rounds in and the last 2 tool-calls returned
- * `success: false`. This is a heuristic guard against infinite re-try
- * loops where the LLM keeps calling the same failing tool with slightly
- * different arguments.
+ * `success: false`. Heuristic guard against infinite retry loops where
+ * the LLM keeps calling the same failing tool with slightly different
+ * arguments.
+ *
+ * Reads the `recentCalls` sliding window from LoopState — the last 5
+ * executed calls in oldest-first order. We only look at the tail 2
+ * because a run that mixes failures and successes is not a true retry
+ * loop, it's just flaky tools.
  */
 export function retryLoopReminder(state: {
 	readonly round: number;
-	readonly lastFailures: readonly boolean[];
+	readonly recentCalls: readonly { readonly result: { readonly success: boolean } }[];
 }): string | null {
 	if (state.round < 3) return null;
-	const recent = state.lastFailures.slice(-2);
-	if (recent.length === 2 && recent.every((f) => f)) {
+	const tail = state.recentCalls.slice(-2);
+	if (tail.length === 2 && tail.every((ec) => !ec.result.success)) {
 		return (
 			`Die letzten 2 Tool-Calls sind fehlgeschlagen. Brich die ` +
 			`Wiederholung ab — formuliere stattdessen einen Summary-Text, ` +
@@ -100,19 +105,10 @@ export function retryLoopReminder(state: {
  */
 export function buildReminderChannel(ctx: ReminderContext): ReminderChannel {
 	return (state) => {
-		const failures: boolean[] = [];
-		// We don't get the full executedCalls in LoopState (intentional —
-		// the channel is meant to be cheap), but `lastCall` is exposed.
-		// For retry-loop detection we'd ideally track the last N; for now
-		// the single lastCall is enough to skip 2-round miss signals, so
-		// this producer is effectively dormant until we extend LoopState.
-		// Left in place so the shape is right for M2 follow-ups.
-		if (state.lastCall) failures.push(!state.lastCall.result.success);
-
 		const out: string[] = [];
 		const budget = tokenBudgetReminder(ctx, state.usage.totalTokens);
 		if (budget) out.push(budget);
-		const retry = retryLoopReminder({ round: state.round, lastFailures: failures });
+		const retry = retryLoopReminder({ round: state.round, recentCalls: state.recentCalls });
 		if (retry) out.push(retry);
 		return out;
 	};
