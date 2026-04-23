@@ -10,6 +10,8 @@
 <script lang="ts">
 	import { Check, UserCircle } from '@mana/shared-icons';
 	import { useReferenceImages } from '$lib/modules/profile/queries';
+	import MeImageUploadZone from '$lib/modules/profile/components/MeImageUploadZone.svelte';
+	import { ingestMeImageFile } from '$lib/modules/profile/api/me-images';
 	import type { MeImage } from '$lib/modules/profile/types';
 
 	interface Props {
@@ -30,6 +32,29 @@
 		hands: 'Hände',
 		reference: 'Referenz',
 	};
+
+	// Inline upload state for the empty-pool case. Uploads here opt the
+	// image in for AI reference use by default (autoAiReference=true) —
+	// the user came into this picker explicitly to feed something into
+	// the generator, so the consent is contextual. /profile/me-images
+	// keeps opt-in-per-image as the default everywhere else.
+	let uploading = $state(false);
+	let uploadError = $state<string | null>(null);
+
+	async function handleUpload(files: File[]) {
+		if (files.length === 0) return;
+		uploading = true;
+		uploadError = null;
+		try {
+			for (const file of files) {
+				await ingestMeImageFile(file, { kind: 'reference', autoAiReference: true });
+			}
+		} catch (err) {
+			uploadError = err instanceof Error ? err.message : 'Upload fehlgeschlagen';
+		} finally {
+			uploading = false;
+		}
+	}
 
 	function isSelected(id: string): boolean {
 		return selectedIds.includes(id);
@@ -55,19 +80,38 @@
 {#if loading && referenceImages.length === 0}
 	<p class="text-xs text-muted-foreground">Lade Referenz-Bilder…</p>
 {:else if referenceImages.length === 0}
-	<div
-		class="flex items-start gap-3 rounded-md border border-dashed border-border bg-background/50 p-3 text-xs text-muted-foreground"
-	>
-		<UserCircle size={18} weight="regular" class="mt-0.5 flex-shrink-0" />
-		<div class="space-y-1">
-			<p class="text-foreground">Noch keine Referenzbilder freigegeben.</p>
-			<p>
-				Lade ein Gesichts- oder Ganzkörperbild hoch und aktiviere "KI darf nutzen" unter
-				<a href="/profile/me-images" class="font-medium text-primary hover:underline">
-					Meine Bilder
-				</a>.
-			</p>
+	<div class="space-y-2 rounded-md border border-dashed border-border bg-background/50 p-3">
+		<div class="flex items-start gap-3 text-xs text-muted-foreground">
+			<UserCircle size={18} weight="regular" class="mt-0.5 flex-shrink-0" />
+			<div class="space-y-1">
+				<p class="text-foreground">Noch keine Referenzbilder.</p>
+				<p>
+					Lade ein Bild hoch — es wird automatisch für KI-Referenzen freigegeben und erscheint hier
+					in der Auswahl.
+				</p>
+			</div>
 		</div>
+		<MeImageUploadZone
+			variant="compact"
+			label="Referenzbild hochladen"
+			hint="Gesicht, Ganzkörper, Hände — was du in Generierungen sehen willst"
+			disabled={uploading}
+			onFiles={handleUpload}
+		/>
+		{#if uploadError}
+			<div
+				class="rounded-md border border-error/30 bg-error/10 px-3 py-2 text-xs text-error"
+				role="alert"
+			>
+				{uploadError}
+			</div>
+		{/if}
+		<p class="text-xs text-muted-foreground">
+			Mehrere Bilder + AI-Opt-in pro Bild:
+			<a href="/profile/me-images" class="font-medium text-primary hover:underline">
+				Meine Bilder
+			</a>.
+		</p>
 	</div>
 {:else}
 	<div class="space-y-2">

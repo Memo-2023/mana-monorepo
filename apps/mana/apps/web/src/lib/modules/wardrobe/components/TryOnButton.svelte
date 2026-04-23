@@ -8,6 +8,8 @@
 	import { Sparkle, UserCircle, Info } from '@mana/shared-icons';
 	import { getActiveSpace } from '$lib/data/scope';
 	import { useImageByPrimary } from '$lib/modules/profile/queries';
+	import MeImageUploadZone from '$lib/modules/profile/components/MeImageUploadZone.svelte';
+	import { ingestMeImageFile } from '$lib/modules/profile/api/me-images';
 	import { isAccessoryOnlyOutfit, runOutfitTryOn } from '../api/try-on';
 	import { CATEGORY_LABELS_SINGULAR } from '../constants';
 	import type { Garment, Outfit } from '../types';
@@ -35,6 +37,13 @@
 	let running = $state(false);
 	let error = $state<string | null>(null);
 
+	// Inline ref-upload state. Deliberately local — the missing-ref
+	// experience lives right here instead of deep-linking to /profile/
+	// me-images, because leaving the outfit detail to upload a face photo
+	// and coming back is jarring (especially inside the workbench card).
+	let uploadingRef = $state(false);
+	let uploadRefError = $state<string | null>(null);
+
 	// Rough credit estimate — mirrors the server tariff from the M3 plan
 	// (3 low / 10 medium / 25 high; we default to medium). Shown on the
 	// button so the user knows the hit before clicking.
@@ -57,25 +66,76 @@
 			running = false;
 		}
 	}
+
+	async function handleRefUpload(
+		files: File[],
+		kind: 'face' | 'fullbody',
+		slot: 'face-ref' | 'body-ref'
+	) {
+		if (files.length === 0) return;
+		uploadingRef = true;
+		uploadRefError = null;
+		try {
+			// Only take the first file — these slots are single-image.
+			await ingestMeImageFile(files[0], { kind, claimSlot: slot });
+			// face$ / body$ live-queries re-run automatically, so the
+			// missing-block disappears and the button becomes active.
+		} catch (err) {
+			uploadRefError = err instanceof Error ? err.message : 'Upload fehlgeschlagen';
+		} finally {
+			uploadingRef = false;
+		}
+	}
 </script>
 
 {#if missingFace || missingBody}
-	<div
-		class="flex items-start gap-3 rounded-xl border border-dashed border-border bg-background/50 p-4 text-sm text-muted-foreground"
-	>
-		<UserCircle size={18} weight="regular" class="mt-0.5 flex-shrink-0 text-primary" />
-		<div class="space-y-1">
-			<p class="text-foreground">Lade erst Referenzbilder hoch, um dich im Outfit zu sehen.</p>
-			<p class="text-xs">
-				Try-On braucht mindestens ein {accessoryOnly
-					? 'Gesichtsbild'
-					: 'Gesichts- und ein Ganzkörperbild'}
-				in diesem Space. Öffne dafür
-				<a href="/profile/me-images" class="font-medium text-primary hover:underline">
-					Meine Bilder
-				</a>.
-			</p>
+	<div class="space-y-3 rounded-xl border border-dashed border-border bg-background/50 p-4">
+		<div class="flex items-start gap-3 text-sm">
+			<UserCircle size={18} weight="regular" class="mt-0.5 flex-shrink-0 text-primary" />
+			<div class="space-y-1">
+				<p class="font-medium text-foreground">Für Try-On brauchen wir dich auf Bild.</p>
+				<p class="text-xs text-muted-foreground">
+					{accessoryOnly
+						? 'Ein Gesichtsbild reicht — der Rest bleibt wie auf deinem Foto.'
+						: 'Ein Gesichts- und ein Ganzkörperbild. Beide werden nur für deine eigenen Generierungen genutzt.'}
+				</p>
+			</div>
 		</div>
+
+		{#if missingFace}
+			<MeImageUploadZone
+				variant="compact"
+				label="Gesichtsbild hochladen"
+				hint="Kopf + Schulter, möglichst neutrale Beleuchtung"
+				disabled={uploadingRef}
+				onFiles={(files) => handleRefUpload(files, 'face', 'face-ref')}
+			/>
+		{/if}
+		{#if missingBody}
+			<MeImageUploadZone
+				variant="compact"
+				label="Ganzkörperbild hochladen"
+				hint="Stehend, freier Hintergrund, gut erkennbare Haltung"
+				disabled={uploadingRef}
+				onFiles={(files) => handleRefUpload(files, 'fullbody', 'body-ref')}
+			/>
+		{/if}
+
+		{#if uploadRefError}
+			<div
+				class="rounded-md border border-error/30 bg-error/10 px-3 py-2 text-xs text-error"
+				role="alert"
+			>
+				{uploadRefError}
+			</div>
+		{/if}
+
+		<p class="text-xs text-muted-foreground">
+			Weitere Referenzen oder AI-Opt-ins pro Bild:
+			<a href="/profile/me-images" class="font-medium text-primary hover:underline">
+				Meine Bilder
+			</a>.
+		</p>
 	</div>
 {:else}
 	<div class="space-y-2">

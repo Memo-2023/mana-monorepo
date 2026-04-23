@@ -22,7 +22,7 @@
 	import MeImageUploadZone from './components/MeImageUploadZone.svelte';
 	import { useAllMeImages, useImageByPrimary } from './queries';
 	import { meImagesStore } from './stores/me-images.svelte';
-	import { readImageDimensions, uploadMeImageFile } from './api/me-images';
+	import { ingestMeImageFile } from './api/me-images';
 	import { migrateLegacyAvatarIfNeeded } from './migration/legacy-avatar';
 	import type { MeImage, MeImageKind, MeImagePrimarySlot } from './types';
 
@@ -70,22 +70,7 @@
 		uploadError = null;
 		try {
 			for (const file of files) {
-				const dims = (await readImageDimensions(file)) ?? { width: 0, height: 0 };
-				const uploaded = await uploadMeImageFile(file);
-				const created = await meImagesStore.createMeImage({
-					kind,
-					mediaId: uploaded.mediaId,
-					storagePath: uploaded.storagePath,
-					publicUrl: uploaded.publicUrl,
-					thumbnailUrl: uploaded.thumbnailUrl ?? null,
-					width: dims.width,
-					height: dims.height,
-				});
-				if (claimSlot) {
-					// setPrimary transactionally clears any previous slot-holder,
-					// so the old Face/Fullbody automatically drops into the grid.
-					await meImagesStore.setPrimary(created.id, claimSlot);
-				}
+				await ingestMeImageFile(file, { kind, claimSlot });
 			}
 		} catch (err) {
 			uploadError = err instanceof Error ? err.message : 'Upload fehlgeschlagen';

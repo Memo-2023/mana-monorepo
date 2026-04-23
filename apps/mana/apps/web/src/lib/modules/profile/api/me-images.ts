@@ -10,6 +10,8 @@
 
 import { getManaApiUrl } from '$lib/api/config';
 import { authStore } from '$lib/stores/auth.svelte';
+import { meImagesStore } from '../stores/me-images.svelte';
+import type { MeImage, MeImageKind, MeImagePrimarySlot } from '../types';
 
 export interface UploadMeImageResult {
 	mediaId: string;
@@ -58,4 +60,49 @@ export function readImageDimensions(file: File): Promise<{ width: number; height
 		};
 		img.src = url;
 	});
+}
+
+/**
+ * Full ingest pipeline for a single File: read dimensions → upload to the
+ * auth-protected endpoint → write a LocalMeImage through the store (which
+ * handles encryption + sync) → optionally claim a primary slot.
+ *
+ * This is the exact sequence `MeImagesView.ingestFiles()` runs for every
+ * file it receives. Extracted so in-context upload cards in other modules
+ * (wardrobe try-on, picture reference picker) can trigger the same write
+ * without duplicating the orchestration.
+ *
+ * `autoAiReference: true` flips `usage.aiReference=true` on creation —
+ * only intended for call-sites where the upload context itself is the
+ * consent (e.g. "upload a reference for the picture generator"). The
+ * default remains opt-in-per-image, matching the /profile/me-images
+ * flow.
+ */
+export async function ingestMeImageFile(
+	file: File,
+	options: {
+		kind: MeImageKind;
+		claimSlot?: MeImagePrimarySlot;
+		autoAiReference?: boolean;
+	}
+): Promise<MeImage> {
+	const dims = (await readImageDimensions(file)) ?? { width: 0, height: 0 };
+	const uploaded = await uploadMeImageFile(file);
+	const created = await meImagesStore.createMeImage({
+		kind: options.kind,
+		mediaId: uploaded.mediaId,
+		storagePath: uploaded.storagePath,
+		publicUrl: uploaded.publicUrl,
+		thumbnailUrl: uploaded.thumbnailUrl ?? null,
+		width: dims.width,
+		height: dims.height,
+		usage: options.autoAiReference ? { aiReference: true } : undefined,
+	});
+	if (options.claimSlot) {
+		// setPrimary transactionally clears any previous slot-holder, so an
+		// old face/body automatically drops into the grid on the profile
+		// page without a separate cleanup step.
+		await meImagesStore.setPrimary(created.id, options.claimSlot);
+	}
+	return created;
 }

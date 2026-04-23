@@ -12,6 +12,10 @@
   the same way picture/ListView does.
 -->
 <script lang="ts">
+	import { UserCircle } from '@mana/shared-icons';
+	import { useImageByPrimary } from '$lib/modules/profile/queries';
+	import MeImageUploadZone from '$lib/modules/profile/components/MeImageUploadZone.svelte';
+	import { ingestMeImageFile } from '$lib/modules/profile/api/me-images';
 	import GridView from './views/GridView.svelte';
 	import OutfitsView from './views/OutfitsView.svelte';
 
@@ -23,6 +27,29 @@
 		{ key: 'garments', label: 'Kleidung' },
 		{ key: 'outfits', label: 'Outfits' },
 	];
+
+	// Face-ref banner: the minimum requirement for *any* wardrobe try-on
+	// (outfit or solo-garment, accessory or full). Body-ref is asked for
+	// later in the detail flow — keeping the top-level banner to one slot
+	// avoids a two-upload wall on first open.
+	const face$ = useImageByPrimary('face-ref');
+	const face = $derived(face$.value);
+
+	let uploadingFace = $state(false);
+	let faceUploadError = $state<string | null>(null);
+
+	async function handleFaceUpload(files: File[]) {
+		if (files.length === 0) return;
+		uploadingFace = true;
+		faceUploadError = null;
+		try {
+			await ingestMeImageFile(files[0], { kind: 'face', claimSlot: 'face-ref' });
+		} catch (err) {
+			faceUploadError = err instanceof Error ? err.message : 'Upload fehlgeschlagen';
+		} finally {
+			uploadingFace = false;
+		}
+	}
 </script>
 
 <div class="wardrobe-root">
@@ -39,6 +66,36 @@
 			</button>
 		{/each}
 	</nav>
+
+	{#if !face$.loading && !face}
+		<div class="space-y-3 rounded-xl border border-dashed border-border bg-background/50 p-4">
+			<div class="flex items-start gap-3 text-sm">
+				<UserCircle size={18} weight="regular" class="mt-0.5 flex-shrink-0 text-primary" />
+				<div class="space-y-1">
+					<p class="font-medium text-foreground">Lade ein Gesichtsbild hoch</p>
+					<p class="text-xs text-muted-foreground">
+						Wir brauchen dich auf Bild, damit Try-On Kleidung an dir visualisieren kann. Das Bild
+						bleibt lokal und wird nur für deine eigenen Generierungen genutzt.
+					</p>
+				</div>
+			</div>
+			<MeImageUploadZone
+				variant="compact"
+				label="Gesichtsbild hochladen"
+				hint="Kopf + Schulter, möglichst neutrale Beleuchtung"
+				disabled={uploadingFace}
+				onFiles={handleFaceUpload}
+			/>
+			{#if faceUploadError}
+				<div
+					class="rounded-md border border-error/30 bg-error/10 px-3 py-2 text-xs text-error"
+					role="alert"
+				>
+					{faceUploadError}
+				</div>
+			{/if}
+		</div>
+	{/if}
 
 	<div class="wardrobe-body">
 		{#if activeTab === 'garments'}
