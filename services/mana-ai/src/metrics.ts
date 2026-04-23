@@ -257,3 +257,29 @@ export const remindersEmittedTotal = new Counter({
 	labelNames: ['producer', 'severity'] as const,
 	registers: [register],
 });
+
+// ── Context-window compactor (Claude-Code wU2 pattern) ──────────────
+
+/**
+ * Bumped once per mission run that crossed the 92% threshold and
+ * triggered the compactor. Pair with `mana_ai_mission_errors_total` to
+ * detect "compactor fires often but missions still fail" regressions.
+ */
+export const compactionsTriggeredTotal = new Counter({
+	name: 'mana_ai_compactions_triggered_total',
+	help: 'Mission runs where the context-window compactor fired at least once.',
+	registers: [register],
+});
+
+/**
+ * Histogram of how many middle turns got folded into each compact-
+ * summary. Low values (< 3) mean the trigger fired on a history that
+ * was already short — usually a signal that maxContextTokens is
+ * misconfigured.
+ */
+export const compactedTurnsHistogram = new Histogram({
+	name: 'mana_ai_compacted_turns',
+	help: 'Number of messages folded into a compact-summary per compaction event.',
+	buckets: [1, 2, 4, 8, 16, 32, 64, 128],
+	registers: [register],
+});

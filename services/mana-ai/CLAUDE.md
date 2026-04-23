@@ -103,6 +103,7 @@ Claude-Code-inspirierte Primitive in `runPlannerLoop` (live in `@mana/shared-ai`
 
 - [x] `reminderChannel` wired via `buildReminderChannel()` in `src/planner/reminders.ts`. Live-Producer 1: `tokenBudgetReminder` — warnt ab 75% Tagesbudget, eskaliert ab 100% mit "JETZT abschliessen"-Prompt. Round-usage wird on-the-fly drauf addiert, so dass der Warn-Level mitwandert.
 - [x] `retryLoopReminder` live — feuert ab Round 3 wenn die letzten 2 Tool-Calls beide fehlschlugen. Liest das `recentCalls`-Sliding-Window (5 Einträge, oldest-first) aus `LoopState`.
+- [x] **Context-window compactor** (wU2 pattern) via `compactHistory()` aus `@mana/shared-ai`. Trigger bei 92% von `MANA_AI_COMPACT_MAX_CTX` (default 1M für gemini-2.5-flash); faltet pre-tail-Turns in ein `<compact-summary>` nach fixem Schema (Goal/Decisions/Tools Called/Current Progress). Metriken: `mana_ai_compactions_triggered_total`, `mana_ai_compacted_turns`.
 - [x] `POLICY_MODE` env (off/log-only/enforce, default log-only) für die mana-ai-seitige Freitext-Inspection (`detectInjectionMarker`). Rate-Limit und destructive-opt-in sind hier NICHT aktiv — tools werden nur als PlanSteps aufgezeichnet, die echte Enforcement passiert im Webapp-Client.
 - [ ] Parallel-Reads im Server-Tick haben keinen Effekt, weil `SERVER_TOOLS` per Konstruktion propose-only ist. Könnte relevant werden sobald mana-ai die vollständige tool-registry absorbiert (M4 des Personas-Plans).
 

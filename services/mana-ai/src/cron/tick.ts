@@ -15,6 +15,7 @@
 
 import {
 	buildSystemPrompt,
+	compactHistory,
 	runPlannerLoop,
 	type Mission,
 	type PlannedStep,
@@ -46,6 +47,8 @@ import {
 	toolCallsTotal,
 	plannerRoundsHistogram,
 	providerErrorsTotal,
+	compactionsTriggeredTotal,
+	compactedTurnsHistogram,
 } from '../metrics';
 import { unwrapMissionGrant } from '../crypto/unwrap-grant';
 import { detectInjectionMarker } from '@mana/tool-registry';
@@ -390,6 +393,31 @@ async function planOneMission(
 		pretickUsage24h,
 	});
 
+	const plannerModel = 'google/gemini-2.5-flash';
+
+	// Claude-Code wU2 pattern: fold the middle of messages into a structured
+	// summary once cumulative tokens cross 92% of maxContextTokens. Uses
+	// the same LLM + model as the planner itself; later we can route this
+	// to a cheaper model (Haiku tier) when mana-llm supports it.
+	const compactor =
+		config.compactMaxContextTokens > 0
+			? {
+					maxContextTokens: config.compactMaxContextTokens,
+					compact: async (msgs: Parameters<typeof compactHistory>[0]) => {
+						const result = await compactHistory(msgs, { llm, model: plannerModel });
+						if (result.compactedTurns > 0) {
+							compactionsTriggeredTotal.inc();
+							compactedTurnsHistogram.observe(result.compactedTurns);
+							console.log(
+								`[mana-ai tick] mission=${m.id} compacted ${result.compactedTurns} turns ` +
+									`(goal=${result.summary.goal.slice(0, 60)}...)`
+							);
+						}
+						return { messages: result.messages, compactedTurns: result.compactedTurns };
+					},
+				}
+			: undefined;
+
 	try {
 		const loopResult = await runPlannerLoop({
 			llm,
@@ -397,8 +425,9 @@ async function planOneMission(
 				systemPrompt,
 				userPrompt,
 				tools,
-				model: 'google/gemini-2.5-flash',
+				model: plannerModel,
 				reminderChannel,
+				compactor,
 			},
 			// Server-side onToolCall: no execution, just acknowledge.
 			// The captured call lands in loopResult.executedCalls and

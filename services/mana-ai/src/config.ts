@@ -55,6 +55,16 @@ export interface Config {
 	 * Defaults to 'log-only' to match the M1 rollout plan.
 	 */
 	policyMode: 'off' | 'log-only' | 'enforce';
+	/**
+	 * Context-window ceiling used by the compactor (Claude-Code `wU2`
+	 * pattern). When cumulative prompt+completion tokens cross 92% of
+	 * this, the loop folds the middle of messages into a compact
+	 * summary before the next LLM call. Default matches
+	 * gemini-2.5-flash's 1M-token context window; override via
+	 * MANA_AI_COMPACT_MAX_CTX for deployments on smaller models. Set
+	 * to 0 to disable compaction entirely.
+	 */
+	compactMaxContextTokens: number;
 }
 
 function requireEnv(key: string, fallback?: string): string {
@@ -85,5 +95,6 @@ export function loadConfig(): Config {
 		tickEnabled: process.env.TICK_ENABLED !== 'false',
 		missionGrantPrivateKeyPem: process.env.MANA_AI_PRIVATE_KEY_PEM || undefined,
 		policyMode: parsePolicyMode(process.env.POLICY_MODE),
+		compactMaxContextTokens: parseInt(process.env.MANA_AI_COMPACT_MAX_CTX ?? '1000000', 10),
 	};
 }
