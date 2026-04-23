@@ -2,6 +2,11 @@ import type { BlockSpec } from './types';
 import { heroBlockSpec } from './hero';
 import { richTextBlockSpec } from './richText';
 import { spacerBlockSpec } from './spacer';
+import { imageBlockSpec } from './image';
+import { ctaBlockSpec } from './cta';
+import { faqBlockSpec } from './faq';
+import { columnsBlockSpec } from './columns';
+import { galleryBlockSpec } from './gallery';
 
 /**
  * The block registry — single source of truth for every block type the
@@ -14,6 +19,11 @@ import { spacerBlockSpec } from './spacer';
 export const BLOCK_SPECS: readonly BlockSpec<unknown>[] = [
 	heroBlockSpec,
 	richTextBlockSpec,
+	ctaBlockSpec,
+	imageBlockSpec,
+	galleryBlockSpec,
+	faqBlockSpec,
+	columnsBlockSpec,
 	spacerBlockSpec,
 ] as unknown as readonly BlockSpec<unknown>[];
 

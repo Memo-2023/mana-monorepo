@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import type { LayoutData } from './$types';
+	import { resolveTheme, themeCssVars, type ThemePreset } from '@mana/website-blocks/themes';
 
 	interface Props {
 		data: LayoutData;
@@ -10,23 +11,14 @@
 	let { data, children }: Props = $props();
 
 	const site = $derived(data.snapshot.site);
-	const theme = $derived(site.theme);
 
-	// Theme preset → CSS variables. Three presets for M3+, classic for M2.
-	const themeVars = $derived.by(() => {
-		const preset = theme?.preset ?? 'classic';
-		const base =
-			preset === 'modern'
-				? { primary: '#6366f1', bg: '#0b0d12', fg: '#f5f6f8' }
-				: preset === 'warm'
-					? { primary: '#f97316', bg: '#1a140f', fg: '#f7ede2' }
-					: { primary: '#3b82f6', bg: '#ffffff', fg: '#0f172a' };
-		const overrides = theme?.overrides ?? {};
-		const primary = overrides.primary ?? base.primary;
-		const bg = overrides.background ?? base.bg;
-		const fg = overrides.foreground ?? base.fg;
-		return `--wb-primary:${primary};--wb-bg:${bg};--wb-fg:${fg};`;
-	});
+	const themeTokens = $derived(
+		resolveTheme(
+			((site.theme?.preset as ThemePreset) ?? 'classic') satisfies ThemePreset,
+			site.theme?.overrides
+		)
+	);
+	const themeVars = $derived(themeCssVars(themeTokens));
 
 	const navItems = $derived(site.navConfig?.items ?? []);
 	const footer = $derived(site.footerConfig);
@@ -94,19 +86,19 @@
 		color: var(--wb-fg);
 		display: flex;
 		flex-direction: column;
-		font-family:
-			system-ui,
-			-apple-system,
-			'Segoe UI',
-			Roboto,
-			sans-serif;
+		font-family: var(--wb-font);
+	}
+	.wb-public :global(h1),
+	.wb-public :global(h2),
+	.wb-public :global(h3) {
+		font-family: var(--wb-font-heading);
 	}
 	.wb-public__nav {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
 		padding: 1rem 1.5rem;
-		border-bottom: 1px solid rgba(127, 127, 127, 0.15);
+		border-bottom: 1px solid var(--wb-border);
 	}
 	.wb-public__nav--minimal {
 		border-bottom: none;
@@ -137,10 +129,10 @@
 	}
 	.wb-public__footer {
 		padding: 2rem 1.5rem;
-		border-top: 1px solid rgba(127, 127, 127, 0.15);
+		border-top: 1px solid var(--wb-border);
 		text-align: center;
 		font-size: 0.875rem;
-		opacity: 0.7;
+		color: var(--wb-muted);
 	}
 	.wb-public__footer ul {
 		list-style: none;

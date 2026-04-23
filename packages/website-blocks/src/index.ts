@@ -26,3 +26,32 @@ export {
 	type RichTextProps,
 } from './richText';
 export { spacerBlockSpec, SpacerSchema, SPACER_DEFAULTS, type SpacerProps } from './spacer';
+export { imageBlockSpec, ImageSchema, IMAGE_DEFAULTS, type ImageProps } from './image';
+export { ctaBlockSpec, CtaSchema, CTA_DEFAULTS, type CtaProps } from './cta';
+export { faqBlockSpec, FaqSchema, FAQ_DEFAULTS, type FaqProps, type FaqItem } from './faq';
+export {
+	columnsBlockSpec,
+	ColumnsSchema,
+	COLUMNS_DEFAULTS,
+	columnSlotKeys,
+	type ColumnsProps,
+} from './columns';
+export {
+	galleryBlockSpec,
+	GallerySchema,
+	GALLERY_DEFAULTS,
+	type GalleryProps,
+	type GalleryImage,
+} from './gallery';
+
+export {
+	THEME_PRESETS,
+	PRESET_LABELS,
+	CLASSIC_LIGHT,
+	MODERN_DARK,
+	WARM,
+	resolveTheme,
+	themeCssVars,
+	type ThemeTokens,
+	type ThemePreset,
+} from './themes';

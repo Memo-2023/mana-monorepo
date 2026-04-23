@@ -1,4 +1,4 @@
-import type { Component } from 'svelte';
+import type { Component, Snippet } from 'svelte';
 import type { ZodTypeAny, z } from 'zod';
 
 /**
@@ -19,6 +19,11 @@ export type BlockMode = 'edit' | 'preview' | 'public';
  * A single block in the tree. Props are block-type-specific and validated
  * against the registered Zod schema at write time (in stores) and at
  * publish time (in the snapshot builder).
+ *
+ * When the renderer passes a block into a container component, the
+ * block's own children (blocks whose `parentBlockId === this.id`) are
+ * pre-arranged into `children`. Leaf blocks always have `children = []`
+ * or undefined.
  */
 export interface Block<Props = unknown> {
 	id: string;
@@ -28,6 +33,7 @@ export interface Block<Props = unknown> {
 	order: number;
 	parentBlockId: string | null;
 	slotKey: string | null;
+	children?: Block[];
 }
 
 /**
@@ -36,13 +42,23 @@ export interface Block<Props = unknown> {
 export type BlockCategory = 'content' | 'media' | 'layout' | 'form' | 'embed';
 
 /**
- * Props passed to every block renderer. `onEdit` is only present in
- * `edit` mode — consumers must guard with `if (mode === 'edit' && onEdit)`.
+ * Props passed to every block renderer.
+ *
+ * `children` is the block's direct children (one level). For container
+ * blocks (columns, future tabs/accordion), consumers render each child
+ * by invoking the `renderChild` snippet — this pushes the outer chrome
+ * (click-to-select in edit mode, cache tagging in public mode) back out
+ * to the renderer that owns it, so the container doesn't need to know
+ * about selection state or mode-specific wrappers.
+ *
+ * `onEdit` is only present in `edit` mode — guard with
+ * `if (mode === 'edit' && onEdit)`.
  */
 export interface BlockRenderProps<Props = unknown> {
 	block: Block<Props>;
 	mode: BlockMode;
 	children?: Block[];
+	renderChild?: Snippet<[Block]>;
 	onEdit?: (patch: Partial<Props>) => void;
 }
 

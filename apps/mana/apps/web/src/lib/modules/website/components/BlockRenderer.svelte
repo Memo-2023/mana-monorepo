@@ -11,10 +11,27 @@
 
 	let { blocks, mode, selectedBlockId, onSelect }: Props = $props();
 
-	// Top-level blocks for M1 — containers come in M3 (columns/rows).
-	const topLevel = $derived(
-		blocks.filter((b) => b.parentBlockId === null).sort((a, b) => a.order - b.order)
-	);
+	/**
+	 * Build a parent→children map once, sort each bucket. The renderChild
+	 * snippet below does the recursive lookup against this map so both
+	 * top-level blocks and container children render through the same
+	 * chrome (click-to-select, outline).
+	 */
+	const byParent = $derived.by(() => {
+		const map = new Map<string | null, WebsiteBlock[]>();
+		for (const b of blocks) {
+			const parent = b.parentBlockId;
+			const list = map.get(parent);
+			if (list) list.push(b);
+			else map.set(parent, [b]);
+		}
+		for (const list of map.values()) {
+			list.sort((a, b) => a.order - b.order || a.id.localeCompare(b.id));
+		}
+		return map;
+	});
+
+	const topLevel = $derived(byParent.get(null) ?? []);
 
 	function asRegistryBlock(b: WebsiteBlock): BlockType<unknown> {
 		return {
@@ -25,32 +42,49 @@
 			order: b.order,
 			parentBlockId: b.parentBlockId,
 			slotKey: b.slotKey,
+			// `children` is intentionally omitted at this level — containers
+			// look up their own via the `children` prop we pass below.
 		};
 	}
 </script>
 
-{#each topLevel as block (block.id)}
+{#snippet renderBlock(block: WebsiteBlock)}
 	{@const spec = getBlockSpec(block.type)}
 	{#if spec}
+		{@const children = (byParent.get(block.id) ?? []).map(asRegistryBlock)}
 		{#if mode === 'edit'}
 			<div
 				class="wb-block-wrap wb-block-wrap--editable"
 				class:wb-block-wrap--selected={selectedBlockId === block.id}
 				role="button"
 				tabindex="0"
-				onclick={() => onSelect?.(block.id)}
+				onclick={(e) => {
+					e.stopPropagation();
+					onSelect?.(block.id);
+				}}
 				onkeydown={(e) => {
 					if (e.key === 'Enter' || e.key === ' ') {
 						e.preventDefault();
+						e.stopPropagation();
 						onSelect?.(block.id);
 					}
 				}}
 			>
-				<spec.Component block={asRegistryBlock(block)} {mode} />
+				<spec.Component
+					block={asRegistryBlock(block)}
+					{mode}
+					{children}
+					renderChild={renderInnerChild}
+				/>
 			</div>
 		{:else}
 			<div class="wb-block-wrap">
-				<spec.Component block={asRegistryBlock(block)} {mode} />
+				<spec.Component
+					block={asRegistryBlock(block)}
+					{mode}
+					{children}
+					renderChild={renderInnerChild}
+				/>
 			</div>
 		{/if}
 	{:else if mode === 'edit'}
@@ -58,6 +92,17 @@
 			Unbekannter Block-Typ: {block.type}
 		</div>
 	{/if}
+{/snippet}
+
+{#snippet renderInnerChild(child: BlockType<unknown>)}
+	{@const fullBlock = blocks.find((b) => b.id === child.id)}
+	{#if fullBlock}
+		{@render renderBlock(fullBlock)}
+	{/if}
+{/snippet}
+
+{#each topLevel as block (block.id)}
+	{@render renderBlock(block)}
 {/each}
 
 <style>

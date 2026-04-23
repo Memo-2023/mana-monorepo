@@ -1,7 +1,10 @@
 <script lang="ts">
-	import { getBlockSpec, type Block } from '@mana/website-blocks';
+	import type { Component } from 'svelte';
+	import { getBlockSpec, type Block, type BlockInspectorProps } from '@mana/website-blocks';
 	import { blocksStore, InvalidBlockPropsError } from '../stores/blocks.svelte';
 	import type { WebsiteBlock } from '../types';
+	import ImageInspector from './ImageInspector.svelte';
+	import GalleryInspector from './GalleryInspector.svelte';
 
 	interface Props {
 		block: WebsiteBlock;
@@ -11,6 +14,24 @@
 	let { block, onDeleted }: Props = $props();
 
 	const spec = $derived(getBlockSpec(block.type));
+
+	/**
+	 * Some blocks need app-level features (image upload via mana-media)
+	 * that can't live in the registry package (which is pure Svelte +
+	 * Zod). Override table: block.type → app-side inspector component.
+	 * Missing entries fall back to `spec.Inspector` from the registry.
+	 *
+	 * Typed as `Component<BlockInspectorProps<unknown>>` because each
+	 * override targets a different block-type's props shape — Svelte's
+	 * generic-component-assignability check can't know the union without
+	 * widening.
+	 */
+	const CUSTOM_INSPECTORS: Record<string, Component<BlockInspectorProps<unknown>> | undefined> = {
+		image: ImageInspector as unknown as Component<BlockInspectorProps<unknown>>,
+		gallery: GalleryInspector as unknown as Component<BlockInspectorProps<unknown>>,
+	};
+
+	const CustomInspector = $derived(CUSTOM_INSPECTORS[block.type]);
 
 	let lastError = $state<string | null>(null);
 
@@ -60,7 +81,11 @@
 		</header>
 
 		<div class="wb-inspector__body">
-			<spec.Inspector block={asRegistryBlock(block)} {onChange} />
+			{#if CustomInspector}
+				<CustomInspector block={asRegistryBlock(block)} {onChange} />
+			{:else}
+				<spec.Inspector block={asRegistryBlock(block)} {onChange} />
+			{/if}
 		</div>
 
 		{#if lastError}

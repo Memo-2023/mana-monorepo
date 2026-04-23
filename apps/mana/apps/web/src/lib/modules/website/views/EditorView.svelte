@@ -13,6 +13,7 @@
 	import InsertPalette from '../components/InsertPalette.svelte';
 	import PageList from '../components/PageList.svelte';
 	import PublishBar from '../components/PublishBar.svelte';
+	import SiteSettingsDialog from '../components/SiteSettingsDialog.svelte';
 
 	interface Props {
 		siteId: string;
@@ -30,6 +31,7 @@
 	const pageBlocks = $derived(blocksForPage(blocks.value, props.pageId));
 
 	let selectedBlockId = $state<string | null>(null);
+	let showSettings = $state(false);
 
 	const selectedBlock = $derived(
 		selectedBlockId ? (pageBlocks.find((b) => b.id === selectedBlockId) ?? null) : null
@@ -57,8 +59,19 @@
 		<aside class="wb-editor__left">
 			{#if site}
 				<div class="wb-editor__site-meta">
-					<p class="wb-editor__site-name">{site.name}</p>
-					<p class="wb-editor__site-slug">/s/{site.slug}</p>
+					<div class="wb-editor__site-row">
+						<div class="wb-editor__site-id">
+							<p class="wb-editor__site-name">{site.name}</p>
+							<p class="wb-editor__site-slug">/s/{site.slug}</p>
+						</div>
+						<button
+							class="wb-editor__settings-btn"
+							onclick={() => (showSettings = true)}
+							title="Website-Einstellungen"
+						>
+							⚙
+						</button>
+					</div>
 				</div>
 			{/if}
 
@@ -98,6 +111,10 @@
 		</aside>
 	</div>
 </div>
+
+{#if showSettings && site}
+	<SiteSettingsDialog {site} onClose={() => (showSettings = false)} />
+{/if}
 
 <style>
 	.wb-editor-layout {
@@ -154,6 +171,32 @@
 	.wb-editor__site-meta {
 		padding-bottom: 0.75rem;
 		border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+	}
+	.wb-editor__site-row {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-start;
+		gap: 0.5rem;
+	}
+	.wb-editor__site-id {
+		min-width: 0;
+		flex: 1 1 auto;
+	}
+	.wb-editor__settings-btn {
+		background: transparent;
+		border: 1px solid rgba(255, 255, 255, 0.12);
+		color: inherit;
+		width: 1.75rem;
+		height: 1.75rem;
+		border-radius: 0.375rem;
+		cursor: pointer;
+		font-size: 1rem;
+		line-height: 1;
+		flex: 0 0 auto;
+	}
+	.wb-editor__settings-btn:hover {
+		background: rgba(99, 102, 241, 0.15);
+		border-color: rgba(99, 102, 241, 0.4);
 	}
 	.wb-editor__site-name {
 		margin: 0;

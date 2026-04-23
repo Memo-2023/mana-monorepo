@@ -21,6 +21,10 @@
 		"./types": {
 			"types": "./src/types.ts",
 			"default": "./src/types.ts"
+		},
+		"./themes": {
+			"types": "./src/themes/index.ts",
+			"default": "./src/themes/index.ts"
 		}
 	},
 	"files": [
