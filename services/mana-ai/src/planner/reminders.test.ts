@@ -1,0 +1,185 @@
+import { describe, expect, it } from 'bun:test';
+import {
+	buildReminderChannel,
+	retryLoopReminder,
+	tokenBudgetReminder,
+	type ReminderContext,
+} from './reminders';
+import type { ServerAgent } from '../db/agents-projection';
+import type { ServerMission } from '../db/missions-projection';
+import type { LoopState } from '@mana/shared-ai';
+
+// ─── Fixtures ──────────────────────────────────────────────────────
+
+function makeAgent(overrides: Partial<ServerAgent> = {}): ServerAgent {
+	return {
+		id: 'agent-1',
+		userId: 'user-1',
+		spaceId: 'space-1',
+		name: 'Mana',
+		role: null,
+		systemPrompt: null,
+		memory: null,
+		state: 'active',
+		maxTokensPerDay: 100_000,
+		maxConcurrentMissions: 3,
+		policy: null,
+		updatedAt: '2026-04-23T00:00:00Z',
+		...overrides,
+	} as ServerAgent;
+}
+
+function makeMission(overrides: Partial<ServerMission> = {}): ServerMission {
+	return {
+		id: 'mission-1',
+		userId: 'user-1',
+		spaceId: 'space-1',
+		title: 'Test',
+		objective: 'Do the thing',
+		state: 'active',
+		nextRunAt: '2026-04-23T00:00:00Z',
+		iterations: [],
+		agentId: 'agent-1',
+		...overrides,
+	} as ServerMission;
+}
+
+function makeState(overrides: Partial<LoopState> = {}): LoopState {
+	return {
+		round: 1,
+		toolCallCount: 0,
+		usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
+		...overrides,
+	};
+}
+
+// ─── tokenBudgetReminder ──────────────────────────────────────────
+
+describe('tokenBudgetReminder', () => {
+	it('returns null when agent has no cap', () => {
+		const ctx: ReminderContext = {
+			agent: makeAgent({ maxTokensPerDay: null as unknown as number }),
+			mission: makeMission(),
+			pretickUsage24h: 50_000,
+		};
+		expect(tokenBudgetReminder(ctx, 10_000)).toBeNull();
+	});
+
+	it('returns null when agent is absent (legacy mission)', () => {
+		const ctx: ReminderContext = { agent: null, mission: makeMission(), pretickUsage24h: 0 };
+		expect(tokenBudgetReminder(ctx, 99_000)).toBeNull();
+	});
+
+	it('returns null below 75% utilisation', () => {
+		const ctx: ReminderContext = {
+			agent: makeAgent({ maxTokensPerDay: 100_000 }),
+			mission: makeMission(),
+			pretickUsage24h: 50_000,
+		};
+		expect(tokenBudgetReminder(ctx, 20_000)).toBeNull(); // 70%
+	});
+
+	it('warns at the 75% threshold', () => {
+		const ctx: ReminderContext = {
+			agent: makeAgent({ maxTokensPerDay: 100_000 }),
+			mission: makeMission(),
+			pretickUsage24h: 50_000,
+		};
+		const msg = tokenBudgetReminder(ctx, 25_000); // 75%
+		expect(msg).not.toBeNull();
+		expect(msg).toContain('75%');
+		expect(msg).toContain('Mana');
+	});
+
+	it('emits a stronger message at/above 100%', () => {
+		const ctx: ReminderContext = {
+			agent: makeAgent({ maxTokensPerDay: 100_000 }),
+			mission: makeMission(),
+			pretickUsage24h: 90_000,
+		};
+		const msg = tokenBudgetReminder(ctx, 15_000); // 105%
+		expect(msg).not.toBeNull();
+		expect(msg).toContain('ausgeschoepft');
+		expect(msg).toContain('JETZT');
+	});
+
+	it('adds pretick and round usage correctly', () => {
+		const ctx: ReminderContext = {
+			agent: makeAgent({ maxTokensPerDay: 100_000 }),
+			mission: makeMission(),
+			pretickUsage24h: 80_000,
+		};
+		// 80k + 0k = 80% → warns
+		expect(tokenBudgetReminder(ctx, 0)).not.toBeNull();
+		// 80k + 20k = 100% → exhausted
+		const exhausted = tokenBudgetReminder(ctx, 20_000);
+		expect(exhausted).toContain('ausgeschoepft');
+	});
+});
+
+// ─── retryLoopReminder ────────────────────────────────────────────
+
+describe('retryLoopReminder', () => {
+	it('is silent before round 3', () => {
+		expect(retryLoopReminder({ round: 2, lastFailures: [true, true] })).toBeNull();
+	});
+
+	it('warns when the last 2 calls failed at round >= 3', () => {
+		const msg = retryLoopReminder({ round: 3, lastFailures: [true, true] });
+		expect(msg).not.toBeNull();
+		expect(msg).toContain('fehlgeschlagen');
+	});
+
+	it('stays silent when only one of the last 2 failed', () => {
+		expect(retryLoopReminder({ round: 4, lastFailures: [false, true] })).toBeNull();
+	});
+
+	it('stays silent with fewer than 2 failures recorded', () => {
+		expect(retryLoopReminder({ round: 5, lastFailures: [true] })).toBeNull();
+	});
+});
+
+// ─── buildReminderChannel — composition ───────────────────────────
+
+describe('buildReminderChannel', () => {
+	it('returns an empty array when no producer fires', () => {
+		const channel = buildReminderChannel({
+			agent: makeAgent({ maxTokensPerDay: 100_000 }),
+			mission: makeMission(),
+			pretickUsage24h: 0,
+		});
+		expect(channel(makeState())).toEqual([]);
+	});
+
+	it('surfaces the budget reminder when usage is high', () => {
+		const channel = buildReminderChannel({
+			agent: makeAgent({ maxTokensPerDay: 10_000 }),
+			mission: makeMission(),
+			pretickUsage24h: 8_000,
+		});
+		const out = channel(
+			makeState({ usage: { promptTokens: 500, completionTokens: 500, totalTokens: 1_000 } })
+		);
+		expect(out).toHaveLength(1);
+		expect(out[0]).toContain('90%');
+	});
+
+	it('uses the updated totalTokens each round (re-evaluated)', () => {
+		const channel = buildReminderChannel({
+			agent: makeAgent({ maxTokensPerDay: 10_000 }),
+			mission: makeMission(),
+			pretickUsage24h: 5_000,
+		});
+		// Round 1 — 50% → silent
+		expect(channel(makeState())).toEqual([]);
+		// Round 2 — 5k + 3k = 80% → warns
+		const round2 = channel(
+			makeState({
+				round: 2,
+				usage: { promptTokens: 1500, completionTokens: 1500, totalTokens: 3_000 },
+			})
+		);
+		expect(round2).toHaveLength(1);
+		expect(round2[0]).toContain('80%');
+	});
+});

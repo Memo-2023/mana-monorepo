@@ -50,6 +50,7 @@ import {
 import { unwrapMissionGrant } from '../crypto/unwrap-grant';
 import { detectInjectionMarker } from '@mana/tool-registry';
 import { NewsResearchClient } from '../planner/news-research-client';
+import { buildReminderChannel } from '../planner/reminders';
 import { ManaResearchClient, type DeepResearchProvider } from '../clients/mana-research';
 import {
 	deletePendingResearchJob,
@@ -192,6 +193,12 @@ export async function runTickOnce(config: Config): Promise<TickStats> {
 				agentDecisionsTotal.inc({ decision: 'skipped-paused' });
 				continue;
 			}
+			// Pretick token usage is surfaced to the reminder channel so the
+			// planner sees a warning as it approaches the cap, rather than
+			// getting cut off without explanation. Default 0 when the
+			// agent has no cap or the query fails (reminder becomes a
+			// no-op for that mission).
+			let pretickUsage24h = 0;
 			if (agent) {
 				const used = activeRuns.get(agent.id) ?? 0;
 				if (used >= agent.maxConcurrentMissions) {
@@ -200,8 +207,8 @@ export async function runTickOnce(config: Config): Promise<TickStats> {
 				}
 				// Budget enforcement: check rolling 24h token usage.
 				if (agent.maxTokensPerDay != null && agent.maxTokensPerDay >= 0) {
-					const windowUsage = await getAgentTokenUsage24h(sql, m.userId, agent.id);
-					if (windowUsage >= agent.maxTokensPerDay) {
+					pretickUsage24h = await getAgentTokenUsage24h(sql, m.userId, agent.id);
+					if (pretickUsage24h >= agent.maxTokensPerDay) {
 						agentDecisionsTotal.inc({ decision: 'skipped-budget' });
 						continue;
 					}
@@ -219,7 +226,7 @@ export async function runTickOnce(config: Config): Promise<TickStats> {
 						'agent.id': agent?.id ?? 'legacy',
 						'agent.name': agent?.name ?? 'Mana',
 					},
-					() => planOneMission(m, llm, sql, agent, config)
+					() => planOneMission(m, llm, sql, agent, config, pretickUsage24h)
 				);
 				if (planResult.outcome === 'skipped') {
 					// Deep-research job still running — pick this mission
@@ -309,7 +316,8 @@ async function planOneMission(
 	llm: ReturnType<typeof createServerLlmClient>,
 	sql: Sql,
 	agent: ServerAgent | null,
-	config: Config
+	config: Config,
+	pretickUsage24h: number
 ): Promise<PlanMissionOutcome> {
 	const mission = serverMissionToSharedMission(m);
 	// Resolve the mission's Key-Grant (if any) once per tick. An absent
@@ -371,6 +379,17 @@ async function planOneMission(
 
 	const tools = filterToolsByAgentPolicy(SERVER_TOOLS, agent);
 
+	// Per-round reminder channel: injects transient hints (token-budget
+	// warnings today; retry-loop detection, stale-data signals later)
+	// into the NEXT LLM turn only. See `planner/reminders.ts` for the
+	// individual producers and the Claude-Code <system-reminder>
+	// rationale.
+	const reminderChannel = buildReminderChannel({
+		agent,
+		mission: m,
+		pretickUsage24h,
+	});
+
 	try {
 		const loopResult = await runPlannerLoop({
 			llm,
@@ -379,6 +398,7 @@ async function planOneMission(
 				userPrompt,
 				tools,
 				model: 'google/gemini-2.5-flash',
+				reminderChannel,
 			},
 			// Server-side onToolCall: no execution, just acknowledge.
 			// The captured call lands in loopResult.executedCalls and
