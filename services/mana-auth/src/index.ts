@@ -29,6 +29,7 @@ import { createAiMissionGrantRoutes } from './routes/ai-mission-grant';
 import { createSettingsRoutes } from './routes/settings';
 import { createAdminRoutes } from './routes/admin';
 import { createAdminPersonasRoutes } from './routes/admin-personas';
+import { createInternalPersonasRoutes } from './routes/internal-personas';
 
 // ─── Bootstrap ──────────────────────────────────────────────
 
@@ -125,6 +126,8 @@ app.route('/api/v1/admin/personas', createAdminPersonasRoutes(db, auth));
 // ─── Internal API ───────────────────────────────────────────
 
 app.use('/api/v1/internal/*', serviceAuth(config.serviceKey));
+
+app.route('/api/v1/internal/personas', createInternalPersonasRoutes(db));
 
 app.get('/api/v1/internal/org/:orgId/member/:userId', async (c) => {
 	const { orgId, userId } = c.req.param();

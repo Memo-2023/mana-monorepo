@@ -428,7 +428,16 @@ Plan D7 wollte `family`/`team`/`practice` Shared-Spaces zwischen Persona-Paaren.
 
 **Exit criteria — erfüllt:** Schema + Code + Katalog shipped, dry-run grün. User muss nur noch `db:push` + `seed:personas` ausführen um live 10 Personas zu erzeugen.
 
-### M3 — Persona-Runner
+### M3 — Persona-Runner — ✅ M3.a–M3.d SHIPPED 2026-04-22
+
+Full tick loop live. End-to-end pipeline proven through type-check + boot smoke; full Postgres verification pending `db:push` + live seed + `ANTHROPIC_API_KEY` run. Smoke recipe documented in [`services/mana-persona-runner/CLAUDE.md`](../../services/mana-persona-runner/CLAUDE.md).
+
+- [x] M3.a — Service scaffold on :3070 (config, auth client, password, `/health`, `/diag/login`)
+- [x] M3.b — Tick loop: due-query → concurrent fan-out → `@anthropic-ai/claude-agent-sdk.query()` with MCP HTTP transport → tool-use + error extraction → rating turn with JSON parse → batched persistence
+- [x] M3.c — Internal endpoints in mana-auth: `GET /due`, `POST /:id/actions`, `POST /:id/feedback`. All idempotent via deterministic row-ids
+- [x] M3.d — CLAUDE.md updated with pipeline diagram + full end-to-end smoke recipe
+
+#### Archived initial checklist
 
 - [ ] `services/mana-persona-runner/` scaffold
 - [ ] Tick-Loop: liest Personas aus DB, Cadence-Check, pro fällige Persona → Claude Agent SDK Aufruf

@@ -29,16 +29,69 @@ Every `TICK_INTERVAL_MS`:
    - **Self-reflection**: after the tool loop settles, ask Claude in-character to rate each module used (1–5 + note).
    - **Persist**: `POST /api/v1/internal/personas/:id/actions` and `/feedback` on mana-auth (service-key auth).
 
-## What M3.a ships (2026-04-22)
-
-Scaffold only — enough to prove the service boots, speaks to mana-auth, and can log in as a persona end-to-end.
+## Files
 
 - `src/config.ts`     — env-driven config + production-secret assertion
 - `src/clients/auth.ts` — login + listSpaces, convenience `loginAndResolvePersonalSpace`
+- `src/clients/mana-auth-internal.ts` — `X-Service-Key`-gated calls: `listDuePersonas`, `postActions`, `postFeedback`
 - `src/password.ts`   — HMAC derivation (mirror of `scripts/personas/password.ts`, see comment)
-- `src/index.ts`      — Hono app, `/health`, `/metrics`, dev-only `/diag/login`
+- `src/runner/claude-session.ts` — per-tick `runMainTurn` + `runRatingTurn` on top of `@anthropic-ai/claude-agent-sdk`
+- `src/runner/tick.ts` — orchestrator: due → concurrency-limited fan-out → per-persona pipeline
+- `src/runner/types.ts` — `ActionRow`/`FeedbackRow` shapes shared between runner modules
+- `src/index.ts`      — Hono app, `/health`, `/metrics`, dev-only `/diag/login` + `/diag/tick`
 
-**Not yet built:** tick dispatcher, Claude Agent SDK integration, MCP client wiring, action/feedback callbacks. Those land in M3.b + M3.c.
+## Tick pipeline (M3.b)
+
+```
+setInterval(config.tickIntervalMs)
+    │
+    ▼
+GET  /api/v1/internal/personas/due          (service-key)
+    │  due? hourly>1h, daily>24h, weekdays>24h mon-fri
+    ▼
+for each persona (max concurrency at once):
+    │
+    POST /api/v1/auth/login                 (persona JWT)
+    GET  /api/auth/organization/list        (personal space id)
+    │
+    ▼
+    runMainTurn
+      query({ systemPrompt, mcpServers: { mana: {type:'http', url, headers} }, maxTurns })
+      for each SDKMessage:
+        tool_use block  →  push ActionRow (ok provisional)
+        tool_result err →  flip last ActionRow to 'error'
+        module prefix   →  modulesUsed.add(module)
+    │
+    ▼
+    runRatingTurn (same systemPrompt, fresh query, tools:[])
+      prompt: 'rate each of {modulesUsed} 1-5, respond JSON'
+      parse {ratings:[{module,rating,notes}]}  →  FeedbackRow[]
+      invalid JSON       →  one synthetic rating row '__parse' as marker
+    │
+    ▼
+POST /api/v1/internal/personas/:id/actions  (idempotent, batch ≤500)
+POST /api/v1/internal/personas/:id/feedback (idempotent, batch ≤100)
+    │
+    ▼
+mana-auth writes rows + bumps personas.last_active_at
+```
+
+The outer tick `Promise.allSettled`s each persona, so one failure never
+kills the batch. Per-persona exceptions become `failed: [{persona,error}]`
+entries in the tick result and get logged. `tickInFlight` guards against
+overlap when Claude latency exceeds the interval.
+
+## What's NOT in M3.b (deferred)
+
+- Precise `tool_use_id` ↔ `tool_result` pairing. Today the last action
+  gets flipped to `error` when a `tool_result` carries `is_error: true`.
+  Good enough for the audit dashboard; exact attribution lands when the
+  dashboard needs it.
+- Retries/back-off on Claude 429/5xx. The SDK has some built-in; we do
+  no extra handling. A burst of 429s can fail a batch — next tick picks
+  them up anyway.
+- Prometheus counters. Health + log lines today, counters when the
+  dashboard lands in M6.
 
 ## Environment Variables
 
@@ -66,23 +119,42 @@ PERSONA_CONCURRENCY=2
 RUNNER_PAUSED=false
 ```
 
-## Local diag smoke
+## End-to-end smoke (M3 exit gate)
 
-Once mana-auth + a seeded persona exist:
+Proves: personas exist, runner picks them up, Claude drives tools via
+MCP, actions + ratings land in Postgres.
 
 ```bash
-# Start the stack
+# 1. Stack
 pnpm docker:up
-pnpm dev:auth                                    # mana-auth on 3001
-pnpm --filter @mana/mcp-service dev              # mana-mcp on 3069
-pnpm --filter @mana/persona-runner dev           # this service on 3070
+cd services/mana-auth && bun run db:push     # applies users.kind + auth.personas* tables
+pnpm dev:auth                                 # mana-auth on 3001
+pnpm dev:sync                                 # mana-sync on 3050
+pnpm --filter @mana/mcp-service dev           # mana-mcp on 3069
+pnpm --filter @mana/persona-runner dev        # this service on 3070
+    # (boots warning-only if MANA_SERVICE_KEY or ANTHROPIC_API_KEY missing)
 
-# From a second shell, once `pnpm seed:personas` has run:
+# 2. Seed the 10 catalog personas
+export MANA_ADMIN_JWT=…                       # admin-tier JWT
+export PERSONA_SEED_SECRET=…                  # any value; must match runner
+pnpm seed:personas
+
+# 3. Verify login works
 curl -s "localhost:3070/diag/login?email=persona.anna@mana.test" | jq
-# → { ok: true, email: "persona.anna@mana.test", userId: "…", spaceId: "…" }
+# → { ok: true, userId: "…", spaceId: "…" }
+
+# 4. Fire a tick manually (dev-only endpoint, avoids waiting the full interval)
+export MANA_SERVICE_KEY=…
+export ANTHROPIC_API_KEY=…
+curl -s -X POST localhost:3070/diag/tick | jq
+# → { ok: true, result: { due: 10, ranSuccessfully: N, failed: [], durationMs: … } }
+
+# 5. Inspect what landed
+psql -c "SELECT persona_id, tool_name, result FROM auth.persona_actions ORDER BY created_at DESC LIMIT 20;"
+psql -c "SELECT persona_id, module, rating, notes FROM auth.persona_feedback ORDER BY created_at DESC LIMIT 20;"
 ```
 
-A successful diag call proves: password derivation matches the seed script, mana-auth login works, the personal space auto-created at signup is discoverable.
+A green run through step 5 is the M3 exit criterion.
 
 ## Why a separate service (not part of mana-ai)
 
