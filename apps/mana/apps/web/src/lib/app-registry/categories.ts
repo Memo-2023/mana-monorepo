@@ -110,6 +110,7 @@ export const APP_CATEGORY_MAP: Record<string, AppCategory> = {
 	library: 'creative',
 	playground: 'creative',
 	quiz: 'creative',
+	wardrobe: 'creative',
 
 	// System — settings, admin, meta
 	settings: 'system',

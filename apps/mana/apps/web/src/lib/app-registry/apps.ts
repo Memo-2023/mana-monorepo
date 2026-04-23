@@ -78,6 +78,7 @@ import {
 	Flask,
 	Exam,
 	Globe,
+	CoatHanger,
 } from '@mana/shared-icons';
 
 // ── Apps with entity capabilities ───────────────────────────
@@ -1289,6 +1290,19 @@ registerApp({
 	icon: ChatCircleDots,
 	views: {
 		list: { load: () => import('$lib/modules/feedback/ListView.svelte') },
+	},
+});
+
+registerApp({
+	id: 'wardrobe',
+	name: 'Kleiderschrank',
+	color: '#e11d48',
+	icon: CoatHanger,
+	views: {
+		// Detail routes (/wardrobe/garment/[id], /wardrobe/outfit/[id],
+		// /wardrobe/compose/[[outfitId]]) live as SvelteKit routes; the
+		// workbench only needs the list view for the tab-switcher root.
+		list: { load: () => import('$lib/modules/wardrobe/ListView.svelte') },
 	},
 });
 
