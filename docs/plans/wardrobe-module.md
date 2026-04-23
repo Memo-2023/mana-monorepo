@@ -70,6 +70,29 @@ Wir bauen in diesem Modul keinen eigenen "Suggester" — das wäre ein redundant
 
 Für Kategorien `accessory`, `glasses`, `hat`, `jewelry` (Hals/Ohren) ist `primaryFullbody` nicht nötig — der Try-On läuft nur mit `primaryFace` + Garment-Photo. Das spart OpenAI-Credits und schärft die Ergebnisse (kein Ganzkörper-Rendering, das die Brille verkleinert). Die UI bietet für diese Kategorien einen "Brillen-Try-On"-Preset an (face-only prompt, 1024×1024 statt Portrait).
 
+### 6. Space-scoped Katalog, user-scoped Try-On-Subject
+
+Der Kleiderschrank selbst (`wardrobeGarments` + `wardrobeOutfits`) ist **space-scoped**: derselbe Mechanismus den tags/scenes/agents/missions/kontextDoc nach Phase 2c nutzen (`spaceId`, `authorId`, `visibility` per Hook gestempelt, Queries über `scopedForModule<>`). Das deckt sämtliche realen Use-Cases ab:
+
+- **personal**: der eigene Kleiderschrank
+- **brand**: Merchandise (T-Shirts, Caps, Zip-Hoodies) einer Marke — der Brand-Space ist gemeinsamer Pflegeort für alle Team-Mitglieder
+- **club**: Trikots, Vereinsbekleidung
+- **family**: Kinder-Kleiderschrank, gemeinsam von beiden Elternteilen gepflegt
+- **team**: Bühnenkostüme, Uniformen, Produktions-Wardrobe
+- **practice**: Praxis-Kittel, Dresscode-Items
+
+Alle sechs Space-Typen bekommen `wardrobe` in die Allowlist.
+
+**Aber**: Try-On-Referenzen (`meImages`) bleiben user-scoped — ein Mensch hat *eine* Identität, die er in jeden Space mitbringt. Konsequenz: wer in einem Brand-Space ein Merch-Hemd "anprobiert", sieht sich selbst im Hemd, nicht die Marke oder einen Avatar der Marke. Ein Vereins-Mitglied das in einem Club-Space auf "Trikot anprobieren" klickt, sieht sich selbst im Trikot — auch wenn der Katalog dem Verein gehört. Das deckt den intuitiven Fall ab ("wie sehe ich in dem Vereinstrikot aus") ohne dass wir ein zweites Subject-Konzept pro Space aufmachen.
+
+Der einzige nicht-offensichtliche Fall ist **family**: Eltern pflegen den Kleiderschrank des Kindes, aber `meImages` eines Kindes existiert nicht (das Kind hat keinen eigenen Account). Try-On würde das Elternteil ins Kinder-Shirt rendern — absurd und unbrauchbar. Für family-Wardrobe machen wir zwei Dinge:
+1. Der Katalog-Teil (Garments + Outfits ansehen, komponieren, neu-eintragen) funktioniert ohne Einschränkung — das ist der Hauptwert für Familien.
+2. Der Try-On-Button bekommt einen Hinweis "Try-On in Familien-Spaces ist auf deine eigenen Bilder angewiesen — ein Bild wie 'so sähe das an meinem Kind aus' gibt es hier nicht."
+
+Falls später konkreter Bedarf für "Try-On auf Familienmitglied" aufkommt, ist das ein separater Plan (neues Konzept `spaceMembers[].faceMediaId` oder ähnliches). Heute nicht spekulieren.
+
+**Membership-Gating**: fällt automatisch aus dem Space-Foundation-Stack — `scopedForModule<>` filtert bereits auf aktive Space-Membership, mana-sync RLS cross-checked auf PostgreSQL-Ebene. Kein extra Code in Wardrobe.
+
 ## Architektur-Überblick
 
 ```
@@ -253,11 +276,11 @@ Vier Tools, alle user-space. Pattern ist 1:1 an `me.ts` aus M5 angelehnt:
 ## Milestones
 
 - **M1 — Datenschicht & Backend-Cap** (~1–1.5 Tage)
-  - [ ] Dexie v39: `wardrobeGarments` + `wardrobeOutfits` mit Indices
-  - [ ] Types + Encryption-Registry + Collections + Queries
+  - [ ] Dexie v39: `wardrobeGarments` + `wardrobeOutfits` mit Indices (space-scoped, also Compound-Index auf `[spaceId+...]` für die hot path Queries)
+  - [ ] Types + Encryption-Registry + Collections + Queries (via `scopedForModule<>`, *nicht* in `USER_LEVEL_TABLES` — volle Space-Scope-Behandlung)
   - [ ] Stores (garments, outfits)
   - [ ] `module.config.ts` registriert `appId='wardrobe'`
-  - [ ] `wardrobe` in Space-Modul-Allowlist aufnehmen (personal space + welche anderen?)
+  - [ ] `wardrobe` in *alle* sechs Space-Typen der Allowlist (`personal`, `brand`, `club`, `family`, `team`, `practice`)
   - [ ] `MAX_REFERENCE_IMAGES` Cap auf 8 (`apps/api/src/modules/picture/routes.ts`) mit Comment + ClientCap im Generator
   - [ ] Neuer `POST /api/v1/wardrobe/garments/upload`-Endpoint + Route-Registrierung
   - [ ] `wardrobeOutfitId`-Feld auf `LocalImage` + `toImage`-Converter
@@ -278,11 +301,12 @@ Vier Tools, alle user-space. Pattern ist 1:1 an `me.ts` aus M5 angelehnt:
   - [ ] `OutfitsView` als zweiter Tab im Root
 
 - **M4 — Try-On-Integration** (~1 Tag)
-  - [ ] `runTryOn(outfit, prompt?)` in `api/try-on.ts` — composed die reference-Liste aus `useImageByPrimary('face-ref' | 'body-ref')` + garment-mediaIds, ruft `/generate-with-reference`
+  - [ ] `runTryOn(outfit, prompt?)` in `api/try-on.ts` — composed die reference-Liste aus *des Nutzers eigenen* `useImageByPrimary('face-ref' | 'body-ref')` + garment-mediaIds (auch in non-personal Spaces), ruft `/generate-with-reference`
   - [ ] `accessoryOnly`-Preset für `glasses`/`jewelry`/`hat` — nur face-ref, quadratisches Format
   - [ ] `TryOnButton.svelte` auf DetailOutfitView + auf DetailGarmentView (mit impliziten "Solo-Outfit")
   - [ ] Nach Erfolg: `picture.images.wardrobeOutfitId` setzen + `lastTryOn`-Snapshot aufs Outfit
   - [ ] Empty-State wenn `primaryFace` oder `primaryFullbody` fehlen → Link zu `/profile/me-images`
+  - [ ] In Non-Personal-Spaces (`brand`/`club`/`family`/`team`/`practice`): Hinweis "Du siehst dich selbst im Outfit — Try-On nutzt deine persönlichen Referenzbilder, nicht die des Spaces" (Subject ist user-global, siehe Entscheidung #6)
   - [ ] Try-On-History als horizontaler Strip in DetailOutfitView
 
 - **M5 — MCP-Tools** (~0.5 Tag)
@@ -317,7 +341,7 @@ Für Zero-Knowledge-Nutzer gilt dasselbe wie bei me-images: `ctx.getMasterKey()`
 | `me-images` | Nichts — Wardrobe konsumiert nur `useImageByPrimary`. |
 | `profile` | Nichts. |
 | `shared-branding` | Neuer App-Eintrag `wardrobe` (Icon, Farbe, Tier — vermutlich `beta`). |
-| `shared-types/spaces.ts` | `wardrobe` in die personal-space Allowlist (vermutlich auch `family` / `team` erlauben, aber nicht `club` / `practice`). |
+| `shared-types/spaces.ts` | `wardrobe` in *alle* sechs Space-Typen der Allowlist: `personal`, `brand`, `club`, `family`, `team`, `practice` (Entscheidung #6). |
 
 ## Offene Fragen (vor M1 klären)
 
@@ -325,7 +349,7 @@ Für Zero-Knowledge-Nutzer gilt dasselbe wie bei me-images: `ctx.getMasterKey()`
 2. **Outfit ohne Foto hochladen**: darf ein Nutzer ein Outfit komponieren, bei dem ein Garment-Bild fehlt? → Empfehlung: ja, aber Try-On ist deaktiviert, bis alle Garments mindestens ein Foto haben. UX-Hinweis im Composer.
 3. **Multi-Foto pro Garment**: sinnvoll (front / back / Detail), aber ein Primary-Foto reicht für Try-On. → `mediaIds: string[]` mit `mediaIds[0]` als Primary. UI macht das in M2 nicht sichtbar, kommt in M7 als Erweiterung.
 4. **Kategorie-Detection via AI beim Upload**: "wir laden dein Foto hoch und schlagen die Kategorie vor" — interessant, aber eine nicht-triviale extra Inferenz. → NICHT M1-Scope. Später als optional Enrichment-Step.
-5. **Space-Scope**: Wardrobe gehört klar in personal-space, aber gibt es Use-Cases für family-Space ("unser gemeinsamer Kinder-Kleiderschrank")? → offen. Default: nur `personal` + `family` in der Allowlist; `brand` / `club` nein.
+5. ~~**Space-Scope**~~ → *entschieden*: alle sechs Space-Typen (siehe Entscheidung #6). Brand hat Merch, Clubs haben Trikots, Families gemeinsame Kleiderschränke, Teams Kostüme, Practices Dresscode. Try-On-Subject bleibt user-global — das deckt auch non-personal-Spaces sauber ab, mit Ausnahme von family (Kinder-Shirts "auf Kind rendern" ist out-of-scope; Katalog-Pflege funktioniert trotzdem).
 6. **Accessoire-Try-On-Prompt-Template**: vorformatierter Prompt für Brillen ("Portrait frontal, freundliche Mimik, studio-Licht, ohne Hintergrundstörung, brillen-fokus") vs. freier Prompt? → Default mit Preset + der Nutzer kann überschreiben. Preset-Variante als MVP.
 
 ## Verweise
