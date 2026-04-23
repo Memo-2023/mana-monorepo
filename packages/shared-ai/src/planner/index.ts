@@ -10,6 +10,16 @@ export type { AiPlanInput, AiPlanOutput, AvailableTool, PlannedStep, ResolvedInp
 export { buildSystemPrompt } from './system-prompt';
 export type { SystemPromptInput, SystemPromptOutput } from './system-prompt';
 export { runPlannerLoop, LOOP_STATE_RECENT_CALLS_WINDOW, PARALLEL_TOOL_BATCH_SIZE } from './loop';
+export {
+	COMPACT_SYSTEM_PROMPT,
+	DEFAULT_COMPACT_KEEP_RECENT,
+	DEFAULT_COMPACT_THRESHOLD,
+	compactHistory,
+	parseCompactSummary,
+	renderCompactSummary,
+	shouldCompact,
+} from './compact';
+export type { CompactHistoryOptions, CompactHistoryResult, CompactSummary } from './compact';
 export { MockLlmClient } from './mock-llm';
 export type { MockLlmTurn } from './mock-llm';
 export type {

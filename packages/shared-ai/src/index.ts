@@ -85,10 +85,18 @@ export type {
 export {
 	buildPlannerPrompt,
 	buildSystemPrompt,
+	compactHistory,
+	COMPACT_SYSTEM_PROMPT,
+	DEFAULT_COMPACT_KEEP_RECENT,
+	DEFAULT_COMPACT_THRESHOLD,
 	MockLlmClient,
+	parseCompactSummary,
 	parsePlannerResponse,
+	renderCompactSummary,
 	runPlannerLoop,
+	shouldCompact,
 } from './planner';
+export type { CompactHistoryOptions, CompactHistoryResult, CompactSummary } from './planner';
 
 export {
 	AI_PROPOSABLE_TOOL_NAMES,
