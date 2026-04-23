@@ -571,7 +571,7 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository_owner }}/mana-auth
           tags: type=raw,value=latest
-      - uses: docker/build-push-action@v5
+      - uses: docker/build-push-action@v7
         with:
           context: .
           file: services/mana-auth/Dockerfile
@@ -600,7 +600,7 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository_owner }}/mana-search
           tags: type=raw,value=latest
-      - uses: docker/build-push-action@v5
+      - uses: docker/build-push-action@v7
         with:
           context: .
           file: services/mana-search/Dockerfile
@@ -630,7 +630,7 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository_owner }}/mana-sync
           tags: type=raw,value=latest
-      - uses: docker/build-push-action@v5
+      - uses: docker/build-push-action@v7
         with:
           context: .
           file: services/mana-sync/Dockerfile
@@ -659,7 +659,7 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository_owner }}/mana-notify
           tags: type=raw,value=latest
-      - uses: docker/build-push-action@v5
+      - uses: docker/build-push-action@v7
         with:
           context: .
           file: services/mana-notify/Dockerfile
@@ -688,7 +688,7 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository_owner }}/mana-api-gateway
           tags: type=raw,value=latest
-      - uses: docker/build-push-action@v5
+      - uses: docker/build-push-action@v7
         with:
           context: .
           file: services/mana-api-gateway/Dockerfile
@@ -717,7 +717,7 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository_owner }}/mana-crawler
           tags: type=raw,value=latest
-      - uses: docker/build-push-action@v5
+      - uses: docker/build-push-action@v7
         with:
           context: .
           file: services/mana-crawler/Dockerfile
@@ -747,7 +747,7 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository_owner }}/mana-media
           tags: type=raw,value=latest
-      - uses: docker/build-push-action@v5
+      - uses: docker/build-push-action@v7
         with:
           context: services/mana-media/apps/api
           file: services/mana-media/apps/api/Dockerfile
@@ -776,7 +776,7 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository_owner }}/mana-credits
           tags: type=raw,value=latest
-      - uses: docker/build-push-action@v5
+      - uses: docker/build-push-action@v7
         with:
           context: services/mana-credits
           file: services/mana-credits/Dockerfile
@@ -805,7 +805,7 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository_owner }}/mana-web
           tags: type=raw,value=latest
-      - uses: docker/build-push-action@v5
+      - uses: docker/build-push-action@v7
         with:
           context: .
           file: apps/mana/apps/web/Dockerfile
@@ -834,7 +834,7 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository_owner }}/chat-backend
           tags: type=raw,value=latest
-      - uses: docker/build-push-action@v5
+      - uses: docker/build-push-action@v7
         with:
           context: .
           file: apps/chat/apps/backend/Dockerfile
@@ -863,7 +863,7 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository_owner }}/chat-web
           tags: type=raw,value=latest
-      - uses: docker/build-push-action@v5
+      - uses: docker/build-push-action@v7
         with:
           context: .
           file: apps/chat/apps/web/Dockerfile
@@ -892,7 +892,7 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository_owner }}/todo-backend
           tags: type=raw,value=latest
-      - uses: docker/build-push-action@v5
+      - uses: docker/build-push-action@v7
         with:
           context: .
           file: apps/todo/apps/backend/Dockerfile
@@ -921,7 +921,7 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository_owner }}/todo-web
           tags: type=raw,value=latest
-      - uses: docker/build-push-action@v5
+      - uses: docker/build-push-action@v7
         with:
           context: .
           file: apps/todo/apps/web/Dockerfile
@@ -950,7 +950,7 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository_owner }}/calendar-backend
           tags: type=raw,value=latest
-      - uses: docker/build-push-action@v5
+      - uses: docker/build-push-action@v7
         with:
           context: .
           file: apps/calendar/apps/backend/Dockerfile
@@ -979,7 +979,7 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository_owner }}/calendar-web
           tags: type=raw,value=latest
-      - uses: docker/build-push-action@v5
+      - uses: docker/build-push-action@v7
         with:
           context: .
           file: apps/calendar/apps/web/Dockerfile
@@ -1010,7 +1010,7 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository_owner }}/clock-web
           tags: type=raw,value=latest
-      - uses: docker/build-push-action@v5
+      - uses: docker/build-push-action@v7
         with:
           context: .
           file: apps/clock/apps/web/Dockerfile
@@ -1039,7 +1039,7 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository_owner }}/contacts-backend
           tags: type=raw,value=latest
-      - uses: docker/build-push-action@v5
+      - uses: docker/build-push-action@v7
         with:
           context: .
           file: apps/contacts/apps/backend/Dockerfile
@@ -1068,7 +1068,7 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository_owner }}/contacts-web
           tags: type=raw,value=latest
-      - uses: docker/build-push-action@v5
+      - uses: docker/build-push-action@v7
         with:
           context: .
           file: apps/contacts/apps/web/Dockerfile
@@ -1099,7 +1099,7 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository_owner }}/presi-web
           tags: type=raw,value=latest
-      - uses: docker/build-push-action@v5
+      - uses: docker/build-push-action@v7
         with:
           context: .
           file: apps/presi/apps/web/Dockerfile
@@ -1128,7 +1128,7 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository_owner }}/storage-backend
           tags: type=raw,value=latest
-      - uses: docker/build-push-action@v5
+      - uses: docker/build-push-action@v7
         with:
           context: .
           file: apps/storage/apps/backend/Dockerfile
@@ -1158,7 +1158,7 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository_owner }}/storage-web
           tags: type=raw,value=latest
-      - uses: docker/build-push-action@v5
+      - uses: docker/build-push-action@v7
         with:
           context: .
           file: apps/storage/apps/web/Dockerfile
@@ -1187,7 +1187,7 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository_owner }}/telegram-stats-bot
           tags: type=raw,value=latest
-      - uses: docker/build-push-action@v5
+      - uses: docker/build-push-action@v7
         with:
           context: .
           file: services/telegram-stats-bot/Dockerfile
@@ -1216,7 +1216,7 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository_owner }}/food-backend
           tags: type=raw,value=latest
-      - uses: docker/build-push-action@v5
+      - uses: docker/build-push-action@v7
         with:
           context: .
           file: apps/food/apps/backend/Dockerfile
@@ -1245,7 +1245,7 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository_owner }}/food-web
           tags: type=raw,value=latest
-      - uses: docker/build-push-action@v5
+      - uses: docker/build-push-action@v7
         with:
           context: .
           file: apps/food/apps/web/Dockerfile
@@ -1276,7 +1276,7 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository_owner }}/skilltree-web
           tags: type=raw,value=latest
-      - uses: docker/build-push-action@v5
+      - uses: docker/build-push-action@v7
         with:
           context: .
           file: apps/skilltree/apps/web/Dockerfile
