@@ -64,7 +64,13 @@ push_schema() {
     elif [ $exit_code -eq 0 ]; then
         echo -e "  ${GREEN}✓ Schema pushed${NC}"
     else
-        echo -e "  ${RED}✗ Failed (may not have db:push script)${NC}"
+        # Real failure (push script exists but exit ≠ 0). Surface the last
+        # lines of drizzle-kit output so the root cause is visible without
+        # re-running by hand. Common cases: interactive rename prompt on
+        # stdin-less invocation, or pre-existing public-schema enums the
+        # service's schemaFilter hides.
+        echo -e "  ${RED}✗ Schema push failed (exit ${exit_code})${NC}"
+        echo "$output" | tail -5 | sed 's/^/    /'
     fi
 }
 
