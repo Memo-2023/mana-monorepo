@@ -55,6 +55,66 @@ Each entry carries:
   4. Expect a new tab that auto-saves the article; no extra "save to Leseliste" click required.
   5. Verify the saved article has readable body + title in `/articles`.
 
+### MCP gateway + Persona-runner — end-to-end live smoke
+
+- **Priority:** 🟠 important
+- **Shipped:** `16c881833` (M1+M1.5 MCP gateway), `493db0c3b` (M2.a-c persona schemas + seed), `f07eae3c0` (M3.b-d tick loop), `eb8fac23e` (tool_use_id pairing + audit), `5a5e24f58` (docker searxng fix). Plan at [`docs/plans/mana-mcp-and-personas.md`](../plans/mana-mcp-and-personas.md). Memory: [`project_mana_mcp_personas.md`](.claude/projects/-Users-till-Documents-Code-mana-monorepo/memory/project_mana_mcp_personas.md).
+- **Why it's here:** ~2600 lines of service code, 14 automated tests passed (type-check × 4, svelte-check, AES round-trip, HMAC 3-way parity, tool-registry integrity, seed dry-run, boot smokes × 2, Playwright config parse, drizzle SQL generate, vitest 21/21), but **none of it has run against a live Postgres + mana-auth + Anthropic**. Unit tests are blind to: real JWT issuance + SSO cookie flow, mana-sync wire-format mismatches, Dexie-table-name case drift, Better-Auth org-list response shape, Claude Agent SDK streaming edge-cases, encryption MK unwrap through the real vault endpoint, ZK-user rejection path.
+- **Steps:**
+  1. `pnpm dev:mana:all` — brings up Postgres + Redis + MinIO + searxng + all dev servers.
+  2. `cd services/mana-auth && bun run db:push` (or verify migrations 005 + 006 already applied).
+  3. `pnpm setup:dev-user` — creates `tills95@gmail.com` as founder. Log in via the web app, copy the JWT from DevTools → Application → Cookies → `better-auth.session_token` (or use the API):
+     ```bash
+     export MANA_ADMIN_JWT=$(curl -s -X POST localhost:3001/api/v1/auth/login \
+       -H 'content-type: application/json' \
+       -d '{"email":"tills95@gmail.com","password":"Aa-123456789"}' | jq -r .token)
+     ```
+  4. `export PERSONA_SEED_SECRET=$(openssl rand -hex 32)` — same value must stay in use for the runner + visual suite.
+  5. `pnpm seed:personas` — expect "✓ Done. 10 personas upserted." Confirm in Postgres:
+     ```
+     psql $DATABASE_URL -c "SELECT email, kind, access_tier FROM auth.users WHERE kind='persona'"
+     ```
+     Row count should be exactly 10, all founder/persona.
+  6. `pnpm --filter @mana/mcp-service dev` — tail the log for `[mana-mcp] listening on :3069`.
+  7. Quick Claude-Code MCP check (optional): drop `.mcp.json` with `{"mcpServers":{"mana":{"type":"http","url":"http://localhost:3069/mcp","headers":{"Authorization":"Bearer $YOUR_JWT","X-Mana-Space":"$YOUR_SPACE_ID"}}}}` and `/mcp list` in Claude Code — expect 13 tools.
+  8. Start the runner:
+     ```bash
+     export MANA_SERVICE_KEY=$(grep MANA_SERVICE_KEY .env.development | cut -d= -f2)
+     export ANTHROPIC_API_KEY=sk-ant-...           # your real key
+     pnpm --filter @mana/persona-runner dev
+     ```
+     Expect `[mana-persona-runner] listening on :3070` **without** any "MANA_SERVICE_KEY missing" or "ANTHROPIC_API_KEY missing" warning.
+  9. Fire one tick manually:
+     ```bash
+     curl -s -X POST localhost:3070/diag/tick | jq
+     ```
+     Expect `{ok: true, result: {due: 10, ranSuccessfully: N, failed: [...], durationMs: …}}`. Any `failed[]` entries with error messages are the actual bugs to chase.
+  10. Inspect what landed:
+      ```
+      psql $DATABASE_URL -c "SELECT persona_id, tool_name, result, latency_ms FROM auth.persona_actions ORDER BY created_at DESC LIMIT 30"
+      psql $DATABASE_URL -c "SELECT persona_id, module, rating, notes FROM auth.persona_feedback ORDER BY created_at DESC LIMIT 30"
+      ```
+      Rows should include calls to `habits.create`, `todo.create`, `notes.create`, `journal.add` etc., plus 1–5 ratings per module a persona used.
+  11. **Encryption check** — encrypted fields must be base64+`enc:1:` prefixed in the wire table but decrypt cleanly client-side:
+      ```
+      psql $MANA_SYNC_URL -c "SELECT data->'title' FROM sync_changes WHERE table_name='tasks' AND actor->>'kind'='persona' LIMIT 3"
+      ```
+      Expect strings beginning with `"enc:1:"`. Then log in as that persona in the web app — the tasks should show **plaintext** titles.
+
+### Persona visual regression — capture first baselines
+
+- **Priority:** 🟡 nice to have
+- **Shipped:** `79d112657` (M5.a scaffold). One flow (`home.spec.ts`), two viewports (desktop + Pixel 5). Extension pattern documented in [`tests/personas/README.md`](../../tests/personas/README.md).
+- **Why it's here:** Playwright config parses and lists tests, but no baseline screenshot has ever been captured. First capture must be a human eyeballing — otherwise the first CI run locks in whatever weird transient state happened at t=0 as "correct".
+- **Steps:**
+  1. Complete the MCP/persona-runner smoke above so each persona has real content (habits, tasks, journal entries). Without content, baselines are meaningless — every module is empty for everyone.
+  2. Keep the web app running (`pnpm mana:dev` at :5173).
+  3. `PERSONA_SEED_SECRET=<same as seed> pnpm test:personas:update` — writes PNGs under `tests/personas/__snapshots__/home.spec.ts/home-adhd-student-{desktop,mobile}.png`.
+  4. **Eyeball each generated PNG** before committing. Look for: persona's actual name in header, any unexpected "no data" empty states that mean step 1 content didn't land, layout breakage on mobile.
+  5. `git add tests/personas/__snapshots__/ && git commit -m "test(personas): baseline home-tour for Anna"` — now CI has a reference. Copy `home.spec.ts` to `todo.spec.ts` etc. to add more flows; repeat step 3–5 per flow.
+
+---
+
 ### Articles — PWA share-target
 
 - **Priority:** 🟡 nice to have
