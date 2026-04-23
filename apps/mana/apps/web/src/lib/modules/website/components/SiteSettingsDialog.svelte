@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { PRESET_LABELS, THEME_PRESETS, type ThemePreset } from '@mana/website-blocks/themes';
 	import { sitesStore } from '../stores/sites.svelte';
+	import DomainsSection from './DomainsSection.svelte';
 	import type { Website, ThemeConfig } from '../types';
 
 	interface Props {
@@ -165,6 +166,10 @@
 					placeholder="© 2026 — Meine Website"
 				/>
 			</label>
+		</section>
+
+		<section class="wb-section">
+			<DomainsSection siteId={site.id} />
 		</section>
 	</div>
 

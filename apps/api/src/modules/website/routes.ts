@@ -19,6 +19,7 @@ import { Hono } from 'hono';
 import type { AuthVariables } from '@mana/shared-hono';
 import { RESERVED_SLUGS, isValidSlug } from './reserved-slugs';
 import { websitePublishRoutes } from './publish';
+import { websiteDomainsRoutes } from './domains';
 
 const routes = new Hono<{ Variables: AuthVariables }>();
 
@@ -49,5 +50,8 @@ routes.get('/slugs/reserved', (c) => c.json({ reserved: RESERVED_SLUGS }));
 
 // ─── Publish + rollback (authenticated) ────────────────
 routes.route('/', websitePublishRoutes);
+
+// ─── Custom-domain CRUD (authenticated, founder-gated above) ──
+routes.route('/', websiteDomainsRoutes);
 
 export const websiteRoutes = routes;

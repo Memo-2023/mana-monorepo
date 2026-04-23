@@ -708,18 +708,31 @@ Jeder Milestone landet als klar erkennbares Commit-Set, ist standalone nützlich
 
 ### M6 — Subdomain-Publishing + Custom-Domain-Foundation
 
-- [ ] SvelteKit-Hook `hooks.server.ts`: Host-Header → rewrite `{slug}.mana.how` → `/s/{slug}/…`
-- [ ] Wildcard-DNS + TLS-Check im Staging
-- [ ] Custom-Domain-Schema: `website.custom_domains { site_id, hostname, status, tls_status, verified_at }`
-- [ ] DNS-Verify-Flow: CNAME-Record auf `custom.mana.how`, TXT-Record mit Challenge
-- [ ] Cloudflare-SaaS-Hostname-Integration (API-Call bei Verify-Success)
-- [ ] Tier-Gate: Custom-Domain nur für `founder`
-- [ ] `mana-landing-builder` Konsolidierungs-Entscheidung:
-  - [ ] Untersuchen: kann Org-Landing-Page als spezial `spaceKind='organization'`-Site im neuen System leben?
-  - [ ] Wenn ja: Org-Landing-Pages migrieren, `mana-landing-builder` → deprecation note, löschen nach Datenmigration
-  - [ ] Wenn nein: Gründe dokumentieren, beide Systeme parallel halten
+- [x] SvelteKit-Hook `hooks.server.ts`: Host-Header → rewrite `{slug}.mana.how` → `/s/{slug}/…`
+- [ ] Wildcard-DNS + TLS-Check im Staging — ops-Aufgabe (Cloudflare-Config, kein Code)
+- [x] Custom-Domain-Schema: `website.custom_domains { site_id, hostname, status, verification_token, verified_at }` — `tls_status` verzichten (kommt von Cloudflare-API in M6.x)
+- [x] DNS-Verify-Flow: CNAME-Record auf `custom.mana.how`, TXT-Record mit Challenge (node:dns/promises)
+- [ ] Cloudflare-SaaS-Hostname-Integration — API-Call ist **gestubbed**; produziert Log-Eintrag, kein realer Call. Siehe "Offene Enden unten".
+- [x] Tier-Gate: Custom-Domain nur für `founder` (via `requireTier('founder')` in domains.ts)
+- [x] `mana-landing-builder` Konsolidierungs-Entscheidung: **Parallel halten** (siehe unten)
 
-**Exit criteria:** `{slug}.mana.how` funktioniert. Founder-User kann eigene Domain verbinden.
+**`mana-landing-builder` — Entscheidung: parallel halten**
+
+Der Service bleibt vorerst nebenher. Gründe:
+
+1. **Ziel-Unterschied.** `mana-landing-builder` ist ein Admin-only Tool für Org-Landing-Pages mit Cloudflare-Pages-Deploys. Der website-Builder ist ein End-User-Tool mit SSR-Rendering. Zwei klar unterschiedliche Surfaces.
+2. **Rollen-Unterschied.** Org-Landings sind Admin-Branding. User-Sites sind private Portfolios, Events, Linktrees. Zwei unterschiedliche Daten-/Permission-Modelle.
+3. **Lifecycle.** Der Builder ist jung + iteriert schnell; Org-Pages ändern sich selten. Sie zu fusionieren würde beide ausbremsen.
+4. **Migration wäre teuer.** Org-Landings nutzen Astro-Sections mit Themes (`org-classic`, `org-warm`) die nicht 1:1 zu unseren Block-Typen passen. Migration = port jeder Section, migrate jede existierende Org.
+
+**Revisit-Kriterium:** Wenn wir (a) Org-Landings selbst mit Block-Editor-Features wollen (Multi-Page, Forms) ODER (b) die Feature-Überlappung groß genug ist, dass doppelte Pflege schmerzt. Frühestens nach 6 Monaten Live-Daten.
+
+**Exit criteria:** `{slug}.mana.how` funktioniert (serverseitiger Rewrite steht). Founder-User kann eigene Domain verbinden (Add + DNS-Check + Verify-Flow steht; TLS-Provisioning via CF SaaS ist die Ops-Lücke).
+
+**Offene Enden in M6 (post-first-pass):**
+- Live Cloudflare-SaaS-Hostname-API-Integration (`POST /zones/{zoneId}/custom_hostnames`) — bisher nur Log-Stub. Ops-Aufgabe + Code-Retrofit sobald `CF_API_TOKEN` + `CF_ZONE_ID` in prod-env liegen.
+- DNS-Verify-Poller (Background-Check, repariert `failed` → `verified` ohne User-Klick). Dependency auf ein Job-Queue-Primitive oder Cron, landet zusammen mit M7 Observability.
+- Apex-Domain-Handling: der Verify-Code akzeptiert A-Record-Fallback wenn CNAME-Lookup ENODATA liefert; bei komplexen Multi-IP-Setups kann das false-negative. Real life: für apex empfiehlt man ANAME/ALIAS, einige DNS-Provider unterstützen das nicht. Follow-up sobald der erste User daran hängt.
 
 ### M7 — Observability, GC, Analytics
 
@@ -769,8 +782,10 @@ Jeder Milestone landet als klar erkennbares Commit-Set, ist standalone nützlich
 
 ## Shipping Log
 
-(Leer — wird befüllt, während M1 → M7 gehen.)
-
 | Phase | Purpose | Commit |
 | --- | --- | --- |
-| — | — | — |
+| M1 + M2 | Foundation (editor, 3 blocks) + publish + public renderer | folded into user's `54a12ffd5` + `89258eb45` |
+| M3 | 5 more blocks, containers, upload, themes | `7a4f8894e` |
+| M4 | Forms + moduleEmbed | `57be0f61b` |
+| M5 | AI tools + starter templates | `13efae8cd` |
+| M6 | Subdomain + custom-domain + tier gate + DNS verify + hooks-rewrite | (pending commit at end of M6 session) |

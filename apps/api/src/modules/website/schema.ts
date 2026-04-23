@@ -92,11 +92,50 @@ export const submissions = websiteSchema.table(
 	(table) => [index('submissions_site_created_idx').on(table.siteId, table.createdAt)]
 );
 
+/**
+ * Custom-domain bindings for founder-tier sites. One row per
+ * (site, hostname). `status` walks the DNS-verify lifecycle:
+ *
+ *   pending   — user added the domain, no DNS check run yet
+ *   verifying — DNS check in flight or retrying
+ *   verified  — both the TXT challenge + CNAME resolve as expected
+ *   failed    — the last check failed; user needs to fix DNS
+ *
+ * The public resolver reads hostname → site_id for VERIFIED rows only
+ * so an unfinished verification can't serve someone else's site.
+ *
+ * See docs/plans/website-builder.md §M6.
+ */
+export const customDomains = websiteSchema.table(
+	'custom_domains',
+	{
+		id: uuid('id').defaultRandom().primaryKey(),
+		siteId: uuid('site_id').notNull(),
+		hostname: text('hostname').notNull().unique(),
+		status: text('status').notNull().default('pending'),
+		/** Expected TXT record contents — random token issued at create time. */
+		verificationToken: text('verification_token').notNull(),
+		/** Current CNAME target the user must point their hostname to. */
+		dnsTarget: text('dns_target').notNull().default('custom.mana.how'),
+		errorMessage: text('error_message'),
+		verifiedAt: timestamp('verified_at', { withTimezone: true }),
+		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+		updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+		createdBy: uuid('created_by').notNull(),
+	},
+	(table) => [index('custom_domains_site_idx').on(table.siteId, table.status)]
+	// A partial unique index on (hostname) WHERE status='verified' lives
+	// in the SQL migration — drizzle-orm's `.where(sql...)` is awkward
+	// for partial-index predicates and this index is rarely regenerated.
+);
+
 export const db = drizzle(getConnection(), {
-	schema: { publishedSnapshots, submissions },
+	schema: { publishedSnapshots, submissions, customDomains },
 });
 
 export type PublishedSnapshotRow = typeof publishedSnapshots.$inferSelect;
 export type NewPublishedSnapshot = typeof publishedSnapshots.$inferInsert;
 export type SubmissionRow = typeof submissions.$inferSelect;
 export type NewSubmission = typeof submissions.$inferInsert;
+export type CustomDomainRow = typeof customDomains.$inferSelect;
+export type NewCustomDomain = typeof customDomains.$inferInsert;

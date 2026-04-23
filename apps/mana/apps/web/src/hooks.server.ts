@@ -56,6 +56,86 @@ const PUBLIC_MANA_RESEARCH_URL_CLIENT =
 // the MANA_AI_PUBLIC/PRIVATE_KEY_PEM pair is provisioned on both services.
 const PUBLIC_AI_MISSION_GRANTS = process.env.PUBLIC_AI_MISSION_GRANTS === 'true' ? 'true' : 'false';
 
+// Hostnames that should NEVER be treated as website-builder subdomains.
+// Covers the root + common marketing/app/auth surfaces.
+const RESERVED_WEBSITE_SUBDOMAINS = new Set([
+	'www',
+	'api',
+	'app',
+	'auth',
+	'admin',
+	'custom', // CNAME target for custom-domain bindings
+	's', // reserved to match the /s/ public-renderer prefix
+]);
+
+// In-memory cache for custom-domain resolutions. Short TTL keeps
+// mana-api query load low without leaving stale bindings around.
+// Replaces with Redis/edge KV in M7.
+const CUSTOM_HOST_CACHE_MS = 60_000;
+const customHostCache = new Map<string, { slug: string | null; expires: number }>();
+
+async function resolveCustomHost(host: string): Promise<string | null> {
+	const cached = customHostCache.get(host);
+	if (cached && cached.expires > Date.now()) return cached.slug;
+
+	const apiBase = process.env.PUBLIC_MANA_API_URL ?? 'http://localhost:3060';
+	try {
+		const res = await fetch(
+			`${apiBase}/api/v1/website/public/resolve-host?host=${encodeURIComponent(host)}`
+		);
+		if (res.status === 404) {
+			customHostCache.set(host, { slug: null, expires: Date.now() + CUSTOM_HOST_CACHE_MS });
+			return null;
+		}
+		if (!res.ok) return null;
+		const body = (await res.json()) as { slug?: string };
+		const slug = typeof body.slug === 'string' ? body.slug : null;
+		customHostCache.set(host, { slug, expires: Date.now() + CUSTOM_HOST_CACHE_MS });
+		return slug;
+	} catch {
+		return null;
+	}
+}
+
+/**
+ * Returns the site slug this request should be rewritten to, or null
+ * if no rewrite applies. Host without port — the handler strips the
+ * port before calling.
+ */
+async function resolveWebsiteRewrite(rawHost: string, subdomain: string): Promise<string | null> {
+	// Strip the port if present (dev: `localhost:5173`).
+	const host = rawHost.toLowerCase().split(':')[0] ?? '';
+	if (!host) return null;
+
+	// Case a — {slug}.mana.how subdomains.
+	if (host.endsWith('.mana.how')) {
+		const sub = subdomain.toLowerCase();
+		// Guard: reserved + existing app subdomains win over website.
+		if (APP_SUBDOMAINS.has(sub)) return null;
+		if (RESERVED_WEBSITE_SUBDOMAINS.has(sub)) return null;
+		// Only single-label subdomains match (no `foo.bar.mana.how`).
+		// The label count on `foo.mana.how` is 3 (foo + mana + how).
+		if (host.split('.').length !== 3) return null;
+		return sub;
+	}
+
+	// Case b — custom hostnames.
+	//
+	// Skip localhost / private addresses in dev so the editor and
+	// public-renderer routes on the same localhost instance don't try
+	// to resolve themselves as custom domains.
+	if (
+		host === 'localhost' ||
+		host.startsWith('127.') ||
+		host === 'mana.how' ||
+		host.endsWith('.local')
+	) {
+		return null;
+	}
+
+	return await resolveCustomHost(host);
+}
+
 // Map of app subdomains to internal paths
 const APP_SUBDOMAINS = new Set([
 	'todo',
@@ -121,6 +201,25 @@ export const handle: Handle = async ({ event, resolve }) => {
 			status: 302,
 			headers: { Location: `/${subdomain}` },
 		});
+	}
+
+	// Website-builder routing (docs/plans/website-builder.md §M6).
+	//
+	// Two cases:
+	//   a) `{siteSlug}.mana.how/path` — subdomain publish. No DB lookup
+	//      required; the slug is the first label.
+	//   b) `custom-host.com/path` — custom-domain publish. Asks mana-api
+	//      for the bound site slug (with a 60s in-memory cache).
+	//
+	// Both paths rewrite `event.url.pathname` to `/s/{slug}{path}` so
+	// SvelteKit serves the existing public renderer. The URL in the
+	// browser stays on the custom host — this is a server-side rewrite,
+	// not a redirect.
+	const websiteRewrite = await resolveWebsiteRewrite(host, subdomain);
+	if (websiteRewrite) {
+		const current = event.url.pathname;
+		const rewritten = `/s/${websiteRewrite}${current === '/' ? '' : current}`;
+		event.url.pathname = rewritten;
 	}
 
 	const response = await resolve(event, {
