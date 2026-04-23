@@ -130,9 +130,16 @@ export function garmentPrimaryMediaId(garment: Pick<Garment, 'mediaIds'>): strin
  * lives in `picture.images` filtered by `wardrobeOutfitId === outfit.id`
  * — this pointer exists so the outfit detail view can render the latest
  * preview without re-querying.
+ *
+ * `imageUrl` is cached here (mana-media URL from the picture.images row)
+ * so OutfitCard's thumbnail renders without a second Dexie round-trip.
+ * The source of truth remains picture.images; if the user deletes that
+ * row the pointer goes stale but the card just falls back to the
+ * garment-collage render — no error.
  */
 export interface OutfitTryOn {
-	imageId: string; // points at picture.images.id
+	imageId: string; // picture.images.id (UUID)
+	imageUrl: string; // mana-media URL, cached for cheap card rendering
 	createdAt: string; // ISO
 	prompt: string;
 	model: string;
