@@ -49,6 +49,7 @@ async function callGenerateWithReference(opts: {
 	if (!res.ok) {
 		const body = (await res.json().catch(() => ({}))) as {
 			error?: string;
+			detail?: string;
 			required?: number;
 			missing?: string[];
 		};
@@ -60,7 +61,12 @@ async function callGenerateWithReference(opts: {
 				'Ein oder mehrere Referenzbilder sind im Server-Ownership-Check durchgefallen — vermutlich sind Face/Body noch nicht in diesem Space hochgeladen.'
 			);
 		}
-		throw new Error(body.error ?? `Try-On fehlgeschlagen (${res.status})`);
+		// Surface the server's `detail` so the user sees *why* it failed
+		// (OpenAI policy rejection, media-download timeout, etc.) instead
+		// of a generic "Try-On fehlgeschlagen". Server always includes
+		// detail on 502 branches — see routes.ts generate-with-reference.
+		const label = body.error ?? `Try-On fehlgeschlagen (${res.status})`;
+		throw new Error(body.detail ? `${label}: ${body.detail}` : label);
 	}
 
 	const data = (await res.json()) as {

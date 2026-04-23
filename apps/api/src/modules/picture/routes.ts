@@ -309,7 +309,12 @@ routes.post('/generate-with-reference', async (c) => {
 		if (e.status === 404) {
 			return c.json({ error: 'Reference media not found', missing: e.missing }, 404);
 		}
-		return c.json({ error: 'Ownership check failed' }, 502);
+		console.error('[picture/generate-with-reference] ownership check failed', {
+			userId,
+			refIds,
+			error: e.message,
+		});
+		return c.json({ error: 'Ownership check failed', detail: e.message }, 502);
 	}
 
 	// Fetch reference buffers in parallel. The mana-media /file route is
@@ -325,8 +330,13 @@ routes.post('/generate-with-reference', async (c) => {
 				filename: `ref-${i}.${ext === 'jpeg' ? 'jpg' : ext}`,
 			};
 		});
-	} catch (_err) {
-		return c.json({ error: 'Failed to fetch reference media' }, 502);
+	} catch (err) {
+		const message = err instanceof Error ? err.message : String(err);
+		console.error('[picture/generate-with-reference] failed to fetch reference media', {
+			refIds,
+			error: message,
+		});
+		return c.json({ error: 'Failed to fetch reference media', detail: message }, 502);
 	}
 
 	// Multipart POST to OpenAI. FormData auto-sets Content-Type with a
@@ -337,9 +347,14 @@ routes.post('/generate-with-reference', async (c) => {
 	formData.append('size', size);
 	formData.append('quality', quality);
 	formData.append('n', String(effectiveBatch));
-	// gpt-image-* accepts a repeated `image` field for multi-reference.
+	// gpt-image-* requires the array-syntax `image[]` for multi-reference
+	// calls — a repeated plain `image` field triggers OpenAI's
+	// `duplicate_parameter` error even though the old DALL·E edits
+	// endpoint tolerated it. Keep `image[]` for the single-ref case too:
+	// OpenAI accepts the array form with any cardinality ≥ 1, so there's
+	// no need to branch here.
 	for (const ref of referenceBlobs) {
-		formData.append('image', ref.blob, ref.filename);
+		formData.append('image[]', ref.blob, ref.filename);
 	}
 
 	let generatedBuffers: ArrayBuffer[];
@@ -351,6 +366,16 @@ routes.post('/generate-with-reference', async (c) => {
 		});
 		if (!res.ok) {
 			const detail = await res.text().catch(() => '');
+			console.error('[picture/generate-with-reference] OpenAI returned non-ok', {
+				status: res.status,
+				statusText: res.statusText,
+				body: detail.slice(0, 1000),
+				refCount: referenceBlobs.length,
+				prompt: prompt.slice(0, 120),
+				model: openaiModel,
+				size,
+				quality,
+			});
 			return c.json({ error: 'OpenAI image edit failed', detail: detail.slice(0, 500) }, 502);
 		}
 		const data = (await res.json()) as { data?: Array<{ b64_json?: string }> };
@@ -360,8 +385,10 @@ routes.post('/generate-with-reference', async (c) => {
 			const bin = Buffer.from(b64, 'base64');
 			return bin.buffer.slice(bin.byteOffset, bin.byteOffset + bin.byteLength) as ArrayBuffer;
 		});
-	} catch (_err) {
-		return c.json({ error: 'OpenAI image edit failed' }, 502);
+	} catch (err) {
+		const message = err instanceof Error ? err.message : String(err);
+		console.error('[picture/generate-with-reference] OpenAI fetch threw', { error: message });
+		return c.json({ error: 'OpenAI image edit failed', detail: message }, 502);
 	}
 
 	// Success path: consume credits, then upload the new images.
