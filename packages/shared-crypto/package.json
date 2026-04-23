@@ -1,0 +1,20 @@
+{
+	"name": "@mana/shared-crypto",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"sideEffects": false,
+	"description": "Runtime-agnostic AES-GCM-256 primitives used by the web app, mana-mcp tool handlers, and any future agent-side consumer. Uses Web Crypto API only — works in Bun, Node 20+, and all modern browsers.",
+	"main": "./src/index.ts",
+	"types": "./src/index.ts",
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"scripts": {
+		"type-check": "tsc --noEmit",
+		"lint": "eslint ."
+	},
+	"devDependencies": {
+		"typescript": "^5.9.3"
+	}
+}
