@@ -144,6 +144,10 @@ ingress:
     service: http://localhost:3002
   - hostname: subscriptions.mana.how
     service: http://localhost:3063
+  - hostname: events.mana.how
+    service: http://localhost:3065
+  - hostname: research.mana.how
+    service: http://localhost:3068
 
   # ============================================
   # Standalone web apps (separate containers)
