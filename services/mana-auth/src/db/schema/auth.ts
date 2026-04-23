@@ -5,19 +5,20 @@ import {
 	timestamp,
 	boolean,
 	jsonb,
-	pgEnum,
 	index,
 	integer,
 } from 'drizzle-orm/pg-core';
 
 export const authSchema = pgSchema('auth');
 
-// Enum for user roles
-export const userRoleEnum = pgEnum('user_role', ['user', 'admin', 'service']);
+// Enums live inside the auth schema so drizzle-kit push with
+// `schemaFilter: ['auth']` can introspect them. Defining via pgEnum()
+// would put them in public and cause spurious CREATE TYPE attempts on
+// every push (the filter hides them, drizzle thinks they're missing).
+export const userRoleEnum = authSchema.enum('user_role', ['user', 'admin', 'service']);
 
-// Enum for access tiers (controls which apps a user can access)
 // Hierarchy: founder > alpha > beta > public > guest
-export const accessTierEnum = pgEnum('access_tier', [
+export const accessTierEnum = authSchema.enum('access_tier', [
 	'guest',
 	'public',
 	'beta',
@@ -25,14 +26,13 @@ export const accessTierEnum = pgEnum('access_tier', [
 	'founder',
 ]);
 
-// Enum for user kind. `human` is the default for everyone real. `persona`
-// is for the auto-test users driven by the persona-runner — they go through
-// the same auth/register/JWT pipeline as humans (no bypass), but admin UIs
-// and product analytics filter them out by default. `system` is reserved
-// for service principals (e.g. mana-ai's planner identity).
-//
+// `human` is the default for everyone real. `persona` is for the auto-test
+// users driven by the persona-runner — they go through the same
+// auth/register/JWT pipeline as humans (no bypass), but admin UIs and
+// product analytics filter them out by default. `system` is reserved for
+// service principals (e.g. mana-ai's planner identity).
 // See docs/plans/mana-mcp-and-personas.md (M2 — Persona-Primitives).
-export const userKindEnum = pgEnum('user_kind', ['human', 'persona', 'system']);
+export const userKindEnum = authSchema.enum('user_kind', ['human', 'persona', 'system']);
 
 // Users table (Better Auth schema)
 export const users = authSchema.table('users', {
