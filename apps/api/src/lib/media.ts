@@ -58,25 +58,33 @@ export async function getMediaBuffer(
 }
 
 /**
- * Verify that every id in `mediaIds` is owned by `userId` under the given
- * `app` scope. Throws { status: 404 } when one or more ids are not in the
- * user's reference set — the caller turns that into an HTTP response.
+ * Verify that every id in `mediaIds` is owned by `userId` under one of
+ * the given app scopes. Throws `{ status: 404, missing }` when any id
+ * doesn't land in the owned set — the caller turns that into an HTTP
+ * response.
  *
- * One `list()` round-trip is all we need: the response is the full set of
- * the user's uploads under that app tag, so set-membership check is O(N)
- * in memory. The `limit: 500` cap is the sanity fence — a single user with
- * more than 500 reference images under one app is already far beyond the
- * product's intended shape; we'd catch that as a design regression long
- * before it breaks this check.
+ * Accepts a single app string or an array. The Wardrobe try-on flow
+ * (plan docs/plans/wardrobe-module.md M4) passes `['me', 'wardrobe']`
+ * in one call — face-ref and body-ref live under `me`, garments live
+ * under `wardrobe`, both legitimate inputs for the same `/v1/images/
+ * edits` POST.
+ *
+ * One `list()` round-trip per app. For N apps this is N calls, each
+ * capped at 500 rows — far beyond the product's intended per-app shape
+ * but the cap is the sanity fence.
  */
 export async function verifyMediaOwnership(
 	userId: string,
 	mediaIds: readonly string[],
-	app: string
+	apps: string | readonly string[]
 ): Promise<void> {
 	if (mediaIds.length === 0) return;
-	const owned = await getMediaClient().list({ userId, app, limit: 500 });
-	const ownedSet = new Set(owned.map((m) => m.id));
+	const appList = typeof apps === 'string' ? [apps] : apps;
+	const ownedSet = new Set<string>();
+	for (const app of appList) {
+		const list = await getMediaClient().list({ userId, app, limit: 500 });
+		for (const m of list) ownedSet.add(m.id);
+	}
 	const missing = mediaIds.filter((id) => !ownedSet.has(id));
 	if (missing.length > 0) {
 		const err = new Error(`Reference media not owned: ${missing.join(', ')}`) as Error & {

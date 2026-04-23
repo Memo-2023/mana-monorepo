@@ -12,11 +12,12 @@
 -->
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { ArrowLeft, Archive, Heart, PencilSimple, Sparkle, Trash } from '@mana/shared-icons';
+	import { ArrowLeft, Archive, Heart, PencilSimple, Trash } from '@mana/shared-icons';
 	import { useAllGarments, useOutfit, useOutfitTryOns } from '../queries';
 	import { wardrobeOutfitsStore } from '../stores/outfits.svelte';
 	import { garmentPhotoUrl } from '../api/media-url';
 	import { CATEGORY_LABELS_SINGULAR, OCCASION_LABELS, SEASON_LABELS } from '../constants';
+	import TryOnButton from '../components/TryOnButton.svelte';
 	import type { Garment } from '../types';
 
 	interface Props {
@@ -126,16 +127,8 @@
 					{/if}
 				</div>
 
-				<!-- Try-On action (M4 stub) -->
-				<button
-					type="button"
-					disabled
-					title="Try-On kommt in M4 — bis dahin ist das hier noch stumm."
-					class="flex w-full items-center justify-center gap-2 rounded-md bg-primary/50 px-4 py-2.5 text-sm font-medium text-primary-foreground opacity-60"
-				>
-					<Sparkle size={16} weight="fill" />
-					Anprobieren (kommt bald)
-				</button>
+				<!-- Try-On action (M4) -->
+				<TryOnButton {outfit} garments={resolvedGarments} />
 
 				{#if tryOns.length > 0}
 					<div>

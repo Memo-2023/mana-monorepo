@@ -297,12 +297,13 @@ routes.post('/generate-with-reference', async (c) => {
 	}
 
 	// Ownership check before we spend credits or burn OpenAI quota.
-	// meImages are tagged `app='me'` at upload time by the profile
-	// module; a mediaId that isn't in the caller's set is either stale
-	// or malicious, treat both as 404.
+	// References span two upload tags: `me` for face/body portraits
+	// (profile module) and `wardrobe` for garment photos (wardrobe
+	// module, M4 try-on flow). Anything outside those two apps is
+	// treated as not-owned regardless of mana-media's own view.
 	try {
 		const { verifyMediaOwnership } = await import('../../lib/media');
-		await verifyMediaOwnership(userId, refIds, 'me');
+		await verifyMediaOwnership(userId, refIds, ['me', 'wardrobe']);
 	} catch (err) {
 		const e = err as Error & { status?: number; missing?: string[] };
 		if (e.status === 404) {
