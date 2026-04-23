@@ -82,6 +82,7 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import { isNavCollapsed as collapsedStore } from '$lib/stores/navigation';
+	import { onboardingStatus } from '$lib/stores/onboarding-status.svelte';
 	import { getPillAppItems } from '@mana/shared-branding';
 	import { STORAGE_KEYS } from '$lib/config/storage-keys';
 	import { SearchRegistry } from '$lib/search/registry';
@@ -108,6 +109,14 @@
 		if (ric) ric(cb, { timeout });
 		else setTimeout(cb, 0);
 	}
+
+	// ── Onboarding mode ─────────────────────────────────────
+	// When the user is on any /onboarding/* route the main chrome
+	// (PillNav, wallpaper, bottom-stack) is hidden so the three
+	// onboarding screens get the full viewport. The route guard
+	// below also reads this flag to avoid redirecting a user who
+	// is already inside the flow.
+	let isOnboarding = $derived($page.url.pathname.startsWith('/onboarding'));
 
 	// ── App switcher ────────────────────────────────────────
 	// Prefer the active Space's tier for gating — falls back to the user
@@ -311,15 +320,25 @@
 	// apps now — no standalone routes. The user-menu dropdown links via
 	// `spiralHref` / `creditsHref` / `profileHref` etc., all pointing to
 	// `/?app=<id>` deep-links.
+	let isOnWorkbench = $derived($page.url.pathname === '/');
 	let baseNavItems = $derived<PillNavItem[]>([
-		{
-			href: '/',
-			label: 'Workbench-Tabs',
-			icon: 'tabs',
-			iconOnly: true,
-			onClick: handleBottomBarToggle,
-			active: isBottomBarVisible,
-		},
+		isOnWorkbench
+			? {
+					href: '/',
+					label: 'Workbench-Tabs',
+					icon: 'tabs',
+					iconOnly: true,
+					onClick: handleBottomBarToggle,
+					active: isBottomBarVisible,
+				}
+			: {
+					href: '/',
+					label: 'Home',
+					icon: 'home',
+					iconOnly: true,
+					onClick: () => goto('/'),
+					active: false,
+				},
 		{
 			href: '/',
 			label: 'Suche',
@@ -626,6 +645,22 @@
 			// value (0 on a fresh tab) until a sync actually runs.
 			refreshPendingCount();
 
+			// Onboarding guard: brand-new users land on `/` after signup
+			// but have `onboardingCompletedAt === null`. Redirect them
+			// into the 3-screen flow. Fired non-blocking because the
+			// earlier Phase A already initialized the data layer, so
+			// leaving sync running in parallel during onboarding is
+			// harmless (and useful — templates/+page.svelte writes a
+			// scene at the end). Self-skips when already inside the
+			// flow so the screens don't bounce each other.
+			if (!isOnboarding) {
+				void onboardingStatus.load().then(() => {
+					if (onboardingStatus.needsOnboarding) {
+						goto('/onboarding/name', { replaceState: true });
+					}
+				});
+			}
+
 			// Phase B-idle: settings + return-visit telemetry. Non-gating.
 			idle(async () => {
 				trackReturnVisit();
@@ -769,270 +804,278 @@
 	appName="Mana"
 	locale={($locale || 'de') === 'de' ? 'de' : 'en'}
 >
-	<div class="min-h-screen" class:bg-background={!wallpaperStore.hasWallpaper}>
-		<WallpaperLayer config={wallpaperStore.effective} />
+	{#if isOnboarding}
+		<!-- Onboarding mode: clean slate — the onboarding shell layout
+			 renders a full-viewport container with its own progress dots
+			 and skip-all. Keep AuthGate wrapping so the screens still
+			 enforce the authenticated-user requirement. -->
+		{@render children()}
+	{:else}
+		<div class="min-h-screen" class:bg-background={!wallpaperStore.hasWallpaper}>
+			<WallpaperLayer config={wallpaperStore.effective} />
 
-		<!-- Bottom Stack: all fixed-bottom elements in one flex container.
+			<!-- Bottom Stack: all fixed-bottom elements in one flex container.
 			 Hidden entirely when fullscreen mode is active (press "f"). -->
-		{#if !isFullscreen}
-			<div class="bottom-stack" style:--bottom-chrome-height="{bottomChromeHeight}px">
-				<!-- Page-injected bottom bar (e.g. workbench scene+app tabs).
+			{#if !isFullscreen}
+				<div class="bottom-stack" style:--bottom-chrome-height="{bottomChromeHeight}px">
+					<!-- Page-injected bottom bar (e.g. workbench scene+app tabs).
 				 Gated by isBottomBarVisible so the "workbench tabs" pill can
 				 toggle it without unmounting the owning page. -->
-				{#if isBottomBarVisible && bottomBarStore.component}
-					{@const BarComponent = bottomBarStore.component}
-					<BarComponent {...bottomBarStore.props} />
-				{/if}
+					{#if isBottomBarVisible && bottomBarStore.component}
+						{@const BarComponent = bottomBarStore.component}
+						<BarComponent {...bottomBarStore.props} />
+					{/if}
 
-				<!-- One-time encryption intro — sits at the top of the stack so
+					<!-- One-time encryption intro — sits at the top of the stack so
 				 it can't be obscured by the QuickInputBar / TagStrip / PillNav.
 				 Self-gates on isVaultUnlocked() so guests never see it.
 				 Lazy-loaded after idle (see $effects above). -->
-				{#if EncryptionIntroBannerC}
-					{@const EncryptionIntroBanner = EncryptionIntroBannerC}
-					<div class="bottom-stack-notification">
-						<EncryptionIntroBanner />
-					</div>
-				{/if}
+					{#if EncryptionIntroBannerC}
+						{@const EncryptionIntroBanner = EncryptionIntroBannerC}
+						<div class="bottom-stack-notification">
+							<EncryptionIntroBanner />
+						</div>
+					{/if}
 
-				<!-- Sync pause banner — shown when sync was paused due to insufficient credits -->
-				{#if syncBilling.paused}
-					<div class="bottom-stack-notification">
-						<div
-							class="flex items-center justify-between gap-3 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:bg-amber-900/20 dark:text-amber-200"
-						>
-							<span>Cloud Sync pausiert — Credits reichen nicht aus.</span>
-							<div class="flex gap-2">
-								<a
-									href="/?app=credits&tab=packages"
-									class="font-medium underline hover:no-underline"
-								>
-									Credits aufladen
-								</a>
-								<a
-									href="/?app=settings#cloud-sync"
-									class="font-medium underline hover:no-underline"
-								>
-									Sync-Einstellungen
-								</a>
+					<!-- Sync pause banner — shown when sync was paused due to insufficient credits -->
+					{#if syncBilling.paused}
+						<div class="bottom-stack-notification">
+							<div
+								class="flex items-center justify-between gap-3 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:bg-amber-900/20 dark:text-amber-200"
+							>
+								<span>Cloud Sync pausiert — Credits reichen nicht aus.</span>
+								<div class="flex gap-2">
+									<a
+										href="/?app=credits&tab=packages"
+										class="font-medium underline hover:no-underline"
+									>
+										Credits aufladen
+									</a>
+									<a
+										href="/?app=settings#cloud-sync"
+										class="font-medium underline hover:no-underline"
+									>
+										Sync-Einstellungen
+									</a>
+								</div>
 							</div>
 						</div>
-					</div>
-				{/if}
+					{/if}
 
-				<!-- Guest notifications — combines the time-based nudge from
+					<!-- Guest notifications — combines the time-based nudge from
 				 createGuestMode (one-shot after N minutes) with the
 				 event-driven prompts pushed by guestPrompt.requireAccount
 				 (e.g. server feature called while signed out, 401 from
 				 the auth-aware fetch). Both flow into the same bar so
 				 the user only ever sees one stripe instead of stacking. -->
-				{#if (guestMode && guestMode.notifications.length > 0) || guestPrompt.notifications.length > 0}
-					<div class="bottom-stack-notification">
-						<NotificationBar
-							notifications={[...(guestMode?.notifications ?? []), ...guestPrompt.notifications]}
-						/>
-					</div>
-				{/if}
+					{#if (guestMode && guestMode.notifications.length > 0) || guestPrompt.notifications.length > 0}
+						<div class="bottom-stack-notification">
+							<NotificationBar
+								notifications={[...(guestMode?.notifications ?? []), ...guestPrompt.notifications]}
+							/>
+						</div>
+					{/if}
 
-				<!-- Session expiry warning (auth only). Self-gates on the
+					<!-- Session expiry warning (auth only). Self-gates on the
 				 secondsLeft countdown and only renders inside the stack
 				 when actually warning, so the wrapper is no-op otherwise.
 				 Lazy-loaded after idle. -->
-				{#if authStore.isAuthenticated && SessionWarningC}
-					{@const SessionWarning = SessionWarningC}
-					<div class="bottom-stack-notification">
-						<SessionWarning />
-					</div>
-				{/if}
+					{#if authStore.isAuthenticated && SessionWarningC}
+						{@const SessionWarning = SessionWarningC}
+						<div class="bottom-stack-notification">
+							<SessionWarning />
+						</div>
+					{/if}
 
-				<!-- Cross-module automation suggestions. Lives in the (app)
+					<!-- Cross-module automation suggestions. Lives in the (app)
 				 stack because automationsStore is an (app)-only module
 				 and the toast doesn't make sense on auth/landing pages
 				 anyway. Self-gates on visible state. Lazy-loaded after idle. -->
-				{#if SuggestionToastC}
-					{@const SuggestionToast = SuggestionToastC}
-					<div class="bottom-stack-notification">
-						<SuggestionToast />
-					</div>
-				{/if}
+					{#if SuggestionToastC}
+						{@const SuggestionToast = SuggestionToastC}
+						<div class="bottom-stack-notification">
+							<SuggestionToast />
+						</div>
+					{/if}
 
-				<!-- Companion Brain pulse nudges — water reminders, streak
+					<!-- Companion Brain pulse nudges — water reminders, streak
 				 warnings, morning summary etc. Self-gates on active nudges.
 				 Lazy-loaded after idle. -->
-				{#if NudgeToastC}
-					{@const NudgeToast = NudgeToastC}
-					<div class="bottom-stack-notification">
-						<NudgeToast />
-					</div>
-				{/if}
+					{#if NudgeToastC}
+						{@const NudgeToast = NudgeToastC}
+						<div class="bottom-stack-notification">
+							<NudgeToast />
+						</div>
+					{/if}
 
-				<!-- QuickInputBar with inline nav toggle — gated by the "search" pill -->
-				{#if isQuickInputVisible}
-					<QuickInputBar
-						onSearch={inputBarAdapter.onSearch}
-						onSelect={inputBarAdapter.onSelect}
-						onParseCreate={inputBarAdapter.onParseCreate}
-						onCreate={inputBarAdapter.onCreate}
-						onSearchChange={inputBarAdapter.onSearchChange}
-						placeholder={inputBarAdapter.placeholder}
-						appIcon={inputBarAdapter.appIcon}
-						emptyText={inputBarAdapter.emptyText}
-						createText={inputBarAdapter.createText}
-						deferSearch={inputBarAdapter.deferSearch}
-						locale={$locale || 'de'}
-						defaultOptions={inputBarAdapter.defaultOptions}
-						selectedDefaultId={inputBarAdapter.selectedDefaultId}
-						defaultOptionLabel={inputBarAdapter.defaultOptionLabel}
-						onDefaultChange={inputBarAdapter.onDefaultChange}
-						highlightPatterns={inputBarAdapter.highlightPatterns}
-						positioning="static"
-						injectedText={sttInjectedText}
-					>
-						{#snippet leftAction()}
-							<button
-								class="stt-mic-btn"
-								class:recording={localStt.state === 'recording'}
-								class:busy={localStt.state === 'loading' || localStt.state === 'transcribing'}
-								onclick={() => localStt.toggle()}
-								disabled={localStt.state === 'loading' || localStt.state === 'transcribing'}
-								title={localStt.state === 'recording'
-									? 'Aufnahme beenden'
-									: localStt.state === 'transcribing'
-										? 'Wird transkribiert…'
-										: localStt.state === 'loading'
-											? 'Modell wird geladen…'
-											: 'Spracheingabe'}
-							>
-								{#if localStt.state === 'recording'}
-									<Stop size={16} weight="fill" />
-								{:else}
-									<Microphone size={16} weight={localStt.state === 'idle' ? 'regular' : 'fill'} />
-								{/if}
-							</button>
-						{/snippet}
-					</QuickInputBar>
-				{/if}
+					<!-- QuickInputBar with inline nav toggle — gated by the "search" pill -->
+					{#if isQuickInputVisible}
+						<QuickInputBar
+							onSearch={inputBarAdapter.onSearch}
+							onSelect={inputBarAdapter.onSelect}
+							onParseCreate={inputBarAdapter.onParseCreate}
+							onCreate={inputBarAdapter.onCreate}
+							onSearchChange={inputBarAdapter.onSearchChange}
+							placeholder={inputBarAdapter.placeholder}
+							appIcon={inputBarAdapter.appIcon}
+							emptyText={inputBarAdapter.emptyText}
+							createText={inputBarAdapter.createText}
+							deferSearch={inputBarAdapter.deferSearch}
+							locale={$locale || 'de'}
+							defaultOptions={inputBarAdapter.defaultOptions}
+							selectedDefaultId={inputBarAdapter.selectedDefaultId}
+							defaultOptionLabel={inputBarAdapter.defaultOptionLabel}
+							onDefaultChange={inputBarAdapter.onDefaultChange}
+							highlightPatterns={inputBarAdapter.highlightPatterns}
+							positioning="static"
+							injectedText={sttInjectedText}
+						>
+							{#snippet leftAction()}
+								<button
+									class="stt-mic-btn"
+									class:recording={localStt.state === 'recording'}
+									class:busy={localStt.state === 'loading' || localStt.state === 'transcribing'}
+									onclick={() => localStt.toggle()}
+									disabled={localStt.state === 'loading' || localStt.state === 'transcribing'}
+									title={localStt.state === 'recording'
+										? 'Aufnahme beenden'
+										: localStt.state === 'transcribing'
+											? 'Wird transkribiert…'
+											: localStt.state === 'loading'
+												? 'Modell wird geladen…'
+												: 'Spracheingabe'}
+								>
+									{#if localStt.state === 'recording'}
+										<Stop size={16} weight="fill" />
+									{:else}
+										<Microphone size={16} weight={localStt.state === 'idle' ? 'regular' : 'fill'} />
+									{/if}
+								</button>
+							{/snippet}
+						</QuickInputBar>
+					{/if}
 
-				<!-- TagStrip (between QuickInputBar and PillNav) -->
-				{#if isTagStripVisible}
-					<TagStrip
-						tags={(allTags.value ?? []).map((t) => ({
-							id: t.id,
-							name: t.name,
-							color: t.color || '#3b82f6',
-						}))}
-						selectedIds={[]}
-						onToggle={() => {}}
-						onClear={() => {}}
-						onTagDrop={tagDropHandler ?? undefined}
-						managementHref="/tags"
-						loading={allTags.loading}
-						positioning="static"
-					/>
-				{/if}
+					<!-- TagStrip (between QuickInputBar and PillNav) -->
+					{#if isTagStripVisible}
+						<TagStrip
+							tags={(allTags.value ?? []).map((t) => ({
+								id: t.id,
+								name: t.name,
+								color: t.color || '#3b82f6',
+							}))}
+							selectedIds={[]}
+							onToggle={() => {}}
+							onClear={() => {}}
+							onTagDrop={tagDropHandler ?? undefined}
+							managementHref="/tags"
+							loading={allTags.loading}
+							positioning="static"
+						/>
+					{/if}
 
-				<!-- Dropdown-as-bar: shows the items of the currently opened
+					<!-- Dropdown-as-bar: shows the items of the currently opened
 				 PillNavigation dropdown (theme / AI / sync / user) as
 				 horizontal pills directly above the PillNav. -->
-				{#if activeBar}
-					<PillDropdownBar
-						items={activeBar.items}
-						label={activeBar.label}
-						icon={activeBar.icon}
+					{#if activeBar}
+						<PillDropdownBar
+							items={activeBar.items}
+							label={activeBar.label}
+							icon={activeBar.icon}
+							positioning="static"
+						/>
+					{/if}
+
+					<!-- PillNav (bottom of stack) -->
+					<PillNavigation
+						onOpenBar={handleOpenBar}
+						activeBarId={activeBar?.id ?? null}
+						items={navItems}
+						currentPath={$page.url.pathname}
+						appName="Mana"
+						homeRoute="/"
+						onLogout={handleSignOut}
+						onToggleTheme={handleToggleTheme}
+						{isDark}
+						{isCollapsed}
+						onCollapsedChange={handleCollapsedChange}
+						showThemeToggle={true}
+						showThemeVariants={true}
+						{themeVariantItems}
+						{currentThemeVariantLabel}
+						themeMode={theme.mode}
+						onThemeModeChange={handleThemeModeChange}
+						showLanguageSwitcher={true}
+						{languageItems}
+						{currentLanguageLabel}
+						showLogout={authStore.isAuthenticated}
+						loginHref="/login"
+						primaryColor="hsl(var(--color-primary))"
+						showAppSwitcher={false}
+						showAiTierSelector={true}
+						aiTierItems={aiTier.items}
+						currentAiTierLabel={aiTier.label}
+						currentAiTierIcon={aiTier.icon}
+						showSyncStatus={authStore.isAuthenticated}
+						syncStatusItems={syncStatus.items}
+						currentSyncLabel={syncStatus.label}
+						{appItems}
+						{userEmail}
+						profileHref="/?app=profile"
+						spiralHref="/?app=spiral"
+						creditsHref="/?app=credits"
+						themesHref="/?app=themes"
+						helpHref="/?app=help"
+						{spotlightActions}
+						{contentSearcher}
 						positioning="static"
-					/>
-				{/if}
+					>
+						{#snippet startSlot()}
+							{#if authStore.isAuthenticated}
+								<SpaceSwitcher locale={$locale === 'en' ? 'en' : 'de'} />
+							{/if}
+						{/snippet}
+					</PillNavigation>
+				</div>
+			{/if}
 
-				<!-- PillNav (bottom of stack) -->
-				<PillNavigation
-					onOpenBar={handleOpenBar}
-					activeBarId={activeBar?.id ?? null}
-					items={navItems}
-					currentPath={$page.url.pathname}
-					appName="Mana"
-					homeRoute="/"
-					onLogout={handleSignOut}
-					onToggleTheme={handleToggleTheme}
-					{isDark}
-					{isCollapsed}
-					onCollapsedChange={handleCollapsedChange}
-					showThemeToggle={true}
-					showThemeVariants={true}
-					{themeVariantItems}
-					{currentThemeVariantLabel}
-					themeMode={theme.mode}
-					onThemeModeChange={handleThemeModeChange}
-					showLanguageSwitcher={true}
-					{languageItems}
-					{currentLanguageLabel}
-					showLogout={authStore.isAuthenticated}
-					loginHref="/login"
-					primaryColor="hsl(var(--color-primary))"
-					showAppSwitcher={false}
-					showAiTierSelector={true}
-					aiTierItems={aiTier.items}
-					currentAiTierLabel={aiTier.label}
-					currentAiTierIcon={aiTier.icon}
-					showSyncStatus={authStore.isAuthenticated}
-					syncStatusItems={syncStatus.items}
-					currentSyncLabel={syncStatus.label}
-					{appItems}
-					{userEmail}
-					profileHref="/?app=profile"
-					spiralHref="/?app=spiral"
-					creditsHref="/?app=credits"
-					themesHref="/?app=themes"
-					helpHref="/?app=help"
-					{spotlightActions}
-					{contentSearcher}
-					positioning="static"
-				>
-					{#snippet startSlot()}
-						{#if authStore.isAuthenticated}
-							<SpaceSwitcher locale={$locale === 'en' ? 'en' : 'de'} />
-						{/if}
-					{/snippet}
-				</PillNavigation>
-			</div>
-		{/if}
+			<!-- DnD: floating preview -->
+			<DragPreview />
 
-		<!-- DnD: floating preview -->
-		<DragPreview />
-
-		<!-- Main content.
+			<!-- Main content.
 			 Publish layout offsets as CSS variables so descendants (esp.
 			 ModuleShell in the carousel) can compute their available
 			 height against viewport + bottom chrome without prop
 			 drilling. `--workbench-top-offset` must match the vertical
 			 padding on the inner max-w-7xl wrapper below. -->
-		<main
-			style="padding-bottom: {bottomChromeHeight +
-				8}px; --bottom-chrome-height: {bottomChromeHeight}px; --workbench-reserved-y: 1.5rem;"
-			class="pt-2"
-		>
-			<div class="mx-auto max-w-7xl px-3 py-2 sm:px-6 sm:py-3 lg:px-8">
-				{#if routeBlocked && routeAppId}
-					<RouteTierGate
-						appName={routeAppId.name}
-						userTierLabel={routeTierLabels.user}
-						requiredTierLabel={routeTierLabels.required}
-					/>
-				{:else}
-					{@render children()}
-				{/if}
-			</div>
-		</main>
+			<main
+				style="padding-bottom: {bottomChromeHeight +
+					8}px; --bottom-chrome-height: {bottomChromeHeight}px; --workbench-reserved-y: 1.5rem;"
+				class="pt-2"
+			>
+				<div class="mx-auto max-w-7xl px-3 py-2 sm:px-6 sm:py-3 lg:px-8">
+					{#if routeBlocked && routeAppId}
+						<RouteTierGate
+							appName={routeAppId.name}
+							userTierLabel={routeTierLabels.user}
+							requiredTierLabel={routeTierLabels.required}
+						/>
+					{:else}
+						{@render children()}
+					{/if}
+				</div>
+			</main>
 
-		<!-- Session expiry warning lives inside .bottom-stack now (see above)
+			<!-- Session expiry warning lives inside .bottom-stack now (see above)
 			 so it doesn't end up obscured by the QuickInputBar like
 			 EncryptionIntroBanner used to be. -->
 
-		<!-- Keyboard shortcuts modal — loaded on first `?` press -->
-		{#if KeyboardShortcutsModalC}
-			{@const KeyboardShortcutsModal = KeyboardShortcutsModalC}
-			<KeyboardShortcutsModal open={showShortcuts} onclose={() => (showShortcuts = false)} />
-		{/if}
-	</div>
+			<!-- Keyboard shortcuts modal — loaded on first `?` press -->
+			{#if KeyboardShortcutsModalC}
+				{@const KeyboardShortcutsModal = KeyboardShortcutsModalC}
+				<KeyboardShortcutsModal open={showShortcuts} onclose={() => (showShortcuts = false)} />
+			{/if}
+		</div>
+	{/if}
 
 	<!-- Navigation Context Menu -->
 	<ContextMenu

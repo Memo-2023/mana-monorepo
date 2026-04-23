@@ -7,11 +7,14 @@
  */
 
 import { Hono } from 'hono';
+import { eq } from 'drizzle-orm';
 import type { AuthUser } from '../middleware/jwt-auth';
 import type { UserDataService } from '../services/user-data';
+import type { Database } from '../db/connection';
+import { users } from '../db/schema/auth';
 import { sendAccountDeletionEmail } from '../email/send';
 
-export function createMeRoutes(userDataService: UserDataService) {
+export function createMeRoutes(userDataService: UserDataService, db: Database) {
 	return (
 		new Hono<{ Variables: { user: AuthUser } }>()
 
@@ -56,6 +59,47 @@ export function createMeRoutes(userDataService: UserDataService) {
 				sendAccountDeletionEmail(user.email).catch(() => {});
 
 				return c.json(result);
+			})
+
+			// ─── Update profile (name, avatar) ──────────────────────
+			// Minimal patch endpoint used by the onboarding flow and
+			// Settings → Profile. JWT-based like the rest of /me/*; the
+			// updated name only lands in the user's JWT on next mint, so
+			// the caller is responsible for refreshing its in-memory
+			// representation of authStore.user. See docs/plans/onboarding-flow.md.
+			.patch('/profile', async (c) => {
+				const user = c.get('user');
+				const body = (await c.req.json().catch(() => ({}))) as {
+					name?: unknown;
+					image?: unknown;
+				};
+
+				const patch: { name?: string; image?: string; updatedAt: Date } = {
+					updatedAt: new Date(),
+				};
+				if (typeof body.name === 'string') {
+					const trimmed = body.name.trim();
+					if (trimmed.length < 1 || trimmed.length > 80) {
+						return c.json({ error: 'name must be 1–80 characters' }, 400);
+					}
+					patch.name = trimmed;
+				}
+				if (typeof body.image === 'string') {
+					patch.image = body.image;
+				}
+
+				if (!('name' in patch) && !('image' in patch)) {
+					return c.json({ error: 'no fields to update' }, 400);
+				}
+
+				const [updated] = await db
+					.update(users)
+					.set(patch)
+					.where(eq(users.id, user.userId))
+					.returning({ id: users.id, name: users.name, image: users.image });
+
+				if (!updated) return c.json({ error: 'User not found' }, 404);
+				return c.json({ name: updated.name, image: updated.image });
 			})
 	);
 }

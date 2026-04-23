@@ -99,7 +99,7 @@ app.route('/api/v1/api-keys', createApiKeyValidationRoute(apiKeysService));
 // ─── Me (GDPR) ──────────────────────────────────────────────
 
 app.use('/api/v1/me/*', jwtAuth(config.baseUrl));
-app.route('/api/v1/me', createMeRoutes(userDataService));
+app.route('/api/v1/me', createMeRoutes(userDataService, db));
 
 // ─── Encryption vault (per-user master key custody) ────────
 // Mounted under /me so it inherits the JWT middleware above and shows
