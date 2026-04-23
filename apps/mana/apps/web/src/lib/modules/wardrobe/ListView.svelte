@@ -12,7 +12,8 @@
   the same way picture/ListView does.
 -->
 <script lang="ts">
-	import { UserCircle } from '@mana/shared-icons';
+	import { fade } from 'svelte/transition';
+	import { CheckCircle, SpinnerGap, UserCircle } from '@mana/shared-icons';
 	import { useImageByPrimary } from '$lib/modules/profile/queries';
 	import MeImageUploadZone from '$lib/modules/profile/components/MeImageUploadZone.svelte';
 	import { ingestMeImageFile } from '$lib/modules/profile/api/me-images';
@@ -35,20 +36,56 @@
 	const face$ = useImageByPrimary('face-ref');
 	const face = $derived(face$.value);
 
-	let uploadingFace = $state(false);
+	// Banner has three phases: prompt (empty) → uploading → success.
+	// The face$ live-query flips to the new image as soon as the Dexie
+	// write lands, which would normally unmount the banner instantly —
+	// so we gate the unmount on `uploadPhase` returning to 'idle' after
+	// a short celebration window. Gives the user a concrete "✓ saved"
+	// moment and a pointer to the next step instead of a silent pop.
+	type UploadPhase = 'idle' | 'uploading' | 'success';
+	let uploadPhase = $state<UploadPhase>('idle');
+	let uploadedPreviewUrl = $state<string | null>(null);
 	let faceUploadError = $state<string | null>(null);
+	let successTimeout: ReturnType<typeof setTimeout> | null = null;
+
+	const showBanner = $derived(!face$.loading && (!face || uploadPhase === 'success'));
 
 	async function handleFaceUpload(files: File[]) {
 		if (files.length === 0) return;
-		uploadingFace = true;
+		if (successTimeout) {
+			clearTimeout(successTimeout);
+			successTimeout = null;
+		}
+		uploadPhase = 'uploading';
 		faceUploadError = null;
 		try {
-			await ingestMeImageFile(files[0], { kind: 'face', claimSlot: 'face-ref' });
+			const image = await ingestMeImageFile(files[0], {
+				kind: 'face',
+				claimSlot: 'face-ref',
+			});
+			uploadedPreviewUrl = image.thumbnailUrl ?? image.publicUrl ?? null;
+			uploadPhase = 'success';
+			// face$ is already flipped via liveQuery; hold the success card
+			// visible briefly so the user sees the confirmation, then let
+			// the banner unmount and GridView take over as the next step.
+			successTimeout = setTimeout(() => {
+				uploadPhase = 'idle';
+				uploadedPreviewUrl = null;
+				successTimeout = null;
+			}, 2500);
 		} catch (err) {
 			faceUploadError = err instanceof Error ? err.message : 'Upload fehlgeschlagen';
-		} finally {
-			uploadingFace = false;
+			uploadPhase = 'idle';
 		}
+	}
+
+	function dismissSuccess() {
+		if (successTimeout) {
+			clearTimeout(successTimeout);
+			successTimeout = null;
+		}
+		uploadPhase = 'idle';
+		uploadedPreviewUrl = null;
 	}
 </script>
 
@@ -67,32 +104,82 @@
 		{/each}
 	</nav>
 
-	{#if !face$.loading && !face}
-		<div class="space-y-3 rounded-xl border border-dashed border-border bg-background/50 p-4">
-			<div class="flex items-start gap-3 text-sm">
-				<UserCircle size={18} weight="regular" class="mt-0.5 flex-shrink-0 text-primary" />
-				<div class="space-y-1">
-					<p class="font-medium text-foreground">Lade ein Gesichtsbild hoch</p>
-					<p class="text-xs text-muted-foreground">
-						Wir brauchen dich auf Bild, damit Try-On Kleidung an dir visualisieren kann. Das Bild
-						bleibt lokal und wird nur für deine eigenen Generierungen genutzt.
-					</p>
+	{#if showBanner}
+		<div
+			class="face-banner space-y-3 rounded-xl border border-dashed p-4"
+			class:face-banner-success={uploadPhase === 'success'}
+			transition:fade={{ duration: 250 }}
+		>
+			{#if uploadPhase === 'success'}
+				<div class="flex items-center gap-3" role="status" aria-live="polite">
+					{#if uploadedPreviewUrl}
+						<img
+							src={uploadedPreviewUrl}
+							alt=""
+							class="h-12 w-12 flex-shrink-0 rounded-full border border-primary/30 object-cover"
+						/>
+					{:else}
+						<span
+							class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary"
+						>
+							<CheckCircle size={24} weight="fill" />
+						</span>
+					{/if}
+					<div class="flex-1 space-y-0.5">
+						<p class="flex items-center gap-1.5 text-sm font-medium text-foreground">
+							<CheckCircle size={14} weight="fill" class="text-primary" />
+							Gesichtsbild gespeichert
+						</p>
+						<p class="text-xs text-muted-foreground">
+							Perfekt — als nächstes lädst du unten dein erstes Kleidungsstück hoch.
+						</p>
+					</div>
+					<button
+						type="button"
+						onclick={dismissSuccess}
+						class="text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+					>
+						Schließen
+					</button>
 				</div>
-			</div>
-			<MeImageUploadZone
-				variant="compact"
-				label="Gesichtsbild hochladen"
-				hint="Kopf + Schulter, möglichst neutrale Beleuchtung"
-				disabled={uploadingFace}
-				onFiles={handleFaceUpload}
-			/>
-			{#if faceUploadError}
-				<div
-					class="rounded-md border border-error/30 bg-error/10 px-3 py-2 text-xs text-error"
-					role="alert"
-				>
-					{faceUploadError}
+			{:else}
+				<div class="flex items-start gap-3 text-sm">
+					<UserCircle size={18} weight="regular" class="mt-0.5 flex-shrink-0 text-primary" />
+					<div class="space-y-1">
+						<p class="font-medium text-foreground">Lade ein Gesichtsbild hoch</p>
+						<p class="text-xs text-muted-foreground">
+							Wir brauchen dich auf Bild, damit Try-On Kleidung an dir visualisieren kann. Das Bild
+							bleibt lokal und wird nur für deine eigenen Generierungen genutzt.
+						</p>
+					</div>
 				</div>
+				<div class="relative">
+					<MeImageUploadZone
+						variant="compact"
+						label={uploadPhase === 'uploading' ? 'Wird hochgeladen…' : 'Gesichtsbild hochladen'}
+						hint="Kopf + Schulter, möglichst neutrale Beleuchtung"
+						disabled={uploadPhase === 'uploading'}
+						onFiles={handleFaceUpload}
+					/>
+					{#if uploadPhase === 'uploading'}
+						<span
+							class="pointer-events-none absolute right-3 top-3 flex items-center gap-1.5 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary"
+							role="status"
+							aria-live="polite"
+						>
+							<SpinnerGap size={12} class="spinner" weight="bold" />
+							Lade…
+						</span>
+					{/if}
+				</div>
+				{#if faceUploadError}
+					<div
+						class="rounded-md border border-error/30 bg-error/10 px-3 py-2 text-xs text-error"
+						role="alert"
+					>
+						{faceUploadError}
+					</div>
+				{/if}
 			{/if}
 		</div>
 	{/if}
@@ -147,6 +234,32 @@
 	.wardrobe-body {
 		flex: 1;
 		min-height: 0;
+	}
+	.face-banner {
+		border-color: hsl(var(--color-border));
+		background: hsl(var(--color-background) / 0.5);
+		transition:
+			background-color 0.25s,
+			border-color 0.25s;
+	}
+	.face-banner-success {
+		border-style: solid;
+		border-color: hsl(var(--color-primary) / 0.4);
+		background: hsl(var(--color-primary) / 0.06);
+	}
+	/* The spinner class travels through Phosphor's <SpinnerGap class={…}>,
+	   which is a child component, so scoped CSS needs :global() to reach
+	   the rendered <svg>. Nested under .face-banner keeps it local. */
+	.face-banner :global(.spinner) {
+		animation: wardrobe-spin 0.9s linear infinite;
+	}
+	@keyframes wardrobe-spin {
+		from {
+			transform: rotate(0deg);
+		}
+		to {
+			transform: rotate(360deg);
+		}
 	}
 	@container (min-width: 640px) {
 		.wardrobe-root {
