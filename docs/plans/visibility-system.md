@@ -254,15 +254,29 @@ Breite Welle — alle Module, die noch public-relevant sind. Jedes ist ein klein
 - Per Modul: Share-Dialog "Link erstellen"
 - Neu erzeugte Tokens rotieren nicht automatisch — wer den Link weitergibt, akzeptiert permanente Exposure bis Revoke
 
-## Offene Designfragen
+## Designentscheidungen (2026-04-23 festgeschrieben)
 
-1. **Subressourcen-Redaction.** Calendar-Event mit Gästen: werden die Gästenamen beim Publish redacted? Vermutung: **ja**, vom Publish-Resolver. Pro Modul entscheiden.
-2. **Public-Items + Owner-Identität.** Ist der Name des Owners auf einem public Item sichtbar? Vermutung: **ja für Events** (Veranstalter), **nein für Todos** (Creator ist irrelevant). Pro Resolver.
-3. **AI-Agent-Zugriff.** Darf ein User-AI-Agent auf public Items anderer User zugreifen (Future-Feature)? Per `canEmbedOnWebsite`-ähnliches Predicate, aber ein neues: `canAiAccessCrossUser`. Nicht Phase 1.
-4. **Encryption-Registry-Update.** Für Module, die das Feld bekommen: Record-Body wie gehabt encrypted (weil auch bei public-Items will man die Dexie-Backup-Exports verschlüsselt haben). `visibility` ist das einzige plaintext-Feld. Publish-Flow bleibt "clientseitig entschlüsseln → inline".
-5. **Mehrere Websites pro Space.** Plan-Doc `website-builder.md` geht von 1 Website pro Space aus. Bei 2+ Websites per Space müsste Visibility pro-Website differenziert werden (`visibleOnSite: siteId[]` statt bool). **Nicht Phase 1.**
-6. **Preview-Mode im Editor.** Der Editor rendert selbst ohne Filter (Owner sieht alles). Der Publish-Preview muss die Filter anwenden, damit der User weiß, was wirklich public geht. Kleines Feature, auf M4 hängen.
-7. **Default-Migration.** Beim Erstmigration der 7 ad-hoc-Flags: alle `isPublic=false` werden `visibility='private'`. Das ist strikt — ein existierendes Private-Item bleibt privat. Aber: ein User, der bisher alles implizit behandelt hat ohne den Flag anzufassen, hat nichts public. OK-Verhalten.
+Die folgenden Fragen waren offen beim ersten Entwurf und wurden vor der Umsetzung entschieden.
+
+1. **Subressourcen-Redaction.** Entschieden: **Whitelist, nicht Blacklist.** Publish-Resolver ziehen nur explizit freigegebene Felder in den Snapshot. Beim Calendar-Event: `{ title, startsAt, endsAt, location.publicAddress }`; das Gäste-Array wird auf `guestCount: number` degradiert. Pro-Feld-Freigabe (`publicFields: string[]` am Record) ist Phase 2.
+
+2. **Owner-Identität auf public Items.** Entschieden: **Space-Setting, nicht per-Record.** Der Space bekommt ein Feld `publicDisplayName` (z. B. "Tills Gigs" oder "Anonym"). Publish-Snapshots zeigen nur diesen Namen — nie User-Real-Name, Avatar oder Email. Space ist ohnehin der Publish-Container; dort gehört die Identitätsentscheidung hin.
+
+3. **AI-Agent-Zugriff cross-user.** Entschieden: **Phase 1 nein, Predicate vorbereitet.** `canAiAccessCrossUser(level)` im `@mana/shared-privacy`-Package returnt immer `false`. Wenn später ein Feature cross-user-Reads will, wird's pro Modul explizit freigeschaltet. Fließt nicht ins MVP.
+
+4. **Encryption-Registry-Update.** Entschieden: **Record bleibt encrypted, nur `visibility` ist plaintext.** Publish-Flow entschlüsselt clientseitig und inlined plaintext in den Snapshot (heutiges Picture-Board-Muster). Vorteile: Dexie-Backups bleiben durchgehend encrypted, Zero-Knowledge-Mode funktioniert weiter, keine Re-Encryption-Migration beim Visibility-Toggle.
+
+5. **Mehrere Websites pro Space.** Entschieden: **Phase 1 ignoriert das.** `visibility='public'` heißt "für das aktive Space-Publish-Target". Bei späterer Multi-Site kommt eine `siteIds`-Filter am Embed-Block, **nicht** am Record. Record-Modell bleibt simpel; Komplexität lebt im Publish-Layer.
+
+6. **Preview-Mode im Editor.** Entschieden: **Zwei explizite Modi, Toggle im Editor.** "Bearbeiten" (Owner sieht alles, default) + "Als Besucher ansehen" (Embed-Filter werden angewandt). `previewAsPublic: boolean` im EditorView-State, den Embed-Renderer respektieren. Implementierung hängt an M4.
+
+7. **Default-Migration der 7 ad-hoc `isPublic`-Flags.** Entschieden: **Strict Mapping, kein User-Prompt.** `isPublic === true` → `visibility='public'`. Alles andere → `visibility='private'` (nicht `space`, weil die existierenden Flags keine Space-Dimension hatten). Hard-Drop des alten Booleans in M6.
+
+**Zusätzlich für M1 festgeschrieben:**
+
+- **Unlisted-Token-Format:** 32-char base64url, generiert via `crypto.randomUUID()` + Base-Normalisierung. Rotiert NICHT automatisch. Revoke = Token auf NULL setzen und Visibility auf `private` zurückdrehen.
+- **Domain-Event:** `VisibilityChanged` mit Payload `{ recordId, collection, before, after, actor }`. Landet im `_events`-Log → integriert sich in Workbench-Timeline und AI-Revert-System.
+- **Rate-Limit-Warnung (optional, M7):** "mehr als 100 Records public in einer Minute" zeigt einen Toast "X Items wurden public gemacht — rückgängig machen?". Kein Hard-Block, nur Fat-Finger-Schutz.
 
 ## Anti-Patterns — was wir nicht bauen
 

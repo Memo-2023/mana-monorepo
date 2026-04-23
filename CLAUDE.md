@@ -53,6 +53,7 @@ Always consult before changing code:
 | [`.claude/guidelines/testing.md`](.claude/guidelines/testing.md) | Vitest, mock factories |
 | [`.claude/guidelines/design-ux.md`](.claude/guidelines/design-ux.md) | UI patterns, a11y |
 | [`.claude/guidelines/ai-tools.md`](.claude/guidelines/ai-tools.md) | Adding AI tools to a module |
+| [`.claude/guidelines/visibility.md`](.claude/guidelines/visibility.md) | Adopting the visibility/privacy system per module |
 
 ## Development Quick Start
 
@@ -154,6 +155,7 @@ Enforced by `pnpm run validate:turbo` (`scripts/validate-no-recursive-turbo.mjs`
 | `@mana/shared-ui` | React Native UI components |
 | `@mana/shared-theme` | Theme config |
 | `@mana/shared-i18n` | i18n |
+| `@mana/shared-privacy` | Unified visibility/privacy system: `VisibilityLevel` enum + zod schema + `<VisibilityPicker>` + predicates (`canEmbedOnWebsite`, …). Plan: [`docs/plans/visibility-system.md`](docs/plans/visibility-system.md). Rollout per-module, not yet adopted anywhere. |
 | `@mana/local-store` | Local-first store primitives — used by unified Mana, manavoxel, arcade, and shared-uload/-stores/-links |
 | `@mana/local-llm` | Browser-local LLM inference (transformers.js + Gemma 4 E2B, WebGPU). Powers `/llm-test` and the playground module. See [`packages/local-llm/CLAUDE.md`](packages/local-llm/CLAUDE.md) for the CSP requirements and the transformers.js v4 gotchas. |
 | `@mana/local-stt` | Browser-local speech-to-text (transformers.js + Whisper, WebGPU). Powers the QuickInputBar mic button. Same architecture as local-llm. See [`packages/local-stt/CLAUDE.md`](packages/local-stt/CLAUDE.md). |
