@@ -29,7 +29,10 @@
 >   mana-analytics `3064`, mana-events `3065`, mana-research `3068`
 >   (new 2026-04-17, Bun/Hono, public: `research.mana.how`),
 >   mana-mcp `3069` (new 2026-04-22, Bun/Hono, MCP gateway over
->   Streamable HTTP — see `services/mana-mcp/CLAUDE.md`)
+>   Streamable HTTP — see `services/mana-mcp/CLAUDE.md`),
+>   mana-persona-runner `3070` (new 2026-04-22, Bun/Hono, drives
+>   M2 personas through Claude + MCP on a tick loop — see
+>   `services/mana-persona-runner/CLAUDE.md`)
 >
 > **Not deployed:** `mana-voice-bot` (default port `3024`, no scheduled
 > task, no cloudflared route, no launchd plist).
