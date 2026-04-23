@@ -16,6 +16,17 @@ export {
 	registerTool,
 } from './registry.ts';
 
+export {
+	DEFAULT_PER_TOOL_RATE_LIMIT,
+	RATE_LIMIT_WINDOW_MS,
+	detectInjectionMarker,
+	evaluatePolicy,
+	type InvocationEvent,
+	type PolicyDecision,
+	type PolicyInput,
+	type UserPolicySettings,
+} from './policy.ts';
+
 export type {
 	SyncChange,
 	SyncClientConfig,

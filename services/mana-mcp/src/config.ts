@@ -9,6 +9,15 @@ export interface Config {
 	jwtAudience: string;
 	manaSyncUrl: string;
 	corsOrigins: string[];
+	/**
+	 * Policy enforcement mode:
+	 *   'off'      — no policy evaluation (legacy behaviour).
+	 *   'log-only' — evaluate, record metrics, but never deny a call.
+	 *                Used during the M1 soak period (see docs/plans/
+	 *                agent-loop-improvements-m1.md §Rollout).
+	 *   'enforce'  — deny calls whose decision is allow:false.
+	 */
+	policyMode: 'off' | 'log-only' | 'enforce';
 }
 
 function intEnv(name: string, fallback: number): number {
@@ -21,6 +30,12 @@ function intEnv(name: string, fallback: number): number {
 	return n;
 }
 
+function parsePolicyMode(raw: string | undefined): Config['policyMode'] {
+	const v = (raw ?? 'log-only').toLowerCase();
+	if (v === 'off' || v === 'log-only' || v === 'enforce') return v;
+	throw new Error(`POLICY_MODE must be off|log-only|enforce, got "${raw}"`);
+}
+
 export function loadConfig(): Config {
 	return {
 		port: intEnv('PORT', 3069),
@@ -31,5 +46,6 @@ export function loadConfig(): Config {
 			.split(',')
 			.map((s) => s.trim())
 			.filter(Boolean),
+		policyMode: parsePolicyMode(process.env.POLICY_MODE),
 	};
 }

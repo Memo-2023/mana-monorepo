@@ -56,7 +56,7 @@ app.all('/mcp', async (c) => {
 		const msg = err instanceof UnauthorizedError ? err.message : 'Unauthorized';
 		return c.json({ error: msg }, 401);
 	}
-	return handleMcpRequest(c.req.raw, user);
+	return handleMcpRequest(c.req.raw, user, config);
 });
 
 // ─── Server ───────────────────────────────────────────────────────

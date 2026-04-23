@@ -15,6 +15,7 @@
 import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js';
 import { createMcpServerForUser } from './mcp-adapter.ts';
 import type { VerifiedUser } from './auth.ts';
+import type { Config } from './config.ts';
 
 interface SessionEntry {
 	transport: WebStandardStreamableHTTPServerTransport;
@@ -23,7 +24,11 @@ interface SessionEntry {
 
 const sessions = new Map<string, SessionEntry>();
 
-export async function handleMcpRequest(req: Request, user: VerifiedUser): Promise<Response> {
+export async function handleMcpRequest(
+	req: Request,
+	user: VerifiedUser,
+	config: Config
+): Promise<Response> {
 	const sessionId = req.headers.get('mcp-session-id');
 
 	// Existing session — must belong to the same user.
@@ -50,7 +55,7 @@ export async function handleMcpRequest(req: Request, user: VerifiedUser): Promis
 			},
 		});
 
-		const server = createMcpServerForUser(user);
+		const server = createMcpServerForUser(user, config);
 		await server.connect(transport);
 
 		return transport.handleRequest(req);

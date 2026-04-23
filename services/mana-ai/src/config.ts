@@ -46,12 +46,27 @@ export interface Config {
 	 *   openssl pkey -in priv.pem -pubout -out pub.pem
 	 */
 	missionGrantPrivateKeyPem?: string;
+	/**
+	 * Policy gate mode for server-side tool dispatch:
+	 *   'off'      — legacy, no policy evaluation.
+	 *   'log-only' — evaluate and log decisions, never block.
+	 *   'enforce'  — convert deny decisions into failed ToolResults so the
+	 *                LLM sees the rejection and can course-correct.
+	 * Defaults to 'log-only' to match the M1 rollout plan.
+	 */
+	policyMode: 'off' | 'log-only' | 'enforce';
 }
 
 function requireEnv(key: string, fallback?: string): string {
 	const value = process.env[key] ?? fallback;
 	if (!value) throw new Error(`Missing required env var: ${key}`);
 	return value;
+}
+
+function parsePolicyMode(raw: string | undefined): Config['policyMode'] {
+	const v = (raw ?? 'log-only').toLowerCase();
+	if (v === 'off' || v === 'log-only' || v === 'enforce') return v;
+	throw new Error(`POLICY_MODE must be off|log-only|enforce, got "${raw}"`);
 }
 
 export function loadConfig(): Config {
@@ -69,5 +84,6 @@ export function loadConfig(): Config {
 		tickIntervalMs: parseInt(process.env.TICK_INTERVAL_MS ?? '60000', 10),
 		tickEnabled: process.env.TICK_ENABLED !== 'false',
 		missionGrantPrivateKeyPem: process.env.MANA_AI_PRIVATE_KEY_PEM || undefined,
+		policyMode: parsePolicyMode(process.env.POLICY_MODE),
 	};
 }

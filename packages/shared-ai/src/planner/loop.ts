@@ -69,6 +69,38 @@ export interface LlmClient {
 
 // ─── Loop input / result ────────────────────────────────────────────
 
+/**
+ * Transient loop state surfaced to the reminderChannel. The reminder
+ * callback is pure — it reads this snapshot and returns hints; it does
+ * not mutate anything.
+ */
+export interface LoopState {
+	/** 1-based round index for the CURRENT LLM call (before it runs). */
+	readonly round: number;
+	/** Number of tool calls executed across all prior rounds. */
+	readonly toolCallCount: number;
+	/** Accumulated tokens reported by the provider, up to (but not
+	 *  including) the current round's call. Zero when the provider
+	 *  hasn't reported usage. */
+	readonly usage: TokenUsage;
+	/** The most recent ExecutedCall, or undefined in round 1. Handy for
+	 *  "the last tool failed — warn the LLM" producers. */
+	readonly lastCall?: ExecutedCall;
+}
+
+/**
+ * Callback that yields transient system-message strings to attach to the
+ * NEXT LLM request only. Returned strings are wrapped in `<reminder>…
+ * </reminder>` tags and injected as system messages AFTER the persistent
+ * `messages` history. They are NEVER written back to `messages[]` and
+ * therefore NEVER appear in `PlannerLoopResult.messages`.
+ *
+ * This is the Claude-Code `<system-reminder>` pattern: steering the model
+ * per-turn without polluting the persisted conversation log or
+ * invalidating the provider's KV-cache on stable prefixes.
+ */
+export type ReminderChannel = (state: LoopState) => readonly string[];
+
 export interface PlannerLoopInput {
 	readonly systemPrompt: string;
 	readonly userPrompt: string;
@@ -82,7 +114,28 @@ export interface PlannerLoopInput {
 	/** Hard ceiling on planner rounds. Each round = one LLM call plus
 	 *  whatever tool executions its output triggered. Defaults to 5. */
 	readonly maxRounds?: number;
+	/** Optional per-round reminder producer — see ReminderChannel docs. */
+	readonly reminderChannel?: ReminderChannel;
+	/**
+	 * Predicate that decides whether a tool is safe to execute in parallel
+	 * with other tools of the same stripe. Claude-Code `gW5` pattern: when
+	 * every tool_call in a round is parallel-safe, they run via Promise.all
+	 * in batches of 10; if any call is NOT parallel-safe, the whole batch
+	 * falls back to sequential (preserves ordering invariants for
+	 * write-after-read chains).
+	 *
+	 * Default: `() => false` → fully sequential, matching pre-M1 behaviour.
+	 *
+	 * The predicate is called once per tool_call per round, so cheap
+	 * constant-time lookups are expected (registry hit, name-prefix check).
+	 */
+	readonly isParallelSafe?: (toolName: string) => boolean;
 }
+
+/** Max concurrent tool executions per round. Mirrors Claude Code's gW5
+ *  ceiling. Keeps tail latency bounded when the LLM requests many reads
+ *  at once and protects downstream services from unbounded fan-out. */
+export const PARALLEL_TOOL_BATCH_SIZE = 10;
 
 export interface ExecutedCall {
 	readonly round: number;
@@ -142,8 +195,35 @@ export async function runPlannerLoop(opts: {
 
 	while (rounds < maxRounds) {
 		rounds++;
+
+		// Per-round reminder injection: ask the channel for transient
+		// hints, wrap each in <reminder> tags, and prepend them as system
+		// messages to THIS request only. Nothing gets pushed to `messages`
+		// — the reminders are ephemeral steering, not conversation.
+		let requestMessages: readonly ChatMessage[] = messages;
+		if (input.reminderChannel) {
+			const state: LoopState = {
+				round: rounds,
+				toolCallCount: executedCalls.length,
+				usage: {
+					promptTokens,
+					completionTokens,
+					totalTokens: promptTokens + completionTokens,
+				},
+				lastCall: executedCalls[executedCalls.length - 1],
+			};
+			const reminders = input.reminderChannel(state);
+			if (reminders.length > 0) {
+				const reminderMessages: ChatMessage[] = reminders.map((text) => ({
+					role: 'system',
+					content: `<reminder>${text}</reminder>`,
+				}));
+				requestMessages = [...messages, ...reminderMessages];
+			}
+		}
+
 		const response = await llm.complete({
-			messages,
+			messages: requestMessages,
 			tools: toolSpecs,
 			model: input.model,
 			temperature: input.temperature,
@@ -169,22 +249,56 @@ export async function runPlannerLoop(opts: {
 			break;
 		}
 
-		// Execute each tool_call sequentially. Parallel execution is a
-		// perfectly valid optimisation for pure-read tools but we keep
-		// order here so the message log tells a linear story when the
-		// user debugs a failure.
-		for (const call of response.toolCalls) {
-			const result = await onToolCall(call);
-			executedCalls.push({ round: rounds, call, result });
-			messages.push({
-				role: 'tool',
-				toolCallId: call.id,
-				content: JSON.stringify({
-					success: result.success,
-					message: result.message,
-					...(result.data !== undefined ? { data: result.data } : {}),
-				}),
-			});
+		// Tool execution.
+		//
+		// Sequential by default. When the caller supplies `isParallelSafe`
+		// and EVERY call in this round passes it, we dispatch in batches
+		// of PARALLEL_TOOL_BATCH_SIZE via Promise.all. A single unsafe
+		// call in the batch downgrades the whole round to sequential —
+		// this preserves semantics for write-after-read chains without
+		// pushing the decision onto the model.
+		//
+		// In both modes we append to `messages` in the LLM's original
+		// call order, not completion order, so the debug-log stays linear.
+		const calls = response.toolCalls;
+		const allParallelSafe =
+			!!input.isParallelSafe &&
+			calls.length > 1 &&
+			calls.every((c) => input.isParallelSafe!(c.name));
+
+		if (allParallelSafe) {
+			for (let i = 0; i < calls.length; i += PARALLEL_TOOL_BATCH_SIZE) {
+				const batch = calls.slice(i, i + PARALLEL_TOOL_BATCH_SIZE);
+				const results = await Promise.all(batch.map((call) => onToolCall(call)));
+				for (let j = 0; j < batch.length; j++) {
+					const call = batch[j];
+					const result = results[j];
+					executedCalls.push({ round: rounds, call, result });
+					messages.push({
+						role: 'tool',
+						toolCallId: call.id,
+						content: JSON.stringify({
+							success: result.success,
+							message: result.message,
+							...(result.data !== undefined ? { data: result.data } : {}),
+						}),
+					});
+				}
+			}
+		} else {
+			for (const call of calls) {
+				const result = await onToolCall(call);
+				executedCalls.push({ round: rounds, call, result });
+				messages.push({
+					role: 'tool',
+					toolCallId: call.id,
+					content: JSON.stringify({
+						success: result.success,
+						message: result.message,
+						...(result.data !== undefined ? { data: result.data } : {}),
+					}),
+				});
+			}
 		}
 
 		// If the round limit is about to hit, surface it as the reason —

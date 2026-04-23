@@ -13,13 +13,15 @@
 	},
 	"scripts": {
 		"type-check": "tsc --noEmit",
-		"lint": "eslint ."
+		"lint": "eslint .",
+		"test": "vitest run"
 	},
 	"dependencies": {
 		"@mana/shared-crypto": "workspace:*",
 		"zod": "^3.25.76"
 	},
 	"devDependencies": {
-		"typescript": "^5.9.3"
+		"typescript": "^5.9.3",
+		"vitest": "^4.1.3"
 	}
 }

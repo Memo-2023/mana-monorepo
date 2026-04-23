@@ -48,6 +48,7 @@ import {
 	providerErrorsTotal,
 } from '../metrics';
 import { unwrapMissionGrant } from '../crypto/unwrap-grant';
+import { detectInjectionMarker } from '@mana/tool-registry';
 import { NewsResearchClient } from '../planner/news-research-client';
 import { ManaResearchClient, type DeepResearchProvider } from '../clients/mana-research';
 import {
@@ -383,10 +384,29 @@ async function planOneMission(
 			// The captured call lands in loopResult.executedCalls and
 			// gets written as a PlanStep with status 'planned' — the
 			// user's client applies it on sync.
-			onToolCall: async (_call: ToolCallRequest): Promise<ToolResult> => ({
-				success: true,
-				message: 'recorded — pending client application',
-			}),
+			//
+			// Policy gate on this layer is limited to freetext injection
+			// inspection: the server can't enforce rate-limits across a
+			// 60s tick and tools here are propose-only by construction
+			// (filtered in SERVER_TOOLS), so destructive opt-in is
+			// meaningless until the full tool-registry absorbs
+			// AI_TOOL_CATALOG. Until then, flagged content is logged; the
+			// webapp's policy enforces the actual block on apply.
+			onToolCall: async (call: ToolCallRequest): Promise<ToolResult> => {
+				if (config.policyMode !== 'off') {
+					const marker = detectInjectionMarker(call.arguments);
+					if (marker) {
+						const label = config.policyMode === 'enforce' ? 'FLAG' : 'FLAG';
+						console.warn(
+							`[mana-ai policy] ${label} tool=${call.name} mission=${m.id} marker=${marker}`
+						);
+					}
+				}
+				return {
+					success: true,
+					message: 'recorded — pending client application',
+				};
+			},
 		});
 
 		// Observability: one counter tick per tool_call + one histogram
