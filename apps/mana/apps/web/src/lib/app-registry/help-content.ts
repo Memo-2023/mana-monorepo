@@ -967,6 +967,23 @@ export const MODULE_HELP: Record<string, ModuleHelp> = {
 		],
 		tips: ['System-Auto folgt deinem OS-Dark-Mode automatisch zur richtigen Uhrzeit'],
 	},
+	wardrobe: {
+		description:
+			'Dein digitaler Kleiderschrank — fotografiere Kleidungsstücke und Accessoires, komponiere Outfits, und probiere sie mit KI an dir selbst an. Pro Space ein eigener Schrank: was im Family-Space liegt, taucht im Brand-Space nicht auf.',
+		features: [
+			'Kleidung nach Kategorien (Oberteile, Hosen, Kleider, Jacken, Schuhe, Accessoires …)',
+			'Outfits aus mehreren Stücken komponieren und als Set anprobieren',
+			'Solo-Try-On pro Einzelstück — Accessoire-Modus (Brille, Schmuck, Hut) rendert nur das Gesicht und spart Credits',
+			'Referenzbilder aus „Meine Bilder" (Gesicht + optional Ganzkörper) werden automatisch genutzt',
+			'MCP-Tools: listGarments / listOutfits / createOutfit / tryOn für Agents',
+		],
+		tips: [
+			'Aktive Kategorie oben bestimmt den Typ für neue Uploads — erst die Kategorie wählen, dann die Datei droppen.',
+			'Die Upload-Zone oben akzeptiert Drag-&-Drop direkt aus dem Finder.',
+			'Frontal-Fotos mit hellem Hintergrund liefern die besten Try-On-Ergebnisse.',
+			'Ohne Gesichtsbild kannst du kein Try-On starten — der Banner oben hilft beim Upload in einem Schritt.',
+		],
+	},
 	'research-lab': {
 		description:
 			'Web-Research-Anbieter Seite-an-Seite vergleichen: gleiche Query an bis zu fünf Provider parallel, Antworten + Latenz + Kosten nebeneinander. Alle Runs werden serverseitig persistiert für spätere Auswertung.',

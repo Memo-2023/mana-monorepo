@@ -1,8 +1,14 @@
 <!--
-  Wardrobe grid view — category tabs + garment grid + upload drop-zone.
+  Wardrobe grid view — category tabs + upload drop-zone + garment grid.
   The active category tab pre-selects the kind for new drops, so "Oberteile"
   tab + drop = garments created as kind='top'. On the "Alle" tab drops
   default to 'other' (user edits later on detail page).
+
+  Layout: tabs → upload zone → grid. Upload is always-visible at the top
+  of the view so a first-time user doesn't have to scroll past an empty
+  grid to find it. The welcome blurb that used to sit on top now lives
+  behind the help (?) icon in the ModuleShell header — wired via
+  `wardrobe` in app-registry/help-content.ts.
 
   Upload flow: drop file(s) → read dimensions client-side → POST to
   `/api/v1/wardrobe/garments/upload` → write a LocalWardrobeGarment
@@ -10,7 +16,6 @@
   to the filename-sans-extension, as in the picture module's upload.
 -->
 <script lang="ts">
-	import { Info, Sparkle } from '@mana/shared-icons';
 	import MeImageUploadZone from '$lib/modules/profile/components/MeImageUploadZone.svelte';
 	import { readImageDimensions } from '$lib/modules/profile/api/me-images';
 	import { useAllGarments } from '../queries';
@@ -75,38 +80,22 @@
 	}
 </script>
 
-<div class="space-y-6">
-	<!-- Intro + active-space hint -->
-	<section class="rounded-2xl border border-border bg-card p-5">
-		<div class="mb-2 flex items-center justify-between gap-2 text-foreground">
-			<div class="flex items-center gap-2">
-				<Sparkle size={18} weight="fill" class="text-primary" />
-				<h2 class="text-base font-semibold">Kleiderschrank</h2>
-			</div>
-			{#if activeSpace}
-				<span
-					class="rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground"
-					title="Der Kleiderschrank ist pro Space — andere Spaces haben ihren eigenen."
-				>
-					{activeSpace.type === 'personal' ? 'Persönlich' : activeSpace.name}
-				</span>
-			{/if}
-		</div>
-		<p class="text-sm text-muted-foreground">
-			Fotografiere Kleidungsstücke und Accessoires, gruppiere sie in Outfits, und probiere sie mit
-			KI an dir selbst an. Du kannst sie später im Generator als Referenz nutzen.
-		</p>
-		<p class="mt-3 flex items-start gap-2 text-xs text-muted-foreground">
-			<Info size={14} weight="regular" class="mt-0.5 flex-shrink-0" />
-			<span>
-				Aktive Kategorie bestimmt den Typ für neue Uploads — auf "Alle" landen sie als "{CATEGORY_LABELS_SINGULAR.other}"
-				und können auf der Detailseite umgestellt werden.
-			</span>
-		</p>
-	</section>
-
-	<!-- Category tabs -->
+<div class="space-y-4">
+	<!-- Category tabs — active tab drives the default kind for drops. -->
 	<CategoryTabs active={activeTab} {counts} onChange={(next) => (activeTab = next)} />
+
+	<!-- Upload zone lives at the top so it's always reachable without
+	     scrolling past an empty grid. Label reflects the active category
+	     so the user knows what kind the drop will be stamped with. -->
+	<MeImageUploadZone
+		variant="compact"
+		label={activeTab === 'all'
+			? 'Kleidungsstück hochladen'
+			: `${CATEGORY_LABELS_SINGULAR[activeTab]} hochladen`}
+		hint="Foto frontal, heller Hintergrund — bessere Try-On-Ergebnisse"
+		disabled={uploading}
+		onFiles={ingestFiles}
+	/>
 
 	{#if uploadError}
 		<div class="rounded-xl border border-error/30 bg-error/10 p-3 text-sm text-error" role="alert">
@@ -122,15 +111,14 @@
 			{/each}
 		</div>
 	{:else if garments.length === 0}
-		<div class="rounded-2xl border border-dashed border-border bg-background/50 p-8 text-center">
+		<div class="rounded-2xl border border-dashed border-border bg-background/50 p-6 text-center">
 			<p class="text-sm font-medium text-foreground">Noch nichts im Schrank.</p>
 			<p class="mt-1 text-sm text-muted-foreground">
-				Lade dein erstes Kleidungsstück hoch — unten auf "Hinzufügen" oder zieh eine Datei direkt in
-				die Zone.
+				Zieh ein Foto in die Zone oben — oder klick sie an, um eins auszuwählen.
 			</p>
 		</div>
 	{:else}
-		<div class="rounded-2xl border border-dashed border-border bg-background/50 p-8 text-center">
+		<div class="rounded-2xl border border-dashed border-border bg-background/50 p-6 text-center">
 			<p class="text-sm text-muted-foreground">
 				Keine Einträge unter <strong class="text-foreground"
 					>{activeTab === 'all' ? 'Alle' : CATEGORY_LABELS[activeTab]}</strong
@@ -139,14 +127,14 @@
 		</div>
 	{/if}
 
-	<!-- Upload zone -->
-	<MeImageUploadZone
-		variant="compact"
-		label={activeTab === 'all'
-			? 'Kleidungsstück hochladen'
-			: `${CATEGORY_LABELS_SINGULAR[activeTab]} hochladen`}
-		hint="Foto frontal, möglichst heller Hintergrund — bessere Try-On-Ergebnisse"
-		disabled={uploading}
-		onFiles={ingestFiles}
-	/>
+	<!-- Non-personal-space footer hint: the wardrobe is per-Space, so in
+	     a Brand/Family/Club/Team/Practice space it's worth signalling that
+	     uploads don't leak into personal. Hidden in personal to keep the
+	     view clean. -->
+	{#if activeSpace && activeSpace.type !== 'personal'}
+		<p class="text-xs text-muted-foreground">
+			Dieser Schrank gehört zu <strong class="text-foreground">{activeSpace.name}</strong> — Uploads landen
+			nur hier, nicht in deinem persönlichen Schrank.
+		</p>
+	{/if}
 </div>
