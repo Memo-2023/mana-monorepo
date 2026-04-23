@@ -89,6 +89,7 @@ import type {
 	LocalBroadcastSettings,
 } from '../../modules/broadcast/types';
 import type { LocalArticle, LocalHighlight } from '../../modules/articles/types';
+import type { LocalMeImage } from '../../modules/profile/types';
 
 export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	// ─── Chat ────────────────────────────────────────────────
@@ -541,6 +542,16 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 		],
 	},
 
+	// ─── Me-Images (AI reference pool) ───────────────────────
+	// docs/plans/me-images-and-reference-generation.md M1.
+	// Encrypted: `label` (user-typed — "Portrait Juni", "Outfit Studio")
+	// and `tags` (string[] — free-form tags like "ohne-brille", "studio").
+	// Plaintext (intentional): `kind`, `primaryFor`, `usage`, mediaId,
+	// storagePath, publicUrl, thumbnailUrl, width, height — all indexed
+	// or structural metadata the query layer needs. The image blob itself
+	// lives in MinIO behind owner-RLS, not in Dexie.
+	meImages: entry<LocalMeImage>(['label', 'tags']),
+
 	// Per-agent kontext documents — same schema as kontextDoc but keyed
 	// per agent. Content is free-form markdown.
 	agentKontextDocs: { enabled: true, fields: ['content'] },
@@ -747,6 +758,19 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 		'legalAddress',
 		'unsubscribeLandingCopy',
 	]),
+
+	// ─── Website Builder ─────────────────────────────────────
+	// docs/plans/website-builder.md §D4 — content is PUBLIC by design.
+	// Site name, page titles, block props, theme config: the whole point
+	// is that published sites are served to anonymous visitors over SSR.
+	// Encrypting the draft would be security theater — the user publishes
+	// the same content seconds later as plaintext into published_snapshots.
+	// Form submissions (M4) land in target modules (contacts, todo, …)
+	// which carry their own encryption; the submissions-audit row holds
+	// the payload only briefly and gets scrubbed after delivery (M7).
+	websites: { enabled: false, fields: [] },
+	websitePages: { enabled: false, fields: [] },
+	websiteBlocks: { enabled: false, fields: [] },
 
 	// Singleton sender profile. The user's legal address + IBAN live here
 	// and are the most sensitive fields in the module (appear on every PDF

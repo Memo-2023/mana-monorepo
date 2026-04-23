@@ -27,6 +27,7 @@ import { musicRoutes } from './modules/music/routes';
 import { chatRoutes } from './modules/chat/routes';
 import { contextRoutes } from './modules/context/routes';
 import { pictureRoutes } from './modules/picture/routes';
+import { profileRoutes } from './modules/profile/routes';
 import { storageRoutes } from './modules/storage/routes';
 import { todoRoutes } from './modules/todo/routes';
 import { plantsRoutes } from './modules/plants/routes';
@@ -40,6 +41,7 @@ import { tracesRoutes } from './modules/traces/routes';
 import { presiRoutes } from './modules/presi/routes';
 import { researchRoutes } from './modules/research/routes';
 import { whoRoutes } from './modules/who/routes';
+import { websiteRoutes } from './modules/website/routes';
 import { wetterRoutes } from './modules/wetter/routes';
 
 const PORT = parseInt(process.env.PORT || '3060', 10);
@@ -97,6 +99,7 @@ app.route('/api/v1/music', musicRoutes);
 app.route('/api/v1/chat', chatRoutes);
 app.route('/api/v1/context', contextRoutes);
 app.route('/api/v1/picture', pictureRoutes);
+app.route('/api/v1/profile', profileRoutes);
 app.route('/api/v1/storage', storageRoutes);
 app.route('/api/v1/todo', todoRoutes);
 app.route('/api/v1/plants', plantsRoutes);
@@ -109,6 +112,7 @@ app.route('/api/v1/articles', articlesRoutes);
 app.route('/api/v1/traces', tracesRoutes);
 app.route('/api/v1/presi', presiRoutes);
 app.route('/api/v1/research', researchRoutes);
+app.route('/api/v1/website', websiteRoutes);
 app.route('/api/v1/who', whoRoutes);
 
 // ─── Server Info ────────────────────────────────────────────

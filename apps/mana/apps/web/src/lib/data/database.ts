@@ -895,6 +895,43 @@ db.version(36).upgrade(async (tx) => {
 	}
 });
 
+// v37 — Website builder module (docs/plans/website-builder.md).
+// Three tables for the block-tree CMS. All space-scoped; all plaintext
+// (public content by design — see plan decision D4).
+//   - websites: root per space. `slug` indexed for the eventual public
+//     resolver + dedupe-within-space. `publishedVersion` indexed so the
+//     editor can fast-filter unpublished drafts.
+//   - websitePages: `[siteId+order]` for the ordered page list in the
+//     editor. `[siteId+path]` for the public path resolver (page by URL).
+//   - websiteBlocks: `[pageId+parentBlockId+order]` is the canonical tree
+//     scan — ordered children of a parent within a page. `[pageId+order]`
+//     is kept separately for the flat render path.
+db.version(37).stores({
+	websites: 'id, slug, publishedVersion, updatedAt, deletedAt',
+	websitePages: 'id, siteId, [siteId+order], [siteId+path], updatedAt, deletedAt',
+	websiteBlocks:
+		'id, pageId, parentBlockId, [pageId+order], [pageId+parentBlockId+order], type, updatedAt, deletedAt',
+});
+
+// v38 — Me-Images: user-owned reference images for AI generation
+// (docs/plans/me-images-and-reference-generation.md M1).
+//
+// User-level table, not space-scoped — see USER_LEVEL_TABLES below.
+// The same human uses the same face/body across every Space, so the
+// images live once per user and are reused from every Space's Picture
+// generator.
+//
+// Indices:
+//   - `kind` for the Settings UI's "all face images" / "all fullbody"
+//     filter and for the query hook `useReferenceImages(kind)`.
+//   - `primaryFor` for the hot lookup "give me the current avatar /
+//     face-ref / body-ref" without a full scan. Null values are
+//     dropped by Dexie so the index stays dense.
+//   - `createdAt` for stable ordering (newest uploads first).
+db.version(38).stores({
+	meImages: 'id, kind, primaryFor, createdAt',
+});
+
 // ─── Sync Routing ──────────────────────────────────────────
 // SYNC_APP_MAP, TABLE_TO_SYNC_NAME, TABLE_TO_APP, SYNC_NAME_TO_TABLE,
 // toSyncName() and fromSyncName() are now derived from per-module
@@ -1077,6 +1114,7 @@ const USER_LEVEL_TABLES: ReadonlySet<string> = new Set([
 	'broadcastSettings',
 	'wetterSettings',
 	'userTagPresets',
+	'meImages',
 ]);
 
 for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {

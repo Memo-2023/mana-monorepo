@@ -119,3 +119,91 @@ export function emptyUserContext(): LocalUserContext {
 		interview: { answeredIds: [], skippedIds: [] },
 	} as LocalUserContext;
 }
+
+// ── Me-Images: user-owned reference images for AI generation ───────
+// Plan: docs/plans/me-images-and-reference-generation.md
+//
+// Small, curated pool (typically 2–10 images) the user uploads once —
+// a face portrait, a fullbody shot, maybe hands for ring try-ons.
+// Per-bild opt-in (`usage.aiReference`) gates whether a given image
+// may be sent to OpenAI `/v1/images/edits` when the Picture generator
+// runs in reference mode.
+//
+// User-level table (like userContext): no spaceId, no authorId. The
+// same human uses the same face across every Space.
+
+/**
+ * Reference kind. `face` and `fullbody` have dedicated primary slots
+ * in the UI (M2). `halfbody`, `hands`, and generic `reference` exist
+ * so the user can hold additional context (hands for rings, half-body
+ * for chest-up generations) without overloading the two main slots.
+ */
+export type MeImageKind = 'face' | 'fullbody' | 'halfbody' | 'hands' | 'reference';
+
+/**
+ * Primary slot a given image fills. At most one image per slot is
+ * active at a time — setPrimary(id, slot) clears the previous holder.
+ *   - `avatar`: drives the derived auth.users.image (M2 sync hook).
+ *   - `face-ref`: default face fed to the reference generator.
+ *   - `body-ref`: default fullbody reference.
+ */
+export type MeImagePrimarySlot = 'avatar' | 'face-ref' | 'body-ref';
+
+export interface MeImageUsage {
+	/** Explicit opt-in per image: may KI verwenden? Default false on upload. */
+	aiReference: boolean;
+	/** Counts towards avatar fallback if primary=avatar is not set. */
+	showInProfile: boolean;
+}
+
+export interface LocalMeImage extends BaseRecord {
+	id: string;
+	kind: MeImageKind;
+	label?: string;
+	mediaId: string;
+	storagePath: string;
+	publicUrl: string;
+	thumbnailUrl?: string | null;
+	width: number;
+	height: number;
+	tags: string[];
+	usage: MeImageUsage;
+	primaryFor?: MeImagePrimarySlot | null;
+}
+
+export interface MeImage {
+	id: string;
+	kind: MeImageKind;
+	label?: string;
+	mediaId: string;
+	storagePath: string;
+	publicUrl: string;
+	thumbnailUrl?: string | null;
+	width: number;
+	height: number;
+	tags: string[];
+	usage: MeImageUsage;
+	primaryFor?: MeImagePrimarySlot | null;
+	createdAt: string;
+	updatedAt: string;
+}
+
+/** Convert a LocalMeImage (Dexie row) to the public MeImage type. */
+export function toMeImage(local: LocalMeImage): MeImage {
+	return {
+		id: local.id,
+		kind: local.kind,
+		label: local.label,
+		mediaId: local.mediaId,
+		storagePath: local.storagePath,
+		publicUrl: local.publicUrl,
+		thumbnailUrl: local.thumbnailUrl ?? null,
+		width: local.width,
+		height: local.height,
+		tags: local.tags ?? [],
+		usage: local.usage ?? { aiReference: false, showInProfile: true },
+		primaryFor: local.primaryFor ?? null,
+		createdAt: local.createdAt ?? '',
+		updatedAt: local.updatedAt ?? '',
+	};
+}
