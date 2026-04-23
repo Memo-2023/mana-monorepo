@@ -25,6 +25,15 @@ export const accessTierEnum = pgEnum('access_tier', [
 	'founder',
 ]);
 
+// Enum for user kind. `human` is the default for everyone real. `persona`
+// is for the auto-test users driven by the persona-runner — they go through
+// the same auth/register/JWT pipeline as humans (no bypass), but admin UIs
+// and product analytics filter them out by default. `system` is reserved
+// for service principals (e.g. mana-ai's planner identity).
+//
+// See docs/plans/mana-mcp-and-personas.md (M2 — Persona-Primitives).
+export const userKindEnum = pgEnum('user_kind', ['human', 'persona', 'system']);
+
 // Users table (Better Auth schema)
 export const users = authSchema.table('users', {
 	id: text('id').primaryKey(), // Better Auth generates nanoid
@@ -37,6 +46,7 @@ export const users = authSchema.table('users', {
 	// Custom fields (not required by Better Auth)
 	role: userRoleEnum('role').default('user').notNull(),
 	accessTier: accessTierEnum('access_tier').default('public').notNull(),
+	kind: userKindEnum('kind').default('human').notNull(),
 	twoFactorEnabled: boolean('two_factor_enabled').default(false),
 	deletedAt: timestamp('deleted_at', { withTimezone: true }),
 });

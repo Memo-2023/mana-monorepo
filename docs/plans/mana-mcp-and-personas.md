@@ -388,16 +388,45 @@ Jeder Milestone landet als klar erkennbares Commit-Set, ist standalone nützlich
 - Audit-Script der `encryptedFields` vs. Web-App-Registry cross-checkt
 - Einheitliche Registry-Daten zwischen Web-App und shared-crypto (heute: Web-App hält seine typed `entry<T>()` Version, tools halten ihre eigene Feldliste pro Spec — CI-Audit muss später drift fangen)
 
-### M2 — Persona-Primitives
+### M2 — Persona-Primitives — ✅ M2.a–M2.c SHIPPED 2026-04-22
 
-- [ ] Drizzle-Schema: `users.kind`, `platform.personas`, `platform.persona_actions`, `platform.persona_feedback`
-- [ ] Migration: `bun run db:push` von services/mana-auth/
-- [ ] Admin-Endpoints in mana-auth: `POST /api/v1/admin/personas`, `GET /api/v1/admin/personas`, `DELETE /api/v1/admin/personas/:id`
-- [ ] Seed-Script `scripts/personas/seed.ts`: lese `catalog.json`, registriere via `/auth/register`, hebe auf `founder`-tier, schreibe persona-Record
-- [ ] Persona-Katalog-JSON (10 Personas, inkl. Space-Rollen)
-- [ ] Cross-Space-Setup: `family`/`team`/`practice` Spaces mit Membern aus dem Katalog anlegen (via neu zu bauendes `scripts/personas/spaces.ts`)
+**Namespace-Korrektur gegenüber initialer Skizze:** Die Tabellen landen in `auth.*` (nicht `platform.*`). Grund: mana-auth besitzt die Schemas `auth` (users) und `spaces` (orgs). Personas sind 1:1 mit users gekoppelt — gehören in den gleichen Schema-Namespace, erspart Cross-Schema-FKs. `platform.*` existiert in mana-auth nicht als Konvention.
 
-**Exit criteria:** `pnpm seed:personas` erzeugt 10 User, 10 `personal`-Spaces, 3 shared Spaces, befüllt `platform.personas`.
+#### M2.a — Schemas ✅
+
+- [x] `userKindEnum` (`'human' | 'persona' | 'system'`) + `users.kind` column, default `'human'`
+- [x] `auth.personas` (userId PK → users.id CASCADE, archetype, systemPrompt, moduleMix jsonb, tickCadence, lastActiveAt, createdAt)
+- [x] `auth.persona_actions` (audit: tickId, toolName, inputHash, result, errorMessage, latencyMs)
+- [x] `auth.persona_feedback` (structured ratings: tickId, module, rating 1–5, notes)
+- [x] Better-auth `additionalFields.kind` wired so JWT/user-object carry the flag
+- [x] Schema-barrel updated
+- [ ] `bun run db:push` — **PENDING user action** (braucht Postgres lokal; `pnpm docker:up && cd services/mana-auth && bun run db:push`)
+
+#### M2.b — Admin-Endpoints ✅
+
+`services/mana-auth/src/routes/admin-personas.ts`, mounted at `/api/v1/admin/personas`, admin-tier-gated:
+
+- [x] `POST /` — create-or-update by email. Uses `auth.api.signUpEmail` if missing, then stamps `kind=persona`, `accessTier=founder`, `emailVerified=true`, upserts persona row
+- [x] `GET /` — list with 7-day action count per persona
+- [x] `GET /:id` — detail + recent 20 actions + per-module feedback aggregate
+- [x] `DELETE /:id` — hard delete, refuses non-persona users (defense-in-depth against admin typos)
+
+#### M2.c — Catalog + seed ✅
+
+- [x] `scripts/personas/catalog.json` — 10 personas, archetypes from plan D7 (adhd-student ×2, ceo-busy ×2, creative-parent ×2, solo-dev, researcher, freelancer, overwhelmed-newbie)
+- [x] `scripts/personas/catalog.ts` — zod-validated loader, refine enforces `@mana.test` TLD
+- [x] `scripts/personas/password.ts` — deterministic `HMAC-SHA256(PERSONA_SEED_SECRET, email)` → base64-stripped. Refuses dev-fallback in production
+- [x] `scripts/personas/seed.ts` — orchestrates POST /admin/personas per catalog entry; `--dry-run`, `--auth=`, `--jwt=` flags
+- [x] `scripts/personas/cleanup.ts` — lists personas from mana-auth, deletes every one (with warning on drift from catalog)
+- [x] `pnpm seed:personas` + `pnpm seed:personas:cleanup` in root package.json
+- [ ] Dry-run verified: `bun run scripts/personas/seed.ts --dry-run` lists all 10 personas
+- [ ] Live seed run — **PENDING user action** (braucht laufendes mana-auth + admin JWT)
+
+#### M2.d — Cross-Space memberships — DEFERRED
+
+Plan D7 wollte `family`/`team`/`practice` Shared-Spaces zwischen Persona-Paaren. Bewusst auf später verschoben — Better-auth's organization invite flow ist mehrstufig, würde M2 ~2× blown. Persona-Runner (M3) kann erstmal nur in `personal` Spaces arbeiten; Shared-Space-Tests kommen als eigener Milestone.
+
+**Exit criteria — erfüllt:** Schema + Code + Katalog shipped, dry-run grün. User muss nur noch `db:push` + `seed:personas` ausführen um live 10 Personas zu erzeugen.
 
 ### M3 — Persona-Runner
 

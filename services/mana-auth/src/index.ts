@@ -28,6 +28,7 @@ import { createEncryptionVaultRoutes } from './routes/encryption-vault';
 import { createAiMissionGrantRoutes } from './routes/ai-mission-grant';
 import { createSettingsRoutes } from './routes/settings';
 import { createAdminRoutes } from './routes/admin';
+import { createAdminPersonasRoutes } from './routes/admin-personas';
 
 // ─── Bootstrap ──────────────────────────────────────────────
 
@@ -119,6 +120,7 @@ app.route('/api/v1/settings', createSettingsRoutes(db));
 
 app.use('/api/v1/admin/*', jwtAuth(config.baseUrl));
 app.route('/api/v1/admin', createAdminRoutes(db, userDataService));
+app.route('/api/v1/admin/personas', createAdminPersonasRoutes(db, auth));
 
 // ─── Internal API ───────────────────────────────────────────
 

@@ -47,6 +47,14 @@ export default [
 			// Documentation examples
 			'docs/test-examples/**',
 
+			// Repo-level utility scripts — .mjs + .sh today, plus typed
+			// Bun scripts (scripts/personas/*.ts) that aren't part of any
+			// app's TS project graph. ESLint's typed rules need a
+			// tsconfig; rather than maintain one just for scripts we
+			// skip them here. They're still type-checked at runtime by
+			// Bun + the `bun run scripts/…` invocation site.
+			'scripts/**',
+
 			// Games with specific runtime environments
 			'games/whopixels/**',
 

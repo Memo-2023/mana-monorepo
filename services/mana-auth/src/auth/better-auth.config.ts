@@ -119,6 +119,11 @@ export function createBetterAuth(databaseUrl: string) {
 					defaultValue: 'public',
 					input: false, // Not settable via sign-up
 				},
+				kind: {
+					type: 'string',
+					defaultValue: 'human',
+					input: false, // Set only via admin endpoints, never sign-up
+				},
 			},
 		},
 

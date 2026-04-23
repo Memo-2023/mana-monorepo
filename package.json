@@ -45,6 +45,8 @@
 		"setup:db:chat": "./scripts/setup-databases.sh chat",
 		"setup:db:auth": "./scripts/setup-databases.sh auth",
 		"setup:dev-user": "./scripts/dev/setup-dev-user.sh",
+		"seed:personas": "bun run scripts/personas/seed.ts",
+		"seed:personas:cleanup": "bun run scripts/personas/cleanup.ts",
 		"build:packages": "pnpm --filter './packages/*' build",
 		"postinstall": "node scripts/generate-env.mjs && pnpm run build:packages",
 		"mana:dev": "turbo run dev --filter=mana...",
