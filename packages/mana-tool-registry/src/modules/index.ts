@@ -17,6 +17,7 @@ import { registerMoodTools } from './mood.ts';
 import { registerNotesTools } from './notes.ts';
 import { registerSpacesTools } from './spaces.ts';
 import { registerTodoTools } from './todo.ts';
+import { registerWardrobeTools } from './wardrobe.ts';
 
 export function registerAllModules(): void {
 	registerHabitsTools();
@@ -26,6 +27,7 @@ export function registerAllModules(): void {
 	registerNotesTools();
 	registerSpacesTools();
 	registerTodoTools();
+	registerWardrobeTools();
 }
 
 export {
@@ -36,4 +38,5 @@ export {
 	registerNotesTools,
 	registerSpacesTools,
 	registerTodoTools,
+	registerWardrobeTools,
 };

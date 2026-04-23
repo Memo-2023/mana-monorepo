@@ -90,14 +90,24 @@ export {
 	DEFAULT_COMPACT_KEEP_RECENT,
 	DEFAULT_COMPACT_MODEL,
 	DEFAULT_COMPACT_THRESHOLD,
+	MAX_SUB_AGENT_DEPTH,
 	MockLlmClient,
 	parseCompactSummary,
 	parsePlannerResponse,
 	renderCompactSummary,
 	runPlannerLoop,
+	runSubAgent,
 	shouldCompact,
+	SubAgentRecursionError,
 } from './planner';
-export type { CompactHistoryOptions, CompactHistoryResult, CompactSummary } from './planner';
+export type {
+	CompactHistoryOptions,
+	CompactHistoryResult,
+	CompactSummary,
+	RunSubAgentInput,
+	SubAgentResult,
+	SubAgentType,
+} from './planner';
 
 export {
 	AI_PROPOSABLE_TOOL_NAMES,

@@ -29,7 +29,9 @@ export type ModuleId =
 	| 'tags'
 	| 'mood'
 	// — M5 (me-images + reference-based image generation) —
-	| 'me';
+	| 'me'
+	// — Wardrobe M5 (garments + outfits + try-on) —
+	| 'wardrobe';
 
 /**
  * `user-space` — operates on the caller's data within a specific Space.

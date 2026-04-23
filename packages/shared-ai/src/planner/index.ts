@@ -21,6 +21,8 @@ export {
 	shouldCompact,
 } from './compact';
 export type { CompactHistoryOptions, CompactHistoryResult, CompactSummary } from './compact';
+export { MAX_SUB_AGENT_DEPTH, SubAgentRecursionError, runSubAgent } from './sub-agent';
+export type { RunSubAgentInput, SubAgentResult, SubAgentType } from './sub-agent';
 export { MockLlmClient } from './mock-llm';
 export type { MockLlmTurn } from './mock-llm';
 export type {
