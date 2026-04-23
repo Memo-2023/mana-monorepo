@@ -8,13 +8,13 @@
 		pagesForSite,
 		blocksForPage,
 	} from '../queries';
-	import { blocksStore } from '../stores/blocks.svelte';
 	import BlockRenderer from '../components/BlockRenderer.svelte';
 	import BlockInspector from '../components/BlockInspector.svelte';
 	import InsertPalette from '../components/InsertPalette.svelte';
 	import PageList from '../components/PageList.svelte';
 	import PublishBar from '../components/PublishBar.svelte';
 	import SiteSettingsDialog from '../components/SiteSettingsDialog.svelte';
+	import { createEditorHistory, setEditorHistoryContext } from '../history.svelte';
 
 	interface Props {
 		siteId: string;
@@ -22,6 +22,9 @@
 	}
 
 	let props: Props = $props();
+
+	const history = createEditorHistory();
+	setEditorHistoryContext(history);
 
 	const sites = useAllSites();
 	const pages = useAllPages();
@@ -47,13 +50,16 @@
 		return pageBlocks.filter((b) => (b.parentBlockId ?? null) === parentId);
 	});
 
-	// Clear selection when switching page.
+	// Clear selection + history when switching page. History is scoped to
+	// a single page's editing session — undoing into a block that belongs
+	// to another page would be confusing and error-prone.
 	$effect(() => {
 		// eslint-disable-next-line @typescript-eslint/no-unused-expressions
 		props.pageId;
 		untrack(() => {
 			selectedBlockId = null;
 			activeTab = 'pages';
+			history.clear();
 		});
 	});
 
@@ -69,15 +75,61 @@
 	});
 
 	async function addBlock(type: string) {
-		const block = await blocksStore.addBlock({ pageId: props.pageId, type });
+		const block = await history.addBlock({ pageId: props.pageId, type });
 		selectedBlockId = block.id;
 	}
+
+	function isTextEditingTarget(el: EventTarget | null): boolean {
+		if (!(el instanceof HTMLElement)) return false;
+		const tag = el.tagName;
+		if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return true;
+		return el.isContentEditable;
+	}
+
+	function onKeyDown(e: KeyboardEvent) {
+		if (!(e.metaKey || e.ctrlKey)) return;
+		// Don't intercept undo/redo inside form fields — the browser's
+		// native text-undo is almost always what the user wants there.
+		if (isTextEditingTarget(e.target)) return;
+
+		const k = e.key.toLowerCase();
+		if (k === 'z' && !e.shiftKey) {
+			e.preventDefault();
+			void history.undo();
+		} else if ((k === 'z' && e.shiftKey) || k === 'y') {
+			e.preventDefault();
+			void history.redo();
+		}
+	}
 </script>
+
+<svelte:window onkeydown={onKeyDown} />
 
 <div class="wb-editor-layout">
 	{#if site}
 		<PublishBar {site} />
 	{/if}
+
+	<div class="wb-toolbar">
+		<button
+			class="wb-toolbar__btn"
+			onclick={() => history.undo()}
+			disabled={!history.canUndo}
+			title={history.undoLabel ? `Rückgängig: ${history.undoLabel}` : 'Rückgängig (⌘Z)'}
+			aria-label="Rückgängig"
+		>
+			↶
+		</button>
+		<button
+			class="wb-toolbar__btn"
+			onclick={() => history.redo()}
+			disabled={!history.canRedo}
+			title={history.redoLabel ? `Wiederholen: ${history.redoLabel}` : 'Wiederholen (⌘⇧Z)'}
+			aria-label="Wiederholen"
+		>
+			↷
+		</button>
+	</div>
 
 	<div class="wb-editor">
 		<main class="wb-editor__center">
@@ -184,6 +236,40 @@
 		display: flex;
 		flex-direction: column;
 		height: 100%;
+	}
+	.wb-toolbar {
+		display: flex;
+		gap: 0.25rem;
+		padding: 0.35rem 0.5rem;
+		border-top: 1px solid rgba(255, 255, 255, 0.06);
+		border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+		background: rgb(12, 15, 20);
+		flex: 0 0 auto;
+	}
+	.wb-toolbar__btn {
+		background: transparent;
+		border: 1px solid rgba(255, 255, 255, 0.12);
+		color: inherit;
+		width: 1.75rem;
+		height: 1.75rem;
+		padding: 0;
+		font-size: 1rem;
+		line-height: 1;
+		border-radius: 0.375rem;
+		cursor: pointer;
+		opacity: 0.75;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+	}
+	.wb-toolbar__btn:hover:not(:disabled) {
+		background: rgba(99, 102, 241, 0.15);
+		border-color: rgba(99, 102, 241, 0.4);
+		opacity: 1;
+	}
+	.wb-toolbar__btn:disabled {
+		opacity: 0.25;
+		cursor: not-allowed;
 	}
 	.wb-editor {
 		display: grid;

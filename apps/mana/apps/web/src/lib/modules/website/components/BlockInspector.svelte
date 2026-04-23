@@ -2,6 +2,7 @@
 	import type { Component } from 'svelte';
 	import { getBlockSpec, type Block, type BlockInspectorProps } from '@mana/website-blocks';
 	import { blocksStore, InvalidBlockPropsError } from '../stores/blocks.svelte';
+	import { getEditorHistoryContext } from '../history.svelte';
 	import type { WebsiteBlock } from '../types';
 	import ImageInspector from './ImageInspector.svelte';
 	import GalleryInspector from './GalleryInspector.svelte';
@@ -13,6 +14,11 @@
 	}
 
 	let { block, siblings, onDeleted }: Props = $props();
+
+	// Route all mutations through the editor's history layer when it's
+	// mounted (always, in the current EditorView). Falls back to the raw
+	// store so the inspector stays usable on surfaces without history.
+	const history = getEditorHistoryContext();
 
 	const siblingIndex = $derived(siblings.findIndex((b) => b.id === block.id));
 	const canMoveUp = $derived(siblingIndex > 0);
@@ -46,7 +52,9 @@
 	async function onChange(patch: unknown) {
 		lastError = null;
 		try {
-			await blocksStore.updateBlockProps(block.id, patch as Record<string, unknown>);
+			const p = patch as Record<string, unknown>;
+			if (history) await history.updateBlockProps(block.id, p);
+			else await blocksStore.updateBlockProps(block.id, p);
 		} catch (err) {
 			if (err instanceof InvalidBlockPropsError) {
 				lastError = `Validation failed: ${err.message}`;
@@ -58,18 +66,21 @@
 
 	async function onDelete() {
 		if (!confirm('Diesen Block löschen?')) return;
-		await blocksStore.deleteBlock(block.id);
+		if (history) await history.deleteBlock(block.id);
+		else await blocksStore.deleteBlock(block.id);
 		onDeleted?.();
 	}
 
 	async function onMoveUp() {
 		if (!canMoveUp) return;
-		await blocksStore.moveBlockUp(block.id);
+		if (history) await history.moveBlockUp(block.id);
+		else await blocksStore.moveBlockUp(block.id);
 	}
 
 	async function onMoveDown() {
 		if (!canMoveDown) return;
-		await blocksStore.moveBlockDown(block.id);
+		if (history) await history.moveBlockDown(block.id);
+		else await blocksStore.moveBlockDown(block.id);
 	}
 
 	function asRegistryBlock(b: WebsiteBlock): Block<unknown> {

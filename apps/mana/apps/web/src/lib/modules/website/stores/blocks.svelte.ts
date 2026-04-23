@@ -159,6 +159,89 @@ export const blocksStore = {
 			updatedAt: now,
 		});
 		await touchSiteForPage(existing.pageId);
+
+		emitDomainEvent('WebsiteBlockUpdated', 'website', 'websiteBlocks', id, {
+			blockId: id,
+			pageId: existing.pageId,
+			fields: ['order'],
+		});
+	},
+
+	/**
+	 * Restore a soft-deleted block to the exact snapshot captured before
+	 * the delete. Used by undo/redo — writes the record back wholesale so
+	 * child blocks (whose parentBlockId points at this id) reattach as if
+	 * nothing happened. Emits `WebsiteBlockAdded` because the outcome for
+	 * the event log is the same as a fresh insert.
+	 */
+	async restoreBlock(snapshot: LocalWebsiteBlock) {
+		const now = new Date().toISOString();
+		const restored: LocalWebsiteBlock = {
+			...snapshot,
+			deletedAt: undefined,
+			updatedAt: now,
+		};
+		await websiteBlocksTable.put(restored);
+		await touchSiteForPage(snapshot.pageId);
+
+		emitDomainEvent('WebsiteBlockAdded', 'website', 'websiteBlocks', snapshot.id, {
+			blockId: snapshot.id,
+			pageId: snapshot.pageId,
+			type: snapshot.type,
+		});
+
+		return restored;
+	},
+
+	/**
+	 * Overwrite a block's props without merging — redo/undo target that
+	 * needs to bypass the merge-and-revalidate path of updateBlockProps.
+	 * Props are still validated against the block's Zod schema.
+	 */
+	async setBlockProps(id: string, fullProps: unknown) {
+		const existing = await websiteBlocksTable.get(id);
+		if (!existing) throw new Error(`Block ${id} not found`);
+
+		const validated = safeValidateBlockProps(existing.type, fullProps);
+		if (!validated.success) {
+			throw new InvalidBlockPropsError(existing.type, validated.error);
+		}
+
+		const now = new Date().toISOString();
+		await websiteBlocksTable.update(id, {
+			props: validated.data,
+			updatedAt: now,
+		});
+		await touchSiteForPage(existing.pageId);
+
+		emitDomainEvent('WebsiteBlockUpdated', 'website', 'websiteBlocks', id, {
+			blockId: id,
+			pageId: existing.pageId,
+			fields: ['props'],
+		});
+	},
+
+	/**
+	 * Set a block's order to an exact value — used by undo/redo of the
+	 * fractional-index reorder path where we need the prior numeric order
+	 * back, not an "insert between" operation.
+	 */
+	async setBlockOrder(id: string, order: number) {
+		const existing = await websiteBlocksTable.get(id);
+		if (!existing) return;
+
+		const now = new Date().toISOString();
+		await websiteBlocksTable.update(id, {
+			order,
+			updatedAt: now,
+		});
+		await touchSiteForPage(existing.pageId);
+
+		emitDomainEvent('WebsiteBlockUpdated', 'website', 'websiteBlocks', id, {
+			blockId: id,
+			pageId: existing.pageId,
+			fields: ['order'],
+		});
 	},
 
 	/**
