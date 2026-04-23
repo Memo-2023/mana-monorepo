@@ -96,8 +96,16 @@ export async function runMainTurn(input: SessionInput): Promise<SessionResult> {
 		},
 	});
 
+	// Per-turn Map so tool_result blocks can flip the *right* ActionRow
+	// (the one whose tool_use_id they reference), not "the most recent".
+	// Anthropic's stream interleaves tool_use and tool_result blocks
+	// deterministically, but when Claude pipelines multiple tools in one
+	// assistant turn, a later tool_result carries an earlier tool_use_id
+	// — the last-action fallback gets that wrong.
+	const toolUseIndex = new Map<string, number>();
+
 	for await (const msg of q as AsyncIterable<SDKMessage>) {
-		collectActionsFromMessage(msg, input.tickId, actions, modulesUsed);
+		collectActionsFromMessage(msg, input.tickId, actions, modulesUsed, toolUseIndex);
 	}
 
 	return { actions, feedback: [], modulesUsed };
@@ -143,7 +151,8 @@ function collectActionsFromMessage(
 	msg: SDKMessage,
 	tickId: string,
 	actions: ActionRow[],
-	modulesUsed: Set<string>
+	modulesUsed: Set<string>,
+	toolUseIndex: Map<string, number>
 ): void {
 	// SDKMessage is a big union; we only care about assistant messages
 	// that contain tool_use blocks, and user messages that contain
@@ -168,19 +177,23 @@ function collectActionsFromMessage(
 				inputHash: hashInput(block.input),
 				result: 'ok', // provisional; rewritten on matching tool_result if it was an error
 			});
+			// Record the Anthropic-assigned id so a later tool_result can
+			// find its row even if other tools finished in between.
+			const toolUseId = typeof block.id === 'string' ? block.id : null;
+			if (toolUseId) toolUseIndex.set(toolUseId, actions.length - 1);
 		} else if (blockType === 'tool_result') {
 			const isError = block.is_error === true;
 			if (!isError) continue;
-			// Flip the most recent action that matches this tool_use_id.
 			const toolUseId = typeof block.tool_use_id === 'string' ? block.tool_use_id : null;
-			if (!toolUseId) continue;
-			// We didn't store tool_use_id (would require pairing state); cheap
-			// fallback: mark the last action as error. Good enough for the
-			// audit dashboard; precise attribution lands in a later iteration.
-			const last = actions[actions.length - 1];
-			if (last) {
-				last.result = 'error';
-				last.errorMessage = stringifyBlock(block);
+			// Exact pairing via tool_use_id → fall back to last action only
+			// if the id is missing (shouldn't happen with the current SDK,
+			// but the fallback keeps the pipeline honest if Anthropic ever
+			// ships a block without an id).
+			const idx = toolUseId !== null ? toolUseIndex.get(toolUseId) : undefined;
+			const target = idx !== undefined ? actions[idx] : actions[actions.length - 1];
+			if (target) {
+				target.result = 'error';
+				target.errorMessage = stringifyBlock(block);
 			}
 		}
 	}
