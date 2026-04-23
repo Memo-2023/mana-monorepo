@@ -36,6 +36,8 @@ COPY packages/shared-hono ./packages/shared-hono
 COPY packages/shared-logger ./packages/shared-logger
 COPY packages/shared-storage ./packages/shared-storage
 COPY packages/shared-types ./packages/shared-types
+COPY packages/shared-ai ./packages/shared-ai
+COPY packages/shared-rss ./packages/shared-rss
 # @mana/media-client lives under services/mana-media (sub-package).
 COPY services/mana-media/packages/client ./services/mana-media/packages/client
 
