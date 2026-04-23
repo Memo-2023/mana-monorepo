@@ -1,0 +1,15 @@
+{
+	"name": "@mana/tests-personas",
+	"version": "0.1.0",
+	"private": true,
+	"description": "Visual regression suite driven by the M2 personas (see docs/plans/mana-mcp-and-personas.md M5).",
+	"type": "module",
+	"scripts": {
+		"test": "playwright test --config=playwright.config.ts",
+		"test:update": "playwright test --config=playwright.config.ts --update-snapshots",
+		"report": "playwright show-report playwright-report-personas"
+	},
+	"devDependencies": {
+		"@playwright/test": "^1.49.0"
+	}
+}

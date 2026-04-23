@@ -465,7 +465,22 @@ Full tick loop live. End-to-end pipeline proven through type-check + boot smoke;
 
 **Exit criteria:** Grep nach duplizierten Tool-Definitionen → leer. Beide Consumer grün.
 
-### M5 — Visual Suite
+### M5 — Visual Suite — ✅ M5.a scaffold SHIPPED 2026-04-23
+
+Single-flow foundation. Fixture + config + one spec + README + pnpm-scripts. Extension is copy-paste per module. Live baseline capture is user-side (needs running stack + seeded + persona-runner ticked).
+
+- [x] `tests/personas/playwright.config.ts` — own config, 2 viewports (desktop + mobile Pixel 5), 0.2 % diff threshold, animations disabled, `snapshotPathTemplate` scoped to per-spec folder, no auto-webServer (regressions only matter against a real running stack)
+- [x] `tests/personas/fixtures/persona-auth.ts` — HMAC-SHA256 password derivation (bit-identical mirror of `scripts/personas/password.ts` + `services/mana-persona-runner/src/password.ts` — **3-way contract**, changing one breaks the others), Set-Cookie parsing, typed `test.extend` with `personaKey` worker option + `personaPage` fixture
+- [x] `tests/personas/flows/home.spec.ts` — smoke flow, captures home-tour screenshot as `anna-adhd-student`
+- [x] `tests/personas/README.md` — prerequisites, run recipe, architecture diagram, "adding a flow" steps
+- [x] `pnpm test:personas` + `pnpm test:personas:update` on the root
+
+**Deferred** (copy-paste extensions once user has stack running):
+- Per-module flows: todo, journal, notes, habits, calendar, contacts
+- Additional viewports (iPad, webkit)
+- Nightly CI job via GitHub Action or Mac-Mini cron
+
+#### Archived initial checklist
 
 - [ ] `tests/personas/` Struktur
 - [ ] Persona-Login-Fixture (API-Login → storageState)
