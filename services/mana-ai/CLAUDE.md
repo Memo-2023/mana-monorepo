@@ -97,6 +97,15 @@ Bewusst nicht gemacht (offen):
 
 Details zum Deep-Research-Flow: [`docs/reports/gemini-deep-research.md`](../../docs/reports/gemini-deep-research.md) §3.2.
 
+## Status: v0.8 (Agent-Loop Improvements M1, 2026-04-23)
+
+Claude-Code-inspirierte Primitive in `runPlannerLoop` (live in `@mana/shared-ai`, siehe [`docs/plans/agent-loop-improvements-m1.md`](../../docs/plans/agent-loop-improvements-m1.md)) und deren Konsumierung hier:
+
+- [x] `reminderChannel` wired via `buildReminderChannel()` in `src/planner/reminders.ts`. Erster Live-Producer: `tokenBudgetReminder` — warnt ab 75% Tagesbudget, eskaliert ab 100% mit "JETZT abschliessen"-Prompt. Round-usage wird on-the-fly drauf addiert, so dass der Warn-Level mitwandert.
+- [x] `retryLoopReminder` — Shape fertig, aber dormant: LoopState exponiert heute nur `lastCall`, nicht ein Failure-Window. Aktiviert automatisch sobald shared-ai LoopState um `recentResults` erweitert.
+- [x] `POLICY_MODE` env (off/log-only/enforce, default log-only) für die mana-ai-seitige Freitext-Inspection (`detectInjectionMarker`). Rate-Limit und destructive-opt-in sind hier NICHT aktiv — tools werden nur als PlanSteps aufgezeichnet, die echte Enforcement passiert im Webapp-Client.
+- [ ] Parallel-Reads im Server-Tick haben keinen Effekt, weil `SERVER_TOOLS` per Konstruktion propose-only ist. Könnte relevant werden sobald mana-ai die vollständige tool-registry absorbiert (M4 des Personas-Plans).
+
 ## Status: v0.6 (Server-side Web-Research + erweiterte Tools)
 
 Der Runner kann jetzt vor dem Planner-Call eigenstaendig Web-Recherche ausfuehren (ohne Browser). Serverseitig werden 31 propose-Tools ueber 16 Module vom Planner vorgeschlagen (auto-Tools laufen ausschliesslich in der Webapp-Reasoning-Loop — der Server sieht nur propose).

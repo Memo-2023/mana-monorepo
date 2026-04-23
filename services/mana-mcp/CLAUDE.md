@@ -91,6 +91,29 @@ The MCP server picks up the tool on next restart — no service code change need
 
 **Policy gating reminder:** `scope: 'admin'` tools never reach MCP clients. `policyHint: 'destructive'` tools are exposed but should be rare; prefer `policyHint: 'write'` with a soft-delete semantic.
 
+## Policy gate
+
+Every tool call is evaluated by `evaluatePolicy()` from `@mana/tool-registry` before reaching the handler (see [`docs/plans/agent-loop-improvements-m1.md`](../../docs/plans/agent-loop-improvements-m1.md) for the design, and [`docs/reports/claude-code-architecture.md`](../../docs/reports/claude-code-architecture.md) for the Claude-Code `UH1` precedent).
+
+| `POLICY_MODE` | Behaviour |
+|---|---|
+| `off`       | Gate disabled. Legacy path. |
+| `log-only`  | **Default.** Evaluates, increments metrics, never blocks. Used during soak. |
+| `enforce`   | Deny decisions abort the call with the reminder payload attached to the MCP error. |
+
+Decisions are emitted as `mana_mcp_policy_decisions_total{decision, reason, mode}` on `/metrics`. During log-only soak, watch `decision="deny"` — those are the calls that WOULD have been blocked. If false-positive rate stays below ~1 % over a week, flip to `enforce`.
+
+### What the gate decides today
+
+1. `scope: 'admin'` → deny outright (defense-in-depth; `isExposable` already filters these, but mana-ai consuming the registry doesn't).
+2. `policyHint: 'destructive'` not in user's `allowDestructive` list → deny. Today the list is hard-coded to `[]` in `settingsFor()`; next PR sources it from the user profile.
+3. Rolling 30 calls / 60 s per tool per user → deny. Ring buffer in `invocation-log.ts`.
+4. Prompt-injection markers in freetext args → allow with `decision=flagged`. Non-blocking; signal only.
+
+## Metrics
+
+`GET /metrics` exposes the `mana_mcp_` registry (prom-client default metrics + policy + tool counters). Scraped by Prometheus at 30 s via the `mana-mcp` job in `docker/prometheus/prometheus.yml`.
+
 ## Local smoke test (M1 exit gate)
 
 Manual end-to-end check that proves: external client → MCP → mana-sync → Postgres.
