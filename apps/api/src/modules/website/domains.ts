@@ -22,6 +22,7 @@ import { and, desc, eq } from 'drizzle-orm';
 import { promises as dns } from 'node:dns';
 import { requireTier, type AuthVariables } from '@mana/shared-hono';
 import { errorResponse, validationError } from '../../lib/responses';
+import { websiteDomainVerifyTotal } from '../../lib/metrics';
 import { db, customDomains } from './schema';
 
 const routes = new Hono<{ Variables: AuthVariables }>();
@@ -171,6 +172,7 @@ routes.post('/sites/:id/domains/:domainId/verify', async (c) => {
 		void cloudflareOnboard(row.hostname).catch((err) => {
 			console.error('[website] cloudflare onboard failed', { hostname: row.hostname, err });
 		});
+		websiteDomainVerifyTotal.inc({ result: 'verified' });
 		return c.json({ verified: true, hostname: row.hostname });
 	}
 
@@ -183,6 +185,7 @@ routes.post('/sites/:id/domains/:domainId/verify', async (c) => {
 		})
 		.where(eq(customDomains.id, domainId));
 
+	websiteDomainVerifyTotal.inc({ result: 'failed' });
 	return c.json({ verified: false, reason: result.reason }, 400);
 });
 
