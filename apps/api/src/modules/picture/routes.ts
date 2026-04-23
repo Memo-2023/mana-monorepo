@@ -341,45 +341,83 @@ routes.post('/generate-with-reference', async (c) => {
 
 	// Multipart POST to OpenAI. FormData auto-sets Content-Type with a
 	// boundary; setting it manually would break parsing on OpenAI's end.
-	const formData = new FormData();
-	formData.append('model', openaiModel);
-	formData.append('prompt', prompt);
-	formData.append('size', size);
-	formData.append('quality', quality);
-	formData.append('n', String(effectiveBatch));
 	// gpt-image-* requires the array-syntax `image[]` for multi-reference
 	// calls — a repeated plain `image` field triggers OpenAI's
 	// `duplicate_parameter` error even though the old DALL·E edits
 	// endpoint tolerated it. Keep `image[]` for the single-ref case too:
 	// OpenAI accepts the array form with any cardinality ≥ 1, so there's
 	// no need to branch here.
-	for (const ref of referenceBlobs) {
-		formData.append('image[]', ref.blob, ref.filename);
+	function buildFormData(modelName: string): FormData {
+		const fd = new FormData();
+		fd.append('model', modelName);
+		fd.append('prompt', prompt);
+		fd.append('size', size);
+		fd.append('quality', quality);
+		fd.append('n', String(effectiveBatch));
+		for (const ref of referenceBlobs) {
+			fd.append('image[]', ref.blob, ref.filename);
+		}
+		return fd;
 	}
 
-	let generatedBuffers: ArrayBuffer[];
-	try {
+	async function callOpenAiEdits(
+		modelName: string
+	): Promise<
+		| { ok: true; data: { data?: Array<{ b64_json?: string }> } }
+		| { ok: false; status: number; body: string }
+	> {
 		const res = await fetch('https://api.openai.com/v1/images/edits', {
 			method: 'POST',
 			headers: { Authorization: `Bearer ${OPENAI_API_KEY}` },
-			body: formData,
+			body: buildFormData(modelName),
 		});
 		if (!res.ok) {
-			const detail = await res.text().catch(() => '');
+			const body = await res.text().catch(() => '');
+			return { ok: false, status: res.status, body };
+		}
+		return { ok: true, data: (await res.json()) as { data?: Array<{ b64_json?: string }> } };
+	}
+
+	// "Verify your organization to use gpt-image-2" is a known OpenAI
+	// rejection that stays blocked until the user completes their org
+	// verification (a manual step on platform.openai.com, sometimes with
+	// a 15-min propagation delay). Falling back to gpt-image-1 keeps the
+	// Try-On flow usable in the meantime — same edits endpoint, same
+	// `image[]` multi-reference semantics, same quality/size values.
+	// Only kicks in when the client requested gpt-image-2 (or left the
+	// default): an explicit `openai/gpt-image-1` request stays on 1.
+	function needsGptImage1Fallback(body: string, attemptedModel: string): boolean {
+		if (attemptedModel !== 'gpt-image-2') return false;
+		return /verified to use the model/i.test(body);
+	}
+
+	let generatedBuffers: ArrayBuffer[];
+	let modelUsed = openaiModel;
+	try {
+		let result = await callOpenAiEdits(openaiModel);
+
+		if (!result.ok && needsGptImage1Fallback(result.body, openaiModel)) {
+			console.warn(
+				'[picture/generate-with-reference] gpt-image-2 unavailable (org not verified), falling back to gpt-image-1'
+			);
+			modelUsed = 'gpt-image-1';
+			result = await callOpenAiEdits('gpt-image-1');
+		}
+
+		if (!result.ok) {
 			console.error('[picture/generate-with-reference] OpenAI returned non-ok', {
-				status: res.status,
-				statusText: res.statusText,
-				body: detail.slice(0, 1000),
+				status: result.status,
+				body: result.body.slice(0, 1000),
 				refCount: referenceBlobs.length,
 				prompt: prompt.slice(0, 120),
-				model: openaiModel,
+				model: modelUsed,
 				size,
 				quality,
 			});
-			return c.json({ error: 'OpenAI image edit failed', detail: detail.slice(0, 500) }, 502);
+			return c.json({ error: 'OpenAI image edit failed', detail: result.body.slice(0, 500) }, 502);
 		}
-		const data = (await res.json()) as { data?: Array<{ b64_json?: string }> };
-		const blobs = (data.data ?? []).map((d) => d.b64_json).filter((b): b is string => !!b);
+
+		const blobs = (result.data.data ?? []).map((d) => d.b64_json).filter((b): b is string => !!b);
 		if (blobs.length === 0) return c.json({ error: 'OpenAI returned no image data' }, 502);
 		generatedBuffers = blobs.map((b64) => {
 			const bin = Buffer.from(b64, 'base64');
@@ -415,10 +453,14 @@ routes.post('/generate-with-reference', async (c) => {
 			idx++;
 		}
 
+		// Report the model that actually produced the image, not the one
+		// the client asked for — matters when the gpt-image-2 fallback
+		// kicked in (we want the picture row's `model` metadata to match
+		// the real source for future re-generation / audit).
 		return c.json({
 			images,
 			prompt,
-			model,
+			model: `openai/${modelUsed}`,
 			referenceMediaIds: refIds,
 			mode: 'edit',
 			// Back-compat: first image exposed at top level too, matching /generate.
