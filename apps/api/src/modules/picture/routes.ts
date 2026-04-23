@@ -317,19 +317,21 @@ routes.post('/generate-with-reference', async (c) => {
 		return c.json({ error: 'Ownership check failed', detail: e.message }, 502);
 	}
 
-	// Fetch reference buffers in parallel. The mana-media /file route is
-	// public, so no auth header needed — ownership was already verified.
+	// Fetch reference buffers in parallel, normalized to clean RGB PNG via
+	// mana-media's transform endpoint. gpt-image-1 is picky about color
+	// modes and rejects HEIC / CMYK / palette-PNG / APNG with
+	// `Invalid image file or mode for image N` — routing through sharp
+	// server-side normalizes every upload before it hits OpenAI, and caps
+	// the longest side at 1024px to stay well under the 4 MB/image limit.
+	// No aspect-ratio distortion (fit=inside).
 	let referenceBlobs: Array<{ blob: Blob; filename: string }>;
 	try {
-		const { getMediaBuffer } = await import('../../lib/media');
-		const buffers = await Promise.all(refIds.map((id) => getMediaBuffer(id)));
-		referenceBlobs = buffers.map((b, i) => {
-			const ext = b.mimeType.split('/')[1]?.split(';')[0] ?? 'png';
-			return {
-				blob: new Blob([b.buffer], { type: b.mimeType }),
-				filename: `ref-${i}.${ext === 'jpeg' ? 'jpg' : ext}`,
-			};
-		});
+		const { getMediaBufferAsPng } = await import('../../lib/media');
+		const buffers = await Promise.all(refIds.map((id) => getMediaBufferAsPng(id, 1024)));
+		referenceBlobs = buffers.map((b, i) => ({
+			blob: new Blob([b.buffer], { type: b.mimeType }),
+			filename: `ref-${i}.png`,
+		}));
 	} catch (err) {
 		const message = err instanceof Error ? err.message : String(err);
 		console.error('[picture/generate-with-reference] failed to fetch reference media', {
