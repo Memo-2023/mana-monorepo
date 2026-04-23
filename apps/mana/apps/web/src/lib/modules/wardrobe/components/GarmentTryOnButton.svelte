@@ -1,0 +1,148 @@
+<!--
+  Single-garment try-on action for the garment detail page. Thinner
+  sibling of TryOnButton — no outfit context, no occasion hint. Still
+  handles the three states (ready / missing refs / loading) and
+  disclaimer in non-personal spaces.
+
+  Plan follow-up: docs/plans/wardrobe-module.md M4 called out solo-
+  garment try-on ("mit impliziten 'Solo-Outfit'"); the runGarmentTryOn
+  helper writes a picture.images row WITHOUT a wardrobeOutfitId, so
+  the result lives in the Picture gallery but doesn't pollute any
+  outfit's try-on history.
+-->
+<script lang="ts">
+	import { Sparkle, UserCircle, Info } from '@mana/shared-icons';
+	import { getActiveSpace } from '$lib/data/scope';
+	import { useImageByPrimary } from '$lib/modules/profile/queries';
+	import { isAccessoryGarment, runGarmentTryOn } from '../api/try-on';
+	import type { Garment } from '../types';
+
+	interface Props {
+		garment: Garment;
+	}
+
+	let { garment }: Props = $props();
+
+	const face$ = useImageByPrimary('face-ref');
+	const body$ = useImageByPrimary('body-ref');
+	const activeSpace = $derived(getActiveSpace());
+
+	const face = $derived(face$.value);
+	const body = $derived(body$.value);
+	const accessoryOnly = $derived(isAccessoryGarment(garment));
+
+	const missingFace = $derived(!face);
+	const missingBody = $derived(!accessoryOnly && !body);
+	const hasPhoto = $derived((garment.mediaIds?.length ?? 0) > 0);
+	const canTryOn = $derived(!missingFace && !missingBody && hasPhoto);
+
+	let running = $state(false);
+	let error = $state<string | null>(null);
+	let lastResultUrl = $state<string | null>(null);
+
+	const estimatedCredits = 10;
+
+	async function handleClick() {
+		if (!face || (!accessoryOnly && !body)) return;
+		running = true;
+		error = null;
+		lastResultUrl = null;
+		try {
+			const result = await runGarmentTryOn({
+				garment,
+				faceRefMediaId: face.mediaId,
+				bodyRefMediaId: accessoryOnly ? null : (body?.mediaId ?? null),
+			});
+			lastResultUrl = result.imageUrl;
+		} catch (err) {
+			error = err instanceof Error ? err.message : 'Try-On fehlgeschlagen';
+		} finally {
+			running = false;
+		}
+	}
+</script>
+
+{#if !hasPhoto}
+	<p class="text-xs text-muted-foreground">
+		Lade erst ein Foto hoch, um dieses Stück an dir zu visualisieren.
+	</p>
+{:else if missingFace || missingBody}
+	<div
+		class="flex items-start gap-3 rounded-xl border border-dashed border-border bg-background/50 p-4 text-sm text-muted-foreground"
+	>
+		<UserCircle size={18} weight="regular" class="mt-0.5 flex-shrink-0 text-primary" />
+		<div class="space-y-1">
+			<p class="text-foreground">Lade erst Referenzbilder hoch, um das Stück an dir zu sehen.</p>
+			<p class="text-xs">
+				Solo-Try-On braucht ein {accessoryOnly
+					? 'Gesichtsbild'
+					: 'Gesichts- und ein Ganzkörperbild'}
+				in diesem Space. Öffne dafür
+				<a href="/profile/me-images" class="font-medium text-primary hover:underline">
+					Meine Bilder
+				</a>.
+			</p>
+		</div>
+	</div>
+{:else}
+	<div class="space-y-2">
+		<button
+			type="button"
+			onclick={handleClick}
+			disabled={running || !canTryOn}
+			class="flex w-full items-center justify-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+		>
+			{#if running}
+				<div
+					class="h-4 w-4 animate-spin rounded-full border-2 border-current border-r-transparent"
+				></div>
+				Rendere…
+			{:else}
+				<Sparkle size={16} weight="fill" />
+				An mir anprobieren · {estimatedCredits} Credits
+			{/if}
+		</button>
+
+		{#if accessoryOnly}
+			<p class="flex items-center gap-1.5 text-xs text-muted-foreground">
+				<Info size={12} weight="regular" class="flex-shrink-0" />
+				Accessoire-Modus — nur das Gesicht wird gerendert (spart Credits).
+			</p>
+		{/if}
+
+		{#if activeSpace && activeSpace.type !== 'personal'}
+			<p class="flex items-start gap-1.5 text-xs text-muted-foreground">
+				<Info size={12} weight="regular" class="mt-0.5 flex-shrink-0" />
+				<span>
+					Try-On nutzt deine Referenzbilder aus diesem Space
+					<strong class="text-foreground">({activeSpace.name})</strong>, nicht aus Persönlich.
+				</span>
+			</p>
+		{/if}
+
+		{#if error}
+			<div
+				class="rounded-md border border-error/30 bg-error/10 px-3 py-2 text-sm text-error"
+				role="alert"
+			>
+				{error}
+			</div>
+		{/if}
+
+		{#if lastResultUrl}
+			<div class="space-y-1.5 rounded-xl border border-border bg-card p-3">
+				<p class="text-xs font-medium uppercase tracking-wider text-muted-foreground">Ergebnis</p>
+				<img
+					src={lastResultUrl}
+					alt="Try-On"
+					class="w-full rounded-md border border-border bg-muted"
+				/>
+				<p class="text-xs text-muted-foreground">
+					Gefunden in der
+					<a href="/picture" class="font-medium text-primary hover:underline">Picture-Galerie</a>
+					als normale Generierung.
+				</p>
+			</div>
+		{/if}
+	</div>
+{/if}

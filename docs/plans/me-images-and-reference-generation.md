@@ -14,6 +14,7 @@ Commits (teils durch parallele Sessions in Commits mit anderer Attribution gelan
 | M4 Reference-Picker | in `d087b4744` | `ReferenceImagePicker.svelte`, Model-Auto-Switch, Endpoint-Routing, `generationMode`+`referenceImageIds` auf `LocalImage` |
 | M2.5 Avatar-Migration | `e2b5ac38c` | One-shot `migration/legacy-avatar.ts`, Autosync face-ref→avatar→`auth.users.image`, EditProfileModal-Cleanup |
 | M5 MCP-Tools | `fc635f983` | `packages/mana-tool-registry/src/modules/me.ts` — zwei Tools, auto-registriert |
+| Space-Scope-Migration | `cb9a9bb42` | `meImages` aus `USER_LEVEL_TABLES` ausgetragen, Dexie v40 retro-stampt `spaceId = _personal:<uid>`-Sentinel + `authorId` + `visibility`, drops `userId`. Queries/Store/MCP-Tool filtern jetzt auf aktiven Space. `auth.users.image` bleibt an Personal-Space primary-avatar gekoppelt — andere Spaces haben ihren eigenen lokalen Avatar. Sub-Plan: `docs/plans/me-images-space-scope-migration.md` |
 
 ## Offen (noch nicht angefangen)
 

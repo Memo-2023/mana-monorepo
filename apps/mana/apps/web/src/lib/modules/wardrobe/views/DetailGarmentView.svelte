@@ -12,6 +12,7 @@
 	import { garmentPhotoUrl } from '../api/media-url';
 	import { CATEGORY_LABELS } from '../constants';
 	import GarmentForm from '../components/GarmentForm.svelte';
+	import GarmentTryOnButton from '../components/GarmentTryOnButton.svelte';
 
 	interface Props {
 		id: string;
@@ -184,14 +185,17 @@
 						{/if}
 					</div>
 
-					<!-- Primary action: heute getragen -->
+					<!-- Try-on — "wie sähe das an mir aus" -->
+					<GarmentTryOnButton {garment} />
+
+					<!-- Wear-tracking -->
 					<button
 						type="button"
 						onclick={handleMarkWorn}
 						disabled={markingWorn}
-						class="flex w-full items-center justify-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+						class="flex w-full items-center justify-center gap-2 rounded-md border border-border bg-background px-4 py-2 text-sm text-foreground transition-colors hover:bg-muted disabled:opacity-50"
 					>
-						<CheckCircle size={16} weight="fill" />
+						<CheckCircle size={14} />
 						{markingWorn ? 'Gespeichert…' : 'Heute getragen'}
 					</button>
 

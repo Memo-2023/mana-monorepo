@@ -1,8 +1,27 @@
 # Wardrobe — Module Plan
 
-## Status (2026-04-23)
+## Status (2026-04-23, Stand nach M5)
 
-Greenfield. Das Fundament (meImages + reference-based image generation) ist komplett verfügbar — siehe `docs/plans/me-images-and-reference-generation.md` Stand M1-M5. Dieses Modul konsumiert es.
+**M1–M5 SHIPPED** — Feature ist end-to-end benutzbar. Nutzer pflegt Garments + Outfits pro Space (alle sechs Space-Typen), komponiert über den Composer, rendert Try-On-Vorschauen via OpenAI `gpt-image-2`-Edits, und kann dasselbe via MCP-Tools an Personas/Agents delegieren. Solo-Garment-Try-On ("nur diese Brille anprobieren") als Follow-up in M4.1.
+
+| Milestone | Commit | Inhalt |
+|---|---|---|
+| M1 Datenschicht | `4fc9d6c59` | Dexie v41 `wardrobeGarments` + `wardrobeOutfits` (space-scoped), Types/Collections/Queries/Stores, module-registry, space-allowlist in allen 6 Typen, `/api/v1/wardrobe/garments/upload`, `MAX_REFERENCE_IMAGES` Cap 4→8, `picture.images.wardrobeOutfitId` Back-Ref |
+| M2 Garments-UI | `5a49bcbf0` | `/wardrobe` Route, CategoryTabs, GarmentCard, GarmentForm, `/wardrobe/garment/[id]`, Drag-Drop-Upload, edit/archive/delete flows, Active-Space-Badge |
+| M3 Outfits-Composer | `2b89bf795` | `/wardrobe/compose/[[outfitId]]` Composer (click-to-add, garment-library left, editor right), OutfitsView-Tab, OutfitCard (try-on cover → garment collage fallback), `/wardrobe/outfit/[id]` Detail |
+| M4 Try-On | `d56ad396d` | `runOutfitTryOn` + `TryOnButton` auf DetailOutfitView, Accessoire-Modus-Detection, Empty-State bei fehlenden Referenzen, non-personal-Space-Hinweis; `verifyMediaOwnership` erweitert auf `['me','wardrobe']` |
+| M5 MCP-Tools | `7e3f53f8a` (+ `66b7e08df` für types/index) | `wardrobe.listGarments` / `.listOutfits` / `.createOutfit` / `.tryOn` in `packages/mana-tool-registry/src/modules/wardrobe.ts`, registered in `registerAllModules` |
+
+**Fundament konsumiert:** me-images M1-M5 (siehe `docs/plans/me-images-and-reference-generation.md`) — Space-scoped `meImages` (v40), `/api/v1/picture/generate-with-reference` (gpt-image-2 via `/v1/images/edits`), `useImageByPrimary('face-ref'|'body-ref')`.
+
+## Offen (nach M5)
+
+- **M4.1 Solo-Garment-Try-On** — `runGarmentTryOn()` + `GarmentTryOnButton` auf DetailGarmentView. Render eines einzelnen Kleidungsstücks ohne Outfit-Kontext (z.B. Brille an mir ausprobieren). Ergebnis landet in `picture.images` ohne `wardrobeOutfitId`-Back-Ref. Implementiert als Plan-Follow-up.
+- **M6 Persona-Template "Stil-Coach"** (~0.5 Tag, optional) — neuer Eintrag unter `/agents/templates` mit auto-policy für `wardrobe.list*` + `me.listReferenceImages`, propose-policy für `wardrobe.createOutfit` + `wardrobe.tryOn`. Seed-Prompt: "Du bist der persönliche Stil-Coach. Schlage Outfits aus dem vorhandenen Kleiderschrank vor, basierend auf Kontext (Kalender-Event, Wetter, Nutzer-Stimmung). Nie kritisch, nie body-urteilend."
+- **M7 "Heute trage ich…"-Tiefe** (~0.5 Tag, optional) — "heute getragen"-Button auf OutfitCard + Stats-Widget ("am häufigsten getragen", "lange nicht mehr angehabt"). Quick-Log-Button ist bereits in DetailGarmentView drin; fehlt nur Card-Ebene + Stats.
+- **M8 Context-basierte Outfit-Mission** (mehrere Tage, optional) — mana-ai Mission-Template "Outfit des Tages": liest calendar + wetter + wardrobe, erzeugt 3 Vorschläge als Proposals. Workbench-Widget "Heute anziehen" als Card.
+- **Multi-Variant-Rendering** (n=2/4) im TryOnButton — Picker-UI "Zeig mir 3 Looks" statt 1-Klick-1-Bild.
+- **Multi-Foto pro Garment** — `mediaIds: string[]` ist vorbereitet (Primary `[0]`); UI rendert aktuell nur Primary. Detail-Strip für alternate Views (front/back/detail) wäre die nächste Ausbau-Stufe.
 
 ## Ziel
 
@@ -275,44 +294,52 @@ Vier Tools, alle user-space. Pattern ist 1:1 an `me.ts` aus M5 angelehnt:
 
 ## Milestones
 
-- **M1 — Datenschicht & Backend-Cap** (~1–1.5 Tage)
-  - [ ] Dexie v39: `wardrobeGarments` + `wardrobeOutfits` mit Indices (space-scoped, also Compound-Index auf `[spaceId+...]` für die hot path Queries)
-  - [ ] Types + Encryption-Registry + Collections + Queries (via `scopedForModule<>`, *nicht* in `USER_LEVEL_TABLES` — volle Space-Scope-Behandlung)
-  - [ ] Stores (garments, outfits)
-  - [ ] `module.config.ts` registriert `appId='wardrobe'`
-  - [ ] `wardrobe` in *alle* sechs Space-Typen der Allowlist (`personal`, `brand`, `club`, `family`, `team`, `practice`)
-  - [ ] `MAX_REFERENCE_IMAGES` Cap auf 8 (`apps/api/src/modules/picture/routes.ts`) mit Comment + ClientCap im Generator
-  - [ ] Neuer `POST /api/v1/wardrobe/garments/upload`-Endpoint + Route-Registrierung
-  - [ ] `wardrobeOutfitId`-Feld auf `LocalImage` + `toImage`-Converter
+- **M1 — Datenschicht & Backend-Cap** ✅ SHIPPED `4fc9d6c59`
+  - [x] Dexie v41 (nicht v39 — me-images-space-migration hat v40 belegt): `wardrobeGarments` + `wardrobeOutfits` mit Indices (space-scoped, kein Compound-Index nötig — `scopedTable` filtert in-memory)
+  - [x] Types + Encryption-Registry (`name/brand/color/size/material/tags/notes` für Garments, `name/description/tags` für Outfits) + Collections + Queries via `scopedForModule<>`, *nicht* in `USER_LEVEL_TABLES`
+  - [x] Stores (garments, outfits) mit Domain-Events (WardrobeGarmentAdded, WardrobeOutfitCreated, WardrobeOutfitTryOn, etc.)
+  - [x] `module.config.ts` registriert `appId='wardrobe'`
+  - [x] `wardrobe` in *alle* sechs Space-Typen der Allowlist
+  - [x] `MAX_REFERENCE_IMAGES` Cap auf 8 (`apps/api/src/modules/picture/routes.ts`) + Client-Default in `ReferenceImagePicker.svelte`
+  - [x] `POST /api/v1/wardrobe/garments/upload`-Endpoint + Route-Registrierung
+  - [x] `wardrobeOutfitId`-Feld auf `LocalImage` + `toImage`-Converter
 
-- **M2 — Garments-Grundlayer** (~1–1.5 Tage)
-  - [ ] Route `/wardrobe` mit `RoutePage`
-  - [ ] `CategoryTabs`, `GarmentCard`, `GarmentUploadZone`, `GarmentForm`
-  - [ ] Multi-File-Upload pro Kategorie (wie me-images)
-  - [ ] Detailseite `/wardrobe/garment/[id]` — Foto, Metadaten, "heute getragen"-Button (incrementiert `wearCount`)
-  - [ ] Archive / Delete / Edit flows
+- **M2 — Garments-Grundlayer** ✅ SHIPPED `5a49bcbf0`
+  - [x] Route `/wardrobe` mit `RoutePage`
+  - [x] `CategoryTabs`, `GarmentCard`, `GarmentForm`; Upload-Zone reuses `MeImageUploadZone` (cross-module import, purely presentational)
+  - [x] Multi-File-Upload, aktive Kategorie bestimmt den default-Kind für neue Drops
+  - [x] Detailseite `/wardrobe/garment/[id]` — Foto, Metadaten, "heute getragen"-Button
+  - [x] Archive / Delete / Edit flows
+  - [x] Active-Space-Badge im Intro-Card
 
-- **M3 — Outfits-Composer** (~1–1.5 Tage)
-  - [ ] Route `/wardrobe/compose/[[outfitId]]`
-  - [ ] Drag-drop-Leiste mit Garments (nach Kategorie gruppiert)
-  - [ ] Outfit-Preview-Kachel rechts (Stapel der Garment-Thumbnails)
-  - [ ] Create/Edit an dieselbe Route, `[[outfitId]]` optional
-  - [ ] Detailseite `/wardrobe/outfit/[id]`
-  - [ ] `OutfitsView` als zweiter Tab im Root
+- **M3 — Outfits-Composer** ✅ SHIPPED `2b89bf795`
+  - [x] Route `/wardrobe/compose/[[outfitId]]`
+  - [x] Zwei-Spalten-Composer mit Garment-Library (nach Kategorie gruppiert) + Outfit-Editor. Click-to-Add statt Drag-Drop (keyboard-accessible, 100% workflow)
+  - [x] Outfit-Preview-Chips mit Hover-× zum Entfernen
+  - [x] Create/Edit an dieselbe Route, `[[outfitId]]` optional; `{#key outfitId ?? 'new'}` für sauberen Re-Mount
+  - [x] Detailseite `/wardrobe/outfit/[id]` mit Metadata-Card + Komposition-Grid + Try-On-Verlauf-Strip
+  - [x] `OutfitsView` als zweiter Tab in ListView mit "+ Neues Outfit"-CTA
 
-- **M4 — Try-On-Integration** (~1 Tag)
-  - [ ] `runTryOn(outfit, prompt?)` in `api/try-on.ts` — composed die reference-Liste aus *des Nutzers eigenen* `useImageByPrimary('face-ref' | 'body-ref')` + garment-mediaIds (auch in non-personal Spaces), ruft `/generate-with-reference`
-  - [ ] `accessoryOnly`-Preset für `glasses`/`jewelry`/`hat` — nur face-ref, quadratisches Format
-  - [ ] `TryOnButton.svelte` auf DetailOutfitView + auf DetailGarmentView (mit impliziten "Solo-Outfit")
-  - [ ] Nach Erfolg: `picture.images.wardrobeOutfitId` setzen + `lastTryOn`-Snapshot aufs Outfit
-  - [ ] Empty-State wenn `primaryFace` oder `primaryFullbody` fehlen → Link zu `/profile/me-images`
-  - [ ] In Non-Personal-Spaces (`brand`/`club`/`family`/`team`/`practice`): Hinweis "Du siehst dich selbst im Outfit — Try-On nutzt deine persönlichen Referenzbilder, nicht die des Spaces" (Subject ist user-global, siehe Entscheidung #6)
-  - [ ] Try-On-History als horizontaler Strip in DetailOutfitView
+- **M4 — Try-On-Integration** ✅ SHIPPED `d56ad396d`
+  - [x] `runOutfitTryOn` in `api/try-on.ts` composed die reference-Liste aus aktivem Space's face-ref + body-ref + garment-mediaIds, ruft `/generate-with-reference`
+  - [x] `accessoryOnly`-Modus auto-detectiert aus `FACE_ONLY_CATEGORIES` — nur face-ref, 1024×1024 Format
+  - [x] `TryOnButton` auf DetailOutfitView (DetailGarmentView folgt in M4.1)
+  - [x] Nach Erfolg: `picture.images.wardrobeOutfitId` + `lastTryOn`-Snapshot aufs Outfit
+  - [x] Empty-State bei fehlenden Referenzen → Link zu `/profile/me-images`
+  - [x] Non-Personal-Space-Hinweis ("Try-On nutzt deine Referenzbilder aus diesem Space"); Family-Space-Sonderhinweis
+  - [x] Try-On-Verlauf-Strip via `useOutfitTryOns` (bereits in M3 angelegt, füllt sich nach erstem Render auto)
+  - [x] Server-side `verifyMediaOwnership` auf `['me','wardrobe']` erweitert
 
-- **M5 — MCP-Tools** (~0.5 Tag)
-  - [ ] `packages/mana-tool-registry/src/modules/wardrobe.ts` mit den 4 Tools
-  - [ ] `'wardrobe'` zum `ModuleId`-Union
-  - [ ] `registerWardrobeTools()` in `registerAllModules()`
+- **M4.1 — Solo-Garment-Try-On** ✅ SHIPPED *(folgender Commit)*
+  - [x] `runGarmentTryOn` in `api/try-on.ts` — Single-Garment als "impliziter Solo-Outfit"; `wardrobeOutfitId=null` auf der erzeugten `picture.images`-Row
+  - [x] `GarmentTryOnButton` auf DetailGarmentView mit Inline-Preview des zuletzt erzeugten Bildes
+  - [x] Gemeinsamer `callGenerateWithReference`-Helper refactored aus `runOutfitTryOn`
+  - [x] `isAccessoryGarment(garment)` Helper für face-only Detection
+
+- **M5 — MCP-Tools** ✅ SHIPPED `7e3f53f8a` (+ `66b7e08df` für types/index)
+  - [x] `packages/mana-tool-registry/src/modules/wardrobe.ts` mit 4 Tools: listGarments, listOutfits, createOutfit, tryOn
+  - [x] `'wardrobe'` im `ModuleId`-Union
+  - [x] `registerWardrobeTools()` in `registerAllModules()` — MCP exponiert automatisch
 
 - **M6 — Persona-Templates** (~0.5 Tag, optional)
   - [ ] Persona-Template "Stil-Coach": auto-Policy für `wardrobe.list*` + `me.listReferenceImages`, propose-Policy für `wardrobe.createOutfit` + `wardrobe.tryOn`
