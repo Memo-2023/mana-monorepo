@@ -21,6 +21,7 @@
 import type { ReminderChannel } from '@mana/shared-ai';
 import type { ServerAgent } from '../db/agents-projection';
 import type { ServerMission } from '../db/missions-projection';
+import { remindersEmittedTotal } from '../metrics';
 
 export interface ReminderContext {
 	readonly agent: ServerAgent | null;
@@ -29,6 +30,22 @@ export interface ReminderContext {
 	 *  BEFORE the current mission run started. Round-level usage
 	 *  accrual is tracked separately by the loop and added on top. */
 	readonly pretickUsage24h: number;
+}
+
+/**
+ * Severity conveys urgency. Used for the `severity` metric label so
+ * dashboards can separate "FYI" from "please change course" without
+ * NLP on the reminder string.
+ *   - `info`: background state — reader may or may not act
+ *   - `warn`: the LLM should probably change course
+ *   - `escalate`: the LLM must change course or the runner will cut it off
+ */
+export type ReminderSeverity = 'info' | 'warn' | 'escalate';
+
+export interface Reminder {
+	readonly producer: string;
+	readonly severity: ReminderSeverity;
+	readonly text: string;
 }
 
 /**
@@ -41,7 +58,7 @@ export interface ReminderContext {
  *   - agents without a cap (`maxTokensPerDay == null`)
  *   - usage below the warn threshold
  */
-export function tokenBudgetReminder(ctx: ReminderContext, roundUsage: number): string | null {
+export function tokenBudgetReminder(ctx: ReminderContext, roundUsage: number): Reminder | null {
 	const cap = ctx.agent?.maxTokensPerDay;
 	if (!ctx.agent || cap == null || cap <= 0) return null;
 
@@ -52,18 +69,24 @@ export function tokenBudgetReminder(ctx: ReminderContext, roundUsage: number): s
 	const pctDisplay = Math.round(pct * 100);
 	const agentName = ctx.agent.name;
 	if (pct >= 1.0) {
-		return (
-			`Agent ${agentName} hat das Tagesbudget komplett ausgeschoepft ` +
-			`(${total} / ${cap} Tokens = ${pctDisplay}%). Schliesse die ` +
-			`Mission JETZT mit einer Summary ab — weitere Tool-Calls werden ` +
-			`kurz nach diesem Turn vom Runner abgeschnitten.`
-		);
+		return {
+			producer: 'token-budget',
+			severity: 'escalate',
+			text:
+				`Agent ${agentName} hat das Tagesbudget komplett ausgeschoepft ` +
+				`(${total} / ${cap} Tokens = ${pctDisplay}%). Schliesse die ` +
+				`Mission JETZT mit einer Summary ab — weitere Tool-Calls werden ` +
+				`kurz nach diesem Turn vom Runner abgeschnitten.`,
+		};
 	}
-	return (
-		`Agent ${agentName} hat ${pctDisplay}% des Tagesbudgets verbraucht ` +
-		`(${total} / ${cap} Tokens). Plane sparsam — vermeide redundante ` +
-		`Tool-Calls und liefere zuegig eine abschliessende Plan-Summary.`
-	);
+	return {
+		producer: 'token-budget',
+		severity: 'warn',
+		text:
+			`Agent ${agentName} hat ${pctDisplay}% des Tagesbudgets verbraucht ` +
+			`(${total} / ${cap} Tokens). Plane sparsam — vermeide redundante ` +
+			`Tool-Calls und liefere zuegig eine abschliessende Plan-Summary.`,
+	};
 }
 
 /**
@@ -81,15 +104,18 @@ export function tokenBudgetReminder(ctx: ReminderContext, roundUsage: number): s
 export function retryLoopReminder(state: {
 	readonly round: number;
 	readonly recentCalls: readonly { readonly result: { readonly success: boolean } }[];
-}): string | null {
+}): Reminder | null {
 	if (state.round < 3) return null;
 	const tail = state.recentCalls.slice(-2);
 	if (tail.length === 2 && tail.every((ec) => !ec.result.success)) {
-		return (
-			`Die letzten 2 Tool-Calls sind fehlgeschlagen. Brich die ` +
-			`Wiederholung ab — formuliere stattdessen einen Summary-Text, ` +
-			`der dem Nutzer erklaert, was schief lief.`
-		);
+		return {
+			producer: 'retry-loop',
+			severity: 'warn',
+			text:
+				`Die letzten 2 Tool-Calls sind fehlgeschlagen. Brich die ` +
+				`Wiederholung ab — formuliere stattdessen einen Summary-Text, ` +
+				`der dem Nutzer erklaert, was schief lief.`,
+		};
 	}
 	return null;
 }
@@ -105,11 +131,19 @@ export function retryLoopReminder(state: {
  */
 export function buildReminderChannel(ctx: ReminderContext): ReminderChannel {
 	return (state) => {
-		const out: string[] = [];
+		const reminders: Reminder[] = [];
 		const budget = tokenBudgetReminder(ctx, state.usage.totalTokens);
-		if (budget) out.push(budget);
+		if (budget) reminders.push(budget);
 		const retry = retryLoopReminder({ round: state.round, recentCalls: state.recentCalls });
-		if (retry) out.push(retry);
-		return out;
+		if (retry) reminders.push(retry);
+
+		// Telemetry — one increment per emitted reminder. No-op when
+		// the counter isn't registered (shouldn't happen outside tests
+		// that don't import the metrics module).
+		for (const r of reminders) {
+			remindersEmittedTotal.inc({ producer: r.producer, severity: r.severity });
+		}
+
+		return reminders.map((r) => r.text);
 	};
 }

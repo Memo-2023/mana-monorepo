@@ -95,28 +95,31 @@ describe('tokenBudgetReminder', () => {
 		expect(tokenBudgetReminder(ctx, 20_000)).toBeNull(); // 70%
 	});
 
-	it('warns at the 75% threshold', () => {
+	it('warns at the 75% threshold with severity=warn', () => {
 		const ctx: ReminderContext = {
 			agent: makeAgent({ maxTokensPerDay: 100_000 }),
 			mission: makeMission(),
 			pretickUsage24h: 50_000,
 		};
-		const msg = tokenBudgetReminder(ctx, 25_000); // 75%
-		expect(msg).not.toBeNull();
-		expect(msg).toContain('75%');
-		expect(msg).toContain('Mana');
+		const r = tokenBudgetReminder(ctx, 25_000); // 75%
+		expect(r).not.toBeNull();
+		expect(r!.severity).toBe('warn');
+		expect(r!.producer).toBe('token-budget');
+		expect(r!.text).toContain('75%');
+		expect(r!.text).toContain('Mana');
 	});
 
-	it('emits a stronger message at/above 100%', () => {
+	it('escalates at/above 100% with severity=escalate', () => {
 		const ctx: ReminderContext = {
 			agent: makeAgent({ maxTokensPerDay: 100_000 }),
 			mission: makeMission(),
 			pretickUsage24h: 90_000,
 		};
-		const msg = tokenBudgetReminder(ctx, 15_000); // 105%
-		expect(msg).not.toBeNull();
-		expect(msg).toContain('ausgeschoepft');
-		expect(msg).toContain('JETZT');
+		const r = tokenBudgetReminder(ctx, 15_000); // 105%
+		expect(r).not.toBeNull();
+		expect(r!.severity).toBe('escalate');
+		expect(r!.text).toContain('ausgeschoepft');
+		expect(r!.text).toContain('JETZT');
 	});
 
 	it('adds pretick and round usage correctly', () => {
@@ -126,10 +129,9 @@ describe('tokenBudgetReminder', () => {
 			pretickUsage24h: 80_000,
 		};
 		// 80k + 0k = 80% → warns
-		expect(tokenBudgetReminder(ctx, 0)).not.toBeNull();
-		// 80k + 20k = 100% → exhausted
-		const exhausted = tokenBudgetReminder(ctx, 20_000);
-		expect(exhausted).toContain('ausgeschoepft');
+		expect(tokenBudgetReminder(ctx, 0)?.severity).toBe('warn');
+		// 80k + 20k = 100% → escalates
+		expect(tokenBudgetReminder(ctx, 20_000)?.severity).toBe('escalate');
 	});
 });
 
@@ -145,13 +147,15 @@ describe('retryLoopReminder', () => {
 		).toBeNull();
 	});
 
-	it('warns when the last 2 calls failed at round >= 3', () => {
-		const msg = retryLoopReminder({
+	it('warns when the last 2 calls failed at round >= 3 with severity=warn', () => {
+		const r = retryLoopReminder({
 			round: 3,
 			recentCalls: [mkExecutedCall(false), mkExecutedCall(false)],
 		});
-		expect(msg).not.toBeNull();
-		expect(msg).toContain('fehlgeschlagen');
+		expect(r).not.toBeNull();
+		expect(r!.severity).toBe('warn');
+		expect(r!.producer).toBe('retry-loop');
+		expect(r!.text).toContain('fehlgeschlagen');
 	});
 
 	it('stays silent when only one of the last 2 failed', () => {

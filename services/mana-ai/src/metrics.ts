@@ -235,3 +235,25 @@ export const providerErrorsTotal = new Counter({
 	labelNames: ['provider', 'kind'] as const,
 	registers: [register],
 });
+
+// ── Reminder channel (Claude-Code <system-reminder> pattern) ─────────
+
+/**
+ * Bumped once per round per producer that returned a non-null string.
+ * Enables dashboards that answer: "is the token-budget warning
+ * actually getting through?" (correlate with agent-run duration) and
+ * "how often do missions hit a retry loop?".
+ *
+ * Labels:
+ *   - producer: `token-budget` | `retry-loop` (extended as we add more)
+ *   - severity: `warn` | `escalate` | `info` — lets the budget producer
+ *      split 75-99% (warn) from 100%+ (escalate) without adding more
+ *      producers. `info` is the default for producers that only have
+ *      one message.
+ */
+export const remindersEmittedTotal = new Counter({
+	name: 'mana_ai_reminders_emitted_total',
+	help: 'Transient reminders injected into the planner loop by producer + severity.',
+	labelNames: ['producer', 'severity'] as const,
+	registers: [register],
+});
