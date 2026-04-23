@@ -8,6 +8,7 @@
 	import { goto } from '$app/navigation';
 	import { browser } from '$app/environment';
 	import { authStore } from '$lib/stores/auth.svelte';
+	import { onboardingFlow } from '$lib/stores/onboarding-flow.svelte';
 	import { ArrowRight } from '@mana/shared-icons';
 
 	function getAuthUrl(): string {
@@ -19,9 +20,10 @@
 		return import.meta.env.DEV ? 'http://localhost:3001' : '';
 	}
 
-	// Prefill: existing name (returning user revisiting) → email local-part
-	// → empty. Trimmed so whitespace-only values don't count as "filled".
-	let name = $state((authStore.user?.name ?? '').trim());
+	// Prefill: last value entered in this flow (back-navigation) → existing
+	// `user.name` (returning user revisiting) → empty. Trimmed so
+	// whitespace-only values don't count as "filled".
+	let name = $state((onboardingFlow.pendingName ?? authStore.user?.name ?? '').trim());
 	let saving = $state(false);
 	let error = $state<string | null>(null);
 
@@ -48,6 +50,7 @@
 		error = null;
 		try {
 			await saveName(trimmed);
+			onboardingFlow.setPendingName(trimmed);
 			await goto('/onboarding/look');
 		} catch (err) {
 			console.error('[onboarding/name] save failed:', err);
@@ -70,6 +73,7 @@
 		} finally {
 			saving = false;
 		}
+		onboardingFlow.setPendingName(fallback);
 		await goto('/onboarding/look');
 	}
 
