@@ -935,6 +935,13 @@ services:
       PUBLIC_MANA_LLM_URL_CLIENT: https://llm.mana.how
       PUBLIC_MANA_EVENTS_URL: http://mana-events:3065
       PUBLIC_MANA_EVENTS_URL_CLIENT: https://events.mana.how
+      # mana-research — async web-research provider orchestration.
+      # Browser hits /research/* endpoints directly; SSR uses the
+      # internal docker-network URL. Without this pair, the SSR-
+      # injected window.__PUBLIC_MANA_RESEARCH_URL__ is empty string
+      # and research fetches fall back to the current origin (404).
+      PUBLIC_MANA_RESEARCH_URL: http://mana-research:3068
+      PUBLIC_MANA_RESEARCH_URL_CLIENT: https://research.mana.how
       # mana-ai background Mission Runner. Browser calls the audit
       # endpoint (/api/v1/me/ai-audit) to render the Workbench
       # "Datenzugriff" tab. SSR doesn't hit this service directly.
@@ -1247,7 +1254,14 @@ services:
       start_period: 10s
 
   umami:
-    image: ghcr.io/umami-software/umami:postgresql-latest
+    # Pinned away from postgresql-latest on 2026-04-23. The rolling
+    # tag jumped to Umami 3.1.0 (Next.js 16) and started crashing the
+    # container on every POST /api/send — page loaders hung on the
+    # failing tracker request. v2.18.0 is the last known-stable v2.
+    # Rolling back to v2 was safe here because the schema is shared
+    # across 2.x. If you bump to v3 again, verify the DB migration
+    # path and test /api/send with a real POST before committing.
+    image: ghcr.io/umami-software/umami:postgresql-v2.18.0
     container_name: mana-mon-umami
     restart: always
     mem_limit: 256m
