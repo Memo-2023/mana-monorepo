@@ -36,8 +36,12 @@ export function isReservedSlug(slug: string): boolean {
 /**
  * Slug regex — lowercase alphanumerics + hyphens, 2-40 chars, no leading
  * or trailing hyphen. Mirrored in the backend for authoritative checks.
+ *
+ * Single-char slugs are forbidden: hard to read, reserved-list + TLD-
+ * collision risk scales with shortness, and `a.mana.how` is the kind
+ * of thing every app would need a special exception for. Min 2.
  */
-export const SLUG_REGEX = /^[a-z0-9](?:[a-z0-9-]{0,38}[a-z0-9])?$/;
+export const SLUG_REGEX = /^[a-z0-9][a-z0-9-]{0,38}[a-z0-9]$/;
 
 export function isValidSlug(slug: string): boolean {
 	return SLUG_REGEX.test(slug) && !isReservedSlug(slug);

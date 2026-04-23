@@ -24,6 +24,7 @@ import { requireTier, type AuthVariables } from '@mana/shared-hono';
 import { errorResponse, validationError } from '../../lib/responses';
 import { websiteDomainVerifyTotal } from '../../lib/metrics';
 import { db, customDomains } from './schema';
+import { isValidHostname } from './reserved-slugs';
 
 const routes = new Hono<{ Variables: AuthVariables }>();
 
@@ -35,36 +36,6 @@ routes.use('/sites/*/domains/*', requireTier('founder'));
 
 const DNS_TARGET = process.env.WEBSITE_DNS_TARGET ?? 'custom.mana.how';
 const CHALLENGE_PREFIX = '_mana-challenge';
-
-// Conservative hostname whitelist — lowercase letters, digits, dots,
-// hyphens. Length 4-253 per RFC. Rejects `localhost`, IPs, internal
-// names. Not a full RFC-compliant parser — just a sanity check before
-// we hand the string to dns.resolve.
-const HOSTNAME_RE = /^(?=.{4,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/;
-
-// Reserved hostnames that must not be user-bound. `mana.how` itself +
-// every app subdomain (todo, chat, …) lives here so a user can't point
-// their CNAME at the app's root.
-const RESERVED_HOSTNAMES = new Set([
-	'mana.how',
-	'www.mana.how',
-	'api.mana.how',
-	'auth.mana.how',
-	'app.mana.how',
-	'admin.mana.how',
-	'custom.mana.how',
-	'events.mana.how',
-	'research.mana.how',
-]);
-
-function isValidHostname(raw: string): boolean {
-	if (!raw) return false;
-	const lower = raw.toLowerCase().trim();
-	if (!HOSTNAME_RE.test(lower)) return false;
-	if (RESERVED_HOSTNAMES.has(lower)) return false;
-	if (lower.endsWith('.mana.how')) return false; // reserved root
-	return true;
-}
 
 function randomToken(): string {
 	const bytes = crypto.getRandomValues(new Uint8Array(16));
