@@ -14,6 +14,7 @@
 import {
 	runPlannerLoop,
 	AI_TOOL_CATALOG,
+	AI_TOOL_CATALOG_BY_NAME,
 	type ChatMessage,
 	type ToolCallRequest,
 	type ToolResult,
@@ -104,6 +105,11 @@ export async function runCompanionChat(
 				model: 'google/gemini-2.5-flash',
 				maxRounds: MAX_TOOL_ROUNDS,
 				temperature: 0.7,
+				// Parallelise reads (auto-policy tools) when the LLM
+				// fans out multiple list_*/get_* calls in one round.
+				// Writes (propose policy) stay sequential to preserve
+				// user-visible intent order in the proposal inbox.
+				isParallelSafe: (name) => AI_TOOL_CATALOG_BY_NAME.get(name)?.defaultPolicy === 'auto',
 			},
 			onToolCall: async (call: ToolCallRequest): Promise<ToolResult> => {
 				const startedAt = Date.now();

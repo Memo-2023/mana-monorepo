@@ -1106,6 +1106,23 @@ export const MANA_APPS: ManaApp[] = [
 		requiredTier: 'beta',
 	},
 	{
+		id: 'website',
+		name: 'Website',
+		description: {
+			de: 'Baukasten für deine Website',
+			en: 'Website builder',
+		},
+		longDescription: {
+			de: 'Mehrseitige Websites mit einem Block-Editor bauen — Hero, Text, Galerien, Formulare — und Inhalte aus anderen Mana-Modulen (Picture-Boards, Bibliothek, News) direkt einbetten. Für Privat (Portfolio, Event-Seite) und für Firmen (Space mit mehreren Membern).',
+			en: 'Build multi-page websites with a block editor — hero, text, galleries, forms — and embed content from your other Mana modules (picture boards, library, news) directly. For personal use (portfolio, event page) and for organisations (shared space with multiple members).',
+		},
+		icon: APP_ICONS.website,
+		color: '#6366f1',
+		comingSoon: false,
+		status: 'development',
+		requiredTier: 'public',
+	},
+	{
 		id: 'spaces',
 		name: 'Spaces',
 		description: {

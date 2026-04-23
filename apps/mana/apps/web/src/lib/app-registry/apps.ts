@@ -77,6 +77,7 @@ import {
 	ArrowClockwise,
 	Flask,
 	Exam,
+	Globe,
 } from '@mana/shared-icons';
 
 // ── Apps with entity capabilities ───────────────────────────
@@ -1323,6 +1324,27 @@ registerApp({
 	views: {
 		list: { load: () => import('$lib/modules/spaces/ListView.svelte') },
 	},
+});
+
+registerApp({
+	id: 'website',
+	name: 'Website',
+	color: '#6366f1',
+	icon: Globe,
+	views: {
+		list: { load: () => import('$lib/modules/website/ListView.svelte') },
+	},
+	contextMenuActions: [
+		{
+			id: 'new-site',
+			label: 'Neue Website',
+			icon: Plus,
+			action: () =>
+				window.dispatchEvent(
+					new CustomEvent('mana:quick-action', { detail: { app: 'website', action: 'new' } })
+				),
+		},
+	],
 });
 
 registerApp({

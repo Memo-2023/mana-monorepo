@@ -40,6 +40,7 @@ import { getAgent } from '../agents/store';
 import { DEFAULT_AGENT_NAME } from '../agents/types';
 import type { Mission, MissionIteration, PlanStep } from './types';
 import {
+	AI_TOOL_CATALOG_BY_NAME,
 	buildSystemPrompt,
 	runPlannerLoop,
 	runPrePlanGuardrails,
@@ -266,6 +267,12 @@ async function runMissionInner(
 				tools: availableTools,
 				model: deps.model ?? 'google/gemini-2.5-flash',
 				maxRounds: MAX_PLANNER_ROUNDS,
+				// Fan-out read tools when the planner requests several in
+				// one round. Writes (propose policy) stay sequential so the
+				// proposal inbox shows the LLM's intended ordering and the
+				// pre-execute guardrail can reason about state built up by
+				// prior steps in the same round.
+				isParallelSafe: (name) => AI_TOOL_CATALOG_BY_NAME.get(name)?.defaultPolicy === 'auto',
 			},
 			onToolCall: async (call: ToolCallRequest): Promise<ToolResult> => {
 				await checkCancel();

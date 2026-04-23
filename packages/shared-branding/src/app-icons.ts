@@ -260,6 +260,12 @@ export const APP_ICONS = {
 		// while still reading as "chronological" in the AI Workbench family.
 		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="tl" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#f59e0b"/><stop offset="100%" style="stop-color:#ea580c"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#tl)"/><line x1="34" y1="22" x2="34" y2="78" stroke="white" stroke-width="3" stroke-linecap="round" opacity="0.55"/><circle cx="34" cy="30" r="5" fill="white"/><circle cx="34" cy="50" r="5" fill="white"/><circle cx="34" cy="70" r="5" fill="white"/><rect x="44" y="26" width="32" height="8" rx="2" fill="white" fill-opacity="0.95"/><rect x="44" y="46" width="26" height="8" rx="2" fill="white" fill-opacity="0.8"/><rect x="44" y="66" width="30" height="8" rx="2" fill="white" fill-opacity="0.9"/></svg>`
 	),
+	website: svgToDataUrl(
+		// Browser window with three stacked content blocks — the "Baukasten"
+		// theme. Indigo→violet gradient, sibling to broadcast (communication
+		// family) but leaning more towards the creative-publishing cluster.
+		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="wb" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#6366f1"/><stop offset="100%" style="stop-color:#8b5cf6"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#wb)"/><rect x="18" y="22" width="64" height="56" rx="5" fill="white"/><rect x="18" y="22" width="64" height="10" rx="5" fill="white" fill-opacity="0.75"/><circle cx="25" cy="27" r="1.8" fill="#6366f1" fill-opacity="0.5"/><circle cx="31" cy="27" r="1.8" fill="#6366f1" fill-opacity="0.5"/><circle cx="37" cy="27" r="1.8" fill="#6366f1" fill-opacity="0.5"/><rect x="24" y="38" width="52" height="12" rx="2" fill="#6366f1" fill-opacity="0.85"/><rect x="24" y="54" width="24" height="18" rx="2" fill="#6366f1" fill-opacity="0.35"/><rect x="52" y="54" width="24" height="8" rx="2" fill="#6366f1" fill-opacity="0.55"/><rect x="52" y="64" width="24" height="8" rx="2" fill="#6366f1" fill-opacity="0.45"/></svg>`
+	),
 	spaces: svgToDataUrl(
 		// Three people-silhouettes clustered in the tile — the Spaces primitive
 		// is about shared workspaces, so the icon emphasises "group". Teal→indigo

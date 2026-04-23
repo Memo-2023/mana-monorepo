@@ -42,6 +42,7 @@ import { presiRoutes } from './modules/presi/routes';
 import { researchRoutes } from './modules/research/routes';
 import { whoRoutes } from './modules/who/routes';
 import { websiteRoutes } from './modules/website/routes';
+import { websitePublicRoutes } from './modules/website/public-routes';
 import { wetterRoutes } from './modules/wetter/routes';
 
 const PORT = parseInt(process.env.PORT || '3060', 10);
@@ -56,8 +57,10 @@ app.use('*', cors({ origin: CORS_ORIGINS, credentials: true }));
 app.route('/health', healthRoute('mana-api'));
 app.use('/api/*', rateLimitMiddleware({ max: 200, windowMs: 60_000 }));
 
-// Public routes — no auth required (weather data is public)
+// Public routes — no auth required (weather data is public, published
+// websites are by definition public).
 app.route('/api/v1/wetter', wetterRoutes);
+app.route('/api/v1/website/public', websitePublicRoutes);
 
 app.use('/api/*', authMiddleware());
 
