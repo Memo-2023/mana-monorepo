@@ -42,6 +42,13 @@ async function fetchWithAuth<T>(endpoint: string, options: RequestInit = {}): Pr
 
 	const response = await fetch(`${getManaAuthUrl()}${endpoint}`, {
 		...options,
+		// Better-Auth's /profile handler calls auth.api.updateUser, which
+		// identifies the user via the session cookie (not the JWT bearer).
+		// In dev the request is cross-origin (5173 → 3001); without
+		// `credentials: 'include'` the browser drops the cookie and the
+		// server throws "Internal server error" instead of updating.
+		// Matches the pattern used throughout packages/shared-auth.
+		credentials: 'include',
 		headers: {
 			'Content-Type': 'application/json',
 			...(token ? { Authorization: `Bearer ${token}` } : {}),
