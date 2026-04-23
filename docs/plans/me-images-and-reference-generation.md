@@ -1,8 +1,39 @@
 # Me-Images + Reference-basierte Bildgenerierung — Plan
 
-## Status (2026-04-23)
+## Status (2026-04-23, Stand nach M5)
 
-Greenfield. Keine Zeile Code, kein Schema, kein Endpunkt. Vorarbeit: Picture-Modul hat bereits ungenutzte `sourceImageId` + `generationId` Felder (Platzhalter), OpenAI `gpt-image-2` ist für Text-zu-Bild produktiv über `apps/api/src/modules/picture/routes.ts:65-96`.
+**M1–M5 + M2.5 SHIPPED** — das Feature ist end-to-end lieferbar. Nutzer legt unter `/profile/me-images` Gesicht + Ganzkörper (+ optional weitere Referenzen) ab, toggled pro Bild "KI darf nutzen", geht in den Picture-Generator, wählt Referenzen, triggert eine OpenAI `gpt-image-2`-Edit. Ergebnis landet in der Picture-Galerie. MCP-Tools (`me.listReferenceImages`, `me.generateWithReference`) sind registriert — Claude Desktop / Persona Runner können dasselbe automatisiert.
+
+Commits (teils durch parallele Sessions in Commits mit anderer Attribution gelandet — Code korrekt, nur Message irreführend):
+
+| Milestone | Commit | Inhalt |
+|---|---|---|
+| M1 Foundation | `89258eb45` | Dexie v38 `meImages`-Table, Encryption-Registry (`label`+`tags`), Store + Queries, `POST /api/v1/profile/me-images/upload` |
+| M2 Settings-UI | `a64a7e39c` | Route `/profile/me-images`, Face/Fullbody-Slots, Grid, Drag-Drop, pro-Bild opt-in Toggle |
+| M3 Edits-Endpoint | in `38dc80654` | `POST /picture/generate-with-reference` → OpenAI `/v1/images/edits`; `getMediaBuffer`, `verifyMediaOwnership` in apps/api/lib/media |
+| M4 Reference-Picker | in `d087b4744` | `ReferenceImagePicker.svelte`, Model-Auto-Switch, Endpoint-Routing, `generationMode`+`referenceImageIds` auf `LocalImage` |
+| M2.5 Avatar-Migration | `e2b5ac38c` | One-shot `migration/legacy-avatar.ts`, Autosync face-ref→avatar→`auth.users.image`, EditProfileModal-Cleanup |
+| M5 MCP-Tools | `fc635f983` | `packages/mana-tool-registry/src/modules/me.ts` — zwei Tools, auto-registriert |
+
+## Offen (noch nicht angefangen)
+
+- **M6 — Lokaler Fallback via mana-image-gen** (mehrere Tage, optional). FLUX + PuLID/InstantID auf dem GPU-Server (Windows, RTX 3090), `POST /edit`-Endpoint in mana-image-gen, Routing über `local/flux-pulid` im apps/api-Endpoint. Lohnt sich erst, wenn Zero-Knowledge-Mode-User das brauchen oder OpenAI-Limits zum Problem werden.
+
+- **M7 — Inpainting Mask Drawing** (~2 Tage, optional). Canvas-basiertes Mask-Editor im Picture-Generator (Brush-Size, Clear, Invert), Mask als zweites Multipart-Part an `/generate-with-reference`. OpenAI `/v1/images/edits` akzeptiert `mask` bereits — nur der Client-Editor fehlt. Nice-to-have für "ersetze nur das Outfit, Gesicht bleibt".
+
+- **M8 — Zero-Knowledge-Bild-Blobs** (größerer Workstream). Client-seitige AES-Verschlüsselung der Bild-Blobs *bevor* sie zu mana-media gehen; beim Generate-Call lokal entschlüsseln, temporär an den Server durchreichen, Ergebnis wieder client-seitig verschlüsseln. Dann sieht selbst der Server nichts ausser Ciphertext. Braucht eine Architektur-Skizze eigener Güte — nicht Teil dieses Plans.
+
+- **Global Kill-Switch `profile.aiUsesReferenceImages`** — im Plan als Feld auf dem profile-Singleton vorgesehen (Panic-Switch für "alle Referenzen temporär aus"). In M2 als "Pro-Bild reicht für jetzt" deferred, noch nicht gebaut. ~30 Minuten: Feld auf `LocalUserContext` + Toggle im Intro-Block von MeImagesView + bei Empty-Set auf dem Generator die Referenzen ausblenden.
+
+- **Kind-Editor pro Tile** — der `kind` eines uploadeten Bilds (face/fullbody/halfbody/hands/reference) ist beim Upload fix. Ein späteres "Kind ändern"-Kontrollelement im Tile ist eine Stunde Arbeit, aber keiner hat's bis jetzt vermisst.
+
+- **Detailansicht eines generierten Bilds zeigt Referenzen** — die Felder (`generationMode`, `referenceImageIds`) sind auf `LocalImage` gespeichert, aber `ListView.svelte` im Picture-Modul rendert sie noch nicht. Im Detail-Modal wäre ein "Erstellt mit Referenzen: [Thumbnail ×3]"-Block der sinnvolle Schritt. ~1 Stunde.
+
+- **Re-Upload-Pfad für Legacy-Avatar** — die M2.5-Migration setzt `mediaId = 'legacy-avatar:<uid>'` und lässt den Legacy-Avatar bewusst *nicht* durch mana-media laufen. Wenn der Nutzer diesen Avatar als KI-Referenz nutzen will, müsste er das Bild nochmal hochladen. Heute bounced `verifyMediaOwnership` — das ist das korrekte Sicherheitsverhalten, aber die UI sagt das dem Nutzer nicht. Ein Hint "Dieses Bild stammt noch aus dem alten Profil — für KI-Nutzung bitte neu hochladen" im Avatar-Tile würde reichen. ~30 Minuten.
+
+## Vorläufer
+
+Picture-Modul hatte bereits ungenutzte `sourceImageId` + `generationId` Felder (Platzhalter), OpenAI `gpt-image-2` war für Text-zu-Bild produktiv über `apps/api/src/modules/picture/routes.ts:65-96`.
 
 ## Ziel
 
@@ -286,54 +317,69 @@ Soft-first/Hard-follow-up-Regel (siehe Memory):
 
 ## Milestones
 
-- **M1 — `meImages` Foundation** (~1 Tag)
-  - [ ] Dexie v27: `meImages`-Tabelle
-  - [ ] `apps/mana/apps/web/src/lib/modules/profile/types.ts`: Typen
-  - [ ] Encryption-Registry-Eintrag
-  - [ ] Store (`stores/meImages.svelte.ts`): CRUD + `setPrimary`
-  - [ ] Queries (`useMyImages`, `useReferenceImages`, `useImageByPrimary`)
-  - [ ] Sync-Schema registrieren
-  - [ ] Upload-Wrapper nutzt bestehenden `picture/upload`-Endpoint mit `app=me` (neuer Bucket `me-storage` in MinIO)
+- **M1 — `meImages` Foundation** ✅ SHIPPED `89258eb45`
+  - [x] Dexie v38 (nicht v27 — v26 war library, v37 website-builder): `meImages`-Tabelle
+  - [x] `apps/mana/apps/web/src/lib/modules/profile/types.ts`: `MeImageKind`, `MeImagePrimarySlot`, `MeImageUsage`, `LocalMeImage`, `MeImage`, `toMeImage`
+  - [x] Encryption-Registry-Eintrag — `label` + `tags` encrypted; `kind`, `primaryFor`, `usage` plaintext
+  - [x] Store `stores/me-images.svelte.ts` — `createMeImage`, `updateMeImage`, `setPrimary` (transactional), `setAiReferenceEnabled`, `deleteMeImage` + Domain-Events
+  - [x] Queries — `useAllMeImages`, `useMeImagesByKind`, `useReferenceImages`, `useImageByPrimary`
+  - [x] Sync-Schema registriert (`module.config.ts`) + `meImages` in `USER_LEVEL_TABLES` (user-scoped, kein spaceId-Stamping)
+  - [x] Upload-Endpoint `POST /api/v1/profile/me-images/upload` wrappt `uploadImageToMedia({ app: 'me' })`
+  - ~~eigener me-storage-Bucket~~: mana-media nutzt einen Bucket für alle Apps; `app='me'` als Tag in `media_references` reicht
 
-- **M2 — UI Route `/profile/me-images`** (~1 Tag)
-  - [ ] Route + ModuleShell-Wrapping (wie andere Settings-Routen)
-  - [ ] Slot-Komponenten für Face/Fullbody, Grid für Reste
-  - [ ] Drag-and-Drop-Upload + Multi-File
-  - [ ] Opt-in-Toggles pro Bild + global
-  - [ ] Primary-Stern
-  - [ ] Profile-Modul ⚙ → neuer Eintrag "Meine Bilder"
-  - [ ] Hard-Migration `auth.users.image` → `meImages`
+- **M2 — UI Route `/profile/me-images`** ✅ SHIPPED `a64a7e39c`
+  - [x] Route + `RoutePage`-Wrapping (nicht `/settings/me-images` — Repo-Konvention: pro-Modul-Subrouten)
+  - [x] `MeImageSlotCard` für Face/Fullbody, `MeImageTile` für Grid, `MeImageUploadZone` (reusable)
+  - [x] Drag-and-Drop + Multi-File via File Picker
+  - [x] Opt-in-Toggle pro Bild (`aiReference`)
+  - [x] Primary-Stern (für kinds mit zugewiesenem Slot)
+  - [x] Profile-ListView → "Meine Bilder"-Eintrag im Konto-Tab mit Sub-Hint
+  - [x] *(Hard-Migration wurde nach M2.5 ausgelagert — siehe unten)*
+  - [ ] Global Kill-Switch `profile.aiUsesReferenceImages` — *offen* (siehe Offenes-Liste)
 
-- **M3 — Backend `generate-with-reference`** (~1-2 Tage)
-  - [ ] `fetchMediaBuffer`-Helper in `apps/api/src/lib/media.ts`
-  - [ ] Neue Route `POST /picture/generate-with-reference` mit OpenAI `/v1/images/edits`
-  - [ ] Credit-Validierung identisch zu `/generate`
-  - [ ] Generation-Log-Tabelle
-  - [ ] Fehler-Matrix
+- **M2.5 — Legacy-Avatar-Migration + Autosync** ✅ SHIPPED `e2b5ac38c`
+  - [x] `migration/legacy-avatar.ts` — idempotenter One-Shot beim Öffnen der Route
+  - [x] `setPrimary(id, 'face-ref')` claimt silent auch `'avatar'` auf derselben Zeile (Kopplung)
+  - [x] `syncAvatarToAuth()` nach jeder primary/delete-Änderung — schreibt `auth.users.image`
+  - [x] `EditProfileModal` Inline-Upload → "In Meine Bilder verwalten"-Link
+  - [x] `profileService.uploadAvatar` + `AvatarUploadResponse` + Test gelöscht (dead code)
 
-- **M4 — Picture-Generator UI** (~1 Tag)
-  - [ ] Reference-Picker-Popover in GeneratorForm
-  - [ ] Payload-Switch `/generate` vs. `/generate-with-reference`
-  - [ ] `picture.images.referenceImageIds` + `generationMode` persistieren
-  - [ ] Detailansicht eines Bilds zeigt genutzte Referenzen
+- **M3 — Backend `generate-with-reference`** ✅ SHIPPED in `38dc80654`
+  - [x] `getMediaBuffer` + `verifyMediaOwnership` in `apps/api/src/lib/media.ts`
+  - [x] `POST /api/v1/picture/generate-with-reference` mit OpenAI `/v1/images/edits` multipart
+  - [x] Credit-Validierung identisch zu `/generate` (3/10/25 × n)
+  - [x] Fehler-Matrix: 400 (prompt/refs), 402 (credits), 404 (ownership), 502 (OpenAI), 503 (keine Config)
+  - [x] Degraded-Fallback: wenn mana-media nach OpenAI-Success failed → inline base64 in Response (Generierung nicht verloren)
+  - ~~Generation-Log-Tabelle~~: verworfen — Credit-Audit-Trail reicht, kein Postgres-Schema-Change in M3 nötig
 
-- **M5 — Tool-Registry + MCP-Exposure** (~0.5 Tag)
-  - [ ] `me.listReferenceImages` + `me.generateWithReference` in `packages/mana-tool-registry`
-  - [ ] MCP-Server (Port 3069) exponiert die Tools
-  - [ ] Persona-Runner (sobald M2 von Personas-Plan live) kann sie konsumieren
+- **M4 — Picture-Generator UI** ✅ SHIPPED in `d087b4744`
+  - [x] `ReferenceImagePicker.svelte` — Multi-Select bis 4, leerer Zustand linkt zu `/profile/me-images`
+  - [x] Payload-Switch `/generate` ↔ `/generate-with-reference` via `isReferenceMode`
+  - [x] Auto-Model-Switch auf `openai/gpt-image-2` wenn Referenzen gewählt; Flux Schnell im Dropdown disabled
+  - [x] `negativePrompt` wird im Referenz-Modus disabled + als "wird ignoriert" markiert
+  - [x] `generationMode` + `referenceImageIds` auf `LocalImage` persistiert (und in `toImage` propagiert)
+  - [ ] Detailansicht eines Bilds zeigt genutzte Referenzen — *offen*, ~1h
 
-- **M6 — (optional, später) Lokaler Fallback via mana-image-gen** (mehrere Tage)
-  - [ ] FLUX + PuLID/InstantID auf GPU-Server
+- **M5 — Tool-Registry + MCP-Exposure** ✅ SHIPPED `fc635f983`
+  - [x] `packages/mana-tool-registry/src/modules/me.ts`
+  - [x] `me.listReferenceImages({kind?})` — pullt via mana-sync (`app=profile`), decryptet `label`+`tags`, filtert auf `usage.aiReference=true`
+  - [x] `me.generateWithReference({prompt, referenceMediaIds, quality, size, n})` — Proxy über M3-Endpoint
+  - [x] MCP-Server exponiert beide automatisch (iteriert Registry in `createMcpServerForUser`)
+  - [x] Persona-Runner kann sie sobald ANTHROPIC_API_KEY gesetzt + Persona ihnen erlaubt ist konsumieren
+
+- **M6 — Lokaler Fallback via mana-image-gen** (mehrere Tage) — OFFEN
+  - [ ] FLUX + PuLID/InstantID auf GPU-Server (Windows, RTX 3090)
   - [ ] `POST /edit` in mana-image-gen
-  - [ ] Routing über `local/flux-pulid`
+  - [ ] Routing über `local/flux-pulid` im apps/api-Endpoint
 
-- **M7 — (optional, später) Inpainting-Mask-Drawing** (~2 Tage)
+- **M7 — Inpainting Mask Drawing** (~2 Tage) — OFFEN
   - [ ] Canvas-Mask-Editor im Picture-Generator
-  - [ ] Mask als zweites Medium hochladen + an `/edit` übergeben
+  - [ ] Mask als zweites Multipart-Part an `/v1/images/edits`
 
-- **M8 — (optional, später) Zero-Knowledge-Bilder**
-  - [ ] Client-seitige Verschlüsselung der Bild-Blobs in MinIO
-  - [ ] Bei Generate-Call entschlüsselt der Client und sendet temp an Server → OpenAI → Result wieder verschlüsseln
+- **M8 — Zero-Knowledge-Bild-Blobs** — OFFEN, großer Workstream
+  - [ ] Client-seitige AES-Verschlüsselung *vor* Upload zu mana-media
+  - [ ] Generate-Call entschlüsselt client-seitig, sendet temp an Server → OpenAI → Ergebnis wieder verschlüsseln
+  - [ ] Braucht eigene Architektur-Skizze; das hier ist nur ein Hinweis dass der Bedarf existiert
 
 ## Entschieden (2026-04-23)
 
