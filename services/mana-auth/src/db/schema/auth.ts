@@ -49,6 +49,10 @@ export const users = authSchema.table('users', {
 	kind: userKindEnum('kind').default('human').notNull(),
 	twoFactorEnabled: boolean('two_factor_enabled').default(false),
 	deletedAt: timestamp('deleted_at', { withTimezone: true }),
+	// Null = user hasn't finished the 3-screen onboarding flow yet (Name
+	// → Look → Templates). The flow is skippable, but even a skip sets
+	// this timestamp so we don't re-prompt. See docs/plans/onboarding-flow.md.
+	onboardingCompletedAt: timestamp('onboarding_completed_at', { withTimezone: true }),
 });
 
 // Sessions table (Better Auth schema)

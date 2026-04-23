@@ -24,6 +24,7 @@ import { createAuthRoutes } from './routes/auth';
 import { createGuildRoutes } from './routes/guilds';
 import { createApiKeyRoutes, createApiKeyValidationRoute } from './routes/api-keys';
 import { createMeRoutes } from './routes/me';
+import { createOnboardingRoutes } from './routes/onboarding';
 import { createEncryptionVaultRoutes } from './routes/encryption-vault';
 import { createAiMissionGrantRoutes } from './routes/ai-mission-grant';
 import { createSettingsRoutes } from './routes/settings';
@@ -110,6 +111,11 @@ app.route('/api/v1/me/encryption-vault', createEncryptionVaultRoutes(encryptionV
 // decrypt scoped encrypted records. Under /me so it inherits the JWT
 // middleware above. See docs/plans/ai-mission-key-grant.md.
 app.route('/api/v1/me/ai-mission-grant', createAiMissionGrantRoutes(missionGrantService));
+
+// ─── Onboarding ────────────────────────────────────────────
+// Per-user "did you finish the 3-screen onboarding flow yet" state.
+// See docs/plans/onboarding-flow.md.
+app.route('/api/v1/me/onboarding', createOnboardingRoutes(db));
 
 // ─── Settings ──────────────────────────────────────────────
 
