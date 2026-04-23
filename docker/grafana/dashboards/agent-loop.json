@@ -1,0 +1,412 @@
+{
+	"annotations": { "list": [] },
+	"editable": true,
+	"fiscalYearStartMonth": 0,
+	"graphTooltip": 1,
+	"id": null,
+	"links": [
+		{
+			"asDropdown": false,
+			"icon": "external link",
+			"includeVars": true,
+			"keepTime": true,
+			"tags": [],
+			"targetBlank": false,
+			"title": "Master Overview",
+			"type": "link",
+			"url": "/d/master-overview/master-overview"
+		}
+	],
+	"panels": [
+		{
+			"collapsed": false,
+			"gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+			"id": 1,
+			"panels": [],
+			"title": "Service Health",
+			"type": "row"
+		},
+		{
+			"datasource": { "type": "prometheus", "uid": "${datasource}" },
+			"fieldConfig": {
+				"defaults": {
+					"color": { "mode": "thresholds" },
+					"mappings": [
+						{
+							"options": {
+								"0": { "color": "red", "index": 1, "text": "DOWN" },
+								"1": { "color": "green", "index": 0, "text": "UP" }
+							},
+							"type": "value"
+						}
+					],
+					"thresholds": {
+						"steps": [
+							{ "color": "red", "value": null },
+							{ "color": "green", "value": 1 }
+						]
+					}
+				}
+			},
+			"gridPos": { "h": 4, "w": 6, "x": 0, "y": 1 },
+			"id": 2,
+			"options": {
+				"colorMode": "background",
+				"graphMode": "none",
+				"reduceOptions": { "calcs": ["lastNotNull"] }
+			},
+			"title": "mana-mcp Status",
+			"type": "stat",
+			"targets": [{ "expr": "up{job=\"mana-mcp\"}", "legendFormat": "Status" }]
+		},
+		{
+			"datasource": { "type": "prometheus", "uid": "${datasource}" },
+			"fieldConfig": {
+				"defaults": {
+					"color": { "mode": "thresholds" },
+					"mappings": [
+						{
+							"options": {
+								"0": { "color": "red", "index": 1, "text": "DOWN" },
+								"1": { "color": "green", "index": 0, "text": "UP" }
+							},
+							"type": "value"
+						}
+					],
+					"thresholds": {
+						"steps": [
+							{ "color": "red", "value": null },
+							{ "color": "green", "value": 1 }
+						]
+					}
+				}
+			},
+			"gridPos": { "h": 4, "w": 6, "x": 6, "y": 1 },
+			"id": 3,
+			"options": {
+				"colorMode": "background",
+				"graphMode": "none",
+				"reduceOptions": { "calcs": ["lastNotNull"] }
+			},
+			"title": "mana-ai Status",
+			"type": "stat",
+			"targets": [{ "expr": "up{job=\"mana-ai\"}", "legendFormat": "Status" }]
+		},
+		{
+			"datasource": { "type": "prometheus", "uid": "${datasource}" },
+			"fieldConfig": {
+				"defaults": {
+					"unit": "short",
+					"color": { "mode": "thresholds" },
+					"thresholds": {
+						"steps": [
+							{ "color": "green", "value": null },
+							{ "color": "yellow", "value": 1 },
+							{ "color": "red", "value": 10 }
+						]
+					}
+				}
+			},
+			"gridPos": { "h": 4, "w": 6, "x": 12, "y": 1 },
+			"id": 4,
+			"options": {
+				"colorMode": "value",
+				"graphMode": "area",
+				"reduceOptions": { "calcs": ["lastNotNull"] }
+			},
+			"title": "Policy Denies / min (1h avg)",
+			"type": "stat",
+			"targets": [
+				{
+					"expr": "sum(rate(mana_mcp_policy_decisions_total{decision=\"deny\"}[1h])) * 60",
+					"legendFormat": "deny/min"
+				}
+			]
+		},
+		{
+			"datasource": { "type": "prometheus", "uid": "${datasource}" },
+			"fieldConfig": {
+				"defaults": {
+					"unit": "short",
+					"color": { "mode": "thresholds" },
+					"thresholds": {
+						"steps": [
+							{ "color": "green", "value": null },
+							{ "color": "yellow", "value": 1 }
+						]
+					}
+				}
+			},
+			"gridPos": { "h": 4, "w": 6, "x": 18, "y": 1 },
+			"id": 5,
+			"options": {
+				"colorMode": "value",
+				"graphMode": "area",
+				"reduceOptions": { "calcs": ["lastNotNull"] }
+			},
+			"title": "Compactions / h",
+			"type": "stat",
+			"targets": [
+				{
+					"expr": "sum(rate(mana_ai_compactions_triggered_total[1h])) * 3600",
+					"legendFormat": "per hour"
+				}
+			]
+		},
+
+		{
+			"collapsed": false,
+			"gridPos": { "h": 1, "w": 24, "x": 0, "y": 5 },
+			"id": 10,
+			"panels": [],
+			"title": "Policy Gate (mana-mcp)",
+			"type": "row"
+		},
+		{
+			"datasource": { "type": "prometheus", "uid": "${datasource}" },
+			"fieldConfig": {
+				"defaults": { "unit": "short", "color": { "mode": "palette-classic" } }
+			},
+			"gridPos": { "h": 8, "w": 12, "x": 0, "y": 6 },
+			"id": 11,
+			"options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["sum"] } },
+			"title": "Decisions / sec by outcome",
+			"type": "timeseries",
+			"targets": [
+				{
+					"expr": "sum by (decision) (rate(mana_mcp_policy_decisions_total[5m]))",
+					"legendFormat": "{{decision}}"
+				}
+			]
+		},
+		{
+			"datasource": { "type": "prometheus", "uid": "${datasource}" },
+			"fieldConfig": {
+				"defaults": { "unit": "short", "color": { "mode": "palette-classic" } }
+			},
+			"gridPos": { "h": 8, "w": 12, "x": 12, "y": 6 },
+			"id": 12,
+			"options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["sum"] } },
+			"title": "Deny reasons (soak signal for enforce-flip)",
+			"type": "timeseries",
+			"targets": [
+				{
+					"expr": "sum by (reason) (rate(mana_mcp_policy_decisions_total{decision=\"deny\"}[5m]))",
+					"legendFormat": "{{reason}}"
+				}
+			]
+		},
+		{
+			"datasource": { "type": "prometheus", "uid": "${datasource}" },
+			"fieldConfig": {
+				"defaults": { "unit": "short", "color": { "mode": "palette-classic" } }
+			},
+			"gridPos": { "h": 8, "w": 12, "x": 0, "y": 14 },
+			"id": 13,
+			"options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["sum"] } },
+			"title": "Tool invocations / sec by outcome",
+			"type": "timeseries",
+			"targets": [
+				{
+					"expr": "sum by (outcome) (rate(mana_mcp_tool_invocations_total[5m]))",
+					"legendFormat": "{{outcome}}"
+				}
+			]
+		},
+		{
+			"datasource": { "type": "prometheus", "uid": "${datasource}" },
+			"fieldConfig": { "defaults": { "unit": "short" } },
+			"gridPos": { "h": 8, "w": 12, "x": 12, "y": 14 },
+			"id": 14,
+			"options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["sum"] } },
+			"title": "Top 10 invoked tools (24h)",
+			"type": "bargauge",
+			"targets": [
+				{
+					"expr": "topk(10, sum by (tool) (increase(mana_mcp_tool_invocations_total[24h])))",
+					"legendFormat": "{{tool}}"
+				}
+			]
+		},
+		{
+			"datasource": { "type": "prometheus", "uid": "${datasource}" },
+			"fieldConfig": { "defaults": { "unit": "s" } },
+			"gridPos": { "h": 8, "w": 24, "x": 0, "y": 22 },
+			"id": 15,
+			"options": {
+				"legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max"] }
+			},
+			"title": "Tool handler latency p50 / p95 / p99",
+			"type": "timeseries",
+			"targets": [
+				{
+					"expr": "histogram_quantile(0.5, sum by (le, tool) (rate(mana_mcp_tool_duration_seconds_bucket[5m])))",
+					"legendFormat": "p50 {{tool}}"
+				},
+				{
+					"expr": "histogram_quantile(0.95, sum by (le, tool) (rate(mana_mcp_tool_duration_seconds_bucket[5m])))",
+					"legendFormat": "p95 {{tool}}"
+				},
+				{
+					"expr": "histogram_quantile(0.99, sum by (le, tool) (rate(mana_mcp_tool_duration_seconds_bucket[5m])))",
+					"legendFormat": "p99 {{tool}}"
+				}
+			]
+		},
+
+		{
+			"collapsed": false,
+			"gridPos": { "h": 1, "w": 24, "x": 0, "y": 30 },
+			"id": 20,
+			"panels": [],
+			"title": "Reminder Channel (mana-ai)",
+			"type": "row"
+		},
+		{
+			"datasource": { "type": "prometheus", "uid": "${datasource}" },
+			"fieldConfig": {
+				"defaults": { "unit": "short", "color": { "mode": "palette-classic" } }
+			},
+			"gridPos": { "h": 8, "w": 12, "x": 0, "y": 31 },
+			"id": 21,
+			"options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["sum"] } },
+			"title": "Reminders emitted / sec by producer",
+			"type": "timeseries",
+			"targets": [
+				{
+					"expr": "sum by (producer) (rate(mana_ai_reminders_emitted_total[5m]))",
+					"legendFormat": "{{producer}}"
+				}
+			]
+		},
+		{
+			"datasource": { "type": "prometheus", "uid": "${datasource}" },
+			"fieldConfig": {
+				"defaults": { "unit": "short", "color": { "mode": "palette-classic" } }
+			},
+			"gridPos": { "h": 8, "w": 12, "x": 12, "y": 31 },
+			"id": 22,
+			"options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["sum"] } },
+			"title": "Reminders by severity (warn/escalate should trend down if the LLM reacts)",
+			"type": "timeseries",
+			"targets": [
+				{
+					"expr": "sum by (severity) (rate(mana_ai_reminders_emitted_total[5m]))",
+					"legendFormat": "{{severity}}"
+				}
+			]
+		},
+
+		{
+			"collapsed": false,
+			"gridPos": { "h": 1, "w": 24, "x": 0, "y": 39 },
+			"id": 30,
+			"panels": [],
+			"title": "Context Compactor (mana-ai)",
+			"type": "row"
+		},
+		{
+			"datasource": { "type": "prometheus", "uid": "${datasource}" },
+			"fieldConfig": { "defaults": { "unit": "short" } },
+			"gridPos": { "h": 8, "w": 12, "x": 0, "y": 40 },
+			"id": 31,
+			"options": { "legend": { "displayMode": "list", "placement": "bottom" } },
+			"title": "Compactions triggered (cumulative)",
+			"type": "timeseries",
+			"targets": [
+				{
+					"expr": "sum(increase(mana_ai_compactions_triggered_total[1h]))",
+					"legendFormat": "per 1h"
+				}
+			]
+		},
+		{
+			"datasource": { "type": "prometheus", "uid": "${datasource}" },
+			"fieldConfig": { "defaults": { "unit": "short" } },
+			"gridPos": { "h": 8, "w": 12, "x": 12, "y": 40 },
+			"id": 32,
+			"options": { "legend": { "displayMode": "list", "placement": "bottom" } },
+			"title": "Turns folded per compaction (histogram)",
+			"description": "p50/p95 of messages folded per compaction event. Values < 3 suggest MANA_AI_COMPACT_MAX_CTX is misconfigured (threshold fires on already-short histories).",
+			"type": "timeseries",
+			"targets": [
+				{
+					"expr": "histogram_quantile(0.5, sum by (le) (rate(mana_ai_compacted_turns_bucket[30m])))",
+					"legendFormat": "p50 turns"
+				},
+				{
+					"expr": "histogram_quantile(0.95, sum by (le) (rate(mana_ai_compacted_turns_bucket[30m])))",
+					"legendFormat": "p95 turns"
+				}
+			]
+		},
+
+		{
+			"collapsed": false,
+			"gridPos": { "h": 1, "w": 24, "x": 0, "y": 48 },
+			"id": 40,
+			"panels": [],
+			"title": "Mission Runner Baseline (for correlation)",
+			"type": "row"
+		},
+		{
+			"datasource": { "type": "prometheus", "uid": "${datasource}" },
+			"fieldConfig": { "defaults": { "unit": "s" } },
+			"gridPos": { "h": 8, "w": 12, "x": 0, "y": 49 },
+			"id": 41,
+			"options": {
+				"legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max"] }
+			},
+			"title": "Tick duration p50 / p95",
+			"type": "timeseries",
+			"targets": [
+				{
+					"expr": "histogram_quantile(0.5, sum by (le) (rate(mana_ai_tick_duration_seconds_bucket[5m])))",
+					"legendFormat": "p50"
+				},
+				{
+					"expr": "histogram_quantile(0.95, sum by (le) (rate(mana_ai_tick_duration_seconds_bucket[5m])))",
+					"legendFormat": "p95"
+				}
+			]
+		},
+		{
+			"datasource": { "type": "prometheus", "uid": "${datasource}" },
+			"fieldConfig": { "defaults": { "unit": "short" } },
+			"gridPos": { "h": 8, "w": 12, "x": 12, "y": 49 },
+			"id": 42,
+			"options": { "legend": { "displayMode": "list", "placement": "bottom" } },
+			"title": "Planner rounds per mission (p50/p95)",
+			"type": "timeseries",
+			"targets": [
+				{
+					"expr": "histogram_quantile(0.5, sum by (le) (rate(mana_ai_planner_rounds_bucket[5m])))",
+					"legendFormat": "p50 rounds"
+				},
+				{
+					"expr": "histogram_quantile(0.95, sum by (le) (rate(mana_ai_planner_rounds_bucket[5m])))",
+					"legendFormat": "p95 rounds"
+				}
+			]
+		}
+	],
+	"schemaVersion": 39,
+	"tags": ["mana", "ai", "agent-loop", "policy", "compactor"],
+	"templating": {
+		"list": [
+			{
+				"current": { "selected": false, "text": "VictoriaMetrics", "value": "victoria-metrics" },
+				"hide": 0,
+				"includeAll": false,
+				"name": "datasource",
+				"options": [],
+				"query": "prometheus",
+				"type": "datasource"
+			}
+		]
+	},
+	"time": { "from": "now-6h", "to": "now" },
+	"title": "Agent Loop — Policy, Reminders, Compactor",
+	"uid": "agent-loop",
+	"version": 1
+}
