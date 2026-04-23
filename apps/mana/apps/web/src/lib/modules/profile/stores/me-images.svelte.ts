@@ -59,10 +59,10 @@ function defaultUsage(override?: Partial<MeImageUsage>): MeImageUsage {
 }
 
 /**
- * After any primary-avatar change in the **personal** space, push the
- * current holder's publicUrl back to Better Auth so `auth.users.image`
- * stays in lockstep. Plan M2.5 — this is the only path by which
- * auth.users.image ever gets written from now on.
+ * After any primary-avatar-relevant change in the **personal** space,
+ * push the current holder's publicUrl back to Better Auth so
+ * `auth.users.image` stays in lockstep. Plan M2.5 — this is the only
+ * path by which auth.users.image ever gets written from now on.
  *
  * After v40 (space-scope migration), avatar-primary is per-space; only
  * the personal-space holder represents the user's global SSO identity.
@@ -70,6 +70,16 @@ function defaultUsage(override?: Partial<MeImageUsage>): MeImageUsage {
  * space is local to that space and must NOT overwrite the Better Auth
  * record — otherwise switching into a brand space and picking a new
  * avatar would leak into the user's navigation/SSO identity elsewhere.
+ *
+ * The user's avatar follows their face-ref: "the photo we'd use to
+ * generate you" is also "the photo we'd put next to your name in nav".
+ * Previously `setPrimary(id, 'face-ref')` tried to coerce both slots
+ * onto one row with a silent twin — but `primaryFor` is a single
+ * column, so the avatar write clobbered the face-ref write and every
+ * fresh upload ended up with `primaryFor='avatar'` and no face-ref at
+ * all. We now keep face-ref as the single source of truth and only
+ * fall back to the legacy `primaryFor='avatar'` row (written by the
+ * pre-M2.5 legacy-avatar migration) when no face-ref exists yet.
  *
  * Best-effort: failures are logged and swallowed. The meImages row is
  * authoritative for the app's own avatar rendering, so a stale
@@ -80,9 +90,14 @@ async function syncAvatarToAuth(): Promise<void> {
 		const active = getActiveSpace();
 		if (active?.type !== 'personal') return;
 		const rows = await scopedForModule<LocalMeImage, string>('profile', 'meImages')
-			.and((row) => row.primaryFor === 'avatar')
+			.and((row) => row.primaryFor === 'face-ref' || row.primaryFor === 'avatar')
 			.toArray();
-		const holder = rows.find((row) => !row.deletedAt);
+		const visible = rows.filter((row) => !row.deletedAt);
+		// Prefer the face-ref holder (current, user-uploaded) over the
+		// legacy avatar row (migrated from the pre-M2.5 auth.users.image).
+		const holder =
+			visible.find((row) => row.primaryFor === 'face-ref') ??
+			visible.find((row) => row.primaryFor === 'avatar');
 		const nextImage = holder?.publicUrl ?? '';
 		await profileService.updateProfile({ image: nextImage });
 	} catch (err) {
@@ -188,34 +203,34 @@ export const meImagesStore = {
 	 * Pass `null` as the second argument to unset the slot on `id`
 	 * without claiming it for anyone else.
 	 *
-	 * The `avatar` slot is coupled to `face-ref`: setting a new
-	 * face-ref also claims the avatar on the same row (plan M2.5
-	 * decision — keeps auth.users.image in lockstep with the user's
-	 * current reference face without a second UI control). Explicit
-	 * avatar-only setPrimary calls (e.g. the legacy migration
-	 * bootstrap) still work and only touch the avatar slot.
+	 * The user's avatar follows their face-ref via `syncAvatarToAuth`
+	 * (which reads the face-ref holder directly) — no silent twin
+	 * write, because `primaryFor` is a single-value column and the
+	 * twin would overwrite the face-ref claim on the same row.
+	 * Explicit avatar-only setPrimary calls (e.g. the legacy migration
+	 * bootstrap that seeds `primaryFor='avatar'` for pre-M2.5 users)
+	 * still work; `syncAvatarToAuth` falls back to that row when no
+	 * face-ref exists yet.
 	 */
 	async setPrimary(id: string, slot: MeImagePrimarySlot | null): Promise<void> {
 		if (slot === null) {
 			// Clear whatever this row currently holds. If it was the
-			// avatar, we also need to sync that out to Better Auth.
+			// face-ref or the legacy avatar holder, we also need to sync
+			// the change out to Better Auth.
 			const existing = await meImagesTable.get(id);
-			const wasAvatar = existing?.primaryFor === 'avatar';
+			const wasAvatarRelevant =
+				existing?.primaryFor === 'face-ref' || existing?.primaryFor === 'avatar';
 			const nowIso = new Date().toISOString();
 			await meImagesTable.update(id, { primaryFor: null, updatedAt: nowIso });
 			emitDomainEvent('MeImagePrimaryChanged', 'profile', 'meImages', id, {
 				meImageId: id,
 				slot: null,
 			});
-			if (wasAvatar) await syncAvatarToAuth();
+			if (wasAvatarRelevant) await syncAvatarToAuth();
 			return;
 		}
 
 		await setPrimaryInTx(id, slot);
-		// Silent twin: a fresh face-ref is also the fresh avatar.
-		if (slot === 'face-ref') {
-			await setPrimaryInTx(id, 'avatar');
-		}
 		emitDomainEvent('MeImagePrimaryChanged', 'profile', 'meImages', id, {
 			meImageId: id,
 			slot,
@@ -227,7 +242,8 @@ export const meImagesStore = {
 
 	async deleteMeImage(id: string): Promise<void> {
 		const existing = await meImagesTable.get(id);
-		const wasAvatar = existing?.primaryFor === 'avatar';
+		const wasAvatarRelevant =
+			existing?.primaryFor === 'face-ref' || existing?.primaryFor === 'avatar';
 		const nowIso = new Date().toISOString();
 		await meImagesTable.update(id, {
 			deletedAt: nowIso,
@@ -238,6 +254,6 @@ export const meImagesStore = {
 			primaryFor: null,
 		});
 		emitDomainEvent('MeImageDeleted', 'profile', 'meImages', id, { meImageId: id });
-		if (wasAvatar) await syncAvatarToAuth();
+		if (wasAvatarRelevant) await syncAvatarToAuth();
 	},
 };

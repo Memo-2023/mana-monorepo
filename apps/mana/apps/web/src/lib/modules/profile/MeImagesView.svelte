@@ -24,6 +24,7 @@
 	import { meImagesStore } from './stores/me-images.svelte';
 	import { ingestMeImageFile } from './api/me-images';
 	import { migrateLegacyAvatarIfNeeded } from './migration/legacy-avatar';
+	import { repairSilentTwinAvatarRows } from './migration/repair-silent-twin';
 	import type { MeImage, MeImageKind, MeImagePrimarySlot } from './types';
 
 	// Active-space indicator for the intro card. After v40 meImages are
@@ -31,11 +32,18 @@
 	// badge makes that transparent without cluttering the rest of the UI.
 	const activeSpace = $derived(getActiveSpace());
 
-	// One-shot bootstrap: pull the pre-M1 auth.users.image into meImages
-	// as the avatar primary. Idempotent — see migration/legacy-avatar.ts.
+	// One-shot bootstraps, both idempotent + localStorage-guarded:
+	//   1. legacy-avatar: pull pre-M1 auth.users.image into meImages as
+	//      the avatar primary.
+	//   2. repair-silent-twin: flip rows that the M2.5 setPrimary bug
+	//      left with primaryFor='avatar' back to 'face-ref' so the
+	//      face-ref live-query sees them again (see migration file).
 	onMount(() => {
 		migrateLegacyAvatarIfNeeded().catch((err) => {
 			console.error('[profile] legacy avatar migration failed', err);
+		});
+		repairSilentTwinAvatarRows().catch((err) => {
+			console.error('[profile] silent-twin repair failed', err);
 		});
 	});
 
