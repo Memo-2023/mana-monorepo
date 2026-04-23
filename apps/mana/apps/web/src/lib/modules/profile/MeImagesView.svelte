@@ -16,6 +16,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { Info, Sparkle } from '@mana/shared-icons';
+	import { getActiveSpace } from '$lib/data/scope';
 	import MeImageSlotCard from './components/MeImageSlotCard.svelte';
 	import MeImageTile from './components/MeImageTile.svelte';
 	import MeImageUploadZone from './components/MeImageUploadZone.svelte';
@@ -24,6 +25,11 @@
 	import { readImageDimensions, uploadMeImageFile } from './api/me-images';
 	import { migrateLegacyAvatarIfNeeded } from './migration/legacy-avatar';
 	import type { MeImage, MeImageKind, MeImagePrimarySlot } from './types';
+
+	// Active-space indicator for the intro card. After v40 meImages are
+	// space-scoped — when the user switches spaces the pool changes. The
+	// badge makes that transparent without cluttering the rest of the UI.
+	const activeSpace = $derived(getActiveSpace());
 
 	// One-shot bootstrap: pull the pre-M1 auth.users.image into meImages
 	// as the avatar primary. Idempotent — see migration/legacy-avatar.ts.
@@ -108,9 +114,19 @@
 <div class="mx-auto max-w-4xl space-y-8 p-4 sm:p-6">
 	<!-- Intro + privacy hint -->
 	<section class="rounded-2xl border border-border bg-card p-5">
-		<div class="mb-2 flex items-center gap-2 text-foreground">
-			<Sparkle size={18} weight="fill" class="text-primary" />
-			<h2 class="text-base font-semibold">Meine Bilder</h2>
+		<div class="mb-2 flex items-center justify-between gap-2 text-foreground">
+			<div class="flex items-center gap-2">
+				<Sparkle size={18} weight="fill" class="text-primary" />
+				<h2 class="text-base font-semibold">Meine Bilder</h2>
+			</div>
+			{#if activeSpace}
+				<span
+					class="rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground"
+					title="Der Pool ist pro Space — Bilder aus anderen Spaces bleiben dort."
+				>
+					{activeSpace.type === 'personal' ? 'Persönlich' : activeSpace.name}
+				</span>
+			{/if}
 		</div>
 		<p class="text-sm text-muted-foreground">
 			Hinterlege hier ein Gesichts- und ein Ganzkörper-Bild sowie weitere Referenzen. Die

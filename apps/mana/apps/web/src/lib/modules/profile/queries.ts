@@ -1,14 +1,21 @@
 /**
  * Profile module — read-side queries.
+ *
+ * `userContext` stays a per-user singleton (read via the direct
+ * collection). `meImages` is now space-scoped (v40) — all reads go
+ * through `scopedForModule` so switching the active space flips the
+ * visible pool without any query re-write.
  */
 
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { decryptRecords } from '$lib/data/crypto';
-import { meImagesTable, userContextTable } from './collections';
+import { scopedForModule } from '$lib/data/scope';
+import { userContextTable } from './collections';
 import {
 	USER_CONTEXT_SINGLETON_ID,
 	toUserContext,
 	toMeImage,
+	type LocalMeImage,
 	type UserContext,
 	type MeImage,
 	type MeImageKind,
@@ -26,26 +33,13 @@ export function useUserContext() {
 }
 
 /**
- * All non-deleted me-images, newest first. Decrypted on the client —
- * filters and sorting happen before decrypt where possible (`kind`,
- * `primaryFor`, `createdAt` are plaintext indices).
+ * All non-deleted me-images in the active space, newest first. The
+ * `scopedForModule` wrapper filters in-memory by `spaceId`; the live-
+ * query re-runs automatically when the active space changes.
  */
 export function useAllMeImages() {
 	return useLiveQueryWithDefault<MeImage[]>(async () => {
-		const locals = await meImagesTable.orderBy('createdAt').reverse().toArray();
-		const visible = locals.filter((row) => !row.deletedAt);
-		const decrypted = await decryptRecords('meImages', visible);
-		return decrypted.map(toMeImage);
-	}, [] as MeImage[]);
-}
-
-/**
- * Me-images filtered by `kind`. Uses the `kind` Dexie index so large
- * pools still filter in one B-tree lookup.
- */
-export function useMeImagesByKind(kind: MeImageKind) {
-	return useLiveQueryWithDefault<MeImage[]>(async () => {
-		const locals = await meImagesTable.where('kind').equals(kind).toArray();
+		const locals = await scopedForModule<LocalMeImage, string>('profile', 'meImages').toArray();
 		const visible = locals
 			.filter((row) => !row.deletedAt)
 			.sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? ''));
@@ -55,33 +49,55 @@ export function useMeImagesByKind(kind: MeImageKind) {
 }
 
 /**
- * Only images the user explicitly opted in for AI reference use.
- * This is the authoritative list the Picture generator's Reference
- * picker reads from — if an image isn't here, it must not be sent
- * to OpenAI.
+ * Me-images in the active space filtered by `kind`.
  */
-export function useReferenceImages() {
+export function useMeImagesByKind(kind: MeImageKind) {
 	return useLiveQueryWithDefault<MeImage[]>(async () => {
-		const locals = await meImagesTable.orderBy('createdAt').reverse().toArray();
-		const visible = locals.filter((row) => !row.deletedAt && row.usage?.aiReference === true);
+		const locals = await scopedForModule<LocalMeImage, string>('profile', 'meImages')
+			.and((row) => row.kind === kind)
+			.toArray();
+		const visible = locals
+			.filter((row) => !row.deletedAt)
+			.sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? ''));
 		const decrypted = await decryptRecords('meImages', visible);
 		return decrypted.map(toMeImage);
 	}, [] as MeImage[]);
 }
 
 /**
- * Current holder of a primary slot (avatar / face-ref / body-ref),
- * or null if nobody claimed it yet. Powers the avatar fallback and
- * the Reference picker's default selection.
+ * Only images the user explicitly opted in for AI reference use
+ * **within the active space**. This is the authoritative list the
+ * Picture generator's Reference picker reads from — if an image
+ * isn't here, it must not be sent to OpenAI.
+ */
+export function useReferenceImages() {
+	return useLiveQueryWithDefault<MeImage[]>(async () => {
+		const locals = await scopedForModule<LocalMeImage, string>('profile', 'meImages').toArray();
+		const visible = locals
+			.filter((row) => !row.deletedAt && row.usage?.aiReference === true)
+			.sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? ''));
+		const decrypted = await decryptRecords('meImages', visible);
+		return decrypted.map(toMeImage);
+	}, [] as MeImage[]);
+}
+
+/**
+ * Current holder of a primary slot (avatar / face-ref / body-ref)
+ * **within the active space**. After v40 each space has its own
+ * primary slots. Personal-space's `avatar` slot drives
+ * `auth.users.image` globally — other spaces' `avatar` slots stay
+ * local to that space.
  */
 export function useImageByPrimary(slot: MeImagePrimarySlot) {
 	return useLiveQueryWithDefault<MeImage | null>(async () => {
-		const locals = await meImagesTable.where('primaryFor').equals(slot).toArray();
+		const locals = await scopedForModule<LocalMeImage, string>('profile', 'meImages')
+			.and((row) => row.primaryFor === slot)
+			.toArray();
 		const visible = locals.filter((row) => !row.deletedAt);
 		if (visible.length === 0) return null;
-		// The setPrimary store method keeps this to exactly one row. If
-		// somehow more than one slipped through (manual DB edit, race on
-		// a broken migration), prefer the most recent write.
+		// The setPrimary store method keeps this to exactly one row per
+		// space. If more than one slipped through (manual DB edit, race
+		// on a broken migration), prefer the most recent write.
 		visible.sort((a, b) => (b.updatedAt ?? '').localeCompare(a.updatedAt ?? ''));
 		const [decrypted] = await decryptRecords('meImages', [visible[0]]);
 		return toMeImage(decrypted);

@@ -77,6 +77,14 @@ export async function migrateLegacyAvatarIfNeeded(): Promise<void> {
 		label: 'Bisheriges Profilbild',
 		usage: { aiReference: false, showInProfile: true },
 		primaryFor: 'avatar',
+		// Legacy avatar is the user's global SSO identity (Better Auth
+		// `users.image`) — it belongs explicitly in the *personal* space,
+		// regardless of which space the user happens to be in when the
+		// migration fires. Use the `_personal:<uid>` sentinel that
+		// reconcileSentinels() rewrites to the real personal-space id on
+		// the next active-space bootstrap (same pattern v28 used for the
+		// blanket data-table migration).
+		spaceId: `_personal:${user.id}`,
 	});
 
 	try {

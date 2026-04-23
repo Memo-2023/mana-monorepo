@@ -932,6 +932,48 @@ db.version(38).stores({
 	meImages: 'id, kind, primaryFor, createdAt',
 });
 
+// v40 — Flip meImages from USER_LEVEL_TABLES to space-scoped data
+// (docs/plans/me-images-space-scope-migration.md).
+//
+// Why: after Wardrobe's decision to be space-scoped across all six
+// space types, leaving meImages user-scoped creates a split-brain
+// model (space-scoped catalog, user-global input). Unification also
+// closes a latent privacy leak in shared spaces — an MCP agent in a
+// brand-space would otherwise see the owner's entire private pool.
+//
+// What the upgrade does to existing rows, in one pass:
+//   1. stamps `spaceId = _personal:<userId>` sentinel (reconcileSentinels
+//      rewrites it to the real personal-space id on next Better Auth
+//      membership load — same path as v28's sentinel population)
+//   2. stamps `authorId = userId`
+//   3. stamps `visibility = 'space'`
+//   4. drops `userId` (meImages is a data-table now, attribution lives
+//      on the Actor fields + tenancy on spaceId — same sweep as v35
+//      did for the other data-tables, just scoped to this one)
+//
+// No schema/index change: `spaceId`, `authorId`, `visibility` are
+// non-indexed fields, scopedTable filters in-memory. Tiny pool per
+// space (typ. 2-10 rows), no compound index warranted.
+db.version(40).upgrade(async (tx) => {
+	await tx
+		.table('meImages')
+		.toCollection()
+		.modify((record: Record<string, unknown>) => {
+			const ownerId =
+				typeof record.userId === 'string' && record.userId ? record.userId : GUEST_USER_ID;
+			if (record.spaceId === undefined || record.spaceId === null) {
+				record.spaceId = `_personal:${ownerId}`;
+			}
+			if (record.authorId === undefined || record.authorId === null) {
+				record.authorId = ownerId;
+			}
+			if (record.visibility === undefined || record.visibility === null) {
+				record.visibility = 'space';
+			}
+			if ('userId' in record) delete record.userId;
+		});
+});
+
 // ─── Sync Routing ──────────────────────────────────────────
 // SYNC_APP_MAP, TABLE_TO_SYNC_NAME, TABLE_TO_APP, SYNC_NAME_TO_TABLE,
 // toSyncName() and fromSyncName() are now derived from per-module
@@ -1114,7 +1156,8 @@ const USER_LEVEL_TABLES: ReadonlySet<string> = new Set([
 	'broadcastSettings',
 	'wetterSettings',
 	'userTagPresets',
-	'meImages',
+	// meImages removed in v40 — now space-scoped like every other
+	// data-table. See docs/plans/me-images-space-scope-migration.md.
 ]);
 
 for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {

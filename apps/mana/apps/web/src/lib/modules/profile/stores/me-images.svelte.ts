@@ -10,6 +10,7 @@
 
 import { encryptRecord } from '$lib/data/crypto';
 import { emitDomainEvent } from '$lib/data/events';
+import { scopedForModule, getActiveSpace } from '$lib/data/scope';
 import { profileService } from '$lib/api/profile';
 import { meImagesTable } from '../collections';
 import { toMeImage } from '../types';
@@ -33,6 +34,15 @@ export interface CreateMeImageInput {
 	tags?: string[];
 	usage?: Partial<MeImageUsage>;
 	primaryFor?: MeImagePrimarySlot | null;
+	/**
+	 * Override the auto-stamped spaceId. Only the legacy-avatar
+	 * migration needs this — it must pin the pre-M1 `auth.users.image`
+	 * explicitly into the user's personal space regardless of which
+	 * space happens to be active when the user first visits the route.
+	 * Regular upload paths leave this unset and let the Dexie hook
+	 * stamp the active space.
+	 */
+	spaceId?: string;
 }
 
 /**
@@ -49,11 +59,17 @@ function defaultUsage(override?: Partial<MeImageUsage>): MeImageUsage {
 }
 
 /**
- * After any primary-avatar change, push the current holder's publicUrl
- * back to Better Auth so `auth.users.image` stays in lockstep. Plan
- * M2.5 — this is the only path by which auth.users.image ever gets
- * written from now on; EditProfileModal's legacy inline upload is
- * gone in the same commit.
+ * After any primary-avatar change in the **personal** space, push the
+ * current holder's publicUrl back to Better Auth so `auth.users.image`
+ * stays in lockstep. Plan M2.5 — this is the only path by which
+ * auth.users.image ever gets written from now on.
+ *
+ * After v40 (space-scope migration), avatar-primary is per-space; only
+ * the personal-space holder represents the user's global SSO identity.
+ * A primary-avatar change inside a brand/club/family/team/practice
+ * space is local to that space and must NOT overwrite the Better Auth
+ * record — otherwise switching into a brand space and picking a new
+ * avatar would leak into the user's navigation/SSO identity elsewhere.
  *
  * Best-effort: failures are logged and swallowed. The meImages row is
  * authoritative for the app's own avatar rendering, so a stale
@@ -61,7 +77,11 @@ function defaultUsage(override?: Partial<MeImageUsage>): MeImageUsage {
  */
 async function syncAvatarToAuth(): Promise<void> {
 	try {
-		const rows = await meImagesTable.where('primaryFor').equals('avatar').toArray();
+		const active = getActiveSpace();
+		if (active?.type !== 'personal') return;
+		const rows = await scopedForModule<LocalMeImage, string>('profile', 'meImages')
+			.and((row) => row.primaryFor === 'avatar')
+			.toArray();
 		const holder = rows.find((row) => !row.deletedAt);
 		const nextImage = holder?.publicUrl ?? '';
 		await profileService.updateProfile({ image: nextImage });
@@ -72,13 +92,17 @@ async function syncAvatarToAuth(): Promise<void> {
 
 /**
  * Internal: swap the primary holder of `slot` to `id` (or clear it
- * when id is null) in one transaction. Extracted so `setPrimary` can
- * reuse it when avatar silently follows face-ref.
+ * when id is null) in one transaction — *within the active space only*.
+ * Extracted so `setPrimary` can reuse it when avatar silently follows
+ * face-ref. After v40, "primary slot" is per-space; a setPrimary in
+ * Brand-space must not clear Personal-space's holder.
  */
 async function setPrimaryInTx(id: string | null, slot: MeImagePrimarySlot): Promise<void> {
 	const nowIso = new Date().toISOString();
 	await meImagesTable.db.transaction('rw', meImagesTable, async () => {
-		const current = await meImagesTable.where('primaryFor').equals(slot).toArray();
+		const current = await scopedForModule<LocalMeImage, string>('profile', 'meImages')
+			.and((row) => row.primaryFor === slot)
+			.toArray();
 		for (const row of current) {
 			if (row.id === id) continue;
 			await meImagesTable.update(row.id, { primaryFor: null, updatedAt: nowIso });
@@ -105,6 +129,12 @@ export const meImagesStore = {
 			usage: defaultUsage(input.usage),
 			primaryFor: input.primaryFor ?? null,
 		};
+		// Pre-stamp the spaceId so the Dexie creating-hook leaves it
+		// alone. Only the legacy-avatar migration uses this — regular
+		// uploads let the hook stamp the active space.
+		if (input.spaceId !== undefined) {
+			newLocal.spaceId = input.spaceId;
+		}
 		const snapshot = toMeImage({ ...newLocal });
 		await encryptRecord('meImages', newLocal);
 		await meImagesTable.add(newLocal);

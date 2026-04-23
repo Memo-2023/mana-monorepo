@@ -70,6 +70,11 @@ interface RawMeImageRow {
 	height?: number | null;
 	usage?: { aiReference?: boolean } | null;
 	deletedAt?: string | null;
+	// Added by the web-app's Dexie v40 migration (docs/plans/
+	// me-images-space-scope-migration.md). Rows pulled from mana-sync
+	// for a user may span multiple spaces — the tool must filter down
+	// to the caller's active space to match the web-app's behaviour.
+	spaceId?: string | null;
 }
 
 // ─── me.listReferenceImages ───────────────────────────────────────
@@ -103,10 +108,15 @@ export const meListReferenceImages: ToolSpec<typeof listInput, typeof listOutput
 		const key = await ctx.getMasterKey();
 
 		const res = await pullAll<RawMeImageRow>(syncCfg(ctx), APP_ID, TABLE);
+		// mana-sync returns all of the caller's meImages across every
+		// space they belong to — filter down to the active space so
+		// agents in a brand-space never see the personal-space pool
+		// (and vice-versa). Matches the web-app's scopedForModule cut.
 		const alive = res.changes
 			.filter((c) => c.op !== 'delete' && c.data)
 			.map((c) => c.data as RawMeImageRow)
-			.filter((row) => !row.deletedAt);
+			.filter((row) => !row.deletedAt)
+			.filter((row) => row.spaceId === ctx.spaceId);
 
 		const optedIn = alive.filter((row) => row.usage?.aiReference === true);
 		const kindFiltered = input.kind ? optedIn.filter((row) => row.kind === input.kind) : optedIn;

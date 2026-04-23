@@ -169,6 +169,14 @@ export interface LocalMeImage extends BaseRecord {
 	tags: string[];
 	usage: MeImageUsage;
 	primaryFor?: MeImagePrimarySlot | null;
+	// Space-scope fields (added in Dexie v40 — see
+	// docs/plans/me-images-space-scope-migration.md). Stamped by the
+	// Dexie creating-hook like any other data table; the initial
+	// `_personal:<userId>` sentinel is rewritten to the real space id
+	// by reconcileSentinels() on the first active-space bootstrap.
+	spaceId?: string;
+	authorId?: string;
+	visibility?: 'space' | 'private';
 }
 
 export interface MeImage {
@@ -184,6 +192,7 @@ export interface MeImage {
 	tags: string[];
 	usage: MeImageUsage;
 	primaryFor?: MeImagePrimarySlot | null;
+	spaceId?: string;
 	createdAt: string;
 	updatedAt: string;
 }
@@ -203,6 +212,7 @@ export function toMeImage(local: LocalMeImage): MeImage {
 		tags: local.tags ?? [],
 		usage: local.usage ?? { aiReference: false, showInProfile: true },
 		primaryFor: local.primaryFor ?? null,
+		spaceId: local.spaceId,
 		createdAt: local.createdAt ?? '',
 		updatedAt: local.updatedAt ?? '',
 	};
