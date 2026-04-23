@@ -157,34 +157,4 @@ describe('profileService', () => {
 			);
 		});
 	});
-
-	describe('uploadAvatar', () => {
-		it('should upload avatar to API and update profile', async () => {
-			const mockFile = new File(['image-data'], 'avatar.png', { type: 'image/png' });
-
-			global.fetch = vi
-				.fn()
-				.mockResolvedValueOnce({
-					ok: true,
-					json: () =>
-						Promise.resolve({ url: 'https://media.mana.how/avatar.png', mediaId: 'media-1' }),
-				})
-				.mockResolvedValueOnce({
-					ok: true,
-					json: () =>
-						Promise.resolve({
-							success: true,
-							user: { id: 'user-1', name: 'Test', email: 'test@mana.how' },
-						}),
-				});
-
-			const result = await profileService.uploadAvatar(mockFile);
-
-			expect(result.success).toBe(true);
-			expect(global.fetch).toHaveBeenCalledWith(
-				'http://localhost:3060/api/v1/storage/avatar/upload',
-				expect.objectContaining({ method: 'POST' })
-			);
-		});
-	});
 });

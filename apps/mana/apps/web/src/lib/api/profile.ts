@@ -4,7 +4,7 @@
  */
 
 import { authStore } from '$lib/stores/auth.svelte';
-import { getManaAuthUrl, getManaApiUrl } from './config';
+import { getManaAuthUrl } from './config';
 
 // Types
 export interface UserProfile {
@@ -34,11 +34,6 @@ export interface DeleteAccountRequest {
 
 export interface ChangeEmailRequest {
 	newEmail: string;
-}
-
-export interface AvatarUploadResponse {
-	url: string;
-	mediaId: string;
 }
 
 // Helper function for authenticated requests
@@ -113,24 +108,5 @@ export const profileService = {
 			method: 'POST',
 			body: JSON.stringify(data),
 		});
-	},
-
-	/**
-	 * Upload avatar file directly, then update profile
-	 */
-	async uploadAvatar(file: File): Promise<{ success: boolean; user: UserProfile }> {
-		const token = await authStore.getValidToken();
-		const formData = new FormData();
-		formData.append('file', file);
-
-		const uploadResponse = await fetch(`${getManaApiUrl()}/api/v1/storage/avatar/upload`, {
-			method: 'POST',
-			headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-			body: formData,
-		});
-
-		if (!uploadResponse.ok) throw new Error('Avatar-Upload fehlgeschlagen');
-		const { url } = (await uploadResponse.json()) as AvatarUploadResponse;
-		return this.updateProfile({ image: url });
 	},
 };

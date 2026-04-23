@@ -14,6 +14,7 @@
   live on the tile/slot components; this file just orchestrates.
 -->
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { Info, Sparkle } from '@mana/shared-icons';
 	import MeImageSlotCard from './components/MeImageSlotCard.svelte';
 	import MeImageTile from './components/MeImageTile.svelte';
@@ -21,7 +22,16 @@
 	import { useAllMeImages, useImageByPrimary } from './queries';
 	import { meImagesStore } from './stores/me-images.svelte';
 	import { readImageDimensions, uploadMeImageFile } from './api/me-images';
+	import { migrateLegacyAvatarIfNeeded } from './migration/legacy-avatar';
 	import type { MeImage, MeImageKind, MeImagePrimarySlot } from './types';
+
+	// One-shot bootstrap: pull the pre-M1 auth.users.image into meImages
+	// as the avatar primary. Idempotent — see migration/legacy-avatar.ts.
+	onMount(() => {
+		migrateLegacyAvatarIfNeeded().catch((err) => {
+			console.error('[profile] legacy avatar migration failed', err);
+		});
+	});
 
 	const allImages$ = useAllMeImages();
 	const faceSlot$ = useImageByPrimary('face-ref');

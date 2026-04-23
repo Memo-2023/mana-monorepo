@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { _ } from 'svelte-i18n';
+	import { goto } from '$app/navigation';
 	import { profileService, type UserProfile } from '$lib/api/profile';
 	import { PencilSimple } from '@mana/shared-icons';
 
@@ -17,13 +18,7 @@
 	let editingEmail = $state(false);
 	let emailSent = $state(false);
 	let saving = $state(false);
-	let uploadingAvatar = $state(false);
 	let error = $state<string | null>(null);
-	let avatarPreview = $state<string | null>(null);
-	let selectedFile = $state<File | null>(null);
-
-	// File input ref
-	let fileInput = $state<HTMLInputElement | undefined>(undefined);
 
 	// Initialize form when modal opens
 	$effect(() => {
@@ -32,57 +27,19 @@
 			newEmail = '';
 			editingEmail = false;
 			emailSent = false;
-			avatarPreview = user.image || null;
-			selectedFile = null;
 			error = null;
 		}
 	});
 
 	function handleBackdropClick(event: MouseEvent) {
-		if (event.target === event.currentTarget && !saving && !uploadingAvatar) {
+		if (event.target === event.currentTarget && !saving) {
 			onClose();
 		}
 	}
 
-	function handleFileSelect(event: Event) {
-		const input = event.target as HTMLInputElement;
-		const file = input.files?.[0];
-
-		if (!file) return;
-
-		// Validate file type
-		if (!file.type.startsWith('image/')) {
-			error = 'Bitte wähle ein Bild aus (JPG, PNG, GIF, WebP)';
-			return;
-		}
-
-		// Validate file size (max 5MB)
-		if (file.size > 5 * 1024 * 1024) {
-			error = 'Das Bild darf maximal 5MB groß sein';
-			return;
-		}
-
-		selectedFile = file;
-		error = null;
-
-		// Create preview
-		const reader = new FileReader();
-		reader.onload = (e) => {
-			avatarPreview = e.target?.result as string;
-		};
-		reader.readAsDataURL(file);
-	}
-
-	function triggerFileInput() {
-		fileInput?.click();
-	}
-
-	function removeAvatar() {
-		selectedFile = null;
-		avatarPreview = null;
-		if (fileInput) {
-			fileInput.value = '';
-		}
+	function openMeImages() {
+		onClose();
+		goto('/profile/me-images');
 	}
 
 	async function handleSubmit(e: Event) {
@@ -96,40 +53,16 @@
 		error = null;
 
 		try {
-			let updatedUser: UserProfile;
-
-			// If new avatar selected, upload first
-			if (selectedFile) {
-				uploadingAvatar = true;
-				const result = await profileService.uploadAvatar(selectedFile);
-				updatedUser = result.user;
-				uploadingAvatar = false;
-
-				// Now update name if changed
-				if (name.trim() !== updatedUser.name) {
-					const nameResult = await profileService.updateProfile({ name: name.trim() });
-					updatedUser = nameResult.user;
-				}
-			} else if (avatarPreview === null && user?.image) {
-				// Avatar was removed
-				const result = await profileService.updateProfile({
-					name: name.trim(),
-					image: '',
-				});
-				updatedUser = result.user;
-			} else {
-				// Just update name
-				const result = await profileService.updateProfile({ name: name.trim() });
-				updatedUser = result.user;
-			}
-
-			onSuccess(updatedUser);
+			// Avatar is now managed exclusively via /profile/me-images (plan
+			// M2.5): setting a primary face in meImages syncs the URL back
+			// to auth.users.image. This modal only covers the name here.
+			const result = await profileService.updateProfile({ name: name.trim() });
+			onSuccess(result.user);
 			onClose();
 		} catch (e) {
 			error = e instanceof Error ? e.message : $_('common.error_saving');
 		} finally {
 			saving = false;
-			uploadingAvatar = false;
 		}
 	}
 
@@ -169,7 +102,7 @@
 	<div
 		class="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4"
 		onclick={handleBackdropClick}
-		onkeydown={(e) => e.key === 'Escape' && !saving && !uploadingAvatar && onClose()}
+		onkeydown={(e) => e.key === 'Escape' && !saving && onClose()}
 		tabindex="-1"
 		role="presentation"
 	>
@@ -188,79 +121,37 @@
 
 				<form onsubmit={handleSubmit}>
 					<div class="space-y-4">
-						<!-- Avatar Upload -->
+						<!-- Profilbild (read-only preview + link to Meine Bilder) -->
 						<div>
 							<span class="block text-sm font-medium mb-2">Profilbild</span>
 							<div class="flex items-center gap-4">
-								<!-- Avatar Preview -->
-								<div class="relative">
-									{#if avatarPreview}
-										<img
-											src={avatarPreview}
-											alt="Avatar"
-											class="h-20 w-20 rounded-full object-cover border-2 border-border"
-										/>
-									{:else}
-										<div
-											class="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xl font-semibold"
-										>
-											{getInitials(name || user?.name || 'U')}
-										</div>
-									{/if}
-
-									{#if uploadingAvatar}
-										<div
-											class="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center"
-										>
-											<svg class="animate-spin h-6 w-6 text-white" fill="none" viewBox="0 0 24 24">
-												<circle
-													class="opacity-25"
-													cx="12"
-													cy="12"
-													r="10"
-													stroke="currentColor"
-													stroke-width="4"
-												></circle>
-												<path
-													class="opacity-75"
-													fill="currentColor"
-													d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-												></path>
-											</svg>
-										</div>
-									{/if}
-								</div>
-
-								<!-- Upload/Remove Buttons -->
-								<div class="flex flex-col gap-2">
-									<input
-										bind:this={fileInput}
-										type="file"
-										accept="image/*"
-										class="hidden"
-										onchange={handleFileSelect}
+								{#if user?.image}
+									<img
+										src={user.image}
+										alt="Avatar"
+										class="h-20 w-20 rounded-full object-cover border-2 border-border"
 									/>
+								{:else}
+									<div
+										class="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xl font-semibold"
+									>
+										{getInitials(name || user?.name || 'U')}
+									</div>
+								{/if}
+								<div class="flex flex-col gap-1">
 									<button
 										type="button"
-										onclick={triggerFileInput}
-										disabled={saving || uploadingAvatar}
-										class="px-3 py-1.5 text-sm border rounded-lg hover:bg-muted transition-colors disabled:opacity-50"
+										onclick={openMeImages}
+										disabled={saving}
+										class="px-3 py-1.5 text-sm border rounded-lg hover:bg-muted transition-colors disabled:opacity-50 text-left"
 									>
-										Bild auswählen
+										In „Meine Bilder" verwalten →
 									</button>
-									{#if avatarPreview}
-										<button
-											type="button"
-											onclick={removeAvatar}
-											disabled={saving || uploadingAvatar}
-											class="px-3 py-1.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors disabled:opacity-50"
-										>
-											Entfernen
-										</button>
-									{/if}
+									<p class="text-xs text-muted-foreground">
+										Dein Profilbild folgt dem Gesichts-Primärbild unter Meine Bilder.
+									</p>
 								</div>
 							</div>
-							<p class="mt-2 text-xs text-muted-foreground">JPG, PNG, GIF oder WebP. Max. 5MB.</p>
 						</div>
 
 						<!-- Email -->
@@ -332,7 +223,7 @@
 											newEmail = '';
 											error = null;
 										}}
-										disabled={saving || uploadingAvatar}
+										disabled={saving}
 										class="px-3 py-2 text-sm border rounded-lg hover:bg-muted transition-colors disabled:opacity-50 whitespace-nowrap"
 									>
 										Ändern
@@ -351,7 +242,7 @@
 								id="profile-name"
 								type="text"
 								bind:value={name}
-								disabled={saving || uploadingAvatar}
+								disabled={saving}
 								placeholder="Dein Name"
 								class="w-full px-3 py-2 border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50"
 							/>
@@ -370,17 +261,17 @@
 						<button
 							type="button"
 							onclick={onClose}
-							disabled={saving || uploadingAvatar}
+							disabled={saving}
 							class="flex-1 px-4 py-2 border rounded-lg hover:bg-muted transition-colors disabled:opacity-50"
 						>
 							{$_('common.cancel')}
 						</button>
 						<button
 							type="submit"
-							disabled={saving || uploadingAvatar}
+							disabled={saving}
 							class="flex-1 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
 						>
-							{#if saving || uploadingAvatar}
+							{#if saving}
 								<svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
 									<circle
 										class="opacity-25"
@@ -396,7 +287,7 @@
 										d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
 									></path>
 								</svg>
-								<span>{uploadingAvatar ? $_('common.uploading') : $_('common.saving')}</span>
+								<span>{$_('common.saving')}</span>
 							{:else}
 								{$_('common.save')}
 							{/if}
