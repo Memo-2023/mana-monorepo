@@ -5,6 +5,7 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { imagesStore } from '$lib/modules/picture/stores/images.svelte';
 	import type { LocalImage } from '$lib/modules/picture/types';
+	import ReferenceImagePicker from '$lib/modules/picture/components/ReferenceImagePicker.svelte';
 	import { ModuleShell } from '$lib/components/shell';
 
 	type ProviderOption = {
@@ -42,6 +43,7 @@
 	let quality = $state<'low' | 'medium' | 'high'>('medium');
 	let aspectId = $state<string>(ASPECT_RATIOS[0].id);
 	let batchCount = $state<1 | 2 | 4>(1);
+	let selectedReferenceIds = $state<string[]>([]);
 	let isGenerating = $state(false);
 	let generationError = $state('');
 	let lastImageUrls = $state<string[]>([]);
@@ -55,6 +57,24 @@
 		currentProvider.supportsQuality ? creditsPerImage * effectiveBatch : 10
 	);
 
+	// Reference edits only work through OpenAI — the plan (M3) rejects
+	// non-OpenAI models server-side. Flip the model automatically the
+	// first time the user adds a reference so they don't get a 400 at
+	// submit time; flipping back is their choice.
+	const isReferenceMode = $derived(selectedReferenceIds.length > 0);
+	$effect(() => {
+		if (isReferenceMode && !modelId.startsWith('openai/')) {
+			modelId = 'openai/gpt-image-2';
+		}
+	});
+
+	/** Map the current aspect-ratio tuple to OpenAI's size literal. */
+	function resolveSize(width: number, height: number): '1024x1024' | '1536x1024' | '1024x1536' {
+		if (width > height) return '1536x1024';
+		if (height > width) return '1024x1536';
+		return '1024x1024';
+	}
+
 	async function handleGenerate() {
 		if (!prompt.trim()) return;
 
@@ -66,21 +86,39 @@
 			const token = await authStore.getValidToken();
 			if (!token) throw new Error('Nicht angemeldet');
 
-			const res = await fetch(`${getManaApiUrl()}/api/v1/picture/generate`, {
+			// Two server paths: /generate is text-to-image, the M3 edit
+			// endpoint takes reference mediaIds + forwards them multipart
+			// to OpenAI /v1/images/edits. Which one we hit is purely
+			// driven by whether the user added references.
+			const endpoint = isReferenceMode
+				? '/api/v1/picture/generate-with-reference'
+				: '/api/v1/picture/generate';
+			const body = isReferenceMode
+				? {
+						prompt: prompt.trim(),
+						referenceMediaIds: selectedReferenceIds,
+						model: modelId,
+						quality: currentProvider.supportsQuality ? quality : undefined,
+						size: resolveSize(currentAspect.width, currentAspect.height),
+						n: effectiveBatch,
+					}
+				: {
+						prompt: prompt.trim(),
+						negativePrompt: negativePrompt.trim() || undefined,
+						model: modelId,
+						quality: currentProvider.supportsQuality ? quality : undefined,
+						width: currentAspect.width,
+						height: currentAspect.height,
+						n: effectiveBatch,
+					};
+
+			const res = await fetch(`${getManaApiUrl()}${endpoint}`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
 					Authorization: `Bearer ${token}`,
 				},
-				body: JSON.stringify({
-					prompt: prompt.trim(),
-					negativePrompt: negativePrompt.trim() || undefined,
-					model: modelId,
-					quality: currentProvider.supportsQuality ? quality : undefined,
-					width: currentAspect.width,
-					height: currentAspect.height,
-					n: effectiveBatch,
-				}),
+				body: JSON.stringify(body),
 			});
 
 			if (!res.ok) {
@@ -111,7 +149,7 @@
 				const local: LocalImage = {
 					id: crypto.randomUUID(),
 					prompt: data.prompt,
-					negativePrompt: negativePrompt.trim() || null,
+					negativePrompt: isReferenceMode ? null : negativePrompt.trim() || null,
 					model: data.model,
 					publicUrl: img.imageUrl,
 					storagePath: img.mediaId ?? img.imageUrl,
@@ -122,6 +160,8 @@
 					isPublic: false,
 					isFavorite: false,
 					downloadCount: 0,
+					generationMode: isReferenceMode ? 'reference' : 'text',
+					referenceImageIds: isReferenceMode ? [...selectedReferenceIds] : null,
 					createdAt: now,
 					updatedAt: now,
 				};
@@ -197,15 +237,41 @@
 			<div>
 				<label for="negative-prompt" class="mb-1.5 block text-sm font-medium text-foreground">
 					Negativ-Prompt <span class="text-muted-foreground">(optional)</span>
+					{#if isReferenceMode}
+						<span class="ml-1 text-xs text-muted-foreground">
+							· wird im Referenz-Modus ignoriert
+						</span>
+					{/if}
 				</label>
 				<input
 					id="negative-prompt"
 					type="text"
 					bind:value={negativePrompt}
+					disabled={isReferenceMode}
 					placeholder="unscharf, verzerrt, niedrige Qualität…"
-					class="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary"
+					class="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary disabled:cursor-not-allowed disabled:opacity-50"
 				/>
 			</div>
+		</section>
+
+		<!-- Reference images section -->
+		<section class="space-y-3 rounded-lg border border-border bg-background/50 p-3">
+			<div class="flex items-baseline justify-between gap-2">
+				<h2 class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+					Referenz-Bilder
+					<span class="ml-1 normal-case text-muted-foreground">(optional)</span>
+				</h2>
+				{#if isReferenceMode}
+					<span class="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+						Referenz-Modus
+					</span>
+				{/if}
+			</div>
+			<p class="text-xs text-muted-foreground">
+				Wähle bis zu 4 deiner freigegebenen Bilder — das erzeugte Bild wird dich enthalten
+				(Outfit-Anprobe, Brillen, Frisuren). Läuft über OpenAI gpt-image-2.
+			</p>
+			<ReferenceImagePicker bind:selectedIds={selectedReferenceIds} />
 		</section>
 
 		<!-- Settings section -->
@@ -222,10 +288,12 @@
 					<select
 						id="model"
 						bind:value={modelId}
-						class="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:ring-1 focus:ring-primary"
+						class="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:ring-1 focus:ring-primary disabled:cursor-not-allowed disabled:opacity-50"
 					>
 						{#each PROVIDERS as p}
-							<option value={p.id}>{p.label}</option>
+							<option value={p.id} disabled={isReferenceMode && !p.id.startsWith('openai/')}>
+								{p.label}{isReferenceMode && !p.id.startsWith('openai/') ? ' · keine Referenz' : ''}
+							</option>
 						{/each}
 					</select>
 					<p class="mt-1 text-xs text-muted-foreground">{currentProvider.description}</p>

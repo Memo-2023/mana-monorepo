@@ -4,6 +4,14 @@
 
 import type { BaseRecord } from '@mana/local-store';
 
+/**
+ * How the image was created. 'text' is the classic prompt-only
+ * generation via /picture/generate; 'reference' is a multi-image edit
+ * via /picture/generate-with-reference (plan M3) — the latter carries
+ * `referenceImageIds` pointing at the meImages that fed the edit.
+ */
+export type ImageGenerationMode = 'text' | 'reference';
+
 export interface LocalImage extends BaseRecord {
 	prompt: string;
 	negativePrompt?: string | null;
@@ -24,6 +32,9 @@ export interface LocalImage extends BaseRecord {
 	isArchived?: boolean;
 	generationId?: string | null;
 	sourceImageId?: string | null;
+	/** mana-media ids of the me-images that fed a reference-edit. */
+	referenceImageIds?: string[] | null;
+	generationMode?: ImageGenerationMode | null;
 }
 
 export interface LocalBoard extends BaseRecord {
@@ -83,6 +94,8 @@ export interface Image {
 	isArchived?: boolean;
 	generationId?: string;
 	sourceImageId?: string;
+	referenceImageIds?: string[];
+	generationMode?: ImageGenerationMode;
 	createdAt: string;
 	updatedAt: string;
 }

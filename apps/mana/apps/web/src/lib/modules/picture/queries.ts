@@ -45,6 +45,8 @@ export function toImage(local: LocalImage): Image {
 		isArchived: local.isArchived ?? undefined,
 		generationId: local.generationId ?? undefined,
 		sourceImageId: local.sourceImageId ?? undefined,
+		referenceImageIds: local.referenceImageIds ?? undefined,
+		generationMode: local.generationMode ?? undefined,
 		createdAt: local.createdAt ?? new Date().toISOString(),
 		updatedAt: local.updatedAt ?? new Date().toISOString(),
 	};

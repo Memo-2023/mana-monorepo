@@ -132,6 +132,17 @@ scrape_configs:
     metrics_path: '/metrics'
     scrape_interval: 30s
 
+  # Mana MCP Gateway (Bun, :3069) — exposes the shared tool-registry
+  # over Streamable HTTP to external agents. Emits policy-gate
+  # decisions (`mana_mcp_policy_decisions_total{decision,reason,mode}`)
+  # and per-tool invocation metrics. Critical during the POLICY_MODE
+  # log-only soak period to decide when it's safe to flip to enforce.
+  - job_name: 'mana-mcp'
+    static_configs:
+      - targets: ['mana-mcp:3069']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
   # ============================================
   # GPU Server (Windows PC, LAN: 192.168.178.11)
   # ============================================
