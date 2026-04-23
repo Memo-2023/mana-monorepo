@@ -118,6 +118,12 @@
 	// is already inside the flow.
 	let isOnboarding = $derived($page.url.pathname.startsWith('/onboarding'));
 
+	// Full-bleed routes skip the max-w-7xl clamp + horizontal padding so
+	// the module can use the full viewport width. Currently used by the
+	// website editor — a canvas-style tool where the centre preview
+	// shouldn't fight two sidebars inside a 1280px container.
+	let isFullBleedRoute = $derived(/^\/website\/[^/]+\/edit\/[^/]+/.test($page.url.pathname));
+
 	// ── App switcher ────────────────────────────────────────
 	// Prefer the active Space's tier for gating — falls back to the user
 	// tier only during the bootstrap window where no space has loaded.
@@ -1052,7 +1058,11 @@
 					8}px; --bottom-chrome-height: {bottomChromeHeight}px; --workbench-reserved-y: 1.5rem;"
 				class="pt-2"
 			>
-				<div class="mx-auto max-w-7xl px-3 py-2 sm:px-6 sm:py-3 lg:px-8">
+				<div
+					class={isFullBleedRoute
+						? 'w-full'
+						: 'mx-auto max-w-7xl px-3 py-2 sm:px-6 sm:py-3 lg:px-8'}
+				>
 					{#if routeBlocked && routeAppId}
 						<RouteTierGate
 							appName={routeAppId.name}
