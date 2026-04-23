@@ -25,6 +25,7 @@ import {
 import type { VerifiedUser } from './auth.ts';
 import type { Config } from './config.ts';
 import { appendInvocation, getRecentInvocations } from './invocation-log.ts';
+import { policyDecisionsTotal, toolDuration, toolInvocationsTotal } from './metrics.ts';
 
 /**
  * Shared across all sessions — the client caches MKs per userId with a
@@ -109,6 +110,7 @@ export function createMcpServerForUser(user: VerifiedUser, config: Config): McpS
 					err instanceof z.ZodError
 						? err.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ')
 						: String(err);
+				toolInvocationsTotal.inc({ tool: spec.name, outcome: 'input-invalid' });
 				return {
 					isError: true,
 					content: [{ type: 'text' as const, text: `Invalid input for ${spec.name}: ${msg}` }],
@@ -129,6 +131,11 @@ export function createMcpServerForUser(user: VerifiedUser, config: Config): McpS
 				});
 
 				if (!decision.allow) {
+					policyDecisionsTotal.inc({
+						decision: 'deny',
+						reason: decision.reason ?? 'unknown',
+						mode: config.policyMode,
+					});
 					const label = config.policyMode === 'enforce' ? 'DENY' : 'WOULD-DENY';
 					console.warn(
 						`[mana-mcp policy] ${label} tool=${spec.name} user=${user.userId.slice(0, 8)} reason=${decision.reason}`
@@ -143,7 +150,18 @@ export function createMcpServerForUser(user: VerifiedUser, config: Config): McpS
 						};
 					}
 				} else if (decision.reminder) {
+					policyDecisionsTotal.inc({
+						decision: 'flagged',
+						reason: 'injection-marker',
+						mode: config.policyMode,
+					});
 					console.info(`[mana-mcp policy] FLAG tool=${spec.name} user=${user.userId.slice(0, 8)}`);
+				} else {
+					policyDecisionsTotal.inc({
+						decision: 'allow',
+						reason: 'clean',
+						mode: config.policyMode,
+					});
 				}
 			}
 
@@ -151,13 +169,18 @@ export function createMcpServerForUser(user: VerifiedUser, config: Config): McpS
 			// handler's duration doesn't open a rate-limit gap.
 			appendInvocation(user.userId, spec.name);
 
+			const endTimer = toolDuration.startTimer({ tool: spec.name, outcome: 'success' });
 			try {
 				const result = await spec.handler(parsed, ctxFor(spec.name));
+				toolInvocationsTotal.inc({ tool: spec.name, outcome: 'success' });
+				endTimer({ tool: spec.name, outcome: 'success' });
 				return {
 					content: [{ type: 'text' as const, text: JSON.stringify(result, null, 2) }],
 				};
 			} catch (err) {
 				const msg = err instanceof Error ? err.message : String(err);
+				toolInvocationsTotal.inc({ tool: spec.name, outcome: 'handler-error' });
+				endTimer({ tool: spec.name, outcome: 'handler-error' });
 				return {
 					isError: true,
 					content: [{ type: 'text' as const, text: `Tool ${spec.name} failed: ${msg}` }],

@@ -14,6 +14,7 @@ import { registerAllModules } from '@mana/tool-registry';
 import { loadConfig } from './config.ts';
 import { authenticateRequest, UnauthorizedError } from './auth.ts';
 import { handleMcpRequest } from './transport.ts';
+import { register as metricsRegistry } from './metrics.ts';
 
 // ─── Bootstrap ────────────────────────────────────────────────────
 
@@ -42,9 +43,10 @@ app.get('/health', (c) =>
 	})
 );
 
-app.get('/metrics', (c) =>
-	c.text('# mana-mcp metrics stub — populated alongside Persona-Runner observability\n')
-);
+app.get('/metrics', async (c) => {
+	const body = await metricsRegistry.metrics();
+	return c.text(body, 200, { 'content-type': metricsRegistry.contentType });
+});
 
 // ─── MCP endpoint ─────────────────────────────────────────────────
 
