@@ -101,6 +101,25 @@ export function tokenBudgetReminder(ctx: ReminderContext, roundUsage: number): R
  * because a run that mixes failures and successes is not a true retry
  * loop, it's just flaky tools.
  */
+/**
+ * Fires the round immediately after the compactor folded older turns.
+ * Tells the LLM that it is now looking at a summary, not the raw log,
+ * so it doesn't burn a turn asking about "that error from earlier" or
+ * trying to re-execute a tool whose detailed result is gone.
+ */
+export function compactedReminder(state: { readonly compactionsDone: number }): Reminder | null {
+	if (state.compactionsDone < 1) return null;
+	return {
+		producer: 'compacted',
+		severity: 'info',
+		text:
+			`Ältere Turns wurden in ein <compact-summary> gefaltet, um den ` +
+			`Context-Window nicht zu sprengen. Die Summary (Goal / Decisions / ` +
+			`Tools Called / Current Progress) ist die autoritative Kurz-Historie ` +
+			`— frag nicht nach verlorenen Details, arbeite ab da weiter.`,
+	};
+}
+
 export function retryLoopReminder(state: {
 	readonly round: number;
 	readonly recentCalls: readonly { readonly result: { readonly success: boolean } }[];
@@ -132,8 +151,16 @@ export function retryLoopReminder(state: {
 export function buildReminderChannel(ctx: ReminderContext): ReminderChannel {
 	return (state) => {
 		const reminders: Reminder[] = [];
+
+		// Order matters — the compacted-info block goes first so the LLM
+		// frames the rest of the reminders (and the upcoming turn) with
+		// the knowledge that it's looking at a summary.
+		const compacted = compactedReminder({ compactionsDone: state.compactionsDone });
+		if (compacted) reminders.push(compacted);
+
 		const budget = tokenBudgetReminder(ctx, state.usage.totalTokens);
 		if (budget) reminders.push(budget);
+
 		const retry = retryLoopReminder({ round: state.round, recentCalls: state.recentCalls });
 		if (retry) reminders.push(retry);
 

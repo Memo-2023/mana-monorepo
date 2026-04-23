@@ -480,6 +480,50 @@ describe('runPlannerLoop — compactor', () => {
 		expect(compactSpy).not.toHaveBeenCalled();
 	});
 
+	it('surfaces compactionsDone in LoopState for reminder producers', async () => {
+		const llm = new MockLlmClient();
+		// Round 1: over threshold
+		(llm as unknown as { queue: unknown[] }).queue.push({
+			content: null,
+			toolCalls: [{ id: 'c1', name: 'list_things', arguments: {} }],
+			finishReason: 'tool_calls',
+			usage: { promptTokens: 950, completionTokens: 0, totalTokens: 950 },
+		});
+		// Round 2: stop so we end cleanly
+		llm.enqueueStop('done');
+
+		const compactionsDoneSeen: number[] = [];
+		await runPlannerLoop({
+			llm,
+			input: {
+				systemPrompt: 's',
+				userPrompt: 'u',
+				tools,
+				model: 'm',
+				compactor: {
+					maxContextTokens: 1000,
+					compact: async () => ({
+						messages: [
+							{ role: 'system', content: 's' },
+							{ role: 'user', content: 'u' },
+							{ role: 'assistant', content: '<compact>' },
+						],
+						compactedTurns: 2,
+					}),
+				},
+				reminderChannel: (state) => {
+					compactionsDoneSeen.push(state.compactionsDone);
+					return [];
+				},
+			},
+			onToolCall: async () => ({ success: true, message: 'ok' }),
+		});
+
+		// Round 1 channel call: before compaction fires, so 0
+		// Round 2 channel call: after compaction, so 1
+		expect(compactionsDoneSeen).toEqual([0, 1]);
+	});
+
 	it('skips when the compactor returns 0 compacted turns', async () => {
 		const llm = new MockLlmClient();
 		(llm as unknown as { queue: unknown[] }).queue.push({

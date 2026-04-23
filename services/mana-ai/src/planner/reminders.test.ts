@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'bun:test';
 import {
 	buildReminderChannel,
+	compactedReminder,
 	retryLoopReminder,
 	tokenBudgetReminder,
 	type ReminderContext,
@@ -50,6 +51,7 @@ function makeState(overrides: Partial<LoopState> = {}): LoopState {
 		toolCallCount: 0,
 		usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
 		recentCalls: [],
+		compactionsDone: 0,
 		...overrides,
 	};
 }
@@ -188,6 +190,27 @@ describe('retryLoopReminder', () => {
 	});
 });
 
+// ─── compactedReminder ────────────────────────────────────────────
+
+describe('compactedReminder', () => {
+	it('is silent when no compaction has happened', () => {
+		expect(compactedReminder({ compactionsDone: 0 })).toBeNull();
+	});
+
+	it('fires once compactionsDone >= 1 with severity=info', () => {
+		const r = compactedReminder({ compactionsDone: 1 });
+		expect(r).not.toBeNull();
+		expect(r!.severity).toBe('info');
+		expect(r!.producer).toBe('compacted');
+		expect(r!.text).toContain('compact-summary');
+		expect(r!.text).toContain('frag nicht');
+	});
+
+	it('fires for counts greater than 1 too (future multi-compact)', () => {
+		expect(compactedReminder({ compactionsDone: 3 })).not.toBeNull();
+	});
+});
+
 // ─── buildReminderChannel — composition ───────────────────────────
 
 describe('buildReminderChannel', () => {
@@ -227,6 +250,24 @@ describe('buildReminderChannel', () => {
 		);
 		expect(out).toHaveLength(1);
 		expect(out[0]).toContain('fehlgeschlagen');
+	});
+
+	it('puts compacted reminder FIRST when it fires alongside budget warning', () => {
+		const channel = buildReminderChannel({
+			agent: makeAgent({ maxTokensPerDay: 10_000 }),
+			mission: makeMission(),
+			pretickUsage24h: 9_000, // triggers budget warn
+		});
+		const out = channel(
+			makeState({
+				round: 2,
+				compactionsDone: 1,
+				usage: { promptTokens: 500, completionTokens: 500, totalTokens: 1_000 },
+			})
+		);
+		expect(out).toHaveLength(2);
+		expect(out[0]).toContain('compact-summary'); // compacted first
+		expect(out[1]).toContain('Tagesbudget'); // budget second
 	});
 
 	it('can fire budget + retry together (composition)', () => {

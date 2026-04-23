@@ -100,6 +100,15 @@ export interface LoopState {
 	 * tool), and similar. Empty in round 1; grows up to the cap.
 	 */
 	readonly recentCalls: readonly ExecutedCall[];
+	/**
+	 * Number of times the compactor has folded the message history in
+	 * this loop run. Capped at 1 by the loop itself (fire-once policy),
+	 * but still exposed as a count rather than a boolean so future
+	 * policies (e.g. multi-compact cycles) don't need a breaking API
+	 * change. A producer can use this to inject a "just compacted"
+	 * reminder on the round immediately after compaction.
+	 */
+	readonly compactionsDone: number;
 }
 
 /**
@@ -276,6 +285,7 @@ export async function runPlannerLoop(opts: {
 				},
 				lastCall: executedCalls[executedCalls.length - 1],
 				recentCalls,
+				compactionsDone,
 			};
 			const reminders = input.reminderChannel(state);
 			if (reminders.length > 0) {
