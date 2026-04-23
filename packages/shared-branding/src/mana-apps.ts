@@ -378,6 +378,23 @@ export const MANA_APPS: ManaApp[] = [
 		requiredTier: 'guest',
 	},
 	{
+		id: 'wardrobe',
+		name: 'Wardrobe',
+		description: {
+			de: 'Dein digitaler Kleiderschrank',
+			en: 'Your digital wardrobe',
+		},
+		longDescription: {
+			de: 'Fotografiere Kleidungsstücke, komponiere Outfits und probiere sie mit KI an dir selbst an — vom eigenen Schrank bis zu Brillen, Vereinstrikots und Merch.',
+			en: 'Photograph garments, compose outfits, and try them on yourself with AI — from your own closet to glasses, club jerseys, and brand merch.',
+		},
+		icon: APP_ICONS.wardrobe,
+		color: '#e11d48',
+		comingSoon: false,
+		status: 'beta',
+		requiredTier: 'beta',
+	},
+	{
 		id: 'questions',
 		name: 'Questions',
 		description: {

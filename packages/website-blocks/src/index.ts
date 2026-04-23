@@ -52,6 +52,12 @@ export {
 	type EmbedItem,
 	type EmbedSource,
 } from './moduleEmbed';
+export {
+	analyticsBlockSpec,
+	AnalyticsSchema,
+	ANALYTICS_DEFAULTS,
+	type AnalyticsProps,
+} from './analytics';
 
 export {
 	THEME_PRESETS,

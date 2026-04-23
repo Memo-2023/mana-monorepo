@@ -736,14 +736,16 @@ Der Service bleibt vorerst nebenher. Gründe:
 
 ### M7 — Observability, GC, Analytics
 
-- [ ] Prometheus-Metrics: `website_publish_total`, `website_submissions_total`, `website_render_duration_seconds`, `website_cache_hit_ratio`
-- [ ] Orphan-Asset-GC: Job findet uload-Assets, die in keinem Block mehr referenziert sind, löscht nach 30d Grace-Period
-- [ ] `analytics`-Block-Typ: Plausible/Simple Analytics Snippet als Opt-In
-- [ ] Per-Site-Stats im Editor (Views/Tag, Top-Seiten)
-- [ ] Submission-Retention: `payload` nach erfolgreicher Weitergabe nullen (behält nur IDs + Status für Audit)
-- [ ] Dashboards in `docs/observability/website.md`
+- [x] Prometheus-Metrics: `mana_api_website_publish_total{result}`, `_publish_duration_seconds`, `_submissions_total{result}`, `_host_resolve_total{result}`, `_domain_verify_total{result}`, `_public_reads_total{result}`, `_public_read_age_seconds`. `/metrics`-Endpoint an apps/api root (unauth, verlässt sich auf Reverse-Proxy).
+- [x] Orphan-Asset-GC: Script `apps/api/scripts/gc-website-assets.ts` — **read-only** in M7 first-pass. Walks published_snapshots + submissions for mediaId refs, compares against mana-media's app=website listing, reports orphans older than 30d. Deletion-Toggle nach 2-3 Wochen stabiler Reports.
+- [x] `analytics`-Block-Typ: Plausible + Umami mit self-hosted Script-URL-Override. Unsichtbar im Editor, emittiert genau einen `<script>` im public-Mode. Keine Cookies, keine PII.
+- [ ] Per-Site-Stats im Editor (Views/Tag, Top-Seiten) — verschoben auf M7.x. Der Analytics-Block deckt die Visitor-Seite; Editor-Inline-Dashboard ist Backlog bis jemand konkret danach fragt.
+- [ ] Submission-Retention: `payload` nach erfolgreicher Weitergabe nullen — M4.x Voraussetzung (Target-Delivery ist noch nicht gewired).
+- [x] Dashboards in `docs/observability/website.md` — Metrics-Referenz, PromQL-Queries, Alert-Vorschläge, Grafana-Pfad.
+- [x] (Bonus) Rollback-UI — Version-History-Dialog in PublishBar, M2-Exit-Kriterium „Rollback funktioniert" jetzt auch im Editor abgehakt.
+- [x] (Bonus) Snapshot-Determinism-Test — vitest in `publish.test.ts` verifiziert byte-identische Outputs + Orphan-Drop.
 
-**Exit criteria:** Betrieb ist beobachtbar, Storage wächst nicht unbegrenzt.
+**Exit criteria:** Betrieb ist beobachtbar (Metrics + PromQL), Storage-Wachstum ist überwacht (Scan-Script), Analytics-Opt-In steht.
 
 ## Risiken + Mitigation
 
@@ -788,4 +790,5 @@ Der Service bleibt vorerst nebenher. Gründe:
 | M3 | 5 more blocks, containers, upload, themes | `7a4f8894e` |
 | M4 | Forms + moduleEmbed | `57be0f61b` |
 | M5 | AI tools + starter templates | `13efae8cd` |
-| M6 | Subdomain + custom-domain + tier gate + DNS verify + hooks-rewrite | (pending commit at end of M6 session) |
+| M6 | Subdomain + custom-domain + tier gate + DNS verify + hooks-rewrite | `3eca5ac20` |
+| M7 | Observability (Prom metrics, /metrics endpoint) + analytics block + orphan-asset GC script + rollback UI + determinism test + docs | (pending commit at end of M7 session) |

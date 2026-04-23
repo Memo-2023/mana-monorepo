@@ -10,6 +10,11 @@ import { Hono } from 'hono';
 import { and, eq } from 'drizzle-orm';
 import { db, publishedSnapshots, customDomains } from './schema';
 import { errorResponse } from '../../lib/responses';
+import {
+	websiteHostResolveTotal,
+	websitePublicReadsTotal,
+	websitePublicReadAge,
+} from '../../lib/metrics';
 import { websiteSubmitRoutes } from './submit';
 
 const routes = new Hono();
@@ -26,7 +31,10 @@ routes.route('/', websiteSubmitRoutes);
 routes.get('/resolve-host', async (c) => {
 	const raw = c.req.query('host');
 	const host = typeof raw === 'string' ? raw.toLowerCase().trim() : '';
-	if (!host) return errorResponse(c, 'host query param required', 400);
+	if (!host) {
+		websiteHostResolveTotal.inc({ result: 'error' });
+		return errorResponse(c, 'host query param required', 400);
+	}
 
 	const rows = await db
 		.select({ siteId: customDomains.siteId, hostname: customDomains.hostname })
@@ -34,7 +42,10 @@ routes.get('/resolve-host', async (c) => {
 		.where(and(eq(customDomains.hostname, host), eq(customDomains.status, 'verified')))
 		.limit(1);
 
-	if (!rows[0]) return errorResponse(c, 'Host not found', 404, { code: 'NOT_FOUND' });
+	if (!rows[0]) {
+		websiteHostResolveTotal.inc({ result: 'miss' });
+		return errorResponse(c, 'Host not found', 404, { code: 'NOT_FOUND' });
+	}
 
 	// Look up the slug from the most recent published snapshot.
 	const snap = await db
@@ -46,11 +57,13 @@ routes.get('/resolve-host', async (c) => {
 		.limit(1);
 
 	if (!snap[0]) {
+		websiteHostResolveTotal.inc({ result: 'miss' });
 		return errorResponse(c, 'Site not currently published', 404, {
 			code: 'NOT_PUBLISHED',
 		});
 	}
 
+	websiteHostResolveTotal.inc({ result: 'hit' });
 	c.header('Cache-Control', 'public, max-age=60, s-maxage=600');
 	return c.json({ slug: snap[0].slug, siteId: rows[0].siteId });
 });
@@ -78,13 +91,20 @@ routes.get('/sites/:slug', async (c) => {
 		.where(and(eq(publishedSnapshots.slug, slug), eq(publishedSnapshots.isCurrent, true)))
 		.limit(1);
 
-	if (!rows[0]) return errorResponse(c, 'Site not found', 404, { code: 'NOT_FOUND' });
+	if (!rows[0]) {
+		websitePublicReadsTotal.inc({ result: 'not_found' });
+		return errorResponse(c, 'Site not found', 404, { code: 'NOT_FOUND' });
+	}
 
 	// Conservative caching: short freshness window, aggressive stale-while-
 	// revalidate. Publish endpoint will purge by tag in M6; until then CF
 	// respects the max-age on the edge layer.
 	c.header('Cache-Control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=86400');
 	c.header('Cache-Tag', `site-${rows[0].id}`);
+
+	const ageSec = Math.max(0, (Date.now() - rows[0].publishedAt.getTime()) / 1000);
+	websitePublicReadsTotal.inc({ result: 'hit' });
+	websitePublicReadAge.observe(ageSec);
 
 	return c.json({
 		snapshotId: rows[0].id,

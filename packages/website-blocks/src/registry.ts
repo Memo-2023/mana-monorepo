@@ -9,6 +9,7 @@ import { columnsBlockSpec } from './columns';
 import { galleryBlockSpec } from './gallery';
 import { formBlockSpec } from './form';
 import { moduleEmbedBlockSpec } from './moduleEmbed';
+import { analyticsBlockSpec } from './analytics';
 
 /**
  * The block registry — single source of truth for every block type the
@@ -27,6 +28,7 @@ export const BLOCK_SPECS: readonly BlockSpec<unknown>[] = [
 	faqBlockSpec,
 	formBlockSpec,
 	moduleEmbedBlockSpec,
+	analyticsBlockSpec,
 	columnsBlockSpec,
 	spacerBlockSpec,
 ] as unknown as readonly BlockSpec<unknown>[];

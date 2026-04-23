@@ -75,6 +75,12 @@ const calcSvg = `<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="n
 // Context icon (document/knowledge with sky blue gradient)
 const contextSvg = `<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="130" y="130" width="764" height="764" rx="382" fill="url(#contextGrad)"/><rect x="300" y="240" width="424" height="544" rx="24" fill="white"/><path d="M400 400H624" stroke="#0ea5e9" stroke-width="24" stroke-linecap="round"/><path d="M400 480H580" stroke="#0ea5e9" stroke-width="24" stroke-linecap="round" stroke-opacity="0.6"/><path d="M400 560H540" stroke="#0ea5e9" stroke-width="24" stroke-linecap="round" stroke-opacity="0.4"/><path d="M400 640H600" stroke="#0ea5e9" stroke-width="24" stroke-linecap="round" stroke-opacity="0.3"/><path d="M620 240V380H760" stroke="white" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/><path d="M620 240L760 380" stroke="#0ea5e9" stroke-width="16" stroke-linecap="round" stroke-opacity="0.3"/><circle cx="680" cy="620" r="100" fill="#0ea5e9" fill-opacity="0.2" stroke="white" stroke-width="16"/><path d="M660 620L680 640L720 600" stroke="white" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/><defs><linearGradient id="contextGrad" x1="130" y1="130" x2="894" y2="894" gradientUnits="userSpaceOnUse"><stop stop-color="#0ea5e9"/><stop offset="1" stop-color="#0284c7"/></linearGradient></defs></svg>`;
 
+// Wardrobe icon — T-shirt on hanger with rose-violet gradient.
+// Rose/violet to sit between Picture (green) and Calc (pink) without
+// clashing; the hanger loop sits on the shoulder line so the silhouette
+// reads as "clothing" at any scale.
+const wardrobeSvg = `<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="130" y="130" width="764" height="764" rx="382" fill="url(#wardrobeGrad)"/><path d="M512 246c-34 0-62 28-62 62 0 15 6 28 15 37l-113 58c-14 7-22 22-22 37v40l-40 28c-10 7-13 20-8 31l20 40c5 10 16 16 27 13l46-12v256c0 18 14 32 32 32h250c18 0 32-14 32-32V580l46 12c11 3 22-3 27-13l20-40c5-11 2-24-8-31l-40-28v-40c0-15-8-30-22-37l-113-58c9-9 15-22 15-37 0-34-28-62-62-62zm0 44c18 0 32 14 32 32s-14 32-32 32-32-14-32-32 14-32 32-32z" fill="white"/><path d="M420 450c0 50 41 90 92 90s92-40 92-90" stroke="#be185d" stroke-width="6" stroke-linecap="round" fill="none" stroke-opacity="0.25"/><defs><linearGradient id="wardrobeGrad" x1="130" y1="130" x2="894" y2="894" gradientUnits="userSpaceOnUse"><stop stop-color="#e11d48"/><stop offset="1" stop-color="#a21caf"/></linearGradient></defs></svg>`;
+
 /**
  * App icons as data URLs
  * Use these directly in <img src={APP_ICONS.memoro}> or CSS background-image
@@ -102,6 +108,7 @@ export const APP_ICONS = {
 	todo: svgToDataUrl(todoSvg),
 	mail: svgToDataUrl(mailSvg),
 	inventory: svgToDataUrl(inventorySvg),
+	wardrobe: svgToDataUrl(wardrobeSvg),
 	questions: svgToDataUrl(questionsSvg),
 	context: svgToDataUrl(contextSvg),
 	citycorners: svgToDataUrl(citycornersSvg),

@@ -104,6 +104,7 @@ import { invoicesModuleConfig } from '$lib/modules/invoices/module.config';
 import { broadcastModuleConfig } from '$lib/modules/broadcast/module.config';
 import { wetterModuleConfig } from '$lib/modules/wetter/module.config';
 import { websiteModuleConfig } from '$lib/modules/website/module.config';
+import { wardrobeModuleConfig } from '$lib/modules/wardrobe/module.config';
 import { aiModuleConfig } from '$lib/data/ai/module.config';
 
 export const MODULE_CONFIGS: readonly ModuleConfig[] = [
@@ -164,6 +165,7 @@ export const MODULE_CONFIGS: readonly ModuleConfig[] = [
 	broadcastModuleConfig,
 	wetterModuleConfig,
 	websiteModuleConfig,
+	wardrobeModuleConfig,
 	aiModuleConfig,
 ];
 

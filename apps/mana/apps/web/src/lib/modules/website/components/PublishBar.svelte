@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { sitesStore } from '../stores/sites.svelte';
 	import { PublishError } from '../publish';
+	import RollbackDialog from './RollbackDialog.svelte';
 	import type { Website } from '../types';
 
 	interface Props {
@@ -12,6 +13,7 @@
 	let publishing = $state(false);
 	let unpublishing = $state(false);
 	let lastError = $state<string | null>(null);
+	let showHistory = $state(false);
 
 	const hasDraftAhead = $derived.by(() => {
 		if (!site.publishedVersion) return site.draftUpdatedAt !== null;
@@ -79,6 +81,13 @@
 		{#if site.publishedVersion}
 			<button
 				class="wb-btn wb-btn--ghost"
+				onclick={() => (showHistory = true)}
+				title="Versionen einsehen / wiederherstellen"
+			>
+				Versionen
+			</button>
+			<button
+				class="wb-btn wb-btn--ghost"
 				onclick={onUnpublish}
 				disabled={unpublishing || publishing}
 			>
@@ -102,6 +111,10 @@
 		<p class="wb-publishbar__error" role="alert">{lastError}</p>
 	{/if}
 </div>
+
+{#if showHistory}
+	<RollbackDialog siteId={site.id} onClose={() => (showHistory = false)} />
+{/if}
 
 <style>
 	.wb-publishbar {

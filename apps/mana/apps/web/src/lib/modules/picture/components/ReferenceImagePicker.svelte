@@ -17,7 +17,7 @@
 		maxSelection?: number;
 	}
 
-	let { selectedIds = $bindable([]), maxSelection = 4 }: Props = $props();
+	let { selectedIds = $bindable([]), maxSelection = 8 }: Props = $props();
 
 	const referenceImages$ = useReferenceImages();
 	const referenceImages = $derived(referenceImages$.value ?? []);

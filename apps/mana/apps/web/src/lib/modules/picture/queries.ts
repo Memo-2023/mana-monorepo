@@ -47,6 +47,7 @@ export function toImage(local: LocalImage): Image {
 		sourceImageId: local.sourceImageId ?? undefined,
 		referenceImageIds: local.referenceImageIds ?? undefined,
 		generationMode: local.generationMode ?? undefined,
+		wardrobeOutfitId: local.wardrobeOutfitId ?? undefined,
 		createdAt: local.createdAt ?? new Date().toISOString(),
 		updatedAt: local.updatedAt ?? new Date().toISOString(),
 	};

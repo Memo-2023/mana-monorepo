@@ -20,6 +20,9 @@ import {
 // MCP server
 import { handleMcpRequest } from './mcp/server';
 
+// Prometheus metrics
+import { register as metricsRegister } from './lib/metrics';
+
 // Module routes
 import { calendarRoutes } from './modules/calendar/routes';
 import { contactsRoutes } from './modules/contacts/routes';
@@ -28,6 +31,7 @@ import { chatRoutes } from './modules/chat/routes';
 import { contextRoutes } from './modules/context/routes';
 import { pictureRoutes } from './modules/picture/routes';
 import { profileRoutes } from './modules/profile/routes';
+import { wardrobeRoutes } from './modules/wardrobe/routes';
 import { storageRoutes } from './modules/storage/routes';
 import { todoRoutes } from './modules/todo/routes';
 import { plantsRoutes } from './modules/plants/routes';
@@ -55,6 +59,15 @@ app.onError(errorHandler);
 app.notFound(notFoundHandler);
 app.use('*', cors({ origin: CORS_ORIGINS, credentials: true }));
 app.route('/health', healthRoute('mana-api'));
+
+// Prometheus scrape endpoint. Unauthenticated on purpose — the Grafana
+// / Prometheus stack runs on the internal network; we rely on the
+// reverse-proxy layer to block external access to /metrics.
+app.get('/metrics', async (c) => {
+	c.header('Content-Type', metricsRegister.contentType);
+	return c.text(await metricsRegister.metrics());
+});
+
 app.use('/api/*', rateLimitMiddleware({ max: 200, windowMs: 60_000 }));
 
 // Public routes — no auth required (weather data is public, published
@@ -103,6 +116,7 @@ app.route('/api/v1/chat', chatRoutes);
 app.route('/api/v1/context', contextRoutes);
 app.route('/api/v1/picture', pictureRoutes);
 app.route('/api/v1/profile', profileRoutes);
+app.route('/api/v1/wardrobe', wardrobeRoutes);
 app.route('/api/v1/storage', storageRoutes);
 app.route('/api/v1/todo', todoRoutes);
 app.route('/api/v1/plants', plantsRoutes);

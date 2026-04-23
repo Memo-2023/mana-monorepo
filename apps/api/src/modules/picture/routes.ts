@@ -240,10 +240,12 @@ routes.post('/generate', async (c) => {
 // image input natively. Replicate/local fallback is a later milestone.
 
 // OpenAI gpt-image-1 / gpt-image-2 accept up to 16 reference images per
-// edit call. We clamp at 4 to keep credit exposure + upload payload size
-// predictable while still covering the common "face + fullbody + outfit"
-// workflow the plan targets.
-const MAX_REFERENCE_IMAGES = 4;
+// edit call. We clamp at 8 to cover the Wardrobe try-on workflow — one
+// face-ref + one body-ref + up to six garment photos (top/bottom/shoes/
+// outerwear + two accessories) — while keeping credit exposure and
+// upload payload size predictable. Pre-wardrobe the cap was 4; bumped
+// in docs/plans/wardrobe-module.md M1.
+const MAX_REFERENCE_IMAGES = 8;
 
 routes.post('/generate-with-reference', async (c) => {
 	const userId = c.get('userId');

@@ -11,6 +11,7 @@ import { z } from 'zod';
 import { and, desc, eq } from 'drizzle-orm';
 import type { AuthVariables } from '@mana/shared-hono';
 import { errorResponse, validationError } from '../../lib/responses';
+import { websitePublishTotal, websitePublishDuration } from '../../lib/metrics';
 import { db, publishedSnapshots, submissions } from './schema';
 import { isValidSlug } from './reserved-slugs';
 
@@ -63,6 +64,7 @@ const DraftSnapshotSchema = z.object({
 // ─── POST /sites/:id/publish ────────────────────────────
 
 routes.post('/sites/:id/publish', async (c) => {
+	const publishTimer = websitePublishDuration.startTimer();
 	const userId = c.get('userId');
 	// Space id flows in via an explicit header (mana-auth doesn't yet
 	// embed the active space in JWT claims). Nullable — full membership
@@ -71,18 +73,30 @@ routes.post('/sites/:id/publish', async (c) => {
 	const spaceId = spaceIdHeader && /^[0-9a-f-]{36}$/i.test(spaceIdHeader) ? spaceIdHeader : null;
 	const siteId = c.req.param('id');
 
-	if (!siteId) return errorResponse(c, 'siteId required', 400);
+	if (!siteId) {
+		websitePublishTotal.inc({ result: 'invalid' });
+		publishTimer();
+		return errorResponse(c, 'siteId required', 400);
+	}
 
 	const parsed = DraftSnapshotSchema.safeParse(await c.req.json().catch(() => null));
-	if (!parsed.success) return validationError(c, parsed.error.issues);
+	if (!parsed.success) {
+		websitePublishTotal.inc({ result: 'invalid' });
+		publishTimer();
+		return validationError(c, parsed.error.issues);
+	}
 
 	const draft = parsed.data;
 	if (draft.site.id !== siteId) {
+		websitePublishTotal.inc({ result: 'invalid' });
+		publishTimer();
 		return errorResponse(c, 'Site id mismatch between path and body', 400, {
 			code: 'SITE_ID_MISMATCH',
 		});
 	}
 	if (!isValidSlug(draft.site.slug)) {
+		websitePublishTotal.inc({ result: 'invalid' });
+		publishTimer();
 		return errorResponse(c, `Slug "${draft.site.slug}" is invalid or reserved`, 400, {
 			code: 'INVALID_SLUG',
 		});
@@ -97,6 +111,8 @@ routes.post('/sites/:id/publish', async (c) => {
 		)
 		.limit(1);
 	if (conflicting[0] && conflicting[0].siteId !== siteId) {
+		websitePublishTotal.inc({ result: 'slug_taken' });
+		publishTimer();
 		return errorResponse(
 			c,
 			`Slug "${draft.site.slug}" is already taken by another published site`,
@@ -139,6 +155,8 @@ routes.post('/sites/:id/publish', async (c) => {
 
 		if (!result) throw new Error('Insert returned no row');
 
+		websitePublishTotal.inc({ result: 'success' });
+		publishTimer();
 		return c.json(
 			{
 				snapshotId: result.id,
@@ -151,10 +169,14 @@ routes.post('/sites/:id/publish', async (c) => {
 		// Postgres unique-constraint violation → slug conflict we didn't
 		// catch in the pre-check (classic race).
 		if (err instanceof Error && /unique/i.test(err.message)) {
+			websitePublishTotal.inc({ result: 'slug_taken' });
+			publishTimer();
 			return errorResponse(c, `Slug "${draft.site.slug}" was taken by a concurrent publish`, 409, {
 				code: 'SLUG_TAKEN',
 			});
 		}
+		websitePublishTotal.inc({ result: 'error' });
+		publishTimer();
 		throw err;
 	}
 });

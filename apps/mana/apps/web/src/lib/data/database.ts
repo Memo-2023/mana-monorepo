@@ -974,6 +974,24 @@ db.version(40).upgrade(async (tx) => {
 		});
 });
 
+// v41 — Wardrobe module (docs/plans/wardrobe-module.md M1).
+// Two space-scoped tables — garments (individual clothing items) and
+// outfits (named compositions of garment refs). Try-on results live in
+// picture.images with a wardrobeOutfitId back-reference; no join table
+// here.
+//
+// Indices:
+//   - wardrobeGarments.category for the Category-Tabs filter
+//   - wardrobeGarments.createdAt for "newest first" ordering
+//   - wardrobeOutfits.createdAt for the grid default sort
+//   - wardrobeOutfits.isFavorite for the favorites filter
+// Both tables get the standard spaceId/authorId/visibility stamping
+// via the Dexie hook (they're NOT in USER_LEVEL_TABLES).
+db.version(41).stores({
+	wardrobeGarments: 'id, category, createdAt, isArchived',
+	wardrobeOutfits: 'id, createdAt, isFavorite, isArchived',
+});
+
 // ─── Sync Routing ──────────────────────────────────────────
 // SYNC_APP_MAP, TABLE_TO_SYNC_NAME, TABLE_TO_APP, SYNC_NAME_TO_TABLE,
 // toSyncName() and fromSyncName() are now derived from per-module

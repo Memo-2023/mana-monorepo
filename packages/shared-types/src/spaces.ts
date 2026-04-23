@@ -88,6 +88,7 @@ export const SPACE_MODULE_ALLOWLIST: Record<SpaceType, readonly SpaceModuleId[] 
 		'invoices',
 		'activity',
 		'goals',
+		'wardrobe', // Merch-Katalog (T-Shirts, Caps, Zip-Hoodies)
 	],
 
 	club: [
@@ -115,6 +116,7 @@ export const SPACE_MODULE_ALLOWLIST: Record<SpaceType, readonly SpaceModuleId[] 
 		'photos',
 		'activity',
 		'goals',
+		'wardrobe', // Vereinstrikots, Club-Bekleidung
 	],
 
 	family: [
@@ -139,6 +141,8 @@ export const SPACE_MODULE_ALLOWLIST: Record<SpaceType, readonly SpaceModuleId[] 
 		'wetter',
 		'wisekeep',
 		'firsts',
+		'wardrobe', // Familien-Kleiderschrank (Kinder inkl.); Try-On
+		//   rendert auf dem aufrufenden Elternteil, nicht auf Kindern
 	],
 
 	team: [
@@ -164,6 +168,7 @@ export const SPACE_MODULE_ALLOWLIST: Record<SpaceType, readonly SpaceModuleId[] 
 		'times',
 		'activity',
 		'goals',
+		'wardrobe', // Bühnen-Kostüme, Uniformen, Produktions-Wardrobe
 	],
 
 	practice: [
@@ -185,6 +190,7 @@ export const SPACE_MODULE_ALLOWLIST: Record<SpaceType, readonly SpaceModuleId[] 
 		'research-lab',
 		'activity',
 		'goals',
+		'wardrobe', // Praxis-Kittel, Dresscode-Items
 	],
 } as const;
 

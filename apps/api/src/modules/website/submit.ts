@@ -23,6 +23,7 @@
 import { Hono } from 'hono';
 import { and, eq } from 'drizzle-orm';
 import { db, publishedSnapshots, submissions } from './schema';
+import { websiteSubmissionsTotal } from '../../lib/metrics';
 
 const routes = new Hono();
 
@@ -142,6 +143,7 @@ routes.post('/submit/:siteSlug/:blockId', async (c) => {
 		c.req.header('x-forwarded-for')?.split(',')[0]?.trim() ??
 		'unknown';
 	if (rateLimitHit(`${siteSlug}:${ip}`)) {
+		websiteSubmissionsTotal.inc({ result: 'rate_limit' });
 		return c.json({ error: 'Rate limit überschritten — bitte später erneut versuchen' }, 429);
 	}
 
@@ -157,19 +159,23 @@ routes.post('/submit/:siteSlug/:blockId', async (c) => {
 		.limit(1);
 
 	if (!snapshotRow[0]) {
+		websiteSubmissionsTotal.inc({ result: 'not_found' });
 		return c.json({ error: 'Website nicht gefunden oder offline' }, 404);
 	}
 
 	const block = findFormBlock(snapshotRow[0].blob as SnapshotBlob, blockId);
 	if (!block) {
+		websiteSubmissionsTotal.inc({ result: 'not_found' });
 		return c.json({ error: 'Block nicht gefunden' }, 404);
 	}
 	if (!isFormBlock(block)) {
+		websiteSubmissionsTotal.inc({ result: 'invalid' });
 		return c.json({ error: 'Block ist kein Formular' }, 400);
 	}
 
 	const rawBody = (await c.req.json().catch(() => null)) as Record<string, unknown> | null;
 	if (!rawBody || typeof rawBody !== 'object') {
+		websiteSubmissionsTotal.inc({ result: 'invalid' });
 		return c.json({ error: 'Payload fehlt oder ungültig' }, 400);
 	}
 
@@ -178,6 +184,7 @@ routes.post('/submit/:siteSlug/:blockId', async (c) => {
 	// Form renderer. We also look for a generic "_trap" key.
 	const trap = rawBody.honeypot ?? rawBody._trap;
 	if (typeof trap === 'string' && trap.trim().length > 0) {
+		websiteSubmissionsTotal.inc({ result: 'spam' });
 		// Act as success to the bot, store nothing.
 		return c.json({ ok: true, spam: true }, 202);
 	}
@@ -188,6 +195,7 @@ routes.post('/submit/:siteSlug/:blockId', async (c) => {
 	for (const field of block.props.fields) {
 		const result = validateField(field, rawBody[field.name]);
 		if (!result.ok) {
+			websiteSubmissionsTotal.inc({ result: 'invalid' });
 			return c.json({ error: result.error, field: field.name }, 400);
 		}
 		cleaned[field.name] = result.value;
@@ -209,6 +217,7 @@ routes.post('/submit/:siteSlug/:blockId', async (c) => {
 		})
 		.returning({ id: submissions.id });
 
+	websiteSubmissionsTotal.inc({ result: 'received' });
 	return c.json({ ok: true, submissionId: row?.id ?? null }, 201);
 });
 

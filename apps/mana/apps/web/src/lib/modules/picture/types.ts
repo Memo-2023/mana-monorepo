@@ -35,6 +35,13 @@ export interface LocalImage extends BaseRecord {
 	/** mana-media ids of the me-images that fed a reference-edit. */
 	referenceImageIds?: string[] | null;
 	generationMode?: ImageGenerationMode | null;
+	/**
+	 * Back-reference to `wardrobeOutfits.id` when this image was produced
+	 * by the Wardrobe try-on flow (plan docs/plans/wardrobe-module.md).
+	 * Lets the outfit detail view query all historical try-ons without
+	 * an extra table. Plaintext — it's an FK.
+	 */
+	wardrobeOutfitId?: string | null;
 }
 
 export interface LocalBoard extends BaseRecord {
@@ -96,6 +103,7 @@ export interface Image {
 	sourceImageId?: string;
 	referenceImageIds?: string[];
 	generationMode?: ImageGenerationMode;
+	wardrobeOutfitId?: string;
 	createdAt: string;
 	updatedAt: string;
 }
