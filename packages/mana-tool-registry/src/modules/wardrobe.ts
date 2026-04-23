@@ -46,7 +46,9 @@ const OUTFIT_ENCRYPTED_FIELDS = ['name', 'description', 'tags'] as const;
 
 const ME_APP_ID = 'profile';
 const ME_TABLE = 'meImages';
-const ME_ENCRYPTED_FIELDS = ['label', 'tags'] as const;
+// meImages has encrypted label + tags, but tryOn only reads mediaId
+// and primaryFor (both plaintext) — no decrypt needed here. The
+// field list is tracked via the profile module's own me.ts tool.
 
 const SYNC_URL = () => process.env.MANA_SYNC_URL ?? 'http://localhost:3050';
 const PICTURE_API_URL = () => process.env.MANA_API_URL ?? 'http://localhost:3060';
@@ -166,65 +168,68 @@ const listGarmentsOutput = z.object({
 	garments: z.array(garmentSchema),
 });
 
-export const wardrobeListGarments: ToolSpec<typeof listGarmentsInput, typeof listGarmentsOutput> =
-	{
-		name: 'wardrobe.listGarments',
-		module: 'wardrobe',
-		scope: 'user-space',
-		policyHint: 'read',
-		description:
-			"List the caller's garments in the active space. Filter by `category` (closed enum) and/or `tags` (intersection — every listed tag must be present). Returns at most `limit` rows, newest first. Archived + soft-deleted items are excluded.",
-		input: listGarmentsInput,
-		output: listGarmentsOutput,
-		encryptedFields: { table: GARMENTS_TABLE, fields: [...GARMENT_ENCRYPTED_FIELDS] },
-		async handler(input, ctx) {
-			const key = await ctx.getMasterKey();
-			const res = await pullAll<RawGarmentRow>(syncCfg(ctx), GARMENTS_APP_ID, GARMENTS_TABLE);
-			const alive = res.changes
-				.filter((c) => c.op !== 'delete' && c.data)
-				.map((c) => c.data as RawGarmentRow)
-				.filter((row) => !row.deletedAt && !row.isArchived)
-				.filter((row) => row.spaceId === ctx.spaceId);
+export const wardrobeListGarments: ToolSpec<typeof listGarmentsInput, typeof listGarmentsOutput> = {
+	name: 'wardrobe.listGarments',
+	module: 'wardrobe',
+	scope: 'user-space',
+	policyHint: 'read',
+	description:
+		"List the caller's garments in the active space. Filter by `category` (closed enum) and/or `tags` (intersection — every listed tag must be present). Returns at most `limit` rows, newest first. Archived + soft-deleted items are excluded.",
+	input: listGarmentsInput,
+	output: listGarmentsOutput,
+	encryptedFields: { table: GARMENTS_TABLE, fields: [...GARMENT_ENCRYPTED_FIELDS] },
+	async handler(input, ctx) {
+		const key = await ctx.getMasterKey();
+		const res = await pullAll<RawGarmentRow>(syncCfg(ctx), GARMENTS_APP_ID, GARMENTS_TABLE);
+		const alive = res.changes
+			.filter((c) => c.op !== 'delete' && c.data)
+			.map((c) => c.data as RawGarmentRow)
+			.filter((row) => !row.deletedAt && !row.isArchived)
+			.filter((row) => row.spaceId === ctx.spaceId);
 
-			const decrypted = (await Promise.all(
-				alive.map((row) =>
-					decryptRecordFields(row as unknown as Record<string, unknown>, GARMENT_ENCRYPTED_FIELDS, key)
+		const decrypted = (await Promise.all(
+			alive.map((row) =>
+				decryptRecordFields(
+					row as unknown as Record<string, unknown>,
+					GARMENT_ENCRYPTED_FIELDS,
+					key
 				)
-			)) as unknown as RawGarmentRow[];
+			)
+		)) as unknown as RawGarmentRow[];
 
-			const filtered = decrypted
-				.filter((row): row is RawGarmentRow & { id: string; name: string; category: string } =>
-					Boolean(row.id && row.name && row.category)
-				)
-				.filter((row) => !input.category || row.category === input.category)
-				.filter((row) => {
-					if (input.tags.length === 0) return true;
-					const rowTags = new Set(row.tags ?? []);
-					return input.tags.every((t) => rowTags.has(t));
-				})
-				.slice(0, input.limit);
+		const filtered = decrypted
+			.filter((row): row is RawGarmentRow & { id: string; name: string; category: string } =>
+				Boolean(row.id && row.name && row.category)
+			)
+			.filter((row) => !input.category || row.category === input.category)
+			.filter((row) => {
+				if (input.tags.length === 0) return true;
+				const rowTags = new Set(row.tags ?? []);
+				return input.tags.every((t) => rowTags.has(t));
+			})
+			.slice(0, input.limit);
 
-			const garments = filtered.map((row) => ({
-				id: row.id,
-				name: row.name,
-				category: row.category as GarmentCategory,
-				mediaIds: row.mediaIds ?? [],
-				brand: row.brand ?? null,
-				color: row.color ?? null,
-				size: row.size ?? null,
-				material: row.material ?? null,
-				tags: row.tags ?? [],
-				notes: row.notes ?? null,
-			}));
+		const garments = filtered.map((row) => ({
+			id: row.id,
+			name: row.name,
+			category: row.category as GarmentCategory,
+			mediaIds: row.mediaIds ?? [],
+			brand: row.brand ?? null,
+			color: row.color ?? null,
+			size: row.size ?? null,
+			material: row.material ?? null,
+			tags: row.tags ?? [],
+			notes: row.notes ?? null,
+		}));
 
-			ctx.logger.info('wardrobe.listGarments', {
-				count: garments.length,
-				category: input.category ?? 'all',
-			});
+		ctx.logger.info('wardrobe.listGarments', {
+			count: garments.length,
+			category: input.category ?? 'all',
+		});
 
-			return { garments };
-		},
-	};
+		return { garments };
+	},
+};
 
 // ─── wardrobe.listOutfits ─────────────────────────────────────────
 
@@ -305,21 +310,50 @@ const createOutfitOutput = z.object({
 	outfit: outfitSchema,
 });
 
-export const wardrobeCreateOutfit: ToolSpec<typeof createOutfitInput, typeof createOutfitOutput> =
-	{
-		name: 'wardrobe.createOutfit',
-		module: 'wardrobe',
-		scope: 'user-space',
-		policyHint: 'write',
-		description:
-			"Compose a new outfit in the active space. `garmentIds` must reference garments the caller owns in the same space — the server will persist whatever you pass (there's no cross-space validation here), so call `wardrobe.listGarments` first to confirm the ids.",
-		input: createOutfitInput,
-		output: createOutfitOutput,
-		encryptedFields: { table: OUTFITS_TABLE, fields: [...OUTFIT_ENCRYPTED_FIELDS] },
-		async handler(input, ctx) {
-			const key = await ctx.getMasterKey();
-			const id = crypto.randomUUID();
-			const plaintext = {
+export const wardrobeCreateOutfit: ToolSpec<typeof createOutfitInput, typeof createOutfitOutput> = {
+	name: 'wardrobe.createOutfit',
+	module: 'wardrobe',
+	scope: 'user-space',
+	policyHint: 'write',
+	description:
+		"Compose a new outfit in the active space. `garmentIds` must reference garments the caller owns in the same space — the server will persist whatever you pass (there's no cross-space validation here), so call `wardrobe.listGarments` first to confirm the ids.",
+	input: createOutfitInput,
+	output: createOutfitOutput,
+	encryptedFields: { table: OUTFITS_TABLE, fields: [...OUTFIT_ENCRYPTED_FIELDS] },
+	async handler(input, ctx) {
+		const key = await ctx.getMasterKey();
+		const id = crypto.randomUUID();
+		const plaintext = {
+			id,
+			name: input.name,
+			description: input.description,
+			garmentIds: input.garmentIds,
+			occasion: input.occasion,
+			tags: input.tags,
+			isFavorite: false,
+		};
+
+		const encrypted = await encryptRecordFields(
+			plaintext as unknown as Record<string, unknown>,
+			OUTFIT_ENCRYPTED_FIELDS,
+			key
+		);
+
+		await pushInsert(syncCfg(ctx), OUTFITS_APP_ID, {
+			table: OUTFITS_TABLE,
+			id,
+			spaceId: ctx.spaceId,
+			data: encrypted,
+		});
+
+		ctx.logger.info('wardrobe.createOutfit', {
+			outfitId: id,
+			garmentCount: input.garmentIds.length,
+			occasion: input.occasion ?? 'none',
+		});
+
+		return {
+			outfit: {
 				id,
 				name: input.name,
 				description: input.description,
@@ -327,40 +361,10 @@ export const wardrobeCreateOutfit: ToolSpec<typeof createOutfitInput, typeof cre
 				occasion: input.occasion,
 				tags: input.tags,
 				isFavorite: false,
-			};
-
-			const encrypted = await encryptRecordFields(
-				plaintext as unknown as Record<string, unknown>,
-				OUTFIT_ENCRYPTED_FIELDS,
-				key
-			);
-
-			await pushInsert(syncCfg(ctx), OUTFITS_APP_ID, {
-				table: OUTFITS_TABLE,
-				id,
-				spaceId: ctx.spaceId,
-				data: encrypted,
-			});
-
-			ctx.logger.info('wardrobe.createOutfit', {
-				outfitId: id,
-				garmentCount: input.garmentIds.length,
-				occasion: input.occasion ?? 'none',
-			});
-
-			return {
-				outfit: {
-					id,
-					name: input.name,
-					description: input.description,
-					garmentIds: input.garmentIds,
-					occasion: input.occasion,
-					tags: input.tags,
-					isFavorite: false,
-				},
-			};
-		},
-	};
+			},
+		};
+	},
+};
 
 // ─── wardrobe.tryOn ───────────────────────────────────────────────
 
@@ -403,18 +407,11 @@ export const wardrobeTryOn: ToolSpec<typeof tryOnInput, typeof tryOnOutput> = {
 		// 1. Fetch outfit + garments + meImages, decrypt what's needed.
 		const key = await ctx.getMasterKey();
 
-		const outfitsRes = await pullAll<RawOutfitRow>(
-			syncCfg(ctx),
-			OUTFITS_APP_ID,
-			OUTFITS_TABLE
-		);
+		const outfitsRes = await pullAll<RawOutfitRow>(syncCfg(ctx), OUTFITS_APP_ID, OUTFITS_TABLE);
 		const outfit = outfitsRes.changes
 			.filter((c) => c.op !== 'delete' && c.data)
 			.map((c) => c.data as RawOutfitRow)
-			.find(
-				(row) =>
-					row.id === input.outfitId && !row.deletedAt && row.spaceId === ctx.spaceId
-			);
+			.find((row) => row.id === input.outfitId && !row.deletedAt && row.spaceId === ctx.spaceId);
 		if (!outfit) {
 			throw new Error(`Outfit ${input.outfitId} not found in the active space`);
 		}
@@ -430,26 +427,16 @@ export const wardrobeTryOn: ToolSpec<typeof tryOnInput, typeof tryOnOutput> = {
 			throw new Error('Outfit has no garments');
 		}
 
-		const garmentsRes = await pullAll<RawGarmentRow>(
-			syncCfg(ctx),
-			GARMENTS_APP_ID,
-			GARMENTS_TABLE
-		);
+		const garmentsRes = await pullAll<RawGarmentRow>(syncCfg(ctx), GARMENTS_APP_ID, GARMENTS_TABLE);
 		const garmentSet = new Set(garmentIds);
 		const relevantGarments = garmentsRes.changes
 			.filter((c) => c.op !== 'delete' && c.data)
 			.map((c) => c.data as RawGarmentRow)
 			.filter(
-				(row) =>
-					row.id &&
-					garmentSet.has(row.id) &&
-					!row.deletedAt &&
-					row.spaceId === ctx.spaceId
+				(row) => row.id && garmentSet.has(row.id) && !row.deletedAt && row.spaceId === ctx.spaceId
 			);
 		if (relevantGarments.length === 0) {
-			throw new Error(
-				'None of the outfit garments exist in the active space (moved or deleted?)'
-			);
+			throw new Error('None of the outfit garments exist in the active space (moved or deleted?)');
 		}
 
 		// Garment metadata we need (category, mediaIds) is plaintext; no
