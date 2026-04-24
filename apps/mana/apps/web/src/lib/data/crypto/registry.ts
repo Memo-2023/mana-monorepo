@@ -97,6 +97,7 @@ import type {
 	LocalGeneration,
 	LocalWritingStyle,
 } from '../../modules/writing/types';
+import type { LocalComicStory } from '../../modules/comic/types';
 
 export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	// ─── Chat ────────────────────────────────────────────────
@@ -585,6 +586,34 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	// JSON-stringified blob via the `season` array-path anyway — keep
 	// it plaintext and revisit if prompts later carry personal data.
 	wardrobeOutfits: entry<LocalWardrobeOutfit>(['name', 'description', 'tags']),
+
+	// ─── Comic (stories + inline panel metadata) ─────────────
+	// docs/plans/comic-module.md M1. Single space-scoped table.
+	//
+	// `title`, `description`, `storyContext`, `tags` are user-typed
+	// prose and get the same treatment as journal.title / notes.content.
+	// `panelMeta` is the per-panel sidecar (Record<panelImageId,
+	// {caption, dialogue, promptUsed, sourceInput}>) — aes.ts JSON-
+	// stringifies the whole blob before wrap, same pattern as
+	// food.foods / recipes.ingredients / quiz.options. Caption +
+	// dialogue are prose fragments the user authored; promptUsed is
+	// the reproduce-key (would-be-convenient for regeneration but
+	// leaks story content if plaintext); sourceInput FKs are
+	// low-risk but ship inside the encrypted blob anyway because
+	// splitting the Record per-field would double the storage cost.
+	//
+	// Plaintext (intentional): id, style enum (drives listStories
+	// filter + per-style prompt-prefix lookup), characterMediaIds
+	// (FKs to meImages / wardrobeGarments), panelImageIds (ordered
+	// FKs to picture.images), isFavorite / isArchived / visibility
+	// fields — all needed by the index or query layer.
+	comicStories: entry<LocalComicStory>([
+		'title',
+		'description',
+		'storyContext',
+		'tags',
+		'panelMeta',
+	]),
 
 	// Per-agent kontext documents — same schema as kontextDoc but keyed
 	// per agent. Content is free-form markdown.

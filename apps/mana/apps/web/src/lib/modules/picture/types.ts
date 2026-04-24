@@ -60,6 +60,22 @@ export interface LocalImage extends BaseRecord {
 	 * `referenceImageIds` containment.
 	 */
 	wardrobeGarmentId?: string | null;
+	/**
+	 * Back-reference to `comicStories.id` when this image was produced as
+	 * a comic panel (docs/plans/comic-module.md). The canonical reading
+	 * order lives on the story in `panelImageIds`; this field lets the
+	 * Picture-gallery show a "Panel von Comic X" chip without having to
+	 * load every story to check which one owns the image. Plaintext FK.
+	 */
+	comicStoryId?: string | null;
+	/**
+	 * Zero-based reading position inside the owning story at write time.
+	 * Denormalised copy of `panelImageIds.indexOf(imageId)` — used for
+	 * the gallery's "Panel 3" label. Goes stale if the story is
+	 * reordered (M3+); the Detail-View re-reads from `panelImageIds` so
+	 * the canonical order is never wrong even if this drifts.
+	 */
+	comicPanelIndex?: number | null;
 }
 
 export interface LocalBoard extends BaseRecord {
@@ -131,6 +147,8 @@ export interface Image {
 	generationMode?: ImageGenerationMode;
 	wardrobeOutfitId?: string;
 	wardrobeGarmentId?: string;
+	comicStoryId?: string;
+	comicPanelIndex?: number;
 	createdAt: string;
 	updatedAt: string;
 }

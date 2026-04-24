@@ -75,6 +75,11 @@ const calcSvg = `<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="n
 // Context icon (document/knowledge with sky blue gradient)
 const contextSvg = `<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="130" y="130" width="764" height="764" rx="382" fill="url(#contextGrad)"/><rect x="300" y="240" width="424" height="544" rx="24" fill="white"/><path d="M400 400H624" stroke="#0ea5e9" stroke-width="24" stroke-linecap="round"/><path d="M400 480H580" stroke="#0ea5e9" stroke-width="24" stroke-linecap="round" stroke-opacity="0.6"/><path d="M400 560H540" stroke="#0ea5e9" stroke-width="24" stroke-linecap="round" stroke-opacity="0.4"/><path d="M400 640H600" stroke="#0ea5e9" stroke-width="24" stroke-linecap="round" stroke-opacity="0.3"/><path d="M620 240V380H760" stroke="white" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/><path d="M620 240L760 380" stroke="#0ea5e9" stroke-width="16" stroke-linecap="round" stroke-opacity="0.3"/><circle cx="680" cy="620" r="100" fill="#0ea5e9" fill-opacity="0.2" stroke="white" stroke-width="16"/><path d="M660 620L680 640L720 600" stroke="white" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/><defs><linearGradient id="contextGrad" x1="130" y1="130" x2="894" y2="894" gradientUnits="userSpaceOnUse"><stop stop-color="#0ea5e9"/><stop offset="1" stop-color="#0284c7"/></linearGradient></defs></svg>`;
 
+// Comic icon — speech bubble with a lightning-bolt panel marker on
+// orange→red gradient. Sits warm between Picture (green) and Wardrobe
+// (rose) so the Mana launcher reads as a coherent creative family.
+const comicSvg = `<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="130" y="130" width="764" height="764" rx="382" fill="url(#comicGrad)"/><path d="M260 340c0-33 27-60 60-60h384c33 0 60 27 60 60v288c0 33-27 60-60 60H480l-108 90v-90h-52c-33 0-60-27-60-60V340z" fill="white"/><path d="M540 370l-90 156h72l-30 128 108-172h-78l28-112h-10z" fill="#ea580c"/><circle cx="360" cy="460" r="18" fill="#ea580c" fill-opacity="0.35"/><circle cx="410" cy="460" r="18" fill="#ea580c" fill-opacity="0.35"/><circle cx="460" cy="460" r="18" fill="#ea580c" fill-opacity="0.35"/><defs><linearGradient id="comicGrad" x1="130" y1="130" x2="894" y2="894" gradientUnits="userSpaceOnUse"><stop stop-color="#f97316"/><stop offset="1" stop-color="#dc2626"/></linearGradient></defs></svg>`;
+
 // Wardrobe icon — T-shirt on hanger with rose-violet gradient.
 // Rose/violet to sit between Picture (green) and Calc (pink) without
 // clashing; the hanger loop sits on the shoulder line so the silhouette
@@ -109,6 +114,7 @@ export const APP_ICONS = {
 	mail: svgToDataUrl(mailSvg),
 	inventory: svgToDataUrl(inventorySvg),
 	wardrobe: svgToDataUrl(wardrobeSvg),
+	comic: svgToDataUrl(comicSvg),
 	questions: svgToDataUrl(questionsSvg),
 	context: svgToDataUrl(contextSvg),
 	citycorners: svgToDataUrl(citycornersSvg),

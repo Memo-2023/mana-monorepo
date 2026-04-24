@@ -1032,6 +1032,26 @@ db.version(43).stores({
 	writingStyles: 'id, source, isSpaceDefault, isFavorite, updatedAt',
 });
 
+// v44 — Comic module (docs/plans/comic-module.md M1).
+// Single space-scoped table: each row is a comic story holding an
+// ordered `panelImageIds: string[]` pointing at picture.images rows
+// generated via /picture/generate-with-reference. No separate panel
+// table — the `picture.images` entry IS the panel, with `comicStoryId`
+// + `comicPanelIndex` plaintext back-refs (added as type-level fields
+// on LocalImage; no schema index needed because the story holds the
+// canonical order and loads its panels by id-list, not by scan).
+//
+// Indices:
+//   - comicStories.createdAt for "newest first" grid ordering
+//   - comicStories.style for the style-filter query (M5 MCP listStories)
+//   - comicStories.isFavorite for the favorites filter
+//   - comicStories.isArchived for the archive-hide filter
+// Gets standard spaceId/authorId/visibility stamping via the Dexie hook
+// (NOT in USER_LEVEL_TABLES).
+db.version(44).stores({
+	comicStories: 'id, createdAt, style, isFavorite, isArchived',
+});
+
 // ─── Sync Routing ──────────────────────────────────────────
 // SYNC_APP_MAP, TABLE_TO_SYNC_NAME, TABLE_TO_APP, SYNC_NAME_TO_TABLE,
 // toSyncName() and fromSyncName() are now derived from per-module

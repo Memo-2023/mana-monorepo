@@ -297,13 +297,18 @@ routes.post('/generate-with-reference', async (c) => {
 	}
 
 	// Ownership check before we spend credits or burn OpenAI quota.
-	// References span two upload tags: `me` for face/body portraits
-	// (profile module) and `wardrobe` for garment photos (wardrobe
-	// module, M4 try-on flow). Anything outside those two apps is
-	// treated as not-owned regardless of mana-media's own view.
+	// References span three upload tags today:
+	//   - `me`       — face/body portraits from the profile module
+	//   - `wardrobe` — garment photos (M4 try-on flow)
+	//   - `comic`    — comic-specific anchor / backdrop uploads
+	//                  (slot reserved for M6+; no writer lands in
+	//                  this app today, M1 character refs come from
+	//                  me + wardrobe only).
+	// Anything outside these apps is treated as not-owned regardless of
+	// mana-media's own view.
 	try {
 		const { verifyMediaOwnership } = await import('../../lib/media');
-		await verifyMediaOwnership(userId, refIds, ['me', 'wardrobe']);
+		await verifyMediaOwnership(userId, refIds, ['me', 'wardrobe', 'comic']);
 	} catch (err) {
 		const e = err as Error & { status?: number; missing?: string[] };
 		if (e.status === 404) {
