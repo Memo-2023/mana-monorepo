@@ -10,122 +10,25 @@ export type SupportedLocale = (typeof supportedLocales)[number];
 const defaultLocale = 'de';
 
 // ─── Per-module locale registration ──────────────────────────
-// Each module has its own JSON file per language.
-// They get merged into a single dictionary at registration time.
+// Every folder under ./locales is one namespace; every <lang>.json
+// inside is auto-registered via Vite's import.meta.glob. Adding a new
+// namespace is a zero-code change: drop the folder + JSON files.
+
+const localeModules = import.meta.glob<{ default: Record<string, unknown> }>('./locales/*/*.json');
 
 function registerLocale(lang: SupportedLocale) {
 	register(lang, async () => {
-		const [
-			apps,
-			common,
-			nav,
-			dashboard,
-			credits,
-			profile,
-			subscription,
-			todo,
-			app_slider,
-			calendar,
-			contacts,
-			chat,
-			cards,
-			picture,
-			quotes,
-			memoro,
-			moodlit,
-			storage,
-			context,
-			presi,
-			uload,
-			times,
-			inventory,
-			photos,
-			food,
-			plants,
-			skilltree,
-			citycorners,
-			calc,
-			questions,
-			guides,
-			help,
-			period,
-			news,
-			body,
-		] = await Promise.all([
-			import(`./locales/apps/${lang}.json`),
-			import(`./locales/common/${lang}.json`),
-			import(`./locales/nav/${lang}.json`),
-			import(`./locales/dashboard/${lang}.json`),
-			import(`./locales/credits/${lang}.json`),
-			import(`./locales/profile/${lang}.json`),
-			import(`./locales/subscription/${lang}.json`),
-			import(`./locales/todo/${lang}.json`),
-			import(`./locales/app_slider/${lang}.json`),
-			import(`./locales/calendar/${lang}.json`),
-			import(`./locales/contacts/${lang}.json`),
-			import(`./locales/chat/${lang}.json`),
-			import(`./locales/cards/${lang}.json`),
-			import(`./locales/picture/${lang}.json`),
-			import(`./locales/quotes/${lang}.json`),
-			import(`./locales/memoro/${lang}.json`),
-			import(`./locales/moodlit/${lang}.json`),
-			import(`./locales/storage/${lang}.json`),
-			import(`./locales/context/${lang}.json`),
-			import(`./locales/presi/${lang}.json`),
-			import(`./locales/uload/${lang}.json`),
-			import(`./locales/times/${lang}.json`),
-			import(`./locales/inventory/${lang}.json`),
-			import(`./locales/photos/${lang}.json`),
-			import(`./locales/food/${lang}.json`),
-			import(`./locales/plants/${lang}.json`),
-			import(`./locales/skilltree/${lang}.json`),
-			import(`./locales/citycorners/${lang}.json`),
-			import(`./locales/calc/${lang}.json`),
-			import(`./locales/questions/${lang}.json`),
-			import(`./locales/guides/${lang}.json`),
-			import(`./locales/help/${lang}.json`),
-			import(`./locales/period/${lang}.json`),
-			import(`./locales/news/${lang}.json`),
-			import(`./locales/body/${lang}.json`),
-		]);
-
-		return {
-			apps: apps.default,
-			common: common.default,
-			nav: nav.default,
-			dashboard: dashboard.default,
-			credits: credits.default,
-			profile: profile.default,
-			subscription: subscription.default,
-			todo: todo.default,
-			app_slider: app_slider.default,
-			calendar: calendar.default,
-			contacts: contacts.default,
-			chat: chat.default,
-			cards: cards.default,
-			picture: picture.default,
-			quotes: quotes.default,
-			memoro: memoro.default,
-			moodlit: moodlit.default,
-			storage: storage.default,
-			context: context.default,
-			presi: presi.default,
-			uload: uload.default,
-			times: times.default,
-			inventory: inventory.default,
-			photos: photos.default,
-			food: food.default,
-			plants: plants.default,
-			skilltree: skilltree.default,
-			citycorners: citycorners.default,
-			calc: calc.default,
-			questions: questions.default,
-			guides: guides.default,
-			help: help.default,
-			period: period.default,
-			news: news.default,
-			body: body.default,
-		};
+		const suffix = `/${lang}.json`;
+		const entries = await Promise.all(
+			Object.entries(localeModules)
+				.filter(([path]) => path.endsWith(suffix))
+				.map(async ([path, loader]) => {
+					const namespace = path.slice('./locales/'.length, -suffix.length);
+					const mod = await loader();
+					return [namespace, mod.default] as const;
+				})
+		);
+		return Object.fromEntries(entries);
 	});
 }
 
