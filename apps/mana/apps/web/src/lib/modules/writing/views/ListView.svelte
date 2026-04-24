@@ -97,6 +97,7 @@
 				bind:value={searchQuery}
 				placeholder="Nach Titel oder Thema suchen…"
 			/>
+			<a href="/writing/styles" class="styles-link" title="Stile verwalten">🎨 Stile</a>
 			<button
 				type="button"
 				class="create-btn"
@@ -181,6 +182,21 @@
 		display: flex;
 		align-items: center;
 		gap: 0.75rem;
+	}
+	.styles-link {
+		padding: 0.45rem 0.75rem;
+		border-radius: 0.55rem;
+		border: 1px solid var(--color-border, rgba(0, 0, 0, 0.1));
+		background: transparent;
+		color: inherit;
+		text-decoration: none;
+		font-size: 0.85rem;
+		white-space: nowrap;
+		flex-shrink: 0;
+	}
+	.styles-link:hover {
+		border-color: #0ea5e9;
+		color: #0ea5e9;
 	}
 	.create-btn {
 		padding: 0.45rem 0.9rem;

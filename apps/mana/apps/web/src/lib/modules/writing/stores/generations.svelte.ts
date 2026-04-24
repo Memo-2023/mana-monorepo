@@ -20,7 +20,7 @@ import { emitDomainEvent } from '$lib/data/events';
 import { generationTable, draftTable, draftVersionTable, writingStyleTable } from '../collections';
 import { callWritingGeneration } from '../api';
 import { buildDraftPrompt, estimateMaxTokens } from '../utils/prompt-builder';
-import { getStylePreset } from '../presets/styles';
+import { getStylePreset, type StylePreset } from '../presets/styles';
 import type {
 	LocalDraftVersion,
 	LocalGeneration,
@@ -37,10 +37,25 @@ function wordCountOf(text: string): number {
 	return trimmed.split(/\s+/).length;
 }
 
-async function loadStyle(styleId: string | null | undefined): Promise<LocalWritingStyle | null> {
+/**
+ * Resolve the `draft.styleId` reference. A draft can point at either a
+ * preset (serialised as `preset:<id>`, no Dexie row needed) or a custom
+ * WritingStyle row (uuid). Presets are static code, so no DB write is
+ * required for first-time selection — the picker just sets the id.
+ */
+async function loadStyle(
+	styleId: string | null | undefined
+): Promise<
+	{ source: 'preset'; preset: StylePreset } | { source: 'custom'; row: LocalWritingStyle } | null
+> {
 	if (!styleId) return null;
+	if (styleId.startsWith('preset:')) {
+		const preset = getStylePreset(styleId.slice('preset:'.length));
+		return preset ? { source: 'preset', preset } : null;
+	}
 	const row = await writingStyleTable.get(styleId);
-	return row && !row.deletedAt ? row : null;
+	if (!row || row.deletedAt) return null;
+	return { source: 'custom', row };
 }
 
 async function nextVersionNumber(draftId: string): Promise<number> {
@@ -76,16 +91,22 @@ export const generationsStore = {
 			(await draftVersionTable.get(draft.currentVersionId))?.content?.trim()
 				? 'full-regenerate'
 				: 'draft-from-brief';
-		const style = await loadStyle(draft.styleId);
+		const resolved = await loadStyle(draft.styleId);
 		const stylePreset =
-			style?.source === 'preset' && style.presetId ? getStylePreset(style.presetId) : undefined;
+			resolved?.source === 'preset'
+				? resolved.preset
+				: resolved?.source === 'custom' && resolved.row.presetId
+					? getStylePreset(resolved.row.presetId)
+					: undefined;
+		const styleExtracted =
+			resolved?.source === 'custom' ? (resolved.row.extractedPrinciples ?? undefined) : undefined;
 
 		const { system, user } = buildDraftPrompt({
 			kind: draft.kind,
 			title: draft.title,
 			briefing: draft.briefing,
 			stylePreset,
-			styleExtracted: style?.extractedPrinciples ?? undefined,
+			styleExtracted,
 		});
 
 		const maxTokens = opts.maxTokens ?? estimateMaxTokens(draft.briefing);

@@ -20,8 +20,10 @@
 		useVersionsForDraft,
 		useCurrentVersionForDraft,
 		useGenerationsForDraft,
+		useAllStyles,
 	} from '../queries';
 	import { KIND_LABELS, STATUS_LABELS } from '../constants';
+	import { getStylePreset } from '../presets/styles';
 	import type { DraftStatus } from '../types';
 
 	let { id }: { id: string } = $props();
@@ -109,6 +111,22 @@
 	const kind = $derived(draft ? KIND_LABELS[draft.kind] : null);
 	const targetWords = $derived(draft?.briefing.targetLength?.value ?? null);
 	const STATUS_ORDER: DraftStatus[] = ['draft', 'refining', 'complete', 'published'];
+
+	// Resolve the active style's display name: preset ids are static
+	// code; custom ids are looked up in the reactive styles list. Falls
+	// back to null when the draft has no style set (ad-hoc).
+	const allStyles$ = useAllStyles();
+	const allStyles = $derived(allStyles$.value);
+	const activeStyleName = $derived.by<string | null>(() => {
+		const sid = draft?.styleId;
+		if (!sid) return null;
+		if (sid.startsWith('preset:')) {
+			const preset = getStylePreset(sid.slice('preset:'.length));
+			return preset ? preset.name.de : null;
+		}
+		const custom = allStyles.find((s) => s.id === sid);
+		return custom ? custom.name : null;
+	});
 </script>
 
 {#if draft$.loading}
@@ -163,6 +181,9 @@
 				{briefingOpen ? '▾' : '▸'} Briefing
 				{#if !briefingOpen}
 					<span class="preview">{draft.briefing.topic}</span>
+					{#if activeStyleName}
+						<span class="style-chip" title="Aktiver Stil">🎨 {activeStyleName}</span>
+					{/if}
 				{/if}
 			</button>
 			{#if briefingOpen}
@@ -366,6 +387,15 @@
 		white-space: nowrap;
 		min-width: 0;
 		flex: 1;
+	}
+	.style-chip {
+		font-size: 0.75rem;
+		padding: 0.1rem 0.5rem;
+		border-radius: 999px;
+		background: color-mix(in srgb, #0ea5e9 10%, transparent);
+		color: #0ea5e9;
+		font-weight: normal;
+		flex-shrink: 0;
 	}
 	.columns {
 		display: grid;

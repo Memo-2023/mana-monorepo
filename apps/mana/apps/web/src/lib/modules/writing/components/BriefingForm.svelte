@@ -7,6 +7,7 @@
 <script lang="ts">
 	import { KIND_LABELS, TONE_PRESETS, LENGTH_PRESETS, DEFAULT_LANGUAGE } from '../constants';
 	import { draftsStore } from '../stores/drafts.svelte';
+	import StylePicker from './StylePicker.svelte';
 	import type { Draft, DraftKind, DraftBriefing } from '../types';
 
 	let {
@@ -59,6 +60,8 @@
 	);
 	/* svelte-ignore state_referenced_locally */
 	let extraInstructions = $state(draft?.briefing.extraInstructions ?? '');
+	/* svelte-ignore state_referenced_locally */
+	let styleId = $state<string | null>(draft?.styleId ?? null);
 
 	let saving = $state(false);
 	let error = $state<string | null>(null);
@@ -96,12 +99,14 @@
 					kind,
 					title: title.trim(),
 					briefing,
+					styleId,
 				});
 				oncreated?.(created);
 			} else if (draft) {
 				await draftsStore.updateDraft(draft.id, {
 					title: title.trim(),
 					kind,
+					styleId,
 				});
 				await draftsStore.updateBriefing(draft.id, briefing);
 			}
@@ -176,6 +181,13 @@
 			</select>
 		</label>
 	</div>
+
+	<label>
+		<span>
+			Stil <small>(optional — prägt Ton & Struktur der Generation)</small>
+		</span>
+		<StylePicker value={styleId} onchange={(next) => (styleId = next)} />
+	</label>
 
 	<label>
 		<span>Zusatzhinweise <small>(optional)</small></span>
