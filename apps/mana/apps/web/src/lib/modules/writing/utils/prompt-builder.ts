@@ -131,3 +131,120 @@ export function estimateMaxTokens(briefing: DraftBriefing): number {
 	const words = unit === 'words' ? target : unit === 'chars' ? target / 5 : target * 150;
 	return Math.min(8000, Math.max(256, Math.round(words * 2 + 200)));
 }
+
+// ─── Selection-refinement prompts (M6) ───────────────────
+
+/**
+ * Optional style hint appended to selection-refinement prompts so the
+ * replacement doesn't drift away from the draft's overall voice. We pass
+ * the raw principles description rather than re-instantiating the whole
+ * system prompt because the selection prompt has different guardrails
+ * (never add preamble, never explain, just return the replacement).
+ */
+function styleHintBlock(
+	stylePreset: StylePreset | undefined,
+	styleExtracted: StyleExtractedPrinciples | undefined
+): string | null {
+	if (stylePreset) {
+		return `Stil-Kontext: ${stylePreset.name.de}. ${stylePreset.principles.rawAnalysis ?? ''}`.trim();
+	}
+	if (styleExtracted?.rawAnalysis) {
+		return `Stil-Kontext: ${styleExtracted.rawAnalysis}`;
+	}
+	return null;
+}
+
+export interface SelectionContext {
+	selectionText: string;
+	language: string;
+	stylePreset?: StylePreset;
+	styleExtracted?: StyleExtractedPrinciples;
+}
+
+const SELECTION_SYSTEM_TAIL =
+	'Gib ausschließlich die neue Version des Ausschnitts zurück — kein Präfix wie "Hier ist…", keine Anführungszeichen, keine Erklärung davor oder danach. Nur der Ersatztext.';
+
+function fenceSelection(selection: string): string {
+	return `---\n${selection}\n---`;
+}
+
+function selectionPrompt(
+	ctx: SelectionContext,
+	systemHead: string,
+	userInstruction: string
+): PromptPair {
+	const systemLines = [systemHead, SELECTION_SYSTEM_TAIL];
+	const styleBlock = styleHintBlock(ctx.stylePreset, ctx.styleExtracted);
+	if (styleBlock) systemLines.push(styleBlock);
+	const userLines = [
+		userInstruction,
+		`Sprache: ${languageLabel(ctx.language)}.`,
+		'',
+		fenceSelection(ctx.selectionText),
+	];
+	return {
+		system: systemLines.join('\n\n'),
+		user: userLines.join('\n'),
+	};
+}
+
+export function buildShortenPrompt(ctx: SelectionContext): PromptPair {
+	return selectionPrompt(
+		ctx,
+		'Du kürzt Textpassagen. Behalte den Kerngedanken und den Ton bei, entferne nur Redundanzen, Füllwörter und Nebensätze.',
+		'Kürze den folgenden Ausschnitt deutlich (ziel: ~50–60% der ursprünglichen Länge).'
+	);
+}
+
+export function buildExpandPrompt(ctx: SelectionContext): PromptPair {
+	return selectionPrompt(
+		ctx,
+		'Du erweiterst Textpassagen mit zusätzlichem Detail, Beispielen oder Nuancen, ohne den Ton zu verlieren.',
+		'Erweitere den folgenden Ausschnitt deutlich (ziel: ~150–180% der ursprünglichen Länge). Füge Details, Beispiele oder weiterführende Gedanken hinzu, bleib aber beim Thema.'
+	);
+}
+
+export interface ChangeToneParams {
+	targetTone: string;
+}
+
+export function buildChangeTonePrompt(ctx: SelectionContext, params: ChangeToneParams): PromptPair {
+	return selectionPrompt(
+		ctx,
+		'Du schreibst Textpassagen im angegebenen Ton um, ohne den Inhalt zu verändern.',
+		`Schreibe den folgenden Ausschnitt im Ton "${params.targetTone}" um. Behalte den Sinn und die Länge grob bei, passe nur Wortwahl, Satzbau und Haltung an den neuen Ton an.`
+	);
+}
+
+export interface RewriteParams {
+	instruction: string;
+}
+
+export function buildRewritePrompt(ctx: SelectionContext, params: RewriteParams): PromptPair {
+	return selectionPrompt(
+		ctx,
+		'Du schreibst Textpassagen nach der Anweisung des Nutzers um.',
+		`Schreibe den folgenden Ausschnitt gemäß dieser Anweisung um: ${params.instruction}`
+	);
+}
+
+export interface TranslateParams {
+	targetLanguage: string;
+}
+
+export function buildTranslatePrompt(ctx: SelectionContext, params: TranslateParams): PromptPair {
+	const targetLabel = languageLabel(params.targetLanguage);
+	// Translate overrides the usual "keep source language" rule; build a
+	// lean pair that doesn't contradict itself.
+	return {
+		system: [
+			'Du übersetzt Textpassagen. Behalte Ton und Struktur des Originals bei. Behalte Eigennamen und technische Begriffe unverändert, außer sie haben eine etablierte Entsprechung.',
+			SELECTION_SYSTEM_TAIL,
+		].join('\n\n'),
+		user: [
+			`Übersetze den folgenden Ausschnitt nach ${targetLabel}.`,
+			'',
+			fenceSelection(ctx.selectionText),
+		].join('\n'),
+	};
+}

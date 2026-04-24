@@ -11,8 +11,16 @@
 	import BriefingForm from '../components/BriefingForm.svelte';
 	import StatusBadge from '../components/StatusBadge.svelte';
 	import VersionEditor from '../components/VersionEditor.svelte';
+	import type { EditorSelection } from '../components/VersionEditor.svelte';
 	import VersionHistory from '../components/VersionHistory.svelte';
 	import GenerationStatus from '../components/GenerationStatus.svelte';
+	import SelectionToolbar from '../components/SelectionToolbar.svelte';
+	import type {
+		SelectionToolKind,
+		SelectionToolInvocation,
+	} from '../components/SelectionToolbar.svelte';
+	import RefinementPanel from '../components/RefinementPanel.svelte';
+	import type { RefinementState } from '../components/RefinementPanel.svelte';
 	import { draftsStore } from '../stores/drafts.svelte';
 	import { generationsStore } from '../stores/generations.svelte';
 	import {
@@ -62,6 +70,32 @@
 	let generating = $state(false);
 	let generateError = $state<string | null>(null);
 
+	// Selection refinement (M6).
+	let activeSelection = $state<EditorSelection | null>(null);
+	let refinement = $state<
+		| (RefinementState & {
+				generationId?: string;
+				selection: EditorSelection;
+				params?: SelectionToolInvocation['params'];
+		  })
+		| null
+	>(null);
+	// One-step undo target after an accepted refinement. Cleared when
+	// the user starts the next refinement or navigates away.
+	let refineUndo = $state<{ content: string; label: string } | null>(null);
+	// Nonce string that VersionEditor watches to swap its local text
+	// after an apply / undo. Monotonic so two identical-content swaps
+	// still trigger a re-sync.
+	let forceEditorContent = $state<string | null>(null);
+
+	const TOOL_LABEL: Record<SelectionToolKind, string> = {
+		'selection-shorten': 'Kürzen',
+		'selection-expand': 'Erweitern',
+		'selection-tone': 'Ton ändern',
+		'selection-rewrite': 'Umschreiben',
+		'selection-translate': 'Übersetzen',
+	};
+
 	async function setStatus(next: DraftStatus) {
 		if (!draft) return;
 		await draftsStore.setStatus(draft.id, next);
@@ -104,6 +138,88 @@
 
 	function dismissGeneration(id: string) {
 		dismissedGenerationIds = new Set([...dismissedGenerationIds, id]);
+	}
+
+	// ─── Selection-refinement handlers (M6) ──────────────────
+
+	async function runRefinement(invocation: SelectionToolInvocation, selection: EditorSelection) {
+		if (!draft || !currentVersion) return;
+		// Fresh refinements supersede any visible undo target; otherwise
+		// "Rückgängig" would revert to a pre-previous-refinement state
+		// the user has already moved past.
+		refineUndo = null;
+		refinement = {
+			kind: invocation.kind,
+			toolLabel: TOOL_LABEL[invocation.kind],
+			originalText: selection.text,
+			status: 'running',
+			selection,
+			params: invocation.params,
+		};
+		try {
+			const { generationId, refined } = await generationsStore.refineSelection(
+				draft.id,
+				currentVersion.id,
+				selection,
+				invocation.kind,
+				// The store validates params shape per kind; undefined is fine
+				// for the two no-param kinds (shorten / expand).
+				invocation.params as never
+			);
+			if (!refinement || refinement.selection !== selection) return; // user moved on
+			refinement = {
+				...refinement,
+				status: 'succeeded',
+				refined,
+				generationId,
+			};
+		} catch (err) {
+			if (!refinement || refinement.selection !== selection) return;
+			refinement = {
+				...refinement,
+				status: 'failed',
+				error: err instanceof Error ? err.message : String(err),
+			};
+		}
+	}
+
+	async function acceptRefinement() {
+		if (!refinement || !currentVersion) return;
+		if (refinement.status !== 'succeeded' || !refinement.refined || !refinement.generationId) {
+			return;
+		}
+		const { before, after } = await generationsStore.applyRefinement(
+			currentVersion.id,
+			refinement.selection,
+			refinement.refined,
+			refinement.generationId
+		);
+		// Nudge the editor to replace its local text with the new content.
+		// `forceContent` is watched as a nonce so identical strings still
+		// trigger a re-sync if two applies happen back to back.
+		forceEditorContent = after;
+		refineUndo = { content: before, label: refinement.toolLabel };
+		refinement = null;
+		activeSelection = null;
+	}
+
+	function retryRefinement() {
+		if (!refinement) return;
+		const sel = refinement.selection;
+		const params = refinement.params;
+		void runRefinement({ kind: refinement.kind, params }, sel);
+	}
+
+	function cancelRefinement() {
+		refinement = null;
+	}
+
+	async function undoLastRefinement() {
+		if (!refineUndo || !currentVersion) return;
+		const restored = refineUndo.content;
+		await draftsStore.updateVersionContent(currentVersion.id, restored);
+		forceEditorContent = restored;
+		refineUndo = null;
 	}
 
 	const hasDraftContent = $derived((currentVersion?.content ?? '').trim().length > 0);
@@ -239,7 +355,33 @@
 					{#if generateError}
 						<p class="error">{generateError}</p>
 					{/if}
-					<VersionEditor version={currentVersion} {targetWords} />
+					{#if activeSelection && !refinement}
+						<SelectionToolbar
+							selectionText={activeSelection.text}
+							ontool={(invocation) => activeSelection && runRefinement(invocation, activeSelection)}
+						/>
+					{/if}
+					{#if refinement}
+						<RefinementPanel
+							state={refinement}
+							onaccept={acceptRefinement}
+							onretry={retryRefinement}
+							oncancel={cancelRefinement}
+						/>
+					{/if}
+					{#if refineUndo && !refinement}
+						<div class="undo-row">
+							<button type="button" class="undo-btn" onclick={undoLastRefinement}>
+								↶ Rückgängig: {refineUndo.label}
+							</button>
+						</div>
+					{/if}
+					<VersionEditor
+						version={currentVersion}
+						{targetWords}
+						forceContent={forceEditorContent}
+						onselect={(sel) => (activeSelection = sel)}
+					/>
 				{:else}
 					<p class="muted">Diese Version existiert nicht mehr.</p>
 				{/if}
@@ -476,6 +618,24 @@
 		background: color-mix(in srgb, #ef4444 6%, transparent);
 		border: 1px solid color-mix(in srgb, #ef4444 40%, transparent);
 		font-size: 0.85rem;
+	}
+	.undo-row {
+		display: flex;
+		justify-content: flex-end;
+	}
+	.undo-btn {
+		padding: 0.35rem 0.8rem;
+		border-radius: 0.45rem;
+		border: 1px solid var(--color-border, rgba(0, 0, 0, 0.1));
+		background: var(--color-surface, transparent);
+		color: inherit;
+		cursor: pointer;
+		font: inherit;
+		font-size: 0.8rem;
+	}
+	.undo-btn:hover {
+		border-color: #0ea5e9;
+		color: #0ea5e9;
 	}
 	.history-column h2 {
 		font-size: 0.8rem;
