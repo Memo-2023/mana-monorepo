@@ -32,4 +32,15 @@ export {
 } from './predicates';
 export { generateUnlistedToken } from './tokens';
 
+export {
+	publishUnlistedSnapshot,
+	revokeUnlistedSnapshot,
+	buildShareUrl,
+	UnlistedApiError,
+	type PublishUnlistedOptions,
+	type PublishUnlistedResult,
+	type RevokeUnlistedOptions,
+} from './unlisted-client';
+
 export { default as VisibilityPicker } from './VisibilityPicker.svelte';
+export { default as SharedLinkControls } from './SharedLinkControls.svelte';
