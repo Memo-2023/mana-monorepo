@@ -18,6 +18,7 @@
 	import { STYLE_LABELS } from '../constants';
 	import PanelStrip from '../components/PanelStrip.svelte';
 	import PanelEditor from '../components/PanelEditor.svelte';
+	import BatchPanelEditor from '../components/BatchPanelEditor.svelte';
 	import { encryptRecord } from '$lib/data/crypto';
 	import type { ComicPanelMeta, LocalComicStory } from '../types';
 
@@ -31,7 +32,8 @@
 	const story$ = useStory(id);
 	const story = $derived(story$.value);
 
-	let showEditor = $state(false);
+	type EditorMode = 'off' | 'single' | 'batch';
+	let editorMode = $state<EditorMode>('off');
 
 	async function handleToggleFavorite() {
 		if (!story) return;
@@ -168,15 +170,26 @@
 		<div class="space-y-3">
 			<div class="flex items-center justify-between">
 				<h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Panels</h2>
-				{#if !showEditor && !story.isArchived}
-					<button
-						type="button"
-						onclick={() => (showEditor = true)}
-						class="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-					>
-						<Plus size={12} />
-						Panel
-					</button>
+				{#if editorMode === 'off' && !story.isArchived}
+					<div class="flex items-center gap-1">
+						<button
+							type="button"
+							onclick={() => (editorMode = 'single')}
+							class="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+						>
+							<Plus size={12} />
+							Panel
+						</button>
+						<button
+							type="button"
+							onclick={() => (editorMode = 'batch')}
+							class="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted"
+							title="2–4 Panels in einem Rutsch generieren"
+						>
+							<Plus size={12} />
+							Batch
+						</button>
+					</div>
 				{/if}
 			</div>
 
@@ -186,16 +199,18 @@
 				onRemove={handleRemovePanel}
 			/>
 
-			{#if showEditor && !story.isArchived}
+			{#if editorMode === 'single' && !story.isArchived}
 				<PanelEditor
 					{story}
-					onClose={() => (showEditor = false)}
+					onClose={() => (editorMode = 'off')}
 					onGenerated={() => {
 						// Keep the editor open for rapid iteration — the user
 						// usually wants to generate 3–5 panels in a row. Reset
 						// happens inside PanelEditor on success.
 					}}
 				/>
+			{:else if editorMode === 'batch' && !story.isArchived}
+				<BatchPanelEditor {story} onClose={() => (editorMode = 'off')} />
 			{/if}
 		</div>
 
