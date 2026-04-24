@@ -130,10 +130,16 @@ export function isAccessoryOnlyOutfit(garments: Garment[]): boolean {
 
 function composeDefaultPrompt(outfit: Outfit, accessoryOnly: boolean): string {
 	if (accessoryOnly) {
+		// Portrait is the right framing for accessories — we want a tight
+		// head-and-shoulders shot so the Brille/Schmuck/Hut is legible.
 		return `Fotorealistisches Portrait von mir mit ${outfit.name}, frontal, studio-Licht, neutraler Hintergrund, Fokus auf dem Accessoire`;
 	}
+	// Explicitly ask for a full-body frame — gpt-image-1/2 otherwise read
+	// "Portrait" as "headshot" and crop to head-and-shoulders, ignoring
+	// the body-ref. "Ganzkörperfoto … stehend, von Kopf bis Fuß sichtbar"
+	// is the German idiom that reliably biases the model to full-length.
 	const occasionHint = outfit.occasion ? ` (Anlass: ${outfit.occasion})` : '';
-	return `Fotorealistisches Portrait von mir im Outfit ${outfit.name}${occasionHint}, natürliches Licht, neutraler Hintergrund`;
+	return `Fotorealistisches Ganzkörperfoto von mir im Outfit ${outfit.name}${occasionHint}, stehend, von Kopf bis Fuß sichtbar, natürliches Licht, neutraler Hintergrund`;
 }
 
 export async function runOutfitTryOn(params: RunOutfitTryOnParams): Promise<RunTryOnResult> {
@@ -237,9 +243,12 @@ export function isAccessoryGarment(garment: Garment): boolean {
 
 function composeGarmentPrompt(garment: Garment, accessoryOnly: boolean): string {
 	if (accessoryOnly) {
+		// Headshot framing for face-only categories (Brille/Schmuck/Hut).
 		return `Fotorealistisches Portrait von mir mit ${garment.name}, frontal, studio-Licht, neutraler Hintergrund, Fokus auf dem Accessoire`;
 	}
-	return `Fotorealistisches Portrait von mir im/in ${garment.name}, natürliches Licht, neutraler Hintergrund`;
+	// Explicit full-body framing — see composeDefaultPrompt for the
+	// rationale. "Portrait" biases to headshot, "Ganzkörperfoto" doesn't.
+	return `Fotorealistisches Ganzkörperfoto von mir im/in ${garment.name}, stehend, von Kopf bis Fuß sichtbar, natürliches Licht, neutraler Hintergrund`;
 }
 
 /**
