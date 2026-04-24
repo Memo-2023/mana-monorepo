@@ -27,7 +27,7 @@ export const PICTURE_GUEST_SEED = {
 			canvasWidth: 2000,
 			canvasHeight: 1500,
 			backgroundColor: '#1e1e2e',
-			isPublic: false,
+			visibility: 'private',
 		},
 	] satisfies LocalBoard[],
 	boardItems: [

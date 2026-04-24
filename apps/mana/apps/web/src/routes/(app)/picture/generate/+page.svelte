@@ -157,7 +157,7 @@
 					format: 'png',
 					width: currentAspect.width,
 					height: currentAspect.height,
-					isPublic: false,
+					visibility: 'private',
 					isFavorite: false,
 					downloadCount: 0,
 					generationMode: isReferenceMode ? 'reference' : 'text',

@@ -8,6 +8,7 @@
 	import type { BoardWithCount } from '$lib/modules/picture/types';
 	import { CaretLeft, Trash, PencilSimple, Image } from '@mana/shared-icons';
 	import { RoutePage } from '$lib/components/shell';
+	import { VisibilityPicker, type VisibilityLevel } from '@mana/shared-privacy';
 
 	const allBoards: { value: BoardWithCount[] } = getContext('allBoards');
 
@@ -39,6 +40,11 @@
 		if (!board) return;
 		await boardsStore.deleteBoard(board.id);
 		goto('/picture/board');
+	}
+
+	async function handleVisibilityChange(next: VisibilityLevel) {
+		if (!board) return;
+		await boardsStore.setVisibility(board.id, next);
 	}
 </script>
 
@@ -74,6 +80,7 @@
 				</div>
 
 				<div class="flex items-center gap-2">
+					<VisibilityPicker level={board.visibility} onChange={handleVisibilityChange} />
 					<button
 						onclick={startEditing}
 						class="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"

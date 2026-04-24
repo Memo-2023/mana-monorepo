@@ -194,7 +194,7 @@
 					fileSize: uf.file.size,
 					width: dims?.width ?? null,
 					height: dims?.height ?? null,
-					isPublic: false,
+					visibility: 'private',
 					isFavorite: false,
 					downloadCount: 0,
 					createdAt: nowIso,

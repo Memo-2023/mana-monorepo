@@ -55,8 +55,10 @@ export async function resolveEmbed(props: ModuleEmbedProps): Promise<ResolvedEmb
 }
 
 /**
- * Picture-board: returns image items for a board that the owner marked
- * `isPublic=true`. Private boards return an error.
+ * Picture-board: returns image items for a board whose owner flipped
+ * its visibility to 'public' via the VisibilityPicker. `canEmbedOnWebsite`
+ * is the hard gate; the soft-migration fallback maps legacy `isPublic`
+ * rows (pre-M3) to the right level.
  */
 async function resolvePictureBoard(props: ModuleEmbedProps): Promise<EmbedItem[]> {
 	if (!props.sourceId) {
@@ -72,8 +74,10 @@ async function resolvePictureBoard(props: ModuleEmbedProps): Promise<EmbedItem[]
 	if (!rawBoard || rawBoard.deletedAt) {
 		throw new Error('Board nicht gefunden');
 	}
-	if (!rawBoard.isPublic) {
-		throw new Error('Board ist nicht öffentlich — setze "Öffentlich" im Picture-Modul');
+	const boardVisibility =
+		rawBoard.visibility ?? (rawBoard.isPublic === true ? 'public' : 'private');
+	if (!canEmbedOnWebsite(boardVisibility)) {
+		throw new Error('Board ist nicht öffentlich — setze es im Picture-Modul auf "Öffentlich"');
 	}
 
 	const items = await db

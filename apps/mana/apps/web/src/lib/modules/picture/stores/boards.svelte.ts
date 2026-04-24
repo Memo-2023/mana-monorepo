@@ -8,6 +8,14 @@
 
 import { db } from '$lib/data/database';
 import { encryptRecord, decryptRecord } from '$lib/data/crypto';
+import { emitDomainEvent } from '$lib/data/events';
+import { getActiveSpace } from '$lib/data/scope';
+import { getEffectiveUserId } from '$lib/data/current-user';
+import {
+	defaultVisibilityFor,
+	generateUnlistedToken,
+	type VisibilityLevel,
+} from '@mana/shared-privacy';
 import type { LocalBoard, LocalBoardItem } from '../types';
 import { toBoard } from '../queries';
 
@@ -39,7 +47,7 @@ export const boardsStore = {
 				canvasWidth: 2000,
 				canvasHeight: 1500,
 				backgroundColor: input.backgroundColor || '#ffffff',
-				isPublic: false,
+				visibility: defaultVisibilityFor(getActiveSpace()?.type),
 				createdAt: new Date().toISOString(),
 				updatedAt: new Date().toISOString(),
 			};
@@ -125,6 +133,9 @@ export const boardsStore = {
 			const newId = crypto.randomUUID();
 			const now = new Date().toISOString();
 
+			// Duplicate inherits the same default-for-space visibility, not
+			// the original's. A copy of a public board should NOT auto-
+			// publish — the user has to explicitly flip visibility again.
 			const duplicated: LocalBoard = {
 				id: newId,
 				name: `${original.name} (Kopie)`,
@@ -132,7 +143,7 @@ export const boardsStore = {
 				canvasWidth: original.canvasWidth,
 				canvasHeight: original.canvasHeight,
 				backgroundColor: original.backgroundColor,
-				isPublic: false,
+				visibility: defaultVisibilityFor(getActiveSpace()?.type),
 				createdAt: now,
 				updatedAt: now,
 			};
@@ -165,6 +176,47 @@ export const boardsStore = {
 			return { success: true, data: plaintextSnapshot };
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to duplicate board';
+			return { success: false, error };
+		}
+	},
+
+	/**
+	 * Flip the board's visibility. Mints/clears an unlisted token on the
+	 * transition boundary and emits the cross-module VisibilityChanged
+	 * event. Caller passes the raw level; no-op if it already matches.
+	 */
+	async setVisibility(id: string, next: VisibilityLevel) {
+		error = null;
+		try {
+			const existing = await db.table<LocalBoard>('boards').get(id);
+			if (!existing) return { success: false, error: 'Board not found' };
+			const before: VisibilityLevel =
+				existing.visibility ?? (existing.isPublic === true ? 'public' : 'private');
+			if (before === next) return { success: true };
+
+			const now = new Date().toISOString();
+			const patch: Partial<LocalBoard> = {
+				visibility: next,
+				visibilityChangedAt: now,
+				visibilityChangedBy: getEffectiveUserId(),
+				updatedAt: now,
+			};
+			if (next === 'unlisted' && !existing.unlistedToken) {
+				patch.unlistedToken = generateUnlistedToken();
+			} else if (next !== 'unlisted' && existing.unlistedToken) {
+				patch.unlistedToken = undefined;
+			}
+			await db.table('boards').update(id, patch);
+
+			emitDomainEvent('VisibilityChanged', 'picture', 'boards', id, {
+				recordId: id,
+				collection: 'boards',
+				before,
+				after: next,
+			});
+			return { success: true };
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Failed to set visibility';
 			return { success: false, error };
 		}
 	},

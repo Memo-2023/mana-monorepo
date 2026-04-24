@@ -3,6 +3,7 @@
  */
 
 import type { BaseRecord } from '@mana/local-store';
+import type { VisibilityLevel } from '@mana/shared-privacy';
 
 /**
  * How the image was created. 'text' is the classic prompt-only
@@ -25,7 +26,16 @@ export interface LocalImage extends BaseRecord {
 	height?: number | null;
 	fileSize?: number | null;
 	blurhash?: string | null;
-	isPublic: boolean;
+	/**
+	 * @deprecated Use `visibility` instead. Kept for the soft-migration
+	 * window — will be dropped in the hard follow-up once no reader
+	 * references it. See docs/plans/visibility-system.md §M3.
+	 */
+	isPublic?: boolean;
+	visibility?: VisibilityLevel;
+	visibilityChangedAt?: string;
+	visibilityChangedBy?: string;
+	unlistedToken?: string;
 	isFavorite: boolean;
 	downloadCount: number;
 	rating?: number | null;
@@ -51,7 +61,15 @@ export interface LocalBoard extends BaseRecord {
 	canvasWidth: number;
 	canvasHeight: number;
 	backgroundColor: string;
-	isPublic: boolean;
+	/**
+	 * @deprecated Use `visibility` instead. Kept during the M3 soft
+	 * migration — dropped in the hard follow-up.
+	 */
+	isPublic?: boolean;
+	visibility?: VisibilityLevel;
+	visibilityChangedAt?: string;
+	visibilityChangedBy?: string;
+	unlistedToken?: string;
 }
 
 export interface LocalBoardItem extends BaseRecord {
@@ -94,7 +112,7 @@ export interface Image {
 	height?: number;
 	fileSize?: number;
 	blurhash?: string;
-	isPublic: boolean;
+	visibility: VisibilityLevel;
 	isFavorite: boolean;
 	downloadCount: number;
 	rating?: number;
@@ -116,7 +134,7 @@ export interface Board {
 	canvasWidth: number;
 	canvasHeight: number;
 	backgroundColor: string;
-	isPublic: boolean;
+	visibility: VisibilityLevel;
 	createdAt: string;
 	updatedAt: string;
 }
