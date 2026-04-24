@@ -244,6 +244,13 @@ export const APP_ICONS = {
 		// and news-research (cyan) in the Wissen & Recherche row.
 		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="ar" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#f97316"/><stop offset="100%" style="stop-color:#f59e0b"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#ar)"/><path d="M28 22h30l18 18v38a4 4 0 0 1-4 4H28a4 4 0 0 1-4-4V26a4 4 0 0 1 4-4z" fill="white" fill-opacity="0.95"/><path d="M58 22v14a4 4 0 0 0 4 4h14" fill="none" stroke="#f97316" stroke-width="2" stroke-opacity="0.35"/><rect x="32" y="48" width="26" height="3" rx="1.5" fill="#f97316" fill-opacity="0.6"/><rect x="32" y="56" width="22" height="3" rx="1.5" fill="#f97316" fill-opacity="0.45"/><rect x="32" y="64" width="24" height="3" rx="1.5" fill="#f97316" fill-opacity="0.6"/><path d="M62 54v22l8-6 8 6V54a4 4 0 0 0-4-4h-8a4 4 0 0 0-4 4z" fill="#f97316"/></svg>`
 	),
+	writing: svgToDataUrl(
+		// Fountain-pen nib writing on a lined sheet — the "Ghostwriter"
+		// theme. Sky→cyan gradient sits next to chat (sky) and storage
+		// (blue) without clashing, while standing apart from articles
+		// (orange) and library (purple) in the text/media family.
+		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="wr" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#0ea5e9"/><stop offset="100%" style="stop-color:#06b6d4"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#wr)"/><rect x="20" y="22" width="44" height="56" rx="4" fill="white" fill-opacity="0.95"/><line x1="26" y1="34" x2="56" y2="34" stroke="#0ea5e9" stroke-width="2" stroke-opacity="0.5" stroke-linecap="round"/><line x1="26" y1="42" x2="52" y2="42" stroke="#0ea5e9" stroke-width="2" stroke-opacity="0.35" stroke-linecap="round"/><line x1="26" y1="50" x2="56" y2="50" stroke="#0ea5e9" stroke-width="2" stroke-opacity="0.35" stroke-linecap="round"/><line x1="26" y1="58" x2="48" y2="58" stroke="#0ea5e9" stroke-width="2" stroke-opacity="0.35" stroke-linecap="round"/><path d="M62 72l14-14 8 8-14 14-10 2 2-10z" fill="white"/><path d="M74 60l8 8" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round" stroke-opacity="0.6"/><path d="M60 74l4 4" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round" stroke-opacity="0.6"/></svg>`
+	),
 	invoices: svgToDataUrl(
 		// Document with a QR-code corner (CH QR-Bill) + a diagonal amount line.
 		// Emerald→teal sits next to finance green in the Arbeit & Finanzen row.

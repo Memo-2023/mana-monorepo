@@ -91,6 +91,12 @@ import type {
 import type { LocalArticle, LocalHighlight } from '../../modules/articles/types';
 import type { LocalMeImage } from '../../modules/profile/types';
 import type { LocalWardrobeGarment, LocalWardrobeOutfit } from '../../modules/wardrobe/types';
+import type {
+	LocalDraft,
+	LocalDraftVersion,
+	LocalGeneration,
+	LocalWritingStyle,
+} from '../../modules/writing/types';
 
 export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	// ─── Chat ────────────────────────────────────────────────
@@ -717,6 +723,36 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 		enabled: true,
 		fields: ['title', 'originalTitle', 'creators', 'review', 'tags'],
 	},
+
+	// ─── Writing ─────────────────────────────────────────────
+	// Ghostwriter module — drafts, version snapshots, generation records,
+	// and user-defined styles. The full prose is the most sensitive
+	// surface: a draft's content, briefing (topic / audience / extra
+	// instructions) and any user-supplied reference notes can disclose
+	// anything from unannounced launches to personal letters.
+	//
+	// Plaintext (intentional):
+	//   - kind, status, publish targets, isFavorite, visibility fields
+	//     drive tabs / chips / sort — query-critical.
+	//   - versionNumber, wordCount, generationId, isAiGenerated — used
+	//     for ordering and the history panel.
+	//   - generation.status, provider, model, params, tokenUsage,
+	//     durationMs, missionId — purely operational, no user content.
+	//   - style.source, presetId, isSpaceDefault, isFavorite — query.
+	//
+	// `references` on a draft is an array of { kind, targetId/url, note }.
+	// targetId + url + kind are plaintext (FKs and public URLs); the
+	// per-reference `note` travels encrypted with the whole array via
+	// array-path encryption (same pattern as food.foods / quiz.options).
+	writingDrafts: entry<LocalDraft>(['title', 'briefing', 'styleOverrides', 'references']),
+	writingDraftVersions: entry<LocalDraftVersion>(['content', 'summary']),
+	writingGenerations: entry<LocalGeneration>(['prompt', 'output']),
+	writingStyles: entry<LocalWritingStyle>([
+		'name',
+		'description',
+		'samples',
+		'extractedPrinciples',
+	]),
 
 	// ─── Invoices ────────────────────────────────────────────
 	// Outbound finance. Sensitive surface is non-trivial: client name and

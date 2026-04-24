@@ -1011,6 +1011,27 @@ db.version(42).stores({
 		'id, isFavorite, isPublic, isArchived, prompt, updatedAt, wardrobeOutfitId, wardrobeGarmentId',
 });
 
+// v43 — Writing module (docs/plans/writing-module.md M1).
+// Four space-scoped tables:
+//   - writingDrafts: briefing + currentVersionId pointer. Indices: kind
+//     (tab filter), status (chip filter), updatedAt (default sort),
+//     isFavorite (favourites toggle).
+//   - writingDraftVersions: immutable snapshots of the draft body. Indexed
+//     on draftId for version-history fetch, versionNumber for ordering.
+//   - writingGenerations: provider-level call records (prompt, status,
+//     tokens, model). Indexed on draftId for per-draft runs and status
+//     so the UI can find in-flight work on reload.
+//   - writingStyles: reusable style definitions (preset + custom). Indexed
+//     on source (preset vs custom), isSpaceDefault, isFavorite.
+// All four get standard spaceId/authorId/visibility stamping via the Dexie
+// hook (NOT in USER_LEVEL_TABLES).
+db.version(43).stores({
+	writingDrafts: 'id, kind, status, updatedAt, isFavorite',
+	writingDraftVersions: 'id, draftId, versionNumber, createdAt',
+	writingGenerations: 'id, draftId, status, createdAt',
+	writingStyles: 'id, source, isSpaceDefault, isFavorite, updatedAt',
+});
+
 // ─── Sync Routing ──────────────────────────────────────────
 // SYNC_APP_MAP, TABLE_TO_SYNC_NAME, TABLE_TO_APP, SYNC_NAME_TO_TABLE,
 // toSyncName() and fromSyncName() are now derived from per-module

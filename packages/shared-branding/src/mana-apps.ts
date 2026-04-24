@@ -1055,6 +1055,23 @@ export const MANA_APPS: ManaApp[] = [
 		requiredTier: 'guest',
 	},
 	{
+		id: 'writing',
+		name: 'Writing',
+		description: {
+			de: 'KI-Ghostwriter für Texte',
+			en: 'AI ghostwriter for prose',
+		},
+		longDescription: {
+			de: 'Brief dem KI-Agenten Thema, Stil und Referenzen — er schreibt den Text. Blog, Essay, E-Mail, Bewerbung, Social Post, Rede, Story und mehr. Mit versionierten Entwürfen und Selection-Refinements.',
+			en: 'Brief the AI agent with topic, style and references — it writes the text. Blog posts, essays, emails, cover letters, social posts, speeches, stories and more. Versioned drafts with selection-based refinements.',
+		},
+		icon: APP_ICONS.writing,
+		color: '#0ea5e9',
+		comingSoon: false,
+		status: 'development',
+		requiredTier: 'guest', // LOCAL TIER PATCH — revert to 'beta' before release
+	},
+	{
 		id: 'broadcast',
 		name: 'Broadcasts',
 		description: {
