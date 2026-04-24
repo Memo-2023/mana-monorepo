@@ -105,14 +105,6 @@
 		"timerReminder": "Timer-Erinnerung (Min.)",
 		"autoStop": "Auto-Stop (Std.)"
 	},
-	"auth": {
-		"login": "Anmelden",
-		"logout": "Abmelden",
-		"register": "Registrieren",
-		"email": "E-Mail",
-		"password": "Passwort",
-		"forgotPassword": "Passwort vergessen?"
-	},
 	"common": {
 		"save": "Speichern",
 		"cancel": "Abbrechen",

@@ -55,9 +55,6 @@
 		"repeat": "Repeat",
 		"reminder": "Reminder",
 		"calendar": "Calendar",
-		"save": "Save",
-		"delete": "Delete",
-		"cancel": "Cancel",
 		"changeStartTime": "Change start time",
 		"changeEndTime": "Change end time"
 	},
@@ -85,14 +82,6 @@
 		"admin": "Admin",
 		"pending": "Pending",
 		"accepted": "Accepted"
-	},
-	"auth": {
-		"login": "Login",
-		"logout": "Logout",
-		"register": "Register",
-		"email": "Email",
-		"password": "Password",
-		"forgotPassword": "Forgot password?"
 	},
 	"toast": {
 		"eventLoadError": "Failed to load events",
@@ -196,88 +185,5 @@
 	"error": {
 		"notFound": "Page not found",
 		"backToHome": "Back to home"
-	},
-	"sync": {
-		"pageTitle": "Calendar Sync - Settings",
-		"title": "Calendar Sync",
-		"back": "Back",
-		"connectCalendar": "Connect calendar",
-		"description": "Connect external calendars to import and synchronize events.",
-		"emptyState": "No external calendars connected",
-		"syncNow": "Sync now",
-		"disconnect": "Disconnect",
-		"confirmDisconnect": "Really disconnect \"{name}\"? Synchronized events will be deleted.",
-		"neverSynced": "Never",
-		"directionLabel": "Direction",
-		"lastSync": "Last sync",
-		"statusLabel": "Status",
-		"autoSync": "Auto-Sync",
-		"connectCaldav": "Connect CalDAV server",
-		"connectProvider": "Connect {provider}",
-		"searching": "Searching...",
-		"searchCalendars": "Search calendars",
-		"discoveredCalendars": "Discovered calendars:",
-		"connecting": "Connecting...",
-		"connect": "Connect",
-		"direction": {
-			"import": "Import only",
-			"export": "Export only",
-			"both": "Bidirectional"
-		},
-		"status": {
-			"error": "Error",
-			"active": "Active (every {interval} min.)",
-			"paused": "Paused"
-		},
-		"providers": {
-			"icalUrl": "iCal URL",
-			"icalUrlDesc": "Import ICS link (e.g. holidays)",
-			"caldav": "CalDAV",
-			"caldavDesc": "Connect CalDAV server",
-			"google": "Google Calendar",
-			"googleDesc": "Sync with Google Calendar",
-			"apple": "Apple Calendar",
-			"appleDesc": "Connect iCloud Calendar"
-		},
-		"form": {
-			"serverUrl": "Server URL",
-			"username": "Username",
-			"password": "Password",
-			"name": "Name",
-			"namePlaceholder": "My external calendar",
-			"url": "URL",
-			"syncDirection": "Sync direction"
-		}
-	},
-	"sharing": {
-		"pageTitle": "Calendar Sharing - Settings",
-		"title": "Sharing",
-		"back": "Back",
-		"shareCalendar": "Share calendar",
-		"invitations": "Invitations ({count})",
-		"calendarInvitation": "Calendar invitation",
-		"access": "access",
-		"accept": "Accept",
-		"sharedWithMe": "Shared with me",
-		"sharedCalendar": "Shared calendar",
-		"shareMyCalendars": "Share my calendars",
-		"notSharedYet": "Not shared yet",
-		"linkShare": "Link share",
-		"pending": "Pending",
-		"removeShare": "Remove share",
-		"confirmRemoveShare": "Really remove this share?",
-		"addPerson": "Add person",
-		"share": "Share",
-		"sharing": "Sharing...",
-		"permission": {
-			"read": "Read",
-			"write": "Read & Edit",
-			"admin": "Admin"
-		},
-		"form": {
-			"calendar": "Calendar",
-			"email": "Email address",
-			"permission": "Permission"
-		}
 	}
 }

@@ -284,24 +284,6 @@
 		"copyright": "© 2025 Memoro GmbH",
 		"made_with_love": "Made with ❤️ in Germany"
 	},
-	"app_slider": {
-		"title": "Altre app Mana",
-		"memoro_desc": "Memo vocali alimentati dall'IA",
-		"memoro_long_desc": "Trasforma la tua voce in informazioni organizzate e utilizzabili con trascrizione e analisi alimentate dall'IA. Perfetto per catturare idee in movimento.",
-		"maerchenzauber_desc": "Storie magiche della buonanotte",
-		"maerchenzauber_long_desc": "Crea storie personalizzate per la buonanotte per i tuoi bambini con l'IA. Accendi l'immaginazione e rendi ogni notte magica con racconti unici.",
-		"moodlit_desc": "Il tuo compagno d'umore",
-		"moodlit_long_desc": "Traccia e comprendi le tue emozioni con analisi alimentate dall'IA. Costruisci consapevolezza emotiva e migliora il tuo benessere mentale.",
-		"mana_desc": "Suite di produttività IA",
-		"mana_long_desc": "L'hub centrale per tutte le app Mana. Gestisci i tuoi abbonamenti, sincronizza i dati e accedi a potenti strumenti IA da un unico posto.",
-		"coming_soon": "Prossimamente",
-		"download": "Scarica",
-		"get_started": "Inizia",
-		"status_published": "Pubblicato",
-		"status_beta": "Beta",
-		"status_development": "In sviluppo",
-		"status_planning": "Pianificato"
-	},
 	"theme": {
 		"toggle": "Cambia tema",
 		"light_mode": "Modalità chiara",

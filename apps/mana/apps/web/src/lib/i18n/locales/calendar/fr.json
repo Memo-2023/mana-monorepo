@@ -23,7 +23,9 @@
 		"allDay": "Toute la journée",
 		"birthday": "Anniversaire",
 		"weekView": "Vue semaine",
-		"monthView": "Vue mois"
+		"monthView": "Vue mois",
+		"weekNumber": "S",
+		"moreEvents": "+{count} de plus"
 	},
 	"calendar": {
 		"today": "Aujourd'hui",
@@ -38,7 +40,10 @@
 			"duplicate": "Dupliquer",
 			"copy": "Copie",
 			"delete": "Supprimer"
-		}
+		},
+		"draftEvent": "(Nouvel événement)",
+		"hideSidebar": "Masquer la barre latérale",
+		"showSidebar": "Afficher la barre latérale"
 	},
 	"event": {
 		"title": "Titre",
@@ -50,9 +55,8 @@
 		"repeat": "Répéter",
 		"reminder": "Rappel",
 		"calendar": "Calendrier",
-		"save": "Enregistrer",
-		"delete": "Supprimer",
-		"cancel": "Annuler"
+		"changeStartTime": "Changer l'heure de début",
+		"changeEndTime": "Changer l'heure de fin"
 	},
 	"repeat": {
 		"none": "Ne pas répéter",
@@ -79,14 +83,6 @@
 		"pending": "En attente",
 		"accepted": "Accepté"
 	},
-	"auth": {
-		"login": "Connexion",
-		"logout": "Déconnexion",
-		"register": "Inscription",
-		"email": "E-mail",
-		"password": "Mot de passe",
-		"forgotPassword": "Mot de passe oublié?"
-	},
 	"toast": {
 		"eventLoadError": "Impossible de charger les événements",
 		"eventUpdateError": "Impossible de mettre à jour l'événement",
@@ -106,19 +102,6 @@
 		"syncCompleted": "Synchronisation terminée",
 		"connectionError": "Échec de la connexion",
 		"syncError": "Échec de la synchronisation"
-	},
-	"common": {
-		"save": "Enregistrer",
-		"cancel": "Annuler",
-		"delete": "Supprimer",
-		"edit": "Modifier",
-		"add": "Ajouter",
-		"close": "Fermer",
-		"search": "Rechercher",
-		"error": "Erreur",
-		"success": "Succès",
-		"calendar": "Calendrier",
-		"create": "Créer"
 	},
 	"settings": {
 		"myCalendars": "Mes calendriers",
@@ -189,87 +172,18 @@
 		"notFound": "Page non trouvée",
 		"backToHome": "Retour à l'accueil"
 	},
-	"sync": {
-		"pageTitle": "Sync des calendriers - Paramètres",
-		"title": "Sync des calendriers",
-		"back": "Retour",
-		"connectCalendar": "Connecter un calendrier",
-		"description": "Connectez des calendriers externes pour importer et synchroniser des événements.",
-		"emptyState": "Aucun calendrier externe connecté",
-		"syncNow": "Synchroniser maintenant",
-		"disconnect": "Déconnecter",
-		"confirmDisconnect": "Vraiment déconnecter \"{name}\" ? Les événements synchronisés seront supprimés.",
-		"neverSynced": "Jamais",
-		"directionLabel": "Direction",
-		"lastSync": "Dernière sync",
-		"statusLabel": "Statut",
-		"autoSync": "Sync auto",
-		"connectCaldav": "Connecter un serveur CalDAV",
-		"connectProvider": "Connecter {provider}",
-		"searching": "Recherche...",
-		"searchCalendars": "Rechercher des calendriers",
-		"discoveredCalendars": "Calendriers trouvés :",
-		"connecting": "Connexion...",
-		"connect": "Connecter",
-		"direction": {
-			"import": "Import uniquement",
-			"export": "Export uniquement",
-			"both": "Bidirectionnel"
-		},
-		"status": {
-			"error": "Erreur",
-			"active": "Actif (toutes les {interval} min.)",
-			"paused": "En pause"
-		},
-		"providers": {
-			"icalUrl": "URL iCal",
-			"icalUrlDesc": "Importer un lien ICS (ex. jours fériés)",
-			"caldav": "CalDAV",
-			"caldavDesc": "Connecter un serveur CalDAV",
-			"google": "Google Calendar",
-			"googleDesc": "Synchroniser avec Google Agenda",
-			"apple": "Apple Calendar",
-			"appleDesc": "Connecter le calendrier iCloud"
-		},
-		"form": {
-			"serverUrl": "URL du serveur",
-			"username": "Nom d'utilisateur",
-			"password": "Mot de passe",
-			"name": "Nom",
-			"namePlaceholder": "Mon calendrier externe",
-			"url": "URL",
-			"syncDirection": "Direction de sync"
-		}
+	"errors": {
+		"loadEvents": "Échec du chargement des événements",
+		"createEvent": "Échec de la création de l'événement",
+		"updateEvent": "Échec de la mise à jour de l'événement",
+		"deleteEvent": "Échec de la suppression de l'événement"
 	},
-	"sharing": {
-		"pageTitle": "Partage de calendriers - Paramètres",
-		"title": "Partages",
-		"back": "Retour",
-		"shareCalendar": "Partager le calendrier",
-		"invitations": "Invitations ({count})",
-		"calendarInvitation": "Invitation de calendrier",
-		"access": "accès",
-		"accept": "Accepter",
-		"sharedWithMe": "Partagés avec moi",
-		"sharedCalendar": "Calendrier partagé",
-		"shareMyCalendars": "Partager mes calendriers",
-		"notSharedYet": "Pas encore partagé",
-		"linkShare": "Partage par lien",
-		"pending": "En attente",
-		"removeShare": "Supprimer le partage",
-		"confirmRemoveShare": "Vraiment supprimer ce partage ?",
-		"addPerson": "Ajouter une personne",
-		"share": "Partager",
-		"sharing": "Partage...",
-		"permission": {
-			"read": "Lecture",
-			"write": "Lecture & modification",
-			"admin": "Administrateur"
-		},
-		"form": {
-			"calendar": "Calendrier",
-			"email": "Adresse e-mail",
-			"permission": "Autorisation"
-		}
+	"success": {
+		"eventCreated": "Événement créé",
+		"eventDeleted": "Événement supprimé"
+	},
+	"a11y": {
+		"createEventOn": "Créer un événement le {date}",
+		"slotTime": "{day} {time}"
 	}
 }
