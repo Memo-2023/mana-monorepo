@@ -13,6 +13,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { ArrowLeft, Archive, Heart, PencilSimple, Trash } from '@mana/shared-icons';
+	import { VisibilityPicker, type VisibilityLevel } from '@mana/shared-privacy';
 	import { useAllGarments, useOutfit, useOutfitTryOns } from '../queries';
 	import { wardrobeOutfitsStore } from '../stores/outfits.svelte';
 	import { garmentPhotoUrl } from '../api/media-url';
@@ -68,6 +69,11 @@
 		if (!confirm(`Outfit "${outfit.name}" wirklich löschen?`)) return;
 		await wardrobeOutfitsStore.deleteOutfit(outfit.id);
 		goto('/wardrobe');
+	}
+
+	async function handleVisibilityChange(next: VisibilityLevel) {
+		if (!outfit) return;
+		await wardrobeOutfitsStore.setVisibility(outfit.id, next);
 	}
 </script>
 
@@ -172,7 +178,12 @@
 								{/if}
 							</div>
 						</div>
-						<div class="flex gap-1">
+						<div class="flex items-center gap-1">
+							<VisibilityPicker
+								level={outfit.visibility ?? 'private'}
+								onChange={handleVisibilityChange}
+								compact
+							/>
 							<button
 								type="button"
 								onclick={handleToggleFavorite}

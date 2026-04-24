@@ -28,6 +28,7 @@ import type { LocalTaskTag } from '$lib/modules/todo/types';
 import type { LocalGoal } from '$lib/companion/goals/types';
 import type { LocalPlace } from '$lib/modules/places/types';
 import type { LocalRecipe } from '$lib/modules/recipes/types';
+import type { LocalWardrobeOutfit } from '$lib/modules/wardrobe/types';
 import type { LocalTimeBlock } from '$lib/data/time-blocks/types';
 
 export interface ResolvedEmbed {
@@ -62,6 +63,9 @@ export async function resolveEmbed(props: ModuleEmbedProps): Promise<ResolvedEmb
 				break;
 			case 'recipes.recipes':
 				items = await resolveRecipes(props);
+				break;
+			case 'wardrobe.outfits':
+				items = await resolveWardrobeOutfits(props);
 				break;
 			default:
 				return {
@@ -450,6 +454,52 @@ async function resolveRecipes(props: ModuleEmbedProps): Promise<EmbedItem[]> {
 			title: r.title,
 			subtitle: parts.join(' · ') || undefined,
 			imageUrl: r.photoThumbnailUrl ?? r.photoUrl ?? undefined,
+		};
+	});
+}
+
+/**
+ * Wardrobe-outfits: style-portfolio use case. Returns outfits flipped
+ * to 'public' with their most recent try-on preview as the card image.
+ * Hard-gated on canEmbedOnWebsite.
+ *
+ * Whitelist: name + occasion/season line + the `lastTryOn.imageUrl`
+ * (which is just a mana-media URL pointing at an AI-generated wearing
+ * shot — no facial identifier unless the user chose to share one).
+ * Individual garments, tags, and description stay out of the snapshot.
+ */
+async function resolveWardrobeOutfits(props: ModuleEmbedProps): Promise<EmbedItem[]> {
+	let outfits = await db.table<LocalWardrobeOutfit>('wardrobeOutfits').toArray();
+	outfits = outfits.filter(
+		(o) => !o.deletedAt && !o.isArchived && canEmbedOnWebsite(o.visibility ?? 'private')
+	);
+
+	if (props.filter?.isFavorite === true) {
+		outfits = outfits.filter((o) => o.isFavorite === true);
+	}
+	if (props.filter?.tagIds?.length) {
+		const wanted = new Set(props.filter.tagIds);
+		outfits = outfits.filter((o) => (o.tags ?? []).some((t) => wanted.has(t)));
+	}
+
+	const decrypted = (await decryptRecords('wardrobeOutfits', outfits)) as LocalWardrobeOutfit[];
+
+	// Favourites first, then newest.
+	decrypted.sort((a, b) => {
+		const favA = a.isFavorite ? 0 : 1;
+		const favB = b.isFavorite ? 0 : 1;
+		if (favA !== favB) return favA - favB;
+		return (b.updatedAt ?? '').localeCompare(a.updatedAt ?? '');
+	});
+
+	return decrypted.map((o) => {
+		const meta: string[] = [];
+		if (o.occasion) meta.push(o.occasion);
+		if (o.season?.length) meta.push(o.season.join(', '));
+		return {
+			title: o.name,
+			subtitle: meta.length > 0 ? meta.join(' · ') : undefined,
+			imageUrl: o.lastTryOn?.imageUrl ?? undefined,
 		};
 	});
 }

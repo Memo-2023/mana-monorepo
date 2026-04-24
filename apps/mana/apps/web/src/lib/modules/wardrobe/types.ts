@@ -16,6 +16,7 @@
  */
 
 import type { BaseRecord } from '@mana/local-store';
+import type { VisibilityLevel } from '@mana/shared-privacy';
 
 // ─── Garment ──────────────────────────────────────────────────────
 
@@ -173,6 +174,10 @@ export interface LocalWardrobeOutfit extends BaseRecord {
 	isArchived?: boolean;
 	lastTryOn?: OutfitTryOn | null;
 	lastWornAt?: string | null;
+	visibility?: VisibilityLevel;
+	visibilityChangedAt?: string;
+	visibilityChangedBy?: string;
+	unlistedToken?: string;
 }
 
 export interface Outfit {
@@ -187,6 +192,7 @@ export interface Outfit {
 	isArchived?: boolean;
 	lastTryOn?: OutfitTryOn;
 	lastWornAt?: string;
+	visibility: VisibilityLevel;
 	createdAt: string;
 	updatedAt: string;
 }
@@ -204,6 +210,7 @@ export function toOutfit(local: LocalWardrobeOutfit): Outfit {
 		isArchived: local.isArchived,
 		lastTryOn: local.lastTryOn ?? undefined,
 		lastWornAt: local.lastWornAt ?? undefined,
+		visibility: local.visibility ?? 'space',
 		createdAt: local.createdAt ?? '',
 		updatedAt: local.updatedAt ?? '',
 	};

@@ -9,6 +9,13 @@
 
 import { encryptRecord } from '$lib/data/crypto';
 import { emitDomainEvent } from '$lib/data/events';
+import { getActiveSpace } from '$lib/data/scope';
+import { getEffectiveUserId } from '$lib/data/current-user';
+import {
+	defaultVisibilityFor,
+	generateUnlistedToken,
+	type VisibilityLevel,
+} from '@mana/shared-privacy';
 import { wardrobeOutfitsTable } from '../collections';
 import { toOutfit } from '../types';
 import type {
@@ -43,6 +50,7 @@ export const wardrobeOutfitsStore = {
 			season: input.season,
 			tags: input.tags ?? [],
 			isFavorite: input.isFavorite ?? false,
+			visibility: defaultVisibilityFor(getActiveSpace()?.type),
 		};
 		const snapshot = toOutfit({ ...newLocal });
 		await encryptRecord('wardrobeOutfits', newLocal);
@@ -120,6 +128,39 @@ export const wardrobeOutfitsStore = {
 		});
 		emitDomainEvent('WardrobeOutfitDeleted', 'wardrobe', 'wardrobeOutfits', id, {
 			outfitId: id,
+		});
+	},
+
+	/**
+	 * Flip an outfit's visibility. Enables the style-portfolio use
+	 * case — mark curated outfits 'public' so they appear in the
+	 * wardrobe.outfits embed on the owner's website.
+	 */
+	async setVisibility(id: string, next: VisibilityLevel): Promise<void> {
+		const existing = await wardrobeOutfitsTable.get(id);
+		if (!existing) throw new Error(`Outfit ${id} not found`);
+		const before: VisibilityLevel = existing.visibility ?? 'space';
+		if (before === next) return;
+
+		const now = new Date().toISOString();
+		const patch: Partial<LocalWardrobeOutfit> = {
+			visibility: next,
+			visibilityChangedAt: now,
+			visibilityChangedBy: getEffectiveUserId(),
+			updatedAt: now,
+		};
+		if (next === 'unlisted' && !existing.unlistedToken) {
+			patch.unlistedToken = generateUnlistedToken();
+		} else if (next !== 'unlisted' && existing.unlistedToken) {
+			patch.unlistedToken = undefined;
+		}
+		await wardrobeOutfitsTable.update(id, patch);
+
+		emitDomainEvent('VisibilityChanged', 'wardrobe', 'wardrobeOutfits', id, {
+			recordId: id,
+			collection: 'wardrobeOutfits',
+			before,
+			after: next,
 		});
 	},
 };
