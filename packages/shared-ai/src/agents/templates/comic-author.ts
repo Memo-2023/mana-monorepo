@@ -42,10 +42,20 @@ import type { AiPolicy } from '../../policy/types';
 const COMIC_AUTHOR_POLICY: AiPolicy = {
 	tools: {
 		...Object.fromEntries(AI_PROPOSABLE_TOOL_NAMES.map((n) => [n, 'propose' as const])),
-		// MCP-tools explicit: they're not in AI_TOOL_CATALOG so the
-		// spread above doesn't cover them. Listing them here is the
-		// only way to pin the policy — defaultsByModule wouldn't help
-		// because the tool-level entry wins over module defaults.
+		// Web-app catalog names (snake_case). The spread above already
+		// covers create_comic_story / generate_comic_panel because both
+		// are defaultPolicy='propose' in AI_TOOL_CATALOG, but we pin
+		// list_comic_stories explicitly as auto (read-only tools come
+		// from the catalog as 'auto' already, so this is defensive
+		// rather than strictly required).
+		list_comic_stories: 'auto',
+		create_comic_story: 'propose',
+		generate_comic_panel: 'propose',
+		// MCP-registry names (dot-case). The agent uses these when
+		// running inside persona-runner / Claude Desktop where the
+		// mana-tool-registry surface is what the MCP client sees.
+		// Listing them keeps the policy intent consistent across both
+		// surfaces (foreground runner + MCP).
 		'comic.listStories': 'auto',
 		'comic.createStory': 'propose',
 		'comic.generatePanel': 'propose',

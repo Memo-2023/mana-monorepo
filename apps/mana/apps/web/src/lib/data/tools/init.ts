@@ -47,6 +47,7 @@ import { libraryTools } from '$lib/modules/library/tools';
 import { broadcastTools } from '$lib/modules/broadcast/tools';
 import { websiteTools } from '$lib/modules/website/tools';
 import { writingTools } from '$lib/modules/writing/tools';
+import { comicTools } from '$lib/modules/comic/tools';
 
 let initialized = false;
 
@@ -95,5 +96,6 @@ export function initTools(): void {
 	registerTools(broadcastTools);
 	registerTools(websiteTools);
 	registerTools(writingTools);
+	registerTools(comicTools);
 	initialized = true;
 }
