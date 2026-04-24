@@ -13,6 +13,7 @@
 import { KIND_LABELS } from '../constants';
 import type { DraftBriefing, DraftKind, StyleExtractedPrinciples } from '../types';
 import type { StylePreset } from '../presets/styles';
+import type { ResolvedReference } from './reference-resolver';
 
 export interface PromptPair {
 	system: string;
@@ -79,6 +80,34 @@ export interface BuildDraftPromptInput {
 	briefing: DraftBriefing;
 	stylePreset?: StylePreset;
 	styleExtracted?: StyleExtractedPrinciples;
+	/**
+	 * Resolved references (M5). Already trimmed to the aggregate budget
+	 * by resolveReferences(); the builder only formats them into the
+	 * user-message "Quellen" block.
+	 */
+	resolvedReferences?: ResolvedReference[];
+}
+
+/**
+ * Format resolved references as a "Quellen" block appended to the user
+ * message. Empty content (e.g. plain URLs without a saved article) still
+ * gets a line so the model knows the pointer exists; user notes are
+ * prefixed with "Kontext:" so they read as guidance, not body text.
+ */
+function renderReferencesBlock(refs: ResolvedReference[]): string {
+	if (refs.length === 0) return '';
+	const blocks = refs.map((ref, idx) => {
+		const head = `[Quelle ${idx + 1}] ${ref.sourceLabel}`;
+		const noteLine = ref.note ? `Kontext: ${ref.note}` : '';
+		const body = ref.content ? `\n${ref.content}` : '';
+		return [head, noteLine, body].filter(Boolean).join('\n');
+	});
+	return [
+		'',
+		'--- Quellen (vom Nutzer verknüpft) ---',
+		blocks.join('\n\n'),
+		'--- Ende Quellen ---',
+	].join('\n');
 }
 
 /**
@@ -88,14 +117,20 @@ export interface BuildDraftPromptInput {
  * the returned text is ready to paste into a version.
  */
 export function buildDraftPrompt(input: BuildDraftPromptInput): PromptPair {
-	const { kind, title, briefing, stylePreset, styleExtracted } = input;
+	const { kind, title, briefing, stylePreset, styleExtracted, resolvedReferences } = input;
 	const lang = languageLabel(briefing.language);
 	const kindLbl = kindLabel(kind);
+	const refs = resolvedReferences ?? [];
 
 	const systemLines: string[] = [
 		`Du bist ein professioneller Ghostwriter. Deine Aufgabe: Schreibe einen fertigen ${kindLbl} auf ${lang} basierend auf dem Briefing des Nutzers.`,
 		`Gib ausschließlich den fertigen Text zurück. Keine Einleitung, keine Metakommentare, kein "Hier ist dein Text", keine Abschlussphrase nach dem Text. Markdown ist erlaubt, aber nicht erzwungen.`,
 	];
+	if (refs.length > 0) {
+		systemLines.push(
+			`Der Nutzer hat ${refs.length} Quelle${refs.length === 1 ? '' : 'n'} verknüpft. Ziehe Aussagen, Zahlen, Beispiele und Haltungen aus diesen Quellen heran, wenn sie zum Briefing passen. Erfinde keine Fakten; wenn eine Quelle nichts Passendes hergibt, lass sie weg. Paraphrasiere — kein wörtliches Zitieren ohne Anführungszeichen.`
+		);
+	}
 	const styleBlock = renderStyle(stylePreset, styleExtracted);
 	if (styleBlock) systemLines.push(styleBlock);
 
@@ -112,6 +147,8 @@ export function buildDraftPrompt(input: BuildDraftPromptInput): PromptPair {
 	if (briefing.extraInstructions) {
 		userLines.push(`Zusätzliche Hinweise: ${briefing.extraInstructions}`);
 	}
+	const referencesBlock = renderReferencesBlock(refs);
+	if (referencesBlock) userLines.push(referencesBlock);
 	userLines.push('');
 	userLines.push(`Schreibe den ${kindLbl} jetzt.`);
 

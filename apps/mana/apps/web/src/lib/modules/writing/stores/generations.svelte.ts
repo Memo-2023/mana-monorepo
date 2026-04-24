@@ -32,6 +32,7 @@ import {
 	type RewriteParams,
 	type TranslateParams,
 } from '../utils/prompt-builder';
+import { resolveReferences } from '../utils/reference-resolver';
 import { getStylePreset, type StylePreset } from '../presets/styles';
 import type {
 	LocalDraftVersion,
@@ -114,12 +115,18 @@ export const generationsStore = {
 		const styleExtracted =
 			resolved?.source === 'custom' ? (resolved.row.extractedPrinciples ?? undefined) : undefined;
 
+		// Resolve any attached references in parallel. Deleted / unsupported
+		// refs drop out silently via resolver; the aggregate budget cap is
+		// enforced inside resolveReferences() so the prompt can't balloon.
+		const resolvedReferences = await resolveReferences(draft.references ?? []);
+
 		const { system, user } = buildDraftPrompt({
 			kind: draft.kind,
 			title: draft.title,
 			briefing: draft.briefing,
 			stylePreset,
 			styleExtracted,
+			resolvedReferences,
 		});
 
 		const maxTokens = opts.maxTokens ?? estimateMaxTokens(draft.briefing);

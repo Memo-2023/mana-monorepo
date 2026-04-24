@@ -1,0 +1,398 @@
+<!--
+  ReferencePicker — inline "Quellen" section inside the briefing form.
+  Shows the currently-attached references as ReferenceChip pills (with
+  live-resolved display labels) and a "+ Quelle" dropdown for adding
+  new ones. M5 supports four kinds:
+
+    - article   → searchable list of saved articles
+    - note      → searchable list of notes
+    - library   → searchable list of library entries
+    - url       → freeform URL input + optional context note
+
+  The parent owns the references array and wires it to the draft via
+  BriefingForm's save handler.
+-->
+<script lang="ts">
+	import { useAllArticles } from '$lib/modules/articles/queries';
+	import { useAllNotes } from '$lib/modules/notes/queries';
+	import { useAllEntries as useAllLibraryEntries } from '$lib/modules/library/queries';
+	import ReferenceChip from './ReferenceChip.svelte';
+	import type { DraftReference, DraftReferenceKind } from '../types';
+
+	const SUPPORTED_KINDS: DraftReferenceKind[] = ['article', 'note', 'library', 'url'];
+	const MAX_REFERENCES = 6;
+
+	let {
+		references,
+		onchange,
+	}: {
+		references: DraftReference[];
+		onchange: (next: DraftReference[]) => void;
+	} = $props();
+
+	const articles$ = useAllArticles();
+	const notes$ = useAllNotes();
+	const library$ = useAllLibraryEntries();
+
+	// Lookup maps so chips can resolve their display label from targetId.
+	const articlesById = $derived(new Map((articles$.value ?? []).map((a) => [a.id, a])));
+	const notesById = $derived(new Map((notes$.value ?? []).map((n) => [n.id, n])));
+	const libraryById = $derived(new Map((library$.value ?? []).map((e) => [e.id, e])));
+
+	function labelFor(ref: DraftReference): string {
+		if (ref.kind === 'url') return ref.url ?? 'Link';
+		if (!ref.targetId) return '—';
+		if (ref.kind === 'article') {
+			const a = articlesById.get(ref.targetId);
+			return a ? a.title : 'Artikel (fehlt)';
+		}
+		if (ref.kind === 'note') {
+			const n = notesById.get(ref.targetId);
+			return n ? n.title || 'Ohne Titel' : 'Notiz (fehlt)';
+		}
+		if (ref.kind === 'library') {
+			const e = libraryById.get(ref.targetId);
+			return e ? e.title : 'Library-Eintrag (fehlt)';
+		}
+		return ref.targetId;
+	}
+
+	type PickerMode = 'closed' | 'article' | 'note' | 'library' | 'url';
+	let mode = $state<PickerMode>('closed');
+	let searchQuery = $state('');
+	let urlInput = $state('');
+	let urlNote = $state('');
+
+	const canAddMore = $derived(references.length < MAX_REFERENCES);
+
+	function openMode(next: PickerMode) {
+		mode = mode === next ? 'closed' : next;
+		searchQuery = '';
+		urlInput = '';
+		urlNote = '';
+	}
+
+	function removeAt(idx: number) {
+		const next = references.filter((_, i) => i !== idx);
+		onchange(next);
+	}
+
+	function addRef(ref: DraftReference) {
+		if (!canAddMore) return;
+		// De-dupe: same kind + targetId/url → skip
+		const duplicate = references.some(
+			(r) => r.kind === ref.kind && (ref.targetId ? r.targetId === ref.targetId : r.url === ref.url)
+		);
+		if (duplicate) {
+			mode = 'closed';
+			return;
+		}
+		onchange([...references, ref]);
+		mode = 'closed';
+		searchQuery = '';
+		urlInput = '';
+		urlNote = '';
+	}
+
+	const filteredArticles = $derived.by(() => {
+		const q = searchQuery.trim().toLowerCase();
+		const all = articles$.value ?? [];
+		if (!q) return all.slice(0, 20);
+		return all
+			.filter(
+				(a) => a.title.toLowerCase().includes(q) || (a.siteName?.toLowerCase().includes(q) ?? false)
+			)
+			.slice(0, 20);
+	});
+
+	const filteredNotes = $derived.by(() => {
+		const q = searchQuery.trim().toLowerCase();
+		const all = notes$.value ?? [];
+		if (!q) return all.slice(0, 20);
+		return all
+			.filter((n) => n.title.toLowerCase().includes(q) || n.content.toLowerCase().includes(q))
+			.slice(0, 20);
+	});
+
+	const filteredLibrary = $derived.by(() => {
+		const q = searchQuery.trim().toLowerCase();
+		const all = library$.value ?? [];
+		if (!q) return all.slice(0, 20);
+		return all
+			.filter(
+				(e) =>
+					e.title.toLowerCase().includes(q) || e.creators.some((c) => c.toLowerCase().includes(q))
+			)
+			.slice(0, 20);
+	});
+
+	function addUrl() {
+		const url = urlInput.trim();
+		if (!url) return;
+		addRef({ kind: 'url', url, note: urlNote.trim() || null });
+	}
+</script>
+
+<div class="picker">
+	{#if references.length > 0}
+		<div class="chips">
+			{#each references as ref, idx (`${ref.kind}:${ref.targetId ?? ref.url ?? idx}`)}
+				<ReferenceChip
+					kind={ref.kind}
+					label={labelFor(ref)}
+					note={ref.note}
+					onremove={() => removeAt(idx)}
+				/>
+			{/each}
+		</div>
+	{/if}
+
+	{#if canAddMore}
+		<div class="add-row">
+			<span class="add-label">+ Quelle:</span>
+			{#each SUPPORTED_KINDS as k (k)}
+				<button
+					type="button"
+					class="kind-btn"
+					class:active={mode === k}
+					onclick={() => openMode(k as PickerMode)}
+				>
+					{#if k === 'article'}📄 Artikel
+					{:else if k === 'note'}📝 Notiz
+					{:else if k === 'library'}📚 Library
+					{:else}🔗 URL{/if}
+				</button>
+			{/each}
+		</div>
+	{:else}
+		<p class="muted">
+			Max. {MAX_REFERENCES} Quellen pro Draft erreicht. Entferne eine, um eine neue hinzuzufügen.
+		</p>
+	{/if}
+
+	{#if mode === 'article' || mode === 'note' || mode === 'library'}
+		<div class="search">
+			<!-- svelte-ignore a11y_autofocus -->
+			<input type="search" bind:value={searchQuery} placeholder="Suche…" autofocus />
+			<div class="results">
+				{#if mode === 'article'}
+					{#if filteredArticles.length === 0}
+						<p class="muted small">Keine Treffer.</p>
+					{:else}
+						{#each filteredArticles as a (a.id)}
+							<button
+								type="button"
+								class="result"
+								onclick={() => addRef({ kind: 'article', targetId: a.id, note: null })}
+							>
+								<strong>{a.title}</strong>
+								{#if a.siteName}
+									<span class="meta">{a.siteName}</span>
+								{/if}
+							</button>
+						{/each}
+					{/if}
+				{:else if mode === 'note'}
+					{#if filteredNotes.length === 0}
+						<p class="muted small">Keine Treffer.</p>
+					{:else}
+						{#each filteredNotes as n (n.id)}
+							<button
+								type="button"
+								class="result"
+								onclick={() => addRef({ kind: 'note', targetId: n.id, note: null })}
+							>
+								<strong>{n.title || 'Ohne Titel'}</strong>
+								{#if n.content}
+									<span class="meta">
+										{n.content.slice(0, 80).replace(/\s+/g, ' ')}
+										{n.content.length > 80 ? '…' : ''}
+									</span>
+								{/if}
+							</button>
+						{/each}
+					{/if}
+				{:else if mode === 'library'}
+					{#if filteredLibrary.length === 0}
+						<p class="muted small">Keine Treffer.</p>
+					{:else}
+						{#each filteredLibrary as e (e.id)}
+							<button
+								type="button"
+								class="result"
+								onclick={() => addRef({ kind: 'library', targetId: e.id, note: null })}
+							>
+								<strong>{e.title}</strong>
+								<span class="meta">
+									{e.kind}
+									{#if e.creators.length}· {e.creators[0]}{/if}
+									{#if e.year}· {e.year}{/if}
+								</span>
+							</button>
+						{/each}
+					{/if}
+				{/if}
+			</div>
+		</div>
+	{:else if mode === 'url'}
+		<div class="url-row">
+			<!-- svelte-ignore a11y_autofocus -->
+			<input type="url" bind:value={urlInput} placeholder="https://…" autofocus />
+			<input type="text" bind:value={urlNote} placeholder="Kontext (optional)" class="note-input" />
+			<button type="button" class="primary" disabled={!urlInput.trim()} onclick={addUrl}>
+				Hinzufügen
+			</button>
+		</div>
+	{/if}
+</div>
+
+<style>
+	.picker {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+	.chips {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.3rem;
+	}
+	.add-row {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.3rem;
+	}
+	.add-label {
+		font-size: 0.8rem;
+		color: var(--color-text-muted, rgba(0, 0, 0, 0.55));
+		margin-right: 0.2rem;
+	}
+	.kind-btn {
+		padding: 0.25rem 0.6rem;
+		border-radius: 0.4rem;
+		border: 1px solid var(--color-border, rgba(0, 0, 0, 0.08));
+		background: transparent;
+		cursor: pointer;
+		font: inherit;
+		font-size: 0.8rem;
+		color: inherit;
+	}
+	.kind-btn:hover:not(.active) {
+		border-color: #0ea5e9;
+		color: #0ea5e9;
+	}
+	.kind-btn.active {
+		background: color-mix(in srgb, #0ea5e9 12%, transparent);
+		border-color: #0ea5e9;
+		color: #0ea5e9;
+	}
+	.search {
+		display: flex;
+		flex-direction: column;
+		gap: 0.4rem;
+		padding: 0.5rem;
+		border-radius: 0.5rem;
+		border: 1px solid color-mix(in srgb, #0ea5e9 25%, transparent);
+		background: color-mix(in srgb, #0ea5e9 3%, transparent);
+	}
+	.search input[type='search'] {
+		padding: 0.4rem 0.6rem;
+		border-radius: 0.4rem;
+		border: 1px solid var(--color-border, rgba(0, 0, 0, 0.1));
+		background: var(--color-surface, transparent);
+		font: inherit;
+		font-size: 0.85rem;
+		color: inherit;
+	}
+	.search input[type='search']:focus {
+		outline: 2px solid #0ea5e9;
+		outline-offset: 1px;
+		border-color: transparent;
+	}
+	.results {
+		display: flex;
+		flex-direction: column;
+		gap: 0.2rem;
+		max-height: 240px;
+		overflow-y: auto;
+	}
+	.result {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 0.15rem;
+		padding: 0.4rem 0.6rem;
+		border-radius: 0.35rem;
+		border: 1px solid transparent;
+		background: transparent;
+		cursor: pointer;
+		font: inherit;
+		color: inherit;
+		text-align: left;
+	}
+	.result:hover {
+		background: var(--color-surface, rgba(0, 0, 0, 0.04));
+		border-color: color-mix(in srgb, #0ea5e9 40%, transparent);
+	}
+	.result strong {
+		font-size: 0.9rem;
+		line-height: 1.25;
+	}
+	.result .meta {
+		font-size: 0.75rem;
+		color: var(--color-text-muted, rgba(0, 0, 0, 0.55));
+	}
+	.url-row {
+		display: flex;
+		gap: 0.4rem;
+		padding: 0.5rem;
+		border-radius: 0.5rem;
+		border: 1px solid color-mix(in srgb, #0ea5e9 25%, transparent);
+		background: color-mix(in srgb, #0ea5e9 3%, transparent);
+		flex-wrap: wrap;
+	}
+	.url-row input {
+		flex: 1;
+		min-width: 9rem;
+		padding: 0.4rem 0.6rem;
+		border-radius: 0.4rem;
+		border: 1px solid var(--color-border, rgba(0, 0, 0, 0.1));
+		background: var(--color-surface, transparent);
+		font: inherit;
+		font-size: 0.85rem;
+		color: inherit;
+	}
+	.url-row input:focus {
+		outline: 2px solid #0ea5e9;
+		outline-offset: 1px;
+		border-color: transparent;
+	}
+	.url-row .note-input {
+		flex: 2;
+	}
+	.url-row .primary {
+		padding: 0.4rem 0.9rem;
+		border-radius: 0.4rem;
+		border: 1px solid #0ea5e9;
+		background: #0ea5e9;
+		color: white;
+		cursor: pointer;
+		font: inherit;
+		font-size: 0.85rem;
+		font-weight: 500;
+	}
+	.url-row .primary:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+	.muted {
+		color: var(--color-text-muted, rgba(0, 0, 0, 0.55));
+		font-size: 0.8rem;
+		margin: 0;
+	}
+	.muted.small {
+		padding: 0.5rem;
+		text-align: center;
+	}
+</style>

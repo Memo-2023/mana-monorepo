@@ -8,7 +8,8 @@
 	import { KIND_LABELS, TONE_PRESETS, LENGTH_PRESETS, DEFAULT_LANGUAGE } from '../constants';
 	import { draftsStore } from '../stores/drafts.svelte';
 	import StylePicker from './StylePicker.svelte';
-	import type { Draft, DraftKind, DraftBriefing } from '../types';
+	import ReferencePicker from './ReferencePicker.svelte';
+	import type { Draft, DraftKind, DraftBriefing, DraftReference } from '../types';
 
 	let {
 		mode,
@@ -62,6 +63,8 @@
 	let extraInstructions = $state(draft?.briefing.extraInstructions ?? '');
 	/* svelte-ignore state_referenced_locally */
 	let styleId = $state<string | null>(draft?.styleId ?? null);
+	/* svelte-ignore state_referenced_locally */
+	let references = $state<DraftReference[]>([...(draft?.references ?? [])]);
 
 	let saving = $state(false);
 	let error = $state<string | null>(null);
@@ -100,6 +103,7 @@
 					title: title.trim(),
 					briefing,
 					styleId,
+					references,
 				});
 				oncreated?.(created);
 			} else if (draft) {
@@ -107,6 +111,7 @@
 					title: title.trim(),
 					kind,
 					styleId,
+					references,
 				});
 				await draftsStore.updateBriefing(draft.id, briefing);
 			}
@@ -189,6 +194,13 @@
 		<StylePicker value={styleId} onchange={(next) => (styleId = next)} />
 	</label>
 
+	<div class="references-field">
+		<span class="field-label">
+			Quellen <small>(optional — flowen als Kontext in den Prompt ein)</small>
+		</span>
+		<ReferencePicker {references} onchange={(next) => (references = next)} />
+	</div>
+
 	<label>
 		<span>Zusatzhinweise <small>(optional)</small></span>
 		<textarea
@@ -235,6 +247,15 @@
 		font-size: 0.85rem;
 	}
 	label > span {
+		color: var(--color-text-muted, rgba(0, 0, 0, 0.55));
+	}
+	.references-field {
+		display: flex;
+		flex-direction: column;
+		gap: 0.35rem;
+		font-size: 0.85rem;
+	}
+	.field-label {
 		color: var(--color-text-muted, rgba(0, 0, 0, 0.55));
 	}
 	small {
