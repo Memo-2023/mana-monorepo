@@ -9,6 +9,7 @@
 	import DetailViewShell from '$lib/components/DetailViewShell.svelte';
 	import { eventsStore } from '../stores/events.svelte';
 	import { MapPin, Clock, X } from '@mana/shared-icons';
+	import { VisibilityPicker, type VisibilityLevel } from '@mana/shared-privacy';
 	import type { ViewProps } from '$lib/app-registry';
 	import type { LocalEvent } from '../types';
 	import type { LocalTimeBlock } from '$lib/data/time-blocks/types';
@@ -92,6 +93,10 @@
 		await saveField();
 	}
 
+	async function handleVisibilityChange(next: VisibilityLevel) {
+		await eventsStore.setVisibility(eventId, next);
+	}
+
 	async function deleteEvent() {
 		const id = eventId;
 		await eventsStore.deleteEvent(id);
@@ -113,13 +118,20 @@
 	onConfirmDelete={deleteEvent}
 >
 	{#snippet body(event)}
-		<input
-			class="title-input"
-			bind:value={editTitle}
-			onfocus={detail.focus}
-			onblur={saveField}
-			placeholder="Titel..."
-		/>
+		<div class="title-row">
+			<input
+				class="title-input"
+				bind:value={editTitle}
+				onfocus={detail.focus}
+				onblur={saveField}
+				placeholder="Titel..."
+			/>
+			<VisibilityPicker
+				level={event.visibility ?? 'private'}
+				onChange={handleVisibilityChange}
+				compact
+			/>
+		</div>
 
 		<div class="properties">
 			<div class="prop-row">
@@ -222,6 +234,15 @@
 </DetailViewShell>
 
 <style>
+	.title-row {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+	.title-row :global(.title-input) {
+		flex: 1 1 auto;
+		min-width: 0;
+	}
 	.prop-icon {
 		display: flex;
 		align-items: center;
