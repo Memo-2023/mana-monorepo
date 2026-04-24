@@ -9,6 +9,13 @@
 import { db } from '$lib/data/database';
 import { eventBus } from '$lib/data/events/event-bus';
 import { emitDomainEvent } from '$lib/data/events/emit';
+import { getActiveSpace } from '$lib/data/scope';
+import { getEffectiveUserId } from '$lib/data/current-user';
+import {
+	defaultVisibilityFor,
+	generateUnlistedToken,
+	type VisibilityLevel,
+} from '@mana/shared-privacy';
 import type { DomainEvent } from '$lib/data/events/types';
 import type { LocalGoal, GoalTemplate } from './types';
 
@@ -108,6 +115,7 @@ export const goalStore = {
 			status: 'active',
 			currentValue: 0,
 			currentPeriodStart: periodStart(template.target.period),
+			visibility: defaultVisibilityFor(getActiveSpace()?.type),
 			createdAt: now,
 			updatedAt: now,
 		};
@@ -133,6 +141,7 @@ export const goalStore = {
 			status: 'active',
 			currentValue: 0,
 			currentPeriodStart: periodStart(input.target.period),
+			visibility: defaultVisibilityFor(getActiveSpace()?.type),
 			createdAt: now,
 			updatedAt: now,
 		};
@@ -172,6 +181,39 @@ export const goalStore = {
 		await db.table(TABLE).update(id, {
 			deletedAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString(),
+		});
+	},
+
+	/**
+	 * Flip a goal's visibility. Enables the "public progress page" use
+	 * case — user marks a fitness/learning goal 'public' so it appears
+	 * in the goals.goals embed on their website.
+	 */
+	async setVisibility(id: string, next: VisibilityLevel): Promise<void> {
+		const existing = await db.table<LocalGoal>(TABLE).get(id);
+		if (!existing) throw new Error(`Goal ${id} not found`);
+		const before: VisibilityLevel = existing.visibility ?? 'space';
+		if (before === next) return;
+
+		const now = new Date().toISOString();
+		const patch: Partial<LocalGoal> = {
+			visibility: next,
+			visibilityChangedAt: now,
+			visibilityChangedBy: getEffectiveUserId(),
+			updatedAt: now,
+		};
+		if (next === 'unlisted' && !existing.unlistedToken) {
+			patch.unlistedToken = generateUnlistedToken();
+		} else if (next !== 'unlisted' && existing.unlistedToken) {
+			patch.unlistedToken = undefined;
+		}
+		await db.table(TABLE).update(id, patch);
+
+		emitDomainEvent('VisibilityChanged', 'goals', TABLE, id, {
+			recordId: id,
+			collection: TABLE,
+			before,
+			after: next,
 		});
 	},
 };

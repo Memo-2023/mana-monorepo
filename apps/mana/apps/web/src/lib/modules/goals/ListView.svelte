@@ -3,6 +3,7 @@
 -->
 <script lang="ts">
 	import { Target, Plus, Play, Pause, Trash, PencilSimple } from '@mana/shared-icons';
+	import { VisibilityPicker, type VisibilityLevel } from '@mana/shared-privacy';
 	import { goalStore, useAllGoals, GOAL_TEMPLATES } from '$lib/companion/goals';
 	import type { LocalGoal } from '$lib/companion/goals/types';
 	import GoalEditor from './GoalEditor.svelte';
@@ -24,6 +25,10 @@
 		const tpl = GOAL_TEMPLATES.find((t) => t.id === templateId);
 		if (tpl) await goalStore.createFromTemplate(tpl);
 		showTemplates = false;
+	}
+
+	async function handleVisibilityChange(goalId: string, next: VisibilityLevel) {
+		await goalStore.setVisibility(goalId, next);
 	}
 </script>
 
@@ -55,6 +60,11 @@
 				<div class="goal-header">
 					<Target size={16} weight="bold" />
 					<span class="goal-title">{goal.title}</span>
+					<VisibilityPicker
+						level={goal.visibility ?? 'private'}
+						onChange={(next) => handleVisibilityChange(goal.id, next)}
+						compact
+					/>
 					<button class="goal-action" onclick={() => goalStore.pause(goal.id)} title="Pausieren">
 						<Pause size={12} />
 					</button>

@@ -31,6 +31,7 @@ export const EmbedSourceSchema = z.enum([
 	'library.entries',
 	'calendar.events',
 	'todo.tasks',
+	'goals.goals',
 ]);
 export type EmbedSource = z.infer<typeof EmbedSourceSchema>;
 
@@ -52,6 +53,9 @@ export const ModuleEmbedSchema = z.object({
 	 *   todo.tasks:      { status?, tagIds? } — typical public-roadmap
 	 *                    shape: status='completed' filters to shipped
 	 *                    items; tagIds restricts to a "public" label
+	 *   goals.goals:     { status? } — 'active' | 'completed' filter;
+	 *                    useful for "currently working on" vs "things
+	 *                    I've hit" progress sections
 	 */
 	filter: z
 		.object({

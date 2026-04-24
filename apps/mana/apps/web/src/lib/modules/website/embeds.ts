@@ -25,6 +25,7 @@ import type { LocalLibraryEntry } from '$lib/modules/library/types';
 import type { LocalEvent } from '$lib/modules/calendar/types';
 import type { LocalTask } from '$lib/modules/todo/types';
 import type { LocalTaskTag } from '$lib/modules/todo/types';
+import type { LocalGoal } from '$lib/companion/goals/types';
 import type { LocalTimeBlock } from '$lib/data/time-blocks/types';
 
 export interface ResolvedEmbed {
@@ -50,6 +51,9 @@ export async function resolveEmbed(props: ModuleEmbedProps): Promise<ResolvedEmb
 				break;
 			case 'todo.tasks':
 				items = await resolveTodoTasks(props);
+				break;
+			case 'goals.goals':
+				items = await resolveGoals(props);
 				break;
 			default:
 				return {
@@ -309,4 +313,42 @@ async function resolveTodoTasks(props: ModuleEmbedProps): Promise<EmbedItem[]> {
 		title: t.title,
 		subtitle: t.isCompleted ? 'Erledigt' : 'In Arbeit',
 	}));
+}
+
+/**
+ * Goals: the "public progress page" use case — marked-public goals with
+ * their current-period progress inlined so a visitor can see "4/5
+ * Workouts diese Woche" at a glance. Gates hard on canEmbedOnWebsite.
+ *
+ * The inlined snapshot carries only title + formatted progress
+ * ("currentValue / target period"). Description is dropped — users
+ * often keep it as an internal "why this matters" note. Metric
+ * configuration (which event type, filter fields) also stays private —
+ * it leaks implementation detail of what the user tracks.
+ */
+async function resolveGoals(props: ModuleEmbedProps): Promise<EmbedItem[]> {
+	let goals = await db.table<LocalGoal>('companionGoals').toArray();
+	goals = goals.filter((g) => !g.deletedAt && canEmbedOnWebsite(g.visibility ?? 'private'));
+
+	if (props.filter?.status) {
+		goals = goals.filter((g) => g.status === props.filter?.status);
+	}
+
+	// Active goals first, then by target value descending so the
+	// chunkier milestones land at the top.
+	goals.sort((a, b) => {
+		if (a.status !== b.status) return a.status === 'active' ? -1 : 1;
+		return b.target.value - a.target.value || a.id.localeCompare(b.id);
+	});
+
+	return goals.map((g) => ({
+		title: g.title,
+		subtitle: formatGoalProgress(g),
+	}));
+}
+
+function formatGoalProgress(g: LocalGoal): string {
+	const periodLabel =
+		g.target.period === 'day' ? 'Tag' : g.target.period === 'week' ? 'Woche' : 'Monat';
+	return `${g.currentValue} / ${g.target.value} · ${periodLabel}`;
 }

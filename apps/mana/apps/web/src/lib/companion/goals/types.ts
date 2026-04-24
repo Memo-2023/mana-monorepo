@@ -5,6 +5,8 @@
  * Wasser/Tag"). Progress is tracked by subscribing to domain events.
  */
 
+import type { VisibilityLevel } from '@mana/shared-privacy';
+
 export interface LocalGoal {
 	id: string;
 	title: string;
@@ -23,6 +25,11 @@ export interface LocalGoal {
 	/** Current period progress (resets each period) */
 	currentValue: number;
 	currentPeriodStart: string; // ISO date
+
+	visibility?: VisibilityLevel;
+	visibilityChangedAt?: string;
+	visibilityChangedBy?: string;
+	unlistedToken?: string;
 
 	createdAt: string;
 	updatedAt: string;
