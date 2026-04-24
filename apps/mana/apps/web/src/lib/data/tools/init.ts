@@ -46,6 +46,7 @@ import { invoicesTools } from '$lib/modules/invoices/tools';
 import { libraryTools } from '$lib/modules/library/tools';
 import { broadcastTools } from '$lib/modules/broadcast/tools';
 import { websiteTools } from '$lib/modules/website/tools';
+import { writingTools } from '$lib/modules/writing/tools';
 
 let initialized = false;
 
@@ -93,5 +94,6 @@ export function initTools(): void {
 	registerTools(libraryTools);
 	registerTools(broadcastTools);
 	registerTools(websiteTools);
+	registerTools(writingTools);
 	initialized = true;
 }

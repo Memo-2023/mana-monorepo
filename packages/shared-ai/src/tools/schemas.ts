@@ -1671,6 +1671,213 @@ export const AI_TOOL_CATALOG: readonly ToolSchema[] = [
 		defaultPolicy: 'auto',
 		parameters: [{ name: 'pageId', type: 'string', description: 'ID der Seite', required: true }],
 	},
+
+	// ── Writing (Ghostwriter) ─────────────────────────────────
+	{
+		name: 'list_drafts',
+		module: 'writing',
+		description:
+			'Listet Writing-Drafts (id, kind, title, status, wordCount). Optional nach kind oder status filterbar.',
+		defaultPolicy: 'auto',
+		parameters: [
+			{
+				name: 'kind',
+				type: 'string',
+				description: 'Nur eine Textart zeigen',
+				required: false,
+				enum: [
+					'blog',
+					'essay',
+					'email',
+					'social',
+					'story',
+					'letter',
+					'speech',
+					'cover-letter',
+					'product-description',
+					'press-release',
+					'bio',
+					'other',
+				],
+			},
+			{
+				name: 'status',
+				type: 'string',
+				description: 'Nur einen Status zeigen',
+				required: false,
+				enum: ['draft', 'refining', 'complete', 'published'],
+			},
+			{
+				name: 'limit',
+				type: 'number',
+				description: 'Maximale Anzahl (Standard 30)',
+				required: false,
+			},
+		],
+	},
+	{
+		name: 'get_draft',
+		module: 'writing',
+		description:
+			'Liefert einen vollstaendigen Draft inklusive Briefing, aktueller Version, Stil und Quellen.',
+		defaultPolicy: 'auto',
+		parameters: [{ name: 'draftId', type: 'string', description: 'ID des Drafts', required: true }],
+	},
+	{
+		name: 'list_writing_styles',
+		module: 'writing',
+		description:
+			'Listet verfuegbare Schreibstile (9 eingebaute Presets + vom Nutzer angelegte). Jeder mit id (preset:<id> oder uuid), name und Kurzbeschreibung.',
+		defaultPolicy: 'auto',
+		parameters: [],
+	},
+	{
+		name: 'create_draft',
+		module: 'writing',
+		description:
+			'Legt einen neuen Writing-Draft mit Briefing an — noch ohne Generation. Optional mit Stil und Quellen. Danach via generate_draft_content die erste Version erzeugen.',
+		defaultPolicy: 'propose',
+		parameters: [
+			{
+				name: 'kind',
+				type: 'string',
+				description: 'Textart',
+				required: true,
+				enum: [
+					'blog',
+					'essay',
+					'email',
+					'social',
+					'story',
+					'letter',
+					'speech',
+					'cover-letter',
+					'product-description',
+					'press-release',
+					'bio',
+					'other',
+				],
+			},
+			{ name: 'title', type: 'string', description: 'Titel / Arbeitstitel', required: true },
+			{
+				name: 'topic',
+				type: 'string',
+				description: 'Kern-Briefing (worum geht es?)',
+				required: true,
+			},
+			{ name: 'audience', type: 'string', description: 'Zielgruppe', required: false },
+			{
+				name: 'tone',
+				type: 'string',
+				description: 'Ton (z.B. "neutral", "warm")',
+				required: false,
+			},
+			{
+				name: 'language',
+				type: 'string',
+				description: 'ISO-Sprachcode, Standard "de"',
+				required: false,
+			},
+			{
+				name: 'targetWords',
+				type: 'number',
+				description: 'Ziel-Laenge in Woertern',
+				required: false,
+			},
+			{
+				name: 'styleId',
+				type: 'string',
+				description: 'Stil-ID (preset:<id> oder uuid einer Custom-Style-Row)',
+				required: false,
+			},
+			{
+				name: 'extraInstructions',
+				type: 'string',
+				description: 'Zusatzhinweise fuer die Generation',
+				required: false,
+			},
+		],
+	},
+	{
+		name: 'generate_draft_content',
+		module: 'writing',
+		description:
+			'Erzeugt Text fuer einen existierenden Draft. Schreibt eine neue LocalDraftVersion und flippt den currentVersionId-Pointer auf die neue Version. Nutzt Briefing + Stil + Quellen des Drafts.',
+		defaultPolicy: 'propose',
+		parameters: [{ name: 'draftId', type: 'string', description: 'ID des Drafts', required: true }],
+	},
+	{
+		name: 'refine_draft_selection',
+		module: 'writing',
+		description:
+			'Verfeinert einen markierten Ausschnitt der aktuellen Version in-place. Operationen: shorten, expand, tone (target), rewrite (instruction), translate (targetLanguage). Wird direkt auf die aktuelle Version angewandt — keine neue Version.',
+		defaultPolicy: 'propose',
+		parameters: [
+			{ name: 'draftId', type: 'string', description: 'ID des Drafts', required: true },
+			{
+				name: 'operation',
+				type: 'string',
+				description: 'Art der Verfeinerung',
+				required: true,
+				enum: ['shorten', 'expand', 'tone', 'rewrite', 'translate'],
+			},
+			{
+				name: 'selectionStart',
+				type: 'number',
+				description: 'Zeichen-Start der Auswahl (0-basiert)',
+				required: true,
+			},
+			{
+				name: 'selectionEnd',
+				type: 'number',
+				description: 'Zeichen-Ende der Auswahl (exklusiv)',
+				required: true,
+			},
+			{
+				name: 'targetTone',
+				type: 'string',
+				description: 'Nur fuer operation=tone: der Zielton',
+				required: false,
+			},
+			{
+				name: 'instruction',
+				type: 'string',
+				description: 'Nur fuer operation=rewrite: die Anweisung',
+				required: false,
+			},
+			{
+				name: 'targetLanguage',
+				type: 'string',
+				description: 'Nur fuer operation=translate: ISO-Code der Zielsprache',
+				required: false,
+			},
+		],
+	},
+	{
+		name: 'set_draft_status',
+		module: 'writing',
+		description:
+			'Setzt den Status eines Drafts (draft/refining/complete/published). Emittiert WritingDraftStatusChanged fuer die Timeline.',
+		defaultPolicy: 'propose',
+		parameters: [
+			{ name: 'draftId', type: 'string', description: 'ID des Drafts', required: true },
+			{
+				name: 'status',
+				type: 'string',
+				description: 'Neuer Status',
+				required: true,
+				enum: ['draft', 'refining', 'complete', 'published'],
+			},
+		],
+	},
+	{
+		name: 'save_draft_as_article',
+		module: 'writing',
+		description:
+			'Veroeffentlicht die aktuelle Version des Drafts als Read-Later-Artikel im articles-Modul. Traegt das Ziel in draft.publishedTo ein und emittiert WritingDraftPublished.',
+		defaultPolicy: 'propose',
+		parameters: [{ name: 'draftId', type: 'string', description: 'ID des Drafts', required: true }],
+	},
 ];
 
 // ═══════════════════════════════════════════════════════════════
