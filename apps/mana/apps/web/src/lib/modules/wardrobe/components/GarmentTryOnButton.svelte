@@ -167,16 +167,21 @@
 			type="button"
 			onclick={handleClick}
 			disabled={running || !canTryOn}
-			class="flex w-full items-center justify-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+			class="flex w-full flex-col items-center justify-center gap-0.5 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
 		>
 			{#if running}
-				<div
-					class="h-4 w-4 animate-spin rounded-full border-2 border-current border-r-transparent"
-				></div>
-				Rendere…
+				<span class="flex items-center gap-2">
+					<span
+						class="h-4 w-4 animate-spin rounded-full border-2 border-current border-r-transparent"
+					></span>
+					Rendere…
+				</span>
 			{:else}
-				<Sparkle size={16} weight="fill" />
-				An mir anprobieren · {estimatedCredits} Credits
+				<span class="flex items-center gap-2">
+					<Sparkle size={16} weight="fill" />
+					An mir anprobieren
+				</span>
+				<span class="text-xs font-normal opacity-75">{estimatedCredits} Credits</span>
 			{/if}
 		</button>
 

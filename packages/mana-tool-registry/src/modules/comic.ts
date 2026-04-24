@@ -159,11 +159,7 @@ export const comicListStories: ToolSpec<typeof listStoriesInput, typeof listStor
 
 		const decrypted = (await Promise.all(
 			alive.map((row) =>
-				decryptRecordFields(
-					row as unknown as Record<string, unknown>,
-					STORY_ENCRYPTED_FIELDS,
-					key
-				)
+				decryptRecordFields(row as unknown as Record<string, unknown>, STORY_ENCRYPTED_FIELDS, key)
 			)
 		)) as unknown as RawStoryRow[];
 
@@ -223,7 +219,7 @@ export const comicCreateStory: ToolSpec<typeof createStoryInput, typeof createSt
 	scope: 'user-space',
 	policyHint: 'write',
 	description:
-		"Start a new comic story in the active space. The style and character references are fixed once written — every future `generatePanel` call against this story uses the same refs + style-prefix. Start with 1–8 `characterMediaIds` (face-ref at index 0, body-ref optional, up to 3 garment-ref photos from wardrobe). Returns the empty story; add panels via `comic.generatePanel`.",
+		'Start a new comic story in the active space. The style and character references are fixed once written — every future `generatePanel` call against this story uses the same refs + style-prefix. Start with 1–8 `characterMediaIds` (face-ref at index 0, body-ref optional, up to 3 garment-ref photos from wardrobe). Returns the empty story; add panels via `comic.generatePanel`.',
 	input: createStoryInput,
 	output: createStoryOutput,
 	encryptedFields: { table: STORIES_TABLE, fields: [...STORY_ENCRYPTED_FIELDS] },
@@ -508,10 +504,7 @@ export const comicReorderPanels: ToolSpec<typeof reorderPanelsInput, typeof reor
 		const raw = storiesRes.changes
 			.filter((c) => c.op !== 'delete' && c.data)
 			.map((c) => c.data as RawStoryRow)
-			.find(
-				(row) =>
-					row.id === input.storyId && !row.deletedAt && row.spaceId === ctx.spaceId
-			);
+			.find((row) => row.id === input.storyId && !row.deletedAt && row.spaceId === ctx.spaceId);
 		if (!raw) {
 			throw new Error(`Comic story ${input.storyId} not found in the active space`);
 		}

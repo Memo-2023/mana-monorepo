@@ -6,7 +6,7 @@
 -->
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { ArrowLeft, CheckCircle, PencilSimple, Archive, Trash } from '@mana/shared-icons';
+	import { CheckCircle, PencilSimple, Archive, Trash } from '@mana/shared-icons';
 	import { useGarment, useGarmentSoloTryOns, useOutfitsContainingGarment } from '../queries';
 	import { wardrobeGarmentsStore } from '../stores/garments.svelte';
 	import { garmentPhotoUrl } from '../api/media-url';
@@ -81,18 +81,10 @@
 	}
 </script>
 
+<!-- The ModuleShell wrapping this view already renders both the
+     back-arrow and the "Kleiderschrank" title in its header. An inner
+     breadcrumb would double them up — drop it. -->
 <div class="mx-auto max-w-3xl space-y-5 p-4 sm:p-6">
-	<nav class="flex items-center gap-2 text-sm">
-		<a
-			href="/wardrobe"
-			class="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted"
-			aria-label="Zurück zum Kleiderschrank"
-		>
-			<ArrowLeft size={16} />
-		</a>
-		<span class="text-muted-foreground">Kleiderschrank</span>
-	</nav>
-
 	{#if !garment}
 		{#if garment$.loading}
 			<p class="text-sm text-muted-foreground">Lädt…</p>
@@ -248,7 +240,6 @@
 					<h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
 						Anproben · {soloTryOns.length}
 					</h2>
-					<span class="text-xs text-muted-foreground">Einzelstück auf dir gerendert</span>
 				</header>
 				<div class="flex gap-3 overflow-x-auto pb-1">
 					{#each soloTryOns as image (image.id)}
@@ -282,7 +273,6 @@
 					<h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
 						In Outfits · {outfits.length}
 					</h2>
-					<span class="text-xs text-muted-foreground">Komposition öffnen</span>
 				</header>
 				<div class="flex gap-3 overflow-x-auto pb-1">
 					{#each outfits as outfit (outfit.id)}

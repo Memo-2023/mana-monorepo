@@ -552,7 +552,11 @@ async function resolveComicStories(props: ModuleEmbedProps): Promise<EmbedItem[]
 	const coverImageIds = decrypted
 		.map((s) => s.panelImageIds?.[0])
 		.filter((id): id is string => Boolean(id));
-	const coverImages = await db.table<LocalImage>('images').where('id').anyOf(coverImageIds).toArray();
+	const coverImages = await db
+		.table<LocalImage>('images')
+		.where('id')
+		.anyOf(coverImageIds)
+		.toArray();
 	const coverById = new Map<string, LocalImage>();
 	for (const img of coverImages) coverById.set(img.id, img);
 

@@ -24,6 +24,7 @@
 	import { CATEGORY_LABELS, CATEGORY_LABELS_SINGULAR } from '../constants';
 	import CategoryTabs from '../components/CategoryTabs.svelte';
 	import GarmentCard from '../components/GarmentCard.svelte';
+	import { prettifyUploadName } from '../utils/name';
 	import { getActiveSpace } from '$lib/data/scope';
 	import type { GarmentCategory } from '../types';
 
@@ -48,11 +49,6 @@
 	let uploading = $state(false);
 	let uploadError = $state<string | null>(null);
 
-	function stripExt(filename: string): string {
-		const i = filename.lastIndexOf('.');
-		return i > 0 ? filename.slice(0, i) : filename;
-	}
-
 	async function ingestFiles(files: File[]) {
 		// Pre-select kind from the active tab. Drops on "Alle" land as
 		// 'other' — less specific, user edits on the detail page. Drops
@@ -67,7 +63,12 @@
 				await readImageDimensions(file);
 				const uploaded = await uploadGarmentPhoto(file);
 				await wardrobeGarmentsStore.createGarment({
-					name: stripExt(file.name),
+					// prettifyUploadName turns e-commerce slugs like
+					// `17390-gestreiftes-herren-t-shirt-aus-baumwolle-17390-2-w`
+					// into `Gestreiftes Herren-T-Shirt Aus Baumwolle 2-W` so the
+					// garment row lands with a presentable default. User still
+					// edits on the detail page for anything nuanced.
+					name: prettifyUploadName(file.name),
 					category: defaultCategory,
 					mediaIds: [uploaded.mediaId],
 				});
