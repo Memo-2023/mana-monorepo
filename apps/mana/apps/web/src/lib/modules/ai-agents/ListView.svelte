@@ -37,6 +37,7 @@
 	import type { AiPolicy, PolicyDecision } from '@mana/shared-ai';
 	import { TagSelector } from '@mana/shared-ui';
 	import { useAllTags } from '@mana/shared-stores';
+	import StylePicker from '$lib/modules/writing/components/StylePicker.svelte';
 
 	const agents = $derived(useAgents());
 	const allTags = $derived(useAllTags());
@@ -89,6 +90,7 @@
 	let editMaxConcurrent = $state(1);
 	let editMaxTokensPerDay = $state<number | null>(null);
 	let editScopeTagIds = $state<string[]>([]);
+	let editDefaultWritingStyleId = $state<string | null>(null);
 	let lastSyncedId = $state<string | null>(null);
 	let saveError = $state<string | null>(null);
 	let saving = $state(false);
@@ -103,6 +105,7 @@
 			editMaxConcurrent = selected.maxConcurrentMissions;
 			editMaxTokensPerDay = selected.maxTokensPerDay ?? null;
 			editScopeTagIds = [...(selected.scopeTagIds ?? [])];
+			editDefaultWritingStyleId = selected.defaultWritingStyleId ?? null;
 			lastSyncedId = selected.id;
 			saveError = null;
 		}
@@ -121,6 +124,7 @@
 				maxConcurrentMissions: editMaxConcurrent,
 				maxTokensPerDay: editMaxTokensPerDay ?? undefined,
 				scopeTagIds: editScopeTagIds.length > 0 ? editScopeTagIds : undefined,
+				defaultWritingStyleId: editDefaultWritingStyleId ?? undefined,
 			});
 		} catch (err) {
 			if (err instanceof DuplicateAgentNameError) {
@@ -453,6 +457,18 @@
 					placeholder="leer = unbegrenzt"
 				/>
 			</label>
+		</section>
+
+		<section class="block">
+			<h3>Writing</h3>
+			<p class="hint">
+				Default-Schreibstil, den der Agent beim Anlegen eines Drafts nutzt, wenn keiner explizit
+				übergeben wird.
+			</p>
+			<StylePicker
+				value={editDefaultWritingStyleId}
+				onchange={(next) => (editDefaultWritingStyleId = next)}
+			/>
 		</section>
 
 		<div class="save-row">

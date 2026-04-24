@@ -54,6 +54,14 @@ export interface Agent {
 	 *  (tag IDs are not sensitive). */
 	scopeTagIds?: string[];
 
+	/** Fallback writing-style id for the Writing module (M8 follow-up).
+	 *  When this agent runs create_draft / generate_draft_content without
+	 *  an explicit styleId, the tool resolves to this value so e.g. a
+	 *  "Marketing-Agent" always drafts in the Corporate-Tone style.
+	 *  Format: `preset:<id>` for a built-in preset or the uuid of a
+	 *  custom LocalWritingStyle row. Plaintext FK. */
+	defaultWritingStyleId?: string;
+
 	/** Per-tool allowlist/propose/deny. Replaces the user-level AiPolicy
 	 *  in Phase 4; pre-populated with the default policy at create time
 	 *  so the runner can start reading it even while still consulting

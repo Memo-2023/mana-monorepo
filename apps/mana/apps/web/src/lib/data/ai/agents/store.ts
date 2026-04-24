@@ -40,6 +40,8 @@ export interface CreateAgentInput {
 	policy?: AiPolicy;
 	maxTokensPerDay?: number;
 	maxConcurrentMissions?: number;
+	scopeTagIds?: string[];
+	defaultWritingStyleId?: string;
 	state?: AgentState;
 }
 
@@ -66,6 +68,8 @@ export async function createAgent(input: CreateAgentInput): Promise<Agent> {
 		avatar: input.avatar,
 		systemPrompt: input.systemPrompt,
 		memory: input.memory,
+		scopeTagIds: input.scopeTagIds,
+		defaultWritingStyleId: input.defaultWritingStyleId,
 		policy: deepClone(input.policy ?? DEFAULT_AI_POLICY),
 		maxTokensPerDay: input.maxTokensPerDay,
 		maxConcurrentMissions: input.maxConcurrentMissions ?? 1,
@@ -130,6 +134,7 @@ export interface AgentPatch {
 	maxTokensPerDay?: number;
 	maxConcurrentMissions?: number;
 	scopeTagIds?: string[];
+	defaultWritingStyleId?: string;
 	state?: AgentState;
 }
 

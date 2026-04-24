@@ -27,6 +27,8 @@ import { decryptRecords, VaultLockedError } from '$lib/data/crypto';
 import { toDraft, toDraftVersion } from './queries';
 import { STYLE_PRESETS } from './presets/styles';
 import { writingStyleTable } from './collections';
+import { getCurrentActor, isAiActor } from '$lib/data/events';
+import { getAgent } from '$lib/data/ai/agents/store';
 import type {
 	LocalDraft,
 	LocalDraftVersion,
@@ -34,6 +36,23 @@ import type {
 	DraftKind,
 	DraftStatus,
 } from './types';
+
+/**
+ * When an AI actor is running a writing tool without an explicit
+ * styleId, fall back to the agent's `defaultWritingStyleId`. User-
+ * invoked calls skip this — a human passing no styleId means "ad-hoc,
+ * no style", not "use my default".
+ */
+async function resolveAgentDefaultStyle(): Promise<string | null> {
+	const actor = getCurrentActor();
+	if (!isAiActor(actor)) return null;
+	try {
+		const agent = await getAgent(actor.principalId);
+		return agent?.defaultWritingStyleId ?? null;
+	} catch {
+		return null;
+	}
+}
 
 const KINDS: DraftKind[] = [
 	'blog',
@@ -266,11 +285,16 @@ export const writingTools: ModuleTool[] = [
 
 			const targetWordsRaw =
 				typeof params.targetWords === 'number' ? Math.round(params.targetWords) : null;
+			const explicitStyleId =
+				typeof params.styleId === 'string' && params.styleId.length > 0 ? params.styleId : null;
+			// Persona-Linkage: AI actors inherit the agent's default style
+			// when they don't pass one; user-invoked calls do not — a human
+			// omitting styleId means "ad-hoc, no style".
+			const styleId = explicitStyleId ?? (await resolveAgentDefaultStyle());
 			const { draft } = await draftsStore.createDraft({
 				kind,
 				title,
-				styleId:
-					typeof params.styleId === 'string' && params.styleId.length > 0 ? params.styleId : null,
+				styleId,
 				briefing: {
 					topic,
 					audience: typeof params.audience === 'string' ? params.audience : null,
