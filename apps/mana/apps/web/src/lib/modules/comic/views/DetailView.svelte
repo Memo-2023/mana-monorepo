@@ -19,6 +19,7 @@
 	import PanelStrip from '../components/PanelStrip.svelte';
 	import PanelEditor from '../components/PanelEditor.svelte';
 	import BatchPanelEditor from '../components/BatchPanelEditor.svelte';
+	import StoryboardSuggester from '../components/StoryboardSuggester.svelte';
 	import { encryptRecord } from '$lib/data/crypto';
 	import type { ComicPanelMeta, LocalComicStory } from '../types';
 
@@ -32,7 +33,7 @@
 	const story$ = useStory(id);
 	const story = $derived(story$.value);
 
-	type EditorMode = 'off' | 'single' | 'batch';
+	type EditorMode = 'off' | 'single' | 'batch' | 'ai';
 	let editorMode = $state<EditorMode>('off');
 
 	async function handleToggleFavorite() {
@@ -189,6 +190,15 @@
 							<Plus size={12} />
 							Batch
 						</button>
+						<button
+							type="button"
+							onclick={() => (editorMode = 'ai')}
+							class="inline-flex items-center gap-1.5 rounded-md border border-primary/40 bg-primary/5 px-3 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/10"
+							title="KI schlägt Panels aus einem Tagebuch-Eintrag, Notiz oder Review vor"
+						>
+							<Sparkle size={12} weight="fill" />
+							Mit KI
+						</button>
 					</div>
 				{/if}
 			</div>
@@ -211,6 +221,8 @@
 				/>
 			{:else if editorMode === 'batch' && !story.isArchived}
 				<BatchPanelEditor {story} onClose={() => (editorMode = 'off')} />
+			{:else if editorMode === 'ai' && !story.isArchived}
+				<StoryboardSuggester {story} onClose={() => (editorMode = 'off')} />
 			{/if}
 		</div>
 

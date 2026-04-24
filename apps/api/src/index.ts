@@ -43,6 +43,7 @@ import { newsResearchRoutes } from './modules/news-research/routes';
 import { articlesRoutes } from './modules/articles/routes';
 import { tracesRoutes } from './modules/traces/routes';
 import { writingRoutes } from './modules/writing/routes';
+import { comicRoutes } from './modules/comic/routes';
 import { presiRoutes } from './modules/presi/routes';
 import { researchRoutes } from './modules/research/routes';
 import { whoRoutes } from './modules/who/routes';
@@ -134,6 +135,7 @@ app.route('/api/v1/research', researchRoutes);
 app.route('/api/v1/website', websiteRoutes);
 app.route('/api/v1/who', whoRoutes);
 app.route('/api/v1/writing', writingRoutes);
+app.route('/api/v1/comic', comicRoutes);
 
 // ─── Server Info ────────────────────────────────────────────
 console.log(`mana-api starting on port ${PORT}...`);
