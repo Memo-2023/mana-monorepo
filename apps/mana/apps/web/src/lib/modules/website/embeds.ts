@@ -29,6 +29,7 @@ import type { LocalGoal } from '$lib/companion/goals/types';
 import type { LocalPlace } from '$lib/modules/places/types';
 import type { LocalRecipe } from '$lib/modules/recipes/types';
 import type { LocalWardrobeOutfit } from '$lib/modules/wardrobe/types';
+import type { LocalComicStory } from '$lib/modules/comic/types';
 import type { LocalTimeBlock } from '$lib/data/time-blocks/types';
 
 export interface ResolvedEmbed {
@@ -66,6 +67,9 @@ export async function resolveEmbed(props: ModuleEmbedProps): Promise<ResolvedEmb
 				break;
 			case 'wardrobe.outfits':
 				items = await resolveWardrobeOutfits(props);
+				break;
+			case 'comic.stories':
+				items = await resolveComicStories(props);
 				break;
 			default:
 				return {
@@ -500,6 +504,66 @@ async function resolveWardrobeOutfits(props: ModuleEmbedProps): Promise<EmbedIte
 			title: o.name,
 			subtitle: meta.length > 0 ? meta.join(' · ') : undefined,
 			imageUrl: o.lastTryOn?.imageUrl ?? undefined,
+		};
+	});
+}
+
+/**
+ * Comic-stories: public-comic-portfolio use case. Returns stories
+ * flipped to 'public' with their cover panel as the card image
+ * (panelImageIds[0] → picture.images.publicUrl). Hard-gated on
+ * canEmbedOnWebsite.
+ *
+ * Whitelist (plan §2): title + "N Panels" subtitle + cover-panel URL.
+ * Character references, panel captions/dialogues, storyContext, and
+ * the full panelMeta stay out of the snapshot — the cover image is
+ * already an AI-rendered artifact, the other fields would leak the
+ * author's briefing and source-entry linkage.
+ */
+async function resolveComicStories(props: ModuleEmbedProps): Promise<EmbedItem[]> {
+	let stories = await db.table<LocalComicStory>('comicStories').toArray();
+	stories = stories.filter(
+		(s) => !s.deletedAt && !s.isArchived && canEmbedOnWebsite(s.visibility ?? 'private')
+	);
+
+	if (props.filter?.isFavorite === true) {
+		stories = stories.filter((s) => s.isFavorite === true);
+	}
+	if (props.filter?.kind) {
+		// `kind` reuses the generic filter slot as a style filter so the
+		// website editor can restrict to e.g. only manga-style comics.
+		stories = stories.filter((s) => s.style === props.filter?.kind);
+	}
+	if (props.filter?.tagIds?.length) {
+		const wanted = new Set(props.filter.tagIds);
+		stories = stories.filter((s) => (s.tags ?? []).some((t) => wanted.has(t)));
+	}
+
+	const decrypted = (await decryptRecords('comicStories', stories)) as LocalComicStory[];
+
+	// Favourites first, then newest.
+	decrypted.sort((a, b) => {
+		const favA = a.isFavorite ? 0 : 1;
+		const favB = b.isFavorite ? 0 : 1;
+		if (favA !== favB) return favA - favB;
+		return (b.updatedAt ?? '').localeCompare(a.updatedAt ?? '');
+	});
+
+	const coverImageIds = decrypted
+		.map((s) => s.panelImageIds?.[0])
+		.filter((id): id is string => Boolean(id));
+	const coverImages = await db.table<LocalImage>('images').where('id').anyOf(coverImageIds).toArray();
+	const coverById = new Map<string, LocalImage>();
+	for (const img of coverImages) coverById.set(img.id, img);
+
+	return decrypted.map((s) => {
+		const coverId = s.panelImageIds?.[0];
+		const cover = coverId ? coverById.get(coverId) : undefined;
+		const panelCount = s.panelImageIds?.length ?? 0;
+		return {
+			title: s.title,
+			subtitle: `${panelCount} ${panelCount === 1 ? 'Panel' : 'Panels'}`,
+			imageUrl: cover?.publicUrl ?? undefined,
 		};
 	});
 }

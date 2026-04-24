@@ -31,7 +31,9 @@ export type ModuleId =
 	// — M5 (me-images + reference-based image generation) —
 	| 'me'
 	// — Wardrobe M5 (garments + outfits + try-on) —
-	| 'wardrobe';
+	| 'wardrobe'
+	// — Comic M5 (stories + panel generation from cross-module text) —
+	| 'comic';
 
 /**
  * `user-space` — operates on the caller's data within a specific Space.

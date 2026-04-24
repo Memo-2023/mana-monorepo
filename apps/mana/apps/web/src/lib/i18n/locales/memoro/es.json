@@ -162,6 +162,7 @@
 		"show_all_memos": "Mostrar todos los memos",
 		"no_memos_yet": "Aún no hay memos",
 		"no_memos_hint": "Ve a la página de grabación para crear tu primer memo",
+		"load_more": "Cargar más memos",
 		"search_placeholder": "Buscar memos...",
 		"delete_memo_title": "Eliminar memo",
 		"delete_memo_confirm": "¿Realmente desea eliminar \"{title}\"?",

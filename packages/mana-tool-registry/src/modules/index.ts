@@ -18,6 +18,7 @@ import { registerNotesTools } from './notes.ts';
 import { registerSpacesTools } from './spaces.ts';
 import { registerTodoTools } from './todo.ts';
 import { registerWardrobeTools } from './wardrobe.ts';
+import { registerComicTools } from './comic.ts';
 
 export function registerAllModules(): void {
 	registerHabitsTools();
@@ -28,6 +29,7 @@ export function registerAllModules(): void {
 	registerSpacesTools();
 	registerTodoTools();
 	registerWardrobeTools();
+	registerComicTools();
 }
 
 export {
@@ -39,4 +41,5 @@ export {
 	registerSpacesTools,
 	registerTodoTools,
 	registerWardrobeTools,
+	registerComicTools,
 };

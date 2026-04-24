@@ -153,6 +153,15 @@
 		"body_stats": {
 			"title": "Body",
 			"description": "Peso actual y estado del entrenamiento"
+		},
+		"activity_feed": {
+			"title": "Actividad",
+			"description": "Cambios recientes en todos los módulos",
+			"empty": "Aún no hay actividad"
+		},
+		"articles_unread": {
+			"title": "Artículos",
+			"description": "Artículos no leídos de tu lista de lectura"
 		}
 	}
 }
