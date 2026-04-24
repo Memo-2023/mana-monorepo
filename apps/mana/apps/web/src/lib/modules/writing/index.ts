@@ -8,6 +8,15 @@ export type { CreateDraftInput, UpdateDraftPatch } from './stores/drafts.svelte'
 export { stylesStore } from './stores/styles.svelte';
 export type { CreateStyleInput, UpdateStylePatch } from './stores/styles.svelte';
 
+export { generationsStore } from './stores/generations.svelte';
+export type { StartDraftGenerationOptions } from './stores/generations.svelte';
+
+export { callWritingGeneration } from './api';
+export type { GenerateDraftRequest, GenerateDraftResponse } from './api';
+
+export { buildDraftPrompt, estimateMaxTokens } from './utils/prompt-builder';
+export type { PromptPair, BuildDraftPromptInput } from './utils/prompt-builder';
+
 export {
 	useAllDrafts,
 	useDraft,

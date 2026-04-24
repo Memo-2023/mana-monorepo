@@ -42,6 +42,7 @@ import { newsRoutes } from './modules/news/routes';
 import { newsResearchRoutes } from './modules/news-research/routes';
 import { articlesRoutes } from './modules/articles/routes';
 import { tracesRoutes } from './modules/traces/routes';
+import { writingRoutes } from './modules/writing/routes';
 import { presiRoutes } from './modules/presi/routes';
 import { researchRoutes } from './modules/research/routes';
 import { whoRoutes } from './modules/who/routes';
@@ -96,6 +97,7 @@ const RESOURCE_MODULES = [
 	'research',
 	'traces',
 	'who',
+	'writing',
 ] as const;
 for (const mod of RESOURCE_MODULES) {
 	app.use(`/api/v1/${mod}/*`, requireTier('beta'));
@@ -131,6 +133,7 @@ app.route('/api/v1/presi', presiRoutes);
 app.route('/api/v1/research', researchRoutes);
 app.route('/api/v1/website', websiteRoutes);
 app.route('/api/v1/who', whoRoutes);
+app.route('/api/v1/writing', writingRoutes);
 
 // ─── Server Info ────────────────────────────────────────────
 console.log(`mana-api starting on port ${PORT}...`);

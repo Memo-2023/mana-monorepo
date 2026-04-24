@@ -31,6 +31,15 @@ export interface LlmJsonOptions {
 	maxTokens?: number;
 }
 
+export interface LlmTextOptions {
+	model: string;
+	system?: string;
+	user: string;
+	temperature?: number;
+	maxTokens?: number;
+	signal?: AbortSignal;
+}
+
 export interface LlmStreamOptions {
 	model: string;
 	system?: string;
@@ -99,6 +108,56 @@ export async function llmJson<T = unknown>(opts: LlmJsonOptions): Promise<T> {
 			raw
 		);
 	}
+}
+
+/**
+ * Call the LLM and return the raw text content — no JSON parsing, no
+ * streaming. Used when you want a finished prose artifact (a generated
+ * draft, a summary, a translation) as one string. Includes token usage
+ * when the provider reports it so generation records can store it.
+ */
+export interface LlmTextResult {
+	text: string;
+	tokenUsage?: { input: number; output: number };
+	model: string;
+}
+
+export async function llmText(opts: LlmTextOptions): Promise<LlmTextResult> {
+	const res = await fetch(`${LLM_URL}/v1/chat/completions`, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({
+			model: opts.model,
+			messages: buildMessages(opts.system, opts.user),
+			temperature: opts.temperature ?? 0.7,
+			max_tokens: opts.maxTokens ?? 2000,
+		}),
+		signal: opts.signal,
+	});
+
+	if (!res.ok) {
+		const body = await res.text().catch(() => '');
+		throw new LlmError(`mana-llm returned ${res.status}`, res.status, body);
+	}
+
+	const data = (await res.json()) as {
+		choices?: Array<{ message?: { content?: string } }>;
+		usage?: { prompt_tokens?: number; completion_tokens?: number };
+		model?: string;
+	};
+	const text = data.choices?.[0]?.message?.content;
+	if (!text) throw new LlmError('mana-llm response missing content');
+	return {
+		text: text.trim(),
+		tokenUsage:
+			data.usage && typeof data.usage.prompt_tokens === 'number'
+				? {
+						input: data.usage.prompt_tokens ?? 0,
+						output: data.usage.completion_tokens ?? 0,
+					}
+				: undefined,
+		model: data.model ?? opts.model,
+	};
 }
 
 /**

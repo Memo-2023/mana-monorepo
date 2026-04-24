@@ -12,8 +12,15 @@
 	import StatusBadge from '../components/StatusBadge.svelte';
 	import VersionEditor from '../components/VersionEditor.svelte';
 	import VersionHistory from '../components/VersionHistory.svelte';
+	import GenerationStatus from '../components/GenerationStatus.svelte';
 	import { draftsStore } from '../stores/drafts.svelte';
-	import { useDraft, useVersionsForDraft, useCurrentVersionForDraft } from '../queries';
+	import { generationsStore } from '../stores/generations.svelte';
+	import {
+		useDraft,
+		useVersionsForDraft,
+		useCurrentVersionForDraft,
+		useGenerationsForDraft,
+	} from '../queries';
 	import { KIND_LABELS, STATUS_LABELS } from '../constants';
 	import type { DraftStatus } from '../types';
 
@@ -28,12 +35,30 @@
 	const versions$ = useVersionsForDraft(id);
 	/* svelte-ignore state_referenced_locally */
 	const currentVersion$ = useCurrentVersionForDraft(id);
+	/* svelte-ignore state_referenced_locally */
+	const generations$ = useGenerationsForDraft(id);
 	const draft = $derived(draft$.value);
 	const versions = $derived(versions$.value);
 	const currentVersion = $derived(currentVersion$.value);
+	const generations = $derived(generations$.value);
+
+	// Surface the freshest running generation, or the most recent failure
+	// so the user can dismiss it. On success we hide — the new version is
+	// already live in the editor via the currentVersionId pointer.
+	const latestGeneration = $derived(
+		generations.find((g) => g.status === 'queued' || g.status === 'running') ??
+			generations.find((g) => g.status === 'failed') ??
+			null
+	);
+	let dismissedGenerationIds = $state<Set<string>>(new Set());
+	const visibleGeneration = $derived(
+		latestGeneration && !dismissedGenerationIds.has(latestGeneration.id) ? latestGeneration : null
+	);
 
 	let briefingOpen = $state(false);
 	let saving = $state(false);
+	let generating = $state(false);
+	let generateError = $state<string | null>(null);
 
 	async function setStatus(next: DraftStatus) {
 		if (!draft) return;
@@ -61,6 +86,25 @@
 		await draftsStore.deleteDraft(draft.id);
 		goto('/writing');
 	}
+
+	async function generate() {
+		if (!draft || generating) return;
+		generating = true;
+		generateError = null;
+		try {
+			await generationsStore.startDraftGeneration(draft.id);
+		} catch (err) {
+			generateError = err instanceof Error ? err.message : String(err);
+		} finally {
+			generating = false;
+		}
+	}
+
+	function dismissGeneration(id: string) {
+		dismissedGenerationIds = new Set([...dismissedGenerationIds, id]);
+	}
+
+	const hasDraftContent = $derived((currentVersion?.content ?? '').trim().length > 0);
 
 	const kind = $derived(draft ? KIND_LABELS[draft.kind] : null);
 	const targetWords = $derived(draft?.briefing.targetLength?.value ?? null);
@@ -130,22 +174,50 @@
 			<section class="editor-column">
 				{#if currentVersion}
 					<div class="editor-head">
-						<div>
+						<div class="version-label">
 							<strong>Version {currentVersion.versionNumber}</strong>
 							{#if currentVersion.isAiGenerated}
 								<span class="ai-tag">KI</span>
 							{/if}
 						</div>
-						<button
-							type="button"
-							class="checkpoint"
-							onclick={saveCheckpoint}
-							disabled={saving}
-							title="Aktuellen Text als neue Version einfrieren"
-						>
-							{saving ? 'Speichert…' : '＋ Als Checkpoint speichern'}
-						</button>
+						<div class="editor-actions">
+							<button
+								type="button"
+								class="generate"
+								onclick={generate}
+								disabled={generating}
+								title={hasDraftContent
+									? 'Kompletten Text neu generieren (überschreibt nicht — neue Version)'
+									: 'Ersten Entwurf aus dem Briefing generieren'}
+							>
+								{#if generating}
+									Schreibt…
+								{:else if hasDraftContent}
+									⟳ Neu generieren
+								{:else}
+									✨ Generate
+								{/if}
+							</button>
+							<button
+								type="button"
+								class="checkpoint"
+								onclick={saveCheckpoint}
+								disabled={saving}
+								title="Aktuellen Text als neue Version einfrieren"
+							>
+								{saving ? 'Speichert…' : '＋ Checkpoint'}
+							</button>
+						</div>
 					</div>
+					{#if visibleGeneration}
+						<GenerationStatus
+							generation={visibleGeneration}
+							ondismiss={() => dismissGeneration(visibleGeneration.id)}
+						/>
+					{/if}
+					{#if generateError}
+						<p class="error">{generateError}</p>
+					{/if}
 					<VersionEditor version={currentVersion} {targetWords} />
 				{:else}
 					<p class="muted">Diese Version existiert nicht mehr.</p>
@@ -321,6 +393,34 @@
 		text-transform: uppercase;
 		letter-spacing: 0.04em;
 	}
+	.version-label {
+		display: flex;
+		align-items: center;
+		gap: 0.3rem;
+	}
+	.editor-actions {
+		display: inline-flex;
+		gap: 0.4rem;
+	}
+	.generate {
+		padding: 0.4rem 0.9rem;
+		border-radius: 0.5rem;
+		border: 1px solid #0ea5e9;
+		background: #0ea5e9;
+		color: white;
+		cursor: pointer;
+		font: inherit;
+		font-weight: 500;
+		font-size: 0.85rem;
+	}
+	.generate:hover:not(:disabled) {
+		background: #0284c7;
+		border-color: #0284c7;
+	}
+	.generate:disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
+	}
 	.checkpoint {
 		padding: 0.4rem 0.8rem;
 		border-radius: 0.5rem;
@@ -337,6 +437,15 @@
 	.checkpoint:disabled {
 		opacity: 0.5;
 		cursor: not-allowed;
+	}
+	.error {
+		margin: 0;
+		padding: 0.5rem 0.75rem;
+		border-radius: 0.5rem;
+		color: #ef4444;
+		background: color-mix(in srgb, #ef4444 6%, transparent);
+		border: 1px solid color-mix(in srgb, #ef4444 40%, transparent);
+		font-size: 0.85rem;
 	}
 	.history-column h2 {
 		font-size: 0.8rem;
