@@ -6,6 +6,7 @@
  */
 
 import type { BaseRecord } from '@mana/local-store';
+import type { VisibilityLevel } from '@mana/shared-privacy';
 import type { TimeBlock, TimeBlockType } from '$lib/data/time-blocks/types';
 
 export interface LocalCalendar extends BaseRecord {
@@ -25,6 +26,10 @@ export interface LocalEvent extends BaseRecord {
 	color?: string | null;
 	reminders?: unknown | null;
 	tagIds?: string[];
+	visibility?: VisibilityLevel;
+	visibilityChangedAt?: string;
+	visibilityChangedBy?: string;
+	unlistedToken?: string;
 }
 
 export type CalendarViewType = 'week' | 'month' | 'agenda';
@@ -48,6 +53,7 @@ export interface CalendarEvent {
 	parentEventId: string | null;
 	color: string | null;
 	tagIds: string[];
+	visibility: VisibilityLevel;
 	createdAt: string;
 	updatedAt: string;
 	// TimeBlock metadata (for universal calendar view)
@@ -97,6 +103,10 @@ export function timeBlockToCalendarEvent(
 		parentEventId: null,
 		color: eventData?.color ?? block.color,
 		tagIds: eventData?.tagIds ?? [],
+		// Cross-module TimeBlock entries (tasks, habits, time entries) don't
+		// carry a calendar-specific visibility — they inherit 'space' so
+		// they stay invisible on the website (public requires explicit opt-in).
+		visibility: eventData?.visibility ?? 'space',
 		createdAt: block.createdAt,
 		updatedAt: block.updatedAt,
 		blockType: block.type,

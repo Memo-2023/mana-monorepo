@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { _ } from 'svelte-i18n';
 	import { getContext } from 'svelte';
+	import { VisibilityPicker, type VisibilityLevel } from '@mana/shared-privacy';
 	import { eventsStore } from '../stores/events.svelte';
 	import { getCalendarById, getCalendarColor } from '../queries';
 	import type { Calendar, CalendarEvent } from '../types';
@@ -28,6 +29,10 @@
 	}
 
 	let { event, onClose }: Props = $props();
+
+	async function handleVisibilityChange(next: VisibilityLevel) {
+		await eventsStore.setVisibility(event.id, next);
+	}
 
 	const calendarsCtx: { readonly value: Calendar[] } = getContext('calendars');
 
@@ -206,6 +211,7 @@
 			</div>
 			<div class="modal-actions">
 				{#if !isEditing}
+					<VisibilityPicker level={event.visibility} onChange={handleVisibilityChange} compact />
 					<button class="btn btn-ghost" onclick={copyToClipboard} title="Kopieren">
 						{#if copied}<Check size={16} />{:else}<Copy size={16} />{/if}
 					</button>

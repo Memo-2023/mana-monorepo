@@ -17,10 +17,13 @@
 import { db } from '$lib/data/database';
 import { decryptRecords } from '$lib/data/crypto';
 import { canEmbedOnWebsite } from '@mana/shared-privacy';
+import { timeBlockTable } from '$lib/data/time-blocks/collections';
 import { mediaFileUrl } from './upload';
 import type { EmbedItem, EmbedSource, ModuleEmbedProps } from '@mana/website-blocks';
 import type { LocalBoard, LocalBoardItem, LocalImage } from '$lib/modules/picture/types';
 import type { LocalLibraryEntry } from '$lib/modules/library/types';
+import type { LocalEvent } from '$lib/modules/calendar/types';
+import type { LocalTimeBlock } from '$lib/data/time-blocks/types';
 
 export interface ResolvedEmbed {
 	items: EmbedItem[];
@@ -39,6 +42,9 @@ export async function resolveEmbed(props: ModuleEmbedProps): Promise<ResolvedEmb
 				break;
 			case 'library.entries':
 				items = await resolveLibraryEntries(props);
+				break;
+			case 'calendar.events':
+				items = await resolveCalendarEvents(props);
 				break;
 			default:
 				return {
@@ -157,4 +163,100 @@ async function resolveLibraryEntries(props: ModuleEmbedProps): Promise<EmbedItem
 				(entry.coverMediaId ? mediaFileUrl(entry.coverMediaId, 'medium') : undefined),
 		};
 	});
+}
+
+/**
+ * Calendar-events: returns events whose owner flipped visibility to
+ * 'public'. By design (plan §2), the snapshot carries a whitelist of
+ * fields only — title, start/end time, location. Description, guest
+ * list, reminders, and tags are NOT inlined because they frequently
+ * carry private context that an event's visibility toggle shouldn't
+ * accidentally expose.
+ *
+ * Optional filters on top of the hard gate:
+ *   - upcomingDays: number of days forward from now; events starting
+ *     later are dropped. Omit to include all (past + future).
+ *   - tagIds: at-least-one overlap with event.tagIds.
+ */
+async function resolveCalendarEvents(props: ModuleEmbedProps): Promise<EmbedItem[]> {
+	let events = await db.table<LocalEvent>('events').toArray();
+	events = events.filter((e) => !e.deletedAt && canEmbedOnWebsite(e.visibility ?? 'private'));
+
+	if (props.filter?.tagIds?.length) {
+		const wanted = new Set(props.filter.tagIds);
+		events = events.filter((e) => (e.tagIds ?? []).some((t) => wanted.has(t)));
+	}
+
+	const decrypted = (await decryptRecords('events', events)) as LocalEvent[];
+
+	// Join with TimeBlock for the actual start/end times (events only
+	// store a reference). Fetch in one pass, then attach by id.
+	const blockIds = decrypted.map((e) => e.timeBlockId).filter((id): id is string => Boolean(id));
+	const blocks = await timeBlockTable.where('id').anyOf(blockIds).toArray();
+	const byBlockId = new Map<string, LocalTimeBlock>();
+	for (const b of blocks) byBlockId.set(b.id, b);
+
+	const now = Date.now();
+	const upcomingCutoff =
+		typeof props.filter?.upcomingDays === 'number'
+			? now + props.filter.upcomingDays * 24 * 60 * 60 * 1000
+			: null;
+
+	const withBlock: Array<{ event: LocalEvent; block: LocalTimeBlock; startMs: number }> = [];
+	for (const e of decrypted) {
+		const b = byBlockId.get(e.timeBlockId);
+		if (!b) continue;
+		const startMs = Date.parse(b.startDate);
+		if (Number.isNaN(startMs)) continue;
+		if (upcomingCutoff !== null && (startMs < now || startMs > upcomingCutoff)) continue;
+		withBlock.push({ event: e, block: b, startMs });
+	}
+
+	// Upcoming-first; same-day ties broken by id so the snapshot is stable.
+	withBlock.sort((a, b) => a.startMs - b.startMs || a.event.id.localeCompare(b.event.id));
+
+	return withBlock.map(({ event, block }) => ({
+		title: event.title,
+		subtitle: formatEventSubtitle(block.startDate, block.endDate, block.allDay, event.location),
+	}));
+}
+
+/**
+ * Build the subtitle shown under a calendar-event embed card. Kept in
+ * the plaintext layer (not in the Svelte renderer) so the inlined blob
+ * is self-contained and the public page needs no locale-aware
+ * formatting round-trip. German only for now — matches the rest of the
+ * module copy.
+ */
+function formatEventSubtitle(
+	startIso: string,
+	endIso: string | null,
+	allDay: boolean,
+	location: string | null | undefined
+): string {
+	const start = new Date(startIso);
+	const dateParts = new Intl.DateTimeFormat('de-DE', {
+		day: '2-digit',
+		month: 'short',
+		year: 'numeric',
+	}).format(start);
+
+	let timePart = '';
+	if (!allDay) {
+		const timeFormat = new Intl.DateTimeFormat('de-DE', {
+			hour: '2-digit',
+			minute: '2-digit',
+		});
+		const startTime = timeFormat.format(start);
+		if (endIso) {
+			const endTime = timeFormat.format(new Date(endIso));
+			timePart = ` · ${startTime}–${endTime}`;
+		} else {
+			timePart = ` · ${startTime}`;
+		}
+	}
+
+	const loc = location?.trim();
+	const locPart = loc ? ` · ${loc}` : '';
+	return `${dateParts}${timePart}${locPart}`;
 }

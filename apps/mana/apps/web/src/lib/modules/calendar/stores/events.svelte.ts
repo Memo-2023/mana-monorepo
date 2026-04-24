@@ -11,6 +11,13 @@
 import { db } from '$lib/data/database';
 import { encryptRecord } from '$lib/data/crypto';
 import { emitDomainEvent } from '$lib/data/events';
+import { getActiveSpace } from '$lib/data/scope';
+import { getEffectiveUserId } from '$lib/data/current-user';
+import {
+	defaultVisibilityFor,
+	generateUnlistedToken,
+	type VisibilityLevel,
+} from '@mana/shared-privacy';
 import { createBlock, updateBlock, deleteBlock } from '$lib/data/time-blocks/service';
 import { timeBlockTable } from '$lib/data/time-blocks/collections';
 import {
@@ -76,6 +83,7 @@ export const eventsStore = {
 				location: input.location ?? null,
 				color: input.color ?? null,
 				reminders: null,
+				visibility: defaultVisibilityFor(getActiveSpace()?.type),
 				createdAt: new Date().toISOString(),
 				updatedAt: new Date().toISOString(),
 			};
@@ -398,6 +406,7 @@ export const eventsStore = {
 			parentEventId: null,
 			color: data.color || null,
 			tagIds: data.tagIds || [],
+			visibility: data.visibility ?? 'private',
 			createdAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString(),
 			blockType: 'event',
@@ -432,5 +441,46 @@ export const eventsStore = {
 			return eventId.split('__recurrence__')[0];
 		}
 		return eventId;
+	},
+
+	/**
+	 * Flip the event's visibility. Mints/clears an unlisted token on the
+	 * transition boundary, emits the cross-module VisibilityChanged event.
+	 * Publishes a public event on the next website snapshot with
+	 * field-level redaction applied server-side (see embeds.ts).
+	 */
+	async setVisibility(id: string, next: VisibilityLevel) {
+		error = null;
+		try {
+			const existing = await db.table<LocalEvent>('events').get(id);
+			if (!existing) return { success: false, error: 'Event not found' };
+			const before: VisibilityLevel = existing.visibility ?? 'space';
+			if (before === next) return { success: true };
+
+			const now = new Date().toISOString();
+			const patch: Partial<LocalEvent> = {
+				visibility: next,
+				visibilityChangedAt: now,
+				visibilityChangedBy: getEffectiveUserId(),
+				updatedAt: now,
+			};
+			if (next === 'unlisted' && !existing.unlistedToken) {
+				patch.unlistedToken = generateUnlistedToken();
+			} else if (next !== 'unlisted' && existing.unlistedToken) {
+				patch.unlistedToken = undefined;
+			}
+			await db.table('events').update(id, patch);
+
+			emitDomainEvent('VisibilityChanged', 'calendar', 'events', id, {
+				recordId: id,
+				collection: 'events',
+				before,
+				after: next,
+			});
+			return { success: true };
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Failed to set visibility';
+			return { success: false, error };
+		}
 	},
 };

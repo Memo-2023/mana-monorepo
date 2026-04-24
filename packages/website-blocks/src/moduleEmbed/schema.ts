@@ -26,7 +26,7 @@ export const EmbedResolvedSchema = z.object({
  * Supported embed sources. Add new sources here + a matching provider
  * in the editor's publish resolver.
  */
-export const EmbedSourceSchema = z.enum(['picture.board', 'library.entries']);
+export const EmbedSourceSchema = z.enum(['picture.board', 'library.entries', 'calendar.events']);
 export type EmbedSource = z.infer<typeof EmbedSourceSchema>;
 
 export const ModuleEmbedSchema = z.object({
@@ -38,14 +38,20 @@ export const ModuleEmbedSchema = z.object({
 	layout: z.enum(['grid', 'list']).default('grid'),
 	maxItems: z.number().int().min(1).max(48).default(12),
 	/**
-	 * Optional filters depending on source. Library uses { isFavorite?,
-	 * status?, kind? }; picture ignores them in M4.
+	 * Optional filters depending on source.
+	 *   library.entries: { isFavorite?, status?, kind? }
+	 *   picture.board:   ignored (board is the source)
+	 *   calendar.events: { upcomingDays?, tagIds? } — omit upcomingDays
+	 *                    to include past events; tagIds AND-filter on
+	 *                    event tag assignments
 	 */
 	filter: z
 		.object({
 			isFavorite: z.boolean().optional(),
 			status: z.string().max(32).optional(),
 			kind: z.string().max(32).optional(),
+			upcomingDays: z.number().int().min(1).max(365).optional(),
+			tagIds: z.array(z.string().max(64)).max(16).optional(),
 		})
 		.default({}),
 	/**
