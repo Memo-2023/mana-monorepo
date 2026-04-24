@@ -12,11 +12,25 @@
 	import { getAccessibleApps } from '$lib/app-registry';
 	import type { AppDescriptor } from '$lib/app-registry/types';
 	import { APP_CATEGORIES, getAppCategory, type AppCategory } from '$lib/app-registry/categories';
+	import appsDeRaw from '$lib/i18n/locales/apps/de.json';
+	import appsEnRaw from '$lib/i18n/locales/apps/en.json';
+
+	const appsDe = appsDeRaw as Record<string, string>;
+	const appsEn = appsEnRaw as Record<string, string>;
 
 	function appName(id: string, fallback: string): string {
 		const key = `apps.${id}`;
 		const translated = $_(key);
 		return translated !== key ? translated : fallback;
+	}
+
+	// Match against DE + EN names, fallback, and id together so English
+	// aliases stay searchable while the UI is in German ("cal" → Kalender).
+	function searchHaystack(id: string, fallback: string, displayName: string): string {
+		return [displayName, fallback, appsDe[id], appsEn[id], id.replace(/-/g, ' ')]
+			.filter(Boolean)
+			.join(' ')
+			.toLowerCase();
 	}
 
 	interface Props {
@@ -43,11 +57,14 @@
 		system: true, // System is collapsed by default — noisy and rarely toggled
 	});
 
-	// Tier-gate first, then drop open apps, then attach display name.
+	// Tier-gate first, then drop open apps, then attach display name + search haystack.
 	let available = $derived(
 		getAccessibleApps(userTier)
 			.filter((app) => !activeAppIds.includes(app.id))
-			.map((app) => ({ app, displayName: appName(app.id, app.name) }))
+			.map((app) => {
+				const displayName = appName(app.id, app.name);
+				return { app, displayName, haystack: searchHaystack(app.id, app.name, displayName) };
+			})
 			.sort((a, b) => a.displayName.localeCompare(b.displayName, 'de'))
 	);
 
@@ -56,9 +73,7 @@
 
 	let searchResults = $derived(
 		searchMode
-			? available.filter(({ displayName }) =>
-					displayName.toLowerCase().includes(query.trim().toLowerCase())
-				)
+			? available.filter(({ haystack }) => haystack.includes(query.trim().toLowerCase()))
 			: []
 	);
 
