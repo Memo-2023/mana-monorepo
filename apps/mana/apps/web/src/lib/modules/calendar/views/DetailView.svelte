@@ -118,22 +118,20 @@
 	onConfirmDelete={deleteEvent}
 >
 	{#snippet body(event)}
-		<div class="title-row">
-			<input
-				class="title-input"
-				bind:value={editTitle}
-				onfocus={detail.focus}
-				onblur={saveField}
-				placeholder="Titel..."
-			/>
-			<VisibilityPicker
-				level={event.visibility ?? 'private'}
-				onChange={handleVisibilityChange}
-				compact
-			/>
-		</div>
+		<input
+			class="title-input"
+			bind:value={editTitle}
+			onfocus={detail.focus}
+			onblur={saveField}
+			placeholder="Titel..."
+		/>
 
 		<div class="properties">
+			<div class="prop-row prop-row--labeled">
+				<span class="prop-label">Sichtbarkeit</span>
+				<VisibilityPicker level={event.visibility ?? 'private'} onChange={handleVisibilityChange} />
+			</div>
+
 			<div class="prop-row">
 				<span class="prop-icon"><Clock size={14} /></span>
 				<div class="time-fields">
@@ -234,14 +232,16 @@
 </DetailViewShell>
 
 <style>
-	.title-row {
+	.prop-row--labeled {
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
+		gap: 0.75rem;
 	}
-	.title-row :global(.title-input) {
-		flex: 1 1 auto;
-		min-width: 0;
+	.prop-row--labeled .prop-label {
+		font-size: 0.8125rem;
+		color: hsl(var(--color-muted-foreground));
+		min-width: 5rem;
+		flex-shrink: 0;
 	}
 	.prop-icon {
 		display: flex;
