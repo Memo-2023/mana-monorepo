@@ -24,6 +24,7 @@ export function toPlace(local: LocalPlace): Place {
 		visitCount: local.visitCount ?? 0,
 		lastVisitedAt: local.lastVisitedAt || null,
 		tagIds: local.tagIds ?? [],
+		visibility: local.visibility ?? 'space',
 		createdAt: local.createdAt ?? new Date().toISOString(),
 		updatedAt: local.updatedAt ?? new Date().toISOString(),
 	};

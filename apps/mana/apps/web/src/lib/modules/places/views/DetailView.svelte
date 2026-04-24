@@ -15,6 +15,7 @@
 		type GeocodingResult,
 	} from '$lib/geocoding';
 	import { Star, MapPin, X, MagnifyingGlass, ArrowsClockwise } from '@mana/shared-icons';
+	import { VisibilityPicker, type VisibilityLevel } from '@mana/shared-privacy';
 	import type { ViewProps } from '$lib/app-registry';
 	import type { LocalPlace, PlaceCategory, LocalLocationLog } from '../types';
 	import { useAllTags, getTagsByIds } from '@mana/shared-stores';
@@ -153,6 +154,10 @@
 		await saveField();
 	}
 
+	async function handleVisibilityChange(next: VisibilityLevel) {
+		await placesStore.setVisibility(placeId, next);
+	}
+
 	async function toggleFavorite() {
 		await placesStore.toggleFavorite(placeId);
 	}
@@ -225,6 +230,11 @@
 		{/if}
 
 		<div class="fields">
+			<div class="field-row">
+				<span class="field-label">Sichtbarkeit</span>
+				<VisibilityPicker level={place.visibility ?? 'private'} onChange={handleVisibilityChange} />
+			</div>
+
 			<div class="field-row">
 				<span class="field-label">Kategorie</span>
 				<select class="field-select" value={editCategory} onchange={onCategoryChange}>

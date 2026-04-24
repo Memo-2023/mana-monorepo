@@ -32,6 +32,7 @@ export const EmbedSourceSchema = z.enum([
 	'calendar.events',
 	'todo.tasks',
 	'goals.goals',
+	'places.places',
 ]);
 export type EmbedSource = z.infer<typeof EmbedSourceSchema>;
 
@@ -56,6 +57,9 @@ export const ModuleEmbedSchema = z.object({
 	 *   goals.goals:     { status? } — 'active' | 'completed' filter;
 	 *                    useful for "currently working on" vs "things
 	 *                    I've hit" progress sections
+	 *   places.places:   { kind? (mapped to PlaceCategory),
+	 *                      isFavorite?, tagIds? } — "my favourite cafes",
+	 *                      "rehearsal rooms I use", etc.
 	 */
 	filter: z
 		.object({

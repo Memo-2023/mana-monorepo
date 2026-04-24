@@ -7,6 +7,13 @@
 
 import { encryptRecord, decryptRecord } from '$lib/data/crypto';
 import { emitDomainEvent } from '$lib/data/events';
+import { getActiveSpace } from '$lib/data/scope';
+import { getEffectiveUserId } from '$lib/data/current-user';
+import {
+	defaultVisibilityFor,
+	generateUnlistedToken,
+	type VisibilityLevel,
+} from '@mana/shared-privacy';
 import { createBlock } from '$lib/data/time-blocks/service';
 import { placeTable } from '../collections';
 import { toPlace } from '../queries';
@@ -33,6 +40,7 @@ export const placesStore = {
 			isFavorite: false,
 			isArchived: false,
 			visitCount: 0,
+			visibility: defaultVisibilityFor(getActiveSpace()?.type),
 			createdAt: now,
 			updatedAt: now,
 		};
@@ -132,6 +140,39 @@ export const placesStore = {
 			placeId: id,
 			name: placeName,
 			visitCount: (local.visitCount ?? 0) + 1,
+		});
+	},
+
+	/**
+	 * Flip a place's visibility. Typical use: mark favourite cafes /
+	 * running routes 'public' so a website-embed can list them. Emits
+	 * cross-module VisibilityChanged.
+	 */
+	async setVisibility(id: string, next: VisibilityLevel) {
+		const existing = await placeTable.get(id);
+		if (!existing) throw new Error(`Place ${id} not found`);
+		const before: VisibilityLevel = existing.visibility ?? 'space';
+		if (before === next) return;
+
+		const now = new Date().toISOString();
+		const patch: Partial<LocalPlace> = {
+			visibility: next,
+			visibilityChangedAt: now,
+			visibilityChangedBy: getEffectiveUserId(),
+			updatedAt: now,
+		};
+		if (next === 'unlisted' && !existing.unlistedToken) {
+			patch.unlistedToken = generateUnlistedToken();
+		} else if (next !== 'unlisted' && existing.unlistedToken) {
+			patch.unlistedToken = undefined;
+		}
+		await placeTable.update(id, patch);
+
+		emitDomainEvent('VisibilityChanged', 'places', 'places', id, {
+			recordId: id,
+			collection: 'places',
+			before,
+			after: next,
 		});
 	},
 };

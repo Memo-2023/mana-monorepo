@@ -3,6 +3,7 @@
  */
 
 import type { BaseRecord } from '@mana/local-store';
+import type { VisibilityLevel } from '@mana/shared-privacy';
 
 export type PlaceCategory = 'home' | 'work' | 'food' | 'shopping' | 'transit' | 'leisure' | 'other';
 
@@ -18,6 +19,10 @@ export interface LocalPlace extends BaseRecord {
 	visitCount?: number;
 	lastVisitedAt?: string;
 	tagIds?: string[];
+	visibility?: VisibilityLevel;
+	visibilityChangedAt?: string;
+	visibilityChangedBy?: string;
+	unlistedToken?: string;
 }
 
 export interface LocalLocationLog extends BaseRecord {
@@ -46,6 +51,7 @@ export interface Place {
 	visitCount: number;
 	lastVisitedAt: string | null;
 	tagIds: string[];
+	visibility: VisibilityLevel;
 	createdAt: string;
 	updatedAt: string;
 }
