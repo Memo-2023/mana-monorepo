@@ -137,3 +137,48 @@ export function useOutfitTryOns(outfitId: string | null) {
 		return decrypted.map(toImage);
 	}, [] as Image[]);
 }
+
+/**
+ * Every solo try-on rendered for a single garment, newest first.
+ * Symmetric to `useOutfitTryOns`: filters `picture.images` by the
+ * `wardrobeGarmentId` FK that `runGarmentTryOn` stamps on write. Does
+ * NOT include outfit try-ons the garment participates in — see
+ * `useOutfitsContainingGarment` for the cross-outfit view.
+ */
+export function useGarmentSoloTryOns(garmentId: string | null) {
+	return useLiveQueryWithDefault<Image[]>(async () => {
+		if (!garmentId) return [];
+		const locals = await scopedForModule<LocalImage, string>('picture', 'images')
+			.and((row) => row.wardrobeGarmentId === garmentId)
+			.toArray();
+		const visible = locals
+			.filter((row) => !row.deletedAt && !row.isArchived)
+			.sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? ''));
+		const decrypted = await decryptRecords('images', visible);
+		return decrypted.map(toImage);
+	}, [] as Image[]);
+}
+
+/**
+ * All outfits in the active space that include the given garment,
+ * newest first. Used on the garment detail page to render a "Teil
+ * dieser Outfits"-Strip so the user can jump back into any outfit
+ * they've built around the item — each outfit's own `lastTryOn`
+ * snapshot provides the thumbnail without another image lookup.
+ */
+export function useOutfitsContainingGarment(garmentId: string | null) {
+	return useLiveQueryWithDefault<Outfit[]>(async () => {
+		if (!garmentId) return [];
+		const locals = await scopedForModule<LocalWardrobeOutfit, string>(
+			'wardrobe',
+			'wardrobeOutfits'
+		).toArray();
+		const visible = locals
+			.filter(
+				(row) => !row.deletedAt && !row.isArchived && (row.garmentIds ?? []).includes(garmentId)
+			)
+			.sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? ''));
+		const decrypted = await decryptRecords('wardrobeOutfits', visible);
+		return decrypted.map(toOutfit);
+	}, [] as Outfit[]);
+}

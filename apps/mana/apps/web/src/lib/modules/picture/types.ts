@@ -52,6 +52,14 @@ export interface LocalImage extends BaseRecord {
 	 * an extra table. Plaintext — it's an FK.
 	 */
 	wardrobeOutfitId?: string | null;
+	/**
+	 * Back-reference to `wardrobeGarments.id` when this image was produced
+	 * by the solo-garment try-on flow (M4.1). Symmetric to
+	 * wardrobeOutfitId — pictures are at most one of the two. Lets the
+	 * garment detail view list its own try-ons without scanning by
+	 * `referenceImageIds` containment.
+	 */
+	wardrobeGarmentId?: string | null;
 }
 
 export interface LocalBoard extends BaseRecord {
@@ -122,6 +130,7 @@ export interface Image {
 	referenceImageIds?: string[];
 	generationMode?: ImageGenerationMode;
 	wardrobeOutfitId?: string;
+	wardrobeGarmentId?: string;
 	createdAt: string;
 	updatedAt: string;
 }

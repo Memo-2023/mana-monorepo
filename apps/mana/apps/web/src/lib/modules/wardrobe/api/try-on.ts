@@ -303,11 +303,13 @@ export async function runGarmentTryOn(params: RunGarmentTryOnParams): Promise<Ru
 		downloadCount: 0,
 		generationMode: 'reference',
 		referenceImageIds: referenceMediaIds,
-		// Deliberately null — this is a standalone preview, not an outfit.
-		// If users later compose outfits from these, the outfit-level
-		// try-on writes its own picture.images row with the wardrobeOutfitId
-		// set; no retroactive linking from the garment row.
+		// Symmetric back-ref to wardrobeOutfitId: a solo try-on belongs
+		// to exactly one garment, so the garment detail page can
+		// liveQuery `where wardrobeGarmentId === id`. Outfit and
+		// garment back-refs are mutually exclusive — this row is a
+		// garment try-on, not an outfit one.
 		wardrobeOutfitId: null,
+		wardrobeGarmentId: garment.id,
 		createdAt: now,
 		updatedAt: now,
 	});

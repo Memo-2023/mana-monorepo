@@ -992,6 +992,25 @@ db.version(41).stores({
 	wardrobeOutfits: 'id, createdAt, isFavorite, isArchived',
 });
 
+// v42 — Index `images.wardrobeOutfitId` + add `images.wardrobeGarmentId`
+// index for fast Wardrobe back-reference queries. Until now Try-On
+// results in `picture.images` carried a back-ref to `wardrobeOutfits`
+// but no index — `useOutfitTryOns` fell back to a linear filter across
+// every image in the active space. Solo-Garment Try-Ons (M4.1) didn't
+// have a back-ref at all; the result ended up in the Picture gallery
+// and was unfindable from the garment detail page.
+//
+// Both fields are plaintext FKs to Wardrobe rows in the same space.
+// Index both together so outfit-detail and garment-detail queries are
+// single-field equality lookups (O(log n)) instead of table scans, and
+// add the symmetric `wardrobeGarmentId` so Solo-Try-Ons have the same
+// first-class back-reference as Outfit-Try-Ons. Invariant (enforced in
+// the write path): at most one of the two is set per row.
+db.version(42).stores({
+	images:
+		'id, isFavorite, isPublic, isArchived, prompt, updatedAt, wardrobeOutfitId, wardrobeGarmentId',
+});
+
 // ─── Sync Routing ──────────────────────────────────────────
 // SYNC_APP_MAP, TABLE_TO_SYNC_NAME, TABLE_TO_APP, SYNC_NAME_TO_TABLE,
 // toSyncName() and fromSyncName() are now derived from per-module

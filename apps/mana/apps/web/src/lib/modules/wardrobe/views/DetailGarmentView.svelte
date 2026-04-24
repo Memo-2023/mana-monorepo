@@ -7,7 +7,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { ArrowLeft, CheckCircle, PencilSimple, Archive, Trash } from '@mana/shared-icons';
-	import { useGarment } from '../queries';
+	import { useGarment, useGarmentSoloTryOns, useOutfitsContainingGarment } from '../queries';
 	import { wardrobeGarmentsStore } from '../stores/garments.svelte';
 	import { garmentPhotoUrl } from '../api/media-url';
 	import { CATEGORY_LABELS } from '../constants';
@@ -25,6 +25,16 @@
 	// svelte-ignore state_referenced_locally
 	const garment$ = useGarment(id);
 	const garment = $derived(garment$.value);
+
+	// Back-refs into Picture + sibling outfits. Both live-queries so
+	// a fresh try-on (solo or via a linked outfit) pushes into the
+	// strips without a manual reload.
+	// svelte-ignore state_referenced_locally
+	const soloTryOns$ = useGarmentSoloTryOns(id);
+	// svelte-ignore state_referenced_locally
+	const outfits$ = useOutfitsContainingGarment(id);
+	const soloTryOns = $derived(soloTryOns$.value);
+	const outfits = $derived(outfits$.value);
 
 	let editing = $state(false);
 	let saving = $state(false);
@@ -221,5 +231,90 @@
 				{/if}
 			</div>
 		</div>
+
+		<!-- Solo try-on history — every image produced by
+		     runGarmentTryOn carrying this garment's wardrobeGarmentId FK.
+		     Clicking a thumb opens the full image in the Picture gallery
+		     so favoriting / download / delete etc. live in their canonical
+		     home. -->
+		{#if soloTryOns.length > 0}
+			<section class="space-y-2">
+				<header class="flex items-baseline justify-between">
+					<h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+						Anproben · {soloTryOns.length}
+					</h2>
+					<span class="text-xs text-muted-foreground">Einzelstück auf dir gerendert</span>
+				</header>
+				<div class="flex gap-3 overflow-x-auto pb-1">
+					{#each soloTryOns as image (image.id)}
+						<!-- Picture module doesn't have a /picture/image/[id] route;
+						     it opens generations inline via a modal in its ListView.
+						     Linking to the full publicUrl in a new tab gives the user
+						     the full-resolution view without a routing detour. A proper
+						     lightbox can come later when we reuse Picture's modal. -->
+						<a
+							href={image.publicUrl ?? '#'}
+							target="_blank"
+							rel="noopener noreferrer"
+							class="group block flex-shrink-0 overflow-hidden rounded-xl border border-border bg-muted transition-all hover:border-primary/50"
+							title={image.prompt}
+						>
+							{#if image.publicUrl}
+								<img
+									src={image.publicUrl}
+									alt={image.prompt}
+									loading="lazy"
+									class="h-40 w-28 object-cover transition-transform group-hover:scale-[1.02]"
+								/>
+							{/if}
+						</a>
+					{/each}
+				</div>
+			</section>
+		{/if}
+
+		<!-- Outfits containing this garment — reverse of DetailOutfitView's
+		     garment list. Each card links to /wardrobe/outfit/[id]; the
+		     lastTryOn snapshot (cached on the outfit row) gives an instant
+		     thumb without another image round-trip. -->
+		{#if outfits.length > 0}
+			<section class="space-y-2">
+				<header class="flex items-baseline justify-between">
+					<h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+						In Outfits · {outfits.length}
+					</h2>
+					<span class="text-xs text-muted-foreground">Komposition öffnen</span>
+				</header>
+				<div class="flex gap-3 overflow-x-auto pb-1">
+					{#each outfits as outfit (outfit.id)}
+						<a
+							href={`/wardrobe/outfit/${outfit.id}`}
+							class="group block w-32 flex-shrink-0 space-y-1.5"
+							title={outfit.name}
+						>
+							<div
+								class="aspect-[2/3] overflow-hidden rounded-xl border border-border bg-muted transition-all group-hover:border-primary/50"
+							>
+								{#if outfit.lastTryOn?.imageUrl}
+									<img
+										src={outfit.lastTryOn.imageUrl}
+										alt={outfit.name}
+										loading="lazy"
+										class="h-full w-full object-cover transition-transform group-hover:scale-[1.02]"
+									/>
+								{:else}
+									<div
+										class="flex h-full w-full items-center justify-center text-xs text-muted-foreground"
+									>
+										Noch keine Anprobe
+									</div>
+								{/if}
+							</div>
+							<p class="truncate text-xs font-medium text-foreground">{outfit.name}</p>
+						</a>
+					{/each}
+				</div>
+			</section>
+		{/if}
 	{/if}
 </div>
