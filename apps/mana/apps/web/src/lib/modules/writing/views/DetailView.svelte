@@ -16,6 +16,7 @@
 	import VersionHistory from '../components/VersionHistory.svelte';
 	import GenerationStatus from '../components/GenerationStatus.svelte';
 	import SelectionToolbar from '../components/SelectionToolbar.svelte';
+	import ExportMenu from '../components/ExportMenu.svelte';
 	import type {
 		SelectionToolKind,
 		SelectionToolInvocation,
@@ -332,6 +333,32 @@
 					</button>
 				</div>
 			{/if}
+
+			{#if draft.publishedTo.length > 0}
+				<div class="published-row">
+					<span class="published-label">📤 Veröffentlicht:</span>
+					{#each draft.publishedTo as target (`${target.module}:${target.targetId}`)}
+						<span
+							class="published-chip"
+							title={new Date(target.publishedAt).toLocaleString('de-DE')}
+						>
+							{#if target.module === 'articles'}
+								📚 <a href={`/articles/${target.targetId}`}>Artikel</a>
+							{:else if target.module === 'website'}
+								🌐 Website
+							{:else if target.module === 'presi'}
+								🎞 Präsi
+							{:else if target.module === 'mail'}
+								✉️ Mail
+							{:else if target.module === 'social-relay'}
+								💬 Social
+							{:else}
+								{target.module}
+							{/if}
+						</span>
+					{/each}
+				</div>
+			{/if}
 		</header>
 
 		<section class="briefing-section">
@@ -386,6 +413,7 @@
 							>
 								{saving ? 'Speichert…' : '＋ Checkpoint'}
 							</button>
+							<ExportMenu {draft} {currentVersion} />
 						</div>
 					</div>
 					{#if visibleGeneration}
@@ -549,6 +577,29 @@
 		border-radius: 0.3rem;
 		background: var(--color-surface-muted, rgba(0, 0, 0, 0.05));
 		word-break: break-all;
+	}
+	.published-row {
+		display: flex;
+		align-items: center;
+		gap: 0.4rem;
+		flex-wrap: wrap;
+		font-size: 0.8rem;
+		color: var(--color-text-muted, rgba(0, 0, 0, 0.55));
+	}
+	.published-label {
+		font-size: 0.75rem;
+	}
+	.published-chip {
+		padding: 0.15rem 0.55rem;
+		border-radius: 999px;
+		background: color-mix(in srgb, #22c55e 10%, transparent);
+		color: #16a34a;
+		border: 1px solid color-mix(in srgb, #22c55e 30%, transparent);
+		font-size: 0.75rem;
+	}
+	.published-chip a {
+		color: inherit;
+		text-decoration: underline;
 	}
 	.status-picker {
 		display: inline-flex;

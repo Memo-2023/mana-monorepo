@@ -32,6 +32,8 @@ import type {
 	DraftBriefing,
 	DraftReference,
 	DraftStyleOverrides,
+	DraftPublishTarget,
+	DraftPublishModule,
 } from '../types';
 
 function wordCountOf(text: string): number {
@@ -280,6 +282,33 @@ export const draftsStore = {
 			draftId,
 			restoredVersionId: versionId,
 			versionNumber: version.versionNumber,
+		});
+	},
+
+	/**
+	 * Record that a draft has been handed off to another module (M10
+	 * Publish-Hooks). Idempotent per (module, targetId) pair — the same
+	 * destination doesn't accumulate duplicate rows if the user exports
+	 * twice. Emits a cross-module event so the Workbench timeline can
+	 * surface the hand-off.
+	 */
+	async recordPublish(draftId: string, target: DraftPublishModule, targetId: string) {
+		const existing = await draftTable.get(draftId);
+		if (!existing) return;
+		const publishedTo = existing.publishedTo ?? [];
+		const now = new Date().toISOString();
+		const next: DraftPublishTarget[] = [
+			...publishedTo.filter((t) => !(t.module === target && t.targetId === targetId)),
+			{ module: target, targetId, publishedAt: now },
+		];
+		await draftTable.update(draftId, {
+			publishedTo: next,
+			updatedAt: now,
+		});
+		emitDomainEvent('WritingDraftPublished', 'writing', 'writingDrafts', draftId, {
+			draftId,
+			module: target,
+			targetId,
 		});
 	},
 
