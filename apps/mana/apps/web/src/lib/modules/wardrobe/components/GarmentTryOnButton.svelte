@@ -16,7 +16,13 @@
 	import { useImageByPrimary } from '$lib/modules/profile/queries';
 	import MeImageUploadZone from '$lib/modules/profile/components/MeImageUploadZone.svelte';
 	import { ingestMeImageFile } from '$lib/modules/profile/api/me-images';
-	import { isAccessoryGarment, runGarmentTryOn } from '../api/try-on';
+	import {
+		DEFAULT_TRY_ON_MODEL,
+		isAccessoryGarment,
+		runGarmentTryOn,
+		type TryOnModel,
+	} from '../api/try-on';
+	import TryOnModelPicker from './TryOnModelPicker.svelte';
 	import type { Garment } from '../types';
 
 	interface Props {
@@ -45,7 +51,18 @@
 	let uploadingRef = $state(false);
 	let uploadRefError = $state<string | null>(null);
 
-	const estimatedCredits = 10;
+	let selectedModel = $state<TryOnModel>(DEFAULT_TRY_ON_MODEL);
+
+	// Credit estimate per model — mirror of server-side `creditsFor`.
+	// Keep in sync with apps/api/src/modules/picture/routes.ts. OpenAI
+	// default 'medium' = 10 cr; Gemini Pro = 18, Gemini Flash 3.1 = 6.
+	const estimatedCredits = $derived(
+		selectedModel === 'openai/gpt-image-2'
+			? 10
+			: selectedModel === 'google/gemini-3-pro-image-preview'
+				? 18
+				: 6
+	);
 
 	async function handleClick() {
 		if (!face || (!accessoryOnly && !body)) return;
@@ -57,6 +74,7 @@
 				garment,
 				faceRefMediaId: face.mediaId,
 				bodyRefMediaId: accessoryOnly ? null : (body?.mediaId ?? null),
+				model: selectedModel,
 			});
 			lastResultUrl = result.imageUrl;
 		} catch (err) {
@@ -139,6 +157,12 @@
 	</div>
 {:else}
 	<div class="space-y-2">
+		<TryOnModelPicker
+			value={selectedModel}
+			onChange={(next) => (selectedModel = next)}
+			disabled={running}
+		/>
+
 		<button
 			type="button"
 			onclick={handleClick}

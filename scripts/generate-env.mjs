@@ -97,6 +97,12 @@ const APP_CONFIGS = [
 			// Picture module providers
 			OPENAI_API_KEY: (env) => env.OPENAI_API_KEY || '',
 			REPLICATE_API_TOKEN: (env) => env.REPLICATE_API_TOKEN || '',
+			// Gemini Nano Banana image edits (Wardrobe Try-On + any future
+			// reference-generation surface). Either key name works — we
+			// read both inside the route with GEMINI_API_KEY taking
+			// precedence, matching how mana-llm ships today.
+			GEMINI_API_KEY: (env) => env.GEMINI_API_KEY || '',
+			GOOGLE_API_KEY: (env) => env.GOOGLE_API_KEY || '',
 		},
 	},
 

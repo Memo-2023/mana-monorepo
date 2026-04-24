@@ -19,6 +19,19 @@ import { wardrobeOutfitsStore } from '../stores/outfits.svelte';
 import { FACE_ONLY_CATEGORIES } from '../types';
 import type { Garment, GarmentCategory, Outfit } from '../types';
 
+/**
+ * Models the Try-On flow can target. Each card on the shared picker
+ * maps to one of these. `openai/gpt-image-2` is the existing default
+ * (falls back to gpt-image-1 server-side when the user's org isn't
+ * verified yet — see picture/routes.ts).
+ */
+export type TryOnModel =
+	| 'openai/gpt-image-2'
+	| 'google/gemini-3-pro-image-preview'
+	| 'google/gemini-3.1-flash-image-preview';
+
+export const DEFAULT_TRY_ON_MODEL: TryOnModel = 'openai/gpt-image-2';
+
 /** Shared low-level POST to /generate-with-reference. Returns the first
  *  generated image's URL + mediaId + prompt + model — outfit and solo
  *  variants both go through here to keep the HTTP error matrix identical.
@@ -28,6 +41,7 @@ async function callGenerateWithReference(opts: {
 	referenceMediaIds: string[];
 	quality: 'low' | 'medium' | 'high';
 	size: TryOnSize;
+	model: TryOnModel;
 }): Promise<{ imageUrl: string; mediaId: string; prompt: string; model: string }> {
 	const token = await authStore.getValidToken();
 	const res = await fetch(`${getManaApiUrl()}/api/v1/picture/generate-with-reference`, {
@@ -39,7 +53,7 @@ async function callGenerateWithReference(opts: {
 		body: JSON.stringify({
 			prompt: opts.prompt,
 			referenceMediaIds: opts.referenceMediaIds,
-			model: 'openai/gpt-image-2',
+			model: opts.model,
 			quality: opts.quality,
 			size: opts.size,
 			n: 1,
@@ -104,6 +118,9 @@ export interface RunOutfitTryOnParams {
 	faceRefMediaId: string;
 	/** Optional — omit for accessory-only mode (glasses/jewelry/hat/accessory). */
 	bodyRefMediaId?: string | null;
+	/** Image model that should produce the try-on. Defaults to
+	 *  DEFAULT_TRY_ON_MODEL if the caller doesn't pass one. */
+	model?: TryOnModel;
 	/** Optional override; default is composed from the outfit meta. */
 	prompt?: string;
 	/** `medium` balances FLUX-ish detail against credit cost (10c). */
@@ -143,7 +160,7 @@ function composeDefaultPrompt(outfit: Outfit, accessoryOnly: boolean): string {
 }
 
 export async function runOutfitTryOn(params: RunOutfitTryOnParams): Promise<RunTryOnResult> {
-	const { outfit, garments, faceRefMediaId, bodyRefMediaId, prompt, quality, size } = params;
+	const { outfit, garments, faceRefMediaId, bodyRefMediaId, prompt, quality, size, model } = params;
 
 	const garmentMediaIds = garments
 		.map((g) => g.mediaIds[0])
@@ -174,6 +191,7 @@ export async function runOutfitTryOn(params: RunOutfitTryOnParams): Promise<RunT
 		referenceMediaIds,
 		quality: quality ?? 'medium',
 		size: effectiveSize,
+		model: model ?? DEFAULT_TRY_ON_MODEL,
 	});
 
 	const now = new Date().toISOString();
@@ -233,6 +251,9 @@ export interface RunGarmentTryOnParams {
 	bodyRefMediaId?: string | null;
 	prompt?: string;
 	quality?: 'low' | 'medium' | 'high';
+	/** Image model that should produce the try-on. Defaults to
+	 *  DEFAULT_TRY_ON_MODEL if the caller doesn't pass one. */
+	model?: TryOnModel;
 }
 
 /** True iff the garment category implies a face-only render. Exposed so
@@ -261,7 +282,7 @@ function composeGarmentPrompt(garment: Garment, accessoryOnly: boolean): string 
  * Plan follow-up to docs/plans/wardrobe-module.md M4.
  */
 export async function runGarmentTryOn(params: RunGarmentTryOnParams): Promise<RunTryOnResult> {
-	const { garment, faceRefMediaId, bodyRefMediaId, prompt, quality } = params;
+	const { garment, faceRefMediaId, bodyRefMediaId, prompt, quality, model } = params;
 
 	const garmentMediaId = garment.mediaIds[0];
 	if (!garmentMediaId) {
@@ -281,6 +302,7 @@ export async function runGarmentTryOn(params: RunGarmentTryOnParams): Promise<Ru
 		referenceMediaIds,
 		quality: quality ?? 'medium',
 		size: effectiveSize,
+		model: model ?? DEFAULT_TRY_ON_MODEL,
 	});
 
 	const now = new Date().toISOString();

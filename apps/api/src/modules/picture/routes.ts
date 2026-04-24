@@ -13,15 +13,29 @@ import type { AuthVariables } from '@mana/shared-hono';
 const REPLICATE_TOKEN = process.env.REPLICATE_API_TOKEN || '';
 const IMAGE_GEN_URL = process.env.MANA_IMAGE_GEN_URL || '';
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || '';
+// Gemini uses API-key auth against generativelanguage.googleapis.com; the
+// same AIza... key works for the Nano Banana (gemini-*-image) family.
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || '';
 
-// Credit cost for OpenAI gpt-image-2 by quality. Reflects ~$0.006 / $0.053 / $0.211
-// per 1024² image so users bear roughly linear cost (1 credit ≈ $0.008).
-// Flux/local stays at the flat 10-credit legacy rate.
+// Credit cost by model × quality. Rough proportionality to upstream
+// pricing at 1 credit ≈ $0.008. OpenAI gpt-image-* billed $0.006 / $0.053
+// / $0.211 per 1024² image for low/medium/high. Google Nano Banana:
+// 2.5-flash-image $0.039, 3.1-flash-image-preview $0.045, 3-pro-image-
+// preview $0.134. Gemini doesn't expose quality tiers — quality input is
+// ignored and the tier is chosen by model id. Flux/local legacy stays
+// at a flat 10.
 function creditsFor(model: string | undefined, quality: string | undefined): number {
 	if (model?.startsWith('openai/')) {
 		if (quality === 'low') return 3;
 		if (quality === 'high') return 25;
 		return 10; // medium / auto
+	}
+	if (model?.startsWith('google/')) {
+		const id = model.slice('google/'.length);
+		if (id === 'gemini-3-pro-image-preview') return 18;
+		if (id === 'gemini-3.1-flash-image-preview') return 6;
+		if (id === 'gemini-2.5-flash-image') return 5;
+		return 10;
 	}
 	return 10;
 }
@@ -272,17 +286,24 @@ routes.post('/generate-with-reference', async (c) => {
 		);
 	}
 
-	if (!OPENAI_API_KEY) {
-		return c.json({ error: 'OpenAI image edits not configured' }, 503);
-	}
-
 	const model = body.model ?? 'openai/gpt-image-2';
-	if (!model.startsWith('openai/')) {
-		// Edits routing for non-OpenAI backends (local FLUX+PuLID, Replicate)
-		// is future work — plan M5. Fail loud rather than silently downgrading.
+	// Two edit providers wired today: OpenAI's gpt-image-1/2 (openai/)
+	// and Google's Nano Banana family (google/) — Gemini 2.5 Flash Image,
+	// 3.1 Flash Image Preview, 3 Pro Image Preview. Everything else
+	// (Replicate, local FLUX+PuLID) is not supported for multi-ref edits.
+	const isOpenAi = model.startsWith('openai/');
+	const isGoogle = model.startsWith('google/');
+	if (!isOpenAi && !isGoogle) {
 		return c.json({ error: `Model ${model} not supported for edits`, model }, 400);
 	}
-	const openaiModel = model.slice('openai/'.length) || 'gpt-image-2';
+	if (isOpenAi && !OPENAI_API_KEY) {
+		return c.json({ error: 'OpenAI image edits not configured' }, 503);
+	}
+	if (isGoogle && !GEMINI_API_KEY) {
+		return c.json({ error: 'Google Gemini image edits not configured' }, 503);
+	}
+	const openaiModel = isOpenAi ? model.slice('openai/'.length) || 'gpt-image-2' : '';
+	const googleModel = isGoogle ? model.slice('google/'.length) || 'gemini-3-pro-image-preview' : '';
 	const quality = (body.quality as 'low' | 'medium' | 'high' | undefined) ?? 'medium';
 	const size: OpenAiSize = body.size ?? '1024x1024';
 	const effectiveBatch = Math.max(1, Math.min(4, Number(body.n) || 1));
@@ -398,42 +419,138 @@ routes.post('/generate-with-reference', async (c) => {
 		return /verified to use the model/i.test(body);
 	}
 
-	let generatedBuffers: ArrayBuffer[];
-	let modelUsed = openaiModel;
-	try {
-		let result = await callOpenAiEdits(openaiModel);
+	// Map our internal size ("1024x1024" | "1024x1536" | "1536x1024")
+	// onto Gemini's separate `aspectRatio` + `imageSize`. 1K covers every
+	// Try-On output — going higher bloats payload without identifiable
+	// quality gain at the thumbnail sizes Wardrobe actually renders.
+	function sizeToGemini(s: OpenAiSize): { aspectRatio: string; imageSize: string } {
+		if (s === '1024x1536') return { aspectRatio: '2:3', imageSize: '1K' };
+		if (s === '1536x1024') return { aspectRatio: '3:2', imageSize: '1K' };
+		return { aspectRatio: '1:1', imageSize: '1K' };
+	}
 
-		if (!result.ok && needsGptImage1Fallback(result.body, openaiModel)) {
-			console.warn(
-				'[picture/generate-with-reference] gpt-image-2 unavailable (org not verified), falling back to gpt-image-1'
-			);
-			modelUsed = 'gpt-image-1';
-			result = await callOpenAiEdits('gpt-image-1');
+	/** Call the Gemini API's generateContent endpoint with multi-image
+	 *  inline_data refs + a text prompt, asking for IMAGE back. Returns
+	 *  the raw base64 PNG(s) Gemini produced, or a structured failure. */
+	async function callGeminiEdits(
+		modelName: string
+	): Promise<{ ok: true; images: ArrayBuffer[] } | { ok: false; status: number; body: string }> {
+		const geminiSize = sizeToGemini(size);
+		const parts: Array<{ text: string } | { inline_data: { mime_type: string; data: string } }> = [
+			{ text: prompt },
+		];
+		for (const ref of referenceBlobs) {
+			const ab = await ref.blob.arrayBuffer();
+			const b64 = Buffer.from(new Uint8Array(ab)).toString('base64');
+			parts.push({ inline_data: { mime_type: 'image/png', data: b64 } });
 		}
-
-		if (!result.ok) {
-			console.error('[picture/generate-with-reference] OpenAI returned non-ok', {
-				status: result.status,
-				body: result.body.slice(0, 1000),
-				refCount: referenceBlobs.length,
-				prompt: prompt.slice(0, 120),
-				model: modelUsed,
-				size,
-				quality,
-			});
-			return c.json({ error: 'OpenAI image edit failed', detail: result.body.slice(0, 500) }, 502);
-		}
-
-		const blobs = (result.data.data ?? []).map((d) => d.b64_json).filter((b): b is string => !!b);
-		if (blobs.length === 0) return c.json({ error: 'OpenAI returned no image data' }, 502);
-		generatedBuffers = blobs.map((b64) => {
-			const bin = Buffer.from(b64, 'base64');
-			return bin.buffer.slice(bin.byteOffset, bin.byteOffset + bin.byteLength) as ArrayBuffer;
+		const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(modelName)}:generateContent?key=${encodeURIComponent(GEMINI_API_KEY)}`;
+		const res = await fetch(url, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				contents: [{ parts }],
+				generationConfig: {
+					// IMAGE alone is rejected; TEXT is required alongside.
+					responseModalities: ['TEXT', 'IMAGE'],
+					imageConfig: {
+						aspectRatio: geminiSize.aspectRatio,
+						imageSize: geminiSize.imageSize,
+					},
+				},
+			}),
 		});
+		if (!res.ok) {
+			const body = await res.text().catch(() => '');
+			return { ok: false, status: res.status, body };
+		}
+		const data = (await res.json()) as {
+			candidates?: Array<{
+				content?: {
+					parts?: Array<{ inlineData?: { data?: string; mimeType?: string } }>;
+				};
+			}>;
+		};
+		const out: ArrayBuffer[] = [];
+		for (const cand of data.candidates ?? []) {
+			for (const p of cand.content?.parts ?? []) {
+				const b64 = p.inlineData?.data;
+				if (!b64) continue;
+				const bin = Buffer.from(b64, 'base64');
+				out.push(bin.buffer.slice(bin.byteOffset, bin.byteOffset + bin.byteLength) as ArrayBuffer);
+			}
+		}
+		if (out.length === 0) {
+			return { ok: false, status: 502, body: 'Gemini returned no image parts' };
+		}
+		return { ok: true, images: out };
+	}
+
+	let generatedBuffers: ArrayBuffer[];
+	let modelUsed = isOpenAi ? openaiModel : googleModel;
+	try {
+		if (isOpenAi) {
+			let result = await callOpenAiEdits(openaiModel);
+
+			if (!result.ok && needsGptImage1Fallback(result.body, openaiModel)) {
+				console.warn(
+					'[picture/generate-with-reference] gpt-image-2 unavailable (org not verified), falling back to gpt-image-1'
+				);
+				modelUsed = 'gpt-image-1';
+				result = await callOpenAiEdits('gpt-image-1');
+			}
+
+			if (!result.ok) {
+				console.error('[picture/generate-with-reference] OpenAI returned non-ok', {
+					status: result.status,
+					body: result.body.slice(0, 1000),
+					refCount: referenceBlobs.length,
+					prompt: prompt.slice(0, 120),
+					model: modelUsed,
+					size,
+					quality,
+				});
+				return c.json(
+					{ error: 'OpenAI image edit failed', detail: result.body.slice(0, 500) },
+					502
+				);
+			}
+
+			const blobs = (result.data.data ?? []).map((d) => d.b64_json).filter((b): b is string => !!b);
+			if (blobs.length === 0) return c.json({ error: 'OpenAI returned no image data' }, 502);
+			generatedBuffers = blobs.map((b64) => {
+				const bin = Buffer.from(b64, 'base64');
+				return bin.buffer.slice(bin.byteOffset, bin.byteOffset + bin.byteLength) as ArrayBuffer;
+			});
+		} else {
+			// Google / Gemini Nano Banana family.
+			const result = await callGeminiEdits(googleModel);
+			if (!result.ok) {
+				console.error('[picture/generate-with-reference] Gemini returned non-ok', {
+					status: result.status,
+					body: result.body.slice(0, 1000),
+					refCount: referenceBlobs.length,
+					prompt: prompt.slice(0, 120),
+					model: modelUsed,
+					size,
+				});
+				return c.json(
+					{ error: 'Gemini image edit failed', detail: result.body.slice(0, 500) },
+					502
+				);
+			}
+			generatedBuffers = result.images;
+		}
 	} catch (err) {
 		const message = err instanceof Error ? err.message : String(err);
-		console.error('[picture/generate-with-reference] OpenAI fetch threw', { error: message });
-		return c.json({ error: 'OpenAI image edit failed', detail: message }, 502);
+		console.error('[picture/generate-with-reference] provider fetch threw', {
+			provider: isOpenAi ? 'openai' : 'google',
+			error: message,
+		});
+		return c.json(
+			{ error: `${isOpenAi ? 'OpenAI' : 'Gemini'} image edit failed`, detail: message },
+			502
+		);
 	}
 
 	// Success path: consume credits, then upload the new images.
@@ -464,10 +581,11 @@ routes.post('/generate-with-reference', async (c) => {
 		// the client asked for — matters when the gpt-image-2 fallback
 		// kicked in (we want the picture row's `model` metadata to match
 		// the real source for future re-generation / audit).
+		const providerPrefix = isOpenAi ? 'openai' : 'google';
 		return c.json({
 			images,
 			prompt,
-			model: `openai/${modelUsed}`,
+			model: `${providerPrefix}/${modelUsed}`,
 			referenceMediaIds: refIds,
 			mode: 'edit',
 			// Back-compat: first image exposed at top level too, matching /generate.
