@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { VisibilityPicker, type VisibilityLevel } from '@mana/shared-privacy';
 	import CoverImage from '../components/CoverImage.svelte';
 	import RatingStars from '../components/RatingStars.svelte';
 	import EntryForm from '../components/EntryForm.svelte';
@@ -9,6 +10,10 @@
 	import type { LibraryEntry, LibraryStatus } from '../types';
 
 	let { entry }: { entry: LibraryEntry } = $props();
+
+	async function onVisibilityChange(next: VisibilityLevel) {
+		await libraryEntriesStore.setVisibility(entry.id, next);
+	}
 
 	let editing = $state(false);
 
@@ -75,9 +80,12 @@
 			</div>
 
 			<div class="meta-col">
-				<div class="kind-pill">
-					{KIND_LABELS[entry.kind].emoji}
-					{KIND_LABELS[entry.kind].de}
+				<div class="meta-top-row">
+					<div class="kind-pill">
+						{KIND_LABELS[entry.kind].emoji}
+						{KIND_LABELS[entry.kind].de}
+					</div>
+					<VisibilityPicker level={entry.visibility} onChange={onVisibilityChange} />
 				</div>
 				<h1>{entry.title}</h1>
 				{#if entry.originalTitle && entry.originalTitle !== entry.title}
@@ -270,6 +278,12 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.35rem;
+	}
+	.meta-top-row {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 0.75rem;
 	}
 	.kind-pill {
 		display: inline-flex;

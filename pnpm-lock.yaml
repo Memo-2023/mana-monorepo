@@ -546,6 +546,9 @@ importers:
       '@mana/shared-llm':
         specifier: workspace:*
         version: link:../../../../packages/shared-llm
+      '@mana/shared-privacy':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-privacy
       '@mana/shared-stores':
         specifier: workspace:*
         version: link:../../../../packages/shared-stores

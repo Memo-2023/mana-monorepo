@@ -32,6 +32,10 @@ export function toLibraryEntry(local: LocalLibraryEntry): LibraryEntry {
 		times: local.times ?? 0,
 		externalIds: local.externalIds ?? null,
 		details: local.details,
+		// Legacy rows pre-dating the visibility pilot default to 'space'
+		// (the pre-pilot stamp that Dexie hooks wrote). New rows get the
+		// space-type-aware default at create time in entries.svelte.ts.
+		visibility: local.visibility ?? 'space',
 		createdAt: local.createdAt ?? now,
 		updatedAt: local.updatedAt ?? now,
 	};

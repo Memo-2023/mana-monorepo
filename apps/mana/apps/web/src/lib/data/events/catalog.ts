@@ -613,6 +613,17 @@ export type BodyEventType =
 	| 'MeasurementLogged'
 	| 'EnergyCheckLogged';
 
+// ── Visibility (Cross-Module) ───────────────────────
+// Emitted by any module whose records carry a `visibility` field when
+// the user flips it (typically via <VisibilityPicker>). The payload type
+// lives in @mana/shared-privacy so the event shape stays aligned with
+// the primitives. See docs/plans/visibility-system.md.
+
+import type { VisibilityChangedPayload } from '@mana/shared-privacy';
+export type { VisibilityChangedPayload };
+
+export type VisibilityEventType = 'VisibilityChanged';
+
 // ── System Events (Goals, Companion) ────────────────
 
 export interface GoalReachedPayload {
@@ -667,7 +678,8 @@ export type ManaEventType =
 	| CompanionEventType
 	| SocialEventsEventType
 	| BodyEventType
-	| SystemEventType;
+	| SystemEventType
+	| VisibilityEventType;
 
 /**
  * Discriminated union of all domain events.
@@ -785,4 +797,6 @@ export type ManaEvent =
 	| DomainEvent<'EnergyCheckLogged', EnergyCheckLoggedPayload>
 	// System
 	| DomainEvent<'GoalReached', GoalReachedPayload>
-	| DomainEvent<'GoalProgress', GoalProgressPayload>;
+	| DomainEvent<'GoalProgress', GoalProgressPayload>
+	// Visibility (cross-module)
+	| DomainEvent<'VisibilityChanged', VisibilityChangedPayload>;

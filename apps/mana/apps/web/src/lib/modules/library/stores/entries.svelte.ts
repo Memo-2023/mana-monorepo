@@ -7,6 +7,13 @@
 
 import { encryptRecord } from '$lib/data/crypto';
 import { emitDomainEvent } from '$lib/data/events';
+import { getActiveSpace } from '$lib/data/scope';
+import { getEffectiveUserId } from '$lib/data/current-user';
+import {
+	defaultVisibilityFor,
+	generateUnlistedToken,
+	type VisibilityLevel,
+} from '@mana/shared-privacy';
 import { libraryEntryTable } from '../collections';
 import { toLibraryEntry } from '../queries';
 import type {
@@ -78,6 +85,10 @@ export const libraryEntriesStore = {
 			times: 0,
 			externalIds: input.externalIds ?? null,
 			details,
+			// Pre-populate the visibility field so the Dexie hook's generic
+			// 'space' fallback doesn't fire for personal-space entries (which
+			// should default to 'private' per the unified visibility system).
+			visibility: defaultVisibilityFor(getActiveSpace()?.type),
 		};
 		const snapshot = toLibraryEntry({ ...newLocal });
 		await encryptRecord('libraryEntries', newLocal);
@@ -187,5 +198,42 @@ export const libraryEntriesStore = {
 			updatedAt: new Date().toISOString(),
 		});
 		emitDomainEvent('LibraryEntryDeleted', 'library', 'libraryEntries', id, { entryId: id });
+	},
+
+	/**
+	 * Flip the visibility of an entry. Mints an unlisted token on first
+	 * transition to 'unlisted' and wipes it when moving back to anything
+	 * else, so a revoked link can't be silently re-activated. Emits a
+	 * cross-module `VisibilityChanged` event so the Workbench timeline +
+	 * audit surfaces pick it up.
+	 *
+	 * No-op if the level is already what the user selected.
+	 */
+	async setVisibility(id: string, next: VisibilityLevel) {
+		const existing = await libraryEntryTable.get(id);
+		if (!existing) throw new Error(`Library entry ${id} not found`);
+		const before: VisibilityLevel = existing.visibility ?? 'space';
+		if (before === next) return;
+
+		const now = new Date().toISOString();
+		const patch: Partial<LocalLibraryEntry> = {
+			visibility: next,
+			visibilityChangedAt: now,
+			visibilityChangedBy: getEffectiveUserId(),
+			updatedAt: now,
+		};
+		if (next === 'unlisted' && !existing.unlistedToken) {
+			patch.unlistedToken = generateUnlistedToken();
+		} else if (next !== 'unlisted' && existing.unlistedToken) {
+			patch.unlistedToken = undefined;
+		}
+		await libraryEntryTable.update(id, patch);
+
+		emitDomainEvent('VisibilityChanged', 'library', 'libraryEntries', id, {
+			recordId: id,
+			collection: 'libraryEntries',
+			before,
+			after: next,
+		});
 	},
 };

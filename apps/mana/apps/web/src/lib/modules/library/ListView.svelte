@@ -109,6 +109,7 @@
 										: presetKind() === 'series'
 											? { kind: 'series', watched: [] }
 											: { kind: 'comic' },
+							visibility: 'private',
 							createdAt: '',
 							updatedAt: '',
 							id: '',

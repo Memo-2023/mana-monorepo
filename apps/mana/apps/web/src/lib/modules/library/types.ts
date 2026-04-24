@@ -6,6 +6,7 @@
  */
 
 import type { BaseRecord } from '@mana/local-store';
+import type { VisibilityLevel } from '@mana/shared-privacy';
 
 // ─── Discriminators & Enums ──────────────────────────────
 
@@ -83,6 +84,24 @@ export interface LocalLibraryEntry extends BaseRecord {
 	times: number;
 	externalIds?: LibraryExternalIds | null;
 	details: LibraryDetails;
+	/**
+	 * Visibility level — pilot of the unified privacy system (see
+	 * docs/plans/visibility-system.md). Optional on the local record
+	 * because existing rows pre-date the field; the Dexie hook stamps
+	 * 'space' as the structural default. `toLibraryEntry` narrows to a
+	 * non-optional VisibilityLevel for callers.
+	 */
+	visibility?: VisibilityLevel;
+	/** ISO timestamp of the last visibility flip — useful for audit. */
+	visibilityChangedAt?: string;
+	/** userId who made the last flip. */
+	visibilityChangedBy?: string;
+	/**
+	 * 32-char base64url token for unlisted-mode. Set when visibility is
+	 * flipped to 'unlisted' and the record doesn't yet have one; cleared
+	 * when visibility moves back to anything else.
+	 */
+	unlistedToken?: string;
 }
 
 // ─── Domain Type (plaintext, for UI) ─────────────────────
@@ -107,6 +126,7 @@ export interface LibraryEntry {
 	times: number;
 	externalIds: LibraryExternalIds | null;
 	details: LibraryDetails;
+	visibility: VisibilityLevel;
 	createdAt: string;
 	updatedAt: string;
 }

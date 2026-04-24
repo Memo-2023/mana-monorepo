@@ -16,6 +16,7 @@
 
 import { db } from '$lib/data/database';
 import { decryptRecords } from '$lib/data/crypto';
+import { canEmbedOnWebsite } from '@mana/shared-privacy';
 import { mediaFileUrl } from './upload';
 import type { EmbedItem, EmbedSource, ModuleEmbedProps } from '@mana/website-blocks';
 import type { LocalBoard, LocalBoardItem, LocalImage } from '$lib/modules/picture/types';
@@ -107,14 +108,19 @@ async function resolvePictureBoard(props: ModuleEmbedProps): Promise<EmbedItem[]
 }
 
 /**
- * Library-entries: returns book/movie/series/comic entries. Owner-only
- * data by default — M4 first-pass exposes it if the owner opts in via
- * `filter.isFavorite` (favorites are the typical "show-on-my-site"
- * subset). Future: per-entry `showOnWebsite` flag.
+ * Library-entries: returns book/movie/series/comic entries the owner has
+ * explicitly marked 'public' via the VisibilityPicker on the entry's
+ * detail view. `canEmbedOnWebsite` is the hard gate — user-provided
+ * filters (kind/status/favorite) stack on top but cannot override it.
+ *
+ * First pilot of the unified visibility system (docs/plans/
+ * visibility-system.md). Before M2 this path used `isFavorite` as a
+ * weak proxy for public intent; that filter is still available as an
+ * optional user-facing filter on top of the visibility gate.
  */
 async function resolveLibraryEntries(props: ModuleEmbedProps): Promise<EmbedItem[]> {
 	let locals = await db.table<LocalLibraryEntry>('libraryEntries').toArray();
-	locals = locals.filter((e) => !e.deletedAt);
+	locals = locals.filter((e) => !e.deletedAt && canEmbedOnWebsite(e.visibility ?? 'private'));
 
 	if (props.filter?.kind) {
 		locals = locals.filter((e) => e.kind === props.filter?.kind);
