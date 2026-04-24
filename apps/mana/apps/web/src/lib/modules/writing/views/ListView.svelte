@@ -6,6 +6,7 @@
   unstarted draft.
 -->
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import KindTabs from '../components/KindTabs.svelte';
 	import StatusFilter from '../components/StatusFilter.svelte';
@@ -86,6 +87,21 @@
 		showCreate = false;
 		openDraft(d);
 	}
+
+	// Workbench "Neuer Draft" context-menu action. Uses the shared
+	// mana:quick-action event channel that the app-registry dispatches
+	// from the card's kebab menu. Also fires when the user picks the
+	// action from the command palette once that's wired up globally.
+	onMount(() => {
+		function handleQuickAction(ev: Event) {
+			const detail = (ev as CustomEvent<{ app?: string; action?: string }>).detail;
+			if (detail?.app === 'writing' && detail?.action === 'new') {
+				showCreate = true;
+			}
+		}
+		window.addEventListener('mana:quick-action', handleQuickAction);
+		return () => window.removeEventListener('mana:quick-action', handleQuickAction);
+	});
 </script>
 
 <div class="writing-shell">

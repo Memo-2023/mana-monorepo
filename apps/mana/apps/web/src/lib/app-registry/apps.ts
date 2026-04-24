@@ -1,3 +1,4 @@
+import { formatDate } from '$lib/i18n/format';
 /**
  * Unified App Registrations — All app descriptors in one file.
  *
@@ -79,6 +80,7 @@ import {
 	Exam,
 	Globe,
 	CoatHanger,
+	NotePencil,
 } from '@mana/shared-icons';
 
 // ── Apps with entity capabilities ───────────────────────────
@@ -119,7 +121,7 @@ registerApp({
 	},
 	getDisplayData: (item) => ({
 		title: (item.title as string) || 'Aufgabe',
-		subtitle: item.dueDate ? new Date(item.dueDate as string).toLocaleDateString('de') : undefined,
+		subtitle: item.dueDate ? formatDate(new Date(item.dueDate as string)) : undefined,
 	}),
 	createItem: async (data) => {
 		const { tasksStore } = await import('$lib/modules/todo/stores/tasks.svelte');
@@ -180,7 +182,7 @@ registerApp({
 	getDisplayData: (item) => ({
 		title: (item.title as string) || 'Termin',
 		subtitle: item.startDate
-			? new Date(item.startDate as string).toLocaleDateString('de', {
+			? formatDate(new Date(item.startDate as string), {
 					day: '2-digit',
 					month: '2-digit',
 					hour: '2-digit',
@@ -1325,6 +1327,29 @@ registerApp({
 			action: () =>
 				window.dispatchEvent(
 					new CustomEvent('mana:quick-action', { detail: { app: 'library', action: 'new' } })
+				),
+		},
+	],
+});
+
+registerApp({
+	id: 'writing',
+	name: 'Writing',
+	color: '#0ea5e9',
+	icon: NotePencil,
+	views: {
+		// Detail view (/writing/draft/[id]) uses goto() from the list view,
+		// same pattern as library. Workbench detail-slot not wired yet.
+		list: { load: () => import('$lib/modules/writing/ListView.svelte') },
+	},
+	contextMenuActions: [
+		{
+			id: 'new-draft',
+			label: 'Neuer Draft',
+			icon: Plus,
+			action: () =>
+				window.dispatchEvent(
+					new CustomEvent('mana:quick-action', { detail: { app: 'writing', action: 'new' } })
 				),
 		},
 	],
