@@ -160,25 +160,26 @@
 			disabled={running}
 		/>
 
-		<!-- Primary CTA: matches GarmentTryOnButton's lift + shadow
-		     treatment so both surfaces use the same visual weight for
-		     "produce the generation". -->
+		<!-- Primary CTA — matches GarmentTryOnButton's lift + ring +
+		     shadow treatment so both surfaces use the same visual
+		     weight for "produce the generation". See that file for
+		     the full rationale on ring / shadow / translate choices. -->
 		<button
 			type="button"
 			onclick={handleClick}
 			disabled={running || !canTryOn}
-			class="flex w-full flex-col items-center justify-center gap-0.5 rounded-lg bg-primary px-5 py-3.5 text-base font-semibold text-primary-foreground shadow-md shadow-primary/20 transition-all hover:-translate-y-0.5 hover:bg-primary/95 hover:shadow-lg hover:shadow-primary/30 active:translate-y-0 active:shadow-sm disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-md"
+			class="flex w-full flex-col items-center justify-center gap-1 rounded-xl bg-primary px-6 py-4 text-lg font-semibold text-primary-foreground shadow-lg ring-2 ring-primary/40 transition-all hover:-translate-y-0.5 hover:bg-primary/95 hover:shadow-xl hover:ring-4 hover:ring-primary/50 active:translate-y-0 active:shadow-md active:ring-2 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-lg disabled:hover:ring-2"
 		>
 			{#if running}
-				<span class="flex items-center gap-2">
+				<span class="flex items-center gap-2.5">
 					<span
 						class="h-5 w-5 animate-spin rounded-full border-2 border-current border-r-transparent"
 					></span>
 					Rendere…
 				</span>
 			{:else}
-				<span class="flex items-center gap-2">
-					<Sparkle size={18} weight="fill" />
+				<span class="flex items-center gap-2.5">
+					<Sparkle size={20} weight="fill" />
 					Anprobieren
 				</span>
 				<span class="text-xs font-normal opacity-80">{estimatedCredits} Credits</span>

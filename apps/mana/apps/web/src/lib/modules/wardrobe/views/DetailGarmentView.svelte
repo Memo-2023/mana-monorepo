@@ -234,37 +234,40 @@
 					<!-- Try-on — "wie sähe das an mir aus" -->
 					<GarmentTryOnButton {garment} />
 
-					<!-- Wear-tracking — same primary-tinted hover as edit /
-					     model picker / try-on thumbs. -->
-					<button
-						type="button"
-						onclick={handleMarkWorn}
-						disabled={markingWorn}
-						class="flex w-full items-center justify-center gap-2 rounded-md border border-border bg-background px-4 py-2 text-sm text-foreground transition-colors hover:border-primary/50 hover:bg-primary/5 disabled:opacity-50 disabled:hover:border-border disabled:hover:bg-background"
-					>
-						<CheckCircle size={14} />
-						{markingWorn ? 'Gespeichert…' : 'Heute getragen'}
-					</button>
-
-					<!-- Secondary actions. Archive keeps the primary-tint hover;
-					     Löschen stays destructive-red so the action reads as
-					     dangerous even at a glance. -->
+					<!-- Secondary-action row: "Heute getragen" is the frequent
+					     positive action and takes most of the width; Archive and
+					     Löschen shrink to icon-only buttons on the right so they
+					     stop competing with the primary CTA for attention. All
+					     three share the primary-tinted hover; Löschen keeps its
+					     destructive-red tint. Tooltips (title+aria-label) carry
+					     the full label for discoverability. -->
 					<div class="flex gap-2">
 						<button
 							type="button"
-							onclick={handleArchive}
-							class="flex flex-1 items-center justify-center gap-2 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground transition-colors hover:border-primary/50 hover:bg-primary/5"
+							onclick={handleMarkWorn}
+							disabled={markingWorn}
+							class="flex flex-1 items-center justify-center gap-2 rounded-md border border-border bg-background px-4 py-2 text-sm text-foreground transition-colors hover:border-primary/50 hover:bg-primary/5 disabled:opacity-50 disabled:hover:border-border disabled:hover:bg-background"
 						>
-							<Archive size={14} />
-							{garment.isArchived ? 'Wieder aktiv' : 'Archivieren'}
+							<CheckCircle size={14} />
+							{markingWorn ? 'Gespeichert…' : 'Heute getragen'}
+						</button>
+						<button
+							type="button"
+							onclick={handleArchive}
+							aria-label={garment.isArchived ? 'Wieder aktiv setzen' : 'Archivieren'}
+							title={garment.isArchived ? 'Wieder aktiv setzen' : 'Archivieren'}
+							class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-md border border-border bg-background text-muted-foreground transition-colors hover:border-primary/50 hover:bg-primary/5 hover:text-foreground"
+						>
+							<Archive size={16} />
 						</button>
 						<button
 							type="button"
 							onclick={handleDelete}
-							class="flex flex-1 items-center justify-center gap-2 rounded-md border border-border bg-background px-3 py-2 text-sm text-error transition-colors hover:border-error/50 hover:bg-error/10"
+							aria-label="Löschen"
+							title="Löschen"
+							class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-md border border-border bg-background text-error transition-colors hover:border-error/50 hover:bg-error/10"
 						>
-							<Trash size={14} />
-							Löschen
+							<Trash size={16} />
 						</button>
 					</div>
 				{/if}
