@@ -49,6 +49,8 @@ import { researchRoutes } from './modules/research/routes';
 import { whoRoutes } from './modules/who/routes';
 import { websiteRoutes } from './modules/website/routes';
 import { websitePublicRoutes } from './modules/website/public-routes';
+import { unlistedRoutes } from './modules/unlisted/routes';
+import { unlistedPublicRoutes } from './modules/unlisted/public-routes';
 import { wetterRoutes } from './modules/wetter/routes';
 
 const PORT = parseInt(process.env.PORT || '3060', 10);
@@ -73,9 +75,11 @@ app.get('/metrics', async (c) => {
 app.use('/api/*', rateLimitMiddleware({ max: 200, windowMs: 60_000 }));
 
 // Public routes — no auth required (weather data is public, published
-// websites are by definition public).
+// websites are by definition public, unlisted-share tokens are public
+// by design).
 app.route('/api/v1/wetter', wetterRoutes);
 app.route('/api/v1/website/public', websitePublicRoutes);
+app.route('/api/v1/unlisted/public', unlistedPublicRoutes);
 
 app.use('/api/*', authMiddleware());
 
@@ -133,6 +137,7 @@ app.route('/api/v1/traces', tracesRoutes);
 app.route('/api/v1/presi', presiRoutes);
 app.route('/api/v1/research', researchRoutes);
 app.route('/api/v1/website', websiteRoutes);
+app.route('/api/v1/unlisted', unlistedRoutes);
 app.route('/api/v1/who', whoRoutes);
 app.route('/api/v1/writing', writingRoutes);
 app.route('/api/v1/comic', comicRoutes);

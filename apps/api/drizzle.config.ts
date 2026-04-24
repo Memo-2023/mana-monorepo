@@ -7,14 +7,18 @@ import { defineConfig } from 'drizzle-kit';
  * schema's generated SQL lives under `drizzle/{schema}/`. Expand the
  * `schema` array and `schemaFilter` when a new module joins.
  *
- * Currently managed: `research`, `website`.
+ * Currently managed: `research`, `website`, `unlisted`.
  */
 export default defineConfig({
-	schema: ['./src/modules/research/schema.ts', './src/modules/website/schema.ts'],
+	schema: [
+		'./src/modules/research/schema.ts',
+		'./src/modules/website/schema.ts',
+		'./src/modules/unlisted/schema.ts',
+	],
 	out: './drizzle',
 	dialect: 'postgresql',
 	dbCredentials: {
 		url: process.env.DATABASE_URL || 'postgresql://mana:devpassword@localhost:5432/mana_platform',
 	},
-	schemaFilter: ['research', 'website'],
+	schemaFilter: ['research', 'website', 'unlisted'],
 });
