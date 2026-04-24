@@ -15,6 +15,7 @@ export {
 	useStory,
 	useStoryPanels,
 	useStoriesByInput,
+	usePanelImage,
 } from './queries';
 export { STYLE_LABELS, STYLE_ORDER, MAX_PANELS_PER_STORY } from './constants';
 export { STYLE_PREFIXES, composePanelPrompt } from './styles';

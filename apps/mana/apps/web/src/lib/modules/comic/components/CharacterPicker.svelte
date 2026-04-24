@@ -1,0 +1,285 @@
+<!--
+  CharacterPicker — selects the reference-image set that every panel
+  in the story renders against. At minimum: primary face-ref from the
+  active space's meImages. Optional add-ons:
+    - primary body-ref (for full-body framing)
+    - up to 3 wardrobe-garment photos (costume setup)
+
+  Mirrors wardrobe's try-on composition (face + body + garments) but
+  here the list is chosen ONCE at story-create time and fixed on the
+  story row — every panel uses the same refs for visual continuity.
+
+  Outputs: `value: string[]` (mediaIds, face-ref at [0]). Emits via
+  `onChange` on every add/remove.
+-->
+<script lang="ts">
+	import { Plus, X, UserCircle, TShirt } from '@mana/shared-icons';
+	import { useImageByPrimary } from '$lib/modules/profile/queries';
+	import { useAllGarments } from '$lib/modules/wardrobe/queries';
+	import { garmentPhotoUrl } from '$lib/modules/wardrobe/api/media-url';
+	import type { Garment } from '$lib/modules/wardrobe/types';
+
+	interface Props {
+		value: string[];
+		onChange: (next: string[]) => void;
+		disabled?: boolean;
+	}
+
+	let { value, onChange, disabled = false }: Props = $props();
+
+	const face$ = useImageByPrimary('face-ref');
+	const body$ = useImageByPrimary('body-ref');
+	const garments$ = useAllGarments();
+
+	const face = $derived(face$.value);
+	const body = $derived(body$.value);
+	const allGarments = $derived(garments$.value ?? []);
+
+	// Auto-seed face-ref at position [0] the first time it becomes
+	// available and value is still empty. After that, mutations go
+	// through the Add/Remove buttons.
+	let seeded = false;
+	$effect(() => {
+		if (!seeded && face?.mediaId && value.length === 0) {
+			seeded = true;
+			onChange([face.mediaId]);
+		}
+	});
+
+	const hasFace = $derived(Boolean(face?.mediaId));
+	const hasBody = $derived(Boolean(body?.mediaId));
+
+	const bodyInValue = $derived(body?.mediaId ? value.includes(body.mediaId) : false);
+
+	// Garment slots = everything beyond [face, body] if present.
+	const garmentIdsInValue = $derived.by<string[]>(() => {
+		const exclude = new Set<string>();
+		if (face?.mediaId) exclude.add(face.mediaId);
+		if (body?.mediaId) exclude.add(body.mediaId);
+		return value.filter((id) => !exclude.has(id));
+	});
+
+	const garmentPicks = $derived.by<Garment[]>(() => {
+		const out: Garment[] = [];
+		for (const id of garmentIdsInValue) {
+			const g = allGarments.find((g) => g.mediaIds[0] === id);
+			if (g) out.push(g);
+		}
+		return out;
+	});
+
+	// Garments the user can still add (not already picked, has a photo,
+	// not archived). Max 3 slots.
+	const MAX_GARMENTS = 3;
+	const canAddGarment = $derived(garmentIdsInValue.length < MAX_GARMENTS);
+	const availableGarments = $derived(
+		allGarments.filter(
+			(g) => !g.isArchived && g.mediaIds[0] && !garmentIdsInValue.includes(g.mediaIds[0])
+		)
+	);
+
+	let showGarmentPicker = $state(false);
+
+	function toggleBody() {
+		if (!body?.mediaId) return;
+		if (bodyInValue) {
+			onChange(value.filter((id) => id !== body.mediaId));
+		} else {
+			// Insert body at [1] (right after face), before garments.
+			const next = [...value];
+			const insertAt = face?.mediaId && next[0] === face.mediaId ? 1 : 0;
+			next.splice(insertAt, 0, body.mediaId);
+			onChange(next);
+		}
+	}
+
+	function addGarment(g: Garment) {
+		const mediaId = g.mediaIds[0];
+		if (!mediaId || value.includes(mediaId)) return;
+		onChange([...value, mediaId]);
+		showGarmentPicker = false;
+	}
+
+	function removeGarment(mediaId: string) {
+		onChange(value.filter((id) => id !== mediaId));
+	}
+</script>
+
+<div class="space-y-3">
+	<div>
+		<h3 class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+			Protagonist
+		</h3>
+		<p class="mt-0.5 text-xs text-muted-foreground">
+			Dein Gesicht ist Pflicht. Body-Ref und bis zu {MAX_GARMENTS} Kostüm-Fotos sind optional.
+		</p>
+	</div>
+
+	<div class="flex flex-wrap items-start gap-2">
+		<!-- Face ref tile — mandatory -->
+		<div class="flex flex-col items-center gap-1">
+			{#if face?.publicUrl}
+				<img
+					src={face.thumbnailUrl ?? face.publicUrl}
+					alt="Face-Ref"
+					class="h-20 w-20 rounded-md border border-primary/30 object-cover"
+				/>
+			{:else}
+				<div
+					class="flex h-20 w-20 flex-col items-center justify-center gap-1 rounded-md border border-dashed border-border bg-muted/50 text-[10px] text-muted-foreground"
+				>
+					<UserCircle size={20} />
+					<span>Face fehlt</span>
+				</div>
+			{/if}
+			<span class="text-[10px] font-medium text-muted-foreground">Face</span>
+		</div>
+
+		<!-- Body ref tile — optional toggle -->
+		<div class="flex flex-col items-center gap-1">
+			{#if body?.publicUrl}
+				<button
+					type="button"
+					{disabled}
+					onclick={toggleBody}
+					class="relative h-20 w-20 overflow-hidden rounded-md border transition-colors
+						{bodyInValue ? 'border-primary/50' : 'border-border opacity-50 hover:opacity-100'}"
+					aria-pressed={bodyInValue}
+					title={bodyInValue ? 'Body-Ref entfernen' : 'Body-Ref hinzufügen'}
+				>
+					<img
+						src={body.thumbnailUrl ?? body.publicUrl}
+						alt="Body-Ref"
+						class="h-full w-full object-cover"
+					/>
+					{#if !bodyInValue}
+						<div
+							class="absolute inset-0 flex items-center justify-center bg-background/40 text-xs text-foreground"
+						>
+							<Plus size={16} />
+						</div>
+					{/if}
+				</button>
+			{:else}
+				<div
+					class="flex h-20 w-20 flex-col items-center justify-center gap-1 rounded-md border border-dashed border-border bg-muted/30 text-[10px] text-muted-foreground"
+					title="Kein Body-Ref im aktiven Space"
+				>
+					<UserCircle size={18} />
+					<span>Body fehlt</span>
+				</div>
+			{/if}
+			<span class="text-[10px] font-medium text-muted-foreground">Body</span>
+		</div>
+
+		<!-- Garment tiles (picked) -->
+		{#each garmentPicks as g (g.id)}
+			{@const mediaId = g.mediaIds[0]}
+			<div class="flex flex-col items-center gap-1">
+				<div class="relative h-20 w-20 overflow-hidden rounded-md border border-primary/30">
+					{#if mediaId}
+						<img
+							src={garmentPhotoUrl(mediaId, 'thumb')}
+							alt={g.name}
+							class="h-full w-full object-cover"
+						/>
+					{/if}
+					<button
+						type="button"
+						{disabled}
+						onclick={() => mediaId && removeGarment(mediaId)}
+						class="absolute right-0 top-0 m-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-background/80 text-foreground shadow-sm hover:bg-background"
+						aria-label={`${g.name} entfernen`}
+						title="Entfernen"
+					>
+						<X size={10} />
+					</button>
+				</div>
+				<span class="max-w-20 truncate text-[10px] font-medium text-muted-foreground">
+					{g.name}
+				</span>
+			</div>
+		{/each}
+
+		<!-- Add-garment button -->
+		{#if canAddGarment}
+			<div class="flex flex-col items-center gap-1">
+				<button
+					type="button"
+					{disabled}
+					onclick={() => (showGarmentPicker = !showGarmentPicker)}
+					class="flex h-20 w-20 flex-col items-center justify-center gap-1 rounded-md border border-dashed border-border bg-background text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+					aria-expanded={showGarmentPicker}
+				>
+					<Plus size={16} />
+					<span class="text-[10px] font-medium">Kostüm</span>
+				</button>
+				<span class="text-[10px] text-muted-foreground">
+					{garmentIdsInValue.length}/{MAX_GARMENTS}
+				</span>
+			</div>
+		{/if}
+	</div>
+
+	<!-- Garment picker (collapsible). Only shows when toggled open. -->
+	{#if showGarmentPicker}
+		<div class="rounded-lg border border-border bg-muted/30 p-3">
+			<div class="mb-2 flex items-center justify-between">
+				<h4 class="text-xs font-semibold text-foreground">Kostüm aus dem Schrank wählen</h4>
+				<button
+					type="button"
+					onclick={() => (showGarmentPicker = false)}
+					class="text-xs text-muted-foreground hover:text-foreground"
+				>
+					Schließen
+				</button>
+			</div>
+			{#if availableGarments.length === 0}
+				<p class="text-xs text-muted-foreground">
+					Keine weiteren Kleidungsstücke verfügbar — lade welche in <a
+						href="/wardrobe"
+						class="text-primary hover:underline">/wardrobe</a
+					> hoch.
+				</p>
+			{:else}
+				<div class="grid max-h-48 grid-cols-4 gap-2 overflow-y-auto sm:grid-cols-6">
+					{#each availableGarments as g (g.id)}
+						{@const mediaId = g.mediaIds[0]}
+						<button
+							type="button"
+							onclick={() => addGarment(g)}
+							class="group flex flex-col items-center gap-1 overflow-hidden rounded-md border border-border bg-background text-left hover:border-primary/50"
+							title={g.name}
+						>
+							<div class="aspect-square w-full bg-muted">
+								{#if mediaId}
+									<img
+										src={garmentPhotoUrl(mediaId, 'thumb')}
+										alt={g.name}
+										class="h-full w-full object-cover"
+									/>
+								{/if}
+							</div>
+							<span class="w-full truncate px-1 pb-1 text-[10px] text-foreground">
+								{g.name}
+							</span>
+						</button>
+					{/each}
+				</div>
+			{/if}
+		</div>
+	{/if}
+
+	{#if !hasFace}
+		<div class="rounded-md border border-error/30 bg-error/5 p-3 text-xs text-error" role="alert">
+			Kein Gesichtsbild in diesem Space. Lade eins in
+			<a href="/profile/me-images" class="underline hover:no-underline">Profil → Bilder</a>
+			hoch — ohne Face-Ref kein Comic.
+		</div>
+	{:else if !hasBody}
+		<p class="text-xs text-muted-foreground">
+			<TShirt size={12} class="inline" /> Tipp: Ein Body-Ref hilft, wenn der Comic Ganzkörper-Panels zeigen
+			soll.
+		</p>
+	{/if}
+</div>

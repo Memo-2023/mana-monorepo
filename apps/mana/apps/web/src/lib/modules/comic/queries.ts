@@ -44,6 +44,26 @@ export function useStoriesByStyle(style: ComicStyle) {
 	}, [] as ComicStory[]);
 }
 
+/**
+ * Load a single picture.images row by id — used for panel rendering
+ * (cover on StoryCard, thumbnails on PanelStrip, full-size on
+ * PanelCard). Lives here (not in picture/queries) because it's
+ * comic-specific convenience; picture's own queries don't need a
+ * single-image hook today.
+ */
+export function usePanelImage(imageId: string | null) {
+	return useLiveQueryWithDefault<Image | null>(async () => {
+		if (!imageId) return null;
+		const locals = await scopedForModule<LocalImage, string>('picture', 'images')
+			.and((row) => row.id === imageId)
+			.toArray();
+		const [local] = locals;
+		if (!local || local.deletedAt) return null;
+		const [decrypted] = await decryptRecords('images', [local]);
+		return toImage(decrypted);
+	}, null);
+}
+
 /** A single story by id, live-updating. Null while loading / missing. */
 export function useStory(id: string | null) {
 	return useLiveQueryWithDefault<ComicStory | null>(async () => {
