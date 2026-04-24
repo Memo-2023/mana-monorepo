@@ -1,20 +1,30 @@
 import type { VisibilityLevel } from './types';
 
 /**
- * Default visibility for newly-created records, derived from the space
- * type. Personal spaces stay `private` so a fresh note or task doesn't
- * accidentally leak to cohabitants of a team space; multi-member spaces
- * (team, club, firma, …) default to `space` so collaboration works
- * without requiring a manual toggle on every write.
+ * Default visibility for newly-created records — always 'space'.
  *
- * Accepts `null`/`undefined`/unknown strings and treats them as personal
- * — the safer direction. Callers that know the space type pass it
- * directly; callers that don't (e.g. during sync-apply) fall back to
- * 'private'.
+ * Why not 'private' for personal spaces even though the original plan
+ * read "personal → private": it would fight the existing 2-tier
+ * visibility filter in `apps/mana/apps/web/src/lib/data/scope/
+ * visibility.ts`, which treats `'private'` records as "only the author
+ * sees them, even inside the same space". That's the semantic the
+ * broader codebase already depends on — queries like `useAllTasks()`
+ * apply it at read time. Stamping `'private'` as the default here
+ * causes records to disappear from module sub-routes during auth
+ * bootstrap (authorId stamped with the guest-sentinel, later filtered
+ * out once the real user id resolves).
+ *
+ * In a personal space there's only one member, so 'space' and 'private'
+ * are equivalent in effect — both mean "only you see it". In
+ * multi-member spaces, 'space' means "fellow members can see it"
+ * which is the desired default for collaboration. Users who want a
+ * genuine "draft, hide from fellow members" state flip explicitly
+ * to `'private'` via the VisibilityPicker.
+ *
+ * The parameter is retained for forward-compatibility — a future
+ * space type (e.g. 'restricted' invite-only) might want a different
+ * default without changing every call site.
  */
-export function defaultVisibilityFor(spaceType: string | null | undefined): VisibilityLevel {
-	if (!spaceType) return 'private';
-	if (spaceType === 'personal') return 'private';
-	// team, club, firma, or any future multi-member type.
+export function defaultVisibilityFor(_spaceType: string | null | undefined): VisibilityLevel {
 	return 'space';
 }

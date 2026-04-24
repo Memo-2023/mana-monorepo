@@ -47,10 +47,13 @@ export type VisibilityLevel = 'private' | 'space' | 'unlisted' | 'public';
 | `unlisted`  | Wer den Direct-Link + Token hat; nicht gelistet, nicht indexiert | Event-Einladungen mit Nicht-Member-Gästen |
 | `public`    | Beliebig — sichtbar auf Website-Embeds, für AI-Agent referenzierbar | Ein aktiv als "für die Öffentlichkeit" markiertes Item |
 
-**Default bei Record-Create:** leitet sich vom Space-Typ ab.
-- Personal-Space → `private`
-- Team/Club-Space → `space` (sonst müssten User bei jedem Task manuell "meine Space-Mitglieder dürfen das sehen" setzen — unrealistisch)
-- Nie `public` oder `unlisted` als Default.
+**Default bei Record-Create:** **immer `space`**, unabhängig vom Space-Typ.
+
+Ursprünglich war Personal-Space → `private` geplant. Nach der ersten Integration (M4.b Todo) stellte sich heraus: das existierende 2-Stufen-System in `scope/visibility.ts` behandelt `'private'` als "nur der Author sieht es, auch innerhalb des gleichen Space" — und filtert solche Records im `applyVisibility()`-Aufruf der Modul-Queries. Das fightet mit dem "Personal-Space default = private"-Plan: neu angelegte Tasks/Events erschienen im Homepage-Widget (das keinen Filter nutzt), verschwanden aber auf `/todo` (Filter schlägt zu). Der `authorId`-Check in `applyVisibility` versagt während des Auth-Bootstraps, wenn der Hook `'guest'` als authorId stempelt aber `getCurrentUserId()` bereits den echten User zurückgibt.
+
+Der robuste Fix: `defaultVisibilityFor()` returnt immer `'space'`. Im Personal-Space (1 Member) ist das semantisch äquivalent zu `'private'`. In Multi-Member-Spaces ist `'space'` der erwünschte Default (sonst müssten User jeden Task manuell für ihre Mitglieder freischalten). `'private'` wird zur **aktiven User-Entscheidung** für Drafts in geteilten Spaces — Klick im VisibilityPicker.
+
+- Nie `public` oder `unlisted` als Default (deny-by-default-Regel bleibt).
 
 **Begründung der Namen:** `visibility` + 4-Stufen-Enum ist das vertraute Google-Drive/YouTube-Mental-Model. Alternativ diskutiert: `sharingLevel`, `audience`. Verworfen — `visibility` ist breiter bekannt und technischer neutral (keine "Zuhörerschaft"-Assoziation).
 
@@ -68,8 +71,11 @@ export type VisibilityLevel = 'private' | 'space' | 'unlisted' | 'public';
 export const VisibilityLevelSchema = z.enum(['private', 'space', 'unlisted', 'public']);
 
 // defaults.ts
-export function defaultVisibilityFor(spaceType: SpaceType): VisibilityLevel {
-  return spaceType === 'personal' ? 'private' : 'space';
+export function defaultVisibilityFor(_spaceType: SpaceType | null | undefined): VisibilityLevel {
+  // Always 'space' — compatible with the existing 2-tier applyVisibility
+  // filter, and semantically equivalent to 'private' in personal spaces
+  // (only one member). Users flip to 'private' explicitly for drafts.
+  return 'space';
 }
 
 // predicates.ts
