@@ -179,11 +179,6 @@
 							</div>
 						</div>
 						<div class="flex items-center gap-1">
-							<VisibilityPicker
-								level={outfit.visibility ?? 'private'}
-								onChange={handleVisibilityChange}
-								compact
-							/>
 							<button
 								type="button"
 								onclick={handleToggleFavorite}
@@ -205,6 +200,14 @@
 							</a>
 						</div>
 					</header>
+
+					<div class="flex items-center justify-between gap-3">
+						<span class="text-xs text-muted-foreground">Sichtbarkeit</span>
+						<VisibilityPicker
+							level={outfit.visibility ?? 'private'}
+							onChange={handleVisibilityChange}
+						/>
+					</div>
 
 					{#if outfit.description}
 						<p class="whitespace-pre-wrap text-sm text-foreground">{outfit.description}</p>

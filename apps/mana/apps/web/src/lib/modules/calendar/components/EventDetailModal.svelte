@@ -211,7 +211,6 @@
 			</div>
 			<div class="modal-actions">
 				{#if !isEditing}
-					<VisibilityPicker level={event.visibility} onChange={handleVisibilityChange} compact />
 					<button class="btn btn-ghost" onclick={copyToClipboard} title="Kopieren">
 						{#if copied}<Check size={16} />{:else}<Copy size={16} />{/if}
 					</button>
@@ -243,6 +242,14 @@
 				/>
 			{:else}
 				<div class="event-details">
+					<!-- Visibility -->
+					<div class="detail-row">
+						<span class="detail-label">Sichtbarkeit</span>
+						<div class="detail-content">
+							<VisibilityPicker level={event.visibility} onChange={handleVisibilityChange} />
+						</div>
+					</div>
+
 					<!-- Time -->
 					<div class="detail-row">
 						<span class="detail-icon"><Clock size={18} /></span>
@@ -494,6 +501,14 @@
 		color: hsl(var(--color-muted-foreground));
 		flex-shrink: 0;
 		margin-top: 0.125rem;
+	}
+
+	.detail-label {
+		font-size: 0.8125rem;
+		color: hsl(var(--color-muted-foreground));
+		min-width: 5rem;
+		flex-shrink: 0;
+		margin-top: 0.25rem;
 	}
 
 	.detail-content {
