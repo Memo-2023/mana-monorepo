@@ -160,25 +160,28 @@
 			disabled={running}
 		/>
 
+		<!-- Primary CTA: matches GarmentTryOnButton's lift + shadow
+		     treatment so both surfaces use the same visual weight for
+		     "produce the generation". -->
 		<button
 			type="button"
 			onclick={handleClick}
 			disabled={running || !canTryOn}
-			class="flex w-full flex-col items-center justify-center gap-0.5 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+			class="flex w-full flex-col items-center justify-center gap-0.5 rounded-lg bg-primary px-5 py-3.5 text-base font-semibold text-primary-foreground shadow-md shadow-primary/20 transition-all hover:-translate-y-0.5 hover:bg-primary/95 hover:shadow-lg hover:shadow-primary/30 active:translate-y-0 active:shadow-sm disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-md"
 		>
 			{#if running}
 				<span class="flex items-center gap-2">
 					<span
-						class="h-4 w-4 animate-spin rounded-full border-2 border-current border-r-transparent"
+						class="h-5 w-5 animate-spin rounded-full border-2 border-current border-r-transparent"
 					></span>
 					Rendere…
 				</span>
 			{:else}
 				<span class="flex items-center gap-2">
-					<Sparkle size={16} weight="fill" />
+					<Sparkle size={18} weight="fill" />
 					Anprobieren
 				</span>
-				<span class="text-xs font-normal opacity-75">{estimatedCredits} Credits</span>
+				<span class="text-xs font-normal opacity-80">{estimatedCredits} Credits</span>
 			{/if}
 		</button>
 

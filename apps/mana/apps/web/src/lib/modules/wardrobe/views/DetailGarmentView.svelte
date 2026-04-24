@@ -42,8 +42,31 @@
 	let saving = $state(false);
 	let markingWorn = $state(false);
 
-	// Lightbox state for the Anproben-Strip. Null = closed, Image = open.
+	// Lightbox state — shared between the Anproben-Strip (try-on thumbs)
+	// and the hero-photo. Null = closed, Image = open.
 	let lightboxImage = $state<Image | null>(null);
+
+	// The hero-photo is a garment row, not a picture.Image — synthesise
+	// the shape the lightbox expects so clicking the photo opens the
+	// full-resolution mana-media URL with the garment's name as
+	// prompt-caption. No model / dims / date are rendered (all optional
+	// in the lightbox), keeping the modal clean for a plain clothing
+	// photo.
+	function openPhotoLightbox() {
+		if (!garment || !garment.mediaIds[0]) return;
+		lightboxImage = {
+			id: garment.id,
+			prompt: garment.name,
+			storagePath: garment.mediaIds[0],
+			filename: garment.name,
+			publicUrl: garmentPhotoUrl(garment.mediaIds[0], 'large'),
+			visibility: 'private',
+			isFavorite: false,
+			downloadCount: 0,
+			createdAt: garment.createdAt,
+			updatedAt: garment.updatedAt,
+		};
+	}
 
 	async function handleMarkWorn() {
 		if (!garment) return;
@@ -98,16 +121,27 @@
 		{/if}
 	{:else}
 		<div class="grid gap-5 md:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
-			<!-- Photo -->
-			<div class="overflow-hidden rounded-2xl border border-border bg-muted">
-				{#if garment.mediaIds[0]}
+			<!-- Photo — clickable: opens the lightbox with the full-res
+			     image so the user can inspect detail at the original
+			     resolution. Hover state mirrors the Try-On thumbnail
+			     strip + model picker (primary-tinted border) so the
+			     whole page uses one interaction vocabulary. -->
+			{#if garment.mediaIds[0]}
+				<button
+					type="button"
+					onclick={openPhotoLightbox}
+					aria-label="Foto vergrößern"
+					class="group block overflow-hidden rounded-2xl border border-border bg-muted transition-all hover:border-primary/50 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+				>
 					<img
 						src={garmentPhotoUrl(garment.mediaIds[0], 'large')}
 						alt={garment.name}
-						class="h-full w-full object-cover"
+						class="h-full w-full object-cover transition-transform group-hover:scale-[1.01]"
 					/>
-				{/if}
-			</div>
+				</button>
+			{:else}
+				<div class="rounded-2xl border border-border bg-muted"></div>
+			{/if}
 
 			<!-- Metadata / Edit -->
 			<div class="space-y-4">
@@ -120,14 +154,19 @@
 								<h1 class="text-lg font-semibold text-foreground">{garment.name}</h1>
 								<p class="text-sm text-muted-foreground">{CATEGORY_LABELS[garment.category]}</p>
 							</div>
+							<!-- Edit affordance uses the same primary-tinted hover as
+							     the Try-On thumbs / model picker so interactive elements
+							     on the page share one hover vocabulary. Label is
+							     always visible (not hover-to-discover) so editing
+							     reads as a first-class action. -->
 							<button
 								type="button"
 								onclick={() => (editing = true)}
 								aria-label="Bearbeiten"
-								title="Bearbeiten"
-								class="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+								class="flex items-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/50 hover:bg-primary/5 hover:text-foreground"
 							>
-								<PencilSimple size={16} />
+								<PencilSimple size={14} />
+								Bearbeiten
 							</button>
 						</header>
 
@@ -195,23 +234,26 @@
 					<!-- Try-on — "wie sähe das an mir aus" -->
 					<GarmentTryOnButton {garment} />
 
-					<!-- Wear-tracking -->
+					<!-- Wear-tracking — same primary-tinted hover as edit /
+					     model picker / try-on thumbs. -->
 					<button
 						type="button"
 						onclick={handleMarkWorn}
 						disabled={markingWorn}
-						class="flex w-full items-center justify-center gap-2 rounded-md border border-border bg-background px-4 py-2 text-sm text-foreground transition-colors hover:bg-muted disabled:opacity-50"
+						class="flex w-full items-center justify-center gap-2 rounded-md border border-border bg-background px-4 py-2 text-sm text-foreground transition-colors hover:border-primary/50 hover:bg-primary/5 disabled:opacity-50 disabled:hover:border-border disabled:hover:bg-background"
 					>
 						<CheckCircle size={14} />
 						{markingWorn ? 'Gespeichert…' : 'Heute getragen'}
 					</button>
 
-					<!-- Secondary actions -->
+					<!-- Secondary actions. Archive keeps the primary-tint hover;
+					     Löschen stays destructive-red so the action reads as
+					     dangerous even at a glance. -->
 					<div class="flex gap-2">
 						<button
 							type="button"
 							onclick={handleArchive}
-							class="flex flex-1 items-center justify-center gap-2 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground transition-colors hover:bg-muted"
+							class="flex flex-1 items-center justify-center gap-2 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground transition-colors hover:border-primary/50 hover:bg-primary/5"
 						>
 							<Archive size={14} />
 							{garment.isArchived ? 'Wieder aktiv' : 'Archivieren'}
@@ -219,7 +261,7 @@
 						<button
 							type="button"
 							onclick={handleDelete}
-							class="flex flex-1 items-center justify-center gap-2 rounded-md border border-border bg-background px-3 py-2 text-sm text-error transition-colors hover:bg-error/10"
+							class="flex flex-1 items-center justify-center gap-2 rounded-md border border-border bg-background px-3 py-2 text-sm text-error transition-colors hover:border-error/50 hover:bg-error/10"
 						>
 							<Trash size={14} />
 							Löschen
