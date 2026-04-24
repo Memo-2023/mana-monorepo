@@ -25,7 +25,12 @@
 		WarningCircle,
 		X,
 	} from '@mana/shared-icons';
-	import { runPanelGenerate, type PanelSize } from '../api/generate-panel';
+	import {
+		runPanelGenerate,
+		DEFAULT_PANEL_MODEL,
+		type PanelModel,
+		type PanelSize,
+	} from '../api/generate-panel';
 	import {
 		suggestPanels,
 		type StoryboardSourceModule,
@@ -40,6 +45,7 @@
 	} from '../constants';
 	import type { ComicStory } from '../types';
 	import ReferenceInputPicker, { type ReferenceSelection } from './ReferenceInputPicker.svelte';
+	import PanelModelPicker from './PanelModelPicker.svelte';
 
 	interface Props {
 		story: ComicStory;
@@ -65,6 +71,7 @@
 	const QUALITIES: readonly Quality[] = ['low', 'medium', 'high'] as const;
 	const CREDIT_COST: Record<Quality, number> = { low: 3, medium: 10, high: 25 };
 	let quality = $state<Quality>('medium');
+	let model = $state<PanelModel>(DEFAULT_PANEL_MODEL);
 	// svelte-ignore state_referenced_locally
 	let size = $state<PanelSize>(story.style === 'webtoon' ? '1024x1536' : '1024x1024');
 
@@ -123,6 +130,7 @@
 				dialogue: row.dialogue?.trim() || undefined,
 				quality,
 				size,
+				model,
 				sourceInput: {
 					module: selection.module,
 					entryId: selection.entryId,
@@ -390,6 +398,8 @@
 					Weiteres Panel manuell
 				</button>
 			{/if}
+
+			<PanelModelPicker value={model} onChange={(m) => (model = m)} disabled={renderBusy} />
 
 			<div class="flex flex-wrap items-center gap-3 border-t border-border pt-3">
 				<div class="flex items-center gap-1.5">

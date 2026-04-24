@@ -104,6 +104,27 @@ auseinanderdriften, adressieren wir das mit einer zusätzlichen
 "Anchor-Panel"-Referenz (erstes erzeugtes Panel wird Referenz für alle
 folgenden) — das ist M6+.
 
+### 2.1 Image-Modell als Picker, nicht hartcodiert (nachgezogen)
+
+Comic nutzt die gleiche Model-Auswahl wie Wardrobe's Try-On:
+
+- `openai/gpt-image-2` — Default, mittlerer Preis, fällt server-seitig
+  auf gpt-image-1 zurück wenn die OpenAI-Org nicht verified ist.
+- `google/gemini-3-pro-image-preview` — Nano Banana Pro, hohe
+  Charakter-Konsistenz, höherer Preis.
+- `google/gemini-3.1-flash-image-preview` — Nano Banana 2, neuestes,
+  schnell, günstig.
+
+`PanelModelPicker` (Analog zu `TryOnModelPicker`) sitzt als
+segmentierter Picker in PanelEditor / BatchPanelEditor /
+StoryboardSuggester. Die Wahl ist per-Editor-Mount lokal; keine
+Story-Level-Persistierung, weil ein Model-Flag auf der Row eine
+Migration bräuchte und die Wahl meistens eh ad-hoc ist.
+
+MCP-Tool `comic.generatePanel` und Catalog-Tool `generate_comic_panel`
+akzeptieren beide einen optionalen `model`-Parameter mit demselben
+Enum. Default bleibt `openai/gpt-image-2`.
+
 ### 3. Fünf Stil-Presets, Mapping im Client
 
 ```typescript

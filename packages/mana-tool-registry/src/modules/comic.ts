@@ -282,6 +282,21 @@ const generatePanelInput = z.object({
 	/** 1024×1024 square is the default; pass `1024x1536` for vertical
 	 *  framings (e.g. webtoon tall panels). */
 	size: z.enum(['1024x1024', '1024x1536']).optional(),
+	/** Rendering backend. Same closed set as Wardrobe's Try-On picker:
+	 *  - `openai/gpt-image-2` (default) — mid-tier cost, strong
+	 *    structure, server-side fallback to gpt-image-1 if org is
+	 *    unverified.
+	 *  - `google/gemini-3-pro-image-preview` — Nano Banana Pro, strong
+	 *    character consistency, higher cost.
+	 *  - `google/gemini-3.1-flash-image-preview` — Nano Banana 2,
+	 *    newest + fast + cheap. */
+	model: z
+		.enum([
+			'openai/gpt-image-2',
+			'google/gemini-3-pro-image-preview',
+			'google/gemini-3.1-flash-image-preview',
+		])
+		.default('openai/gpt-image-2'),
 });
 
 const generatePanelOutput = z.object({
@@ -353,7 +368,7 @@ export const comicGeneratePanel: ToolSpec<typeof generatePanelInput, typeof gene
 			body: JSON.stringify({
 				prompt: composed,
 				referenceMediaIds,
-				model: 'openai/gpt-image-2',
+				model: input.model,
 				quality: input.quality,
 				size: effectiveSize,
 				n: 1,

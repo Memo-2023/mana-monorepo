@@ -23,9 +23,15 @@
 		WarningCircle,
 		X,
 	} from '@mana/shared-icons';
-	import { runPanelGenerate, type PanelSize } from '../api/generate-panel';
+	import {
+		runPanelGenerate,
+		DEFAULT_PANEL_MODEL,
+		type PanelModel,
+		type PanelSize,
+	} from '../api/generate-panel';
 	import { MAX_PANELS_PER_STORY, PANEL_COUNT_WARN_THRESHOLD } from '../constants';
 	import type { ComicStory } from '../types';
+	import PanelModelPicker from './PanelModelPicker.svelte';
 
 	interface Props {
 		story: ComicStory;
@@ -56,6 +62,7 @@
 
 	let rows = $state<Row[]>([emptyRow(), emptyRow()]);
 	let quality = $state<Quality>('medium');
+	let model = $state<PanelModel>(DEFAULT_PANEL_MODEL);
 	// svelte-ignore state_referenced_locally
 	let size = $state<PanelSize>(story.style === 'webtoon' ? '1024x1536' : '1024x1024');
 
@@ -103,6 +110,7 @@
 				dialogue: row.dialogue.trim() || undefined,
 				quality,
 				size,
+				model,
 			});
 			rowStatus[row.id] = { status: 'ok' };
 			return result.imageId;
@@ -311,6 +319,8 @@
 				Weiteres Panel ({rows.length}/{Math.min(MAX_BATCH, roomLeft)})
 			</button>
 		</div>
+
+		<PanelModelPicker value={model} onChange={(m) => (model = m)} disabled={submitting} />
 
 		<div class="flex flex-wrap items-center gap-3">
 			<div class="flex items-center gap-1.5">

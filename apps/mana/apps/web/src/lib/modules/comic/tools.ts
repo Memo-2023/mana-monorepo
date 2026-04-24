@@ -30,9 +30,19 @@ import { scopedForModule } from '$lib/data/scope';
 import { decryptRecords, VaultLockedError } from '$lib/data/crypto';
 import { meImagesTable } from '$lib/modules/profile/collections';
 import { comicStoriesStore } from './stores/stories.svelte';
-import { runPanelGenerate } from './api/generate-panel';
+import { runPanelGenerate, DEFAULT_PANEL_MODEL, type PanelModel } from './api/generate-panel';
 import { toStory } from './types';
 import type { ComicStyle, LocalComicStory } from './types';
+
+const VALID_MODELS: readonly PanelModel[] = [
+	'openai/gpt-image-2',
+	'google/gemini-3-pro-image-preview',
+	'google/gemini-3.1-flash-image-preview',
+] as const;
+
+function isValidModel(v: unknown): v is PanelModel {
+	return typeof v === 'string' && (VALID_MODELS as readonly string[]).includes(v);
+}
 import type { LocalMeImage } from '$lib/modules/profile/types';
 import { getActiveSpace } from '$lib/data/scope';
 
@@ -265,6 +275,14 @@ export const comicTools: ModuleTool[] = [
 				required: false,
 				enum: ['low', 'medium', 'high'],
 			},
+			{
+				name: 'model',
+				type: 'string',
+				description:
+					'Rendering-Backend (Default openai/gpt-image-2). Alternativen: google/gemini-3-pro-image-preview (Nano Banana Pro), google/gemini-3.1-flash-image-preview (Nano Banana 2).',
+				required: false,
+				enum: [...VALID_MODELS],
+			},
 		],
 		async execute(params) {
 			const storyId = String(params.storyId ?? '').trim();
@@ -283,6 +301,7 @@ export const comicTools: ModuleTool[] = [
 					: undefined;
 			const quality =
 				params.quality === 'low' || params.quality === 'high' ? params.quality : 'medium';
+			const model = isValidModel(params.model) ? params.model : DEFAULT_PANEL_MODEL;
 
 			try {
 				// Load the story for runPanelGenerate — same code path as the
@@ -306,6 +325,7 @@ export const comicTools: ModuleTool[] = [
 					caption,
 					dialogue,
 					quality: quality as 'low' | 'medium' | 'high',
+					model,
 				});
 
 				return {

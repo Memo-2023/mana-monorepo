@@ -29,6 +29,29 @@ import type { ComicPanelMeta, ComicStory } from '../types';
  */
 export type PanelSize = '1024x1024' | '1024x1536';
 
+/**
+ * Models that can drive panel rendering. Same closed set as
+ * Wardrobe's Try-On picker so character consistency between a
+ * user's outfit try-ons and their comic panels stays comparable
+ * (different models ≈ different faces).
+ *
+ * - `openai/gpt-image-2` — existing default, mid-tier cost.
+ *   Server-side transparent fallback to gpt-image-1 for
+ *   unverified OpenAI orgs; see apps/api picture/routes.ts.
+ * - `google/gemini-3-pro-image-preview` — Nano Banana Pro.
+ *   Strong character consistency across panels, higher cost.
+ * - `google/gemini-3.1-flash-image-preview` — Nano Banana 2.
+ *   Newest + fast + cheap, good default for drafts.
+ *
+ * Credit tarifs are set by creditsFor() in picture/routes.ts.
+ */
+export type PanelModel =
+	| 'openai/gpt-image-2'
+	| 'google/gemini-3-pro-image-preview'
+	| 'google/gemini-3.1-flash-image-preview';
+
+export const DEFAULT_PANEL_MODEL: PanelModel = 'openai/gpt-image-2';
+
 export interface RunPanelGenerateParams {
 	story: ComicStory;
 	panelPrompt: string;
@@ -39,6 +62,10 @@ export interface RunPanelGenerateParams {
 	sourceInput?: ComicPanelMeta['sourceInput'];
 	quality?: 'low' | 'medium' | 'high';
 	size?: PanelSize;
+	/** Rendering backend — defaults to `DEFAULT_PANEL_MODEL`. Mirrored
+	 *  from Wardrobe so users can pick per-call without a story-level
+	 *  schema change. See `PanelModelPicker.svelte`. */
+	model?: PanelModel;
 }
 
 export interface RunPanelGenerateResult {
@@ -64,6 +91,7 @@ async function callGenerateWithReference(opts: {
 	referenceMediaIds: string[];
 	quality: 'low' | 'medium' | 'high';
 	size: PanelSize;
+	model: PanelModel;
 }): Promise<{ imageUrl: string; mediaId: string; prompt: string; model: string }> {
 	const token = await authStore.getValidToken();
 	const res = await fetch(`${getManaApiUrl()}/api/v1/picture/generate-with-reference`, {
@@ -75,7 +103,7 @@ async function callGenerateWithReference(opts: {
 		body: JSON.stringify({
 			prompt: opts.prompt,
 			referenceMediaIds: opts.referenceMediaIds,
-			model: 'openai/gpt-image-2',
+			model: opts.model,
 			quality: opts.quality,
 			size: opts.size,
 			n: 1,
@@ -153,6 +181,7 @@ export async function runPanelGenerate(
 	const effectiveSize: PanelSize =
 		params.size ?? (story.style === 'webtoon' ? '1024x1536' : '1024x1024');
 	const effectiveQuality = params.quality ?? 'medium';
+	const effectiveModel: PanelModel = params.model ?? DEFAULT_PANEL_MODEL;
 
 	// Cap at 8 references (server limit). If the story somehow has more
 	// in its characterMediaIds (shouldn't — UI caps at ~5), truncate and
@@ -164,6 +193,7 @@ export async function runPanelGenerate(
 		referenceMediaIds,
 		quality: effectiveQuality,
 		size: effectiveSize,
+		model: effectiveModel,
 	});
 
 	const now = new Date().toISOString();

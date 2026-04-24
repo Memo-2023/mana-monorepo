@@ -1973,6 +1973,18 @@ export const AI_TOOL_CATALOG: readonly ToolSchema[] = [
 				required: false,
 				enum: ['low', 'medium', 'high'],
 			},
+			{
+				name: 'model',
+				type: 'string',
+				description:
+					'Rendering-Backend. openai/gpt-image-2 ist Standard. google/gemini-3-pro-image-preview = Nano Banana Pro (hoehere Charakter-Konsistenz, teurer). google/gemini-3.1-flash-image-preview = Nano Banana 2 (neuestes, schnell, guenstig).',
+				required: false,
+				enum: [
+					'openai/gpt-image-2',
+					'google/gemini-3-pro-image-preview',
+					'google/gemini-3.1-flash-image-preview',
+				],
+			},
 		],
 	},
 ];

@@ -14,9 +14,15 @@
 -->
 <script lang="ts">
 	import { Sparkle, SpinnerGap, X } from '@mana/shared-icons';
-	import { runPanelGenerate, type PanelSize } from '../api/generate-panel';
+	import {
+		runPanelGenerate,
+		DEFAULT_PANEL_MODEL,
+		type PanelModel,
+		type PanelSize,
+	} from '../api/generate-panel';
 	import { MAX_PANELS_PER_STORY, PANEL_COUNT_WARN_THRESHOLD } from '../constants';
 	import type { ComicStory } from '../types';
+	import PanelModelPicker from './PanelModelPicker.svelte';
 
 	interface Props {
 		story: ComicStory;
@@ -30,6 +36,7 @@
 	let caption = $state('');
 	let dialogue = $state('');
 	let quality = $state<'low' | 'medium' | 'high'>('medium');
+	let model = $state<PanelModel>(DEFAULT_PANEL_MODEL);
 	// Size defaults based on the story's style at mount time — users
 	// can flip the toggle per panel afterwards, so capturing the
 	// initial value is intentional here.
@@ -58,6 +65,7 @@
 				dialogue: dialogue.trim() || undefined,
 				quality,
 				size,
+				model,
 			});
 			onGenerated?.(result.imageId);
 			// Reset local state so the next panel-add starts fresh.
@@ -181,6 +189,8 @@
 			Caption und Dialog werden direkt in das Bild gerendert. Englische Texte rendern stabiler als
 			deutsche, kurze Sätze funktionieren am besten.
 		</p>
+
+		<PanelModelPicker value={model} onChange={(m) => (model = m)} disabled={submitting} />
 
 		<div class="flex flex-wrap items-center gap-3">
 			<div class="flex items-center gap-1.5">
