@@ -36,6 +36,7 @@ export function toDraft(local: LocalDraft): Draft {
 		publishedTo: local.publishedTo ?? [],
 		isFavorite: local.isFavorite ?? false,
 		visibility: local.visibility ?? 'space',
+		unlistedToken: local.unlistedToken ?? null,
 		createdAt: local.createdAt ?? now,
 		updatedAt: local.updatedAt ?? now,
 	};

@@ -8,6 +8,7 @@
 -->
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { VisibilityPicker, type VisibilityLevel } from '@mana/shared-privacy';
 	import BriefingForm from '../components/BriefingForm.svelte';
 	import StatusBadge from '../components/StatusBadge.svelte';
 	import VersionEditor from '../components/VersionEditor.svelte';
@@ -104,6 +105,31 @@
 	async function toggleFavorite() {
 		if (!draft) return;
 		await draftsStore.toggleFavorite(draft.id);
+	}
+
+	async function onVisibilityChange(next: VisibilityLevel) {
+		if (!draft) return;
+		await draftsStore.setVisibility(draft.id, next);
+	}
+
+	let shareCopied = $state(false);
+	let shareCopyTimer: ReturnType<typeof setTimeout> | null = null;
+
+	async function copyShareToken() {
+		// The public read-URL for a draft lands with M10 (Publish-Hooks).
+		// Until then we copy the bare token so the user has *something* to
+		// keep — when the route goes live, the URL can be reconstructed as
+		// `<origin>/share/writing/<token>`.
+		if (!draft?.unlistedToken) return;
+		try {
+			await navigator.clipboard.writeText(draft.unlistedToken);
+			shareCopied = true;
+			if (shareCopyTimer) clearTimeout(shareCopyTimer);
+			shareCopyTimer = setTimeout(() => (shareCopied = false), 2000);
+		} catch {
+			// Clipboard API can fail (e.g. insecure context). Swallow;
+			// the user can still read the token from the DOM.
+		}
 	}
 
 	async function saveCheckpoint() {
@@ -289,7 +315,23 @@
 						{/if}
 					{/each}
 				</div>
+				<div class="visibility-slot">
+					<VisibilityPicker level={draft.visibility} onChange={onVisibilityChange} />
+				</div>
 			</div>
+
+			{#if draft.visibility === 'unlisted' && draft.unlistedToken}
+				<div
+					class="share-row"
+					title="Öffentlicher Link kommt mit M10 (Publish-Hooks). Bis dahin: Token kopieren."
+				>
+					<span class="share-label">🔗 Unlisted-Token:</span>
+					<code class="share-token">{draft.unlistedToken}</code>
+					<button type="button" class="tiny" onclick={copyShareToken}>
+						{shareCopied ? '✓ Kopiert' : 'Kopieren'}
+					</button>
+				</div>
+			{/if}
 		</header>
 
 		<section class="briefing-section">
@@ -482,6 +524,31 @@
 		align-items: center;
 		gap: 0.75rem;
 		flex-wrap: wrap;
+	}
+	.visibility-slot {
+		margin-left: auto;
+	}
+	.share-row {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		flex-wrap: wrap;
+		padding: 0.5rem 0.75rem;
+		border-radius: 0.5rem;
+		border: 1px solid var(--color-border, rgba(0, 0, 0, 0.08));
+		background: var(--color-surface, rgba(0, 0, 0, 0.02));
+		font-size: 0.8rem;
+	}
+	.share-label {
+		color: var(--color-text-muted, rgba(0, 0, 0, 0.55));
+	}
+	.share-token {
+		font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+		font-size: 0.75rem;
+		padding: 0.15rem 0.4rem;
+		border-radius: 0.3rem;
+		background: var(--color-surface-muted, rgba(0, 0, 0, 0.05));
+		word-break: break-all;
 	}
 	.status-picker {
 		display: inline-flex;

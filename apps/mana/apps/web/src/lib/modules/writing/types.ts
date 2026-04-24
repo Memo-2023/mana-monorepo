@@ -210,6 +210,8 @@ export interface Draft {
 	references: DraftReference[];
 	currentVersionId: string | null;
 	visibility: VisibilityLevel;
+	/** 32-char token minted on first flip to 'unlisted'. Null otherwise. */
+	unlistedToken: string | null;
 	publishedTo: DraftPublishTarget[];
 	isFavorite: boolean;
 	createdAt: string;
