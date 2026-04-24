@@ -23,6 +23,8 @@ import type { EmbedItem, EmbedSource, ModuleEmbedProps } from '@mana/website-blo
 import type { LocalBoard, LocalBoardItem, LocalImage } from '$lib/modules/picture/types';
 import type { LocalLibraryEntry } from '$lib/modules/library/types';
 import type { LocalEvent } from '$lib/modules/calendar/types';
+import type { LocalTask } from '$lib/modules/todo/types';
+import type { LocalTaskTag } from '$lib/modules/todo/types';
 import type { LocalTimeBlock } from '$lib/data/time-blocks/types';
 
 export interface ResolvedEmbed {
@@ -45,6 +47,9 @@ export async function resolveEmbed(props: ModuleEmbedProps): Promise<ResolvedEmb
 				break;
 			case 'calendar.events':
 				items = await resolveCalendarEvents(props);
+				break;
+			case 'todo.tasks':
+				items = await resolveTodoTasks(props);
 				break;
 			default:
 				return {
@@ -259,4 +264,49 @@ function formatEventSubtitle(
 	const loc = location?.trim();
 	const locPart = loc ? ` · ${loc}` : '';
 	return `${dateParts}${timePart}${locPart}`;
+}
+
+/**
+ * Todo-tasks: public-roadmap use case. Returns tasks flipped to
+ * 'public' via the VisibilityPicker on the Todo DetailView. Filters
+ * (status, tagIds) are optional and stack on top of the hard gate.
+ *
+ * Whitelist (plan §2): only title and a compact status label land in
+ * the snapshot. Description, subtasks, LLM-labels, dueDate, and
+ * project-membership stay out — they frequently carry private context
+ * the user didn't intend to publish by flipping a single flag.
+ *
+ * `tagIds` filter: tasks are tagged through the N:N `taskTags` table;
+ * the resolver joins tag assignments inline rather than asking each
+ * task to carry a denormalised tagIds array.
+ */
+async function resolveTodoTasks(props: ModuleEmbedProps): Promise<EmbedItem[]> {
+	let tasks = await db.table<LocalTask>('tasks').toArray();
+	tasks = tasks.filter((t) => !t.deletedAt && canEmbedOnWebsite(t.visibility ?? 'private'));
+
+	if (props.filter?.status) {
+		const wantCompleted = props.filter.status === 'completed';
+		tasks = tasks.filter((t) => t.isCompleted === wantCompleted);
+	}
+
+	if (props.filter?.tagIds?.length) {
+		const wanted = new Set(props.filter.tagIds);
+		const taskTags = await db.table<LocalTaskTag>('taskTags').toArray();
+		const hitTaskIds = new Set(
+			taskTags.filter((tt) => wanted.has(tt.tagId)).map((tt) => tt.taskId)
+		);
+		tasks = tasks.filter((t) => hitTaskIds.has(t.id));
+	}
+
+	const decrypted = (await decryptRecords('tasks', tasks)) as LocalTask[];
+
+	// Newest public-items first (by updatedAt); id as stable tiebreaker.
+	decrypted.sort(
+		(a, b) => (b.updatedAt ?? '').localeCompare(a.updatedAt ?? '') || a.id.localeCompare(b.id)
+	);
+
+	return decrypted.map((t) => ({
+		title: t.title,
+		subtitle: t.isCompleted ? 'Erledigt' : 'In Arbeit',
+	}));
 }

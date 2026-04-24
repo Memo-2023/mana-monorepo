@@ -11,6 +11,7 @@
 	import { getBlock, decryptBlock } from '$lib/data/time-blocks/service';
 	import type { LocalTimeBlock } from '$lib/data/time-blocks/types';
 	import { Check, X, CalendarBlank } from '@mana/shared-icons';
+	import { VisibilityPicker, type VisibilityLevel } from '@mana/shared-privacy';
 	import SlotSuggestions from '$lib/modules/calendar/components/SlotSuggestions.svelte';
 	import type { ViewProps } from '$lib/app-registry';
 	import type { LocalTask, TaskPriority } from '../types';
@@ -106,6 +107,10 @@
 		await saveField();
 	}
 
+	async function handleVisibilityChange(next: VisibilityLevel) {
+		await tasksStore.setVisibility(taskId, next);
+	}
+
 	async function handlePriorityChange() {
 		await tasksStore.updateTask(taskId, { priority: editPriority });
 	}
@@ -181,6 +186,11 @@
 		</div>
 
 		<div class="properties">
+			<div class="prop-row">
+				<span class="prop-label">Sichtbarkeit</span>
+				<VisibilityPicker level={task.visibility ?? 'private'} onChange={handleVisibilityChange} />
+			</div>
+
 			<div class="prop-row">
 				<span class="prop-label">Priorität</span>
 				<select

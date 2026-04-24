@@ -11,6 +11,13 @@ import type { LocalTask, TaskPriority, Subtask } from '../types';
 import { createBlock, updateBlock, deleteBlock } from '$lib/data/time-blocks/service';
 import { encryptRecord, decryptRecord } from '$lib/data/crypto';
 import { emitDomainEvent } from '$lib/data/events';
+import { getActiveSpace } from '$lib/data/scope';
+import { getEffectiveUserId } from '$lib/data/current-user';
+import {
+	defaultVisibilityFor,
+	generateUnlistedToken,
+	type VisibilityLevel,
+} from '@mana/shared-privacy';
 import { transcribeAudio } from '$lib/voice/transcribe';
 import { TodoEvents } from '@mana/shared-utils/analytics';
 import { tagCollection, type LocalTag } from '@mana/shared-stores';
@@ -142,6 +149,7 @@ export const tasksStore = {
 			order: count,
 			subtasks: data.subtasks,
 			metadata: data.labelIds && data.labelIds.length > 0 ? { labelIds: data.labelIds } : undefined,
+			visibility: defaultVisibilityFor(getActiveSpace()?.type),
 		};
 
 		if (data.projectId !== undefined) {
@@ -467,5 +475,39 @@ export const tasksStore = {
 				updatedAt: new Date().toISOString(),
 			});
 		}
+	},
+
+	/**
+	 * Flip a task's visibility. The typical use-case is "public roadmap":
+	 * a user marks selected tasks 'public' so they appear in the
+	 * todo.tasks embed on their website. Emits cross-module
+	 * VisibilityChanged.
+	 */
+	async setVisibility(id: string, next: VisibilityLevel) {
+		const existing = await taskTable.get(id);
+		if (!existing) throw new Error(`Task ${id} not found`);
+		const before: VisibilityLevel = existing.visibility ?? 'space';
+		if (before === next) return;
+
+		const now = new Date().toISOString();
+		const patch: Partial<LocalTask> = {
+			visibility: next,
+			visibilityChangedAt: now,
+			visibilityChangedBy: getEffectiveUserId(),
+			updatedAt: now,
+		};
+		if (next === 'unlisted' && !existing.unlistedToken) {
+			patch.unlistedToken = generateUnlistedToken();
+		} else if (next !== 'unlisted' && existing.unlistedToken) {
+			patch.unlistedToken = undefined;
+		}
+		await taskTable.update(id, patch);
+
+		emitDomainEvent('VisibilityChanged', 'todo', 'tasks', id, {
+			recordId: id,
+			collection: 'tasks',
+			before,
+			after: next,
+		});
 	},
 };

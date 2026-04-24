@@ -36,6 +36,7 @@ export function toTask(local: LocalTask): Task {
 		subtasks: local.subtasks ?? null,
 		transcriptModel: local.transcriptModel ?? null,
 		metadata: local.metadata ?? null,
+		visibility: local.visibility ?? 'space',
 		createdAt: local.createdAt ?? new Date().toISOString(),
 		updatedAt: local.updatedAt ?? new Date().toISOString(),
 	};

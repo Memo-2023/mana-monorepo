@@ -26,7 +26,12 @@ export const EmbedResolvedSchema = z.object({
  * Supported embed sources. Add new sources here + a matching provider
  * in the editor's publish resolver.
  */
-export const EmbedSourceSchema = z.enum(['picture.board', 'library.entries', 'calendar.events']);
+export const EmbedSourceSchema = z.enum([
+	'picture.board',
+	'library.entries',
+	'calendar.events',
+	'todo.tasks',
+]);
 export type EmbedSource = z.infer<typeof EmbedSourceSchema>;
 
 export const ModuleEmbedSchema = z.object({
@@ -42,8 +47,11 @@ export const ModuleEmbedSchema = z.object({
 	 *   library.entries: { isFavorite?, status?, kind? }
 	 *   picture.board:   ignored (board is the source)
 	 *   calendar.events: { upcomingDays?, tagIds? } — omit upcomingDays
-	 *                    to include past events; tagIds AND-filter on
+	 *                    to include past events; tagIds OR-filter on
 	 *                    event tag assignments
+	 *   todo.tasks:      { status?, tagIds? } — typical public-roadmap
+	 *                    shape: status='completed' filters to shipped
+	 *                    items; tagIds restricts to a "public" label
 	 */
 	filter: z
 		.object({

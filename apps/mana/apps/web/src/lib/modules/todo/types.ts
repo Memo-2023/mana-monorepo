@@ -4,6 +4,7 @@
 
 import type { BaseRecord } from '@mana/local-store';
 import type { Tag } from '@mana/shared-tags';
+import type { VisibilityLevel } from '@mana/shared-privacy';
 
 /**
  * A tag attached to a task. Structurally identical to the shared `Tag`
@@ -41,6 +42,10 @@ export interface LocalTask extends BaseRecord {
 	/** STT backend/model identifier (e.g. "whisperx-large-v3"). Set when task created via voice. */
 	transcriptModel?: string | null;
 	metadata?: Record<string, unknown>;
+	visibility?: VisibilityLevel;
+	visibilityChangedAt?: string;
+	visibilityChangedBy?: string;
+	unlistedToken?: string;
 }
 
 export interface LocalTaskTag extends BaseRecord {
@@ -119,6 +124,7 @@ export interface Task {
 	subtasks?: Subtask[] | null;
 	transcriptModel: string | null;
 	metadata?: Record<string, unknown> | null;
+	visibility: VisibilityLevel;
 	createdAt: string;
 	updatedAt: string;
 }
