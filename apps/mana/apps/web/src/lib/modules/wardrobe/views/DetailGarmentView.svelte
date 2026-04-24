@@ -13,6 +13,8 @@
 	import { CATEGORY_LABELS } from '../constants';
 	import GarmentForm from '../components/GarmentForm.svelte';
 	import GarmentTryOnButton from '../components/GarmentTryOnButton.svelte';
+	import ImageLightbox from '$lib/modules/picture/components/ImageLightbox.svelte';
+	import type { Image } from '$lib/modules/picture/types';
 
 	interface Props {
 		id: string;
@@ -39,6 +41,9 @@
 	let editing = $state(false);
 	let saving = $state(false);
 	let markingWorn = $state(false);
+
+	// Lightbox state for the Anproben-Strip. Null = closed, Image = open.
+	let lightboxImage = $state<Image | null>(null);
 
 	async function handleMarkWorn() {
 		if (!garment) return;
@@ -247,15 +252,9 @@
 				</header>
 				<div class="flex gap-3 overflow-x-auto pb-1">
 					{#each soloTryOns as image (image.id)}
-						<!-- Picture module doesn't have a /picture/image/[id] route;
-						     it opens generations inline via a modal in its ListView.
-						     Linking to the full publicUrl in a new tab gives the user
-						     the full-resolution view without a routing detour. A proper
-						     lightbox can come later when we reuse Picture's modal. -->
-						<a
-							href={image.publicUrl ?? '#'}
-							target="_blank"
-							rel="noopener noreferrer"
+						<button
+							type="button"
+							onclick={() => (lightboxImage = image)}
 							class="group block flex-shrink-0 overflow-hidden rounded-xl border border-border bg-muted transition-all hover:border-primary/50"
 							title={image.prompt}
 						>
@@ -267,7 +266,7 @@
 									class="h-40 w-28 object-cover transition-transform group-hover:scale-[1.02]"
 								/>
 							{/if}
-						</a>
+						</button>
 					{/each}
 				</div>
 			</section>
@@ -318,3 +317,18 @@
 		{/if}
 	{/if}
 </div>
+
+<!-- Lightbox for Solo-Try-On previews. The action slot carries a
+     deep-link to the Picture gallery so the user can reach the full
+     CRUD surface (Favorit, Archiv, Download) without us duplicating
+     those buttons here in Wardrobe. -->
+<ImageLightbox image={lightboxImage} onClose={() => (lightboxImage = null)}>
+	{#snippet actions()}
+		<a
+			href="/picture"
+			class="flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+		>
+			In Picture öffnen
+		</a>
+	{/snippet}
+</ImageLightbox>

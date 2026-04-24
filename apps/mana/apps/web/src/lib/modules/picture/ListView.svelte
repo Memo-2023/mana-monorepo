@@ -25,6 +25,7 @@
 	} from '@mana/shared-icons';
 	import { imagesStore } from './stores/images.svelte';
 	import { pictureViewStore } from './stores/view.svelte';
+	import ImageLightbox from './components/ImageLightbox.svelte';
 	import {
 		useAllImages,
 		useAllImageTags,
@@ -393,75 +394,35 @@
 	</div>
 </div>
 
-<!-- Detail modal (fixed overlay — stays outside the container-query root) -->
-{#if selectedImage}
-	<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-		<div
-			class="relative max-h-[90vh] w-full max-w-4xl overflow-auto rounded-xl border border-border bg-card"
-		>
-			<div class="relative flex items-center justify-center bg-black">
-				{#if selectedImage.publicUrl}
-					<img
-						src={selectedImage.publicUrl}
-						alt={selectedImage.prompt}
-						class="max-h-[60vh] w-full object-contain"
-					/>
-				{:else}
-					<div class="flex h-64 items-center justify-center">
-						<SquaresFour size={64} class="text-muted-foreground/30" />
-					</div>
-				{/if}
-			</div>
-
-			<div class="p-4">
-				<p class="text-sm text-foreground">{selectedImage.prompt}</p>
-				{#if selectedImage.model}
-					<p class="mt-1 text-xs text-muted-foreground">Modell: {selectedImage.model}</p>
-				{/if}
-				{#if selectedImage.width && selectedImage.height}
-					<p class="text-xs text-muted-foreground">
-						{selectedImage.width} × {selectedImage.height}
-					</p>
-				{/if}
-				<p class="text-xs text-muted-foreground">
-					{new Date(selectedImage.createdAt).toLocaleDateString('de-DE', {
-						day: 'numeric',
-						month: 'long',
-						year: 'numeric',
-					})}
-				</p>
-
-				<div class="mt-3 flex gap-2">
-					<button
-						onclick={() => selectedImage && handleToggleFavorite(selectedImage)}
-						class="flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-sm font-medium hover:bg-muted transition-colors"
-					>
-						<Heart
-							size={14}
-							weight={selectedImage.isFavorite ? 'fill' : 'regular'}
-							class={selectedImage.isFavorite ? 'text-red-500' : 'text-muted-foreground'}
-						/>
-						{selectedImage.isFavorite ? 'Entfernen' : 'Favorit'}
-					</button>
-					<button
-						onclick={() => selectedImage && handleArchive(selectedImage)}
-						class="flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-sm font-medium hover:bg-muted transition-colors"
-					>
-						<Archive size={14} class="text-muted-foreground" />
-						Archivieren
-					</button>
-					<div class="flex-1"></div>
-					<button
-						onclick={() => (selectedImage = null)}
-						class="rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted transition-colors"
-					>
-						Schließen
-					</button>
-				</div>
-			</div>
-		</div>
-	</div>
-{/if}
+<!-- Detail lightbox (fixed overlay — stays outside the container-query root).
+     Picture-specific actions (Favorit, Archivieren) go into the `actions`
+     snippet; the base lightbox handles layout, backdrop, ESC + close. -->
+<ImageLightbox image={selectedImage} onClose={() => (selectedImage = null)}>
+	{#snippet actions()}
+		{#if selectedImage}
+			<button
+				type="button"
+				onclick={() => selectedImage && handleToggleFavorite(selectedImage)}
+				class="flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-sm font-medium transition-colors hover:bg-muted"
+			>
+				<Heart
+					size={14}
+					weight={selectedImage.isFavorite ? 'fill' : 'regular'}
+					class={selectedImage.isFavorite ? 'text-red-500' : 'text-muted-foreground'}
+				/>
+				{selectedImage.isFavorite ? 'Entfernen' : 'Favorit'}
+			</button>
+			<button
+				type="button"
+				onclick={() => selectedImage && handleArchive(selectedImage)}
+				class="flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-sm font-medium transition-colors hover:bg-muted"
+			>
+				<Archive size={14} class="text-muted-foreground" />
+				Archivieren
+			</button>
+		{/if}
+	{/snippet}
+</ImageLightbox>
 
 <style>
 	.picture-list {
