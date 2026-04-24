@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { formatDate, formatDateTime } from '$lib/i18n/format';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { ArrowLeft, Check, Trash, Plus, Link as LinkIcon, Star, X } from '@mana/shared-icons';
@@ -296,7 +297,7 @@
 					{#each priceChecks.value.slice(0, 10) as check (check.id)}
 						<div class="flex items-center justify-between text-sm">
 							<span class="truncate text-[hsl(var(--color-muted-foreground))]">
-								{new Date(check.checkedAt).toLocaleDateString('de-DE')}
+								{formatDate(new Date(check.checkedAt))}
 							</span>
 							<span
 								class="font-medium {check.available
@@ -328,7 +329,7 @@
 						>
 							<p>{note.content}</p>
 							<p class="mt-1 text-[10px] text-[hsl(var(--color-muted-foreground))]">
-								{new Date(note.createdAt).toLocaleString('de-DE')}
+								{formatDateTime(new Date(note.createdAt))}
 							</p>
 						</li>
 					{/each}

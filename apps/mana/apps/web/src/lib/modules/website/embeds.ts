@@ -1,3 +1,4 @@
+import { formatDateTime } from '$lib/i18n/format';
 /**
  * Module-embed resolvers — client-side functions that walk Dexie to
  * pre-fetch data for `moduleEmbed` blocks at publish time.
@@ -260,11 +261,11 @@ function formatEventSubtitle(
 	location: string | null | undefined
 ): string {
 	const start = new Date(startIso);
-	const dateParts = new Intl.DateTimeFormat('de-DE', {
+	const dateParts = formatDateTime(start, {
 		day: '2-digit',
 		month: 'short',
 		year: 'numeric',
-	}).format(start);
+	});
 
 	let timePart = '';
 	if (!allDay) {

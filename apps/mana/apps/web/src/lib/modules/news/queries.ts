@@ -1,3 +1,4 @@
+import { formatDate } from '$lib/i18n/format';
 /**
  * Reactive queries + type converters for News.
  *
@@ -176,5 +177,5 @@ export function formatRelativeTime(iso: string | null): string {
 	if (hours < 24) return `vor ${hours}h`;
 	const days = Math.floor(hours / 24);
 	if (days < 7) return `vor ${days}d`;
-	return new Date(iso).toLocaleDateString('de-DE', { day: 'numeric', month: 'short' });
+	return formatDate(new Date(iso), { day: 'numeric', month: 'short' });
 }

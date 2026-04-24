@@ -1,10 +1,10 @@
 <script lang="ts">
+	import { getDateFnsLocale } from '$lib/i18n/format';
 	import { _ } from 'svelte-i18n';
 	import { getContext, onMount, tick } from 'svelte';
 	import { getDefaultCalendar, getCalendarColor } from '../queries';
 	import type { Calendar } from '../types';
 	import { format, addMinutes } from 'date-fns';
-	import { de } from 'date-fns/locale';
 	import {
 		X,
 		Clock,

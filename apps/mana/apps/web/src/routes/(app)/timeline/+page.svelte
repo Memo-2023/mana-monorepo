@@ -3,6 +3,7 @@
   "What did I do today?" as a standalone page.
 -->
 <script lang="ts">
+	import { getDateFnsLocale } from '$lib/i18n/format';
 	import { _ } from 'svelte-i18n';
 	import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 	import { db } from '$lib/data/database';
@@ -22,7 +23,6 @@
 		Funnel,
 	} from '@mana/shared-icons';
 	import { format, addDays, subDays, isToday, isTomorrow, isYesterday } from 'date-fns';
-	import { de } from 'date-fns/locale';
 	import { RoutePage } from '$lib/components/shell';
 
 	let currentDate = $state(new Date());
@@ -78,7 +78,7 @@
 		if (isToday(date)) return 'Heute';
 		if (isTomorrow(date)) return 'Morgen';
 		if (isYesterday(date)) return 'Gestern';
-		return format(date, 'EEEE, d. MMMM yyyy', { locale: de });
+		return format(date, 'EEEE, d. MMMM yyyy', { locale: getDateFnsLocale() });
 	}
 
 	function formatBlockTime(block: TimeBlock): string {

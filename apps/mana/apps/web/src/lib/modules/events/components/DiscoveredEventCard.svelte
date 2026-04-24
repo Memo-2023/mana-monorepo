@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { formatDate, formatTime } from '$lib/i18n/format';
 	import type { DiscoveredEvent } from '../discovery/types';
 
 	interface Props {
@@ -11,16 +12,14 @@
 
 	const startDate = $derived(new Date(event.startAt));
 	const dateLabel = $derived(
-		startDate.toLocaleDateString('de-DE', {
+		formatDate(startDate, {
 			weekday: 'short',
 			day: '2-digit',
 			month: 'short',
 		})
 	);
 	const timeLabel = $derived(
-		event.allDay
-			? 'Ganztag'
-			: startDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+		event.allDay ? 'Ganztag' : formatTime(startDate, { hour: '2-digit', minute: '2-digit' })
 	);
 
 	const isSaved = $derived(event.userAction === 'save');

@@ -1,3 +1,4 @@
+import { formatDate } from '$lib/i18n/format';
 /**
  * Sync Status Dropdown — composable for the PillNavigation sync pill.
  *
@@ -22,7 +23,7 @@ export function useSyncStatusItems() {
 				disabled: true,
 			});
 			if (syncBilling.nextChargeAt) {
-				const date = new Date(syncBilling.nextChargeAt).toLocaleDateString('de-DE', {
+				const date = formatDate(new Date(syncBilling.nextChargeAt), {
 					day: '2-digit',
 					month: '2-digit',
 					year: 'numeric',

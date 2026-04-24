@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { formatTime } from '$lib/i18n/format';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { getContext } from 'svelte';
@@ -200,7 +201,7 @@
 							>
 								<p class="whitespace-pre-wrap">{msg.messageText}</p>
 								<p class="mt-1 text-[10px] opacity-60">
-									{new Date(msg.createdAt).toLocaleTimeString('de-DE', {
+									{formatTime(new Date(msg.createdAt), {
 										hour: '2-digit',
 										minute: '2-digit',
 									})}

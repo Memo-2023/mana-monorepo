@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { formatDate } from '$lib/i18n/format';
 	import type { ProjectDataSummary } from '$lib/api/services/admin';
 
 	interface Props {
@@ -20,7 +21,7 @@
 		if (diffMins < 60) return `vor ${diffMins} Min`;
 		if (diffHours < 24) return `vor ${diffHours} Std`;
 		if (diffDays < 7) return `vor ${diffDays} Tagen`;
-		return new Date(dateStr).toLocaleDateString('de-DE');
+		return formatDate(new Date(dateStr));
 	}
 </script>
 

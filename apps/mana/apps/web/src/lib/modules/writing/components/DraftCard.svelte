@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { formatDate } from '$lib/i18n/format';
 	import StatusBadge from './StatusBadge.svelte';
 	import { KIND_LABELS } from '../constants';
 	import type { Draft, DraftVersion } from '../types';
@@ -32,7 +33,7 @@
 		if (hrs < 24) return `vor ${hrs} h`;
 		const days = Math.round(hrs / 24);
 		if (days < 30) return `vor ${days} d`;
-		return d.toLocaleDateString('de-DE');
+		return formatDate(d);
 	}
 
 	function open() {

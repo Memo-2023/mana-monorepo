@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { formatDate } from '$lib/i18n/format';
 	import { getContext } from 'svelte';
 	import { ChartBar } from '@mana/shared-icons';
 	import type { Deck } from '$lib/modules/cards/types';
@@ -67,7 +68,7 @@
 							</div>
 							<div class="text-right">
 								<div class="text-sm text-muted-foreground">
-									{new Date(deck.updatedAt).toLocaleDateString('de-DE', {
+									{formatDate(new Date(deck.updatedAt), {
 										day: '2-digit',
 										month: 'short',
 									})}

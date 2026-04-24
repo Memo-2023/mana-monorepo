@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { formatDate } from '$lib/i18n/format';
 	import { getContext } from 'svelte';
 	import { _ } from 'svelte-i18n';
 	import type { TimeEntry, Project, Client } from '$lib/modules/times/types';
@@ -69,7 +70,7 @@
 			const dayEntries = entries().filter((e) => e.date === dateStr);
 			days.push({
 				date: dateStr,
-				label: d.toLocaleDateString('de-DE', { weekday: 'short', day: 'numeric' }),
+				label: formatDate(d, { weekday: 'short', day: 'numeric' }),
 				duration: getTotalDuration(dayEntries),
 			});
 		}

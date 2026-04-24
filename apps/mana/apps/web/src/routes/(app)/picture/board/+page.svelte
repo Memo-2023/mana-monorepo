@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { formatDate } from '$lib/i18n/format';
 	import { _ } from 'svelte-i18n';
 	import { goto } from '$app/navigation';
 	import { getContext } from 'svelte';
@@ -129,7 +130,7 @@
 
 							<div class="mt-2 flex items-center justify-between text-xs text-muted-foreground">
 								<span>{board.itemCount} {board.itemCount === 1 ? 'Element' : 'Elemente'}</span>
-								<span>{new Date(board.updatedAt).toLocaleDateString('de-DE')}</span>
+								<span>{formatDate(new Date(board.updatedAt))}</span>
 							</div>
 
 							<!-- Actions -->

@@ -3,6 +3,7 @@
   All fields are always editable. Changes auto-save on blur.
 -->
 <script lang="ts">
+	import { formatDate } from '$lib/i18n/format';
 	import { useDetailEntity } from '$lib/data/detail-entity.svelte';
 	import DetailViewShell from '$lib/components/DetailViewShell.svelte';
 	import { libraryStore } from '../stores/library.svelte';
@@ -157,12 +158,12 @@
 		</div>
 
 		<div class="meta">
-			<span>Erstellt: {new Date(song.createdAt ?? '').toLocaleDateString('de')}</span>
+			<span>Erstellt: {formatDate(new Date(song.createdAt ?? ''))}</span>
 			{#if song.updatedAt}
-				<span>Bearbeitet: {new Date(song.updatedAt).toLocaleDateString('de')}</span>
+				<span>Bearbeitet: {formatDate(new Date(song.updatedAt))}</span>
 			{/if}
 			{#if song.lastPlayedAt}
-				<span>Zuletzt gehört: {new Date(song.lastPlayedAt).toLocaleDateString('de')}</span>
+				<span>Zuletzt gehört: {formatDate(new Date(song.lastPlayedAt))}</span>
 			{/if}
 		</div>
 	{/snippet}

@@ -1,3 +1,4 @@
+import { formatDate, formatTime } from '$lib/i18n/format';
 /**
  * Wetter AI tools — expose weather data to the AI companion.
  * Both tools are read-only (auto policy) and run during the reasoning loop.
@@ -75,7 +76,7 @@ export const wetterTools: ModuleTool[] = [
 
 			lines.push('## 7-Tage-Vorhersage');
 			for (const d of forecast.daily.slice(0, 7)) {
-				const day = new Date(d.date).toLocaleDateString('de-DE', {
+				const day = formatDate(new Date(d.date), {
 					weekday: 'short',
 					day: 'numeric',
 					month: 'short',
@@ -145,7 +146,7 @@ export const wetterTools: ModuleTool[] = [
 					lines.push('Kein Niederschlag erwartet.');
 				} else {
 					for (const m of withRain.slice(0, 12)) {
-						const t = new Date(m.time).toLocaleTimeString('de-DE', {
+						const t = formatTime(new Date(m.time), {
 							hour: '2-digit',
 							minute: '2-digit',
 						});

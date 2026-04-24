@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { formatDate } from '$lib/i18n/format';
 	import { _ } from 'svelte-i18n';
 	import type { Skill, SkillBranch } from '../types';
 	import { BRANCH_INFO } from '../types';
@@ -165,7 +166,7 @@
 						<div>
 							<div class="text-muted-foreground">Erstellt</div>
 							<div class="font-semibold text-white">
-								{new Date(skill.createdAt).toLocaleDateString('de-DE')}
+								{formatDate(new Date(skill.createdAt))}
 							</div>
 						</div>
 					</div>

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getDateFnsLocale } from '$lib/i18n/format';
 	/**
 	 * TasksTodayWidget - Today's tasks from Todo app (local-first)
 	 *
@@ -10,14 +11,12 @@
 	import { useOpenTasks } from '$lib/data/cross-app-queries';
 	import { db } from '$lib/data/database';
 	import { format, isToday, isTomorrow, isPast } from 'date-fns';
-	import { de } from 'date-fns/locale';
-
 	function formatDueDate(dueDate?: string | null): string | null {
 		if (!dueDate) return null;
 		const date = new Date(dueDate);
 		if (isToday(date)) return 'Heute';
 		if (isTomorrow(date)) return 'Morgen';
-		return format(date, 'dd. MMM', { locale: de });
+		return format(date, 'dd. MMM', { locale: getDateFnsLocale() });
 	}
 
 	function isOverdue(dueDate?: string | null): boolean {

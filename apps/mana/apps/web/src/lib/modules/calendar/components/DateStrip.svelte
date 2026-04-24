@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getDateFnsLocale } from '$lib/i18n/format';
 	import { getContext } from 'svelte';
 	import { calendarViewStore } from '../stores/view.svelte';
 	import { getEventsForDay } from '../queries';
@@ -12,7 +13,6 @@
 		startOfDay,
 		isWithinInterval,
 	} from 'date-fns';
-	import { de } from 'date-fns/locale';
 	import { onMount, tick } from 'svelte';
 	import SunCalc from 'suncalc';
 
@@ -154,7 +154,7 @@
 	}
 
 	// Get the month of the center visible day
-	let visibleMonth = $state(format(new Date(), 'MMMM yyyy', { locale: de }));
+	let visibleMonth = $state(format(new Date(), 'MMMM yyyy', { locale: getDateFnsLocale() }));
 
 	function updateVisibleMonth() {
 		if (!scrollContainer) return;
@@ -169,7 +169,7 @@
 				const dateStr = el.getAttribute('data-date');
 				if (dateStr) {
 					const date = new Date(dateStr);
-					visibleMonth = format(date, 'MMMM yyyy', { locale: de });
+					visibleMonth = format(date, 'MMMM yyyy', { locale: getDateFnsLocale() });
 				}
 				break;
 			}
@@ -211,7 +211,9 @@
 				{#if !isTodayVisible}
 					<button onclick={goToToday} title="Zum heutigen Tag" class="today-button">
 						<span class="today-label">Heute</span>
-						<span class="today-date">{format(new Date(), 'd. MMM', { locale: de })}</span>
+						<span class="today-date"
+							>{format(new Date(), 'd. MMM', { locale: getDateFnsLocale() })}</span
+						>
 					</button>
 				{/if}
 				{visibleMonth}
@@ -251,7 +253,7 @@
 					{#if moonPhase.significant && showMoonPhases}
 						<span class="moon-indicator">{moonPhase.emoji}</span>
 					{/if}
-					<span class="day-weekday">{format(day, 'EE', { locale: de })}</span>
+					<span class="day-weekday">{format(day, 'EE', { locale: getDateFnsLocale() })}</span>
 					<span class="day-number">{format(day, 'd')}</span>
 					{#if eventCount > 0 && showEventIndicators}
 						<div class="event-dots">

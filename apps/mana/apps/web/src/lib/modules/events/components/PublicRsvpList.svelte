@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { formatTime } from '$lib/i18n/format';
 	import { eventsApi, type PublicRsvpRecord } from '../api';
 	import { eventGuestsStore } from '../stores/guests.svelte';
 
@@ -104,7 +105,7 @@
 
 		{#if lastFetchedAt}
 			<div class="meta">
-				Aktualisiert um {lastFetchedAt.toLocaleTimeString('de-DE', {
+				Aktualisiert um {formatTime(lastFetchedAt, {
 					hour: '2-digit',
 					minute: '2-digit',
 					second: '2-digit',

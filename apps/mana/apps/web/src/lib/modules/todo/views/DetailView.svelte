@@ -3,6 +3,7 @@
   All fields are always editable. Changes auto-save on blur.
 -->
 <script lang="ts">
+	import { formatDate } from '$lib/i18n/format';
 	import { db } from '$lib/data/database';
 	import { decryptRecord } from '$lib/data/crypto';
 	import { useDetailEntity } from '$lib/data/detail-entity.svelte';
@@ -325,9 +326,9 @@
 		{/if}
 
 		<div class="meta">
-			<span>Erstellt: {new Date(task.createdAt ?? '').toLocaleDateString('de')}</span>
+			<span>Erstellt: {formatDate(new Date(task.createdAt ?? ''))}</span>
 			{#if task.updatedAt}
-				<span>Bearbeitet: {new Date(task.updatedAt).toLocaleDateString('de')}</span>
+				<span>Bearbeitet: {formatDate(new Date(task.updatedAt))}</span>
 			{/if}
 		</div>
 	{/snippet}

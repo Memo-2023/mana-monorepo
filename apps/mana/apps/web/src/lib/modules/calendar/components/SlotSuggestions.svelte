@@ -3,14 +3,13 @@
   Used in task scheduling and event creation to suggest optimal times.
 -->
 <script lang="ts">
+	import { getDateFnsLocale } from '$lib/i18n/format';
 	import { db } from '$lib/data/database';
 	import type { LocalTimeBlock } from '$lib/data/time-blocks/types';
 	import { toTimeBlock, findFreeSlots } from '$lib/data/time-blocks/queries';
 	import type { TimeBlock } from '$lib/data/time-blocks/types';
 	import { CalendarBlank } from '@mana/shared-icons';
 	import { format, addDays, isToday, isTomorrow } from 'date-fns';
-	import { de } from 'date-fns/locale';
-
 	let {
 		minDurationMinutes = 30,
 		onSelect,
@@ -52,7 +51,7 @@
 	function formatDayLabel(date: Date): string {
 		if (isToday(date)) return 'Heute';
 		if (isTomorrow(date)) return 'Morgen';
-		return format(date, 'EEE, d. MMM', { locale: de });
+		return format(date, 'EEE, d. MMM', { locale: getDateFnsLocale() });
 	}
 </script>
 

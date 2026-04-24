@@ -1,3 +1,4 @@
+import { formatTime } from '$lib/i18n/format';
 /**
  * CSV Export utility for time entries
  */
@@ -40,12 +41,8 @@ export function exportEntriesToCSV(
 			(hours * 60 + minutes).toString(),
 			e.isBillable ? 'Ja' : 'Nein',
 			`"${e.tags.join(', ')}"`,
-			e.startTime
-				? new Date(e.startTime).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
-				: '',
-			e.endTime
-				? new Date(e.endTime).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
-				: '',
+			e.startTime ? formatTime(new Date(e.startTime), { hour: '2-digit', minute: '2-digit' }) : '',
+			e.endTime ? formatTime(new Date(e.endTime), { hour: '2-digit', minute: '2-digit' }) : '',
 		];
 	});
 

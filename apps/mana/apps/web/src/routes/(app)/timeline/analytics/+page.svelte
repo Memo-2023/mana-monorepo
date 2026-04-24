@@ -3,6 +3,7 @@
   Shows time breakdown, daily trends, habit heatmap, and plan adherence.
 -->
 <script lang="ts">
+	import { getDateFnsLocale } from '$lib/i18n/format';
 	import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 	import { db } from '$lib/data/database';
 	import type { LocalTimeBlock } from '$lib/data/time-blocks/types';
@@ -20,7 +21,6 @@
 	} from '$lib/data/time-blocks/analytics';
 	import { Clock, TrendUp, Fire, Target } from '@mana/shared-icons';
 	import { format, subDays } from 'date-fns';
-	import { de } from 'date-fns/locale';
 	import { RoutePage } from '$lib/components/shell';
 
 	let periodDays = $state(7);
@@ -156,7 +156,7 @@
 								</div>
 							</div>
 							<span class="daily-label">
-								{format(new Date(day.date), 'EEE', { locale: de })}
+								{format(new Date(day.date), 'EEE', { locale: getDateFnsLocale() })}
 							</span>
 						</div>
 					{/each}

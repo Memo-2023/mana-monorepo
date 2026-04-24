@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { formatDate } from '$lib/i18n/format';
 	/**
 	 * TasksTodayWidget — Aufgaben fällig heute oder überfällig.
 	 *
@@ -68,7 +69,7 @@
 	function formatDue(dueDate: string): string {
 		if (dueDate.slice(0, 10) === todayStr) return 'Heute';
 		const d = new Date(dueDate);
-		return d.toLocaleDateString('de-DE', { day: 'numeric', month: 'short' });
+		return formatDate(d, { day: 'numeric', month: 'short' });
 	}
 
 	async function toggleComplete(task: Task) {

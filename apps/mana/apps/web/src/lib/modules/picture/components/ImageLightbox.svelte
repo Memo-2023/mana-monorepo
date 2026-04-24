@@ -15,6 +15,7 @@
   and ESC both close the modal.
 -->
 <script lang="ts">
+	import { formatDate } from '$lib/i18n/format';
 	import { onMount, type Snippet } from 'svelte';
 	import { SquaresFour } from '@mana/shared-icons';
 	import type { Image } from '../types';
@@ -89,7 +90,7 @@
 					</p>
 				{/if}
 				<p class="text-xs text-muted-foreground">
-					{new Date(image.createdAt).toLocaleDateString('de-DE', {
+					{formatDate(new Date(image.createdAt), {
 						day: 'numeric',
 						month: 'long',
 						year: 'numeric',

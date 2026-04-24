@@ -3,6 +3,7 @@
   Streak, quick-start routines, assessment recommendation, recent sessions.
 -->
 <script lang="ts">
+	import { formatDate } from '$lib/i18n/format';
 	import {
 		useAllStretchExercises,
 		useAllStretchRoutines,
@@ -135,7 +136,7 @@
 					<div class="heatmap-day" title="{day.date}: {day.minutes} Min">
 						<div class="heatmap-dot" class:active={day.count > 0} class:multi={day.count > 1}></div>
 						<span class="heatmap-label"
-							>{new Date(day.date + 'T00:00').toLocaleDateString('de', { weekday: 'narrow' })}</span
+							>{formatDate(new Date(day.date + 'T00:00'), { weekday: 'narrow' })}</span
 						>
 					</div>
 				{/each}

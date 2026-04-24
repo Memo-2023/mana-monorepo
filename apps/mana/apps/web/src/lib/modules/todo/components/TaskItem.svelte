@@ -1,11 +1,10 @@
 <script lang="ts">
+	import { getDateFnsLocale } from '$lib/i18n/format';
 	import type { Task, TaskPriority } from '../types';
 	import { getPriorityLabel, getPriorityColor } from '../queries';
 	import { Check, Circle, CalendarBlank, CheckSquare } from '@mana/shared-icons';
 	import { TagChip } from '@mana/shared-ui';
 	import { isToday, isPast, format } from 'date-fns';
-	import { de } from 'date-fns/locale';
-
 	interface Props {
 		task: Task;
 		tags?: { id: string; name: string; color: string }[];
@@ -38,7 +37,7 @@
 		const overdue = isPast(d) && !isToday(d) && !task.isCompleted;
 		const today = isToday(d);
 		return {
-			text: today ? 'Heute' : format(d, 'd. MMM', { locale: de }),
+			text: today ? 'Heute' : format(d, 'd. MMM', { locale: getDateFnsLocale() }),
 			overdue,
 			today,
 		};

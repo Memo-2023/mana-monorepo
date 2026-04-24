@@ -1,3 +1,4 @@
+import { formatDate } from '$lib/i18n/format';
 /**
  * Reactive Queries & Pure Helpers for Journal module.
  *
@@ -81,7 +82,7 @@ export function groupByMonth(
 	const groups = new Map<string, JournalEntry[]>();
 	for (const e of entries) {
 		const date = new Date(e.entryDate);
-		const label = date.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
+		const label = formatDate(date, { month: 'long', year: 'numeric' });
 		if (!groups.has(label)) groups.set(label, []);
 		groups.get(label)!.push(e);
 	}
@@ -96,7 +97,7 @@ export function formatEntryDate(iso: string): string {
 	if (diffDays === 0) return 'Heute';
 	if (diffDays === 1) return 'Gestern';
 	if (diffDays < 7) return `vor ${diffDays} Tagen`;
-	return date.toLocaleDateString('de-DE', { day: 'numeric', month: 'short', year: 'numeric' });
+	return formatDate(date, { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
 /** Find "On this day" entries — same month+day from previous years. */

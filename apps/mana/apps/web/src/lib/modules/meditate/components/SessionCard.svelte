@@ -2,6 +2,7 @@
   SessionCard — displays a completed meditation session.
 -->
 <script lang="ts">
+	import { formatDate } from '$lib/i18n/format';
 	import type { MeditateSession, MeditatePreset } from '../types';
 	import { CATEGORY_LABELS } from '../types';
 	import { formatDuration } from '../queries';
@@ -17,7 +18,7 @@
 	const name = $derived(preset?.name ?? CATEGORY_LABELS[session.category].de);
 	const duration = $derived(formatDuration(session.durationSec));
 	const date = $derived(
-		new Date(session.startedAt).toLocaleDateString('de-DE', {
+		formatDate(new Date(session.startedAt), {
 			day: '2-digit',
 			month: '2-digit',
 			hour: '2-digit',

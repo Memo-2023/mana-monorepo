@@ -1,3 +1,4 @@
+import { getDateFnsLocale } from '$lib/i18n/format';
 /**
  * Calendar QuickInputBar Adapter
  */
@@ -11,8 +12,6 @@ import { toCalendar } from './queries';
 import type { LocalCalendar, LocalEvent } from './types';
 import type { LocalTimeBlock } from '$lib/data/time-blocks/types';
 import { format } from 'date-fns';
-import { de } from 'date-fns/locale';
-
 export function createAdapter(): InputBarAdapter {
 	return {
 		placeholder: 'Neuer Termin oder suchen...',
@@ -40,7 +39,7 @@ export function createAdapter(): InputBarAdapter {
 					id: b.sourceId, // event ID
 					title: b.title || '',
 					subtitle: b.startDate
-						? format(new Date(b.startDate), 'dd. MMM yyyy, HH:mm', { locale: de })
+						? format(new Date(b.startDate), 'dd. MMM yyyy, HH:mm', { locale: getDateFnsLocale() })
 						: '',
 				}));
 		},

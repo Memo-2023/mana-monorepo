@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { formatDate } from '$lib/i18n/format';
 	import { _ } from 'svelte-i18n';
 	import {
 		useAllLinks,
@@ -527,8 +528,7 @@
 										{#if link.expiresAt}
 											<span
 												class="shrink-0 rounded bg-orange-100 px-1.5 py-0.5 text-xs text-orange-700 dark:bg-orange-900 dark:text-orange-300"
-												title="Laeuft ab: {new Date(link.expiresAt).toLocaleDateString('de')}"
-												>Ablauf</span
+												title="Laeuft ab: {formatDate(new Date(link.expiresAt))}">Ablauf</span
 											>
 										{/if}
 									</div>

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getDateFnsLocale } from '$lib/i18n/format';
 	import { calendarViewStore } from '../stores/view.svelte';
 	import type { CalendarViewType } from '../types';
 	import type { TimeBlockType } from '$lib/data/time-blocks/types';
@@ -30,8 +31,6 @@
 	import { toTimeBlock } from '$lib/data/time-blocks/queries';
 	import { downloadICalendar } from '$lib/data/time-blocks/ical-export';
 	import { format } from 'date-fns';
-	import { de } from 'date-fns/locale';
-
 	interface Props {
 		onNewEvent: () => void;
 	}
@@ -76,9 +75,11 @@
 
 	let headerLabel = $derived.by(() => {
 		if (calendarViewStore.viewType === 'month') {
-			return format(calendarViewStore.currentDate, 'MMMM yyyy', { locale: de });
+			return format(calendarViewStore.currentDate, 'MMMM yyyy', { locale: getDateFnsLocale() });
 		}
-		return format(calendarViewStore.currentDate, "'KW' w — MMMM yyyy", { locale: de });
+		return format(calendarViewStore.currentDate, "'KW' w — MMMM yyyy", {
+			locale: getDateFnsLocale(),
+		});
 	});
 
 	const viewLabels: Record<CalendarViewType, string> = {

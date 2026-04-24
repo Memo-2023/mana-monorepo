@@ -3,6 +3,7 @@
   Memo details with transcript, pin toggle, auto-save on blur.
 -->
 <script lang="ts">
+	import { formatDate } from '$lib/i18n/format';
 	import { useDetailEntity } from '$lib/data/detail-entity.svelte';
 	import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 	import DetailViewShell from '$lib/components/DetailViewShell.svelte';
@@ -224,9 +225,9 @@
 		</div>
 
 		<div class="meta">
-			<span>Erstellt: {new Date(memo.createdAt ?? '').toLocaleDateString('de')}</span>
+			<span>Erstellt: {formatDate(new Date(memo.createdAt ?? ''))}</span>
 			{#if memo.updatedAt}
-				<span>Bearbeitet: {new Date(memo.updatedAt).toLocaleDateString('de')}</span>
+				<span>Bearbeitet: {formatDate(new Date(memo.updatedAt))}</span>
 			{/if}
 		</div>
 	{/snippet}

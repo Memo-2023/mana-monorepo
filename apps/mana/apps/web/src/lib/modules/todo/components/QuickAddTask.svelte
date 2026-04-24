@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { formatDate } from '$lib/i18n/format';
 	import { _ } from 'svelte-i18n';
 	import { tasksStore } from '../stores/tasks.svelte';
 	import {
@@ -141,7 +142,7 @@
 						{#if task.dueDate}
 							<span class="inline-flex items-center gap-0.5 text-amber-500">
 								<CalendarBlank size={10} />
-								{task.dueDate.toLocaleDateString('de-DE', { day: 'numeric', month: 'short' })}
+								{formatDate(task.dueDate, { day: 'numeric', month: 'short' })}
 								{#if task.dueTime}
 									{task.dueTime}
 								{/if}

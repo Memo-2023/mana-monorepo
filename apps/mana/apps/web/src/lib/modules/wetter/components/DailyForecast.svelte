@@ -2,6 +2,7 @@
   7-day daily forecast — shows min/max temp, weather icon, precipitation.
 -->
 <script lang="ts">
+	import { formatDate } from '$lib/i18n/format';
 	import type { DailyForecast } from '../types';
 	import { getWeatherIcon, getWeatherLabel } from '../weather-icons';
 
@@ -16,7 +17,7 @@
 	function dayLabel(dateStr: string, idx: number): string {
 		if (idx === 0) return 'Heute';
 		if (idx === 1) return 'Morgen';
-		return new Date(dateStr).toLocaleDateString('de-DE', { weekday: 'short' });
+		return formatDate(new Date(dateStr), { weekday: 'short' });
 	}
 
 	function tempBarStyle(min: number, max: number): string {

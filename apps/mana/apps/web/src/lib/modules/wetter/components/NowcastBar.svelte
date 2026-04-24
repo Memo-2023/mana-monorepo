@@ -2,6 +2,7 @@
   Rain nowcast — bar chart showing minute-level precipitation forecast.
 -->
 <script lang="ts">
+	import { formatTime } from '$lib/i18n/format';
 	import type { RainNowcast } from '../types';
 
 	interface Props {
@@ -20,7 +21,7 @@
 		<div class="nowcast-chart">
 			{#each nowcast.minutely as point (point.time)}
 				{@const height = Math.max(2, (point.precipitation / maxPrecip) * 100)}
-				{@const time = new Date(point.time).toLocaleTimeString('de-DE', {
+				{@const time = formatTime(new Date(point.time), {
 					hour: '2-digit',
 					minute: '2-digit',
 				})}
@@ -31,13 +32,13 @@
 		</div>
 		<div class="nowcast-time-labels">
 			<span
-				>{new Date(nowcast.minutely[0].time).toLocaleTimeString('de-DE', {
+				>{formatTime(new Date(nowcast.minutely[0].time), {
 					hour: '2-digit',
 					minute: '2-digit',
 				})}</span
 			>
 			<span
-				>{new Date(nowcast.minutely[nowcast.minutely.length - 1].time).toLocaleTimeString('de-DE', {
+				>{formatTime(new Date(nowcast.minutely[nowcast.minutely.length - 1].time), {
 					hour: '2-digit',
 					minute: '2-digit',
 				})}</span

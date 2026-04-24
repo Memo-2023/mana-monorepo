@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { formatDate } from '$lib/i18n/format';
 	import { getContext } from 'svelte';
 	import type { Observable } from 'dexie';
 	import type { Transaction, FinanceCategory, TransactionType } from '$lib/modules/finance/types';
@@ -83,7 +84,7 @@
 	}
 
 	let monthLabel = $derived(
-		new Date(month + '-01').toLocaleDateString('de-DE', { month: 'long', year: 'numeric' })
+		formatDate(new Date(month + '-01'), { month: 'long', year: 'numeric' })
 	);
 
 	let maxSpend = $derived(Math.max(1, ...spending.values()));

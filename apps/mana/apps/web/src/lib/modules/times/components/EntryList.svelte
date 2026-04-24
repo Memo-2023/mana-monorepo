@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { formatDate } from '$lib/i18n/format';
 	import { _ } from 'svelte-i18n';
 	import EntryItem from './EntryItem.svelte';
 	import {
@@ -26,7 +27,7 @@
 		if (dateStr === today) return $_('entry.today');
 		if (dateStr === yesterday) return 'Gestern';
 
-		return new Date(dateStr + 'T00:00:00').toLocaleDateString('de-DE', {
+		return formatDate(new Date(dateStr + 'T00:00:00'), {
 			weekday: 'long',
 			day: 'numeric',
 			month: 'long',

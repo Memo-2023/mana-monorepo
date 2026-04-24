@@ -3,6 +3,7 @@
   Collection details, always editable, auto-save on blur.
 -->
 <script lang="ts">
+	import { formatDate } from '$lib/i18n/format';
 	import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 	import { db } from '$lib/data/database';
 	import { useDetailEntity } from '$lib/data/detail-entity.svelte';
@@ -124,9 +125,9 @@
 		</div>
 
 		<div class="meta">
-			<span>Erstellt: {new Date(collection.createdAt ?? '').toLocaleDateString('de')}</span>
+			<span>Erstellt: {formatDate(new Date(collection.createdAt ?? ''))}</span>
 			{#if collection.updatedAt}
-				<span>Bearbeitet: {new Date(collection.updatedAt).toLocaleDateString('de')}</span>
+				<span>Bearbeitet: {formatDate(new Date(collection.updatedAt))}</span>
 			{/if}
 		</div>
 	{/snippet}

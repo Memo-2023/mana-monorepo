@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getDateFnsLocale } from '$lib/i18n/format';
 	import { getContext } from 'svelte';
 	import { calendarViewStore } from '../stores/view.svelte';
 	import { eventsStore } from '../stores/events.svelte';
@@ -11,7 +12,6 @@
 	import type { Calendar, CalendarEvent } from '../types';
 	import { toDate } from '../utils/event-date-helpers';
 	import { format, parseISO, isToday, isTomorrow, startOfDay, addMonths } from 'date-fns';
-	import { de } from 'date-fns/locale';
 	import { CalendarBlank, MapPin, CaretRight } from '@mana/shared-icons';
 
 	interface Props {
@@ -75,7 +75,7 @@
 	function formatDateHeader(date: Date) {
 		if (isToday(date)) return 'Heute';
 		if (isTomorrow(date)) return 'Morgen';
-		return format(date, 'EEEE, d. MMMM', { locale: de });
+		return format(date, 'EEEE, d. MMMM', { locale: getDateFnsLocale() });
 	}
 
 	function handleEventClick(event: CalendarEvent) {

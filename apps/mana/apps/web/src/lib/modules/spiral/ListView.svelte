@@ -4,6 +4,7 @@
   a spiral pattern. Extracted from the former /spiral standalone route.
 -->
 <script lang="ts">
+	import { formatTime } from '$lib/i18n/format';
 	import { onMount } from 'svelte';
 	import { COLORS } from '@mana/spiral-db';
 	import type { ColorDefinition } from '@mana/spiral-db';
@@ -142,7 +143,7 @@
 
 				{#if manaSpiralStore.lastCollectedAt}
 					<p class="collected-at">
-						Zuletzt gesammelt: {manaSpiralStore.lastCollectedAt.toLocaleTimeString('de-DE')}
+						Zuletzt gesammelt: {formatTime(manaSpiralStore.lastCollectedAt)}
 					</p>
 				{/if}
 			</section>

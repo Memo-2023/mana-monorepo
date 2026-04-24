@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { formatDate } from '$lib/i18n/format';
 	import { _ } from 'svelte-i18n';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
@@ -260,7 +261,7 @@
 								</div>
 							</div>
 							<div class="mt-2 text-xs opacity-40">
-								{new Date(doc.updated_at).toLocaleDateString('de')}
+								{formatDate(new Date(doc.updated_at))}
 							</div>
 						</div>
 					{/each}

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { formatDate } from '$lib/i18n/format';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { ArrowLeft, Trash } from '@mana/shared-icons';
@@ -200,10 +201,10 @@
 					<span>{doc.metadata.word_count} Woerter</span>
 				{/if}
 				<span>
-					Erstellt: {new Date(doc.created_at).toLocaleDateString('de')}
+					Erstellt: {formatDate(new Date(doc.created_at))}
 				</span>
 				<span>
-					Aktualisiert: {new Date(doc.updated_at).toLocaleDateString('de')}
+					Aktualisiert: {formatDate(new Date(doc.updated_at))}
 				</span>
 			</div>
 		{/if}

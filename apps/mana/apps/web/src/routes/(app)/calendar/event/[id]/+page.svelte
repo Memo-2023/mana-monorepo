@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getDateFnsLocale } from '$lib/i18n/format';
 	import { _ } from 'svelte-i18n';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
@@ -7,7 +8,6 @@
 	import { getEventById, getCalendarById, getCalendarColor } from '$lib/modules/calendar/queries';
 	import type { Calendar, CalendarEvent } from '$lib/modules/calendar/types';
 	import { format } from 'date-fns';
-	import { de } from 'date-fns/locale';
 	import { CaretLeft, Trash, PencilSimple, MapPin, Clock } from '@mana/shared-icons';
 	import { RoutePage } from '$lib/components/shell';
 
@@ -239,7 +239,11 @@
 					<div class="flex items-center gap-2 text-foreground">
 						<Clock size={18} class="text-muted-foreground" />
 						<div>
-							<div>{format(new Date(event.startTime), 'EEEE, d. MMMM yyyy', { locale: de })}</div>
+							<div>
+								{format(new Date(event.startTime), 'EEEE, d. MMMM yyyy', {
+									locale: getDateFnsLocale(),
+								})}
+							</div>
 							{#if event.isAllDay}
 								<div class="text-sm text-muted-foreground">Ganztägig</div>
 							{:else}

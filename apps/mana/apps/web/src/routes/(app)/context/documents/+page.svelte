@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { formatDate } from '$lib/i18n/format';
 	import { goto } from '$app/navigation';
 	import { Plus, MagnifyingGlass, FileText } from '@mana/shared-icons';
 	import {
@@ -209,7 +210,7 @@
 								{/each}
 							{/if}
 							<span class="ml-auto">
-								{new Date(doc.updated_at).toLocaleDateString('de')}
+								{formatDate(new Date(doc.updated_at))}
 							</span>
 						</div>
 					</div>

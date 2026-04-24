@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getDateFnsLocale } from '$lib/i18n/format';
 	import { _ } from 'svelte-i18n';
 	import { getContext } from 'svelte';
 	import { VisibilityPicker, type VisibilityLevel } from '@mana/shared-privacy';
@@ -21,8 +22,6 @@
 		Check,
 	} from '@mana/shared-icons';
 	import { format, differenceInDays, differenceInHours, differenceInMinutes } from 'date-fns';
-	import { de } from 'date-fns/locale';
-
 	interface Props {
 		event: CalendarEvent;
 		onClose: () => void;
@@ -60,7 +59,7 @@
 		if (ev.isAllDay) return 'Ganztägig';
 		const start = toDate(ev.startTime);
 		const end = toDate(ev.endTime);
-		const dateStr = format(start, 'EEEE, d. MMMM yyyy', { locale: de });
+		const dateStr = format(start, 'EEEE, d. MMMM yyyy', { locale: getDateFnsLocale() });
 		const timeStr = `${format(start, 'HH:mm')} – ${format(end, 'HH:mm')}`;
 		return `${dateStr}\n${timeStr}`;
 	}
@@ -308,12 +307,14 @@
 					<!-- Metadata -->
 					<div class="detail-meta-row">
 						<span
-							>Erstellt: {format(new Date(event.createdAt), 'dd. MMM yyyy', { locale: de })}</span
+							>Erstellt: {format(new Date(event.createdAt), 'dd. MMM yyyy', {
+								locale: getDateFnsLocale(),
+							})}</span
 						>
 						{#if event.updatedAt !== event.createdAt}
 							<span
 								>· Bearbeitet: {format(new Date(event.updatedAt), 'dd. MMM yyyy', {
-									locale: de,
+									locale: getDateFnsLocale(),
 								})}</span
 							>
 						{/if}

@@ -4,6 +4,7 @@
   Open-Meteo Best Match) stacked for easy comparison.
 -->
 <script lang="ts">
+	import { formatDate, formatTime } from '$lib/i18n/format';
 	import { getComparison, type CompareResponse, type ModelComparison } from '../api';
 	import { getWeatherIcon, getWeatherLabel } from '../weather-icons';
 
@@ -122,7 +123,7 @@
 						? 'Heute'
 						: dayIdx === 1
 							? 'Morgen'
-							: new Date(dateStr).toLocaleDateString('de-DE', { weekday: 'short', day: 'numeric' })}
+							: formatDate(new Date(dateStr), { weekday: 'short', day: 'numeric' })}
 				<div class="day-compare">
 					<div class="day-compare-header">{dayLabel}</div>
 					<div class="day-models">
@@ -176,7 +177,7 @@
 		{/if}
 
 		<div class="fetched-at">
-			Abgerufen: {new Date(data.fetchedAt).toLocaleTimeString('de-DE')}
+			Abgerufen: {formatTime(new Date(data.fetchedAt))}
 			<button class="refresh-btn" onclick={() => loadComparison(lat, lon)} disabled={loading}>
 				Aktualisieren
 			</button>

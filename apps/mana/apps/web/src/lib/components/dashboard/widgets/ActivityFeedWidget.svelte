@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getDateFnsLocale } from '$lib/i18n/format';
 	/**
 	 * ActivityFeedWidget — Recent timeBlock activity across all modules.
 	 *
@@ -35,8 +36,6 @@
 	} from '@mana/shared-icons';
 	import { getIconComponent } from '@mana/shared-icons';
 	import { formatDistanceToNow } from 'date-fns';
-	import { de } from 'date-fns/locale';
-
 	const MAX_ITEMS = 10;
 
 	const recentQuery = useLiveQueryWithDefault(async () => {
@@ -72,7 +71,7 @@
 	};
 
 	function timeAgo(iso: string): string {
-		return formatDistanceToNow(new Date(iso), { addSuffix: true, locale: de });
+		return formatDistanceToNow(new Date(iso), { addSuffix: true, locale: getDateFnsLocale() });
 	}
 
 	function actionLabel(block: TimeBlock): string {

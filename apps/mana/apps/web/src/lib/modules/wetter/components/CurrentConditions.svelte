@@ -3,6 +3,7 @@
   conditions, wind, humidity, pressure, UV index, and last-updated time.
 -->
 <script lang="ts">
+	import { formatTime } from '$lib/i18n/format';
 	import type { CurrentWeather } from '../types';
 	import { getWeatherIcon, getWeatherLabel, windDirectionLabel } from '../weather-icons';
 
@@ -23,7 +24,7 @@
 
 	let lastUpdated = $derived(() => {
 		if (!fetchedAt) return '';
-		return new Date(fetchedAt).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+		return formatTime(new Date(fetchedAt), { hour: '2-digit', minute: '2-digit' });
 	});
 </script>
 

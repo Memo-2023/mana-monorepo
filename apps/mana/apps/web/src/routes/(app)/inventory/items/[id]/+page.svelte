@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { formatDate } from '$lib/i18n/format';
 	import { _ } from 'svelte-i18n';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
@@ -323,7 +324,7 @@
 									<div>
 										<p class="text-sm text-[hsl(var(--color-foreground))]">{note.content}</p>
 										<p class="mt-1 text-xs text-[hsl(var(--color-muted-foreground))]">
-											{new Date(note.createdAt).toLocaleDateString('de-DE')}
+											{formatDate(new Date(note.createdAt))}
 										</p>
 									</div>
 									<button

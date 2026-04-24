@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { formatDate } from '$lib/i18n/format';
 	import { skillStore } from '$lib/modules/skilltree/stores/skills.svelte';
 	import {
 		achievementStore,
@@ -336,7 +337,7 @@
 										</div>
 									</div>
 									<span class="text-sm text-muted-foreground">
-										{new Date(activity.timestamp).toLocaleDateString('de-DE')}
+										{formatDate(new Date(activity.timestamp))}
 									</span>
 								</div>
 							{/if}

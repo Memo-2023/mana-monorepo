@@ -2,6 +2,7 @@
   DayTimeline — shows all habit logs for a given date as a timeline.
 -->
 <script lang="ts">
+	import { formatDate } from '$lib/i18n/format';
 	import type { Habit, HabitLog } from '../types';
 	import { formatTime } from '../queries';
 	import { DynamicIcon } from '@mana/shared-ui/atoms';
@@ -29,7 +30,7 @@
 		const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
 		if (d === today) return 'Heute';
 		if (d === yesterday) return 'Gestern';
-		return new Date(d).toLocaleDateString('de-DE', {
+		return formatDate(new Date(d), {
 			weekday: 'short',
 			day: 'numeric',
 			month: 'short',

@@ -1,3 +1,4 @@
+import { formatDate } from '$lib/i18n/format';
 /**
  * Todo QuickInputBar Adapter
  */
@@ -33,7 +34,7 @@ export function createAdapter(): InputBarAdapter {
 				.map((t) => ({
 					id: t.id,
 					title: t.title || '',
-					subtitle: t.dueDate ? new Date(t.dueDate).toLocaleDateString('de-DE') : 'Keine Frist',
+					subtitle: t.dueDate ? formatDate(new Date(t.dueDate)) : 'Keine Frist',
 				}));
 		},
 

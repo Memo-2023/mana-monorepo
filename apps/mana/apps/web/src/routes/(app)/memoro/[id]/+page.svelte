@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { formatDate } from '$lib/i18n/format';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { getContext } from 'svelte';
@@ -143,7 +144,7 @@
 							</button>
 						{/if}
 						<p class="text-sm text-[hsl(var(--color-muted-foreground))]">
-							{new Date(memo.createdAt).toLocaleDateString('de-DE', {
+							{formatDate(new Date(memo.createdAt), {
 								day: '2-digit',
 								month: 'long',
 								year: 'numeric',

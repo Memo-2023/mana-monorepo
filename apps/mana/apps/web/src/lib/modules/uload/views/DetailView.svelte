@@ -3,6 +3,7 @@
   All fields are always editable. Changes auto-save on blur.
 -->
 <script lang="ts">
+	import { formatDate } from '$lib/i18n/format';
 	import { db } from '$lib/data/database';
 	import { encryptRecord } from '$lib/data/crypto';
 	import { useDetailEntity } from '$lib/data/detail-entity.svelte';
@@ -162,9 +163,9 @@
 		</div>
 
 		<div class="meta">
-			<span>Erstellt: {new Date(link.createdAt ?? '').toLocaleDateString('de')}</span>
+			<span>Erstellt: {formatDate(new Date(link.createdAt ?? ''))}</span>
 			{#if link.updatedAt}
-				<span>Bearbeitet: {new Date(link.updatedAt).toLocaleDateString('de')}</span>
+				<span>Bearbeitet: {formatDate(new Date(link.updatedAt))}</span>
 			{/if}
 		</div>
 	{/snippet}

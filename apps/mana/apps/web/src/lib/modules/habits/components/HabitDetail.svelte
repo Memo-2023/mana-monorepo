@@ -3,6 +3,7 @@
   Shows stats, log timeline, edit form, and archive/delete actions.
 -->
 <script lang="ts">
+	import { formatDate } from '$lib/i18n/format';
 	import type { Habit, HabitLog } from '../types';
 	import { habitsStore } from '../stores/habits.svelte';
 	import { getCountForDate, getStreak, groupLogsByDate, todayStr, formatTime } from '../queries';
@@ -55,7 +56,7 @@
 		const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
 		if (d === today) return 'Heute';
 		if (d === yesterday) return 'Gestern';
-		return new Date(d).toLocaleDateString('de-DE', {
+		return formatDate(new Date(d), {
 			weekday: 'short',
 			day: 'numeric',
 			month: 'short',
@@ -63,7 +64,7 @@
 	}
 
 	function formatDayLabel(d: string): string {
-		return new Date(d).toLocaleDateString('de-DE', { weekday: 'narrow' });
+		return formatDate(new Date(d), { weekday: 'narrow' });
 	}
 
 	async function handleDelete() {

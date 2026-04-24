@@ -1,7 +1,7 @@
 <script lang="ts">
+	import { getDateFnsLocale } from '$lib/i18n/format';
 	import type { Task } from '../../types';
 	import { isToday, isPast, format } from 'date-fns';
-	import { de } from 'date-fns/locale';
 	import { Check, Circle, CalendarBlank, CheckSquare, Flag, Trash } from '@mana/shared-icons';
 	import { TagChip } from '@mana/shared-ui';
 
@@ -31,7 +31,7 @@
 		const overdue = isPast(d) && !isToday(d) && !task.isCompleted;
 		const today = isToday(d);
 		return {
-			text: today ? 'Heute' : format(d, 'd. MMM', { locale: de }),
+			text: today ? 'Heute' : format(d, 'd. MMM', { locale: getDateFnsLocale() }),
 			overdue,
 			today,
 		};

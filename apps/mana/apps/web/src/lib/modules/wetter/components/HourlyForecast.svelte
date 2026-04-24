@@ -2,6 +2,7 @@
   Horizontal scrolling hourly forecast — next 24 hours.
 -->
 <script lang="ts">
+	import { formatTime } from '$lib/i18n/format';
 	import type { HourlyForecast } from '../types';
 	import { getWeatherIcon } from '../weather-icons';
 
@@ -18,7 +19,7 @@
 	<span class="section-label">Stundenvorhersage</span>
 	<div class="hourly-scroll">
 		{#each visibleHours as hour (hour.time)}
-			{@const time = new Date(hour.time).toLocaleTimeString('de-DE', {
+			{@const time = formatTime(new Date(hour.time), {
 				hour: '2-digit',
 				minute: '2-digit',
 			})}

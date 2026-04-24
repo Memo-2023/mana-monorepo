@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getDateFnsLocale } from '$lib/i18n/format';
 	import {
 		format,
 		startOfMonth,
@@ -12,7 +13,6 @@
 		addMonths,
 		subMonths,
 	} from 'date-fns';
-	import { de } from 'date-fns/locale';
 	import { CaretLeft, CaretRight } from '@mana/shared-icons';
 
 	interface Props {
@@ -44,7 +44,9 @@
 		>
 			<CaretLeft size={16} />
 		</button>
-		<span class="month-label">{format(currentMonth, 'MMMM yyyy', { locale: de })}</span>
+		<span class="month-label"
+			>{format(currentMonth, 'MMMM yyyy', { locale: getDateFnsLocale() })}</span
+		>
 		<button
 			class="nav-btn"
 			onclick={() => (currentMonth = addMonths(currentMonth, 1))}

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { formatDate } from '$lib/i18n/format';
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import { CaretLeft } from '@mana/shared-icons';
@@ -129,7 +130,7 @@
 				<div class="rounded-xl border border-border/10 bg-muted/5 p-5">
 					<p class="text-xs font-medium uppercase tracking-wider text-muted-foreground">Erstellt</p>
 					<p class="mt-1 text-lg font-bold text-white">
-						{new Date(link.createdAt).toLocaleDateString('de')}
+						{formatDate(new Date(link.createdAt))}
 					</p>
 				</div>
 			</div>
@@ -185,7 +186,7 @@
 					{#if link.expiresAt}
 						<div class="flex items-center justify-between text-sm">
 							<span class="text-muted-foreground">Laeuft ab</span>
-							<span class="text-white">{new Date(link.expiresAt).toLocaleDateString('de')}</span>
+							<span class="text-white">{formatDate(new Date(link.expiresAt))}</span>
 						</div>
 					{/if}
 					{#if link.maxClicks}

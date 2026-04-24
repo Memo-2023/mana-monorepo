@@ -2,6 +2,7 @@
   AI Health app — runner status + manual tick + link to status page.
 -->
 <script lang="ts">
+	import { formatDateTime } from '$lib/i18n/format';
 	import { isMissionTickRunning, productionDeps } from '$lib/data/ai/missions/setup';
 	import { runDueMissions } from '$lib/data/ai/missions/runner';
 
@@ -19,13 +20,13 @@
 				errors += r.failedSteps;
 			}
 			lastRunStats = {
-				at: new Date().toLocaleString('de-DE'),
+				at: formatDateTime(new Date()),
 				plansProduced,
 				errors,
 			};
 		} catch (err) {
 			console.error(err);
-			lastRunStats = { at: new Date().toLocaleString('de-DE'), plansProduced: 0, errors: 1 };
+			lastRunStats = { at: formatDateTime(new Date()), plansProduced: 0, errors: 1 };
 		} finally {
 			manualRunning = false;
 		}

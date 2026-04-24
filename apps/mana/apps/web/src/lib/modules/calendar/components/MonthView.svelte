@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getDateFnsLocale } from '$lib/i18n/format';
 	import { getContext } from 'svelte';
 	import { calendarViewStore } from '../stores/view.svelte';
 	import { eventsStore } from '../stores/events.svelte';
@@ -27,8 +28,6 @@
 		getHours,
 		getMinutes,
 	} from 'date-fns';
-	import { de } from 'date-fns/locale';
-
 	interface Props {
 		onEventClick?: (event: CalendarEvent) => void;
 		onDayClick?: (day: Date) => void;

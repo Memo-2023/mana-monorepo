@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { formatDate } from '$lib/i18n/format';
 	import type { AchievementWithStatus } from '../types';
 	import { RARITY_INFO } from '../types';
 	import { Trophy, Lock, Star } from '@mana/shared-icons';
@@ -88,7 +89,7 @@
 				</span>
 				{#if achievement.unlocked && achievement.unlockedAt}
 					<span class="text-muted-foreground">
-						{new Date(achievement.unlockedAt).toLocaleDateString('de-DE')}
+						{formatDate(new Date(achievement.unlockedAt))}
 					</span>
 				{/if}
 			</div>

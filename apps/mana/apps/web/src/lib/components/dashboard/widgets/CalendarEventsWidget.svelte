@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { formatDate, formatTime } from '$lib/i18n/format';
 	/**
 	 * CalendarEventsWidget - Upcoming timeBlocks (local-first)
 	 *
@@ -35,7 +36,7 @@
 		} else if (start.toDateString() === tomorrow.toDateString()) {
 			dateStr = 'Morgen';
 		} else {
-			dateStr = start.toLocaleDateString('de-DE', {
+			dateStr = formatDate(start, {
 				weekday: 'short',
 				day: 'numeric',
 				month: 'short',
@@ -46,7 +47,7 @@
 			return dateStr;
 		}
 
-		const timeStr = start.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+		const timeStr = formatTime(start, { hour: '2-digit', minute: '2-digit' });
 		return `${dateStr}, ${timeStr}`;
 	}
 

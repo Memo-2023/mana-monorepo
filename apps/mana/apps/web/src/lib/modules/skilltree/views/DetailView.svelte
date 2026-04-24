@@ -3,6 +3,7 @@
   Skill details with XP display and quick add XP. Auto-save on blur.
 -->
 <script lang="ts">
+	import { formatDate } from '$lib/i18n/format';
 	import { useDetailEntity } from '$lib/data/detail-entity.svelte';
 	import DetailViewShell from '$lib/components/DetailViewShell.svelte';
 	import { skillStore } from '../stores/skills.svelte';
@@ -177,9 +178,9 @@
 		</div>
 
 		<div class="meta">
-			<span>Erstellt: {new Date(skill.createdAt ?? '').toLocaleDateString('de')}</span>
+			<span>Erstellt: {formatDate(new Date(skill.createdAt ?? ''))}</span>
 			{#if skill.updatedAt}
-				<span>Bearbeitet: {new Date(skill.updatedAt).toLocaleDateString('de')}</span>
+				<span>Bearbeitet: {formatDate(new Date(skill.updatedAt))}</span>
 			{/if}
 		</div>
 	{/snippet}

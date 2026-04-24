@@ -8,6 +8,7 @@
   Renders equally well inside the workbench or standalone at /spaces.
 -->
 <script lang="ts">
+	import { formatDate } from '$lib/i18n/format';
 	import { onMount } from 'svelte';
 	import { getActiveSpace, authFetch } from '$lib/data/scope';
 	import { SPACE_TYPE_LABELS } from '@mana/shared-branding';
@@ -135,7 +136,7 @@
 		if (sec < 60) return 'gerade eben';
 		if (sec < 3600) return `vor ${Math.floor(sec / 60)} min`;
 		if (sec < 86400) return `vor ${Math.floor(sec / 3600)} h`;
-		return d.toLocaleDateString('de-DE');
+		return formatDate(d);
 	}
 </script>
 

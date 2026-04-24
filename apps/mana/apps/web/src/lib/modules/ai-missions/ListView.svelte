@@ -4,6 +4,7 @@
   Master-detail inline (list ↔ create ↔ detail) in a single panel.
 -->
 <script lang="ts">
+	import { formatDateTime } from '$lib/i18n/format';
 	import { ArrowLeft, Play, Pause, Check, Trash, Plus } from '@mana/shared-icons';
 	import { useMissions } from '$lib/data/ai/missions/queries';
 	import {
@@ -412,7 +413,7 @@
 				{@const isRunning = it.overallStatus === 'running'}
 				<article class="it" class:it-running={isRunning}>
 					<header>
-						<span class="it-date">{new Date(it.startedAt).toLocaleString('de-DE')}</span>
+						<span class="it-date">{formatDateTime(new Date(it.startedAt))}</span>
 						<span class="badge badge-{it.overallStatus}">{it.overallStatus}</span>
 					</header>
 

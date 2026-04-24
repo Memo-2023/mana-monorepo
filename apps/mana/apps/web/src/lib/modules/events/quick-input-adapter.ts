@@ -1,3 +1,4 @@
+import { getDateFnsLocale } from '$lib/i18n/format';
 /**
  * Events QuickInputBar Adapter — quick-create gatherings.
  *
@@ -11,8 +12,6 @@ import type { QuickInputItem } from '@mana/shared-ui';
 import { db } from '$lib/data/database';
 import type { LocalSocialEvent } from './types';
 import { format } from 'date-fns';
-import { de } from 'date-fns/locale';
-
 function defaultStart(): Date {
 	const d = new Date();
 	d.setHours(19, 0, 0, 0);
@@ -49,7 +48,7 @@ export function createAdapter(): InputBarAdapter {
 			const start = defaultStart();
 			return {
 				title: `"${query.trim()}" anlegen`,
-				subtitle: `Start: ${format(start, 'EEE, d. MMM, HH:mm', { locale: de })}`,
+				subtitle: `Start: ${format(start, 'EEE, d. MMM, HH:mm', { locale: getDateFnsLocale() })}`,
 			};
 		},
 

@@ -1,3 +1,4 @@
+import { formatDate } from '$lib/i18n/format';
 /**
  * Memoro LLM result watcher.
  *
@@ -140,12 +141,12 @@ async function applyRow(row: QueuedTask): Promise<void> {
 	if (!titleToWrite) {
 		const created = (memo as { createdAt?: string }).createdAt;
 		const dateLabel = created
-			? new Date(created).toLocaleDateString('de', {
+			? formatDate(new Date(created), {
 					day: 'numeric',
 					month: 'long',
 					year: 'numeric',
 				})
-			: new Date().toLocaleDateString('de');
+			: formatDate(new Date());
 		titleToWrite = `Memo vom ${dateLabel}`;
 		console.warn(
 			`[memoro-llm-watcher] row ${row.id} returned empty title — using date fallback "${titleToWrite}"`,

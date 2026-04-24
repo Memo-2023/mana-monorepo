@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { formatDate } from '$lib/i18n/format';
 	/**
 	 * TransactionsWidget - Recent credit transactions
 	 */
@@ -80,7 +81,7 @@
 						<div>
 							<p class="text-sm font-medium">{tx.description || tx.type}</p>
 							<p class="text-xs text-muted-foreground">
-								{new Date(tx.createdAt).toLocaleDateString('de-DE')}
+								{formatDate(new Date(tx.createdAt))}
 							</p>
 						</div>
 					</div>

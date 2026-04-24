@@ -3,6 +3,7 @@
   Minimal task list. Inline due-date badges. Floating input at bottom.
 -->
 <script lang="ts">
+	import { formatDate, formatTime } from '$lib/i18n/format';
 	import { useAllTasks, filterIncomplete, filterOverdue, filterToday, sortTasks } from './queries';
 	import { tasksStore } from './stores/tasks.svelte';
 	import { toastStore } from '@mana/shared-ui/toast';
@@ -55,7 +56,7 @@
 		if (due < todayStart) return { label: 'Überfällig', variant: 'overdue' };
 		if (due < tomorrowStart) return { label: 'Heute', variant: 'today' };
 		return {
-			label: due.toLocaleDateString('de', { day: 'numeric', month: 'short' }),
+			label: formatDate(due, { day: 'numeric', month: 'short' }),
 			variant: 'upcoming',
 		};
 	}
@@ -185,10 +186,10 @@
 					{/if}
 					{#if task.isCompleted && task.completedAt}
 						<span class="completed-at"
-							>{new Date(task.completedAt).toLocaleTimeString('de', {
+							>{formatTime(new Date(task.completedAt), {
 								hour: '2-digit',
 								minute: '2-digit',
-							})} Uhr, {new Date(task.completedAt).toLocaleDateString('de', {
+							})} Uhr, {formatDate(new Date(task.completedAt), {
 								day: 'numeric',
 								month: 'short',
 							})}</span

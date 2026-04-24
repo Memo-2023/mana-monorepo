@@ -3,6 +3,7 @@
   Conversation thread with streaming AI responses.
 -->
 <script lang="ts">
+	import { formatTime } from '$lib/i18n/format';
 	import { useConversationMessages, useAllConversations } from '../queries';
 	import { conversationsStore } from '../stores/conversations.svelte';
 	import { sendAndStream } from '../services/completion';
@@ -91,7 +92,7 @@
 				<div class="bubble" class:user-bubble={msg.sender === 'user'}>
 					<p class="msg-text">{msg.messageText}</p>
 					<span class="msg-time">
-						{new Date(msg.createdAt).toLocaleTimeString('de-DE', {
+						{formatTime(new Date(msg.createdAt), {
 							hour: '2-digit',
 							minute: '2-digit',
 						})}

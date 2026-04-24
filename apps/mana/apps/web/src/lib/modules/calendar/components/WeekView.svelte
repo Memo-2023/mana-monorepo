@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getDateFnsLocale } from '$lib/i18n/format';
 	import { onMount, getContext } from 'svelte';
 	import { calendarViewStore } from '../stores/view.svelte';
 	import { eventsStore } from '../stores/events.svelte';
@@ -32,8 +33,6 @@
 		startOfWeek,
 		endOfWeek,
 	} from 'date-fns';
-	import { de } from 'date-fns/locale';
-
 	interface Props {
 		onEventClick?: (event: CalendarEvent) => void;
 		onQuickCreate?: (startTime: Date, endTime: Date, position: { x: number; y: number }) => void;
@@ -223,9 +222,9 @@
 					class="day-header"
 					class:today={isToday(day)}
 					role="columnheader"
-					aria-label={format(day, 'EEEE, d. MMMM', { locale: de })}
+					aria-label={format(day, 'EEEE, d. MMMM', { locale: getDateFnsLocale() })}
 				>
-					<span class="day-name">{format(day, 'EEE', { locale: de })}</span>
+					<span class="day-name">{format(day, 'EEE', { locale: getDateFnsLocale() })}</span>
 					<span class="day-number" class:today={isToday(day)}>{format(day, 'd')}</span>
 				</div>
 			{/each}

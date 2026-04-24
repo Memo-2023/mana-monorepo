@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { formatDate } from '$lib/i18n/format';
 	import { useAllSites } from './queries';
 
 	const sites = useAllSites();
@@ -13,7 +14,7 @@
 		if (diffH < 24) return `vor ${diffH} Std`;
 		const diffD = Math.floor(diffH / 24);
 		if (diffD < 30) return `vor ${diffD} Tg`;
-		return new Date(iso).toLocaleDateString('de-DE');
+		return formatDate(new Date(iso));
 	}
 </script>
 

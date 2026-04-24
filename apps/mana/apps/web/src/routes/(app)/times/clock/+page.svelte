@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { formatDate, formatTime } from '$lib/i18n/format';
 	import { Clock, Bell, Timer, Hourglass, Globe } from '@mana/shared-icons';
 	import { RoutePage } from '$lib/components/shell';
 
@@ -53,14 +54,14 @@
 				</div>
 				<div>
 					<div class="text-4xl font-bold tabular-nums text-foreground">
-						{new Date().toLocaleTimeString('de-DE', {
+						{formatTime(new Date(), {
 							hour: '2-digit',
 							minute: '2-digit',
 							second: '2-digit',
 						})}
 					</div>
 					<div class="text-muted-foreground">
-						{new Date().toLocaleDateString('de-DE', {
+						{formatDate(new Date(), {
 							weekday: 'long',
 							year: 'numeric',
 							month: 'long',

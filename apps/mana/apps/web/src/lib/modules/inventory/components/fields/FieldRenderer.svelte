@@ -1,7 +1,6 @@
 <script lang="ts">
+	import { getDateFnsLocale } from '$lib/i18n/format';
 	import { format } from 'date-fns';
-	import { de } from 'date-fns/locale';
-
 	interface FieldDef {
 		id: string;
 		name: string;
@@ -27,7 +26,7 @@
 	function formatDate(val: unknown): string {
 		if (!val) return '';
 		try {
-			return format(new Date(String(val)), 'dd.MM.yyyy', { locale: de });
+			return format(new Date(String(val)), 'dd.MM.yyyy', { locale: getDateFnsLocale() });
 		} catch {
 			return String(val);
 		}

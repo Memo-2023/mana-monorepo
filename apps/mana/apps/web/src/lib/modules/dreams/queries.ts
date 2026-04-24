@@ -1,3 +1,4 @@
+import { formatDate } from '$lib/i18n/format';
 /**
  * Reactive Queries & Pure Helpers for Dreams module.
  *
@@ -113,7 +114,7 @@ export function groupByMonth(dreams: Dream[]): Array<{ label: string; dreams: Dr
 	const groups = new Map<string, Dream[]>();
 	for (const d of dreams) {
 		const date = new Date(d.dreamDate);
-		const label = date.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
+		const label = formatDate(date, { month: 'long', year: 'numeric' });
 		if (!groups.has(label)) groups.set(label, []);
 		groups.get(label)!.push(d);
 	}
@@ -128,7 +129,7 @@ export function formatDreamDate(iso: string): string {
 	if (diffDays === 0) return 'Heute Nacht';
 	if (diffDays === 1) return 'Gestern Nacht';
 	if (diffDays < 7) return `vor ${diffDays} Tagen`;
-	return date.toLocaleDateString('de-DE', { day: 'numeric', month: 'short', year: 'numeric' });
+	return formatDate(date, { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
 /** Map of symbol name → most recent dreamDate that references it. */

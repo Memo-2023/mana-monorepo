@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { formatDateTime } from '$lib/i18n/format';
 	import { useEvent, useEventGuests, summarizeRsvps } from '../queries';
 	import { eventsStore } from '../stores/events.svelte';
 	import GuestListEditor from '../components/GuestListEditor.svelte';
@@ -221,7 +222,7 @@
 				<h1 class="title">{event.title}</h1>
 				<div class="meta-row">
 					<span class="when">
-						{new Date(event.startTime).toLocaleString('de-DE', {
+						{formatDateTime(new Date(event.startTime), {
 							weekday: 'long',
 							day: '2-digit',
 							month: 'long',

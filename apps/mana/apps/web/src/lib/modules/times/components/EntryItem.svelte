@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { formatTime } from '$lib/i18n/format';
 	import { getContext } from 'svelte';
 	import { _ } from 'svelte-i18n';
 	import { timeEntryTable } from '$lib/modules/times/collections';
@@ -93,16 +94,14 @@
 
 	let startTimeStr = $derived(
 		entry.startTime
-			? new Date(entry.startTime).toLocaleTimeString('de-DE', {
+			? formatTime(new Date(entry.startTime), {
 					hour: '2-digit',
 					minute: '2-digit',
 				})
 			: ''
 	);
 	let endTimeStr = $derived(
-		entry.endTime
-			? new Date(entry.endTime).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
-			: ''
+		entry.endTime ? formatTime(new Date(entry.endTime), { hour: '2-digit', minute: '2-digit' }) : ''
 	);
 </script>
 

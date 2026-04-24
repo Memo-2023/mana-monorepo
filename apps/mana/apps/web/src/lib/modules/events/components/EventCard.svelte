@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { formatDate, formatTime } from '$lib/i18n/format';
 	import type { SocialEvent, RsvpSummary } from '../types';
 
 	interface Props {
@@ -11,16 +12,14 @@
 
 	const startDate = $derived(new Date(event.startTime));
 	const dateLabel = $derived(
-		startDate.toLocaleDateString('de-DE', {
+		formatDate(startDate, {
 			weekday: 'short',
 			day: '2-digit',
 			month: 'short',
 		})
 	);
 	const timeLabel = $derived(
-		event.isAllDay
-			? 'Ganztägig'
-			: startDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+		event.isAllDay ? 'Ganztägig' : formatTime(startDate, { hour: '2-digit', minute: '2-digit' })
 	);
 </script>
 

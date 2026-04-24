@@ -3,6 +3,7 @@
   All fields are always editable. Changes auto-save on blur.
 -->
 <script lang="ts">
+	import { formatDate } from '$lib/i18n/format';
 	import { useDetailEntity } from '$lib/data/detail-entity.svelte';
 	import DetailViewShell from '$lib/components/DetailViewShell.svelte';
 	import { contactsStore } from '../stores/contacts.svelte';
@@ -372,10 +373,10 @@
 
 		<div class="meta">
 			{#if contact.createdAt}
-				<span>Erstellt: {new Date(contact.createdAt).toLocaleDateString('de')}</span>
+				<span>Erstellt: {formatDate(new Date(contact.createdAt))}</span>
 			{/if}
 			{#if contact.updatedAt}
-				<span>Bearbeitet: {new Date(contact.updatedAt).toLocaleDateString('de')}</span>
+				<span>Bearbeitet: {formatDate(new Date(contact.updatedAt))}</span>
 			{/if}
 		</div>
 	{/snippet}

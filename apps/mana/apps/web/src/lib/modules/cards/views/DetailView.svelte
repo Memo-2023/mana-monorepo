@@ -3,6 +3,7 @@
   All fields are always editable. Changes auto-save on blur.
 -->
 <script lang="ts">
+	import { formatDate } from '$lib/i18n/format';
 	import { liveQuery } from 'dexie';
 	import { db } from '$lib/data/database';
 	import { useDetailEntity } from '$lib/data/detail-entity.svelte';
@@ -116,7 +117,7 @@
 			{#if deck.lastStudied}
 				<div class="prop-row">
 					<span class="prop-label">Zuletzt gelernt</span>
-					<span class="prop-value">{new Date(deck.lastStudied).toLocaleDateString('de')}</span>
+					<span class="prop-value">{formatDate(new Date(deck.lastStudied))}</span>
 				</div>
 			{/if}
 		</div>
@@ -134,9 +135,9 @@
 		</div>
 
 		<div class="meta">
-			<span>Erstellt: {new Date(deck.createdAt ?? '').toLocaleDateString('de')}</span>
+			<span>Erstellt: {formatDate(new Date(deck.createdAt ?? ''))}</span>
 			{#if deck.updatedAt}
-				<span>Bearbeitet: {new Date(deck.updatedAt).toLocaleDateString('de')}</span>
+				<span>Bearbeitet: {formatDate(new Date(deck.updatedAt))}</span>
 			{/if}
 		</div>
 	{/snippet}

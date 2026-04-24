@@ -1,3 +1,4 @@
+import { formatDate } from '$lib/i18n/format';
 import type { ModuleTool } from '$lib/data/tools/types';
 import { eventsStore } from './stores/events.svelte';
 import { discoveryStore } from './discovery/store.svelte';
@@ -89,7 +90,7 @@ export const socialEventsTools: ModuleTool[] = [
 				.slice(0, 10)
 				.map(
 					(e) =>
-						`- ${e.title} (${new Date(e.date).toLocaleDateString('de-DE')}${e.location ? `, ${e.location}` : ''})`
+						`- ${e.title} (${formatDate(new Date(e.date))}${e.location ? `, ${e.location}` : ''})`
 				)
 				.join('\n');
 

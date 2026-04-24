@@ -7,6 +7,7 @@
   place).
 -->
 <script lang="ts">
+	import { formatDateTime } from '$lib/i18n/format';
 	import { goto } from '$app/navigation';
 	import { VisibilityPicker, type VisibilityLevel } from '@mana/shared-privacy';
 	import BriefingForm from '../components/BriefingForm.svelte';
@@ -338,10 +339,7 @@
 				<div class="published-row">
 					<span class="published-label">📤 Veröffentlicht:</span>
 					{#each draft.publishedTo as target (`${target.module}:${target.targetId}`)}
-						<span
-							class="published-chip"
-							title={new Date(target.publishedAt).toLocaleString('de-DE')}
-						>
+						<span class="published-chip" title={formatDateTime(new Date(target.publishedAt))}>
 							{#if target.module === 'articles'}
 								📚 <a href={`/articles/${target.targetId}`}>Artikel</a>
 							{:else if target.module === 'website'}

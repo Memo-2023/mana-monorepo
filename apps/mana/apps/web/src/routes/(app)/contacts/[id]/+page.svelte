@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { formatDate } from '$lib/i18n/format';
 	import { _ } from 'svelte-i18n';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
@@ -570,7 +571,7 @@
 							<div class="flex items-center gap-3">
 								<Cake size={16} class="flex-shrink-0 text-muted-foreground" />
 								<span class="text-sm text-foreground">
-									{new Date(contact.birthday).toLocaleDateString('de-DE', {
+									{formatDate(new Date(contact.birthday), {
 										day: 'numeric',
 										month: 'long',
 										year: 'numeric',
@@ -675,7 +676,7 @@
 						<div class="grid grid-cols-2 gap-y-2 text-xs text-muted-foreground">
 							<span>Erstellt</span>
 							<span
-								>{new Date(contact.createdAt).toLocaleDateString('de-DE', {
+								>{formatDate(new Date(contact.createdAt), {
 									day: 'numeric',
 									month: 'short',
 									year: 'numeric',
@@ -683,7 +684,7 @@
 							>
 							<span>Aktualisiert</span>
 							<span
-								>{new Date(contact.updatedAt).toLocaleDateString('de-DE', {
+								>{formatDate(new Date(contact.updatedAt), {
 									day: 'numeric',
 									month: 'short',
 									year: 'numeric',

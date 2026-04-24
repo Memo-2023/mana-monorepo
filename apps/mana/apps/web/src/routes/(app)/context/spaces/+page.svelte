@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { formatDate } from '$lib/i18n/format';
 	import { Plus, MagnifyingGlass } from '@mana/shared-icons';
 	import { useAllSpaces } from '$lib/modules/context/queries';
 	import { contextSpaceTable } from '$lib/modules/context/collections';
@@ -192,7 +193,7 @@
 							</div>
 						</div>
 						<div class="mt-3 text-xs opacity-40">
-							Erstellt: {new Date(space.created_at).toLocaleDateString('de')}
+							Erstellt: {formatDate(new Date(space.created_at))}
 						</div>
 					</div>
 				{/each}

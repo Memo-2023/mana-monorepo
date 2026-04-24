@@ -3,6 +3,7 @@
   All fields are always editable. Changes auto-save on blur.
 -->
 <script lang="ts">
+	import { formatDate, formatTime } from '$lib/i18n/format';
 	import { db } from '$lib/data/database';
 	import { useDetailEntity } from '$lib/data/detail-entity.svelte';
 	import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
@@ -73,7 +74,7 @@
 	function fmtTime(iso?: string | null): string {
 		if (!iso) return '';
 		const d = new Date(iso);
-		return d.toLocaleTimeString('de', { hour: '2-digit', minute: '2-digit' });
+		return formatTime(d, { hour: '2-digit', minute: '2-digit' });
 	}
 
 	async function saveField() {
@@ -230,7 +231,7 @@
 
 		<div class="meta">
 			{#if entry.createdAt}
-				<span>Erstellt: {new Date(entry.createdAt).toLocaleDateString('de')}</span>
+				<span>Erstellt: {formatDate(new Date(entry.createdAt))}</span>
 			{/if}
 			{#if entry.source?.app}
 				<span>Quelle: {entry.source.app}</span>
