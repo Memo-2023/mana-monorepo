@@ -5,6 +5,7 @@
  */
 
 import type { BaseRecord } from '@mana/local-store';
+import type { VisibilityLevel } from '@mana/shared-privacy';
 
 // ─── Subtypes ───────────────────────────────────────────
 
@@ -32,6 +33,10 @@ export interface LocalRecipe extends BaseRecord {
 	photoMediaId: string | null;
 	photoUrl: string | null;
 	photoThumbnailUrl: string | null;
+	visibility?: VisibilityLevel;
+	visibilityChangedAt?: string;
+	visibilityChangedBy?: string;
+	unlistedToken?: string;
 }
 
 // ─── Domain Type ────────────────────────────────────────
@@ -51,6 +56,7 @@ export interface Recipe {
 	photoMediaId: string | null;
 	photoUrl: string | null;
 	photoThumbnailUrl: string | null;
+	visibility: VisibilityLevel;
 	createdAt: string;
 	updatedAt: string;
 }

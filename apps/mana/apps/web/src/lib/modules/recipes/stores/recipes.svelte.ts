@@ -6,6 +6,13 @@
 
 import { encryptRecord } from '$lib/data/crypto';
 import { emitDomainEvent } from '$lib/data/events';
+import { getActiveSpace } from '$lib/data/scope';
+import { getEffectiveUserId } from '$lib/data/current-user';
+import {
+	defaultVisibilityFor,
+	generateUnlistedToken,
+	type VisibilityLevel,
+} from '@mana/shared-privacy';
 import { recipeTable } from '../collections';
 import { toRecipe } from '../queries';
 import type { LocalRecipe, Difficulty, Ingredient } from '../types';
@@ -37,6 +44,7 @@ export const recipesStore = {
 			photoMediaId: null,
 			photoUrl: null,
 			photoThumbnailUrl: null,
+			visibility: defaultVisibilityFor(getActiveSpace()?.type),
 		};
 		const snapshot = toRecipe({ ...newLocal });
 		await encryptRecord('recipes', newLocal);
@@ -93,6 +101,39 @@ export const recipesStore = {
 		});
 	},
 
+	/**
+	 * Flip the recipe's visibility. Typical use-case: mark tested
+	 * recipes 'public' so they land in the recipes.recipes embed on
+	 * the owner's website.
+	 */
+	async setVisibility(id: string, next: VisibilityLevel) {
+		const existing = await recipeTable.get(id);
+		if (!existing) throw new Error(`Recipe ${id} not found`);
+		const before: VisibilityLevel = existing.visibility ?? 'space';
+		if (before === next) return;
+
+		const now = new Date().toISOString();
+		const patch: Partial<LocalRecipe> = {
+			visibility: next,
+			visibilityChangedAt: now,
+			visibilityChangedBy: getEffectiveUserId(),
+			updatedAt: now,
+		};
+		if (next === 'unlisted' && !existing.unlistedToken) {
+			patch.unlistedToken = generateUnlistedToken();
+		} else if (next !== 'unlisted' && existing.unlistedToken) {
+			patch.unlistedToken = undefined;
+		}
+		await recipeTable.update(id, patch);
+
+		emitDomainEvent('VisibilityChanged', 'recipes', 'recipes', id, {
+			recordId: id,
+			collection: 'recipes',
+			before,
+			after: next,
+		});
+	},
+
 	async duplicateRecipe(id: string) {
 		const existing = await recipeTable.get(id);
 		if (!existing) return null;
@@ -102,6 +143,13 @@ export const recipesStore = {
 			id: crypto.randomUUID(),
 			title: `Kopie von ${existing.title}`,
 			isFavorite: false,
+			// Duplicate resets to the space default; copies should not
+			// inherit a public flag from the original (same rule as picture
+			// boards — makes sharing explicit, not transitive).
+			visibility: defaultVisibilityFor(getActiveSpace()?.type),
+			visibilityChangedAt: undefined,
+			visibilityChangedBy: undefined,
+			unlistedToken: undefined,
 			createdAt: undefined,
 			updatedAt: undefined,
 			deletedAt: undefined,

@@ -27,6 +27,7 @@ export function toRecipe(local: LocalRecipe): Recipe {
 		photoMediaId: local.photoMediaId ?? null,
 		photoUrl: local.photoUrl ?? null,
 		photoThumbnailUrl: local.photoThumbnailUrl ?? null,
+		visibility: local.visibility ?? 'space',
 		createdAt: local.createdAt ?? now,
 		updatedAt: local.updatedAt ?? now,
 	};

@@ -33,6 +33,7 @@ export const EmbedSourceSchema = z.enum([
 	'todo.tasks',
 	'goals.goals',
 	'places.places',
+	'recipes.recipes',
 ]);
 export type EmbedSource = z.infer<typeof EmbedSourceSchema>;
 

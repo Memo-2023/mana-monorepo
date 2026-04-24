@@ -27,6 +27,7 @@ import type { LocalTask } from '$lib/modules/todo/types';
 import type { LocalTaskTag } from '$lib/modules/todo/types';
 import type { LocalGoal } from '$lib/companion/goals/types';
 import type { LocalPlace } from '$lib/modules/places/types';
+import type { LocalRecipe } from '$lib/modules/recipes/types';
 import type { LocalTimeBlock } from '$lib/data/time-blocks/types';
 
 export interface ResolvedEmbed {
@@ -58,6 +59,9 @@ export async function resolveEmbed(props: ModuleEmbedProps): Promise<ResolvedEmb
 				break;
 			case 'places.places':
 				items = await resolvePlaces(props);
+				break;
+			case 'recipes.recipes':
+				items = await resolveRecipes(props);
 				break;
 			default:
 				return {
@@ -398,4 +402,54 @@ async function resolvePlaces(props: ModuleEmbedProps): Promise<EmbedItem[]> {
 		title: p.name,
 		subtitle: p.address ?? undefined,
 	}));
+}
+
+/**
+ * Recipes: "my tested recipes" / "cookbook". Hard-gated on
+ * canEmbedOnWebsite.
+ *
+ * Whitelist (plan §2): title + description + photo URL + compact
+ * time/difficulty line. Ingredient list, cooking steps, and internal
+ * tags stay out of the snapshot — the public embed is a teaser, not
+ * the full recipe. A future extension could surface the full recipe
+ * on a dedicated /s/<slug>/recipes/<id> page behind an unlisted token,
+ * but that's M8 scope.
+ */
+async function resolveRecipes(props: ModuleEmbedProps): Promise<EmbedItem[]> {
+	let recipes = await db.table<LocalRecipe>('recipes').toArray();
+	recipes = recipes.filter((r) => !r.deletedAt && canEmbedOnWebsite(r.visibility ?? 'private'));
+
+	if (props.filter?.isFavorite === true) {
+		recipes = recipes.filter((r) => r.isFavorite === true);
+	}
+	if (props.filter?.tagIds?.length) {
+		const wanted = new Set(props.filter.tagIds);
+		recipes = recipes.filter((r) => (r.tags ?? []).some((t) => wanted.has(t)));
+	}
+
+	const decrypted = (await decryptRecords('recipes', recipes)) as LocalRecipe[];
+
+	// Favourites first, then newest.
+	decrypted.sort((a, b) => {
+		const favA = a.isFavorite ? 0 : 1;
+		const favB = b.isFavorite ? 0 : 1;
+		if (favA !== favB) return favA - favB;
+		return (b.updatedAt ?? '').localeCompare(a.updatedAt ?? '');
+	});
+
+	return decrypted.map((r) => {
+		const total = (r.prepTimeMin ?? 0) + (r.cookTimeMin ?? 0) || null;
+		const timeLabel =
+			total !== null && total > 0
+				? total < 60
+					? `${total} Min`
+					: `${Math.floor(total / 60)}h ${total % 60}m`
+				: null;
+		const parts = [timeLabel, `${r.servings} Port.`].filter((x): x is string => Boolean(x));
+		return {
+			title: r.title,
+			subtitle: parts.join(' · ') || undefined,
+			imageUrl: r.photoThumbnailUrl ?? r.photoUrl ?? undefined,
+		};
+	});
 }

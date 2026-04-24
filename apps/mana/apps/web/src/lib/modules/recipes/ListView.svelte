@@ -25,6 +25,7 @@
 	import { ContextMenu, type ContextMenuItem } from '@mana/shared-ui';
 	import { useItemContextMenu } from '$lib/data/item-context-menu.svelte';
 	import { Trash, Heart, Copy, Star } from '@mana/shared-icons';
+	import { VisibilityPicker } from '@mana/shared-privacy';
 
 	let recipes$ = useAllRecipes();
 	let recipes = $derived(recipes$.value);
@@ -260,6 +261,13 @@
 
 			{#if expandedId === recipe.id}
 				<div class="detail-panel">
+					<div class="detail-section">
+						<div class="detail-heading">Sichtbarkeit</div>
+						<VisibilityPicker
+							level={recipe.visibility ?? 'private'}
+							onChange={(next) => recipesStore.setVisibility(recipe.id, next)}
+						/>
+					</div>
 					{#if recipe.ingredients.length > 0}
 						<div class="detail-section">
 							<div class="detail-heading">
