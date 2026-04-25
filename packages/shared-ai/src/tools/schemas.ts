@@ -1987,6 +1987,210 @@ export const AI_TOOL_CATALOG: readonly ToolSchema[] = [
 			},
 		],
 	},
+
+	// ── Augur (signs / fortunes / hunches) ──────────────────────
+	{
+		name: 'capture_sign',
+		module: 'augur',
+		description:
+			'Erfasst ein Zeichen (Omen, Wahrsagung oder Bauchgefuehl) im Augur-Modul. Standardmaessig Stimmung "mysterious" wenn nicht angegeben. Gibt die ID zurueck.',
+		defaultPolicy: 'propose',
+		parameters: [
+			{
+				name: 'kind',
+				type: 'string',
+				description: 'Art des Zeichens',
+				required: true,
+				enum: ['omen', 'fortune', 'hunch'],
+			},
+			{
+				name: 'source',
+				type: 'string',
+				description: 'Quelle (z.B. "schwarze Katze", "Glueckskeks", "Bauchgefuehl")',
+				required: true,
+			},
+			{
+				name: 'claim',
+				type: 'string',
+				description: 'Was das Zeichen aussagt',
+				required: true,
+			},
+			{
+				name: 'sourceCategory',
+				type: 'string',
+				description: 'Quellenkategorie',
+				required: false,
+				enum: [
+					'gut',
+					'tarot',
+					'horoscope',
+					'fortune-cookie',
+					'iching',
+					'dream',
+					'person',
+					'media',
+					'natural',
+					'other',
+				],
+			},
+			{
+				name: 'vibe',
+				type: 'string',
+				description: 'Grundstimmung des Zeichens',
+				required: false,
+				enum: ['good', 'bad', 'mysterious'],
+			},
+			{
+				name: 'feltMeaning',
+				type: 'string',
+				description: 'Eigene Deutung (optional)',
+				required: false,
+			},
+			{
+				name: 'expectedOutcome',
+				type: 'string',
+				description: 'Konkrete Prognose (optional)',
+				required: false,
+			},
+			{
+				name: 'expectedBy',
+				type: 'string',
+				description: 'Bis wann sollte sich zeigen ob es eintritt (YYYY-MM-DD)',
+				required: false,
+			},
+			{
+				name: 'probability',
+				type: 'number',
+				description: 'Wahrscheinlichkeit 0..1 (optional)',
+				required: false,
+			},
+			{
+				name: 'tags',
+				type: 'string',
+				description: 'Tags durch Komma getrennt',
+				required: false,
+			},
+		],
+	},
+	{
+		name: 'resolve_sign',
+		module: 'augur',
+		description:
+			'Loest ein offenes Zeichen auf — markiert ob es eingetreten ist (fulfilled / partly / not-fulfilled) und kann eine Notiz speichern.',
+		defaultPolicy: 'propose',
+		parameters: [
+			{ name: 'entryId', type: 'string', description: 'ID des Zeichens', required: true },
+			{
+				name: 'outcome',
+				type: 'string',
+				description: 'Ergebnis',
+				required: true,
+				enum: ['fulfilled', 'partly', 'not-fulfilled'],
+			},
+			{
+				name: 'note',
+				type: 'string',
+				description: 'Optionale Notiz wie es kam',
+				required: false,
+			},
+		],
+	},
+	{
+		name: 'list_open_signs',
+		module: 'augur',
+		description:
+			'Listet noch offene Zeichen — id, kind, source, claim, encounteredAt, expectedBy. Optional gefiltert nach kind.',
+		defaultPolicy: 'auto',
+		parameters: [
+			{
+				name: 'kind',
+				type: 'string',
+				description: 'Nur eine Art zeigen',
+				required: false,
+				enum: ['omen', 'fortune', 'hunch'],
+			},
+			{
+				name: 'limit',
+				type: 'number',
+				description: 'Maximale Anzahl (Standard 30)',
+				required: false,
+			},
+		],
+	},
+	{
+		name: 'consult_oracle',
+		module: 'augur',
+		description:
+			'Befragt das Living Oracle: nimmt eine Sign-Beschreibung und gibt zurueck was bei aehnlichen Zeichen in der Vergangenheit geschah (n, hit-rate, breakdown). Schweigt unter 50 aufgeloesten Eintraegen oder unter 3 Treffern (cold-start).',
+		defaultPolicy: 'auto',
+		parameters: [
+			{
+				name: 'kind',
+				type: 'string',
+				description: 'Art des hypothetischen Zeichens',
+				required: true,
+				enum: ['omen', 'fortune', 'hunch'],
+			},
+			{
+				name: 'sourceCategory',
+				type: 'string',
+				description: 'Quellenkategorie',
+				required: true,
+				enum: [
+					'gut',
+					'tarot',
+					'horoscope',
+					'fortune-cookie',
+					'iching',
+					'dream',
+					'person',
+					'media',
+					'natural',
+					'other',
+				],
+			},
+			{
+				name: 'vibe',
+				type: 'string',
+				description: 'Grundstimmung',
+				required: true,
+				enum: ['good', 'bad', 'mysterious'],
+			},
+			{
+				name: 'source',
+				type: 'string',
+				description: 'Quellen-Stichwort fuer Keyword-Matching',
+				required: false,
+			},
+			{
+				name: 'claim',
+				type: 'string',
+				description: 'Aussage fuer Keyword-Matching',
+				required: false,
+			},
+			{
+				name: 'tags',
+				type: 'string',
+				description: 'Tags durch Komma getrennt',
+				required: false,
+			},
+		],
+	},
+	{
+		name: 'augur_year_recap',
+		module: 'augur',
+		description:
+			'Strukturierter Jahresrueckblick: total / aufgeloest / hit-rate / vibe-breakdown / top-source-categories. Year als YYYY (Standard: aktuelles Jahr).',
+		defaultPolicy: 'auto',
+		parameters: [
+			{
+				name: 'year',
+				type: 'number',
+				description: 'Jahr (z.B. 2026). Standard: aktuelles Jahr.',
+				required: false,
+			},
+		],
+	},
 ];
 
 // ═══════════════════════════════════════════════════════════════

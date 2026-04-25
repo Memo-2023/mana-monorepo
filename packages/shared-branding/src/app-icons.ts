@@ -86,6 +86,13 @@ const comicSvg = `<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="
 // reads as "clothing" at any scale.
 const wardrobeSvg = `<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="130" y="130" width="764" height="764" rx="382" fill="url(#wardrobeGrad)"/><path d="M512 246c-34 0-62 28-62 62 0 15 6 28 15 37l-113 58c-14 7-22 22-22 37v40l-40 28c-10 7-13 20-8 31l20 40c5 10 16 16 27 13l46-12v256c0 18 14 32 32 32h250c18 0 32-14 32-32V580l46 12c11 3 22-3 27-13l20-40c5-11 2-24-8-31l-40-28v-40c0-15-8-30-22-37l-113-58c9-9 15-22 15-37 0-34-28-62-62-62zm0 44c18 0 32 14 32 32s-14 32-32 32-32-14-32-32 14-32 32-32z" fill="white"/><path d="M420 450c0 50 41 90 92 90s92-40 92-90" stroke="#be185d" stroke-width="6" stroke-linecap="round" fill="none" stroke-opacity="0.25"/><defs><linearGradient id="wardrobeGrad" x1="130" y1="130" x2="894" y2="894" gradientUnits="userSpaceOnUse"><stop stop-color="#e11d48"/><stop offset="1" stop-color="#a21caf"/></linearGradient></defs></svg>`;
 
+// Augur icon — open eye with a small star in the iris and three drifting
+// dots ("signs in the air") on indigo→violet gradient. Sits in the cosmic
+// family next to Dreams (indigo) and Cards (violet) so the launcher reads
+// as "the seeing/oracular cluster". The eye is symmetric and abstract on
+// purpose: not a religious or zodiac symbol, just "watch".
+const augurSvg = `<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="130" y="130" width="764" height="764" rx="382" fill="url(#augurGrad)"/><path d="M260 512c0 0 112-148 252-148s252 148 252 148-112 148-252 148S260 512 260 512z" fill="white"/><circle cx="512" cy="512" r="86" fill="#4338ca"/><circle cx="512" cy="512" r="34" fill="#0f0a3d"/><path d="M512 470l8 26h27l-22 16 8 26-21-16-21 16 8-26-22-16h27z" fill="white"/><circle cx="320" cy="320" r="14" fill="white" fill-opacity="0.55"/><circle cx="700" cy="290" r="10" fill="white" fill-opacity="0.45"/><circle cx="740" cy="720" r="12" fill="white" fill-opacity="0.5"/><circle cx="290" cy="700" r="8" fill="white" fill-opacity="0.4"/><defs><linearGradient id="augurGrad" x1="130" y1="130" x2="894" y2="894" gradientUnits="userSpaceOnUse"><stop stop-color="#4338ca"/><stop offset="1" stop-color="#7c3aed"/></linearGradient></defs></svg>`;
+
 /**
  * App icons as data URLs
  * Use these directly in <img src={APP_ICONS.memoro}> or CSS background-image
@@ -115,6 +122,7 @@ export const APP_ICONS = {
 	inventory: svgToDataUrl(inventorySvg),
 	wardrobe: svgToDataUrl(wardrobeSvg),
 	comic: svgToDataUrl(comicSvg),
+	augur: svgToDataUrl(augurSvg),
 	questions: svgToDataUrl(questionsSvg),
 	context: svgToDataUrl(contextSvg),
 	citycorners: svgToDataUrl(citycornersSvg),

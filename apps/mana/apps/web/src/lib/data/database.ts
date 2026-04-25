@@ -1079,6 +1079,23 @@ db.version(46).stores({
 	_scopeCursor: null,
 });
 
+// v47 — Augur module (docs/plans/augur-module.md M1).
+// Single space-scoped table: each row is a sign — an omen, a fortune,
+// or a hunch — with a witness-side capture (source/claim/vibe/feltMeaning)
+// and an oracle-side resolution (outcome/outcomeNote/resolvedAt).
+//
+// Index strategy:
+//   - kind for the witness gallery's KindTabs filter
+//   - outcome to find unresolved entries fast (Resolve-Reminder + due-for-reveal)
+//   - vibe for the vibe-color galleries
+//   - sourceCategory for Calibration-per-Source aggregation in OracleView
+//   - encounteredAt for chronological sort (default order)
+//   - expectedBy for the "fällig" reminder list (M3)
+//   - isArchived for the standard archive-hide filter
+db.version(47).stores({
+	augurEntries: 'id, kind, outcome, vibe, sourceCategory, encounteredAt, expectedBy, isArchived',
+});
+
 // v48 — One-shot dedup of duplicate "Home" scenes that the seeding race
 // in `stores/workbench-scenes.svelte.ts` has been accumulating since the
 // Spaces-Foundation migration shipped 2026-04-22. The seeder writes new

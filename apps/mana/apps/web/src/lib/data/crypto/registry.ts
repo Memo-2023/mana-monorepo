@@ -98,6 +98,7 @@ import type {
 	LocalWritingStyle,
 } from '../../modules/writing/types';
 import type { LocalComicStory } from '../../modules/comic/types';
+import type { LocalAugurEntry } from '../../modules/augur/types';
 
 export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 	// ─── Chat ────────────────────────────────────────────────
@@ -613,6 +614,39 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 		'storyContext',
 		'tags',
 		'panelMeta',
+	]),
+
+	// ─── Augur (signs: omens / fortunes / hunches) ───────────
+	// docs/plans/augur-module.md M1. Single space-scoped table.
+	//
+	// User-typed prose is the sensitive surface — `source` (free-text
+	// label like "schwarze Katze" or "Mutter"), `claim` (what the sign
+	// said), `feltMeaning` (the user's interpretation), `expectedOutcome`
+	// (the prediction), `outcomeNote` (the resolve write-up),
+	// `livingOracleSnapshot` (the deterministic reflection cached at
+	// capture time), and free-form `tags`. All travel encrypted.
+	//
+	// Plaintext (intentional):
+	//   - kind, vibe, outcome, sourceCategory: enum discriminators that
+	//     drive the kind-tabs filter, vibe-galleries, the resolve-reminder
+	//     list (`outcome === 'open'`), and Calibration-per-Source
+	//     aggregation in OracleView. Encrypting any of them would force a
+	//     full table scan + decrypt loop on every render.
+	//   - encounteredAt, expectedBy, resolvedAt: ISO dates the index layer
+	//     uses for sort + the due-for-reveal range scan.
+	//   - probability: nullable 0..1 forecaster number — used by the Brier
+	//     score computation in `lib/calibration.ts`. No prose value.
+	//   - relatedDreamId / relatedDecisionId: foreign keys (standard
+	//     "IDs are plaintext" rule).
+	//   - isPrivate / isArchived: structural flags.
+	augurEntries: entry<LocalAugurEntry>([
+		'source',
+		'claim',
+		'feltMeaning',
+		'expectedOutcome',
+		'outcomeNote',
+		'tags',
+		'livingOracleSnapshot',
 	]),
 
 	// Per-agent kontext documents — same schema as kontextDoc but keyed

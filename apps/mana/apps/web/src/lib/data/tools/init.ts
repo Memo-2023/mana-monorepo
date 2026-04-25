@@ -48,6 +48,7 @@ import { broadcastTools } from '$lib/modules/broadcast/tools';
 import { websiteTools } from '$lib/modules/website/tools';
 import { writingTools } from '$lib/modules/writing/tools';
 import { comicTools } from '$lib/modules/comic/tools';
+import { augurTools } from '$lib/modules/augur/tools';
 
 let initialized = false;
 
@@ -97,5 +98,6 @@ export function initTools(): void {
 	registerTools(websiteTools);
 	registerTools(writingTools);
 	registerTools(comicTools);
+	registerTools(augurTools);
 	initialized = true;
 }

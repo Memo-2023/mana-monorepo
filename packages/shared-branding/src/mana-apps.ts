@@ -1174,6 +1174,23 @@ export const MANA_APPS: ManaApp[] = [
 		requiredTier: 'public',
 	},
 	{
+		id: 'augur',
+		name: 'Augur',
+		description: {
+			de: 'Zeichen sammeln, Muster lesen',
+			en: 'Collect signs, read patterns',
+		},
+		longDescription: {
+			de: 'Halte Omen, Wahrsagungen und Bauchgefühle fest — und lass Mana mit der Zeit zeigen, welche deiner inneren Stimmen wirklich Recht behalten. Witness-Modus für poetisches Erfassen, Oracle-Modus für ehrliche Auswertung.',
+			en: 'Capture omens, fortunes, and hunches — and over time let Mana show which of your inner voices actually get it right. Witness mode for poetic capture, Oracle mode for honest evaluation.',
+		},
+		icon: APP_ICONS.augur,
+		color: '#7c3aed',
+		comingSoon: false,
+		status: 'development',
+		requiredTier: 'guest',
+	},
+	{
 		id: 'spaces',
 		name: 'Spaces',
 		description: {

@@ -15,6 +15,138 @@ recommendation.
 
 ---
 
+## 2026-04-25 Brainstorm — Mana-spezifische Ideen
+
+Ideen, die bewusst auf das einzigartige Stack-Profil von Mana setzen:
+Personas, MCP-Tools, Spaces, Visibility/Embed, Local-First, Verschlüsselung.
+Keiner dieser Vorschläge existiert in den 82 aktuellen Modulen oder weiter
+unten in dieser Datei.
+
+### KI-native (Personas, Missions, MCP)
+
+- **debate** — Zwei Personas argumentieren live einen Streitpunkt aus deinem Prompt. Du votest pro Runde; Output = strukturierte Pro/Contra-Liste.
+- **rubberduck** — Sprich-laut-denken: Mic an → STT → AI strukturiert "Du hast erst X gesagt, dann Y, Kerngedanke = Z". Verknüpft mit `notes`/`decisions`.
+- **dialogues** — Schwierige Gespräche üben (Gehaltsverhandlung, Trennung, Eltern, Bewerbungsinterview). Persona spielt Gegenüber + Feedback zu Tonfall/Struktur.
+- **scribe** — Live-Notetaker für In-Person-Meetings: Mic offen, transcribed + strukturiert in Echtzeit (Action-Items → `todo`, Zitate → `quotes`).
+- **pitch** — 30-Sek-Pitch aufnehmen, AI bewertet Hook/Klarheit/Lieferung. Versionsverlauf.
+- **clones** *(ZK)* — Persona, trainiert auf Gespräche/Texte einer realen Person (du selbst, Freund, verstorbener Großvater). Chat & Briefe — heikel, klar als Roleplay markiert.
+- **ai-pets** — Persistenter AI-Charakter (Tamagotchi-Logik): füttern, sprechen, wächst über Wochen. Kinder-Modul-Kandidat.
+- **prompts** — Prompt-Bibliothek mit Variablen, Versionen, eingefangenen Outputs. Mana-Twist: gespeicherte Prompts werden automatisch zu MCP-Tools.
+
+### Zeit, Erinnerung, Identität
+
+- **eras** — Selbst-betitelte Lebensabschnitte ("Burnout-Jahr 2024", "Berlin-Phase"). Aggregiert *alles* aus dem Zeitraum (Fotos, Journal, Mood, Todos) zu einer Wikipedia-artigen Seite — AI-generiert, kuratierbar.
+- **threads** — Mehrjährige Themen-Threads (Beziehung zur Schwester, dieses Side-Projekt, diese Angst). Tagged Einträge, AI fasst Bogen zusammen.
+- **lasts** — Gegenstück zu `firsts`: das *letzte* Mal, dass du X getan/gesehen/gefühlt hast. Oft erst rückwirkend erkennbar — push notification "vor X Jahren das letzte Mal …".
+- **legacy** *(ZK)* — Was du hinterlassen willst: digitales Testament, Briefe an Hinterbliebene, Memorial-Botschaften (zeitgesperrt freischaltbar — wie `letters` aber outward).
+- **sealed** — Vorhersagen verschlossen ablegen, automatisches Reveal am Datum X. Kalibrierungs-Tracking (Brier-Score) — persönliche Tetlock-Statistik.
+- **regret / forgive** *(ZK)* — Bedauern / Vergeben; CBT-light Workflow: erfassen → reframen → loslassen-markieren.
+
+### Sensorik & Welt
+
+- **sounds** — Field-Recordings-Bibliothek (Regen in Tokyo, Vogelchor auf Wanderung). Geo+Zeit-getaggt; Spotlight für `flashbacks`.
+- **scents** — Parfums, Kerzen, Räucherstäbchen — was du wann getragen hast. "Geruchsgedächtnis"-Notizen.
+- **tastes** — Verkostungs-Notizen (Wein, Whisky, Spezialitätenkaffee, Tee). Vivino-artig aber generisch und verschlüsselt.
+- **palette** — Farben, die du an einem Tag siehst — Foto, AI extrahiert Hauptfarben → Jahres-Farbgeschichte.
+- **light** — Tageslicht-Exposition (manuell oder Wetter-API). Korreliert mit `moodlit`/`sleep`.
+
+### Bewegung & Orte (jenseits von `places`)
+
+- **routes** — Lauf/Rad/Wander-Routen, die du gemacht hast. Map-View, Wiederholungs-Counter.
+- **hikes** — Wander-Log: Distanz, Höhenmeter, Gipfel, Foto-Sammlung. Reused `places` + `photos`.
+- **borders** — Länder/Grenzen, die du überschritten hast. Visa, Stempel-Foto, Erinnerungen pro Übergang.
+- **landmarks** — *Persönliche* Landmarks: wo du verlobt warst, erstes Date-Café, wo du den Anruf bekamst. Geo-pinned, oft (ZK).
+
+### Selbsterkenntnis & Muster
+
+- **triggers** — Was dich getriggert hat (Wut/Angst/Scham). AI-Mustererkennung über Wochen.
+- **rules** — Persönliche Operating-Rules ("Kein Handy vor Kaffee", "Sonntags kein Slack"). Adhärenz-Tracking, schlägt Edits vor wenn dauerhaft gebrochen.
+- **anti-todos** — Was du *bewusst nicht* tust und warum. Mindestens so wertvoll wie eine Todo-Liste.
+- **delegations** — Was du an wen delegiert hast — privat *und* beruflich. Auto-Follow-up.
+- **ifsthen** — Implementation Intentions ("Wenn Mittwoch 20h, dann Klettern"). Spätere Auswertung: welche Pläne hielten?
+- **superpowers** — Konkrete Stärken mit echten Beispielen. AI hilft Muster zu finden ("du wirst oft als 'klar' beschrieben").
+- **cravings** — Triebmomente erfassen (Junkfood, Scrollen, Rauchen). Pattern + Redirect-Vorschlag.
+
+### Geld erweitert
+
+- **donations** — Spenden-Log mit Steuerexport.
+- **patrons** — Creator, die du unterstützt (Patreon, Substack, GitHub-Sponsors). Budget-Sicht, Renewal-Daten.
+- **negotiations** — Was du verhandelt hast: Ask vs. Result. Übungs-Datenbank für nächste Runde.
+- **freebies** — Was du geschenkt/gratis bekommen hast. Erstaunlich motivierend; gut für Steuer wenn beruflich.
+
+### Kreativ & Werk
+
+- **drafts** — Universaler Entwurfs-Inbox (Texte, Mails, Posts, Tweets). Kein Modul-Zwang; AI schlägt Ziel-Modul vor.
+- **publishings** — Alles, was du veröffentlicht hast (Blog, Tweet, Vortrag, Podcast). Wo, wann, Reaktionen — eine Karriere-Timeline.
+- **shows** — Konzerte, Ausstellungen, Filme, Theater die du besucht hast. Tickets-Archiv (Foto), Begleitung, Gedanken danach.
+- **tickets** — Stub-Sammlung: Konzert/Sport/Kino. Foto + OCR + Erinnerung. Stark als Embed (Visibility).
+- **portfolios** — Public-facing kuratierte Werk-Sammlung (zieht aus `picture`, `writing`, `comic`, `presi`). Visibility-System pur.
+
+### Affirmation & Mentalmodelle
+
+- **mantras** — Persönliche Mantras + Frequenz-Tracking ("dieses Mantra benutze ich tatsächlich").
+- **lessons** — Lebenslektionen. Tagged nach Domäne, jährliche Review.
+- **wins** — Mikro-Wins täglich (kleiner als `goals`, kein Streak-Druck).
+- **fears** — Furcht-Inventar mit Status (aktiv/abgeschlossen/transformiert).
+- **losses** *(ZK)* — Trauer-Journal pro Person/Sache. Anniversary-Reminder, AI-Begleitung optional.
+
+### Bürgerlich / Welt
+
+- **votes** — Wahl-Historie + Wahlzettel-Recherche-Notizen + lokale Repräsentanten.
+- **causes** — Themen, die dir wichtig sind. Aktionen (Demo, Spende, Brief), Updates pro Cause.
+- **rights** — Mieter-/Arbeitsrechte als Situations-Checkliste ("Vermieter sagt X — was sind meine Rechte?"). MCP-Tool wäre sinnvoll.
+
+### Häuslich (Detail)
+
+- **moves** — Alle Umzüge: was verschwand, was du wegspendetest, was blieb. Ergänzt `inventory`.
+- **roomies** — WG-Mitbewohner-Log; Konflikte/Vereinbarungen.
+- **handymen** — Handwerker, Ärzte, Service-Provider mit echten Bewertungen. Privater "lokaler Yelp".
+- **insurance** — Policies, Schäden, Beitragshistorie. Synergie mit `documents`.
+
+### Sozial fein granular
+
+- **handshakes** — Bemerkenswerte Menschen, die du getroffen hast. Eine-Zeile-Erinnerung pro Person.
+- **mentors / mentees** — Wer dir half / wem du halfst. Konkrete Momente.
+- **rolemodels** — Public Figures, von denen du lernst. Was genau, und warum.
+- **names** — Wie spricht/schreibt man Namen? Eselsbrücken pro Person.
+
+### Verspielt
+
+- **bets** — Wetten mit Freunden. Multi-Member Space als Wettregister; wer hatte recht?
+- **wagers** — Selbst-Wetten an Goals geknüpft ("Wenn ich Marathon nicht laufe → 200€ Spende").
+- **prophecies** — Vorhersagen, die du *öffentlich* gemacht hast (Tweets, Diskussionen). Realitäts-Check Quartal.
+- **fortunes** — Glückskekse, Horoskope, Tarot. Realitäts-Abgleich — Pseudo-Weisheit-Inventur.
+
+### Notfall & Sorge
+
+- **emergency** *(ZK)* — Notfall-Kontakte, Allergien, Blutgruppe, Ärzte. Schnellzugriff am Sperrbildschirm wäre Killer.
+- **caregiving** *(ZK)* — Pflege für Eltern: Medikamente, Termine, Episoden. Mehrere Familienmitglieder via Spaces.
+- **proxy** *(ZK)* — Vorsorgevollmacht, Patientenverfügung, digitale Erbschaft.
+
+### Pro-Tooling
+
+- **tools** — Werkzeuge-Inventar (Holz, Code, Küche). Was hast du womit gebaut?
+- **rigs** — Compute-Setups über Zeit (welche Maschine, welche dotfiles, was hast du damit gebaut). Nostalgie + Migration.
+- **commands** — CLI-Commands die du *wirklich* benutzt. Aliase mit Kontext.
+
+### Phänomenologisch (mutig)
+
+- **synchronicities** — Zufälle/Synchronizitäten erfassen. AI sucht Muster — wahrscheinlich keine, aber spannend.
+- **dejavu** — Déjà-vu-Episoden mit Auslöser. Häufungs-Heatmap.
+- **omens** — Was hast du als Zeichen genommen? Was passierte tatsächlich? Aberglaubens-Auditor.
+
+### Top-7 zum Bauen (höchster Hebel auf bestehende Architektur)
+
+1. **scribe** — riesiger Wert, perfekter Fit für mana-stt + Personas
+2. **eras** — emotional starke Killer-Feature, zieht aus *allen* Modulen
+3. **lasts** — billig zu bauen, einzigartiges Gefühl (existiert nirgends)
+4. **rubberduck** — STT + AI Reflection, organisch zu `decisions`/`notes`
+5. **emergency** *(ZK)* — echtes Lebens-Utility, schwacher Markt
+6. **sealed** — eingebaute Kalibrierung, gamified Selbsterkenntnis
+7. **portfolios** — testet Visibility-System unter Last, 0 neue Datentabellen
+
+---
+
 ## Current modules (for reference)
 
 **Productivity:** todo, calendar, contacts, notes, habits, times, timeblocks, events

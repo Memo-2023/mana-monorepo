@@ -1,0 +1,26 @@
+<script lang="ts">
+	import { VIBE_LABELS, VIBE_COLORS, type AugurVibe } from '../types';
+
+	let { vibe, size = 'sm' }: { vibe: AugurVibe; size?: 'sm' | 'md' } = $props();
+</script>
+
+<span class="badge" class:md={size === 'md'} style:--badge-color={VIBE_COLORS[vibe]}>
+	{VIBE_LABELS[vibe].de}
+</span>
+
+<style>
+	.badge {
+		display: inline-block;
+		font-size: 0.72rem;
+		padding: 0.12rem 0.55rem;
+		border-radius: 999px;
+		color: var(--badge-color);
+		background: color-mix(in srgb, var(--badge-color) 15%, transparent);
+		font-weight: 500;
+		white-space: nowrap;
+	}
+	.badge.md {
+		font-size: 0.85rem;
+		padding: 0.25rem 0.75rem;
+	}
+</style>
