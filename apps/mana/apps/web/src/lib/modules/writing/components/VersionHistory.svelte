@@ -3,23 +3,34 @@
   "Wiederherstellen" flips the draft's `currentVersionId` back via the
   store. Versions are immutable snapshots so Restore is a pointer change,
   not a destructive revert.
+
+  AI-generated versions also show their generation cost (token usage +
+  duration) when the linked Generation row is available, so the user can
+  see what each draft cost without digging into Workbench audit views.
 -->
 <script lang="ts">
 	import { draftsStore } from '../stores/drafts.svelte';
-	import type { DraftVersion } from '../types';
+	import type { DraftVersion, Generation } from '../types';
+	import { formatDate as formatLocaleDate } from '$lib/i18n/format';
 
 	let {
 		versions,
+		generations = [],
 		currentVersionId,
 		draftId,
 	}: {
 		versions: DraftVersion[];
+		/** Generations for this draft. Used to show token-usage / duration
+		 *  next to AI-generated versions; harmless to omit. */
+		generations?: Generation[];
 		currentVersionId: string | null;
 		draftId: string;
 	} = $props();
 
 	// Newest on top.
 	const sorted = $derived([...versions].sort((a, b) => b.versionNumber - a.versionNumber));
+
+	const generationById = $derived(new Map(generations.map((g) => [g.id, g])));
 
 	async function restore(versionId: string) {
 		await draftsStore.restoreVersion(draftId, versionId);
@@ -28,18 +39,34 @@
 	function formatDate(iso: string): string {
 		const d = new Date(iso);
 		if (Number.isNaN(d.getTime())) return '';
-		return d.toLocaleString('de-DE', {
+		return formatLocaleDate(d, {
 			day: '2-digit',
 			month: '2-digit',
 			hour: '2-digit',
 			minute: '2-digit',
 		});
 	}
+
+	function genCostLine(version: DraftVersion): string | null {
+		if (!version.generationId) return null;
+		const gen = generationById.get(version.generationId);
+		if (!gen) return null;
+		const parts: string[] = [];
+		if (gen.tokenUsage) {
+			parts.push(`${gen.tokenUsage.input} → ${gen.tokenUsage.output} Tokens`);
+		}
+		if (gen.durationMs) {
+			parts.push(`${(gen.durationMs / 1000).toFixed(1)}s`);
+		}
+		if (gen.model) parts.push(gen.model);
+		return parts.length > 0 ? parts.join(' · ') : null;
+	}
 </script>
 
 <ul class="history">
 	{#each sorted as version (version.id)}
 		{@const isCurrent = version.id === currentVersionId}
+		{@const costLine = genCostLine(version)}
 		<li class="version" class:current={isCurrent}>
 			<div class="meta">
 				<strong>v{version.versionNumber}</strong>
@@ -54,6 +81,9 @@
 				<span>{version.wordCount} Wörter</span>
 				<span class="date">{formatDate(version.createdAt)}</span>
 			</div>
+			{#if costLine}
+				<div class="cost" title="Verbrauch + Modell der zugehörigen Generation">{costLine}</div>
+			{/if}
 			{#if version.summary}
 				<p class="summary">{version.summary}</p>
 			{/if}
@@ -113,6 +143,12 @@
 		justify-content: space-between;
 		font-size: 0.75rem;
 		color: var(--color-text-muted, rgba(0, 0, 0, 0.55));
+	}
+	.cost {
+		font-size: 0.7rem;
+		font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+		color: var(--color-text-muted, rgba(0, 0, 0, 0.55));
+		opacity: 0.8;
 	}
 	.summary {
 		margin: 0;

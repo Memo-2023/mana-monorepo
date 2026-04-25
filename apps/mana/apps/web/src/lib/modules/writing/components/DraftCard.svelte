@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { formatDate } from '$lib/i18n/format';
+	import { dragSource } from '@mana/shared-ui/dnd';
 	import StatusBadge from './StatusBadge.svelte';
 	import { KIND_LABELS } from '../constants';
 	import type { Draft, DraftVersion } from '../types';
@@ -41,7 +42,22 @@
 	}
 </script>
 
-<button type="button" class="card" onclick={open}>
+<button
+	type="button"
+	class="card"
+	onclick={open}
+	use:dragSource={{
+		type: 'draft',
+		data: () => ({
+			id: draft.id,
+			title: draft.title || draft.briefing.topic || 'Unbenannt',
+			kind: draft.kind,
+			content: currentVersion?.content ?? '',
+			wordCount: currentVersion?.wordCount ?? 0,
+			topic: draft.briefing.topic,
+		}),
+	}}
+>
 	<header>
 		<span class="kind" title={kind.de}>
 			<span aria-hidden="true">{kind.emoji}</span>

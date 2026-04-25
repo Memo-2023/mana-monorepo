@@ -510,6 +510,7 @@
 				<h2>Versionen</h2>
 				<VersionHistory
 					versions={versions ?? []}
+					generations={generations ?? []}
 					currentVersionId={draft.currentVersionId}
 					draftId={draft.id}
 				/>

@@ -1354,6 +1354,16 @@ registerApp({
 				),
 		},
 	],
+	collection: 'writingDrafts',
+	paramKey: 'draftId',
+	dragType: 'draft',
+	getDisplayData: (item) => ({
+		title: (item.title as string) || (item.topic as string) || 'Draft',
+		subtitle:
+			typeof item.wordCount === 'number' && item.wordCount > 0
+				? `${item.wordCount} Wörter`
+				: undefined,
+	}),
 });
 
 registerApp({
