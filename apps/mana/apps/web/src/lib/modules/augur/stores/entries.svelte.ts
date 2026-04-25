@@ -1,7 +1,15 @@
 import { augurEntriesTable } from '../collections';
 import { toAugurEntry } from '../queries';
 import { encryptRecord } from '$lib/data/crypto';
-import { generateUnlistedToken, type VisibilityLevel } from '@mana/shared-privacy';
+import {
+	publishUnlistedSnapshot,
+	revokeUnlistedSnapshot,
+	type VisibilityLevel,
+} from '@mana/shared-privacy';
+import { buildUnlistedBlob } from '$lib/data/unlisted/resolvers';
+import { authStore } from '$lib/stores/auth.svelte';
+import { getManaApiUrl } from '$lib/api/config';
+import { getActiveSpace } from '$lib/data/scope';
 import { getEffectiveUserId } from '$lib/data/current-user';
 import type {
 	AugurEntry,
@@ -112,6 +120,25 @@ export const augurStore = {
 	},
 
 	async deleteEntry(id: string) {
+		const existing = await augurEntriesTable.get(id);
+		// Revoke any active share-link before tombstoning so a recipient
+		// reloading the link gets 410 Gone instead of stale data.
+		if (existing?.visibility === 'unlisted' && existing.unlistedToken) {
+			const jwt = await authStore.getValidToken();
+			if (jwt) {
+				try {
+					await revokeUnlistedSnapshot({
+						apiUrl: getManaApiUrl(),
+						jwt,
+						collection: 'augurEntries',
+						recordId: id,
+					});
+				} catch (e) {
+					console.error('[augur] revoke on delete failed', e);
+				}
+			}
+		}
+
 		await augurEntriesTable.update(id, {
 			deletedAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString(),
@@ -119,33 +146,54 @@ export const augurStore = {
 	},
 
 	/**
-	 * Flip the visibility level. M6 wires the local field + token-allocation;
-	 * the unlisted-snapshot publish/revoke pipeline (server-side blob store)
-	 * is a follow-up — until then, 'unlisted' just allocates a local token so
-	 * the share URL is stable when we wire the backend.
+	 * Flip the visibility level. Coordinates with the server-side
+	 * unlisted-snapshots table — same pattern as library/calendar.
+	 * Server is authoritative for the token.
 	 */
 	async setVisibility(id: string, next: VisibilityLevel) {
 		const existing = await augurEntriesTable.get(id);
-		if (!existing) return;
+		if (!existing) throw new Error(`Augur entry ${id} not found`);
+		const before: VisibilityLevel = existing.visibility ?? 'private';
+		if (before === next) return;
 
-		const userId = getEffectiveUserId();
 		const now = new Date().toISOString();
-		const diff: Partial<LocalAugurEntry> = {
+		const patch: Partial<LocalAugurEntry> = {
 			visibility: next,
 			visibilityChangedAt: now,
-			visibilityChangedBy: userId ?? undefined,
+			visibilityChangedBy: getEffectiveUserId() ?? undefined,
 			updatedAt: now,
 		};
 
 		if (next === 'unlisted') {
-			if (!existing.unlistedToken) diff.unlistedToken = generateUnlistedToken();
-		} else {
-			if (existing.unlistedToken) {
-				diff.unlistedToken = undefined;
-				diff.unlistedExpiresAt = null;
+			const blob = await buildUnlistedBlob('augurEntries', id);
+			const jwt = await authStore.getValidToken();
+			if (!jwt) throw new Error('Nicht eingeloggt');
+			const spaceId =
+				(existing as unknown as { spaceId?: string }).spaceId ?? getActiveSpace()?.id ?? '';
+			const { token } = await publishUnlistedSnapshot({
+				apiUrl: getManaApiUrl(),
+				jwt,
+				collection: 'augurEntries',
+				recordId: id,
+				spaceId,
+				blob,
+			});
+			patch.unlistedToken = token;
+			patch.unlistedExpiresAt = null;
+		} else if (before === 'unlisted') {
+			const jwt = await authStore.getValidToken();
+			if (jwt) {
+				await revokeUnlistedSnapshot({
+					apiUrl: getManaApiUrl(),
+					jwt,
+					collection: 'augurEntries',
+					recordId: id,
+				});
 			}
+			patch.unlistedToken = undefined;
+			patch.unlistedExpiresAt = null;
 		}
 
-		await augurEntriesTable.update(id, diff);
+		await augurEntriesTable.update(id, patch);
 	},
 };

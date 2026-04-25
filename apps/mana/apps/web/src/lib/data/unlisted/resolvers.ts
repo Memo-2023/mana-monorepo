@@ -21,6 +21,7 @@ import type { LocalEvent } from '$lib/modules/calendar/types';
 import type { LocalLibraryEntry } from '$lib/modules/library/types';
 import type { LocalPlace } from '$lib/modules/places/types';
 import type { LocalTimeBlock } from '$lib/data/time-blocks/types';
+import type { LocalAugurEntry } from '$lib/modules/augur/types';
 
 export class UnsupportedCollectionError extends Error {
 	constructor(collection: string) {
@@ -51,6 +52,8 @@ export async function buildUnlistedBlob(
 			return buildLibraryEntryBlob(recordId);
 		case 'places':
 			return buildPlaceBlob(recordId);
+		case 'augurEntries':
+			return buildAugurEntryBlob(recordId);
 		default:
 			throw new UnsupportedCollectionError(collection);
 	}
@@ -175,5 +178,47 @@ async function buildPlaceBlob(recordId: string): Promise<Record<string, unknown>
 		name: decrypted.name,
 		address: decrypted.address ?? null,
 		category: decrypted.category ?? 'other',
+	};
+}
+
+/**
+ * Augur entry → snapshot blob.
+ *
+ * Whitelist: source, claim, kind, vibe, encounteredAt, outcome,
+ * outcomeNote (only when resolved). Defensive about what counts as
+ * "shareable" for a divinatory record — this is sensitive territory.
+ *
+ * EXPLICITLY NOT inlined:
+ *   - feltMeaning            (the user's private interpretation —
+ *                              "soll den Job nicht annehmen" — never share)
+ *   - expectedOutcome        (private prediction)
+ *   - probability            (the user's forecaster number)
+ *   - livingOracleSnapshot   (data-derived hint, not narrative)
+ *   - tags                   (organisational, can leak topology)
+ *   - relatedDreamId / Decision (FK references would dox other modules)
+ *   - sourceCategory         (small-cardinality leak of method)
+ */
+async function buildAugurEntryBlob(recordId: string): Promise<Record<string, unknown>> {
+	const raw = await db.table<LocalAugurEntry>('augurEntries').get(recordId);
+	if (!raw || raw.deletedAt) {
+		throw new RecordNotFoundError('augurEntries', recordId);
+	}
+
+	const decrypted = (await decryptRecord('augurEntries', { ...raw })) as LocalAugurEntry;
+
+	const isResolved = decrypted.outcome && decrypted.outcome !== 'open';
+
+	return {
+		source: decrypted.source,
+		claim: decrypted.claim,
+		kind: decrypted.kind,
+		vibe: decrypted.vibe,
+		encounteredAt: decrypted.encounteredAt,
+		outcome: decrypted.outcome ?? 'open',
+		// Only inline the post-mortem note when the user actually resolved
+		// the sign — open entries' outcomeNote is always null anyway, but
+		// being explicit keeps the contract clear.
+		outcomeNote: isResolved ? (decrypted.outcomeNote ?? null) : null,
+		resolvedAt: isResolved ? (decrypted.resolvedAt ?? null) : null,
 	};
 }
