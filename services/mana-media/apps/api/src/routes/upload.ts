@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import type { UploadService, MediaRecord } from '../services/upload';
+import { sniffImageMimeType } from '../services/sniff';
 
 function toResponse(record: MediaRecord) {
 	const baseUrl = process.env.PUBLIC_URL || 'http://localhost:3015/api/v1';
@@ -38,18 +39,59 @@ export function uploadRoutes(uploadService: UploadService) {
 			return c.json({ error: 'File too large (max 100MB)' }, 400);
 		}
 
-		const buffer = Buffer.from(await file.arrayBuffer());
-		const record = await uploadService.upload(
-			buffer,
-			file.name,
-			file.type || 'application/octet-stream',
-			file.size,
-			{
-				app: body['app'] as string | undefined,
-				userId: body['userId'] as string | undefined,
-				skipProcessing: body['skipProcessing'] === 'true',
+		let buffer = Buffer.from(await file.arrayBuffer());
+
+		// Magic-byte sniff first; trust the bytes over the browser's
+		// `file.type`. Chrome on macOS doesn't recognise HEIC and sends
+		// an empty type, which would otherwise land as
+		// `application/octet-stream` and break every downstream
+		// `mimeType.startsWith('image/')` check (transform endpoint,
+		// process pipeline, etc). A successful sniff returns an
+		// authoritative image MIME; anything we don't recognise falls
+		// back to whatever the browser claimed.
+		const sniffed = sniffImageMimeType(buffer);
+		let mimeType = sniffed ?? file.type ?? 'application/octet-stream';
+		let storedName = file.name;
+		let storedSize = file.size;
+
+		// HEIC/HEIF transcode. The sharp version we ship has the heif
+		// container format but no HEVC decoder plugin (libde265 is not
+		// bundled in sharp's prebuilt binaries due to patent licensing),
+		// so iPhone HEIC uploads would fail every downstream sharp
+		// transform with `No decoding plugin installed for this
+		// compression format`. Convert to JPEG once at upload time via
+		// `heic-convert` (pure-JS WASM, no system deps); the server then
+		// stores standard JPEG and every later step is mime-agnostic.
+		if (mimeType === 'image/heic' || mimeType === 'image/heif') {
+			try {
+				const heicConvert = (await import('heic-convert')).default;
+				const jpegArrayBuffer = await heicConvert({
+					// `Buffer` extends `Uint8Array` and is what heic-convert
+					// actually accepts at runtime. `@types/heic-convert`
+					// over-tightens the param to `ArrayBufferLike` (which
+					// in TS ≥ 5.7 includes the `grow` property only on
+					// `SharedArrayBuffer`), so a normal Buffer doesn't
+					// match the declared type. Cast through `unknown` to
+					// avoid lying about a wider intersection.
+					buffer: buffer as unknown as ArrayBufferLike,
+					format: 'JPEG',
+					quality: 0.9,
+				});
+				buffer = Buffer.from(jpegArrayBuffer);
+				mimeType = 'image/jpeg';
+				storedName = file.name.replace(/\.(heic|heif)$/i, '.jpg');
+				storedSize = buffer.length;
+			} catch (err) {
+				console.error('[upload] HEIC convert failed', err);
+				return c.json({ error: 'HEIC conversion failed', detail: (err as Error).message }, 500);
 			}
-		);
+		}
+
+		const record = await uploadService.upload(buffer, storedName, mimeType, storedSize, {
+			app: body['app'] as string | undefined,
+			userId: body['userId'] as string | undefined,
+			skipProcessing: body['skipProcessing'] === 'true',
+		});
 
 		return c.json(toResponse(record), 201);
 	});

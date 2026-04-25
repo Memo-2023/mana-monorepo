@@ -3,6 +3,7 @@ import { stream } from 'hono/streaming';
 import type { UploadService } from '../services/upload';
 import type { ProcessService } from '../services/process';
 import type { StorageService } from '../services/storage';
+import { sniffImageMimeType } from '../services/sniff';
 
 type Variant = 'thumb' | 'medium' | 'large';
 
@@ -46,11 +47,19 @@ export function deliveryRoutes(
 		const record = await uploadService.get(c.req.param('id'));
 		if (!record) return c.json({ error: 'Media not found' }, 404);
 
-		if (!record.mimeType.startsWith('image/')) {
+		const originalBuffer = await storage.download(record.keys.original);
+
+		// Trust the stored mime first; fall back to magic-byte sniffing
+		// for legacy rows uploaded before the upload sniffer landed
+		// (HEIC from Chrome, etc.) where the row says
+		// `application/octet-stream` but the bytes are actually an image.
+		// Refuse only when neither header nor bytes look like an image.
+		const looksLikeImage =
+			record.mimeType.startsWith('image/') || sniffImageMimeType(originalBuffer) !== null;
+		if (!looksLikeImage) {
 			return c.json({ error: 'Transform only supported for images' }, 400);
 		}
 
-		const originalBuffer = await storage.download(record.keys.original);
 		const format = (c.req.query('format') as 'webp' | 'jpeg' | 'png' | 'avif') || 'webp';
 
 		const transformedBuffer = await processService.transformImage(originalBuffer, {
