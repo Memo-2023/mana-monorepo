@@ -34,6 +34,9 @@ import type { LocalComicStory } from '$lib/modules/comic/types';
 import type { LocalHabit, LocalHabitLog } from '$lib/modules/habits/types';
 import type { LocalQuiz } from '$lib/modules/quiz/types';
 import type { LocalSocialEvent } from '$lib/modules/events/types';
+import type { LocalMemo } from '$lib/modules/memoro/types';
+import type { LocalDeck as LocalCardDeck } from '$lib/modules/cards/types';
+import type { LocalDeck as LocalPresiDeck } from '$lib/modules/presi/types';
 import type { LocalTimeBlock } from '$lib/data/time-blocks/types';
 
 export interface ResolvedEmbed {
@@ -83,6 +86,15 @@ export async function resolveEmbed(props: ModuleEmbedProps): Promise<ResolvedEmb
 				break;
 			case 'events.socialEvents':
 				items = await resolveSocialEvents(props);
+				break;
+			case 'memoro.memos':
+				items = await resolveMemos(props);
+				break;
+			case 'cards.decks':
+				items = await resolveCardDecks(props);
+				break;
+			case 'presi.decks':
+				items = await resolvePresiDecks(props);
 				break;
 			default:
 				return {
@@ -772,6 +784,131 @@ async function resolveSocialEvents(props: ModuleEmbedProps): Promise<EmbedItem[]
 			title: e.title,
 			subtitle: parts.length > 0 ? parts.join(' · ') : undefined,
 			imageUrl: e.coverImage ?? undefined,
+		};
+	});
+}
+
+/**
+ * Memoro: voice-memo teaser. Returns memos flipped to 'public' with
+ * the first sentence of the intro as subtitle.
+ *
+ * Whitelist: title + intro (first 140 chars) + audio duration. The
+ * full transcript, source-audio paths, and per-utterance speaker
+ * data all stay private — those are the user's words verbatim and
+ * have a much stronger privacy weight than a curated headline.
+ */
+async function resolveMemos(_props: ModuleEmbedProps): Promise<EmbedItem[]> {
+	let memos = await db.table<LocalMemo>('memos').toArray();
+	memos = memos.filter(
+		(m) =>
+			!m.deletedAt &&
+			!m.isArchived &&
+			canEmbedOnWebsite(m.visibility ?? (m.isPublic === true ? 'public' : 'private'))
+	);
+
+	if (memos.length === 0) return [];
+
+	const decrypted = (await decryptRecords('memos', memos)) as LocalMemo[];
+
+	// Pinned first, then newest.
+	decrypted.sort((a, b) => {
+		const pinA = a.isPinned ? 0 : 1;
+		const pinB = b.isPinned ? 0 : 1;
+		if (pinA !== pinB) return pinA - pinB;
+		return (b.updatedAt ?? '').localeCompare(a.updatedAt ?? '');
+	});
+
+	function durationLabel(ms: number | null): string | null {
+		if (!ms || ms <= 0) return null;
+		const seconds = Math.round(ms / 1000);
+		if (seconds < 60) return `${seconds}s`;
+		const m = Math.floor(seconds / 60);
+		const s = seconds % 60;
+		return s === 0 ? `${m} Min` : `${m}:${String(s).padStart(2, '0')} Min`;
+	}
+
+	return decrypted.map((m) => {
+		const intro = (m.intro ?? '').trim().slice(0, 140);
+		const dur = durationLabel(m.audioDurationMs);
+		const subtitleParts = [intro || null, dur].filter((x): x is string => Boolean(x));
+		return {
+			title: (m.title ?? '').trim() || 'Memo',
+			subtitle: subtitleParts.length > 0 ? subtitleParts.join(' · ') : undefined,
+		};
+	});
+}
+
+/**
+ * Card-decks: shareable-flashcard-collection teaser. Returns decks
+ * flipped to 'public' with their card count as subtitle.
+ *
+ * Whitelist: title + "N Karten". Card fronts/backs, difficulty
+ * scores, and review history all stay private — the deck is a
+ * unit; its cards belong to the play-experience (future
+ * unlisted-share flow), not the public teaser.
+ */
+async function resolveCardDecks(_props: ModuleEmbedProps): Promise<EmbedItem[]> {
+	let decks = await db.table<LocalCardDeck>('cardDecks').toArray();
+	decks = decks.filter(
+		(d) =>
+			!d.deletedAt &&
+			canEmbedOnWebsite(d.visibility ?? (d.isPublic === true ? 'public' : 'private'))
+	);
+
+	if (decks.length === 0) return [];
+
+	const decrypted = (await decryptRecords('cardDecks', decks)) as LocalCardDeck[];
+
+	// Newest first.
+	decrypted.sort((a, b) => (b.updatedAt ?? '').localeCompare(a.updatedAt ?? ''));
+
+	return decrypted.map((d) => {
+		const count = d.cardCount ?? 0;
+		return {
+			title: d.name,
+			subtitle: `${count} ${count === 1 ? 'Karte' : 'Karten'}`,
+		};
+	});
+}
+
+/**
+ * Presi-decks: "talks I've given" teaser. Returns decks flipped to
+ * 'public' with their slide count as subtitle.
+ *
+ * Whitelist: title + "N Folien". Slide content (titles, body text,
+ * images, bullet points) all stay private — the public deck is a
+ * pointer the user can link from elsewhere; the actual slides
+ * belong to the talk experience.
+ */
+async function resolvePresiDecks(_props: ModuleEmbedProps): Promise<EmbedItem[]> {
+	let decks = await db.table<LocalPresiDeck>('presiDecks').toArray();
+	decks = decks.filter(
+		(d) =>
+			!d.deletedAt &&
+			canEmbedOnWebsite(d.visibility ?? (d.isPublic === true ? 'public' : 'private'))
+	);
+
+	if (decks.length === 0) return [];
+
+	const decrypted = (await decryptRecords('presiDecks', decks)) as LocalPresiDeck[];
+
+	// Newest first.
+	decrypted.sort((a, b) => (b.updatedAt ?? '').localeCompare(a.updatedAt ?? ''));
+
+	const deckIds = decrypted.map((d) => d.id);
+	const slides =
+		deckIds.length > 0 ? await db.table('slides').where('deckId').anyOf(deckIds).toArray() : [];
+	const slideCountByDeck = new Map<string, number>();
+	for (const s of slides as Array<{ deckId: string; deletedAt?: string }>) {
+		if (s.deletedAt) continue;
+		slideCountByDeck.set(s.deckId, (slideCountByDeck.get(s.deckId) ?? 0) + 1);
+	}
+
+	return decrypted.map((d) => {
+		const count = slideCountByDeck.get(d.id) ?? 0;
+		return {
+			title: d.title,
+			subtitle: `${count} ${count === 1 ? 'Folie' : 'Folien'}`,
 		};
 	});
 }
