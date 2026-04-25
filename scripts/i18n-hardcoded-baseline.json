@@ -285,7 +285,7 @@
 	"apps/mana/apps/web/src/lib/modules/writing/components/StyleForm.svelte": 2,
 	"apps/mana/apps/web/src/lib/modules/writing/components/VersionEditor.svelte": 1,
 	"apps/mana/apps/web/src/lib/modules/writing/components/VersionHistory.svelte": 1,
-	"apps/mana/apps/web/src/lib/modules/writing/views/DetailView.svelte": 6,
+	"apps/mana/apps/web/src/lib/modules/writing/views/DetailView.svelte": 7,
 	"apps/mana/apps/web/src/lib/modules/writing/views/ListView.svelte": 3,
 	"apps/mana/apps/web/src/lib/modules/writing/views/StylesView.svelte": 4,
 	"apps/mana/apps/web/src/routes/(app)/+page.svelte": 1,

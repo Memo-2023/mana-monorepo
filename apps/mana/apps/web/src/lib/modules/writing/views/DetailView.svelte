@@ -8,6 +8,7 @@
 -->
 <script lang="ts">
 	import { formatDateTime } from '$lib/i18n/format';
+	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { VisibilityPicker, type VisibilityLevel } from '@mana/shared-privacy';
 	import BriefingForm from '../components/BriefingForm.svelte';
@@ -250,6 +251,38 @@
 		refineUndo = null;
 	}
 
+	// ─── Keyboard shortcuts ────────────────────────────────
+	// ⌘G / Ctrl+G              → Generate (or "neu generieren")
+	// ⌘⇧S / Ctrl+Shift+S       → Save checkpoint
+	// ⌘Z / Ctrl+Z              → Undo last refinement (only when refineUndo is set)
+	// We listen at document level; modifier-based combos are safe even
+	// when the textarea has focus. ⌘Z without a refineUndo target falls
+	// through to the textarea's native undo, which the user expects.
+	onMount(() => {
+		function onKey(ev: KeyboardEvent) {
+			const mod = ev.metaKey || ev.ctrlKey;
+			if (!mod) return;
+			const key = ev.key.toLowerCase();
+			if (key === 'g' && !ev.shiftKey && !ev.altKey) {
+				ev.preventDefault();
+				void generate();
+				return;
+			}
+			if (key === 's' && ev.shiftKey && !ev.altKey) {
+				ev.preventDefault();
+				void saveCheckpoint();
+				return;
+			}
+			if (key === 'z' && !ev.shiftKey && !ev.altKey && refineUndo) {
+				ev.preventDefault();
+				void undoLastRefinement();
+				return;
+			}
+		}
+		document.addEventListener('keydown', onKey);
+		return () => document.removeEventListener('keydown', onKey);
+	});
+
 	const hasDraftContent = $derived((currentVersion?.content ?? '').trim().length > 0);
 
 	const kind = $derived(draft ? KIND_LABELS[draft.kind] : null);
@@ -281,6 +314,19 @@
 		<a href="/writing">Zurück zur Übersicht</a>
 	</div>
 {:else}
+	<!--
+	  Print target — only visible when the user triggers Drucken/PDF
+	  via the ExportMenu (which calls window.print()). The screen layout
+	  is suppressed by @media print so the printed page is just title +
+	  body, without the workbench chrome.
+	-->
+	<article class="print-target" aria-hidden="true">
+		<h1 class="print-title">{draft.title || draft.briefing.topic || 'Unbenannt'}</h1>
+		{#if currentVersion}
+			<div class="print-body">{currentVersion.content}</div>
+		{/if}
+	</article>
+
 	<div class="shell">
 		<header class="head">
 			<div class="title-row">
@@ -391,8 +437,8 @@
 								onclick={generate}
 								disabled={generating}
 								title={hasDraftContent
-									? 'Kompletten Text neu generieren (überschreibt nicht — neue Version)'
-									: 'Ersten Entwurf aus dem Briefing generieren'}
+									? 'Kompletten Text neu generieren — neue Version (⌘G)'
+									: 'Ersten Entwurf aus dem Briefing generieren (⌘G)'}
 							>
 								{#if generating}
 									Schreibt…
@@ -407,7 +453,7 @@
 								class="checkpoint"
 								onclick={saveCheckpoint}
 								disabled={saving}
-								title="Aktuellen Text als neue Version einfrieren"
+								title="Aktuellen Text als neue Version einfrieren (⌘⇧S)"
 							>
 								{saving ? 'Speichert…' : '＋ Checkpoint'}
 							</button>
@@ -439,7 +485,12 @@
 					{/if}
 					{#if refineUndo && !refinement}
 						<div class="undo-row">
-							<button type="button" class="undo-btn" onclick={undoLastRefinement}>
+							<button
+								type="button"
+								class="undo-btn"
+								onclick={undoLastRefinement}
+								title="Letzte Auswahl-Verfeinerung rückgängig (⌘Z)"
+							>
 								↶ Rückgängig: {refineUndo.label}
 							</button>
 						</div>
@@ -765,6 +816,56 @@
 	@media (max-width: 900px) {
 		.columns {
 			grid-template-columns: 1fr;
+		}
+	}
+
+	/* ─── Print / PDF — triggered by ExportMenu's window.print() ────
+	   The screen layout (.shell + the rest of the SvelteKit app shell)
+	   is hidden; only .print-target stays visible so the PDF reads
+	   like a manuscript: serif body, full-width prose, no chrome.
+	   `:global(...)` reaches through component boundaries to suppress
+	   the route page + workbench wrapping that the user can't see
+	   from inside this file. */
+	.print-target {
+		display: none;
+	}
+	@media print {
+		:global(body > *) {
+			visibility: hidden;
+		}
+		.print-target,
+		.print-target * {
+			visibility: visible;
+		}
+		.print-target {
+			display: block;
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			padding: 0;
+			margin: 0;
+			background: white;
+			color: black;
+			font-family: ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
+		}
+		.print-title {
+			font-size: 1.8rem;
+			line-height: 1.2;
+			margin: 0 0 1.5rem;
+			font-weight: 600;
+		}
+		.print-body {
+			white-space: pre-wrap;
+			font-size: 1.05rem;
+			line-height: 1.65;
+		}
+		@page {
+			margin: 2cm;
+		}
+		.shell,
+		.empty {
+			display: none !important;
 		}
 	}
 </style>
