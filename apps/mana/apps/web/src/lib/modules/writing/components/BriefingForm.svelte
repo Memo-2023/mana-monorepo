@@ -7,6 +7,9 @@
 <script lang="ts">
 	import { KIND_LABELS, TONE_PRESETS, LENGTH_PRESETS, DEFAULT_LANGUAGE } from '../constants';
 	import { draftsStore } from '../stores/drafts.svelte';
+	import { callWritingGeneration } from '../api';
+	import { buildTitleSuggestionPrompt, cleanSuggestedTitle } from '../utils/prompt-builder';
+	import { useCurrentVersionForDraft } from '../queries';
 	import StylePicker from './StylePicker.svelte';
 	import ReferencePicker from './ReferencePicker.svelte';
 	import type { Draft, DraftKind, DraftBriefing, DraftReference } from '../types';
@@ -68,6 +71,57 @@
 
 	let saving = $state(false);
 	let error = $state<string | null>(null);
+	let suggestingTitle = $state(false);
+
+	// In edit mode we can hand the model an excerpt of the current
+	// version so the title hugs the actual prose, not just the briefing.
+	// In create mode there's nothing to excerpt yet.
+	/* svelte-ignore state_referenced_locally */
+	const currentVersion$ = draft ? useCurrentVersionForDraft(draft.id) : null;
+	const currentExcerpt = $derived.by<string | undefined>(() => {
+		const content = currentVersion$?.value?.content;
+		if (!content) return undefined;
+		return content.length > 800 ? content.slice(0, 800) + '…' : content;
+	});
+
+	async function suggestTitle() {
+		if (suggestingTitle) return;
+		const trimmedTopic = topic.trim();
+		if (!trimmedTopic) {
+			error = 'Bitte erst ein Thema eingeben — der Vorschlag braucht Kontext.';
+			return;
+		}
+		suggestingTitle = true;
+		error = null;
+		try {
+			const prompt = buildTitleSuggestionPrompt({
+				kind,
+				briefing: {
+					topic: trimmedTopic,
+					audience: audience.trim() || null,
+					tone: tone.trim() || null,
+					language,
+					extraInstructions: extraInstructions.trim() || null,
+				},
+				excerpt: currentExcerpt,
+			});
+			const result = await callWritingGeneration({
+				systemPrompt: prompt.system,
+				userPrompt: prompt.user,
+				kind: 'title-suggestion',
+				temperature: 0.6,
+				// Titles are 4–8 words; 60 tokens is enough headroom even
+				// for a chatty model that adds whitespace.
+				maxTokens: 60,
+			});
+			const cleaned = cleanSuggestedTitle(result.output);
+			if (cleaned) title = cleaned;
+		} catch (err) {
+			error = err instanceof Error ? err.message : String(err);
+		} finally {
+			suggestingTitle = false;
+		}
+	}
 
 	// When the user switches kind while creating a new draft, nudge the
 	// target length to that kind's preset so they don't have to touch it.
@@ -128,8 +182,25 @@
 	<div class="row">
 		<label>
 			<span>Titel</span>
-			<!-- svelte-ignore a11y_autofocus -->
-			<input type="text" bind:value={title} placeholder="Mein Blogpost über …" required autofocus />
+			<div class="title-row">
+				<!-- svelte-ignore a11y_autofocus -->
+				<input
+					type="text"
+					bind:value={title}
+					placeholder="Mein Blogpost über …"
+					required
+					autofocus
+				/>
+				<button
+					type="button"
+					class="suggest-btn"
+					onclick={suggestTitle}
+					disabled={suggestingTitle || !topic.trim()}
+					title={topic.trim() ? 'Titel aus Briefing + Inhalt vorschlagen' : 'Erst Thema ausfüllen'}
+				>
+					{suggestingTitle ? '…' : '✨'}
+				</button>
+			</div>
 		</label>
 		<label class="kind-select">
 			<span>Textart</span>
@@ -257,6 +328,34 @@
 	}
 	.field-label {
 		color: var(--color-text-muted, rgba(0, 0, 0, 0.55));
+	}
+	.title-row {
+		display: flex;
+		gap: 0.4rem;
+		align-items: stretch;
+	}
+	.title-row input {
+		flex: 1;
+		min-width: 0;
+	}
+	.suggest-btn {
+		flex-shrink: 0;
+		padding: 0 0.7rem;
+		border-radius: 0.5rem;
+		border: 1px solid var(--color-border, rgba(0, 0, 0, 0.1));
+		background: transparent;
+		cursor: pointer;
+		font: inherit;
+		font-size: 1rem;
+		color: inherit;
+	}
+	.suggest-btn:hover:not(:disabled) {
+		border-color: #0ea5e9;
+		color: #0ea5e9;
+	}
+	.suggest-btn:disabled {
+		opacity: 0.4;
+		cursor: not-allowed;
 	}
 	small {
 		font-weight: normal;

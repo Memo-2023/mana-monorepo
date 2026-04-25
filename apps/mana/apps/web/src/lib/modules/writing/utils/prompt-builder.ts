@@ -285,3 +285,78 @@ export function buildTranslatePrompt(ctx: SelectionContext, params: TranslatePar
 		].join('\n'),
 	};
 }
+
+// ─── Title suggestion (Auto-Title) ───────────────────────
+
+export interface TitleSuggestionInput {
+	kind: DraftKind;
+	briefing: DraftBriefing;
+	/** Optional excerpt of the current draft body (already trimmed). */
+	excerpt?: string;
+}
+
+/**
+ * Build a system+user pair that asks the LLM for a single 4–8-word
+ * title. We keep the system prompt strict: just the bare title, no
+ * quotes / periods / prefixes — so the result drops cleanly into the
+ * title input without post-processing on the client.
+ */
+export function buildTitleSuggestionPrompt(input: TitleSuggestionInput): PromptPair {
+	const { kind, briefing, excerpt } = input;
+	const lang = languageLabel(briefing.language);
+	const kindLbl = kindLabel(kind);
+
+	const system = [
+		`Du schlägst einen pointierten Titel auf ${lang} für einen ${kindLbl} vor.`,
+		'Gib ausschließlich den Titel zurück: 4 bis 8 Wörter, keine Anführungszeichen, kein Schlusspunkt, keine Aufzählung, kein "Titel:"-Präfix. Kein Markdown.',
+	].join('\n\n');
+
+	const userLines: string[] = [];
+	userLines.push(`Thema: ${briefing.topic}`);
+	if (briefing.audience) userLines.push(`Zielgruppe: ${briefing.audience}`);
+	if (briefing.tone) userLines.push(`Ton: ${briefing.tone}`);
+	if (briefing.extraInstructions) {
+		userLines.push(`Hinweise: ${briefing.extraInstructions}`);
+	}
+	if (excerpt) {
+		userLines.push('');
+		userLines.push('Aktueller Textauszug:');
+		userLines.push('---');
+		userLines.push(excerpt);
+		userLines.push('---');
+	}
+	userLines.push('');
+	userLines.push('Schlage genau einen Titel vor.');
+
+	return { system, user: userLines.join('\n') };
+}
+
+/**
+ * Strip common LLM-output artefacts (wrapping quotes, trailing period,
+ * trailing newline) from a single suggested title. Keeps the result
+ * usable as a one-shot drop-in.
+ */
+export function cleanSuggestedTitle(raw: string): string {
+	let out = raw.trim();
+	// Strip wrapping quotes — straight or curly, single or double.
+	const QUOTE_PAIRS: Array<[string, string]> = [
+		['"', '"'],
+		["'", "'"],
+		['„', '“'],
+		['«', '»'],
+		['‚', '‘'],
+	];
+	for (const [open, close] of QUOTE_PAIRS) {
+		if (out.startsWith(open) && out.endsWith(close) && out.length >= open.length + close.length) {
+			out = out.slice(open.length, out.length - close.length).trim();
+			break;
+		}
+	}
+	// Drop a "Titel:" / "Title:" prefix if the model adds one despite the
+	// instruction.
+	out = out.replace(/^(?:Titel|Title)\s*:\s*/i, '').trim();
+	// Strip terminal full stop only — keep "?" / "!" because they may be
+	// intentional for blog/social titles.
+	if (out.endsWith('.') && !out.endsWith('..')) out = out.slice(0, -1).trim();
+	return out;
+}
