@@ -7,7 +7,7 @@
  * parameters change, which is why we don't accept id params here.
  */
 
-import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
 import type {
@@ -72,7 +72,7 @@ export function toWebsiteBlock(local: LocalWebsiteBlock): WebsiteBlock {
 // ─── Live Queries ─────────────────────────────────────────
 
 export function useAllSites() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalWebsite, string>('website', 'websites').toArray();
 		const visible = locals.filter((s) => !s.deletedAt);
 		return visible.map(toWebsite).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
@@ -80,7 +80,7 @@ export function useAllSites() {
 }
 
 export function useAllPages() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await db.table<LocalWebsitePage>('websitePages').toArray();
 		const visible = locals.filter((p) => !p.deletedAt);
 		return visible.map(toWebsitePage).sort((a, b) => a.order - b.order);
@@ -88,7 +88,7 @@ export function useAllPages() {
 }
 
 export function useAllBlocks() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await db.table<LocalWebsiteBlock>('websiteBlocks').toArray();
 		const visible = locals.filter((b) => !b.deletedAt);
 		return visible.map(toWebsiteBlock).sort((a, b) => a.order - b.order);

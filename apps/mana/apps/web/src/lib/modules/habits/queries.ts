@@ -1,10 +1,10 @@
 /**
  * Reactive Queries & Pure Helpers for Habits module.
  *
- * Uses useLiveQueryWithDefault on the unified database.
+ * Uses useScopedLiveQuery on the unified database.
  */
 
-import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
 import type { LocalHabit, LocalHabitLog, Habit, HabitLog } from './types';
@@ -44,14 +44,14 @@ export function toHabitLog(local: LocalHabitLog, block?: LocalTimeBlock | null):
 // ─── Live Queries ──────────────────────────────────────────
 
 export function useAllHabits() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalHabit, string>('habits', 'habits').sortBy('order');
 		return locals.filter((h) => !h.deletedAt).map(toHabit);
 	}, [] as Habit[]);
 }
 
 export function useAllHabitLogs() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalHabitLog, string>('habits', 'habitLogs').toArray();
 		const active = locals.filter((l) => !l.deletedAt);
 
@@ -68,7 +68,7 @@ export function useAllHabitLogs() {
 }
 
 export function useHabitLogsForHabit(habitId: string) {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await db
 			.table<LocalHabitLog>('habitLogs')
 			.where('habitId')

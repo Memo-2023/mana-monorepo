@@ -4,7 +4,7 @@
  * Joins LocalSocialEvent with its TimeBlock to produce the UI-facing SocialEvent.
  */
 
-import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
@@ -87,7 +87,7 @@ export function toEventGuest(local: LocalEventGuest): EventGuest {
 
 /** All non-deleted events, joined with their TimeBlock for time fields. */
 export function useAllEvents() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalSocialEvent, string>(
 			'events',
 			'socialEvents'
@@ -101,7 +101,7 @@ export function useAllEvents() {
 
 /** Upcoming events (startTime >= now), sorted ascending. */
 export function useUpcomingEvents() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalSocialEvent, string>(
 			'events',
 			'socialEvents'
@@ -119,7 +119,7 @@ export function useUpcomingEvents() {
 
 /** Past events. */
 export function usePastEvents() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalSocialEvent, string>(
 			'events',
 			'socialEvents'
@@ -137,7 +137,7 @@ export function usePastEvents() {
 
 /** Single event by ID. */
 export function useEvent(eventId: () => string) {
-	return useLiveQueryWithDefault(
+	return useScopedLiveQuery(
 		async () => {
 			const id = eventId();
 			if (!id) return null;
@@ -153,7 +153,7 @@ export function useEvent(eventId: () => string) {
 
 /** All guests across all events, grouped by eventId. Useful for list views. */
 export function useGuestsByEvent() {
-	return useLiveQueryWithDefault(
+	return useScopedLiveQuery(
 		async () => {
 			const all = await scopedForModule<LocalEventGuest, string>('events', 'eventGuests').toArray();
 			const visible = all.filter((g) => !g.deletedAt);
@@ -173,7 +173,7 @@ export function useGuestsByEvent() {
 
 /** Guests for a single event. */
 export function useEventGuests(eventId: () => string) {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const id = eventId();
 		if (!id) return [];
 		const guests = await db
@@ -189,7 +189,7 @@ export function useEventGuests(eventId: () => string) {
 
 /** Bring-list items for a single event, sorted by order. */
 export function useEventItems(eventId: () => string) {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const id = eventId();
 		if (!id) return [];
 		const items = await db

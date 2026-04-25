@@ -7,7 +7,7 @@
  */
 
 import { liveQuery } from 'dexie';
-import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
@@ -77,7 +77,7 @@ export function toBoard(local: LocalBoard): Board {
 
 /** All non-archived images, sorted by createdAt desc. */
 export function useAllImages() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalImage, string>('picture', 'images').toArray();
 		const visible = locals.filter((img) => !img.isArchived && !img.deletedAt);
 		const decrypted = await decryptRecords('images', visible);
@@ -89,7 +89,7 @@ export function useAllImages() {
 
 /** All archived images, sorted by createdAt desc. */
 export function useArchivedImages() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalImage, string>('picture', 'images').toArray();
 		const visible = locals.filter((img) => !!img.isArchived && !img.deletedAt);
 		const decrypted = await decryptRecords('images', visible);
@@ -101,7 +101,7 @@ export function useArchivedImages() {
 
 /** All boards with item counts, sorted by updatedAt desc. */
 export function useAllBoards() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalBoard, string>('picture', 'boards').toArray();
 		const allItems = await scopedForModule<LocalBoardItem, string>(
 			'picture',
@@ -139,7 +139,7 @@ export { useAllTags as useAllPictureTags } from '@mana/shared-stores';
 
 /** All image-tag associations. */
 export function useAllImageTags() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		return await scopedForModule<LocalImageTag, string>('picture', 'imageTags').toArray();
 	}, [] as LocalImageTag[]);
 }

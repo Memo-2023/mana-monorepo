@@ -4,7 +4,7 @@
  * Uses table names: meals, goals, foodFavorites.
  */
 
-import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
@@ -43,7 +43,7 @@ export function toMealWithNutrition(local: LocalMeal): MealWithNutrition {
 
 /** All meals, auto-updates on any change. */
 export function useAllMeals() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalMeal, string>('food', 'meals').toArray();
 		const visible = locals.filter((m) => !m.deletedAt);
 		const decrypted = await decryptRecords('meals', visible);
@@ -53,7 +53,7 @@ export function useAllMeals() {
 
 /**
  * Look up a single meal by id and decrypt it. Used by the detail page,
- * which inlines its own useLiveQueryWithDefault wrapper so the querier
+ * which inlines its own useScopedLiveQuery wrapper so the querier
  * can capture the route param directly (matches plants DetailView pattern).
  */
 export async function loadMealById(id: string): Promise<MealWithNutrition | null> {
@@ -65,7 +65,7 @@ export async function loadMealById(id: string): Promise<MealWithNutrition | null
 
 /** All goals, auto-updates on any change. */
 export function useAllGoals() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalGoal, string>('food', 'goals').toArray();
 		return locals.filter((g) => !g.deletedAt);
 	}, [] as LocalGoal[]);
@@ -73,7 +73,7 @@ export function useAllGoals() {
 
 /** All favorites, auto-updates on any change. */
 export function useAllFavorites() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalFavorite, string>('food', 'foodFavorites').toArray();
 		return locals.filter((f) => !f.deletedAt);
 	}, [] as LocalFavorite[]);

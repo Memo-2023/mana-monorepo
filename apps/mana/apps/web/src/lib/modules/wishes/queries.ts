@@ -2,7 +2,7 @@
  * Reactive queries & pure helpers for Wishes — uses Dexie liveQuery on the unified DB.
  */
 
-import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
@@ -68,7 +68,7 @@ export function toPriceCheck(local: LocalPriceCheck): PriceCheck {
 // ─── Live Queries ──────────────────────────────────────────
 
 export function useAllWishes() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalWish, string>('wishes', 'wishesItems').sortBy(
 			'order'
 		);
@@ -79,7 +79,7 @@ export function useAllWishes() {
 }
 
 export function useAllLists() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalWishList, string>('wishes', 'wishesLists').sortBy(
 			'order'
 		);
@@ -89,7 +89,7 @@ export function useAllLists() {
 }
 
 export function usePriceChecks(wishId: string) {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await db
 			.table<LocalPriceCheck>('wishesPriceChecks')
 			.where('wishId')

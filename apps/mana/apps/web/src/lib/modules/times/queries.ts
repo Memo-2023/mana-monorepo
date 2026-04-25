@@ -7,7 +7,7 @@
 import { liveQuery } from 'dexie';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
-import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
 import type {
 	LocalClient,
 	LocalProject,
@@ -255,7 +255,7 @@ export function allWorldClocks$() {
 
 /** All alarms, auto-updates on any change. Returns { value, loading, error }. */
 export function useAllAlarms() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalAlarm, string>('times', 'timeAlarms').toArray();
 		return locals.filter((a) => !a.deletedAt).map(toAlarm);
 	}, [] as Alarm[]);
@@ -263,7 +263,7 @@ export function useAllAlarms() {
 
 /** All countdown timers, auto-updates on any change. Returns { value, loading, error }. */
 export function useAllCountdownTimers() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalCountdownTimer, string>(
 			'times',
 			'timeCountdownTimers'
@@ -274,7 +274,7 @@ export function useAllCountdownTimers() {
 
 /** All world clocks, sorted by sortOrder. Returns { value, loading, error }. */
 export function useAllWorldClocks() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await db
 			.table<LocalWorldClock>('timeWorldClocks')
 			.orderBy('sortOrder')

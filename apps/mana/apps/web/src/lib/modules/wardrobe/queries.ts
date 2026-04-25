@@ -7,7 +7,7 @@
  * filtered by `wardrobeOutfitId` — see useOutfitTryOns below.
  */
 
-import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
 import { scopedForModule } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
 import type { LocalImage, Image } from '$lib/modules/picture/types';
@@ -27,7 +27,7 @@ import {
 
 /** All non-archived, non-deleted garments in the active space. */
 export function useAllGarments() {
-	return useLiveQueryWithDefault<Garment[]>(async () => {
+	return useScopedLiveQuery<Garment[]>(async () => {
 		const locals = await scopedForModule<LocalWardrobeGarment, string>(
 			'wardrobe',
 			'wardrobeGarments'
@@ -42,7 +42,7 @@ export function useAllGarments() {
 
 /** Garments filtered by category — used by the Category-Tabs view. */
 export function useGarmentsByCategory(category: GarmentCategory) {
-	return useLiveQueryWithDefault<Garment[]>(async () => {
+	return useScopedLiveQuery<Garment[]>(async () => {
 		const locals = await scopedForModule<LocalWardrobeGarment, string>(
 			'wardrobe',
 			'wardrobeGarments'
@@ -59,7 +59,7 @@ export function useGarmentsByCategory(category: GarmentCategory) {
 
 /** A single garment by id, live-updating. Null while loading / missing. */
 export function useGarment(id: string | null) {
-	return useLiveQueryWithDefault<Garment | null>(async () => {
+	return useScopedLiveQuery<Garment | null>(async () => {
 		if (!id) return null;
 		const locals = await scopedForModule<LocalWardrobeGarment, string>(
 			'wardrobe',
@@ -78,7 +78,7 @@ export function useGarment(id: string | null) {
 
 /** All non-archived outfits in the active space. */
 export function useAllOutfits() {
-	return useLiveQueryWithDefault<Outfit[]>(async () => {
+	return useScopedLiveQuery<Outfit[]>(async () => {
 		const locals = await scopedForModule<LocalWardrobeOutfit, string>(
 			'wardrobe',
 			'wardrobeOutfits'
@@ -92,7 +92,7 @@ export function useAllOutfits() {
 }
 
 export function useOutfitsByOccasion(occasion: OutfitOccasion) {
-	return useLiveQueryWithDefault<Outfit[]>(async () => {
+	return useScopedLiveQuery<Outfit[]>(async () => {
 		const locals = await scopedForModule<LocalWardrobeOutfit, string>('wardrobe', 'wardrobeOutfits')
 			.and((row) => row.occasion === occasion)
 			.toArray();
@@ -105,7 +105,7 @@ export function useOutfitsByOccasion(occasion: OutfitOccasion) {
 }
 
 export function useOutfit(id: string | null) {
-	return useLiveQueryWithDefault<Outfit | null>(async () => {
+	return useScopedLiveQuery<Outfit | null>(async () => {
 		if (!id) return null;
 		const locals = await scopedForModule<LocalWardrobeOutfit, string>('wardrobe', 'wardrobeOutfits')
 			.and((row) => row.id === id)
@@ -125,7 +125,7 @@ export function useOutfit(id: string | null) {
  * strip under the current composition.
  */
 export function useOutfitTryOns(outfitId: string | null) {
-	return useLiveQueryWithDefault<Image[]>(async () => {
+	return useScopedLiveQuery<Image[]>(async () => {
 		if (!outfitId) return [];
 		const locals = await scopedForModule<LocalImage, string>('picture', 'images')
 			.and((row) => row.wardrobeOutfitId === outfitId)
@@ -146,7 +146,7 @@ export function useOutfitTryOns(outfitId: string | null) {
  * `useOutfitsContainingGarment` for the cross-outfit view.
  */
 export function useGarmentSoloTryOns(garmentId: string | null) {
-	return useLiveQueryWithDefault<Image[]>(async () => {
+	return useScopedLiveQuery<Image[]>(async () => {
 		if (!garmentId) return [];
 		const locals = await scopedForModule<LocalImage, string>('picture', 'images')
 			.and((row) => row.wardrobeGarmentId === garmentId)
@@ -167,7 +167,7 @@ export function useGarmentSoloTryOns(garmentId: string | null) {
  * snapshot provides the thumbnail without another image lookup.
  */
 export function useOutfitsContainingGarment(garmentId: string | null) {
-	return useLiveQueryWithDefault<Outfit[]>(async () => {
+	return useScopedLiveQuery<Outfit[]>(async () => {
 		if (!garmentId) return [];
 		const locals = await scopedForModule<LocalWardrobeOutfit, string>(
 			'wardrobe',

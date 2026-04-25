@@ -6,7 +6,7 @@
  * pattern as notes / dreams / places.
  */
 
-import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
@@ -34,7 +34,7 @@ export function toSnippet(local: LocalPlaygroundSnippet): PlaygroundSnippet {
 }
 
 export function useAllSnippets() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await db
 			.table<LocalPlaygroundSnippet>('playgroundSnippets')
 			.orderBy('order')
@@ -85,7 +85,7 @@ export function toMessage(local: LocalPlaygroundMessage): PlaygroundConversation
 }
 
 export function useAllConversations() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalPlaygroundConversation, string>(
 			'playground',
 			'playgroundConversations'
@@ -100,7 +100,7 @@ export function useAllConversations() {
 }
 
 export function useConversationMessages(conversationId: () => string | null) {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const cid = conversationId();
 		if (!cid) return [];
 		const locals = await db

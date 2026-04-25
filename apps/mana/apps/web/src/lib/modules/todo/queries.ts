@@ -2,7 +2,7 @@
  * Reactive queries & pure helpers for Todo — uses Dexie liveQuery on the unified DB.
  */
 
-import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
 import { db } from '$lib/data/database';
 import { scopedForModule, applyVisibility } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
@@ -45,7 +45,7 @@ export function toTask(local: LocalTask): Task {
 // ─── Live Queries ──────────────────────────────────────────
 
 export function useAllTasks() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		// Scope-first, then in-memory sort by `order`. sortBy is O(n) — fine
 		// for a user's own task list; if it ever becomes hot, add a
 		// [spaceId+order] compound index in a follow-up Dexie version.
@@ -72,7 +72,7 @@ export function useAllTasks() {
 export { useAllTags as useAllLabels } from '@mana/shared-stores';
 
 export function useAllBoardViews() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalBoardView, string>('todo', 'boardViews').sortBy(
 			'order'
 		);
@@ -81,14 +81,14 @@ export function useAllBoardViews() {
 }
 
 export function useAllReminders() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalReminder, string>('todo', 'reminders').toArray();
 		return applyVisibility(locals).filter((r) => !r.deletedAt);
 	}, [] as LocalReminder[]);
 }
 
 export function useAllProjects() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalTodoProject, string>('todo', 'todoProjects').sortBy(
 			'order'
 		);

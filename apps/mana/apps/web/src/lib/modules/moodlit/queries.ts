@@ -2,7 +2,7 @@
  * Reactive queries for Moodlit — uses Dexie liveQuery on the unified DB.
  */
 
-import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
 import type { LocalMood, LocalSequence, Mood } from './types';
@@ -26,7 +26,7 @@ export function getMoodById(moods: Mood[], id: string): Mood | undefined {
 
 /** All moods, sorted by name. */
 export function useAllMoods() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalMood, string>('moodlit', 'moods').toArray();
 		return locals.filter((m) => !m.deletedAt);
 	}, []);
@@ -34,7 +34,7 @@ export function useAllMoods() {
 
 /** All sequences, sorted by name. */
 export function useAllSequences() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalSequence, string>('moodlit', 'sequences').toArray();
 		return locals.filter((s) => !s.deletedAt);
 	}, []);

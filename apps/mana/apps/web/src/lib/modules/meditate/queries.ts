@@ -4,7 +4,7 @@
  * Read-side only — mutations live in stores/meditate.svelte.ts.
  */
 
-import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
 import { decryptRecords } from '$lib/data/crypto';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
@@ -67,7 +67,7 @@ export function toMeditateSettings(local: LocalMeditateSettings): MeditateSettin
 // ─── Live Queries ───────────────────────────────────────────
 
 export function useAllPresets() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await db
 			.table<LocalMeditatePreset>('meditatePresets')
 			.orderBy('order')
@@ -79,7 +79,7 @@ export function useAllPresets() {
 }
 
 export function useAllSessions() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await db
 			.table<LocalMeditateSession>('meditateSessions')
 			.orderBy('startedAt')
@@ -92,7 +92,7 @@ export function useAllSessions() {
 }
 
 export function useSettings() {
-	return useLiveQueryWithDefault(
+	return useScopedLiveQuery(
 		async () => {
 			const locals = await scopedForModule<LocalMeditateSettings, string>(
 				'meditate',

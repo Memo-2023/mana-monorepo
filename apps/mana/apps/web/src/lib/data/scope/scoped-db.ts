@@ -24,7 +24,6 @@ import { getActiveSpaceId } from './active-space.svelte';
 import { personalSpaceSentinel } from './bootstrap';
 import { isModuleAllowedInSpace, type SpaceModuleId, type SpaceType } from '@mana/shared-types';
 import { getActiveSpace } from './active-space.svelte';
-import { touchScopeCursor } from './cursor';
 
 export class ScopeNotReadyError extends Error {
 	constructor() {
@@ -76,11 +75,6 @@ export function getInScopeSpaceIds(): string[] {
  * first and the spaceId filter runs on the narrowed set.
  */
 export function scopedTable<T, PK>(tableName: string): Collection<T, PK> {
-	// Register a liveQuery-time subscription on `_scopeCursor` so that
-	// setActiveSpace / setCurrentUserId changes trigger a re-run of this
-	// query. See data/scope/cursor.ts for the full rationale on the Dexie
-	// bridge for scope state.
-	touchScopeCursor();
 	const table = db.table(tableName) as Table<T, PK>;
 	const ids = getInScopeSpaceIds();
 	const check = (record: unknown) => {
@@ -133,7 +127,6 @@ export function scopedForModule<T, PK>(
  * compound queries with `.or()`, `.and()`, `.reverse()` first.
  */
 export function scopedAnd<T, PK>(collection: Collection<T, PK>): Collection<T, PK> {
-	touchScopeCursor();
 	const ids = getInScopeSpaceIds();
 	return collection.and((record) => {
 		const r = record as { spaceId?: unknown };
@@ -151,10 +144,6 @@ export function scopedAnd<T, PK>(collection: Collection<T, PK>): Collection<T, P
  * is a single field comparison on the one row returned.
  */
 export async function scopedGet<T>(tableName: string, id: string | number): Promise<T | undefined> {
-	// Register the liveQuery-time subscription same as scopedTable — a
-	// scopedGet inside a liveQuery (e.g. useGarment(id)) needs to re-run
-	// too when scope changes.
-	touchScopeCursor();
 	const record = (await db.table(tableName).get(id)) as T | undefined;
 	if (!record) return undefined;
 	const rec = record as { spaceId?: unknown };

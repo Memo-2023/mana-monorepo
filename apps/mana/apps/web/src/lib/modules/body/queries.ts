@@ -4,7 +4,7 @@
  * Read-side only — mutations live in stores/body.svelte.ts.
  */
 
-import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
 import { decryptRecords } from '$lib/data/crypto';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
@@ -131,7 +131,7 @@ export function toBodyPhase(local: LocalBodyPhase): BodyPhase {
 // ─── Live Queries ───────────────────────────────────────────
 
 export function useAllBodyExercises() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalBodyExercise, string>(
 			'body',
 			'bodyExercises'
@@ -143,7 +143,7 @@ export function useAllBodyExercises() {
 }
 
 export function useAllBodyRoutines() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalBodyRoutine, string>('body', 'bodyRoutines').sortBy(
 			'order'
 		);
@@ -154,7 +154,7 @@ export function useAllBodyRoutines() {
 }
 
 export function useAllBodyWorkouts() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalBodyWorkout, string>(
 			'body',
 			'bodyWorkouts'
@@ -166,7 +166,7 @@ export function useAllBodyWorkouts() {
 }
 
 export function useAllBodySets() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalBodySet, string>('body', 'bodySets').toArray();
 		const visible = locals.filter((s) => !s.deletedAt);
 		const decrypted = await decryptRecords('bodySets', visible);
@@ -175,7 +175,7 @@ export function useAllBodySets() {
 }
 
 export function useSetsForWorkout(workoutId: string) {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await db
 			.table<LocalBodySet>('bodySets')
 			.where('workoutId')
@@ -188,7 +188,7 @@ export function useSetsForWorkout(workoutId: string) {
 }
 
 export function useAllBodyMeasurements() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalBodyMeasurement, string>(
 			'body',
 			'bodyMeasurements'
@@ -200,7 +200,7 @@ export function useAllBodyMeasurements() {
 }
 
 export function useAllBodyChecks() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalBodyCheck, string>('body', 'bodyChecks').toArray();
 		const visible = locals.filter((c) => !c.deletedAt);
 		const decrypted = await decryptRecords('bodyChecks', visible);
@@ -209,7 +209,7 @@ export function useAllBodyChecks() {
 }
 
 export function useAllBodyPhases() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalBodyPhase, string>('body', 'bodyPhases').toArray();
 		const visible = locals.filter((p) => !p.deletedAt);
 		const decrypted = await decryptRecords('bodyPhases', visible);
@@ -231,7 +231,7 @@ export function useAllBodyPhases() {
  * the helper is permissive so a future "year view" can extend it.
  */
 export function useFoodMealsSince(since: string) {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await db.table<LocalMeal>('meals').where('date').aboveOrEqual(since).toArray();
 		const visible = locals.filter((m) => !m.deletedAt);
 		// Encrypted fields (description / portionSize / foods) get unwrapped

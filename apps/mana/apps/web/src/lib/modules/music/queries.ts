@@ -2,7 +2,7 @@
  * Reactive queries & pure helpers for Music — uses Dexie liveQuery on the unified DB.
  */
 
-import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
@@ -71,7 +71,7 @@ export function toProject(local: LocalProject): Project {
 
 /** All songs, sorted by title. */
 export function useAllSongs() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalSong, string>('music', 'songs').toArray();
 		const visible = locals.filter((s) => !s.deletedAt);
 		// title is encrypted on disk; sort needs the plaintext value.
@@ -82,7 +82,7 @@ export function useAllSongs() {
 
 /** All playlists, sorted by name. */
 export function useAllPlaylists() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalPlaylist, string>(
 			'music',
 			'mukkePlaylists'
@@ -95,7 +95,7 @@ export function useAllPlaylists() {
 
 /** All playlist-song associations. */
 export function useAllPlaylistSongs() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalPlaylistSong, string>(
 			'music',
 			'playlistSongs'
@@ -106,7 +106,7 @@ export function useAllPlaylistSongs() {
 
 /** All projects, sorted by title. */
 export function useAllProjects() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalProject, string>('music', 'mukkeProjects').toArray();
 		return locals
 			.filter((p) => !p.deletedAt)
@@ -117,7 +117,7 @@ export function useAllProjects() {
 
 /** All markers for a given beat ID. */
 export function useMarkersByBeat(beatId: string) {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await db.table<LocalMarker>('markers').where('beatId').equals(beatId).toArray();
 		return locals.filter((m) => !m.deletedAt).sort((a, b) => a.startTime - b.startTime);
 	}, []);

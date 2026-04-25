@@ -2,7 +2,7 @@
  * Mail module queries — drafts (local-first) + API data helpers.
  */
 
-import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
 import { decryptRecords } from '$lib/data/crypto';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
@@ -29,7 +29,7 @@ export function toMailDraft(local: LocalMailDraft): MailDraft {
 // ─── Live Queries (local drafts) ────────────────────────────
 
 export function useAllDrafts() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalMailDraft, string>('mail', 'mailDrafts').toArray();
 		const visible = locals.filter((d) => !d.deletedAt);
 		const decrypted = await decryptRecords('mailDrafts', visible);

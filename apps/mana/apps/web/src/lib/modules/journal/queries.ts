@@ -7,7 +7,7 @@ import { formatDate } from '$lib/i18n/format';
  * then decryptRecords the visible set before mapping to public types.
  */
 
-import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
@@ -36,7 +36,7 @@ export function toJournalEntry(local: LocalJournalEntry): JournalEntry {
 // ─── Live Queries ──────────────────────────────────────────
 
 export function useAllJournalEntries() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const visible = (
 			await scopedForModule<LocalJournalEntry, string>('journal', 'journalEntries').toArray()
 		).filter((e) => !e.deletedAt && !e.isArchived);
@@ -49,7 +49,7 @@ export function useAllJournalEntries() {
 }
 
 export function useJournalEntry(id: string) {
-	return useLiveQueryWithDefault(
+	return useScopedLiveQuery(
 		async () => {
 			const local = await db.table<LocalJournalEntry>('journalEntries').get(id);
 			if (!local || local.deletedAt) return null;

@@ -10,7 +10,7 @@
  * at init time; no manual fetch/refresh needed.
  */
 
-import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
 import { db } from '$lib/data/database';
 import { scopedForModule, applyVisibility } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
@@ -41,7 +41,7 @@ export function toCalendar(local: LocalCalendar): Calendar {
 
 /** All calendars, auto-updates on any change. */
 export function useAllCalendars() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalCalendar, string>('calendar', 'calendars').toArray();
 		const visible = applyVisibility(locals).filter((c) => !c.deletedAt);
 		return visible.map(toCalendar);
@@ -53,7 +53,7 @@ export function useAllCalendars() {
  * with LocalEvent for native calendar events. Auto-updates on change.
  */
 export function useAllCalendarItems() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		// Fetch all non-deleted timeBlocks (filter on plaintext deletedAt
 		// before paying the per-row decrypt cost). Scope filter narrows to
 		// the active space + visibility filter drops records the user isn't

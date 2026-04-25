@@ -2,7 +2,7 @@
  * Reactive Queries & Pure Helpers for Drink module.
  */
 
-import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
 import { decryptRecords } from '$lib/data/crypto';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
@@ -45,7 +45,7 @@ export function toDrinkPreset(local: LocalDrinkPreset): DrinkPreset {
 // ─── Live Queries ─────────────────────────────────────────
 
 export function useAllDrinkEntries() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await db
 			.table<LocalDrinkEntry>('drinkEntries')
 			.orderBy('date')
@@ -58,7 +58,7 @@ export function useAllDrinkEntries() {
 }
 
 export function useAllDrinkPresets() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalDrinkPreset, string>('drink', 'drinkPresets').sortBy(
 			'order'
 		);

@@ -2,7 +2,7 @@
  * Reactive Queries & Pure Helpers for Recipes module.
  */
 
-import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
 import { decryptRecords } from '$lib/data/crypto';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
@@ -36,7 +36,7 @@ export function toRecipe(local: LocalRecipe): Recipe {
 // ─── Live Queries ─────────────────────────────────────────
 
 export function useAllRecipes() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalRecipe, string>('recipes', 'recipes').toArray();
 		const visible = locals.filter((r) => !r.deletedAt);
 		const decrypted = await decryptRecords('recipes', visible);

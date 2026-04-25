@@ -15,7 +15,7 @@ import { formatDate } from '$lib/i18n/format';
  * a future concern only if note volume per user grows past that.
  */
 
-import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
 import { db } from '$lib/data/database';
 import { scopedForModule, scopedGet, applyVisibility } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
@@ -42,7 +42,7 @@ export function toNote(local: LocalNote): Note {
 // ─── Live Queries ──────────────────────────────────────────
 
 export function useAllNotes() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		// Filter on plaintext metadata first — none of these fields are
 		// in the encryption registry, so they stay readable even with
 		// the vault locked. Cuts the decrypt workload to only what the
@@ -64,7 +64,7 @@ export function useAllNotes() {
 
 /** Single note by id, decrypted. Used by detail views. */
 export function useNote(id: string) {
-	return useLiveQueryWithDefault(
+	return useScopedLiveQuery(
 		async () => {
 			// scopedGet returns undefined if the note belongs to another
 			// space — protects against URL-manipulated deep links.

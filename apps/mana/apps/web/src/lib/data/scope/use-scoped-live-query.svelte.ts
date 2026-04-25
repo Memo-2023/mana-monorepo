@@ -9,29 +9,46 @@
  * Why this exists:
  *   Dexie's `liveQuery` only re-runs when a Dexie table it read during
  *   evaluation is written to. The scope state — `active` in
- *   `active-space.svelte.ts` and `currentUserId` in
- *   `current-user.svelte.ts` — lives in Svelte 5 `$state` runes,
- *   which Dexie cannot observe. Without a bridge, a module mounted
- *   before the active-space bootstrap finished would render an empty
- *   first result and stay empty until some unrelated Dexie write
+ *   `active-space.svelte.ts` and `currentUserId` in `current-user.ts` —
+ *   lives outside Dexie, so a scope change is invisible to the
+ *   subscription. Without a bridge, a module mounted before the
+ *   active-space bootstrap finished would render an empty first
+ *   result and stay empty until some unrelated Dexie write
  *   accidentally re-triggered the querier.
  *
- *   The clean fix: wrap the Dexie liveQuery subscription in an
- *   `$effect` that reads `getActiveSpaceId()` + `getEffectiveUserId()`
- *   at the top. Svelte 5 auto-tracks those reads as effect
- *   dependencies, and re-runs the effect — tearing down the previous
- *   subscription and creating a fresh one — whenever scope changes.
- *   Every call to the querier inside the new subscription evaluates
- *   `getInScopeSpaceIds()` fresh, so the visible result matches the
- *   active scope. No infra-tables, no hidden side-effects.
+ *   The clean fix: wrap the Dexie `liveQuery` subscription in a
+ *   Svelte 5 `$effect` whose dependency is a `scopeTick` `$state`
+ *   counter. `setActiveSpace` (via `onActiveSpaceChanged`) and
+ *   `setCurrentUserId` (via `onCurrentUserChanged`) bump the counter,
+ *   which re-runs the effect — tearing down the previous Dexie
+ *   subscription and creating a fresh one. Each new subscription
+ *   evaluates the querier with the up-to-date `getInScopeSpaceIds()`,
+ *   so the visible result matches the active scope. No infra-tables,
+ *   no hidden side-effects in `scopedTable`.
  *
  * Same return shape as `useLiveQueryWithDefault` for drop-in
  * migration.
  */
 
 import { liveQuery } from 'dexie';
-import { getActiveSpaceId } from './active-space.svelte';
-import { getEffectiveUserId } from '../current-user';
+import { onActiveSpaceChanged } from './active-space.svelte';
+import { onCurrentUserChanged } from '../current-user';
+
+// Module-level scope-tick counter. A single counter is enough because
+// every consumer just needs *some* reactive value to track — the
+// liveQuery's querier itself reads the actual scope ids.
+let scopeTick = $state(0);
+
+// Wire both event buses to bump the tick once per real change. The
+// handlers replay the current value on subscribe (so the tick fires
+// once at module-init), then again on every flip. Subscriptions are
+// permanent — there's only one of each per app session.
+onActiveSpaceChanged(() => {
+	scopeTick++;
+});
+onCurrentUserChanged(() => {
+	scopeTick++;
+});
 
 export function useScopedLiveQuery<T>(
 	querier: () => T | Promise<T>,
@@ -42,14 +59,15 @@ export function useScopedLiveQuery<T>(
 	let error = $state<unknown>(undefined);
 
 	$effect(() => {
-		// Tracking reads — these are the dependencies that trigger
-		// re-subscription. Reading the values (even discarding them)
-		// is enough; Svelte 5's $effect auto-registers the dep.
-		void getActiveSpaceId();
-		void getEffectiveUserId();
+		// Tracking read — Svelte 5 auto-registers this as a dependency.
+		// Whenever the tick changes (active space or user changed), the
+		// effect re-fires: the previous teardown unsubscribes the old
+		// Dexie observable, and a fresh one is created below with the
+		// up-to-date scope.
+		void scopeTick;
 
-		// Reset the loading flag on every re-subscribe so consumers
-		// can show a transient skeleton while the new querier runs.
+		// Reset the loading flag on every re-subscribe so consumers can
+		// show a transient skeleton while the new querier runs.
 		loading = true;
 
 		const subscription = liveQuery(querier).subscribe({
@@ -65,7 +83,7 @@ export function useScopedLiveQuery<T>(
 		});
 
 		// Tear-down: Svelte runs this when the effect re-fires (scope
-		// changed) or the component unmounts. Replaces the old onDestroy
+		// changed) or the component unmounts. Replaces the onDestroy
 		// pattern from `useLiveQueryWithDefault`.
 		return () => subscription.unsubscribe();
 	});

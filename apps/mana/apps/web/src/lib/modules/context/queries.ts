@@ -6,7 +6,7 @@
  * at init time; no manual fetch/refresh needed.
  */
 
-import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
@@ -49,7 +49,7 @@ export function toDocument(local: LocalDocument): Document {
 
 /** All spaces, sorted by name. Auto-updates on any change. */
 export function useAllSpaces() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalContextSpace, string>(
 			'context',
 			'contextSpaces'
@@ -63,7 +63,7 @@ export function useAllSpaces() {
 
 /** All documents, sorted by updated_at desc. Auto-updates on any change. */
 export function useAllDocuments() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalDocument, string>('context', 'documents').toArray();
 		const visible = locals.filter((d) => !d.deletedAt);
 		const decrypted = await decryptRecords('documents', visible);
@@ -75,7 +75,7 @@ export function useAllDocuments() {
 
 /** Documents for a specific context-space. Auto-updates on any change. */
 export function useSpaceDocuments(contextSpaceId: string) {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await db
 			.table<LocalDocument>('documents')
 			.where('contextSpaceId')

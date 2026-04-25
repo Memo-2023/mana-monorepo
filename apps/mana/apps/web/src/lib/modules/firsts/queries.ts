@@ -1,4 +1,4 @@
-import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
@@ -35,7 +35,7 @@ export function toFirst(local: LocalFirst): First {
 // ─── Live Queries ──────────────────────────────────────────
 
 export function useAllFirsts() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const visible = (
 			await scopedForModule<LocalFirst, string>('firsts', 'firsts').toArray()
 		).filter((f) => !f.deletedAt && !f.isArchived);
@@ -58,7 +58,7 @@ export function useAllFirsts() {
 }
 
 export function useDreams() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const visible = (
 			await scopedForModule<LocalFirst, string>('firsts', 'firsts').toArray()
 		).filter((f) => !f.deletedAt && !f.isArchived && f.status === 'dream');
@@ -72,7 +72,7 @@ export function useDreams() {
 }
 
 export function useLivedFirsts() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const visible = (
 			await scopedForModule<LocalFirst, string>('firsts', 'firsts').toArray()
 		).filter((f) => !f.deletedAt && !f.isArchived && f.status === 'lived');
@@ -84,7 +84,7 @@ export function useLivedFirsts() {
 }
 
 export function useFirstsByPerson(personId: string) {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const visible = (
 			await scopedForModule<LocalFirst, string>('firsts', 'firsts').toArray()
 		).filter((f) => !f.deletedAt && !f.isArchived && f.personIds?.includes(personId));

@@ -2,7 +2,7 @@
  * Reactive queries for Calc — uses Dexie liveQuery on the unified DB.
  */
 
-import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
 import type { LocalCalculation, LocalSavedFormula } from './types';
@@ -39,7 +39,7 @@ export function toSavedFormula(local: LocalSavedFormula): SavedFormula {
 
 /** All calculations (history), newest first. */
 export function useAllCalculations() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalCalculation, string>(
 			'calc',
 			'calculations'
@@ -53,7 +53,7 @@ export function useAllCalculations() {
 
 /** All saved formulas. */
 export function useAllSavedFormulas() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalSavedFormula, string>(
 			'calc',
 			'savedFormulas'

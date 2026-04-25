@@ -2,7 +2,7 @@
  * Reactive Queries & Pure Helpers for the Mood module.
  */
 
-import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
 import { decryptRecords } from '$lib/data/crypto';
 import { db } from '$lib/data/database';
 import { scopedForModule, applyVisibility } from '$lib/data/scope';
@@ -46,7 +46,7 @@ export function toMoodSettings(local: LocalMoodSettings): MoodSettings {
 // ─── Live Queries ───────────────────────────────────────────
 
 export function useAllMoodEntries() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalMoodEntry, string>('mood', 'moodEntries').toArray();
 		const visible = applyVisibility(locals).filter((e) => !e.deletedAt);
 		const decrypted = await decryptRecords('moodEntries', visible);
@@ -58,7 +58,7 @@ export function useAllMoodEntries() {
 }
 
 export function useMoodSettings() {
-	return useLiveQueryWithDefault(
+	return useScopedLiveQuery(
 		async () => {
 			const locals = await scopedForModule<LocalMoodSettings, string>(
 				'mood',

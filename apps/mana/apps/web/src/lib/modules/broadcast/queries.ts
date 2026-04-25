@@ -6,7 +6,7 @@
  * matches the post-Spaces convention so lists respect the active space.
  */
 
-import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
 import { decryptRecords } from '$lib/data/crypto';
 import { scopedForModule } from '$lib/data/scope';
 import { campaignTable, templateTable, settingsTable } from './collections';
@@ -77,7 +77,7 @@ export function toSettings(local: LocalBroadcastSettings): BroadcastSettings {
 
 /** All campaigns in the active space, newest first by updatedAt. */
 export function useAllCampaigns() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const rows = await scopedForModule<LocalCampaign, string>(
 			'broadcast',
 			'broadcastCampaigns'
@@ -89,7 +89,7 @@ export function useAllCampaigns() {
 }
 
 export function useAllTemplates() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const rows = await scopedForModule<LocalBroadcastTemplate, string>(
 			'broadcast',
 			'broadcastTemplates'

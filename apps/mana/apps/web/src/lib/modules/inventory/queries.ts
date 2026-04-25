@@ -4,7 +4,7 @@
  * Uses prefixed table names: invCollections, invItems, invLocations, invCategories.
  */
 
-import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
@@ -161,7 +161,7 @@ export function toCategory(local: LocalCategory): Category {
 // ─── Live Queries ──────────────────────────────────────────
 
 export function useAllCollections() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalCollection, string>(
 			'inventory',
 			'invCollections'
@@ -171,7 +171,7 @@ export function useAllCollections() {
 }
 
 export function useAllItems() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const visible = (
 			await scopedForModule<LocalItem, string>('inventory', 'invItems').toArray()
 		).filter((i) => !i.deletedAt);
@@ -181,7 +181,7 @@ export function useAllItems() {
 }
 
 export function useAllLocations() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalLocation, string>(
 			'inventory',
 			'invLocations'
@@ -191,7 +191,7 @@ export function useAllLocations() {
 }
 
 export function useAllCategories() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalCategory, string>(
 			'inventory',
 			'invCategories'

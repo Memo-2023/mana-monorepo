@@ -2,7 +2,7 @@
  * Reactive Queries & Pure Helpers for Periods module.
  */
 
-import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
 import { decryptRecord, decryptRecords } from '$lib/data/crypto';
@@ -65,7 +65,7 @@ export function toPeriodSymptom(local: LocalPeriodSymptom): PeriodSymptom {
 // ─── Live Queries ──────────────────────────────────────────
 
 export function useAllPeriods() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const visible = (
 			await scopedForModule<LocalPeriod, string>('period', 'periods').toArray()
 		).filter((c) => !c.deletedAt && !c.isArchived);
@@ -75,7 +75,7 @@ export function useAllPeriods() {
 }
 
 export function useCurrentPeriod() {
-	return useLiveQueryWithDefault(
+	return useScopedLiveQuery(
 		async () => {
 			const locals = await scopedForModule<LocalPeriod, string>('period', 'periods').toArray();
 			const real = locals.filter((c) => !c.deletedAt && !c.isArchived && !c.isPredicted);
@@ -89,7 +89,7 @@ export function useCurrentPeriod() {
 }
 
 export function useAllDayLogs() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const visible = (
 			await scopedForModule<LocalPeriodDayLog, string>('period', 'periodDayLogs').toArray()
 		).filter((l) => !l.deletedAt);
@@ -99,7 +99,7 @@ export function useAllDayLogs() {
 }
 
 export function useDayLog(date: string) {
-	return useLiveQueryWithDefault(
+	return useScopedLiveQuery(
 		async () => {
 			const locals = await db
 				.table<LocalPeriodDayLog>('periodDayLogs')
@@ -116,7 +116,7 @@ export function useDayLog(date: string) {
 }
 
 export function useAllSymptoms() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalPeriodSymptom, string>(
 			'period',
 			'periodSymptoms'

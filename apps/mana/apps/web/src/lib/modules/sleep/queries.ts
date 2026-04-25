@@ -4,7 +4,7 @@
  * Read-side only — mutations live in stores/sleep.svelte.ts.
  */
 
-import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
 import { decryptRecords } from '$lib/data/crypto';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
@@ -84,7 +84,7 @@ export function toSleepSettings(local: LocalSleepSettings): SleepSettings {
 // ─── Live Queries ───────────────────────────────────────────
 
 export function useAllSleepEntries() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalSleepEntry, string>(
 			'sleep',
 			'sleepEntries'
@@ -96,7 +96,7 @@ export function useAllSleepEntries() {
 }
 
 export function useAllSleepHygieneLogs() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalSleepHygieneLog, string>(
 			'sleep',
 			'sleepHygieneLogs'
@@ -107,7 +107,7 @@ export function useAllSleepHygieneLogs() {
 }
 
 export function useAllSleepHygieneChecks() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalSleepHygieneCheck, string>(
 			'sleep',
 			'sleepHygieneChecks'
@@ -119,7 +119,7 @@ export function useAllSleepHygieneChecks() {
 }
 
 export function useSleepSettings() {
-	return useLiveQueryWithDefault(
+	return useScopedLiveQuery(
 		async () => {
 			const locals = await scopedForModule<LocalSleepSettings, string>(
 				'sleep',

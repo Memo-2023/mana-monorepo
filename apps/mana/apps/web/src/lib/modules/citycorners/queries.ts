@@ -5,7 +5,7 @@
  * at init time; no manual fetch/refresh needed.
  */
 
-import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
 import type { LocalCity, LocalLocation, LocalFavorite } from './types';
@@ -19,7 +19,7 @@ import type { LocalCity, LocalLocation, LocalFavorite } from './types';
 
 /** All cities, sorted by name. Auto-updates on any change. */
 export function useAllCities() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const all = await scopedForModule<LocalCity, string>('citycorners', 'cities').toArray();
 		return all.filter((c) => !c.deletedAt).sort((a, b) => a.name.localeCompare(b.name));
 	}, [] as LocalCity[]);
@@ -27,7 +27,7 @@ export function useAllCities() {
 
 /** All locations, sorted by name. Auto-updates on any change. */
 export function useAllLocations() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const all = await scopedForModule<LocalLocation, string>(
 			'citycorners',
 			'ccLocations'
@@ -38,7 +38,7 @@ export function useAllLocations() {
 
 /** All favorites. Auto-updates on any change. */
 export function useAllFavorites() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const all = await scopedForModule<LocalFavorite, string>(
 			'citycorners',
 			'ccFavorites'

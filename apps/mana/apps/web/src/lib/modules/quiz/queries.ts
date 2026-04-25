@@ -7,7 +7,7 @@
  * AttemptAnswer payloads, which hold no user-typed content).
  */
 
-import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
@@ -69,7 +69,7 @@ export function toAttempt(local: LocalQuizAttempt): QuizAttempt {
 // ─── Live Queries ──────────────────────────────────────────
 
 export function useAllQuizzes() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const visible = (await scopedForModule<LocalQuiz, string>('quiz', 'quizzes').toArray()).filter(
 			(q) => !q.deletedAt && !q.isArchived
 		);
@@ -82,7 +82,7 @@ export function useAllQuizzes() {
 }
 
 export function useQuiz(id: string) {
-	return useLiveQueryWithDefault(
+	return useScopedLiveQuery(
 		async () => {
 			const local = await db.table<LocalQuiz>('quizzes').get(id);
 			if (!local || local.deletedAt) return null;
@@ -94,7 +94,7 @@ export function useQuiz(id: string) {
 }
 
 export function useQuestions(quizId: string) {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const visible = (
 			await db.table<LocalQuizQuestion>('quizQuestions').where('quizId').equals(quizId).toArray()
 		).filter((q) => !q.deletedAt);
@@ -104,7 +104,7 @@ export function useQuestions(quizId: string) {
 }
 
 export function useAttempts(quizId: string) {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const visible = (
 			await db.table<LocalQuizAttempt>('quizAttempts').where('quizId').equals(quizId).toArray()
 		).filter((a) => !a.deletedAt);

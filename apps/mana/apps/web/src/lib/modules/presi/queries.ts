@@ -4,7 +4,7 @@
  * Uses prefixed table names: presiDecks, slides.
  */
 
-import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
 import { decryptRecord, decryptRecords } from '$lib/data/crypto';
@@ -40,7 +40,7 @@ export function toSlide(local: LocalSlide): Slide {
 
 /** All decks, sorted by updatedAt descending. Auto-updates on any change. */
 export function useAllDecks() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const visible = (
 			await scopedForModule<LocalDeck, string>('presi', 'presiDecks').toArray()
 		).filter((d) => !d.deletedAt);
@@ -53,7 +53,7 @@ export function useAllDecks() {
 
 /** Slides for a specific deck, sorted by order. Auto-updates on any change. */
 export function useDeckSlides(deckId: string) {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const visible = (
 			await db.table<LocalSlide>('slides').where('deckId').equals(deckId).toArray()
 		).filter((s) => !s.deletedAt);
@@ -64,7 +64,7 @@ export function useDeckSlides(deckId: string) {
 
 /** Single deck by ID. Auto-updates on any change. */
 export function useDeck(id: string) {
-	return useLiveQueryWithDefault(
+	return useScopedLiveQuery(
 		async () => {
 			const local = await db.table<LocalDeck>('presiDecks').get(id);
 			if (!local || local.deletedAt) return null;

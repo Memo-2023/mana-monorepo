@@ -2,27 +2,27 @@
  * Wetter module read-side — Dexie liveQuery hooks for locations.
  */
 
-import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
 import type { WeatherLocation, WeatherSettings } from './types';
 
 export function useLocations() {
-	return useLiveQueryWithDefault(
+	return useScopedLiveQuery(
 		() => scopedForModule<WeatherLocation, string>('wetter', 'wetterLocations').sortBy('order'),
 		[] as WeatherLocation[]
 	);
 }
 
 export function useDefaultLocation() {
-	return useLiveQueryWithDefault(
+	return useScopedLiveQuery(
 		() => db.table<WeatherLocation>('wetterLocations').where('isDefault').equals(1).first(),
 		undefined as WeatherLocation | undefined
 	);
 }
 
 export function useSettings() {
-	return useLiveQueryWithDefault(
+	return useScopedLiveQuery(
 		async () => {
 			const settings = await db.table<WeatherSettings>('wetterSettings').get('default');
 			return (

@@ -6,7 +6,7 @@
  * to know which space it's in.
  */
 
-import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
 import { decryptRecords } from '$lib/data/crypto';
 import { scopedForModule, scopedGet } from '$lib/data/scope';
 import { articleTagOps } from './stores/tags.svelte';
@@ -61,7 +61,7 @@ export function toHighlight(local: LocalHighlight): Highlight {
 // ─── Live Queries ─────────────────────────────────────────
 
 export function useAllArticles() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalArticle, string>('articles', 'articles').toArray();
 		const visible = locals.filter((a) => !a.deletedAt);
 		const decrypted = await decryptRecords('articles', visible);
@@ -72,7 +72,7 @@ export function useAllArticles() {
 }
 
 export function useArticle(id: string) {
-	return useLiveQueryWithDefault(
+	return useScopedLiveQuery(
 		async () => {
 			// scopedGet returns undefined if the article belongs to another
 			// space — protects against URL-manipulated deep links.
@@ -91,7 +91,7 @@ export function useArticle(id: string) {
  * table, so the DetailView's TagField stays in sync with both sides.
  */
 export function useArticleTagIds(articleId: string) {
-	return useLiveQueryWithDefault(async () => articleTagOps.getTagIds(articleId), [] as string[]);
+	return useScopedLiveQuery(async () => articleTagOps.getTagIds(articleId), [] as string[]);
 }
 
 /**
@@ -100,7 +100,7 @@ export function useArticleTagIds(articleId: string) {
  * Dexie query regardless of how many articles are shown.
  */
 export function useArticleTagMap(articleIds: string[]) {
-	return useLiveQueryWithDefault(
+	return useScopedLiveQuery(
 		async () => articleTagOps.getTagIdsForMany(articleIds),
 		new Map<string, string[]>()
 	);
@@ -132,7 +132,7 @@ const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
  * articles (needed for title-based top-sites grouping).
  */
 export function useStats() {
-	return useLiveQueryWithDefault(
+	return useScopedLiveQuery(
 		async () => {
 			const [articleRows, highlightRows] = await Promise.all([
 				scopedForModule<LocalArticle, string>('articles', 'articles').toArray(),
@@ -214,7 +214,7 @@ export interface HighlightWithArticle {
 }
 
 export function useAllHighlights() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const [articleRows, highlightRows] = await Promise.all([
 			scopedForModule<LocalArticle, string>('articles', 'articles').toArray(),
 			scopedForModule<LocalHighlight, string>('articles', 'articleHighlights').toArray(),
@@ -250,7 +250,7 @@ export function useAllHighlights() {
 }
 
 export function useArticleHighlights(articleId: string) {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		// scopedForModule returns the scope-filtered Collection; we narrow
 		// to this article in a post-filter (O(highlights per space), tiny).
 		// Using scopedForModule instead of a direct indexed where() keeps the

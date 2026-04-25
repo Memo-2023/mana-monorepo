@@ -6,7 +6,7 @@
  * at init time; no manual fetch/refresh needed.
  */
 
-import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
@@ -99,7 +99,7 @@ export function toWateringLog(local: LocalWateringLog): WateringLog {
 
 /** All plants. Auto-updates on any change. */
 export function useAllPlants() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const visible = (
 			await scopedForModule<LocalPlant, string>('plants', 'plants').toArray()
 		).filter((p) => !p.deletedAt);
@@ -110,7 +110,7 @@ export function useAllPlants() {
 
 /** All plant photos. Auto-updates on any change. */
 export function useAllPlantPhotos() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalPlantPhoto, string>(
 			'plants',
 			'plantPhotos'
@@ -121,7 +121,7 @@ export function useAllPlantPhotos() {
 
 /** All watering schedules. Auto-updates on any change. */
 export function useAllWateringSchedules() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalWateringSchedule, string>(
 			'plants',
 			'wateringSchedules'
@@ -132,7 +132,7 @@ export function useAllWateringSchedules() {
 
 /** All watering logs. Auto-updates on any change. */
 export function useAllWateringLogs() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalWateringLog, string>(
 			'plants',
 			'wateringLogs'
@@ -143,7 +143,7 @@ export function useAllWateringLogs() {
 
 /** All plant↔tag junctions (active only). */
 export function useAllPlantTags() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalPlantTag, string>('plants', 'plantTags').toArray();
 		return locals.filter((t) => !t.deletedAt);
 	}, []);

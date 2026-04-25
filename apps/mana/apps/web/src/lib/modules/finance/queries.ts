@@ -2,7 +2,7 @@
  * Reactive Queries & Pure Helpers for Finance module.
  */
 
-import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
@@ -45,7 +45,7 @@ export function toCategory(local: LocalFinanceCategory): FinanceCategory {
 // ─── Live Queries ──────────────────────────────────────────
 
 export function useAllTransactions() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const visible = (
 			await scopedForModule<LocalTransaction, string>('finance', 'transactions').toArray()
 		).filter((t) => !t.deletedAt);
@@ -57,7 +57,7 @@ export function useAllTransactions() {
 }
 
 export function useAllCategories() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalFinanceCategory, string>(
 			'finance',
 			'financeCategories'

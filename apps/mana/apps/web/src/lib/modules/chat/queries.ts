@@ -7,7 +7,7 @@
  * to the public types so consumers see plaintext.
  */
 
-import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
@@ -69,7 +69,7 @@ export function toMessage(local: LocalMessage): Message {
 
 /** All non-archived conversations, sorted by pinned first then updatedAt desc. */
 export function useAllConversations() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const visible = (
 			await scopedForModule<LocalConversation, string>('chat', 'conversations').toArray()
 		).filter((c) => !c.deletedAt && !c.isArchived);
@@ -80,7 +80,7 @@ export function useAllConversations() {
 
 /** All archived conversations, sorted by updatedAt desc. */
 export function useArchivedConversations() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const visible = (
 			await scopedForModule<LocalConversation, string>('chat', 'conversations').toArray()
 		).filter((c) => !c.deletedAt && c.isArchived);
@@ -93,7 +93,7 @@ export function useArchivedConversations() {
 
 /** All templates, sorted by name. */
 export function useAllTemplates() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const visible = (
 			await scopedForModule<LocalTemplate, string>('chat', 'chatTemplates').toArray()
 		).filter((t) => !t.deletedAt);
@@ -104,7 +104,7 @@ export function useAllTemplates() {
 
 /** Messages for a specific conversation, sorted by createdAt asc. */
 export function useConversationMessages(conversationId: string) {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const visible = (
 			await db
 				.table<LocalMessage>('messages')

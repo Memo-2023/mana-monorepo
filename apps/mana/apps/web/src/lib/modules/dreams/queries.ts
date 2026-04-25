@@ -7,7 +7,7 @@ import { formatDate } from '$lib/i18n/format';
  * then decryptRecords the visible set before mapping to public types.
  */
 
-import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
@@ -63,7 +63,7 @@ export function toDreamSymbol(local: LocalDreamSymbol): DreamSymbol {
 // ─── Live Queries ──────────────────────────────────────────
 
 export function useAllDreams() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const visible = (
 			await scopedForModule<LocalDream, string>('dreams', 'dreams').toArray()
 		).filter((d) => !d.deletedAt && !d.isArchived);
@@ -76,7 +76,7 @@ export function useAllDreams() {
 }
 
 export function useAllDreamSymbols() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const visible = (
 			await scopedForModule<LocalDreamSymbol, string>('dreams', 'dreamSymbols').toArray()
 		).filter((s) => !s.deletedAt);

@@ -2,7 +2,7 @@
  * Reactive queries + pure helpers for the Writing module.
  */
 
-import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
 import { decryptRecords } from '$lib/data/crypto';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
@@ -102,7 +102,7 @@ export function toWritingStyle(local: LocalWritingStyle): WritingStyle {
 // ─── Live Queries ─────────────────────────────────────────
 
 export function useAllDrafts() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalDraft, string>('writing', 'writingDrafts').toArray();
 		const visible = locals.filter((d) => !d.deletedAt);
 		const decrypted = await decryptRecords('writingDrafts', visible);
@@ -111,7 +111,7 @@ export function useAllDrafts() {
 }
 
 export function useDraft(id: string) {
-	return useLiveQueryWithDefault(
+	return useScopedLiveQuery(
 		async () => {
 			if (!id) return null;
 			const row = await db.table<LocalDraft>('writingDrafts').get(id);
@@ -124,7 +124,7 @@ export function useDraft(id: string) {
 }
 
 export function useVersionsForDraft(draftId: string) {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		if (!draftId) return [] as DraftVersion[];
 		const rows = await db
 			.table<LocalDraftVersion>('writingDraftVersions')
@@ -138,7 +138,7 @@ export function useVersionsForDraft(draftId: string) {
 }
 
 export function useVersion(versionId: string) {
-	return useLiveQueryWithDefault(
+	return useScopedLiveQuery(
 		async () => {
 			if (!versionId) return null;
 			const row = await db.table<LocalDraftVersion>('writingDraftVersions').get(versionId);
@@ -157,7 +157,7 @@ export function useVersion(versionId: string) {
  * automatically in the editor.
  */
 export function useCurrentVersionForDraft(draftId: string) {
-	return useLiveQueryWithDefault(
+	return useScopedLiveQuery(
 		async () => {
 			if (!draftId) return null;
 			const draftRow = await db.table<LocalDraft>('writingDrafts').get(draftId);
@@ -174,7 +174,7 @@ export function useCurrentVersionForDraft(draftId: string) {
 }
 
 export function useGenerationsForDraft(draftId: string) {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		if (!draftId) return [] as Generation[];
 		const rows = await db
 			.table<LocalGeneration>('writingGenerations')
@@ -188,7 +188,7 @@ export function useGenerationsForDraft(draftId: string) {
 }
 
 export function useAllStyles() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const rows = await scopedForModule<LocalWritingStyle, string>(
 			'writing',
 			'writingStyles'

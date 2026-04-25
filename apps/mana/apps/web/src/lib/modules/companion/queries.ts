@@ -2,13 +2,13 @@
  * Companion Queries — Reactive reads for conversations and messages.
  */
 
-import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
 import type { LocalConversation, LocalMessage } from './types';
 
 export function useConversations() {
-	return useLiveQueryWithDefault<LocalConversation[]>(async () => {
+	return useScopedLiveQuery<LocalConversation[]>(async () => {
 		try {
 			const all = await scopedForModule<LocalConversation, string>(
 				'companion',
@@ -22,7 +22,7 @@ export function useConversations() {
 }
 
 export function useMessages(conversationId: string) {
-	return useLiveQueryWithDefault<LocalMessage[]>(async () => {
+	return useScopedLiveQuery<LocalMessage[]>(async () => {
 		if (!conversationId) return [];
 		try {
 			return await db

@@ -2,7 +2,7 @@
  * Reactive queries and pure helpers for the Invoices module.
  */
 
-import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
 import { decryptRecords } from '$lib/data/crypto';
 import { scopedForModule } from '$lib/data/scope';
 import type {
@@ -77,7 +77,7 @@ export function toInvoiceClient(local: LocalInvoiceClient): InvoiceClient {
  * and persisting would require a cron to flip it, creating sync churn.
  */
 export function useAllInvoices() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalInvoice, string>('invoices', 'invoices').toArray();
 		const visible = locals.filter((i) => !i.deletedAt);
 		const decrypted = await decryptRecords('invoices', visible);
@@ -95,7 +95,7 @@ export function useAllInvoices() {
 }
 
 export function useInvoiceClients() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalInvoiceClient, string>(
 			'invoices',
 			'invoiceClients'

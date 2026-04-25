@@ -6,7 +6,7 @@
  * at init time; no manual fetch/refresh needed.
  */
 
-import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
 import type { LocalSkill, LocalActivity, LocalAchievement } from './types';
@@ -47,7 +47,7 @@ export function toActivity(local: LocalActivity): Activity {
 
 /** All skills, auto-updates on any change. */
 export function useAllSkills() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalSkill, string>('skilltree', 'skills').toArray();
 		return locals.filter((s) => !s.deletedAt).map(toSkill);
 	}, [] as Skill[]);
@@ -55,7 +55,7 @@ export function useAllSkills() {
 
 /** All activities, auto-updates on any change. */
 export function useAllActivities() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalActivity, string>(
 			'skilltree',
 			'activities'
@@ -66,7 +66,7 @@ export function useAllActivities() {
 
 /** All achievements (raw local records), auto-updates on any change. */
 export function useAllAchievements() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalAchievement, string>(
 			'skilltree',
 			'achievements'

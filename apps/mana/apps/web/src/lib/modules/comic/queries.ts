@@ -8,7 +8,7 @@
  * in this module, panels are picture rows).
  */
 
-import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
 import { scopedForModule } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
 import type { LocalImage, Image } from '$lib/modules/picture/types';
@@ -17,7 +17,7 @@ import { toStory, type ComicStory, type ComicStyle, type LocalComicStory } from 
 
 /** All non-archived, non-deleted stories in the active space, newest first. */
 export function useAllStories() {
-	return useLiveQueryWithDefault<ComicStory[]>(async () => {
+	return useScopedLiveQuery<ComicStory[]>(async () => {
 		const locals = await scopedForModule<LocalComicStory, string>(
 			'comic',
 			'comicStories'
@@ -32,7 +32,7 @@ export function useAllStories() {
 
 /** Stories filtered by style — used by the style-tabs view in M5 list tool. */
 export function useStoriesByStyle(style: ComicStyle) {
-	return useLiveQueryWithDefault<ComicStory[]>(async () => {
+	return useScopedLiveQuery<ComicStory[]>(async () => {
 		const locals = await scopedForModule<LocalComicStory, string>('comic', 'comicStories')
 			.and((row) => row.style === style)
 			.toArray();
@@ -52,7 +52,7 @@ export function useStoriesByStyle(style: ComicStyle) {
  * single-image hook today.
  */
 export function usePanelImage(imageId: string | null) {
-	return useLiveQueryWithDefault<Image | null>(async () => {
+	return useScopedLiveQuery<Image | null>(async () => {
 		if (!imageId) return null;
 		const locals = await scopedForModule<LocalImage, string>('picture', 'images')
 			.and((row) => row.id === imageId)
@@ -66,7 +66,7 @@ export function usePanelImage(imageId: string | null) {
 
 /** A single story by id, live-updating. Null while loading / missing. */
 export function useStory(id: string | null) {
-	return useLiveQueryWithDefault<ComicStory | null>(async () => {
+	return useScopedLiveQuery<ComicStory | null>(async () => {
 		if (!id) return null;
 		const locals = await scopedForModule<LocalComicStory, string>('comic', 'comicStories')
 			.and((row) => row.id === id)
@@ -87,7 +87,7 @@ export function useStory(id: string | null) {
  * ordered list but not deleted.
  */
 export function useStoryPanels(storyId: string | null) {
-	return useLiveQueryWithDefault<Image[]>(async () => {
+	return useScopedLiveQuery<Image[]>(async () => {
 		if (!storyId) return [];
 		const locals = await scopedForModule<LocalImage, string>('picture', 'images')
 			.and((row) => row.comicStoryId === storyId)
@@ -111,7 +111,7 @@ export function useStoriesByInput(
 	module: 'journal' | 'notes' | 'library' | 'writing' | 'calendar' | null,
 	entryId: string | null
 ) {
-	return useLiveQueryWithDefault<ComicStory[]>(async () => {
+	return useScopedLiveQuery<ComicStory[]>(async () => {
 		if (!module || !entryId) return [];
 		const locals = await scopedForModule<LocalComicStory, string>(
 			'comic',

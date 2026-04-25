@@ -4,7 +4,7 @@
  * Read-side only — mutations live in stores/stretch.svelte.ts.
  */
 
-import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
 import { decryptRecords } from '$lib/data/crypto';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
@@ -109,7 +109,7 @@ export function toStretchReminder(local: LocalStretchReminder): StretchReminder 
 // ─── Live Queries ───────────────────────────────────────────
 
 export function useAllStretchExercises() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalStretchExercise, string>(
 			'stretch',
 			'stretchExercises'
@@ -121,7 +121,7 @@ export function useAllStretchExercises() {
 }
 
 export function useAllStretchRoutines() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalStretchRoutine, string>(
 			'stretch',
 			'stretchRoutines'
@@ -133,7 +133,7 @@ export function useAllStretchRoutines() {
 }
 
 export function useAllStretchSessions() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalStretchSession, string>(
 			'stretch',
 			'stretchSessions'
@@ -145,7 +145,7 @@ export function useAllStretchSessions() {
 }
 
 export function useAllStretchAssessments() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalStretchAssessment, string>(
 			'stretch',
 			'stretchAssessments'
@@ -159,7 +159,7 @@ export function useAllStretchAssessments() {
 }
 
 export function useAllStretchReminders() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalStretchReminder, string>(
 			'stretch',
 			'stretchReminders'

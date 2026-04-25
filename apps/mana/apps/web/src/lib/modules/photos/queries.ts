@@ -4,7 +4,7 @@
  * Uses Dexie liveQuery on the unified DB.
  */
 
-import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
 import type { LocalAlbum, LocalAlbumItem, LocalFavorite, Album, AlbumItem } from './types';
@@ -42,7 +42,7 @@ export function toAlbumItem(local: LocalAlbumItem): AlbumItem {
 
 /** All albums. Auto-updates on any change. */
 export function useAllAlbums() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalAlbum, string>('photos', 'albums').toArray();
 		return locals.filter((a) => !a.deletedAt).map(toAlbum);
 	}, []);
@@ -50,7 +50,7 @@ export function useAllAlbums() {
 
 /** All album items. Auto-updates on any change. */
 export function useAllAlbumItems() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalAlbumItem, string>('photos', 'albumItems').toArray();
 		return locals.filter((i) => !i.deletedAt).map(toAlbumItem);
 	}, []);
@@ -58,7 +58,7 @@ export function useAllAlbumItems() {
 
 /** All favorites. Auto-updates on any change. */
 export function useAllFavorites() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalFavorite, string>(
 			'photos',
 			'photoFavorites'

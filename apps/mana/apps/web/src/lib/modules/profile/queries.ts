@@ -7,7 +7,7 @@
  * visible pool without any query re-write.
  */
 
-import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
 import { decryptRecords } from '$lib/data/crypto';
 import { scopedForModule } from '$lib/data/scope';
 import { userContextTable } from './collections';
@@ -24,7 +24,7 @@ import {
 
 /** Reactive live-query for the user context singleton. */
 export function useUserContext() {
-	return useLiveQueryWithDefault<UserContext | null>(async () => {
+	return useScopedLiveQuery<UserContext | null>(async () => {
 		const local = await userContextTable.get(USER_CONTEXT_SINGLETON_ID);
 		if (!local || local.deletedAt) return null;
 		const [decrypted] = await decryptRecords('userContext', [local]);
@@ -38,7 +38,7 @@ export function useUserContext() {
  * query re-runs automatically when the active space changes.
  */
 export function useAllMeImages() {
-	return useLiveQueryWithDefault<MeImage[]>(async () => {
+	return useScopedLiveQuery<MeImage[]>(async () => {
 		const locals = await scopedForModule<LocalMeImage, string>('profile', 'meImages').toArray();
 		const visible = locals
 			.filter((row) => !row.deletedAt)
@@ -52,7 +52,7 @@ export function useAllMeImages() {
  * Me-images in the active space filtered by `kind`.
  */
 export function useMeImagesByKind(kind: MeImageKind) {
-	return useLiveQueryWithDefault<MeImage[]>(async () => {
+	return useScopedLiveQuery<MeImage[]>(async () => {
 		const locals = await scopedForModule<LocalMeImage, string>('profile', 'meImages')
 			.and((row) => row.kind === kind)
 			.toArray();
@@ -71,7 +71,7 @@ export function useMeImagesByKind(kind: MeImageKind) {
  * isn't here, it must not be sent to OpenAI.
  */
 export function useReferenceImages() {
-	return useLiveQueryWithDefault<MeImage[]>(async () => {
+	return useScopedLiveQuery<MeImage[]>(async () => {
 		const locals = await scopedForModule<LocalMeImage, string>('profile', 'meImages').toArray();
 		const visible = locals
 			.filter((row) => !row.deletedAt && row.usage?.aiReference === true)
@@ -89,7 +89,7 @@ export function useReferenceImages() {
  * local to that space.
  */
 export function useImageByPrimary(slot: MeImagePrimarySlot) {
-	return useLiveQueryWithDefault<MeImage | null>(async () => {
+	return useScopedLiveQuery<MeImage | null>(async () => {
 		const locals = await scopedForModule<LocalMeImage, string>('profile', 'meImages')
 			.and((row) => row.primaryFor === slot)
 			.toArray();

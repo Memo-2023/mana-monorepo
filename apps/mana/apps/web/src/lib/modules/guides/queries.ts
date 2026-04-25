@@ -5,7 +5,7 @@
  * content fields on the fly before handing to the UI.
  */
 
-import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
@@ -78,7 +78,7 @@ export function toRun(local: LocalRun): Run {
 // ─── Live Queries ──────────────────────────────────────────
 
 export function useAllGuides() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const all = await scopedForModule<LocalGuide, string>('guides', 'guides').toArray();
 		const visible = all.filter((g) => !g.deletedAt);
 		const decrypted = await decryptRecords('guides', visible);
@@ -87,7 +87,7 @@ export function useAllGuides() {
 }
 
 export function useGuide(id: () => string) {
-	return useLiveQueryWithDefault(
+	return useScopedLiveQuery(
 		async () => {
 			const guideId = id();
 			if (!guideId) return null;
@@ -101,7 +101,7 @@ export function useGuide(id: () => string) {
 }
 
 export function useSections(guideId: () => string) {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const gid = guideId();
 		if (!gid) return [];
 		const all = await db.table<LocalSection>('sections').where('guideId').equals(gid).toArray();
@@ -112,7 +112,7 @@ export function useSections(guideId: () => string) {
 }
 
 export function useSteps(guideId: () => string) {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const gid = guideId();
 		if (!gid) return [];
 		const all = await db.table<LocalStep>('steps').where('guideId').equals(gid).toArray();
@@ -123,7 +123,7 @@ export function useSteps(guideId: () => string) {
 }
 
 export function useLatestRun(guideId: () => string) {
-	return useLiveQueryWithDefault(
+	return useScopedLiveQuery(
 		async () => {
 			const gid = guideId();
 			if (!gid) return null;
@@ -138,7 +138,7 @@ export function useLatestRun(guideId: () => string) {
 }
 
 export function useRunsByGuide() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const all = await scopedForModule<LocalRun, string>('guides', 'runs').toArray();
 		const visible = all.filter((r) => !r.deletedAt);
 		const map = new Map<string, Run>();

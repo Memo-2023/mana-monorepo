@@ -2,7 +2,7 @@
  * Reactive queries & pure helpers for Contacts — uses Dexie liveQuery on the unified DB.
  */
 
-import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
 import { db } from '$lib/data/database';
 import { scopedForModule, applyVisibility } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
@@ -53,7 +53,7 @@ export function toContact(local: LocalContact): Contact {
 // ─── Live Queries ──────────────────────────────────────────
 
 export function useAllContacts() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const raw = await scopedForModule<LocalContact, string>('contacts', 'contacts').toArray();
 		const visible = applyVisibility(raw).filter((c) => !c.deletedAt);
 		const decrypted = await decryptRecords('contacts', visible);

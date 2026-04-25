@@ -1052,15 +1052,31 @@ db.version(44).stores({
 	comicStories: 'id, createdAt, style, isFavorite, isArchived',
 });
 
-// v45 — Infra table `_scopeCursor` (see data/scope/cursor.ts for the
-// full rationale). Single-row beacon that every scoped query touches
-// so Dexie's liveQuery subscribes to it; bumped on every
-// setActiveSpace. Without this, scope changes were invisible to
-// liveQueries and modules rendered empty on first mount until an
-// unrelated write re-triggered the querier. NOT in SYNC_APP_MAP —
-// it's a client-side liveness signal, not user data.
+// v45 → v46: scope-cursor bridge superseded by `useScopedLiveQuery`.
+//
+// v45 introduced a `_scopeCursor` infra table as a Dexie-side beacon
+// for active-space / current-user changes — every scoped query touched
+// it so Dexie's liveQuery subscribed to it, every setActiveSpace
+// bumped it. Worked, but smelled: hidden side-effect inside scopedTable,
+// scope state pretending to be a Dexie row, +1 roundtrip per query.
+//
+// The clean replacement: `data/scope/use-scoped-live-query.svelte.ts`
+// wraps liveQuery in a Svelte 5 `$effect` that reads the scope state
+// directly. Runes auto-track those reads, so a scope change tears
+// down the previous Dexie subscription and creates a fresh one — no
+// bridge table needed. Both `active-space.svelte.ts#active` and
+// `current-user.svelte.ts#currentUserId` are `$state` so the tracking
+// just works.
+//
+// v45 stays declared so existing Dexie databases keep their version
+// chain intact; v46 drops the table by passing `null` (Dexie idiom
+// for "delete this store"). Safe because `_scopeCursor` only ever
+// held a transient `{id, bumpedAt}` row — no user data lost.
 db.version(45).stores({
 	_scopeCursor: 'id',
+});
+db.version(46).stores({
+	_scopeCursor: null,
 });
 
 // ─── Sync Routing ──────────────────────────────────────────

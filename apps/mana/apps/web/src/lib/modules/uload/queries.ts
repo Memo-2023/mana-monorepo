@@ -6,7 +6,7 @@
  */
 
 import { liveQuery } from 'dexie';
-import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
 import { decryptRecord, decryptRecords } from '$lib/data/crypto';
@@ -165,7 +165,7 @@ export function allLinkTags$() {
 // ─── Svelte 5 Reactive Hooks ──────────────────────────────
 
 export function useAllLinks() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalLink, string>('uload', 'links').toArray();
 		const visible = locals.filter((l) => !l.deletedAt);
 		const decrypted = await decryptRecords('links', visible);
@@ -174,14 +174,14 @@ export function useAllLinks() {
 }
 
 export function useAllTags() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalTag, string>('uload', 'uloadTags').toArray();
 		return locals.filter((t) => !t.deletedAt).map(toTag);
 	}, [] as Tag[]);
 }
 
 export function useAllFolders() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalFolder, string>('uload', 'uloadFolders').sortBy(
 			'order'
 		);
@@ -190,14 +190,14 @@ export function useAllFolders() {
 }
 
 export function useAllLinkTags() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalLinkTag, string>('uload', 'linkTags').toArray();
 		return locals.filter((lt) => !lt.deletedAt).map(toLinkTag);
 	}, [] as LinkTag[]);
 }
 
 export function useLinkById(id: string) {
-	return useLiveQueryWithDefault(
+	return useScopedLiveQuery(
 		async () => {
 			if (!id) return null;
 			const local = await db.table<LocalLink>('links').get(id);
