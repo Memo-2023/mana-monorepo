@@ -1079,6 +1079,29 @@ db.version(46).stores({
 	_scopeCursor: null,
 });
 
+// v48 — One-shot dedup of duplicate "Home" scenes that the seeding race
+// in `stores/workbench-scenes.svelte.ts` has been accumulating since the
+// Spaces-Foundation migration shipped 2026-04-22. The seeder writes new
+// scenes without `spaceId`, so the creating-hook stamps them with the
+// `_personal:<userId>` sentinel. The dedup check in
+// `onActiveSpaceChanged` filters by the *real* space UUID and never
+// finds them — every login adds another Home row.
+//
+// This upgrade is the soft cleanup. The structural fix (per-space-seeds
+// registry + deterministic ids + creating-hook hardening) ships in
+// follow-up commits — see docs/plans/workbench-seeding-cleanup.md.
+//
+// No schema/index change. The upgrade only soft-deletes the loser rows
+// (sets `deletedAt`) so mana-sync propagates the cleanup to other
+// devices instead of resurrecting them on next pull.
+db.version(48).upgrade(async (tx) => {
+	const { dedupHomeScenesOn } = await import('./scope/dedup-workbench-scenes');
+	const removed = await dedupHomeScenesOn(tx.table('workbenchScenes'));
+	if (removed > 0) {
+		console.info(`[workbench-scenes v48] deduped ${removed} duplicate Home scenes`);
+	}
+});
+
 // ─── Sync Routing ──────────────────────────────────────────
 // SYNC_APP_MAP, TABLE_TO_SYNC_NAME, TABLE_TO_APP, SYNC_NAME_TO_TABLE,
 // toSyncName() and fromSyncName() are now derived from per-module
