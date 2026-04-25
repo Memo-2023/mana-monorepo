@@ -333,30 +333,35 @@ export function buildTitleSuggestionPrompt(input: TitleSuggestionInput): PromptP
 
 /**
  * Strip common LLM-output artefacts (wrapping quotes, trailing period,
- * trailing newline) from a single suggested title. Keeps the result
- * usable as a one-shot drop-in.
+ * "Titel:" prefix) from a single suggested title. Iterative until
+ * stable so combined artefacts (e.g. `Titel: "Hello World".`) all get
+ * cleaned in one call. Keeps `?` / `!` intact — those may be intentional
+ * for blog/social titles.
  */
+const QUOTE_OPENS = new Set(['"', "'", '„', '«', '‚', '“', '‘']);
+const QUOTE_CLOSES = new Set(['"', "'", '“', '»', '‘', '„', '‚']);
+
 export function cleanSuggestedTitle(raw: string): string {
 	let out = raw.trim();
-	// Strip wrapping quotes — straight or curly, single or double.
-	const QUOTE_PAIRS: Array<[string, string]> = [
-		['"', '"'],
-		["'", "'"],
-		['„', '“'],
-		['«', '»'],
-		['‚', '‘'],
-	];
-	for (const [open, close] of QUOTE_PAIRS) {
-		if (out.startsWith(open) && out.endsWith(close) && out.length >= open.length + close.length) {
-			out = out.slice(open.length, out.length - close.length).trim();
-			break;
+	let stable = false;
+	let iterations = 0;
+	while (!stable && iterations < 5) {
+		const before = out;
+		// Strip a single leading quote char (any common variant).
+		if (out.length >= 2 && QUOTE_OPENS.has(out[0])) {
+			out = out.slice(1).trim();
 		}
+		// Strip a single trailing quote char.
+		if (out.length >= 1 && QUOTE_CLOSES.has(out[out.length - 1])) {
+			out = out.slice(0, -1).trim();
+		}
+		// Drop a "Titel:" / "Title:" prefix if the model adds one despite
+		// the instruction.
+		out = out.replace(/^(?:Titel|Title)\s*:\s*/i, '').trim();
+		// Strip terminal full stop only — keep "?" / "!" / "..".
+		if (out.endsWith('.') && !out.endsWith('..')) out = out.slice(0, -1).trim();
+		stable = out === before;
+		iterations++;
 	}
-	// Drop a "Titel:" / "Title:" prefix if the model adds one despite the
-	// instruction.
-	out = out.replace(/^(?:Titel|Title)\s*:\s*/i, '').trim();
-	// Strip terminal full stop only — keep "?" / "!" because they may be
-	// intentional for blog/social titles.
-	if (out.endsWith('.') && !out.endsWith('..')) out = out.slice(0, -1).trim();
 	return out;
 }

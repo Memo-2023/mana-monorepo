@@ -1086,7 +1086,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#0ea5e9',
 		comingSoon: false,
 		status: 'development',
-		requiredTier: 'guest', // LOCAL TIER PATCH — revert to 'beta' before release
+		requiredTier: 'beta',
 	},
 	{
 		id: 'broadcast',

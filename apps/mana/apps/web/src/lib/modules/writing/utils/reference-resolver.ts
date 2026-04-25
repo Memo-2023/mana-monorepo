@@ -65,7 +65,9 @@ async function resolveArticle(
 	return {
 		sourceLabel: `Artikel: ${siteName}${article.title}`,
 		title: article.title,
-		content: truncate(article.content ?? article.excerpt ?? ''),
+		// `||` (not `??`) so empty-string content falls through to excerpt;
+		// articles with extraction failures often have content === ''.
+		content: truncate(article.content || article.excerpt || ''),
 	};
 }
 
