@@ -15,14 +15,19 @@
  * with a note, not truncated mid-sentence.
  */
 
-import { scopedGet } from '$lib/data/scope';
+import { scopedGet, scopedForModule } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
+import { db } from '$lib/data/database';
 import { toArticle } from '$lib/modules/articles/queries';
 import { toNote } from '$lib/modules/notes/queries';
 import { toLibraryEntry } from '$lib/modules/library/queries';
+import { toKontextDoc } from '$lib/modules/kontext/queries';
 import type { LocalArticle } from '$lib/modules/articles/types';
 import type { LocalNote } from '$lib/modules/notes/types';
 import type { LocalLibraryEntry } from '$lib/modules/library/types';
+import type { LocalKontextDoc } from '$lib/modules/kontext/types';
+import type { LocalMeImage } from '$lib/modules/profile/types';
+import type { LocalGoal } from '$lib/companion/goals/types';
 import type { DraftReference } from '../types';
 
 const MAX_CHARS_PER_REF = 1500;
@@ -126,6 +131,67 @@ function resolveUrl(ref: DraftReference): Omit<ResolvedReference, 'kind' | 'note
 	};
 }
 
+/**
+ * Kontext is a per-space singleton — the picker stores a sentinel
+ * targetId ('singleton'), and the resolver ignores it and picks the
+ * first non-deleted row scoped to the active space. Legacy rows use
+ * id='singleton' explicitly; fresh rows use a uuid but are still
+ * singular per space.
+ */
+async function resolveKontext(): Promise<Omit<ResolvedReference, 'kind' | 'note'> | null> {
+	const rows = await scopedForModule<LocalKontextDoc, string>('kontext', 'kontextDoc').toArray();
+	const local = rows.find((r) => !r.deletedAt);
+	if (!local) return null;
+	const [decrypted] = await decryptRecords('kontextDoc', [local]);
+	if (!decrypted) return null;
+	const doc = toKontextDoc(decrypted);
+	return {
+		sourceLabel: 'Kontext-Dokument des Spaces',
+		title: 'Kontext',
+		content: truncate(doc.content ?? ''),
+	};
+}
+
+async function resolveGoal(id: string): Promise<Omit<ResolvedReference, 'kind' | 'note'> | null> {
+	// Goals are plaintext today (companionGoals is on the plaintext-allowlist),
+	// so no decryption is needed. If that ever flips, this function gets the
+	// same decryptRecords call as the others.
+	const local = await db.table<LocalGoal>('companionGoals').get(id);
+	if (!local || local.deletedAt) return null;
+	const parts: string[] = [];
+	if (local.description) parts.push(local.description);
+	parts.push(
+		`Status: ${local.status}. Ziel: ${local.target.value} (${local.target.period}), aktuell: ${local.currentValue}.`
+	);
+	return {
+		sourceLabel: `Ziel: ${local.title}`,
+		title: local.title,
+		content: truncate(parts.join('\n')),
+	};
+}
+
+async function resolveMeImage(
+	id: string
+): Promise<Omit<ResolvedReference, 'kind' | 'note'> | null> {
+	const local = await scopedGet<LocalMeImage>('meImages', id);
+	if (!local || local.deletedAt) return null;
+	const [decrypted] = await decryptRecords('meImages', [local]);
+	if (!decrypted) return null;
+	// Me-images carry a user-written label + tag chips (encrypted) plus a
+	// structural `kind` (plaintext: face / fullbody / halfbody / hands /
+	// reference). For prose we hand the descriptor to the model, not the
+	// binary — the model couldn't use the image anyway. The label nudges
+	// tone/scene; a blog post "über mich" benefits from knowing "Portrait
+	// Juni, ohne Brille, Studio".
+	const tags = (decrypted.tags ?? []).join(', ');
+	const descriptor = [decrypted.label, tags].filter(Boolean).join(' — ');
+	return {
+		sourceLabel: `Bild (${local.kind}): ${decrypted.label ?? 'ohne Label'}`,
+		title: decrypted.label ?? local.kind,
+		content: truncate(descriptor || `${local.kind}-Referenzbild`),
+	};
+}
+
 export async function resolveReference(ref: DraftReference): Promise<ResolvedReference | null> {
 	switch (ref.kind) {
 		case 'article': {
@@ -147,7 +213,20 @@ export async function resolveReference(ref: DraftReference): Promise<ResolvedRef
 			const base = resolveUrl(ref);
 			return base ? { ...base, kind: 'url', note: ref.note ?? null } : null;
 		}
-		// kontext / goal / me-image — roadmap, not M5.
+		case 'kontext': {
+			const base = await resolveKontext();
+			return base ? { ...base, kind: 'kontext', note: ref.note ?? null } : null;
+		}
+		case 'goal': {
+			if (!ref.targetId) return null;
+			const base = await resolveGoal(ref.targetId);
+			return base ? { ...base, kind: 'goal', note: ref.note ?? null } : null;
+		}
+		case 'me-image': {
+			if (!ref.targetId) return null;
+			const base = await resolveMeImage(ref.targetId);
+			return base ? { ...base, kind: 'me-image', note: ref.note ?? null } : null;
+		}
 		default:
 			return null;
 	}

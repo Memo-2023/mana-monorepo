@@ -2,12 +2,15 @@
   ReferencePicker — inline "Quellen" section inside the briefing form.
   Shows the currently-attached references as ReferenceChip pills (with
   live-resolved display labels) and a "+ Quelle" dropdown for adding
-  new ones. M5 supports four kinds:
+  new ones. Seven kinds:
 
     - article   → searchable list of saved articles
     - note      → searchable list of notes
     - library   → searchable list of library entries
     - url       → freeform URL input + optional context note
+    - kontext   → space's kontext-doc singleton (one-click add)
+    - goal      → searchable list of goals
+    - me-image  → searchable list of profile reference images
 
   The parent owns the references array and wires it to the draft via
   BriefingForm's save handler.
@@ -16,11 +19,25 @@
 	import { useAllArticles } from '$lib/modules/articles/queries';
 	import { useAllNotes } from '$lib/modules/notes/queries';
 	import { useAllEntries as useAllLibraryEntries } from '$lib/modules/library/queries';
+	import { useKontextDoc } from '$lib/modules/kontext/queries';
+	import { useAllMeImages } from '$lib/modules/profile/queries';
+	import { useAllGoals } from '$lib/companion/goals/queries';
 	import ReferenceChip from './ReferenceChip.svelte';
 	import type { DraftReference, DraftReferenceKind } from '../types';
 
-	const SUPPORTED_KINDS: DraftReferenceKind[] = ['article', 'note', 'library', 'url'];
+	const SUPPORTED_KINDS: DraftReferenceKind[] = [
+		'article',
+		'note',
+		'library',
+		'url',
+		'kontext',
+		'goal',
+		'me-image',
+	];
 	const MAX_REFERENCES = 6;
+	/** Sentinel targetId for the kontext-singleton — the resolver doesn't
+	 *  use it, but a non-null id keeps the de-dupe + chip-key logic uniform. */
+	const KONTEXT_SINGLETON_ID = 'kontext:singleton';
 
 	let {
 		references,
@@ -33,14 +50,21 @@
 	const articles$ = useAllArticles();
 	const notes$ = useAllNotes();
 	const library$ = useAllLibraryEntries();
+	const kontext$ = useKontextDoc();
+	const meImages$ = useAllMeImages();
+	const goals$ = useAllGoals();
 
 	// Lookup maps so chips can resolve their display label from targetId.
 	const articlesById = $derived(new Map((articles$.value ?? []).map((a) => [a.id, a])));
 	const notesById = $derived(new Map((notes$.value ?? []).map((n) => [n.id, n])));
 	const libraryById = $derived(new Map((library$.value ?? []).map((e) => [e.id, e])));
+	const meImagesById = $derived(new Map((meImages$.value ?? []).map((m) => [m.id, m])));
+	const goalsById = $derived(new Map((goals$.value ?? []).map((g) => [g.id, g])));
+	const kontextDoc = $derived(kontext$.value);
 
 	function labelFor(ref: DraftReference): string {
 		if (ref.kind === 'url') return ref.url ?? 'Link';
+		if (ref.kind === 'kontext') return 'Kontext-Dokument';
 		if (!ref.targetId) return '—';
 		if (ref.kind === 'article') {
 			const a = articlesById.get(ref.targetId);
@@ -54,10 +78,26 @@
 			const e = libraryById.get(ref.targetId);
 			return e ? e.title : 'Library-Eintrag (fehlt)';
 		}
+		if (ref.kind === 'goal') {
+			const g = goalsById.get(ref.targetId);
+			return g ? g.title : 'Ziel (fehlt)';
+		}
+		if (ref.kind === 'me-image') {
+			const m = meImagesById.get(ref.targetId);
+			return m ? (m.label ?? `${m.kind}-Bild`) : 'Bild (fehlt)';
+		}
 		return ref.targetId;
 	}
 
-	type PickerMode = 'closed' | 'article' | 'note' | 'library' | 'url';
+	type PickerMode =
+		| 'closed'
+		| 'article'
+		| 'note'
+		| 'library'
+		| 'url'
+		| 'kontext'
+		| 'goal'
+		| 'me-image';
 	let mode = $state<PickerMode>('closed');
 	let searchQuery = $state('');
 	let urlInput = $state('');
@@ -126,6 +166,45 @@
 			.slice(0, 20);
 	});
 
+	const filteredGoals = $derived.by(() => {
+		const q = searchQuery.trim().toLowerCase();
+		const all = goals$.value ?? [];
+		// Active goals are most relevant for writing context — sort them
+		// to the top, then archived/done as a secondary group.
+		const visible = all.filter((g) => !g.deletedAt);
+		const sorted = [...visible].sort((a, b) => {
+			const aRank = a.status === 'active' ? 0 : 1;
+			const bRank = b.status === 'active' ? 0 : 1;
+			return aRank - bRank;
+		});
+		if (!q) return sorted.slice(0, 20);
+		return sorted
+			.filter(
+				(g) =>
+					g.title.toLowerCase().includes(q) || (g.description?.toLowerCase().includes(q) ?? false)
+			)
+			.slice(0, 20);
+	});
+
+	const filteredMeImages = $derived.by(() => {
+		const q = searchQuery.trim().toLowerCase();
+		const all = meImages$.value ?? [];
+		if (!q) return all.slice(0, 20);
+		return all
+			.filter(
+				(m) =>
+					(m.label?.toLowerCase().includes(q) ?? false) ||
+					m.kind.toLowerCase().includes(q) ||
+					m.tags.some((t) => t.toLowerCase().includes(q))
+			)
+			.slice(0, 20);
+	});
+
+	function addKontext() {
+		if (!kontextDoc) return;
+		addRef({ kind: 'kontext', targetId: KONTEXT_SINGLETON_ID, note: null });
+	}
+
 	function addUrl() {
 		const url = urlInput.trim();
 		if (!url) return;
@@ -160,6 +239,9 @@
 					{#if k === 'article'}📄 Artikel
 					{:else if k === 'note'}📝 Notiz
 					{:else if k === 'library'}📚 Library
+					{:else if k === 'kontext'}🗂 Kontext
+					{:else if k === 'goal'}🎯 Ziel
+					{:else if k === 'me-image'}🖼 Bild
 					{:else}🔗 URL{/if}
 				</button>
 			{/each}
@@ -170,7 +252,7 @@
 		</p>
 	{/if}
 
-	{#if mode === 'article' || mode === 'note' || mode === 'library'}
+	{#if mode === 'article' || mode === 'note' || mode === 'library' || mode === 'goal' || mode === 'me-image'}
 		<div class="search">
 			<!-- svelte-ignore a11y_autofocus -->
 			<input type="search" bind:value={searchQuery} placeholder="Suche…" autofocus />
@@ -231,8 +313,67 @@
 							</button>
 						{/each}
 					{/if}
+				{:else if mode === 'goal'}
+					{#if filteredGoals.length === 0}
+						<p class="muted small">Keine Ziele angelegt.</p>
+					{:else}
+						{#each filteredGoals as g (g.id)}
+							<button
+								type="button"
+								class="result"
+								onclick={() => addRef({ kind: 'goal', targetId: g.id, note: null })}
+							>
+								<strong>{g.title}</strong>
+								<span class="meta">
+									{g.status} · {g.currentValue}/{g.target.value}
+									{g.target.period}
+								</span>
+							</button>
+						{/each}
+					{/if}
+				{:else if mode === 'me-image'}
+					{#if filteredMeImages.length === 0}
+						<p class="muted small">Keine Bilder. Lege welche unter /profile/me-images an.</p>
+					{:else}
+						{#each filteredMeImages as m (m.id)}
+							<button
+								type="button"
+								class="result me-image-result"
+								onclick={() => addRef({ kind: 'me-image', targetId: m.id, note: null })}
+							>
+								{#if m.thumbnailUrl || m.publicUrl}
+									<img src={m.thumbnailUrl ?? m.publicUrl} alt="" class="thumb" />
+								{/if}
+								<span class="me-image-text">
+									<strong>{m.label ?? `${m.kind}-Bild`}</strong>
+									<span class="meta">
+										{m.kind}{#if m.tags.length}
+											· {m.tags.join(', ')}
+										{/if}
+									</span>
+								</span>
+							</button>
+						{/each}
+					{/if}
 				{/if}
 			</div>
+		</div>
+	{:else if mode === 'kontext'}
+		<div class="search">
+			{#if !kontextDoc}
+				<p class="muted small">
+					Dieser Space hat noch kein Kontext-Dokument. Lege eines unter
+					<a href="/kontext">/kontext</a> an.
+				</p>
+			{:else}
+				<button type="button" class="result" onclick={addKontext}>
+					<strong>Kontext-Dokument verknüpfen</strong>
+					<span class="meta">
+						{(kontextDoc.content ?? '').slice(0, 100).replace(/\s+/g, ' ')}
+						{(kontextDoc.content ?? '').length > 100 ? '…' : ''}
+					</span>
+				</button>
+			{/if}
 		</div>
 	{:else if mode === 'url'}
 		<div class="url-row">
@@ -342,6 +483,24 @@
 	.result .meta {
 		font-size: 0.75rem;
 		color: var(--color-text-muted, rgba(0, 0, 0, 0.55));
+	}
+	.me-image-result {
+		flex-direction: row;
+		gap: 0.55rem;
+		align-items: center;
+	}
+	.me-image-result .thumb {
+		width: 2.5rem;
+		height: 2.5rem;
+		border-radius: 0.4rem;
+		object-fit: cover;
+		flex-shrink: 0;
+	}
+	.me-image-text {
+		display: flex;
+		flex-direction: column;
+		gap: 0.1rem;
+		min-width: 0;
 	}
 	.url-row {
 		display: flex;
