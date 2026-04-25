@@ -88,8 +88,8 @@
 		gap: 0.6rem;
 		padding: 0.75rem 1rem;
 		border-radius: 0.65rem;
-		border: 1px solid color-mix(in srgb, #0ea5e9 40%, transparent);
-		background: color-mix(in srgb, #0ea5e9 5%, transparent);
+		border: 1px solid hsl(var(--color-primary) / 0.4);
+		background: hsl(var(--color-primary) / 0.05);
 	}
 	.panel.error {
 		border-color: color-mix(in srgb, #ef4444 50%, transparent);
@@ -111,7 +111,7 @@
 		width: 0.55rem;
 		height: 0.55rem;
 		border-radius: 999px;
-		background: #0ea5e9;
+		background: hsl(var(--color-primary));
 	}
 	.panel.running .dot {
 		animation: pulse 1.1s ease-in-out infinite;
@@ -131,7 +131,7 @@
 		}
 	}
 	.muted {
-		color: var(--color-text-muted, rgba(0, 0, 0, 0.55));
+		color: hsl(var(--color-muted-foreground));
 	}
 	.err-label {
 		color: #ef4444;
@@ -155,15 +155,15 @@
 		font-size: 0.7rem;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
-		color: var(--color-text-muted, rgba(0, 0, 0, 0.55));
+		color: hsl(var(--color-muted-foreground));
 		font-weight: 500;
 	}
 	.text {
 		margin: 0;
 		padding: 0.5rem 0.7rem;
 		border-radius: 0.45rem;
-		border: 1px solid var(--color-border, rgba(0, 0, 0, 0.08));
-		background: var(--color-surface, rgba(255, 255, 255, 0.9));
+		border: 1px solid hsl(var(--color-border));
+		background: hsl(var(--color-surface));
 		font-size: 0.85rem;
 		line-height: 1.5;
 		white-space: pre-wrap;
@@ -171,8 +171,8 @@
 		overflow-y: auto;
 	}
 	.text.refined {
-		border-color: color-mix(in srgb, #0ea5e9 50%, transparent);
-		background: color-mix(in srgb, #0ea5e9 3%, var(--color-surface, white));
+		border-color: hsl(var(--color-primary) / 0.5);
+		background: hsl(var(--color-primary) / 0.03);
 	}
 	.text.italic {
 		font-style: italic;
@@ -195,21 +195,21 @@
 		font-size: 0.85rem;
 	}
 	footer .primary {
-		background: #0ea5e9;
+		background: hsl(var(--color-primary));
 		color: white;
-		border: 1px solid #0ea5e9;
+		border: 1px solid hsl(var(--color-primary));
 	}
 	footer .primary:hover {
-		background: #0284c7;
-		border-color: #0284c7;
+		background: hsl(var(--color-primary));
+		border-color: hsl(var(--color-primary));
 	}
 	footer .secondary {
 		background: transparent;
 		color: inherit;
-		border: 1px solid var(--color-border, rgba(0, 0, 0, 0.1));
+		border: 1px solid hsl(var(--color-border));
 	}
 	footer .secondary:hover {
-		background: var(--color-surface, rgba(0, 0, 0, 0.04));
+		background: hsl(var(--color-surface));
 	}
 
 	@media (max-width: 700px) {

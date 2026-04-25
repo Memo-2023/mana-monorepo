@@ -108,15 +108,15 @@
 	.version {
 		padding: 0.6rem 0.75rem;
 		border-radius: 0.55rem;
-		border: 1px solid var(--color-border, rgba(0, 0, 0, 0.08));
-		background: var(--color-surface, rgba(255, 255, 255, 0.04));
+		border: 1px solid hsl(var(--color-border));
+		background: hsl(var(--color-surface));
 		display: flex;
 		flex-direction: column;
 		gap: 0.25rem;
 	}
 	.version.current {
-		border-color: #0ea5e9;
-		background: color-mix(in srgb, #0ea5e9 6%, transparent);
+		border-color: hsl(var(--color-primary));
+		background: hsl(var(--color-primary) / 0.06);
 	}
 	.meta {
 		display: flex;
@@ -135,38 +135,38 @@
 		color: #a855f7;
 	}
 	.tag.current {
-		background: color-mix(in srgb, #0ea5e9 15%, transparent);
-		color: #0ea5e9;
+		background: hsl(var(--color-primary) / 0.15);
+		color: hsl(var(--color-primary));
 	}
 	.stats {
 		display: flex;
 		justify-content: space-between;
 		font-size: 0.75rem;
-		color: var(--color-text-muted, rgba(0, 0, 0, 0.55));
+		color: hsl(var(--color-muted-foreground));
 	}
 	.cost {
 		font-size: 0.7rem;
 		font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-		color: var(--color-text-muted, rgba(0, 0, 0, 0.55));
+		color: hsl(var(--color-muted-foreground));
 		opacity: 0.8;
 	}
 	.summary {
 		margin: 0;
 		font-size: 0.8rem;
-		color: var(--color-text-muted, rgba(0, 0, 0, 0.55));
+		color: hsl(var(--color-muted-foreground));
 	}
 	.restore {
 		align-self: flex-start;
 		padding: 0.25rem 0.6rem;
 		font-size: 0.75rem;
 		border-radius: 0.4rem;
-		border: 1px solid var(--color-border, rgba(0, 0, 0, 0.1));
+		border: 1px solid hsl(var(--color-border));
 		background: transparent;
 		cursor: pointer;
 		color: inherit;
 		font: inherit;
 	}
 	.restore:hover {
-		background: var(--color-surface-hover, rgba(0, 0, 0, 0.05));
+		background: hsl(var(--color-surface-hover));
 	}
 </style>

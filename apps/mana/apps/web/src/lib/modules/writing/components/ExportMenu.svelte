@@ -148,7 +148,7 @@
 	.trigger {
 		padding: 0.4rem 0.8rem;
 		border-radius: 0.5rem;
-		border: 1px solid var(--color-border, rgba(0, 0, 0, 0.1));
+		border: 1px solid hsl(var(--color-border));
 		background: transparent;
 		color: inherit;
 		cursor: pointer;
@@ -156,13 +156,13 @@
 		font-size: 0.85rem;
 	}
 	.trigger:hover {
-		border-color: #0ea5e9;
-		color: #0ea5e9;
+		border-color: hsl(var(--color-primary));
+		color: hsl(var(--color-primary));
 	}
 	.trigger.active {
-		background: color-mix(in srgb, #0ea5e9 10%, transparent);
-		border-color: #0ea5e9;
-		color: #0ea5e9;
+		background: hsl(var(--color-primary) / 0.1);
+		border-color: hsl(var(--color-primary));
+		color: hsl(var(--color-primary));
 	}
 	.dropdown {
 		position: absolute;
@@ -174,8 +174,8 @@
 		min-width: 14rem;
 		padding: 0.3rem;
 		border-radius: 0.55rem;
-		border: 1px solid var(--color-border, rgba(0, 0, 0, 0.1));
-		background: var(--color-surface, white);
+		border: 1px solid hsl(var(--color-border));
+		background: hsl(var(--color-surface));
 		box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
 	}
 	.dropdown button {
@@ -190,8 +190,8 @@
 		font-size: 0.85rem;
 	}
 	.dropdown button:hover:not(:disabled) {
-		background: color-mix(in srgb, #0ea5e9 10%, transparent);
-		color: #0ea5e9;
+		background: hsl(var(--color-primary) / 0.1);
+		color: hsl(var(--color-primary));
 	}
 	.dropdown button:disabled {
 		opacity: 0.5;
@@ -200,11 +200,11 @@
 	.dropdown hr {
 		margin: 0.2rem 0.1rem;
 		border: none;
-		border-top: 1px solid var(--color-border, rgba(0, 0, 0, 0.08));
+		border-top: 1px solid hsl(var(--color-border));
 	}
 	.toast {
 		font-size: 0.8rem;
-		color: #0284c7;
+		color: hsl(var(--color-primary));
 		white-space: nowrap;
 	}
 </style>

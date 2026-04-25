@@ -109,7 +109,7 @@
 		font-size: 0.85rem;
 	}
 	label > span {
-		color: var(--color-text-muted, rgba(0, 0, 0, 0.55));
+		color: hsl(var(--color-muted-foreground));
 	}
 	small {
 		font-weight: normal;
@@ -119,8 +119,8 @@
 	textarea {
 		padding: 0.5rem 0.7rem;
 		border-radius: 0.5rem;
-		border: 1px solid var(--color-border, rgba(0, 0, 0, 0.1));
-		background: var(--color-surface, transparent);
+		border: 1px solid hsl(var(--color-border));
+		background: hsl(var(--color-surface));
 		font: inherit;
 		color: inherit;
 	}
@@ -130,7 +130,7 @@
 	}
 	input:focus,
 	textarea:focus {
-		outline: 2px solid #0ea5e9;
+		outline: 2px solid hsl(var(--color-primary));
 		outline-offset: 1px;
 		border-color: transparent;
 	}
@@ -152,21 +152,21 @@
 		cursor: not-allowed;
 	}
 	.primary {
-		background: #0ea5e9;
+		background: hsl(var(--color-primary));
 		color: white;
-		border: 1px solid #0ea5e9;
+		border: 1px solid hsl(var(--color-primary));
 	}
 	.primary:hover:not(:disabled) {
-		background: #0284c7;
-		border-color: #0284c7;
+		background: hsl(var(--color-primary));
+		border-color: hsl(var(--color-primary));
 	}
 	.secondary {
 		background: transparent;
-		color: var(--color-text, inherit);
-		border: 1px solid var(--color-border, rgba(0, 0, 0, 0.1));
+		color: hsl(var(--color-foreground));
+		border: 1px solid hsl(var(--color-border));
 	}
 	.secondary:hover:not(:disabled) {
-		background: var(--color-surface, rgba(0, 0, 0, 0.04));
+		background: hsl(var(--color-surface));
 	}
 	.error {
 		color: #ef4444;

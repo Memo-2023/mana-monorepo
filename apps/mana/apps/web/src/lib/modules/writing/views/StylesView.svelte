@@ -140,11 +140,11 @@
 	}
 	.back {
 		font-size: 0.85rem;
-		color: var(--color-text-muted, rgba(0, 0, 0, 0.55));
+		color: hsl(var(--color-muted-foreground));
 		text-decoration: none;
 	}
 	.back:hover {
-		color: #0ea5e9;
+		color: hsl(var(--color-primary));
 	}
 	h1 {
 		margin: 0 0 0.25rem;
@@ -155,11 +155,11 @@
 		font-size: 1rem;
 		text-transform: uppercase;
 		letter-spacing: 0.04em;
-		color: var(--color-text-muted, rgba(0, 0, 0, 0.55));
+		color: hsl(var(--color-muted-foreground));
 		font-weight: 500;
 	}
 	.muted {
-		color: var(--color-text-muted, rgba(0, 0, 0, 0.55));
+		color: hsl(var(--color-muted-foreground));
 		margin: 0;
 	}
 	.muted.small {
@@ -169,8 +169,8 @@
 	.create-btn {
 		padding: 0.5rem 1rem;
 		border-radius: 0.55rem;
-		border: 1px solid #0ea5e9;
-		background: #0ea5e9;
+		border: 1px solid hsl(var(--color-primary));
+		background: hsl(var(--color-primary));
 		color: white;
 		cursor: pointer;
 		font: inherit;
@@ -178,17 +178,17 @@
 		white-space: nowrap;
 	}
 	.create-btn:hover {
-		background: #0284c7;
-		border-color: #0284c7;
+		background: hsl(var(--color-primary));
+		border-color: hsl(var(--color-primary));
 	}
 	.create-btn.active {
 		background: transparent;
-		color: #0ea5e9;
+		color: hsl(var(--color-primary));
 	}
 	.inline-form {
-		border: 1px solid color-mix(in srgb, #0ea5e9 30%, transparent);
+		border: 1px solid hsl(var(--color-primary) / 0.3);
 		border-radius: 0.75rem;
-		background: color-mix(in srgb, #0ea5e9 4%, transparent);
+		background: hsl(var(--color-primary) / 0.04);
 	}
 	.grid {
 		display: grid;
@@ -198,8 +198,8 @@
 	.card {
 		padding: 0.9rem 1rem;
 		border-radius: 0.75rem;
-		border: 1px solid var(--color-border, rgba(0, 0, 0, 0.08));
-		background: var(--color-surface, rgba(255, 255, 255, 0.04));
+		border: 1px solid hsl(var(--color-border));
+		background: hsl(var(--color-surface));
 		display: flex;
 		flex-direction: column;
 		gap: 0.45rem;
@@ -208,7 +208,7 @@
 		border-style: dashed;
 	}
 	.card.editing {
-		border-color: #0ea5e9;
+		border-color: hsl(var(--color-primary));
 		padding: 0;
 	}
 	.card-head {
@@ -221,8 +221,8 @@
 		font-size: 0.65rem;
 		padding: 0.05rem 0.45rem;
 		border-radius: 999px;
-		background: color-mix(in srgb, #0ea5e9 12%, transparent);
-		color: #0ea5e9;
+		background: hsl(var(--color-primary) / 0.12);
+		color: hsl(var(--color-primary));
 		text-transform: uppercase;
 		letter-spacing: 0.04em;
 	}
@@ -230,7 +230,7 @@
 		margin: 0;
 		font-size: 0.85rem;
 		line-height: 1.45;
-		color: var(--color-text, inherit);
+		color: hsl(var(--color-foreground));
 	}
 	.traits {
 		display: flex;
@@ -244,8 +244,8 @@
 		font-size: 0.7rem;
 		padding: 0.05rem 0.5rem;
 		border-radius: 999px;
-		background: var(--color-surface-muted, rgba(0, 0, 0, 0.05));
-		color: var(--color-text-muted, rgba(0, 0, 0, 0.55));
+		background: hsl(var(--color-muted));
+		color: hsl(var(--color-muted-foreground));
 	}
 	.actions {
 		display: inline-flex;
@@ -255,7 +255,7 @@
 	.tiny {
 		padding: 0.2rem 0.55rem;
 		border-radius: 0.4rem;
-		border: 1px solid var(--color-border, rgba(0, 0, 0, 0.1));
+		border: 1px solid hsl(var(--color-border));
 		background: transparent;
 		font-size: 0.75rem;
 		cursor: pointer;
@@ -263,8 +263,8 @@
 		font: inherit;
 	}
 	.tiny:hover {
-		border-color: #0ea5e9;
-		color: #0ea5e9;
+		border-color: hsl(var(--color-primary));
+		color: hsl(var(--color-primary));
 	}
 	.tiny.danger:hover {
 		border-color: #ef4444;

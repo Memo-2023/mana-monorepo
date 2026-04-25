@@ -38,19 +38,19 @@
 	.chip {
 		padding: 0.3rem 0.65rem;
 		border-radius: 999px;
-		border: 1px solid var(--color-border, rgba(0, 0, 0, 0.08));
+		border: 1px solid hsl(var(--color-border));
 		background: transparent;
 		cursor: pointer;
 		font-size: 0.8rem;
-		color: var(--color-text-muted, rgba(0, 0, 0, 0.55));
+		color: hsl(var(--color-muted-foreground));
 	}
 	.chip:hover {
-		background: var(--color-surface, rgba(0, 0, 0, 0.04));
+		background: hsl(var(--color-surface));
 	}
 	.chip.active {
-		background: color-mix(in srgb, #0ea5e9 10%, transparent);
-		border-color: #0ea5e9;
-		color: #0ea5e9;
+		background: hsl(var(--color-primary) / 0.1);
+		border-color: hsl(var(--color-primary));
+		color: hsl(var(--color-primary));
 		font-weight: 500;
 	}
 </style>

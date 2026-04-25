@@ -54,14 +54,14 @@
 	.style-picker {
 		padding: 0.5rem 0.7rem;
 		border-radius: 0.5rem;
-		border: 1px solid var(--color-border, rgba(0, 0, 0, 0.1));
-		background: var(--color-surface, transparent);
+		border: 1px solid hsl(var(--color-border));
+		background: hsl(var(--color-surface));
 		font: inherit;
 		color: inherit;
 		width: 100%;
 	}
 	.style-picker:focus {
-		outline: 2px solid #0ea5e9;
+		outline: 2px solid hsl(var(--color-primary));
 		outline-offset: 1px;
 		border-color: transparent;
 	}

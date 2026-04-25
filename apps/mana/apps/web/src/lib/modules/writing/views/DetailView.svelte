@@ -529,7 +529,7 @@
 		gap: 1rem;
 	}
 	.muted {
-		color: var(--color-text-muted, rgba(0, 0, 0, 0.55));
+		color: hsl(var(--color-muted-foreground));
 	}
 	.muted.center {
 		text-align: center;
@@ -541,7 +541,7 @@
 		text-align: center;
 	}
 	.empty a {
-		color: #0ea5e9;
+		color: hsl(var(--color-primary));
 	}
 	.head {
 		display: flex;
@@ -559,18 +559,18 @@
 	}
 	.back {
 		font-size: 0.85rem;
-		color: var(--color-text-muted, rgba(0, 0, 0, 0.55));
+		color: hsl(var(--color-muted-foreground));
 		text-decoration: none;
 		padding-top: 0.5rem;
 	}
 	.back:hover {
-		color: #0ea5e9;
+		color: hsl(var(--color-primary));
 	}
 	.kind {
 		font-size: 0.75rem;
 		text-transform: uppercase;
 		letter-spacing: 0.04em;
-		color: var(--color-text-muted, rgba(0, 0, 0, 0.55));
+		color: hsl(var(--color-muted-foreground));
 	}
 	h1 {
 		margin: 0;
@@ -584,14 +584,14 @@
 	.ghost {
 		padding: 0.4rem 0.7rem;
 		border-radius: 0.5rem;
-		border: 1px solid var(--color-border, rgba(0, 0, 0, 0.1));
+		border: 1px solid hsl(var(--color-border));
 		background: transparent;
 		cursor: pointer;
 		color: inherit;
 		font: inherit;
 	}
 	.ghost:hover {
-		background: var(--color-surface, rgba(0, 0, 0, 0.04));
+		background: hsl(var(--color-surface));
 	}
 	.ghost.danger:hover {
 		border-color: #ef4444;
@@ -613,19 +613,19 @@
 		flex-wrap: wrap;
 		padding: 0.5rem 0.75rem;
 		border-radius: 0.5rem;
-		border: 1px solid var(--color-border, rgba(0, 0, 0, 0.08));
-		background: var(--color-surface, rgba(0, 0, 0, 0.02));
+		border: 1px solid hsl(var(--color-border));
+		background: hsl(var(--color-surface));
 		font-size: 0.8rem;
 	}
 	.share-label {
-		color: var(--color-text-muted, rgba(0, 0, 0, 0.55));
+		color: hsl(var(--color-muted-foreground));
 	}
 	.share-token {
 		font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 		font-size: 0.75rem;
 		padding: 0.15rem 0.4rem;
 		border-radius: 0.3rem;
-		background: var(--color-surface-muted, rgba(0, 0, 0, 0.05));
+		background: hsl(var(--color-muted));
 		word-break: break-all;
 	}
 	.published-row {
@@ -634,7 +634,7 @@
 		gap: 0.4rem;
 		flex-wrap: wrap;
 		font-size: 0.8rem;
-		color: var(--color-text-muted, rgba(0, 0, 0, 0.55));
+		color: hsl(var(--color-muted-foreground));
 	}
 	.published-label {
 		font-size: 0.75rem;
@@ -659,20 +659,20 @@
 	.tiny {
 		padding: 0.15rem 0.5rem;
 		border-radius: 0.35rem;
-		border: 1px solid var(--color-border, rgba(0, 0, 0, 0.08));
+		border: 1px solid hsl(var(--color-border));
 		background: transparent;
 		font-size: 0.75rem;
 		cursor: pointer;
-		color: var(--color-text-muted, rgba(0, 0, 0, 0.55));
+		color: hsl(var(--color-muted-foreground));
 	}
 	.tiny:hover {
-		border-color: #0ea5e9;
-		color: #0ea5e9;
+		border-color: hsl(var(--color-primary));
+		color: hsl(var(--color-primary));
 	}
 	.briefing-section {
-		border: 1px solid var(--color-border, rgba(0, 0, 0, 0.08));
+		border: 1px solid hsl(var(--color-border));
 		border-radius: 0.75rem;
-		background: var(--color-surface, rgba(255, 255, 255, 0.02));
+		background: hsl(var(--color-surface));
 	}
 	.briefing-toggle {
 		width: 100%;
@@ -690,7 +690,7 @@
 	}
 	.briefing-toggle .preview {
 		font-weight: normal;
-		color: var(--color-text-muted, rgba(0, 0, 0, 0.55));
+		color: hsl(var(--color-muted-foreground));
 		font-size: 0.85rem;
 		overflow: hidden;
 		text-overflow: ellipsis;
@@ -702,8 +702,8 @@
 		font-size: 0.75rem;
 		padding: 0.1rem 0.5rem;
 		border-radius: 999px;
-		background: color-mix(in srgb, #0ea5e9 10%, transparent);
-		color: #0ea5e9;
+		background: hsl(var(--color-primary) / 0.1);
+		color: hsl(var(--color-primary));
 		font-weight: normal;
 		flex-shrink: 0;
 	}
@@ -745,8 +745,8 @@
 	.generate {
 		padding: 0.4rem 0.9rem;
 		border-radius: 0.5rem;
-		border: 1px solid #0ea5e9;
-		background: #0ea5e9;
+		border: 1px solid hsl(var(--color-primary));
+		background: hsl(var(--color-primary));
 		color: white;
 		cursor: pointer;
 		font: inherit;
@@ -754,8 +754,8 @@
 		font-size: 0.85rem;
 	}
 	.generate:hover:not(:disabled) {
-		background: #0284c7;
-		border-color: #0284c7;
+		background: hsl(var(--color-primary));
+		border-color: hsl(var(--color-primary));
 	}
 	.generate:disabled {
 		opacity: 0.6;
@@ -764,15 +764,15 @@
 	.checkpoint {
 		padding: 0.4rem 0.8rem;
 		border-radius: 0.5rem;
-		border: 1px solid #0ea5e9;
+		border: 1px solid hsl(var(--color-primary));
 		background: transparent;
-		color: #0ea5e9;
+		color: hsl(var(--color-primary));
 		cursor: pointer;
 		font: inherit;
 		font-size: 0.85rem;
 	}
 	.checkpoint:hover:not(:disabled) {
-		background: color-mix(in srgb, #0ea5e9 10%, transparent);
+		background: hsl(var(--color-primary) / 0.1);
 	}
 	.checkpoint:disabled {
 		opacity: 0.5;
@@ -794,23 +794,23 @@
 	.undo-btn {
 		padding: 0.35rem 0.8rem;
 		border-radius: 0.45rem;
-		border: 1px solid var(--color-border, rgba(0, 0, 0, 0.1));
-		background: var(--color-surface, transparent);
+		border: 1px solid hsl(var(--color-border));
+		background: hsl(var(--color-surface));
 		color: inherit;
 		cursor: pointer;
 		font: inherit;
 		font-size: 0.8rem;
 	}
 	.undo-btn:hover {
-		border-color: #0ea5e9;
-		color: #0ea5e9;
+		border-color: hsl(var(--color-primary));
+		color: hsl(var(--color-primary));
 	}
 	.history-column h2 {
 		font-size: 0.8rem;
 		margin: 0 0 0.5rem;
 		text-transform: uppercase;
 		letter-spacing: 0.04em;
-		color: var(--color-text-muted, rgba(0, 0, 0, 0.55));
+		color: hsl(var(--color-muted-foreground));
 		font-weight: 500;
 	}
 

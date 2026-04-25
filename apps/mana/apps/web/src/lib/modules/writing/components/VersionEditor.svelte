@@ -154,8 +154,8 @@
 		min-height: 50vh;
 		padding: 1rem 1.25rem;
 		border-radius: 0.75rem;
-		border: 1px solid var(--color-border, rgba(0, 0, 0, 0.08));
-		background: var(--color-surface, rgba(255, 255, 255, 0.04));
+		border: 1px solid hsl(var(--color-border));
+		background: hsl(var(--color-surface));
 		font-family: ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
 		font-size: 1.05rem;
 		line-height: 1.6;
@@ -163,7 +163,7 @@
 		resize: vertical;
 	}
 	textarea:focus {
-		outline: 2px solid #0ea5e9;
+		outline: 2px solid hsl(var(--color-primary));
 		outline-offset: 1px;
 		border-color: transparent;
 	}
@@ -173,7 +173,7 @@
 		align-items: center;
 		gap: 0.75rem;
 		font-size: 0.75rem;
-		color: var(--color-text-muted, rgba(0, 0, 0, 0.55));
+		color: hsl(var(--color-muted-foreground));
 	}
 	.target {
 		opacity: 0.7;

@@ -85,8 +85,8 @@
 		gap: 0.5rem;
 		padding: 0.9rem 1rem;
 		border-radius: 0.75rem;
-		border: 1px solid var(--color-border, rgba(0, 0, 0, 0.08));
-		background: var(--color-surface, rgba(255, 255, 255, 0.04));
+		border: 1px solid hsl(var(--color-border));
+		background: hsl(var(--color-surface));
 		cursor: pointer;
 		transition:
 			background 0.15s ease,
@@ -98,11 +98,11 @@
 	}
 	.card:hover,
 	.card:focus-visible {
-		background: var(--color-surface-hover, rgba(0, 0, 0, 0.04));
-		border-color: color-mix(in srgb, #0ea5e9 40%, transparent);
+		background: hsl(var(--color-surface-hover));
+		border-color: hsl(var(--color-primary) / 0.4);
 	}
 	.card:focus-visible {
-		outline: 2px solid #0ea5e9;
+		outline: 2px solid hsl(var(--color-primary));
 		outline-offset: 1px;
 	}
 	header {
@@ -116,7 +116,7 @@
 		align-items: center;
 		gap: 0.3rem;
 		font-size: 0.75rem;
-		color: var(--color-text-muted, rgba(0, 0, 0, 0.55));
+		color: hsl(var(--color-muted-foreground));
 		text-transform: uppercase;
 		letter-spacing: 0.04em;
 	}
@@ -132,7 +132,7 @@
 		margin: 0;
 		font-size: 0.85rem;
 		line-height: 1.4;
-		color: var(--color-text-muted, rgba(0, 0, 0, 0.55));
+		color: hsl(var(--color-muted-foreground));
 		display: -webkit-box;
 		-webkit-line-clamp: 3;
 		line-clamp: 3;
@@ -145,7 +145,7 @@
 		gap: 0.5rem;
 		justify-content: space-between;
 		font-size: 0.75rem;
-		color: var(--color-text-muted, rgba(0, 0, 0, 0.55));
+		color: hsl(var(--color-muted-foreground));
 		flex-wrap: wrap;
 	}
 	.words {

@@ -47,13 +47,13 @@
 		gap: 0.25rem;
 		padding: 0.5rem 0.75rem;
 		border-radius: 0.55rem;
-		border: 1px solid var(--color-border, rgba(0, 0, 0, 0.08));
-		background: var(--color-surface, rgba(255, 255, 255, 0.04));
+		border: 1px solid hsl(var(--color-border));
+		background: hsl(var(--color-surface));
 		font-size: 0.85rem;
 	}
 	.status.running {
-		border-color: color-mix(in srgb, #0ea5e9 40%, transparent);
-		background: color-mix(in srgb, #0ea5e9 6%, transparent);
+		border-color: hsl(var(--color-primary) / 0.4);
+		background: hsl(var(--color-primary) / 0.06);
 	}
 	.status.error {
 		border-color: color-mix(in srgb, #ef4444 50%, transparent);
@@ -71,7 +71,7 @@
 		background: #94a3b8;
 	}
 	.status.running .dot {
-		background: #0ea5e9;
+		background: hsl(var(--color-primary));
 		animation: pulse 1.1s ease-in-out infinite;
 	}
 	.status.error .dot {
@@ -89,7 +89,7 @@
 		}
 	}
 	.meta {
-		color: var(--color-text-muted, rgba(0, 0, 0, 0.55));
+		color: hsl(var(--color-muted-foreground));
 		font-size: 0.8rem;
 	}
 	.err-msg {

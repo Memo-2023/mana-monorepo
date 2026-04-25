@@ -156,12 +156,12 @@
 		gap: 0.45rem;
 		padding: 0.5rem 0.75rem;
 		border-radius: 0.55rem;
-		border: 1px solid color-mix(in srgb, #0ea5e9 30%, transparent);
-		background: color-mix(in srgb, #0ea5e9 4%, transparent);
+		border: 1px solid hsl(var(--color-primary) / 0.3);
+		background: hsl(var(--color-primary) / 0.04);
 	}
 	.info {
 		font-size: 0.75rem;
-		color: var(--color-text-muted, rgba(0, 0, 0, 0.55));
+		color: hsl(var(--color-muted-foreground));
 	}
 	.actions {
 		display: flex;
@@ -171,21 +171,21 @@
 	.actions > button {
 		padding: 0.35rem 0.7rem;
 		border-radius: 0.45rem;
-		border: 1px solid var(--color-border, rgba(0, 0, 0, 0.08));
-		background: var(--color-surface, rgba(255, 255, 255, 0.9));
+		border: 1px solid hsl(var(--color-border));
+		background: hsl(var(--color-surface));
 		cursor: pointer;
 		font: inherit;
 		font-size: 0.8rem;
 		color: inherit;
 	}
 	.actions > button:hover:not(:disabled) {
-		border-color: #0ea5e9;
-		color: #0ea5e9;
+		border-color: hsl(var(--color-primary));
+		color: hsl(var(--color-primary));
 	}
 	.actions > button.active {
-		border-color: #0ea5e9;
-		color: #0ea5e9;
-		background: color-mix(in srgb, #0ea5e9 10%, transparent);
+		border-color: hsl(var(--color-primary));
+		color: hsl(var(--color-primary));
+		background: hsl(var(--color-primary) / 0.1);
 	}
 	.actions > button:disabled {
 		opacity: 0.45;
@@ -197,25 +197,25 @@
 		gap: 0.3rem;
 		align-items: center;
 		padding-top: 0.3rem;
-		border-top: 1px dashed color-mix(in srgb, #0ea5e9 30%, transparent);
+		border-top: 1px dashed hsl(var(--color-primary) / 0.3);
 	}
 	.submenu-label {
 		font-size: 0.75rem;
-		color: var(--color-text-muted, rgba(0, 0, 0, 0.55));
+		color: hsl(var(--color-muted-foreground));
 	}
 	.chip {
 		padding: 0.2rem 0.55rem;
 		border-radius: 999px;
-		border: 1px solid var(--color-border, rgba(0, 0, 0, 0.08));
-		background: var(--color-surface, transparent);
+		border: 1px solid hsl(var(--color-border));
+		background: hsl(var(--color-surface));
 		cursor: pointer;
 		font: inherit;
 		font-size: 0.75rem;
 		color: inherit;
 	}
 	.chip:hover:not(:disabled) {
-		border-color: #0ea5e9;
-		color: #0ea5e9;
+		border-color: hsl(var(--color-primary));
+		color: hsl(var(--color-primary));
 	}
 	.chip:disabled {
 		opacity: 0.5;
@@ -229,22 +229,22 @@
 		min-width: 0;
 		padding: 0.4rem 0.6rem;
 		border-radius: 0.4rem;
-		border: 1px solid var(--color-border, rgba(0, 0, 0, 0.1));
-		background: var(--color-surface, rgba(255, 255, 255, 0.9));
+		border: 1px solid hsl(var(--color-border));
+		background: hsl(var(--color-surface));
 		font: inherit;
 		font-size: 0.85rem;
 		color: inherit;
 	}
 	.rewrite-row input:focus {
-		outline: 2px solid #0ea5e9;
+		outline: 2px solid hsl(var(--color-primary));
 		outline-offset: 1px;
 		border-color: transparent;
 	}
 	.rewrite-row .primary {
 		padding: 0.4rem 0.9rem;
 		border-radius: 0.4rem;
-		border: 1px solid #0ea5e9;
-		background: #0ea5e9;
+		border: 1px solid hsl(var(--color-primary));
+		background: hsl(var(--color-primary));
 		color: white;
 		cursor: pointer;
 		font: inherit;
