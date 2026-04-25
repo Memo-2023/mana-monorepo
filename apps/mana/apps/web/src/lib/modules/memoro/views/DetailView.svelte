@@ -12,6 +12,7 @@
 	import type { QueuedTask } from '@mana/shared-llm';
 	import type { LlmTier } from '@mana/shared-llm';
 	import { PushPin } from '@mana/shared-icons';
+	import { VisibilityPicker, type VisibilityLevel } from '@mana/shared-privacy';
 	import type { ViewProps } from '$lib/app-registry';
 	import type { LocalMemo, ProcessingStatus } from '../types';
 
@@ -187,6 +188,15 @@
 					onfocus={detail.focus}
 					onblur={saveField}
 					placeholder="z.B. de"
+				/>
+			</div>
+
+			<div class="prop-row">
+				<span class="prop-label">Sichtbarkeit</span>
+				<VisibilityPicker
+					level={memo.visibility ?? (memo.isPublic ? 'public' : 'space')}
+					onChange={(next: VisibilityLevel) => memosStore.setVisibility(memoId, next)}
+					disabledLevels={['unlisted']}
 				/>
 			</div>
 		</div>

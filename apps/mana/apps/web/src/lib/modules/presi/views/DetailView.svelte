@@ -9,6 +9,7 @@
 	import { useDetailEntity } from '$lib/data/detail-entity.svelte';
 	import DetailViewShell from '$lib/components/DetailViewShell.svelte';
 	import { decksStore } from '../stores/decks.svelte';
+	import { VisibilityPicker, type VisibilityLevel } from '@mana/shared-privacy';
 	import type { ViewProps } from '$lib/app-registry';
 	import type { LocalDeck, LocalSlide } from '../types';
 
@@ -17,7 +18,6 @@
 
 	let editTitle = $state('');
 	let editDescription = $state('');
-	let editIsPublic = $state(false);
 
 	const detail = useDetailEntity<LocalDeck>({
 		id: () => deckId,
@@ -25,7 +25,6 @@
 		onLoad: (val) => {
 			editTitle = val.title;
 			editDescription = val.description ?? '';
-			editIsPublic = val.isPublic;
 		},
 	});
 
@@ -49,13 +48,7 @@
 		await decksStore.updateDeck(deckId, {
 			title: editTitle.trim() || detail.entity?.title || 'Unbenannt',
 			description: editDescription.trim() || undefined,
-			isPublic: editIsPublic,
 		});
-	}
-
-	async function handlePublicToggle() {
-		editIsPublic = !editIsPublic;
-		await decksStore.updateDeck(deckId, { isPublic: editIsPublic });
 	}
 </script>
 
@@ -89,10 +82,12 @@
 
 		<div class="properties">
 			<div class="prop-row">
-				<span class="prop-label">Öffentlich</span>
-				<button class="toggle-btn" class:active={editIsPublic} onclick={handlePublicToggle}>
-					{editIsPublic ? 'Ja' : 'Nein'}
-				</button>
+				<span class="prop-label">Sichtbarkeit</span>
+				<VisibilityPicker
+					level={deck.visibility ?? (deck.isPublic ? 'public' : 'space')}
+					onChange={(next: VisibilityLevel) => decksStore.setVisibility(deckId, next)}
+					disabledLevels={['unlisted']}
+				/>
 			</div>
 
 			<div class="prop-row">

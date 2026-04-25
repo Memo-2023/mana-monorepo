@@ -9,6 +9,7 @@
 	import { useDetailEntity } from '$lib/data/detail-entity.svelte';
 	import DetailViewShell from '$lib/components/DetailViewShell.svelte';
 	import { deckStore } from '../stores/decks.svelte';
+	import { VisibilityPicker, type VisibilityLevel } from '@mana/shared-privacy';
 	import type { ViewProps } from '$lib/app-registry';
 	import type { LocalDeck, LocalCard } from '../types';
 
@@ -18,7 +19,6 @@
 	let editName = $state('');
 	let editDescription = $state('');
 	let editColor = $state('#6366f1');
-	let editIsPublic = $state(false);
 
 	const detail = useDetailEntity<LocalDeck>({
 		id: () => deckId,
@@ -27,7 +27,6 @@
 			editName = val.name;
 			editDescription = val.description ?? '';
 			editColor = val.color ?? '#6366f1';
-			editIsPublic = val.isPublic;
 		},
 	});
 
@@ -51,18 +50,12 @@
 		await deckStore.updateDeck(deckId, {
 			title: editName.trim() || detail.entity?.name || 'Unbenannt',
 			description: editDescription.trim() || undefined,
-			isPublic: editIsPublic,
 		});
 		// Color is not in UpdateDeckInput, update directly
 		await db.table('decks').update(deckId, {
 			color: editColor,
 			updatedAt: new Date().toISOString(),
 		});
-	}
-
-	async function handlePublicToggle() {
-		editIsPublic = !editIsPublic;
-		await deckStore.updateDeck(deckId, { isPublic: editIsPublic });
 	}
 </script>
 
@@ -103,10 +96,12 @@
 			</div>
 
 			<div class="prop-row">
-				<span class="prop-label">Öffentlich</span>
-				<button class="toggle-btn" class:active={editIsPublic} onclick={handlePublicToggle}>
-					{editIsPublic ? 'Ja' : 'Nein'}
-				</button>
+				<span class="prop-label">Sichtbarkeit</span>
+				<VisibilityPicker
+					level={deck.visibility ?? (deck.isPublic ? 'public' : 'space')}
+					onChange={(next: VisibilityLevel) => deckStore.setVisibility(deckId, next)}
+					disabledLevels={['unlisted']}
+				/>
 			</div>
 
 			<div class="prop-row">

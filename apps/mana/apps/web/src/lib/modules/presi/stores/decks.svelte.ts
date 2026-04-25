@@ -10,6 +10,10 @@ import { presiDeckTable, slideTable } from '../collections';
 import { toDeck, toSlide } from '../queries';
 import { PresiEvents } from '@mana/shared-utils/analytics';
 import { encryptRecord, decryptRecord } from '$lib/data/crypto';
+import { emitDomainEvent } from '$lib/data/events';
+import { getActiveSpace } from '$lib/data/scope';
+import { getEffectiveUserId } from '$lib/data/current-user';
+import { defaultVisibilityFor, type VisibilityLevel } from '@mana/shared-privacy';
 import { createBlock, updateBlock } from '$lib/data/time-blocks/service';
 import type {
 	LocalDeck,
@@ -36,6 +40,7 @@ function createDecksStore() {
 				description: dto.description || null,
 				themeId: dto.themeId || null,
 				isPublic: false,
+				visibility: defaultVisibilityFor(getActiveSpace()?.type),
 			};
 			const plaintextSnapshot = toDeck(newLocal);
 			await encryptRecord('presiDecks', newLocal);
@@ -60,7 +65,11 @@ function createDecksStore() {
 			if (dto.title !== undefined) localUpdates.title = dto.title;
 			if (dto.description !== undefined) localUpdates.description = dto.description;
 			if (dto.themeId !== undefined) localUpdates.themeId = dto.themeId;
-			if (dto.isPublic !== undefined) localUpdates.isPublic = dto.isPublic;
+			if (dto.isPublic !== undefined) {
+				// Mirror to unified visibility during M6 soak.
+				localUpdates.isPublic = dto.isPublic;
+				localUpdates.visibility = dto.isPublic ? 'public' : 'space';
+			}
 
 			await encryptRecord('presiDecks', localUpdates);
 			await presiDeckTable.update(id, localUpdates);
@@ -68,6 +77,34 @@ function createDecksStore() {
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to update deck';
 			console.error('Failed to update deck:', e);
+			return false;
+		}
+	}
+
+	async function setVisibility(id: string, next: VisibilityLevel): Promise<boolean> {
+		try {
+			const existing = await presiDeckTable.get(id);
+			if (!existing) return false;
+			const before: VisibilityLevel =
+				existing.visibility ?? (existing.isPublic ? 'public' : 'space');
+			if (before === next) return true;
+			const stamp = new Date().toISOString();
+			await presiDeckTable.update(id, {
+				visibility: next,
+				isPublic: next === 'public',
+				visibilityChangedAt: stamp,
+				visibilityChangedBy: getEffectiveUserId(),
+				updatedAt: stamp,
+			});
+			emitDomainEvent('VisibilityChanged', 'presi', 'presiDecks', id, {
+				recordId: id,
+				collection: 'presiDecks',
+				before,
+				after: next,
+			});
+			return true;
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Failed to set visibility';
 			return false;
 		}
 	}
@@ -219,6 +256,7 @@ function createDecksStore() {
 		},
 		createDeck,
 		updateDeck,
+		setVisibility,
 		deleteDeck,
 		createSlide,
 		updateSlide,

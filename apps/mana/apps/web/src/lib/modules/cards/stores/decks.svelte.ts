@@ -10,6 +10,10 @@ import { db } from '$lib/data/database';
 import { cardDeckTable, cardTable } from '../collections';
 import { toDeck } from '../queries';
 import { encryptRecord, decryptRecord } from '$lib/data/crypto';
+import { emitDomainEvent } from '$lib/data/events';
+import { getActiveSpace } from '$lib/data/scope';
+import { getEffectiveUserId } from '$lib/data/current-user';
+import { defaultVisibilityFor, type VisibilityLevel } from '@mana/shared-privacy';
 import { createBlock, updateBlock } from '$lib/data/time-blocks/service';
 import type { LocalDeck } from '../types';
 import type { Deck, CreateDeckInput, UpdateDeckInput } from '../types';
@@ -24,13 +28,17 @@ export const deckStore = {
 	async createDeck(input: CreateDeckInput): Promise<Deck | null> {
 		error = null;
 		try {
+			const initialPublic = input.isPublic ?? false;
 			const newLocal: LocalDeck = {
 				id: crypto.randomUUID(),
 				name: input.title,
 				description: input.description ?? null,
 				color: '#6366f1',
 				cardCount: 0,
-				isPublic: input.isPublic ?? false,
+				isPublic: initialPublic,
+				// Initialize the unified field too — if the create flow set
+				// isPublic, mirror it as 'public'; otherwise space-default.
+				visibility: initialPublic ? 'public' : defaultVisibilityFor(getActiveSpace()?.type),
 			};
 
 			const plaintextSnapshot = toDeck(newLocal);
@@ -51,7 +59,12 @@ export const deckStore = {
 			const localUpdates: Partial<LocalDeck> = {};
 			if (updates.title !== undefined) localUpdates.name = updates.title;
 			if (updates.description !== undefined) localUpdates.description = updates.description;
-			if (updates.isPublic !== undefined) localUpdates.isPublic = updates.isPublic;
+			if (updates.isPublic !== undefined) {
+				// Legacy callers still pass isPublic — mirror to visibility
+				// so the unified field stays in sync until M6.1 hard-drop.
+				localUpdates.isPublic = updates.isPublic;
+				localUpdates.visibility = updates.isPublic ? 'public' : 'space';
+			}
 
 			const diff: Partial<LocalDeck> = {
 				...localUpdates,
@@ -63,6 +76,34 @@ export const deckStore = {
 			error = err.message || 'Failed to update deck';
 			console.error('Update deck error:', err);
 		}
+	},
+
+	/**
+	 * Flip a deck's visibility. M6 soft-migration: writes both
+	 * `visibility` and the legacy `isPublic` mirror so the picker
+	 * coexists with the older "public" badge UI until M6.1 hard-drop.
+	 */
+	async setVisibility(id: string, next: VisibilityLevel) {
+		const existing = await cardDeckTable.get(id);
+		if (!existing) throw new Error(`Deck ${id} not found`);
+		const before: VisibilityLevel = existing.visibility ?? (existing.isPublic ? 'public' : 'space');
+		if (before === next) return;
+
+		const stamp = new Date().toISOString();
+		await cardDeckTable.update(id, {
+			visibility: next,
+			isPublic: next === 'public',
+			visibilityChangedAt: stamp,
+			visibilityChangedBy: getEffectiveUserId(),
+			updatedAt: stamp,
+		});
+
+		emitDomainEvent('VisibilityChanged', 'cards', 'cardDecks', id, {
+			recordId: id,
+			collection: 'cardDecks',
+			before,
+			after: next,
+		});
 	},
 
 	async deleteDeck(id: string) {

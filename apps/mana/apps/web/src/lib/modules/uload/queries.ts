@@ -42,7 +42,9 @@ export interface Tag {
 	slug: string;
 	color?: string;
 	icon?: string;
+	/** @deprecated Use `visibility`. */
 	isPublic: boolean;
+	visibility: import('@mana/shared-privacy').VisibilityLevel;
 	usageCount: number;
 	createdAt: string;
 	updatedAt: string;
@@ -104,7 +106,8 @@ export function toTag(local: LocalTag): Tag {
 		slug: local.slug,
 		color: local.color ?? undefined,
 		icon: local.icon ?? undefined,
-		isPublic: local.isPublic,
+		isPublic: local.isPublic ?? local.visibility === 'public',
+		visibility: local.visibility ?? (local.isPublic === true ? 'public' : 'space'),
 		usageCount: local.usageCount,
 		createdAt: local.createdAt ?? new Date().toISOString(),
 		updatedAt: local.updatedAt ?? new Date().toISOString(),

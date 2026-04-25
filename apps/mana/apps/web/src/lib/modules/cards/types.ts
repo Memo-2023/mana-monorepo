@@ -3,6 +3,7 @@
  */
 
 import type { BaseRecord } from '@mana/local-store';
+import type { VisibilityLevel } from '@mana/shared-privacy';
 
 export interface LocalDeck extends BaseRecord {
 	name: string;
@@ -10,7 +11,11 @@ export interface LocalDeck extends BaseRecord {
 	color: string;
 	cardCount: number;
 	lastStudied?: string | null;
+	/** @deprecated Use `visibility`. Mirror kept until M6.1 hard-drop. */
 	isPublic: boolean;
+	visibility?: VisibilityLevel;
+	visibilityChangedAt?: string;
+	visibilityChangedBy?: string;
 	activeStudyBlockId?: string | null;
 }
 
@@ -31,7 +36,9 @@ export interface Deck {
 	title: string;
 	description?: string;
 	color: string;
+	/** @deprecated Use `visibility`. */
 	isPublic: boolean;
+	visibility: VisibilityLevel;
 	tags: string[];
 	cardCount: number;
 	createdAt: string;

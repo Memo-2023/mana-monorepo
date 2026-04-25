@@ -88,6 +88,7 @@ export const ULOAD_GUEST_SEED = {
 			color: '#8b5cf6',
 			icon: null,
 			isPublic: false,
+			visibility: 'space',
 			usageCount: 0,
 		},
 		{
@@ -97,6 +98,7 @@ export const ULOAD_GUEST_SEED = {
 			color: '#3b82f6',
 			icon: null,
 			isPublic: false,
+			visibility: 'space',
 			usageCount: 0,
 		},
 		{
@@ -106,6 +108,7 @@ export const ULOAD_GUEST_SEED = {
 			color: '#10b981',
 			icon: null,
 			isPublic: false,
+			visibility: 'space',
 			usageCount: 0,
 		},
 	] satisfies LocalTag[],

@@ -11,6 +11,9 @@ import { createArchiveOps } from '@mana/shared-stores';
 import { MemoroEvents } from '@mana/shared-utils/analytics';
 import { encryptRecord } from '$lib/data/crypto';
 import { emitDomainEvent } from '$lib/data/events';
+import { getActiveSpace } from '$lib/data/scope';
+import { getEffectiveUserId } from '$lib/data/current-user';
+import { defaultVisibilityFor, type VisibilityLevel } from '@mana/shared-privacy';
 import { transcribeAudio } from '$lib/voice/transcribe';
 import { llmTaskQueue } from '$lib/llm-queue';
 import { generateTitleTask } from '$lib/llm-tasks/generate-title';
@@ -43,6 +46,7 @@ export const memosStore = {
 			isArchived: false,
 			isPinned: false,
 			isPublic: false,
+			visibility: defaultVisibilityFor(getActiveSpace()?.type),
 			blueprintId: data.blueprintId ?? null,
 			language: data.language ?? null,
 			// createdAt + updatedAt are required by LocalMemo's type but the
@@ -167,6 +171,36 @@ export const memosStore = {
 	// Archive ops (delegated to shared factory)
 	archive: (id: string) => memoArchive.archive(id),
 	unarchive: (id: string) => memoArchive.unarchive(id),
+
+	/**
+	 * Flip a memo's visibility. M6 soft-migration: writes both
+	 * `visibility` and the legacy `isPublic` mirror so older readers
+	 * (search index, server snapshots) keep working until the M6.1
+	 * hard-drop. Public memos surface in the user's website embed
+	 * once a memoro embed-resolver lands.
+	 */
+	async setVisibility(id: string, next: VisibilityLevel) {
+		const existing = await memoTable.get(id);
+		if (!existing) throw new Error(`Memo ${id} not found`);
+		const before: VisibilityLevel = existing.visibility ?? (existing.isPublic ? 'public' : 'space');
+		if (before === next) return;
+
+		const stamp = new Date().toISOString();
+		await memoTable.update(id, {
+			visibility: next,
+			isPublic: next === 'public',
+			visibilityChangedAt: stamp,
+			visibilityChangedBy: getEffectiveUserId(),
+			updatedAt: stamp,
+		});
+
+		emitDomainEvent('VisibilityChanged', 'memoro', 'memos', id, {
+			recordId: id,
+			collection: 'memos',
+			before,
+			after: next,
+		});
+	},
 
 	/** Pin a memo. */
 	async pin(id: string) {
