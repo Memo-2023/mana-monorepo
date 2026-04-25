@@ -17,9 +17,23 @@ export const GUEST_USER_ID = 'guest';
 
 let currentUserId: string | null = null;
 
-/** Updates the active user. Pass `null` for sign-out / guest. */
+/**
+ * Updates the active user. Pass `null` for sign-out / guest.
+ *
+ * After updating the in-memory value, bumps the Dexie `_scopeCursor`
+ * (lazy import to keep this module leaf-level) so every liveQuery
+ * subscribed via `touchScopeCursor` re-evaluates with the new
+ * `getInScopeSpaceIds()`. Fire-and-forget — a missing bump only
+ * delays re-evaluation until the next Dexie write elsewhere.
+ */
 export function setCurrentUserId(id: string | null): void {
+	const prev = currentUserId;
 	currentUserId = id;
+	if (id !== prev) {
+		void import('./scope/cursor').then(({ bumpScopeCursor }) => {
+			bumpScopeCursor();
+		});
+	}
 }
 
 /** Returns the active user id, or `null` if unauthenticated. */

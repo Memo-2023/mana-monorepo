@@ -12,6 +12,7 @@
 import type { SpaceType, SpaceTier } from '@mana/shared-types';
 import { isSpaceType, isSpaceTier } from '@mana/shared-types';
 import { authFetch } from './auth-fetch';
+import { bumpScopeCursor } from './cursor';
 
 export interface ActiveSpace {
 	id: string;
@@ -91,7 +92,14 @@ export function setActiveSpace(space: ActiveSpace | null): void {
 	active = space;
 	status = space ? 'ready' : 'idle';
 	lastError = null;
-	if (space?.id !== prevId) notifyHandlers(space);
+	if (space?.id !== prevId) {
+		notifyHandlers(space);
+		// Dexie-bridge: bump the _scopeCursor so every liveQuery that
+		// touchScopeCursor'd re-runs with the new getInScopeSpaceIds().
+		// Without this, modules mounted before the bootstrap resolved
+		// the active space sit on an empty first result forever.
+		bumpScopeCursor();
+	}
 }
 
 /**
@@ -164,7 +172,10 @@ export async function loadActiveSpace(opts: { force?: boolean } = {}): Promise<A
 			active = member;
 			status = 'ready';
 			writeActiveSpaceHint(member.id);
-			if (member.id !== prevId) notifyHandlers(member);
+			if (member.id !== prevId) {
+				notifyHandlers(member);
+				bumpScopeCursor();
+			}
 			return member;
 		}
 
@@ -186,7 +197,10 @@ export async function loadActiveSpace(opts: { force?: boolean } = {}): Promise<A
 		active = { ...chosen, role: hinted ? hinted.role : 'owner' };
 		status = 'ready';
 		writeActiveSpaceHint(chosen.id);
-		if (active.id !== prevId) notifyHandlers(active);
+		if (active.id !== prevId) {
+			notifyHandlers(active);
+			bumpScopeCursor();
+		}
 		return active;
 	} catch (err) {
 		lastError = err instanceof Error ? err.message : String(err);

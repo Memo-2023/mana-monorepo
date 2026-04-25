@@ -1052,6 +1052,17 @@ db.version(44).stores({
 	comicStories: 'id, createdAt, style, isFavorite, isArchived',
 });
 
+// v45 — Infra table `_scopeCursor` (see data/scope/cursor.ts for the
+// full rationale). Single-row beacon that every scoped query touches
+// so Dexie's liveQuery subscribes to it; bumped on every
+// setActiveSpace. Without this, scope changes were invisible to
+// liveQueries and modules rendered empty on first mount until an
+// unrelated write re-triggered the querier. NOT in SYNC_APP_MAP —
+// it's a client-side liveness signal, not user data.
+db.version(45).stores({
+	_scopeCursor: 'id',
+});
+
 // ─── Sync Routing ──────────────────────────────────────────
 // SYNC_APP_MAP, TABLE_TO_SYNC_NAME, TABLE_TO_APP, SYNC_NAME_TO_TABLE,
 // toSyncName() and fromSyncName() are now derived from per-module
