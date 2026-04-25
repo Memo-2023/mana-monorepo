@@ -60,8 +60,12 @@
 {#if image}
 	<!-- svelte-ignore a11y_click_events_have_key_events -->
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
+	<!-- z-[100] sits above the layout's `.bottom-stack` (z-index: 90,
+	     hosts PillNav + QuickInputBar + the sync-status row) so the
+	     lightbox actually covers it. Tailwind's `z-50` would have left
+	     the bottom chrome poking through. -->
 	<div
-		class="lightbox-root fixed inset-0 z-50 flex items-center justify-center p-6 sm:p-10"
+		class="lightbox-root fixed inset-0 z-[100] flex items-center justify-center p-6 sm:p-10"
 		onclick={handleBackdropClick}
 		role="dialog"
 		aria-modal="true"
@@ -99,11 +103,14 @@
 			</div>
 		{/if}
 
-		<!-- Metadata: bottom-right, small, grey. Right-aligned so the
-		     longest line (the prompt) wraps naturally toward the image
-		     edge. `pointer-events-none` keeps clicks falling through to
-		     the backdrop dismiss. -->
-		<div class="lightbox-meta pointer-events-none absolute bottom-6 right-6 max-w-md text-right">
+		<!-- Metadata: bottom-right, small, grey. Tight column (max-w
+		     ≈ 14rem) so even long prompts hug the right edge instead of
+		     stretching halfway across the image. Right-aligned so the
+		     wrap stays anchored to the corner. `pointer-events-none`
+		     keeps clicks falling through to the backdrop dismiss. -->
+		<div
+			class="lightbox-meta pointer-events-none absolute bottom-6 right-6 max-w-[14rem] text-right"
+		>
 			<p class="lightbox-meta-prompt">{image.prompt}</p>
 			<div class="lightbox-meta-detail">
 				{#if image.model}<span>{image.model}</span>{/if}
@@ -154,6 +161,7 @@
 	.lightbox-meta-detail {
 		margin-top: 0.25rem;
 		display: flex;
+		flex-wrap: wrap;
 		gap: 0.625rem;
 		justify-content: flex-end;
 		font-size: 0.6875rem;
