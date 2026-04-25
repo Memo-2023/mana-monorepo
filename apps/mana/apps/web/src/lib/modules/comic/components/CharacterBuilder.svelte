@@ -194,7 +194,7 @@
 				id="character-add-prompt"
 				type="text"
 				bind:value={addPrompt}
-				placeholder="z.B. "freundlicher Ausdruck", "casual outfit", "action pose""
+				placeholder="z.B. freundlicher Ausdruck, casual outfit, action pose"
 				maxlength={200}
 				class="block w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
 				disabled={busy}

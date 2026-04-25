@@ -15,10 +15,11 @@
 	import { comicStoriesStore } from '../stores/stories.svelte';
 	import type { ComicStyle } from '../types';
 	import StylePicker from './StylePicker.svelte';
-	import CharacterPicker from './CharacterPicker.svelte';
+	import CharacterRefPicker from './CharacterRefPicker.svelte';
 
 	let title = $state('');
 	let style = $state<ComicStyle>('comic');
+	let characterId = $state<string | null>(null);
 	let characterMediaIds = $state<string[]>([]);
 	let storyContext = $state('');
 	let submitting = $state(false);
@@ -38,6 +39,7 @@
 			const story = await comicStoriesStore.createStory({
 				title: title.trim(),
 				style,
+				characterId,
 				characterMediaIds,
 				storyContext: storyContext.trim() || null,
 			});
@@ -81,10 +83,15 @@
 		</p>
 	</div>
 
-	<!-- Character refs -->
-	<CharacterPicker
-		value={characterMediaIds}
-		onChange={(next) => (characterMediaIds = next)}
+	<!-- Character refs (Mc3): default is character-mode if any exist,
+	     fallback Quick-Mode für Spontan-Stories ohne Setup. -->
+	<CharacterRefPicker
+		selectedCharacterId={characterId}
+		referenceMediaIds={characterMediaIds}
+		onChange={({ characterId: nextId, referenceMediaIds: nextRefs }) => {
+			characterId = nextId;
+			characterMediaIds = nextRefs;
+		}}
 		disabled={submitting}
 	/>
 

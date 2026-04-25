@@ -24,6 +24,10 @@ export interface CreateStoryInput {
 	title: string;
 	style: ComicStyle;
 	characterMediaIds: string[];
+	/** When the story is bound to a comicCharacter (Character-Mode), the
+	 *  FK lands here for display + cross-ref. Quick-Mode stories pass
+	 *  `null` and only fill `characterMediaIds` with raw face/body/garments. */
+	characterId?: string | null;
 	description?: string | null;
 	storyContext?: string | null;
 	tags?: string[];
@@ -45,6 +49,7 @@ export const comicStoriesStore = {
 			title: input.title,
 			description: input.description ?? null,
 			style: input.style,
+			characterId: input.characterId ?? null,
 			characterMediaIds: [...input.characterMediaIds],
 			storyContext: input.storyContext ?? null,
 			panelImageIds: [],

@@ -66,9 +66,23 @@ export interface LocalComicStory extends BaseRecord {
 	description?: string | null;
 	style: ComicStyle;
 	/**
+	 * FK to the comicCharacter that drives this story (Character-Mode,
+	 * Mc3+). Plaintext — used for "Charakter: <Name>"-Anzeige im
+	 * DetailView und für `useStoriesByCharacter`-Cross-Refs.
+	 *
+	 * `null` when the story was created in **Quick-Mode** (rohes
+	 * face/body/garments-Setup ohne Character-Iteration). Beide Modi
+	 * funktionieren parallel — die Story hängt am `characterMediaIds`-
+	 * Array für die eigentliche Render-Logik (Snapshot-Pattern).
+	 */
+	characterId?: string | null;
+	/**
 	 * Reference-image IDs passed unchanged to every panel-generate call.
-	 * Minimum: the primary face-ref from meImages. Optional additions:
-	 * body-ref + up to ~3 wardrobe-garment photos for a costume-setup.
+	 * Character-Mode: enthält genau die `pinnedVariantMediaId` des
+	 * referenzierten comicCharacters zum Story-Create-Zeitpunkt
+	 * (Snapshot — Re-Pinning ändert das nicht rückwirkend).
+	 * Quick-Mode: enthält face-ref + optional body-ref + Wardrobe-
+	 * Garment-Photos.
 	 * Capped at 8 by the backend (MAX_REFERENCE_IMAGES in the /picture/
 	 * generate-with-reference endpoint).
 	 */
@@ -104,6 +118,8 @@ export interface ComicStory {
 	title: string;
 	description?: string;
 	style: ComicStyle;
+	/** FK to the comic-character driving this story; undefined in Quick-Mode. */
+	characterId?: string;
 	characterMediaIds: string[];
 	storyContext?: string;
 	panelImageIds: string[];
@@ -122,6 +138,7 @@ export function toStory(local: LocalComicStory): ComicStory {
 		title: local.title,
 		description: local.description ?? undefined,
 		style: local.style,
+		characterId: local.characterId ?? undefined,
 		characterMediaIds: local.characterMediaIds ?? [],
 		storyContext: local.storyContext ?? undefined,
 		panelImageIds: local.panelImageIds ?? [],
