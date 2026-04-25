@@ -19,6 +19,7 @@ import { registerSpacesTools } from './spaces.ts';
 import { registerTodoTools } from './todo.ts';
 import { registerWardrobeTools } from './wardrobe.ts';
 import { registerComicTools } from './comic.ts';
+import { registerAugurTools } from './augur.ts';
 
 export function registerAllModules(): void {
 	registerHabitsTools();
@@ -30,6 +31,7 @@ export function registerAllModules(): void {
 	registerTodoTools();
 	registerWardrobeTools();
 	registerComicTools();
+	registerAugurTools();
 }
 
 export {
@@ -42,4 +44,5 @@ export {
 	registerTodoTools,
 	registerWardrobeTools,
 	registerComicTools,
+	registerAugurTools,
 };

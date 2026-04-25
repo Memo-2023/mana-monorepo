@@ -33,7 +33,9 @@ export type ModuleId =
 	// — Wardrobe M5 (garments + outfits + try-on) —
 	| 'wardrobe'
 	// — Comic M5 (stories + panel generation from cross-module text) —
-	| 'comic';
+	| 'comic'
+	// — Augur M5 (signs / fortunes / hunches + Living Oracle + year recap) —
+	| 'augur';
 
 /**
  * `user-space` — operates on the caller's data within a specific Space.
