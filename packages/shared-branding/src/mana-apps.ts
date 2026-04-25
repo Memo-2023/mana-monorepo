@@ -1073,7 +1073,7 @@ export const MANA_APPS: ManaApp[] = [
 	},
 	{
 		id: 'writing',
-		name: 'Writing',
+		name: 'Schreiben',
 		description: {
 			de: 'KI-Ghostwriter für Texte',
 			en: 'AI ghostwriter for prose',

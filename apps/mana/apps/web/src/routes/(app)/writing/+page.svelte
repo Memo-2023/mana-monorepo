@@ -4,7 +4,7 @@
 </script>
 
 <svelte:head>
-	<title>Writing - Mana</title>
+	<title>Schreiben - Mana</title>
 </svelte:head>
 
 <RoutePage appId="writing">

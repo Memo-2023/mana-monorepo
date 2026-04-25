@@ -1335,7 +1335,7 @@ registerApp({
 
 registerApp({
 	id: 'writing',
-	name: 'Writing',
+	name: 'Schreiben',
 	color: '#0ea5e9',
 	icon: NotePencil,
 	views: {
