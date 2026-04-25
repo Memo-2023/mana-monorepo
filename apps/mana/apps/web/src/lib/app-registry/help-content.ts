@@ -612,6 +612,28 @@ export const MODULE_HELP: Record<string, ModuleHelp> = {
 			'Lege deinen Heimatort als Standard fest',
 		],
 	},
+	writing: {
+		description:
+			'KI-Ghostwriter für intentional produzierten Prosa-Text. Brief Thema, Stil und Quellen — ein fertiger Entwurf entsteht, den du iterativ verfeinerst.',
+		features: [
+			'12 Textarten: Blog, Essay, E-Mail, Social, Story, Brief, Rede, Bewerbung, Pressetext, Bio, …',
+			'9 eingebaute Schreibstile (Akademisch, Casual Blog, LinkedIn, Hemingway, Memoir, …) plus eigene Stile',
+			'Quellen verknüpfen aus 7 Modulen: Artikel, Notiz, Library, Kontext, Ziel, Bild, URL',
+			'Selection-Verfeinerung: Markiere Text → Kürzen / Erweitern / Ton ändern / Umschreiben / Übersetzen',
+			'Versionierung mit "Als Checkpoint speichern" + Wiederherstellen',
+			'Visibility: privat / Space / Unlisted-Link / öffentlich',
+			'Export: Markdown, PDF, "Als Artikel speichern"',
+			'Persona-Linkage: Agents pinnen einen Default-Stil',
+			'Token-Cost pro Generation in der Versionshistorie',
+		],
+		tips: [
+			'⌘G generiert · ⌘⇧S speichert Checkpoint · ⌘Z macht letzte Verfeinerung rückgängig',
+			'Klicke ✨ neben dem Titel-Feld — die KI schlägt einen Titel aus deinem Briefing vor',
+			'In der BriefingForm: "Quellen" → 7 Buttons. Nutze "Kontext" um den Space-Kontext-Doc anzuhängen.',
+			'Drafts sind ziehbar — auf andere Module droppen, sobald deren Drop-Targets ausgebaut sind',
+			'Eigene Stile unter "🎨 Stile" anlegen — die Beschreibung wird wörtlich an die KI übergeben',
+		],
+	},
 	library: {
 		description:
 			'Medien-Log — Bücher, Filme, Serien und Comics tracken. Status, Fortschritt, Bewertung.',
