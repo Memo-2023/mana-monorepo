@@ -1,32 +1,25 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import { _ } from 'svelte-i18n';
 	import DetailView from '$lib/modules/augur/views/DetailView.svelte';
 	import { useAllAugurEntries } from '$lib/modules/augur/queries';
 	import { RoutePage } from '$lib/components/shell';
 
 	const entries$ = useAllAugurEntries();
 	const entry = $derived(entries$.value.find((e) => e.id === page.params.id));
-
-	const T = {
-		fallbackTitle: 'Augur',
-		routeTitle: 'Zeichen',
-		loading: 'laedt ...',
-		notFound: 'Eintrag nicht gefunden.',
-		backLink: '← zurueck',
-	} as const;
 </script>
 
 <svelte:head>
-	<title>{entry?.source ?? T.fallbackTitle} - Mana</title>
+	<title>{entry?.source ?? $_('augur.route.detailFallbackTitle')} - Mana</title>
 </svelte:head>
 
-<RoutePage appId="augur" backHref="/augur" title={T.routeTitle}>
+<RoutePage appId="augur" backHref="/augur" title={$_('augur.route.detailRouteTitle')}>
 	{#if entries$.loading}
-		<p class="state">{T.loading}</p>
+		<p class="state">{$_('augur.route.loading')}</p>
 	{:else if !entry}
 		<div class="state">
-			<p>{T.notFound}</p>
-			<a href="/augur">{T.backLink}</a>
+			<p>{$_('augur.route.notFound')}</p>
+			<a href="/augur">{$_('augur.route.backLink')}</a>
 		</div>
 	{:else}
 		<DetailView {entry} />

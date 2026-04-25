@@ -8,6 +8,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
+	import { _ } from 'svelte-i18n';
 	import WitnessView from './views/WitnessView.svelte';
 	import OracleView from './views/OracleView.svelte';
 	import type { ViewProps } from '$lib/app-registry';
@@ -15,13 +16,6 @@
 	let { navigate, goBack, params }: ViewProps = $props();
 
 	type Mode = 'witness' | 'oracle';
-
-	const T = {
-		witness: 'Witness',
-		oracle: 'Oracle',
-		witnessHint: 'Zeichen sammeln',
-		oracleHint: 'Muster lesen',
-	} as const;
 
 	const mode = $derived<Mode>(
 		page.url.searchParams.get('mode') === 'oracle' ? 'oracle' : 'witness'
@@ -45,8 +39,8 @@
 			aria-selected={mode === 'witness'}
 			onclick={() => setMode('witness')}
 		>
-			<span class="label">{T.witness}</span>
-			<span class="hint">{T.witnessHint}</span>
+			<span class="label">{$_('augur.mode.witness')}</span>
+			<span class="hint">{$_('augur.mode.witnessHint')}</span>
 		</button>
 		<button
 			type="button"
@@ -56,8 +50,8 @@
 			aria-selected={mode === 'oracle'}
 			onclick={() => setMode('oracle')}
 		>
-			<span class="label">{T.oracle}</span>
-			<span class="hint">{T.oracleHint}</span>
+			<span class="label">{$_('augur.mode.oracle')}</span>
+			<span class="hint">{$_('augur.mode.oracleHint')}</span>
 		</button>
 	</div>
 

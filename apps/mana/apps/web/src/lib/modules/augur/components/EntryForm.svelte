@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { augurStore } from '../stores/entries.svelte';
 	import { useAllAugurEntries } from '../queries';
 	import LivingOracleHint from './LivingOracleHint.svelte';
@@ -25,28 +26,6 @@
 	const history$ = useAllAugurEntries();
 	const history = $derived(history$.value);
 	let oracleReflection = $state<string | null>(null);
-
-	const T = {
-		kind: 'Art',
-		source: 'Quelle',
-		category: 'Kategorie',
-		claim: 'Was sagt das Zeichen?',
-		vibe: 'Stimmung',
-		feltMeaning: 'Eigene Deutung (optional)',
-		expectedOutcome: 'Was sollte konkret passieren? (optional)',
-		expectedBy: 'Bis wann? (optional)',
-		probability: 'Wahrscheinlichkeit (optional, 0-100%)',
-		tags: 'Tags (komma-getrennt)',
-		encounteredAt: 'Wann erlebt?',
-		sourcePlaceholder: 'z. B. schwarze Katze, Glueckskeks, Bauchgefuehl',
-		claimPlaceholder: 'z. B. heute kommt eine gute Nachricht',
-		feltPlaceholder: 'Was es fuer mich bedeutet ...',
-		expectedPlaceholder: 'z. B. Job-Zusage bis Freitag',
-		tagsPlaceholder: 'arbeit, naturzeichen ...',
-		submitCreate: '+ erfassen',
-		submitUpdate: 'speichern',
-		cancel: 'abbrechen',
-	} as const;
 
 	/* svelte-ignore state_referenced_locally */
 	let kind = $state<AugurKind>(initial?.kind ?? 'hunch');
@@ -143,7 +122,7 @@
 	{#if mode === 'create'}
 		<div class="row">
 			<label class="field">
-				<span>{T.kind}</span>
+				<span>{$_('augur.form.kind')}</span>
 				<select bind:value={kind}>
 					{#each KIND_ORDER as k (k)}
 						<option value={k}>{KIND_LABELS[k].de}</option>
@@ -151,7 +130,7 @@
 				</select>
 			</label>
 			<label class="field">
-				<span>{T.encounteredAt}</span>
+				<span>{$_('augur.form.encounteredAt')}</span>
 				<input type="date" bind:value={encounteredAt} />
 			</label>
 		</div>
@@ -159,11 +138,11 @@
 
 	<div class="row">
 		<label class="field grow">
-			<span>{T.source}</span>
-			<input bind:value={source} placeholder={T.sourcePlaceholder} required />
+			<span>{$_('augur.form.source')}</span>
+			<input bind:value={source} placeholder={$_('augur.form.sourcePlaceholder')} required />
 		</label>
 		<label class="field">
-			<span>{T.category}</span>
+			<span>{$_('augur.form.category')}</span>
 			<select bind:value={sourceCategory}>
 				{#each CATEGORY_ORDER as c (c)}
 					<option value={c}>{SOURCE_CATEGORY_LABELS[c].de}</option>
@@ -173,13 +152,14 @@
 	</div>
 
 	<label class="field">
-		<span>{T.claim}</span>
-		<textarea bind:value={claim} placeholder={T.claimPlaceholder} rows="2" required></textarea>
+		<span>{$_('augur.form.claim')}</span>
+		<textarea bind:value={claim} placeholder={$_('augur.form.claimPlaceholder')} rows="2" required
+		></textarea>
 	</label>
 
 	<div class="row">
 		<label class="field grow">
-			<span>{T.vibe}</span>
+			<span>{$_('augur.form.vibe')}</span>
 			<div class="vibe-row">
 				{#each VIBE_ORDER as v (v)}
 					<button
@@ -196,8 +176,9 @@
 	</div>
 
 	<label class="field">
-		<span>{T.feltMeaning}</span>
-		<textarea bind:value={feltMeaning} placeholder={T.feltPlaceholder} rows="2"></textarea>
+		<span>{$_('augur.form.feltMeaning')}</span>
+		<textarea bind:value={feltMeaning} placeholder={$_('augur.form.feltPlaceholder')} rows="2"
+		></textarea>
 	</label>
 
 	{#if mode === 'create'}
@@ -216,18 +197,18 @@
 	{/if}
 
 	<details class="more">
-		<summary>+ Prognose & Tags</summary>
+		<summary>{$_('augur.form.more')}</summary>
 		<label class="field">
-			<span>{T.expectedOutcome}</span>
-			<input bind:value={expectedOutcome} placeholder={T.expectedPlaceholder} />
+			<span>{$_('augur.form.expectedOutcome')}</span>
+			<input bind:value={expectedOutcome} placeholder={$_('augur.form.expectedPlaceholder')} />
 		</label>
 		<div class="row">
 			<label class="field">
-				<span>{T.expectedBy}</span>
+				<span>{$_('augur.form.expectedBy')}</span>
 				<input type="date" bind:value={expectedBy} />
 			</label>
 			<label class="field">
-				<span>{T.probability}</span>
+				<span>{$_('augur.form.probability')}</span>
 				<input
 					type="number"
 					min="0"
@@ -239,19 +220,19 @@
 			</label>
 		</div>
 		<label class="field">
-			<span>{T.tags}</span>
-			<input bind:value={tagsText} placeholder={T.tagsPlaceholder} />
+			<span>{$_('augur.form.tags')}</span>
+			<input bind:value={tagsText} placeholder={$_('augur.form.tagsPlaceholder')} />
 		</label>
 	</details>
 
 	<div class="actions">
 		{#if onclose}
 			<button type="button" class="btn ghost" onclick={() => onclose?.()} disabled={saving}>
-				{T.cancel}
+				{$_('augur.form.cancel')}
 			</button>
 		{/if}
 		<button type="submit" class="btn primary" disabled={saving}>
-			{mode === 'edit' ? T.submitUpdate : T.submitCreate}
+			{mode === 'edit' ? $_('augur.form.submitUpdate') : $_('augur.form.submitCreate')}
 		</button>
 	</div>
 </form>

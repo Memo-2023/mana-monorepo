@@ -9,6 +9,7 @@
 -->
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { _ } from 'svelte-i18n';
 	import KindTabs from '../components/KindTabs.svelte';
 	import EntryCard from '../components/EntryCard.svelte';
 	import EntryForm from '../components/EntryForm.svelte';
@@ -21,17 +22,6 @@
 	} from '../queries';
 	import { isDue } from '../lib/reminders';
 	import type { AugurEntry, AugurKind } from '../types';
-
-	const T = {
-		searchPlaceholder: 'Suche nach Quelle, Aussage, Deutung ...',
-		newOpen: '+ neu',
-		newClose: '× schliessen',
-		emptyAll: 'Noch keine Zeichen erfasst. Sammle erst — auswerten kommt spaeter.',
-		emptyFiltered: 'Keine passenden Zeichen.',
-		openOnly: 'nur offene',
-		dueOnly: 'nur faellige',
-		openHint: 'noch offen',
-	} as const;
 
 	let entries$ = useAllAugurEntries();
 	let entries = $derived(entries$.value);
@@ -75,7 +65,7 @@
 				type="search"
 				class="search"
 				bind:value={searchQuery}
-				placeholder={T.searchPlaceholder}
+				placeholder={$_('augur.witness.searchPlaceholder')}
 			/>
 			<button
 				type="button"
@@ -84,7 +74,7 @@
 				onclick={() => (showCreate = !showCreate)}
 				aria-expanded={showCreate}
 			>
-				{showCreate ? T.newClose : T.newOpen}
+				{showCreate ? $_('augur.witness.newClose') : $_('augur.witness.newOpen')}
 			</button>
 		</div>
 
@@ -99,14 +89,14 @@
 		<div class="filter-row">
 			<label class="open-toggle">
 				<input type="checkbox" bind:checked={showOpenOnly} />
-				<span>{T.openOnly}</span>
+				<span>{$_('augur.witness.openOnly')}</span>
 				{#if unresolvedCount > 0}
-					<span class="badge open">{unresolvedCount} {T.openHint}</span>
+					<span class="badge open">{unresolvedCount} {$_('augur.witness.openHint')}</span>
 				{/if}
 			</label>
 			<label class="open-toggle">
 				<input type="checkbox" bind:checked={showDueOnly} />
-				<span>{T.dueOnly}</span>
+				<span>{$_('augur.witness.dueOnly')}</span>
 				{#if dueEntries.length > 0}
 					<span class="badge due">{dueEntries.length}</span>
 				{/if}
@@ -116,7 +106,7 @@
 
 	{#if filtered.length === 0}
 		<p class="empty">
-			{entries.length === 0 ? T.emptyAll : T.emptyFiltered}
+			{entries.length === 0 ? $_('augur.witness.emptyAll') : $_('augur.witness.emptyFiltered')}
 		</p>
 	{:else}
 		<ul class="grid">

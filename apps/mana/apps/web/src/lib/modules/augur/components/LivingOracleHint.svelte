@@ -14,6 +14,7 @@
       *at the time*, alongside what actually happened.
 -->
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import {
 		findMatches,
 		fingerprint,
@@ -50,15 +51,6 @@
 
 	let props: Props = $props();
 
-	const T = {
-		title: 'Was deine Daten zurueck sagen',
-		titleSnapshot: 'Was das Orakel damals sagte',
-		matchCount: 'aehnliche Zeichen',
-		hit: 'eingetreten',
-		partly: 'teilweise',
-		no: 'nicht eingetreten',
-	} as const;
-
 	const liveResult = $derived.by(() => {
 		if (props.mode === 'snapshot') return null;
 		const fp: Fingerprint | null = fingerprint(props.input);
@@ -80,7 +72,7 @@
 		<aside class="hint snapshot">
 			<header>
 				<span class="dot"></span>
-				<span class="title">{T.titleSnapshot}</span>
+				<span class="title">{$_('augur.oracleHint.titleSnapshot')}</span>
 			</header>
 			<p class="text">{props.snapshot}</p>
 		</aside>
@@ -89,18 +81,30 @@
 	<aside class="hint live">
 		<header>
 			<span class="dot"></span>
-			<span class="title">{T.title}</span>
+			<span class="title">{$_('augur.oracleHint.titleLive')}</span>
 		</header>
 		<p class="text">{liveResult.text}</p>
 		<div class="bars">
 			{#if liveResult.set.fulfilled > 0}
-				<span class="bar yes" style:flex={liveResult.set.fulfilled} title={T.hit}></span>
+				<span
+					class="bar yes"
+					style:flex={liveResult.set.fulfilled}
+					title={$_('augur.oracleHint.hit')}
+				></span>
 			{/if}
 			{#if liveResult.set.partly > 0}
-				<span class="bar partly" style:flex={liveResult.set.partly} title={T.partly}></span>
+				<span
+					class="bar partly"
+					style:flex={liveResult.set.partly}
+					title={$_('augur.oracleHint.partly')}
+				></span>
 			{/if}
 			{#if liveResult.set.notFulfilled > 0}
-				<span class="bar no" style:flex={liveResult.set.notFulfilled} title={T.no}></span>
+				<span
+					class="bar no"
+					style:flex={liveResult.set.notFulfilled}
+					title={$_('augur.oracleHint.no')}
+				></span>
 			{/if}
 		</div>
 	</aside>

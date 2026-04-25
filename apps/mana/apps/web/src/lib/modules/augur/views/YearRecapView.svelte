@@ -15,6 +15,7 @@
 -->
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { _ } from 'svelte-i18n';
 	import { useAllAugurEntries } from '../queries';
 	import { buildYearRecap } from '../lib/year-recap';
 	import {
@@ -29,31 +30,12 @@
 
 	let { year }: { year: number } = $props();
 
-	const T = {
-		title: 'Jahresrueckblick',
-		yearTotal: 'Zeichen',
-		yearResolved: 'aufgeloest',
-		yearHitRate: 'Trefferquote',
-		emptyYear: 'In diesem Jahr noch keine Zeichen erfasst.',
-		distKind: 'Nach Art',
-		distVibe: 'Nach Stimmung',
-		distOutcome: 'Nach Ergebnis',
-		bestSource: 'Bester Forecaster',
-		worstSource: 'Unzuverlaessigster Forecaster',
-		topSources: 'Meistgenutzte Quellen',
-		mostFulfilled: 'Eingetretene Zeichen',
-		mostSurprising: 'Ueberraschungen — wo dein Gefuehl danebenlag',
-		none: '—',
-		hitOf: 'von',
-		matches: 'Treffer',
-	} as const;
-
 	const entries$ = useAllAugurEntries();
 	const entries = $derived(entries$.value);
 	const recap = $derived(buildYearRecap(entries, year));
 
 	function pct(v: number | null): string {
-		if (v == null) return T.none;
+		if (v == null) return $_('augur.recap.none');
 		return `${Math.round(v * 100)}%`;
 	}
 
@@ -65,30 +47,30 @@
 <div class="recap">
 	<header class="head">
 		<div class="year">{year}</div>
-		<h2>{T.title}</h2>
+		<h2>{$_('augur.recap.title')}</h2>
 	</header>
 
 	{#if recap.total === 0}
-		<p class="empty">{T.emptyYear}</p>
+		<p class="empty">{$_('augur.recap.emptyYear')}</p>
 	{:else}
 		<section class="headline">
 			<div class="big-stat">
 				<span class="num">{recap.total}</span>
-				<span class="lbl">{T.yearTotal}</span>
+				<span class="lbl">{$_('augur.recap.yearTotal')}</span>
 			</div>
 			<div class="big-stat">
 				<span class="num">{recap.resolved}</span>
-				<span class="lbl">{T.yearResolved}</span>
+				<span class="lbl">{$_('augur.recap.yearResolved')}</span>
 			</div>
 			<div class="big-stat highlight">
 				<span class="num">{pct(recap.hitRate)}</span>
-				<span class="lbl">{T.yearHitRate}</span>
+				<span class="lbl">{$_('augur.recap.yearHitRate')}</span>
 			</div>
 		</section>
 
 		<section class="dist-row">
 			<div class="dist">
-				<h4>{T.distKind}</h4>
+				<h4>{$_('augur.recap.distKind')}</h4>
 				<ul>
 					{#each Object.entries(recap.byKind) as [k, n] (k)}
 						<li>
@@ -99,7 +81,7 @@
 				</ul>
 			</div>
 			<div class="dist">
-				<h4>{T.distVibe}</h4>
+				<h4>{$_('augur.recap.distVibe')}</h4>
 				<ul>
 					{#each Object.entries(recap.byVibe) as [v, n] (v)}
 						<li>
@@ -112,7 +94,7 @@
 				</ul>
 			</div>
 			<div class="dist">
-				<h4>{T.distOutcome}</h4>
+				<h4>{$_('augur.recap.distOutcome')}</h4>
 				<ul>
 					{#each Object.entries(recap.byOutcome) as [o, n] (o)}
 						<li>
@@ -126,34 +108,42 @@
 
 		<section class="forecaster-row">
 			<div class="forecaster best">
-				<h4>{T.bestSource}</h4>
+				<h4>{$_('augur.recap.bestSource')}</h4>
 				{#if recap.bestSource}
 					<div class="fc-name">
 						{SOURCE_CATEGORY_LABELS[recap.bestSource.sourceCategory].de}
 					</div>
 					<div class="fc-num">{pct(recap.bestSource.hitRate)}</div>
-					<div class="fc-meta">{recap.bestSource.fulfilled} {T.hitOf} {recap.bestSource.n}</div>
+					<div class="fc-meta">
+						{recap.bestSource.fulfilled}
+						{$_('augur.recap.hitOf')}
+						{recap.bestSource.n}
+					</div>
 				{:else}
-					<p class="fc-empty">{T.none}</p>
+					<p class="fc-empty">{$_('augur.recap.none')}</p>
 				{/if}
 			</div>
 			<div class="forecaster worst">
-				<h4>{T.worstSource}</h4>
+				<h4>{$_('augur.recap.worstSource')}</h4>
 				{#if recap.worstSource}
 					<div class="fc-name">
 						{SOURCE_CATEGORY_LABELS[recap.worstSource.sourceCategory].de}
 					</div>
 					<div class="fc-num">{pct(recap.worstSource.hitRate)}</div>
-					<div class="fc-meta">{recap.worstSource.fulfilled} {T.hitOf} {recap.worstSource.n}</div>
+					<div class="fc-meta">
+						{recap.worstSource.fulfilled}
+						{$_('augur.recap.hitOf')}
+						{recap.worstSource.n}
+					</div>
 				{:else}
-					<p class="fc-empty">{T.none}</p>
+					<p class="fc-empty">{$_('augur.recap.none')}</p>
 				{/if}
 			</div>
 		</section>
 
 		{#if recap.topCategories.length > 0}
 			<section class="block">
-				<h3>{T.topSources}</h3>
+				<h3>{$_('augur.recap.topSources')}</h3>
 				<ul class="ranked-list">
 					{#each recap.topCategories as cat (cat.category)}
 						<li>
@@ -173,7 +163,7 @@
 
 		{#if recap.mostFulfilled.length > 0}
 			<section class="block">
-				<h3>{T.mostFulfilled}</h3>
+				<h3>{$_('augur.recap.mostFulfilled')}</h3>
 				<div class="card-grid">
 					{#each recap.mostFulfilled as entry (entry.id)}
 						<EntryCard {entry} onclick={openEntry} />
@@ -184,7 +174,7 @@
 
 		{#if recap.mostSurprising.length > 0}
 			<section class="block">
-				<h3>{T.mostSurprising}</h3>
+				<h3>{$_('augur.recap.mostSurprising')}</h3>
 				<div class="card-grid">
 					{#each recap.mostSurprising as entry (entry.id)}
 						<EntryCard {entry} onclick={openEntry} />

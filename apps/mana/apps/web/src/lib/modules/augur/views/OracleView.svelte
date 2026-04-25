@@ -15,6 +15,7 @@
   needs the mood/sleep query layer pulled in. Not in this PR.
 -->
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { useAllAugurEntries } from '../queries';
 	import {
 		calibrationPerSource,
@@ -26,43 +27,8 @@
 	import { useMoodByDate, useSleepByDate } from '../lib/signal-bridge.svelte';
 	import { KIND_LABELS, SOURCE_CATEGORY_LABELS, VIBE_LABELS, VIBE_COLORS } from '../types';
 
-	const T = {
-		title: 'Oracle',
-		subtitle: 'Was deine Daten zurueck sagen.',
-		coldStart: 'Noch zu wenig aufgeloeste Zeichen.',
-		coldStartHint: 'Sammle und loese mindestens',
-		coldStartUnit: 'Zeichen auf, dann zeigt das Orakel verlaessliche Zahlen.',
-		statTotal: 'gesammelt',
-		statResolved: 'aufgeloest',
-		statOpen: 'offen',
-		statHitRate: 'Trefferquote',
-		statBrier: 'Brier-Score',
-		statBrierBaseline: 'Baseline 0.25 (50/50)',
-		sourceTitle: 'Forecaster in deinem Leben',
-		sourceSub: 'Wer / was war wie oft richtig?',
-		sourceCol: 'Quelle',
-		sourceN: 'n',
-		sourceHit: 'Treffer',
-		sourceBrier: 'Brier',
-		sourceMix: 'Verteilung',
-		vibeTitle: 'Stimmt dein Bauchgefuehl?',
-		vibeSub: 'Treffer pro Stimmung — gut, raetselhaft, schlecht.',
-		vibeNoData: 'noch keine Daten',
-		vibeHit: 'Treffer',
-		vibeDir: 'Richtung',
-		brierUnknown: '–',
-		corrTitle: 'Was um deine Zeichen herum passiert',
-		corrSub: 'Korrelation, nicht Kausalitaet — gefunden in deinen eigenen Daten.',
-		corrEmpty:
-			'Noch keine belastbaren Muster. Logge weiter — Mood und Sleep werden dazu gerechnet.',
-		corrAfter: 'In den 3 Tagen danach',
-		corrMoodLevel: 'lag dein Mood-Level bei',
-		corrSleepQuality: 'lag deine Schlaf-Qualitaet bei',
-		corrSleepDuration: 'lag deine Schlafdauer bei',
-		corrVsBaseline: 'Baseline:',
-		corrUnits: { min: 'min', score: '/10', score5: '/5' },
-		yearRecapLink: 'Jahresrueckblick →',
-	} as const;
+	// Metric units stay as constants — they're not translated, just symbolic.
+	const METRIC_UNITS = { min: 'min', score: '/10', score5: '/5' } as const;
 
 	const currentYear = new Date().getFullYear();
 
@@ -82,22 +48,22 @@
 	function metricLabel(f: CorrelationFinding): string {
 		switch (f.metric) {
 			case 'mood-level':
-				return T.corrMoodLevel;
+				return $_('augur.oracle.corrMoodLevel');
 			case 'sleep-quality':
-				return T.corrSleepQuality;
+				return $_('augur.oracle.corrSleepQuality');
 			case 'sleep-duration':
-				return T.corrSleepDuration;
+				return $_('augur.oracle.corrSleepDuration');
 		}
 	}
 
 	function metricUnit(f: CorrelationFinding): string {
 		switch (f.metric) {
 			case 'mood-level':
-				return T.corrUnits.score;
+				return METRIC_UNITS.score;
 			case 'sleep-quality':
-				return T.corrUnits.score5;
+				return METRIC_UNITS.score5;
 			case 'sleep-duration':
-				return T.corrUnits.min;
+				return METRIC_UNITS.min;
 		}
 	}
 
@@ -117,12 +83,12 @@
 	}
 
 	function pct(value: number | null): string {
-		if (value == null) return T.brierUnknown;
+		if (value == null) return $_('augur.common.brierUnknown');
 		return `${Math.round(value * 100)}%`;
 	}
 
 	function brier(value: number | null): string {
-		if (value == null) return T.brierUnknown;
+		if (value == null) return $_('augur.common.brierUnknown');
 		return value.toFixed(3);
 	}
 
@@ -132,42 +98,42 @@
 <div class="oracle">
 	<header class="head">
 		<div>
-			<h2>{T.title}</h2>
-			<p class="sub">{T.subtitle}</p>
+			<h2>{$_('augur.oracle.title')}</h2>
+			<p class="sub">{$_('augur.oracle.subtitle')}</p>
 		</div>
-		<a class="recap-link" href="/augur/recap/{currentYear}">{T.yearRecapLink}</a>
+		<a class="recap-link" href="/augur/recap/{currentYear}">{$_('augur.oracle.yearRecapLink')}</a>
 	</header>
 
 	<section class="stats">
 		<div class="stat">
 			<span class="stat-num">{stats.total}</span>
-			<span class="stat-label">{T.statTotal}</span>
+			<span class="stat-label">{$_('augur.oracle.statTotal')}</span>
 		</div>
 		<div class="stat">
 			<span class="stat-num">{stats.resolved}</span>
-			<span class="stat-label">{T.statResolved}</span>
+			<span class="stat-label">{$_('augur.oracle.statResolved')}</span>
 		</div>
 		<div class="stat">
 			<span class="stat-num">{stats.open}</span>
-			<span class="stat-label">{T.statOpen}</span>
+			<span class="stat-label">{$_('augur.oracle.statOpen')}</span>
 		</div>
 		<div class="stat highlight">
 			<span class="stat-num">{pct(stats.hitRate)}</span>
-			<span class="stat-label">{T.statHitRate}</span>
+			<span class="stat-label">{$_('augur.oracle.statHitRate')}</span>
 		</div>
-		<div class="stat" title={T.statBrierBaseline}>
+		<div class="stat" title={$_('augur.oracle.statBrierBaseline')}>
 			<span class="stat-num">{brier(stats.brier)}</span>
-			<span class="stat-label">{T.statBrier} ({stats.brierN})</span>
+			<span class="stat-label">{$_('augur.oracle.statBrier')} ({stats.brierN})</span>
 		</div>
 	</section>
 
 	{#if isColdStart}
 		<section class="cold-start">
-			<p>{T.coldStart}</p>
+			<p>{$_('augur.oracle.coldStart')}</p>
 			<p class="hint">
-				{T.coldStartHint}
+				{$_('augur.oracle.coldStartHint')}
 				<strong>{ORACLE_COLD_START_MIN}</strong>
-				{T.coldStartUnit}
+				{$_('augur.oracle.coldStartUnit')}
 			</p>
 			<div class="progress">
 				<div
@@ -179,20 +145,20 @@
 	{:else}
 		<section class="block">
 			<header class="block-head">
-				<h3>{T.sourceTitle}</h3>
-				<p>{T.sourceSub}</p>
+				<h3>{$_('augur.oracle.sourceTitle')}</h3>
+				<p>{$_('augur.oracle.sourceSub')}</p>
 			</header>
 			{#if sourceRows.length === 0}
-				<p class="empty">{T.vibeNoData}</p>
+				<p class="empty">{$_('augur.oracle.vibeNoData')}</p>
 			{:else}
 				<table class="ranked">
 					<thead>
 						<tr>
-							<th>{T.sourceCol}</th>
-							<th class="num">{T.sourceN}</th>
-							<th class="num">{T.sourceHit}</th>
-							<th class="num">{T.sourceBrier}</th>
-							<th class="mix">{T.sourceMix}</th>
+							<th>{$_('augur.oracle.sourceCol')}</th>
+							<th class="num">{$_('augur.oracle.sourceN')}</th>
+							<th class="num">{$_('augur.oracle.sourceHit')}</th>
+							<th class="num">{$_('augur.oracle.sourceBrier')}</th>
+							<th class="mix">{$_('augur.oracle.sourceMix')}</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -229,11 +195,11 @@
 
 		<section class="block">
 			<header class="block-head">
-				<h3>{T.corrTitle}</h3>
-				<p>{T.corrSub}</p>
+				<h3>{$_('augur.oracle.corrTitle')}</h3>
+				<p>{$_('augur.oracle.corrSub')}</p>
 			</header>
 			{#if correlations.length === 0}
-				<p class="empty">{T.corrEmpty}</p>
+				<p class="empty">{$_('augur.oracle.corrEmpty')}</p>
 			{:else}
 				<ul class="corr-list">
 					{#each correlations.slice(0, 6) as f (f.dimension + f.bucket + f.metric + f.windowDays)}
@@ -247,10 +213,10 @@
 								<span class="corr-n">n={f.n}</span>
 							</div>
 							<p class="corr-text">
-								{T.corrAfter}
+								{$_('augur.oracle.corrAfter')}
 								{bucketLabel(f).toLowerCase()}-Zeichen {metricLabel(f)}
 								<strong>{fmt(f.bucketMean, f.metric)}{metricUnit(f)}</strong>
-								— {T.corrVsBaseline}
+								— {$_('augur.oracle.corrVsBaseline')}
 								{fmt(f.baseline, f.metric)}{metricUnit(f)}.
 							</p>
 						</li>
@@ -261,21 +227,21 @@
 
 		<section class="block">
 			<header class="block-head">
-				<h3>{T.vibeTitle}</h3>
-				<p>{T.vibeSub}</p>
+				<h3>{$_('augur.oracle.vibeTitle')}</h3>
+				<p>{$_('augur.oracle.vibeSub')}</p>
 			</header>
 			<div class="vibe-grid">
 				{#each vibeRows as row (row.vibe)}
 					<div class="vibe-card" style:--vibe-color={VIBE_COLORS[row.vibe]}>
 						<div class="vibe-label">{VIBE_LABELS[row.vibe].de}</div>
 						{#if row.n === 0}
-							<div class="vibe-empty">{T.vibeNoData}</div>
+							<div class="vibe-empty">{$_('augur.oracle.vibeNoData')}</div>
 						{:else}
 							<div class="vibe-rate">{pct(row.hitRate)}</div>
-							<div class="vibe-meta">{T.vibeHit} (n={row.n})</div>
+							<div class="vibe-meta">{$_('augur.oracle.vibeHit')} (n={row.n})</div>
 							{#if row.directionalHitRate != null}
 								<div class="vibe-rate small">{pct(row.directionalHitRate)}</div>
-								<div class="vibe-meta">{T.vibeDir}</div>
+								<div class="vibe-meta">{$_('augur.oracle.vibeDir')}</div>
 							{/if}
 						{/if}
 					</div>

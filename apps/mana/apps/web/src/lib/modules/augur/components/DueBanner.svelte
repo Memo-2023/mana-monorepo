@@ -12,6 +12,7 @@
 -->
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { _ } from 'svelte-i18n';
 	import { augurStore } from '../stores/entries.svelte';
 	import { reminderDate, daysUntilDue } from '../lib/reminders';
 	import type { AugurEntry, AugurOutcome } from '../types';
@@ -20,23 +21,11 @@
 
 	let expanded = $state(false);
 
-	const T = {
-		single: 'Zeichen wartet auf Aufloesung',
-		plural: 'Zeichen warten auf Aufloesung',
-		hide: 'verbergen',
-		show: 'oeffnen',
-		yes: 'ja',
-		partly: 'teils',
-		no: 'nein',
-		overdue: 'Tage faellig',
-		dueToday: 'heute',
-	} as const;
-
 	function dueLabel(e: AugurEntry): string {
 		const d = daysUntilDue(e);
 		if (d == null) return '';
-		if (d === 0) return T.dueToday;
-		if (d < 0) return `${-d} ${T.overdue}`;
+		if (d === 0) return $_('augur.due.dueToday');
+		if (d < 0) return `${-d} ${$_('augur.due.overdue')}`;
 		return reminderDate(e) ?? '';
 	}
 
@@ -51,9 +40,9 @@
 			<span class="dot"></span>
 			<span class="text">
 				<strong>{entries.length}</strong>
-				{entries.length === 1 ? T.single : T.plural}
+				{entries.length === 1 ? $_('augur.due.single') : $_('augur.due.plural')}
 			</span>
-			<span class="toggle">{expanded ? T.hide : T.show}</span>
+			<span class="toggle">{expanded ? $_('augur.due.hide') : $_('augur.due.show')}</span>
 		</button>
 
 		{#if expanded}
@@ -70,7 +59,7 @@
 								type="button"
 								class="qb yes"
 								onclick={() => quickResolve(entry.id, 'fulfilled')}
-								title={T.yes}
+								title={$_('augur.due.yes')}
 							>
 								✓
 							</button>
@@ -78,7 +67,7 @@
 								type="button"
 								class="qb partly"
 								onclick={() => quickResolve(entry.id, 'partly')}
-								title={T.partly}
+								title={$_('augur.due.partly')}
 							>
 								~
 							</button>
@@ -86,7 +75,7 @@
 								type="button"
 								class="qb no"
 								onclick={() => quickResolve(entry.id, 'not-fulfilled')}
-								title={T.no}
+								title={$_('augur.due.no')}
 							>
 								✗
 							</button>

@@ -1,13 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import { _ } from 'svelte-i18n';
 	import YearRecapView from '$lib/modules/augur/views/YearRecapView.svelte';
 	import { RoutePage } from '$lib/components/shell';
-
-	const T = {
-		title: 'Jahresrueckblick',
-		invalid: 'Ungueltiges Jahr.',
-		back: '← zurueck',
-	} as const;
 
 	const year = $derived.by(() => {
 		const raw = page.params.year;
@@ -19,14 +14,14 @@
 </script>
 
 <svelte:head>
-	<title>{year ?? T.title} - Augur - Mana</title>
+	<title>{year ?? $_('augur.recap.title')} - Augur - Mana</title>
 </svelte:head>
 
-<RoutePage appId="augur" backHref="/augur?mode=oracle" title={T.title}>
+<RoutePage appId="augur" backHref="/augur?mode=oracle" title={$_('augur.recap.title')}>
 	{#if year == null}
 		<div class="state">
-			<p>{T.invalid}</p>
-			<a href="/augur">{T.back}</a>
+			<p>{$_('augur.route.recapInvalid')}</p>
+			<a href="/augur">{$_('augur.route.recapBack')}</a>
 		</div>
 	{:else}
 		<YearRecapView {year} />
