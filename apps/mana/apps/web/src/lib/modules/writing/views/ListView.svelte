@@ -10,8 +10,19 @@
   unstarted draft.
 -->
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, type Component } from 'svelte';
 	import { goto } from '$app/navigation';
+	import {
+		Palette,
+		NotePencil,
+		Sparkle,
+		Newspaper,
+		Notebook,
+		Envelope,
+		ChatCircle,
+		BookOpen,
+		Microphone,
+	} from '@mana/shared-icons';
 	import KindTabs from '../components/KindTabs.svelte';
 	import StatusFilter from '../components/StatusFilter.svelte';
 	import DraftCard from '../components/DraftCard.svelte';
@@ -37,6 +48,28 @@
 	 * 12-kind picker is one click away inside the BriefingForm.
 	 */
 	const QUICK_START_KINDS: DraftKind[] = ['blog', 'essay', 'email', 'social', 'letter', 'speech'];
+
+	/**
+	 * Phosphor-icon mapping for the quick-start tiles (and any other
+	 * UI surface that needs an icon-not-emoji affordance per kind). The
+	 * KIND_LABELS map still carries an `emoji` field for places that
+	 * lean on it (KindTabs in the populated state, etc.) — this lookup
+	 * is the icon-only equivalent for the workbench card hero.
+	 */
+	const QUICK_ICON: Record<DraftKind, Component> = {
+		blog: Newspaper,
+		essay: Notebook,
+		email: Envelope,
+		social: ChatCircle,
+		letter: Envelope,
+		speech: Microphone,
+		story: BookOpen,
+		'cover-letter': Envelope,
+		'product-description': Notebook,
+		'press-release': Newspaper,
+		bio: NotePencil,
+		other: NotePencil,
+	};
 
 	const drafts$ = useAllDrafts();
 	const drafts = $derived(drafts$.value);
@@ -151,7 +184,7 @@
 			title="Stile verwalten"
 			aria-label="Stile verwalten"
 		>
-			🎨
+			<Palette size={18} weight="regular" />
 		</a>
 		<button
 			type="button"
@@ -193,27 +226,35 @@
 	{:else if isEmpty && !showCreate}
 		<!-- Hero empty-state: the "What is this?" view. -->
 		<section class="hero">
-			<div class="hero-icon" aria-hidden="true">📝</div>
+			<div class="hero-icon" aria-hidden="true">
+				<NotePencil size={40} weight="duotone" />
+			</div>
 			<h2>Dein KI-Ghostwriter</h2>
 			<p class="hero-pitch">
 				Brief Thema, Stil und Quellen — ein fertiger Entwurf entsteht. Verfeinere ihn absatzweise
 				mit ⌘G zum Generieren, Markieren + Selection-Tools, oder direkt im Editor.
 			</p>
-			<p class="hero-meta">
-				✨ 12 Textarten · 9 Stile · 7 Quellen-Typen · End-to-End-verschlüsselt
-			</p>
+			<ul class="hero-meta">
+				<li><Sparkle size={12} weight="fill" /> 12 Textarten</li>
+				<li>9 Stile</li>
+				<li>7 Quellen</li>
+				<li>E2E-verschlüsselt</li>
+			</ul>
 
 			<div class="quick-start">
-				<p class="quick-start-label">Schnellstart:</p>
+				<p class="quick-start-label">Schnellstart</p>
 				<div class="quick-grid">
 					{#each QUICK_START_KINDS as kind (kind)}
+						{@const Icon = QUICK_ICON[kind]}
 						<button
 							type="button"
 							class="quick-tile"
 							onclick={() => startWithKind(kind)}
 							title={`Neuer ${KIND_LABELS[kind].de}-Entwurf`}
 						>
-							<span class="quick-emoji" aria-hidden="true">{KIND_LABELS[kind].emoji}</span>
+							<span class="quick-icon" aria-hidden="true">
+								<Icon size={20} weight="regular" />
+							</span>
 							<span class="quick-label">{KIND_LABELS[kind].de}</span>
 						</button>
 					{/each}
@@ -268,15 +309,16 @@
 		margin-bottom: 1.5rem;
 	}
 	.styles-link {
-		padding: 0.4rem 0.55rem;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 2rem;
+		height: 2rem;
 		border-radius: 0.5rem;
 		border: 1px solid var(--color-border, rgba(0, 0, 0, 0.08));
 		background: transparent;
 		color: var(--color-text-muted, rgba(0, 0, 0, 0.55));
 		text-decoration: none;
-		font-size: 0.95rem;
-		line-height: 1;
-		white-space: nowrap;
 		flex-shrink: 0;
 	}
 	.styles-link:hover {
@@ -351,57 +393,79 @@
 
 	.hero {
 		max-width: 600px;
-		margin: 1.5rem auto;
-		padding: 1.5rem 1rem;
+		margin: 1rem auto;
+		padding: 1rem 0.5rem 1.5rem;
 		text-align: center;
 	}
 	.hero-icon {
-		font-size: 2.4rem;
-		line-height: 1;
-		margin-bottom: 0.75rem;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 3rem;
+		height: 3rem;
+		border-radius: 0.85rem;
+		background: color-mix(in srgb, #0ea5e9 12%, transparent);
+		color: #0ea5e9;
+		margin-bottom: 0.85rem;
 	}
 	.hero h2 {
-		margin: 0 0 0.5rem;
-		font-size: 1.4rem;
+		margin: 0 0 0.4rem;
+		font-size: 1.25rem;
 		font-weight: 600;
+		line-height: 1.25;
 	}
 	.hero-pitch {
 		color: var(--color-text-muted, rgba(0, 0, 0, 0.55));
-		line-height: 1.55;
-		margin: 0 auto 1rem;
-		max-width: 480px;
-		font-size: 0.95rem;
+		line-height: 1.5;
+		margin: 0 auto 0.85rem;
+		max-width: 460px;
+		font-size: 0.9rem;
 	}
 	.hero-meta {
-		font-size: 0.75rem;
-		color: var(--color-text-muted, rgba(0, 0, 0, 0.45));
-		margin: 0 0 1.75rem;
+		display: flex;
+		justify-content: center;
+		flex-wrap: wrap;
+		gap: 0.35rem 0.75rem;
+		list-style: none;
+		padding: 0;
+		margin: 0 auto 1.5rem;
+		font-size: 0.7rem;
+		color: var(--color-text-muted, rgba(0, 0, 0, 0.55));
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+	}
+	.hero-meta li {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.25rem;
 	}
 
 	.quick-start {
-		margin-top: 1rem;
+		margin-top: 0.5rem;
 	}
 	.quick-start-label {
-		font-size: 0.75rem;
+		font-size: 0.7rem;
 		text-transform: uppercase;
-		letter-spacing: 0.05em;
+		letter-spacing: 0.06em;
 		color: var(--color-text-muted, rgba(0, 0, 0, 0.55));
-		margin: 0 0 0.6rem;
+		margin: 0 0 0.55rem;
 		font-weight: 500;
 	}
 	.quick-grid {
 		display: grid;
 		grid-template-columns: repeat(3, 1fr);
-		gap: 0.55rem;
+		gap: 0.5rem;
+		max-width: 360px;
+		margin: 0 auto;
 	}
 	.quick-tile {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		gap: 0.3rem;
-		padding: 0.85rem 0.5rem;
-		border-radius: 0.65rem;
+		gap: 0.35rem;
+		padding: 0.75rem 0.4rem;
+		border-radius: 0.6rem;
 		border: 1px solid var(--color-border, rgba(0, 0, 0, 0.08));
 		background: var(--color-surface, rgba(255, 255, 255, 0.04));
 		cursor: pointer;
@@ -420,16 +484,22 @@
 	.quick-tile:active {
 		transform: scale(0.98);
 	}
-	.quick-emoji {
-		font-size: 1.35rem;
-		line-height: 1;
+	.quick-icon {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		color: var(--color-text-muted, rgba(0, 0, 0, 0.6));
+	}
+	.quick-tile:hover .quick-icon {
+		color: #0ea5e9;
 	}
 	.quick-label {
-		font-size: 0.8rem;
+		font-size: 0.75rem;
 		font-weight: 500;
 	}
 
-	@media (max-width: 480px) {
+	/* Below ~360px (narrow workbench card) drop to 2 cols. */
+	@media (max-width: 360px) {
 		.quick-grid {
 			grid-template-columns: repeat(2, 1fr);
 		}
