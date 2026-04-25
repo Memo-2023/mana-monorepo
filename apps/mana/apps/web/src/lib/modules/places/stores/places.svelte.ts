@@ -201,6 +201,7 @@ export const placesStore = {
 				blob,
 			});
 			patch.unlistedToken = token;
+			patch.unlistedExpiresAt = undefined;
 		} else if (before === 'unlisted') {
 			const jwt = await authStore.getValidToken();
 			if (jwt) {
@@ -212,6 +213,7 @@ export const placesStore = {
 				});
 			}
 			patch.unlistedToken = undefined;
+			patch.unlistedExpiresAt = undefined;
 		}
 
 		await placeTable.update(id, patch);
@@ -246,6 +248,7 @@ export const placesStore = {
 				recordId: id,
 				spaceId,
 				blob,
+				expiresAt: existing.unlistedExpiresAt ? new Date(existing.unlistedExpiresAt) : undefined,
 			});
 			await placeTable.update(id, {
 				unlistedToken: token,
@@ -255,6 +258,33 @@ export const placesStore = {
 		} catch (e) {
 			console.error('[places] regenerate failed', e);
 			return null;
+		}
+	},
+
+	async setUnlistedExpiry(id: string, expiresAt: Date | null) {
+		const existing = await placeTable.get(id);
+		if (!existing || existing.visibility !== 'unlisted') return;
+		const jwt = await authStore.getValidToken();
+		if (!jwt) return;
+		try {
+			const blob = await buildUnlistedBlob('places', id);
+			const spaceId =
+				(existing as unknown as { spaceId?: string }).spaceId ?? getActiveSpace()?.id ?? '';
+			await publishUnlistedSnapshot({
+				apiUrl: getManaApiUrl(),
+				jwt,
+				collection: 'places',
+				recordId: id,
+				spaceId,
+				blob,
+				expiresAt,
+			});
+			await placeTable.update(id, {
+				unlistedExpiresAt: expiresAt ? expiresAt.toISOString() : undefined,
+				updatedAt: new Date().toISOString(),
+			});
+		} catch (e) {
+			console.error('[places] setUnlistedExpiry failed', e);
 		}
 	},
 
@@ -274,6 +304,7 @@ export const placesStore = {
 				recordId: id,
 				spaceId,
 				blob,
+				expiresAt: existing.unlistedExpiresAt ? new Date(existing.unlistedExpiresAt) : undefined,
 			});
 		} catch (e) {
 			console.error('[places] refreshUnlistedSnapshot failed', e);

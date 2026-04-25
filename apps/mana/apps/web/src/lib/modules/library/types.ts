@@ -102,6 +102,8 @@ export interface LocalLibraryEntry extends BaseRecord {
 	 * when visibility moves back to anything else.
 	 */
 	unlistedToken?: string;
+	/** ISO timestamp when the unlisted snapshot expires; absent = never. */
+	unlistedExpiresAt?: string;
 }
 
 // ─── Domain Type (plaintext, for UI) ─────────────────────
@@ -129,6 +131,8 @@ export interface LibraryEntry {
 	visibility: VisibilityLevel;
 	/** Server-issued share token. Empty when not 'unlisted'. */
 	unlistedToken: string;
+	/** ISO timestamp when the unlisted snapshot expires, or null = never. */
+	unlistedExpiresAt: string | null;
 	createdAt: string;
 	updatedAt: string;
 }

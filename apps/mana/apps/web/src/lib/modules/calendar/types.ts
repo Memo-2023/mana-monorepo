@@ -30,6 +30,8 @@ export interface LocalEvent extends BaseRecord {
 	visibilityChangedAt?: string;
 	visibilityChangedBy?: string;
 	unlistedToken?: string;
+	/** Local mirror of the server-side unlisted-snapshot expiry. */
+	unlistedExpiresAt?: string;
 }
 
 export type CalendarViewType = 'week' | 'month' | 'agenda';
@@ -60,6 +62,8 @@ export interface CalendarEvent {
 	 * to know whether to render the share-link controls).
 	 */
 	unlistedToken: string;
+	/** ISO expiry for the active unlisted-share, null when never expires. */
+	unlistedExpiresAt: string | null;
 	createdAt: string;
 	updatedAt: string;
 	// TimeBlock metadata (for universal calendar view)
@@ -114,6 +118,7 @@ export function timeBlockToCalendarEvent(
 		// they stay invisible on the website (public requires explicit opt-in).
 		visibility: eventData?.visibility ?? 'space',
 		unlistedToken: eventData?.unlistedToken ?? '',
+		unlistedExpiresAt: eventData?.unlistedExpiresAt ?? null,
 		createdAt: block.createdAt,
 		updatedAt: block.updatedAt,
 		blockType: block.type,

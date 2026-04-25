@@ -111,6 +111,7 @@
 											: { kind: 'comic' },
 							visibility: 'private',
 							unlistedToken: '',
+							unlistedExpiresAt: null,
 							createdAt: '',
 							updatedAt: '',
 							id: '',

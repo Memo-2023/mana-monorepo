@@ -436,6 +436,7 @@ export const eventsStore = {
 			tagIds: data.tagIds || [],
 			visibility: data.visibility ?? 'private',
 			unlistedToken: data.unlistedToken ?? '',
+			unlistedExpiresAt: data.unlistedExpiresAt ?? null,
 			createdAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString(),
 			blockType: 'event',
@@ -523,6 +524,7 @@ export const eventsStore = {
 					blob,
 				});
 				patch.unlistedToken = token;
+				patch.unlistedExpiresAt = undefined;
 			} else if (before === 'unlisted') {
 				const jwt = await authStore.getValidToken();
 				if (jwt) {
@@ -534,6 +536,7 @@ export const eventsStore = {
 					});
 				}
 				patch.unlistedToken = undefined;
+				patch.unlistedExpiresAt = undefined;
 			}
 
 			await db.table('events').update(id, patch);
@@ -597,6 +600,39 @@ export const eventsStore = {
 	},
 
 	/**
+	 * Set or clear the unlisted-share expiry. Re-publishes the snapshot
+	 * with the new `expiresAt`; mirrors the value locally so the
+	 * SharedLinkControls picker shows the right state without a server
+	 * round-trip. No-op if the event isn't currently 'unlisted'.
+	 */
+	async setUnlistedExpiry(id: string, expiresAt: Date | null) {
+		const existing = await db.table<LocalEvent>('events').get(id);
+		if (!existing || existing.visibility !== 'unlisted') return;
+		const jwt = await authStore.getValidToken();
+		if (!jwt) return;
+		try {
+			const blob = await buildUnlistedBlob('events', id);
+			const spaceId =
+				(existing as unknown as { spaceId?: string }).spaceId ?? getActiveSpace()?.id ?? '';
+			await publishUnlistedSnapshot({
+				apiUrl: getManaApiUrl(),
+				jwt,
+				collection: 'events',
+				recordId: id,
+				spaceId,
+				blob,
+				expiresAt,
+			});
+			await db.table('events').update(id, {
+				unlistedExpiresAt: expiresAt ? expiresAt.toISOString() : undefined,
+				updatedAt: new Date().toISOString(),
+			});
+		} catch (e) {
+			console.error('[calendar/events] setUnlistedExpiry failed', e);
+		}
+	},
+
+	/**
 	 * Re-publish the unlisted snapshot for an event. Called by
 	 * updateEvent/updateSingleInstance/etc. when the owning record is
 	 * currently flagged 'unlisted' — keeps the share-link in sync with
@@ -622,6 +658,9 @@ export const eventsStore = {
 				recordId: id,
 				spaceId,
 				blob,
+				// Preserve any existing expiry so a content edit doesn't
+				// silently extend the link's lifetime.
+				expiresAt: existing.unlistedExpiresAt ? new Date(existing.unlistedExpiresAt) : undefined,
 			});
 		} catch (e) {
 			console.error('[calendar/events] refreshUnlistedSnapshot failed', e);

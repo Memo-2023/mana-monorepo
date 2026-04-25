@@ -37,6 +37,7 @@ export function toLibraryEntry(local: LocalLibraryEntry): LibraryEntry {
 		// space-type-aware default at create time in entries.svelte.ts.
 		visibility: local.visibility ?? 'space',
 		unlistedToken: local.unlistedToken ?? '',
+		unlistedExpiresAt: local.unlistedExpiresAt ?? null,
 		createdAt: local.createdAt ?? now,
 		updatedAt: local.updatedAt ?? now,
 	};

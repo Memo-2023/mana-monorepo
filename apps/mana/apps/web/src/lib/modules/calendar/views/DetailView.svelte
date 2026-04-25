@@ -111,6 +111,10 @@
 		await eventsStore.setVisibility(eventId, 'space');
 	}
 
+	async function handleExpiryChange(expiresAt: Date | null) {
+		await eventsStore.setUnlistedExpiry(eventId, expiresAt);
+	}
+
 	const shareUrl = $derived.by(() => {
 		const token = detail.entity?.unlistedToken;
 		if (!token) return '';
@@ -158,8 +162,10 @@
 					<SharedLinkControls
 						token={event.unlistedToken}
 						url={shareUrl}
+						expiresAt={event.unlistedExpiresAt}
 						onRegenerate={handleRegenerate}
 						onRevoke={handleRevoke}
+						onExpiryChange={handleExpiryChange}
 					/>
 				</div>
 			{/if}

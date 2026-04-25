@@ -46,6 +46,10 @@
 		await eventsStore.setVisibility(event.id, 'space');
 	}
 
+	async function handleExpiryChange(expiresAt: Date | null) {
+		await eventsStore.setUnlistedExpiry(event.id, expiresAt);
+	}
+
 	const shareUrl = $derived.by(() => {
 		if (!event.unlistedToken) return '';
 		const origin = typeof window === 'undefined' ? 'https://mana.how' : window.location.origin;
@@ -276,8 +280,10 @@
 								<SharedLinkControls
 									token={event.unlistedToken}
 									url={shareUrl}
+									expiresAt={event.unlistedExpiresAt}
 									onRegenerate={handleRegenerate}
 									onRevoke={handleRevoke}
+									onExpiryChange={handleExpiryChange}
 								/>
 							</div>
 						</div>

@@ -28,6 +28,10 @@
 		await libraryEntriesStore.setVisibility(entry.id, 'space');
 	}
 
+	async function onExpiryChange(expiresAt: Date | null) {
+		await libraryEntriesStore.setUnlistedExpiry(entry.id, expiresAt);
+	}
+
 	const shareUrl = $derived.by(() => {
 		if (!entry.unlistedToken) return '';
 		const origin = typeof window === 'undefined' ? 'https://mana.how' : window.location.origin;
@@ -167,8 +171,10 @@
 							<SharedLinkControls
 								token={entry.unlistedToken}
 								url={shareUrl}
+								expiresAt={entry.unlistedExpiresAt}
 								{onRegenerate}
 								{onRevoke}
+								{onExpiryChange}
 							/>
 						</dd>
 					{/if}

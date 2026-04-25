@@ -171,6 +171,10 @@
 		await placesStore.setVisibility(placeId, 'space');
 	}
 
+	async function handleExpiryChange(expiresAt: Date | null) {
+		await placesStore.setUnlistedExpiry(placeId, expiresAt);
+	}
+
 	const shareUrl = $derived.by(() => {
 		const token = detail.entity?.unlistedToken;
 		if (!token) return '';
@@ -261,8 +265,10 @@
 					<SharedLinkControls
 						token={place.unlistedToken}
 						url={shareUrl}
+						expiresAt={place.unlistedExpiresAt}
 						onRegenerate={handleRegenerate}
 						onRevoke={handleRevoke}
+						onExpiryChange={handleExpiryChange}
 					/>
 				</div>
 			{/if}

@@ -259,6 +259,7 @@ export const libraryEntriesStore = {
 				blob,
 			});
 			patch.unlistedToken = token;
+			patch.unlistedExpiresAt = undefined;
 		} else if (before === 'unlisted') {
 			const jwt = await authStore.getValidToken();
 			if (jwt) {
@@ -270,6 +271,7 @@ export const libraryEntriesStore = {
 				});
 			}
 			patch.unlistedToken = undefined;
+			patch.unlistedExpiresAt = undefined;
 		}
 
 		await libraryEntryTable.update(id, patch);
@@ -309,6 +311,9 @@ export const libraryEntriesStore = {
 				recordId: id,
 				spaceId,
 				blob,
+				// Preserve any existing expiry — regenerate is about leaking
+				// the URL, not extending the lifetime.
+				expiresAt: existing.unlistedExpiresAt ? new Date(existing.unlistedExpiresAt) : undefined,
 			});
 			await libraryEntryTable.update(id, {
 				unlistedToken: token,
@@ -318,6 +323,38 @@ export const libraryEntriesStore = {
 		} catch (e) {
 			console.error('[library] regenerate failed', e);
 			return null;
+		}
+	},
+
+	/**
+	 * Set or clear the unlisted-share expiry. Mirrors
+	 * eventsStore.setUnlistedExpiry — re-publishes with the new expiry
+	 * and stores it locally so the picker stays in sync.
+	 */
+	async setUnlistedExpiry(id: string, expiresAt: Date | null) {
+		const existing = await libraryEntryTable.get(id);
+		if (!existing || existing.visibility !== 'unlisted') return;
+		const jwt = await authStore.getValidToken();
+		if (!jwt) return;
+		try {
+			const blob = await buildUnlistedBlob('libraryEntries', id);
+			const spaceId =
+				(existing as unknown as { spaceId?: string }).spaceId ?? getActiveSpace()?.id ?? '';
+			await publishUnlistedSnapshot({
+				apiUrl: getManaApiUrl(),
+				jwt,
+				collection: 'libraryEntries',
+				recordId: id,
+				spaceId,
+				blob,
+				expiresAt,
+			});
+			await libraryEntryTable.update(id, {
+				unlistedExpiresAt: expiresAt ? expiresAt.toISOString() : undefined,
+				updatedAt: new Date().toISOString(),
+			});
+		} catch (e) {
+			console.error('[library] setUnlistedExpiry failed', e);
 		}
 	},
 
@@ -342,6 +379,9 @@ export const libraryEntriesStore = {
 				recordId: id,
 				spaceId,
 				blob,
+				// Preserve any existing expiry so a content edit doesn't
+				// silently extend the link's lifetime.
+				expiresAt: existing.unlistedExpiresAt ? new Date(existing.unlistedExpiresAt) : undefined,
 			});
 		} catch (e) {
 			console.error('[library] refreshUnlistedSnapshot failed', e);

@@ -4,16 +4,14 @@
   Shown below the VisibilityPicker in a module's DetailView when
   `visibility === 'unlisted'` and a token exists. Dumb — owner (the
   module DetailView) passes the token + handlers; this component only
-  renders the URL, manages copy-to-clipboard, and dispatches
-  regenerate/revoke/expiry actions.
-
-  QR-code rendering is a later polish (M8.5) — currently stubbed as
-  a button that disables itself. Expiry-picker is present but
-  minimal — datetime-local input, no fancy picker.
+  renders the URL, manages copy-to-clipboard, QR-code display, and
+  dispatches regenerate/revoke/expiry actions.
 
   See docs/plans/unlisted-sharing.md §7.
 -->
 <script lang="ts">
+	import QRCode from 'qrcode';
+
 	let {
 		/** The 32-char token — used only for display fallback. */
 		token,
@@ -47,6 +45,33 @@
 	let copied = $state(false);
 	let showConfirmRegenerate = $state(false);
 	let editingExpiry = $state(false);
+	let showQr = $state(false);
+	let qrSvg = $state<string | null>(null);
+	let qrError = $state<string | null>(null);
+
+	// Lazy-render QR. Re-runs whenever the URL changes (e.g. after
+	// regenerate) so the QR always tracks the live token.
+	$effect(() => {
+		if (!showQr) {
+			qrSvg = null;
+			qrError = null;
+			return;
+		}
+		QRCode.toString(url, {
+			type: 'svg',
+			errorCorrectionLevel: 'M',
+			margin: 1,
+			width: 220,
+		})
+			.then((svg) => {
+				qrSvg = svg;
+				qrError = null;
+			})
+			.catch((e: unknown) => {
+				qrError = e instanceof Error ? e.message : 'QR-Code-Generierung fehlgeschlagen';
+				qrSvg = null;
+			});
+	});
 
 	// datetime-local wants YYYY-MM-DDTHH:MM (no seconds, no zone).
 	const expiryInputValue = $derived.by(() => {
@@ -120,6 +145,16 @@
 		<button
 			type="button"
 			class="slc__btn"
+			onclick={() => (showQr = !showQr)}
+			{disabled}
+			aria-pressed={showQr}
+			title="QR-Code anzeigen"
+		>
+			🔗 QR
+		</button>
+		<button
+			type="button"
+			class="slc__btn"
 			onclick={() => (showConfirmRegenerate = true)}
 			{disabled}
 			title="Neu erzeugen (alter Link wird sofort ungültig)"
@@ -136,6 +171,20 @@
 			🗑 Widerrufen
 		</button>
 	</div>
+
+	{#if showQr}
+		<div class="slc__qr">
+			{#if qrSvg}
+				<!-- QR is plain SVG returned by `qrcode/toString`, safe to inline. -->
+				<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+				{@html qrSvg}
+			{:else if qrError}
+				<p class="slc__qr-error">{qrError}</p>
+			{:else}
+				<p class="slc__qr-loading">QR-Code wird erstellt …</p>
+			{/if}
+		</div>
+	{/if}
 
 	{#if onExpiryChange}
 		<div class="slc__expiry">
@@ -296,6 +345,32 @@
 		color: inherit;
 		font-size: 0.75rem;
 	}
+	.slc__qr {
+		display: flex;
+		justify-content: center;
+		padding: 0.5rem;
+		background: #ffffff;
+		border-radius: 0.5rem;
+		border: 1px solid rgba(0, 0, 0, 0.08);
+	}
+	.slc__qr :global(svg) {
+		display: block;
+		max-width: 220px;
+		width: 100%;
+		height: auto;
+	}
+	.slc__qr-loading,
+	.slc__qr-error {
+		margin: 0;
+		padding: 1rem;
+		font-size: 0.8125rem;
+		color: #6b7280;
+		text-align: center;
+	}
+	.slc__qr-error {
+		color: rgb(248, 113, 113);
+	}
+
 	.slc__token {
 		margin: 0;
 		font-family: ui-monospace, monospace;

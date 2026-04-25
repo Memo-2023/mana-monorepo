@@ -23,6 +23,8 @@ export interface LocalPlace extends BaseRecord {
 	visibilityChangedAt?: string;
 	visibilityChangedBy?: string;
 	unlistedToken?: string;
+	/** ISO timestamp when the unlisted snapshot expires; absent = never. */
+	unlistedExpiresAt?: string;
 }
 
 export interface LocalLocationLog extends BaseRecord {
@@ -54,6 +56,8 @@ export interface Place {
 	visibility: VisibilityLevel;
 	/** Server-issued share token. Empty when not 'unlisted'. */
 	unlistedToken: string;
+	/** ISO timestamp when the unlisted snapshot expires, or null = never. */
+	unlistedExpiresAt: string | null;
 	createdAt: string;
 	updatedAt: string;
 }
