@@ -81,6 +81,7 @@ import {
 	Globe,
 	CoatHanger,
 	NotePencil,
+	FilmStrip,
 } from '@mana/shared-icons';
 
 // ── Apps with entity capabilities ───────────────────────────
@@ -1351,6 +1352,30 @@ registerApp({
 				window.dispatchEvent(
 					new CustomEvent('mana:quick-action', { detail: { app: 'writing', action: 'new' } })
 				),
+		},
+	],
+});
+
+registerApp({
+	id: 'comic',
+	name: 'Comic',
+	color: '#f97316',
+	icon: FilmStrip,
+	views: {
+		// /comic/new (StoryForm) and /comic/[id] (DetailView) live as
+		// SvelteKit routes; the workbench card hosts the ListView root.
+		// Quick-action "Neue Story" navigates to /comic/new directly —
+		// the create flow has its own page, no inline modal in the card.
+		list: { load: () => import('$lib/modules/comic/ListView.svelte') },
+	},
+	contextMenuActions: [
+		{
+			id: 'new-story',
+			label: 'Neue Story',
+			icon: Plus,
+			action: () => {
+				window.location.href = '/comic/new';
+			},
 		},
 	],
 });
