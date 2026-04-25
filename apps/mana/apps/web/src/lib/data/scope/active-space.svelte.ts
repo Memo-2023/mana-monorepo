@@ -12,6 +12,7 @@
 import type { SpaceType, SpaceTier } from '@mana/shared-types';
 import { isSpaceType, isSpaceTier } from '@mana/shared-types';
 import { authFetch } from './auth-fetch';
+import { runSpaceSeeds } from './per-space-seeds';
 
 export interface ActiveSpace {
 	id: string;
@@ -86,12 +87,32 @@ export function getActiveSpaceError(): string | null {
 	return lastError;
 }
 
-export function setActiveSpace(space: ActiveSpace | null): void {
+/**
+ * Internal: mutate the active-space state and fan out side effects in
+ * one place. Both `setActiveSpace` (UI / tests) and `loadActiveSpace`
+ * (boot path) funnel through here so notifications and per-Space seeds
+ * fire identically regardless of which entry point updated the state.
+ */
+function applyActiveSpace(space: ActiveSpace | null): void {
 	const prevId = active?.id;
 	active = space;
 	status = space ? 'ready' : 'idle';
 	lastError = null;
-	if (space?.id !== prevId) notifyHandlers(space);
+	if (space?.id === prevId) return;
+	notifyHandlers(space);
+	// Drive per-Space seeders (workbench Home scene + future module
+	// seeds) on every Space activation. Fire-and-forget — seeders are
+	// individually idempotent (deterministic ids + Dexie `put`), so a
+	// missed run self-heals on the next Space switch. Centralising into
+	// applyActiveSpace replaces the racy ad-hoc paths the scenes store
+	// used to drive itself.
+	if (space) {
+		void runSpaceSeeds(space.id);
+	}
+}
+
+export function setActiveSpace(space: ActiveSpace | null): void {
+	applyActiveSpace(space);
 }
 
 /**
@@ -157,14 +178,11 @@ export async function loadActiveSpace(opts: { force?: boolean } = {}): Promise<A
 	status = 'loading';
 	lastError = null;
 
-	const prevId = active?.id;
 	try {
 		const member = await fetchActiveMember();
 		if (member) {
-			active = member;
-			status = 'ready';
 			writeActiveSpaceHint(member.id);
-			if (member.id !== prevId) notifyHandlers(member);
+			applyActiveSpace(member);
 			return member;
 		}
 
@@ -183,11 +201,10 @@ export async function loadActiveSpace(opts: { force?: boolean } = {}): Promise<A
 		}
 
 		await setActiveOnServer(chosen.id);
-		active = { ...chosen, role: hinted ? hinted.role : 'owner' };
-		status = 'ready';
 		writeActiveSpaceHint(chosen.id);
-		if (active.id !== prevId) notifyHandlers(active);
-		return active;
+		const resolved = { ...chosen, role: hinted ? hinted.role : 'owner' };
+		applyActiveSpace(resolved);
+		return resolved;
 	} catch (err) {
 		lastError = err instanceof Error ? err.message : String(err);
 		status = 'error';

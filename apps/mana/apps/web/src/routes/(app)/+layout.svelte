@@ -1,4 +1,10 @@
 <script lang="ts">
+	// Side-effect: registers every per-Space seeder (workbench Home
+	// scene + future module seeds) into the per-space-seeds map BEFORE
+	// any code path can call `loadActiveSpace` / `setActiveSpace`.
+	// See docs/plans/workbench-seeding-cleanup.md.
+	import '$lib/data/seeds';
+
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import type { Component, Snippet } from 'svelte';

@@ -44,12 +44,6 @@ function mruKey(spaceId: string | null): string {
 	return spaceId ? `${MRU_LS_KEY_BASE}:${spaceId}` : MRU_LS_KEY_BASE;
 }
 
-const DEFAULT_HOME_APPS: WorkbenchSceneApp[] = [
-	{ appId: 'todo' },
-	{ appId: 'calendar' },
-	{ appId: 'notes' },
-];
-
 // ─── Reactive state ───────────────────────────────────────────
 
 let scenesState = $state<WorkbenchScene[]>([]);
@@ -122,21 +116,6 @@ export function toScene(local: LocalWorkbenchScene): WorkbenchScene {
 
 function nowIso() {
 	return new Date().toISOString();
-}
-
-async function ensureSeedScene(): Promise<string> {
-	const id = crypto.randomUUID();
-	const now = nowIso();
-	const seed: LocalWorkbenchScene = {
-		id,
-		name: 'Home',
-		openApps: DEFAULT_HOME_APPS,
-		order: 0,
-		createdAt: now,
-		updatedAt: now,
-	};
-	await db.table<LocalWorkbenchScene>(TABLE).add(seed);
-	return id;
 }
 
 /** Exported for unit tests — resolves the active scene id against the
@@ -285,44 +264,22 @@ export const workbenchScenesStore = {
 	async initialize() {
 		if (!browser || initializedState) return;
 
-		// Seed a Home scene on first run so the UI never has zero scenes.
-		// We can't safely check "none in this Space" until the active-
-		// space handler replays — the guard is "no scenes anywhere", same
-		// as before. Per-Space seeding happens inside onSpaceChanged
-		// below.
-		const count = await db.table(TABLE).count();
-		if (count === 0) {
-			await ensureSeedScene();
-		}
+		// Default-Home seeding moved to `data/seeds/workbench-home.ts`,
+		// driven by `setActiveSpace` via the per-space-seeds registry.
+		// The store no longer owns seed lifecycle — it just renders
+		// whatever rows the liveQuery surfaces.
+		// See docs/plans/workbench-seeding-cleanup.md.
 
 		activeSceneIdState = readActiveIdFromStorage();
 		openSubscription();
 
-		// Register a handler that refreshes per-Space state whenever the
-		// active Space flips. Replay-on-register fires once immediately if
-		// a Space is already loaded, so the initial state is correct
-		// regardless of which store finishes initializing first.
-		onActiveSpaceChanged(async (space) => {
-			// Update activeSceneIdState from the new Space's LS key. The
-			// liveQuery is already re-running because getInScopeSpaceIds()
-			// returns a different set, but the local activeSceneIdState
-			// needs an explicit re-read.
+		// Register a handler that refreshes the per-Device LS hint
+		// whenever the active Space flips. The liveQuery itself is
+		// already re-running because `getInScopeSpaceIds()` returns a
+		// different set; this handler only re-reads the active-scene id
+		// from the new Space's localStorage key.
+		onActiveSpaceChanged(() => {
 			activeSceneIdState = readActiveIdFromStorage();
-
-			// Seed a default scene for this Space if none exists yet. Runs
-			// on the first visit to every Shared/Brand/Family/Team Space a
-			// user joins, so the workbench never shows empty.
-			if (space) {
-				const anyInSpace = await db
-					.table<LocalWorkbenchScene>(TABLE)
-					.filter((r) => {
-						if (r.deletedAt) return false;
-						const spaceId = (r as { spaceId?: unknown }).spaceId;
-						return spaceId === space.id;
-					})
-					.first();
-				if (!anyInSpace) await ensureSeedScene();
-			}
 		});
 	},
 
