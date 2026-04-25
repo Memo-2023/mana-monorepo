@@ -11,9 +11,13 @@ import { getActiveSpace } from '$lib/data/scope';
 import { getEffectiveUserId } from '$lib/data/current-user';
 import {
 	defaultVisibilityFor,
-	generateUnlistedToken,
+	publishUnlistedSnapshot,
+	revokeUnlistedSnapshot,
 	type VisibilityLevel,
 } from '@mana/shared-privacy';
+import { buildUnlistedBlob } from '$lib/data/unlisted/resolvers';
+import { authStore } from '$lib/stores/auth.svelte';
+import { getManaApiUrl } from '$lib/api/config';
 import { createBlock } from '$lib/data/time-blocks/service';
 import { placeTable } from '../collections';
 import { toPlace } from '../queries';
@@ -80,11 +84,31 @@ export const placesStore = {
 		// through untouched.
 		await encryptRecord('places', diff);
 		await placeTable.update(id, diff);
+		// Refresh share-snapshot if this place is unlisted.
+		void this.refreshUnlistedSnapshot(id);
 	},
 
 	async deletePlace(id: string) {
 		const local = await placeTable.get(id);
 		const decrypted = local ? await decryptRecord('places', { ...local }) : null;
+
+		// Revoke active share-link before tombstone.
+		if (local?.visibility === 'unlisted' && local.unlistedToken) {
+			const jwt = await authStore.getValidToken();
+			if (jwt) {
+				try {
+					await revokeUnlistedSnapshot({
+						apiUrl: getManaApiUrl(),
+						jwt,
+						collection: 'places',
+						recordId: id,
+					});
+				} catch (e) {
+					console.error('[places] revoke on delete failed', e);
+				}
+			}
+		}
+
 		await placeTable.update(id, {
 			deletedAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString(),
@@ -144,9 +168,9 @@ export const placesStore = {
 	},
 
 	/**
-	 * Flip a place's visibility. Typical use: mark favourite cafes /
-	 * running routes 'public' so a website-embed can list them. Emits
-	 * cross-module VisibilityChanged.
+	 * Flip a place's visibility. Coordinates with the server-side
+	 * unlisted-snapshots table — see calendar/eventsStore.setVisibility
+	 * for the full pattern. Server is authoritative for the token.
 	 */
 	async setVisibility(id: string, next: VisibilityLevel) {
 		const existing = await placeTable.get(id);
@@ -161,11 +185,35 @@ export const placesStore = {
 			visibilityChangedBy: getEffectiveUserId(),
 			updatedAt: now,
 		};
-		if (next === 'unlisted' && !existing.unlistedToken) {
-			patch.unlistedToken = generateUnlistedToken();
-		} else if (next !== 'unlisted' && existing.unlistedToken) {
+
+		if (next === 'unlisted') {
+			const blob = await buildUnlistedBlob('places', id);
+			const jwt = await authStore.getValidToken();
+			if (!jwt) throw new Error('Nicht eingeloggt');
+			const spaceId =
+				(existing as unknown as { spaceId?: string }).spaceId ?? getActiveSpace()?.id ?? '';
+			const { token } = await publishUnlistedSnapshot({
+				apiUrl: getManaApiUrl(),
+				jwt,
+				collection: 'places',
+				recordId: id,
+				spaceId,
+				blob,
+			});
+			patch.unlistedToken = token;
+		} else if (before === 'unlisted') {
+			const jwt = await authStore.getValidToken();
+			if (jwt) {
+				await revokeUnlistedSnapshot({
+					apiUrl: getManaApiUrl(),
+					jwt,
+					collection: 'places',
+					recordId: id,
+				});
+			}
 			patch.unlistedToken = undefined;
 		}
+
 		await placeTable.update(id, patch);
 
 		emitDomainEvent('VisibilityChanged', 'places', 'places', id, {
@@ -174,5 +222,61 @@ export const placesStore = {
 			before,
 			after: next,
 		});
+	},
+
+	async regenerateUnlistedToken(id: string) {
+		const existing = await placeTable.get(id);
+		if (!existing || existing.visibility !== 'unlisted') return null;
+		const jwt = await authStore.getValidToken();
+		if (!jwt) return null;
+		try {
+			await revokeUnlistedSnapshot({
+				apiUrl: getManaApiUrl(),
+				jwt,
+				collection: 'places',
+				recordId: id,
+			});
+			const blob = await buildUnlistedBlob('places', id);
+			const spaceId =
+				(existing as unknown as { spaceId?: string }).spaceId ?? getActiveSpace()?.id ?? '';
+			const { token } = await publishUnlistedSnapshot({
+				apiUrl: getManaApiUrl(),
+				jwt,
+				collection: 'places',
+				recordId: id,
+				spaceId,
+				blob,
+			});
+			await placeTable.update(id, {
+				unlistedToken: token,
+				updatedAt: new Date().toISOString(),
+			});
+			return token;
+		} catch (e) {
+			console.error('[places] regenerate failed', e);
+			return null;
+		}
+	},
+
+	async refreshUnlistedSnapshot(id: string) {
+		const existing = await placeTable.get(id);
+		if (!existing || existing.visibility !== 'unlisted') return;
+		try {
+			const blob = await buildUnlistedBlob('places', id);
+			const jwt = await authStore.getValidToken();
+			if (!jwt) return;
+			const spaceId =
+				(existing as unknown as { spaceId?: string }).spaceId ?? getActiveSpace()?.id ?? '';
+			await publishUnlistedSnapshot({
+				apiUrl: getManaApiUrl(),
+				jwt,
+				collection: 'places',
+				recordId: id,
+				spaceId,
+				blob,
+			});
+		} catch (e) {
+			console.error('[places] refreshUnlistedSnapshot failed', e);
+		}
 	},
 };

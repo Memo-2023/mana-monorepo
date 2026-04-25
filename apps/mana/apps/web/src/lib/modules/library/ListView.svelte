@@ -110,6 +110,7 @@
 											? { kind: 'series', watched: [] }
 											: { kind: 'comic' },
 							visibility: 'private',
+							unlistedToken: '',
 							createdAt: '',
 							updatedAt: '',
 							id: '',

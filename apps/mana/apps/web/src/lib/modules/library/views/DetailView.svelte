@@ -1,6 +1,11 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { VisibilityPicker, type VisibilityLevel } from '@mana/shared-privacy';
+	import {
+		VisibilityPicker,
+		SharedLinkControls,
+		buildShareUrl,
+		type VisibilityLevel,
+	} from '@mana/shared-privacy';
 	import CoverImage from '../components/CoverImage.svelte';
 	import RatingStars from '../components/RatingStars.svelte';
 	import EntryForm from '../components/EntryForm.svelte';
@@ -14,6 +19,20 @@
 	async function onVisibilityChange(next: VisibilityLevel) {
 		await libraryEntriesStore.setVisibility(entry.id, next);
 	}
+
+	async function onRegenerate() {
+		await libraryEntriesStore.regenerateUnlistedToken(entry.id);
+	}
+
+	async function onRevoke() {
+		await libraryEntriesStore.setVisibility(entry.id, 'space');
+	}
+
+	const shareUrl = $derived.by(() => {
+		if (!entry.unlistedToken) return '';
+		const origin = typeof window === 'undefined' ? 'https://mana.how' : window.location.origin;
+		return buildShareUrl(origin, entry.unlistedToken);
+	});
 
 	let editing = $state(false);
 
@@ -142,6 +161,17 @@
 					<dd>
 						<VisibilityPicker level={entry.visibility} onChange={onVisibilityChange} />
 					</dd>
+					{#if entry.visibility === 'unlisted' && entry.unlistedToken && shareUrl}
+						<dt>Link</dt>
+						<dd>
+							<SharedLinkControls
+								token={entry.unlistedToken}
+								url={shareUrl}
+								{onRegenerate}
+								{onRevoke}
+							/>
+						</dd>
+					{/if}
 					{#if entry.details.kind === 'book'}
 						{#if entry.details.pages}
 							<dt>Seiten</dt>

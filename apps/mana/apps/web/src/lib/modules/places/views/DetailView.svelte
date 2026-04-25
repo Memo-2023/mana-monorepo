@@ -15,7 +15,12 @@
 		type GeocodingResult,
 	} from '$lib/geocoding';
 	import { Star, MapPin, X, MagnifyingGlass, ArrowsClockwise } from '@mana/shared-icons';
-	import { VisibilityPicker, type VisibilityLevel } from '@mana/shared-privacy';
+	import {
+		VisibilityPicker,
+		SharedLinkControls,
+		buildShareUrl,
+		type VisibilityLevel,
+	} from '@mana/shared-privacy';
 	import type { ViewProps } from '$lib/app-registry';
 	import type { LocalPlace, PlaceCategory, LocalLocationLog } from '../types';
 	import { useAllTags, getTagsByIds } from '@mana/shared-stores';
@@ -158,6 +163,21 @@
 		await placesStore.setVisibility(placeId, next);
 	}
 
+	async function handleRegenerate() {
+		await placesStore.regenerateUnlistedToken(placeId);
+	}
+
+	async function handleRevoke() {
+		await placesStore.setVisibility(placeId, 'space');
+	}
+
+	const shareUrl = $derived.by(() => {
+		const token = detail.entity?.unlistedToken;
+		if (!token) return '';
+		const origin = typeof window === 'undefined' ? 'https://mana.how' : window.location.origin;
+		return buildShareUrl(origin, token);
+	});
+
 	async function toggleFavorite() {
 		await placesStore.toggleFavorite(placeId);
 	}
@@ -234,6 +254,18 @@
 				<span class="field-label">Sichtbarkeit</span>
 				<VisibilityPicker level={place.visibility ?? 'private'} onChange={handleVisibilityChange} />
 			</div>
+
+			{#if place.visibility === 'unlisted' && place.unlistedToken && shareUrl}
+				<div class="field-row field-row--share">
+					<span class="field-label">Link</span>
+					<SharedLinkControls
+						token={place.unlistedToken}
+						url={shareUrl}
+						onRegenerate={handleRegenerate}
+						onRevoke={handleRevoke}
+					/>
+				</div>
+			{/if}
 
 			<div class="field-row">
 				<span class="field-label">Kategorie</span>

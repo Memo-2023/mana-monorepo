@@ -5,6 +5,8 @@
 -->
 <script lang="ts">
 	import SharedEventView from '$lib/modules/calendar/SharedEventView.svelte';
+	import SharedLibraryEntryView from '$lib/modules/library/SharedLibraryEntryView.svelte';
+	import SharedPlaceView from '$lib/modules/places/SharedPlaceView.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -12,6 +14,10 @@
 
 {#if data.collection === 'events'}
 	<SharedEventView blob={data.blob} token={data.token} expiresAt={data.expiresAt} />
+{:else if data.collection === 'libraryEntries'}
+	<SharedLibraryEntryView blob={data.blob} token={data.token} expiresAt={data.expiresAt} />
+{:else if data.collection === 'places'}
+	<SharedPlaceView blob={data.blob} token={data.token} expiresAt={data.expiresAt} />
 {:else}
 	<div class="unknown">
 		<h1>Unbekannter Link-Typ</h1>

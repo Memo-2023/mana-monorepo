@@ -127,6 +127,8 @@ export interface LibraryEntry {
 	externalIds: LibraryExternalIds | null;
 	details: LibraryDetails;
 	visibility: VisibilityLevel;
+	/** Server-issued share token. Empty when not 'unlisted'. */
+	unlistedToken: string;
 	createdAt: string;
 	updatedAt: string;
 }

@@ -2,7 +2,7 @@
  * Reactive queries and pure helpers for the Library module.
  */
 
-import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
 import { decryptRecords } from '$lib/data/crypto';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
@@ -36,6 +36,7 @@ export function toLibraryEntry(local: LocalLibraryEntry): LibraryEntry {
 		// (the pre-pilot stamp that Dexie hooks wrote). New rows get the
 		// space-type-aware default at create time in entries.svelte.ts.
 		visibility: local.visibility ?? 'space',
+		unlistedToken: local.unlistedToken ?? '',
 		createdAt: local.createdAt ?? now,
 		updatedAt: local.updatedAt ?? now,
 	};
@@ -44,7 +45,7 @@ export function toLibraryEntry(local: LocalLibraryEntry): LibraryEntry {
 // ─── Live Queries ─────────────────────────────────────────
 
 export function useAllEntries() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalLibraryEntry, string>(
 			'library',
 			'libraryEntries'

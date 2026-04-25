@@ -2,7 +2,7 @@
  * Reactive queries & pure helpers for Places — uses Dexie liveQuery on the unified DB.
  */
 
-import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
@@ -25,6 +25,7 @@ export function toPlace(local: LocalPlace): Place {
 		lastVisitedAt: local.lastVisitedAt || null,
 		tagIds: local.tagIds ?? [],
 		visibility: local.visibility ?? 'space',
+		unlistedToken: local.unlistedToken ?? '',
 		createdAt: local.createdAt ?? new Date().toISOString(),
 		updatedAt: local.updatedAt ?? new Date().toISOString(),
 	};
@@ -47,7 +48,7 @@ export function toLocationLog(local: LocalLocationLog): LocationLog {
 // ─── Live Queries ────────────────────────────────────────
 
 export function useAllPlaces() {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		const locals = await scopedForModule<LocalPlace, string>('places', 'places').toArray();
 		const visible = locals.filter((p) => !p.deletedAt);
 		const decrypted = await decryptRecords<LocalPlace>('places', visible);
@@ -56,7 +57,7 @@ export function useAllPlaces() {
 }
 
 export function useLocationLogs(placeId?: string) {
-	return useLiveQueryWithDefault(async () => {
+	return useScopedLiveQuery(async () => {
 		let query = db.table<LocalLocationLog>('locationLogs').orderBy('timestamp').reverse();
 		const locals = await query.toArray();
 		const filtered = placeId ? locals.filter((l) => l.placeId === placeId) : locals;

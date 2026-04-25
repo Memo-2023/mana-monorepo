@@ -11,9 +11,13 @@ import { getActiveSpace } from '$lib/data/scope';
 import { getEffectiveUserId } from '$lib/data/current-user';
 import {
 	defaultVisibilityFor,
-	generateUnlistedToken,
+	publishUnlistedSnapshot,
+	revokeUnlistedSnapshot,
 	type VisibilityLevel,
 } from '@mana/shared-privacy';
+import { buildUnlistedBlob } from '$lib/data/unlisted/resolvers';
+import { authStore } from '$lib/stores/auth.svelte';
+import { getManaApiUrl } from '$lib/api/config';
 import { libraryEntryTable } from '../collections';
 import { toLibraryEntry } from '../queries';
 import type {
@@ -132,6 +136,8 @@ export const libraryEntriesStore = {
 			...wrapped,
 			updatedAt: new Date().toISOString(),
 		});
+		// Keep the share-link snapshot in sync if this entry is unlisted.
+		void this.refreshUnlistedSnapshot(id);
 	},
 
 	async setStatus(id: string, status: LibraryStatus) {
@@ -193,6 +199,25 @@ export const libraryEntriesStore = {
 	},
 
 	async deleteEntry(id: string) {
+		const existing = await libraryEntryTable.get(id);
+		// Revoke any active share-link before tombstoning, so a recipient
+		// reloading the link gets 410 Gone instead of seeing stale data.
+		if (existing?.visibility === 'unlisted' && existing.unlistedToken) {
+			const jwt = await authStore.getValidToken();
+			if (jwt) {
+				try {
+					await revokeUnlistedSnapshot({
+						apiUrl: getManaApiUrl(),
+						jwt,
+						collection: 'libraryEntries',
+						recordId: id,
+					});
+				} catch (e) {
+					console.error('[library] revoke on delete failed', e);
+				}
+			}
+		}
+
 		await libraryEntryTable.update(id, {
 			deletedAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString(),
@@ -201,13 +226,9 @@ export const libraryEntriesStore = {
 	},
 
 	/**
-	 * Flip the visibility of an entry. Mints an unlisted token on first
-	 * transition to 'unlisted' and wipes it when moving back to anything
-	 * else, so a revoked link can't be silently re-activated. Emits a
-	 * cross-module `VisibilityChanged` event so the Workbench timeline +
-	 * audit surfaces pick it up.
-	 *
-	 * No-op if the level is already what the user selected.
+	 * Flip the visibility of an entry. Coordinates with the server-side
+	 * unlisted-snapshots table — see calendar/eventsStore.setVisibility
+	 * for the full pattern. Server is authoritative for the token.
 	 */
 	async setVisibility(id: string, next: VisibilityLevel) {
 		const existing = await libraryEntryTable.get(id);
@@ -222,11 +243,35 @@ export const libraryEntriesStore = {
 			visibilityChangedBy: getEffectiveUserId(),
 			updatedAt: now,
 		};
-		if (next === 'unlisted' && !existing.unlistedToken) {
-			patch.unlistedToken = generateUnlistedToken();
-		} else if (next !== 'unlisted' && existing.unlistedToken) {
+
+		if (next === 'unlisted') {
+			const blob = await buildUnlistedBlob('libraryEntries', id);
+			const jwt = await authStore.getValidToken();
+			if (!jwt) throw new Error('Nicht eingeloggt');
+			const spaceId =
+				(existing as unknown as { spaceId?: string }).spaceId ?? getActiveSpace()?.id ?? '';
+			const { token } = await publishUnlistedSnapshot({
+				apiUrl: getManaApiUrl(),
+				jwt,
+				collection: 'libraryEntries',
+				recordId: id,
+				spaceId,
+				blob,
+			});
+			patch.unlistedToken = token;
+		} else if (before === 'unlisted') {
+			const jwt = await authStore.getValidToken();
+			if (jwt) {
+				await revokeUnlistedSnapshot({
+					apiUrl: getManaApiUrl(),
+					jwt,
+					collection: 'libraryEntries',
+					recordId: id,
+				});
+			}
 			patch.unlistedToken = undefined;
 		}
+
 		await libraryEntryTable.update(id, patch);
 
 		emitDomainEvent('VisibilityChanged', 'library', 'libraryEntries', id, {
@@ -235,5 +280,71 @@ export const libraryEntriesStore = {
 			before,
 			after: next,
 		});
+	},
+
+	/**
+	 * Force-regenerate the unlisted token. Same semantics as
+	 * eventsStore.regenerateUnlistedToken — revoke + republish, returns
+	 * the new token.
+	 */
+	async regenerateUnlistedToken(id: string) {
+		const existing = await libraryEntryTable.get(id);
+		if (!existing || existing.visibility !== 'unlisted') return null;
+		const jwt = await authStore.getValidToken();
+		if (!jwt) return null;
+		try {
+			await revokeUnlistedSnapshot({
+				apiUrl: getManaApiUrl(),
+				jwt,
+				collection: 'libraryEntries',
+				recordId: id,
+			});
+			const blob = await buildUnlistedBlob('libraryEntries', id);
+			const spaceId =
+				(existing as unknown as { spaceId?: string }).spaceId ?? getActiveSpace()?.id ?? '';
+			const { token } = await publishUnlistedSnapshot({
+				apiUrl: getManaApiUrl(),
+				jwt,
+				collection: 'libraryEntries',
+				recordId: id,
+				spaceId,
+				blob,
+			});
+			await libraryEntryTable.update(id, {
+				unlistedToken: token,
+				updatedAt: new Date().toISOString(),
+			});
+			return token;
+		} catch (e) {
+			console.error('[library] regenerate failed', e);
+			return null;
+		}
+	},
+
+	/**
+	 * Re-publish unlisted snapshot when whitelist fields change. Called
+	 * fire-and-forget after updateEntry/setStatus/rate. No-op if the
+	 * entry isn't currently 'unlisted'.
+	 */
+	async refreshUnlistedSnapshot(id: string) {
+		const existing = await libraryEntryTable.get(id);
+		if (!existing || existing.visibility !== 'unlisted') return;
+		try {
+			const blob = await buildUnlistedBlob('libraryEntries', id);
+			const jwt = await authStore.getValidToken();
+			if (!jwt) return;
+			const spaceId =
+				(existing as unknown as { spaceId?: string }).spaceId ?? getActiveSpace()?.id ?? '';
+			await publishUnlistedSnapshot({
+				apiUrl: getManaApiUrl(),
+				jwt,
+				collection: 'libraryEntries',
+				recordId: id,
+				spaceId,
+				blob,
+			});
+		} catch (e) {
+			console.error('[library] refreshUnlistedSnapshot failed', e);
+		}
 	},
 };

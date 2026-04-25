@@ -52,6 +52,8 @@ export interface Place {
 	lastVisitedAt: string | null;
 	tagIds: string[];
 	visibility: VisibilityLevel;
+	/** Server-issued share token. Empty when not 'unlisted'. */
+	unlistedToken: string;
 	createdAt: string;
 	updatedAt: string;
 }
