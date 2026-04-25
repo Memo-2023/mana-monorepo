@@ -9,8 +9,6 @@ export interface LocalDeck extends BaseRecord {
 	title: string;
 	description?: string | null;
 	themeId?: string | null;
-	/** @deprecated Use `visibility`. Mirror kept until M6.1 hard-drop. */
-	isPublic: boolean;
 	visibility?: VisibilityLevel;
 	visibilityChangedAt?: string;
 	visibilityChangedBy?: string;
@@ -39,8 +37,6 @@ export interface Deck {
 	title: string;
 	description?: string;
 	themeId?: string;
-	/** @deprecated Use `visibility`. */
-	isPublic: boolean;
 	visibility: VisibilityLevel;
 	createdAt: string;
 	updatedAt: string;
@@ -66,7 +62,6 @@ export interface UpdateDeckDto {
 	title?: string;
 	description?: string;
 	themeId?: string;
-	isPublic?: boolean;
 }
 
 export interface CreateSlideDto {

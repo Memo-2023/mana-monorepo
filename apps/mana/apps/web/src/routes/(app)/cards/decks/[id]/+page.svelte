@@ -91,7 +91,7 @@
 				</div>
 
 				<div class="flex items-center gap-2">
-					{#if deck.isPublic}
+					{#if deck.visibility === 'public'}
 						<span class="rounded-full bg-primary/10 px-3 py-1 text-xs text-primary">
 							Offentlich
 						</span>

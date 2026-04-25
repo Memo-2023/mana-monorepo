@@ -84,7 +84,7 @@
 			<div class="prop-row">
 				<span class="prop-label">Sichtbarkeit</span>
 				<VisibilityPicker
-					level={deck.visibility ?? (deck.isPublic ? 'public' : 'space')}
+					level={deck.visibility ?? 'space'}
 					onChange={(next: VisibilityLevel) => decksStore.setVisibility(deckId, next)}
 					disabledLevels={['unlisted']}
 				/>

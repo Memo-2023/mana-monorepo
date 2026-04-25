@@ -24,7 +24,6 @@ export const CARDS_GUEST_SEED = {
 			description: 'Lerne Cards kennen mit diesen Beispiel-Karteikarten.',
 			color: '#6366f1',
 			cardCount: 3,
-			isPublic: false,
 		},
 	],
 	cards: [

@@ -19,8 +19,7 @@ export function toDeck(local: LocalDeck): Deck {
 		title: local.title,
 		description: local.description ?? undefined,
 		themeId: local.themeId ?? undefined,
-		isPublic: local.isPublic ?? local.visibility === 'public',
-		visibility: local.visibility ?? (local.isPublic === true ? 'public' : 'space'),
+		visibility: local.visibility ?? 'space',
 		createdAt: local.createdAt ?? new Date().toISOString(),
 		updatedAt: local.updatedAt ?? new Date().toISOString(),
 	};

@@ -35,12 +35,7 @@ export function toMemo(local: LocalMemo): Memo {
 		processingStatus: local.processingStatus,
 		isArchived: local.isArchived,
 		isPinned: local.isPinned,
-		isPublic: local.isPublic ?? local.visibility === 'public',
-		// Soft-fallback during M6 soak: legacy rows use isPublic, new
-		// writes set visibility directly. Keep both in sync via the
-		// store's setVisibility/setPublic methods until M6.1 drops the
-		// legacy field.
-		visibility: local.visibility ?? (local.isPublic === true ? 'public' : 'space'),
+		visibility: local.visibility ?? 'space',
 		language: local.language,
 		createdAt: local.createdAt ?? new Date().toISOString(),
 		updatedAt: local.updatedAt ?? new Date().toISOString(),

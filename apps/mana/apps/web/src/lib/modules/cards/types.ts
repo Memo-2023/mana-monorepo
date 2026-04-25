@@ -11,8 +11,6 @@ export interface LocalDeck extends BaseRecord {
 	color: string;
 	cardCount: number;
 	lastStudied?: string | null;
-	/** @deprecated Use `visibility`. Mirror kept until M6.1 hard-drop. */
-	isPublic: boolean;
 	visibility?: VisibilityLevel;
 	visibilityChangedAt?: string;
 	visibilityChangedBy?: string;
@@ -36,8 +34,6 @@ export interface Deck {
 	title: string;
 	description?: string;
 	color: string;
-	/** @deprecated Use `visibility`. */
-	isPublic: boolean;
 	visibility: VisibilityLevel;
 	tags: string[];
 	cardCount: number;
@@ -61,13 +57,11 @@ export interface Card {
 export interface CreateDeckInput {
 	title: string;
 	description?: string;
-	isPublic?: boolean;
 }
 
 export interface UpdateDeckInput {
 	title?: string;
 	description?: string;
-	isPublic?: boolean;
 }
 
 export interface CreateCardInput {

@@ -18,8 +18,7 @@ export function toDeck(local: LocalDeck): Deck {
 		title: local.name,
 		description: local.description ?? undefined,
 		color: local.color,
-		isPublic: local.isPublic ?? local.visibility === 'public',
-		visibility: local.visibility ?? (local.isPublic === true ? 'public' : 'space'),
+		visibility: local.visibility ?? 'space',
 		tags: [],
 		cardCount: local.cardCount,
 		createdAt: local.createdAt ?? new Date().toISOString(),
@@ -83,7 +82,7 @@ export function getDeckById(decks: Deck[], id: string): Deck | undefined {
 }
 
 export function getPublicDecks(decks: Deck[]): Deck[] {
-	return decks.filter((d) => d.isPublic);
+	return decks.filter((d) => d.visibility === 'public');
 }
 
 export function getCardCountForDeck(cards: Card[], deckId: string): number {

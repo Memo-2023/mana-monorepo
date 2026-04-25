@@ -39,7 +39,6 @@ function createDecksStore() {
 				title: dto.title,
 				description: dto.description || null,
 				themeId: dto.themeId || null,
-				isPublic: false,
 				visibility: defaultVisibilityFor(getActiveSpace()?.type),
 			};
 			const plaintextSnapshot = toDeck(newLocal);
@@ -65,11 +64,6 @@ function createDecksStore() {
 			if (dto.title !== undefined) localUpdates.title = dto.title;
 			if (dto.description !== undefined) localUpdates.description = dto.description;
 			if (dto.themeId !== undefined) localUpdates.themeId = dto.themeId;
-			if (dto.isPublic !== undefined) {
-				// Mirror to unified visibility during M6 soak.
-				localUpdates.isPublic = dto.isPublic;
-				localUpdates.visibility = dto.isPublic ? 'public' : 'space';
-			}
 
 			await encryptRecord('presiDecks', localUpdates);
 			await presiDeckTable.update(id, localUpdates);
@@ -85,13 +79,11 @@ function createDecksStore() {
 		try {
 			const existing = await presiDeckTable.get(id);
 			if (!existing) return false;
-			const before: VisibilityLevel =
-				existing.visibility ?? (existing.isPublic ? 'public' : 'space');
+			const before: VisibilityLevel = existing.visibility ?? 'space';
 			if (before === next) return true;
 			const stamp = new Date().toISOString();
 			await presiDeckTable.update(id, {
 				visibility: next,
-				isPublic: next === 'public',
 				visibilityChangedAt: stamp,
 				visibilityChangedBy: getEffectiveUserId(),
 				updatedAt: stamp,

@@ -9,10 +9,10 @@ import { formatDateTime } from '$lib/i18n/format';
  * content. Trade-off: publishes are slightly slower, public visits are
  * much faster.
  *
- * Every resolver MUST enforce the source's public-visibility rules —
- * e.g. `picture.board.isPublic === true`. An owner who embeds a
- * private board gets an empty result with a clear error message in the
- * resolved.error field.
+ * Every resolver MUST enforce the source's public-visibility rules
+ * via `canEmbedOnWebsite(visibility)`. An owner who embeds a
+ * non-public record gets an empty result with a clear error message
+ * in the resolved.error field.
  */
 
 import { db } from '$lib/data/database';
@@ -117,8 +117,7 @@ export async function resolveEmbed(props: ModuleEmbedProps): Promise<ResolvedEmb
 /**
  * Picture-board: returns image items for a board whose owner flipped
  * its visibility to 'public' via the VisibilityPicker. `canEmbedOnWebsite`
- * is the hard gate; the soft-migration fallback maps legacy `isPublic`
- * rows (pre-M3) to the right level.
+ * is the hard gate.
  */
 async function resolvePictureBoard(props: ModuleEmbedProps): Promise<EmbedItem[]> {
 	if (!props.sourceId) {
@@ -134,8 +133,7 @@ async function resolvePictureBoard(props: ModuleEmbedProps): Promise<EmbedItem[]
 	if (!rawBoard || rawBoard.deletedAt) {
 		throw new Error('Board nicht gefunden');
 	}
-	const boardVisibility =
-		rawBoard.visibility ?? (rawBoard.isPublic === true ? 'public' : 'private');
+	const boardVisibility = rawBoard.visibility ?? 'private';
 	if (!canEmbedOnWebsite(boardVisibility)) {
 		throw new Error('Board ist nicht öffentlich — setze es im Picture-Modul auf "Öffentlich"');
 	}
@@ -804,10 +802,7 @@ async function resolveSocialEvents(props: ModuleEmbedProps): Promise<EmbedItem[]
 async function resolveMemos(_props: ModuleEmbedProps): Promise<EmbedItem[]> {
 	let memos = await db.table<LocalMemo>('memos').toArray();
 	memos = memos.filter(
-		(m) =>
-			!m.deletedAt &&
-			!m.isArchived &&
-			canEmbedOnWebsite(m.visibility ?? (m.isPublic === true ? 'public' : 'private'))
+		(m) => !m.deletedAt && !m.isArchived && canEmbedOnWebsite(m.visibility ?? 'private')
 	);
 
 	if (memos.length === 0) return [];
@@ -853,11 +848,7 @@ async function resolveMemos(_props: ModuleEmbedProps): Promise<EmbedItem[]> {
  */
 async function resolveCardDecks(_props: ModuleEmbedProps): Promise<EmbedItem[]> {
 	let decks = await db.table<LocalCardDeck>('cardDecks').toArray();
-	decks = decks.filter(
-		(d) =>
-			!d.deletedAt &&
-			canEmbedOnWebsite(d.visibility ?? (d.isPublic === true ? 'public' : 'private'))
-	);
+	decks = decks.filter((d) => !d.deletedAt && canEmbedOnWebsite(d.visibility ?? 'private'));
 
 	if (decks.length === 0) return [];
 
@@ -886,11 +877,7 @@ async function resolveCardDecks(_props: ModuleEmbedProps): Promise<EmbedItem[]> 
  */
 async function resolvePresiDecks(_props: ModuleEmbedProps): Promise<EmbedItem[]> {
 	let decks = await db.table<LocalPresiDeck>('presiDecks').toArray();
-	decks = decks.filter(
-		(d) =>
-			!d.deletedAt &&
-			canEmbedOnWebsite(d.visibility ?? (d.isPublic === true ? 'public' : 'private'))
-	);
+	decks = decks.filter((d) => !d.deletedAt && canEmbedOnWebsite(d.visibility ?? 'private'));
 
 	if (decks.length === 0) return [];
 

@@ -38,9 +38,7 @@ export function toImage(local: LocalImage): Image {
 		height: local.height ?? undefined,
 		fileSize: local.fileSize ?? undefined,
 		blurhash: local.blurhash ?? undefined,
-		// Soft-migration fallback: rows written before M3 only have the
-		// legacy `isPublic` flag; map it to the nearest visibility level.
-		visibility: local.visibility ?? (local.isPublic === true ? 'public' : 'private'),
+		visibility: local.visibility ?? 'private',
 		isFavorite: local.isFavorite,
 		downloadCount: local.downloadCount,
 		rating: local.rating ?? undefined,
@@ -68,7 +66,7 @@ export function toBoard(local: LocalBoard): Board {
 		canvasWidth: local.canvasWidth,
 		canvasHeight: local.canvasHeight,
 		backgroundColor: local.backgroundColor,
-		visibility: local.visibility ?? (local.isPublic === true ? 'public' : 'private'),
+		visibility: local.visibility ?? 'private',
 		createdAt: local.createdAt ?? new Date().toISOString(),
 		updatedAt: local.updatedAt ?? new Date().toISOString(),
 	};

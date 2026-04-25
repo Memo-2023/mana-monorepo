@@ -110,7 +110,7 @@
 			<p class="truncate text-sm font-medium text-foreground">{deck.title}</p>
 			<div class="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
 				<span>{slideCount(deck.id)} Folien</span>
-				{#if deck.isPublic}
+				{#if deck.visibility === 'public'}
 					<span class="rounded bg-muted px-1.5 py-0.5 text-[10px]">Öffentlich</span>
 				{/if}
 			</div>

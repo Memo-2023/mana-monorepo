@@ -39,7 +39,6 @@ export const MEMORO_GUEST_SEED = {
 			processingStatus: 'completed' as const,
 			isArchived: false,
 			isPinned: true,
-			isPublic: false,
 			blueprintId: null,
 			language: 'de',
 		},

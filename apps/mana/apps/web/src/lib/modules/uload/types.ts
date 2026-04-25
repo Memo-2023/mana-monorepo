@@ -30,12 +30,6 @@ export interface LocalTag extends BaseRecord {
 	slug: string;
 	color?: string | null;
 	icon?: string | null;
-	/**
-	 * @deprecated Use `visibility`. Mirror kept for the M6 soak window.
-	 * No active CRUD UI yet — the field is set only by seed data and
-	 * the future tag-management view will write `visibility` directly.
-	 */
-	isPublic: boolean;
 	visibility?: VisibilityLevel;
 	usageCount: number;
 }

@@ -45,7 +45,6 @@ export const memosStore = {
 			processingStatus: data.processingStatus ?? (data.transcript ? 'completed' : 'pending'),
 			isArchived: false,
 			isPinned: false,
-			isPublic: false,
 			visibility: defaultVisibilityFor(getActiveSpace()?.type),
 			blueprintId: data.blueprintId ?? null,
 			language: data.language ?? null,
@@ -141,7 +140,7 @@ export const memosStore = {
 	/** Update a memo's fields. */
 	async update(
 		id: string,
-		data: Partial<Pick<LocalMemo, 'title' | 'intro' | 'transcript' | 'language' | 'isPublic'>>
+		data: Partial<Pick<LocalMemo, 'title' | 'intro' | 'transcript' | 'language'>>
 	) {
 		const diff: Partial<LocalMemo> = {
 			...data,
@@ -173,22 +172,18 @@ export const memosStore = {
 	unarchive: (id: string) => memoArchive.unarchive(id),
 
 	/**
-	 * Flip a memo's visibility. M6 soft-migration: writes both
-	 * `visibility` and the legacy `isPublic` mirror so older readers
-	 * (search index, server snapshots) keep working until the M6.1
-	 * hard-drop. Public memos surface in the user's website embed
-	 * once a memoro embed-resolver lands.
+	 * Flip a memo's visibility. Public memos surface in the user's
+	 * website embed via the memoro embed-resolver.
 	 */
 	async setVisibility(id: string, next: VisibilityLevel) {
 		const existing = await memoTable.get(id);
 		if (!existing) throw new Error(`Memo ${id} not found`);
-		const before: VisibilityLevel = existing.visibility ?? (existing.isPublic ? 'public' : 'space');
+		const before: VisibilityLevel = existing.visibility ?? 'space';
 		if (before === next) return;
 
 		const stamp = new Date().toISOString();
 		await memoTable.update(id, {
 			visibility: next,
-			isPublic: next === 'public',
 			visibilityChangedAt: stamp,
 			visibilityChangedBy: getEffectiveUserId(),
 			updatedAt: stamp,

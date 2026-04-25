@@ -26,12 +26,6 @@ export interface LocalImage extends BaseRecord {
 	height?: number | null;
 	fileSize?: number | null;
 	blurhash?: string | null;
-	/**
-	 * @deprecated Use `visibility` instead. Kept for the soft-migration
-	 * window — will be dropped in the hard follow-up once no reader
-	 * references it. See docs/plans/visibility-system.md §M3.
-	 */
-	isPublic?: boolean;
 	visibility?: VisibilityLevel;
 	visibilityChangedAt?: string;
 	visibilityChangedBy?: string;
@@ -95,11 +89,6 @@ export interface LocalBoard extends BaseRecord {
 	canvasWidth: number;
 	canvasHeight: number;
 	backgroundColor: string;
-	/**
-	 * @deprecated Use `visibility` instead. Kept during the M3 soft
-	 * migration — dropped in the hard follow-up.
-	 */
-	isPublic?: boolean;
 	visibility?: VisibilityLevel;
 	visibilityChangedAt?: string;
 	visibilityChangedBy?: string;

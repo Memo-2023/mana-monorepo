@@ -22,7 +22,6 @@ export const PRESI_GUEST_SEED = {
 			id: ONBOARDING_DECK_ID,
 			title: 'Willkommen bei Presi',
 			description: 'Eine kurze Einfuhrung in die Prasentations-App.',
-			isPublic: false,
 		},
 	],
 	slides: [

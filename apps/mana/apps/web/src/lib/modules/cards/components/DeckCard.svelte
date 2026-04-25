@@ -39,7 +39,7 @@
 		>
 			<div class="flex items-center gap-2">
 				<span>{deck.cardCount || 0} Karten</span>
-				{#if deck.isPublic}
+				{#if deck.visibility === 'public'}
 					<span class="rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">
 						Öffentlich
 					</span>

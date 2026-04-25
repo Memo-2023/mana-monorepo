@@ -194,7 +194,7 @@
 			<div class="prop-row">
 				<span class="prop-label">Sichtbarkeit</span>
 				<VisibilityPicker
-					level={memo.visibility ?? (memo.isPublic ? 'public' : 'space')}
+					level={memo.visibility ?? 'space'}
 					onChange={(next: VisibilityLevel) => memosStore.setVisibility(memoId, next)}
 					disabledLevels={['unlisted']}
 				/>

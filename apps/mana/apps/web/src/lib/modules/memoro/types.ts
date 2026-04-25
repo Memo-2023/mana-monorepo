@@ -16,14 +16,6 @@ export interface LocalMemo extends BaseRecord {
 	processingStatus: ProcessingStatus;
 	isArchived: boolean;
 	isPinned: boolean;
-	/**
-	 * @deprecated Soft-migrating to unified `visibility`. Kept for the
-	 * soak window so the converter can fall back to `isPublic` for
-	 * legacy rows that haven't been touched since the M6 rollout.
-	 * Hard-drop once `visibility` has propagated to all rows.
-	 */
-	isPublic?: boolean;
-	/** Unified visibility (M6 pilot — replaces isPublic). */
 	visibility?: VisibilityLevel;
 	visibilityChangedAt?: string;
 	visibilityChangedBy?: string;
@@ -95,8 +87,6 @@ export interface Memo {
 	processingStatus: ProcessingStatus;
 	isArchived: boolean;
 	isPinned: boolean;
-	/** @deprecated Use `visibility`. Mirror kept until M6.1 hard-drop. */
-	isPublic: boolean;
 	visibility: VisibilityLevel;
 	language: string | null;
 	createdAt: string;

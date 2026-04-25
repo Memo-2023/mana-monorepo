@@ -190,8 +190,7 @@ export const boardsStore = {
 		try {
 			const existing = await db.table<LocalBoard>('boards').get(id);
 			if (!existing) return { success: false, error: 'Board not found' };
-			const before: VisibilityLevel =
-				existing.visibility ?? (existing.isPublic === true ? 'public' : 'private');
+			const before: VisibilityLevel = existing.visibility ?? 'private';
 			if (before === next) return { success: true };
 
 			const now = new Date().toISOString();

@@ -13,7 +13,6 @@
 
 	let title = $state('');
 	let description = $state('');
-	let isPublic = $state(false);
 	let color = $state(DEFAULT_COLOR);
 	let submitting = $state(false);
 	let selectedTagIds = $state<string[]>([]);
@@ -27,7 +26,6 @@
 		const deck = await deckStore.createDeck({
 			title: title.trim(),
 			description: description.trim() || undefined,
-			isPublic,
 		});
 
 		submitting = false;
@@ -35,7 +33,6 @@
 		if (deck) {
 			title = '';
 			description = '';
-			isPublic = false;
 			open = false;
 			onClose?.();
 		}
@@ -94,18 +91,6 @@
 						placeholder="Worum geht es in diesem Deck?"
 						class="min-h-[80px] w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
 					></textarea>
-				</div>
-
-				<div class="flex items-center gap-2">
-					<input
-						type="checkbox"
-						id="deck-public"
-						bind:checked={isPublic}
-						class="h-4 w-4 rounded border-border"
-					/>
-					<label for="deck-public" class="cursor-pointer text-sm text-foreground">
-						Offentlich machen
-					</label>
 				</div>
 
 				<div>
