@@ -142,8 +142,10 @@
 					type="button"
 					{disabled}
 					onclick={toggleBody}
-					class="relative h-20 w-20 overflow-hidden rounded-md border transition-colors
-						{bodyInValue ? 'border-primary/50' : 'border-border opacity-50 hover:opacity-100'}"
+					class="relative h-20 w-20 overflow-hidden rounded-md border transition-all active:translate-y-px
+						{bodyInValue
+						? 'border-primary shadow-sm shadow-primary/20'
+						: 'border-border opacity-60 hover:border-primary/50 hover:opacity-100 hover:shadow-sm'}"
 					aria-pressed={bodyInValue}
 					title={bodyInValue ? 'Body-Ref entfernen' : 'Body-Ref hinzufügen'}
 				>
@@ -208,7 +210,10 @@
 					type="button"
 					{disabled}
 					onclick={() => (showGarmentPicker = !showGarmentPicker)}
-					class="flex h-20 w-20 flex-col items-center justify-center gap-1 rounded-md border border-dashed border-border bg-background text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+					class="flex h-20 w-20 flex-col items-center justify-center gap-1 rounded-md border border-dashed border-border bg-background text-muted-foreground transition-all hover:border-primary/50 hover:bg-primary/5 hover:text-foreground hover:shadow-sm active:translate-y-px"
+					class:!border-primary={showGarmentPicker}
+					class:!bg-primary={showGarmentPicker}
+					class:bg-opacity-10={showGarmentPicker}
 					aria-expanded={showGarmentPicker}
 				>
 					<Plus size={16} />

@@ -35,16 +35,21 @@ export const comicStoriesStore = {
 		if (input.characterMediaIds.length === 0) {
 			throw new Error('Story needs at least one character reference image');
 		}
+		// Spread incoming arrays to break Svelte 5 $state proxies — the
+		// caller (StoryForm) declares `characterMediaIds`/`tags` as
+		// `$state<string[]>([])` and passes them directly. IndexedDB's
+		// structured-clone refuses to clone proxies, so without this
+		// `comicStoriesTable.add(...)` throws DataCloneError.
 		const newLocal: LocalComicStory = {
 			id: crypto.randomUUID(),
 			title: input.title,
 			description: input.description ?? null,
 			style: input.style,
-			characterMediaIds: input.characterMediaIds,
+			characterMediaIds: [...input.characterMediaIds],
 			storyContext: input.storyContext ?? null,
 			panelImageIds: [],
 			panelMeta: {},
-			tags: input.tags ?? [],
+			tags: input.tags ? [...input.tags] : [],
 			isFavorite: input.isFavorite ?? false,
 			visibility: defaultVisibilityFor(getActiveSpace()?.type),
 		};
@@ -64,7 +69,15 @@ export const comicStoriesStore = {
 			Pick<LocalComicStory, 'title' | 'description' | 'storyContext' | 'tags' | 'characterMediaIds'>
 		>
 	): Promise<void> {
-		const wrapped = { ...patch } as Record<string, unknown>;
+		// Same proxy-breaking copy as createStory: any array on the patch
+		// might be a $state proxy if the caller is a Svelte 5 component.
+		const wrapped: Record<string, unknown> = { ...patch };
+		if (Array.isArray(wrapped.characterMediaIds)) {
+			wrapped.characterMediaIds = [...(wrapped.characterMediaIds as string[])];
+		}
+		if (Array.isArray(wrapped.tags)) {
+			wrapped.tags = [...(wrapped.tags as string[])];
+		}
 		await encryptRecord('comicStories', wrapped);
 		await comicStoriesTable.update(id, {
 			...wrapped,
