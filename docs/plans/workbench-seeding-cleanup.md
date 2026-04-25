@@ -100,10 +100,12 @@ Statt nur den Symptom-Patch (`spaceId` durchreichen) werden die unterliegenden F
 
 ## Reihenfolge
 
-1. ✅ **Schicht D-soft** — räumt deine konkrete IndexedDB sofort auf, blockiert nichts. Risikoarm. **DIESES PR.**
-2. **Schicht B + C** — fixt den Bug strukturell. Eigenes PR, nach D-soft soak (1 Tag).
-3. **Schicht A** — Großputz. Eigenes PR. Nach Audit + Fix der vergessenen Call-Sites.
-4. **Schicht D-hard** — Code-Annahme festschreiben. Eigenes PR.
+1. ✅ **Schicht D-soft** — `d62ae8f1e` (Dexie v48 + +layout post-reconcile dedup)
+2. ✅ **Schicht B + C** — `c73f93ff1` (per-space-seeds Registry, deterministic Home id, store-stripped) + `568d79dc1` (transitional legacy-Home check + wiring integration test)
+3. ⏳ **Schicht A** — gestaffelt:
+   - ✅ **Etappe 1** — `43bef2b24`: Helper `getEffectiveSpaceId()` + 16 explizite Migrations in 10 Modulen (picture/events/companion/calc/quotes/skilltree/moodlit/plants/questions + data/ai). Hook stempelt weiter Sentinel als Fallback.
+   - 🔜 **Etappe 2** (post-soak ≥1 Tag): Hook auf `throw` flippen. Vorher kurzer grep-Pass um sicherzugehen dass kein neuer ungesetzter `.add()` in der Zwischenzeit gelandet ist.
+4. 🔜 **Schicht D-hard** — Survivor → deterministische ID umbenennen, Code-Annahme festschreiben. Nach Schicht A Etappe 2.
 
 ## Erfolgskriterien
 
