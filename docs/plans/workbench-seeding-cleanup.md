@@ -98,14 +98,23 @@ Statt nur den Symptom-Patch (`spaceId` durchreichen) werden die unterliegenden F
 - Dexie v49 (oder höher) Migration: alle `workbenchScenes` mit `name === 'Home'` und ohne ID-Prefix `seed-home-` umbenennen auf `seed-home-${spaceId}`. Falls Konflikt mit existierendem deterministischen Survivor: alte Row löschen.
 - Code-Annahme: queries dürfen ab hier `db.workbenchScenes.get(\`seed-home-\${spaceId}\`)` direkt benutzen, ohne By-Name-Filter-Fallback.
 
-## Reihenfolge
+## Reihenfolge — final state (alles SHIPPED)
 
-1. ✅ **Schicht D-soft** — `d62ae8f1e` (Dexie v48 + +layout post-reconcile dedup)
+Die ursprüngliche Vier-Schichten-Sequenz wurde während der Umsetzung
+zu einer einfacheren Architektur kondensiert: weil der Hook *smart*
+sein kann (statt nur Sentinel zu stempeln), entfällt die
+"throw on missing"-Variante und damit auch der Etappe-2-Soak.
+
+1. ✅ **Schicht D-soft** — `d62ae8f1e` (Dexie v48 dedup + +layout post-reconcile dedup)
 2. ✅ **Schicht B + C** — `c73f93ff1` (per-space-seeds Registry, deterministic Home id, store-stripped) + `568d79dc1` (transitional legacy-Home check + wiring integration test)
-3. ⏳ **Schicht A** — gestaffelt:
-   - ✅ **Etappe 1** — `43bef2b24`: Helper `getEffectiveSpaceId()` + 16 explizite Migrations in 10 Modulen (picture/events/companion/calc/quotes/skilltree/moodlit/plants/questions + data/ai). Hook stempelt weiter Sentinel als Fallback.
-   - 🔜 **Etappe 2** (post-soak ≥1 Tag): Hook auf `throw` flippen. Vorher kurzer grep-Pass um sicherzugehen dass kein neuer ungesetzter `.add()` in der Zwischenzeit gelandet ist.
-4. 🔜 **Schicht D-hard** — Survivor → deterministische ID umbenennen, Code-Annahme festschreiben. Nach Schicht A Etappe 2.
+3. ✅ **Schicht A Etappe 1** — `43bef2b24` (Helper + 16 explicit stamps, soft phase)
+4. ✅ **Schicht A — final** — `a6c5397d1` (smart hook stempelt aktive Space-UUID statt Sentinel; 16 explicit stamps reverted weil redundant)
+5. ✅ **Schicht D-hard + Cleanup** — `fa71269fc` (v50 löscht legacy non-deterministic Home rows, transitional check aus Seeder raus, post-reconcile dedup aus +layout raus)
+
+Endzustand: **eine** Stelle entscheidet über Tenancy-Stamping (der
+Hook), **deterministische IDs** garantieren Idempotenz, **kein
+transitional code** mehr, **kein post-reconcile fallback** mehr —
+exakt das was "saubere Lösung ohne legacy reste" verlangt.
 
 ## Erfolgskriterien
 
