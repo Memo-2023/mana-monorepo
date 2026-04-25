@@ -31,6 +31,9 @@ import type { LocalPlace } from '$lib/modules/places/types';
 import type { LocalRecipe } from '$lib/modules/recipes/types';
 import type { LocalWardrobeOutfit } from '$lib/modules/wardrobe/types';
 import type { LocalComicStory } from '$lib/modules/comic/types';
+import type { LocalHabit, LocalHabitLog } from '$lib/modules/habits/types';
+import type { LocalQuiz } from '$lib/modules/quiz/types';
+import type { LocalSocialEvent } from '$lib/modules/events/types';
 import type { LocalTimeBlock } from '$lib/data/time-blocks/types';
 
 export interface ResolvedEmbed {
@@ -71,6 +74,15 @@ export async function resolveEmbed(props: ModuleEmbedProps): Promise<ResolvedEmb
 				break;
 			case 'comic.stories':
 				items = await resolveComicStories(props);
+				break;
+			case 'habits.habits':
+				items = await resolveHabits(props);
+				break;
+			case 'quiz.quizzes':
+				items = await resolveQuizzes(props);
+				break;
+			case 'events.socialEvents':
+				items = await resolveSocialEvents(props);
 				break;
 			default:
 				return {
@@ -569,6 +581,197 @@ async function resolveComicStories(props: ModuleEmbedProps): Promise<EmbedItem[]
 			title: s.title,
 			subtitle: `${panelCount} ${panelCount === 1 ? 'Panel' : 'Panels'}`,
 			imageUrl: cover?.publicUrl ?? undefined,
+		};
+	});
+}
+
+/**
+ * Habits: build-in-public use case. Returns active habits flipped to
+ * 'public' with their current streak as subtitle.
+ *
+ * Whitelist: title + "🔥 N Tage Streak · gesamt M ×" — never the per-log
+ * timestamps or notes (those reveal sleep/intake patterns). Streak +
+ * total are aggregate counts that sit at the right level of detail
+ * for a public "what I'm working on" widget.
+ */
+async function resolveHabits(props: ModuleEmbedProps): Promise<EmbedItem[]> {
+	let habits = await db.table<LocalHabit>('habits').toArray();
+	habits = habits.filter(
+		(h) => !h.deletedAt && !h.isArchived && canEmbedOnWebsite(h.visibility ?? 'private')
+	);
+
+	if (props.filter?.tagIds?.length) {
+		// Habits don't have direct tagIds today; the filter is reserved
+		// for when they do. Skip silently.
+	}
+
+	if (habits.length === 0) return [];
+
+	const habitIds = new Set(habits.map((h) => h.id));
+	const allLogs = await db.table<LocalHabitLog>('habitLogs').toArray();
+	const logsByHabit = new Map<string, LocalHabitLog[]>();
+	for (const log of allLogs) {
+		if (log.deletedAt || !habitIds.has(log.habitId)) continue;
+		const list = logsByHabit.get(log.habitId) ?? [];
+		list.push(log);
+		logsByHabit.set(log.habitId, list);
+	}
+
+	// Resolve each log's date via its TimeBlock (date-only, the time
+	// dimension itself is intentionally not exposed).
+	const blockIds = allLogs.map((l) => l.timeBlockId).filter(Boolean);
+	const blocks =
+		blockIds.length > 0
+			? await db.table<LocalTimeBlock>('timeBlocks').where('id').anyOf(blockIds).toArray()
+			: [];
+	const blockDateById = new Map<string, string>();
+	for (const b of blocks) blockDateById.set(b.id, (b.startDate ?? '').slice(0, 10));
+
+	function streakFor(logs: LocalHabitLog[]): number {
+		const dates = new Set<string>();
+		for (const l of logs) {
+			const d = blockDateById.get(l.timeBlockId);
+			if (d) dates.add(d);
+		}
+		let streak = 0;
+		const cursor = new Date();
+		while (true) {
+			const key = cursor.toISOString().slice(0, 10);
+			if (!dates.has(key)) break;
+			streak++;
+			cursor.setDate(cursor.getDate() - 1);
+		}
+		return streak;
+	}
+
+	const decrypted = (await decryptRecords('habits', habits)) as LocalHabit[];
+
+	// Active streak first, then total-count.
+	const enriched = decrypted.map((h) => {
+		const logs = logsByHabit.get(h.id) ?? [];
+		return { habit: h, streak: streakFor(logs), total: logs.length };
+	});
+	enriched.sort((a, b) => b.streak - a.streak || b.total - a.total);
+
+	return enriched.map(({ habit, streak, total }) => {
+		const parts: string[] = [];
+		if (streak > 0) parts.push(`🔥 ${streak} ${streak === 1 ? 'Tag' : 'Tage'} Streak`);
+		if (total > 0) parts.push(`gesamt ${total} ×`);
+		return {
+			title: habit.title,
+			subtitle: parts.length > 0 ? parts.join(' · ') : undefined,
+		};
+	});
+}
+
+/**
+ * Quizzes: shareable quiz collection use case. Returns quizzes flipped
+ * to 'public' with their question count + category as subtitle.
+ *
+ * Whitelist: title + "N Fragen · {category}" line — questions, options,
+ * explanations, attempts/scores all stay private. The teaser exists
+ * to drive opens; the unlisted-share flow (future) would carry the
+ * actual play-experience.
+ */
+async function resolveQuizzes(props: ModuleEmbedProps): Promise<EmbedItem[]> {
+	let quizzes = await db.table<LocalQuiz>('quizzes').toArray();
+	quizzes = quizzes.filter(
+		(q) => !q.deletedAt && !q.isArchived && canEmbedOnWebsite(q.visibility ?? 'private')
+	);
+
+	if (props.filter?.tagIds?.length) {
+		const wanted = new Set(props.filter.tagIds);
+		quizzes = quizzes.filter((q) => (q.tags ?? []).some((t) => wanted.has(t)));
+	}
+
+	const decrypted = (await decryptRecords('quizzes', quizzes)) as LocalQuiz[];
+
+	// Pinned first, then newest.
+	decrypted.sort((a, b) => {
+		const pinA = a.isPinned ? 0 : 1;
+		const pinB = b.isPinned ? 0 : 1;
+		if (pinA !== pinB) return pinA - pinB;
+		return (b.updatedAt ?? '').localeCompare(a.updatedAt ?? '');
+	});
+
+	return decrypted.map((q) => {
+		const count = q.questionCount ?? 0;
+		const parts: string[] = [`${count} ${count === 1 ? 'Frage' : 'Fragen'}`];
+		if (q.category) parts.push(q.category);
+		return {
+			title: q.title,
+			subtitle: parts.join(' · '),
+		};
+	});
+}
+
+/**
+ * Social-events (the events module — distinct from calendar.events).
+ * Returns events flipped to 'public' with their date + location as
+ * subtitle. Hard-gated on the unified `visibility`; the legacy
+ * `isPublished` flag is intentionally NOT consulted here so the new
+ * Picker is the single source of truth (M6 cleanup will drop the
+ * legacy field entirely).
+ *
+ * Whitelist: title + formatted date + location — guest list, RSVP
+ * counts, capacity, host contact, items/bring-list all stay private.
+ */
+async function resolveSocialEvents(props: ModuleEmbedProps): Promise<EmbedItem[]> {
+	let events = await db.table<LocalSocialEvent>('socialEvents').toArray();
+	events = events.filter(
+		(e) => !e.deletedAt && e.status !== 'cancelled' && canEmbedOnWebsite(e.visibility ?? 'private')
+	);
+
+	if (events.length === 0) return [];
+
+	// Resolve dates via TimeBlock — the time dimension lives there.
+	const blockIds = events.map((e) => e.timeBlockId).filter(Boolean);
+	const blocks =
+		blockIds.length > 0
+			? await db.table<LocalTimeBlock>('timeBlocks').where('id').anyOf(blockIds).toArray()
+			: [];
+	const blockById = new Map<string, LocalTimeBlock>();
+	for (const b of blocks) blockById.set(b.id, b);
+
+	if (props.filter?.upcomingDays !== undefined) {
+		const cutoff = new Date();
+		cutoff.setDate(cutoff.getDate() + props.filter.upcomingDays);
+		const cutoffISO = cutoff.toISOString();
+		const nowISO = new Date().toISOString();
+		events = events.filter((e) => {
+			const start = blockById.get(e.timeBlockId)?.startDate;
+			return start && start >= nowISO && start <= cutoffISO;
+		});
+	}
+
+	const decrypted = (await decryptRecords('socialEvents', events)) as LocalSocialEvent[];
+
+	// Upcoming-first by start date.
+	decrypted.sort((a, b) => {
+		const sa = blockById.get(a.timeBlockId)?.startDate ?? '';
+		const sb = blockById.get(b.timeBlockId)?.startDate ?? '';
+		return sa.localeCompare(sb);
+	});
+
+	return decrypted.map((e) => {
+		const block = blockById.get(e.timeBlockId);
+		const parts: string[] = [];
+		if (block?.startDate) {
+			parts.push(
+				formatDateTime(new Date(block.startDate), {
+					day: '2-digit',
+					month: 'long',
+					year: 'numeric',
+					hour: block.allDay ? undefined : '2-digit',
+					minute: block.allDay ? undefined : '2-digit',
+				})
+			);
+		}
+		if (e.location) parts.push(e.location);
+		return {
+			title: e.title,
+			subtitle: parts.length > 0 ? parts.join(' · ') : undefined,
+			imageUrl: e.coverImage ?? undefined,
 		};
 	});
 }

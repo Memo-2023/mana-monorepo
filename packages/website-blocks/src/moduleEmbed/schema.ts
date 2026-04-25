@@ -36,6 +36,9 @@ export const EmbedSourceSchema = z.enum([
 	'recipes.recipes',
 	'wardrobe.outfits',
 	'comic.stories',
+	'habits.habits',
+	'quiz.quizzes',
+	'events.socialEvents',
 ]);
 export type EmbedSource = z.infer<typeof EmbedSourceSchema>;
 
