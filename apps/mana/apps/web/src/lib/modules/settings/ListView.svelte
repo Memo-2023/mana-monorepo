@@ -15,6 +15,7 @@
 	import GeneralSection from '$lib/components/settings/sections/GeneralSection.svelte';
 	import AiSection from '$lib/components/settings/sections/AiSection.svelte';
 	import SecuritySection from '$lib/components/settings/sections/SecuritySection.svelte';
+	import PrivacySection from '$lib/components/settings/sections/PrivacySection.svelte';
 	import DataSection from '$lib/components/settings/sections/DataSection.svelte';
 	import TagPresetsSection from '$lib/components/settings/sections/TagPresetsSection.svelte';
 
@@ -76,6 +77,8 @@
 			<AiSection />
 		{:else if activeCategory === 'security'}
 			<SecuritySection />
+		{:else if activeCategory === 'privacy'}
+			<PrivacySection />
 		{:else if activeCategory === 'data'}
 			<DataSection />
 		{:else if activeCategory === 'tag-presets'}

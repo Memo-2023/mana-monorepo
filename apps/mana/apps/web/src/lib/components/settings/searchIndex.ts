@@ -6,7 +6,7 @@
 import type { Component } from 'svelte';
 import { Gear, Robot, ShieldCheck, Cloud, Tag } from '@mana/shared-icons';
 
-export type CategoryId = 'general' | 'ai' | 'security' | 'data' | 'tag-presets';
+export type CategoryId = 'general' | 'ai' | 'security' | 'privacy' | 'data' | 'tag-presets';
 
 export interface Category {
 	id: CategoryId;
@@ -38,6 +38,13 @@ export const categories: Category[] = [
 		description: 'Passkeys, 2FA, Verschlüsselung & Sitzungen',
 		icon: ShieldCheck,
 		anchors: ['passkeys', 'sessions', 'two-factor', 'vault', 'security-log'],
+	},
+	{
+		id: 'privacy',
+		label: 'Privatsphäre',
+		description: 'Was ist gerade öffentlich oder per Link geteilt — mit Kill-Switch.',
+		icon: ShieldCheck,
+		anchors: ['privacy'],
 	},
 	{
 		id: 'data',
@@ -150,6 +157,20 @@ export const searchIndex: SearchEntry[] = [
 		keywords: ['audit', 'history', 'verlauf'],
 		category: 'security',
 		anchor: 'security-log',
+	},
+
+	// Privacy
+	{
+		label: 'Privatsphäre-Übersicht',
+		keywords: ['public', 'öffentlich', 'unlisted', 'teilen', 'sharing', 'link'],
+		category: 'privacy',
+		anchor: 'privacy',
+	},
+	{
+		label: 'Alle auf privat zurücksetzen',
+		keywords: ['kill-switch', 'kill switch', 'reset', 'privat', 'widerrufen'],
+		category: 'privacy',
+		anchor: 'privacy',
 	},
 
 	// Data
