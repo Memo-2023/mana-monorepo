@@ -620,23 +620,6 @@
 				if (rewritten > 0) {
 					console.info(`[spaces] reconciled ${rewritten} sentinel records to active space`);
 				}
-
-				// Belt-and-suspenders dedup of duplicate "Home" workbench
-				// scenes. The Dexie v48 upgrade already does one pass at
-				// schema-bump time; this second pass covers the edge case
-				// where reconcileSentinels just collapsed sentinel-stamped
-				// rows into the same space-id as already-reconciled rows,
-				// producing fresh duplicates. Idempotent — a no-op when
-				// nothing matches. The structural fix that prevents new
-				// duplicates ships separately, see
-				// docs/plans/workbench-seeding-cleanup.md.
-				const { dedupHomeScenesOn } = await import('$lib/data/scope/dedup-workbench-scenes');
-				const dedupedCount = await db.transaction('rw', 'workbenchScenes', () =>
-					dedupHomeScenesOn(db.table('workbenchScenes'))
-				);
-				if (dedupedCount > 0) {
-					console.info(`[workbench-scenes] deduped ${dedupedCount} duplicate Home scenes`);
-				}
 			} catch (err) {
 				console.warn('[spaces] active-space boot failed — sync will use sentinel scope', err);
 			}

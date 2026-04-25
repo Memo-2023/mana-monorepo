@@ -8,14 +8,13 @@
  * Idempotency is structural: the row id is `seed-home-${spaceId}`
  * (deterministic) and the seeder no-ops if the row already exists.
  * Re-running for the same Space is a no-op — no duplicate possible
- * regardless of how the boot/replay timing shakes out. This is the
- * structural answer to the bug Schicht D-soft cleaned up after.
+ * regardless of how the boot/replay timing shakes out.
  *
  * The actual write is split out into `seedWorkbenchHomeOn(table, ...)`
  * so unit tests can drive it against a fixture Dexie instance without
  * pulling in `database.ts`'s side-effect imports.
  *
- * See docs/plans/workbench-seeding-cleanup.md §"Schicht B + C".
+ * See docs/plans/workbench-seeding-cleanup.md.
  */
 
 import type { Table } from 'dexie';
@@ -49,18 +48,9 @@ export function workbenchHomeSeedId(spaceId: string): string {
 /**
  * Pure-ish: takes a Dexie Table reference, ensures a Home scene exists
  * for the given Space. Returns true when a new row was inserted, false
- * when an existing Home is honoured. The creating-hook stamps the
- * actor / timestamps fields; this function only owns the
+ * when the deterministic-id row was already there. The creating-hook
+ * stamps the actor / timestamps fields; this function only owns the
  * deterministic-id + default-shape contract.
- *
- * Two reasons we may skip the insert:
- *   1. The deterministic-id row already exists — the structural
- *      idempotency case. Re-running for the same Space is a no-op.
- *   2. A legacy random-uuid Home already exists for this Space — the
- *      transitional case for users coming from the pre-deterministic
- *      world (Schicht D-soft survivors). We defer to the user's
- *      existing layout. Schicht D-hard will rename such rows to the
- *      deterministic id and this branch becomes dead code.
  */
 export async function seedWorkbenchHomeOn(
 	table: Table<LocalWorkbenchScene, string>,
@@ -68,28 +58,6 @@ export async function seedWorkbenchHomeOn(
 ): Promise<boolean> {
 	const id = workbenchHomeSeedId(spaceId);
 	if (await table.get(id)) return false;
-
-	// Transitional check: a Home scene already exists for this Space
-	// under a different (legacy random) id. Skipping here avoids an
-	// unnecessary create-then-soft-delete roundtrip via the dedup pass
-	// in `+layout.svelte`, which would otherwise pick the customised
-	// legacy row as the survivor and nuke our just-inserted seed.
-	// Looks at the same "uncustomised default seed" shape the dedup
-	// function uses, so a deliberately-named "Home" with description /
-	// wallpaper / agent / scope still triggers a fresh seed.
-	const legacy = await table
-		.filter((r) => {
-			if (r.deletedAt) return false;
-			if (r.name !== 'Home') return false;
-			if ((r as { spaceId?: unknown }).spaceId !== spaceId) return false;
-			if (r.description) return false;
-			if (r.wallpaper) return false;
-			if (r.viewingAsAgentId) return false;
-			if (r.scopeTagIds && r.scopeTagIds.length > 0) return false;
-			return true;
-		})
-		.first();
-	if (legacy) return false;
 
 	const now = new Date().toISOString();
 	const row: LocalWorkbenchScene & { spaceId: string } = {

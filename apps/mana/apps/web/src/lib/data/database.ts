@@ -1144,6 +1144,43 @@ db.version(49).stores({
 	comicCharacters: 'id, createdAt, style, isFavorite, isArchived',
 });
 
+// v50 — Final normalisation step for the workbench-Home seeding
+// cleanup. Soft-deletes every uncustomised "Home" row whose id is NOT
+// the deterministic `seed-home-<spaceId>`. After this upgrade runs,
+// the only surviving Home rows in any Space are either user-customised
+// (description / wallpaper / agent / scope) or already on the
+// deterministic-id contract. The per-space-seeds registry recreates a
+// fresh `seed-home-<spaceId>` row on the next `setActiveSpace` for
+// any Space that lost its uncustomised Home, making the system self-
+// healing. Together with v48 this leaves zero legacy duplicates or
+// random-UUID seeds in the table. See
+// docs/plans/workbench-seeding-cleanup.md.
+db.version(50).upgrade(async (tx) => {
+	const now = new Date().toISOString();
+	let removed = 0;
+	await tx
+		.table('workbenchScenes')
+		.toCollection()
+		.modify((row: Record<string, unknown>) => {
+			if (row.deletedAt) return;
+			if (row.name !== 'Home') return;
+			if (typeof row.id !== 'string' || row.id.startsWith('seed-home-')) return;
+			if (row.description) return;
+			if (row.wallpaper) return;
+			if (row.viewingAsAgentId) return;
+			const scope = row.scopeTagIds;
+			if (Array.isArray(scope) && scope.length > 0) return;
+			row.deletedAt = now;
+			row.updatedAt = now;
+			removed += 1;
+		});
+	if (removed > 0) {
+		console.info(
+			`[workbench-scenes v50] retired ${removed} legacy Home rows to deterministic-id contract`
+		);
+	}
+});
+
 // ─── Sync Routing ──────────────────────────────────────────
 // SYNC_APP_MAP, TABLE_TO_SYNC_NAME, TABLE_TO_APP, SYNC_NAME_TO_TABLE,
 // toSyncName() and fromSyncName() are now derived from per-module
