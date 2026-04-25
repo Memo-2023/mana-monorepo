@@ -4,7 +4,6 @@
  */
 
 import { db } from '$lib/data/database';
-import { getEffectiveSpaceId } from '$lib/data/scope';
 import type { LocalCustomQuote } from '../types';
 
 export interface CustomQuoteInput {
@@ -19,14 +18,13 @@ export const customQuotesStore = {
 	async create(input: CustomQuoteInput): Promise<string> {
 		const now = new Date().toISOString();
 		const id = `custom-${crypto.randomUUID()}`;
-		await db.table('customQuotes').add({
+		await db.table<LocalCustomQuote>('customQuotes').add({
 			id,
 			text: input.text,
 			author: input.author,
 			category: input.category ?? null,
 			source: input.source ?? null,
 			year: input.year ?? null,
-			spaceId: getEffectiveSpaceId(),
 			createdAt: now,
 			updatedAt: now,
 		});

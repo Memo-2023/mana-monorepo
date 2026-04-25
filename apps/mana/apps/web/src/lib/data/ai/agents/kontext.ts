@@ -9,7 +9,6 @@
 
 import { db } from '../../database';
 import { encryptRecord, decryptRecords } from '../../crypto';
-import { getEffectiveSpaceId } from '../../scope/scoped-db';
 
 const TABLE = 'agentKontextDocs';
 
@@ -66,6 +65,6 @@ export async function saveAgentKontext(agentId: string, content: string): Promis
 			content,
 		};
 		await encryptRecord(TABLE, doc);
-		await db.table(TABLE).add({ ...doc, spaceId: getEffectiveSpaceId() });
+		await db.table<LocalAgentKontextDoc>(TABLE).add(doc);
 	}
 }

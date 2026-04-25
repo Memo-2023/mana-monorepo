@@ -13,6 +13,7 @@ import type { SpaceType, SpaceTier } from '@mana/shared-types';
 import { isSpaceType, isSpaceTier } from '@mana/shared-types';
 import { authFetch } from './auth-fetch';
 import { runSpaceSeeds } from './per-space-seeds';
+import { getEffectiveUserId } from '../current-user';
 
 export interface ActiveSpace {
 	id: string;
@@ -77,6 +78,29 @@ export function getActiveSpace(): ActiveSpace | null {
 
 export function getActiveSpaceId(): string | null {
 	return active?.id ?? null;
+}
+
+/**
+ * The spaceId every new write to a space-scoped table should carry.
+ * Used by the Dexie creating-hook to auto-stamp tenancy on records the
+ * caller hasn't explicitly assigned. Returns:
+ *
+ *   - the active Space's id when one is loaded (e.g. `<personal-uuid>`,
+ *     `<brand-uuid>`, …) — every write goes to the right tenant
+ *   - the personal sentinel `_personal:<userId>` during the bootstrap
+ *     window before `loadActiveSpace` resolves, so writes never block
+ *     and `reconcileSentinels` rewrites the placeholder once the real
+ *     id is known.
+ *
+ * Inlined sentinel helper instead of importing `personalSpaceSentinel`
+ * from `./bootstrap` because bootstrap.ts pulls in `db` and the
+ * creating-hook in `database.ts` imports this function — the indirect
+ * cycle would tangle ESM resolution.
+ */
+export function getEffectiveSpaceId(): string {
+	const id = active?.id;
+	if (id) return id;
+	return `_personal:${getEffectiveUserId()}`;
 }
 
 export function getActiveSpaceStatus(): ActiveSpaceStatus {

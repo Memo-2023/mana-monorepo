@@ -9,7 +9,7 @@
 import { db } from '$lib/data/database';
 import { encryptRecord, decryptRecord } from '$lib/data/crypto';
 import { emitDomainEvent } from '$lib/data/events';
-import { getActiveSpace, getEffectiveSpaceId } from '$lib/data/scope';
+import { getActiveSpace } from '$lib/data/scope';
 import { getEffectiveUserId } from '$lib/data/current-user';
 import {
 	defaultVisibilityFor,
@@ -56,7 +56,7 @@ export const boardsStore = {
 			// mutates `newLocal` in place — UI consumers expect plaintext.
 			const plaintextSnapshot = toBoard({ ...newLocal });
 			await encryptRecord('boards', newLocal);
-			await db.table('boards').add({ ...newLocal, spaceId: getEffectiveSpaceId() });
+			await db.table<LocalBoard>('boards').add(newLocal);
 			return { success: true, data: plaintextSnapshot };
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to create board';
@@ -170,7 +170,7 @@ export const boardsStore = {
 					updatedAt: now,
 				};
 				await encryptRecord('boardItems', newItem);
-				await db.table('boardItems').add({ ...newItem, spaceId: getEffectiveSpaceId() });
+				await db.table<LocalBoardItem>('boardItems').add(newItem);
 			}
 
 			return { success: true, data: plaintextSnapshot };

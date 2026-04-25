@@ -4,7 +4,6 @@
 
 import { db } from '$lib/data/database';
 import { encryptRecord } from '$lib/data/crypto';
-import { getEffectiveSpaceId } from '$lib/data/scope';
 import type { LocalEventGuest, RsvpStatus } from '../types';
 
 let error = $state<string | null>(null);
@@ -45,7 +44,7 @@ export const eventGuestsStore = {
 			// records stay local-only — they're never pushed to the
 			// public RSVP snapshot, so no decrypt-before-publish here.
 			await encryptRecord('eventGuests', newGuest);
-			await db.table('eventGuests').add({ ...newGuest, spaceId: getEffectiveSpaceId() });
+			await db.table<LocalEventGuest>('eventGuests').add(newGuest);
 			return { success: true as const, id };
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to add guest';

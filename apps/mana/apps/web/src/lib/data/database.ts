@@ -19,6 +19,7 @@ import { trackFirstContent } from '$lib/stores/funnel-tracking';
 import { fire as fireTrigger } from '$lib/triggers/registry';
 import { checkInlineSuggestion } from '$lib/triggers/inline-suggest';
 import { getEffectiveUserId, GUEST_USER_ID } from './current-user';
+import { getEffectiveSpaceId } from './scope/active-space.svelte';
 import { getCurrentActor } from './events/actor';
 import type { Actor } from './events/actor';
 import { isQuotaError, notifyQuotaExceeded } from './quota-detect';
@@ -1119,6 +1120,30 @@ db.version(48).upgrade(async (tx) => {
 	}
 });
 
+// v49 — Comic-Character sub-system (docs/plans/comic-module.md §11).
+// Space-scoped sibling table to comicStories: a `LocalComicCharacter`
+// row groups N variant renderings of "the user as a comic-style
+// character" generated via gpt-image-2 / Nano Banana edits over the
+// raw face/body meImages with a comic-style prefix. One pinned variant
+// is the canonical look; stories snapshot that variant's mediaId at
+// story-create time so re-pinning later doesn't rewrite history.
+//
+// Why space-scoped (not user-scoped): the source meImages this builds
+// on are themselves space-scoped after v40. A character generated in
+// the personal space references face/body refs that don't exist in
+// the brand space, so making the character user-global would orphan
+// references on space-switch. Same scoping rationale as wardrobe-
+// garments — derived assets travel with their source.
+//
+// Indices:
+//   - createdAt for "newest first" grid ordering
+//   - style for style-tab filtering on /comic/character (M5 list-tool)
+//   - isFavorite for the favorites filter
+//   - isArchived for the standard archive-hide filter
+db.version(49).stores({
+	comicCharacters: 'id, createdAt, style, isFavorite, isArchived',
+});
+
 // ─── Sync Routing ──────────────────────────────────────────
 // SYNC_APP_MAP, TABLE_TO_SYNC_NAME, TABLE_TO_APP, SYNC_NAME_TO_TABLE,
 // toSyncName() and fromSyncName() are now derived from per-module
@@ -1340,17 +1365,21 @@ for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {
 				// (see v36 below). Skipping the stamps here keeps future
 				// rows clean.
 			} else {
-				// Auto-stamp the Space-scope fields on data tables. Until
-				// the scope bootstrap (see `./scope/active-space.svelte.ts`)
-				// resolves the user's personal-space id from Better Auth,
-				// new records carry a deterministic sentinel
-				// `_personal:<userId>` that the bootstrap rewrites in a
-				// single pass. Module stores set spaceId explicitly once
-				// they start writing into non-personal spaces — this stamp
-				// only fills the gap. Sentinel uses `effectiveUserId`
-				// directly since `userId` isn't on data records anymore.
+				// Auto-stamp Space-scope fields on data tables. The hook
+				// resolves `getEffectiveSpaceId()` which returns the
+				// currently-active Space's id — so a calendar event
+				// created during a Brand-Space session lands under that
+				// Brand UUID, not under Personal. During the bootstrap
+				// window before `loadActiveSpace` resolves, the helper
+				// falls back to the sentinel `_personal:<userId>` which
+				// `reconcileSentinels` rewrites once the real id is known.
+				//
+				// Stores can set `spaceId` explicitly when writing to a
+				// space they're not currently active in (e.g. workbench-
+				// home seeder writes to a target Space's id, not the
+				// active one) — the hook only fills in the gap.
 				if (objRecord.spaceId === undefined || objRecord.spaceId === null) {
-					objRecord.spaceId = `_personal:${effectiveUserId}`;
+					objRecord.spaceId = getEffectiveSpaceId();
 				}
 				if (objRecord.authorId === undefined || objRecord.authorId === null) {
 					objRecord.authorId = effectiveUserId;

@@ -5,7 +5,6 @@
 import { db } from '$lib/data/database';
 import { MoodlitEvents } from '@mana/shared-utils/analytics';
 import { createBlock, updateBlock } from '$lib/data/time-blocks/service';
-import { getEffectiveSpaceId } from '$lib/data/scope';
 import type { LocalMood } from '../types';
 import type { Mood, MoodSettings } from '../types';
 
@@ -129,13 +128,12 @@ function createMoodsStore() {
 
 		// IndexedDB mutation methods
 		async createMood(data: { name: string; colors: string[]; animation: string }) {
-			await db.table('moods').add({
+			await db.table<LocalMood>('moods').add({
 				id: crypto.randomUUID(),
 				name: data.name,
 				colors: data.colors,
 				animation: data.animation,
 				isDefault: false,
-				spaceId: getEffectiveSpaceId(),
 				createdAt: new Date().toISOString(),
 				updatedAt: new Date().toISOString(),
 			});

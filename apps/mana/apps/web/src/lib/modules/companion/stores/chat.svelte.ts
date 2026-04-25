@@ -8,7 +8,6 @@
 
 import { db } from '$lib/data/database';
 import { emitDomainEvent } from '$lib/data/events';
-import { getEffectiveSpaceId } from '$lib/data/scope';
 import type { LocalConversation, LocalMessage } from '../types';
 
 const CONV_TABLE = 'companionConversations';
@@ -25,7 +24,7 @@ export const chatStore = {
 			createdAt: now,
 			updatedAt: now,
 		};
-		await db.table(CONV_TABLE).add({ ...conv, spaceId: getEffectiveSpaceId() });
+		await db.table<LocalConversation>(CONV_TABLE).add(conv);
 		emitDomainEvent('CompanionConversationStarted', 'companion', CONV_TABLE, conv.id, {
 			conversationId: conv.id,
 			title: conv.title,
@@ -67,7 +66,7 @@ export const chatStore = {
 			toolResult: extra?.toolResult,
 			createdAt: new Date().toISOString(),
 		};
-		await db.table(MSG_TABLE).add({ ...msg, spaceId: getEffectiveSpaceId() });
+		await db.table<LocalMessage>(MSG_TABLE).add(msg);
 
 		// Touch conversation updatedAt
 		await db.table<LocalConversation>(CONV_TABLE).update(conversationId, {

@@ -11,6 +11,7 @@
 export {
 	getActiveSpace,
 	getActiveSpaceId,
+	getEffectiveSpaceId,
 	getActiveSpaceStatus,
 	getActiveSpaceError,
 	setActiveSpace,
@@ -29,7 +30,6 @@ export {
 	scopedGet,
 	assertModuleAllowed,
 	getInScopeSpaceIds,
-	getEffectiveSpaceId,
 	ScopeNotReadyError,
 	ModuleNotInSpaceError,
 } from './scoped-db';

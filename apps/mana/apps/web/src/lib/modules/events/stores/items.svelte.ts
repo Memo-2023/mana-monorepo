@@ -4,7 +4,6 @@
  */
 
 import { db } from '$lib/data/database';
-import { getEffectiveSpaceId } from '$lib/data/scope';
 import type { LocalEventItem } from '../types';
 import { eventsStore } from './events.svelte';
 
@@ -48,7 +47,7 @@ export const eventItemsStore = {
 				createdAt: new Date().toISOString(),
 				updatedAt: new Date().toISOString(),
 			};
-			await db.table('eventItems').add({ ...newItem, spaceId: getEffectiveSpaceId() });
+			await db.table<LocalEventItem>('eventItems').add(newItem);
 			void eventsStore.syncItems(input.eventId);
 			return { success: true as const, id };
 		} catch (e) {

@@ -11,7 +11,6 @@ import { PlantsEvents } from '@mana/shared-utils/analytics';
 import { encryptRecord, decryptRecord } from '$lib/data/crypto';
 import { emitDomainEvent } from '$lib/data/events';
 import { createBlock } from '$lib/data/time-blocks/service';
-import { getEffectiveSpaceId } from '$lib/data/scope';
 import { uploadPlantPhoto, identifyPlant, type IdentifyResult } from './api';
 import type {
 	LocalPlant,
@@ -195,7 +194,6 @@ export const wateringMutations = {
 				nextWateringAt: nextDate.toISOString(),
 				reminderEnabled: false,
 				reminderHoursBefore: 0,
-				spaceId: getEffectiveSpaceId(),
 				createdAt: now,
 				updatedAt: now,
 			});

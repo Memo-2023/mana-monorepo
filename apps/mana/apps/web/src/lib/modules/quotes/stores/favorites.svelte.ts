@@ -5,17 +5,15 @@
  */
 
 import { db } from '$lib/data/database';
-import { getEffectiveSpaceId } from '$lib/data/scope';
 import type { LocalFavorite } from '../types';
 import type { Favorite } from '../queries';
 
 export const favoritesStore = {
 	async add(quoteId: string) {
 		const now = new Date().toISOString();
-		await db.table('quotesFavorites').add({
+		await db.table<LocalFavorite>('quotesFavorites').add({
 			id: crypto.randomUUID(),
 			quoteId,
-			spaceId: getEffectiveSpaceId(),
 			createdAt: now,
 			updatedAt: now,
 		});
