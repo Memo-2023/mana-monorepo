@@ -103,6 +103,68 @@ describe('seedWorkbenchHomeOn', () => {
 		expect(row?.openApps).toEqual([{ appId: 'todo' }, { appId: 'mood' }, { appId: 'meditate' }]);
 	});
 
+	it('defers to a legacy random-uuid Home in the same Space (transitional)', async () => {
+		// Simulates a user coming from the pre-deterministic-id world —
+		// e.g. a Schicht D-soft dedup survivor with a random UUID and
+		// the default openApps shape. The new seeder must NOT create a
+		// second deterministic-id row alongside it, otherwise +layout's
+		// dedup pass would just churn through soft-deleting one of them.
+		await db.workbenchScenes.add({
+			id: 'legacy-random-uuid-1234',
+			name: 'Home',
+			order: 0,
+			openApps: [{ appId: 'todo' }, { appId: 'calendar' }, { appId: 'notes' }],
+			createdAt: '2026-04-23T08:00:00.000Z',
+			updatedAt: '2026-04-23T08:00:00.000Z',
+			spaceId: 'space-abc',
+		} as LocalWorkbenchScene & { spaceId: string });
+
+		const inserted = await seedWorkbenchHomeOn(db.workbenchScenes, 'space-abc');
+		expect(inserted).toBe(false);
+
+		const all = await db.workbenchScenes.toArray();
+		expect(all).toHaveLength(1);
+		expect(all[0].id).toBe('legacy-random-uuid-1234');
+	});
+
+	it('still seeds when the existing Home is in a different Space', async () => {
+		await db.workbenchScenes.add({
+			id: 'legacy-random-uuid-other-space',
+			name: 'Home',
+			order: 0,
+			openApps: DEFAULT_HOME_APPS,
+			createdAt: '2026-04-23T08:00:00.000Z',
+			updatedAt: '2026-04-23T08:00:00.000Z',
+			spaceId: 'space-different',
+		} as LocalWorkbenchScene & { spaceId: string });
+
+		const inserted = await seedWorkbenchHomeOn(db.workbenchScenes, 'space-abc');
+		expect(inserted).toBe(true);
+
+		const seeded = await db.workbenchScenes.get('seed-home-space-abc');
+		expect(seeded).toBeDefined();
+	});
+
+	it('still seeds when the existing Home in this Space is customised', async () => {
+		// A user-customised "Home" (renamed-back, with a description or
+		// wallpaper) shouldn't block fresh seeds — the dedup heuristic
+		// already excludes such rows from merging, so the symmetric
+		// behaviour here is to seed anyway. Schicht D-hard will normalise.
+		await db.workbenchScenes.add({
+			id: 'user-custom-home',
+			name: 'Home',
+			description: 'My personal layout',
+			order: 0,
+			openApps: [{ appId: 'todo' }],
+			createdAt: '2026-04-23T08:00:00.000Z',
+			updatedAt: '2026-04-23T08:00:00.000Z',
+			spaceId: 'space-abc',
+		} as LocalWorkbenchScene & { spaceId: string });
+
+		const inserted = await seedWorkbenchHomeOn(db.workbenchScenes, 'space-abc');
+		expect(inserted).toBe(true);
+	});
+
 	it('seeds independently per Space (no cross-pollination)', async () => {
 		await seedWorkbenchHomeOn(db.workbenchScenes, 'space-A');
 		await seedWorkbenchHomeOn(db.workbenchScenes, 'space-B');

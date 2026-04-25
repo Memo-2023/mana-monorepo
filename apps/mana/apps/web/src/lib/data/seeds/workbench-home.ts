@@ -49,17 +49,47 @@ export function workbenchHomeSeedId(spaceId: string): string {
 /**
  * Pure-ish: takes a Dexie Table reference, ensures a Home scene exists
  * for the given Space. Returns true when a new row was inserted, false
- * when the row was already there. The creating-hook stamps the actor /
- * timestamps fields; this function only owns the deterministic-id +
- * default-shape contract.
+ * when an existing Home is honoured. The creating-hook stamps the
+ * actor / timestamps fields; this function only owns the
+ * deterministic-id + default-shape contract.
+ *
+ * Two reasons we may skip the insert:
+ *   1. The deterministic-id row already exists — the structural
+ *      idempotency case. Re-running for the same Space is a no-op.
+ *   2. A legacy random-uuid Home already exists for this Space — the
+ *      transitional case for users coming from the pre-deterministic
+ *      world (Schicht D-soft survivors). We defer to the user's
+ *      existing layout. Schicht D-hard will rename such rows to the
+ *      deterministic id and this branch becomes dead code.
  */
 export async function seedWorkbenchHomeOn(
 	table: Table<LocalWorkbenchScene, string>,
 	spaceId: string
 ): Promise<boolean> {
 	const id = workbenchHomeSeedId(spaceId);
-	const existing = await table.get(id);
-	if (existing) return false;
+	if (await table.get(id)) return false;
+
+	// Transitional check: a Home scene already exists for this Space
+	// under a different (legacy random) id. Skipping here avoids an
+	// unnecessary create-then-soft-delete roundtrip via the dedup pass
+	// in `+layout.svelte`, which would otherwise pick the customised
+	// legacy row as the survivor and nuke our just-inserted seed.
+	// Looks at the same "uncustomised default seed" shape the dedup
+	// function uses, so a deliberately-named "Home" with description /
+	// wallpaper / agent / scope still triggers a fresh seed.
+	const legacy = await table
+		.filter((r) => {
+			if (r.deletedAt) return false;
+			if (r.name !== 'Home') return false;
+			if ((r as { spaceId?: unknown }).spaceId !== spaceId) return false;
+			if (r.description) return false;
+			if (r.wallpaper) return false;
+			if (r.viewingAsAgentId) return false;
+			if (r.scopeTagIds && r.scopeTagIds.length > 0) return false;
+			return true;
+		})
+		.first();
+	if (legacy) return false;
 
 	const now = new Date().toISOString();
 	const row: LocalWorkbenchScene & { spaceId: string } = {
