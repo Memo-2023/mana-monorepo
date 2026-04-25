@@ -902,3 +902,58 @@ These work locally because both the browser and server access `localhost`.
   });
 </script>
 ```
+
+## i18n
+
+The unified Mana app supports `de` (default + fallback), `en`, `it`,
+`fr`, `es`. Three CI gates protect the i18n surface — read them before
+adding new strings.
+
+### Strings → svelte-i18n
+
+```svelte
+<script>
+	import { _ } from 'svelte-i18n';
+</script>
+
+<button>{$_('common.save')}</button>
+```
+
+Never hard-code German into `.svelte` markup or attributes. The
+`validate:i18n-hardcoded` baseline ratchets per-file: if a file's
+count of placeholder/title/aria-label/text-content strings with
+umlauts goes up, CI fails. Run `pnpm run validate:i18n-hardcoded -- --update`
+only after intentionally adding non-translated dev-only UI.
+
+Adding a new key:
+
+1. Drop it into `apps/mana/apps/web/src/lib/i18n/locales/<ns>/de.json`
+2. Add the same path to `en.json`, `it.json`, `fr.json`, `es.json`
+   — the `validate:i18n-parity` check requires identical key-sets
+   across all 5 locales.
+3. New namespace = create the folder + 5 JSONs. Registration is
+   automatic via `import.meta.glob`; no edits to `i18n/index.ts`.
+
+A `$_('typo.key')` call that resolves to nothing is caught by
+`validate:i18n-keys`. Existing 315 broken refs are baselined so you
+can fix them gradually; new misses fail the build.
+
+### Dates and numbers → format helpers
+
+```svelte
+<script>
+	import { formatDate, formatNumber, formatCurrency } from '$lib/i18n/format';
+</script>
+
+<p>{formatDate(event.startTime, { day: 'numeric', month: 'short' })}</p>
+<p>{formatCurrency(item.price, 'EUR')}</p>
+```
+
+Never call `.toLocaleDateString('de-DE', …)` or `Intl.NumberFormat('de-DE', …)`
+directly — those pin output to German regardless of the active locale.
+The helpers in `$lib/i18n/format.ts` pull the active locale from the
+svelte-i18n store and map (`de → de-DE`, `en → en-US`, …).
+
+For date-fns formatters that need a locale object, use
+`getDateFnsLocale()` from the same module instead of importing
+`{ de }` from `'date-fns/locale'`.

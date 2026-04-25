@@ -84,13 +84,22 @@ Quality:
 pnpm run build
 pnpm run type-check
 pnpm run format
-pnpm run validate:all   # turbo recursion + pgSchema + crypto registry — run before push
+pnpm run validate:all   # turbo + pgSchema + theme + i18n + crypto — run before push
 pnpm run test:coverage  # emit v8 coverage under per-package coverage/
 ```
 
 `validate:all` is the local mirror of the CI `validate` job — it runs in
-seconds and fails fast on any of the three invariant checks. Use it as a
-pre-push gate.
+seconds and fails fast on any invariant check. Currently bundled:
+
+- `validate:turbo` — no recursive `turbo run` calls in non-root packages
+- `validate:pg-schema` — every Drizzle table uses `pgSchema(...)`
+- `validate:theme-{variables,utilities,parity}` — token coverage across CSS variants
+- `validate:i18n-parity` — every namespace mirrors DE's key-set across all 5 locales
+- `validate:i18n-hardcoded` — ratcheting baseline; new German strings without `$_()` fail
+- `validate:i18n-keys` — `$_('key')` calls must resolve to a defined DE key (baseline-tracked)
+- `check:crypto` + `audit:encrypted-tools` — every Dexie table classified, every AI tool aware of encryption
+
+Use it as a pre-push gate.
 
 ## Key Architecture Notes
 

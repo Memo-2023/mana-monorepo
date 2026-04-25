@@ -11,7 +11,7 @@ This directory contains comprehensive guidelines for working in the Mana Univers
 | [Testing](./guidelines/testing.md) | Jest/Vitest patterns, mock factories, coverage |
 | [Hono Server](./guidelines/hono-server.md) | Compute servers (Hono + Bun) |
 | [Error Handling](./guidelines/error-handling.md) | Go-style errors, error codes, Result types |
-| [SvelteKit Web](./guidelines/sveltekit-web.md) | Svelte 5 runes, stores, routing |
+| [SvelteKit Web](./guidelines/sveltekit-web.md) | Svelte 5 runes, stores, routing, i18n |
 | [Expo Mobile](./guidelines/expo-mobile.md) | React Native, NativeWind, navigation |
 | [Authentication](./guidelines/authentication.md) | Mana Core Auth integration |
 | [Design & UX](./guidelines/design-ux.md) | UI patterns, animations, accessibility |
