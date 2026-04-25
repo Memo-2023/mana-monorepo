@@ -462,6 +462,22 @@ Emitted aus dem jeweiligen Store beim Publish/Revoke. Landet im `_events`-Log �
 
 **Aufwand:** ~1h
 
+> **TODO 2026-05-09 (zwei Wochen nach M8.5):** Check ob expired-but-not-cleaned-up Rows sich stapeln — das ist das Signal, dass M8.6 jetzt fällig ist.
+>
+> ```sh
+> docker exec -i mana-postgres psql -U mana -d mana_platform -c \
+>   "SELECT COUNT(*) AS total,
+>           COUNT(*) FILTER (WHERE expires_at IS NOT NULL
+>                            AND expires_at < NOW()
+>                            AND revoked_at IS NULL) AS expired_not_cleaned,
+>           COUNT(*) FILTER (WHERE revoked_at IS NULL) AS active
+>      FROM unlisted.snapshots;"
+> ```
+>
+> - `expired_not_cleaned > 0` → M8.6 starten.
+> - `total = 0` → Feature wird noch nicht genutzt; warte länger.
+> - Erstcheck war ursprünglich für 2026-05-09 als One-Shot-Cron geplant; durable-Flag wurde vom Scheduler ignoriert, daher hier als Plan-TODO geparkt.
+
 ### Gesamtschätzung
 ~15h über 4–5 Tage, passt für iterative Reviews zwischen Milestones.
 
