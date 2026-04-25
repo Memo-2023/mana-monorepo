@@ -13,7 +13,15 @@ import { scopedForModule } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
 import type { LocalImage, Image } from '$lib/modules/picture/types';
 import { toImage } from '$lib/modules/picture/queries';
-import { toStory, type ComicStory, type ComicStyle, type LocalComicStory } from './types';
+import {
+	toStory,
+	toCharacter,
+	type ComicStory,
+	type ComicStyle,
+	type ComicCharacter,
+	type LocalComicStory,
+	type LocalComicCharacter,
+} from './types';
 
 /** All non-archived, non-deleted stories in the active space, newest first. */
 export function useAllStories() {
@@ -98,6 +106,53 @@ export function useStoryPanels(storyId: string | null) {
 		const decrypted = await decryptRecords('images', visible);
 		return decrypted.map(toImage);
 	}, [] as Image[]);
+}
+
+// ─── Characters ──────────────────────────────────────────────────
+
+/** All non-archived, non-deleted comic-characters in the active space,
+ *  newest first. Characters travel with their source meImages, so they're
+ *  space-scoped. */
+export function useAllCharacters() {
+	return useScopedLiveQuery<ComicCharacter[]>(async () => {
+		const locals = await scopedForModule<LocalComicCharacter, string>(
+			'comic',
+			'comicCharacters'
+		).toArray();
+		const visible = locals
+			.filter((row) => !row.deletedAt && !row.isArchived)
+			.sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? ''));
+		const decrypted = await decryptRecords('comicCharacters', visible);
+		return decrypted.map(toCharacter);
+	}, [] as ComicCharacter[]);
+}
+
+/** Characters filtered by style — used by style-tabs in the picker. */
+export function useCharactersByStyle(style: ComicStyle) {
+	return useScopedLiveQuery<ComicCharacter[]>(async () => {
+		const locals = await scopedForModule<LocalComicCharacter, string>('comic', 'comicCharacters')
+			.and((row) => row.style === style)
+			.toArray();
+		const visible = locals
+			.filter((row) => !row.deletedAt && !row.isArchived)
+			.sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? ''));
+		const decrypted = await decryptRecords('comicCharacters', visible);
+		return decrypted.map(toCharacter);
+	}, [] as ComicCharacter[]);
+}
+
+/** A single character by id, live-updating. Null while loading / missing. */
+export function useCharacter(id: string | null) {
+	return useScopedLiveQuery<ComicCharacter | null>(async () => {
+		if (!id) return null;
+		const locals = await scopedForModule<LocalComicCharacter, string>('comic', 'comicCharacters')
+			.and((row) => row.id === id)
+			.toArray();
+		const [local] = locals;
+		if (!local || local.deletedAt) return null;
+		const [decrypted] = await decryptRecords('comicCharacters', [local]);
+		return toCharacter(decrypted);
+	}, null);
 }
 
 /**

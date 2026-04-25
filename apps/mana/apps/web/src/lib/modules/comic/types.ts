@@ -140,3 +140,93 @@ export function toStory(local: LocalComicStory): ComicStory {
 export function storyCoverPanelId(story: Pick<ComicStory, 'panelImageIds'>): string | null {
 	return story.panelImageIds[0] ?? null;
 }
+
+// ─── Character ────────────────────────────────────────────────────
+
+/**
+ * A reusable comic-style stand-in for the user. Generated once, refined
+ * across N variant renders (gpt-image-2 / Nano Banana edits over the
+ * raw face/body meImages with a style-prefix), and pinned to one
+ * variant that becomes the character's canonical look. Stories then
+ * reference the pinned variant's mediaId rather than the raw face-ref
+ * — that's how a "Manga-Me" stays consistent across many stories.
+ *
+ * One character → many variants (all kept in `variantMediaIds[]`).
+ * The pinned variant is the cover + the ref every story-create
+ * snapshots into the new story. Re-pinning later doesn't touch
+ * existing stories (those snapshotted at story-create time).
+ *
+ * Variants are written into `picture.images` with a `comicCharacterId`
+ * back-ref so the gallery can show "all renders of Manga-Me" if the
+ * user ever wants that view.
+ */
+export interface LocalComicCharacter extends BaseRecord {
+	id: string;
+	name: string;
+	description?: string | null;
+	style: ComicStyle;
+	/** Optional add-on prompt the user typed during character-build,
+	 *  e.g. "freundlicher Ausdruck", "casual outfit", "action pose".
+	 *  Re-used as default when the user clicks "Mehr Varianten" later. */
+	addPrompt?: string | null;
+	/** Source meImages that fed every variant generation. Pinned in the
+	 *  character so re-generating later keeps the same identity anchor. */
+	sourceFaceMediaId: string;
+	sourceBodyMediaId?: string | null;
+	/** All generated variant images (mana-media ids on `picture.images`).
+	 *  Newest-first by convention; a future "regenerate" appends to the
+	 *  end. Unbounded but rendered as a paginated grid in the detail view. */
+	variantMediaIds: string[];
+	/** Which variant IS the character — used as the cover and as the
+	 *  ref every story-create snapshots. `null` if the user hasn't
+	 *  picked one yet (build-in-progress). */
+	pinnedVariantId?: string | null;
+	tags: string[];
+	isFavorite?: boolean;
+	isArchived?: boolean;
+}
+
+export interface ComicCharacter {
+	id: string;
+	name: string;
+	description?: string;
+	style: ComicStyle;
+	addPrompt?: string;
+	sourceFaceMediaId: string;
+	sourceBodyMediaId?: string;
+	variantMediaIds: string[];
+	pinnedVariantId?: string;
+	tags: string[];
+	isFavorite?: boolean;
+	isArchived?: boolean;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export function toCharacter(local: LocalComicCharacter): ComicCharacter {
+	return {
+		id: local.id,
+		name: local.name,
+		description: local.description ?? undefined,
+		style: local.style,
+		addPrompt: local.addPrompt ?? undefined,
+		sourceFaceMediaId: local.sourceFaceMediaId,
+		sourceBodyMediaId: local.sourceBodyMediaId ?? undefined,
+		variantMediaIds: local.variantMediaIds ?? [],
+		pinnedVariantId: local.pinnedVariantId ?? undefined,
+		tags: local.tags ?? [],
+		isFavorite: local.isFavorite,
+		isArchived: local.isArchived,
+		createdAt: local.createdAt ?? '',
+		updatedAt: local.updatedAt ?? '',
+	};
+}
+
+/** Cover variant for a character — pinned variant if set, otherwise
+ *  the first variant in `variantMediaIds` (so a build-in-progress
+ *  character still shows something). `null` if no variants generated. */
+export function characterCoverVariantId(
+	character: Pick<ComicCharacter, 'pinnedVariantId' | 'variantMediaIds'>
+): string | null {
+	return character.pinnedVariantId ?? character.variantMediaIds[0] ?? null;
+}

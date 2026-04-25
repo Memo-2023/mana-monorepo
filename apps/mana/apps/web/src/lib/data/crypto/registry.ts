@@ -97,7 +97,7 @@ import type {
 	LocalGeneration,
 	LocalWritingStyle,
 } from '../../modules/writing/types';
-import type { LocalComicStory } from '../../modules/comic/types';
+import type { LocalComicStory, LocalComicCharacter } from '../../modules/comic/types';
 import type { LocalAugurEntry } from '../../modules/augur/types';
 
 export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
@@ -615,6 +615,19 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 		'tags',
 		'panelMeta',
 	]),
+
+	// ─── Comic-Characters (variant pool + pinned identity) ────
+	// docs/plans/comic-module.md §11. User-scoped sibling table to
+	// comicStories. Encrypted: `name` (display label), `description`
+	// (optional context), `addPrompt` (the user's free-text prompt
+	// add-on like "freundlicher Ausdruck"), `tags`. Plaintext:
+	// `style` (filter discriminator), `sourceFaceMediaId` /
+	// `sourceBodyMediaId` (FKs to meImages), `variantMediaIds` (FK
+	// array to picture.images), `pinnedVariantId`, booleans.
+	// Same encryption envelope as a wardrobe-outfit — name + free-
+	// text + tags travel encrypted, structural fields stay plaintext
+	// for query/sort.
+	comicCharacters: entry<LocalComicCharacter>(['name', 'description', 'addPrompt', 'tags']),
 
 	// ─── Augur (signs: omens / fortunes / hunches) ───────────
 	// docs/plans/augur-module.md M1. Single space-scoped table.

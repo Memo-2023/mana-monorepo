@@ -574,6 +574,140 @@ funktional weil die Decrypts client-side passieren.
    behalten oder dort final löschen. Symmetrisch zu Wardrobe (Try-On-
    Bilder überleben eine Outfit-Löschung).
 
+## §11 Character-System (Mc1–Mc5)
+
+Nachgezogen 2026-04-25, weil sich im Soak gezeigt hat: rohe meImages
+direkt als Story-Refs sind kein guter „Identity-Anchor". gpt-image-2
+und Nano Banana variieren zwischen Calls — Panel 1 sieht anders aus
+als Panel 4. User hat zwischen den Panels keine Iteration, kein
+„nochmal probieren bis das Aussehen stimmt".
+
+Lösung: ein **Comic-Character** als eigene Entität, die der Nutzer
+einmal aufbaut + iteriert + pinnt, und die dann als stabiler
+Story-Anchor dient.
+
+### Datenmodell
+
+Eigenes Table `comicCharacters` (Sibling zu `comicStories`,
+**space-scoped** wie comicStories — Source-meImages sind ja auch
+space-scoped post-v40, sonst orphan-Refs nach Space-Wechsel).
+
+```typescript
+interface LocalComicCharacter extends BaseRecord {
+  id: string;
+  name: string;                   // "Manga-Me", "Cartoon-Casual"
+  description?: string | null;
+  style: ComicStyle;              // mit welchem Stil generiert
+  addPrompt?: string | null;      // user-typed Add-Prompt zum Stil
+
+  sourceFaceMediaId: string;      // welche meImages dienten als Source
+  sourceBodyMediaId?: string | null;
+
+  variantMediaIds: string[];      // alle generierten Versuche (FK auf picture.images)
+  pinnedVariantId?: string | null; // welcher Versuch IST der Charakter
+
+  tags: string[];
+  isFavorite?: boolean;
+  isArchived?: boolean;
+}
+```
+
+**Encryption**: name / description / addPrompt / tags. Style + IDs
++ Variant-Liste + Booleans bleiben plaintext.
+
+`picture.images` bekommt einen `comicCharacterId`-Back-Ref (analog
+zu `comicStoryId`/`wardrobeOutfitId`/`wardrobeGarmentId`). Mutually
+exclusive mit `comicStoryId` — eine Image-Row ist entweder Panel
+ODER Variant, nie beides.
+
+### Snapshot-Semantik
+
+Stories speichern **mediaId at create time**, nicht den
+`characterId` als Live-Lookup. Re-Pinning eines Characters ändert
+also keine bestehenden Stories — die haben den alten Variant
+weiter als Ref. Neue Stories nach dem Re-Pin nutzen den neuen.
+
+### UX-Flow
+
+**Mc1 — Datenschicht** (3h): Dexie v49 + types + crypto-registry +
+collections + queries (`useAllCharacters`, `useCharacter`,
+`useCharactersByStyle`) + Store (`createCharacter`, `appendVariant`,
+`pinVariant`, `removeVariant`, `updateCharacter`, `archive`, `delete`).
+`picture.images.comicCharacterId` + Module-Registry-Tabellenliste +
+Encryption-Roundtrip-Test.
+
+**Mc2 — UI** (5h):
+- Routes `/comic/character`, `/comic/character/new`,
+  `/comic/character/[id]`
+- ListView-Root bekommt 2-Tab-UI: **Stories | Characters**
+- `CharacterBuilder.svelte`: Source picken (face Pflicht, body
+  optional), Stil picken, Add-Prompt optional, „Generieren"-Button
+  feuert 4 parallele Variant-Calls (n=4 in einem gpt-image-2-Call).
+  Variant-Grid darunter, User pinnt eine, „Mehr Varianten" appendet
+  weitere 4.
+- `CharacterCard.svelte`: Cover = pinned-variant (oder erste
+  Variant als Fallback), Style-Badge, Favorit-Heart.
+- `api/generate-character.ts`: `runCharacterGenerate({character,
+  n=4})` ruft `/picture/generate-with-reference` mit
+  `[face, body?]`-Refs + Stil-Prefix + Add-Prompt, schreibt N
+  picture.images mit `comicCharacterId`-Back-Ref, ruft
+  `appendVariant` für jeden.
+
+**Mc3 — Story-Create-Update** (3h):
+- StoryForm wechselt von „face/body/garments-Picker" auf
+  `CharacterRefPicker.svelte`:
+  - Default-Modus: Grid existierender Characters (gefiltert
+    nach Stil oder „Alle"). Pick = einzige Story-Character-Ref.
+  - „+ Neuer Character" navigiert zu `/comic/character/new` mit
+    Return-URL.
+  - Toggle „Quick-Modus (kein Character)": fällt zurück auf
+    altes Pattern (face + body + garments) — für „mal eben
+    schnell aus dem Tagebuch ohne Setup".
+- Story-Type bekommt:
+  - `characterId?: string` (FK auf comicCharacters, für
+    Anzeige + Click-Through; null im Quick-Modus)
+  - `characterMediaId?: string` (Snapshot der gepinnten
+    Variant zum Story-Create-Zeitpunkt — was der Renderer
+    nutzt)
+  - **Soft-Migration**: bestehende Stories mit `characterMediaIds[]`
+    bleiben kompatibel; runPanelGenerate prüft erst
+    `characterMediaId` (Snapshot), dann fällt zurück auf
+    `characterMediaIds[0..n]`. Hard-Migration in einem Folge-Commit
+    wenn alle Stories migrert sind.
+  - Optional `costumeGarmentIds: string[]` für Wardrobe-Refs
+    zusätzlich zum Character (Kostüm über dem Character).
+
+**Mc4 — MCP + AI-Catalog** (~2h, optional):
+- `comic.listCharacters`, `comic.createCharacter`,
+  `comic.generateVariant`, `comic.pinVariant` in
+  packages/mana-tool-registry.
+- `list_comic_characters`, `create_comic_character`,
+  `generate_character_variant` in AI_TOOL_CATALOG.
+- Persona kann „mach mir einen Manga-Character für Story X" sagen.
+
+**Mc5 — Wardrobe-Hook** (~2h, optional):
+- In Wardrobe-DetailOutfitView nach erfolgreichem Try-On ein
+  Knopf „Als Comic-Character speichern" → öffnet Builder mit
+  Try-On-Result als optionalem `sourceBodyMediaId`.
+- In DetailGarmentView analog für ein einzelnes Kleidungsstück.
+
+### Tradeoffs
+
+- **Variant-Count fix bei 4** statt Slider 1-4: 4 ist sweet-spot
+  für Auswahl ohne Decision-Fatigue, in einem API-Call ausführbar,
+  Credits ~10c × 4 = 40c pro Generate-Round (medium-Quality).
+- **Quick-Modus behalten**: nicht jede Story braucht Setup. Soft
+  defaults: existieren Characters → Default-Modus „Pick", sonst
+  Default „Quick".
+- **Snapshot statt Live-Ref**: Stories sind stabil. Trade-off:
+  re-pinned Characters reflektieren nicht in alten Stories — User
+  muss explizit „Story-Charakter aktualisieren"-Flow nutzen
+  (M5+ Feature).
+- **Space-scoped Characters**: bewusst nicht user-global, weil
+  Source-meImages space-scoped sind. Trade-off: man muss in jedem
+  Space einen eigenen Manga-Me bauen. Akzeptabel weil Spaces
+  unterschiedliche Settings sind (personal vs. brand).
+
 ## Verweise
 
 - Fundament Picture-Generate-Reference: `apps/api/src/modules/picture/routes.ts:250-430`

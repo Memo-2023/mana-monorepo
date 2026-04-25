@@ -7,8 +7,9 @@
  */
 
 export * from './types';
-export { comicStoriesTable } from './collections';
+export { comicStoriesTable, comicCharactersTable } from './collections';
 export { comicStoriesStore } from './stores/stories.svelte';
+export { comicCharactersStore } from './stores/characters.svelte';
 export {
 	useAllStories,
 	useStoriesByStyle,
@@ -16,6 +17,9 @@ export {
 	useStoryPanels,
 	useStoriesByInput,
 	usePanelImage,
+	useAllCharacters,
+	useCharactersByStyle,
+	useCharacter,
 } from './queries';
 export { STYLE_LABELS, STYLE_ORDER, MAX_PANELS_PER_STORY } from './constants';
 export { STYLE_PREFIXES, composePanelPrompt } from './styles';

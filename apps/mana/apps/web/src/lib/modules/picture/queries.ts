@@ -53,6 +53,7 @@ export function toImage(local: LocalImage): Image {
 		wardrobeGarmentId: local.wardrobeGarmentId ?? undefined,
 		comicStoryId: local.comicStoryId ?? undefined,
 		comicPanelIndex: local.comicPanelIndex ?? undefined,
+		comicCharacterId: local.comicCharacterId ?? undefined,
 		createdAt: local.createdAt ?? new Date().toISOString(),
 		updatedAt: local.updatedAt ?? new Date().toISOString(),
 	};

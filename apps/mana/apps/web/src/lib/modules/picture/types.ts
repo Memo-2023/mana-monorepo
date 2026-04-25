@@ -76,6 +76,16 @@ export interface LocalImage extends BaseRecord {
 	 * the canonical order is never wrong even if this drifts.
 	 */
 	comicPanelIndex?: number | null;
+	/**
+	 * Back-reference to `comicCharacters.id` when this image was produced
+	 * as a character-variant render (docs/plans/comic-module.md §11).
+	 * Lets the Picture gallery show "Variant of <Character>" without
+	 * loading every character row, and keeps the variant identifiable
+	 * in cross-module embeds. Plaintext FK. Mutually exclusive with
+	 * `comicStoryId` — a single image is either a panel OR a variant,
+	 * never both.
+	 */
+	comicCharacterId?: string | null;
 }
 
 export interface LocalBoard extends BaseRecord {
@@ -149,6 +159,7 @@ export interface Image {
 	wardrobeGarmentId?: string;
 	comicStoryId?: string;
 	comicPanelIndex?: number;
+	comicCharacterId?: string;
 	createdAt: string;
 	updatedAt: string;
 }

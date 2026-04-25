@@ -28,7 +28,7 @@ import {
 	isEncrypted,
 } from '$lib/data/crypto';
 import { setCurrentUserId } from '$lib/data/current-user';
-import type { ComicPanelMeta, LocalComicStory } from './types';
+import type { ComicPanelMeta, LocalComicCharacter, LocalComicStory } from './types';
 
 const TABLE = 'comicStories';
 
@@ -165,5 +165,83 @@ describe('comicStories encryption registry', () => {
 		expect(row.description).toBe(null);
 		await decryptRecord(TABLE, row as unknown as Record<string, unknown>);
 		expect(row.description).toBe(null);
+	});
+});
+
+// ─── Comic-Characters ─────────────────────────────────────────────
+
+const CHAR_TABLE = 'comicCharacters';
+
+function makeCharacter(overrides: Partial<LocalComicCharacter> = {}): LocalComicCharacter {
+	return {
+		id: 'char-1',
+		name: 'Manga-Me',
+		description: 'Mein Manga-Stil mit freundlichem Ausdruck',
+		style: 'manga',
+		addPrompt: 'Casual Outfit, freundliches Lächeln',
+		sourceFaceMediaId: 'me-face-99',
+		sourceBodyMediaId: 'me-body-77',
+		variantMediaIds: ['variant-a', 'variant-b', 'variant-c'],
+		pinnedVariantId: 'variant-b',
+		tags: ['casual', 'manga', 'standard'],
+		isFavorite: true,
+		isArchived: false,
+		...overrides,
+	};
+}
+
+describe('comicCharacters encryption registry', () => {
+	it('encrypts name + description + addPrompt + tags; leaves structural fields plaintext', async () => {
+		const row = makeCharacter();
+		await encryptRecord(CHAR_TABLE, row as unknown as Record<string, unknown>);
+
+		expect(isEncrypted(row.name)).toBe(true);
+		expect(isEncrypted(row.description)).toBe(true);
+		expect(isEncrypted(row.addPrompt)).toBe(true);
+		expect(isEncrypted(row.tags)).toBe(true);
+
+		// User-typed prose nicht im Klartext durchgerutscht
+		expect(String(row.name)).not.toContain('Manga-Me');
+		expect(String(row.description)).not.toContain('freundlichem');
+		expect(String(row.addPrompt)).not.toContain('Lächeln');
+		expect(JSON.stringify(row.tags)).not.toContain('manga');
+
+		// Strukturelle Felder unangetastet — Style-Filter, Source-FKs,
+		// Variant-Liste und Pin müssen im Index lesbar bleiben.
+		expect(row.id).toBe('char-1');
+		expect(row.style).toBe('manga');
+		expect(row.sourceFaceMediaId).toBe('me-face-99');
+		expect(row.sourceBodyMediaId).toBe('me-body-77');
+		expect(row.variantMediaIds).toEqual(['variant-a', 'variant-b', 'variant-c']);
+		expect(row.pinnedVariantId).toBe('variant-b');
+		expect(row.isFavorite).toBe(true);
+		expect(row.isArchived).toBe(false);
+	});
+
+	it('roundtrips name / description / addPrompt / tags', async () => {
+		const row = makeCharacter();
+		await encryptRecord(CHAR_TABLE, row as unknown as Record<string, unknown>);
+		await decryptRecord(CHAR_TABLE, row as unknown as Record<string, unknown>);
+
+		expect(row.name).toBe('Manga-Me');
+		expect(row.description).toBe('Mein Manga-Stil mit freundlichem Ausdruck');
+		expect(row.addPrompt).toBe('Casual Outfit, freundliches Lächeln');
+		expect(row.tags).toEqual(['casual', 'manga', 'standard']);
+	});
+
+	it('handles a build-in-progress character with no variants yet', async () => {
+		const row = makeCharacter({
+			variantMediaIds: [],
+			pinnedVariantId: null,
+			addPrompt: null,
+			description: null,
+		});
+		await encryptRecord(CHAR_TABLE, row as unknown as Record<string, unknown>);
+		// addPrompt and description are null — no-wrap path
+		expect(row.addPrompt).toBe(null);
+		expect(row.description).toBe(null);
+		await decryptRecord(CHAR_TABLE, row as unknown as Record<string, unknown>);
+		expect(row.variantMediaIds).toEqual([]);
+		expect(row.pinnedVariantId).toBe(null);
 	});
 });
