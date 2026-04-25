@@ -6,6 +6,7 @@
  */
 
 import { db } from '$lib/data/database';
+import { getEffectiveSpaceId } from '$lib/data/scope';
 import type {
 	AchievementWithStatus,
 	AchievementUnlockResult,
@@ -95,13 +96,14 @@ async function seedIfEmpty() {
 	const active = stored.filter((a) => !a.deletedAt);
 	if (active.length === 0) {
 		for (const def of ACHIEVEMENT_DEFINITIONS) {
-			await db.table<LocalAchievement>('achievements').add({
+			await db.table('achievements').add({
 				id: def.id,
 				key: def.id,
 				name: def.name,
 				description: def.description,
 				icon: def.icon,
 				unlockedAt: '',
+				spaceId: getEffectiveSpaceId(),
 				createdAt: new Date().toISOString(),
 				updatedAt: new Date().toISOString(),
 			});

@@ -67,6 +67,25 @@ export function getInScopeSpaceIds(): string[] {
 }
 
 /**
+ * The spaceId every new write to a space-scoped table should carry.
+ * Returns the active Space's id when one is loaded, falling back to the
+ * personal sentinel `_personal:<userId>` for guests / pre-bootstrap
+ * windows. The sentinel value matches what `reconcileSentinels` rewrites
+ * to the real personal-space id once `loadActiveSpace` resolves, so no
+ * row gets stranded.
+ *
+ * Module stores call this and stamp `spaceId` on the record explicitly
+ * before `.add()` / `.put()`. Once Schicht A flips the creating-hook to
+ * throw on missing spaceId (see docs/plans/workbench-seeding-cleanup.md),
+ * forgetting this call is a hard error instead of silent corruption.
+ */
+export function getEffectiveSpaceId(): string {
+	const active = getActiveSpaceId();
+	if (active) return active;
+	return personalSpaceSentinel(getEffectiveUserId());
+}
+
+/**
  * Return a Collection that applies the space filter — chainable with any
  * further `.where()`, `.filter()`, `.toArray()`, `.modify()`.
  *

@@ -7,6 +7,7 @@
 
 import { db } from '$lib/data/database';
 import { emitDomainEvent } from '$lib/data/events';
+import { getEffectiveSpaceId } from '$lib/data/scope';
 import type { Skill } from '../types';
 import { calculateLevel, createDefaultSkill, createActivity } from '../types';
 import type { LocalSkill, LocalActivity } from '../types';
@@ -29,8 +30,9 @@ async function addSkill(data: Partial<Skill>): Promise<Skill> {
 		totalXp: skill.totalXp,
 		level: skill.level,
 	};
-	await db.table<LocalSkill>('skills').add({
+	await db.table('skills').add({
 		...localSkill,
+		spaceId: getEffectiveSpaceId(),
 		createdAt: new Date().toISOString(),
 		updatedAt: new Date().toISOString(),
 	});

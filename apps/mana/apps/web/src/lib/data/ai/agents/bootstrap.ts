@@ -27,6 +27,7 @@ import { encryptRecord } from '../../crypto';
 import type { Mission } from '../missions/types';
 import { MISSIONS_TABLE } from '../missions/types';
 import { getActiveSpace } from '../../scope/active-space.svelte';
+import { getEffectiveSpaceId } from '../../scope/scoped-db';
 import { DEFAULT_AI_POLICY } from '../policy';
 import { getAgent } from './store';
 import type { Agent } from './types';
@@ -105,7 +106,7 @@ export async function ensureDefaultAgent(): Promise<Agent> {
 	const toWrite: Agent = { ...agent };
 	await encryptRecord(AGENTS_TABLE, toWrite);
 	try {
-		await db.table(AGENTS_TABLE).add(toWrite);
+		await db.table(AGENTS_TABLE).add({ ...toWrite, spaceId: getEffectiveSpaceId() });
 	} catch (err) {
 		// Race: another tab just wrote the same id. Re-fetch and return
 		// that tab's record.

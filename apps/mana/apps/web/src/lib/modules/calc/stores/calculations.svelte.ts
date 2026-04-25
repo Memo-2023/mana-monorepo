@@ -4,17 +4,19 @@
 
 import { db } from '$lib/data/database';
 import { CalcEvents } from '@mana/shared-utils/analytics';
+import { getEffectiveSpaceId } from '$lib/data/scope';
 import type { LocalCalculation } from '../types';
 import type { CreateCalculationInput } from '@calc/shared';
 
 export const calculationsStore = {
 	async addCalculation(input: CreateCalculationInput) {
-		await db.table<LocalCalculation>('calculations').add({
+		await db.table('calculations').add({
 			id: crypto.randomUUID(),
 			mode: input.mode,
 			expression: input.expression,
 			result: input.result,
 			skin: input.skin,
+			spaceId: getEffectiveSpaceId(),
 			createdAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString(),
 		});

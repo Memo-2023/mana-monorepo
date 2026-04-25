@@ -29,6 +29,7 @@ export {
 	scopedGet,
 	assertModuleAllowed,
 	getInScopeSpaceIds,
+	getEffectiveSpaceId,
 	ScopeNotReadyError,
 	ModuleNotInSpaceError,
 } from './scoped-db';

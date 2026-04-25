@@ -22,6 +22,7 @@
 import { db } from '$lib/data/database';
 import { encryptRecord, decryptRecord } from '$lib/data/crypto';
 import { emitDomainEvent } from '$lib/data/events';
+import { getEffectiveSpaceId } from '$lib/data/scope';
 import { researchApi, type ResearchEvent, type ResearchSource } from '$lib/api/research';
 import type { LocalAnswer, LocalQuestion } from '../types';
 
@@ -43,6 +44,7 @@ async function createManual(input: CreateManualAnswerInput): Promise<string> {
 		citations: [],
 		rating: null,
 		isAccepted: false,
+		spaceId: getEffectiveSpaceId(),
 		createdAt: now,
 		updatedAt: now,
 	};
@@ -108,6 +110,7 @@ async function startResearch(opts: StartResearchOptions): Promise<ResearchHandle
 		citations: [],
 		rating: null,
 		isAccepted: false,
+		spaceId: getEffectiveSpaceId(),
 		createdAt: now,
 		updatedAt: now,
 	};
