@@ -42,6 +42,7 @@ export const EmbedSourceSchema = z.enum([
 	'memoro.memos',
 	'cards.decks',
 	'presi.decks',
+	'augur.entries',
 ]);
 export type EmbedSource = z.infer<typeof EmbedSourceSchema>;
 

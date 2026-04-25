@@ -31,6 +31,7 @@
 			<option value="memoro.memos">Memoro</option>
 			<option value="cards.decks">Karten (Decks)</option>
 			<option value="presi.decks">Präsentationen</option>
+			<option value="augur.entries">Augur (Omen / Wahrsagungen)</option>
 		</select>
 	</label>
 

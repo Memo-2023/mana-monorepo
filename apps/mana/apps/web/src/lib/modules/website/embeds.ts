@@ -37,6 +37,7 @@ import type { LocalSocialEvent } from '$lib/modules/events/types';
 import type { LocalMemo } from '$lib/modules/memoro/types';
 import type { LocalDeck as LocalCardDeck } from '$lib/modules/cards/types';
 import type { LocalDeck as LocalPresiDeck } from '$lib/modules/presi/types';
+import type { LocalAugurEntry } from '$lib/modules/augur/types';
 import type { LocalTimeBlock } from '$lib/data/time-blocks/types';
 
 export interface ResolvedEmbed {
@@ -95,6 +96,9 @@ export async function resolveEmbed(props: ModuleEmbedProps): Promise<ResolvedEmb
 				break;
 			case 'presi.decks':
 				items = await resolvePresiDecks(props);
+				break;
+			case 'augur.entries':
+				items = await resolveAugurEntries(props);
 				break;
 			default:
 				return {
@@ -909,6 +913,75 @@ async function resolvePresiDecks(_props: ModuleEmbedProps): Promise<EmbedItem[]>
 		return {
 			title: d.title,
 			subtitle: `${count} ${count === 1 ? 'Folie' : 'Folien'}`,
+		};
+	});
+}
+
+/**
+ * Augur (omens / fortunes / hunches): public-divination teaser.
+ * Returns entries flipped to 'public' with the kind + vibe + outcome
+ * status as subtitle.
+ *
+ * Whitelist: claim + "{kind} · {vibe} · {outcome}". The personal
+ * fields — feltMeaning, expectedOutcome, expectedBy, source name,
+ * outcomeNote, related dream/decision links, livingOracleSnapshot —
+ * all stay private. Augur captures are by default private (the
+ * store stamps `'private'` rather than space-default), so a flip
+ * to 'public' is an explicit "I want to share this prediction".
+ *
+ * Filters: optional `status` maps to AugurOutcome ('open' /
+ * 'fulfilled' / 'partly' / 'not-fulfilled') so the user can build
+ * "predictions I got right" or "still open" widgets.
+ */
+async function resolveAugurEntries(props: ModuleEmbedProps): Promise<EmbedItem[]> {
+	const KIND_LABEL: Record<string, string> = {
+		omen: 'Omen',
+		fortune: 'Wahrsagung',
+		hunch: 'Bauchgefühl',
+	};
+	const VIBE_LABEL: Record<string, string> = {
+		good: 'Gutes Zeichen',
+		bad: 'Warnung',
+		mysterious: 'Rätselhaft',
+	};
+	const OUTCOME_LABEL: Record<string, string> = {
+		open: 'Offen',
+		fulfilled: 'Eingetreten',
+		partly: 'Teilweise',
+		'not-fulfilled': 'Nicht eingetreten',
+	};
+
+	let entries = await db.table<LocalAugurEntry>('augurEntries').toArray();
+	entries = entries.filter(
+		(e) => !e.deletedAt && !e.isArchived && canEmbedOnWebsite(e.visibility ?? 'private')
+	);
+
+	if (props.filter?.status) {
+		entries = entries.filter((e) => e.outcome === props.filter?.status);
+	}
+
+	if (entries.length === 0) return [];
+
+	const decrypted = (await decryptRecords('augurEntries', entries)) as LocalAugurEntry[];
+
+	// Resolved-first then by encounteredAt desc — fulfilled predictions
+	// rank above open ones, which is the more interesting public signal.
+	decrypted.sort((a, b) => {
+		const aOpen = a.outcome === 'open' ? 1 : 0;
+		const bOpen = b.outcome === 'open' ? 1 : 0;
+		if (aOpen !== bOpen) return aOpen - bOpen;
+		return (b.encounteredAt ?? '').localeCompare(a.encounteredAt ?? '');
+	});
+
+	return decrypted.map((e) => {
+		const parts = [
+			KIND_LABEL[e.kind] ?? e.kind,
+			VIBE_LABEL[e.vibe] ?? e.vibe,
+			OUTCOME_LABEL[e.outcome] ?? e.outcome,
+		];
+		return {
+			title: e.claim,
+			subtitle: parts.join(' · '),
 		};
 	});
 }

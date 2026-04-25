@@ -235,6 +235,18 @@ const TABLES: TableConfig[] = [
 			return decksStore.setVisibility(id, next);
 		},
 	},
+	{
+		module: 'augur',
+		collection: 'augurEntries',
+		moduleLabel: 'Augur (Omen / Wahrsagungen)',
+		encrypted: true,
+		title: (r) => asString(r.claim),
+		href: (id) => `/augur/entry/${id}`,
+		setVisibility: async (id, next) => {
+			const { augurStore } = await import('$lib/modules/augur/stores/entries.svelte');
+			return augurStore.setVisibility(id, next);
+		},
+	},
 ];
 
 /**
