@@ -6,6 +6,7 @@
  */
 
 import type { BaseRecord } from '@mana/local-store';
+import type { VisibilityLevel } from '@mana/shared-privacy';
 
 export type QuestionType = 'single' | 'multi' | 'truefalse' | 'text';
 
@@ -25,6 +26,10 @@ export interface LocalQuiz extends BaseRecord {
 	questionCount: number;
 	isPinned: boolean;
 	isArchived: boolean;
+	/** Visibility level — pilot of the unified privacy system. */
+	visibility?: VisibilityLevel;
+	visibilityChangedAt?: string;
+	visibilityChangedBy?: string;
 }
 
 export interface LocalQuizQuestion extends BaseRecord {
@@ -64,6 +69,7 @@ export interface Quiz {
 	questionCount: number;
 	isPinned: boolean;
 	isArchived: boolean;
+	visibility: VisibilityLevel;
 	createdAt: string;
 	updatedAt: string;
 }

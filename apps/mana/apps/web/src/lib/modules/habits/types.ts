@@ -6,6 +6,7 @@
  */
 
 import type { BaseRecord } from '@mana/local-store';
+import type { VisibilityLevel } from '@mana/shared-privacy';
 
 // ─── Local Record Types (Dexie) ───────────────────────────
 
@@ -23,6 +24,15 @@ export interface LocalHabit extends BaseRecord {
 	schedule?: HabitSchedule | null; // optional recurring schedule
 	order: number;
 	isArchived: boolean;
+	/**
+	 * Visibility level — pilot of the unified privacy system. Optional
+	 * on the local record because legacy rows pre-date the field; the
+	 * Dexie hook stamps 'space' as the structural default. `toHabit`
+	 * narrows to a non-optional VisibilityLevel for callers.
+	 */
+	visibility?: VisibilityLevel;
+	visibilityChangedAt?: string;
+	visibilityChangedBy?: string;
 }
 
 export interface LocalHabitLog extends BaseRecord {
@@ -43,6 +53,7 @@ export interface Habit {
 	schedule: HabitSchedule | null;
 	order: number;
 	isArchived: boolean;
+	visibility: VisibilityLevel;
 	createdAt: string;
 	updatedAt: string;
 }

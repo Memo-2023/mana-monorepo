@@ -6,6 +6,9 @@
  */
 
 import { emitDomainEvent } from '$lib/data/events';
+import { getActiveSpace } from '$lib/data/scope';
+import { getEffectiveUserId } from '$lib/data/current-user';
+import { defaultVisibilityFor, type VisibilityLevel } from '@mana/shared-privacy';
 import { habitTable, habitLogTable } from '../collections';
 import { toHabit } from '../queries';
 import {
@@ -99,6 +102,9 @@ export const habitsStore = {
 			defaultDuration: data.defaultDuration ?? null,
 			order: count,
 			isArchived: false,
+			// Pre-populate visibility so the Dexie hook's generic 'space'
+			// fallback doesn't fire for personal-space habits.
+			visibility: defaultVisibilityFor(getActiveSpace()?.type),
 		};
 
 		await habitTable.add(newLocal);
@@ -121,6 +127,35 @@ export const habitsStore = {
 		await habitTable.update(id, {
 			...data,
 			updatedAt: new Date().toISOString(),
+		});
+	},
+
+	/**
+	 * Flip a habit's visibility. v1 supports private/space/public
+	 * only — the unlisted-share flow is not wired for habits because
+	 * a per-day-tracker snapshot would be more confusing than useful.
+	 * Public habits will surface in the owner's website embed when the
+	 * habits resolver lands.
+	 */
+	async setVisibility(id: string, next: VisibilityLevel) {
+		const existing = await habitTable.get(id);
+		if (!existing) throw new Error(`Habit ${id} not found`);
+		const before: VisibilityLevel = existing.visibility ?? 'space';
+		if (before === next) return;
+
+		const now = new Date().toISOString();
+		await habitTable.update(id, {
+			visibility: next,
+			visibilityChangedAt: now,
+			visibilityChangedBy: getEffectiveUserId(),
+			updatedAt: now,
+		});
+
+		emitDomainEvent('VisibilityChanged', 'habits', 'habits', id, {
+			recordId: id,
+			collection: 'habits',
+			before,
+			after: next,
 		});
 	},
 

@@ -34,6 +34,7 @@ export function toQuiz(local: LocalQuiz): Quiz {
 		questionCount: local.questionCount ?? 0,
 		isPinned: local.isPinned ?? false,
 		isArchived: local.isArchived ?? false,
+		visibility: local.visibility ?? 'space',
 		createdAt: local.createdAt ?? new Date().toISOString(),
 		updatedAt: local.updatedAt ?? new Date().toISOString(),
 	};

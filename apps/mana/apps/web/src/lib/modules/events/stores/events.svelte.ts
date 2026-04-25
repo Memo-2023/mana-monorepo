@@ -10,6 +10,9 @@ import { createBlock, updateBlock, deleteBlock } from '$lib/data/time-blocks/ser
 import { timeBlockTable } from '$lib/data/time-blocks/collections';
 import { encryptRecord, decryptRecord } from '$lib/data/crypto';
 import { emitDomainEvent } from '$lib/data/events';
+import { getActiveSpace } from '$lib/data/scope';
+import { getEffectiveUserId } from '$lib/data/current-user';
+import { defaultVisibilityFor, type VisibilityLevel } from '@mana/shared-privacy';
 import type { LocalSocialEvent, LocalEventItem, EventStatus } from '../types';
 import { eventsApi } from '../api';
 import { recordTombstone } from '../tombstones';
@@ -66,6 +69,7 @@ export const eventsStore = {
 				isPublished: false,
 				publicToken: null,
 				status: input.status ?? 'draft',
+				visibility: defaultVisibilityFor(getActiveSpace()?.type),
 				createdAt: new Date().toISOString(),
 				updatedAt: new Date().toISOString(),
 			};
@@ -174,6 +178,36 @@ export const eventsStore = {
 			error = e instanceof Error ? e.message : 'Failed to delete event';
 			return { success: false as const, error };
 		}
+	},
+
+	/**
+	 * Flip a social-event's visibility. Coexists with the legacy
+	 * `isPublished`/`publicToken` flow until M6 (Konsolidierung):
+	 * publishEvent/unpublishEvent still drive the public RSVP snapshot;
+	 * this Picker only writes the unified `visibility` field. v1 supports
+	 * private/space/public — unlisted is reserved for the future when
+	 * the share-snapshot flow gets ported here.
+	 */
+	async setVisibility(id: string, next: VisibilityLevel) {
+		const existing = await db.table<LocalSocialEvent>('socialEvents').get(id);
+		if (!existing) throw new Error(`Event ${id} not found`);
+		const before: VisibilityLevel = existing.visibility ?? 'space';
+		if (before === next) return;
+
+		const now = new Date().toISOString();
+		await db.table('socialEvents').update(id, {
+			visibility: next,
+			visibilityChangedAt: now,
+			visibilityChangedBy: getEffectiveUserId(),
+			updatedAt: now,
+		});
+
+		emitDomainEvent('VisibilityChanged', 'events', 'socialEvents', id, {
+			recordId: id,
+			collection: 'socialEvents',
+			before,
+			after: next,
+		});
 	},
 
 	/**

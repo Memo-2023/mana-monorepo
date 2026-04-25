@@ -8,6 +8,10 @@
 import { quizTable, quizQuestionTable } from '../collections';
 import { toQuiz } from '../queries';
 import { encryptRecord } from '$lib/data/crypto';
+import { emitDomainEvent } from '$lib/data/events';
+import { getActiveSpace } from '$lib/data/scope';
+import { getEffectiveUserId } from '$lib/data/current-user';
+import { defaultVisibilityFor, type VisibilityLevel } from '@mana/shared-privacy';
 import type { LocalQuiz, LocalQuizQuestion, Quiz, QuestionOption, QuestionType } from '../types';
 
 function now() {
@@ -30,6 +34,7 @@ export const quizzesStore = {
 			questionCount: 0,
 			isPinned: false,
 			isArchived: false,
+			visibility: defaultVisibilityFor(getActiveSpace()?.type),
 		};
 		const snapshot = toQuiz(newLocal);
 		await encryptRecord('quizzes', newLocal);
@@ -60,6 +65,33 @@ export const quizzesStore = {
 		const quiz = await quizTable.get(id);
 		if (!quiz) return;
 		await quizTable.update(id, { isPinned: !quiz.isPinned, updatedAt: now() });
+	},
+
+	/**
+	 * Flip a quiz's visibility. v1 supports private/space/public only —
+	 * unlisted-share for quizzes is a candidate for a future milestone
+	 * (share a single quiz with a friend) but not wired yet.
+	 */
+	async setVisibility(id: string, next: VisibilityLevel) {
+		const existing = await quizTable.get(id);
+		if (!existing) throw new Error(`Quiz ${id} not found`);
+		const before: VisibilityLevel = existing.visibility ?? 'space';
+		if (before === next) return;
+
+		const stamp = now();
+		await quizTable.update(id, {
+			visibility: next,
+			visibilityChangedAt: stamp,
+			visibilityChangedBy: getEffectiveUserId(),
+			updatedAt: stamp,
+		});
+
+		emitDomainEvent('VisibilityChanged', 'quiz', 'quizzes', id, {
+			recordId: id,
+			collection: 'quizzes',
+			before,
+			after: next,
+		});
 	},
 
 	// ── Questions ──────────────────────────────────────────

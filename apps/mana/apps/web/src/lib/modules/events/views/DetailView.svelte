@@ -9,6 +9,7 @@
 	import type { ViewProps } from '$lib/app-registry';
 	import { searchAddress, formatAddress, type GeocodingResult } from '$lib/geocoding';
 	import { MapPin } from '@mana/shared-icons';
+	import { VisibilityPicker, type VisibilityLevel } from '@mana/shared-privacy';
 
 	let { navigate, goBack, params }: ViewProps = $props();
 
@@ -145,6 +146,11 @@
 		const url = `${window.location.origin}/rsvp/${event.publicToken}`;
 		navigator.clipboard.writeText(url);
 	}
+
+	async function handleVisibilityChange(next: VisibilityLevel) {
+		if (!event) return;
+		await eventsStore.setVisibility(event.id, next);
+	}
 </script>
 
 {#if !event}
@@ -260,6 +266,17 @@
 				{/if}
 			</div>
 		{/if}
+
+		<section class="section">
+			<div class="visibility-row">
+				<span class="visibility-label">Sichtbarkeit</span>
+				<VisibilityPicker
+					level={event.visibility ?? 'space'}
+					onChange={handleVisibilityChange}
+					disabledLevels={['unlisted']}
+				/>
+			</div>
+		</section>
 
 		<section class="section">
 			<h2>RSVPs</h2>
@@ -378,6 +395,17 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.75rem;
+	}
+	.visibility-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.75rem;
+	}
+	.visibility-label {
+		font-size: 0.875rem;
+		font-weight: 500;
+		opacity: 0.85;
 	}
 	.section h2 {
 		margin: 0;

@@ -10,6 +10,7 @@
 	import HabitForm from './HabitForm.svelte';
 	import { DynamicIcon } from '@mana/shared-ui/atoms';
 	import { CaretLeft, PencilSimple, X } from '@mana/shared-icons';
+	import { VisibilityPicker, type VisibilityLevel } from '@mana/shared-privacy';
 
 	let {
 		habit,
@@ -80,6 +81,10 @@
 	async function handleDeleteLog(logId: string) {
 		await habitsStore.deleteLog(logId);
 	}
+
+	async function handleVisibilityChange(next: VisibilityLevel) {
+		await habitsStore.setVisibility(habit.id, next);
+	}
 </script>
 
 <div class="habit-detail">
@@ -103,6 +108,16 @@
 	{#if showEdit}
 		<HabitForm {habit} onDone={() => (showEdit = false)} onCancel={() => (showEdit = false)} />
 	{/if}
+
+	<!-- Visibility -->
+	<div class="prop-row">
+		<span class="prop-label">Sichtbarkeit</span>
+		<VisibilityPicker
+			level={habit.visibility ?? 'space'}
+			onChange={handleVisibilityChange}
+			disabledLevels={['unlisted']}
+		/>
+	</div>
 
 	<!-- Stats Cards -->
 	<div class="stats-grid">
@@ -199,6 +214,22 @@
 		display: flex;
 		align-items: center;
 		gap: 0.75rem;
+	}
+
+	.prop-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.75rem;
+		padding: 0.5rem 0.75rem;
+		background: rgba(255, 255, 255, 0.03);
+		border: 1px solid rgba(255, 255, 255, 0.06);
+		border-radius: 0.5rem;
+		font-size: 0.875rem;
+	}
+	.prop-label {
+		font-weight: 500;
+		opacity: 0.8;
 	}
 
 	.back-btn,

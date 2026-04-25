@@ -23,6 +23,10 @@ export function toHabit(local: LocalHabit): Habit {
 		schedule: local.schedule ?? null,
 		order: local.order,
 		isArchived: local.isArchived,
+		// Legacy rows pre-dating the visibility pilot default to 'space'
+		// (the structural default). New rows get the space-type-aware
+		// default at create time in habits.svelte.ts.
+		visibility: local.visibility ?? 'space',
 		createdAt: local.createdAt ?? new Date().toISOString(),
 		updatedAt: local.updatedAt ?? new Date().toISOString(),
 	};

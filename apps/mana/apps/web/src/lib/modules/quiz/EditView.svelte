@@ -9,6 +9,7 @@
 	import { QUESTION_TYPE_LABELS } from './types';
 	import type { QuestionType, QuestionOption, QuizQuestion } from './types';
 	import { ArrowLeft, Plus, Trash, Check, Play, PencilSimple, X } from '@mana/shared-icons';
+	import { VisibilityPicker, type VisibilityLevel } from '@mana/shared-privacy';
 
 	interface Props {
 		quizId: string;
@@ -49,6 +50,11 @@
 				.map((s) => s.trim())
 				.filter(Boolean),
 		});
+	}
+
+	async function handleVisibilityChange(next: VisibilityLevel) {
+		if (!quiz) return;
+		await quizzesStore.setVisibility(quiz.id, next);
 	}
 
 	// ── Question form (new OR edit) ─────────────────────
@@ -221,6 +227,14 @@
 					bind:value={metaTags}
 					onblur={saveMeta}
 					placeholder="Tags (Komma-getrennt)"
+				/>
+			</div>
+			<div class="visibility-row">
+				<span class="visibility-label">Sichtbarkeit</span>
+				<VisibilityPicker
+					level={quiz.visibility ?? 'space'}
+					onChange={handleVisibilityChange}
+					disabledLevels={['unlisted']}
 				/>
 			</div>
 		</section>
@@ -449,6 +463,18 @@
 	.meta-row {
 		display: flex;
 		gap: 0.5rem;
+	}
+	.visibility-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.75rem;
+		margin-top: 0.25rem;
+	}
+	.visibility-label {
+		font-size: 0.8125rem;
+		font-weight: 500;
+		opacity: 0.8;
 	}
 	.small-input {
 		flex: 1;

@@ -7,6 +7,7 @@
  */
 
 import type { BaseRecord } from '@mana/local-store';
+import type { VisibilityLevel } from '@mana/shared-privacy';
 
 export type EventStatus = 'draft' | 'published' | 'cancelled' | 'past';
 
@@ -33,6 +34,16 @@ export interface LocalSocialEvent extends BaseRecord {
 	isPublished: boolean;
 	publicToken?: string | null;
 	status: EventStatus;
+	/**
+	 * Unified visibility (private/space/unlisted/public). Lives alongside
+	 * the legacy `isPublished` + `publicToken` flags until M6
+	 * (Konsolidierung der Legacy-Flags). Until then, treat both: the
+	 * embed/public surface still keys off `isPublished`, but the
+	 * Picker writes to `visibility` so the unified system can take over.
+	 */
+	visibility?: VisibilityLevel;
+	visibilityChangedAt?: string;
+	visibilityChangedBy?: string;
 }
 
 export interface LocalEventGuest extends BaseRecord {
@@ -86,6 +97,7 @@ export interface SocialEvent {
 	isPublished: boolean;
 	publicToken: string | null;
 	status: EventStatus;
+	visibility: VisibilityLevel;
 	timeBlockId: string;
 	startTime: string;
 	endTime: string;

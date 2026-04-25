@@ -39,6 +39,9 @@ export function toSocialEvent(local: LocalSocialEvent, block: LocalTimeBlock | n
 		isPublished: local.isPublished ?? false,
 		publicToken: local.publicToken ?? null,
 		status: local.status,
+		// Coexists with isPublished until M6 consolidation. Default
+		// 'space' for legacy rows; the Picker writes the unified field.
+		visibility: local.visibility ?? 'space',
 		timeBlockId: local.timeBlockId,
 		startTime: block?.startDate ?? now,
 		endTime: block?.endDate ?? block?.startDate ?? now,
