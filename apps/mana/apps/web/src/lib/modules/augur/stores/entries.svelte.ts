@@ -196,4 +196,78 @@ export const augurStore = {
 
 		await augurEntriesTable.update(id, patch);
 	},
+
+	/**
+	 * Force-regenerate the unlisted token. Revoke + republish — server
+	 * gives back a new token because the prior row is marked revoked.
+	 * UI intent: "the old link is leaked or I want a clean slate".
+	 * Preserves the existing expiry so a rotation doesn't extend the
+	 * link's lifetime.
+	 */
+	async regenerateUnlistedToken(id: string) {
+		const existing = await augurEntriesTable.get(id);
+		if (!existing || existing.visibility !== 'unlisted') return null;
+		const jwt = await authStore.getValidToken();
+		if (!jwt) return null;
+		try {
+			await revokeUnlistedSnapshot({
+				apiUrl: getManaApiUrl(),
+				jwt,
+				collection: 'augurEntries',
+				recordId: id,
+			});
+			const blob = await buildUnlistedBlob('augurEntries', id);
+			const spaceId =
+				(existing as unknown as { spaceId?: string }).spaceId ?? getActiveSpace()?.id ?? '';
+			const { token } = await publishUnlistedSnapshot({
+				apiUrl: getManaApiUrl(),
+				jwt,
+				collection: 'augurEntries',
+				recordId: id,
+				spaceId,
+				blob,
+				expiresAt: existing.unlistedExpiresAt ? new Date(existing.unlistedExpiresAt) : undefined,
+			});
+			await augurEntriesTable.update(id, {
+				unlistedToken: token,
+				updatedAt: new Date().toISOString(),
+			});
+			return token;
+		} catch (e) {
+			console.error('[augur] regenerate failed', e);
+			return null;
+		}
+	},
+
+	/**
+	 * Set or clear the unlisted-share expiry. Re-publishes with the new
+	 * `expiresAt` and mirrors locally so the picker stays in sync.
+	 * Same pattern as calendar/library/places (M8.5).
+	 */
+	async setUnlistedExpiry(id: string, expiresAt: Date | null) {
+		const existing = await augurEntriesTable.get(id);
+		if (!existing || existing.visibility !== 'unlisted') return;
+		const jwt = await authStore.getValidToken();
+		if (!jwt) return;
+		try {
+			const blob = await buildUnlistedBlob('augurEntries', id);
+			const spaceId =
+				(existing as unknown as { spaceId?: string }).spaceId ?? getActiveSpace()?.id ?? '';
+			await publishUnlistedSnapshot({
+				apiUrl: getManaApiUrl(),
+				jwt,
+				collection: 'augurEntries',
+				recordId: id,
+				spaceId,
+				blob,
+				expiresAt,
+			});
+			await augurEntriesTable.update(id, {
+				unlistedExpiresAt: expiresAt ? expiresAt.toISOString() : null,
+				updatedAt: new Date().toISOString(),
+			});
+		} catch (e) {
+			console.error('[augur] setUnlistedExpiry failed', e);
+		}
+	},
 };

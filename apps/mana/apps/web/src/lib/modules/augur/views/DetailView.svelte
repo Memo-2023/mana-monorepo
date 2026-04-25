@@ -11,6 +11,7 @@
 -->
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { _ } from 'svelte-i18n';
 	import EntryForm from '../components/EntryForm.svelte';
 	import VibeBadge from '../components/VibeBadge.svelte';
 	import OutcomeBadge from '../components/OutcomeBadge.svelte';
@@ -19,6 +20,8 @@
 	import {
 		VisibilityPicker,
 		VISIBILITY_METADATA,
+		SharedLinkControls,
+		buildShareUrl,
 		type VisibilityLevel,
 	} from '@mana/shared-privacy';
 	import {
@@ -31,34 +34,27 @@
 
 	let { entry }: { entry: AugurEntry } = $props();
 
-	const T = {
-		source: 'Quelle',
-		claim: 'Aussage',
-		felt: 'Eigene Deutung',
-		expected: 'Erwartetes Ergebnis',
-		expectedBy: 'Bis',
-		probability: 'Wahrscheinlichkeit',
-		tags: 'Tags',
-		captured: 'Erfasst',
-		resolved: 'Aufgeloest',
-		outcomeNote: 'Wie es kam',
-		resolvePrompt: 'Hat sich das bewahrheitet?',
-		resolveYes: 'eingetreten',
-		resolvePartly: 'teilweise',
-		resolveNo: 'nicht eingetreten',
-		resolveReopen: 'erneut oeffnen',
-		actionEdit: 'bearbeiten',
-		actionArchive: 'archivieren',
-		actionDelete: 'loeschen',
-		actionCancel: 'abbrechen',
-		notePlaceholder: 'Optionale Notiz: wie genau ist es gekommen?',
-		confirmDelete: 'Diesen Eintrag wirklich loeschen?',
-		visibility: 'Sichtbarkeit',
-	} as const;
-
 	async function onVisibilityChange(next: VisibilityLevel) {
 		await augurStore.setVisibility(entry.id, next);
 	}
+
+	async function handleRegenerate() {
+		await augurStore.regenerateUnlistedToken(entry.id);
+	}
+
+	async function handleRevoke() {
+		await augurStore.setVisibility(entry.id, 'space');
+	}
+
+	async function handleExpiryChange(expiresAt: Date | null) {
+		await augurStore.setUnlistedExpiry(entry.id, expiresAt);
+	}
+
+	const shareUrl = $derived.by(() => {
+		if (!entry.unlistedToken) return '';
+		const origin = typeof window === 'undefined' ? 'https://mana.how' : window.location.origin;
+		return buildShareUrl(origin, entry.unlistedToken);
+	});
 
 	let mode = $state<'view' | 'edit'>('view');
 	let resolveNoteOpen = $state(false);
@@ -89,7 +85,7 @@
 	}
 
 	async function handleDelete() {
-		if (!confirm(T.confirmDelete)) return;
+		if (!confirm($_('augur.detail.confirmDelete'))) return;
 		await augurStore.deleteEntry(entry.id);
 		goto('/augur');
 	}
@@ -122,24 +118,24 @@
 
 		{#if entry.feltMeaning}
 			<section class="block">
-				<h3>{T.felt}</h3>
+				<h3>{$_('augur.detail.felt')}</h3>
 				<p>{entry.feltMeaning}</p>
 			</section>
 		{/if}
 
 		{#if entry.expectedOutcome || entry.expectedBy}
 			<section class="block">
-				<h3>{T.expected}</h3>
+				<h3>{$_('augur.detail.expected')}</h3>
 				{#if entry.expectedOutcome}<p>{entry.expectedOutcome}</p>{/if}
 				{#if entry.expectedBy}
-					<p class="meta">{T.expectedBy}: {entry.expectedBy}</p>
+					<p class="meta">{$_('augur.detail.expectedBy')}: {entry.expectedBy}</p>
 				{/if}
 			</section>
 		{/if}
 
 		{#if entry.tags.length > 0}
 			<section class="block">
-				<h3>{T.tags}</h3>
+				<h3>{$_('augur.detail.tags')}</h3>
 				<div class="tags">
 					{#each entry.tags as tag (tag)}
 						<span class="tag">{tag}</span>
@@ -153,37 +149,50 @@
 		{/if}
 
 		<section class="block">
-			<h3>{T.visibility}</h3>
+			<h3>{$_('augur.detail.visibility')}</h3>
 			<VisibilityPicker level={entry.visibility} onChange={onVisibilityChange} />
+			{#if entry.visibility === 'unlisted' && entry.unlistedToken && shareUrl}
+				<div class="share-controls">
+					<SharedLinkControls
+						token={entry.unlistedToken}
+						url={shareUrl}
+						expiresAt={entry.unlistedExpiresAt}
+						onRegenerate={handleRegenerate}
+						onRevoke={handleRevoke}
+						onExpiryChange={handleExpiryChange}
+					/>
+				</div>
+			{/if}
 		</section>
 
 		<section class="block resolve">
 			{#if entry.outcome === 'open' && !resolveNoteOpen}
-				<h3>{T.resolvePrompt}</h3>
+				<h3>{$_('augur.detail.resolvePrompt')}</h3>
 				<div class="resolve-row">
 					<button type="button" class="btn yes" onclick={() => startResolve('fulfilled')}>
-						{T.resolveYes}
+						{$_('augur.detail.resolveYes')}
 					</button>
 					<button type="button" class="btn partly" onclick={() => startResolve('partly')}>
-						{T.resolvePartly}
+						{$_('augur.detail.resolvePartly')}
 					</button>
 					<button type="button" class="btn no" onclick={() => startResolve('not-fulfilled')}>
-						{T.resolveNo}
+						{$_('augur.detail.resolveNo')}
 					</button>
 				</div>
 			{:else if resolveNoteOpen}
-				<h3>{T.outcomeNote}</h3>
-				<textarea bind:value={resolveNote} placeholder={T.notePlaceholder} rows="3"></textarea>
+				<h3>{$_('augur.detail.outcomeNote')}</h3>
+				<textarea bind:value={resolveNote} placeholder={$_('augur.detail.notePlaceholder')} rows="3"
+				></textarea>
 				<div class="resolve-row">
 					<button type="button" class="btn ghost" onclick={() => (resolveNoteOpen = false)}>
-						{T.actionCancel}
+						{$_('augur.detail.actionCancel')}
 					</button>
 					<button type="button" class="btn primary" onclick={confirmResolve}>
-						{T.captured}
+						{$_('augur.detail.captured')}
 					</button>
 				</div>
 			{:else}
-				<h3>{T.resolved}</h3>
+				<h3>{$_('augur.detail.resolved')}</h3>
 				{#if entry.outcomeNote}
 					<p>{entry.outcomeNote}</p>
 				{/if}
@@ -191,20 +200,22 @@
 					<p class="meta">{entry.resolvedAt.slice(0, 10)}</p>
 				{/if}
 				<div class="resolve-row">
-					<button type="button" class="btn ghost" onclick={reopen}>{T.resolveReopen}</button>
+					<button type="button" class="btn ghost" onclick={reopen}
+						>{$_('augur.detail.resolveReopen')}</button
+					>
 				</div>
 			{/if}
 		</section>
 
 		<footer class="actions">
 			<button type="button" class="btn ghost" onclick={() => (mode = 'edit')}>
-				{T.actionEdit}
+				{$_('augur.detail.actionEdit')}
 			</button>
 			<button type="button" class="btn ghost" onclick={handleArchive}>
-				{T.actionArchive}
+				{$_('augur.detail.actionArchive')}
 			</button>
 			<button type="button" class="btn danger" onclick={handleDelete}>
-				{T.actionDelete}
+				{$_('augur.detail.actionDelete')}
 			</button>
 		</footer>
 	</article>
@@ -273,6 +284,9 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.4rem;
+	}
+	.share-controls {
+		margin-top: 0.4rem;
 	}
 	.block h3 {
 		font-size: 0.78rem;
