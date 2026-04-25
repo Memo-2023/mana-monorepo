@@ -111,19 +111,32 @@
 			Protagonist
 		</h3>
 		<p class="mt-0.5 text-xs text-muted-foreground">
-			Dein Gesicht ist Pflicht. Body-Ref und bis zu {MAX_GARMENTS} Kostüm-Fotos sind optional.
+			Dein Gesicht ist Pflicht. Body-Ref und bis zu {MAX_GARMENTS} Kostüm-Fotos sind optional — klicke
+			ein Bild oder das ✕, um es wieder zu entfernen.
 		</p>
 	</div>
 
 	<div class="flex flex-wrap items-start gap-2">
-		<!-- Face ref tile — mandatory -->
+		<!-- Face ref tile — mandatory, not deselectable. Small "Pflicht"-
+		     badge makes the locked state explicit so the user doesn't
+		     hunt for a remove button that doesn't exist. -->
 		<div class="flex flex-col items-center gap-1">
 			{#if face?.publicUrl}
-				<img
-					src={face.thumbnailUrl ?? face.publicUrl}
-					alt="Face-Ref"
-					class="h-20 w-20 rounded-md border border-primary/30 object-cover"
-				/>
+				<div
+					class="relative h-20 w-20 overflow-hidden rounded-md border-2 border-primary/40"
+					title="Face-Ref ist Pflicht — kann nicht entfernt werden"
+				>
+					<img
+						src={face.thumbnailUrl ?? face.publicUrl}
+						alt="Face-Ref"
+						class="h-full w-full object-cover"
+					/>
+					<span
+						class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-1 py-0.5 text-center text-[9px] font-semibold uppercase tracking-wider text-white"
+					>
+						Pflicht
+					</span>
+				</div>
 			{:else}
 				<div
 					class="flex h-20 w-20 flex-col items-center justify-center gap-1 rounded-md border border-dashed border-border bg-muted/50 text-[10px] text-muted-foreground"
@@ -135,19 +148,24 @@
 			<span class="text-[10px] font-medium text-muted-foreground">Face</span>
 		</div>
 
-		<!-- Body ref tile — optional toggle -->
+		<!-- Body ref tile — optional toggle. Two states need clear visual
+		     differentiation:
+		       - inactive: dimmed image + Plus overlay → "click to add"
+		       - active:   primary border + on-hover X overlay → "click to remove"
+		     The X-on-hover when active is the part the user was missing
+		     (previously nothing changed on hover when picked). -->
 		<div class="flex flex-col items-center gap-1">
 			{#if body?.publicUrl}
 				<button
 					type="button"
 					{disabled}
 					onclick={toggleBody}
-					class="relative h-20 w-20 overflow-hidden rounded-md border transition-all active:translate-y-px
+					class="group relative h-20 w-20 overflow-hidden rounded-md border-2 transition-all active:translate-y-px
 						{bodyInValue
 						? 'border-primary shadow-sm shadow-primary/20'
 						: 'border-border opacity-60 hover:border-primary/50 hover:opacity-100 hover:shadow-sm'}"
 					aria-pressed={bodyInValue}
-					title={bodyInValue ? 'Body-Ref entfernen' : 'Body-Ref hinzufügen'}
+					title={bodyInValue ? 'Klick zum Entfernen' : 'Klick zum Hinzufügen'}
 				>
 					<img
 						src={body.thumbnailUrl ?? body.publicUrl}
@@ -156,9 +174,15 @@
 					/>
 					{#if !bodyInValue}
 						<div
-							class="absolute inset-0 flex items-center justify-center bg-background/40 text-xs text-foreground"
+							class="absolute inset-0 flex items-center justify-center bg-background/50 text-foreground"
 						>
-							<Plus size={16} />
+							<Plus size={20} weight="bold" />
+						</div>
+					{:else}
+						<div
+							class="absolute inset-0 flex items-center justify-center bg-error/0 text-white opacity-0 transition-all group-hover:bg-error/60 group-hover:opacity-100"
+						>
+							<X size={20} weight="bold" />
 						</div>
 					{/if}
 				</button>
@@ -174,11 +198,21 @@
 			<span class="text-[10px] font-medium text-muted-foreground">Body</span>
 		</div>
 
-		<!-- Garment tiles (picked) -->
+		<!-- Garment tiles (picked). Whole tile is also clickable to
+		     remove — easier to hit on touch. Plus a dedicated X badge
+		     in the corner that's bigger + higher contrast than before
+		     so it reads as a control even at a glance. -->
 		{#each garmentPicks as g (g.id)}
 			{@const mediaId = g.mediaIds[0]}
 			<div class="flex flex-col items-center gap-1">
-				<div class="relative h-20 w-20 overflow-hidden rounded-md border border-primary/30">
+				<button
+					type="button"
+					{disabled}
+					onclick={() => mediaId && removeGarment(mediaId)}
+					class="group relative h-20 w-20 overflow-hidden rounded-md border-2 border-primary/40 shadow-sm transition-all active:translate-y-px hover:border-error/60"
+					aria-label={`${g.name} entfernen`}
+					title="Klick zum Entfernen"
+				>
 					{#if mediaId}
 						<img
 							src={garmentPhotoUrl(mediaId, 'thumb')}
@@ -186,17 +220,13 @@
 							class="h-full w-full object-cover"
 						/>
 					{/if}
-					<button
-						type="button"
-						{disabled}
-						onclick={() => mediaId && removeGarment(mediaId)}
-						class="absolute right-0 top-0 m-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-background/80 text-foreground shadow-sm hover:bg-background"
-						aria-label={`${g.name} entfernen`}
-						title="Entfernen"
+					<!-- Always-visible X badge -->
+					<span
+						class="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-background text-foreground shadow ring-1 ring-border transition-all group-hover:bg-error group-hover:text-white group-hover:ring-error"
 					>
-						<X size={10} />
-					</button>
-				</div>
+						<X size={12} weight="bold" />
+					</span>
+				</button>
 				<span class="max-w-20 truncate text-[10px] font-medium text-muted-foreground">
 					{g.name}
 				</span>

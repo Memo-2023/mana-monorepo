@@ -65,7 +65,7 @@
 			placeholder="Bug-Hunt-Frust, Urlaubs-Abenteuer, …"
 			maxlength={120}
 			autocomplete="off"
-			class="block w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+			class="block w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
 			disabled={submitting}
 			required
 		/>
@@ -102,7 +102,7 @@
 			rows={3}
 			maxlength={800}
 			placeholder="Kurze Zusammenfassung, Ton, Ziel der Geschichte. Wird im AI-Storyboard-Flow (M4) als Briefing genutzt."
-			class="block w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+			class="block w-full resize-none rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
 			disabled={submitting}
 		></textarea>
 	</div>
