@@ -15,9 +15,13 @@ import { getActiveSpace } from '$lib/data/scope';
 import { getEffectiveUserId } from '$lib/data/current-user';
 import {
 	defaultVisibilityFor,
-	generateUnlistedToken,
+	publishUnlistedSnapshot,
+	revokeUnlistedSnapshot,
 	type VisibilityLevel,
 } from '@mana/shared-privacy';
+import { buildUnlistedBlob } from '$lib/data/unlisted/resolvers';
+import { authStore } from '$lib/stores/auth.svelte';
+import { getManaApiUrl } from '$lib/api/config';
 import { createBlock, updateBlock, deleteBlock } from '$lib/data/time-blocks/service';
 import { timeBlockTable } from '$lib/data/time-blocks/collections';
 import {
@@ -166,6 +170,9 @@ export const eventsStore = {
 				fields: Object.keys(input).filter((k) => input[k as keyof typeof input] !== undefined),
 			});
 			CalendarEvents.eventUpdated();
+			// If this event is shared via unlisted-link, keep the server
+			// snapshot fresh so the shared view tracks local edits.
+			void this.refreshUnlistedSnapshot(id);
 			return { success: true };
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to update event';
@@ -215,6 +222,7 @@ export const eventsStore = {
 			await encryptRecord('events', localData);
 			await db.table('events').update(id, localData);
 			CalendarEvents.eventUpdated();
+			void this.refreshUnlistedSnapshot(id);
 			return { success: true };
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to update instance';
@@ -361,6 +369,26 @@ export const eventsStore = {
 				await deleteBlock(event.timeBlockId);
 			}
 
+			// If the event is shared via unlisted-link, revoke the server
+			// snapshot before the local tombstone — the link should die
+			// the moment the user deletes the record, not whenever the cron
+			// happens to notice.
+			if (event?.visibility === 'unlisted' && event.unlistedToken) {
+				const jwt = await authStore.getValidToken();
+				if (jwt) {
+					try {
+						await revokeUnlistedSnapshot({
+							apiUrl: getManaApiUrl(),
+							jwt,
+							collection: 'events',
+							recordId: id,
+						});
+					} catch (e) {
+						console.error('[calendar/events] revoke on delete failed', e);
+					}
+				}
+			}
+
 			await db.table('events').update(id, {
 				deletedAt: new Date().toISOString(),
 				updatedAt: new Date().toISOString(),
@@ -407,6 +435,7 @@ export const eventsStore = {
 			color: data.color || null,
 			tagIds: data.tagIds || [],
 			visibility: data.visibility ?? 'private',
+			unlistedToken: data.unlistedToken ?? '',
 			createdAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString(),
 			blockType: 'event',
@@ -444,10 +473,21 @@ export const eventsStore = {
 	},
 
 	/**
-	 * Flip the event's visibility. Mints/clears an unlisted token on the
-	 * transition boundary, emits the cross-module VisibilityChanged event.
-	 * Publishes a public event on the next website snapshot with
-	 * field-level redaction applied server-side (see embeds.ts).
+	 * Flip the event's visibility. Coordinates with the server-side
+	 * unlisted-snapshots table when the transition involves the
+	 * 'unlisted' level:
+	 *
+	 *   - private|space|public → unlisted:
+	 *     build the whitelist blob, publish to mana-api, server returns
+	 *     the authoritative token, store it on the Dexie record.
+	 *   - unlisted → anything else:
+	 *     revoke the server snapshot first, then clear the local token.
+	 *
+	 * Server call failures abort the flip so Dexie and server don't
+	 * drift out of sync — the user sees an error and can retry. Emits
+	 * the cross-module VisibilityChanged domain event for audit.
+	 *
+	 * See docs/plans/unlisted-sharing.md §4 (Store-Integration).
 	 */
 	async setVisibility(id: string, next: VisibilityLevel) {
 		error = null;
@@ -464,11 +504,38 @@ export const eventsStore = {
 				visibilityChangedBy: getEffectiveUserId(),
 				updatedAt: now,
 			};
-			if (next === 'unlisted' && !existing.unlistedToken) {
-				patch.unlistedToken = generateUnlistedToken();
-			} else if (next !== 'unlisted' && existing.unlistedToken) {
+
+			// Server-authoritative token. Publish first; local update only
+			// if the server accepted the snapshot so a share-link always
+			// resolves to a real row.
+			if (next === 'unlisted') {
+				const blob = await buildUnlistedBlob('events', id);
+				const jwt = await authStore.getValidToken();
+				if (!jwt) return { success: false, error: 'Nicht eingeloggt' };
+				const spaceId =
+					(existing as unknown as { spaceId?: string }).spaceId ?? getActiveSpace()?.id ?? '';
+				const { token } = await publishUnlistedSnapshot({
+					apiUrl: getManaApiUrl(),
+					jwt,
+					collection: 'events',
+					recordId: id,
+					spaceId,
+					blob,
+				});
+				patch.unlistedToken = token;
+			} else if (before === 'unlisted') {
+				const jwt = await authStore.getValidToken();
+				if (jwt) {
+					await revokeUnlistedSnapshot({
+						apiUrl: getManaApiUrl(),
+						jwt,
+						collection: 'events',
+						recordId: id,
+					});
+				}
 				patch.unlistedToken = undefined;
 			}
+
 			await db.table('events').update(id, patch);
 
 			emitDomainEvent('VisibilityChanged', 'calendar', 'events', id, {
@@ -481,6 +548,83 @@ export const eventsStore = {
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to set visibility';
 			return { success: false, error };
+		}
+	},
+
+	/**
+	 * Force-regenerate the unlisted token for an event. Revoke the
+	 * existing snapshot, then publish a fresh one — server gives back
+	 * a new token because the previous row is marked revoked. UI
+	 * intent: "the old link is leaked or I want a clean slate".
+	 *
+	 * No-op if the event isn't currently 'unlisted'.
+	 */
+	async regenerateUnlistedToken(id: string) {
+		const existing = await db.table<LocalEvent>('events').get(id);
+		if (!existing || existing.visibility !== 'unlisted') {
+			return { success: false, error: 'Event is not unlisted' };
+		}
+		const jwt = await authStore.getValidToken();
+		if (!jwt) return { success: false, error: 'Nicht eingeloggt' };
+
+		try {
+			await revokeUnlistedSnapshot({
+				apiUrl: getManaApiUrl(),
+				jwt,
+				collection: 'events',
+				recordId: id,
+			});
+			const blob = await buildUnlistedBlob('events', id);
+			const spaceId =
+				(existing as unknown as { spaceId?: string }).spaceId ?? getActiveSpace()?.id ?? '';
+			const { token } = await publishUnlistedSnapshot({
+				apiUrl: getManaApiUrl(),
+				jwt,
+				collection: 'events',
+				recordId: id,
+				spaceId,
+				blob,
+			});
+			await db.table('events').update(id, {
+				unlistedToken: token,
+				updatedAt: new Date().toISOString(),
+			});
+			return { success: true, token };
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Failed to regenerate link';
+			return { success: false, error };
+		}
+	},
+
+	/**
+	 * Re-publish the unlisted snapshot for an event. Called by
+	 * updateEvent/updateSingleInstance/etc. when the owning record is
+	 * currently flagged 'unlisted' — keeps the share-link in sync with
+	 * local edits to the whitelist fields.
+	 *
+	 * Fire-and-forget in practice: a failure logs but doesn't revert the
+	 * edit. The next successful re-publish will heal any drift, and the
+	 * user can re-flip visibility to force a fresh publish.
+	 */
+	async refreshUnlistedSnapshot(id: string) {
+		const existing = await db.table<LocalEvent>('events').get(id);
+		if (!existing || existing.visibility !== 'unlisted') return;
+		try {
+			const blob = await buildUnlistedBlob('events', id);
+			const jwt = await authStore.getValidToken();
+			if (!jwt) return;
+			const spaceId =
+				(existing as unknown as { spaceId?: string }).spaceId ?? getActiveSpace()?.id ?? '';
+			await publishUnlistedSnapshot({
+				apiUrl: getManaApiUrl(),
+				jwt,
+				collection: 'events',
+				recordId: id,
+				spaceId,
+				blob,
+			});
+		} catch (e) {
+			console.error('[calendar/events] refreshUnlistedSnapshot failed', e);
 		}
 	},
 };

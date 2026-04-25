@@ -2,7 +2,12 @@
 	import { getDateFnsLocale } from '$lib/i18n/format';
 	import { _ } from 'svelte-i18n';
 	import { getContext } from 'svelte';
-	import { VisibilityPicker, type VisibilityLevel } from '@mana/shared-privacy';
+	import {
+		VisibilityPicker,
+		SharedLinkControls,
+		buildShareUrl,
+		type VisibilityLevel,
+	} from '@mana/shared-privacy';
 	import { eventsStore } from '../stores/events.svelte';
 	import { getCalendarById, getCalendarColor } from '../queries';
 	import type { Calendar, CalendarEvent } from '../types';
@@ -32,6 +37,20 @@
 	async function handleVisibilityChange(next: VisibilityLevel) {
 		await eventsStore.setVisibility(event.id, next);
 	}
+
+	async function handleRegenerate() {
+		await eventsStore.regenerateUnlistedToken(event.id);
+	}
+
+	async function handleRevoke() {
+		await eventsStore.setVisibility(event.id, 'space');
+	}
+
+	const shareUrl = $derived.by(() => {
+		if (!event.unlistedToken) return '';
+		const origin = typeof window === 'undefined' ? 'https://mana.how' : window.location.origin;
+		return buildShareUrl(origin, event.unlistedToken);
+	});
 
 	const calendarsCtx: { readonly value: Calendar[] } = getContext('calendars');
 
@@ -248,6 +267,21 @@
 							<VisibilityPicker level={event.visibility} onChange={handleVisibilityChange} />
 						</div>
 					</div>
+
+					<!-- Share link (only when visibility = unlisted) -->
+					{#if event.visibility === 'unlisted' && event.unlistedToken && shareUrl}
+						<div class="detail-row">
+							<span class="detail-label">Link</span>
+							<div class="detail-content">
+								<SharedLinkControls
+									token={event.unlistedToken}
+									url={shareUrl}
+									onRegenerate={handleRegenerate}
+									onRevoke={handleRevoke}
+								/>
+							</div>
+						</div>
+					{/if}
 
 					<!-- Time -->
 					<div class="detail-row">

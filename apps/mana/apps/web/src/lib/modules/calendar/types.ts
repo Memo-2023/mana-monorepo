@@ -54,6 +54,12 @@ export interface CalendarEvent {
 	color: string | null;
 	tagIds: string[];
 	visibility: VisibilityLevel;
+	/**
+	 * Server-issued share token for `visibility === 'unlisted'`. Empty
+	 * string for any other visibility (UI checks `event.unlistedToken`
+	 * to know whether to render the share-link controls).
+	 */
+	unlistedToken: string;
 	createdAt: string;
 	updatedAt: string;
 	// TimeBlock metadata (for universal calendar view)
@@ -107,6 +113,7 @@ export function timeBlockToCalendarEvent(
 		// carry a calendar-specific visibility — they inherit 'space' so
 		// they stay invisible on the website (public requires explicit opt-in).
 		visibility: eventData?.visibility ?? 'space',
+		unlistedToken: eventData?.unlistedToken ?? '',
 		createdAt: block.createdAt,
 		updatedAt: block.updatedAt,
 		blockType: block.type,

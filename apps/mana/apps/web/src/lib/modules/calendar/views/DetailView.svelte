@@ -10,7 +10,12 @@
 	import DetailViewShell from '$lib/components/DetailViewShell.svelte';
 	import { eventsStore } from '../stores/events.svelte';
 	import { MapPin, Clock, X } from '@mana/shared-icons';
-	import { VisibilityPicker, type VisibilityLevel } from '@mana/shared-privacy';
+	import {
+		VisibilityPicker,
+		SharedLinkControls,
+		buildShareUrl,
+		type VisibilityLevel,
+	} from '@mana/shared-privacy';
 	import type { ViewProps } from '$lib/app-registry';
 	import type { LocalEvent } from '../types';
 	import type { LocalTimeBlock } from '$lib/data/time-blocks/types';
@@ -98,6 +103,21 @@
 		await eventsStore.setVisibility(eventId, next);
 	}
 
+	async function handleRegenerate() {
+		await eventsStore.regenerateUnlistedToken(eventId);
+	}
+
+	async function handleRevoke() {
+		await eventsStore.setVisibility(eventId, 'space');
+	}
+
+	const shareUrl = $derived.by(() => {
+		const token = detail.entity?.unlistedToken;
+		if (!token) return '';
+		const origin = typeof window === 'undefined' ? 'https://mana.how' : window.location.origin;
+		return buildShareUrl(origin, token);
+	});
+
 	async function deleteEvent() {
 		const id = eventId;
 		await eventsStore.deleteEvent(id);
@@ -132,6 +152,17 @@
 				<span class="prop-label">Sichtbarkeit</span>
 				<VisibilityPicker level={event.visibility ?? 'private'} onChange={handleVisibilityChange} />
 			</div>
+
+			{#if event.visibility === 'unlisted' && event.unlistedToken && shareUrl}
+				<div class="prop-row prop-row--share">
+					<SharedLinkControls
+						token={event.unlistedToken}
+						url={shareUrl}
+						onRegenerate={handleRegenerate}
+						onRevoke={handleRevoke}
+					/>
+				</div>
+			{/if}
 
 			<div class="prop-row">
 				<span class="prop-icon"><Clock size={14} /></span>
