@@ -3,6 +3,7 @@
   6 tests with score selection, pain region marking, and result summary.
 -->
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import {
 		ASSESSMENT_TESTS,
 		BODY_REGION_LABELS,
@@ -106,7 +107,11 @@
 			{currentStep === 0 && !showResults ? '×' : '←'}
 		</button>
 		<span class="step-label">
-			{showResults ? 'Ergebnis' : `Schritt ${currentStep + 1} von ${totalSteps}`}
+			{showResults
+				? $_('stretch.assessment.result_label')
+				: $_('stretch.assessment.step_label', {
+						values: { current: currentStep + 1, total: totalSteps },
+					})}
 		</span>
 	</div>
 
@@ -120,7 +125,7 @@
 		<div class="results-screen">
 			<div class="score-circle">
 				<span class="score-value">{overallScore()}%</span>
-				<span class="score-label">Beweglichkeit</span>
+				<span class="score-label">{$_('stretch.assessment.score_label')}</span>
 			</div>
 
 			<div class="results-grid">
@@ -143,7 +148,7 @@
 
 			{#if weakAreas().length > 0}
 				<div class="weak-notice">
-					<span class="weak-title">Verbesserungsbedarf:</span>
+					<span class="weak-title">{$_('stretch.assessment.weak_title')}</span>
 					<span class="weak-areas">
 						{weakAreas()
 							.map((r) => BODY_REGION_LABELS[r]?.de ?? r)
@@ -154,7 +159,7 @@
 
 			<!-- Pain Regions (optional) -->
 			<div class="pain-section">
-				<span class="pain-title">Schmerzbereiche (optional)</span>
+				<span class="pain-title">{$_('stretch.assessment.pain_title')}</span>
 				<div class="pain-add-row">
 					<select class="pain-select" bind:value={painRegion}>
 						{#each BODY_REGIONS.filter((r) => r !== 'full_body') as region}
@@ -173,7 +178,9 @@
 				{/each}
 			</div>
 
-			<button class="save-btn" onclick={saveAndFinish}>Speichern</button>
+			<button class="save-btn" onclick={saveAndFinish}
+				>{$_('stretch.assessment.action_save')}</button
+			>
 		</div>
 	{:else if currentTest}
 		<!-- Test Step -->

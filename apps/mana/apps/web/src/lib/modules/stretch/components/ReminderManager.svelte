@@ -2,6 +2,8 @@
   ReminderManager — Configure stretch reminders (time, days, linked routine).
 -->
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
+	import { untrack } from 'svelte';
 	import type { StretchReminder, StretchRoutine } from '../types';
 	import { stretchStore } from '../stores/stretch.svelte';
 
@@ -14,12 +16,20 @@
 	let { reminders, routines, onClose }: Props = $props();
 
 	let showCreate = $state(false);
-	let newName = $state('Dehn-Erinnerung');
+	let newName = $state(untrack(() => $_('stretch.reminders.default_name')));
 	let newTime = $state('09:00');
 	let newDays = $state<number[]>([1, 2, 3, 4, 5]); // Mon–Fri
 	let newRoutineId = $state<string | null>(null);
 
-	const DAY_LABELS = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+	const DAY_LABELS = $derived([
+		$_('stretch.reminders.day_short_0'),
+		$_('stretch.reminders.day_short_1'),
+		$_('stretch.reminders.day_short_2'),
+		$_('stretch.reminders.day_short_3'),
+		$_('stretch.reminders.day_short_4'),
+		$_('stretch.reminders.day_short_5'),
+		$_('stretch.reminders.day_short_6'),
+	]);
 
 	function toggleDay(day: number) {
 		if (newDays.includes(day)) {
@@ -38,7 +48,7 @@
 			days: newDays,
 		});
 		showCreate = false;
-		newName = 'Dehn-Erinnerung';
+		newName = $_('stretch.reminders.default_name');
 		newTime = '09:00';
 		newDays = [1, 2, 3, 4, 5];
 		newRoutineId = null;
@@ -56,7 +66,7 @@
 <div class="reminder-overlay">
 	<div class="reminder-header">
 		<button class="back-btn" onclick={onClose}>←</button>
-		<span class="header-title">Erinnerungen</span>
+		<span class="header-title">{$_('stretch.reminders.header_title')}</span>
 	</div>
 
 	<div class="reminder-body">
@@ -85,13 +95,20 @@
 						<span class="rem-routine">{linked.name}</span>
 					{/if}
 				{/if}
-				<button class="rem-delete" onclick={() => deleteReminder(reminder.id)}>Löschen</button>
+				<button class="rem-delete" onclick={() => deleteReminder(reminder.id)}
+					>{$_('stretch.reminders.action_delete')}</button
+				>
 			</div>
 		{/each}
 
 		{#if showCreate}
 			<div class="create-form">
-				<input class="form-input" type="text" placeholder="Name..." bind:value={newName} />
+				<input
+					class="form-input"
+					type="text"
+					placeholder={$_('stretch.reminders.placeholder_name')}
+					bind:value={newName}
+				/>
 				<input class="form-input time-input" type="time" bind:value={newTime} />
 				<div class="days-row">
 					{#each [0, 1, 2, 3, 4, 5, 6] as day}
@@ -103,24 +120,28 @@
 					{/each}
 				</div>
 				<select class="form-select" bind:value={newRoutineId}>
-					<option value={null}>Keine Routine verknüpft</option>
+					<option value={null}>{$_('stretch.reminders.select_no_routine')}</option>
 					{#each routines as routine}
 						<option value={routine.id}>{routine.name}</option>
 					{/each}
 				</select>
 				<div class="form-actions">
-					<button class="btn-cancel" onclick={() => (showCreate = false)}>Abbrechen</button>
+					<button class="btn-cancel" onclick={() => (showCreate = false)}
+						>{$_('stretch.reminders.action_cancel')}</button
+					>
 					<button class="btn-save" onclick={handleCreate} disabled={newDays.length === 0}>
-						Erstellen
+						{$_('stretch.reminders.action_create')}
 					</button>
 				</div>
 			</div>
 		{:else}
-			<button class="add-btn" onclick={() => (showCreate = true)}> + Neue Erinnerung </button>
+			<button class="add-btn" onclick={() => (showCreate = true)}>
+				{$_('stretch.reminders.action_new')}
+			</button>
 		{/if}
 
 		{#if reminders.length === 0 && !showCreate}
-			<p class="empty-text">Noch keine Erinnerungen eingerichtet.</p>
+			<p class="empty-text">{$_('stretch.reminders.empty')}</p>
 		{/if}
 	</div>
 </div>

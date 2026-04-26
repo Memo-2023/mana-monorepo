@@ -3,6 +3,7 @@
   Fullscreen overlay with exercise instructions, countdown, side-switch, skip/pause.
 -->
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import type { StretchRoutine, StretchExercise, RoutineExercise } from '../types';
 	import { BODY_REGION_LABELS } from '../types';
 	import { stretchStore } from '../stores/stretch.svelte';
@@ -214,9 +215,13 @@
 				<h2 class="ready-title">{routine.name}</h2>
 				<p class="ready-desc">{routine.description}</p>
 				<p class="ready-meta">
-					{totalSlots} Übungen &middot; ~{routine.estimatedDurationMin} Min
+					{$_('stretch.player.ready_meta', {
+						values: { count: totalSlots, minutes: routine.estimatedDurationMin },
+					})}
 				</p>
-				<button class="start-btn" onclick={startSession}> Starten </button>
+				<button class="start-btn" onclick={startSession}>
+					{$_('stretch.player.action_start')}
+				</button>
 			</div>
 		</div>
 	{:else if phase === 'finished'}
@@ -224,16 +229,23 @@
 		<div class="finish-screen">
 			<div class="finish-content">
 				<div class="finish-check">&#10003;</div>
-				<h2 class="finish-title">Geschafft!</h2>
+				<h2 class="finish-title">{$_('stretch.player.finish_title')}</h2>
 				<p class="finish-stats">
-					{completedCount} von {totalSlots} Übungen &middot;
-					{Math.round((Date.now() - sessionStartTime) / 60000)} Min
+					{$_('stretch.player.finish_stats', {
+						values: {
+							completed: completedCount,
+							total: totalSlots,
+							minutes: Math.round((Date.now() - sessionStartTime) / 60000),
+						},
+					})}
 				</p>
 				{#if skippedIds.length > 0}
-					<p class="finish-skipped">{skippedIds.length} übersprungen</p>
+					<p class="finish-skipped">
+						{$_('stretch.player.finish_skipped', { values: { count: skippedIds.length } })}
+					</p>
 				{/if}
 				<div class="mood-section">
-					<p class="mood-label">Wie fühlst du dich?</p>
+					<p class="mood-label">{$_('stretch.player.mood_label')}</p>
 					<div class="mood-row">
 						{#each [1, 2, 3, 4, 5] as val}
 							<button
@@ -246,7 +258,9 @@
 						{/each}
 					</div>
 				</div>
-				<button class="done-btn" onclick={handleFinishWithMood}>Fertig</button>
+				<button class="done-btn" onclick={handleFinishWithMood}
+					>{$_('stretch.player.action_done')}</button
+				>
 			</div>
 		</div>
 	{:else}
@@ -256,7 +270,7 @@
 				<button class="close-btn" onclick={handleCancel}>×</button>
 				<span class="exercise-counter">{currentIndex + 1} / {totalSlots}</span>
 				{#if isPaused}
-					<span class="pause-badge">Pause</span>
+					<span class="pause-badge">{$_('stretch.player.pause_badge')}</span>
 				{/if}
 			</div>
 
@@ -264,7 +278,10 @@
 				{#if currentExercise}
 					<h2 class="exercise-name">{currentExercise.name}</h2>
 					{#if currentSide}
-						<span class="side-badge">{currentSide === 'left' ? 'Linke Seite' : 'Rechte Seite'}</span
+						<span class="side-badge"
+							>{currentSide === 'left'
+								? $_('stretch.player.side_left')
+								: $_('stretch.player.side_right')}</span
 						>
 					{/if}
 					<span class="exercise-region"
@@ -274,9 +291,9 @@
 				{/if}
 
 				{#if phase === 'side_switch'}
-					<div class="side-switch-notice">Seitenwechsel...</div>
+					<div class="side-switch-notice">{$_('stretch.player.side_switch_notice')}</div>
 				{:else if phase === 'rest'}
-					<div class="rest-notice">Pause</div>
+					<div class="rest-notice">{$_('stretch.player.rest_notice')}</div>
 				{/if}
 			</div>
 
@@ -291,12 +308,14 @@
 			<!-- Controls -->
 			<div class="controls">
 				<button class="ctrl-btn" onclick={previousExercise} disabled={currentIndex <= 0}>
-					&#9664; Zurück
+					{$_('stretch.player.action_back')}
 				</button>
 				<button class="ctrl-btn pause-btn" onclick={togglePause}>
-					{isPaused ? '&#9654; Weiter' : '&#10074;&#10074; Pause'}
+					{isPaused ? $_('stretch.player.action_resume') : $_('stretch.player.action_pause')}
 				</button>
-				<button class="ctrl-btn" onclick={skipExercise}> Weiter &#9654; </button>
+				<button class="ctrl-btn" onclick={skipExercise}>
+					{$_('stretch.player.action_next')}
+				</button>
 			</div>
 
 			<!-- Overall Progress -->

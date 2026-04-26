@@ -2,6 +2,7 @@
   RoutineCreator — Build a custom stretch routine from the exercise library.
 -->
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import type { StretchExercise, RoutineExercise, BodyRegion } from '../types';
 	import { BODY_REGION_LABELS } from '../types';
 	import { stretchStore } from '../stores/stretch.svelte';
@@ -87,13 +88,13 @@
 <div class="creator-overlay">
 	<div class="creator-header">
 		<button class="back-btn" onclick={onCancel}>×</button>
-		<span class="header-title">Neue Routine</span>
+		<span class="header-title">{$_('stretch.creator.header_title')}</span>
 		<button
 			class="save-btn"
 			onclick={handleSave}
 			disabled={!name.trim() || selectedExercises.length === 0}
 		>
-			Speichern
+			{$_('stretch.creator.action_save')}
 		</button>
 	</div>
 
@@ -104,14 +105,14 @@
 			<input
 				class="name-input"
 				type="text"
-				placeholder="Name der Routine..."
+				placeholder={$_('stretch.creator.placeholder_name')}
 				bind:value={name}
 				autofocus
 			/>
 			<input
 				class="desc-input"
 				type="text"
-				placeholder="Beschreibung (optional)..."
+				placeholder={$_('stretch.creator.placeholder_description')}
 				bind:value={description}
 			/>
 		</div>
@@ -120,7 +121,9 @@
 		{#if selectedExercises.length > 0}
 			<div class="selected-section">
 				<span class="section-label">
-					{selectedExercises.length} Übungen &middot; ~{estimatedMin} Min
+					{$_('stretch.creator.selected_summary', {
+						values: { count: selectedExercises.length, minutes: estimatedMin },
+					})}
 				</span>
 				{#each selectedExercises as slot, i (slot.exerciseId)}
 					{@const ex = exercises.find((e) => e.id === slot.exerciseId)}
@@ -143,13 +146,13 @@
 
 		<!-- Exercise Picker -->
 		<div class="picker-section">
-			<span class="section-label">Übung hinzufügen</span>
+			<span class="section-label">{$_('stretch.creator.section_picker')}</span>
 			<!-- Region Filter -->
 			<div class="filter-row">
 				<button
 					class="filter-chip"
 					class:active={filterRegion === 'all'}
-					onclick={() => (filterRegion = 'all')}>Alle</button
+					onclick={() => (filterRegion = 'all')}>{$_('stretch.creator.filter_all')}</button
 				>
 				{#each ['neck', 'shoulders', 'upper_back', 'lower_back', 'hips', 'hamstrings', 'quads', 'full_body'] as region}
 					<button

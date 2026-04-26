@@ -2,6 +2,7 @@
   SessionHistory — Past stretch sessions with calendar heatmap and stats.
 -->
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import type { StretchSession, StretchRoutine } from '../types';
 	import {
 		getSessionsPerDay,
@@ -36,7 +37,7 @@
 <div class="history-overlay">
 	<div class="history-header">
 		<button class="back-btn" onclick={onClose}>←</button>
-		<span class="header-title">Verlauf</span>
+		<span class="header-title">{$_('stretch.history.header_title')}</span>
 	</div>
 
 	<div class="history-body">
@@ -44,21 +45,21 @@
 		<div class="stats-row">
 			<div class="stat">
 				<span class="stat-val">{totalSessions}</span>
-				<span class="stat-lbl">Sessions</span>
+				<span class="stat-lbl">{$_('stretch.history.stat_sessions')}</span>
 			</div>
 			<div class="stat">
 				<span class="stat-val">{totalMinutes}</span>
-				<span class="stat-lbl">Minuten</span>
+				<span class="stat-lbl">{$_('stretch.history.stat_minutes')}</span>
 			</div>
 			<div class="stat">
 				<span class="stat-val">{streak}</span>
-				<span class="stat-lbl">Streak</span>
+				<span class="stat-lbl">{$_('stretch.history.stat_streak')}</span>
 			</div>
 		</div>
 
 		<!-- 30-Day Heatmap -->
 		<div class="heatmap-section">
-			<span class="section-label">Letzte 30 Tage</span>
+			<span class="section-label">{$_('stretch.history.section_30_days')}</span>
 			<div class="heatmap-grid">
 				{#each last30 as day}
 					<div
@@ -75,7 +76,7 @@
 		<!-- Body Region Balance -->
 		{#if regionBalance.length > 0}
 			<div class="balance-section">
-				<span class="section-label">Körperregion-Balance</span>
+				<span class="section-label">{$_('stretch.history.section_balance')}</span>
 				{#each regionBalance.slice(0, 6) as rb}
 					{@const maxCount = regionBalance[0]?.count ?? 1}
 					<div class="balance-row">
@@ -91,14 +92,19 @@
 
 		<!-- Session List -->
 		<div class="session-list">
-			<span class="section-label">Alle Sessions</span>
+			<span class="section-label">{$_('stretch.history.section_all_sessions')}</span>
 			{#each sessions.slice(0, 50) as session (session.id)}
 				<div class="session-item">
 					<div class="si-left">
 						<span class="si-name">{session.routineName}</span>
 						<span class="si-meta">
-							{Math.round(session.totalDurationSec / 60)} Min &middot;
-							{session.completedExercises}/{session.totalExercises} Übungen
+							{$_('stretch.history.session_meta', {
+								values: {
+									minutes: Math.round(session.totalDurationSec / 60),
+									completed: session.completedExercises,
+									total: session.totalExercises,
+								},
+							})}
 							{#if session.mood}
 								&middot; {['😫', '😕', '😐', '😊', '🤩'][session.mood - 1]}
 							{/if}

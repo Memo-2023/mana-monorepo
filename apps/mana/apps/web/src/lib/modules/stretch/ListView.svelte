@@ -3,6 +3,7 @@
   Streak, quick-start routines, assessment recommendation, recent sessions.
 -->
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { formatDate } from '$lib/i18n/format';
 	import {
 		useAllStretchExercises,
@@ -99,17 +100,17 @@
 			<button
 				class="tab"
 				class:active={activeTab === 'dashboard'}
-				onclick={() => (activeTab = 'dashboard')}>Dashboard</button
+				onclick={() => (activeTab = 'dashboard')}>{$_('stretch.list_view.tab_dashboard')}</button
 			>
 			<button
 				class="tab"
 				class:active={activeTab === 'routines'}
-				onclick={() => (activeTab = 'routines')}>Routinen</button
+				onclick={() => (activeTab = 'routines')}>{$_('stretch.list_view.tab_routines')}</button
 			>
 			<button
 				class="tab"
 				class:active={activeTab === 'exercises'}
-				onclick={() => (activeTab = 'exercises')}>Übungen</button
+				onclick={() => (activeTab = 'exercises')}>{$_('stretch.list_view.tab_exercises')}</button
 			>
 		</div>
 
@@ -118,15 +119,15 @@
 			<div class="stats-row">
 				<div class="stat-card">
 					<span class="stat-value">{streak}</span>
-					<span class="stat-label">Tage Streak</span>
+					<span class="stat-label">{$_('stretch.list_view.stat_streak')}</span>
 				</div>
 				<div class="stat-card">
 					<span class="stat-value">{todayMinutes}</span>
-					<span class="stat-label">Min heute</span>
+					<span class="stat-label">{$_('stretch.list_view.stat_today')}</span>
 				</div>
 				<div class="stat-card">
 					<span class="stat-value">{weekCount}</span>
-					<span class="stat-label">Diese Woche</span>
+					<span class="stat-label">{$_('stretch.list_view.stat_week')}</span>
 				</div>
 			</div>
 
@@ -145,13 +146,17 @@
 			<!-- Quick Start -->
 			<div class="section">
 				<div class="section-header">
-					<span class="section-title">Schnellstart</span>
+					<span class="section-title">{$_('stretch.list_view.section_quickstart')}</span>
 				</div>
 				<div class="routine-grid">
 					{#each pinnedRoutines as routine (routine.id)}
 						<button class="routine-card" onclick={() => startRoutine(routine.id)}>
 							<span class="routine-name">{routine.name}</span>
-							<span class="routine-meta">{routine.estimatedDurationMin} Min</span>
+							<span class="routine-meta"
+								>{$_('stretch.list_view.routine_minutes', {
+									values: { count: routine.estimatedDurationMin },
+								})}</span
+							>
 							<span class="routine-type"
 								>{ROUTINE_TYPE_LABELS[routine.routineType]?.de ?? routine.routineType}</span
 							>
@@ -165,26 +170,42 @@
 				<div class="recommendation">
 					<div class="rec-header">
 						{#if weakAreas.length > 0}
-							<span class="rec-title">Empfohlen für dich</span>
+							<span class="rec-title">{$_('stretch.list_view.rec_title_for_you')}</span>
 							<span class="rec-detail">
-								Schwachstellen: {weakAreas.map((r) => BODY_REGION_LABELS[r]?.de ?? r).join(', ')}
+								{$_('stretch.list_view.rec_weak_areas', {
+									values: {
+										areas: weakAreas.map((r) => BODY_REGION_LABELS[r]?.de ?? r).join(', '),
+									},
+								})}
 							</span>
 						{:else}
-							<span class="rec-title">Vorschlag</span>
+							<span class="rec-title">{$_('stretch.list_view.rec_title_suggestion')}</span>
 						{/if}
 					</div>
 					<button class="rec-btn" onclick={() => startRoutine(recommended.id)}>
-						{recommended.name} starten ({recommended.estimatedDurationMin} Min)
+						{$_('stretch.list_view.rec_btn_start', {
+							values: {
+								name: recommended.name,
+								minutes: recommended.estimatedDurationMin,
+							},
+						})}
 					</button>
 				</div>
 			{/if}
 
 			<!-- Assessment CTA -->
 			<button class="action-btn" onclick={() => (showAssessment = true)}>
-				{latestAssessment ? 'Bestandsaufnahme wiederholen' : 'Erste Bestandsaufnahme starten'}
+				{latestAssessment
+					? $_('stretch.list_view.assessment_btn_repeat')
+					: $_('stretch.list_view.assessment_btn_first')}
 				{#if latestAssessment}
 					<span class="action-meta"
-						>Letzte: {relativeDays(latestAssessment.assessedAt)} — Score: {latestAssessment.overallScore}%</span
+						>{$_('stretch.list_view.assessment_meta', {
+							values: {
+								when: relativeDays(latestAssessment.assessedAt),
+								score: latestAssessment.overallScore,
+							},
+						})}</span
 					>
 				{/if}
 			</button>
@@ -193,13 +214,19 @@
 			{#if todaySessions.length > 0}
 				<div class="section">
 					<div class="section-header">
-						<span class="section-title">Heute</span>
-						<button class="link-btn" onclick={() => (showHistory = true)}>Alle</button>
+						<span class="section-title">{$_('stretch.list_view.section_today')}</span>
+						<button class="link-btn" onclick={() => (showHistory = true)}
+							>{$_('stretch.list_view.section_all_link')}</button
+						>
 					</div>
 					{#each todaySessions.slice(0, 3) as session (session.id)}
 						<div class="session-row">
 							<span class="session-name">{session.routineName}</span>
-							<span class="session-duration">{Math.round(session.totalDurationSec / 60)} Min</span>
+							<span class="session-duration"
+								>{$_('stretch.list_view.routine_minutes', {
+									values: { count: Math.round(session.totalDurationSec / 60) },
+								})}</span
+							>
 							<span class="session-time">{session.startedAt.split('T')[1]?.slice(0, 5)}</span>
 						</div>
 					{/each}
@@ -208,8 +235,12 @@
 
 			<!-- Quick Actions -->
 			<div class="quick-actions">
-				<button class="action-link" onclick={() => (showReminders = true)}>Erinnerungen</button>
-				<button class="action-link" onclick={() => (showHistory = true)}>Verlauf</button>
+				<button class="action-link" onclick={() => (showReminders = true)}
+					>{$_('stretch.list_view.action_reminders')}</button
+				>
+				<button class="action-link" onclick={() => (showHistory = true)}
+					>{$_('stretch.list_view.action_history')}</button
+				>
 			</div>
 		{:else if activeTab === 'routines'}
 			<!-- All Routines -->
@@ -221,13 +252,17 @@
 							<span class="rli-desc">{routine.description}</span>
 						</div>
 						<div class="rli-right">
-							<span class="rli-duration">{routine.estimatedDurationMin} Min</span>
+							<span class="rli-duration"
+								>{$_('stretch.list_view.routine_minutes', {
+									values: { count: routine.estimatedDurationMin },
+								})}</span
+							>
 							<span class="rli-type">{ROUTINE_TYPE_LABELS[routine.routineType]?.de ?? ''}</span>
 						</div>
 					</button>
 				{/each}
 				<button class="add-routine-btn" onclick={() => (showCreateRoutine = true)}>
-					+ Eigene Routine erstellen
+					{$_('stretch.list_view.action_create_routine')}
 				</button>
 			</div>
 		{:else if activeTab === 'exercises'}
@@ -243,7 +278,9 @@
 							<span class="ex-region">{BODY_REGION_LABELS[ex.bodyRegion]?.de ?? ex.bodyRegion}</span
 							>
 							<span class="ex-duration"
-								>{ex.defaultDurationSec}s{ex.bilateral ? ' /Seite' : ''}</span
+								>{ex.defaultDurationSec}s{ex.bilateral
+									? $_('stretch.list_view.side_suffix')
+									: ''}</span
 							>
 						</div>
 					</div>
