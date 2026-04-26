@@ -148,7 +148,7 @@ ingress:
     service: http://localhost:3065
   - hostname: research.mana.how
     service: http://localhost:3068
-  - hostname: analytics.mana.how
+  - hostname: community.mana.how
     service: http://localhost:3064
 
   # ============================================

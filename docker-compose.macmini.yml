@@ -587,7 +587,7 @@ services:
       # ("Wachsame Eule #4528"). Set in .env.macmini — rotation re-keys
       # only future pseudonyms, existing rows keep the old hash/name.
       FEEDBACK_PSEUDONYM_SECRET: ${FEEDBACK_PSEUDONYM_SECRET:?missing in .env.macmini}
-      CORS_ORIGINS: https://mana.how
+      CORS_ORIGINS: https://mana.how,https://community.mana.how
     ports:
       - "3064:3064"
     healthcheck:
@@ -950,7 +950,7 @@ services:
       # /api/v1/(public/)feedback/* endpoints directly; SSR uses the
       # internal docker-network URL.
       PUBLIC_MANA_ANALYTICS_URL: http://mana-analytics:3064
-      PUBLIC_MANA_ANALYTICS_URL_CLIENT: https://analytics.mana.how
+      PUBLIC_MANA_ANALYTICS_URL_CLIENT: https://community.mana.how
       # mana-ai background Mission Runner. Browser calls the audit
       # endpoint (/api/v1/me/ai-audit) to render the Workbench
       # "Datenzugriff" tab. SSR doesn't hit this service directly.
