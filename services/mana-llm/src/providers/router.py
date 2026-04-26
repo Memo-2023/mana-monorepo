@@ -1,12 +1,38 @@
-"""Provider routing logic for mana-llm with auto-fallback support."""
+"""Provider routing with alias resolution and health-aware fallback.
 
-import asyncio
+The router is the single entry point that the FastAPI handlers use. Its
+job is:
+
+1. Resolve the request's ``model`` field. If it lives in the ``mana/``
+   namespace the :class:`AliasRegistry` returns an ordered chain of
+   concrete provider/model strings; everything else is treated as a
+   single-entry chain (caller passed a direct provider/model).
+2. Walk the chain, skipping entries whose provider is either
+   unconfigured at this deployment (no API key) or currently marked
+   unhealthy in the :class:`ProviderHealthCache`.
+3. Try each remaining entry. Connection errors, timeouts, 5xx, and rate
+   limits are retryable — record them in the cache and move to the next
+   entry. Capability/auth/blocked errors are caller-fixable and
+   propagate immediately without touching the health cache.
+4. Return the first successful response. If every entry was skipped or
+   failed, raise :class:`NoHealthyProviderError` (HTTP 503) carrying
+   the full attempt log so debugging is straightforward.
+
+The full design lives in ``docs/plans/llm-fallback-aliases.md``. This is
+the M3 milestone.
+"""
+
+from __future__ import annotations
+
 import logging
-import time
-from collections.abc import AsyncIterator
-from typing import Any
+from collections.abc import AsyncIterator, Awaitable, Callable
+from typing import Any, TypeVar
 
+import httpx
+
+from src.aliases import AliasRegistry
 from src.config import settings
+from src.health import ProviderHealthCache
 from src.models import (
     ChatCompletionRequest,
     ChatCompletionResponse,
@@ -17,36 +43,51 @@ from src.models import (
 )
 
 from .base import LLMProvider
-from .errors import ProviderCapabilityError
+from .errors import (
+    NoHealthyProviderError,
+    ProviderAuthError,
+    ProviderBlockedError,
+    ProviderCapabilityError,
+    ProviderError,
+    ProviderRateLimitError,
+)
 from .ollama import OllamaProvider
 from .openai_compat import OpenAICompatProvider
 
 logger = logging.getLogger(__name__)
 
+T = TypeVar("T")
+
 
 class ProviderRouter:
-    """Routes requests to appropriate LLM providers with auto-fallback.
+    """Health-aware provider router with alias resolution.
 
-    When auto_fallback_enabled is True and a Google API key is configured:
-    - Ollama requests that fail or exceed max_concurrent are automatically
-      retried on Google Gemini with model mapping.
-    - Explicit provider requests (e.g., openrouter/...) are never fallback-routed.
+    Construct with the AliasRegistry and ProviderHealthCache from
+    application startup; both are external dependencies so tests can
+    inject mocks without going through global state.
     """
 
-    def __init__(self):
+    def __init__(
+        self,
+        aliases: AliasRegistry,
+        health_cache: ProviderHealthCache,
+    ) -> None:
+        self.aliases = aliases
+        self.health_cache = health_cache
         self.providers: dict[str, LLMProvider] = {}
-        self._ollama_concurrent: int = 0
-        self._ollama_health_cache: tuple[dict[str, Any] | None, float] = (None, 0)
-        self._health_cache_ttl: float = 5.0  # seconds
         self._initialize_providers()
 
-    def _initialize_providers(self) -> None:
-        """Initialize available providers based on configuration."""
-        # Ollama is always available (local)
-        self.providers["ollama"] = OllamaProvider()
-        logger.info(f"Initialized Ollama provider at {settings.ollama_url}")
+    # ------------------------------------------------------------------
+    # Provider initialisation
+    # ------------------------------------------------------------------
 
-        # Google Gemini (fallback provider)
+    def _initialize_providers(self) -> None:
+        """Spin up provider adapters based on what's configured."""
+        # Ollama: always present (talks to a local/proxied server). Whether
+        # it's actually reachable is the cache's job to figure out.
+        self.providers["ollama"] = OllamaProvider()
+        logger.info("Initialized Ollama provider at %s", settings.ollama_url)
+
         if settings.google_api_key:
             from .google import GoogleProvider
 
@@ -54,9 +95,8 @@ class ProviderRouter:
                 api_key=settings.google_api_key,
                 default_model=settings.google_default_model,
             )
-            logger.info("Initialized Google Gemini provider (fallback)")
+            logger.info("Initialized Google Gemini provider")
 
-        # OpenRouter (if API key configured)
         if settings.openrouter_api_key:
             self.providers["openrouter"] = OpenAICompatProvider(
                 name="openrouter",
@@ -66,7 +106,6 @@ class ProviderRouter:
             )
             logger.info("Initialized OpenRouter provider")
 
-        # Groq (if API key configured)
         if settings.groq_api_key:
             self.providers["groq"] = OpenAICompatProvider(
                 name="groq",
@@ -75,7 +114,6 @@ class ProviderRouter:
             )
             logger.info("Initialized Groq provider")
 
-        # Together (if API key configured)
         if settings.together_api_key:
             self.providers["together"] = OpenAICompatProvider(
                 name="together",
@@ -84,83 +122,82 @@ class ProviderRouter:
             )
             logger.info("Initialized Together provider")
 
+    # ------------------------------------------------------------------
+    # Helpers
+    # ------------------------------------------------------------------
+
     def _parse_model(self, model: str) -> tuple[str, str]:
-        """Parse model string into (provider, model_name)."""
+        """Split ``provider/model`` into its parts.
+
+        Bare names (no prefix) default to Ollama for compatibility with
+        plain OpenAI-style requests. Aliases (``mana/...``) are resolved
+        before this is ever called.
+        """
         if "/" in model:
-            parts = model.split("/", 1)
-            provider = parts[0].lower()
-            model_name = parts[1]
-        else:
-            provider = "ollama"
-            model_name = model
+            provider, _, model_name = model.partition("/")
+            return provider.lower(), model_name
+        return "ollama", model
 
-        return provider, model_name
+    def _resolve_chain(self, model_or_alias: str) -> list[str]:
+        """Expand aliases to chains; pass everything else through unchanged."""
+        if AliasRegistry.is_alias(model_or_alias):
+            return list(self.aliases.resolve_chain(model_or_alias))
+        return [model_or_alias]
 
-    def _get_provider(self, provider_name: str) -> LLMProvider:
-        """Get provider by name, raise if not available."""
-        if provider_name not in self.providers:
-            available = list(self.providers.keys())
-            raise ValueError(
-                f"Provider '{provider_name}' not available. "
-                f"Available providers: {available}"
-            )
-        return self.providers[provider_name]
+    @staticmethod
+    def _is_retryable(exc: BaseException) -> bool:
+        """Should we treat this exception as "try the next chain entry"?
 
-    def _can_fallback_to_google(self, provider_name: str) -> bool:
-        """Check if a request can be fallback-routed to Google."""
-        return (
-            settings.auto_fallback_enabled
-            and provider_name == "ollama"
-            and "google" in self.providers
-        )
+        ConnectError / timeouts / 5xx / rate-limits = yes (provider blip).
+        Auth / capability / blocked / 4xx = no (caller has to fix
+        something; retrying with a different provider only hides the bug).
+        """
+        if isinstance(exc, ProviderCapabilityError):
+            return False
+        if isinstance(exc, ProviderBlockedError):
+            return False
+        if isinstance(exc, ProviderAuthError):
+            return False
+        if isinstance(exc, ProviderRateLimitError):
+            return True
+        if isinstance(
+            exc,
+            (
+                httpx.ConnectError,
+                httpx.ConnectTimeout,
+                httpx.ReadError,
+                httpx.ReadTimeout,
+                httpx.RemoteProtocolError,
+                httpx.WriteError,
+                httpx.WriteTimeout,
+                httpx.PoolTimeout,
+            ),
+        ):
+            return True
+        if isinstance(exc, httpx.HTTPStatusError):
+            return exc.response.status_code >= 500
+        if isinstance(exc, ProviderError):
+            # Any other provider-side error — treat as retryable.
+            # Subclasses with explicit non-retry semantics are caught above.
+            return True
+        # Unknown exception types: do NOT silently retry. Better to
+        # surface a strange error than hide a real bug behind a fallback.
+        return False
 
-    def _should_use_ollama(self) -> bool:
-        """Determine if Ollama should handle the request based on load."""
-        return self._ollama_concurrent < settings.ollama_max_concurrent
-
-    async def _get_ollama_health_cached(self) -> dict[str, Any]:
-        """Get Ollama health with caching (5s TTL)."""
-        cached, cached_at = self._ollama_health_cache
-        if cached is not None and (time.time() - cached_at) < self._health_cache_ttl:
-            return cached
-
-        try:
-            provider = self.providers.get("ollama")
-            if provider:
-                result = await provider.health_check()
-            else:
-                result = {"status": "unhealthy", "error": "no ollama provider"}
-        except Exception as e:
-            result = {"status": "unhealthy", "error": str(e)}
-
-        self._ollama_health_cache = (result, time.time())
-        return result
-
-    async def _fallback_to_google(
-        self,
-        request: ChatCompletionRequest,
-        model_name: str,
-        original_error: Exception | None = None,
-    ) -> ChatCompletionResponse:
-        """Route a request to Google Gemini as fallback."""
-        from .google import GoogleProvider
-
-        google = self.providers["google"]
-        assert isinstance(google, GoogleProvider)
-
-        gemini_model = google.map_model(model_name)
-        reason = f"error: {original_error}" if original_error else "overloaded"
-        logger.warning(
-            f"Falling back to Google Gemini ({gemini_model}) for ollama/{model_name} ({reason})"
-        )
-        return await google.chat_completion(request, gemini_model)
+    @staticmethod
+    def _exception_summary(exc: BaseException) -> str:
+        """Compact one-liner for cache.last_error and log entries."""
+        return f"{type(exc).__name__}: {exc}"
 
     def _check_tool_capability(
-        self, provider: LLMProvider, model_name: str, request: ChatCompletionRequest
+        self,
+        provider: LLMProvider,
+        model_name: str,
+        request: ChatCompletionRequest,
     ) -> None:
-        """Refuse tool-bearing requests for providers/models without tool support.
+        """Refuse tool-bearing requests for models that don't support tools.
 
-        Silent downgrade (dropping the `tools` payload) is more dangerous
+        Silent downgrade (dropping the ``tools`` payload) is more dangerous
         than an explicit error — the caller would get plain text back and
         have no way to tell the tools never reached the model.
         """
@@ -169,168 +206,228 @@ class ProviderRouter:
         if not provider.model_supports_tools(model_name):
             raise ProviderCapabilityError(
                 f"{provider.name}/{model_name} does not support tool calling. "
-                "Choose a tool-capable model (e.g. gemini-2.5-flash, llama3.1:*)"
+                "Choose a tool-capable model (e.g. groq/llama-3.3-70b-versatile)"
             )
+
+    # ------------------------------------------------------------------
+    # Core fallback executor (non-streaming)
+    # ------------------------------------------------------------------
+
+    async def _execute_with_fallback(
+        self,
+        model_or_alias: str,
+        request: ChatCompletionRequest,
+        call: Callable[[LLMProvider, str, ChatCompletionRequest], Awaitable[T]],
+    ) -> T:
+        """Walk the resolved chain, returning the first successful result.
+
+        ``call`` is the operation to run against each chain entry, e.g.
+        ``lambda p, m, req: p.chat_completion(req, m)``. The function
+        receives the provider instance, the model name (without the
+        provider prefix), and the original request.
+        """
+        chain = self._resolve_chain(model_or_alias)
+        attempts: list[tuple[str, str]] = []
+        last_exc: Exception | None = None
+
+        for entry in chain:
+            provider_name, model_name = self._parse_model(entry)
+            if provider_name not in self.providers:
+                logger.debug(
+                    "skip chain entry %s — provider %s not configured here",
+                    entry,
+                    provider_name,
+                )
+                attempts.append((entry, "unconfigured"))
+                continue
+
+            if not self.health_cache.is_healthy(provider_name):
+                logger.debug("skip chain entry %s — cache says unhealthy", entry)
+                attempts.append((entry, "cache-unhealthy"))
+                continue
+
+            provider = self.providers[provider_name]
+            self._check_tool_capability(provider, model_name, request)
+
+            try:
+                logger.info(
+                    "execute → %s (alias=%s)",
+                    entry,
+                    model_or_alias if model_or_alias != entry else "<direct>",
+                )
+                result = await call(provider, model_name, request)
+                self.health_cache.mark_healthy(provider_name)
+                return result
+            except Exception as e:
+                if not self._is_retryable(e):
+                    # Caller error / non-retryable provider error — propagate
+                    # without touching the health cache. The cache is for
+                    # liveness, not for recording what the user asked for
+                    # being wrong.
+                    raise
+                self.health_cache.mark_unhealthy(provider_name, self._exception_summary(e))
+                attempts.append((entry, type(e).__name__))
+                last_exc = e
+                logger.warning(
+                    "execute %s failed (retryable, will try next): %s",
+                    entry,
+                    e,
+                )
+
+        raise NoHealthyProviderError(model_or_alias, attempts, last_exc)
+
+    # ------------------------------------------------------------------
+    # Public API — non-streaming
+    # ------------------------------------------------------------------
 
     async def chat_completion(
         self,
         request: ChatCompletionRequest,
     ) -> ChatCompletionResponse:
-        """Route chat completion request with auto-fallback."""
-        provider_name, model_name = self._parse_model(request.model)
+        """Chat completion with alias resolution + health-aware fallback."""
 
-        # Non-Ollama providers: direct routing, no fallback
-        if provider_name != "ollama":
-            provider = self._get_provider(provider_name)
-            self._check_tool_capability(provider, model_name, request)
-            logger.info(f"Routing chat completion to {provider_name}/{model_name}")
-            return await provider.chat_completion(request, model_name)
+        async def call(provider: LLMProvider, model: str, req: ChatCompletionRequest):
+            return await provider.chat_completion(req, model)
 
-        # Ollama with fallback logic
-        can_fallback = self._can_fallback_to_google(provider_name)
+        return await self._execute_with_fallback(request.model, request, call)
 
-        # Check if Ollama is overloaded
-        if can_fallback and not self._should_use_ollama():
-            return await self._fallback_to_google(request, model_name)
-
-        # Try Ollama first
-        provider = self._get_provider("ollama")
-        self._check_tool_capability(provider, model_name, request)
-        logger.info(f"Routing chat completion to ollama/{model_name}")
-        self._ollama_concurrent += 1
-
-        try:
-            return await provider.chat_completion(request, model_name)
-        except Exception as e:
-            logger.error(f"Chat completion failed on ollama: {e}")
-            if can_fallback:
-                return await self._fallback_to_google(request, model_name, e)
-            raise
-        finally:
-            self._ollama_concurrent -= 1
+    # ------------------------------------------------------------------
+    # Public API — streaming (pre-first-byte fallback)
+    # ------------------------------------------------------------------
 
     async def chat_completion_stream(
         self,
         request: ChatCompletionRequest,
     ) -> AsyncIterator[ChatCompletionStreamResponse]:
-        """Route streaming chat completion with auto-fallback."""
-        provider_name, model_name = self._parse_model(request.model)
+        """Streaming variant. Falls back BEFORE the first chunk arrives;
+        once the first chunk has been yielded the provider is committed
+        and any further error propagates.
 
-        # Non-Ollama: direct
-        if provider_name != "ollama":
-            provider = self._get_provider(provider_name)
+        Why pre-first-byte only: stitching half-streams from two different
+        providers would mix two voices in the output and is impossible to
+        sanity-check after the fact.
+        """
+        chain = self._resolve_chain(request.model)
+        attempts: list[tuple[str, str]] = []
+        last_exc: Exception | None = None
+
+        for entry in chain:
+            provider_name, model_name = self._parse_model(entry)
+            if provider_name not in self.providers:
+                attempts.append((entry, "unconfigured"))
+                continue
+            if not self.health_cache.is_healthy(provider_name):
+                attempts.append((entry, "cache-unhealthy"))
+                continue
+
+            provider = self.providers[provider_name]
             self._check_tool_capability(provider, model_name, request)
-            logger.info(f"Routing streaming to {provider_name}/{model_name}")
-            async for chunk in provider.chat_completion_stream(request, model_name):
+
+            stream = provider.chat_completion_stream(request, model_name)
+            try:
+                first_chunk = await stream.__anext__()
+            except StopAsyncIteration:
+                # Empty stream is a successful but content-free response.
+                # Commit and exit cleanly.
+                self.health_cache.mark_healthy(provider_name)
+                logger.info("stream %s yielded empty response", entry)
+                return
+            except Exception as e:
+                if not self._is_retryable(e):
+                    raise
+                self.health_cache.mark_unhealthy(provider_name, self._exception_summary(e))
+                attempts.append((entry, type(e).__name__))
+                last_exc = e
+                logger.warning(
+                    "stream %s failed before first byte (retryable, trying next): %s",
+                    entry,
+                    e,
+                )
+                continue
+
+            # First byte landed — commit the provider, mark healthy, drain
+            # the rest of the stream. Any error from here on propagates;
+            # it is NOT safe to splice another provider's output in.
+            self.health_cache.mark_healthy(provider_name)
+            logger.info("stream → %s (committed after first chunk)", entry)
+            yield first_chunk
+            async for chunk in stream:
                 yield chunk
             return
 
-        # Ollama with fallback
-        can_fallback = self._can_fallback_to_google(provider_name)
+        raise NoHealthyProviderError(request.model, attempts, last_exc)
 
-        if can_fallback and not self._should_use_ollama():
-            from .google import GoogleProvider
+    # ------------------------------------------------------------------
+    # Embeddings — no fallback (out of scope for M3, separate concerns)
+    # ------------------------------------------------------------------
 
-            google = self.providers["google"]
-            assert isinstance(google, GoogleProvider)
-            gemini_model = google.map_model(model_name)
-            logger.warning(f"Streaming fallback to Google Gemini ({gemini_model})")
-            async for chunk in google.chat_completion_stream(request, gemini_model):
-                yield chunk
-            return
-
-        provider = self._get_provider("ollama")
-        self._check_tool_capability(provider, model_name, request)
-        logger.info(f"Routing streaming to ollama/{model_name}")
-        self._ollama_concurrent += 1
-
-        try:
-            async for chunk in provider.chat_completion_stream(request, model_name):
-                yield chunk
-        except Exception as e:
-            logger.error(f"Streaming failed on ollama: {e}")
-            if can_fallback:
-                from .google import GoogleProvider
-
-                google = self.providers["google"]
-                assert isinstance(google, GoogleProvider)
-                gemini_model = google.map_model(model_name)
-                logger.warning(f"Streaming fallback to Google Gemini ({gemini_model})")
-                async for chunk in google.chat_completion_stream(request, gemini_model):
-                    yield chunk
-            else:
-                raise
-        finally:
-            self._ollama_concurrent -= 1
-
-    async def embeddings(
-        self,
-        request: EmbeddingRequest,
-    ) -> EmbeddingResponse:
-        """Route embeddings request to appropriate provider."""
+    async def embeddings(self, request: EmbeddingRequest) -> EmbeddingResponse:
+        """Route an embeddings request directly. No alias / fallback."""
         provider_name, model_name = self._parse_model(request.model)
-        provider = self._get_provider(provider_name)
-
-        logger.info(f"Routing embeddings to {provider_name}/{model_name}")
-
+        if provider_name not in self.providers:
+            available = list(self.providers)
+            raise ValueError(
+                f"Provider '{provider_name}' not available. Available: {available}"
+            )
+        provider = self.providers[provider_name]
+        logger.info("embeddings → %s/%s", provider_name, model_name)
         return await provider.embeddings(request, model_name)
 
-    async def list_models(self) -> list[ModelInfo]:
-        """List all available models from all providers."""
-        all_models: list[ModelInfo] = []
+    # ------------------------------------------------------------------
+    # Discovery / introspection
+    # ------------------------------------------------------------------
 
+    async def list_models(self) -> list[ModelInfo]:
+        """List all available models from all configured providers.
+
+        Best-effort: providers that error are skipped with a warning so a
+        single broken provider can't take down ``GET /v1/models``.
+        """
+        all_models: list[ModelInfo] = []
         for provider in self.providers.values():
             try:
-                models = await provider.list_models()
-                all_models.extend(models)
-            except Exception as e:
-                logger.warning(f"Failed to list models from {provider.name}: {e}")
-
+                all_models.extend(await provider.list_models())
+            except Exception as e:  # noqa: BLE001
+                logger.warning("Failed to list models from %s: %s", provider.name, e)
         return all_models
 
     async def get_model(self, model_id: str) -> ModelInfo | None:
-        """Get specific model info."""
+        """Look up a single model by id, dispatching on the prefix."""
         provider_name, model_name = self._parse_model(model_id)
-
         if provider_name not in self.providers:
             return None
-
-        provider = self.providers[provider_name]
-        models = await provider.list_models()
-
-        for model in models:
-            if model.id == model_id or model.id.endswith(f"/{model_name}"):
-                return model
-
+        models = await self.providers[provider_name].list_models()
+        for m in models:
+            if m.id == model_id or m.id.endswith(f"/{model_name}"):
+                return m
         return None
 
     async def health_check(self) -> dict[str, Any]:
-        """Check health of all providers."""
-        results: dict[str, Any] = {}
+        """Snapshot of the per-provider liveness cache.
 
-        for name, provider in self.providers.items():
-            results[name] = await provider.health_check()
-
-        # Overall status
-        all_healthy = all(r.get("status") == "healthy" for r in results.values())
-        any_healthy = any(r.get("status") == "healthy" for r in results.values())
-
-        status_info: dict[str, Any] = {
-            "status": "healthy" if all_healthy else ("degraded" if any_healthy else "unhealthy"),
-            "providers": results,
-        }
-
-        # Include fallback info
-        if settings.auto_fallback_enabled and "google" in self.providers:
-            status_info["fallback"] = {
-                "enabled": True,
-                "ollama_concurrent": self._ollama_concurrent,
-                "ollama_max_concurrent": settings.ollama_max_concurrent,
+        Returns the same shape as before for backwards-compat with
+        ``GET /health`` (deprecated structure — M4 will swap to a
+        cleaner ``/v1/health`` endpoint).
+        """
+        snapshot = self.health_cache.snapshot(expected=list(self.providers))
+        providers_out: dict[str, Any] = {}
+        for name, state in snapshot.items():
+            providers_out[name] = {
+                "status": "healthy" if state.healthy else "unhealthy",
+                "consecutive_failures": state.consecutive_failures,
+                "last_error": state.last_error,
+                "last_check_unix": state.last_check or None,
+                "unhealthy_until_unix": state.unhealthy_until or None,
             }
 
-        return status_info
+        all_healthy = all(state.healthy for state in snapshot.values())
+        any_healthy = any(state.healthy for state in snapshot.values())
+        return {
+            "status": "healthy" if all_healthy else ("degraded" if any_healthy else "unhealthy"),
+            "providers": providers_out,
+        }
 
     async def close(self) -> None:
-        """Close all providers."""
+        """Close all provider clients."""
         for provider in self.providers.values():
             await provider.close()

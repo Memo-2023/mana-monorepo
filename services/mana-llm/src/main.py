@@ -3,6 +3,7 @@
 import logging
 import time
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, HTTPException, Request
@@ -10,8 +11,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 from sse_starlette.sse import EventSourceResponse
 
+from src.aliases import AliasRegistry
 from src.api_auth import ApiKeyMiddleware
 from src.config import settings
+from src.health import ProviderHealthCache
+from src.health_probe import HealthProbe, make_http_probe
 from src.models import (
     ChatCompletionRequest,
     ChatCompletionResponse,
@@ -33,25 +37,66 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Global router instance
+# Global service singletons
 router: ProviderRouter | None = None
+health_cache: ProviderHealthCache | None = None
+health_probe: HealthProbe | None = None
+alias_registry: AliasRegistry | None = None
+
+
+def _build_provider_probes(
+    providers: dict[str, Any],
+) -> dict[str, Any]:
+    """Wire each configured provider to a cheap HTTP probe."""
+    probes: dict[str, Any] = {}
+
+    if "ollama" in providers:
+        probes["ollama"] = make_http_probe(f"{settings.ollama_url}/api/tags")
+    if "openrouter" in providers:
+        probes["openrouter"] = make_http_probe(
+            f"{settings.openrouter_base_url}/models",
+            headers={"Authorization": f"Bearer {settings.openrouter_api_key}"},
+        )
+    if "groq" in providers:
+        probes["groq"] = make_http_probe(
+            f"{settings.groq_base_url}/models",
+            headers={"Authorization": f"Bearer {settings.groq_api_key}"},
+        )
+    if "together" in providers:
+        probes["together"] = make_http_probe(
+            f"{settings.together_base_url}/models",
+            headers={"Authorization": f"Bearer {settings.together_api_key}"},
+        )
+    # Google: skipped — google-genai SDK is opaque enough that a probe
+    # would amount to a real API call. Treat as healthy by default; the
+    # router's call-site fallback will mark it unhealthy on real errors.
+    return probes
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Application lifespan management."""
-    global router
+    """Application lifespan: load aliases, spin up router + health probe."""
+    global router, health_cache, health_probe, alias_registry
 
-    # Startup
     logger.info("Starting mana-llm service...")
-    router = ProviderRouter()
-    logger.info(f"Initialized providers: {list(router.providers.keys())}")
+
+    aliases_path = Path(__file__).resolve().parent.parent / "aliases.yaml"
+    alias_registry = AliasRegistry(aliases_path)
+    logger.info("Loaded %d aliases from %s", len(alias_registry.list_aliases()), aliases_path)
+
+    health_cache = ProviderHealthCache()
+    router = ProviderRouter(aliases=alias_registry, health_cache=health_cache)
+    logger.info("Initialized providers: %s", list(router.providers))
+
+    health_probe = HealthProbe(health_cache, _build_provider_probes(router.providers))
+    await health_probe.start()
 
     yield
 
-    # Shutdown
     logger.info("Shutting down mana-llm service...")
-    if router:
+    if health_probe is not None:
+        await health_probe.stop()
+    if router is not None:
         await router.close()
     await close_redis()
 

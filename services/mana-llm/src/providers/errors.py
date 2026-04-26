@@ -76,3 +76,36 @@ class ProviderCapabilityError(ProviderError):
 
     kind = "capability"
     http_status = 400
+
+
+class NoHealthyProviderError(ProviderError):
+    """Every entry in the resolved chain has been tried and either was
+    unconfigured, marked unhealthy by the cache, or failed in flight.
+
+    Carries the full attempt log so the caller can see which providers
+    were tried and why each one was skipped or failed — invaluable when
+    a real outage hits and the API returns 503 instead of the usual 200.
+    """
+
+    kind = "no_healthy_provider"
+    http_status = 503
+
+    def __init__(
+        self,
+        model_or_alias: str,
+        attempts: list[tuple[str, str]],
+        last_exception: Exception | None = None,
+    ) -> None:
+        self.model_or_alias = model_or_alias
+        self.attempts = list(attempts)
+        self.last_exception = last_exception
+        if attempts:
+            attempt_log = ", ".join(f"{model}={reason}" for model, reason in attempts)
+        else:
+            attempt_log = "(no providers in resolved chain were configured)"
+        msg = (
+            f"no healthy provider could serve {model_or_alias!r}. Attempts: {attempt_log}"
+        )
+        if last_exception is not None:
+            msg += f". Last error: {type(last_exception).__name__}: {last_exception}"
+        super().__init__(msg)

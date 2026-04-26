@@ -1,44 +1,54 @@
 """Provider tests."""
 
+from pathlib import Path
+
 import pytest
 
-from src.models import ChatCompletionRequest, Message
+from src.aliases import AliasRegistry
+from src.health import ProviderHealthCache
+from src.models import ChatCompletionRequest, EmbeddingRequest, Message
 from src.providers import OllamaProvider, OpenAICompatProvider, ProviderRouter
 
 
+@pytest.fixture
+def shipped_aliases() -> AliasRegistry:
+    """The repo's real aliases.yaml — same one production uses."""
+    return AliasRegistry(Path(__file__).resolve().parents[1] / "aliases.yaml")
+
+
+@pytest.fixture
+def router(shipped_aliases: AliasRegistry) -> ProviderRouter:
+    return ProviderRouter(aliases=shipped_aliases, health_cache=ProviderHealthCache())
+
+
 class TestProviderRouter:
-    """Test provider routing logic."""
+    """Tests for the helpers exposed by the router."""
 
-    def test_parse_model_with_provider(self):
-        """Test model parsing with provider prefix."""
-        router = ProviderRouter()
-
+    def test_parse_model_with_provider(self, router: ProviderRouter) -> None:
         provider, model = router._parse_model("ollama/gemma3:4b")
         assert provider == "ollama"
         assert model == "gemma3:4b"
 
-    def test_parse_model_without_provider(self):
-        """Test model parsing without provider prefix (defaults to ollama)."""
-        router = ProviderRouter()
-
+    def test_parse_model_without_provider(self, router: ProviderRouter) -> None:
+        # Bare names default to Ollama for OpenAI-style compat.
         provider, model = router._parse_model("gemma3:4b")
         assert provider == "ollama"
         assert model == "gemma3:4b"
 
-    def test_parse_model_openrouter(self):
-        """Test model parsing for OpenRouter."""
-        router = ProviderRouter()
-
+    def test_parse_model_openrouter(self, router: ProviderRouter) -> None:
         provider, model = router._parse_model("openrouter/meta-llama/llama-3.1-8b-instruct")
         assert provider == "openrouter"
         assert model == "meta-llama/llama-3.1-8b-instruct"
 
-    def test_get_invalid_provider(self):
-        """Test getting invalid provider raises error."""
-        router = ProviderRouter()
-
+    @pytest.mark.asyncio
+    async def test_embeddings_unknown_provider_raises(self, router: ProviderRouter) -> None:
+        # Embeddings don't go through the alias/fallback pipeline — they
+        # hit the requested provider directly. Asking for an unconfigured
+        # one is a config error and must raise loudly.
         with pytest.raises(ValueError, match="not available"):
-            router._get_provider("invalid_provider")
+            await router.embeddings(
+                EmbeddingRequest(model="bogus_provider/x", input="hi")
+            )
 
 
 class TestOllamaProvider:
