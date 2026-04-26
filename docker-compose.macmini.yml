@@ -569,8 +569,8 @@ services:
 
   mana-analytics:
     build:
-      context: services/mana-analytics
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: services/mana-analytics/Dockerfile
     image: mana-analytics:local
     container_name: mana-analytics
     restart: always
