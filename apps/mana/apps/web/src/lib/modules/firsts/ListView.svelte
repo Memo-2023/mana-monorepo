@@ -3,12 +3,12 @@
   Track first-time experiences: dreams (bucket list) and lived moments.
 -->
 <script lang="ts">
+	import { _, locale } from 'svelte-i18n';
+	import { get } from 'svelte/store';
 	import { useAllFirsts, useDreams, useLivedFirsts, searchFirsts, groupByPerson } from './queries';
 	import { firstsStore } from './stores/firsts.svelte';
 	import {
-		CATEGORY_LABELS,
 		CATEGORY_COLORS,
-		PRIORITY_LABELS,
 		type First,
 		type FirstCategory,
 		type FirstPriority,
@@ -182,7 +182,9 @@
 			? [
 					{
 						id: 'pin',
-						label: ctxMenu.state.target.isPinned ? 'Lösen' : 'Pinnen',
+						label: ctxMenu.state.target.isPinned
+							? $_('firsts.list_view.ctx_unpin')
+							: $_('firsts.list_view.ctx_pin'),
 						icon: PushPin,
 						action: () => {
 							const target = ctxMenu.state.target;
@@ -191,7 +193,7 @@
 					},
 					{
 						id: 'archive',
-						label: 'Archivieren',
+						label: $_('firsts.list_view.ctx_archive'),
 						icon: Archive,
 						action: () => {
 							const target = ctxMenu.state.target;
@@ -201,7 +203,7 @@
 					{ id: 'div', label: '', type: 'divider' as const },
 					{
 						id: 'delete',
-						label: 'Löschen',
+						label: $_('firsts.list_view.ctx_delete'),
 						icon: Trash,
 						variant: 'danger' as const,
 						action: () => {
@@ -214,7 +216,7 @@
 	);
 
 	function formatDate(iso: string): string {
-		return new Date(iso).toLocaleDateString('de-DE', {
+		return new Date(iso).toLocaleDateString(get(locale) ?? 'de', {
 			day: 'numeric',
 			month: 'short',
 			year: 'numeric',
@@ -232,14 +234,14 @@
 			class:active={activeTab === 'timeline'}
 			onclick={() => (activeTab = 'timeline')}
 		>
-			Timeline
+			{$_('firsts.list_view.tab_timeline')}
 		</button>
 		<button
 			class="tab"
 			class:active={activeTab === 'dreams'}
 			onclick={() => (activeTab = 'dreams')}
 		>
-			Dreams
+			{$_('firsts.list_view.tab_dreams')}
 			{#if dreams.length > 0}
 				<span class="tab-count">{dreams.length}</span>
 			{/if}
@@ -249,7 +251,7 @@
 			class:active={activeTab === 'people'}
 			onclick={() => (activeTab = 'people')}
 		>
-			People
+			{$_('firsts.list_view.tab_people')}
 		</button>
 	</div>
 
@@ -258,25 +260,25 @@
 		<div class="quick-top">
 			<select class="cat-select" bind:value={newCategory}>
 				{#each CATEGORIES as cat}
-					<option value={cat}>{CATEGORY_LABELS[cat].de}</option>
+					<option value={cat}>{$_('firsts.categories.' + cat)}</option>
 				{/each}
 			</select>
 			<input
 				class="add-input"
 				type="text"
 				placeholder={newAsDream
-					? 'Neues erstes Mal erträumen... (Enter)'
-					: 'Neues erstes Mal eintragen... (Enter)'}
+					? $_('firsts.list_view.placeholder_dream')
+					: $_('firsts.list_view.placeholder_lived')}
 				bind:value={newTitle}
 				onkeydown={handleQuickCreate}
 			/>
 		</div>
 		<div class="quick-toggle">
 			<button class="toggle-btn" class:active={newAsDream} onclick={() => (newAsDream = true)}>
-				Dream
+				{$_('firsts.list_view.toggle_dream')}
 			</button>
 			<button class="toggle-btn" class:active={!newAsDream} onclick={() => (newAsDream = false)}>
-				Erlebt
+				{$_('firsts.list_view.toggle_lived')}
 			</button>
 		</div>
 	</form>
@@ -289,7 +291,7 @@
 				class:active={categoryFilter === null}
 				onclick={() => (categoryFilter = null)}
 			>
-				Alle
+				{$_('firsts.list_view.filter_all')}
 			</button>
 			{#each CATEGORIES as cat}
 				<button
@@ -298,7 +300,7 @@
 					style="--cat-color: {CATEGORY_COLORS[cat]}"
 					onclick={() => (categoryFilter = categoryFilter === cat ? null : cat)}
 				>
-					{CATEGORY_LABELS[cat].de}
+					{$_('firsts.categories.' + cat)}
 				</button>
 			{/each}
 		</div>
@@ -309,7 +311,7 @@
 		<input
 			class="search-input"
 			type="text"
-			placeholder="Erste Male durchsuchen..."
+			placeholder={$_('firsts.list_view.placeholder_search')}
 			bind:value={searchQuery}
 		/>
 	{/if}
@@ -317,8 +319,12 @@
 	<!-- Stats ribbon -->
 	{#if allFirsts.length > 0}
 		<div class="insights">
-			<span class="ins-stat">{lived.length} erlebt</span>
-			<span class="ins-stat">{dreams.length} Dreams</span>
+			<span class="ins-stat"
+				>{$_('firsts.list_view.stat_lived', { values: { count: lived.length } })}</span
+			>
+			<span class="ins-stat"
+				>{$_('firsts.list_view.stat_dreams', { values: { count: dreams.length } })}</span
+			>
 		</div>
 	{/if}
 
@@ -342,47 +348,47 @@
 						</div>
 
 						<label class="ed-field">
-							<span class="ed-label">Wann?</span>
+							<span class="ed-label">{$_('firsts.list_view.convert_when')}</span>
 							<input type="date" bind:value={convertDate} class="ed-input-sm" />
 						</label>
 
 						<label class="ed-field">
-							<span class="ed-label">Ich dachte vorher...</span>
+							<span class="ed-label">{$_('firsts.list_view.convert_expected_label')}</span>
 							<textarea
 								class="ed-textarea"
 								bind:value={convertExpectation}
 								rows="2"
-								placeholder="Was hast du erwartet?"
+								placeholder={$_('firsts.list_view.placeholder_expected')}
 							></textarea>
 						</label>
 
 						<label class="ed-field">
-							<span class="ed-label">Es war tatsächlich...</span>
+							<span class="ed-label">{$_('firsts.list_view.convert_reality_label')}</span>
 							<textarea
 								class="ed-textarea"
 								bind:value={convertReality}
 								rows="2"
-								placeholder="Wie war es wirklich?"
+								placeholder={$_('firsts.list_view.placeholder_reality')}
 							></textarea>
 						</label>
 
 						<label class="ed-field">
-							<span class="ed-label">Notizen</span>
+							<span class="ed-label">{$_('firsts.list_view.convert_notes')}</span>
 							<textarea
 								class="ed-textarea"
 								bind:value={convertNote}
 								rows="2"
-								placeholder="Was willst du festhalten?"
+								placeholder={$_('firsts.list_view.placeholder_notes')}
 							></textarea>
 						</label>
 
 						<label class="ed-field">
-							<span class="ed-label">Mit wem?</span>
+							<span class="ed-label">{$_('firsts.list_view.convert_with_whom')}</span>
 							<input
 								type="text"
 								class="ed-input-sm"
 								bind:value={convertSharedWith}
-								placeholder="Alleine, mit Lisa, ..."
+								placeholder={$_('firsts.list_view.placeholder_shared_with')}
 							/>
 						</label>
 
@@ -405,15 +411,23 @@
 										class:active={convertWouldRepeat === opt}
 										onclick={() => (convertWouldRepeat = convertWouldRepeat === opt ? null : opt)}
 									>
-										{opt === 'no' ? 'Nein' : opt === 'yes' ? 'Ja' : 'Definitiv!'}
+										{opt === 'no'
+											? $_('firsts.list_view.repeat_no')
+											: opt === 'yes'
+												? $_('firsts.list_view.repeat_yes')
+												: $_('firsts.list_view.repeat_definitely')}
 									</button>
 								{/each}
 							</div>
 						</div>
 
 						<div class="ed-actions">
-							<button class="ed-btn" onclick={() => (convertingId = null)}>Abbrechen</button>
-							<button class="ed-btn primary" onclick={saveConvert}>Erlebt!</button>
+							<button class="ed-btn" onclick={() => (convertingId = null)}
+								>{$_('firsts.list_view.action_cancel')}</button
+							>
+							<button class="ed-btn primary" onclick={saveConvert}
+								>{$_('firsts.list_view.action_lived')}</button
+							>
 						</div>
 					</div>
 				{:else if editingId === first.id}
@@ -431,14 +445,14 @@
 							class="ed-title"
 							type="text"
 							bind:value={editTitle}
-							placeholder="Titel..."
+							placeholder={$_('firsts.list_view.placeholder_title')}
 							autofocus
 						/>
 
 						<div class="ed-row">
 							<select class="cat-select" bind:value={editCategory}>
 								{#each CATEGORIES as cat}
-									<option value={cat}>{CATEGORY_LABELS[cat].de}</option>
+									<option value={cat}>{$_('firsts.categories.' + cat)}</option>
 								{/each}
 							</select>
 						</div>
@@ -448,10 +462,10 @@
 								class="ed-textarea"
 								bind:value={editMotivation}
 								rows="2"
-								placeholder="Warum will ich das erleben?"
+								placeholder={$_('firsts.list_view.placeholder_motivation')}
 							></textarea>
 							<div class="ed-row">
-								<span class="ed-label">Priorität</span>
+								<span class="ed-label">{$_('firsts.list_view.label_priority')}</span>
 								<div class="priority-picker">
 									{#each [1, 2, 3] as const as p}
 										<button
@@ -459,35 +473,39 @@
 											class:active={editPriority === p}
 											onclick={() => (editPriority = editPriority === p ? null : p)}
 										>
-											{PRIORITY_LABELS[p].de}
+											{$_('firsts.priorities.' + p)}
 										</button>
 									{/each}
 								</div>
 							</div>
 						{:else}
 							<label class="ed-field">
-								<span class="ed-label">Datum</span>
+								<span class="ed-label">{$_('firsts.list_view.label_date')}</span>
 								<input type="date" bind:value={editDate} class="ed-input-sm" />
 							</label>
 							<textarea
 								class="ed-textarea"
 								bind:value={editExpectation}
 								rows="2"
-								placeholder="Ich dachte vorher..."
+								placeholder={$_('firsts.list_view.convert_expected_label')}
 							></textarea>
 							<textarea
 								class="ed-textarea"
 								bind:value={editReality}
 								rows="2"
-								placeholder="Es war tatsächlich..."
+								placeholder={$_('firsts.list_view.convert_reality_label')}
 							></textarea>
-							<textarea class="ed-textarea" bind:value={editNote} rows="2" placeholder="Notizen..."
+							<textarea
+								class="ed-textarea"
+								bind:value={editNote}
+								rows="2"
+								placeholder={$_('firsts.list_view.convert_notes')}
 							></textarea>
 							<input
 								type="text"
 								class="ed-input-sm"
 								bind:value={editSharedWith}
-								placeholder="Mit wem?"
+								placeholder={$_('firsts.list_view.placeholder_shared_with_short')}
 							/>
 
 							<div class="ed-row">
@@ -509,7 +527,11 @@
 											class:active={editWouldRepeat === opt}
 											onclick={() => (editWouldRepeat = editWouldRepeat === opt ? null : opt)}
 										>
-											{opt === 'no' ? 'Nein' : opt === 'yes' ? 'Ja' : 'Definitiv!'}
+											{opt === 'no'
+												? $_('firsts.list_view.repeat_no')
+												: opt === 'yes'
+													? $_('firsts.list_view.repeat_yes')
+													: $_('firsts.list_view.repeat_definitely')}
 										</button>
 									{/each}
 								</div>
@@ -517,8 +539,12 @@
 						{/if}
 
 						<div class="ed-actions">
-							<button class="ed-btn danger" onclick={() => handleDelete(first.id)}>Löschen</button>
-							<button class="ed-btn primary" onclick={saveEdit}>Fertig</button>
+							<button class="ed-btn danger" onclick={() => handleDelete(first.id)}
+								>{$_('firsts.list_view.action_delete')}</button
+							>
+							<button class="ed-btn primary" onclick={saveEdit}
+								>{$_('firsts.list_view.action_done')}</button
+							>
 						</div>
 					</div>
 				{:else}
@@ -563,10 +589,10 @@
 									<span class="dot">{'\u00b7'}</span>
 									<span class="repeat-badge">
 										{first.wouldRepeat === 'definitely'
-											? 'Definitiv nochmal'
+											? $_('firsts.list_view.repeat_definitely_again')
 											: first.wouldRepeat === 'yes'
-												? 'Nochmal'
-												: 'Einmal reicht'}
+												? $_('firsts.list_view.repeat_again')
+												: $_('firsts.list_view.repeat_once')}
 									</span>
 								{/if}
 							</div>
@@ -574,13 +600,13 @@
 								<div class="exp-vs-real">
 									{#if first.expectation}
 										<div class="exp-line">
-											<span class="exp-label">Vorher:</span>
+											<span class="exp-label">{$_('firsts.list_view.label_before')}</span>
 											{first.expectation}
 										</div>
 									{/if}
 									{#if first.reality}
 										<div class="exp-line">
-											<span class="exp-label">Nachher:</span>
+											<span class="exp-label">{$_('firsts.list_view.label_after')}</span>
 											{first.reality}
 										</div>
 									{/if}
@@ -594,7 +620,7 @@
 							<div class="card-meta">
 								{#if first.priority}
 									<span class="prio-badge prio-{first.priority}"
-										>{PRIORITY_LABELS[first.priority].de}</span
+										>{$_('firsts.priorities.' + first.priority)}</span
 									>
 								{/if}
 								{#if first.sharedWith}
@@ -612,19 +638,19 @@
 									startConvert(first);
 								}}
 							>
-								Erlebt!
+								{$_('firsts.list_view.action_lived')}
 							</button>
 						{/if}
 
 						<span class="cat-label" style="color: {CATEGORY_COLORS[first.category]}">
-							{CATEGORY_LABELS[first.category].de}
+							{$_('firsts.categories.' + first.category)}
 						</span>
 					</div>
 				{/if}
 			{/each}
 
 			{#if filtered().length === 0 && allFirsts.length > 0}
-				<p class="empty">Keine Treffer</p>
+				<p class="empty">{$_('firsts.list_view.empty_no_results')}</p>
 			{/if}
 		</div>
 	{/if}
@@ -635,7 +661,7 @@
 			{#each [3, 2, 1] as prio}
 				{@const group = filtered().filter((f) => (f.priority ?? 1) === prio)}
 				{#if group.length > 0}
-					<div class="month-label">{PRIORITY_LABELS[prio as FirstPriority].de}</div>
+					<div class="month-label">{$_('firsts.priorities.' + prio)}</div>
 					{#each group as first (first.id)}
 						<div
 							class="entry-card dream"
@@ -667,7 +693,7 @@
 									startConvert(first);
 								}}
 							>
-								Erlebt!
+								{$_('firsts.list_view.action_lived')}
 							</button>
 						</div>
 					{/each}
@@ -675,7 +701,7 @@
 			{/each}
 
 			{#if dreams.length === 0}
-				<p class="empty">Keine Dreams. Füge dein erstes Wunsch-Erlebnis hinzu!</p>
+				<p class="empty">{$_('firsts.list_view.empty_no_dreams')}</p>
 			{/if}
 		</div>
 	{/if}
@@ -685,7 +711,7 @@
 		<div class="entry-list">
 			{#each [...personGroups.entries()] as [personKey, firsts] (personKey)}
 				<div class="month-label">
-					{personKey === '__alone' ? 'Alleine' : personKey}
+					{personKey === '__alone' ? $_('firsts.list_view.people_alone') : personKey}
 					<span class="group-count">({firsts.length})</span>
 				</div>
 				{#each firsts as first (first.id)}
@@ -707,20 +733,20 @@
 						{#if first.status === 'lived' && first.date}
 							<span class="row-date">{formatDate(first.date)}</span>
 						{:else}
-							<span class="row-dream-tag">Dream</span>
+							<span class="row-dream-tag">{$_('firsts.list_view.row_dream_tag')}</span>
 						{/if}
 					</div>
 				{/each}
 			{/each}
 
 			{#if allFirsts.length === 0}
-				<p class="empty">Noch keine Einträge.</p>
+				<p class="empty">{$_('firsts.list_view.empty_no_entries')}</p>
 			{/if}
 		</div>
 	{/if}
 
 	{#if allFirsts.length === 0}
-		<p class="empty">Halte dein erstes "Erstes Mal" fest!</p>
+		<p class="empty">{$_('firsts.list_view.empty_no_firsts')}</p>
 	{/if}
 
 	<ContextMenu

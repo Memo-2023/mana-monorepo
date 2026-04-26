@@ -6,6 +6,7 @@
 	"apps/mana/apps/web/src/lib/modules/ai-agents/ListView.svelte": 2,
 	"apps/mana/apps/web/src/lib/modules/ai-missions/ListView.svelte": 2,
 	"apps/mana/apps/web/src/lib/modules/credits/ListView.svelte": 1,
+	"apps/mana/apps/web/src/lib/modules/firsts/ListView.svelte": 2,
 	"apps/mana/apps/web/src/lib/modules/invoices/components/StatusBadge.svelte": 1,
 	"apps/mana/apps/web/src/lib/modules/invoices/constants.ts": 1,
 	"apps/mana/apps/web/src/lib/modules/invoices/ListView.svelte": 1,

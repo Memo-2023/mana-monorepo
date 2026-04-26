@@ -121,7 +121,6 @@
 	"apps/mana/apps/web/src/lib/modules/dreams/views/SymbolDetailView.svelte": 8,
 	"apps/mana/apps/web/src/lib/modules/drink/ListView.svelte": 5,
 	"apps/mana/apps/web/src/lib/modules/finance/ListView.svelte": 6,
-	"apps/mana/apps/web/src/lib/modules/firsts/ListView.svelte": 15,
 	"apps/mana/apps/web/src/lib/modules/goals/ListView.svelte": 1,
 	"apps/mana/apps/web/src/lib/modules/guides/ListView.svelte": 1,
 	"apps/mana/apps/web/src/lib/modules/guides/views/DetailView.svelte": 7,
