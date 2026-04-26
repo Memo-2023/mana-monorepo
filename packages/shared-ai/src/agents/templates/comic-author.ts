@@ -43,14 +43,16 @@ const COMIC_AUTHOR_POLICY: AiPolicy = {
 	tools: {
 		...Object.fromEntries(AI_PROPOSABLE_TOOL_NAMES.map((n) => [n, 'propose' as const])),
 		// Web-app catalog names (snake_case). The spread above already
-		// covers create_comic_story / generate_comic_panel because both
-		// are defaultPolicy='propose' in AI_TOOL_CATALOG, but we pin
-		// list_comic_stories explicitly as auto (read-only tools come
-		// from the catalog as 'auto' already, so this is defensive
-		// rather than strictly required).
+		// covers propose-defaults; read tools (list_*) get pinned to
+		// auto explicitly for clarity.
 		list_comic_stories: 'auto',
 		create_comic_story: 'propose',
 		generate_comic_panel: 'propose',
+		// Character tools (Mc4) — same auto/propose split as story tools.
+		list_comic_characters: 'auto',
+		create_comic_character: 'propose',
+		generate_character_variant: 'propose',
+		pin_character_variant: 'propose',
 		// MCP-registry names (dot-case). The agent uses these when
 		// running inside persona-runner / Claude Desktop where the
 		// mana-tool-registry surface is what the MCP client sees.
@@ -60,6 +62,10 @@ const COMIC_AUTHOR_POLICY: AiPolicy = {
 		'comic.createStory': 'propose',
 		'comic.generatePanel': 'propose',
 		'comic.reorderPanels': 'propose',
+		'comic.listCharacters': 'auto',
+		'comic.createCharacter': 'propose',
+		'comic.generateVariant': 'propose',
+		'comic.pinVariant': 'propose',
 	},
 	defaultsByModule: {
 		// Read-only companions the agent uses to find source material.
@@ -103,12 +109,13 @@ Jeder Generate-Schritt ist ein Vorschlag — du bestimmst, wann Credits fließen
 Vorgehen:
 1. Lies den Ausgangstext zu Ende, bevor du mit Panels anfängst — Details aus der Mitte oder dem Ende sind oft der Kern.
 2. Wähle einen Stil, der zum Ton passt: 'comic' für Humor/Alltag, 'manga' für Drama, 'cartoon' für Kinder/Leichtigkeit, 'graphic-novel' für Reflexion/Melancholie, 'webtoon' für vertikale Long-Reads.
-3. Schlage 4 Panels vor (2–6 je nach Textlänge). Jedes Panel hat:
+3. Wenn der User noch keinen passenden Comic-Character hat: nutze list_comic_characters um zu prüfen, dann create_comic_character (legt Row an) → generate_character_variant (rendert 4 Varianten) → User wählt eine → pin_character_variant. Das ist EINMALIG — der gepinnte Character bleibt für viele Stories der stabile Identity-Anchor.
+4. Schlage 4 Panels vor (2–6 je nach Textlänge). Jedes Panel hat:
    - prompt: was passiert bildlich (kurze englische Sätze, Komposition + Aktion + Stimmung)
    - caption (optional): kurze Erzählzeile über/unter dem Bild
    - dialogue (optional): was der Protagonist sagt, in Sprechblase
-4. Protagonist ist IMMER der User selbst (seine face-ref liegt schon in der Story).
-5. Kein Panel-Nummerieren, keine Meta-Kommentare, keine Style-Beschreibungen im Prompt (Stil kommt aus der Story).
+5. Protagonist ist IMMER der User selbst (sein gepinnter Character bzw. sein face-ref im Quick-Mode).
+6. Kein Panel-Nummerieren, keine Meta-Kommentare, keine Style-Beschreibungen im Prompt (Stil kommt aus der Story / aus dem Character).
 
 Ton:
 - Humor wenn der User es leicht nimmt, ernst wenn er es ernst nimmt. Nicht belehrend.
@@ -117,9 +124,10 @@ Ton:
 
 Tools:
 - journal.listEntries / notes.list / library.listEntries um Quelle zu finden
-- comic.listStories um bestehende Stories zu sehen (nicht jede Quelle braucht eine neue)
-- comic.createStory um eine Story anzulegen (Titel + Stil + characterMediaIds)
-- comic.generatePanel um einen Panel anzuhängen (teurer Call — nur nach Bestätigung)`,
+- list_comic_characters / list_comic_stories um Bestand zu prüfen (nicht jede Quelle braucht neuen Character oder neue Story)
+- create_comic_character → generate_character_variant → pin_character_variant: Character-Aufbau-Pfad (einmalig pro Stil)
+- create_comic_story um eine Story anzulegen (mit existierendem Character als Anchor oder im Quick-Mode mit face-ref)
+- generate_comic_panel um einen Panel anzuhängen (teurer Call — nur nach Bestätigung)`,
 		memory: `# Comic-Richtlinien
 
 (Hier kannst du festhalten wie du Comics magst — z.B. bevorzugter Stil,

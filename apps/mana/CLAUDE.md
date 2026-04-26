@@ -238,7 +238,7 @@ Agents interact with the app through tools — each one either auto (executes si
 | invoices | `create_invoice`, `mark_invoice_paid` | `list_invoices`, `get_invoice_stats` |
 | library | `create_library_entry`, `update_library_entry_status`, `rate_library_entry` | `list_library_entries` |
 | writing | `create_draft`, `generate_draft_content`, `refine_draft_selection`, `set_draft_status`, `save_draft_as_article` | `list_drafts`, `get_draft`, `list_writing_styles` |
-| comic | `create_comic_story`, `generate_comic_panel` | `list_comic_stories` |
+| comic | `create_comic_story`, `generate_comic_panel`, `create_comic_character`, `generate_character_variant`, `pin_character_variant` | `list_comic_stories`, `list_comic_characters` |
 
 **Server-side web-research**: mana-ai calls mana-api's `/api/v1/news-research/discover` + `/search` directly before the planner prompt is built (pre-planning injection). Missions with research-keyword objectives get real article URLs + excerpts injected as a synthetic ResolvedInput. See `services/mana-ai/src/planner/news-research-client.ts`.
 

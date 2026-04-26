@@ -1987,6 +1987,114 @@ export const AI_TOOL_CATALOG: readonly ToolSchema[] = [
 			},
 		],
 	},
+	{
+		name: 'list_comic_characters',
+		module: 'comic',
+		description:
+			'Listet Comic-Characters im aktiven Space (id, name, style, variantCount, pinnedVariantId, isFavorite). Optional nach Stil oder Favoriten filterbar.',
+		defaultPolicy: 'auto',
+		parameters: [
+			{
+				name: 'style',
+				type: 'string',
+				description: 'Nur einen Stil zeigen',
+				required: false,
+				enum: ['comic', 'manga', 'cartoon', 'graphic-novel', 'webtoon'],
+			},
+			{
+				name: 'favoriteOnly',
+				type: 'boolean',
+				description: 'Nur Favoriten',
+				required: false,
+			},
+			{ name: 'limit', type: 'number', description: 'Max (Standard 30)', required: false },
+		],
+	},
+	{
+		name: 'create_comic_character',
+		module: 'comic',
+		description:
+			'Legt einen neuen Comic-Character an OHNE direkt Varianten zu rendern (Splittet Anlegen von Generierung — User reviewt erst). Charakter-Refs werden automatisch aus dem primary face-ref + body-ref des aktiven Space aufgeloest. Stil ist fix nach Anlage. Gibt characterId zurueck — danach generate_character_variant aufrufen.',
+		defaultPolicy: 'propose',
+		parameters: [
+			{ name: 'name', type: 'string', description: 'Name des Characters', required: true },
+			{
+				name: 'style',
+				type: 'string',
+				description: 'Visueller Stil',
+				required: true,
+				enum: ['comic', 'manga', 'cartoon', 'graphic-novel', 'webtoon'],
+			},
+			{
+				name: 'addPrompt',
+				type: 'string',
+				description: 'Zusaetzlicher Prompt (z.B. "freundlicher Ausdruck", "casual outfit")',
+				required: false,
+			},
+			{
+				name: 'description',
+				type: 'string',
+				description: 'Kurze Charakter-Beschreibung',
+				required: false,
+			},
+			{ name: 'tags', type: 'string', description: 'Tags durch Komma getrennt', required: false },
+		],
+	},
+	{
+		name: 'generate_character_variant',
+		module: 'comic',
+		description:
+			'Rendert N (default 4) Variant-Portraits fuer einen existierenden Comic-Character und appended sie an den Variant-Pool. Konsumiert Credits × count (medium=10c). Auto-pinnt die erste Variante wenn noch keine gepinnt ist. Stil + Source-Refs kommen aus dem Character — nur count + quality + model sind hier waehlbar.',
+		defaultPolicy: 'propose',
+		parameters: [
+			{
+				name: 'characterId',
+				type: 'string',
+				description: 'ID des Characters',
+				required: true,
+			},
+			{
+				name: 'count',
+				type: 'number',
+				description: 'Anzahl Varianten (1-4, default 4)',
+				required: false,
+			},
+			{
+				name: 'quality',
+				type: 'string',
+				description: 'Render-Qualitaet — hoeher = mehr Credits',
+				required: false,
+				enum: ['low', 'medium', 'high'],
+			},
+			{
+				name: 'model',
+				type: 'string',
+				description: 'Rendering-Backend (default openai/gpt-image-2).',
+				required: false,
+				enum: [
+					'openai/gpt-image-2',
+					'google/gemini-3-pro-image-preview',
+					'google/gemini-3.1-flash-image-preview',
+				],
+			},
+		],
+	},
+	{
+		name: 'pin_character_variant',
+		module: 'comic',
+		description:
+			'Setzt einen anderen Variant als kanonischen Look des Comic-Characters. Stories die DANACH erstellt werden nutzen den neuen Pin; bestehende Stories bleiben unveraendert (sie haben den alten Variant zum Story-Create-Zeitpunkt fix gespeichert).',
+		defaultPolicy: 'propose',
+		parameters: [
+			{ name: 'characterId', type: 'string', description: 'ID des Characters', required: true },
+			{
+				name: 'variantMediaId',
+				type: 'string',
+				description: 'ID der Variante die zum neuen Pin werden soll (muss in variantMediaIds sein)',
+				required: true,
+			},
+		],
+	},
 
 	// ── Augur (signs / fortunes / hunches) ──────────────────────
 	{

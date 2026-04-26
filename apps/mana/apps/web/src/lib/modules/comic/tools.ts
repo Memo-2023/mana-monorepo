@@ -30,9 +30,12 @@ import { scopedForModule } from '$lib/data/scope';
 import { decryptRecords, VaultLockedError } from '$lib/data/crypto';
 import { meImagesTable } from '$lib/modules/profile/collections';
 import { comicStoriesStore } from './stores/stories.svelte';
+import { comicCharactersStore } from './stores/characters.svelte';
 import { runPanelGenerate, DEFAULT_PANEL_MODEL, type PanelModel } from './api/generate-panel';
-import { toStory } from './types';
-import type { ComicStyle, LocalComicStory } from './types';
+import { runCharacterGenerate } from './api/generate-character';
+import { comicCharactersTable } from './collections';
+import { toStory, toCharacter } from './types';
+import type { ComicStyle, LocalComicStory, LocalComicCharacter } from './types';
 
 const VALID_MODELS: readonly PanelModel[] = [
 	'openai/gpt-image-2',
@@ -355,3 +358,285 @@ export const comicTools: ModuleTool[] = [
 // when the LocalMeImage reference in resolveCharacterMediaIds is
 // compile-time only.
 export type { LocalMeImage };
+
+// ─── Character tools (Mc4) ────────────────────────────────────────
+
+export const comicCharacterTools: ModuleTool[] = [
+	{
+		name: 'list_comic_characters',
+		module: 'comic',
+		description:
+			'Listet Comic-Characters im aktiven Space (id, name, style, variantCount, pinnedVariantId, isFavorite). Optional nach Stil oder Favoriten filterbar.',
+		parameters: [
+			{
+				name: 'style',
+				type: 'string',
+				description: 'Nur einen Stil zeigen',
+				required: false,
+				enum: [...VALID_STYLES],
+			},
+			{
+				name: 'favoriteOnly',
+				type: 'boolean',
+				description: 'Nur Favoriten',
+				required: false,
+			},
+			{ name: 'limit', type: 'number', description: 'Max (Standard 30)', required: false },
+		],
+		async execute(params) {
+			const styleFilter = params.style as ComicStyle | undefined;
+			const favoriteOnly = params.favoriteOnly === true;
+			const limit = Math.min(Math.max(Number(params.limit) || 30, 1), 100);
+
+			try {
+				const locals = await scopedForModule<LocalComicCharacter, string>(
+					'comic',
+					'comicCharacters'
+				).toArray();
+				const visible = locals.filter((c) => !c.deletedAt && !c.isArchived);
+				const decrypted = await decryptRecords('comicCharacters', visible);
+				const rows = decrypted
+					.map(toCharacter)
+					.filter((c) => (styleFilter ? c.style === styleFilter : true))
+					.filter((c) => (favoriteOnly ? c.isFavorite === true : true))
+					.sort((a, b) => (b.updatedAt ?? '').localeCompare(a.updatedAt ?? ''))
+					.slice(0, limit)
+					.map((c) => ({
+						id: c.id,
+						name: c.name,
+						style: c.style,
+						variantCount: c.variantMediaIds.length,
+						pinnedVariantId: c.pinnedVariantId ?? null,
+						isFavorite: c.isFavorite === true,
+					}));
+
+				return {
+					success: true,
+					data: { characters: rows, total: rows.length },
+					message: `${rows.length} Character${rows.length === 1 ? '' : 's'} gelistet`,
+				};
+			} catch (err) {
+				if (err instanceof VaultLockedError) {
+					return {
+						success: false,
+						message: 'Vault ist gesperrt — Comic-Characters können nicht entschlüsselt werden',
+					};
+				}
+				throw err;
+			}
+		},
+	},
+
+	{
+		name: 'create_comic_character',
+		module: 'comic',
+		description:
+			'Legt einen neuen Comic-Character an OHNE direkt Varianten zu rendern. Charakter-Refs werden automatisch aus dem primary face-ref + body-ref des aktiven Space aufgeloest. Stil ist fix nach Anlage.',
+		parameters: [
+			{ name: 'name', type: 'string', description: 'Name des Characters', required: true },
+			{
+				name: 'style',
+				type: 'string',
+				description: 'Visueller Stil',
+				required: true,
+				enum: [...VALID_STYLES],
+			},
+			{
+				name: 'addPrompt',
+				type: 'string',
+				description: 'Zusaetzlicher Prompt',
+				required: false,
+			},
+			{
+				name: 'description',
+				type: 'string',
+				description: 'Kurze Charakter-Beschreibung',
+				required: false,
+			},
+			{ name: 'tags', type: 'string', description: 'Tags durch Komma getrennt', required: false },
+		],
+		async execute(params) {
+			const name = String(params.name ?? '').trim();
+			if (!name) return { success: false, message: 'name erforderlich' };
+
+			const style = params.style;
+			if (!isValidStyle(style)) {
+				return {
+					success: false,
+					message: `style muss einer von ${VALID_STYLES.join(', ')} sein`,
+				};
+			}
+
+			const refs = await resolveCharacterMediaIds();
+			if (!refs.faceRef) {
+				return {
+					success: false,
+					message:
+						'Kein Gesichtsbild im aktiven Space. Lade eines in /profile/me-images hoch, dann erneut versuchen.',
+				};
+			}
+
+			const description =
+				typeof params.description === 'string' && params.description.trim()
+					? params.description.trim()
+					: null;
+			const addPrompt =
+				typeof params.addPrompt === 'string' && params.addPrompt.trim()
+					? params.addPrompt.trim()
+					: null;
+			const tags =
+				typeof params.tags === 'string' && params.tags.trim()
+					? params.tags
+							.split(',')
+							.map((t) => t.trim())
+							.filter((t) => t.length > 0)
+					: [];
+
+			try {
+				const character = await comicCharactersStore.createCharacter({
+					name,
+					style,
+					sourceFaceMediaId: refs.faceRef,
+					sourceBodyMediaId: refs.bodyRef,
+					addPrompt,
+					description,
+					tags,
+				});
+				return {
+					success: true,
+					data: {
+						id: character.id,
+						name: character.name,
+						style: character.style,
+						hasBodyRef: refs.bodyRef !== null,
+						note: 'Character-Row angelegt — jetzt generate_character_variant aufrufen um Varianten zu rendern.',
+					},
+					message: `Character "${character.name}" angelegt (Stil: ${character.style})`,
+				};
+			} catch (err) {
+				if (err instanceof VaultLockedError) {
+					return { success: false, message: 'Vault ist gesperrt — Character nicht gespeichert' };
+				}
+				throw err;
+			}
+		},
+	},
+
+	{
+		name: 'generate_character_variant',
+		module: 'comic',
+		description:
+			'Rendert N (default 4) Variant-Portraits fuer einen existierenden Comic-Character via gpt-image-2. Konsumiert Credits × count. Auto-pinnt die erste Variante wenn noch keine gepinnt ist.',
+		parameters: [
+			{ name: 'characterId', type: 'string', description: 'ID des Characters', required: true },
+			{
+				name: 'count',
+				type: 'number',
+				description: 'Anzahl Varianten (1-4, default 4)',
+				required: false,
+			},
+			{
+				name: 'quality',
+				type: 'string',
+				description: 'Render-Qualitaet',
+				required: false,
+				enum: ['low', 'medium', 'high'],
+			},
+			{
+				name: 'model',
+				type: 'string',
+				description: 'Rendering-Backend',
+				required: false,
+				enum: [...VALID_MODELS],
+			},
+		],
+		async execute(params) {
+			const characterId = String(params.characterId ?? '').trim();
+			if (!characterId) return { success: false, message: 'characterId erforderlich' };
+
+			const count = Math.max(1, Math.min(4, Number(params.count) || 4));
+			const quality =
+				params.quality === 'low' || params.quality === 'high' ? params.quality : 'medium';
+			const model: PanelModel = isValidModel(params.model) ? params.model : DEFAULT_PANEL_MODEL;
+
+			try {
+				const local = await comicCharactersTable.get(characterId);
+				if (!local || local.deletedAt) {
+					return { success: false, message: `Character ${characterId} nicht gefunden` };
+				}
+				const [decrypted] = await decryptRecords('comicCharacters', [local]);
+				if (!decrypted) {
+					return { success: false, message: 'Entschlüsselung des Characters fehlgeschlagen' };
+				}
+				const character = toCharacter(decrypted);
+
+				const result = await runCharacterGenerate({
+					character,
+					count,
+					quality: quality as 'low' | 'medium' | 'high',
+					model,
+				});
+
+				return {
+					success: true,
+					data: {
+						characterId: character.id,
+						newVariantMediaIds: result.variantMediaIds,
+						imageUrls: result.imageUrls,
+						model: result.model,
+					},
+					message: `${result.variantMediaIds.length} Variant${result.variantMediaIds.length === 1 ? '' : 's'} für "${character.name}" generiert`,
+				};
+			} catch (err) {
+				if (err instanceof VaultLockedError) {
+					return { success: false, message: 'Vault ist gesperrt' };
+				}
+				return {
+					success: false,
+					message: err instanceof Error ? err.message : 'Variant-Generierung fehlgeschlagen',
+				};
+			}
+		},
+	},
+
+	{
+		name: 'pin_character_variant',
+		module: 'comic',
+		description:
+			'Setzt einen anderen Variant als kanonischen Look. Stories danach erstellt nutzen den neuen Pin — bestehende Stories bleiben unveraendert (Snapshot-Pattern).',
+		parameters: [
+			{ name: 'characterId', type: 'string', description: 'ID des Characters', required: true },
+			{
+				name: 'variantMediaId',
+				type: 'string',
+				description: 'ID des neuen Pin-Variants',
+				required: true,
+			},
+		],
+		async execute(params) {
+			const characterId = String(params.characterId ?? '').trim();
+			const variantMediaId = String(params.variantMediaId ?? '').trim();
+			if (!characterId || !variantMediaId) {
+				return { success: false, message: 'characterId und variantMediaId erforderlich' };
+			}
+
+			try {
+				await comicCharactersStore.pinVariant(characterId, variantMediaId);
+				return {
+					success: true,
+					data: { characterId, pinnedVariantId: variantMediaId },
+					message: `Variant gepinned`,
+				};
+			} catch (err) {
+				return {
+					success: false,
+					message: err instanceof Error ? err.message : 'Pin fehlgeschlagen',
+				};
+			}
+		},
+	},
+];
+
+// Append character tools to the main export so init.ts picks them
+// up via the existing registerTools(comicTools) call.
+comicTools.push(...comicCharacterTools);
