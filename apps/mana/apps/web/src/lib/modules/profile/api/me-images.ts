@@ -21,18 +21,35 @@ export interface UploadMeImageResult {
 }
 
 export async function uploadMeImageFile(file: File): Promise<UploadMeImageResult> {
+	// Fail-fast wenn der Auth-Store keinen Token liefern kann. Vorher
+	// schickten wir die Anfrage trotzdem ohne `Authorization`-Header
+	// los und der Server antwortete kryptisch mit "Missing authorization
+	// header" — der User hatte keinen Hinweis ob's ein Login-Problem
+	// oder Server-Down war. Jetzt klarer Diagnose-Pfad.
 	const token = await authStore.getValidToken();
+	if (!token) {
+		throw new Error(
+			'Du bist nicht eingeloggt — bitte aktualisiere die Seite und logge dich neu ein, dann erneut hochladen.'
+		);
+	}
+
 	const formData = new FormData();
 	formData.append('file', file);
 
 	const response = await fetch(`${getManaApiUrl()}/api/v1/profile/me-images/upload`, {
 		method: 'POST',
-		headers: token ? { Authorization: `Bearer ${token}` } : {},
+		headers: { Authorization: `Bearer ${token}` },
 		body: formData,
 	});
 
 	if (!response.ok) {
 		const body = await response.json().catch(() => ({ error: `HTTP ${response.status}` }));
+		// 401 nach getValidToken-Erfolg = Token war serverseitig schon
+		// abgelaufen / invalidiert. Nutzer-freundliche Meldung statt
+		// Server-String "Missing authorization header".
+		if (response.status === 401) {
+			throw new Error('Session abgelaufen — bitte aktualisiere die Seite und logge dich neu ein.');
+		}
 		throw new Error(body.error || `Upload failed (${response.status})`);
 	}
 
