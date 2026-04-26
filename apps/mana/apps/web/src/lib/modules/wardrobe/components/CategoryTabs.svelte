@@ -5,7 +5,8 @@
   category, so "Oberteile aktiv → Datei droppen → landet als top").
 -->
 <script lang="ts">
-	import { CATEGORY_LABELS, CATEGORY_ORDER } from '../constants';
+	import { _ } from 'svelte-i18n';
+	import { CATEGORY_ORDER } from '../constants';
 	import type { GarmentCategory } from '../types';
 
 	interface Props {
@@ -26,7 +27,7 @@
 			? 'border-primary bg-primary text-primary-foreground'
 			: 'border-border bg-background text-muted-foreground hover:border-primary/50 hover:text-foreground'}"
 	>
-		Alle
+		{$_('wardrobe.categories.all')}
 		{#if counts?.all !== undefined}
 			<span class="ml-1 text-xs opacity-70">{counts.all}</span>
 		{/if}
@@ -39,7 +40,7 @@
 				? 'border-primary bg-primary text-primary-foreground'
 				: 'border-border bg-background text-muted-foreground hover:border-primary/50 hover:text-foreground'}"
 		>
-			{CATEGORY_LABELS[category]}
+			{$_('wardrobe.categories.' + category)}
 			{#if counts?.[category] !== undefined && counts[category]! > 0}
 				<span class="ml-1 text-xs opacity-70">{counts[category]}</span>
 			{/if}

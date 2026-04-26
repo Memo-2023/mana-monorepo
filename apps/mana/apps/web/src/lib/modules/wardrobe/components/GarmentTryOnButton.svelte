@@ -11,6 +11,7 @@
   outfit's try-on history.
 -->
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { Sparkle, UserCircle, Info } from '@mana/shared-icons';
 	import { getActiveSpace } from '$lib/data/scope';
 	import { useImageByPrimary } from '$lib/modules/profile/queries';
@@ -78,7 +79,7 @@
 			});
 			lastResultUrl = result.imageUrl;
 		} catch (err) {
-			error = err instanceof Error ? err.message : 'Try-On fehlgeschlagen';
+			error = err instanceof Error ? err.message : $_('wardrobe.try_on_garment.err_failed');
 		} finally {
 			running = false;
 		}
@@ -95,7 +96,8 @@
 		try {
 			await ingestMeImageFile(files[0], { kind, claimSlot: slot });
 		} catch (err) {
-			uploadRefError = err instanceof Error ? err.message : 'Upload fehlgeschlagen';
+			uploadRefError =
+				err instanceof Error ? err.message : $_('wardrobe.try_on_garment.err_upload');
 		} finally {
 			uploadingRef = false;
 		}
@@ -104,18 +106,18 @@
 
 {#if !hasPhoto}
 	<p class="text-xs text-muted-foreground">
-		Lade erst ein Foto hoch, um dieses Stück an dir zu visualisieren.
+		{$_('wardrobe.try_on_garment.no_photo')}
 	</p>
 {:else if missingFace || missingBody}
 	<div class="space-y-3 rounded-xl border border-dashed border-border bg-background/50 p-4">
 		<div class="flex items-start gap-3 text-sm">
 			<UserCircle size={18} weight="regular" class="mt-0.5 flex-shrink-0 text-primary" />
 			<div class="space-y-1">
-				<p class="font-medium text-foreground">Für Solo-Try-On brauchen wir dich auf Bild.</p>
+				<p class="font-medium text-foreground">{$_('wardrobe.try_on_garment.refs_title')}</p>
 				<p class="text-xs text-muted-foreground">
 					{accessoryOnly
-						? 'Ein Gesichtsbild reicht — das Stück wird darauf montiert.'
-						: 'Ein Gesichts- und ein Ganzkörperbild. Beide werden nur für deine eigenen Generierungen genutzt.'}
+						? $_('wardrobe.try_on_garment.refs_accessory')
+						: $_('wardrobe.try_on_garment.refs_full')}
 				</p>
 			</div>
 		</div>
@@ -123,8 +125,8 @@
 		{#if missingFace}
 			<MeImageUploadZone
 				variant="compact"
-				label="Gesichtsbild hochladen"
-				hint="Kopf + Schulter, möglichst neutrale Beleuchtung"
+				label={$_('wardrobe.try_on_garment.upload_face')}
+				hint={$_('wardrobe.try_on_garment.face_hint')}
 				disabled={uploadingRef}
 				onFiles={(files) => handleRefUpload(files, 'face', 'face-ref')}
 			/>
@@ -132,8 +134,8 @@
 		{#if missingBody}
 			<MeImageUploadZone
 				variant="compact"
-				label="Ganzkörperbild hochladen"
-				hint="Stehend, freier Hintergrund, gut erkennbare Haltung"
+				label={$_('wardrobe.try_on_garment.upload_body')}
+				hint={$_('wardrobe.try_on_garment.body_hint')}
 				disabled={uploadingRef}
 				onFiles={(files) => handleRefUpload(files, 'fullbody', 'body-ref')}
 			/>
@@ -149,9 +151,9 @@
 		{/if}
 
 		<p class="text-xs text-muted-foreground">
-			Weitere Referenzen oder AI-Opt-ins pro Bild:
+			{$_('wardrobe.try_on_garment.refs_more_prefix')}
 			<a href="/profile/me-images" class="font-medium text-primary hover:underline">
-				Meine Bilder
+				{$_('wardrobe.try_on_garment.refs_link')}
 			</a>.
 		</p>
 	</div>
@@ -182,21 +184,23 @@
 					<span
 						class="h-5 w-5 animate-spin rounded-full border-2 border-current border-r-transparent"
 					></span>
-					Rendere…
+					{$_('wardrobe.try_on_garment.rendering')}
 				</span>
 			{:else}
 				<span class="flex items-center gap-2.5">
 					<Sparkle size={20} weight="fill" />
-					An mir anprobieren
+					{$_('wardrobe.try_on_garment.cta')}
 				</span>
-				<span class="text-xs font-normal opacity-80">{estimatedCredits} Credits</span>
+				<span class="text-xs font-normal opacity-80"
+					>{$_('wardrobe.try_on_garment.credits', { values: { count: estimatedCredits } })}</span
+				>
 			{/if}
 		</button>
 
 		{#if accessoryOnly}
 			<p class="flex items-center gap-1.5 text-xs text-muted-foreground">
 				<Info size={12} weight="regular" class="flex-shrink-0" />
-				Accessoire-Modus — nur das Gesicht wird gerendert (spart Credits).
+				{$_('wardrobe.try_on_garment.accessory_hint')}
 			</p>
 		{/if}
 
@@ -204,8 +208,10 @@
 			<p class="flex items-start gap-1.5 text-xs text-muted-foreground">
 				<Info size={12} weight="regular" class="mt-0.5 flex-shrink-0" />
 				<span>
-					Try-On nutzt deine Referenzbilder aus diesem Space
-					<strong class="text-foreground">({activeSpace.name})</strong>, nicht aus Persönlich.
+					{$_('wardrobe.try_on_garment.space_hint_prefix')}
+					<strong class="text-foreground">({activeSpace.name})</strong>{$_(
+						'wardrobe.try_on_garment.space_hint_suffix'
+					)}
 				</span>
 			</p>
 		{/if}
@@ -221,16 +227,20 @@
 
 		{#if lastResultUrl}
 			<div class="space-y-1.5 rounded-xl border border-border bg-card p-3">
-				<p class="text-xs font-medium uppercase tracking-wider text-muted-foreground">Ergebnis</p>
+				<p class="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+					{$_('wardrobe.try_on_garment.result_label')}
+				</p>
 				<img
 					src={lastResultUrl}
-					alt="Try-On"
+					alt={$_('wardrobe.try_on_garment.try_on_alt')}
 					class="w-full rounded-md border border-border bg-muted"
 				/>
 				<p class="text-xs text-muted-foreground">
-					Gefunden in der
-					<a href="/picture" class="font-medium text-primary hover:underline">Picture-Galerie</a>
-					als normale Generierung.
+					{$_('wardrobe.try_on_garment.result_hint_prefix')}
+					<a href="/picture" class="font-medium text-primary hover:underline"
+						>{$_('wardrobe.try_on_garment.picture_gallery_link')}</a
+					>
+					{$_('wardrobe.try_on_garment.result_hint_suffix')}
 				</p>
 			</div>
 		{/if}

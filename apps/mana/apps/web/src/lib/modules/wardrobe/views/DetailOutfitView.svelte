@@ -12,12 +12,12 @@
 -->
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { _ } from 'svelte-i18n';
 	import { ArrowLeft, Archive, Heart, PencilSimple, Sparkle, Trash } from '@mana/shared-icons';
 	import { VisibilityPicker, type VisibilityLevel } from '@mana/shared-privacy';
 	import { useAllGarments, useOutfit, useOutfitTryOns } from '../queries';
 	import { wardrobeOutfitsStore } from '../stores/outfits.svelte';
 	import { garmentPhotoUrl } from '../api/media-url';
-	import { CATEGORY_LABELS_SINGULAR, OCCASION_LABELS, SEASON_LABELS } from '../constants';
 	import TryOnButton from '../components/TryOnButton.svelte';
 	import type { Garment } from '../types';
 
@@ -66,7 +66,8 @@
 
 	async function handleDelete() {
 		if (!outfit) return;
-		if (!confirm(`Outfit "${outfit.name}" wirklich löschen?`)) return;
+		if (!confirm($_('wardrobe.detail_outfit.confirm_delete', { values: { name: outfit.name } })))
+			return;
 		await wardrobeOutfitsStore.deleteOutfit(outfit.id);
 		goto('/wardrobe');
 	}
@@ -82,20 +83,24 @@
 		<a
 			href="/wardrobe"
 			class="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted"
-			aria-label="Zurück zum Kleiderschrank"
+			aria-label={$_('wardrobe.detail_outfit.back')}
 		>
 			<ArrowLeft size={16} />
 		</a>
-		<span class="text-muted-foreground">Kleiderschrank · Outfits</span>
+		<span class="text-muted-foreground">{$_('wardrobe.detail_outfit.breadcrumb')}</span>
 	</nav>
 
 	{#if !outfit}
 		{#if outfit$.loading}
-			<p class="text-sm text-muted-foreground">Lädt…</p>
+			<p class="text-sm text-muted-foreground">{$_('wardrobe.detail_outfit.loading')}</p>
 		{:else}
 			<div class="rounded-2xl border border-dashed border-border bg-background/50 p-8 text-center">
-				<p class="text-sm font-medium text-foreground">Outfit nicht gefunden.</p>
-				<p class="mt-1 text-sm text-muted-foreground">Gelöscht oder in einem anderen Space.</p>
+				<p class="text-sm font-medium text-foreground">
+					{$_('wardrobe.detail_outfit.not_found_title')}
+				</p>
+				<p class="mt-1 text-sm text-muted-foreground">
+					{$_('wardrobe.detail_outfit.not_found_desc')}
+				</p>
 			</div>
 		{/if}
 	{:else}
@@ -106,7 +111,7 @@
 					{#if outfit.lastTryOn?.imageUrl}
 						<img
 							src={outfit.lastTryOn.imageUrl}
-							alt="Try-On Vorschau"
+							alt={$_('wardrobe.detail_outfit.try_on_preview_alt')}
 							class="h-full w-full object-cover"
 						/>
 					{:else if resolvedGarments.length > 0}
@@ -128,7 +133,7 @@
 						<div
 							class="flex aspect-square items-center justify-center text-sm text-muted-foreground"
 						>
-							Keine Kleidungsstücke
+							{$_('wardrobe.detail_outfit.no_garments')}
 						</div>
 					{/if}
 				</div>
@@ -143,17 +148,17 @@
 					<a
 						href={`/comic/character/new?title=${encodeURIComponent(outfit.name)}&prompt=${encodeURIComponent('wearing the ' + outfit.name + ' outfit')}`}
 						class="flex w-full items-center justify-center gap-1.5 rounded-md border border-border bg-background px-3 py-2 text-xs font-medium text-foreground transition-colors hover:border-primary/40 hover:bg-primary/5"
-						title="Aus diesem Outfit einen Comic-Character generieren"
+						title={$_('wardrobe.detail_outfit.action_comic_title')}
 					>
 						<Sparkle size={12} />
-						Als Comic-Character
+						{$_('wardrobe.detail_outfit.action_comic')}
 					</a>
 				{/if}
 
 				{#if tryOns.length > 0}
 					<div>
 						<h3 class="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-							Try-On Verlauf
+							{$_('wardrobe.detail_outfit.try_on_history')}
 						</h3>
 						<div class="flex gap-2 overflow-x-auto">
 							{#each tryOns as t (t.id)}
@@ -180,15 +185,17 @@
 							<div class="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
 								<span>
 									{outfit.garmentIds.length}
-									{outfit.garmentIds.length === 1 ? 'Stück' : 'Stücke'}
+									{outfit.garmentIds.length === 1
+										? $_('wardrobe.piece_singular')
+										: $_('wardrobe.piece_plural')}
 								</span>
 								{#if outfit.occasion}
 									<span class="text-border">·</span>
-									<span>{OCCASION_LABELS[outfit.occasion]}</span>
+									<span>{$_('wardrobe.occasions.' + outfit.occasion)}</span>
 								{/if}
 								{#if outfit.season && outfit.season.length > 0}
 									<span class="text-border">·</span>
-									<span>{outfit.season.map((s) => SEASON_LABELS[s]).join(', ')}</span>
+									<span>{outfit.season.map((s) => $_('wardrobe.seasons.' + s)).join(', ')}</span>
 								{/if}
 							</div>
 						</div>
@@ -196,8 +203,12 @@
 							<button
 								type="button"
 								onclick={handleToggleFavorite}
-								aria-label={outfit.isFavorite ? 'Favorit entfernen' : 'Als Favorit markieren'}
-								title={outfit.isFavorite ? 'Favorit entfernen' : 'Als Favorit markieren'}
+								aria-label={outfit.isFavorite
+									? $_('wardrobe.detail_outfit.action_unfavorite')
+									: $_('wardrobe.detail_outfit.action_favorite')}
+								title={outfit.isFavorite
+									? $_('wardrobe.detail_outfit.action_unfavorite')
+									: $_('wardrobe.detail_outfit.action_favorite')}
 								class="flex h-8 w-8 items-center justify-center rounded-md transition-colors {outfit.isFavorite
 									? 'text-rose-500 hover:bg-rose-500/10'
 									: 'text-muted-foreground hover:bg-muted hover:text-foreground'}"
@@ -206,8 +217,8 @@
 							</button>
 							<a
 								href="/wardrobe/compose/{outfit.id}"
-								aria-label="Bearbeiten"
-								title="Bearbeiten"
+								aria-label={$_('wardrobe.detail_outfit.action_edit')}
+								title={$_('wardrobe.detail_outfit.action_edit')}
 								class="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
 							>
 								<PencilSimple size={16} />
@@ -216,7 +227,9 @@
 					</header>
 
 					<div class="flex items-center justify-between gap-3">
-						<span class="text-xs text-muted-foreground">Sichtbarkeit</span>
+						<span class="text-xs text-muted-foreground"
+							>{$_('wardrobe.detail_outfit.label_visibility')}</span
+						>
 						<VisibilityPicker
 							level={outfit.visibility ?? 'private'}
 							onChange={handleVisibilityChange}
@@ -241,7 +254,7 @@
 				<!-- Garments in this outfit -->
 				<div class="space-y-3 rounded-2xl border border-border bg-card p-5">
 					<h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-						Zusammenstellung
+						{$_('wardrobe.detail_outfit.section_composition')}
 					</h2>
 					{#if resolvedGarments.length > 0}
 						<div class="grid grid-cols-3 gap-2 sm:grid-cols-4">
@@ -264,7 +277,7 @@
 									<div class="px-1.5 py-1">
 										<p class="truncate text-xs font-medium text-foreground">{g.name}</p>
 										<p class="truncate text-[10px] text-muted-foreground">
-											{CATEGORY_LABELS_SINGULAR[g.category]}
+											{$_('wardrobe.categories_singular.' + g.category)}
 										</p>
 									</div>
 								</a>
@@ -272,7 +285,7 @@
 						</div>
 					{:else}
 						<p class="text-sm text-muted-foreground">
-							Referenzierte Kleidungsstücke wurden entfernt oder gehören zu einem anderen Space.
+							{$_('wardrobe.detail_outfit.composition_missing')}
 						</p>
 					{/if}
 				</div>
@@ -285,7 +298,9 @@
 						class="flex flex-1 items-center justify-center gap-2 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground transition-colors hover:bg-muted"
 					>
 						<Archive size={14} />
-						{outfit.isArchived ? 'Wieder aktiv' : 'Archivieren'}
+						{outfit.isArchived
+							? $_('wardrobe.detail_outfit.action_unarchive')
+							: $_('wardrobe.detail_outfit.action_archive')}
 					</button>
 					<button
 						type="button"
@@ -293,7 +308,7 @@
 						class="flex flex-1 items-center justify-center gap-2 rounded-md border border-border bg-background px-3 py-2 text-sm text-error transition-colors hover:bg-error/10"
 					>
 						<Trash size={14} />
-						Löschen
+						{$_('wardrobe.detail_outfit.action_delete')}
 					</button>
 				</div>
 			</div>

@@ -6,7 +6,8 @@
   and the detail view immediately opens in edit mode.
 -->
 <script lang="ts">
-	import { CATEGORY_LABELS, CATEGORY_ORDER } from '../constants';
+	import { _ } from 'svelte-i18n';
+	import { CATEGORY_ORDER } from '../constants';
 	import type { Garment, GarmentCategory } from '../types';
 
 	interface Props {
@@ -62,7 +63,7 @@
 	async function handleSubmit(e: Event) {
 		e.preventDefault();
 		if (!name.trim()) {
-			error = 'Name darf nicht leer sein';
+			error = $_('wardrobe.garment_form.err_name_required');
 			return;
 		}
 		error = null;
@@ -85,7 +86,7 @@
 				currency: currency.trim() || null,
 			});
 		} catch (e) {
-			error = e instanceof Error ? e.message : 'Speichern fehlgeschlagen';
+			error = e instanceof Error ? e.message : $_('wardrobe.garment_form.err_save_failed');
 		}
 	}
 </script>
@@ -94,7 +95,7 @@
 	<div class="grid gap-3 sm:grid-cols-2">
 		<div class="sm:col-span-2">
 			<label for="garment-name" class="mb-1.5 block text-sm font-medium text-foreground">
-				Name <span class="text-error">*</span>
+				{$_('wardrobe.garment_form.label_name')} <span class="text-error">*</span>
 			</label>
 			<input
 				id="garment-name"
@@ -102,14 +103,14 @@
 				bind:value={name}
 				disabled={saving}
 				required
-				placeholder="z.B. Blau-weiß gestreiftes Hemd"
+				placeholder={$_('wardrobe.garment_form.placeholder_name')}
 				class="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary disabled:opacity-50"
 			/>
 		</div>
 
 		<div>
 			<label for="garment-category" class="mb-1.5 block text-sm font-medium text-foreground">
-				Kategorie
+				{$_('wardrobe.garment_form.label_category')}
 			</label>
 			<select
 				id="garment-category"
@@ -118,84 +119,85 @@
 				class="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:ring-1 focus:ring-primary disabled:opacity-50"
 			>
 				{#each CATEGORY_ORDER as c}
-					<option value={c}>{CATEGORY_LABELS[c]}</option>
+					<option value={c}>{$_('wardrobe.categories.' + c)}</option>
 				{/each}
 			</select>
 		</div>
 
 		<div>
 			<label for="garment-brand" class="mb-1.5 block text-sm font-medium text-foreground">
-				Marke
+				{$_('wardrobe.garment_form.label_brand')}
 			</label>
 			<input
 				id="garment-brand"
 				type="text"
 				bind:value={brand}
 				disabled={saving}
-				placeholder="z.B. Uniqlo"
+				placeholder={$_('wardrobe.garment_form.placeholder_brand')}
 				class="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary disabled:opacity-50"
 			/>
 		</div>
 
 		<div>
 			<label for="garment-color" class="mb-1.5 block text-sm font-medium text-foreground">
-				Farbe
+				{$_('wardrobe.garment_form.label_color')}
 			</label>
 			<input
 				id="garment-color"
 				type="text"
 				bind:value={color}
 				disabled={saving}
-				placeholder="z.B. navy"
+				placeholder={$_('wardrobe.garment_form.placeholder_color')}
 				class="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary disabled:opacity-50"
 			/>
 		</div>
 
 		<div>
 			<label for="garment-size" class="mb-1.5 block text-sm font-medium text-foreground">
-				Größe
+				{$_('wardrobe.garment_form.label_size')}
 			</label>
 			<input
 				id="garment-size"
 				type="text"
 				bind:value={size}
 				disabled={saving}
-				placeholder="z.B. M oder 42"
+				placeholder={$_('wardrobe.garment_form.placeholder_size')}
 				class="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary disabled:opacity-50"
 			/>
 		</div>
 
 		<div>
 			<label for="garment-material" class="mb-1.5 block text-sm font-medium text-foreground">
-				Material
+				{$_('wardrobe.garment_form.label_material')}
 			</label>
 			<input
 				id="garment-material"
 				type="text"
 				bind:value={material}
 				disabled={saving}
-				placeholder="z.B. Baumwolle"
+				placeholder={$_('wardrobe.garment_form.placeholder_material')}
 				class="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary disabled:opacity-50"
 			/>
 		</div>
 
 		<div class="sm:col-span-2">
 			<label for="garment-tags" class="mb-1.5 block text-sm font-medium text-foreground">
-				Tags <span class="text-muted-foreground">(komma-getrennt)</span>
+				{$_('wardrobe.garment_form.label_tags')}
+				<span class="text-muted-foreground">{$_('wardrobe.garment_form.tags_hint')}</span>
 			</label>
 			<input
 				id="garment-tags"
 				type="text"
 				bind:value={tagsText}
 				disabled={saving}
-				placeholder="formal, sommer, lieblingsstück"
+				placeholder={$_('wardrobe.garment_form.placeholder_tags')}
 				class="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary disabled:opacity-50"
 			/>
 		</div>
 
 		<div>
 			<label for="garment-price" class="mb-1.5 block text-sm font-medium text-foreground">
-				Preis
+				{$_('wardrobe.garment_form.label_price')}
 			</label>
 			<div class="flex gap-2">
 				<input
@@ -213,7 +215,7 @@
 					bind:value={currency}
 					disabled={saving}
 					maxlength="3"
-					aria-label="Währung"
+					aria-label={$_('wardrobe.garment_form.aria_currency')}
 					class="w-16 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary disabled:opacity-50"
 				/>
 			</div>
@@ -221,14 +223,14 @@
 
 		<div class="sm:col-span-2">
 			<label for="garment-notes" class="mb-1.5 block text-sm font-medium text-foreground">
-				Notizen
+				{$_('wardrobe.garment_form.label_notes')}
 			</label>
 			<textarea
 				id="garment-notes"
 				bind:value={notes}
 				disabled={saving}
 				rows="2"
-				placeholder="Anlass, Tragevorschriften, …"
+				placeholder={$_('wardrobe.garment_form.placeholder_notes')}
 				class="w-full resize-none rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary disabled:opacity-50"
 			></textarea>
 		</div>
@@ -249,7 +251,7 @@
 			disabled={saving || !name.trim()}
 			class="flex-1 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
 		>
-			{saving ? 'Speichere…' : 'Speichern'}
+			{saving ? $_('wardrobe.garment_form.action_saving') : $_('wardrobe.garment_form.action_save')}
 		</button>
 		{#if onCancel}
 			<button
@@ -258,7 +260,7 @@
 				disabled={saving}
 				class="rounded-md border border-border bg-background px-4 py-2 text-sm text-foreground transition-colors hover:bg-muted disabled:opacity-50"
 			>
-				Abbrechen
+				{$_('wardrobe.garment_form.action_cancel')}
 			</button>
 		{/if}
 	</div>

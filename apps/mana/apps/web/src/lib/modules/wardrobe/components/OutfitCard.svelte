@@ -7,9 +7,9 @@
   favorite) lives on the detail page.
 -->
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { Heart, Sparkle } from '@mana/shared-icons';
 	import { garmentPhotoUrl } from '../api/media-url';
-	import { OCCASION_LABELS } from '../constants';
 	import type { Garment, Outfit } from '../types';
 
 	interface Props {
@@ -51,10 +51,10 @@
 			<img src={tryOnUrl} alt={outfit.name} loading="lazy" class="h-full w-full object-cover" />
 			<span
 				class="absolute left-2 top-2 flex items-center gap-1 rounded-md bg-primary/90 px-2 py-0.5 text-xs font-medium text-primary-foreground shadow-sm backdrop-blur-sm"
-				title="Try-On Vorschau"
+				title={$_('wardrobe.outfit_card.try_on_preview_title')}
 			>
 				<Sparkle size={11} weight="fill" />
-				Try-On
+				{$_('wardrobe.outfit_card.try_on_badge')}
 			</span>
 		{:else if resolvedGarments.length > 0}
 			<div class="grid h-full w-full grid-cols-2 grid-rows-2 gap-0.5 bg-border">
@@ -79,14 +79,14 @@
 			</div>
 		{:else}
 			<div class="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
-				Leer
+				{$_('wardrobe.outfit_card.empty')}
 			</div>
 		{/if}
 
 		{#if outfit.isFavorite}
 			<span
 				class="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-background/90 text-rose-500 shadow-sm backdrop-blur-sm"
-				title="Favorit"
+				title={$_('wardrobe.outfit_card.favorite')}
 			>
 				<Heart size={14} weight="fill" />
 			</span>
@@ -95,10 +95,15 @@
 	<div class="px-3 py-2">
 		<p class="truncate text-sm font-medium text-foreground">{outfit.name}</p>
 		<div class="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
-			<span>{outfit.garmentIds.length}{outfit.garmentIds.length === 1 ? ' Stück' : ' Stücke'}</span>
+			<span
+				>{outfit.garmentIds.length}
+				{outfit.garmentIds.length === 1
+					? $_('wardrobe.piece_singular')
+					: $_('wardrobe.piece_plural')}</span
+			>
 			{#if outfit.occasion}
 				<span class="text-border">·</span>
-				<span>{OCCASION_LABELS[outfit.occasion]}</span>
+				<span>{$_('wardrobe.occasions.' + outfit.occasion)}</span>
 			{/if}
 		</div>
 	</div>

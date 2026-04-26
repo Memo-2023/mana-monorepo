@@ -13,6 +13,7 @@
   on the detail route.
 -->
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import type { TryOnModel } from '../api/try-on';
 
 	interface Props {
@@ -23,31 +24,33 @@
 
 	let { value, onChange, disabled = false }: Props = $props();
 
-	const OPTIONS: Array<{
-		id: TryOnModel;
-		label: string;
-		hint: string;
-	}> = [
+	const OPTIONS = $derived<
+		Array<{
+			id: TryOnModel;
+			label: string;
+			hint: string;
+		}>
+	>([
 		{
 			id: 'openai/gpt-image-2',
-			label: 'OpenAI',
-			hint: 'GPT-image · Standard',
+			label: $_('wardrobe.model_picker.option_openai_label'),
+			hint: $_('wardrobe.model_picker.option_openai_hint'),
 		},
 		{
 			id: 'google/gemini-3-pro-image-preview',
-			label: 'Nano Banana Pro',
-			hint: 'Google · hohe Konsistenz',
+			label: $_('wardrobe.model_picker.option_pro_label'),
+			hint: $_('wardrobe.model_picker.option_pro_hint'),
 		},
 		{
 			id: 'google/gemini-3.1-flash-image-preview',
-			label: 'Nano Banana 2',
-			hint: 'Google · neuestes · günstig',
+			label: $_('wardrobe.model_picker.option_flash_label'),
+			hint: $_('wardrobe.model_picker.option_flash_hint'),
 		},
-	];
+	]);
 </script>
 
 <fieldset class="picker" {disabled}>
-	<legend class="legend">Modell</legend>
+	<legend class="legend">{$_('wardrobe.model_picker.legend')}</legend>
 	<div class="options">
 		{#each OPTIONS as opt (opt.id)}
 			<button

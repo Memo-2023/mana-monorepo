@@ -13,16 +13,13 @@
   of the workflow and is keyboard-accessible for free).
 -->
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { Check, Plus, X } from '@mana/shared-icons';
 	import { garmentPhotoUrl } from '../api/media-url';
-	import {
-		CATEGORY_LABELS,
-		CATEGORY_ORDER,
-		OCCASION_LABELS,
-		OCCASION_ORDER,
-		SEASON_LABELS,
-	} from '../constants';
+	import { CATEGORY_ORDER, OCCASION_ORDER } from '../constants';
 	import type { Garment, GarmentCategory, Outfit, OutfitOccasion, OutfitSeason } from '../types';
+
+	const SEASON_KEYS: OutfitSeason[] = ['spring', 'summer', 'autumn', 'winter'];
 
 	interface Props {
 		/** Full library of garments available in the active space. */
@@ -108,11 +105,11 @@
 	async function handleSubmit(e: Event) {
 		e.preventDefault();
 		if (!name.trim()) {
-			error = 'Gib dem Outfit einen Namen.';
+			error = $_('wardrobe.composer.err_name_required');
 			return;
 		}
 		if (selectedIds.length === 0) {
-			error = 'Wähle mindestens ein Kleidungsstück aus.';
+			error = $_('wardrobe.composer.err_no_garments');
 			return;
 		}
 		error = null;
@@ -130,7 +127,7 @@
 				tags: tagList,
 			});
 		} catch (e) {
-			error = e instanceof Error ? e.message : 'Speichern fehlgeschlagen';
+			error = e instanceof Error ? e.message : $_('wardrobe.composer.err_save_failed');
 		}
 	}
 </script>
@@ -140,21 +137,24 @@
 	<section class="space-y-4">
 		<header class="flex items-center justify-between">
 			<h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-				Kleiderschrank
+				{$_('wardrobe.composer.section_library')}
 			</h2>
 			<span class="text-xs text-muted-foreground">
-				{garments.length}
-				{garments.length === 1 ? 'Stück' : 'Stücke'} verfügbar
+				{garments.length === 1
+					? $_('wardrobe.composer.available_singular', { values: { count: garments.length } })
+					: $_('wardrobe.composer.available_plural', { values: { count: garments.length } })}
 			</span>
 		</header>
 
 		{#if garments.length === 0}
 			<div class="rounded-xl border border-dashed border-border bg-background/50 p-6 text-center">
-				<p class="text-sm font-medium text-foreground">Nichts zum Kombinieren.</p>
+				<p class="text-sm font-medium text-foreground">{$_('wardrobe.composer.empty_title')}</p>
 				<p class="mt-1 text-sm text-muted-foreground">
-					Lade zuerst ein paar Kleidungsstücke im Tab
-					<a href="/wardrobe" class="font-medium text-primary hover:underline">Kleidung</a>
-					hoch.
+					{$_('wardrobe.composer.empty_hint_prefix')}
+					<a href="/wardrobe" class="font-medium text-primary hover:underline"
+						>{$_('wardrobe.composer.tab_garments_link')}</a
+					>
+					{$_('wardrobe.composer.empty_hint_suffix')}
 				</p>
 			</div>
 		{:else}
@@ -166,7 +166,7 @@
 					{#if list.length > 0}
 						<div>
 							<h3 class="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-								{CATEGORY_LABELS[category]}
+								{$_('wardrobe.categories.' + category)}
 								<span class="text-border"> · {list.length}</span>
 							</h3>
 							<div class="grid grid-cols-3 gap-2 sm:grid-cols-4">
@@ -216,7 +216,7 @@
 		<div class="space-y-3 rounded-2xl border border-border bg-card p-4">
 			<div>
 				<label for="outfit-name" class="mb-1.5 block text-sm font-medium text-foreground">
-					Name <span class="text-error">*</span>
+					{$_('wardrobe.composer.label_name')} <span class="text-error">*</span>
 				</label>
 				<input
 					id="outfit-name"
@@ -224,28 +224,28 @@
 					bind:value={name}
 					required
 					disabled={saving}
-					placeholder="z.B. Bürooutfit Juni"
+					placeholder={$_('wardrobe.composer.placeholder_name')}
 					class="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary disabled:opacity-50"
 				/>
 			</div>
 
 			<div>
 				<label for="outfit-description" class="mb-1.5 block text-sm font-medium text-foreground">
-					Beschreibung
+					{$_('wardrobe.composer.label_description')}
 				</label>
 				<textarea
 					id="outfit-description"
 					bind:value={description}
 					disabled={saving}
 					rows="2"
-					placeholder="Für welchen Anlass? Besonderheiten?"
+					placeholder={$_('wardrobe.composer.placeholder_description')}
 					class="w-full resize-none rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary disabled:opacity-50"
 				></textarea>
 			</div>
 
 			<div>
 				<label for="outfit-occasion" class="mb-1.5 block text-sm font-medium text-foreground">
-					Anlass
+					{$_('wardrobe.composer.label_occasion')}
 				</label>
 				<select
 					id="outfit-occasion"
@@ -253,18 +253,19 @@
 					disabled={saving}
 					class="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:ring-1 focus:ring-primary disabled:opacity-50"
 				>
-					<option value="">— kein Anlass —</option>
+					<option value="">{$_('wardrobe.composer.no_occasion')}</option>
 					{#each OCCASION_ORDER as o}
-						<option value={o}>{OCCASION_LABELS[o]}</option>
+						<option value={o}>{$_('wardrobe.occasions.' + o)}</option>
 					{/each}
 				</select>
 			</div>
 
 			<fieldset>
-				<legend class="mb-1.5 text-sm font-medium text-foreground">Jahreszeit</legend>
+				<legend class="mb-1.5 text-sm font-medium text-foreground"
+					>{$_('wardrobe.composer.label_seasons')}</legend
+				>
 				<div class="flex flex-wrap gap-1.5">
-					{#each Object.entries(SEASON_LABELS) as [season, label]}
-						{@const s = season as OutfitSeason}
+					{#each SEASON_KEYS as s}
 						{@const on = selectedSeasons.includes(s)}
 						<button
 							type="button"
@@ -275,7 +276,7 @@
 								? 'border-primary bg-primary text-primary-foreground'
 								: 'border-border bg-background text-muted-foreground hover:border-primary/50 hover:text-foreground'} disabled:opacity-50"
 						>
-							{label}
+							{$_('wardrobe.seasons.' + s)}
 						</button>
 					{/each}
 				</div>
@@ -283,14 +284,15 @@
 
 			<div>
 				<label for="outfit-tags" class="mb-1.5 block text-sm font-medium text-foreground">
-					Tags <span class="text-muted-foreground">(komma-getrennt)</span>
+					{$_('wardrobe.composer.label_tags')}
+					<span class="text-muted-foreground">{$_('wardrobe.composer.tags_hint')}</span>
 				</label>
 				<input
 					id="outfit-tags"
 					type="text"
 					bind:value={tagsText}
 					disabled={saving}
-					placeholder="minimal, layering, meeting"
+					placeholder={$_('wardrobe.composer.placeholder_tags')}
 					class="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary disabled:opacity-50"
 				/>
 			</div>
@@ -299,10 +301,15 @@
 		<div class="space-y-3 rounded-2xl border border-border bg-card p-4">
 			<header class="flex items-center justify-between">
 				<h3 class="text-sm font-medium text-foreground">
-					Zusammenstellung
+					{$_('wardrobe.composer.section_composition')}
 					<span class="ml-1 text-xs text-muted-foreground">
-						· {selectedGarments.length}
-						{selectedGarments.length === 1 ? 'Stück' : 'Stücke'}
+						{selectedGarments.length === 1
+							? $_('wardrobe.composer.composition_count_singular', {
+									values: { count: selectedGarments.length },
+								})
+							: $_('wardrobe.composer.composition_count_plural', {
+									values: { count: selectedGarments.length },
+								})}
 					</span>
 				</h3>
 			</header>
@@ -310,7 +317,7 @@
 				<p
 					class="rounded-md border border-dashed border-border bg-background/50 p-3 text-xs text-muted-foreground"
 				>
-					Klicke links auf Kleidungsstücke, um sie dem Outfit hinzuzufügen.
+					{$_('wardrobe.composer.composition_empty')}
 				</p>
 			{:else}
 				<div class="flex flex-wrap gap-2">
@@ -331,8 +338,8 @@
 							<button
 								type="button"
 								onclick={() => removeGarment(g.id)}
-								aria-label="Aus Outfit entfernen"
-								title="Aus Outfit entfernen"
+								aria-label={$_('wardrobe.composer.action_remove')}
+								title={$_('wardrobe.composer.action_remove')}
 								class="absolute right-0.5 top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-background/90 text-muted-foreground opacity-0 shadow-sm transition-opacity hover:text-error group-hover:opacity-100"
 							>
 								<X size={12} weight="bold" />
@@ -358,7 +365,11 @@
 				disabled={saving || !name.trim() || selectedIds.length === 0}
 				class="flex-1 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
 			>
-				{saving ? 'Speichere…' : outfit ? 'Änderungen speichern' : 'Outfit anlegen'}
+				{saving
+					? $_('wardrobe.composer.action_saving')
+					: outfit
+						? $_('wardrobe.composer.action_save_edit')
+						: $_('wardrobe.composer.action_save_new')}
 			</button>
 			{#if onCancel}
 				<button
@@ -367,7 +378,7 @@
 					disabled={saving}
 					class="rounded-md border border-border bg-background px-4 py-2 text-sm text-foreground transition-colors hover:bg-muted disabled:opacity-50"
 				>
-					Abbrechen
+					{$_('wardrobe.composer.action_cancel')}
 				</button>
 			{/if}
 		</div>

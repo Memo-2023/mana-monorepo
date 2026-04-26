@@ -16,12 +16,12 @@
   to the filename-sans-extension, as in the picture module's upload.
 -->
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import MeImageUploadZone from '$lib/modules/profile/components/MeImageUploadZone.svelte';
 	import { readImageDimensions } from '$lib/modules/profile/api/me-images';
 	import { useAllGarments } from '../queries';
 	import { wardrobeGarmentsStore } from '../stores/garments.svelte';
 	import { uploadGarmentPhoto } from '../api/upload';
-	import { CATEGORY_LABELS, CATEGORY_LABELS_SINGULAR } from '../constants';
 	import CategoryTabs from '../components/CategoryTabs.svelte';
 	import GarmentCard from '../components/GarmentCard.svelte';
 	import { prettifyUploadName } from '../utils/name';
@@ -74,7 +74,7 @@
 				});
 			}
 		} catch (err) {
-			uploadError = err instanceof Error ? err.message : 'Upload fehlgeschlagen';
+			uploadError = err instanceof Error ? err.message : $_('wardrobe.upload_failed');
 		} finally {
 			uploading = false;
 		}
@@ -91,9 +91,11 @@
 	<MeImageUploadZone
 		variant="compact"
 		label={activeTab === 'all'
-			? 'Kleidungsstück hochladen'
-			: `${CATEGORY_LABELS_SINGULAR[activeTab]} hochladen`}
-		hint="Foto frontal, heller Hintergrund — bessere Try-On-Ergebnisse"
+			? $_('wardrobe.grid_view.upload_label_all')
+			: $_('wardrobe.grid_view.upload_label_for_category', {
+					values: { category: $_('wardrobe.categories_singular.' + activeTab) },
+				})}
+		hint={$_('wardrobe.grid_view.upload_hint')}
 		disabled={uploading}
 		onFiles={ingestFiles}
 	/>
@@ -113,17 +115,22 @@
 		</div>
 	{:else if garments.length === 0}
 		<div class="rounded-2xl border border-dashed border-border bg-background/50 p-6 text-center">
-			<p class="text-sm font-medium text-foreground">Noch nichts im Schrank.</p>
+			<p class="text-sm font-medium text-foreground">{$_('wardrobe.grid_view.empty_title')}</p>
 			<p class="mt-1 text-sm text-muted-foreground">
-				Zieh ein Foto in die Zone oben — oder klick sie an, um eins auszuwählen.
+				{$_('wardrobe.grid_view.empty_hint')}
 			</p>
 		</div>
 	{:else}
 		<div class="rounded-2xl border border-dashed border-border bg-background/50 p-6 text-center">
 			<p class="text-sm text-muted-foreground">
-				Keine Einträge unter <strong class="text-foreground"
-					>{activeTab === 'all' ? 'Alle' : CATEGORY_LABELS[activeTab]}</strong
-				>.
+				{$_('wardrobe.grid_view.no_entries_under', {
+					values: {
+						category:
+							activeTab === 'all'
+								? $_('wardrobe.categories.all')
+								: $_('wardrobe.categories.' + activeTab),
+					},
+				})}
 			</p>
 		</div>
 	{/if}
@@ -134,8 +141,7 @@
 	     view clean. -->
 	{#if activeSpace && activeSpace.type !== 'personal'}
 		<p class="text-xs text-muted-foreground">
-			Dieser Schrank gehört zu <strong class="text-foreground">{activeSpace.name}</strong> — Uploads landen
-			nur hier, nicht in deinem persönlichen Schrank.
+			{$_('wardrobe.grid_view.space_footer', { values: { name: activeSpace.name } })}
 		</p>
 	{/if}
 </div>

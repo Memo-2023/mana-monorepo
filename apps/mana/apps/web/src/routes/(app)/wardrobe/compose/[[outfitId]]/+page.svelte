@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
+	import { _ } from 'svelte-i18n';
 	import { ArrowLeft } from '@mana/shared-icons';
 	import { RoutePage } from '$lib/components/shell';
 	import OutfitComposer from '$lib/modules/wardrobe/components/OutfitComposer.svelte';
@@ -54,7 +55,9 @@
 </script>
 
 <svelte:head>
-	<title>{outfitId ? 'Outfit bearbeiten' : 'Neues Outfit'} · Mana</title>
+	<title
+		>{outfitId ? $_('wardrobe.compose.title_edit') : $_('wardrobe.compose.title_new')} · Mana</title
+	>
 </svelte:head>
 
 <RoutePage appId="wardrobe" backHref="/wardrobe">
@@ -63,19 +66,23 @@
 			<a
 				href={outfitId ? `/wardrobe/outfit/${outfitId}` : '/wardrobe'}
 				class="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted"
-				aria-label="Zurück"
+				aria-label={$_('wardrobe.compose.back')}
 			>
 				<ArrowLeft size={16} />
 			</a>
 			<h1 class="text-xl font-bold text-foreground">
-				{outfitId ? 'Outfit bearbeiten' : 'Neues Outfit'}
+				{outfitId ? $_('wardrobe.compose.title_edit') : $_('wardrobe.compose.title_new')}
 			</h1>
 		</header>
 
 		{#if outfitId && !outfit && !existingOutfit$.loading}
 			<div class="rounded-2xl border border-dashed border-border bg-background/50 p-8 text-center">
-				<p class="text-sm font-medium text-foreground">Outfit nicht gefunden.</p>
-				<p class="mt-1 text-sm text-muted-foreground">Gelöscht oder in einem anderen Space.</p>
+				<p class="text-sm font-medium text-foreground">
+					{$_('wardrobe.detail_outfit.not_found_title')}
+				</p>
+				<p class="mt-1 text-sm text-muted-foreground">
+					{$_('wardrobe.detail_outfit.not_found_desc')}
+				</p>
 			</div>
 		{:else}
 			<!-- Remount when we switch from /compose (new) to /compose/:id (edit)

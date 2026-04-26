@@ -7,7 +7,7 @@
   component trusts the input.
 -->
 <script lang="ts">
-	import { CATEGORY_LABELS_SINGULAR } from '../constants';
+	import { _ } from 'svelte-i18n';
 	import { garmentPrimaryMediaId } from '../types';
 	import { garmentPhotoUrl } from '../api/media-url';
 	import type { Garment } from '../types';
@@ -34,12 +34,14 @@
 		<span
 			class="absolute left-2 top-2 rounded-md bg-background/90 px-2 py-0.5 text-xs font-medium text-foreground shadow-sm backdrop-blur-sm"
 		>
-			{CATEGORY_LABELS_SINGULAR[garment.category] ?? garment.category}
+			{$_('wardrobe.categories_singular.' + garment.category)}
 		</span>
 		{#if garment.wearCount && garment.wearCount > 0}
 			<span
 				class="absolute right-2 top-2 rounded-full bg-primary/90 px-2 py-0.5 text-xs font-medium text-primary-foreground shadow-sm"
-				title="{garment.wearCount}× getragen"
+				title={$_('wardrobe.garment_card.wear_count_title', {
+					values: { count: garment.wearCount },
+				})}
 			>
 				{garment.wearCount}×
 			</span>

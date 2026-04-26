@@ -6,12 +6,12 @@
 -->
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { _ } from 'svelte-i18n';
 	import { deriveUpdatedAt } from '$lib/data/sync';
 	import { CheckCircle, PencilSimple, Archive, Sparkle, Trash } from '@mana/shared-icons';
 	import { useGarment, useGarmentSoloTryOns, useOutfitsContainingGarment } from '../queries';
 	import { wardrobeGarmentsStore } from '../stores/garments.svelte';
 	import { garmentPhotoUrl } from '../api/media-url';
-	import { CATEGORY_LABELS } from '../constants';
 	import GarmentForm from '../components/GarmentForm.svelte';
 	import GarmentTryOnButton from '../components/GarmentTryOnButton.svelte';
 	import ImageLightbox from '$lib/modules/picture/components/ImageLightbox.svelte';
@@ -86,7 +86,8 @@
 
 	async function handleDelete() {
 		if (!garment) return;
-		if (!confirm(`"${garment.name}" wirklich löschen?`)) return;
+		if (!confirm($_('wardrobe.detail_garment.confirm_delete', { values: { name: garment.name } })))
+			return;
 		await wardrobeGarmentsStore.deleteGarment(garment.id);
 		goto('/wardrobe');
 	}
@@ -111,12 +112,14 @@
 <div class="mx-auto max-w-3xl space-y-5 p-4 sm:p-6">
 	{#if !garment}
 		{#if garment$.loading}
-			<p class="text-sm text-muted-foreground">Lädt…</p>
+			<p class="text-sm text-muted-foreground">{$_('wardrobe.detail_garment.loading')}</p>
 		{:else}
 			<div class="rounded-2xl border border-dashed border-border bg-background/50 p-8 text-center">
-				<p class="text-sm font-medium text-foreground">Nicht gefunden.</p>
+				<p class="text-sm font-medium text-foreground">
+					{$_('wardrobe.detail_garment.not_found_title')}
+				</p>
 				<p class="mt-1 text-sm text-muted-foreground">
-					Das Kleidungsstück wurde gelöscht oder gehört zu einem anderen Space.
+					{$_('wardrobe.detail_garment.not_found_desc')}
 				</p>
 			</div>
 		{/if}
@@ -131,7 +134,7 @@
 				<button
 					type="button"
 					onclick={openPhotoLightbox}
-					aria-label="Foto vergrößern"
+					aria-label={$_('wardrobe.detail_garment.action_enlarge')}
 					class="group block overflow-hidden rounded-2xl border border-border bg-muted transition-all hover:border-primary/50 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
 				>
 					<img
@@ -153,7 +156,9 @@
 						<header class="flex items-start justify-between gap-2">
 							<div>
 								<h1 class="text-lg font-semibold text-foreground">{garment.name}</h1>
-								<p class="text-sm text-muted-foreground">{CATEGORY_LABELS[garment.category]}</p>
+								<p class="text-sm text-muted-foreground">
+									{$_('wardrobe.categories.' + garment.category)}
+								</p>
 							</div>
 							<!-- Edit affordance uses the same primary-tinted hover as
 							     the Try-On thumbs / model picker so interactive elements
@@ -163,42 +168,52 @@
 							<button
 								type="button"
 								onclick={() => (editing = true)}
-								aria-label="Bearbeiten"
+								aria-label={$_('wardrobe.detail_garment.action_edit')}
 								class="flex items-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/50 hover:bg-primary/5 hover:text-foreground"
 							>
 								<PencilSimple size={14} />
-								Bearbeiten
+								{$_('wardrobe.detail_garment.action_edit')}
 							</button>
 						</header>
 
 						<dl class="grid grid-cols-2 gap-3 text-sm">
 							{#if garment.brand}
 								<div>
-									<dt class="text-xs uppercase tracking-wider text-muted-foreground">Marke</dt>
+									<dt class="text-xs uppercase tracking-wider text-muted-foreground">
+										{$_('wardrobe.detail_garment.label_brand')}
+									</dt>
 									<dd class="text-foreground">{garment.brand}</dd>
 								</div>
 							{/if}
 							{#if garment.color}
 								<div>
-									<dt class="text-xs uppercase tracking-wider text-muted-foreground">Farbe</dt>
+									<dt class="text-xs uppercase tracking-wider text-muted-foreground">
+										{$_('wardrobe.detail_garment.label_color')}
+									</dt>
 									<dd class="text-foreground">{garment.color}</dd>
 								</div>
 							{/if}
 							{#if garment.size}
 								<div>
-									<dt class="text-xs uppercase tracking-wider text-muted-foreground">Größe</dt>
+									<dt class="text-xs uppercase tracking-wider text-muted-foreground">
+										{$_('wardrobe.detail_garment.label_size')}
+									</dt>
 									<dd class="text-foreground">{garment.size}</dd>
 								</div>
 							{/if}
 							{#if garment.material}
 								<div>
-									<dt class="text-xs uppercase tracking-wider text-muted-foreground">Material</dt>
+									<dt class="text-xs uppercase tracking-wider text-muted-foreground">
+										{$_('wardrobe.detail_garment.label_material')}
+									</dt>
 									<dd class="text-foreground">{garment.material}</dd>
 								</div>
 							{/if}
 							{#if garment.priceCents}
 								<div>
-									<dt class="text-xs uppercase tracking-wider text-muted-foreground">Preis</dt>
+									<dt class="text-xs uppercase tracking-wider text-muted-foreground">
+										{$_('wardrobe.detail_garment.label_price')}
+									</dt>
 									<dd class="text-foreground">
 										{(garment.priceCents / 100).toFixed(2)}
 										{garment.currency ?? ''}
@@ -207,10 +222,16 @@
 							{/if}
 							{#if garment.wearCount && garment.wearCount > 0}
 								<div>
-									<dt class="text-xs uppercase tracking-wider text-muted-foreground">Getragen</dt>
+									<dt class="text-xs uppercase tracking-wider text-muted-foreground">
+										{$_('wardrobe.detail_garment.label_wear_count')}
+									</dt>
 									<dd class="text-foreground">
-										{garment.wearCount}×{garment.lastWornAt
-											? ` · zuletzt ${garment.lastWornAt}`
+										{$_('wardrobe.detail_garment.wear_count_value', {
+											values: { count: garment.wearCount },
+										})}{garment.lastWornAt
+											? $_('wardrobe.detail_garment.last_worn_suffix', {
+													values: { date: garment.lastWornAt },
+												})
 											: ''}
 									</dd>
 								</div>
@@ -242,10 +263,10 @@
 						<a
 							href={`/comic/character/new?title=${encodeURIComponent(garment.name)}&prompt=${encodeURIComponent('wearing ' + garment.name)}`}
 							class="flex w-full items-center justify-center gap-1.5 rounded-md border border-border bg-background px-3 py-2 text-xs font-medium text-foreground transition-colors hover:border-primary/40 hover:bg-primary/5"
-							title="Aus diesem Kleidungsstück einen Comic-Character generieren"
+							title={$_('wardrobe.detail_garment.action_comic_title')}
 						>
 							<Sparkle size={12} />
-							Als Comic-Character
+							{$_('wardrobe.detail_garment.action_comic')}
 						</a>
 					{/if}
 
@@ -264,13 +285,19 @@
 							class="flex flex-1 items-center justify-center gap-2 rounded-md border border-border bg-background px-4 py-2 text-sm text-foreground transition-colors hover:border-primary/50 hover:bg-primary/5 disabled:opacity-50 disabled:hover:border-border disabled:hover:bg-background"
 						>
 							<CheckCircle size={14} />
-							{markingWorn ? 'Gespeichert…' : 'Heute getragen'}
+							{markingWorn
+								? $_('wardrobe.detail_garment.action_marking')
+								: $_('wardrobe.detail_garment.action_mark_worn')}
 						</button>
 						<button
 							type="button"
 							onclick={handleArchive}
-							aria-label={garment.isArchived ? 'Wieder aktiv setzen' : 'Archivieren'}
-							title={garment.isArchived ? 'Wieder aktiv setzen' : 'Archivieren'}
+							aria-label={garment.isArchived
+								? $_('wardrobe.detail_garment.action_unarchive')
+								: $_('wardrobe.detail_garment.action_archive')}
+							title={garment.isArchived
+								? $_('wardrobe.detail_garment.action_unarchive')
+								: $_('wardrobe.detail_garment.action_archive')}
 							class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-md border border-border bg-background text-muted-foreground transition-colors hover:border-primary/50 hover:bg-primary/5 hover:text-foreground"
 						>
 							<Archive size={16} />
@@ -278,8 +305,8 @@
 						<button
 							type="button"
 							onclick={handleDelete}
-							aria-label="Löschen"
-							title="Löschen"
+							aria-label={$_('wardrobe.detail_garment.action_delete')}
+							title={$_('wardrobe.detail_garment.action_delete')}
 							class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-md border border-border bg-background text-error transition-colors hover:border-error/50 hover:bg-error/10"
 						>
 							<Trash size={16} />
@@ -298,7 +325,9 @@
 			<section class="space-y-2">
 				<header class="flex items-baseline justify-between">
 					<h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-						Anproben · {soloTryOns.length}
+						{$_('wardrobe.detail_garment.section_try_ons', {
+							values: { count: soloTryOns.length },
+						})}
 					</h2>
 				</header>
 				<div class="flex gap-3 overflow-x-auto pb-1">
@@ -331,7 +360,9 @@
 			<section class="space-y-2">
 				<header class="flex items-baseline justify-between">
 					<h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-						In Outfits · {outfits.length}
+						{$_('wardrobe.detail_garment.section_outfits', {
+							values: { count: outfits.length },
+						})}
 					</h2>
 				</header>
 				<div class="flex gap-3 overflow-x-auto pb-1">
@@ -355,7 +386,7 @@
 									<div
 										class="flex h-full w-full items-center justify-center text-xs text-muted-foreground"
 									>
-										Noch keine Anprobe
+										{$_('wardrobe.detail_garment.no_try_on_yet')}
 									</div>
 								{/if}
 							</div>
@@ -378,7 +409,7 @@
 			href="/picture"
 			class="flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
 		>
-			In Picture öffnen
+			{$_('wardrobe.detail_garment.action_open_picture')}
 		</a>
 	{/snippet}
 </ImageLightbox>

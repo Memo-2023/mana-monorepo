@@ -13,6 +13,7 @@
 -->
 <script lang="ts">
 	import { fade } from 'svelte/transition';
+	import { _ } from 'svelte-i18n';
 	import { CheckCircle, SpinnerGap, UserCircle } from '@mana/shared-icons';
 	import { useImageByPrimary } from '$lib/modules/profile/queries';
 	import MeImageUploadZone from '$lib/modules/profile/components/MeImageUploadZone.svelte';
@@ -24,10 +25,10 @@
 
 	let activeTab = $state<Tab>('garments');
 
-	const TABS: { key: Tab; label: string }[] = [
-		{ key: 'garments', label: 'Kleidung' },
-		{ key: 'outfits', label: 'Outfits' },
-	];
+	const TABS = $derived<{ key: Tab; label: string }[]>([
+		{ key: 'garments', label: $_('wardrobe.list_view.tab_garments') },
+		{ key: 'outfits', label: $_('wardrobe.list_view.tab_outfits') },
+	]);
 
 	// Face-ref banner: the minimum requirement for *any* wardrobe try-on
 	// (outfit or solo-garment, accessory or full). Body-ref is asked for
@@ -74,7 +75,7 @@
 				successTimeout = null;
 			}, 2500);
 		} catch (err) {
-			faceUploadError = err instanceof Error ? err.message : 'Upload fehlgeschlagen';
+			faceUploadError = err instanceof Error ? err.message : $_('wardrobe.upload_failed');
 			uploadPhase = 'idle';
 		}
 	}
@@ -90,7 +91,7 @@
 </script>
 
 <div class="wardrobe-root">
-	<nav class="wardrobe-tabs" aria-label="Ansicht wechseln">
+	<nav class="wardrobe-tabs" aria-label={$_('wardrobe.list_view.aria_tabs')}>
 		{#each TABS as tab (tab.key)}
 			<button
 				type="button"
@@ -128,10 +129,10 @@
 					<div class="flex-1 space-y-0.5">
 						<p class="flex items-center gap-1.5 text-sm font-medium text-foreground">
 							<CheckCircle size={14} weight="fill" class="text-primary" />
-							Gesichtsbild gespeichert
+							{$_('wardrobe.list_view.face_saved_title')}
 						</p>
 						<p class="text-xs text-muted-foreground">
-							Perfekt — als nächstes lädst du unten dein erstes Kleidungsstück hoch.
+							{$_('wardrobe.list_view.face_saved_hint')}
 						</p>
 					</div>
 					<button
@@ -139,25 +140,28 @@
 						onclick={dismissSuccess}
 						class="text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
 					>
-						Schließen
+						{$_('wardrobe.list_view.dismiss')}
 					</button>
 				</div>
 			{:else}
 				<div class="flex items-start gap-3 text-sm">
 					<UserCircle size={18} weight="regular" class="mt-0.5 flex-shrink-0 text-primary" />
 					<div class="space-y-1">
-						<p class="font-medium text-foreground">Lade ein Gesichtsbild hoch</p>
+						<p class="font-medium text-foreground">
+							{$_('wardrobe.list_view.face_prompt_title')}
+						</p>
 						<p class="text-xs text-muted-foreground">
-							Wir brauchen dich auf Bild, damit Try-On Kleidung an dir visualisieren kann. Das Bild
-							bleibt lokal und wird nur für deine eigenen Generierungen genutzt.
+							{$_('wardrobe.list_view.face_prompt_desc')}
 						</p>
 					</div>
 				</div>
 				<div class="relative">
 					<MeImageUploadZone
 						variant="compact"
-						label={uploadPhase === 'uploading' ? 'Wird hochgeladen…' : 'Gesichtsbild hochladen'}
-						hint="Kopf + Schulter, möglichst neutrale Beleuchtung"
+						label={uploadPhase === 'uploading'
+							? $_('wardrobe.list_view.face_uploading_label')
+							: $_('wardrobe.list_view.face_upload_label')}
+						hint={$_('wardrobe.list_view.face_upload_hint')}
 						disabled={uploadPhase === 'uploading'}
 						onFiles={handleFaceUpload}
 					/>
@@ -168,7 +172,7 @@
 							aria-live="polite"
 						>
 							<SpinnerGap size={12} class="spinner" weight="bold" />
-							Lade…
+							{$_('wardrobe.list_view.face_uploading_chip')}
 						</span>
 					{/if}
 				</div>
