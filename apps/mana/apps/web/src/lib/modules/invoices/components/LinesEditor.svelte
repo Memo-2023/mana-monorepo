@@ -8,6 +8,7 @@
   blur / emit. All in-component math uses minor units.
 -->
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { VAT_RATES_CH, VAT_RATES_DE, CURRENCIES } from '../constants';
 	import { computeLineTotal } from '../totals';
 	import type { LocalInvoiceLine, Currency } from '../types';
@@ -72,17 +73,17 @@
 
 <div class="editor">
 	<div class="head">
-		<span class="col-title">Position</span>
-		<span class="col-qty">Menge</span>
-		<span class="col-unit">Einheit</span>
-		<span class="col-price">Einzelpreis</span>
-		<span class="col-vat">MwSt.</span>
-		<span class="col-total">Total</span>
+		<span class="col-title">{$_('invoices.lines_editor.th_position')}</span>
+		<span class="col-qty">{$_('invoices.lines_editor.th_quantity')}</span>
+		<span class="col-unit">{$_('invoices.lines_editor.th_unit')}</span>
+		<span class="col-price">{$_('invoices.lines_editor.th_unit_price')}</span>
+		<span class="col-vat">{$_('invoices.lines_editor.th_vat')}</span>
+		<span class="col-total">{$_('invoices.lines_editor.th_total')}</span>
 		<span class="col-actions"></span>
 	</div>
 
 	{#if lines.length === 0}
-		<p class="empty">Noch keine Positionen. Füge die erste hinzu.</p>
+		<p class="empty">{$_('invoices.lines_editor.empty')}</p>
 	{/if}
 
 	{#each lines as line (line.id)}
@@ -91,7 +92,7 @@
 			<input
 				class="col-title"
 				type="text"
-				placeholder="Titel der Position"
+				placeholder={$_('invoices.lines_editor.placeholder_title')}
 				value={line.title}
 				oninput={(e) => updateLine(line.id, { title: e.currentTarget.value })}
 			/>
@@ -106,7 +107,7 @@
 			<input
 				class="col-unit"
 				type="text"
-				placeholder="Std"
+				placeholder={$_('invoices.lines_editor.placeholder_unit')}
 				value={line.unit ?? ''}
 				oninput={(e) => updateLine(line.id, { unit: e.currentTarget.value || null })}
 			/>
@@ -125,38 +126,43 @@
 				onchange={(e) => updateLine(line.id, { vatRate: Number(e.currentTarget.value) })}
 			>
 				{#each vatOptions as option (option.value)}
-					<option value={option.value}>{option.label}</option>
+					<option value={option.value}>{$_(option.i18nKey)}</option>
 				{/each}
 			</select>
 			<span class="col-total total-cell">
 				<strong>{formatMinor(net + tax)}</strong>
-				<small>netto {formatMinor(net)}</small>
+				<small
+					>{$_('invoices.lines_editor.label_total_net', {
+						values: { amount: formatMinor(net) },
+					})}</small
+				>
 			</span>
 			<span class="col-actions">
 				<button
 					type="button"
-					title="Nach oben"
+					title={$_('invoices.lines_editor.aria_move_up')}
 					onclick={() => moveLine(line.id, -1)}
-					aria-label="Nach oben">↑</button
+					aria-label={$_('invoices.lines_editor.aria_move_up')}>↑</button
 				>
 				<button
 					type="button"
-					title="Nach unten"
+					title={$_('invoices.lines_editor.aria_move_down')}
 					onclick={() => moveLine(line.id, 1)}
-					aria-label="Nach unten">↓</button
+					aria-label={$_('invoices.lines_editor.aria_move_down')}>↓</button
 				>
 				<button
 					type="button"
 					class="remove"
-					title="Entfernen"
+					title={$_('invoices.lines_editor.aria_remove')}
 					onclick={() => removeLine(line.id)}
-					aria-label="Entfernen">×</button
+					aria-label={$_('invoices.lines_editor.aria_remove')}>×</button
 				>
 			</span>
 		</div>
 	{/each}
 
-	<button type="button" class="add" onclick={addLine}>+ Position</button>
+	<button type="button" class="add" onclick={addLine}>{$_('invoices.lines_editor.add_line')}</button
+	>
 </div>
 
 <style>

@@ -11,6 +11,7 @@
   downstream store which table (if any) the backing record lives in.
 -->
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { useAllContacts } from '$lib/modules/contacts/queries';
 	import { useInvoiceClients } from '../queries';
 	import type { InvoiceClientSnapshot, ClientSource } from '../types';
@@ -43,7 +44,7 @@
 			.map((c) => ({
 				id: c.id,
 				source: 'contact' as ClientSource,
-				name: c.displayName ?? 'Unbenannter Kontakt',
+				name: c.displayName ?? $_('invoices.client_picker.fallback_unnamed'),
 				email: c.email,
 				// Contacts already have structured fields — map them over directly
 				// so picking a contact populates Strasse/PLZ/Ort without lossy
@@ -101,10 +102,10 @@
 
 <div class="picker">
 	<label class="field">
-		<span class="label">Kunde *</span>
+		<span class="label">{$_('invoices.client_picker.label')}</span>
 		<input
 			type="text"
-			placeholder="Name tippen oder aus Kontakten wählen"
+			placeholder={$_('invoices.client_picker.placeholder')}
 			value={query || snapshot.name}
 			oninput={(e) => setName(e.currentTarget.value)}
 			onfocus={() => (showSuggest = query.length > 0)}
@@ -116,7 +117,9 @@
 					<button type="button" class="suggest-row" onclick={() => select(s)}>
 						<span class="suggest-name">{s.name}</span>
 						<span class="suggest-source">
-							{s.source === 'contact' ? 'aus Kontakten' : 'aus Rechnungen'}
+							{s.source === 'contact'
+								? $_('invoices.client_picker.suggest_contact')
+								: $_('invoices.client_picker.suggest_invoice')}
 						</span>
 					</button>
 				{/each}
@@ -126,37 +129,37 @@
 
 	<div class="address-grid">
 		<label class="field street">
-			<span class="label">Strasse + Nr.</span>
+			<span class="label">{$_('invoices.client_picker.label_street')}</span>
 			<input
 				type="text"
-				placeholder="Bahnhofstrasse 1"
+				placeholder={$_('invoices.client_picker.placeholder_street')}
 				value={snapshot.street ?? ''}
 				oninput={(e) => (snapshot = { ...snapshot, street: e.currentTarget.value || undefined })}
 			/>
 		</label>
 		<label class="field zip">
-			<span class="label">PLZ</span>
+			<span class="label">{$_('invoices.client_picker.label_zip')}</span>
 			<input
 				type="text"
-				placeholder="8000"
+				placeholder={$_('invoices.client_picker.placeholder_zip')}
 				value={snapshot.zip ?? ''}
 				oninput={(e) => (snapshot = { ...snapshot, zip: e.currentTarget.value || undefined })}
 			/>
 		</label>
 		<label class="field city">
-			<span class="label">Ort</span>
+			<span class="label">{$_('invoices.client_picker.label_city')}</span>
 			<input
 				type="text"
-				placeholder="Zürich"
+				placeholder={$_('invoices.client_picker.placeholder_city')}
 				value={snapshot.city ?? ''}
 				oninput={(e) => (snapshot = { ...snapshot, city: e.currentTarget.value || undefined })}
 			/>
 		</label>
 		<label class="field country">
-			<span class="label">Land</span>
+			<span class="label">{$_('invoices.client_picker.label_country')}</span>
 			<input
 				type="text"
-				placeholder="CH"
+				placeholder={$_('invoices.client_picker.placeholder_country')}
 				maxlength="2"
 				value={snapshot.country ?? ''}
 				oninput={(e) =>
@@ -166,20 +169,20 @@
 	</div>
 
 	<label class="field">
-		<span class="label">E-Mail</span>
+		<span class="label">{$_('invoices.client_picker.label_email')}</span>
 		<input
 			type="email"
-			placeholder="kontakt@kunde.ch"
+			placeholder={$_('invoices.client_picker.placeholder_email')}
 			value={snapshot.email ?? ''}
 			oninput={(e) => (snapshot = { ...snapshot, email: e.currentTarget.value || undefined })}
 		/>
 	</label>
 
 	<label class="field">
-		<span class="label">USt-IdNr. / MwSt-Nr.</span>
+		<span class="label">{$_('invoices.client_picker.label_vat')}</span>
 		<input
 			type="text"
-			placeholder="CHE-123.456.789 MWST"
+			placeholder={$_('invoices.client_picker.placeholder_vat')}
 			value={snapshot.vatNumber ?? ''}
 			oninput={(e) => (snapshot = { ...snapshot, vatNumber: e.currentTarget.value || undefined })}
 		/>

@@ -4,9 +4,9 @@
   search + row navigation. FAB → /invoices/new, settings icon → /invoices/settings.
 -->
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { goto } from '$app/navigation';
 	import { useAllInvoices, computeStats, formatAmount, searchInvoices } from './queries';
-	import { STATUS_LABELS } from './constants';
 	import StatusBadge from './components/StatusBadge.svelte';
 	import type { Invoice, InvoiceStatus, Currency } from './types';
 
@@ -46,48 +46,56 @@
 <div class="invoices-shell">
 	<header class="head">
 		<div>
-			<h1>Rechnungen</h1>
-			<p class="subtitle">Rechnungen stellen und Zahlungen verfolgen</p>
+			<h1>{$_('invoices.list.title')}</h1>
+			<p class="subtitle">{$_('invoices.list.subtitle')}</p>
 		</div>
 		<div class="head-actions">
 			<button
 				class="btn-icon"
 				type="button"
-				title="Einstellungen"
-				aria-label="Einstellungen"
+				title={$_('invoices.list.settings_aria')}
+				aria-label={$_('invoices.list.settings_aria')}
 				onclick={() => goto('/invoices/settings')}
 			>
 				⚙
 			</button>
 			<button class="btn-primary" type="button" onclick={() => goto('/invoices/new')}>
-				+ Neue Rechnung
+				{$_('invoices.list.new_invoice')}
 			</button>
 		</div>
 	</header>
 
 	<section class="stats">
 		<div class="stat">
-			<div class="stat-label">Offen</div>
+			<div class="stat-label">{$_('invoices.list.stat_open')}</div>
 			<div class="stat-value">{formatAmount(stats.openByCurrency[openCurrency], openCurrency)}</div>
 			<div class="stat-sub">
-				{stats.totalByStatus.sent + stats.totalByStatus.overdue} Rechnungen
+				{$_('invoices.list.stat_count', {
+					values: { count: stats.totalByStatus.sent + stats.totalByStatus.overdue },
+				})}
 			</div>
 		</div>
 		<div class="stat stat-warn" class:empty={stats.overdueByCurrency[overdueCurrency] === 0}>
-			<div class="stat-label">Überfällig</div>
+			<div class="stat-label">{$_('invoices.list.stat_overdue')}</div>
 			<div class="stat-value">
 				{formatAmount(stats.overdueByCurrency[overdueCurrency], overdueCurrency)}
 			</div>
-			<div class="stat-sub">{stats.totalByStatus.overdue} Rechnungen</div>
+			<div class="stat-sub">
+				{$_('invoices.list.stat_count', { values: { count: stats.totalByStatus.overdue } })}
+			</div>
 		</div>
 		<div class="stat">
-			<div class="stat-label">Fakturiert {currentYear}</div>
+			<div class="stat-label">
+				{$_('invoices.list.stat_invoiced_ytd', { values: { year: currentYear } })}
+			</div>
 			<div class="stat-value">
 				{formatAmount(stats.invoicedYtdByCurrency[ytdCurrency], ytdCurrency)}
 			</div>
 		</div>
 		<div class="stat">
-			<div class="stat-label">Bezahlt {currentYear}</div>
+			<div class="stat-label">
+				{$_('invoices.list.stat_paid_ytd', { values: { year: currentYear } })}
+			</div>
 			<div class="stat-value">
 				{formatAmount(stats.paidYtdByCurrency[ytdCurrency], ytdCurrency)}
 			</div>
@@ -101,7 +109,7 @@
 				class:active={activeStatus === 'all'}
 				onclick={() => (activeStatus = 'all')}
 			>
-				Alle <span class="count">{invoices.length}</span>
+				{$_('invoices.list.chip_all')} <span class="count">{invoices.length}</span>
 			</button>
 			{#each ['draft', 'sent', 'overdue', 'paid', 'void'] as status (status)}
 				<button
@@ -109,7 +117,7 @@
 					class:active={activeStatus === status}
 					onclick={() => (activeStatus = status as InvoiceStatus)}
 				>
-					{STATUS_LABELS[status as InvoiceStatus].de}
+					{$_('invoices.status.' + status)}
 					<span class="count">{stats.totalByStatus[status as InvoiceStatus]}</span>
 				</button>
 			{/each}
@@ -117,7 +125,7 @@
 		<input
 			class="search"
 			type="search"
-			placeholder="Suchen (Nummer, Kunde, Betreff)"
+			placeholder={$_('invoices.list.search_placeholder')}
 			bind:value={searchQuery}
 		/>
 	</section>
@@ -125,15 +133,15 @@
 	{#if invoices.length === 0}
 		<div class="empty">
 			<div class="empty-icon">📄</div>
-			<h2>Noch keine Rechnungen</h2>
-			<p>Stelle deine erste Rechnung — inklusive PDF-Export und Schweizer QR-Bill (M5).</p>
+			<h2>{$_('invoices.list.empty_title')}</h2>
+			<p>{$_('invoices.list.empty_body')}</p>
 			<button class="btn-primary" onclick={() => goto('/invoices/new')}>
-				Erste Rechnung erstellen
+				{$_('invoices.list.empty_cta')}
 			</button>
 		</div>
 	{:else if filtered.length === 0}
 		<div class="empty">
-			<p>Keine Rechnungen gefunden.</p>
+			<p>{$_('invoices.list.empty_filtered')}</p>
 		</div>
 	{:else}
 		<ul class="list" role="list">

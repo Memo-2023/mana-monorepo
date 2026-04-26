@@ -3,6 +3,8 @@
   M4 adds PDF preview on the right; M6 adds the send flow.
 -->
 <script lang="ts">
+	import { _, locale } from 'svelte-i18n';
+	import { get } from 'svelte/store';
 	import { goto } from '$app/navigation';
 	import StatusBadge from '../components/StatusBadge.svelte';
 	import SendModal from '../components/SendModal.svelte';
@@ -10,7 +12,6 @@
 	import { invoiceSettingsStore } from '../stores/settings.svelte';
 	import { formatAmount } from '../queries';
 	import type { Invoice, InvoiceSettings } from '../types';
-	import { STATUS_LABELS } from '../constants';
 
 	// Dynamic import — pdf-lib + swissqrbill together are ~350 KB, only needed
 	// when a user actually opens an invoice (or sends one). Lazy-loading them
@@ -58,7 +59,7 @@
 			if (pdfUrl) URL.revokeObjectURL(pdfUrl);
 			pdfUrl = URL.createObjectURL(blob);
 		} catch (e) {
-			pdfError = e instanceof Error ? e.message : 'PDF-Rendering fehlgeschlagen';
+			pdfError = e instanceof Error ? e.message : $_('invoices.detail.err_pdf_render');
 		} finally {
 			renderingPdf = false;
 		}
@@ -100,7 +101,7 @@
 			// Revoke after the browser has started the download.
 			setTimeout(() => URL.revokeObjectURL(url), 1000);
 		} catch (e) {
-			pdfError = e instanceof Error ? e.message : 'Download fehlgeschlagen';
+			pdfError = e instanceof Error ? e.message : $_('invoices.detail.err_download');
 		}
 	}
 
@@ -110,35 +111,38 @@
 		try {
 			await fn();
 		} catch (e) {
-			actionError = e instanceof Error ? e.message : `${label} fehlgeschlagen`;
+			actionError =
+				e instanceof Error
+					? e.message
+					: $_('invoices.detail.err_action_failed', { values: { label } });
 		} finally {
 			busy = false;
 		}
 	}
 
 	async function onMarkSent() {
-		await run('Als versendet markieren', () => invoicesStore.markSent(invoice.id));
+		await run($_('invoices.detail.action_mark_sent'), () => invoicesStore.markSent(invoice.id));
 	}
 
 	async function onMarkPaid() {
-		await run('Als bezahlt markieren', () => invoicesStore.markPaid(invoice.id));
+		await run($_('invoices.detail.action_mark_paid'), () => invoicesStore.markPaid(invoice.id));
 	}
 
 	async function onVoid() {
-		if (!confirm('Diese Rechnung stornieren?')) return;
-		await run('Stornieren', () => invoicesStore.voidInvoice(invoice.id));
+		if (!confirm($_('invoices.detail.confirm_void'))) return;
+		await run($_('invoices.detail.action_void'), () => invoicesStore.voidInvoice(invoice.id));
 	}
 
 	async function onDuplicate() {
-		await run('Duplizieren', async () => {
+		await run($_('invoices.detail.action_duplicate'), async () => {
 			const newId = await invoicesStore.duplicate(invoice.id);
 			goto(`/invoices/${newId}`);
 		});
 	}
 
 	async function onDelete() {
-		if (!confirm('Rechnung endgültig löschen?')) return;
-		await run('Löschen', async () => {
+		if (!confirm($_('invoices.detail.confirm_delete'))) return;
+		await run($_('invoices.detail.action_delete'), async () => {
 			await invoicesStore.deleteInvoice(invoice.id);
 			goto('/invoices');
 		});
@@ -153,35 +157,45 @@
 	<header class="head">
 		<div class="head-left">
 			<div class="number">{invoice.number}</div>
-			<h1>{invoice.subject || 'Rechnung'}</h1>
+			<h1>{invoice.subject || $_('invoices.detail.title_default')}</h1>
 			<StatusBadge status={invoice.status} />
 		</div>
 		<div class="head-right">
 			<div class="amount">{formatAmount(invoice.totals.gross, invoice.currency)}</div>
 			<div class="due">
-				Fällig {invoice.dueDate}
+				{$_('invoices.detail.due', { values: { date: invoice.dueDate } })}
 			</div>
 		</div>
 	</header>
 
 	<div class="actions">
 		{#if invoice.status === 'draft'}
-			<button class="btn" onclick={onEdit}>Bearbeiten</button>
-			<button class="btn btn-primary" onclick={openSendModal}>Per Mail versenden</button>
-			<button class="btn" onclick={onMarkSent} disabled={busy}>Als versendet markieren</button>
+			<button class="btn" onclick={onEdit}>{$_('invoices.detail.edit')}</button>
+			<button class="btn btn-primary" onclick={openSendModal}
+				>{$_('invoices.detail.send_via_mail')}</button
+			>
+			<button class="btn" onclick={onMarkSent} disabled={busy}
+				>{$_('invoices.detail.mark_sent')}</button
+			>
 		{/if}
 		{#if invoice.status === 'sent' || invoice.status === 'overdue'}
 			<button class="btn btn-primary" onclick={onMarkPaid} disabled={busy}>
-				Als bezahlt markieren
+				{$_('invoices.detail.mark_paid')}
 			</button>
 		{/if}
-		<button class="btn" onclick={downloadPdf}>PDF herunterladen</button>
-		<button class="btn" onclick={onDuplicate} disabled={busy}>Duplizieren</button>
+		<button class="btn" onclick={downloadPdf}>{$_('invoices.detail.download_pdf')}</button>
+		<button class="btn" onclick={onDuplicate} disabled={busy}
+			>{$_('invoices.detail.duplicate')}</button
+		>
 		{#if invoice.status !== 'paid' && invoice.status !== 'void'}
-			<button class="btn btn-danger" onclick={onVoid} disabled={busy}> Stornieren </button>
+			<button class="btn btn-danger" onclick={onVoid} disabled={busy}>
+				{$_('invoices.detail.cancel')}
+			</button>
 		{/if}
 		{#if invoice.status === 'draft' || invoice.status === 'void'}
-			<button class="btn btn-danger" onclick={onDelete} disabled={busy}> Löschen </button>
+			<button class="btn btn-danger" onclick={onDelete} disabled={busy}>
+				{$_('invoices.detail.delete')}
+			</button>
 		{/if}
 	</div>
 
@@ -191,35 +205,37 @@
 
 	<section class="block pdf-preview-block">
 		<div class="preview-head">
-			<h3>Vorschau</h3>
+			<h3>{$_('invoices.detail.preview_title')}</h3>
 			{#if renderingPdf}
-				<span class="preview-status">Rendert …</span>
+				<span class="preview-status">{$_('invoices.detail.preview_rendering')}</span>
 			{/if}
 		</div>
 		{#if qrWarning}
 			<div class="warning">
-				<strong>QR-Rechnung nicht eingefügt:</strong>
+				<strong>{$_('invoices.detail.qr_warning_strong')}</strong>
 				{qrWarning}
-				<a href="/invoices/settings">Einstellungen öffnen →</a>
+				<a href="/invoices/settings">{$_('invoices.detail.qr_open_settings')}</a>
 			</div>
 		{/if}
 		{#if pdfError}
-			<div class="error">PDF-Fehler: {pdfError}</div>
+			<div class="error">{$_('invoices.detail.err_pdf', { values: { error: pdfError } })}</div>
 		{:else if pdfUrl}
 			<iframe
 				class="pdf-frame"
 				src={pdfUrl}
-				title="Vorschau Rechnung {invoice.number}"
+				title={$_('invoices.detail.preview_iframe_title', {
+					values: { number: invoice.number },
+				})}
 				loading="lazy"
 			></iframe>
 		{/if}
 	</section>
 
 	<details class="raw-details">
-		<summary>Strukturierte Daten anzeigen</summary>
+		<summary>{$_('invoices.detail.raw_summary')}</summary>
 
 		<section class="block">
-			<h3>Empfänger</h3>
+			<h3>{$_('invoices.detail.section_recipient')}</h3>
 			<div class="client">
 				<div class="client-name">{invoice.clientSnapshot.name}</div>
 				{#if invoice.clientSnapshot.street && invoice.clientSnapshot.city}
@@ -238,21 +254,25 @@
 					<div class="client-meta">{invoice.clientSnapshot.email}</div>
 				{/if}
 				{#if invoice.clientSnapshot.vatNumber}
-					<div class="client-meta">MwSt-Nr.: {invoice.clientSnapshot.vatNumber}</div>
+					<div class="client-meta">
+						{$_('invoices.detail.label_vat_number', {
+							values: { number: invoice.clientSnapshot.vatNumber },
+						})}
+					</div>
 				{/if}
 			</div>
 		</section>
 
 		<section class="block">
-			<h3>Positionen</h3>
+			<h3>{$_('invoices.detail.section_lines')}</h3>
 			<table class="lines">
 				<thead>
 					<tr>
-						<th>Position</th>
-						<th>Menge</th>
-						<th>Einzelpreis</th>
-						<th>MwSt.</th>
-						<th class="right">Netto</th>
+						<th>{$_('invoices.detail.th_position')}</th>
+						<th>{$_('invoices.detail.th_quantity')}</th>
+						<th>{$_('invoices.detail.th_unit_price')}</th>
+						<th>{$_('invoices.detail.th_vat')}</th>
+						<th class="right">{$_('invoices.detail.th_net')}</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -275,38 +295,50 @@
 		</section>
 
 		<section class="block totals-block">
-			<h3>Summe</h3>
+			<h3>{$_('invoices.detail.section_totals')}</h3>
 			<dl class="totals">
-				<dt>Netto</dt>
+				<dt>{$_('invoices.detail.total_label_net')}</dt>
 				<dd>{formatAmount(invoice.totals.net, invoice.currency)}</dd>
 				{#each invoice.totals.vatBreakdown as b (b.rate)}
-					<dt>MwSt. {b.rate}%</dt>
+					<dt>{$_('invoices.detail.total_label_vat', { values: { rate: b.rate } })}</dt>
 					<dd>{formatAmount(b.tax, invoice.currency)}</dd>
 				{/each}
-				<dt class="gross">Total</dt>
+				<dt class="gross">{$_('invoices.detail.total_label_total')}</dt>
 				<dd class="gross">{formatAmount(invoice.totals.gross, invoice.currency)}</dd>
 			</dl>
 		</section>
 
 		{#if invoice.notes}
 			<section class="block">
-				<h3>Notizen</h3>
+				<h3>{$_('invoices.detail.section_notes')}</h3>
 				<p class="prose">{invoice.notes}</p>
 			</section>
 		{/if}
 
 		{#if invoice.terms}
 			<section class="block">
-				<h3>Zahlungsbedingungen</h3>
+				<h3>{$_('invoices.detail.section_terms')}</h3>
 				<p class="prose">{invoice.terms}</p>
 			</section>
 		{/if}
 	</details>
 
 	<footer class="meta">
-		<div>Status: {STATUS_LABELS[invoice.status].de}</div>
-		{#if invoice.sentAt}<div>Versendet: {new Date(invoice.sentAt).toLocaleString()}</div>{/if}
-		{#if invoice.paidAt}<div>Bezahlt: {new Date(invoice.paidAt).toLocaleString()}</div>{/if}
+		<div>
+			{$_('invoices.detail.meta_status', {
+				values: { label: $_('invoices.status.' + invoice.status) },
+			})}
+		</div>
+		{#if invoice.sentAt}<div>
+				{$_('invoices.detail.meta_sent', {
+					values: { date: new Date(invoice.sentAt).toLocaleString(get(locale) ?? 'de') },
+				})}
+			</div>{/if}
+		{#if invoice.paidAt}<div>
+				{$_('invoices.detail.meta_paid', {
+					values: { date: new Date(invoice.paidAt).toLocaleString(get(locale) ?? 'de') },
+				})}
+			</div>{/if}
 	</footer>
 </article>
 

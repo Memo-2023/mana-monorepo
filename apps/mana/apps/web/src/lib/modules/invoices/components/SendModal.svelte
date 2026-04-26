@@ -17,6 +17,7 @@
 -->
 <script lang="ts">
 	import { untrack } from 'svelte';
+	import { _ } from 'svelte-i18n';
 	import type { Invoice, InvoiceSettings } from '../types';
 	import { buildInvoiceMailDraft, mailDraftToMailto, looksLikeEmail } from '../mail-template';
 	import { invoicesStore } from '../stores/invoices.svelte';
@@ -71,7 +72,7 @@
 
 			phase = 'handed-off';
 		} catch (e) {
-			error = e instanceof Error ? e.message : 'Öffnen fehlgeschlagen';
+			error = e instanceof Error ? e.message : $_('invoices.send_modal.err_open_failed');
 		}
 	}
 
@@ -84,7 +85,7 @@
 			onClose();
 		} catch (e) {
 			phase = 'handed-off';
-			error = e instanceof Error ? e.message : 'Markieren fehlgeschlagen';
+			error = e instanceof Error ? e.message : $_('invoices.send_modal.err_mark_failed');
 		}
 	}
 
@@ -104,35 +105,44 @@
 <div class="backdrop" onclick={onBackdropClick} role="presentation">
 	<div class="modal" role="dialog" aria-modal="true" aria-labelledby="send-title" tabindex="-1">
 		<header class="head">
-			<h2 id="send-title">Rechnung {invoice.number} versenden</h2>
-			<button type="button" class="close" onclick={onClose} aria-label="Schließen">×</button>
+			<h2 id="send-title">
+				{$_('invoices.send_modal.title', { values: { number: invoice.number } })}
+			</h2>
+			<button
+				type="button"
+				class="close"
+				onclick={onClose}
+				aria-label={$_('invoices.send_modal.close')}>×</button
+			>
 		</header>
 
 		{#if phase === 'compose'}
 			<div class="body">
 				<p class="intro">
-					Die PDF wird heruntergeladen und dein Mail-Programm öffnet sich mit vorausgefüllten
-					Feldern. <strong>Die PDF musst du manuell anhängen</strong>
-					— Mana kann Anhänge (noch) nicht automatisch einbetten.
+					{$_('invoices.send_modal.intro_pre')}<strong
+						>{$_('invoices.send_modal.intro_strong')}</strong
+					>{$_('invoices.send_modal.intro_post')}
 				</p>
 
 				<label class="field">
-					<span>An</span>
-					<input type="email" bind:value={to} placeholder="kontakt@kunde.ch" />
+					<span>{$_('invoices.send_modal.label_to')}</span>
+					<input
+						type="email"
+						bind:value={to}
+						placeholder={$_('invoices.send_modal.placeholder_to')}
+					/>
 					{#if !hasRecipient}
-						<span class="hint-warn">
-							Keine gültige E-Mail — du kannst sie gleich im Mail-Programm ergänzen.
-						</span>
+						<span class="hint-warn">{$_('invoices.send_modal.invalid_email_warn')}</span>
 					{/if}
 				</label>
 
 				<label class="field">
-					<span>Betreff</span>
+					<span>{$_('invoices.send_modal.label_subject')}</span>
 					<input type="text" bind:value={subject} />
 				</label>
 
 				<label class="field">
-					<span>Nachricht</span>
+					<span>{$_('invoices.send_modal.label_body')}</span>
 					<textarea rows="10" bind:value={body}></textarea>
 				</label>
 
@@ -140,39 +150,42 @@
 			</div>
 
 			<footer class="foot">
-				<button type="button" class="btn" onclick={onClose}>Abbrechen</button>
+				<button type="button" class="btn" onclick={onClose}
+					>{$_('invoices.send_modal.cancel')}</button
+				>
 				<button type="button" class="btn btn-primary" onclick={openAndDownload}>
-					Öffnen & herunterladen
+					{$_('invoices.send_modal.open_and_download')}
 				</button>
 			</footer>
 		{:else if phase === 'handed-off' || phase === 'marking-sent'}
 			<div class="body handoff">
 				<div class="check-row">
 					<span class="check">✓</span>
-					<span>PDF wurde heruntergeladen</span>
+					<span>{$_('invoices.send_modal.handoff_pdf')}</span>
 				</div>
 				<div class="check-row">
 					<span class="check">✓</span>
-					<span>Mail-Programm wurde geöffnet</span>
+					<span>{$_('invoices.send_modal.handoff_mail')}</span>
 				</div>
 
-				<p class="handoff-hint">
-					Hänge die heruntergeladene PDF an und sende die Mail. Kehre danach hierher zurück und
-					markiere die Rechnung als versendet.
-				</p>
+				<p class="handoff-hint">{$_('invoices.send_modal.handoff_hint')}</p>
 
 				{#if error}<div class="error">{error}</div>{/if}
 			</div>
 
 			<footer class="foot">
-				<button type="button" class="btn" onclick={onClose}>Später</button>
+				<button type="button" class="btn" onclick={onClose}
+					>{$_('invoices.send_modal.later')}</button
+				>
 				<button
 					type="button"
 					class="btn btn-primary"
 					onclick={markSent}
 					disabled={phase === 'marking-sent'}
 				>
-					{phase === 'marking-sent' ? 'Markiere …' : 'Rechnung wurde versendet'}
+					{phase === 'marking-sent'
+						? $_('invoices.send_modal.confirming_sent')
+						: $_('invoices.send_modal.confirm_sent')}
 				</button>
 			</footer>
 		{/if}

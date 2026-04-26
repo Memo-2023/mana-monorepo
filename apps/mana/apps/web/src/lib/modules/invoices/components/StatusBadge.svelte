@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { STATUS_LABELS, STATUS_COLORS } from '../constants';
+	import { _ } from 'svelte-i18n';
+	import { STATUS_COLORS } from '../constants';
 	import type { InvoiceStatus } from '../types';
 
 	interface Props {
@@ -11,7 +12,7 @@
 
 <span class="badge" style="--dot: {STATUS_COLORS[status]}">
 	<span class="dot"></span>
-	{STATUS_LABELS[status].de}
+	{$_('invoices.status.' + status)}
 </span>
 
 <style>

@@ -1,5 +1,11 @@
 import type { Currency, InvoiceStatus } from './types';
 
+/**
+ * Status display labels are now sourced from the `invoices.status.*` i18n
+ * namespace. Components should call `$_('invoices.status.' + status)`
+ * directly. The legacy STATUS_LABELS export is kept for non-Svelte callers
+ * (mail-template, PDF renderer) that don't have access to the i18n store.
+ */
 export const STATUS_LABELS: Record<InvoiceStatus, { de: string; en: string }> = {
 	draft: { de: 'Entwurf', en: 'Draft' },
 	sent: { de: 'Versendet', en: 'Sent' },
@@ -16,19 +22,22 @@ export const STATUS_COLORS: Record<InvoiceStatus, string> = {
 	void: '#94a3b8',
 };
 
-/** Swiss VAT rates as of 2024 (MwSt-Satz). */
+/**
+ * VAT rate option lists carry i18n keys (under `invoices.vat_ch.*` /
+ * `invoices.vat_de.*`) instead of literal labels. Consumers resolve to
+ * the active locale via `$_(option.i18nKey)`.
+ */
 export const VAT_RATES_CH = [
-	{ value: 0, label: '0% (ausgenommen)' },
-	{ value: 2.6, label: '2.6% (reduziert)' },
-	{ value: 3.8, label: '3.8% (Beherbergung)' },
-	{ value: 8.1, label: '8.1% (Normalsatz)' },
+	{ value: 0, i18nKey: 'invoices.vat_ch.v0' },
+	{ value: 2.6, i18nKey: 'invoices.vat_ch.v2_6' },
+	{ value: 3.8, i18nKey: 'invoices.vat_ch.v3_8' },
+	{ value: 8.1, i18nKey: 'invoices.vat_ch.v8_1' },
 ];
 
-/** German VAT rates. */
 export const VAT_RATES_DE = [
-	{ value: 0, label: '0%' },
-	{ value: 7, label: '7% (ermäßigt)' },
-	{ value: 19, label: '19% (Regelsatz)' },
+	{ value: 0, i18nKey: 'invoices.vat_de.v0' },
+	{ value: 7, i18nKey: 'invoices.vat_de.v7' },
+	{ value: 19, i18nKey: 'invoices.vat_de.v19' },
 ];
 
 export const CURRENCIES: Record<Currency, { symbol: string; minorUnit: number }> = {

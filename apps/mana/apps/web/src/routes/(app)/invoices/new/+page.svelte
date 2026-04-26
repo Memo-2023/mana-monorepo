@@ -1,17 +1,18 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import InvoiceForm from '$lib/modules/invoices/components/InvoiceForm.svelte';
 	import { RoutePage } from '$lib/components/shell';
 </script>
 
 <svelte:head>
-	<title>Neue Rechnung - Mana</title>
+	<title>{$_('invoices.routes.new_doc_title')}</title>
 </svelte:head>
 
 <RoutePage appId="invoices" backHref="/invoices">
 	<div class="page">
 		<header class="head">
-			<h1>Neue Rechnung</h1>
-			<p class="subtitle">Entwurf erstellen — wird nach dem Speichern noch nicht versendet.</p>
+			<h1>{$_('invoices.routes.new_heading')}</h1>
+			<p class="subtitle">{$_('invoices.routes.new_subtitle')}</p>
 		</header>
 
 		<InvoiceForm />

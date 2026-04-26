@@ -3,20 +3,21 @@
   Reached via the ⚙ button in the invoices module; not a workbench card.
 -->
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import SenderProfileForm from '$lib/modules/invoices/components/SenderProfileForm.svelte';
 	import { RoutePage } from '$lib/components/shell';
 </script>
 
 <svelte:head>
-	<title>Rechnungs-Einstellungen — Mana</title>
+	<title>{$_('invoices.routes.settings_doc_title')}</title>
 </svelte:head>
 
 <RoutePage appId="invoices" backHref="/invoices">
 	<div class="pane">
 		<header class="bar">
 			<div class="title">
-				<strong>Rechnungs-Einstellungen</strong>
-				<span class="sub">Absender, Nummernkreis und Standards</span>
+				<strong>{$_('invoices.routes.settings_heading')}</strong>
+				<span class="sub">{$_('invoices.routes.settings_sub')}</span>
 			</div>
 		</header>
 		<SenderProfileForm />

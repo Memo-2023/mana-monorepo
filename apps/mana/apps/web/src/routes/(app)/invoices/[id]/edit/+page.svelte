@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { page } from '$app/stores';
 	import { useAllInvoices } from '$lib/modules/invoices/queries';
 	import InvoiceForm from '$lib/modules/invoices/components/InvoiceForm.svelte';
@@ -12,33 +13,35 @@
 </script>
 
 <svelte:head>
-	<title>Rechnung bearbeiten - Mana</title>
+	<title>{$_('invoices.routes.edit_doc_title')}</title>
 </svelte:head>
 
-<RoutePage appId="invoices" backHref="/invoices" title="Rechnung">
+<RoutePage appId="invoices" backHref="/invoices" title={$_('invoices.routes.detail_route_title')}>
 	<div class="page">
 		{#if !invoice && invoices$.value !== undefined}
 			<div class="not-found">
-				<p>Rechnung nicht gefunden.</p>
-				<a href="/invoices">Zurück zur Übersicht</a>
+				<p>{$_('invoices.routes.not_found')}</p>
+				<a href="/invoices">{$_('invoices.routes.back_to_list')}</a>
 			</div>
 		{:else if invoice && !canEdit}
 			<div class="not-editable">
-				<h2>Rechnung kann nicht bearbeitet werden</h2>
+				<h2>{$_('invoices.routes.not_editable_title')}</h2>
 				<p>
-					Nur Entwürfe sind editierbar. Diese Rechnung hat Status
-					<strong>{invoice.status}</strong>. Um eine versendete Rechnung zu ändern, storniere sie
-					und dupliziere sie als neuen Entwurf.
+					{$_('invoices.routes.not_editable_body_pre')}<strong
+						>{$_('invoices.status.' + invoice.status)}</strong
+					>{$_('invoices.routes.not_editable_body_post')}
 				</p>
-				<a href="/invoices/{invoice.id}">Zurück zum Detail</a>
+				<a href="/invoices/{invoice.id}">{$_('invoices.routes.back_to_detail')}</a>
 			</div>
 		{:else if invoice}
 			<header class="head">
-				<h1>Rechnung {invoice.number} bearbeiten</h1>
+				<h1>
+					{$_('invoices.routes.edit_heading', { values: { number: invoice.number } })}
+				</h1>
 			</header>
 			<InvoiceForm existing={invoice} />
 		{:else}
-			<div class="loading">Lädt …</div>
+			<div class="loading">{$_('invoices.routes.loading')}</div>
 		{/if}
 	</div>
 </RoutePage>

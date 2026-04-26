@@ -8,6 +8,7 @@
 	 * detaillierte Aufschlüsselung gibt's im ListView.
 	 */
 
+	import { _ } from 'svelte-i18n';
 	import { liveQuery } from 'dexie';
 	import { invoiceTable } from '$lib/modules/invoices/collections';
 	import { decryptRecords } from '$lib/data/crypto';
@@ -76,9 +77,11 @@
 	<div class="mb-3 flex items-center justify-between">
 		<h3 class="flex items-center gap-2 text-lg font-semibold">
 			<span aria-hidden="true">📄</span>
-			Rechnungen
+			{$_('invoices.widget.title')}
 		</h3>
-		<a href="/invoices" class="text-xs text-muted-foreground hover:text-foreground"> Alle → </a>
+		<a href="/invoices" class="text-xs text-muted-foreground hover:text-foreground">
+			{$_('invoices.widget.all_link')}
+		</a>
 	</div>
 
 	{#if loading}
@@ -89,18 +92,18 @@
 		</div>
 	{:else if invoices.length === 0}
 		<div class="py-4 text-center">
-			<p class="text-sm text-muted-foreground">Noch keine Rechnungen gestellt.</p>
+			<p class="text-sm text-muted-foreground">{$_('invoices.widget.empty')}</p>
 			<a
 				href="/invoices/new"
 				class="mt-3 inline-block rounded-lg bg-primary/10 px-4 py-2 text-sm font-medium text-primary hover:bg-primary/20"
 			>
-				Erste Rechnung
+				{$_('invoices.widget.create_first')}
 			</a>
 		</div>
 	{:else}
 		<div class="mb-3 grid grid-cols-2 gap-2">
 			<div class="rounded-lg bg-surface-hover p-2.5">
-				<div class="text-xs text-muted-foreground">Offen</div>
+				<div class="text-xs text-muted-foreground">{$_('invoices.widget.open')}</div>
 				<div class="text-lg font-semibold tabular-nums">
 					{formatAmount(openSum, openCurrency)}
 				</div>
@@ -110,12 +113,14 @@
 				class:bg-surface-hover={overdueSum === 0}
 				class:bg-red-50={overdueSum > 0}
 			>
-				<div class="text-xs text-muted-foreground">Überfällig</div>
+				<div class="text-xs text-muted-foreground">{$_('invoices.widget.overdue')}</div>
 				<div class="text-lg font-semibold tabular-nums" class:text-red-700={overdueSum > 0}>
 					{formatAmount(overdueSum, openCurrency)}
 				</div>
 				{#if overdueCount > 0}
-					<div class="text-[10px] text-red-700">{overdueCount} Rechnungen</div>
+					<div class="text-[10px] text-red-700">
+						{$_('invoices.widget.overdue_count', { values: { count: overdueCount } })}
+					</div>
 				{/if}
 			</div>
 		</div>
@@ -132,7 +137,7 @@
 								{invoice.clientSnapshot.name}
 							</div>
 							<div class="text-xs text-red-700">
-								{daysSince(invoice.dueDate)} Tage überfällig
+								{$_('invoices.widget.days_overdue', { values: { n: daysSince(invoice.dueDate) } })}
 							</div>
 						</div>
 						<div class="ml-2 text-sm font-medium tabular-nums">

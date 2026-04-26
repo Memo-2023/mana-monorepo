@@ -3,6 +3,8 @@
   used on every PDF the user issues. Also carries the number-sequence state.
 -->
 <script lang="ts">
+	import { _, locale } from 'svelte-i18n';
+	import { get } from 'svelte/store';
 	import { invoiceSettingsStore } from '../stores/settings.svelte';
 	import type { InvoiceSettings, Currency } from '../types';
 	import { VAT_RATES_CH, VAT_RATES_DE, CURRENCIES } from '../constants';
@@ -29,7 +31,7 @@
 			await invoiceSettingsStore.update({ logoMediaId: mediaId });
 			settings.logoMediaId = mediaId;
 		} catch (e) {
-			logoError = e instanceof Error ? e.message : 'Upload fehlgeschlagen';
+			logoError = e instanceof Error ? e.message : $_('invoices.sender_form.err_upload');
 		} finally {
 			uploadingLogo = false;
 			input.value = '';
@@ -44,7 +46,7 @@
 			await invoiceSettingsStore.update({ logoMediaId: null });
 			settings.logoMediaId = null;
 		} catch (e) {
-			logoError = e instanceof Error ? e.message : 'Entfernen fehlgeschlagen';
+			logoError = e instanceof Error ? e.message : $_('invoices.sender_form.err_remove');
 		} finally {
 			uploadingLogo = false;
 		}
@@ -80,7 +82,7 @@
 				defaultDueDays: settings.defaultDueDays,
 				defaultTerms: settings.defaultTerms,
 			});
-			savedAt = new Date().toLocaleTimeString();
+			savedAt = new Date().toLocaleTimeString(get(locale) ?? 'de');
 		} finally {
 			saving = false;
 		}
@@ -96,7 +98,7 @@
 </script>
 
 {#if !settings}
-	<p class="loading">Lade Einstellungen …</p>
+	<p class="loading">{$_('invoices.sender_form.loading')}</p>
 {:else}
 	<form
 		onsubmit={(e) => {
@@ -106,17 +108,17 @@
 		class="form"
 	>
 		<section class="section">
-			<h3>Absender</h3>
-			<p class="hint">Erscheint im Kopf jeder Rechnung.</p>
+			<h3>{$_('invoices.sender_form.section_sender')}</h3>
+			<p class="hint">{$_('invoices.sender_form.section_sender_hint')}</p>
 
 			<div class="field logo-field">
-				<span>Logo</span>
+				<span>{$_('invoices.sender_form.label_logo')}</span>
 				<div class="logo-row">
 					{#if settings.logoMediaId}
 						<img
 							class="logo-preview"
 							src={logoPreviewUrl(settings.logoMediaId)}
-							alt="Logo-Vorschau"
+							alt={$_('invoices.sender_form.logo_alt')}
 						/>
 						<div class="logo-actions">
 							<button
@@ -125,7 +127,7 @@
 								onclick={() => logoInput?.click()}
 								disabled={uploadingLogo}
 							>
-								Ersetzen
+								{$_('invoices.sender_form.logo_replace')}
 							</button>
 							<button
 								type="button"
@@ -133,7 +135,7 @@
 								onclick={removeLogo}
 								disabled={uploadingLogo}
 							>
-								Entfernen
+								{$_('invoices.sender_form.logo_remove')}
 							</button>
 						</div>
 					{:else}
@@ -143,7 +145,9 @@
 							onclick={() => logoInput?.click()}
 							disabled={uploadingLogo}
 						>
-							{uploadingLogo ? 'Lädt hoch …' : '+ Logo hochladen'}
+							{uploadingLogo
+								? $_('invoices.sender_form.logo_uploading')
+								: $_('invoices.sender_form.logo_drop')}
 						</button>
 					{/if}
 					<input
@@ -160,25 +164,25 @@
 			</div>
 
 			<label class="field">
-				<span>Name *</span>
+				<span>{$_('invoices.sender_form.label_name')}</span>
 				<input type="text" bind:value={settings.senderName} required />
 			</label>
 
 			<div class="grid-2">
 				<label class="field">
-					<span>Strasse + Nr. *</span>
+					<span>{$_('invoices.sender_form.label_street')}</span>
 					<input
 						type="text"
-						placeholder="Bahnhofstrasse 1"
+						placeholder={$_('invoices.sender_form.placeholder_street')}
 						value={settings.senderStreet ?? ''}
 						oninput={(e) => settings && (settings.senderStreet = e.currentTarget.value || null)}
 					/>
 				</label>
 				<label class="field">
-					<span>PLZ *</span>
+					<span>{$_('invoices.sender_form.label_zip')}</span>
 					<input
 						type="text"
-						placeholder="8000"
+						placeholder={$_('invoices.sender_form.placeholder_zip')}
 						value={settings.senderZip ?? ''}
 						oninput={(e) => settings && (settings.senderZip = e.currentTarget.value || null)}
 					/>
@@ -187,19 +191,19 @@
 
 			<div class="grid-2">
 				<label class="field">
-					<span>Ort *</span>
+					<span>{$_('invoices.sender_form.label_city')}</span>
 					<input
 						type="text"
-						placeholder="Zürich"
+						placeholder={$_('invoices.sender_form.placeholder_city')}
 						value={settings.senderCity ?? ''}
 						oninput={(e) => settings && (settings.senderCity = e.currentTarget.value || null)}
 					/>
 				</label>
 				<label class="field">
-					<span>Land</span>
+					<span>{$_('invoices.sender_form.label_country')}</span>
 					<input
 						type="text"
-						placeholder="CH"
+						placeholder={$_('invoices.sender_form.placeholder_country')}
 						maxlength="2"
 						value={settings.senderCountry ?? 'CH'}
 						oninput={(e) =>
@@ -209,28 +213,25 @@
 			</div>
 
 			<details class="legacy-address">
-				<summary>Abweichende Adresse im PDF anzeigen (Freitext-Fallback)</summary>
-				<p class="hint">
-					Wird nur verwendet, wenn die strukturierten Felder oben leer sind. Nützlich für Postfächer
-					/ c/o-Adressen, die nicht ins Strasse+PLZ+Ort-Schema passen.
-				</p>
+				<summary>{$_('invoices.sender_form.legacy_address_summary')}</summary>
+				<p class="hint">{$_('invoices.sender_form.legacy_address_hint')}</p>
 				<textarea
 					rows="3"
-					placeholder="Postfach 123&#10;8021 Zürich"
+					placeholder={$_('invoices.sender_form.legacy_address_placeholder')}
 					bind:value={settings.senderAddress}
 				></textarea>
 			</details>
 
 			<div class="grid-2">
 				<label class="field">
-					<span>E-Mail *</span>
+					<span>{$_('invoices.sender_form.label_email')}</span>
 					<input type="email" bind:value={settings.senderEmail} required />
 				</label>
 				<label class="field">
-					<span>MwSt-Nummer</span>
+					<span>{$_('invoices.sender_form.label_vat')}</span>
 					<input
 						type="text"
-						placeholder="CHE-123.456.789 MWST"
+						placeholder={$_('invoices.sender_form.placeholder_vat')}
 						value={settings.senderVatNumber ?? ''}
 						oninput={(e) => settings && (settings.senderVatNumber = e.currentTarget.value || null)}
 					/>
@@ -239,16 +240,16 @@
 
 			<div class="grid-2">
 				<label class="field">
-					<span>IBAN *</span>
+					<span>{$_('invoices.sender_form.label_iban')}</span>
 					<input
 						type="text"
-						placeholder="CH93 0076 2011 6238 5295 7"
+						placeholder={$_('invoices.sender_form.placeholder_iban')}
 						bind:value={settings.senderIban}
 						required
 					/>
 				</label>
 				<label class="field">
-					<span>BIC</span>
+					<span>{$_('invoices.sender_form.label_bic')}</span>
 					<input
 						type="text"
 						value={settings.senderBic ?? ''}
@@ -258,10 +259,10 @@
 			</div>
 
 			<label class="field">
-				<span>Fußzeile</span>
+				<span>{$_('invoices.sender_form.label_footer')}</span>
 				<textarea
 					rows="2"
-					placeholder="Ergänzung unter jeder Rechnung (z.B. rechtliche Hinweise)"
+					placeholder={$_('invoices.sender_form.placeholder_footer')}
 					value={settings.footer ?? ''}
 					oninput={(e) => settings && (settings.footer = e.currentTarget.value || null)}
 				></textarea>
@@ -269,31 +270,33 @@
 		</section>
 
 		<section class="section">
-			<h3>Nummernkreis</h3>
-			<p class="hint">Nächste Rechnung: <code>{nextPreview}</code></p>
+			<h3>{$_('invoices.sender_form.section_numbering')}</h3>
+			<p class="hint">
+				{$_('invoices.sender_form.section_numbering_hint_pre')}<code>{nextPreview}</code>
+			</p>
 
 			<div class="grid-3">
 				<label class="field">
-					<span>Präfix</span>
+					<span>{$_('invoices.sender_form.label_prefix')}</span>
 					<input type="text" bind:value={settings.numberPrefix} />
 				</label>
 				<label class="field">
-					<span>Stellen</span>
+					<span>{$_('invoices.sender_form.label_padding')}</span>
 					<input type="number" min="1" max="8" bind:value={settings.numberPadding} />
 				</label>
 				<label class="field">
-					<span>Nächste Nummer</span>
+					<span>{$_('invoices.sender_form.label_next_number')}</span>
 					<input type="number" min="1" bind:value={settings.nextNumber} />
 				</label>
 			</div>
 		</section>
 
 		<section class="section">
-			<h3>Standards</h3>
+			<h3>{$_('invoices.sender_form.section_defaults')}</h3>
 
 			<div class="grid-3">
 				<label class="field">
-					<span>Währung</span>
+					<span>{$_('invoices.sender_form.label_currency')}</span>
 					<select bind:value={settings.defaultCurrency}>
 						{#each Object.keys(CURRENCIES) as c (c)}
 							<option value={c}>{c}</option>
@@ -301,27 +304,27 @@
 					</select>
 				</label>
 				<label class="field">
-					<span>MwSt.-Satz</span>
+					<span>{$_('invoices.sender_form.label_vat_rate')}</span>
 					<select
 						value={settings.defaultVatRate}
 						onchange={(e) => settings && (settings.defaultVatRate = Number(e.currentTarget.value))}
 					>
 						{#each vatOptions as o (o.value)}
-							<option value={o.value}>{o.label}</option>
+							<option value={o.value}>{$_(o.i18nKey)}</option>
 						{/each}
 					</select>
 				</label>
 				<label class="field">
-					<span>Zahlungsfrist (Tage)</span>
+					<span>{$_('invoices.sender_form.label_due_days')}</span>
 					<input type="number" min="0" max="365" bind:value={settings.defaultDueDays} />
 				</label>
 			</div>
 
 			<label class="field">
-				<span>Standard-AGB / Zahlungsbedingungen</span>
+				<span>{$_('invoices.sender_form.label_terms')}</span>
 				<textarea
 					rows="2"
-					placeholder="Zahlbar innert 30 Tagen netto."
+					placeholder={$_('invoices.sender_form.placeholder_terms')}
 					value={settings.defaultTerms ?? ''}
 					oninput={(e) => settings && (settings.defaultTerms = e.currentTarget.value || null)}
 				></textarea>
@@ -330,10 +333,12 @@
 
 		<div class="actions">
 			<button type="submit" class="btn-primary" disabled={saving}>
-				{saving ? 'Speichert …' : 'Speichern'}
+				{saving ? $_('invoices.sender_form.saving') : $_('invoices.sender_form.save')}
 			</button>
 			{#if savedAt}
-				<span class="saved">Gespeichert um {savedAt}</span>
+				<span class="saved"
+					>{$_('invoices.sender_form.saved_at', { values: { time: savedAt } })}</span
+				>
 			{/if}
 		</div>
 	</form>

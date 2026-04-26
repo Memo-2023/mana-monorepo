@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { page } from '$app/stores';
 	import { useAllInvoices } from '$lib/modules/invoices/queries';
 	import DetailView from '$lib/modules/invoices/views/DetailView.svelte';
@@ -11,19 +12,23 @@
 </script>
 
 <svelte:head>
-	<title>{invoice?.number ?? 'Rechnung'} - Mana</title>
+	<title
+		>{$_('invoices.routes.detail_doc_title', {
+			values: { number: invoice?.number ?? $_('invoices.routes.detail_title_fallback') },
+		})}</title
+	>
 </svelte:head>
 
-<RoutePage appId="invoices" backHref="/invoices" title="Rechnung">
+<RoutePage appId="invoices" backHref="/invoices" title={$_('invoices.routes.detail_route_title')}>
 	{#if invoice}
 		<DetailView {invoice} />
 	{:else if invoices$.value !== undefined}
 		<div class="not-found">
-			<p>Rechnung nicht gefunden.</p>
-			<a href="/invoices">Zurück zur Übersicht</a>
+			<p>{$_('invoices.routes.not_found')}</p>
+			<a href="/invoices">{$_('invoices.routes.back_to_list')}</a>
 		</div>
 	{:else}
-		<div class="loading">Lädt …</div>
+		<div class="loading">{$_('invoices.routes.loading')}</div>
 	{/if}
 </RoutePage>
 

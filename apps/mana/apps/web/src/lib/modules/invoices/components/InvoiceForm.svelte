@@ -5,6 +5,7 @@
 -->
 <script lang="ts">
 	import { untrack } from 'svelte';
+	import { _ } from 'svelte-i18n';
 	import { goto } from '$app/navigation';
 	import ClientPicker from './ClientPicker.svelte';
 	import LinesEditor from './LinesEditor.svelte';
@@ -83,11 +84,11 @@
 	async function saveDraft() {
 		error = null;
 		if (!snapshot.name?.trim()) {
-			error = 'Kunde ist erforderlich';
+			error = $_('invoices.form.err_client_required');
 			return;
 		}
 		if (lines.length === 0) {
-			error = 'Mindestens eine Position hinzufügen';
+			error = $_('invoices.form.err_min_one_line');
 			return;
 		}
 		saving = true;
@@ -122,7 +123,7 @@
 				goto(`/invoices/${newId}`);
 			}
 		} catch (e) {
-			error = e instanceof Error ? e.message : 'Speichern fehlgeschlagen';
+			error = e instanceof Error ? e.message : $_('invoices.form.err_save');
 		} finally {
 			saving = false;
 		}
@@ -137,19 +138,23 @@
 	class="form"
 >
 	<section class="section">
-		<h3>Kunde</h3>
+		<h3>{$_('invoices.form.section_client')}</h3>
 		<ClientPicker bind:clientId bind:clientSource bind:snapshot />
 	</section>
 
 	<section class="section">
-		<h3>Rechnung</h3>
+		<h3>{$_('invoices.form.section_invoice')}</h3>
 		<div class="grid-3">
 			<label class="field">
-				<span>Betreff</span>
-				<input type="text" placeholder="Beratungsleistung April" bind:value={subject} />
+				<span>{$_('invoices.form.label_subject')}</span>
+				<input
+					type="text"
+					placeholder={$_('invoices.form.placeholder_subject')}
+					bind:value={subject}
+				/>
 			</label>
 			<label class="field">
-				<span>Währung</span>
+				<span>{$_('invoices.form.label_currency')}</span>
 				<select bind:value={currency}>
 					{#each Object.keys(CURRENCIES) as c (c)}
 						<option value={c}>{c}</option>
@@ -157,43 +162,43 @@
 				</select>
 			</label>
 			<label class="field">
-				<span>Rechnungsdatum</span>
+				<span>{$_('invoices.form.label_issue_date')}</span>
 				<input type="date" bind:value={issueDate} />
 			</label>
 			<label class="field">
-				<span>Fällig am</span>
+				<span>{$_('invoices.form.label_due_date')}</span>
 				<input type="date" bind:value={dueDate} />
 			</label>
 		</div>
 	</section>
 
 	<section class="section">
-		<h3>Positionen</h3>
+		<h3>{$_('invoices.form.section_lines')}</h3>
 		<LinesEditor bind:lines {currency} {vatRegime} />
 	</section>
 
 	<section class="section totals-section">
-		<h3>Summe</h3>
+		<h3>{$_('invoices.form.section_totals')}</h3>
 		<dl class="totals">
-			<dt>Netto</dt>
+			<dt>{$_('invoices.form.total_label_net')}</dt>
 			<dd>{formatAmount(totals.net, currency)}</dd>
 			{#each totals.vatBreakdown as b (b.rate)}
-				<dt>MwSt. {b.rate}%</dt>
+				<dt>{$_('invoices.form.total_label_vat', { values: { rate: b.rate } })}</dt>
 				<dd>{formatAmount(b.tax, currency)}</dd>
 			{/each}
-			<dt class="gross-label">Total</dt>
+			<dt class="gross-label">{$_('invoices.form.total_label_total')}</dt>
 			<dd class="gross-value">{formatAmount(totals.gross, currency)}</dd>
 		</dl>
 	</section>
 
 	<section class="section">
-		<h3>Notizen & Zahlungsbedingungen</h3>
+		<h3>{$_('invoices.form.section_notes')}</h3>
 		<label class="field">
-			<span>Notizen (unter den Positionen)</span>
+			<span>{$_('invoices.form.label_notes')}</span>
 			<textarea rows="2" bind:value={notes}></textarea>
 		</label>
 		<label class="field">
-			<span>Zahlungsbedingungen / AGB</span>
+			<span>{$_('invoices.form.label_terms')}</span>
 			<textarea rows="2" bind:value={terms}></textarea>
 		</label>
 	</section>
@@ -203,9 +208,15 @@
 	{/if}
 
 	<div class="actions">
-		<button type="button" class="btn-secondary" onclick={() => history.back()}> Abbrechen </button>
+		<button type="button" class="btn-secondary" onclick={() => history.back()}>
+			{$_('invoices.form.cancel')}
+		</button>
 		<button type="submit" class="btn-primary" disabled={saving}>
-			{saving ? 'Speichert …' : isEdit ? 'Änderungen speichern' : 'Als Entwurf speichern'}
+			{saving
+				? $_('invoices.form.saving')
+				: isEdit
+					? $_('invoices.form.submit_update')
+					: $_('invoices.form.submit_create')}
 		</button>
 	</div>
 </form>
