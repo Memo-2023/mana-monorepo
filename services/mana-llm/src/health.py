@@ -31,9 +31,14 @@ import logging
 import threading
 import time
 from dataclasses import dataclass, field
-from typing import Iterable
+from typing import Callable, Iterable
 
 logger = logging.getLogger(__name__)
+
+#: Notification fired whenever a provider transitions between healthy and
+#: unhealthy. ``main.py`` wires this to the Prometheus gauge — but the
+#: cache itself stays metrics-agnostic so tests don't need to mock it.
+HealthChangeListener = Callable[[str, bool], None]
 
 DEFAULT_FAILURE_THRESHOLD = 2
 DEFAULT_UNHEALTHY_BACKOFF_SEC = 60.0
@@ -77,6 +82,22 @@ class ProviderHealthCache:
         self._clock = clock
         self._lock = threading.Lock()
         self._states: dict[str, ProviderState] = {}
+        self._listeners: list[HealthChangeListener] = []
+
+    def add_listener(self, listener: HealthChangeListener) -> None:
+        """Register a callback fired with ``(provider_id, healthy: bool)``
+        whenever a provider's healthy-flag transitions. Listeners run
+        outside the cache's lock; exceptions are swallowed and logged so a
+        bad listener can't break the underlying state machine.
+        """
+        self._listeners.append(listener)
+
+    def _notify(self, provider_id: str, healthy: bool) -> None:
+        for listener in self._listeners:
+            try:
+                listener(provider_id, healthy)
+            except Exception as e:  # noqa: BLE001
+                logger.error("health-change listener raised: %s", e)
 
     @property
     def failure_threshold(self) -> int:
@@ -129,19 +150,22 @@ class ProviderHealthCache:
 
     def mark_healthy(self, provider_id: str) -> None:
         """Provider answered correctly — clear any failure state."""
+        transitioned = False
         with self._lock:
             state = self._states.setdefault(provider_id, ProviderState())
-            previously_unhealthy = not state.healthy
+            transitioned = not state.healthy
             state.healthy = True
             state.consecutive_failures = 0
             state.last_check = self._clock()
             state.last_error = None
             state.unhealthy_until = 0.0
-            if previously_unhealthy:
-                logger.info("provider %s recovered", provider_id)
+        if transitioned:
+            logger.info("provider %s recovered", provider_id)
+            self._notify(provider_id, True)
 
     def mark_unhealthy(self, provider_id: str, reason: str) -> None:
         """Record a failure. Trips the breaker after the threshold."""
+        transitioned = False
         with self._lock:
             state = self._states.setdefault(provider_id, ProviderState())
             state.consecutive_failures += 1
@@ -151,6 +175,7 @@ class ProviderHealthCache:
             if tripped and state.healthy:
                 state.healthy = False
                 state.unhealthy_until = self._clock() + self._unhealthy_backoff
+                transitioned = True
                 logger.warning(
                     "provider %s marked unhealthy after %d consecutive failures (%s); "
                     "backoff %.0fs",
@@ -163,6 +188,8 @@ class ProviderHealthCache:
                 # Still in unhealthy window; refresh the backoff so a flapping
                 # provider doesn't get re-tried every probe tick.
                 state.unhealthy_until = self._clock() + self._unhealthy_backoff
+        if transitioned:
+            self._notify(provider_id, False)
 
 
 def _copy(state: ProviderState) -> ProviderState:

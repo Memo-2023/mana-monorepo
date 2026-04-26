@@ -1,6 +1,8 @@
 """Main FastAPI application for mana-llm service."""
 
+import asyncio
 import logging
+import signal
 import time
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -8,10 +10,10 @@ from typing import Any
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import Response
+from fastapi.responses import JSONResponse, Response
 from sse_starlette.sse import EventSourceResponse
 
-from src.aliases import AliasRegistry
+from src.aliases import AliasConfigError, AliasRegistry
 from src.api_auth import ApiKeyMiddleware
 from src.config import settings
 from src.health import ProviderHealthCache
@@ -28,7 +30,18 @@ from src.providers import ProviderRouter
 from src.providers.errors import ProviderError
 from src.streaming import stream_chat_completion
 from src.utils.cache import close_redis
-from src.utils.metrics import get_metrics, record_llm_error, record_llm_request
+from src.utils.metrics import (
+    get_metrics,
+    record_llm_error,
+    record_llm_request,
+    set_provider_healthy,
+)
+
+#: Header carrying the concrete provider/model that actually served a
+#: non-streaming response — useful for token-cost accounting on the
+#: caller side, since `mana/long-form` could resolve to ollama, groq,
+#: or claude depending on which providers were healthy at request time.
+RESOLVED_MODEL_HEADER = "X-Mana-LLM-Resolved"
 
 # Configure logging
 logging.basicConfig(
@@ -73,6 +86,35 @@ def _build_provider_probes(
     return probes
 
 
+def _on_health_change(provider: str, healthy: bool) -> None:
+    """Mirror health-cache transitions into the Prometheus gauge."""
+    set_provider_healthy(provider, healthy)
+
+
+def _install_sighup_reload(loop: asyncio.AbstractEventLoop) -> None:
+    """Reload ``aliases.yaml`` when the process receives SIGHUP.
+
+    Reload errors keep the previous good state in memory (see
+    AliasRegistry.reload). SIGHUP isn't available on Windows; we just
+    log and skip in that case.
+    """
+
+    def handler() -> None:
+        if alias_registry is None:
+            return
+        try:
+            alias_registry.reload()
+        except AliasConfigError as e:
+            logger.error("alias reload rejected, keeping previous state: %s", e)
+
+    try:
+        loop.add_signal_handler(signal.SIGHUP, handler)
+    except (NotImplementedError, AttributeError, RuntimeError):
+        # NotImplementedError on Windows; RuntimeError when the loop is
+        # not running in the main thread (TestClient does this).
+        logger.info("SIGHUP reload not available in this context — skipping")
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan: load aliases, spin up router + health probe."""
@@ -85,11 +127,19 @@ async def lifespan(app: FastAPI):
     logger.info("Loaded %d aliases from %s", len(alias_registry.list_aliases()), aliases_path)
 
     health_cache = ProviderHealthCache()
+    health_cache.add_listener(_on_health_change)
     router = ProviderRouter(aliases=alias_registry, health_cache=health_cache)
     logger.info("Initialized providers: %s", list(router.providers))
 
+    # Initial gauge values so dashboards render before the first probe
+    # transition fires the listener.
+    for provider_name in router.providers:
+        set_provider_healthy(provider_name, True)
+
     health_probe = HealthProbe(health_cache, _build_provider_probes(router.providers))
     await health_probe.start()
+
+    _install_sighup_reload(asyncio.get_running_loop())
 
     yield
 
@@ -143,6 +193,43 @@ async def metrics() -> Response:
     return Response(content=get_metrics(), media_type="text/plain")
 
 
+# ----- Alias / health debug endpoints (M4) ---------------------------------
+
+
+@app.get("/v1/aliases")
+async def list_aliases() -> dict[str, Any]:
+    """Inspect the alias registry — what each ``mana/<class>`` resolves to.
+
+    Useful for debugging "which model actually answered my request" and
+    for confirming SIGHUP reloads picked up edits to ``aliases.yaml``.
+    """
+    if alias_registry is None:
+        raise HTTPException(status_code=503, detail="Service not ready")
+    return {
+        "default": alias_registry.default_alias,
+        "aliases": [
+            {
+                "name": a.name,
+                "description": a.description,
+                "chain": list(a.chain),
+            }
+            for a in alias_registry.list_aliases()
+        ],
+    }
+
+
+@app.get("/v1/health")
+async def detailed_health() -> dict[str, Any]:
+    """Full per-provider liveness snapshot.
+
+    Includes the failure counter, last error, and the unhealthy-until
+    backoff timestamp — info the original ``/health`` endpoint hides.
+    """
+    if router is None:
+        raise HTTPException(status_code=503, detail="Service not ready")
+    return await router.health_check()
+
+
 # Models endpoints
 @app.get("/v1/models", response_model=ModelsResponse)
 async def list_models() -> ModelsResponse:
@@ -182,10 +269,12 @@ async def chat_completions(
     if router is None:
         raise HTTPException(status_code=503, detail="Service not ready")
 
-    # Parse provider and model for metrics
-    model_parts = request.model.split("/", 1)
-    provider = model_parts[0] if len(model_parts) > 1 else "ollama"
-    model = model_parts[1] if len(model_parts) > 1 else request.model
+    # The request's `model` field is what the caller asked for — could be
+    # `mana/long-form`, `ollama/gemma3:4b`, or even bare `gemma3:4b`. For
+    # error-path metrics we use that value (it's what the caller will
+    # search for); for success-path metrics we use the resolved provider
+    # so token-cost / latency attribute to the model that actually ran.
+    requested_provider, requested_model = _split_model(request.model)
 
     start_time = time.time()
 
@@ -198,7 +287,11 @@ async def chat_completions(
                 async for chunk in stream_chat_completion(router, request):
                     yield chunk
 
-            record_llm_request(provider, model, streaming=True)
+            # Streaming metrics: we don't yet know which provider answered
+            # at request-record time. Each chunk's `model` field carries
+            # the resolved name; per-token latency is harder to attribute
+            # cleanly so we skip it for streams.
+            record_llm_request(requested_provider, requested_model, streaming=True)
 
             return EventSourceResponse(
                 generate(),
@@ -209,35 +302,43 @@ async def chat_completions(
             logger.info(f"Chat completion: {request.model}")
             response = await router.chat_completion(request)
 
-            # Record metrics
+            resolved_provider, resolved_model = _split_model(response.model)
             latency = time.time() - start_time
             record_llm_request(
-                provider=provider,
-                model=model,
+                provider=resolved_provider,
+                model=resolved_model,
                 streaming=False,
                 prompt_tokens=response.usage.prompt_tokens,
                 completion_tokens=response.usage.completion_tokens,
                 latency=latency,
             )
 
-            return response
+            # `response.model` is the concrete provider/model the chain
+            # actually resolved to. Surface it via header so the caller
+            # can attribute token cost to the right model even when the
+            # request used an alias.
+            return JSONResponse(
+                content=response.model_dump(),
+                headers={RESOLVED_MODEL_HEADER: response.model},
+            )
 
     except ValueError as e:
         logger.error(f"Invalid request: {e}")
-        record_llm_error(provider, model, "invalid_request")
+        record_llm_error(requested_provider, requested_model, "invalid_request")
         raise HTTPException(status_code=400, detail=str(e))
     except ProviderError as e:
         logger.warning(
-            f"Provider error on {provider}/{model}: kind={e.kind} detail={e}"
+            f"Provider error on {requested_provider}/{requested_model}: "
+            f"kind={e.kind} detail={e}"
         )
-        record_llm_error(provider, model, e.kind)
+        record_llm_error(requested_provider, requested_model, e.kind)
         raise HTTPException(
             status_code=e.http_status,
             detail={"kind": e.kind, "message": str(e)},
         )
     except Exception as e:
         logger.error(f"Chat completion failed: {e}")
-        record_llm_error(provider, model, "server_error")
+        record_llm_error(requested_provider, requested_model, "server_error")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -248,10 +349,7 @@ async def create_embeddings(request: EmbeddingRequest) -> EmbeddingResponse:
     if router is None:
         raise HTTPException(status_code=503, detail="Service not ready")
 
-    # Parse provider and model for metrics
-    model_parts = request.model.split("/", 1)
-    provider = model_parts[0] if len(model_parts) > 1 else "ollama"
-    model = model_parts[1] if len(model_parts) > 1 else request.model
+    provider, model = _split_model(request.model)
 
     start_time = time.time()
 
@@ -278,6 +376,21 @@ async def create_embeddings(request: EmbeddingRequest) -> EmbeddingResponse:
         logger.error(f"Embeddings failed: {e}")
         record_llm_error(provider, model, "server_error")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+def _split_model(model: str) -> tuple[str, str]:
+    """Split a ``provider/model`` string for metric labelling.
+
+    Bare names with no slash default to ``ollama`` to match the legacy
+    OpenAI-style behaviour. Aliases (``mana/...``) keep their namespace
+    in the metrics — that's intentional, so request-side counters tell
+    you what callers ASKED for, while the resolved-side counters
+    (``mana_llm_alias_resolved_total``) tell you what they GOT.
+    """
+    if "/" in model:
+        provider, _, name = model.partition("/")
+        return provider.lower(), name
+    return "ollama", model
 
 
 if __name__ == "__main__":

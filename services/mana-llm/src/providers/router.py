@@ -41,6 +41,11 @@ from src.models import (
     EmbeddingResponse,
     ModelInfo,
 )
+from src.utils.metrics import (
+    record_alias_resolved,
+    record_fallback,
+    set_provider_healthy,
+)
 
 from .base import LLMProvider
 from .errors import (
@@ -229,8 +234,10 @@ class ProviderRouter:
         chain = self._resolve_chain(model_or_alias)
         attempts: list[tuple[str, str]] = []
         last_exc: Exception | None = None
+        is_alias = AliasRegistry.is_alias(model_or_alias)
 
-        for entry in chain:
+        for i, entry in enumerate(chain):
+            next_entry = chain[i + 1] if i + 1 < len(chain) else ""
             provider_name, model_name = self._parse_model(entry)
             if provider_name not in self.providers:
                 logger.debug(
@@ -239,11 +246,13 @@ class ProviderRouter:
                     provider_name,
                 )
                 attempts.append((entry, "unconfigured"))
+                record_fallback(entry, next_entry, "unconfigured")
                 continue
 
             if not self.health_cache.is_healthy(provider_name):
                 logger.debug("skip chain entry %s — cache says unhealthy", entry)
                 attempts.append((entry, "cache-unhealthy"))
+                record_fallback(entry, next_entry, "cache-unhealthy")
                 continue
 
             provider = self.providers[provider_name]
@@ -253,10 +262,13 @@ class ProviderRouter:
                 logger.info(
                     "execute → %s (alias=%s)",
                     entry,
-                    model_or_alias if model_or_alias != entry else "<direct>",
+                    model_or_alias if is_alias else "<direct>",
                 )
                 result = await call(provider, model_name, request)
                 self.health_cache.mark_healthy(provider_name)
+                set_provider_healthy(provider_name, True)
+                if is_alias:
+                    record_alias_resolved(model_or_alias, entry)
                 return result
             except Exception as e:
                 if not self._is_retryable(e):
@@ -266,7 +278,11 @@ class ProviderRouter:
                     # being wrong.
                     raise
                 self.health_cache.mark_unhealthy(provider_name, self._exception_summary(e))
+                set_provider_healthy(
+                    provider_name, self.health_cache.is_healthy(provider_name)
+                )
                 attempts.append((entry, type(e).__name__))
+                record_fallback(entry, next_entry, type(e).__name__)
                 last_exc = e
                 logger.warning(
                     "execute %s failed (retryable, will try next): %s",
@@ -310,14 +326,18 @@ class ProviderRouter:
         chain = self._resolve_chain(request.model)
         attempts: list[tuple[str, str]] = []
         last_exc: Exception | None = None
+        is_alias = AliasRegistry.is_alias(request.model)
 
-        for entry in chain:
+        for i, entry in enumerate(chain):
+            next_entry = chain[i + 1] if i + 1 < len(chain) else ""
             provider_name, model_name = self._parse_model(entry)
             if provider_name not in self.providers:
                 attempts.append((entry, "unconfigured"))
+                record_fallback(entry, next_entry, "unconfigured")
                 continue
             if not self.health_cache.is_healthy(provider_name):
                 attempts.append((entry, "cache-unhealthy"))
+                record_fallback(entry, next_entry, "cache-unhealthy")
                 continue
 
             provider = self.providers[provider_name]
@@ -330,13 +350,20 @@ class ProviderRouter:
                 # Empty stream is a successful but content-free response.
                 # Commit and exit cleanly.
                 self.health_cache.mark_healthy(provider_name)
+                set_provider_healthy(provider_name, True)
+                if is_alias:
+                    record_alias_resolved(request.model, entry)
                 logger.info("stream %s yielded empty response", entry)
                 return
             except Exception as e:
                 if not self._is_retryable(e):
                     raise
                 self.health_cache.mark_unhealthy(provider_name, self._exception_summary(e))
+                set_provider_healthy(
+                    provider_name, self.health_cache.is_healthy(provider_name)
+                )
                 attempts.append((entry, type(e).__name__))
+                record_fallback(entry, next_entry, type(e).__name__)
                 last_exc = e
                 logger.warning(
                     "stream %s failed before first byte (retryable, trying next): %s",
@@ -349,6 +376,9 @@ class ProviderRouter:
             # the rest of the stream. Any error from here on propagates;
             # it is NOT safe to splice another provider's output in.
             self.health_cache.mark_healthy(provider_name)
+            set_provider_healthy(provider_name, True)
+            if is_alias:
+                record_alias_resolved(request.model, entry)
             logger.info("stream → %s (committed after first chunk)", entry)
             yield first_chunk
             async for chunk in stream:

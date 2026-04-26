@@ -4,7 +4,7 @@ import time
 from collections.abc import Callable
 
 from fastapi import Request, Response
-from prometheus_client import Counter, Histogram, generate_latest
+from prometheus_client import Counter, Gauge, Histogram, generate_latest
 from starlette.middleware.base import BaseHTTPMiddleware
 
 # Request metrics
@@ -45,6 +45,35 @@ LLM_ERRORS = Counter(
     "mana_llm_llm_errors_total",
     "Total LLM errors",
     ["provider", "model", "error_type"],
+)
+
+# ---------------------------------------------------------------------------
+# Alias / fallback / health metrics — added in M4 of llm-fallback-aliases.md.
+# ---------------------------------------------------------------------------
+
+ALIAS_RESOLVED = Counter(
+    "mana_llm_alias_resolved_total",
+    "How often an alias resolved to a concrete provider/model. The `target` "
+    "label is the chain entry that actually served the request — useful for "
+    "spotting cases where the primary always falls through to a cloud entry.",
+    ["alias", "target"],
+)
+
+FALLBACK_TRIGGERED = Counter(
+    "mana_llm_fallback_total",
+    "Fallback transitions: a chain entry failed (or was skipped via cache) "
+    "and the router moved to the next entry. `reason` is the exception class "
+    "name or `cache-unhealthy` / `unconfigured`. `from_model` is the entry "
+    "that didn't serve, `to_model` is empty when no further entries existed.",
+    ["from_model", "to_model", "reason"],
+)
+
+PROVIDER_HEALTHY = Gauge(
+    "mana_llm_provider_healthy",
+    "1 when the provider is currently considered healthy by the cache, "
+    "0 when in backoff. Refreshed on every probe tick and on every router "
+    "call-site state transition.",
+    ["provider"],
 )
 
 
@@ -107,3 +136,23 @@ def record_llm_request(
 def record_llm_error(provider: str, model: str, error_type: str) -> None:
     """Record LLM error metrics."""
     LLM_ERRORS.labels(provider=provider, model=model, error_type=error_type).inc()
+
+
+def record_alias_resolved(alias: str, target: str) -> None:
+    """Record which concrete model an alias resolved to for this request."""
+    ALIAS_RESOLVED.labels(alias=alias, target=target).inc()
+
+
+def record_fallback(from_model: str, to_model: str, reason: str) -> None:
+    """Record a fallback transition. ``to_model`` is empty when the chain
+    ran out (i.e. NoHealthyProviderError)."""
+    FALLBACK_TRIGGERED.labels(
+        from_model=from_model,
+        to_model=to_model,
+        reason=reason,
+    ).inc()
+
+
+def set_provider_healthy(provider: str, healthy: bool) -> None:
+    """Mirror ``ProviderHealthCache`` state into a Prometheus gauge."""
+    PROVIDER_HEALTHY.labels(provider=provider).set(1.0 if healthy else 0.0)

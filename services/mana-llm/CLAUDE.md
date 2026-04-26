@@ -143,12 +143,98 @@ curl -X POST http://localhost:3025/v1/embeddings \
 ### Health & Metrics
 
 ```bash
-# Health check
+# Liveness summary (legacy, terse shape — only status + per-provider status string)
 curl http://localhost:3025/health
+
+# Detailed per-provider liveness snapshot (M4)
+curl http://localhost:3025/v1/health
 
 # Prometheus metrics
 curl http://localhost:3025/metrics
 ```
+
+### Aliases (M4 — see `aliases.yaml` and the fallback section below)
+
+```bash
+# What does each `mana/<class>` resolve to?
+curl http://localhost:3025/v1/aliases
+```
+
+## Aliases & Fallback
+
+> Background: [`docs/plans/llm-fallback-aliases.md`](../../docs/plans/llm-fallback-aliases.md)
+
+### What callers send
+
+Two acceptable shapes for the `model` field of `/v1/chat/completions`:
+
+1. **Aliases** in the reserved `mana/` namespace — recommended for product code.
+   The router resolves them via `aliases.yaml` to a chain of concrete
+   `provider/model` strings and tries them in order.
+2. **Direct `provider/model`** — bypasses the alias layer, no fallback.
+   Useful for tests, debugging, and one-off integrations.
+
+| Alias | Class |
+|---|---|
+| `mana/fast-text` | Short answers, classification, single-shot Q&A |
+| `mana/long-form` | Writing, essays, stories, longer prose |
+| `mana/structured` | JSON output (comic storyboards, research subqueries, tag suggestions) |
+| `mana/reasoning` | Agent missions, tool calls, multi-step plans |
+| `mana/vision` | Multimodal (image + text) |
+
+The chain for each alias lives in `services/mana-llm/aliases.yaml`. Edit
+the file and `kill -HUP <pid>` to reload — no restart needed. Reload
+errors keep the previous good state; check the service logs.
+
+### Fallback semantics
+
+Every chain is tried in order. The router skips an entry if the provider
+isn't configured at this deployment (no API key) or is currently marked
+unhealthy by the health-cache. For each remaining entry the request is
+attempted; on a **retryable** error (connection failure, timeout, 5xx,
+rate-limit, RemoteProtocolError) the provider is marked unhealthy and
+the next entry is tried. **Non-retryable** errors (auth, capability,
+content-blocked, 4xx, unknown exception types) propagate immediately —
+no fallback, the cache is not poisoned.
+
+Streaming follows the same logic up to the **first byte**. Once a chunk
+has been yielded the provider is committed; mid-stream errors surface
+as-is so we never splice two providers' voices into one output.
+
+If every entry was skipped or failed, the response is `503` carrying a
+structured `attempts: list[(model, reason)]` log so the cause is
+visible to the caller, not only in service logs.
+
+### Resolved-model header
+
+Non-streaming responses carry `X-Mana-LLM-Resolved: <provider>/<model>`
+(e.g. `groq/llama-3.3-70b-versatile`) — the concrete model that
+actually answered. Use this for token-cost attribution when the request
+used an alias. For streaming, each chunk's `model` field carries the
+same info (headers go out before the chain is walked).
+
+### Health-cache + probe
+
+`ProviderHealthCache` keeps a per-provider circuit-breaker:
+
+* 1 failure: still healthy (transient blip, don't bounce).
+* 2 consecutive failures: `is_healthy → False` for 60 s; the router
+  fail-fasts straight to the next chain entry.
+* After 60 s: half-open. Next call exercises the provider; success
+  fully resets, failure re-arms the backoff.
+
+A background `HealthProbe` task runs every 30 s with a 3 s timeout per
+provider, calling cheap endpoints (`/api/tags` for Ollama, `/v1/models`
+for OpenAI-compat). One bad probe can't sink the loop; results feed
+into the same cache as the call-site fallback.
+
+### Prometheus metrics added in M4
+
+| Metric | Labels | Purpose |
+|---|---|---|
+| `mana_llm_alias_resolved_total` | `alias`, `target` | How often an alias resolved to which concrete model — useful for spotting cases where the primary always falls through. |
+| `mana_llm_fallback_total` | `from_model`, `to_model`, `reason` | Each fallback transition. `reason` is the exception class name or `cache-unhealthy` / `unconfigured`. |
+| `mana_llm_provider_healthy` | `provider` | Gauge: 1 healthy, 0 in backoff. Mirrors the circuit-breaker. |
 
 ## Provider Routing
 
