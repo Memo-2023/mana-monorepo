@@ -16,6 +16,7 @@
   BriefingForm's save handler.
 -->
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { useAllArticles } from '$lib/modules/articles/queries';
 	import { useAllNotes } from '$lib/modules/notes/queries';
 	import { useAllEntries as useAllLibraryEntries } from '$lib/modules/library/queries';
@@ -63,28 +64,35 @@
 	const kontextDoc = $derived(kontext$.value);
 
 	function labelFor(ref: DraftReference): string {
-		if (ref.kind === 'url') return ref.url ?? 'Link';
-		if (ref.kind === 'kontext') return 'Kontext-Dokument';
-		if (!ref.targetId) return '—';
+		if (ref.kind === 'url') return ref.url ?? $_('writing.reference_picker.label_url_default');
+		if (ref.kind === 'kontext') return $_('writing.reference_picker.label_kontext');
+		if (!ref.targetId) return $_('writing.reference_picker.label_unknown');
 		if (ref.kind === 'article') {
 			const a = articlesById.get(ref.targetId);
-			return a ? a.title : 'Artikel (fehlt)';
+			return a ? a.title : $_('writing.reference_picker.label_article_missing');
 		}
 		if (ref.kind === 'note') {
 			const n = notesById.get(ref.targetId);
-			return n ? n.title || 'Ohne Titel' : 'Notiz (fehlt)';
+			return n
+				? n.title || $_('writing.reference_picker.label_note_untitled')
+				: $_('writing.reference_picker.label_note_missing');
 		}
 		if (ref.kind === 'library') {
 			const e = libraryById.get(ref.targetId);
-			return e ? e.title : 'Library-Eintrag (fehlt)';
+			return e ? e.title : $_('writing.reference_picker.label_library_missing');
 		}
 		if (ref.kind === 'goal') {
 			const g = goalsById.get(ref.targetId);
-			return g ? g.title : 'Ziel (fehlt)';
+			return g ? g.title : $_('writing.reference_picker.label_goal_missing');
 		}
 		if (ref.kind === 'me-image') {
 			const m = meImagesById.get(ref.targetId);
-			return m ? (m.label ?? `${m.kind}-Bild`) : 'Bild (fehlt)';
+			return m
+				? (m.label ??
+						$_('writing.reference_picker.label_image_kind_fallback', {
+							values: { kind: m.kind },
+						}))
+				: $_('writing.reference_picker.label_image_missing');
 		}
 		return ref.targetId;
 	}
@@ -228,7 +236,7 @@
 
 	{#if canAddMore}
 		<div class="add-row">
-			<span class="add-label">+ Quelle:</span>
+			<span class="add-label">{$_('writing.reference_picker.add_label')}</span>
 			{#each SUPPORTED_KINDS as k (k)}
 				<button
 					type="button"
@@ -236,30 +244,29 @@
 					class:active={mode === k}
 					onclick={() => openMode(k as PickerMode)}
 				>
-					{#if k === 'article'}📄 Artikel
-					{:else if k === 'note'}📝 Notiz
-					{:else if k === 'library'}📚 Library
-					{:else if k === 'kontext'}🗂 Kontext
-					{:else if k === 'goal'}🎯 Ziel
-					{:else if k === 'me-image'}🖼 Bild
-					{:else}🔗 URL{/if}
+					{$_('writing.reference_picker.kind_' + k)}
 				</button>
 			{/each}
 		</div>
 	{:else}
 		<p class="muted">
-			Max. {MAX_REFERENCES} Quellen pro Draft erreicht. Entferne eine, um eine neue hinzuzufügen.
+			{$_('writing.reference_picker.max_reached', { values: { max: MAX_REFERENCES } })}
 		</p>
 	{/if}
 
 	{#if mode === 'article' || mode === 'note' || mode === 'library' || mode === 'goal' || mode === 'me-image'}
 		<div class="search">
 			<!-- svelte-ignore a11y_autofocus -->
-			<input type="search" bind:value={searchQuery} placeholder="Suche…" autofocus />
+			<input
+				type="search"
+				bind:value={searchQuery}
+				placeholder={$_('writing.reference_picker.search_placeholder')}
+				autofocus
+			/>
 			<div class="results">
 				{#if mode === 'article'}
 					{#if filteredArticles.length === 0}
-						<p class="muted small">Keine Treffer.</p>
+						<p class="muted small">{$_('writing.reference_picker.no_results')}</p>
 					{:else}
 						{#each filteredArticles as a (a.id)}
 							<button
@@ -276,7 +283,7 @@
 					{/if}
 				{:else if mode === 'note'}
 					{#if filteredNotes.length === 0}
-						<p class="muted small">Keine Treffer.</p>
+						<p class="muted small">{$_('writing.reference_picker.no_results')}</p>
 					{:else}
 						{#each filteredNotes as n (n.id)}
 							<button
@@ -284,7 +291,7 @@
 								class="result"
 								onclick={() => addRef({ kind: 'note', targetId: n.id, note: null })}
 							>
-								<strong>{n.title || 'Ohne Titel'}</strong>
+								<strong>{n.title || $_('writing.reference_picker.label_note_untitled')}</strong>
 								{#if n.content}
 									<span class="meta">
 										{n.content.slice(0, 80).replace(/\s+/g, ' ')}
@@ -296,7 +303,7 @@
 					{/if}
 				{:else if mode === 'library'}
 					{#if filteredLibrary.length === 0}
-						<p class="muted small">Keine Treffer.</p>
+						<p class="muted small">{$_('writing.reference_picker.no_results')}</p>
 					{:else}
 						{#each filteredLibrary as e (e.id)}
 							<button
@@ -315,7 +322,7 @@
 					{/if}
 				{:else if mode === 'goal'}
 					{#if filteredGoals.length === 0}
-						<p class="muted small">Keine Ziele angelegt.</p>
+						<p class="muted small">{$_('writing.reference_picker.no_goals')}</p>
 					{:else}
 						{#each filteredGoals as g (g.id)}
 							<button
@@ -333,7 +340,7 @@
 					{/if}
 				{:else if mode === 'me-image'}
 					{#if filteredMeImages.length === 0}
-						<p class="muted small">Keine Bilder. Lege welche unter /profile/me-images an.</p>
+						<p class="muted small">{$_('writing.reference_picker.no_me_images')}</p>
 					{:else}
 						{#each filteredMeImages as m (m.id)}
 							<button
@@ -345,7 +352,12 @@
 									<img src={m.thumbnailUrl ?? m.publicUrl} alt="" class="thumb" />
 								{/if}
 								<span class="me-image-text">
-									<strong>{m.label ?? `${m.kind}-Bild`}</strong>
+									<strong
+										>{m.label ??
+											$_('writing.reference_picker.label_image_kind_fallback', {
+												values: { kind: m.kind },
+											})}</strong
+									>
 									<span class="meta">
 										{m.kind}{#if m.tags.length}
 											· {m.tags.join(', ')}
@@ -362,12 +374,13 @@
 		<div class="search">
 			{#if !kontextDoc}
 				<p class="muted small">
-					Dieser Space hat noch kein Kontext-Dokument. Lege eines unter
-					<a href="/kontext">/kontext</a> an.
+					{$_('writing.reference_picker.kontext_empty_pre')}<a href="/kontext">/kontext</a>{$_(
+						'writing.reference_picker.kontext_empty_post'
+					)}
 				</p>
 			{:else}
 				<button type="button" class="result" onclick={addKontext}>
-					<strong>Kontext-Dokument verknüpfen</strong>
+					<strong>{$_('writing.reference_picker.kontext_link')}</strong>
 					<span class="meta">
 						{(kontextDoc.content ?? '').slice(0, 100).replace(/\s+/g, ' ')}
 						{(kontextDoc.content ?? '').length > 100 ? '…' : ''}
@@ -378,10 +391,20 @@
 	{:else if mode === 'url'}
 		<div class="url-row">
 			<!-- svelte-ignore a11y_autofocus -->
-			<input type="url" bind:value={urlInput} placeholder="https://…" autofocus />
-			<input type="text" bind:value={urlNote} placeholder="Kontext (optional)" class="note-input" />
+			<input
+				type="url"
+				bind:value={urlInput}
+				placeholder={$_('writing.reference_picker.url_placeholder')}
+				autofocus
+			/>
+			<input
+				type="text"
+				bind:value={urlNote}
+				placeholder={$_('writing.reference_picker.url_note_placeholder')}
+				class="note-input"
+			/>
 			<button type="button" class="primary" disabled={!urlInput.trim()} onclick={addUrl}>
-				Hinzufügen
+				{$_('writing.reference_picker.url_add')}
 			</button>
 		</div>
 	{/if}

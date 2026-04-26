@@ -7,6 +7,7 @@
   separate flows; those don't belong in this form.
 -->
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { stylesStore } from '../stores/styles.svelte';
 	import type { WritingStyle } from '../types';
 
@@ -59,20 +60,26 @@
 
 <form class="style-form" onsubmit={submit}>
 	<label>
-		<span>Name</span>
+		<span>{$_('writing.style_form.label_name')}</span>
 		<!-- svelte-ignore a11y_autofocus -->
-		<input type="text" bind:value={name} placeholder="Mein Corporate-Ton" required autofocus />
+		<input
+			type="text"
+			bind:value={name}
+			placeholder={$_('writing.style_form.placeholder_name')}
+			required
+			autofocus
+		/>
 	</label>
 
 	<label>
 		<span>
-			Beschreibung
-			<small>(die KI liest das wörtlich — sei konkret)</small>
+			{$_('writing.style_form.label_description')}
+			<small>{$_('writing.style_form.label_description_hint')}</small>
 		</span>
 		<textarea
 			bind:value={description}
 			rows="5"
-			placeholder={'z.B. "Kurze Sätze, aktive Formulierungen, keine Buzzwords. Erste-Person-Singular, du-Ansprache. Max. 3 Sätze pro Absatz. Jeder Abschnitt endet mit einer konkreten nächsten Aktion."'}
+			placeholder={$_('writing.style_form.placeholder_description')}
 			required
 		></textarea>
 	</label>
@@ -82,14 +89,16 @@
 	{/if}
 
 	<div class="actions">
-		<button type="button" class="secondary" onclick={onclose} disabled={saving}>Abbrechen</button>
+		<button type="button" class="secondary" onclick={onclose} disabled={saving}
+			>{$_('writing.style_form.cancel')}</button
+		>
 		<button type="submit" class="primary" disabled={!isValid || saving}>
 			{#if saving}
-				Speichert…
+				{$_('writing.style_form.saving')}
 			{:else if mode === 'create'}
-				Stil anlegen
+				{$_('writing.style_form.submit_create')}
 			{:else}
-				Speichern
+				{$_('writing.style_form.submit_update')}
 			{/if}
 		</button>
 	</div>

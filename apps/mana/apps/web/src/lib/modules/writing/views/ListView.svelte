@@ -10,6 +10,7 @@
   unstarted draft.
 -->
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { onMount, type Component } from 'svelte';
 	import { goto } from '$app/navigation';
 	import {
@@ -175,14 +176,14 @@
 				type="search"
 				class="search"
 				bind:value={searchQuery}
-				placeholder="Nach Titel oder Thema suchen…"
+				placeholder={$_('writing.list_view.search_placeholder')}
 			/>
 		{/if}
 		<a
 			href="/writing/styles"
 			class="styles-link"
-			title="Stile verwalten"
-			aria-label="Stile verwalten"
+			title={$_('writing.list_view.styles_title')}
+			aria-label={$_('writing.list_view.styles_title')}
 		>
 			<Palette size={18} weight="regular" />
 		</a>
@@ -193,7 +194,7 @@
 			onclick={() => (showCreate = !showCreate)}
 			aria-expanded={showCreate}
 		>
-			{showCreate ? '× Schließen' : '+ Neuer Draft'}
+			{showCreate ? $_('writing.list_view.close_btn') : $_('writing.list_view.new_draft_btn')}
 		</button>
 	</div>
 
@@ -204,7 +205,7 @@
 				<StatusFilter active={activeStatus} onselect={(s) => (activeStatus = s)} />
 				<label class="fav-toggle">
 					<input type="checkbox" bind:checked={showFavoritesOnly} />
-					<span>Nur Favoriten</span>
+					<span>{$_('writing.list_view.fav_only')}</span>
 				</label>
 			</div>
 		</div>
@@ -222,27 +223,24 @@
 	{/if}
 
 	{#if drafts$.loading}
-		<p class="muted center">Lädt…</p>
+		<p class="muted center">{$_('writing.list_view.loading')}</p>
 	{:else if isEmpty && !showCreate}
 		<!-- Hero empty-state: the "What is this?" view. -->
 		<section class="hero">
 			<div class="hero-icon" aria-hidden="true">
 				<NotePencil size={40} weight="duotone" />
 			</div>
-			<h2>Dein KI-Ghostwriter</h2>
-			<p class="hero-pitch">
-				Brief Thema, Stil und Quellen — ein fertiger Entwurf entsteht. Verfeinere ihn absatzweise
-				mit ⌘G zum Generieren, Markieren + Selection-Tools, oder direkt im Editor.
-			</p>
+			<h2>{$_('writing.list_view.hero_title')}</h2>
+			<p class="hero-pitch">{$_('writing.list_view.hero_pitch')}</p>
 			<ul class="hero-meta">
-				<li><Sparkle size={12} weight="fill" /> 12 Textarten</li>
-				<li>9 Stile</li>
-				<li>7 Quellen</li>
-				<li>E2E-verschlüsselt</li>
+				<li><Sparkle size={12} weight="fill" /> {$_('writing.list_view.hero_meta_kinds')}</li>
+				<li>{$_('writing.list_view.hero_meta_styles')}</li>
+				<li>{$_('writing.list_view.hero_meta_references')}</li>
+				<li>{$_('writing.list_view.hero_meta_e2e')}</li>
 			</ul>
 
 			<div class="quick-start">
-				<p class="quick-start-label">Schnellstart</p>
+				<p class="quick-start-label">{$_('writing.list_view.quick_start_label')}</p>
 				<div class="quick-grid">
 					{#each QUICK_START_KINDS as kind (kind)}
 						{@const Icon = QUICK_ICON[kind]}
@@ -250,12 +248,14 @@
 							type="button"
 							class="quick-tile"
 							onclick={() => startWithKind(kind)}
-							title={`Neuer ${KIND_LABELS[kind].de}-Entwurf`}
+							title={$_('writing.list_view.quick_start_title_template', {
+								values: { kind: $_('writing.kinds.' + kind) },
+							})}
 						>
 							<span class="quick-icon" aria-hidden="true">
 								<Icon size={20} weight="regular" />
 							</span>
-							<span class="quick-label">{KIND_LABELS[kind].de}</span>
+							<span class="quick-label">{$_('writing.kinds.' + kind)}</span>
 						</button>
 					{/each}
 				</div>
@@ -263,7 +263,7 @@
 		</section>
 	{:else if filtered.length === 0}
 		<div class="empty">
-			<p class="muted">Keine Drafts passen zum aktuellen Filter.</p>
+			<p class="muted">{$_('writing.list_view.empty_filtered')}</p>
 		</div>
 	{:else}
 		<div class="grid">

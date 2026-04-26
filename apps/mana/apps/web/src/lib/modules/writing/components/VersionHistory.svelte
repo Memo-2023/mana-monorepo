@@ -9,6 +9,7 @@
   see what each draft cost without digging into Workbench audit views.
 -->
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { draftsStore } from '../stores/drafts.svelte';
 	import type { DraftVersion, Generation } from '../types';
 	import { formatDate as formatLocaleDate } from '$lib/i18n/format';
@@ -53,7 +54,11 @@
 		if (!gen) return null;
 		const parts: string[] = [];
 		if (gen.tokenUsage) {
-			parts.push(`${gen.tokenUsage.input} → ${gen.tokenUsage.output} Tokens`);
+			parts.push(
+				$_('writing.version_history.tokens_label', {
+					values: { input: gen.tokenUsage.input, output: gen.tokenUsage.output },
+				})
+			);
 		}
 		if (gen.durationMs) {
 			parts.push(`${(gen.durationMs / 1000).toFixed(1)}s`);
@@ -71,25 +76,31 @@
 			<div class="meta">
 				<strong>v{version.versionNumber}</strong>
 				{#if version.isAiGenerated}
-					<span class="tag ai" title="KI-generiert">KI</span>
+					<span class="tag ai" title={$_('writing.version_history.badge_ai_title')}
+						>{$_('writing.version_history.badge_ai')}</span
+					>
 				{/if}
 				{#if isCurrent}
-					<span class="tag current">Aktiv</span>
+					<span class="tag current">{$_('writing.version_history.badge_active')}</span>
 				{/if}
 			</div>
 			<div class="stats">
-				<span>{version.wordCount} Wörter</span>
+				<span
+					>{$_('writing.version_history.word_count', {
+						values: { count: version.wordCount },
+					})}</span
+				>
 				<span class="date">{formatDate(version.createdAt)}</span>
 			</div>
 			{#if costLine}
-				<div class="cost" title="Verbrauch + Modell der zugehörigen Generation">{costLine}</div>
+				<div class="cost" title={$_('writing.version_history.cost_title')}>{costLine}</div>
 			{/if}
 			{#if version.summary}
 				<p class="summary">{version.summary}</p>
 			{/if}
 			{#if !isCurrent}
 				<button type="button" class="restore" onclick={() => restore(version.id)}>
-					Wiederherstellen
+					{$_('writing.version_history.restore')}
 				</button>
 			{/if}
 		</li>

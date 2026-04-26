@@ -10,6 +10,7 @@
   component is just the menu surface + confirmation toasts.
 -->
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { goto } from '$app/navigation';
 	import { articlesStore } from '$lib/modules/articles/stores/articles.svelte';
 	import { draftsStore } from '../stores/drafts.svelte';
@@ -43,13 +44,17 @@
 
 	async function copyMd() {
 		const ok = await copyTextToClipboard(draftToMarkdown(draft, currentVersion));
-		flash(ok ? '✓ Markdown kopiert' : 'Kopieren fehlgeschlagen');
+		flash(
+			ok ? $_('writing.export_menu.toast_md_copied') : $_('writing.export_menu.toast_copy_failed')
+		);
 		open = false;
 	}
 
 	async function copyPlain() {
 		const ok = await copyTextToClipboard(draftToPlainText(draft, currentVersion));
-		flash(ok ? '✓ Text kopiert' : 'Kopieren fehlgeschlagen');
+		flash(
+			ok ? $_('writing.export_menu.toast_text_copied') : $_('writing.export_menu.toast_copy_failed')
+		);
 		open = false;
 	}
 
@@ -59,7 +64,7 @@
 			draftToMarkdown(draft, currentVersion),
 			'text/markdown;charset=utf-8'
 		);
-		flash('↓ Heruntergeladen');
+		flash($_('writing.export_menu.toast_downloaded'));
 		open = false;
 	}
 
@@ -80,17 +85,17 @@
 			// doubles as a back-reference to the source draft.
 			const article = await articlesStore.saveFromExtracted({
 				originalUrl: `internal://writing/${draft.id}`,
-				title: draft.title || draft.briefing.topic || 'Unbenannt',
+				title: draft.title || draft.briefing.topic || $_('writing.detail_view.untitled_fallback'),
 				excerpt: content.slice(0, 240).trim() || null,
 				content,
 				htmlContent: content, // no HTML body yet — the articles reader handles plain text fine
 				author: null,
-				siteName: 'Writing',
+				siteName: $_('writing.export_menu.site_name'),
 				wordCount,
 				readingTimeMinutes: Math.max(1, Math.round(wordCount / 200)),
 			});
 			await draftsStore.recordPublish(draft.id, 'articles', article.id);
-			flash('✓ Als Artikel gespeichert');
+			flash($_('writing.export_menu.toast_saved_article'));
 			open = false;
 			// Give the toast a moment before navigating away.
 			setTimeout(() => goto(`/articles/${article.id}`), 600);
@@ -109,27 +114,27 @@
 		class:active={open}
 		onclick={() => (open = !open)}
 		aria-expanded={open}
-		title="Exportieren / Veröffentlichen"
+		title={$_('writing.export_menu.title')}
 	>
-		📤 Export
+		{$_('writing.export_menu.trigger')}
 	</button>
 	{#if open}
 		<div class="dropdown" role="menu">
 			<button type="button" role="menuitem" onclick={copyMd} disabled={busy}>
-				📋 Markdown kopieren
+				{$_('writing.export_menu.copy_md')}
 			</button>
 			<button type="button" role="menuitem" onclick={copyPlain} disabled={busy}>
-				📋 Text kopieren
+				{$_('writing.export_menu.copy_text')}
 			</button>
 			<button type="button" role="menuitem" onclick={downloadMd} disabled={busy}>
-				↓ Als .md herunterladen
+				{$_('writing.export_menu.download_md')}
 			</button>
 			<button type="button" role="menuitem" onclick={printDraft} disabled={busy}>
-				🖨 Drucken / PDF
+				{$_('writing.export_menu.print_pdf')}
 			</button>
 			<hr />
 			<button type="button" role="menuitem" onclick={saveAsArticle} disabled={busy}>
-				📚 Als Artikel speichern
+				{$_('writing.export_menu.save_as_article')}
 			</button>
 		</div>
 	{/if}

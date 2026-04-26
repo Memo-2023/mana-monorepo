@@ -5,6 +5,7 @@
   but the full form remains the canonical source-of-truth view.
 -->
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { KIND_LABELS, TONE_PRESETS, LENGTH_PRESETS, DEFAULT_LANGUAGE } from '../constants';
 	import { draftsStore } from '../stores/drafts.svelte';
 	import { callWritingGeneration } from '../api';
@@ -88,7 +89,7 @@
 		if (suggestingTitle) return;
 		const trimmedTopic = topic.trim();
 		if (!trimmedTopic) {
-			error = 'Bitte erst ein Thema eingeben — der Vorschlag braucht Kontext.';
+			error = $_('writing.briefing_form.err_no_topic');
 			return;
 		}
 		suggestingTitle = true;
@@ -181,13 +182,13 @@
 <form class="briefing" onsubmit={submit}>
 	<div class="row">
 		<label>
-			<span>Titel</span>
+			<span>{$_('writing.briefing_form.label_title')}</span>
 			<div class="title-row">
 				<!-- svelte-ignore a11y_autofocus -->
 				<input
 					type="text"
 					bind:value={title}
-					placeholder="Mein Blogpost über …"
+					placeholder={$_('writing.briefing_form.placeholder_title')}
 					required
 					autofocus
 				/>
@@ -196,19 +197,21 @@
 					class="suggest-btn"
 					onclick={suggestTitle}
 					disabled={suggestingTitle || !topic.trim()}
-					title={topic.trim() ? 'Titel aus Briefing + Inhalt vorschlagen' : 'Erst Thema ausfüllen'}
+					title={topic.trim()
+						? $_('writing.briefing_form.suggest_title')
+						: $_('writing.briefing_form.suggest_title_no_topic')}
 				>
 					{suggestingTitle ? '…' : '✨'}
 				</button>
 			</div>
 		</label>
 		<label class="kind-select">
-			<span>Textart</span>
+			<span>{$_('writing.briefing_form.label_kind')}</span>
 			<select bind:value={kind}>
 				{#each KIND_ORDER as k (k)}
 					<option value={k}>
 						{KIND_LABELS[k].emoji}
-						{KIND_LABELS[k].de}
+						{$_('writing.kinds.' + k)}
 					</option>
 				{/each}
 			</select>
@@ -216,26 +219,33 @@
 	</div>
 
 	<label>
-		<span>Worum geht's? <small>(wird als Kern-Briefing an die KI übergeben)</small></span>
+		<span
+			>{$_('writing.briefing_form.label_topic')}
+			<small>{$_('writing.briefing_form.label_topic_hint')}</small></span
+		>
 		<textarea
 			bind:value={topic}
 			rows="3"
-			placeholder="z.B. 'Was Mana von klassischen Produktivitätstools unterscheidet, aus Nutzersicht'"
+			placeholder={$_('writing.briefing_form.placeholder_topic')}
 			required
 		></textarea>
 	</label>
 
 	<div class="row">
 		<label>
-			<span>Zielgruppe</span>
-			<input type="text" bind:value={audience} placeholder="z.B. Gründer, Eltern, …" />
+			<span>{$_('writing.briefing_form.label_audience')}</span>
+			<input
+				type="text"
+				bind:value={audience}
+				placeholder={$_('writing.briefing_form.placeholder_audience')}
+			/>
 		</label>
 		<label>
-			<span>Ton</span>
+			<span>{$_('writing.briefing_form.label_tone')}</span>
 			<select bind:value={tone}>
-				<option value="">— kein fester Ton —</option>
+				<option value="">{$_('writing.briefing_form.tone_none')}</option>
 				{#each TONE_PRESETS as preset (preset.id)}
-					<option value={preset.id}>{preset.de}</option>
+					<option value={preset.id}>{$_('writing.tones.' + preset.id)}</option>
 				{/each}
 			</select>
 		</label>
@@ -243,41 +253,46 @@
 
 	<div class="row">
 		<label>
-			<span>Länge (Wörter)</span>
+			<span>{$_('writing.briefing_form.label_target_length')}</span>
 			<input type="number" min="20" max="20000" step="20" bind:value={targetLengthValue} />
 		</label>
 		<label>
-			<span>Sprache</span>
+			<span>{$_('writing.briefing_form.label_language')}</span>
 			<select bind:value={language}>
-				<option value="de">Deutsch</option>
-				<option value="en">English</option>
-				<option value="fr">Français</option>
-				<option value="es">Español</option>
-				<option value="it">Italiano</option>
+				<option value="de">{$_('writing.briefing_form.language_de')}</option>
+				<option value="en">{$_('writing.briefing_form.language_en')}</option>
+				<option value="fr">{$_('writing.briefing_form.language_fr')}</option>
+				<option value="es">{$_('writing.briefing_form.language_es')}</option>
+				<option value="it">{$_('writing.briefing_form.language_it')}</option>
 			</select>
 		</label>
 	</div>
 
 	<label>
 		<span>
-			Stil <small>(optional — prägt Ton & Struktur der Generation)</small>
+			{$_('writing.briefing_form.label_style')}
+			<small>{$_('writing.briefing_form.label_style_hint')}</small>
 		</span>
 		<StylePicker value={styleId} onchange={(next) => (styleId = next)} />
 	</label>
 
 	<div class="references-field">
 		<span class="field-label">
-			Quellen <small>(optional — flowen als Kontext in den Prompt ein)</small>
+			{$_('writing.briefing_form.label_references')}
+			<small>{$_('writing.briefing_form.label_references_hint')}</small>
 		</span>
 		<ReferencePicker {references} onchange={(next) => (references = next)} />
 	</div>
 
 	<label>
-		<span>Zusatzhinweise <small>(optional)</small></span>
+		<span
+			>{$_('writing.briefing_form.label_extra')}
+			<small>{$_('writing.briefing_form.label_extra_hint')}</small></span
+		>
 		<textarea
 			bind:value={extraInstructions}
 			rows="2"
-			placeholder="z.B. 'keine Buzzwords', 'mit einem Zitat beginnen', …"
+			placeholder={$_('writing.briefing_form.placeholder_extra')}
 		></textarea>
 	</label>
 
@@ -286,14 +301,16 @@
 	{/if}
 
 	<div class="actions">
-		<button type="button" class="secondary" onclick={onclose} disabled={saving}> Abbrechen </button>
+		<button type="button" class="secondary" onclick={onclose} disabled={saving}>
+			{$_('writing.briefing_form.cancel')}
+		</button>
 		<button type="submit" class="primary" disabled={!isValid || saving}>
 			{#if saving}
-				Speichert…
+				{$_('writing.briefing_form.saving')}
 			{:else if mode === 'create'}
-				Draft anlegen
+				{$_('writing.briefing_form.submit_create')}
 			{:else}
-				Speichern
+				{$_('writing.briefing_form.submit_update')}
 			{/if}
 		</button>
 	</div>

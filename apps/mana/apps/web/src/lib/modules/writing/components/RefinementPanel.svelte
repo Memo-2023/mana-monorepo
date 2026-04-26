@@ -6,6 +6,7 @@
   error message + a "Noch mal" button.
 -->
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import type { SelectionToolKind } from './SelectionToolbar.svelte';
 
 	export interface RefinementState {
@@ -40,43 +41,58 @@
 			<span class="dot" aria-hidden="true"></span>
 			<strong>{state.toolLabel}</strong>
 			{#if state.status === 'running'}
-				<span class="muted">Läuft…</span>
+				<span class="muted">{$_('writing.refinement_panel.running')}</span>
 			{:else if state.status === 'failed'}
-				<span class="err-label">Fehlgeschlagen</span>
+				<span class="err-label">{$_('writing.refinement_panel.failed')}</span>
 			{:else}
-				<span class="muted">Vorschlag bereit</span>
+				<span class="muted">{$_('writing.refinement_panel.ready')}</span>
 			{/if}
 		</div>
-		<button type="button" class="close" onclick={oncancel} aria-label="Schließen">×</button>
+		<button
+			type="button"
+			class="close"
+			onclick={oncancel}
+			aria-label={$_('writing.refinement_panel.close_aria')}>×</button
+		>
 	</header>
 
 	<div class="cols">
 		<div class="col">
-			<h4>Original</h4>
+			<h4>{$_('writing.refinement_panel.col_original')}</h4>
 			<p class="text">{state.originalText}</p>
 		</div>
 		<div class="col">
-			<h4>Vorschlag</h4>
+			<h4>{$_('writing.refinement_panel.col_proposal')}</h4>
 			{#if state.status === 'running'}
-				<p class="text muted italic">Generiert…</p>
+				<p class="text muted italic">{$_('writing.refinement_panel.generating')}</p>
 			{:else if state.status === 'failed'}
-				<p class="text err-text">{state.error ?? 'Unbekannter Fehler.'}</p>
+				<p class="text err-text">{state.error ?? $_('writing.refinement_panel.err_unknown')}</p>
 			{:else if state.refined}
 				<p class="text refined">{state.refined}</p>
 			{:else}
-				<p class="text muted italic">Kein Ergebnis.</p>
+				<p class="text muted italic">{$_('writing.refinement_panel.empty_result')}</p>
 			{/if}
 		</div>
 	</div>
 
 	<footer>
 		{#if state.status === 'succeeded'}
-			<button type="button" class="primary" onclick={onaccept}>Übernehmen</button>
-			<button type="button" class="secondary" onclick={onretry}>Noch mal</button>
-			<button type="button" class="secondary" onclick={oncancel}>Verwerfen</button>
+			<button type="button" class="primary" onclick={onaccept}
+				>{$_('writing.refinement_panel.action_accept')}</button
+			>
+			<button type="button" class="secondary" onclick={onretry}
+				>{$_('writing.refinement_panel.action_retry')}</button
+			>
+			<button type="button" class="secondary" onclick={oncancel}
+				>{$_('writing.refinement_panel.action_discard')}</button
+			>
 		{:else if state.status === 'failed'}
-			<button type="button" class="primary" onclick={onretry}>Noch mal</button>
-			<button type="button" class="secondary" onclick={oncancel}>Abbrechen</button>
+			<button type="button" class="primary" onclick={onretry}
+				>{$_('writing.refinement_panel.action_retry')}</button
+			>
+			<button type="button" class="secondary" onclick={oncancel}
+				>{$_('writing.refinement_panel.action_cancel')}</button
+			>
 		{/if}
 	</footer>
 </section>

@@ -10,6 +10,7 @@
   version restore) via the `forceContent` prop.
 -->
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { draftsStore } from '../stores/drafts.svelte';
 	import type { DraftVersion } from '../types';
 
@@ -124,20 +125,22 @@
 		onselect={captureSelection}
 		onmouseup={captureSelection}
 		onkeyup={captureSelection}
-		placeholder="Hier schreibst du (oder die KI). Leer lassen für Generate."
+		placeholder={$_('writing.version_editor.placeholder')}
 		spellcheck="true"
 	></textarea>
 	<footer>
 		<span>
-			{wordCount} Wörter{#if targetWords}
-				<span class="target"> / Ziel ~{targetWords}</span>
-			{/if}
+			{$_('writing.version_editor.word_count', {
+				values: { count: wordCount },
+			})}{#if targetWords}<span class="target"
+					>{$_('writing.version_editor.target_words', { values: { words: targetWords } })}</span
+				>{/if}
 		</span>
 		<span class="status" aria-live="polite">
 			{#if pending}
-				Speichert…
+				{$_('writing.version_editor.saving')}
 			{:else}
-				Gespeichert
+				{$_('writing.version_editor.saved')}
 			{/if}
 		</span>
 	</footer>

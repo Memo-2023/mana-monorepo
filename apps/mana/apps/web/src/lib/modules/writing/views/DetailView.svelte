@@ -8,6 +8,7 @@
 -->
 <script lang="ts">
 	import { formatDateTime } from '$lib/i18n/format';
+	import { _ } from 'svelte-i18n';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { VisibilityPicker, type VisibilityLevel } from '@mana/shared-privacy';
@@ -92,13 +93,13 @@
 	// still trigger a re-sync.
 	let forceEditorContent = $state<string | null>(null);
 
-	const TOOL_LABEL: Record<SelectionToolKind, string> = {
-		'selection-shorten': 'Kürzen',
-		'selection-expand': 'Erweitern',
-		'selection-tone': 'Ton ändern',
-		'selection-rewrite': 'Umschreiben',
-		'selection-translate': 'Übersetzen',
-	};
+	const TOOL_LABEL = $derived<Record<SelectionToolKind, string>>({
+		'selection-shorten': $_('writing.selection_tools.shorten'),
+		'selection-expand': $_('writing.selection_tools.expand'),
+		'selection-tone': $_('writing.selection_tools.tone'),
+		'selection-rewrite': $_('writing.selection_tools.rewrite'),
+		'selection-translate': $_('writing.selection_tools.translate'),
+	});
 
 	async function setStatus(next: DraftStatus) {
 		if (!draft) return;
@@ -147,7 +148,8 @@
 
 	async function remove() {
 		if (!draft) return;
-		if (!confirm(`"${draft.title}" wirklich löschen?`)) return;
+		if (!confirm($_('writing.detail_view.confirm_delete', { values: { title: draft.title } })))
+			return;
 		await draftsStore.deleteDraft(draft.id);
 		goto('/writing');
 	}
@@ -307,11 +309,11 @@
 </script>
 
 {#if draft$.loading}
-	<p class="muted center">Lädt…</p>
+	<p class="muted center">{$_('writing.detail_view.loading')}</p>
 {:else if !draft}
 	<div class="empty">
-		<p>Dieser Draft existiert nicht (mehr).</p>
-		<a href="/writing">Zurück zur Übersicht</a>
+		<p>{$_('writing.detail_view.not_found_title')}</p>
+		<a href="/writing">{$_('writing.detail_view.not_found_back')}</a>
 	</div>
 {:else}
 	<!--
@@ -321,7 +323,9 @@
 	  body, without the workbench chrome.
 	-->
 	<article class="print-target" aria-hidden="true">
-		<h1 class="print-title">{draft.title || draft.briefing.topic || 'Unbenannt'}</h1>
+		<h1 class="print-title">
+			{draft.title || draft.briefing.topic || $_('writing.detail_view.untitled_fallback')}
+		</h1>
 		{#if currentVersion}
 			<div class="print-body">{currentVersion.content}</div>
 		{/if}
@@ -330,13 +334,15 @@
 	<div class="shell">
 		<header class="head">
 			<div class="title-row">
-				<a href="/writing" class="back">← Alle Drafts</a>
+				<a href="/writing" class="back">{$_('writing.detail_view.back_to_drafts')}</a>
 				<div class="title-block">
-					<div class="kind" title={kind?.de}>
+					<div class="kind" title={kind ? $_('writing.kinds.' + draft.kind) : ''}>
 						<span aria-hidden="true">{kind?.emoji}</span>
-						{kind?.de}
+						{$_('writing.kinds.' + draft.kind)}
 					</div>
-					<h1>{draft.title || draft.briefing.topic || 'Unbenannt'}</h1>
+					<h1>
+						{draft.title || draft.briefing.topic || $_('writing.detail_view.untitled_fallback')}
+					</h1>
 				</div>
 				<div class="actions">
 					<button
@@ -344,11 +350,13 @@
 						class="ghost"
 						onclick={toggleFavorite}
 						aria-pressed={draft.isFavorite}
-						title="Favorit"
+						title={$_('writing.detail_view.toggle_favorite_title')}
 					>
 						{draft.isFavorite ? '★' : '☆'}
 					</button>
-					<button type="button" class="ghost danger" onclick={remove}>Löschen</button>
+					<button type="button" class="ghost danger" onclick={remove}>
+						{$_('writing.detail_view.action_delete')}
+					</button>
 				</div>
 			</div>
 
@@ -358,7 +366,7 @@
 					{#each STATUS_ORDER as s (s)}
 						{#if s !== draft.status}
 							<button type="button" class="tiny" onclick={() => setStatus(s)}>
-								→ {STATUS_LABELS[s].de}
+								→ {$_('writing.statuses.' + s)}
 							</button>
 						{/if}
 					{/each}
@@ -369,33 +377,35 @@
 			</div>
 
 			{#if draft.visibility === 'unlisted' && draft.unlistedToken}
-				<div
-					class="share-row"
-					title="Öffentlicher Link kommt mit M10 (Publish-Hooks). Bis dahin: Token kopieren."
-				>
-					<span class="share-label">🔗 Unlisted-Token:</span>
+				<div class="share-row" title={$_('writing.detail_view.share_row_title')}>
+					<span class="share-label">{$_('writing.detail_view.share_row_label')}</span>
 					<code class="share-token">{draft.unlistedToken}</code>
 					<button type="button" class="tiny" onclick={copyShareToken}>
-						{shareCopied ? '✓ Kopiert' : 'Kopieren'}
+						{shareCopied
+							? $_('writing.detail_view.share_row_copied')
+							: $_('writing.detail_view.share_row_copy')}
 					</button>
 				</div>
 			{/if}
 
 			{#if draft.publishedTo.length > 0}
 				<div class="published-row">
-					<span class="published-label">📤 Veröffentlicht:</span>
+					<span class="published-label">{$_('writing.detail_view.published_label')}</span>
 					{#each draft.publishedTo as target (`${target.module}:${target.targetId}`)}
 						<span class="published-chip" title={formatDateTime(new Date(target.publishedAt))}>
 							{#if target.module === 'articles'}
-								📚 <a href={`/articles/${target.targetId}`}>Artikel</a>
+								{$_('writing.detail_view.published_articles')}
+								<a href={`/articles/${target.targetId}`}
+									>{$_('writing.detail_view.published_articles_link')}</a
+								>
 							{:else if target.module === 'website'}
-								🌐 Website
+								{$_('writing.detail_view.published_website')}
 							{:else if target.module === 'presi'}
-								🎞 Präsi
+								{$_('writing.detail_view.published_presi')}
 							{:else if target.module === 'mail'}
-								✉️ Mail
+								{$_('writing.detail_view.published_mail')}
 							{:else if target.module === 'social-relay'}
-								💬 Social
+								{$_('writing.detail_view.published_social')}
 							{:else}
 								{target.module}
 							{/if}
@@ -407,11 +417,14 @@
 
 		<section class="briefing-section">
 			<button type="button" class="briefing-toggle" onclick={() => (briefingOpen = !briefingOpen)}>
-				{briefingOpen ? '▾' : '▸'} Briefing
+				{briefingOpen ? '▾' : '▸'}
+				{$_('writing.detail_view.briefing_section_label')}
 				{#if !briefingOpen}
 					<span class="preview">{draft.briefing.topic}</span>
 					{#if activeStyleName}
-						<span class="style-chip" title="Aktiver Stil">🎨 {activeStyleName}</span>
+						<span class="style-chip" title={$_('writing.detail_view.active_style_title')}
+							>🎨 {activeStyleName}</span
+						>
 					{/if}
 				{/if}
 			</button>
@@ -425,9 +438,13 @@
 				{#if currentVersion}
 					<div class="editor-head">
 						<div class="version-label">
-							<strong>Version {currentVersion.versionNumber}</strong>
+							<strong
+								>{$_('writing.detail_view.version_label', {
+									values: { n: currentVersion.versionNumber },
+								})}</strong
+							>
 							{#if currentVersion.isAiGenerated}
-								<span class="ai-tag">KI</span>
+								<span class="ai-tag">{$_('writing.detail_view.ai_tag')}</span>
 							{/if}
 						</div>
 						<div class="editor-actions">
@@ -437,15 +454,15 @@
 								onclick={generate}
 								disabled={generating}
 								title={hasDraftContent
-									? 'Kompletten Text neu generieren — neue Version (⌘G)'
-									: 'Ersten Entwurf aus dem Briefing generieren (⌘G)'}
+									? $_('writing.detail_view.regenerate_title')
+									: $_('writing.detail_view.generate_first_title')}
 							>
 								{#if generating}
-									Schreibt…
+									{$_('writing.detail_view.generating_btn')}
 								{:else if hasDraftContent}
-									⟳ Neu generieren
+									{$_('writing.detail_view.regenerate_btn')}
 								{:else}
-									✨ Generate
+									{$_('writing.detail_view.generate_btn')}
 								{/if}
 							</button>
 							<button
@@ -453,9 +470,11 @@
 								class="checkpoint"
 								onclick={saveCheckpoint}
 								disabled={saving}
-								title="Aktuellen Text als neue Version einfrieren (⌘⇧S)"
+								title={$_('writing.detail_view.checkpoint_title')}
 							>
-								{saving ? 'Speichert…' : '＋ Checkpoint'}
+								{saving
+									? $_('writing.detail_view.checkpoint_saving')
+									: $_('writing.detail_view.checkpoint_btn')}
 							</button>
 							<ExportMenu {draft} {currentVersion} />
 						</div>
@@ -489,9 +508,9 @@
 								type="button"
 								class="undo-btn"
 								onclick={undoLastRefinement}
-								title="Letzte Auswahl-Verfeinerung rückgängig (⌘Z)"
+								title={$_('writing.detail_view.undo_title')}
 							>
-								↶ Rückgängig: {refineUndo.label}
+								{$_('writing.detail_view.undo_label', { values: { label: refineUndo.label } })}
 							</button>
 						</div>
 					{/if}
@@ -502,12 +521,12 @@
 						onselect={(sel) => (activeSelection = sel)}
 					/>
 				{:else}
-					<p class="muted">Diese Version existiert nicht mehr.</p>
+					<p class="muted">{$_('writing.detail_view.version_missing')}</p>
 				{/if}
 			</section>
 
 			<aside class="history-column">
-				<h2>Versionen</h2>
+				<h2>{$_('writing.detail_view.history_heading')}</h2>
 				<VersionHistory
 					versions={versions ?? []}
 					generations={generations ?? []}

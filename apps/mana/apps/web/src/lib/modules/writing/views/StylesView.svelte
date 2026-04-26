@@ -8,11 +8,11 @@
   from a batch of user samples) via a separate flow.
 -->
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { STYLE_PRESETS } from '../presets/styles';
 	import { useAllStyles } from '../queries';
 	import { stylesStore } from '../stores/styles.svelte';
 	import StyleForm from '../components/StyleForm.svelte';
-	import { STYLE_SOURCE_LABELS } from '../constants';
 	import type { WritingStyle } from '../types';
 
 	const styles$ = useAllStyles();
@@ -25,17 +25,18 @@
 	);
 
 	async function remove(style: WritingStyle) {
-		if (!confirm(`"${style.name}" wirklich löschen?`)) return;
+		if (!confirm($_('writing.styles_view.confirm_delete', { values: { name: style.name } })))
+			return;
 		await stylesStore.deleteStyle(style.id);
 	}
 </script>
 
 <div class="styles-shell">
 	<header class="head">
-		<a href="/writing" class="back">← Zurück zu Writing</a>
+		<a href="/writing" class="back">{$_('writing.styles_view.back_to_writing')}</a>
 		<div>
-			<h1>Stile</h1>
-			<p class="muted">Vorlagen und eigene Stile, die der Ghostwriter beim Generieren anwendet.</p>
+			<h1>{$_('writing.styles_view.title')}</h1>
+			<p class="muted">{$_('writing.styles_view.subtitle')}</p>
 		</div>
 		<button
 			type="button"
@@ -43,7 +44,7 @@
 			class:active={createOpen}
 			onclick={() => (createOpen = !createOpen)}
 		>
-			{createOpen ? '× Schließen' : '+ Eigener Stil'}
+			{createOpen ? $_('writing.styles_view.close_btn') : $_('writing.styles_view.create_btn')}
 		</button>
 	</header>
 
@@ -54,17 +55,14 @@
 	{/if}
 
 	<section>
-		<h2>Vorlagen</h2>
-		<p class="muted small">
-			Eingebaute Stile — direkt im Briefing auswählbar. Nicht bearbeitbar; für Anpassungen lege
-			einen eigenen Stil an.
-		</p>
+		<h2>{$_('writing.styles_view.section_presets')}</h2>
+		<p class="muted small">{$_('writing.styles_view.section_presets_hint')}</p>
 		<div class="grid">
 			{#each STYLE_PRESETS as preset (preset.id)}
 				<article class="card preset">
 					<header class="card-head">
 						<strong>{preset.name.de}</strong>
-						<span class="tag">Vorlage</span>
+						<span class="tag">{$_('writing.styles_view.badge_template')}</span>
 					</header>
 					<p class="desc">{preset.description.de}</p>
 					{#if preset.principles.toneTraits.length}
@@ -80,13 +78,14 @@
 	</section>
 
 	<section>
-		<h2>Meine Stile</h2>
+		<h2>{$_('writing.styles_view.section_my_styles')}</h2>
 		{#if styles$.loading}
-			<p class="muted small">Lädt…</p>
+			<p class="muted small">{$_('writing.styles_view.loading')}</p>
 		{:else if customStyles.length === 0}
 			<p class="muted small">
-				Keine eigenen Stile. Klick oben auf <strong>+ Eigener Stil</strong>, um einen anzulegen —
-				z.B. "Mein Corporate-Ton" oder "Persönliche Blog-Stimme".
+				{$_('writing.styles_view.empty_my_styles_pre')}<strong
+					>{$_('writing.styles_view.empty_my_styles_strong')}</strong
+				>{$_('writing.styles_view.empty_my_styles_post')}
 			</p>
 		{:else}
 			<div class="grid">
@@ -94,7 +93,7 @@
 					<article class="card" class:editing={editingId === style.id}>
 						<header class="card-head">
 							<strong>{style.name}</strong>
-							<span class="tag">{STYLE_SOURCE_LABELS[style.source].de}</span>
+							<span class="tag">{$_('writing.style_sources.' + style.source)}</span>
 						</header>
 						{#if editingId === style.id}
 							<StyleForm mode="edit" {style} onclose={() => (editingId = null)} />
@@ -109,10 +108,10 @@
 							{/if}
 							<div class="actions">
 								<button type="button" class="tiny" onclick={() => (editingId = style.id)}>
-									Bearbeiten
+									{$_('writing.styles_view.action_edit')}
 								</button>
 								<button type="button" class="tiny danger" onclick={() => remove(style)}>
-									Löschen
+									{$_('writing.styles_view.action_delete')}
 								</button>
 							</div>
 						{/if}
