@@ -44,7 +44,7 @@ import { createInternalPersonasRoutes } from './routes/internal-personas';
 initLogger('mana-auth');
 const config = loadConfig();
 const db = getDb(config.databaseUrl);
-const auth = createBetterAuth(config.databaseUrl, config.webauthn);
+const auth = createBetterAuth(config.databaseUrl, config.syncDatabaseUrl, config.webauthn);
 
 // Load the Key Encryption Key before any vault operation can run.
 // Top-level await is supported by Bun. Throws if MANA_AUTH_KEK is

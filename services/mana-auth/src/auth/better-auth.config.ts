@@ -21,6 +21,8 @@ import { organization } from 'better-auth/plugins/organization';
 import { twoFactor } from 'better-auth/plugins/two-factor';
 import { magicLink } from 'better-auth/plugins/magic-link';
 import { passkey } from '@better-auth/passkey';
+import postgres from 'postgres';
+import { logger } from '@mana/shared-hono';
 import { getDb } from '../db/connection';
 import { organizations, members, invitations } from '../db/schema/organizations';
 import {
@@ -45,6 +47,7 @@ import {
 	assertSpaceIsDeletable,
 	createPersonalSpaceFor,
 } from '../spaces';
+import { bootstrapSpaceSingletons } from '../services/bootstrap-singletons';
 
 // Re-export so existing imports (`import { TRUSTED_ORIGINS } from './better-auth.config'`)
 // keep working. New code should import from './sso-origins' directly.
@@ -94,12 +97,29 @@ export interface BetterAuthWebAuthnOptions {
 /**
  * Create Better Auth instance
  *
- * @param databaseUrl - PostgreSQL connection URL
+ * @param databaseUrl - PostgreSQL connection URL for the auth DB
+ * @param syncDatabaseUrl - PostgreSQL connection URL for `mana_sync`. The
+ *   personal-space + organization hooks bootstrap per-Space singletons
+ *   into `sync_changes` so fresh clients pull the row instead of racing
+ *   on a local insert. See `bootstrapSpaceSingletons`.
  * @param webauthn - WebAuthn settings for the passkey plugin
  * @returns Better Auth instance
  */
-export function createBetterAuth(databaseUrl: string, webauthn: BetterAuthWebAuthnOptions) {
+export function createBetterAuth(
+	databaseUrl: string,
+	syncDatabaseUrl: string,
+	webauthn: BetterAuthWebAuthnOptions
+) {
 	const db = getDb(databaseUrl);
+
+	// Lazy module-scoped sync SQL pool. Mirrors the pattern in
+	// routes/auth.ts so we don't open a second pool just for the
+	// org-create hook. Process lifetime owns it; never closed manually.
+	let _syncSql: ReturnType<typeof postgres> | null = null;
+	const getSyncSql = (): ReturnType<typeof postgres> => {
+		if (!_syncSql) _syncSql = postgres(syncDatabaseUrl, { max: 2 });
+		return _syncSql;
+	};
 
 	return betterAuth({
 		// Database adapter (Drizzle with PostgreSQL)
@@ -246,12 +266,30 @@ export function createBetterAuth(databaseUrl: string, webauthn: BetterAuthWebAut
 			user: {
 				create: {
 					after: async (user) => {
-						await createPersonalSpaceFor(db, {
+						const result = await createPersonalSpaceFor(db, {
 							id: user.id,
 							email: user.email,
 							name: user.name,
 							accessTier: (user as { accessTier?: string | null }).accessTier,
 						});
+						// Bootstrap the personal Space's kontextDoc only on a
+						// real first-time creation. The `created: false` path
+						// means a previous signup retry already provisioned it
+						// and the doc has been bootstrapped before. Failures
+						// are logged but do not abort signup — the webapp's
+						// `ensureDoc()` fallback still creates the row on the
+						// first write attempt.
+						if (result.created) {
+							bootstrapSpaceSingletons(result.organizationId, user.id, getSyncSql()).catch(
+								(err: unknown) => {
+									logger.error('[auth] bootstrapSpaceSingletons (personal) failed', {
+										userId: user.id,
+										organizationId: result.organizationId,
+										err: err instanceof Error ? err.message : String(err),
+									});
+								}
+							);
+						}
 					},
 				},
 			},
@@ -340,12 +378,31 @@ export function createBetterAuth(databaseUrl: string, webauthn: BetterAuthWebAut
 				/**
 				 * Spaces — enforce that every organization carries a valid
 				 * `metadata.type` (the Space type), and block deletion of the
-				 * user's personal space. See docs/plans/spaces-foundation.md
+				 * user's personal space. After-create bootstraps per-Space
+				 * singletons (currently `kontextDoc`) into mana_sync so fresh
+				 * clients pull the row instead of racing on a local insert.
+				 * Personal-space gets the same bootstrap, but from
+				 * `databaseHooks.user.create.after` because Better Auth's
+				 * `afterCreateOrganization` does not fire on the implicit
+				 * personal-space creation that runs inside the user-create
+				 * hook (createPersonalSpaceFor writes to `organizations`
+				 * directly via Drizzle). See docs/plans/spaces-foundation.md
 				 * and ../spaces/metadata.ts.
 				 */
 				organizationHooks: {
 					beforeCreateOrganization: async ({ organization }) => {
 						assertValidSpaceMetadataForCreate(organization.metadata);
+					},
+					afterCreateOrganization: async ({ organization, user }) => {
+						bootstrapSpaceSingletons(organization.id, user.id, getSyncSql()).catch(
+							(err: unknown) => {
+								logger.error('[auth] bootstrapSpaceSingletons (org-hook) failed', {
+									userId: user.id,
+									organizationId: organization.id,
+									err: err instanceof Error ? err.message : String(err),
+								});
+							}
+						);
 					},
 					beforeDeleteOrganization: async ({ organization }) => {
 						assertSpaceIsDeletable(organization.metadata);
