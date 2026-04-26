@@ -53,6 +53,7 @@ COPY packages/shared-tailwind ./packages/shared-tailwind
 COPY packages/shared-theme ./packages/shared-theme
 COPY packages/shared-theme-ui ./packages/shared-theme-ui
 COPY packages/shared-links ./packages/shared-links
+COPY packages/shared-privacy ./packages/shared-privacy
 COPY packages/shared-types ./packages/shared-types
 COPY packages/shared-ui ./packages/shared-ui
 COPY packages/shared-utils ./packages/shared-utils
