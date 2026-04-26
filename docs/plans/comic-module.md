@@ -685,11 +685,23 @@ Encryption-Roundtrip-Test.
   `generate_character_variant` in AI_TOOL_CATALOG.
 - Persona kann „mach mir einen Manga-Character für Story X" sagen.
 
-**Mc5 — Wardrobe-Hook** (~2h, optional):
-- In Wardrobe-DetailOutfitView nach erfolgreichem Try-On ein
-  Knopf „Als Comic-Character speichern" → öffnet Builder mit
-  Try-On-Result als optionalem `sourceBodyMediaId`.
-- In DetailGarmentView analog für ein einzelnes Kleidungsstück.
+**Mc5 — Wardrobe-Hook** ✅ shipped:
+- In Wardrobe-DetailOutfitView ein „Als Comic-Character"-Knopf
+  unterhalb des TryOnButton, navigiert zu
+  `/comic/character/new?title=…&prompt=wearing+the+OUTFITNAME+outfit`.
+- In DetailGarmentView analog mit `prompt=wearing+GARMENTNAME`.
+- CharacterBuilder akzeptiert `initialName` / `initialAddPrompt` /
+  `initialStyle`-Props. Die `/comic/character/new`-Route liest
+  URL-Params und reicht sie als initial state durch — der Builder
+  startet mit dem prefillten Add-Prompt, User picked Stil + rendert
+  die ersten 4 Varianten selbst.
+- Bewusst KEIN Try-On-Output als sourceBodyMediaId: das
+  Try-On-Bild ist mit `app='picture'` getaggt, der
+  `verifyMediaOwnership`-Check des Comic-Endpoints akzeptiert nur
+  `['me', 'wardrobe', 'comic']`. Re-Upload als 'comic' wäre eine
+  zusätzliche Server-Route — Aufwand vs. Nutzen nicht klar.
+  Workflow stattdessen: rohe meImages bleiben Source, der
+  Add-Prompt steuert den Outfit-Look.
 
 ### Tradeoffs
 

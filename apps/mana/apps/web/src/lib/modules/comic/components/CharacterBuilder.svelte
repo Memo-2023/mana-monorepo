@@ -31,27 +31,36 @@
 		 *  character — name+style+source are locked, only Add-Prompt
 		 *  is editable per generation. */
 		existing?: ComicCharacter;
+		/** Optional pre-fills for create-mode — used by the wardrobe-
+		 *  hook (Mc5) to seed an addPrompt like "wearing the
+		 *  Bühnenoutfit" when the user clicks "Als Comic-Character"
+		 *  on a Wardrobe-Outfit. Ignored in extend-mode. */
+		initialName?: string;
+		initialAddPrompt?: string;
+		initialStyle?: ComicStyle;
 		/** Called after the first successful variant batch with the
 		 *  resulting character id, so the parent route can navigate. */
 		onCreated?: (characterId: string) => void;
 		onClose?: () => void;
 	}
 
-	let { existing, onClose, onCreated }: Props = $props();
+	let { existing, initialName, initialAddPrompt, initialStyle, onClose, onCreated }: Props =
+		$props();
 
 	const isExtend = $derived(Boolean(existing));
 
 	// Builder state. In extend-mode all of these come from `existing`
 	// at mount time and aren't editable; in create-mode the user fills
-	// them in. Init-time read of `existing` is intentional — the
+	// them in (with optional pre-fills from URL-params via the route
+	// page wrapper). Init-time read is intentional — the
 	// character is always remounted via {#key} when the route id
 	// changes, so capturing the snapshot here is correct.
 	// svelte-ignore state_referenced_locally
-	let name = $state(existing?.name ?? '');
+	let name = $state(existing?.name ?? initialName ?? '');
 	// svelte-ignore state_referenced_locally
-	let style = $state<ComicStyle>(existing?.style ?? 'comic');
+	let style = $state<ComicStyle>(existing?.style ?? initialStyle ?? 'comic');
 	// svelte-ignore state_referenced_locally
-	let addPrompt = $state(existing?.addPrompt ?? '');
+	let addPrompt = $state(existing?.addPrompt ?? initialAddPrompt ?? '');
 
 	type Quality = 'low' | 'medium' | 'high';
 	const QUALITIES: readonly Quality[] = ['low', 'medium', 'high'] as const;

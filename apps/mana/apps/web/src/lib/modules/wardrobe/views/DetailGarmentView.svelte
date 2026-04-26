@@ -6,7 +6,7 @@
 -->
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { CheckCircle, PencilSimple, Archive, Trash } from '@mana/shared-icons';
+	import { CheckCircle, PencilSimple, Archive, Sparkle, Trash } from '@mana/shared-icons';
 	import { useGarment, useGarmentSoloTryOns, useOutfitsContainingGarment } from '../queries';
 	import { wardrobeGarmentsStore } from '../stores/garments.svelte';
 	import { garmentPhotoUrl } from '../api/media-url';
@@ -233,6 +233,20 @@
 
 					<!-- Try-on — "wie sähe das an mir aus" -->
 					<GarmentTryOnButton {garment} />
+
+					<!-- Mc5: Comic-Character aus Garment. Pre-fillt den
+					     Add-Prompt im Builder mit "wearing X" — User
+					     picked dann Stil + rendert die ersten 4 Varianten. -->
+					{#if garment && !garment.isArchived}
+						<a
+							href={`/comic/character/new?title=${encodeURIComponent(garment.name)}&prompt=${encodeURIComponent('wearing ' + garment.name)}`}
+							class="flex w-full items-center justify-center gap-1.5 rounded-md border border-border bg-background px-3 py-2 text-xs font-medium text-foreground transition-colors hover:border-primary/40 hover:bg-primary/5"
+							title="Aus diesem Kleidungsstück einen Comic-Character generieren"
+						>
+							<Sparkle size={12} />
+							Als Comic-Character
+						</a>
+					{/if}
 
 					<!-- Secondary-action row: "Heute getragen" is the frequent
 					     positive action and takes most of the width; Archive and

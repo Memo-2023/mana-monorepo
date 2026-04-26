@@ -12,7 +12,7 @@
 -->
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { ArrowLeft, Archive, Heart, PencilSimple, Trash } from '@mana/shared-icons';
+	import { ArrowLeft, Archive, Heart, PencilSimple, Sparkle, Trash } from '@mana/shared-icons';
 	import { VisibilityPicker, type VisibilityLevel } from '@mana/shared-privacy';
 	import { useAllGarments, useOutfit, useOutfitTryOns } from '../queries';
 	import { wardrobeOutfitsStore } from '../stores/outfits.svelte';
@@ -135,6 +135,20 @@
 
 				<!-- Try-On action (M4) -->
 				<TryOnButton {outfit} garments={resolvedGarments} />
+
+				<!-- Mc5: Comic-Character aus Outfit. Pre-fillt den
+				     Add-Prompt im Builder, User picked Stil + rendert
+				     selbst die ersten 4 Varianten. -->
+				{#if outfit && !outfit.isArchived}
+					<a
+						href={`/comic/character/new?title=${encodeURIComponent(outfit.name)}&prompt=${encodeURIComponent('wearing the ' + outfit.name + ' outfit')}`}
+						class="flex w-full items-center justify-center gap-1.5 rounded-md border border-border bg-background px-3 py-2 text-xs font-medium text-foreground transition-colors hover:border-primary/40 hover:bg-primary/5"
+						title="Aus diesem Outfit einen Comic-Character generieren"
+					>
+						<Sparkle size={12} />
+						Als Comic-Character
+					</a>
+				{/if}
 
 				{#if tryOns.length > 0}
 					<div>
