@@ -6,6 +6,7 @@
  */
 
 import { Hono } from 'hono';
+import postgres from 'postgres';
 import { logger } from '@mana/shared-hono';
 import type { AuthUser } from '../middleware/jwt-auth';
 import type { BetterAuthInstance } from '../auth/better-auth.config';
@@ -13,6 +14,16 @@ import type { SecurityEventsService, AccountLockoutService } from '../services/s
 import type { SignupLimitService } from '../services/signup-limit';
 import type { Config } from '../config';
 import { sourceAppStore, passwordResetRedirectStore } from '../auth/stores';
+import { bootstrapUserSingletons } from '../services/bootstrap-singletons';
+
+/** Module-scoped postgres pool for the sync DB. Lazily created on first
+ *  signUp; reused across requests. Caller never closes — the process
+ *  lifetime owns it. */
+let _syncSql: ReturnType<typeof postgres> | null = null;
+function getSyncSql(syncDatabaseUrl: string): ReturnType<typeof postgres> {
+	if (!_syncSql) _syncSql = postgres(syncDatabaseUrl, { max: 2 });
+	return _syncSql;
+}
 import {
 	AuthErrorCode,
 	classify,
@@ -129,6 +140,19 @@ export function createAuthRoutes(
 					name: body.name || (body.email || '').split('@')[0],
 				}),
 			}).catch(() => {});
+			// Bootstrap per-user singletons in mana_sync (userContext today;
+			// kontextDoc + others can join later). Fire-and-forget — failure
+			// only means the webapp's `ensureDoc()` fallback path will create
+			// the row on the first mount, which is the F4-pre behaviour. See
+			// docs/plans/sync-field-meta-overhaul.md F4.
+			bootstrapUserSingletons(response.user.id, getSyncSql(config.syncDatabaseUrl)).catch(
+				(err: unknown) => {
+					logger.error('[auth] bootstrapUserSingletons failed', {
+						userId: response.user?.id,
+						err: err instanceof Error ? err.message : String(err),
+					});
+				}
+			);
 		}
 
 		return c.json(response);
