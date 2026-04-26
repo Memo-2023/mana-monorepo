@@ -545,7 +545,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#8b5cf6',
 		comingSoon: false,
 		status: 'beta',
-		requiredTier: 'beta',
+		requiredTier: 'guest', // LOCAL TIER PATCH — revert to 'beta' before release
 	},
 	{
 		id: 'calc',
@@ -1086,7 +1086,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#0ea5e9',
 		comingSoon: false,
 		status: 'development',
-		requiredTier: 'beta',
+		requiredTier: 'guest', // LOCAL TIER PATCH — revert to 'beta' before release
 	},
 	{
 		id: 'broadcast',
@@ -1103,7 +1103,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#6366f1',
 		comingSoon: false,
 		status: 'development',
-		requiredTier: 'alpha',
+		requiredTier: 'guest', // LOCAL TIER PATCH — revert to 'alpha' before release
 	},
 	{
 		id: 'invoices',
@@ -1120,7 +1120,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#059669',
 		comingSoon: false,
 		status: 'development',
-		requiredTier: 'alpha',
+		requiredTier: 'guest', // LOCAL TIER PATCH — revert to 'alpha' before release
 	},
 	{
 		id: 'agents',
@@ -1137,7 +1137,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#8b5cf6',
 		comingSoon: false,
 		status: 'beta',
-		requiredTier: 'beta',
+		requiredTier: 'guest', // LOCAL TIER PATCH — revert to 'beta' before release
 	},
 	{
 		id: 'timeline',
@@ -1154,7 +1154,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#f59e0b',
 		comingSoon: false,
 		status: 'beta',
-		requiredTier: 'beta',
+		requiredTier: 'guest', // LOCAL TIER PATCH — revert to 'beta' before release
 	},
 	{
 		id: 'website',
@@ -1171,7 +1171,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#6366f1',
 		comingSoon: false,
 		status: 'development',
-		requiredTier: 'public',
+		requiredTier: 'guest', // LOCAL TIER PATCH — revert to 'public' before release
 	},
 	{
 		id: 'augur',
@@ -1205,7 +1205,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#14b8a6',
 		comingSoon: false,
 		status: 'beta',
-		requiredTier: 'beta',
+		requiredTier: 'guest', // LOCAL TIER PATCH — revert to 'beta' before release
 	},
 ];
 
