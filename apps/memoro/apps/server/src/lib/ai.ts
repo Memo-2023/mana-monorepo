@@ -7,9 +7,14 @@
  *   3. Azure OpenAI (Microsoft Cloud)
  */
 
-// Self-hosted mana-llm service
+// Self-hosted mana-llm service. Use the `mana/<class>` alias system —
+// see packages/shared-ai/src/llm-aliases.ts and
+// services/mana-llm/aliases.yaml for the SSOT and the resolution chain.
+// (memoro-server doesn't pull @mana/shared-ai as a workspace dep yet,
+// so the alias string is inlined here. If memoro adds more LLM call
+// sites, fold this into a workspace import.)
 const MANA_LLM_URL = process.env.MANA_LLM_URL || '';
-const MANA_LLM_MODEL = process.env.MANA_LLM_MODEL || 'ollama/gemma3:4b';
+const MANA_LLM_MODEL = process.env.MANA_LLM_MODEL || 'mana/fast-text';
 
 // Gemini (cloud fallback)
 const GEMINI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models';

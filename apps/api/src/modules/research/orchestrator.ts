@@ -18,9 +18,15 @@
 import { eq } from 'drizzle-orm';
 import { db, researchResults, sources, type ResearchDepth } from './schema';
 import { llmJson, llmStream, LlmError } from '../../lib/llm';
+import { MANA_LLM } from '@mana/shared-ai';
 import { webSearch, bulkExtract, type SearchHit, SearchError } from '../../lib/search';
 
 // ─── Depth configuration ────────────────────────────────────
+//
+// `planModel` is always `STRUCTURED` (the planner emits JSON).
+// `synthModel` varies by depth: `quick` runs through `FAST_TEXT` for a
+// terse summary, `standard`/`deep` use `LONG_FORM` for richer prose.
+// Concrete provider/model selection lives in services/mana-llm/aliases.yaml.
 
 interface DepthConfig {
 	subQueryCount: number;
@@ -39,8 +45,8 @@ const DEPTH_CONFIG: Record<ResearchDepth, DepthConfig> = {
 		maxSources: 5,
 		extract: false,
 		categories: ['general'],
-		planModel: 'ollama/gemma3:4b',
-		synthModel: 'ollama/gemma3:4b',
+		planModel: MANA_LLM.STRUCTURED,
+		synthModel: MANA_LLM.FAST_TEXT,
 	},
 	standard: {
 		subQueryCount: 3,
@@ -48,8 +54,8 @@ const DEPTH_CONFIG: Record<ResearchDepth, DepthConfig> = {
 		maxSources: 15,
 		extract: true,
 		categories: ['general', 'news'],
-		planModel: 'ollama/gemma3:4b',
-		synthModel: 'ollama/gemma3:12b',
+		planModel: MANA_LLM.STRUCTURED,
+		synthModel: MANA_LLM.LONG_FORM,
 	},
 	deep: {
 		subQueryCount: 6,
@@ -57,8 +63,8 @@ const DEPTH_CONFIG: Record<ResearchDepth, DepthConfig> = {
 		maxSources: 30,
 		extract: true,
 		categories: ['general', 'news', 'science', 'it'],
-		planModel: 'ollama/gemma3:12b',
-		synthModel: 'ollama/gemma3:12b',
+		planModel: MANA_LLM.STRUCTURED,
+		synthModel: MANA_LLM.LONG_FORM,
 	},
 };
 

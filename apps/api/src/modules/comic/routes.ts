@@ -27,9 +27,10 @@
 
 import { Hono } from 'hono';
 import { llmJson, LlmError } from '../../lib/llm';
+import { MANA_LLM } from '@mana/shared-ai';
 import { logger, type AuthVariables } from '@mana/shared-hono';
 
-const STORYBOARD_MODEL = process.env.COMIC_STORYBOARD_MODEL || 'ollama/gemma3:4b';
+const STORYBOARD_MODEL = MANA_LLM.STRUCTURED;
 
 type ComicStyle = 'comic' | 'manga' | 'cartoon' | 'graphic-novel' | 'webtoon';
 

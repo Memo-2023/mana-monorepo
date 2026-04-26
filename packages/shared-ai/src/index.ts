@@ -37,6 +37,9 @@ export {
 	isFromMissionRunner,
 } from './actor';
 
+export type { FieldMeta, FieldOrigin } from './field-meta';
+export { makeFieldMeta, isUserOriginatedField } from './field-meta';
+
 export type {
 	IterationPhase,
 	Mission,
@@ -166,3 +169,5 @@ export type {
 	WorkbenchTemplateCategory,
 } from './agents';
 export { DEFAULT_AGENT_ID, DEFAULT_AGENT_NAME, ALL_TEMPLATES, getTemplateById } from './agents';
+
+export { MANA_LLM, type ManaLlmAlias } from './llm-aliases';

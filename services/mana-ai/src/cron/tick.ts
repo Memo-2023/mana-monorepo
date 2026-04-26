@@ -30,6 +30,7 @@ import { loadActiveAgents, refreshAgentSnapshots, type ServerAgent } from '../db
 import { appendServerIteration, planToIteration } from '../db/iteration-writer';
 import { refreshSnapshots } from '../db/snapshot-refresh';
 import { createServerLlmClient, ProviderCallError } from '../planner/llm-client';
+import { MANA_LLM } from '@mana/shared-ai';
 import { SERVER_TOOLS } from '../planner/tools';
 import {
 	ticksTotal,
@@ -393,7 +394,7 @@ async function planOneMission(
 		pretickUsage24h,
 	});
 
-	const plannerModel = 'google/gemini-2.5-flash';
+	const plannerModel = MANA_LLM.REASONING;
 
 	// Claude-Code wU2 pattern: fold the middle of messages into a structured
 	// summary once cumulative tokens cross 92% of maxContextTokens.
@@ -493,7 +494,7 @@ async function planOneMission(
 	} catch (err) {
 		const msg = err instanceof Error ? err.message : String(err);
 		if (err instanceof ProviderCallError) {
-			const provider = inferProviderFromModel('google/gemini-2.5-flash');
+			const provider = inferProviderFromModel(MANA_LLM.REASONING);
 			providerErrorsTotal.inc({ provider, kind: err.kind });
 		}
 		console.warn(`[mana-ai tick] mission=${m.id} planner loop failed: ${msg}`);

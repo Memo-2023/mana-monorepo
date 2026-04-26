@@ -19,20 +19,16 @@
 
 import { json } from '@sveltejs/kit';
 import { env } from '$env/dynamic/private';
+import { MANA_LLM } from '@mana/shared-ai';
 import type { RequestHandler } from './$types';
 import { coerce, extractJson, fallback } from './coerce';
 
 const MAX_TRANSCRIPT_CHARS = 1000;
 const LLM_TIMEOUT_MS = 8000;
-// gemma3:12b consistently nails relative date math ("nächsten Montag"
-// from a Wednesday → next Monday's date) and respects "null when
-// absent" for both dueDate and priority. gemma3:4b gets weekday math
-// off-by-one and stamps today's date on every bare task. The 12b
-// model is only ~10% slower in practice on the GPU box (~1.1s vs
-// ~1.0s for these tiny prompts) so the accuracy win is essentially
-// free. The deterministic guards in coerce() are still kept as a
-// safety net in case the GPU box swaps in a weaker model.
-const DEFAULT_MODEL = 'ollama/gemma3:12b';
+// Voice → JSON intent (relative dates, priority, title cleanup):
+// STRUCTURED. The deterministic guards in coerce() stay as a backstop
+// in case the alias chain falls back to a model with weaker date math.
+const DEFAULT_MODEL = MANA_LLM.STRUCTURED;
 
 function buildPrompt(transcript: string, language: string): string {
 	const now = new Date();

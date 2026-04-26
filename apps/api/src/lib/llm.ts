@@ -10,8 +10,11 @@
  *                  the full concatenated text at the end. Used for synthesis.
  *
  * mana-llm exposes an OpenAI-compatible /v1/chat/completions endpoint
- * (see services/mana-llm). Models are namespaced as `provider/model`, e.g.
- * `ollama/gemma3:4b`, `openrouter/meta-llama/llama-3.1-70b-instruct`.
+ * (see services/mana-llm). Callers should request models via the
+ * `MANA_LLM.<class>` aliases from `./llm-aliases` — the gateway resolves
+ * them through `services/mana-llm/aliases.yaml` with health-aware
+ * fallback. Concrete provider/model strings are reserved for the
+ * registry itself.
  *
  * Internal service-to-service calls — no auth on the wire (private network).
  */

@@ -15,6 +15,7 @@ import type {
 	LlmFinishReason,
 	ToolCallRequest,
 } from '@mana/shared-ai';
+import { MANA_LLM } from '@mana/shared-ai';
 
 /** Thrown when mana-llm returns a non-2xx status. ``kind`` mirrors the
  *  structured ProviderError vocabulary (blocked / truncated / auth /
@@ -37,7 +38,7 @@ export interface ServerLlmClientOptions {
 	readonly fetchTimeoutMs?: number;
 }
 
-const DEFAULT_MODEL = 'google/gemini-2.5-flash';
+const DEFAULT_MODEL = MANA_LLM.REASONING;
 const DEFAULT_FETCH_TIMEOUT_MS = 120_000;
 
 export function createServerLlmClient(opts: ServerLlmClientOptions): LlmClient {

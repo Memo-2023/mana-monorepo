@@ -8,10 +8,11 @@
 import { Hono } from 'hono';
 import { consumeCredits, validateCredits } from '@mana/shared-hono/credits';
 import type { AuthVariables } from '@mana/shared-hono';
+import { MANA_LLM } from '@mana/shared-ai';
 
 const LLM_URL = process.env.MANA_LLM_URL || 'http://localhost:3025';
 const CRAWLER_URL = process.env.MANA_CRAWLER_URL || 'http://localhost:3023';
-const DEFAULT_SUMMARY_MODEL = process.env.MANA_LLM_DEFAULT_MODEL || 'gemma3:4b';
+const DEFAULT_SUMMARY_MODEL = MANA_LLM.FAST_TEXT;
 
 const routes = new Hono<{ Variables: AuthVariables }>();
 
@@ -231,7 +232,7 @@ routes.post('/ai/generate', async (c) => {
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
 				messages,
-				model: model || 'gemma3:4b',
+				model: model || MANA_LLM.FAST_TEXT,
 				max_tokens: maxTokens || 2000,
 			}),
 		});
@@ -245,7 +246,7 @@ routes.post('/ai/generate', async (c) => {
 		// Consume credits
 		await consumeCredits(userId, 'AI_CONTEXT_GENERATE', 5, `AI generation (${tokensUsed} tokens)`);
 
-		return c.json({ content, tokensUsed, model: model || 'gemma3:4b' });
+		return c.json({ content, tokensUsed, model: model || MANA_LLM.FAST_TEXT });
 	} catch (_err) {
 		return c.json({ error: 'Generation failed' }, 500);
 	}

@@ -24,18 +24,18 @@
 
 import { json } from '@sveltejs/kit';
 import { env } from '$env/dynamic/private';
+import { MANA_LLM } from '@mana/shared-ai';
 import type { RequestHandler } from './$types';
 
 const MAX_TRANSCRIPT_CHARS = 500;
 const MAX_HABITS = 50;
 const LLM_TIMEOUT_MS = 8000;
-// gemma3:12b is more consistent than 4b at the "pick from this list,
-// don't paraphrase" instruction — 4b sometimes returns "Joggen" when
-// "Laufen" was in the list, which the verbatim-validation in coerce
-// then drops, costing an LLM round-trip for nothing. The accuracy
-// win matters more here than for parse-task because parse-habit only
-// runs at all when the cheap client-side substring fast path missed.
-const DEFAULT_MODEL = 'ollama/gemma3:12b';
+// Voice → JSON intent: STRUCTURED is the right class. mana-llm's
+// alias chain picks a model that consistently honours the
+// "verbatim from this list" constraint that parse-habit needs (the
+// coerce step still drops paraphrases, so accuracy here is direct
+// round-trip savings).
+const DEFAULT_MODEL = MANA_LLM.STRUCTURED;
 
 interface ParseResult {
 	match: string | null;

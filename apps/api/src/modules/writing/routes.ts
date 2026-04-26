@@ -17,9 +17,10 @@
 
 import { Hono } from 'hono';
 import { llmText, LlmError } from '../../lib/llm';
+import { MANA_LLM } from '@mana/shared-ai';
 import { logger, type AuthVariables } from '@mana/shared-hono';
 
-const DEFAULT_MODEL = process.env.WRITING_MODEL || 'ollama/gemma3:4b';
+const DEFAULT_MODEL = MANA_LLM.LONG_FORM;
 
 /** Hard cap so a runaway briefing can't burn unlimited tokens. */
 const MAX_OUTPUT_TOKENS = 8000;

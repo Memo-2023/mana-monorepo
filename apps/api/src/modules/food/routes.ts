@@ -30,14 +30,13 @@ import {
 	type MealAnalysis,
 } from '@mana/shared-types';
 import { logger, type AuthVariables } from '@mana/shared-hono';
+import { MANA_LLM } from '@mana/shared-ai';
 
 const LLM_URL = process.env.MANA_LLM_URL || 'http://localhost:3025';
-// mana-llm parses model strings as `provider/model` (router.py:_parse_model).
-// Default to Gemma 3 (4B, multimodal) on the local Ollama instance — it
-// runs on the GPU server (192.168.178.11) via the gpu-proxy bridge and
-// supports vision out of the box. Override with VISION_MODEL=google/gemini-2.0-flash
-// (or similar) once mana-llm has GOOGLE_API_KEY configured.
-const VISION_MODEL = process.env.VISION_MODEL || 'ollama/gemma3:4b';
+// mana-llm resolves this alias to a healthy vision model (chain in
+// services/mana-llm/aliases.yaml). To swap the chain, edit the YAML
+// and SIGHUP — no service redeploy here.
+const VISION_MODEL = MANA_LLM.VISION;
 
 const llm = createOpenAICompatible({
 	name: 'mana-llm',

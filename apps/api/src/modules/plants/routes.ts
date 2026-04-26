@@ -19,11 +19,10 @@ import {
 	type PlantIdentification,
 } from '@mana/shared-types';
 import { logger, type AuthVariables } from '@mana/shared-hono';
+import { MANA_LLM } from '@mana/shared-ai';
 
 const LLM_URL = process.env.MANA_LLM_URL || 'http://localhost:3025';
-// See food/routes.ts for the rationale on the default model and
-// the /v1 base URL.
-const VISION_MODEL = process.env.VISION_MODEL || 'ollama/gemma3:4b';
+const VISION_MODEL = MANA_LLM.VISION;
 
 const llm = createOpenAICompatible({
 	name: 'mana-llm',

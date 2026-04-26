@@ -121,7 +121,10 @@ async function llmExtractEvents(
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
-				model: 'ollama/gemma3:4b',
+				// JSON event extraction → STRUCTURED alias (resolved by mana-llm).
+				// SSOT: packages/shared-ai/src/llm-aliases.ts. Inlined because
+				// mana-events doesn't depend on @mana/shared-ai today.
+				model: 'mana/structured',
 				messages: [
 					{ role: 'system', content: buildExtractionPrompt() },
 					{ role: 'user', content: `Extrahiere Events von dieser Seite:\n\n${pageContent}` },

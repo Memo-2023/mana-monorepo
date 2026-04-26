@@ -19,7 +19,11 @@ export class ManaLlmClient {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
-				model: opts.model ?? 'ollama/gemma3:4b',
+				// Default to the FAST_TEXT alias — mana-research uses mana-llm
+				// for query classification and short-form analysis. SSOT:
+				// packages/shared-ai/src/llm-aliases.ts. Inlined because
+				// mana-research doesn't depend on @mana/shared-ai today.
+				model: opts.model ?? 'mana/fast-text',
 				messages,
 				max_tokens: opts.maxTokens ?? 256,
 				temperature: opts.temperature ?? 0.2,
