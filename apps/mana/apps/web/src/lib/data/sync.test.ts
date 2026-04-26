@@ -38,11 +38,18 @@ import {
 	readFieldMeta,
 	applyServerChanges,
 	subscribeSyncConflicts,
+	deriveUpdatedAt,
 	type SyncChange,
 	type SyncConflictPayload,
 } from './sync';
-import { db, FIELD_META_KEY } from './database';
-import { makeFieldMeta, USER_ACTOR } from './events/actor';
+import { db, FIELD_META_KEY, UPDATED_AT_INDEX_KEY } from './database';
+import {
+	makeFieldMeta,
+	USER_ACTOR,
+	makeSystemActor,
+	SYSTEM_BOOTSTRAP,
+	runAsAsync,
+} from './events/actor';
 
 // ─── Pure tests ──────────────────────────────────────────────────
 
@@ -661,6 +668,145 @@ describe('applyServerChanges (Dexie integration)', () => {
 
 			expect(conflicts).toHaveLength(1);
 			expect(conflicts[0].field).toBe('title');
+		});
+	});
+
+	// ─── F1-F4-fu cross-cutting integration ──────────────────────
+	// Sanity checks that verify the architectural promises of the
+	// 2026-04-26 sync field-meta overhaul still hold from end to end:
+	//   - `deriveUpdatedAt(record)` returns max(__fieldMeta[*].at) so
+	//     the public `updatedAt` stays correct after F3.
+	//   - The Dexie creating/updating hook stamps `__fieldMeta` AND
+	//     `_updatedAtIndex` on every local write.
+	//   - The SYSTEM_BOOTSTRAP fallback path stamps origin='system'
+	//     so the server's matching bootstrap pull doesn't fight with
+	//     the local fallback row (no false-positive conflict toast).
+	//   - The bootstrap-twin race scenario: local fallback row + later
+	//     server pull collapse via field-LWW with no conflict surface.
+	describe('field-meta overhaul (F1-F4-fu)', () => {
+		it('deriveUpdatedAt returns max __fieldMeta[*].at', () => {
+			const record = {
+				id: 'x',
+				[FIELD_META_KEY]: {
+					title: makeFieldMeta('2026-04-01T10:00:00Z', USER_ACTOR, 'user'),
+					priority: makeFieldMeta('2026-04-01T11:00:00Z', USER_ACTOR, 'user'),
+					notes: makeFieldMeta('2026-03-01T10:00:00Z', USER_ACTOR, 'user'),
+				},
+			};
+			expect(deriveUpdatedAt(record)).toBe('2026-04-01T11:00:00Z');
+		});
+
+		it('deriveUpdatedAt returns empty string when no __fieldMeta', () => {
+			expect(deriveUpdatedAt({ id: 'x', title: 'no meta yet' })).toBe('');
+			expect(deriveUpdatedAt({})).toBe('');
+			expect(deriveUpdatedAt(null)).toBe('');
+			expect(deriveUpdatedAt(undefined)).toBe('');
+		});
+
+		it('Dexie creating-hook stamps __fieldMeta + _updatedAtIndex on local writes', async () => {
+			await db.table('tasks').add({
+				id: 'task-hook-create',
+				title: 'first',
+				priority: 'low',
+				isCompleted: false,
+				order: 0,
+			});
+			const stored = await db.table('tasks').get('task-hook-create');
+			const meta = readFieldMeta(stored);
+
+			expect(meta.title?.at).toBeTruthy();
+			expect(meta.title?.origin).toBe('user');
+			// _updatedAtIndex equals max meta.at on a fresh insert.
+			expect(stored[UPDATED_AT_INDEX_KEY]).toBe(deriveUpdatedAt(stored));
+		});
+
+		it('Dexie updating-hook stamps __fieldMeta only for changed fields and bumps _updatedAtIndex', async () => {
+			await db.table('tasks').add({
+				id: 'task-hook-update',
+				title: 'first',
+				priority: 'low',
+				isCompleted: false,
+				order: 0,
+			});
+			const before = await db.table('tasks').get('task-hook-update');
+			const beforeMeta = readFieldMeta(before);
+			const beforePriorityAt = beforeMeta.priority?.at;
+			expect(beforePriorityAt).toBeTruthy();
+
+			// Wait a millisecond so the hook's at-stamp on update is strictly later.
+			await new Promise((r) => setTimeout(r, 5));
+			await db.table('tasks').update('task-hook-update', { title: 'changed' });
+
+			const after = await db.table('tasks').get('task-hook-update');
+			const afterMeta = readFieldMeta(after);
+			expect(afterMeta.title?.at).not.toBe(beforeMeta.title?.at); // bumped
+			expect(afterMeta.priority?.at).toBe(beforePriorityAt); // unchanged
+			expect(after[UPDATED_AT_INDEX_KEY]).toBe(afterMeta.title?.at);
+		});
+
+		it('SYSTEM_BOOTSTRAP-stamped local insert uses origin=system, not user', async () => {
+			const bootstrapActor = makeSystemActor(SYSTEM_BOOTSTRAP);
+			await runAsAsync(bootstrapActor, async () => {
+				await db.table('tasks').add({
+					id: 'task-bootstrap-twin',
+					title: '',
+					priority: 'low',
+					isCompleted: false,
+					order: 0,
+				});
+			});
+			const stored = await db.table('tasks').get('task-bootstrap-twin');
+			const meta = readFieldMeta(stored);
+			expect(meta.title?.origin).toBe('system');
+			expect(meta.priority?.origin).toBe('system');
+		});
+
+		it('bootstrap-twin race: local SYSTEM_BOOTSTRAP row + later server insert → no conflict, LWW wins', async () => {
+			// 1. Client-side fallback creates an empty row stamped origin='system'.
+			//    This is what `getOrCreateLocalDoc()` does in userContextStore /
+			//    kontextStore when a write lands before the first sync pull.
+			const bootstrapActor = makeSystemActor(SYSTEM_BOOTSTRAP);
+			await runAsAsync(bootstrapActor, async () => {
+				await db.table('tasks').add({
+					id: 'task-bootstrap-race',
+					title: '',
+					priority: 'low',
+					isCompleted: false,
+					order: 0,
+				});
+			});
+
+			// 2. Server's bootstrap pull arrives later. mana-auth's
+			//    bootstrap-singletons stamps the same record id with the
+			//    real default values from emptyUserContext()/emptyKontextDocData().
+			const conflicts: SyncConflictPayload[] = [];
+			const unsubscribe = subscribeSyncConflicts((p) => conflicts.push(p));
+			try {
+				await applyServerChanges('todo', [
+					{
+						table: 'tasks',
+						id: 'task-bootstrap-race',
+						op: 'insert',
+						data: {
+							id: 'task-bootstrap-race',
+							title: '',
+							priority: 'low',
+							isCompleted: false,
+							order: 0,
+							updatedAt: '2026-04-01T10:00:00Z',
+						},
+					},
+				]);
+			} finally {
+				unsubscribe();
+			}
+
+			// No conflict surface — local origin='system' would be exempt
+			// even if values differed. With identical empty values, the
+			// equality short-circuit also kicks in. Belt-and-suspenders.
+			expect(conflicts).toHaveLength(0);
+			const stored = await db.table('tasks').get('task-bootstrap-race');
+			expect(stored).toBeDefined();
 		});
 	});
 });
