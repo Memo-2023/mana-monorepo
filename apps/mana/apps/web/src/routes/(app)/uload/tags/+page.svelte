@@ -20,16 +20,17 @@
 
 	async function createTag() {
 		if (!newName.trim()) return;
+		const created = newName.trim();
 		await uloadTagTable.add({
 			id: crypto.randomUUID(),
-			name: newName.trim(),
+			name: created,
 			slug: slugify(newName),
 			color: newColor,
 			icon: null,
 			isPublic: false,
 			usageCount: 0,
 		} as LocalTag);
-		toast.success(`Tag "${newName}" erstellt`);
+		toast.success($_('uload.tags_route.toast_created', { values: { name: created } }));
 		newName = '';
 		newColor = '#6366f1';
 		showCreateForm = false;
@@ -37,7 +38,7 @@
 
 	async function deleteTag(tag: { id: string; name: string }) {
 		await uloadTagTable.delete(tag.id);
-		toast.success(`Tag "${tag.name}" geloescht`);
+		toast.success($_('uload.tags_route.toast_deleted', { values: { name: tag.name } }));
 	}
 
 	async function updateTag() {
@@ -47,7 +48,7 @@
 			slug: slugify(editingTag.name),
 			color: editingTag.color,
 		});
-		toast.success('Tag aktualisiert');
+		toast.success($_('uload.tags_route.toast_updated'));
 		editingTag = null;
 	}
 </script>
@@ -59,13 +60,13 @@
 				<a href="/uload" class="rounded-lg p-2 transition-colors hover:bg-muted/5">
 					<ArrowLeft size={20} class="text-muted-foreground" />
 				</a>
-				<h1 class="text-2xl font-bold text-white">Tags</h1>
+				<h1 class="text-2xl font-bold text-white">{$_('uload.tags_route.heading')}</h1>
 			</div>
 			<button
 				onclick={() => (showCreateForm = !showCreateForm)}
 				class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
 			>
-				{showCreateForm ? 'Ausblenden' : '+ Neuer Tag'}
+				{showCreateForm ? $_('uload.tags_route.hide_form') : $_('uload.tags_route.show_form')}
 			</button>
 		</div>
 
@@ -74,20 +75,20 @@
 				<div class="flex items-end gap-4">
 					<div class="flex-1">
 						<label for="tag-name" class="mb-1 block text-sm font-medium text-muted-foreground"
-							>Name</label
+							>{$_('uload.tags_route.label_name')}</label
 						>
 						<input
 							id="tag-name"
 							type="text"
 							bind:value={newName}
-							placeholder="z.B. Social Media"
+							placeholder={$_('uload.tags_route.placeholder_name')}
 							class="w-full rounded-lg border border-border/10 bg-muted/5 px-4 py-2 text-white placeholder-white/30 focus:border-indigo-500 focus:outline-none"
 							onkeydown={(e) => e.key === 'Enter' && createTag()}
 						/>
 					</div>
 					<div>
 						<label for="tag-color" class="mb-1 block text-sm font-medium text-muted-foreground"
-							>Farbe</label
+							>{$_('uload.tags_route.label_color')}</label
 						>
 						<input
 							id="tag-color"
@@ -101,7 +102,7 @@
 						disabled={!newName.trim()}
 						class="rounded-lg bg-indigo-600 px-6 py-2 font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
 					>
-						Erstellen
+						{$_('uload.tags_route.action_create')}
 					</button>
 				</div>
 			</div>
@@ -109,9 +110,11 @@
 
 		{#if !tags.value || tags.value.length === 0}
 			<div class="rounded-xl border-2 border-dashed border-border/10 p-12 text-center">
-				<p class="text-lg font-medium text-muted-foreground">Noch keine Tags</p>
+				<p class="text-lg font-medium text-muted-foreground">
+					{$_('uload.tags_route.empty_title')}
+				</p>
 				<p class="mt-1 text-sm text-muted-foreground">
-					Erstelle Tags um deine Links zu organisieren.
+					{$_('uload.tags_route.empty_desc')}
 				</p>
 			</div>
 		{:else}
@@ -151,7 +154,11 @@
 									<span class="font-medium text-white">{tag.name}</span>
 								</div>
 								<div class="flex items-center gap-2">
-									<span class="text-sm text-muted-foreground">{getUsageCount(tag.id)} Links</span>
+									<span class="text-sm text-muted-foreground"
+										>{$_('uload.tags_route.links_count', {
+											values: { count: getUsageCount(tag.id) },
+										})}</span
+									>
 									<button
 										onclick={() => (editingTag = { id: tag.id, name: tag.name, color: tag.color })}
 										class="rounded p-1 text-muted-foreground opacity-0 transition-colors hover:bg-muted/10 hover:text-white group-hover:opacity-100"

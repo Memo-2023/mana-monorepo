@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import {
 		useAllLinks,
 		useAllTags,
@@ -68,7 +69,7 @@
 
 	function copyShortUrl(code: string) {
 		navigator.clipboard.writeText(getShortUrl(code));
-		toast.success('Link kopiert!');
+		toast.success($_('uload.links_route.toast_copied'));
 	}
 
 	async function toggleActive(link: Link) {
@@ -76,9 +77,10 @@
 	}
 
 	async function deleteLink(link: Link) {
-		if (!confirm(`"${link.title || link.shortCode}" wirklich loeschen?`)) return;
+		const name = link.title || link.shortCode;
+		if (!confirm($_('uload.links_route.confirm_delete_single', { values: { name } }))) return;
 		await linkTable.delete(link.id);
-		toast.success('Link geloescht');
+		toast.success($_('uload.links_route.toast_deleted_single'));
 	}
 
 	// Bulk actions
@@ -101,22 +103,24 @@
 	}
 
 	async function bulkDelete() {
-		if (!confirm(`${selectedIds.size} Link(s) loeschen?`)) return;
+		const count = selectedIds.size;
+		if (!confirm($_('uload.links_route.confirm_bulk_delete', { values: { count } }))) return;
 		for (const id of selectedIds) {
 			await linkTable.delete(id);
 		}
-		toast.success(`${selectedIds.size} Links geloescht`);
+		toast.success($_('uload.links_route.toast_bulk_deleted', { values: { count } }));
 		selectedIds.clear();
 		selectedIds = selectedIds;
 		selectMode = false;
 	}
 
 	async function bulkToggleActive() {
+		const count = selectedIds.size;
 		for (const id of selectedIds) {
 			const link = filteredLinks.find((l) => l.id === id);
 			if (link) await linkTable.update(id, { isActive: !link.isActive });
 		}
-		toast.success(`${selectedIds.size} Links aktualisiert`);
+		toast.success($_('uload.links_route.toast_bulk_updated', { values: { count } }));
 		selectedIds.clear();
 		selectedIds = selectedIds;
 		selectMode = false;
@@ -127,7 +131,7 @@
 </script>
 
 <svelte:head>
-	<title>Alle Links - uLoad - Mana</title>
+	<title>{$_('uload.links_route.title')}</title>
 </svelte:head>
 
 <RoutePage appId="uload" backHref="/uload">
@@ -139,13 +143,13 @@
 					<a
 						href="/uload"
 						class="rounded-lg p-2 hover:bg-muted dark:hover:bg-muted"
-						title="Zurueck"
+						title={$_('uload.links_route.action_back_title')}
 					>
 						<ArrowLeft size={20} />
 					</a>
 					<div>
 						<h1 class="text-2xl font-bold">
-							Alle Links
+							{$_('uload.links_route.heading')}
 							{#if filteredLinks.length > 0}
 								<span class="ml-1 text-xl opacity-50">({filteredLinks.length})</span>
 							{/if}
@@ -165,7 +169,9 @@
 							? 'bg-indigo-600 text-white'
 							: 'hover:bg-muted dark:border-border dark:hover:bg-muted'}"
 					>
-						{selectMode ? 'Fertig' : 'Auswaehlen'}
+						{selectMode
+							? $_('uload.links_route.action_select_done')
+							: $_('uload.links_route.action_select_start')}
 					</button>
 				</div>
 			</div>
@@ -180,18 +186,18 @@
 					<input
 						type="text"
 						bind:value={searchQuery}
-						placeholder="Links durchsuchen..."
+						placeholder={$_('uload.links_route.placeholder_search')}
 						class="w-60 rounded-lg border border-border-strong bg-white py-2 pl-8 pr-3 text-sm focus:border-indigo-500 focus:outline-none dark:border-border dark:bg-muted"
 					/>
 				</div>
 				<select bind:value={selectedStatus} class={inputSmClass} style="max-width: 140px">
-					<option value="all">Alle</option>
-					<option value="active">Aktiv</option>
-					<option value="inactive">Inaktiv</option>
+					<option value="all">{$_('uload.links_route.option_all')}</option>
+					<option value="active">{$_('uload.links_route.option_active')}</option>
+					<option value="inactive">{$_('uload.links_route.option_inactive')}</option>
 				</select>
 				{#if folders.length > 0}
 					<select bind:value={selectedFolderId} class={inputSmClass} style="max-width: 160px">
-						<option value={null}>Alle Ordner</option>
+						<option value={null}>{$_('uload.links_route.option_all_folders')}</option>
 						{#each folders as folder}
 							<option value={folder.id}>{folder.name}</option>
 						{/each}
@@ -211,18 +217,22 @@
 							onchange={toggleSelectAll}
 							class="h-4 w-4 rounded"
 						/>
-						<span class="text-sm font-medium">{selectedIds.size} ausgewaehlt</span>
+						<span class="text-sm font-medium"
+							>{$_('uload.links_route.selected_count', {
+								values: { count: selectedIds.size },
+							})}</span
+						>
 					</label>
 					<div class="h-4 w-px bg-indigo-300 dark:bg-indigo-700"></div>
 					<button
 						onclick={bulkToggleActive}
 						class="rounded px-3 py-1 text-sm font-medium hover:bg-indigo-100 dark:hover:bg-indigo-800"
-						>Aktivieren/Deaktivieren</button
+						>{$_('uload.links_route.action_bulk_toggle')}</button
 					>
 					<button
 						onclick={bulkDelete}
 						class="rounded px-3 py-1 text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
-						>Loeschen</button
+						>{$_('uload.links_route.action_bulk_delete')}</button
 					>
 				</div>
 			{/if}
@@ -239,11 +249,11 @@
 					class="rounded-xl border-2 border-dashed border-border-strong p-12 text-center dark:border-border"
 				>
 					<LinkIcon size={48} class="mx-auto mb-4 opacity-20" />
-					<p class="text-lg font-medium opacity-60">Keine Links gefunden</p>
+					<p class="text-lg font-medium opacity-60">{$_('uload.links_route.empty_title')}</p>
 					{#if searchQuery || selectedStatus !== 'all' || selectedFolderId}
-						<p class="mt-1 text-sm opacity-40">Versuche andere Filtereinstellungen.</p>
+						<p class="mt-1 text-sm opacity-40">{$_('uload.links_route.empty_filtered')}</p>
 					{:else}
-						<p class="mt-1 text-sm opacity-40">Erstelle Links auf der uLoad-Hauptseite.</p>
+						<p class="mt-1 text-sm opacity-40">{$_('uload.links_route.empty_root')}</p>
 					{/if}
 				</div>
 			{:else}
@@ -301,7 +311,7 @@
 									<a
 										href="/uload/analytics/{link.id}"
 										class="flex items-center gap-1 rounded-lg px-2 py-1.5 text-sm font-medium opacity-60 transition-colors hover:bg-muted hover:opacity-100 dark:hover:bg-muted"
-										title="Analytics"
+										title={$_('uload.links_route.action_analytics_title')}
 									>
 										<ChartBar size={16} />
 										{link.clickCount}
@@ -309,14 +319,16 @@
 									<button
 										onclick={() => copyShortUrl(link.shortCode)}
 										class="rounded-lg p-2 opacity-0 transition-colors hover:bg-muted group-hover:opacity-100 dark:hover:bg-muted"
-										title="Link kopieren"
+										title={$_('uload.links_route.action_copy_title')}
 									>
 										<Copy size={16} />
 									</button>
 									<button
 										onclick={() => toggleActive(link)}
 										class="rounded-lg p-2 opacity-0 transition-colors hover:bg-muted group-hover:opacity-100 dark:hover:bg-muted"
-										title={link.isActive ? 'Deaktivieren' : 'Aktivieren'}
+										title={link.isActive
+											? $_('uload.links_route.action_deactivate_title')
+											: $_('uload.links_route.action_activate_title')}
 									>
 										<Lightning
 											size={16}
@@ -326,7 +338,7 @@
 									<button
 										onclick={() => deleteLink(link)}
 										class="rounded-lg p-2 opacity-0 transition-colors hover:bg-red-50 hover:text-red-600 group-hover:opacity-100 dark:hover:bg-red-900/20"
-										title="Loeschen"
+										title={$_('uload.links_route.action_delete_title')}
 									>
 										<Trash size={16} />
 									</button>

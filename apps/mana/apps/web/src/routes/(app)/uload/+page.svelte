@@ -117,30 +117,30 @@
 		if (!newUrl) return;
 
 		if (!isValidUrl(newUrl)) {
-			toast.error('Bitte eine gueltige URL eingeben (mit https://)');
+			toast.error($_('uload.page.err_invalid_url_input'));
 			return;
 		}
 
 		const shortCode = newCustomCode || generateShortCode();
 
 		if (newCustomCode && !isValidCustomCode(newCustomCode)) {
-			toast.error('Custom Code darf nur Buchstaben, Zahlen, - und _ enthalten');
+			toast.error($_('uload.page.err_invalid_custom_code'));
 			return;
 		}
 
 		if (!(await isShortCodeUnique(shortCode))) {
-			toast.error(`Short Code "${shortCode}" ist bereits vergeben`);
+			toast.error($_('uload.page.err_short_code_taken', { values: { code: shortCode } }));
 			return;
 		}
 
 		const maxClicks = newMaxClicks ? parseInt(newMaxClicks) : null;
 		if (maxClicks !== null && maxClicks < 1) {
-			toast.error('Max Klicks muss mindestens 1 sein');
+			toast.error($_('uload.page.err_max_clicks'));
 			return;
 		}
 
 		if (newExpiresAt && new Date(newExpiresAt) <= new Date()) {
-			toast.error('Ablaufdatum muss in der Zukunft liegen');
+			toast.error($_('uload.page.err_expires_past'));
 			return;
 		}
 
@@ -165,7 +165,7 @@
 		};
 		await encryptRecord('links', newRow);
 		await linkTable.add(newRow);
-		toast.success(`Link erstellt: ${shortCode}`);
+		toast.success($_('uload.page.toast_created', { values: { code: shortCode } }));
 		newUrl = '';
 		newTitle = '';
 		newCustomCode = '';
@@ -195,18 +195,18 @@
 		if (!editingLink || !editUrl) return;
 
 		if (!isValidUrl(editUrl)) {
-			toast.error('Bitte eine gueltige URL eingeben (mit https://)');
+			toast.error($_('uload.page.err_invalid_url_input'));
 			return;
 		}
 
 		const maxClicks = editMaxClicks ? parseInt(editMaxClicks) : null;
 		if (maxClicks !== null && maxClicks < 1) {
-			toast.error('Max Klicks muss mindestens 1 sein');
+			toast.error($_('uload.page.err_max_clicks'));
 			return;
 		}
 
 		if (editExpiresAt && new Date(editExpiresAt) <= new Date()) {
-			toast.error('Ablaufdatum muss in der Zukunft liegen');
+			toast.error($_('uload.page.err_expires_past'));
 			return;
 		}
 
@@ -222,7 +222,7 @@
 		};
 		await encryptRecord('links', diff);
 		await linkTable.update(editingLink.id, diff);
-		toast.success('Link aktualisiert');
+		toast.success($_('uload.page.toast_updated'));
 		editingLink = null;
 	}
 
@@ -231,14 +231,15 @@
 	}
 
 	async function deleteLink(link: Link) {
-		if (!confirm(`"${link.title || link.shortCode}" wirklich loeschen?`)) return;
+		const name = link.title || link.shortCode;
+		if (!confirm($_('uload.page.confirm_delete', { values: { name } }))) return;
 		await linkTable.delete(link.id);
-		toast.success('Link geloescht');
+		toast.success($_('uload.page.toast_deleted'));
 	}
 
 	function copyShortUrl(code: string) {
 		navigator.clipboard.writeText(getShortUrl(code));
-		toast.success('Link kopiert!');
+		toast.success($_('uload.page.toast_copied'));
 	}
 
 	function downloadQr(code: string) {
@@ -256,7 +257,7 @@
 </script>
 
 <svelte:head>
-	<title>uLoad - Mana</title>
+	<title>{$_('uload.page.title')}</title>
 </svelte:head>
 
 <RoutePage appId="uload">
@@ -267,10 +268,13 @@
 				<div>
 					<h1 class="text-2xl font-bold">uLoad</h1>
 					<p class="mt-1 text-sm opacity-60">
-						{filteredLinks.length} Links
-						{#if folders.length > 0}
-							&middot; {folders.length} Ordner
-						{/if}
+						{folders.length > 0
+							? $_('uload.page.counts', {
+									values: { links: filteredLinks.length, folders: folders.length },
+								})
+							: $_('uload.page.counts_no_folders', {
+									values: { links: filteredLinks.length },
+								})}
 					</p>
 				</div>
 				<div class="flex items-center gap-2">
@@ -278,13 +282,13 @@
 						href="/uload/links"
 						class="rounded-lg border border-border-strong px-3 py-2 text-sm font-medium hover:bg-muted dark:border-border dark:hover:bg-muted"
 					>
-						Alle Links
+						{$_('uload.page.all_links')}
 					</a>
 					<button
 						onclick={() => (showCreateForm = !showCreateForm)}
 						class="rounded-lg bg-indigo-600 px-4 py-2 font-medium text-white shadow-lg transition-[transform,colors,box-shadow] hover:scale-105 hover:bg-indigo-700"
 					>
-						{showCreateForm ? '- Ausblenden' : '+ Neuer Link'}
+						{showCreateForm ? $_('uload.page.hide_form') : $_('uload.page.show_form')}
 					</button>
 				</div>
 			</div>
@@ -296,7 +300,9 @@
 				>
 					<div class="grid gap-4 md:grid-cols-2">
 						<div class="md:col-span-2">
-							<label for="url" class="mb-1 block text-sm font-medium">URL</label>
+							<label for="url" class="mb-1 block text-sm font-medium"
+								>{$_('uload.page.label_url_modal')}</label
+							>
 							<input
 								id="url"
 								type="url"
@@ -307,23 +313,26 @@
 							/>
 						</div>
 						<div>
-							<label for="title" class="mb-1 block text-sm font-medium">Titel (optional)</label>
+							<label for="title" class="mb-1 block text-sm font-medium"
+								>{$_('uload.page.label_title')}</label
+							>
 							<input
 								id="title"
 								type="text"
 								bind:value={newTitle}
-								placeholder="Mein Link"
+								placeholder={$_('uload.page.placeholder_title')}
 								class={inputClass}
 							/>
 						</div>
 						<div>
-							<label for="code" class="mb-1 block text-sm font-medium">Custom Code (optional)</label
+							<label for="code" class="mb-1 block text-sm font-medium"
+								>{$_('uload.page.label_custom_code')}</label
 							>
 							<input
 								id="code"
 								type="text"
 								bind:value={newCustomCode}
-								placeholder="mein-link"
+								placeholder={$_('uload.page.placeholder_custom_code')}
 								class={inputClass}
 							/>
 						</div>
@@ -337,13 +346,13 @@
 						<span class="transition-transform {showAdvanced ? 'rotate-90' : ''}"
 							><CaretRight size={16} /></span
 						>
-						Erweitert
+						{$_('uload.page.section_advanced')}
 					</button>
 					{#if showAdvanced}
 						<div class="mt-3 grid gap-3 md:grid-cols-3">
 							<div>
 								<label for="expires" class="mb-1 block text-xs font-medium opacity-70"
-									>Ablaufdatum</label
+									>{$_('uload.page.label_expires')}</label
 								>
 								<input
 									id="expires"
@@ -354,25 +363,25 @@
 							</div>
 							<div>
 								<label for="password" class="mb-1 block text-xs font-medium opacity-70"
-									>Passwort</label
+									>{$_('uload.page.label_password')}</label
 								>
 								<input
 									id="password"
 									type="text"
 									bind:value={newPassword}
-									placeholder="Optional"
+									placeholder={$_('uload.page.placeholder_optional')}
 									class={inputSmClass}
 								/>
 							</div>
 							<div>
 								<label for="maxclicks" class="mb-1 block text-xs font-medium opacity-70"
-									>Max Klicks</label
+									>{$_('uload.page.label_max_clicks')}</label
 								>
 								<input
 									id="maxclicks"
 									type="number"
 									bind:value={newMaxClicks}
-									placeholder="Unbegrenzt"
+									placeholder={$_('uload.page.placeholder_unlimited')}
 									min="1"
 									class={inputSmClass}
 								/>
@@ -388,43 +397,43 @@
 						<span class="transition-transform {showUtm ? 'rotate-90' : ''}"
 							><CaretRight size={16} /></span
 						>
-						UTM-Parameter
+						{$_('uload.page.section_utm')}
 					</button>
 					{#if showUtm}
 						<div class="mt-3 grid gap-3 md:grid-cols-3">
 							<div>
 								<label for="utm-source" class="mb-1 block text-xs font-medium opacity-70"
-									>Source</label
+									>{$_('uload.page.label_source')}</label
 								>
 								<input
 									id="utm-source"
 									type="text"
 									bind:value={newUtmSource}
-									placeholder="newsletter"
+									placeholder={$_('uload.page.placeholder_source')}
 									class={inputSmClass}
 								/>
 							</div>
 							<div>
 								<label for="utm-medium" class="mb-1 block text-xs font-medium opacity-70"
-									>Medium</label
+									>{$_('uload.page.label_medium')}</label
 								>
 								<input
 									id="utm-medium"
 									type="text"
 									bind:value={newUtmMedium}
-									placeholder="email"
+									placeholder={$_('uload.page.placeholder_medium')}
 									class={inputSmClass}
 								/>
 							</div>
 							<div>
 								<label for="utm-campaign" class="mb-1 block text-xs font-medium opacity-70"
-									>Campaign</label
+									>{$_('uload.page.label_campaign')}</label
 								>
 								<input
 									id="utm-campaign"
 									type="text"
 									bind:value={newUtmCampaign}
-									placeholder="spring-2026"
+									placeholder={$_('uload.page.placeholder_campaign')}
 									class={inputSmClass}
 								/>
 							</div>
@@ -437,7 +446,7 @@
 							disabled={!newUrl}
 							class="rounded-lg bg-indigo-600 px-6 py-2.5 font-medium text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
 						>
-							Link erstellen
+							{$_('uload.page.action_create')}
 						</button>
 					</div>
 				</div>
@@ -453,18 +462,18 @@
 					<input
 						type="text"
 						bind:value={searchQuery}
-						placeholder="Links durchsuchen..."
+						placeholder={$_('uload.page.placeholder_search')}
 						class="w-60 rounded-lg border border-border-strong bg-white py-2 pl-8 pr-3 text-sm focus:border-indigo-500 focus:outline-none dark:border-border dark:bg-muted"
 					/>
 				</div>
 				<select bind:value={selectedStatus} class={inputSmClass} style="max-width: 140px">
-					<option value="all">Alle</option>
-					<option value="active">Aktiv</option>
-					<option value="inactive">Inaktiv</option>
+					<option value="all">{$_('uload.page.option_all')}</option>
+					<option value="active">{$_('uload.page.option_active')}</option>
+					<option value="inactive">{$_('uload.page.option_inactive')}</option>
 				</select>
 				{#if folders.length > 0}
 					<select bind:value={selectedFolderId} class={inputSmClass} style="max-width: 160px">
-						<option value={null}>Alle Ordner</option>
+						<option value={null}>{$_('uload.page.option_all_folders')}</option>
 						{#each folders as folder}
 							<option value={folder.id}>{folder.name}</option>
 						{/each}
@@ -484,13 +493,13 @@
 					class="rounded-xl border-2 border-dashed border-border-strong p-12 text-center dark:border-border"
 				>
 					<LinkIcon size={48} class="mx-auto mb-4 opacity-20" />
-					<p class="text-lg font-medium opacity-60">Noch keine Links</p>
-					<p class="mt-1 text-sm opacity-40">Erstelle deinen ersten gekuerzten Link!</p>
+					<p class="text-lg font-medium opacity-60">{$_('uload.page.empty_title')}</p>
+					<p class="mt-1 text-sm opacity-40">{$_('uload.page.empty_desc')}</p>
 					<button
 						onclick={() => (showCreateForm = true)}
 						class="mt-4 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
 					>
-						+ Neuer Link
+						{$_('uload.page.show_form')}
 					</button>
 				</div>
 			{:else}
@@ -516,19 +525,21 @@
 										{#if link.utmSource || link.utmMedium || link.utmCampaign}
 											<span
 												class="shrink-0 rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-700 dark:bg-amber-900 dark:text-amber-300"
-												>UTM</span
+												>{$_('uload.page.badge_utm')}</span
 											>
 										{/if}
 										{#if link.password}
 											<span
 												class="shrink-0 rounded bg-red-100 px-1.5 py-0.5 text-xs text-red-700 dark:bg-red-900 dark:text-red-300"
-												>Passwort</span
+												>{$_('uload.page.badge_password')}</span
 											>
 										{/if}
 										{#if link.expiresAt}
 											<span
 												class="shrink-0 rounded bg-orange-100 px-1.5 py-0.5 text-xs text-orange-700 dark:bg-orange-900 dark:text-orange-300"
-												title="Laeuft ab: {formatDate(new Date(link.expiresAt))}">Ablauf</span
+												title={$_('uload.page.badge_expires_title', {
+													values: { date: formatDate(new Date(link.expiresAt)) },
+												})}>{$_('uload.page.badge_expires')}</span
 											>
 										{/if}
 									</div>
@@ -552,7 +563,7 @@
 									<a
 										href="/uload/analytics/{link.id}"
 										class="flex items-center gap-1 rounded-lg px-2 py-1.5 text-sm font-medium opacity-60 transition-colors hover:bg-muted hover:opacity-100 dark:hover:bg-muted"
-										title="Analytics"
+										title={$_('uload.page.action_analytics_title')}
 									>
 										<ChartBar size={16} />
 										{link.clickCount}
@@ -560,28 +571,30 @@
 									<button
 										onclick={() => copyShortUrl(link.shortCode)}
 										class="rounded-lg p-2 opacity-0 transition-colors hover:bg-muted group-hover:opacity-100 dark:hover:bg-muted"
-										title="Link kopieren"
+										title={$_('uload.page.action_copy_title')}
 									>
 										<Copy size={16} />
 									</button>
 									<button
 										onclick={() => (qrLink = link)}
 										class="rounded-lg p-2 opacity-0 transition-colors hover:bg-muted group-hover:opacity-100 dark:hover:bg-muted"
-										title="QR-Code"
+										title={$_('uload.page.action_qr_title')}
 									>
 										<QrCode size={16} />
 									</button>
 									<button
 										onclick={() => openEdit(link)}
 										class="rounded-lg p-2 opacity-0 transition-colors hover:bg-muted group-hover:opacity-100 dark:hover:bg-muted"
-										title={$_('common.edit')}
+										title={$_('uload.page.action_edit_title')}
 									>
 										<PencilSimple size={16} />
 									</button>
 									<button
 										onclick={() => toggleActive(link)}
 										class="rounded-lg p-2 opacity-0 transition-colors hover:bg-muted group-hover:opacity-100 dark:hover:bg-muted"
-										title={link.isActive ? 'Deaktivieren' : 'Aktivieren'}
+										title={link.isActive
+											? $_('uload.page.action_deactivate_title')
+											: $_('uload.page.action_activate_title')}
 									>
 										<Lightning
 											size={16}
@@ -591,7 +604,7 @@
 									<button
 										onclick={() => deleteLink(link)}
 										class="rounded-lg p-2 opacity-0 transition-colors hover:bg-red-50 hover:text-red-600 group-hover:opacity-100 dark:hover:bg-red-900/20"
-										title="Loeschen"
+										title={$_('uload.page.action_delete_title')}
 									>
 										<Trash size={16} />
 									</button>
@@ -620,7 +633,7 @@
 			role="none"
 		>
 			<div class="mb-4 flex items-center justify-between">
-				<h3 class="text-lg font-semibold">Link bearbeiten</h3>
+				<h3 class="text-lg font-semibold">{$_('uload.page.modal_edit_title')}</h3>
 				<button
 					onclick={() => (editingLink = null)}
 					class="rounded-lg p-1 hover:bg-muted dark:hover:bg-muted"
@@ -631,50 +644,57 @@
 
 			<div class="space-y-4">
 				<div>
-					<label for="edit-url" class="mb-1 block text-sm font-medium">URL</label>
+					<label for="edit-url" class="mb-1 block text-sm font-medium"
+						>{$_('uload.page.label_url_modal')}</label
+					>
 					<input id="edit-url" type="url" bind:value={editUrl} class={inputClass} />
 				</div>
 				<div>
-					<label for="edit-title" class="mb-1 block text-sm font-medium">Titel</label>
+					<label for="edit-title" class="mb-1 block text-sm font-medium"
+						>{$_('uload.page.label_title_modal')}</label
+					>
 					<input id="edit-title" type="text" bind:value={editTitle} class={inputClass} />
 				</div>
 				<div>
-					<label for="edit-code" class="mb-1 block text-sm font-medium">Short Code</label>
+					<label for="edit-code" class="mb-1 block text-sm font-medium"
+						>{$_('uload.page.label_short_code_modal')}</label
+					>
 					<div class="flex items-center gap-2">
 						<span class="text-sm opacity-50">/{editingLink.shortCode}</span>
-						<span class="text-xs opacity-30">(nicht aenderbar)</span>
+						<span class="text-xs opacity-30">{$_('uload.page.short_code_locked')}</span>
 					</div>
 				</div>
 
 				<div class="border-t border-border-strong pt-4 dark:border-border">
-					<p class="mb-2 text-sm font-medium opacity-70">UTM-Parameter</p>
+					<p class="mb-2 text-sm font-medium opacity-70">{$_('uload.page.section_utm')}</p>
 					<div class="grid gap-3 md:grid-cols-3">
 						<input
 							type="text"
 							bind:value={editUtmSource}
-							placeholder="Source"
+							placeholder={$_('uload.page.label_source')}
 							class={inputSmClass}
 						/>
 						<input
 							type="text"
 							bind:value={editUtmMedium}
-							placeholder="Medium"
+							placeholder={$_('uload.page.label_medium')}
 							class={inputSmClass}
 						/>
 						<input
 							type="text"
 							bind:value={editUtmCampaign}
-							placeholder="Campaign"
+							placeholder={$_('uload.page.label_campaign')}
 							class={inputSmClass}
 						/>
 					</div>
 				</div>
 
 				<div class="border-t border-border-strong pt-4 dark:border-border">
-					<p class="mb-2 text-sm font-medium opacity-70">Erweitert</p>
+					<p class="mb-2 text-sm font-medium opacity-70">{$_('uload.page.section_advanced')}</p>
 					<div class="grid gap-3 md:grid-cols-3">
 						<div>
-							<label for="uload-expires-at" class="mb-1 block text-xs opacity-50">Ablaufdatum</label
+							<label for="uload-expires-at" class="mb-1 block text-xs opacity-50"
+								>{$_('uload.page.label_expires')}</label
 							>
 							<input
 								id="uload-expires-at"
@@ -684,22 +704,26 @@
 							/>
 						</div>
 						<div>
-							<label for="uload-password" class="mb-1 block text-xs opacity-50">Passwort</label>
+							<label for="uload-password" class="mb-1 block text-xs opacity-50"
+								>{$_('uload.page.label_password')}</label
+							>
 							<input
 								id="uload-password"
 								type="text"
 								bind:value={editPassword}
-								placeholder="Optional"
+								placeholder={$_('uload.page.placeholder_optional')}
 								class={inputSmClass}
 							/>
 						</div>
 						<div>
-							<label for="uload-max-clicks" class="mb-1 block text-xs opacity-50">Max Klicks</label>
+							<label for="uload-max-clicks" class="mb-1 block text-xs opacity-50"
+								>{$_('uload.page.label_max_clicks')}</label
+							>
 							<input
 								id="uload-max-clicks"
 								type="number"
 								bind:value={editMaxClicks}
-								placeholder="Unbegrenzt"
+								placeholder={$_('uload.page.placeholder_unlimited')}
 								min="1"
 								class={inputSmClass}
 							/>
@@ -713,14 +737,14 @@
 					onclick={() => (editingLink = null)}
 					class="rounded-lg border border-border-strong px-4 py-2 text-sm font-medium hover:bg-muted dark:border-border dark:hover:bg-muted"
 				>
-					Abbrechen
+					{$_('uload.page.action_cancel')}
 				</button>
 				<button
 					onclick={saveEdit}
 					disabled={!editUrl}
 					class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
 				>
-					Speichern
+					{$_('uload.page.action_save')}
 				</button>
 			</div>
 		</div>
@@ -742,7 +766,7 @@
 			role="none"
 		>
 			<div class="mb-4 flex items-center justify-between">
-				<h3 class="text-lg font-semibold">QR-Code</h3>
+				<h3 class="text-lg font-semibold">{$_('uload.page.modal_qr_title')}</h3>
 				<button
 					onclick={() => (qrLink = null)}
 					class="rounded-lg p-1 hover:bg-muted dark:hover:bg-muted"
@@ -755,7 +779,7 @@
 				<div class="rounded-lg bg-white p-4">
 					<img
 						src="{QR_API}/?size=200x200&data={encodeURIComponent(getShortUrl(qrLink.shortCode))}"
-						alt="QR Code fuer {qrLink.shortCode}"
+						alt={$_('uload.page.qr_alt', { values: { code: qrLink.shortCode } })}
 						class="h-48 w-48"
 					/>
 				</div>
@@ -765,13 +789,13 @@
 						onclick={() => copyShortUrl(qrLink!.shortCode)}
 						class="flex-1 rounded-lg border border-border-strong px-4 py-2 text-sm font-medium hover:bg-muted dark:border-border dark:hover:bg-muted"
 					>
-						Link kopieren
+						{$_('uload.page.action_copy_link')}
 					</button>
 					<button
 						onclick={() => downloadQr(qrLink!.shortCode)}
 						class="flex-1 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
 					>
-						QR herunterladen
+						{$_('uload.page.action_download_qr')}
 					</button>
 				</div>
 			</div>

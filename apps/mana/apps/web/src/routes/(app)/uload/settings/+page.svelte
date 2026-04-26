@@ -3,6 +3,7 @@
   Reached via the ⚙ button in the uLoad module; not a workbench card.
 -->
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { Trash, DownloadSimple } from '@mana/shared-icons';
 	import { linkTable, uloadTagTable, uloadFolderTable, linkTagTable } from '$lib/modules/uload';
 	import { decryptRecords } from '$lib/data/crypto';
@@ -15,14 +16,13 @@
 	const folders = useAllFolders();
 
 	async function clearAllData() {
-		if (!confirm('Alle lokalen uLoad-Daten löschen? Dies kann nicht rückgängig gemacht werden.'))
-			return;
+		if (!confirm($_('uload.settings_route.confirm_clear'))) return;
 
 		await linkTable.clear();
 		await uloadTagTable.clear();
 		await uloadFolderTable.clear();
 		await linkTagTable.clear();
-		toast.success('Alle uLoad-Daten gelöscht');
+		toast.success($_('uload.settings_route.toast_cleared'));
 	}
 
 	async function exportData() {
@@ -47,59 +47,58 @@
 		a.download = `uload-export-${new Date().toISOString().slice(0, 10)}.json`;
 		a.click();
 		URL.revokeObjectURL(url);
-		toast.success('Export heruntergeladen');
+		toast.success($_('uload.settings_route.toast_exported'));
 	}
 </script>
 
 <svelte:head>
-	<title>uLoad-Einstellungen — Mana</title>
+	<title>{$_('uload.settings_route.title')}</title>
 </svelte:head>
 
 <RoutePage appId="uload" backHref="/uload">
 	<div class="pane">
 		<header class="bar">
 			<div class="title">
-				<strong>uLoad-Einstellungen</strong>
-				<span class="sub">Datenübersicht · Export · Gefahrenzone</span>
+				<strong>{$_('uload.settings_route.heading')}</strong>
+				<span class="sub">{$_('uload.settings_route.subtitle')}</span>
 			</div>
 		</header>
 
 		<section class="panel">
-			<h2>Daten</h2>
+			<h2>{$_('uload.settings_route.section_data')}</h2>
 			<div class="stats">
 				<div class="stat">
 					<p class="stat-value">{links.value?.length ?? 0}</p>
-					<p class="stat-label">Links</p>
+					<p class="stat-label">{$_('uload.settings_route.stat_links')}</p>
 				</div>
 				<div class="stat">
 					<p class="stat-value">{tags.value?.length ?? 0}</p>
-					<p class="stat-label">Tags</p>
+					<p class="stat-label">{$_('uload.settings_route.stat_tags')}</p>
 				</div>
 				<div class="stat">
 					<p class="stat-value">{folders.value?.length ?? 0}</p>
-					<p class="stat-label">Ordner</p>
+					<p class="stat-label">{$_('uload.settings_route.stat_folders')}</p>
 				</div>
 			</div>
 		</section>
 
 		<section class="panel">
-			<h2>Daten exportieren</h2>
-			<p class="hint">Alle Links, Tags und Ordner als JSON-Datei herunterladen.</p>
+			<h2>{$_('uload.settings_route.section_export')}</h2>
+			<p class="hint">{$_('uload.settings_route.export_hint')}</p>
 			<button type="button" class="btn" onclick={exportData}>
 				<DownloadSimple size={16} />
-				JSON exportieren
+				{$_('uload.settings_route.action_export')}
 			</button>
 		</section>
 
 		<section class="panel danger">
-			<h2>Gefahrenzone</h2>
+			<h2>{$_('uload.settings_route.section_danger')}</h2>
 			<p class="hint">
-				Löscht alle lokalen uLoad-Daten (Links, Tags, Ordner). Synchronisierte Daten auf dem Server
-				bleiben erhalten.
+				{$_('uload.settings_route.danger_hint')}
 			</p>
 			<button type="button" class="btn danger" onclick={clearAllData}>
 				<Trash size={16} />
-				Alle Daten löschen
+				{$_('uload.settings_route.action_clear')}
 			</button>
 		</section>
 	</div>
