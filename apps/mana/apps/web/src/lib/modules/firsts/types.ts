@@ -1,21 +1,18 @@
 import type { BaseRecord } from '@mana/local-store';
+import type { MilestoneCategory } from '$lib/data/milestones/categories';
+
+export { CATEGORY_LABELS, CATEGORY_COLORS } from '$lib/data/milestones/categories';
 
 // ─── Enums ────────────────────────────────────────────────
 
 export type FirstStatus = 'dream' | 'lived';
 
-export type FirstCategory =
-	| 'culinary'
-	| 'adventure'
-	| 'travel'
-	| 'people'
-	| 'career'
-	| 'creative'
-	| 'nature'
-	| 'culture'
-	| 'health'
-	| 'tech'
-	| 'other';
+/**
+ * `FirstCategory` is the same vocabulary as `MilestoneCategory`. Re-exported
+ * under the local name so existing imports from `firsts/types` keep working;
+ * the underlying definition lives in `$lib/data/milestones/categories`.
+ */
+export type FirstCategory = MilestoneCategory;
 
 export type FirstPriority = 1 | 2 | 3; // 1 = someday, 2 = this year, 3 = asap
 
@@ -81,34 +78,6 @@ export interface First {
 }
 
 // ─── Constants ────────────────────────────────────────────
-
-export const CATEGORY_LABELS: Record<FirstCategory, { de: string; en: string }> = {
-	culinary: { de: 'Kulinarisch', en: 'Culinary' },
-	adventure: { de: 'Abenteuer', en: 'Adventure' },
-	travel: { de: 'Reisen', en: 'Travel' },
-	people: { de: 'Menschen', en: 'People' },
-	career: { de: 'Beruf', en: 'Career' },
-	creative: { de: 'Kreativ', en: 'Creative' },
-	nature: { de: 'Natur', en: 'Nature' },
-	culture: { de: 'Kultur', en: 'Culture' },
-	health: { de: 'Gesundheit', en: 'Health' },
-	tech: { de: 'Technik', en: 'Tech' },
-	other: { de: 'Sonstiges', en: 'Other' },
-};
-
-export const CATEGORY_COLORS: Record<FirstCategory, string> = {
-	culinary: '#f97316',
-	adventure: '#ef4444',
-	travel: '#0ea5e9',
-	people: '#ec4899',
-	career: '#6366f1',
-	creative: '#a855f7',
-	nature: '#22c55e',
-	culture: '#eab308',
-	health: '#14b8a6',
-	tech: '#64748b',
-	other: '#9ca3af',
-};
 
 export const PRIORITY_LABELS: Record<FirstPriority, { de: string; en: string }> = {
 	1: { de: 'Irgendwann', en: 'Someday' },

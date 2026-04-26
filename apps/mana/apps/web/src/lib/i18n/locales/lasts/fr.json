@@ -1,0 +1,105 @@
+{
+	"app": {
+		"title": "Lasts",
+		"tagline": "Dernières fois — marquées ou reconnues."
+	},
+	"list": {
+		"emptyAll": "Aucun last enregistré pour le moment.",
+		"emptyTab": "Rien dans cette vue.",
+		"searchPlaceholder": "Rechercher des lasts ..."
+	},
+	"tabs": {
+		"all": "Tous",
+		"suspected": "Soupçonnés",
+		"confirmed": "Confirmés",
+		"reclaimed": "Repris",
+		"inbox": "Boîte"
+	},
+	"status": {
+		"suspected": "Soupçonné",
+		"confirmed": "Confirmé",
+		"reclaimed": "Repris"
+	},
+	"quickAdd": {
+		"placeholder": "Noter une dernière fois ... (Entrée)",
+		"modeSuspected": "Soupçonné",
+		"modeConfirmed": "Confirmé"
+	},
+	"actions": {
+		"confirm": "Confirmer",
+		"reclaim": "Reprendre",
+		"delete": "Supprimer",
+		"pin": "Épingler",
+		"unpin": "Désépingler",
+		"archive": "Archiver",
+		"save": "Enregistrer",
+		"cancel": "Annuler"
+	},
+	"detail": {
+		"routeTitle": "Last",
+		"loading": "Chargement ...",
+		"notFound": "Last introuvable.",
+		"backLink": "Retour à la liste",
+		"titlePlaceholder": "Titre ...",
+		"categoryLabel": "Catégorie",
+		"dateLabel": "Date",
+		"confidenceLabel": "Confiance",
+		"meaningLabel": "Qu'est-ce que cela signifiait ?",
+		"meaningPlaceholder": "Qu'est-ce que cela signifiait pour toi ?",
+		"whatIKnewThenLabel": "Que ne savais-je pas alors ?",
+		"whatIKnewThenPlaceholder": "Qu'aurais-tu voulu savoir ?",
+		"whatIKnowNowLabel": "Que sais-je maintenant ?",
+		"whatIKnowNowPlaceholder": "Qu'est-ce qui est plus clair aujourd'hui ?",
+		"noteLabel": "Note",
+		"notePlaceholder": "Autre chose à noter ?",
+		"tendernessLabel": "À quel point cela te touche-t-il aujourd'hui ?",
+		"wouldReclaimLabel": "Le reprendrais-tu ?",
+		"reclaimedAt": "Repris le",
+		"reclaimedNotePlaceholder": "C'est revenu — quoi ?",
+		"inferredFrom": "Suggéré à partir de",
+		"visibilityLabel": "Visibilité"
+	},
+	"confidence": {
+		"probably": "Probablement",
+		"likely": "Plutôt sûr",
+		"certain": "Sûr"
+	},
+	"wouldReclaim": {
+		"no": "Non",
+		"maybe": "Peut-être",
+		"yes": "Oui"
+	},
+	"inbox": {
+		"routeTitle": "Boîte de réception",
+		"title": "Boîte de réception",
+		"tagline": "Suggestions IA en attente de révision. Accepter ou écarter.",
+		"empty": "Aucune suggestion — l'analyse n'a rien trouvé de pertinent.",
+		"scanNow": "Analyser maintenant",
+		"scanning": "Analyse en cours ...",
+		"scanSummary": "{written} nouvelles suggestions — {cooldown} ignorées en délai, {existing} déjà connues.",
+		"accept": "Accepter",
+		"dismiss": "Écarter"
+	},
+	"banner": {
+		"title": "Aujourd'hui",
+		"anniversary": "Il y a {years} an(s) — dernière fois",
+		"recognition": "Reconnu comme un last il y a {years} an(s)",
+		"inbox": "{count} nouvelle(s) suggestion(s) dans la boîte"
+	},
+	"settings": {
+		"routeTitle": "Lasts — Paramètres",
+		"title": "Paramètres",
+		"tagline": "Quand les lasts doivent-ils te rappeler que tu es là aujourd'hui ?",
+		"anniversaryLabel": "Rappels d'anniversaire",
+		"anniversaryDesc": "Affiche les lasts dont la date correspond à aujourd'hui il y a X ans.",
+		"recognitionLabel": "Rappels de reconnaissance",
+		"recognitionDesc": "Affiche les lasts que tu as reconnus aujourd'hui il y a X ans.",
+		"inboxLabel": "Indice de boîte",
+		"inboxDesc": "Affiche une ligne quand de nouvelles suggestions IA arrivent dans la boîte.",
+		"bannerCapLabel": "Au plus {count} rappels à la fois",
+		"reset": "Réinitialiser",
+		"showTestBanner": "Afficher la bannière de test",
+		"testSampleTitle": "Last d'exemple",
+		"pushNote": "Les vraies notifications push de l'OS arriveront quand l'infrastructure PWA push existera. D'ici là, les rappels apparaissent en haut de la liste à l'ouverture de l'app."
+	}
+}

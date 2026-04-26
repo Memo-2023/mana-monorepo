@@ -193,6 +193,12 @@ export const APP_ICONS = {
 		// Warm amber→rose gradient to evoke excitement and novelty.
 		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="fi" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#f59e0b"/><stop offset="100%" style="stop-color:#e11d48"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#fi)"/><path d="M50 18l5 14 14-5-10 11 10 11-14-5-5 14-5-14-14 5 10-11-10-11 14 5z" fill="white"/><circle cx="28" cy="70" r="4" fill="white" fill-opacity="0.6"/><circle cx="72" cy="68" r="3" fill="white" fill-opacity="0.5"/><circle cx="38" cy="80" r="2.5" fill="white" fill-opacity="0.4"/><circle cx="65" cy="82" r="2" fill="white" fill-opacity="0.35"/></svg>`
 	),
+	lasts: svgToDataUrl(
+		// Hourglass with a single falling grain — the moment something
+		// passes for the last time. Indigo→slate gradient for the
+		// contemplative, retrospective tone (mirror to firsts' warm amber).
+		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="la" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#6366f1"/><stop offset="100%" style="stop-color:#475569"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#la)"/><path d="M32 22h36" stroke="white" stroke-width="4" stroke-linecap="round"/><path d="M32 78h36" stroke="white" stroke-width="4" stroke-linecap="round"/><path d="M34 24c0 14 16 22 16 26s-16 12-16 26" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M66 24c0 14-16 22-16 26s16 12 16 26" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M40 30h20l-10 16z" fill="white" fill-opacity="0.85"/><path d="M40 70h20l-10-16z" fill="white" fill-opacity="0.35"/><circle cx="50" cy="55" r="2" fill="white"/></svg>`
+	),
 	drink: svgToDataUrl(
 		// Water drop + glass — represents beverage tracking.
 		// Blue→cyan gradient for the hydration theme.

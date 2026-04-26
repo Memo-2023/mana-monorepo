@@ -2299,6 +2299,186 @@ export const AI_TOOL_CATALOG: readonly ToolSchema[] = [
 			},
 		],
 	},
+
+	// ── Lasts (mirror sibling to firsts) ────────────────────────
+	{
+		name: 'create_last',
+		module: 'lasts',
+		description:
+			'Erstellt einen neuen "Last" — ein letztes Mal, das markiert oder vermutet werden soll. Status standardmaessig "suspected"; "confirmed" nur setzen wenn der User sicher ist.',
+		defaultPolicy: 'propose',
+		parameters: [
+			{
+				name: 'title',
+				type: 'string',
+				description: 'Was zum letzten Mal passiert ist (z.B. "Letzter Tag im alten Job")',
+				required: true,
+			},
+			{
+				name: 'category',
+				type: 'string',
+				description: 'Kategorie',
+				required: false,
+				enum: [
+					'culinary',
+					'adventure',
+					'travel',
+					'people',
+					'career',
+					'creative',
+					'nature',
+					'culture',
+					'health',
+					'tech',
+					'other',
+				],
+			},
+			{
+				name: 'status',
+				type: 'string',
+				description: 'Lifecycle-Status',
+				required: false,
+				enum: ['suspected', 'confirmed'],
+			},
+			{
+				name: 'date',
+				type: 'string',
+				description: 'Datum des letzten Mals (YYYY-MM-DD), falls bekannt',
+				required: false,
+			},
+			{
+				name: 'confidence',
+				type: 'string',
+				description: 'Sicherheit, dass es das letzte Mal war',
+				required: false,
+				enum: ['probably', 'likely', 'certain'],
+			},
+			{
+				name: 'meaning',
+				type: 'string',
+				description: 'Was es bedeutet hat (optional)',
+				required: false,
+			},
+			{
+				name: 'note',
+				type: 'string',
+				description: 'Freie Notiz (optional)',
+				required: false,
+			},
+		],
+	},
+	{
+		name: 'confirm_last',
+		module: 'lasts',
+		description:
+			'Bewegt einen Last von "suspected" auf "confirmed" und ergaenzt Reflexionsfelder. Setzt Datum auf heute, falls keines uebergeben wird.',
+		defaultPolicy: 'propose',
+		parameters: [
+			{ name: 'lastId', type: 'string', description: 'ID des Lasts', required: true },
+			{
+				name: 'date',
+				type: 'string',
+				description: 'Datum des letzten Mals (YYYY-MM-DD)',
+				required: false,
+			},
+			{
+				name: 'meaning',
+				type: 'string',
+				description: 'Was es bedeutet hat',
+				required: false,
+			},
+			{
+				name: 'whatIKnewThen',
+				type: 'string',
+				description: 'Was du damals nicht wusstest',
+				required: false,
+			},
+			{
+				name: 'whatIKnowNow',
+				type: 'string',
+				description: 'Was du heute siehst',
+				required: false,
+			},
+			{
+				name: 'tenderness',
+				type: 'number',
+				description: 'Wie sehr es dich heute beruehrt (1-5)',
+				required: false,
+			},
+			{
+				name: 'wouldReclaim',
+				type: 'string',
+				description: 'Wuerdest du es zurueckholen?',
+				required: false,
+				enum: ['no', 'maybe', 'yes'],
+			},
+		],
+	},
+	{
+		name: 'reclaim_last',
+		module: 'lasts',
+		description:
+			'Markiert einen Last als "aufgehoben" — es ist wieder passiert. Optionaler Notiz-Text beschreibt, was zurueckgekommen ist.',
+		defaultPolicy: 'propose',
+		parameters: [
+			{ name: 'lastId', type: 'string', description: 'ID des Lasts', required: true },
+			{
+				name: 'reclaimedNote',
+				type: 'string',
+				description: 'Was ist wieder passiert (optional)',
+				required: false,
+			},
+		],
+	},
+	{
+		name: 'list_lasts',
+		module: 'lasts',
+		description:
+			'Listet Lasts (id, title, status, category, date). Optional nach Status oder Kategorie filterbar.',
+		defaultPolicy: 'auto',
+		parameters: [
+			{
+				name: 'status',
+				type: 'string',
+				description: 'Nur einen Status zeigen',
+				required: false,
+				enum: ['suspected', 'confirmed', 'reclaimed'],
+			},
+			{
+				name: 'category',
+				type: 'string',
+				description: 'Nur eine Kategorie zeigen',
+				required: false,
+				enum: [
+					'culinary',
+					'adventure',
+					'travel',
+					'people',
+					'career',
+					'creative',
+					'nature',
+					'culture',
+					'health',
+					'tech',
+					'other',
+				],
+			},
+			{
+				name: 'limit',
+				type: 'number',
+				description: 'Maximale Anzahl (Standard 30)',
+				required: false,
+			},
+		],
+	},
+	{
+		name: 'suggest_lasts',
+		module: 'lasts',
+		description:
+			'Laesst die Inferenz-Engine ueber places/habits/contacts scannen und generiert "suspected"-Lasts mit inferredFrom-Provenance fuer Eintraege, die Frequenz-Drops zeigen. Dedupliziert gegen existierende Lasts und die Cooldown-Liste. Schreibt direkt in die Inbox — kein Proposal-Workflow noetig, weil die Eintraege als suspected landen und der User sie dort akzeptieren oder verwerfen kann.',
+		defaultPolicy: 'auto',
+		parameters: [],
+	},
 ];
 
 // ═══════════════════════════════════════════════════════════════

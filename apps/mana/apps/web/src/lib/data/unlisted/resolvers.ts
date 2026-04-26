@@ -22,6 +22,7 @@ import type { LocalLibraryEntry } from '$lib/modules/library/types';
 import type { LocalPlace } from '$lib/modules/places/types';
 import type { LocalTimeBlock } from '$lib/data/time-blocks/types';
 import type { LocalAugurEntry } from '$lib/modules/augur/types';
+import type { LocalLast } from '$lib/modules/lasts/types';
 
 export class UnsupportedCollectionError extends Error {
 	constructor(collection: string) {
@@ -54,6 +55,8 @@ export async function buildUnlistedBlob(
 			return buildPlaceBlob(recordId);
 		case 'augurEntries':
 			return buildAugurEntryBlob(recordId);
+		case 'lasts':
+			return buildLastBlob(recordId);
 		default:
 			throw new UnsupportedCollectionError(collection);
 	}
@@ -220,5 +223,48 @@ async function buildAugurEntryBlob(recordId: string): Promise<Record<string, unk
 		// being explicit keeps the contract clear.
 		outcomeNote: isResolved ? (decrypted.outcomeNote ?? null) : null,
 		resolvedAt: isResolved ? (decrypted.resolvedAt ?? null) : null,
+	};
+}
+
+/**
+ * Last → snapshot blob.
+ *
+ * Whitelist: only the *reflective core* — the parts a user might actually
+ * want to share publicly without exposing their full inner monologue.
+ *
+ * IN: title, status, category, date, meaning, whatIKnewThen, whatIKnowNow,
+ *     tenderness, wouldReclaim
+ * OUT: note (often raw stream-of-consciousness), inferredFrom (internal
+ *      provenance), confidence (internal flag), reclaimedAt/reclaimedNote
+ *      (later state, complicated to render publicly), personIds /
+ *      sharedWith / mediaIds / audioNoteId / placeId (private refs),
+ *      recognisedAt (internal timeline), pin/archive flags.
+ *
+ * Tone-decision: lasts are intim. Reclaimed lasts are NOT shared (would
+ * leak the "this is back" emotion that's even more vulnerable). The
+ * whitelist already drops `reclaimedNote` but we additionally refuse to
+ * publish a blob whose status is 'reclaimed' to make the intent explicit.
+ */
+async function buildLastBlob(recordId: string): Promise<Record<string, unknown>> {
+	const raw = await db.table<LocalLast>('lasts').get(recordId);
+	if (!raw || raw.deletedAt) {
+		throw new RecordNotFoundError('lasts', recordId);
+	}
+	if (raw.status === 'reclaimed') {
+		throw new RecordNotFoundError('lasts', recordId);
+	}
+
+	const decrypted = (await decryptRecord('lasts', { ...raw })) as LocalLast;
+
+	return {
+		title: decrypted.title,
+		status: decrypted.status,
+		category: decrypted.category,
+		date: decrypted.date ?? null,
+		meaning: decrypted.meaning ?? null,
+		whatIKnewThen: decrypted.whatIKnewThen ?? null,
+		whatIKnowNow: decrypted.whatIKnowNow ?? null,
+		tenderness: decrypted.tenderness ?? null,
+		wouldReclaim: decrypted.wouldReclaim ?? null,
 	};
 }

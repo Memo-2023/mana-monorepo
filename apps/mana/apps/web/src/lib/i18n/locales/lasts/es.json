@@ -1,0 +1,105 @@
+{
+	"app": {
+		"title": "Lasts",
+		"tagline": "Últimas veces — marcadas o reconocidas."
+	},
+	"list": {
+		"emptyAll": "Aún no hay lasts registrados.",
+		"emptyTab": "Nada en esta vista.",
+		"searchPlaceholder": "Buscar lasts ..."
+	},
+	"tabs": {
+		"all": "Todos",
+		"suspected": "Sospechados",
+		"confirmed": "Confirmados",
+		"reclaimed": "Recuperados",
+		"inbox": "Bandeja"
+	},
+	"status": {
+		"suspected": "Sospechado",
+		"confirmed": "Confirmado",
+		"reclaimed": "Recuperado"
+	},
+	"quickAdd": {
+		"placeholder": "Anotar una última vez ... (Enter)",
+		"modeSuspected": "Sospechado",
+		"modeConfirmed": "Confirmado"
+	},
+	"actions": {
+		"confirm": "Confirmar",
+		"reclaim": "Recuperar",
+		"delete": "Eliminar",
+		"pin": "Fijar",
+		"unpin": "Desfijar",
+		"archive": "Archivar",
+		"save": "Guardar",
+		"cancel": "Cancelar"
+	},
+	"detail": {
+		"routeTitle": "Last",
+		"loading": "Cargando ...",
+		"notFound": "Last no encontrado.",
+		"backLink": "Volver a la lista",
+		"titlePlaceholder": "Título ...",
+		"categoryLabel": "Categoría",
+		"dateLabel": "Fecha",
+		"confidenceLabel": "Confianza",
+		"meaningLabel": "¿Qué significó?",
+		"meaningPlaceholder": "¿Qué significó para ti?",
+		"whatIKnewThenLabel": "¿Qué no sabía entonces?",
+		"whatIKnewThenPlaceholder": "¿Qué te habría gustado saber?",
+		"whatIKnowNowLabel": "¿Qué sé ahora?",
+		"whatIKnowNowPlaceholder": "¿Qué se ve más claro hoy?",
+		"noteLabel": "Nota",
+		"notePlaceholder": "¿Algo más para anotar?",
+		"tendernessLabel": "¿Cuánto te conmueve hoy?",
+		"wouldReclaimLabel": "¿Lo recuperarías?",
+		"reclaimedAt": "Recuperado el",
+		"reclaimedNotePlaceholder": "Volvió a pasar — ¿qué?",
+		"inferredFrom": "Sugerido a partir de",
+		"visibilityLabel": "Visibilidad"
+	},
+	"confidence": {
+		"probably": "Probable",
+		"likely": "Bastante seguro",
+		"certain": "Seguro"
+	},
+	"wouldReclaim": {
+		"no": "No",
+		"maybe": "Quizás",
+		"yes": "Sí"
+	},
+	"inbox": {
+		"routeTitle": "Bandeja",
+		"title": "Bandeja",
+		"tagline": "Sugerencias de IA pendientes de revisión. Acepta o descarta.",
+		"empty": "Sin sugerencias — la búsqueda no encontró coincidencias.",
+		"scanNow": "Escanear ahora",
+		"scanning": "Escaneando ...",
+		"scanSummary": "{written} sugerencias nuevas — {cooldown} omitidas en enfriamiento, {existing} ya conocidas.",
+		"accept": "Aceptar",
+		"dismiss": "Descartar"
+	},
+	"banner": {
+		"title": "Hoy",
+		"anniversary": "Hace {years} año(s) — última vez",
+		"recognition": "Reconocido como un last hace {years} año(s)",
+		"inbox": "{count} nueva(s) sugerencia(s) en la bandeja"
+	},
+	"settings": {
+		"routeTitle": "Lasts — Ajustes",
+		"title": "Ajustes",
+		"tagline": "¿Cuándo deberían los lasts recordarte que hoy estás aquí?",
+		"anniversaryLabel": "Recordatorios de aniversario",
+		"anniversaryDesc": "Muestra lasts cuya fecha coincide con hoy hace X años.",
+		"recognitionLabel": "Recordatorios de reconocimiento",
+		"recognitionDesc": "Muestra lasts que reconociste hoy hace X años.",
+		"inboxLabel": "Aviso de bandeja",
+		"inboxDesc": "Muestra una línea cuando hay nuevas sugerencias de IA en la bandeja.",
+		"bannerCapLabel": "Como máximo {count} recordatorios a la vez",
+		"reset": "Restablecer",
+		"showTestBanner": "Mostrar banner de prueba",
+		"testSampleTitle": "Last de ejemplo",
+		"pushNote": "Las notificaciones push reales del SO llegarán cuando exista la infraestructura PWA push. Hasta entonces, los recordatorios aparecen arriba de la lista al abrir la app."
+	}
+}

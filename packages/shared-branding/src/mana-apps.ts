@@ -752,6 +752,23 @@ export const MANA_APPS: ManaApp[] = [
 		requiredTier: 'guest',
 	},
 	{
+		id: 'lasts',
+		name: 'Lasts',
+		description: {
+			de: 'Letzte Male',
+			en: 'Last Times',
+		},
+		longDescription: {
+			de: 'Halte fest, was zum letzten Mal passiert ist — bewusst markiert oder rückwirkend erkannt. Spiegelbild zu Firsts: leise Reflexion statt Vorfreude.',
+			en: 'Capture what happened for the last time — marked deliberately or recognised in hindsight. Mirror sibling to Firsts: quiet reflection instead of anticipation.',
+		},
+		icon: APP_ICONS.lasts,
+		color: '#6366f1',
+		comingSoon: false,
+		status: 'development',
+		requiredTier: 'guest', // LOCAL TIER PATCH — revert to 'beta' before release (see project_tier_patch_resolved memory)
+	},
+	{
 		id: 'period',
 		name: 'Periode',
 		description: {

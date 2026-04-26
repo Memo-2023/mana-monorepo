@@ -1,0 +1,105 @@
+{
+	"app": {
+		"title": "Lasts",
+		"tagline": "Letzte Male — markieren oder erkennen."
+	},
+	"list": {
+		"emptyAll": "Noch keine Lasts erfasst.",
+		"emptyTab": "Nichts in dieser Ansicht.",
+		"searchPlaceholder": "Lasts durchsuchen ..."
+	},
+	"tabs": {
+		"all": "Alle",
+		"suspected": "Vermutet",
+		"confirmed": "Bestätigt",
+		"reclaimed": "Aufgehoben",
+		"inbox": "Inbox"
+	},
+	"status": {
+		"suspected": "Vermutet",
+		"confirmed": "Bestätigt",
+		"reclaimed": "Aufgehoben"
+	},
+	"quickAdd": {
+		"placeholder": "Letztes Mal eintragen ... (Enter)",
+		"modeSuspected": "Vermutet",
+		"modeConfirmed": "Bestätigt"
+	},
+	"actions": {
+		"confirm": "Bestätigen",
+		"reclaim": "Aufheben",
+		"delete": "Löschen",
+		"pin": "Pinnen",
+		"unpin": "Lösen",
+		"archive": "Archivieren",
+		"save": "Speichern",
+		"cancel": "Abbrechen"
+	},
+	"detail": {
+		"routeTitle": "Last",
+		"loading": "Lädt ...",
+		"notFound": "Last nicht gefunden.",
+		"backLink": "Zurück zur Liste",
+		"titlePlaceholder": "Titel ...",
+		"categoryLabel": "Kategorie",
+		"dateLabel": "Datum",
+		"confidenceLabel": "Sicherheit",
+		"meaningLabel": "Was hat es bedeutet?",
+		"meaningPlaceholder": "Was hat es dir bedeutet?",
+		"whatIKnewThenLabel": "Was wusste ich damals nicht?",
+		"whatIKnewThenPlaceholder": "Was hättest du damals wissen wollen?",
+		"whatIKnowNowLabel": "Was weiss ich jetzt?",
+		"whatIKnowNowPlaceholder": "Was siehst du heute klarer?",
+		"noteLabel": "Notiz",
+		"notePlaceholder": "Was willst du festhalten?",
+		"tendernessLabel": "Wie sehr berührt es dich heute?",
+		"wouldReclaimLabel": "Würdest du es zurückholen?",
+		"reclaimedAt": "Aufgehoben am",
+		"reclaimedNotePlaceholder": "Es ist wieder passiert — was?",
+		"inferredFrom": "Vorgeschlagen aus",
+		"visibilityLabel": "Sichtbarkeit"
+	},
+	"confidence": {
+		"probably": "Wahrscheinlich",
+		"likely": "Recht sicher",
+		"certain": "Sicher"
+	},
+	"wouldReclaim": {
+		"no": "Nein",
+		"maybe": "Vielleicht",
+		"yes": "Ja"
+	},
+	"inbox": {
+		"routeTitle": "Inbox",
+		"title": "Inbox",
+		"tagline": "AI-Vorschläge zur Überprüfung. Akzeptiere oder verwirf.",
+		"empty": "Keine Vorschläge — die Suche hat nichts Passendes gefunden.",
+		"scanNow": "Jetzt scannen",
+		"scanning": "Scannt ...",
+		"scanSummary": "{written} neue Vorschläge — {cooldown} im Cooldown übersprungen, {existing} schon bekannt.",
+		"accept": "Akzeptieren",
+		"dismiss": "Verwerfen"
+	},
+	"banner": {
+		"title": "Heute",
+		"anniversary": "Vor {years} Jahr(en) das letzte Mal",
+		"recognition": "Vor {years} Jahr(en) als Last erkannt",
+		"inbox": "{count} neue Vorschläge in der Inbox"
+	},
+	"settings": {
+		"routeTitle": "Lasts — Einstellungen",
+		"title": "Einstellungen",
+		"tagline": "Wann sollen dich Lasts daran erinnern, dass du heute hier bist?",
+		"anniversaryLabel": "Jahrestags-Erinnerungen",
+		"anniversaryDesc": "Zeigt heute Lasts, deren Datum auf den heutigen Tag vor X Jahren fällt.",
+		"recognitionLabel": "Erkennungs-Erinnerungen",
+		"recognitionDesc": "Zeigt Lasts, die heute vor X Jahren als Last erkannt wurden.",
+		"inboxLabel": "Inbox-Hinweis",
+		"inboxDesc": "Zeigt eine Zeile, wenn neue AI-Vorschläge in der Inbox liegen.",
+		"bannerCapLabel": "Maximal {count} Erinnerungen gleichzeitig",
+		"reset": "Zurücksetzen",
+		"showTestBanner": "Test-Banner zeigen",
+		"testSampleTitle": "Beispiel-Last",
+		"pushNote": "Echtes OS-Push folgt sobald die PWA-Push-Infrastruktur landet. Bis dahin tauchen Erinnerungen oben in der Liste auf, sobald du die App öffnest."
+	}
+}

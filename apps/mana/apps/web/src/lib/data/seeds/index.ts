@@ -16,3 +16,6 @@
 
 // Side-effect: registers `workbench-home` in the per-space-seeds map.
 import './workbench-home';
+
+// Side-effect: registers `lasts-welcome` per-space-seed.
+import './lasts';

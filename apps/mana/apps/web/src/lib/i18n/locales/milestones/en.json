@@ -1,0 +1,27 @@
+{
+	"timeline": {
+		"title": "Milestones",
+		"tagline": "First times and last times side by side.",
+		"empty": "No milestones yet.",
+		"emptyTab": "Nothing in this view.",
+		"recapLink": "{year} recap"
+	},
+	"tabs": {
+		"all": "All",
+		"first": "Firsts",
+		"last": "Lasts"
+	},
+	"recap": {
+		"title": "{year} in review",
+		"titleFallback": "Year recap",
+		"tagline": "What began, what ended.",
+		"empty": "{year} had no milestones.",
+		"invalid": "Invalid year.",
+		"backLink": "Back to timeline",
+		"totalLabel": "Total",
+		"categoriesLabel": "By category",
+		"topFirstsLabel": "Top firsts",
+		"topLastsLabel": "Top lasts",
+		"activeMonthsLabel": "Active months"
+	}
+}

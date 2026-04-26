@@ -1,0 +1,105 @@
+{
+	"app": {
+		"title": "Lasts",
+		"tagline": "Ultime volte — annotate o riconosciute."
+	},
+	"list": {
+		"emptyAll": "Ancora nessun last registrato.",
+		"emptyTab": "Niente in questa vista.",
+		"searchPlaceholder": "Cerca lasts ..."
+	},
+	"tabs": {
+		"all": "Tutti",
+		"suspected": "Sospettati",
+		"confirmed": "Confermati",
+		"reclaimed": "Ripresi",
+		"inbox": "In arrivo"
+	},
+	"status": {
+		"suspected": "Sospettato",
+		"confirmed": "Confermato",
+		"reclaimed": "Ripreso"
+	},
+	"quickAdd": {
+		"placeholder": "Annotare un'ultima volta ... (Invio)",
+		"modeSuspected": "Sospettato",
+		"modeConfirmed": "Confermato"
+	},
+	"actions": {
+		"confirm": "Conferma",
+		"reclaim": "Riprendi",
+		"delete": "Elimina",
+		"pin": "Fissa",
+		"unpin": "Rimuovi pin",
+		"archive": "Archivia",
+		"save": "Salva",
+		"cancel": "Annulla"
+	},
+	"detail": {
+		"routeTitle": "Last",
+		"loading": "Caricamento ...",
+		"notFound": "Last non trovato.",
+		"backLink": "Torna alla lista",
+		"titlePlaceholder": "Titolo ...",
+		"categoryLabel": "Categoria",
+		"dateLabel": "Data",
+		"confidenceLabel": "Sicurezza",
+		"meaningLabel": "Cosa ha significato?",
+		"meaningPlaceholder": "Cosa ha significato per te?",
+		"whatIKnewThenLabel": "Cosa non sapevo allora?",
+		"whatIKnewThenPlaceholder": "Cosa avresti voluto sapere?",
+		"whatIKnowNowLabel": "Cosa so adesso?",
+		"whatIKnowNowPlaceholder": "Cosa è più chiaro oggi?",
+		"noteLabel": "Nota",
+		"notePlaceholder": "Qualcos'altro da annotare?",
+		"tendernessLabel": "Quanto ti tocca oggi?",
+		"wouldReclaimLabel": "Lo riprenderesti?",
+		"reclaimedAt": "Ripreso il",
+		"reclaimedNotePlaceholder": "È successo di nuovo — cosa?",
+		"inferredFrom": "Suggerito da",
+		"visibilityLabel": "Visibilità"
+	},
+	"confidence": {
+		"probably": "Probabile",
+		"likely": "Abbastanza sicuro",
+		"certain": "Sicuro"
+	},
+	"wouldReclaim": {
+		"no": "No",
+		"maybe": "Forse",
+		"yes": "Sì"
+	},
+	"inbox": {
+		"routeTitle": "In arrivo",
+		"title": "In arrivo",
+		"tagline": "Suggerimenti IA in attesa di revisione. Accetta o scarta.",
+		"empty": "Nessun suggerimento — la scansione non ha trovato nulla di rilevante.",
+		"scanNow": "Scansiona ora",
+		"scanning": "Scansione ...",
+		"scanSummary": "{written} nuovi suggerimenti — {cooldown} saltati in cooldown, {existing} già noti.",
+		"accept": "Accetta",
+		"dismiss": "Scarta"
+	},
+	"banner": {
+		"title": "Oggi",
+		"anniversary": "{years} anno/i fa — ultima volta",
+		"recognition": "Riconosciuto come last {years} anno/i fa",
+		"inbox": "{count} nuovi suggerimenti in arrivo"
+	},
+	"settings": {
+		"routeTitle": "Lasts — Impostazioni",
+		"title": "Impostazioni",
+		"tagline": "Quando dovrebbero i lasts ricordarti che sei qui oggi?",
+		"anniversaryLabel": "Promemoria anniversari",
+		"anniversaryDesc": "Mostra i lasts la cui data coincide con oggi X anni fa.",
+		"recognitionLabel": "Promemoria di riconoscimento",
+		"recognitionDesc": "Mostra i lasts che hai riconosciuto oggi X anni fa.",
+		"inboxLabel": "Avviso in arrivo",
+		"inboxDesc": "Mostra una riga quando arrivano nuovi suggerimenti IA in arrivo.",
+		"bannerCapLabel": "Massimo {count} promemoria alla volta",
+		"reset": "Ripristina",
+		"showTestBanner": "Mostra banner di prova",
+		"testSampleTitle": "Last di esempio",
+		"pushNote": "Le notifiche push reali del SO arriveranno quando esisterà l'infrastruttura PWA push. Fino ad allora, i promemoria appaiono in cima alla lista all'apertura dell'app."
+	}
+}

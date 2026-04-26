@@ -463,6 +463,33 @@ export const ENCRYPTION_REGISTRY: Record<string, EncryptionConfig> = {
 		fields: ['title', 'motivation', 'note', 'expectation', 'reality', 'sharedWith'],
 	},
 
+	// ─── Lasts ───────────────────────────────────────────────
+	// Mirror sibling to firsts (docs/plans/lasts-module.md). User-typed text
+	// fields are encrypted. Status, category, confidence, dates, tenderness,
+	// wouldReclaim, personIds, mediaIds, placeId, inferredFrom stay plaintext
+	// for indexing/filtering and so the inference scanner can read provenance
+	// without master-key access. Visibility metadata + unlistedToken stay
+	// plaintext — they're routing fields the server-side share endpoint
+	// must read without the master key.
+	lasts: {
+		enabled: true,
+		fields: [
+			'title',
+			'meaning',
+			'note',
+			'whatIKnewThen',
+			'whatIKnowNow',
+			'reclaimedNote',
+			'sharedWith',
+		],
+	},
+
+	// ─── Lasts inference cooldown ───────────────────────────
+	// Plaintext metadata table — records dismissed inference candidates by
+	// (refTable, refId) so the scanner skips them for ~12 months. No
+	// user-typed content lives here.
+	lastsCooldown: { enabled: false, fields: [] },
+
 	// ─── Guides ──────────────────────────────────────────────
 	guides: { enabled: true, fields: ['title', 'description'] },
 	sections: { enabled: true, fields: ['title', 'content'] },

@@ -1,0 +1,27 @@
+{
+	"timeline": {
+		"title": "Hitos",
+		"tagline": "Primeras veces y últimas veces lado a lado.",
+		"empty": "Aún no hay hitos.",
+		"emptyTab": "Nada en esta vista.",
+		"recapLink": "Resumen {year}"
+	},
+	"tabs": {
+		"all": "Todos",
+		"first": "Firsts",
+		"last": "Lasts"
+	},
+	"recap": {
+		"title": "{year} en resumen",
+		"titleFallback": "Resumen anual",
+		"tagline": "Qué empezó, qué terminó.",
+		"empty": "{year} no tuvo hitos.",
+		"invalid": "Año inválido.",
+		"backLink": "Volver a la timeline",
+		"totalLabel": "Total",
+		"categoriesLabel": "Por categoría",
+		"topFirstsLabel": "Top firsts",
+		"topLastsLabel": "Top lasts",
+		"activeMonthsLabel": "Meses activos"
+	}
+}

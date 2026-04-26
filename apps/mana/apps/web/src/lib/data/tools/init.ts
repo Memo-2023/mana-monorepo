@@ -26,6 +26,7 @@ import { memoroTools } from '$lib/modules/memoro/tools';
 import { skilltreeTools } from '$lib/modules/skilltree/tools';
 import { periodTools } from '$lib/modules/period/tools';
 import { firstsTools } from '$lib/modules/firsts/tools';
+import { lastsTools } from '$lib/modules/lasts/tools';
 import { guidesTools } from '$lib/modules/guides/tools';
 import { inventoryTools } from '$lib/modules/inventory/tools';
 import { plantsTools } from '$lib/modules/plants/tools';
@@ -76,6 +77,7 @@ export function initTools(): void {
 	registerTools(skilltreeTools);
 	registerTools(periodTools);
 	registerTools(firstsTools);
+	registerTools(lastsTools);
 	registerTools(guidesTools);
 	registerTools(inventoryTools);
 	registerTools(plantsTools);

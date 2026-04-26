@@ -1,0 +1,27 @@
+{
+	"timeline": {
+		"title": "Pietre miliari",
+		"tagline": "Prime volte e ultime volte fianco a fianco.",
+		"empty": "Ancora nessuna pietra miliare.",
+		"emptyTab": "Niente in questa vista.",
+		"recapLink": "Riepilogo {year}"
+	},
+	"tabs": {
+		"all": "Tutte",
+		"first": "Firsts",
+		"last": "Lasts"
+	},
+	"recap": {
+		"title": "{year} in sintesi",
+		"titleFallback": "Riepilogo annuale",
+		"tagline": "Cosa è iniziato, cosa è finito.",
+		"empty": "{year} non ha avuto pietre miliari.",
+		"invalid": "Anno non valido.",
+		"backLink": "Torna alla timeline",
+		"totalLabel": "Totale",
+		"categoriesLabel": "Per categoria",
+		"topFirstsLabel": "Top firsts",
+		"topLastsLabel": "Top lasts",
+		"activeMonthsLabel": "Mesi attivi"
+	}
+}

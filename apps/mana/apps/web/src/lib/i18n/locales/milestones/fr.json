@@ -1,0 +1,27 @@
+{
+	"timeline": {
+		"title": "Jalons",
+		"tagline": "Premières fois et dernières fois côte à côte.",
+		"empty": "Aucun jalon pour le moment.",
+		"emptyTab": "Rien dans cette vue.",
+		"recapLink": "Bilan {year}"
+	},
+	"tabs": {
+		"all": "Tous",
+		"first": "Firsts",
+		"last": "Lasts"
+	},
+	"recap": {
+		"title": "{year} en revue",
+		"titleFallback": "Bilan annuel",
+		"tagline": "Ce qui a commencé, ce qui a fini.",
+		"empty": "{year} n'a eu aucun jalon.",
+		"invalid": "Année invalide.",
+		"backLink": "Retour à la timeline",
+		"totalLabel": "Total",
+		"categoriesLabel": "Par catégorie",
+		"topFirstsLabel": "Top firsts",
+		"topLastsLabel": "Top lasts",
+		"activeMonthsLabel": "Mois actifs"
+	}
+}

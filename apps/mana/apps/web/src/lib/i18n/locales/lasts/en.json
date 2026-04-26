@@ -1,0 +1,105 @@
+{
+	"app": {
+		"title": "Lasts",
+		"tagline": "Last times — marked or recognised."
+	},
+	"list": {
+		"emptyAll": "No lasts captured yet.",
+		"emptyTab": "Nothing in this view.",
+		"searchPlaceholder": "Search lasts ..."
+	},
+	"tabs": {
+		"all": "All",
+		"suspected": "Suspected",
+		"confirmed": "Confirmed",
+		"reclaimed": "Reclaimed",
+		"inbox": "Inbox"
+	},
+	"status": {
+		"suspected": "Suspected",
+		"confirmed": "Confirmed",
+		"reclaimed": "Reclaimed"
+	},
+	"quickAdd": {
+		"placeholder": "Capture a last time ... (Enter)",
+		"modeSuspected": "Suspected",
+		"modeConfirmed": "Confirmed"
+	},
+	"actions": {
+		"confirm": "Confirm",
+		"reclaim": "Reclaim",
+		"delete": "Delete",
+		"pin": "Pin",
+		"unpin": "Unpin",
+		"archive": "Archive",
+		"save": "Save",
+		"cancel": "Cancel"
+	},
+	"detail": {
+		"routeTitle": "Last",
+		"loading": "Loading ...",
+		"notFound": "Last not found.",
+		"backLink": "Back to list",
+		"titlePlaceholder": "Title ...",
+		"categoryLabel": "Category",
+		"dateLabel": "Date",
+		"confidenceLabel": "Confidence",
+		"meaningLabel": "What did it mean?",
+		"meaningPlaceholder": "What did it mean to you?",
+		"whatIKnewThenLabel": "What didn't I know then?",
+		"whatIKnewThenPlaceholder": "What would you have wanted to know?",
+		"whatIKnowNowLabel": "What do I know now?",
+		"whatIKnowNowPlaceholder": "What is clearer today?",
+		"noteLabel": "Note",
+		"notePlaceholder": "Anything else to capture?",
+		"tendernessLabel": "How much does it touch you today?",
+		"wouldReclaimLabel": "Would you reclaim it?",
+		"reclaimedAt": "Reclaimed on",
+		"reclaimedNotePlaceholder": "It happened again — what?",
+		"inferredFrom": "Suggested from",
+		"visibilityLabel": "Visibility"
+	},
+	"confidence": {
+		"probably": "Probably",
+		"likely": "Likely",
+		"certain": "Certain"
+	},
+	"wouldReclaim": {
+		"no": "No",
+		"maybe": "Maybe",
+		"yes": "Yes"
+	},
+	"inbox": {
+		"routeTitle": "Inbox",
+		"title": "Inbox",
+		"tagline": "AI suggestions awaiting review. Accept or dismiss.",
+		"empty": "No suggestions — the scan found nothing matching.",
+		"scanNow": "Scan now",
+		"scanning": "Scanning ...",
+		"scanSummary": "{written} new suggestion(s) — {cooldown} skipped on cooldown, {existing} already known.",
+		"accept": "Accept",
+		"dismiss": "Dismiss"
+	},
+	"banner": {
+		"title": "Today",
+		"anniversary": "{years} year(s) ago — last time",
+		"recognition": "Recognised as a last {years} year(s) ago",
+		"inbox": "{count} new suggestion(s) in the Inbox"
+	},
+	"settings": {
+		"routeTitle": "Lasts — Settings",
+		"title": "Settings",
+		"tagline": "When should lasts remind you that you're here today?",
+		"anniversaryLabel": "Anniversary reminders",
+		"anniversaryDesc": "Surfaces lasts whose date matches today X years ago.",
+		"recognitionLabel": "Recognition reminders",
+		"recognitionDesc": "Surfaces lasts you recognised today X years ago.",
+		"inboxLabel": "Inbox hint",
+		"inboxDesc": "Shows a line when new AI suggestions land in the Inbox.",
+		"bannerCapLabel": "At most {count} reminders at once",
+		"reset": "Reset",
+		"showTestBanner": "Show test banner",
+		"testSampleTitle": "Sample last",
+		"pushNote": "Real OS push lands once PWA push infrastructure exists. Until then, reminders surface at the top of the list when you open the app."
+	}
+}

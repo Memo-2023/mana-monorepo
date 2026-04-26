@@ -1,0 +1,27 @@
+{
+	"timeline": {
+		"title": "Meilensteine",
+		"tagline": "Erste Male und letzte Male nebeneinander.",
+		"empty": "Noch keine Meilensteine.",
+		"emptyTab": "Nichts in dieser Ansicht.",
+		"recapLink": "{year}-Rückblick"
+	},
+	"tabs": {
+		"all": "Alle",
+		"first": "Firsts",
+		"last": "Lasts"
+	},
+	"recap": {
+		"title": "{year} im Rückblick",
+		"titleFallback": "Jahresrückblick",
+		"tagline": "Was war neu, was endete.",
+		"empty": "{year} hatte keine Meilensteine.",
+		"invalid": "Ungültiges Jahr.",
+		"backLink": "Zurück zur Timeline",
+		"totalLabel": "Gesamt",
+		"categoriesLabel": "Nach Kategorie",
+		"topFirstsLabel": "Top Firsts",
+		"topLastsLabel": "Top Lasts",
+		"activeMonthsLabel": "Aktive Monate"
+	}
+}

@@ -8,6 +8,7 @@
 	import SharedLibraryEntryView from '$lib/modules/library/SharedLibraryEntryView.svelte';
 	import SharedPlaceView from '$lib/modules/places/SharedPlaceView.svelte';
 	import SharedAugurEntryView from '$lib/modules/augur/SharedAugurEntryView.svelte';
+	import SharedLastView from '$lib/modules/lasts/SharedLastView.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -21,6 +22,8 @@
 	<SharedPlaceView blob={data.blob} token={data.token} expiresAt={data.expiresAt} />
 {:else if data.collection === 'augurEntries'}
 	<SharedAugurEntryView blob={data.blob} token={data.token} expiresAt={data.expiresAt} />
+{:else if data.collection === 'lasts'}
+	<SharedLastView blob={data.blob} token={data.token} expiresAt={data.expiresAt} />
 {:else}
 	<div class="unknown">
 		<h1>Unbekannter Link-Typ</h1>

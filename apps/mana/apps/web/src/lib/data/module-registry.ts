@@ -88,6 +88,7 @@ import { whoModuleConfig } from '$lib/modules/who/module.config';
 import { newsModuleConfig } from '$lib/modules/news/module.config';
 import { bodyModuleConfig } from '$lib/modules/body/module.config';
 import { firstsModuleConfig } from '$lib/modules/firsts/module.config';
+import { lastsModuleConfig } from '$lib/modules/lasts/module.config';
 import { drinkModuleConfig } from '$lib/modules/drink/module.config';
 import { recipesModuleConfig } from '$lib/modules/recipes/module.config';
 import { stretchModuleConfig } from '$lib/modules/stretch/module.config';
@@ -152,6 +153,7 @@ export const MODULE_CONFIGS: readonly ModuleConfig[] = [
 	newsModuleConfig,
 	bodyModuleConfig,
 	firstsModuleConfig,
+	lastsModuleConfig,
 	drinkModuleConfig,
 	recipesModuleConfig,
 	stretchModuleConfig,
