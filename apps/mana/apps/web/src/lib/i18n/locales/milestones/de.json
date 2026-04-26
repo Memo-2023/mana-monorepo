@@ -8,8 +8,8 @@
 	},
 	"tabs": {
 		"all": "Alle",
-		"first": "Firsts",
-		"last": "Lasts"
+		"first": "Erste Male",
+		"last": "Letzte Male"
 	},
 	"recap": {
 		"title": "{year} im Rückblick",
@@ -20,8 +20,8 @@
 		"backLink": "Zurück zur Timeline",
 		"totalLabel": "Gesamt",
 		"categoriesLabel": "Nach Kategorie",
-		"topFirstsLabel": "Top Firsts",
-		"topLastsLabel": "Top Lasts",
+		"topFirstsLabel": "Top Erste Male",
+		"topLastsLabel": "Top Letzte Male",
 		"activeMonthsLabel": "Aktive Monate"
 	}
 }

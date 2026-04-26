@@ -736,7 +736,7 @@ export const MANA_APPS: ManaApp[] = [
 	},
 	{
 		id: 'firsts',
-		name: 'Firsts',
+		name: 'Erste Male',
 		description: {
 			de: 'Erste Male',
 			en: 'First Times',
@@ -753,7 +753,7 @@ export const MANA_APPS: ManaApp[] = [
 	},
 	{
 		id: 'lasts',
-		name: 'Lasts',
+		name: 'Letzte Male',
 		description: {
 			de: 'Letzte Male',
 			en: 'Last Times',

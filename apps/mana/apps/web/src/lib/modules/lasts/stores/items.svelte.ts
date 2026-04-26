@@ -321,7 +321,7 @@ export const lastsStore = {
 		if (before === next) return;
 
 		if (next === 'unlisted' && existing.status === 'reclaimed') {
-			throw new Error('Aufgehobene Lasts können nicht öffentlich geteilt werden.');
+			throw new Error('Aufgehobene Einträge können nicht öffentlich geteilt werden.');
 		}
 
 		const now = nowIso();

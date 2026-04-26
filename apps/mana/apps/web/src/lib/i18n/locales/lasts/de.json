@@ -1,12 +1,12 @@
 {
 	"app": {
-		"title": "Lasts",
+		"title": "Letzte Male",
 		"tagline": "Letzte Male — markieren oder erkennen."
 	},
 	"list": {
-		"emptyAll": "Noch keine Lasts erfasst.",
+		"emptyAll": "Noch keine Einträge erfasst.",
 		"emptyTab": "Nichts in dieser Ansicht.",
-		"searchPlaceholder": "Lasts durchsuchen ..."
+		"searchPlaceholder": "Letzte Male durchsuchen ..."
 	},
 	"tabs": {
 		"all": "Alle",
@@ -36,9 +36,9 @@
 		"cancel": "Abbrechen"
 	},
 	"detail": {
-		"routeTitle": "Last",
+		"routeTitle": "Letztes Mal",
 		"loading": "Lädt ...",
-		"notFound": "Last nicht gefunden.",
+		"notFound": "Eintrag nicht gefunden.",
 		"backLink": "Zurück zur Liste",
 		"titlePlaceholder": "Titel ...",
 		"categoryLabel": "Kategorie",
@@ -83,23 +83,23 @@
 	"banner": {
 		"title": "Heute",
 		"anniversary": "Vor {years} Jahr(en) das letzte Mal",
-		"recognition": "Vor {years} Jahr(en) als Last erkannt",
+		"recognition": "Vor {years} Jahr(en) als letztes Mal erkannt",
 		"inbox": "{count} neue Vorschläge in der Inbox"
 	},
 	"settings": {
-		"routeTitle": "Lasts — Einstellungen",
+		"routeTitle": "Letzte Male — Einstellungen",
 		"title": "Einstellungen",
-		"tagline": "Wann sollen dich Lasts daran erinnern, dass du heute hier bist?",
+		"tagline": "Wann sollen dich letzte Male daran erinnern, dass du heute hier bist?",
 		"anniversaryLabel": "Jahrestags-Erinnerungen",
-		"anniversaryDesc": "Zeigt heute Lasts, deren Datum auf den heutigen Tag vor X Jahren fällt.",
+		"anniversaryDesc": "Zeigt heute Einträge, deren Datum auf den heutigen Tag vor X Jahren fällt.",
 		"recognitionLabel": "Erkennungs-Erinnerungen",
-		"recognitionDesc": "Zeigt Lasts, die heute vor X Jahren als Last erkannt wurden.",
+		"recognitionDesc": "Zeigt Einträge, die heute vor X Jahren als letztes Mal erkannt wurden.",
 		"inboxLabel": "Inbox-Hinweis",
 		"inboxDesc": "Zeigt eine Zeile, wenn neue AI-Vorschläge in der Inbox liegen.",
 		"bannerCapLabel": "Maximal {count} Erinnerungen gleichzeitig",
 		"reset": "Zurücksetzen",
 		"showTestBanner": "Test-Banner zeigen",
-		"testSampleTitle": "Beispiel-Last",
+		"testSampleTitle": "Beispiel-Eintrag",
 		"pushNote": "Echtes OS-Push folgt sobald die PWA-Push-Infrastruktur landet. Bis dahin tauchen Erinnerungen oben in der Liste auf, sobald du die App öffnest."
 	}
 }
