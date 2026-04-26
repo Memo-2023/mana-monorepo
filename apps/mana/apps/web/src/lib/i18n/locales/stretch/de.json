@@ -1,0 +1,91 @@
+{
+	"list_view": {
+		"tab_dashboard": "Dashboard",
+		"tab_routines": "Routinen",
+		"tab_exercises": "Übungen",
+		"stat_streak": "Tage Streak",
+		"stat_today": "Min heute",
+		"stat_week": "Diese Woche",
+		"section_quickstart": "Schnellstart",
+		"routine_minutes": "{count} Min",
+		"rec_title_for_you": "Empfohlen für dich",
+		"rec_title_suggestion": "Vorschlag",
+		"rec_weak_areas": "Schwachstellen: {areas}",
+		"rec_btn_start": "{name} starten ({minutes} Min)",
+		"assessment_btn_repeat": "Bestandsaufnahme wiederholen",
+		"assessment_btn_first": "Erste Bestandsaufnahme starten",
+		"assessment_meta": "Letzte: {when} — Score: {score}%",
+		"section_today": "Heute",
+		"section_all_link": "Alle",
+		"action_reminders": "Erinnerungen",
+		"action_history": "Verlauf",
+		"action_create_routine": "+ Eigene Routine erstellen",
+		"side_suffix": " /Seite"
+	},
+	"assessment": {
+		"result_label": "Ergebnis",
+		"step_label": "Schritt {current} von {total}",
+		"score_label": "Beweglichkeit",
+		"weak_title": "Verbesserungsbedarf:",
+		"pain_title": "Schmerzbereiche (optional)",
+		"action_save": "Speichern"
+	},
+	"reminders": {
+		"header_title": "Erinnerungen",
+		"default_name": "Dehn-Erinnerung",
+		"placeholder_name": "Name...",
+		"select_no_routine": "Keine Routine verknüpft",
+		"action_cancel": "Abbrechen",
+		"action_create": "Erstellen",
+		"action_delete": "Löschen",
+		"action_new": "+ Neue Erinnerung",
+		"empty": "Noch keine Erinnerungen eingerichtet.",
+		"day_short_0": "So",
+		"day_short_1": "Mo",
+		"day_short_2": "Di",
+		"day_short_3": "Mi",
+		"day_short_4": "Do",
+		"day_short_5": "Fr",
+		"day_short_6": "Sa"
+	},
+	"creator": {
+		"header_title": "Neue Routine",
+		"action_save": "Speichern",
+		"placeholder_name": "Name der Routine...",
+		"placeholder_description": "Beschreibung (optional)...",
+		"section_picker": "Übung hinzufügen",
+		"filter_all": "Alle",
+		"selected_summary": "{count} Übungen · ~{minutes} Min"
+	},
+	"history": {
+		"header_title": "Verlauf",
+		"stat_sessions": "Sessions",
+		"stat_minutes": "Minuten",
+		"stat_streak": "Streak",
+		"section_30_days": "Letzte 30 Tage",
+		"section_balance": "Körperregion-Balance",
+		"section_all_sessions": "Alle Sessions",
+		"session_meta": "{minutes} Min · {completed}/{total} Übungen"
+	},
+	"player": {
+		"action_start": "Starten",
+		"ready_meta": "{count} Übungen · ~{minutes} Min",
+		"finish_title": "Geschafft!",
+		"finish_stats": "{completed} von {total} Übungen · {minutes} Min",
+		"finish_skipped": "{count} übersprungen",
+		"mood_label": "Wie fühlst du dich?",
+		"action_done": "Fertig",
+		"pause_badge": "Pause",
+		"side_left": "Linke Seite",
+		"side_right": "Rechte Seite",
+		"side_switch_notice": "Seitenwechsel...",
+		"rest_notice": "Pause",
+		"action_back": "◀ Zurück",
+		"action_next": "Weiter ▶",
+		"action_resume": "▶ Weiter",
+		"action_pause": "❚❚ Pause"
+	},
+	"route": {
+		"title": "Stretch"
+	}
+}

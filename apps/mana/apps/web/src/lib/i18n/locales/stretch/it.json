@@ -1,0 +1,91 @@
+{
+	"list_view": {
+		"tab_dashboard": "Dashboard",
+		"tab_routines": "Routine",
+		"tab_exercises": "Esercizi",
+		"stat_streak": "giorni di fila",
+		"stat_today": "min oggi",
+		"stat_week": "questa settimana",
+		"section_quickstart": "Avvio rapido",
+		"routine_minutes": "{count} min",
+		"rec_title_for_you": "Consigliato per te",
+		"rec_title_suggestion": "Suggerimento",
+		"rec_weak_areas": "Punti deboli: {areas}",
+		"rec_btn_start": "Avvia {name} ({minutes} min)",
+		"assessment_btn_repeat": "Ripeti la valutazione",
+		"assessment_btn_first": "Inizia la prima valutazione",
+		"assessment_meta": "Ultima: {when} — Punteggio: {score}%",
+		"section_today": "Oggi",
+		"section_all_link": "Tutte",
+		"action_reminders": "Promemoria",
+		"action_history": "Cronologia",
+		"action_create_routine": "+ Crea una routine personale",
+		"side_suffix": " /lato"
+	},
+	"assessment": {
+		"result_label": "Risultato",
+		"step_label": "Passo {current} di {total}",
+		"score_label": "Mobilità",
+		"weak_title": "Da migliorare:",
+		"pain_title": "Zone di dolore (opzionale)",
+		"action_save": "Salva"
+	},
+	"reminders": {
+		"header_title": "Promemoria",
+		"default_name": "Promemoria stretching",
+		"placeholder_name": "Nome...",
+		"select_no_routine": "Nessuna routine collegata",
+		"action_cancel": "Annulla",
+		"action_create": "Crea",
+		"action_delete": "Elimina",
+		"action_new": "+ Nuovo promemoria",
+		"empty": "Ancora nessun promemoria.",
+		"day_short_0": "Dom",
+		"day_short_1": "Lun",
+		"day_short_2": "Mar",
+		"day_short_3": "Mer",
+		"day_short_4": "Gio",
+		"day_short_5": "Ven",
+		"day_short_6": "Sab"
+	},
+	"creator": {
+		"header_title": "Nuova routine",
+		"action_save": "Salva",
+		"placeholder_name": "Nome della routine...",
+		"placeholder_description": "Descrizione (opzionale)...",
+		"section_picker": "Aggiungi esercizio",
+		"filter_all": "Tutti",
+		"selected_summary": "{count} esercizi · ~{minutes} min"
+	},
+	"history": {
+		"header_title": "Cronologia",
+		"stat_sessions": "Sessioni",
+		"stat_minutes": "Minuti",
+		"stat_streak": "Serie",
+		"section_30_days": "Ultimi 30 giorni",
+		"section_balance": "Bilancio per zona",
+		"section_all_sessions": "Tutte le sessioni",
+		"session_meta": "{minutes} min · {completed}/{total} esercizi"
+	},
+	"player": {
+		"action_start": "Avvia",
+		"ready_meta": "{count} esercizi · ~{minutes} min",
+		"finish_title": "Fatto!",
+		"finish_stats": "{completed} su {total} esercizi · {minutes} min",
+		"finish_skipped": "{count} saltati",
+		"mood_label": "Come ti senti?",
+		"action_done": "Fine",
+		"pause_badge": "Pausa",
+		"side_left": "Lato sinistro",
+		"side_right": "Lato destro",
+		"side_switch_notice": "Cambio lato...",
+		"rest_notice": "Pausa",
+		"action_back": "◀ Indietro",
+		"action_next": "Avanti ▶",
+		"action_resume": "▶ Riprendi",
+		"action_pause": "❚❚ Pausa"
+	},
+	"route": {
+		"title": "Stretch"
+	}
+}

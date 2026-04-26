@@ -1,0 +1,91 @@
+{
+	"list_view": {
+		"tab_dashboard": "Tableau de bord",
+		"tab_routines": "Routines",
+		"tab_exercises": "Exercices",
+		"stat_streak": "jours d'affilée",
+		"stat_today": "min aujourd'hui",
+		"stat_week": "cette semaine",
+		"section_quickstart": "Démarrage rapide",
+		"routine_minutes": "{count} min",
+		"rec_title_for_you": "Recommandé pour toi",
+		"rec_title_suggestion": "Suggestion",
+		"rec_weak_areas": "Points faibles : {areas}",
+		"rec_btn_start": "Démarrer {name} ({minutes} min)",
+		"assessment_btn_repeat": "Refaire l'évaluation",
+		"assessment_btn_first": "Lancer la première évaluation",
+		"assessment_meta": "Dernière : {when} — Score : {score}%",
+		"section_today": "Aujourd'hui",
+		"section_all_link": "Toutes",
+		"action_reminders": "Rappels",
+		"action_history": "Historique",
+		"action_create_routine": "+ Créer ma propre routine",
+		"side_suffix": " /côté"
+	},
+	"assessment": {
+		"result_label": "Résultat",
+		"step_label": "Étape {current} sur {total}",
+		"score_label": "Mobilité",
+		"weak_title": "À améliorer :",
+		"pain_title": "Zones douloureuses (optionnel)",
+		"action_save": "Enregistrer"
+	},
+	"reminders": {
+		"header_title": "Rappels",
+		"default_name": "Rappel d'étirement",
+		"placeholder_name": "Nom...",
+		"select_no_routine": "Aucune routine liée",
+		"action_cancel": "Annuler",
+		"action_create": "Créer",
+		"action_delete": "Supprimer",
+		"action_new": "+ Nouveau rappel",
+		"empty": "Aucun rappel configuré.",
+		"day_short_0": "Dim",
+		"day_short_1": "Lun",
+		"day_short_2": "Mar",
+		"day_short_3": "Mer",
+		"day_short_4": "Jeu",
+		"day_short_5": "Ven",
+		"day_short_6": "Sam"
+	},
+	"creator": {
+		"header_title": "Nouvelle routine",
+		"action_save": "Enregistrer",
+		"placeholder_name": "Nom de la routine...",
+		"placeholder_description": "Description (optionnel)...",
+		"section_picker": "Ajouter un exercice",
+		"filter_all": "Tous",
+		"selected_summary": "{count} exercices · ~{minutes} min"
+	},
+	"history": {
+		"header_title": "Historique",
+		"stat_sessions": "Sessions",
+		"stat_minutes": "Minutes",
+		"stat_streak": "Série",
+		"section_30_days": "30 derniers jours",
+		"section_balance": "Équilibre par zone",
+		"section_all_sessions": "Toutes les sessions",
+		"session_meta": "{minutes} min · {completed}/{total} exercices"
+	},
+	"player": {
+		"action_start": "Démarrer",
+		"ready_meta": "{count} exercices · ~{minutes} min",
+		"finish_title": "Terminé !",
+		"finish_stats": "{completed} sur {total} exercices · {minutes} min",
+		"finish_skipped": "{count} ignorés",
+		"mood_label": "Comment te sens-tu ?",
+		"action_done": "Terminé",
+		"pause_badge": "Pause",
+		"side_left": "Côté gauche",
+		"side_right": "Côté droit",
+		"side_switch_notice": "Changement de côté...",
+		"rest_notice": "Pause",
+		"action_back": "◀ Retour",
+		"action_next": "Suivant ▶",
+		"action_resume": "▶ Reprendre",
+		"action_pause": "❚❚ Pause"
+	},
+	"route": {
+		"title": "Stretch"
+	}
+}
